@@ -13,7 +13,11 @@
 
 	#include "consbtch.hpp"
 	#include "reflist.hpp"
-
+	#include "langenum.h"
+extern "C"
+{	
+	#include "language.h"
+};
 
 	#define UseLocalAssert Yes
 	#include "ourasert.h"
@@ -159,7 +163,7 @@ BatchFileProcessing :: Run(char* Filename)
 
 	// Feedback:
 	{
-		SCString* pSCString_1 = new SCString("EXECUTING BATCH FILE ");
+		SCString* pSCString_1 = new SCString(GetTextString(TEXTSTRING_CONSOLE_EXEC_BATCH));
 			// LOCALISEME
 		SCString* pSCString_2 = new SCString(Filename);
 		SCString* pSCString_Feedback = new SCString

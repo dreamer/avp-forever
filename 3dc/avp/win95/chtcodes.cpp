@@ -337,13 +337,13 @@ void Cheats :: ToggleImmortality(void)
 	#if 1
 	if ( PlayerStatusPtr->IsImmortal )
 	{
-		GADGET_NewOnScreenMessage("IMMORTALITY DISABLED");
+		GADGET_NewOnScreenMessage(GetTextString(TEXTSTRING_CONSOLE_GOD_OFF));
 		// LOCALISEME();
 		PlayerStatusPtr->IsImmortal = 0;
 	}
 	else
 	{
-		GADGET_NewOnScreenMessage("IMMORTALITY ENABLED");
+		GADGET_NewOnScreenMessage(GetTextString(TEXTSTRING_CONSOLE_GOD_ON));
 		// LOCALISEME();
 		PlayerStatusPtr->IsImmortal = 1;
 	}		

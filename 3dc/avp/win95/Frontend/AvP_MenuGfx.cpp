@@ -256,6 +256,20 @@ extern int RenderMenuText_Clipped(char *textPtr, int x, int y, int alpha, enum A
 	return R2Pos_StartOfRow.x;
 }
 
+extern int LengthOfSmallMenuText(char *textPtr)
+{
+	int length = 0;
+	if(textPtr)
+	{
+		char *ptr = textPtr;
+
+		while(*ptr)
+		{
+			length+=AAFontWidths[*ptr++];
+		}
+	}
+	return length;
+}
 
 extern int RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format) 
 {

@@ -2528,19 +2528,8 @@ static long * front_ptr = table + SEP_3;
 static long * rear_ptr = table;
 
 
-/*
-	This code (FastRandom and SetFastRandom) stolen from Jamie Lokier
-	September 95.  The original version was part of a C library
-	implementation
-*/
 
-
-/* This is derived from the GNU C library source, which is in turn
-   derived from Berkeley source.  The algorithm, the polynomial, and the
-   initial numbers are the same, but the code has been reworked for the
-   needs of this version.
-
-   This version doesn't support different types of random number
+/* This version doesn't support different types of random number
    generators, or saving and restoring the state.  It is fast, short and
    as simple as it can be while still generating numbers as good as the
    Berkeley one.  The basic algorithm is to have a linear-feedback shift

@@ -18,7 +18,7 @@
 #include "DetailLevels.h"
 #include "CD_player.h"
 
-#define MPLAYER_SUPPORT 1
+#define MPLAYER_SUPPORT 0
 
 
 #define MAX_MULTIPLAYER_NAME_LENGTH 10

@@ -1,9 +1,11 @@
+
+
 /* KJL 15:25:20 8/16/97
  *
  * smacker.h - functions to handle FMV playback
  *
  */
-#include "smack.h"
+typedef int Smack;
 
 extern void PlayFMV(char *filenamePtr);
 extern void StartMenuMusic(void);

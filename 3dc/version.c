@@ -10,6 +10,6 @@ void GiveVersionDetails(void)
 //	NewOnScreenMessage("Aliens vs Predator - Alien Demo V1.3 - Rebellion Developments 1999/1/25");
 //	NewOnScreenMessage("Aliens vs Predator - \n   Build 103 \n   Rebellion Developments 1999/7/13 \n   (European Release)");
 //	NewOnScreenMessage("Aliens vs Predator - \n   Build 103 \n   Rebellion Developments 1999/7/13 \n   (American Release)");
-	NewOnScreenMessage("Aliens vs Predator - Gold\n   Build 116 \n   Rebellion Developments 2000/16/3 \n"); //11:25
+	NewOnScreenMessage("Aliens vs Predator - Gold\n   Build 117 \n   Rebellion Developments 2000/17/5 \n"); //10:50
 
 }

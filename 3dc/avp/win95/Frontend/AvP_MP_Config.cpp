@@ -615,6 +615,9 @@ void BuildMultiplayerLevelNameArray()
 
 	HANDLE hFindFile = ::FindFirstFile(load_name,&wfd);
 	
+	int NumCustomCoop = 0;//levels containing (c)
+	int NumCustomMultiplayer = 0; 
+	
 	if (INVALID_HANDLE_VALUE != hFindFile)
 	{
 		char* custom_string = GetTextString(TEXTSTRING_CUSTOM_LEVEL); 
@@ -640,7 +643,16 @@ void BuildMultiplayerLevelNameArray()
 				strcpy(name,buffer);
 
 				CustomLevelNameList.add_entry(name);
-	
+
+				//update the coop / other level type count
+				if(strstr(name,"(c)"))
+				{
+					NumCustomCoop++;
+				}
+				else
+				{
+					NumCustomMultiplayer++;
+				}
 			}
 	
 		}while (::FindNextFile(hFindFile,&wfd));
@@ -652,8 +664,8 @@ void BuildMultiplayerLevelNameArray()
 	NumCustomLevels = CustomLevelNameList.size();
 
 
-	NumMultiplayerLevels = MAX_NO_OF_MULTIPLAYER_EPISODES + NumCustomLevels;
-	NumCoopLevels = MAX_NO_OF_COOPERATIVE_EPISODES + NumCustomLevels;
+	NumMultiplayerLevels = MAX_NO_OF_MULTIPLAYER_EPISODES + NumCustomMultiplayer;
+	NumCoopLevels = MAX_NO_OF_COOPERATIVE_EPISODES + NumCustomCoop;
 
 	MultiplayerLevelNames = (char**) AllocateMem(sizeof(char*)* NumMultiplayerLevels);
 
@@ -704,10 +716,18 @@ void BuildMultiplayerLevelNameArray()
 	}
 
 	//now add the custom level names
+	int coop_pos = MAX_NO_OF_COOPERATIVE_EPISODES;
+	int mp_pos = MAX_NO_OF_MULTIPLAYER_EPISODES;
 	for(i=0;i<NumCustomLevels;i++)
 	{
-		CoopLevelNames[i+MAX_NO_OF_COOPERATIVE_EPISODES] = CustomLevelNameList[i];
-		MultiplayerLevelNames[i+MAX_NO_OF_MULTIPLAYER_EPISODES] = CustomLevelNameList[i];
+		if(strstr(CustomLevelNameList[i],"(c)"))
+		{
+			CoopLevelNames[coop_pos++] = CustomLevelNameList[i];
+		}
+		else
+		{
+			MultiplayerLevelNames[mp_pos++] = CustomLevelNameList[i];
+		}
 	}
 	
 	

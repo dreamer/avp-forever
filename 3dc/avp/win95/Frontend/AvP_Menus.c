@@ -3387,7 +3387,17 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 				}
 				else
 				{
-					int length = LengthOfMenuText(textPtr);
+					int length;
+					//need to choose appropriate 'text length' function according to the 
+					//font being used
+					if(AvPMenus.FontToUse==AVPMENU_FONT_BIG)
+					{
+						length = LengthOfMenuText(textPtr);
+					}
+					else
+					{
+						length = LengthOfSmallMenuText(textPtr);
+					}
 
 					if (length>ScreenDescriptorBlock.SDB_Width-MENU_CENTREX-MENU_ELEMENT_SPACING*2)
 					{

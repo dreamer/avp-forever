@@ -10243,6 +10243,19 @@ static void Handle_SpeciesTag_NewPersonIt(DPID predatorID)
 		
 	if(AVPDPNetID==predatorID)
 	{
+		BOOL TeleportNeeded = FALSE;
+ 		PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *)(Player->ObStrategyBlock->SBdataptr);
+		LOCALASSERT(playerStatusPtr);    	        
+
+		if(!PlayerStatusPtr->IsAlive)
+		{
+			//if the player that is to become the alien/predator is dead , then they
+			//need to be taken to a respawn spot
+			TeleportNeeded = TRUE;
+
+		}
+		
+		
 		//become aa predator or alien
 		if(netGameData.gameType==NGT_PredatorTag)
 		{
@@ -10253,6 +10266,11 @@ static void Handle_SpeciesTag_NewPersonIt(DPID predatorID)
 		{
 			extern void ChangeToAlien();
 			ChangeToAlien();
+		}
+
+		if(TeleportNeeded)
+		{
+			TeleportNetPlayerToAStartingPosition(Player->ObStrategyBlock,0);
 		}
 	}
 
@@ -10624,7 +10642,7 @@ void GetNextAllowedSpecies(int* species,BOOL search_forwards)
 		}
 		count++;
 		
-	}while(count<9);
+	}while(count<11);
 
 	//oh dear no allowable species
 	*species=0;
