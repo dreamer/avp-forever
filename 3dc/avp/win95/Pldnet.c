@@ -51,6 +51,8 @@
 #include "db.h"
 
 #define CalculateBytesSentPerSecond 0
+
+#include "networking.h" // new net
 							  
 /*----------------------------------------------------------------------
   Some globals for use in this file
@@ -217,11 +219,11 @@ int LobbiedGame=0;
 
 
 
-static char sendBuffer[NET_MESSAGEBUFFERSIZE];
-static char *endSendBuffer;
+static unsigned char sendBuffer[NET_MESSAGEBUFFERSIZE];
+static unsigned char *endSendBuffer;
 static int netNextLocalObjectId = 1;
-DPID myNetworkKillerId = NULL;
-DPID myIgniterId = NULL;
+DPID myNetworkKillerId = 0;
+DPID myIgniterId = 0;
 int MyHitBodyPartId=-1;
 DPID MultiplayerObservedPlayer=0;
 
@@ -262,7 +264,8 @@ extern void UpdateAlienAIGhostAnimSequence(STRATEGYBLOCK *sbPtr,HMODEL_SEQUENCE_
 extern void RemovePickedUpObject(STRATEGYBLOCK *objectPtr);
 extern void PrintStringTableEntryInConsole(enum TEXTSTRING_ID string_id);
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern int DebouncedGotAnyKey;
+//extern int DebouncedGotAnyKey;
+extern unsigned char DebouncedGotAnyKey;
 extern int LastHand;  // For alien claws and two pistols
 
 extern void CreateSpearPossiblyWithFragment(DISPLAYBLOCK *dispPtr, VECTORCH *spearPositionPtr, VECTORCH *spearDirectionPtr);
@@ -270,8 +273,8 @@ extern void NewOnScreenMessage(unsigned char *messagePtr);
 /*----------------------------------------------------------------------
   Some protoypes for this file
   ----------------------------------------------------------------------*/
-static void ProcessSystemMessage(char *msgP,unsigned int msgSize);
-static void ProcessGameMessage(DPID senderId, char *msgP,unsigned int msgSize);
+static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize);
+static void ProcessGameMessage(DPID senderId, unsigned char *msgP,unsigned int msgSize);
 static void AddPlayerToGame(DPID id, char*name);
 static void AddPlayerAndObjectUpdateMessages(void);
 static void UpdateNetworkGameScores(DPID playerKilledId, DPID killerId,NETGAME_CHARACTERTYPE playerKilledType,NETGAME_CHARACTERTYPE killerType);
@@ -392,7 +395,7 @@ void InitAVPNetGame(void)
 		int i,j;
 		for(i=0;i<(NET_MAXPLAYERS);i++)
 		{
-			netGameData.playerData[i].playerId = NULL;		
+			netGameData.playerData[i].playerId = 0;		
 			for(j=0;j<(NET_PLAYERNAMELENGTH);j++) netGameData.playerData[i].name[j] = '\0';
 			netGameData.playerData[i].characterType = NGCT_Marine;
 			netGameData.playerData[i].characterSubType = NGSCT_General;
@@ -478,7 +481,7 @@ void InitAVPNetGameForHost(int species, int gamestyle, int level)
 		int i,j;
 		for(i=0;i<(NET_MAXPLAYERS);i++)
 		{
-			netGameData.playerData[i].playerId = NULL;		
+			netGameData.playerData[i].playerId = 0;		
 			for(j=0;j<(NET_PLAYERNAMELENGTH);j++) netGameData.playerData[i].name[j] = '\0';
 			netGameData.playerData[i].characterType = NGCT_Marine;
 			netGameData.playerData[i].characterSubType = NGSCT_General;
@@ -632,7 +635,7 @@ void InitAVPNetGameForJoin(void)
 		int i,j;
 		for(i=0;i<(NET_MAXPLAYERS);i++)
 		{
-			netGameData.playerData[i].playerId = NULL;		
+			netGameData.playerData[i].playerId = 0;		
 			for(j=0;j<(NET_PLAYERNAMELENGTH);j++) netGameData.playerData[i].name[j] = '\0';
 			netGameData.playerData[i].characterType = NGCT_Marine;
 			netGameData.playerData[i].characterSubType = NGSCT_General;
@@ -689,42 +692,46 @@ void InitAVPNetGameForJoin(void)
 	netGameData.joiningGameStatus = JOINNETGAME_WAITFORSTART;
 }
 
+static unsigned char msg[NET_MESSAGEBUFFERSIZE];
+
 /*----------------------------------------------------------------------
   Core message collection function
   ----------------------------------------------------------------------*/
 void MinimalNetCollectMessages(void)
 {			
-	HRESULT res = DP_OK;
-	DPID	dPlayFromId = NULL;
-	DPID 	dPlayToId = NULL;
-	unsigned char *msgP = NULL;
-	unsigned msgSize = 0;
+	int res = DP_OK;
+	DPID	dPlayFromId = 0;
+	DPID 	dPlayToId = 0;
+//	unsigned char *msgP = NULL;
+//	unsigned char msg[NET_MESSAGEBUFFERSIZE];
+	int msgSize = 0;
 		
 	/* collects messages until something other than DP_OK is returned (eg DP_NoMessages) */
 	if(!netGameData.skirmishMode)
 	{
 		while((res==DP_OK) && glpDP && AVPDPNetID)
 		{
-			res = DpExtRecv(glpDP,&dPlayFromId,&dPlayToId,DPRECEIVE_ALL,&msgP,(LPDWORD)&msgSize);				
+			res = DpExtRecv(glpDP,&dPlayFromId,&dPlayToId,DPRECEIVE_ALL,&msg[0],/*(LPDWORD)*/&msgSize);				
 			if(res==DP_OK)
 			{
 				/* process last message, if there is one */
 				if(dPlayFromId == DPID_SYSMSG)
 				{			
-					ProcessSystemMessage(msgP,msgSize);
+					ProcessSystemMessage(&msg[0],msgSize);
 				}
-				else ProcessGameMessage(dPlayFromId,msgP,msgSize);										
+				else ProcessGameMessage(dPlayFromId,&msg[0],msgSize);										
 			}		
 		}
 	}
 }
 void NetCollectMessages(void)
 {			
-	HRESULT res = DP_OK;
-	DPID	dPlayFromId = NULL;
-	DPID 	dPlayToId = NULL;
-	unsigned char *msgP = NULL;
-	unsigned msgSize = 0;
+	int res = DP_OK;
+	DPID	dPlayFromId = 0;
+	DPID 	dPlayToId = 0;
+//	unsigned char *msgP = NULL;
+//	unsigned char msg[NET_MESSAGEBUFFERSIZE];
+	int msgSize = 0;
 		
 	/* first off, some assertions about our game state */
 	LOCALASSERT(!((AvP.Network==I_Host)&&(netGameData.myGameState==NGS_Leaving)));	
@@ -737,26 +744,28 @@ void NetCollectMessages(void)
 
 	InitNetLog();
 	LogNetInfo("Collecting Messages... \n");
+//	OutputDebugString("Connecting Messages...\n");
 
 	/* collects messages until something other than DP_OK is returned (eg DP_NoMessages) */
 	if(!netGameData.skirmishMode)
 	{
 		while((res==DP_OK) && glpDP && AVPDPNetID)
 		{
-			res = DpExtRecv(glpDP,&dPlayFromId,&dPlayToId,DPRECEIVE_ALL,&msgP,(LPDWORD)&msgSize);				
+			res = DpExtRecv(glpDP,&dPlayFromId,&dPlayToId,DPRECEIVE_ALL,&msg[0],/*(LPDWORD)*/&msgSize);				
 			if(res==DP_OK)
 			{
 				numMessagesReceived++;
 				/* process last message, if there is one */
 				if(dPlayFromId == DPID_SYSMSG)
 				{			
-					ProcessSystemMessage(msgP,msgSize);
+					ProcessSystemMessage(&msg[0],msgSize);
 				}
-				else ProcessGameMessage(dPlayFromId,msgP,msgSize);										
+				else ProcessGameMessage(dPlayFromId,&msg[0],msgSize);										
 			}	
 		}
 	}
 	LogNetInfo("... Finished collecting Messages\n");
+//	OutputDebugString("...Finished collecting Messages\n");
 
 	/* check ghost integrities */
 	MaintainGhosts();
@@ -932,15 +941,17 @@ void NetCollectMessages(void)
 /*----------------------------------------------------------------------
   Functions for processing system messages
   ----------------------------------------------------------------------*/
-static void ProcessSystemMessage(char *msgP,unsigned int msgSize)
+static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize)
 {
-	LPDPMSG_GENERIC systemMessage = (LPDPMSG_GENERIC)msgP;	
-	
+	int systemMessage = *(int*)&msgP[5]; // get from 'lpidTo'
+
 	/* currently, only the host deals with system mesages */
 	/* check for invalid parameters */
 	if((msgSize==0)||(msgP==NULL)) return;
 
-	switch(systemMessage->dwType)
+	OutputDebugString("\n we're going to process a system message\n");
+
+	switch(systemMessage/*->dwType*/)
 	{
 		case DPSYS_ADDPLAYERTOGROUP:
 		{
@@ -949,25 +960,32 @@ static void ProcessSystemMessage(char *msgP,unsigned int msgSize)
 		}
 		case DPSYS_CREATEPLAYERORGROUP:
 		{
+			OutputDebugString("will try adding a player to our server game\n");
+
 			/* only useful during startup: during main game, connecting player should
 			detect game state and exit immediately */
 			if((AvP.Network==I_Host))
 			{	
-				LPDPMSG_CREATEPLAYERORGROUP createMessage;
-				createMessage = (LPDPMSG_CREATEPLAYERORGROUP)systemMessage;
-				if(createMessage->dwPlayerType == DPPLAYERTYPE_PLAYER)
+				playerDetails newPlayer;
+
+				/* copy message data to player struct */
+				memcpy(/*(playerDetails*)*/&newPlayer, &msgP[MESSAGEHEADERSIZE], sizeof(playerDetails));
+				if(newPlayer.playerType == DPPLAYERTYPE_PLAYER)
 				{
-					DPID id = createMessage->dpId;
-					char *name = &(createMessage->dpnName.lpszShortNameA[0]);
-					AddPlayerToGame(id,name);
+					int id = newPlayer.playerId;
+					char name[40];
+
+					strcpy(&name[0], &newPlayer.playerName[0]);
+					AddPlayerToGame(id,&name[0]);
 				}
 			}
 			LogNetInfo("system message:  DPSYS_CREATEPLAYERORGROUP \n");
+			NewOnScreenMessage("A PLAYER HAS CONNECTED");
 			break;
 		}
 		case DPSYS_DELETEPLAYERFROMGROUP:
 		{
-//					NewOnScreenMessage("A PLAYER HAS DISCONNECTED");
+			NewOnScreenMessage("A PLAYER HAS DISCONNECTED");
 			/* ignore */
 			break;
 		}
@@ -977,17 +995,21 @@ static void ProcessSystemMessage(char *msgP,unsigned int msgSize)
 			or s/he has exited abnormally. In either case, only need to act on
 			this during start-up. During the main game, the ghosts will time-out
 			anyway */
+
 			if((AvP.Network==I_Host))
 			{	
-				LPDPMSG_DESTROYPLAYERORGROUP destroyMessage;
-				destroyMessage = (LPDPMSG_DESTROYPLAYERORGROUP)systemMessage;
-				if(destroyMessage->dwPlayerType == DPPLAYERTYPE_PLAYER)
+				DPMSG_DESTROYPLAYERORGROUP destroyMessage;
+				memcpy(&destroyMessage, &msgP[MESSAGEHEADERSIZE], sizeof(DPMSG_DESTROYPLAYERORGROUP));
+
+				if(destroyMessage.dwPlayerType == DPPLAYERTYPE_PLAYER)
 				{
-					DPID id = destroyMessage->dpId;
+					DPID id = destroyMessage.dpId;
+					OutputDebugString("going to drop a player as they disconnected\n");
 					RemovePlayerFromGame(id);
 //					NewOnScreenMessage("A PLAYER HAS DISCONNECTED");
 				}
 			}
+
 			LogNetInfo("system message:  DPSYS_DESTROYPLAYERORGROUP \n");
 			break;
 		}
@@ -1056,8 +1078,9 @@ static void AddPlayerToGame(DPID id, char* name)
 {
 	int freePlayerIndex;
 
-	LOCALASSERT(AvP.Network==I_Host);			
+	OutputDebugString("add player to game\n");
 
+	LOCALASSERT(AvP.Network==I_Host);			
 
 	/* find a free slot for the player */
 	freePlayerIndex = EmptySlotInPlayerList();
@@ -1112,7 +1135,7 @@ void RemovePlayerFromGame(DPID id)
 	}
 
 	/* free the slot */
-	netGameData.playerData[playerIndex].playerId = NULL;		
+	netGameData.playerData[playerIndex].playerId = 0;		
 	for(j=0;j<NET_PLAYERNAMELENGTH;j++) netGameData.playerData[playerIndex].name[j] = '\0';
 	netGameData.playerData[playerIndex].characterType = NGCT_Marine;
 	netGameData.playerData[playerIndex].characterSubType = NGSCT_General;
@@ -1143,11 +1166,11 @@ void RemovePlayerFromGame(DPID id)
 /*----------------------------------------------------------------------
   Core function for processing game messages
   ----------------------------------------------------------------------*/
-static void ProcessGameMessage(DPID senderId, char *msgP,unsigned int msgSize)
+static void ProcessGameMessage(DPID senderId, unsigned char *msgP,unsigned int msgSize)
 {
-	char* subMessagePtr;
+	unsigned char* subMessagePtr;
 	NETMESSAGEHEADER *headerPtr;
-	char *endOfMessage;
+	unsigned char *endOfMessage;
 		
 	LogNetInfo("Processing a game message \n");
 
@@ -1155,9 +1178,6 @@ static void ProcessGameMessage(DPID senderId, char *msgP,unsigned int msgSize)
 	{
 		/* check for invalid parameters */
 		if((msgSize==0)||(msgP==NULL)) return;
-		/* check for an empty message, ie a message that is only the size of
-		the dpext header.  We shouldn't get any of these.  */
-		if(msgSize <= DPEXT_HEADER_SIZE) return;
 	}	
 		
 	/* some assertions about our game state */
@@ -1175,8 +1195,11 @@ static void ProcessGameMessage(DPID senderId, char *msgP,unsigned int msgSize)
 	
 	/* the message includes garry's dp extented header, so skip past this
 	and find the end of the message (for checking integrity) */
-	subMessagePtr = msgP + DPEXT_HEADER_SIZE;	
-	endOfMessage = (char *)(subMessagePtr + (msgSize - DPEXT_HEADER_SIZE));	
+
+	/* skip past our header */
+	subMessagePtr = &msgP[MESSAGEHEADERSIZE];// + DPEXT_HEADER_SIZE;
+	endOfMessage = &msgP[msgSize];
+//	endOfMessage = (unsigned char *)(subMessagePtr + msgSize);//(msgSize - DPEXT_HEADER_SIZE));	
 
 	/* Read through to the end of the message... */
 	while(subMessagePtr<endOfMessage)
@@ -1509,6 +1532,7 @@ static void ProcessGameMessage(DPID senderId, char *msgP,unsigned int msgSize)
 			
 			default:
 			{
+				OutputDebugString("default case hit in ProcessGameMessage\n");
 				LOCALASSERT(1==0);
 				break;
 			}
@@ -1660,7 +1684,7 @@ void NetSendMessages(void)
 	{
 		/* send our message buffer...
 		NB it should always be non-empty, and always less than the maximum message size */
-		HRESULT res;
+		int res;
 		int numBytes;
 		BOOL clearSendBuffer=TRUE;
 		numBytes = (int)(endSendBuffer - &sendBuffer[0]);
@@ -1678,12 +1702,15 @@ void NetSendMessages(void)
 		{
 			if(glpDP && AVPDPNetID)
 			{
-				res = DpExtSend(glpDP,AVPDPNetID,DPID_ALLPLAYERS,0,&sendBuffer,numBytes);
+				res = DpExtSend(glpDP,AVPDPNetID,DPID_ALLPLAYERS,0,&sendBuffer[0],numBytes);
 				if(res!=DP_OK)
 				{
 					//we have some problem sending...
 					switch(res)
 					{
+						case DP_FAIL:
+							OutputDebugString("some problem sending\n");
+
 						case DPERR_BUSY :
 							/*
 							failed to send this frame , try preserving the contents of the send buffer ,
@@ -1862,15 +1889,6 @@ static void AddPlayerAndObjectUpdateMessages(void)
   ----------------------------------------------------------------------*/
 void EndAVPNetGame(void)
 {
-	HRESULT hres;
-
-	/* garry's dp extended clean up */
-	if(!netGameData.skirmishMode)
-	{
-		DpExtUnInit();	
-	}
-	
-
 	//netGameData.myGameState=NGS_Leaving;
 	RemovePlayerFromGame(AVPDPNetID);
 	TransmitPlayerLeavingNetMsg();
@@ -2588,7 +2606,7 @@ void AddNetMsg_PlayerState_Minimal(STRATEGYBLOCK *sbPtr,BOOL sendOrient)
 	if(PlayerStatusPtr->IsAlive) messagePtr->IAmAlive = 1;
 	else messagePtr->IAmAlive = 0;
 
-	netGameData.playerData[playerIndex].playerAlive=messagePtr->IAmAlive;
+	netGameData.playerData[playerIndex].playerAlive = (unsigned char)(messagePtr->IAmAlive);
 	
 	//Is the player alive or in possesion of extra lives?
 	if(messagePtr->IAmAlive)
@@ -4716,7 +4734,7 @@ void AddNetMsg_AlienAIState(STRATEGYBLOCK *sbPtr)
 		//can we get away with not sending an update this frame
 
 		//has it been a while since the last send
-		if(TimeCounterForExtrapolation<alienStatusPtr->timeOfLastSend ||
+		if(TimeCounterForExtrapolation < (unsigned int)alienStatusPtr->timeOfLastSend ||
 		   TimeCounterForExtrapolation-alienStatusPtr->timeOfLastSend>ONE_FIXED/4)
 		{
 			updateRequired=TRUE;
@@ -5285,7 +5303,7 @@ void AddNetMsg_PlayerID(DPID playerID,unsigned char message)
 
 }
 
-void AddNetMsg_LastManStanding_RestartTimer(char time) 
+void AddNetMsg_LastManStanding_RestartTimer(char time)
 {
 	NETMESSAGEHEADER *headerPtr;
 	NETMESSAGE_LMS_RESTARTTIMER *messagePtr;
@@ -5453,7 +5471,7 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
 
 			if (netGameData.myGameState==NGS_Playing && playerChanged)
 			{
-				if (messagePtr->players[i].playerId==NULL)
+				if (messagePtr->players[i].playerId==0)
 				{
 					Inform_PlayerHasLeft(netGameData.playerData[i].playerId);
 				}
@@ -5471,6 +5489,11 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
 			{
 				if(messagePtr->players[i].playerId)
 				{
+					sendSystemMessage(AVP_GETPLAYERNAME, AVPDPNetID, messagePtr->players[i].playerId, 0, 0);
+					//AddNetMsg_PlayerGetName(messagePtr->players[i].playerId); // pass request through internal message system?
+
+					//tempPlayerDetails.
+#if 0 // i'm thinking we should do this differently..pass request through games message queue
 					DWORD size=0;
 					char* data;
 					HRESULT hr;
@@ -5479,27 +5502,26 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
   					hr=IDirectPlayX_GetPlayerName(glpDP,messagePtr->players[i].playerId,0,&size);
 					if(hr==DP_OK || hr==DPERR_BUFFERTOOSMALL)
 					{
-						//allocate buffer to recive the name
+						//allocate buffer to receive the name
 						data=AllocateMem(size);
 						*data=0;
 						hr=IDirectPlayX_GetPlayerName(glpDP,messagePtr->players[i].playerId,data,&size);
 
 						if(hr==DP_OK)
 						{
-							strncpy(netGameData.playerData[i].name,((DPNAME*)data)->lpszShortNameA,NET_PLAYERNAMELENGTH-1);	
+							strncpy(netGameData.playerData[i].name,/*((DPNAME*)data)->lpszShortNameA*/data,NET_PLAYERNAMELENGTH-1);	
 							netGameData.playerData[i].name[NET_PLAYERNAMELENGTH-1]='\0';
-
 						}
 						DeallocateMem(data);
 					}
-
 				}
 				else
 				{
-					netGameData.playerData[i].name[0]='\0';
+#endif
+					netGameData.playerData[i].name[0]='\0'; // set this for now
 				}
-			}
-		
+			}		
+
 			netGameData.playerData[i].playerId = messagePtr->players[i].playerId;
 			netGameData.playerData[i].characterType = (NETGAME_CHARACTERTYPE)messagePtr->players[i].characterType;
 			netGameData.playerData[i].characterSubType = (NETGAME_CHARACTERTYPE)messagePtr->players[i].characterSubType;
@@ -5560,9 +5582,7 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
 					case NETGAMESPEED_100PERCENT :
 						TimeScale=(ONE_FIXED*100)/100;
 						break;
-
 				}
-				
 			}
 		}
 		
@@ -5617,10 +5637,7 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
 				//best take the host's value
 				netGameData.GameTimeElapsed=receivedTime;
 			}
-					
 		}
-
-
 	}
 
 	if(messagePtr->endGame)
@@ -5638,7 +5655,6 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
 			//must have missed message to restart game
 			//therefore probably better restart now
 			RestartNetworkGame(0);
-
 		}
 	}
 }
@@ -5665,7 +5681,6 @@ static void ProcessNetMsg_PlayerDescription(NETMESSAGE_PLAYERDESCRIPTION *messag
 				Inform_PlayerHasJoined(netGameData.playerData[id].playerId);
 		}
 		netGameData.playerData[id].startFlag = messagePtr->startFlag;
-
 	}
 }
 
@@ -5894,7 +5909,7 @@ static void ProcessNetMsg_PlayerState(NETMESSAGE_PLAYERSTATE *messagePtr, DPID s
 
 				ghostData->velocity=velocity;
 				ghostData->extrapTimerLast=0;
-				if(playerTimer>=ghostData->lastTimeRead)
+				if(playerTimer >= (int)ghostData->lastTimeRead)
 				{
 					ghostData->extrapTimer-=(playerTimer-ghostData->lastTimeRead);
 				}
@@ -6566,7 +6581,7 @@ static void ProcessNetMsg_LocalObjectDamaged(char *messagePtr, DPID senderId)
 		/* we set this global to remember the id of the player who sent this damage message,
 		so that if the player is killed, we know the id of the killer. this is a bit of
 		a nasty hack, but means that we don't have to make any changes to the core damage functions */
-		LOCALASSERT(myNetworkKillerId==NULL || myNetworkKillerId ==AVPDPNetID);
+		LOCALASSERT(myNetworkKillerId==0 || myNetworkKillerId ==AVPDPNetID);
 		/*
 		Don't bother setting the killer id for molotov damage. This is because the only source of this damage
 		is explosions from flamethrowers. This damage will always come from the net host , and we don't want to credit the 
@@ -7370,7 +7385,7 @@ static void ProcessNetMsg_StrategySynch(NETMESSAGE_STRATEGYSYNCH *messagePtr)
 	for (i=0; i<NumActiveStBlocks; i++)
 	{
 		STRATEGYBLOCK *sbPtr = ActiveStBlockList[i];
-		int status;
+//		int status;
 
 		if(sbPtr->I_SBtype == I_BehaviourBinarySwitch ||
 		   sbPtr->I_SBtype == I_BehaviourLinkSwitch ||
@@ -7504,7 +7519,7 @@ static void ProcessNetMsg_AlienAIState(NETMESSAGE_ALIENAISTATE *messagePtr, DPID
 
 		ghostData->velocity=velocity;
 		ghostData->extrapTimerLast=0;
-		if(playerTimer>=ghostData->lastTimeRead)
+		if(playerTimer >= (int)ghostData->lastTimeRead)
 		{
 			ghostData->extrapTimer-=(playerTimer-ghostData->lastTimeRead);
 		}
@@ -7621,7 +7636,7 @@ static void ProcessNetMsg_FarAlienPosition(NETMESSAGE_FARALIENPOSITION *messageP
 	if(netGameData.myGameState!=NGS_Playing) return;
 
 	//make sure the target module index is in range
-	if(messagePtr->targetModuleIndex>=AIModuleArraySize) return;
+	if(messagePtr->targetModuleIndex >= (unsigned int)AIModuleArraySize) return;
 	targetModule = &AIModuleArray[messagePtr->targetModuleIndex];
 
 	if(messagePtr->indexIsModuleIndex)
@@ -7630,7 +7645,7 @@ static void ProcessNetMsg_FarAlienPosition(NETMESSAGE_FARALIENPOSITION *messageP
 		AIMODULE *startModule=0;
 		//The alien is located at an entry point , the second index is the source module index
 		//Make sure it is a valid module index
-		if(messagePtr->index>=AIModuleArraySize) return;
+		if(messagePtr->index >= (unsigned int)AIModuleArraySize) return;
 		startModule = &AIModuleArray[messagePtr->index];
 		
 		//find the appropriate entry point
@@ -7649,7 +7664,7 @@ static void ProcessNetMsg_FarAlienPosition(NETMESSAGE_FARALIENPOSITION *messageP
 		VECTORCH *auxLocsList = FALLP_AuxLocs[messagePtr->targetModuleIndex].locationsList; 
 
 		//make sure we have a valid index
-		if(messagePtr->index>=noOfAuxLocs) return;
+		if(messagePtr->index >= (unsigned int)noOfAuxLocs) return;
 
 		//found the alien's location (relative to module)
 		position=auxLocsList[messagePtr->index];
@@ -7957,8 +7972,9 @@ static void ProcessNetMsg_SpotOtherSound(NETMESSAGE_SPOTOTHERSOUND *messagePtr, 
 int PlayerIdInPlayerList(DPID Id)
 {
 	int i;
+	
 	/* check first, if we've been passed a null id */
-	if(Id==NULL) return NET_IDNOTINPLAYERLIST;
+	if(Id==0) return NET_IDNOTINPLAYERLIST;
 
 	/* check player list */
 	for(i=0;i<NET_MAXPLAYERS;i++)
@@ -7977,7 +7993,7 @@ int EmptySlotInPlayerList(void)
 
 	for(i=0;i<NET_MAXPLAYERS;i++)
 	{
-		if(netGameData.playerData[i].playerId == NULL) return i;
+		if(netGameData.playerData[i].playerId == 0) return i;
 	}
 	return NET_NOEMPTYSLOTINPLAYERLIST;
 }
@@ -8080,7 +8096,7 @@ static void UpdateNetworkGameScores(DPID playerKilledId, DPID killerId,NETGAME_C
 	playerKilledIndex = PlayerIdInPlayerList(playerKilledId);
 	if(playerKilledIndex==NET_IDNOTINPLAYERLIST) return;
 					
-	if(killerId==NULL || killerId == playerKilledId || killerType>=NGCT_AI_Alien)
+	if(killerId==0 || killerId == playerKilledId || killerType>=NGCT_AI_Alien)
 	{		
 		//suicide
 		killerIndex=playerKilledIndex;
@@ -8311,7 +8327,7 @@ int AddUpPlayerFrags(int playerId)
 {
 	int score = 0;
 	int j;
-	LOCALASSERT(netGameData.playerData[playerId].playerId!=NULL);
+	LOCALASSERT(netGameData.playerData[playerId].playerId!=0);
 	for(j=0;j<(NET_MAXPLAYERS);j++) score+=netGameData.playerData[playerId].playerFrags[j];
 	return score;
 }
@@ -9417,16 +9433,19 @@ void CreatePlayersImageInMirror(void)
 	{
 		case(I_BehaviourMarinePlayer):
 		{
+			extern void CreateMarineHModel(NETGHOSTDATABLOCK *ghostDataPtr, int weapon); // remove undefined warning
 			CreateMarineHModel(ghostData,WEAPON_PULSERIFLE);
 			break;
 		}
 		case(I_BehaviourAlienPlayer):
 		{
+//			extern void CreateAlienHModel(NETGHOSTDATABLOCK *ghostDataPtr,int alienType); // remove undefined warning
 			CreateAlienHModel(ghostData);
 			break;
 		}
 			case(I_BehaviourPredatorPlayer):
 		{
+			extern void CreatePredatorHModel(NETGHOSTDATABLOCK *ghostDataPtr, int weapon); // remove undefined warning
 			CreatePredatorHModel(ghostData,WEAPON_PRED_WRISTBLADE);
 			break;
 		}
@@ -9534,8 +9553,8 @@ void RenderPlayersImageInMirror(void)
 		extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 		DISPLAYBLOCK *dPtr = &PlayersMirrorImage;
 		dPtr->ObWorld = PlayersMirrorDynBlock.Position;
-		dPtr->ObMat = PlayersMirrorDynBlock.OrientMat;	
-		ReflectObject(dPtr);	 
+		dPtr->ObMat = PlayersMirrorDynBlock.OrientMat;
+		ReflectObject(dPtr);
 
 		PlayersMirrorImage.ObStrategyBlock = 0;
 		
@@ -9811,7 +9830,7 @@ static int GetDynamicScoreMultiplier(int playerKilledIndex,int killerIndex)
 	//count players
 	for(i=0;i<NET_MAXPLAYERS;i++) 	
 	{
-		if(netGameData.playerData[i].playerId==NULL) continue;
+		if(netGameData.playerData[i].playerId==0) continue;
 		playerCount++;
 	}
 	//only bother if there are at least 3 players
@@ -10876,9 +10895,8 @@ static void CheckForPointBasedObjectRespawn()
 
 static int CountMultiplayerLivesLeft()
 {
-	int i,j;
+	int i;//,j;
 	int livesUsed=0;
-	
 	
 	//count the lives used
 	if(netGameData.useSharedLives)
@@ -10893,8 +10911,6 @@ static int CountMultiplayerLivesLeft()
 		{
 			livesUsed=netGameData.numDeaths[0]+netGameData.numDeaths[1]+netGameData.numDeaths[2];
 		}
-
-		
 
 		for(i=0;i<NET_MAXPLAYERS;i++)	
 		{
@@ -11245,7 +11261,6 @@ static BOOL IsItPossibleToScore()
 
 void DoMultiplayerSpecificHud()
 {
-
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 	char text[200];
 
@@ -11522,5 +11537,3 @@ static int GetStrategySynchObjectChecksum()
 	if(sum==0) sum=1;
 	return sum;
 }
-
-

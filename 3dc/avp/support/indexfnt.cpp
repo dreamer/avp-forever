@@ -12,7 +12,7 @@
 #include "3dc.h"
 #include "inline.h"
 #include "indexfnt.hpp"
-#include "tallfont.hpp"
+//#include "tallfont.hpp"
 
 extern "C"
 {
@@ -39,8 +39,8 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr,int x,int y,int colour);
 #endif
 		extern unsigned char *ScreenBuffer;
 		extern long BackBufferPitch;
-		extern LPDIRECTDRAWSURFACE lpDDSBack;
-		extern DDPIXELFORMAT DisplayPixelFormat;
+//		extern LPDIRECTDRAWSURFACE lpDDSBack;
+// bjd		extern DDPIXELFORMAT DisplayPixelFormat;
 		extern int CloudTable[128][128];
 		extern int CloakingPhase;
 		#if 0
@@ -422,6 +422,7 @@ IndexedFont_Kerned :: RenderString_Clipped
 	const SCString& SCStr
 ) const
 {
+#if 0 // bjd
 	ProjChar* pProjChar_I = SCStr . pProjCh();
 
 	const LPDIRECTDRAWSURFACE image_ptr = GetImagePtr();
@@ -575,6 +576,7 @@ IndexedFont_Kerned :: RenderString_Clipped
 		pProjChar_I++;
 	}
 	image_ptr->Unlock((LPVOID)ddsdimage.lpSurface);
+#endif
 }
 
 void
@@ -586,6 +588,7 @@ IndexedFont_Kerned :: RenderString_Unclipped
 ) const
 #if 1
 {
+#if 0 // bjd
 	ProjChar* pProjChar_I = SCStr . pProjCh();
 
 	const LPDIRECTDRAWSURFACE image_ptr = GetImagePtr();
@@ -743,6 +746,7 @@ IndexedFont_Kerned :: RenderString_Unclipped
 		pProjChar_I++;
 	}
 	image_ptr->Unlock((LPVOID)ddsdimage.lpSurface);
+#endif
 }
 #else
 {
@@ -1115,6 +1119,7 @@ void IndexedFont_HUD :: RenderString_Clipped
 	const SCString& SCStr
 ) const
 {
+//#if 0 // bjd
 	/* KJL 16:16:26 16/04/98 - if you're completely off-screen, go away */
 	if (R2Pos_Cursor . y<=-HUD_FONT_HEIGHT) return;
 
@@ -1152,6 +1157,7 @@ void IndexedFont_HUD :: RenderString_Clipped
 		D3D_RenderHUDString(pProjChar_I,R2Pos_Cursor.x,R2Pos_Cursor.y,(255<<24)+(192<<16)+(192<<8)+(192));
 		#endif
 	}
+//#endif
 }
 
 void IndexedFont_HUD :: RenderString_Unclipped

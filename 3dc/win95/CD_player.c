@@ -39,6 +39,7 @@ int CDTrackMax=-1; //highest track number on cd
 
 void CDDA_Start(void)
 {
+	/* function should complete successfully even if no disc in drive */
 	CDDAVolume = CDDA_VOLUME_DEFAULT;
 	CDPlayerVolume = CDDAVolume;
 	CDDAState = CDOp_Idle;

@@ -43,6 +43,9 @@ extern "C"
 #include "detaillevels.h"
 #include "savegame.h"
 
+// bjd
+#include "OGG_player.h"
+
 
 int DebuggingCommandsActive=0;
 extern void GimmeCharge(void);
@@ -809,6 +812,19 @@ void CreateGameSpecificConsoleCommands(void)
 		DisplaySavesLeft
 	);
 
+	ConsoleCommand::Make
+	(
+		"PLAYOGG",
+		"",
+		loadOgg
+	);
+
+	ConsoleCommand::Make
+	(
+		"STOPOGG",
+		"",
+		stopOgg
+	);
 }	
 
 

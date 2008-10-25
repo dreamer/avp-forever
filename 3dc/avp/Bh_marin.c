@@ -18804,7 +18804,8 @@ static STATE_RETURN_CONDITION Execute_MNS_DischargeSkeeter(STRATEGYBLOCK *sbPtr)
 {
 	MARINE_STATUS_BLOCK *marineStatusPointer;    
 	VECTORCH orientationDirn,relPos,relPos2;
-	int correctlyOrientated,range;
+	int correctlyOrientated = 0;
+	int range = 0;
 
 	LOCALASSERT(sbPtr);
 	marineStatusPointer = (MARINE_STATUS_BLOCK *)(sbPtr->SBdataptr);    

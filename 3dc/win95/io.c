@@ -651,8 +651,9 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
       determine what display modes, available
 	  video memory etc exist.
 	*/
-
-	if (InitialiseDirectDrawObject()
+#if 0 // bjd
+	if (InitialiseDirect3DObject() 
+	//if (InitialiseDirectDrawObject() // BJD 06/05/2007
 	    == FALSE)
 	   /* 
 	     If we cannot get a video mode, 
@@ -663,7 +664,7 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 	    ReleaseDirect3D();
 	    exit(0x997799);
 	   }
-
+#endif
     /*
 		Initialise global to say whether
 		we think there is an onboard 3D 
@@ -671,7 +672,7 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 		built-in
 	*/
 
-    TestInitD3DObject();
+//    TestInitD3DObject();
 
 /*
 	This is (HOPEFULLY!!) now the right
@@ -682,7 +683,7 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 	that MMX works better with the back buffer in
 	system memory...
 */
-    TestMemoryAccess();
+//    TestMemoryAccess();
 
     /* Initialise main window, windows procedure etc */
 	rc = InitialiseWindowsSystem(hInstance, nCmdShow, WinInitFull);
@@ -801,7 +802,6 @@ void FrameCounterHandler(void)
 		{
 			NormalFrameTime = MUL_FIXED(NormalFrameTime,TimeScale);
 		}
-
 	}
 	/* cap NormalFrameTime if frame rate is really low */
 	if (NormalFrameTime>16384) NormalFrameTime=16384;
@@ -1765,7 +1765,7 @@ void InitPrintQueue(void)
 */
 
 #if debug || PreBeta
-extern LPDIRECTDRAWSURFACE lpDDDbgFont;
+//extern LPDIRECTDRAWSURFACE lpDDDbgFont; // BJD
 #endif
 
 

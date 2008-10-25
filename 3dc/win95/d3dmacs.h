@@ -12,6 +12,7 @@
 #ifndef __D3DMACS_H__
 #define __D3DMACS_H__
 
+#if 0 // bjd - just gonna gradually remove unneeded stuff..
 #undef RELEASE
 
 #ifndef __cplusplus
@@ -143,5 +144,7 @@
 
 #define QWORD_ALIGNED(ptr) \
     !(0x00000007L & (ULONG)(ptr))
+
+#endif
 
 #endif // __D3DMACS_H__

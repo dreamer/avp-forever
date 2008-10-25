@@ -1,3 +1,4 @@
+#if 0
 /*------------------------------Patrick 18/3/97------------------------
 Header for setting up and handling direct play objects
 (This is mostly nicked from DHM's headhunter stuff)
@@ -51,5 +52,6 @@ HRESULT DPlaySetPlayerData(DPID pid, LPVOID lpData, DWORD dwSize, DWORD dwFlags)
 
 #ifdef __cplusplus
 }
+#endif
 #endif
 #endif

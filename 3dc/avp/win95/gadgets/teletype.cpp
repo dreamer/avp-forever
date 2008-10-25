@@ -450,6 +450,7 @@ void TeletypeCursor :: Render
 			255, // unsigned char B,
 			(FixP_Alpha/256) // unsigned char translucency
 		);
+
 	}
 	#endif
 }

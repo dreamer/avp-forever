@@ -364,7 +364,7 @@ static STRATEGYBLOCK* InitialiseFrisbeeBehaviour_ForLoad() {
 	DISPLAYBLOCK *dispPtr;
 	DYNAMICSBLOCK *dynPtr;
   	FRISBEE_BEHAV_BLOCK *bblk;
-	int a;
+//	int a;
 	
 		
 	/* make displayblock with correct shape, etc */
@@ -470,7 +470,7 @@ STRATEGYBLOCK* CreateFrisbeeKernel(VECTORCH *position, MATRIXCH *orient, int fro
 	/* Create HModel. */
 	{
 		SECTION *root_section;
-		SECTION_DATA *local_disc;
+//		SECTION_DATA *local_disc;
 
 		root_section=GetNamedHierarchyFromLibrary("mdisk","Mdisk");
 				
@@ -3103,7 +3103,7 @@ static STRATEGYBLOCK* InitialiseDiscBehaviour_ForLoad() {
 	DISPLAYBLOCK *dispPtr;
 	DYNAMICSBLOCK *dynPtr;
   	PC_PRED_DISC_BEHAV_BLOCK *bblk;
-	int a;
+//	int a;
 	
 		
 	/* make displayblock with correct shape, etc */

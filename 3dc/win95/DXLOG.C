@@ -12,6 +12,8 @@
 static char*
 D3DAppErrorToString(HRESULT error)
 {
+	return "D3DAppErrorToString function in Dxlog.c";
+#if 0
     switch(error) {
         case DD_OK:
             return "No error.\0";
@@ -276,6 +278,7 @@ D3DAppErrorToString(HRESULT error)
         default:
             return "Unrecognized error value.\0";
     }
+#endif
 }
 
 #ifdef __WATCOMC__
@@ -289,13 +292,13 @@ static int closed_once = 0;
 
 void dx_err_log(HRESULT error, int line, char const * file)
 {
-	if (DD_OK==error) return;
+//	if (DD_OK==error) return;
 	if (closed_once) return;
 
 	
 	if (!dxlog) dxlog = lfopen(LOGFILE_NAME);
 
-	lfprintf(dxlog,"Line %d of %s:\n%s\n\n",line,file,D3DAppErrorToString(error));
+//	lfprintf(dxlog,"Line %d of %s:\n%s\n\n",line,file,D3DAppErrorToString(error));
 }
 
 void dx_str_log(char const * str, int line, char const * file)
@@ -365,12 +368,14 @@ int LocalAssertFired(char * Filename, int LineNum,char * Condition)
 
 void DXLOGHandleCompilerWarningMessage(void)
 {
+#if 0 // bjd
 	int temp;
 
 	temp = D3DRMMAP_PERSPCORRECT;
 	temp = D3DRMMAP_WRAPU;
 	temp = D3DRMMAP_WRAPV;
 	temp = D3DRMGROUP_ALLGROUPS;
+#endif
 }	
 
 void ExitFired(char* Filename, int LineNum, int ExitCode)

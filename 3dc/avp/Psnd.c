@@ -71,6 +71,7 @@ void SoundSys_Start(void)
 	{
 		Sound_MaxActive_HW = SOUND_MAXACTIVE;
 	} 
+
 	SoundSys_SwitchOn();
 
 	/* cancel any fades */
@@ -79,7 +80,6 @@ void SoundSys_Start(void)
 	/* set global volume */
 	GlobalVolume = VOLUME_DEFAULT;
 	PlatChangeGlobalVolume(VOLUME_DEFAULT);
-	
 	
 }
 	
@@ -920,6 +920,7 @@ void Save_SoundsWithNoReference()
 
 				if(sound->dsBufferP)
 					IDirectSoundBuffer_GetCurrentPosition(sound->dsBufferP,(LPDWORD)&block->position,NULL);
+//					GetBufferCurrentPosition(sound->dsBufferP, &block->position,NULL);
 				else
 					block->position = 0;
 

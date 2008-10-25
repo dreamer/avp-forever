@@ -66,6 +66,8 @@ int CloakPowerOnDrain=(2*ONE_FIXED);
 
 extern DPID myNetworkKillerId;
 extern DPID myIgniterId;
+extern DPID AVPDPNetID; // bjd
+
 extern int MyHitBodyPartId;
 extern HMODELCONTROLLER PlayersWeaponHModelController;
 extern SECTION_DATA *PWMFSDP; /* PlayersWeaponMuzzleFlashSectionDataPointer */
@@ -109,7 +111,7 @@ void InitPlayer(STRATEGYBLOCK* sbPtr, int sb_type)
 	* and fills in some initial values.                                                       *
 	**************************************************************************************KJL*/
 
-	SECTION *root_section;
+//	SECTION *root_section;
 	PLAYER_STATUS *psPtr = &PlayerStatusBlock;
 	GLOBALASSERT(psPtr);
  	GLOBALASSERT(sbPtr);

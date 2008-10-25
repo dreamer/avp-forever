@@ -1,7 +1,7 @@
 extern "C" {
 
 #include "3dc.h"
-#include "vramtime.h"
+//#include "vramtime.h"
 #include "dxlog.h"
 #include "inline.h"
 #include "scrshot.hpp"
@@ -48,7 +48,22 @@ extern void TimeStampedMessage(char *s);
 /*
 	Globals
 */
-	
+
+// New Direct3D stuff - BJD
+/*
+IDirect3D8 *			lpDD = NULL;			// Direct3D object			
+IDirect3DDevice8 *	    pd3dDevice = NULL;		// Direct3D device 
+IDirect3DSurface8 *		lpDDSPrimary = NULL;	// Direct3D primary surface
+IDirect3DSurface8 *		lpDDSBack = NULL;		// Direct3D back surface
+IDirect3DSurface8 *		lpDDSHiddenBack = NULL;	// Direct3D ? surface
+*/
+/*
+#if debug || PreBeta
+IDirect3DSurface9 *		lpDDDbgFont = NULL;     // Direct3D debugging font surface..
+#endif
+*/
+// Old Direct Draw stuff
+/*
 LPDIRECTDRAW            lpDD;           // DirectDraw object
 LPDIRECTDRAWSURFACE     lpDDSPrimary;   // DirectDraw primary surface
 LPDIRECTDRAWSURFACE     lpDDSBack;      // DirectDraw back surface
@@ -57,10 +72,13 @@ LPDIRECTDRAWPALETTE     lpDDPal[MaxPalettes];        // DirectDraw palette
 #if debug || PreBeta
 LPDIRECTDRAWSURFACE     lpDDDbgFont; // Debugging font, specific to current video mode
 #endif
+*/
+
 // For SubWindow mode
-LPDIRECTDRAWCLIPPER		lpDDClipper;
+//LPDIRECTDRAWCLIPPER		lpDDClipper; // BJD D3D does auto clipping? 
 // DirectDraw gdi surface
-LPDIRECTDRAWSURFACE     lpDDGDI;      
+//LPDIRECTDRAWSURFACE     lpDDGDI;      // BJD
+
 int 					VideoModeColourDepth;
 long				    BackBufferPitch;
 // To describe available video hardware
@@ -112,12 +130,12 @@ int oddDraw;
 
 
 // Surface for Backdrop composition
-LPDIRECTDRAWSURFACE lpDDBackdrop;
+//IDirect3DSurface9 * lpDDBackdrop = NULL; // BJD
 // Pointer into Backdrop DD surface 
 unsigned char* BackScreenBuffer;
 // Pitch on auxilliary backdrop surface
 static long BackScreenPitch;
-DDPIXELFORMAT DisplayPixelFormat;
+//DDPIXELFORMAT DisplayPixelFormat; // BJD more DirectDraw stuff
 
 // For locking against other processes, e.g.
 // mouse pointer display
@@ -158,10 +176,59 @@ extern int sine[];
 
 BOOL really_32_bit = 0;
 
+/* Replacement for InitialiseDirectDrawObject..hopefully 
+// BJD - 06/09/2007
+*/
+/*
+BOOL InitialiseDirect3DObject() {
+
+	HRESULT hr;
+
+	lpDD = Direct3DCreate8(D3D_SDK_VERSION);
+
+	if (!lpDD)
+	{
+		//LOGDXERR(ddrval);
+		return false;
+	}
+
+	D3DDISPLAYMODE d3ddm;
+	hr = lpDD->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
+
+	if (FAILED(hr)) {
+		return false;
+	}
+
+	D3DPRESENT_PARAMETERS d3dpp; 
+	ZeroMemory( &d3dpp, sizeof(d3dpp) );
+    d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	d3dpp.Windowed = FALSE;
+    d3dpp.BackBufferWidth = d3ddm.Width;
+    d3dpp.BackBufferHeight = d3ddm.Height;
+    d3dpp.BackBufferFormat = D3DFMT_X8R8G8B8; // 32 bit
+	//d3dpp.BackBufferFormat = D3DFMT_R5G6B5; // 16 bit
+
+	hr = lpDD->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWndMain,
+		D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &pd3dDevice);
+
+		if(FAILED(hr))
+			hr = lpDD->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWndMain,
+					D3DCREATE_MIXED_VERTEXPROCESSING , &d3dpp, &pd3dDevice);
+		if(FAILED(hr))
+			hr = lpDD->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWndMain,
+					D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &pd3dDevice);
+		if (FAILED(hr))
+			return false;
+
+		AwSetDDObject(lpDD);
+
+	return true;
+}
+*/
 void GenerateDirectDrawSurface()
 
 {
-
+#if 0 // bjd
     DDCAPS          ddcaps;
     HRESULT         ddrval;
     DDSURFACEDESC   ddsd;
@@ -680,13 +747,14 @@ void GenerateDirectDrawSurface()
 	LockSurfaceAndGetBufferPointer();
 	UnlockSurface();
 	TimeStampedMessage("after Lock & Unlock");
-
+#endif
 } 
 
 // Lock back buffer and get screen pointer
 
-void		LockSurfaceAndGetBufferPointer()
+void LockSurfaceAndGetBufferPointer()
 {
+#if 0 // bjd
    DDSURFACEDESC    ddsdback;
    HRESULT          ddrval;
    int count = 0;
@@ -733,10 +801,12 @@ void		LockSurfaceAndGetBufferPointer()
 	// rendering target
     memcpy(&DisplayPixelFormat, &ddsdback.ddpfPixelFormat, 
 	      sizeof(DDPIXELFORMAT));
+#endif
 }
 
 void UnlockSurface(void)
 {
+#if 0
     HRESULT         ddrval;
 
 	ddrval = lpDDSBack->Unlock((LPVOID)ScreenBuffer);
@@ -749,8 +819,10 @@ void UnlockSurface(void)
 	   exit(ddrval);
 	  }
 	#endif
+#endif
 }
 
+#if 0 // bjd
 void FlipBuffers(void)
 {
 	HRESULT ddrval;
@@ -852,6 +924,9 @@ void FlipBuffers(void)
 	oddDraw ^= 1;
 	#endif
 }
+#endif
+
+#if 0 // bjd
 
 void InGameFlipBuffers(void)
 {
@@ -956,8 +1031,9 @@ void InGameFlipBuffers(void)
     #if InterlaceExperiment
 	oddDraw ^= 1;
 	#endif
-}
 
+}
+#endif
 // As of 29/4/96, slightly later in the day,
 // it now deallocates NOTHING explcitly, but
 // just calls Release on the entire DD object,
@@ -968,11 +1044,13 @@ void InGameFlipBuffers(void)
 
 void finiObjects(void)
 {
+#if 0 // bjd
     if (lpDD != NULL)
     {
      lpDD->Release();
      lpDD = NULL;
     }
+#endif
 }
 
 // Release ONE direct draw surface, to be used
@@ -980,8 +1058,16 @@ void finiObjects(void)
 // e.g. in LoadBackdrop.
 
 void ReleaseDDSurface(void* DDSurface)
-
 {
+	AVPTexture *d3d_texture = (AVPTexture *)DDSurface;
+	
+	if (d3d_texture->buffer) {
+		free(d3d_texture->buffer);
+	} 
+	
+	free(d3d_texture);			
+
+#if 0 // bjd
 	LPDIRECTDRAWSURFACE lpSurface;
 
 	WaitForVRamReady(VWS_DDRELEASE);
@@ -992,16 +1078,17 @@ void ReleaseDDSurface(void* DDSurface)
 	  {
 	   lpSurface->Release();
 	   lpSurface = NULL;
-	  }
+	}
+#endif
 }
 
 
 // Blt member is used rather BltFast because BltFast does not 
 // allow a colour fill
-
+#if 0 // bjd
 void ColourFillBackBuffer(int FillColour)
-
 {
+
 	HRESULT ddrval;
 	DDBLTFX ddbltfx;
 
@@ -1034,15 +1121,19 @@ void ColourFillBackBuffer(int FillColour)
 	   return;
 	   #endif
 	  }
+
 }
+#endif
 
 // Blt member is used rather BltFast because BltFast does not 
 // allow a colour fill
 
+#if 0 // bjd
 void ColourFillBackBufferQuad(int FillColour, int LeftX,
      int TopY, int RightX, int BotY)
 
 {
+
 	HRESULT ddrval;
 	DDBLTFX ddbltfx;
 	RECT destRect;
@@ -1079,8 +1170,10 @@ void ColourFillBackBufferQuad(int FillColour, int LeftX,
 	   #else
 	   return;
 	   #endif
-	  }
+	}
+
 }
+#endif
 
 // Note Blt is used rather than BltFast because BltFast will
 // always attempt to invoke an asynchronous blit and this appears
@@ -1091,6 +1184,7 @@ void ColourFillBackBufferQuad(int FillColour, int LeftX,
 void BlitToBackBuffer(void* lpBackground, RECT* destRectPtr, RECT* srcRectPtr)
 
 {
+#if 0 // bjd
 	HRESULT ddrval;
 
     #if optimiseblit 
@@ -1119,6 +1213,7 @@ void BlitToBackBuffer(void* lpBackground, RECT* destRectPtr, RECT* srcRectPtr)
 	   return;
 	   #endif
 	  }
+#endif
 }
 
 // Note Blt is used rather than BltFast because BltFast does not
@@ -1128,6 +1223,7 @@ void BlitToBackBuffer(void* lpBackground, RECT* destRectPtr, RECT* srcRectPtr)
 void BlitToBackBufferWithoutTearing(void* lpBackground, RECT* destRectPtr, RECT* srcRectPtr)
 
 {
+#if 0 // bjd
 	HRESULT ddrval;
 	DDBLTFX ddbltfx;
 
@@ -1161,6 +1257,7 @@ void BlitToBackBufferWithoutTearing(void* lpBackground, RECT* destRectPtr, RECT*
 	   return;
 	   #endif
 	  }
+#endif
 }
 
 #if 0
@@ -1277,6 +1374,7 @@ void RotatedBlitToBackBufferWithoutTearing(void* lpBackground, RECT* destRectPtr
 void BlitWin95Char(int x, int y, unsigned char toprint)
 
 {
+#if 0 // bjd
 	static int bltwin95char_ok=1;
 	if (!bltwin95char_ok) return;
 
@@ -1316,7 +1414,8 @@ void BlitWin95Char(int x, int y, unsigned char toprint)
 	ddrval = lpDDSBack->Blt(&destination, lpDDDbgFont,
 	       &source, DDBLT_WAIT | DDBLT_KEYSRC, NULL);
 	#else
-	ddrval = lpDDSBack->BltFast(x, y,
+
+	ddrval = lpDDSBack->BltFast(x, y, // DIRECT DRAW FUNCTION
 			 lpDDDbgFont, &source, 
 			 DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
 	#endif
@@ -1332,6 +1431,7 @@ void BlitWin95Char(int x, int y, unsigned char toprint)
 	 bltwin95char_ok = 0;
 	 return;
 	#endif
+#endif
 }
 
 #else
@@ -1368,6 +1468,7 @@ static BOOL bNoHardwareDD = FALSE;
 BOOL FAR PASCAL EnumDDObjectsCallback(GUID FAR* lpGUID, LPSTR lpDriverDesc,
                                       LPSTR lpDriverName, LPVOID lpContext)
 {
+#if 0 // bjd
     LPDIRECTDRAW lpDDTest;
     DDCAPS DriverCaps, HELCaps;
 	HRESULT ddrval;
@@ -1418,7 +1519,8 @@ BOOL FAR PASCAL EnumDDObjectsCallback(GUID FAR* lpGUID, LPSTR lpDriverDesc,
          }       
         lpDDTest->Release();
     }
-    return DDENUMRET_OK;
+#endif
+    return true;
 }
 
 
@@ -1450,13 +1552,25 @@ BOOL FAR PASCAL EnumDDObjectsCallback(GUID FAR* lpGUID, LPSTR lpDriverDesc,
 // after InitialVideoMode (it is currently
 // called at the start of InitialiseSystem).
 
-DDCAPS direct_draw_caps;
+//D3DCAPS9 *direct_draw_caps; // BJD
 
 BOOL InitialiseDirectDrawObject(void)
 
 {
-    HRESULT         ddrval;
-	LPDIRECTDRAW    lpDDHardware = NULL;
+#if 0 // bjd
+    HRESULT ddrval;
+
+	LPDirect3D8		lpDDHardware = NULL; // Direct3D object
+	//LPDIRECTDRAW    lpDDHardware = NULL;
+
+	LPDirect3D8		lpDDHardware = Direct3DCreate8(D3D_SDK_VERSION);
+
+	D3DDISPLAYMODE d3ddm;
+	ddrval = lpDDHardware->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
+
+	if(FAILED(ddrval)) {
+		//todo..
+	}
 
     // Set up DirectDraw object.
 
@@ -1466,8 +1580,26 @@ BOOL InitialiseDirectDrawObject(void)
 	// are in emulation, go straight for the HEL.
 	if (RasterisationRequestMode != RequestSoftwareRasterisation)
 	  {
-       ddrval = DirectDrawEnumerate(EnumDDObjectsCallback, &lpDDHardware);
-	LOGDXERR(ddrval);
+		ddrval = pd3dDevice->CheckDeviceType(D3DADAPTER_DEFAULT,
+						D3DDEVTYPE_HAL,
+						D3DFMT_R5G6B5,
+						D3DFMT_R5G6B5,
+						false);
+		
+		LOGDXERR(ddrval);
+
+		if(FAILED(ddrval)){
+		  #if debug
+	      ReleaseDirect3D();
+	      exit(ddrval);
+	      #else
+	      return FALSE;
+	      #endif
+		}
+		/*
+		ddrval = DirectDrawEnumerate(EnumDDObjectsCallback, &lpDDHardware);
+	   LOGDXERR(ddrval);
+
 	   if (ddrval != DD_OK)
 	     {
 	      #if debug
@@ -1478,11 +1610,13 @@ BOOL InitialiseDirectDrawObject(void)
 	      #endif
 	     }
       }
+	*/
 
     // If we don't have a hardware driver, either
 	// because there wasn't one or because we are in 
 	// HEL... then make one.
 
+	/*Software Rendering? bye bye... // BJD
     if (!lpDDHardware)
 	  {
 	   if (RasterisationRequestMode != RequestSoftwareRasterisation)
@@ -1504,21 +1638,30 @@ BOOL InitialiseDirectDrawObject(void)
 	      }
 	   #endif
 	  }
-	else
-	{
-	   bHardwareDDObj = TRUE;
+	*/
+	//else
+	//{
+	   bHardwareDDObj = TRUE; // using 3d hardware
 	   lpDD = lpDDHardware;
-	}
+	//}
 	
-	AwSetDDObject(lpDD);
+	AwSetDDObject(lpDD); // need to sort this out later for texture loading
+
+
+	direct_draw_caps = new D3DCAPS8;
 
     // Get caps for hardware DD driver/HEL layer
     memset(&direct_draw_caps, 0, sizeof(direct_draw_caps));
     direct_draw_caps.dwSize = sizeof(direct_draw_caps);
-    ddrval = lpDD->GetCaps(&direct_draw_caps, NULL);
+    
+	//ddrval = lpDD->GetCaps(&direct_draw_caps, NULL);
+	ddrval = lpDD->GetDeviceCaps(D3DADAPTER_DEFAULT,
+							D3DDEVTYPE_HAL,
+							&direct_draw_caps);
+	
 	LOGDXERR(ddrval);
 
-    if (ddrval != DD_OK)
+    if (ddrval != D3D_OK)
 	#if debug
 	   {
 	    ReleaseDirect3D();
@@ -1606,7 +1749,7 @@ BOOL InitialiseDirectDrawObject(void)
 	     }
 	  }
 	#endif // for CheckVideoMode
-
+#endif 
 	return TRUE; // Successful completion
 }
 
@@ -1658,6 +1801,7 @@ static BOOL ReallyChangeDDObj(void)
 
 int SelectDirectDrawObject(LPGUID pGUID)
 {
+#if 0 // bjd
     HRESULT         ddrval;
 	LPDIRECTDRAW    lpDDHardware = NULL;
 
@@ -1688,7 +1832,7 @@ int SelectDirectDrawObject(LPGUID pGUID)
 	#endif
 
     // Put statistics into globals
-	TotalVideoMemory = (int) (direct_draw_caps.dwVidMemTotal);
+//	TotalVideoMemory = (int) (direct_draw_caps.dwVidMemTotal); // BJD
     // At some stage, we should set up a proper
 	// structure here with the general system
 	// capabilities in it.
@@ -1708,7 +1852,7 @@ int SelectDirectDrawObject(LPGUID pGUID)
 	// means enumerate all available display
 	// modes on the driver.
 	NumAvailableVideoModes = 0;
-    ddrval = lpDD->EnumDisplayModes(0, NULL, 0, EnumDisplayModesCallback);
+//    ddrval = lpDD->EnumDisplayModes(0, NULL, 0, EnumDisplayModesCallback); // BJD
 	LOGDXERR(ddrval);
 
     if (ddrval != DD_OK)
@@ -1762,7 +1906,7 @@ int SelectDirectDrawObject(LPGUID pGUID)
 	     }
 	  }
 	#endif // for CheckVideoMode
-
+#endif
 	return TRUE; // Successful completion
 }
 
@@ -1819,7 +1963,7 @@ BOOL CheckForVideoModes(int TestVideoMode)
     return(EarlyExit);
 }
 
-HRESULT CALLBACK EnumDisplayModesCallback(LPDDSURFACEDESC pddsd, LPVOID Context)
+/*HRESULT CALLBACK EnumDisplayModesCallback(LPDDSURFACEDESC pddsd, LPVOID Context)
 {
     AvailableVideoModes[NumAvailableVideoModes].Width = pddsd->dwWidth;
     AvailableVideoModes[NumAvailableVideoModes].Height = pddsd->dwHeight;
@@ -1831,7 +1975,7 @@ HRESULT CALLBACK EnumDisplayModesCallback(LPDDSURFACEDESC pddsd, LPVOID Context)
 	else
 	   return DDENUMRET_CANCEL;
 }
-
+*/
 // Deallocate all objects except the basic
 // DirectDraw objects, which we want to do
 // before shifting display modes or window 
@@ -1853,6 +1997,7 @@ HRESULT CALLBACK EnumDisplayModesCallback(LPDDSURFACEDESC pddsd, LPVOID Context)
 
 void finiObjectsExceptDD(void)
 {
+#if 0 // bjd
 	if (WindowMode == WindowModeSubWindow)
 	  {
 	   if (lpDDClipper != NULL)
@@ -1879,6 +2024,7 @@ void finiObjectsExceptDD(void)
        lpDDSPrimary->Release();
        lpDDSPrimary = NULL;
       }
+#endif
 }
 
 
@@ -1899,6 +2045,7 @@ void finiObjectsExceptDD(void)
 int ChangePalette (unsigned char* NewPalette)
 
 {
+#if 0 // bjd
 	unsigned char DDPalette[1024]; // 256 colours, 4 bytes each
 	int NumEntries;
 
@@ -1936,7 +2083,7 @@ int ChangePalette (unsigned char* NewPalette)
     // Set all entries in palette to new values
     lpDDPal[0]->SetEntries(0,0,NumEntries,(LPPALETTEENTRY)
           DDPalette);
-
+#endif
     return Yes;
 }
 
@@ -1945,9 +2092,10 @@ int ChangePalette (unsigned char* NewPalette)
 // with one that uses GetCaps to fill out a general
 // structure.
 
+// BJD
 int GetAvailableVideoMemory(void)
 {
-  DDCAPS          ddcaps;
+  /*DDCAPS          ddcaps;
   HRESULT         ddrval;
 
   // Get caps for DirectDraw object
@@ -1965,8 +2113,8 @@ int GetAvailableVideoMemory(void)
   #else
      return -1;
   #endif
-
-  return (int) (ddcaps.dwVidMemFree);
+*/
+  return 32;
 }
 
 /*
@@ -2097,6 +2245,7 @@ void HandleVideoModeRestarts(HINSTANCE hInstance, int nCmdShow)
 int GetSingleColourForPrimary(int Colour)
 
 {
+#if 0 // bjd
     unsigned long m;
     int s;
     int red_shift, red_scale;
@@ -2147,6 +2296,8 @@ int GetSingleColourForPrimary(int Colour)
            | (b << blue_shift);
 
     return(RetVal);
+#endif 
+	return(0);
 }
 
 #if triplebuffer
@@ -2187,9 +2338,10 @@ HRESULT WINAPI InitTripleBuffers(LPDIRECTDRAWSURFACE lpdd,
 
 
 /* new versions of these functions, provided by neil */
-static GDIObjectReferenceCount = 0;
+static int GDIObjectReferenceCount = 0;
 BOOL GetGDISurface(void)
 {
+#if 0 // bjd
 	HRESULT hr = DD_OK;
 
 	if(WindowMode	== WindowModeSubWindow) return TRUE;
@@ -2224,13 +2376,14 @@ BOOL GetGDISurface(void)
 	   	SetSystemPaletteUse(hdc, SYSPAL_STATIC);
        	ReleaseDC(NULL, hdc);
 	}
-   
+#endif
   	return TRUE;
 }
 
 
 BOOL LeaveGDISurface(void)
 {
+#if 0 // bjd
 	HRESULT hr = DD_OK;
 
 	if(WindowMode == WindowModeSubWindow) return TRUE;
@@ -2250,7 +2403,7 @@ BOOL LeaveGDISurface(void)
 	   SetSystemPaletteUse(hdc, SYSPAL_NOSTATIC);
        ReleaseDC(NULL, hdc);
 	}
-
+#endif
 	return TRUE;
 }
 

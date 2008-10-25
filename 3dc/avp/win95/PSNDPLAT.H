@@ -81,6 +81,8 @@ void InitialiseBaseFrequency(SOUNDINDEX soundNum);
 int LoadWavFile(int soundNum, char *);
 int LoadWavFromFastFile(int soundNum, char *);
 
+void GetBufferCurrentPosition(LPDIRECTSOUNDBUFFER pBuffer, LPDWORD currentPlayCursor, LPDWORD currentWriteCursor);
+
 /* Patrick 5/6/97 -------------------------------------------------------------
   Start and EndSoundSys: does any platform operations required to initialise
   and exit the sound system

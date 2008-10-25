@@ -1,3 +1,4 @@
+#if 0
 /* KJL 15:54:57 03/07/98 - DirectPlay.c */
 #include "3dc.h"
 #include "module.h"
@@ -470,8 +471,7 @@ BOOL FAR PASCAL EnumSessionsCallback(
 		return (FALSE); 
 		
 	gamestyle = (lpSessionDesc->dwUser2 >> 8) & 0xff;
-	level = lpSessionDesc->dwUser2  & 0xff;
-		                                        
+	level = lpSessionDesc->dwUser2  & 0xff;                                  
 
 	//split the session name up into its parts
 	if(level>=100)
@@ -489,11 +489,8 @@ BOOL FAR PASCAL EnumSessionsCallback(
 		else
 		{
 			strcpy(sessionName,lpSessionDesc->lpszSessionNameA);
-			levelName[0] = 0;
-			
+			levelName[0] = 0;	
 		}
-		
-
 	}
 	else
 	{
@@ -528,9 +525,7 @@ BOOL FAR PASCAL EnumSessionsCallback(
 			return TRUE;
 		}
 			
-		SessionData[NumberOfSessionsFound].levelIndex = local_index;
-		
-
+		SessionData[NumberOfSessionsFound].levelIndex = local_index;		
 	}
 
 	NumberOfSessionsFound++;
@@ -891,3 +886,4 @@ BOOL DirectPlay_UpdateSessionList(int * SelectedItem)
 
 	return changed;
 }
+#endif // #if 0

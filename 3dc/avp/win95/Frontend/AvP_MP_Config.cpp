@@ -66,15 +66,15 @@ BOOL BuildLoadMPConfigMenu()
 	
 	// get any path in the load_name
 	int nPathLen = 0;
-	char * pColon = strrchr(load_name,':');
+	const char * pColon = strrchr(load_name,':');
 	if (pColon) nPathLen = pColon - load_name + 1;
-	char * pBackSlash = strrchr(load_name,'\\');
+	const char * pBackSlash = strrchr(load_name,'\\');
 	if (pBackSlash)
 	{
 		int nLen = pBackSlash - load_name + 1;
 		if (nLen > nPathLen) nPathLen = nLen;
 	}
-	char * pSlash = strrchr(load_name,'/');
+	const char * pSlash = strrchr(load_name,'/');
 	if (pSlash)
 	{
 		int nLen = pSlash - load_name + 1;
@@ -138,7 +138,8 @@ BOOL BuildLoadMPConfigMenu()
 	//create a new menu from the list of filenames
 	AvPMenu_Multiplayer_LoadConfig=new AVPMENU_ELEMENT[ConfigurationFilenameList.size()+1];
 
-	for(int i=0;i<ConfigurationFilenameList.size();i++)
+	int i;
+	for(i=0;i<ConfigurationFilenameList.size();i++)
 	{
 		AvPMenu_Multiplayer_LoadConfig[i].ElementID=AVPMENU_ELEMENT_LOADMPCONFIG;	
 		AvPMenu_Multiplayer_LoadConfig[i].TextDescription=TEXTSTRING_BLANK;	
@@ -229,8 +230,6 @@ void LoadMultiplayerConfigurationByIndex(int index)
 
 void LoadMultiplayerConfiguration(const char* name)
 {
-	
-	
 	FILE* file;
 	char filename[200];
 	if(netGameData.skirmishMode)
@@ -241,8 +240,6 @@ void LoadMultiplayerConfiguration(const char* name)
 	file=fopen(filename,"rb");
 	if(!file) return;
 
-	
-	
 
 	//set defaults first , in case there are entries not set by this file
 	SetDefaultMultiplayerConfig();
@@ -483,15 +480,15 @@ BOOL BuildLoadIPAddressMenu()
 	
 	// get any path in the load_name
 	int nPathLen = 0;
-	char * pColon = strrchr(load_name,':');
+	const char * pColon = strrchr(load_name,':');
 	if (pColon) nPathLen = pColon - load_name + 1;
-	char * pBackSlash = strrchr(load_name,'\\');
+	const char * pBackSlash = strrchr(load_name,'\\');
 	if (pBackSlash)
 	{
 		int nLen = pBackSlash - load_name + 1;
 		if (nLen > nPathLen) nPathLen = nLen;
 	}
-	char * pSlash = strrchr(load_name,'/');
+	const char * pSlash = strrchr(load_name,'/');
 	if (pSlash)
 	{
 		int nLen = pSlash - load_name + 1;
@@ -530,7 +527,8 @@ BOOL BuildLoadIPAddressMenu()
 	//create a new menu from the list of filenames
 	AvPMenu_Multiplayer_LoadIPAddress=new AVPMENU_ELEMENT[IPAddFilenameList.size()+1];
 
-	for(int i=0;i<IPAddFilenameList.size();i++)
+	int i;
+	for(i=0;i<IPAddFilenameList.size();i++)
 	{
 		AvPMenu_Multiplayer_LoadIPAddress[i].ElementID=AVPMENU_ELEMENT_LOADIPADDRESS;	
 		AvPMenu_Multiplayer_LoadIPAddress[i].TextDescription=TEXTSTRING_BLANK;	

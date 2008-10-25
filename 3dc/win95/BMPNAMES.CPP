@@ -131,11 +131,11 @@ Chunk_With_BMPs::Chunk_With_BMPs (Chunk_With_Children * parent, const char * con
 	
 	for (int i=0; i<num; i++)
 	{
-		int f,i,d1,d2,d3;
+		int f,j,d1,d2,d3;
 	
 		f = *((int *)bdata);
 		bdata += 4;
-		i = *((int *)bdata);
+		j = *((int *)bdata);
 		bdata += 4;
 		d1 = *((int *)bdata);
 		bdata += 4;
@@ -148,7 +148,7 @@ Chunk_With_BMPs::Chunk_With_BMPs (Chunk_With_Children * parent, const char * con
 		bdata += (4-strlen(bn.filename)%4) + strlen(bn.filename);
 
 		bn.flags = (BMPN_Flags)f;
-		bn.index = i;
+		bn.index = j;
 		bn.version_num = d1 & BMPNAME_VERSION_NUM_MASK;
 		bn.enum_id = (int)((unsigned int)d1 >> BMPNAME_ENUMID_SHIFT);
 		bn.priority = d2;

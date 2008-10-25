@@ -361,7 +361,7 @@ void CreateAlienBot(VECTORCH *Position,int type)
 			alienStatus->EnablePounce=0;
 		}
 		
-		alienStatus->aliensIgniterId=NULL;
+		alienStatus->aliensIgniterId=0;
 
 		MakeAlienNear(sbPtr);
 
@@ -583,7 +583,7 @@ void CreateAlienDynamic(STRATEGYBLOCK *Generator, ALIEN_TYPE type_of_alien)
 			alienStatus->PounceDetected=0;
 			alienStatus->EnablePounce=0;
 		}
-		alienStatus->aliensIgniterId=NULL;
+		alienStatus->aliensIgniterId=0;
 
 	}
 	else
@@ -805,7 +805,7 @@ void InitAlienBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
 			alienStatus->EnablePounce=0;
 		}
 		
-		alienStatus->aliensIgniterId=NULL;
+		alienStatus->aliensIgniterId=0;
 
 	}
 	else

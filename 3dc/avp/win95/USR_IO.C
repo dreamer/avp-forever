@@ -834,7 +834,6 @@ void InitPlayerGameInput(STRATEGYBLOCK* sbPtr)
 
 }
 
-
 /* This function maps raw inputs onto the players movement attributes in
    the player_status block.  It is called from the ExecuteFreeMovement
    function.
@@ -1248,9 +1247,6 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 
 	/* KJL 10:16:49 04/29/97 - mouse control */
 
-
-
-
 	if (GotMouse)
 	{
 		extern int MouseVelX;
@@ -1345,7 +1341,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		}	
 								 
 	}
-	
+
 	/* KJL 18:27:34 04/29/97 - joystick control */
 	if (GotJoystick)
 	{

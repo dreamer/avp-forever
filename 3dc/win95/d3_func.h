@@ -2,9 +2,23 @@
 #define _included_d3_func_h_
 
 #ifdef __cplusplus
+
 extern "C" {
+
 #endif
 
+#ifdef WIN32
+	#include <d3d9.h>
+	#include "Dxerr9.h"
+
+	#pragma comment(lib, "Dxerr9.lib")
+#endif
+
+#ifdef _XBOX
+	#include <xtl.h>
+#endif
+
+#include "aw.h"
 /*
   Direct3D globals
 */
@@ -28,8 +42,6 @@ extern "C" {
 typedef struct D3DDriverInfo {
     char Name[30]; /* short name of driver */
 	char About[50]; /* string about driver */
-    D3DDEVICEDESC Desc; /* full driver description */
-    GUID Guid; /* wacky universally unique id thingy */
 	BOOL Hardware; /* accelerated driver? */
 	BOOL Textures; /* Texture mapping available? */
 	BOOL ZBuffer; /* Z Buffering available? */
@@ -41,7 +53,6 @@ typedef struct D3DDriverInfo {
 */
 
 typedef struct D3DTextureFormat {
-    DDSURFACEDESC ddsd; /* DDSURFACEDESC for the surface description */
     BOOL Palette;   /* is Palettized? */
     int RedBPP;         /* #red bits per pixel */
     int BlueBPP;        /* #blue bits per pixel */
@@ -51,19 +62,27 @@ typedef struct D3DTextureFormat {
 
 
 typedef struct D3DInfo {
-    LPDIRECT3D          lpD3D;
-    LPDIRECT3DDEVICE    lpD3DDevice;
-    LPDIRECT3DVIEWPORT  lpD3DViewport;
-    int                 NumDrivers;
-    int                 CurrentDriver;
-    D3DDEVICEDESC       ThisDriver;
-    D3DDRIVERINFO       Driver[MAX_D3D_DRIVERS];
-    int                 CurrentTextureFormat;
-    int                 NumTextureFormats;
-    D3DTEXTUREFORMAT    TextureFormat[MAX_TEXTURE_FORMATS];
+    LPDIRECT3D9				lpD3D;
+    LPDIRECT3DDEVICE9		lpD3DDevice; 
+    D3DVIEWPORT9			lpD3DViewport; 
+	LPDIRECT3DSURFACE9		lpD3DBackSurface;// back buffer surface
+	D3DSURFACE_DESC			BackSurface_desc; // back buffer surface description
+	D3DPRESENT_PARAMETERS	d3dpp;
+
+	LPDIRECT3DVERTEXBUFFER9 lpD3DVertexBuffer;
+	LPDIRECT3DINDEXBUFFER9	lpD3DIndexBuffer;
+    int						NumDrivers;
+    int						CurrentDriver;
+	D3DADAPTER_IDENTIFIER9	AdapterInfo;
+	int						NumModes;
+	D3DDISPLAYMODE			DisplayMode[100];
+	D3DFORMAT				Formats[20];
+//    D3DDEVICEDESC			ThisDriver; // BJD
+    D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS]; // BJD
+    int						CurrentTextureFormat;
+    int						NumTextureFormats;
+    D3DTEXTUREFORMAT		TextureFormat[MAX_TEXTURE_FORMATS];
 } D3DINFO;
-
-
 
 /* KJL 14:24:45 12/4/97 - render state information */
 enum TRANSLUCENCY_TYPE
@@ -95,11 +114,40 @@ typedef struct
 
 } RENDERSTATES;
 
+LPDIRECT3DTEXTURE9 CreateD3DTexture(AVPTexture *tex, unsigned char *buf);
+LPDIRECT3DSURFACE9 CreateD3DSurface(DDSurface *tex, int width, int height);
+LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTexture *tex, int *real_height, int *real_width);
+LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTexture *tex);
 
+BOOL ReleaseVolatileResources();
+BOOL CreateVolatileResources();
+BOOL ChangeGameResolution(int width, int height, int colour_depth);
 
+void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, BOOL alpha);
+void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, int alpha);
+void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha);
+void DrawCloudTable(int topX, int topY, int word_length, int alpha);
+void DrawFadeQuad(int topX, int topY, int alpha);
+void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha);
+void DrawTexturedFadedQuad(int topX, int topY, int image_num, int alpha);
+void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_texture, int original_width, int original_height, int new_width, int new_height);
+void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired);
+//void LogDxError(HRESULT hr);
+//void LogDebugValue(int value);
+void ReleaseD3DTexture8(LPDIRECT3DTEXTURE9 *d3dTexture);
+void DrawBinkFmv(int topX, int topY, int height, int width, LPDIRECT3DTEXTURE9 fmvTexture);
+void CreateScreenShotImage();
+LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int *height);
 
+D3DINFO GetD3DInfo();
+void InGameFlipBuffers(void);
+char* GetDeviceName();
+#define RGB_MAKE	D3DCOLOR_XRGB
+
+#define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 
 #ifdef __cplusplus
+
 }
 #endif
 

@@ -305,7 +305,7 @@ void MaintainHUD(void)
 //	RenderSmokeTest();
 	PlatformSpecificEnteringHUD();
 	
-	if (ScanDrawMode != ScanDrawDirectDraw)
+//	if (ScanDrawMode != ScanDrawDirectDraw)
 	{
 		HandleParticleSystem();
 	}
@@ -580,7 +580,8 @@ void MaintainHUD(void)
 
 extern void DoCompletedLevelStatisticsScreen(void)
 {
-	extern int DebouncedGotAnyKey;
+	//extern int DebouncedGotAnyKey;
+	extern unsigned char DebouncedGotAnyKey;
 	extern unsigned char DebouncedKeyboardInput[];
 	if (DebouncedKeyboardInput[KEY_ESCAPE])
 	{	
@@ -605,7 +606,9 @@ static void DoMotionTracker(void)
 	static int distance=0;
 	
 	/* draw static motion tracker background, and the moving scanline */
-	BLTMotionTrackerToHUD(MTScanLineSize);
+//	BLTMotionTrackerToHUD(MTScanLineSize);
+	D3D_BLTMotionTrackerToHUD(MTScanLineSize);
+
   	
 	if(distanceNotLocked) /* if MT hasn't found any contacts this scan */
 	{
@@ -730,7 +733,8 @@ static void DoMotionTracker(void)
 
 				if(Fast2dMagnitude(x,y2)<ONE_FIXED)
 				{				
-					BLTMotionTrackerBlipToHUD
+					D3D_BLTMotionTrackerBlipToHUD
+					//BLTMotionTrackerBlipToHUD
 					(
 						x,
 				   		y2,
@@ -1182,7 +1186,7 @@ static void HandleMarineWeapon(void)
 	PLAYER_WEAPON_DATA *weaponPtr;
 	TEMPLATE_WEAPON_DATA *twPtr;
     
-	    /* access the extra data hanging off the strategy block */
+	/* access the extra data hanging off the strategy block */
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
     GLOBALASSERT(playerStatusPtr);
     	
@@ -1280,11 +1284,13 @@ static void DrawMarineSights(void)
 	/* draw standard crosshairs */
 	if (MIRROR_CHEATMODE)
 	{
- 		BLTGunSightToScreen(ScreenDescriptorBlock.SDB_Width - (GunMuzzleSightX>>16), GunMuzzleSightY>>16, GUNSIGHT_CROSSHAIR);
+ 		//BLTGunSightToScreen(ScreenDescriptorBlock.SDB_Width - (GunMuzzleSightX>>16), GunMuzzleSightY>>16, GUNSIGHT_CROSSHAIR);
+		D3D_BLTGunSightToHUD(ScreenDescriptorBlock.SDB_Width - (GunMuzzleSightX>>16),GunMuzzleSightY>>16,GUNSIGHT_CROSSHAIR);
 	}
 	else
 	{
-	 	BLTGunSightToScreen(GunMuzzleSightX>>16, GunMuzzleSightY>>16, GUNSIGHT_CROSSHAIR);
+	 	//BLTGunSightToScreen(GunMuzzleSightX>>16, GunMuzzleSightY>>16, GUNSIGHT_CROSSHAIR);
+		D3D_BLTGunSightToHUD(GunMuzzleSightX>>16, GunMuzzleSightY>>16, GUNSIGHT_CROSSHAIR);
 	}
 
 	/* draw smart target sights if required */
@@ -1299,22 +1305,26 @@ static void DrawMarineSights(void)
 			{
 		     	if (CurrentlySmartTargetingObject)	/* tracking target so use the red box */
 		     	{
-		     		BLTGunSightToScreen(ScreenDescriptorBlock.SDB_Width - (SmartTargetSightX>>16),SmartTargetSightY>>16,GUNSIGHT_REDBOX);
+		     		//BLTGunSightToScreen(ScreenDescriptorBlock.SDB_Width - (SmartTargetSightX>>16),SmartTargetSightY>>16,GUNSIGHT_REDBOX);
+					D3D_BLTGunSightToHUD(ScreenDescriptorBlock.SDB_Width - (SmartTargetSightX>>16),SmartTargetSightY>>16,GUNSIGHT_REDBOX);
 				}
 				else /* not tracking anything, use green box */
 				{
-				   	BLTGunSightToScreen(ScreenDescriptorBlock.SDB_Width - (SmartTargetSightX>>16),SmartTargetSightY>>16,GUNSIGHT_GREENBOX);
+				   	//BLTGunSightToScreen(ScreenDescriptorBlock.SDB_Width - (SmartTargetSightX>>16),SmartTargetSightY>>16,GUNSIGHT_GREENBOX);
+					D3D_BLTGunSightToHUD(ScreenDescriptorBlock.SDB_Width - (SmartTargetSightX>>16),SmartTargetSightY>>16,GUNSIGHT_GREENBOX);
 				}
 			}
 			else
 			{
 		     	if (CurrentlySmartTargetingObject)	/* tracking target so use the red box */
 		     	{
-		     		BLTGunSightToScreen(SmartTargetSightX>>16,SmartTargetSightY>>16,GUNSIGHT_REDBOX);
+		     		//BLTGunSightToScreen(SmartTargetSightX>>16,SmartTargetSightY>>16,GUNSIGHT_REDBOX);
+					D3D_BLTGunSightToHUD(SmartTargetSightX>>16,SmartTargetSightY>>16,GUNSIGHT_REDBOX);
 				}
 				else /* not tracking anything, use green box */
 				{
-				   	BLTGunSightToScreen(SmartTargetSightX>>16,SmartTargetSightY>>16,GUNSIGHT_GREENBOX);
+				   	//BLTGunSightToScreen(SmartTargetSightX>>16,SmartTargetSightY>>16,GUNSIGHT_GREENBOX);
+					D3D_BLTGunSightToHUD(SmartTargetSightX>>16,SmartTargetSightY>>16,GUNSIGHT_GREENBOX);
 				}
 			}
 	    }   
@@ -1888,7 +1898,7 @@ void DrawWristDisplay(void)
 {
 	extern HMODELCONTROLLER PlayersWeaponHModelController;
 	SECTION_DATA *sectionPtr;
-	int i;
+//	int i;
 
  	char *sectionName[]= {"Dum bar display","Dum 1 display","Dum 2 display","Dum 3 display","Dum 4 display"};
 
@@ -2074,7 +2084,7 @@ static void DrawAlienTeeth(void)
 
 	if (AlienTeethOffset)
 	{
-		extern int CloakingPhase;
+//		extern int CloakingPhase;
 		int offsetY;
 
 	   	DISPLAYBLOCK displayblock;

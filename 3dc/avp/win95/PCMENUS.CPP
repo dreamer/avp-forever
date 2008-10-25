@@ -7,7 +7,9 @@
 /*****************/
 
 #include <math.h> // for sqrt
-#include <windows.h> // for SetCursor
+#ifdef WIN32
+	#include <windows.h> // for SetCursor
+#endif
 #include <string.h> // strcat, strcpy, etc
 
 #include "3dc.h" // for directdraw stuff
@@ -208,6 +210,7 @@ public:
 	// filter for D3D video modes
 	int IsForD3D() const
 		{
+#if 0 // bjd
 			if (ColourDepth<=8 || Width>MaxScreenWidth) // no 8-bit support - it looks crap in 3-3-2!! & look at MaxScreenWidth
 				return 0;
 			else
@@ -231,6 +234,8 @@ public:
 			else
 			// ColourDepth>32
 				return 0;
+#endif
+			return 1;
 			
 		}
 	// filter for scan draw video modes
@@ -746,6 +751,7 @@ void InitOptionsMenu(void)
 	
 	// find the direct 3d driver we'll be using
 	d3d.CurrentDriver = 0;
+#if 0 // bjd
 	for (int i = 0; i < d3d.NumDrivers; ++i)
 	{
 		if (d3d.Driver[i].Hardware && hw_now_avail)
@@ -756,17 +762,17 @@ void InitOptionsMenu(void)
 		if (D3DCOLOR_RGB == d3d.Driver[i].Desc.dcmColorModel)
 			d3d.CurrentDriver = i;
 	}
+#endif
+// bjd	d3d.ThisDriver = d3d.Driver[d3d.CurrentDriver].Desc;
 	
-	d3d.ThisDriver = d3d.Driver[d3d.CurrentDriver].Desc;
-	
-	zbuf_avail[VM3_D3D] = d3d.Driver[d3d.CurrentDriver].ZBuffer ? TRUE : FALSE;
+// bjd	zbuf_avail[VM3_D3D] = d3d.Driver[d3d.CurrentDriver].ZBuffer ? TRUE : FALSE;
 	zbuf_avail[VM3_SCANDRAW] = TRUE;
 	
 	// not yet implemented properly and never been tested
-	mipmap_avail[VM3_D3D] = d3d.ThisDriver.dpcTriCaps.dwTextureFilterCaps & (D3DPTFILTERCAPS_MIPLINEAR|D3DPTFILTERCAPS_MIPNEAREST) ? TRUE : FALSE;
+//bjd	mipmap_avail[VM3_D3D] = d3d.ThisDriver.dpcTriCaps.dwTextureFilterCaps & (D3DPTFILTERCAPS_MIPLINEAR|D3DPTFILTERCAPS_MIPNEAREST) ? TRUE : FALSE;
 	mipmap_avail[VM3_SCANDRAW] = TRUE;
 	
-	bilin_filter_avail = d3d.ThisDriver.dpcTriCaps.dwTextureFilterCaps & D3DPTFILTERCAPS_LINEAR ? TRUE : FALSE;
+// bjd	bilin_filter_avail = d3d.ThisDriver.dpcTriCaps.dwTextureFilterCaps & D3DPTFILTERCAPS_LINEAR ? TRUE : FALSE;
 
 	hw_avail = hw_now_avail;
 	d3d_opt = hw_avail ? VM3_D3D : VM3_SCANDRAW;
@@ -802,7 +808,7 @@ void InitOptionsMenu(void)
 	}
 	
 	// possible hardware video modes
-	for (i=0; i<NumAvailableVideoModes; ++i)
+	for (int i=0; i<NumAvailableVideoModes; ++i)
 	{
 		VidModeInfo vmi(AvailableVideoModes[i]);
 		
@@ -865,6 +871,7 @@ void InitOptionsMenu(void)
 
 extern int SetGameVideoMode(void)
 {
+#if 0
 	desc_textures_to_load = hw_try_desc[0];
 	
 	LOGDXSTR("SetGameVideoMode");
@@ -922,11 +929,13 @@ extern int SetGameVideoMode(void)
 		s_depth  = vidmode[d3d_opt].ColourDepth;
 		#else
 		{
+#if 0 // bjd
 			DEVICEANDVIDEOMODESDESC *dPtr = &DeviceDescriptions[CurrentlySelectedDevice];
 			VIDEOMODEDESC *vmPtr = &(dPtr->VideoModes[CurrentlySelectedVideoMode]);
 			s_width  = vmPtr->Width;
 			s_height = vmPtr->Height;
 			s_depth  = vmPtr->ColourDepth;
+#endif
 		}
 		#endif
 		if (s_depth<=8)
@@ -980,10 +989,10 @@ extern int SetGameVideoMode(void)
 		ScreenDescriptorBlock.SDB_ClipRight = s_width;
 		ScreenDescriptorBlock.SDB_ClipUp    = 0;
 		ScreenDescriptorBlock.SDB_ClipDown  = s_height;
-		
+#ifdef WIN32		
 		GenerateDirectDrawSurface();
 		SetCursor(NULL);
-
+#endif
 		/* For dubious DirectX failures */
 		if (AttemptVideoModeRestart)
 			return 0;
@@ -1005,12 +1014,12 @@ extern int SetGameVideoMode(void)
 		// erm, something
 		return 0;
 	}
-
+/* bjd
 	if (!InitialiseDirect3DImmediateMode())
 	{
 		return 0;
 	}
-	
+*/	
 	// CL_Init_All(); // set up shifts for display pixel format - not required
 	
 	if (ScanDrawMode == ScanDrawDirectDraw)
@@ -1143,6 +1152,8 @@ extern int SetGameVideoMode(void)
 	}
 	
 	LOGDXSTR("leaving SetGameVideoMode");
+	return 1;
+#endif
 	return 1;
 }
 

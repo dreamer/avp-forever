@@ -25,7 +25,7 @@ fail (const char * format, ...)
 
   exit (EXIT_FAILURE);
 }
-
+#if 0
 void FAILHandleCompilerWarningMessage(void)
 {
 	int temp;
@@ -35,3 +35,4 @@ void FAILHandleCompilerWarningMessage(void)
 	temp = D3DRMMAP_WRAPV;
 	temp = D3DRMGROUP_ALLGROUPS;
 }	
+#endif

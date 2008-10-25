@@ -21,7 +21,8 @@ int PanningOfNearestVideoScreen;
 
 extern char *ScreenBuffer;
 extern LPDIRECTSOUND DSObject; 
-extern int GotAnyKey;
+//extern int GotAnyKey;
+extern unsigned char GotAnyKey;
 extern void DirectReadKeyboard(void);
 extern IMAGEHEADER ImageHeaderArray[];
 #if MaxImageGroups>1
@@ -34,7 +35,7 @@ void PlayFMV(char *filenamePtr);
 static int NextSmackerFrame(Smack *smackHandle);
 static UpdatePalette(Smack *smackHandle);
 
-static int GetSmackerPixelFormat(DDPIXELFORMAT *pixelFormatPtr);
+// bjd static int GetSmackerPixelFormat(DDPIXELFORMAT *pixelFormatPtr);
 void FindLightingValueFromFMV(unsigned short *bufferPtr);
 void FindLightingValuesFromTriggeredFMV(unsigned char *bufferPtr, FMVTEXTURE *ftPtr);
 
@@ -94,7 +95,8 @@ static int NextSmackerFrame(Smack *smackHandle)
 //	if (smackHandle->NewPalette) UpdatePalette(smackHandle);
 
 	/* unpack frame */
-	extern DDPIXELFORMAT DisplayPixelFormat;
+//	extern DDPIXELFORMAT DisplayPixelFormat;
+	void* DisplayPixelFormat;
 	SmackToBuffer(smackHandle,(640-smackHandle->Width)/2,(480-smackHandle->Height)/2,640*2,480,(void*)ScreenBuffer,GetSmackerPixelFormat(&DisplayPixelFormat));
 	SmackDoFrame(smackHandle);
 
@@ -182,9 +184,10 @@ void CloseFMV(void)
 #endif
 }
 
-static int GetSmackerPixelFormat(DDPIXELFORMAT *pixelFormatPtr)
+//static int GetSmackerPixelFormat(DDPIXELFORMAT *pixelFormatPtr)
+static int GetSmackerPixelFormat(void* *pixelFormatPtr)
 {
-
+#if 0 // bjd
 	if( (pixelFormatPtr->dwFlags & DDPF_RGB) && !(pixelFormatPtr->dwFlags & DDPF_PALETTEINDEXED8) )
 	{
 	    int m;
@@ -256,17 +259,9 @@ static int GetSmackerPixelFormat(DDPIXELFORMAT *pixelFormatPtr)
 	{
 		return 0;
 	}
+#endif
+	return SMACKBUFFER565;
 }
-
-
-
-
-
-
-
-
-
-
 
 void StartMenuMusic(void)
 {
@@ -421,8 +416,6 @@ void ScanImagesForFMVs(void)
 			}		
 		}
 	}
-
-
 }
 
 void UpdateAllFMVTextures(void)
@@ -450,6 +443,7 @@ void ReleaseAllFMVTextures(void)
 			SmackClose(FMVTexture[i].SmackHandle);
 			FMVTexture[i].SmackHandle=0;
 		}
+/*
 		if (FMVTexture[i].SrcTexture)
 		{
 			ReleaseD3DTexture(FMVTexture[i].SrcTexture);
@@ -460,13 +454,37 @@ void ReleaseAllFMVTextures(void)
 			ReleaseDDSurface(FMVTexture[i].SrcSurface);
 			FMVTexture[i].SrcSurface=0;
 		}
+
 		if (FMVTexture[i].DestTexture)
 		{	
 			ReleaseD3DTexture(FMVTexture[i].DestTexture);
 			FMVTexture[i].DestTexture = 0;
 		}
+*/
+		ReleaseD3DTexture8(&FMVTexture[i].SrcTexture);
+		ReleaseD3DTexture8(&FMVTexture[i].SrcSurface);
+		ReleaseD3DTexture8(&FMVTexture[i].DestTexture);
+		ReleaseD3DTexture8(&FMVTexture[i].ImagePtr->Direct3DTexture);
+#if 0
+		if (FMVTexture[i].SrcTexture)
+		{
+//			ReleaseD3DTexture(FMVTexture[i].SrcTexture);
+			FMVTexture[i].SrcTexture->lpVtbl->Release(FMVTexture[i].SrcTexture);
+			FMVTexture[i].SrcTexture=0;
+		}
+		if (FMVTexture[i].SrcSurface)
+		{
+//			ReleaseDDSurface(FMVTexture[i].SrcSurface);
+			FMVTexture[i].SrcSurface->lpVtbl->Release(FMVTexture[i].SrcSurface);
+			FMVTexture[i].SrcSurface=0;
+		}
+		if (FMVTexture[i].DestTexture)
+		{	
+			FMVTexture[i].DestTexture->lpVtbl->Release(FMVTexture[i].DestTexture);
+			FMVTexture[i].DestTexture = NULL;
+		}
+#endif
 	}
-
 }
 
 
@@ -477,7 +495,8 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr)
 	
 	{
 		extern D3DINFO d3d;
-		smackerFormat = GetSmackerPixelFormat(&(d3d.TextureFormat[d3d.CurrentTextureFormat].ddsd.ddpfPixelFormat));
+// bjd		smackerFormat = GetSmackerPixelFormat(&(d3d.TextureFormat[d3d.CurrentTextureFormat].ddsd.ddpfPixelFormat));
+		smackerFormat = SMACKBUFFER565;
 	}
 	if (smackerFormat) w*=2;
 
@@ -488,6 +507,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr)
 		ftPtr->SoundVolume = SmackerSoundVolume;
 	    
 	    if (SmackWait(ftPtr->SmackHandle)) return 0;
+
 		/* unpack frame */
 	  	SmackToBuffer(ftPtr->SmackHandle,0,0,w,96,bufferPtr,smackerFormat);
 

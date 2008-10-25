@@ -153,7 +153,7 @@ Module_Waypoint_Chunk::Module_Waypoint_Chunk(Chunk_With_Children* parent,const c
 			else
 				cw->ModLinks=0;
 
-			for(j=0;j<cw->NumModLinks;j++)
+			for(int j=0;j<cw->NumModLinks;j++)
 			{
 				ModuleLink* ml=&cw->ModLinks[j];
 				ml->module_name=new char[strlen(data)+1];
@@ -279,7 +279,7 @@ void Module_Waypoint_Chunk::fill_data_block(char* data_start)
 		*(int*)data_start=cw->NumModLinks;
 		data_start+=4;
 		
-		for(j=0;j<cw->NumModLinks;j++)
+		for(int j=0;j<cw->NumModLinks;j++)
 		{
 			ModuleLink* ml=&cw->ModLinks[j];
 			strcpy(data_start,ml->module_name);
@@ -312,7 +312,7 @@ void Module_Waypoint_Chunk::TransferWaypointData(Module_Waypoint_Chunk* mwc_from
 
 		//copy alien waypoints from other chunk
 
-		for(i=0;i<mwc_from->NumAlienWaypoints;i++)
+		for(int i=0;i<mwc_from->NumAlienWaypoints;i++)
 		{
 			ChunkWaypoint* cw=&new_wp[i+NumAlienWaypoints];
 			*cw=mwc_from->AlienWaypoints[i];
@@ -331,7 +331,7 @@ void Module_Waypoint_Chunk::TransferWaypointData(Module_Waypoint_Chunk* mwc_from
 		NumAlienWaypoints+=mwc_from->NumAlienWaypoints;
 
 		//now take ground waypoints from this chunk
-		for(i=0;i<NumGroundWaypoints;i++)
+		for(int i=0;i<NumGroundWaypoints;i++)
 		{
 			new_wp[NumAlienWaypoints+i]=GroundWaypoints[i];
 			//set pointers to zero so the memory doesn't get deallocated when the old
@@ -342,7 +342,7 @@ void Module_Waypoint_Chunk::TransferWaypointData(Module_Waypoint_Chunk* mwc_from
 
 		//copy ground waypoints from other chunk
 
-		for(i=0;i<mwc_from->NumGroundWaypoints;i++)
+		for(int i=0;i<mwc_from->NumGroundWaypoints;i++)
 		{
 			ChunkWaypoint* cw=&new_wp[i+NumAlienWaypoints+NumGroundWaypoints];
 			*cw=mwc_from->GroundWaypoints[i];

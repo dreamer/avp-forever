@@ -4,7 +4,7 @@
 #include "inline.h"
 #include "module.h"
 
-#include <string.hpp>
+//#include <string.hpp>
 
 #include "list_tem.hpp"
 #include "chnkload.hpp"
@@ -54,7 +54,7 @@
 #include "pldnet.h"
 
 extern "C" {
-#include "3dc.h"
+//#include "3dc.h"
 #include "inventry.h"
 
 extern int VideoMode;
@@ -126,9 +126,9 @@ void setup_start_position(RIFFHANDLE h)
 	}
 	if(start_chunk)
 	{
-		PlayerStartLocation.vx=start_chunk->location.x*local_scale;
-		PlayerStartLocation.vy=start_chunk->location.y*local_scale;
-		PlayerStartLocation.vz=start_chunk->location.z*local_scale;
+		PlayerStartLocation.vx = (int)(start_chunk->location.x*local_scale);
+		PlayerStartLocation.vy = (int)(start_chunk->location.y*local_scale);
+		PlayerStartLocation.vz = (int)(start_chunk->location.z*local_scale);
 
 		PlayerStartMat.mat11=start_chunk->orientation.mat11;
 		PlayerStartMat.mat12=start_chunk->orientation.mat12;
@@ -172,7 +172,9 @@ void setup_paths(RIFFHANDLE h)
 	if(!pathlist.size()) return;
 	
 	//find the highest path index
-	for(LIF<Chunk*> plif(&pathlist);!plif.done();plif.next())
+
+	LIF<Chunk*> plif(&pathlist);
+	for(;!plif.done();plif.next())
 	{
 		AVP_Path_Chunk* apc=(AVP_Path_Chunk*) plif();
 		PathArraySize=max(PathArraySize,apc->PathID+1);	
@@ -200,7 +202,7 @@ void setup_paths(RIFFHANDLE h)
 		
 		path->modules_in_path=(AIMODULE**)PoolAllocateMem(sizeof(AIMODULE*)*length);
 	
-		for(i=0;i<apc->PathLength;i++)
+		for(int i=0;i<apc->PathLength;i++)
 		{
 			Object_Chunk* path_object=h->fc->get_object_by_index(apc->Path[i].module_index);
 			if(!path_object)continue;
@@ -219,7 +221,7 @@ void setup_paths(RIFFHANDLE h)
 
 		if(apc->flags & PathFlag_BackAndForth)
 		{
-			for(i=path->path_length-2;i>0;i--)
+			for(int i=path->path_length-2;i>0;i--)
 			{
 				path->modules_in_path[path->path_length]=path->modules_in_path[i];
 				path->path_length++;
@@ -465,7 +467,9 @@ Global_Hierarchy_Store::Global_Hierarchy_Store (RIFFHANDLE h)
 
 	//find the highest sound index
 	int max_index=-1;
-	for(LIF<Chunk*> chlif(&chlist);!chlif.done();chlif.next())
+
+	LIF<Chunk*> chlif(&chlist);
+	for(;!chlif.done();chlif.next())
 	{
 		Indexed_Sound_Chunk* isc=(Indexed_Sound_Chunk*)chlif();
 		max_index=max(max_index,isc->index);
@@ -493,8 +497,8 @@ Global_Hierarchy_Store::Global_Hierarchy_Store (RIFFHANDLE h)
 
 			GLOBALASSERT(sound_array[index].sound_loaded==0);
 			
-			sound_array[index].s3d.inner_range=isc->inner_range*local_scale;
-			sound_array[index].s3d.outer_range=isc->outer_range*local_scale;
+			sound_array[index].s3d.inner_range = (int)(isc->inner_range*local_scale);
+			sound_array[index].s3d.outer_range = (int)(isc->outer_range*local_scale);
 			sound_array[index].s3d.velocity=ZeroVector;
 			sound_array[index].s3d.position=ZeroVector;
 
@@ -513,13 +517,8 @@ Global_Hierarchy_Store::Global_Hierarchy_Store (RIFFHANDLE h)
 			{
 				sound_array[index].sound_index=(SOUNDINDEX)sound_array[index].sound_loaded->sound_num;
 			}
-			
-		
 		}
 	}
-	
-
-
 }
 
 
@@ -664,7 +663,8 @@ void Global_Hierarchy_Store::setup_alternate_shape_sets(List <Object_ShapeNum_Pa
 	List<Chunk*> chlist;
 	fc->lookup_child("OBHALTSH",chlist);
 	
-	for(LIF<Chunk*> chlif(&chlist);!chlif.done();chlif.next())
+	LIF<Chunk*> chlif(&chlist);
+	for(;!chlif.done();chlif.next())
 	{
 		Object_Hierarchy_Alternate_Shape_Set_Chunk* ohassc=(Object_Hierarchy_Alternate_Shape_Set_Chunk*) chlif();
 
@@ -688,7 +688,8 @@ void Global_Hierarchy_Store::setup_alternate_shape_sets(List <Object_ShapeNum_Pa
 			hsr->replacement_id = 0;
 			
 			//find the shape num for the new shape
-			for(LIF<Object_ShapeNum_Pair*> olif(&osnp_lst);!olif.done();olif.next())
+			LIF<Object_ShapeNum_Pair*> olif(&osnp_lst);
+			for(;!olif.done();olif.next())
 			{
 				if(!strcmp(olif()->ob->object_data.o_name,rlif()->new_object_name))
 				{
@@ -793,7 +794,7 @@ void Global_Hierarchy_Store::setup_alternate_shape_sets(List <Object_ShapeNum_Pa
 			
 
 			int pos=0;
-			for(i=0;i<num_found_sets;i++)
+			for(int i=0;i<num_found_sets;i++)
 			{
 				Hierarchy_Alternate_Shape_Set* hass=found_sets[i];
 				for(int j=0;j<hass->num_replaced_shapes;j++)
@@ -917,7 +918,7 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 				KEYFRAME_DATA * kfd=0;
 								
 				
-				for(int frame_no=0;frame_no<seq->num_frames;)
+				for(unsigned int frame_no=0;frame_no<seq->num_frames;)
 				{
 					Object_Animation_Frame* frame=&seq->frames[frame_no];
 					
@@ -970,9 +971,9 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 										
 					VECTORCH offset;
 					
-					offset.vx = frame->transform.x * local_scale;
-					offset.vy = frame->transform.y * local_scale;
-					offset.vz = frame->transform.z * local_scale;
+					offset.vx = (int)(frame->transform.x * local_scale);
+					offset.vy = (int)(frame->transform.y * local_scale);
+					offset.vz = (int)(frame->transform.z * local_scale);
 
 					SetKeyFrameOffset(kfd,&offset);
 					
@@ -1180,9 +1181,9 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 
 					VECTORCH offset;
 					
-					offset.vx = frame->transform.x * local_scale;
-					offset.vy = frame->transform.y * local_scale;
-					offset.vz = frame->transform.z * local_scale;
+					offset.vx = (int)(frame->transform.x * local_scale);
+					offset.vy = (int)(frame->transform.y * local_scale);
+					offset.vz = (int)(frame->transform.z * local_scale);
 
 					SetKeyFrameOffset(kfd,&offset);
 					
@@ -1386,7 +1387,7 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 		if((NumObjectsLoaded &0xf)==0)
 		{
 			//update bar every 16 objects
-			Set_Progress_Bar_Position(progress_start+progress_interval*((.5*NumObjectsLoaded)/NumObjectsToLoad));
+			Set_Progress_Bar_Position((int)(progress_start+progress_interval*((.5*NumObjectsLoaded)/NumObjectsToLoad)));
 		}
 		NumObjectsLoaded++;
 		
@@ -1446,7 +1447,7 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 				int ir=svic->intensity_array[vn]>>16;
 			 	int ig=svic->intensity_array[vn]>>8 &0xff;
 			 	int ib=svic->intensity_array[vn] &0xff;
-			 	int mag =sqrt((ir*ir+ig*ig+ib*ib)/3.0);
+			 	int mag = (int)sqrt((double)(ir*ir+ig*ig+ib*ib)/3.0);
 				
 			 	mainshapelist[osnp->sh_num]->sh_extraitemdata[vn].EID_VertexI = svic->intensity_array[vn] + (mag<<24);
 				
@@ -1493,7 +1494,7 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 	**-----------------------------*/
 	
 	
-	Set_Progress_Bar_Position(progress_start+progress_interval*.5);
+	Set_Progress_Bar_Position((int)(progress_start+progress_interval*.5));
 	//get the distances at which the various detail levels should be used
 	int* distance_array=0;
 	Hierarchy_Degradation_Distance_Chunk* hddc=(Hierarchy_Degradation_Distance_Chunk*)h->fc->lookup_single_child("HIDEGDIS");
@@ -1593,7 +1594,7 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 	
 	for (LIF<Chunk *> cli (&cl); !cli.done(); cli.next())
 	{
-		Set_Progress_Bar_Position(progress_start+progress_interval*(.7+(.2*NumHierLoaded)/NumHierToLoad));
+		Set_Progress_Bar_Position((int)(progress_start+progress_interval*(.7+(.2*NumHierLoaded)/NumHierToLoad)));
 		NumHierLoaded++;
 		
 		Object_Hierarchy_Chunk * ohc = (Object_Hierarchy_Chunk *)cli();
@@ -1612,7 +1613,7 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 
 	Global_Hierarchy_Library.add_entry(ghs);
 
-	Set_Progress_Bar_Position(progress_start+progress_interval*.9);
+	Set_Progress_Bar_Position((int)(progress_start+progress_interval*.9));
 
 	//reset the sound directory
 	Rif_Sound_Directory=0;
@@ -1925,7 +1926,8 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 		MainScene.sm_module += 2;
 		MainScene.sm_marray += 1;
 		
-		for (int i=0; i<num_modules; i++)
+		int i;
+		for (i=0; i<num_modules; i++)
 		{
 			MainScene.sm_module[i] = Empty_Module;
 			MainScene.sm_marray[i] = &MainScene.sm_module[i];
@@ -1963,7 +1965,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 			if((NumShapesLoaded & 0xf)==0)
 			{
 				//update bar every 16 objects
-				Set_Progress_Bar_Position(progress_start+progress_interval*((.6*NumShapesLoaded)/NumShapesToLoad));
+				Set_Progress_Bar_Position((int)(progress_start+progress_interval*((.6*NumShapesLoaded)/NumShapesToLoad)));
 			}
 			
 			NumShapesLoaded++;
@@ -2136,7 +2138,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 
 		if (flags & CCF_ENVIRONMENT)
 		{
-			Set_Progress_Bar_Position(progress_start+progress_interval*.6);
+			Set_Progress_Bar_Position((int)(progress_start+progress_interval*.6));
 		}
 		MainScene.sm_module[mod_pos] = Term_Module;
 		MainScene.sm_marray[mod_pos] = 0;
@@ -2224,7 +2226,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 
 		if (flags & CCF_ENVIRONMENT)
 		{
-			Set_Progress_Bar_Position(progress_start+progress_interval*.7);
+			Set_Progress_Bar_Position((int)(progress_start+progress_interval*.7));
 		}
 		
 		for (i=0; i<mod_pos; i++)
@@ -2431,7 +2433,8 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 						if(adj_ai_module!=this_ai_module_index)
 						{
 							//make sure not already in list
-							for(LIF<int> adjlif(&adjacent_aimodule_list);!adjlif.done();adjlif.next())
+							LIF<int> adjlif(&adjacent_aimodule_list);
+							for(;!adjlif.done();adjlif.next())
 							{
 								if(adjlif()==adj_ai_module) break;
 							}
@@ -2483,7 +2486,8 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 								if(adj_ai_module!=this_ai_module_index)
 								{
 									//make sure not already in list
-									for(LIF<int> adjlif(&adjacent_aimodule_list);!adjlif.done();adjlif.next())
+									LIF<int> adjlif(&adjacent_aimodule_list);
+									for(;!adjlif.done();adjlif.next())
 									{
 										if(adjlif()==adj_ai_module) break;
 									}
@@ -2586,7 +2590,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 
 		if (flags & CCF_ENVIRONMENT)
 		{
-			Set_Progress_Bar_Position(progress_start+progress_interval*.8);
+			Set_Progress_Bar_Position((int)(progress_start+progress_interval*.8));
 		}
 		//setup entry points
 		for(i=0;i<AIModuleArraySize;i++)
@@ -2705,7 +2709,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 
 
 		
-		Set_Progress_Bar_Position(progress_start+progress_interval*.9);
+		Set_Progress_Bar_Position((int)(progress_start+progress_interval*.9));
 	}
 	else
 	{
@@ -2823,7 +2827,7 @@ int load_rif_bitmap (char const * fname, BMPN_Flags flags)
 	return CL_LoadImageOnce
 		(
 			fname,
-			(ScanDrawDirectDraw == ScanDrawMode ? LIO_CHIMAGE : LIO_D3DTEXTURE)
+			(/*ScanDrawDirectDraw == ScanDrawMode ? LIO_CHIMAGE : */LIO_D3DTEXTURE)
 			|(flags & ChunkBMPFlag_IFF ? LIO_RELATIVEPATH : LIO_RIFFPATH)
 			|(flags & ChunkBMPFlag_UsesTransparency ? LIO_TRANSPARENT : LIO_NONTRANSP)
 			|(flags & (cl_pszGameMode ?
@@ -2863,7 +2867,8 @@ int GetMSLPos(void)
 	if (GLS_NOTINLIST == first_free_pos)
 		first_free_pos = msl_term_pos = start_of_loaded_shapes = load_precompiled_shapes();
 
-	for (int pos = first_free_pos; pos < msl_term_pos && FREE_SHAPE != mainshapelist[pos]; ++pos)
+	int pos = first_free_pos;
+	for (; pos < msl_term_pos && FREE_SHAPE != mainshapelist[pos]; ++pos)
 		;
 
 	first_free_pos = pos+1;
@@ -3087,18 +3092,23 @@ RIFFHANDLE avp_load_rif (const char * fname)
 {
 	//see if there is a local copy of the rif file
 	FILE* rifFile=fopen(fname,"rb");
+
 	if(!rifFile && AvpCDPath)
 	{
 		//try and load rif file from cd instead
 		char RifName[200];
 		sprintf(RifName,"%s%s",AvpCDPath,fname);
 		return load_rif(RifName);
-
 	}
-	fclose(rifFile);
-	return load_rif(fname); 
 
+	if(rifFile)
+	{
+		fclose(rifFile);
+	}
+
+	return load_rif(fname);
 }
+
 RIFFHANDLE avp_load_rif_non_env (const char * fname)
 {
 	//see if there is a local copy of the rif file
@@ -3111,9 +3121,13 @@ RIFFHANDLE avp_load_rif_non_env (const char * fname)
 		return load_rif_non_env(RifName);
 
 	}
-	fclose(rifFile);
-	return load_rif_non_env(fname); 
 
+	if(rifFile)
+	{
+		fclose(rifFile);
+	}
+
+	return load_rif_non_env(fname); 
 }
 
 
@@ -3256,7 +3270,8 @@ void LoadModuleData()
 		{
 			if(this_mod->m_vmptr[j].vmod_data.vmodidata)
 			{
-				for(int k=j+1;k<vmod_no;k++)
+				int k;
+				for(k=j+1;k<vmod_no;k++)
 				{
 					if(*((int *)this_mod->m_vmptr[k].vmod_name)>=this_mod->m_vmptr[j].vmod_data.vmodidata)
 					{
@@ -3516,6 +3531,5 @@ void DeallocateSoundsAndPoolAllocatedMemory()
 	DeallocateAllImages();
 
 	PurgeMSLShapeList();
-
 }
 };

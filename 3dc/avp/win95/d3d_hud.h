@@ -2,7 +2,6 @@
 extern void D3D_HUD_Setup(void);
 extern void D3D_HUDQuad_Output(int imageNumber,struct VertexTag *quadVerticesPtr,unsigned int colour);
 
-
 extern int TransparencyLevelOfHUD;
 /* takes values of 0 (not drawn) to 255 (opaque) */
 

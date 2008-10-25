@@ -8,16 +8,18 @@ extern "C"
 	#include "AvP_Menus.h"
 	extern int NormalFrameTime;
 	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-	extern DDPIXELFORMAT DisplayPixelFormat;
-	extern LPDIRECTDRAWSURFACE lpDDSBack;
-	extern int GotAnyKey;
-	extern int DebouncedGotAnyKey;
+//	extern int GotAnyKey;
+	extern unsigned char GotAnyKey;
+	//extern int DebouncedGotAnyKey;
+	extern unsigned char DebouncedGotAnyKey;
 
 	extern AVPMENUGFX AvPMenuGfxStorage[];
 extern void DirectReadKeyboard(void);
 
+extern void ThisFramesRenderingHasBegun(void);
+extern void ThisFramesRenderingHasFinished(void);
 
-static IntroHasAlreadyBeenPlayed = 1;
+static int IntroHasAlreadyBeenPlayed = 1;
 
 
 void Show_CopyrightInfo(void);
@@ -29,6 +31,8 @@ extern void Show_WinnerScreen(void);
 extern void PlayBinkedFMV(char *filenamePtr);
 extern void DrawMainMenusBackdrop(void);
 extern void FadedScreen(int alpha);
+
+extern void DrawFadeQuad(int topX, int topY, int alpha);
 
 void WeWantAnIntro(void)
 {
@@ -48,13 +52,19 @@ extern void PlayIntroSequence(void)
 	ResetFrameCounter();
 	Show_CopyrightInfo();
 
+//	ThisFramesRenderingHasBegun();
 	/* play the Fox Interactive FMV */
-	ClearScreenToBlack();
-	FlipBuffers();
-	ClearScreenToBlack();
+//	ClearScreenToBlack();
+
+//	ThisFramesRenderingHasBegun();
+//	ClearScreenToBlack();
 
 	PlayBinkedFMV("FMVs/logos.bik");
-	//PlayFMV("FMVs/rebellion.smk");
+//	PlayFMV("FMVs/rebellion.smk");
+
+//	ThisFramesRenderingHasFinished();
+
+//	FlipBuffers();
 
 	StartMenuMusic();
 	ResetFrameCounter();
@@ -83,6 +93,8 @@ extern void ShowSplashScreens(void)
 		int timeRemaining = 5*ONE_FIXED;
 		do
 		{
+			ThisFramesRenderingHasBegun();
+
 			int a = timeRemaining*2;
 			if (a>ONE_FIXED) a=ONE_FIXED;
 			
@@ -100,10 +112,13 @@ extern void ShowSplashScreens(void)
 				else
 				{
 				  	DrawAvPMenuGfx_Faded(graphic[i], 0, 0, a,AVPMENUFORMAT_LEFTJUSTIFIED);
+					DrawFadeQuad(0, 0, a);
 				}
 				timeRemaining-=NormalFrameTime/2;
 			}
 			CheckForWindowsMessages();
+
+			ThisFramesRenderingHasFinished();
 			FlipBuffers();
 			
 		  	DirectReadKeyboard();	
@@ -111,12 +126,15 @@ extern void ShowSplashScreens(void)
 		}
 		while(timeRemaining>=0 && !DebouncedGotAnyKey);
 	}
+	ThisFramesRenderingHasBegun();
 	ClearScreenToBlack();
-	FlipBuffers();
-	ClearScreenToBlack();
+	ThisFramesRenderingHasFinished();
 	FlipBuffers();
 
+//	ClearScreenToBlack();
+//	FlipBuffers();
 }
+
 extern void Show_WinnerScreen(void)
 {
 	LoadAvPMenuGfx(AVPMENUGFX_WINNER_SCREEN);
@@ -124,6 +142,8 @@ extern void Show_WinnerScreen(void)
 	int timeRemaining = 10*ONE_FIXED;
 	do
 	{
+		ThisFramesRenderingHasBegun();
+
 		int a = timeRemaining*2;
 		if (a>ONE_FIXED)
 		{
@@ -135,6 +155,8 @@ extern void Show_WinnerScreen(void)
 		}
 
 		CheckForWindowsMessages();
+
+		ThisFramesRenderingHasFinished();
 		FlipBuffers();
 			
 	  	DirectReadKeyboard();	
@@ -142,11 +164,13 @@ extern void Show_WinnerScreen(void)
 		timeRemaining-=NormalFrameTime;
 	}
 	while(timeRemaining>=0 && !DebouncedGotAnyKey);
+
+	ThisFramesRenderingHasBegun();
 	ClearScreenToBlack();
+	ThisFramesRenderingHasFinished();
 	FlipBuffers();
-	ClearScreenToBlack();
-	FlipBuffers();
-	
+//	ClearScreenToBlack();
+//	FlipBuffers();
 }
 
 void Show_CopyrightInfo(void)
@@ -156,7 +180,9 @@ void Show_CopyrightInfo(void)
 	{
 		CheckForWindowsMessages();
 		{
+			ThisFramesRenderingHasBegun();
 			DrawAvPMenuGfx_Faded(AVPMENUGFX_COPYRIGHT_SCREEN, 0, 0, ONE_FIXED-timeRemaining*2,AVPMENUFORMAT_LEFTJUSTIFIED);
+			ThisFramesRenderingHasFinished();
 			FlipBuffers();
 		}
 		FrameCounterHandler();
@@ -169,7 +195,9 @@ void Show_CopyrightInfo(void)
 	{
 		CheckForWindowsMessages();
 		{
+			ThisFramesRenderingHasBegun();
 			DrawAvPMenuGfx_Faded(AVPMENUGFX_COPYRIGHT_SCREEN, 0, 0, ONE_FIXED,AVPMENUFORMAT_LEFTJUSTIFIED);
+			ThisFramesRenderingHasFinished();
 			FlipBuffers();
 		}
 		FrameCounterHandler();
@@ -182,7 +210,9 @@ void Show_CopyrightInfo(void)
 	{
 		CheckForWindowsMessages();
 		{
+			ThisFramesRenderingHasBegun();
 			DrawAvPMenuGfx_Faded(AVPMENUGFX_COPYRIGHT_SCREEN, 0, 0, timeRemaining*2,AVPMENUFORMAT_LEFTJUSTIFIED);
+			ThisFramesRenderingHasFinished();
 			FlipBuffers();
 		}
 		FrameCounterHandler();
@@ -194,8 +224,11 @@ void Show_CopyrightInfo(void)
 void Show_Presents(void)
 {
 	int timeRemaining = 8*ONE_FIXED-ONE_FIXED/2;
+
 	do
 	{
+		ThisFramesRenderingHasBegun();
+
 		CheckForWindowsMessages();
 		{
 			char *textPtr = GetTextString(TEXTSTRING_FOXINTERACTIVE);
@@ -207,7 +240,8 @@ void Show_Presents(void)
 			{
 			  //	DrawGraphicWithFadingLevel(&Starfield_Backdrop,timeRemaining-7*ONE_FIXED);
 //				DrawAvPMenuGfx_Faded(AVPMENUGFX_BACKDROP, 0, 0, 15*ONE_FIXED-timeRemaining*2,AVPMENUFORMAT_LEFTJUSTIFIED);
-				FadedScreen((15*ONE_FIXED-timeRemaining*2)/3);
+//				FadedScreen((15*ONE_FIXED-timeRemaining*2)/3);
+				DrawFadeQuad(0, 0, (15*ONE_FIXED-timeRemaining*2)/3);
 			}
 			else if (timeRemaining > 5*ONE_FIXED)
 			{
@@ -222,6 +256,7 @@ void Show_Presents(void)
 				RenderMenuText(textPtr,MENU_CENTREX,y,timeRemaining-3*ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
 			}
 			
+			ThisFramesRenderingHasFinished();
 			FlipBuffers();
 		}
 		#if ALLOW_SKIP_INTRO
@@ -231,7 +266,9 @@ void Show_Presents(void)
 		timeRemaining-=NormalFrameTime;
 	}
 	#if ALLOW_SKIP_INTRO
+	
 	while((timeRemaining>0) && !GotAnyKey);
+
 	#else
 	while(timeRemaining>0);// && !GotAnyKey);
 	#endif
@@ -242,6 +279,8 @@ void Show_ARebellionGame(void)
 	int timeRemaining = 7*ONE_FIXED;
 	do
 	{
+		ThisFramesRenderingHasBegun();
+
 		CheckForWindowsMessages();
 		{
 			char *textPtr = GetTextString(TEXTSTRING_PRESENTS);
@@ -269,6 +308,7 @@ void Show_ARebellionGame(void)
 //				DrawGraphicWithAlphaChannel(&RebellionLogo, ONE_FIXED - (timeRemaining-3*ONE_FIXED)/2);
 			}
 
+			ThisFramesRenderingHasFinished();
 			FlipBuffers();
 		}
 		DirectReadKeyboard();	
@@ -286,6 +326,8 @@ void Show_AvPLogo(void)
 	int timeRemaining = 5*ONE_FIXED;
 	do
 	{
+		ThisFramesRenderingHasBegun();
+
 		CheckForWindowsMessages();
 		{
 			int y = (480-AvPMenuGfxStorage[AVPMENUGFX_ALIENSVPREDATOR].Height)/2;
@@ -307,6 +349,7 @@ void Show_AvPLogo(void)
 				timeRemaining-=NormalFrameTime/4;
 			}
 
+			ThisFramesRenderingHasFinished();
 			FlipBuffers();
 		}
 		DirectReadKeyboard();	

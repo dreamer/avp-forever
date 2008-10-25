@@ -23,6 +23,7 @@
 
 extern int MarineSight_FrustrumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRATEGYBLOCK *target);
 extern int FrisbeeSight_FrustrumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRATEGYBLOCK *target);
+int AGunSight_FrustrumReject(VECTORCH *localOffset);
 
 int NPCCanSeeTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, int viewRange)
 {

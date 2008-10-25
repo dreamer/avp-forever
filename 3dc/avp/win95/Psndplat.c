@@ -1,3 +1,4 @@
+#if 0
 /* Patrick 5/6/97 -------------------------------------------------------------
   AvP platform specific sound management source
   ----------------------------------------------------------------------------*/
@@ -541,7 +542,7 @@ int PlatStartSoundSys(void)
 				&IID_IKsPropertySet,
 				(void**) &PropSetP
 			);
-	   	if(hres != DD_OK)
+	   	if(hres != DS_OK)
 		{
 			/* No property set. */
 			db_log1("Error: Failed to get the property set.");
@@ -600,6 +601,7 @@ int PlatStartSoundSys(void)
 			if(support == (KSPROPERTY_SUPPORT_GET | KSPROPERTY_SUPPORT_SET))
 			{
 				db_log1("EAX suppport.");
+				OutputDebugString("\n we're using EAX");
 				SoundConfig.flags |= SOUND_EAX;
 
 				// Set a default value.
@@ -656,7 +658,7 @@ int PlatStartSoundSys(void)
 					&IID_IKsPropertySet,
 					(void**) &PropSetP
 				);
-		   	if(hres != DD_OK)
+		   	if(hres != DS_OK)
 			{
 				/* No property set. */
 				db_log1("Error: Failed to get the property set again.");
@@ -833,7 +835,7 @@ int PlatPlaySound(activeIndex)
 				&ActiveSounds[activeIndex].ds3DBufferP
 			);
 
-		if(hres != DD_OK)
+		if(hres != DS_OK)
 		{
 			db_logf5(("Error: Failed to get a DirectSound3DBuffer. res %x", hres));
 		}
@@ -881,7 +883,15 @@ int PlatPlaySound(activeIndex)
 			IDirectSound3DBuffer_SetMode(ActiveSounds[activeIndex].ds3DBufferP,DS3DMODE_NORMAL,DS3D_DEFERRED);
 
 			/*set distance at which attenuation starts*/
-			IDirectSound3DBuffer_SetMinDistance(ActiveSounds[activeIndex].ds3DBufferP,(D3DVALUE)ActiveSounds[activeIndex].threedeedata.inner_range,DS3D_DEFERRED);
+			hres = IDirectSound3DBuffer_SetMinDistance(ActiveSounds[activeIndex].ds3DBufferP,(D3DVALUE)ActiveSounds[activeIndex].threedeedata.inner_range,DS3D_DEFERRED);
+			if(FAILED(hres))
+			{
+				char buf[100];
+				sprintf(buf, "\n incorrect min distance was: %f", (D3DVALUE)ActiveSounds[activeIndex].threedeedata.inner_range);
+				OutputDebugString(buf);
+				sprintf(buf, "\n pre float cast: %d", ActiveSounds[activeIndex].threedeedata.inner_range);
+				OutputDebugString(buf);
+			}
 			IDirectSound3DBuffer_SetMaxDistance(ActiveSounds[activeIndex].ds3DBufferP,DS3D_DEFAULTMAXDISTANCE,DS3D_DEFERRED);
 		}
 
@@ -942,7 +952,7 @@ int PlatPlaySound(activeIndex)
 				);
 		}
 
-		if(res != DD_OK)
+		if(res != DS_OK)
 		{
 			db_logf3(("Error: Failed to set the buffer property set at play start. res %x", res));
 		}
@@ -1653,7 +1663,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		ffclose(myFile);
 		return 0;	
 	}
-	
+
 	//calculate length of sample
 	lengthInSeconds=DIV_FIXED(myChunkHeader.chunkLength,myWaveFormat.nAvgBytesPerSec);
 
@@ -1967,7 +1977,7 @@ void PlatUpdatePlayer()
 					);
 				}
 
-				if(res != DD_OK)
+				if(res != DS_OK)
 				{
 					db_logf3(("Error: Failed to set the property set. %x", res));
 				}
@@ -1977,6 +1987,9 @@ void PlatUpdatePlayer()
 	}
 
 	IDirectSound3DListener_CommitDeferredSettings(DS3DListener);
+
+	// update buffer for ogg file playback
+	updateOggBuffer();
 }
 
 void PlatSetEnviroment(unsigned int env_index, float reverb_mix)
@@ -2009,7 +2022,7 @@ void PlatSetEnviroment(unsigned int env_index, float reverb_mix)
 
 		db_logf3(("Set the Enviroment to %i", env_index));
 
-		if(res != DD_OK)
+		if(res != DS_OK)
 		{
 			db_logf3(("Error: Failed to set the enviroment. %x", res));
 		}
@@ -2057,6 +2070,8 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 	WAVEFORMATEX myWaveFormat;
 	unsigned char *endOfBufferPtr;   
 	int lengthInSeconds;
+
+	OutputDebugString("\n extract wave file");
 
 	{
 		int length = strlen (bufferPtr) + 1;
@@ -2284,7 +2299,7 @@ int PlatUse3DSoundHW()
 					&ActiveSounds[count].ds3DBufferP
 				);
 
-			if(hres != DD_OK)
+			if(hres != DS_OK)
 			{
 				db_logf3(("Error: Failed to get a DirectSound3DBuffer. res %x", hres));
 			}
@@ -2340,4 +2355,5 @@ void UpdateSoundFrequencies(void)
 		}
 	}
 }
+#endif
 #endif

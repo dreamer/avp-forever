@@ -1,8 +1,10 @@
 #ifndef _INCLUDED_AWTEXLD_H_
 #define _INCLUDED_AWTEXLD_H_
 
-#include <windows.h>
-#include <d3d.h>
+#ifdef WIN32
+	#include <windows.h>
+	#include <d3d9.h> // BJD
+#endif
 
 /*********************************************/
 /* Note:                                     */
@@ -207,7 +209,7 @@ struct AwCreateGraphicRegion
 	union /* DDSurface or D3DTexture pointer depending on the context used */
 	{
 		DDSurface * pSurface; /* Direct Draw Surface object pointer */
-		D3DTexture * pTexture; /* Direct 3D Texture object pointer */
+		AVPTexture * pTexture; /* Direct 3D Texture object pointer */
 	};
 };
 
@@ -280,7 +282,7 @@ extern AW_TL_ERC AwSetDDObject(DDObject * _ddP);
 		AW_TLE_BADPARMS if the parameters passed to the
 			function were incorrect
 */
-extern AW_TL_ERC AwSetTextureFormat2(LPDDPIXELFORMAT _ddpfP);
+extern AW_TL_ERC AwSetTextureFormat2(void* _ddpfP); // BJD
 #define AwSetTextureFormat(_descP) (AwSetTextureFormat2((_descP) ? &(_descP)->ddpfPixelFormat : NULL))
 
 /* AwSetAdditionalTextureFormat2(LPDDPIXELFORMAT _ddpfP, unsigned _maxAlphaBits, int _canDoTransp, unsigned _maxColours)
@@ -330,7 +332,7 @@ extern AW_TL_ERC AwSetTextureFormat2(LPDDPIXELFORMAT _ddpfP);
 		AW_TLE_BADPARMS if the parameters passed to the
 			function were incorrect
 */
-extern AW_TL_ERC AwSetAdditionalTextureFormat2(LPDDPIXELFORMAT _ddpfP, unsigned _maxAlphaBits, int _canDoTransp, unsigned _maxColours);
+extern AW_TL_ERC AwSetAdditionalTextureFormat2(void* _ddpfP, unsigned _maxAlphaBits, int _canDoTransp, unsigned _maxColours); // BJD
 #define AwSetAdditionalTextureFormat(_descP, _maxAlphaBits, _canDoTransp, _maxColours) (AwSetAdditionalTextureFormat2((_descP) ? &(_descP->ddpfPixelFormat) : NULL,_maxAlphaBits,_canDoTransp,_maxColours))
 
 /* AwSetSurfaceFormat2(LPDDPIXELFORMAT _ddpfP)
@@ -339,7 +341,7 @@ extern AW_TL_ERC AwSetAdditionalTextureFormat2(LPDDPIXELFORMAT _ddpfP, unsigned 
 		As for AwSetTextureFormat but tells AwCreateSurface()
 		what format surfaces for blitting should be in
 */
-extern AW_TL_ERC AwSetSurfaceFormat2(LPDDPIXELFORMAT _ddpfP);
+//extern AW_TL_ERC AwSetSurfaceFormat2(LPDDPIXELFORMAT _ddpfP); // BJD
 #define AwSetSurfaceFormat(_descP) (AwSetSurfaceFormat2((_descP) ? &(_descP)->ddpfPixelFormat : NULL))
 
 /* AwGetTextureSize(unsigned * _widthP, unsigned * _heightP, unsigned _width, unsigned _height)
@@ -520,7 +522,7 @@ extern AW_TL_ERC AwGetTextureSize(unsigned * _widthP, unsigned * _heightP, unsig
 			parameters were correct but another error
 			occurred.
 */
-extern D3DTexture * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...);
+extern AVPTexture * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...);
 
 /* AwCreateSurface(char const * _argFormatS, ...)
 

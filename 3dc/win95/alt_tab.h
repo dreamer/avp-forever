@@ -12,7 +12,7 @@ Deal with lost surfaces and textures - restore them when the application is re-a
 	extern "C" {
 #endif
 
-typedef void (* AT_PFN_RESTORETEXTURE) (D3DTexture * pTexture, void * pUser);
+typedef void (* AT_PFN_RESTORETEXTURE) (AVPTexture * pTexture, void * pUser);
 typedef void (* AT_PFN_RESTORESURFACE) (DDSurface * pSurface, void * pUser);
 
 #ifdef NDEBUG
@@ -21,8 +21,8 @@ typedef void (* AT_PFN_RESTORESURFACE) (DDSurface * pSurface, void * pUser);
 	extern void ATIncludeSurface(DDSurface * pSurface, AW_BACKUPTEXTUREHANDLE hBackup);
 	extern void ATIncludeSurfaceEx(DDSurface * pSurface, AT_PFN_RESTORESURFACE pfnRestore, void * pUser);
 #else
-	extern void _ATIncludeTexture(D3DTexture * pTexture, AW_BACKUPTEXTUREHANDLE hBackup, char const * pszFile, unsigned nLine, char const * pszDebugString);
-	extern void _ATIncludeTextureEx(D3DTexture * pTexture, AT_PFN_RESTORETEXTURE pfnRestore, void * pUser, char const * pszFile, unsigned nLine, char const * pszFuncName, char const * pszDebugString);
+	extern void _ATIncludeTexture(AVPTexture * pTexture, AW_BACKUPTEXTUREHANDLE hBackup, char const * pszFile, unsigned nLine, char const * pszDebugString);
+	extern void _ATIncludeTextureEx(AVPTexture * pTexture, AT_PFN_RESTORETEXTURE pfnRestore, void * pUser, char const * pszFile, unsigned nLine, char const * pszFuncName, char const * pszDebugString);
 	extern void _ATIncludeSurface(DDSurface * pSurface, AW_BACKUPTEXTUREHANDLE hBackup, char const * pszFile, unsigned nLine, char const * pszDebugString);
 	extern void _ATIncludeSurfaceEx(DDSurface * pSurface, AT_PFN_RESTORESURFACE pfnRestore, void * pUser, char const * pszFile, unsigned nLine, char const * pszFuncName, char const * pszDebugString);
 	#define ATIncludeTexture(p,h) _ATIncludeTexture(p,h,__FILE__,__LINE__,NULL)
@@ -35,7 +35,7 @@ typedef void (* AT_PFN_RESTORESURFACE) (DDSurface * pSurface, void * pUser);
 	#define ATIncludeSurfaceExDb(p,f,u,d) _ATIncludeSurfaceEx(p,f,u,__FILE__,__LINE__,#f ,d)
 #endif
 
-extern void ATRemoveTexture(D3DTexture * pTexture);
+extern void ATRemoveTexture(AVPTexture * pTexture);
 extern void ATRemoveSurface(DDSurface * pSurface);
 
 extern void ATOnAppReactivate();

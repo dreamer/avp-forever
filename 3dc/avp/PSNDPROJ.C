@@ -93,7 +93,7 @@ void DoPlayerSounds(void)
 {
 	PLAYER_STATUS *playerStatusPtr;
 	PLAYER_WEAPON_DATA *weaponPtr;
-	VECTORCH *playerPos;
+//	VECTORCH *playerPos;
 
 	#if CDDA_TEST
 	if (doneCDDA == 0)
@@ -854,6 +854,7 @@ int FindAndLoadWavFile(int soundNum,char* wavFileName)
 {
 	static char sound_name[200];
 	sprintf (sound_name, "%s%s", FirstSoundDir,wavFileName);
+//	OutputDebugString(sound_name);
 
 #if LOAD_SOUND_FROM_FAST_FILE
 	//first look in fast file
@@ -903,7 +904,7 @@ int FindAndLoadWavFile(int soundNum,char* wavFileName)
 /* Patrick 5/6/97 -------------------------------------------------------------
   Sound data loaders 
   ----------------------------------------------------------------------------*/
-#if USE_REBSND_LOADERS
+#if 1//USE_REBSND_LOADERS
 extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr);
 void *LoadRebSndFile(char *filename)
 {
@@ -1036,7 +1037,7 @@ void LoadSounds(char *soundDirectory)
 	strcat((char*)&soundFileName, soundDirectory);
 	strcat((char*)&soundFileName, ".SL");
 	myFile = fopen(soundFileName,"rt");
-	LOCALASSERT(myFile!=NULL);
+	//LOCALASSERT(myFile!=NULL);
 	
 	/* just return if we can't find the file */
 	if(!myFile)	return;

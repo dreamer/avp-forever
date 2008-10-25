@@ -19,6 +19,7 @@ extern "C" {
 	// messages to avoid problems with re-entrancy due to WinProc()
 	
 #include "alt_tab.h"
+
 	
 #include "dxlog.h"
 #include "zmouse.h"
@@ -29,10 +30,12 @@ void MakeToAsciiTable(void);
 UINT const RWM_MOUSEWHEEL = RegisterWindowMessage(MSH_MOUSEWHEEL);
 signed int MouseWheelStatus;
 
-extern LPDIRECTDRAWSURFACE lpDDSBack;
-extern LPDIRECTDRAWSURFACE lpDDSPrimary;
-extern LPDIRECTDRAWSURFACE lpZBuffer;
-extern LPDIRECTDRAWSURFACE lpDDBackdrop;
+/*
+extern IDirect3DSurface8 * lpDDSBack;
+extern IDirect3DSurface8 * lpDDSPrimary;
+extern IDirect3DSurface8 * lpZBuffer;
+extern IDirect3DSurface8 * lpDDBackdrop;
+*/
 
 unsigned char ksarray[256];
 unsigned char ToAsciiTable[256][256];
@@ -97,9 +100,9 @@ extern WINSCALEXY ExtentXYSubWindow;
 }
 
 extern void KeyboardEntryQueue_Add(char c);
-extern IngameKeyboardInput_KeyDown(unsigned char key);
-extern IngameKeyboardInput_KeyUp(unsigned char key);
-extern IngameKeyboardInput_ClearBuffer(void);
+extern void IngameKeyboardInput_KeyDown(unsigned char key);
+extern void IngameKeyboardInput_KeyUp(unsigned char key);
+extern void IngameKeyboardInput_ClearBuffer(void);
 
 
 long FAR PASCAL WindowProc(HWND hWnd, UINT message, 
@@ -212,17 +215,20 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message,
      case WM_ACTIVATEAPP:
         bActive = (BOOL) wParam;
         
-        LOGDXFMT(("WM_ACTIVATEAPP msg: bActive = %d",(int)bActive));
+//bjd	LOGDXFMT(("WM_ACTIVATEAPP msg: bActive = %d",(int)bActive));
         
         if (bActive)
         {
         	// need to restore all surfaces - do the special ones first
-        	RESTORE_SURFACE(lpDDSPrimary)
+        	
+			/* BJD ALT TAB TEXTURE RESTORE STUFF HERE
+ 			RESTORE_SURFACE(lpDDSPrimary)
         	RESTORE_SURFACE(lpDDSBack)
         	RESTORE_SURFACE(lpZBuffer)
         	// dodgy, this is meant to be graphic, so it'll really need to be reloaded
         	RESTORE_SURFACE(lpDDBackdrop)
         	// now do all the graphics surfaces and textures, etc.
+			*/
         	ATOnAppReactivate();
         }
 		IngameKeyboardInput_ClearBuffer();
@@ -332,7 +338,7 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message,
 
 BOOL InitialiseWindowsSystem(HANDLE hInstance, int nCmdShow,
      int WinInitMode)
-{
+{ 
     WNDCLASS            wc;
 	BOOL			    rc;
 
@@ -349,10 +355,9 @@ BOOL InitialiseWindowsSystem(HANDLE hInstance, int nCmdShow,
 
    if (WindowMode == WindowModeSubWindow)
      {
-	  
 	  //force window to be 640x480 to avoid stretch blits.
-	  WinWidth=640;
-	  WinHeight=480;	
+	  WinWidth = 800;//640;
+	  WinHeight = 600;//480;	
 
       WinLeftX = (int) (TopLeftSubWindow.x * 
 	     (float) GetSystemMetrics(SM_CXSCREEN));
@@ -364,8 +369,8 @@ BOOL InitialiseWindowsSystem(HANDLE hInstance, int nCmdShow,
    else if (WindowMode == WindowModeFullScreen)
      {
       #if 1
-      WinWidth = GetSystemMetrics(SM_CXSCREEN);
-      WinHeight = GetSystemMetrics(SM_CYSCREEN);
+		WinWidth = GetSystemMetrics(SM_CXSCREEN);
+		WinHeight = GetSystemMetrics(SM_CYSCREEN);
       #else
       // This version of the code MUST be
       // kept up to date with new video modes!!!
@@ -463,6 +468,7 @@ BOOL InitialiseWindowsSystem(HANDLE hInstance, int nCmdShow,
 */
 
 #if debug
+
     if (WindowMode == WindowModeSubWindow)
 	  {
        hWndMain = CreateWindowEx(
@@ -494,7 +500,9 @@ BOOL InitialiseWindowsSystem(HANDLE hInstance, int nCmdShow,
            (HINSTANCE)hInstance,
 // Parameter for associated structure (null in this case)
            NULL);
+
 	  }
+
 	else if (WindowMode == WindowModeFullScreen)
 	  {
        hWndMain = CreateWindowEx(
@@ -636,7 +644,6 @@ BOOL InitialiseWindowsSystem(HANDLE hInstance, int nCmdShow,
 // Project specific to go with the initialiser
 
 BOOL ExitWindowsSystem(void)
-
 {
    BOOL rc = TRUE;
 

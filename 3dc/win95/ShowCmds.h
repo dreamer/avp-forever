@@ -30,10 +30,12 @@ extern struct DEBUGGINGTEXTOPTIONS ShowDebuggingText;
 	#define DEBUGGING_TEXT_ON 0
 #endif
 
+#if 0
 #if DEBUGGING_TEXT_ON
 extern int PrintDebuggingText(const char* t, ...);
 #else
 #define PrintDebuggingText(ignore)
+#endif
 #endif
 
 #if 1

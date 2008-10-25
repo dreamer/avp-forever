@@ -141,19 +141,14 @@ void Shape_Fragment_Type::Setup_sh_frags(Fragment_Type_Chunk* ftc)
 	{
 		Fragment_Type_Sound_Chunk* ftsoc=(Fragment_Type_Sound_Chunk*) pChunk;
 		
-		
 		sh_fragdesc->sh_fragsound=(SHAPEFRAGMENTSOUND*)PoolAllocateMem(sizeof(SHAPEFRAGMENTSOUND));
 		sh_fragdesc->sh_fragsound->sound_loaded=GetSoundForMainRif (ftsoc->wav_name);
-		sh_fragdesc->sh_fragsound->inner_range=ftsoc->inner_range*local_scale;
-		sh_fragdesc->sh_fragsound->outer_range=ftsoc->outer_range*local_scale;
+		sh_fragdesc->sh_fragsound->inner_range = (unsigned long)(ftsoc->inner_range*local_scale);
+		sh_fragdesc->sh_fragsound->outer_range = (unsigned long)(ftsoc->outer_range*local_scale);
 		sh_fragdesc->sh_fragsound->pitch=ftsoc->pitch;
 		sh_fragdesc->sh_fragsound->max_volume=ftsoc->max_volume;
-
-	}
-
-	
+	}	
 }
-
 
 static List<Shape_Fragment_Type*> FragList;
 
@@ -475,7 +470,7 @@ RIFFHANDLE load_rif (const char * fname)
 		#if OUTPUT_LOG
 		CL_LogFile.lprintf("FAILED TO LOAD RIF: %s\n",fname);
 		#endif
-	   	ReleaseDirect3D();
+//	   	ReleaseDirect3D();
 		char message[200];
 		sprintf(message,"Error loading %s",fname);
 		MessageBox(NULL,message,"AvP",MB_OK+MB_SYSTEMMODAL);
@@ -509,7 +504,7 @@ RIFFHANDLE load_rif_non_env (const char * fname)
 		CL_LogFile.lprintf("FAILED TO LOAD RIF: %s\n",fname);
 		#endif
 		
-	   	ReleaseDirect3D();
+//	   	ReleaseDirect3D();
 		char message[200];
 		sprintf(message,"Error loading %s",fname);
 		MessageBox(NULL,message,"AvP",MB_OK+MB_SYSTEMMODAL);
@@ -667,7 +662,8 @@ static void setup_tex_conv_array (
 		// load in the textures from the shape
 	
 		max_indices = 0;
-		for (LIF<BMP_Name> bns (&blsc->bmps); !bns.done(); bns.next())
+		LIF<BMP_Name> bns (&blsc->bmps);
+		for (; !bns.done(); bns.next())
 		{
 			max_indices = max(bns().index,max_indices);
 		}
@@ -707,7 +703,7 @@ static void setup_tex_conv_array (
 	
 }
 
-CopyShapeAnimationHeader(SHAPEHEADER* shpfrom,SHAPEHEADER* shpto)
+void CopyShapeAnimationHeader(SHAPEHEADER* shpfrom,SHAPEHEADER* shpto)
 {
 	GLOBALASSERT(shpfrom->numitems==shpto->numitems);
 	GLOBALASSERT(shpfrom->animation_header);
@@ -716,7 +712,9 @@ CopyShapeAnimationHeader(SHAPEHEADER* shpfrom,SHAPEHEADER* shpto)
 	//find a sequence which has some frames;
 	
 	shapeanimationsequence* sas=0;
-	for(int i=0;i<shpto->animation_header->num_sequences;i++)
+
+	unsigned int i = 0;
+	for(i=0;i<shpto->animation_header->num_sequences;i++)
 	{
 		sas=&shpto->animation_header->anim_sequences[i];
 		if(sas->num_frames)
@@ -919,9 +917,9 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk * tmpshp, int fla
 					
 					if (sflc)
 					{
-						mainshapelist[main_shape_num]->sh_fragdesc->sh_frags[fragpos].x_offset = sflc->frag_loc.x * local_scale;
-						mainshapelist[main_shape_num]->sh_fragdesc->sh_frags[fragpos].y_offset = sflc->frag_loc.y * local_scale;
-						mainshapelist[main_shape_num]->sh_fragdesc->sh_frags[fragpos].z_offset = sflc->frag_loc.z * local_scale;
+						mainshapelist[main_shape_num]->sh_fragdesc->sh_frags[fragpos].x_offset = (int)(sflc->frag_loc.x * local_scale);
+						mainshapelist[main_shape_num]->sh_fragdesc->sh_frags[fragpos].y_offset = (int)(sflc->frag_loc.y * local_scale);
+						mainshapelist[main_shape_num]->sh_fragdesc->sh_frags[fragpos].z_offset = (int)(sflc->frag_loc.z * local_scale);
 						
 					}
 					else
@@ -942,13 +940,11 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk * tmpshp, int fla
 				{
 					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound=(SHAPEFRAGMENTSOUND*)PoolAllocateMem(sizeof(SHAPEFRAGMENTSOUND));
 					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound->sound_loaded=GetSoundForMainRif (ftsoc->wav_name);
-					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound->inner_range=ftsoc->inner_range*local_scale;
-					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound->outer_range=ftsoc->outer_range*local_scale;
+					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound->inner_range = (unsigned long)(ftsoc->inner_range*local_scale);
+					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound->outer_range = (unsigned long)(ftsoc->outer_range*local_scale);
 					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound->pitch=ftsoc->pitch;
 					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound->max_volume=ftsoc->max_volume;
 				}
-
-
 			}
 		}
 	}
@@ -1170,7 +1166,8 @@ BOOL load_rif_bitmaps (RIFFHANDLE h, int/* flags*/)
 
 	if (gbnc)
 	{
-		for (LIF<BMP_Name> bns (&gbnc->bmps); !bns.done(); bns.next())
+		LIF<BMP_Name> bns (&gbnc->bmps);
+		for (; !bns.done(); bns.next())
 		{
 			h->max_index = max(bns().index,h->max_index);
 		}
@@ -1288,7 +1285,9 @@ BOOL copy_rif_tlt (RIFFHANDLE h, int /*flags*/)
 					{
 						ScreenDescriptorBlock.SDB_Flags |= SDB_Flag_TLTSize;
 						ScreenDescriptorBlock.TLTSize = tltch->width;
-						for (int shft = 0; 1<<shft < tltch->width; ++shft)
+
+						int shft;
+						for (shft = 0; 1<<shft < tltch->width; ++shft)
 							;
 						if (1<<shft==tltch->width)
 						{
@@ -1545,7 +1544,7 @@ void DeallocateRifLoadedShapeheader(SHAPEHEADER * shp)
 	#endif
 
 	int max_num_texs = 0;
-	int i;
+//	int i;
 
 	if(shp->animation_header)
 	{
@@ -1892,9 +1891,11 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 	int VertConv[3];//conversion between vert nos in triangles and vert nos in quad
 	int VertFrom,VertTo;//for remaining vert in second poly
 	VertTo=6;
+
+	int j;
 	for(int i=0;i<3;i++)
 	{
-		for(int j=0;j<4;j++)
+		for(j=0;j<4;j++)
 		{
 			if(sc->shape_data.poly_list[ta1->poly].vert_ind[i]==(shp->items[poly][j+4]))break;
 		}
@@ -1902,6 +1903,8 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 		VertConv[i]=j;
 		VertTo-=j;
 	}
+	
+	int i;
 	for(i=0;i<3;i++)
 	{
 		if(sc->shape_data.poly_list[ta2->poly].vert_ind[i]==(shp->items[poly][4+VertTo]))break;
@@ -1912,7 +1915,7 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 	txanimheader** thlist=(txanimheader**)PoolAllocateMem((ta1->NumSeq+2)*sizeof(txanimheader*));
 	thlist[0]=0;
 	thlist[ta1->NumSeq+1]=0;
-	for(i=0;i<ta1->NumSeq;i++)
+	for(int i=0;i<ta1->NumSeq;i++)
 	{
 		thlist[i+1]=(txanimheader*)PoolAllocateMem(sizeof(txanimheader));
 		txanimheader* th=thlist[i+1];
@@ -2018,7 +2021,7 @@ void SetupAnimatedTextures(Shape_Chunk* sc,SHAPEHEADER* shp,Animation_Chunk* ac,
 			
 		}
 
-		for(i=0;i<ac->NumPolys;i++)
+		for(int i=0;i<ac->NumPolys;i++)
 		{
 			TEXANIM* ta1,*ta2;
 			ta1=ac->AnimList[i];
@@ -2028,6 +2031,7 @@ void SetupAnimatedTextures(Shape_Chunk* sc,SHAPEHEADER* shp,Animation_Chunk* ac,
 			}
 			else if(mgd[ta1->poly]>ta1->poly)
 			{
+				int j;
 				for(j=0;j<ac->NumPolys;j++)
 				{
 					if(ac->AnimList[j]->poly==mgd[ta1->poly])break;
@@ -2119,7 +2123,9 @@ void SetupAnimatingShape(Shape_Chunk* sc,SHAPEHEADER* shp, Shape_Merge_Data_Chun
 	int numseq=0;
 	List<Chunk *> chlist;
 	sc->lookup_child("ANIMSEQU",chlist);
-	for(LIF<Chunk*> chlif(&chlist);!chlif.done();chlif.next())
+
+	LIF<Chunk*> chlif(&chlist);
+	for(;!chlif.done();chlif.next())
 	{
 		Anim_Shape_Sequence_Chunk* assc=(Anim_Shape_Sequence_Chunk*)chlif();
 		numseq=max(assc->sequence_data.SequenceNum+1,numseq);
@@ -2160,11 +2166,15 @@ void SetupAnimatingShape(Shape_Chunk* sc,SHAPEHEADER* shp, Shape_Merge_Data_Chun
 		int x=max(-sas->min_x,sas->max_x);
 		int y=max(-sas->min_y,sas->max_y);
 		int z=max(-sas->min_z,sas->max_z);
-		sas->radius=sqrt(x*x+y*y+z*z);
-		
+
+//		double square_root = x*x+y*y+z*z;
+//		square_root = sqrt(square_root);
+//		sas->radius = (int)square_root;
+
+		sas->radius = (int)sqrt((double)x*x+y*y+z*z);
 		
 		sas->vertex_normals=(int*)PoolAllocateMem(sizeof(VECTORCH)*cas->num_verts);
-		for(i=0;i<cas->num_verts;i++)
+		for(int i=0;i<cas->num_verts;i++)
 		{
 			sas->vertex_normals[i*3]=(int)(cas->v_normal_list[i].x*ONE_FIXED);
 			sas->vertex_normals[i*3+1]=(int)(cas->v_normal_list[i].y*ONE_FIXED);
@@ -2174,7 +2184,7 @@ void SetupAnimatingShape(Shape_Chunk* sc,SHAPEHEADER* shp, Shape_Merge_Data_Chun
 		sas->num_frames=cas->NumFrames;
 		sas->anim_frames=(shapeanimationframe*)PoolAllocateMem(sizeof(shapeanimationframe)*cas->NumFrames);
 		
-		for(i=0;i<cas->NumFrames;i++)
+		for(int i=0;i<cas->NumFrames;i++)
 		{
 			const ChunkAnimFrame* caf=cas->Frames[i];
 			shapeanimationframe* saf=&sas->anim_frames[i];
@@ -2188,7 +2198,7 @@ void SetupAnimatingShape(Shape_Chunk* sc,SHAPEHEADER* shp, Shape_Merge_Data_Chun
 			}
 
 			saf->item_normals=(int*) PoolAllocateMem(sizeof(VECTORCH)*shp->numitems);
-			for(j=0;j<caf->num_polys;j++)
+			for(int j=0;j<caf->num_polys;j++)
 			{
 				saf->item_normals[PolyConv[j]*3]=(int)(caf->p_normal_list[j].x*ONE_FIXED);
 				saf->item_normals[PolyConv[j]*3+1]=(int)(caf->p_normal_list[j].y*ONE_FIXED);
@@ -2203,6 +2213,7 @@ void SetupAnimatingShape(Shape_Chunk* sc,SHAPEHEADER* shp, Shape_Merge_Data_Chun
 
 	//find a sequence which has some frames;
 	shapeanimationsequence* sas=0;
+	unsigned int i;
 	for(i=0;i<shp->animation_header->num_sequences;i++)
 	{
 		sas=&shp->animation_header->anim_sequences[i];
@@ -2309,9 +2320,9 @@ BOOL copy_to_shapeheader (
 		object_float.z=(double)object->location.z;
 
 		VECTORCH object_int;
-		object_int.vx=object_float.x*local_scale;
-		object_int.vy=object_float.y*local_scale;
-		object_int.vz=object_float.z*local_scale;
+		object_int.vx = (int)(object_float.x*local_scale);
+		object_int.vy = (int)(object_float.y*local_scale);
+		object_int.vz = (int)(object_float.z*local_scale);
 
 		for (i=0; i<shphd->numpoints; i++) {
 			tptr[i*3] = (int) ((cshp_ptr->v_list[i].x+object_float.x)*local_scale);
@@ -2588,7 +2599,8 @@ BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Heade
 		// load in the textures from the shape
 	
 		local_max_index = 0;
-		for (LIF<BMP_Name> bns (&blsc->bmps); !bns.done(); bns.next())
+		LIF<BMP_Name> bns (&blsc->bmps);
+		for (; !bns.done(); bns.next())
 		{
 			local_max_index = max(bns().index,local_max_index);
 		}
@@ -2634,18 +2646,18 @@ BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Heade
 
 	if(sec)
 	{
-		shphd->shapemaxx =sec->maxx*GlobalScale; 
-		shphd->shapeminx =sec->minx*GlobalScale; 
-		shphd->shapemaxy =sec->maxy*GlobalScale; 
-		shphd->shapeminy =sec->miny*GlobalScale; 
+		shphd->shapemaxx = (int)sec->maxx*GlobalScale; 
+		shphd->shapeminx = (int)sec->minx*GlobalScale; 
+		shphd->shapemaxy = (int)sec->maxy*GlobalScale; 
+		shphd->shapeminy = (int)sec->miny*GlobalScale; 
 		
 	}
 	else
 	{
-		shphd->shapemaxx =ssc->maxx*GlobalScale; 
-		shphd->shapeminx =-ssc->maxx*GlobalScale; 
-		shphd->shapemaxy =ssc->maxy*GlobalScale; 
-		shphd->shapeminy =-ssc->maxy*GlobalScale; 
+		shphd->shapemaxx =  (int)ssc->maxx*GlobalScale; 
+		shphd->shapeminx =- (int)ssc->maxx*GlobalScale; 
+		shphd->shapemaxy =  (int)ssc->maxy*GlobalScale; 
+		shphd->shapeminy =- (int)ssc->maxy*GlobalScale; 
 	}
 	shphd->shapemaxz =501*GlobalScale; 
 	shphd->shapeminz =-501*GlobalScale; 
@@ -2857,11 +2869,10 @@ BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Heade
 							tf->txf_uvdata[pos2][l*2+1]=ProcessUVCoord(h,UVC_SPRITE_V,f->UVCoords[3-l][1]<<16,BmpConv[f->Texture]);
 							
 							
-							tf->txf_uvdata[pos][l*2+8]=-(f->UVCoords[3-l][0]-f->CentreX)*bmpscale*GlobalScale;
-						   	tf->txf_uvdata[pos][l*2+9]=(f->UVCoords[3-l][1]-f->CentreY)*bmpscale*GlobalScale;
-							tf->txf_uvdata[pos2][l*2+8]=-(f->UVCoords[3-l][0]-f->CentreX)*bmpscale*GlobalScale;
-							tf->txf_uvdata[pos2][l*2+9]=(f->UVCoords[3-l][1]-f->CentreY)*bmpscale*GlobalScale;
-							
+							tf->txf_uvdata[pos][l*2+8]=(int)(-(f->UVCoords[3-l][0]-f->CentreX)*bmpscale*GlobalScale);
+						   	tf->txf_uvdata[pos][l*2+9]=(int)((f->UVCoords[3-l][1]-f->CentreY)*bmpscale*GlobalScale);
+							tf->txf_uvdata[pos2][l*2+8]=(int)(-(f->UVCoords[3-l][0]-f->CentreX)*bmpscale*GlobalScale);
+							tf->txf_uvdata[pos2][l*2+9]=(int)((f->UVCoords[3-l][1]-f->CentreY)*bmpscale*GlobalScale);
 						}
 					}
 					else
@@ -2874,11 +2885,10 @@ BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Heade
 							tf->txf_uvdata[pos2][l*2+1]=ProcessUVCoord(h,UVC_SPRITE_V,f->UVCoords[l][1]<<16,BmpConv[f->Texture]);
 							
 							
-							tf->txf_uvdata[pos][l*2+8]=(f->UVCoords[l][0]-f->CentreX)*bmpscale*GlobalScale;
-						   	tf->txf_uvdata[pos][l*2+9]=(f->UVCoords[l][1]-f->CentreY)*bmpscale*GlobalScale;
-							tf->txf_uvdata[pos2][l*2+8]=(f->UVCoords[l][0]-f->CentreX)*bmpscale*GlobalScale;
-							tf->txf_uvdata[pos2][l*2+9]=(f->UVCoords[l][1]-f->CentreY)*bmpscale*GlobalScale;
-							
+							tf->txf_uvdata[pos][l*2+8]=(int)((f->UVCoords[l][0]-f->CentreX)*bmpscale*GlobalScale);
+						   	tf->txf_uvdata[pos][l*2+9]=(int)((f->UVCoords[l][1]-f->CentreY)*bmpscale*GlobalScale);
+							tf->txf_uvdata[pos2][l*2+8]=(int)((f->UVCoords[l][0]-f->CentreX)*bmpscale*GlobalScale);
+							tf->txf_uvdata[pos2][l*2+9]=(int)((f->UVCoords[l][1]-f->CentreY)*bmpscale*GlobalScale);	
 						}
 					}
 				}
@@ -2956,10 +2966,10 @@ BOOL copy_to_map6(Object_Chunk * ob,MAPBLOCK6* mapblock, int shplst_pos)
 
 	QUAT q;
 
-	q.quatx = -ob->object_data.orientation.x*ONE_FIXED;
-	q.quaty = -ob->object_data.orientation.y*ONE_FIXED;
-	q.quatz = -ob->object_data.orientation.z*ONE_FIXED;
-	q.quatw = ob->object_data.orientation.w*ONE_FIXED;
+	q.quatx = (int)-ob->object_data.orientation.x*ONE_FIXED;
+	q.quaty = (int)-ob->object_data.orientation.y*ONE_FIXED;
+	q.quatz = (int)-ob->object_data.orientation.z*ONE_FIXED;
+	q.quatw = (int)ob->object_data.orientation.w*ONE_FIXED;
 
 	MATRIXCH m;
 	
@@ -3157,9 +3167,11 @@ void merge_polygons_in_chunkshape (ChunkShape & shp, Shape_Merge_Data_Chunk * sm
 			
 			int mpoly=mgd[i];
 			//find the 'unique vertex' in the second triangle
-			for(int j=0;j<3;j++)
+			int j;
+			int k;
+			for(j=0;j<3;j++)
 			{
-				for(int k=0;k<3;k++)
+				for(k=0;k<3;k++)
 				{
 					if(shp.poly_list[mpoly].vert_ind[j]==shp.poly_list[i].vert_ind[k])break;
 				}

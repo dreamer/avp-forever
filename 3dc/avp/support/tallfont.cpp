@@ -47,7 +47,7 @@
 		extern unsigned char *ScreenBuffer;
 		extern long BackBufferPitch;
 		extern LPDIRECTDRAWSURFACE lpDDSBack;
-		extern DDPIXELFORMAT DisplayPixelFormat;
+//		extern DDPIXELFORMAT DisplayPixelFormat;
 		extern int CloudTable[128][128];
 		extern int CloakingPhase;
 
@@ -167,7 +167,7 @@ IndexedFont_Proportional_Column :: RenderChar_Unclipped
 			tempDDBltFx . ddckSrcColorkey . dwColorSpaceLowValue = 0;
 			tempDDBltFx . ddckSrcColorkey . dwColorSpaceHighValue = 0;
 			#endif
-
+#if 0 // bjd
 			HRESULT ddrval = lpDDSBack->Blt
 			(
 				&destRect,
@@ -188,7 +188,7 @@ IndexedFont_Proportional_Column :: RenderChar_Unclipped
 				NULL
 				// &tempDDBltFx // LPDDBLTFX lpDDBltFx 
 			);
-
+#endif
 
 			#if 0
 				// or even:
@@ -375,12 +375,12 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 	GLOBALASSERT(R2Size_OverallImage . h>0);
 	ATIncludeSurface(image_ptr,hBackup);
 
-	DDCOLORKEY tempDDColorKey;
+//	DDCOLORKEY tempDDColorKey;
 
-    tempDDColorKey . dwColorSpaceLowValue = 0;
-    tempDDColorKey . dwColorSpaceHighValue = 0;
+//    tempDDColorKey . dwColorSpaceLowValue = 0;
+//    tempDDColorKey . dwColorSpaceHighValue = 0;
 
-
+#if 0 // bjd
 	HRESULT hrSetColorKey = image_ptr -> SetColorKey
 	(
 		(
@@ -393,7 +393,7 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 	{
 		LOGDXERR(hrSetColorKey);
 	}
-	 
+#endif	 
 #if 0
 
 typedef struct _DDCOLORKEY{ 
@@ -450,11 +450,13 @@ IndexedFont_Proportional_Column :: UpdateWidths(void)
 
 	// Test: read the surface:
 	{
+#if 0 // bjd
 		// LPDIRECTDRAWSURFACE image_ptr;
 
 		DDSURFACEDESC tempDDSurfaceDesc;
 
 		tempDDSurfaceDesc . dwSize = sizeof(DDSURFACEDESC);
+
 
 		HRESULT hrLock = image_ptr -> Lock
 		(
@@ -478,7 +480,7 @@ IndexedFont_Proportional_Column :: UpdateWidths(void)
 			LOGDXERR(hrLock);
 			return;
 		}
-
+#endif
 		// Read the data...
 		{
 			for (int iOffset=0;iOffset<NumChars;iOffset++)
@@ -497,8 +499,8 @@ IndexedFont_Proportional_Column :: UpdateWidths(void)
 						bAnyNonTransparentPixelsInColumn
 						(
 							r2pos(x,y), // r2pos R2Pos_TopOfColumn,
-							HeightPerChar_Val, // int HeightOfColumn
-							&tempDDSurfaceDesc // LPDDSURFACEDESC lpDDSurfaceDesc
+							HeightPerChar_Val // int HeightOfColumn
+							 // LPDDSURFACEDESC lpDDSurfaceDesc
 						)
 					)
 					{
@@ -513,7 +515,7 @@ IndexedFont_Proportional_Column :: UpdateWidths(void)
 			}
 		}
 
-
+#if 0 // bjd
 		HRESULT hrUnlock = image_ptr -> Unlock
 		(
 			NULL // LPVOID lpSurfaceData  
@@ -527,6 +529,7 @@ IndexedFont_Proportional_Column :: UpdateWidths(void)
 			LOGDXERR(hrUnlock);
 			return;
 		}
+#endif
 	}
 }
 
@@ -535,11 +538,12 @@ OurBool
 IndexedFont_Proportional_Column :: bAnyNonTransparentPixelsInColumn
 (
 	r2pos R2Pos_TopOfColumn,
-	int HeightOfColumn,
-	LPDDSURFACEDESC lpDDSurfaceDesc
+	int HeightOfColumn
+//	void* lpDDSurfaceDesc // bjd
 		// assumes you have a read lock
 )
 {
+#if 0 // bjd
 	GLOBALASSERT( lpDDSurfaceDesc );
 
 	void* pSurface = lpDDSurfaceDesc -> lpSurface;
@@ -611,6 +615,8 @@ IndexedFont_Proportional_Column :: bAnyNonTransparentPixelsInColumn
 	}
 
 	return No;
+#endif
+	return Yes;
 }
 
 
@@ -656,6 +662,7 @@ IndexedFont_Kerned_Column :: RenderChar_Clipped
 		)
 		{
 			{
+#if 0 // bjd
 				// This code adapted from DrawGraphicWithAlphaChannel();
 				// it assumes you're in a 16-bit mode...
 				DDSURFACEDESC ddsdimage;
@@ -734,8 +741,9 @@ IndexedFont_Kerned_Column :: RenderChar_Clipped
 						backbufferRowStartPtr += backbufferPitchInShorts;
 					}
 				}
+#endif
 			   	
-			   	image_ptr->Unlock((LPVOID)ddsdimage.lpSurface);
+//			   	image_ptr->Unlock((LPVOID)ddsdimage.lpSurface);
 			}
 		}
 	}
@@ -772,6 +780,7 @@ IndexedFont_Kerned_Column :: RenderChar_Unclipped
 		)
 		{
 			{
+#if 0 // bjd
 				// This code adapted from DrawGraphicWithAlphaChannel();
 				// it assumes you're in a 16-bit mode...
 				DDSURFACEDESC ddsdback, ddsdimage;
@@ -780,6 +789,7 @@ IndexedFont_Kerned_Column :: RenderChar_Unclipped
 				memset(&ddsdimage, 0, sizeof(ddsdimage));
 				ddsdback.dwSize = sizeof(ddsdback);
 				ddsdimage.dwSize = sizeof(ddsdimage);
+
 
 				/* lock the image */
 				while (image_ptr->Lock(NULL, &ddsdimage, DDLOCK_WAIT, NULL) == DDERR_WASSTILLDRAWING);
@@ -855,9 +865,9 @@ IndexedFont_Kerned_Column :: RenderChar_Unclipped
 						backbufferRowStartPtr += backbufferPitchInShorts;
 					}
 				}
-			   	
-			   	lpDDSBack->Unlock((LPVOID)ddsdback.lpSurface);
-			   	image_ptr->Unlock((LPVOID)ddsdimage.lpSurface);
+#endif			   	
+//			   	lpDDSBack->Unlock((LPVOID)ddsdback.lpSurface);
+//				image_ptr->Unlock((LPVOID)ddsdimage.lpSurface);
 			}
 		}
 	}
@@ -966,6 +976,7 @@ IndexedFont_Kerned_Column* IndexedFont_Kerned_Column :: Create
 	int ASCIICodeForInitialCharacter
 )
 {
+/*
 	IndexedFont_Kerned_Column* pFont = new IndexedFont_Kerned_Column
 	(
 		I_Font_New,
@@ -974,10 +985,11 @@ IndexedFont_Kerned_Column* IndexedFont_Kerned_Column :: Create
 		SpaceWidth_New,
 		ASCIICodeForInitialCharacter
 	);
-
+*/
 	SCString :: UpdateAfterFontChange( I_Font_New );
 
-	return pFont;
+//	return pFont;
+	return 0;
 }
 
 
@@ -1079,12 +1091,12 @@ IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
 	GLOBALASSERT(R2Size_OverallImage . h>0);
 	ATIncludeSurface(image_ptr,hBackup);
 
-	DDCOLORKEY tempDDColorKey;
+//	DDCOLORKEY tempDDColorKey;
 
-    tempDDColorKey . dwColorSpaceLowValue = 0;
-    tempDDColorKey . dwColorSpaceHighValue = 0;
+//    tempDDColorKey . dwColorSpaceLowValue = 0;
+//    tempDDColorKey . dwColorSpaceHighValue = 0;
 
-
+#if 0 // bjd
 	HRESULT hrSetColorKey = image_ptr -> SetColorKey
 	(
 		(
@@ -1097,7 +1109,8 @@ IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
 	{
 		LOGDXERR(hrSetColorKey);
 	}
-	 
+#endif	 
+
 #if 0
 
 typedef struct _DDCOLORKEY{ 
@@ -1154,6 +1167,7 @@ IndexedFont_Kerned_Column :: UpdateWidths(void)
 
 	// Test: read the surface:
 	{
+#if 0 // bjd
 		// LPDIRECTDRAWSURFACE image_ptr;
 
 		DDSURFACEDESC tempDDSurfaceDesc;
@@ -1182,7 +1196,7 @@ IndexedFont_Kerned_Column :: UpdateWidths(void)
 			LOGDXERR(hrLock);
 			return;
 		}
-
+#endif
 		// Read the data...
 		{
 			for (int iOffset=0;iOffset<NumChars;iOffset++)
@@ -1201,8 +1215,8 @@ IndexedFont_Kerned_Column :: UpdateWidths(void)
 						bAnyNonTransparentPixelsInColumn
 						(
 							r2pos(x,y), // r2pos R2Pos_TopOfColumn,
-							HeightPerChar_Val, // int HeightOfColumn
-							&tempDDSurfaceDesc // LPDDSURFACEDESC lpDDSurfaceDesc
+							HeightPerChar_Val // int HeightOfColumn
+							//&tempDDSurfaceDesc // LPDDSURFACEDESC lpDDSurfaceDesc
 						)
 					)
 					{
@@ -1217,7 +1231,7 @@ IndexedFont_Kerned_Column :: UpdateWidths(void)
 			}
 		}
 
-
+#if 0 // bjd
 		HRESULT hrUnlock = image_ptr -> Unlock
 		(
 			NULL // LPVOID lpSurfaceData  
@@ -1231,12 +1245,14 @@ IndexedFont_Kerned_Column :: UpdateWidths(void)
 			LOGDXERR(hrUnlock);
 			return;
 		}
+#endif
 	}
 }
 
 void
 IndexedFont_Kerned_Column :: UpdateXIncs(void)
 {
+#if 0 // bjd
 	DDSURFACEDESC tempDDSurfaceDesc;
 
 	tempDDSurfaceDesc . dwSize = sizeof(DDSURFACEDESC);
@@ -1271,7 +1287,7 @@ IndexedFont_Kerned_Column :: UpdateXIncs(void)
 		}
 		return;
 	}
-
+#endif
 	int RowsToProcess = NumChars*GetHeight();
 	int* minOpaqueX = new int[RowsToProcess];
 	int* maxOpaqueX = new int[RowsToProcess];
@@ -1285,7 +1301,7 @@ IndexedFont_Kerned_Column :: UpdateXIncs(void)
 				int rightmostX=GetMaxWidth()-1;
 				while (rightmostX>0)
 				{
-					if
+/*					if
 					(
 						bOpaque
 						(
@@ -1293,7 +1309,9 @@ IndexedFont_Kerned_Column :: UpdateXIncs(void)
 							rightmostX, // int x,
 							Row
 						)
+
 					)
+
 					{
 						break;
 					}
@@ -1301,6 +1319,7 @@ IndexedFont_Kerned_Column :: UpdateXIncs(void)
 					{
 						rightmostX--;
 					}
+*/
 				}
 				
 				maxOpaqueX[Row]=rightmostX;
@@ -1311,6 +1330,7 @@ IndexedFont_Kerned_Column :: UpdateXIncs(void)
 				int leftmostX=0;
 				while(leftmostX<GetMaxWidth())
 				{
+#if 0 //bjd
 					if
 					(
 						bOpaque
@@ -1320,6 +1340,7 @@ IndexedFont_Kerned_Column :: UpdateXIncs(void)
 							Row // int y
 						)
 					)
+
 					{
 						break;
 					}
@@ -1327,12 +1348,13 @@ IndexedFont_Kerned_Column :: UpdateXIncs(void)
 					{
 						leftmostX++;
 					}
+#endif
 				}
 				minOpaqueX[Row]=leftmostX;
 			}
 		}		
 	}
-
+/* bjd
 	HRESULT hrUnlock = image_ptr -> Unlock
 	(
 		NULL // LPVOID lpSurfaceData  
@@ -1354,8 +1376,10 @@ IndexedFont_Kerned_Column :: UpdateXIncs(void)
 		}
 		return;
 	}
+
 	else
 	{
+*/
 		// Use the table of opaque extents:
 
 		for (int i=0;i<NumChars;i++)
@@ -1378,7 +1402,7 @@ IndexedFont_Kerned_Column :: UpdateXIncs(void)
 				XIncForOffset[i][j] =XInc;
 			}		
 		}
-	}
+//	}
 
 	// Destroy the table of opaque extents:
 	{
@@ -1394,11 +1418,12 @@ OurBool
 IndexedFont_Kerned_Column :: bAnyNonTransparentPixelsInColumn
 (
 	r2pos R2Pos_TopOfColumn,
-	int HeightOfColumn,
-	LPDDSURFACEDESC lpDDSurfaceDesc
+	int HeightOfColumn
+//	void* lpDDSurfaceDesc // bjd
 		// assumes you have a read lock
 )
 {
+#if 0 // bjd
 	GLOBALASSERT( lpDDSurfaceDesc );
 
 	void* pSurface = lpDDSurfaceDesc -> lpSurface;
@@ -1464,7 +1489,7 @@ IndexedFont_Kerned_Column :: bAnyNonTransparentPixelsInColumn
 
 		y++;
 	}
-
+#endif
 	return No;
 }
 
@@ -1536,6 +1561,7 @@ IndexedFont_Kerned_Column :: OverlapOnRow
 	
 	#if 1
 	{
+#if 0 // bjd
 		DDSURFACEDESC tempDDSurfaceDesc;
 
 		tempDDSurfaceDesc . dwSize = sizeof(DDSURFACEDESC);
@@ -1562,12 +1588,13 @@ IndexedFont_Kerned_Column :: OverlapOnRow
 			LOGDXERR(hrLock);
 			return Yes;
 		}
-
+#endif
 		// Find right-most pixel in row of first character
 		int rightmostX;
 		int firstoffsetY = Row+(currentOffset*GetHeight());
 		for (rightmostX=GetMaxWidth()-1;rightmostX>0;rightmostX--)
 		{
+#if 0 // bjd
 			if
 			(
 				bOpaque
@@ -1577,9 +1604,11 @@ IndexedFont_Kerned_Column :: OverlapOnRow
 					firstoffsetY // int y
 				)
 			)
+			else
 			{
 				break;
 			}
+#endif
 		}
 		
 		// Find left-most pixel in row of second character
@@ -1587,6 +1616,7 @@ IndexedFont_Kerned_Column :: OverlapOnRow
 		int nextoffsetY = Row+(nextOffset*GetHeight());
 		for (leftmostX=0;leftmostX<GetMaxWidth();leftmostX++)
 		{
+#if 0 // bjd
 			if
 			(
 				bOpaque
@@ -1599,6 +1629,7 @@ IndexedFont_Kerned_Column :: OverlapOnRow
 			{
 				break;
 			}
+#endif
 		}
 
 		// Is there an overlap when displaced by the proposed XInc?
@@ -1655,13 +1686,14 @@ IndexedFont_Kerned_Column :: GetSmallestXIncForRow
 OurBool
 IndexedFont_Kerned_Column :: bOpaque
 (
-	LPDDSURFACEDESC lpDDSurfaceDesc,
+	void* lpDDSurfaceDesc, // bjd
 		// assumes you have a read lock
 	int x,
 	int y
 		// must be in range
 )
 {
+#if 0 // bjd
 	GLOBALASSERT(lpDDSurfaceDesc);
 
 	void* pSurface = lpDDSurfaceDesc -> lpSurface;
@@ -1686,8 +1718,9 @@ IndexedFont_Kerned_Column :: bOpaque
 			( x * BytesPerPixel)
 		)
 	);
-
 	return (Pixel != 0 );
+#endif
+	return true;
 }
 
 

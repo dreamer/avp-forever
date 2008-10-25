@@ -50,8 +50,8 @@ unsigned int AlienPheromoneScale;
 static unsigned int *Pher_Marines1;
 static unsigned int *Pher_Marines2;
 
-unsigned int *PherMars_ReadBuf;
-unsigned int *PherMars_WriteBuf;
+unsigned int *PherMars_ReadBuf = 0;
+unsigned int *PherMars_WriteBuf = 0;
 
 #endif
 

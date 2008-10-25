@@ -80,6 +80,8 @@ extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern void (*SetVideoMode[]) (void);
 extern int FrameRate;
 
+extern HWND hWndMain; // bjd
+
 extern int WindowRequestMode;
 
 extern int NumActiveBlocks;
@@ -133,6 +135,8 @@ int VideoModeNotAvailable=0;
 extern int DebuggingCommandsActive;
 
 extern void BuildMultiplayerLevelNameArray();
+void LoadDeviceAndVideoModePreferences();
+void CDDA_Start(void);
 
 extern int WindowMode;
 void exit_break_point_fucntion ()
@@ -145,6 +149,10 @@ void exit_break_point_fucntion ()
 	#endif
 }	
 
+int mainMenu = 1;
+
+#include "VideoModes.h"
+extern DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
  
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                         LPSTR lpCmdLine, int nCmdShow)
@@ -158,19 +166,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	AVP_HInstance = hInst = hInstance;
 	AVP_NCmd = nCmdShow;
 
-	EnumerateCardsAndVideoModes();
+// bjd	EnumerateCardsAndVideoModes();
+	LoadDeviceAndVideoModePreferences();
 
 	LoadCDTrackList(); //load list of cd tracks assigned to levels , from a text file
-
-	
-//	CDDA_Start();
-//	CDDA_Play(1);
+	loadOggTrackList(); // do the same for any user ogg music files
 
 	SetFastRandom();
 	
-	/**** init game now ONLY sets up varibles for the whole
-				game. If you want to put something in it it must
-				be something that only needs to be called once
+	/**** 
+		init game now ONLY sets up varibles for the whole
+		game. If you want to put something in it it must
+		be something that only needs to be called once
 	****/
 	#if debug && 1//!PREDATOR_DEMO
 	{
@@ -345,19 +352,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	InitGame();
 
-
     /*** Define video mode for windows initialisation ***/
-	InitialVideoMode();
+ //bjd	InitialVideoMode();
 
 	/****** Put in by John to sort out easy sub window mode ******/
 	/****** REMOVE FOR GAME!!!!! ******/
 
 	#if debug && 1//!PREDATOR_DEMO
+
+	// windowed mode?
 	if(strstr(command_line, "-w"))
 	{
 		WindowRequestMode = WindowModeSubWindow;
 		if (!HWAccel)
 			RasterisationRequestMode = RequestSoftwareRasterisation;
+
+		// will stop mouse cursor moving outside game window
+		UseMouseCentreing = TRUE;
 	}
 	if(instr = strstr(command_line, "-s"))
 		sscanf(instr, "-s%d", &level_to_load);
@@ -368,8 +379,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	level_to_load = 0;
 
 	/*******	System initialisation **********/
+	
+	/* timer init test */
+	timeBeginPeriod(1); 
+
 	InitialiseSystem(hInstance, nCmdShow);
 	InitialiseRenderer();
+
+	if(!InitialiseDirect3DImmediateMode()){
+		MessageBox(hWndMain, "Couldn't create a Direct3D device. See dx_log.txt for details", "Couldn't create render device!", MB_OK | MB_ICONSTOP);
+		ReleaseDirect3D();
+		exit(-1);
+	}
 	
 	InitOptionsMenu(); /* by this time we know all about the video card, etc */
 
@@ -394,18 +415,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	
 	BuildMultiplayerLevelNameArray();//sort out multiplayer level names
 	
-	ChangeDirectDrawObject();
+//	ChangeDirectDrawObject();
 	AvP.LevelCompleted = 0;
 	LoadSounds("PLAYER"); 
 
 	#if PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO
 	if(AvP_MainMenus())
 	#else
+
 	while(AvP_MainMenus())
 	#endif
 	{
 		int menusActive=0;
 		int thisLevelHasBeenCompleted=0;
+
+		mainMenu = 0;
+
 		#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
 		if(instr = strstr(command_line, "-n"))
 		{								  
@@ -436,13 +461,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 			So it is set here */
 
 		/********** Grab The Video mode **********/
-		GetCorrectDirectDrawObject();
+//		GetCorrectDirectDrawObject();
 		
+		ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth);
+#if 0 // bjd resolution change?
 		if(!SetGameVideoMode())
 		{
 			VideoModeNotAvailable=1;
 			continue;
 		}
+#endif
 
 	    /* Dubious restart hack for DirectDraw problems */
 		/* JH - I'm not sure this is really necessary
@@ -450,14 +478,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 			a video mode which is not supported
 			BUT we are never going to try and do that
 			- or are we? */
-	    HandleVideoModeRestarts(hInstance, nCmdShow);
+//	    HandleVideoModeRestarts(hInstance, nCmdShow);
 
 
 		/* Check Gamma Settings are correct after video mode change */
-		InitialiseGammaSettings(RequestedGammaSetting);
-
-
-
+//bjd		InitialiseGammaSettings(RequestedGammaSetting);
 
 		/**** init the chunk loaders ***************/
 
@@ -520,6 +545,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		Game_Has_Loaded();
 		ResetFrameCounter();
 
+		// bjd..
+//		ThisFramesRenderingHasBegun();
+
 		if(AvP.Network!=I_No_Network)
 		{
 			/*Need to choose a starting position for the player , but first we must look
@@ -530,6 +558,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		}
 		
 		IngameKeyboardInput_ClearBuffer();
+
+		// bjd
+//		ThisFramesRenderingHasFinished();
+//		FlipBuffers();
+
 		while(AvP.MainLoopRunning) 
 		{
 
@@ -574,6 +607,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 							}
 						}
 						#endif  /* MainTextPrint */
+
+						// bjd
+						ThisFramesRenderingHasBegun();
+
+//						FlushD3DZBuffer();
 						
 						DoAllShapeAnimations();
 
@@ -603,7 +641,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 						//check cd status
 						CheckCDAndChooseTrackIfNeeded();
-						
+		
 						// check to see if we're pausing the game;
 						// if so kill off any sound effects
 						if(InGameMenusAreRunning() && ( (AvP.Network!=I_No_Network && netGameData.skirmishMode) || (AvP.Network==I_No_Network))	)
@@ -617,11 +655,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 						#if SOFTWARE_RENDERER
 						FlushSoftwareZBuffer();
 						#else
-						FlushD3DZBuffer();
-						#endifÿ
+					
+						// bjd
+						ThisFramesRenderingHasBegun();
+//						FlushD3DZBuffer();
+						#endif
 						{
-							extern void ThisFramesRenderingHasBegun(void);
-							ThisFramesRenderingHasBegun();
+							//extern void ThisFramesRenderingHasBegun(void);
+							//ThisFramesRenderingHasBegun();
 						}
 					}
 
@@ -638,7 +679,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 					{
 						/* after this call, no more graphics can be drawn until the next frame */
-						extern void ThisFramesRenderingHasFinished(void);
+						//extern void ThisFramesRenderingHasFinished(void);
 						ThisFramesRenderingHasFinished();
 					}
 
@@ -697,14 +738,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				AvP.LevelCompleted = 0;
 				FixCheatModesInUserProfile(UserProfilePtr);
 				RestartLevel();
-			}
-			
+			}			
 
 		}// end of main game loop
 		{
 			AvP.LevelCompleted = thisLevelHasBeenCompleted;
+			mainMenu = 1;
 		}
-
+/*
+		ThisFramesRenderingHasBegun();
+		ColourFillBackBuffer(0);
+		ThisFramesRenderingHasFinished();
+		InGameFlipBuffers();
+*/
 		FixCheatModesInUserProfile(UserProfilePtr);
 
 		#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
@@ -741,10 +787,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		Destroy_CurrentEnvironment();
 		TimeStampedMessage("After Destroy_CurrentEnvironment");
 		DeallocateAllImages();
+
 		TimeStampedMessage("After DeallocateAllImages");
 		EndNPCs(); /* JH 30/4/97 - unload npc rifs */
 		TimeStampedMessage("After EndNPCs");
 		ExitGame();
+
+		// set menu resolution
+		ChangeGameResolution(640, 480, 32);
+
 		#endif
 		/* Patrick 26/6/97
 		Stop and remove all game sounds here, since we are returning to the menus */
@@ -759,6 +810,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 		TimeStampedMessage("After SoundSys_RemoveAll");
 		CDDA_Stop();
+		stopOgg(); // stop ogg player
 		TimeStampedMessage("After CDDA_Stop");
 
 		/* netgame support */
@@ -809,9 +861,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	SoundSys_StopAll();
   	SoundSys_RemoveAll(); 
 
-	
-	
-
 
 	#else
 	QuickSplashScreens();
@@ -840,6 +889,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
  	CDDA_End();
 	ClearMemoryPool();
 
+	/* 'shutdown' timer */
+	timeEndPeriod(1);
+
 	return(0);
 }
-

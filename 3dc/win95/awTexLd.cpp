@@ -28,6 +28,8 @@
 	#include <typeinfo.h>
 #endif
 
+#include "d3_func.h"
+
 /* awTexLd.cpp - Author: Jake Hotson */
 
 /*****************************************/
@@ -90,10 +92,10 @@ namespace AwTl
 	/* Allow breakpoints to be potentially hard coded */
 	/* into macros and template functions             */
 	/**************************************************/
-	
+
 	db_code5(void BrkPt(){})
 	#define BREAKPOINT db_code5(::AwTl::BrkPt();)
-	
+
 	#if DB_LEVEL > 4
 	static unsigned GetRefCount(IUnknown * pUnknown)
 	{
@@ -102,16 +104,16 @@ namespace AwTl
 		return static_cast<unsigned>(pUnknown->Release());
 	}
 	#endif
-	
+
 	/*********************************/
 	/* Pixel format global structure */
 	/*********************************/
 
 	PixelFormat pixelFormat;
-	
+
 	PixelFormat pfTextureFormat;
 	PixelFormat pfSurfaceFormat;
-	
+
 	static inline void SetBitShifts(unsigned * leftShift,unsigned * rightShift,unsigned mask)
 	{
 		if (!mask)
@@ -122,7 +124,7 @@ namespace AwTl
 		for (*rightShift = 8; mask; --*rightShift, mask>>=1)
 			;
 	}
-		
+
 	/************************************/
 	/* D3D Driver info global structure */
 	/************************************/
@@ -131,26 +133,26 @@ namespace AwTl
 	struct DriverDesc
 	{
 		DriverDesc() : validB(false), ddP(NULL) {}
-		
+
 		bool validB : 1;
 		bool needSquareB : 1;
 		bool needPow2B : 1;
-		
+
 		unsigned minWidth;
 		unsigned minHeight;
 		unsigned maxWidth;
 		unsigned maxHeight;
-		
+
 		DWORD memFlag;
-		
-		DDObject * ddP;
+
+		void * ddP; // BJD
 	}
 		driverDesc;
 
 	/*************************************************************************/
 	/* Class used to hold all the parameters for the CreateTexture functions */
 	/*************************************************************************/
-	
+
 	class CreateTextureParms
 	{
 		public:
@@ -167,55 +169,55 @@ namespace AwTl
 				, widthP(NULL)
 				, heightP(NULL)
 				, backupHP(NULL)
-				, prevTexP(static_cast<D3DTexture *>(NULL))
+				, prevTexP(static_cast<AVPTexture *>(NULL))
 				, prevTexB(false)
 				, loadTextureB(false)
 				, callbackF(NULL)
 				, rectA(NULL)
 			{
 			}
-			
+
 			SurfUnion DoCreate() const;
-			
+
 			bool loadTextureB;
-			
+
 			LPCTSTR fileNameS;
 			HANDLE fileH;
 			PtrUnionConst dataP;
 			AW_BACKUPTEXTUREHANDLE restoreH;
-			
+
 			unsigned maxReadBytes;
 			unsigned * bytesReadP;
-			
+
 			unsigned flags;
-			
+
 			unsigned * widthP;
 			unsigned * heightP;
-			
+
 			unsigned * originalWidthP;
 			unsigned * originalHeightP;
-			
+
 			AW_BACKUPTEXTUREHANDLE * backupHP;
-			
+
 			SurfUnion prevTexP;
 			bool prevTexB; // used when rectA is non-NULL, otherwise prevTexP is used
-			
+
 			AW_TL_PFN_CALLBACK callbackF;
 			void * callbackParam;
-			
+
 			unsigned numRects;
 			AwCreateGraphicRegion * rectA;
 	};
-	
+
 
 	/****************************************/
 	/* Reference Count Object Debug Support */
 	/****************************************/
-	
+
 	#ifndef NDEBUG
-	
+
 		static bool g_bAllocListActive = false;
-		
+
 		class AllocList : public ::HashTable<RefCntObj *>
 		{
 			public:
@@ -254,51 +256,51 @@ namespace AwTl
 					g_bAllocListActive = false;
 				}
 		};
-		
+
 		static AllocList g_listAllocated;
 
 		void DbRemember(RefCntObj * pObj)
 		{
 			g_listAllocated.AddAsserted(pObj);
 		}
-		
+
 		void DbForget(RefCntObj * pObj)
 		{
 			if (g_bAllocListActive)
 				g_listAllocated.RemoveAsserted(pObj);
 		}
-		
+
 	#endif // ! NDEBUG
-	
+
 	/********************************************/
 	/* structure to contain loading information */
 	/********************************************/
-	
+
 	struct LoadInfo
 	{
 		DDSurface * surfaceP;
 		bool surface_lockedB;
 		DDSurface * dst_surfaceP;
-		D3DTexture * textureP;
-		D3DTexture * dst_textureP;
-		
+		AVPTexture * textureP;
+		AVPTexture * dst_textureP;
+
 		unsigned surface_width;
 		unsigned surface_height;
 		PtrUnion surface_dataP;
 		LONG surface_pitch;
 		DWORD dwCapsCaps;
-		
+
 		unsigned * widthP;
 		unsigned * heightP;
 		SurfUnion prevTexP;
 		SurfUnion resultP;
 		unsigned top,left,bottom,right;
 		unsigned width,height; // set to right-left and bottom-top
-		
+
 		AwCreateGraphicRegion * rectP;
-		
+
 		bool skipB; // used to indicate that a surface/texture was not lost and .`. does not need restoring
-		
+
 		LoadInfo()
 			: surfaceP(NULL)
 			, surface_lockedB(false)
@@ -309,21 +311,21 @@ namespace AwTl
 		{
 		}
 	};
-	
+
 	/*******************************/
 	/* additiional texture formats */
 	/*******************************/
-	
+
 	struct AdditionalPixelFormat : PixelFormat
 	{
 		bool canDoTranspB;
 		unsigned maxColours;
-		
+
 		// for List
 		bool operator == (AdditionalPixelFormat const &) const { return false; }
 		bool operator != (AdditionalPixelFormat const &) const { return true; }
 	};
-	
+
 	static List<AdditionalPixelFormat> listTextureFormats;
 
 } // namespace AwTl
@@ -331,7 +333,7 @@ namespace AwTl
 /*******************/
 /* Generic Loaders */
 /*******************/
-	
+
 #define HANDLE_DXERROR(s) \
 	if (DD_OK != awTlLastDxErr)	{ \
 		awTlLastErr = AW_TLE_DXERROR; \
@@ -341,16 +343,16 @@ namespace AwTl
 	} else { \
 		db_logf5(("\tsuccessfully completed %s",s)); \
 	}
-	
+
 #define ON_ERROR_RETURN_NULL(s) \
 	if (awTlLastErr != AW_TLE_OK) { \
 		db_logf3(("AwCreateGraphic() failed whilst %s",s)); \
 		db_logf1(("AwCreateGraphic(): ERROR: %s",AwTlErrorToString())); \
-		return static_cast<D3DTexture *>(NULL); \
+		return static_cast<AVPTexture *>(NULL); \
 	} else { \
 		db_logf5(("\tsuccessfully completed %s",s)); \
 	}
-	
+
 #define CHECK_MEDIA_ERRORS(s) \
 	if (pMedium->m_fError) { \
 		db_logf3(("AwCreateGraphic(): The following media errors occurred whilst %s",s)); \
@@ -379,30 +381,30 @@ namespace AwTl
 			if (awTlLastErr == AW_TLE_OK) { awTlLastErr = AW_TLE_CANTREADFILE; awTlLastWinErr = GetLastError(); } \
 		} \
 	}
-	
+
 AwTl::SurfUnion AwBackupTexture::Restore(AwTl::CreateTextureParms const & rParams)
 {
 	using namespace AwTl;
-	
+
 	ChoosePixelFormat(rParams);
-	
+
 	if (!pixelFormat.validB)
 		db_log3("AwCreateGraphic(): ERROR: pixel format not valid");
 	if (!driverDesc.ddP || !driverDesc.validB && rParams.loadTextureB)
 		db_log3("AwCreateGraphic(): ERROR: driver description not valid");
-	
+
 	awTlLastErr = pixelFormat.validB && driverDesc.ddP && (driverDesc.validB || !rParams.loadTextureB) ? AW_TLE_OK : AW_TLE_NOINIT;
-	
+
 	ON_ERROR_RETURN_NULL("initializing restore")
-	
+
 	OnBeginRestoring(pixelFormat.palettizedB ? 1<<pixelFormat.bitsPerPixel : 0);
-	
+
 	ON_ERROR_RETURN_NULL("initializing restore")
-	
+
 	SurfUnion pTex = CreateTexture(rParams);
-	
+
 	OnFinishRestoring(AW_TLE_OK == awTlLastErr ? true : false);
-	
+
 	return pTex;
 }
 
@@ -419,19 +421,19 @@ DWORD AwBackupTexture::GetTransparentColour()
 void AwBackupTexture::ChoosePixelFormat(AwTl::CreateTextureParms const & _parmsR)
 {
 	using namespace AwTl;
-	
+
 	pixelFormat.validB = false; // set invalid first
-	
+
 	// which flags to use?
 	unsigned fMyFlags =
 		_parmsR.flags & AW_TLF_PREVSRCALL ? db_assert1(_parmsR.restoreH), m_fFlags
 		: _parmsR.flags & AW_TLF_PREVSRC ? db_assert1(_parmsR.restoreH),
 			_parmsR.flags & ~AW_TLF_TRANSP | m_fFlags & AW_TLF_TRANSP
 		: _parmsR.flags;
-		
+
 	// transparency?
 	m_bTranspMask = HasTransparentMask(fMyFlags & AW_TLF_TRANSP ? true : false);
-		
+
 	#if 0
 	if (_parmsR.prevTexP.voidP)
 	{
@@ -443,15 +445,16 @@ void AwBackupTexture::ChoosePixelFormat(AwTl::CreateTextureParms const & _parmsR
 	}
 	else
 	#endif
-	
+
 	if (_parmsR.loadTextureB || fMyFlags & AW_TLF_TEXTURE)
 	{
+#if 0 // BJD
 		// use a texture format
 		unsigned nColours = GetNumColours();
 		unsigned nMinPalSize = GetMinPaletteSize();
-		
+
 		PixelFormat const * pFormat = &pfTextureFormat;
-		
+
 		for (LIF<AdditionalPixelFormat> itFormat(&listTextureFormats); !itFormat.done(); itFormat.next())
 		{
 			AdditionalPixelFormat const * pThisFormat = &itFormat();
@@ -467,9 +470,9 @@ void AwBackupTexture::ChoosePixelFormat(AwTl::CreateTextureParms const & _parmsR
 				pFormat = pThisFormat;
 			}
 		}
-		
+
 		pixelFormat = *pFormat;
-		
+
 		#if DB_LEVEL >= 4
 		if (pixelFormat.palettizedB)
 		{
@@ -480,8 +483,8 @@ void AwBackupTexture::ChoosePixelFormat(AwTl::CreateTextureParms const & _parmsR
 			if (pixelFormat.alphaB)
 			{
 				unsigned alpha_l_shft,alpha_r_shft;
-				SetBitShifts(&alpha_l_shft,&alpha_r_shft,pixelFormat.ddpf.dwRGBAlphaBitMask);
-			
+				SetBitShifts(&alpha_l_shft,&alpha_r_shft,pixelFormat.dwRGBAlphaBitMask); // BJD removed ddpf again
+
 				db_logf4(("\tchosen %u-bit %u%u%u%u texture format",
 					pixelFormat.bitsPerPixel,
 					8U-pixelFormat.redRightShift,
@@ -504,14 +507,87 @@ void AwBackupTexture::ChoosePixelFormat(AwTl::CreateTextureParms const & _parmsR
 	{
 		// use display surface format
 		pixelFormat = pfSurfaceFormat;
-	}
+#endif
+		// Code from linux port..
+		/* Just convert the texture to 32bpp */
+		pixelFormat.palettizedB = 0;
 		
+		pixelFormat.alphaB = 1;
+		pixelFormat.validB = 1;
+		pixelFormat.texB = 1;
+		pixelFormat.bitsPerPixel = 32;
+		pixelFormat.redLeftShift = 0;
+		pixelFormat.greenLeftShift = 8;
+		pixelFormat.blueLeftShift = 16;
+		pixelFormat.redRightShift = 0;
+		pixelFormat.greenRightShift = 0;
+		pixelFormat.blueRightShift = 0;
+		pixelFormat.dwRGBAlphaBitMask = 0xFF000000;
+	}
+
 }
 
 AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & _parmsR)
 {
 	using namespace AwTl;
+
+	if (_parmsR.originalWidthP) *_parmsR.originalWidthP = m_nWidth;
+	if (_parmsR.originalHeightP) *_parmsR.originalHeightP = m_nHeight;
+
+	AVPTexture *d3d_texture = new AVPTexture;
+
+	unsigned char *buffer = (unsigned char *)malloc(m_nWidth * m_nHeight * 4);
+
+	unsigned int y = 0;
+
+	Colour * paletteP = m_nPaletteSize ? GetPalette() : NULL;
+
+	bool reversed_rowsB = AreRowsReversed();
 	
+	if (reversed_rowsB)
+	{
+		y = m_nHeight-1;
+	}
+
+	for (int i = 0, rowcount = m_nHeight; rowcount; --rowcount, i++) {
+	
+		PtrUnion src_rowP = GetRowPtr(y);
+		db_assert1(src_rowP.voidP);
+				
+		// allow loading of the next row from the file
+		LoadNextRow(src_rowP);
+			
+		// loop for copying data to surfaces
+		{	
+			{
+				// are we in the vertical range of this surface?
+				{		
+					// convert and copy the section of the row to the direct draw surface
+//					ConvertRow(pLoadInfo->surface_dataP,pLoadInfo->surface_width,src_rowP,pLoadInfo->left,pLoadInfo->width,paletteP db_code1(DB_COMMA m_nPaletteSize));
+					PtrUnion my_data = &buffer[y*m_nWidth*4];
+							
+					ConvertRow(my_data,m_nWidth,src_rowP,0,m_nWidth,paletteP db_code1(DB_COMMA m_nPaletteSize));					
+				}
+			}
+		}
+				
+		// next row
+		if (reversed_rowsB)
+			--y;
+		else
+			++y;
+	}
+		
+	db_logf4(("\tThe image with is %ux%u with %u %spalette",m_nWidth,m_nHeight,m_nPaletteSize ? m_nPaletteSize : 0,m_nPaletteSize ? "colour " : ""));
+
+	d3d_texture->width = m_nWidth;
+	d3d_texture->height = m_nHeight;
+
+	d3d_texture->buffer = buffer;
+				
+	return static_cast<SurfUnion>(d3d_texture);
+
+#if 0
 	// which flags to use?
 	unsigned fMyFlags =
 		_parmsR.flags & AW_TLF_PREVSRCALL ? db_assert1(_parmsR.restoreH),
@@ -519,9 +595,9 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 		: _parmsR.flags & AW_TLF_PREVSRC ? db_assert1(_parmsR.restoreH),
 			_parmsR.flags & ~AW_TLF_TRANSP | m_fFlags & AW_TLF_TRANSP
 		: _parmsR.flags;
-		
+
 	db_code1(ULONG refcnt;)
-	
+
 	DDPalette * dd_paletteP = NULL;
 	LoadInfo * arrLoadInfo = NULL;
 	unsigned nLoadInfos = 0;
@@ -536,14 +612,14 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 			db_log1("AwCreateGraphic() failed whilst interpreting the header data or palette");
 			goto EXIT_WITH_ERROR;
 		}
-		
+
 		if (_parmsR.originalWidthP) *_parmsR.originalWidthP = m_nWidth;
 		if (_parmsR.originalHeightP) *_parmsR.originalHeightP = m_nHeight;
-		
+
 		if (_parmsR.rectA)
 		{
 			nLoadInfos = 0;
-			arrLoadInfo = _parmsR.numRects ? new LoadInfo[_parmsR.numRects] : NULL; 
+			arrLoadInfo = _parmsR.numRects ? new LoadInfo[_parmsR.numRects] : NULL;
 			for (unsigned i=0; i<_parmsR.numRects; ++i)
 			{
 				_parmsR.rectA[i].width = 0;
@@ -575,16 +651,16 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 						else
 							_parmsR.rectA[i].pSurface = NULL;
 					}
-					
+
 					arrLoadInfo[nLoadInfos].rectP = &_parmsR.rectA[i];
 					arrLoadInfo[nLoadInfos].top = _parmsR.rectA[i].top;
 					arrLoadInfo[nLoadInfos].left = _parmsR.rectA[i].left;
 					arrLoadInfo[nLoadInfos].bottom = _parmsR.rectA[i].bottom;
 					arrLoadInfo[nLoadInfos].right = _parmsR.rectA[i].right;
-					
+
 					if (arrLoadInfo[nLoadInfos].right > m_nWidth) arrLoadInfo[nLoadInfos].right = m_nWidth;
 					if (arrLoadInfo[nLoadInfos].bottom > m_nHeight) arrLoadInfo[nLoadInfos].bottom = m_nHeight;
-					
+
 					arrLoadInfo[nLoadInfos].width = arrLoadInfo[nLoadInfos].right - arrLoadInfo[nLoadInfos].left;
 					arrLoadInfo[nLoadInfos].height = arrLoadInfo[nLoadInfos].bottom - arrLoadInfo[nLoadInfos].top;
 
@@ -612,19 +688,19 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 			arrLoadInfo[0].width = m_nWidth;
 			arrLoadInfo[0].height = m_nHeight;
 		}
-		
+
 		bool bSkipAll = true;
-		
+
 		// loop creating surfaces
 		{for (unsigned i=0; i<nLoadInfos; ++i)
 		{
 			LoadInfo * pLoadInfo = &arrLoadInfo[i];
-			
+
 			db_logf4(("\trectangle from image (%u,%u)-(%u,%u)",pLoadInfo->left,pLoadInfo->top,pLoadInfo->right,pLoadInfo->bottom));
 			db_logf5(("\treference count on input surface %u",_parmsR.loadTextureB ? GetRefCount(pLoadInfo->prevTexP.textureP) : GetRefCount(pLoadInfo->prevTexP.surfaceP)));
-			
+
 			// determine what the width and height of the surface will be
-			
+
 			if (_parmsR.loadTextureB || fMyFlags & AW_TLF_TEXTURE)
 			{
 				awTlLastErr =
@@ -649,12 +725,12 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 				pLoadInfo->surface_height &= ~3;
 				#endif
 			}
-		
+
 			if (pLoadInfo->widthP) *pLoadInfo->widthP = pLoadInfo->surface_width;
 			if (pLoadInfo->heightP) *pLoadInfo->heightP = pLoadInfo->surface_height;
 
-			// Create DD Surface	
-		
+			// Create DD Surface
+
 			DD_SURFACE_DESC ddsd;
 			INITDXSTRUCT(ddsd);
 			ddsd.ddpfPixelFormat = pixelFormat.ddpf;
@@ -666,10 +742,10 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 			ddsd.ddsCaps.dwCaps = pLoadInfo->dwCapsCaps;
 			ddsd.dwHeight = pLoadInfo->surface_height;
 			ddsd.dwWidth = pLoadInfo->surface_width;
-		
+
 			#if MIPMAPTEST
 			/*
-			D3DPTEXTURECAPS_POW2 
+			D3DPTEXTURECAPS_POW2
 			All nonmipmapped textures must have widths and heights specified as powers of two if this flag is set.
 			(Note that all mipmapped textures must always have dimensions that are powers of two.)
 			*/
@@ -680,7 +756,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 				ddsd.dwMipMapCount = 3;
 			}
 			#endif
-		
+
 			if (pLoadInfo->prevTexP.voidP && (!_parmsR.loadTextureB || !(fMyFlags & AW_TLF_COMPRESS)))
 			{
 				if (_parmsR.loadTextureB)
@@ -694,28 +770,28 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 				else
 					db_logf5(("\t\tnow prev surf ref %u new surface i/f ref %u",GetRefCount(pLoadInfo->prevTexP.surfaceP),GetRefCount(pLoadInfo->surfaceP)));
 				#endif
-				
+
 				// check for lost surfaces
 				if (fMyFlags & AW_TLF_CHECKLOST)
 				{
 					awTlLastDxErr = pLoadInfo->surfaceP->IsLost();
-					
+
 					if (DDERR_SURFACELOST == awTlLastDxErr)
 					{
 						db_log4("\tRestoring Lost Surface");
-						
+
 						awTlLastDxErr = pLoadInfo->surfaceP->Restore();
 					}
 					else if (DD_OK == awTlLastDxErr && (fMyFlags & AW_TLF_SKIPNOTLOST))
 					{
 						db_log4("\tSkipping Surface which was not Lost");
-						
+
 						pLoadInfo->skipB = true;
 					}
-					
+
 					HANDLE_DXERROR("testing for lost surface and restoring if necessary");
 				}
-				
+
 				if (!pLoadInfo->skipB)
 				{
 					// check that the surface desc is OK
@@ -741,7 +817,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 							else if (old_ddsd.ddpfPixelFormat.dwFlags & DDPF_RGB)
 								bpp = old_ddsd.ddpfPixelFormat.dwRGBBitCount;
 							if (pixelFormat.bitsPerPixel != bpp)
-								awTlLastErr = AW_TLE_CANTRELOAD;	
+								awTlLastErr = AW_TLE_CANTRELOAD;
 						}
 						else
 							awTlLastErr = AW_TLE_CANTRELOAD;
@@ -765,33 +841,33 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 				if (pLoadInfo->prevTexP.voidP && (fMyFlags & AW_TLF_CHECKLOST))
 				{
 					db_assert1(_parmsR.loadTextureB);
-					
+
 					awTlLastDxErr = pLoadInfo->prevTexP.textureP->QueryInterface(GUID_DD_SURFACE,(LPVOID *)&pLoadInfo->surfaceP);
 					HANDLE_DXERROR("getting direct draw surface interface")
-					
+
 					db_logf5(("\t\tnow prev tex ref %u new surface i/f ref %u",GetRefCount(pLoadInfo->prevTexP.textureP),GetRefCount(pLoadInfo->surfaceP)));
-					
+
 					awTlLastDxErr = pLoadInfo->surfaceP->IsLost();
-					
+
 					if (DDERR_SURFACELOST == awTlLastDxErr)
 					{
 						db_log4("\tRestoring Lost Surface");
-						
+
 						awTlLastDxErr = pLoadInfo->surfaceP->Restore();
 					}
 					else if (DD_OK == awTlLastDxErr && (fMyFlags & AW_TLF_SKIPNOTLOST))
 					{
 						db_log4("\tSkipping Surface which was not Lost");
-						
+
 						pLoadInfo->skipB = true;
 					}
-					
+
 					HANDLE_DXERROR("testing for lost surface and restoring if necessary");
-					
+
 					pLoadInfo->surfaceP->Release();
 					pLoadInfo->surfaceP = NULL;
 				}
-				
+
 				if (!pLoadInfo->skipB)
 				{
 					do
@@ -804,24 +880,24 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 							&& _parmsR.callbackF
 							&& _parmsR.callbackF(_parmsR.callbackParam)
 						);
-					
+
 					HANDLE_DXERROR("creating direct draw surface")
 				}
 			}
-			
+
 			if (pLoadInfo->skipB)
 			{
 				db_assert1(pLoadInfo->prevTexP.voidP);
-				
+
 				// skipping so result is same as input
 				pLoadInfo->resultP = pLoadInfo->prevTexP;
-				
+
 				if (_parmsR.loadTextureB)
 					pLoadInfo->prevTexP.textureP->AddRef();
 				else
 					pLoadInfo->prevTexP.surfaceP->AddRef();
 			}
-		
+
 			#if MIPMAPTEST
 			if (128==surface_width && 128==surface_height)
 			{
@@ -845,34 +921,34 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 				db_onlyassert1(1==refcnt);
 			}
 			#endif
-			
+
 			bSkipAll = bSkipAll && pLoadInfo->skipB;
 		}}
-		
+
 		if (!bSkipAll)
 		{
 			Colour * paletteP = m_nPaletteSize ? GetPalette() : NULL;
-			
+
 			unsigned y = 0;
 			bool reversed_rowsB = AreRowsReversed();
 			if (reversed_rowsB)
 			{
 				y = m_nHeight-1;
 			}
-			
+
 			for (unsigned rowcount = m_nHeight; rowcount; --rowcount)
 			{
 				PtrUnion src_rowP = GetRowPtr(y);
 				db_assert1(src_rowP.voidP);
-				
+
 				// allow loading of the next row from the file
 				LoadNextRow(src_rowP);
-				
+
 				// loop for copying data to surfaces
 				for (unsigned i=0; i<nLoadInfos; ++i)
 				{
 					LoadInfo * pLoadInfo = &arrLoadInfo[i];
-					
+
 					if (!pLoadInfo->skipB)
 					{
 						// are we in the vertical range of this surface?
@@ -890,10 +966,10 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 								pLoadInfo->surface_dataP.byteP += ddsd.lPitch * (y-pLoadInfo->top);
 								pLoadInfo->surface_pitch = ddsd.lPitch;
 							}
-							
+
 							// convert and copy the section of the row to the direct draw surface
 							ConvertRow(pLoadInfo->surface_dataP,pLoadInfo->surface_width,src_rowP,pLoadInfo->left,pLoadInfo->width,paletteP db_code1(DB_COMMA m_nPaletteSize));
-							
+
 							// do the bottom row twice if the dd surface is bigger
 							if (pLoadInfo->bottom-1 == y && pLoadInfo->surface_height > pLoadInfo->height)
 							{
@@ -901,7 +977,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 								next_surface_rowP.byteP += pLoadInfo->surface_pitch;
 								ConvertRow(next_surface_rowP,pLoadInfo->surface_width,src_rowP,pLoadInfo->left,pLoadInfo->width,paletteP db_code1(DB_COMMA m_nPaletteSize));
 							}
-							
+
 							// next ddsurface row
 							if (reversed_rowsB)
 								pLoadInfo->surface_dataP.byteP -= pLoadInfo->surface_pitch;
@@ -917,20 +993,20 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 						}
 					}
 				}
-				
+
 				// next row
 				if (reversed_rowsB)
 					--y;
 				else
 					++y;
-				
+
 				if (AW_TLE_OK != awTlLastErr)
 				{
 					db_log1("AwCreateGraphic() failed whilst copying data to direct draw surface");
 					goto EXIT_WITH_ERROR;
 				}
 			}
-			
+
 			// create a palette for the surfaces if there is one
 			DWORD palcreateflags = 0;
 			PALETTEENTRY colour_tableA[256];
@@ -940,7 +1016,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 				{
 					db_log3("AwCreateGraphic(): WARNING: setting a palette on a DD surface may have no effect");
 				}
-				
+
 				#if 0
 				if (m_bTranspMask)
 				{
@@ -991,11 +1067,11 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 				awTlLastDxErr = driverDesc.ddP->CreatePalette(palcreateflags,colour_tableA,&dd_paletteP,NULL);
 				HANDLE_DXERROR("creating palette for direct draw surface")
 			}
-				
+
 			{for (unsigned i=0; i<nLoadInfos; ++i)
 			{
 				LoadInfo * pLoadInfo = &arrLoadInfo[i];
-			
+
 				if (!pLoadInfo->skipB)
 				{
 					// unlock the surface
@@ -1005,7 +1081,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 						HANDLE_DXERROR("unlocking direct draw surface")
 						pLoadInfo->surface_lockedB = false;
 					}
-					
+
 					if (pixelFormat.palettizedB)
 					{
 						// set the palette on the surface
@@ -1013,16 +1089,16 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 						HANDLE_DXERROR("setting palette on direct draw surface")
 					}
 				}
-				
+
 			}}
-			
+
 			if (pixelFormat.palettizedB)
 			{
 				db_logf5(("\tabout to release palette with ref %u",GetRefCount(dd_paletteP)));
 				dd_paletteP->Release();
 				dd_paletteP = NULL;
 			}
-			
+
 			DWORD dwColourKey;
 			DDCOLORKEY invis;
 			// get colour for chroma keying if required
@@ -1032,22 +1108,22 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 				invis.dwColorSpaceLowValue = dwColourKey;
 				invis.dwColorSpaceHighValue = dwColourKey;
 			}
-			
+
 			{for (unsigned i=0; i<nLoadInfos; ++i)
 			{
 				LoadInfo * pLoadInfo = &arrLoadInfo[i];
-				
+
 				if (!pLoadInfo->skipB)
 				{
 					// do the copying crap and Texture::Load() stuff - see CopyD3DTexture in d3_func.cpp
-					
+
 					if (_parmsR.loadTextureB)
 					{
 						// get a texture pointer
 						awTlLastDxErr = pLoadInfo->surfaceP->QueryInterface(GUID_D3D_TEXTURE,(LPVOID *)&pLoadInfo->textureP);
 						HANDLE_DXERROR("getting texture interface on direct draw surface")
 						db_logf5(("\t\tnow surface ref %u texture ref %u",GetRefCount(pLoadInfo->surfaceP),GetRefCount(pLoadInfo->textureP)));
-						
+
 						if (fMyFlags & AW_TLF_COMPRESS) // deal with Texture::Load and ALLOCONLOAD flag
 						{
 							if (pLoadInfo->prevTexP.voidP)
@@ -1079,7 +1155,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 										else if (old_ddsd.ddpfPixelFormat.dwFlags & DDPF_RGB)
 											bpp = old_ddsd.ddpfPixelFormat.dwRGBBitCount;
 										if (pixelFormat.bitsPerPixel != bpp)
-											awTlLastErr = AW_TLE_CANTRELOAD;	
+											awTlLastErr = AW_TLE_CANTRELOAD;
 									}
 									else
 										awTlLastErr = AW_TLE_CANTRELOAD;
@@ -1095,9 +1171,9 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 							else
 							{
 								DD_SURFACE_DESC ddsd;
-								
+
 								INITDXSTRUCT(ddsd);
-								
+
 								awTlLastDxErr = pLoadInfo->surfaceP->GetSurfaceDesc(&ddsd);
 								HANDLE_DXERROR("getting direct draw surface desc")
 
@@ -1115,12 +1191,12 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 									);
 								HANDLE_DXERROR("creating destination direct draw surface")
 							}
-							
+
 							// create a zero palette if required -> Texture::Load() will copy in correct palette
 							if (pixelFormat.palettizedB)
 							{
 								memset(colour_tableA,0,sizeof colour_tableA);
-								
+
 								awTlLastDxErr = driverDesc.ddP->CreatePalette(palcreateflags,colour_tableA,&dd_paletteP,NULL);
 								HANDLE_DXERROR("creating palette for destination direct draw surface")
 								awTlLastDxErr = pLoadInfo->dst_surfaceP->SetPalette(dd_paletteP);
@@ -1129,12 +1205,12 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 								dd_paletteP->Release();
 								dd_paletteP = NULL;
 							}
-							
+
 							// get a texture pointer on the destination
 							awTlLastDxErr = pLoadInfo->dst_surfaceP->QueryInterface(GUID_D3D_TEXTURE,(LPVOID *)&pLoadInfo->dst_textureP);
 							HANDLE_DXERROR("getting texture interface on destination direct draw surface")
 							db_logf5(("\t\tnow dst surface ref %u dst texture ref %u",GetRefCount(pLoadInfo->dst_surfaceP),GetRefCount(pLoadInfo->dst_textureP)));
-							
+
 							do
 							{
 								awTlLastDxErr = pLoadInfo->dst_textureP->Load(pLoadInfo->textureP);
@@ -1146,7 +1222,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 									&& _parmsR.callbackF(_parmsR.callbackParam)
 								);
 							HANDLE_DXERROR("loading texture into destination")
-							
+
 							// release src texture and surface, and set pointers to point to dst texture and surface
 							db_logf5(("\tabout to release internal surface with ref %u",GetRefCount(pLoadInfo->surfaceP)));
 							db_code1(refcnt =)
@@ -1154,7 +1230,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 							db_onlyassert1(1==refcnt);
 							pLoadInfo->surfaceP = pLoadInfo->dst_surfaceP;
 							pLoadInfo->dst_surfaceP = NULL;
-							
+
 							db_logf5(("\tabout to release internal texture i/f with ref %u",GetRefCount(pLoadInfo->textureP)));
 							db_code1(refcnt =)
 							pLoadInfo->textureP->Release();
@@ -1163,14 +1239,14 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 							pLoadInfo->dst_textureP = NULL;
 						}
 					}
-						
+
 					// set chroma keying if required
 					if (m_bTranspMask && (!pixelFormat.alphaB || fMyFlags & AW_TLF_CHROMAKEY))
 					{
 						awTlLastDxErr = pLoadInfo->surfaceP->SetColorKey(DDCKEY_SRCBLT,&invis);
 						HANDLE_DXERROR("setting the colour key")
 					}
-					
+
 					if (_parmsR.loadTextureB)
 					{
 						// release the direct draw interface:
@@ -1178,31 +1254,31 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 						// to QueryInterface on the surface (increasing
 						// its referenc count), this wont actually release
 						// the surface
-						
+
 						db_logf5(("\tabout to release surface i/f with ref %u",GetRefCount(pLoadInfo->surfaceP)));
 						db_code1(refcnt =)
 						pLoadInfo->surfaceP->Release();
 						pLoadInfo->surfaceP = NULL;
 						// if loading into a previous texture, refcnt may be two or more, our ref and the ref passed to us
 						db_onlyassert1(1==refcnt|| pLoadInfo->prevTexP.voidP);
-						
+
 						pLoadInfo->resultP = pLoadInfo->textureP;
 					}
 					else
 					{
 						db_assert1(pLoadInfo->surfaceP);
-						
+
 						DDSurface * pSurfaceReturn = NULL;
-						
+
 						awTlLastDxErr = pLoadInfo->surfaceP->QueryInterface(GUID_DD_SURFACE, (LPVOID *)&pSurfaceReturn);
 						HANDLE_DXERROR("getting the required DDSurface interface")
 						db_logf5(("\t\tnow surface ref %u return surface ref %u",GetRefCount(pLoadInfo->surfaceP),GetRefCount(pSurfaceReturn)));
-						
+
 						pLoadInfo->resultP = pSurfaceReturn;
 					}
 				}
 			}}
-			
+
 			// release the IDirectDrawSurface interfaces if returning DDSurface interfaces
 			if (!_parmsR.loadTextureB)
 			{
@@ -1220,9 +1296,9 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 
 		// OK
 		db_log4("AwCreateGraphic() OK");
-		
+
 		SurfUnion pRet = static_cast<D3DTexture *>(NULL);
-		
+
 		if (!_parmsR.rectA)
 		{
 			// if loading the entire graphic as one surface/texture, return pointer to that
@@ -1234,9 +1310,9 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 			for (unsigned i=0; i<nLoadInfos; ++i)
 			{
 				LoadInfo * pLoadInfo = &arrLoadInfo[i];
-				
+
 				db_assert1(pLoadInfo->rectP);
-				
+
 				if (_parmsR.loadTextureB)
 				{
 					if (pLoadInfo->prevTexP.voidP)
@@ -1270,34 +1346,34 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 			}
 		}
 		delete[] arrLoadInfo;
-		
+
 		#if DB_LEVEL >= 5
 		if (_parmsR.loadTextureB)
 			db_logf5(("AwCreateGraphic(): returning texture with ref cnt %u",GetRefCount(pRet.textureP)));
 		else
 			db_logf5(("AwCreateGraphic(): returning surface with ref cnt %u",GetRefCount(pRet.surfaceP)));
 		#endif
-		
+
 		return pRet;
 	}
-		
+
 	EXIT_WITH_ERROR:
 	{
-		
+
 		db_logf2(("AwCreateGraphic(): ERROR: %s",AwTlErrorToString()));
-		
+
 		if (arrLoadInfo)
 		{
 			for (unsigned i=0; i<nLoadInfos; ++i)
 			{
 				LoadInfo * pLoadInfo = &arrLoadInfo[i];
-				
+
 				db_logf5(("\tref counts: dst tex %u dst surf %u int tex %u int surf %u",
 					GetRefCount(pLoadInfo->dst_textureP),
 					GetRefCount(pLoadInfo->dst_surfaceP),
 					GetRefCount(pLoadInfo->textureP),
 					GetRefCount(pLoadInfo->surfaceP)));
-				
+
 				if (pLoadInfo->dst_textureP)
 				{
 					pLoadInfo->dst_textureP->Release();
@@ -1318,26 +1394,27 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 					pLoadInfo->surfaceP->Release();
 					db_onlyassert1(!refcnt);
 				}
-				
+
 				if (pLoadInfo->rectP)
 				{
 					pLoadInfo->rectP->width = 0;
 					pLoadInfo->rectP->height = 0;
 				}
 			}
-			
+
 			delete[] arrLoadInfo;
 		}
-		
+
 		if (dd_paletteP)
 		{
 			db_code1(refcnt =)
 			dd_paletteP->Release();
 			db_onlyassert1(!refcnt);
 		}
-		
+
 		return static_cast<D3DTexture *>(NULL);
 	}
+#endif
 }
 
 void AwBackupTexture::OnBeginRestoring(unsigned nMaxPaletteSize)
@@ -1411,45 +1488,48 @@ namespace AwTl {
 	{
 		return m_nPaletteSize;
 	}
-	
+
 
 	SurfUnion TexFileLoader::Load(MediaMedium * pMedium, CreateTextureParms const & rParams)
 	{
 		m_fFlags = rParams.flags;
-		
-		awTlLastErr = AW_TLE_OK;
-		
-		LoadHeaderInfo(pMedium);
-		
-		CHECK_MEDIA_ERRORS("loading file headers")
-		ON_ERROR_RETURN_NULL("loading file headers")
-		
-		ChoosePixelFormat(rParams);
 
+		awTlLastErr = AW_TLE_OK;
+
+		LoadHeaderInfo(pMedium);
+
+//		CHECK_MEDIA_ERRORS("loading file headers")
+		ON_ERROR_RETURN_NULL("loading file headers")
+
+		ChoosePixelFormat(rParams);
+#if 0 // bjd
 		if (!pixelFormat.validB)
 			db_log3("AwCreateGraphic(): ERROR: pixel format not valid");
 		if (!driverDesc.ddP || !driverDesc.validB && rParams.loadTextureB)
 			db_log3("AwCreateGraphic(): ERROR: driver description not valid");
-		
+
 		awTlLastErr = pixelFormat.validB && driverDesc.ddP && (driverDesc.validB || !rParams.loadTextureB) ? AW_TLE_OK : AW_TLE_NOINIT;
-		
+
 		ON_ERROR_RETURN_NULL("initializing load")
-		
+
 		AllocateBuffers(rParams.backupHP ? true : false, pixelFormat.palettizedB ? 1<<pixelFormat.bitsPerPixel : 0);
-		
-		CHECK_MEDIA_ERRORS("allocating buffers")
+#endif
+		AllocateBuffers(false, 0); // no backup, not paletised
+
+//		CHECK_MEDIA_ERRORS("allocating buffers")
 		ON_ERROR_RETURN_NULL("allocating buffers")
-		
-		db_logf4(("\tThe image in the file is %ux%u with %u %spalette",m_nWidth,m_nHeight,m_nPaletteSize ? m_nPaletteSize : 0,m_nPaletteSize ? "colour " : ""));
-		
+
+//bjd off for now		db_logf4(("\tThe image in the file is %ux%u with %u %spalette",m_nWidth,m_nHeight,m_nPaletteSize ? m_nPaletteSize : 0,m_nPaletteSize ? "colour " : ""));
+
 		SurfUnion pTex = CreateTexture(rParams);
-		
+
 		bool bOK = AW_TLE_OK == awTlLastErr;
-		
+
 		CHECK_MEDIA_ERRORS("loading image data")
-		
+
 		if (bOK && awTlLastErr != AW_TLE_OK)
 		{
+#if 0 // bjd
 			// an error occurred which was not detected in CreateTexture()
 			if (pTex.voidP)
 			{
@@ -1462,11 +1542,11 @@ namespace AwTl {
 			else
 			{
 				db_assert1(rParams.rectA);
-				
+
 				for (unsigned i=0; i<rParams.numRects; ++i)
 				{
 					AwCreateGraphicRegion * pRect = &rParams.rectA[i];
-					
+
 					if (!rParams.prevTexB)
 					{
 						// release what was created
@@ -1480,16 +1560,17 @@ namespace AwTl {
 				}
 			}
 			db_logf1(("AwCreateGraphic(): ERROR: %s",AwTlErrorToString()));
+#endif
 			bOK = false;
 		}
-		
+
 		OnFinishLoading(bOK);
-		
+/*
 		if (bOK && rParams.backupHP)
 		{
 			*rParams.backupHP = CreateBackupTexture();
 		}
-		
+*/
 		return pTex;
 	}
 
@@ -1503,7 +1584,7 @@ namespace AwTl {
 		if (m_pPalette)
 		{
 			delete[] m_pPalette;
-			
+
 			if (m_pRowBuf) delete[] m_pRowBuf.byteP;
 			if (m_ppPixMap)
 			{
@@ -1521,7 +1602,7 @@ namespace AwTl {
 			}
 		}
 	}
-	
+
 	unsigned TypicalTexFileLoader::GetNumColours()
 	{
 		return m_nPaletteSize;
@@ -1538,7 +1619,7 @@ namespace AwTl {
 		{
 			m_pPalette = new Colour [ m_nPaletteSize ];
 		}
-		
+
 		if (bWantBackup)
 		{
 			m_ppPixMap = new PtrUnion [m_nHeight];
@@ -1591,7 +1672,7 @@ namespace AwTl {
 		m_pPalette = NULL;
 		return pBackup;
 	}
-	
+
 	/****************************************************************************/
 	/* For determining which loader should be used for the file format detected */
 	/****************************************************************************/
@@ -1609,23 +1690,23 @@ namespace AwTl {
 				for (unsigned i=0; i<256; ++i)
 					m_arrNextLayer[i]=NULL;
 			}
-			
+
 			~MagicFileIdTree()
 			{
 				for (unsigned i=0; i<256; ++i)
 					if (m_arrNextLayer[i]) delete m_arrNextLayer[i];
 			}
-		
+
 			MagicFileIdTree * m_arrNextLayer [256];
-			
+
 			TexFileLoader * (* m_pfnCreate) ();
-			
+
 		#ifdef _MSC_VER
 			unsigned hack;
 		#endif
 	}
 		* g_pMagicFileIdTree = NULL;
-	
+
 	void RegisterLoader(char const * pszMagic, TexFileLoader * (* pfnCreate) () )
 	{
 		static MagicFileIdTree mfidt;
@@ -1634,11 +1715,11 @@ namespace AwTl {
 		// Touch the loaders.
 		{
 			mfidt.hack += reinterpret_cast<unsigned>(&rlcAwBmpLoader_187);
-			
+
 			mfidt.hack += reinterpret_cast<unsigned>(&rlcAwIffLoader_428);
 			mfidt.hack += reinterpret_cast<unsigned>(&rlcAwIffLoader_429);
 			mfidt.hack += reinterpret_cast<unsigned>(&rlcAwIffLoader_430);
-			
+
 			mfidt.hack += reinterpret_cast<unsigned>(&rlcAwPpmLoader_229);
 			mfidt.hack += reinterpret_cast<unsigned>(&rlcAwPgmLoader_230);
 			mfidt.hack += reinterpret_cast<unsigned>(&rlcAwPbmLoader_231);
@@ -1650,49 +1731,49 @@ namespace AwTl {
 		}
 #endif
 		g_pMagicFileIdTree = &mfidt;
-		
+
 		MagicFileIdTree * pLayer = g_pMagicFileIdTree;
-		
+
 		while (*pszMagic)
 		{
 			BYTE c = static_cast<BYTE>(*pszMagic++);
-			
+
 			if (!pLayer->m_arrNextLayer[c])
 				pLayer->m_arrNextLayer[c] = new MagicFileIdTree;
-				
+
 			pLayer = pLayer->m_arrNextLayer[c];
 		}
-		
+
 		db_assert1(!pLayer->m_pfnCreate);
-		
+
 		pLayer->m_pfnCreate = pfnCreate;
 	}
-	
+
 	static
 	TexFileLoader * CreateLoaderObject(MediaMedium * pMedium)
 	{
 		TexFileLoader * (* pfnBest) () = NULL;
-		
+
 		signed nMoveBack = 0;
-		
+
 		BYTE c;
-		
+
 		MagicFileIdTree * pLayer = g_pMagicFileIdTree;
-		
+
 		while (pLayer)
 		{
 			if (pLayer->m_pfnCreate)
 				pfnBest = pLayer->m_pfnCreate;
-			
+
 			MediaRead(pMedium,&c);
-			
+
 			-- nMoveBack;
-			
+
 			pLayer = pLayer->m_arrNextLayer[c];
 		}
-		
+
 		pMedium->MovePos(nMoveBack);
-		
+
 		if (pfnBest)
 			return pfnBest();
 		else
@@ -1702,25 +1783,26 @@ namespace AwTl {
 	/**********************************/
 	/* These are the loader functions */
 	/**********************************/
-	
+
 	static inline SurfUnion DoLoadTexture(MediaMedium * pMedium, CreateTextureParms const & rParams)
 	{
 		TexFileLoader * pLoader = CreateLoaderObject(pMedium);
-		
+
 		if (!pLoader)
 		{
 			awTlLastErr = AW_TLE_BADFILEFORMAT;
 			db_log1("AwCreateGraphic(): ERROR: file format not recognized");
-			return static_cast<D3DTexture *>(NULL);
+			return static_cast<AVPTexture *>(NULL);
 		}
 		else
 		{
+			// bjd - menu graphics loading gets us here
 			SurfUnion pTex = pLoader->Load(pMedium,rParams);
 			pLoader->Release();
 			return pTex;
 		}
 	}
-	
+
 	static inline SurfUnion LoadTexture(MediaMedium * pMedium, CreateTextureParms const & _parmsR)
 	{
 		if (_parmsR.bytesReadP||_parmsR.maxReadBytes!=UINT_MAX)
@@ -1738,7 +1820,7 @@ namespace AwTl {
 			return DoLoadTexture(pMedium,_parmsR);
 		}
 	}
-	
+
 	SurfUnion CreateTextureParms::DoCreate() const
 	{
 		if (INVALID_HANDLE_VALUE!=fileH)
@@ -1752,6 +1834,7 @@ namespace AwTl {
 		}
 		else if (dataP)
 		{
+			// bjd - we're hitting here on menu graphics load
 			MediaMemoryReadMedium * pMedium = new MediaMemoryReadMedium;
 			pMedium->Open(dataP);
 			SurfUnion pTex = LoadTexture(pMedium,*this);
@@ -1765,13 +1848,14 @@ namespace AwTl {
 			return restoreH->Restore(*this);
 		}
 	}
-	
+
 	#if DB_LEVEL >= 4
+#if 0 // bjd
 	static void LogPrimCaps(LPD3DPRIMCAPS _pcP, bool _triB)
 	{
 		#define DEVCAP(mask,can_or_does,explanation) \
 			db_logf4(("\t\t" can_or_does "%s " explanation, _pcP->MEMBER & (mask) ? "" : "not"));
-			
+
 		#define MEMBER dwMiscCaps
 		DEVCAP(D3DPMISCCAPS_CONFORMANT,"Does ","conform to OpenGL standard")
 		if (_triB)
@@ -1923,19 +2007,19 @@ namespace AwTl {
 			db_logf4(("\tCan%s perform 3D clipping",_descP->bClipping ? "" : "not"));
 		}
 		else db_log4("\tHas unknown 3D clipping capability");
-		
+
 		if (_descP->dwFlags & D3DDD_COLORMODEL)
 		{
 			db_logf4(("\tCan%s use mono (ramp) colour model",_descP->dcmColorModel & D3DCOLOR_MONO ? "" : "not"));
 			db_logf4(("\tCan%s use full RGB colour model",_descP->dcmColorModel & D3DCOLOR_RGB ? "" : "not"));
 		}
 		else db_log4("\tHas unknown colour model");
-		
+
 		if (_descP->dwFlags & D3DDD_DEVCAPS)
 		{
 			#define DEVCAP(mask,can_or_does,explanation) \
 				db_logf4(("\t" can_or_does "%s " explanation,_descP->dwDevCaps & (mask) ? "" : "not"));
-				
+
 			DEVCAP(D3DDEVCAPS_CANRENDERAFTERFLIP,"Can","queue rendering commands after a page flip")
 			DEVCAP(D3DDEVCAPS_DRAWPRIMTLVERTEX,"Does ","export a DrawPrimitive-aware HAL")
 			DEVCAP(D3DDEVCAPS_EXECUTESYSTEMMEMORY,"Can","use execute buffers from system memory")
@@ -1949,65 +2033,65 @@ namespace AwTl {
 			DEVCAP(D3DDEVCAPS_TEXTUREVIDEOMEMORY,"Can","retrieve textures from device memory")
 			DEVCAP(D3DDEVCAPS_TLVERTEXSYSTEMMEMORY,"Can","use buffers from system memory for transformed and lit vertices")
 			DEVCAP(D3DDEVCAPS_TLVERTEXVIDEOMEMORY,"Can","use buffers from video memory for transformed and lit vertices")
-			
+
 			#undef DEVCAP
 		}
 		else db_log4("\tHas unknown device capabilities");
-		
+
 		if (_descP->dwFlags & D3DDD_DEVICERENDERBITDEPTH)
 		{
 			#define DEVCAP(mask,explanation) \
 				db_logf4(("\tCan%s render to "explanation" surface",_descP->dwDeviceRenderBitDepth & (mask) ? "" : "not"));
-				
+
 			DEVCAP(DDBD_8,"an 8-bit")
 			DEVCAP(DDBD_16,"a 16-bit")
 			DEVCAP(DDBD_24,"a 24-bit")
 			DEVCAP(DDBD_32,"a 32-bit")
-			
+
 			#undef DEVCAP
 		}
 		else db_log4("\tHas unknown rendering target bitdepth requirements");
-		
+
 		if (_descP->dwFlags & D3DDD_DEVICEZBUFFERBITDEPTH)
 		{
 			#define DEVCAP(mask,explanation) \
 				db_logf4(("\tCan%s use "explanation" Z-buffer",_descP->dwDeviceZBufferBitDepth & (mask) ? "" : "not"));
-				
+
 			DEVCAP(DDBD_8,"an 8-bit")
 			DEVCAP(DDBD_16,"a 16-bit")
 			DEVCAP(DDBD_24,"a 24-bit")
 			DEVCAP(DDBD_32,"a 32-bit")
-			
+
 			#undef DEVCAP
 		}
 		else db_log4("\tHas unknown Z-buffer bitdepth requirements");
-		
+
 		if (_descP->dwFlags & D3DDD_TRANSFORMCAPS)
 		{
 			db_log4("\tTransform capabilities are known");
 		}
 		else db_log4("\tHas unknown transform capabilities");
-		
+
 		if (_descP->dwFlags & D3DDD_LIGHTINGCAPS)
 		{
 			db_log4("\tLighting capabilities are known");
 		}
 		else db_log4("\tHas unknown lighting capabilities");
-		
+
 		if (_descP->dwFlags & D3DDD_LINECAPS)
 		{
 			db_log4("\tLine drawing capabilities follow");
 			LogPrimCaps(&_descP->dpcLineCaps,false);
 		}
 		else db_log4("\tHas unknown line drawing capabilities");
-		
+
 		if (_descP->dwFlags & D3DDD_TRICAPS)
 		{
 			db_log4("\tTriangle rendering capabilities follow");
 			LogPrimCaps(&_descP->dpcTriCaps,true);
 		}
 		else db_log4("\tHas unknown triangle rendering capabilities");
-		
+
 		if (_descP->dwFlags & D3DDD_MAXBUFFERSIZE)
 		{
 			unsigned max_exb = _descP->dwMaxBufferSize;
@@ -2015,13 +2099,13 @@ namespace AwTl {
 			db_logf4(("\tMaximum execute buffer size is %u",max_exb));
 		}
 		else db_log4("\tHas unknown maximum execute buffer size");
-		
+
 		if (_descP->dwFlags & D3DDD_MAXVERTEXCOUNT)
 		{
 			db_logf4(("\tMaximum vertex count is %u",_descP->dwMaxVertexCount));
 		}
 		else db_log4("\tHas unknown maximum vertex count");
-		
+
 		unsigned max_tw = _descP->dwMaxTextureWidth;
 		unsigned max_th = _descP->dwMaxTextureHeight;
 		unsigned max_sw = _descP->dwMaxStippleWidth;
@@ -2030,22 +2114,24 @@ namespace AwTl {
 		if (!max_th) max_th = UINT_MAX;
 		if (!max_sw) max_sw = UINT_MAX;
 		if (!max_sh) max_sh = UINT_MAX;
-		
+
 		db_logf4(("\tMinimum texture size is %u x %u",_descP->dwMinTextureWidth,_descP->dwMinTextureHeight));
 		db_logf4(("\tMaximum texture size is %u x %u",max_tw,max_th));
 		db_logf4(("\tMinimum stipple size is %u x %u",_descP->dwMinStippleWidth,_descP->dwMinStippleHeight));
 		db_logf4(("\tMaximum stipple size is %u x %u",max_sw,max_sh));
+
 	}
+#endif
 	#endif
 
 	// Parse the format string and get the parameters
-	
+
 	static bool ParseParams(CreateTextureParms * pParams, char const * _argFormatS, va_list ap)
 	{
 		bool bad_parmsB = false;
 		db_code2(unsigned ch_off = 0;)
 		db_code2(char ch = 0;)
-		
+
 		while (*_argFormatS && !bad_parmsB)
 		{
 			db_code2(++ch_off;)
@@ -2170,7 +2256,7 @@ namespace AwTl {
 					}
 					else if (pParams->loadTextureB)
 					{
-						pParams->prevTexP = va_arg(ap,D3DTexture *);
+						pParams->prevTexP = va_arg(ap,AVPTexture *);
 						db_logf4(("\tPrevious D3DTexture * = %p",pParams->prevTexP.textureP));
 					}
 					else
@@ -2203,7 +2289,7 @@ namespace AwTl {
 					bad_parmsB = true;
 			}
 		}
-		
+
 		if (!pParams->fileNameS && INVALID_HANDLE_VALUE==pParams->fileH && !pParams->dataP && !pParams->restoreH)
 		{
 			awTlLastErr = AW_TLE_BADPARMS;
@@ -2222,28 +2308,29 @@ namespace AwTl {
 			return true;
 		}
 	}
-	
+
 	// Use the parameters parsed to load the surface or texture
-	
+
 	SurfUnion LoadFromParams(CreateTextureParms * pParams)
 	{
 		if (pParams->fileNameS)
 		{
+			// opens a file, not creates one ;)
 			pParams->fileH = CreateFile(pParams->fileNameS,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
-		
+
 			if (INVALID_HANDLE_VALUE==pParams->fileH)
 			{
 				awTlLastErr = AW_TLE_CANTOPENFILE;
 				awTlLastWinErr = GetLastError();
 				db_logf1(("AwCreateGraphic(): ERROR opening file \"%s\"",pParams->fileNameS));
 				db_log2(AwTlErrorToString());
-				return static_cast<D3DTexture *>(NULL);
+				return static_cast<AVPTexture *>(NULL);
 			}
-			
+
 			SurfUnion textureP = pParams->DoCreate();
-		
+
 			CloseHandle(pParams->fileH);
-			
+
 			return textureP;
 		}
 		else return pParams->DoCreate();
@@ -2272,41 +2359,41 @@ namespace AwTl {
 		db_logf5(("\t" FUNCTION_NAME " passed check '%s'",#test )); \
 	}
 
-#define FUNCTION_NAME "AwSetD3DDevice()"		
+#define FUNCTION_NAME "AwSetD3DDevice()"
 
 AW_TL_ERC AwSetD3DDevice(D3DDevice * _d3ddeviceP)
 {
 	using AwTl::driverDesc;
-	
+
 	driverDesc.validB = false;
-	
+
 	db_logf4(("AwSetD3DDevice(%p) called",_d3ddeviceP));
-	
+
 	HANDLE_INITERROR(_d3ddeviceP,"D3DDevice * is NULL")
-	
+#if 0 // bjd
 	D3DDEVICEDESC hw_desc;
 	D3DDEVICEDESC hel_desc;
 	INITDXSTRUCT(hw_desc);
 	INITDXSTRUCT(hel_desc);
-	
+
 	awTlLastDxErr = _d3ddeviceP->GetCaps(&hw_desc,&hel_desc);
 	if (DD_OK != awTlLastDxErr)
 	{
 		db_logf2(("AwSetD3DDevice(): ERROR: %s",AwDxErrorToString()));
 		return AW_TLE_DXERROR;
 	}
-	
+
 	db_log4("Direct3D Device Hardware Capabilities:");
 	db_code4(AwTl::LogCaps(&hw_desc);)
 	db_log4("Direct3D Device Emulation Capabilities:");
 	db_code4(AwTl::LogCaps(&hel_desc);)
-	
+
 	LPD3DDEVICEDESC descP = (GET_VALID_MEMBER(&hw_desc,dwFlags,0) & D3DDD_COLORMODEL && GET_VALID_MEMBER(&hw_desc,dcmColorModel,0) & (D3DCOLOR_RGB|D3DCOLOR_MONO)) ? &hw_desc : &hel_desc;
 	db_logf4(("Direct3D Device is %s",&hw_desc==descP ? "HAL" : "emulation only"));
-	
+
 	HANDLE_INITERROR(GET_VALID_MEMBER(descP,dwFlags,0) & D3DDD_DEVCAPS && IS_VALID_MEMBER(descP,dwDevCaps),"LPD3DDEVICEDESC::dwDevCaps is not valid")
 	HANDLE_INITERROR(descP->dwDevCaps & (D3DDEVCAPS_TEXTUREVIDEOMEMORY|D3DDEVCAPS_TEXTURENONLOCALVIDMEM|D3DDEVCAPS_TEXTURESYSTEMMEMORY),"Textures cannot be in ANY type of memory")
-	
+
 	driverDesc.memFlag = descP->dwDevCaps & D3DDEVCAPS_TEXTURESYSTEMMEMORY ? DDSCAPS_SYSTEMMEMORY : DDSCAPS_VIDEOMEMORY;
 	driverDesc.minWidth = GET_VALID_MEMBER(descP,dwMinTextureWidth,0);
 	driverDesc.minHeight = GET_VALID_MEMBER(descP,dwMinTextureHeight,0);
@@ -2317,9 +2404,9 @@ AW_TL_ERC AwSetD3DDevice(D3DDevice * _d3ddeviceP)
 	// if max w and h are 0, make them as large as possible
 	if (!driverDesc.maxWidth) driverDesc.maxWidth = UINT_MAX;
 	if (!driverDesc.maxHeight) driverDesc.maxHeight = UINT_MAX;
-	
+
 	db_log4("AwSetD3DDevice() OK");
-	
+
 	db_log4("Direct 3D Device texture characteristics follow:");
 	db_logf4(("\tMinimum texture size: %u x %u",driverDesc.minWidth,driverDesc.minHeight));
 	db_logf4(("\tMaximum texture size: %u x %u",driverDesc.maxWidth,driverDesc.maxHeight));
@@ -2329,36 +2416,36 @@ AW_TL_ERC AwSetD3DDevice(D3DDevice * _d3ddeviceP)
 	db_logf4(("\tTextures can%s be in local video (device) memory",descP->dwDevCaps & D3DDEVCAPS_TEXTUREVIDEOMEMORY ? "" : "not"));
 	db_logf4(("\tTextures can%s be in system memory",descP->dwDevCaps & D3DDEVCAPS_TEXTURESYSTEMMEMORY ? "" : "not"));
 	db_logf4(("\tTextures will be in %s memory",driverDesc.memFlag & DDSCAPS_SYSTEMMEMORY ? "system" : "video"));
-	
+#endif
 	driverDesc.validB = true;
-	
+
 	return AW_TLE_OK;
 }
 
 AW_TL_ERC AwSetDDObject(DDObject * _ddP)
 {
 	using AwTl::driverDesc;
-	
+
 	db_logf4(("AwSetDDObject(%p) called.",_ddP));
 	#ifdef DIRECTDRAW_VERSION
 		db_logf4(("\tCompiled with DirectDraw Version %u.%u",DIRECTDRAW_VERSION/0x100U,DIRECTDRAW_VERSION%0x100U));
 	#else
 		db_log4("\tCompiled with unknown DirectDraw version");
 	#endif
-	
-	
+
+
 	HANDLE_INITERROR(_ddP,"DDObject * is NULL")
 	driverDesc.ddP = _ddP;
-	
+
 	return AW_TLE_OK;
 }
 
 AW_TL_ERC AwSetD3DDevice(DDObject * _ddP, D3DDevice * _d3ddeviceP)
 {
 	db_logf4(("AwSetD3DDevice(%p,%p) called",_ddP,_d3ddeviceP));
-	
+
 	AW_TL_ERC iResult = AwSetDDObject(_ddP);
-	
+
 	if (AW_TLE_OK != iResult)
 		return iResult;
 	else
@@ -2367,12 +2454,38 @@ AW_TL_ERC AwSetD3DDevice(DDObject * _ddP, D3DDevice * _d3ddeviceP)
 
 #undef FUNCTION_NAME
 #define FUNCTION_NAME "AwSetPixelFormat()"
-static AW_TL_ERC AwSetPixelFormat(AwTl::PixelFormat * _pfP, LPDDPIXELFORMAT _ddpfP)
+static AW_TL_ERC AwSetPixelFormat(AwTl::PixelFormat * _pfP, void * _ddpfP)
 {
-	using AwTl::SetBitShifts;
+
+		using AwTl::SetBitShifts;
 	
+//fprintf(stderr, "AwSetPixelFormat(%p, %p)\n", _pfP, _ddpfP);
+
 	_pfP->validB = false;
 	
+	_pfP->palettizedB = true;
+
+	_pfP->validB = true;
+	
+_pfP->palettizedB = 0;
+_pfP->alphaB = 0;
+_pfP->validB = 1;
+_pfP->bitsPerPixel = 32;
+_pfP->redLeftShift = 0;
+_pfP->greenLeftShift = 8;
+_pfP->blueLeftShift = 16;
+_pfP->redRightShift = 0;
+_pfP->greenRightShift = 0;
+_pfP->blueRightShift = 0;
+_pfP->dwRGBAlphaBitMask = 0xFF000000;
+
+	return AW_TLE_OK;
+
+#if 0 // BJD - following the linux port for now.. 32bit all the way	
+	using AwTl::SetBitShifts;
+
+	_pfP->validB = false;
+
 	// parameter check
 	HANDLE_INITERROR(_ddpfP,"DDPIXELFORMAT is NULL")
 	HANDLE_INITERROR(IS_VALID_MEMBER(_ddpfP,dwFlags),"DDPIXELFORMAT::dwFlags is an invalid field")
@@ -2382,7 +2495,7 @@ static AW_TL_ERC AwSetPixelFormat(AwTl::PixelFormat * _pfP, LPDDPIXELFORMAT _ddp
 	HANDLE_INITERROR(!(_ddpfP->dwFlags & DDPF_ZPIXELS),"DDPIXELFORMAT describes a RGBZ surface")
 	HANDLE_INITERROR(!(_ddpfP->dwFlags & DDPF_YUV),"DDPIXELFORMAT describes a YUV surface. This is not yet supported")
 	HANDLE_INITERROR(!(_ddpfP->dwFlags & DDPF_FOURCC),"DDPIXELFORMAT gives a FourCC code for a non RGB surface. This is not yet supported")
-	
+
 	_pfP->palettizedB = true;
 	switch (_ddpfP->dwFlags & (DDPF_PALETTEINDEXED8|DDPF_PALETTEINDEXED4|DDPF_PALETTEINDEXED2|DDPF_PALETTEINDEXED1))
 	{
@@ -2405,9 +2518,9 @@ static AW_TL_ERC AwSetPixelFormat(AwTl::PixelFormat * _pfP, LPDDPIXELFORMAT _ddp
 			db_log1("AwSetPixelFormat(): ERROR: more than one DDPF_PALETTEINDEXED<n> flags is set");
 			return AW_TLE_BADPARMS;
 	}
-	
+
 	_pfP->alphaB = _ddpfP->dwFlags & DDPF_ALPHAPIXELS ? true : false;
-	
+
 	if (_pfP->palettizedB)
 	{
 		HANDLE_INITERROR(!_pfP->alphaB,"alpha channel info is on a palettized format. This is not yet supported")
@@ -2437,12 +2550,12 @@ static AW_TL_ERC AwSetPixelFormat(AwTl::PixelFormat * _pfP, LPDDPIXELFORMAT _ddp
 				db_log1("AwSetPixelFormat(): ERROR: RGB bit count is not 4,8,16,24 or 32");
 				return AW_TLE_BADPARMS;
 		}
-		
+
 		HANDLE_INITERROR(!_pfP->alphaB || GET_VALID_MEMBER(_ddpfP,dwRGBAlphaBitMask,0),"Pixel format specifies alpha channel info but alpha mask is zero")
 		HANDLE_INITERROR(IS_VALID_MEMBER(_ddpfP,dwRBitMask),"DDPIXELFORMAT::dwRBitMask is an invalid field")
 		HANDLE_INITERROR(IS_VALID_MEMBER(_ddpfP,dwGBitMask),"DDPIXELFORMAT::dwGBitMask is an invalid field")
 		HANDLE_INITERROR(IS_VALID_MEMBER(_ddpfP,dwBBitMask),"DDPIXELFORMAT::dwBBitMask is an invalid field")
-		
+
 		_pfP->bitsPerPixel = _ddpfP->dwRGBBitCount;
 		SetBitShifts(&_pfP->redLeftShift,&_pfP->redRightShift,_ddpfP->dwRBitMask);
 		SetBitShifts(&_pfP->greenLeftShift,&_pfP->greenRightShift,_ddpfP->dwGBitMask);
@@ -2452,14 +2565,14 @@ static AW_TL_ERC AwSetPixelFormat(AwTl::PixelFormat * _pfP, LPDDPIXELFORMAT _ddp
 	memcpy(&_pfP->ddpf,_ddpfP,__min(_ddpfP->dwSize,sizeof(DDPIXELFORMAT)));
 	if (!_pfP->alphaB)
 		_pfP->ddpf.dwRGBAlphaBitMask = 0;
-		
+
 	db_log4("AwSetPixelFormat() OK");
-	
+
 	#if DB_LEVEL >= 4
 	db_logf4(("Pixel Format is %u-bit %s",_pfP->bitsPerPixel,_pfP->palettizedB ? "palettized" : _pfP->alphaB ? "RGBA" : "RGB"));
 	if (!_pfP->palettizedB)
 	{
-		if (_pfP->alphaB) 
+		if (_pfP->alphaB)
 		{
 			unsigned alpha_l_shft,alpha_r_shft;
 			SetBitShifts(&alpha_l_shft,&alpha_r_shft,_pfP->ddpf.dwRGBAlphaBitMask);
@@ -2475,50 +2588,51 @@ static AW_TL_ERC AwSetPixelFormat(AwTl::PixelFormat * _pfP, LPDDPIXELFORMAT _ddp
 		db_logf4(("\tBlue->[%u..%u]",_pfP->blueLeftShift+7-_pfP->blueRightShift,_pfP->blueLeftShift));
 	}
 	#endif
-	
+
 	_pfP->validB = true;
 	return AW_TLE_OK;
+#endif
 }
 
-AW_TL_ERC AwSetTextureFormat2(LPDDPIXELFORMAT _ddpfP)
+AW_TL_ERC AwSetTextureFormat2(void* _ddpfP) // BJD
 {
 	db_logf4(("AwSetTextureFormat(%p) called",_ddpfP));
-	
+
 	using namespace AwTl;
-	
+
 	while (listTextureFormats.size())
 		listTextureFormats.delete_first_entry();
-	
+
 	return AwSetPixelFormat(&pfTextureFormat, _ddpfP);
 }
 
-AW_TL_ERC AwSetAdditionalTextureFormat2(LPDDPIXELFORMAT _ddpfP, unsigned _maxAlphaBits, int _canDoTransp, unsigned _maxColours)
+AW_TL_ERC AwSetAdditionalTextureFormat2(void* _ddpfP, unsigned _maxAlphaBits, int _canDoTransp, unsigned _maxColours)
 {
 	db_logf4(("AwSetAdditionalTextureFormat(%p.%u,%d,%u) called",_ddpfP,_maxAlphaBits,_canDoTransp,_maxColours));
-	
+
 	using namespace AwTl;
-	
+
 	AdditionalPixelFormat pf;
-	
+
 	AW_TL_ERC erc = AwSetPixelFormat(&pf, _ddpfP);
-	
+
 	if (AW_TLE_OK == erc)
 	{
 		pf.canDoTranspB = _canDoTransp ? true : false;
 		pf.maxColours = _maxColours;
-		
+
 		listTextureFormats.add_entry_end(pf);
 	}
-	
+
 	return erc;
 }
 
-AW_TL_ERC AwSetSurfaceFormat2(LPDDPIXELFORMAT _ddpfP)
+AW_TL_ERC AwSetSurfaceFormat2(void* _ddpfP) // bjd
 {
 	db_logf4(("AwSetSurfaceFormat(%p) called",_ddpfP));
-	
+
 	using namespace AwTl;
-	
+
 	return AwSetPixelFormat(&pfSurfaceFormat, _ddpfP);
 }
 
@@ -2528,20 +2642,21 @@ AW_TL_ERC AwSetSurfaceFormat2(LPDDPIXELFORMAT _ddpfP)
 
 AW_TL_ERC AwGetTextureSize(register unsigned * _widthP, register unsigned * _heightP, unsigned _width, unsigned _height)
 {
+/*
 	db_assert1(_widthP);
 	db_assert1(_heightP);
-	
+
 	using AwTl::driverDesc;
-	
+
 	if (!driverDesc.validB)
 	{
 		db_log3("AwGetTextureSize(): ERROR: driver description not valid");
 		return AW_TLE_NOINIT;
 	}
-	
+
 	if (_width < driverDesc.minWidth) _width = driverDesc.minWidth;
 	if (_height < driverDesc.minHeight) _height = driverDesc.minHeight;
-	
+
 	if (driverDesc.needPow2B)
 	{
 		*_widthP = 1;
@@ -2551,31 +2666,35 @@ AW_TL_ERC AwGetTextureSize(register unsigned * _widthP, register unsigned * _hei
 	}
 	else
 	{
+*/
 		*_widthP = _width;
 		*_heightP = _height;
+/*
 	}
-	
+
 	if (driverDesc.needSquareB)
 	{
 		if (*_widthP < *_heightP) *_widthP = *_heightP;
 		else *_heightP = *_widthP;
 	}
-	
+
 	#if 1 // not sure if this is required...
 	*_widthP += 3;
 	*_widthP &= ~3;
 	*_heightP += 3;
 	*_heightP &= ~3;
 	#endif
-	
+
 	db_logf4(("\tAwGetTextureSize(): d3d texture will be %ux%u",*_widthP,*_heightP));
-	
+
 	if (*_widthP > driverDesc.maxWidth || *_heightP > driverDesc.maxHeight)
 	{
 		db_log3("AwGetTextureSize(): ERROR: image size too large to be a d3d texture");
 		return AW_TLE_IMAGETOOLARGE;
 	}
-	else return AW_TLE_OK;
+	else 
+*/	
+	return AW_TLE_OK;
 }
 
 
@@ -2583,12 +2702,12 @@ AW_TL_ERC AwGetTextureSize(register unsigned * _widthP, register unsigned * _hei
 /* PUBLIC: AwCreate functions */
 /******************************/
 
-D3DTexture * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...)
+AVPTexture * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...)
 {
 	db_logf4(("AwCreateTexture(\"%s\") called",_argFormatS));
-	
+
 	using namespace AwTl;
-	
+
 	va_list ap;
 	va_start(ap,_argFormatS);
 	CreateTextureParms parms;
@@ -2601,9 +2720,26 @@ D3DTexture * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...)
 DDSurface * _AWTL_VARARG AwCreateSurface(char const * _argFormatS, ...)
 {
 	db_logf4(("AwCreateSurface(\"%s\") called",_argFormatS));
-	
+
 	using namespace AwTl;
-	
+
+	// linux port code
+	/* Just convert the texture to 32bpp */
+	pixelFormat.palettizedB = 0;
+
+	pixelFormat.alphaB = 1;
+	pixelFormat.validB = 1;
+	pixelFormat.texB = 0;
+	pixelFormat.bitsPerPixel = 32;
+	pixelFormat.redLeftShift = 0;
+	pixelFormat.greenLeftShift = 8;
+	pixelFormat.blueLeftShift = 16;
+	pixelFormat.redRightShift = 0;
+	pixelFormat.greenRightShift = 0;
+	pixelFormat.blueRightShift = 0;
+	pixelFormat.dwRGBAlphaBitMask = 0xFF000000;
+
+
 	va_list ap;
 	va_start(ap,_argFormatS);
 	CreateTextureParms parms;
@@ -2667,10 +2803,10 @@ char const * AwTlErrorToString(AwTlErc error)
 		case AW_TLE_OK:
 			return "No error";
 		case AW_TLE_DXERROR:
-			if (DD_OK==awTlLastDxErr)
+//			if (DD_OK==awTlLastDxErr)
 				return "Unknown DirectX error";
-			else
-				return AwDxErrorToString();
+//			else
+//				return AwDxErrorToString();
 		case AW_TLE_BADPARMS:
 			return "Invalid parameters or functionality not supported";
 		case AW_TLE_NOINIT:
@@ -2704,6 +2840,7 @@ char const * AwTlErrorToString(AwTlErc error)
 
 char const * AwDxErrorToString(HRESULT error)
 {
+#if 0 // bjd
     switch(error) {
         case DD_OK:
             return "No error.\0";
@@ -2970,5 +3107,7 @@ char const * AwDxErrorToString(HRESULT error)
         default:
             return "Unrecognized error value.\0";
     }
+#endif
+	return "AwDxErrorToString Error";
 }
 #endif

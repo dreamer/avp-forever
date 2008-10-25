@@ -22,9 +22,10 @@ typedef struct
 
 	int MessageNumber;
 
-	LPDIRECTDRAWSURFACE SrcSurface;
-	LPDIRECT3DTEXTURE SrcTexture;
-	LPDIRECT3DTEXTURE DestTexture;
+	LPDIRECT3DTEXTURE9 SrcSurface;
+	LPDIRECT3DTEXTURE9 SrcTexture;
+	LPDIRECT3DTEXTURE9 DestTexture;
+
 	PALETTEENTRY SrcPalette[256];
 
 	int RedScale;

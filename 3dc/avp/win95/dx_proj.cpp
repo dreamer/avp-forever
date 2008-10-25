@@ -1,3 +1,5 @@
+#if 0
+
 // Project specific parts of the Win95 DirectX system,
 // largely concerned with the rules for selecting a driver,
 // draw mode, memory mode etc during system initialisation, which
@@ -105,7 +107,7 @@ extern int StartDriver;
 extern int StartFormat;
 extern HRESULT LastError;
 extern BOOL MMXAvailable;
-extern LPDIRECTDRAW lpDD;
+//extern LPDIRECTDRAW lpDD; // BJD
 
 // Globals
 // Test only!!!
@@ -121,6 +123,7 @@ int TestHw = No;
 // (with preference given to palettized 
 // formats) and returned via the lpContext.
 
+#if 0 // bjd
 HRESULT CALLBACK TextureFormatsEnumerator
         (LPDDSURFACEDESC lpDDSD, LPVOID lpContext)
 {
@@ -128,19 +131,15 @@ HRESULT CALLBACK TextureFormatsEnumerator
     int r, g, b;
     int *lpStartFormat = (int*) lpContext;
 
-    /*
-      Record the DDSURFACEDESC of this texture format
-    */
+    //	Record the DDSURFACEDESC of this texture format
 
     memset(&d3d.TextureFormat[d3d.NumTextureFormats], 0,
            sizeof(D3DTEXTUREFORMAT));
     memcpy(&d3d.TextureFormat[d3d.NumTextureFormats].ddsd, 
           lpDDSD, sizeof(DDSURFACEDESC));
 
-    /*
-      Is this format palettized?  How many bits?  Otherwise, how many RGB
-      bits?
-    */
+    //	Is this format palettized?  How many bits?  Otherwise, how many RGB
+    //	bits?
 
     if (lpDDSD->ddpfPixelFormat.dwFlags & DDPF_PALETTEINDEXED8)
 	  {
@@ -197,7 +196,7 @@ HRESULT CALLBACK TextureFormatsEnumerator
     d3d.NumTextureFormats++;
     return DDENUMRET_OK;
 }
-
+#endif
 
 // Code to pick a driver and scan draw mode
 // based on what hardware is present on the
@@ -219,8 +218,9 @@ HRESULT CALLBACK TextureFormatsEnumerator
 // InitialiseDirectDrawObject and TestInitD3DObject!!!!
 
 void SelectD3DDriverAndDrawMode(void)
-
 {
+	return;
+#if 0
 // Note that if we have requested default rasterisation and hw is 
 // available, we may want to pick the software RGB driver if MMXAvailable
 // is Yes!!! Fix later!!!
@@ -249,7 +249,7 @@ void SelectD3DDriverAndDrawMode(void)
 	  {
 	   int i=0;
 	   BOOL EarlyExit = No;
-
+#if 0 // bjd
        do 
 	     {
 		  if ((!d3d.Driver[i].Hardware) &&
@@ -260,7 +260,7 @@ void SelectD3DDriverAndDrawMode(void)
 			}
 		 }
 	   while ((++i < d3d.NumDrivers) && !EarlyExit);
-
+#endif
 	   D3DDriverMode = D3DSoftwareRGBDriver;
 	   ScanDrawMode = ScanDrawD3DSoftwareRGB;
 	  }
@@ -272,7 +272,7 @@ void SelectD3DDriverAndDrawMode(void)
 	  {
 	   int i=0;
 	   BOOL EarlyExit = No;
-
+#if 0 // bjd
        do 
 	     {
 		  if ((!d3d.Driver[i].Hardware) &&
@@ -283,7 +283,7 @@ void SelectD3DDriverAndDrawMode(void)
 			}
 		 }
 	   while ((++i < d3d.NumDrivers) && !EarlyExit);
-
+#endif
 	   D3DDriverMode = D3DSoftwareRampDriver;
 	   ScanDrawMode = ScanDrawD3DRamp;
 	  }
@@ -293,6 +293,7 @@ void SelectD3DDriverAndDrawMode(void)
 	   int i=0;
 	   BOOL EarlyExit = No;
 
+#if 0 // bjd
        // Set ramp driver anyway for convenience
        do 
 	     {
@@ -304,7 +305,7 @@ void SelectD3DDriverAndDrawMode(void)
 			}
 		 }
 	   while ((++i < d3d.NumDrivers) && !EarlyExit);
-
+#endif
 	   D3DDriverMode = D3DSoftwareRampDriver;
 	   ScanDrawMode = ScanDrawDirectDraw;
 	  }
@@ -360,7 +361,7 @@ void SelectD3DDriverAndDrawMode(void)
 	D3DDriverMode = D3DSoftwareRampDriver;
 	ScanDrawMode = ScanDrawDirectDraw;
     #endif
-
+#endif
 }
 
 #if SUPPORT_MMX
@@ -383,6 +384,8 @@ void SelectMMXOptions(void)
 
 BOOL TestInitD3DObject(void)
 {
+	return true;
+#if 0
     // Zero hardware available global
 	D3DHardwareAvailable = No;
 
@@ -390,7 +393,8 @@ BOOL TestInitD3DObject(void)
     memset(&d3d, 0, sizeof(D3DINFO));
 
 //  Set up Direct3D interface object
-    LastError = lpDD->QueryInterface(IID_IDirect3D, (LPVOID*) &d3d.lpD3D);
+#if 0 // bjd
+	LastError = lpDD->QueryInterface(IID_IDirect3D, (LPVOID*) &d3d.lpD3D);
 
     if (LastError != DD_OK)
 	  return FALSE;
@@ -402,12 +406,12 @@ BOOL TestInitD3DObject(void)
 
     if (LastError != D3D_OK)
       return FALSE;
-	  
+#endif	  
 	// select the usual driver - get its description
 	int old_rrm = RasterisationRequestMode;
 	RasterisationRequestMode = RequestDefaultRasterisation;
 	SelectD3DDriverAndDrawMode();
-	d3d.ThisDriver = d3d.Driver[d3d.CurrentDriver].Desc;
+//	d3d.ThisDriver = d3d.Driver[d3d.CurrentDriver].Desc;
 	RasterisationRequestMode = old_rrm;
 
 // THE TEXTURE FORMATS ENUMERATOR COULD ALSO BE CALLED HERE TO DETERMINE
@@ -470,6 +474,7 @@ BOOL TestInitD3DObject(void)
    #endif
 
    return TRUE;
+#endif
 }
 
 // Function to test access speed of VRAM
@@ -502,8 +507,9 @@ BOOL TestInitD3DObject(void)
 // AN ACCELERATOR!!!
 
 BOOL TestMemoryAccess(void)
-
 {
+	return true;
+	#if 0
     // We take this request AT IT'S WORD, i.e. to mean
 	// that we will always do our best to provide a system
 	// memory target.  Note that this means that if we then 
@@ -555,15 +561,15 @@ BOOL TestMemoryAccess(void)
 			int TimeForSysMemWrite;
 			unsigned char* SurfacePtr;
             // DirectX intfc
-            DDCAPS              ddcaps;
+// bjd            DDCAPS              ddcaps;
             HRESULT             ddrval;
 			LPDIRECTDRAWSURFACE lpTestSurf;
-			DDSURFACEDESC       ddsd;
+// bjd			DDSURFACEDESC       ddsd;
 			// etc
 			int i;
 			int TestSurfHeight = 480;
 			int TestSurfWidth = 640;
-
+#if 0 //bjd
             // Get caps on the DirectDraw object
             memset(&ddcaps, 0, sizeof(ddcaps));
             ddcaps.dwSize = sizeof(ddcaps);
@@ -611,7 +617,7 @@ BOOL TestMemoryAccess(void)
 			  Flip = TRUE;
 			else
 			  Flip = FALSE;
-     
+#endif    
 	        // Creating surfaces like this before setting exclusive mode
 			// und so weiter seems to REALLY UPSET IT.  So for now, we
 			// shall say sod it and decide purely on the basis of the caps.
@@ -701,10 +707,11 @@ BOOL TestMemoryAccess(void)
 	  }
 
 	return TRUE;
+#endif
 }
 
 
 // For extern "C"
-
 };
 
+#endif

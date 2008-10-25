@@ -19,7 +19,7 @@
 #include "ourasert.h"
 #include "iofocus.h"
 #include <time.h>
-#include "winnls.h"
+//#include "winnls.h"
 #include "GammaControl.h"
 #include "AvP_MP_Config.h"
 #include "psnd.h"
@@ -31,9 +31,9 @@
 #endif
 
 
-extern void StartMenuBackgroundBink(void);
-extern int PlayMenuBackgroundBink(void);
-extern void EndMenuBackgroundBink(void);
+//extern void StartMenuBackgroundBink(void);
+//extern int PlayMenuBackgroundBink(void);
+//extern void EndMenuBackgroundBink(void);
 
 
 /* KJL 11:22:37 23/06/98 - Hopefully these will be the final menus! */
@@ -114,6 +114,32 @@ extern void GetFilenameForSaveSlot(int i, unsigned char *filenamePtr);
 static void GetHeaderInfoForSaveSlot(SAVE_SLOT_HEADER* save_slot,const char* filename);
 
 static void PasteFromClipboard(char* Text,int MaxTextLength);
+
+/* buttload more function prototypes */
+void LoadDefaultPrimaryConfigs(void);
+void TimeStampedMessage(char *stringPtr);
+extern void InitialiseMenuGfx(void);
+void ThisFramesRenderingHasFinished(void);
+void PlayMenuMusic(void);
+void ThisFramesRenderingHasFinished(void);
+void EndMenuMusic(void);
+extern void EndMenuBackgroundBink(void);
+void PlayBinkedFMV(char *filenamePtr);
+int DirectPlay_ConnectingToLobbiedGame(char* playerName);
+int DirectPlay_ConnectingToSession();
+extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale);
+extern int AnyCheatModesAllowed(void);
+void LoadDeviceAndVideoModePreferences() ;
+int NumberOfAvailableLevels(I_PLAYER_TYPE playerID);
+int LevelMostLikelyToPlay(I_PLAYER_TYPE playerID);
+void DirectPlay_EnumConnections();
+extern void MakeConnectionSelectMenu();
+int MaxDifficultyLevelAllowed(I_PLAYER_TYPE playerID, int level);
+static int HeightOfMenuElement(AVPMENU_ELEMENT *elementPtr);
+extern void RenderKeyConfigRectangle(int alpha);
+extern void Hardware_RenderKeyConfigRectangle(int alpha);
+extern void Hardware_RenderHighlightRectangle(int x1,int y1,int x2,int y2,int r, int g, int b);
+
 /* KJL 11:23:03 23/06/98 - Requirements
 
 	1.      'Floating' over backdrop, possibly using translucency effects
@@ -165,7 +191,8 @@ extern int VideoModeNotAvailable;
 extern int RealFrameTime;
 extern unsigned char KeyboardInput[];
 extern unsigned char DebouncedKeyboardInput[];
-extern int DebouncedGotAnyKey;
+//extern int DebouncedGotAnyKey;
+extern unsigned char DebouncedGotAnyKey;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern int TimeScale;
 
@@ -215,8 +242,18 @@ static const char* MultiplayerConfigurationName=0; //ditto
 
 extern int DebuggingCommandsActive;
 
-extern int AvP_MainMenus(void)
+extern int mainMenu;
+
+int GetAvPMenuState()
 {
+//	if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS) return 1;
+//	else return 0;
+	return AvPMenus.MenusState;
+}
+
+int AvP_MainMenus(void)
+{
+//	ThisFramesRenderingHasBegun();
 	#if 0
 	SaveDefaultPrimaryConfigs();
 	#else
@@ -229,17 +266,16 @@ extern int AvP_MainMenus(void)
 	TimeScale = ONE_FIXED;
 
 
-
  	if (!LobbiedGame)  // Edmond
 		CheckForCredits();
 	
 	TimeStampedMessage("start of menus");
-	// open a 640x480x16 screen     
-	SelectMenuDisplayMode();
-	TimeStampedMessage("after SelectMenuDisplayMode");
 
-	
-	
+	// open a 640x480x16 screen     
+
+	// bjd resolution change
+//	SelectMenuDisplayMode();
+	TimeStampedMessage("after SelectMenuDisplayMode");
 
 
 	InitialiseMenuGfx();
@@ -258,14 +294,14 @@ extern int AvP_MainMenus(void)
 	#endif
 
 	LoadAllAvPMenuGfx();
+
 	TimeStampedMessage("after LoadAllAvPMenuGfx");
-
-
 
 	ResetFrameCounter();
 
  	if (!LobbiedGame)	// Edmond
 		PlayIntroSequence();
+
 	
 	if (VideoModeNotAvailable)
 	{	
@@ -305,17 +341,27 @@ extern int AvP_MainMenus(void)
 
 	TimeStampedMessage("starting general menus");
 
+//	ThisFramesRenderingHasFinished();
+//	FlipBuffers();
+
 	while(AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
 	{
+		mainMenu = 1;
+		ThisFramesRenderingHasBegun();
+
 		CheckForWindowsMessages();
+
 		DrawMainMenusBackdrop();
+
 		ReadUserInput();
+
 		AvP_UpdateMenus();
+
    //	BezierCurve();
 		
 		ShowMenuFrameRate();
 
-		FlipBuffers();
+//		FlipBuffers();
 		FrameCounterHandler();
 		PlayMenuMusic();
 		#if 0
@@ -328,6 +374,9 @@ extern int AvP_MainMenus(void)
 		UpdateGammaSettings();
 
 		CheckForLoadGame();
+		
+		ThisFramesRenderingHasFinished();
+		FlipBuffers();
 	}
 	
 	if (AvPMenus.MenusState==MENUSSTATE_OUTSIDEMENUS)
@@ -341,8 +390,9 @@ extern int AvP_MainMenus(void)
 				DoCredits();
 		}
 	}
+
 	TimeStampedMessage("ready to exit menus");
-	
+
 	EndMenuMusic();
 	EndMenuBackgroundBink();
 	TimeStampedMessage("after EndMenuMusic");
@@ -353,6 +403,7 @@ extern int AvP_MainMenus(void)
 	TimeStampedMessage("after ShowSplashScreens");
 	#endif
 	#endif
+
 	ReleaseAllAvPMenuGfx();
 
 	TimeStampedMessage("after ReleaseAllAvPMenuGfx");
@@ -367,6 +418,7 @@ extern int AvP_MainMenus(void)
 
 	return (AvPMenus.MenusState == MENUSSTATE_STARTGAME);
 }
+
 void HandlePostGameFMVs(void)
 {
 	switch(AvP.PlayerType)
@@ -375,9 +427,11 @@ void HandlePostGameFMVs(void)
 		{
 			if (MarineEpisodeToPlay==MAX_NO_OF_BASIC_MARINE_EPISODES-1)
 			{
+/*
 				ClearScreenToBlack();
 				FlipBuffers();
 				ClearScreenToBlack();
+*/
 				PlayBinkedFMV("FMVs/marineoutro.bik");
 			}
 			break;
@@ -386,9 +440,11 @@ void HandlePostGameFMVs(void)
 		{
 			if (AlienEpisodeToPlay==MAX_NO_OF_BASIC_ALIEN_EPISODES-1)
 			{
+/*
 				ClearScreenToBlack();
 				FlipBuffers();
 				ClearScreenToBlack();
+*/
 				PlayBinkedFMV("FMVs/alienoutro.bik");
 			}
 			break;
@@ -397,9 +453,11 @@ void HandlePostGameFMVs(void)
 		{
 			if (PredatorEpisodeToPlay==MAX_NO_OF_BASIC_PREDATOR_EPISODES-1)
 			{
+/*
 				ClearScreenToBlack();
 				FlipBuffers();
 				ClearScreenToBlack();
+*/
 				PlayBinkedFMV("FMVs/predatoroutro.bik");
 			}
 			break;
@@ -411,25 +469,31 @@ void HandlePreGameFMVs(void)
 	if (AvPMenus.MenusState == MENUSSTATE_STARTGAME && LoadGameRequest == SAVELOAD_REQUEST_NONE)
 	{
 		extern char LevelName[];
-		if (!stricmp("derelict",&LevelName))
+		if (!stricmp("derelict",LevelName))
 		{
+/*
 			ClearScreenToBlack();
 			FlipBuffers();
 			ClearScreenToBlack();
+*/
 			PlayBinkedFMV("FMVs/marineintro.bik");
 		}
-		else if (!stricmp("temple",&LevelName))
+		else if (!stricmp("temple",LevelName))
 		{
+/*
 			ClearScreenToBlack();
 			FlipBuffers();
 			ClearScreenToBlack();
+*/
 			PlayBinkedFMV("FMVs/alienintro.bik");
 		}
-		else if (!stricmp("fall",&LevelName))
+		else if (!stricmp("fall",LevelName))
 		{
+/*
 			ClearScreenToBlack();
 			FlipBuffers();
 			ClearScreenToBlack();
+*/
 			PlayBinkedFMV("FMVs/predatorintro.bik");
 		}
 	}
@@ -437,7 +501,8 @@ void HandlePreGameFMVs(void)
 
 extern void QuickSplashScreens(void)
 {
-	SelectMenuDisplayMode();
+	// bjd resolution change
+//	SelectMenuDisplayMode();
 	if (AvP.LevelCompleted)
 	{
 		Show_WinnerScreen();
@@ -688,7 +753,7 @@ extern void AvP_UpdateMenus(void)
 			break;
 
 		}
-		case AVPMENU_MULTIPLAYER_DELETECONFIG :
+		case AVPMENU_MULTIPLAYER_DELETECONFIG:
 		{
 			//show the name of the configuration we're trying to delete
 			RenderMenuText(MultiplayerConfigurationName,MENU_CENTREX,MENU_CENTREY-100,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
@@ -787,7 +852,6 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 	AvPMenus.UserChangingKeyConfig = 0;
 	AvPMenus.PositionInTextField = 0;
 	AvPMenus.WidthLeftForText = 0;
-
 
 	/* menu specific stuff */
 	switch (menuID)
@@ -911,7 +975,6 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 			LoadMultiplayerConfiguration(GetTextString(TEXTSTRING_PREVIOUSGAME_FILENAME));
 			MP_Config_Description[0]=0;
 			
-
 			if(LobbiedGame)
 			{
 				//use alternative multiplayer menus for lobbied games
@@ -925,9 +988,10 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 				}
 				return;
 			}
-			
+
 			DirectPlay_EnumConnections();
 			MakeConnectionSelectMenu();
+
 			break;
 		}
 
@@ -995,9 +1059,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 				////for non tcpip games skip to the select session menu
 				SetupNewMenu(AVPMENU_MULTIPLAYERSELECTSESSION);
 				return;
-	
 			}
-			
 
 			break;
 		}
@@ -1006,7 +1068,6 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 		{
 			break;
 		}
-
 
 		case AVPMENU_MULTIPLAYER_LOADCONFIG :
 		{
@@ -1069,7 +1130,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 			MakeOpenIPAddressMenu();
 			break;
 		}
-		
+	
 		case AVPMENU_SAVEGAME:
 		case AVPMENU_LOADGAME:
 		{
@@ -1203,7 +1264,9 @@ static void RenderMenu(void)
 	}
 	else // in game menus
 	{
-		y = (ScreenDescriptorBlock.SDB_Height - AvPMenus.MenuHeight)/2;
+		// bjd - no more squinting to read text at high resolutions!
+//		AvPMenus.FontToUse = AVPMENU_FONT_BIG;
+		y = (ScreenDescriptorBlock.SDB_Height - AvPMenus.MenuHeight * 2)/2;
 	}
 
 	for (e = 0; e<AvPMenus.NumberOfElementsInMenu; e++, elementPtr++)
@@ -2010,6 +2073,7 @@ static void ActUponUsersInput(void)
 {
 	static int BackspaceTimer=0;
 	//Set up a keyboard repeat rate thingy for deleting long strings
+
 	if(KeyboardInput[KEY_BACKSPACE])
 	{
 		BackspaceTimer+=RealFrameTime;
@@ -2145,6 +2209,7 @@ static void ActUponUsersInput(void)
 		}
 		KeyboardEntryQueue_Clear();
 	}
+	// bjd - key config
 	else if (AvPMenus.UserChangingKeyConfig)
 	{
 		if (DebouncedKeyboardInput[KEY_ESCAPE])
@@ -2156,7 +2221,11 @@ static void ActUponUsersInput(void)
 			signed int key,selectedKey=-1;
 
 			// see if a valid key has been pressed
-			for (key = 0 ; key <= MAX_NUMBER_OF_INPUT_KEYS ; key++)
+			/* bjd - changed from key <= MAX_NUMBER_OF_INPUT_KEYS
+			/* to														
+			/* key < MAX_NUMBER_OF_INPUT_KEYS				*/
+
+			for (key = 0 ; key < MAX_NUMBER_OF_INPUT_KEYS ; key++)
 			{
 				if (!(key == KEY_ESCAPE) &&
 //					!(key >= KEY_F1 && key <= KEY_F12) &&
@@ -2169,7 +2238,7 @@ static void ActUponUsersInput(void)
 					}
 				}
 			}
-			
+
 			if (AvPMenus.ChangingPrimaryConfig)
 			{
 				if (selectedKey!=-1)
@@ -2925,7 +2994,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 				
 				AvP.Difficulty = 1;
 
-				if (DirectPlay_HostGame(MP_PlayerName,MP_SessionName,MP_Species,netGameData.gameType,netGameData.levelNumber))
+				if(DirectPlay_HostGame(MP_PlayerName,MP_SessionName,MP_Species,netGameData.gameType,netGameData.levelNumber))
 				{
 					AvPMenus.MenusState = MENUSSTATE_STARTGAME;
 					if(netGameData.gameType==NGT_Coop)
@@ -2935,7 +3004,6 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 	
 					
 					SetBriefingTextForMultiplayer();
-					
 				}
 			}
 			break;
@@ -3270,7 +3338,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 	if (AvPMenus.FontToUse==AVPMENU_FONT_BIG)
 	{
 		RenderText = RenderMenuText;
-
+		RenderText_Coloured = Hardware_RenderSmallMenuText_Coloured;
 	}
 	else
 	{
@@ -3314,8 +3382,18 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 		case AVPMENU_ELEMENT_SAVESETTINGS:
 		{
 			char *textPtr = GetTextString(elementPtr->TextDescription);
-			RenderText(textPtr,MENU_CENTREX,y,elementPtr->Brightness,AVPMENUFORMAT_CENTREJUSTIFIED);
-			break;
+			int menuCentreX = ScreenDescriptorBlock.SDB_Width / 2;
+			// general text rendering
+			if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
+			{
+				RenderText(textPtr,menuCentreX,y,elementPtr->Brightness,AVPMENUFORMAT_CENTREJUSTIFIED);
+				break;
+			}
+			else
+			{
+				RenderText(textPtr,MENU_CENTREX,y,elementPtr->Brightness,AVPMENUFORMAT_CENTREJUSTIFIED);
+				break;
+			}
 		}
 		#if 0
 		case AVPMENU_ELEMENT_STARTALIENGAME:
@@ -3446,6 +3524,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 		case AVPMENU_ELEMENT_DUMMYTEXTFIELD:
 		case AVPMENU_ELEMENT_TEXTFIELD:
 		{
+			// field where user can enter text themselves (profile name etc)
 			if (elementPtr->TextDescription==TEXTSTRING_BLANK)
 			{
 				if (AvPMenus.UserEnteringText && e==AvPMenus.CurrentlySelectedElement)
@@ -4165,7 +4244,6 @@ static char *GetDescriptionOfKey(unsigned char key)
 		case KEY_F12:
 			textPtr = GetTextString(TEXTSTRING_KEYS_F12);
 			break;
-
 		case KEY_A_UMLAUT:
 			KeyDescBuffer[0] = 196; // Windows Latin 1 (ANSI)
 			textPtr = KeyDescBuffer;
@@ -4494,13 +4572,21 @@ void DisplayVideoModeUnavailableScreen(void)
 
 void CheckForCredits(void)
 {
+
+#ifdef WIN32
 	FILE *fp = fopen("credits.txt","rb");
+#endif
+#ifdef _XBOX
+	FILE *fp = fopen("d:\\credits.txt","rb");
+#endif
 	
 	if (!fp)
 	{
 		char message[100];
 		sprintf(message,"Unable to access credits.txt\n");
+#ifdef WIN32
 		MessageBox(NULL,message,"AvP Error",MB_OK+MB_SYSTEMMODAL);
+#endif
 		exit(0x111);
 		return;
 	}
@@ -4513,8 +4599,13 @@ void DoCredits(void)
 {
 	int position = 300*2048;
 	BOOL FinishedCredits = FALSE;
-	
+
+#ifdef WIN32	
 	char *creditsBufferPtr = LoadTextFile("credits.txt");
+#endif
+#ifdef _XBOX
+	char *creditsBufferPtr = LoadTextFile("D:\\credits.txt");
+#endif
 	char *creditsPtr;
 	
 	if (!creditsBufferPtr) return;
@@ -4533,12 +4624,16 @@ void DoCredits(void)
 
 	do
 	{
+		ThisFramesRenderingHasBegun();
+
 		CheckForWindowsMessages();
 		DrawMainMenusBackdrop();
 		ReadUserInput();
 	
 		FinishedCredits = !RollCreditsText(position,creditsPtr+4);
 		ShowMenuFrameRate();
+
+		ThisFramesRenderingHasFinished();
 
 		FlipBuffers();
 		FrameCounterHandler();
@@ -4943,6 +5038,8 @@ extern void DrawMainMenusBackdrop(void)
 
 int WhiteOfBrightness(int brightness)
 {
+	return 0;
+#if 0 // bjd
 	extern DDPIXELFORMAT DisplayPixelFormat;
 	int a;
 
@@ -4951,10 +5048,12 @@ int WhiteOfBrightness(int brightness)
 	a |= MUL_FIXED(DisplayPixelFormat.dwBBitMask,brightness) & DisplayPixelFormat.dwBBitMask;
 
 	return a;
+#endif
 }
 
 void RenderPixel(int x,int y,int r,int g,int b)
 {
+#if 0 // bjd
 	extern DDPIXELFORMAT DisplayPixelFormat;
 	extern unsigned char *ScreenBuffer;
 	extern long BackBufferPitch;
@@ -4967,6 +5066,7 @@ void RenderPixel(int x,int y,int r,int g,int b)
 	
 	
 	*(unsigned short*) (ScreenBuffer + (x)*2 + (y)*BackBufferPitch)  = colour;
+#endif
 	
 }
 #if 0
@@ -5333,7 +5433,7 @@ void RenderBriefingText(int centreY, int brightness)
 
 			while(*ptr)
 			{
-				length+=AAFontWidths[*ptr++];
+				length+=AAFontWidths[(unsigned char)*ptr++];
 			}
 		}
 		
@@ -5345,6 +5445,7 @@ void RenderBriefingText(int centreY, int brightness)
 
 	x = (ScreenDescriptorBlock.SDB_Width-lengthOfLongestLine)/2;
 	y = centreY - 3*HUD_FONT_HEIGHT;
+
 	for(i=0; i<5; i++)
 	{
 		if (AvPMenus.MenusState != MENUSSTATE_MAINMENUS)

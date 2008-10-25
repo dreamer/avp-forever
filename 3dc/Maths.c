@@ -123,14 +123,13 @@ void ConstructOneOverSinTable(void) {
 
 }
 
-int GetOneOverSin(int a) {
-
+int GetOneOverSin(int a) 
+{
 	int b;
 
 	b=a&wrap360;
 	
 	return(oneoversin[b]);
-
 }
 
 /*
@@ -142,9 +141,7 @@ int GetOneOverSin(int a) {
 */
 
 int _DotProduct(VECTORCH *vptr1, VECTORCH *vptr2)
-
 {
-
 	int dp;
 
 	dp =  MUL_FIXED(vptr1->vx, vptr2->vx);
@@ -152,22 +149,16 @@ int _DotProduct(VECTORCH *vptr1, VECTORCH *vptr2)
 	dp += MUL_FIXED(vptr1->vz, vptr2->vz);
 
 	return(dp);
-
 }
 
-
 int DotProduct2d(VECTOR2D *vptr1, VECTOR2D *vptr2)
-
 {
-
 	int dp;
-
 
 	dp  = MUL_FIXED(vptr1->vx, vptr2->vx);
 	dp += MUL_FIXED(vptr1->vy, vptr2->vy);
 
 	return dp;
-
 }
 
 
@@ -178,18 +169,14 @@ int DotProduct2d(VECTOR2D *vptr1, VECTOR2D *vptr2)
 */
 
 int VectorDistance(VECTORCH *v1, VECTORCH *v2)
-
 {
-
 	VECTORCH v;
-
 
 	v.vx = v1->vx - v2->vx;
 	v.vy = v1->vy - v2->vy;
 	v.vz = v1->vz - v2->vz;
 
 	return Magnitude(&v);
-
 }
 
 
@@ -202,9 +189,7 @@ int VectorDistance(VECTORCH *v1, VECTORCH *v2)
 */
 
 int OutcodeVectorDistance(VECTORCH *v1, VECTORCH *v2, int d)
-
 {
-
 	int i;
 
 
@@ -224,7 +209,6 @@ int OutcodeVectorDistance(VECTORCH *v1, VECTORCH *v2, int d)
 	if(i >= d) return No;
 
 	return Yes;
-
 }
 
 
@@ -237,7 +221,6 @@ int OutcodeVectorDistance(VECTORCH *v1, VECTORCH *v2, int d)
 */
 
 void GetNormalVector(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3)
-
 {
 
 	v3->vx = v1->vx - v2->vx;
@@ -245,7 +228,6 @@ void GetNormalVector(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3)
 	v3->vz = v1->vz - v2->vz;
 
 	Normalise(v3);
-
 }
 
 
@@ -256,7 +238,6 @@ void GetNormalVector(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3)
 */
 
 void Renormalise(VECTORCH *nvector)
-
 {
 
 	int m;
@@ -283,16 +264,7 @@ void Renormalise(VECTORCH *nvector)
 	nvector->vx = (nvector->vx * ONE_FIXED) / m;
 	nvector->vy = (nvector->vy * ONE_FIXED) / m;
 	nvector->vz = (nvector->vz * ONE_FIXED) / m;
-
 }
-
-
-
-
-
-
-
-
 
 /*
 
@@ -301,19 +273,15 @@ void Renormalise(VECTORCH *nvector)
 */
 
 int FindShift32(int value, int limit)
-
 {
-
 	int shift = 0;
-
 
 	/*if(limit == 0) exit(0xfa11fa11);*/
 
-
 	if(value < 0) value = -value;
 
-	while(value > limit) {
-
+	while(value > limit) 
+	{
 		#if trip_debugger
 		if(shift > 32) {
 			testa = testb / testc;
@@ -323,11 +291,9 @@ int FindShift32(int value, int limit)
 		shift++;
 
 		value >>= 1;
-
 	}
 
 	return shift;
-
 }
 
 
@@ -338,7 +304,6 @@ int FindShift32(int value, int limit)
 */
 
 int MaxInt(int *iarray, int iarraysize)
-
 {
 
 	int imax = smallint;
@@ -353,7 +318,6 @@ int MaxInt(int *iarray, int iarraysize)
 	}
 
 	return imax;
-
 }
 
 
@@ -364,24 +328,20 @@ int MaxInt(int *iarray, int iarraysize)
 */
 
 int MinInt(int *iarray, int iarraysize)
-
 {
 
 	int imin = bigint;
 	int i;
 
-	for(i = iarraysize; i!=0; i--) {
-
+	for(i = iarraysize; i!=0; i--) 
+	{
 		if(imin > *iarray) imin = *iarray;
 
 		iarray++;
-
 	}
 
 	return imin;
-
 }
-
 
 
 /*
@@ -508,9 +468,7 @@ void CreateEulerMatrix(e, m1)
 */
 
 void CreateEulerVector(EULER *e, VECTORCH *v)
-
 {
-
 	int t, sx, sy, sz, cx, cy, cz;
 
 
@@ -542,7 +500,6 @@ void CreateEulerVector(EULER *e, VECTORCH *v)
 	/* z = cx*cy */
 
 	v->vz = MUL_FIXED(cx,cy);
-
 }
 
 
@@ -2635,9 +2592,7 @@ static long * seeded_rear_ptr = seeded_table;
 
 
 int SeededFastRandom(void)
-
 {
-
 	long i;
 
 	/*
@@ -2677,18 +2632,15 @@ int SeededFastRandom(void)
 }
 
 void SetSeededFastRandom(int seed)
-
 {
-
 	int i;
 	long number = seed;
 
 
-	for(i = 0; i < SEEDED_DEG_3; ++i) {
-
+	for(i = 0; i < SEEDED_DEG_3; ++i) 
+	{
       number   = 1103515145 * number + 12345;
       seeded_table[i] = number;
-
 	}
 
 	seeded_front_ptr = seeded_table + SEEDED_SEP_3;

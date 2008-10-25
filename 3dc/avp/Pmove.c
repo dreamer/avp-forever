@@ -59,7 +59,8 @@ static void AlienContactWeapon(void);
 #if FLY_MODE_CHEAT_ON
 extern unsigned char KeyboardInput[];
 #endif
-extern int DebouncedGotAnyKey;
+//extern int DebouncedGotAnyKey;
+extern unsigned char DebouncedGotAnyKey;
 
 /*KJL*****************************************************
 * If the define below is set to non-zero then the player *
@@ -128,6 +129,10 @@ extern void NewOnScreenMessage(unsigned char *messagePtr);
 extern void RemoveAllThisPlayersDiscs(void);
 void NetPlayerRespawn(STRATEGYBLOCK *sbPtr);
 
+extern void ChangeToMarine();
+extern void ChangeToAlien();
+extern void ChangeToPredator();
+extern STRATEGYBLOCK* CreateGrenadeKernel(AVP_BEHAVIOUR_TYPE behaviourID, VECTORCH *position, MATRIXCH *orient,int fromplayer);
 int timeInContactWithFloor;
 
 extern int weaponHandle;
@@ -1174,7 +1179,7 @@ static void CorpseMovement(STRATEGYBLOCK *sbPtr)
   ------------------------------------------------------*/
 static void NetPlayerDeadProcessing(STRATEGYBLOCK *sbPtr)
 {
-	SECTION *root_section;
+//	SECTION *root_section;
 
 	#if SupportWindows95
 	PLAYER_STATUS *psPtr= (PLAYER_STATUS *) (sbPtr->SBdataptr);
@@ -1258,7 +1263,7 @@ extern void InitPlayerCloakingSystem(void);
 void NetPlayerRespawn(STRATEGYBLOCK *sbPtr)
 {
 	extern int LeanScale;
-	SECTION *root_section;
+//	SECTION *root_section;
 
 	#if SupportWindows95
 	PLAYER_STATUS *psPtr= (PLAYER_STATUS *) (sbPtr->SBdataptr);

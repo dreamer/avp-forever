@@ -1,3 +1,5 @@
+
+#ifdef WIN32 // windows only
 /****
 
 Windows functionality that is definitely
@@ -10,7 +12,7 @@ not project specific.
 extern "C" {
 
 #include "3dc.h"
-#include "inline.h"
+//#include "inline.h"
 
 // For modifications necessary to make Alt-Tabbing
 // behaviour (WM_ACTIVATEAPP) work full screen.
@@ -21,7 +23,7 @@ extern "C" {
 
 // Globals
 
-static HANDLE RasterThread;
+//static HANDLE RasterThread;
 
 // Externs
 
@@ -147,7 +149,7 @@ void CheckForWindowsMessages(void)
   necessary for some hardware accelerators anyway
   (deferred texturing problem!!!)
 */
-
+#if 0
 BOOL SpawnRasterThread()
 
 {
@@ -199,13 +201,15 @@ BOOL SpawnRasterThread()
 
 	return TRUE;
 }
+#endif
 
+#if 0
 BOOL WaitForRasterThread()
 
 {
     BOOL RetVal;
 	DWORD ThreadStatus;
-	int i;
+//	int i;
 
     // Note that if this is to work the 
     // rasterisation thread must have a
@@ -240,7 +244,7 @@ BOOL WaitForRasterThread()
 
 	return TRUE;
 }
-
+#endif
 
 /*
   Pick up processor types,
@@ -252,7 +256,7 @@ BOOL WaitForRasterThread()
   can use GetProcessorType from the 
   mssetup api
 */
-
+#if 0
 #ifdef __WATCOMC__
 
 unsigned int GetCPUId(void);
@@ -280,10 +284,12 @@ static unsigned int GetCPUId(void)
 #error "Unknown compiler"
 
 #endif
-
+#endif
 
 PROCESSORTYPES ReadProcessorType(void)
 {
+	return PType_PentiumMMX;
+#if 0
 	SYSTEM_INFO SystemInfo;
 	int ProcessorType;
 	PROCESSORTYPES RetVal;
@@ -319,8 +325,8 @@ PROCESSORTYPES ReadProcessorType(void)
 	     RetVal = PType_OffTopOfScale;
 		 break;
 	  }
-
 	return RetVal;
+#endif
 }
 
 
@@ -329,6 +335,6 @@ PROCESSORTYPES ReadProcessorType(void)
 
 };
 
-
+#endif // ifdef WIN32
 
 

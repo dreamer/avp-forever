@@ -713,24 +713,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 			RenderPlayersImageInMirror();
 			DrawingAReflection=0;
 		}
-
 	#endif
-
-		#if 0//SupportWindows95
-		if (ScanDrawMode != ScanDrawDirectDraw)
-		{
-			WriteEndCodeToExecuteBuffer();
-		 	UnlockExecuteBufferAndPrepareForUse();
-			ExecuteBuffer();
-			EndD3DScene();
-		}
-		#endif
-
-		if (ScanDrawMode == ScanDrawDirectDraw) 
-		{
-			UnlockSurface();
-		}
-
 	}
 }
 
@@ -1184,5 +1167,3 @@ void KShapeItemsInstr(SHAPEINSTR *shapeinstrptr)
 	}
 }
 #endif
-
-

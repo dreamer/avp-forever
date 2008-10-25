@@ -545,7 +545,7 @@ void InitNPCs(RIFFHANDLE h)
 	
 	List<LoadedNPC> newnpcs;
 
-	for(i=0;i<HNPC_Last;i++)
+	for(int i=0;i<HNPC_Last;i++)
 	{
 		if(Load_HNPC[i])
 		{
@@ -570,13 +570,19 @@ void InitNPCs(RIFFHANDLE h)
 
 	if(AvP.PlayerType==I_Marine || Load_HNPC[HNPC_Marine])
 	{
-		//need to load the mdisk hierarchy
-		LoadedNPC tempnpc("mdisk.rif");
-		if (tempnpc.IsValid())
+		// as per linux port, check if mdisk.rif exists. if it does,
+		// we're using the gold version, else the regular
+		FILE * mdisk = fopen("\\avp_huds\\mdisk.rif","r");
+		if(mdisk != NULL)
 		{
-			newnpcs.add_entry(tempnpc);
+			fclose(mdisk);
+			//need to load the mdisk hierarchy
+			LoadedNPC tempnpc("mdisk.rif");
+			if (tempnpc.IsValid())
+			{
+				newnpcs.add_entry(tempnpc);
+			}
 		}
-
 	}
 	#endif
 	

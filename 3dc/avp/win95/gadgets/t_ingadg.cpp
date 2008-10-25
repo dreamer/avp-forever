@@ -228,6 +228,7 @@ void TextEntryGadget :: Render
 			0, // unsigned char B,
 			translucency
 		);
+
 	}
 
 	struct r2pos R2Pos_Char = R2Pos;
@@ -272,6 +273,7 @@ void TextEntryGadget :: Render
 					R2Rect_Cursor . bHasArea()
 				)
 				{
+
 					R2Rect_Cursor . AlphaFill
 					(
 						255, // unsigned char R,
@@ -279,6 +281,7 @@ void TextEntryGadget :: Render
 						255, // unsigned char B,
 						(FixP_Alpha * 2 / (256*3))// unsigned char translucency
 					);
+
 				}
 			}
 
@@ -342,6 +345,7 @@ void TextEntryGadget :: Render
 					255, // unsigned char B,
 					(FixP_Alpha * 2 / (256*3))// unsigned char translucency
 				);
+
 			}
 
 			pLetterFont -> RenderString_Clipped
@@ -397,6 +401,7 @@ void TextEntryGadget :: Render
 			R2Rect_Cursor . bHasArea()
 		)
 		{
+
 			R2Rect_Cursor . AlphaFill
 			(
 				255, // unsigned char R,
@@ -404,6 +409,7 @@ void TextEntryGadget :: Render
 				255, // unsigned char B,
 				(FixP_Alpha * 2 / (256*3))// unsigned char translucency
 			);
+
 		}
 	}
 

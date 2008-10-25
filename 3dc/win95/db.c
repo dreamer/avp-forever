@@ -33,7 +33,7 @@
 	#include "advwin32.h"
 #endif	
 #ifndef DB_NODIRECTDRAW
-	#include <ddraw.h>
+//	#include <ddraw.h>
 #endif
 #include "db.h"	 /* Contains most off the interface. */
 
@@ -183,9 +183,11 @@ static fontPtr guiload_font(char *new_fname);
 /* Cleanup function for the above. */
 static fontPtr CleanupFontLoadFail(HANDLE fH, fontPtr fontP);
 
+#if 0 // bjd
 /* Outputs debugging text. */
 static void out_text(LPDIRECTDRAWSURFACE surfP, int xc, int yc, 
 	const char *text, short x_limit, fontPtr fP);
+#endif
 
 /* Debounce all the keys the Direct Draw stuff uses. */	
 static void Debounce(void);
@@ -273,12 +275,12 @@ void db_assert_fail(const char *exprP, const char *fileP, int line)
 #ifndef DB_NODIRECTDRAW			
 		case DB_DIRECTDRAW:
 			{
-				char msg[256];
+//				char msg[256];
 				unsigned short xLimit = (unsigned short) dd_mode.width;
 				
 				/* Wait for any hardware to finish flipping. */
 				DbWaitForHw();
-				
+#if 0 // bjd				
 				out_text((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP,
 					0, 0, db_assert_textA[ 0 ], xLimit, FontP);
 				wsprintf(msg, db_assert_textA[ 1 ], exprP);
@@ -288,6 +290,7 @@ void db_assert_fail(const char *exprP, const char *fileP, int line)
 				out_text((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP,
 					0, 32, msg, xLimit, FontP);
 				db_do_std_prompt( 48 );
+#endif
 			}	
 			break;
 #endif	
@@ -338,10 +341,11 @@ void db_msg_fired(const char *strP)
 				
 				/* Wait for any flip hardware to be ready. */
 				DbWaitForHw();
-				
+#if 0 // bjd				
 				out_text((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP,
 					0, 0, strP, xLimit, FontP);
 				db_do_std_prompt( 16 );
+#endif
 			}	
 			break;	
 #endif
@@ -365,9 +369,11 @@ void db_print_fired(int x, int y, const char *strP)
 #ifndef DB_NODIRECTDRAW		
 		case DB_DIRECTDRAW:
 		{
+#if 0 // bjd
 			unsigned short xLimit = (unsigned short) (dd_mode.width - x);
 			out_text((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP, x, y, 
 				strP, xLimit, FontP);
+#endif
 			break;
 		}	
 #endif
@@ -425,14 +431,18 @@ void db_set_mode_ex(int mode, void *modeInfoP, void *newFontP)
 #ifndef DB_NODIRECTDRAW	
 	if(dd_mode.visibleSurfaceP)
 	{
+#if 0 // bjd
 		IDirectDrawSurface_Release((LPDIRECTDRAWSURFACE) dd_mode.visibleSurfaceP);
 		dd_mode.visibleSurfaceP = NULL;
+#endif
 	}
 	
 	if(dd_mode.drawSurfaceP)
 	{
+#if 0 // bjd
 		IDirectDrawSurface_Release((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP);
 		dd_mode.drawSurfaceP = NULL;
+#endif
 	}
 
 	if(mode == DB_DIRECTDRAW) 
@@ -441,12 +451,12 @@ void db_set_mode_ex(int mode, void *modeInfoP, void *newFontP)
 
 		if(dd_mode.visibleSurfaceP)
 		{
-			IDirectDrawSurface_AddRef((LPDIRECTDRAWSURFACE) dd_mode.visibleSurfaceP);
+// bjd			IDirectDrawSurface_AddRef((LPDIRECTDRAWSURFACE) dd_mode.visibleSurfaceP);
 		}
 
 		if(dd_mode.drawSurfaceP)
 		{
-			IDirectDrawSurface_AddRef((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP);
+// bjd			IDirectDrawSurface_AddRef((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP);
 		}
 
 		if(!FontP)
@@ -510,12 +520,12 @@ void db_uninit(void)
 
 	if(dd_mode.visibleSurfaceP)
 	{
-		IDirectDrawSurface_Release((LPDIRECTDRAWSURFACE) dd_mode.visibleSurfaceP);
+// bjd		IDirectDrawSurface_Release((LPDIRECTDRAWSURFACE) dd_mode.visibleSurfaceP);
 	}
 
 	if(dd_mode.drawSurfaceP)
 	{
-		IDirectDrawSurface_Release((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP);
+// bjd		IDirectDrawSurface_Release((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP);
 	}
 
 	#endif
@@ -548,10 +558,12 @@ static void db_do_std_prompt(unsigned yOffset)
 			SHORT response;
 			BOOL done = FALSE;
 			unsigned short xLimit = (unsigned short) dd_mode.width;
-			
+
+			/* bjd
 			out_text((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP,
 				0, yOffset, db_prompt_std, xLimit, FontP);
-			
+			*/
+
 			/* Show the message. */
 			if(dd_mode.bltOrFlip == DB_FLIP) 
 			{
@@ -847,7 +859,7 @@ static fontPtr CleanupFontLoadFail(HANDLE fH, fontPtr fontP)
 	
 	return NULL;
 }
-
+#if 0 // bjd
 static void out_text(LPDIRECTDRAWSURFACE surfP, int xc, int yc, 
 	const char *text, short x_limit, fontPtr fP)
 {
@@ -955,6 +967,7 @@ static void out_text(LPDIRECTDRAWSURFACE surfP, int xc, int yc,
 	}
 	return;
 }
+#endif
 
 static void Debounce(void)
 {
@@ -974,6 +987,7 @@ static void Debounce(void)
 
 static void DbWaitForHw(void)
 {
+#if 0 // bjd
 	/* Wait until the last flip is finished and the last blt done */
 	BOOL finished;
 
@@ -992,25 +1006,29 @@ static void DbWaitForHw(void)
 		}
 	}
 	while(!finished);
+#endif
 }
 
 static void DbFlip(void)
 {
+#if 0 // bjd
 	LPDIRECTDRAWSURFACE	fromSurfP = 
 		(LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP;
 	LPDIRECTDRAWSURFACE	toSurfP = 
 		(LPDIRECTDRAWSURFACE) dd_mode.visibleSurfaceP;
 	HRESULT res;
-	
+
 	/* Try to flip the screen. */
 	res = IDirectDrawSurface_Flip(toSurfP, fromSurfP, DDFLIP_WAIT);
-	
+
 	if(res != DD_OK)
 		db_log_fired("Internal debug flip failed - message lost!");
+#endif
 }
 
 static void DbBlt(void)
 {
+#if 0 // bjd
 	LPDIRECTDRAWSURFACE	fromSurfP = 
 		(LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP;
 	LPDIRECTDRAWSURFACE	toSurfP = 
@@ -1030,6 +1048,7 @@ static void DbBlt(void)
 		
 	if(res != DD_OK) 
 		db_log_fired("Internal debug blit failed - message lost.");	
+#endif
 }
 
 #endif

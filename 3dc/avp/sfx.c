@@ -228,7 +228,6 @@ void HandleSfxForObject(DISPLAYBLOCK *dispPtr)
 	}
 }
 
-
 void HandleObjectOnFire(DISPLAYBLOCK *dispPtr)
 {
 	int objectIsDisappearing;

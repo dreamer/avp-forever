@@ -162,11 +162,15 @@ void InitGame(void)
 
 #if SupportWindows95
 
+#if 0 // bjd
+//game resolution change?
+
 	AvP.GameVideoRequestMode = VideoMode_DX_320x200x8; /* ignored */
 	if(HWAccel)
 		AvP.MenuVideoRequestMode = VideoMode_DX_640x480x15;
 	else
 		AvP.MenuVideoRequestMode = VideoMode_DX_640x480x8;
+#endif
 
 #endif
 
@@ -214,13 +218,21 @@ void StartGame(void)
 	Temporarily disable sounds while loading. Largely to avoid 
 	some irritating teletext sounds starting up
 	*/
+
 	int playSoundsStore=PlaySounds;
 	PlaySounds=0;
 
+
+	/*	surely we should init squad data here?
+	*	funtion calls in create_strategies_from_list(); test data in squad struct
+	*	but if this hasn't been initialised, it surely just contains garbage?
+	*	keep an eye on this! 
+	*/
+	InitSquad();
+
 	//get the cd to start again at the beginning of the play list.
 	ResetCDPlayForLevel();
-	
-	
+
 	ProcessSystemObjects();
 	
 	create_strategies_from_list ();
@@ -236,7 +248,7 @@ void StartGame(void)
 	InitPheromoneSystem();
 	BuildFarModuleLocs();
 	InitHive();
-	InitSquad();
+//	InitSquad();
 
 	InitialiseParticleSystem();
 	InitialiseSfxBlocks();
@@ -566,12 +578,12 @@ extern void CheckCDStatus(void)
 
 void TimeStampedMessage(char *stringPtr)
 {
-#if 0
+//#if 0
 	static int time=0;
 	int t=timeGetTime();
 	LOGDXFMT(("%s %fs\n",stringPtr,(float)(t-time)/1000.0f ));
 	time = t;
-#endif
+//#endif
 }
 
 

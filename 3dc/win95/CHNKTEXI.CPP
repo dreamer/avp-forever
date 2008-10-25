@@ -1,4 +1,8 @@
-#include <windows.h>
+
+#ifdef WIN32
+	#include <windows.h>
+#endif
+
 #include <string.h>
 #include <string.hpp>
 #ifndef DB_LEVEL
@@ -33,6 +37,8 @@
 	
 char const * cl_pszGameMode = NULL;
 
+#include <string>
+#include "d3_func.h"
 // used to determine if the display is palettized
 // currently assuming that if this is <= 8 then all
 // surfaces et. except d3d textures have a global palette
@@ -651,10 +657,18 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 
 extern "C" extern void CheckForWindowsMessages(void);
 
+/* folder to check for user textures */
+std::string newTextureFolder = "Textures\\";
+std::string newTextureFileName;
+
 int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 {
 	// safe to handle windows messages at this point (I think - JCWH)
 	CheckForWindowsMessages();
+
+	newTextureFileName = newTextureFolder + pszFileName;
+	/* lop .RIM off the end of the filename */
+	newTextureFileName = newTextureFileName.substr(0, newTextureFileName.length() - 4);
 	
 	// get the filename
 	char szBuf[MAX_PATH];
@@ -728,13 +742,27 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					IMAGEHEADER * pImageHdr = GetImageHeader();
 					db_assert1(pImageHdr);
 					memset(pImageHdr,0,sizeof(IMAGEHEADER));
-					pImageHdr->ImageWidth = nWidth;
-					pImageHdr->ImageHeight = nHeight;
+					pImageHdr->ImageWidth = pSurface->width; //nWidth;
+					pImageHdr->ImageHeight = pSurface->height; //nHeight;
 					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
 					strcpy(pImageHdr->ImageName,szBuf);
 					pImageHdr->DDSurface = pSurface;
 					pImageHdr->hBackup = hBackup;
 					db_logf4(("\tloaded to image number %d",NumImages-1));
+/*					
+					if (pSurface->buf) {
+						pImageHdr->Direct3DSurface8 = CreateD3DSurface(pSurface, pSurface->w, pSurface->h);
+						//char szDbInf[512];
+						//sprintf(szDbInf,"Surface \"%s\" didn't load",pImageHdr->ImageName);
+							
+						if (pImageHdr->Direct3DSurface8 == NULL) {
+							OutputDebugString("Direct3DSurface8 was Null!");
+						}
+					}
+					else {
+						OutputDebugString("pSurface->buf was Null!");
+					}
+*/
 					#if CL_SUPPORT_ALTTAB
 						if (fFlagsEtc & LIO_RESTORABLE)
 						#ifdef NDEBUG
@@ -777,14 +805,28 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					IMAGEHEADER * pImageHdr = GetImageHeader();
 					db_assert1(pImageHdr);
 					memset(pImageHdr,0,sizeof(IMAGEHEADER));
-					pImageHdr->ImageWidth = nWidth;
-					pImageHdr->ImageHeight = nHeight;
+					pImageHdr->ImageWidth = pSurface->width; //nWidth;
+					pImageHdr->ImageHeight = pSurface->height; //nHeight;
 					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
 					strcpy(pImageHdr->ImageName,szBuf);
 					pImageHdr->DDSurface = pSurface;
 					pImageHdr->hBackup = hBackup;
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 					db_logf4(("\t\tsurface:%p",pSurface));
+/*					
+					if (pSurface->buf) {
+						pImageHdr->Direct3DSurface8 = CreateD3DSurface(pSurface, pSurface->w, pSurface->h);
+						//char szDbInf[512];
+						//sprintf(szDbInf,"Surface \"%s\" didn't load",pImageHdr->ImageName);
+							
+						if (pImageHdr->Direct3DSurface8 == NULL) {
+							OutputDebugString("Direct3DSurface8 was Null!");
+						}
+					}
+					else {
+						OutputDebugString("pSurface->buf was Null!");
+					}
+*/
 					#if CL_SUPPORT_ALTTAB
 						if (fFlagsEtc & LIO_RESTORABLE)
 						#ifdef NDEBUG
@@ -816,12 +858,34 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 			#if CL_SUPPORT_FASTFILE
 			unsigned nFastFileLen;
 			void const * pFastFileData = ffreadbuf(szBuf,&nFastFileLen);
+
+			/* check for user texture first? */
+			int height, width;
+			LPDIRECT3DTEXTURE9 test;
+			test = CheckAndLoadUserTexture(newTextureFileName.c_str(), &height, &width);
+			if(test)
+			{
+				IMAGEHEADER * pImageHdr = GetImageHeader();
+				db_assert1(pImageHdr);
+				memset(pImageHdr,0,sizeof(IMAGEHEADER));
+				pImageHdr->ImageWidth = width;//pTexture->width;//nWidth;
+				pImageHdr->ImageHeight = height;//pTexture->height;//nHeight;
+//				db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
+				strcpy(pImageHdr->ImageName,szBuf);
+//				pImageHdr->D3DTexture = pTexture;
+//				pImageHdr->hBackup = hBackup;
+				pImageHdr->Direct3DTexture = test;
+				pImageHdr->UserTexture = 1;
+				return NumImages-1;
+			}
+
+			// eg, Graphics\HUDs\Marine\pulsetx.RIM
 			if (pFastFileData)
 			{
 				db_log4("\tfile is in a fast file");
 				unsigned nWidth, nHeight;
 				AW_BACKUPTEXTUREHANDLE hBackup = NULL;
-				D3DTexture * pTexture =
+				AVPTexture * pTexture =
 					AwCreateTexture
 					(
 						fFlagsEtc & LIO_RESTORABLE ? "pxfWHB" : "pxfWH",
@@ -837,18 +901,37 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					IMAGEHEADER * pImageHdr = GetImageHeader();
 					db_assert1(pImageHdr);
 					memset(pImageHdr,0,sizeof(IMAGEHEADER));
-					pImageHdr->ImageWidth = nWidth;
-					pImageHdr->ImageHeight = nHeight;
+					pImageHdr->ImageWidth = pTexture->width;//nWidth;
+					pImageHdr->ImageHeight = pTexture->height;//nHeight;
 					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
 					strcpy(pImageHdr->ImageName,szBuf);
 					pImageHdr->D3DTexture = pTexture;
 					pImageHdr->hBackup = hBackup;
+
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 
 					/* KJL 16:05:50 26/02/98 - attempt to get a texture handle */
 					{
-						int gotTextureHandle = GetTextureHandle(pImageHdr);
-						db_assert1(gotTextureHandle==TRUE);
+//						OutputDebugString("\n");
+//						OutputDebugString(pImageHdr->ImageName);
+
+						// load Direct3D Texture 8 here?	
+						if (pTexture->buffer) {
+							pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer);
+							//char szDbInf[512];
+								//sprintf(szDbInf,"Texture \"%s\" didn't load",pImageHdr->ImageName);
+							
+							if (pImageHdr->Direct3DTexture == NULL) {
+								OutputDebugString("Direct3DTexture was Null!");
+							}
+
+							int gotTextureHandle = 1;
+							//int gotTextureHandle = GetTextureHandle(pImageHdr);
+							//db_assert1(gotTextureHandle==TRUE);
+						}
+						else {
+							OutputDebugString("pTexture->buf was Null!");
+						}
 					}
 					
 					#if CL_SUPPORT_ALTTAB
@@ -878,7 +961,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 				db_log4("\tloading the actual file");
 				unsigned nWidth, nHeight;
 				AW_BACKUPTEXTUREHANDLE hBackup = NULL;
-				D3DTexture * pTexture =
+				AVPTexture * pTexture =
 					AwCreateTexture
 					(
 						fFlagsEtc & LIO_RESTORABLE ? "sfWHB" : "sfWH",
@@ -893,8 +976,8 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					IMAGEHEADER * pImageHdr = GetImageHeader();
 					db_assert1(pImageHdr);
 					memset(pImageHdr,0,sizeof(IMAGEHEADER));
-					pImageHdr->ImageWidth = nWidth;
-					pImageHdr->ImageHeight = nHeight;
+					pImageHdr->ImageWidth = pTexture->width;//nWidth;
+					pImageHdr->ImageHeight = pTexture->height;//nHeight;
 					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
 					strcpy(pImageHdr->ImageName,szBuf);
 					pImageHdr->D3DTexture = pTexture;
@@ -903,8 +986,25 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 
 					/* KJL 16:05:50 26/02/98 - attempt to get a texture handle */
 					{
-						int gotTextureHandle = GetTextureHandle(pImageHdr);
-						db_assert1(gotTextureHandle==TRUE);
+						OutputDebugString("\n");
+						OutputDebugString(pImageHdr->ImageName);
+
+						if (pTexture->buffer) {
+							pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer);
+							//char szDbInf[512];
+							//	sprintf(szDbInf,"Texture \"%s\" didn't load",pImageHdr->ImageName);
+							
+							if (pImageHdr->Direct3DTexture == NULL) {
+								OutputDebugString("Direct3DTexture 8 was null!");
+							}
+							
+							int gotTextureHandle = 1;
+							//int gotTextureHandle = GetTextureHandle(pImageHdr);
+							//db_assert1(gotTextureHandle==TRUE);
+						}
+						else {
+							OutputDebugString("pTexture->buf was null!");
+						}
 					}
 
 					#if CL_SUPPORT_ALTTAB
@@ -937,4 +1037,3 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 			return GEI_NOTLOADED;
 	}
 }
-

@@ -330,7 +330,7 @@ Object_Hierarchy_Alternate_Shape_Set_Chunk::Object_Hierarchy_Alternate_Shape_Set
    	flags=*(int*)data;
 	data+=4;
 
-	for(i=0;i<3;i++)
+	for(int i=0;i<3;i++)
 	{
 		spare[i]=*(int*)data;
 		data+=4;

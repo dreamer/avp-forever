@@ -20,11 +20,12 @@ extern "C"  {
 /*
 	Standard windows functionality
 */
-
-#include <windows.h>
-#include <windowsx.h>
-#include <winuser.h>
-#include <mmsystem.h>
+#ifdef WIN32
+	#include <windows.h>
+	#include <windowsx.h>
+	#include <winuser.h>
+	#include <mmsystem.h>
+#endif
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -32,18 +33,22 @@ extern "C"  {
 /*
 	DirectX functionality
 */
+#ifdef WIN32
+	#include <d3d9.h>
+	#include "dsound.h"
+//	#include "dplay.h"
+//	#include "dplobby.h"
 
-#include "ddraw.h"
-#include "d3d.h"
-#include "dsound.h"
-#include "dplay.h"
-#include "dinput.h"
-#include "dplobby.h"
+//	#include "dplay8.h"
+	typedef int DPID;
+//	#include "dplobby8.h"
+
+	#define DIRECTINPUT_VERSION 0x0800
+	#include "dinput.h"
+#endif
 //#include "fastfile.h"
 
-
-#define platform_pc Yes
-
+#define platform_pc		Yes
 #define Saturn			No
 
 #define Hardware2dTextureClipping No
@@ -771,6 +776,8 @@ void BlitToBackBufferWithoutTearing(void* lpBackground, RECT* destRectPtr, RECT*
 void BlitWin95Char(int x, int y, unsigned char toprint);
 void ReleaseDDSurface(void* DDSurface);
 BOOL InitialiseDirectDrawObject(void);
+//BOOL InitialiseDirect3DObject(void); // BJD 06/05/2007
+BOOL InitialiseDirect3DObject(HWND hWndMain);
 BOOL ChangeDirectDrawObject(void);
 BOOL CheckForVideoModes(int TestVideoMode);
 void finiObjectsExceptDD(void);
@@ -790,9 +797,10 @@ int GetSingleColourForPrimary(int Colour);
 	C++ under Watcom at present
 */
 #ifdef __cplusplus
-HRESULT CALLBACK EnumDisplayModesCallback(LPDDSURFACEDESC pddsd, LPVOID Context);
+/*HRESULT CALLBACK EnumDisplayModesCallback(LPDDSURFACEDESC pddsd, LPVOID Context);
 BOOL FAR PASCAL EnumDDObjectsCallback(GUID FAR* lpGUID, LPSTR lpDriverDesc,
                                       LPSTR lpDriverName, LPVOID lpContext);
+*/
 #if triplebuffer
 /* 
 	must be WINAPI to support Windows FAR PASCAL
@@ -845,14 +853,18 @@ void WriteZB3dTexturedPolygonToExecuteBuffer(int* itemptr);
 void WriteZBGouraud3dTexturedPolygonToExecuteBuffer(int* itemptr);
 #endif
 
+/*
 #ifdef __cplusplus
-HRESULT WINAPI DeviceEnumerator(LPGUID lpGuid,
+ //BJD
+   HRESULT WINAPI DeviceEnumerator(LPGUID lpGuid,
    LPSTR lpDeviceDescription, LPSTR lpDeviceName,
    LPD3DDEVICEDESC lpHWDesc, LPD3DDEVICEDESC lpHELDesc, LPVOID lpContext);
+
+	// BJD
 HRESULT CALLBACK TextureFormatsEnumerator
    (LPDDSURFACEDESC lpDDSD, LPVOID lpContext);
 #endif
-
+*/
 /* KJL 11:28:31 9/9/97 - Direct Input prototypes */
 BOOL InitialiseDirectInput(void);
 void ReleaseDirectInput(void);
@@ -894,7 +906,8 @@ void ConvertDDToInternalPalette(unsigned char* src, unsigned char* dst, int leng
 PROCESSORTYPES ReadProcessorType(void);
 
 /* EXTERNS FOR GLOBALS GO HERE !!!!!! */
-extern DDCAPS direct_draw_caps;
+//extern DDCAPS direct_draw_caps; // BJD
+//extern D3DCAPS9 *direct_draw_caps; // BJD
 
 /*
 

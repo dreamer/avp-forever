@@ -15,7 +15,7 @@
 
 	font control - Fonts description and sturctures game/plat/font.h
 								 Platform dependent processing		game/plat/platsup.c or ddplat.cpp
-*/								 
+*/
 
 
 
@@ -26,50 +26,50 @@
 	using hotspots for the texture processing, that way we dont need extra tools to convert
 	fonts. It also allows complete font positioning (except different letter combos changing)
 	I have shifted most of the emphasis onto the artists to set up the font and to mark it how they
-	see fit. All the fonts must contain hotspots for all the letters. In that way we can easily 
-	expand fonts. The character offests at the mo are simply -32. We may have to set up jump tables 
-	at some later date to get chars for different languages.	
+	see fit. All the fonts must contain hotspots for all the letters. In that way we can easily
+	expand fonts. The character offests at the mo are simply -32. We may have to set up jump tables
+	at some later date to get chars for different languages.
 
 	Nothing supports anti-aliasing at the moment. Be careful with colours!!!
-	
+
 	Most of the info is being passed as locals. Clumsy I know. I didnt want to take up more
 	space than was nessecery
-	
+
 
 	HARD coded. Names of the fonts
 							Number of fonts to load
 							Number of characters in the font. you can leave letters blank.	The number of
 							characters in the fonts can be changed for different languages
-								
+
 	AVP-Win95
-		
-		This loads all the fonts in the structure PFFONT AvpFonts[] that is passed 
-		to while NUM_FONTS. The Imageheader->ImagePtr for the data is maintained 
+
+		This loads all the fonts in the structure PFFONT AvpFonts[] that is passed
+		to while NUM_FONTS. The Imageheader->ImagePtr for the data is maintained
 		untill we have processd	the characters. I dont fancy manipulating the data
 		in a LPDIRECTDRAWSURFACE. The character descriptors in the font contain
 		nothing but a src RECT. the void* pointer in the PFFONT structure in this
 		case is cast to LPDIRECTDRAWSURFACE.
-		
-	
-	
-	Not that the entire font is placed into a 
+
+
+
+	Not that the entire font is placed into a
 	file That is then processed. CLUT where to
 	put the CLU????	Put it into the vid memory.
 	use a void*
 */
-   
+
 /*
 	Only have 8 bit support a tne moment. More to come!!!
-	Screen modes. I recommend loading up different fonts for different screen modes. 
+	Screen modes. I recommend loading up different fonts for different screen modes.
 	Simply reference a different structure.
 */
-   
+
 
 #define CHAR_WIDTH(font_num, offset) ((AvpFonts[font_num].srcRect[offset].right - AvpFonts[font_num].srcRect[offset].left))
 #define CHAR_HEIGHT(font_num, offset) ((AvpFonts[font_num].srcRect[offset].bottom - AvpFonts[font_num].srcRect[offset].top))
 #define IS_CHAR_WHITE_SPACE(ch)	((ch == '\t' || ch == '\n' || ch == ' ' || (int)ch == 0x0))
 
-   
+
 
 static int ProcessFontEntry
 (
@@ -98,7 +98,7 @@ void LoadAllFonts()
 	// specific font.
 
 	int fontnum = 0;
-	
+
 	while(fontnum < NUM_FONTS)
 		{
 			/* load the font in turn */
@@ -110,6 +110,7 @@ void LoadAllFonts()
 
 void LoadPFFont(int fontnum)
 {
+#if 0 // bjd
 	// these fonts end up being in memory all the time,
 	// I will also supply a function which is delete
 	// specific font.
@@ -121,16 +122,16 @@ void LoadPFFont(int fontnum)
 	LoadFont(font);
 
 	/* get the hotspot color  first entry in */
-	
+
 	if(font->fttexBitDepth == 15)font->fttexBitDepth = 16;
-	
+
 	pSurface = FontLock(font,&nPitch);
 	GLOBALASSERT(pSurface);
-	
+
 	font->hotSpotValue = *(unsigned *)pSurface & (font->fttexBitDepth<32 ? (1<<font->fttexBitDepth)-1 : 0xffffffffU);
-	
+
 	/* the hotspot value is the top-left pixel */
-	{			
+	{
 		int charnum = 0;
 		int countfromrow = 1;
 		int countfromcol = 0;
@@ -140,7 +141,7 @@ void LoadPFFont(int fontnum)
 			processing function. This part of routine find the
 			hotspots in numbers of pixels
 		*/
-		
+
 		/*Top line of the texture is redundent we get the hotspot from this*/
 		/*edge of the texture has only lines*/
 
@@ -157,7 +158,7 @@ void LoadPFFont(int fontnum)
 		#endif
 		charnum = 0;
 	}
-	
+
 	FontUnlock(font);
 
 	#if SupportWindows95
@@ -168,6 +169,7 @@ void LoadPFFont(int fontnum)
 		font // PFFONT *pffont_New
 	);
 	#endif
+#endif
 }
 
 
@@ -182,14 +184,14 @@ static int ProcessFontEntry
 	int 	charnum
 )
 {
-	/* 
+	/*
 		okay set the starting point
-	
+
 		countfromrow marks the current depth of the processing row in the texture.
 		countfromcol marks how far along the current coloum we have processed
-	
+
 	 * = HOTSPOT .. the first pixel is used as the hotspot
-	
+
 	**********************
 	 *	 **		**		****  *		<---- startfromrow
 		###
@@ -201,20 +203,20 @@ static int ProcessFontEntry
 	  		 ###			 ^^			 |at the top and the bottom
 				*		*			 ||			 |
 	 ^							 ||______|
-	 |							 
+	 |
 	 |
 	 startfromcol
-	 	
+
 	********************* Note that the spot in col 0 marks a new linw of chars
-	 
-   */	 
-	 
+
+   */
+
 
 	int curr_row = *countfromrow;
 	int curr_col = *countfromcol;
 	int y_offset = 0, x_offset = curr_col;
-				 
-				 
+
+
 	GLOBALASSERT(font);
 	GLOBALASSERT(fontstartaddress);
 	GLOBALASSERT(charnum < font->num_chars_in_font);
@@ -226,7 +228,7 @@ static int ProcessFontEntry
 		we process each line (row) from startfromrow to the end
 		first find the next marker in startfromrow
 	*/
-	
+
 	// only supported if bit depth is a whole number of bytes
 	GLOBALASSERT(8==font->fttexBitDepth || 16==font->fttexBitDepth || 24==font->fttexBitDepth || 32==font->fttexBitDepth);
 
@@ -234,7 +236,7 @@ static int ProcessFontEntry
 		{
 		// this bit processes the chars, finds uvs, extents and fills in the sturcture*/
 		// count along the row to find the next x position
-		
+
 		unsigned int colour_here;
 
 		if(x_offset > font->fttexWidth - 1)
@@ -243,13 +245,13 @@ static int ProcessFontEntry
 
 			x_offset = 0;
 			curr_col = 0;
-			
+
 			curr_row += font->fontHeight;	// max line height
 			*countfromrow = curr_row;
 
 			GLOBALASSERT(curr_row < font->fttexHeight);
 		}
-			
+
 		switch (font->fttexBitDepth)
 		{
 			default:
@@ -270,15 +272,15 @@ static int ProcessFontEntry
 			case 32:
 				colour_here = *(unsigned *)(fontstartaddress + (curr_row*pitch + 4*x_offset));
 				break;
-				
+
 		}
-		
+
 		if(colour_here == font->hotSpotValue)
 		{
 			int width = -1, height = -1;
 			/* set up the uv corrds of the top left corner*/
-			int u = x_offset + 1;	 
-			int v = curr_row + 1;	 
+			int u = x_offset + 1;
+			int v = curr_row + 1;
 
 
 			/* scan down to give height*/
@@ -304,14 +306,14 @@ static int ProcessFontEntry
 					case 32:
 						colour_here = *(unsigned *)(fontstartaddress + (y_offset*pitch + 4*x_offset));
 						break;
-						
+
 				}
-				
+
 				if(colour_here == font->hotSpotValue)
 				{
 					height = y_offset - curr_row - 1;	 // -1 because we exclude the top and bottom hotspots
 					break;
-				}		
+				}
 			}
 
 		 	/* scan along to get the width*/
@@ -337,28 +339,28 @@ static int ProcessFontEntry
 					case 32:
 						colour_here = *(unsigned *)(fontstartaddress + (curr_row*pitch + 4*x_offset));
 						break;
-						
+
 				}
-				
+
 				if(colour_here == font->hotSpotValue)
 				{
 					width = x_offset - curr_col - 1; // exclude end hotspot
 					break;
-				}	
+				}
 			}
-				
+
 			*countfromcol = x_offset + 1; /* ready for the next char*/
 
 			/*fill in the data structure -  platform dependent*/
-			FillCharacterSlot(u, v, width, height, charnum, font);	
-			return 0;														
+			FillCharacterSlot(u, v, width, height, charnum, font);
+			return 0;
 		}
 
 		x_offset++;
 
-	}	
+	}
 	return 0;
-}											
+}
 
 
 #if 0 // obsolete
@@ -368,14 +370,14 @@ static int Process8BitEntry(PFFONT* font,
 													int*  countfromcol,
 													int   charnum)
 {
-	/* 
+	/*
 		okay set the starting point
-	
+
 		countfromrow marks the current depth of the processing row in the texture.
 		countfromcol marks how far along the current coloum we have processed
-	
+
 	 * = HOTSPOT .. the first pixel is used as the hotspot
-	
+
 	**********************
 	 *	 **		**		****  *		<---- startfromrow
 		###
@@ -387,20 +389,20 @@ static int Process8BitEntry(PFFONT* font,
 	  		 ###			 ^^			 |at the top and the bottom
 				*		*			 ||			 |
 	 ^							 ||______|
-	 |							 
+	 |
 	 |
 	 startfromcol
-	 	
+
 	********************* Note that the spot in col 0 marks a new linw of chars
-	 
-   */	 
-	 
+
+   */
+
 
 	int curr_row = *countfromrow;
 	int curr_col = *countfromcol;
 	int y_offset = 0, x_offset = curr_col;
-				 
-				 
+
+
 	GLOBALASSERT(font);
 	GLOBALASSERT(fontstartaddress);
 	GLOBALASSERT(charnum < font->num_chars_in_font);
@@ -417,7 +419,7 @@ static int Process8BitEntry(PFFONT* font,
 		{
 		// this bit processes the chars, finds uvs, extents and fills in the sturcture*/
 		// count along the row to find the next x position
-		
+
 		unsigned int colour_here;
 
 		if(x_offset > font->fttexWidth - 1)
@@ -426,22 +428,22 @@ static int Process8BitEntry(PFFONT* font,
 
 			x_offset = 0;
 			curr_col = 0;
-			
+
 			curr_row += font->fontHeight;	// max line height
 			*countfromrow = curr_row;
 
 			GLOBALASSERT(curr_row < font->fttexHeight);
 		}
-			
+
 		colour_here = (int)*(fontstartaddress + (curr_row*font->fttexWidth	+ x_offset));
-	
-		
+
+
 		if(colour_here == font->hotSpotValue)
 		{
 			int width = -1, height = -1;
 			/* set up the uv corrds of the top left corner*/
-			int u = x_offset + 1;	 
-			int v = curr_row + 1;	 
+			int u = x_offset + 1;
+			int v = curr_row + 1;
 
 
 			/* scan down to give height*/
@@ -453,27 +455,27 @@ static int Process8BitEntry(PFFONT* font,
 				{
 					height = y_offset - curr_row - 1;	 // -1 because we exclude the top and bottom hotspots
 					break;
-				}		
+				}
 			}
 
 		 	/* scan along to get the width*/
 			for(++x_offset; x_offset < font->fttexWidth; x_offset ++)
 			{
 				colour_here = (int)*(fontstartaddress + (curr_row*font->fttexWidth	+ x_offset));
-			
+
 
 				if(colour_here == font->hotSpotValue)
 				{
 					width = x_offset - curr_col - 1; // exclude end hotspot
 					break;
-				}	
+				}
 			}
-				
+
 			*countfromcol = x_offset + 1; /* ready for the next char*/
 
 			/*fill in the data structure -  platform dependent*/
-			FillCharacterSlot(u, v, width, height, charnum, font);	
-			return 0;														
+			FillCharacterSlot(u, v, width, height, charnum, font);
+			return 0;
 		}
 
 		x_offset++;
@@ -483,7 +485,7 @@ static int Process8BitEntry(PFFONT* font,
 
 
 
-									
+
 static int Process16BitEntry(PFFONT *font,
 													char* fontstartaddress,
 													int*  countfromrow,
@@ -493,8 +495,8 @@ static int Process16BitEntry(PFFONT *font,
 int curr_row = *countfromrow;
 int curr_col = *countfromcol;
 int y_offset = 0, x_offset = curr_col;
-			 
-			 
+
+
 GLOBALASSERT(font);
 GLOBALASSERT(fontstartaddress);
 GLOBALASSERT(charnum < font->num_chars_in_font);
@@ -511,7 +513,7 @@ GLOBALASSERT(curr_col <= font->fttexWidth);
 	{
 		// this bit processes the chars, finds uvs, extents and fills in the sturcture*/
 		// count along the row to find the next x position
-		
+
 		unsigned int colour_here;
 
 		if(x_offset > font->fttexWidth - 1)
@@ -520,7 +522,7 @@ GLOBALASSERT(curr_col <= font->fttexWidth);
 
 			x_offset = 0;
 			curr_col = 0;
-			
+
 			curr_row += font->fontHeight;	// max line height
 			*countfromrow = curr_row;
 
@@ -532,13 +534,13 @@ GLOBALASSERT(curr_col <= font->fttexWidth);
 			unsigned int colour_low = 0x000000ff & (int)*(fontstartaddress + (curr_row*font->fttexWidth + x_offset)*2  + 1);
  			colour_here = (colour_high <<  8) | colour_low;
 		}
-			
+
 		if(colour_here == font->hotSpotValue)
 		{
 			int width = -1, height = -1;
 			/* set up the uv corrds of the top left corner*/
-			int u = x_offset + 1;	 
-			int v = curr_row + 1;	 
+			int u = x_offset + 1;
+			int v = curr_row + 1;
 
 
 			/* scan down to give height*/
@@ -549,12 +551,12 @@ GLOBALASSERT(curr_col <= font->fttexWidth);
 					int colour_low = 0x000000ff & (int)*(fontstartaddress + (y_offset*font->fttexWidth + x_offset)*2  + 1);
 		 			colour_here = (colour_high <<  8) | colour_low;
 				}
-		 			 
+
 				if(colour_here == font->hotSpotValue)
 				{
 					height = y_offset - curr_row - 1;	 // -1 because we exclude the top and bottom hotspots
 					break;
-				}		
+				}
 			}
 
 		 	/* scan along to get the width*/
@@ -565,26 +567,26 @@ GLOBALASSERT(curr_col <= font->fttexWidth);
 					int colour_low = 0x000000ff & (int)*(fontstartaddress + (curr_row*font->fttexWidth + x_offset)*2  + 1);
 		 			colour_here = (colour_high <<  8) | colour_low;
 				}
-				
+
 				if(colour_here == font->hotSpotValue)
 				{
 					width = x_offset - curr_col - 1; // exclude end hotspot
 					break;
-				}	
+				}
 			}
-				
+
 			*countfromcol = x_offset + 1; /* ready for the next char*/
 
 			/*fill in the data structure -  platform dependent*/
-			FillCharacterSlot(u, v, width, height, charnum, font);	
-			return 0;														
+			FillCharacterSlot(u, v, width, height, charnum, font);
+			return 0;
 		}
 
 		x_offset++;
 
-	}	
+	}
 	return 0;
-}											
+}
 
 static int Process24BitEntry(PFFONT* font,
 													char* fontstartaddress,
@@ -603,13 +605,14 @@ static int Process24BitEntry(PFFONT* font,
 
 void BLTWholeFont(int fontnum, int x , int y, int win_width)
 {
+#if 0 // bjd
 	int i = 0;
 	int plotto_x = x, plotto_y = y;
 
 	while(i < AvpFonts[fontnum].num_chars_in_font)
 		{
 			int charwidth = AvpFonts[fontnum].srcRect[i].right - AvpFonts[fontnum].srcRect[i].left;
-	
+
 			if((charwidth + plotto_x - x) > win_width)
 				{
 					plotto_y += AvpFonts[fontnum].fontHeight;
@@ -623,19 +626,21 @@ void BLTWholeFont(int fontnum, int x , int y, int win_width)
 			i++;
 		}
 	return;
+#endif
 }
 
 
 void BLTString(FONT_DESC str_packet)
 {
+#if 0 // bjd
 	PFFONT font = AvpFonts[str_packet.fontnum];
-  
+
 	unsigned char *strptr = str_packet.string;
 	int offset = 0;
 	int not_finished = Yes;
 	int pos_x = str_packet.destx;
 	int pos_y = str_packet.desty;
-	int white_space_width = CHAR_WIDTH(str_packet.fontnum, 0);	
+	int white_space_width = CHAR_WIDTH(str_packet.fontnum, 0);
 
 
 	// set up the font processing varibles depending on the type of font
@@ -643,12 +648,12 @@ void BLTString(FONT_DESC str_packet)
 	switch(font.font_type)
 		{
 			case(I_FONT_NUMERIC):
-				{	
+				{
 					offset = 0x30;
    					break;
 				}
 			case(I_FONT_UC_NUMERIC):
-				{	
+				{
 					offset = 0x20;
    					break;
 				}
@@ -659,16 +664,16 @@ void BLTString(FONT_DESC str_packet)
 				}
 			default:
 				GLOBALASSERT(2<1);
-		}			
-	
+		}
+
 	while(not_finished)
 	{
 		int line_length;
 		char *end_char;
-	
-	
+
+
 		// find the line length and the end char in the line
-	
+#if 0 // bjd
 		not_finished = ProcessLineLength
 		(
 			strptr, 		// start char of string
@@ -677,19 +682,19 @@ void BLTString(FONT_DESC str_packet)
 			str_packet.width,			// the width of the line
 			&end_char, 			// filled with end address
 			&line_length		// filled with line length
-		);			
-					  
-					  
-		// work out where to print the line			  	
+		);
+#endif
 
-		if(line_length)						
+		// work out where to print the line
+
+		if(line_length)
 		{
 			switch(str_packet.just)
-			{	
-	
+			{
+
 				case FJ_LEFT_JUST:
 				{
-					pos_x = str_packet.destx;					
+					pos_x = str_packet.destx;
 					break;
 				}
 				case FJ_CENTRED:
@@ -703,11 +708,11 @@ void BLTString(FONT_DESC str_packet)
 					break;
 				}
 				default:
-				{	
+				{
 					;
 				}
 			}
-				
+
 			// now print the line untill we reach the address of
 			// the end char
 
@@ -720,16 +725,16 @@ void BLTString(FONT_DESC str_packet)
 				else if(*strptr == '\t')
 				{
 					pos_x += 4*white_space_width;
-				}	
+				}
 				else if(*strptr == '\n' || strptr == 0x0)
 				{
 					GLOBALASSERT(strptr == end_char);
 				}
-				else if((int)*strptr == 0xD) 
+				else if((int)*strptr == 0xD)
 				{
-					// carrige return 
+					// carrige return
 					// do nothing - our next char should be '\n'
-					
+
 					GLOBALASSERT(*(strptr + 1) == '\n');
 				}
 				else
@@ -739,35 +744,36 @@ void BLTString(FONT_DESC str_packet)
 					int bottom_pos = pos_y + CHAR_HEIGHT(str_packet.fontnum, ((int)*strptr - offset));
 
 					if(end_pos > ScreenDescriptorBlock.SDB_Width || pos_x < 0)
-					{			
-						//dont draw		
+					{
+						//dont draw
 						//not_finished = No;
-					}					
+					}
 					else if( bottom_pos > ScreenDescriptorBlock.SDB_Height || pos_y < 0)
 					{
 						not_finished = No;
 					}
-					else								
+					else
 					{
 						pos_x += BLTFontOffsetToHUD
 						(
-							&font, 
-							pos_x, 
-							pos_y, 
+							&font,
+							pos_x,
+							pos_y,
 							(int)*strptr - offset
 						);
-						
+
 						pos_x ++; // to make space between letters
 					}
 				}
-			}		
+			}
 			while(++strptr != end_char);
 
 			pos_y += font.fontHeight - 2;
 		}
-		
+
 		strptr++;
 	}
+#endif
 }
 
 
@@ -782,7 +788,7 @@ It returns 0 when we have reached the end of a string
 */
 
 
-
+#if 0 // bjd
 int ProcessLineLength
 (
 	char* start_ch, 		// start char of string
@@ -794,21 +800,21 @@ int ProcessLineLength
 )
 {
 	int continue_to_process_word = Yes;
-	int white_space_width = CHAR_WIDTH(fontnum, 0);	
+	int white_space_width = CHAR_WIDTH(fontnum, 0);
 	char *word_ptr = start_ch;
-		
-	*line_length = 0;	
+
+	*line_length = 0;
 
 	if(start_ch == NULL)
-	{		
+	{
 		*end_ch = NULL;
 		*line_length = 0;
 		return 0;
-	}	   		
+	}
 
 	// first process any white space at the end of the
-	// line out 
-	
+	// line out
+
 	while(*start_ch == ' ')
 	{
 		// make sure we havent run out
@@ -817,41 +823,41 @@ int ProcessLineLength
 		{
 			*end_ch = NULL;
 			*line_length = 0;
-			return 0;		
-		}	
-		
+			return 0;
+		}
+
 		start_ch++;
-	}	
-	
-	// Now we can start on the characters in the line	
+	}
+
+	// Now we can start on the characters in the line
 	// note that we have to have two loops. The first
 	// continues untill we break out of it. The second
 	// adds up the length of each word and sees if the line
 	// with the new word will overrun the max_width
-	
-	
+
+
 	// the  word_ptr points to the current char - it is only incremented
 	// when we can be sure that we can add the current letter to the word
-	
-	
+
+
 	while(1)
 	{
 		int word_length = 0;
 
 		continue_to_process_word = Yes;
 
-		while(continue_to_process_word) 				
+		while(continue_to_process_word)
 		{
 			// is the next char white space ?
 			// if so close the word
-		
+
 			if(IS_CHAR_WHITE_SPACE(*(word_ptr + 1)))
 			{
 				// hit white space - finish this current word but only
 				// AFTER we have processed the current char
 				continue_to_process_word = No;
-			}	
-			
+			}
+
 			// need to process every white space seperately
  			if(*word_ptr == '\t')
  			{
@@ -862,14 +868,14 @@ int ProcessLineLength
  			}
  			else if(*word_ptr == 0x0)
  			{
-				// reached end of file - need to return 0 
-				
-				*end_ch = word_ptr;				
+				// reached end of file - need to return 0
+
+				*end_ch = word_ptr;
 				return 0;
  			}
  			else if(*word_ptr == '\n')
  			{
-				*end_ch = word_ptr;				
+				*end_ch = word_ptr;
 				return 1;
  			}
  			else if(*word_ptr == ' ')
@@ -880,9 +886,9 @@ int ProcessLineLength
 					word_length += white_space_width;
 				}
 				// other wise keep on tiking on
-				
+
  				word_ptr++;
- 			}														
+ 			}
  			else
  			{
  				// yeah add a letter to the word length
@@ -891,24 +897,25 @@ int ProcessLineLength
 				word_length ++; //for space between lettes
 
 				word_ptr++; //process next char
-			}		
+			}
 		}
-		
+
 		// okay we have the length of this word - check to see if
 		// it overruns the end of the line - if it is too long,
 		// break out of the line loop
-		
-		
-		if((word_length + *line_length) >= max_width) 
+
+
+		if((word_length + *line_length) >= max_width)
 		{
 			*end_ch = start_ch;
-			return 1;				
-		}	
-		else 	
+			return 1;
+		}
+		else
 		{
 			*line_length += word_length;
 			// set up the next word save the beginning of teh word in start_ch
 			start_ch = word_ptr;
-		}												
+		}
 	}
-}		
+}
+#endif

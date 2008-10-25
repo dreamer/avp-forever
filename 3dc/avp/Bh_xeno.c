@@ -1886,7 +1886,7 @@ void Xeno_TurnAndTarget(STRATEGYBLOCK *sbPtr, int *ref_anglex,int *ref_angley) {
 void Xeno_Limbs_ShootTheRoof(STRATEGYBLOCK *sbPtr) {
 
 	XENO_STATUS_BLOCK *xenoStatusPointer;
-	int anglex,angley;
+//	int anglex,angley;
 
 	LOCALASSERT(sbPtr);
 	xenoStatusPointer = (XENO_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
@@ -4125,7 +4125,7 @@ void Execute_Xeno_TurnToFace_Far(STRATEGYBLOCK *sbPtr)
 void Execute_Xeno_Follow_Far(STRATEGYBLOCK *sbPtr)
 {
 	XENO_STATUS_BLOCK *xenoStatusPointer;
-	int anglex,angley;
+//	int anglex,angley;
 
 	LOCALASSERT(sbPtr);
 	xenoStatusPointer = (XENO_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
@@ -4320,7 +4320,7 @@ void Execute_Xeno_Return_Far(STRATEGYBLOCK *sbPtr)
 void Execute_Xeno_Avoidance_Far(STRATEGYBLOCK *sbPtr)
 {
 	XENO_STATUS_BLOCK *xenoStatusPointer;    
-	int anglex,angley;
+//	int anglex,angley;
 	
 	LOCALASSERT(sbPtr);
 	xenoStatusPointer = (XENO_STATUS_BLOCK *)(sbPtr->SBdataptr);    

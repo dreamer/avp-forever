@@ -1,3 +1,4 @@
+#if 0
 // Launches mplayer.com into a specific URL with LaunchMplayer()
 // By Rich Rice --rich@mpath.com
 // Modified by Edmond Meinfelder (edmond@mpath.com) for use with AvP
@@ -113,3 +114,4 @@ LaunchMplayer()
 	sprintf(cmdline, "rundll32.exe url.dll,FileProtocolHandler %s", mplayer_url);
 	return Execute(cmdline);
 }
+#endif

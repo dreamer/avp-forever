@@ -103,7 +103,7 @@ extern void TranslationSetup(void);
 extern void TranslatePointIntoViewspace(VECTORCH *pointPtr);
 
 
-extern void CheckRenderStatesForModule(MODULE *modulePtr);
+//extern void CheckRenderStatesForModule(MODULE *modulePtr);
 
 
 

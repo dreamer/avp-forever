@@ -42,6 +42,7 @@ namespace AwTl {
 		bool palettizedB : 1;
 		bool alphaB : 1;
 		bool validB : 1;
+		bool texB : 1; // BJD as per linux port..
 		
 		unsigned bitsPerPixel;
 		unsigned redLeftShift;
@@ -50,8 +51,9 @@ namespace AwTl {
 		unsigned greenRightShift;
 		unsigned blueLeftShift;
 		unsigned blueRightShift;
-		
-		DDPIXELFORMAT ddpf;
+
+		unsigned dwRGBAlphaBitMask; /// BJD as per linux port
+		//DDPIXELFORMAT ddpf;
 	};
 
 	// DO SOMTHING ABOUT THIS
@@ -76,7 +78,7 @@ namespace AwTl {
 						 static_cast<unsigned>(_colP->r)>>pixelFormat.redRightShift<<pixelFormat.redLeftShift
 						|static_cast<unsigned>(_colP->g)>>pixelFormat.greenRightShift<<pixelFormat.greenLeftShift
 						|static_cast<unsigned>(_colP->b)>>pixelFormat.blueRightShift<<pixelFormat.blueLeftShift
-						|pixelFormat.ddpf.dwRGBAlphaBitMask
+						|pixelFormat.dwRGBAlphaBitMask // BJD - "was pixelFormat.ddpf.dwRGBAlphaBitMask"
 					;
 				}
 				static inline unsigned DoConv(BYTE const * _colP, Colour const * _paletteP db_code1(DB_COMMA unsigned _paletteSize))
@@ -143,11 +145,11 @@ namespace AwTl {
 	
 	union SurfUnion
 	{
-		D3DTexture * textureP;
+		AVPTexture * textureP;
 		DDSurface * surfaceP;
 		void * voidP;
 		SurfUnion(){}
-		SurfUnion(D3DTexture * p) : textureP(p){}
+		SurfUnion(AVPTexture * p) : textureP(p){}
 		SurfUnion(DDSurface * p) : surfaceP(p){}
 	};
 
@@ -247,6 +249,7 @@ namespace AwTl {
 					*_dstRowP.byteP++ = u.b[1];
 					*_dstRowP.byteP = u.b[2];
 				}
+				break;
 			}
 			case 32:
 			{

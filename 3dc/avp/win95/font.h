@@ -20,7 +20,7 @@ typedef enum fonts
 	DATABASE_MESSAGE_FONT,
 
 	IntroFont_Dark,
-	IntroFont_Light,
+	//IntroFont_Light,
 
 	NUM_FONTS,
 
@@ -84,7 +84,7 @@ typedef struct
 
 typedef struct pffont
 {
-	LPDIRECTDRAWSURFACE data;	 						/*LPDIRECTDRAWSURFACE, etc - fill out*/
+	LPDIRECTDRAWSURFACE *data;	 						/*LPDIRECTDRAWSURFACE, etc - fill out*/
 	char filename[100];				 						/*compile in -filename */
 	int fontHeight;												/* max height of chars */
 	int num_chars_in_font;								/*number of chars in this font */

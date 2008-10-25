@@ -139,6 +139,7 @@ void FindIntersectionWithYPlane(VECTORCH *startPtr, VECTORCH *directionPtr, VECT
 void FindZFromXYIntersection(VECTORCH *startPtr, VECTORCH *directionPtr, VECTORCH *intersectionPtr);
 void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr);
 void DrawWaterFallPoly(VECTORCH *v);
+void RenderAllParticlesFurtherAwayThan(int zThreshold);
 
 #if platform_pc
 extern int sine[];
@@ -760,6 +761,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 	{
 		POLYHEADER *polyPtr = (POLYHEADER*) (*itemArrayPtr++);
 		int pif;	
+
 		#if 0
 		if (objectCompletelyInView)
 		{
@@ -4052,7 +4054,7 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 			  	D3D_DecalSystem_Setup();
 				for(i=0; i<63; i++)
 				{
-					PARTICLE particle;
+					PARTICLE particle = {0};
 
 					particle.Position.vy = -280+i-GetCos((CloakingPhase/16*i + i*64+particle.Position.vz)&4095)/1024;
 
@@ -4234,13 +4236,12 @@ static void FindAlienEnergySource_Recursion(HMODELCONTROLLER *controllerPtr, SEC
 
 void AddHierarchicalShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 {
-
+	// players gun, player models..
 	SHAPEHEADER *shapeheaderptr;
 	SHAPEINSTR *shapeinstrptr;
 
 	GLOBALASSERT(!dptr->HModelControlBlock);
 	if(!ObjectWithinFrustrum(dptr)) return;
-
 
 	#if 0
 	shapeheaderptr = GetShapeData(dptr->ObShape);
@@ -4330,6 +4331,7 @@ void AddHierarchicalShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 
 	if (BALLSOFFIRE_CHEATMODE && dptr->ObStrategyBlock)
 	{
+		void HandleObjectOnFire(DISPLAYBLOCK *dispPtr);
 		HandleObjectOnFire(dptr);
 	}
 
@@ -4448,6 +4450,7 @@ void TranslatePoint(int *source, int *dest, int *matrix);
 parm[esi] [ebx] [edi];
 
 #else
+#if 0
 void TranslatePoint(int *source, int *dest, int *matrix)
 {
 	__asm
@@ -4498,25 +4501,32 @@ void TranslatePoint(int *source, int *dest, int *matrix)
 		fstp	DWORD PTR [ebx+8]
 	}
 }
-
+#endif
+static void TranslatePoint(const float *source, float *dest, const float *matrix)
+{
+	dest[0] = matrix[ 0] * source[0] + matrix[ 1] * source[1] + matrix[ 2] * source[2] + matrix[ 3];
+	dest[1] = matrix[ 4] * source[0] + matrix[ 5] * source[1] + matrix[ 6] * source[2] + matrix[ 7];
+	dest[2] = matrix[ 8] * source[0] + matrix[ 9] * source[1] + matrix[10] * source[2] + matrix[11];
+}
 #endif
 
 void TranslatePointIntoViewspace(VECTORCH *pointPtr)
 {
-
 	Source[0] = pointPtr->vx;
 	Source[1] = pointPtr->vy;
 	Source[2] = pointPtr->vz;
 
-	TranslatePoint((int*)&Source,(int*)&Dest,(int*)&ViewMatrix);
+	TranslatePoint(Source, Dest, ViewMatrix);
 
 	f2i(pointPtr->vx,Dest[0]);
 	f2i(pointPtr->vy,Dest[1]);
 	f2i(pointPtr->vz,Dest[2]);
 }
+
 void SquishPoints(SHAPEINSTR *shapeinstrptr)
 {
 	int **shapeitemarrayptr = shapeinstrptr->sh_instr_data;
+
 	VECTORCH *shapePts      = (VECTORCH*)*shapeitemarrayptr;
 	{
 		int i;
@@ -4541,7 +4551,7 @@ void SquishPoints(SHAPEINSTR *shapeinstrptr)
 			Source[1] = point.vy;
 			Source[2] = point.vz;
 
-			TranslatePoint((int*)&Source,(int*)&Dest,(int*)&ViewMatrix);
+			TranslatePoint(Source, Dest, ViewMatrix);
 
 			f2i(RotatedPts[i].vx,Dest[0]);
 			f2i(RotatedPts[i].vy,Dest[1]);
@@ -4626,7 +4636,7 @@ void MorphPoints(SHAPEINSTR *shapeinstrptr)
 			Source[1] = srcPtr->vy+Global_ODB_Ptr->ObWorld.vy;
 			Source[2] = srcPtr->vz+Global_ODB_Ptr->ObWorld.vz;
 
-			TranslatePoint((int*)&Source,(int*)&Dest,(int*)&ViewMatrix);
+			TranslatePoint(Source, Dest, ViewMatrix);
 
 			f2i(destPtr->vx,Dest[0]);
 			f2i(destPtr->vy,Dest[1]);
@@ -4683,8 +4693,8 @@ void TranslateShapeVertices(SHAPEINSTR *shapeinstrptr)
 			Source[1] = srcPtr->vy;
 			Source[2] = srcPtr->vz;
 
-			TranslatePoint((int*)&Source,(int*)&Dest,(int*)&ObjectViewMatrix);
-			TranslatePoint((int*)&Dest,(int*)&Source,(int*)&ViewMatrix);
+			TranslatePoint(Source, Dest, ObjectViewMatrix);
+			TranslatePoint(Dest, Source, ViewMatrix);
 
 			f2i(destPtr->vx,Source[0]);
 			f2i(destPtr->vy,Source[1]);
@@ -4949,7 +4959,6 @@ void RenderParticle(PARTICLE *particlePtr)
 		
 		VerticesBuffer[3].X += offset[3].vx;
 		VerticesBuffer[3].Y += MUL_FIXED(offset[3].vy,87381);
-	
 	}
 	
 	{
@@ -4971,10 +4980,10 @@ void RenderParticle(PARTICLE *particlePtr)
 				if(RenderPolygon.NumberOfVertices<3) return;
 				TexturedPolygon_ClipWithPositiveX();
 				if(RenderPolygon.NumberOfVertices<3) return;
-				D3D_Particle_Output(particlePtr,RenderPolygon.Vertices);
-  			
+//				D3D_Particle_Output(particlePtr,RenderPolygon.Vertices);
+				AddParticle(particlePtr, RenderPolygon.Vertices);
   			}
-			else D3D_Particle_Output(particlePtr,VerticesBuffer);
+			else AddParticle(particlePtr, VerticesBuffer);//D3D_Particle_Output(particlePtr,VerticesBuffer);
 		}
 	}	
 }
@@ -4984,6 +4993,7 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 	VECTORCH vertices[5];
 	MATRIXCH mat;
 	
+	void MakeMatrixFromDirection(VECTORCH *directionPtr, MATRIXCH *matrixPtr);
 	MakeMatrixFromDirection(&particlePtr->Velocity,&mat);
 
 	mat.mat11 >>= 12;
@@ -6264,6 +6274,7 @@ void RenderSky(void)
 						GouraudTexturedPolygon_ClipWithPositiveX();
 						if(RenderPolygon.NumberOfVertices>=3)
 						{
+							void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr);
 							D3D_SkyPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
 						}
 					}
@@ -6392,7 +6403,7 @@ void DrawWaterFallPoly(VECTORCH *v)
 		RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
 	}
 	{
-		static wv=0;
+		static int wv=0;
 		unsigned int a;
 		for (a=0; a<4; a++) 
 		{
@@ -6682,7 +6693,6 @@ void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour)
 	PARTICLE particle;
 //	VECTORCH point = {-20947,-8216,2244};
 	VECTORCH point = *positionPtr;
-
 
 	#if 0
 	if (IsThisObjectVisibleFromThisPosition(Player,&point,ONE_FIXED))

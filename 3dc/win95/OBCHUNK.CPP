@@ -228,7 +228,8 @@ BOOL Object_Chunk::assoc_with_shape_no(File_Chunk *fc)
 	List<Chunk *> chlst;
 	fc->lookup_child("REBSHAPE",chlst);
 	
-	for (LIF<Chunk *> l(&chlst); !l.done(); l.next())
+	LIF<Chunk *> l(&chlst);
+	for (; !l.done(); l.next())
 	{
 		shp = (Shape_Chunk *)l();
 		shphd = shp->get_header();
@@ -1253,7 +1254,7 @@ Object_Track_Chunk2::Object_Track_Chunk2 (Chunk_With_Children * parent,const cha
 
 	if(!(flags & TrackFlag_QuatProblemSorted))
 	{
-		for(i=0;i<num_sections;i++)
+		for(int i=0;i<num_sections;i++)
 		{
 			ChunkQuat temp=sections[i].quat_start;
 			sections[i].quat_start.x=-temp.w;

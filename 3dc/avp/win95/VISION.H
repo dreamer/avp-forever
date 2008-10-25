@@ -62,7 +62,7 @@ extern struct D3DLightColourControl d3d_light_ctrl;
 
 /* JH 6/4/97 - define a structure to control an alpha channelled coloured overlay */
 extern D3DINFO d3d;
-#define d3d_overlays_available ((d3d.ThisDriver.dpcTriCaps.dwSrcBlendCaps & (D3DPBLENDCAPS_SRCALPHA|D3DPBLENDCAPS_INVSRCALPHA))==(D3DPBLENDCAPS_SRCALPHA|D3DPBLENDCAPS_INVSRCALPHA))
+// bjd #define d3d_overlays_available ((d3d.ThisDriver.dpcTriCaps.dwSrcBlendCaps & (D3DPBLENDCAPS_SRCALPHA|D3DPBLENDCAPS_INVSRCALPHA))==(D3DPBLENDCAPS_SRCALPHA|D3DPBLENDCAPS_INVSRCALPHA))
 
 enum D3DOCC_Mode
 {

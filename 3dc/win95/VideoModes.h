@@ -1,3 +1,16 @@
+
+typedef struct
+{
+//	GUID DDGUID;
+//	int  DDGUIDIsSet;
+	int  Width;
+	int  Height;
+	int  ColourDepth;
+	
+} DEVICEANDVIDEOMODE;
+
+#if 0 
+
 #define MAX_DEVICES 4
 #define MAX_VIDEOMODES 100
 
@@ -38,3 +51,4 @@ extern int NumberOfDevices;
 extern int CurrentlySelectedDevice;
 extern int CurrentlySelectedVideoMode;
 
+#endif

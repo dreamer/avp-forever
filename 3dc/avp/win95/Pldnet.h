@@ -968,7 +968,7 @@ extern void AddNetMsg_LocalObjectDestroyed_Request(STRATEGYBLOCK *sbPtr);
 extern void AddNetMsg_ScoreChange(int killerIndex,int victimIndex);
 
 extern void AddNetMsg_PlayerID(DPID playerID,unsigned char message);
-extern void AddNetMsg_LastManStanding_RestartTimer(unsigned char time);
+extern void AddNetMsg_LastManStanding_RestartTimer(char time);
 extern void AddNetMsg_LastManStanding_Restart(DPID alienID,int seed);
 
 extern void AddNetMsg_CreateWeapon(char* objectName,int type,VECTORCH* location);
@@ -997,6 +997,25 @@ extern void GetNextMultiplayerObservedPlayer();
 extern void TurnOffMultiplayerObserveMode();
 extern void CheckStateOfObservedPlayer();
 
+extern int DirectPlay_Disconnect(void);
+static int MyPlayerHasAMuzzleFlash(STRATEGYBLOCK *sbPtr);
+int LinkSwitchGetSynchData(STRATEGYBLOCK* sbPtr);
+int TrackObjectGetSynchData(STRATEGYBLOCK* sbPtr);
+void LinkSwitchSetSynchData(STRATEGYBLOCK* sbPtr,int status);
+void TrackObjectSetSynchData(STRATEGYBLOCK* sbPtr,int status);
+void SetSeededFastRandom(int seed);
+int SeededFastRandom(void);
+void AllNewModuleHandler(void);
+//void CreateMarineHModel(NETGHOSTDATABLOCK *ghostDataPtr, int weapon);
+//void CreateAlienHModel(NETGHOSTDATABLOCK *ghostDataPtr,int alienType);
+//void CreatePredatorHModel(NETGHOSTDATABLOCK *ghostDataPtr, int weapon);
+void ReflectObject(DISPLAYBLOCK *dPtr);
+void SmartTarget_GetCofM(DISPLAYBLOCK *target,VECTORCH *viewSpaceOutput);
+int IsThisObjectVisibleFromThisPosition_WithIgnore(DISPLAYBLOCK *objectPtr,DISPLAYBLOCK *ignoredObjectPtr,VECTORCH *positionPtr,int maxRange);
+extern void D3D_FadeDownScreen(int brightness, int colour);
+extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, int colour);
+extern void RenderStringCentred(char *stringPtr, int centreX, int y, int colour);
+extern void RenderString(char *stringPtr, int x, int y, int colour);
 
 /* ---------------------------------------------------------------------
    Some global references

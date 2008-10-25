@@ -22,7 +22,11 @@ extern "C" {
 /* I N C L U D E S ---------------------------------------------------- */
 
 /* DirectPlay include. */
-#include "dplay.h"
+//#include "dplay.h"
+//#include "dplay8.h"
+
+//typedef int DPID;
+//typedef int AVPDPNetID;
 
 /* C O N S T A N T S -------------------------------------------------- */
 
@@ -31,7 +35,10 @@ extern "C" {
  * you must make all buffers at least this big and not use these bytes 
  * yourself.
  */
-#define DPEXT_HEADER_SIZE	( sizeof( struct DpExtHeader) )
+//#define DPEXT_HEADER_SIZE	( sizeof( struct DpExtHeader) )
+
+// dont want to use that
+#define DPEXT_HEADER_SIZE	0
 
 /* This flag alters the DpExtRecv() function behaviour to allow the user
  * to provide the buffer that the message will be copied to. This is more
@@ -75,6 +82,8 @@ extern void DpExtUnInit(void);
  * However, you *must* leave DPEXT_HEADER_SIZE bytes free at the start of
  * your data buffer. The dwDataSize byte count must includes these bytes. 
  */ 
+
+#if 0
 extern HRESULT DpExtSend
 (
 	LPDIRECTPLAY4 lpDP2A,	/* IN: Ptr to IDirectPlay2A (DBCS) interface. */	 
@@ -84,6 +93,7 @@ extern HRESULT DpExtSend
 	LPVOID lpData,			/* IN: Ptr to start of message. 	*/
 	DWORD dwDataSize		/* IN: Byte count of message. 		*/
 );
+#endif
 
 /* This fn has similar parameters to the standard DirectPlay Receive()
  * fn. Be aware that the 2 id parameters, the lplpData parameter and the
@@ -110,6 +120,8 @@ extern HRESULT DpExtSend
  * bytes for header information. Your message proper begins after this 
  * header.
  */
+
+#if 0
 extern HRESULT DpExtRecv
 (
 	LPDIRECTPLAY4 lpDP2A,	/* IN: Ptr to IDirectPlay2A (DBCS) interface. */
@@ -119,6 +131,7 @@ extern HRESULT DpExtRecv
 	LPVOID *lplpData, 		/* IN/OUT: Ptr to ptr to message data.	*/
 	LPDWORD lpdwDataSize	/* IN/OUT: Ptr to byte count of message.	*/
 );
+#endif
 
 /* E N D   W R A P P E R ---------------------------------------------- */
 

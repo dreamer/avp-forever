@@ -60,6 +60,10 @@ enum AVPMENUGFX_ID
 	AVPMENUGFX_ALIEN_EPISODE9,
 	AVPMENUGFX_ALIEN_EPISODE10,
 
+	//bjd - adding these here
+//	AVPMENUGFX_LOADINGBAR_EMPTY,
+//	AVPMENUGFX_LOADINGBAR_FULL,
+
 	AVPMENUGFX_WINNER_SCREEN,
 
 	AVPMENUGFX_SPLASH_SCREEN1,
@@ -74,12 +78,27 @@ enum AVPMENUGFX_ID
 typedef struct
 {
 	char *FilenamePtr;
-	LPDIRECTDRAWSURFACE ImagePtr;
+	void *ImagePtr;
+	LPDIRECT3DTEXTURE9 menuTexture;
 	AW_BACKUPTEXTUREHANDLE hBackup;
 	int Width;
 	int Height;
 
+	int newWidth;
+	int newHeight;
+
 } AVPMENUGFX;
+
+typedef struct AVPIndexedFont
+{
+	AVPMENUGFX info;	/* graphic info */
+	int swidth;		/* width for space */
+	int ascii;		/* ascii code for initial character */
+	int height;		/* height per character */
+	
+	int numchars;
+	int FontWidth[256];
+} AVPIndexedFont;
 
 enum AVPMENUFORMAT_ID
 {

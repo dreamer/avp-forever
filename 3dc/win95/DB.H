@@ -70,8 +70,10 @@
 /* I N C L U D E D S ************************************************** */
 #include "advwin32.h"
 #ifndef DB_NOWINDOWS
-	#include <windows.h>
-	#include "advwin32.h"
+	#ifdef WIN32
+		#include <windows.h>
+		#include "advwin32.h"
+	#endif
 #endif
 
 /* Permit use in a C++ source file. */

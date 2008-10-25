@@ -28,11 +28,13 @@ extern unsigned long int rdtsc_mid(void);
 	value [eax]		\
 	modify [edx];
 
+
 /* Test to see if we have a Pentium or not. Note that this test is reliable 
  * enough for a tools project (where we can put in an overide switch) but not
  * for a released product.
  */
 extern unsigned char Pentium(void);
+
 #pragma aux Pentium = \
 					"pushfd" \
 					"pop eax" \
@@ -60,5 +62,3 @@ extern unsigned char Pentium(void);
 	"finish: 		 nop" \
 					value [al] \
 					modify [eax ecx]
-
-

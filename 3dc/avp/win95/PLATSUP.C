@@ -368,6 +368,7 @@ char *LoadTextFile(char *filename)
 	char *bufferPtr;
 	long int save_pos, size_of_file;
 	FILE *fp;
+
 	fp = fopen(filename,"rb");
 	
 	if (!fp) goto error;

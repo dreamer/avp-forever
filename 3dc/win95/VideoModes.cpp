@@ -1,11 +1,233 @@
+#include <fstream>
+#include <string>
+
 extern "C"
 {
+#include "VideoModes.h"
+#include <stdio.h>
+#include "d3_func.h"
+
+extern D3DInfo d3d;
+
+int CurrentVideoMode = 0;
+DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
+
+void NextVideoMode2() {
+
+	if (++CurrentVideoMode >= d3d.NumModes)
+	{
+		CurrentVideoMode = 0;
+	}
+}
+
+void PreviousVideoMode2() {
+
+	if (--CurrentVideoMode < 0)
+	{
+		CurrentVideoMode = d3d.NumModes - 1;
+	}
+}
+
+char *GetVideoModeDescription2()
+{
+	return d3d.AdapterInfo.Description;
+}
+
+char *GetVideoModeDescription3() {
+
+	static char buf[64];
+	
+	int colour_depth = 0;
+	
+	// determine colour depth from d3d format
+	switch(d3d.DisplayMode[CurrentVideoMode].Format) {
+		case 22:
+			colour_depth = 32;
+			break;
+		case 23:
+			colour_depth = 16;
+			break;
+	}
+	sprintf(buf, "%dx%dx%d", d3d.DisplayMode[CurrentVideoMode].Width, d3d.DisplayMode[CurrentVideoMode].Height, colour_depth);
+	return buf;
+}
+
+void GetDeviceAndVideoModePrefences() {
+
+	int colour_depth = 0;
+
+	for (int i=0; i < d3d.NumModes; i++)
+	{
+		// determine colour depth from d3d format
+		switch(d3d.DisplayMode[i].Format) {
+			case 22:
+				colour_depth = 32;
+				break;
+			case 23:
+				colour_depth = 16;
+				break;
+		}
+
+		if ((PreferredDeviceAndVideoMode.Width == d3d.DisplayMode[i].Width)
+		  &&(PreferredDeviceAndVideoMode.Height == d3d.DisplayMode[i].Height)
+		  &&(PreferredDeviceAndVideoMode.ColourDepth == colour_depth))
+		{
+			CurrentVideoMode = i;
+			break;
+		}
+	}
+
+}
+
+void SelectBasicDeviceAndVideoMode() {
+
+	// default to 640x480x16
+	PreferredDeviceAndVideoMode.Width = 640;
+	PreferredDeviceAndVideoMode.Height = 480;
+	PreferredDeviceAndVideoMode.ColourDepth = 16;
+	
+	// create new file here?
+	std::ofstream file("AliensVsPredator.cfg");
+	file << "[VideoMode] \n";
+	file << "Width = " << PreferredDeviceAndVideoMode.Width << "\n";
+	file << "Height = " << PreferredDeviceAndVideoMode.Height << "\n";
+	file << "ColourDepth = " << PreferredDeviceAndVideoMode.ColourDepth << "\n";
+	file.close();
+}
+
+void LoadDeviceAndVideoModePreferences() {
+
+	std::string temp_value;
+//	FILE* file=fopen("AliensVsPredator.cfg","rb");
+	std::ifstream file("AliensVsPredator.cfg");
+	
+	// if the file doesn't exist
+	if(!file)
+	{
+		SelectBasicDeviceAndVideoMode();
+		return;
+	}
+
+	std::string temp, temp2;
+
+	getline(file, temp);
+	temp2 = "[VideoMode] ";
+	if(temp != temp2 ) {
+		OutputDebugString("\n didnt [VideoMode] config header");
+	}
+
+	getline (file,temp, '=');
+	if (temp == "Width ") {
+		file.ignore(1);
+		getline(file, temp);
+		int value = atoi(temp.c_str());
+		PreferredDeviceAndVideoMode.Width = value;
+	}
+	else {
+		OutputDebugString("\n nope, wasnt it");
+	}
+
+	getline (file,temp, '=');
+	if (temp == "Height ") {
+		file.ignore(1);
+		getline(file, temp);
+		int value = atoi(temp.c_str());
+		PreferredDeviceAndVideoMode.Height = value;
+	}
+	else {
+		OutputDebugString("\n nope, wasnt it");
+	}
+
+	getline (file,temp, '=');
+	if (temp == "ColourDepth ") {
+		file.ignore(1);
+		getline(file, temp);
+		int value = atoi(temp.c_str());
+		if(value == 32 || value == 16) PreferredDeviceAndVideoMode.ColourDepth = value;
+		else PreferredDeviceAndVideoMode.ColourDepth = 16;
+	}
+	else {
+		OutputDebugString("\n nope, wasnt it");
+	}
+
+//	char buf[100];
+//	sprintf(buf, "\n width: %d, height: %d depth: %d", PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth);
+//	OutputDebugString(buf);
+
+	file.close();
+
+	GetDeviceAndVideoModePrefences();
+
+//	if ((file >> temp_value) != temp_value) {
+//	}
+//	file.getline(temp_value, 100);
+
+//	fread(&PreferredDeviceAndVideoMode,sizeof(DEVICEANDVIDEOMODE),1,file);
+//	fclose(file);
+//	GetDeviceAndVideoModePrefences();
+}
+
+//const int TotalVideoModes = sizeof(VideoModeList) / sizeof(VideoModeList[0]);
+
+static void SetDeviceAndVideoModePreferences(void)
+{
+	PreferredDeviceAndVideoMode.Width = d3d.DisplayMode[CurrentVideoMode].Width;
+	PreferredDeviceAndVideoMode.Height = d3d.DisplayMode[CurrentVideoMode].Height;
+
+	int colour_depth = 0;
+	
+	// determine colour depth from d3d format
+	switch(d3d.DisplayMode[CurrentVideoMode].Format) {
+		case 22:
+			colour_depth = 32;
+			break;
+		case 23:
+			colour_depth = 16;
+			break;
+	}
+
+	PreferredDeviceAndVideoMode.ColourDepth = colour_depth;
+	/*
+	DEVICEANDVIDEOMODESDESC *dPtr = &DeviceDescriptions[CurrentlySelectedDevice];
+	VIDEOMODEDESC *vmPtr = &(dPtr->VideoModes[CurrentlySelectedVideoMode]);
+
+	PreferredDeviceAndVideoMode.DDGUID = dPtr->DDGUID;
+	PreferredDeviceAndVideoMode.DDGUIDIsSet = dPtr->DDGUIDIsSet;
+	PreferredDeviceAndVideoMode.Width = vmPtr->Width;
+	PreferredDeviceAndVideoMode.Height = vmPtr->Height;
+	PreferredDeviceAndVideoMode.ColourDepth = vmPtr->ColourDepth;
+	*/
+}
+
+// called when you select "use selected settings" when selecting a video mode
+void SaveDeviceAndVideoModePreferences() {
+
+	//	FILE* file=fopen("AliensVsPredator.cfg","rb");
+	std::ofstream file("AliensVsPredator.cfg");
+	
+	// if the file doesn't exist
+	if(!file)
+	{
+		SelectBasicDeviceAndVideoMode();
+		return;
+	}
+
+	SetDeviceAndVideoModePreferences();
+
+	file << "[VideoMode] \n";
+	file << "Width = " << PreferredDeviceAndVideoMode.Width << "\n";
+	file << "Height = " << PreferredDeviceAndVideoMode.Height << "\n";
+	file << "ColourDepth = " << PreferredDeviceAndVideoMode.ColourDepth << "\n";
+	file.close();
+}
+
+#if 0 // bjd
 
 #include "3dc.h"
 #include "videomodes.h"
 #include "awTexLd.h" // to set the surface format for Aw gfx dd surface loads
 
-extern LPDIRECTDRAW            lpDD;
+extern IDirect3D8          *lpDD;
 DEVICEANDVIDEOMODESDESC DeviceDescriptions[MAX_DEVICES];
 int NumberOfDevices;
 int CurrentlySelectedDevice=0;
@@ -384,4 +606,7 @@ extern void LoadDeviceAndVideoModePreferences(void)
 	GetDeviceAndVideoModePrefences();
 }
 
+#endif
 };
+
+

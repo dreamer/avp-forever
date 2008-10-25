@@ -7,7 +7,7 @@ extern "C"
 #include "d3dmacs.h"
 #include "GammaControl.h"
 
-extern LPDIRECTDRAWSURFACE lpDDSPrimary;
+//extern LPDIRECTDRAWSURFACE lpDDSPrimary; // BJD
 static int ActualGammaSetting;
 int RequestedGammaSetting;
 
@@ -22,17 +22,20 @@ void InitialiseGammaSettings(int gamma)
 #if 0
 void UpdateGammaSettings(void)
 {
-	LPDIRECTDRAWGAMMACONTROL handle=NULL;
-	DDGAMMARAMP gammaValues;
+	//LPDIRECTDRAWGAMMACONTROL handle=NULL; // BJD
+	//DDGAMMARAMP gammaValues; // BJD
+	D3DGAMMARAMP gammaValues;
 
 	if (RequestedGammaSetting==ActualGammaSetting) return;
-
+/*
 	lpDDSPrimary->QueryInterface(IID_IDirectDrawGammaControl,(LPVOID*)&handle);
 	if(!handle)
 	{
 		return;
 	}
+*/
 //	handle->GetGammaRamp(0,&gammaValues);
+	d3d.lpD3DDevice->GetGammaRamp(&gammaValues);
 	for (int i=0; i<=255; i++)
 	{
 		int u = ((i*65536)/255);
@@ -50,18 +53,23 @@ void UpdateGammaSettings(void)
 		gammaValues.blue[i]=a*256;
 	}
 
-	HRESULT result = handle->SetGammaRamp(0,&gammaValues);
+#if ForceCalibration
+d3d.lpD3DDevice->SetGammaRamp(D3DSGR_CALIBRATE,&gammaValues);
+#else
+d3d.lpD3DDevice->SetGammaRamp(D3DSGR_NO_CALIBRATION,&gammaValues);
+#endif
+	//HRESULT result = handle->SetGammaRamp(0,&gammaValues);
 
-	RELEASE(handle);
+	//RELEASE(handle);
 
 	ActualGammaSetting=RequestedGammaSetting;
-
 }
 #else
 void UpdateGammaSettings(void)
 {
-	LPDIRECTDRAWGAMMACONTROL handle=NULL;
-	DDGAMMARAMP gammaValues;
+	//LPDIRECTDRAWGAMMACONTROL handle=NULL; // BJD
+	//DDGAMMARAMP gammaValues; // BJD
+//	D3DGAMMARAMP gammaValues;
 
 	if (RequestedGammaSetting==ActualGammaSetting) return;
 
@@ -74,8 +82,6 @@ void UpdateGammaSettings(void)
 		int a;
 		
 		a = m+MUL_FIXED(RequestedGammaSetting*256,l);
-
-
 
 		m = MUL_FIXED(a,a);
 		l = MUL_FIXED(2*a,ONE_FIXED-a);

@@ -1710,6 +1710,12 @@ void MakeParticle(VECTORCH *positionPtr, VECTORCH *velocityPtr, enum PARTICLE_ID
 	}
 }
 
+int sortParticle( const PARTICLE_DESC *elem1, const PARTICLE_DESC *elem2 )
+{
+	//return elem1.value > elem2.value;
+	return elem1->TranslucencyType > elem2->TranslucencyType;
+}
+
 void HandleParticleSystem(void)
 {
 	int i;
@@ -1726,6 +1732,9 @@ void HandleParticleSystem(void)
 //	D3D_DecalSystem_Setup();
 	i = NumActiveParticles;
 	particlePtr = ParticleStorage;
+
+	/* bjd - do particle sort here?? */
+//	qsort (&ParticleDescription[particlePtr->ParticleID], NumActiveParticles, sizeof(PARTICLE_DESC), sortParticle);
 	
 	while(i--)
 	{
@@ -3432,6 +3441,7 @@ static PARTICLE RainDropStorage[MAX_RAINDROPS];
 #define MAX_NO_OF_RIPPLES 100
 RIPPLE RippleStorage[MAX_NO_OF_RIPPLES];
 int ActiveRippleNumber;
+
 void InitialiseRainDrops(void)
 {
 	{

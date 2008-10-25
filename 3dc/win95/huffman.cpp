@@ -99,7 +99,7 @@ extern HuffmanPackage *HuffmanCompression(unsigned char *sourcePtr, int length)
 	{
     	outpackage->CodelengthCount[n] = Depths[n + 1];
 	}
-    for (n = 0; n < 256; n++)
+    for (int n = 0; n < 256; n++)
 	{
 	   	outpackage->ByteAssignment[n]  = SymbolCensus[n + 1].Symbol;
 	}

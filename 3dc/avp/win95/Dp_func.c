@@ -1,3 +1,4 @@
+#if 0
 #include "3dc.h"
 #include "module.h"
 #include "stratdef.h"
@@ -84,6 +85,7 @@ void CheckCaps(void)
 		TRACE(_T("CheckCaps - Async not supported\n"));
 }
 #endif
+
 /*
  * DPlayClose
  *
@@ -143,6 +145,7 @@ FAILURE:
 	return hr;
 }
 
+#if 0
 /*
  * DPlayCreatePlayer
  *
@@ -170,6 +173,7 @@ HRESULT DPlayCreatePlayer(LPDPID lppidID, LPTSTR lptszPlayerName, HANDLE hEvent,
 									
 	return hr;
 }
+#endif
 
 /*
  * DPlayCreateSession
@@ -213,6 +217,7 @@ HRESULT DPlayCreateSession(LPTSTR lptszSessionName,int maxPlayers,int dwUser1,in
 	return hr;
 }
 
+#if 0
 /*
  * DPlayDestroyPlayer
  * 
@@ -227,7 +232,9 @@ HRESULT DPlayDestroyPlayer(DPID pid)
 
 	return hr;
 }
+#endif
 
+#if 0
 /*
  * DPlayEnumPlayers
  *
@@ -243,7 +250,9 @@ HRESULT DPlayEnumPlayers(LPGUID lpSessionGuid, LPDPENUMPLAYERSCALLBACK2 lpEnumCa
 
 	return hr;
 }
+#endif
 
+#if 0
 /*
  * DPlayEnumSessions
  *
@@ -267,7 +276,9 @@ HRESULT DPlayEnumSessions(DWORD dwTimeout, LPDPENUMSESSIONSCALLBACK2 lpEnumCallb
 
 	return hr;
 }
+#endif
 
+#if 0
 /*
  * DPlayGetPlayerData
  * 
@@ -282,7 +293,9 @@ HRESULT DPlayGetPlayerData(DPID pid, LPVOID lpData, LPDWORD lpdwDataSize, DWORD 
 
 	return hr;
 }
+#endif
 
+#if 0
 /*
  * DPlayGetSessionDesc
  *
@@ -321,7 +334,9 @@ HRESULT DPlayGetSessionDesc(void)
 
 	return hr;
 }
+#endif
 
+#if 0
 /*
  * IsDPlay
  *
@@ -331,6 +346,8 @@ BOOL IsDPlay(void)
 {
 	return (glpDP ? TRUE:FALSE);
 }
+#endif
+
 
 /*
  * DPlayOpenSession
@@ -367,7 +384,7 @@ HRESULT DPlayOpenSession(LPGUID lpSessionGuid)
 	return hr;
 }
 
-
+#if 0
 /*
  * DPlayReceive
  *
@@ -382,6 +399,7 @@ HRESULT DPlayReceive(LPDPID lpidFrom, LPDPID lpidTo, DWORD dwFlags, LPVOID lpDat
 	
 	return hr;
 }
+#endif
 
 /*
  * DPlayRelease
@@ -414,7 +432,7 @@ HRESULT DPlayRelease(void)
 
 	return hr;
 }
-
+#if 0
 /*
  * DPlaySend
  * 
@@ -437,7 +455,9 @@ HRESULT DPlaySend(DPID idFrom, DPID idTo, DWORD dwFlags, LPVOID lpData, DWORD dw
 
 	return hr;
 }
+#endif
 
+#if 0
 /*
  * DPlaySetPlayerData
  *
@@ -452,4 +472,6 @@ HRESULT DPlaySetPlayerData(DPID pid, LPVOID lpData, DWORD dwSize, DWORD dwFlags)
 	
 	return hr;
 }
+#endif
 
+#endif // #if 0

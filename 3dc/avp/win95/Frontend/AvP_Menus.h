@@ -45,6 +45,8 @@ enum MENUSSTATE_ID
 	MENUSSTATE_STARTGAME,
 };
 
+int GetAvPMenuState();
+
 enum AVPMENU_ID
 {
 	AVPMENU_MAIN,
@@ -314,6 +316,7 @@ typedef struct
 {
 	char Name[40];
 	char levelIndex;//local level index
+	char hostAddress[16];
 	GUID Guid;
 	BOOL AllowedToJoin;
 } SESSION_DESC;

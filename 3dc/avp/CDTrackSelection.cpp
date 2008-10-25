@@ -14,6 +14,8 @@ extern "C"
 
 #include "list_tem.hpp"
 
+#include "OGG_player.h"
+
 //lists of tracks for each level
 List<int> LevelCDTracks[AVP_ENVIRONMENT_END_OF_LIST];
 
@@ -32,7 +34,7 @@ void EmptyCDTrackList()
 		while(LevelCDTracks[i].size()) LevelCDTracks[i].delete_first_entry();
 	}
 
-	for(i=0;i<3;i++)
+	for(int i=0;i<3;i++)
 	{
 		while(MultiplayerCDTracks[i].size()) MultiplayerCDTracks[i].delete_first_entry();
 	}
@@ -132,7 +134,6 @@ void LoadCDTrackList()
 	
 	char* bufferptr=buffer;
 
-
 	//first extract the multiplayer tracks
 	for(int i=0;i<3;i++)
 	{
@@ -140,12 +141,11 @@ void LoadCDTrackList()
 	}
 	
 	//now the level tracks
-	for(i=0 ;i<AVP_ENVIRONMENT_END_OF_LIST;i++)
+	for(int i=0 ;i<AVP_ENVIRONMENT_END_OF_LIST;i++)
 	{
 		ExtractTracksForLevel(bufferptr,LevelCDTracks[i]);
 	}
 	
-
 	delete [] buffer;
 }
 
@@ -169,15 +169,36 @@ static BOOL PickCDTrack(List<int>& track_list)
 	return TRUE;	
 }
 
+//#include <process.h>
+
+static bool PickOGGTrack(List<int>& track_list)
+{
+	//make sure we have some tracks in the list
+	if(!OGG_CheckNumberOfTracks()) return FALSE;
+
+	//pick the next track in the list
+	unsigned int index=TrackSelectCounter % OGG_CheckNumberOfTracks();
+
+	TrackSelectCounter++;
+
+	//play it
+	stopOgg();
+	loadOgg(index);
+
+	LastTrackChosen = index;
+
+	return TRUE;
+}
+
 
 void CheckCDAndChooseTrackIfNeeded()
 {
 	static enum playertypes lastPlayerType;
 	
 	//are we bothering with cd tracks
-	if(!CDDA_IsOn()) return;
+//	if(!CDDA_IsOn()) return;
 	//is our current track still playing
-	if(CDDA_IsPlaying())
+	if(CDDA_IsPlaying() || oggIsPlaying()) // check this is ok
 	{
 		//if in a multiplayer game see if we have changed character type
 		if(AvP.Network == I_No_Network || AvP.PlayerType==lastPlayerType) 
@@ -196,12 +217,22 @@ void CheckCDAndChooseTrackIfNeeded()
 		int level=NumberForCurrentLevel();
 		if(level>=0 && level<AVP_ENVIRONMENT_END_OF_LIST)
 		{
-			//pick track based on level
-			if(PickCDTrack(LevelCDTracks[level]))
+// bjd
+			if(CDDA_IsOn())
 			{
-				return;
+				//pick track based on level
+				if(PickCDTrack(LevelCDTracks[level]))
+				{
+//					return;
+				}
 			}
-			
+			// if use ogg
+			{
+				if(PickOGGTrack(LevelCDTracks[level]))
+				{
+					return;
+				}
+			}
 		}
 	}
 	

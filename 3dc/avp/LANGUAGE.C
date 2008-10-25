@@ -22,14 +22,16 @@
 
 
 #ifdef AVP_DEBUG_VERSION
-	#define USE_LANGUAGE_TXT 0
+	// bjd - this'll look for ENGLISH.TXT which doesn't exist in the retail data files
+	// so i'll set it to '1' to use language.txt
+	#define USE_LANGUAGE_TXT 1
 #else
 	#define USE_LANGUAGE_TXT 1
 #endif
 
 static char EmptyString[]="";
 
-static char *TextStringPtr[MAX_NO_OF_TEXTSTRINGS]={&EmptyString,};
+static char *TextStringPtr[MAX_NO_OF_TEXTSTRINGS]={EmptyString};
 static char *TextBufferPtr;
 
 void InitTextStrings(void)
@@ -46,12 +48,27 @@ void InitTextStrings(void)
 	#elif ALIEN_DEMO
 	TextBufferPtr = LoadTextFile("aenglish.txt");
 	#elif USE_LANGUAGE_TXT
-	TextBufferPtr = LoadTextFile("language.txt");
+#ifdef _XBOX
+	TextBufferPtr = LoadTextFile("D:\\language.txt"); // xbox
+#endif
+#ifdef WIN32 
+	TextBufferPtr = LoadTextFile("language.txt"); // win32
+#endif
 	#else
 	TextBufferPtr = LoadTextFile(LanguageFilename[AvP.Language]);
 	#endif
 	
-	LOCALASSERT(TextBufferPtr);
+	if(TextBufferPtr == NULL) {
+		/* NOTE:
+		   if this load fails, then most likely the game is not 
+		   installed correctly. 
+		   SBF
+		  */ 
+		OutputDebugString("cant find language.txt\n");
+//		fprintf(stderr, "ERROR: unable to load %s language text file\n",
+//			 filename);
+		exit(1);
+	}
 
 	if (!strncmp (TextBufferPtr, "REBCRIF1", 8))
 	{
@@ -64,9 +81,7 @@ void InitTextStrings(void)
 		textPtr = TextBufferPtr;
 	}
 
-	#if SupportWindows95
-	AddToTable( &EmptyString );
-	#endif
+	AddToTable( EmptyString );
 
 	for (i=1; i<MAX_NO_OF_TEXTSTRINGS; i++)
 	{	
@@ -85,18 +100,14 @@ void InitTextStrings(void)
 		/* change quote mark to zero terminator */
 		*textPtr = 0;
 
-		#if SupportWindows95
 		AddToTable( TextStringPtr[i] );
-		#endif
 	}
 }
 void KillTextStrings(void)
 {
 	UnloadTextFile(LanguageFilename[AvP.Language],TextBufferPtr);
 
-	#if SupportWindows95
 	UnloadTable();
-	#endif
 }
 
 char *GetTextString(enum TEXTSTRING_ID stringID)

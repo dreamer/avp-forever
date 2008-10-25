@@ -40,7 +40,6 @@ typedef enum gamedrawmode
 	I_GDM_Flippin,
 
 } I_GAMEDRAW_MODE;
-	
 
 /* Languages*/
 

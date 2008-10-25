@@ -2500,16 +2500,16 @@ int GetTextureHandle(IMAGEHEADER *imageHeaderPtr);
 void* LoadFontIntoDirectDrawSurface(char *fname, IMAGEHEADER *iheader);
 void ClearScreen(SCREENDESCRIPTORBLOCK* sdb, int Colour);
 #ifdef __cplusplus
-LPDIRECTDRAWSURFACE LoadPPMInD3DMode(char* fname,
+/*LPDirect3DSurface8 LoadPPMInD3DMode(char* fname,
         LPDDSURFACEDESC lpFormat, IMAGEHEADER* iheader,
-        int MemoryType);
-LPDIRECTDRAWSURFACE LoadPPMIntoDDSurface(LPDIRECTDRAWSURFACE lpDDS,
+        int MemoryType);*/
+/*LPDirect3DSurface8 LoadPPMIntoDDSurface(LPDirect3DSurface8 lpDDS,
         DDSURFACEDESC format, int Height, int Width,
         IMAGEHEADER* iheader, BOOL Quantise, FILE* fp, 
-        int psize, int pcaps, char* fname, int MipNum);
-LPDIRECTDRAWSURFACE LoadPGMInD3DMode(char* fname,
+        int psize, int pcaps, char* fname, int MipNum);*/
+/*LPDirect3DSurface8 LoadPGMInD3DMode(char* fname,
         LPDDSURFACEDESC lpFormat, IMAGEHEADER* iheader,
-        int MemoryType);
+        int MemoryType);*/
 #endif // for __cplusplus
 #endif // for SupportWindows95
 

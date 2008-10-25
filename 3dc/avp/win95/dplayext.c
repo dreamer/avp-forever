@@ -1,3 +1,4 @@
+#if 0
 /* ********************************************************************	*
  *																		*
  *	DPLAYEXT.C - DirectPlay multi-player code extensions.				*
@@ -390,3 +391,4 @@ static void DpExtUseDestroyMsg(LPDPMSG_DESTROYPLAYERORGROUP pmsgDestroy)
 {
 	/* No implementation yet. */
 }
+#endif // #if 0

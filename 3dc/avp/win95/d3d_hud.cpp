@@ -110,6 +110,9 @@ int WaterShaftImageNumber;
 
 int HUDScaleFactor;
 
+// bjd - for new textures
+extern IMAGEHEADER ImageHeaderArray[];
+
 static struct HUDFontDescTag HUDFontDesc[] =
 {
 	//MARINE_HUD_FONT_BLUE,
@@ -197,7 +200,7 @@ void D3D_InitialiseMarineHUD(void)
 {
 	//SelectGenTexDirectory(ITI_TEXTURE);
 
-	extern unsigned char *ScreenBuffer;
+//	extern unsigned char *ScreenBuffer;
 
 	/* set game mode: different though for multiplayer game */
 	if(AvP.Network==I_No_Network)
@@ -209,8 +212,16 @@ void D3D_InitialiseMarineHUD(void)
 	{
 		HUDResolution = HUD_RES_MED;
 		HUDImageNumber = CL_LoadImageOnce("Huds\\Marine\\MarineHUD.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
+
+		/* stupid hard coded texture sizes.. */
+		int Size = ImageHeaderArray[HUDImageNumber].ImageWidth;
+
+		/* the image the tracker is normally on is 256x256 */
 		MotionTrackerHalfWidth = 127/2;
 		MotionTrackerTextureSize = 128;
+
+//		MotionTrackerHalfWidth = ((Size / 2) - 1) /2;
+//		MotionTrackerTextureSize = Size / 2;
 
 		BlueBar.ImageNumber = HUDImageNumber;
 		BlueBar.TopLeftX = 0;
@@ -405,7 +416,11 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 	if (quadVertices[3].U<0) quadVertices[3].U = 0;
 
 	D3D_HUD_Setup();
-	D3D_HUDQuad_Output(HUDImageNumber,quadVertices,RGBALIGHT_MAKE(255,255,255,HUDTranslucencyLevel));
+
+	D3D_HUDQuad_Output(HUDImageNumber,
+		quadVertices,
+		RGBALIGHT_MAKE(255,255,255,HUDTranslucencyLevel)
+		);
 	
 	#if 1
 	{
@@ -444,7 +459,7 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 void D3D_BLTMotionTrackerBlipToHUD(int x, int y, int brightness)
 {
 	HUDImageDesc imageDesc;
-	int screenX,screenY; /* in 16.16 */
+//	int screenX,screenY; /* in 16.16 */
 	int frame;
 	int motionTrackerScaledHalfWidth = MUL_FIXED(MotionTrackerScale*3,MotionTrackerHalfWidth/2);
     
@@ -711,7 +726,7 @@ void LoadBackdropImage(void)
 
 void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 {
-	HUDCharDesc charDesc;
+//	HUDCharDesc charDesc;
 	int i=MAX_NO_OF_COMMON_HUD_DIGITS;
 	unsigned int healthColour;
 	unsigned int armourColour;
@@ -847,18 +862,14 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 				SpecialFXImageNumber,// AlienEnergyBarImageNumber,
 				quadVertices,
 				0xffffffff
-			);
-			
+			);	
 		}
-
-	}
-	
-
-		
+	}		
 } 
+
 void Render_MarineAmmo(enum TEXTSTRING_ID ammoText, enum TEXTSTRING_ID magazinesText, unsigned int magazines, enum TEXTSTRING_ID roundsText, unsigned int rounds, int primaryAmmo)
 {
-	HUDCharDesc charDesc;
+//	HUDCharDesc charDesc;
 	int i=MAX_NO_OF_COMMON_HUD_DIGITS;
 	int xCentre = MUL_FIXED(HUDLayout_RightmostTextCentre,HUDScaleFactor)+ScreenDescriptorBlock.SDB_Width;
 	if(!primaryAmmo) xCentre+=MUL_FIXED(HUDScaleFactor,HUDLayout_RightmostTextCentre*2);
@@ -898,9 +909,9 @@ void Render_MarineAmmo(enum TEXTSTRING_ID ammoText, enum TEXTSTRING_ID magazines
 		ScreenDescriptorBlock.SDB_Height - MUL_FIXED(HUDScaleFactor,HUDLayout_Rounds_TopY - HUDLayout_Linespacing),
 		HUDLayout_Colour_MarineRed
 	);	
-
 		
 } 
+
 void DrawPredatorEnergyBar(void)
 {
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
@@ -918,6 +929,7 @@ void DrawPredatorEnergyBar(void)
 			ScreenDescriptorBlock.SDB_Height
 			
 		);
+
 		rectangle . AlphaFill
 		(
 			0xff, // unsigned char R,
@@ -925,6 +937,7 @@ void DrawPredatorEnergyBar(void)
 			0x00,// unsigned char B,
 		   	128 // unsigned char translucency
 		);
+
 	}
 	if (weaponPtr->WeaponIDNumber == WEAPON_PRED_SHOULDERCANNON)
 	{
@@ -938,6 +951,7 @@ void DrawPredatorEnergyBar(void)
 			ScreenDescriptorBlock.SDB_Height
 			
 		);
+
 		rectangle . AlphaFill
 		(
 			0x00, // unsigned char R,

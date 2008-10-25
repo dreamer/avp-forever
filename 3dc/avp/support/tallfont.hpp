@@ -100,7 +100,7 @@
 		r2size R2Size_OverallImage;
 
 		int ASCIICodeForOffset0;
-		int NumChars;
+		unsigned int NumChars;
 		RECT WindowsRectForOffset[ MAX_CHARS_IN_TALLFONT ];
 			// coordinates of characters in the image
 		int WidthForOffset[ MAX_CHARS_IN_TALLFONT ];
@@ -122,8 +122,8 @@
 		static OurBool bAnyNonTransparentPixelsInColumn
 		(
 			r2pos R2Pos_TopOfColumn,
-			int HeightOfColumn,
-			LPDDSURFACEDESC lpDDSurfaceDesc
+			int HeightOfColumn
+			//void* lpDDSurfaceDesc
 				// assumes you have a read lock
 		);
 
@@ -213,11 +213,13 @@
 
 		int FullWidthForOffset[ MAX_CHARS_IN_TALLFONT ];
 		
-		LPDIRECTDRAWSURFACE GetImagePtr(void) const
+/*		LPDIRECTDRAWSURFACE GetImagePtr(void) const
 		{
 			return (LPDIRECTDRAWSURFACE) image_ptr;
 		}
+*/
 		LPDIRECTDRAWSURFACE image_ptr;
+
 	private:
 		IndexedFont_Kerned_Column
 		(
@@ -236,7 +238,7 @@
 		r2size R2Size_OverallImage;
 
 		int ASCIICodeForOffset0;
-		int NumChars;
+		unsigned int NumChars;
 		RECT WindowsRectForOffset[ MAX_CHARS_IN_TALLFONT ];
 			// coordinates of characters in the image
 		int XIncForOffset[ MAX_CHARS_IN_TALLFONT ][ MAX_CHARS_IN_TALLFONT ];
@@ -260,8 +262,8 @@
 		static OurBool bAnyNonTransparentPixelsInColumn
 		(
 			r2pos R2Pos_TopOfColumn,
-			int HeightOfColumn,
-			LPDDSURFACEDESC lpDDSurfaceDesc
+			int HeightOfColumn
+//			void* lpDDSurfaceDesc
 				// assumes you have a read lock
 		);
 
@@ -314,7 +316,7 @@
 
 		OurBool bOpaque
 		(
-			LPDDSURFACEDESC lpDDSurfaceDesc,
+			void* lpDDSurfaceDesc, // bjd
 				// assumes you have a read lock
 			int x,
 			int y

@@ -24,7 +24,7 @@ public:
 	Sprite_Header_Chunk(Chunk_With_Children* parent)
 	: Chunk_With_Children(parent,"SPRIHEAD"){}
 										 
-	write_file(const char* fname);
+	int write_file(const char* fname);
 	virtual BOOL output_chunk(HANDLE &hand);
 	#if cencon
 	virtual void post_input_processing();

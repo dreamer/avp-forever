@@ -14,12 +14,16 @@
 	#endif
 #endif
 #if SupportWindows95
-	#include <ddraw.h>
-	#include <d3d.h>
+#ifdef WIN32
+	#include <d3d9.h>
+#endif
 	#include "aw.h"
 #endif
 #include "shpanim.h"
 
+#ifdef _XBOX
+	#include <xtl.h>
+#endif
 
 #ifdef __cplusplus
 
@@ -310,19 +314,19 @@ typedef struct extraitemdata {
 
 
 /* it might be a good idea to put in an instruction field here
-   so that each fragment can have an instruction telling it what 
+   so that each fragment can have an instruction telling it what
    to do e.g. a remain around instruction */
 
 typedef struct shapefragment
 {
-	
+
 	int ShapeIndex;
 	int NumFrags;
-	
+
 	int x_offset;
 	int y_offset;
 	int z_offset;
-	
+
 } SHAPEFRAGMENT;
 
 struct loaded_sound;
@@ -339,13 +343,13 @@ typedef struct shapefragmentsound
 
 typedef struct shapefragmentdesc
 {
-  /* array of shape fragment indices terminated with 
+  /* array of shape fragment indices terminated with
      ShapeIndex = NumFrags = -1 */
 	SHAPEFRAGMENT* sh_frags;
 	SHAPEFRAGMENTSOUND* sh_fragsound;
 } SHAPEFRAGMENTDESC;
 
-typedef struct	Adaptive_Degradation_Desc 
+typedef struct	Adaptive_Degradation_Desc
 {
 	struct shapeheader* shape;
 	int distance;/*The shape should be used if the distance is greater than or equal to this distance*/
@@ -371,7 +375,7 @@ typedef struct shapeheader {
 	int **sh_textures;						/* Polygon u,v definitions */
 	char **sh_localtextures;				/* Array of ptrs to filenames */
 
-	SHAPEFRAGMENTDESC * sh_fragdesc;		
+	SHAPEFRAGMENTDESC * sh_fragdesc;
 
 	EXTRAITEMDATA *sh_extraitemdata;
 
@@ -397,7 +401,7 @@ typedef struct shapeheader {
 	 and whose shape is this shapeheader*/
 	 /*the shapes are listed in ascending order of complexity*/
 	ADAPTIVE_DEGRADATION_DESC* shape_degradation_array;
-	
+
 } SHAPEHEADER;
 
 
@@ -518,11 +522,11 @@ typedef struct polyheader {
 
 #if InterfaceEngine
 
-/* 
+/*
 
 	Little structure for use creating
 	merge lists
-	
+
 */
 
 typedef struct merged_poly
@@ -831,19 +835,20 @@ typedef struct imageheader {
 	int ImageWidth;
 
 	int ImageWidthShift;				/* Image Width as a power of 2 */
-	
+
 	TEXTURE *ImagePtr;					/* Pointer to texture in memory */
 
 	#if SupportWindows95
-	
+
 	LPDIRECTDRAWSURFACE DDSurface;
-
 	LPDIRECT3DTEXTURE D3DTexture;
-
 	D3DTEXTUREHANDLE D3DHandle;
-
 	AW_BACKUPTEXTUREHANDLE hBackup;
-	
+
+	LPDIRECT3DTEXTURE9 Direct3DTexture;
+
+	int UserTexture;						/* bjd - for high res textures */
+
 	#endif
 
 	int ImageNum;							/* # MIP images */

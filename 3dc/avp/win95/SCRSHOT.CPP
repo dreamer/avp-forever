@@ -7,9 +7,10 @@
 #include "stratdef.h"
 #include "gamedef.h"
 #include "ourasert.h"
+
 #include "frontend\avp_menus.h"
 extern "C"{
- extern DDPIXELFORMAT DisplayPixelFormat;
+// extern DDPIXELFORMAT DisplayPixelFormat;
  extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
  extern int VideoModeTypeScreen;
  extern long BackBufferPitch;
@@ -94,14 +95,44 @@ void HandleScreenShot()
 
 	#endif
 }
+
+extern void CreateScreenShotImage();
 					 
 void ScreenShot()
 {
+	/* in d3_func.cpp */
+	CreateScreenShotImage();
+#if 0
+	// this is called via the console by typing SCREENSHOT
+	// it'll have the console in the screen shot as a result..
+	LPDIRECT3DSURFACE9 front_buffer;
+
+	d3d.lpD3DDevice->CreateImageSurface(ScreenDescriptorBlock.SDB_Width, ScreenDescriptorBlock.SDB_Height, D3DFMT_A8R8G8B8, &front_buffer);
+
+	if(FAILED(d3d.lpD3DDevice->GetFrontBuffer(front_buffer))) {
+		OutputDebugString("\n Couldn't get a copy of the front buffer");
+		front_buffer->Release();
+		return;
+	}
+
+	char buf[100];
+	sprintf(buf,"avp_screenshot_%d.bmp", screen_num);
+
+	if(FAILED(D3DXSaveSurfaceToFileA(buf, D3DXIFF_BMP, front_buffer, NULL, NULL))) {
+		OutputDebugString("\n Save Surface to file failed!!!");
+	}
+	OutputDebugString("\n WROTE A SCREENSHOT");
+
+	front_buffer->Release();
+#endif
+#if 0 // bjd
 	char Name[40];
 	strcpy(Name,"AVP");
 	int length=strlen(Name);
 	strncpy(&Name[length],"00.bmp",8);
-	for(int i=0;i<100;i++)
+	
+	int i;
+	for(i=0;i<100;i++)
 	{
 		Name[length]=i/10+'0';
 		Name[length+1]=(i%10)+'0';
@@ -238,7 +269,7 @@ void ScreenShot()
 	UnlockSurface();
 
 	fclose(fp);
-	
+#endif
 }
 
 

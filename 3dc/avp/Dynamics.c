@@ -6388,7 +6388,7 @@ VECTORCH *GetNearestModuleTeleportPoint(MODULE* thisModulePtr, VECTORCH* positio
 	{
 		VECTORCH p = *positionPtr;
 		int d;		
-		char buffer[100];
+//		char buffer[100];
 
 		p.vx -= thisModulePtr->m_aimodule->m_world.vx + epList->position.vx;
 		p.vy -= thisModulePtr->m_aimodule->m_world.vy + epList->position.vy;

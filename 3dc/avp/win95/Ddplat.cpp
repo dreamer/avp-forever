@@ -54,8 +54,6 @@ int BackdropImage;
 
 int UsingDataBase = 0;
 
-
-
 /* HUD globals */
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 static int TrackerPolyBuffer[25];
@@ -127,14 +125,15 @@ extern void LoadCommonTextures(void);
 ****************************************/
 void PlatformSpecificInitMarineHUD(void)
 {
-	if ((ScanDrawMode != ScanDrawDirectDraw) && (ZBufferOn==ZBufferMode))
-	{
+	//if ((ScanDrawMode != ScanDrawDirectDraw) && (ZBufferOn==ZBufferMode)) // BJD 
+//	{
 		D3D_InitialiseMarineHUD();
 		LoadCommonTextures();
 //		ChromeImageNumber = CL_LoadImageOnce("Common\\chromelike.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
-		return;
-	}
-	
+	return;
+//	}
+
+#if 0 // bjd
 	//SelectGenTexDirectory(ITI_TEXTURE);
 
 	extern unsigned char *ScreenBuffer;
@@ -246,6 +245,7 @@ void PlatformSpecificInitMarineHUD(void)
 
 
 	LoadDDGraphic(&PauseDDInfo,"paused");	
+#endif
 }
 
 void PlatformSpecificInitPredatorHUD(void)
@@ -378,7 +378,7 @@ void PlatformSpecificKillMarineHUD(void)
 			AwDestroyBackupTexture( HUDDDInfo[gfxID].hBackup );
 		}
 		if (HUDDDInfo[gfxID].LPDDS)
-			HUDDDInfo[gfxID].LPDDS->Release();
+			//HUDDDInfo[gfxID].LPDDS->Release(); // BJD
 		HUDDDInfo[gfxID].LPDDS = 0;
 		HUDDDInfo[gfxID].hBackup = 0;
 	}
@@ -389,7 +389,7 @@ void PlatformSpecificKillMarineHUD(void)
 		AwDestroyBackupTexture( PauseDDInfo.hBackup );
 	}
 	if (PauseDDInfo.LPDDS)
-		PauseDDInfo.LPDDS->Release();	
+		//PauseDDInfo.LPDDS->Release();	// BJD
 	PauseDDInfo.LPDDS = 0;
 	PauseDDInfo.hBackup = 0;
 	
@@ -399,7 +399,7 @@ void PlatformSpecificKillMarineHUD(void)
 		AwDestroyBackupTexture( E3FontDDInfo.hBackup );
 	}
 	if (E3FontDDInfo.LPDDS)
-		E3FontDDInfo.LPDDS->Release();	
+		//E3FontDDInfo.LPDDS->Release(); // BJD
 	E3FontDDInfo.LPDDS = 0;
 	E3FontDDInfo.hBackup = 0;
 }
@@ -417,7 +417,7 @@ void PlatformSpecificKillPredatorHUD(void)
 			AwDestroyBackupTexture( HUDDDInfo[gfxID].hBackup );
 		}
 		if (HUDDDInfo[gfxID].LPDDS)
-			HUDDDInfo[gfxID].LPDDS->Release();
+			//HUDDDInfo[gfxID].LPDDS->Release(); // BJD
 		HUDDDInfo[gfxID].LPDDS = 0;
 		HUDDDInfo[gfxID].hBackup = 0;
 	}
@@ -428,7 +428,7 @@ void PlatformSpecificKillPredatorHUD(void)
 		AwDestroyBackupTexture( PauseDDInfo.hBackup );
 	}
 	if (PauseDDInfo.LPDDS)
-		PauseDDInfo.LPDDS->Release();	
+//bjd		PauseDDInfo.LPDDS->Release();	
 	PauseDDInfo.LPDDS = 0;
 	PauseDDInfo.hBackup = 0;
 	
@@ -438,7 +438,7 @@ void PlatformSpecificKillPredatorHUD(void)
 		AwDestroyBackupTexture( E3FontDDInfo.hBackup );
 	}
 	if (E3FontDDInfo.LPDDS)
-		E3FontDDInfo.LPDDS->Release();	
+		//E3FontDDInfo.LPDDS->Release(); // BJD
 	E3FontDDInfo.LPDDS = 0;
 	E3FontDDInfo.hBackup = 0;
 }
@@ -455,7 +455,7 @@ void PlatformSpecificKillAlienHUD(void)
 			AwDestroyBackupTexture( HUDDDInfo[gfxID].hBackup );
 		}
 		if (HUDDDInfo[gfxID].LPDDS)
-			HUDDDInfo[gfxID].LPDDS->Release();
+			//HUDDDInfo[gfxID].LPDDS->Release(); // BJD
 		HUDDDInfo[gfxID].LPDDS = 0;
 		HUDDDInfo[gfxID].hBackup = 0;
 	}
@@ -466,7 +466,7 @@ void PlatformSpecificKillAlienHUD(void)
 		AwDestroyBackupTexture( PauseDDInfo.hBackup );
 	}
 	if (PauseDDInfo.LPDDS)
-		PauseDDInfo.LPDDS->Release();	
+		//PauseDDInfo.LPDDS->Release();	// BJD
 	PauseDDInfo.LPDDS = 0;
 	PauseDDInfo.hBackup = 0;
 	
@@ -476,7 +476,7 @@ void PlatformSpecificKillAlienHUD(void)
 		AwDestroyBackupTexture( E3FontDDInfo.hBackup );
 	}
 	if (E3FontDDInfo.LPDDS)
-		E3FontDDInfo.LPDDS->Release();	
+		//E3FontDDInfo.LPDDS->Release(); // BJD
 	E3FontDDInfo.LPDDS = 0;
 	E3FontDDInfo.hBackup = 0;
 }
@@ -504,12 +504,15 @@ void PlatformSpecificEnteringHUD(void)
 {
 	/* JH 13/5/97 */
 	/* Flush the ZBuffer so the weapons don't sink into the wall! */
-	#if SupportZBuffering
-	if ((ScanDrawMode != ScanDrawDirectDraw) && (ZBufferMode != ZBufferOff))
+//	#if SupportZBuffering
+//	if ((ScanDrawMode != ScanDrawDirectDraw) && (ZBufferMode != ZBufferOff))
+
+	// bjd - commenting out buffer flush. causes unnecessary buffer flush
+	// which leads to nasty zbuffer issues (walls being overwritten on lab 14 level etc)
 	{
-		//		FlushD3DZBuffer();
+//				FlushD3DZBuffer();
 	}
-	#endif
+//	#endif
 
 #if 0
 	/* KJL 11:37:49 06/14/97 - reinit execute buffer */
@@ -524,6 +527,7 @@ void PlatformSpecificEnteringHUD(void)
 /*KJL**********************
 * MARINE DRAWING ROUTINES *
 **********************KJL*/
+/*
 void BLTMotionTrackerToHUD(int scanLineSize)
 {
  //	if (VideoModeType_8 != VideoModeTypeScreen) return;
@@ -534,7 +538,9 @@ void BLTMotionTrackerToHUD(int scanLineSize)
 	return;
 	
 }
+*/
 
+/*
 void BLTMotionTrackerBlipToHUD(int x, int y, int brightness)
 {
 	if ((ScanDrawMode != ScanDrawDirectDraw) && (ZBufferOn==ZBufferMode))
@@ -544,7 +550,7 @@ void BLTMotionTrackerBlipToHUD(int x, int y, int brightness)
 	return;
 
 }
-
+*/
 
 /*KJL*******************
 * Draw numerics to HUD *
@@ -589,7 +595,7 @@ extern void BLTMarineNumericsToHUD(enum MARINE_HUD_DIGIT digitsToDraw)
 }	
 static void BLTDigitToHUD(char digit, int x, int y, int font)
 {
-	HRESULT ddrval;
+//	HRESULT ddrval;
 	struct HUDFontDescTag *FontDescPtr;
  	RECT srcRect;
 	int gfxID;
@@ -639,8 +645,9 @@ static void BLTDigitToHUD(char digit, int x, int y, int font)
 	srcRect.bottom =srcRect.top + FontDescPtr->Height;
 	srcRect.left = FontDescPtr->XOffset;
    	srcRect.right = srcRect.left + FontDescPtr->Width;
-	   
-   	ddrval = lpDDSBack->BltFast
+
+#if 0 // bjd
+   	ddrval = lpDDSBack->BltFast // DIRECT DRAW FUCTION
    	(
    		x,y,
    		HUDDDInfo[gfxID].LPDDS,
@@ -653,6 +660,7 @@ static void BLTDigitToHUD(char digit, int x, int y, int font)
    		ReleaseDirect3D();
    		exit(0x666004);
 	}
+#endif
 }		  
 
 
@@ -666,6 +674,7 @@ void BLTGunSightToScreen(int screenX, int screenY, enum GUNSIGHT_SHAPE gunsightS
 	}
 }
 
+#if 0
 /*KJL************************
 * PREDATOR DRAWING ROUTINES *
 ************************KJL*/
@@ -680,10 +689,11 @@ void BLTPredatorOverlayToHUD(void)
 		EndD3DScene();
 	}
 
-  	HRESULT ddrval;
+//  HRESULT ddrval;
 	if ((ScreenDescriptorBlock.SDB_Height ==200) ||(ScreenDescriptorBlock.SDB_Width ==320) )
 	{  	
-	   	ddrval = lpDDSBack->BltFast
+#if 0 // bjd
+	   	ddrval = lpDDSBack->BltFast // DIRECT DRAW FUNCTION
 	   	(
 	   		0,
 	   		13,
@@ -691,7 +701,7 @@ void BLTPredatorOverlayToHUD(void)
 	   		&(HUDDDInfo[PREDATOR_HUD_GFX_TOP].SrcRect),
 	   		DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	   	);
-	   	ddrval = lpDDSBack->BltFast
+	   	ddrval = lpDDSBack->BltFast // DIRECT DRAW FUNCTION
 	   	(
 	   		0,
 	   		136,
@@ -699,10 +709,12 @@ void BLTPredatorOverlayToHUD(void)
 	   		&(HUDDDInfo[PREDATOR_HUD_GFX_BOTTOM].SrcRect),
 	   		DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	   	);
+#endif
 	}	
 	else if ((ScreenDescriptorBlock.SDB_Height ==480) ||(ScreenDescriptorBlock.SDB_Width ==640) )
 	{  	
-	   	ddrval = lpDDSBack->BltFast
+#if 0
+	   	ddrval = lpDDSBack->BltFast // DIRECT DRAW FUNCTION
 	   	(
 	   		1,
 	   		13*2,
@@ -710,7 +722,7 @@ void BLTPredatorOverlayToHUD(void)
 	   		&(HUDDDInfo[PREDATOR_HUD_GFX_TOP].SrcRect),
 	   		DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	   	);
-	   	ddrval = lpDDSBack->BltFast
+	   	ddrval = lpDDSBack->BltFast // DIRECT DRAW FUNCTION
 	   	(
 	   		1,
 	   		136*2+80,
@@ -718,8 +730,11 @@ void BLTPredatorOverlayToHUD(void)
 	   		&(HUDDDInfo[PREDATOR_HUD_GFX_BOTTOM].SrcRect),
 	   		DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	   	);
+#endif
 	}	
 }
+#endif 
+
 void BLTPredatorNumericsToHUD(void)
 {
    	int digit = MAX_NO_OF_PREDATOR_HUD_DIGITS;
@@ -753,7 +768,7 @@ void BLTPredatorNumericsToHUD(void)
 }	
 static void BLTPredatorDigitToHUD(char digit, int x, int y, int font)
 {
-	HRESULT ddrval;
+//	HRESULT ddrval;
  	RECT srcRect;
 
 	srcRect.top = digit*12;
@@ -761,8 +776,8 @@ static void BLTPredatorDigitToHUD(char digit, int x, int y, int font)
 	
    	srcRect.left = 0;
    	srcRect.right = HUDDDInfo[font].SrcRect.right;
-	   
-   	ddrval = lpDDSBack->BltFast
+#if 0 // bjd	   
+   	ddrval = lpDDSBack->BltFast // DIRECT DRAW FUNCTION
    	(
    		x,
    		y,
@@ -776,9 +791,11 @@ static void BLTPredatorDigitToHUD(char digit, int x, int y, int font)
    		ReleaseDirect3D();
    		exit(0x666004);
 	}
-	
+#endif
+
 }		  
 
+#if 0
 /*KJL*********************
 * ALIEN DRAWING ROUTINES *
 *********************KJL*/
@@ -796,10 +813,11 @@ extern void BLTAlienOverlayToHUD(void)
 	/* KJL 10:24:49 7/17/97 - no overlay, please */
 	return;
 
-	HRESULT ddrval;
+	//	HRESULT ddrval;
 	if ((ScreenDescriptorBlock.SDB_Height ==200)&&(ScreenDescriptorBlock.SDB_Width ==320))
 	{
-	 	ddrval = lpDDSBack->BltFast
+#if 0 // bjd
+	 	ddrval = lpDDSBack->BltFast // DIRECT DRAW FUNCTION
 		(
 		  	0,
 			0,
@@ -807,7 +825,7 @@ extern void BLTAlienOverlayToHUD(void)
 			&(HUDDDInfo[ALIEN_HUD_GFX_TOP].SrcRect),
 	        DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	    );
-		ddrval = lpDDSBack->BltFast
+		ddrval = lpDDSBack->BltFast // DIRECT DRAW FUNCTION
 		(
 		  	0,
 			25,
@@ -815,7 +833,7 @@ extern void BLTAlienOverlayToHUD(void)
 			&(HUDDDInfo[ALIEN_HUD_GFX_LEFT].SrcRect),
 	        DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	    );
-		ddrval = lpDDSBack->BltFast
+		ddrval = lpDDSBack->BltFast // DIRECT DRAW FUNCTION
 		(
 		  	320-48,
 			25,
@@ -823,7 +841,7 @@ extern void BLTAlienOverlayToHUD(void)
 			&(HUDDDInfo[ALIEN_HUD_GFX_RIGHT].SrcRect),
 	        DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	    );
-		ddrval = lpDDSBack->BltFast
+		ddrval = lpDDSBack->BltFast // DIRECT DRAW FUNCTION
 		(
 		  	0,
 			160,
@@ -831,10 +849,12 @@ extern void BLTAlienOverlayToHUD(void)
 			&(HUDDDInfo[ALIEN_HUD_GFX_BOTTOM].SrcRect),
 	        DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	    );
+#endif
 	}
 	else if ((ScreenDescriptorBlock.SDB_Height ==480)&&(ScreenDescriptorBlock.SDB_Width ==640))
 	{
-	 	ddrval = lpDDSBack->BltFast
+#if 0 // bjd
+	 	ddrval = lpDDSBack->BltFast // DIRECT DRAW FUNCTION
 		(
 		  	0,
 			0,
@@ -842,7 +862,7 @@ extern void BLTAlienOverlayToHUD(void)
 			&(HUDDDInfo[ALIEN_HUD_GFX_TOP].SrcRect),
 	        DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	    );
-		ddrval = lpDDSBack->BltFast
+		ddrval = lpDDSBack->BltFast // DIRECT DRAW FUNCTION
 		(
 		  	0,
 			52,
@@ -850,7 +870,7 @@ extern void BLTAlienOverlayToHUD(void)
 			&(HUDDDInfo[ALIEN_HUD_GFX_LEFT].SrcRect),
 	        DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	    );
-		ddrval = lpDDSBack->BltFast
+		ddrval = lpDDSBack->BltFast // DIRECT DRAW FUNCTION
 		(
 		  	640-97,
 			52,
@@ -858,7 +878,7 @@ extern void BLTAlienOverlayToHUD(void)
 			&(HUDDDInfo[ALIEN_HUD_GFX_RIGHT].SrcRect),
 	        DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	    );
-		ddrval = lpDDSBack->BltFast
+		ddrval = lpDDSBack->BltFast // DIRECT DRAW FUNCTION
 		(
 		  	0,
 			480-97,
@@ -866,9 +886,11 @@ extern void BLTAlienOverlayToHUD(void)
 			&(HUDDDInfo[ALIEN_HUD_GFX_BOTTOM].SrcRect),
 	        DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	    );
+#endif
 	}
-
 }
+#endif
+
 void BLTAlienNumericsToHUD(void)
 {
 
@@ -917,7 +939,8 @@ void BLTAlienNumericsToHUD(void)
 
 void BLTPausedToScreen(void)
 {
-	lpDDSBack->BltFast
+#if 0 // bjd
+	lpDDSBack->BltFast // DIRECT DRAW FUNCTION
 	(
 	  	(ScreenDescriptorBlock.SDB_Width-PauseDDInfo.SrcRect.right)/2,
 		(ScreenDescriptorBlock.SDB_Height-PauseDDInfo.SrcRect.bottom)/2,
@@ -925,7 +948,7 @@ void BLTPausedToScreen(void)
 		&(PauseDDInfo.SrcRect),
         DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
     );
-	
+#endif
 }
 
 
@@ -1016,7 +1039,7 @@ void MinimizeAllDDGraphics(void)
 		if (HUDDDInfo[gfxID].LPDDS)
 		{
 			ATRemoveSurface(HUDDDInfo[gfxID].LPDDS);
-			HUDDDInfo[gfxID].LPDDS->Release();
+			//HUDDDInfo[gfxID].LPDDS->Release(); // BJD
 			HUDDDInfo[gfxID].LPDDS = 0;
 		}
 	}
@@ -1024,14 +1047,14 @@ void MinimizeAllDDGraphics(void)
 	if (PauseDDInfo.LPDDS)
 	{
 		ATRemoveSurface(PauseDDInfo.LPDDS);
-		PauseDDInfo.LPDDS->Release();	
+		//PauseDDInfo.LPDDS->Release(); // BJD
 		PauseDDInfo.LPDDS = 0;
 	}
 	
 	if (E3FontDDInfo.LPDDS)
 	{
 		ATRemoveSurface(E3FontDDInfo.LPDDS);
-		E3FontDDInfo.LPDDS->Release();	
+		//E3FontDDInfo.LPDDS->Release(); // BJD
 		E3FontDDInfo.LPDDS = 0;
 	}
 }
@@ -1084,7 +1107,7 @@ void ReleaseHUDGraphic(HUDGRAPHIC* hgptr)
 	Windows externs. See win_func
 */
 
-
+#if 0 // bjd
 void BLTGraphicToScreen(HUDGRAPHIC* hgptr)
 {
 	/*
@@ -1101,7 +1124,7 @@ void BLTGraphicToScreen(HUDGRAPHIC* hgptr)
 
 	HRESULT ddrval;
 
-	LPDIRECTDRAWSURFACE wdds = *((LPDIRECTDRAWSURFACE*)hgptr->data);
+	LPDIRECTDRAWSURFACE wdds = *((LPDIRECTDRAWSURFACE*)hgptr->data); // BJD DIRECT DRAW
 
 	GLOBALASSERT(hgptr->srcRect->top < hgptr->srcRect->bottom);
 	GLOBALASSERT(hgptr->srcRect->left < hgptr->srcRect->right);
@@ -1119,7 +1142,7 @@ void BLTGraphicToScreen(HUDGRAPHIC* hgptr)
 
 	if((hgptr->width == 0) || (hgptr->height == 0))
 		{	
-			ddrval = lpDDSBack->Blt(NULL, wdds, hgptr->srcRect, DDBLT_WAIT, NULL);
+			ddrval = lpDDSBack->Blt(NULL, wdds, hgptr->srcRect, DDBLT_WAIT, NULL); // DIRECT DRAW FUNCTION
 		}
 	else		
 		{
@@ -1131,7 +1154,7 @@ void BLTGraphicToScreen(HUDGRAPHIC* hgptr)
 			destRect.left = hgptr->xdest;
 			destRect.right = hgptr->xdest + hgptr->width;
 			
-			ddrval = lpDDSBack->Blt(&destRect, wdds, hgptr->srcRect, DDBLT_WAIT, NULL);
+			ddrval = lpDDSBack->Blt(&destRect, wdds, hgptr->srcRect, DDBLT_WAIT, NULL); // DIRECT DRAW FUNCTION
 			
 		}
 
@@ -1142,7 +1165,7 @@ void BLTGraphicToScreen(HUDGRAPHIC* hgptr)
 		}
 
 }
-
+#endif
 
 
 
@@ -1153,8 +1176,10 @@ void BLTGraphicToScreen(HUDGRAPHIC* hgptr)
 
 //static int BLTFontCharToHUD(PFFONT* font , int xdest, int ydest, char todraw);
 
-LPDIRECTDRAWSURFACE FontLPDDS[NUM_FONTS];
+//LPDIRECTDRAWSURFACE FontLPDDS[NUM_FONTS]; // DIRECT DRAW SURFACE
+DIRECTDRAWSURFACE FontLPDDS[NUM_FONTS];
 
+#if 0 // bjd
 PFFONT AvpFonts[] =
 {
 	{
@@ -1187,13 +1212,14 @@ PFFONT AvpFonts[] =
 	 	59,	 // num chars
 		I_FONT_UC_NUMERIC
  	},
-
 };
+#endif
 
 extern int VideoModeColourDepth;
 
 void LoadFont(PFFONT *pffont)
 {
+#if 0 // bjd
 	GLOBALASSERT(pffont);
 	GLOBALASSERT(pffont->filename);
 	
@@ -1254,15 +1280,17 @@ void LoadFont(PFFONT *pffont)
 	GLOBALASSERT((nWidth > 0));
 
 	pffont->flags.loaded = 1;
+#endif
 }
 
 
 void * FontLock(PFFONT const * pFont, unsigned * pPitch)
 {
+#if 0 // bjd
 	GLOBALASSERT(pFont);
 	GLOBALASSERT(pFont->data);
 	
-	DDSURFACEDESC ddsd;
+	DDSURFACEDESC ddsd; // DIRECT DRAW SURFACE DESCRIPTION
 	memset(&ddsd,0,sizeof ddsd);
 	ddsd.dwSize = sizeof ddsd;
 	HRESULT hResult = pFont->data->Lock(NULL,&ddsd,DDLOCK_NOSYSLOCK,NULL);
@@ -1270,20 +1298,25 @@ void * FontLock(PFFONT const * pFont, unsigned * pPitch)
 	
 	*pPitch = ddsd.lPitch;
 	return ddsd.lpSurface;
+#endif
+	return NULL;
 }
 
 void FontUnlock(PFFONT const * pFont)
 {
+#if 0 // bjd
 	GLOBALASSERT(pFont);
 	GLOBALASSERT(pFont->data);
 	
 	HRESULT hResult = pFont->data->Unlock(NULL);
 	GLOBALASSERT(DD_OK == hResult);
+#endif
 }
 
 
 void UnloadFont(PFFONT *pffont)
 {
+#if 0 // bjd
 	GLOBALASSERT(pffont);
 	
 	if (pffont->hBackup)
@@ -1308,6 +1341,7 @@ void UnloadFont(PFFONT *pffont)
 			// FontIndex I_Font_Old,
 			// very ugly way to get at the index
 	);
+#endif
 }
 
 
@@ -1339,6 +1373,7 @@ void FillCharacterSlot(int u, int v,
 
 int BLTFontOffsetToHUD(PFFONT* font , int xdest, int ydest, int offset)
 {
+#if 0 // bjd
 	HRESULT ddrval;
 
 	RECT *rect = &(font->srcRect[offset]);
@@ -1350,7 +1385,7 @@ int BLTFontOffsetToHUD(PFFONT* font , int xdest, int ydest, int offset)
 		return(rect->right - rect->left	+ 1);
 
 
-  	ddrval = lpDDSBack->BltFast(xdest, ydest,	font->data, rect,	DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+  	ddrval = lpDDSBack->BltFast(xdest, ydest,	font->data, rect,	DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY); // DIRECT DRAW FUNCTION
   	
   	LOGDXERR(ddrval);
   	
@@ -1363,6 +1398,8 @@ int BLTFontOffsetToHUD(PFFONT* font , int xdest, int ydest, int offset)
 		}
 
 	return(font->srcRect[offset].right - font->srcRect[offset].left);
+#endif
+	return 0;
 }
 
 
@@ -1554,7 +1591,7 @@ static void SetupScanlinePoly(char const *filenamePtr, int width)
 	int imageNumber;
 	int height;
 
-	imageNumber = CL_LoadImageOnce(filenamePtr, (ScanDrawDirectDraw == ScanDrawMode ? LIO_CHIMAGE : LIO_D3DTEXTURE)|LIO_TRANSPARENT|LIO_RIFFPATH|LIO_RESTORABLE);
+	imageNumber = CL_LoadImageOnce(filenamePtr, (/*ScanDrawDirectDraw == ScanDrawMode ? LIO_CHIMAGE : */LIO_D3DTEXTURE)|LIO_TRANSPARENT|LIO_RIFFPATH|LIO_RESTORABLE);
 	height = width/2;
 								
 	ScanlinePolyBuffer[3] = imageNumber;
@@ -1581,8 +1618,10 @@ static void SetupScanlinePoly(char const *filenamePtr, int width)
 #define MAX_MESSAGE_LENGTH 50
 #define MESSAGE_FONT_WIDTH 5
 #define MESSAGE_FONT_HEIGHT 8
+
 extern void DrawOnScreenMessage(unsigned char *messagePtr)
 {
+#if 0 // bjd
 	RECT srcRect;
 	int destX,destY;
 	int lengthOfMessage=0;
@@ -1643,7 +1682,7 @@ extern void DrawOnScreenMessage(unsigned char *messagePtr)
 			  	srcRect.bottom = srcRect.top+messageFontHeight;
 			}
 
-		   	lpDDSBack->BltFast
+		   	lpDDSBack->BltFast // DIRECT DRAW FUNCTION
 		   	(
 		   		destX,destY,
 		   		E3FontDDInfo.LPDDS,
@@ -1653,7 +1692,7 @@ extern void DrawOnScreenMessage(unsigned char *messagePtr)
 		}
 		destX += messageFontWidth+2;
 	}
+#endif
 }
-
 
 }; // extern 

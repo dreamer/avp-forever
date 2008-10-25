@@ -51,7 +51,9 @@
 
 #if standard
 #include "advwin32.h"
-#include <windows.h>
+#ifdef WIN32
+	#include <windows.h>
+#endif
 #include "list_tem.hpp"
 #endif
 

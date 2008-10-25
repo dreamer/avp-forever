@@ -1226,6 +1226,7 @@ AIMODULE *FarNPC_GetTargetAIModuleForMarineRespond(STRATEGYBLOCK *sbPtr)
 				/* if this adjacent module's smell value is higher than
 				the current 'highest smell' record the new module as the
 				target. */
+
 				if(PherMars_ReadBuf[AdjModuleIndex] > highestSmell)
 				{						
 					highestSmell = PherMars_ReadBuf[AdjModuleIndex];

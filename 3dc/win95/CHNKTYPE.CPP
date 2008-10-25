@@ -1079,10 +1079,11 @@ ChunkAnimSequence& ChunkAnimSequence::operator=(const ChunkAnimSequence &seq)
 
 void ChunkAnimSequence::UpdateNormalsAndExtents(ChunkShape const * cs,List<int>* poly_not_in_bb)
 {
+	int i;
 	if(!cs) return;
 	num_verts=cs->num_verts;
 	if(!v_normal_list)v_normal_list=new ChunkVectorFloat[cs->num_verts];
-	for(int i=0;i<num_verts;i++)
+	for(i=0;i<num_verts;i++)
 	{
 		v_normal_list[i].x=0;
 		v_normal_list[i].y=0;
@@ -1177,7 +1178,7 @@ void ChunkAnimSequence::DeleteInterpolatedFrames()
 	if(NewNumFrames==NumFrames)return;
 
 	int framepos=0;
-	for(i=0;i<NumFrames;i++)
+	for(int i=0;i<NumFrames;i++)
 	{
 		if(Frames[i]->flags & animframeflag_interpolated_frame) continue;
 		Frames[framepos++]=Frames[i];

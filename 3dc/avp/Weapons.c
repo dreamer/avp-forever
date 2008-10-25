@@ -2615,7 +2615,7 @@ void HandleEffectsOfExplosion(STRATEGYBLOCK *objectToIgnorePtr, VECTORCH *centre
 					}
 				 	/* effect of explosion on object's dynamics */
 					{
-						VECTORCH directionOfForce;
+//						VECTORCH directionOfForce;
 						EULER rotation;
 	 					int magnitudeOfForce = 5000*damage/dynPtr->Mass;
 						
@@ -8501,8 +8501,6 @@ void PlasmaCaster_Recoil(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 	#endif
 
 	if (weaponPtr->StateTimeOutCounter == WEAPONSTATE_INITIALTIMEOUTCOUNT) {
-		
-		int multiplyer,a;
 
 		if (playerStatusPtr->PlasmaCasterCharge<Caster_MinCharge) {
 			/* Don't fire at all! */
@@ -8512,6 +8510,8 @@ void PlasmaCaster_Recoil(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 
 		/* Fix plasmacaster damage. */
 		#if 0
+
+		int multiplyer,a;
 		a=playerStatusPtr->PlasmaCasterCharge;
 		
 		/* These values computed by hand! */
@@ -11687,8 +11687,8 @@ int FireMarineTwoPistols(PLAYER_WEAPON_DATA *weaponPtr, int secondary)
 	DELTA_CONTROLLER *FireRight;
 	DELTA_CONTROLLER *FireLeft;
 
-	EULER judder;
-	MATRIXCH juddermat;
+//	EULER judder;
+//	MATRIXCH juddermat;
 
 	/* Deduce which pistol can fire, if either? */
 

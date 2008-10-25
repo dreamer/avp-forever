@@ -60,7 +60,6 @@ extern "C++"{
 	Globals
 */
 
-
 static LPDIRECTINPUT            lpdi;          // DirectInput interface
 static LPDIRECTINPUTDEVICE      lpdiKeyboard;  // keyboard device interface
 static LPDIRECTINPUTDEVICE      lpdiMouse;     // mouse device interface
@@ -118,9 +117,9 @@ static unsigned char LastFramesKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
 extern int NormalFrameTime;
 
 static char IngameKeyboardInput[256];
-extern IngameKeyboardInput_KeyDown(unsigned char key);
-extern IngameKeyboardInput_KeyUp(unsigned char key);
-extern IngameKeyboardInput_ClearBuffer(void);
+extern void IngameKeyboardInput_KeyDown(unsigned char key);
+extern void IngameKeyboardInput_KeyUp(unsigned char key);
+extern void IngameKeyboardInput_ClearBuffer(void);
 
 /*
 
@@ -128,42 +127,36 @@ extern IngameKeyboardInput_ClearBuffer(void);
 
 */
 
-
 BOOL InitialiseDirectInput(void)
-
 {
-    // try to create di object
-    if (DirectInputCreate(hInst, DIRECTINPUT_VERSION, &lpdi, NULL) != DI_OK)
-      {
-	   #if debug
-	   ReleaseDirect3D();
-	   exit(0x4111);
-	   #else
-	   return FALSE;
-	   #endif
-      }
-
-    return TRUE;
+	// try to create di object
+	if (DirectInput8Create(hInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&lpdi, NULL) != DI_OK) // BJD
+	//if (DirectInputCreate(hInst, DIRECTINPUT_VERSION, &lpdi, NULL) != DI_OK)
+	{
+		#if debug
+		ReleaseDirect3D();
+		exit(0x4111);
+		#else
+		return FALSE;
+		#endif
+	}
+	return TRUE;
 }
+
 
 /*
 
 	Release DirectInput object
 
 */
-
-
 void ReleaseDirectInput(void)
-
 {
-    if (lpdi!= NULL)
-	  {
-       lpdi->Release();
-	   lpdi = NULL;
-	  }
+	if (lpdi!= NULL)
+	{
+		lpdi->Release();
+		lpdi = NULL;
+	}
 }
-
-
 
 
 // see comments below
@@ -172,7 +165,6 @@ void ReleaseDirectInput(void)
 
 GUID     guid = GUID_SysKeyboard;
 BOOL InitialiseDirectKeyboard()
-
 {    
     HRESULT  hRes;
 
@@ -1133,8 +1125,8 @@ void DirectReadMouse(void)
 
     MouseVelX = DIV_FIXED(MouseX-OldMouseX,NormalFrameTime);
     MouseVelY = DIV_FIXED(MouseY-OldMouseY,NormalFrameTime);
-    //MouseVelZ = DIV_FIXED(MouseZ-OldMouseZ,NormalFrameTime);
 
+    //MouseVelZ = DIV_FIXED(MouseZ-OldMouseZ,NormalFrameTime);
 	
     #if 0
 	textprint("MouseNormalFrameTime %d\n",MouseNormalFrameTime);
@@ -1317,17 +1309,17 @@ BOOL CALLBACK EnumJoysticksCallback( LPCDIDEVICEINSTANCE pInst,
 #endif
 
 
-extern IngameKeyboardInput_KeyDown(unsigned char key)
+extern void IngameKeyboardInput_KeyDown(unsigned char key)
 {
 	IngameKeyboardInput[key] = 1;
 }
 
-extern IngameKeyboardInput_KeyUp(unsigned char key)
+extern void IngameKeyboardInput_KeyUp(unsigned char key)
 {
 	IngameKeyboardInput[key] = 0;
 }
 
-extern IngameKeyboardInput_ClearBuffer(void)
+extern void IngameKeyboardInput_ClearBuffer(void)
 {
 	int i;
 

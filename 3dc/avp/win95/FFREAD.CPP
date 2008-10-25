@@ -1,6 +1,11 @@
 #include <string.h>
 #include <malloc.h>
-#include <windows.h>
+#ifdef WIN32
+	#include <windows.h>
+#endif
+#ifdef _XBOX
+	#include <xtl.h>
+#endif
 #include <stdio.h>
 
 #include "ffread.hpp"

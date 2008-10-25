@@ -1,4 +1,18 @@
 /*
+Taken from icculus port of AVP
+http://svn.icculus.org/avp/trunk/avp/support/rebmenus.hpp?rev=31&view=markup
+
+*[avp] / trunk / avp / support / rebmenus.hpp    
+
+avp: trunk/avp/support/rebmenus.hpp
+File: [avp] / trunk / avp / support / rebmenus.hpp (download) 
+Revision: 31, Tue Aug 7 02:38:43 2001 UTC (6 years ago) by relnev 
+File size: 18555 byte(s) 
+More warning cleanups.
+
+Removed a few unused files.
+*/
+/*
 	
 	rebmenus.hpp
 
@@ -572,9 +586,7 @@ namespace RebMenus
 			{
 			}
 
-			~SelectionList();
-
-			AddSelection
+			void AddSelection
 			(
 				Selectable Sel_ToAdd
 			)
@@ -587,6 +599,8 @@ namespace RebMenus
 		private:
 			int NumInList;
 			Selectable theSel_A[MAX_IN_LIST];
+		public:
+			~SelectionList();
 		};
 	};
 
@@ -693,9 +707,9 @@ namespace RebMenus
 			enum Direction theD,
 			enum Alignment theAlignment_New
 		) : Item(theOnOffApp_New),
+			NumItems(0),
 			theDir(theD),
-			theAlignment_Val(theAlignment_New),
-			NumItems(0)
+			theAlignment_Val(theAlignment_New)
 		{
 			// what value should SelectedItem have when there aren't any items?
 		}
@@ -965,17 +979,3 @@ namespace RebMenus
 
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-

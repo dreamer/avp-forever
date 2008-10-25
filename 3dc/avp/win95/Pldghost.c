@@ -4440,9 +4440,9 @@ int Deduce_PlayerMarineDeathSequence(STRATEGYBLOCK* sbPtr,DAMAGE_PROFILE* damage
 	NETCORPSEDATABLOCK *corpseDataPtr=(NETCORPSEDATABLOCK *)sbPtr->SBdataptr;
 	
 	int deathtype,gibbFactor;
-	int a;
+//	int a;
 
-	SECTION_DATA *head;
+//	SECTION_DATA *head;
 
 	/* Set GibbFactor  and death type*/
 	gibbFactor=0;
@@ -4711,7 +4711,7 @@ int Deduce_PlayerPredatorDeathSequence(STRATEGYBLOCK* sbPtr,DAMAGE_PROFILE* dama
 		HIT_FACING facing;
 		SECTION *root;
 		int burning;
-		int wounds;
+//		int wounds;
 		int crouched;
 
 		root=GetNamedHierarchyFromLibrary("hnpcpredator","Template");
