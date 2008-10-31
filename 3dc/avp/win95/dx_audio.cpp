@@ -30,7 +30,7 @@ extern "C" {
 #include <windows.h>
 #include "ffstdio.h"
 
-extern void updateOggBuffer();
+#include "vorbisPlayer.h"
 
 /* Davew 27/7/98 --------------------------------------------------------------
 	Internal types.
@@ -2003,7 +2003,7 @@ void PlatUpdatePlayer()
 	IDirectSound3DListener_CommitDeferredSettings(DS3DListener);
 
 	/* update ogg buffer */
-	updateOggBuffer();
+	UpdateVorbisBuffer();
 }
 
 void PlatSetEnviroment(unsigned int env_index, float reverb_mix)

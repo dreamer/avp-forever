@@ -9684,16 +9684,8 @@ void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, B
 	int real_width = AvPMenuGfxStorage[image_num].newWidth;
 	int real_height = AvPMenuGfxStorage[image_num].newHeight;
 
-	if (alpha) {
-//		CheckTranslucencyModeIsCorrect(TRANSLUCENCY_GLOWING);
-		CheckVertexBuffer(4, image_num, TRANSLUCENCY_GLOWING);
-	}
-	else {
-//		CheckTranslucencyModeIsCorrect(TRANSLUCENCY_OFF);
-		CheckVertexBuffer(4, image_num, TRANSLUCENCY_OFF);
-	}
-
-//	alpha = alpha / 256;
+	if (alpha)	CheckVertexBuffer(4, image_num, TRANSLUCENCY_GLOWING);
+	else		CheckVertexBuffer(4, image_num, TRANSLUCENCY_OFF);
 
 	// bottom left
 	mainVertex[vb].sx = (float)topX - 0.5f;

@@ -43,8 +43,8 @@ extern "C"
 #include "detaillevels.h"
 #include "savegame.h"
 
-// bjd
-#include "OGG_player.h"
+/* BJD - 27/10/08 */
+#include "vorbisPlayer.h"
 
 
 int DebuggingCommandsActive=0;
@@ -811,19 +811,19 @@ void CreateGameSpecificConsoleCommands(void)
 		"",
 		DisplaySavesLeft
 	);
-
+/*
 	ConsoleCommand::Make
 	(
 		"PLAYOGG",
 		"",
-		loadOgg
+		LoadVorbis
 	);
-
+*/
 	ConsoleCommand::Make
 	(
 		"STOPOGG",
 		"",
-		stopOgg
+		StopVorbis
 	);
 }	
 

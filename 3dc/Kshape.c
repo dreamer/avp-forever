@@ -4512,9 +4512,9 @@ static void TranslatePoint(const float *source, float *dest, const float *matrix
 
 void TranslatePointIntoViewspace(VECTORCH *pointPtr)
 {
-	Source[0] = pointPtr->vx;
-	Source[1] = pointPtr->vy;
-	Source[2] = pointPtr->vz;
+	Source[0] = (float)pointPtr->vx;
+	Source[1] = (float)pointPtr->vy;
+	Source[2] = (float)pointPtr->vz;
 
 	TranslatePoint(Source, Dest, ViewMatrix);
 
@@ -4547,9 +4547,9 @@ void SquishPoints(SHAPEINSTR *shapeinstrptr)
 			point.vy += Global_ODB_Ptr->ObWorld.vy;
 			point.vy = HierarchicalObjectsLowestYValue + MUL_FIXED(point.vy-HierarchicalObjectsLowestYValue, scale);
 
-			Source[0] = point.vx;
-			Source[1] = point.vy;
-			Source[2] = point.vz;
+			Source[0] = (float)point.vx;
+			Source[1] = (float)point.vy;
+			Source[2] = (float)point.vz;
 
 			TranslatePoint(Source, Dest, ViewMatrix);
 
@@ -4632,9 +4632,9 @@ void MorphPoints(SHAPEINSTR *shapeinstrptr)
 		int i;
 		for(i = shapeinstrptr->sh_numitems; i!=0; i--)
 		{
-			Source[0] = srcPtr->vx+Global_ODB_Ptr->ObWorld.vx;
-			Source[1] = srcPtr->vy+Global_ODB_Ptr->ObWorld.vy;
-			Source[2] = srcPtr->vz+Global_ODB_Ptr->ObWorld.vz;
+			Source[0] = (float)(srcPtr->vx+Global_ODB_Ptr->ObWorld.vx);
+			Source[1] = (float)(srcPtr->vy+Global_ODB_Ptr->ObWorld.vy);
+			Source[2] = (float)(srcPtr->vz+Global_ODB_Ptr->ObWorld.vz);
 
 			TranslatePoint(Source, Dest, ViewMatrix);
 
@@ -4684,14 +4684,14 @@ void TranslateShapeVertices(SHAPEINSTR *shapeinstrptr)
 		ObjectViewMatrix[1+2*4] = (float)(Global_ODB_Ptr->ObMat.mat23)/65536.0f;
 		ObjectViewMatrix[2+2*4] = (float)(Global_ODB_Ptr->ObMat.mat33)/65536.0f;
 
-		ObjectViewMatrix[3+0*4] = Global_ODB_Ptr->ObWorld.vx;
-		ObjectViewMatrix[3+1*4] = Global_ODB_Ptr->ObWorld.vy;
-		ObjectViewMatrix[3+2*4] = Global_ODB_Ptr->ObWorld.vz;
+		ObjectViewMatrix[3+0*4] = (float)Global_ODB_Ptr->ObWorld.vx;
+		ObjectViewMatrix[3+1*4] = (float)Global_ODB_Ptr->ObWorld.vy;
+		ObjectViewMatrix[3+2*4] = (float)Global_ODB_Ptr->ObWorld.vz;
 		for(i = shapeinstrptr->sh_numitems; i!=0; i--)
 		{
-			Source[0] = srcPtr->vx;
-			Source[1] = srcPtr->vy;
-			Source[2] = srcPtr->vz;
+			Source[0] = (float)srcPtr->vx;
+			Source[1] = (float)srcPtr->vy;
+			Source[2] = (float)srcPtr->vz;
 
 			TranslatePoint(Source, Dest, ObjectViewMatrix);
 			TranslatePoint(Dest, Source, ViewMatrix);
@@ -5633,11 +5633,11 @@ void FindIntersectionWithYPlane(VECTORCH *startPtr, VECTORCH *directionPtr, VECT
 }
 void FindZFromXYIntersection(VECTORCH *startPtr, VECTORCH *directionPtr, VECTORCH *intersectionPtr)
 {
-	float a = intersectionPtr->vx - startPtr->vx;
+	float a = (float)(intersectionPtr->vx - startPtr->vx);
 	
 	a/=directionPtr->vx;
 	
-	intersectionPtr->vz = startPtr->vz + (directionPtr->vz*a);
+	intersectionPtr->vz = (float)(startPtr->vz + (directionPtr->vz*a));
 //	textprint("%d %d %d\n",intersectionPtr->vx,intersectionPtr->vy,intersectionPtr->vz);
 }
 

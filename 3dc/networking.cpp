@@ -2,9 +2,6 @@ extern "C" {
 
 #include "3dc.h"
 #include "networking.h"
-
-//#include "dplayext.h"
-
 #include "AvP_Menus.h"
 #include "AvP_MP_Config.h"
 
@@ -46,7 +43,6 @@ int DPlayOpenSession(char *hostName);
 int sendSystemMessage(int messageType, int idFrom, int idTo, unsigned char *lpData, int dwDataSize);
 void findPlayerName(int playerId, char *playerName, int size);
 
-//int nextPlayerID = 100;
 
 BOOL DirectPlay_UpdateSessionList(int *SelectedItem)
 {
@@ -657,13 +653,15 @@ static BOOL DirectPlay_CreatePlayer(char* FormalName,char* FriendlyName)
 	return 1;
 }
 
+/* just grab the value from timeGetTime as the player id
+** it's probably fairly safe to assume two players will never 
+** get the same values for this... */
 int GetNextPlayerID()
 {
 	int val = timeGetTime();
-	char buf[100];
-	sprintf(buf, "giving player id: %d\n", val);
-	OutputDebugString(buf);
-//	return ++nextPlayerID;
+//	char buf[100];
+//	sprintf(buf, "giving player id: %d\n", val);
+//	OutputDebugString(buf);
 	return val;
 }
 

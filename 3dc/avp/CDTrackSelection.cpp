@@ -14,7 +14,7 @@ extern "C"
 
 #include "list_tem.hpp"
 
-#include "OGG_player.h"
+#include "vorbisPlayer.h"
 
 //lists of tracks for each level
 List<int> LevelCDTracks[AVP_ENVIRONMENT_END_OF_LIST];
@@ -174,16 +174,16 @@ static BOOL PickCDTrack(List<int>& track_list)
 static bool PickOGGTrack(List<int>& track_list)
 {
 	//make sure we have some tracks in the list
-	if(!OGG_CheckNumberOfTracks()) return FALSE;
+	if(!CheckNumberOfVorbisTracks()) return FALSE;
 
 	//pick the next track in the list
-	unsigned int index=TrackSelectCounter % OGG_CheckNumberOfTracks();
+	unsigned int index=TrackSelectCounter % CheckNumberOfVorbisTracks();
 
 	TrackSelectCounter++;
 
 	//play it
-	stopOgg();
-	loadOgg(index);
+	StopVorbis();
+	LoadVorbisTrack(index);
 
 	LastTrackChosen = index;
 
@@ -198,7 +198,7 @@ void CheckCDAndChooseTrackIfNeeded()
 	//are we bothering with cd tracks
 //	if(!CDDA_IsOn()) return;
 	//is our current track still playing
-	if(CDDA_IsPlaying() || oggIsPlaying()) // check this is ok
+	if(CDDA_IsPlaying() || IsVorbisPlaying()) // check this is ok
 	{
 		//if in a multiplayer game see if we have changed character type
 		if(AvP.Network == I_No_Network || AvP.PlayerType==lastPlayerType) 

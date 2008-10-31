@@ -1,7 +1,7 @@
 #include <vorbis/vorbisfile.h>
 #include <stdio.h>
 #include <windows.h>
-#include "ogg_player.h"
+#include "vorbisPlayer.h"
 
 #include "dsound.h"
 
@@ -13,7 +13,7 @@
 #include <fstream>
 
 extern "C" {
-	extern LPDIRECTSOUND8 DSObject;
+	extern LPDIRECTSOUND DSObject;
 }
 
 FILE* file;
@@ -29,7 +29,7 @@ DWORD audioBytes1;
 LPVOID audioPtr2;   
 DWORD audioBytes2;
 
-LPDIRECTSOUNDBUFFER dsbuffer = NULL;
+LPDIRECTSOUNDBUFFER vorbisBuffer = NULL;
 DSBUFFERDESC dsbufferdesc;
 LPDIRECTSOUNDNOTIFY pDSNotify = NULL;
 HANDLE hHandles[2];
@@ -50,14 +50,14 @@ const std::string musicFolderName = "Music/";
 // for dsound notify
 #pragma comment(lib,"dxguid.lib")
 
-// type 'PLAYOGG' into in game console to call this function
-void loadOgg(int track) 
+
+void LoadVorbisTrack(int track) 
 {
 	/* check if we have some files to play */
 //	if(!loadOggTrackList()) return;
 
 	/* if we're already playing a track, stop it */
-	if (ogg_is_playing) stopOgg();
+	if (ogg_is_playing) StopVorbis();
 
 	/* if user enters 1, decrement to 0 to align to array (enters 2, decrement to 1 etc) */
 	if(track != 0) track--;
@@ -109,13 +109,13 @@ void loadOgg(int track)
 	buffer_size = dsbufferdesc.dwBufferBytes;
 	half_buffer_size = dsbufferdesc.dwBufferBytes / 2;
 
-	if(FAILED(DSObject->CreateSoundBuffer(&dsbufferdesc, &dsbuffer, NULL)))
+	if(FAILED(DSObject->CreateSoundBuffer(&dsbufferdesc, &vorbisBuffer, NULL)))
 	{
 		OutputDebugString("\n couldnt create buffer");
 	}
 
 	// lock the entire buffer
-	if(FAILED(dsbuffer->Lock(0, buffer_size,
+	if(FAILED(vorbisBuffer->Lock(0, buffer_size,
 		&audioPtr1,&audioBytes1,&audioPtr2,&audioBytes2,DSBLOCK_ENTIREBUFFER))) 
 	{
 			OutputDebugString("\n couldn't lock buffer");
@@ -150,12 +150,12 @@ void loadOgg(int track)
 		BytesReadTotal += BytesReadPerLoop;
 	}
 
-	if(FAILED(dsbuffer->Unlock(audioPtr1, audioBytes1, audioPtr2, audioBytes2))) 
+	if(FAILED(vorbisBuffer->Unlock(audioPtr1, audioBytes1, audioPtr2, audioBytes2))) 
 	{
 		OutputDebugString("\n couldn't unlock ds buffer");
 	}
 
-	if(FAILED(dsbuffer->QueryInterface( IID_IDirectSoundNotify, 
+	if(FAILED(vorbisBuffer->QueryInterface( IID_IDirectSoundNotify, 
                                         (void**)&pDSNotify ) ) )
 	{
 		OutputDebugString("\n query interface for dsnotify didnt work");
@@ -188,12 +188,12 @@ void loadOgg(int track)
 	pDSNotify = NULL;
 
 	// start playing
-	playOgg();
+	PlayVorbis();
 }
 
 //#include <process.h>
 
-void updateOggBuffer() 
+void UpdateVorbisBuffer() 
 //static unsigned __cdecl updateOggBuffer(void*)
 {
 	if (ogg_is_playing != true) return;
@@ -217,7 +217,7 @@ void updateOggBuffer()
 	}
 
 	/* lock buffer at offset */
-	if(FAILED(dsbuffer->Lock(0, half_buffer_size, &audioPtr1, &audioBytes1, &audioPtr2, &audioBytes2, NULL))) 
+	if(FAILED(vorbisBuffer->Lock(0, half_buffer_size, &audioPtr1, &audioBytes1, &audioPtr2, &audioBytes2, NULL))) 
 	{
 		OutputDebugString("couldn't lock buffer\n");
 		return;
@@ -272,15 +272,15 @@ void updateOggBuffer()
 		}
 	}
 
-	if(FAILED(dsbuffer->Unlock(audioPtr1, audioBytes1, audioPtr2, audioBytes2)))
+	if(FAILED(vorbisBuffer->Unlock(audioPtr1, audioBytes1, audioPtr2, audioBytes2)))
 	{	
 		OutputDebugString("\n couldn't unlock ds buffer");
 	}
 }
 
-void playOgg() 
+void PlayVorbis() 
 {
-	if(FAILED(dsbuffer->Play(0,0,DSBPLAY_LOOPING)))
+	if(FAILED(vorbisBuffer->Play(0,0,DSBPLAY_LOOPING)))
 	{
 		OutputDebugString("\n couldnt play ds buffer");
 	}
@@ -289,11 +289,11 @@ void playOgg()
 	}
 }
 
-void stopOgg() 
+void StopVorbis() 
 {
 	if (ogg_is_playing)
 	{
-		dsbuffer->Stop();
+		vorbisBuffer->Stop();
 	}
 	ov_clear(&oggFile);
 //	fclose(file);
@@ -304,19 +304,19 @@ void stopOgg()
 }
 
 // cleanup function
-void endOgg()
+void CleanupVorbis()
 {
-	if(dsbuffer != NULL) 
+	if(vorbisBuffer != NULL) 
 	{
-		dsbuffer->Release();
-		dsbuffer = NULL;
+		vorbisBuffer->Release();
+		vorbisBuffer = NULL;
 	}
 
 	CloseHandle(hHandles[0]);
 	CloseHandle(hHandles[1]);
 }
 
-bool loadOggTrackList()
+bool LoadVorbisTrackList()
 {
 	//clear out the old list first
 //	EmptyCDTrackList();
@@ -348,12 +348,12 @@ bool loadOggTrackList()
 	return true;
 }
 
-int OGG_CheckNumberOfTracks()
+int CheckNumberOfVorbisTracks()
 {
 	return (int)TrackList.size();
 }
 
-bool oggIsPlaying()
+bool IsVorbisPlaying()
 {
 	return ogg_is_playing;
 }	

@@ -170,7 +170,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	LoadDeviceAndVideoModePreferences();
 
 	LoadCDTrackList(); //load list of cd tracks assigned to levels , from a text file
-	loadOggTrackList(); // do the same for any user ogg music files
+	LoadVorbisTrackList(); // do the same for any user ogg music files
 
 	SetFastRandom();
 	
@@ -810,7 +810,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 		TimeStampedMessage("After SoundSys_RemoveAll");
 		CDDA_Stop();
-		stopOgg(); // stop ogg player
+		StopVorbis(); // stop ogg player
 		TimeStampedMessage("After CDDA_Stop");
 
 		/* netgame support */
