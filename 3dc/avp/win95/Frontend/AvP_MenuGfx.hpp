@@ -79,7 +79,7 @@ typedef struct
 {
 	char *FilenamePtr;
 	void *ImagePtr;
-	LPDIRECT3DTEXTURE9 menuTexture;
+	D3DTEXTURE menuTexture;
 	AW_BACKUPTEXTUREHANDLE hBackup;
 	int Width;
 	int Height;

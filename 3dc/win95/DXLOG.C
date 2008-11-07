@@ -280,11 +280,18 @@ D3DAppErrorToString(HRESULT error)
     }
 #endif
 }
-
+/*
 #ifdef __WATCOMC__
 	#define LOGFILE_NAME "dx_error.log"
 #else
 	#define LOGFILE_NAME "dx_errorM.log"
+#endif
+*/
+#ifdef WIN32
+	#define LOGFILE_NAME "dx_error.log"
+#endif
+#ifdef _XBOX
+	#define LOGFILE_NAME "D:\\dx_error.log"
 #endif
 
 static LOGFILE * dxlog = 0;

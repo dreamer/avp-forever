@@ -59,6 +59,7 @@ static void AlienContactWeapon(void);
 #if FLY_MODE_CHEAT_ON
 extern unsigned char KeyboardInput[];
 #endif
+
 //extern int DebouncedGotAnyKey;
 extern unsigned char DebouncedGotAnyKey;
 

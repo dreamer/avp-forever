@@ -7,7 +7,7 @@
 extern "C"
 {
 	#include "inline.h"
-	#include "smacker.h"
+//	#include "smacker.h"
 	extern int NormalFrameTime;
 	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 	extern DDPIXELFORMAT DisplayPixelFormat;

@@ -15,7 +15,9 @@ extern "C"  {
 	speed compiles...
 */
 
-#define WIN32_LEAN_AND_MEAN
+#ifdef WIN32
+	#define WIN32_LEAN_AND_MEAN
+#endif
 
 /*
 	Standard windows functionality
@@ -36,15 +38,14 @@ extern "C"  {
 #ifdef WIN32
 	#include <d3d9.h>
 	#include "dsound.h"
-//	#include "dplay.h"
-//	#include "dplobby.h"
-
-//	#include "dplay8.h"
 	typedef int DPID;
-//	#include "dplobby8.h"
 
 	#define DIRECTINPUT_VERSION 0x0800
 	#include "dinput.h"
+#endif
+#ifdef _XBOX
+	#include <xtl.h>
+	#include "xbox_defines.h"
 #endif
 //#include "fastfile.h"
 
@@ -52,7 +53,6 @@ extern "C"  {
 #define Saturn			No
 
 #define Hardware2dTextureClipping No
-
 
 /*
 
@@ -831,8 +831,7 @@ void Write3dTexturedPolygonToExecuteBuffer(int* itemptr);
 void WriteGouraud3dTexturedPolygonToExecuteBuffer(int* itemptr);
 void WriteBackdrop2dTexturedPolygonToExecuteBuffer(int* itemptr);
 void WriteBackdrop3dTexturedPolygonToExecuteBuffer(int* itemptr);
-void WriteEndCodeToExecuteBuffer(void);
-void ReleaseD3DTexture(void* D3DTexture);
+void ReleaseD3DTexture(void* texture);
 void ReleaseDirect3DNotDD(void);
 void ReleaseDirect3DNotDDOrImages(void);
 BOOL SetExecuteBufferDefaults(void);

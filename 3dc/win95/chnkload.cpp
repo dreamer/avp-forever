@@ -473,8 +473,11 @@ RIFFHANDLE load_rif (const char * fname)
 //	   	ReleaseDirect3D();
 		char message[200];
 		sprintf(message,"Error loading %s",fname);
+#ifdef WIN32
 		MessageBox(NULL,message,"AvP",MB_OK+MB_SYSTEMMODAL);
 		exit(0x111);
+#endif
+		OutputDebugString("\n load_rif - chnload.cpp");
 		return INVALID_RIFFHANDLE;
 	}
 	#if OUTPUT_LOG
@@ -507,8 +510,11 @@ RIFFHANDLE load_rif_non_env (const char * fname)
 //	   	ReleaseDirect3D();
 		char message[200];
 		sprintf(message,"Error loading %s",fname);
+#ifdef WIN32
 		MessageBox(NULL,message,"AvP",MB_OK+MB_SYSTEMMODAL);
 		exit(0x111);
+#endif
+		OutputDebugString("\n load_rif_non_env - chnload.cpp");
 		return INVALID_RIFFHANDLE;
 	}
 	#if OUTPUT_LOG
@@ -1892,8 +1898,8 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 	int VertFrom,VertTo;//for remaining vert in second poly
 	VertTo=6;
 
-	int j;
-	for(int i=0;i<3;i++)
+	int i, j;
+	for(i=0;i<3;i++)
 	{
 		for(j=0;j<4;j++)
 		{
@@ -1904,7 +1910,6 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 		VertTo-=j;
 	}
 	
-	int i;
 	for(i=0;i<3;i++)
 	{
 		if(sc->shape_data.poly_list[ta2->poly].vert_ind[i]==(shp->items[poly][4+VertTo]))break;
@@ -1915,7 +1920,7 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 	txanimheader** thlist=(txanimheader**)PoolAllocateMem((ta1->NumSeq+2)*sizeof(txanimheader*));
 	thlist[0]=0;
 	thlist[ta1->NumSeq+1]=0;
-	for(int i=0;i<ta1->NumSeq;i++)
+	for(i=0;i<ta1->NumSeq;i++)
 	{
 		thlist[i+1]=(txanimheader*)PoolAllocateMem(sizeof(txanimheader));
 		txanimheader* th=thlist[i+1];
@@ -1937,7 +1942,7 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 		th->txa_anim_id=ta1->Identifier;
 
 		txanimframe* tf;
-		for(int j=0;j<th->txa_numframes;j++)
+		for(j=0;j<th->txa_numframes;j++)
 		{
 			tf=&th->txa_framedata[j];
 			tf->txf_flags=0;
@@ -1981,9 +1986,8 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 	shp->sh_textures[UVIndex]=(int*)thlist;
 	shp->items[poly][2]|=iflag_txanim;
 	shp->items[poly][3]=UVIndex<<16;
-
-
 }
+
 void SetupAnimatedTextures(Shape_Chunk* sc,SHAPEHEADER* shp,Animation_Chunk* ac,Shape_Merge_Data_Chunk* smdc, int * local_tex_index_nos)
 {
 	//create conversion between unmerged poly nos and merged poly nos

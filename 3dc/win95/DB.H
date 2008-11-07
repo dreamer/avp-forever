@@ -74,6 +74,14 @@
 		#include <windows.h>
 		#include "advwin32.h"
 	#endif
+	#ifdef _XBOX
+		#include "xbox_defines.h"
+//		#include <xtl.h>
+	#endif
+#endif
+
+#ifdef _XBOX
+	#include <xtl.h>
 #endif
 
 /* Permit use in a C++ source file. */

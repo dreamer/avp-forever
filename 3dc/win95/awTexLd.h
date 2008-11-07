@@ -3,7 +3,10 @@
 
 #ifdef WIN32
 	#include <windows.h>
-	#include <d3d9.h> // BJD
+	#include <d3d9.h>
+#endif
+#ifdef _XBOX
+	#include <xtl.h>
 #endif
 
 /*********************************************/
@@ -209,7 +212,7 @@ struct AwCreateGraphicRegion
 	union /* DDSurface or D3DTexture pointer depending on the context used */
 	{
 		DDSurface * pSurface; /* Direct Draw Surface object pointer */
-		AVPTexture * pTexture; /* Direct 3D Texture object pointer */
+		AvPTexture * pTexture; /* Direct 3D Texture object pointer */
 	};
 };
 
@@ -247,7 +250,7 @@ typedef struct AwCreateGraphicRegion AW_CREATEGRAPHICREGION;
 		AW_TLE_DXERROR if a DirectX SDK call failed
 */
 #ifdef __cplusplus
-	extern "C++" AW_TL_ERC AwSetD3DDevice(DDObject * _ddP, D3DDevice * _d3ddeviceP);
+	extern "C++" AW_TL_ERC AwSetD3DDevice(AvPDDObject * _ddP, AvPD3DDevice * _d3ddeviceP);
 #endif
 
 /* AwSetDDObject(DDObject * _ddP)
@@ -261,8 +264,8 @@ typedef struct AwCreateGraphicRegion AW_CREATEGRAPHICREGION;
 		return values are as described above.
 */
 
-extern AW_TL_ERC AwSetD3DDevice(D3DDevice * _d3ddeviceP);
-extern AW_TL_ERC AwSetDDObject(DDObject * _ddP);
+extern AW_TL_ERC AwSetD3DDevice(AvPD3DDevice * _d3ddeviceP);
+extern AW_TL_ERC AwSetDDObject(AvPDDObject * _ddP);
 
 /* AwSetTextureFormat2(LPDDPIXELFORMAT _ddpfP)
 
@@ -522,7 +525,7 @@ extern AW_TL_ERC AwGetTextureSize(unsigned * _widthP, unsigned * _heightP, unsig
 			parameters were correct but another error
 			occurred.
 */
-extern AVPTexture * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...);
+extern AvPTexture * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...);
 
 /* AwCreateSurface(char const * _argFormatS, ...)
 

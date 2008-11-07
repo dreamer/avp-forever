@@ -94,9 +94,17 @@ const char * GenTex75pc_Directory = "\\\\Kate\\Kate Share\\avp\\Gen34Tex\\";
 const char * GenTex50pc_Directory = "\\\\Kate\\Kate Share\\avp\\Gen12Tex\\";
 
 // new directories for new-style graphics - to be determined properly
-char const * FirstTex_Directory = "Graphics"; // currently relative to cwd
+#ifdef WIN32
+	char const * FirstTex_Directory = "Graphics"; // currently relative to cwd
+#endif
+#ifdef _XBOX
+        char const * FirstTex_Directory = "Graphics"; // currently relative to cwd
+#endif
 char const * SecondTex_Directory = 0; // will be the src safe shadow for development builds
 								//used for cd graphics directory in final version
+
+// xbox
+const char * BaseDir = "D:\\";
 
 char* Rif_Sound_Directory=0;//set for the main level rif
 
@@ -3088,6 +3096,7 @@ void avp_undo_rif_load(RIFFHANDLE h)
    	undo_rif_load(h);
 }
 
+/*
 RIFFHANDLE avp_load_rif (const char * fname)
 {
 	//see if there is a local copy of the rif file
@@ -3108,7 +3117,60 @@ RIFFHANDLE avp_load_rif (const char * fname)
 
 	return load_rif(fname);
 }
+*/
 
+RIFFHANDLE avp_load_rif (const char * fname)
+{
+#ifdef _XBOX
+	char fileName[200];
+	sprintf(fileName, "%s%s","D:\\",fname);
+
+//	OutputDebugString("\n");
+//	OutputDebugString(fileName);
+
+	//see if there is a local copy of the rif file
+	FILE* rifFile=fopen(fileName,"rb");
+/*
+	if(!rifFile && AvpCDPath)
+	{
+		//try and load rif file from cd instead
+		char RifName[200];
+		sprintf(RifName,"%s%s",AvpCDPath,fname);
+		return load_rif(RifName);
+
+	}
+*/
+	// extra check
+	if(rifFile)
+	{
+		fclose(rifFile);
+	}
+	return load_rif(fileName); 
+
+#endif
+#ifdef WIN32
+	//see if there is a local copy of the rif file
+	FILE* rifFile=fopen(fname,"rb");
+
+	if(!rifFile && AvpCDPath)
+	{
+		//try and load rif file from cd instead
+		char RifName[200];
+		sprintf(RifName,"%s%s",AvpCDPath,fname);
+		return load_rif(RifName);
+
+	}
+	// extra check
+	if(rifFile)
+	{
+		fclose(rifFile);
+	}
+	return load_rif(fname); 
+#endif
+}
+
+
+/*
 RIFFHANDLE avp_load_rif_non_env (const char * fname)
 {
 	//see if there is a local copy of the rif file
@@ -3129,7 +3191,54 @@ RIFFHANDLE avp_load_rif_non_env (const char * fname)
 
 	return load_rif_non_env(fname); 
 }
+*/
 
+RIFFHANDLE avp_load_rif_non_env (const char * fname)
+{
+#ifdef _XBOX
+	char fileName[200];
+	sprintf(fileName, "%s%s","D:\\",fname);
+
+//	OutputDebugString("\n");
+//	OutputDebugString(fileName);
+
+	//see if there is a local copy of the rif file
+	FILE* rifFile=fopen(fileName,"rb");
+/*
+	if(!rifFile && AvpCDPath)
+	{
+		//try and load rif file from cd instead
+		char RifName[200];
+		sprintf(RifName,"%s%s",AvpCDPath,fname);
+		return load_rif_non_env(RifName);
+	}
+*/
+	// extra check
+	if(rifFile)
+	{
+		fclose(rifFile);
+	}
+	return load_rif_non_env(fileName); 
+#endif
+#ifdef WIN32
+	//see if there is a local copy of the rif file
+	FILE* rifFile=fopen(fname,"rb");
+	if(!rifFile && AvpCDPath)
+	{
+		//try and load rif file from cd instead
+		char RifName[200];
+		sprintf(RifName,"%s%s",AvpCDPath,fname);
+		return load_rif_non_env(RifName);
+
+	}
+	// extra check
+	if(rifFile)
+	{
+		fclose(rifFile);
+	}
+	return load_rif_non_env(fname); 
+#endif
+}
 
 
 #if debug
@@ -3364,7 +3473,11 @@ static BOOL WarnedAboutDiskSpace=FALSE;
 static void MakeBackupFile(File_Chunk* fc)
 {
 	unsigned long spc,bps,numclust,total;
+#ifdef WIN32
 	if(GetDiskFreeSpace(0,&spc,&bps,&numclust,&total))
+#else
+	if(1) // fix this..
+#endif
 	{
 		unsigned int freespace=spc*bps*numclust;
 		if(freespace<40000000)

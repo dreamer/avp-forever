@@ -492,7 +492,6 @@ void PlatformSpecificExitingHUD(void)
 	/* KJL 11:37:19 06/14/97 - draw whatever is in the execute buffer */
 	if (ScanDrawMode != ScanDrawDirectDraw)
 	{
-		WriteEndCodeToExecuteBuffer();
 		UnlockExecuteBufferAndPrepareForUse();
 		ExecuteBuffer();
 		EndD3DScene();
@@ -683,7 +682,6 @@ void BLTPredatorOverlayToHUD(void)
 	/* KJL 11:37:19 06/14/97 - draw whatever is in the execute buffer */
 	if (ScanDrawMode != ScanDrawDirectDraw)
 	{
-		WriteEndCodeToExecuteBuffer();
 		UnlockExecuteBufferAndPrepareForUse();
 		ExecuteBuffer();
 		EndD3DScene();
@@ -804,7 +802,6 @@ extern void BLTAlienOverlayToHUD(void)
 	/* KJL 11:37:19 06/14/97 - draw whatever is in the execute buffer */
 	if (ScanDrawMode != ScanDrawDirectDraw)
 	{
-		WriteEndCodeToExecuteBuffer();
 		UnlockExecuteBufferAndPrepareForUse();
 		ExecuteBuffer();
 		EndD3DScene();

@@ -17,6 +17,7 @@
 #include "fail.h"
 void ReportError(char const * mesg1, char const * mesg2)
 {
+#ifdef WIN32 /* fix for xbox? */
 	char * mesg;
 	DWORD err = 0;
 	
@@ -61,6 +62,7 @@ void ReportError(char const * mesg1, char const * mesg2)
    
    	// Free the buffer.
 	delete[] mesg;
+#endif
 }
 
 /***************/

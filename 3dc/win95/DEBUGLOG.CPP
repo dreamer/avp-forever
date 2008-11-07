@@ -1,10 +1,16 @@
 #include <string.h>
 #include <stdlib.h>
-#include <windows.h>
+#ifdef WIN32
+	#include <windows.h>
+#endif
+#ifdef _XBOX
+	#include <xtl.h>
+#endif
 #include "debuglog.hpp"
 
 LogFile::LogFile(char const * const _fname) : fname(0) , ever_written(0)
 {
+#ifdef WIN32
 	FILE * fp = fopen(_fname,"w");
 	if (fp)
 	{
@@ -28,6 +34,7 @@ LogFile::LogFile(char const * const _fname) : fname(0) , ever_written(0)
 		delete[] fname;
 		fname = 0;
 	}
+#endif
 }
 
 LogFile::~LogFile()

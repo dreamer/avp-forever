@@ -59,7 +59,9 @@ typedef struct activesoundsample
 	
 	LPDIRECTSOUNDBUFFER dsBufferP;
 	LPDIRECTSOUND3DBUFFER ds3DBufferP;
+#ifdef WIN32
 	LPKSPROPERTYSET	PropSetP;
+#endif
 	
 }ACTIVESOUNDSAMPLE;
 

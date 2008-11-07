@@ -220,7 +220,6 @@ void r2rect :: AlphaFill
 	/* check to see if buffer is getting full */
 	if (NumVertices > (MaxD3DVertices-12)) 
 	{
-	   WriteEndCodeToExecuteBuffer();
   	   UnlockExecuteBufferAndPrepareForUse();
 	   ExecuteBuffer();
   	   LockExecuteBuffer();

@@ -48,10 +48,10 @@ void AltTabAwRestore<DDSurface>::DoRestore(DDSurface * pSurface)
 #endif
 }
 
-void AltTabAwRestore<AVPTexture>::DoRestore(AVPTexture * pTexture)
+void AltTabAwRestore<AvPTexture>::DoRestore(AvPTexture * pTexture)
 {
 //#if 0 // bjd
-	AVPTexture * pNewTexture = AwCreateTexture("rtf",m_hBackup,pTexture,AW_TLF_PREVSRCALL);
+	AvPTexture * pNewTexture = AwCreateTexture("rtf",m_hBackup,pTexture,AW_TLF_PREVSRCALL);
 	// should have succeeded
 	db_assert1(pNewTexture);
 	// should return the same pointer!
@@ -114,7 +114,7 @@ struct AltTabEntry
 
 struct AltTabLists
 {
-	HashTable<AltTabEntry<AVPTexture> > m_listTextures;
+	HashTable<AltTabEntry<AvPTexture> > m_listTextures;
 	HashTable<AltTabEntry<DDSurface> > m_listSurfaces;
 };
 
@@ -155,7 +155,7 @@ struct AltTabDebugLists : AltTabLists
 			unsigned i = 1;
 			for
 			(
-				HashTable<AltTabEntry<AVPTexture> >::ConstIterator itTextures(m_listTextures);
+				HashTable<AltTabEntry<AvPTexture> >::ConstIterator itTextures(m_listTextures);
 				!itTextures.Done(); itTextures.Next()
 			)
 			{
@@ -172,16 +172,16 @@ struct AltTabDebugLists : AltTabLists
 #endif
 
 #ifdef NDEBUG
-	void ATIncludeTexture(AVPTexture * pTexture, AW_BACKUPTEXTUREHANDLE hBackup)
+	void ATIncludeTexture(AvPTexture * pTexture, AW_BACKUPTEXTUREHANDLE hBackup)
 #else
-	void _ATIncludeTexture(AVPTexture * pTexture, AW_BACKUPTEXTUREHANDLE hBackup, char const * pszFile, unsigned nLine, char const * pszDebugString)
+	void _ATIncludeTexture(AvPTexture * pTexture, AW_BACKUPTEXTUREHANDLE hBackup, char const * pszFile, unsigned nLine, char const * pszDebugString)
 #endif
 {
 	db_assert1(pTexture);
 	//db_assert1(hBackup); // bjd
-	HashTable<AltTabEntry<AVPTexture> >::Node * pNewNode = g_atlists.m_listTextures.NewNode();
+	HashTable<AltTabEntry<AvPTexture> >::Node * pNewNode = g_atlists.m_listTextures.NewNode();
 	pNewNode->d.m_pDxGraphic = pTexture;
-	pNewNode->d.m_pRestore = new AltTabAwRestore<AVPTexture>(hBackup);
+	pNewNode->d.m_pRestore = new AltTabAwRestore<AvPTexture>(hBackup);
 	#ifndef NDEBUG
 		pNewNode->d.m_pszFile = pszFile;
 		pNewNode->d.m_nLine = nLine;
@@ -222,17 +222,17 @@ struct AltTabDebugLists : AltTabLists
 }
 
 #ifdef NDEBUG
-	void ATIncludeTextureEx(AVPTexture * pTexture, AT_PFN_RESTORETEXTURE pfnRestore, void * pUser)
+	void ATIncludeTextureEx(AvPTexture * pTexture, AT_PFN_RESTORETEXTURE pfnRestore, void * pUser)
 #else
-	void _ATIncludeTextureEx(AVPTexture * pTexture, AT_PFN_RESTORETEXTURE pfnRestore, void * pUser, char const * pszFile, unsigned nLine, char const * pszFuncName, char const * pszDebugString)
+	void _ATIncludeTextureEx(AvPTexture * pTexture, AT_PFN_RESTORETEXTURE pfnRestore, void * pUser, char const * pszFile, unsigned nLine, char const * pszFuncName, char const * pszDebugString)
 #endif
 {
 	db_assert1(pTexture);
 	db_assert1(pfnRestore);
-	HashTable<AltTabEntry<AVPTexture> >::Node * pNewNode = g_atlists.m_listTextures.NewNode();
+	HashTable<AltTabEntry<AvPTexture> >::Node * pNewNode = g_atlists.m_listTextures.NewNode();
 	pNewNode->d.m_pDxGraphic = pTexture;
 	#ifndef NDEBUG
-		pNewNode->d.m_pRestore = new AltTabUserRestore<AVPTexture>(pfnRestore,pUser,pszFuncName);
+		pNewNode->d.m_pRestore = new AltTabUserRestore<AvPTexture>(pfnRestore,pUser,pszFuncName);
 		pNewNode->d.m_pszFile = pszFile;
 		pNewNode->d.m_nLine = nLine;
 		if (pszDebugString)
@@ -275,12 +275,12 @@ struct AltTabDebugLists : AltTabLists
 	g_atlists.m_listSurfaces.AddAsserted(pNewNode);
 }
 
-void ATRemoveTexture(AVPTexture * pTexture)
+void ATRemoveTexture(AvPTexture * pTexture)
 {
 	db_assert1(pTexture);
-	AltTabEntry<AVPTexture> ateRemove;
+	AltTabEntry<AvPTexture> ateRemove;
 	ateRemove.m_pDxGraphic = pTexture;
-	AltTabEntry<AVPTexture> const * pEntry = g_atlists.m_listTextures.Contains(ateRemove);
+	AltTabEntry<AvPTexture> const * pEntry = g_atlists.m_listTextures.Contains(ateRemove);
 	db_assert1(pEntry);
 	db_assert1(pEntry->m_pRestore);
 	delete pEntry->m_pRestore;

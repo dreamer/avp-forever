@@ -348,7 +348,6 @@ BOOL IsDPlay(void)
 }
 #endif
 
-
 /*
  * DPlayOpenSession
  *

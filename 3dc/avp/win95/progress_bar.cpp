@@ -51,8 +51,8 @@ RECT LoadingBarEmpty_SrcRect;
 RECT LoadingBarFull_DestRect;
 RECT LoadingBarFull_SrcRect;
 
-LPDIRECT3DTEXTURE9 LoadingBarFullTexture;
-LPDIRECT3DTEXTURE9 LoadingBarEmptyTexture;
+D3DTEXTURE LoadingBarFullTexture;
+D3DTEXTURE LoadingBarEmptyTexture;
 
 int fullbar_height, fullbar_width;
 int emptybar_height, emptybar_width;
@@ -92,7 +92,7 @@ void Start_Progress_Bar()
 							);
 		}
 		// create d3d texture here
-		LoadingBarEmptyTexture = CreateD3DTexturePadded((AVPTexture*)LoadingBarEmpty, &emptybar_height, &emptybar_width);
+		LoadingBarEmptyTexture = CreateD3DTexturePadded((AvPTexture*)LoadingBarEmpty, &emptybar_height, &emptybar_width);
 	}
 	{
 		char buffer[100];
@@ -124,7 +124,7 @@ void Start_Progress_Bar()
 							);
 		}
 		
-		LoadingBarFullTexture = CreateD3DTexturePadded((AVPTexture*)LoadingBarFull, &fullbar_height, &fullbar_width);
+		LoadingBarFullTexture = CreateD3DTexturePadded((AvPTexture*)LoadingBarFull, &fullbar_height, &fullbar_width);
 	}
 	DDSurface* image=0;
 	
@@ -297,6 +297,7 @@ void Game_Has_Loaded(void)
 
 	int f = 65536;
 	ResetFrameCounter();
+
 	do
 	{
 		CheckForWindowsMessages();

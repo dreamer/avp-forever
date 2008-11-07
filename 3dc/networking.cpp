@@ -12,7 +12,13 @@ extern "C" {
 #else
 	#pragma comment(lib, "enet.lib")
 #endif
-#pragma comment(lib, "ws2_32.lib")
+
+#ifdef WIN32
+	#pragma comment(lib, "ws2_32.lib")
+#endif
+#ifdef _XBOX
+	//#pragma comment(lib, "xnetd.lib")
+#endif
 
 ENetHost * Client;
 ENetAddress ServerAddress;
@@ -609,7 +615,7 @@ int IDirectPlayX_GetPlayerName(int glpDP, DPID id, unsigned char *data, int *siz
 		return DP_OK;
 	}
 
-	strcpy((char*)data, "ArseFace");
+	strcpy((char*)data, "DeadMeat");
 	*size = 9;
 #endif
 	return DP_OK;

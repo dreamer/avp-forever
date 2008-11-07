@@ -325,7 +325,6 @@ void DrawHUDMapLine(VECTOR2D *vertex1, VECTOR2D *vertex2, enum MAP_COLOUR_ID col
 			*/ /* Neal's comment, not mine... :)  KJL */
 			if ((ScanDrawMode != ScanDrawDirectDraw) && (NumVertices > (MaxD3DVertices-24))) 
 			{
-				WriteEndCodeToExecuteBuffer();
 				UnlockExecuteBufferAndPrepareForUse();
 				ExecuteBuffer();
 				LockExecuteBuffer();

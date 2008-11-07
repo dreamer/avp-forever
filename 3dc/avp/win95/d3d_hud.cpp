@@ -110,9 +110,6 @@ int WaterShaftImageNumber;
 
 int HUDScaleFactor;
 
-// bjd - for new textures
-extern IMAGEHEADER ImageHeaderArray[];
-
 static struct HUDFontDescTag HUDFontDesc[] =
 {
 	//MARINE_HUD_FONT_BLUE,
@@ -212,16 +209,8 @@ void D3D_InitialiseMarineHUD(void)
 	{
 		HUDResolution = HUD_RES_MED;
 		HUDImageNumber = CL_LoadImageOnce("Huds\\Marine\\MarineHUD.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
-
-		/* stupid hard coded texture sizes.. */
-		int Size = ImageHeaderArray[HUDImageNumber].ImageWidth;
-
-		/* the image the tracker is normally on is 256x256 */
 		MotionTrackerHalfWidth = 127/2;
 		MotionTrackerTextureSize = 128;
-
-//		MotionTrackerHalfWidth = ((Size / 2) - 1) /2;
-//		MotionTrackerTextureSize = Size / 2;
 
 		BlueBar.ImageNumber = HUDImageNumber;
 		BlueBar.TopLeftX = 0;

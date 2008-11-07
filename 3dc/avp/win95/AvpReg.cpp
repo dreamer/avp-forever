@@ -72,8 +72,8 @@ void GetPathFromRegistry()
 		RegCloseKey(hKey);
 	}
 
-	OutputDebugString("\n");
-	OutputDebugString(AvpCDPath);
+//	OutputDebugString("\n");
+//	OutputDebugString(AvpCDPath);
 
 	//now set second texture directory
 	if(!SecondTex_Directory)
@@ -90,8 +90,8 @@ void GetPathFromRegistry()
 			strcpy(directory,"\\\\bob\\textures\\avp_graphics");
 		}
 		*(char**)&SecondTex_Directory=directory;
-		OutputDebugString("\n");
-		OutputDebugString(SecondTex_Directory);
+//		OutputDebugString("\n");
+//		OutputDebugString(SecondTex_Directory);
 	}
 
 	//and the second sound directory
@@ -109,8 +109,8 @@ void GetPathFromRegistry()
 			strcpy(directory,"\\\\bob\\vss\\avp\\sound\\");
 		}
 		SecondSoundDir=directory;
-		OutputDebugString("\n");
-		OutputDebugString(SecondSoundDir);
+//		OutputDebugString("\n");
+//		OutputDebugString(SecondSoundDir);
 	}
 #endif
 }

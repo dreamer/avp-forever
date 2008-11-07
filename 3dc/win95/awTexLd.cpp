@@ -169,7 +169,7 @@ namespace AwTl
 				, widthP(NULL)
 				, heightP(NULL)
 				, backupHP(NULL)
-				, prevTexP(static_cast<AVPTexture *>(NULL))
+				, prevTexP(static_cast<AvPTexture *>(NULL))
 				, prevTexB(false)
 				, loadTextureB(false)
 				, callbackF(NULL)
@@ -281,8 +281,8 @@ namespace AwTl
 		DDSurface * surfaceP;
 		bool surface_lockedB;
 		DDSurface * dst_surfaceP;
-		AVPTexture * textureP;
-		AVPTexture * dst_textureP;
+		AvPTexture * textureP;
+		AvPTexture * dst_textureP;
 
 		unsigned surface_width;
 		unsigned surface_height;
@@ -348,7 +348,7 @@ namespace AwTl
 	if (awTlLastErr != AW_TLE_OK) { \
 		db_logf3(("AwCreateGraphic() failed whilst %s",s)); \
 		db_logf1(("AwCreateGraphic(): ERROR: %s",AwTlErrorToString())); \
-		return static_cast<AVPTexture *>(NULL); \
+		return static_cast<AvPTexture *>(NULL); \
 	} else { \
 		db_logf5(("\tsuccessfully completed %s",s)); \
 	}
@@ -534,7 +534,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 	if (_parmsR.originalWidthP) *_parmsR.originalWidthP = m_nWidth;
 	if (_parmsR.originalHeightP) *_parmsR.originalHeightP = m_nHeight;
 
-	AVPTexture *d3d_texture = new AVPTexture;
+	AvPTexture *d3d_texture = new AvPTexture;
 
 	unsigned char *buffer = (unsigned char *)malloc(m_nWidth * m_nHeight * 4);
 
@@ -1792,7 +1792,7 @@ namespace AwTl {
 		{
 			awTlLastErr = AW_TLE_BADFILEFORMAT;
 			db_log1("AwCreateGraphic(): ERROR: file format not recognized");
-			return static_cast<AVPTexture *>(NULL);
+			return static_cast<AvPTexture *>(NULL);
 		}
 		else
 		{
@@ -2256,7 +2256,7 @@ namespace AwTl {
 					}
 					else if (pParams->loadTextureB)
 					{
-						pParams->prevTexP = va_arg(ap,AVPTexture *);
+						pParams->prevTexP = va_arg(ap,AvPTexture *);
 						db_logf4(("\tPrevious D3DTexture * = %p",pParams->prevTexP.textureP));
 					}
 					else
@@ -2324,7 +2324,7 @@ namespace AwTl {
 				awTlLastWinErr = GetLastError();
 				db_logf1(("AwCreateGraphic(): ERROR opening file \"%s\"",pParams->fileNameS));
 				db_log2(AwTlErrorToString());
-				return static_cast<AVPTexture *>(NULL);
+				return static_cast<AvPTexture *>(NULL);
 			}
 
 			SurfUnion textureP = pParams->DoCreate();
@@ -2361,7 +2361,7 @@ namespace AwTl {
 
 #define FUNCTION_NAME "AwSetD3DDevice()"
 
-AW_TL_ERC AwSetD3DDevice(D3DDevice * _d3ddeviceP)
+AW_TL_ERC AwSetD3DDevice(AvPD3DDevice * _d3ddeviceP)
 {
 	using AwTl::driverDesc;
 
@@ -2422,7 +2422,7 @@ AW_TL_ERC AwSetD3DDevice(D3DDevice * _d3ddeviceP)
 	return AW_TLE_OK;
 }
 
-AW_TL_ERC AwSetDDObject(DDObject * _ddP)
+AW_TL_ERC AwSetDDObject(AvPDDObject * _ddP)
 {
 	using AwTl::driverDesc;
 
@@ -2440,7 +2440,7 @@ AW_TL_ERC AwSetDDObject(DDObject * _ddP)
 	return AW_TLE_OK;
 }
 
-AW_TL_ERC AwSetD3DDevice(DDObject * _ddP, D3DDevice * _d3ddeviceP)
+AW_TL_ERC AwSetD3DDevice(AvPDDObject * _ddP, AvPD3DDevice * _d3ddeviceP)
 {
 	db_logf4(("AwSetD3DDevice(%p,%p) called",_ddP,_d3ddeviceP));
 
@@ -2702,7 +2702,7 @@ AW_TL_ERC AwGetTextureSize(register unsigned * _widthP, register unsigned * _hei
 /* PUBLIC: AwCreate functions */
 /******************************/
 
-AVPTexture * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...)
+AvPTexture * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...)
 {
 	db_logf4(("AwCreateTexture(\"%s\") called",_argFormatS));
 
@@ -2781,7 +2781,9 @@ char const * AwWinErrorToString(DWORD error)
 {
 	if (NO_ERROR==error) return "No error";
 	static TCHAR buffer[1024];
+#ifdef WIN32
 	if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,NULL,error,MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),buffer,sizeof buffer/sizeof(TCHAR)-1,NULL))
+#endif
 		wsprintf(buffer,TEXT("FormatMessage() failed; previous Windows error code: 0x%08X"),error);
 	for (TCHAR * bufP = buffer; *bufP; ++bufP)
 	{

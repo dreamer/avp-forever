@@ -1252,6 +1252,50 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		extern int MouseVelX;
 		extern int MouseVelY;
 
+#ifdef _XBOX
+		extern int MovementVelX;
+		extern int MovementVelY;
+
+		/* bjd - handle movement here, with values from left stick */
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// back and forth movement
+		if(MovementVelY > 0)
+		{
+			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Forward = 1;
+			playerStatusPtr->Mvt_MotionIncrement = ((int)MovementVelY)*ControlMethods.MouseYSensitivity;
+		}
+
+		else if(MovementVelY < 0)
+		{
+			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Backward = 1;
+			playerStatusPtr->Mvt_MotionIncrement = ((int)MovementVelY)*ControlMethods.MouseYSensitivity;
+		}
+
+		if(playerStatusPtr->Mvt_MotionIncrement < -ONE_FIXED)
+			playerStatusPtr->Mvt_MotionIncrement = -ONE_FIXED;
+		if(playerStatusPtr->Mvt_MotionIncrement > ONE_FIXED)
+			playerStatusPtr->Mvt_MotionIncrement = ONE_FIXED;
+
+		// strafing
+		if(MovementVelX<0)
+		{
+			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_SideStepLeft = 1;
+			playerStatusPtr->Mvt_SideStepIncrement = ((int)MovementVelX)*ControlMethods.MouseXSensitivity;
+		}
+
+		else if(MovementVelX>0)
+		{
+			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_SideStepRight = 1;
+			playerStatusPtr->Mvt_SideStepIncrement = ((int)MovementVelX)*ControlMethods.MouseXSensitivity;
+		}
+		
+	   	if(playerStatusPtr->Mvt_SideStepIncrement < -ONE_FIXED)
+	   		playerStatusPtr->Mvt_SideStepIncrement = -ONE_FIXED;
+	   	if(playerStatusPtr->Mvt_SideStepIncrement > ONE_FIXED)
+	   		playerStatusPtr->Mvt_SideStepIncrement = ONE_FIXED;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#endif
 
 		if(ControlMethods.HAxisIsTurning)
 		{
@@ -1296,13 +1340,11 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 	   			playerStatusPtr->Mvt_SideStepIncrement = -ONE_FIXED;
 	   		if(playerStatusPtr->Mvt_SideStepIncrement > ONE_FIXED)
 	   			playerStatusPtr->Mvt_SideStepIncrement = ONE_FIXED;
-			
-
 		}
 
 		if(ControlMethods.VAxisIsMovement)
 		{
-			
+#ifdef WIN32
 			if(MouseVelY<0)
 			{
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Forward = 1;
@@ -1318,6 +1360,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 	   			playerStatusPtr->Mvt_MotionIncrement = -ONE_FIXED;
 	   		if(playerStatusPtr->Mvt_MotionIncrement > ONE_FIXED)
 	   			playerStatusPtr->Mvt_MotionIncrement = ONE_FIXED;
+#endif
 		}
 		else // it's looking
 		{
@@ -1338,10 +1381,10 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 				playerStatusPtr->Mvt_AnaloguePitching = 1;
 				playerStatusPtr->Mvt_PitchIncrement = ((int)newMouseVelY)*ControlMethods.MouseYSensitivity;
 			}
-		}	
-								 
+		}
 	}
 
+#ifdef WIN32
 	/* KJL 18:27:34 04/29/97 - joystick control */
 	if (GotJoystick)
 	{
@@ -1584,6 +1627,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			JoystickData.dwPOV);
 		#endif
 	}
+#endif // ifdef WIN32
 
 	/* KJL 16:03:06 05/11/97 - Handle map options */
 	#if 0

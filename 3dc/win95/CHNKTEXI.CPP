@@ -2,6 +2,9 @@
 #ifdef WIN32
 	#include <windows.h>
 #endif
+#ifdef _XBOX
+	#include <xtl.h>
+#endif
 
 #include <string.h>
 #include <string.hpp>
@@ -861,7 +864,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 
 			/* check for user texture first? */
 			int height, width;
-			LPDIRECT3DTEXTURE9 test;
+			D3DTEXTURE test;
 			test = CheckAndLoadUserTexture(newTextureFileName.c_str(), &height, &width);
 			if(test)
 			{
@@ -885,7 +888,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 				db_log4("\tfile is in a fast file");
 				unsigned nWidth, nHeight;
 				AW_BACKUPTEXTUREHANDLE hBackup = NULL;
-				AVPTexture * pTexture =
+				AvPTexture * pTexture =
 					AwCreateTexture
 					(
 						fFlagsEtc & LIO_RESTORABLE ? "pxfWHB" : "pxfWH",
@@ -905,7 +908,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					pImageHdr->ImageHeight = pTexture->height;//nHeight;
 					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
 					strcpy(pImageHdr->ImageName,szBuf);
-					pImageHdr->D3DTexture = pTexture;
+					pImageHdr->AvPTexture = pTexture;
 					pImageHdr->hBackup = hBackup;
 
 					db_logf4(("\tloaded to image number %d",NumImages-1));
@@ -961,7 +964,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 				db_log4("\tloading the actual file");
 				unsigned nWidth, nHeight;
 				AW_BACKUPTEXTUREHANDLE hBackup = NULL;
-				AVPTexture * pTexture =
+				AvPTexture * pTexture =
 					AwCreateTexture
 					(
 						fFlagsEtc & LIO_RESTORABLE ? "sfWHB" : "sfWH",
@@ -980,7 +983,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					pImageHdr->ImageHeight = pTexture->height;//nHeight;
 					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
 					strcpy(pImageHdr->ImageName,szBuf);
-					pImageHdr->D3DTexture = pTexture;
+					pImageHdr->AvPTexture = pTexture;
 					pImageHdr->hBackup = hBackup;
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 

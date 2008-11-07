@@ -190,7 +190,6 @@ static bool PickOGGTrack(List<int>& track_list)
 	return TRUE;
 }
 
-
 void CheckCDAndChooseTrackIfNeeded()
 {
 	static enum playertypes lastPlayerType;
@@ -217,7 +216,6 @@ void CheckCDAndChooseTrackIfNeeded()
 		int level=NumberForCurrentLevel();
 		if(level>=0 && level<AVP_ENVIRONMENT_END_OF_LIST)
 		{
-// bjd
 			if(CDDA_IsOn())
 			{
 				//pick track based on level

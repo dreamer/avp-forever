@@ -165,6 +165,7 @@ void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN
 /* Functions callable from the WinMain() body of code */
 void RE_ENTRANT_QUEUE_WinMain_FlushMessages(void)
 {
+#ifdef WIN32
 	// Process the messages:
 	{
 		#if UseGadgets
@@ -278,6 +279,7 @@ void RE_ENTRANT_QUEUE_WinMain_FlushMessages(void)
 
 	// Clear the messages (only place where a semaphore might be needed):
 	NumQMessages = 0;
+#endif
 }
 
 void RE_ENTRANT_QUEUE_WinMain_FlushMessagesWithoutProcessing(void)

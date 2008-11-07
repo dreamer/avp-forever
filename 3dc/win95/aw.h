@@ -1,15 +1,8 @@
 #ifndef _INCLUDED_AW_H_
 #define _INCLUDED_AW_H_
 
-typedef void* DDObject; // BJD DIRECT DRAW
-typedef void* D3DDevice;//IDirect3DDevice9 *D3DDevice;
-typedef void* DDPalette; // BJD DIRECT DRAW
-
-#define GUID_D3D_TEXTURE IID_IDirect3DTexture9
-#define GUID_DD_SURFACE IID_IDirectDrawSurface9
-
-typedef void* DD_SURFACE_DESC;
-typedef void* DD_S_CAPS;
+typedef void* AvPDDObject; // BJD DIRECT DRAW
+typedef void* AvPD3DDevice;//IDirect3DDevice9 *D3DDevice;
 
 struct AwBackupTexture;
 typedef struct AwBackupTexture * AW_BACKUPTEXTUREHANDLE;
@@ -36,9 +29,17 @@ typedef struct DIRECT3DTEXTURE
 } DIRECT3DTEXTURE;
 
 typedef DIRECT3DTEXTURE * LPDIRECT3DTEXTURE;
-typedef DIRECT3DTEXTURE AVPTexture;
+typedef DIRECT3DTEXTURE AvPTexture;
 
+#ifdef WIN32
 typedef LPDIRECT3DTEXTURE9 D3DTEXTUREHANDLE; 
+typedef LPDIRECT3DTEXTURE9 D3DTEXTURE;
+#endif
+
+#ifdef _XBOX
+typedef LPDIRECT3DTEXTURE8 D3DTEXTUREHANDLE; 
+typedef LPDIRECT3DTEXTURE8 D3DTEXTURE;
+#endif
 
 //typedef int D3DTEXTUREHANDLE;
 
@@ -81,6 +82,7 @@ typedef struct _D3DTLVERTEX {
         float tv;
         float dvTV;
     };
+/*
 #if (defined __cplusplus) && (defined D3D_OVERLOADS)
     _D3DTLVERTEX() { }
     _D3DTLVERTEX(const D3DVECTOR& v,float w,D3DCOLOR col,D3DCOLOR spec, float _tu, float _tv)
@@ -89,6 +91,7 @@ typedef struct _D3DTLVERTEX {
           tu = _tu; tv = _tv;
     }
 #endif
+*/
 } D3DTLVERTEX, *LPD3DTLVERTEX;
 
 #define D3DFVF_TLVERTEX	(D3DFVF_XYZRHW|/*D3DFVF_RESERVED0|*/D3DFVF_DIFFUSE|D3DFVF_SPECULAR|D3DFVF_TEX1)

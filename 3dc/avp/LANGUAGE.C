@@ -57,16 +57,11 @@ void InitTextStrings(void)
 	#else
 	TextBufferPtr = LoadTextFile(LanguageFilename[AvP.Language]);
 	#endif
-	
-	if(TextBufferPtr == NULL) {
-		/* NOTE:
-		   if this load fails, then most likely the game is not 
-		   installed correctly. 
-		   SBF
-		  */ 
+
+	if(TextBufferPtr == NULL) 
+	{
+		/* have to quit if this file isn't available */
 		OutputDebugString("cant find language.txt\n");
-//		fprintf(stderr, "ERROR: unable to load %s language text file\n",
-//			 filename);
 		exit(1);
 	}
 

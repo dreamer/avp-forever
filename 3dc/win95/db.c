@@ -29,7 +29,9 @@
 /* Windows includes. Actually internal, but here to allow pre-compilation. */
 #include "advwin32.h"
 #ifndef DB_NOWINDOWS
+#ifdef WIN32
 	#include <windows.h>
+#endif
 	#include "advwin32.h"
 #endif	
 #ifndef DB_NODIRECTDRAW
@@ -76,14 +78,23 @@ int db_option = 0; /* Default is off. */
 #define PROP_WIDTH 0
 
 /* Logfile name */
-#define LOGFILE_NAME "LOGFILE.TXT"
+#ifdef WIN32
+	#define LOGFILE_NAME "LOGFILE.TXT"
+#endif
+#ifdef _XBOX
+	#define LOGFILE_NAME "D:\\LOGFILE.TXT"
+#endif
 
 /* Set this to 1 if the logfile name is an absolute path. Otherwise the
  * logfile will go in the directory that is current when db_log_init() 
  * is called.
  */
-#define ABSOLUTE_PATH	0
-
+#ifdef WIN32
+	#define ABSOLUTE_PATH	0
+#endif
+#ifdef _XBOX
+	#define ABSOLUTE_PATH	1
+#endif
 /* M A C R O S ******************************************************** */
 
 /* Causes a division by zero exception. */
@@ -544,6 +555,7 @@ static void db_do_std_prompt(unsigned yOffset)
 	switch(db_display_type)
 	{
 		case DB_DOS:
+#ifdef WIN32
 			printf( db_prompt_std );
 			printf("\n");
 			do
@@ -551,6 +563,9 @@ static void db_do_std_prompt(unsigned yOffset)
 				ch = toupper(getch());
 			}
 			while((ch != 'N') && (ch != 'Y') && (ch != 'X'));
+#else
+			ch = 'N';
+#endif
 			break;
 #ifndef DB_NODIRECTDRAW
 		case DB_DIRECTDRAW:

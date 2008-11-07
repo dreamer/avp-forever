@@ -48,7 +48,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="3dc,3dc\avp,3dc\avp\support,3dc\avp\win95,3dc\avp\win95\frontend,3dc\avp\win95\gadgets,3dc\include,3dc\win95"
+				AdditionalIncludeDirectories="3dc;3dc\avp;3dc\avp\support;3dc\avp\win95;3dc\avp\win95\frontend;3dc\avp\win95\gadgets;3dc\include;3dc\win95;win32"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;AVP_DEBUG_VERSION;engine=1;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -80,7 +80,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib d3d9.lib dsound.lib dinput8.lib winmm.lib user32.lib advapi32.lib shell32.lib gdi32.lib ole32.lib smackw32.lib binkw32.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib d3d9.lib dsound.lib dinput8.lib winmm.lib user32.lib advapi32.lib shell32.lib gdi32.lib ole32.lib"
 				OutputFile="debug_AvP.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -162,7 +162,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="false"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="3dc;3dc\avp;3dc\avp\support;3dc\avp\win95;3dc\avp\win95\frontend;3dc\avp\win95\gadgets;3dc\include;3dc\win95"
+				AdditionalIncludeDirectories="3dc;3dc\avp;3dc\avp\support;3dc\avp\win95;3dc\avp\win95\frontend;3dc\avp\win95\gadgets;3dc\include;3dc\win95;win32"
 				PreprocessorDefinitions="WIN32;_WINDOWS;engine=1;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="false"
 				ExceptionHandling="1"
@@ -196,7 +196,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib d3d9.lib dsound.lib dinput8.lib winmm.lib user32.lib advapi32.lib shell32.lib gdi32.lib ole32.lib smackw32.lib binkw32.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib d3d9.lib dsound.lib dinput8.lib winmm.lib user32.lib advapi32.lib shell32.lib gdi32.lib ole32.lib"
 				OutputFile="MyAvP.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -2119,10 +2119,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\3dc\win95\bink.c"
-				>
-			</File>
-			<File
 				RelativePath="3dc\win95\Bmpnames.cpp"
 				>
 				<FileConfiguration
@@ -2836,35 +2832,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="3dc\win95\d3_func.cpp"
+				RelativePath=".\win32\d3_func.cpp"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release For Fox|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="3dc\avp\win95\d3d_hud.cpp"
@@ -2898,35 +2867,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="3dc\avp\win95\d3d_render.cpp"
+				RelativePath=".\win32\d3d_render.cpp"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release For Fox|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="3dc\avp\support\Daemon.cpp"
@@ -3181,35 +3123,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="3dc\win95\Di_func.cpp"
+				RelativePath=".\win32\Di_func.cpp"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release For Fox|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="3dc\avp\win95\DirectPlay.c"
@@ -5585,10 +5500,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\3dc\OGG_player.cpp"
-				>
-			</File>
-			<File
 				RelativePath="3dc\win95\Our_mem.c"
 				>
 				<FileConfiguration
@@ -6616,10 +6527,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\3dc\win95\smacker.c"
-				>
-			</File>
-			<File
 				RelativePath="3dc\win95\Sndchunk.cpp"
 				>
 				<FileConfiguration
@@ -7461,6 +7368,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\3dc\vorbisPlayer.cpp"
+				>
+			</File>
+			<File
 				RelativePath="3dc\avp\Weapons.c"
 				>
 				<FileConfiguration
@@ -8004,7 +7915,7 @@
 				>
 			</File>
 			<File
-				RelativePath="3dc\win95\d3_func.h"
+				RelativePath=".\win32\d3_func.h"
 				>
 			</File>
 			<File
@@ -8012,7 +7923,7 @@
 				>
 			</File>
 			<File
-				RelativePath="3dc\avp\win95\d3d_render.h"
+				RelativePath=".\win32\d3d_render.h"
 				>
 			</File>
 			<File
@@ -8141,6 +8052,10 @@
 			</File>
 			<File
 				RelativePath="3dc\avp\win95\Ffstdio.h"
+				>
+			</File>
+			<File
+				RelativePath=".\3dc\Fmv.h"
 				>
 			</File>
 			<File
@@ -8320,6 +8235,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\3dc\mathline.c"
+				>
+			</File>
+			<File
 				RelativePath="3dc\win95\md5.h"
 				>
 			</File>
@@ -8385,10 +8304,6 @@
 			</File>
 			<File
 				RelativePath="3dc\win95\OEChunk.h"
-				>
-			</File>
-			<File
-				RelativePath=".\3dc\OGG_player.h"
 				>
 			</File>
 			<File
@@ -8673,6 +8588,10 @@
 			</File>
 			<File
 				RelativePath="3dc\avp\win95\Vmanpset.h"
+				>
+			</File>
+			<File
+				RelativePath=".\3dc\vorbisPlayer.h"
 				>
 			</File>
 			<File

@@ -1,6 +1,7 @@
 #ifndef _INCLUDED_IFF_HPP_
 #define _INCLUDED_IFF_HPP_
 
+#if 0
 #if defined(_WIN32) || defined(WIN32) || defined(WINDOWS) || defined(_WINDOWS)
 	#define _IFF_WIN_TARGET
 	#include <windows.h>
@@ -8,6 +9,16 @@
 	#include <stdio.h>
 	#include <conio.h>
 #endif // ! WIN32 && ! _WIN32 && ! WINDOWS && ! _WINDOWS
+#endif
+
+#ifdef WIN32
+	#define _IFF_WIN_TARGET
+	#include <windows.h>
+#endif
+
+#ifdef _XBOX
+	#include <xtl.h>
+#endif
 
 #include "media.hpp"
 
@@ -48,10 +59,12 @@ namespace IFF
 		inline void DisplayMessage(char const * pszTitle,char const * pszText)
 		{
 			::printf("%s\n%s\n",pszTitle,pszText);
+#ifdef WIN32
 			while (::kbhit())
 				::getch();
 			while (!::kbhit() || '\r' != ::getch())
 				;
+#endif
 		}
 	#endif
 	

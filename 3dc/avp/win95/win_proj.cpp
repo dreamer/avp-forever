@@ -1,3 +1,4 @@
+#ifdef WIN32
 /****
 
 Project specific (or potentially 
@@ -683,7 +684,4 @@ void MakeToAsciiTable(void)
 // End of extern C declaration 
 
 };
-
-
-
-
+#endif //ifdef WIN32

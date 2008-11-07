@@ -24,6 +24,9 @@ extern "C" {
 
 #define UseLocalAssert No
 #include "ourasert.h"
+
+extern D3DINFO d3d;
+
 extern "C++"{
 
 #include "r2base.h"
@@ -43,7 +46,8 @@ extern "C++"{
 #include "lighting.h"
 #include "showcmds.h"
 #include "frustrum.h"
-#include "smacker.h"
+//#include "smacker.h"
+#include "fmv.h"
 #include "d3d_render.h"
 #include "avp_userprofile.h"
 #include "bh_types.h"
@@ -75,6 +79,40 @@ struct RENDER_STATES
 	bool operator<(const RENDER_STATES& rhs) const {return translucency_type < rhs.translucency_type;}
 };
 
+struct renderParticle
+{
+	PARTICLE particle;
+	RENDERVERTEX vertices[9];
+	int translucency;
+
+	int numVerts;
+
+	bool operator<(const renderParticle& rhs) const {return translucency < rhs.translucency;}
+};
+
+std::vector<renderParticle> particleArray;
+
+void DrawParticles()
+{
+	if(particleArray.size() == 0) return;
+
+	int backup = RenderPolygon.NumberOfVertices;
+
+	/* sort particle array */
+	std::sort(particleArray.begin(), particleArray.end());
+
+	/* loop particles and add them to vertex buffer */
+	for(int i = 0; i < particleArray.size(); i++)
+	{
+		RenderPolygon.NumberOfVertices = particleArray[i].numVerts;
+		D3D_Particle_Output(&particleArray[i].particle, &particleArray[i].vertices[0]);
+	}
+
+	particleArray.resize(0);
+	/* restore RenderPolygon.NumberOfVertices value... */
+	RenderPolygon.NumberOfVertices = backup;
+}
+
 const signed int NO_TEXTURE = -1;
 // set them to 'null' texture initially
 signed int currentTextureId = NO_TEXTURE;
@@ -89,6 +127,7 @@ RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
 int NumVertices = 0;
 int NumIndicies = 0;
 int vb = 0;
+int particleIndex = 0;
 unsigned int renderCount = 0;
 
 extern AVPIndexedFont IntroFont_Light;
@@ -417,8 +456,6 @@ static void D3D_OutputTriangles()
 	}
 }
 
-extern D3DINFO d3d;
-
 /* KJL 15:12:02 10/05/98 - FMV stuff */
 static PALETTEENTRY FMVPalette[4][256];
 
@@ -647,13 +684,15 @@ BOOL LockExecuteBuffer()
 	renderCount = 0;
 	vb = 0;
 
-	renderTest.resize(0);
+//	renderTest.resize(0);
 
     return TRUE;
 }
 
 BOOL UnlockExecuteBufferAndPrepareForUse()
 {
+//	DrawParticles();
+
 	LastError = d3d.lpD3DVertexBuffer->Unlock();
 	if(FAILED(LastError)) {
 //		OutputDebugString("Couldn't UNlock vertex buffer!");
@@ -676,24 +715,26 @@ BOOL UnlockExecuteBufferAndPrepareForUse()
 // Test for multiple execute buffers!!!!
 BOOL BeginD3DScene()
 {
-
 	// check for lost device
 	LastError = d3d.lpD3DDevice->TestCooperativeLevel();
-	if(FAILED(LastError)) {
-
-		while(1) {
-			if(LastError == D3DERR_DEVICENOTRESET) {
+	if(FAILED(LastError)) 
+	{
+		while(1) 
+		{
+			if( D3DERR_DEVICENOTRESET == LastError ) 
+			{
 				OutputDebugString("\n DEVICE NOT RESET ");
-				if (ReleaseVolatileResources() == TRUE) {
-					if(FAILED(d3d.lpD3DDevice->Reset(&d3d.d3dpp))) {
+				if( ReleaseVolatileResources() == TRUE ) 
+				{
+					if(FAILED( d3d.lpD3DDevice->Reset( &d3d.d3dpp ))) 
+					{
 						OutputDebugString("\n Couldn't reset device");
 					}
-					else {
-						CreateVolatileResources();
-					}
+					else CreateVolatileResources();
 				}
 			}
-			else if (LastError == D3DERR_DEVICELOST ) {
+			else if( D3DERR_DEVICELOST == LastError ) 
+			{
 				OutputDebugString("\n DEVICE LOST ");
 			}
 			Sleep(100);
@@ -772,7 +813,6 @@ BOOL EndD3DScene()
 
 bool dither_on = false;
 
-//extern AVP_GAME_DESC AvP;
 extern int mainMenu;
 
 void ChangeTexture(const int texture_id)
@@ -833,6 +873,7 @@ BOOL ExecuteBuffer()
 	int pos = 0;
 	int new_ind_start = 0;
 	int new_ind_end = 0;
+
 /*
 	LastError = d3d.lpD3DIndexBuffer->Unlock();
 	if(FAILED(LastError)) {
@@ -865,7 +906,7 @@ BOOL ExecuteBuffer()
 	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
 //	for (int i = 0; i < renderCount; i++) {
-	for (unsigned int i = 0; i < renderTest.size(); i++)
+	for (unsigned int i = 0; i < /*renderTest.size()*/renderCount; i++)
 	{
 		tempTexture = renderList[i].texture_id;
 
@@ -900,7 +941,7 @@ BOOL ExecuteBuffer()
 /* do transparents here.. */
 
 //	for (int i = 0; i <= pos; i++) 
-	for (unsigned int i = 0; i < renderTest.size(); i++)
+	for (unsigned int i = 0; i < /*renderTest.size()*/renderCount; i++)
 	{
 		tempTexture = renderList[i].texture_id;
 
@@ -923,6 +964,7 @@ BOOL ExecuteBuffer()
 		else ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
 		unsigned int num_prims = (renderList[i].index_end - renderList[i].index_start) / 3;
+
 //		unsigned int num_prims = (renderList[i].vert_end - renderList[i].vert_start) / 3;
 
 		if (num_prims > 0) 
@@ -1376,8 +1418,8 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 
 	if(!texoffset) texoffset = currentTextureId;
 
-	RecipW = (1.0/65536.0)/(float) ImageHeaderArray[texoffset].ImageWidth;
-	RecipH = (1.0/65536.0)/(float) ImageHeaderArray[texoffset].ImageHeight;
+	RecipW = (1.0f/65536.0f)/(float) ImageHeaderArray[texoffset].ImageWidth;
+	RecipH = (1.0f/65536.0f)/(float) ImageHeaderArray[texoffset].ImageHeight;
 
 	int scale = 1;
 
@@ -1407,7 +1449,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 		if(zvalue <0.0f) zvalue = 0.0f;
 
 		int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-
+/*
 		if (x < Global_VDB_Ptr->VDB_ClipLeft)
 		{
 			x = Global_VDB_Ptr->VDB_ClipLeft;
@@ -1416,11 +1458,9 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 		{
 			x = Global_VDB_Ptr->VDB_ClipRight;
 		}
-
-		mainVertex[vb].sx = (float)x;
-
+*/
 		int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-
+/*
 		if (y < Global_VDB_Ptr->VDB_ClipUp)
 		{
 			y = Global_VDB_Ptr->VDB_ClipUp;
@@ -1429,7 +1469,8 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 		{
 			y = Global_VDB_Ptr->VDB_ClipDown;
 		}
-
+*/
+		mainVertex[vb].sx = (float)x;
 		mainVertex[vb].sy = (float)y;
 		mainVertex[vb].sz = zvalue;
 		mainVertex[vb].rhw = oneOverZ;
@@ -1494,7 +1535,7 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 					x=Global_VDB_Ptr->VDB_ClipRight;
 				}
 
-				mainVertex[vb].sx = x;
+				mainVertex[vb].sx = (float)x;
 			}
 			{
 				int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
@@ -1506,10 +1547,10 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 				{
 					y=Global_VDB_Ptr->VDB_ClipDown;
 				}
-				mainVertex[vb].sy = y;
+				mainVertex[vb].sy = (float)y;
 			}
 			{
-				zvalue = vertices->Z+HeadUpDisplayZOffset;
+				zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
 				//zvalue = ((zvalue-ZNear)/zvalue);
 				zvalue = 1.0f - Zoffset * ZNear/zvalue;
 			}
@@ -1528,7 +1569,7 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 				}
 			}
 
-			mainVertex[vb].specular = 1.0f;
+			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = 0.0f;
 			mainVertex[vb].tv = 0.0f;
 
@@ -1573,7 +1614,7 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERT
 					x=Global_VDB_Ptr->VDB_ClipRight;
 				}
 
-				mainVertex[vb].sx = x;
+				mainVertex[vb].sx = (float)x;
 			}
 			{
 				int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
@@ -1585,10 +1626,10 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERT
 				{
 					y=Global_VDB_Ptr->VDB_ClipDown;
 				}
-				mainVertex[vb].sy = y;
+				mainVertex[vb].sy = (float)y;
 			}
 			{
-				zvalue = vertices->Z+HeadUpDisplayZOffset;
+				zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
 				//zvalue = ((zvalue-ZNear)/zvalue);
 				zvalue = 1.0f - Zoffset * ZNear/zvalue;
 			}
@@ -1596,7 +1637,7 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERT
 			mainVertex[vb].sz = zvalue;
 			mainVertex[vb].rhw = zvalue;
 			mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);//RGBALIGHT_MAKE(255,255,255,255);
-			mainVertex[vb].specular = 1.0f;
+			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = 0.0f;
 			mainVertex[vb].tv = 0.0f;
 
@@ -1721,16 +1762,16 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 	else
 	{
 		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-		RecipW = (1.0 / width);
+		RecipW = (1.0f / width);
 	}
 	if(ImageHeaderArray[texoffset].ImageHeight==128)
 	{
-		RecipH = (1.0 / 128.0);
+		RecipH = (1.0f / 128.0);
 	}
 	else
 	{
 		float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-		RecipH = (1.0 / height);
+		RecipH = (1.0f / height);
 	}
 
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, TRANSLUCENCY_NORMAL);
@@ -1742,7 +1783,7 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 			RENDERVERTEX *vertices = &renderVerticesPtr[i];
 
 		  	float oneOverZ;
-		  	oneOverZ = (1.0)/vertices->Z;
+		  	oneOverZ = (1.0f)/vertices->Z;
 			float zvalue;
 
 			{
@@ -1756,7 +1797,7 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 					x=Global_VDB_Ptr->VDB_ClipRight;
 				}
 
-				mainVertex[vb].sx = x;
+				mainVertex[vb].sx = (float)x;
 			}
 			{
 				int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
@@ -1768,11 +1809,11 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 				{
 					y=Global_VDB_Ptr->VDB_ClipDown;
 				}
-				mainVertex[vb].sy = y;
+				mainVertex[vb].sy = (float)y;
 			}
 
 			{
-				zvalue = vertices->Z+HeadUpDisplayZOffset;
+				zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
 				//zvalue = ((zvalue-ZNear)/zvalue);
 				zvalue= 1.0f - Zoffset * ZNear/zvalue;
 			}
@@ -1791,8 +1832,8 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 //		   	mainVertex[vb].specular=RGBALIGHT_MAKE(vertices->SpecularR,vertices->SpecularG,vertices->SpecularB,255);
 			mainVertex[vb].specular=RGBALIGHT_MAKE(0,0,0,255);
 
-			mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5) * RecipW;
-			mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5) * RecipH;
+			mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
+			mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
 
 			vb++;
 		}
@@ -2235,48 +2276,48 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
 
 	// top left - 0
-	mainVertex[vb].sx = x0;
-	mainVertex[vb].sy = y0;
+	mainVertex[vb].sx = (float)x0;
+	mainVertex[vb].sy = (float)y0;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(r,g,b,a);//colour;
-	mainVertex[vb].specular = 1.0f;
+	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = 0.0f;
 	mainVertex[vb].tv = 0.0f;
 
 	vb++;
 
 	// top right - 1
-	mainVertex[vb].sx = x1 - 1;
-	mainVertex[vb].sy = y0;
+	mainVertex[vb].sx = (float)(x1 - 1);
+	mainVertex[vb].sy = (float)y0;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(r,g,b,a);//colour;
-	mainVertex[vb].specular = 1.0f;
+	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = 0.0f;
 	mainVertex[vb].tv = 0.0f;
 
 	vb++;
 
 	// bottom right - 2
-	mainVertex[vb].sx = x1 - 1;
-	mainVertex[vb].sy = y1 - 1;
+	mainVertex[vb].sx = (float)(x1 - 1);
+	mainVertex[vb].sy = (float)(y1 - 1);
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(r,g,b,a);//colour;
-	mainVertex[vb].specular = 1.0f;
+	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = 0.0f;
 	mainVertex[vb].tv = 0.0f;
 
 	vb++;
 
 	// bottom left - 3
-	mainVertex[vb].sx = x0;
-	mainVertex[vb].sy = y1 - 1;
+	mainVertex[vb].sx = (float)x0;
+	mainVertex[vb].sy = (float)(y1 - 1);
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(r,g,b,a);//colour;
-	mainVertex[vb].specular = 1.0f;
+	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = 0.0f;
 	mainVertex[vb].tv = 0.0f;
 
@@ -2527,7 +2568,7 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr,VECTORCH *prevPositionPtr)
 						x=Global_VDB_Ptr->VDB_ClipRight;
 					}
 
-					mainVertex[vb].sx = x;
+					mainVertex[vb].sx = (float)x;
 				}
 				{
 					if (y<Global_VDB_Ptr->VDB_ClipUp)
@@ -2538,7 +2579,7 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr,VECTORCH *prevPositionPtr)
 					{
 						y=Global_VDB_Ptr->VDB_ClipDown;
 					}
-					mainVertex[vb].sy = y;
+					mainVertex[vb].sy = (float)y;
 				}
 
 			  	float oneOverZ = ((float)verticesPtr->vz-ZNear)/(float)verticesPtr->vz;
@@ -2638,7 +2679,7 @@ void D3D_DrawParticle_Smoke(PARTICLE *particlePtr)
 						x=Global_VDB_Ptr->VDB_ClipRight;
 					}
 
-					mainVertex[vb].sx = x;
+					mainVertex[vb].sx = (float)x;
 				}
 				{
 					if (y<Global_VDB_Ptr->VDB_ClipUp)
@@ -2649,31 +2690,19 @@ void D3D_DrawParticle_Smoke(PARTICLE *particlePtr)
 					{
 						y=Global_VDB_Ptr->VDB_ClipDown;
 					}
-					mainVertex[vb].sy = y;
+					mainVertex[vb].sy = (float)y;
 				}
 
-				float zvalue = (vertices->vz)+HeadUpDisplayZOffset;
+				float zvalue = (float)((vertices->vz)+HeadUpDisplayZOffset);
 				zvalue = ((zvalue-ZNear)/zvalue);
 
 				mainVertex[vb].sz = zvalue;
 				/* check */
 				mainVertex[vb].rhw = 1.0f;
 
-			  	 // Different behaviour for different driver modes
-				switch (D3DDriverMode)
-				{
- 					default:
-					case D3DSoftwareRGBDriver:
-					case D3DSoftwareRampDriver:
-					break;
-					case D3DHardwareRGBDriver:
-					{
-						mainVertex[vb].color = RGBALIGHT_MAKE((particlePtr->LifeTime>>8),(particlePtr->LifeTime>>8),0,(particlePtr->LifeTime>>7)+64);
-						break;
-					}
-				}
+				mainVertex[vb].color = RGBALIGHT_MAKE((particlePtr->LifeTime>>8),(particlePtr->LifeTime>>8),0,(particlePtr->LifeTime>>7)+64);
 
-				mainVertex[vb].specular = 1.0f;
+				mainVertex[vb].specular = (D3DCOLOR)1.0f;
 				mainVertex[vb].tu = 0.0f;
 				mainVertex[vb].tv = 0.0f;
 
@@ -2716,6 +2745,8 @@ void D3D_DecalSystem_Setup(void)
 
 void D3D_DecalSystem_End(void)
 {
+	DrawParticles();
+
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
 	LockExecuteBuffer();
@@ -2895,7 +2926,7 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 			}
 
 			{
-				zvalue = (vertices->Z)+HeadUpDisplayZOffset-50;
+				zvalue = (float)((vertices->Z)+HeadUpDisplayZOffset-50);
 			   	//zvalue = ((zvalue-ZNear)/zvalue);
 				zvalue = 1.0f - Zoffset * ZNear/zvalue;
 			}
@@ -2919,10 +2950,22 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 #endif
 }
 
+void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
+{
+	renderParticle tempParticle;
+
+	tempParticle.numVerts = RenderPolygon.NumberOfVertices;
+	tempParticle.particle = *particlePtr;
+//	tempParticle.vertices = &renderVerticesPtr[0];
+	memcpy(&tempParticle.vertices[0], renderVerticesPtr, tempParticle.numVerts * sizeof(RENDERVERTEX));
+	tempParticle.translucency = ParticleDescription[particlePtr->ParticleID].TranslucencyType;
+
+	particleArray.push_back(tempParticle);
+}
+
 void D3D_Particle_Output(PARTICLE *particlePtr,RENDERVERTEX *renderVerticesPtr)
 {
-//	return;
-	// steam jets, wall lights etc
+	// steam jets, wall lights, fire (inc aliens on fire) etc
 #if 1 // bjd
 	PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
 	int texoffset = SpecialFXImageNumber;
@@ -2955,7 +2998,11 @@ void D3D_Particle_Output(PARTICLE *particlePtr,RENDERVERTEX *renderVerticesPtr)
 
 	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, particleDescPtr->TranslucencyType);
-
+/*
+	char buf[100];
+	sprintf(buf, "trans type: %d\n", particleDescPtr->TranslucencyType);
+	OutputDebugString(buf);
+*/
 	int colour;
 
 	if (particleDescPtr->IsLit && !(particlePtr->ParticleID==PARTICLE_ALIEN_BLOOD && CurrentVisionMode==VISION_MODE_PRED_SEEALIENS) )
@@ -3018,7 +3065,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr,RENDERVERTEX *renderVerticesPtr)
 					{
 						x = Global_VDB_Ptr->VDB_ClipRight;
 					}
-					mainVertex[vb].sx = x;
+					mainVertex[vb].sx = (float)x;
 				}
 				{
 					int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
@@ -3031,7 +3078,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr,RENDERVERTEX *renderVerticesPtr)
 					{
 						y = Global_VDB_Ptr->VDB_ClipDown;
 					}
-					mainVertex[vb].sy = y;
+					mainVertex[vb].sy = (float)y;
 
 				}
 
@@ -3053,10 +3100,10 @@ void D3D_Particle_Output(PARTICLE *particlePtr,RENDERVERTEX *renderVerticesPtr)
 				mainVertex[vb].rhw = oneOverZ;
 
 				mainVertex[vb].color = colour;
-	 			mainVertex[vb].specular=RGBALIGHT_MAKE(0,0,0,255);//RGBALIGHT_MAKE(vertices->SpecularR,vertices->SpecularG,vertices->SpecularB,fog);
+	 			mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);//RGBALIGHT_MAKE(vertices->SpecularR,vertices->SpecularG,vertices->SpecularB,fog);
 
-				mainVertex[vb].tu = ((float)(vertices->U>>16)+.5) * RecipW;
-				mainVertex[vb].tv = ((float)(vertices->V>>16)+.5) * RecipH;
+				mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
+				mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
 				vb++;
 			}
 
@@ -5436,8 +5483,8 @@ void DrawNoiseOverlay(int t)
 {
 #if 1//FUNCTION_ON
 	extern float CameraZoomScale;
-	float u = FastRandom()&255;
-	float v = FastRandom()&255;
+	float u = (float)(FastRandom()&255);
+	float v = (float)(FastRandom()&255);
 	int c = 255;
 	int size = 256;//*CameraZoomScale;
 
@@ -5447,47 +5494,47 @@ void DrawNoiseOverlay(int t)
 
 	CheckVertexBuffer(4, StaticImageNumber, TRANSLUCENCY_GLOWING);
 
-	mainVertex[vb].sx =	Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	Global_VDB_Ptr->VDB_ClipUp;
+	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
+  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
-	mainVertex[vb].specular = 1.0f;
-	mainVertex[vb].tu = u/256.0;
-	mainVertex[vb].tv = v/256.0;
+	mainVertex[vb].specular = (D3DCOLOR)1.0f;
+	mainVertex[vb].tu = u/256.0f;
+	mainVertex[vb].tv = v/256.0f;
 
 	vb++;
 
-  	mainVertex[vb].sx =	Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	Global_VDB_Ptr->VDB_ClipUp;
+  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
+  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
-	mainVertex[vb].specular = 1.0f;
-	mainVertex[vb].tu = (u+size)/256.0;
-	mainVertex[vb].tv = v/256.0;
+	mainVertex[vb].specular = (D3DCOLOR)1.0f;
+	mainVertex[vb].tu = (u+size)/256.0f;
+	mainVertex[vb].tv = v/256.0f;
 
 	vb++;
 
-  	mainVertex[vb].sx =	Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	Global_VDB_Ptr->VDB_ClipDown;
+  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
+  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
-	mainVertex[vb].specular = 1.0f;
-	mainVertex[vb].tu = (u+size)/256.0;
-	mainVertex[vb].tv = (v+size)/256.0;
+	mainVertex[vb].specular = (D3DCOLOR)1.0f;
+	mainVertex[vb].tu = (u+size)/256.0f;
+	mainVertex[vb].tv = (v+size)/256.0f;
 
 	vb++;
 
-  	mainVertex[vb].sx =	Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	Global_VDB_Ptr->VDB_ClipDown;
+  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
+  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
-	mainVertex[vb].specular = 1.0f;
-	mainVertex[vb].tu = u/256.0;
-	mainVertex[vb].tv = (v+size)/256.0;
+	mainVertex[vb].specular = (D3DCOLOR)1.0f;
+	mainVertex[vb].tu = u/256.0f;
+	mainVertex[vb].tv = (v+size)/256.0f;
 
 	vb++;
 
@@ -5536,45 +5583,45 @@ void DrawScanlinesOverlay(float level)
 	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(4, PredatorNumbersImageNumber, TRANSLUCENCY_NORMAL);
 
-  	mainVertex[vb].sx =	Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	Global_VDB_Ptr->VDB_ClipUp;
+  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
+  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
-	mainVertex[vb].specular = 1.0f;
+	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = (v-size)/256.0f;
 	mainVertex[vb].tv = 1.0f;
 
 	vb++;
 
-  	mainVertex[vb].sx =	Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	Global_VDB_Ptr->VDB_ClipUp;
+  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
+  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
-	mainVertex[vb].specular = 1.0f;
+	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = (v-size)/256.0f;
 	mainVertex[vb].tv = 1.0f;
 	
 	vb++;
 
-  	mainVertex[vb].sx =	Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	Global_VDB_Ptr->VDB_ClipDown;
+  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
+  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
-	mainVertex[vb].specular = 1.0f;
+	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = (v+size)/256.0f;
 	mainVertex[vb].tv = 1.0f;
 
 	vb++;
 
-  	mainVertex[vb].sx =	Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	Global_VDB_Ptr->VDB_ClipDown;
+  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
+  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
-	mainVertex[vb].specular = 1.0f;
+	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = (v+size)/256.0f;
 	mainVertex[vb].tv = 1.0f;
 	
@@ -6000,21 +6047,21 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 //	#ifdef AVP_DEBUG_VERSION
 	if(ImageHeaderArray[texoffset].ImageWidth == 128)
 	{
-		RecipW = (1.0 /128.0) / 65536.0f;
+		RecipW = (1.0f /128.0f) / 65536.0f;
 	}
 	else
 	{
 		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-		RecipW = (1.0 / width) / 65536.0f;
+		RecipW = (1.0f / width) / 65536.0f;
 	}
 	if(ImageHeaderArray[texoffset].ImageHeight == 128)
 	{
-		RecipH = (1.0 / 128.0) / 65536.0f;
+		RecipH = (1.0f / 128.0f) / 65536.0f;
 	}
 	else
 	{
 		float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-		RecipH = (1.0 / height) / 65536.0f;
+		RecipH = (1.0f / height) / 65536.0f;
 	}
 //	#else
 //	RecipW = (1.0/65536.0)/128.0;
@@ -6033,12 +6080,12 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 
 	  	float oneOverZ;
-	  	oneOverZ = (1.0)/(vertices->Z);
+	  	oneOverZ = (1.0f)/(vertices->Z);
 		float zvalue;
 		{
-			zvalue = vertices->Z+HeadUpDisplayZOffset;
+			zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
    //		zvalue /= 65536.0;
-   		   	zvalue = 1.0 - ZNear/zvalue;
+   		   	zvalue = 1.0f - ZNear/zvalue;
 		}
 
 		{
@@ -6054,7 +6101,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 				x=Global_VDB_Ptr->VDB_ClipRight;
 			}
 			#endif
-			mainVertex[vb].sx = x;
+			mainVertex[vb].sx = (float)x;
 		}
 		{
 			int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
@@ -6069,7 +6116,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 				y=Global_VDB_Ptr->VDB_ClipDown;
 			}
 			#endif
-			mainVertex[vb].sy = y;
+			mainVertex[vb].sy = (float)y;
 
 		}
 //			vertexPtr->tu = ((float)(vertices->U>>16)+0.5) * RecipW;
@@ -6081,8 +6128,8 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
   		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
 		mainVertex[vb].specular=RGBALIGHT_MAKE(0,0,0,255);
 
-		mainVertex[vb].tu = ((float)vertices->U) * RecipW + (1.0 / 256.0);
-		mainVertex[vb].tv = ((float)vertices->V) * RecipH + (1.0 / 256.0);
+		mainVertex[vb].tu = ((float)vertices->U) * RecipW + (1.0f / 256.0f);
+		mainVertex[vb].tv = ((float)vertices->V) * RecipH + (1.0f / 256.0f);
 
 		vb++;
 	}
@@ -6409,7 +6456,7 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 				x = Global_VDB_Ptr->VDB_ClipRight;
 			}
 
-			mainVertex[vb].sx = x;
+			mainVertex[vb].sx = (float)x;
 		}
 		{
 			if (y < Global_VDB_Ptr->VDB_ClipUp)
@@ -6420,7 +6467,7 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 			{
 				y = Global_VDB_Ptr->VDB_ClipDown;
 			}
-			mainVertex[vb].sy = y;
+			mainVertex[vb].sy = (float)y;
 		}
 
 //		point->vz+=HeadUpDisplayZOffset;
@@ -7233,7 +7280,7 @@ void ThisFramesRenderingHasFinished(void)
 void D3D_DrawWaterOctagonPatch(int xOrigin, int yOrigin, int zOrigin, int xOffset, int zOffset)
 {
 #if 1//FUNCTION_ON
-	float grad = 2.414213562373;
+	float grad = (float)2.414213562373;
 	int i=0;
 	int x;
 	for (x=xOffset; x<16+xOffset; x++)
@@ -7900,7 +7947,7 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = (t<<24)+colour;
-	mainVertex[vb].specular = 1.0f;
+	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = 0.0f;
 	mainVertex[vb].tv = 0.0f;
 
@@ -7911,7 +7958,7 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = (t<<24)+colour;
-	mainVertex[vb].specular = 1.0f;
+	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = 0.0f;
 	mainVertex[vb].tv = 0.0f;
 
@@ -7922,7 +7969,7 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = (t<<24)+colour;
-	mainVertex[vb].specular = 1.0f;
+	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = 0.0f;
 	mainVertex[vb].tv = 0.0f;
 
@@ -7933,7 +7980,7 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = (t<<24)+colour;
-	mainVertex[vb].specular = 1.0f;
+	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = 0.0f;
 	mainVertex[vb].tv = 0.0f;
 
@@ -8046,7 +8093,7 @@ extern void D3D_PlayerOnFireOverlay(void)
 		mainVertex[vb].sz = 0.0f;
 		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = 1.0f;
+		mainVertex[vb].specular = (D3DCOLOR)1.0f;
 		mainVertex[vb].tu = u;
 		mainVertex[vb].tv = v;
 		
@@ -8057,7 +8104,7 @@ extern void D3D_PlayerOnFireOverlay(void)
 		mainVertex[vb].sz = 0.0f;
 		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = 1.0f;
+		mainVertex[vb].specular = (D3DCOLOR)1.0f;
 		mainVertex[vb].tu = u+1.0f;
 		mainVertex[vb].tv = v;
 		vb++;
@@ -8067,7 +8114,7 @@ extern void D3D_PlayerOnFireOverlay(void)
 		mainVertex[vb].sz = 0.0f;
 		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = 1.0f;
+		mainVertex[vb].specular = (D3DCOLOR)1.0f;
 		mainVertex[vb].tu = u+1.0f;
 		mainVertex[vb].tv = v+1.0f;
 
@@ -8078,7 +8125,7 @@ extern void D3D_PlayerOnFireOverlay(void)
 		mainVertex[vb].sz = 0.0f;
 		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = 1.0f;
+		mainVertex[vb].specular = (D3DCOLOR)1.0f;
 		mainVertex[vb].tu = u;
 		mainVertex[vb].tv = v+1.0f;
 
@@ -8144,7 +8191,7 @@ extern void D3D_ScreenInversionOverlay()
 			mainVertex[vb].sz = 0.0f;
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = 1.0f;
+			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = 0.375f + (cos*(-1) - sin*(-1));
 			mainVertex[vb].tv = 0.375f + (sin*(-1) + cos*(-1));
 
@@ -8155,7 +8202,7 @@ extern void D3D_ScreenInversionOverlay()
 			mainVertex[vb].sz = 0.0f;
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = 1.0f;
+			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = .375f + (cos*(+1) - sin*(-1));
 			mainVertex[vb].tv = .375f + (sin*(+1) + cos*(-1));
 			
@@ -8166,7 +8213,7 @@ extern void D3D_ScreenInversionOverlay()
 			mainVertex[vb].sz = 0.0f;
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = 1.0f;
+			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = .375f + (cos*(+1) - sin*(+1));
 			mainVertex[vb].tv = .375f + (sin*(+1) + cos*(+1));
 			
@@ -8177,7 +8224,7 @@ extern void D3D_ScreenInversionOverlay()
 			mainVertex[vb].sz = 0.0f;
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = 1.0f;
+			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = .375f + (cos*(-1) - sin*(+1));
 			mainVertex[vb].tv = .375f + (sin*(-1) + cos*(+1));
 
@@ -8230,45 +8277,45 @@ extern void D3D_PredatorScreenInversionOverlay()
 	{
 		CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_DARKENINGCOLOUR);
 
-	  	mainVertex[vb].sx =	Global_VDB_Ptr->VDB_ClipLeft;
-	  	mainVertex[vb].sy =	Global_VDB_Ptr->VDB_ClipUp;
+	  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
+	  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
 		mainVertex[vb].sz = 1.0f;
 		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = 1.0f;
+		mainVertex[vb].specular = (D3DCOLOR)1.0f;
 		mainVertex[vb].tu = 0.0f;
 		mainVertex[vb].tv = 0.0f;
 
 		vb++;
 
-	  	mainVertex[vb].sx =	Global_VDB_Ptr->VDB_ClipRight;
-	  	mainVertex[vb].sy =	Global_VDB_Ptr->VDB_ClipUp;
+	  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
+	  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
 		mainVertex[vb].sz = 1.0f;
 		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = 1.0f;
+		mainVertex[vb].specular = (D3DCOLOR)1.0f;
 		mainVertex[vb].tu = 0.0f;
 		mainVertex[vb].tv = 0.0f;
 
 		vb++;
 
-	  	mainVertex[vb].sx =	Global_VDB_Ptr->VDB_ClipRight;
-	  	mainVertex[vb].sy =	Global_VDB_Ptr->VDB_ClipDown;
+	  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
+	  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
 		mainVertex[vb].sz = 1.0f;
 		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = 1.0f;
+		mainVertex[vb].specular = (D3DCOLOR)1.0f;
 		mainVertex[vb].tu = 0.0f;
 		mainVertex[vb].tv = 0.0f;
 
 		vb++;
 
-	  	mainVertex[vb].sx =	Global_VDB_Ptr->VDB_ClipLeft;
-	  	mainVertex[vb].sy =	Global_VDB_Ptr->VDB_ClipDown;
+	  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
+	  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
 		mainVertex[vb].sz = 1.0f;
 		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = 1.0f;
+		mainVertex[vb].specular = (D3DCOLOR)1.0f;
 		mainVertex[vb].tu = 0.0f;
 		mainVertex[vb].tv = 0.0f;
 
@@ -8358,49 +8405,48 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 		float sin = (GetSin(theta[i]))/65536.0f/16.0f;
 		float cos = (GetCos(theta[i]))/65536.0f/16.0f;
 		{
-	 	  	mainVertex[vb].sx =	Global_VDB_Ptr->VDB_ClipLeft;
-		  	mainVertex[vb].sy =	Global_VDB_Ptr->VDB_ClipUp;
+	 	  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
+		  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
 			mainVertex[vb].sz = 0.0f;
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = 1.0f;
-			mainVertex[vb].tu = 0.875 + (cos*(-1) - sin*(-1));
-			mainVertex[vb].tv = 0.375 + (sin*(-1) + cos*(-1));
+			mainVertex[vb].specular = (D3DCOLOR)1.0f;
+			mainVertex[vb].tu = (float)(0.875 + (cos*(-1) - sin*(-1)));
+			mainVertex[vb].tv = (float)(0.375 + (sin*(-1) + cos*(-1)));
 
 			vb++;
 
-		  	mainVertex[vb].sx =	Global_VDB_Ptr->VDB_ClipRight;
-		  	mainVertex[vb].sy =	Global_VDB_Ptr->VDB_ClipUp;
+		  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
+		  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
 			mainVertex[vb].sz = 0.0f;
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = 1.0f;
-			mainVertex[vb].tu = .875 + (cos*(+1) - sin*(-1));
-			mainVertex[vb].tv = .375 + (sin*(+1) + cos*(-1));
+			mainVertex[vb].specular = (D3DCOLOR)1.0f;
+			mainVertex[vb].tu = (float)(.875 + (cos*(+1) - sin*(-1)));
+			mainVertex[vb].tv = (float)(.375 + (sin*(+1) + cos*(-1)));
 
 			vb++;
 
-		  	mainVertex[vb].sx =	Global_VDB_Ptr->VDB_ClipRight;
-		  	mainVertex[vb].sy =	Global_VDB_Ptr->VDB_ClipDown;
+		  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
+		  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
 			mainVertex[vb].sz = 0.0f;
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = 1.0f;
-			mainVertex[vb].tu = .875 + (cos*(+1) - sin*(+1));
-			mainVertex[vb].tv = .375 + (sin*(+1) + cos*(+1));
+			mainVertex[vb].specular = (D3DCOLOR)1.0f;
+			mainVertex[vb].tu = (float)(.875 + (cos*(+1) - sin*(+1)));
+			mainVertex[vb].tv = (float)(.375 + (sin*(+1) + cos*(+1)));
 
 			vb++;
 
-		  	mainVertex[vb].sx =	Global_VDB_Ptr->VDB_ClipLeft;
-		  	mainVertex[vb].sy =	Global_VDB_Ptr->VDB_ClipDown;
+		  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
+		  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
 			mainVertex[vb].sz = 0.0f;
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = 1.0f;
-			mainVertex[vb].tu = .875 + (cos*(-1) - sin*(+1));
-			mainVertex[vb].tv = .375 + (sin*(-1) + cos*(+1));
+			mainVertex[vb].specular = (D3DCOLOR)1.0f;
+			mainVertex[vb].tu = (float)(.875 + (cos*(-1) - sin*(+1)));
+			mainVertex[vb].tv = (float)(.375 + (sin*(-1) + cos*(+1)));
 			
-
 			vb++;
 
 			OUTPUT_TRIANGLE(0,1,3, 4);
@@ -8656,8 +8702,9 @@ void ReleaseFMVTexture()
 
 void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 {
-	LOCALASSERT(ftPtr);
-	LOCALASSERT(ftPtr->ImagePtr);
+//	LOCALASSERT(ftPtr);
+//	LOCALASSERT(ftPtr->ImagePtr);
+	if(!ftPtr) return;
 
 	/* lock the d3d texture */
 	D3DLOCKED_RECT texture_rect;
@@ -8675,7 +8722,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 			ftPtr->DestTexture->UnlockRect(0);
 		 	return;
 		}
-  	}
+	}
 
 	/* unlock d3d texture */
 	LastError = ftPtr->DestTexture->UnlockRect(0);
@@ -9639,16 +9686,8 @@ void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, B
 	int real_width = AvPMenuGfxStorage[image_num].newWidth;
 	int real_height = AvPMenuGfxStorage[image_num].newHeight;
 
-	if (alpha) {
-//		CheckTranslucencyModeIsCorrect(TRANSLUCENCY_GLOWING);
-		CheckVertexBuffer(4, image_num, TRANSLUCENCY_GLOWING);
-	}
-	else {
-//		CheckTranslucencyModeIsCorrect(TRANSLUCENCY_OFF);
-		CheckVertexBuffer(4, image_num, TRANSLUCENCY_OFF);
-	}
-
-//	alpha = alpha / 256;
+	if (alpha)	CheckVertexBuffer(4, image_num, TRANSLUCENCY_GLOWING);
+	else		CheckVertexBuffer(4, image_num, TRANSLUCENCY_OFF);
 
 	// bottom left
 	mainVertex[vb].sx = (float)topX - 0.5f;

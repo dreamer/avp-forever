@@ -30,17 +30,28 @@ void PreviousVideoMode2() {
 
 char *GetVideoModeDescription2()
 {
+#ifdef _XBOX
+	char *description = "Microsoft Xbox";
+	return description;
+#else
 	return d3d.AdapterInfo.Description;
+#endif
 }
 
 char *GetVideoModeDescription3() {
 
 	static char buf[64];
+
+#ifdef _XBOX
+	sprintf(buf, "%dx%dx%d", 640, 480, 32);
+	return buf;
+#else
 	
 	int colour_depth = 0;
 	
 	// determine colour depth from d3d format
-	switch(d3d.DisplayMode[CurrentVideoMode].Format) {
+	switch(d3d.DisplayMode[CurrentVideoMode].Format) 
+	{
 		case 22:
 			colour_depth = 32;
 			break;
@@ -50,6 +61,7 @@ char *GetVideoModeDescription3() {
 	}
 	sprintf(buf, "%dx%dx%d", d3d.DisplayMode[CurrentVideoMode].Width, d3d.DisplayMode[CurrentVideoMode].Height, colour_depth);
 	return buf;
+#endif
 }
 
 void GetDeviceAndVideoModePrefences() {
@@ -76,7 +88,6 @@ void GetDeviceAndVideoModePrefences() {
 			break;
 		}
 	}
-
 }
 
 void SelectBasicDeviceAndVideoMode() {
@@ -99,7 +110,11 @@ void LoadDeviceAndVideoModePreferences() {
 
 	std::string temp_value;
 //	FILE* file=fopen("AliensVsPredator.cfg","rb");
+#ifdef _XBOX
+	std::ifstream file("d:\\AliensVsPredator.cfg");
+#else
 	std::ifstream file("AliensVsPredator.cfg");
+#endif
 	
 	// if the file doesn't exist
 	if(!file)
@@ -203,7 +218,11 @@ static void SetDeviceAndVideoModePreferences(void)
 void SaveDeviceAndVideoModePreferences() {
 
 	//	FILE* file=fopen("AliensVsPredator.cfg","rb");
+#ifdef _XBOX
+	std::ofstream file("d:\\AliensVsPredator.cfg");
+#else
 	std::ofstream file("AliensVsPredator.cfg");
+#endif
 	
 	// if the file doesn't exist
 	if(!file)
@@ -587,15 +606,22 @@ static void SetDeviceAndVideoModePreferences(void)
 extern void SaveDeviceAndVideoModePreferences(void)
 {
 	SetDeviceAndVideoModePreferences();
-
+#ifdef _XBOX
+	FILE* file=fopen("d:\\AvP_Video.cfg","wb");
+#else
 	FILE* file=fopen("AvP_Video.cfg","wb");
+#endif
 	if(!file) return;
 	fwrite(&PreferredDeviceAndVideoMode,sizeof(DEVICEANDVIDEOMODE),1,file);
 	fclose(file);
 }
 extern void LoadDeviceAndVideoModePreferences(void)
 {
+#ifdef _XBOX
+	FILE* file=fopen("d:\\AvP_Video.cfg","rb");
+#else
 	FILE* file=fopen("AvP_Video.cfg","rb");
+#endif
 	if(!file)
 	{
 		SelectBasicDeviceAndVideoMode();

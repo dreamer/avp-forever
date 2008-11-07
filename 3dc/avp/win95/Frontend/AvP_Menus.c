@@ -30,6 +30,12 @@
 #define BRIGHTNESS_CHANGE_SPEED (RealFrameTime/4)
 #endif
 
+// XBOX
+#ifdef _XBOX
+	#define DATE_SHORTDATE            0x00000001  // use short date picture
+	#define DATE_LONGDATE             0x00000002  // use long date picture
+	#include <xtl.h>
+#endif
 
 //extern void StartMenuBackgroundBink(void);
 //extern int PlayMenuBackgroundBink(void);
@@ -740,12 +746,14 @@ extern void AvP_UpdateMenus(void)
 
 			    time_of_day = time( NULL );
 
+#ifdef WIN32
 				nLen = GetDateFormat(GetThreadLocale(), DATE_LONGDATE, &profilePtr->TimeLastUpdated,NULL,buffer,nLen);
 				nLen = GetTimeFormat(GetThreadLocale(), 0, &profilePtr->TimeLastUpdated,NULL,buffer2,100);
 
 				strcat(buffer2,"  ");
 				strcat(buffer2,buffer);
 				RenderSmallMenuText(buffer2,MENU_CENTREX,MENU_CENTREY-70,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
+#endif
 			}
 			
 			RenderMenu();
@@ -753,7 +761,7 @@ extern void AvP_UpdateMenus(void)
 			break;
 
 		}
-		case AVPMENU_MULTIPLAYER_DELETECONFIG:
+		case AVPMENU_MULTIPLAYER_DELETECONFIG :
 		{
 			//show the name of the configuration we're trying to delete
 			RenderMenuText(MultiplayerConfigurationName,MENU_CENTREX,MENU_CENTREY-100,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
@@ -852,6 +860,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 	AvPMenus.UserChangingKeyConfig = 0;
 	AvPMenus.PositionInTextField = 0;
 	AvPMenus.WidthLeftForText = 0;
+
 
 	/* menu specific stuff */
 	switch (menuID)
@@ -991,7 +1000,6 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 
 			DirectPlay_EnumConnections();
 			MakeConnectionSelectMenu();
-
 			break;
 		}
 
@@ -1851,6 +1859,7 @@ static void RenderUserProfileSelectMenu(void)
 //			  strftime( buffer, 80, "%c",
 //				     localtime( &time_of_day ) );
 
+#ifdef WIN32
 				nLen = GetDateFormat(GetThreadLocale(), DATE_LONGDATE, &profilePtr->TimeLastUpdated,
 				NULL,buffer,
 				nLen);
@@ -1860,6 +1869,7 @@ static void RenderUserProfileSelectMenu(void)
 				strcat(buffer2,"  ");
 				strcat(buffer2,buffer);
 				RenderSmallMenuText(buffer2,MENU_CENTREX,MENU_CENTREY+y-30,b,AVPMENUFORMAT_CENTREJUSTIFIED);
+#endif
 			}
 		}
 	}
@@ -1997,8 +2007,10 @@ static void RenderLoadGameMenu(void)
 
 				//GetLocalTime(&slotPtr->TimeStamp);
 
+#ifdef WIN32
 				nLen = GetDateFormat(GetThreadLocale(), DATE_SHORTDATE, &slotPtr->TimeStamp,NULL,buffer,nLen);
 				nLen = GetTimeFormat(GetThreadLocale(), 0, &slotPtr->TimeStamp,NULL,buffer2,100);
+#endif
 
 				strcat(buffer2,"  ");
 				strcat(buffer2,buffer);
@@ -4112,6 +4124,8 @@ static char *GetDescriptionOfKey(unsigned char key)
 		case KEY_NUMPADDEL:
 			textPtr = GetTextString(TEXTSTRING_KEYS_PADDEL);
 			break;
+
+#ifdef WIN32
 		case KEY_JOYSTICK_BUTTON_1:
 			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_1);
 			break;
@@ -4160,6 +4174,59 @@ static char *GetDescriptionOfKey(unsigned char key)
 		case KEY_JOYSTICK_BUTTON_16:
 			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_16);
 			break;
+#endif // #if WIN32
+
+#ifdef _XBOX // change joystick button names to xbox button names
+		case KEY_JOYSTICK_BUTTON_1:
+			textPtr = "XBOX_A";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_1);
+			break;
+		case KEY_JOYSTICK_BUTTON_2:
+			textPtr = "XBOX_B";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_2);
+			break;
+		case KEY_JOYSTICK_BUTTON_3:
+			textPtr = "XBOX_X";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_3);
+			break;
+		case KEY_JOYSTICK_BUTTON_4:
+			textPtr = "XBOX_Y";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_4);
+			break;
+		case KEY_JOYSTICK_BUTTON_5:
+			textPtr = "XBOX_BLACK";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_5);
+			break;
+		case KEY_JOYSTICK_BUTTON_6:
+			textPtr = "XBOX_WHITE";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_6);
+			break;
+		case KEY_JOYSTICK_BUTTON_7:
+			textPtr = "XBOX_LEFT_TRIGGER";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_7);
+			break;
+		case KEY_JOYSTICK_BUTTON_8:
+			textPtr = "XBOX_RIGHT_TRIGGER";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_8);
+			break;
+		case KEY_JOYSTICK_BUTTON_9:
+			textPtr = "XBOX_RIGHT_STICK";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_9);
+			break;
+		case KEY_JOYSTICK_BUTTON_10:
+			textPtr = "XBOX_LEFT_STICK";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_10);
+			break;
+		case KEY_JOYSTICK_BUTTON_11:
+			textPtr = "XBOX_START";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_11);
+			break;
+		case KEY_JOYSTICK_BUTTON_12:
+			textPtr = "XBOX_BACK";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_12);
+			break;
+		case KEY_JOYSTICK_BUTTON_13:
+			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_13);
+			break;
+		case KEY_JOYSTICK_BUTTON_14:
+			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_14);
+			break;
+		case KEY_JOYSTICK_BUTTON_15:
+			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_15);
+			break;
+		case KEY_JOYSTICK_BUTTON_16:
+			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_16);
+			break;
+#endif // #if _XBOX
+
 		case KEY_LBRACKET:	
 			textPtr = GetTextString(TEXTSTRING_KEYS_LBRACKET);
 			break;
@@ -4572,7 +4639,6 @@ void DisplayVideoModeUnavailableScreen(void)
 
 void CheckForCredits(void)
 {
-
 #ifdef WIN32
 	FILE *fp = fopen("credits.txt","rb");
 #endif
@@ -4606,6 +4672,7 @@ void DoCredits(void)
 #ifdef _XBOX
 	char *creditsBufferPtr = LoadTextFile("D:\\credits.txt");
 #endif
+
 	char *creditsPtr;
 	
 	if (!creditsBufferPtr) return;
@@ -5762,6 +5829,7 @@ static void CheckForLoadGame()
 
 static void PasteFromClipboard(char* Text,int MaxTextLength)
 {
+#ifdef WIN32
 	HANDLE hGlobal;
 	if(!Text)
 	{
@@ -5784,29 +5852,5 @@ static void PasteFromClipboard(char* Text,int MaxTextLength)
 		}
 		CloseClipboard();
 	}
+#endif
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

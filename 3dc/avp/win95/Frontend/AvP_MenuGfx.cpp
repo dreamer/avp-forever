@@ -215,7 +215,7 @@ static void LoadMenuFont(void)
 	
 	gfxPtr->hBackup = 0;
 	
-	AVPTexture *image = (AVPTexture*)gfxPtr->ImagePtr;
+	AvPTexture *image = (AvPTexture*)gfxPtr->ImagePtr;
 
 	unsigned char *srcPtr = image->buffer;
 
@@ -891,10 +891,10 @@ static int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red,
 	int alphaB = MUL_FIXED(alpha,blue);
 
 	AVPMENUGFX *gfxPtr;
-	AVPTexture *image;
+	AvPTexture *image;
 
 	gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_SMALL_FONT];
-	image = (AVPTexture*)gfxPtr->ImagePtr;
+	image = (AvPTexture*)gfxPtr->ImagePtr;
 /*
 	D3DInfo temp;
 
@@ -970,13 +970,13 @@ extern void RenderSmallFontString_Wrapped(char *textPtr,RECT* area,int alpha,int
 	unsigned char *srcPtr;
 //	unsigned short *destPtr;
 	AVPMENUGFX *gfxPtr;
-	AVPTexture *image;
+	AvPTexture *image;
 	int wordWidth;
 	int sx = area->left;
 	int sy = area->top;
 	
 	gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_SMALL_FONT];
-	image = (AVPTexture*)gfxPtr->ImagePtr;
+	image = (AvPTexture*)gfxPtr->ImagePtr;
 
 /*
 Determine area used by text , so we can draw it centrally
@@ -1230,7 +1230,7 @@ extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 
 	if (gfxPtr->ImagePtr) 
 	{
-		AvPMenuGfxStorage[menuGfxID].menuTexture = CreateD3DTexturePadded((AVPTexture*)gfxPtr->ImagePtr, &gfxPtr->newHeight, &gfxPtr->newWidth);
+		AvPMenuGfxStorage[menuGfxID].menuTexture = CreateD3DTexturePadded((AvPTexture*)gfxPtr->ImagePtr, &gfxPtr->newHeight, &gfxPtr->newWidth);
 
 		if( AvPMenuGfxStorage[menuGfxID].menuTexture == NULL) {
 			OutputDebugString("Texture in AvPMenuGfxStorage was NULL!");
@@ -1291,9 +1291,9 @@ extern void LoadAllAvPMenuGfx(void)
 
 		AVPMENUGFX *gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_CLOUDY];
 		
-		AVPTexture *image;
+		AvPTexture *image;
 
-		image = (AVPTexture*)gfxPtr->ImagePtr;
+		image = (AvPTexture*)gfxPtr->ImagePtr;
 		srcPtr = image->buffer;
 	  		
 		int x,y;
@@ -2229,11 +2229,11 @@ static void CalculateWidthsOfAAFont(void)
 {
 	unsigned char *srcPtr;
 	AVPMENUGFX *gfxPtr;
-	AVPTexture *image;
+	AvPTexture *image;
 	int c;
 	
 	gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_SMALL_FONT];
-	image = (AVPTexture*)gfxPtr->ImagePtr;
+	image = (AvPTexture*)gfxPtr->ImagePtr;
 	
 	srcPtr = image->buffer;
 	

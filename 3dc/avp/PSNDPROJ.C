@@ -870,7 +870,7 @@ int FindAndLoadWavFile(int soundNum,char* wavFileName)
 #if !LOAD_SOUND_FROM_FAST_FILE_ONLY
 	//look for sound locally
 	{
-	
+
 		{
 			//check to see if file exists locally first
 			FILE* wavFile=fopen(sound_name,"rb");
@@ -964,7 +964,11 @@ void LoadSounds(char *soundDirectory)
 		#if ALIEN_DEMO
 		strcpy(filename, ".\\alienfastfile");//CommonSoundDirectory);
 		#else
+#ifdef _XBOX
+		strcpy(filename, "d:\\fastfile");
+#else
 		strcpy(filename, ".\\fastfile");//CommonSoundDirectory);
+#endif
 		#endif
 //		strcat(filename, soundDirectory);
 		strcat(filename, "\\");

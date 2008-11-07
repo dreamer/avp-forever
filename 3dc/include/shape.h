@@ -7,23 +7,25 @@
 */
 
 #ifndef SupportWindows95
-	#if defined(_WIN32)||defined(WIN32)
+//	#if defined(_WIN32)||defined(WIN32)
 		#define SupportWindows95 1
-	#else
-		#define SupportWindows95 0
+//	#else
+//		#define SupportWindows95 0
+//	#endif
+#endif
+
+#if SupportWindows95
+	#ifdef WIN32
+		#include <d3d9.h>
 	#endif
 #endif
-#if SupportWindows95
-#ifdef WIN32
-	#include <d3d9.h>
-#endif
-	#include "aw.h"
-#endif
-#include "shpanim.h"
 
 #ifdef _XBOX
 	#include <xtl.h>
 #endif
+
+#include "aw.h"
+#include "shpanim.h"
 
 #ifdef __cplusplus
 
@@ -841,13 +843,13 @@ typedef struct imageheader {
 	#if SupportWindows95
 
 	LPDIRECTDRAWSURFACE DDSurface;
-	LPDIRECT3DTEXTURE D3DTexture;
-	D3DTEXTUREHANDLE D3DHandle;
+	LPDIRECT3DTEXTURE AvPTexture;
+//	D3DTEXTUREHANDLE D3DHandle;
 	AW_BACKUPTEXTUREHANDLE hBackup;
 
-	LPDIRECT3DTEXTURE9 Direct3DTexture;
+	D3DTEXTURE Direct3DTexture;
 
-	int UserTexture;						/* bjd - for high res textures */
+	int UserTexture;
 
 	#endif
 

@@ -1732,9 +1732,6 @@ void HandleParticleSystem(void)
 //	D3D_DecalSystem_Setup();
 	i = NumActiveParticles;
 	particlePtr = ParticleStorage;
-
-	/* bjd - do particle sort here?? */
-//	qsort (&ParticleDescription[particlePtr->ParticleID], NumActiveParticles, sizeof(PARTICLE_DESC), sortParticle);
 	
 	while(i--)
 	{

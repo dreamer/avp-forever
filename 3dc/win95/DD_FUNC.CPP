@@ -1059,7 +1059,7 @@ void finiObjects(void)
 
 void ReleaseDDSurface(void* DDSurface)
 {
-	AVPTexture *d3d_texture = (AVPTexture *)DDSurface;
+	AvPTexture *d3d_texture = (AvPTexture *)DDSurface;
 	
 	if (d3d_texture->buffer) {
 		free(d3d_texture->buffer);

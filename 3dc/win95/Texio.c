@@ -1529,13 +1529,13 @@ static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 	{
 		if (ihptr->DDSurface)
 		{
-			GLOBALASSERT(!ihptr->D3DTexture);
+			GLOBALASSERT(!ihptr->DDSurface);
 			ATRemoveSurface(ihptr->DDSurface);
 		}
-		else if (ihptr->D3DTexture)
+		else if (ihptr->AvPTexture)
 		{
-			GLOBALASSERT(!ihptr->DDSurface);
-			ATRemoveTexture(ihptr->D3DTexture);
+			GLOBALASSERT(!ihptr->AvPTexture);
+			ATRemoveTexture(ihptr->AvPTexture);
 		}
 		
 		AwDestroyBackupTexture(ihptr->hBackup);
@@ -1555,12 +1555,11 @@ static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 		ihptr->DDSurface = (void*) 0;
 	}
 
-	if (ihptr->D3DTexture)
+	if (ihptr->AvPTexture)
 	{
-		//ReleaseD3DTexture(ihptr->D3DTexture);
-		ATRemoveTexture(ihptr->D3DTexture);
-		ihptr->D3DTexture = (void*) 0;
-		ihptr->D3DHandle = (void*) 0;
+		//ReleaseD3DTexture(ihptr->AvPTexture);
+		ATRemoveTexture(ihptr->AvPTexture);
+		ihptr->AvPTexture = (void*) 0;
 	}
 
 	if (ihptr->Direct3DTexture)
@@ -1577,11 +1576,10 @@ static void MinimizeImageHeader(IMAGEHEADER * ihptr)
 		ihptr->DDSurface = (void*) 0;
 	}
 
-	if (ihptr->D3DTexture)
+	if (ihptr->AvPTexture)
 	{
-		ReleaseD3DTexture(ihptr->D3DTexture);
-		ihptr->D3DTexture = (void*) 0;
-		ihptr->D3DHandle = (void*) 0;
+		ReleaseD3DTexture(ihptr->AvPTexture);
+		ihptr->AvPTexture = (void*) 0;
 	}
 
 	if (ihptr->Direct3DTexture)

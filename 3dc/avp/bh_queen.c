@@ -1144,7 +1144,7 @@ void QueenMove_Walk(STRATEGYBLOCK *sbPtr) {
 			else
 			{
 				VECTORCH velocity;
-				int walkSpeed;
+//				int walkSpeed;
 	
 				velocity.vx=sbPtr->DynPtr->OrientMat.mat31;
 				velocity.vy=0;
@@ -4860,7 +4860,7 @@ static BOOL TargetIsFiringFlamethrowerAtQueen(STRATEGYBLOCK *sbPtr)
 static void MakeNonFragable_Recursion(SECTION_DATA *this_section_data)
 {
 	SECTION_DATA *sdptr;
-	int health_increment;
+//	int health_increment;
 
 	sdptr=NULL;
 

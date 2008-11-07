@@ -4,7 +4,12 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-#include <windows.h>
+#ifdef WIN32
+	#include <windows.h>
+#endif
+#ifdef _XBOX
+	#include <xtl.h>
+#endif
 
 void ClearLog();
 void WriteToLog(const std::string &logLine);

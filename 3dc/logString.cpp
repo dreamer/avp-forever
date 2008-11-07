@@ -31,6 +31,7 @@ void LogDxError(/*std::string errorString,*/ HRESULT hr)
 void LogDxErrorString(const std::string &errorString)
 {
 	std::string temp = "\t" + errorString;
+	OutputDebugString(temp.c_str());
 	WriteToLog(temp);
 }
 

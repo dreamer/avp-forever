@@ -4,13 +4,12 @@ extern "C"
 	#include "3dc.h"
 	//#include "intro.hpp"
 	#include "inline.h"
-	#include "smacker.h"
+//	#include "smacker.h"
+	#include "fmv.h"
 	#include "AvP_Menus.h"
 	extern int NormalFrameTime;
 	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-//	extern int GotAnyKey;
 	extern unsigned char GotAnyKey;
-	//extern int DebouncedGotAnyKey;
 	extern unsigned char DebouncedGotAnyKey;
 
 	extern AVPMENUGFX AvPMenuGfxStorage[];
@@ -53,6 +52,7 @@ extern void PlayIntroSequence(void)
 	Show_CopyrightInfo();
 
 //	ThisFramesRenderingHasBegun();
+
 	/* play the Fox Interactive FMV */
 //	ClearScreenToBlack();
 

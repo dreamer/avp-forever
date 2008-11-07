@@ -16,7 +16,8 @@
 #include "lighting.h"
 #include "weapons.h"
 #include "sfx.h"
-#include "smacker.h"
+//#include "smacker.h"
+#include "fmv.h"
 /* character extents data so you know where the player's eyes are */
 #include "extents.h"
 #include "avp_userprofile.h"

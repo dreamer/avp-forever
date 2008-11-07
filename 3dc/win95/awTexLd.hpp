@@ -145,11 +145,11 @@ namespace AwTl {
 	
 	union SurfUnion
 	{
-		AVPTexture * textureP;
+		AvPTexture * textureP;
 		DDSurface * surfaceP;
 		void * voidP;
 		SurfUnion(){}
-		SurfUnion(AVPTexture * p) : textureP(p){}
+		SurfUnion(AvPTexture * p) : textureP(p){}
 		SurfUnion(DDSurface * p) : surfaceP(p){}
 	};
 

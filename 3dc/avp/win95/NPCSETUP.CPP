@@ -20,7 +20,7 @@
 #endif
 #define FIRST_FREE_IMAGE_GROUP 3 // 0 for char,1 for weapon rif ,2 for env
 
-#if debug
+//#if debug
 extern "C"
 {
 	BOOL ForceLoad_Alien=FALSE;
@@ -37,7 +37,7 @@ extern "C"
 	extern BOOL KeepMainRifFile;
 
 };
-#endif
+//#endif
 
 static char Marine_File[]= "hnpcmarine.rif";
 static char Alien_File[]= "hnpcalien.rif";

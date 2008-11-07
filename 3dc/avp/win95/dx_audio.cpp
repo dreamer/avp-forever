@@ -1,4 +1,3 @@
-#if 1
 /* Patrick 5/6/97 -------------------------------------------------------------
   AvP platform specific sound management source
   ----------------------------------------------------------------------------*/
@@ -76,9 +75,19 @@ ACTIVESOUNDSAMPLE BlankActiveSound = {SID_NOSOUND,ASP_Minimum,0,0,NULL,0,0,0,0,0
   ----------------------------------------------------------------------------*/
 LPDIRECTSOUND			DSObject = NULL; 
 LPDIRECTSOUNDBUFFER		DSPrimaryBuffer = NULL;
+LPDIRECTSOUNDBUFFER		vorbisBuffer = NULL;
 LPDIRECTSOUND3DLISTENER	DS3DListener = NULL;
 LPKSPROPERTYSET 		PropSetP = NULL;
 unsigned int 			SoundMinBufferFree;
+
+/*
+struct AUDIOBUFFER
+{
+	LPDIRECTSOUNDBUFFER	audioBuffer;
+	int	bufferSize;
+};
+AUDIOBUFFER vorbisBuffer;
+*/
 
 /* Patrick 5/6/97 -------------------------------------------------------------
   Internal global variables
@@ -374,7 +383,7 @@ int PlatStartSoundSys()
  	DSCAPS caps;
 
 	db_log4("PlatStartSound called");
-	LogDxString("Starting to initialise DirectSound8");
+	LogDxString("Starting to initialise DirectSound");
 
 	LOG_RC();
 
@@ -388,6 +397,7 @@ int PlatStartSoundSys()
 	hres = DirectSoundCreate(NULL,&DSObject,NULL);
 	if(hres!=DS_OK)
 	{		
+		LogDxErrorString("Couldn't create DirectSound object\n");
 		PlatEndSoundSys();
 		return 0;
 	}
@@ -399,6 +409,7 @@ int PlatStartSoundSys()
     hres = IDirectSound_SetCooperativeLevel(DSObject, hWndMain, DSSCL_PRIORITY);
 	if(hres!=DS_OK)
 	{		
+		LogDxErrorString("Couldn't set DirectSound cooperative level\n");
 		PlatEndSoundSys();
 		return 0;
 	}
@@ -429,6 +440,7 @@ int PlatStartSoundSys()
 		hres = IDirectSound_CreateSoundBuffer(DSObject, &dsBuffDesc, &DSPrimaryBuffer, NULL);	
 		if(hres!=DS_OK)
 		{		
+			LogDxErrorString("Couldn't create DirectSound primary buffer\n");
 			PlatEndSoundSys();
 			return 0;
 		}
@@ -2371,5 +2383,74 @@ void UpdateSoundFrequencies(void)
 }
 #endif
 
+int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
+{
+	WAVEFORMATEX waveFormat;
+	DSBUFFERDESC bufferFormat;
+
+	memset(&waveFormat, 0, sizeof(waveFormat));
+	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
+	waveFormat.nChannels		= channels;				//how many channels the OGG contains
+	waveFormat.wBitsPerSample	= 16;					//always 16 in OGG
+	waveFormat.nSamplesPerSec	= rate;	
+	waveFormat.nBlockAlign		= waveFormat.nChannels * waveFormat.wBitsPerSample / 8;	//what block boundaries exist
+	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
+	waveFormat.cbSize			= sizeof(waveFormat);	//how big this structure is
+
+	memset(&bufferFormat, 0, sizeof(DSBUFFERDESC));
+	bufferFormat.dwSize = sizeof(DSBUFFERDESC);
+	bufferFormat.dwFlags = DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_LOCSOFTWARE;
+	bufferFormat.dwBufferBytes = waveFormat.nAvgBytesPerSec * 2;
+	bufferFormat.lpwfxFormat = &waveFormat;
+
+	if(FAILED(DSObject->CreateSoundBuffer(&bufferFormat, &vorbisBuffer, NULL))) 
+	{
+		LogDxErrorString("couldn't create buffer for ogg vorbis\n");
+		return 1;
+	}
+
+//	vorbisBuffer.bufferSize = bufferFormat.dwBufferBytes;
+	(*bufferSize) = bufferFormat.dwBufferBytes;
+
+	return 0;
+}
+
+LPVOID audioPtr1;
+DWORD audioBytes1;
+LPVOID audioPtr2;   
+DWORD audioBytes2;
+
+/* return the amount of data written to buffer */
+int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
+{
+	int bytesWritten = 0;
+
+	/* lock the vorbis buffer */
+	if(FAILED(vorbisBuffer->Lock(offset, dataSize, &audioPtr1, &audioBytes1, &audioPtr2, &audioBytes2, NULL))) 
+	{
+		LogDxErrorString("couldn't lock ogg vorbis buffer for update\n");
+	}
+
+	/* write data to buffer */
+	if(!audioPtr2) // buffer didn't wrap
+	{
+		memcpy(audioPtr1, audioData, audioBytes1);
+		bytesWritten += audioBytes1;
+	}
+	else // need to split memcpy
+	{
+		memcpy(audioPtr1, audioData, audioBytes1);
+		memcpy(audioPtr2, &audioData[audioBytes1], audioBytes2);
+		bytesWritten += audioBytes1+audioBytes2;
+	}
+
+	if(FAILED(vorbisBuffer->Unlock(audioPtr1, audioBytes1, audioPtr2, audioBytes2))) 
+	{
+		LogDxErrorString("couldn't unlock ogg vorbis buffer\n");
+	}
+
+
+	return bytesWritten;
+}
+
 } // extern "C"
-#endif
