@@ -2154,7 +2154,6 @@ int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
 		LogDxErrorString("couldn't unlock ogg vorbis buffer\n");
 	}
 
-
 	return bytesWritten;
 }
 

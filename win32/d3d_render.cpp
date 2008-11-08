@@ -2956,7 +2956,7 @@ void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 	tempParticle.numVerts = RenderPolygon.NumberOfVertices;
 	tempParticle.particle = *particlePtr;
-//	tempParticle.vertices = &renderVerticesPtr[0];
+
 	memcpy(&tempParticle.vertices[0], renderVerticesPtr, tempParticle.numVerts * sizeof(RENDERVERTEX));
 	tempParticle.translucency = ParticleDescription[particlePtr->ParticleID].TranslucencyType;
 

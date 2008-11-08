@@ -534,6 +534,9 @@ int DirectPlay_ConnectToSession(int sessionNumber, char *playerName)
 {
 	OutputDebugString("Connect To Session\n");
 	if(DPlayOpenSession(SessionData[sessionNumber].hostAddress) != 0) return 0;
+
+	OutputDebugString("connecting to host: ");
+	OutputDebugString(SessionData[sessionNumber].hostAddress);
 	
 	if(!DirectPlay_CreatePlayer(playerName,playerName)) return 0;
 

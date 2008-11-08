@@ -104,6 +104,27 @@ struct renderParticle
 
 std::vector<renderParticle> particleArray;
 
+void DrawParticles()
+{
+	if(particleArray.size() == 0) return;
+
+	int backup = RenderPolygon.NumberOfVertices;
+
+	/* sort particle array */
+	std::sort(particleArray.begin(), particleArray.end());
+
+	/* loop particles and add them to vertex buffer */
+	for(int i = 0; i < particleArray.size(); i++)
+	{
+		RenderPolygon.NumberOfVertices = particleArray[i].numVerts;
+		D3D_Particle_Output(&particleArray[i].particle, &particleArray[i].vertices[0]);
+	}
+
+	particleArray.resize(0);
+	/* restore RenderPolygon.NumberOfVertices value... */
+	RenderPolygon.NumberOfVertices = backup;
+}
+
 const signed int NO_TEXTURE = -1;
 // set them to 'null' texture initially
 signed int currentTextureId = NO_TEXTURE;
@@ -2659,6 +2680,7 @@ void D3D_DecalSystem_Setup(void)
 
 void D3D_DecalSystem_End(void)
 {
+	DrawParticles();
 /*
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
@@ -2835,6 +2857,8 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 
 void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 {
+	if(RenderPolygon.NumberOfVertices == 0) return;
+
 	renderParticle tempParticle;
 
 	tempParticle.numVerts = RenderPolygon.NumberOfVertices;

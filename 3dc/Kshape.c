@@ -4981,9 +4981,9 @@ void RenderParticle(PARTICLE *particlePtr)
 				TexturedPolygon_ClipWithPositiveX();
 				if(RenderPolygon.NumberOfVertices<3) return;
 //				D3D_Particle_Output(particlePtr,RenderPolygon.Vertices);
-				AddParticle(particlePtr, RenderPolygon.Vertices);
+				AddParticle(particlePtr, &RenderPolygon.Vertices[0]);
   			}
-			else AddParticle(particlePtr, VerticesBuffer);//D3D_Particle_Output(particlePtr,VerticesBuffer);
+			else AddParticle(particlePtr, &VerticesBuffer[0]);//D3D_Particle_Output(particlePtr,VerticesBuffer);
 		}
 	}	
 }

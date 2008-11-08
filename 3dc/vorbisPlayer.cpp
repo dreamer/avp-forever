@@ -11,7 +11,6 @@
 extern "C" {
 	extern LPDIRECTSOUND DSObject;
 	extern LPDIRECTSOUNDBUFFER vorbisBuffer;
-//	extern struct AUDIOBUFFER vorbisBuffer;
 	extern int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize);
 	extern int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset);
 }
@@ -23,12 +22,12 @@ OggVorbis_File oggFile;
 unsigned int bytesReadTotal		= 0; //keep track of how many bytes we have read so far
 unsigned int bytesReadPerLoop	= 0; //keep track of how many bytes we read per ov_read invokation (1 to ensure that while loop is entered below)
 //int nBitStream				= 0; //used to specify logical bitstream 0
-
+/*
 LPVOID audioPtr1;
 DWORD audioBytes1;
 LPVOID audioPtr2;   
 DWORD audioBytes2;
-
+*/
 //extern LPDIRECTSOUNDBUFFER vorbisBuffer;
 DSBUFFERDESC dsbufferdesc;
 LPDIRECTSOUNDNOTIFY pDSNotify = NULL;
@@ -90,51 +89,14 @@ void LoadVorbisTrack(int track)
 	char buf[100];
 	sprintf(buf, "\n frequency: %d", pInfo->rate);
 	OutputDebugString(buf);
-#if 0
-	memset(&waveFormat, 0, sizeof(waveFormat));
-	waveFormat.cbSize			= sizeof(waveFormat);	//how big this structure is
-	waveFormat.nChannels		= pInfo->channels;	//how many channels the OGG contains
-	waveFormat.wBitsPerSample	= 16;					//always 16 in OGG
-	waveFormat.nSamplesPerSec	= pInfo->rate;	
-	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nChannels * 2;	//average bytes per second
-	waveFormat.nBlockAlign		= 2 * waveFormat.nChannels;								//what block boundaries exist
-	waveFormat.wFormatTag		= 1;
 
-	memset(&dsbufferdesc, 0, sizeof(dsbufferdesc));
-
-	dsbufferdesc.dwSize			= sizeof(dsbufferdesc);		//how big this structure is
-	dsbufferdesc.lpwfxFormat	= &waveFormat;						//information about the sound that the buffer will contain
-	dsbufferdesc.dwBufferBytes	= waveFormat.nAvgBytesPerSec * 2;				//total buffer size = 2 * half size
-	dsbufferdesc.dwFlags		= DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_LOCSOFTWARE;		//buffer must support notifications
-
-	bufferSize = dsbufferdesc.dwBufferBytes;
-	halfBufferSize = dsbufferdesc.dwBufferBytes / 2;
-
-	if(FAILED(DSObject->CreateSoundBuffer(&dsbufferdesc, &vorbisBuffer, NULL)))
-	{
-		LogDxErrorString("couldn't create buffer for ogg vorbis\n");
-	}
-#endif
-
+	/* create the audio buffer (directsound or whatever)*/
 	CreateVorbisAudioBuffer(pInfo->channels, pInfo->rate, &bufferSize);
 
 	/* init some temp audio data storage */
 	audioData = new char[bufferSize];
 	
 	halfBufferSize = bufferSize / 2;
-
-#if 0
-	// lock the entire buffer
-	if(FAILED(vorbisBuffer->Lock(0, bufferSize,
-		&audioPtr1,&audioBytes1,&audioPtr2,&audioBytes2,DSBLOCK_ENTIREBUFFER))) 
-	{
-		LogDxErrorString("couldn't lock ogg vorbis buffer for update\n");
-	}
-
-	// ov_read wont read all the data we request in one go
-	// we need to loop, adding to our buffer and keeping track of how much its 
-	// reading per loop, to ensure we fill our buffer
-#endif
 
 	while(bytesReadTotal < bufferSize) 
 	{
@@ -231,24 +193,7 @@ void UpdateVorbisBuffer()
 	{
 		lockOffset = halfBufferSize;
 	}
-#if 0
-	/* lock buffer at offset */
-	if(FAILED(vorbisBuffer->Lock(lockOffset, halfBufferSize, &audioPtr1, &audioBytes1, &audioPtr2, &audioBytes2, NULL))) 
-	{
-		LogDxErrorString("couldn't lock ogg vorbis buffer for update\n");
-		return;
-	}
 
-	if(audioBytes1 != halfBufferSize) 
-	{
-		LogDxErrorString("couldn't lock desired half of ogg vorbis buffer\n");
-	}
-
-	if(audioPtr2) 
-	{
-		//OutputDebugString("Ogg player needs to loop\n");
-	}
-#endif
 	// ov_read wont read all the data we request in one go
 	// we need to loop, adding to our buffer and keeping track of how much its 
 	// reading per loop, to ensure we fill our buffer
@@ -319,6 +264,8 @@ void StopVorbis()
 	ov_clear(&oggFile);
 //	fclose(file);
 	oggIsPlaying = false;
+
+	delete[] audioData;
 
 	bytesReadTotal = 0;
 	bytesReadPerLoop = 0;
