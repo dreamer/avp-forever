@@ -204,18 +204,11 @@ void LightSourcesInRangeOfObject(DISPLAYBLOCK *dptr)
 							llocal = vertexToLight;
 
 							RotateAndCopyVector(&llocal, &lptr->LocalLP, &WToLMat);
-
 						}
-
-
 					}
-
 				}
-
 			}
-
 		}
-
 	}
 
 	{
@@ -249,14 +242,11 @@ void LightSourcesInRangeOfObject(DISPLAYBLOCK *dptr)
 				/* Transform the light position to local space */
 				llocal = vertexToLight;
 				RotateAndCopyVector(&llocal, &lptr->LocalLP, &WToLMat);
-
 			}
 
 			lightElementPtr++;
 		}
 	}
-
-
 }
 
 EULER HeadOrientation = {0,0,0};
@@ -693,12 +683,12 @@ void AvpShowViews(void)
 	/* lights associated with the player may have changed */
 	UpdateObjectLights(Player);
 
-
 	if(NumOnScreenBlocks)
 	{
 	 	/* KJL 12:13:26 02/05/97 - divert rendering for AvP */
 		KRenderItems(Global_VDB_Ptr);
 	}
+
 	#if 0 
 	RenderDungeon();
 	#endif

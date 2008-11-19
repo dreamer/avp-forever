@@ -133,8 +133,8 @@ signed int currentWaterTexture = NO_TEXTURE;
 // use 999 as a reference for the tallfont texture
 const int TALLFONT_TEX = 999;
 
-RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
-std::vector<RENDER_STATES> renderTest;
+//RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
+//std::vector<RENDER_STATES> renderTest;
 
 int NumVertices;
 int NumIndicies;
@@ -394,7 +394,7 @@ static void OUTPUT_TRIANGLE(int a, int b, int c, int n) {
 }
 */
 
-static void OUTPUT_TRIANGLE(int a, int b, int c, int n) {
+static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n) {
 	testVertex[NumVertices] = tempVertex[a]; \
 	NumVertices++; \
 	testVertex[NumVertices] = tempVertex[b]; \
@@ -415,7 +415,7 @@ static void SetNewTexture(int tex_id)
 	}
 }
 
-static void PushVerts()
+static inline void PushVerts()
 {
 	DWORD *pPush; 
 	DWORD dwordCount = 8 * NumVertices;
@@ -456,10 +456,9 @@ static void PushVerts()
 	d3d.lpD3DDevice->EndPush( pPush );
 
 	NumVertices = 0;
-
 }
 
-static void D3D_OutputTriangles()
+static inline void D3D_OutputTriangles()
 {
 	switch(RenderPolygon.NumberOfVertices)
 	{
@@ -625,7 +624,7 @@ BOOL SetExecuteBufferDefaults()
 	// set less + equal z buffer test
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_LESSEQUAL);
 	D3DZFunc = D3DCMP_LESSEQUAL;
-
+/*
 	// fill out first render list struct
 	renderList[0].texture_id = NO_TEXTURE;
 	renderList[0].vert_start = 0;
@@ -634,7 +633,7 @@ BOOL SetExecuteBufferDefaults()
 	renderList[0].translucency_type = TRANSLUCENCY_OFF;
 
 	renderTest.push_back(renderList[0]);
-
+*/
 	// Enable fog blending.
 //    d3d.lpD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE);
  
@@ -679,7 +678,7 @@ static int NeedToClearExecuteBuffer=1;
 void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE translucency_mode) 
 {
 	return;
-
+#if 0
 	int real_num_verts = 0;
 
 	switch(num_verts) {
@@ -747,6 +746,7 @@ void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE t
 	renderCount++;
 
 	NumVertices+=num_verts;
+#endif
 }
 
 BOOL LockExecuteBuffer()
@@ -1164,12 +1164,12 @@ void SetFogDistance(int fogDistance)
 
 void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired) 
 {
-	renderList[renderCount].filtering_type = filteringRequired;
+//	renderList[renderCount].filtering_type = filteringRequired;
 }
 
 void SetTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 {
-	renderList[renderCount].translucency_type = translucencyRequired;
+//	renderList[renderCount].translucency_type = translucencyRequired;
 }
 
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
@@ -2367,16 +2367,23 @@ void D3D_HUDQuad_Output(int imageNumber,struct VertexTag *quadVerticesPtr, unsig
 //	CheckVertexBuffer(4, imageNumber, TRANSLUCENCY_GLOWING);
 	ChangeTranslucencyMode(TRANSLUCENCY_GLOWING);
 
+	/* if in menus (outside game) */
 	if(imageNumber != currentTextureId)
 	{
-		LastError = d3d.lpD3DDevice->SetTexture(0, ImageHeaderArray[imageNumber].Direct3DTexture);
-		if(FAILED(LastError)) {
-			OutputDebugString("Couldn't set menu quad texture");
+		if(mainMenu)
+		{
+			LastError = d3d.lpD3DDevice->SetTexture(0, AvPMenuGfxStorage[imageNumber].menuTexture);
+		}
+		else
+		{
+			LastError = d3d.lpD3DDevice->SetTexture(0, ImageHeaderArray[imageNumber].Direct3DTexture);
 		}
 		currentTextureId = imageNumber;
 	}
 
-	for(int i = 0; i < 4; i++ ) {
+
+	for(int i = 0; i < 4; i++ ) 
+	{
 //		textprint("x %d, y %d, u %d, v %d\n",quadVerticesPtr->X,quadVerticesPtr->Y,quadVerticesPtr->U,quadVerticesPtr->V);
 		tempVertex[i].sx = (float)quadVerticesPtr->X;
 		tempVertex[i].sy = (float)quadVerticesPtr->Y;
@@ -2393,6 +2400,8 @@ void D3D_HUDQuad_Output(int imageNumber,struct VertexTag *quadVerticesPtr, unsig
 	OUTPUT_TRIANGLE(0,1,3, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
 
+	PushVerts();
+#if 0
 	DWORD *pPush; 
 	DWORD dwordCount = 8 * NumVertices;
 //	d3d.lpD3DDevice->SetVertexShader( D3DTLVERTEX );
@@ -2433,7 +2442,7 @@ void D3D_HUDQuad_Output(int imageNumber,struct VertexTag *quadVerticesPtr, unsig
 	d3d.lpD3DDevice->EndPush( pPush );
 
 	NumVertices = 0;
-
+#endif
 
 #endif
 }
@@ -7084,6 +7093,38 @@ void ThisFramesRenderingHasFinished(void)
 	ExecuteBuffer();
 	EndD3DScene();
 
+	#define MB	(1024*1024)
+	MEMORYSTATUS stat;
+//	CHAR strOut[1024], *pstrOut;
+	char buf[100];
+
+	// Get the memory status.
+    GlobalMemoryStatus( &stat );
+
+	// Setup the output string.
+//    pstrOut = strOut;
+    sprintf(buf, "%4d  free MB of physical memory.\n", stat.dwAvailPhys / MB );
+	OutputDebugString( buf );
+/*
+	sprintf(buf,  "%4d total MB of virtual memory.\n", stat.dwTotalVirtual / MB );
+	OutputDebugString( buf );
+
+    sprintf(buf, "%4d  free MB of virtual memory.\n", stat.dwAvailVirtual / MB );
+	OutputDebugString( buf );
+*/
+
+/*
+    AddStr( "%4d total MB of virtual memory.\n", stat.dwTotalVirtual / MB );
+    AddStr( "%4d  free MB of virtual memory.\n", stat.dwAvailVirtual / MB );
+    AddStr( "%4d total MB of physical memory.\n", stat.dwTotalPhys / MB );
+    AddStr( "%4d  free MB of physical memory.\n", stat.dwAvailPhys / MB );
+    AddStr( "%4d total MB of paging file.\n", stat.dwTotalPageFile / MB );
+    AddStr( "%4d  free MB of paging file.\n", stat.dwAvailPageFile / MB );
+    AddStr( "%4d  percent of memory is in use.\n", stat.dwMemoryLoad );
+*/
+    // Output the string.
+    OutputDebugString( buf );
+
  	/* KJL 11:46:56 01/16/97 - kill off any lights which are fated to be removed */
 	LightBlockDeallocation();
 }
@@ -7451,7 +7492,7 @@ extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha)
 	if (colour>255) colour = 255;
 	colour = (colour<<24)+0xffffff;
 
-	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
+//	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
 
 	quadVertices[0].Y = y;
 	quadVertices[1].Y = y;
@@ -8462,18 +8503,20 @@ void SetupFMVTexture(FMVTEXTURE *ftPtr)
 	/* texture will generally be created with A8R8G8B8. Release so we can create with R5G6B5 format */
 	SAFE_RELEASE(ftPtr->ImagePtr->Direct3DTexture);
 
+	ftPtr->DestTexture = NULL;
+
 	/* this texture is what's used for rendering of ingame video monitors */
 	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, NULL, D3DFMT_R5G6B5, D3DPOOL_DEFAULT, &ftPtr->ImagePtr->Direct3DTexture);
 	if(FAILED(LastError))
 	{
-		OutputDebugString("\n couldn't create FMV texture in image header");
+		LogDxErrorString("Could not create Direct3D texture ftPtr->ImagePtr->Direct3DTexture\n");
 	}
 
 	/* we use this texture to write fmv data to */
 	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, D3DUSAGE_DYNAMIC, D3DFMT_R5G6B5, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &ftPtr->DestTexture);
 	if(FAILED(LastError))
 	{
-		OutputDebugString("\n couldn't create FMV texture for ftPtr");
+		LogDxErrorString("Could not create Direct3D texture ftPtr->DestTexture\n");
 	}
 
 	ftPtr->SoundVolume = 0;
@@ -8481,8 +8524,6 @@ void SetupFMVTexture(FMVTEXTURE *ftPtr)
 
 void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 {
-	//	LOCALASSERT(ftPtr);
-//	LOCALASSERT(ftPtr->ImagePtr);
 	if(!ftPtr) return;
 
 	/* lock the d3d texture */
@@ -8490,7 +8531,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	LastError = ftPtr->ImagePtr->Direct3DTexture->LockRect(0,&texture_rect,NULL,/*D3DLOCK_DISCARD*/NULL);
 	if(FAILED(LastError))
 	{
-		OutputDebugString("\n couldn't lock Texture");
+		LogDxErrorString("Could not lock Direct3D texture ftPtr->ImagePtr->Direct3DTexture\n");
 		return;
 	}
 
@@ -8505,7 +8546,9 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 
 	/* unlock d3d texture */
 	LastError = ftPtr->ImagePtr->Direct3DTexture->UnlockRect(0);
-	if(FAILED(LastError)) {
+	if(FAILED(LastError)) 
+	{
+		LogDxErrorString("Could not unlock Direct3D texture ftPtr->ImagePtr->Direct3DTexture\n");
 		return;
 	}
 #if 0

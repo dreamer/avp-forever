@@ -16,7 +16,6 @@ extern "C"
 #include "d3d_render.h"
 
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-//extern int DebouncedGotAnyKey;
 extern unsigned char DebouncedGotAnyKey;
 
 extern void MinimalNetCollectMessages(void);
@@ -43,9 +42,6 @@ static const char* Loading_Image_Name="Menus\\Loading.rim";
 static const char* Loading_Bar_Empty_Image_Name="Menus\\Loadingbar_empty.rim";
 static const char* Loading_Bar_Full_Image_Name="Menus\\Loadingbar_full.rim";
 
-DDSurface *LoadingBarEmpty;
-DDSurface *LoadingBarFull;
-DDSurface *aa_font;
 RECT LoadingBarEmpty_DestRect;
 RECT LoadingBarEmpty_SrcRect;
 RECT LoadingBarFull_DestRect;
@@ -53,9 +49,12 @@ RECT LoadingBarFull_SrcRect;
 
 D3DTEXTURE LoadingBarFullTexture;
 D3DTEXTURE LoadingBarEmptyTexture;
+DDSurface *image = 0;
+DDSurface *LoadingBarEmpty;
+DDSurface *LoadingBarFull;
+DDSurface *aa_font;
 
-int fullbar_height, fullbar_width;
-int emptybar_height, emptybar_width;
+int fullbarHeight, fullbarWidth, emptybarHeight, emptybarWidth;
 
 void Start_Progress_Bar()
 {
@@ -92,7 +91,7 @@ void Start_Progress_Bar()
 							);
 		}
 		// create d3d texture here
-		LoadingBarEmptyTexture = CreateD3DTexturePadded((AvPTexture*)LoadingBarEmpty, &emptybar_height, &emptybar_width);
+		LoadingBarEmptyTexture = CreateD3DTexturePadded((AvPTexture*)LoadingBarEmpty, &emptybarHeight, &emptybarWidth);
 	}
 	{
 		char buffer[100];
@@ -124,9 +123,8 @@ void Start_Progress_Bar()
 							);
 		}
 		
-		LoadingBarFullTexture = CreateD3DTexturePadded((AvPTexture*)LoadingBarFull, &fullbar_height, &fullbar_width);
+		LoadingBarFullTexture = CreateD3DTexturePadded((AvPTexture*)LoadingBarFull, &fullbarHeight, &fullbarWidth);
 	}
-	DDSurface* image=0;
 	
 	//set progress bar dimensions
 	BarLeft=ScreenDescriptorBlock.SDB_Width/6;
@@ -138,7 +136,6 @@ void Start_Progress_Bar()
 	char buffer[100];
 	CL_GetImageFileName(buffer, 100,Loading_Image_Name, LIO_RELATIVEPATH);
 	
-
 	//see if graphic can be found in fast file
 	unsigned int fastFileLength;
 	void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
@@ -193,15 +190,7 @@ void Start_Progress_Bar()
 	{
 		ThisFramesRenderingHasBegun();
 
-//		ColourFillBackBuffer(0);
-//		if (LoadingBarEmpty) lpDDSBack->BltImage(&LoadingBarEmpty_DestRect,LoadingBarEmpty,&LoadingBarEmpty_SrcRect,DDBLT_WAIT,0);
-		DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height, emptybar_width, emptybar_height);
-
-		#if SOFTWARE_RENDERER
-		FlushSoftwareZBuffer();
-		#else
-//		FlushD3DZBuffer();
-		#endif
+		DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height, emptybarWidth, emptybarHeight);
 
 		RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
 
@@ -245,7 +234,7 @@ void Set_Progress_Bar_Position(int pos)
 
 		// need to render the empty bar here again. As we're not blitting anymore, 
 		// the empty bar will only be rendered for one frame.
-		DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height, emptybar_width, emptybar_height);
+		DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height, emptybarWidth, emptybarHeight);
 
 		// also need this here again, or else the text disappears!
 		RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
@@ -253,7 +242,7 @@ void Set_Progress_Bar_Position(int pos)
 //		FlipBuffers();
 
 		// now render the green percent loaded overlay
-		DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height, fullbar_width, fullbar_height);
+		DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height, fullbarWidth, fullbarHeight);
 //		if (LoadingBarFull) lpDDSBack->Blt(&LoadingBarFull_DestRect,LoadingBarFull,&LoadingBarFull_SrcRect,DDBLT_WAIT,0);
 		
 		ThisFramesRenderingHasFinished();
@@ -280,7 +269,6 @@ void Set_Progress_Bar_Position(int pos)
 				NetSendMessages();
 			}
 		}
-		
 	}
 }
 
@@ -331,7 +319,7 @@ void Game_Has_Loaded(void)
 			// also need this here again, or else the text disappears!
 			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
 
-			DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height, fullbar_width, fullbar_height);
+			DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height, fullbarWidth, fullbarHeight);
 // bjd			if (LoadingBarFull) lpDDSBack->Blt(&LoadingBarFull_DestRect,LoadingBarFull,&LoadingBarFull_SrcRect,DDBLT_WAIT,0);
 			f-=NormalFrameTime;
 			if (f<0) f=0;
@@ -350,7 +338,6 @@ void Game_Has_Loaded(void)
 		FlipBuffers();	
 		FrameCounterHandler();
 
-
 		/* If in a network game then we may as well check the network messages while waiting*/
 		if(AvP.Network != I_No_Network)
 		{
@@ -358,38 +345,29 @@ void Game_Has_Loaded(void)
 			//send messages , mainly  needed so that the host will send the game description
 			//allowing people to join while the host is loading
 			NetSendMessages();
-			
 		}
 	}
 
 	while(!DebouncedGotAnyKey);
 
 	FadingGameInAfterLoading=ONE_FIXED;
-/*
+
 	if(image)
 	{
 		ReleaseDDSurface(image);
 	}
-*/
+
 	if (LoadingBarEmpty) 
 	{
 		ReleaseDDSurface(LoadingBarEmpty);
-	}
-	if (LoadingBarEmptyTexture != NULL) 
-	{
-		LoadingBarEmptyTexture->Release();
-		LoadingBarEmptyTexture = NULL;
-	}
-
-	if (LoadingBarFullTexture != NULL) 
-	{
-		LoadingBarFullTexture->Release();
-		LoadingBarFullTexture = NULL;
 	}
 	if (LoadingBarFull)
 	{
 		ReleaseDDSurface(LoadingBarFull);
 	}
+
+	SAFE_RELEASE(LoadingBarEmptyTexture);
+	SAFE_RELEASE(LoadingBarFullTexture);
 }
 
 

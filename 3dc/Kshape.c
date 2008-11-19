@@ -184,7 +184,7 @@ static COLOURINTENSITIES ColourIntensityArray[maxrotpts];
 														
 
 
-RENDERPOLYGON RenderPolygon={1,};
+RENDERPOLYGON RenderPolygon;//={1,};
 RENDERVERTEX VerticesBuffer[9]={1,};
 static RENDERVERTEX TriangleVerticesBuffer[3]={1,};
 
@@ -283,7 +283,6 @@ void SetupShapePipeline(void)
 //		Global_ODB_Ptr->ObFlags3 &= ObFlag3_NoLightDot;
 
 	ObjectCounter++;
-
 }
 
 void ChooseLightingModel(DISPLAYBLOCK *dispPtr)
@@ -1341,7 +1340,6 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 	RENDERVERTEX *renderVerticesPtr = VerticesBuffer;
 	int i = RenderPolygon.NumberOfVertices;
 
-
 	/* get ptr to uv coords for this polygon */
 	{
 		int texture_defn_index = (polyPtr->PolyColour >> TxDefn);
@@ -1638,7 +1636,6 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 					  	break;
 					}
 				}
-				
 			}
 			else
 			{
@@ -1651,7 +1648,6 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 		}
 	    while(--i);
 	}
-
 }
 
 
@@ -1664,8 +1660,6 @@ static void VertexIntensity_Pred_Thermal(RENDERVERTEX *renderVertexPtr)
 
 	int vertexNumber = *VertexNumberPtr;
 
-
-	
 	if(ColourIntensityArray[vertexNumber].Stamp==ObjectCounter)
 	{
 		renderVertexPtr->R = ColourIntensityArray[vertexNumber].R;
@@ -3874,14 +3868,13 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 		{
 			dptr->SpecialFXFlags &= ~SFXFLAG_ONFIRE;
 		}
-
 	}
 	
 	/* is object a morphing one? */	
  	if(dptr->ObMorphCtrl)
 	{
 		LOCALASSERT(dptr->ObMorphCtrl->ObMorphHeader);
-		if(dptr->ObMorphCtrl->ObMorphHeader)
+//comment out as in linux port		if(dptr->ObMorphCtrl->ObMorphHeader)
 	 	{
 			GetMorphDisplay(&MorphDisplay, dptr);
 			dptr->ObShape     = MorphDisplay.md_shape1;
@@ -4040,6 +4033,7 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	}
 	/* call polygon pipeline */
 	ShapePipeline(shapeheaderptr);
+
 	/* call sfx code */
 	HandleSfxForObject(dptr);
 	if (dptr->ObStrategyBlock)
@@ -4056,7 +4050,8 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 				{
 					PARTICLE particle = {0};
 
-					particle.Position.vy = -280+i-GetCos((CloakingPhase/16*i + i*64+particle.Position.vz)&4095)/1024;
+//					particle.Position.vy = -280+i-GetCos((CloakingPhase/16*i + i*64+particle.Position.vz)&4095)/1024;
+					particle.Position.vy = -280+i-GetCos((CloakingPhase/16*i + i*64/*+particle.Position.vz*/)&4095)/1024;
 
 					particle.Position.vx = GetCos((CloakingPhase +i*64+particle.Position.vy)&4095)/512;
 					particle.Position.vz = GetSin((CloakingPhase +i*64+particle.Position.vy)&4095)/512;
@@ -4071,9 +4066,7 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 					RenderParticle(&particle);
 				}
 			 	D3D_DecalSystem_End();
-				
 			}
-
 		}
 	}
 }
@@ -4403,7 +4396,8 @@ extern void TranslationSetup(void)
 }
 
 
-#ifndef _MSC_VER
+//#ifndef _MSC_VER
+#if 0
 void TranslatePoint(int *source, int *dest, int *matrix);
 #pragma aux TranslatePoint = \
 "fld	DWORD PTR [esi]"\
@@ -4449,7 +4443,8 @@ void TranslatePoint(int *source, int *dest, int *matrix);
 "fstp	DWORD PTR [ebx+8]"\
 parm[esi] [ebx] [edi];
 
-#else
+//#else
+#endif
 #if 0
 void TranslatePoint(int *source, int *dest, int *matrix)
 {
@@ -4508,7 +4503,6 @@ static void TranslatePoint(const float *source, float *dest, const float *matrix
 	dest[1] = matrix[ 4] * source[0] + matrix[ 5] * source[1] + matrix[ 6] * source[2] + matrix[ 7];
 	dest[2] = matrix[ 8] * source[0] + matrix[ 9] * source[1] + matrix[10] * source[2] + matrix[11];
 }
-#endif
 
 void TranslatePointIntoViewspace(VECTORCH *pointPtr)
 {

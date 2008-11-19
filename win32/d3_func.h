@@ -135,7 +135,7 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_textu
 void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 //void LogDxError(HRESULT hr);
 //void LogDebugValue(int value);
-void ReleaseD3DTexture8(LPDIRECT3DTEXTURE9 *d3dTexture);
+void ReleaseD3DTexture8(LPDIRECT3DTEXTURE9 d3dTexture);
 void DrawBinkFmv(int topX, int topY, int height, int width, LPDIRECT3DTEXTURE9 fmvTexture);
 void CreateScreenShotImage();
 LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int *height);
@@ -145,12 +145,12 @@ void InGameFlipBuffers(void);
 char* GetDeviceName();
 #define RGB_MAKE	D3DCOLOR_XRGB
 
-#define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
-
 #ifdef __cplusplus
-
 }
 #endif
+
+#define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
+
 #endif /* ifdef WIN32 */
 
 #endif /* ! _included_d3_func_h_ */

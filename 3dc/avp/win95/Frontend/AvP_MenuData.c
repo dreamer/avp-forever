@@ -1161,9 +1161,4 @@ extern void MakeOpenIPAddressMenu()
 	{
 		AvPMenu_MultiplayerOpenAddress[3].ElementID=AVPMENU_ELEMENT_ENDOFMENU;
 	}
-
 }
-
-
-
-

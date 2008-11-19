@@ -1550,21 +1550,21 @@ static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 
 	if (ihptr->DDSurface)
 	{
-		ATRemoveSurface(ihptr->DDSurface);
-		//ReleaseDDSurface(ihptr->DDSurface);
+//		ATRemoveSurface(ihptr->DDSurface);
+		ReleaseDDSurface(ihptr->DDSurface);
 		ihptr->DDSurface = (void*) 0;
 	}
 
 	if (ihptr->AvPTexture)
 	{
-		//ReleaseD3DTexture(ihptr->AvPTexture);
-		ATRemoveTexture(ihptr->AvPTexture);
+		ReleaseD3DTexture(ihptr->AvPTexture);
+		//ATRemoveTexture(ihptr->AvPTexture);
 		ihptr->AvPTexture = (void*) 0;
 	}
 
 	if (ihptr->Direct3DTexture)
 	{
-		ReleaseD3DTexture8(&ihptr->Direct3DTexture);
+		ReleaseD3DTexture8(ihptr->Direct3DTexture);
 	}
 }
 
@@ -1584,7 +1584,7 @@ static void MinimizeImageHeader(IMAGEHEADER * ihptr)
 
 	if (ihptr->Direct3DTexture)
 	{
-		ReleaseD3DTexture8(&ihptr->Direct3DTexture);
+		ReleaseD3DTexture8(ihptr->Direct3DTexture);
 	}
 }
 

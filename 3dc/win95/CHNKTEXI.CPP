@@ -751,6 +751,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					strcpy(pImageHdr->ImageName,szBuf);
 					pImageHdr->DDSurface = pSurface;
 					pImageHdr->hBackup = hBackup;
+					pImageHdr->Direct3DTexture = NULL;
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 /*					
 					if (pSurface->buf) {
@@ -861,7 +862,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 			#if CL_SUPPORT_FASTFILE
 			unsigned nFastFileLen;
 			void const * pFastFileData = ffreadbuf(szBuf,&nFastFileLen);
-
+#if 0
 			/* check for user texture first? */
 			int height, width;
 			D3DTEXTURE test;
@@ -881,7 +882,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 				pImageHdr->UserTexture = 1;
 				return NumImages-1;
 			}
-
+#endif
 			// eg, Graphics\HUDs\Marine\pulsetx.RIM
 			if (pFastFileData)
 			{
@@ -918,13 +919,15 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 //						OutputDebugString("\n");
 //						OutputDebugString(pImageHdr->ImageName);
 
-						// load Direct3D Texture 8 here?	
-						if (pTexture->buffer) {
+						// load Direct3D Texture here?	
+						if (pTexture->buffer) 
+						{
 							pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer);
 							//char szDbInf[512];
 								//sprintf(szDbInf,"Texture \"%s\" didn't load",pImageHdr->ImageName);
 							
-							if (pImageHdr->Direct3DTexture == NULL) {
+							if (pImageHdr->Direct3DTexture == NULL) 
+							{
 								OutputDebugString("Direct3DTexture was Null!");
 							}
 
@@ -932,9 +935,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 							//int gotTextureHandle = GetTextureHandle(pImageHdr);
 							//db_assert1(gotTextureHandle==TRUE);
 						}
-						else {
-							OutputDebugString("pTexture->buf was Null!");
-						}
+						else OutputDebugString("pTexture->buf was Null!");
 					}
 					
 					#if CL_SUPPORT_ALTTAB

@@ -75,19 +75,19 @@ ACTIVESOUNDSAMPLE BlankActiveSound = {SID_NOSOUND,ASP_Minimum,0,0,NULL,0,0,0,0,0
   ----------------------------------------------------------------------------*/
 LPDIRECTSOUND			DSObject = NULL; 
 LPDIRECTSOUNDBUFFER		DSPrimaryBuffer = NULL;
-LPDIRECTSOUNDBUFFER		vorbisBuffer = NULL;
 LPDIRECTSOUND3DLISTENER	DS3DListener = NULL;
 LPKSPROPERTYSET 		PropSetP = NULL;
 unsigned int 			SoundMinBufferFree;
 
-/*
-struct AUDIOBUFFER
-{
-	LPDIRECTSOUNDBUFFER	audioBuffer;
-	int	bufferSize;
-};
-AUDIOBUFFER vorbisBuffer;
-*/
+/* for vorbis playback */
+LPDIRECTSOUNDBUFFER		vorbisBuffer = NULL;
+LPDIRECTSOUNDNOTIFY		pDSNotify = NULL;
+HANDLE					hHandles[2];
+LPVOID					audioPtr1;
+DWORD					audioBytes1;
+LPVOID					audioPtr2;   
+DWORD					audioBytes2;
+
 
 /* Patrick 5/6/97 -------------------------------------------------------------
   Internal global variables
@@ -2015,7 +2015,8 @@ void PlatUpdatePlayer()
 	IDirectSound3DListener_CommitDeferredSettings(DS3DListener);
 
 	/* update ogg buffer */
-	UpdateVorbisBuffer();
+//	UpdateVorbisBuffer();
+//	UpdateVorbisBuffer(0);
 }
 
 void PlatSetEnviroment(unsigned int env_index, float reverb_mix)
@@ -2409,16 +2410,42 @@ int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
 		return 1;
 	}
 
-//	vorbisBuffer.bufferSize = bufferFormat.dwBufferBytes;
 	(*bufferSize) = bufferFormat.dwBufferBytes;
+
+		if(FAILED(vorbisBuffer->QueryInterface( IID_IDirectSoundNotify, 
+                                        (void**)&pDSNotify ) ) )
+	{
+		LogDxErrorString("couldn't query interface for ogg vorbis buffer notifications\n");
+	}
+
+	DSBPOSITIONNOTIFY notifyPosition[2];
+
+	hHandles[0] = CreateEvent(NULL,FALSE,FALSE,NULL);
+	hHandles[1] = CreateEvent(NULL,FALSE,FALSE,NULL);
+
+	// halfway
+	notifyPosition[0].dwOffset = bufferFormat.dwBufferBytes / 2;
+	notifyPosition[0].hEventNotify = hHandles[0];
+
+	// end
+	notifyPosition[1].dwOffset = bufferFormat.dwBufferBytes - 1;
+	notifyPosition[1].hEventNotify = hHandles[1];
+
+	if(FAILED(pDSNotify->SetNotificationPositions(2, notifyPosition)))
+	{
+		LogDxErrorString("couldn't set notifications for ogg vorbis buffer\n");
+		pDSNotify->Release();
+		return 1;
+	}
+
+	hHandles[0] = notifyPosition[0].hEventNotify;
+	hHandles[1] = notifyPosition[1].hEventNotify;
+
+	pDSNotify->Release();
+	pDSNotify = NULL;
 
 	return 0;
 }
-
-LPVOID audioPtr1;
-DWORD audioBytes1;
-LPVOID audioPtr2;   
-DWORD audioBytes2;
 
 /* return the amount of data written to buffer */
 int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
@@ -2449,8 +2476,30 @@ int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
 		LogDxErrorString("couldn't unlock ogg vorbis buffer\n");
 	}
 
-
 	return bytesWritten;
+}
+
+int SetVorbisBufferVolume(int volume)
+{
+	if(vorbisBuffer == NULL) return 0;
+
+	signed int attenuation;
+	HRESULT hres;
+
+	if(volume<VOLUME_MIN) volume=VOLUME_MIN;
+	if(volume>VOLUME_MAX) volume=VOLUME_MAX;
+
+	/* convert from intensity to attenuation */
+	attenuation = vol_to_atten_table[volume];
+
+	if(attenuation>VOLUME_MAXPLAT) attenuation=VOLUME_MAXPLAT;
+	if(attenuation<VOLUME_MINPLAT) attenuation=VOLUME_MINPLAT;
+
+	/* and apply it */
+	hres = vorbisBuffer->SetVolume(attenuation);
+	if(FAILED(hres)) return 0;
+	
+	return 1;
 }
 
 } // extern "C"

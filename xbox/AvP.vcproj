@@ -110,9 +110,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="xapilibd.lib d3d8d.lib d3dx8d.lib xgraphicsd.lib dsoundd.lib dmusicd.lib xactengd.lib xsndtrkd.lib xvoiced.lib xonlined.lib xboxkrnl.lib xbdm.lib"
+				AdditionalDependencies="xapilibd.lib d3d8d.lib d3dx8d.lib xgraphicsd.lib dsoundd.lib xonlined.lib xboxkrnl.lib xbdm.lib"
+				IgnoreDefaultLibraryNames="libcmt.lib"
 				MapExports="TRUE"
-				MapLines="TRUE"/>
+				MapLines="FALSE"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
@@ -437,6 +438,12 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Xbox">
+					<Tool
+						Name="VCCLCompilerTool"
+						WarningLevel="4"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release For Fox|Win32">

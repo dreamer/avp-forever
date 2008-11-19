@@ -152,27 +152,28 @@ void ScanImagesForFMVs()
 
 void ReleaseAllFMVTextures()
 {
-	extern void UpdateFMVTexture(FMVTEXTURE *ftPtr);
-	int i = NumberOfFMVTextures;
-
-	while(i--)
+	for(int i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].MessageNumber = 0;
+		ReleaseD3DTexture8(FMVTexture[i].SrcTexture);
+		ReleaseD3DTexture8(FMVTexture[i].SrcSurface);
+		ReleaseD3DTexture8(FMVTexture[i].DestTexture);
+	}
+}
 
-		if (FMVTexture[i].SrcTexture)
+void ReleaseAllFMVTexturesForDeviceReset()
+{
+	for(int i = 0; i < NumberOfFMVTextures; i++)
+	{
+		FMVTexture[i].MessageNumber = 0;
+		ReleaseD3DTexture8(FMVTexture[i].SrcTexture);
+		ReleaseD3DTexture8(FMVTexture[i].SrcSurface);
+		ReleaseD3DTexture8(FMVTexture[i].DestTexture);
+//		ReleaseD3DTexture8(FMVTexture[i].ImagePtr->Direct3DTexture);
+		if(FMVTexture[i].ImagePtr->Direct3DTexture != NULL)
 		{
-			ReleaseD3DTexture(FMVTexture[i].SrcTexture);
-			FMVTexture[i].SrcTexture=0;
-		}
-		if (FMVTexture[i].SrcSurface)
-		{
-			ReleaseDDSurface(FMVTexture[i].SrcSurface);
-			FMVTexture[i].SrcSurface=0;
-		}
-		if (FMVTexture[i].DestTexture)
-		{	
-			ReleaseD3DTexture(FMVTexture[i].DestTexture);
-			FMVTexture[i].DestTexture = 0;
+			FMVTexture[i].ImagePtr->Direct3DTexture->Release();
+			FMVTexture[i].ImagePtr->Direct3DTexture = NULL;
 		}
 	}
 }
@@ -242,7 +243,6 @@ void FindLightingValuesFromTriggeredFMV(unsigned char *bufferPtr, FMVTEXTURE *ft
 	FmvColourRed = totalRed/48*16;
 	FmvColourGreen = totalGreen/48*16;
 	FmvColourBlue = totalBlue/48*16;
-
 }
 
 int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr)

@@ -15,10 +15,6 @@ extern "C" {
 #define UseLocalAssert Yes
 #include "ourasert.h"
 #include "db.h"
-//#include "dsound.h"
-//#include "eax.h"
-//#include "vmanpset.h"
-//#include <windows.h>
 #include "ffstdio.h"
 
 static int SoundActivated = 0;
@@ -65,12 +61,15 @@ ACTIVESOUNDSAMPLE BlankActiveSound = {SID_NOSOUND,ASP_Minimum,0,0,NULL,0,0,0,0,0
 
 //	Direct sound globals
 LPDIRECTSOUND8			DSObject = NULL; 
-LPDIRECTSOUNDBUFFER		vorbisBuffer = NULL;
-//LPDIRECTSOUNDBUFFER		DSPrimaryBuffer = NULL;
-//LPDIRECTSOUND3DLISTENER	DS3DListener = NULL;
-//LPKSPROPERTYSET 		PropSetP = NULL;
 int 					SoundMinBufferFree;
-//LPDIRECTSOUNDBUFFER8	NullDSBufferP = NULL;
+
+/* for vorbis playback */
+LPDIRECTSOUNDBUFFER		vorbisBuffer = NULL;
+HANDLE					hHandles[2];
+LPVOID					audioPtr1;
+DWORD					audioBytes1;
+LPVOID					audioPtr2;   
+DWORD					audioBytes2;
 
 static unsigned int SoundMaxHW;
 
@@ -663,21 +662,27 @@ void PlatUpdatePlayer()
 		}
 		else
 		{
-//			IDirectSound3DListener_SetOrientation
-			LastError = DSObject->SetOrientation
-				(
-//					DS3DListener,
-					(float) ((Global_VDB_Ptr->VDB_Mat.mat13) / 65536.0F),
-					(float) ((Global_VDB_Ptr->VDB_Mat.mat23) / 65536.0F),
-					(float) ((Global_VDB_Ptr->VDB_Mat.mat33) / 65536.0F),
-					(float) ((Global_VDB_Ptr->VDB_Mat.mat12) / 65536.0F),
-					(float) ((Global_VDB_Ptr->VDB_Mat.mat22) / 65536.0F),
-					(float) ((Global_VDB_Ptr->VDB_Mat.mat32) / 65536.0F),
-					DS3D_DEFERRED
-				);
-			if(FAILED(LastError))
+			/* dsound on the xbox seems to barf on 0 values..*/
+			if((float) (((Global_VDB_Ptr->VDB_Mat.mat13) / 65536.0f) != 0.0f)
+				&& 
+			   (float) (((Global_VDB_Ptr->VDB_Mat.mat33) / 65536.0f) != 0.0f))
 			{
-				OutputDebugString("Couldn't set orientation\n");
+	//			IDirectSound3DListener_SetOrientation
+				LastError = DSObject->SetOrientation
+					(
+	//					DS3DListener,
+						(float) ((Global_VDB_Ptr->VDB_Mat.mat13) / 65536.0F),
+						(float) ((Global_VDB_Ptr->VDB_Mat.mat23) / 65536.0F),
+						(float) ((Global_VDB_Ptr->VDB_Mat.mat33) / 65536.0F),
+						(float) ((Global_VDB_Ptr->VDB_Mat.mat12) / 65536.0F),
+						(float) ((Global_VDB_Ptr->VDB_Mat.mat22) / 65536.0F),
+						(float) ((Global_VDB_Ptr->VDB_Mat.mat32) / 65536.0F),
+						DS3D_DEFERRED
+					);
+				if(FAILED(LastError))
+				{
+					OutputDebugString("Couldn't set orientation\n");
+				}
 			}
 		}
 
@@ -1916,9 +1921,8 @@ void UpdateSoundFrequencies()
 
 int PlatSoundHasStopped(int activeIndex)
 {
-	if (!SoundActivated) {
+	if (!SoundActivated)
 		return 0;
-	}
 
 	HRESULT LastError;
 	DWORD status = 0;
@@ -2114,16 +2118,32 @@ int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
 		return 1;
 	}
 
-//	vorbisBuffer.bufferSize = bufferFormat.dwBufferBytes;
 	(*bufferSize) = bufferFormat.dwBufferBytes;
+
+	hHandles[0] = CreateEvent(NULL,FALSE,FALSE,NULL);
+	hHandles[1] = CreateEvent(NULL,FALSE,FALSE,NULL);
+
+	DSBPOSITIONNOTIFY notifyPosition[2];
+
+	/* set to notify at halfway point */
+	notifyPosition[0].dwOffset = bufferFormat.dwBufferBytes / 2;
+	notifyPosition[0].hEventNotify = hHandles[0];
+
+	/* set to notify at end */
+	notifyPosition[1].dwOffset = bufferFormat.dwBufferBytes - 4;
+	notifyPosition[1].hEventNotify = hHandles[1];
+
+	if(FAILED(vorbisBuffer->SetNotificationPositions(2, &notifyPosition[0])))
+	{
+		LogDxErrorString("couldn't set notifications for ogg vorbis buffer\n");
+		return 1;
+	}
+
+	hHandles[0] = notifyPosition[0].hEventNotify;
+	hHandles[1] = notifyPosition[1].hEventNotify;
 
 	return 0;
 }
-
-LPVOID audioPtr1;
-DWORD audioBytes1;
-LPVOID audioPtr2;   
-DWORD audioBytes2;
 
 /* return the amount of data written to buffer */
 int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
@@ -2155,6 +2175,29 @@ int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
 	}
 
 	return bytesWritten;
+}
+
+int SetVorbisBufferVolume(int volume)
+{
+	if(vorbisBuffer == NULL) return 0;
+
+	signed int attenuation;
+	HRESULT hres;
+
+	if(volume<VOLUME_MIN) volume=VOLUME_MIN;
+	if(volume>VOLUME_MAX) volume=VOLUME_MAX;
+
+	/* convert from intensity to attenuation */
+	attenuation = vol_to_atten_table[volume];
+
+	if(attenuation>VOLUME_MAXPLAT) attenuation=VOLUME_MAXPLAT;
+	if(attenuation<VOLUME_MINPLAT) attenuation=VOLUME_MINPLAT;
+
+	/* and apply it */
+	hres = vorbisBuffer->SetVolume(attenuation);
+	if(FAILED(hres)) return 0;
+	
+	return 1;
 }
 
 } // extern C

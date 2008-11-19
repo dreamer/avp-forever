@@ -504,7 +504,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture (AvPTexture *tex)
 }
 
 // use this to make textures from non power of two images
-LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex,int *real_height, int *real_width) 
+LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int *real_width) 
 {
 	int original_width = tex->width;
 	int original_height = tex->height;
@@ -860,21 +860,26 @@ extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
 #define MAX_NO_FMVTEXTURES 10
 extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 
+extern int mainMenu;
+
+/* size of vertex and index buffers */
+const int MAX_VERTEXES = 4096;
+const int MAX_INDICES = 9216;
+
 BOOL ReleaseVolatileResources() 
 {
 	SAFE_RELEASE(d3d.lpD3DBackSurface);
 	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
 	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
-
-	ReleaseAllFMVTextures();
-	ReleaseBinkTextures();
-
+/*
+	if(mainMenu)
+	{
+		ReleaseAllFMVTextures();
+		ReleaseBinkTextures();
+	}
+*/
 	return TRUE;
 }
-
-/* size of vertex and index buffers */
-const int MAX_VERTEXES = 4096;
-const int MAX_INDICES = 9216;
 
 BOOL CreateVolatileResources() 
 {
@@ -910,14 +915,17 @@ BOOL CreateVolatileResources()
 	}
 
 	SetExecuteBufferDefaults();
-
-	/* re-create fmv textures */
-	for(int i = 0; i < NumberOfFMVTextures; i++)
-	{	
-		SetupFMVTexture(&FMVTexture[i]);
+#if 0
+	if(!mainMenu)
+	{
+		/* re-create fmv textures */
+		for(int i = 0; i < NumberOfFMVTextures; i++)
+		{	
+			SetupFMVTexture(&FMVTexture[i]);
+		}
 	}
-
-	return true;
+#endif
+	return TRUE;
 }
 
 BOOL ChangeGameResolution(int width, int height, int colour_depth)
@@ -977,7 +985,7 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	if (!d3d.lpD3D)
 	{
-		LogDxErrorString("Could not create Direct3D object \n");
+		LogDxErrorString("Could not create Direct3D object\n");
 		return FALSE;
 	}
 
@@ -990,7 +998,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	LastError = d3d.lpD3D->GetAdapterIdentifier(D3DADAPTER_DEFAULT, D3DENUM_WHQL_LEVEL, &d3d.AdapterInfo);
 	if(FAILED(LastError)) 
 	{
-		LogDxString("Could not get Adapter Identifier Information");
+		LogDxString("Could not get Adapter Identifier Information\n");
 		return FALSE;
 	}
 
@@ -1064,7 +1072,7 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	if(FAILED(LastError)) 
 	{
-		LogDxErrorString("GetAdapterDisplayMode failed");
+		LogDxErrorString("GetAdapterDisplayMode failed\n");
 		return FALSE;
 	}
 
@@ -1091,6 +1099,7 @@ BOOL InitialiseDirect3DImmediateMode()
 		// the timer goes a bit mad if this isnt capped!
 		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 //		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 	}
 	d3dpp.BackBufferCount = 1;
 
@@ -1140,7 +1149,7 @@ BOOL InitialiseDirect3DImmediateMode()
 									SelectedDepthFormat);
 	if(FAILED(LastError)) 
 	{
-		LogDxErrorString("Stencil and Depth format didn't match");
+		LogDxErrorString("Stencil and Depth format didn't match\n");
 		d3dpp.EnableAutoDepthStencil = false;
 	}
 	else d3dpp.EnableAutoDepthStencil = true;
@@ -1203,7 +1212,7 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	if (FAILED(LastError)) 
 	{
-		LogDxErrorString("Could not create Direct3D device");
+		LogDxErrorString("Could not create Direct3D device\n");
 		return FALSE;
 	}
 
@@ -1235,14 +1244,14 @@ BOOL InitialiseDirect3DImmediateMode()
 	LastError = d3d.lpD3DDevice->SetViewport(&d3d.lpD3DViewport);
 	if (FAILED(LastError))
 	{
-		LogDxErrorString("Could not set viewport");
+		LogDxErrorString("Could not set viewport\n");
 	}
 
 	LastError = d3d.lpD3DDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &d3d.lpD3DBackSurface);
 
 	if (FAILED(LastError))
 	{
-		LogDxErrorString("Could not get a copy of the back buffer");
+		LogDxErrorString("Could not get a copy of the back buffer\n");
 		return FALSE;
 	}
 
@@ -1250,7 +1259,7 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	if (FAILED(LastError))
 	{
-		LogDxErrorString("Could not get backbuffer surface description");
+		LogDxErrorString("Could not get backbuffer surface description\n");
 		return FALSE;
 	}
 
@@ -1328,39 +1337,6 @@ void ReleaseDirect3D()
 	ReleaseDirectKeyboard();
 	ReleaseDirectMouse();
 	ReleaseDirectInput();
-
-	/* call delete on vertex/index buffers? */
-//	DeleteBuffers();
-}
-
-// Release all Direct3D objects
-// but not DirectDraw
-
-void ReleaseDirect3DNotDDOrImages()
-
-{
-#if 0
-	RELEASE(d3d.lpD3DViewport);
-    RELEASE(d3d.lpD3DDevice);
-	/*#if SupportZBuffering
-    RELEASE(lpZBuffer);
-	#endif*/
-    RELEASE(d3d.lpD3D);
-#endif
-}
-
-void ReleaseDirect3DNotDD()
-
-{
-#if 0
-    DeallocateAllImages();
-    //RELEASE(d3d.lpD3DViewport);
-    RELEASE(d3d.lpD3DDevice);
-	/*#if SupportZBuffering
-    RELEASE(lpZBuffer);
-	#endif*/
-    RELEASE(d3d.lpD3D);
-#endif
 }
 
 // reload D3D image -- assumes a base pointer points to the image loaded
@@ -1410,10 +1386,10 @@ void ReleaseD3DTexture(void* texture)
 	free(TextureHandle);
 }
 
-void ReleaseD3DTexture8(LPDIRECT3DTEXTURE9 *d3dTexture) 
+void ReleaseD3DTexture8(LPDIRECT3DTEXTURE9 d3dTexture) 
 {
 	/* release d3d texture */
-	SAFE_RELEASE(*d3dTexture)
+	SAFE_RELEASE(d3dTexture);
 }
 
 BOOL CreateD3DZBuffer()

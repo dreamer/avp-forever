@@ -307,6 +307,7 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message,
 	 // this now (25/7/96).
 	 // And putting it back... (20/9/96)
     	ReleaseDirect3D();
+
 	 	/* patrick 9/6/97: hmmmmm.... */  	
 	   	PlatEndSoundSys();
 

@@ -976,7 +976,10 @@ BOOL InitialiseDirect3DImmediateMode()
 	// clear log file first, then write header text
 	ClearLog();
 	LogDxString("Starting to initialise Direct3D");
-
+/*
+	int width = 720;
+	int height = 576;
+*/
 	int width = 640;
 	int height = 480;
 	int depth = 32;
@@ -1035,21 +1038,40 @@ BOOL InitialiseDirect3DImmediateMode()
 		DWORD videoFlags = XGetVideoFlags();
 
 		if(videoFlags & XC_VIDEO_FLAGS_PAL_60Hz)		// PAL 60 user
-			d3dpp.FullScreen_RefreshRateInHz = 60;
+		{
+			//d3dpp.FullScreen_RefreshRateInHz = 60;
+			OutputDebugString("using refresh of 60\n");
+		}
 		else
-			d3dpp.FullScreen_RefreshRateInHz = 50;
+		{
+			//d3dpp.FullScreen_RefreshRateInHz = 50;
+			OutputDebugString("using refresh of 50\n");
+		}
 	}
 
-	d3dpp.BackBufferWidth = 640;
-	d3dpp.BackBufferHeight = 480;
+	if(XGetVideoFlags() == XC_VIDEO_FLAGS_PAL_60Hz)
+	{
+		OutputDebugString("XC_VIDEO_FLAGS_PAL_60Hz set\n");
+	}
+
+	D3DDISPLAYMODE d3ddm;
+	LastError = d3d.lpD3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
+
+	char buf[100];
+	sprintf(buf, "width: %d height: %d format: %d\n", d3ddm.Width, d3ddm.Height, d3ddm.Format);
+	OutputDebugString(buf);
+
+	d3dpp.BackBufferWidth = width;
+	d3dpp.BackBufferHeight = height;
 	d3dpp.BackBufferFormat = D3DFMT_X8R8G8B8;
 	d3dpp.BackBufferCount = 1;
 	d3dpp.EnableAutoDepthStencil = TRUE;
 	d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8;
-	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	d3dpp.SwapEffect = D3DSWAPEFFECT_COPY;//D3DSWAPEFFECT_DISCARD;
 //	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 //	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE_OR_IMMEDIATE;
+//	d3dpp.Flags = D3DPRESENTFLAG_10X11PIXELASPECTRATIO;
 	UsingStencil = true;
 
 //#endif
@@ -1065,7 +1087,7 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	// Log resolution set
 	LogDxString("\t Resolution set: " + LogInteger(d3dpp.BackBufferWidth) + " x " + LogInteger(d3dpp.BackBufferHeight));
-
+/*
 	ZeroMemory(&d3d.lpD3DViewport, sizeof(d3d.lpD3DViewport));
 	d3d.lpD3DViewport.X = 0;
 	d3d.lpD3DViewport.Y = 0;
@@ -1079,7 +1101,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	{
 		LogDxErrorString("Could not set viewport");
 	}
-
+*/
 	LastError = d3d.lpD3DDevice->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &d3d.lpD3DBackSurface);
 
 	if (FAILED(LastError))
@@ -1228,163 +1250,6 @@ void ReleaseDirect3D()
 	ReleaseDirectInput();
 }
 
-// Release all Direct3D objects
-// but not DirectDraw
-
-void ReleaseDirect3DNotDDOrImages()
-
-{
-#if 0
-	RELEASE(d3d.lpD3DViewport);
-    RELEASE(d3d.lpD3DDevice);
-	/*#if SupportZBuffering
-    RELEASE(lpZBuffer);
-	#endif*/
-    RELEASE(d3d.lpD3D);
-#endif
-}
-
-void ReleaseDirect3DNotDD()
-
-{
-#if 0
-    DeallocateAllImages();
-    //RELEASE(d3d.lpD3DViewport);
-    RELEASE(d3d.lpD3DDevice);
-	/*#if SupportZBuffering
-    RELEASE(lpZBuffer);
-	#endif*/
-    RELEASE(d3d.lpD3D);
-#endif
-}
-
-#if 0
-// NOTE!!! These functions depend on Microsoft macros
-// in d3dmacs.h, which is in the win95 directory
-// and must be upgraded from sdk upgrades!!!
-
-
-// ALSO NOTE!!!  All this stuff involves heavy
-// use of floating point assembler in software
-// emulation, probably hand parallelised between
-// the FPU and the processor or something bizarre,
-// implying that this stuff SHOULD NOT be used
-// one anything below a Pentium.
-
-// AND AGAIN!!! Due to the nature of the item
-// format, the  rasterisation module MUST RECEIVE
-// repeated vertices in the data area.  Tough shit,
-// Microsoft, that's what I say...
-
-void WritePolygonToExecuteBuffer(int* itemptr)
-
-{
-}
-
-void WriteGouraudPolygonToExecuteBuffer(int* itemptr)
-
-{
-}
-
-void Write2dTexturedPolygonToExecuteBuffer(int* itemptr)
-
-{
-}
-
-void WriteGouraud2dTexturedPolygonToExecuteBuffer(int* itemptr)
-
-{
-}
-
-
-void Write3dTexturedPolygonToExecuteBuffer(int* itemptr)
-
-{
- }
-
-void WriteGouraud3dTexturedPolygonToExecuteBuffer(int* itemptr)
-
-{
-}
-
-#if SupportZBuffering
-
-// To make effective use of 16 bit z buffers (common
-// on hardware accelerators) we must have a z coordinate
-// which has been transformed into screen space in such a
-// way that linearity and planearity are preserved, i.e. as
-// if we had done a homogeneous transformation.  For the case
-// in which the far clipping plane is much further away than the
-// near one (effectively true for 3dc, especially as there is
-// no far clipping plane as such), the appropriate transformation
-// can be reduced to zScreen = (ZWorld - ZNear) / ZWorld.  This
-// calculation is therefore (unfortunately) done for each vertex
-// for z buffered items, taking ZNear to be the current
-// VDB_ClipZ * GlobalScale.
-
-
-void WriteZBPolygonToExecuteBuffer(int* itemptr)
-
-{
-}
-
-void WriteZBGouraudPolygonToExecuteBuffer(int* itemptr)
-
-{
-}
-
-void WriteZB2dTexturedPolygonToExecuteBuffer(int* itemptr)
-
-{
-}
-
-
-void WriteZBGouraud2dTexturedPolygonToExecuteBuffer(int* itemptr)
-
-{
-}
-
-void WriteZB3dTexturedPolygonToExecuteBuffer(int* itemptr)
-
-{
-}
-
-void WriteZBGouraud3dTexturedPolygonToExecuteBuffer(int* itemptr)
-
-{
-}
-
-#endif
-
-
-
-void WriteBackdrop2dTexturedPolygonToExecuteBuffer(int* itemptr)
-
-{
-}
-
-// Same as ordinary 2d textured draw at present, but may e.g.
-// require different texture wrapping behaviour or
-// w values.
-
-void WriteBackdrop3dTexturedPolygonToExecuteBuffer(int* itemptr)
-
-{
-}
-
-
-// Note that this is all dead crap and deeply unoptimised
-// But then... a) it's really only a test and
-// b) it's for the tools group anyway...
-
-
-void DirectWriteD3DLine(VECTOR2D* LineStart, VECTOR2D* LineEnd, int LineColour)
-
-{
-
-}
-#endif
-
 // reload D3D image -- assumes a base pointer points to the image loaded
 // from disc, in a suitable format
 
@@ -1428,20 +1293,18 @@ int GetTextureHandle(IMAGEHEADER *imageHeaderPtr)
 
 
 
-void ReleaseD3DTexture(void* tex)
+void ReleaseD3DTexture(void* texture)
 {
-	AvPTexture *TextureHandle = (AvPTexture *)tex;
+	AvPTexture *TextureHandle = (AvPTexture *)texture;
 
 	free(TextureHandle);
 }
 
-void ReleaseD3DTexture8(LPDIRECT3DTEXTURE8 tex8) 
+void ReleaseD3DTexture8(LPDIRECT3DTEXTURE8 d3dTexture) 
 {
 	/* release d3d texture */
-	SAFE_RELEASE(tex8);
+	SAFE_RELEASE(d3dTexture);
 }
-
-#if SupportZBuffering
 
 BOOL CreateD3DZBuffer()
 {
@@ -1483,8 +1346,6 @@ void FlushZB()
 		OutputDebugString("Couldn't FlushZB");
 	}
 }
-
-#endif
 
 // For extern "C"
 

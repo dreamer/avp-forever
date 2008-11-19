@@ -730,7 +730,6 @@ void ExitSystem(void)
 	/* Game specific exit functions */
 	ExitGame();
 
-
 	// Added by Mark so that Direct Sound exits cleanly
 	#if SOUND_ON
 	ExitSoundSystem();	// In ds_func.cpp
@@ -745,7 +744,8 @@ void ExitSystem(void)
 	  rename it ReleaseDirectX sometime...
     */
 
-	ReleaseDirect3D();
+	/* should be taken care of with WM_DESTROY ?*/
+//	ReleaseDirect3D();
 
 	/* Kill windows procedures */
 	ExitWindowsSystem();
@@ -773,12 +773,11 @@ void ResetFrameCounter(void)
 
 	RealFrameTime = NormalFrameTime;
 	FrameRate = 16;
-	GlobalFrameCounter=0;
+	GlobalFrameCounter = 0;
 	CloakingPhase = 0;
-	
-	
-	RouteFinder_CallsThisFrame=0;
+	RouteFinder_CallsThisFrame = 0;
 }
+
 void FrameCounterHandler(void)
 {
 	int newTickCount = timeGetTime();
@@ -813,61 +812,6 @@ void FrameCounterHandler(void)
 
 /*
 
-   This jump table has been provided
-   solely to ensure compatibility with
-   DOS and other versions.
-	
-*/
-
-void (*UpdateScreen[]) (void) = {
-
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers
-
-};
-
-
-/*
-	Not supported in Windows 95 !!!
-*/
-
-
-void PlotPixelTest(int x, int y, unsigned char col)
-
-{
-
-}
-
-
-/*
-
  Wait for Return Key
 
  Such a function may not be defined on some platforms
@@ -882,13 +826,12 @@ void PlotPixelTest(int x, int y, unsigned char col)
 */
 
 void WaitForReturn(void)
-
 {
 	/* Crude but probably serviceable for now */
 	long SavedTickCount;
 	SavedTickCount  = lastTickCount;
 
-/* Display any lingering text */
+	/* Display any lingering text */
     FlushTextprintBuffer();
 	FlipBuffers();
 
@@ -916,37 +859,11 @@ void ReadUserInput(void)
 }
 
 /*
-	At present all keyboard and mouse input is handled
-	through project specific functionality in win_func,
-	and all these functions are therefore empty.  Later
-	we may port to DirectInput, at which point we 
-	may reactivate these.
-*/
-
-
-
-void ReadKeyboard(void)
-
-{
-}
-
-
-void ReadMouse(void)
-
-{
-
-
-}
-
-
-
-/*
 	Not NECESSARILY the standard functionality,
 	but it seems good enough to me...
 */
 
 void CursorHome(void)
-
 {
 /* Reset positions for textprint system */
 	textprintPosX = 0;
@@ -1163,7 +1080,6 @@ void InitPrintQueue(void)
 */
 
 void FlushTextprintBuffer(void)
-
 {
 	/* PRECONDITION: */
 	{
@@ -1433,7 +1349,6 @@ int ReleasePrintDebuggingText(const char* t, ...)
 
 
 int textprintXY(int x, int y, const char* t, ...)
-
 {
 	#if (debug && textprintOn)
 	if
@@ -1835,11 +1750,6 @@ int ChangeDisplayModes(HINSTANCE hInst, int nCmd,
 	  ChangeWindow = Yes;
 
     DeallocateAllImages();
-
-    ReleaseDirect3DNotDD();
-
-    finiObjectsExceptDD();
-
 
     if (ChangeWindow)
       ExitWindowsSystem(); 

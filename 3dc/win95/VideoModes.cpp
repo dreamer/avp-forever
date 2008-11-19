@@ -41,12 +41,12 @@ char *GetVideoModeDescription2()
 char *GetVideoModeDescription3() {
 
 	static char buf[64];
-
+/*
 #ifdef _XBOX
 	sprintf(buf, "%dx%dx%d", 640, 480, 32);
 	return buf;
 #else
-	
+*/	
 	int colour_depth = 0;
 	
 	// determine colour depth from d3d format
@@ -61,7 +61,7 @@ char *GetVideoModeDescription3() {
 	}
 	sprintf(buf, "%dx%dx%d", d3d.DisplayMode[CurrentVideoMode].Width, d3d.DisplayMode[CurrentVideoMode].Height, colour_depth);
 	return buf;
-#endif
+//#endif
 }
 
 void GetDeviceAndVideoModePrefences() {

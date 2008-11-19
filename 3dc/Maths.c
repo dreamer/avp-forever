@@ -622,7 +622,6 @@ void MatrixMultiply(m1, m2, m3)
 
 }
 
-
 void PSXAccurateMatrixMultiply(m1, m2, m3)
 
 	struct matrixch *m1, *m2, *m3;

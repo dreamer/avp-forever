@@ -4832,9 +4832,6 @@ extern void SelectMenuDisplayMode(void)
 	MinimizeAllDDGraphics();
 	TimeStampedMessage("after MinimizeAllDDGraphics");
 
-    ReleaseDirect3DNotDDOrImages();
-	TimeStampedMessage("after ReleaseDirect3DNotDDOrImages");
-
     finiObjectsExceptDD();
 	TimeStampedMessage("after finiObjectsExceptDD");
 

@@ -3,6 +3,7 @@
 #include "vorbisPlayer.h"
 #include "logString.h"
 #include "dsound.h"
+#include <process.h>
 
 #include <vector>
 #include <string>
@@ -13,6 +14,9 @@ extern "C" {
 	extern LPDIRECTSOUNDBUFFER vorbisBuffer;
 	extern int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize);
 	extern int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset);
+	extern int SetVorbisBufferVolume(int volume);
+	extern int CDPlayerVolume; // volume control from menus
+	extern HANDLE hHandles[2];
 }
 
 FILE* file;
@@ -21,33 +25,24 @@ OggVorbis_File oggFile;
 
 unsigned int bytesReadTotal		= 0; //keep track of how many bytes we have read so far
 unsigned int bytesReadPerLoop	= 0; //keep track of how many bytes we read per ov_read invokation (1 to ensure that while loop is entered below)
-//int nBitStream				= 0; //used to specify logical bitstream 0
-/*
-LPVOID audioPtr1;
-DWORD audioBytes1;
-LPVOID audioPtr2;   
-DWORD audioBytes2;
-*/
-//extern LPDIRECTSOUNDBUFFER vorbisBuffer;
-DSBUFFERDESC dsbufferdesc;
-LPDIRECTSOUNDNOTIFY pDSNotify = NULL;
-HANDLE hHandles[2];
-
-WAVEFORMATEX waveFormat;
 
 bool oggIsPlaying = false;
 unsigned int bufferSize = 0;
 unsigned int halfBufferSize = 0;
 
 std::vector<std::string> TrackList;
-const std::string tracklistFilename = "Music/ogg_tracks.txt";
-const std::string musicFolderName = "Music/";
+#ifdef WIN32
+	const std::string tracklistFilename = "Music/ogg_tracks.txt";
+	const std::string musicFolderName = "Music/";
+#endif
+#ifdef _XBOX
+	const std::string tracklistFilename = "d:\\Music\\ogg_tracks.txt";
+	const std::string musicFolderName = "d:\\Music\\";
+#endif
 
 #pragma comment(lib, "vorbisfile_static.lib")
 #pragma comment(lib, "ogg_static.lib")
 #pragma comment(lib, "vorbis_static.lib")
-// for dsound notify
-//#pragma comment(lib,"dxguid.lib")
 
 char *audioData;
 
@@ -81,7 +76,7 @@ void LoadVorbisTrack(int track)
 	// get some audio info
 	pInfo = ov_info(&oggFile, -1);
 
-	// Check the number of channels... always use 16-bit samples
+	/* Check the number of channels... always use 16-bit samples */
 	if (pInfo->channels == 1) OutputDebugString("\n MONO");
 	else OutputDebugString("\n STEREO");
 
@@ -90,7 +85,7 @@ void LoadVorbisTrack(int track)
 	sprintf(buf, "\n frequency: %d", pInfo->rate);
 	OutputDebugString(buf);
 
-	/* create the audio buffer (directsound or whatever)*/
+	/* create the audio buffer (directsound or whatever) */
 	CreateVorbisAudioBuffer(pInfo->channels, pInfo->rate, &bufferSize);
 
 	/* init some temp audio data storage */
@@ -102,7 +97,7 @@ void LoadVorbisTrack(int track)
 	{
 		bytesReadPerLoop = ov_read(
 			&oggFile,							//what file to read from
-			/*(char*)audioPtr1*/audioData + bytesReadTotal,	//where to put the decoded data
+			audioData + bytesReadTotal,			//where to put the decoded data
 			bufferSize - bytesReadTotal,		//how much data to read
 			0,									//0 specifies little endian decoding mode
 			2,									//2 specifies 16-bit samples
@@ -114,7 +109,7 @@ void LoadVorbisTrack(int track)
 		{
 			LogDxErrorString("ov_read encountered an error\n");
 		}
-		// if we reach the end of the file, go back to start
+		/* if we reach the end of the file, go back to start */
 		if(bytesReadPerLoop == 0)
 		{
 			ov_raw_seek(&oggFile, 0);
@@ -126,121 +121,72 @@ void LoadVorbisTrack(int track)
 	/* fill entire buffer initially */
 	UpdateVorbisAudioBuffer(audioData, bytesReadTotal, 0);
 
-#if 0
-	if(FAILED(vorbisBuffer->Unlock(audioPtr1, audioBytes1, audioPtr2, audioBytes2))) 
-	{
-		LogDxErrorString("couldn't unlock ogg vorbis buffer\n");
-	}
-
-	if(FAILED(vorbisBuffer->QueryInterface( IID_IDirectSoundNotify, 
-                                        (void**)&pDSNotify ) ) )
-	{
-		LogDxErrorString("couldn't query interface for ogg vorbis buffer notifications\n");
-	}
-
-	DSBPOSITIONNOTIFY notifyPosition[2];
-
-	hHandles[0] = CreateEvent(NULL,FALSE,FALSE,NULL);
-	hHandles[1] = CreateEvent(NULL,FALSE,FALSE,NULL);
-
-	// halfway
-	notifyPosition[0].dwOffset = halfBufferSize;
-	notifyPosition[0].hEventNotify = hHandles[0];
-
-	// end
-	notifyPosition[1].dwOffset = bufferSize - 1;
-	notifyPosition[1].hEventNotify = hHandles[1];
-
-	if(FAILED(pDSNotify->SetNotificationPositions(2, notifyPosition)))
-	{
-		LogDxErrorString("couldn't set notifications for ogg vorbis buffer\n");
-		pDSNotify->Release();
-		return;
-	}
-
-	hHandles[0] = notifyPosition[0].hEventNotify;
-	hHandles[1] = notifyPosition[1].hEventNotify;
-
-	pDSNotify->Release();
-	pDSNotify = NULL;
-#endif
-
-	// start playing
+	/* start playing */
 	PlayVorbis();
 }
 
-//#include <process.h>
-
-void UpdateVorbisBuffer() 
-//static unsigned __cdecl updateOggBuffer(void*)
+void UpdateVorbisBuffer(void *arg) 
 {
-	if (oggIsPlaying != true) return;
-
-	int wait_value = WaitForMultipleObjects(2, hHandles, FALSE,1);
-
-	if (wait_value == WAIT_TIMEOUT) return;
-	else if (wait_value == WAIT_FAILED) return;
-
-	wait_value -= WAIT_OBJECT_0;
-
 	int lockOffset = 0;
-	
-	if(wait_value == 0) 
+
+	OutputDebugString("created vorbis thread\n");
+
+	while(oggIsPlaying)
 	{
-		lockOffset = 0;
-	}
-	else 
-	{
-		lockOffset = halfBufferSize;
-	}
+		int wait_value = WaitForMultipleObjects(2, hHandles, FALSE, 1);
 
-	// ov_read wont read all the data we request in one go
-	// we need to loop, adding to our buffer and keeping track of how much its 
-	// reading per loop, to ensure we fill our buffer
-	bytesReadPerLoop = 0;
-	bytesReadTotal = 0;
-
-	while(bytesReadTotal < halfBufferSize) 
-	{
-		bytesReadPerLoop = ov_read(
-			&oggFile,								//what file to read from
-			/*(char*)audioPtr1*/audioData + bytesReadTotal,		//destination + offset into destination data
-			halfBufferSize - bytesReadTotal,		//how much data to read
-			0,										//0 specifies little endian decoding mode
-			2,										//2 specifies 16-bit samples
-			1,										//1 specifies signed data
-			0
-		);
-
-		bytesReadTotal += bytesReadPerLoop;
-
-		if(bytesReadPerLoop < 0) 
+		if((wait_value != WAIT_TIMEOUT) && (wait_value != WAIT_FAILED))
 		{
-			LogDxErrorString("ov_read encountered an error\n");
-		}
-		// if we reach the end of the file, go back to start
-		if(bytesReadPerLoop == 0)
-		{
-			OutputDebugString("\n end of ogg file");
-			ov_raw_seek(&oggFile, 0);
-		}
-		if(bytesReadPerLoop == OV_HOLE) 
-		{
-			LogDxErrorString("OV_HOLE\n");
-		}
-		if(bytesReadPerLoop == OV_EBADLINK) {
-			LogDxErrorString("OV_EBADLINK\n");
+			if(wait_value == 0) 
+			{
+				lockOffset = 0;
+				OutputDebugString("locking at offset 0\n");
+			}
+			else 
+			{
+				OutputDebugString("locking at halfway offset\n");
+				lockOffset = halfBufferSize;
+			}
+
+			bytesReadPerLoop = 0;
+			bytesReadTotal = 0;
+
+			while(bytesReadTotal < halfBufferSize) 
+			{
+				bytesReadPerLoop = ov_read(
+					&oggFile,								//what file to read from
+					audioData + bytesReadTotal,				//destination + offset into destination data
+					halfBufferSize - bytesReadTotal,		//how much data to read
+					0,										//0 specifies little endian decoding mode
+					2,										//2 specifies 16-bit samples
+					1,										//1 specifies signed data
+					0
+				);
+
+				bytesReadTotal += bytesReadPerLoop;
+
+				if(bytesReadPerLoop < 0) 
+				{
+					LogDxErrorString("ov_read encountered an error\n");
+				}
+				/* if we reach the end of the file, go back to start */
+				if(bytesReadPerLoop == 0)
+				{
+					OutputDebugString("\n end of ogg file");
+					ov_raw_seek(&oggFile, 0);
+				}
+				if(bytesReadPerLoop == OV_HOLE) 
+				{
+					LogDxErrorString("OV_HOLE\n");
+				}
+				if(bytesReadPerLoop == OV_EBADLINK) 
+				{
+					LogDxErrorString("OV_EBADLINK\n");
+				}
+			}
+			UpdateVorbisAudioBuffer(audioData, bytesReadTotal, lockOffset);
 		}
 	}
-
-	UpdateVorbisAudioBuffer(audioData, bytesReadTotal, lockOffset);
-
-/*
-	if(FAILED(vorbisBuffer->Unlock(audioPtr1, audioBytes1, audioPtr2, audioBytes2)))
-	{	
-		LogDxErrorString("couldn't unlock ogg vorbis buffer\n");
-	}
-*/
 }
 
 void PlayVorbis() 
@@ -252,6 +198,8 @@ void PlayVorbis()
 	else 
 	{
 		oggIsPlaying = true;
+		SetVorbisBufferVolume(CDPlayerVolume);
+		 _beginthread(UpdateVorbisBuffer, 0, 0);
 	}
 }
 
@@ -260,10 +208,10 @@ void StopVorbis()
 	if (oggIsPlaying)
 	{
 		vorbisBuffer->Stop();
+		oggIsPlaying = false;
 	}
 	ov_clear(&oggFile);
 //	fclose(file);
-	oggIsPlaying = false;
 
 	delete[] audioData;
 
@@ -279,9 +227,9 @@ void CleanupVorbis()
 		vorbisBuffer->Release();
 		vorbisBuffer = NULL;
 	}
-
-	CloseHandle(hHandles[0]);
-	CloseHandle(hHandles[1]);
+	// move to dx_audio.cpp 
+//	CloseHandle(hHandles[0]);
+//	CloseHandle(hHandles[1]);
 }
 
 bool LoadVorbisTrackList()

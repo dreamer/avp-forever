@@ -203,7 +203,7 @@
 				AdditionalLibraryDirectories="3dc"
 				GenerateManifest="true"
 				IgnoreDefaultLibraryNames=""
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				AssemblyDebug="0"
 				ProgramDatabaseFile=".\AvP___Win32_Release_For_Fox/MyAvP.pdb"
 				GenerateMapFile="false"

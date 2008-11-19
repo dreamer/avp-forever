@@ -3,11 +3,10 @@
 extern "C" {
 #endif
 
-// I really need to settle on a naming convention for functions..
 extern void LoadVorbisTrack(int track);
 extern void PlayVorbis();
 extern void StopVorbis();
-extern void UpdateVorbisBuffer();
+extern void UpdateVorbisBuffer(void *arg);
 extern bool LoadVorbisTrackList();
 bool IsVorbisPlaying();
 int CheckNumberOfVorbisTracks();

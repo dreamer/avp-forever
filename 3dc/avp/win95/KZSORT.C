@@ -759,6 +759,11 @@ static int PointIsInModule(VECTORCH *pointPtr,MODULE *modulePtr)
 
 void RenderThisDisplayblock(DISPLAYBLOCK *dbPtr)
 {
+/* 
+	bjd - returning from this function before calling 
+	AddShape makes the marines weapons disappear. Nothing else changes
+	when playing marine level 1
+*/
 	extern VIEWDESCRIPTORBLOCK *ActiveVDBList[];
 	VIEWDESCRIPTORBLOCK *VDBPtr = ActiveVDBList[0];
 
@@ -767,6 +772,10 @@ void RenderThisDisplayblock(DISPLAYBLOCK *dbPtr)
 
 void RenderThisHierarchicalDisplayblock(DISPLAYBLOCK *dbPtr)
 {
+/* 
+	bjd - returning from this function early makes the marines weapons
+	and NPCs disappear, nothing else!
+*/
 	extern VIEWDESCRIPTORBLOCK *ActiveVDBList[];
 	VIEWDESCRIPTORBLOCK *VDBPtr = ActiveVDBList[0];
 

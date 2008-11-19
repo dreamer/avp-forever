@@ -277,6 +277,7 @@ List<int> LoadedNPC::image_groups;
 extern "C"
 {
 	extern BOOL Current_Level_Requires_Mirror_Image();
+	extern int AllowGoldWeapons;
 };
 void InitNPCs(RIFFHANDLE h)
 {
@@ -580,6 +581,7 @@ void InitNPCs(RIFFHANDLE h)
 			LoadedNPC tempnpc("mdisk.rif");
 			if (tempnpc.IsValid())
 			{
+				AllowGoldWeapons = 1;
 				newnpcs.add_entry(tempnpc);
 			}
 		}

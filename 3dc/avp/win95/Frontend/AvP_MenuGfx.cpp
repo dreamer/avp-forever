@@ -764,17 +764,22 @@ extern void Hardware_RenderKeyConfigRectangle(int alpha)
 }
 extern void RenderKeyConfigRectangle(int alpha)
 {
+	extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha);
+	D3D_DrawRectangle(10,ScreenDescriptorBlock.SDB_Height/2+25-115,ScreenDescriptorBlock.SDB_Width-20,250,alpha);
+//	return;
+/*
 	int x = 10;
 	int y = ScreenDescriptorBlock.SDB_Height/2+25-115;
 	int width = ScreenDescriptorBlock.SDB_Width-20;
 	int height = 250;
+*/
 /*
 	char buf[100];
 	sprintf(buf, "\n x: %d y: %d width: %d height: %d", x,y,width,height);
 	OutputDebugString(buf);
 */
-	extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha);
-	D3D_DrawRectangle(x,y,width,height,alpha);
+//	extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha);
+//	D3D_DrawRectangle(x, y, width, height, alpha);
 
 #if 0
 	int x,y;

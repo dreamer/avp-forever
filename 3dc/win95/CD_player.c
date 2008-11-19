@@ -39,6 +39,8 @@ int CDPlayerVolume; // volume control from menus
 
 int CDTrackMax=-1; //highest track number on cd
 
+extern int SetVorbisBufferVolume(int volume);
+
 void CDDA_Start(void)
 {
 	/* function should complete successfully even if no disc in drive */
@@ -113,11 +115,21 @@ extern void CheckCDVolume(void)
 {
 	if (CDDAVolume != CDPlayerVolume)
 	{
+		OutputDebugString("need to change music volume\n");
 		CDDA_ChangeVolume(CDPlayerVolume);
 	}
 }
 void CDDA_ChangeVolume(int volume)
 {
+	/* set vorbis volume here for now */
+	if(SetVorbisBufferVolume(volume))
+	{
+		OutputDebugString("should have set vorbis buffer volume ok\n");
+		CDDAVolume=volume;
+		CDPlayerVolume = volume;
+		return;
+	}
+
 	if(!CDDASwitchedOn) return; /* CDDA is off */
 	if(volume<CDDA_VOLUME_MIN) return;
 	if(volume>CDDA_VOLUME_MAX) return;

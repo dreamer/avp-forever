@@ -265,7 +265,8 @@ static unsigned char DefaultD3DTextureFilterMax;
 // coloured materials for D3D rendering interface
 
 
-
+extern void ReleaseAllFMVTexturesForDeviceReset();
+extern void ScanImagesForFMVs();
 
 static int NumberOfRenderedTriangles=0;
 int NumberOfLandscapePolygons;
@@ -726,11 +727,19 @@ BOOL BeginD3DScene()
 				OutputDebugString("\n DEVICE NOT RESET ");
 				if( ReleaseVolatileResources() == TRUE ) 
 				{
+					/* release fmv textures */
+					ReleaseAllFMVTexturesForDeviceReset();
+
 					if(FAILED( d3d.lpD3DDevice->Reset( &d3d.d3dpp ))) 
 					{
 						OutputDebugString("\n Couldn't reset device");
 					}
-					else CreateVolatileResources();
+					else 
+					{	
+						CreateVolatileResources();
+						/* reload fmv textures */
+						ScanImagesForFMVs();
+					}
 				}
 			}
 			else if( D3DERR_DEVICELOST == LastError ) 
@@ -6733,17 +6742,17 @@ void D3D_DrawMoltenMetalMesh_Clipped(void)
 #endif
 }
 
-void *DynamicImagePtr;
+//void *DynamicImagePtr;
 
 #define NUMBER_OF_SMACK_SURFACES 4
-LPDIRECTDRAWSURFACE SrcDDSurface[NUMBER_OF_SMACK_SURFACES];
-LPDIRECT3DTEXTURE SrcTexture[NUMBER_OF_SMACK_SURFACES];
-void *SrcSurfacePtr[NUMBER_OF_SMACK_SURFACES];
+//LPDIRECTDRAWSURFACE SrcDDSurface[NUMBER_OF_SMACK_SURFACES];
+//LPDIRECT3DTEXTURE SrcTexture[NUMBER_OF_SMACK_SURFACES];
+//void *SrcSurfacePtr[NUMBER_OF_SMACK_SURFACES];
 
-LPDIRECTDRAWSURFACE DstDDSurface[NUMBER_OF_SMACK_SURFACES]={0,0,0};
-LPDIRECT3DTEXTURE DstTexture[NUMBER_OF_SMACK_SURFACES]={0,0,0};
+//LPDIRECTDRAWSURFACE DstDDSurface[NUMBER_OF_SMACK_SURFACES]={0,0,0};
+//LPDIRECT3DTEXTURE DstTexture[NUMBER_OF_SMACK_SURFACES]={0,0,0};
 
-LPDIRECT3DTEXTURE9 D3DDstTexture[NUMBER_OF_SMACK_SURFACES]={0,0,0};
+//LPDIRECT3DTEXTURE9 D3DDstTexture[NUMBER_OF_SMACK_SURFACES]={0,0,0};
 
 int CurrentSurface;
 
@@ -8619,80 +8628,23 @@ void SetupFMVTexture(FMVTEXTURE *ftPtr)
 
 	/* just in case */
 //	SAFE_RELEASE(ftPtr->DestTexture);
+	ftPtr->DestTexture = NULL;
 
 	/* this texture is what's used for rendering of ingame video monitors */
 	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, NULL, D3DFMT_R5G6B5, D3DPOOL_DEFAULT, &ftPtr->ImagePtr->Direct3DTexture, NULL);
 	if(FAILED(LastError))
 	{
-		OutputDebugString("\n couldn't create FMV texture in image header");
+		LogDxErrorString("Could not create Direct3D texture ftPtr->ImagePtr->Direct3DTexture\n");
 	}
 
 	/* we use this texture to write fmv data to */
 	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, D3DUSAGE_DYNAMIC, D3DFMT_R5G6B5, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &ftPtr->DestTexture, NULL);
 	if(FAILED(LastError))
 	{
-		OutputDebugString("\n couldn't create FMV texture for ftPtr");
+		LogDxErrorString("Could not create Direct3D texture ftPtr->DestTexture\n");
 	}
 
 	ftPtr->SoundVolume = 0;
-
-#if 0
-	DDSURFACEDESC ddsd;
-	memcpy(&ddsd, &(d3d.TextureFormat[d3d.CurrentTextureFormat].ddsd), sizeof(ddsd));
-
-	ddsd.dwSize = sizeof(ddsd);
-
-	ddsd.dwFlags = (DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT);
-		ddsd.ddsCaps.dwCaps = (DDSCAPS_SYSTEMMEMORY|DDSCAPS_TEXTURE);
-
-	ddsd.dwHeight = FMV_SIZE;
-	ddsd.dwWidth = FMV_SIZE;
-
-	LastError = lpDD->CreateSurface(&ddsd, &(ftPtr->SrcSurface), NULL);
-	LOGDXERR(LastError);
-
-	DDBLTFX ddbltfx;
-	memset(&ddbltfx, 0, sizeof(ddbltfx));
-	ddbltfx.dwSize = sizeof(ddbltfx);
-	ddbltfx.dwFillColor	= 0;// (2<<11)+(26<<5)+8;
-	LastError=(ftPtr->SrcSurface)->Blt(NULL, NULL, NULL, DDBLT_COLORFILL | DDBLT_WAIT, &ddbltfx);
-	LOGDXERR(LastError);
-
-	LastError = (ftPtr->SrcSurface)->QueryInterface(IID_IDirect3DTexture, (LPVOID*) &(ftPtr->SrcTexture));
-	LOGDXERR(LastError);
-
-
-	{
-		int PalCaps;
-
-		if (ddsd.ddpfPixelFormat.dwFlags & DDPF_PALETTEINDEXED8)
-		{
-			PalCaps = (DDPCAPS_8BIT | DDPCAPS_ALLOW256);
-		}
-		else if (ddsd.ddpfPixelFormat.dwFlags &	DDPF_PALETTEINDEXED4)
-		{
-			PalCaps = DDPCAPS_4BIT;
-		}
-		else
-		{
-			PalCaps = 0;
-		}
-
-		if (PalCaps)
-		{
-			LPDIRECTDRAWPALETTE destPalette = NULL;
-			LastError = lpDD->CreatePalette(PalCaps, ftPtr->SrcPalette, &destPalette, NULL);
-			LOGDXERR(LastError);
-
-			LastError = (ftPtr->SrcSurface)->SetPalette(destPalette);
-//				LastError = tempSurface->SetPalette(destPalette);
-			LOGDXERR(LastError);
-		}
-	}
-	ftPtr->DestTexture = 0;
-	ftPtr->SoundVolume = 0;
-
-#endif
 }
 
 void ReleaseFMVTexture()
@@ -8702,6 +8654,7 @@ void ReleaseFMVTexture()
 
 void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 {
+//	return;
 //	LOCALASSERT(ftPtr);
 //	LOCALASSERT(ftPtr->ImagePtr);
 	if(!ftPtr) return;
@@ -8711,7 +8664,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	LastError = ftPtr->DestTexture->LockRect(0,&texture_rect,NULL,D3DLOCK_DISCARD);
 	if(FAILED(LastError))
 	{
-		OutputDebugString("\n couldn't lock Texture");
+		LogDxErrorString("Could not lock Direct3D texture ftPtr->DestTexture\n");
 		return;
 	}
 
@@ -8726,7 +8679,9 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 
 	/* unlock d3d texture */
 	LastError = ftPtr->DestTexture->UnlockRect(0);
-	if(FAILED(LastError)) {
+	if(FAILED(LastError)) 
+	{
+		LogDxErrorString("Could not unlock Direct3D texture ftPtr->DestTexture\n");
 		return;
 	}
 
@@ -8734,103 +8689,10 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	LastError = d3d.lpD3DDevice->UpdateTexture(ftPtr->DestTexture, ftPtr->ImagePtr->Direct3DTexture);
 	if(FAILED(LastError))
 	{	
-		OutputDebugString("\n couldn't update texture in UpdateFMVTexture");
+		LogDxErrorString("Could not UpdateTexture in UpdateFMVTexture function\n");
 	}
-
-
-#if 0
-	LPDIRECTDRAWSURFACE destSurface = NULL;
-	LOCALASSERT(ftPtr);
-	LOCALASSERT(ftPtr->ImagePtr);
-	LPDIRECTDRAWSURFACE srcSurface = ftPtr->SrcSurface;
-	LPDIRECT3DTEXTURE srcTexture = ftPtr->SrcTexture;
-
-	LOCALASSERT(srcSurface);
-
-	DDSURFACEDESC ddsd;
-	memset(&ddsd, 0, sizeof(DDSURFACEDESC));
-	ddsd.dwSize = sizeof(DDSURFACEDESC);
-
-	LastError = srcSurface->Lock(NULL,&ddsd,DDLOCK_WAIT,NULL);
-
-	// check for success
-	{
-		if (!NextFMVTextureFrame(ftPtr,(void*)ddsd.lpSurface))
-		{
-	    	LastError = srcSurface->Unlock(NULL);
-			LOGDXERR(LastError);
-		 	return;
-		}
-  	}
-
-    LastError = srcSurface->Unlock(NULL);
-	LOGDXERR(LastError);
-
-	if (ftPtr->DestTexture)
-	{
-		ReleaseD3DTexture(ftPtr->DestTexture);
-		ftPtr->DestTexture = 0;
-	}
-
-	// Query destination surface for a texture interface.
-	memset(&ddsd, 0, sizeof(DDSURFACEDESC));
-	ddsd.dwSize = sizeof(DDSURFACEDESC);
-
-	LastError = srcSurface->GetSurfaceDesc(&ddsd);
-	LOGDXERR(LastError);
-
-	ddsd.dwFlags = (DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT);
-	ddsd.ddsCaps.dwCaps = (DDSCAPS_TEXTURE | DDSCAPS_ALLOCONLOAD );
-
-	LastError = lpDD->CreateSurface(&ddsd, &destSurface, NULL);
-	LOGDXERR(LastError);
-	{
-		int PalCaps;
-
-		if (ddsd.ddpfPixelFormat.dwFlags & DDPF_PALETTEINDEXED8)
-		{
-			PalCaps = (DDPCAPS_8BIT | DDPCAPS_ALLOW256);
-		}
-		else if (ddsd.ddpfPixelFormat.dwFlags &	DDPF_PALETTEINDEXED4)
-		{
-			PalCaps = DDPCAPS_4BIT;
-		}
-		else
-		{
-			PalCaps = 0;
-		}
-
-		#if 1
-		if (PalCaps)
-		{
-			LPDIRECTDRAWPALETTE destPalette = NULL;
-
-			LastError = lpDD->CreatePalette(PalCaps, ftPtr->SrcPalette, &destPalette, NULL);
-			LOGDXERR(LastError);
-			UpdateFMVTexturePalette(ftPtr);
-			LastError = destSurface->SetPalette(destPalette);
-			LOGDXERR(LastError);
-			LastError = srcSurface->SetPalette(destPalette);
-			LOGDXERR(LastError);
-
-			destPalette->Release();
-		}
-		#endif
-	}
-	LastError = destSurface->QueryInterface(IID_IDirect3DTexture,(LPVOID*) &(ftPtr->DestTexture));
-	LOGDXERR(LastError);
-
-	LastError = (ftPtr->DestTexture)->Load(srcTexture);
- 	LOGDXERR(LastError);
-
-	LastError = (ftPtr->DestTexture)->GetHandle(d3d.lpD3DDevice, &(ftPtr->ImagePtr->D3DHandle));
-	LOGDXERR(LastError);
-
-  //	ftPtr->ImagePtr->DDSurface = destSurface;
-//	ftPtr->ImagePtr->D3DTexture = (ftPtr->DestTexture);
-	if (destSurface) ReleaseDDSurface(destSurface);
-#endif
 }
+
 #if 0
 static int GammaSetting;
 void UpdateGammaSettings(int g, int forceUpdate)

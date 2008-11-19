@@ -253,9 +253,6 @@ int AVP_ChangeDisplayMode
 	   that are not linked to direct draw */
 	MinimizeAllImages();
 	MinimizeAllDDGraphics();
-	ReleaseDirect3DNotDDOrImages();
-
-	finiObjectsExceptDD();
 
 	if (ChangeWindow)
 		ExitWindowsSystem(); 
