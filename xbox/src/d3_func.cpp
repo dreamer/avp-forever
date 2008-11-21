@@ -31,9 +31,7 @@ extern "C" {
 #include "vmanpset.h"
 
 extern "C++" {
-//	#include "chnktexi.h"
 	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
-//	#include "r2base.h"
 
 	#include <string>
 	#include <fstream>
@@ -59,37 +57,6 @@ extern "C++" {
 
 int image_num = 0;
 
-//#pragma comment(lib, "d3dx9.lib")
-
-//#define UseLocalAssert No
-//#include "ourasert.h"
-
-//#include <math.h> // for sqrt
-
-// FIXME!!! Structures in d3d structure
-// never have any size field set!!!
-// This is how it's done in Microsoft's
-// demo code --- but ARE THEY LYING???
-
-// As far as I know the execute buffer should always be in
-// system memory on any configuration, but this may
-// eventually have to be changed to something that reacts
-// to the caps bit in the driver, once drivers have reached
-// the point where we can safely assume that such bits will be valid.
-//#define ForceExecuteBufferIntoSystemMemory Yes
-
-// To define TBLEND mode --- at present
-// it must be on for ramp textures and
-// off for evrything else...
-//#define ForceTBlendCopy No
-
-// Set to Yes for debugging, to No for normal
-// operations (i.e. if we need a palettised
-// file for an accelerator, load it from
-// pre-palettised data, using code not yet
-// written as of 27 / 8/ 96)
-//#define QuantiseOnLoad Yes
-
 // Set to Yes to make default texture filter bilinear averaging rather
 // than nearest
 BOOL BilinearTextureFilter = 1;
@@ -97,26 +64,18 @@ BOOL BilinearTextureFilter = 1;
 //extern HWND hWndMain;
 
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-
-HRESULT LastError;
-//int ExBufSize;
-
-D3DINFO d3d;
-BOOL D3DHardwareAvailable;
-
-//int num_modes = 0;
-
-int StartDriver;
-int StartFormat;
-
-
-//static int devZBufDepth;
-
-
 extern int WindowMode;
 extern int ZBufferMode;
 extern int ScanDrawMode;
 extern int VideoModeColourDepth;
+
+HRESULT LastError;
+
+D3DINFO d3d;
+BOOL D3DHardwareAvailable;
+
+int StartDriver;
+int StartFormat;
 
 /* TGA header structure */
 #pragma pack(1)
@@ -135,9 +94,6 @@ struct TGA_HEADER {
 	char imagedescriptor;
 };
 #pragma pack()
-
-//extern enum TexFmt { D3TF_4BIT, D3TF_8BIT, D3TF_16BIT, D3TF_32BIT, D3TF_MAX } d3d_desired_tex_fmt;
-//extern void DeleteBuffers();
 
 void ColourFillBackBuffer(int FillColour) 
 {
@@ -172,56 +128,6 @@ D3DFORMAT SelectedAdapterFormat = D3DFMT_X8R8G8B8;
 D3DFORMAT SelectedTextureFormat = D3DFMT_A8R8G8B8;
 
 bool UsingStencil = false;
-
-#if 0
-void ClearLog()
-{
-	std::ofstream file(logFilename.c_str(), std::ios::out );
-	return;
-}
-
-void WriteToLog(const std::string &logLine)
-{
-	std::ofstream file(logFilename.c_str(), std::ios::out | std::ios::app );
-	file << logLine;
-	file.close();
-	return;
-}
-
-void LogDxError(/*std::string errorString,*/ HRESULT hr)
-{
-	OutputDebugString("\n a HRESULT error was encountered");
-#if 0
-	std::string temp = "\t Error!: ";
-	temp.append(DXGetErrorString8(hr));
-	temp.append(" - ");
-	temp.append(DXGetErrorDescription8(hr));
-	temp.append("\n");
-	WriteToLog(temp);
-#endif
-	return;
-}
-
-void LogDxErrorString(const std::string &errorString)
-{
-	std::string temp = "\t" + errorString;
-	WriteToLog(temp);
-}
-
-void LogDxString(const std::string &logString)
-{
-	std::string temp = logString + "\n";
-	WriteToLog(temp);
-	return;
-}
-
-void LogDebugValue(int value)
-{
-	std::ostringstream stream;
-	stream << "\n value was: " << value;
-	OutputDebugString(stream.str().c_str());
-}
-#endif
 
 LPDIRECT3DSURFACE8 CreateD3DSurface(DDSurface *tex, int width, int height) {
 #if 0
@@ -301,7 +207,6 @@ int NearestSuperiorPow2(int i)
 
 LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AvPTexture *tex) 
 {
-//	LPDIRECT3DTEXTURE8 tempTexture = NULL;
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
 	LPDIRECT3DTEXTURE8 swizTexture = NULL;
 
@@ -652,51 +557,6 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex,int *real_height, int 
 */
 //	return destTexture;
 	return swizTexture;
-}
-
-LPDIRECT3DSURFACE8 test;
-
-void CreateD3DFMVTexture()
-{
-#if 0
-//	LastError = d3d.lpD3DDevice->CreateTexture(128, 128, 1, NULL, D3DFMT_R5G6B5, D3DPOOL_MANAGED, &test, NULL);
-	LastError = d3d.lpD3DDevice->CreateOffscreenPlainSurface(128, 128, D3DFMT_R5G6B5, D3DPOOL_DEFAULT, &test, NULL);
-
-	if (FAILED(LastError))
-	{
-		OutputDebugString("\n couldn't create FMV texture");
-	}
-#endif
-}
-
-D3DLOCKED_RECT temp_lock;
-
-void* LockFMVTexture()
-{
-//	LastError = test->LockRect(0, &temp_lock, NULL, NULL );
-	LastError = test->LockRect(&temp_lock, NULL, 0);
-
-	if(FAILED(LastError))
-	{
-		OutputDebugString("\n couldn't lock FMV texture");
-	}
-
-	return temp_lock.pBits;
-}
-
-void UnlockFMVTexture()
-{
-	LastError = test->UnlockRect();
-
-	if(FAILED(LastError))
-	{
-		OutputDebugString("\n couldn't unlock FMV texture");
-	}
-
-//	if(FAILED(D3DXSaveSurfaceToFileA("fmv_test.png", D3DXIFF_PNG, test, NULL)))
-	{
-//		OutputDebugString("couldnt save fmv image to file");
-	}
 }
 
 LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf) 
@@ -1297,6 +1157,7 @@ void ReleaseD3DTexture(void* texture)
 {
 	AvPTexture *TextureHandle = (AvPTexture *)texture;
 
+	free(TextureHandle->buffer);
 	free(TextureHandle);
 }
 

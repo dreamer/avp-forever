@@ -124,6 +124,12 @@ const int TALLFONT_TEX = 999;
 RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
 //std::vector<RENDER_STATES> renderTest;
 
+void DeleteRenderMemory()
+{
+	delete [] quadVert;
+	delete [] renderList;
+}
+
 int NumVertices = 0;
 int NumIndicies = 0;
 int vb = 0;

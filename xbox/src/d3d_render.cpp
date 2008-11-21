@@ -1417,15 +1417,17 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 
  //   if (TextureHandle == (D3DTEXTUREHANDLE) 0)
 //	  return;
-
+/*
 	if(ImageHeaderArray[texoffset].ImageWidth==128)
 	{
 		RecipW = 1.0f /128;
 	}
 	else
 	{
+*/
 		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
 		RecipW = 1.0f / width;
+/*
 	}
 	if(ImageHeaderArray[texoffset].ImageHeight==128)
 	{
@@ -1433,9 +1435,10 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 	}
 	else
 	{
+*/
 		float height = (float) ImageHeaderArray[texoffset].ImageHeight;
 		RecipH = 1.0f / height;
-	}
+//	}
 
 	/* OUTPUT VERTICES TO EXECUTE BUFFER */
 	{
@@ -1456,7 +1459,7 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 
 			{
 				int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-
+/*
 				if (x<Global_VDB_Ptr->VDB_ClipLeft)
 				{
 					x=Global_VDB_Ptr->VDB_ClipLeft;
@@ -1465,12 +1468,12 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 				{
 					x=Global_VDB_Ptr->VDB_ClipRight;
 				}
-
+*/
 				tempVertex[i].sx = (float)x;
 			}
 			{
 				int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-
+/*
 				if (y<Global_VDB_Ptr->VDB_ClipUp)
 				{
 					y=Global_VDB_Ptr->VDB_ClipUp;
@@ -1479,6 +1482,7 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 				{
 					y=Global_VDB_Ptr->VDB_ClipDown;
 				}
+*/
 				tempVertex[i].sy = (float)y;
 
 			}
@@ -1552,7 +1556,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 		if(zvalue <0.0f) zvalue = 0.0f;
 
 		int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-
+/*
 		if (x < Global_VDB_Ptr->VDB_ClipLeft)
 		{
 			x = Global_VDB_Ptr->VDB_ClipLeft;
@@ -1561,9 +1565,10 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 		{
 			x = Global_VDB_Ptr->VDB_ClipRight;
 		}
-
+*/
 		int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
 
+/*
 		if (y < Global_VDB_Ptr->VDB_ClipUp)
 		{
 			y = Global_VDB_Ptr->VDB_ClipUp;
@@ -1572,6 +1577,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 		{
 			y = Global_VDB_Ptr->VDB_ClipDown;
 		}
+*/
 
 		tempVertex[i].sx = (float)x;
 		tempVertex[i].sy = (float)y;
@@ -2344,15 +2350,17 @@ void D3D_HUDQuad_Output(int imageNumber,struct VertexTag *quadVerticesPtr, unsig
 {
 #if 1//FUNCTION_ON
 	float RecipW, RecipH;
-
+/*
 	if(ImageHeaderArray[imageNumber].ImageWidth==128)
 	{
 		RecipW = 1.0f / 128.0f;
 	}
 	else
 	{
+*/
 		float width = (float) ImageHeaderArray[imageNumber].ImageWidth; //- 0.0f;
 		RecipW = 1.0f / width;
+/*
 	}
 	if(ImageHeaderArray[imageNumber].ImageHeight==128)
 	{
@@ -2360,9 +2368,10 @@ void D3D_HUDQuad_Output(int imageNumber,struct VertexTag *quadVerticesPtr, unsig
 	}
 	else
 	{
+*/
 		float height = (float) ImageHeaderArray[imageNumber].ImageHeight;// - 0.0f;
 		RecipH = 1.0f / height;
-	}
+//	}
 
 //	CheckVertexBuffer(4, imageNumber, TRANSLUCENCY_GLOWING);
 	ChangeTranslucencyMode(TRANSLUCENCY_GLOWING);
@@ -2720,7 +2729,7 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 	float ZNear;
 	float RecipW, RecipH;
 	int colour;
-	int specular=RGBALIGHT_MAKE(0,0,0,0);//255);
+	int specular = RGBALIGHT_MAKE(0,0,0,0);//255);
 
     // Get ZNear
 	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
@@ -2744,15 +2753,17 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 	else
 	{
 		texoffset = SpecialFXImageNumber;
-
+/*
 		if(ImageHeaderArray[texoffset].ImageWidth == 256)
 		{
 			RecipW = 1.0f / 256.0;
 		}
 		else
 		{
+*/
 			float width = (float) ImageHeaderArray[texoffset].ImageWidth;
 			RecipW = 1.0f / width;
+/*
 		}
 		if(ImageHeaderArray[texoffset].ImageHeight == 256)
 		{
@@ -2760,9 +2771,10 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 		}
 		else
 		{
+*/
 			float height = (float) ImageHeaderArray[texoffset].ImageHeight;
 			RecipH = 1.0f / height;
-		}
+//		}
 
 		tex_id = texoffset;
 	}
@@ -2815,7 +2827,7 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 
 			{
 				int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-
+/*
 				if (x < Global_VDB_Ptr->VDB_ClipLeft)
 				{
 					x = Global_VDB_Ptr->VDB_ClipLeft;
@@ -2824,12 +2836,13 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 				{
 					x = Global_VDB_Ptr->VDB_ClipRight;
 				}
+*/
 				tempVertex[i].sx = (float)x;
 
 			}
 			{
 				int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-
+/*
 				if (y < Global_VDB_Ptr->VDB_ClipUp)
 				{
 					y = Global_VDB_Ptr->VDB_ClipUp;
@@ -2838,10 +2851,10 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 				{
 					y = Global_VDB_Ptr->VDB_ClipDown;
 				}
+*/
 				tempVertex[i].sy = (float)y;
 
 			}
-
 			{
 				zvalue = (float)((vertices->Z)+HeadUpDisplayZOffset-50);
 			   	//zvalue = ((zvalue-ZNear)/zvalue);
@@ -2892,15 +2905,17 @@ void D3D_Particle_Output(PARTICLE *particlePtr,RENDERVERTEX *renderVerticesPtr)
 	// properly
 //    if (TextureHandle == NULL)
 //	  return;
-
+/*
 	if(ImageHeaderArray[texoffset].ImageWidth == 256)
 	{
 		RecipW = (1.0f / 256.0);
 	}
 	else
 	{
+*/
 		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
 		RecipW = (1.0f / width);
+/*
 	}
 	if(ImageHeaderArray[texoffset].ImageHeight == 256)
 	{
@@ -2908,9 +2923,10 @@ void D3D_Particle_Output(PARTICLE *particlePtr,RENDERVERTEX *renderVerticesPtr)
 	}
 	else
 	{
+*/
 		float height = (float) ImageHeaderArray[texoffset].ImageHeight;
 		RecipH = (1.0f / height);
-	}
+//	}
 
 	SetNewTexture(texoffset);
 	SetFilteringMode(FILTERING_BILINEAR_ON);
@@ -2970,7 +2986,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr,RENDERVERTEX *renderVerticesPtr)
 
 				{
 					int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-
+/*
 					if (x<Global_VDB_Ptr->VDB_ClipLeft)
 					{
 						x = Global_VDB_Ptr->VDB_ClipLeft;
@@ -2979,11 +2995,12 @@ void D3D_Particle_Output(PARTICLE *particlePtr,RENDERVERTEX *renderVerticesPtr)
 					{
 						x = Global_VDB_Ptr->VDB_ClipRight;
 					}
+*/
 					tempVertex[i].sx = (float)x;
 				}
 				{
 					int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-
+/*
 					if (y < Global_VDB_Ptr->VDB_ClipUp)
 					{
 						y = Global_VDB_Ptr->VDB_ClipUp;
@@ -2992,6 +3009,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr,RENDERVERTEX *renderVerticesPtr)
 					{
 						y = Global_VDB_Ptr->VDB_ClipDown;
 					}
+*/
 					tempVertex[i].sy = (float)y;
 
 				}

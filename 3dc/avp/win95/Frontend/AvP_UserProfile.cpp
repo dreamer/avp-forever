@@ -23,7 +23,7 @@ extern "C"
 
 static int LoadUserProfiles(void);
 
-static void EmptyUserProfilesList(void);
+/*static*/ void EmptyUserProfilesList(void);
 static int MakeNewUserProfile(void);
 static void InsertProfileIntoList(AVP_USER_PROFILE *profilePtr);
 static int ProfileIsMoreRecent(AVP_USER_PROFILE *profilePtr, AVP_USER_PROFILE *profileToTestAgainstPtr);
@@ -102,7 +102,7 @@ extern AVP_USER_PROFILE *GetNextUserProfile(void)
 	return CurrentUserProfilePtr;
 }
 
-static void EmptyUserProfilesList(void)
+/*static*/ void EmptyUserProfilesList(void)
 {
 	while (UserProfilesList.size())
 	{
@@ -161,10 +161,7 @@ extern void DeleteUserProfile(int number)
 		}
 		delete [] filename;
 	}
-
 }
-
-
 
 static void InsertProfileIntoList(AVP_USER_PROFILE *profilePtr)
 {

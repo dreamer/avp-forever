@@ -1,4 +1,8 @@
 /* Main designed spec for use with windows95*/
+#define _CRTDBG_MAP_ALLOC
+
+#define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
+#define malloc malloc(_NORMAL_BLOCK,__FILE__,__LINE__)
 
 #include "3dc.h"
 #include "module.h"
@@ -151,6 +155,8 @@ void exit_break_point_fucntion ()
 
 int mainMenu = 1;
 
+#include <crtdbg.h>
+
 #include "VideoModes.h"
 extern DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
  
@@ -166,7 +172,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	AVP_HInstance = hInst = hInstance;
 	AVP_NCmd = nCmdShow;
 
-// bjd	EnumerateCardsAndVideoModes();
+	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF|_CRTDBG_ALLOC_MEM_DF);
+	_CrtSetReportMode(_CRT_ASSERT,_CRTDBG_MODE_FILE);
+	_CrtSetReportFile(_CRT_ASSERT,_CRTDBG_FILE_STDERR);
+
+	_CrtSetBreakAlloc( 253244 );
+	
 	LoadDeviceAndVideoModePreferences();
 
 	LoadCDTrackList(); //load list of cd tracks assigned to levels , from a text file
@@ -861,6 +872,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	SoundSys_StopAll();
   	SoundSys_RemoveAll(); 
 
+	/* bjd - delete some profile data that was showing up as memory leaks */
+	EmptyUserProfilesList();
 
 	#else
 	QuickSplashScreens();

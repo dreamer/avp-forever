@@ -69,7 +69,7 @@ void InitTextStrings(void)
 	{
 		textPtr = (char*)HuffmanDecompress((HuffmanPackage*)(TextBufferPtr)); 		
 		DeallocateMem(TextBufferPtr);
-		TextBufferPtr=textPtr;
+		TextBufferPtr = textPtr;
 	}
 	else
 	{

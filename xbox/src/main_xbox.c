@@ -877,9 +877,8 @@ void _cdecl main()
 	SoundSys_StopAll();
   	SoundSys_RemoveAll();
 
-
-
-
+	/* bjd - delete some profile data that was showing up as memory leaks */
+	EmptyUserProfilesList();
 
 	#else
 	QuickSplashScreens();

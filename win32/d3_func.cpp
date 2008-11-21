@@ -3,6 +3,8 @@
 
 // Must link to C code in main engine system
 
+//#include <vld.h>
+
 extern "C" {
 
 // Mysterious definition required by objbase.h
@@ -14,26 +16,16 @@ extern "C" {
 #define INITGUID
 
 #include "3dc.h"
-
 #include "awTexLd.h"
-
-//#include "dxlog.h"
 #include "module.h"
-//#include "inline.h"
-
 #include "d3_func.h"
-//#include "d3dmacs.h"
-
-//#include "string.h"
 
 #include "kshape.h"
 #include "eax.h"
 #include "vmanpset.h"
 
 extern "C++" {
-//	#include "chnktexi.h"
 	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
-//	#include "r2base.h"
 
 	//#include <string>
 	//#include <fstream>
@@ -49,64 +41,23 @@ extern "C++" {
 
 int image_num = 0;
 
-//#pragma comment(lib, "d3dx9.lib")
-
-//#define UseLocalAssert No
-//#include "ourasert.h"
-
-//#include <math.h> // for sqrt
-
-// FIXME!!! Structures in d3d structure
-// never have any size field set!!!
-// This is how it's done in Microsoft's
-// demo code --- but ARE THEY LYING???
-
-// As far as I know the execute buffer should always be in
-// system memory on any configuration, but this may
-// eventually have to be changed to something that reacts
-// to the caps bit in the driver, once drivers have reached
-// the point where we can safely assume that such bits will be valid.
-//#define ForceExecuteBufferIntoSystemMemory Yes
-
-// To define TBLEND mode --- at present
-// it must be on for ramp textures and
-// off for evrything else...
-//#define ForceTBlendCopy No
-
-// Set to Yes for debugging, to No for normal
-// operations (i.e. if we need a palettised
-// file for an accelerator, load it from
-// pre-palettised data, using code not yet
-// written as of 27 / 8/ 96)
-//#define QuantiseOnLoad Yes
-
-// Set to Yes to make default texture filter bilinear averaging rather
-// than nearest
 BOOL BilinearTextureFilter = 1;
 
 extern HWND hWndMain;
-
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-
-HRESULT LastError;
-//int ExBufSize;
-
-D3DINFO d3d;
-BOOL D3DHardwareAvailable;
-
-//int num_modes = 0;
-
-int StartDriver;
-int StartFormat;
-
-
-//static int devZBufDepth;
-
-
+extern void DeleteRenderMemory();
 extern int WindowMode;
 extern int ZBufferMode;
 extern int ScanDrawMode;
 extern int VideoModeColourDepth;
+
+HRESULT LastError;
+
+D3DINFO d3d;
+BOOL D3DHardwareAvailable;
+
+int StartDriver;
+int StartFormat;
 
 /* TGA header structure */
 #pragma pack(1)
@@ -125,9 +76,6 @@ struct TGA_HEADER {
 	char imagedescriptor;
 };
 #pragma pack()
-
-//extern enum TexFmt { D3TF_4BIT, D3TF_8BIT, D3TF_16BIT, D3TF_32BIT, D3TF_MAX } d3d_desired_tex_fmt;
-//extern void DeleteBuffers();
 
 void ColourFillBackBuffer(int FillColour) 
 {
@@ -1330,6 +1278,9 @@ void ReleaseDirect3D()
 	// release back-buffer copy surface, vertex buffer and index buffer
 	ReleaseVolatileResources();
 
+	/* delete up any new()-ed memory in d3d_render.cpp */
+	DeleteRenderMemory();
+
 	SAFE_RELEASE(d3d.lpD3DDevice);
 	SAFE_RELEASE(d3d.lpD3D);
 
@@ -1383,6 +1334,7 @@ void ReleaseD3DTexture(void* texture)
 {
 	AvPTexture *TextureHandle = (AvPTexture *)texture;
 	
+	free(TextureHandle->buffer);
 	free(TextureHandle);
 }
 

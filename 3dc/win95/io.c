@@ -1289,8 +1289,6 @@ int textprint(const char* t, ...)
 		}
 
 		return DHM_MoveBufferToQueue(&textprintPosX,&textprintPosY,Yes);
-
-		
 	}
 	else
 	{

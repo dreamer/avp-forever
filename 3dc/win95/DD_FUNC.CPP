@@ -1061,7 +1061,8 @@ void ReleaseDDSurface(void* DDSurface)
 {
 	AvPTexture *d3d_texture = (AvPTexture *)DDSurface;
 	
-	if (d3d_texture->buffer) {
+	if (d3d_texture->buffer) 
+	{
 		free(d3d_texture->buffer);
 	} 
 	

@@ -113,7 +113,7 @@
 				AdditionalDependencies="xapilibd.lib d3d8d.lib d3dx8d.lib xgraphicsd.lib dsoundd.lib xonlined.lib xboxkrnl.lib xbdm.lib"
 				IgnoreDefaultLibraryNames="libcmt.lib"
 				MapExports="TRUE"
-				MapLines="FALSE"/>
+				MapLines="TRUE"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
@@ -210,18 +210,21 @@
 				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="TRUE"
+				ImproveFloatingPointConsistency="TRUE"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="TRUE"
+				EnableFiberSafeOptimizations="FALSE"
 				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src"
 				PreprocessorDefinitions="_XBOX;_WINDOWS;engine=1;DB_NOWINDOWS"
 				MinimalRebuild="TRUE"
+				ExceptionHandling="FALSE"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="TRUE"
 				EnableEnhancedInstructionSet="1"
 				TreatWChar_tAsBuiltInType="TRUE"
 				ForceConformanceInForLoopScope="TRUE"
-				RuntimeTypeInfo="TRUE"
+				RuntimeTypeInfo="FALSE"
 				PrecompiledHeaderFile="$(OutDir)/$(ProjectName).pch"
 				WarningLevel="3"
 				DebugInformationFormat="0"
