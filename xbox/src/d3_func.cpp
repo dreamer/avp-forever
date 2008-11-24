@@ -836,12 +836,12 @@ BOOL InitialiseDirect3DImmediateMode()
 	// clear log file first, then write header text
 	ClearLog();
 	LogDxString("Starting to initialise Direct3D");
-/*
+
 	int width = 720;
 	int height = 576;
-*/
-	int width = 640;
-	int height = 480;
+
+//	int width = 640;
+//	int height = 480;
 	int depth = 32;
 
 	D3DHardwareAvailable = Yes;
@@ -947,7 +947,7 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	// Log resolution set
 	LogDxString("\t Resolution set: " + LogInteger(d3dpp.BackBufferWidth) + " x " + LogInteger(d3dpp.BackBufferHeight));
-/*
+
 	ZeroMemory(&d3d.lpD3DViewport, sizeof(d3d.lpD3DViewport));
 	d3d.lpD3DViewport.X = 0;
 	d3d.lpD3DViewport.Y = 0;
@@ -961,7 +961,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	{
 		LogDxErrorString("Could not set viewport");
 	}
-*/
+
 	LastError = d3d.lpD3DDevice->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &d3d.lpD3DBackSurface);
 
 	if (FAILED(LastError))

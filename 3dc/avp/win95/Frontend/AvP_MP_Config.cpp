@@ -669,7 +669,6 @@ void BuildMultiplayerLevelNameArray()
 			//allocate memory and copy the string.
 			MultiplayerLevelNames[i] = (char*) AllocateMem(strlen(buffer)+1);
 			strcpy(MultiplayerLevelNames[i],buffer);
-			
 		}
 		else
 		{
@@ -693,7 +692,6 @@ void BuildMultiplayerLevelNameArray()
 			//allocate memory and copy the string.
 			CoopLevelNames[i] =(char*) AllocateMem(strlen(buffer)+1);
 			strcpy(CoopLevelNames[i],buffer);
-			
 		}
 		else
 		{
@@ -711,7 +709,6 @@ void BuildMultiplayerLevelNameArray()
 	
 	//now initialise the environment name entries for the various configuration menus
 	AVPMENU_ELEMENT *elementPtr;
-
 
 	elementPtr = AvPMenu_Multiplayer_Config;
 	//search for the level name element
@@ -746,6 +743,20 @@ void BuildMultiplayerLevelNameArray()
 	elementPtr->MaxSliderValue = NumMultiplayerLevels-1;
 	elementPtr->TextSliderStringPointer = MultiplayerLevelNames;
 
+}
+
+void DeleteMultiplayerLevelNameArray()
+{
+//	DeallocateMem(MultiplayerLevelNames[0]);
+
+	for(int i = 0; i < NumMultiplayerLevels; i++)
+	{
+		OutputDebugString((char*)MultiplayerLevelNames[i]);
+//		DeallocateMem(MultiplayerLevelNames[i]);
+	}
+
+//	DeallocateMem(*MultiplayerLevelNames);
+//	DeallocateMem(*CoopLevelNames);
 }
 
 

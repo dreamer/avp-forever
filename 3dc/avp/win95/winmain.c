@@ -1,8 +1,8 @@
 /* Main designed spec for use with windows95*/
 #define _CRTDBG_MAP_ALLOC
 
-#define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
-#define malloc malloc(_NORMAL_BLOCK,__FILE__,__LINE__)
+//#define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
+//#define malloc malloc(_NORMAL_BLOCK,__FILE__,__LINE__)
 
 #include "3dc.h"
 #include "module.h"
@@ -118,11 +118,30 @@ BOOL KeepMainRifFile=FALSE;
 
 extern void LoadKeyConfiguration();
 extern void DeInitialisePlayer();
-
 extern int AvP_MainMenus(void);
 extern int AvP_InGameMenus(void);
-
 extern IngameKeyboardInput_ClearBuffer(void);
+extern void BuildMultiplayerLevelNameArray();
+void LoadDeviceAndVideoModePreferences();
+void CDDA_Start(void);
+void InitCentreMouseThread();
+void ScanImagesForFMVs();
+void Game_Has_Loaded(void);
+void MinimalNetCollectMessages(void);
+void ThisFramesRenderingHasBegun(void);
+int InGameMenusAreRunning(void);
+void DoCompletedLevelStatisticsScreen(void);
+void ThisFramesRenderingHasFinished(void);
+void RestartLevel();
+void TimeStampedMessage(char *stringPtr);
+void ReleaseAllFMVTextures();
+void ResetEaxEnvironment(void);
+void CDDA_Stop();
+void StopVorbis();
+void FinishCentreMouseThread();
+void EmptyUserProfilesList(void);
+void dx_log_close();
+void CDDA_End(void);
 
 HINSTANCE AVP_HInstance, hInst;
 int AVP_NCmd;
@@ -130,17 +149,13 @@ int AVP_NCmd;
 extern unsigned long TotalMemAllocated;
 
 char LevelName[] = {"predbit6\0QuiteALongNameActually"};
-static ELO ELOLevelToLoad = {&LevelName};
+static ELO ELOLevelToLoad = { LevelName };
 
 int QuickStartMultiplayer=1;
 
 int VideoModeNotAvailable=0;
 
 extern int DebuggingCommandsActive;
-
-extern void BuildMultiplayerLevelNameArray();
-void LoadDeviceAndVideoModePreferences();
-void CDDA_Start(void);
 
 extern int WindowMode;
 void exit_break_point_fucntion ()
@@ -171,12 +186,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 						
 	AVP_HInstance = hInst = hInstance;
 	AVP_NCmd = nCmdShow;
-
+/*
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF|_CRTDBG_ALLOC_MEM_DF);
 	_CrtSetReportMode(_CRT_ASSERT,_CRTDBG_MODE_FILE);
 	_CrtSetReportFile(_CRT_ASSERT,_CRTDBG_FILE_STDERR);
-
-	_CrtSetBreakAlloc( 253244 );
+*/
+//	_CrtSetBreakAlloc( 5235 );
 	
 	LoadDeviceAndVideoModePreferences();
 
@@ -881,13 +896,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
 	TimeStampedMessage("After SoundSys_End");
 	TimeStampedMessage("After CDDA_End");
+
+	DeleteMultiplayerLevelNameArray();
+
 	/* unload language file */
-//	KillTextStrings();
+	KillTextStrings();
+
 // 	TimeStampedMessage("After KillTextStrings");
 	ExitSystem();
 	TimeStampedMessage("After ExitSystem");
 
-//	ffKill(); /* to avoid misreported memory leaks */
+	ffKill(); /* to avoid misreported memory leaks */
 	TimeStampedMessage("After ffKill");
 	#else
 	SoundSys_End();
@@ -899,6 +918,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	//TimeStampedMessage("after ExitWindowsSystem");
 
 	#endif
+
+	/* close dx logfile if open (has to be called after all calls to TimeStampedMessage() */
+	dx_log_close();
+
  	CDDA_End();
 	ClearMemoryPool();
 

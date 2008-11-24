@@ -218,10 +218,10 @@ void DoPlayerSounds(void)
 			{
 		 		if(weaponHandle == SOUND_NOACTIVEINDEX) 
 				{
-		 		  //Sound_Play(SID_PULSE_START,"hp",-PRED_PISTOL_PITCH_CHANGE);	  
-				  //Sound_Play(SID_PULSE_LOOP,"elhp",&weaponHandle,-PRED_PISTOL_PITCH_CHANGE);					
-			   	  //weaponPitchTimer=ONE_FIXED>>3;
-				  Sound_Play(SID_PRED_PISTOL,"h");					
+		 			//Sound_Play(SID_PULSE_START,"hp",-PRED_PISTOL_PITCH_CHANGE);	  
+					//Sound_Play(SID_PULSE_LOOP,"elhp",&weaponHandle,-PRED_PISTOL_PITCH_CHANGE);					
+			   		//weaponPitchTimer=ONE_FIXED>>3;
+					Sound_Play(SID_PRED_PISTOL,"h");					
 					playerNoise=1;
 			  	}
 				else
@@ -845,16 +845,14 @@ void PlayCudgelSound(void) {
 
 }
 
-
 char * SecondSoundDir = 0;
 static const char * FirstSoundDir = "SOUND\\";
 static char *CommonSoundDirectory = ".\\SOUND\\COMMON\\";
 
-int FindAndLoadWavFile(int soundNum,char* wavFileName)
+int FindAndLoadWavFile(int soundNum, char* wavFileName)
 {
 	static char sound_name[200];
-	sprintf (sound_name, "%s%s", FirstSoundDir,wavFileName);
-//	OutputDebugString(sound_name);
+	sprintf (sound_name, "%s%s", FirstSoundDir, wavFileName);
 
 #if LOAD_SOUND_FROM_FAST_FILE
 	//first look in fast file
@@ -862,7 +860,7 @@ int FindAndLoadWavFile(int soundNum,char* wavFileName)
 		unsigned nLen;
 		if(ffreadbuf(sound_name,&nLen))
 		{
-			return LoadWavFromFastFile(soundNum,sound_name);
+			return LoadWavFromFastFile(soundNum, sound_name);
 		}
 	}
 #endif
@@ -870,30 +868,30 @@ int FindAndLoadWavFile(int soundNum,char* wavFileName)
 #if !LOAD_SOUND_FROM_FAST_FILE_ONLY
 	//look for sound locally
 	{
-
 		{
 			//check to see if file exists locally first
-			FILE* wavFile=fopen(sound_name,"rb");
+			FILE* wavFile = fopen(sound_name,"rb");
 	
 			if(!wavFile && SecondSoundDir)
 			{
 				//look for sound over network
-				sprintf (sound_name, "%s%s", SecondSoundDir,wavFileName);
+				sprintf(sound_name, "%s%s", SecondSoundDir, wavFileName);
 	
-				wavFile=fopen(sound_name,"rb");
+				wavFile = fopen(sound_name,"rb");
 				if(!wavFile)
 				{
+					OutputDebugString("failed to find sound\n");
 					LOGDXFMT(("Failed to find %s\n",wavFileName));	
 					return 0;
 				}
-
 			}
 			fclose(wavFile);
 		}
 
-		return LoadWavFile(soundNum,sound_name) ;
+		return LoadWavFile(soundNum, sound_name) ;
 	}
 #else
+	OutputDebugString("else failed to find sound\n");
 	LOGDXFMT(("Failed to find %s\n",wavFileName));	
 	return 0;
 #endif
@@ -904,7 +902,6 @@ int FindAndLoadWavFile(int soundNum,char* wavFileName)
 /* Patrick 5/6/97 -------------------------------------------------------------
   Sound data loaders 
   ----------------------------------------------------------------------------*/
-#if 1//USE_REBSND_LOADERS
 extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr);
 void *LoadRebSndFile(char *filename)
 {
@@ -1018,68 +1015,3 @@ void LoadSounds(char *soundDirectory)
 
 	ReleaseRebSndFile(rebSndBuffer);
 }
-#else
-void LoadSounds(char *soundDirectory)
-{
-	char soundFileName[48];
-	char fileLine[128];
-	FILE *myFile;
-	int soundNum;
-	int pitchOffset;
-	int ok;
-
-	LOCALASSERT(soundDirectory);
-
-	/* first check that sound has initialised and is turned on */
-	if(!SoundSys_IsOn()) return;	
-	
-	/* construct the sound list file name, and load it */
- //	strcpy((char*)&soundFileName, gameSoundDirectory);
- //	strcat((char*)&soundFileName, soundDirectory);
- //	strcat((char*)&soundFileName, "\\");
-	strcpy((char*)&soundFileName, CommonSoundDirectory);
-	strcat((char*)&soundFileName, soundDirectory);
-	strcat((char*)&soundFileName, ".SL");
-	myFile = fopen(soundFileName,"rt");
-	//LOCALASSERT(myFile!=NULL);
-	
-	/* just return if we can't find the file */
-	if(!myFile)	return;
-
-	/* Process the file */
-	while(fgets((char*)fileLine,128,myFile))
-	{
-		char wavFileName[128];
-		if(!strncmp((char*)fileLine,"//",2)) continue; /* comment */
-		if(strlen((char*)fileLine) < 4) continue; /* blank line, or something */
-
-		
-		/* Assume the string is a valid wav file reference */		
-		soundNum = atoi(strtok(fileLine,", \n"));
-		strcpy((char*)&wavFileName,"Common\\");		
-		strcat((char*)&wavFileName,strtok(NULL,", \n")); 
-		
-		/* pitch offset is in semitones: need to convert to 1/128ths */
-		pitchOffset = PITCH_DEFAULTPLAT + (atoi(strtok(NULL,", \n"))*128); 
-
-		if((soundNum<0)||(soundNum>=SID_MAXIMUM)) continue; /* invalid sound number */
-		if(GameSounds[soundNum].loaded)	continue; /* Duplicate game sound loaded */
-		ok = FindAndLoadWavFile(soundNum, wavFileName);
-		
-		/* Fill in the GameSound: the pointer to the ds buffer is filled in by 
-		the wav file loader, if everthing went ok.  If the load failed, do not
-		fill in the game sound data: it should remain initialised */
-		if(ok)
-		{
-	  	GameSounds[soundNum].loaded = 1;
-			GameSounds[soundNum].activeInstances = 0;;	 
-			GameSounds[soundNum].volume = VOLUME_DEFAULT;		
-			GameSounds[soundNum].pitch = pitchOffset;				
-			InitialiseBaseFrequency(soundNum);
-		}
-	}
-	fclose(myFile);
-
-	db_log1("loaded all the sounds.");
-}
-#endif

@@ -59,7 +59,12 @@ static CharacterSoundEffects QueenSounds={0,0,0,SID_NOSOUND};
 #if ALIEN_DEMO
 #define ScreamFilePath "alienfastfile\\"
 #elif LOAD_SCREAMS_FROM_FASTFILES
-#define ScreamFilePath "fastfile\\"
+	#ifdef WIN32
+		#define ScreamFilePath "fastfile\\"
+	#endif
+	#ifdef _XBOX
+		#define ScreamFilePath "d:\\fastfile\\"
+	#endif
 #else
 #define ScreamFilePath "sound\\"
 #endif
@@ -234,9 +239,7 @@ void CharacterSoundEffects::LoadSounds(const char* filename,const char* director
 				{
 					cat->num_sounds--;
 				}
-
 			}
-
 		}
 	}
 

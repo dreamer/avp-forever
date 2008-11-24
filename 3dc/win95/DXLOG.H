@@ -2,9 +2,6 @@
 #define _included_dxlog_h_
 
 #include "system.h"
-//#include "ddraw.h" 
-//#include <d3d9.h> // BJD
-//#include <d3drm.h> // BJD
 
 #ifdef __cplusplus
 extern "C" {

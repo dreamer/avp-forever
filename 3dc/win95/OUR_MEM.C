@@ -44,7 +44,7 @@ void DeallocMem(void *__ptr)
 
 	#if debug
 	else {
-
+		OutputDebugString("ERROR - freeing null ptr\n");
 		textprint("ERROR - freeing null ptr\n");
 		WaitForReturn();
 

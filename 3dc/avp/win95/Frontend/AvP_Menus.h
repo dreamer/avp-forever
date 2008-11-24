@@ -14,8 +14,9 @@
 #ifdef AVP_DEBUG_VERSION
 	#define CONSOLE_DEBUGGING_COMMANDS_ACTIVATED 1
 
-	#define LOAD_SCREAMS_FROM_FASTFILES 0
-	#define LOAD_USING_FASTFILES 0
+	/* bjd 24/11/08 - load all sounds for debug mode.. */
+	#define LOAD_SCREAMS_FROM_FASTFILES 1
+	#define LOAD_USING_FASTFILES 1
 
 #else //AVP_DEBUG_VERSION
 

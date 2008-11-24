@@ -160,7 +160,6 @@ LOADED_SOUND const * GetSound (char const * fname)
 	
 	int ok = FindAndLoadWavFile (soundNum, (char *)fname);
 
-
 	if (ok)
 	{
 		GameSounds[soundNum].loaded = 1;

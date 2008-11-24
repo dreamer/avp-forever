@@ -210,8 +210,7 @@ void setup_track_sound(Object_Chunk* oc,TRACK_SOUND** start_sound,TRACK_SOUND** 
 
 			*sound_ptr=sound;
 		}
-			
-	}	
+	}
 }
 
 TRACK_CONTROLLER* setup_track_controller(Object_Chunk* oc)

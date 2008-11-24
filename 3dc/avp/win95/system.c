@@ -999,7 +999,6 @@ void ExitGame(void)
 	{
 		avp_undo_rif_load(player_rif);
 	  	player_rif=INVALID_RIFFHANDLE;
-
 	}
 	
 	if(alien_weapon_rif != INVALID_RIFFHANDLE)

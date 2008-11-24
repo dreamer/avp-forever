@@ -98,6 +98,7 @@ void InitTextStrings(void)
 		AddToTable( TextStringPtr[i] );
 	}
 }
+
 void KillTextStrings(void)
 {
 	UnloadTextFile(LanguageFilename[AvP.Language],TextBufferPtr);

@@ -103,9 +103,6 @@ const char * GenTex50pc_Directory = "\\\\Kate\\Kate Share\\avp\\Gen12Tex\\";
 char const * SecondTex_Directory = 0; // will be the src safe shadow for development builds
 								//used for cd graphics directory in final version
 
-// xbox
-const char * BaseDir = "D:\\";
-
 char* Rif_Sound_Directory=0;//set for the main level rif
 
 static char * light_set_name = "NORMALLT";

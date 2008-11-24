@@ -2286,8 +2286,6 @@ void D3D_ZBufferedTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *
 
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a) 
 {
-#if 1
-
 	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
 
 	// top left - 0
@@ -2343,7 +2341,6 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 
 	OUTPUT_TRIANGLE(0,1,2, 4);
 	OUTPUT_TRIANGLE(0,3,2, 4);
-#endif
 }
 
 void D3D_HUD_Setup(void)

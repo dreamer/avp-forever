@@ -355,36 +355,6 @@ int PlatStartSoundSys()
 	}
 	SoundMinBufferFree = SoundMaxHW / 2;
 
-	// do stuff here?
-#if 0
-	/* Create a NULL secondary buffer. */
-	DSBUFFERDESC	dsBuffDesc;
-	WAVEFORMATEX	wfex;
-
-	/* Set buffer desciption. */
-	memset(&dsBuffDesc, 0, sizeof(DSBUFFERDESC));
-	dsBuffDesc.dwSize			= sizeof(DSBUFFERDESC);
-	dsBuffDesc.dwFlags			= (/*DSBCAPS_STATIC |*/ DSBCAPS_CTRL3D | DSBCAPS_MUTE3DATMAXDISTANCE);
-	dsBuffDesc.dwBufferBytes	= 8;
-	dsBuffDesc.lpwfxFormat		= &wfex;
-
-	/* Set the format. */
-	wfex.wFormatTag				= WAVE_FORMAT_PCM;
-	wfex.nChannels				= 1;
-	wfex.nSamplesPerSec			= 11025;
-	wfex.nBlockAlign			= 1;
-	wfex.nAvgBytesPerSec		= wfex.nSamplesPerSec * wfex.nBlockAlign;
-	wfex.wBitsPerSample			= 8;
-	wfex.cbSize					= 0;
-
-	LastError = DSObject->CreateSoundBuffer(&dsBuffDesc, &NullDSBufferP, NULL);
-	if(FAILED(LastError))
-	{		
-		PlatEndSoundSys();
-		return 0;
-	}
-#endif 
-
 	/* set up listener */
 	// position
 	DSObject->SetPosition(0.0f, 0.0f, 0.0f, DS3D_DEFERRED);
@@ -616,7 +586,6 @@ static int PlatChangeSoundPan(int activeIndex, int pan)
 
 void PlatUpdatePlayer()
 {
-//	return;
 	if(!SoundActivated)
 		return;
 
@@ -765,17 +734,13 @@ void PlatUpdatePlayer()
 		SoundConfig.reverb_changed = FALSE;
 	}
 #endif
-//	IDirectSound3DListener_CommitDeferredSettings(DS3DListener);
+
 	DSObject->CommitDeferredSettings();
-
-	// update buffer for ogg file playback
-//	update_ogg_buffer();
-
 }
 
 void PlatEndSoundSys()
 {
-
+	OutputDebugString("PlatEndSoundSys()\n");
 }
 
 int PlatDo3dSound(int activeIndex)
@@ -1088,11 +1053,6 @@ void InitialiseBaseFrequency(SOUNDINDEX soundNum)
 
 int LoadWavFile(int soundNum, char * wavFileName)
 {
-/*
-	OutputDebugString("going to load wav: ");
-	OutputDebugString(wavFileName);
-	OutputDebugString("\n");
-*/
 	PWAVCHUNKHEADER myChunkHeader;
 	PWAVRIFFHEADER myRiffHeader;
 	FILE *myFile;
@@ -1235,13 +1195,13 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		DSCAPS DSCaps;
 		DSObject->GetCaps(&DSCaps);
 
-		if(DSCaps.dwFree2DBuffers + DSCaps.dwFree3DBuffers == 0)
+		if(DSCaps.dwFree2DBuffers + DSCaps.dwFree3DBuffers <= 0)
 		{
 			dsBuffDesc.dwFlags |= DSBCAPS_LOCDEFER;
 		}
 
 		/* Create the Direct Sound buffer for this sound */
-		LastError = DSObject->CreateSoundBuffer(&dsBuffDesc,&sndBuffer,NULL);
+		LastError = DSObject->CreateSoundBuffer(&dsBuffDesc, &sndBuffer, NULL);
 		if(FAILED(LastError))
 		{
 			LOCALASSERT(1==0);
@@ -1250,14 +1210,16 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		}
 
 		/* Lock the buffer to allow the write */
-		LastError = sndBuffer->Lock(0,myChunkHeader.chunkLength,
-			&audioPtr1,&audioBytes1,&audioPtr2,&audioBytes2,0);
-//		hres = IDirectSoundBuffer_Lock(sndBuffer,0,myChunkHeader.chunkLength,
-//			&audioPtr1,&audioBytes1,&audioPtr2,&audioBytes2,0); 
+		LastError = sndBuffer->Lock(0, myChunkHeader.chunkLength,
+										&audioPtr1,
+										&audioBytes1,
+										&audioPtr2,
+										&audioBytes2,
+										0);
+
 		if((LastError!=DS_OK)||(audioPtr2 != NULL))
 		{
-			LOCALASSERT(1==0);
-//			IDirectSoundBuffer_Release(sndBuffer);		
+			LOCALASSERT(1==0);	
 			sndBuffer->Release();
 			fclose(myFile);
 			return 0;
@@ -1267,20 +1229,16 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		res = fread(audioPtr1,1,myChunkHeader.chunkLength,myFile);
 		if(res != (size_t)myChunkHeader.chunkLength)
 		{
-			LOCALASSERT(1==0);
-//			IDirectSoundBuffer_Release(sndBuffer);		
+			LOCALASSERT(1==0);	
 			sndBuffer->Release();
 			fclose(myFile);
 			return 0;
 		}
 		/* then unlock it and close the file */
-		LastError = sndBuffer->Unlock(audioPtr1,audioBytes1,audioPtr2,audioBytes2);
-//		hres = IDirectSoundBuffer_Unlock(sndBuffer,audioPtr1,audioBytes1,audioPtr2,audioBytes2);
-//		if (hres!=DS_OK)
+		LastError = sndBuffer->Unlock(audioPtr1, audioBytes1, audioPtr2, audioBytes2);
 		if(FAILED(LastError))
 		{
-			LOCALASSERT(1==0);
-//			IDirectSoundBuffer_Release(sndBuffer);		
+			LOCALASSERT(1==0);		
 			sndBuffer->Release();
 			fclose(myFile);
 			return 0;
@@ -1383,8 +1341,6 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		return 0;
 	}
 
-	// up to here looks fine..
-#if 1
 	/* Read	the data chunk header */
 	//skip chunks until we reach the 'data' chunk
 	do
@@ -1417,7 +1373,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		ffclose(myFile);
 		return 0;	
 	}
-#endif	
+
 	//calculate length of sample
 	lengthInSeconds=DIV_FIXED(myChunkHeader.chunkLength,myWaveFormat.nAvgBytesPerSec);
 
@@ -1483,9 +1439,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		}
 
 		/* Create the Direct Sound buffer for this sound */
-//		hres = IDirectSound_CreateSoundBuffer(DSObject,&dsBuffDesc,&sndBuffer,NULL); 
 		LastError = DSObject->CreateSoundBuffer(&dsBuffDesc,&sndBuffer,NULL);
-//		if(hres != DS_OK)
 		if(FAILED(LastError))
 		{
 			LOCALASSERT(1==0);
@@ -1493,15 +1447,12 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 			return 0;
 		}
 
-		/* Lock the buffer to allow the write */
-//		hres = IDirectSoundBuffer_Lock(sndBuffer,0,myChunkHeader.chunkLength,
-//			&audioPtr1,&audioBytes1,&audioPtr2,&audioBytes2,0); 
+		/* Lock the buffer to allow the write */ 
 		LastError = sndBuffer->Lock(0,myChunkHeader.chunkLength,
 			&audioPtr1,&audioBytes1,&audioPtr2,&audioBytes2,0); 
 		if((LastError!=DS_OK)||(audioPtr2 != NULL))
 		{
-			LOCALASSERT(1==0);
-//			IDirectSoundBuffer_Release(sndBuffer);		
+			LOCALASSERT(1==0);	
 			sndBuffer->Release();
 			ffclose(myFile);
 			return 0;
@@ -1511,8 +1462,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		res = ffread(audioPtr1,1,myChunkHeader.chunkLength,myFile);
 		if(res != (size_t)myChunkHeader.chunkLength)
 		{
-			LOCALASSERT(1==0);
-//			IDirectSoundBuffer_Release(sndBuffer);		
+			LOCALASSERT(1==0);		
 			sndBuffer->Release();
 			ffclose(myFile);
 			return 0;
@@ -1522,8 +1472,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		LastError = sndBuffer->Unlock(audioPtr1,audioBytes1,audioPtr2,audioBytes2);
 		if (LastError!=DS_OK)
 		{
-			LOCALASSERT(1==0);
-//			IDirectSoundBuffer_Release(sndBuffer);		
+			LOCALASSERT(1==0);	
 			sndBuffer->Release();
 			ffclose(myFile);
 			return 0;
@@ -1967,7 +1916,7 @@ void PlatStopSound(int activeIndex)
 
 	if(ActiveSounds[activeIndex].ds3DBufferP)
 	{
-
+		ActiveSounds[activeIndex].ds3DBufferP->StopEx( 0, DSBSTOPEX_IMMEDIATE );
 		do
 		{
 			ActiveSounds[activeIndex].ds3DBufferP->GetStatus( &dwStatus );
@@ -1977,17 +1926,15 @@ void PlatStopSound(int activeIndex)
 		ActiveSounds[activeIndex].ds3DBufferP->Release();
 		ActiveSounds[activeIndex].ds3DBufferP = NULL;
 	}
-
+/*
 	do
 	{
 		ActiveSounds[activeIndex].dsBufferP->GetStatus( &dwStatus );
 	} 
 	while( dwStatus & DSBSTATUS_PLAYING );
-
+*/
 	ActiveSounds[activeIndex].dsBufferP->Release();
 	ActiveSounds[activeIndex].dsBufferP = NULL;
-
-//	OutputDebugString("released a sound buffer\n");
 }
 
 #if 0

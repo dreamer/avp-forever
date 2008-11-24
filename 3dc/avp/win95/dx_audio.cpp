@@ -1615,6 +1615,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 	fclose(myFile);
     return 1;
 }
+
 /*identical to above function except it loads from fast files*/
 int LoadWavFromFastFile(int soundNum, char * wavFileName)
 {

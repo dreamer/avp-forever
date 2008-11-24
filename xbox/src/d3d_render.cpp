@@ -2271,9 +2271,6 @@ void D3D_ZBufferedTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *
 
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a) 
 {
-//	return;
-#if 1
-
 	SetNewTexture(NO_TEXTURE);
 	ChangeTranslucencyMode(TRANSLUCENCY_GLOWING);
 
@@ -2334,7 +2331,6 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 //	OUTPUT_TRIANGLE(0,3,2, 4);
 
 	PushVerts();
-#endif
 }
 
 void D3D_HUD_Setup(void)
@@ -7121,8 +7117,8 @@ void ThisFramesRenderingHasFinished(void)
 
 	// Setup the output string.
 //    pstrOut = strOut;
-    sprintf(buf, "%4d  free MB of physical memory.\n", stat.dwAvailPhys / MB );
-	OutputDebugString( buf );
+ //   sprintf(buf, "%4d  free MB of physical memory.\n", stat.dwAvailPhys / MB );
+//	OutputDebugString( buf );
 /*
 	sprintf(buf,  "%4d total MB of virtual memory.\n", stat.dwTotalVirtual / MB );
 	OutputDebugString( buf );
@@ -7141,7 +7137,7 @@ void ThisFramesRenderingHasFinished(void)
     AddStr( "%4d  percent of memory is in use.\n", stat.dwMemoryLoad );
 */
     // Output the string.
-    OutputDebugString( buf );
+//    OutputDebugString( buf );
 
  	/* KJL 11:46:56 01/16/97 - kill off any lights which are fated to be removed */
 	LightBlockDeallocation();

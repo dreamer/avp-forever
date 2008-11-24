@@ -337,6 +337,11 @@ void dx_strf_log(char const * fmt, ... )
 	lfputs(dxlog,"\n\n");
 }
 
+void dx_log_close()
+{
+	if(dxlog) lfclose(dxlog);
+}
+
 #undef exit
 int GlobalAssertFired(char * Filename, int LineNum,char * Condition)
 {
