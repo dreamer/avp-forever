@@ -837,11 +837,11 @@ BOOL InitialiseDirect3DImmediateMode()
 	ClearLog();
 	LogDxString("Starting to initialise Direct3D");
 
-	int width = 720;
-	int height = 576;
+//	int width = 720;
+//	int height = 576;
 
-//	int width = 640;
-//	int height = 480;
+	int width = 640;
+	int height = 480;
 	int depth = 32;
 
 	D3DHardwareAvailable = Yes;
@@ -928,8 +928,8 @@ BOOL InitialiseDirect3DImmediateMode()
 	d3dpp.EnableAutoDepthStencil = TRUE;
 	d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8;
 	d3dpp.SwapEffect = D3DSWAPEFFECT_COPY;//D3DSWAPEFFECT_DISCARD;
-//	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
-	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+//	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 //	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE_OR_IMMEDIATE;
 //	d3dpp.Flags = D3DPRESENTFLAG_10X11PIXELASPECTRATIO;
 	UsingStencil = true;
@@ -961,7 +961,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	{
 		LogDxErrorString("Could not set viewport");
 	}
-
+/*
 	LastError = d3d.lpD3DDevice->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &d3d.lpD3DBackSurface);
 
 	if (FAILED(LastError))
@@ -977,7 +977,7 @@ BOOL InitialiseDirect3DImmediateMode()
 		LogDxErrorString("Could not get backbuffer surface description");
 		return FALSE;
 	}
-
+*/
 	ScreenDescriptorBlock.SDB_Width     = width;
 	ScreenDescriptorBlock.SDB_Height    = height;
 	ScreenDescriptorBlock.SDB_Depth		= depth;
@@ -994,6 +994,9 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	ScanDrawMode = ScanDrawD3DHardwareRGB;
 
+	/* use an offset for hud items to account for tv safe zones. just use width for now. 5%?  */
+	ScreenDescriptorBlock.SDB_SafeZoneOffset = (width / 100) * 5;
+
 	// save a copy of the presentation parameters for use
 	// later (device reset, resolution/depth change)
 	d3d.d3dpp = d3dpp;
@@ -1001,7 +1004,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	// create vertex and index buffers
 	CreateVolatileResources();
 
-	LogDxString("Initialise Direct3D succesfully");
+	LogDxString("Initialised Direct3D succesfully");
 	return TRUE;
 }
 

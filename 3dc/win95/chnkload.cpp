@@ -477,7 +477,6 @@ RIFFHANDLE load_rif (const char * fname)
 		MessageBox(NULL,message,"AvP",MB_OK+MB_SYSTEMMODAL);
 		exit(0x111);
 #endif
-		OutputDebugString("\n load_rif - chnload.cpp");
 		return INVALID_RIFFHANDLE;
 	}
 	#if OUTPUT_LOG
@@ -514,7 +513,6 @@ RIFFHANDLE load_rif_non_env (const char * fname)
 		MessageBox(NULL,message,"AvP",MB_OK+MB_SYSTEMMODAL);
 		exit(0x111);
 #endif
-		OutputDebugString("\n load_rif_non_env - chnload.cpp");
 		return INVALID_RIFFHANDLE;
 	}
 	#if OUTPUT_LOG
@@ -1158,7 +1156,7 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk * tmpshp, int fla
 }
 
 // load textures for environment
-BOOL load_rif_bitmaps (RIFFHANDLE h, int/* flags*/)
+BOOL load_rif_bitmaps (RIFFHANDLE h, int flags)
 {
 	Global_BMP_Name_Chunk * gbnc = 0;
 
@@ -2650,18 +2648,18 @@ BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Heade
 
 	if(sec)
 	{
-		shphd->shapemaxx = (int)sec->maxx*GlobalScale; 
-		shphd->shapeminx = (int)sec->minx*GlobalScale; 
-		shphd->shapemaxy = (int)sec->maxy*GlobalScale; 
-		shphd->shapeminy = (int)sec->miny*GlobalScale; 
+		shphd->shapemaxx = (int)(sec->maxx*GlobalScale); 
+		shphd->shapeminx = (int)(sec->minx*GlobalScale); 
+		shphd->shapemaxy = (int)(sec->maxy*GlobalScale); 
+		shphd->shapeminy = (int)(sec->miny*GlobalScale); 
 		
 	}
 	else
 	{
-		shphd->shapemaxx =  (int)ssc->maxx*GlobalScale; 
-		shphd->shapeminx =- (int)ssc->maxx*GlobalScale; 
-		shphd->shapemaxy =  (int)ssc->maxy*GlobalScale; 
-		shphd->shapeminy =- (int)ssc->maxy*GlobalScale; 
+		shphd->shapemaxx = (int)(ssc->maxx*GlobalScale); 
+		shphd->shapeminx = (int)(-ssc->maxx*GlobalScale); 
+		shphd->shapemaxy = (int)(ssc->maxy*GlobalScale); 
+		shphd->shapeminy = (int)(-ssc->maxy*GlobalScale); 
 	}
 	shphd->shapemaxz =501*GlobalScale; 
 	shphd->shapeminz =-501*GlobalScale; 
@@ -2892,7 +2890,7 @@ BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Heade
 							tf->txf_uvdata[pos][l*2+8]=(int)((f->UVCoords[l][0]-f->CentreX)*bmpscale*GlobalScale);
 						   	tf->txf_uvdata[pos][l*2+9]=(int)((f->UVCoords[l][1]-f->CentreY)*bmpscale*GlobalScale);
 							tf->txf_uvdata[pos2][l*2+8]=(int)((f->UVCoords[l][0]-f->CentreX)*bmpscale*GlobalScale);
-							tf->txf_uvdata[pos2][l*2+9]=(int)((f->UVCoords[l][1]-f->CentreY)*bmpscale*GlobalScale);	
+							tf->txf_uvdata[pos2][l*2+9]=(int)((f->UVCoords[l][1]-f->CentreY)*bmpscale*GlobalScale);
 						}
 					}
 				}
@@ -2970,10 +2968,10 @@ BOOL copy_to_map6(Object_Chunk * ob,MAPBLOCK6* mapblock, int shplst_pos)
 
 	QUAT q;
 
-	q.quatx = (int)-ob->object_data.orientation.x*ONE_FIXED;
-	q.quaty = (int)-ob->object_data.orientation.y*ONE_FIXED;
-	q.quatz = (int)-ob->object_data.orientation.z*ONE_FIXED;
-	q.quatw = (int)ob->object_data.orientation.w*ONE_FIXED;
+	q.quatx = (int)(-ob->object_data.orientation.x*ONE_FIXED);
+	q.quaty = (int)(-ob->object_data.orientation.y*ONE_FIXED);
+	q.quatz = (int)(-ob->object_data.orientation.z*ONE_FIXED);
+	q.quatw = (int)(ob->object_data.orientation.w*ONE_FIXED);
 
 	MATRIXCH m;
 	
@@ -3171,8 +3169,8 @@ void merge_polygons_in_chunkshape (ChunkShape & shp, Shape_Merge_Data_Chunk * sm
 			
 			int mpoly=mgd[i];
 			//find the 'unique vertex' in the second triangle
-			int j;
-			int k;
+			int j, k;
+
 			for(j=0;j<3;j++)
 			{
 				for(k=0;k<3;k++)

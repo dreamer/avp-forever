@@ -338,6 +338,7 @@ void db_msg_fired(const char *strP)
 	{
 		case DB_DOS:
 			printf("%s\n", strP);
+			OutputDebugString("program has paused!\n");
 			db_do_std_prompt( 0 );
 			break;
 #ifndef DB_NOWINDOWS			

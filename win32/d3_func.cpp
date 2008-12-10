@@ -34,7 +34,11 @@ extern "C++" {
 	#include "logString.h"
 
 	#include <d3dx9.h>
+#ifdef _DEBUG
+	#pragma comment(lib, "d3dx9d.lib")
+#else
 	#pragma comment(lib, "d3dx9.lib")
+#endif
 
 	bool use_d3dx_tools = false;
 }
@@ -79,7 +83,8 @@ struct TGA_HEADER {
 
 void ColourFillBackBuffer(int FillColour) 
 {
-	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0,0,0), 1.0f, 0 );
+	D3DCOLOR colour = FillColour;
+	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET, colour, 1.0f, 0 );
 }
 
 char* GetDeviceName() 
@@ -1226,6 +1231,13 @@ BOOL InitialiseDirect3DImmediateMode()
 	ScreenDescriptorBlock.SDB_ClipDown  = height;
 
 	ScanDrawMode = ScanDrawD3DHardwareRGB;
+
+	/* use an offset for hud items to account for tv safe zones. just use width for now. 15%?  */
+	if(1)
+	{
+		ScreenDescriptorBlock.SDB_SafeZoneOffset = (width / 100) * 15;
+	}
+	else ScreenDescriptorBlock.SDB_SafeZoneOffset = 0;
 
 	// save a copy of the presentation parameters for use 
 	// later (device reset, resolution/depth change)

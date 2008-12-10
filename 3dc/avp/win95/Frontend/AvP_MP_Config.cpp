@@ -745,21 +745,6 @@ void BuildMultiplayerLevelNameArray()
 
 }
 
-void DeleteMultiplayerLevelNameArray()
-{
-//	DeallocateMem(MultiplayerLevelNames[0]);
-
-	for(int i = 0; i < NumMultiplayerLevels; i++)
-	{
-		OutputDebugString((char*)MultiplayerLevelNames[i]);
-//		DeallocateMem(MultiplayerLevelNames[i]);
-	}
-
-//	DeallocateMem(*MultiplayerLevelNames);
-//	DeallocateMem(*CoopLevelNames);
-}
-
-
 //returns local index of a custom level (if it is a custom level)
 int GetCustomMultiplayerLevelIndex(char* name,int gameType)
 {

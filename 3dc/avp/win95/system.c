@@ -371,6 +371,8 @@ void InitCharacter()
 	#endif
 	
 	Start_Progress_Bar();
+
+	OutputDebugString("Start_Progress_Bar();\n");
 	
 	Set_Progress_Bar_Position(PBAR_HUD_START);
 
@@ -417,10 +419,7 @@ void InitCharacter()
 				break;
 			}
 			default:
-			{
-				
-
-				
+			{	
 				// set up a multiplayer game - here becuse we might end
 				// up with a cooperative game
 				//load all weapon rifs
@@ -441,7 +440,6 @@ void InitCharacter()
 	
 	Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.75);
 	
-	
 	if(alien_weapon_rif!=INVALID_RIFFHANDLE)
 		copy_rif_data(alien_weapon_rif,CCF_LOAD_AS_HIERARCHY_IF_EXISTS|CCF_IMAGEGROUPSET+CCF_DONT_INITIALISE_TEXTURES,PBAR_HUD_START+PBAR_HUD_INTERVAL*.5,PBAR_HUD_INTERVAL*.25);
 
@@ -459,7 +457,9 @@ void InitCharacter()
 	*************************************KJL*/
 
  	InitialiseEquipment();
+
 	InitHUD();
+
 }
 
 extern void create_strategies_from_list ();

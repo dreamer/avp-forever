@@ -502,10 +502,9 @@ typedef struct screendescriptorblock {
 	int SDB_Width;
 	int SDB_Height;
 	int SDB_Depth;
-	#if SupportWindows95
 	int SDB_ScreenDepth;
-	#endif
 	int SDB_Size;
+	int SDB_SafeZoneOffset;
 
 	int SDB_DiagonalWidth;
 
@@ -616,9 +615,7 @@ typedef struct viewdescriptorblock {
 	int VDB_Width;
 	int VDB_Height;
 	int VDB_Depth;
-	#if SupportWindows95
 	int VDB_ScreenDepth;
-	#endif
 
 	int VDB_CentreX;
 	int VDB_CentreY;

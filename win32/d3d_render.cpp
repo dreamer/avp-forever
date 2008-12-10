@@ -3338,7 +3338,7 @@ void PostLandscapeRendering()
 			MeshZScale = (66572-51026)/15;
 			MeshXScale = (109952+3039)/45;
 
-	   		D3D_DrawWaterFall(175545,-3039,51026);
+//bjd	   		D3D_DrawWaterFall(175545,-3039,51026);
 //			MeshZScale = -(538490-392169);
 //			MeshXScale = 55000;
 	//		D3D_DrawWaterPatch(-100000, WaterFallBase, 538490);
@@ -4852,7 +4852,7 @@ void D3D_DrawPowerFence(int xOrigin, int yOrigin, int zOrigin, int xScale, int y
 	}
 }
 #endif
-
+#if 0
 void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin)
 {
 	{
@@ -5005,7 +5005,7 @@ void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin)
 	}
 	}
 }
-
+#endif
 // Another function never called?
 #if 0
 void D3D_DrawParticleBeam(DISPLAYBLOCK *muzzlePtr, VECTORCH *targetPositionPtr)
@@ -8502,10 +8502,14 @@ VECTORCH CablePhiDirection[NUMBER_OF_CABLE_SEGMENTS];
 
 extern void MakeMatrixFromDirection(VECTORCH *directionPtr, MATRIXCH *matrixPtr);
 
+/* D3D_DrawCable - draws predator grappling hook */
 void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
-{
-#if 0 // bjd
+{	/* TODO - not disabling zwrites. probably need to do this but double check (be handy if we didn't have to) */
+
+	currentWaterTexture = NO_TEXTURE;
+#if 1 // bjd
 	{
+/*
 	// Turn OFF texturing if it is on...
 	if (CurrTextureHandle != NULL)
 	{
@@ -8517,7 +8521,7 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 
 	if (NumVertices)
 	{
-	   WriteEndCodeToExecuteBuffer();
+//	   WriteEndCodeToExecuteBuffer();
   	   UnlockExecuteBufferAndPrepareForUse();
 	   ExecuteBuffer();
   	   LockExecuteBuffer();
@@ -8530,7 +8534,7 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
 		D3DZWriteEnable = FALSE;
 	}
-
+*/
 	}
 	MeshXScale = 4096/16;
 	MeshZScale = 4096/16;
@@ -8551,7 +8555,6 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 				int theta = ((4096*z)/15)&4095;
 				int rOffset = GetSin((x*64+theta/32-CloakingPhase)&4095);
 				rOffset = MUL_FIXED(rOffset,rOffset)/512;
-
 
 				radius.vx = MUL_FIXED(innerRadius+rOffset/8,GetSin(theta));
 				radius.vy = MUL_FIXED(innerRadius+rOffset/8,GetCos(theta));
@@ -8615,12 +8618,14 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
   	   //	D3D_DrawWaterMesh_Clipped();
 	}
 	}
+/*
 	//OP_STATE_RENDER(1, ExecBufInstPtr);
 	//STATE_DATA(D3DRENDERSTATE_ZWRITEENABLE, TRUE, ExecBufInstPtr);
 	if (D3DZWriteEnable != TRUE) {
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
 		D3DZWriteEnable = TRUE;
 	}
+*/
 #endif
 }
 

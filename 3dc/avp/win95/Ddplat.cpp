@@ -559,7 +559,6 @@ extern void BLTMarineNumericsToHUD(enum MARINE_HUD_DIGIT digitsToDraw)
    	int digit = digitsToDraw;
     struct DigitPropertiesTag *propertiesPtr;
 
-	
 	if (HUDResolution == HUD_RES_LO)
 	{
 		propertiesPtr = &LoresMarineHUDDigitProperties[digit];

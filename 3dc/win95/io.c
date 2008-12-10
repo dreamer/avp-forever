@@ -692,6 +692,11 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
     memset((void*)KeyboardInput, No, MAX_NUMBER_OF_INPUT_KEYS);
 	GotAnyKey = No;
 
+#ifdef WIN32
+	/* init raw input for mouse */
+	InitialiseRawInput();
+#endif
+
 	/* launch Direct Input */
 	InitialiseDirectInput();
 	InitialiseDirectKeyboard();

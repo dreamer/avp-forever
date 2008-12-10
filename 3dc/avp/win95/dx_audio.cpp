@@ -2401,7 +2401,7 @@ int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
 
 	memset(&bufferFormat, 0, sizeof(DSBUFFERDESC));
 	bufferFormat.dwSize = sizeof(DSBUFFERDESC);
-	bufferFormat.dwFlags = DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_LOCSOFTWARE;
+	bufferFormat.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_LOCSOFTWARE;
 	bufferFormat.dwBufferBytes = waveFormat.nAvgBytesPerSec * 2;
 	bufferFormat.lpwfxFormat = &waveFormat;
 
@@ -2482,7 +2482,10 @@ int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
 
 int SetVorbisBufferVolume(int volume)
 {
-	if(vorbisBuffer == NULL) return 0;
+	if(vorbisBuffer == NULL)
+	{
+		return 0;
+	}
 
 	signed int attenuation;
 	HRESULT hres;
@@ -2498,9 +2501,43 @@ int SetVorbisBufferVolume(int volume)
 
 	/* and apply it */
 	hres = vorbisBuffer->SetVolume(attenuation);
-	if(FAILED(hres)) return 0;
-	
+	if(FAILED(hres))
+	{
+		OutputDebugString("cant set vorbis volume..returning\n");
+		return 0;
+	}
+
 	return 1;
+}
+
+int StopVorbisBuffer()
+{
+	if(FAILED(vorbisBuffer->Stop()))
+	{
+		LogDxErrorString("couldn't stop vorbis buffer\n");
+		return 1;
+	}
+	return 0;
+}
+
+bool PlayVorbisBuffer()
+{
+	if(FAILED(vorbisBuffer->Play(0,0,DSBPLAY_LOOPING)))
+	{
+		LogDxErrorString("PlayVorbisBuffer() - couldn't play vorbis buffer\n");
+		return false;
+	}
+	return true;
+}
+
+int ReleaseVorbisBuffer()
+{
+	if(vorbisBuffer != NULL) 
+	{
+		vorbisBuffer->Release();
+		vorbisBuffer = NULL;
+	}
+	return 0;
 }
 
 } // extern "C"

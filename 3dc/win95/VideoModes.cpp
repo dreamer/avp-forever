@@ -1,5 +1,6 @@
 #include <fstream>
 #include <string>
+#include "logString.h"
 
 extern "C"
 {
@@ -90,8 +91,8 @@ void GetDeviceAndVideoModePrefences() {
 	}
 }
 
-void SelectBasicDeviceAndVideoMode() {
-
+void SelectBasicDeviceAndVideoMode() 
+{
 	// default to 640x480x16
 	PreferredDeviceAndVideoMode.Width = 640;
 	PreferredDeviceAndVideoMode.Height = 480;
@@ -106,12 +107,12 @@ void SelectBasicDeviceAndVideoMode() {
 	file.close();
 }
 
-void LoadDeviceAndVideoModePreferences() {
-
+void LoadDeviceAndVideoModePreferences() 
+{
 	std::string temp_value;
 //	FILE* file=fopen("AliensVsPredator.cfg","rb");
 #ifdef _XBOX
-	std::ifstream file("d:\\AliensVsPredator.cfg");
+	std::ifstream file("d:/AliensVsPredator.cfg");
 #else
 	std::ifstream file("AliensVsPredator.cfg");
 #endif
@@ -119,6 +120,7 @@ void LoadDeviceAndVideoModePreferences() {
 	// if the file doesn't exist
 	if(!file)
 	{
+		LogDxErrorString("Can't find file AliensVsPredator.cfg - creating and using basic display mode\n");
 		SelectBasicDeviceAndVideoMode();
 		return;
 	}
@@ -219,7 +221,7 @@ void SaveDeviceAndVideoModePreferences() {
 
 	//	FILE* file=fopen("AliensVsPredator.cfg","rb");
 #ifdef _XBOX
-	std::ofstream file("d:\\AliensVsPredator.cfg");
+	std::ofstream file("d:/AliensVsPredator.cfg");
 #else
 	std::ofstream file("AliensVsPredator.cfg");
 #endif

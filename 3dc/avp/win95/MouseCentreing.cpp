@@ -11,7 +11,6 @@ extern "C"
 {
  extern BOOL bActive;
  extern int WinLeftX, WinRightX, WinTopY, WinBotY;
-	
 }
 
 static volatile int EndMouseThread=0;
@@ -30,8 +29,6 @@ void MouseThread(void* )
 		if(!bActive) continue;
 
 		SetCursorPos((WinLeftX+WinRightX)>>1,(WinTopY+WinBotY)>>1);
-	
-	    
 	}	
 	EndMouseThread=0;
 }

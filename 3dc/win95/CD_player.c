@@ -115,7 +115,6 @@ extern void CheckCDVolume(void)
 {
 	if (CDDAVolume != CDPlayerVolume)
 	{
-		OutputDebugString("need to change music volume\n");
 		CDDA_ChangeVolume(CDPlayerVolume);
 	}
 }
@@ -124,7 +123,6 @@ void CDDA_ChangeVolume(int volume)
 	/* set vorbis volume here for now */
 	if(SetVorbisBufferVolume(volume))
 	{
-		OutputDebugString("should have set vorbis buffer volume ok\n");
 		CDDAVolume=volume;
 		CDPlayerVolume = volume;
 		return;

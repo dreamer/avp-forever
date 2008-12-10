@@ -234,7 +234,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="xapilib.lib d3d8.lib d3dx8.lib xgraphics.lib dsound.lib xboxkrnl.lib xbdm.lib xonline.lib"
-				GenerateDebugInformation="FALSE"
+				GenerateDebugInformation="TRUE"
 				GenerateMapFile="FALSE"
 				MapExports="FALSE"
 				MapLines="FALSE"

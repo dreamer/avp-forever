@@ -10,6 +10,9 @@ project specific) windows functionality
 
 extern "C" {
 
+extern unsigned char KeyboardInput[256];
+extern unsigned char GotAnyKey;
+
 #include "3dc.h"
 #include "inline.h"
 #include "cd_player.h"
@@ -30,13 +33,6 @@ void MakeToAsciiTable(void);
 // mousewheel msg id
 UINT const RWM_MOUSEWHEEL = RegisterWindowMessage(MSH_MOUSEWHEEL);
 signed int MouseWheelStatus;
-
-/*
-extern IDirect3DSurface8 * lpDDSBack;
-extern IDirect3DSurface8 * lpDDSPrimary;
-extern IDirect3DSurface8 * lpZBuffer;
-extern IDirect3DSurface8 * lpDDBackdrop;
-*/
 
 unsigned char ksarray[256];
 unsigned char ToAsciiTable[256][256];
@@ -105,8 +101,12 @@ extern void IngameKeyboardInput_KeyDown(unsigned char key);
 extern void IngameKeyboardInput_KeyUp(unsigned char key);
 extern void IngameKeyboardInput_ClearBuffer(void);
 
+int xPosRelative = 0;
+int yPosRelative = 0;
+int mouseMoved = 0;
 
-long FAR PASCAL WindowProc(HWND hWnd, UINT message, 
+
+/*long FAR PASCAL*/LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, 
                             WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
@@ -119,9 +119,30 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message,
 		wParam <<= 16;
 	}
 
-
 	switch(message)
     {
+		case WM_INPUT: 
+		{
+			UINT dwSize = 40;
+			static BYTE lpb[40];
+
+			GetRawInputData((HRAWINPUT)lParam, RID_INPUT, 
+			lpb, &dwSize, sizeof(RAWINPUTHEADER));
+
+			RAWINPUT* raw = (RAWINPUT*)lpb;
+
+			if (raw->header.dwType == RIM_TYPEMOUSE) 
+			{
+				mouseMoved = 1;
+				xPosRelative = raw->data.mouse.lLastX;
+				yPosRelative = raw->data.mouse.lLastY;
+				//char buf[100];
+				//sprintf(buf, "x: %d y: %d\n", xPosRelative, yPosRelative);
+				//OutputDebugString(buf);
+			} 
+			//break;
+			return 0;
+		}
 
 		case WM_MOUSEWHEEL:
 		{
@@ -146,9 +167,11 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message,
 		// it's intentional for this case to fall through to WM_SYSKEYDOWN
     case WM_SYSKEYDOWN:
 		{
+			IngameKeyboardInput_KeyDown(wParam);
+#if 0
 			int scancode = (lParam>>16)&255;
 			unsigned char vkcode = (wParam&255);
-		
+
 			// ignore the status of caps lock
 			//ksarray[VK_CAPITAL] = 0;	
 		 	//ksarray[VK_CAPITAL] = GetKeyState(VK_CAPITAL);	
@@ -163,10 +186,14 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message,
 				#else
 				if (ToAsciiTable[vkcode][scancode])
 				{
+					char buf[100];
+					sprintf(buf, "vkcode: %d scancode: %d\n", vkcode ,scancode);
+					OutputDebugString(buf);
 					IngameKeyboardInput_KeyDown(ToAsciiTable[vkcode][scancode]);
 				}
 				#endif
 			}
+#endif
 			// reset caps lock status
 			//ksarray[VK_CAPITAL] = GetKeyState(VK_CAPITAL);	
 			//ToAscii(wParam&255,scancode,&ksarray[0],&output,0);
@@ -176,6 +203,8 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message,
 	case WM_SYSKEYUP:
 	case WM_KEYUP:						
 		{
+			IngameKeyboardInput_KeyUp(wParam);
+#if 0
 			int scancode = (lParam>>16)&255;
 			unsigned char vkcode = (wParam&255);
 
@@ -208,6 +237,7 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message,
 			// reset caps lock status
 			//ksarray[VK_CAPITAL] = GetKeyState(VK_CAPITAL);	
 			//ToAscii(wParam&255,scancode,&ksarray[0],&output,0);
+#endif
 		}
 		return 0;
 		 
@@ -341,8 +371,9 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message,
 BOOL InitialiseWindowsSystem(HANDLE hInstance, int nCmdShow,
      int WinInitMode)
 { 
-    WNDCLASS            wc;
-	BOOL			    rc;
+	WNDCLASS	wc;
+	BOOL		rc;
+	RECT		clientRect;
 
 	MakeToAsciiTable();
 /*
@@ -354,110 +385,116 @@ BOOL InitialiseWindowsSystem(HANDLE hInstance, int nCmdShow,
 // size to the current system metrics, which
 // may or may not be ideal.  Surprisingly, it
 // seems not to make much difference.
+	
+	/* if "-w" passed to command line */
+	if (WindowMode == WindowModeSubWindow)
+	{
+		//force window to be 640x480 to avoid stretch blits.
+		WinWidth = 800;//640;
+		WinHeight = 600;//480;	
 
-   if (WindowMode == WindowModeSubWindow)
-     {
-	  //force window to be 640x480 to avoid stretch blits.
-	  WinWidth = 800;//640;
-	  WinHeight = 600;//480;	
+		clientRect.left = 0;
+		clientRect.top = 0;
+		clientRect.right = 800;
+		clientRect.bottom = 600;
 
-      WinLeftX = (int) (TopLeftSubWindow.x * 
-	     (float) GetSystemMetrics(SM_CXSCREEN));
-	  WinTopY = (int) (TopLeftSubWindow.y *
-	     (float) GetSystemMetrics(SM_CYSCREEN));
-	  WinRightX = (WinLeftX + WinWidth);
-	  WinBotY = (WinTopY + WinHeight);
-     }
-   else if (WindowMode == WindowModeFullScreen)
-     {
-      #if 1
-		WinWidth = GetSystemMetrics(SM_CXSCREEN);
-		WinHeight = GetSystemMetrics(SM_CYSCREEN);
-      #else
-      // This version of the code MUST be
-      // kept up to date with new video modes!!!
-      if ((VideoMode == VideoMode_DX_320x200x8) ||
-        (VideoMode == VideoMode_DX_320x200x8T))
-	     {
-	      WinWidth = 320;
-	      WinHeight = 200;
-	     }
-      else if (VideoMode == VideoMode_DX_320x240x8)
-         {
-	      WinWidth = 320;
-	      WinHeight = 240;
-	     }
-      else // Default to 640x480
-         {
-	      WinWidth = 640;
-	      WinHeight = 480;
-	     }
-      #endif
+		WinLeftX = (int) (TopLeftSubWindow.x * 
+			(float) GetSystemMetrics(SM_CXSCREEN));
+		WinTopY = (int) (TopLeftSubWindow.y *
+			(float) GetSystemMetrics(SM_CYSCREEN));
+		WinRightX = (WinLeftX + WinWidth);
+		WinBotY = (WinTopY + WinHeight);
+	}
+	else if (WindowMode == WindowModeFullScreen)
+	{
+		#if 1
+			WinWidth = GetSystemMetrics(SM_CXSCREEN);
+			WinHeight = GetSystemMetrics(SM_CYSCREEN);
+		#else
+			// This version of the code MUST be
+			// kept up to date with new video modes!!!
+			if ((VideoMode == VideoMode_DX_320x200x8) ||
+			(VideoMode == VideoMode_DX_320x200x8T))
+			{
+				WinWidth = 320;
+				WinHeight = 200;
+			}
+			else if (VideoMode == VideoMode_DX_320x240x8)
+			{
+				WinWidth = 320;
+				WinHeight = 240;
+			}
+			else // Default to 640x480
+			{
+				WinWidth = 640;
+				WinHeight = 480;
+			}
+		#endif
 
-      // Set up globals for window corners
-      WinLeftX = 0;
-      WinTopY = 0;
-      WinRightX = WinWidth;
-      WinBotY = WinHeight;
+		// Set up globals for window corners
+		WinLeftX = 0;
+		WinTopY = 0;
+		WinRightX = WinWidth;
+		WinBotY = WinHeight;
 	 }
-   else
-     return FALSE;
+	else
+		return FALSE;
 
 // We only want to register the class in
 // WinInitFull mode!!!
 
-   if (WinInitMode == WinInitFull)
-     {
+	if (WinInitMode == WinInitFull)
+	{
+		/* Set up and register window class */
+	
+		//	get double click messages from mouse if user double-clicks it 
+		wc.style = CS_DBLCLKS;
+		//	Name of window procedure (see above) 
+		wc.lpfnWndProc = WindowProc;
+		/*
+			Extra bytes for  obscure purposes bearing a sordid relationship to
+			dialog box conventions.  Zero for us.
+		*/
+		wc.cbClsExtra = 0;
+		wc.cbWndExtra = 0;
+		
+		// Instance which window is within 
+		wc.hInstance = (HINSTANCE) hInstance;
+		/*
+			System icon resource.  This one is generic.  For an actual
+			game this icon will be project specific.
+		*/
+		#if 1
+			wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+		#else
+			wc.hIcon = NULL;
+		#endif
+		// System cursor resource.  This one is generic.
+		#if 1
+			wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+		#else
+			wc.hCursor = NULL;
+		#endif
+		/*
+			NULL background forces application to redraw
+			the background ITSELF when it receives a WM_ERASEBKGND
+			message, leaving graphical control with the engine
+		*/
+		wc.hbrBackground = NULL;
+		
+		// Project name and class for windows menus etc.
+		wc.lpszMenuName = NAME;
+		wc.lpszClassName = NAME;
+		/*
+			Register the class we have constructed as a valid window that
+			can then be created.   Return code indicates success or
+			failure.
+		*/
+		rc = RegisterClass(&wc);
 
-/*
-	Set up and register window class
-*/
-// get double click messages from mouse if user double-clicks it 
-      wc.style = CS_DBLCLKS;
-// Name of window procedure (see above) 
-      wc.lpfnWndProc = WindowProc;
-/*
-	Extra bytes for  obscure purposes bearing a sordid relationship to
-	dialog box conventions.  Zero for us.
-*/
-      wc.cbClsExtra = 0;
-      wc.cbWndExtra = 0;
-// Instance which window is within 
-      wc.hInstance = (HINSTANCE) hInstance;
-/*
-	System icon resource.  This one is generic.  For an actual
-	game this icon will be project specific.
-*/
-      #if 1
-      wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	  #else
-      wc.hIcon = NULL;
-	  #endif
-// System cursor resource.  This one is generic.
-      #if 1
-      wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	  #else
-      wc.hCursor = NULL;
-	  #endif
-/*
-	NULL background forces application to redraw
-	the background ITSELF when it receives a WM_ERASEBKGND
-	message, leaving graphical control with the engine
-*/
-      wc.hbrBackground = NULL;
-// Project name and class for windows menus etc.
-      wc.lpszMenuName = NAME;
-      wc.lpszClassName = NAME;
-/*
-	Register the class we have constructed as a valid window that
-	can then be created.   Return code indicates success or
-	failure.
-*/
-      rc = RegisterClass(&wc);
-
-	  if (!rc)
-		return FALSE;
-	 }
+		if (!rc)
+			return FALSE;
+	}
 
 /*
   Create a window  (extended function  call) and return
@@ -471,40 +508,44 @@ BOOL InitialiseWindowsSystem(HANDLE hInstance, int nCmdShow,
 
 #if debug
 
-    if (WindowMode == WindowModeSubWindow)
-	  {
-       hWndMain = CreateWindowEx(
-           0, // WS_EX_TOPMOST
-		   NAME, //  Name of class (registered by RegisterClass call above) 
-           TITLE, // Name of window 
-		   WS_OVERLAPPED |
-		   WS_CAPTION |
-		   WS_THICKFRAME,
+	if (WindowMode == WindowModeSubWindow)
+	{
+		AdjustWindowRect(&clientRect, wc.style, false);
+		hWndMain = CreateWindowEx(
+			0, // WS_EX_TOPMOST
+			NAME, //  Name of class (registered by RegisterClass call above) 
+			TITLE, // Name of window 
+			WS_OVERLAPPED |
+			WS_CAPTION |
+			WS_THICKFRAME,
 /*
 	Initial horizontal and  vertical position.  For a pop-up window,
 	these are the coordinates of the upper left corner.
 */
-           WinLeftX,
-           WinTopY,
+			clientRect.left,
+			clientRect.top,
+			//WinLeftX,
+			//WinTopY,
 /*
 	Width and height of window. These are set to the current full
 	screen widths as determined by a Win32 GetSystemMetrics call
 	(GetSystemMetrics(SM_CXSCREEN) and 
 	GetSystemMetrics(SM_CYSCREEN)).
 */
-           WinWidth,
-		   WinHeight,
+			clientRect.right,
+			clientRect.bottom,
+			//WinWidth,
+			//WinHeight,
 // Parent window (could possibly be set in tools system?)
-           NULL,
+			NULL,
 // Child/menu window (could possibly be set in tools system?) 
-           NULL,
+			NULL,
 // Handle for module associated with window 
-           (HINSTANCE)hInstance,
+			(HINSTANCE)hInstance,
 // Parameter for associated structure (null in this case)
-           NULL);
-
-	  }
-
+			NULL
+		);
+	}
 	else if (WindowMode == WindowModeFullScreen)
 	  {
        hWndMain = CreateWindowEx(
@@ -637,10 +678,27 @@ BOOL InitialiseWindowsSystem(HANDLE hInstance, int nCmdShow,
 // Load null cursor shape
 	SetCursor(NULL);
 	#endif
-	MakeToAsciiTable();
+//	MakeToAsciiTable();
 
     return TRUE;
 
+}
+
+void InitialiseRawInput()
+{
+	#ifndef HID_USAGE_PAGE_GENERIC
+		#define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
+    #endif
+    #ifndef HID_USAGE_GENERIC_MOUSE
+		#define HID_USAGE_GENERIC_MOUSE        ((USHORT) 0x02)
+    #endif
+
+    RAWINPUTDEVICE Rid[1];
+    Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC; 
+    Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE; 
+    Rid[0].dwFlags = RIDEV_INPUTSINK;   
+    Rid[0].hwndTarget = hWndMain;
+    RegisterRawInputDevices(Rid, 1, sizeof(Rid[0]));
 }
 
 // Project specific to go with the initialiser

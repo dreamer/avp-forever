@@ -1274,7 +1274,8 @@ static void RenderMenu(void)
 	{
 		// bjd - no more squinting to read text at high resolutions!
 //		AvPMenus.FontToUse = AVPMENU_FONT_BIG;
-		y = (ScreenDescriptorBlock.SDB_Height - AvPMenus.MenuHeight * 2)/2;
+//		y = (ScreenDescriptorBlock.SDB_Height - AvPMenus.MenuHeight * 2)/2;
+		y = (ScreenDescriptorBlock.SDB_Height - AvPMenus.MenuHeight)/2;
 	}
 
 	for (e = 0; e<AvPMenus.NumberOfElementsInMenu; e++, elementPtr++)
@@ -1675,7 +1676,6 @@ static void RenderKeyConfigurationMenu(void)
 				RenderSmallMenuText(textPtr,MENU_LEFTXEDGE+150,centreY+y,b,AVPMENUFORMAT_LEFTJUSTIFIED/*,MENU_CENTREY-60-100,MENU_CENTREY-60+180*/);
 			}
 			#endif
-
 		}
 	}
 
@@ -3795,7 +3795,8 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 				int x,g;
 				if (KeyConfigSelectionColumn)
 				{
-					x = MENU_RIGHTXEDGE;
+					/* bjd - 24/11/08 - tv safe zone adjustment */
+					x = MENU_RIGHTXEDGE - ScreenDescriptorBlock.SDB_SafeZoneOffset;
 				}
 				else
 				{
@@ -3828,7 +3829,8 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 					RenderText
 					(
 						GetDescriptionOfKey(*secondaryKey),
-						MENU_RIGHTXEDGE,
+						/* bjd - 24/11/08 - tv safe zone adjustment */
+						MENU_RIGHTXEDGE - ScreenDescriptorBlock.SDB_SafeZoneOffset,
 						y,
 						elementPtr->Brightness,
 						AVPMENUFORMAT_RIGHTJUSTIFIED
@@ -3882,7 +3884,8 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 					RenderText_Coloured
 					(
 						GetDescriptionOfKey(*secondaryKey),
-						MENU_RIGHTXEDGE,
+						/* bjd - 24/11/08 - tv safe zone adjustment */
+						MENU_RIGHTXEDGE - ScreenDescriptorBlock.SDB_SafeZoneOffset,
 						y,
 						ONE_FIXED,
 						AVPMENUFORMAT_RIGHTJUSTIFIED,
@@ -3896,7 +3899,8 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 					RenderText
 					(
 						GetDescriptionOfKey(*secondaryKey),
-						MENU_RIGHTXEDGE,
+						/* bjd - 24/11/08 - tv safe zone adjustment */
+						MENU_RIGHTXEDGE - ScreenDescriptorBlock.SDB_SafeZoneOffset,
 						y,
 						elementPtr->Brightness,
 						AVPMENUFORMAT_RIGHTJUSTIFIED
@@ -3907,13 +3911,12 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 			RenderText
 			(
 				GetTextString(elementPtr->TextDescription),
-				MENU_LEFTXEDGE,
+				/* bjd - 24/11/08 - tv safe zone adjustment */
+				MENU_LEFTXEDGE + ScreenDescriptorBlock.SDB_SafeZoneOffset / 2,
 				y,
 				elementPtr->Brightness,
 				AVPMENUFORMAT_LEFTJUSTIFIED
 			);
-
-
 		}
 	}
 }

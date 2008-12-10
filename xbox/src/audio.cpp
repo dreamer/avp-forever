@@ -2147,4 +2147,34 @@ int SetVorbisBufferVolume(int volume)
 	return 1;
 }
 
+int StopVorbisBuffer()
+{
+	if(FAILED(vorbisBuffer->Stop()))
+	{
+		OutputDebugString("couldn't stop vorbis buffer\n");
+		return 1;
+	}
+	return 0;
+}
+
+bool PlayVorbisBuffer()
+{
+	if(FAILED(vorbisBuffer->Play(0,0,DSBPLAY_LOOPING)))
+	{
+		OutputDebugString("couldn't play vorbis buffer\n");
+		return false;
+	}
+	return true;
+}
+
+int ReleaseVorbisBuffer()
+{
+	if(vorbisBuffer != NULL) 
+	{
+		vorbisBuffer->Release();
+		vorbisBuffer = NULL;
+	}
+	return 0;
+}
+
 } // extern C

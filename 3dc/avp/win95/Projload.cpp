@@ -1861,11 +1861,10 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 			set_quantization_event (h,flags);
 
 			copy_rif_palette (h,flags);
-			
+
 			copy_rif_tlt (h,flags);
 
 			get_rif_palette_remap_table (h,flags);
-
 		}
 
 		/*find the default sound settings */
@@ -1877,8 +1876,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 			if(env_ac->reverb<=1) env_reverb=env_ac->reverb;
 			env_sound_type=env_ac->env_index;
 		}
-		
-	
+
 	/*-------------------------------------**
 	** Load in shapes to the mainshapelist **
 	**-------------------------------------*/
@@ -2137,6 +2135,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 			}
 		}
 		GLOBALASSERT(num_modules==mod_pos);
+
 	/*--------------**
 	** Module Stuff **
 	**--------------*/

@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include "vorbisPlayer.h"
 #include "logString.h"
-#include "dsound.h"
 #include <process.h>
 
 #include <vector>
@@ -10,12 +9,12 @@
 #include <fstream>
 
 extern "C" {
-	extern LPDIRECTSOUND DSObject;
-	extern LPDIRECTSOUNDBUFFER vorbisBuffer;
 	extern int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize);
 	extern int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset);
 	extern int SetVorbisBufferVolume(int volume);
+	extern int StopVorbisBuffer();
 	extern int CDPlayerVolume; // volume control from menus
+	extern bool PlayVorbisBuffer();
 	extern HANDLE hHandles[2];
 }
 
@@ -36,15 +35,15 @@ std::vector<std::string> TrackList;
 	const std::string musicFolderName = "Music/";
 #endif
 #ifdef _XBOX
-	const std::string tracklistFilename = "d:\\Music\\ogg_tracks.txt";
-	const std::string musicFolderName = "d:\\Music\\";
+	const std::string tracklistFilename = "d:/Music/ogg_tracks.txt";
+	const std::string musicFolderName = "d:/Music/";
 #endif
 
 #pragma comment(lib, "vorbisfile_static.lib")
 #pragma comment(lib, "ogg_static.lib")
 #pragma comment(lib, "vorbis_static.lib")
 
-char *audioData;
+char *audioData = 0;
 
 void LoadVorbisTrack(int track) 
 {
@@ -129,8 +128,6 @@ void UpdateVorbisBuffer(void *arg)
 {
 	int lockOffset = 0;
 
-	OutputDebugString("created vorbis thread\n");
-
 	while(oggIsPlaying)
 	{
 		int wait_value = WaitForMultipleObjects(2, hHandles, FALSE, 1);
@@ -140,11 +137,9 @@ void UpdateVorbisBuffer(void *arg)
 			if(wait_value == 0) 
 			{
 				lockOffset = 0;
-				OutputDebugString("locking at offset 0\n");
 			}
 			else 
 			{
-				OutputDebugString("locking at halfway offset\n");
 				lockOffset = halfBufferSize;
 			}
 
@@ -191,7 +186,7 @@ void UpdateVorbisBuffer(void *arg)
 
 void PlayVorbis() 
 {
-	if(FAILED(vorbisBuffer->Play(0,0,DSBPLAY_LOOPING)))
+	if(PlayVorbisBuffer() == false)
 	{
 		LogDxErrorString("couldn't play ogg vorbis buffer\n");
 	}
@@ -207,29 +202,17 @@ void StopVorbis()
 {
 	if (oggIsPlaying)
 	{
-		vorbisBuffer->Stop();
+		StopVorbisBuffer();
 		oggIsPlaying = false;
 	}
+
 	ov_clear(&oggFile);
-//	fclose(file);
 
 	delete[] audioData;
+	audioData = 0;
 
 	bytesReadTotal = 0;
 	bytesReadPerLoop = 0;
-}
-
-// cleanup function
-void CleanupVorbis()
-{
-	if(vorbisBuffer != NULL) 
-	{
-		vorbisBuffer->Release();
-		vorbisBuffer = NULL;
-	}
-	// move to dx_audio.cpp 
-//	CloseHandle(hHandles[0]);
-//	CloseHandle(hHandles[1]);
 }
 
 bool LoadVorbisTrackList()
@@ -272,4 +255,4 @@ int CheckNumberOfVorbisTracks()
 bool IsVorbisPlaying()
 {
 	return oggIsPlaying;
-}	
+}

@@ -3,6 +3,8 @@
 
 // Must link to C code in main engine system
 
+#include "logString.h"
+
 extern "C" {
 
 // Note: INITGUID has NOT been defined here,
@@ -41,7 +43,7 @@ extern "C++"{
 	They will obviously have to be kept up to date
 	with changes in the DIMOUSESTATE structure manually.
 */
-
+/*
 #define DIMouseXOffset 0
 
 #define DIMouseYOffset 4
@@ -54,16 +56,16 @@ extern "C++"{
 #define DIMouseButton2Offset 14
 
 #define DIMouseButton3Offset 15
-
+*/
 
 /*
 	Globals
 */
 
-static LPDIRECTINPUT            lpdi;          // DirectInput interface
-static LPDIRECTINPUTDEVICE      lpdiKeyboard;  // keyboard device interface
-static LPDIRECTINPUTDEVICE      lpdiMouse;     // mouse device interface
-static BOOL                     DIKeyboardOkay;  // Is the keyboard acquired?
+static LPDIRECTINPUT8           lpdi;          // DirectInput interface
+static LPDIRECTINPUTDEVICE8     lpdiKeyboard;  // keyboard device interface
+static LPDIRECTINPUTDEVICE8     lpdiMouse;     // mouse device interface
+static BOOL						DIKeyboardOkay;  // Is the keyboard acquired?
 
 static IDirectInputDevice*     g_pJoystick         = NULL;     
 static IDirectInputDevice2*    g_pJoystickDevice2  = NULL;  // needed to poll joystick
@@ -121,6 +123,11 @@ extern void IngameKeyboardInput_KeyDown(unsigned char key);
 extern void IngameKeyboardInput_KeyUp(unsigned char key);
 extern void IngameKeyboardInput_ClearBuffer(void);
 
+/* defines to make the keyboard buffer code a little more readable - taken from http://msdn.microsoft.com/en-us/library/ms645540.aspx */
+#define LETTER_A	0x41
+#define LETTER_Z	0x5A
+#define NUMBER_0	0x30
+#define NUMBER_9	0x39
 /*
 
  Create DirectInput via CoCreateInstance
@@ -129,10 +136,12 @@ extern void IngameKeyboardInput_ClearBuffer(void);
 
 BOOL InitialiseDirectInput(void)
 {
+	return FALSE;
 	// try to create di object
-	if (DirectInput8Create(hInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&lpdi, NULL) != DI_OK) // BJD
+	if(FAILED(DirectInput8Create(hInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&lpdi, NULL)))
 	//if (DirectInputCreate(hInst, DIRECTINPUT_VERSION, &lpdi, NULL) != DI_OK)
 	{
+		LogDxErrorString("Can't create DirectInput8 object\n");
 		#if debug
 		ReleaseDirect3D();
 		exit(0x4111);
@@ -161,34 +170,35 @@ void ReleaseDirectInput(void)
 
 // see comments below
 
-#define UseForegroundKeyboard No
+#define UseForegroundKeyboard Yes//No
 
 GUID     guid = GUID_SysKeyboard;
 BOOL InitialiseDirectKeyboard()
-{    
-    HRESULT  hRes;
+{
+	return FALSE;
+	// try to create keyboard device
+	if (FAILED(lpdi->CreateDevice(guid, &lpdiKeyboard, NULL)))
+	{
+		LogDxErrorString("Couldn't create DirectInput keyboard\n");
+		#if debug
+		ReleaseDirect3D();
+		exit(0x4112);
+		#else
+		return FALSE;
+		#endif
+	}
 
-    // try to create keyboard device
-    if (lpdi->CreateDevice(guid, &lpdiKeyboard, NULL) !=DI_OK)
-      {
-	   #if debug
-	   ReleaseDirect3D();
-	   exit(0x4112);
-	   #else
-	   return FALSE;
-	   #endif
-      }
-
-    // Tell DirectInput that we want to receive data in keyboard format
-    if (lpdiKeyboard->SetDataFormat(&c_dfDIKeyboard) != DI_OK)
-      {
-	   #if debug
-	   ReleaseDirect3D();
-	   exit(0x4113);
-	   #else
-	   return FALSE;
-	   #endif
-      }
+	// Tell DirectInput that we want to receive data in keyboard format
+	if (FAILED(lpdiKeyboard->SetDataFormat(&c_dfDIKeyboard)))
+	{
+		LogDxErrorString("Couldn't set DirectInput keyboard data format\n");
+		#if debug
+		ReleaseDirect3D();
+		exit(0x4113);
+		#else
+		return FALSE;
+		#endif
+	}
 
     // set cooperative level
 	// this level is the most likely to work across
@@ -196,36 +206,36 @@ BOOL InitialiseDirectKeyboard()
 	// (i.e. this is probably best for a production
 	// release)
 	#if UseForegroundKeyboard
-    if (lpdiKeyboard->SetCooperativeLevel(hWndMain,
-                         DISCL_NONEXCLUSIVE | DISCL_FOREGROUND) != DI_OK)
+    if (FAILED(lpdiKeyboard->SetCooperativeLevel(hWndMain,
+                         DISCL_NONEXCLUSIVE | DISCL_FOREGROUND)))
 	#else
 	// this level makes alt-tabbing multiple instances in
 	// SunWindow mode possible without receiving lots
 	// of false inputs
-    if (lpdiKeyboard->SetCooperativeLevel(hWndMain,
-                         DISCL_NONEXCLUSIVE | DISCL_BACKGROUND) != DI_OK)
+    if (FAILED(lpdiKeyboard->SetCooperativeLevel(hWndMain,
+                         DISCL_NONEXCLUSIVE | DISCL_BACKGROUND)))
 	#endif
-      {
-	   #if debug
-	   ReleaseDirect3D();
-	   exit(0x4114);
-	   #else
-	   return FALSE;
-	   #endif
-      }
+	{
+		LogDxErrorString("Couldn't set DirectInput cooperative level\n");
+		#if debug
+		ReleaseDirect3D();
+		exit(0x4114);
+		#else
+		return FALSE;
+		#endif
+	}
 
     // try to acquire the keyboard
-    hRes = lpdiKeyboard->Acquire();
-    if (hRes == DI_OK)
-      {
-       // keyboard was acquired
-       DIKeyboardOkay = TRUE;
-      }
-    else
-      {
-       // keyboard was NOT acquired
-       DIKeyboardOkay = FALSE;
-      }
+	if (FAILED(lpdiKeyboard->Acquire()))
+	{
+		// keyboard was NOT acquired
+		DIKeyboardOkay = FALSE;
+	}
+	else
+	{	
+		// keyboard was acquired
+		DIKeyboardOkay = TRUE;
+	}
 
     // if we get here, all objects were created successfully
     return TRUE;    
@@ -260,7 +270,8 @@ BOOL InitialiseDirectKeyboard()
 
 void DirectReadKeyboard(void)
 {
-    // Local array for map of all 256 characters on
+#if 0
+	// Local array for map of all 256 characters on
 	// keyboard
 	BYTE DiKeybd[256];
 	HRESULT hRes;
@@ -268,50 +279,411 @@ void DirectReadKeyboard(void)
     // Get keyboard state
     hRes = lpdiKeyboard->GetDeviceState(sizeof(DiKeybd), DiKeybd);
 	if (hRes != DI_OK)
-      {
-	   if (hRes == DIERR_INPUTLOST)
-	     {
-	      // keyboard control lost; try to reacquire
-	      DIKeyboardOkay = FALSE;
-	      hRes = lpdiKeyboard->Acquire();
-	      if (hRes == DI_OK)
-		    DIKeyboardOkay = TRUE;
-		 }
-      }
+	{
+		if (hRes == DIERR_INPUTLOST)
+		{
+			// keyboard control lost; try to reacquire
+			DIKeyboardOkay = FALSE;
+			hRes = lpdiKeyboard->Acquire();
+			if (hRes == DI_OK)
+			DIKeyboardOkay = TRUE;
+		}
+	}
 
     // Check for error values on routine exit
 	if (hRes != DI_OK)
-	  {
-       // failed to read the keyboard
-	   #if debug
-       ReleaseDirect3D();
-	   exit(0x999774);
-	   #else
-       return;
-	   #endif
-	  }
-
+	{
+		// failed to read the keyboard
+		#if debug
+		ReleaseDirect3D();
+		exit(0x999774);
+		#else
+		return;
+		#endif
+	}
+#endif
 	// Take a copy of last frame's inputs:
 	memcpy((void*)LastFramesKeyboardInput, (void*)KeyboardInput, MAX_NUMBER_OF_INPUT_KEYS);
-	LastGotAnyKey=GotAnyKey;
+	LastGotAnyKey = GotAnyKey;
 
     // Zero current inputs (i.e. set all keys to FALSE,
 	// or not pressed)
     memset((void*)KeyboardInput, FALSE, MAX_NUMBER_OF_INPUT_KEYS);
 	GotAnyKey = FALSE;
 
-	#if 1
+	/* do letters */
+	for(int i = LETTER_A; i <= LETTER_Z; i++)
+	{
+		if (IngameKeyboardInput[i])
+		{
+			KeyboardInput[KEY_A + i - LETTER_A] = TRUE;
+			GotAnyKey = TRUE;
+		}
+	}
+
+	/* numbers */
+	for(int i = NUMBER_0; i <= NUMBER_9; i++)
+	{
+		if (IngameKeyboardInput[i])
+		{
+			KeyboardInput[KEY_0 + i - KEY_0] = TRUE;
+			GotAnyKey = TRUE;
+		}
+	}
+
+#if 0
+	int c;
+	/* do letters */
+	for (c='a'; c<='z'; c++)
+	{
+		if (IngameKeyboardInput[c])
+		{
+			KeyboardInput[KEY_A + c - 'a'] = TRUE;
+		}
+	}
+#endif
+
+	if (IngameKeyboardInput[/*249*/'~'])
+	{
+		KeyboardInput[KEY_U_GRAVE] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_LEFT])
+	{
+		KeyboardInput[KEY_LEFT] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_RIGHT])
+	{
+		KeyboardInput[KEY_RIGHT] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_UP])
+	{
+		KeyboardInput[KEY_UP] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_DOWN])
+	{
+		KeyboardInput[KEY_DOWN] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_ESCAPE])
+	{
+		KeyboardInput[KEY_ESCAPE] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_RETURN])
+	{
+		KeyboardInput[KEY_CR] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_TAB])
+	{
+		KeyboardInput[KEY_TAB] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_F1])
+	{
+		KeyboardInput[KEY_F1] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_F2])
+	{
+		KeyboardInput[KEY_F2] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_F3])
+	{
+		KeyboardInput[KEY_F3] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_F4])
+	{
+		KeyboardInput[KEY_F4] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_F5])
+	{
+		KeyboardInput[KEY_F5] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_F6])
+	{
+		KeyboardInput[KEY_F6] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_F7])
+	{
+		KeyboardInput[KEY_F7] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_F8])
+	{
+		KeyboardInput[KEY_F8] = TRUE;
+		/* KJL 14:51:38 21/04/98 - F8 does screen shots, and so this is a hack
+		to make F8 not count in a 'press any key' situation */
+		//	   GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_F9])
+	{
+		KeyboardInput[KEY_F9] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_F10])
+	{
+		KeyboardInput[KEY_F10] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_F11])
+	{
+		KeyboardInput[KEY_F11] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_F12])
+	{
+		KeyboardInput[KEY_F12] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_INSERT])
+	{
+		KeyboardInput[KEY_INS] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_DELETE])
+	{
+		KeyboardInput[KEY_DEL] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_END])
+	{
+		KeyboardInput[KEY_END] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_HOME])
+	{
+		KeyboardInput[KEY_HOME] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_PRIOR]) // page up virtual key
+	{
+		KeyboardInput[KEY_PAGEUP] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_NEXT]) // page down virtual key
+	{
+		KeyboardInput[KEY_PAGEDOWN] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_BACK])
+	{
+		KeyboardInput[KEY_BACKSPACE] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_SPACE])
+	{
+		KeyboardInput[KEY_SPACE] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_LSHIFT])
+	{
+		KeyboardInput[KEY_LEFTSHIFT] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_RSHIFT])
+	{
+		KeyboardInput[KEY_RIGHTSHIFT] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_LCONTROL])
+	{
+		KeyboardInput[KEY_LEFTCTRL] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_RCONTROL])
+	{
+		KeyboardInput[KEY_RIGHTCTRL] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_CAPITAL])
+	{
+		KeyboardInput[KEY_CAPS] = TRUE;
+		KeyboardInput[KEY_CAPITAL] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_NUMLOCK])
+	{
+		KeyboardInput[KEY_NUMLOCK] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_SCROLL])
+	{
+		KeyboardInput[KEY_SCROLLOK] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_LMENU])
+	{
+		KeyboardInput[KEY_LEFTALT] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_RMENU])
+	{
+		KeyboardInput[KEY_RIGHTALT] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_NUMPAD0])
+	{
+		KeyboardInput[KEY_NUMPAD0] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_NUMPAD1])
+	{
+		KeyboardInput[KEY_NUMPAD1] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_NUMPAD2])
+	{
+		KeyboardInput[KEY_NUMPAD2] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_NUMPAD3])
+	{
+		KeyboardInput[KEY_NUMPAD3] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_NUMPAD4])
+	{
+		KeyboardInput[KEY_NUMPAD4] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_NUMPAD5])
+	{
+		KeyboardInput[KEY_NUMPAD5] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_NUMPAD6])
+	{
+		KeyboardInput[KEY_NUMPAD6] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_NUMPAD7])
+	{
+		KeyboardInput[KEY_NUMPAD7] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_NUMPAD8])
+	{
+		KeyboardInput[KEY_NUMPAD8] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_NUMPAD9])
+	{
+		KeyboardInput[KEY_NUMPAD9] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_SUBTRACT])
+	{
+		KeyboardInput[KEY_NUMPADSUB] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_ADD])
+	{
+		KeyboardInput[KEY_NUMPADADD] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_DECIMAL])
+	{
+		KeyboardInput[KEY_NUMPADDEL] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_LWIN])
+	{
+		KeyboardInput[KEY_LWIN] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_RWIN])
+	{
+		KeyboardInput[KEY_RWIN] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_APPS])
+	{
+		KeyboardInput[KEY_APPS] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	#if 0
 	{
 		int c;
 		
+		/* do letters */
 		for (c='a'; c<='z'; c++)
 		{
 			if (IngameKeyboardInput[c])
 			{
 				KeyboardInput[KEY_A + c - 'a'] = TRUE;
 				GotAnyKey = TRUE;
-			}	  
+			}
 		}
+
+		if (IngameKeyboardInput[28])
+		{
+			KeyboardInput[KEY_CR] = TRUE;
+			GotAnyKey = TRUE;
+		}
+
 		if (IngameKeyboardInput[246])
 		{
 			KeyboardInput[KEY_O_UMLAUT] = TRUE;
@@ -418,7 +790,6 @@ void DirectReadKeyboard(void)
 			GotAnyKey = TRUE;
 		}
 
-
 		if (IngameKeyboardInput['['])
 		{
 			KeyboardInput[KEY_LBRACKET] = TRUE;
@@ -469,11 +840,10 @@ void DirectReadKeyboard(void)
 			KeyboardInput[KEY_FSTOP] = TRUE;
 			GotAnyKey = TRUE;
 		}
-
 	}
 
 	#endif
-
+#if 0
     // Check and set keyboard array
 	// (test checks only for the moment)
     if (DiKeybd[DIK_LEFT] & DikOn)
@@ -856,8 +1226,8 @@ to make F8 not count in a 'press any key' situation */
 		KeyboardInput[KEY_APPS] = TRUE;
 		GotAnyKey = TRUE;
 	}
-
-
+#endif
+#if 0
 	#if 0
 	// Added 14/1/98 by DHM: Process the grave key (known to some as the tilde key)
 	// Done this way as a bit of a hack to avoid touching PLATFORM.H
@@ -883,6 +1253,7 @@ to make F8 not count in a 'press any key' situation */
 		KeyboardInput[KEY_GRAVE] = TRUE;
 	}
 	#endif
+#endif
 	
 	/* mouse keys */
 	if (MouseButton & LeftButton)
@@ -945,9 +1316,8 @@ to make F8 not count in a 'press any key' situation */
 		}
 		DebouncedGotAnyKey = GotAnyKey && !LastGotAnyKey;
 	}
-
-
 }
+
 /*
 
  Clean up direct keyboard objects
@@ -957,37 +1327,43 @@ to make F8 not count in a 'press any key' situation */
 void ReleaseDirectKeyboard(void)
 {
 	if (DIKeyboardOkay)
-      {
-       lpdiKeyboard->Unacquire();
-       DIKeyboardOkay = FALSE;
-      }
+	{
+		lpdiKeyboard->Unacquire();
+		DIKeyboardOkay = FALSE;
+	}
 
-    if (lpdiKeyboard != NULL)
-	  {
-       lpdiKeyboard->Release();
-	   lpdiKeyboard = NULL;
-	  }
+	if (lpdiKeyboard != NULL)
+	{
+		lpdiKeyboard->Release();
+		lpdiKeyboard = NULL;
+	}
 }
 
 
 BOOL InitialiseDirectMouse()
-
 {
+	return FALSE;
+#if 0
     GUID    guid = GUID_SysMouse;
 	HRESULT hres;
 
 	//MouseButton = 0;
     
     // Obtain an interface to the system mouse device.
-    hres = lpdi->CreateDevice(guid, &lpdiMouse, NULL);
-	if (hres != DI_OK) return FALSE;
+	if (FAILED(lpdi->CreateDevice(guid, &lpdiMouse, NULL)))
+	{
+		LogDxErrorString("Couldn't create DirectInput mouse device\n");
+		return FALSE;
+	}
 
-    // Set the data format to "mouse format".
-    hres = lpdiMouse->SetDataFormat(&c_dfDIMouse);
-    if (hres != DI_OK) return FALSE;
-	
+	// Set the data format to "mouse format".
+	if (FAILED(lpdiMouse->SetDataFormat(&c_dfDIMouse)))
+	{
+		LogDxErrorString("Couldn't set DirectInput mouse data format\n");
+		return FALSE;
+	}
+
     //  Set the cooperativity level.
-
     #if debug
 	// This level should allow the debugger to actually work
 	// not to mention drop 'n' drag in sub-window mode
@@ -999,7 +1375,12 @@ BOOL InitialiseDirectMouse()
     hres = lpdiMouse->SetCooperativeLevel(hWndMain,
                        DISCL_EXCLUSIVE | DISCL_FOREGROUND);
 	#endif
-    if (hres != DI_OK) return FALSE;
+//    if (hres != DI_OK) return FALSE;
+	if(FAILED(hres))
+	{
+		LogDxErrorString("Couldn't set DirectInput mouse cooperative level\n");
+		return FALSE;
+	}
 
     //  Set the buffer size for reading the mouse to
 	//  DMouse_BufferSize elements
@@ -1016,18 +1397,56 @@ BOOL InitialiseDirectMouse()
         DMouse_BufferSize,              // dwData
     };
 
-    hres = lpdiMouse->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph);
+	if (FAILED(lpdiMouse->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph)))
+	{
+		LogDxErrorString("Couldn't set DirectInput mouse property\n");
+		return FALSE;
+	}
 
-    if (hres != DI_OK) return FALSE;
-
-    // try to acquire the mouse
-    hres = lpdiMouse->Acquire();
+	// try to acquire the mouse
+	hres = lpdiMouse->Acquire();
 	
 	return TRUE;
+#endif
 }
+
+extern int xPosRelative;
+extern int yPosRelative;
+extern int mouseMoved;
 
 void DirectReadMouse(void)
 {
+#if 1
+	int OldMouseX, OldMouseY, OldMouseZ;
+
+	GotMouse = No;
+
+	if(mouseMoved == 0) return;
+
+	MouseVelX = 0;
+	MouseVelY = 0;
+	MouseVelZ = 0;
+
+	// Save mouse x and y for velocity determination
+	OldMouseX = MouseX;
+	OldMouseY = MouseY;
+	OldMouseZ = MouseZ;
+
+	GotMouse = Yes;
+
+	MouseX += xPosRelative;
+	MouseY += yPosRelative;
+
+//	char buf[100];
+//	sprintf(buf, "x: %d, y: %d\n", xPosRelative, yPosRelative);
+//	OutputDebugString(buf);
+
+	MouseVelX = DIV_FIXED(MouseX-OldMouseX,NormalFrameTime);
+	MouseVelY = DIV_FIXED(MouseY-OldMouseY,NormalFrameTime);
+
+	mouseMoved = 0;
+
+#else
     DIDEVICEOBJECTDATA od[DMouse_RetrieveSize];
     DWORD dwElements = DMouse_RetrieveSize;
 	HRESULT hres;
@@ -1040,7 +1459,6 @@ void DirectReadMouse(void)
 
     hres = lpdiMouse->GetDeviceData(sizeof(DIDEVICEOBJECTDATA),&od[0],&dwElements, 0);
 
-    
     if (hres == DIERR_INPUTLOST || hres==DIERR_NOTACQUIRED)
 	{
 		// We had acquisition, but lost it.  Try to reacquire it.
@@ -1066,6 +1484,7 @@ void DirectReadMouse(void)
 	// status variables.
 
     int i;
+	char buf[100];
 
     for (i=0; i<dwElements; i++)
 	{
@@ -1074,22 +1493,26 @@ void DirectReadMouse(void)
 		switch (od[i].dwOfs)
 		{
 			// DIMOFS_X: Mouse horizontal motion
-			case DIMouseXOffset:
+			case DIMOFS_X://DIMouseXOffset:
 			    MouseX += od[i].dwData;
+//				sprintf(buf, "x: %d\n", od[i].dwData);
+//				OutputDebugString(buf);
 			    break;
 
 			// DIMOFS_Y: Mouse vertical motion
-			case DIMouseYOffset: 
+			case DIMOFS_Y://DIMouseYOffset: 
 			    MouseY += od[i].dwData;
+//				sprintf(buf, "y: %d\n", od[i].dwData);
+//				OutputDebugString(buf);
 			    break;
 
-			case DIMouseZOffset: 
+			case DIMOFS_Z://DIMouseZOffset: 
 			    MouseZ += od[i].dwData;
 				textprint("z info received %d\n",MouseZ);
 			    break;
 
 			// DIMOFS_BUTTON0: Button 0 pressed or released
-			case DIMouseButton0Offset:
+			case DIMOFS_BUTTON0://DIMouseButton0Offset:
 			    if (od[i].dwData & DikOn) 
 			      // Button pressed
 				  MouseButton |= LeftButton;
@@ -1099,7 +1522,7 @@ void DirectReadMouse(void)
 			    break;
 
 			// DIMOFS_BUTTON1: Button 1 pressed or released
-			case DIMouseButton1Offset:
+			case DIMOFS_BUTTON1://DIMouseButton1Offset:
 			  if (od[i].dwData & DikOn)
 			      // Button pressed
 				  MouseButton |= RightButton;
@@ -1108,8 +1531,8 @@ void DirectReadMouse(void)
 				  MouseButton &= ~RightButton;
 			  break;
 
-			case DIMouseButton2Offset:
-			case DIMouseButton3Offset:
+			case DIMOFS_BUTTON2://DIMouseButton2Offset:
+			case DIMOFS_BUTTON3://DIMouseButton3Offset:
 			  if (od[i].dwData & DikOn)
 			      // Button pressed
 				  MouseButton |= MiddleButton;
@@ -1134,16 +1557,16 @@ void DirectReadMouse(void)
 	textprint("Vel X %d\n", MouseVelX);
 	textprint("Vel Y %d\n", MouseVelY);
 	#endif
+#endif
 }
 
 void ReleaseDirectMouse(void)
-
 {
-    if (lpdiMouse != NULL)
-	  {
-       lpdiMouse->Release();
-	   lpdiMouse = NULL;
-	  }
+	if (lpdiMouse != NULL)
+	{
+		lpdiMouse->Release();
+		lpdiMouse = NULL;
+	}
 }
 
 

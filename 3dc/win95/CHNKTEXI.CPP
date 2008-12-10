@@ -932,6 +932,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 							}
 
 							int gotTextureHandle = 1;
+							//free(pTexture->buffer);
 							//int gotTextureHandle = GetTextureHandle(pImageHdr);
 							//db_assert1(gotTextureHandle==TRUE);
 						}

@@ -305,17 +305,12 @@ void MaintainHUD(void)
 //	RenderSmokeTest();
 	PlatformSpecificEnteringHUD();
 	
-//	if (ScanDrawMode != ScanDrawDirectDraw)
-	{
-		HandleParticleSystem();
-	}
+	HandleParticleSystem();
+
 	RenderGrapplingHook();
 	
-	#if SOFTWARE_RENDERER
-	FlushSoftwareZBuffer();
-	#else
 	SecondFlushD3DZBuffer();
-	#endif
+
 	//DrawFontTest();
 	if (Observer)
 	{

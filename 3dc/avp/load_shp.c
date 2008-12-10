@@ -39,7 +39,7 @@ char *Marine_Loaded_Shape_Names[I_Num_Character_Shapes] =
 	"FACEHUGGER_BLOOD_SPLASH",
 };
 
-	
+
 char *Alien_Loaded_Shape_Names[I_Num_Character_Shapes] =
 {
 	"MARINE",

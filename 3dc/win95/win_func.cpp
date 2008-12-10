@@ -128,7 +128,7 @@ void CheckForWindowsMessages(void)
 			g_bMustRedrawScreen = TRUE;
 		}
 	}
-		while (!bActive);
+	while (!bActive);
 }
 
 

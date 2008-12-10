@@ -1,9 +1,6 @@
 /* Main designed spec for use with windows95*/
 #define _CRTDBG_MAP_ALLOC
 
-//#define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
-//#define malloc malloc(_NORMAL_BLOCK,__FILE__,__LINE__)
-
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
@@ -175,8 +172,8 @@ int mainMenu = 1;
 #include "VideoModes.h"
 extern DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
  
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-                        LPSTR lpCmdLine, int nCmdShow)
+/* entry point */
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
 	char * instr;
 	#if debug
@@ -186,6 +183,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 						
 	AVP_HInstance = hInst = hInstance;
 	AVP_NCmd = nCmdShow;
+
+	// Enable run-time memory check for debug builds.
+#if defined(DEBUG) | defined(_DEBUG)
+//    _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+#endif
+
 /*
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF|_CRTDBG_ALLOC_MEM_DF);
 	_CrtSetReportMode(_CRT_ASSERT,_CRTDBG_MODE_FILE);
@@ -469,7 +472,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		{
 			//Start thread that recentres mouse , making it easier to play
 			//in subwindow mode
-			InitCentreMouseThread();
+//			InitCentreMouseThread();
 		}
 		#endif
 //		Env_List[0] = &(ELOLevelToLoad);
@@ -488,7 +491,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 		/********** Grab The Video mode **********/
 //		GetCorrectDirectDrawObject();
-		
+
 		ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth);
 #if 0 // bjd resolution change?
 		if(!SetGameVideoMode())
@@ -513,19 +516,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		/**** init the chunk loaders ***************/
 
 		// no longer required here
-		
+
 		// Load precompiled shapes 
 	    start_of_loaded_shapes = load_precompiled_shapes();
-		
+
 		/***********  Load up the character stuff *******/
 
 		InitCharacter();
 
 		/* KJL 17:56:14 26/02/98 - load a font required for Dave's HUD */
 //		LoadPFFont(DATABASE_MESSAGE_FONT);
-	
+
 		/***********  Read in the env Map	 **************/
-		
+
 		#if debug
   		if(level_to_load != I_Num_Environments)
   		{
@@ -535,15 +538,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
  				#else
  					level_to_load = I_Sp1;
  				#endif
-  
+
   			AvP.CurrentEnv = AvP.StartingEnv = level_to_load;
   		}
 		#endif
 		
 		LoadRifFile(); /* sets up a map*/
 		#if debug
-		DebugFontLoaded = 1;		
-		#endif 																					 	
+		DebugFontLoaded = 1;
+		#endif
 
 		/*********** Process the data ************/
 		AssignAllSBNames();
@@ -560,7 +563,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		/* JH 28/5/97 */
 		/* remove resident loaded 'fast' files */
 		ffcloseall();
-		/*********** Play the game ***************/		 
+		/*********** Play the game ***************/
 
 		/* KJL 15:43:25 03/11/97 - run until this boolean is set to 0 */
 		AvP.MainLoopRunning = 1;
@@ -617,7 +620,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 					{
 						#if MainTextPrint 		/* debugging stuff */
 						{
-
 							if (ShowDebuggingText.FPS) ReleasePrintDebuggingText("FrameRate = %d fps\n",FrameRate);
 							if (ShowDebuggingText.Environment) ReleasePrintDebuggingText("Environment %s\n", Env_List[AvP.CurrentEnv]->main);
 							if (ShowDebuggingText.Coords) ReleasePrintDebuggingText("Player World Coords: %d,%d,%d\n",Player->ObWorld.vx,Player->ObWorld.vy,Player->ObWorld.vz);
@@ -888,7 +890,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   	SoundSys_RemoveAll(); 
 
 	/* bjd - delete some profile data that was showing up as memory leaks */
-	EmptyUserProfilesList();
+//	EmptyUserProfilesList();
 
 	#else
 	QuickSplashScreens();
@@ -897,16 +899,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	TimeStampedMessage("After SoundSys_End");
 	TimeStampedMessage("After CDDA_End");
 
-	DeleteMultiplayerLevelNameArray();
-
 	/* unload language file */
-	KillTextStrings();
+//	KillTextStrings();
 
 // 	TimeStampedMessage("After KillTextStrings");
 	ExitSystem();
 	TimeStampedMessage("After ExitSystem");
 
-	ffKill(); /* to avoid misreported memory leaks */
+//	ffKill(); /* to avoid misreported memory leaks */
 	TimeStampedMessage("After ffKill");
 	#else
 	SoundSys_End();
