@@ -100,6 +100,8 @@ extern void KeyboardEntryQueue_Add(char c);
 extern void IngameKeyboardInput_KeyDown(unsigned char key);
 extern void IngameKeyboardInput_KeyUp(unsigned char key);
 extern void IngameKeyboardInput_ClearBuffer(void);
+extern void Mouse_ButtonUp(unsigned char button);
+extern void Mouse_ButtonDown(unsigned char button);
 
 int xPosRelative = 0;
 int yPosRelative = 0;
@@ -136,11 +138,7 @@ int mouseMoved = 0;
 				mouseMoved = 1;
 				xPosRelative = raw->data.mouse.lLastX;
 				yPosRelative = raw->data.mouse.lLastY;
-				//char buf[100];
-				//sprintf(buf, "x: %d y: %d\n", xPosRelative, yPosRelative);
-				//OutputDebugString(buf);
-			} 
-			//break;
+			}
 			return 0;
 		}
 
@@ -151,22 +149,30 @@ int mouseMoved = 0;
 			return 0;
 		}	
 	
-	 // 21/11/97 DHM: Added porcessing of WM_CHAR messages:
-	 case WM_CHAR:
-		RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR
-		(
-			(char) wParam
-		);
-		KeyboardEntryQueue_Add((char)wParam);
-		return 0;
-	case WM_KEYDOWN:
-		RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN
-		(
-			wParam
-		);
-		// it's intentional for this case to fall through to WM_SYSKEYDOWN
-    case WM_SYSKEYDOWN:
+		// 21/11/97 DHM: Added processing of WM_CHAR messages:
+		case WM_CHAR:
 		{
+			RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR((char)wParam);
+			KeyboardEntryQueue_Add((char)wParam);
+			//return 0;
+			break;
+		}
+		case WM_KEYDOWN:
+		{
+			RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(wParam);
+		}
+		// it's intentional for this case to fall through to WM_SYSKEYDOWN
+		case WM_SYSKEYDOWN:
+		{
+			/* handle left/right alt keys */
+			if(wParam == VK_MENU)
+			{			
+				if(lParam&(1<<24))
+					wParam = VK_RMENU;
+				else
+					wParam = VK_LMENU;
+			}
+
 			IngameKeyboardInput_KeyDown(wParam);
 #if 0
 			int scancode = (lParam>>16)&255;
@@ -197,12 +203,22 @@ int mouseMoved = 0;
 			// reset caps lock status
 			//ksarray[VK_CAPITAL] = GetKeyState(VK_CAPITAL);	
 			//ToAscii(wParam&255,scancode,&ksarray[0],&output,0);
+			//return 0;
+			break;
 		}
-		return 0;
 
-	case WM_SYSKEYUP:
-	case WM_KEYUP:						
+		case WM_SYSKEYUP:
+		case WM_KEYUP:						
 		{
+			/* handle left/right alt keys */
+			if(wParam == VK_MENU)
+			{	
+				if(lParam&(1<<24))
+					wParam = VK_RMENU;
+				else
+					wParam = VK_LMENU;
+			}
+
 			IngameKeyboardInput_KeyUp(wParam);
 #if 0
 			int scancode = (lParam>>16)&255;
@@ -238,113 +254,150 @@ int mouseMoved = 0;
 			//ksarray[VK_CAPITAL] = GetKeyState(VK_CAPITAL);	
 			//ToAscii(wParam&255,scancode,&ksarray[0],&output,0);
 #endif
+			//return 0;
+			break;
 		}
-		return 0;
-		 
+		case WM_LBUTTONDOWN:
+		{
+			Mouse_ButtonDown(LeftMouse);
+			break;
+		}
+        case WM_LBUTTONUP:
+        {
+			Mouse_ButtonUp(LeftMouse);
+			break;
+        }
+		case WM_RBUTTONDOWN:
+		{
+			Mouse_ButtonDown(RightMouse);
+			break;
+		}
+        case WM_RBUTTONUP:
+        {
+			Mouse_ButtonUp(RightMouse);
+            break;
+        }
+		case WM_MBUTTONDOWN:
+		{
+			Mouse_ButtonDown(MiddleMouse);
+			break;
+		}
+        case WM_MBUTTONUP:
+        {
+			Mouse_ButtonUp(MiddleMouse);
+            break;
+        }
+		case WM_XBUTTONDOWN:
+        {
+			Mouse_ButtonDown(GET_XBUTTON_WPARAM(wParam) == XBUTTON1 ? ExtraMouse1 : ExtraMouse2);
+            break;
+        }
+		case WM_XBUTTONUP:
+        {
+			Mouse_ButtonUp(GET_XBUTTON_WPARAM(wParam) == XBUTTON1 ? ExtraMouse1 : ExtraMouse2);
+            break;
+        }
+
+
 	 // This, in combination with code in win_func,
 	 // will hopefully disable Alt-Tabbing...
-     case WM_ACTIVATEAPP:
-        bActive = (BOOL) wParam;
-        
-//bjd	LOGDXFMT(("WM_ACTIVATEAPP msg: bActive = %d",(int)bActive));
-        
-        if (bActive)
-        {
-        	// need to restore all surfaces - do the special ones first
-        	
-			/* BJD ALT TAB TEXTURE RESTORE STUFF HERE
- 			RESTORE_SURFACE(lpDDSPrimary)
-        	RESTORE_SURFACE(lpDDSBack)
-        	RESTORE_SURFACE(lpZBuffer)
-        	// dodgy, this is meant to be graphic, so it'll really need to be reloaded
-        	RESTORE_SURFACE(lpDDBackdrop)
-        	// now do all the graphics surfaces and textures, etc.
-			*/
-        	ATOnAppReactivate();
-        }
-		IngameKeyboardInput_ClearBuffer();
-        
-		return 0;
+		case WM_ACTIVATEAPP:
+		{
+			bActive = (BOOL) wParam;
+
+			//LOGDXFMT(("WM_ACTIVATEAPP msg: bActive = %d",(int)bActive));
+			if (bActive)
+			{
+        		// need to restore all surfaces - do the special ones first
+				/* BJD ALT TAB TEXTURE RESTORE STUFF HERE
+ 				RESTORE_SURFACE(lpDDSPrimary)
+        		RESTORE_SURFACE(lpDDSBack)
+        		RESTORE_SURFACE(lpZBuffer)
+        		// dodgy, this is meant to be graphic, so it'll really need to be reloaded
+        		RESTORE_SURFACE(lpDDBackdrop)
+        		// now do all the graphics surfaces and textures, etc.
+				*/
+        		ATOnAppReactivate();
+			}
+			IngameKeyboardInput_ClearBuffer();
+			return 0;
+		}
 
      // Three below are for safety, to turn off
 	 // as much as possible of the more annoying 
 	 // functionality of the default Windows 
 	 // procedure handler
 
-	 case WM_ACTIVATE:
-	    return 0;
-#if 0
-     case WM_SYSKEYUP:
-	    return 0;
+		case WM_ACTIVATE:
+			return 0;
+		case WM_CREATE:
+			break;
 
-	case WM_SYSKEYDOWN:
-	    return 0;
-#endif
-     case WM_CREATE:
-        break;
+		case WM_MOVE:
+		{
+			// Necessary to stop it crashing in 640x480
+			// FullScreen modes on window initialisation
+			if (WindowMode == WindowModeSubWindow)
+			{
+				GetWindowRect(hWndMain, &NewWindCoord);
+				WinLeftX = NewWindCoord.left;
+				WinTopY = NewWindCoord.top;
+				WinRightX = NewWindCoord.right;
+				WinBotY = NewWindCoord.bottom;
+			}
+			break;
+		}
 
-     case WM_MOVE:
-	    // Necessary to stop it crashing in 640x480
-		// FullScreen modes on window initialisation
-	    if (WindowMode == WindowModeSubWindow)
-		  {
-	       GetWindowRect(hWndMain, &NewWindCoord);
-		   WinLeftX = NewWindCoord.left;
-		   WinTopY = NewWindCoord.top;
-		   WinRightX = NewWindCoord.right;
-		   WinBotY = NewWindCoord.bottom;
-		  }
-	    break;
+		case WM_SIZE:
+		{
+			// Necessary to stop it crashing in 640x480
+			// FullScreen modes on window initialisation
+			if (WindowMode == WindowModeSubWindow)
+			{
+				GetWindowRect(hWndMain, &NewWindCoord);
+				WinLeftX = NewWindCoord.left;
+				WinTopY = NewWindCoord.top;
+				WinRightX = NewWindCoord.right;
+				WinBotY = NewWindCoord.bottom;
+			}
+			break;
+		}
+		case WM_SETCURSOR:
+			SetCursor(NULL);
+			return TRUE;
 
-     case WM_SIZE:
-	    // Necessary to stop it crashing in 640x480
-		// FullScreen modes on window initialisation
-	    if (WindowMode == WindowModeSubWindow)
+		case WM_ERASEBKGND:
+			return TRUE;
 
-		  {
-	       GetWindowRect(hWndMain, &NewWindCoord);
-		   WinLeftX = NewWindCoord.left;
-		   WinTopY = NewWindCoord.top;
-		   WinRightX = NewWindCoord.right;
-		   WinBotY = NewWindCoord.bottom;
-		  }
-	    break;
+		case WM_PAINT:
+			hdc = BeginPaint(hWnd, &ps);
+			EndPaint(hWnd, &ps);
+			return TRUE;
 
-     case WM_SETCURSOR:
-        SetCursor(NULL);
-        return TRUE;
+		/* Patrick 11/6/97: this to detects the end of a cdda track */
+		case MM_MCINOTIFY:
+			PlatCDDAManagementCallBack(wParam, lParam);
+			break;
 
-	 case WM_ERASEBKGND:
-        return TRUE;
+		case WM_DESTROY:
+		{
+			// Calls ReleaseDirect3D DIRECTLY,
+			// so as to avoid calling ExitSystem and exiting the
+			// Windows system inside the windows procedure
+			// IMPORTANT!!! For this to work, release functions 
+			// must be re-entrant.  Since this may be causing
+			// problems under obscure cirumstances, I am removing 
+			// this now (25/7/96).
+			// And putting it back... (20/9/96)
+			ReleaseDirect3D();
 
-     case WM_PAINT:
-        hdc = BeginPaint(hWnd, &ps);
-        EndPaint(hWnd, &ps);
-        return TRUE;
+	 		/* patrick 9/6/97: hmmmmm.... */  	
+	   		PlatEndSoundSys();
 
-	 /* Patrick 11/6/97: this to detects the end of a cdda track */
-	 case MM_MCINOTIFY:
-		PlatCDDAManagementCallBack(wParam, lParam);
-	 	break;
-
-     case WM_DESTROY:
-	 // Calls ReleaseDirect3D DIRECTLY,
-	 // so as to avoid calling ExitSystem and exiting the
-	 // Windows system inside the windows procedure
-	 // IMPORTANT!!! For this to work, release functions 
-	 // must be re-entrant.  Since this may be causing
-	 // problems under obscure cirumstances, I am removing 
-	 // this now (25/7/96).
-	 // And putting it back... (20/9/96)
-    	ReleaseDirect3D();
-
-	 	/* patrick 9/6/97: hmmmmm.... */  	
-	   	PlatEndSoundSys();
-
-	   	PostQuitMessage(0);
-        break;
+	   		PostQuitMessage(0);
+			break;
+		}
     }
-
     return DefWindowProc(hWnd, message, wParam, lParam);
 }
 

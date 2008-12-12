@@ -472,7 +472,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		{
 			//Start thread that recentres mouse , making it easier to play
 			//in subwindow mode
-//			InitCentreMouseThread();
+			InitCentreMouseThread();
 		}
 		#endif
 //		Env_List[0] = &(ELOLevelToLoad);

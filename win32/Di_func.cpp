@@ -81,7 +81,7 @@ extern HINSTANCE hInst;
 extern HWND hWndMain;
 
 int GotMouse;
-unsigned int MouseButton;
+//unsigned int MouseButton;
 int MouseVelX;
 int MouseVelY;
 int MouseVelZ;
@@ -119,6 +119,8 @@ static unsigned char LastFramesKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
 extern int NormalFrameTime;
 
 static char IngameKeyboardInput[256];
+/* mouse - 5 buttons? */
+unsigned char MouseButtons[5] = {0};
 extern void IngameKeyboardInput_KeyDown(unsigned char key);
 extern void IngameKeyboardInput_KeyUp(unsigned char key);
 extern void IngameKeyboardInput_ClearBuffer(void);
@@ -343,6 +345,12 @@ void DirectReadKeyboard(void)
 	}
 #endif
 
+	if (IngameKeyboardInput['/'])
+	{
+		KeyboardInput[KEY_SLASH] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
 	if (IngameKeyboardInput[/*249*/'~'])
 	{
 		KeyboardInput[KEY_U_GRAVE] = TRUE;
@@ -558,12 +566,14 @@ void DirectReadKeyboard(void)
 
 	if (IngameKeyboardInput[VK_LMENU])
 	{
+		OutputDebugString("left alt\n");
 		KeyboardInput[KEY_LEFTALT] = TRUE;
 		GotAnyKey = TRUE;
 	}
 
 	if (IngameKeyboardInput[VK_RMENU])
 	{
+		OutputDebugString("right alt\n");
 		KeyboardInput[KEY_RIGHTALT] = TRUE;
 		GotAnyKey = TRUE;
 	}
@@ -661,6 +671,33 @@ void DirectReadKeyboard(void)
 	if (IngameKeyboardInput[VK_APPS])
 	{
 		KeyboardInput[KEY_APPS] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	/* mouse buttons */
+	if (MouseButtons[LeftMouse])
+	{
+		KeyboardInput[KEY_LMOUSE] = TRUE;
+		GotAnyKey = TRUE;
+	}
+	if (MouseButtons[MiddleMouse])
+	{
+		KeyboardInput[KEY_MMOUSE] = TRUE;
+		GotAnyKey = TRUE;
+	}
+	if (MouseButtons[RightMouse])
+	{
+		KeyboardInput[KEY_RMOUSE] = TRUE;
+		GotAnyKey = TRUE;
+	}
+	if (MouseButtons[ExtraMouse1])
+	{
+		KeyboardInput[KEY_MOUSEBUTTON4] = TRUE;
+		GotAnyKey = TRUE;
+	}
+	if (MouseButtons[ExtraMouse2])
+	{
+		KeyboardInput[KEY_MOUSEBUTTON4] = TRUE;
 		GotAnyKey = TRUE;
 	}
 
@@ -1254,7 +1291,7 @@ to make F8 not count in a 'press any key' situation */
 	}
 	#endif
 #endif
-	
+#if 0
 	/* mouse keys */
 	if (MouseButton & LeftButton)
 	{
@@ -1271,7 +1308,7 @@ to make F8 not count in a 'press any key' situation */
 		KeyboardInput[KEY_RMOUSE] = TRUE;
 		GotAnyKey = TRUE;
 	}
-
+#endif
 	/* mouse wheel - read using windows messages */
 	{
 		extern signed int MouseWheelStatus;
@@ -1434,8 +1471,8 @@ void DirectReadMouse(void)
 
 	GotMouse = Yes;
 
-	MouseX += xPosRelative;
-	MouseY += yPosRelative;
+	MouseX += xPosRelative * 3;
+	MouseY += yPosRelative * 3;
 
 //	char buf[100];
 //	sprintf(buf, "x: %d, y: %d\n", xPosRelative, yPosRelative);
@@ -1742,6 +1779,16 @@ extern void IngameKeyboardInput_KeyUp(unsigned char key)
 	IngameKeyboardInput[key] = 0;
 }
 
+extern void Mouse_ButtonDown(unsigned char button)
+{
+	MouseButtons[button] = 1;
+}
+
+extern void Mouse_ButtonUp(unsigned char button)
+{
+	MouseButtons[button] = 0;
+}
+
 extern void IngameKeyboardInput_ClearBuffer(void)
 {
 	int i;
@@ -1749,6 +1796,11 @@ extern void IngameKeyboardInput_ClearBuffer(void)
 	for (i=0; i<=255; i++)
 	{
 		IngameKeyboardInput[i] = 0;
+	}
+
+	for (i = 0; i < 5; i++)
+	{
+		MouseButtons[i] = 0;
 	}
 }
 

@@ -369,8 +369,11 @@ typedef enum {
 #define		RightButton		0x0002
 #define		MiddleButton	0x0004
 
-
-
+#define		LeftMouse		1
+#define		MiddleMouse		2
+#define		RightMouse		3
+#define		ExtraMouse1		4
+#define		ExtraMouse2		5
 
 /*
 	Video Modes

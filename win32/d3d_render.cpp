@@ -2,23 +2,22 @@ extern "C" {
 
 #include "3dc.h"
 #include "inline.h"
-#include "module.h"
+//#include "module.h"
 #include "gamedef.h"
-#include "stratdef.h"
+//#include "stratdef.h"
 //#include "vramtime.h"
 
 #include "dxlog.h"
 
 #include "d3_func.h"
-#include "d3dmacs.h"
+//#include "d3dmacs.h"
 
-#include "string.h"
+//#include "string.h"
 
-#include "kshape.h"
-#include "frustrum.h"
+//#include "kshape.h"
+//#include "frustrum.h"
 
 #include "d3d_hud.h"
-#include "gamedef.h"
 
 #include "particle.h"
 
@@ -42,7 +41,7 @@ extern "C++"{
 };
 #include "HUD_layout.h"
 #define HAVE_VISION_H 1
-#include "vision.h"
+//#include "vision.h"
 #include "lighting.h"
 #include "showcmds.h"
 #include "frustrum.h"
@@ -75,8 +74,8 @@ struct RENDER_STATES
 	enum TRANSLUCENCY_TYPE translucency_type;
 	enum FILTERING_MODE_ID filtering_type;
 
-//	bool operator<(const RENDER_STATES& rhs) const {return texture_id < rhs.texture_id;}
-	bool operator<(const RENDER_STATES& rhs) const {return translucency_type < rhs.translucency_type;}
+	bool operator<(const RENDER_STATES& rhs) const {return texture_id < rhs.texture_id;}
+//	bool operator<(const RENDER_STATES& rhs) const {return translucency_type < rhs.translucency_type;}
 };
 
 struct renderParticle
@@ -122,7 +121,7 @@ signed int currentWaterTexture = NO_TEXTURE;
 const int TALLFONT_TEX = 999;
 
 RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
-//std::vector<RENDER_STATES> renderTest;
+std::vector<RENDER_STATES> renderTest;
 
 void DeleteRenderMemory()
 {
@@ -650,7 +649,7 @@ void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE t
 		renderCount != 0) 
 	{
 		// ok, drop back to the previous data
-//		renderTest.pop_back();
+		renderTest.pop_back();
 		renderCount--;
 	}
 	else 
@@ -662,7 +661,7 @@ void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE t
 	renderList[renderCount].vert_end = NumVertices + num_verts;
 	renderList[renderCount].index_end = NumIndicies + real_num_verts;
 
-//	renderTest.push_back(renderList[renderCount]);
+	renderTest.push_back(renderList[renderCount]);
 	renderCount++;
 
 	NumVertices+=num_verts;
@@ -691,7 +690,7 @@ BOOL LockExecuteBuffer()
 	renderCount = 0;
 	vb = 0;
 
-//	renderTest.resize(0);
+	renderTest.resize(0);
 
     return TRUE;
 }
@@ -872,7 +871,7 @@ BOOL ExecuteBuffer()
 	if (NumVertices < 3)
 		return FALSE;
 
-//	std::sort(renderTest.begin(), renderTest.end());
+	std::sort(renderTest.begin(), renderTest.end());
 //	std::sort(renderList.begin(), renderList.end());
 
 /*
@@ -921,6 +920,78 @@ BOOL ExecuteBuffer()
 	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
 //	for (int i = 0; i < renderCount; i++) {
+#if 1
+	for (unsigned int i = 0; i < renderTest.size(); i++)
+	{
+		tempTexture = renderTest[i].texture_id;
+
+		if (renderTest[i].translucency_type != TRANSLUCENCY_OFF) continue;
+
+		// texture stuff here
+		ChangeTexture(tempTexture);
+
+		ChangeTranslucencyMode(renderTest[i].translucency_type);
+
+		unsigned int num_prims = (renderTest[i].index_end - renderTest[i].index_start) / 3;
+
+		if (num_prims > 0) 
+		{
+			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 
+			   0, 
+			   0, 
+			   NumVertices,
+			   renderTest[i].index_start,
+			   num_prims);
+
+			draw_calls_per_frame++;
+			if (FAILED(LastError)){
+				LogDxError(LastError);
+			}
+		}
+	}
+
+/* do transparents here.. */
+
+	for (unsigned int i = 0; i < renderTest.size(); i++)
+	{
+		tempTexture = renderTest[i].texture_id;
+
+		if (renderTest[i].translucency_type == TRANSLUCENCY_OFF) continue;
+
+		// texture stuff here
+		ChangeTexture(tempTexture);
+
+		ChangeTranslucencyMode(renderTest[i].translucency_type);
+
+		extern int HUDImageNumber;
+		extern int HUDFontsImageNumber;
+		extern int AAFontImageNumber;
+
+		/* lazy way to get the filtering working correctly :) */
+		if ( tempTexture == AAFontImageNumber || tempTexture == HUDFontsImageNumber || tempTexture == HUDImageNumber)
+		{
+			ChangeFilteringMode(FILTERING_BILINEAR_OFF);
+		}
+		else ChangeFilteringMode(FILTERING_BILINEAR_ON);
+
+		unsigned int num_prims = (renderTest[i].index_end - renderTest[i].index_start) / 3;
+
+		if (num_prims > 0) 
+		{
+			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 
+			   0, 
+			   0, 
+			   NumVertices,
+			   renderTest[i].index_start,
+			   num_prims);
+
+			draw_calls_per_frame++;
+			if (FAILED(LastError)){
+				LogDxError(LastError);
+			}
+		}
+	}
+#else
 	for (unsigned int i = 0; i < /*renderTest.size()*/renderCount; i++)
 	{
 		tempTexture = renderList[i].texture_id;
@@ -999,7 +1070,7 @@ BOOL ExecuteBuffer()
 			}
 		}
 	}
-
+#endif
 	return TRUE;
 }
 

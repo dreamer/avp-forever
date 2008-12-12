@@ -26,21 +26,13 @@ extern "C" {
 
 extern "C++" {
 	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
-
-	//#include <string>
-	//#include <fstream>
-	//#include <sstream>
-
 	#include "logString.h"
-
 	#include <d3dx9.h>
 #ifdef _DEBUG
 	#pragma comment(lib, "d3dx9d.lib")
 #else
 	#pragma comment(lib, "d3dx9.lib")
 #endif
-
-	bool use_d3dx_tools = false;
 }
 
 int image_num = 0;
@@ -127,11 +119,11 @@ LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int
 	/* try find a png file at given path */
 	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice, 
 		fullFileName.c_str(), 
-		D3DX_DEFAULT,	// width
-		D3DX_DEFAULT,	// height
-		1,	// mip levels
-		0,				// usage	
-		D3DFMT_UNKNOWN,	// format
+		D3DX_DEFAULT,			// width
+		D3DX_DEFAULT,			// height
+		1,						// mip levels
+		0,						// usage	
+		D3DFMT_UNKNOWN,			// format
 		D3DPOOL_MANAGED,
 		D3DX_FILTER_NONE,
 		D3DX_FILTER_NONE,
@@ -143,7 +135,6 @@ LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int
 
 	if(FAILED(LastError))
 	{
-//		OutputDebugString("\n couldn't create texture");
 		*width = 0;
 		*height = 0;
 		return NULL;
@@ -1050,8 +1041,8 @@ BOOL InitialiseDirect3DImmediateMode()
 		d3dpp.BackBufferHeight = height;
 		// setting this to interval one will cap the framerate to monitor refresh
 		// the timer goes a bit mad if this isnt capped!
-		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 //		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 	}
 	d3dpp.BackBufferCount = 1;
@@ -1233,17 +1224,16 @@ BOOL InitialiseDirect3DImmediateMode()
 	ScanDrawMode = ScanDrawD3DHardwareRGB;
 
 	/* use an offset for hud items to account for tv safe zones. just use width for now. 15%?  */
-	if(1)
+	if(0)
 	{
 		ScreenDescriptorBlock.SDB_SafeZoneOffset = (width / 100) * 15;
 	}
 	else ScreenDescriptorBlock.SDB_SafeZoneOffset = 0;
 
-	// save a copy of the presentation parameters for use 
-	// later (device reset, resolution/depth change)
+	/* save a copy of the presentation parameters for use later (device reset, resolution/depth change) */
 	d3d.d3dpp = d3dpp;
 
-	// create vertex and index buffers
+	/* create vertex and index buffers */
 	CreateVolatileResources();
 
 	LogDxString("Initialise Direct3D succesfully");
