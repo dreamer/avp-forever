@@ -1,9 +1,6 @@
 #ifndef _INCLUDED_AW_H_
 #define _INCLUDED_AW_H_
 
-typedef void* AvPDDObject; // BJD DIRECT DRAW
-typedef void* AvPD3DDevice;//IDirect3DDevice9 *D3DDevice;
-
 struct AwBackupTexture;
 typedef struct AwBackupTexture * AW_BACKUPTEXTUREHANDLE;
 
@@ -47,8 +44,6 @@ typedef LPDIRECT3DTEXTURE8 D3DTEXTURE;
 	taken from http://www.mvps.org/directx/articles/definitions_for_dx7_vertex_types.htm
 */
 
-//#define D3DTLFVF_VERTEX    D3DFVF_XYZRHW|D3DFVF_DIFFUSE|D3DFVF_SPECULAR|D3DFVF_TEX1
-
 typedef struct _D3DTLVERTEX {
     union {
         float sx;
@@ -82,16 +77,7 @@ typedef struct _D3DTLVERTEX {
         float tv;
         float dvTV;
     };
-/*
-#if (defined __cplusplus) && (defined D3D_OVERLOADS)
-    _D3DTLVERTEX() { }
-    _D3DTLVERTEX(const D3DVECTOR& v,float w,D3DCOLOR col,D3DCOLOR spec, float _tu, float _tv)
-        { sx = v.x; sy = v.y; sz = v.z; rhw=w;
-          color = col; specular = spec;
-          tu = _tu; tv = _tv;
-    }
-#endif
-*/
+
 } D3DTLVERTEX, *LPD3DTLVERTEX;
 
 #define D3DFVF_TLVERTEX	(D3DFVF_XYZRHW|/*D3DFVF_RESERVED0|*/D3DFVF_DIFFUSE|D3DFVF_SPECULAR|D3DFVF_TEX1)
@@ -102,12 +88,7 @@ typedef struct _D3DTLVERTEX {
 // 32bit RGBA to 16bit D3DFMT_A1R5G5B5 format
 #define ARGB1555(a, r, g, b) ( (a << 15)| ((r >> 3) << 10)| ((g >> 3) << 5)| (b >> 3))
 
-// R G B A
-//#define RGB32(r, g, b) ( (255) | (r >> 8) | (g >> 8) | (b >> 8))
-//#define RGB32 (r << 24) | (g << 16) | (b << 8) | a);
-
-// BJD - taken from d3dtypes.h
+// bjd - taken from d3dtypes.h
 #define RGBA_MAKE(r, g, b, a)   ((D3DCOLOR) (((a) << 24) | ((r) << 16) | ((g) << 8) | (b)))
-//#define RGBA_MAKE(r, g, b, a)	D3DCOLOR_ARGB(a,r,g,b)
 
 #endif /* _INCLUDED_AW_H_ */

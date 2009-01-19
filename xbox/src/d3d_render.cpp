@@ -63,7 +63,8 @@ bool useStaticBuffer = true;
 //WORD *mainIndex = new WORD[MAX_INDICES];
 //WORD *tempIndex = new WORD[MAX_INDICES];
 
-D3DTLVERTEX testVertex[256];
+#define MAX_TOTAL_VERTS 1360
+D3DTLVERTEX testVertex[MAX_TOTAL_VERTS];
 D3DTLVERTEX tempVertex[256];
 //int testCount = 0;
 
@@ -394,12 +395,15 @@ static void OUTPUT_TRIANGLE(int a, int b, int c, int n) {
 }
 */
 
-static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n) {
-	testVertex[NumVertices] = tempVertex[a]; \
-	NumVertices++; \
-	testVertex[NumVertices] = tempVertex[b]; \
-	NumVertices++; \
-	testVertex[NumVertices] = tempVertex[c]; \
+static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n) 
+{
+	if(NumVertices >= MAX_TOTAL_VERTS - 3) OutputDebugString("\n too many verts!");
+
+	testVertex[NumVertices] = tempVertex[a];
+	NumVertices++;
+	testVertex[NumVertices] = tempVertex[b];
+	NumVertices++;
+	testVertex[NumVertices] = tempVertex[c];
 	NumVertices++;
 }
 static void SetNewTexture(int tex_id)
@@ -417,6 +421,13 @@ static void SetNewTexture(int tex_id)
 
 static inline void PushVerts()
 {
+	if((NumVertices * 8) > 2047)
+	{
+		OutputDebugString("too much data for BeginPush\n"); 
+		NumVertices = 0;
+		return;
+	}
+
 	DWORD *pPush; 
 	DWORD dwordCount = 8 * NumVertices;
 //	d3d.lpD3DDevice->SetVertexShader( D3DTLVERTEX );
@@ -2386,7 +2397,6 @@ void D3D_HUDQuad_Output(int imageNumber,struct VertexTag *quadVerticesPtr, unsig
 		currentTextureId = imageNumber;
 	}
 
-
 	for(int i = 0; i < 4; i++ ) 
 	{
 //		textprint("x %d, y %d, u %d, v %d\n",quadVerticesPtr->X,quadVerticesPtr->Y,quadVerticesPtr->U,quadVerticesPtr->V);
@@ -3911,7 +3921,6 @@ char MeshVertexOutcode[256];
 
 void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 {
-	return;
 #if 1//FUNCTION_ON
 	int i=0;
 	int x;
@@ -6265,8 +6274,7 @@ void D3D_DrawMoltenMetal(int xOrigin, int yOrigin, int zOrigin)
 
 void D3D_DrawMoltenMetalMesh_Unclipped(void)
 {
-	return;
-#if 0//FUNCTION_ON
+#if 1//FUNCTION_ON
 	float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
 
 	/* OUTPUT VERTICES TO EXECUTE BUFFER */
@@ -6275,8 +6283,11 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 
 	// outputs 450 triangles with each run of the loop
 	// 450 triangles has 3 * 450 vertices which = 1350
-	SetFilteringMode(FILTERING_BILINEAR_ON);
-	CheckVertexBuffer(256, currentWaterTexture, TRANSLUCENCY_NORMAL);
+//	SetFilteringMode(FILTERING_BILINEAR_ON);
+//	CheckVertexBuffer(256, currentWaterTexture, TRANSLUCENCY_NORMAL);
+	
+	SetNewTexture(currentWaterTexture);
+	ChangeTranslucencyMode(TRANSLUCENCY_NORMAL);
 
 	for (int i=0; i<256; i++)
 	{
@@ -6285,6 +6296,7 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 		int y = (point->vy*(Global_VDB_Ptr->VDB_ProjY+1))/point->vz+Global_VDB_Ptr->VDB_CentreY;
 //			textprint("%d, %d\n",x,y);
 		{
+/*
 			if (x < Global_VDB_Ptr->VDB_ClipLeft)
 			{
 				x = Global_VDB_Ptr->VDB_ClipLeft;
@@ -6293,8 +6305,8 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 			{
 				x = Global_VDB_Ptr->VDB_ClipRight;
 			}
-
-			mainVertex[vb].sx = (float)x;
+*/
+			tempVertex[i].sx = (float)x;
 		}
 		{
 			if (y < Global_VDB_Ptr->VDB_ClipUp)
@@ -6305,7 +6317,7 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 			{
 				y = Global_VDB_Ptr->VDB_ClipDown;
 			}
-			mainVertex[vb].sy = (float)y;
+			tempVertex[i].sy = (float)y;
 		}
 
 //		point->vz+=HeadUpDisplayZOffset;
@@ -6316,15 +6328,15 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 
 	  	float oneOverZ = ((float)(point->vz)-ZNear)/(float)(point->vz);
 
-		mainVertex[vb].sz = zf;//oneOverZ;// - 0.1f;
-		mainVertex[vb].rhw = rhw;///1.0/point->vz;
-	   	mainVertex[vb].color = MeshVertexColour[i];
-		mainVertex[vb].specular = 0;
+		tempVertex[i].sz = zf;//oneOverZ;// - 0.1f;
+		tempVertex[i].rhw = rhw;///1.0/point->vz;
+	   	tempVertex[i].color = MeshVertexColour[i];
+		tempVertex[i].specular = 0;
 
-		mainVertex[vb].tu = pointWS->vx*WaterUScale+(1.0f/256.0f);
-		mainVertex[vb].tv =	pointWS->vy*WaterVScale+(1.0f/256.0f);
+		tempVertex[i].tu = pointWS->vx*WaterUScale+(1.0f/256.0f);
+		tempVertex[i].tv =	pointWS->vy*WaterVScale+(1.0f/256.0f);
 	
-		vb++;
+//		vb++;
 		point++;
 		pointWS++;
 	}
@@ -6360,17 +6372,22 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 		}
 	}
 
+	char buf[100];
+	sprintf(buf, "vert count is: %d *8: %d", count, count * 8);
+	OutputDebugString(buf);
+
 	{
 //	   UnlockExecuteBufferAndPrepareForUse();
 //	   ExecuteBuffer();
 //	   LockExecuteBuffer();
 	}
+
+	PushVerts();
 #endif
 }
 
 void D3D_DrawMoltenMetalMesh_Clipped(void)
 {
-	return;
 	D3D_DrawMoltenMetalMesh_Unclipped();
 #if 0 // bjd
 	float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
@@ -7109,16 +7126,13 @@ void ThisFramesRenderingHasFinished(void)
 
 	#define MB	(1024*1024)
 	MEMORYSTATUS stat;
-//	CHAR strOut[1024], *pstrOut;
 	char buf[100];
 
 	// Get the memory status.
     GlobalMemoryStatus( &stat );
 
-	// Setup the output string.
-//    pstrOut = strOut;
- //   sprintf(buf, "%4d  free MB of physical memory.\n", stat.dwAvailPhys / MB );
-//	OutputDebugString( buf );
+	sprintf(buf, "%4d  free MB of physical memory.\n", stat.dwAvailPhys / MB );
+	OutputDebugString( buf );
 /*
 	sprintf(buf,  "%4d total MB of virtual memory.\n", stat.dwTotalVirtual / MB );
 	OutputDebugString( buf );

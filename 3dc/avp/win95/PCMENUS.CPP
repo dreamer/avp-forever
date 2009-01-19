@@ -14,7 +14,7 @@
 
 #include "3dc.h" // for directdraw stuff
 #include "chnktexi.h" // for requesting textures on powers of two
-#include "d3_func.h"
+//#include "d3_func.h"
 
 //#include "menudefs.h" // general menu stuff
 //#include "menugfx.h" // menu graphics stuff
@@ -57,7 +57,7 @@ extern "C"
 
 	extern int NumAvailableVideoModes; // ditto!!!
 	extern VIDEOMODEINFO AvailableVideoModes[]; // ditto - sort you globals out Chris&Neal!!!
-	extern LPDIRECTDRAWSURFACE lpDDSBack;      // DirectDraw back surface
+//	extern LPDIRECTDRAWSURFACE lpDDSBack;      // DirectDraw back surface
 	extern unsigned char KeyboardInput[];
 	extern CONTROL_METHODS ControlMethods;
 	extern D3DINFO d3d;

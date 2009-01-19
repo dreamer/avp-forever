@@ -39,9 +39,9 @@ std::vector<std::string> TrackList;
 	const std::string musicFolderName = "d:/Music/";
 #endif
 
-#pragma comment(lib, "vorbisfile_static.lib")
-#pragma comment(lib, "ogg_static.lib")
-#pragma comment(lib, "vorbis_static.lib")
+#pragma comment(lib, "libvorbisfile.lib")
+#pragma comment(lib, "ogg.lib")
+#pragma comment(lib, "libvorbis.lib")
 
 char *audioData = 0;
 

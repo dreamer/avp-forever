@@ -379,7 +379,7 @@ etc
 	NumVertices++; \
 */
 
-inline static void OUTPUT_TRIANGLE(int a, int b, int c, int n) {
+static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n) {
 	mainIndex[NumIndicies] = (NumVertices - (n) + (a));
 	mainIndex[NumIndicies+1] = (NumVertices - (n) + (b));
 	mainIndex[NumIndicies+2] = (NumVertices - (n) + (c));
@@ -8703,21 +8703,21 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
 {
 	/* texture will generally be created with A8R8G8B8. Release so we can create with R5G6B5 format */
-	SAFE_RELEASE(ftPtr->ImagePtr->Direct3DTexture);
+//	SAFE_RELEASE(ftPtr->ImagePtr->Direct3DTexture);
 
 	/* just in case */
-//	SAFE_RELEASE(ftPtr->DestTexture);
+	SAFE_RELEASE(ftPtr->DestTexture);
 	ftPtr->DestTexture = NULL;
 
 	/* this texture is what's used for rendering of ingame video monitors */
-	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, NULL, D3DFMT_R5G6B5, D3DPOOL_DEFAULT, &ftPtr->ImagePtr->Direct3DTexture, NULL);
-	if(FAILED(LastError))
-	{
-		LogDxErrorString("Could not create Direct3D texture ftPtr->ImagePtr->Direct3DTexture\n");
-	}
+//	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, NULL, D3DFMT_R5G6B5, D3DPOOL_DEFAULT, &ftPtr->ImagePtr->Direct3DTexture, NULL);
+//	if(FAILED(LastError))
+//	{
+//		LogDxErrorString("Could not create Direct3D texture ftPtr->ImagePtr->Direct3DTexture\n");
+//	}
 
 	/* we use this texture to write fmv data to */
-	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, D3DUSAGE_DYNAMIC, D3DFMT_R5G6B5, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &ftPtr->DestTexture, NULL);
+	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &ftPtr->DestTexture, NULL);
 	if(FAILED(LastError))
 	{
 		LogDxErrorString("Could not create Direct3D texture ftPtr->DestTexture\n");
@@ -8749,7 +8749,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 
 	// check for success
 	{
-		if (!NextFMVTextureFrame(ftPtr,(void*)texture_rect.pBits))
+		if (!NextFMVTextureFrame(ftPtr,(void*)texture_rect.pBits, texture_rect.Pitch))
 		{
 			ftPtr->DestTexture->UnlockRect(0);
 		 	return;
@@ -9474,6 +9474,8 @@ void DrawTexturedFadedQuad(int topX, int topY, int image_num, int alpha)
 /* more quad drawing functions than you can shake a stick at! */
 void DrawBinkFmv(int topX, int topY, int height, int width, LPDIRECT3DTEXTURE9 fmvTexture)
 {
+//	OutputDebugString("drawing bink fmv\n");
+
 	/* set the texture */
 	LastError = d3d.lpD3DDevice->SetTexture(0, fmvTexture);
 

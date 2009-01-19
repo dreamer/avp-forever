@@ -59,7 +59,9 @@ extern void PlayIntroSequence(void)
 //	ThisFramesRenderingHasBegun();
 //	ClearScreenToBlack();
 
-	PlayBinkedFMV("FMVs/logos.bik");
+//	PlayBinkedFMV("FMVs/logos.bik");
+	PlayBinkedFMV("FMVs/logos.ogv");
+
 //	PlayFMV("FMVs/rebellion.smk");
 
 //	ThisFramesRenderingHasFinished();

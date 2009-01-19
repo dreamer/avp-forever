@@ -482,7 +482,8 @@ void HandlePreGameFMVs(void)
 			FlipBuffers();
 			ClearScreenToBlack();
 */
-			PlayBinkedFMV("FMVs/marineintro.bik");
+//			PlayBinkedFMV("FMVs/marineintro.bik");
+			PlayBinkedFMV("FMVs/marineintro.ogv");
 		}
 		else if (!stricmp("temple",LevelName))
 		{
@@ -491,7 +492,8 @@ void HandlePreGameFMVs(void)
 			FlipBuffers();
 			ClearScreenToBlack();
 */
-			PlayBinkedFMV("FMVs/alienintro.bik");
+//			PlayBinkedFMV("FMVs/alienintro.bik");
+			PlayBinkedFMV("FMVs/alienintro.ogv");
 		}
 		else if (!stricmp("fall",LevelName))
 		{
@@ -500,7 +502,8 @@ void HandlePreGameFMVs(void)
 			FlipBuffers();
 			ClearScreenToBlack();
 */
-			PlayBinkedFMV("FMVs/predatorintro.bik");
+//			PlayBinkedFMV("FMVs/predatorintro.bik");
+			PlayBinkedFMV("FMVs/predatorintro.ogv");
 		}
 	}
 }

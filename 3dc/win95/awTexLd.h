@@ -249,10 +249,11 @@ typedef struct AwCreateGraphicRegion AW_CREATEGRAPHICREGION;
 			function were incorrect
 		AW_TLE_DXERROR if a DirectX SDK call failed
 */
+/*
 #ifdef __cplusplus
 	extern "C++" AW_TL_ERC AwSetD3DDevice(AvPDDObject * _ddP, AvPD3DDevice * _d3ddeviceP);
 #endif
-
+*/
 /* AwSetDDObject(DDObject * _ddP)
    AwSetD3DDevice(D3DDevice * _d3ddeviceP)
 
@@ -263,10 +264,10 @@ typedef struct AwCreateGraphicRegion AW_CREATEGRAPHICREGION;
 		loading direct draw surfaces. The parameters and
 		return values are as described above.
 */
-
+/*
 extern AW_TL_ERC AwSetD3DDevice(AvPD3DDevice * _d3ddeviceP);
 extern AW_TL_ERC AwSetDDObject(AvPDDObject * _ddP);
-
+*/
 /* AwSetTextureFormat2(LPDDPIXELFORMAT _ddpfP)
 
 	Description:

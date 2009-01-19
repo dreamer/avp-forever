@@ -28,7 +28,7 @@
 	#include <typeinfo.h>
 #endif
 
-#include "d3_func.h"
+//#include "d3_func.h"
 
 /* awTexLd.cpp - Author: Jake Hotson */
 
@@ -2361,6 +2361,7 @@ namespace AwTl {
 
 #define FUNCTION_NAME "AwSetD3DDevice()"
 
+#if 0
 AW_TL_ERC AwSetD3DDevice(AvPD3DDevice * _d3ddeviceP)
 {
 	using AwTl::driverDesc;
@@ -2421,7 +2422,9 @@ AW_TL_ERC AwSetD3DDevice(AvPD3DDevice * _d3ddeviceP)
 
 	return AW_TLE_OK;
 }
+#endif
 
+#if 0
 AW_TL_ERC AwSetDDObject(AvPDDObject * _ddP)
 {
 	using AwTl::driverDesc;
@@ -2451,33 +2454,30 @@ AW_TL_ERC AwSetD3DDevice(AvPDDObject * _ddP, AvPD3DDevice * _d3ddeviceP)
 	else
 		return AwSetD3DDevice(_d3ddeviceP);
 }
+#endif
 
 #undef FUNCTION_NAME
 #define FUNCTION_NAME "AwSetPixelFormat()"
 static AW_TL_ERC AwSetPixelFormat(AwTl::PixelFormat * _pfP, void * _ddpfP)
 {
+	using AwTl::SetBitShifts;
 
-		using AwTl::SetBitShifts;
-	
 //fprintf(stderr, "AwSetPixelFormat(%p, %p)\n", _pfP, _ddpfP);
 
 	_pfP->validB = false;
-	
 	_pfP->palettizedB = true;
-
 	_pfP->validB = true;
-	
-_pfP->palettizedB = 0;
-_pfP->alphaB = 0;
-_pfP->validB = 1;
-_pfP->bitsPerPixel = 32;
-_pfP->redLeftShift = 0;
-_pfP->greenLeftShift = 8;
-_pfP->blueLeftShift = 16;
-_pfP->redRightShift = 0;
-_pfP->greenRightShift = 0;
-_pfP->blueRightShift = 0;
-_pfP->dwRGBAlphaBitMask = 0xFF000000;
+	_pfP->palettizedB = 0;
+	_pfP->alphaB = 0;
+	_pfP->validB = 1;
+	_pfP->bitsPerPixel = 32;
+	_pfP->redLeftShift = 0;
+	_pfP->greenLeftShift = 8;
+	_pfP->blueLeftShift = 16;
+	_pfP->redRightShift = 0;
+	_pfP->greenRightShift = 0;
+	_pfP->blueRightShift = 0;
+	_pfP->dwRGBAlphaBitMask = 0xFF000000;
 
 	return AW_TLE_OK;
 
@@ -2593,7 +2593,7 @@ _pfP->dwRGBAlphaBitMask = 0xFF000000;
 	return AW_TLE_OK;
 #endif
 }
-
+#if 0
 AW_TL_ERC AwSetTextureFormat2(void* _ddpfP) // BJD
 {
 	db_logf4(("AwSetTextureFormat(%p) called",_ddpfP));
@@ -2696,7 +2696,7 @@ AW_TL_ERC AwGetTextureSize(register unsigned * _widthP, register unsigned * _hei
 */	
 	return AW_TLE_OK;
 }
-
+#endif
 
 /******************************/
 /* PUBLIC: AwCreate functions */

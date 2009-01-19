@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+/* required for translucency type enum */
 #include "d3_func.h"
 
 /*KJL****************************************************************************************

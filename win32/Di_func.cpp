@@ -67,11 +67,11 @@ static LPDIRECTINPUTDEVICE8     lpdiKeyboard;  // keyboard device interface
 static LPDIRECTINPUTDEVICE8     lpdiMouse;     // mouse device interface
 static BOOL						DIKeyboardOkay;  // Is the keyboard acquired?
 
-static IDirectInputDevice*     g_pJoystick         = NULL;     
-static IDirectInputDevice2*    g_pJoystickDevice2  = NULL;  // needed to poll joystick
+static IDirectInputDevice*		g_pJoystick         = NULL;     
+static IDirectInputDevice2*		g_pJoystickDevice2  = NULL;  // needed to poll joystick
 
-	static char bGravePressed = No;
-		// added 14/1/98 by DHM as a temporary hack to debounce the GRAVE key
+static char bGravePressed = No;
+// added 14/1/98 by DHM as a temporary hack to debounce the GRAVE key
 
 /*
 	Externs for input communication
@@ -1338,7 +1338,6 @@ to make F8 not count in a 'press any key' situation */
 				GotAnyKey = TRUE;
 			}
 		}
-		
 	}
 
 

@@ -41,7 +41,7 @@
 char const * cl_pszGameMode = NULL;
 
 #include <string>
-#include "d3_func.h"
+//#include "d3_func.h"
 // used to determine if the display is palettized
 // currently assuming that if this is <= 8 then all
 // surfaces et. except d3d textures have a global palette

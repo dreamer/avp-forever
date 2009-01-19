@@ -684,6 +684,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf)
 		imageData[i+3] = buf[i+3];
 	}
 
+#if 0
 	/* create direct3d texture */
 	if(FAILED(D3DXCreateTextureFromFileInMemory(d3d.lpD3DDevice,
 		buffer,
@@ -695,6 +696,30 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf)
 		delete[] buffer;
 		return NULL;
 	}
+#endif
+
+	D3DXIMAGE_INFO image;
+	image.Depth = 32;
+	image.Width = tex->width;
+	image.Height= tex->height;
+	image.MipLevels = 1;
+	image.Depth = D3DFMT_A8R8G8B8;
+
+	if(FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
+		buffer,
+		sizeof(TGA_HEADER) + imageSize,
+		tex->width,
+		tex->height,
+		1,
+		0,
+		D3DFMT_A8R8G8B8,
+		D3DPOOL_DEFAULT, // not used for xbox
+		D3DX_FILTER_NONE,
+		D3DX_FILTER_NONE,
+		0,
+		&image,
+		0,
+		&destTexture)))
 
 	delete TgaHeader;
 	delete[] buffer;
@@ -1041,8 +1066,8 @@ BOOL InitialiseDirect3DImmediateMode()
 		d3dpp.BackBufferHeight = height;
 		// setting this to interval one will cap the framerate to monitor refresh
 		// the timer goes a bit mad if this isnt capped!
-//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 //		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 	}
 	d3dpp.BackBufferCount = 1;
