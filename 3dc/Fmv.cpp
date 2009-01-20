@@ -200,10 +200,12 @@ void FmvClose()
 	fmvPlaying = false;
 
 	/* ......................... ahem */
-	while (frameThreadHandle != 0 && decodingThreadHandle != 0 && updateAudioThreadHandle != 0)
+	while ((frameThreadHandle != 0) || (decodingThreadHandle != 0) || (updateAudioThreadHandle != 0))
 	{
 		Sleep(2);
 	}
+
+	OutputDebugString("releasing..\n");
 
 	SAFE_RELEASE(fmvTexture);
 	SAFE_RELEASE(fmvDynamicTexture);
@@ -216,6 +218,9 @@ void FmvClose()
 
 	delete []audioDataBuffer;
 	audioDataBuffer = NULL;
+	audioDataBufferSize = 0;
+	OutputDebugString("deleted audioDataBuffer\n");
+
 	delete []fmvRingBuffer.buffer;
 	fmvRingBuffer.buffer = NULL;
 
@@ -937,9 +942,11 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 		if (audioDataBuffer != NULL)
 		{
 			delete []audioDataBuffer;
+			OutputDebugString("deleted audioDataBuffer to resize\n");
 		}
 		
 		audioDataBuffer = new unsigned char[dataSize];
+		OutputDebugString("creating audioDataBuffer\n");
 //		unsigned char *new_buffer = (unsigned char*)realloc(audioDataBuffer, dataSize);
 		if (!audioDataBuffer) {
 			printf("Out of memory\n");
@@ -1059,8 +1066,6 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 			}
 		}
 #endif
-
-//		SDL_UnlockAudio();
 	}
 #endif
 }
