@@ -8740,7 +8740,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 
 	/* lock the d3d texture */
 	D3DLOCKED_RECT texture_rect;
-	LastError = ftPtr->DestTexture->LockRect(0,&texture_rect,NULL,D3DLOCK_DISCARD);
+	LastError = ftPtr->DestTexture->LockRect(0, &texture_rect, NULL,D3DLOCK_DISCARD);
 	if(FAILED(LastError))
 	{
 		LogDxErrorString("Could not lock Direct3D texture ftPtr->DestTexture\n");

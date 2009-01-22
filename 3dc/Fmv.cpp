@@ -8,6 +8,7 @@ extern "C" {
 #include "inline.h"
 #include <math.h>
 
+#include <assert.h>
 #include <sndfile.h>
 
 extern int GotAnyKey;
@@ -75,6 +76,8 @@ void writeFmvData(unsigned char *destData, unsigned char* srcData, int width, in
 int CreateFMVAudioBuffer(int channels, int rate);
 void handle_audio_data (OggPlay * player, int track, OggPlayAudioData * data, int samples);
 int WriteToDsound(int dataSize, int offset);
+int GetWritableBufferSize();
+int updateAudioBuffer(int numBytes, short *data);
 
 extern LPDIRECTSOUND			DSObject; 
 
@@ -100,6 +103,12 @@ LPVOID					fmvaudioPtr2;
 DWORD					fmvaudioBytes2;
 int						fullBufferSize = 0;
 int						halfBufferSize = 0;
+
+DWORD					bufferOffset = 0;
+long					lastPlayCursor = 0;
+long					totalBytesPlayed = 0;
+long					totalBytesWritten = 0;
+
 
 /* audio buffer for liboggplay */
 static unsigned char	*audioDataBuffer = NULL;
@@ -140,6 +149,7 @@ void UpdateFMVAudioBuffer(void *arg)
 
 	while(fmvPlaying)
 	{
+#if 0
 		int wait_value = WaitForMultipleObjects(2, fmvhHandles, FALSE, 1);
 
 		if((wait_value != WAIT_TIMEOUT) && (wait_value != WAIT_FAILED))
@@ -157,6 +167,7 @@ void UpdateFMVAudioBuffer(void *arg)
 
 			WriteToDsound( fmvRingBuffer.bufferSize / 2, lockOffset );
 		}
+#endif
 	}
 
 	updateAudioThreadHandle = 0;
@@ -207,26 +218,44 @@ void FmvClose()
 
 	OutputDebugString("releasing..\n");
 
+	/* release d3d textures */
 	SAFE_RELEASE(fmvTexture);
 	SAFE_RELEASE(fmvDynamicTexture);
 
+	/* delete texture data buffer */
 	if (textureData != NULL)
 	{
 		delete []textureData;
 		textureData = NULL;
 	}
 
+	/* delete temp audio buffer */
 	delete []audioDataBuffer;
 	audioDataBuffer = NULL;
 	audioDataBufferSize = 0;
 	OutputDebugString("deleted audioDataBuffer\n");
 
+	/* clear ringbuffer */
 	delete []fmvRingBuffer.buffer;
 	fmvRingBuffer.buffer = NULL;
+	fmvRingBuffer.bufferBytesPlayed = 0;
+	fmvRingBuffer.bufferBytesWritten = 0;
+	fmvRingBuffer.bufferFillSize = 0;
+	fmvRingBuffer.bufferInitialFill = false;
+	fmvRingBuffer.bufferReadPos = 0;
+	fmvRingBuffer.bufferSize = 0;
+	fmvRingBuffer.bufferWritePos = 0;
 
+	bufferOffset = 0;
+	lastPlayCursor = 0;
+	totalBytesPlayed = 0;
+	totalBytesWritten = 0;
+
+	/* stop and release dsound buffer */
 	fmvAudioBuffer->Stop();
 	SAFE_RELEASE(fmvAudioBuffer);
 
+	/* destroy liboggplay reader */
 	if (reader != NULL)
 		reader->destroy(reader);
 
@@ -488,6 +517,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr, int pitch)
 //	OutputDebugString("NextFMVTextureFrame\n");
 	int smackerFormat = 1;
 	int w = 128;
+	int h = 96;
 	
 	{
 //		extern D3DINFO d3d;
@@ -505,7 +535,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr, int pitch)
 		if (FmvWait()) return 0;
 		/* unpack frame */
 
-		writeFmvData((unsigned char*)bufferPtr, textureData, w, 96, pitch);
+		writeFmvData((unsigned char*)bufferPtr, textureData, w, h, pitch);
 
 //		if (textureData == NULL) return -1;
 //		bufferPtr = textureData;
@@ -540,7 +570,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr, int pitch)
 
 	else if(!ftPtr->StaticImageDrawn || smackerFormat)
 	{
-		int i = w*96;///2;
+		int i = w*h;///2;
 		unsigned int seed = FastRandom();
 		int *ptr = (int*)bufferPtr;
 		do
@@ -659,7 +689,7 @@ int FmvOpen(char *filenamePtr)
 		{
 			int ret;
 			audio_track = i;      
-			oggplay_set_offset(player, i, 200);
+			oggplay_set_offset(player, i, 300);
 			ret = oggplay_get_audio_samplerate(player, i , &rate);
 			ret = oggplay_get_audio_channels(player, i, &channels);
 			printf("samplerate: %d channels: %d\n", rate, channels);
@@ -683,7 +713,7 @@ int FmvOpen(char *filenamePtr)
 
 	if (video_track == -1) {
 		if (audio_track >= 0) {
-			oggplay_set_callback_num_frames(player, audio_track, 2048);
+			oggplay_set_callback_num_frames(player, audio_track, 8192);
 		}
 	}
 
@@ -713,7 +743,7 @@ int FmvOpen(char *filenamePtr)
 	/* create decoding threads? */
 	_beginthread(drive_decoding, 0, 0);
 	_beginthread(display_frame, 0, 0);
-	_beginthread(UpdateFMVAudioBuffer, 0, 0);
+//	_beginthread(UpdateFMVAudioBuffer, 0, 0);
 
 	return 0;
 }
@@ -804,7 +834,7 @@ void display_frame(void *arg)
 			continue;
 		}
 
-		Sleep(35);
+		Sleep(delay - 5);
 /*
 		if (target > bufferBytesPlayed - position) 
 		{
@@ -947,16 +977,22 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 		
 		audioDataBuffer = new unsigned char[dataSize];
 		OutputDebugString("creating audioDataBuffer\n");
-//		unsigned char *new_buffer = (unsigned char*)realloc(audioDataBuffer, dataSize);
+
 		if (!audioDataBuffer) {
-			printf("Out of memory\n");
-		return;
+			OutputDebugString("Out of memory\n");
+			return;
 		}
-//		audioDataBuffer = new_buffer;
 		audioDataBufferSize = dataSize;
 	}
 
 	float_to_short_array((float *)data, (short*)audioDataBuffer, samples * channels);
+
+//	char buf[100];
+//	sprintf(buf, "writable dsound space: %d\n", GetWritableBufferSize());
+//	OutputDebugString(buf);
+
+	GetWritableBufferSize();
+	updateAudioBuffer(dataSize, (short*)audioDataBuffer);
 #if 1
 //	if (audio_opened) 
 	{
@@ -997,7 +1033,9 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 		/* if we can't fit all our data.. */
 		if (dataSize > freeSpace) 
 		{
-			printf("not enough room for all data. need %d, have free %d fillCount: %d\n", dataSize, freeSpace, fmvRingBuffer.bufferFillSize);
+			char buf[100];
+			sprintf(buf, "not enough room for all data. need %d, have free %d fillCount: %d\n", dataSize, freeSpace, fmvRingBuffer.bufferFillSize);
+//			OutputDebugString(buf);
 			dataSize = freeSpace;
 		}
 
@@ -1045,7 +1083,7 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 
 		if (fmvRingBuffer.bufferFillSize > fmvRingBuffer.bufferSize)
 		{
-			printf("bufferFillSize greater than store size!\n");
+			OutputDebugString("bufferFillSize greater than store size!\n");
 		}
 
 		fmvRingBuffer.bufferBytesWritten += firstSize + secondSize;
@@ -1054,20 +1092,132 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 //		if (bufferInitialFill == false)
 		if (fmvRingBuffer.bufferInitialFill == false)
 		{
-//			if(bufferBytesWritten >= fullBufferSize)
-			if(fmvRingBuffer.bufferBytesWritten >= fullBufferSize)
+//			OutputDebugString("bufferInitialFill = false\n");
+			if(totalBytesWritten >= fullBufferSize / 2)
+//			if(fmvRingBuffer.bufferBytesWritten / 2 >= fullBufferSize)
 			{
-				WriteToDsound(fullBufferSize, 0);
+//				WriteToDsound(fullBufferSize, 0);
 
-				printf("starting audio. buffer should have: %d bytes\n", fmvRingBuffer.bufferBytesWritten);
+				char buf[100];
+				sprintf(buf, "starting audio. buffer should have: %d bytes\n", fmvRingBuffer.bufferBytesWritten);
+				OutputDebugString(buf);
 				fmvRingBuffer.bufferInitialFill = true;
 
-				fmvAudioBuffer->Play(0,0,DSBPLAY_LOOPING);
+				if(FAILED(fmvAudioBuffer->Play(0,0,DSBPLAY_LOOPING)))
+				{
+					OutputDebugString("can't play dsound fmv buffer\n");
+				}
 			}
 		}
 #endif
 	}
 #endif
+}
+
+int updateAudioBuffer(int numBytes, short *data)
+{
+	if(numBytes == 0) return 0;
+
+	int bytesWritten = 0;
+	DWORD playPosition = 0;
+	DWORD writePosition = 0;
+	DWORD writeLen = 0;
+
+	unsigned char *audioData = (unsigned char *)data;
+
+	/* check where play cursor is... */
+	fmvAudioBuffer->GetCurrentPosition(&playPosition, &writePosition);
+
+	char buf[100];
+//	sprintf(buf, "play cursor: %i writing data at: %i\n", playPosition, bufferOffset);
+//	OutputDebugString(buf);
+
+	/* lock buffer */
+	if(FAILED(fmvAudioBuffer->Lock(bufferOffset/*offset*/, numBytes/*size of lock*/, &fmvaudioPtr1, &fmvaudioBytes1, &fmvaudioPtr2, &fmvaudioBytes2, NULL))) 
+	{
+		OutputDebugString("\n couldn't lock buffer");
+		return 0;
+	}
+
+	/* write data to buffer */
+	if(!fmvaudioPtr2) // buffer didn't wrap
+	{
+		memcpy(fmvaudioPtr1, audioData, fmvaudioBytes1);
+		bytesWritten += fmvaudioBytes1;
+	}
+	else // need to split memcpy
+	{
+		memcpy(fmvaudioPtr1, audioData, fmvaudioBytes1);
+		memcpy(fmvaudioPtr2, &audioData[fmvaudioBytes1], fmvaudioBytes2);
+		bytesWritten += fmvaudioBytes1 + fmvaudioBytes2;
+	}
+
+	if((fmvaudioBytes1 + fmvaudioBytes2) != numBytes)
+	{
+		OutputDebugString("didnt lock enough buffer space\n");
+	}
+
+	/* unlock buffer */
+	if(FAILED(fmvAudioBuffer->Unlock(fmvaudioPtr1, fmvaudioBytes1, fmvaudioPtr2, fmvaudioBytes2))) 
+	{
+		OutputDebugString("\n couldn't unlock ds buffer");
+		return 0;
+	}
+
+	/* add to previous offset, and get remainder from buffersize */
+	bufferOffset = (bufferOffset + fmvaudioBytes1 + fmvaudioBytes2)
+                     % fullBufferSize;
+
+
+	totalBytesWritten += bytesWritten;//+= (audioBytes1 + audioBytes2);
+
+	return bytesWritten;
+}
+
+int GetWritableBufferSize()
+{
+	DWORD playPosition = 0;
+	DWORD writePosition = 0;
+	DWORD writeLen = 0;
+	long bytesPlayed = 0;
+
+	fmvAudioBuffer->GetCurrentPosition(&playPosition, &writePosition);
+
+	/* How many bytes does DirectSound say have been played. */
+	bytesPlayed = playPosition - lastPlayCursor;
+	if( bytesPlayed < 0 ) bytesPlayed += fullBufferSize; // unwrap
+	lastPlayCursor = playPosition;
+
+	char buf[100];
+//	sprintf(buf, "getWrite - playPosition: %d writePosition: %d\n", playPosition, writePosition);
+//	OutputDebugString(buf);
+
+	if(bufferOffset <= playPosition)
+	{
+		writeLen = playPosition - bufferOffset;
+	}
+
+    else // (bufferOffset > playPosition)
+    {
+		// Play cursor has wrapped
+		writeLen = (fullBufferSize - bufferOffset) + playPosition;
+    }
+
+//	char buf[100];
+//	sprintf(buf, "bytesPlayed: %ld\n", bytesPlayed);
+//	OutputDebugString(buf);
+/*
+	if(bytesPlayed > bufferSize) // FIX THIS PLZZ
+	{	
+		bytesPlayed = 0;
+	}
+*/
+	totalBytesPlayed += bytesPlayed;
+
+//	sprintf(buf, "total bytes played: %d\n", totalBytesPlayed);
+//	OutputDebugString(buf);
+
+	return writeLen;
 }
 
 int WriteToDsound(/*char *audioData,*/ int dataSize, int offset)
@@ -1341,9 +1491,7 @@ int CreateFMVAudioBuffer(int channels, int rate)
 		return 0;
 	}
 
-//	(*bufferSize) = bufferFormat.dwBufferBytes;
-
-#if 1
+#if 0
 	if(FAILED(fmvAudioBuffer->QueryInterface( IID_IDirectSoundNotify, 
                                         (void**)&fmvpDSNotify ) ) )
 	{
@@ -1398,7 +1546,7 @@ int CreateFMVAudioBuffer(int channels, int rate)
 	OutputDebugString(buf);
 
 	/* initalise data buffer in ring buffer */
-	fmvRingBuffer.buffer = new unsigned char[bufferFormat.dwBufferBytes * 4];
+	fmvRingBuffer.buffer = new unsigned char[bufferFormat.dwBufferBytes * 2];
 	fmvRingBuffer.bufferSize = bufferFormat.dwBufferBytes;
 
 	return bufferFormat.dwBufferBytes;

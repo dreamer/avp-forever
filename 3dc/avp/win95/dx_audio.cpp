@@ -2457,6 +2457,7 @@ int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
 	if(FAILED(vorbisBuffer->Lock(offset, dataSize, &audioPtr1, &audioBytes1, &audioPtr2, &audioBytes2, NULL))) 
 	{
 		LogDxErrorString("couldn't lock ogg vorbis buffer for update\n");
+		return 0;
 	}
 
 	/* write data to buffer */

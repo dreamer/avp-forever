@@ -22,11 +22,10 @@ void LogDxErrorString(char *errorString)
 	#pragma comment(lib, "ws2_32.lib")
 #endif
 
-ENetHost * Client;
-ENetAddress ServerAddress;
-ENetAddress BroadcastAddress;
-
-ENetPeer *ServerPeer;
+ENetHost		*Client;
+ENetAddress		ServerAddress;
+ENetAddress		BroadcastAddress;
+ENetPeer		*ServerPeer;
 
 /* used to hold message data */
 static unsigned char packetBuffer[NET_MESSAGEBUFFERSIZE]; 
@@ -39,14 +38,14 @@ extern void MinimalNetCollectMessages(void);
 extern void InitAVPNetGameForHost(int species, int gamestyle, int level);
 extern void InitAVPNetGameForJoin(void);
 extern int DetermineAvailableCharacterTypes(BOOL ConsiderUsedCharacters);
-extern char* GetCustomMultiplayerLevelName(int index,int gameType);
+extern char* GetCustomMultiplayerLevelName(int index, int gameType);
 
 static BOOL DirectPlay_CreatePlayer(char* FormalName,char* FriendlyName);
 int GetNextPlayerID();
 void FindAvPSessions();
 static BOOL DpExtProcessRecvdMsg(BOOL bIsSystemMsg, LPVOID lpData, DWORD dwDataSize);
-HRESULT DPlayCreateSession(LPTSTR lptszSessionName,int maxPlayers,int dwUser1,int dwUser2);
-BOOL DirectPlay_UpdateSessionDescForLobbiedGame(int gamestyle,int level);
+HRESULT DPlayCreateSession(LPTSTR lptszSessionName,int maxPlayers, int dwUser1, int dwUser2);
+BOOL DirectPlay_UpdateSessionDescForLobbiedGame(int gamestyle, int level);
 int DPlayOpenSession(char *hostName);
 int sendSystemMessage(int messageType, int idFrom, int idTo, unsigned char *lpData, int dwDataSize);
 void findPlayerName(int playerId, char *playerName, int size);
@@ -166,9 +165,10 @@ int DirectPlay_HostGame(char *playerName, char *sessionName, int species, int ga
                                   0     /* assume any amount of outgoing bandwidth */);
 			if(Client == NULL)
 			{
-				LogDxErrorString("Failed to create Enet client\n");
+				LogDxErrorString("Failed to create Enet server\n");
 				return 0;
 			}
+
 //			else OutputDebugString("Created Enet server\n");
 
 			/* create session */
@@ -869,7 +869,7 @@ void FindAvPSessions()
 	enet_host_destroy(Client);
 }
 
-HRESULT DPlayCreateSession(LPTSTR lptszSessionName,int maxPlayers,int dwUser1,int dwUser2)
+HRESULT DPlayCreateSession(LPTSTR lptszSessionName, int maxPlayers, int dwUser1, int dwUser2)
 {
 	ZeroMemory(&dpSession, sizeof(dpSession));
 	dpSession.dwSize = sizeof(dpSession);

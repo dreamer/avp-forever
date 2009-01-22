@@ -1224,7 +1224,7 @@ BOOL InitialiseDirect3DImmediateMode()
 		return FALSE;
 	}
 
-	LastError = d3d.lpD3DBackSurface->GetDesc(&d3d.BackSurface_desc);
+	LastError = d3d.lpD3DBackSurface->GetDesc(&d3d.backSurfaceDesc);
 
 	if (FAILED(LastError))
 	{

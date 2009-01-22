@@ -68,7 +68,7 @@ typedef struct D3DInfo {
     LPDIRECT3DDEVICE9		lpD3DDevice; 
     D3DVIEWPORT9			lpD3DViewport; 
 	LPDIRECT3DSURFACE9		lpD3DBackSurface;// back buffer surface
-	D3DSURFACE_DESC			BackSurface_desc; // back buffer surface description
+	D3DSURFACE_DESC			backSurfaceDesc; // back buffer surface description
 	D3DPRESENT_PARAMETERS	d3dpp;
 
 	LPDIRECT3DVERTEXBUFFER9 lpD3DVertexBuffer;

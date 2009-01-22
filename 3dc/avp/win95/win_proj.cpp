@@ -298,7 +298,6 @@ int mouseMoved = 0;
             break;
         }
 
-
 	 // This, in combination with code in win_func,
 	 // will hopefully disable Alt-Tabbing...
 		case WM_ACTIVATEAPP:
