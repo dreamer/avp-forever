@@ -10,10 +10,9 @@ extern "C" {
 #include "dxlog.h"
 
 #include "d3_func.h"
+
 //#include "d3dmacs.h"
-
 //#include "string.h"
-
 //#include "kshape.h"
 //#include "frustrum.h"
 
@@ -34,7 +33,8 @@ extern "C++"{
 // STL stuff
 #include <vector>
 #include <algorithm>
-//#include <string.h>
+
+#include <XInput.h> // XInput API
 
 #include "logString.h"
 
@@ -732,8 +732,12 @@ BOOL BeginD3DScene()
 				OutputDebugString("\n DEVICE NOT RESET ");
 				if( ReleaseVolatileResources() == TRUE ) 
 				{
+					OutputDebugString("releasing resources for a device reset..\n");
 					/* release fmv textures */
 					ReleaseAllFMVTexturesForDeviceReset();
+
+					/* disable XInput */
+					XInputEnable( false );
 
 					if(FAILED( d3d.lpD3DDevice->Reset( &d3d.d3dpp ))) 
 					{
@@ -741,9 +745,14 @@ BOOL BeginD3DScene()
 					}
 					else 
 					{	
+						OutputDebugString("we have reset the device. recreating resources..\n");
 						CreateVolatileResources();
 						/* reload fmv textures */
 						ScanImagesForFMVs();
+
+						/* re-enable XInput */
+						XInputEnable( true );
+						break;
 					}
 				}
 			}
@@ -751,8 +760,8 @@ BOOL BeginD3DScene()
 			{
 				OutputDebugString("\n DEVICE LOST ");
 			}
-			Sleep(100);
-			break;
+			Sleep(50);
+//			continue;
 		}
 	}
 
@@ -8702,19 +8711,20 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
 {
-	/* texture will generally be created with A8R8G8B8. Release so we can create with R5G6B5 format */
-//	SAFE_RELEASE(ftPtr->ImagePtr->Direct3DTexture);
+	/* texture will be created with managed pool. we need it in default */
+	SAFE_RELEASE(ftPtr->ImagePtr->Direct3DTexture);
+	ftPtr->ImagePtr->Direct3DTexture = NULL;
 
 	/* just in case */
 	SAFE_RELEASE(ftPtr->DestTexture);
 	ftPtr->DestTexture = NULL;
 
 	/* this texture is what's used for rendering of ingame video monitors */
-//	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, NULL, D3DFMT_R5G6B5, D3DPOOL_DEFAULT, &ftPtr->ImagePtr->Direct3DTexture, NULL);
-//	if(FAILED(LastError))
-//	{
-//		LogDxErrorString("Could not create Direct3D texture ftPtr->ImagePtr->Direct3DTexture\n");
-//	}
+	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &ftPtr->ImagePtr->Direct3DTexture, NULL);
+	if(FAILED(LastError))
+	{
+		LogDxErrorString("Could not create Direct3D texture ftPtr->ImagePtr->Direct3DTexture\n");
+	}
 
 	/* we use this texture to write fmv data to */
 	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &ftPtr->DestTexture, NULL);
@@ -8733,14 +8743,13 @@ void ReleaseFMVTexture()
 
 void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 {
-//	return;
 //	LOCALASSERT(ftPtr);
 //	LOCALASSERT(ftPtr->ImagePtr);
 	if(!ftPtr) return;
 
 	/* lock the d3d texture */
 	D3DLOCKED_RECT texture_rect;
-	LastError = ftPtr->DestTexture->LockRect(0, &texture_rect, NULL,D3DLOCK_DISCARD);
+	LastError = ftPtr->DestTexture->LockRect(0, &texture_rect, NULL, D3DLOCK_DISCARD);
 	if(FAILED(LastError))
 	{
 		LogDxErrorString("Could not lock Direct3D texture ftPtr->DestTexture\n");

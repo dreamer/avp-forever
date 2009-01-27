@@ -91,14 +91,20 @@ char* GetDeviceName()
 // list of allowed display formats
 const D3DFORMAT DisplayFormats[] =
 {
+	D3DFMT_A8R8G8B8,
 	D3DFMT_X8R8G8B8,
-	D3DFMT_R5G6B5
+	D3DFMT_R8G8B8,
+	D3DFMT_A1R5G5B5,
+	D3DFMT_R5G6B5,
+	D3DFMT_X1R5G5B5
 };
 
 // list of allowed depth buffer formats
 const D3DFORMAT StencilFormats[] =
 {
 	D3DFMT_D24S8,
+	D3DFMT_D32,
+	D3DFMT_D24FS8,
 	D3DFMT_D16
 };
 
@@ -713,7 +719,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf)
 		1,
 		0,
 		D3DFMT_A8R8G8B8,
-		D3DPOOL_DEFAULT, // not used for xbox
+		D3DPOOL_MANAGED,
 		D3DX_FILTER_NONE,
 		D3DX_FILTER_NONE,
 		0,
@@ -840,13 +846,18 @@ BOOL ReleaseVolatileResources()
 	SAFE_RELEASE(d3d.lpD3DBackSurface);
 	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
 	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
-/*
-	if(mainMenu)
+
+	if(!mainMenu)
 	{
-		ReleaseAllFMVTextures();
-		ReleaseBinkTextures();
+		/* release fmv textures */
+		for(int i = 0; i < NumberOfFMVTextures; i++)
+		{	
+			OutputDebugString("releasing an fmv texture..\n");
+			SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
+			SAFE_RELEASE(FMVTexture[i].DestTexture);
+		}
 	}
-*/
+
 	return TRUE;
 }
 
@@ -884,7 +895,7 @@ BOOL CreateVolatileResources()
 	}
 
 	SetExecuteBufferDefaults();
-#if 0
+#if 1
 	if(!mainMenu)
 	{
 		/* re-create fmv textures */
@@ -897,7 +908,7 @@ BOOL CreateVolatileResources()
 	return TRUE;
 }
 
-BOOL ChangeGameResolution(int width, int height, int colour_depth)
+BOOL ChangeGameResolution(int width, int height, int colourDepth)
 {
 	ReleaseVolatileResources();
 
@@ -909,7 +920,7 @@ BOOL ChangeGameResolution(int width, int height, int colour_depth)
 	if(!FAILED(LastError)) {
 		ScreenDescriptorBlock.SDB_Width     = width;
 		ScreenDescriptorBlock.SDB_Height    = height;
-		ScreenDescriptorBlock.SDB_Depth		= colour_depth;
+		ScreenDescriptorBlock.SDB_Depth		= colourDepth;
 		ScreenDescriptorBlock.SDB_Size      = width*height;
 		ScreenDescriptorBlock.SDB_CentreX   = width/2;
 		ScreenDescriptorBlock.SDB_CentreY   = height/2;
@@ -930,6 +941,7 @@ BOOL ChangeGameResolution(int width, int height, int colour_depth)
 	return true;
 }
 
+/* need to redo all the enumeration code here, as it's not very good.. */
 BOOL InitialiseDirect3DImmediateMode()
 {
 	/* clear log file first, then write header text */
@@ -1072,7 +1084,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	}
 	d3dpp.BackBufferCount = 1;
 
-	if(triple_buffer) 
+	if(triple_buffer)
 	{
 		d3dpp.BackBufferCount = 2;
 		d3dpp.SwapEffect = D3DSWAPEFFECT_FLIP;
@@ -1095,7 +1107,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	// the timer goes a bit mad if this isnt capped!
 //	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;//D3DPRESENT_INTERVAL_IMMEDIATE;
 
-	for( int i = 0; i < 2; i++) 
+	for( int i = 0; i < (sizeof(StencilFormats) / sizeof(StencilFormats[0])); i++) 
 	{
 		LastError = d3d.lpD3D->CheckDeviceFormat(D3DADAPTER_DEFAULT, 
 									D3DDEVTYPE_HAL, 
@@ -1105,26 +1117,41 @@ BOOL InitialiseDirect3DImmediateMode()
 									StencilFormats[i]);
 		if(FAILED(LastError)) 
 		{
-			LogDxError(LastError);
+			LogDxErrorString("CheckDeviceFormat failed\n");
 			continue;
 		}
-		else SelectedDepthFormat = StencilFormats[i];
-	}
-	
-	LastError = d3d.lpD3D->CheckDepthStencilMatch( D3DADAPTER_DEFAULT,
+
+		LastError = d3d.lpD3D->CheckDepthStencilMatch( D3DADAPTER_DEFAULT,
 									D3DDEVTYPE_HAL,
 									SelectedAdapterFormat,
 									D3DFMT_X8R8G8B8,
 									SelectedDepthFormat);
+
+		if(FAILED(LastError))
+		{
+			LogDxErrorString("CheckDepthStencilMatch failed\n");
+		}
+		else
+		{
+			SelectedDepthFormat = StencilFormats[i];
+			d3dpp.EnableAutoDepthStencil = true;
+			break;
+		}
+
+		LogDxErrorString("couldn't get a usable depth buffer!\n");
+		d3dpp.EnableAutoDepthStencil = false;
+	}
+	
+/*	
 	if(FAILED(LastError)) 
 	{
 		LogDxErrorString("Stencil and Depth format didn't match\n");
 		d3dpp.EnableAutoDepthStencil = false;
 	}
 	else d3dpp.EnableAutoDepthStencil = true;
-
-	d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8;//SelectedDepthFormat;
-	if(SelectedDepthFormat == D3DFMT_D24S8) UsingStencil = true;
+*/
+	d3dpp.AutoDepthStencilFormat = SelectedDepthFormat;
+//	if(SelectedDepthFormat == D3DFMT_D24S8) UsingStencil = true;
 
 //	d3dpp.AutoDepthStencilFormat = D3DFMT_D16;//SelectedDepthFormat;
 //	if(SelectedDepthFormat == D3DFMT_D16) UsingStencil = true;
@@ -1191,14 +1218,46 @@ BOOL InitialiseDirect3DImmediateMode()
 	// Log format set
 	switch(d3dpp.BackBufferFormat)
 	{
+		case D3DFMT_A8R8G8B8:
+			LogDxString("\t Format set: 32bit - D3DFMT_A8R8G8B8");
+			break;
 		case D3DFMT_X8R8G8B8:
 			LogDxString("\t Format set: 32bit - D3DFMT_X8R8G8B8");
+			break;
+		case D3DFMT_R8G8B8:
+			LogDxString("\t Format set: 32bit - D3DFMT_R8G8B8");
+			break;
+		case D3DFMT_A1R5G5B5:
+			LogDxString("\t Format set: 16bit - D3DFMT_A1R5G5B5");
 			break;
 		case D3DFMT_R5G6B5:
 			LogDxString("\t Format set: 16bit - D3DFMT_R5G6B5");
 			break;
+		case D3DFMT_X1R5G5B5:
+			LogDxString("\t Format set: 16bit - D3DFMT_X1R5G5B5");
+			break;
 		default:
 			LogDxString("\t Format set: Unknown");
+			break;
+	}
+
+	// Log format set
+	switch(d3dpp.AutoDepthStencilFormat)
+	{
+		case D3DFMT_D24S8:
+			LogDxString("\t Depth Format set: 24bit and 8bit stencil - D3DFMT_D24S8");
+			break;
+		case D3DFMT_D24X8:
+			LogDxString("\t Depth Format set: 24bit and 0bit stencil - D3DFMT_D24X8");
+			break;
+		case D3DFMT_D32:
+			LogDxString("\t Depth Format set: 32bit and 0bit stencil - D3DFMT_D32");
+			break;
+		case D3DFMT_D24FS8:
+			LogDxString("\t Depth Format set: 24bit and 8bit stencil - D3DFMT_D32");
+			break;
+		default:
+			LogDxString("\t Depth Format set: Unknown");
 			break;
 	}
 	

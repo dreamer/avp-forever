@@ -29,8 +29,8 @@ typedef struct FMVTEXTURE
 
 	int MessageNumber;
 
-	D3DTEXTURE SrcSurface;
-	D3DTEXTURE SrcTexture;
+//	D3DTEXTURE SrcSurface;
+//	D3DTEXTURE SrcTexture;
 	D3DTEXTURE DestTexture;
 
 //	PALETTEENTRY SrcPalette[256];

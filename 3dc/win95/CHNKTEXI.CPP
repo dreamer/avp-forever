@@ -815,6 +815,8 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					strcpy(pImageHdr->ImageName,szBuf);
 					pImageHdr->DDSurface = pSurface;
 					pImageHdr->hBackup = hBackup;
+					pImageHdr->Direct3DTexture = NULL;
+
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 					db_logf4(("\t\tsurface:%p",pSurface));
 /*					
@@ -999,8 +1001,9 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 							//char szDbInf[512];
 							//	sprintf(szDbInf,"Texture \"%s\" didn't load",pImageHdr->ImageName);
 							
-							if (pImageHdr->Direct3DTexture == NULL) {
-								OutputDebugString("Direct3DTexture 8 was null!");
+							if (pImageHdr->Direct3DTexture == NULL) 
+							{
+								OutputDebugString("Direct3DTexture was null!");
 							}
 							
 							int gotTextureHandle = 1;

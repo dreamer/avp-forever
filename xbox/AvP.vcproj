@@ -2885,7 +2885,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\Fmv.cpp">
+				RelativePath="..\3dc\Fmv_stubbed.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\fragchnk.cpp">

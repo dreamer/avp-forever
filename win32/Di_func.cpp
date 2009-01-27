@@ -4,6 +4,7 @@
 // Must link to C code in main engine system
 
 #include "logString.h"
+#include <XInput.h> // XInput API
 
 extern "C" {
 
@@ -101,6 +102,19 @@ int JoystickEnabled;
 
 DIJOYSTATE JoystickState;          // DirectInput joystick state 
 
+/* XInput stuff from dx sdk sameples */
+
+/* XInput controller state */
+struct CONTROLER_STATE
+{
+    XINPUT_STATE state;
+    bool bConnected;
+};
+
+#define MAX_CONTROLLERS 4  // XInput handles up to 4 controllers 
+#define INPUT_DEADZONE  ( 0.24f * FLOAT(0x7FFF) )  // Default to 24% of the +/- 32767 range.   This is a reasonable default value but can be altered if needed.
+
+CONTROLER_STATE g_Controllers[MAX_CONTROLLERS];
 
 /*
 	8/4/98 DHM: A new array, analagous to KeyboardInput, except it's debounced
@@ -1637,11 +1651,34 @@ void InitJoysticks(void)
 	JoystickData.dwSize = sizeof(JoystickData);
 
     GotJoystick = CheckForJoystick();
+
+	/* maybe move this somewhere else? */
+	ZeroMemory( g_Controllers, sizeof( CONTROLER_STATE ) * MAX_CONTROLLERS );
+}
+
+HRESULT UpdateControllerState()
+{
+    DWORD dwResult;
+    for( DWORD i = 0; i < MAX_CONTROLLERS; i++ )
+    {
+        // Simply get the state of the controller from XInput.
+        dwResult = XInputGetState( i, &g_Controllers[i].state );
+
+        if( dwResult == ERROR_SUCCESS )
+            g_Controllers[i].bConnected = true;
+        else
+            g_Controllers[i].bConnected = false;
+    }
+
+    return S_OK;
 }
 
 void ReadJoysticks(void)
 {
 	GotJoystick = ReadJoystick();
+
+	/* check XInput pads */
+	UpdateControllerState();
 }
 
 int ReadJoystick(void)

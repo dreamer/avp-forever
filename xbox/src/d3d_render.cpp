@@ -8571,7 +8571,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 
 	// check for success
 	{
-		if (!NextFMVTextureFrame(ftPtr,(void*)texture_rect.pBits))
+		if (!NextFMVTextureFrame(ftPtr, (void*)texture_rect.pBits, texture_rect.Pitch))
 		{
 			ftPtr->ImagePtr->Direct3DTexture->UnlockRect(0);
 		 	return;

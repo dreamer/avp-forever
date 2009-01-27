@@ -80,7 +80,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib d3d9.lib dsound.lib dinput8.lib user32.lib libsndfile-1.lib $(NOINHERIT)"
+				AdditionalDependencies="winmm.lib d3d9.lib dsound.lib dinput8.lib user32.lib libsndfile-1.lib xinput.lib $(NOINHERIT)"
 				OutputFile="debug_AvP.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"

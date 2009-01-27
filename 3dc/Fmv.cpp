@@ -9,7 +9,7 @@ extern "C" {
 #include <math.h>
 
 #include <assert.h>
-#include <sndfile.h>
+#include "sndfile.h"
 
 extern int GotAnyKey;
 
@@ -179,6 +179,20 @@ extern void PlayBinkedFMV(char *filenamePtr)
 
 	/* try to open file - quit this function if we can't */
 	if (FmvOpen(filenamePtr) != 0) return;
+
+	if(FAILED(d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &fmvTexture, NULL)))
+	{
+		OutputDebugString("problem creating fmv texture from d3d\n");
+		FmvClose();
+		return;
+	}
+
+	if(FAILED(d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &fmvDynamicTexture, NULL)))
+	{
+		OutputDebugString("problem creating dynamic fmv texture from d3d\n");
+		FmvClose();
+		return;
+	}
 
 	playing = 1;
 
@@ -417,11 +431,14 @@ void ScanImagesForFMVs()
 
 void ReleaseAllFMVTextures()
 {
+	OutputDebugString("releasing fmv textures and also closing ingame fmv playback\n");
+	FmvClose();
+
 	for(int i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].MessageNumber = 0;
-		ReleaseD3DTexture8(FMVTexture[i].SrcTexture);
-		ReleaseD3DTexture8(FMVTexture[i].SrcSurface);
+//		ReleaseD3DTexture8(FMVTexture[i].SrcTexture);
+//		ReleaseD3DTexture8(FMVTexture[i].SrcSurface);
 		ReleaseD3DTexture8(FMVTexture[i].DestTexture);
 	}
 }
@@ -431,15 +448,20 @@ void ReleaseAllFMVTexturesForDeviceReset()
 	for(int i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].MessageNumber = 0;
-		ReleaseD3DTexture8(FMVTexture[i].SrcTexture);
-		ReleaseD3DTexture8(FMVTexture[i].SrcSurface);
+//		ReleaseD3DTexture8(FMVTexture[i].SrcTexture);
+//		ReleaseD3DTexture8(FMVTexture[i].SrcSurface);
 		ReleaseD3DTexture8(FMVTexture[i].DestTexture);
+
+		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
+
 //		ReleaseD3DTexture8(FMVTexture[i].ImagePtr->Direct3DTexture);
+/*
 		if(FMVTexture[i].ImagePtr->Direct3DTexture != NULL)
 		{
 			FMVTexture[i].ImagePtr->Direct3DTexture->Release();
 			FMVTexture[i].ImagePtr->Direct3DTexture = NULL;
 		}
+*/
 	}
 }
 
@@ -663,7 +685,9 @@ int FmvOpen(char *filenamePtr)
 	{
 		char message[100];
 		sprintf(message,"Unable to access file: %s\n",filenamePtr);
+#ifdef WIN32
 		MessageBox(NULL,message,"AvP Error",MB_OK+MB_SYSTEMMODAL);
+#endif
 //		exit(0x111);
 		return 1;
 //		printf ("could not initialise oggplay with this file\n");
@@ -721,17 +745,14 @@ int FmvOpen(char *filenamePtr)
 
 	/* create direct3d textures */
 //	fmvTexture = CreateD3DTexturePadded(&tempTex, &textureHeight, &textureWidth); 
-	d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &fmvTexture, NULL);
-	d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &fmvDynamicTexture, NULL);
-
-	if (fmvTexture == NULL)
-	{
-		OutputDebugString("problem creating fmv texture from d3d\n");
-	}
-	if (fmvDynamicTexture == NULL)
-	{
-		OutputDebugString("problem creating dynamic fmv texture from d3d\n");
-	}
+#ifdef WIN32
+//	d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &fmvTexture, NULL);
+//	d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &fmvDynamicTexture, NULL);
+#endif
+#ifdef _XBOX
+	d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &fmvTexture);
+	d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &fmvDynamicTexture);
+#endif
 
 	fullBufferSize = CreateFMVAudioBuffer(channels, rate);
 	halfBufferSize = fullBufferSize / 2;

@@ -623,6 +623,7 @@ LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf)
 		1,
 		0,
 		D3DFMT_A8R8G8B8,
+//		D3DFMT_DXT3,
 		D3DPOOL_DEFAULT, // not used for xbox
 		D3DX_FILTER_NONE,
 		D3DX_FILTER_NONE,
