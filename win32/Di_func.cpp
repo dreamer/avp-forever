@@ -116,6 +116,16 @@ struct CONTROLER_STATE
 
 CONTROLER_STATE g_Controllers[MAX_CONTROLLERS];
 
+int xPadRightX;
+int xPadRightY;
+int xPadLeftX;
+int xPadLeftY;
+
+int xPadLookX;
+int xPadLookY;
+int xPadTurnX;
+int xPadTurnY;
+
 /*
 	8/4/98 DHM: A new array, analagous to KeyboardInput, except it's debounced
 */
@@ -1675,10 +1685,151 @@ HRESULT UpdateControllerState()
 
 void ReadJoysticks(void)
 {
+	int tempX = 0;
+	int tempY = 0;
+	int oldxPadLookX, oldxPadLookY;
+	int oldxPadTurnX, oldxPadTurnY;
+
+	xPadLookX = 0;
+	xPadLookY = 0;
+	xPadTurnX = 0;
+	xPadTurnY = 0;
+
+	/* Save right x and y for velocity determination */
+	oldxPadLookX = xPadRightX;
+	oldxPadLookY = xPadRightY;
+
+	/* Save left x and y for velocity determination */
+	oldxPadTurnX = xPadLeftX;
+	oldxPadTurnY = xPadLeftY;
+
 	GotJoystick = ReadJoystick();
 
 	/* check XInput pads */
 	UpdateControllerState();
+
+	GotJoystick = 1;
+
+	for( DWORD i = 0; i < MAX_CONTROLLERS; i++ )
+	{
+		/* check buttons if the controller is actually connected */
+		if( g_Controllers[i].bConnected )
+		{
+			/* handle d-pad */
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP )
+			{
+				OutputDebugString("xinput DPAD UP\n");
+			}
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN )
+			{
+				OutputDebugString("xinput DPAD DOWN\n");
+			}
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT )
+			{
+				OutputDebugString("xinput DPAD LEFT\n");
+			}
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT )
+			{
+				OutputDebugString("xinput DPAD RIGHT\n");
+			}
+
+			/* handle coloured buttons - X A Y B */
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_X)
+			{
+				OutputDebugString("xinput button X pressed\n");
+			}
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_A)
+			{
+				OutputDebugString("xinput button A pressed\n");
+			}
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_Y)
+			{
+				OutputDebugString("xinput button Y pressed\n");
+			}
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_B)
+			{
+				OutputDebugString("xinput button B pressed\n");
+			}
+
+			/* handle bumper buttons */
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER)
+			{
+				OutputDebugString("xinput left bumper pressed\n");
+			}
+
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER)
+			{
+				OutputDebugString("xinput right bumper pressed\n");
+			}
+
+			/* handle back and start */
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_START)
+			{
+				OutputDebugString("xinput start pressed\n");
+			}
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK)
+			{
+				OutputDebugString("xinput back pressed\n");
+			}
+
+			/* handle stick clicks */
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB)
+			{
+				OutputDebugString("xinput left stick clicked\n");
+			}
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB)
+			{
+				OutputDebugString("xinput right stick clicked\n");
+			}
+
+			/* handle analogue stick movement */
+
+			/* Zero value if thumbsticks are within the dead zone */
+			if( ( g_Controllers[i].state.Gamepad.sThumbLX < INPUT_DEADZONE &&
+				  g_Controllers[i].state.Gamepad.sThumbLX > -INPUT_DEADZONE ) &&
+				( g_Controllers[i].state.Gamepad.sThumbLY < INPUT_DEADZONE &&
+				  g_Controllers[i].state.Gamepad.sThumbLY > -INPUT_DEADZONE ) )
+			{
+				g_Controllers[i].state.Gamepad.sThumbLX = 0;
+				g_Controllers[i].state.Gamepad.sThumbLY = 0;
+			}
+
+			if( ( g_Controllers[i].state.Gamepad.sThumbRX < INPUT_DEADZONE &&
+				  g_Controllers[i].state.Gamepad.sThumbRX > -INPUT_DEADZONE ) &&
+				( g_Controllers[i].state.Gamepad.sThumbRY < INPUT_DEADZONE &&
+				  g_Controllers[i].state.Gamepad.sThumbRY > -INPUT_DEADZONE ) )
+			{
+				g_Controllers[i].state.Gamepad.sThumbRX = 0;
+				g_Controllers[i].state.Gamepad.sThumbRY = 0;
+			}
+
+			/* Right Stick */
+			tempX = g_Controllers[i].state.Gamepad.sThumbRX;
+			tempY = g_Controllers[i].state.Gamepad.sThumbRY;
+
+			/* scale it down a bit */
+			xPadRightX += (int)(tempX / 400.0f);
+			xPadRightY += (int)(tempY / 400.0f);
+
+			xPadLookX = DIV_FIXED(xPadRightX - oldxPadLookX, NormalFrameTime);
+			xPadLookY = DIV_FIXED(xPadRightY - oldxPadLookY, NormalFrameTime);
+/*
+			char buf[100];
+			sprintf(buf,"xpad x: %d xpad y: %d\n", xPadLookX, xPadLookY);
+			OutputDebugString(buf);
+*/
+			/* Left Stick */
+			tempX = g_Controllers[i].state.Gamepad.sThumbLX;
+			tempY = g_Controllers[i].state.Gamepad.sThumbLY;
+
+			/* scale it down a bit */
+			xPadLeftX += (int)(tempX / 400.0f);
+			xPadLeftY += (int)(tempY / 400.0f);
+
+			xPadTurnX = DIV_FIXED(xPadLeftX - oldxPadTurnX, NormalFrameTime);
+			xPadTurnY = DIV_FIXED(xPadLeftY - oldxPadTurnY, NormalFrameTime);
+		}
+	}
 }
 
 int ReadJoystick(void)

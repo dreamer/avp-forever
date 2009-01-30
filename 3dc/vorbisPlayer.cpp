@@ -206,6 +206,8 @@ void StopVorbis()
 		oggIsPlaying = false;
 	}
 
+	ReleaseVorbisBuffer();
+
 	ov_clear(&oggFile);
 
 	delete[] audioData;

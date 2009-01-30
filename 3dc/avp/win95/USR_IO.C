@@ -807,6 +807,12 @@ extern unsigned char DebouncedKeyboardInput[];
 extern int GotJoystick;
 extern int GotMouse;
 
+/* XInput value externs */
+extern int xPadLookX;
+extern int xPadLookY;
+extern int xPadTurnX;
+extern int xPadTurnY;
+
 /* initialise the player input structure(s) in the player_status block */
 void InitPlayerGameInput(STRATEGYBLOCK* sbPtr)
 {
@@ -1392,11 +1398,41 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		extern int GotJoystick;
 		extern JOYINFOEX JoystickData;
 		extern JOYCAPS JoystickCaps;
-		
-		
+
 		int yAxis = (32768-JoystickData.dwYpos)*2;
 		int xAxis = (JoystickData.dwXpos-32768)*2;
-		
+
+/* XInput -------------------------------------------------------------------------------------------------- */
+
+		/* looking up and down */
+		if(xPadLookY < 0)
+		{
+			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookUp = 1;
+			playerStatusPtr->Mvt_AnaloguePitching = 1;
+			playerStatusPtr->Mvt_PitchIncrement = ((int)xPadLookY) * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
+		}
+		else if(xPadLookY > 0)
+		{
+			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookDown = 1;
+			playerStatusPtr->Mvt_AnaloguePitching = 1;
+			playerStatusPtr->Mvt_PitchIncrement = ((int)xPadLookY) * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
+		}
+
+		/* looking left and right */
+		if(xPadTurnX < 0)
+		{
+			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_TurnLeft = 1;
+			playerStatusPtr->Mvt_AnalogueTurning = 1;
+			playerStatusPtr->Mvt_TurnIncrement = ((int)xPadTurnX) * JoystickControlMethods.JoystickTrackerBallHorizontalSensitivity;
+		}
+		else if(xPadTurnX > 0)
+		{			  
+				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_TurnRight = 1;
+				playerStatusPtr->Mvt_AnalogueTurning = 1;
+				playerStatusPtr->Mvt_TurnIncrement = ((int)xPadTurnX) * JoystickControlMethods.JoystickTrackerBallHorizontalSensitivity;
+		}
+/* XInput -------------------------------------------------------------------------------------------------- */
+
 		if(JoystickControlMethods.JoystickVAxisIsMovement)
 		{
 			if(JoystickControlMethods.JoystickFlipVerticalAxis) yAxis=-yAxis;

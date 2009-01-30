@@ -13,14 +13,14 @@ extern "C" {
 
 extern int GotAnyKey;
 
-int SmackerSoundVolume = 65536/512;
+int SmackerSoundVolume = 65536/512; // 128
 int MoviesAreActive;
 int IntroOutroMoviesAreActive = 1;
 int VolumeOfNearestVideoScreen = 0;
 int PanningOfNearestVideoScreen = 0;
 
 #define MAX_NO_FMVTEXTURES 10
-FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
+FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES] = {0};
 int NumberOfFMVTextures;
 
 extern IMAGEHEADER ImageHeaderArray[];
@@ -79,8 +79,6 @@ int WriteToDsound(int dataSize, int offset);
 int GetWritableBufferSize();
 int updateAudioBuffer(int numBytes, short *data);
 
-extern LPDIRECTSOUND			DSObject; 
-
 unsigned char	*textureData = NULL;
 int				imageWidth = 0;
 int				imageHeight = 0;
@@ -94,6 +92,7 @@ D3DTEXTURE		fmvTexture = NULL;
 D3DTEXTURE		fmvDynamicTexture = NULL;
 
 /* dsound stuff */
+extern LPDIRECTSOUND	DSObject;
 LPDIRECTSOUNDBUFFER		fmvAudioBuffer = NULL;
 LPDIRECTSOUNDNOTIFY		fmvpDSNotify = NULL;
 HANDLE					fmvhHandles[2];
@@ -180,6 +179,7 @@ extern void PlayBinkedFMV(char *filenamePtr)
 	/* try to open file - quit this function if we can't */
 	if (FmvOpen(filenamePtr) != 0) return;
 
+	/* create the d3d textures used to display the video */
 	if(FAILED(d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &fmvTexture, NULL)))
 	{
 		OutputDebugString("problem creating fmv texture from d3d\n");
@@ -196,6 +196,7 @@ extern void PlayBinkedFMV(char *filenamePtr)
 
 	playing = 1;
 
+	/* start the playback loop. */
 	while(playing == 1)
 	{
 		CheckForWindowsMessages();
@@ -205,9 +206,9 @@ extern void PlayBinkedFMV(char *filenamePtr)
 
 		ThisFramesRenderingHasBegun();
 		ClearScreenToBlack();
-	
+
 			DrawBinkFmv((640-imageWidth)/2, (480-imageHeight)/2, imageHeight, imageWidth, fmvTexture);
-	
+
 		ThisFramesRenderingHasFinished();
 		FlipBuffers();
 
@@ -267,6 +268,7 @@ void FmvClose()
 
 	/* stop and release dsound buffer */
 	fmvAudioBuffer->Stop();
+	OutputDebugString("releasing fmv dsound buffer...\n");
 	SAFE_RELEASE(fmvAudioBuffer);
 
 	/* destroy liboggplay reader */
@@ -317,13 +319,13 @@ extern void StartTriggerPlotFMV(int number)
 		{
 			if(FMVTexture[i].SmackHandle)
 			{
+				delete FMVTexture[i].SmackHandle;
 //				SmackClose(FMVTexture[i].SmackHandle);
 			}
 
 			Smack *smackHandle = new Smack;
 
 			OutputDebugString("opening..");
-			OutputDebugString(buffer);
 			OutputDebugString(buffer);
 			FmvOpen(buffer);
 
@@ -399,10 +401,10 @@ void ScanImagesForFMVs()
 					}
 					else 
 					{	
+						smackHandle = new Smack;
 						OutputDebugString("found smacker file!");
 						OutputDebugString(filename);
 						OutputDebugString("\n");
-						smackHandle = new Smack;
 						smackHandle->isValidFile = 1;
 						fclose(file);
 					}
@@ -419,7 +421,7 @@ void ScanImagesForFMVs()
 					{
 						FMVTexture[NumberOfFMVTextures].SmackHandle = smackHandle;
 						FMVTexture[NumberOfFMVTextures].ImagePtr = ihPtr;
-						FMVTexture[NumberOfFMVTextures].StaticImageDrawn=0;
+						FMVTexture[NumberOfFMVTextures].StaticImageDrawn = 0;
 						SetupFMVTexture(&FMVTexture[NumberOfFMVTextures]);
 						NumberOfFMVTextures++;
 					}
@@ -439,6 +441,7 @@ void ReleaseAllFMVTextures()
 		FMVTexture[i].MessageNumber = 0;
 //		ReleaseD3DTexture8(FMVTexture[i].SrcTexture);
 //		ReleaseD3DTexture8(FMVTexture[i].SrcSurface);
+		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
 		ReleaseD3DTexture8(FMVTexture[i].DestTexture);
 	}
 }
@@ -478,6 +481,7 @@ extern void InitialiseTriggeredFMVs()
 		{
 			if(FMVTexture[i].SmackHandle)
 			{
+				delete FMVTexture[i].SmackHandle;
 //				SmackClose(FMVTexture[i].SmackHandle);
 				FMVTexture[i].MessageNumber = 0;
 			}
@@ -743,17 +747,6 @@ int FmvOpen(char *filenamePtr)
 
 	oggplay_use_buffer(player, 20);
 
-	/* create direct3d textures */
-//	fmvTexture = CreateD3DTexturePadded(&tempTex, &textureHeight, &textureWidth); 
-#ifdef WIN32
-//	d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &fmvTexture, NULL);
-//	d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &fmvDynamicTexture, NULL);
-#endif
-#ifdef _XBOX
-	d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &fmvTexture);
-	d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &fmvDynamicTexture);
-#endif
-
 	fullBufferSize = CreateFMVAudioBuffer(channels, rate);
 	halfBufferSize = fullBufferSize / 2;
 
@@ -841,7 +834,7 @@ void display_frame(void *arg)
 	/* work out how many milliseconds per frame */
 	delay = 1000 / fps_num;
 
-	num_tracks = oggplay_get_num_tracks (player);
+	num_tracks = oggplay_get_num_tracks(player);
 
 	frameThreadHandle = 1;
 
@@ -1024,17 +1017,14 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 //		sf_write_raw( sndFile, &audioDataBuffer[0], dataSize);
 
 		/* if our read and write positions are at the same location, does that mean the buffer is empty or full? */
-//		if (bufferReadPos == bufferWritePos)
 		if (fmvRingBuffer.bufferReadPos == fmvRingBuffer.bufferWritePos)
 		{
 			/* if fill size is greater than 0, we must be full? .. */
 			if (fmvRingBuffer.bufferFillSize == fmvRingBuffer.bufferSize)
-//			if (bufferFillSize == MAX_STORE_SIZE)
 			{
 				/* this should really just be zero store size free logically? */
 				freeSpace = 0;// - bufferFillSize;
 			}
-//			else if(bufferFillSize == 0)
 			else if(fmvRingBuffer.bufferFillSize == 0)
 			{
 				/* buffer fill size must be zero, we can assume there's no data in buffer, ie freespace is entire buffer */
@@ -1044,7 +1034,6 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 		else 
 		{
 			/* standard logic - buffers have a gap, work out writable space between them */
-//			freeSpace = bufferReadPos - bufferWritePos;
 			freeSpace = fmvRingBuffer.bufferReadPos - fmvRingBuffer.bufferWritePos;
 			if (freeSpace < 0) freeSpace += fmvRingBuffer.bufferSize;
 		}
@@ -1095,7 +1084,6 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 		/* update the write cusor position */
 //		printf("buffer write was: %d now: %d\n", bufferWritePos, ((bufferWritePos + firstSize + secondSize) % MAX_STORE_SIZE));
 		fmvRingBuffer.bufferWritePos = (fmvRingBuffer.bufferWritePos + firstSize + secondSize) % fmvRingBuffer.bufferSize;
-//		bufferFillSize += firstSize + secondSize;
 		fmvRingBuffer.bufferFillSize += firstSize + secondSize;
 
 		/* update read cursor */
@@ -1108,14 +1096,12 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 		}
 
 		fmvRingBuffer.bufferBytesWritten += firstSize + secondSize;
-//		bufferBytesWritten += firstSize + secondSize;
+
 #if 1
-//		if (bufferInitialFill == false)
 		if (fmvRingBuffer.bufferInitialFill == false)
 		{
 //			OutputDebugString("bufferInitialFill = false\n");
 			if(totalBytesWritten >= fullBufferSize / 2)
-//			if(fmvRingBuffer.bufferBytesWritten / 2 >= fullBufferSize)
 			{
 //				WriteToDsound(fullBufferSize, 0);
 
@@ -1124,7 +1110,7 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 				OutputDebugString(buf);
 				fmvRingBuffer.bufferInitialFill = true;
 
-				if(FAILED(fmvAudioBuffer->Play(0,0,DSBPLAY_LOOPING)))
+				if(FAILED(fmvAudioBuffer->Play(0, 0, DSBPLAY_LOOPING)))
 				{
 					OutputDebugString("can't play dsound fmv buffer\n");
 				}
@@ -1394,16 +1380,12 @@ bool FmvWait()
 {
 	if (frameReady == true)
 	{
-//		OutputDebugString("frame was ready\n");
 		return false;
 	}
-
 	else
 	{
 		return true;
 	}
-//	if (1)
-//		return false;
 }
 
 void writeFmvData(unsigned char *destData, unsigned char* srcData, int width, int height, int pitch)
@@ -1419,9 +1401,12 @@ void writeFmvData(unsigned char *destData, unsigned char* srcData, int width, in
 	{
 		destPtr = (((unsigned char *)destData) + y*pitch);
 
+//		memcpy(destPtr, srcPtr, width * 4);
+//		srcPtr+=width * 4;
+
 		for (int x = 0; x < width; x++)
 		{
-			*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], 255);
+			*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], srcPtr[3]);
 
 			destPtr+=4;
 			srcPtr+=4;
@@ -1446,34 +1431,7 @@ int NextFMVFrame()
 //	srcPtr = (unsigned char *)textureData;
 
 	writeFmvData((unsigned char*)texture_rect.pBits, textureData, imageWidth, imageHeight, texture_rect.Pitch);
-#if 0
-	// lets pad the whole thing black first
-	for (int y = 0; y < 1024; y++)
-	{
-		destPtr = (((unsigned char  *)texture_rect.pBits) + y*texture_rect.Pitch);
 
-		for (int x = 0; x < 1024; x++)
-		{
-			*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(0,0,0,0xff);
-			destPtr+=4;
-		}
-	}
-#endif
-#if 0
-	// then actual image data
-	for (int y = 0; y < imageHeight; y++)
-	{
-		destPtr = (((unsigned char *)texture_rect.pBits) + y*texture_rect.Pitch);
-
-		for (int x = 0; x < imageWidth; x++)
-		{
-			*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], 255);
-
-			destPtr+=4;
-			srcPtr+=4;
-		}
-	}
-#endif
 	/* unlock d3d texture */
 	fmvDynamicTexture->UnlockRect( 0 );
 
@@ -1511,6 +1469,7 @@ int CreateFMVAudioBuffer(int channels, int rate)
 		OutputDebugString("couldn't create audio buffer for fmv\n");
 		return 0;
 	}
+	else { OutputDebugString("created dsound fmv buffer....\n"); }
 
 #if 0
 	if(FAILED(fmvAudioBuffer->QueryInterface( IID_IDirectSoundNotify, 
