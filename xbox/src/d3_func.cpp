@@ -929,8 +929,8 @@ BOOL InitialiseDirect3DImmediateMode()
 	d3dpp.EnableAutoDepthStencil = TRUE;
 	d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8;
 	d3dpp.SwapEffect = D3DSWAPEFFECT_COPY;//D3DSWAPEFFECT_DISCARD;
-	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
-//	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+//	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 //	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE_OR_IMMEDIATE;
 //	d3dpp.Flags = D3DPRESENTFLAG_10X11PIXELASPECTRATIO;
 	UsingStencil = true;
@@ -1195,6 +1195,7 @@ void SecondFlushD3DZBuffer()
 	FlushD3DZBuffer();
 }
 
+/* bjd - commented out
 void FlushZB()
 {
 	OutputDebugString(" FlushZB called ");
@@ -1211,6 +1212,7 @@ void FlushZB()
 		OutputDebugString("Couldn't FlushZB");
 	}
 }
+*/
 
 // For extern "C"
 

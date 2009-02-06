@@ -91,10 +91,14 @@ int MouseX;
 int MouseY;
 int MouseZ;
 
+/*
 int MovementVelX;
 int MovementVelY;
 int MovementX;
 int MovementY;
+*/
+int xPadMoveX;
+int xPadMoveY;
 
 extern unsigned char KeyboardInput[];
 extern unsigned char GotAnyKey;
@@ -152,7 +156,7 @@ BOOL InitialiseDirectInput()
 
 	// initialise devices using above struct
 //	XInitDevices(sizeof(deviceTypes) / sizeof(XDEVICE_PREALLOC_TYPE),deviceTypes );
-	XInitDevices(0 ,NULL);
+	XInitDevices(0, NULL);
 
 	devices = XGetDevices(XDEVICE_TYPE_GAMEPAD);
 
@@ -414,6 +418,7 @@ void DirectReadKeyboard()
 		OldMouseY = MouseY;
 		OldMouseZ = MouseZ;
 
+/*
 		// do the same for movement
 		int OldMouseMovementX, OldMouseMovementY;
 		MovementVelX = 0;
@@ -422,7 +427,8 @@ void DirectReadKeyboard()
 		// Save mouse x and y for velocity determination
 		OldMouseMovementX = MovementX;
 		OldMouseMovementY = MovementY;
-	
+*/
+
 		int x = 0;
 		int y = 0;
 
@@ -449,11 +455,15 @@ void DirectReadKeyboard()
 		}
 
 		// scale it down a bit
-		MouseX += (int)(x / 400.0f);
-		MouseY += (int)(y / 400.0f);
+		MouseX += (int)(x / 700.0f);
+		MouseY += (int)(y / 700.0f);
 
 	    MouseVelX = DIV_FIXED(MouseX-OldMouseX,NormalFrameTime);
 		MouseVelY = DIV_FIXED(MouseY-OldMouseY,NormalFrameTime);
+
+		char buf[100];
+		sprintf(buf, "x: %d y: %d\n", x, y);
+		OutputDebugString(buf);
 
 		// use left stick to move?
 		// move up
@@ -508,12 +518,18 @@ void DirectReadKeyboard()
 			y = inputState.Gamepad.sThumbLY;
 		}
 
+		xPadMoveX = x;
+		xPadMoveY = y;
+
+/*
 		// scale it down a bit
-		MovementX += (int)(x / 400.0f);
-		MovementY += (int)(y / 400.0f);
+		MovementX += (int)(x / 700.0f);
+		MovementY += (int)(y / 700.0f);
 
 	    MovementVelX = DIV_FIXED(MovementX-OldMouseMovementX,NormalFrameTime);
 		MovementVelY = DIV_FIXED(MovementY-OldMouseMovementY,NormalFrameTime);
+*/
+
 	}
 
 	#if 1

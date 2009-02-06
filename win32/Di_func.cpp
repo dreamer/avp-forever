@@ -123,8 +123,8 @@ int xPadLeftY;
 
 int xPadLookX;
 int xPadLookY;
-int xPadTurnX;
-int xPadTurnY;
+int xPadMoveX;
+int xPadMoveY;
 
 /*
 	8/4/98 DHM: A new array, analagous to KeyboardInput, except it's debounced
@@ -337,7 +337,7 @@ void DirectReadKeyboard(void)
     memset((void*)KeyboardInput, FALSE, MAX_NUMBER_OF_INPUT_KEYS);
 	GotAnyKey = FALSE;
 
-	/* do letters */
+	/* letters */
 	for(int i = LETTER_A; i <= LETTER_Z; i++)
 	{
 		if (IngameKeyboardInput[i])
@@ -352,7 +352,7 @@ void DirectReadKeyboard(void)
 	{
 		if (IngameKeyboardInput[i])
 		{
-			KeyboardInput[KEY_0 + i - KEY_0] = TRUE;
+			KeyboardInput[KEY_0 + i - NUMBER_0] = TRUE;
 			GotAnyKey = TRUE;
 		}
 	}
@@ -369,15 +369,59 @@ void DirectReadKeyboard(void)
 	}
 #endif
 
-	if (IngameKeyboardInput['/'])
+	if (IngameKeyboardInput[VK_OEM_5])
+	{
+		KeyboardInput[KEY_BACKSLASH] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_OEM_2])
 	{
 		KeyboardInput[KEY_SLASH] = TRUE;
 		GotAnyKey = TRUE;
 	}
 
-	if (IngameKeyboardInput[/*249*/'~'])
+	if (IngameKeyboardInput[VK_OEM_4])
 	{
-		KeyboardInput[KEY_U_GRAVE] = TRUE;
+		KeyboardInput[KEY_LBRACKET] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_OEM_6])
+	{
+		KeyboardInput[KEY_RBRACKET] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_OEM_1])
+	{
+		KeyboardInput[KEY_SEMICOLON] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_OEM_PERIOD])
+	{
+		KeyboardInput[KEY_FSTOP] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_OEM_COMMA])
+	{
+		KeyboardInput[KEY_COMMA] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_OEM_7])
+	{
+		KeyboardInput[KEY_APOSTROPHE] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+
+//	if (IngameKeyboardInput[/*249*/'~'])
+	if (IngameKeyboardInput[0xDF])
+	{
+		KeyboardInput[KEY_GRAVE] = TRUE;
 		GotAnyKey = TRUE;
 	}
 
@@ -590,14 +634,12 @@ void DirectReadKeyboard(void)
 
 	if (IngameKeyboardInput[VK_LMENU])
 	{
-		OutputDebugString("left alt\n");
 		KeyboardInput[KEY_LEFTALT] = TRUE;
 		GotAnyKey = TRUE;
 	}
 
 	if (IngameKeyboardInput[VK_RMENU])
 	{
-		OutputDebugString("right alt\n");
 		KeyboardInput[KEY_RIGHTALT] = TRUE;
 		GotAnyKey = TRUE;
 	}
@@ -662,6 +704,7 @@ void DirectReadKeyboard(void)
 		GotAnyKey = TRUE;
 	}
 
+	/* subtract/minus symbol on keypad */
 	if (IngameKeyboardInput[VK_SUBTRACT])
 	{
 		KeyboardInput[KEY_NUMPADSUB] = TRUE;
@@ -1494,8 +1537,8 @@ void DirectReadMouse(void)
 
 	GotMouse = Yes;
 
-	MouseX += xPosRelative * 3;
-	MouseY += yPosRelative * 3;
+	MouseX += xPosRelative * 4;
+	MouseY += yPosRelative * 4;
 
 //	char buf[100];
 //	sprintf(buf, "x: %d, y: %d\n", xPosRelative, yPosRelative);
@@ -1688,27 +1731,20 @@ void ReadJoysticks(void)
 	int tempX = 0;
 	int tempY = 0;
 	int oldxPadLookX, oldxPadLookY;
-	int oldxPadTurnX, oldxPadTurnY;
 
 	xPadLookX = 0;
 	xPadLookY = 0;
-	xPadTurnX = 0;
-	xPadTurnY = 0;
+	xPadMoveX = 0;
+	xPadMoveY = 0;
 
 	/* Save right x and y for velocity determination */
 	oldxPadLookX = xPadRightX;
 	oldxPadLookY = xPadRightY;
 
-	/* Save left x and y for velocity determination */
-	oldxPadTurnX = xPadLeftX;
-	oldxPadTurnY = xPadLeftY;
-
 	GotJoystick = ReadJoystick();
 
 	/* check XInput pads */
 	UpdateControllerState();
-
-	GotJoystick = 1;
 
 	for( DWORD i = 0; i < MAX_CONTROLLERS; i++ )
 	{
@@ -1749,6 +1785,19 @@ void ReadJoysticks(void)
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_B)
 			{
 				OutputDebugString("xinput button B pressed\n");
+			}
+
+			/* handle triggers */
+			if (g_Controllers[0].state.Gamepad.bLeftTrigger && 
+				g_Controllers[0].state.Gamepad.bLeftTrigger < XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
+			{
+				OutputDebugString("xinput left trigger pressed\n");
+			}
+
+			if (g_Controllers[0].state.Gamepad.bRightTrigger && 
+				g_Controllers[0].state.Gamepad.bRightTrigger < XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
+			{
+				OutputDebugString("xinput right trigger pressed\n");
 			}
 
 			/* handle bumper buttons */
@@ -1808,8 +1857,8 @@ void ReadJoysticks(void)
 			tempY = g_Controllers[i].state.Gamepad.sThumbRY;
 
 			/* scale it down a bit */
-			xPadRightX += (int)(tempX / 400.0f);
-			xPadRightY += (int)(tempY / 400.0f);
+			xPadRightX += (int)(tempX / 600.0f);
+			xPadRightY += (int)(tempY / 600.0f);
 
 			xPadLookX = DIV_FIXED(xPadRightX - oldxPadLookX, NormalFrameTime);
 			xPadLookY = DIV_FIXED(xPadRightY - oldxPadLookY, NormalFrameTime);
@@ -1818,16 +1867,9 @@ void ReadJoysticks(void)
 			sprintf(buf,"xpad x: %d xpad y: %d\n", xPadLookX, xPadLookY);
 			OutputDebugString(buf);
 */
-			/* Left Stick */
-			tempX = g_Controllers[i].state.Gamepad.sThumbLX;
-			tempY = g_Controllers[i].state.Gamepad.sThumbLY;
-
-			/* scale it down a bit */
-			xPadLeftX += (int)(tempX / 400.0f);
-			xPadLeftY += (int)(tempY / 400.0f);
-
-			xPadTurnX = DIV_FIXED(xPadLeftX - oldxPadTurnX, NormalFrameTime);
-			xPadTurnY = DIV_FIXED(xPadLeftY - oldxPadTurnY, NormalFrameTime);
+			/* Left Stick - can grab this value directly */
+			xPadMoveX = g_Controllers[i].state.Gamepad.sThumbLX;
+			xPadMoveY = g_Controllers[i].state.Gamepad.sThumbLY;
 		}
 	}
 }

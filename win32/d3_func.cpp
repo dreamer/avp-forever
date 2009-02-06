@@ -453,6 +453,8 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture (AvPTexture *tex)
 	return destTexture;
 }
 
+/* TODO: Pre-order source image data into ARGB order? */
+
 // use this to make textures from non power of two images
 LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int *real_width) 
 {
@@ -617,6 +619,9 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 		for (int y = 0; y < original_height; y++)
 		{
 			destPtr = (((unsigned char *)lock.pBits) + y*lock.Pitch);
+
+//			memcpy(destPtr, srcPtr, original_width * 4);
+//			srcPtr+=original_width * 4;
 
 			for (int x = 0; x < original_width; x++)
 			{
@@ -1456,6 +1461,7 @@ void SecondFlushD3DZBuffer()
 	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
 }
 
+/* bjd - commented out
 void FlushZB()
 {
 	OutputDebugString(" FlushZB called ");
@@ -1472,6 +1478,7 @@ void FlushZB()
 		OutputDebugString("Couldn't FlushZB");
 	}
 }
+*/
 
 // For extern "C"
 

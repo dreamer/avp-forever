@@ -7124,6 +7124,7 @@ void ThisFramesRenderingHasFinished(void)
 	ExecuteBuffer();
 	EndD3DScene();
 
+#if 0 // output how much memory is free
 	#define MB	(1024*1024)
 	MEMORYSTATUS stat;
 	char buf[100];
@@ -7133,6 +7134,8 @@ void ThisFramesRenderingHasFinished(void)
 
 	sprintf(buf, "%4d  free MB of physical memory.\n", stat.dwAvailPhys / MB );
 	OutputDebugString( buf );
+#endif
+
 /*
 	sprintf(buf,  "%4d total MB of virtual memory.\n", stat.dwTotalVirtual / MB );
 	OutputDebugString( buf );

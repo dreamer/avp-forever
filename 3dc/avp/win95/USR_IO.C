@@ -63,11 +63,17 @@ PLAYER_INPUT_CONFIGURATION AlienInputSecondaryConfig;
 #if 1 // English
 PLAYER_INPUT_CONFIGURATION DefaultMarineInputPrimaryConfig =
 {
+#ifdef _XBOX
+	KEY_VOID,			// Forward;
+	KEY_VOID,			// Backward;
+	KEY_VOID, 			// Left;
+	KEY_VOID, 			// Right;
+#else
 	KEY_UP,				// Forward;
 	KEY_DOWN,			// Backward;
 	KEY_NUMPAD4, 		// Left;
 	KEY_NUMPAD6, 		// Right;
-
+#endif
 	KEY_RIGHTALT,		// Strafe;
 	KEY_LEFT,	 		// StrafeLeft;
 	KEY_RIGHT,	 		// StrafeRight;
@@ -100,11 +106,17 @@ PLAYER_INPUT_CONFIGURATION DefaultMarineInputPrimaryConfig =
 };
 PLAYER_INPUT_CONFIGURATION DefaultPredatorInputPrimaryConfig =
 {
+#ifdef _XBOX
+	KEY_VOID,			// Forward;
+	KEY_VOID,			// Backward;
+	KEY_VOID, 			// Left;
+	KEY_VOID, 			// Right;
+#else
 	KEY_UP,				// Forward;
 	KEY_DOWN,			// Backward;
 	KEY_NUMPAD4, 		// Left;
 	KEY_NUMPAD6, 		// Right;
-
+#endif
 	KEY_RIGHTALT,		// Strafe;
 	KEY_LEFT,	 		// StrafeLeft;
 	KEY_RIGHT,	 		// StrafeRight;
@@ -141,11 +153,17 @@ PLAYER_INPUT_CONFIGURATION DefaultPredatorInputPrimaryConfig =
 
 PLAYER_INPUT_CONFIGURATION DefaultAlienInputPrimaryConfig =
 {
+#ifdef _XBOX
+	KEY_VOID,			// Forward;
+	KEY_VOID,			// Backward;
+	KEY_VOID, 			// Left;
+	KEY_VOID, 			// Right;
+#else
 	KEY_UP,				// Forward;
 	KEY_DOWN,			// Backward;
 	KEY_NUMPAD4, 		// Left;
 	KEY_NUMPAD6, 		// Right;
-
+#endif
 	KEY_RIGHTALT,		// Strafe;
 	KEY_LEFT,	 		// StrafeLeft;
 	KEY_RIGHT,	 		// StrafeRight;
@@ -810,8 +828,8 @@ extern int GotMouse;
 /* XInput value externs */
 extern int xPadLookX;
 extern int xPadLookY;
-extern int xPadTurnX;
-extern int xPadTurnY;
+extern int xPadMoveX;
+extern int xPadMoveY;
 
 /* initialise the player input structure(s) in the player_status block */
 void InitPlayerGameInput(STRATEGYBLOCK* sbPtr)
@@ -1259,8 +1277,6 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		extern int MouseVelY;
 
 #ifdef _XBOX
-		extern int MovementVelX;
-		extern int MovementVelY;
 
 		/* bjd - handle movement here, with values from left stick */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1399,10 +1415,25 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		extern JOYINFOEX JoystickData;
 		extern JOYCAPS JoystickCaps;
 
-		int yAxis = (32768-JoystickData.dwYpos)*2;
-		int xAxis = (JoystickData.dwXpos-32768)*2;
+		char buf[100];
+
+//		sprintf(buf, "joy y: %d x: %d\n", JoystickData.dwYpos, JoystickData.dwXpos);
+//		OutputDebugString(buf);
+
+//		int yAxis = (32768-JoystickData.dwYpos)*2;
+//		int xAxis = (JoystickData.dwXpos-32768)*2;
+
+		int yAxis = (/*32768-*/xPadMoveY)*2;
+		int xAxis = (xPadMoveX/*-32768*/)*2;
+
+//		sprintf(buf, "joy y: %d y: %d\n", yAxis, xAxis);
+//		OutputDebugString(buf);
+
+//		OutputDebugString("GotJoystick\n");
 
 /* XInput -------------------------------------------------------------------------------------------------- */
+
+		xPadLookY=-xPadLookY;
 
 		/* looking up and down */
 		if(xPadLookY < 0)
@@ -1419,20 +1450,57 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		}
 
 		/* looking left and right */
-		if(xPadTurnX < 0)
+		if(xPadLookX < 0)
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_TurnLeft = 1;
-			playerStatusPtr->Mvt_AnalogueTurning = 1;
-			playerStatusPtr->Mvt_TurnIncrement = ((int)xPadTurnX) * JoystickControlMethods.JoystickTrackerBallHorizontalSensitivity;
+			playerStatusPtr->Mvt_AnaloguePitching = 1;
+			playerStatusPtr->Mvt_TurnIncrement = ((int)xPadLookX) * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
 		}
-		else if(xPadTurnX > 0)
-		{			  
-				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_TurnRight = 1;
-				playerStatusPtr->Mvt_AnalogueTurning = 1;
-				playerStatusPtr->Mvt_TurnIncrement = ((int)xPadTurnX) * JoystickControlMethods.JoystickTrackerBallHorizontalSensitivity;
+		else if(xPadLookX > 0)
+		{
+			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_TurnRight = 1;
+			playerStatusPtr->Mvt_AnaloguePitching = 1;
+			playerStatusPtr->Mvt_TurnIncrement = ((int)xPadLookX) * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
 		}
+
+		if(JoystickControlMethods.JoystickFlipVerticalAxis) yAxis=-yAxis;
+
+		/* forward and backward movement */
+		if(yAxis > JOYSTICK_DEAD_ZONE)
+		{
+			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Forward = 1;
+			playerStatusPtr->Mvt_MotionIncrement = yAxis;
+		}
+		else if(yAxis < -JOYSTICK_DEAD_ZONE)
+		{
+			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Backward = 1;
+			playerStatusPtr->Mvt_MotionIncrement = yAxis;
+		}
+#if 0
+		/* clamp the values */
+		if(playerStatusPtr->Mvt_MotionIncrement < -ONE_FIXED)
+			playerStatusPtr->Mvt_MotionIncrement = -ONE_FIXED;
+		if(playerStatusPtr->Mvt_MotionIncrement > ONE_FIXED)
+			playerStatusPtr->Mvt_MotionIncrement = ONE_FIXED;
+#endif
+//		sprintf(buf, "motion increment: %d\n", playerStatusPtr->Mvt_MotionIncrement);
+//		OutputDebugString(buf);
+
+		/* sidestep left and right */
+		if(xAxis < -JOYSTICK_DEAD_ZONE)
+		{
+			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_SideStepLeft = 1;
+			playerStatusPtr->Mvt_SideStepIncrement = xAxis;
+		}
+		else if(xAxis > JOYSTICK_DEAD_ZONE)
+		{
+			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_SideStepRight = 1;
+			playerStatusPtr->Mvt_SideStepIncrement = xAxis;
+		}
+
 /* XInput -------------------------------------------------------------------------------------------------- */
 
+#if 0
 		if(JoystickControlMethods.JoystickVAxisIsMovement)
 		{
 			if(JoystickControlMethods.JoystickFlipVerticalAxis) yAxis=-yAxis;
@@ -1648,7 +1716,6 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 				playerStatusPtr->Mvt_AnaloguePitching = 1;
 				playerStatusPtr->Mvt_PitchIncrement = trackerballV*JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;;
 			}
-
 		}
 					   
 		#if 1
@@ -1662,7 +1729,9 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			JoystickData.dwButtons,
 			JoystickData.dwPOV);
 		#endif
+#endif
 	}
+
 #endif // ifdef WIN32
 
 	/* KJL 16:03:06 05/11/97 - Handle map options */

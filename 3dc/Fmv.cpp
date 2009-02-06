@@ -221,6 +221,7 @@ extern void PlayBinkedFMV(char *filenamePtr)
 	FmvClose();
 }
 
+/* TODO: This needs to be actually fixed so it's not called if we aren't playing anything! */
 void FmvClose()
 {
 	fmvPlaying = false;
@@ -267,13 +268,18 @@ void FmvClose()
 	totalBytesWritten = 0;
 
 	/* stop and release dsound buffer */
-	fmvAudioBuffer->Stop();
-	OutputDebugString("releasing fmv dsound buffer...\n");
-	SAFE_RELEASE(fmvAudioBuffer);
+	if(fmvAudioBuffer != NULL)
+	{
+		fmvAudioBuffer->Stop();
+		OutputDebugString("releasing fmv dsound buffer...\n");
+		SAFE_RELEASE(fmvAudioBuffer);
+	}
 
+#if 0
 	/* destroy liboggplay reader */
 	if (reader != NULL)
 		reader->destroy(reader);
+#endif
 
 	OutputDebugString("our reader is gone\n");
 }

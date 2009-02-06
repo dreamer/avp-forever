@@ -1019,9 +1019,12 @@ CHEATMODEDESC CheatModeDesc[] =
 
 extern void CheatMode_GetNextAllowedSpecies(int *speciesPtr, int searchForward)
 {
+	char buf[100];
+
 	while(!(CheatModeDesc[CheatMode_Active].PlayableForSpecies[*speciesPtr]
 			&&ThereIsAnAllowedEnvironment()) )
 	{
+		OutputDebugString("CheatMode_GetNextAllowedSpecies\n");
 		if (searchForward)
 		{
 			(*speciesPtr)++;
@@ -1039,6 +1042,9 @@ extern void CheatMode_GetNextAllowedSpecies(int *speciesPtr, int searchForward)
 			(*speciesPtr)--;
 		}
 	}
+
+	sprintf(buf, "allowed species: %d\n", (*speciesPtr));
+	OutputDebugString(buf);
 }
 
 static int ThereIsAnAllowedEnvironment(void)
@@ -1084,14 +1090,27 @@ static int EnvironmentPlayableBySpecies(int environment)
 }
 extern void CheatMode_GetNextAllowedEnvironment(int *environmentPtr, int searchForward)
 {
+	char buf[100];
+	// bjd - NUMBER_OF_ENVIRONMENTS = 32
+	int playableForEnvironment = CheatModeDesc[CheatMode_Active].PlayableForEnvironment[*environmentPtr];
+	int playableBySpecies = EnvironmentPlayableBySpecies(*environmentPtr);
+
+	// both of these need to be 1 for loop to stop
 	while(! (CheatModeDesc[CheatMode_Active].PlayableForEnvironment[*environmentPtr]
 			 && EnvironmentPlayableBySpecies(*environmentPtr) ) )
 	{
+		int playableForEnvironment = CheatModeDesc[CheatMode_Active].PlayableForEnvironment[*environmentPtr];
+		int playableBySpecies = EnvironmentPlayableBySpecies(*environmentPtr);
+
+		sprintf(buf, "playableForEnvironment: %d playableBySpecies: %d\n", playableForEnvironment, playableBySpecies);
+		OutputDebugString(buf);
+
 		if (searchForward)
 		{
 			(*environmentPtr)++;
 			if (*environmentPtr>=NUMBER_OF_ENVIRONMENTS)
 			{
+				OutputDebugString("environmentPtr resetting to zero\n");
 				*environmentPtr = 0;
 			}
 		}

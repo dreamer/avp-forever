@@ -823,6 +823,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		// set menu resolution
 		ChangeGameResolution(640, 480, 32);
+//		ChangeGameResolution(1024, 768, 32);
 
 		#endif
 		/* Patrick 26/6/97

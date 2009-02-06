@@ -91,6 +91,7 @@ struct renderParticle
 
 std::vector<renderParticle> particleArray;
 
+/* TODO: try to remove .resize(0) call. use reserve feature of vector? */
 void DrawParticles()
 {
 	if(particleArray.size() == 0) return;
@@ -9327,7 +9328,8 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 */
 	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
 
-	int height = 480; int width = 640;
+	int height = ScreenDescriptorBlock.SDB_Height;
+	int width = ScreenDescriptorBlock.SDB_Width;
 
 	alpha = alpha / 256;
 	if (alpha > 255) alpha = 255;

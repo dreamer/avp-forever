@@ -3998,6 +3998,20 @@ static char *GetDescriptionOfKey(unsigned char key)
 	
 	switch (key)
 	{
+#ifdef _XBOX
+		case KEY_UP:
+			textPtr = "XBOX_DPAD_UP";
+			break;
+		case KEY_DOWN:
+			textPtr = "XBOX_DPAD_DOWN";;
+			break;
+		case KEY_LEFT:
+			textPtr = "XBOX_DPAD_LEFT";
+			break;
+		case KEY_RIGHT:
+			textPtr = "XBOX_DPAD_RIGHT";
+			break;
+#else
 		case KEY_UP:
 			textPtr = GetTextString(TEXTSTRING_KEYS_UP);
 			break;
@@ -4010,6 +4024,7 @@ static char *GetDescriptionOfKey(unsigned char key)
 		case KEY_RIGHT:
 			textPtr = GetTextString(TEXTSTRING_KEYS_RIGHT);
 			break;
+#endif
 		case KEY_CR:
 			textPtr = GetTextString(TEXTSTRING_KEYS_RETURN);
 			break;
@@ -4831,6 +4846,7 @@ extern int WindowRequestMode;
 extern int DXMemoryMode;
 extern int DXMemoryRequestMode;
 
+/* bjd - commented this out
 extern void SelectMenuDisplayMode(void)
 {
     MinimizeAllImages();
@@ -4868,6 +4884,7 @@ extern void SelectMenuDisplayMode(void)
 		Global_VDB_Ptr = 0;
 	}
 }
+*/
 
 
 

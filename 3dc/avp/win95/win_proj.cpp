@@ -115,7 +115,7 @@ int mouseMoved = 0;
     HDC         hdc;
 	RECT		NewWindCoord;
 
- 	if (message==RWM_MOUSEWHEEL)
+ 	if (message == RWM_MOUSEWHEEL)
 	{
 		message = WM_MOUSEWHEEL;
 		wParam <<= 16;
@@ -123,6 +123,13 @@ int mouseMoved = 0;
 
 	switch(message)
     {
+		case WM_MOUSEWHEEL:
+		{
+			MouseWheelStatus = wParam;
+			MouseWheelStatus>>=16;
+			return 0;
+		}	
+
 		case WM_INPUT: 
 		{
 			UINT dwSize = 40;
@@ -139,15 +146,8 @@ int mouseMoved = 0;
 				xPosRelative = raw->data.mouse.lLastX;
 				yPosRelative = raw->data.mouse.lLastY;
 			}
-			return 0;
+			break;
 		}
-
-		case WM_MOUSEWHEEL:
-		{
-			MouseWheelStatus = wParam;
-			MouseWheelStatus>>=16;
-			return 0;
-		}	
 	
 		// 21/11/97 DHM: Added processing of WM_CHAR messages:
 		case WM_CHAR:
@@ -173,6 +173,34 @@ int mouseMoved = 0;
 					wParam = VK_LMENU;
 			}
 
+			/* handle left/right control keys */
+			if(wParam == VK_CONTROL)
+			{			
+				if(lParam&(1<<24))
+					wParam = VK_RCONTROL;
+				else
+					wParam = VK_LCONTROL;
+			}
+
+#if 0
+			/* handle left/right shift keys */	
+			if(wParam == VK_SHIFT)
+			{
+				/* TODO: How should I handle it if BOTH keys are pressed? */
+				if(GetAsyncKeyState(VK_RSHIFT) & 0x8000)
+				{
+					//OutputDebugString("caught right shift!\n");
+					wParam = VK_RSHIFT;
+				}
+				/* favour left shift over right? */
+				if(GetAsyncKeyState(VK_LSHIFT) & 0x8000)
+				{
+					//OutputDebugString("caught left shift!\n");
+					wParam = VK_LSHIFT;
+				}
+			}
+#endif
+
 			IngameKeyboardInput_KeyDown(wParam);
 #if 0
 			int scancode = (lParam>>16)&255;
@@ -195,7 +223,7 @@ int mouseMoved = 0;
 					char buf[100];
 					sprintf(buf, "vkcode: %d scancode: %d\n", vkcode ,scancode);
 					OutputDebugString(buf);
-					IngameKeyboardInput_KeyDown(ToAsciiTable[vkcode][scancode]);
+//					IngameKeyboardInput_KeyDown(ToAsciiTable[vkcode][scancode]);
 				}
 				#endif
 			}
@@ -218,6 +246,34 @@ int mouseMoved = 0;
 				else
 					wParam = VK_LMENU;
 			}
+
+			/* handle left/right control keys */
+			if(wParam == VK_CONTROL)
+			{			
+				if(lParam&(1<<24))
+					wParam = VK_RCONTROL;
+				else
+					wParam = VK_LCONTROL;
+			}
+
+#if 0
+			/* handle left/right shift keys */	
+			if(wParam == VK_SHIFT)
+			{
+				/* TODO: How should I handle it if BOTH keys are pressed? */
+				if(!(GetAsyncKeyState(VK_RSHIFT) & 0x8000))
+				{
+					//OutputDebugString("caught right shift!\n");
+					wParam = VK_RSHIFT;
+				}
+				/* favour left shift over right? */
+				if(!(GetAsyncKeyState(VK_LSHIFT) & 0x8000))
+				{
+					//OutputDebugString("caught left shift!\n");
+					wParam = VK_LSHIFT;
+				}
+			}
+#endif
 
 			IngameKeyboardInput_KeyUp(wParam);
 #if 0
