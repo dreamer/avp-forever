@@ -590,7 +590,9 @@ void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr)
 				playerStatusPtr->WeaponSlot[a].Possessed=1;
 			}
 			a=SlotForThisWeapon(WEAPON_PRED_STAFF);
-            playerStatusPtr->WeaponSlot[a].PrimaryMagazinesRemaining=0;
+			/* bjd - below line added. MUST break here or else we index WeaponSlot array at index -1! */
+			if (a < 0) break;
+			playerStatusPtr->WeaponSlot[a].PrimaryMagazinesRemaining=0;
 			playerStatusPtr->WeaponSlot[a].Possessed=0;
 
 			break;
@@ -1533,7 +1535,9 @@ int SlotForThisWeapon(enum WEAPON_ID weaponID) {
 	}
 	if (a!=MAX_NO_OF_WEAPON_SLOTS) {
 		return(a);
-	} else {
+	} else 
+	{
+		/* bjd - HAS to be checked by calling function. */
 		return(-1);
 	}
 }

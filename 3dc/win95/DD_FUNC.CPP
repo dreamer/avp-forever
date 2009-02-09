@@ -1060,13 +1060,13 @@ void finiObjects(void)
 void ReleaseDDSurface(void* DDSurface)
 {
 	AvPTexture *d3d_texture = (AvPTexture *)DDSurface;
-	
-	if (d3d_texture->buffer) 
+
+	if (d3d_texture->buffer)
 	{
 		free(d3d_texture->buffer);
-	} 
+	}
 	
-	free(d3d_texture);			
+	free (d3d_texture);
 
 #if 0 // bjd
 	LPDIRECTDRAWSURFACE lpSurface;

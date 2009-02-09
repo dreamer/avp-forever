@@ -40,7 +40,11 @@ void DeallocMem(void *__ptr)
 	deall_cnt++;
 	#endif
 
-	if(__ptr) free(__ptr);
+	if(__ptr)
+	{	
+		free(__ptr);
+		__ptr = 0;
+	}
 
 	#if debug
 	else {
@@ -51,4 +55,3 @@ void DeallocMem(void *__ptr)
 	}
 	#endif
 };
-

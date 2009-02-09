@@ -534,7 +534,8 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 	if (_parmsR.originalWidthP) *_parmsR.originalWidthP = m_nWidth;
 	if (_parmsR.originalHeightP) *_parmsR.originalHeightP = m_nHeight;
 
-	AvPTexture *d3d_texture = new AvPTexture;
+	//AvPTexture *d3d_texture = new AvPTexture;
+	AvPTexture *d3d_texture = (AvPTexture*)malloc(sizeof(AvPTexture));
 
 	unsigned char *buffer = (unsigned char *)malloc(m_nWidth * m_nHeight * 4);
 

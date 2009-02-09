@@ -20,6 +20,7 @@
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
+#include <cassert> // remove
 
 #if PSX
 #include "psx_cdf.h"
@@ -361,13 +362,14 @@ static void InitFarLocDataAreas(MODULE **moduleList, int numModules)
 	}
 }
 
-
+extern void DeleteArrayMem(void *ptr);
 /*-----------------------Patrick 28/11/96---------------------------
 This function deallocates the location lists for each module,
 and must be called at some point before the environment re-load
 -------------------------------------------------------------------*/
 void KillFarModuleLocs(void)
 {	
+	OutputDebugString("KillFarModuleLocs\n");
 	/* don't do this for a net game */
 	//in fact do do it in net game
 	//if(AvP.Network != I_No_Network)	return;
@@ -392,12 +394,17 @@ void KillFarModuleLocs(void)
 		int i;
 		for(i=0;i<AIModuleArraySize;i++)
 		{
+			FALLP_EntryPoints[i].numEntryPoints = 0;
+
 			if(FALLP_EntryPoints[i].entryPointsList)
 			{
 				DeallocateMem(FALLP_EntryPoints[i].entryPointsList);
 			}
 		}
 		DeallocateMem(FALLP_EntryPoints);
+//		delete []FALLP_EntryPoints;
+//		DeleteArrayMem(FALLP_EntryPoints);
+		OutputDebugString("deallocated FALLP_EntryPoints\n");
 	}
 	FALLP_EntryPoints = (FARENTRYPOINTSHEADER *)0;
 }
@@ -523,8 +530,8 @@ or 0 if there isn't one.
 -------------------------------------------------------------------*/
 FARENTRYPOINT *GetModuleEP(MODULE* thisModule, MODULE*fromModule)
 {
-	int numEps;
-	FARENTRYPOINT *epList;
+	int numEps = 0;
+	FARENTRYPOINT *epList = NULL;
 	FARENTRYPOINT *thisEp = (FARENTRYPOINT *)0;
 	int tmIndex = fromModule->m_index;
 
@@ -541,10 +548,10 @@ FARENTRYPOINT *GetModuleEP(MODULE* thisModule, MODULE*fromModule)
 	return thisEp;
 }
 
-FARENTRYPOINT *GetAIModuleEP(AIMODULE* thisModule, AIMODULE*fromModule)
+FARENTRYPOINT *GetAIModuleEP(AIMODULE* thisModule, AIMODULE* fromModule)
 {
-	int numEps;
-	FARENTRYPOINT *epList;
+	int numEps = 0;
+	FARENTRYPOINT *epList = NULL;
 	FARENTRYPOINT *thisEp = (FARENTRYPOINT *)0;
 	int tmIndex = fromModule->m_index;
 

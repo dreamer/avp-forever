@@ -686,7 +686,7 @@ NB returns 0 if relocation failed.
 static EmergRelocCalls = 0;
 static int EmergencyRelocateObject(STRATEGYBLOCK *sbPtr)
 {
-
+		OutputDebugString("EmergencyRelocateObject\n");
         EmergRelocCalls++;
 
         if(sbPtr->I_SBtype == I_BehaviourNetGhost) return 1;
@@ -729,6 +729,7 @@ static int EmergencyRelocateObject(STRATEGYBLOCK *sbPtr)
 
                 LOCALASSERT(ModuleArraySize);
                 LOCALASSERT(Global_ModulePtr);
+
                 LOCALASSERT(FALLP_EntryPoints); /* NB should never get here in a net game, so the codition should be true */
 
                 //ScenePtr = Global_ModulePtr[Global_Scene];

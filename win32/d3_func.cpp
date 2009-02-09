@@ -731,6 +731,11 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf)
 		&image,
 		0,
 		&destTexture)))
+	{
+		delete TgaHeader;
+		delete[] buffer;
+		return NULL;
+	}
 
 	delete TgaHeader;
 	delete[] buffer;

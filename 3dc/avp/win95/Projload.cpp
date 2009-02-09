@@ -53,6 +53,8 @@
 #include "db.h"
 #include "pldnet.h"
 
+#include <crtdbg.h>
+
 extern "C" {
 //#include "3dc.h"
 #include "inventry.h"
@@ -60,8 +62,8 @@ extern "C" {
 extern int VideoMode;
 extern int ScanDrawMode;
 extern int ZBufferMode;
-extern unsigned char *PaletteRemapTable;
-extern unsigned char **PaletteShadingTableArray;
+//extern unsigned char *PaletteRemapTable;
+//extern unsigned char **PaletteShadingTableArray;
 extern int cosine[];
 extern int HWAccel;
 #define remap_table_size (1 << (remap_table_rgb_bits * 3))
@@ -2215,13 +2217,14 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 			
 			ai_mod_pos++;
 		}
-		
+
 		FALLP_EntryPoints = (FARENTRYPOINTSHEADER *)AllocateMem(AIModuleArraySize*sizeof(FARENTRYPOINTSHEADER));		
 		if(!FALLP_EntryPoints) 
 		{
 			memoryInitialisationFailure = 1;
 			return FALSE;
 		}
+
 		for(i=0;i<AIModuleArraySize;i++)
 		{
 			FALLP_EntryPoints[i].entryPointsList=0;
@@ -2603,6 +2606,13 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 			if(num_ep)
 			{
 				FALLP_EntryPoints[i].entryPointsList=(FARENTRYPOINT*)AllocateMem(sizeof(FARENTRYPOINT)*num_ep);
+				FALLP_EntryPoints[i].entryPointsList->donorIndex = 0;
+				FALLP_EntryPoints[i].entryPointsList->position.vx = 0;
+				FALLP_EntryPoints[i].entryPointsList->position.vy = 0;
+				FALLP_EntryPoints[i].entryPointsList->position.vz = 0;
+
+				FALLP_EntryPoints[i].entryPointsList->alien_only = 0;
+
 				FALLP_EntryPoints[i].numEntryPoints=num_ep;
 
 				int adj_pos=0;
@@ -2641,7 +2651,6 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 			}
 		}
 		delete [] entry_points;
-
 
 		// putting an infinite module at the beginning - followed by a term
 		// and setting the arrays back to point at them !!
@@ -2711,8 +2720,6 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 		//set sky colour , and other envionmental properties
 		set_environment_properties(h->envd);
 
-
-		
 		Set_Progress_Bar_Position((int)(progress_start+progress_interval*.9));
 	}
 	else

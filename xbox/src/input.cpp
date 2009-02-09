@@ -91,12 +91,14 @@ int MouseX;
 int MouseY;
 int MouseZ;
 
-/*
-int MovementVelX;
-int MovementVelY;
-int MovementX;
-int MovementY;
-*/
+int GotXPad = 0;
+int xPadRightX;
+int xPadRightY;
+int xPadLeftX;
+int xPadLeftY;
+
+int xPadLookX;
+int xPadLookY;
 int xPadMoveX;
 int xPadMoveY;
 
@@ -301,6 +303,8 @@ void DirectReadKeyboard()
 
 		// Query latest state.
 		XInputGetState( gamePad, &inputState );
+
+		GotXPad = 1;
 
 		/* d-pad */
 		if (inputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP )

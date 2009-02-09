@@ -45,6 +45,7 @@ void EmptyCDTrackList()
 
 static void ExtractTracksForLevel(char* & buffer,List<int> & track_list)
 {
+	return;
 	//search for a line starting with a #
 	while(*buffer)
 	{

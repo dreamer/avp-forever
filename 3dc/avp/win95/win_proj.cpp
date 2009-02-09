@@ -182,20 +182,18 @@ int mouseMoved = 0;
 					wParam = VK_LCONTROL;
 			}
 
-#if 0
+#if 1
 			/* handle left/right shift keys */	
 			if(wParam == VK_SHIFT)
 			{
-				/* TODO: How should I handle it if BOTH keys are pressed? */
-				if(GetAsyncKeyState(VK_RSHIFT) & 0x8000)
+				if(GetKeyState(VK_RSHIFT) & 0x8000)
 				{
-					//OutputDebugString("caught right shift!\n");
+					OutputDebugString("caught right shift!\n");
 					wParam = VK_RSHIFT;
 				}
-				/* favour left shift over right? */
-				if(GetAsyncKeyState(VK_LSHIFT) & 0x8000)
+				else if(GetKeyState(VK_LSHIFT) & 0x8000)
 				{
-					//OutputDebugString("caught left shift!\n");
+					OutputDebugString("caught left shift!\n");
 					wParam = VK_LSHIFT;
 				}
 			}
@@ -256,20 +254,18 @@ int mouseMoved = 0;
 					wParam = VK_LCONTROL;
 			}
 
-#if 0
+#if 1
 			/* handle left/right shift keys */	
 			if(wParam == VK_SHIFT)
 			{
-				/* TODO: How should I handle it if BOTH keys are pressed? */
-				if(!(GetAsyncKeyState(VK_RSHIFT) & 0x8000))
+				if(!(GetKeyState(VK_RSHIFT) & 0x8000))
 				{
-					//OutputDebugString("caught right shift!\n");
+					OutputDebugString("released right shift!\n");
 					wParam = VK_RSHIFT;
 				}
-				/* favour left shift over right? */
-				if(!(GetAsyncKeyState(VK_LSHIFT) & 0x8000))
+				else if(!(GetKeyState(VK_LSHIFT) & 0x8000))
 				{
-					//OutputDebugString("caught left shift!\n");
+					OutputDebugString("released left shift!\n");
 					wParam = VK_LSHIFT;
 				}
 			}

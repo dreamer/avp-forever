@@ -6496,17 +6496,17 @@ void Marine_Enter_SentryMode_State(STRATEGYBLOCK *sbPtr) {
 
 void Marine_Enter_Wait_State(STRATEGYBLOCK *sbPtr) {
 
-	MARINE_STATUS_BLOCK *marineStatusPointer;    
+	MARINE_STATUS_BLOCK *marineStatusPointer = NULL;    
 
 	LOCALASSERT(sbPtr);
 	marineStatusPointer = (MARINE_STATUS_BLOCK *)(sbPtr->SBdataptr);    
 	LOCALASSERT(marineStatusPointer);	          		
 
-	marineStatusPointer->gotapoint=0;
+	marineStatusPointer->gotapoint = 0;
 
-	marineStatusPointer->internalState=0;
+	marineStatusPointer->internalState = 0;
 	marineStatusPointer->volleySize = 0;
-	marineStatusPointer->lastState=marineStatusPointer->behaviourState;
+	marineStatusPointer->lastState = marineStatusPointer->behaviourState;
 	marineStatusPointer->behaviourState = MBS_Waiting;
 	marineStatusPointer->stateTimer = MARINE_NEARWAITTIME;
 
@@ -13630,8 +13630,8 @@ void RunAroundOnFireMission_Control(STRATEGYBLOCK *sbPtr) {
 
 void GetPointToFaceMarineTowards(STRATEGYBLOCK *sbPtr,VECTORCH *output) {
 
-	MARINE_STATUS_BLOCK *marineStatusPointer;
-	AIMODULE *targetModule;
+	MARINE_STATUS_BLOCK *marineStatusPointer = NULL;
+	AIMODULE *targetModule = NULL;
 	AIMODULE **AdjModuleRefPtr;
 	AIMODULE* chosenModule = NULL;
 	VECTORCH chosenEpWorld;
@@ -13769,7 +13769,7 @@ void GetPointToFaceMarineTowards(STRATEGYBLOCK *sbPtr,VECTORCH *output) {
 		{
 			/* Overlook airducts :-) */
 			FARENTRYPOINT *thisEp = GetAIModuleEP(nextAdjModule, sbPtr->containingModule->m_aimodule);
-			if(thisEp)
+			if(thisEp != NULL)
 			{
 				if (thisEp->alien_only==0) {
 					/* aha. an ep!... */ 

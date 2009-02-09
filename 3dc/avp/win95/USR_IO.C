@@ -824,6 +824,7 @@ extern unsigned char KeyboardInput[];
 extern unsigned char DebouncedKeyboardInput[];
 extern int GotJoystick;
 extern int GotMouse;
+extern int GotXPad;
 
 /* XInput value externs */
 extern int xPadLookX;
@@ -1276,7 +1277,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		extern int MouseVelX;
 		extern int MouseVelY;
 
-#ifdef _XBOX
+#if 0//#ifdef _XBOX
 
 		/* bjd - handle movement here, with values from left stick */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1366,7 +1367,6 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 
 		if(ControlMethods.VAxisIsMovement)
 		{
-#ifdef WIN32
 			if(MouseVelY<0)
 			{
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Forward = 1;
@@ -1382,7 +1382,6 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 	   			playerStatusPtr->Mvt_MotionIncrement = -ONE_FIXED;
 	   		if(playerStatusPtr->Mvt_MotionIncrement > ONE_FIXED)
 	   			playerStatusPtr->Mvt_MotionIncrement = ONE_FIXED;
-#endif
 		}
 		else // it's looking
 		{
@@ -1406,32 +1405,12 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		}
 	}
 
-#ifdef WIN32
-	/* KJL 18:27:34 04/29/97 - joystick control */
-	if (GotJoystick)
+	/* handle xbox controllers seperate from joysticks */
+	if (GotXPad)
 	{
 		#define JOYSTICK_DEAD_ZONE 12000
-		extern int GotJoystick;
-		extern JOYINFOEX JoystickData;
-		extern JOYCAPS JoystickCaps;
-
-		char buf[100];
-
-//		sprintf(buf, "joy y: %d x: %d\n", JoystickData.dwYpos, JoystickData.dwXpos);
-//		OutputDebugString(buf);
-
-//		int yAxis = (32768-JoystickData.dwYpos)*2;
-//		int xAxis = (JoystickData.dwXpos-32768)*2;
-
-		int yAxis = (/*32768-*/xPadMoveY)*2;
-		int xAxis = (xPadMoveX/*-32768*/)*2;
-
-//		sprintf(buf, "joy y: %d y: %d\n", yAxis, xAxis);
-//		OutputDebugString(buf);
-
-//		OutputDebugString("GotJoystick\n");
-
-/* XInput -------------------------------------------------------------------------------------------------- */
+		int yAxis = xPadMoveY * 2;
+		int xAxis = xPadMoveX * 2;
 
 		xPadLookY=-xPadLookY;
 
@@ -1476,15 +1455,6 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Backward = 1;
 			playerStatusPtr->Mvt_MotionIncrement = yAxis;
 		}
-#if 0
-		/* clamp the values */
-		if(playerStatusPtr->Mvt_MotionIncrement < -ONE_FIXED)
-			playerStatusPtr->Mvt_MotionIncrement = -ONE_FIXED;
-		if(playerStatusPtr->Mvt_MotionIncrement > ONE_FIXED)
-			playerStatusPtr->Mvt_MotionIncrement = ONE_FIXED;
-#endif
-//		sprintf(buf, "motion increment: %d\n", playerStatusPtr->Mvt_MotionIncrement);
-//		OutputDebugString(buf);
 
 		/* sidestep left and right */
 		if(xAxis < -JOYSTICK_DEAD_ZONE)
@@ -1497,10 +1467,20 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_SideStepRight = 1;
 			playerStatusPtr->Mvt_SideStepIncrement = xAxis;
 		}
-
 /* XInput -------------------------------------------------------------------------------------------------- */
+	}
 
-#if 0
+#ifdef WIN32
+	/* KJL 18:27:34 04/29/97 - joystick control */
+	if (GotJoystick)
+	{
+		#define JOYSTICK_DEAD_ZONE 12000
+		extern JOYINFOEX JoystickData;
+		extern JOYCAPS JoystickCaps;
+
+		int yAxis = (32768-JoystickData.dwYpos)*2;
+		int xAxis = (JoystickData.dwXpos-32768)*2;
+
 		if(JoystickControlMethods.JoystickVAxisIsMovement)
 		{
 			if(JoystickControlMethods.JoystickFlipVerticalAxis) yAxis=-yAxis;
@@ -1729,7 +1709,6 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			JoystickData.dwButtons,
 			JoystickData.dwPOV);
 		#endif
-#endif
 	}
 
 #endif // ifdef WIN32

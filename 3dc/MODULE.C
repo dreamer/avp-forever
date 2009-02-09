@@ -239,7 +239,7 @@ int ThisObjectIsInAModuleVisibleFromCurrentlyVisibleModules(STRATEGYBLOCK *sbPtr
 	
 	while(vPtr->vmod_type != vmtype_term)
 	{
-		MODULE *mptr;
+		MODULE *mptr = NULL;
 
 		/* consider this module */
 		if(vPtr->vmod_mref.mref_ptr)

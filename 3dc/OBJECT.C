@@ -465,6 +465,7 @@ LIGHTBLOCK* AddLightBlock(DISPLAYBLOCK *dptr, LIGHTBLOCK *lptr_to_add)
 	lfree = No;
 
 	larrayptr = &dptr->ObLights[0];
+	freelarrayptr = NULL;
 
 	for(i = MaxObjectLights; i!=0 && lfree == No; i--) {
 

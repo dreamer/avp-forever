@@ -195,6 +195,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	_CrtSetReportFile(_CRT_ASSERT,_CRTDBG_FILE_STDERR);
 */
 //	_CrtSetBreakAlloc( 5235 );
+
+//	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF | _CRTDBG_DELAY_FREE_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+//	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF | _CRTDBG_DELAY_FREE_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	
 	LoadDeviceAndVideoModePreferences();
 
@@ -472,7 +475,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		{
 			//Start thread that recentres mouse , making it easier to play
 			//in subwindow mode
-			InitCentreMouseThread();
+//			InitCentreMouseThread();
 		}
 		#endif
 //		Env_List[0] = &(ELOLevelToLoad);
@@ -891,7 +894,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
   	SoundSys_RemoveAll(); 
 
 	/* bjd - delete some profile data that was showing up as memory leaks */
-//	EmptyUserProfilesList();
+	EmptyUserProfilesList();
 
 	#else
 	QuickSplashScreens();

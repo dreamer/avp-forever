@@ -900,7 +900,7 @@ static void DisplayHealthAndArmour(void)
 	int health,armour;
     /* access the extra data hanging off the strategy block */
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
-	NPC_DATA *NpcData;
+	NPC_DATA *NpcData = NULL;
 	
 	switch (AvP.PlayerType)
 	{
@@ -1489,7 +1489,7 @@ void DisplayPredatorHealthAndEnergy(void)
 	int scale = DIV_FIXED(ScreenDescriptorBlock.SDB_Width,640);
 	int size = MUL_FIXED(51,scale);
 	{
-		NPC_DATA *NpcData;
+		NPC_DATA *NpcData = NULL;
 		switch (AvP.Difficulty) {
 			case I_Easy:
 				NpcData=GetThisNpcData(I_PC_Predator_Easy);

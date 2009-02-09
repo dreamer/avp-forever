@@ -103,6 +103,7 @@ int JoystickEnabled;
 DIJOYSTATE JoystickState;          // DirectInput joystick state 
 
 /* XInput stuff from dx sdk sameples */
+int GotXPad = 0;
 
 /* XInput controller state */
 struct CONTROLER_STATE
@@ -143,6 +144,7 @@ static unsigned char LastFramesKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
 extern int NormalFrameTime;
 
 static char IngameKeyboardInput[256];
+
 /* mouse - 5 buttons? */
 unsigned char MouseButtons[5] = {0};
 extern void IngameKeyboardInput_KeyDown(unsigned char key);
@@ -1709,21 +1711,25 @@ void InitJoysticks(void)
 	ZeroMemory( g_Controllers, sizeof( CONTROLER_STATE ) * MAX_CONTROLLERS );
 }
 
-HRESULT UpdateControllerState()
+int UpdateControllerState()
 {
     DWORD dwResult;
+	int numConnected = 0;
     for( DWORD i = 0; i < MAX_CONTROLLERS; i++ )
     {
         // Simply get the state of the controller from XInput.
         dwResult = XInputGetState( i, &g_Controllers[i].state );
 
         if( dwResult == ERROR_SUCCESS )
+		{
             g_Controllers[i].bConnected = true;
+			numConnected++;
+		}
         else
             g_Controllers[i].bConnected = false;
     }
 
-    return S_OK;
+    return numConnected;
 }
 
 void ReadJoysticks(void)
@@ -1741,10 +1747,10 @@ void ReadJoysticks(void)
 	oldxPadLookX = xPadRightX;
 	oldxPadLookY = xPadRightY;
 
-	GotJoystick = ReadJoystick();
+	GotJoystick = 0;//= ReadJoystick();
 
 	/* check XInput pads */
-	UpdateControllerState();
+	GotXPad = UpdateControllerState();
 
 	for( DWORD i = 0; i < MAX_CONTROLLERS; i++ )
 	{

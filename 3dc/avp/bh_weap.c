@@ -7,7 +7,6 @@
 
 #include "bh_types.h"
 #include "comp_shp.h"
-#include "inventry.h"
 
 #define UseLocalAssert Yes
 
