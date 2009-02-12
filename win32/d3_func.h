@@ -115,7 +115,7 @@ typedef struct
 
 } RENDERSTATES;
 
-LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf);
+LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL poolType);
 LPDIRECT3DSURFACE9 CreateD3DSurface(DDSurface *tex, int width, int height);
 LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int *real_width);
 LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex);

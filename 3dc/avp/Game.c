@@ -235,7 +235,7 @@ void StartGame(void)
 
 	ProcessSystemObjects();
 	
-	create_strategies_from_list ();
+	create_strategies_from_list();
 	AssignAllSBNames();
 	
 	SetupVision();

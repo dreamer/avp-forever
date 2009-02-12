@@ -572,18 +572,15 @@ void SetPlayerStartingArmour(int value) {
 
 }
 
-void ResetPersonalBests(void) {
+void ResetPersonalBests(void) 
+{
+	int a,b;
 
-	{
-		int a,b;
-
-		for (a=0; a<I_MaxDifficulties; a++) {
-			for (b=0; b<AVP_ENVIRONMENT_END_OF_LIST; b++) {
-				UserProfilePtr->PersonalBests[a][b]=DefaultLevelGameStats;
-			}
+	for (a=0; a<I_MaxDifficulties; a++) {
+		for (b=0; b<AVP_ENVIRONMENT_END_OF_LIST; b++) {
+			UserProfilePtr->PersonalBests[a][b]=DefaultLevelGameStats;
 		}
 	}
-
 }
 
 void CreateMoreGameSpecificConsoleVariables(void)

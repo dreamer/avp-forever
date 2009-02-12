@@ -844,7 +844,7 @@ void ChangeTexture(const int texture_id)
 	if(texture_id == currentTextureId) return;
 
 	/* menu large font */
-	if (texture_id == TALLFONT_TEX)
+	else if (texture_id == TALLFONT_TEX)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, IntroFont_Light.info.menuTexture);
 		if(!FAILED(LastError)) currentTextureId = TALLFONT_TEX;
@@ -852,7 +852,7 @@ void ChangeTexture(const int texture_id)
 	}
 
 	/* if texture was specified as 'null' */
-	if (texture_id == NO_TEXTURE)
+	else if (texture_id == NO_TEXTURE)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, NULL);
 		if(!FAILED(LastError)) currentTextureId = NO_TEXTURE;
@@ -8713,20 +8713,21 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
 {
 	/* texture will be created with managed pool. we need it in default */
-	SAFE_RELEASE(ftPtr->ImagePtr->Direct3DTexture);
-	ftPtr->ImagePtr->Direct3DTexture = NULL;
+//	SAFE_RELEASE(ftPtr->ImagePtr->Direct3DTexture);
+//	ftPtr->ImagePtr->Direct3DTexture = NULL;
 
 	/* just in case */
-	SAFE_RELEASE(ftPtr->DestTexture);
-	ftPtr->DestTexture = NULL;
+//	SAFE_RELEASE(ftPtr->DestTexture);
+//	ftPtr->DestTexture = NULL;
 
 	/* this texture is what's used for rendering of ingame video monitors */
+/*
 	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &ftPtr->ImagePtr->Direct3DTexture, NULL);
 	if(FAILED(LastError))
 	{
 		LogDxErrorString("Could not create Direct3D texture ftPtr->ImagePtr->Direct3DTexture\n");
 	}
-
+*/
 	/* we use this texture to write fmv data to */
 	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &ftPtr->DestTexture, NULL);
 	if(FAILED(LastError))

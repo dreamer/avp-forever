@@ -85,6 +85,7 @@
 // The first declaration of these class templates was previously as friends
 // of List. However, Visual C++ 5 can't parse them unless we give a 
 // forward declaration first - I think this is a compiler bug - Garry.
+
 template<class T>
 class List_Iterator_Forward;
 template<class T>

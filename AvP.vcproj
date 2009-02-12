@@ -5000,6 +5000,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\memmgr\MemMgr.cpp"
+				>
+			</File>
+			<File
 				RelativePath="3dc\avp\mempool.c"
 				>
 				<FileConfiguration
@@ -8244,6 +8248,10 @@
 			</File>
 			<File
 				RelativePath="3dc\win95\media.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\memmgr\MemMgr.h"
 				>
 			</File>
 			<File

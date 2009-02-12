@@ -1,3 +1,4 @@
+
 extern "C"
 {
 #include "3dc.h"
@@ -43,9 +44,78 @@ void EmptyCDTrackList()
 #define CDTrackFileName "CD Tracks.txt"
 
 
-static void ExtractTracksForLevel(char* & buffer,List<int> & track_list)
+static void ExtractTracksForLevel(char* &buffer, List<int> &track_list)
 {
 	return;
+#if 0
+	int index = 0;
+
+	//search for a line starting with a #
+	while(buffer[index])
+	{
+		if(buffer[index] =='#') break;
+		//search for next line
+		while(buffer[index])
+		{
+			if(buffer[index]=='\n')
+			{
+				index++;
+				if(buffer[index]=='\r') index++;
+				break;
+			}
+			index++;
+		}
+	}
+	
+	while(buffer[index])
+	{
+		//search for a track number or comment
+		if(buffer[index]==';')
+		{
+			//comment , so no further info on this line
+			break;
+		}
+		else if(buffer[index]=='\n' || buffer[index]=='\r')
+		{
+			//reached end of line
+			break;
+		}
+		else if(buffer[index]>='0' && buffer[index]<='9')
+		{
+			int track=-1;
+			//find a number , add it to the list
+			sscanf(&buffer[index],"%d",&track);
+
+			if(track>=0)
+			{
+				char buf[100];
+				sprintf(buf, "adding track: %d\n", track);
+				OutputDebugString(buf);
+				track_list.add_entry(track);
+			}
+
+			//skip to the next non numerical character
+			while(buffer[index]>='0' && buffer[index]<='9') index++;
+		}
+		else
+		{
+			index++;
+		}
+	}
+
+	//go to the next line
+	while(buffer[index])
+	{
+		if(buffer[index]=='\n')
+		{
+			index++;
+			if(buffer[index]=='\r') index++;
+			break;
+		}
+		index++;
+	}
+#endif
+#if 1
 	//search for a line starting with a #
 	while(*buffer)
 	{
@@ -61,7 +131,6 @@ static void ExtractTracksForLevel(char* & buffer,List<int> & track_list)
 			}
 			buffer++;
 		}
-
 	}
 	
 	while(*buffer)
@@ -79,7 +148,7 @@ static void ExtractTracksForLevel(char* & buffer,List<int> & track_list)
 		}
 		else if(*buffer>='0' && *buffer<='9')
 		{
-			int track=-1;
+			signed int track=-1;
 			//find a number , add it to the list
 			sscanf(buffer,"%d",&track);
 
@@ -108,7 +177,7 @@ static void ExtractTracksForLevel(char* & buffer,List<int> & track_list)
 		}
 		buffer++;
 	}
-	
+#endif
 }
 
 void LoadCDTrackList()
@@ -128,12 +197,14 @@ void LoadCDTrackList()
 	unsigned long bytes_read;
 
 	//copy the file contents into a buffer
-	file_size= GetFileSize(file,0);
-	buffer=new char[file_size+1];
-	ReadFile(file,buffer,file_size,&bytes_read,0);
+	file_size = GetFileSize(file,0);
+	buffer = new char[file_size+1];
+	ReadFile(file, buffer, file_size, &bytes_read,0);
 	CloseHandle(file);
+
+	strncpy(&buffer[file_size], "\0" , 1);
 	
-	char* bufferptr=buffer;
+	char* bufferptr = buffer;
 
 	//first extract the multiplayer tracks
 	for(int i=0;i<3;i++)
@@ -148,6 +219,8 @@ void LoadCDTrackList()
 	}
 	
 	delete [] buffer;
+	buffer = NULL;
+	bufferptr = NULL;
 }
 
 static unsigned int TrackSelectCounter=0;

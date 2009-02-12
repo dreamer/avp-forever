@@ -497,7 +497,6 @@ SCString :: SCString
 
 			pFirst = this;
 		}
-
 	}
 }
 
@@ -582,7 +581,6 @@ SCString :: SCString
 
 			pFirst = this;
 		}
-
 	}
 }
 
@@ -908,6 +906,7 @@ SCString :: SCString
 	{
 		AllocatedSize = (size_t) (List_ProjChar . size() + 1) * sizeof(ProjChar);
 
+		OutputDebugString("creating pProjCh_Val\n");
 		pProjCh_Val = new ProjChar[	AllocatedSize ];
 		GLOBALASSERT( pProjCh_Val );
 
@@ -980,7 +979,6 @@ SCString :: SCString
 			pFirst = this;
 		}
 	}
-	
 }
 
 /*static*/ void SCString :: UpdateAfterFontChange( FontIndex I_Font_Changed )
@@ -1118,6 +1116,7 @@ SCString :: SCString
 //private:
 SCString :: ~SCString()
 {
+	OutputDebugString("string destructor\n");
 	/* PRECONDITION */
 	{
 		GLOBALASSERT( pProjCh_Val );
@@ -1125,6 +1124,7 @@ SCString :: ~SCString()
 
 	/* CODE */
 	{
+		OutputDebugString("deleting pProjCh_Val\n");
 		delete[] pProjCh_Val;
 
 		// Remove from list:

@@ -323,7 +323,7 @@
 
 void DAVEHOOK_Init(void)
 {
-	SCString* pSCString_TestLeak = new SCString("this is a test memory leak");
+//	SCString* pSCString_TestLeak = new SCString("this is a test memory leak");
 
 	MissionHacks :: TestInit();
 

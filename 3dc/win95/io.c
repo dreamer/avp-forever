@@ -859,7 +859,7 @@ void WaitForReturn(void)
 void ReadUserInput(void)
 {
 	DirectReadMouse();
-    ReadJoysticks();
+/* bjd - called at top of DirectReadKeyboard() */ ReadJoysticks();
 	DirectReadKeyboard();
 }
 

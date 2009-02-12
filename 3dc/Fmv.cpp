@@ -23,6 +23,8 @@ int PanningOfNearestVideoScreen = 0;
 FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES] = {0};
 int NumberOfFMVTextures;
 
+extern HWND hWndMain;
+
 extern IMAGEHEADER ImageHeaderArray[];
 #if MaxImageGroups>1
 	extern int NumImagesArray[];
@@ -448,7 +450,7 @@ void ReleaseAllFMVTextures()
 //		ReleaseD3DTexture8(FMVTexture[i].SrcTexture);
 //		ReleaseD3DTexture8(FMVTexture[i].SrcSurface);
 		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
-		ReleaseD3DTexture8(FMVTexture[i].DestTexture);
+		SAFE_RELEASE(FMVTexture[i].DestTexture);
 	}
 }
 
@@ -696,7 +698,7 @@ int FmvOpen(char *filenamePtr)
 		char message[100];
 		sprintf(message,"Unable to access file: %s\n",filenamePtr);
 #ifdef WIN32
-		MessageBox(NULL,message,"AvP Error",MB_OK+MB_SYSTEMMODAL);
+		MessageBox(hWndMain, message, "AvP Error", MB_OK+MB_SYSTEMMODAL);
 #endif
 //		exit(0x111);
 		return 1;

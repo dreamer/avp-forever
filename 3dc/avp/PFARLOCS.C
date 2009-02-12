@@ -369,7 +369,6 @@ and must be called at some point before the environment re-load
 -------------------------------------------------------------------*/
 void KillFarModuleLocs(void)
 {	
-	OutputDebugString("KillFarModuleLocs\n");
 	/* don't do this for a net game */
 	//in fact do do it in net game
 	//if(AvP.Network != I_No_Network)	return;
@@ -402,9 +401,6 @@ void KillFarModuleLocs(void)
 			}
 		}
 		DeallocateMem(FALLP_EntryPoints);
-//		delete []FALLP_EntryPoints;
-//		DeleteArrayMem(FALLP_EntryPoints);
-		OutputDebugString("deallocated FALLP_EntryPoints\n");
 	}
 	FALLP_EntryPoints = (FARENTRYPOINTSHEADER *)0;
 }

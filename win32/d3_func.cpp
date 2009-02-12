@@ -653,7 +653,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 #endif
 }
 
-LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf) 
+LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL poolType) 
 {
 	/* create our texture for returning */
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
@@ -724,7 +724,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf)
 		1,
 		0,
 		D3DFMT_A8R8G8B8,
-		D3DPOOL_MANAGED,
+		poolType,
 		D3DX_FILTER_NONE,
 		D3DX_FILTER_NONE,
 		0,
@@ -732,6 +732,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf)
 		0,
 		&destTexture)))
 	{
+		OutputDebugString("COULD NOT CREATE TEXTURE?\n");
 		delete TgaHeader;
 		delete[] buffer;
 		return NULL;
@@ -857,7 +858,7 @@ BOOL ReleaseVolatileResources()
 	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
 	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
 
-	if(!mainMenu)
+//	if(!mainMenu)
 	{
 		/* release fmv textures */
 		for(int i = 0; i < NumberOfFMVTextures; i++)
@@ -905,16 +906,17 @@ BOOL CreateVolatileResources()
 	}
 
 	SetExecuteBufferDefaults();
-#if 1
-	if(!mainMenu)
+
+	if(!mainMenu) // so we don't recreate textures when going back to the main menus
 	{
 		/* re-create fmv textures */
 		for(int i = 0; i < NumberOfFMVTextures; i++)
 		{	
+			d3d.lpD3DDevice->CreateTexture(FMVTexture[i].ImagePtr->ImageWidth, FMVTexture[i].ImagePtr->ImageHeight, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &FMVTexture[i].ImagePtr->Direct3DTexture, NULL);
 			SetupFMVTexture(&FMVTexture[i]);
 		}
 	}
-#endif
+
 	return TRUE;
 }
 

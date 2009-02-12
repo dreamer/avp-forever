@@ -924,7 +924,21 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 						// load Direct3D Texture here?	
 						if (pTexture->buffer) 
 						{
-							pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer);
+							if (strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0)
+							{
+								OutputDebugString("found fmv texture.. \n");
+								/* is fmv texture, create in default pool so we can dynamically update it */
+								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, D3DPOOL_DEFAULT);
+								/* will need to be restored on alt/tab or device loss */
+								pImageHdr->RequiresRestore = 1;
+							}
+							else
+							{
+								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, D3DPOOL_MANAGED);
+								/* don't need to restore on alt/tab or device loss */
+								pImageHdr->RequiresRestore = 0;
+							}
+
 							//char szDbInf[512];
 								//sprintf(szDbInf,"Texture \"%s\" didn't load",pImageHdr->ImageName);
 							
@@ -993,11 +1007,24 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 
 					/* KJL 16:05:50 26/02/98 - attempt to get a texture handle */
 					{
-						OutputDebugString("\n");
-						OutputDebugString(pImageHdr->ImageName);
+//						OutputDebugString("\n");
+//						OutputDebugString(pImageHdr->ImageName);
 
-						if (pTexture->buffer) {
-							pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer);
+						if (pTexture->buffer) 
+						{
+							if (strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0)
+							{
+								/* is fmv texture, create in default pool so we can dynamically update it */
+								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, D3DPOOL_DEFAULT);
+								/* will need to be restored on alt/tab or device loss */
+								pImageHdr->RequiresRestore = 1;
+							}
+							else
+							{
+								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, D3DPOOL_MANAGED);
+								/* don't need to restore on alt/tab or device loss */
+								pImageHdr->RequiresRestore = 0;
+							}
 							//char szDbInf[512];
 							//	sprintf(szDbInf,"Texture \"%s\" didn't load",pImageHdr->ImageName);
 							
@@ -1005,6 +1032,12 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 							{
 								OutputDebugString("Direct3DTexture was null!");
 							}
+
+							/* 
+								the below allows us to basically check if a texture is in the D3D managed pool or not
+								we don't need to restore a managed texture on device reset (alt tab etc) but we will
+								for the fmv textures
+							*/
 							
 							int gotTextureHandle = 1;
 							//int gotTextureHandle = GetTextureHandle(pImageHdr);

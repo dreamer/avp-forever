@@ -840,8 +840,6 @@ typedef struct imageheader {
 
 	TEXTURE *ImagePtr;					/* Pointer to texture in memory */
 
-	#if SupportWindows95
-
 	LPDIRECTDRAWSURFACE DDSurface;
 	LPDIRECT3DTEXTURE AvPTexture;
 //	D3DTEXTUREHANDLE D3DHandle;
@@ -850,15 +848,14 @@ typedef struct imageheader {
 	D3DTEXTURE Direct3DTexture;
 
 	int UserTexture;
+	int RequiresRestore;
 
-	#endif
+	int ImageNum;						/* # MIP images */
+	char ImageName[ImageNameSize];		/* Filename */
 
-	int ImageNum;							/* # MIP images */
-	char ImageName[ImageNameSize];	/* Filename */
+	int ImageHeight;					/* Height, Pixels */
 
-	int ImageHeight;						/* Height, Pixels */
-
-	int ImageSize;							/* Size of Image Data in bytes */
+	int ImageSize;						/* Size of Image Data in bytes */
 	int ImageFlags;						/* Load / Display Options */
 
 
@@ -917,6 +914,7 @@ typedef struct imagepolyextents {
 
 */
 
+/* bjd 
 typedef struct texture24 {
 
 	unsigned char r24;
@@ -924,7 +922,7 @@ typedef struct texture24 {
 	unsigned char b24;
 
 } TEXTURE24;
-
+*/
 
 /*
 
