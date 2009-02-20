@@ -46,7 +46,7 @@ void EmptyCDTrackList()
 
 static void ExtractTracksForLevel(char* &buffer, List<int> &track_list)
 {
-	return;
+//	return;
 #if 0
 	int index = 0;
 
@@ -154,6 +154,9 @@ static void ExtractTracksForLevel(char* &buffer, List<int> &track_list)
 
 			if(track>=0)
 			{
+				char buf[100];
+				sprintf(buf, "adding track: %d\n", track);
+				OutputDebugString(buf);
 				track_list.add_entry(track);
 			}
 
@@ -233,6 +236,10 @@ static BOOL PickCDTrack(List<int>& track_list)
 	//pick the next track in the list
 	unsigned int index=TrackSelectCounter % track_list.size();
 
+	char buf[100];
+	sprintf(buf, "track size: %d\n", track_list.size());
+//	OutputDebugString(buf);
+
 	TrackSelectCounter++;
 
 	//play it
@@ -243,33 +250,44 @@ static BOOL PickCDTrack(List<int>& track_list)
 	return TRUE;	
 }
 
-//#include <process.h>
-
 static bool PickOGGTrack(List<int>& track_list)
 {
 	//make sure we have some tracks in the list
-	if(!CheckNumberOfVorbisTracks()) return FALSE;
+	if(!CheckNumberOfVorbisTracks()) return false;
+	if(!track_list.size()) return false;
 
 	//pick the next track in the list
-	unsigned int index=TrackSelectCounter % CheckNumberOfVorbisTracks();
+	unsigned int index=TrackSelectCounter % track_list.size();
+
+	char buf[100];
+	sprintf(buf, "wants to play track: %d\n", index);
+//	OutputDebugString(buf);
+
+//	unsigned int index=TrackSelectCounter % CheckNumberOfVorbisTracks();
+
+	if (index > CheckNumberOfVorbisTracks())
+	{
+		return false;
+	}
 
 	TrackSelectCounter++;
 
 	//play it
-	StopVorbis();
 	LoadVorbisTrack(index);
 
 	LastTrackChosen = index;
 
-	return TRUE;
+	return true;
 }
 
 void CheckCDAndChooseTrackIfNeeded()
 {
 	static enum playertypes lastPlayerType;
+
+//	OutputDebugString("CheckCDAndChooseTrackIfNeeded\n");
 	
 	//are we bothering with cd tracks
-//	if(!CDDA_IsOn()) return;
+	if(!CDDA_IsOn()) return;
 	//is our current track still playing
 	if(CDDA_IsPlaying() || IsVorbisPlaying()) // check this is ok
 	{
@@ -295,11 +313,14 @@ void CheckCDAndChooseTrackIfNeeded()
 				//pick track based on level
 				if(PickCDTrack(LevelCDTracks[level]))
 				{
-//					return;
+					return;
 				}
 			}
+			else
+
 			// if use ogg
 			{
+				OutputDebugString("USING OGG\n");
 				if(PickOGGTrack(LevelCDTracks[level]))
 				{
 					return;
@@ -311,9 +332,7 @@ void CheckCDAndChooseTrackIfNeeded()
 	
 	//multiplayer (or their weren't ant level specific tracks)
 	lastPlayerType=AvP.PlayerType;
-	PickCDTrack(MultiplayerCDTracks[AvP.PlayerType]);
-	
-	 	
+	PickCDTrack(MultiplayerCDTracks[AvP.PlayerType]); 	
 }
 
 void ResetCDPlayForLevel()

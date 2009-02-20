@@ -1189,6 +1189,9 @@ BOOL load_rif_bitmaps (RIFFHANDLE h, int flags)
 		{
 			if (!(bns().flags & ChunkBMPFlag_NotInPC))
 			{
+				OutputDebugString("load_rif_bitmaps");
+				OutputDebugString(bns().filename);
+				OutputDebugString("\n");
 				// JH 17-2-97 -- image loaders have changed to avoid loading the same image twice
 				int imgnum = load_rif_bitmap(bns().filename,bns().flags);
 				if (GEI_NOTLOADED != imgnum)

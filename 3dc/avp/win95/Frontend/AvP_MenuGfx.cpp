@@ -891,15 +891,16 @@ static int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red,
 
 //	int extra = 0;
 
-	int alphaR = MUL_FIXED(alpha,red);
-	int alphaG = MUL_FIXED(alpha,green);
-	int alphaB = MUL_FIXED(alpha,blue);
-
+	int alphaR = MUL_FIXED(alpha, red);
+	int alphaG = MUL_FIXED(alpha, green);
+	int alphaB = MUL_FIXED(alpha, blue);
+/*
 	AVPMENUGFX *gfxPtr;
 	AvPTexture *image;
 
 	gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_SMALL_FONT];
 	image = (AvPTexture*)gfxPtr->ImagePtr;
+*/
 /*
 	D3DInfo temp;
 
@@ -921,17 +922,15 @@ static int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red,
 			int topLeftU = 1+((c-32)&15)*16;
 			int topLeftV = 1+((c-32)>>4)*16;
 
-			int x,y;
-
-			DrawSmallMenuCharacter(sx, sy, topLeftU, topLeftV, alphaR, alphaG, alphaB,alpha);
+			DrawSmallMenuCharacter(sx, sy, topLeftU, topLeftV, alphaR, alphaG, alphaB, alpha);
 
 //			srcPtr = &image->buffer[(topLeftU+topLeftV*image->width)*4];
 
-			for (y=sy; y<HUD_FONT_HEIGHT+sy; y++)
+			for (int y=sy; y<HUD_FONT_HEIGHT+sy; y++)
 			{
 //				destPtr = (unsigned short *)(((unsigned char *)lock.pBits)+y*lock.Pitch) + sx;
 
-				for (x=0; x<HUD_FONT_WIDTH; x++)
+				for (int x=0; x<HUD_FONT_WIDTH; x++)
 				{
 /*
 					if (srcPtr[0] || srcPtr[1] || srcPtr[2])

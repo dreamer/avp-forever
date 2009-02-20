@@ -24,57 +24,6 @@ extern "C++"{
 
 #include "showcmds.h"
 
-// DirectInput key down value
-#define DikOn 0x80
-
-// Internal DirectInput driver
-// buffer Size for direct mouse read
-#define DMouse_BufferSize         128
-
-// Maximum number of buffered events retrievable
-// from a mouse data acquisition
-#define DMouse_RetrieveSize       128
-
-/*
-	These are (hopefully) temporary #defines,
-	introduced as a hack because the curious
-	FIELD_OFFSET macros in the dinput.h header
-	don't appear to compile, at least in Watcom 10.6.
-	They will obviously have to be kept up to date
-	with changes in the DIMOUSESTATE structure manually.
-*/
-
-#define DIMouseXOffset 0
-
-#define DIMouseYOffset 4
-#define DIMouseZOffset 8
-
-#define DIMouseButton0Offset 12
-
-#define DIMouseButton1Offset 13
-
-#define DIMouseButton2Offset 14
-
-#define DIMouseButton3Offset 15
-
-
-/*
-	Globals
-*/
-
-#if 0
-static LPDIRECTINPUT            lpdi;          // DirectInput interface
-static LPDIRECTINPUTDEVICE      lpdiKeyboard;  // keyboard device interface
-static LPDIRECTINPUTDEVICE      lpdiMouse;     // mouse device interface
-static BOOL                     DIKeyboardOkay;  // Is the keyboard acquired?
-
-static IDirectInputDevice*     g_pJoystick         = NULL;
-static IDirectInputDevice2*    g_pJoystickDevice2  = NULL;  // needed to poll joystick
-#endif
-
-	static char bGravePressed = No;
-		// added 14/1/98 by DHM as a temporary hack to debounce the GRAVE key
-
 /*
 	Externs for input communication
 */
@@ -108,12 +57,46 @@ static unsigned char LastGotAnyKey;
 unsigned char DebouncedGotAnyKey;
 
 int GotJoystick;
-//JOYCAPS JoystickCaps;
-//JOYINFOEX JoystickData;
 int JoystickEnabled;
 
-//DIJOYSTATE JoystickState;          // DirectInput joystick state
+#define MAX_CONTROLLERS 4  // XInput handles up to 4 controllers
+#define INPUT_DEADZONE  ( 0.24f * FLOAT(0x7FFF) )  // Default to 24% of the +/- 32767 range.   This is a reasonable default value but can be altered if needed.
 
+/* XInput controller state */
+struct CONTROLER_STATE
+{
+    XINPUT_STATE state;
+    bool bConnected;
+	bool bInserted;
+	bool bRemoved;
+	HANDLE handle;
+};
+
+CONTROLER_STATE g_Controllers[MAX_CONTROLLERS];
+
+enum
+{
+	X,
+	A,
+	Y,
+	B,
+	LT,
+	RT,
+	WHITE,
+	BLACK,
+	BACK,
+	START,
+	LEFTCLICK,
+	RIGHTCLICK,
+	DUP,
+	DDOWN,
+	DLEFT,
+	DRIGHT
+};
+
+#define NUMPADBUTTONS 16
+static char GamePadButtons[NUMPADBUTTONS];
+#define XINPUT_GAMEPAD_TRIGGER_THRESHOLD    30
 
 /*
 	8/4/98 DHM: A new array, analagous to KeyboardInput, except it's debounced
@@ -148,6 +131,7 @@ bool usePad = false;
 
 BOOL InitialiseDirectInput()
 {
+#if 0
 	OutputDebugString("\n InitialiseDirectInput()");
 	
 	// device struct - just gamepads
@@ -209,7 +193,7 @@ BOOL InitialiseDirectInput()
         HandleDeviceChanges( g_dsDevices[i].pxdt, g_dsDevices[i].dwState, 0 );
     }
 */
-
+#endif
     return TRUE;
 }
 
@@ -270,8 +254,8 @@ BOOL InitialiseDirectKeyboard()
 
 void DirectReadKeyboard()
 {
-	DWORD inserts, removals;
-	XINPUT_STATE inputState;
+	/* read gamepad/joystick input */
+	ReadJoysticks();
 
 	// Take a copy of last frame's inputs:
 	memcpy((void*)LastFramesKeyboardInput, (void*)KeyboardInput, MAX_NUMBER_OF_INPUT_KEYS);
@@ -281,895 +265,17 @@ void DirectReadKeyboard()
 	// or not pressed)
     memset((void*)KeyboardInput, FALSE, MAX_NUMBER_OF_INPUT_KEYS);
 	GotAnyKey = FALSE;
-	GotMouse = FALSE;
 
-	if (usePad) 
+	/* xbox gamepad buttons */
+	for (int i = 0; i < NUMPADBUTTONS; i++)
 	{
-		/* check for pad removals or inserts */
-		XGetDeviceChanges( XDEVICE_TYPE_GAMEPAD, &inserts, &removals );
-
-		if (devices != (removals & (1 << 0))) // check removal of pad at port 0
+		if (GamePadButtons[i])
 		{
-			//OutputDebugString("Gamepad removed!\n");
-			if(gamePad)
-				XInputClose(gamePad);
-		}
-
-		if (devices != (inserts & (1 << 0)))
-		{
-			//OutputDebugString("Gamepad inserted!\n");
-			gamePad = XInputOpen( XDEVICE_TYPE_GAMEPAD, XDEVICE_PORT0, XDEVICE_NO_SLOT, NULL );
-		}
-
-		// Query latest state.
-		XInputGetState( gamePad, &inputState );
-
-		GotXPad = 1;
-
-		/* d-pad */
-		if (inputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP )
-		{
-			KeyboardInput[KEY_UP] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-		if (inputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN )
-		{
-			KeyboardInput[KEY_DOWN] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-		if (inputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT )
-		{
-			KeyboardInput[KEY_LEFT] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-		if (inputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT )
-		{
-			KeyboardInput[KEY_RIGHT] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-		/* analogue buttons */
-		if (inputState.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_A] > XINPUT_GAMEPAD_MAX_CROSSTALK)
-		{
-			KeyboardInput[KEY_JOYSTICK_BUTTON_1] = TRUE;
-//			KeyboardInput[KEY_CR] = TRUE; // need to use something for return key for menus
-			GotAnyKey = TRUE;
-		}
-
-		if (inputState.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_B] > XINPUT_GAMEPAD_MAX_CROSSTALK)
-		{
-			KeyboardInput[KEY_JOYSTICK_BUTTON_2] = TRUE;
-//			KeyboardInput[KEY_ESCAPE] = TRUE; // this can be our back/escape key?
-			GotAnyKey = TRUE;
-		}
-
-		if (inputState.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_X] > XINPUT_GAMEPAD_MAX_CROSSTALK)
-		{
-			KeyboardInput[KEY_JOYSTICK_BUTTON_3] = TRUE;
-			GotAnyKey = TRUE;
-		}
-			
-		if (inputState.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_Y] > XINPUT_GAMEPAD_MAX_CROSSTALK)
-		{
-			KeyboardInput[KEY_JOYSTICK_BUTTON_4] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-		if (inputState.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_BLACK] > XINPUT_GAMEPAD_MAX_CROSSTALK)
-		{
-			KeyboardInput[KEY_JOYSTICK_BUTTON_5] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-		if (inputState.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_WHITE] > XINPUT_GAMEPAD_MAX_CROSSTALK)
-		{
-			KeyboardInput[KEY_JOYSTICK_BUTTON_6] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-		if (inputState.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_LEFT_TRIGGER] > 60)
-		{
-			KeyboardInput[KEY_JOYSTICK_BUTTON_7] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-		if (inputState.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_RIGHT_TRIGGER] > 60)
-		{
-			KeyboardInput[KEY_JOYSTICK_BUTTON_8] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-		/* clicky thumbsticks */
-		if (inputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB)
-		{
-			KeyboardInput[KEY_JOYSTICK_BUTTON_9] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-		if (inputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB)
-		{
-			KeyboardInput[KEY_JOYSTICK_BUTTON_10] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-		/* start and back buttons */
-		if (inputState.Gamepad.wButtons & XINPUT_GAMEPAD_START)
-		{
-//			KeyboardInput[KEY_JOYSTICK_BUTTON_11] = TRUE;
-			KeyboardInput[KEY_CR] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-		if (inputState.Gamepad.wButtons & XINPUT_GAMEPAD_BACK)
-		{
-//			KeyboardInput[KEY_JOYSTICK_BUTTON_12] = TRUE;
-			KeyboardInput[KEY_ESCAPE] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		
-		// going to treat the right gamepad stick as our mouse
-		int OldMouseX, OldMouseY, OldMouseZ;
- 		GotMouse = Yes;
-		MouseVelX = 0;
-		MouseVelY = 0;
-		MouseVelZ = 0;
-
-		// Save mouse x and y for velocity determination
-		OldMouseX = MouseX;
-		OldMouseY = MouseY;
-		OldMouseZ = MouseZ;
-
-/*
-		// do the same for movement
-		int OldMouseMovementX, OldMouseMovementY;
-		MovementVelX = 0;
-		MovementVelY = 0;
-
-		// Save mouse x and y for velocity determination
-		OldMouseMovementX = MovementX;
-		OldMouseMovementY = MovementY;
-*/
-
-		int x = 0;
-		int y = 0;
-
-		// check if we're in the dead zone for x axis
-		if (inputState.Gamepad.sThumbRX < XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE &&
-			inputState.Gamepad.sThumbRX > -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
-		{
-			x = 0; // in dead zone, don't update
-		}
-		else
-		{
-			x = inputState.Gamepad.sThumbRX;
-		}
-
-		// check if we're in the dead zone for y axis
-		if (inputState.Gamepad.sThumbRY < XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE &&
-			inputState.Gamepad.sThumbRY > -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
-		{
-			y = 0; // in dead zone, don't update
-		}
-		else
-		{
-			y = inputState.Gamepad.sThumbRY;
-		}
-
-		// scale it down a bit
-		MouseX += (int)(x / 700.0f);
-		MouseY += (int)(y / 700.0f);
-
-	    MouseVelX = DIV_FIXED(MouseX-OldMouseX,NormalFrameTime);
-		MouseVelY = DIV_FIXED(MouseY-OldMouseY,NormalFrameTime);
-
-		char buf[100];
-		sprintf(buf, "x: %d y: %d\n", x, y);
-		OutputDebugString(buf);
-
-		// use left stick to move?
-		// move up
-#if 0
-		if (inputState.Gamepad.sThumbLY > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-		{
-			KeyboardInput[KEY_UP] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-		// move down
-		if (inputState.Gamepad.sThumbLY < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-		{
-			KeyboardInput[KEY_DOWN] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-		// strafe right
-		if (inputState.Gamepad.sThumbLX > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-		{
-			KeyboardInput[KEY_D] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-		// strafe left
-		if (inputState.Gamepad.sThumbLX < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-		{
-			KeyboardInput[KEY_A] = TRUE;
-			GotAnyKey = TRUE;
-		}
-#endif
-
-		// check if we're in the dead zone for x axis
-		if (inputState.Gamepad.sThumbLX < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE &&
-			inputState.Gamepad.sThumbLX > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-		{
-			x = 0; // in dead zone, don't update
-		}
-		else
-		{
-			x = inputState.Gamepad.sThumbLX;
-		}
-
-		// check if we're in the dead zone for y axis
-		if (inputState.Gamepad.sThumbLY < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE &&
-			inputState.Gamepad.sThumbLY > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-		{
-			y = 0; // in dead zone, don't update
-		}
-		else
-		{
-			y = inputState.Gamepad.sThumbLY;
-		}
-
-		xPadMoveX = x;
-		xPadMoveY = y;
-
-/*
-		// scale it down a bit
-		MovementX += (int)(x / 700.0f);
-		MovementY += (int)(y / 700.0f);
-
-	    MovementVelX = DIV_FIXED(MovementX-OldMouseMovementX,NormalFrameTime);
-		MovementVelY = DIV_FIXED(MovementY-OldMouseMovementY,NormalFrameTime);
-*/
-
-	}
-
-	#if 1
-	{
-		int c;
-
-		for (c='a'; c<='z'; c++)
-		{
-			if (IngameKeyboardInput[c])
-			{
-				KeyboardInput[KEY_A + c - 'a'] = TRUE;
-				GotAnyKey = TRUE;
-			}
-		}
-		if (IngameKeyboardInput[246])
-		{
-			KeyboardInput[KEY_O_UMLAUT] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[228])
-		{
-			KeyboardInput[KEY_A_UMLAUT] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[252])
-		{
-			KeyboardInput[KEY_U_UMLAUT] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[223])
-		{
-			KeyboardInput[KEY_BETA] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput['+'])
-		{
-			KeyboardInput[KEY_PLUS] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput['#'])
-		{
-			KeyboardInput[KEY_HASH] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[161])
-		{
-			KeyboardInput[KEY_UPSIDEDOWNEXCLAMATION] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[231])
-		{
-			KeyboardInput[KEY_C_CEDILLA] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[241])
-		{
-			KeyboardInput[KEY_N_TILDE] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[')'])
-		{
-			KeyboardInput[KEY_RIGHTBRACKET] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput['*'])
-		{
-			KeyboardInput[KEY_ASTERISK] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput['$'])
-		{
-			KeyboardInput[KEY_DOLLAR] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[249])
-		{
-			KeyboardInput[KEY_U_GRAVE] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput['!'])
-		{
-			KeyboardInput[KEY_EXCLAMATION] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[':'])
-		{
-			KeyboardInput[KEY_COLON] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[96])
-		{
-			KeyboardInput[KEY_DIACRITIC_GRAVE] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[180])
-		{
-			KeyboardInput[KEY_DIACRITIC_ACUTE] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[94])
-		{
-			KeyboardInput[KEY_DIACRITIC_CARET] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[168])
-		{
-			KeyboardInput[KEY_DIACRITIC_UMLAUT] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput['<'])
-		{
-			KeyboardInput[KEY_LESSTHAN] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[176])
-		{
-			KeyboardInput[KEY_ORDINAL] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-
-		if (IngameKeyboardInput['['])
-		{
-			KeyboardInput[KEY_LBRACKET] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[']'])
-		{
-			KeyboardInput[KEY_RBRACKET] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[';'])
-		{
-			KeyboardInput[KEY_SEMICOLON] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput['\''])
-		{
-			KeyboardInput[KEY_APOSTROPHE] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput['\\'])
-		{
-			KeyboardInput[KEY_BACKSLASH] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput['/'])
-		{
-			KeyboardInput[KEY_SLASH] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput['-'])
-		{
-			KeyboardInput[KEY_MINUS] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput['='])
-		{
-			KeyboardInput[KEY_EQUALS] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput[','])
-		{
-			KeyboardInput[KEY_COMMA] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		if (IngameKeyboardInput['.'])
-		{
-			KeyboardInput[KEY_FSTOP] = TRUE;
-			GotAnyKey = TRUE;
-		}
-
-	}
-	#endif
-#if 0
-
-    // Check and set keyboard array
-	// (test checks only for the moment)
-    if (DiKeybd[DIK_LEFT] & DikOn)
-	  {
-	   KeyboardInput[KEY_LEFT] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_RIGHT] & DikOn)
-	  {
-	   KeyboardInput[KEY_RIGHT] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_UP] & DikOn)
-	  {
-	   KeyboardInput[KEY_UP] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_DOWN] & DikOn)
-	  {
-	   KeyboardInput[KEY_DOWN] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_ESCAPE] & DikOn)
-	  {
-	   KeyboardInput[KEY_ESCAPE] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_RETURN] & DikOn)
-	  {
-	   KeyboardInput[KEY_CR] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_TAB] & DikOn)
-	  {
-	   KeyboardInput[KEY_TAB] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_F1] & DikOn)
-	  {
-	   KeyboardInput[KEY_F1] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_F2] & DikOn)
-	  {
-	   KeyboardInput[KEY_F2] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_F3] & DikOn)
-	  {
-	   KeyboardInput[KEY_F3] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_F4] & DikOn)
-	  {
-	   KeyboardInput[KEY_F4] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_F5] & DikOn)
-	  {
-	   KeyboardInput[KEY_F5] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_F6] & DikOn)
-	  {
-	   KeyboardInput[KEY_F6] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_F7] & DikOn)
-	  {
-	   KeyboardInput[KEY_F7] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_F8] & DikOn)
-	  {
-	   KeyboardInput[KEY_F8] = TRUE;
-/* KJL 14:51:38 21/04/98 - F8 does screen shots, and so this is a hack
-to make F8 not count in a 'press any key' situation */
-//	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_F9] & DikOn)
-	  {
-	   KeyboardInput[KEY_F9] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_F10] & DikOn)
-	  {
-	   KeyboardInput[KEY_F10] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_F11] & DikOn)
-	  {
-	   KeyboardInput[KEY_F11] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_F12] & DikOn)
-	  {
-	   KeyboardInput[KEY_F12] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_INSERT] & DikOn)
-	  {
-	   KeyboardInput[KEY_INS] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_DELETE] & DikOn)
-	  {
-	   KeyboardInput[KEY_DEL] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_END] & DikOn)
-	  {
-	   KeyboardInput[KEY_END] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_HOME] & DikOn)
-	  {
-	   KeyboardInput[KEY_HOME] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_PRIOR] & DikOn)
-	  {
-	   KeyboardInput[KEY_PAGEUP] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_NEXT] & DikOn)
-	  {
-	   KeyboardInput[KEY_PAGEDOWN] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_BACK] & DikOn)
-	  {
-	   KeyboardInput[KEY_BACKSPACE] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_SPACE] & DikOn)
-	  {
-	   KeyboardInput[KEY_SPACE] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_LSHIFT] & DikOn)
-	  {
-	   KeyboardInput[KEY_LEFTSHIFT] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_RSHIFT] & DikOn)
-	  {
-	   KeyboardInput[KEY_RIGHTSHIFT] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_LCONTROL] & DikOn)
-	  {
-	   KeyboardInput[KEY_LEFTCTRL] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_RCONTROL] & DikOn)
-	  {
-	   KeyboardInput[KEY_RIGHTCTRL] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_CAPSLOCK] & DikOn)
-	  {
-	   KeyboardInput[KEY_CAPS] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_NUMLOCK] & DikOn)
-	  {
-	   KeyboardInput[KEY_NUMLOCK] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_SCROLL] & DikOn)
-	  {
-	   KeyboardInput[KEY_SCROLLOK] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_LMENU] & DikOn)
-	  {
-	   KeyboardInput[KEY_LEFTALT] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_RMENU] & DikOn)
-	  {
-	   KeyboardInput[KEY_RIGHTALT] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_0] & DikOn)
-	  {
-	   KeyboardInput[KEY_0] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_1] & DikOn)
-	  {
-	   KeyboardInput[KEY_1] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_2] & DikOn)
-	  {
-	   KeyboardInput[KEY_2] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_3] & DikOn)
-	  {
-	   KeyboardInput[KEY_3] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_4] & DikOn)
-	  {
-	   KeyboardInput[KEY_4] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_5] & DikOn)
-	  {
-	   KeyboardInput[KEY_5] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_6] & DikOn)
-	  {
-	   KeyboardInput[KEY_6] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_7] & DikOn)
-	  {
-	   KeyboardInput[KEY_7] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_8] & DikOn)
-	  {
-	   KeyboardInput[KEY_8] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-    if (DiKeybd[DIK_9] & DikOn)
-	  {
-	   KeyboardInput[KEY_9] = TRUE;
-	   GotAnyKey = TRUE;
-	  }
-
-
-	/* KJL 16:12:19 05/11/97 - numeric pad follows */
-	if (DiKeybd[DIK_NUMPAD7] & DikOn)
-	{
-		KeyboardInput[KEY_NUMPAD7] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_NUMPAD8] & DikOn)
-	{
-		KeyboardInput[KEY_NUMPAD8] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_NUMPAD9] & DikOn)
-	{
-		KeyboardInput[KEY_NUMPAD9] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_SUBTRACT] & DikOn)
-	{
-		KeyboardInput[KEY_NUMPADSUB] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_NUMPAD4] & DikOn)
-	{
-		KeyboardInput[KEY_NUMPAD4] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_NUMPAD5] & DikOn)
-	{
-		KeyboardInput[KEY_NUMPAD5] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_NUMPAD6] & DikOn)
-	{
-		KeyboardInput[KEY_NUMPAD6] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_ADD] & DikOn)
-	{
-		KeyboardInput[KEY_NUMPADADD] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_NUMPAD1] & DikOn)
-	{
-		KeyboardInput[KEY_NUMPAD1] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_NUMPAD2] & DikOn)
-	{
-		KeyboardInput[KEY_NUMPAD2] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_NUMPAD3] & DikOn)
-	{
-		KeyboardInput[KEY_NUMPAD3] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_NUMPAD0] & DikOn)
-	{
-		KeyboardInput[KEY_NUMPAD0] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_DECIMAL] & DikOn)
-	{
-		KeyboardInput[KEY_NUMPADDEL] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_NUMPADENTER] & DikOn)
-	{
-		KeyboardInput[KEY_NUMPADENTER] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_DIVIDE] & DikOn)
-	{
-		KeyboardInput[KEY_NUMPADDIVIDE] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_MULTIPLY] & DikOn)
-	{
-		KeyboardInput[KEY_NUMPADMULTIPLY] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_CAPITAL] & DikOn)
-	{
-		KeyboardInput[KEY_CAPITAL] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_LWIN] & DikOn)
-	{
-		KeyboardInput[KEY_LWIN] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_RWIN] & DikOn)
-	{
-		KeyboardInput[KEY_RWIN] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (DiKeybd[DIK_APPS] & DikOn)
-	{
-		KeyboardInput[KEY_APPS] = TRUE;
-		GotAnyKey = TRUE;
-	}
-
-
-	#if 0
-	// Added 14/1/98 by DHM: Process the grave key (known to some as the tilde key)
-	// Done this way as a bit of a hack to avoid touching PLATFORM.H
-	// which would force big recompiles
-	if (DiKeybd[DIK_GRAVE] & DikOn)
-	{
-		if ( !bGravePressed )
-		{
-			IOFOCUS_Toggle();
-		}
-
-		bGravePressed = Yes;
-
-		GotAnyKey = TRUE;
-	}
-	else
-	{
-		bGravePressed = No;
-	}
-	#else
-	if (DiKeybd[DIK_GRAVE] & DikOn)
-	{
-		KeyboardInput[KEY_GRAVE] = TRUE;
-	}
-	#endif
-
-	/* mouse keys */
-	if (MouseButton & LeftButton)
-	{
-		KeyboardInput[KEY_LMOUSE] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (MouseButton & MiddleButton)
-	{
-		KeyboardInput[KEY_MMOUSE] = TRUE;
-		GotAnyKey = TRUE;
-	}
-	if (MouseButton & RightButton)
-	{
-		KeyboardInput[KEY_RMOUSE] = TRUE;
-		GotAnyKey = TRUE;
-	}
-
-	/* mouse wheel - read using windows messages */
-	{
-		extern signed int MouseWheelStatus;
-		if (MouseWheelStatus>0)
-		{
-			KeyboardInput[KEY_MOUSEWHEELUP] = TRUE;
-			GotAnyKey = TRUE;
-		}
-		else if (MouseWheelStatus<0)
-		{
-			KeyboardInput[KEY_MOUSEWHEELDOWN] = TRUE;
+			KeyboardInput[KEY_JOYSTICK_BUTTON_1+i] = TRUE;
 			GotAnyKey = TRUE;
 		}
 	}
 
-
-	/* joystick buttons */
-	if (GotJoystick)
-	{
-		unsigned int n,bit;
-
-		for (n=0,bit=1; n<16; n++,bit*=2)
-		{
-			if(JoystickData.dwButtons&bit)
-			{
-				KeyboardInput[KEY_JOYSTICK_BUTTON_1+n]=TRUE;
-				GotAnyKey = TRUE;
-			}
-		}
-
-	}
-
-#endif
 	/* update debounced keys array */
 	{
 		for (int i=0;i<MAX_NUMBER_OF_INPUT_KEYS;i++)
@@ -1182,6 +288,49 @@ to make F8 not count in a 'press any key' situation */
 		DebouncedGotAnyKey = GotAnyKey && !LastGotAnyKey;
 	}
 }
+
+char *GetGamePadButtonTextString(enum TEXTSTRING_ID stringID)
+{
+	switch(stringID)
+	{
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_1:
+			return "XPAD_X";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_2:
+			return "XPAD_A";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_3:
+			return "XPAD_Y";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_4:
+			return "XPAD_B";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_5:
+			return "XPAD_LEFT_TRIGGER";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_6:
+			return "XPAD_RIGHT_TRIGGER";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_7:
+			return "XPAD_WHITE";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_8:
+			return "XPAD_BLACK";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_9:
+			return "XPAD_BACK";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_10:
+			return "XPAD_START";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_11:
+			return "XPAD_LEFT_CLICK";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_12:
+			return "XPAD_RIGHT_CLICK";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_13:
+			return "XPAD_DPAD_UP";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_14:
+			return "XPAD_DPAD_DOWN";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_15:
+			return "XPAD_DPAD_LEFT";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_16:
+			return "XPAD_DPAD_RIGHT";
+		default:
+			return "NO_BIND";
+	}
+}
+
+
 /*
 
  Clean up direct keyboard objects
@@ -1237,12 +386,284 @@ void ReleaseDirectMouse()
 
 void InitJoysticks()
 {
+	OutputDebugString("InitJoysticks()\n");
+	XInitDevices(0, NULL);
 
+	// Get a mask of all currently available devices
+	DWORD dwDeviceMask = XGetDevices( XDEVICE_TYPE_GAMEPAD );
+
+	// Open the devices
+	for (DWORD i = 0; i < XGetPortCount(); i++)
+	{
+//		ZeroMemory( &g_InputStates[i], sizeof(XINPUT_STATE) );
+//		ZeroMemory( &g_Gamepads[i], sizeof(XBGAMEPAD) );
+        if( dwDeviceMask & (1<<i) ) 
+        {
+			OutputDebugString("opening a pad\n");
+			// Get a handle to the device
+			g_Controllers[i].handle = XInputOpen( XDEVICE_TYPE_GAMEPAD, i, XDEVICE_NO_SLOT, NULL );
+
+			// Store capabilities of the device
+//			XInputGetCapabilities( g_Gamepads[i].hDevice, &g_Gamepads[i].caps );
+
+            // Initialize last pressed buttons
+//			XInputGetState( g_Gamepads[i].hDevice, &g_InputStates[i] );
+
+//			g_Gamepads[i].wLastButtons = g_InputStates[i].Gamepad.wButtons;
+/*
+            for( DWORD b=0; b<8; b++ )
+            {
+                g_Gamepads[i].bLastAnalogButtons[b] =
+                    // Turn the 8-bit polled value into a boolean value
+                    ( g_InputStates[i].Gamepad.bAnalogButtons[b] > XINPUT_GAMEPAD_MAX_CROSSTALK );
+            }
+*/
+        }
+    }
+}
+
+int UpdateControllerState()
+{
+	DWORD dwInsertions, dwRemovals;
+	int numConnected = 0;
+
+	XGetDeviceChanges( XDEVICE_TYPE_GAMEPAD, &dwInsertions, &dwRemovals );
+
+	// Loop through all gamepads
+    for (DWORD i = 0; i < XGetPortCount(); i++ )
+	{
+		g_Controllers[i].bRemoved = (dwRemovals & (1<<i)) ? true : false;
+
+		if( g_Controllers[i].bRemoved )
+        {
+            // If the controller was removed after XGetDeviceChanges but before
+            // XInputOpen, the device handle will be NULL
+            if( g_Controllers[i].handle )
+                XInputClose( g_Controllers[i].handle );
+				g_Controllers[i].handle = NULL;
+            //pGamepads[i].Feedback.Rumble.wLeftMotorSpeed  = 0;
+			//pGamepads[i].Feedback.Rumble.wRightMotorSpeed = 0;
+        }
+
+		// Handle inserted devices
+        g_Controllers[i].bInserted = ( dwInsertions & (1<<i) ) ? true : false;
+        if (g_Controllers[i].bInserted) 
+        {
+			OutputDebugString("opening pad\n");
+			// TCR Device Types
+            g_Controllers[i].handle = XInputOpen( XDEVICE_TYPE_GAMEPAD, i, XDEVICE_NO_SLOT, NULL );
+		}
+
+		if (g_Controllers[i].handle)
+		{
+			XInputGetState(g_Controllers[i].handle, &g_Controllers[i].state);
+			numConnected++;
+		}
+	}
+#if 0
+	/* check for pad removals or inserts */
+		XGetDeviceChanges( XDEVICE_TYPE_GAMEPAD, &inserts, &removals );
+
+		if (devices != (removals & (1 << 0))) // check removal of pad at port 0
+		{
+			//OutputDebugString("Gamepad removed!\n");
+			if(gamePad)
+				XInputClose(gamePad);
+		}
+
+		if (devices != (inserts & (1 << 0)))
+		{
+			//OutputDebugString("Gamepad inserted!\n");
+			gamePad = XInputOpen( XDEVICE_TYPE_GAMEPAD, XDEVICE_PORT0, XDEVICE_NO_SLOT, NULL );
+		}
+
+		// Query latest state.
+		XInputGetState( gamePad, &inputState );
+
+	
+	DWORD dwResult;
+	int numConnected = 0;
+    for( DWORD i = 0; i < MAX_CONTROLLERS; i++ )
+    {
+        // Simply get the state of the controller from XInput.
+        dwResult = XInputGetState( i, &g_Controllers[i].state );
+
+        if( dwResult == ERROR_SUCCESS )
+		{
+            g_Controllers[i].bConnected = true;
+			numConnected++;
+		}
+        else
+            g_Controllers[i].bConnected = false;
+    }
+#endif
+    return numConnected;
 }
 
 void ReadJoysticks()
 {
+	int tempX = 0;
+	int tempY = 0;
+	int oldxPadLookX, oldxPadLookY;
 
+	xPadLookX = 0;
+	xPadLookY = 0;
+	xPadMoveX = 0;
+	xPadMoveY = 0;
+
+	/* Save right x and y for velocity determination */
+	oldxPadLookX = xPadRightX;
+	oldxPadLookY = xPadRightY;
+
+	/* check XInput pads */
+	
+	GotXPad = UpdateControllerState();
+
+	memset(&GamePadButtons[0], 0, sizeof(GamePadButtons));
+
+	for( DWORD i = 0; i < MAX_CONTROLLERS; i++ )
+	{
+		/* check buttons if the controller is actually connected */
+		if( g_Controllers[i].handle )
+		{
+			/* handle d-pad */
+			if (g_Controllers[i].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP )
+			{
+				GamePadButtons[DUP] = Yes;
+				//OutputDebugString("xinput DPAD UP\n");
+			}
+			if (g_Controllers[i].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN )
+			{
+				GamePadButtons[DDOWN] = Yes;
+				//OutputDebugString("xinput DPAD DOWN\n");
+			}
+			if (g_Controllers[i].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT )
+			{
+				GamePadButtons[DLEFT] = Yes;
+				//OutputDebugString("xinput DPAD LEFT\n");
+			}
+			if (g_Controllers[i].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT )
+			{
+				GamePadButtons[DRIGHT] = Yes;
+				//OutputDebugString("xinput DPAD RIGHT\n");
+			}
+
+			/* handle coloured buttons - X A Y B */
+			if (g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_X] > XINPUT_GAMEPAD_MAX_CROSSTALK)
+			{
+				GamePadButtons[X] = Yes;
+				//OutputDebugString("xinput button X pressed\n");
+			}
+			if (g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_A] > XINPUT_GAMEPAD_MAX_CROSSTALK)
+			{
+				GamePadButtons[A] = Yes;
+				//OutputDebugString("xinput button A pressed\n");
+			}
+			if (g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_Y] > XINPUT_GAMEPAD_MAX_CROSSTALK)
+			{
+				GamePadButtons[Y] = Yes;
+				//OutputDebugString("xinput button Y pressed\n");
+			}
+			if (g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_B] > XINPUT_GAMEPAD_MAX_CROSSTALK)
+			{
+				GamePadButtons[B] = Yes;
+				//OutputDebugString("xinput button B pressed\n");
+			}
+
+			/* handle triggers */
+			if (g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_LEFT_TRIGGER] && 
+				g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_LEFT_TRIGGER] > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
+			{
+				GamePadButtons[LT] = Yes;
+				//OutputDebugString("xinput left trigger pressed\n");
+			}
+
+			if (g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_RIGHT_TRIGGER] && 
+				g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_RIGHT_TRIGGER] > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
+			{
+				GamePadButtons[RT] = Yes;
+				//OutputDebugString("xinput right trigger pressed\n");
+			}
+
+			/* handle black and white buttons */
+			if (g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_WHITE] > XINPUT_GAMEPAD_MAX_CROSSTALK)
+			{
+				GamePadButtons[WHITE] = Yes;
+				//OutputDebugString("xinput white button pressed\n");
+			}
+
+			if (g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_BLACK] > XINPUT_GAMEPAD_MAX_CROSSTALK)
+			{
+				GamePadButtons[BLACK] = Yes;
+				//OutputDebugString("xinput black button pressed\n");
+			}
+
+			/* handle back and start */
+			if (g_Controllers[i].state.Gamepad.wButtons & XINPUT_GAMEPAD_START)
+			{
+				GamePadButtons[START] = Yes;
+				//OutputDebugString("xinput start button clicked\n");
+			}
+
+			if (g_Controllers[i].state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK)
+			{
+				GamePadButtons[BACK] = Yes;
+				//OutputDebugString("xinput back button clicked\n");
+			}
+
+			/* handle stick clicks */
+			if (g_Controllers[i].state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB)
+			{
+				GamePadButtons[LEFTCLICK] = Yes;
+				//OutputDebugString("xinput left stick clicked\n");
+			}
+			if (g_Controllers[i].state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB)
+			{
+				GamePadButtons[RIGHTCLICK] = Yes;
+				//OutputDebugString("xinput right stick clicked\n");
+			}
+
+			/* handle analogue stick movement */
+
+			/* Zero value if thumbsticks are within the dead zone */
+			if( ( g_Controllers[i].state.Gamepad.sThumbLX < INPUT_DEADZONE &&
+				  g_Controllers[i].state.Gamepad.sThumbLX > -INPUT_DEADZONE ) &&
+				( g_Controllers[i].state.Gamepad.sThumbLY < INPUT_DEADZONE &&
+				  g_Controllers[i].state.Gamepad.sThumbLY > -INPUT_DEADZONE ) )
+			{
+				g_Controllers[i].state.Gamepad.sThumbLX = 0;
+				g_Controllers[i].state.Gamepad.sThumbLY = 0;
+			}
+
+			if( ( g_Controllers[i].state.Gamepad.sThumbRX < INPUT_DEADZONE &&
+				  g_Controllers[i].state.Gamepad.sThumbRX > -INPUT_DEADZONE ) &&
+				( g_Controllers[i].state.Gamepad.sThumbRY < INPUT_DEADZONE &&
+				  g_Controllers[i].state.Gamepad.sThumbRY > -INPUT_DEADZONE ) )
+			{
+				g_Controllers[i].state.Gamepad.sThumbRX = 0;
+				g_Controllers[i].state.Gamepad.sThumbRY = 0;
+			}
+
+			/* Right Stick */
+			tempX = g_Controllers[i].state.Gamepad.sThumbRX;
+			tempY = g_Controllers[i].state.Gamepad.sThumbRY;
+
+			/* scale it down a bit */
+			xPadRightX += (int)(tempX / 600.0f);
+			xPadRightY += (int)(tempY / 600.0f);
+
+			xPadLookX = DIV_FIXED(xPadRightX - oldxPadLookX, NormalFrameTime);
+			xPadLookY = DIV_FIXED(xPadRightY - oldxPadLookY, NormalFrameTime);
+/*
+			char buf[100];
+			sprintf(buf,"xpad x: %d xpad y: %d\n", xPadLookX, xPadLookY);
+			OutputDebugString(buf);
+*/
+			/* Left Stick - can grab this value directly */
+			xPadMoveX = g_Controllers[i].state.Gamepad.sThumbLX;
+			xPadMoveY = g_Controllers[i].state.Gamepad.sThumbLY;
+		}
+	}
 }
 
 int ReadJoystick()

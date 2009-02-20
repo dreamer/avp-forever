@@ -247,6 +247,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 			db_logf4(("\t(which is a path relative to %s or %s)",
 				FirstTex_Directory ? FirstTex_Directory : "<not-specified>",
 				SecondTex_Directory ? SecondTex_Directory : "<not-specified>"));
+
 			#define _GET_RELATIVE_PATH(pszDirectory,fnDoesExist) \
 				if (pszDirectory) { \
 					String str = pszDirectory; \

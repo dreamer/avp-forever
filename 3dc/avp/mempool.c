@@ -28,16 +28,14 @@ void* PoolAllocateMem(unsigned int amount)
 		MemoryBlocks[CurrentMemoryBlock]=AllocateMem(MEMORY_BLOCK_SIZE);
 		GLOBALASSERT(MemoryBlocks[CurrentMemoryBlock]);
 
-		
 		MemoryLeft=MEMORY_BLOCK_SIZE;
 		MemoryPoolPtr=MemoryBlocks[CurrentMemoryBlock];
 	}
-		
+
 	retval=MemoryPoolPtr;
 	MemoryLeft-=amount;
 	MemoryPoolPtr+=amount;
 	return (void*)retval;
-	
 }
 
 

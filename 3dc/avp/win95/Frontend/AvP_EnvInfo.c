@@ -5167,6 +5167,7 @@ void SetLevelToLoad(enum AVP_ENVIRONMENT_ID env)
 {
 	strcpy(LevelName,RifNamesForEnvironments[env]);
 }
+
 void SetLevelToLoadForCheatMode(int environment)
 {
 	if (environment<=10)
@@ -5202,6 +5203,8 @@ static BOOL DoesNamedLevelExist(const char* level_name)
 {
 	HANDLE file_handle;
 	char filename[200];
+
+	OutputDebugString("DoesNamedLevelExist\n");
 	
 	sprintf(filename,"avp_rifs\\%s.rif",level_name);
 

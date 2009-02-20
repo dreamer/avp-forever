@@ -170,7 +170,6 @@ extern int SoftwareScanDrawRequestMode;
 extern unsigned char AttemptVideoModeRestart;
 extern VIDEORESTARTMODES VideoRestartMode;
 extern BOOL MMXAvailable;
-extern BOOL D3DHardwareAvailable;
 extern int cosine[];
 extern int sine[];
 

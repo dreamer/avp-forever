@@ -88,7 +88,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				InlineFunctionExpansion="0"
-				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src"
+				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet-1.2-xbox\include&quot;"
 				PreprocessorDefinitions="_DEBUG;_XBOX;_WINDOWS;engine=1;DB_NOWINDOWS"
 				StringPooling="FALSE"
 				MinimalRebuild="TRUE"
@@ -111,6 +111,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="xapilibd.lib d3d8d.lib d3dx8d.lib xgraphicsd.lib dsoundd.lib xonlined.lib xboxkrnl.lib xbdm.lib"
+				AdditionalLibraryDirectories="..\xbox\enet-1.2-xbox\lib"
 				IgnoreDefaultLibraryNames="libcmt.lib"
 				MapExports="TRUE"
 				MapLines="TRUE"/>
@@ -214,7 +215,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="TRUE"
 				EnableFiberSafeOptimizations="FALSE"
-				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src"
+				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet-1.2-xbox\include&quot;"
 				PreprocessorDefinitions="_XBOX;_WINDOWS;engine=1;DB_NOWINDOWS"
 				MinimalRebuild="TRUE"
 				ExceptionHandling="FALSE"
@@ -234,6 +235,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="xapilib.lib d3d8.lib d3dx8.lib xgraphics.lib dsound.lib xboxkrnl.lib xbdm.lib xonline.lib"
+				AdditionalLibraryDirectories="..\xbox\enet-1.2-xbox\lib"
 				GenerateDebugInformation="FALSE"
 				GenerateMapFile="FALSE"
 				MapExports="FALSE"

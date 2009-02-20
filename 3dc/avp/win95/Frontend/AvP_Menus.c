@@ -146,6 +146,8 @@ extern void RenderKeyConfigRectangle(int alpha);
 extern void Hardware_RenderKeyConfigRectangle(int alpha);
 extern void Hardware_RenderHighlightRectangle(int x1,int y1,int x2,int y2,int r, int g, int b);
 
+extern char *GetGamePadButtonTextString(enum TEXTSTRING_ID stringID);
+
 /* KJL 11:23:03 23/06/98 - Requirements
 
 	1.      'Floating' over backdrop, possibly using translucency effects
@@ -1550,9 +1552,8 @@ static void RenderEpisodeSelectMenu(void)
 			EpisodeSelectScrollOffset=0;
 		}
 	}
-
-	
 }
+
 static void RenderKeyConfigurationMenu(void)
 {
 	AVPMENU_ELEMENT *elementPtr = AvPMenus.MenuElements;//AvPMenus.CurrentlySelectedElement];
@@ -1783,13 +1784,11 @@ static void RenderScrollyMenu()
 			}
 
 			elementPtr->Brightness = targetBrightness;
-			
+
 			RenderMenuElement(elementPtr, i, y);
 			y+=HeightOfMenuElement(elementPtr);
-		}
-		
+		}	
 	}
-	
 }
 
 
@@ -1893,8 +1892,6 @@ static void RenderUserProfileSelectMenu(void)
 			EpisodeSelectScrollOffset=0;
 		}
 	}
-
-	
 }
 
 static void RenderLoadGameMenu(void)
@@ -1953,7 +1950,6 @@ static void RenderLoadGameMenu(void)
 			{
 				elementPtr->Brightness = targetBrightness;
 			}
-			
 		}
 		
 		sprintf(buffer,"%d.",e+1);
@@ -2061,7 +2057,6 @@ static void RenderHelpString()
 		area.bottom=ScreenDescriptorBlock.SDB_Height;
 
 		RenderSmallFontString_Wrapped(GetTextString(elementPtr->HelpString),&area,BRIGHTNESS_OF_HIGHLIGHTED_ELEMENT,0,0);
-		
 	}
 }
 
@@ -2167,7 +2162,6 @@ static void ActUponUsersInput(void)
 							//the damned kerned fonts until after I'd written most of this
 							if(AvPMenus.WidthLeftForText<32) break;
 							AvPMenus.WidthLeftForText-=32;
-
 						}
 						else
 						{
@@ -2181,7 +2175,6 @@ static void ActUponUsersInput(void)
 						elementPtr->TextPtr[AvPMenus.PositionInTextField] = 0;
 					}
 				}
-
 			}
 		
 			KeyboardEntryQueue_Clear();
@@ -2274,7 +2267,8 @@ static void ActUponUsersInput(void)
 	}
 	else
 	{	
-		if (DebouncedKeyboardInput[KEY_ESCAPE] && (AvPMenus.CurrentMenu != AVPMENU_MAIN && AvPMenus.CurrentMenu != AVPMENU_INGAME))
+//		if (DebouncedKeyboardInput[KEY_ESCAPE] && (AvPMenus.CurrentMenu != AVPMENU_MAIN && AvPMenus.CurrentMenu != AVPMENU_INGAME))
+		if ((DebouncedKeyboardInput[KEY_ESCAPE] || DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_4]) && (AvPMenus.CurrentMenu != AVPMENU_MAIN && AvPMenus.CurrentMenu != AVPMENU_INGAME))
 		{
 			//if (AvPMenus.CurrentMenu == AVPMENU_MULTIPLAYERJOINGAME2)
 			switch(AvPMenus.CurrentMenu)
@@ -2320,7 +2314,6 @@ static void ActUponUsersInput(void)
 					MP_Config_Description[0]=0;
 					break;
 				}
-
 			}
 
 
@@ -3998,20 +3991,6 @@ static char *GetDescriptionOfKey(unsigned char key)
 	
 	switch (key)
 	{
-#ifdef _XBOX
-		case KEY_UP:
-			textPtr = "XBOX_DPAD_UP";
-			break;
-		case KEY_DOWN:
-			textPtr = "XBOX_DPAD_DOWN";;
-			break;
-		case KEY_LEFT:
-			textPtr = "XBOX_DPAD_LEFT";
-			break;
-		case KEY_RIGHT:
-			textPtr = "XBOX_DPAD_RIGHT";
-			break;
-#else
 		case KEY_UP:
 			textPtr = GetTextString(TEXTSTRING_KEYS_UP);
 			break;
@@ -4024,7 +4003,6 @@ static char *GetDescriptionOfKey(unsigned char key)
 		case KEY_RIGHT:
 			textPtr = GetTextString(TEXTSTRING_KEYS_RIGHT);
 			break;
-#endif
 		case KEY_CR:
 			textPtr = GetTextString(TEXTSTRING_KEYS_RETURN);
 			break;
@@ -4146,107 +4124,54 @@ static char *GetDescriptionOfKey(unsigned char key)
 			textPtr = GetTextString(TEXTSTRING_KEYS_PADDEL);
 			break;
 
-#ifdef WIN32
 		case KEY_JOYSTICK_BUTTON_1:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_1);
+			textPtr = GetGamePadButtonTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_1);
 			break;
 		case KEY_JOYSTICK_BUTTON_2:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_2);
+			textPtr = GetGamePadButtonTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_2);
 			break;
 		case KEY_JOYSTICK_BUTTON_3:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_3);
+			textPtr = GetGamePadButtonTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_3);
 			break;
 		case KEY_JOYSTICK_BUTTON_4:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_4);
+			textPtr = GetGamePadButtonTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_4);
 			break;
 		case KEY_JOYSTICK_BUTTON_5:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_5);
+			textPtr = GetGamePadButtonTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_5);
 			break;
 		case KEY_JOYSTICK_BUTTON_6:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_6);
+			textPtr = GetGamePadButtonTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_6);
 			break;
 		case KEY_JOYSTICK_BUTTON_7:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_7);
+			textPtr = GetGamePadButtonTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_7);
 			break;
 		case KEY_JOYSTICK_BUTTON_8:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_8);
+			textPtr = GetGamePadButtonTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_8);
 			break;
 		case KEY_JOYSTICK_BUTTON_9:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_9);
+			textPtr = GetGamePadButtonTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_9);
 			break;
 		case KEY_JOYSTICK_BUTTON_10:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_10);
+			textPtr = GetGamePadButtonTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_10);
 			break;
 		case KEY_JOYSTICK_BUTTON_11:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_11);
+			textPtr = GetGamePadButtonTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_11);
 			break;
 		case KEY_JOYSTICK_BUTTON_12:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_12);
+			textPtr = GetGamePadButtonTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_12);
 			break;
 		case KEY_JOYSTICK_BUTTON_13:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_13);
+			textPtr = GetGamePadButtonTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_13);
 			break;
 		case KEY_JOYSTICK_BUTTON_14:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_14);
+			textPtr = GetGamePadButtonTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_14);
 			break;
 		case KEY_JOYSTICK_BUTTON_15:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_15);
+			textPtr = GetGamePadButtonTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_15);
 			break;
 		case KEY_JOYSTICK_BUTTON_16:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_16);
+			textPtr = GetGamePadButtonTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_16);
 			break;
-#endif // #if WIN32
-
-#ifdef _XBOX // change joystick button names to xbox button names
-		case KEY_JOYSTICK_BUTTON_1:
-			textPtr = "XBOX_A";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_1);
-			break;
-		case KEY_JOYSTICK_BUTTON_2:
-			textPtr = "XBOX_B";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_2);
-			break;
-		case KEY_JOYSTICK_BUTTON_3:
-			textPtr = "XBOX_X";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_3);
-			break;
-		case KEY_JOYSTICK_BUTTON_4:
-			textPtr = "XBOX_Y";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_4);
-			break;
-		case KEY_JOYSTICK_BUTTON_5:
-			textPtr = "XBOX_BLACK";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_5);
-			break;
-		case KEY_JOYSTICK_BUTTON_6:
-			textPtr = "XBOX_WHITE";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_6);
-			break;
-		case KEY_JOYSTICK_BUTTON_7:
-			textPtr = "XBOX_LEFT_TRIGGER";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_7);
-			break;
-		case KEY_JOYSTICK_BUTTON_8:
-			textPtr = "XBOX_RIGHT_TRIGGER";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_8);
-			break;
-		case KEY_JOYSTICK_BUTTON_9:
-			textPtr = "XBOX_RIGHT_STICK";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_9);
-			break;
-		case KEY_JOYSTICK_BUTTON_10:
-			textPtr = "XBOX_LEFT_STICK";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_10);
-			break;
-		case KEY_JOYSTICK_BUTTON_11:
-			textPtr = "XBOX_START";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_11);
-			break;
-		case KEY_JOYSTICK_BUTTON_12:
-			textPtr = "XBOX_BACK";//GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_12);
-			break;
-		case KEY_JOYSTICK_BUTTON_13:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_13);
-			break;
-		case KEY_JOYSTICK_BUTTON_14:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_14);
-			break;
-		case KEY_JOYSTICK_BUTTON_15:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_15);
-			break;
-		case KEY_JOYSTICK_BUTTON_16:
-			textPtr = GetTextString(TEXTSTRING_KEYS_JOYSTICKBUTTON_16);
-			break;
-#endif // #if _XBOX
 
 		case KEY_LBRACKET:	
 			textPtr = GetTextString(TEXTSTRING_KEYS_LBRACKET);

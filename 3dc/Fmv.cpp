@@ -132,6 +132,7 @@ ringBuffer fmvRingBuffer = {0};
 
 #define	USE_AUDIO		1
 #define	WRITE_WAV		0
+#define USE_ARGB		0
 
 SNDFILE					*sndFile;
 
@@ -277,11 +278,7 @@ void FmvClose()
 		SAFE_RELEASE(fmvAudioBuffer);
 	}
 
-#if 0
-	/* destroy liboggplay reader */
-	if (reader != NULL)
-		reader->destroy(reader);
-#endif
+//	oggplay_close(player);
 
 	OutputDebugString("our reader is gone\n");
 }
@@ -355,12 +352,15 @@ extern void StartFMVAtFrame(int number, int frame)
 { 
 }
 
+/* bjd - called during each level load */
 void ScanImagesForFMVs()
 {
 	extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
 	int i;
 	IMAGEHEADER *ihPtr;
 	NumberOfFMVTextures=0;
+
+	OutputDebugString("scan images for fmvs\n");
 
 	#if MaxImageGroups>1
 	for (j=0; j<MaxImageGroups; j++)
@@ -786,6 +786,7 @@ void drive_decoding(void *arg)
 		r = E_OGGPLAY_TIMEOUT;
 		while (r == E_OGGPLAY_TIMEOUT) 
 		{
+//			OutputDebugString("while (r == E_OGGPLAY_TIMEOUT) \n");
 			r = oggplay_step_decoding(player);
 		}
 
@@ -803,6 +804,8 @@ void drive_decoding(void *arg)
 		if (r == E_OGGPLAY_END_OF_FILE)
 		{
 			OutputDebugString("end of file!\n");
+			playing = 0;
+			break;
 		}
 
 		if (r != E_OGGPLAY_CONTINUE && r != E_OGGPLAY_USER_INTERRUPT) 
@@ -1379,7 +1382,12 @@ void handle_video_data (OggPlay * player, int track_num, OggPlayVideoData * vide
 	rgb.rgb_width = y_width;
 	rgb.rgb_height = y_height;  
 
+#if USE_ARGB
+	oggplay_yuv2argb(&yuv, &rgb);
+#else
 	oggplay_yuv2rgb(&yuv, &rgb);
+#endif
+	
 
 	frameReady = true;
 }
@@ -1400,7 +1408,7 @@ void writeFmvData(unsigned char *destData, unsigned char* srcData, int width, in
 {
 	unsigned char *srcPtr, *destPtr;
 
-	if (textureData == NULL) return;
+	if (srcData == NULL) return;
 
 	srcPtr = (unsigned char *)srcData;
 
@@ -1409,9 +1417,10 @@ void writeFmvData(unsigned char *destData, unsigned char* srcData, int width, in
 	{
 		destPtr = (((unsigned char *)destData) + y*pitch);
 
-//		memcpy(destPtr, srcPtr, width * 4);
-//		srcPtr+=width * 4;
-
+#if USE_ARGB
+		memcpy(destPtr, srcPtr, width * 4);
+		srcPtr+=width * 4;
+#else
 		for (int x = 0; x < width; x++)
 		{
 			*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], srcPtr[3]);
@@ -1419,6 +1428,7 @@ void writeFmvData(unsigned char *destData, unsigned char* srcData, int width, in
 			destPtr+=4;
 			srcPtr+=4;
 		}
+#endif
 	}
 }
 

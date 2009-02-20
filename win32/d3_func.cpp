@@ -3,8 +3,6 @@
 
 // Must link to C code in main engine system
 
-//#include <vld.h>
-
 extern "C" {
 
 // Mysterious definition required by objbase.h
@@ -50,28 +48,30 @@ extern int VideoModeColourDepth;
 HRESULT LastError;
 
 D3DINFO d3d;
-BOOL D3DHardwareAvailable;
 
-int StartDriver;
-int StartFormat;
+int StartDriver = 0;
+int StartFormat = 0;
 
 /* TGA header structure */
 #pragma pack(1)
-struct TGA_HEADER {
-	char idlength;
-	char colourmaptype;
-	char datatypecode;
-	short int colourmaporigin;
-	short int colourmaplength;
-	char colourmapdepth;
-	short int x_origin;
-	short int y_origin;
-	short width;
-	short height;
-	char bitsperpixel;
-	char imagedescriptor;
+struct TGA_HEADER 
+{
+	char		idlength;
+	char		colourmaptype;
+	char		datatypecode;
+	short int	colourmaporigin;
+	short int	colourmaplength;
+	char		colourmapdepth;
+	short int	x_origin;
+	short int	y_origin;
+	short		width;
+	short		height;
+	char		bitsperpixel;
+	char		imagedescriptor;
 };
 #pragma pack()
+
+TGA_HEADER TgaHeader = {0};
 
 void ColourFillBackBuffer(int FillColour) 
 {
@@ -112,7 +112,7 @@ D3DFORMAT SelectedDepthFormat = D3DFMT_D24S8;
 D3DFORMAT SelectedAdapterFormat = D3DFMT_X8R8G8B8;
 D3DFORMAT SelectedTextureFormat = D3DFMT_A8R8G8B8;
 
-bool UsingStencil = false;
+bool usingStencil = false;
 
 LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int *height)
 {
@@ -210,68 +210,6 @@ void CreateScreenShotImage()
 	SAFE_RELEASE(frontBuffer);
 }
 
-LPDIRECT3DSURFACE9 CreateD3DSurface(DDSurface *tex, int width, int height) {
-#if 0
-/*
-	char buf[100];
-	int size = sizeof(tex);
-
-	sprintf(buf, "width: %d height: %d size: %d", width, height, size);
-	OutputDebugString(buf);
-*/
-	LPDIRECT3DSURFACE9 tempSurface = NULL;
-
-	if(FAILED(d3d.lpD3DDevice->CreateImageSurface(width, height, D3DFMT_R5G6B5, &tempSurface))) {
-		OutputDebugString(" Couldn't create image surface");
-		return NULL;
-	}
-
-/*
-	if(FAILED(d3d.lpD3DDevice->CreateRenderTarget(width, height, D3DFMT_R5G6B5, D3DMULTISAMPLE_NONE, TRUE, &tempSurface))) {
-		OutputDebugString(" Couldn't create render target surface");
-		return NULL;
-	}
-*/
-	D3DLOCKED_RECT lock;
-
-	if(FAILED(tempSurface->LockRect(&lock, NULL, 0 ))){
-		tempSurface->Release();
-		OutputDebugString(" Couldn't LockRect for surface");
-		return NULL;
-	}
-
-	unsigned short *destPtr;
-	unsigned char *srcPtr;
-
-	srcPtr = (unsigned char *)tex->buffer;
-
-	for (int y = 0; y < height; y++)
-	{
-		destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch));
-
-		for (int x = 0; x < width; x++)
-		{
-			// >> 3 for red and blue in a 16 bit texture, 2 for green
-			*destPtr =	((srcPtr[0]>>3)<<11) | // R
-					((srcPtr[1]>>2)<<5 ) | // G
-					((srcPtr[2]>>3)); // B
-
-			destPtr+=1;
-			srcPtr+=4;
-		}
-	}
-
-	if(FAILED(tempSurface->UnlockRect())) {
-		OutputDebugString(" Couldn't UnLockRect for Surface");
-		return NULL;
-	}
-
-	return tempSurface;
-#endif
-	return NULL;
-}
-
-
 bool IsPowerOf2(int i) 
 {
 	if ((i & -i) == i) {
@@ -286,27 +224,28 @@ int NearestSuperiorPow2(int i)
 	return x ? NearestSuperiorPow2(x) : i << 1;
 }
 
-LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture (AvPTexture *tex) 
+LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex) 
 {
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
 
 	// default colour format
-	D3DFORMAT colour_format = D3DFMT_R5G6B5;
+	D3DFORMAT colourFormat = D3DFMT_R5G6B5;
 
 	if (ScreenDescriptorBlock.SDB_Depth == 16) {
-		colour_format = D3DFMT_R5G6B5;
+		colourFormat = D3DFMT_R5G6B5;
 	}
 	if (ScreenDescriptorBlock.SDB_Depth == 32) {
-		colour_format = D3DFMT_A8R8G8B8;
+		colourFormat = D3DFMT_A8R8G8B8;
 	}
 
-	int height = 495;
 	int width = 450;
+	int height = 495;
 
-	int pad_height = 512;
-	int pad_width = 512;
+	int padWidth = 512;
+	int padHeight = 512;
+	
 
-	LastError = d3d.lpD3DDevice->CreateTexture(pad_width, pad_height, 1, NULL, colour_format, D3DPOOL_MANAGED, &destTexture, NULL);
+	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, NULL, colourFormat, D3DPOOL_MANAGED, &destTexture, NULL);
 	if(FAILED(LastError)) {
 //		LogDxError("Unable to create tall font texture", LastError);
 		LogDxError(LastError);
@@ -330,17 +269,17 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture (AvPTexture *tex)
 
 		srcPtr = (unsigned char *)tex->buffer;
 
-		D3DCOLOR pad_colour = D3DCOLOR_XRGB(0,0,0);
+		D3DCOLOR padColour = D3DCOLOR_XRGB(0,0,0);
 
 		// lets pad the whole thing black first
-		for (int y = 0; y < pad_height; y++)
+		for (int y = 0; y < padHeight; y++)
 		{
 			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch));
 
-			for (int x = 0; x < pad_width; x++)
+			for (int x = 0; x < padWidth; x++)
 			{
 				// >> 3 for red and blue in a 16 bit texture, 2 for green
-				*destPtr = RGB16(pad_colour, pad_colour, pad_colour);
+				*destPtr = RGB16(padColour, padColour, padColour);
 /*
 				*destPtr =	((pad_colour>>3)<<11) | // R
 						((pad_colour>>2)<<5 ) | // G
@@ -350,23 +289,23 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture (AvPTexture *tex)
 			}
 		}
 
-		int char_width = 30;
-		int char_height = 33;
+		int charWidth = 30;
+		int charHeight = 33;
 
 		for (int i = 0; i < 224; i++) 
 		{
 			int row = i / 15; // get row
 			int column = i % 15; // get column from remainder value
 
-			int offset = ((column * char_width) *2) + ((row * char_height) * lock.Pitch);
+			int offset = ((column * charWidth) *2) + ((row * charHeight) * lock.Pitch);
 
 			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits + offset)));
 
-			for (int y = 0; y < char_height; y++) 
+			for (int y = 0; y < charHeight; y++) 
 			{
 				destPtr = ((unsigned short *)(((unsigned char *)lock.pBits + offset) + (y*lock.Pitch)));
 
-				for (int x = 0; x < char_width; x++) {
+				for (int x = 0; x < charWidth; x++) {
 					*destPtr = RGB16(srcPtr[0], srcPtr[1], srcPtr[2]);
 /*
 					*destPtr =	((srcPtr[0]>>3)<<11) | // R
@@ -385,40 +324,40 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture (AvPTexture *tex)
 
 		srcPtr = (unsigned char *)tex->buffer;
 
-		D3DCOLOR pad_colour = D3DCOLOR_XRGB(0,0,0);
+		D3DCOLOR padColour = D3DCOLOR_XRGB(0,0,0);
 
 		// lets pad the whole thing black first
-		for (int y = 0; y < pad_height; y++)
+		for (int y = 0; y < padHeight; y++)
 		{
 			destPtr = (((unsigned char *)lock.pBits) + y*lock.Pitch);
 
-			for (int x = 0; x < pad_width; x++)
+			for (int x = 0; x < padWidth; x++)
 			{
 				// >> 3 for red and blue in a 16 bit texture, 2 for green
-				*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(pad_colour, pad_colour, pad_colour, pad_colour);
+				*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(padColour, padColour, padColour, padColour);
 //					*destPtr = pad_colour;
 
 				destPtr+=4;
 			}
 		}
 
-		int char_width = 30;
-		int char_height = 33;
+		int charWidth = 30;
+		int charHeight = 33;
 
 		for (int i = 0; i < 224; i++) 
 		{
 			int row = i / 15; // get row
 			int column = i % 15; // get column from remainder value
 
-			int offset = ((column * char_width) *4) + ((row * char_height) * lock.Pitch);
+			int offset = ((column * charWidth) *4) + ((row * charHeight) * lock.Pitch);
 
 			destPtr = (((unsigned char *)lock.pBits + offset));
 
-			for (int y = 0; y < char_height; y++) 
+			for (int y = 0; y < charHeight; y++) 
 			{
 				destPtr = (((unsigned char *)lock.pBits + offset) + (y*lock.Pitch));
 
-				for (int x = 0; x < char_width; x++) 
+				for (int x = 0; x < charWidth; x++) 
 				{
 //					*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], srcPtr[3]);
 
@@ -658,20 +597,19 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL
 	/* create our texture for returning */
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
 
-	/* create and fill tga header */
-	TGA_HEADER *TgaHeader = new TGA_HEADER;
-	TgaHeader->idlength = 0;
-	TgaHeader->x_origin = tex->width;
-	TgaHeader->y_origin = tex->height;
-	TgaHeader->colourmapdepth = 0;
-	TgaHeader->colourmaplength = 0;
-	TgaHeader->colourmaporigin = 0;
-	TgaHeader->colourmaptype = 0;
-	TgaHeader->datatypecode = 2;			// RGB
-	TgaHeader->bitsperpixel = 32;
-	TgaHeader->imagedescriptor = 0x20;		// set origin to top left
-	TgaHeader->height = tex->height;
-	TgaHeader->width = tex->width;
+	/* fill tga header */
+	TgaHeader.idlength = 0;
+	TgaHeader.x_origin = tex->width;
+	TgaHeader.y_origin = tex->height;
+	TgaHeader.colourmapdepth = 0;
+	TgaHeader.colourmaplength = 0;
+	TgaHeader.colourmaporigin = 0;
+	TgaHeader.colourmaptype = 0;
+	TgaHeader.datatypecode = 2;			// RGB
+	TgaHeader.bitsperpixel = 32;
+	TgaHeader.imagedescriptor = 0x20;		// set origin to top left
+	TgaHeader.height = tex->height;
+	TgaHeader.width = tex->width;
 
 	/* size of raw image data */
 	int imageSize = tex->height * tex->width * 4;
@@ -680,7 +618,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL
 	byte *buffer = new byte[sizeof(TGA_HEADER) + imageSize];
 
 	/* copy header and image data to buffer */
-	memcpy(buffer, TgaHeader, sizeof(TGA_HEADER));
+	memcpy(buffer, &TgaHeader, sizeof(TGA_HEADER));
 
 	byte *imageData = buffer + sizeof(TGA_HEADER);
 
@@ -733,12 +671,10 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL
 		&destTexture)))
 	{
 		OutputDebugString("COULD NOT CREATE TEXTURE?\n");
-		delete TgaHeader;
 		delete[] buffer;
 		return NULL;
 	}
 
-	delete TgaHeader;
 	delete[] buffer;
 	return destTexture;
 #if 0
@@ -967,8 +903,6 @@ BOOL InitialiseDirect3DImmediateMode()
 	bool triple_buffer = false;
 
 	if (WindowMode == WindowModeSubWindow) windowed = true;
-
-	D3DHardwareAvailable = Yes;
 
 	//	Zero d3d structure
     memset(&d3d, 0, sizeof(D3DINFO));

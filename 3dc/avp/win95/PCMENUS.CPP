@@ -61,7 +61,6 @@ extern "C"
 	extern unsigned char KeyboardInput[];
 	extern CONTROL_METHODS ControlMethods;
 	extern D3DINFO d3d;
-	extern BOOL D3DHardwareAvailable;
 	extern int TotalVideoMemory;
 	extern int DXMemoryMode;
 	extern BOOL BilinearTextureFilter;
@@ -747,7 +746,7 @@ void InitOptionsMenu(void)
 	#endif
 	
 	// hardware and direct 3d, zbuffering?
-	int hw_now_avail = D3DHardwareAvailable ? 1 : 0; // 4Mb cards only?
+//	int hw_now_avail = D3DHardwareAvailable ? 1 : 0; // 4Mb cards only?
 	
 	// find the direct 3d driver we'll be using
 	d3d.CurrentDriver = 0;
@@ -774,6 +773,7 @@ void InitOptionsMenu(void)
 	
 // bjd	bilin_filter_avail = d3d.ThisDriver.dpcTriCaps.dwTextureFilterCaps & D3DPTFILTERCAPS_LINEAR ? TRUE : FALSE;
 
+#if 0
 	hw_avail = hw_now_avail;
 	d3d_opt = hw_avail ? VM3_D3D : VM3_SCANDRAW;
 	
@@ -790,7 +790,8 @@ void InitOptionsMenu(void)
 	sel_shading[VM3_D3D]=SHADE_GOURAUD;
 	
 	BilinearTextureFilter = hw_avail && bilin_filter_avail ? TRUE : FALSE;
-	
+#endif
+
 	LoadVideoModeSettings();
 	
 	#if !ENABLE_MIPMAP_OPTION
@@ -798,6 +799,7 @@ void InitOptionsMenu(void)
 	mipmap_opt[VM3_D3D] = FALSE;
 	#endif
 	
+#if 0
 	if (hw_now_avail != hw_avail) // card removed/added so set default
 	{
 		hw_avail = hw_now_avail;
@@ -806,7 +808,8 @@ void InitOptionsMenu(void)
 		BilinearTextureFilter = hw_avail && bilin_filter_avail ? TRUE : FALSE;
 		mipmap_opt[VM3_D3D] = mipmap_avail[VM3_D3D];
 	}
-	
+#endif
+
 	// possible hardware video modes
 	for (int i=0; i<NumAvailableVideoModes; ++i)
 	{

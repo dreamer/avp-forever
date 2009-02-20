@@ -59,6 +59,8 @@ char *GetVideoModeDescription3() {
 		case 23:
 			colour_depth = 16;
 			break;
+		default: colour_depth = 32;
+			break;
 	}
 	sprintf(buf, "%dx%dx%d", d3d.DisplayMode[CurrentVideoMode].Width, d3d.DisplayMode[CurrentVideoMode].Height, colour_depth);
 	return buf;
@@ -78,6 +80,9 @@ void GetDeviceAndVideoModePrefences() {
 				break;
 			case 23:
 				colour_depth = 16;
+				break;
+			default: 
+				colour_depth = 32;
 				break;
 		}
 
@@ -99,7 +104,11 @@ void SelectBasicDeviceAndVideoMode()
 	PreferredDeviceAndVideoMode.ColourDepth = 16;
 	
 	// create new file here?
+#ifdef _XBOX
+	std::ofstream file("d:\\AliensVsPredator.cfg");
+#else
 	std::ofstream file("AliensVsPredator.cfg");
+#endif
 	file << "[VideoMode] \n";
 	file << "Width = " << PreferredDeviceAndVideoMode.Width << "\n";
 	file << "Height = " << PreferredDeviceAndVideoMode.Height << "\n";
@@ -112,7 +121,7 @@ void LoadDeviceAndVideoModePreferences()
 	std::string temp_value;
 //	FILE* file=fopen("AliensVsPredator.cfg","rb");
 #ifdef _XBOX
-	std::ifstream file("d:/AliensVsPredator.cfg");
+	std::ifstream file("d:\\AliensVsPredator.cfg");
 #else
 	std::ifstream file("AliensVsPredator.cfg");
 #endif
@@ -221,7 +230,7 @@ void SaveDeviceAndVideoModePreferences() {
 
 	//	FILE* file=fopen("AliensVsPredator.cfg","rb");
 #ifdef _XBOX
-	std::ofstream file("d:/AliensVsPredator.cfg");
+	std::ofstream file("d:\\AliensVsPredator.cfg");
 #else
 	std::ofstream file("AliensVsPredator.cfg");
 #endif

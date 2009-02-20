@@ -54,9 +54,8 @@ extern "C++"{
 const int MAX_VERTEXES = 4096;
 const int MAX_INDICES = 9216;
 
-D3DTLVERTEX *mainVertex;// = new D3DTLVERTEX[MAX_VERTEXES];
-WORD *mainIndex;// = new WORD[MAX_INDICES];
-//WORD *tempIndex = new WORD[MAX_INDICES];
+D3DTLVERTEX *mainVertex;
+WORD *mainIndex;
 
 // for quad rendering
 D3DTLVERTEX *quadVert = new D3DTLVERTEX[4];
@@ -91,7 +90,6 @@ struct renderParticle
 
 std::vector<renderParticle> particleArray;
 
-/* TODO: try to remove .resize(0) call. use reserve feature of vector? */
 void DrawParticles()
 {
 	if(particleArray.size() == 0) return;
@@ -108,7 +106,7 @@ void DrawParticles()
 		D3D_Particle_Output(&particleArray[i].particle, &particleArray[i].vertices[0]);
 	}
 
-	particleArray.resize(0);
+	particleArray.clear();
 	/* restore RenderPolygon.NumberOfVertices value... */
 	RenderPolygon.NumberOfVertices = backup;
 }
@@ -898,6 +896,16 @@ BOOL ExecuteBuffer()
 	int new_ind_start = 0;
 	int new_ind_end = 0;
 
+	if (Global_VDB_Ptr)
+	{
+		char buf[100];
+		sprintf(buf, "world x: %d y: %d z: %d\n", 
+			Global_VDB_Ptr->VDB_World.vx,
+			Global_VDB_Ptr->VDB_World.vy,
+			Global_VDB_Ptr->VDB_World.vz);
+
+		OutputDebugString(buf);
+	}
 /*
 	LastError = d3d.lpD3DIndexBuffer->Unlock();
 	if(FAILED(LastError)) {
@@ -947,11 +955,11 @@ BOOL ExecuteBuffer()
 		if (num_prims > 0) 
 		{
 			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 
-			   0, 
-			   0, 
-			   NumVertices,
-			   renderTest[i].index_start,
-			   num_prims);
+				0, 
+				0, 
+				NumVertices,
+				renderTest[i].index_start,
+				num_prims);
 
 			draw_calls_per_frame++;
 			if (FAILED(LastError)){
@@ -3419,7 +3427,7 @@ void PostLandscapeRendering()
 			MeshZScale = (66572-51026)/15;
 			MeshXScale = (109952+3039)/45;
 
-//bjd	   		D3D_DrawWaterFall(175545,-3039,51026);
+	   		D3D_DrawWaterFall(175545,-3039,51026);
 //			MeshZScale = -(538490-392169);
 //			MeshXScale = 55000;
 	//		D3D_DrawWaterPatch(-100000, WaterFallBase, 538490);
@@ -4933,160 +4941,25 @@ void D3D_DrawPowerFence(int xOrigin, int yOrigin, int zOrigin, int xScale, int y
 	}
 }
 #endif
-#if 0
+
 void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin)
 {
+	int noRequired = MUL_FIXED(250,NormalFrameTime);
+	for (int i=0; i<noRequired; i++)
 	{
-		int noRequired = MUL_FIXED(250,NormalFrameTime);
-		for (int i=0; i<noRequired; i++)
-		{
-			VECTORCH velocity;
-			VECTORCH position;
-			position.vx = xOrigin;
-			position.vy = yOrigin-(FastRandom()&511);//+45*MeshXScale;
-			position.vz = zOrigin+(FastRandom()%(15*MeshZScale));
+		VECTORCH velocity;
+		VECTORCH position;
+		position.vx = xOrigin;
+		position.vy = yOrigin-(FastRandom()&511);//+45*MeshXScale;
+		position.vz = zOrigin+(FastRandom()%(15*MeshZScale));
 
-			velocity.vy = (FastRandom()&511)+512;//-((FastRandom()&1023)+2048)*8;
-			velocity.vx = ((FastRandom()&511)+256)*2;
-			velocity.vz = 0;//-((FastRandom()&511))*8;
-			MakeParticle(&(position), &velocity, PARTICLE_WATERFALLSPRAY);
-		}
-		#if 0
-		noRequired = MUL_FIXED(200,NormalFrameTime);
-		for (i=0; i<noRequired; i++)
-		{
-			VECTORCH velocity;
-			VECTORCH position;
-			position.vx = xOrigin+(FastRandom()%(15*MeshZScale));
-			position.vy = yOrigin+45*MeshXScale;
-			position.vz = zOrigin;
-
-			velocity.vy = -((FastRandom()&16383)+4096);
-			velocity.vx = ((FastRandom()&4095)-2048);
-			velocity.vz = -((FastRandom()&2047)+1048);
-			MakeParticle(&(position), &velocity, PARTICLE_WATERFALLSPRAY);
-		}
-		#endif
-	}
-	{
-		extern void RenderWaterFall(int xOrigin, int yOrigin, int zOrigin);
-		//RenderWaterFall(xOrigin, yOrigin-500, zOrigin+50);
-	}
-   	return;
-	for (int field=0; field<3; field++)
-	{
-	int i=0;
-	int x;
-	for (x=(0+field*15); x<(16+field*15); x++)
-	{
-		int z;
-		for(z=0; z<16; z++)
-		{
-			VECTORCH *point = &MeshVertex[i];
-			int offset = ForceFieldPointDisplacement[x][z];
-
-		#if 1
-			int u = (x*65536)/45;
-
-			int b = MUL_FIXED(2*u,(65536-u));
-			int c = MUL_FIXED(u,u);
-			int y3 = 45*MeshXScale;
-			int x3 = 5000;
-			int y2 = 1*MeshXScale;
-			int x2 = GetSin(CloakingPhase&4095)+GetCos((CloakingPhase*3+399)&4095);
-			x2 = MUL_FIXED(x2,x2)/128;
-
-			if (offset<0) offset =-offset;
-			point->vx = xOrigin+MUL_FIXED(b,x2)+MUL_FIXED(c,x3)+offset;
-			point->vy = yOrigin+MUL_FIXED(b,y2)+MUL_FIXED(c,y3);
-			point->vz = zOrigin+(z*MeshZScale);
-
-			if (point->vy>4742)
-			{
-				if (z<=4)
-				{
-					point->vy-=MeshXScale;
-					if (point->vy<4742) point->vy=4742;
-					if (point->vx<179427) point->vx=179427;
-				}
-				else if (z<=8)
-				{
-					point->vx+=(8-z)*1000;
-				}
-			}
-
-			#else
-			if (offset<0) offset =-offset;
-		 	point->vx = xOrigin-offset;
-		 	point->vy = yOrigin+(x*MeshXScale);
-		 	point->vz = zOrigin+(z*MeshZScale);
-			#endif
-
-
-
-
-			offset= (offset/4)+127;
-
-//			offset-=32;
-//			if (offset<0) offset = 0;
-
-			if(offset>255) offset=255;
-
-			MeshVertexColour[i] = RGBALIGHT_MAKE(offset,offset,255,offset/2);
-			#if TEXTURE_WATER
-			MeshWorldVertex[i].vx = point->vx;
-			MeshWorldVertex[i].vz = point->vz;
-			#endif
-
-			/* translate particle into view space */
-			TranslatePointIntoViewspace(point);
-
-			/* is particle within normal view frustrum ? */
-			if(AvP.PlayerType==I_Alien)	/* wide frustrum */
-			{
-				if(( (-point->vx <= point->vz*2)
-		   			&&(point->vx <= point->vz*2)
-					&&(-point->vy <= point->vz*2)
-					&&(point->vy <= point->vz*2) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-			else
-			{
-				if(( (-point->vx <= point->vz)
-		   			&&(point->vx <= point->vz)
-					&&(-point->vy <= point->vz)
-					&&(point->vy <= point->vz) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-
-			i++;
-		}
-	}
-	//textprint("\n");
-	if ((MeshVertexOutcode[0]&&MeshVertexOutcode[15]&&MeshVertexOutcode[240]&&MeshVertexOutcode[255]))
-	{
-		D3D_DrawWaterMesh_Unclipped();
-	}
-	else
-//	else if (MeshVertexOutcode[0]||MeshVertexOutcode[15]||MeshVertexOutcode[240]||MeshVertexOutcode[255])
-	{
-		D3D_DrawWaterMesh_Clipped();
-	}
+		velocity.vy = (FastRandom()&511)+512;//-((FastRandom()&1023)+2048)*8;
+		velocity.vx = ((FastRandom()&511)+256)*2;
+		velocity.vz = 0;//-((FastRandom()&511))*8;
+		MakeParticle(&(position), &velocity, PARTICLE_WATERFALLSPRAY);
 	}
 }
-#endif
+
 // Another function never called?
 #if 0
 void D3D_DrawParticleBeam(DISPLAYBLOCK *muzzlePtr, VECTORCH *targetPositionPtr)

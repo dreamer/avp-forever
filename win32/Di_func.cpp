@@ -1435,7 +1435,7 @@ to make F8 not count in a 'press any key' situation */
 			}
 		}
 	}
-
+	 
 	/* xbox gamepad buttons */
 	for (int i = 0; i < NUMPADBUTTONS; i++)
 	{
@@ -1768,6 +1768,47 @@ int UpdateControllerState()
     }
 
     return numConnected;
+}
+
+char *GetGamePadButtonTextString(enum TEXTSTRING_ID stringID)
+{
+	switch(stringID)
+	{
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_1:
+			return "XPAD_X";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_2:
+			return "XPAD_A";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_3:
+			return "XPAD_Y";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_4:
+			return "XPAD_B";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_5:
+			return "XPAD_LEFT_TRIGGER";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_6:
+			return "XPAD_RIGHT_TRIGGER";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_7:
+			return "XPAD_LEFT_BUMPER";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_8:
+			return "XPAD_RIGHT_BUMPER";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_9:
+			return "XPAD_BACK";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_10:
+			return "XPAD_START";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_11:
+			return "XPAD_LEFT_CLICK";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_12:
+			return "XPAD_RIGHT_CLICK";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_13:
+			return "XPAD_DPAD_UP";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_14:
+			return "XPAD_DPAD_DOWN";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_15:
+			return "XPAD_DPAD_LEFT";
+		case TEXTSTRING_KEYS_JOYSTICKBUTTON_16:
+			return "XPAD_DPAD_RIGHT";
+		default:
+			return "NO_BIND";
+	}
 }
 
 void ReadJoysticks(void)

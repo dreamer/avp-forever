@@ -28,7 +28,7 @@ extern "C" {
 
 #include "kshape.h"
 #include "eax.h"
-#include "vmanpset.h"
+//#include "vmanpset.h"
 
 extern "C++" {
 	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
@@ -79,21 +79,24 @@ int StartFormat;
 
 /* TGA header structure */
 #pragma pack(1)
-struct TGA_HEADER {
-	char idlength;
-	char colourmaptype;
-	char datatypecode;
-	short int colourmaporigin;
-	short int colourmaplength;
-	char colourmapdepth;
-	short int x_origin;
-	short int y_origin;
-	short width;
-	short height;
-	char bitsperpixel;
-	char imagedescriptor;
+struct TGA_HEADER 
+{
+	char		idlength;
+	char		colourmaptype;
+	char		datatypecode;
+	short int	colourmaporigin;
+	short int	colourmaplength;
+	char		colourmapdepth;
+	short int	x_origin;
+	short int	y_origin;
+	short		width;
+	short		height;
+	char		bitsperpixel;
+	char		imagedescriptor;
 };
 #pragma pack()
+
+TGA_HEADER TgaHeader = {0};
 
 void ColourFillBackBuffer(int FillColour) 
 {
@@ -108,88 +111,6 @@ char* GetDeviceName()
 	}
 	else return "Default Adapter";
 }
-
-// list of allowed display formats
-const D3DFORMAT DisplayFormats[] =
-{
-	D3DFMT_X8R8G8B8,
-	D3DFMT_R5G6B5
-};
-
-// list of allowed depth buffer formats
-const D3DFORMAT StencilFormats[] =
-{
-	D3DFMT_D24S8,
-	D3DFMT_D16
-};
-
-D3DFORMAT SelectedDepthFormat = D3DFMT_D24S8;
-D3DFORMAT SelectedAdapterFormat = D3DFMT_X8R8G8B8;
-D3DFORMAT SelectedTextureFormat = D3DFMT_A8R8G8B8;
-
-bool UsingStencil = false;
-
-LPDIRECT3DSURFACE8 CreateD3DSurface(DDSurface *tex, int width, int height) {
-#if 0
-/*
-	char buf[100];
-	int size = sizeof(tex);
-
-	sprintf(buf, "width: %d height: %d size: %d", width, height, size);
-	OutputDebugString(buf);
-*/
-	LPDIRECT3DSURFACE8 tempSurface = NULL;
-
-	if(FAILED(d3d.lpD3DDevice->CreateImageSurface(width, height, D3DFMT_R5G6B5, &tempSurface))) {
-		OutputDebugString(" Couldn't create image surface");
-		return NULL;
-	}
-
-/*
-	if(FAILED(d3d.lpD3DDevice->CreateRenderTarget(width, height, D3DFMT_R5G6B5, D3DMULTISAMPLE_NONE, TRUE, &tempSurface))) {
-		OutputDebugString(" Couldn't create render target surface");
-		return NULL;
-	}
-*/
-	D3DLOCKED_RECT lock;
-
-	if(FAILED(tempSurface->LockRect(&lock, NULL, 0 ))){
-		tempSurface->Release();
-		OutputDebugString(" Couldn't LockRect for surface");
-		return NULL;
-	}
-
-	unsigned short *destPtr;
-	unsigned char *srcPtr;
-
-	srcPtr = (unsigned char *)tex->buffer;
-
-	for (int y = 0; y < height; y++)
-	{
-		destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch));
-
-		for (int x = 0; x < width; x++)
-		{
-			// >> 3 for red and blue in a 16 bit texture, 2 for green
-			*destPtr =	((srcPtr[0]>>3)<<11) | // R
-					((srcPtr[1]>>2)<<5 ) | // G
-					((srcPtr[2]>>3)); // B
-
-			destPtr+=1;
-			srcPtr+=4;
-		}
-	}
-
-	if(FAILED(tempSurface->UnlockRect())) {
-		OutputDebugString(" Couldn't UnLockRect for Surface");
-		return NULL;
-	}
-
-	return tempSurface;
-#endif
-	return NULL;
-}
-
 
 bool IsPowerOf2(int i) 
 {
@@ -273,11 +194,6 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AvPTexture *tex)
 			{
 				// >> 3 for red and blue in a 16 bit texture, 2 for green
 				*destPtr = RGB16(pad_colour, pad_colour, pad_colour);
-/*
-				*destPtr =	((pad_colour>>3)<<11) | // R
-						((pad_colour>>2)<<5 ) | // G
-						((pad_colour>>3)); // B
-*/
 				destPtr+=1;
 			}
 		}
@@ -300,11 +216,6 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AvPTexture *tex)
 
 				for (int x = 0; x < char_width; x++) {
 					*destPtr = RGB16(srcPtr[0], srcPtr[1], srcPtr[2]);
-/*
-					*destPtr =	((srcPtr[0]>>3)<<11) | // R
-						((srcPtr[1]>>2)<<5 ) | // G
-						((srcPtr[2]>>3)); // B
-*/
 					destPtr+=1;
 					srcPtr+=4;
 				}
@@ -559,25 +470,24 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex,int *real_height, int 
 	return swizTexture;
 }
 
-LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf) 
+LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL poolType) 
 {
 	/* create our texture for returning */
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
 
-	/* create and fill tga header */
-	TGA_HEADER *TgaHeader = new TGA_HEADER;
-	TgaHeader->idlength = 0;
-	TgaHeader->x_origin = tex->width;
-	TgaHeader->y_origin = tex->height;
-	TgaHeader->colourmapdepth = 0;
-	TgaHeader->colourmaplength = 0;
-	TgaHeader->colourmaporigin = 0;
-	TgaHeader->colourmaptype = 0;
-	TgaHeader->datatypecode = 2;			// RGB
-	TgaHeader->bitsperpixel = 32;
-	TgaHeader->imagedescriptor = 0x20;		// set origin to top left
-	TgaHeader->height = tex->height;
-	TgaHeader->width = tex->width;
+	/* fill tga header */
+	TgaHeader.idlength = 0;
+	TgaHeader.x_origin = tex->width;
+	TgaHeader.y_origin = tex->height;
+	TgaHeader.colourmapdepth = 0;
+	TgaHeader.colourmaplength = 0;
+	TgaHeader.colourmaporigin = 0;
+	TgaHeader.colourmaptype = 0;
+	TgaHeader.datatypecode = 2;			// RGB
+	TgaHeader.bitsperpixel = 32;
+	TgaHeader.imagedescriptor = 0x20;		// set origin to top left
+	TgaHeader.height = tex->height;
+	TgaHeader.width = tex->width;
 
 	/* size of raw image data */
 	int imageSize = tex->height * tex->width * 4;
@@ -586,7 +496,7 @@ LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf)
 	byte *buffer = new byte[sizeof(TGA_HEADER) + imageSize];
 
 	/* copy header and image data to buffer */
-	memcpy(buffer, TgaHeader, sizeof(TGA_HEADER));
+	memcpy(buffer, &TgaHeader, sizeof(TGA_HEADER));
 
 	byte *imageData = buffer + sizeof(TGA_HEADER);
 
@@ -633,12 +543,10 @@ LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf)
 		&destTexture)))
 	{
 		OutputDebugString("\n no, didn't work");
-		delete TgaHeader;
 		delete[] buffer;
 		return NULL;
 	}
 
-	delete TgaHeader;
 	delete[] buffer;
 	return destTexture;
 }
@@ -800,8 +708,8 @@ BOOL CreateVolatileResources()
 
 BOOL ChangeGameResolution(int width, int height, int colour_depth)
 {
-#if 0
-	ReleaseVolatileResources();
+#if 1
+//	ReleaseVolatileResources();
 
 	d3d.d3dpp.BackBufferHeight = height;
 	d3d.d3dpp.BackBufferWidth = width;
@@ -822,7 +730,7 @@ BOOL ChangeGameResolution(int width, int height, int colour_depth)
 		ScreenDescriptorBlock.SDB_ClipUp    = 0;
 		ScreenDescriptorBlock.SDB_ClipDown  = height;
 
-		CreateVolatileResources();
+//		CreateVolatileResources();
 	}
 	else {
 //		OutputDebugString("\n couldn't reset for res change");
@@ -918,22 +826,57 @@ BOOL InitialiseDirect3DImmediateMode()
 	D3DDISPLAYMODE d3ddm;
 	LastError = d3d.lpD3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
 
-	char buf[100];
-	sprintf(buf, "width: %d height: %d format: %d\n", d3ddm.Width, d3ddm.Height, d3ddm.Format);
-	OutputDebugString(buf);
+	D3DDISPLAYMODE tempMode;
+
+	/* create our list of supported resolutions for D3DFMT_LIN_X8R8G8B8 format */
+	for (int i = 0; i < modeCount; i++)
+	{
+		if (FAILED(d3d.lpD3D->EnumAdapterModes( D3DADAPTER_DEFAULT, i, &tempMode )))
+		{
+			OutputDebugString("EnumAdapterModes failed\n");
+			continue;
+		}
+
+		/* we only want D3DFMT_LIN_X8R8G8B8 format */
+		if (tempMode.Format == D3DFMT_LIN_X8R8G8B8)
+		{
+			if (tempMode.Height < 480 || tempMode.Width < 640) 
+				continue;
+
+			int j = 0;
+			/* check if the more already exists */
+			for (; j < d3d.NumModes; j++)
+			{
+				if ((d3d.DisplayMode[j].Width == tempMode.Width) &&
+					(d3d.DisplayMode[j].Height == tempMode.Height) &&
+					(d3d.DisplayMode[j].Format == tempMode.Format))
+					break;
+			}
+			
+			/* we looped all the way through but didn't break early due to already existing item */
+			if (j == d3d.NumModes)
+			{
+				d3d.DisplayMode[d3d.NumModes].Width       = tempMode.Width;
+				d3d.DisplayMode[d3d.NumModes].Height      = tempMode.Height;
+				d3d.DisplayMode[d3d.NumModes].Format      = tempMode.Format;
+				d3d.DisplayMode[d3d.NumModes].RefreshRate = 0;
+				d3d.NumModes++;
+			}
+		}
+	}
 
 	d3dpp.BackBufferWidth = width;
 	d3dpp.BackBufferHeight = height;
-	d3dpp.BackBufferFormat = D3DFMT_X8R8G8B8;
+	d3dpp.BackBufferFormat = D3DFMT_LIN_X8R8G8B8;
 	d3dpp.BackBufferCount = 1;
 	d3dpp.EnableAutoDepthStencil = TRUE;
 	d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8;
-	d3dpp.SwapEffect = D3DSWAPEFFECT_COPY;//D3DSWAPEFFECT_DISCARD;
+	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
 //	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 //	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE_OR_IMMEDIATE;
 //	d3dpp.Flags = D3DPRESENTFLAG_10X11PIXELASPECTRATIO;
-	UsingStencil = true;
+//	UsingStencil = true;
 
 //#endif
 

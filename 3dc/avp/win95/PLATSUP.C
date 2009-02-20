@@ -92,11 +92,10 @@ int IDemandLookDown(void)
 	return No;
 }
 
-
 int IDemandTurnLeft(void)
 {
 	InputMode = Digital;
-	if(KeyboardInput[KEY_LEFT])
+	if(KeyboardInput[KEY_LEFT] || KeyboardInput[KEY_JOYSTICK_BUTTON_15])
 		return Yes;
 	return No;
 }
@@ -105,7 +104,7 @@ int IDemandTurnLeft(void)
 int IDemandTurnRight(void)
 {
 	InputMode = Digital;
-	if(KeyboardInput[KEY_RIGHT])
+	if(KeyboardInput[KEY_RIGHT] || KeyboardInput[KEY_JOYSTICK_BUTTON_16])
 		return Yes;
 	return No;
 }
@@ -114,7 +113,7 @@ int IDemandTurnRight(void)
 int IDemandGoForward(void)
 {
 	InputMode = Digital;
-	if(KeyboardInput[KEY_UP])
+	if(KeyboardInput[KEY_UP] || KeyboardInput[KEY_JOYSTICK_BUTTON_13])
 		return Yes;
 	return No;
 }
@@ -123,7 +122,7 @@ int IDemandGoForward(void)
 int IDemandGoBackward(void)
 {
 	InputMode = Digital;
-	if(KeyboardInput[KEY_DOWN])
+	if(KeyboardInput[KEY_DOWN] || KeyboardInput[KEY_JOYSTICK_BUTTON_14])
 		return Yes;
 	return No;
 }
@@ -153,6 +152,7 @@ int IDemandSelect(void)
     
     if(KeyboardInput[KEY_CR]) return Yes;
     if(KeyboardInput[KEY_SPACE]) return Yes;
+	if(KeyboardInput[KEY_JOYSTICK_BUTTON_2]) return Yes; // bjd - A button?
 	else return No;
 }
 

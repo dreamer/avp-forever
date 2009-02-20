@@ -96,12 +96,8 @@ const char * GenTex75pc_Directory = "\\\\Kate\\Kate Share\\avp\\Gen34Tex\\";
 const char * GenTex50pc_Directory = "\\\\Kate\\Kate Share\\avp\\Gen12Tex\\";
 
 // new directories for new-style graphics - to be determined properly
-#ifdef WIN32
-	char const * FirstTex_Directory = "Graphics"; // currently relative to cwd
-#endif
-#ifdef _XBOX
-        char const * FirstTex_Directory = "Graphics"; // currently relative to cwd
-#endif
+
+char const * FirstTex_Directory = "Graphics"; // currently relative to cwd
 char const * SecondTex_Directory = 0; // will be the src safe shadow for development builds
 								//used for cd graphics directory in final version
 
@@ -235,7 +231,6 @@ void setup_paths(RIFFHANDLE h)
 			}
 		}
 	}
-	
 }
 
 extern "C"
@@ -280,9 +275,7 @@ void set_environment_properties(Environment_Data_Chunk* edc)
 			StartingEquipment.predator_num_spears=0;
 		}
 	}
-	
 }
-
 
 
 int ConvertObjectIndexToPathIndex(int path_index,int object_index)
@@ -1904,7 +1897,6 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 					num_modules++;
 				}
 			}
-		
 		}
 		// One module per object at the moment
 
@@ -2463,15 +2455,10 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 
 								entry_points[adj_ai_module].add_entry(ad_aim);
 								adjacent_aimodule_list.add_entry(adj_ai_module);
-
 							}
-							
 						}
 					}
-					
 				}
-
-
 			}
 
 			if(ammc)
@@ -2518,10 +2505,8 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 										entry_points[adj_ai_module].add_entry(ad_aim);
 										adjacent_aimodule_list.add_entry(adj_ai_module);
 									}
-									
 								}
 							}
-							
 						}
 					}
 				}	
@@ -2585,14 +2570,11 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 					wv->workspace=0;
 					wv->weighting=5;
 				}
-
 			}
 			else
 			{
 				aim->m_waypoints=0;
 			}
-			
-						
 		}
 
 		if (flags & CCF_ENVIRONMENT)

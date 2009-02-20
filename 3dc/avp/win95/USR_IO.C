@@ -1092,7 +1092,8 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			}
 		}
 		
-		if(DebouncedKeyboardInput[FixedInputConfig.PauseGame])
+		/* bjd - gamepad support */
+		if((DebouncedKeyboardInput[FixedInputConfig.PauseGame]) || (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_9]))
 			AvP_TriggerInGameMenus();
 	//		playerStatusPtr->Mvt_InputRequests.Flags.Rqst_QuitGame = 1;
 //			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_PauseGame = 1;

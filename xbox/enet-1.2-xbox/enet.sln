@@ -1,0 +1,21 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "enet", "enet.vcproj", "{98034BF8-AE8C-4226-B84C-1F932834661D}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{98034BF8-AE8C-4226-B84C-1F932834661D}.Debug.ActiveCfg = Debug|Xbox
+		{98034BF8-AE8C-4226-B84C-1F932834661D}.Debug.Build.0 = Debug|Xbox
+		{98034BF8-AE8C-4226-B84C-1F932834661D}.Release.ActiveCfg = Release|Xbox
+		{98034BF8-AE8C-4226-B84C-1F932834661D}.Release.Build.0 = Release|Xbox
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

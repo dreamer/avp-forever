@@ -54,7 +54,7 @@ void LoadVorbisTrack(int track)
 	if (oggIsPlaying) StopVorbis();
 
 	/* if user enters 1, decrement to 0 to align to array (enters 2, decrement to 1 etc) */
-	if(track != 0) track--;
+	if (track != 0) track--;
 
 	if (track > TrackList.size()) return;
 
