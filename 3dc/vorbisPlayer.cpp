@@ -53,10 +53,11 @@ void LoadVorbisTrack(int track)
 	/* if we're already playing a track, stop it */
 	if (oggIsPlaying) StopVorbis();
 
+	/* TODO? rather than return, pick a random track or just play last? */
+	if (track > TrackList.size()) return;
+
 	/* if user enters 1, decrement to 0 to align to array (enters 2, decrement to 1 etc) */
 	if (track != 0) track--;
-
-	if (track > TrackList.size()) return;
 
 	file = fopen(TrackList[track].c_str(),"rb");
 	if (!file) 

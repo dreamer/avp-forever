@@ -110,7 +110,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="xapilibd.lib d3d8d.lib d3dx8d.lib xgraphicsd.lib dsoundd.lib xonlined.lib xboxkrnl.lib xbdm.lib"
+				AdditionalDependencies="xapilibd.lib d3d8d.lib d3dx8d.lib xgraphicsd.lib dsoundd.lib xnetd.lib xboxkrnl.lib xbdm.lib"
 				AdditionalLibraryDirectories="..\xbox\enet-1.2-xbox\lib"
 				IgnoreDefaultLibraryNames="libcmt.lib"
 				MapExports="TRUE"

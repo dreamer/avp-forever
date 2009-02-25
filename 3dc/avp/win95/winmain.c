@@ -1,5 +1,4 @@
 /* Main designed spec for use with windows95*/
-#define _CRTDBG_MAP_ALLOC
 
 #include "3dc.h"
 #include "module.h"
@@ -74,19 +73,19 @@ extern int PrintDebuggingText(const char* t, ...);
  externs for commonly used global variables and arrays
 
 */
-extern int VideoMode;
-extern void (*UpdateScreen[]) (void);
-extern DISPLAYBLOCK* ActiveBlockList[];
+//extern int VideoMode;
+//extern void (*UpdateScreen[]) (void);
+//extern DISPLAYBLOCK* ActiveBlockList[];
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern void (*SetVideoMode[]) (void);
+//extern void (*SetVideoMode[]) (void);
 extern int FrameRate;
 
 extern HWND hWndMain; // bjd
 
 extern int WindowRequestMode;
 
-extern int NumActiveBlocks;
-int HWAccel = 0;
+//extern int NumActiveBlocks;
+//int HWAccel = 0;
 
 #if debug
 #define MainTextPrint 1
@@ -215,12 +214,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	{
 		#if OverrideOldMenus
 		{
-			HWAccel = 1;
+//			HWAccel = 1;
  		}
 		#else
 		if(strstr(command_line, "-h"))
 		{
-			HWAccel = 1;
+//			HWAccel = 1;
 		}
 		#endif
 
@@ -315,7 +314,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	{
 		#if OverrideOldMenus
 		{
-			HWAccel = 1;
+//			HWAccel = 1;
 		}
 		#endif
 	}
@@ -396,8 +395,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	if(strstr(command_line, "-w"))
 	{
 		WindowRequestMode = WindowModeSubWindow;
-		if (!HWAccel)
-			RasterisationRequestMode = RequestSoftwareRasterisation;
+//		if (!HWAccel)
+//			RasterisationRequestMode = RequestSoftwareRasterisation;
 
 		// will stop mouse cursor moving outside game window
 		UseMouseCentreing = TRUE;
@@ -475,7 +474,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		{
 			//Start thread that recentres mouse , making it easier to play
 			//in subwindow mode
-			InitCentreMouseThread();
+//			InitCentreMouseThread();
 		}
 		#endif
 //		Env_List[0] = &(ELOLevelToLoad);
@@ -599,8 +598,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		{
 
 			#if debug
-			#if 0
-			DumpBoundsCheckInfo(DUMPTOSCREEN);
+			#if 1
+			//DumpBoundsCheckInfo(DUMPTOSCREEN);
 			#endif
 			#endif
 

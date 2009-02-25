@@ -1116,7 +1116,7 @@ SCString :: SCString
 //private:
 SCString :: ~SCString()
 {
-	OutputDebugString("string destructor\n");
+//	OutputDebugString("string destructor\n");
 	/* PRECONDITION */
 	{
 		GLOBALASSERT( pProjCh_Val );
@@ -1124,7 +1124,7 @@ SCString :: ~SCString()
 
 	/* CODE */
 	{
-		OutputDebugString("deleting pProjCh_Val\n");
+//		OutputDebugString("deleting pProjCh_Val\n");
 		delete[] pProjCh_Val;
 
 		// Remove from list:

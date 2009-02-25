@@ -9,7 +9,7 @@
 int DirectPlay_ConnectingToSession();
 int DpExtSend(int lpDP2A, DPID idFrom, DPID idTo, DWORD dwFlags, unsigned char *lpData, int dwDataSize);
 int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned char *lplpData, int *lpdwDataSize);
-int sendSystemMessage(int messageType, int idFrom, int idTo, unsigned char *lpData, int dwDataSize);
+int SendSystemMessage(int messageType, int idFrom, int idTo, unsigned char *lpData, int dwDataSize);
 
 /*
 Version 0 - Original multiplayer + save patch
@@ -17,7 +17,7 @@ Version 100 - Added pistol,skeeter (and new levels)
 */
 #define AVP_MULTIPLAYER_VERSION 100
 
-#define MESSAGEHEADERSIZE				sizeof(unsigned char) + (sizeof(int) * 2)
+const int MESSAGEHEADERSIZE = sizeof(unsigned char) + (sizeof(int) * 2);
 
 DPID AVPDPNetID;
 

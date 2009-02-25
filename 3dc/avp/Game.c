@@ -88,7 +88,6 @@ extern int FrameRate;
 extern int NormalFrameTime;
 extern int FrameRate;
 
-extern int HWAccel;
 extern int Resolution;
 
 unsigned char Null_Name[8];
@@ -166,10 +165,8 @@ void InitGame(void)
 //game resolution change?
 
 	AvP.GameVideoRequestMode = VideoMode_DX_320x200x8; /* ignored */
-	if(HWAccel)
-		AvP.MenuVideoRequestMode = VideoMode_DX_640x480x15;
-	else
-		AvP.MenuVideoRequestMode = VideoMode_DX_640x480x8;
+	AvP.MenuVideoRequestMode = VideoMode_DX_640x480x15;
+
 #endif
 
 #endif

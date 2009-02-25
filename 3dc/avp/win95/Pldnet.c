@@ -699,7 +699,7 @@ static unsigned char msg[NET_MESSAGEBUFFERSIZE];
   ----------------------------------------------------------------------*/
 void MinimalNetCollectMessages(void)
 {			
-	int res = DP_OK;
+	int		res = DP_OK;
 	DPID	dPlayFromId = 0;
 	DPID 	dPlayToId = 0;
 //	unsigned char *msgP = NULL;
@@ -711,7 +711,7 @@ void MinimalNetCollectMessages(void)
 	{
 		while((res==DP_OK) && glpDP && AVPDPNetID)
 		{
-			res = DpExtRecv(glpDP,&dPlayFromId,&dPlayToId,DPRECEIVE_ALL,&msg[0],/*(LPDWORD)*/&msgSize);				
+			res = DpExtRecv(glpDP, &dPlayFromId, &dPlayToId, DPRECEIVE_ALL, &msg[0], /*(LPDWORD)*/&msgSize);				
 			if(res==DP_OK)
 			{
 				/* process last message, if there is one */
@@ -981,6 +981,7 @@ static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize)
 			}
 			LogNetInfo("system message:  DPSYS_CREATEPLAYERORGROUP \n");
 			NewOnScreenMessage("A PLAYER HAS CONNECTED");
+			OutputDebugString("A PLAYER HAS CONNECTED\n");
 			break;
 		}
 		case DPSYS_DELETEPLAYERFROMGROUP:
@@ -990,7 +991,9 @@ static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize)
 			break;
 		}
 		case DPSYS_DESTROYPLAYERORGROUP:
-		{			
+		{
+			OutputDebugString("DPSYS_DESTROYPLAYERORGROUP\n");
+
 			/* Aha. Either a player has left (should have sent a leaving message)
 			or s/he has exited abnormally. In either case, only need to act on
 			this during start-up. During the main game, the ghosts will time-out
@@ -1006,7 +1009,7 @@ static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize)
 					DPID id = destroyMessage.dpId;
 					OutputDebugString("going to drop a player as they disconnected\n");
 					RemovePlayerFromGame(id);
-//					NewOnScreenMessage("A PLAYER HAS DISCONNECTED");
+					NewOnScreenMessage("A PLAYER HAS DISCONNECTED");
 				}
 			}
 
@@ -1068,6 +1071,7 @@ static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize)
 		}
 		default:
 		{
+			OutputDebugString("invalid system message type: ignore\n");
 			/* invalid system message type: ignore */
 			break;
 		}
@@ -1159,7 +1163,6 @@ void RemovePlayerFromGame(DPID id)
 		netGameData.playerData[playerIndex].lastKnownPosition.vx=0;
 		netGameData.playerData[playerIndex].lastKnownPosition.vy=100000000;
 		netGameData.playerData[playerIndex].lastKnownPosition.vz=0;
-		
 	}
 }
 
@@ -1744,13 +1747,9 @@ void NetSendMessages(void)
 
 						default :
 							LOCALASSERT(0=="Send - Unknown error");
-							break;
-
-									
+							break;		
 					}
-
 				}
-				
 			}
 		}
 		numMessagesTransmitted++;
@@ -5489,7 +5488,7 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
 			{
 				if(messagePtr->players[i].playerId)
 				{
-					sendSystemMessage(AVP_GETPLAYERNAME, AVPDPNetID, messagePtr->players[i].playerId, 0, 0);
+					SendSystemMessage(AVP_GETPLAYERNAME, AVPDPNetID, messagePtr->players[i].playerId, 0, 0);
 					//AddNetMsg_PlayerGetName(messagePtr->players[i].playerId); // pass request through internal message system?
 
 					//tempPlayerDetails.

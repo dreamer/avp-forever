@@ -58,7 +58,6 @@ extern SCENEMODULE **Global_ModulePtr;
 extern SCENEMODULE *MainSceneArray[];
 
 extern void (*SetVideoMode[]) (void);
-extern int HWAccel;
 extern int Resolution;
 extern void SetupVision(void);
 extern void ReInitHUD(void);

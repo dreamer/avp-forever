@@ -896,6 +896,7 @@ BOOL ExecuteBuffer()
 	int new_ind_start = 0;
 	int new_ind_end = 0;
 
+/*
 	if (Global_VDB_Ptr)
 	{
 		char buf[100];
@@ -906,6 +907,7 @@ BOOL ExecuteBuffer()
 
 		OutputDebugString(buf);
 	}
+*/
 /*
 	LastError = d3d.lpD3DIndexBuffer->Unlock();
 	if(FAILED(LastError)) {
@@ -8601,6 +8603,11 @@ void SetupFMVTexture(FMVTEXTURE *ftPtr)
 		LogDxErrorString("Could not create Direct3D texture ftPtr->ImagePtr->Direct3DTexture\n");
 	}
 */
+	if (ftPtr->DestTexture)
+	{
+		OutputDebugString("A TEXTURE ALREADY EXISTS! we'll write over it..uh oh\n");
+	}
+
 	/* we use this texture to write fmv data to */
 	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &ftPtr->DestTexture, NULL);
 	if(FAILED(LastError))
@@ -8623,8 +8630,8 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	if(!ftPtr) return;
 
 	/* lock the d3d texture */
-	D3DLOCKED_RECT texture_rect;
-	LastError = ftPtr->DestTexture->LockRect(0, &texture_rect, NULL, D3DLOCK_DISCARD);
+	D3DLOCKED_RECT textureRect;
+	LastError = ftPtr->DestTexture->LockRect(0, &textureRect, NULL, D3DLOCK_DISCARD);
 	if(FAILED(LastError))
 	{
 		LogDxErrorString("Could not lock Direct3D texture ftPtr->DestTexture\n");
@@ -8633,7 +8640,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 
 	// check for success
 	{
-		if (!NextFMVTextureFrame(ftPtr,(void*)texture_rect.pBits, texture_rect.Pitch))
+		if (!NextFMVTextureFrame(ftPtr,(void*)textureRect.pBits, textureRect.Pitch))
 		{
 			ftPtr->DestTexture->UnlockRect(0);
 		 	return;

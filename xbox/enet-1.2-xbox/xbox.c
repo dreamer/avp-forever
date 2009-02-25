@@ -30,16 +30,23 @@ enet_initialize (void)
 	XNetStartupParams xnsp;
 	ZeroMemory( &xnsp, sizeof(xnsp) );
 	xnsp.cfgSizeOfStruct = sizeof(xnsp);
-	xnsp.cfgSockDefaultRecvBufsizeInK = 32;
 
-	// Bypass security so that we may connect to 'untrusted' hosts
+	xnsp.cfgPrivatePoolSizeInPages = 64; // == 256kb, default = 12 (48kb)
+	xnsp.cfgEnetReceiveQueueLength = 16; // == 32kb, default = 8 (16kb)
+	xnsp.cfgIpFragMaxSimultaneous = 16; // default = 4
+	xnsp.cfgIpFragMaxPacketDiv256 = 32; // == 8kb, default = 8 (2kb)
+	xnsp.cfgSockMaxSockets = 64; // default = 64
+	xnsp.cfgSockDefaultRecvBufsizeInK = 128; // default = 16
+	xnsp.cfgSockDefaultSendBufsizeInK = 128; // default = 16
+
+	/* Allow unsecured communications */
 	xnsp.cfgFlags = XNET_STARTUP_BYPASS_SECURITY;
 
 	err = XNetStartup( &xnsp );
 
 	// Init Winsock
 	
-	err = WSAStartup( MAKEWORD(2,2), &wsaData );
+	err = WSAStartup( MAKEWORD(1,1), &wsaData );
 
 /*
     WORD versionRequested = MAKEWORD (1, 1);

@@ -803,6 +803,7 @@ BOOL ReleaseVolatileResources()
 			SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
 			SAFE_RELEASE(FMVTexture[i].DestTexture);
 		}
+		NumberOfFMVTextures = 0; // this correct to do here?
 	}
 
 	return TRUE;
@@ -865,7 +866,14 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 
 	LastError = d3d.lpD3DDevice->Reset(&d3d.d3dpp);
 
-	if(!FAILED(LastError)) {
+	if(FAILED(LastError)) 
+	{
+		OutputDebugString("\n couldn't reset for res change");
+		LogDxError(LastError);
+		return FALSE;
+	}
+	else
+	{
 		ScreenDescriptorBlock.SDB_Width     = width;
 		ScreenDescriptorBlock.SDB_Height    = height;
 		ScreenDescriptorBlock.SDB_Depth		= colourDepth;
@@ -881,12 +889,8 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 
 		CreateVolatileResources();
 	}
-	else {
-//		OutputDebugString("\n couldn't reset for res change");
-		LogDxError(LastError);
-	}
 
-	return true;
+	return TRUE;
 }
 
 /* need to redo all the enumeration code here, as it's not very good.. */
@@ -1046,7 +1050,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	}
 	SelectedAdapterFormat  = d3dpp.BackBufferFormat;
 
-	d3dpp.Flags = D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
+//	d3dpp.Flags = D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
 	d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
 
 	// setting this to interval one will cap the framerate to monitor refresh
@@ -1220,7 +1224,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	{
 		LogDxErrorString("Could not set viewport\n");
 	}
-
+/*
 	LastError = d3d.lpD3DDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &d3d.lpD3DBackSurface);
 
 	if (FAILED(LastError))
@@ -1236,7 +1240,7 @@ BOOL InitialiseDirect3DImmediateMode()
 		LogDxErrorString("Could not get backbuffer surface description\n");
 		return FALSE;
 	}
-
+*/
 	ScreenDescriptorBlock.SDB_Width     = width;
 	ScreenDescriptorBlock.SDB_Height    = height;
 	ScreenDescriptorBlock.SDB_Depth		= depth;

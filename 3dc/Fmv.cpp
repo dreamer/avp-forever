@@ -11,7 +11,6 @@ extern "C" {
 #include <assert.h>
 #include "sndfile.h"
 
-extern int GotAnyKey;
 
 int SmackerSoundVolume = 65536/512; // 128
 int MoviesAreActive;
@@ -23,9 +22,10 @@ int PanningOfNearestVideoScreen = 0;
 FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES] = {0};
 int NumberOfFMVTextures;
 
+extern int GotAnyKey;
 extern HWND hWndMain;
-
 extern IMAGEHEADER ImageHeaderArray[];
+
 #if MaxImageGroups>1
 	extern int NumImagesArray[];
 #else
@@ -54,14 +54,14 @@ static OggPlayReader	*reader = NULL;
 static int				video_track = 0;
 static int				audio_track = 0;
 
-static int				channels = 0;
-static int				rate = 0;
-static int				fps_num = 0;
-static int				fps_denom = 0;
-static int				n_frames = 0;
+static int				channels	= 0;
+static int				rate		= 0;
+static int				fps_num		= 0;
+static int				fps_denom	= 0;
+static int				n_frames	= 0;
 
-bool					fmvPlaying = false;
-bool					frameReady = false;
+bool					fmvPlaying	= false;
+bool					frameReady	= false;
 
 extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
@@ -74,18 +74,18 @@ int NextFMVFrame();
 int FmvOpen(char *filenamePtr);
 void FmvClose();
 int GetVolumeOfNearestVideoScreen(void);
-void writeFmvData(unsigned char *destData, unsigned char* srcData, int width, int height, int pitch);
+void WriteFmvData(unsigned char *destData, unsigned char* srcData, int width, int height, int pitch);
 int CreateFMVAudioBuffer(int channels, int rate);
 void handle_audio_data (OggPlay * player, int track, OggPlayAudioData * data, int samples);
 int WriteToDsound(int dataSize, int offset);
 int GetWritableBufferSize();
 int updateAudioBuffer(int numBytes, short *data);
 
-unsigned char	*textureData = NULL;
-int				imageWidth = 0;
-int				imageHeight = 0;
-int				textureWidth = 0;
-int				textureHeight = 0;
+unsigned char	*textureData	= NULL;
+int				imageWidth		= 0;
+int				imageHeight		= 0;
+int				textureWidth	= 0;
+int				textureHeight	= 0;
 
 int				playing = 0;
 
@@ -132,7 +132,7 @@ ringBuffer fmvRingBuffer = {0};
 
 #define	USE_AUDIO		1
 #define	WRITE_WAV		0
-#define USE_ARGB		0
+#define USE_ARGB		1
 
 SNDFILE					*sndFile;
 
@@ -447,11 +447,10 @@ void ReleaseAllFMVTextures()
 	for(int i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].MessageNumber = 0;
-//		ReleaseD3DTexture8(FMVTexture[i].SrcTexture);
-//		ReleaseD3DTexture8(FMVTexture[i].SrcSurface);
 		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
 		SAFE_RELEASE(FMVTexture[i].DestTexture);
 	}
+	NumberOfFMVTextures = 0;
 }
 
 void ReleaseAllFMVTexturesForDeviceReset()
@@ -459,20 +458,9 @@ void ReleaseAllFMVTexturesForDeviceReset()
 	for(int i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].MessageNumber = 0;
-//		ReleaseD3DTexture8(FMVTexture[i].SrcTexture);
-//		ReleaseD3DTexture8(FMVTexture[i].SrcSurface);
-		ReleaseD3DTexture8(FMVTexture[i].DestTexture);
 
+		SAFE_RELEASE(FMVTexture[i].DestTexture);
 		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
-
-//		ReleaseD3DTexture8(FMVTexture[i].ImagePtr->Direct3DTexture);
-/*
-		if(FMVTexture[i].ImagePtr->Direct3DTexture != NULL)
-		{
-			FMVTexture[i].ImagePtr->Direct3DTexture->Release();
-			FMVTexture[i].ImagePtr->Direct3DTexture = NULL;
-		}
-*/
 	}
 }
 
@@ -569,7 +557,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr, int pitch)
 		if (FmvWait()) return 0;
 		/* unpack frame */
 
-		writeFmvData((unsigned char*)bufferPtr, textureData, w, h, pitch);
+		WriteFmvData((unsigned char*)bufferPtr, textureData, w, h, pitch);
 
 //		if (textureData == NULL) return -1;
 //		bufferPtr = textureData;
@@ -729,10 +717,6 @@ int FmvOpen(char *filenamePtr)
 			ret = oggplay_get_audio_samplerate(player, i , &rate);
 			ret = oggplay_get_audio_channels(player, i, &channels);
 			printf("samplerate: %d channels: %d\n", rate, channels);
-
-			/* fix this! */
-//			if(channels == 1) audioFormat = AUDIO_S16SYS;
-//			else			  audioFormat = AUDIO_S16SYS;
 		}
 		else if (oggplay_get_track_type (player, i) == OGGZ_CONTENT_KATE) {
 			const char *category = "<unknown>", *language = "<unknown>";
@@ -749,7 +733,7 @@ int FmvOpen(char *filenamePtr)
 
 	if (video_track == -1) {
 		if (audio_track >= 0) {
-			oggplay_set_callback_num_frames(player, audio_track, 8192);
+			oggplay_set_callback_num_frames(player, audio_track, 2048);
 		}
 	}
 
@@ -1353,8 +1337,8 @@ void handle_video_data (OggPlay * player, int track_num, OggPlayVideoData * vide
 	int					uv_height;
 	OggPlayYUVChannels	yuv;
 	OggPlayRGBChannels	rgb;
-	long frameTime = 0;
-	int frameDelay = 0;
+	long				frameTime = 0;
+	int					frameDelay = 0;
 
 	oggplay_get_video_y_size(player, track_num, &y_width, &y_height);
 	oggplay_get_video_uv_size(player, track_num, &uv_width, &uv_height);
@@ -1362,7 +1346,7 @@ void handle_video_data (OggPlay * player, int track_num, OggPlayVideoData * vide
 	if (textureData == NULL) 
 	{
 		textureData = new unsigned char[y_width * y_height * 4];
-		imageWidth = y_width;
+		imageWidth  = y_width;
 		imageHeight = y_height;
 	}
 
@@ -1370,24 +1354,23 @@ void handle_video_data (OggPlay * player, int track_num, OggPlayVideoData * vide
 	* Convert the YUV data to RGB, using platform-specific optimisations
 	* where possible.
 	*/
-	yuv.ptry = video_data->y;
-	yuv.ptru = video_data->u;
-	yuv.ptrv = video_data->v;
-	yuv.uv_width = uv_width;
-	yuv.uv_height = uv_height;  
-	yuv.y_width = y_width;
-	yuv.y_height = y_height;  
+	yuv.ptry		= video_data->y;
+	yuv.ptru		= video_data->u;
+	yuv.ptrv		= video_data->v;
+	yuv.uv_width	= uv_width;
+	yuv.uv_height	= uv_height;  
+	yuv.y_width		= y_width;
+	yuv.y_height	= y_height;  
 
-	rgb.ptro = textureData;
-	rgb.rgb_width = y_width;
-	rgb.rgb_height = y_height;  
+	rgb.ptro		= textureData;
+	rgb.rgb_width	= y_width;
+	rgb.rgb_height	= y_height;  
 
 #if USE_ARGB
 	oggplay_yuv2argb(&yuv, &rgb);
 #else
-	oggplay_yuv2rgb(&yuv, &rgb);
+	oggplay_yuv2rgba(&yuv, &rgb);
 #endif
-	
 
 	frameReady = true;
 }
@@ -1404,7 +1387,7 @@ bool FmvWait()
 	}
 }
 
-void writeFmvData(unsigned char *destData, unsigned char* srcData, int width, int height, int pitch)
+void WriteFmvData(unsigned char *destData, unsigned char *srcData, int width, int height, int pitch)
 {
 	unsigned char *srcPtr, *destPtr;
 
@@ -1412,32 +1395,47 @@ void writeFmvData(unsigned char *destData, unsigned char* srcData, int width, in
 
 	srcPtr = (unsigned char *)srcData;
 
-	// then actual image data
-	for (int y = 0; y < height; y++)
+	if (pitch == (width * 4))
 	{
-		destPtr = (((unsigned char *)destData) + y*pitch);
-
-#if USE_ARGB
-		memcpy(destPtr, srcPtr, width * 4);
-		srcPtr+=width * 4;
-#else
-		for (int x = 0; x < width; x++)
+		memcpy(destData, srcPtr, (height * width * 4));
+	}
+	else
+	{
+		// then actual image data
+		for (int y = 0; y < height; y++)
 		{
-			*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], srcPtr[3]);
+			destPtr = (((unsigned char *)destData) + y*pitch);
 
-			destPtr+=4;
-			srcPtr+=4;
-		}
+#if 0//USE_ARGB
+			memcpy(destPtr, srcPtr, width * 4);
+			srcPtr += (width * 4);
+#else
+			for (int x = 0; x < width; x++)
+			{
+				// A R G B
+				// A B G R
+
+				destPtr[0] = srcPtr[3];
+				destPtr[1] = srcPtr[2];
+				destPtr[2] = srcPtr[1];
+				destPtr[3] = srcPtr[0];
+
+//				*(D3DCOLOR*)destPtr = D3DCOLOR_ARGB(srcPtr[0], srcPtr[1], srcPtr[2], srcPtr[3]);
+
+				destPtr+=4;
+				srcPtr+=4;
+			}
 #endif
+		}	
 	}
 }
 
 int NextFMVFrame()
 {
-	D3DLOCKED_RECT texture_rect;
+	D3DLOCKED_RECT textureRect;
 
 	/* lock the d3d texture */
-	fmvDynamicTexture->LockRect( 0, &texture_rect, NULL, NULL );
+	fmvDynamicTexture->LockRect( 0, &textureRect, NULL, NULL );
 
 	/* copy bink frame to texture */
 //	BinkCopyToBuffer(binkHandle, texture_rect.pBits, texture_rect.Pitch, 1024, 0, 0, BinkSurfaceType);
@@ -1448,7 +1446,7 @@ int NextFMVFrame()
 //
 //	srcPtr = (unsigned char *)textureData;
 
-	writeFmvData((unsigned char*)texture_rect.pBits, textureData, imageWidth, imageHeight, texture_rect.Pitch);
+	WriteFmvData((unsigned char*)textureRect.pBits, textureData, imageWidth, imageHeight, textureRect.Pitch);
 
 	/* unlock d3d texture */
 	fmvDynamicTexture->UnlockRect( 0 );

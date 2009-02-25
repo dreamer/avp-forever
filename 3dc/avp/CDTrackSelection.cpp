@@ -154,9 +154,6 @@ static void ExtractTracksForLevel(char* &buffer, List<int> &track_list)
 
 			if(track>=0)
 			{
-				char buf[100];
-				sprintf(buf, "adding track: %d\n", track);
-				OutputDebugString(buf);
 				track_list.add_entry(track);
 			}
 
@@ -236,10 +233,6 @@ static BOOL PickCDTrack(List<int>& track_list)
 	//pick the next track in the list
 	unsigned int index=TrackSelectCounter % track_list.size();
 
-	char buf[100];
-	sprintf(buf, "track size: %d\n", track_list.size());
-//	OutputDebugString(buf);
-
 	TrackSelectCounter++;
 
 	//play it
@@ -259,12 +252,6 @@ static bool PickOGGTrack(List<int>& track_list)
 	//pick the next track in the list
 	unsigned int index=TrackSelectCounter % track_list.size();
 
-	char buf[100];
-	sprintf(buf, "wants to play track: %d\n", index);
-//	OutputDebugString(buf);
-
-//	unsigned int index=TrackSelectCounter % CheckNumberOfVorbisTracks();
-
 	if (index > CheckNumberOfVorbisTracks())
 	{
 		return false;
@@ -273,9 +260,9 @@ static bool PickOGGTrack(List<int>& track_list)
 	TrackSelectCounter++;
 
 	//play it
-	LoadVorbisTrack(index);
+	LoadVorbisTrack(track_list[index]);
 
-	LastTrackChosen = index;
+	LastTrackChosen = track_list[index];
 
 	return true;
 }
@@ -283,8 +270,6 @@ static bool PickOGGTrack(List<int>& track_list)
 void CheckCDAndChooseTrackIfNeeded()
 {
 	static enum playertypes lastPlayerType;
-
-//	OutputDebugString("CheckCDAndChooseTrackIfNeeded\n");
 	
 	//are we bothering with cd tracks
 	if(!CDDA_IsOn()) return;
@@ -308,8 +293,9 @@ void CheckCDAndChooseTrackIfNeeded()
 		int level=NumberForCurrentLevel();
 		if(level>=0 && level<AVP_ENVIRONMENT_END_OF_LIST)
 		{
-			if(CDDA_IsOn())
+			if((CDDA_IsOn()) && (CDTrackMax > 0))
 			{
+				OutputDebugString("USING CDDA\n");
 				//pick track based on level
 				if(PickCDTrack(LevelCDTracks[level]))
 				{

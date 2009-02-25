@@ -195,7 +195,8 @@ int CDDA_CheckNumberOfTracks()
 		PlatGetNumberOfCDTracks(&numTracks);
 
 		//if there is only one track , then it probably can't be used anyway
-		if(numTracks==1) numTracks=0;
+//		if(numTracks==1) numTracks=0;
+		if(numTracks <= 1) numTracks = 0; // bjd
 
 		//store the maximum allowed track number
 		CDTrackMax=numTracks;
