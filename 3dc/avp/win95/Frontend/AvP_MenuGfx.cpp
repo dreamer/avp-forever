@@ -282,7 +282,7 @@ static void UnloadMenuFont(void)
 	SAFE_RELEASE(IntroFont_Light.info.menuTexture);
 #endif
 }
-extern int LengthOfMenuText(char *textPtr)
+extern int LengthOfMenuText(const char *textPtr)
 {
 	int width = 0;
 	
@@ -294,7 +294,7 @@ extern int LengthOfMenuText(char *textPtr)
 	return width;
 }
 
-extern int RenderMenuText(char *textPtr, int pX, int pY, int alpha, enum AVPMENUFORMAT_ID format) 
+extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum AVPMENUFORMAT_ID format) 
 {
 	int width = LengthOfMenuText(textPtr);
 	int word_length = 0;
@@ -967,7 +967,7 @@ static int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red,
 	return sx;
 }
 
-extern void RenderSmallFontString_Wrapped(char *textPtr,RECT* area,int alpha,int* output_x,int* output_y)
+extern void RenderSmallFontString_Wrapped(const char *textPtr,RECT* area,int alpha,int* output_x,int* output_y)
 {
 	// text on menus in bottom black space
 

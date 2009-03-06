@@ -182,22 +182,20 @@ int mouseMoved = 0;
 					wParam = VK_LCONTROL;
 			}
 
-#if 1
 			/* handle left/right shift keys */	
 			if(wParam == VK_SHIFT)
 			{
-				if(GetKeyState(VK_RSHIFT) & 0x8000)
+				if((GetKeyState(VK_RSHIFT) & 0x8000) && (KeyboardInput[KEY_RIGHTSHIFT] == FALSE))
 				{
-					OutputDebugString("caught right shift!\n");
+//					OutputDebugString("caught right shift!\n");
 					wParam = VK_RSHIFT;
 				}
-				else if(GetKeyState(VK_LSHIFT) & 0x8000)
+				else if((GetKeyState(VK_LSHIFT) & 0x8000) && (KeyboardInput[KEY_LEFTSHIFT] == FALSE))
 				{
-					OutputDebugString("caught left shift!\n");
+//					OutputDebugString("caught left shift!\n");
 					wParam = VK_LSHIFT;
 				}
 			}
-#endif
 
 			IngameKeyboardInput_KeyDown(wParam);
 #if 0
@@ -254,22 +252,20 @@ int mouseMoved = 0;
 					wParam = VK_LCONTROL;
 			}
 
-#if 1
 			/* handle left/right shift keys */	
 			if(wParam == VK_SHIFT)
 			{
-				if(!(GetKeyState(VK_RSHIFT) & 0x8000))
+				if((!(GetKeyState(VK_RSHIFT) & 0x8000)) && (KeyboardInput[KEY_RIGHTSHIFT] == TRUE))
 				{
-					OutputDebugString("released right shift!\n");
+//					OutputDebugString("released right shift!\n");
 					wParam = VK_RSHIFT;
 				}
-				else if(!(GetKeyState(VK_LSHIFT) & 0x8000))
+				else if((!(GetKeyState(VK_LSHIFT) & 0x8000)) && (KeyboardInput[KEY_LEFTSHIFT] == TRUE))
 				{
-					OutputDebugString("released left shift!\n");
+//					OutputDebugString("released left shift!\n");
 					wParam = VK_LSHIFT;
 				}
 			}
-#endif
 
 			IngameKeyboardInput_KeyUp(wParam);
 #if 0

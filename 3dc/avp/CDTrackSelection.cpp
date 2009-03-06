@@ -306,7 +306,7 @@ void CheckCDAndChooseTrackIfNeeded()
 
 			// if use ogg
 			{
-				OutputDebugString("USING OGG\n");
+//				OutputDebugString("USING OGG\n");
 				if(PickOGGTrack(LevelCDTracks[level]))
 				{
 					return;

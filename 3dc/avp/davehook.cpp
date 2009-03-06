@@ -39,7 +39,6 @@
 
 #include "missions.hpp"
 
-#include "rebmenus.hpp"
 #include "indexfnt.hpp"
 	// Includes for console variables:
 	#include "textexp.hpp"

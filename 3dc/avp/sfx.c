@@ -285,7 +285,7 @@ void HandleObjectOnFire(DISPLAYBLOCK *dispPtr)
 			MakeParticle(&(position), &velocity, PARTICLE_FIRE);
 		}
 
-		if (FastRandom()&65535 > 32768)
+		if ((FastRandom()&65535) > 32768)
 		{
 			MakeParticle(&(position), &velocity, PARTICLE_IMPACTSMOKE);
 		}

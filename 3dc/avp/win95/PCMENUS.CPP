@@ -13,7 +13,7 @@
 #include <string.h> // strcat, strcpy, etc
 
 #include "3dc.h" // for directdraw stuff
-#include "chnktexi.h" // for requesting textures on powers of two
+//#include "chnktexi.h" // for requesting textures on powers of two
 //#include "d3_func.h"
 
 //#include "menudefs.h" // general menu stuff
@@ -46,9 +46,9 @@ extern "C"
 /* EXTERNAL FUNCTIONS */
 /**********************/
 
-	extern void DrawInternationalizedString(MENU_TEXT_ITEM *itemPtr, int highlighted);
+//	extern void DrawInternationalizedString(MENU_TEXT_ITEM *itemPtr, int highlighted);
 	extern void DrawMenuBackdrop(void);
-	extern void (*UpdateScreen[]) (void);
+//	extern void (*UpdateScreen[]) (void);
  	extern int IDemandSelect(void); // not in any header file!!!
 
 /**********************/

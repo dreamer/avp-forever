@@ -26,9 +26,6 @@
 #include "huddefs.h"
 #include "vision.h"
 #include "pcmenus.h"
-#include "multmenu.h"
-#include "menudefs.h"
-#include "database.h"
 #include "avp_menus.h"
 #include "kshape.h"
 #define UseLocalAssert Yes
@@ -39,8 +36,6 @@
 
 #include "davehook.h"
 
-#include "rebmenus.hpp"
-#include "intro.hpp"
 #include "showcmds.h"
 
 #include "consbind.hpp"

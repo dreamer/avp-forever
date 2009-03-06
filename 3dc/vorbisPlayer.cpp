@@ -35,13 +35,20 @@ std::vector<std::string> TrackList;
 	const std::string musicFolderName = "Music/";
 #endif
 #ifdef _XBOX
-	const std::string tracklistFilename = "d:/Music/ogg_tracks.txt";
-	const std::string musicFolderName = "d:/Music/";
+	const std::string tracklistFilename = "d:\\Music\\ogg_tracks.txt";
+	const std::string musicFolderName = "d:\\Music\\";
 #endif
 
+#ifdef WIN32
+#pragma comment(lib, "libvorbisfile_static.lib")
+#pragma comment(lib, "libvorbis_static.lib")
+#pragma comment(lib, "libogg_static.lib")
+#endif
+#ifdef _XBOX
 #pragma comment(lib, "libvorbisfile.lib")
-#pragma comment(lib, "ogg.lib")
 #pragma comment(lib, "libvorbis.lib")
+#pragma comment(lib, "libogg.lib")
+#endif
 
 char *audioData = 0;
 

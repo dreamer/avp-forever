@@ -19,13 +19,12 @@
 #include "consbind.hpp"
 
 	#if KeyBindingUses_KEY_ID
-		#include "avpitems.hpp"
 		#include "iofocus.h"
 		#include "scstring.hpp"
 		#include "strtab.hpp"
 	#endif
 
-	
+
 	#define UseLocalAssert Yes
 	#include "ourasert.h"
 #include "frontend/avp_menus.h"
@@ -73,7 +72,7 @@
 /* Exported globals ************************************************/
 
 /* Internal type definitions ***************************************/
-
+typedef enum TEXTSTRING_ID TextID;
 /* Internal function prototypes ************************************/
 
 /* Internal globals ************************************************/
@@ -82,7 +81,7 @@
 // class KeyBinding
 // public:
 
-// static 
+// static
 void
 KeyBinding :: ParseBindCommand
 (
@@ -119,7 +118,7 @@ KeyBinding :: ParseBindCommand
 		{
 			SCString* pSCString_1 = new SCString("BOUND \"");
 				// LOCALISEME
-				  
+
 			SCString* pSCString_2 = new SCString("\" TO ");
 
 			SCString* pSCString_3 = MakeStringForKey
@@ -140,7 +139,7 @@ KeyBinding :: ParseBindCommand
 			pSCString_Feedback -> R_Release();
 			pSCString_3 -> R_Release();
 			pSCString_2 -> R_Release();
-			pSCString_1 -> R_Release();	
+			pSCString_1 -> R_Release();
 		}
 
 		pSCString_ToBind -> R_Release();
@@ -153,7 +152,7 @@ KeyBinding :: ParseBindCommand
 	}
 }
 
-// static 
+// static
 void
 KeyBinding :: ParseUnbindCommand
 (
@@ -189,7 +188,7 @@ KeyBinding :: ParseUnbindCommand
 		{
 			BindableKey theKey = (BindableKey)i;
 
-			SCString* pSCString_TestKey = MakeStringForKey(theKey);			
+			SCString* pSCString_TestKey = MakeStringForKey(theKey);
 
 			unsigned int LengthOfTestString = pSCString_TestKey -> GetNumChars();
 
@@ -213,14 +212,14 @@ KeyBinding :: ParseUnbindCommand
 						LongestMatch = LengthOfTestString;
 
 						theKey_ToUnbind = theKey;
-						bGotMatch = Yes;						
+						bGotMatch = Yes;
 
 					}
 				}
 			}
 
 			pSCString_TestKey -> R_Release();
-		}			
+		}
 
 		if (bGotMatch)
 		{
@@ -240,7 +239,7 @@ KeyBinding :: ParseUnbindCommand
 				{
 					oi . next();
 				}
-			}			
+			}
 		}
 	}
 }
@@ -292,7 +291,7 @@ KeyBinding :: AttemptToBind
 // static
 void
 KeyBinding :: AttemptToUnbind
-(			
+(
 	SCString* pSCString_Key // description of key
 )
 {
@@ -336,11 +335,11 @@ KeyBinding :: UnbindAll(void)
 	SCString* pSCString_Feedback = new SCString("DESTROYING ALL KEY BINDINGS");
 		// LOCALISEME
 
-	pSCString_Feedback -> SendToScreen();	
+	pSCString_Feedback -> SendToScreen();
 
 	pSCString_Feedback -> R_Release();
 
-	while 
+	while
 	(
 		List_pKeyBindings . size() > 0
 	)
@@ -348,7 +347,7 @@ KeyBinding :: UnbindAll(void)
 		delete List_pKeyBindings . first_entry();
 			// The destructor for the KeyBinding will remove
 			// it from the list and hence the list will shrink.
-	}	
+	}
 }
 
 // static
@@ -358,7 +357,7 @@ KeyBinding :: ListAllBindings(void)
 	SCString* pSCString_Feedback = new SCString("LIST OF ALL KEY BINDINGS:");
 		// LOCALISEME
 
-	pSCString_Feedback -> SendToScreen();	
+	pSCString_Feedback -> SendToScreen();
 
 	pSCString_Feedback -> R_Release();
 
@@ -400,12 +399,12 @@ void KeyBinding :: WriteToConfigFile(char* Filename)
 		!oi.done();
 		oi.next()
 	)
-	{	
+	{
 		SCString* pSCString_Key = MakeStringForKey
 		(
 			oi() -> theKey
 		);
-		
+
 		fprintf
 		(
 			pFile,
@@ -413,7 +412,7 @@ void KeyBinding :: WriteToConfigFile(char* Filename)
 			pSCString_Key -> pProjCh(),
 			oi() -> pSCString_ToOutput -> pProjCh()
 		);
-		
+
 		pSCString_Key->R_Release();
 	}
 
@@ -422,7 +421,7 @@ void KeyBinding :: WriteToConfigFile(char* Filename)
 	// Destroy all the current bindings so we don't get a duplicate
 	// set next time the batch file fires:
 	{
-		while 
+		while
 		(
 			List_pKeyBindings . size() > 0
 		)
@@ -430,7 +429,7 @@ void KeyBinding :: WriteToConfigFile(char* Filename)
 			delete List_pKeyBindings . first_entry();
 				// The destructor for the KeyBinding will remove
 				// it from the list and hence the list will shrink.
-		}	
+		}
 	}
 }
 
@@ -509,7 +508,7 @@ KeyBinding :: Process_WM_KEYDOWN
 #endif
 
 #if KeyBindingUses_KEY_ID
-// static 
+// static
 void
 KeyBinding :: Maintain(void)
 {
@@ -580,7 +579,7 @@ KeyBinding :: Maintain(void)
 		// Ensure the pending list finishes off empty
 		// (since we're pretending it's a local variable):
 		GLOBALASSERT( 0 == PendingList . NumEntries() );
-	}	
+	}
 }
 #endif
 
@@ -790,14 +789,14 @@ static SCString* GetMethodString(BindableKey inPhysicalKey)
 		{
 			theProjChar[0] = 0;
 		}
-					
+
 		theProjChar[1] = 0;
 
 		return new SCString(theProjChar);
-	}	
+	}
 }
 
-// static 
+// static
 SCString*
 KeyBinding :: MakeStringForKey
 (
@@ -865,7 +864,7 @@ OurBool KeyBinding :: ParseBindCommand
 		{
 			BindableKey theKey = (BindableKey)i;
 
-			SCString* pSCString_TestKey = MakeStringForKey(theKey);			
+			SCString* pSCString_TestKey = MakeStringForKey(theKey);
 
 			unsigned int LengthOfTestString = pSCString_TestKey -> GetNumChars();
 
@@ -891,14 +890,14 @@ OurBool KeyBinding :: ParseBindCommand
 						theKey_Out = theKey;
 						*ppProjCh_Out = pProjCh_In + LengthOfTestString;
 							// Continue processing after the string
-						bGotMatch = Yes;						
+						bGotMatch = Yes;
 
 					}
 				}
 			}
 
 			pSCString_TestKey -> R_Release();
-		}			
+		}
 
 		if (bGotMatch)
 		{

@@ -920,6 +920,8 @@ BOOL InitialiseDirect3DImmediateMode()
 		return FALSE;
 	}
 
+//#define D3DADAPTER_DEFAULT 1
+
 	// Get the number of devices in the system
 	d3d.NumDrivers = d3d.lpD3D->GetAdapterCount();
 

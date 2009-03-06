@@ -2,11 +2,11 @@
 extern "C"
 {
 	#include "3dc.h"
-	//#include "intro.hpp"
 	#include "inline.h"
 //	#include "smacker.h"
 	#include "fmv.h"
 	#include "AvP_Menus.h"
+	#include "avp_intro.h"
 	extern int NormalFrameTime;
 	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 	extern unsigned char GotAnyKey;
@@ -70,7 +70,7 @@ extern void PlayIntroSequence(void)
 
 	StartMenuMusic();
 	ResetFrameCounter();
-	
+
 	Show_Presents();
 	#if ALLOW_SKIP_INTRO
 	if (!GotAnyKey) Show_ARebellionGame();
@@ -85,7 +85,7 @@ extern void ShowSplashScreens(void)
 {
 	LoadAllSplashScreenGfx();
 	int i;
-	enum AVPMENUGFX_ID graphic[] = 
+	enum AVPMENUGFX_ID graphic[] =
 	{
 		AVPMENUGFX_SPLASH_SCREEN1,AVPMENUGFX_SPLASH_SCREEN2,AVPMENUGFX_SPLASH_SCREEN3,
 		AVPMENUGFX_SPLASH_SCREEN4,AVPMENUGFX_SPLASH_SCREEN5,
@@ -99,7 +99,7 @@ extern void ShowSplashScreens(void)
 
 			int a = timeRemaining*2;
 			if (a>ONE_FIXED) a=ONE_FIXED;
-			
+
 			if (i!=4)
 			{
 			  	DrawAvPMenuGfx_CrossFade(graphic[i],graphic[i+1], a);
@@ -122,8 +122,8 @@ extern void ShowSplashScreens(void)
 
 			ThisFramesRenderingHasFinished();
 			FlipBuffers();
-			
-		  	DirectReadKeyboard();	
+
+		  	DirectReadKeyboard();
 			FrameCounterHandler();
 		}
 		while(timeRemaining>=0 && !DebouncedGotAnyKey);
@@ -140,7 +140,7 @@ extern void ShowSplashScreens(void)
 extern void Show_WinnerScreen(void)
 {
 	LoadAvPMenuGfx(AVPMENUGFX_WINNER_SCREEN);
-	
+
 	int timeRemaining = 10*ONE_FIXED;
 	do
 	{
@@ -160,8 +160,8 @@ extern void Show_WinnerScreen(void)
 
 		ThisFramesRenderingHasFinished();
 		FlipBuffers();
-			
-	  	DirectReadKeyboard();	
+
+	  	DirectReadKeyboard();
 		FrameCounterHandler();
 		timeRemaining-=NormalFrameTime;
 	}
@@ -191,7 +191,7 @@ void Show_CopyrightInfo(void)
 		timeRemaining-=NormalFrameTime;
 	}
 	while(timeRemaining>0);
-	
+
 	timeRemaining = ONE_FIXED*2;
 	do
 	{
@@ -206,7 +206,7 @@ void Show_CopyrightInfo(void)
 		timeRemaining-=NormalFrameTime;
 	}
 	while(timeRemaining>0);
-	
+
 	timeRemaining = ONE_FIXED/2;
 	do
 	{
@@ -237,7 +237,7 @@ void Show_Presents(void)
 			int y = (480-AvPMenuGfxStorage[AVPMENUGFX_PRESENTS].Height)/2;
 			PlayMenuMusic();
 			DrawMainMenusBackdrop();
-	
+
 			if (timeRemaining > 6*ONE_FIXED)
 			{
 			  //	DrawGraphicWithFadingLevel(&Starfield_Backdrop,timeRemaining-7*ONE_FIXED);
@@ -257,18 +257,18 @@ void Show_Presents(void)
 			{
 				RenderMenuText(textPtr,MENU_CENTREX,y,timeRemaining-3*ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
 			}
-			
+
 			ThisFramesRenderingHasFinished();
 			FlipBuffers();
 		}
 		#if ALLOW_SKIP_INTRO
-		DirectReadKeyboard();	
+		DirectReadKeyboard();
 		#endif
 		FrameCounterHandler();
 		timeRemaining-=NormalFrameTime;
 	}
 	#if ALLOW_SKIP_INTRO
-	
+
 	while((timeRemaining>0) && !GotAnyKey);
 
 	#else
@@ -313,7 +313,7 @@ void Show_ARebellionGame(void)
 			ThisFramesRenderingHasFinished();
 			FlipBuffers();
 		}
-		DirectReadKeyboard();	
+		DirectReadKeyboard();
 		FrameCounterHandler();
 		timeRemaining-=NormalFrameTime;
 	}
@@ -354,7 +354,7 @@ void Show_AvPLogo(void)
 			ThisFramesRenderingHasFinished();
 			FlipBuffers();
 		}
-		DirectReadKeyboard();	
+		DirectReadKeyboard();
 		FrameCounterHandler();
 		timeRemaining-=NormalFrameTime;
 	}

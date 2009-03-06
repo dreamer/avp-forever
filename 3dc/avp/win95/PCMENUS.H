@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "menugfx.h"
+//#include "menugfx.h"
 
 #define ENABLE_SHADING_OPTION 0
 #define ENABLE_MIPMAP_OPTION 0
@@ -116,15 +116,15 @@ float GetUVScale(IMAGETYPEIDX);
 #define AMB_MODELESS 0x00000001 /* do not wait for select or blank screen */
 void AvpMessageBox(char const * text, char const * title, int flags);
 
-extern AVP_MENU OptionsMenuData;
-extern AVP_MENU VideoModeOptionsMenu;
+//extern AVP_MENU OptionsMenuData;
+//extern AVP_MENU VideoModeOptionsMenu;
 
 #ifdef __cplusplus
 }
 #endif
 
 
-
+#if 0
 
 /*
 	NEW CONTENT 1/4/98 by DHM:
@@ -178,7 +178,7 @@ extern AVP_MENU VideoModeOptionsMenu;
 
 #endif /* __cplusplus */
 
-
+#endif
 
 
 #endif /* ! _included_pcmenus_h_ */

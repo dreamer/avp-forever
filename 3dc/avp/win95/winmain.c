@@ -24,9 +24,6 @@
 #include "huddefs.h"
 #include "vision.h"
 #include "pcmenus.h"
-#include "multmenu.h"
-#include "menudefs.h"
-#include "database.h"
 #include "avp_menus.h"
 #include "kshape.h"
 #define UseLocalAssert Yes
@@ -37,8 +34,6 @@
 
 #include "davehook.h"
 
-#include "rebmenus.hpp"
-#include "intro.hpp"
 #include "showcmds.h"
 
 #include "consbind.hpp"
@@ -73,19 +68,12 @@ extern int PrintDebuggingText(const char* t, ...);
  externs for commonly used global variables and arrays
 
 */
-//extern int VideoMode;
-//extern void (*UpdateScreen[]) (void);
-//extern DISPLAYBLOCK* ActiveBlockList[];
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-//extern void (*SetVideoMode[]) (void);
 extern int FrameRate;
 
 extern HWND hWndMain; // bjd
 
 extern int WindowRequestMode;
-
-//extern int NumActiveBlocks;
-//int HWAccel = 0;
 
 #if debug
 #define MainTextPrint 1
@@ -162,7 +150,10 @@ void exit_break_point_fucntion ()
 		__asm int 3;
 	}
 	#endif
-}	
+}
+
+/* so we can disable/enable stickey keys */
+STICKYKEYS startupStickyKeys = {sizeof(STICKYKEYS), 0};
 
 int mainMenu = 1;
 
@@ -170,6 +161,8 @@ int mainMenu = 1;
 
 #include "VideoModes.h"
 extern DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
+
+STICKYKEYS skOff;
  
 /* entry point */
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
@@ -182,6 +175,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 						
 	AVP_HInstance = hInst = hInstance;
 	AVP_NCmd = nCmdShow;
+	skOff = startupStickyKeys;
 
 	// Enable run-time memory check for debug builds.
 #if defined(DEBUG) | defined(_DEBUG)
@@ -198,6 +192,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 //	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF | _CRTDBG_DELAY_FREE_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 //	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF | _CRTDBG_DELAY_FREE_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	
+	if( (skOff.dwFlags & SKF_STICKYKEYSON) == 0 )
+	{
+		// Disable the hotkey and the confirmation
+		skOff.dwFlags &= ~SKF_HOTKEYACTIVE;
+		skOff.dwFlags &= ~SKF_CONFIRMHOTKEY;
+
+		SystemParametersInfo(SPI_SETSTICKYKEYS, sizeof(STICKYKEYS), &skOff, 0);
+	}
+
 	LoadDeviceAndVideoModePreferences();
 
 	LoadCDTrackList(); //load list of cd tracks assigned to levels , from a text file
@@ -474,7 +477,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		{
 			//Start thread that recentres mouse , making it easier to play
 			//in subwindow mode
-//			InitCentreMouseThread();
+			InitCentreMouseThread();
 		}
 		#endif
 //		Env_List[0] = &(ELOLevelToLoad);
@@ -927,6 +930,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
  	CDDA_End();
 	ClearMemoryPool();
+
+	/* restore stickey keys setting */
+	SystemParametersInfo(SPI_SETSTICKYKEYS, sizeof(STICKYKEYS), &startupStickyKeys, 0);
 
 	/* 'shutdown' timer */
 	timeEndPeriod(1);

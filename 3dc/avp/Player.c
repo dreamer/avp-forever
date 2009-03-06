@@ -19,9 +19,6 @@ so player.c is looking a bit bare at the moment. */
 #include "particle.h"
 #include "scream.h"
 #include "savegame.h"
-#if SupportWindows95
-	#include "rebmenus.hpp"
-#endif
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
@@ -104,7 +101,7 @@ Cloaking stuff
 void InitPlayerCloakingSystem(void);
 static void DoPlayerCloakingSystem(void);
 
-void InitPlayer(STRATEGYBLOCK* sbPtr, int sb_type) 
+void InitPlayer(STRATEGYBLOCK* sbPtr, int sb_type)
 {
 	/*KJL**************************************************************************************
 	* InitPlayer() was written by me. It attaches the extra player data to the strategy block *
@@ -115,7 +112,7 @@ void InitPlayer(STRATEGYBLOCK* sbPtr, int sb_type)
 	PLAYER_STATUS *psPtr = &PlayerStatusBlock;
 	GLOBALASSERT(psPtr);
  	GLOBALASSERT(sbPtr);
-	
+
 	// set up our global
 
 	PlayerStatusPtr = psPtr;
@@ -131,7 +128,7 @@ void InitPlayer(STRATEGYBLOCK* sbPtr, int sb_type)
 		NPC_DATA *NpcData;
 		NPC_TYPES PlayerType;
 
-		switch(AvP.PlayerType) 
+		switch(AvP.PlayerType)
 		{
 			case(I_Marine):
 			{
@@ -306,18 +303,18 @@ void InitPlayer(STRATEGYBLOCK* sbPtr, int sb_type)
 		dynPtr->OrientMat = PlayerStartMat;
 		MatrixToEuler(&dynPtr->OrientMat,&dynPtr->OrientEuler);
 		//dynPtr->OrientEuler = dPtr->ObEuler;
-		
-		
+
+
 		dynPtr->PrevPosition = dynPtr->Position;
 		dynPtr->PrevOrientMat = dynPtr->OrientMat;
 		dynPtr->PrevOrientEuler = dynPtr->OrientEuler;
-																 				
+
 		/* let alien walk on walls & ceiling */
 		if (AvP.PlayerType == I_Alien)
 		{
-			dynPtr->ToppleForce = TOPPLE_FORCE_ALIEN;	
+			dynPtr->ToppleForce = TOPPLE_FORCE_ALIEN;
 		}
-		
+
 		/* KJL 10:56:57 11/24/97 - set ObRadius to a sensible value */
 		dPtr->ObRadius = 1200;
 
@@ -329,24 +326,24 @@ void InitPlayer(STRATEGYBLOCK* sbPtr, int sb_type)
 			extern int PlayersMaxHeightWhilstNotInContactWithGround;
 			PlayersMaxHeightWhilstNotInContactWithGround=dynPtr->Position.vy;
 		}
-	}   
+	}
 
 	/* zero inertia values */
 	psPtr->ForwardInertia=0;
-	psPtr->StrafeInertia=0; 
-	psPtr->TurnInertia=0; 	
+	psPtr->StrafeInertia=0;
+	psPtr->TurnInertia=0;
 	psPtr->IsMovingInWater = 0;
     PlayerDamagedOverlayIntensity = 0;
-	
+
 	/* a little addition by patrick */
 	InitPlayerMovementData(sbPtr);
-	
+
 	/* security clearance */
 	psPtr->securityClearances = 0;
 
 	/* thou art mortal */
 	psPtr->IsImmortal = 0;
-	
+
 	if (AvP.Network==I_No_Network)
 	{
 		SoundSys_FadeIn();
@@ -418,7 +415,7 @@ void ChangeToPredator()
 		InitPlayerMovementData(Player->ObStrategyBlock);
 		Player->ObStrategyBlock->DynPtr->ToppleForce=TOPPLE_FORCE_NONE;
 		netGameData.myCharacterType=netGameData.myNextCharacterType=NGCT_Predator;
-		
+
 		//reorient the player
 		{
 			EULER e;
@@ -441,7 +438,7 @@ void MaintainPlayer(void)
 {
 	int rand = FastRandom();
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
-    
+
     if (playerStatusPtr->IsAlive)
 	{
 	    MaintainPlayersInventory();
@@ -452,13 +449,13 @@ void MaintainPlayer(void)
 	}
 
 	/* Set here, as first point. */
-	playerNoise=0;	
-	
+	playerNoise=0;
+
 	/* Incident handling. */
 	playerStatusPtr->incidentFlag=0;
 
 	playerStatusPtr->incidentTimer-=NormalFrameTime;
-	
+
 	if (playerStatusPtr->incidentTimer<0) {
 		playerStatusPtr->incidentFlag=1;
 		playerStatusPtr->incidentTimer=32767+(FastRandom()&65535);
@@ -481,13 +478,6 @@ void MaintainPlayer(void)
 	textprint("PlayerLight %d\n",CurrentLightAtPlayer);
 	#endif
 
-	#if SupportWindows95
-	#if 0//UseRebMenus
-	if(playerStatusPtr->Mvt_InputRequests.Flags.Rqst_PauseGame)
-	{
-		REBMENUS_ProcessPauseRequest();
-	}
-	#else
 	if(AvP.Network==I_No_Network)
 	{
 		#if 1
@@ -501,30 +491,29 @@ void MaintainPlayer(void)
 	else
 	if(playerStatusPtr->Mvt_InputRequests.Flags.Rqst_PauseGame)
 	{
-		if (AvP.Network == I_Host) 
+		if (AvP.Network == I_Host)
 		{
 			TransmitEndOfGameNetMsg();
 			netGameData.myGameState = NGS_EndGame;
 		}
-		else if	(AvP.Network == I_Peer)	
+		else if	(AvP.Network == I_Peer)
 		{
 			TransmitPlayerLeavingNetMsg();
 			netGameData.myGameState = NGS_Leaving;
-		}		
+		}
 		// go to start menu
 		AvP.MainLoopRunning = 0;
 	}
-	#endif
-	#endif
+
 	//Update the player's invulnerabilty timer
 	if(playerStatusPtr->invulnerabilityTimer>0)
 	{
 		playerStatusPtr->invulnerabilityTimer-=NormalFrameTime;
-				
+
 		if(playerStatusPtr->invulnerabilityTimer<=0)
 		{
 			playerStatusPtr->invulnerabilityTimer=0;
-		}	
+		}
 		//lose invulnerability if player is firing
 
 		if(playerStatusPtr->Mvt_InputRequests.Flags.Rqst_FirePrimaryWeapon)
@@ -589,7 +578,7 @@ void MaintainPlayer(void)
 		} else if (playerStatusPtr->IsAlive) {
 		 	Sound_Play(SID_FIRE,"dlev",&(Player->ObStrategyBlock->DynPtr->Position),&playerStatusPtr->soundHandle3,127);
 		}
-		
+
 		/* Put the fire out... */
 
 		#if 1
@@ -608,7 +597,7 @@ void MaintainPlayer(void)
 				/* Normal bloke. */
 				playerStatusPtr->fireTimer-=NormalFrameTime;
 			}
-			
+
 			if(playerStatusPtr->invulnerabilityTimer>0)
 			{
 				//player is invulnerable, so put him out.
@@ -645,7 +634,7 @@ void MaintainPlayer(void)
 			Sound_Stop(playerStatusPtr->soundHandle3);
 		}
 	}
-	
+
 	if (playerStatusPtr->IsMovingInWater)
 	{
 		#if 0
@@ -701,7 +690,7 @@ void MaintainPlayer(void)
 	/* Taunt effects. */
 	if (playerStatusPtr->tauntTimer) {
 		int ex,ey,ez;
-	
+
 		playerNoise=1;
 		/* An actual noise, too, would probably be good. */
 
@@ -729,7 +718,7 @@ void MaintainPlayer(void)
 			ex=MUL_FIXED(64,GetSin(((playerStatusPtr->tauntTimer>>6)&wrap360)));
 			ey=MUL_FIXED(128,GetSin(((playerStatusPtr->tauntTimer>>5)&wrap360)));
 			ez=MUL_FIXED(-64,GetSin(((playerStatusPtr->tauntTimer>>5)&wrap360)));
- 
+
 			ex&=wrap360;
 			ey&=wrap360;
 			ez&=wrap360;
@@ -781,7 +770,7 @@ void MaintainPlayer(void)
 				break;
 		}
 		LOCALASSERT(NpcData);
-		
+
 		if (Player->ObStrategyBlock->SBDamageBlock.Health>(NpcData->StartingStats.Health<<ONE_FIXED_SHIFT)) {
 			/* Decay health a bit. */
 			Player->ObStrategyBlock->SBDamageBlock.Health-=(NormalFrameTime);
@@ -791,7 +780,7 @@ void MaintainPlayer(void)
 			PlayerStatusPtr->Health=Player->ObStrategyBlock->SBDamageBlock.Health;
 		}
 	}
-}	
+}
 
 void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplier,VECTORCH* incoming)
 {
@@ -799,7 +788,7 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 	int pitch = (rand & 255) - 128;
  	int deltaHealth;
  	int deltaArmour;
-	
+
 	/* access the extra data hanging off the strategy block */
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (sbPtr->SBdataptr);
   GLOBALASSERT(playerStatusPtr);
@@ -808,7 +797,7 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 	deltaArmour=playerStatusPtr->Armour-sbPtr->SBDamageBlock.Armour;
 
 	CurrentGameStats_DamageTaken(deltaHealth,deltaArmour);
-	
+
 	/* Patrick 4/8/97--------------------------------------------------
 	A little hack-et to make the predator tougher in multiplayer games
 	------------------------------------------------------------------*/
@@ -839,7 +828,7 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 		}
 		#endif
 		{
-			int maxTilt = deltaHealth>>12; 
+			int maxTilt = deltaHealth>>12;
 			int halfTilt = maxTilt/2;
 			if (maxTilt)
 			{
@@ -851,15 +840,15 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 				if (HeadOrientation.EulerY < 0) HeadOrientation.EulerY += 4096;
 				if (HeadOrientation.EulerZ < 0) HeadOrientation.EulerZ += 4096;
 			}
-		}	
-	 	
+		}
+
 		if ((playerStatusPtr->soundHandle==SOUND_NOACTIVEINDEX)&&(deltaHealth||deltaArmour)) {
 	 		switch (AvP.PlayerType)
 		 	{
 				case I_Alien:
 				{
-					if ((damage->Impact==0) 		
-						&&(damage->Cutting==0)  	
+					if ((damage->Impact==0)
+						&&(damage->Cutting==0)
 						&&(damage->Penetrative==0)
 						&&(damage->Fire>0)
 						&&(damage->Electrical==0)
@@ -873,7 +862,7 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 					}
 					break;
 				}
-	
+
 				case I_Marine:
 				{
 					if (damage->Id==AMMO_FACEHUGGER) {
@@ -881,7 +870,7 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 					} else if (damage->Id==AMMO_FALLING_POSTMAX) {
 						PlayMarineScream(0,SC_Falling,pitch,&playerStatusPtr->soundHandle,NULL);
 					} else if ((damage->Impact==0)
-						&&(damage->Cutting==0)  	
+						&&(damage->Cutting==0)
 						&&(damage->Penetrative==0)
 						&&(damage->Fire==0)
 						&&(damage->Electrical==0)
@@ -889,8 +878,8 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 						) {
 						PlayMarineScream(0,SC_Acid,pitch,&playerStatusPtr->soundHandle,NULL);
 						if(AvP.Network!=I_No_Network) netGameData.myLastScream=SC_Acid;
-					} else if ((damage->Impact==0) 		
-						&&(damage->Cutting==0)  	
+					} else if ((damage->Impact==0)
+						&&(damage->Cutting==0)
 						&&(damage->Penetrative==0)
 						&&(damage->Fire>0)
 						&&(damage->Electrical==0)
@@ -904,13 +893,13 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 					}
 					break;
 				}
-	
+
 				case I_Predator:
 				{
 					if (damage->Id==AMMO_FACEHUGGER) {
 						PlayPredatorSound(0,PSC_Facehugged,pitch,&playerStatusPtr->soundHandle,NULL);
-					} else if ((damage->Impact==0) 		
-						&&(damage->Cutting==0)  	
+					} else if ((damage->Impact==0)
+						&&(damage->Cutting==0)
 						&&(damage->Penetrative==0)
 						&&(damage->Fire==0)
 						&&(damage->Electrical==0)
@@ -918,8 +907,8 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 						) {
 						PlayPredatorSound(0,PSC_Acid,pitch,&playerStatusPtr->soundHandle,NULL);
 						if(AvP.Network!=I_No_Network) netGameData.myLastScream=PSC_Acid;
-					} else if ((damage->Impact==0) 		
-						&&(damage->Cutting==0)  	
+					} else if ((damage->Impact==0)
+						&&(damage->Cutting==0)
 						&&(damage->Penetrative==0)
 						&&(damage->Fire>0)
 						&&(damage->Electrical==0)
@@ -933,7 +922,7 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 					}
 					break;
 				}
-	
+
 				default:
 				{
 					break;
@@ -953,7 +942,7 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 		{
 			NPC_DATA *NpcData;
 			int scaled_DeltaHealth;
-			
+
 			switch (AvP.PlayerType)
 			{
 				case I_Marine:
@@ -1045,12 +1034,12 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 			else
 			{
 				PlayerIsDead(damage,multiplier,incoming);
-			} 
+			}
 		}
 
 		playerStatusPtr->Health=sbPtr->SBDamageBlock.Health;
 		playerStatusPtr->Armour=sbPtr->SBDamageBlock.Armour;
-		
+
 	}
 }
 
@@ -1092,7 +1081,7 @@ static void PlayerIsDead(DAMAGE_PROFILE* damage,int multiplier,VECTORCH* incomin
 				PlayMarineScream(0,SC_Death,0,NULL,NULL);
 			}
 			break;
-		}  
+		}
 		case I_Predator:
 		{
 			if (damage->Id==AMMO_FACEHUGGER) {
@@ -1110,8 +1099,8 @@ static void PlayerIsDead(DAMAGE_PROFILE* damage,int multiplier,VECTORCH* incomin
 		}
 		default:
 		{
-			break;  
-		}  
+			break;
+		}
 	}
 
 	/* Well, it was nice knowing you. */
@@ -1136,7 +1125,7 @@ static void PlayerIsDead(DAMAGE_PROFILE* damage,int multiplier,VECTORCH* incomin
 
 	deathTargetOrientation.EulerX = 0;//1024-(FastRandom()&255);
 	deathFadeLevel=65536;
-	
+
 	/* if in single player, fade out sound... */
 	if (AvP.Network==I_No_Network)
 	{
@@ -1150,11 +1139,11 @@ static void PlayerIsDead(DAMAGE_PROFILE* damage,int multiplier,VECTORCH* incomin
 
 	/* network support... */
 	#if SupportWindows95
-	if(AvP.Network!=I_No_Network) 
+	if(AvP.Network!=I_No_Network)
 	{
 		playerStatusPtr->MyCorpse=MakeNewCorpse();
 		AddNetMsg_PlayerKilled((*((int *)(&(playerStatusPtr->MyCorpse->SBname[4])))),damage);
-		
+
 		/*---------------------------------------------------------**
 		** 		handle various special body being torn apart cases **
 		**---------------------------------------------------------*/
@@ -1178,21 +1167,21 @@ static void PlayerIsDead(DAMAGE_PROFILE* damage,int multiplier,VECTORCH* incomin
 				}
 				//play the head being bitten off sound
 				Sound_Play(SID_ALIEN_JAW_ATTACK,"d",&(Player->ObStrategyBlock->DynPtr->Position));
-				
+
 			}
 			//chopped by predator disc?
 			else if(damage->Id==AMMO_PRED_DISC && AvP.PlayerType!=I_Predator)
 			{
 				SECTION_DATA *firstSectionPtr;
 				SECTION_DATA *chest_section=0;
-		
+
 				firstSectionPtr=hmodel->section_data;
 				LOCALASSERT(firstSectionPtr);
 				LOCALASSERT(firstSectionPtr->flags&section_data_initialised);
-		
+
 				/* look for the object's torso in preference */
 				chest_section =GetThisSectionData(hmodel->section_data,"chest");
-		
+
 				if (chest_section)
 				{
 					CauseDamageToHModel(hmodel,playerStatusPtr->MyCorpse,damage, ONE_FIXED, chest_section,incoming,&chest_section->World_Offset,0);
@@ -1207,14 +1196,14 @@ static void PlayerIsDead(DAMAGE_PROFILE* damage,int multiplier,VECTORCH* incomin
 			{
 				SECTION_DATA *firstSectionPtr;
 				SECTION_DATA *chest_section=0;
-		
+
 				firstSectionPtr=hmodel->section_data;
 				LOCALASSERT(firstSectionPtr);
 				LOCALASSERT(firstSectionPtr->flags&section_data_initialised);
-		
+
 				/* look for the object's torso in preference */
 				chest_section =GetThisSectionData(hmodel->section_data,"chest");
-		
+
 				if (chest_section)
 				{
 					//spherical blood explosion for aliens
@@ -1243,7 +1232,7 @@ static void PlayerIsDead(DAMAGE_PROFILE* damage,int multiplier,VECTORCH* incomin
 					DISPLAYBLOCK *fragged_section=0;
 					fragged_section=CauseDamageToHModel(hmodel,playerStatusPtr->MyCorpse,damage,
 										multiplier,section_data,incoming,NULL,0);
-					
+
 					if(fragged_section && incoming && damage->Id==AMMO_PRED_RIFLE)
 					{
 					//a speargun has fragged off a body part , so we need to create a spear
@@ -1282,7 +1271,7 @@ static void PlayerIsDead(DAMAGE_PROFILE* damage,int multiplier,VECTORCH* incomin
 			ApplyCorpseDeathAnim(playerStatusPtr->MyCorpse,deathId);
 			//tell everyone else about the chosen death
 			AddNetMsg_PlayerDeathAnim(deathId,*(int*)&playerStatusPtr->MyCorpse->SBname[4]);
-			
+
 		}
 
 //		if(AvP.Network==I_Host) DoNetScoresForHostDeath();
@@ -1303,7 +1292,7 @@ static void PlayerIsDead(DAMAGE_PROFILE* damage,int multiplier,VECTORCH* incomin
 						//set  the next character to be an alien then
 						netGameData.myNextCharacterType=NGCT_Alien;
 					}
-					
+
 				}
 				else
 				{
@@ -1343,7 +1332,7 @@ void ActivateSelfDestructSequence (int seconds)
 
 void DeInitialisePlayer(void) {
 	/* I thought it would be logical to put it here... */
-	
+
   	int slot = MAX_NO_OF_WEAPON_SLOTS;
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 
@@ -1359,7 +1348,7 @@ void DeInitialisePlayer(void) {
 			txactrl_next = txactrl->tac_next;
 			DeallocateMem((void*)txactrl);
 		}
-	
+
 		wdPtr->TxAnimCtrl=NULL;
 	} while(slot);
 
@@ -1375,7 +1364,7 @@ void InitPlayerCloakingSystem(void)
 {
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 	LOCALASSERT(playerStatusPtr);
-	
+
 	playerStatusPtr->cloakOn = 0;
 	playerStatusPtr->cloakPositionGivenAway = 0;
 	playerStatusPtr->CloakingEffectiveness = 0;
@@ -1413,7 +1402,7 @@ static void DoPlayerCloakingSystem(void)
 				/* Check validity. */
 				if ((playerStatusPtr->FieldCharge>CloakThreshold)
 					&&(playerStatusPtr->FieldCharge>CloakPowerOnDrain)) {
-				
+
 					PLAYER_WEAPON_DATA *weaponPtr;
 					TEMPLATE_WEAPON_DATA *twPtr;
 
@@ -1432,7 +1421,7 @@ static void DoPlayerCloakingSystem(void)
 				}
 			}
 		}
-	}	
+	}
 	else
 	{
 		cloakDebounce = 1;
@@ -1457,7 +1446,7 @@ static void DoPlayerCloakingSystem(void)
 			{
 				if(playerStatusPtr->soundHandleForPredatorCloakDamaged!=SOUND_NOACTIVEINDEX)
 					Sound_Stop(playerStatusPtr->soundHandleForPredatorCloakDamaged);
-				
+
 				maxPossibleEffectiveness = ONE_FIXED - DIV_FIXED(Magnitude(&velocity)*2,NormalFrameTime);
 				if (maxPossibleEffectiveness<0) maxPossibleEffectiveness = 0;
 			}
@@ -1500,7 +1489,7 @@ static void DoPlayerCloakingSystem(void)
 		int chargeUsed;
 
 		chargeUsed=MUL_FIXED(NormalFrameTime,CloakDrain);
-		
+
 		if (playerStatusPtr->IsMovingInWater) {
 			chargeUsed<<=2;
 		}
@@ -1546,12 +1535,12 @@ static void DoPlayerCloakingSystem(void)
 			if(playerStatusPtr->FieldCharge > PLAYERCLOAK_MAXENERGY) {
 				playerStatusPtr->FieldCharge = PLAYERCLOAK_MAXENERGY;
 			}
-			
+
 			#if 0
 			/* Infinite field charge? */
 			playerStatusPtr->FieldCharge = PLAYERCLOAK_MAXENERGY;
 			#endif
-		}	
+		}
 	}
 	#endif
 
@@ -1568,7 +1557,7 @@ static void DoPlayerCloakingSystem(void)
 			} else {
 				PrintDebuggingText("Speargun not possessed.\n");
 			}
-            
+
 		}
 		PrintDebuggingText("Cloak given away: %d \n", playerStatusPtr->cloakPositionGivenAway);
 		PrintDebuggingText("Cloak given away timer: %d \n", playerStatusPtr->cloakPositionGivenAwayTimer);
@@ -1576,7 +1565,7 @@ static void DoPlayerCloakingSystem(void)
 		PrintDebuggingText("Gimme_Charge Calls: %d \n",GimmeChargeCalls);
 	}
 	#if 1
-	/* now, if we are cloaked, lets see if we have given away our position... 
+	/* now, if we are cloaked, lets see if we have given away our position...
 	if we have already given away our position, we may do so again */
 	if(playerStatusPtr->cloakOn)
 	{
@@ -1600,9 +1589,9 @@ static void DoPlayerCloakingSystem(void)
 			nextReport = Player->ObStrategyBlock->DynPtr->CollisionReportPtr;
 
 			while(nextReport)
-			{		
+			{
  				if(nextReport->ObstacleSBPtr)
- 				{	
+ 				{
 	 				if((nextReport->ObstacleSBPtr->I_SBtype==I_BehaviourAlien)||
 					   (nextReport->ObstacleSBPtr->I_SBtype==I_BehaviourMarine)||
 					   (nextReport->ObstacleSBPtr->I_SBtype==I_BehaviourXenoborg)||
@@ -1615,10 +1604,10 @@ static void DoPlayerCloakingSystem(void)
 						playerStatusPtr->cloakPositionGivenAwayTimer = PLAYERCLOAK_POSTIONGIVENAWAYTIME;
 						break;
 					}
-				} 		
+				}
  				nextReport = nextReport->NextCollisionReportPtr;
 			}
-		}		
+		}
 	}
 	#endif
 
@@ -1671,7 +1660,7 @@ int AlienPCIsCurrentlyVisible(int checktime,STRATEGYBLOCK *sbPtr) {
 		range=Approximate3dMagnitude(&offset);
 
 		/* In fact, let's turn this around... */
-	
+
 		if (playerStatusPtr->ShapeState==PMph_Standing) {
 			if (range>=(CurrentLightAtPlayer)+AUTOSPOT_RANGE) {
 				return(0);
@@ -1696,7 +1685,7 @@ int AlienPCIsCurrentlyVisible(int checktime,STRATEGYBLOCK *sbPtr) {
 				}
 			}
 			return(0);
-		}	
+		}
 
 	}
 
@@ -1779,7 +1768,7 @@ int AlienPCIsCurrentlyVisible(int checktime,STRATEGYBLOCK *sbPtr) {
 static void HandlePredatorVisionModes(void)
 {
 	extern unsigned char DebouncedKeyboardInput[];
-	
+
 	if (DebouncedKeyboardInput[KEY_K])
 	{
 		ChangePredatorVisionMode();
@@ -1792,7 +1781,7 @@ void ShowAdjacencies(void) {
 	int moduleCounter;
 	AIMODULE **AdjModuleRefPtr;
 	AIMODULE *thisModule;
-	AIMODULE *ModuleListPointer;	
+	AIMODULE *ModuleListPointer;
 
 	/* Utility function... */
 	PrintDebuggingText("Adjacencies FROM Player's Module (%s):\n",
@@ -1801,7 +1790,7 @@ void ShowAdjacencies(void) {
 	thisModule=playerPherModule->m_aimodule;
 
 	AdjModuleRefPtr = thisModule->m_link_ptrs;
-    
+
     if(AdjModuleRefPtr)     /* check that there is a list of adjacent modules */
     {
     	while(*AdjModuleRefPtr != 0)
@@ -1830,16 +1819,16 @@ void ShowAdjacencies(void) {
 		ModuleListPointer = AIModuleArray;
 	}
 
-	/* go through each aimodule in the environment  */	
+	/* go through each aimodule in the environment  */
 	for(moduleCounter = 0; moduleCounter < AIModuleArraySize; moduleCounter++)
 	{
 
 		/* get a pointer to the next current module */
-		thisModule = &(ModuleListPointer[moduleCounter]); 
+		thisModule = &(ModuleListPointer[moduleCounter]);
 		LOCALASSERT(thisModule);
 
 		AdjModuleRefPtr = thisModule->m_link_ptrs;
-	    
+
 	    if(AdjModuleRefPtr)     /* check that there is a list of adjacent modules */
 	    {
 	    	while(*AdjModuleRefPtr != 0)
@@ -1886,17 +1875,17 @@ typedef struct player_save_block
 	enum WEAPON_SLOT	SelectedWeaponSlot;
 	enum WEAPON_SLOT	SwapToWeaponSlot;
 	enum WEAPON_SLOT	PreviouslySelectedWeaponSlot;
-    
+
     int	Health;	 /* in 16.16 */
 	int	Energy;	 /* in 16.16 */
 	int	Armour;	 /* in 16.16 */
- 
-		
+
+
 	enum player_morph_state ShapeState;		/* for controlling morphing */
-	
+
 	signed int ForwardInertia;
-	signed int StrafeInertia; 
-	signed int TurnInertia; 	
+	signed int StrafeInertia;
+	signed int TurnInertia;
 
 	int ViewPanX; /* the looking up/down value that used to be in displayblock */
 
@@ -1922,7 +1911,7 @@ typedef struct player_save_block
 	int cloakPositionGivenAwayTimer;
 	int PlasmaCasterCharge;
 
-	int CloakingEffectiveness; 
+	int CloakingEffectiveness;
 
 	ENCUMBERANCE_STATE Encumberance;
 	int tauntTimer;
@@ -1941,7 +1930,7 @@ typedef struct player_save_block
 	enum VISION_MODE_ID CurrentVisionMode;
 	SMARTGUN_MODES SmartgunMode;
 	GRENADE_LAUNCHER_DATA GrenadeLauncherData;
-	
+
 
 //strategy block stuff
 	DYNAMICSBLOCK dynamics;
@@ -1967,17 +1956,17 @@ void SaveStrategy_Player(STRATEGYBLOCK* sbPtr)
 	COPYELEMENT_SAVE(SelectedWeaponSlot)
 	COPYELEMENT_SAVE(SwapToWeaponSlot)
 	COPYELEMENT_SAVE(PreviouslySelectedWeaponSlot)
-    
+
     COPYELEMENT_SAVE(Health)	 /* in 16.16 */
 	COPYELEMENT_SAVE(Energy)	 /* in 16.16 */
 	COPYELEMENT_SAVE(Armour)	 /* in 16.16 */
- 
-		
+
+
 	COPYELEMENT_SAVE(ShapeState)		/* for controlling morphing */
-	
+
 	COPYELEMENT_SAVE(ForwardInertia)
-	COPYELEMENT_SAVE(StrafeInertia) 
-	COPYELEMENT_SAVE(TurnInertia) 	
+	COPYELEMENT_SAVE(StrafeInertia)
+	COPYELEMENT_SAVE(TurnInertia)
 
 	COPYELEMENT_SAVE(ViewPanX) /* the looking up/down value that used to be in displayblock */
 
@@ -2002,26 +1991,26 @@ void SaveStrategy_Player(STRATEGYBLOCK* sbPtr)
 	COPYELEMENT_SAVE(FieldCharge)
 	COPYELEMENT_SAVE(cloakPositionGivenAwayTimer)
 	COPYELEMENT_SAVE(PlasmaCasterCharge)
-	COPYELEMENT_SAVE(CloakingEffectiveness) 
+	COPYELEMENT_SAVE(CloakingEffectiveness)
 	COPYELEMENT_SAVE(Encumberance)
 	COPYELEMENT_SAVE(tauntTimer)
 
 	COPYELEMENT_SAVE(incidentFlag)
 	COPYELEMENT_SAVE(incidentTimer)
 	COPYELEMENT_SAVE(fireTimer)
-	
+
 	for(i=0;i<MAX_NO_OF_WEAPON_SLOTS;i++)
 	{
-		block->WeaponSlot[i].WeaponIDNumber = playerStatusPtr->WeaponSlot[i].WeaponIDNumber; 		
-		block->WeaponSlot[i].CurrentState = playerStatusPtr->WeaponSlot[i].CurrentState; 		
-		block->WeaponSlot[i].StateTimeOutCounter = playerStatusPtr->WeaponSlot[i].StateTimeOutCounter; 		
-		block->WeaponSlot[i].PrimaryRoundsRemaining = playerStatusPtr->WeaponSlot[i].PrimaryRoundsRemaining; 		
-		block->WeaponSlot[i].SecondaryRoundsRemaining = playerStatusPtr->WeaponSlot[i].SecondaryRoundsRemaining; 		
-		block->WeaponSlot[i].PrimaryMagazinesRemaining = playerStatusPtr->WeaponSlot[i].PrimaryMagazinesRemaining;	
-		block->WeaponSlot[i].SecondaryMagazinesRemaining = playerStatusPtr->WeaponSlot[i].SecondaryMagazinesRemaining; 		
-		block->WeaponSlot[i].PositionOffset = playerStatusPtr->WeaponSlot[i].PositionOffset;  		
-		block->WeaponSlot[i].DirectionOffset = playerStatusPtr->WeaponSlot[i].DirectionOffset; 		
-		block->WeaponSlot[i].Possessed = playerStatusPtr->WeaponSlot[i].Possessed; 		
+		block->WeaponSlot[i].WeaponIDNumber = playerStatusPtr->WeaponSlot[i].WeaponIDNumber;
+		block->WeaponSlot[i].CurrentState = playerStatusPtr->WeaponSlot[i].CurrentState;
+		block->WeaponSlot[i].StateTimeOutCounter = playerStatusPtr->WeaponSlot[i].StateTimeOutCounter;
+		block->WeaponSlot[i].PrimaryRoundsRemaining = playerStatusPtr->WeaponSlot[i].PrimaryRoundsRemaining;
+		block->WeaponSlot[i].SecondaryRoundsRemaining = playerStatusPtr->WeaponSlot[i].SecondaryRoundsRemaining;
+		block->WeaponSlot[i].PrimaryMagazinesRemaining = playerStatusPtr->WeaponSlot[i].PrimaryMagazinesRemaining;
+		block->WeaponSlot[i].SecondaryMagazinesRemaining = playerStatusPtr->WeaponSlot[i].SecondaryMagazinesRemaining;
+		block->WeaponSlot[i].PositionOffset = playerStatusPtr->WeaponSlot[i].PositionOffset;
+		block->WeaponSlot[i].DirectionOffset = playerStatusPtr->WeaponSlot[i].DirectionOffset;
+		block->WeaponSlot[i].Possessed = playerStatusPtr->WeaponSlot[i].Possessed;
 	}
 
 	//some stuff for the weapon displayblock
@@ -2038,7 +2027,7 @@ void SaveStrategy_Player(STRATEGYBLOCK* sbPtr)
 
 	block->integrity = sbPtr->integrity;
 	block->SBDamageBlock = sbPtr->SBDamageBlock;
-	
+
 	block->dynamics = *sbPtr->DynPtr;
 	block->dynamics.CollisionReportPtr=0;
 
@@ -2068,17 +2057,17 @@ void LoadStrategy_Player(SAVE_BLOCK_STRATEGY_HEADER* header)
 	COPYELEMENT_LOAD(SelectedWeaponSlot)
 	COPYELEMENT_LOAD(SwapToWeaponSlot)
 	COPYELEMENT_LOAD(PreviouslySelectedWeaponSlot)
-    
+
     COPYELEMENT_LOAD(Health)	 /* in 16.16 */
 	COPYELEMENT_LOAD(Energy)	 /* in 16.16 */
 	COPYELEMENT_LOAD(Armour)	 /* in 16.16 */
- 
-		
+
+
 	COPYELEMENT_LOAD(ShapeState)		/* for controlling morphing */
-	
+
 	COPYELEMENT_LOAD(ForwardInertia)
-	COPYELEMENT_LOAD(StrafeInertia) 
-	COPYELEMENT_LOAD(TurnInertia) 	
+	COPYELEMENT_LOAD(StrafeInertia)
+	COPYELEMENT_LOAD(TurnInertia)
 
 	COPYELEMENT_LOAD(ViewPanX) /* the looking up/down value that used to be in displayblock */
 
@@ -2103,7 +2092,7 @@ void LoadStrategy_Player(SAVE_BLOCK_STRATEGY_HEADER* header)
 	COPYELEMENT_LOAD(FieldCharge)
 	COPYELEMENT_LOAD(cloakPositionGivenAwayTimer)
 	COPYELEMENT_LOAD(PlasmaCasterCharge)
-	COPYELEMENT_LOAD(CloakingEffectiveness) 
+	COPYELEMENT_LOAD(CloakingEffectiveness)
 	COPYELEMENT_LOAD(Encumberance)
 	COPYELEMENT_LOAD(tauntTimer)
 
@@ -2112,23 +2101,23 @@ void LoadStrategy_Player(SAVE_BLOCK_STRATEGY_HEADER* header)
 	COPYELEMENT_LOAD(fireTimer)
 
 //	playerStatusPtr->SwapToWeaponSlot = block->SelectedWeaponSlot;
-	
+
 
 
 	for(i=0;i<MAX_NO_OF_WEAPON_SLOTS;i++)
 	{
-		playerStatusPtr->WeaponSlot[i].WeaponIDNumber = block->WeaponSlot[i].WeaponIDNumber; 		
-		playerStatusPtr->WeaponSlot[i].CurrentState = block->WeaponSlot[i].CurrentState; 		
-		playerStatusPtr->WeaponSlot[i].StateTimeOutCounter = block->WeaponSlot[i].StateTimeOutCounter; 		
-		playerStatusPtr->WeaponSlot[i].PrimaryRoundsRemaining = block->WeaponSlot[i].PrimaryRoundsRemaining; 		
-		playerStatusPtr->WeaponSlot[i].SecondaryRoundsRemaining = block->WeaponSlot[i].SecondaryRoundsRemaining; 		
-		playerStatusPtr->WeaponSlot[i].PrimaryMagazinesRemaining = block->WeaponSlot[i].PrimaryMagazinesRemaining;	
-		playerStatusPtr->WeaponSlot[i].SecondaryMagazinesRemaining = block->WeaponSlot[i].SecondaryMagazinesRemaining; 		
-		playerStatusPtr->WeaponSlot[i].PositionOffset = block->WeaponSlot[i].PositionOffset;  		
-		playerStatusPtr->WeaponSlot[i].DirectionOffset = block->WeaponSlot[i].DirectionOffset; 		
-		playerStatusPtr->WeaponSlot[i].Possessed = block->WeaponSlot[i].Possessed; 		
+		playerStatusPtr->WeaponSlot[i].WeaponIDNumber = block->WeaponSlot[i].WeaponIDNumber;
+		playerStatusPtr->WeaponSlot[i].CurrentState = block->WeaponSlot[i].CurrentState;
+		playerStatusPtr->WeaponSlot[i].StateTimeOutCounter = block->WeaponSlot[i].StateTimeOutCounter;
+		playerStatusPtr->WeaponSlot[i].PrimaryRoundsRemaining = block->WeaponSlot[i].PrimaryRoundsRemaining;
+		playerStatusPtr->WeaponSlot[i].SecondaryRoundsRemaining = block->WeaponSlot[i].SecondaryRoundsRemaining;
+		playerStatusPtr->WeaponSlot[i].PrimaryMagazinesRemaining = block->WeaponSlot[i].PrimaryMagazinesRemaining;
+		playerStatusPtr->WeaponSlot[i].SecondaryMagazinesRemaining = block->WeaponSlot[i].SecondaryMagazinesRemaining;
+		playerStatusPtr->WeaponSlot[i].PositionOffset = block->WeaponSlot[i].PositionOffset;
+		playerStatusPtr->WeaponSlot[i].DirectionOffset = block->WeaponSlot[i].DirectionOffset;
+		playerStatusPtr->WeaponSlot[i].Possessed = block->WeaponSlot[i].Possessed;
 	}
-	
+
 	//some stuff for the weapon displayblock
 	PlayersWeapon.ObWorld = block->Weapon_World;
 	PlayersWeapon.ObEuler = block->Weapon_Euler;
@@ -2138,15 +2127,15 @@ void LoadStrategy_Player(SAVE_BLOCK_STRATEGY_HEADER* header)
 	CurrentVisionMode = block->CurrentVisionMode;
 	SmartgunMode = block->SmartgunMode;
 	GrenadeLauncherData = block->GrenadeLauncherData;
-	
+
 	//strategy block stuff
 	*sbPtr->DynPtr = block->dynamics;
 	sbPtr->integrity = block->integrity;
 	sbPtr->SBDamageBlock = block->SBDamageBlock;
 
-	
-	
-	
+
+
+
 	{
 		extern VIEWDESCRIPTORBLOCK* Global_VDB_Ptr;
 	   	sbPtr->containingModule = ModuleFromPosition(&(sbPtr->DynPtr->Position), (MODULE*)0);
