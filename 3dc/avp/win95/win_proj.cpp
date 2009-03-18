@@ -18,6 +18,8 @@ extern unsigned char GotAnyKey;
 #include "cd_player.h"
 #include "psndplat.h"
 
+#include "console.h"
+
 #include "rentrntq.h"
 	// Added 21/11/97 by DHM: support for a queue of Windows
 	// messages to avoid problems with re-entrancy due to WinProc()
@@ -152,8 +154,15 @@ int mouseMoved = 0;
 		// 21/11/97 DHM: Added processing of WM_CHAR messages:
 		case WM_CHAR:
 		{
+			if (Con_IsActive())
+			{
+				Con_AddTypedChar((char)wParam);
+				break;
+			}
+
 			RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR((char)wParam);
 			KeyboardEntryQueue_Add((char)wParam);
+
 			//return 0;
 			break;
 		}
@@ -163,7 +172,18 @@ int mouseMoved = 0;
 		}
 		// it's intentional for this case to fall through to WM_SYSKEYDOWN
 		case WM_SYSKEYDOWN:
-		{
+		{	
+			if (Con_IsActive())
+			{
+/*
+				if(wParam == VK_BACK)
+				{
+					Con_Key_Backspace(true);
+					break;
+				}
+*/
+			}
+
 			/* handle left/right alt keys */
 			if(wParam == VK_MENU)
 			{			
@@ -234,6 +254,16 @@ int mouseMoved = 0;
 		case WM_SYSKEYUP:
 		case WM_KEYUP:						
 		{
+/*
+			if (Con_IsActive())
+			{
+				if(wParam == VK_BACK)
+				{
+					Con_Key_Backspace(false);
+					break;
+				}
+			}
+*/
 			/* handle left/right alt keys */
 			if(wParam == VK_MENU)
 			{	
@@ -257,12 +287,10 @@ int mouseMoved = 0;
 			{
 				if((!(GetKeyState(VK_RSHIFT) & 0x8000)) && (KeyboardInput[KEY_RIGHTSHIFT] == TRUE))
 				{
-//					OutputDebugString("released right shift!\n");
 					wParam = VK_RSHIFT;
 				}
 				else if((!(GetKeyState(VK_LSHIFT) & 0x8000)) && (KeyboardInput[KEY_LEFTSHIFT] == TRUE))
 				{
-//					OutputDebugString("released left shift!\n");
 					wParam = VK_LSHIFT;
 				}
 			}

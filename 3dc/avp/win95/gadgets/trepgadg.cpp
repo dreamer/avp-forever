@@ -779,7 +779,7 @@ void TextReportGadget :: UpdateLineTimes()
 {
 	int time;
 	
-	//if we are currently displaying to many lines ,g et rifd of the earliest ones
+	//if we are currently displaying to many lines, get rid of the earliest ones
 	while(NumberOfLinesToDisplay > MAX_MESSAGES_TO_DISPLAY)
 	{
 		if(LineTimes.size()) LineTimes.delete_first_entry();

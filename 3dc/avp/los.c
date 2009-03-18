@@ -688,12 +688,14 @@ void CheckForRayIntersectionWithObject(DISPLAYBLOCK *dPtr)
 	(viewpointPositionPtr), with a given field of view (fieldOfView) about a given
 	direction (viewpointDirectionPtr).
 */
+
+/* bjd - not used
 int IsObjectVisibleFromThisPoint(DISPLAYBLOCK *dispPtr, VECTORCH *viewpointDirectionPtr, VECTORCH *viewpointPositionPtr, int fieldOfView)
 {
 
 	return 0;
 }
-
+*/
 
 
 

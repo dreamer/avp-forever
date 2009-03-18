@@ -4070,6 +4070,7 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 		}
 	}
 }
+
 void DoAlienEnergyView(DISPLAYBLOCK *dispPtr)
 {
 	HMODELCONTROLLER *controllerPtr = dispPtr->HModelControlBlock;

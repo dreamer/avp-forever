@@ -2077,7 +2077,7 @@ int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
 	notifyPosition[0].hEventNotify = hHandles[0];
 
 	/* set to notify at end */
-	notifyPosition[1].dwOffset = bufferFormat.dwBufferBytes - 4;
+	notifyPosition[1].dwOffset = bufferFormat.dwBufferBytes - 1;
 	notifyPosition[1].hEventNotify = hHandles[1];
 
 	if(FAILED(vorbisBuffer->SetNotificationPositions(2, &notifyPosition[0])))

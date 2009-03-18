@@ -26,6 +26,8 @@ extern "C++" {
 	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 	#include "logString.h"
 	#include <d3dx9.h>
+	#include "console.h"
+
 #ifdef _DEBUG
 	#pragma comment(lib, "d3dx9d.lib")
 #else
@@ -48,6 +50,7 @@ extern int VideoModeColourDepth;
 HRESULT LastError;
 
 D3DINFO d3d;
+D3DTEXTURE consoleText;
 
 int StartDriver = 0;
 int StartFormat = 0;
@@ -113,6 +116,38 @@ D3DFORMAT SelectedAdapterFormat = D3DFMT_X8R8G8B8;
 D3DFORMAT SelectedTextureFormat = D3DFMT_A8R8G8B8;
 
 bool usingStencil = false;
+
+void LoadConsoleFont()
+{
+	D3DXIMAGE_INFO		imageInfo;
+
+	/* try find a png file at given path */
+	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice, 
+		"aa_font.png", 
+		D3DX_DEFAULT,			// width
+		D3DX_DEFAULT,			// height
+		1,						// mip levels
+		0,						// usage	
+		D3DFMT_UNKNOWN,			// format
+		D3DPOOL_MANAGED,
+		D3DX_FILTER_NONE,
+		D3DX_FILTER_NONE,
+		0,
+		&imageInfo,
+		NULL,
+		&consoleText
+		);	
+
+	if(FAILED(LastError))
+	{
+		OutputDebugString("Couldn't load console font!\n");
+		consoleText = NULL;
+	}
+	else
+	{	
+		OutputDebugString("loaded console font ok\n");
+	}
+}
 
 LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int *height)
 {
@@ -1262,15 +1297,17 @@ BOOL InitialiseDirect3DImmediateMode()
 	/* use an offset for hud items to account for tv safe zones. just use width for now. 15%?  */
 	if(0)
 	{
-		ScreenDescriptorBlock.SDB_SafeZoneOffset = (width / 100) * 15;
+		ScreenDescriptorBlock.SDB_SafeZoneWidthOffset = (width / 100) * 15;
 	}
-	else ScreenDescriptorBlock.SDB_SafeZoneOffset = 0;
+	else ScreenDescriptorBlock.SDB_SafeZoneWidthOffset = 0;
 
 	/* save a copy of the presentation parameters for use later (device reset, resolution/depth change) */
 	d3d.d3dpp = d3dpp;
 
 	/* create vertex and index buffers */
 	CreateVolatileResources();
+
+//	Con_Init();
 
 	LogDxString("Initialise Direct3D succesfully");
 	return TRUE;

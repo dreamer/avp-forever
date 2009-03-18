@@ -127,11 +127,13 @@ BOOL ChangeGameResolution(int width, int height, int colour_depth);
 void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, BOOL alpha);
 void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, int alpha);
 void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha);
+void DrawBigChar(char c, int x, int y, int colour);
 void DrawCloudTable(int topX, int topY, int word_length, int alpha);
 void DrawFadeQuad(int topX, int topY, int alpha);
 void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha);
 void DrawTexturedFadedQuad(int topX, int topY, int image_num, int alpha);
 void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_texture, int original_width, int original_height, int new_width, int new_height);
+void DrawQuad(int x, int y, int width, int height, int colour);
 void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 //void LogDxError(HRESULT hr);
 //void LogDebugValue(int value);
@@ -139,6 +141,8 @@ void ReleaseD3DTexture8(LPDIRECT3DTEXTURE9 d3dTexture);
 void DrawBinkFmv(int topX, int topY, int height, int width, LPDIRECT3DTEXTURE9 fmvTexture);
 void CreateScreenShotImage();
 LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int *height);
+
+void LoadConsoleFont();
 
 D3DINFO GetD3DInfo();
 void InGameFlipBuffers(void);

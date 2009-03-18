@@ -93,7 +93,7 @@
 				StringPooling="FALSE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
-				SmallerTypeCheck="TRUE"
+				SmallerTypeCheck="FALSE"
 				RuntimeLibrary="1"
 				StructMemberAlignment="0"
 				BufferSecurityCheck="TRUE"
@@ -363,30 +363,6 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
-			<File
-				RelativePath="..\3dc\Afont.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release For Fox|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\gadgets\ahudgadg.cpp">
 				<FileConfiguration
@@ -3431,9 +3407,6 @@
 						Name="VCCLCompilerTool"
 						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\intro.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\Inventry.c">
@@ -6500,6 +6473,9 @@
 			</File>
 			<File
 				RelativePath="..\3dc\avp\projtext.h">
+			</File>
+			<File
+				RelativePath="..\3dc\include\prototyp.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\Psnd.h">

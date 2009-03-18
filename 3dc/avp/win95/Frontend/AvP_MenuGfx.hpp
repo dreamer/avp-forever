@@ -60,10 +60,6 @@ enum AVPMENUGFX_ID
 	AVPMENUGFX_ALIEN_EPISODE9,
 	AVPMENUGFX_ALIEN_EPISODE10,
 
-	//bjd - adding these here
-//	AVPMENUGFX_LOADINGBAR_EMPTY,
-//	AVPMENUGFX_LOADINGBAR_FULL,
-
 	AVPMENUGFX_WINNER_SCREEN,
 
 	AVPMENUGFX_SPLASH_SCREEN1,
@@ -120,6 +116,7 @@ extern int RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha, 
 extern int Hardware_RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
 extern int Hardware_RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int red, int green, int blue);
 
+extern int RenderSmallChar(char c, int x, int y, int alpha, int red, int green, int blue);
 extern int RenderMenuText_Clipped(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int topY, int bottomY);
 extern void RenderSmallFontString_Wrapped(const char *textPtr,RECT* area,int alpha,int* output_x,int* output_y);
 

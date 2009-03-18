@@ -8601,7 +8601,7 @@ extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour)
 	quadVertices[1].Y = y-1;
 	quadVertices[2].Y = y + HUD_FONT_HEIGHT + 1;
 	quadVertices[3].Y = y + HUD_FONT_HEIGHT + 1;
-	
+
 	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
 //	SetFilteringMode(FILTERING_BILINEAR_OFF);
 

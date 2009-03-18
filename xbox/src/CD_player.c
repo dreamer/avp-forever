@@ -39,12 +39,17 @@ int CDTrackMax=-1; //highest track number on cd
 
 void CDDA_Start(void)
 {
-
+	CDDAIsInitialised = 1; 
+	CDDA_SwitchOn();
+	CDDA_ChangeVolume(CDDAVolume); /* init the volume */
+	CDDA_CheckNumberOfTracks();
 }
 
 void CDDA_End(void)
 {
+	if(!CDDAIsInitialised) return;
 
+	CDDAIsInitialised = 0;
 }
 
 void CDDA_Management(void)
@@ -82,7 +87,7 @@ void CDDA_Stop()
 
 void CDDA_SwitchOn()
 {
-
+	if(CDDAIsInitialised) CDDASwitchedOn = 1;
 }
 
 void CDDA_SwitchOff()

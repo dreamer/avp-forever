@@ -439,7 +439,14 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex,int *real_height, int 
 	LastError = d3d.lpD3DDevice->CreateTexture(new_width, new_height, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &swizTexture);
 	LastError = swizTexture->LockRect(0, &lock2, NULL, NULL );
 
-	XGSwizzleRect(lock.pBits, lock.Pitch, NULL, lock2.pBits, new_width, new_height, NULL, 4);
+	if (ScreenDescriptorBlock.SDB_Depth == 16)
+	{
+		XGSwizzleRect(lock.pBits, lock.Pitch, NULL, lock2.pBits, new_width, new_height, NULL, 1);
+	}
+	else
+	{
+		XGSwizzleRect(lock.pBits, lock.Pitch, NULL, lock2.pBits, new_width, new_height, NULL, 4);
+	}
 
 	LastError = destTexture->UnlockRect(0);
 	if(FAILED(LastError)) {
@@ -939,7 +946,8 @@ BOOL InitialiseDirect3DImmediateMode()
 	ScanDrawMode = ScanDrawD3DHardwareRGB;
 
 	/* use an offset for hud items to account for tv safe zones. just use width for now. 5%?  */
-	ScreenDescriptorBlock.SDB_SafeZoneOffset = (width / 100) * 5;
+	ScreenDescriptorBlock.SDB_SafeZoneWidthOffset = (width / 100) * 5;
+	ScreenDescriptorBlock.SDB_SafeZoneHeightOffset = (height / 100) * 5;
 
 	// save a copy of the presentation parameters for use
 	// later (device reset, resolution/depth change)

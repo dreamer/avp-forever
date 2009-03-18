@@ -435,12 +435,7 @@ void HandlePostGameFMVs(void)
 		{
 			if (MarineEpisodeToPlay==MAX_NO_OF_BASIC_MARINE_EPISODES-1)
 			{
-/*
-				ClearScreenToBlack();
-				FlipBuffers();
-				ClearScreenToBlack();
-*/
-				PlayBinkedFMV("FMVs/marineoutro.bik");
+				PlayBinkedFMV("FMVs/marineoutro.ogv");
 			}
 			break;
 		}
@@ -448,12 +443,7 @@ void HandlePostGameFMVs(void)
 		{
 			if (AlienEpisodeToPlay==MAX_NO_OF_BASIC_ALIEN_EPISODES-1)
 			{
-/*
-				ClearScreenToBlack();
-				FlipBuffers();
-				ClearScreenToBlack();
-*/
-				PlayBinkedFMV("FMVs/alienoutro.bik");
+				PlayBinkedFMV("FMVs/alienoutro.ogv");
 			}
 			break;
 		}
@@ -461,12 +451,7 @@ void HandlePostGameFMVs(void)
 		{
 			if (PredatorEpisodeToPlay==MAX_NO_OF_BASIC_PREDATOR_EPISODES-1)
 			{
-/*
-				ClearScreenToBlack();
-				FlipBuffers();
-				ClearScreenToBlack();
-*/
-				PlayBinkedFMV("FMVs/predatoroutro.bik");
+				PlayBinkedFMV("FMVs/predatoroutro.ogv");
 			}
 			break;
 		}
@@ -479,32 +464,14 @@ void HandlePreGameFMVs(void)
 		extern char LevelName[];
 		if (!stricmp("derelict",LevelName))
 		{
-/*
-			ClearScreenToBlack();
-			FlipBuffers();
-			ClearScreenToBlack();
-*/
-//			PlayBinkedFMV("FMVs/marineintro.bik");
 			PlayBinkedFMV("FMVs/marineintro.ogv");
 		}
 		else if (!stricmp("temple",LevelName))
 		{
-/*
-			ClearScreenToBlack();
-			FlipBuffers();
-			ClearScreenToBlack();
-*/
-//			PlayBinkedFMV("FMVs/alienintro.bik");
 			PlayBinkedFMV("FMVs/alienintro.ogv");
 		}
 		else if (!stricmp("fall",LevelName))
 		{
-/*
-			ClearScreenToBlack();
-			FlipBuffers();
-			ClearScreenToBlack();
-*/
-//			PlayBinkedFMV("FMVs/predatorintro.bik");
 			PlayBinkedFMV("FMVs/predatorintro.ogv");
 		}
 	}
@@ -3792,7 +3759,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 				if (KeyConfigSelectionColumn)
 				{
 					/* bjd - 24/11/08 - tv safe zone adjustment */
-					x = MENU_RIGHTXEDGE - ScreenDescriptorBlock.SDB_SafeZoneOffset;
+					x = MENU_RIGHTXEDGE - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
 				}
 				else
 				{
@@ -3826,7 +3793,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 					(
 						GetDescriptionOfKey(*secondaryKey),
 						/* bjd - 24/11/08 - tv safe zone adjustment */
-						MENU_RIGHTXEDGE - ScreenDescriptorBlock.SDB_SafeZoneOffset,
+						MENU_RIGHTXEDGE - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset,
 						y,
 						elementPtr->Brightness,
 						AVPMENUFORMAT_RIGHTJUSTIFIED
@@ -3881,7 +3848,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 					(
 						GetDescriptionOfKey(*secondaryKey),
 						/* bjd - 24/11/08 - tv safe zone adjustment */
-						MENU_RIGHTXEDGE - ScreenDescriptorBlock.SDB_SafeZoneOffset,
+						MENU_RIGHTXEDGE - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset,
 						y,
 						ONE_FIXED,
 						AVPMENUFORMAT_RIGHTJUSTIFIED,
@@ -3896,7 +3863,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 					(
 						GetDescriptionOfKey(*secondaryKey),
 						/* bjd - 24/11/08 - tv safe zone adjustment */
-						MENU_RIGHTXEDGE - ScreenDescriptorBlock.SDB_SafeZoneOffset,
+						MENU_RIGHTXEDGE - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset,
 						y,
 						elementPtr->Brightness,
 						AVPMENUFORMAT_RIGHTJUSTIFIED
@@ -3908,7 +3875,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 			(
 				GetTextString(elementPtr->TextDescription),
 				/* bjd - 24/11/08 - tv safe zone adjustment */
-				MENU_LEFTXEDGE + ScreenDescriptorBlock.SDB_SafeZoneOffset / 2,
+				MENU_LEFTXEDGE + ScreenDescriptorBlock.SDB_SafeZoneWidthOffset / 2,
 				y,
 				elementPtr->Brightness,
 				AVPMENUFORMAT_LEFTJUSTIFIED

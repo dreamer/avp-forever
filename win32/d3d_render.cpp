@@ -24,9 +24,11 @@ extern "C" {
 #include "ourasert.h"
 
 extern D3DINFO d3d;
+extern D3DTEXTURE consoleText;
 
 extern "C++"{
 
+#include "console.h"
 #include "r2base.h"
 #include <math.h> // for sqrt
 
@@ -118,6 +120,7 @@ signed int currentWaterTexture = NO_TEXTURE;
 
 // use 999 as a reference for the tallfont texture
 const int TALLFONT_TEX = 999;
+const int CONSOLE	   = 998;
 
 RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
 std::vector<RENDER_STATES> renderTest;
@@ -849,6 +852,13 @@ void ChangeTexture(const int texture_id)
 		return;
 	}
 
+	else if (texture_id == CONSOLE)
+	{
+		LastError = d3d.lpD3DDevice->SetTexture(0, consoleText);
+		if(!FAILED(LastError)) currentTextureId = CONSOLE;
+		return;
+	}
+
 	/* if texture was specified as 'null' */
 	else if (texture_id == NO_TEXTURE)
 	{
@@ -879,7 +889,7 @@ BOOL ExecuteBuffer()
 	if (NumVertices < 3)
 		return FALSE;
 
-	std::sort(renderTest.begin(), renderTest.end());
+//	std::sort(renderTest.begin(), renderTest.end());
 //	std::sort(renderList.begin(), renderList.end());
 
 /*
@@ -7237,6 +7247,8 @@ void ThisFramesRenderingHasBegun(void)
 
 void ThisFramesRenderingHasFinished(void)
 {
+	Con_Draw();
+
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
 	EndD3DScene();
@@ -9503,6 +9515,62 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_textu
 	}
 }
 
+void DrawQuad(int x, int y, int width, int height, int colour) 
+{
+	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_NORMAL);
+
+	// bottom left
+	mainVertex[vb].sx = (float)x - 0.5f;
+	mainVertex[vb].sy = (float)y + height - 0.5f;
+	mainVertex[vb].sz = 0.0f;
+	mainVertex[vb].rhw = 1.0f;
+	mainVertex[vb].color = colour;
+	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+	mainVertex[vb].tu = 0.0f;
+	mainVertex[vb].tv = 0.0f;
+
+	vb++;
+
+	// top left
+	mainVertex[vb].sx = (float)x - 0.5f;
+	mainVertex[vb].sy = (float)y - 0.5f;
+	mainVertex[vb].sz = 0.0f;
+	mainVertex[vb].rhw = 1.0f;
+	mainVertex[vb].color = colour;
+	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+	mainVertex[vb].tu = 0.0f;
+	mainVertex[vb].tv = 0.0f;
+
+	vb++;
+
+	// bottom right
+	mainVertex[vb].sx = (float)x + width - 0.5f;
+	mainVertex[vb].sy = (float)y + height - 0.5f;
+	mainVertex[vb].sz = 0.0f;
+	mainVertex[vb].rhw = 1.0f;
+	mainVertex[vb].color = colour;
+	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+	mainVertex[vb].tu = 0.0f;
+	mainVertex[vb].tv = 0.0f;
+
+	vb++;
+
+	// top right
+	mainVertex[vb].sx = (float)x + width - 0.5f;
+	mainVertex[vb].sy = (float)y - 0.5f;
+	mainVertex[vb].sz = 0.0f;
+	mainVertex[vb].rhw = 1.0f;
+	mainVertex[vb].color = colour;
+	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+	mainVertex[vb].tu = 0.0f;
+	mainVertex[vb].tv = 0.0f;
+
+	vb++;
+
+	OUTPUT_TRIANGLE(0,1,2, 4);
+	OUTPUT_TRIANGLE(1,2,3, 4);
+}
+
 void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, BOOL alpha) 
 {
 /*
@@ -9680,19 +9748,20 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	CheckVertexBuffer(4, AVPMENUGFX_SMALL_FONT, TRANSLUCENCY_GLOWING);
 
 	alpha = (alpha / 256);// - 1;
-/*
+
 	red = (red / 256);// - 1;
 	green = (green / 256);// - 1;
 	blue = (blue / 256);// - 1;
-*/
+
 	// clamp if needed
 	if (alpha > 255) alpha = 255;
-/*
+
 	if (red > 255) red = 255;
 	if (green > 255) green = 255;
 	if (blue > 255) blue = 255;
-*/
+
 	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
+//	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, red, green, blue);
 
 	int font_height = 15;
 	int font_width = 15;
@@ -9765,6 +9834,86 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 */
 }
 
+void DrawBigChar(char c, int x, int y, int colour)
+{
+	#define BIG_CHAR 30
+#if 0
+	/* realign it to our text image */
+	c = c - 32;
+
+	int row = (int)(c / 16); // get row 
+	int column = c % 16; // get column from remainder value
+
+	int texU = column * BIG_CHAR;
+	int texV = row * BIG_CHAR;
+#endif
+	
+	int texU = 1+((c-32)&29)*16;
+	int texV = 1+((c-32)>>8)*16;
+
+	CheckVertexBuffer(4, CONSOLE, TRANSLUCENCY_GLOWING);
+
+	int TexRealHeight = 512;
+	int TexRealWidth = 512;
+
+	int width_of_char = BIG_CHAR;
+	int height_of_char = BIG_CHAR;
+
+	float RecipW = (1.0f / TexRealWidth);
+	float RecipH = (1.0f / TexRealHeight);
+
+	// bottom left
+	mainVertex[vb].sx = (float)x - 0.5f;
+	mainVertex[vb].sy = (float)y + height_of_char - 0.5f;
+	mainVertex[vb].sz = 0.0f;
+	mainVertex[vb].rhw = 1.0f;
+	mainVertex[vb].color = colour;
+	mainVertex[vb].specular = RGBALIGHT_MAKE(0, 0 ,0, 255);
+	mainVertex[vb].tu = (float)((texU) * RecipW);
+	mainVertex[vb].tv = (float)((texV + height_of_char) * RecipH);
+
+	vb++;
+
+	// top left
+	mainVertex[vb].sx = (float)x - 0.5f;
+	mainVertex[vb].sy = (float)y - 0.5f;
+	mainVertex[vb].sz = 0.0f;
+	mainVertex[vb].rhw = 1.0f;
+	mainVertex[vb].color = colour;
+	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+	mainVertex[vb].tu = (float)((texU) * RecipW);
+	mainVertex[vb].tv = (float)((texV) * RecipH);
+
+	vb++;
+
+	// bottom right
+	mainVertex[vb].sx = (float)x + width_of_char - 0.5f;
+	mainVertex[vb].sy = (float)y + height_of_char - 0.5f;
+	mainVertex[vb].sz = 0.0f;
+	mainVertex[vb].rhw = 1.0f;
+	mainVertex[vb].color = colour;
+	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+	mainVertex[vb].tu = (float)((texU + width_of_char) * RecipW);
+	mainVertex[vb].tv = (float)((texV + height_of_char) * RecipH);
+
+	vb++;
+
+	// top right
+	mainVertex[vb].sx = (float)x + width_of_char - 0.5f;
+	mainVertex[vb].sy = (float)y - 0.5f;
+	mainVertex[vb].sz = 0.0f;
+	mainVertex[vb].rhw = 1.0f;
+	mainVertex[vb].color = colour;
+	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+	mainVertex[vb].tu = (float)((texU + width_of_char) * RecipW);
+	mainVertex[vb].tv = (float)((texV) * RecipH);
+
+	vb++;
+
+	OUTPUT_TRIANGLE(0,1,2, 4);
+	OUTPUT_TRIANGLE(1,2,3, 4);
+}
+
 void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha) 
 {
 	CheckVertexBuffer(4, TALLFONT_TEX, TRANSLUCENCY_GLOWING);
@@ -9774,8 +9923,8 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 
 	D3DCOLOR colour = D3DCOLOR_ARGB(alpha,255,255,255);
 
-	int height = 495;
-	int width = 450;
+//	int height = 495;
+//	int width = 450;
 
 	int real_height = 512;
 	int real_width = 512;

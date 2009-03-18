@@ -19,8 +19,11 @@ extern "C" {
 #include "gamedef.h"
 #include "gameplat.h"
 #include "usr_io.h"
-extern "C++"{
-#include "iofocus.h"
+
+extern "C++"
+{
+	#include "console.h"
+	#include "iofocus.h"
 };
 
 #include "showcmds.h"
@@ -440,7 +443,7 @@ void DirectReadKeyboard(void)
 		GotAnyKey = TRUE;
 	}
 
-	if (IngameKeyboardInput[VK_OEM_7])
+	if (IngameKeyboardInput[VK_OEM_3])
 	{
 		KeyboardInput[KEY_APOSTROPHE] = TRUE;
 		GotAnyKey = TRUE;
@@ -1457,6 +1460,13 @@ to make F8 not count in a 'press any key' situation */
 		}
 		DebouncedGotAnyKey = GotAnyKey && !LastGotAnyKey;
 	}
+
+	if (DebouncedKeyboardInput[KEY_TAB]) 
+	{	
+		Con_Toggle();
+		return;
+	}
+
 }
 
 /*

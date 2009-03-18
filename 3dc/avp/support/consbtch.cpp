@@ -202,11 +202,9 @@ BatchFileProcessing :: Run(char* Filename)
 				pSCString -> R_Release();
 			}
 		}
-
 	}
 
 	return Yes;
-	
 }
 
 // public:

@@ -5,7 +5,7 @@
   Status).  This is, of course, entirely platform dependant.  Consoles will
   need their own equivalent functions.... 
 
-  -------------------------------------------------------------------------------*/ 
+  -------------------------------------------------------------------------------*/
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
@@ -33,6 +33,7 @@ extern void AvP_TriggerInGameMenus(void);
 extern void Recall_Disc(void);
 extern void ShowMultiplayerScores(void);
 
+//#include "console.h"
 
 extern int NormalFrameTime;
 

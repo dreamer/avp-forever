@@ -130,7 +130,7 @@ AVPMENUGFX AvPMenuGfxStorage[MAX_NO_OF_AVPMENUGFXS] =
 
 static void LoadMenuFont(void);
 static void UnloadMenuFont(void);
-static int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red, int green, int blue);
+/*static*/ extern int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red, int green, int blue);
 static void CalculateWidthsOfAAFont(void);
 extern void DrawAvPMenuGlowyBar(int topleftX, int topleftY, int alpha, int length);
 extern void DrawAvPMenuGlowyBar_Clipped(int topleftX, int topleftY, int alpha, int length, int topY, int bottomY);
@@ -347,41 +347,12 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 	int positionX = pX;
 	int positionY = pY;
 
-//	D3D_RenderHUDString(textPtr,pX,pY,0);
-
-//#if 0 // bjd
-/*
-	unsigned char *srcPtr;
-	unsigned short *destPtr;
-	AVPMENUGFX *gfxPtr;
-	D3DTexture *image;
-	
-	gfxPtr = &IntroFont_Light.info;
-	image = (D3DTexture*)gfxPtr->ImagePtr;
-*/
-/*
-	D3DInfo temp;
-
-	temp = GetD3DInfo();
-
-	D3DSURFACE_DESC surface_desc;
-	temp.lpD3DBackSurface->GetDesc(&surface_desc);
-
-	D3DLOCKED_RECT lock = {0,NULL};
-
-	temp.lpD3DBackSurface->LockRect(&lock, NULL, 0); if (lock.pBits == NULL) return 0;
-*/	
-//	D3DInfo temp;
-//	temp = GetD3DInfo();
-/*
-	temp.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_STENCIL ,
-		D3DCOLOR_XRGB(0,0,0), 1.0f, 0 );
-*/
-	while( *textPtr ) {
+	while( *textPtr ) 
+	{
 		char c = *textPtr++;
 
-		if (c>=' ') {
-
+		if (c>=' ') 
+		{
 //			int topLeftU = 1;
 //			int topLeftV = 1+(c-32)*33;
 //			int x, y;
@@ -399,8 +370,8 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 			int topLeftV = tex_y;
 
 			/* bjd note
-			need to fix the 'Cloud Table'
-			ie the moving hazy smoke/cloud effect behind the large font text on the menus
+				need to fix the 'Cloud Table'
+				ie the moving hazy smoke/cloud effect behind the large font text on the menus
 			*/
 			DrawTallFontCharacter(positionX, positionY, topLeftU, topLeftV, width, alpha);
 
@@ -446,11 +417,9 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 		}
 	}
 //	DrawCloudTable(pX, pY, word_length, alpha);
-
-//	temp.lpD3DBackSurface->UnlockRect();
-//#endif
 	return positionX;
 }
+
 extern int RenderMenuText_Clipped(char *textPtr, int pX, int pY, int alpha, enum AVPMENUFORMAT_ID format, int topY, int bottomY) 
 {
 	// this'll do for now :)
@@ -604,7 +573,7 @@ extern int RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPM
 
 	LOCALASSERT(x>0);
 
-	x = RenderSmallFontString(textPtr,x,y,alpha,ONE_FIXED,ONE_FIXED,ONE_FIXED);
+	x = RenderSmallFontString(textPtr, x, y, alpha, ONE_FIXED, ONE_FIXED, ONE_FIXED);
 	return x;
 }
 extern int RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int red, int green, int blue) 
@@ -648,7 +617,7 @@ extern int RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha, 
 
 	LOCALASSERT(x>0);
 
-	x = RenderSmallFontString(textPtr,x,y,alpha,red,green,blue);
+	x = RenderSmallFontString(textPtr, x, y, alpha, red, green, blue);
 
 	return x;
 }
@@ -882,7 +851,21 @@ extern void RenderHighlightRectangle(int x1,int y1,int x2,int y2, int r, int g, 
 #endif
 }
 
-static int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red, int green, int blue)
+extern int RenderSmallChar(char c, int x, int y, int alpha, int red, int green, int blue)
+{
+	int alphaR = MUL_FIXED(alpha, red);
+	int alphaG = MUL_FIXED(alpha, green);
+	int alphaB = MUL_FIXED(alpha, blue);
+
+	int topLeftU = 1+((c-32)&15)*16;
+	int topLeftV = 1+((c-32)>>4)*16;
+
+	DrawSmallMenuCharacter(x, y, topLeftU, topLeftV, alphaR, alphaG, alphaB, alphaR);
+
+	return AAFontWidths[(unsigned int) c];
+}
+
+/*static*/extern int RenderSmallFontString(char *textPtr, int sx, int sy, int alpha, int red, int green, int blue)
 {
 //#if 0
 
@@ -890,10 +873,42 @@ static int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red,
 //	unsigned char *srcPtr;
 
 //	int extra = 0;
+#if 0
+	if (alpha > 255)
+	{
+		alpha = alpha / 256;
+		if (alpha > 255) alpha = 255;
+	}
+	if (red > 255)
+	{
+		red = red / 256;
+		if (red > 255) red = 255;
+	}
+	if (green > 255)
+	{
+		green = green / 256;
+		if (green > 255) green = 255;
+	}
+	if (blue > 255)
+	{
+		blue = blue / 256;
+		if (blue > 255) blue = 255;
+	}
+
+	char buf[100];
+	sprintf(buf, "alpha: %d red: %d green: %d blue: %d\n", alpha, red, green, blue);
+	OutputDebugString(buf);
+#else
+/*
+	if (red > 255) red = 255;
+	if (blue > 255) blue = 255;
+	if (green > 255) green = 255;
+*/
 
 	int alphaR = MUL_FIXED(alpha, red);
 	int alphaG = MUL_FIXED(alpha, green);
 	int alphaB = MUL_FIXED(alpha, blue);
+#endif
 /*
 	AVPMENUGFX *gfxPtr;
 	AvPTexture *image;
@@ -922,10 +937,10 @@ static int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red,
 			int topLeftU = 1+((c-32)&15)*16;
 			int topLeftV = 1+((c-32)>>4)*16;
 
-			DrawSmallMenuCharacter(sx, sy, topLeftU, topLeftV, alphaR, alphaG, alphaB, alpha);
+			DrawSmallMenuCharacter(sx, sy, topLeftU, topLeftV, alphaR, alphaG, alphaB, alphaR);
 
 //			srcPtr = &image->buffer[(topLeftU+topLeftV*image->width)*4];
-
+#if 0
 			for (int y=sy; y<HUD_FONT_HEIGHT+sy; y++)
 			{
 //				destPtr = (unsigned short *)(((unsigned char *)lock.pBits)+y*lock.Pitch) + sx;
@@ -958,7 +973,7 @@ static int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red,
 				} 
 //				srcPtr += (image->width - HUD_FONT_WIDTH) * 4;	
 			}
-
+#endif
 			sx += AAFontWidths[(unsigned int) c];
 		}
 	}

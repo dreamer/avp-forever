@@ -1,5 +1,8 @@
-#define USE_FMV
+//#define USE_FMV
 #ifdef USE_FMV
+
+#define	USE_AUDIO		1
+#define USE_ARGB		1
 
 extern "C" {
 
@@ -10,8 +13,6 @@ extern "C" {
 #include <math.h>
 
 #include <assert.h>
-#include "sndfile.h"
-
 
 int SmackerSoundVolume = 65536/512; // 128
 int MoviesAreActive;
@@ -24,6 +25,7 @@ FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES] = {0};
 int NumberOfFMVTextures;
 
 extern int GotAnyKey;
+extern int DebouncedGotAnyKey;
 extern HWND hWndMain;
 extern IMAGEHEADER ImageHeaderArray[];
 
@@ -136,12 +138,6 @@ struct ringBuffer
 };
 ringBuffer ring = {0};
 
-#define	USE_AUDIO		1
-#define	WRITE_WAV		0
-#define USE_ARGB		1
-
-SNDFILE					*sndFile;
-
 int count = 0;
 char buf[100];
 
@@ -151,37 +147,6 @@ extern void EndMenuBackgroundBink()
 
 extern void StartMenuBackgroundBink()
 {
-}
-
-void UpdateFMVAudioBuffer(void *arg) 
-{
-	int lockOffset = 0;
-	updateAudioThreadHandle = 1;
-
-	while(fmvPlaying)
-	{
-#if 0
-		int wait_value = WaitForMultipleObjects(2, fmvhHandles, FALSE, 1);
-
-		if((wait_value != WAIT_TIMEOUT) && (wait_value != WAIT_FAILED))
-		{
-			if(wait_value == 0) 
-			{
-				OutputDebugString("lock first half\n");
-				lockOffset = 0;
-			}
-			else 
-			{
-				OutputDebugString("lock second half\n");
-				lockOffset = halfBufferSize;
-			}
-
-			WriteToDsound( ring.bufferSize / 2, lockOffset );
-		}
-#endif
-	}
-
-	updateAudioThreadHandle = 0;
 }
 
 extern void PlayBinkedFMV(char *filenamePtr)
@@ -225,8 +190,9 @@ extern void PlayBinkedFMV(char *filenamePtr)
 		FlipBuffers();
 
 		DirectReadKeyboard();
-		if (GotAnyKey) 
-			playing = 0;
+
+		/* added DebouncedGotAnyKey to ensure previous frame's key press for starting level doesn't count */
+		if (GotAnyKey && DebouncedGotAnyKey) playing = 0;
 	}
 
 	OutputDebugString("closing pre-game fmv..\n");
@@ -334,6 +300,8 @@ extern void StartTriggerPlotFMV(int number)
 		FILE* file=fopen(buffer,"rb");
 		if(!file)
 		{
+			OutputDebugString("couldn't open fmv file: ");
+			OutputDebugString(buffer);
 			return;
 		}
 		fclose(file);
@@ -554,22 +522,44 @@ void FindLightingValuesFromTriggeredFMV(unsigned char *bufferPtr, FMVTEXTURE *ft
 	FmvColourBlue = totalBlue/48*16;
 }
 
+void FmvVolumePan(int volume, int pan)
+{
+	/* 
+		have changed the code that calls this function to pass the pan value
+		in the rage of -32768 for left, 0 middle and 32768 for right.
+
+		DSound needs the pan in the range of -10000 to 10000. need to conver tour
+		value to that format. the code below should do this. At least, it seems to pan and sound fine!
+	*/
+
+	int volume2 = (int)volume * .30517578125f;
+	if (volume2 < 0) volume2 = 0;
+	if (volume2 > 10000) volume2 = 10000;
+
+//	fmvAudioBuffer->SetVolume(volume2);
+
+	int pan2 = (int)pan * .30517578125f;
+
+	if (pan2 < -10000) pan2 = -10000;
+	if (pan2 > 10000) pan2 = 10000;
+
+	fmvAudioBuffer->SetPan(pan2);
+}
+
 int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr, int pitch)
 {
-//	OutputDebugString("NextFMVTextureFrame\n");
 	int smackerFormat = 1;
 	int w = 128;
 	int h = 96;
-	
-	{
-//		extern D3DINFO d3d;
-//		smackerFormat = GetSmackerPixelFormat(&(d3d.TextureFormat[d3d.CurrentTextureFormat].ddsd.ddpfPixelFormat));
-	}
-//	if (smackerFormat) w*=2;
 
 	if (MoviesAreActive && ftPtr->SmackHandle)
 	{
-		int volume = MUL_FIXED(SmackerSoundVolume*256,GetVolumeOfNearestVideoScreen());
+		int volume = MUL_FIXED(SmackerSoundVolume*256, GetVolumeOfNearestVideoScreen());
+
+//		sprintf(buf, "vol of nearest screen: %d, volume: %d, pan: %d\n", GetVolumeOfNearestVideoScreen(), volume, PanningOfNearestVideoScreen);
+//		OutputDebugString(buf);
+
+		FmvVolumePan(volume, PanningOfNearestVideoScreen);
 //		SmackVolumePan(ftPtr->SmackHandle,SMACKTRACKS,volume,PanningOfNearestVideoScreen);
 		ftPtr->SoundVolume = SmackerSoundVolume;
 	    
@@ -668,7 +658,6 @@ int GetVolumeOfNearestVideoScreen(void)
 					leastDistanceRecorded = dist;
 					VolumeOfNearestVideoScreen = ONE_FIXED + 1024 - dist/2;
 					if (VolumeOfNearestVideoScreen>ONE_FIXED) VolumeOfNearestVideoScreen = ONE_FIXED;
-
 					{
 						VECTORCH rightEarDirection;
 						#if 0
@@ -684,7 +673,9 @@ int GetVolumeOfNearestVideoScreen(void)
 						Normalise(&disp);
 						Normalise(&rightEarDirection);
 						#endif
-						PanningOfNearestVideoScreen = 32768 + DotProduct(&disp,&rightEarDirection)/2;
+						int temp = /*32768 +*/ DotProduct(&disp,&rightEarDirection)/2;
+						//PanningOfNearestVideoScreen = 32768 + DotProduct(&disp,&rightEarDirection)/2;
+						PanningOfNearestVideoScreen = temp;
 					}
 				}
 			}
@@ -698,9 +689,13 @@ int FmvOpen(char *filenamePtr)
 {
 	/* try to open our video file by filename*/
 	reader = oggplay_file_reader_new(filenamePtr);
+	if (reader == NULL)
+	{
+		OutputDebugString("couldn't create oggplay reader\n");
+		return 1;
+	}
 
 	player = oggplay_open_with_reader(reader);
-
 	if (player == NULL) 
 	{
 		char message[100];
@@ -708,10 +703,7 @@ int FmvOpen(char *filenamePtr)
 #ifdef WIN32
 		MessageBox(hWndMain, message, "AvP Error", MB_OK+MB_SYSTEMMODAL);
 #endif
-//		exit(0x111);
 		return 1;
-//		printf ("could not initialise oggplay with this file\n");
-//		exit (1);
 	}
 
 	video_track = -1; 
@@ -773,7 +765,6 @@ int FmvOpen(char *filenamePtr)
 	/* create decoding threads */
 	_beginthread(drive_decoding, 0, 0);
 	_beginthread(display_frame, 0, 0);
-//	_beginthread(UpdateFMVAudioBuffer, 0, 0);
 
 	return 0;
 }
@@ -863,7 +854,6 @@ void display_frame(void *arg)
 		if (track_info == NULL) 
 		{
 			/* sleep for 40ms - one frame at 25fps, if no new data available */
-//			SDL_Delay(delay);
 			//Sleep(delay);
 			continue;
 		}
@@ -982,7 +972,8 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 {
 	int dataSize = (samples * sizeof (short) * channels);
 
-	if (audioDataBufferSize < dataSize) {
+	if (audioDataBufferSize < dataSize) 
+	{
 		if (audioDataBuffer != NULL)
 		{
 			delete []audioDataBuffer;
@@ -1007,17 +998,11 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 
 //	UpdateAudioBuffer(dataSize, (short*)audioDataBuffer);
 
-#if WRITE_WAV
-//	sf_write_raw( sndFile, audioDataBuffer, dataSize);
-#endif
-#if 1
 //	if (audio_opened) 
 	{
 		int freeSpace = 0;
 		int firstSize = 0;
 		int secondSize = 0;
-
-//		sf_write_raw( sndFile, &audioDataBuffer[0], dataSize);
 
 		/* if our read and write positions are at the same location, does that mean the buffer is empty or full? */
 		if (ring.readPos == ring.writePos)
@@ -1063,10 +1048,6 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 
 		secondSize = dataSize - firstSize;
 
-#if WRITE_WAV
-//		sf_write_raw( sndFile, &ring.buffer[ring.writePos], firstSize);
-#endif
-
 		/* need to do second copy due to wrap */
 		if (secondSize > 0)
 		{
@@ -1074,10 +1055,6 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 //			printf("write pos: %d read pos: %d free space: %d\n", writePos, readPos, freeSpace);
 			/* copy second part. start of buffer to play cursor */
 			memcpy( &ring.buffer[0], &audioDataBuffer[firstSize], secondSize);
-
-#if WRITE_WAV
-//			sf_write_raw( sndFile, &ring.buffer[0], secondSize);
-#endif
 		}
 
 //		printf("data: %d firstSize: %d secondSize: %d total: %d\n", dataSize, firstSize, secondSize, firstSize + secondSize);
@@ -1106,8 +1083,6 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 	{
 		WriteToDsound(writableSize);
 	}
-
-#endif
 }
 
 int GetWritableBufferSize()
@@ -1217,9 +1192,6 @@ int WriteToDsound(int dataSize)
 
 	secondSize = dataSize - firstSize;
 
-//	sf_write_raw(sndFile, &ring.buffer[ring.readPos], firstSize);
-//	if (secondSize) sf_write_raw(sndFile, &ring.buffer[0], secondSize);
-
 	/* copy audio into temp buffer, reordering to make copying to dsound buffer a bit easier */
 	memcpy(&testBuffer[0], &ring.buffer[ring.readPos], firstSize);
 	if (secondSize) memcpy(&testBuffer[firstSize], &ring.buffer[0], secondSize);
@@ -1228,6 +1200,7 @@ int WriteToDsound(int dataSize)
 	if(FAILED(fmvAudioBuffer->Lock(writeOffset, dataSize, &fmvaudioPtr1, &fmvaudioBytes1, &fmvaudioPtr2, &fmvaudioBytes2, NULL))) 
 	{
 		OutputDebugString("couldn't lock fmv audio buffer for update\n");
+		return 0;
 	}
 
 	count++;
@@ -1454,7 +1427,7 @@ int CreateFMVAudioBuffer(int channels, int rate)
 
 	memset(&bufferFormat, 0, sizeof(DSBUFFERDESC));
 	bufferFormat.dwSize			= sizeof(DSBUFFERDESC);
-	bufferFormat.dwFlags		= DSBCAPS_CTRLVOLUME | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_LOCSOFTWARE;
+	bufferFormat.dwFlags		= DSBCAPS_CTRLVOLUME | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_LOCSOFTWARE | DSBCAPS_CTRLPAN;
 	bufferFormat.dwBufferBytes	= waveFormat.nAvgBytesPerSec / 2;
 	bufferFormat.lpwfxFormat	= &waveFormat;
 
@@ -1484,20 +1457,6 @@ int CreateFMVAudioBuffer(int channels, int rate)
 		OutputDebugString("\n couldn't unlock ds buffer");
 		return 0;
 	}
-
-#if WRITE_WAV
-	const int format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;  
-	const char* outfilename = "c:/foo.wav";
-	SF_INFO info;
-
-	info.samplerate = rate;
-	info.channels = channels;
-	info.format = format;
-
-//	sndFile = sf_open(outfilename, SFM_READ, &info);
-	sndFile = sf_open(outfilename, SFM_WRITE, &info);
-
-#endif
 
 	char buf[100];
 	sprintf(buf, "DSound fmv buffer size: %d\n", bufferFormat.dwBufferBytes);

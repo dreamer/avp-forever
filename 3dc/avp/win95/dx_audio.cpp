@@ -394,7 +394,7 @@ int PlatStartSoundSys()
 	SoundConfig.env_index		= 1000;
 
 	/* Create the ds object */
-	hres = DirectSoundCreate(NULL,&DSObject,NULL);
+	hres = DirectSoundCreate(NULL, &DSObject, NULL);
 	if(hres!=DS_OK)
 	{		
 		LogDxErrorString("Couldn't create DirectSound object\n");
@@ -421,21 +421,20 @@ int PlatStartSoundSys()
     	
 		/* set format description */
     	memset(&wfex, 0, sizeof(WAVEFORMATEX));
-    	wfex.wFormatTag = WAVE_FORMAT_PCM;
-    	wfex.nChannels = 2;
-    	wfex.nSamplesPerSec = 22050;
-    	wfex.nBlockAlign = 4;
-    	wfex.nAvgBytesPerSec = 
-        wfex.nSamplesPerSec * wfex.nBlockAlign;
-    	wfex.wBitsPerSample = 16;
-		wfex.cbSize = 0;
+    	wfex.wFormatTag			= WAVE_FORMAT_PCM;
+    	wfex.nChannels			= 2;
+    	wfex.nSamplesPerSec		= 44100;//22050;
+    	wfex.nBlockAlign		= 4;
+    	wfex.nAvgBytesPerSec	= wfex.nSamplesPerSec * wfex.nBlockAlign;
+    	wfex.wBitsPerSample		= 16;
+		wfex.cbSize				= 0;
 
 		/* set buffer description */
 		memset(&dsBuffDesc,0,sizeof(DSBUFFERDESC));
-		dsBuffDesc.dwSize = sizeof(DSBUFFERDESC);
-		dsBuffDesc.dwFlags = (DSBCAPS_PRIMARYBUFFER | DSBCAPS_CTRL3D | DSBCAPS_LOCHARDWARE | DSBCAPS_CTRLVOLUME);
-		dsBuffDesc.dwBufferBytes = 0;
-		dsBuffDesc.lpwfxFormat = NULL;
+		dsBuffDesc.dwSize			= sizeof(DSBUFFERDESC);
+		dsBuffDesc.dwFlags			= (DSBCAPS_PRIMARYBUFFER | DSBCAPS_CTRL3D | DSBCAPS_LOCHARDWARE | DSBCAPS_CTRLVOLUME);
+		dsBuffDesc.dwBufferBytes	= 0;
+		dsBuffDesc.lpwfxFormat		= NULL;
 	
 		hres = IDirectSound_CreateSoundBuffer(DSObject, &dsBuffDesc, &DSPrimaryBuffer, NULL);	
 		if(hres!=DS_OK)
@@ -1323,7 +1322,7 @@ static int PlatChangeSoundPan(int activeIndex, int pan)
 	if(pan<PAN_MINPLAT) pan=PAN_MINPLAT;
 
 	hres = IDirectSoundBuffer_SetPan(ActiveSounds[activeIndex].dsBufferP,pan);
-	if(hres==DS_OK) return 1;	
+	if(hres==DS_OK) return 1;
 	else return SOUND_PLATFORMERROR;
 	return 1;
 }

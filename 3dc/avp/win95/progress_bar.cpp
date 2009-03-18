@@ -125,13 +125,15 @@ void Start_Progress_Bar()
 		
 		LoadingBarFullTexture = CreateD3DTexturePadded((AvPTexture*)LoadingBarFull, &fullbarHeight, &fullbarWidth);
 	}
-	
+/*	
 	//set progress bar dimensions
 	BarLeft=ScreenDescriptorBlock.SDB_Width/6;
 	BarRight=(ScreenDescriptorBlock.SDB_Width*5)/6;
-	BarTop=(ScreenDescriptorBlock.SDB_Height*19)/22;
-	BarBottom=(ScreenDescriptorBlock.SDB_Height*21)/22;
-	
+//	BarTop=(ScreenDescriptorBlock.SDB_Height*19)/22;
+	BarTop = ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)) * 19/22;
+//	BarBottom=(ScreenDescriptorBlock.SDB_Height*21)/22;
+	BarBottom=((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*21)/22;
+*/	
 	//load background image for bar
 	char buffer[100];
 	CL_GetImageFileName(buffer, 100,Loading_Image_Name, LIO_RELATIVEPATH);
@@ -183,8 +185,8 @@ void Start_Progress_Bar()
 	LoadingBarEmpty_SrcRect.bottom=39;
 	LoadingBarEmpty_DestRect.left=0;
 	LoadingBarEmpty_DestRect.right=ScreenDescriptorBlock.SDB_Width-1;
-	LoadingBarEmpty_DestRect.top=(ScreenDescriptorBlock.SDB_Height *11)/12;
-	LoadingBarEmpty_DestRect.bottom=ScreenDescriptorBlock.SDB_Height-1;
+	LoadingBarEmpty_DestRect.top=((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset) *11)/12;
+	LoadingBarEmpty_DestRect.bottom=(ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)-1;
 
 //	for (int i=0; i<2; i++)
 	{
@@ -227,8 +229,8 @@ void Set_Progress_Bar_Position(int pos)
 		LoadingBarFull_SrcRect.bottom=39;
 		LoadingBarFull_DestRect.left=0;
 		LoadingBarFull_DestRect.right=MUL_FIXED(ScreenDescriptorBlock.SDB_Width-1,NewPosition);
-		LoadingBarFull_DestRect.top=(ScreenDescriptorBlock.SDB_Height *11)/12;
-		LoadingBarFull_DestRect.bottom=ScreenDescriptorBlock.SDB_Height-1;
+		LoadingBarFull_DestRect.top=((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset) *11)/12;
+		LoadingBarFull_DestRect.bottom=(ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)-1;
 		
 		ThisFramesRenderingHasBegun();
 
@@ -313,8 +315,8 @@ void Game_Has_Loaded(void)
 			LoadingBarFull_DestRect.right=MUL_FIXED(ScreenDescriptorBlock.SDB_Width-1,f)+LoadingBarFull_DestRect.left;
 
 			int h = MUL_FIXED((ScreenDescriptorBlock.SDB_Height)/24,ONE_FIXED-f);
-			LoadingBarFull_DestRect.top=(ScreenDescriptorBlock.SDB_Height *11)/12+h;
-			LoadingBarFull_DestRect.bottom=ScreenDescriptorBlock.SDB_Height-1-h;
+			LoadingBarFull_DestRect.top=((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset) *11)/12+h;
+			LoadingBarFull_DestRect.bottom=(ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)-1-h;
 			
 			// also need this here again, or else the text disappears!
 			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
@@ -328,7 +330,7 @@ void Game_Has_Loaded(void)
 //			extern void ThisFramesRenderingHasBegun(void);
 //			ThisFramesRenderingHasBegun();
 		}
-		RenderStringCentred(GetTextString(TEXTSTRING_INGAME_PRESSANYKEYTOCONTINUE), ScreenDescriptorBlock.SDB_Width/2, (ScreenDescriptorBlock.SDB_Height*23)/24-9, 0xffffffff);
+		RenderStringCentred(GetTextString(TEXTSTRING_INGAME_PRESSANYKEYTOCONTINUE), ScreenDescriptorBlock.SDB_Width/2, ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*23)/24-9, 0xffffffff);
 //		{
 			/* after this call, no more graphics can be drawn until the next frame */
 //			extern void ThisFramesRenderingHasFinished(void);

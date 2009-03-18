@@ -99,6 +99,7 @@
 		}
 		#else
 		return new AlienHUDGadget();
+//		return NULL;
 		#endif
 	}
 }

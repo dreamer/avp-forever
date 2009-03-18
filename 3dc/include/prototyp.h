@@ -504,7 +504,8 @@ typedef struct screendescriptorblock {
 	int SDB_Depth;
 	int SDB_ScreenDepth;
 	int SDB_Size;
-	int SDB_SafeZoneOffset;
+	int SDB_SafeZoneWidthOffset;
+	int SDB_SafeZoneHeightOffset;
 
 	int SDB_DiagonalWidth;
 

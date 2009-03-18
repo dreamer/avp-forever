@@ -8,7 +8,8 @@
 #include <string>
 #include <fstream>
 
-extern "C" {
+extern "C" 
+{
 	extern int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize);
 	extern int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset);
 	extern int SetVorbisBufferVolume(int volume);
@@ -30,6 +31,7 @@ unsigned int bufferSize = 0;
 unsigned int halfBufferSize = 0;
 
 std::vector<std::string> TrackList;
+
 #ifdef WIN32
 	const std::string tracklistFilename = "Music/ogg_tracks.txt";
 	const std::string musicFolderName = "Music/";
@@ -142,7 +144,7 @@ void UpdateVorbisBuffer(void *arg)
 
 		if((wait_value != WAIT_TIMEOUT) && (wait_value != WAIT_FAILED))
 		{
-			if(wait_value == 0) 
+			if (wait_value == 0) 
 			{
 				lockOffset = 0;
 			}
@@ -168,25 +170,26 @@ void UpdateVorbisBuffer(void *arg)
 
 				bytesReadTotal += bytesReadPerLoop;
 
-				if(bytesReadPerLoop < 0) 
+				if (bytesReadPerLoop < 0) 
 				{
 					LogDxErrorString("ov_read encountered an error\n");
 				}
 				/* if we reach the end of the file, go back to start */
-				if(bytesReadPerLoop == 0)
+				if (bytesReadPerLoop == 0)
 				{
 					OutputDebugString("\n end of ogg file");
 					ov_raw_seek(&oggFile, 0);
 				}
-				if(bytesReadPerLoop == OV_HOLE) 
+				if (bytesReadPerLoop == OV_HOLE) 
 				{
 					LogDxErrorString("OV_HOLE\n");
 				}
-				if(bytesReadPerLoop == OV_EBADLINK) 
+				if (bytesReadPerLoop == OV_EBADLINK) 
 				{
 					LogDxErrorString("OV_EBADLINK\n");
 				}
 			}
+
 			UpdateVorbisAudioBuffer(audioData, bytesReadTotal, lockOffset);
 		}
 	}
@@ -194,7 +197,7 @@ void UpdateVorbisBuffer(void *arg)
 
 void PlayVorbis() 
 {
-	if(PlayVorbisBuffer() == false)
+	if (PlayVorbisBuffer() == false)
 	{
 		LogDxErrorString("couldn't play ogg vorbis buffer\n");
 	}

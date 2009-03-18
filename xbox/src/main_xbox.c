@@ -181,9 +181,9 @@ void _cdecl main()
 //	AVP_NCmd = nCmdShow;
 */
 // bjd	EnumerateCardsAndVideoModes();
-//	LoadDeviceAndVideoModePreferences();
+	LoadDeviceAndVideoModePreferences();
 
-//	LoadCDTrackList(); //load list of cd tracks assigned to levels , from a text file
+	LoadCDTrackList(); //load list of cd tracks assigned to levels , from a text file
 	LoadVorbisTrackList(); // do the same for any user ogg vorbis music files
 
 //	CDDA_Start();
@@ -429,9 +429,6 @@ void _cdecl main()
 	SoundSys_Start();
 	CDDA_Start();
 
-	/* kill mouse cursor */
-//	SetCursor(NULL);
-
 	/* load language file and setup text string access */
 	InitTextStrings();
 
@@ -487,7 +484,7 @@ void _cdecl main()
 		/********** Grab The Video mode **********/
 //		GetCorrectDirectDrawObject();
 
-//		ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth);
+		ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth);
 
 	    /* Dubious restart hack for DirectDraw problems */
 		/* JH - I'm not sure this is really necessary
@@ -770,13 +767,9 @@ void _cdecl main()
 
 		/* KJL 17:56:14 26/02/98 - unload a font required for Dave's HUD */
 //		UnloadFont(&AvpFonts[DATABASE_MESSAGE_FONT]);
-		#if 1
-		{
-			extern void CloseFMV(void);
-			CloseFMV();
-			ReleaseAllFMVTextures();
-		}
-		#endif
+
+		CloseFMV();
+		ReleaseAllFMVTextures();
 
 		/* DHM 23/3/98 */
 //		REBMENUS_ProjectSpecific_EndOfMainLoopHook();
@@ -838,15 +831,6 @@ void _cdecl main()
 		//need to get rid of the player rifs before we can clear the memory pool
 
 		ClearMemoryPool();
-
-		#if debug
-		if(UseMouseCentreing)
-		{
-			//Stop thread that recentres mouse , making it easier to play
-			//in subwindow mode
-//			FinishCentreMouseThread();
-		}
-		#endif
 
 		if(LobbiedGame)
 		{

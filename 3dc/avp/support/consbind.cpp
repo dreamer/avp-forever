@@ -2,7 +2,7 @@
  *
  *    DESCRIPTION: 	consbind.cpp
  *
- *		Ability to kind keystrokes to strings so they appear in the
+ *		Ability to bind keystrokes to strings so they appear in the
  *	console when you hit the key.  Initial implementation went through
  * the WM_KEYDOWN hook so that we get debouncing and typematic action
  * for free; subsequently added an implementation based on the KeyboadInput[]

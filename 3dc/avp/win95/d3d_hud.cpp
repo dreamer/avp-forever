@@ -213,8 +213,8 @@ void D3D_InitialiseMarineHUD(void)
 		MotionTrackerTextureSize = 128;
 
 		BlueBar.ImageNumber = HUDImageNumber;
-		BlueBar.TopLeftX = ScreenDescriptorBlock.SDB_SafeZoneOffset;//0; bjd
-		BlueBar.TopLeftY = (ScreenDescriptorBlock.SDB_Height-40) - ScreenDescriptorBlock.SDB_SafeZoneOffset;
+		BlueBar.TopLeftX = ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;//0; bjd
+		BlueBar.TopLeftY = (ScreenDescriptorBlock.SDB_Height-40) - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
 		BlueBar.TopLeftU = 1;
 		BlueBar.TopLeftV = 223;
 		BlueBar.Red = 255;
@@ -328,7 +328,7 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 	int widthCos,widthSin;
 	extern int CloakingPhase;
 
-	BlueBar.TopLeftY = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneOffset) - MUL_FIXED(MotionTrackerScale,40);
+	BlueBar.TopLeftY = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset) - MUL_FIXED(MotionTrackerScale,40);
 	MotionTrackerCentreY = BlueBar.TopLeftY;
 	MotionTrackerCentreX = BlueBar.TopLeftX+MUL_FIXED(MotionTrackerScale,(BlueBar.Width/2));
 	BlueBar.Scale = MotionTrackerScale;
@@ -589,16 +589,16 @@ void D3D_DrawHUDPredatorDigit(HUDCharDesc *charDescPtr, int scale)
 	/* if x is in the first half of screen, its the red bar..offset towards centre of screen */
 	if(charDescPtr->X <= ScreenDescriptorBlock.SDB_Width / 2)
 	{
-		imageDesc.TopLeftX = charDescPtr->X + ScreenDescriptorBlock.SDB_SafeZoneOffset;
+		imageDesc.TopLeftX = charDescPtr->X + ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
 	}
 	/* we're on the right side of the screen, minus some offset to move us back left a bit */
 	else
 	{
-		imageDesc.TopLeftX = charDescPtr->X - ScreenDescriptorBlock.SDB_SafeZoneOffset;
+		imageDesc.TopLeftX = charDescPtr->X - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
 	}
 
 	/* y will be the same for both bars, need to add some offset */
-	imageDesc.TopLeftY = charDescPtr->Y + ScreenDescriptorBlock.SDB_SafeZoneOffset;
+	imageDesc.TopLeftY = charDescPtr->Y + ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
 
 //	imageDesc.TopLeftX = charDescPtr->X;
 //	imageDesc.TopLeftY = charDescPtr->Y;
@@ -740,35 +740,35 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 
 	if (AvP.PlayerType == I_Marine)
 	{										  
-		int xCentre = MUL_FIXED(HUDLayout_RightmostTextCentre,HUDScaleFactor)+ScreenDescriptorBlock.SDB_Width - ScreenDescriptorBlock.SDB_SafeZoneOffset;
+		int xCentre = MUL_FIXED(HUDLayout_RightmostTextCentre,HUDScaleFactor)+ScreenDescriptorBlock.SDB_Width - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
 		healthColour = HUDLayout_Colour_MarineGreen;
 		armourColour = HUDLayout_Colour_MarineGreen;
 		D3D_RenderHUDString_Centred
 		(
 			GetTextString(TEXTSTRING_INGAME_HEALTH),
 			xCentre,
-			MUL_FIXED(HUDLayout_Health_TopY,HUDScaleFactor) + ScreenDescriptorBlock.SDB_SafeZoneOffset,
+			MUL_FIXED(HUDLayout_Health_TopY,HUDScaleFactor) + ScreenDescriptorBlock.SDB_SafeZoneWidthOffset,
 			HUDLayout_Colour_BrightWhite
 		);
 		D3D_RenderHUDNumber_Centred
 		(
 			health,
 			xCentre,
-			MUL_FIXED(HUDLayout_Health_TopY+HUDLayout_Linespacing,HUDScaleFactor) + ScreenDescriptorBlock.SDB_SafeZoneOffset,
+			MUL_FIXED(HUDLayout_Health_TopY+HUDLayout_Linespacing,HUDScaleFactor) + ScreenDescriptorBlock.SDB_SafeZoneWidthOffset,
 			healthColour
 		);	
 		D3D_RenderHUDString_Centred
 		(
 			GetTextString(TEXTSTRING_INGAME_ARMOUR),
 			xCentre,
-			MUL_FIXED(HUDLayout_Armour_TopY,HUDScaleFactor) + ScreenDescriptorBlock.SDB_SafeZoneOffset,
+			MUL_FIXED(HUDLayout_Armour_TopY,HUDScaleFactor) + ScreenDescriptorBlock.SDB_SafeZoneWidthOffset,
 			HUDLayout_Colour_BrightWhite
 		);
 		D3D_RenderHUDNumber_Centred
 		(
 			armour,
 			xCentre,
-			MUL_FIXED(HUDLayout_Armour_TopY+HUDLayout_Linespacing,HUDScaleFactor) + ScreenDescriptorBlock.SDB_SafeZoneOffset,
+			MUL_FIXED(HUDLayout_Armour_TopY+HUDLayout_Linespacing,HUDScaleFactor) + ScreenDescriptorBlock.SDB_SafeZoneWidthOffset,
 			armourColour
 		);	
 	}
@@ -811,7 +811,7 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 				scaledHeight = scaledWidth/32;
 			}
 			x = (ScreenDescriptorBlock.SDB_Width - scaledWidth)/2;
-			y = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_Width/32 + x/32) - ScreenDescriptorBlock.SDB_SafeZoneOffset;
+			y = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_Width/32 + x/32) - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
 
 			quadVertices[0].U = 8;
 			quadVertices[0].V = 5;
@@ -853,7 +853,7 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 			}
 	
 			x = (ScreenDescriptorBlock.SDB_Width - scaledWidth)/2;
-			y = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_Width/32 + x/32) - ScreenDescriptorBlock.SDB_SafeZoneOffset;
+			y = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_Width/32 + x/32) - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
 	
 			quadVertices[0].X = x;
 			quadVertices[0].Y = y;
@@ -878,42 +878,42 @@ void Render_MarineAmmo(enum TEXTSTRING_ID ammoText, enum TEXTSTRING_ID magazines
 {
 //	HUDCharDesc charDesc;
 	int i=MAX_NO_OF_COMMON_HUD_DIGITS;
-	int xCentre = (MUL_FIXED(HUDLayout_RightmostTextCentre,HUDScaleFactor)+ScreenDescriptorBlock.SDB_Width) - ScreenDescriptorBlock.SDB_SafeZoneOffset;
+	int xCentre = (MUL_FIXED(HUDLayout_RightmostTextCentre,HUDScaleFactor)+ScreenDescriptorBlock.SDB_Width) - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
 	if(!primaryAmmo) xCentre+=MUL_FIXED(HUDScaleFactor,HUDLayout_RightmostTextCentre*2);
 
 	D3D_RenderHUDString_Centred
 	(
 		GetTextString(ammoText),
 		xCentre,
-		(ScreenDescriptorBlock.SDB_Height - MUL_FIXED(HUDScaleFactor,HUDLayout_AmmoDesc_TopY))  - ScreenDescriptorBlock.SDB_SafeZoneOffset,
+		(ScreenDescriptorBlock.SDB_Height - MUL_FIXED(HUDScaleFactor,HUDLayout_AmmoDesc_TopY))  - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset,
 		HUDLayout_Colour_BrightWhite
 	);
 	D3D_RenderHUDString_Centred
 	(
 		GetTextString(magazinesText),
 		xCentre,
-		(ScreenDescriptorBlock.SDB_Height - MUL_FIXED(HUDScaleFactor, HUDLayout_Magazines_TopY)) - ScreenDescriptorBlock.SDB_SafeZoneOffset,
+		(ScreenDescriptorBlock.SDB_Height - MUL_FIXED(HUDScaleFactor, HUDLayout_Magazines_TopY)) - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset,
 		HUDLayout_Colour_BrightWhite
 	);
 	D3D_RenderHUDNumber_Centred
 	(
 		magazines,
 		xCentre,
-		(ScreenDescriptorBlock.SDB_Height - MUL_FIXED(HUDScaleFactor,HUDLayout_Magazines_TopY - HUDLayout_Linespacing)) - ScreenDescriptorBlock.SDB_SafeZoneOffset,
+		(ScreenDescriptorBlock.SDB_Height - MUL_FIXED(HUDScaleFactor,HUDLayout_Magazines_TopY - HUDLayout_Linespacing)) - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset,
 		HUDLayout_Colour_MarineRed
 	);	
 	D3D_RenderHUDString_Centred
 	(
 		GetTextString(roundsText),
 		xCentre,
-		(ScreenDescriptorBlock.SDB_Height - MUL_FIXED(HUDScaleFactor,HUDLayout_Rounds_TopY)) - ScreenDescriptorBlock.SDB_SafeZoneOffset,
+		(ScreenDescriptorBlock.SDB_Height - MUL_FIXED(HUDScaleFactor,HUDLayout_Rounds_TopY)) - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset,
 		HUDLayout_Colour_BrightWhite
 	);
 	D3D_RenderHUDNumber_Centred
 	(
 		rounds,
 		xCentre,
-		(ScreenDescriptorBlock.SDB_Height - MUL_FIXED(HUDScaleFactor,HUDLayout_Rounds_TopY - HUDLayout_Linespacing)) - ScreenDescriptorBlock.SDB_SafeZoneOffset,
+		(ScreenDescriptorBlock.SDB_Height - MUL_FIXED(HUDScaleFactor,HUDLayout_Rounds_TopY - HUDLayout_Linespacing)) - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset,
 		HUDLayout_Colour_MarineRed
 	);	
 } 

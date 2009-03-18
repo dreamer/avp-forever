@@ -247,7 +247,6 @@ void RE_ENTRANT_QUEUE_WinMain_FlushMessages(void)
 									HUDGadget :: GetHUD() -> Key_Tab();
 									break;							
 							}
-
 						}
 						else
 						{
@@ -270,7 +269,6 @@ void RE_ENTRANT_QUEUE_WinMain_FlushMessages(void)
 
 					}
 					break;
-					
 				}
 			}
 		}
