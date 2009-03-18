@@ -20,6 +20,7 @@
 #include "ourasert.h"
 #include "avp_menus.h"
 
+extern HWND hWndMain;
 
 #ifdef AVP_DEBUG_VERSION
 	// bjd - this'll look for ENGLISH.TXT which doesn't exist in the retail data files
@@ -37,6 +38,8 @@ static char *TextBufferPtr;
 void InitTextStrings(void)
 {
 	char *textPtr;
+	char *filenamePtr;
+
 	int i;
 
 	/* language select here! */
@@ -44,24 +47,35 @@ void InitTextStrings(void)
 	GLOBALASSERT(AvP.Language<I_MAX_NO_OF_LANGUAGES);
 	
 	#if MARINE_DEMO
-	TextBufferPtr = LoadTextFile("menglish.txt");
+	filenamePtr = "menglish.txt";
+//	TextBufferPtr = LoadTextFile("menglish.txt");
 	#elif ALIEN_DEMO
-	TextBufferPtr = LoadTextFile("aenglish.txt");
+	filenamePtr = "aenglish.txt";
+//	TextBufferPtr = LoadTextFile("aenglish.txt");
 	#elif USE_LANGUAGE_TXT
 #ifdef _XBOX
-	TextBufferPtr = LoadTextFile("D:\\language.txt"); // xbox
+	filenamePtr = "D:\\language.txt";
+//	TextBufferPtr = LoadTextFile("D:\\language.txt"); // xbox
 #endif
 #ifdef WIN32 
-	TextBufferPtr = LoadTextFile("language.txt"); // win32
+	filenamePtr = "language.txt";
+//	TextBufferPtr = LoadTextFile("language.txt"); // win32
 #endif
 	#else
-	TextBufferPtr = LoadTextFile(LanguageFilename[AvP.Language]);
+	filenamePtr = LanguageFilename[AvP.Language];
+//	TextBufferPtr = LoadTextFile(LanguageFilename[AvP.Language]);
 	#endif
+
+	TextBufferPtr = LoadTextFile(filenamePtr);
 
 	if(TextBufferPtr == NULL) 
 	{
 		/* have to quit if this file isn't available */
-		OutputDebugString("cant find language.txt\n");
+		char message[100];
+		sprintf(message,"Unable to load language file: %s\n",filenamePtr);
+#ifdef WIN32
+		MessageBox(hWndMain, message, "AvP Error", MB_OK+MB_SYSTEMMODAL);
+#endif
 		exit(1);
 	}
 
@@ -74,6 +88,17 @@ void InitTextStrings(void)
 	else
 	{
 		textPtr = TextBufferPtr;
+	}
+
+	/* check if language file is not from Gold version */
+	if (strncmp (textPtr, "REBINFF2", 8))
+	{
+		char message[100];
+		sprintf(message,"File %s is not compatible with Gold Edition\n",filenamePtr);
+#ifdef WIN32
+		MessageBox(hWndMain, message, "AvP Error", MB_OK+MB_SYSTEMMODAL);
+#endif
+		exit(1);
 	}
 
 	AddToTable( EmptyString );
@@ -112,5 +137,3 @@ char *GetTextString(enum TEXTSTRING_ID stringID)
 
 	return TextStringPtr[stringID];
 }
-
-
