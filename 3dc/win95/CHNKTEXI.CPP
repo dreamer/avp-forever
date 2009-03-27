@@ -753,6 +753,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					pImageHdr->DDSurface = pSurface;
 					pImageHdr->hBackup = hBackup;
 					pImageHdr->Direct3DTexture = NULL;
+					
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 /*					
 					if (pSurface->buf) {

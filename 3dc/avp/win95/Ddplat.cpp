@@ -572,6 +572,8 @@ extern void BLTMarineNumericsToHUD(enum MARINE_HUD_DIGIT digitsToDraw)
 		propertiesPtr = &HiresMarineHUDDigitProperties[digit];
 	}
 
+	LOCALASSERT(digit < 6);
+
     do
 	{
     	/* paranoia check */
@@ -746,6 +748,8 @@ void BLTPredatorNumericsToHUD(void)
 	{
 		propertiesPtr = &MedresPredatorHUDDigitProperties[digit];
 	}
+
+	LOCALASSERT(digit < 6);
    
     while(digit)
     {
@@ -887,6 +891,7 @@ extern void BLTAlienOverlayToHUD(void)
 }
 #endif
 
+#if 0
 void BLTAlienNumericsToHUD(void)
 {
 
@@ -929,7 +934,7 @@ void BLTAlienNumericsToHUD(void)
 	    }
 	}
 }	
-
+#endif
 
 
 

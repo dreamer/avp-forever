@@ -22,6 +22,7 @@ extern "C" {
 
 #define UseLocalAssert No
 #include "ourasert.h"
+#include <assert.h>
 
 extern D3DINFO d3d;
 extern D3DTEXTURE consoleText;
@@ -112,6 +113,8 @@ void DrawParticles()
 	/* restore RenderPolygon.NumberOfVertices value... */
 	RenderPolygon.NumberOfVertices = backup;
 }
+
+int draw_calls_per_frame = 0;
 
 const signed int NO_TEXTURE = -1;
 // set them to 'null' texture initially
@@ -271,8 +274,6 @@ static unsigned char DefaultD3DTextureFilterMax;
 // Globals for frame by frame definition of
 // coloured materials for D3D rendering interface
 
-
-extern void ReleaseAllFMVTexturesForDeviceReset();
 extern void ScanImagesForFMVs();
 
 static int NumberOfRenderedTriangles=0;
@@ -736,7 +737,7 @@ BOOL BeginD3DScene()
 				{
 					OutputDebugString("releasing resources for a device reset..\n");
 					/* release fmv textures */
-					ReleaseAllFMVTexturesForDeviceReset();
+					//ReleaseAllFMVTexturesForDeviceReset();
 
 					/* disable XInput */
 					XInputEnable( false );
@@ -749,8 +750,9 @@ BOOL BeginD3DScene()
 					{	
 						OutputDebugString("we have reset the device. recreating resources..\n");
 						CreateVolatileResources();
+
 						/* reload fmv textures */
-						ScanImagesForFMVs();
+						//RecreateAllFMVTexturesAfterDeviceReset();
 
 						/* re-enable XInput */
 						XInputEnable( true );
@@ -836,8 +838,6 @@ BOOL EndD3DScene()
 	  return TRUE;
 }
 
-bool dither_on = false;
-
 extern int mainMenu;
 
 void ChangeTexture(const int texture_id)
@@ -880,8 +880,6 @@ void ChangeTexture(const int texture_id)
 		if(!FAILED(LastError)) currentTextureId = texture_id;
 		return;
 	}
-
-	return;
 }
 
 BOOL ExecuteBuffer()
@@ -942,8 +940,7 @@ BOOL ExecuteBuffer()
 	if(FAILED(LastError)) {
 		LogDxError(LastError);
 	}
-	
-	int draw_calls_per_frame = 0;
+
 	int tempTexture = 0;
 
 	// we can assume to keep this turned on
@@ -2511,121 +2508,6 @@ void D3D_HUDQuad_Output(int imageNumber,struct VertexTag *quadVerticesPtr, unsig
 	OUTPUT_TRIANGLE(1,2,3, 4);
 #endif
 }
-
-// not used
-#if 0 // bjd
-void D3D_DrawRebellionLogo(unsigned int alpha)
-{
-	extern int RebellionLogoImageNumber;
-	extern int FoxLogoImageNumber;
-	float scale = ScreenDescriptorBlock.SDB_Width/640.0f;
-
-	D3DTEXTUREHANDLE TextureHandle = (D3DTEXTUREHANDLE)ImageHeaderArray[FoxLogoImageNumber].D3DHandle;
-
-	int colour = 0xffffff+((alpha>>8)<<24);
-    // Check for textures that have not loaded properly
-    LOCALASSERT(TextureHandle != (D3DTEXTUREHANDLE) 0);
-
-	D3DTLVERTEX *vertexPtr = new D3DTLVERTEX[4];// = &((LPD3DTLVERTEX)ExecuteBufferDataArea)[NumVertices];
-
-	/* OUTPUT quadVerticesPtr TO EXECUTE BUFFER */
-	{
-		float x[] = {0.0f,1.0f,1.0f,0.0f};
-		float y[] = {0.0f,0.0f,1.0f,1.0f};
-		int i;
-		for (i=0; i<4; i++)
-		{
-			//D3DTLVERTEX *vertexPtr = &((LPD3DTLVERTEX)ExecuteBufferDataArea)[NumVertices];
-			vertexPtr->sx = (x[i]*63.0f+64.0f)*scale;
-			vertexPtr->sy = (y[i]*63.0f+4.0f)*scale;
-			vertexPtr->sz = 0.0f;
-			vertexPtr->tu = x[i];
-			vertexPtr->tv = y[i];
-			vertexPtr->rhw = 1.0;
-	  		vertexPtr->color = colour;
-			vertexPtr->specular = RGBALIGHT_MAKE(0,0,0,255);
-
-//			NumVertices++;
-
-			vertexPtr++; // increment
-		}
-	}
-	// set correct texture handle
-    if (TextureHandle != CurrTextureHandle)
-	{
-		d3d.lpD3DDevice->SetTexture(0,TextureHandle);
-		CurrTextureHandle = TextureHandle;
-	}
-	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_NORMAL);
-
-
-	/* output triangles to execute buffer */
-//	OP_TRIANGLE_LIST(2, ExecBufInstPtr);
-//	OUTPUT_TRIANGLE(0,1,3, 4);
-//	OUTPUT_TRIANGLE(1,2,3, 4);
-
-	/* check to see if buffer is getting full */
-/*
-	if (NumVertices > (MaxVerticesInExecuteBuffer-12))
-	{
-	   WriteEndCodeToExecuteBuffer();
-  	   UnlockExecuteBufferAndPrepareForUse();
-	   ExecuteBuffer();
-  	   LockExecuteBuffer();
-	}
-*/
-
-	TextureHandle = (D3DTEXTUREHANDLE)ImageHeaderArray[RebellionLogoImageNumber].Direct3DTexture9;
-
-	D3DTLVERTEX *vertexPtr2 = new D3DTLVERTEX[4];
-	{
-		float x[] = {0.0f,1.0f,1.0f,0.0f};
-		float y[] = {0.0f,0.0f,1.0f,1.0f};
-		int i;
-		for (i=0; i<4; i++)
-		{
-			//D3DTLVERTEX *vertexPtr = &((LPD3DTLVERTEX)ExecuteBufferDataArea)[NumVertices];
-			vertexPtr2->sx = (x[i]*127.0f+4.0f+130.0f)*scale;
-			vertexPtr2->sy = (y[i]*63.0f+4.0f)*scale;
-			vertexPtr2->sz = 0.0f;
-			vertexPtr2->tu = x[i];
-			vertexPtr2->tv = y[i];
-			vertexPtr2->rhw = 1.0;
-	  		vertexPtr2->color = colour;
-			vertexPtr2->specular = RGBALIGHT_MAKE(0,0,0,255);
-
-//			NumVertices++;
-
-			vertexPtr2++; // increment
-		}
-	}
-
-	// set correct texture handle
-    if (TextureHandle != CurrTextureHandle)
-	{
-		d3d.lpD3DDevice->SetTexture(0,TextureHandle);
-		CurrTextureHandle = TextureHandle;
-	}
-	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_NORMAL);
-
-
-	/* output triangles to execute buffer */
-//	OP_TRIANGLE_LIST(2, ExecBufInstPtr);
-//	OUTPUT_TRIANGLE(0,1,3, 4);
-//	OUTPUT_TRIANGLE(1,2,3, 4);
-
-	/* check to see if buffer is getting full */
-/*
-	if (NumVertices > (MaxVerticesInExecuteBuffer-12))
-	{
-	   WriteEndCodeToExecuteBuffer();
-  	   UnlockExecuteBufferAndPrepareForUse();
-	   ExecuteBuffer();
-  	   LockExecuteBuffer();
-	}
-*/
-}
-#endif
 
 void D3D_DrawParticle_Rain(PARTICLE *particlePtr,VECTORCH *prevPositionPtr)
 {
@@ -7241,6 +7123,7 @@ void KillFMVTexture(void)
 
 void ThisFramesRenderingHasBegun(void)
 {
+	draw_calls_per_frame = 0;
 	BeginD3DScene(); // calls a function to perform d3d_device->Begin();
 	LockExecuteBuffer(); // lock vertex buffer
 }
@@ -7255,6 +7138,11 @@ void ThisFramesRenderingHasFinished(void)
 
  	/* KJL 11:46:56 01/16/97 - kill off any lights which are fated to be removed */
 	LightBlockDeallocation();
+/*
+	char buf[100];
+	sprintf(buf, "draw prim calls that frame: %d\n", draw_calls_per_frame);
+	OutputDebugString(buf);
+*/
 }
 
 void D3D_DrawWaterOctagonPatch(int xOrigin, int yOrigin, int zOrigin, int xOffset, int zOffset)
@@ -8599,46 +8487,34 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
 {
-	/* texture will be created with managed pool. we need it in default */
-//	SAFE_RELEASE(ftPtr->ImagePtr->Direct3DTexture);
-//	ftPtr->ImagePtr->Direct3DTexture = NULL;
-
-	/* just in case */
-//	SAFE_RELEASE(ftPtr->DestTexture);
-//	ftPtr->DestTexture = NULL;
-
-	/* this texture is what's used for rendering of ingame video monitors */
+	assert(ftPtr->DestTexture == NULL);
 /*
-	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &ftPtr->ImagePtr->Direct3DTexture, NULL);
-	if(FAILED(LastError))
-	{
-		LogDxErrorString("Could not create Direct3D texture ftPtr->ImagePtr->Direct3DTexture\n");
-	}
-*/
 	if (ftPtr->DestTexture)
 	{
 		OutputDebugString("A TEXTURE ALREADY EXISTS! we'll write over it..uh oh\n");
+		return;
 	}
-
+*/
 	/* we use this texture to write fmv data to */
-	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &ftPtr->DestTexture, NULL);
+	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &ftPtr->DestTexture, NULL);
 	if(FAILED(LastError))
 	{
 		LogDxErrorString("Could not create Direct3D texture ftPtr->DestTexture\n");
+		ftPtr->DestTexture = NULL;
 	}
 
 	ftPtr->SoundVolume = 0;
 }
 
-void ReleaseFMVTexture()
-{
-
-}
+#include <assert.h>
 
 void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 {
-//	LOCALASSERT(ftPtr);
-//	LOCALASSERT(ftPtr->ImagePtr);
+	assert(ftPtr);
+	assert(ftPtr->ImagePtr);
+	assert(ftPtr->DestTexture);
+	assert(ftPtr->ImagePtr->Direct3DTexture);
+
 	if(!ftPtr) return;
 
 	/* lock the d3d texture */
@@ -8652,7 +8528,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 
 	// check for success
 	{
-		if (!NextFMVTextureFrame(ftPtr,(void*)textureRect.pBits, textureRect.Pitch))
+		if (!NextFMVTextureFrame(ftPtr, (void*)textureRect.pBits, textureRect.Pitch))
 		{
 			ftPtr->DestTexture->UnlockRect(0);
 		 	return;

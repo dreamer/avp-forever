@@ -753,7 +753,7 @@ typedef struct trianglearray {
 long GetWindowsTickCount(void);
 void CheckForWindowsMessages(void);
 BOOL ExitWindowsSystem(void);
-BOOL InitialiseWindowsSystem(HANDLE hInstance, int nCmdShow, int WinInitMode);
+BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode);
 void KeyboardHandlerKeyDown(WPARAM wParam);
 void KeyboardHandlerKeyUp(WPARAM wParam);
 void MouseVelocityHandler(UINT message, LPARAM lParam);
@@ -824,7 +824,6 @@ BOOL UnlockExecuteBufferAndPrepareForUse(void);
 BOOL BeginD3DScene(void);
 BOOL EndD3DScene(void);
 BOOL ExecuteBuffer(void);
-BOOL RenderD3DScene(void);
 void ReleaseDirect3D(void);
 void WritePolygonToExecuteBuffer(int* itemptr);
 void WriteGouraudPolygonToExecuteBuffer(int* itemptr);

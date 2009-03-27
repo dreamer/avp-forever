@@ -1,7 +1,5 @@
 /* Main designed spec for use with windows95*/
 
-//#include <xtl.h>
-
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
@@ -55,29 +53,14 @@ New sound system
 
 #include "AvP_UserProfile.h"
 
-#define PROFILING_ON 0
-#if PROFILING_ON
-#include "pentime.h"
-#endif
-
-#if 0
-#undef PrintDebuggingText
-extern int PrintDebuggingText(const char* t, ...);
-#endif
-
 /*
 
  externs for commonly used global variables and arrays
 
 */
-extern int VideoMode;
-extern void (*UpdateScreen[]) (void);
-extern DISPLAYBLOCK* ActiveBlockList[];
-extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern void (*SetVideoMode[]) (void);
+
 extern int FrameRate;
 
-extern HWND hWndMain; // bjd
 /* Extern for global keyboard buffer */
 extern unsigned char KeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
 //extern unsigned char DebouncedKeyboardInput[];
@@ -85,14 +68,7 @@ unsigned char DebouncedKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
 extern unsigned char GotAnyKey;
 extern unsigned char DebouncedGotAnyKey;
 
-void PollEvents();
-void ToggleKey(int avp_key, int key_state);
-int SDLtoAvpKey(int sdl_key);
-
-extern int WindowRequestMode;
-
 extern int NumActiveBlocks;
-int HWAccel = 0;
 
 #if debug
 #define MainTextPrint 1
@@ -111,8 +87,6 @@ extern BOOL ForceLoad_Xenoborg;
 extern BOOL ForceLoad_Pretorian;
 extern BOOL ForceLoad_SentryGun;
 
-
-BOOL UseMouseCentreing = FALSE;
 #else
 #define MainTextPrint 0
 #endif
@@ -145,7 +119,6 @@ extern void BuildMultiplayerLevelNameArray();
 void LoadDeviceAndVideoModePreferences();
 void CDDA_Start(void);
 
-extern int WindowMode;
 void exit_break_point_fucntion ()
 {
 	#if debug
@@ -180,14 +153,11 @@ void _cdecl main()
 //	AVP_HInstance = hInst = hInstance;
 //	AVP_NCmd = nCmdShow;
 */
-// bjd	EnumerateCardsAndVideoModes();
+
 	LoadDeviceAndVideoModePreferences();
 
 	LoadCDTrackList(); //load list of cd tracks assigned to levels , from a text file
 	LoadVorbisTrackList(); // do the same for any user ogg vorbis music files
-
-//	CDDA_Start();
-//	CDDA_Play(1);
 
 	SetFastRandom();
 
@@ -373,20 +343,11 @@ void _cdecl main()
 
 	InitGame();
 
-    /*** Define video mode for windows initialisation ***/
- //bjd	InitialVideoMode();
-
 	/****** Put in by John to sort out easy sub window mode ******/
 	/****** REMOVE FOR GAME!!!!! ******/
 
 	#if debug && 1//!PREDATOR_DEMO
 /*
-	if(strstr(command_line, "-w"))
-	{
-		WindowRequestMode = WindowModeSubWindow;
-		if (!HWAccel)
-			RasterisationRequestMode = RequestSoftwareRasterisation;
-	}
 	if(instr = strstr(command_line, "-s"))
 		sscanf(instr, "-s%d", &level_to_load);
 */
@@ -397,21 +358,18 @@ void _cdecl main()
 
 	/*******	System initialisation **********/
 
-	/* timer init test */
-//	timeBeginPeriod(1); not necessary for xbox
-
 	InitialiseSystem(0,0/*hInstance, nCmdShow*/);
 	GotMouse = 1;
 
 	InitialiseRenderer();
 
-	if(!InitialiseDirect3DImmediateMode()){
-		OutputDebugString("InitialiseDirect3DImmediateMode() didn't complete fully");
-//		MessageBox(NULL, "Could not create a valid Direct3D device", "Oh no!", MB_OK);
+	if(!InitialiseDirect3DImmediateMode())
+	{
+		LogDxErrorString("InitialiseDirect3DImmediateMode() didn't complete fully");
 		ReleaseDirect3D();
-//		exit(-1);
 	}
-	else {
+	else 
+	{
 		OutputDebugString("InitialiseDirect3DImmediateMode() OK");
 	}
 
@@ -434,7 +392,6 @@ void _cdecl main()
 
 	BuildMultiplayerLevelNameArray();//sort out multiplayer level names
 
-//	ChangeDirectDrawObject();
 	AvP.LevelCompleted = 0;
 	LoadSounds("PLAYER");
 
@@ -459,14 +416,6 @@ void _cdecl main()
 */
 		#endif
 
-		#if debug
-		if(UseMouseCentreing)
-		{
-			//Start thread that recentres mouse , making it easier to play
-			//in subwindow mode
-//			InitCentreMouseThread();
-		}
-		#endif
 //		Env_List[0] = &(ELOLevelToLoad);
 //		level_to_load = 0;
 //		AvP.PlayerType = I_Marine;
@@ -480,9 +429,6 @@ void _cdecl main()
 			The video mode is no longer set when exiting the menus
 			(not necessary if user selects EXIT)
 			So it is set here */
-
-		/********** Grab The Video mode **********/
-//		GetCorrectDirectDrawObject();
 
 		ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth);
 
@@ -665,18 +611,9 @@ void _cdecl main()
 						ReadUserInput();
 //						UpdateAllFMVTextures();
 						SoundSys_Management();
-						#if SOFTWARE_RENDERER
-						FlushSoftwareZBuffer();
-						#else
 
 						// bjd
 						ThisFramesRenderingHasBegun();
-//						FlushD3DZBuffer();
-						#endif
-						{
-							//extern void ThisFramesRenderingHasBegun(void);
-							//ThisFramesRenderingHasBegun();
-						}
 					}
 
 					{
@@ -885,22 +822,13 @@ void _cdecl main()
 	#endif
  	CDDA_End();
 	ClearMemoryPool();
-	
-	/* 'shutdown' timer */
-//	timeEndPeriod(1); not necessary for xbox
 
-//	return(0);
+	/* bye bye! */
 }
 
-
-//int MouseX = 0;
-//int MouseY = 0;
-
-// replacement for windows message loop
+/* just a stub */
 void CheckForWindowsMessages()
 {
-	// read controller input here
-
 }
 
 BOOL ExitWindowsSystem(void)
@@ -918,67 +846,4 @@ BOOL InitialiseWindowsSystem(HANDLE hInstance, int nCmdShow,
 PROCESSORTYPES ReadProcessorType(void)
 {
 	return PType_PentiumMMX;
-}
-
-void ToggleKey(int avp_key, int unicode_key, int key_state)
-{
-#if 0
-	void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(char Ch);
-	void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(int wParam);
-
-	if(avp_key == -1) return;
-
-	if (key_state) {
-		switch(avp_key) {
-			case KEY_BACKSPACE:
-				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(VK_BACK);
-				break;
-			case KEY_END:
-				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(VK_END);
-				break;
-			case KEY_HOME:
-				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(VK_HOME);
-				break;
-			case KEY_LEFT:
-				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(VK_LEFT);
-				break;
-			case KEY_UP:
-				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(VK_UP);
-				break;
-			case KEY_RIGHT:
-				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(VK_RIGHT);
-				break;
-			case KEY_DOWN:
-				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(VK_DOWN);
-				break;
-			case KEY_INS:
-				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(VK_INSERT);
-				break;
-			case KEY_DEL:
-				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(VK_DELETE);
-				break;
-			case KEY_TAB:
-				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(VK_TAB);
-				break;
-			default:
-				if (unicode_key && !(unicode_key & 0xFF80)) {
-					RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(unicode_key);
-					KeyboardEntryQueue_Add(unicode_key);
-				}
-				break;
-		}
-	}
-
-	KeyboardInput[avp_key] = key_state;
-	GotAnyKey = key_state;
-//	IngameKeyboardInput_KeyDown(avp_key);
-/*
-	if (!KeyboardInput[avp_key]) {
-		DebouncedKeyboardInput[avp_key] = key_state;
-		DebouncedGotAnyKey = key_state;
-	}
-*/
-	DebouncedKeyboardInput[avp_key] = KeyboardInput[avp_key];
-	DebouncedGotAnyKey = GotAnyKey;// && !LastGotAnyKey;
-#endif
 }

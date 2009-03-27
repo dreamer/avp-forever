@@ -455,7 +455,17 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 	(*real_width) = new_width;
 
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
-#if 0
+#if 1
+
+	D3DXIMAGE_INFO image;
+	image.Depth = 32;
+	image.Width = tex->width;
+	image.Height= tex->height;
+	image.MipLevels = 1;
+	image.Depth = D3DFMT_A8R8G8B8;
+
+	D3DPOOL poolType = D3DPOOL_MANAGED;
+
 	/* create and fill tga header */
 	TGA_HEADER *TgaHeader = new TGA_HEADER;
 	TgaHeader->idlength = 0;
@@ -492,7 +502,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 		imageData[i] = tex->buffer[i+2];
 		imageData[i+3] = tex->buffer[i+3];
 	}
-
+#if 0
 	/* create direct3d texture */
 	if(FAILED(D3DXCreateTextureFromFileInMemory(d3d.lpD3DDevice,
 		buffer,
@@ -504,13 +514,37 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 		delete[] buffer;
 		return NULL;
 	}
+#endif
+
+	if(FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
+		buffer,
+		sizeof(TGA_HEADER) + imageSize,
+		D3DX_DEFAULT,//tex->width,
+		D3DX_DEFAULT,//tex->height,
+		1,
+		0,
+		D3DFMT_A8R8G8B8,
+		poolType,
+		D3DX_FILTER_NONE,
+		D3DX_FILTER_NONE,
+		0,
+		&image,
+		0,
+		&destTexture)))
+	{
+		OutputDebugString("COULD NOT CREATE TEXTURE?\n");
+		delete TgaHeader;
+		delete[] buffer;
+		return NULL;
+
+	}
 
 	delete TgaHeader;
 	delete[] buffer;
 
 	return destTexture;
 #endif
-#if 1	
+#if 0	
 	// default colour format
 	D3DFORMAT colour_format = D3DFMT_R5G6B5;
 
@@ -642,7 +676,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL
 	TgaHeader.colourmaptype = 0;
 	TgaHeader.datatypecode = 2;			// RGB
 	TgaHeader.bitsperpixel = 32;
-	TgaHeader.imagedescriptor = 0x20;		// set origin to top left
+	TgaHeader.imagedescriptor = 0x20;	// set origin to top left
 	TgaHeader.height = tex->height;
 	TgaHeader.width = tex->width;
 
@@ -825,27 +859,19 @@ const int MAX_INDICES = 9216;
 
 BOOL ReleaseVolatileResources() 
 {
+	ReleaseAllFMVTexturesForDeviceReset();
+
 	SAFE_RELEASE(d3d.lpD3DBackSurface);
 	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
 	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
-
-//	if(!mainMenu)
-	{
-		/* release fmv textures */
-		for(int i = 0; i < NumberOfFMVTextures; i++)
-		{	
-			OutputDebugString("releasing an fmv texture..\n");
-			SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
-			SAFE_RELEASE(FMVTexture[i].DestTexture);
-		}
-		NumberOfFMVTextures = 0; // this correct to do here?
-	}
 
 	return TRUE;
 }
 
 BOOL CreateVolatileResources() 
 {
+	RecreateAllFMVTexturesAfterDeviceReset();
+
 	/* create dynamic vertex buffer */
 	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DTLVERTEX),D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_TLVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
 	if(FAILED(LastError)) {
@@ -879,22 +905,15 @@ BOOL CreateVolatileResources()
 
 	SetExecuteBufferDefaults();
 
-	if(!mainMenu) // so we don't recreate textures when going back to the main menus
-	{
-		/* re-create fmv textures */
-		for(int i = 0; i < NumberOfFMVTextures; i++)
-		{	
-			d3d.lpD3DDevice->CreateTexture(FMVTexture[i].ImagePtr->ImageWidth, FMVTexture[i].ImagePtr->ImageHeight, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &FMVTexture[i].ImagePtr->Direct3DTexture, NULL);
-			SetupFMVTexture(&FMVTexture[i]);
-		}
-	}
-
 	return TRUE;
 }
 
 BOOL ChangeGameResolution(int width, int height, int colourDepth)
 {
 	ReleaseVolatileResources();
+
+	/* location of this will need to be rechecked if we ever decide to add ingame res change.. */
+//	NumberOfFMVTextures = 0;
 
 	d3d.d3dpp.BackBufferHeight = height;
 	d3d.d3dpp.BackBufferWidth = width;
@@ -1325,17 +1344,6 @@ void InGameFlipBuffers()
 {
 	FlipBuffers();
 }
-
-// Note that error conditions have been removed
-// on the grounds that an early exit will prevent
-// EndScene being run if this function is used,
-// which screws up all subsequent buffers
-
-BOOL RenderD3DScene()
-{
-	return TRUE;
-}
-
 
 // With a bit of luck this should automatically
 // release all the Direct3D and  DirectDraw

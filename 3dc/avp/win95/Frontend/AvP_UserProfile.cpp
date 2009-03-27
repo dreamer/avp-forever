@@ -118,12 +118,8 @@ extern int SaveUserProfile(AVP_USER_PROFILE *profilePtr)
 	strcat(filename,profilePtr->Name);
 	strcat(filename,USER_PROFILES_SUFFIX);
 
-#ifdef WIN32
 	FILE* file=fopen(filename,"wb");
-#endif
-#ifdef _XBOX
-	FILE* file=fopen(filename,"wb");
-#endif
+
 	delete [] filename;
 	if(!file) return 0;
 	
@@ -180,6 +176,7 @@ static void InsertProfileIntoList(AVP_USER_PROFILE *profilePtr)
 	}
 	UserProfilesList.add_entry(profilePtr);
 }
+
 static int ProfileIsMoreRecent(AVP_USER_PROFILE *profilePtr, AVP_USER_PROFILE *profileToTestAgainstPtr)
 {
 	if (CompareFileTime(&profilePtr->FileTime,&profileToTestAgainstPtr->FileTime)==1)
@@ -191,9 +188,9 @@ static int ProfileIsMoreRecent(AVP_USER_PROFILE *profilePtr, AVP_USER_PROFILE *p
 		return 0;
 	}
 }
+
 static int LoadUserProfiles(void)
 {
-
 	const char* load_name=USER_PROFILES_WILDCARD_NAME;
 	// allow a wildcard search
 	WIN32_FIND_DATA wfd;
@@ -425,7 +422,6 @@ extern void FixCheatModesInUserProfile(AVP_USER_PROFILE *profilePtr)
 			profilePtr->CheatMode[a]=1;
 		}
 	}
-
 }
 
 }; // extern "C"

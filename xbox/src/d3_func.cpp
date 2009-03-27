@@ -327,154 +327,82 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex,int *real_height, int 
 	}
 	else { new_height = original_height; }
 
-	if(new_height < 64) new_height = 64;
-	if(new_width < 64) new_width = 64;
-
 	// set passed in width and height values to be used later
 	(*real_height) = new_height;
 	(*real_width) = new_width;
 
-//	char buf[100];
-//	sprintf(buf,"Got in width: %d, height: %d and made a new tex, width: %d, height: %d",tex->w, tex->h, new_width, new_height);
-//	OutputDebugString(buf);
-
-//	LPDIRECT3DTEXTURE9 tempTexture = NULL;
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
-	LPDIRECT3DTEXTURE8 swizTexture = NULL;
-	
-	// default colour format
-	D3DFORMAT colour_format = D3DFMT_R5G6B5;
 
-	if (ScreenDescriptorBlock.SDB_Depth == 16) {
-		colour_format = D3DFMT_R5G6B5;
-	}
-	if (ScreenDescriptorBlock.SDB_Depth == 32) {
-//		colour_format = D3DFMT_A8R8G8B8;
-		colour_format = D3DFMT_LIN_A8R8G8B8;
-	}
+	D3DXIMAGE_INFO image;
+	image.Depth = 32;
+	image.Width = tex->width;
+	image.Height= tex->height;
+	image.MipLevels = 1;
+	image.Depth = D3DFMT_A8R8G8B8;
 
-	LastError = d3d.lpD3DDevice->CreateTexture(new_width, new_height, 1, NULL, colour_format, D3DPOOL_MANAGED, &destTexture);
-	if(FAILED(LastError)) {
-//		LogDxError("Unable to create menu texture", LastError);
-		LogDxError(LastError);
-//		OutputDebugString("\n Couldn't create padded texture");
-		return NULL;
-	}
+	D3DPOOL poolType = D3DPOOL_MANAGED;
 
-	D3DLOCKED_RECT lock;
-	
-	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
-	if(FAILED(LastError)) {
-//		LogDxError("Unable to lock menu texture for writing", LastError);
-		LogDxError(LastError);
-		destTexture->Release();
-		return NULL;
-	}
+	/* fill tga header */
+	TgaHeader.idlength = 0;
+	TgaHeader.x_origin = tex->width;
+	TgaHeader.y_origin = tex->height;
+	TgaHeader.colourmapdepth = 0;
+	TgaHeader.colourmaplength = 0;
+	TgaHeader.colourmaporigin = 0;
+	TgaHeader.colourmaptype = 0;
+	TgaHeader.datatypecode = 2;			// RGB
+	TgaHeader.bitsperpixel = 32;
+	TgaHeader.imagedescriptor = 0x20;	// set origin to top left
+	TgaHeader.height = tex->height;
+	TgaHeader.width = tex->width;
 
-	if (ScreenDescriptorBlock.SDB_Depth == 16) {
-		unsigned short *destPtr;
-		unsigned char *srcPtr;
-		
-		srcPtr = (unsigned char *)tex->buffer;
+	/* size of raw image data */
+	int imageSize = tex->height * tex->width * 4;
 
-		// lets pad the whole thing black first
-		for (int y = 0; y < new_height; y++)
-		{
-			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch));
+	/* create new buffer for header and image data */
+	byte *buffer = new byte[sizeof(TGA_HEADER) + imageSize];
 
-			for (int x = 0; x < new_width; x++)
-			{
-				*destPtr = RGB16(pad_colour, pad_colour, pad_colour);
-				destPtr+=1;
-			}
-		}
+	/* copy header and image data to buffer */
+	memcpy(buffer, &TgaHeader, sizeof(TGA_HEADER));
 
-		// then actual image data
-		for (int y = 0; y < original_height; y++)
-		{
-			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch));
+	byte *imageData = buffer + sizeof(TGA_HEADER);
 
-			for (int x = 0; x < original_width; x++)
-			{
-				*destPtr = RGB16(srcPtr[0], srcPtr[1], srcPtr[2]);
-
-				destPtr+=1;
-				srcPtr+=4;
-			}
-		}
-	}
-	if (ScreenDescriptorBlock.SDB_Depth == 32) { 
-		unsigned char *srcPtr, *destPtr;
-		
-		srcPtr = (unsigned char *)tex->buffer;
-
-		// lets pad the whole thing black first
-		for (int y = 0; y < new_height; y++)
-		{
-			destPtr = (((unsigned char  *)lock.pBits) + y*lock.Pitch);
-
-			for (int x = 0; x < new_width; x++)
-			{
-				*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(pad_colour,pad_colour,pad_colour,0xff);
-				destPtr+=4;
-			}
-		}
-
-		// then actual image data
-		for (int y = 0; y < original_height; y++)
-		{
-			destPtr = (((unsigned char *)lock.pBits) + y*lock.Pitch);
-
-			for (int x = 0; x < original_width; x++)
-			{
-				*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], 255);
-
-				destPtr+=4;
-				srcPtr+=4;
-			}
-		}
-	}
-
-	D3DLOCKED_RECT lock2;
-	LastError = d3d.lpD3DDevice->CreateTexture(new_width, new_height, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &swizTexture);
-	LastError = swizTexture->LockRect(0, &lock2, NULL, NULL );
-
-	if (ScreenDescriptorBlock.SDB_Depth == 16)
+	/* loop, converting RGB to BGR for D3DX function */
+	for (int i = 0; i < imageSize; i+=4)
 	{
-		XGSwizzleRect(lock.pBits, lock.Pitch, NULL, lock2.pBits, new_width, new_height, NULL, 1);
+		// RGB
+		// BGR
+		imageData[i+2] = tex->buffer[i];
+		imageData[i+1] = tex->buffer[i+1];
+		imageData[i] = tex->buffer[i+2];
+		imageData[i+3] = tex->buffer[i+3];
 	}
-	else
+
+	if(FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
+		buffer,
+		sizeof(TGA_HEADER) + imageSize,
+		D3DX_DEFAULT,//tex->width,
+		D3DX_DEFAULT,//tex->height,
+		1,
+		0,
+		D3DFMT_A8R8G8B8,
+		poolType,
+		D3DX_FILTER_NONE,
+		D3DX_FILTER_NONE,
+		0,
+		&image,
+		0,
+		&destTexture)))
 	{
-		XGSwizzleRect(lock.pBits, lock.Pitch, NULL, lock2.pBits, new_width, new_height, NULL, 4);
+		OutputDebugString("COULD NOT CREATE TEXTURE?\n");
+		delete[] buffer;
+		return NULL;
+
 	}
 
-	LastError = destTexture->UnlockRect(0);
-	if(FAILED(LastError)) {
-//		LogDxError("Unable to unlock menu texture", LastError);
-		LogDxError(LastError);
-	}
+	delete[] buffer;
 
-	LastError = swizTexture->UnlockRect(0);
-	destTexture->Release();
-/*
-	if(FAILED(d3d.lpD3DDevice->UpdateTexture(tempTexture, destTexture))) {
-		OutputDebugString("UpdateTexture failed \n");
-	}
-*/
-//	char char_buf[100];
-//	sprintf(char_buf, "image_%d.png", image_num);
-//	if(FAILED(D3DXSaveTextureToFileA(char_buf, D3DXIFF_PNG, destTexture, NULL))) {
-//		OutputDebugString("couldnt save tex to file");
-//	}
-
-//	image_num++;
-
-/*
-	tempTexture->Release();
-	tempTexture = NULL;
-*/
-//	return destTexture;
-	return swizTexture;
+	return destTexture;
 }
 
 LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL poolType) 
@@ -815,12 +743,12 @@ BOOL InitialiseDirect3DImmediateMode()
 
 		if(videoFlags & XC_VIDEO_FLAGS_PAL_60Hz)		// PAL 60 user
 		{
-			//d3dpp.FullScreen_RefreshRateInHz = 60;
+			d3dpp.FullScreen_RefreshRateInHz = 60;
 			OutputDebugString("using refresh of 60\n");
 		}
 		else
 		{
-			//d3dpp.FullScreen_RefreshRateInHz = 50;
+			d3dpp.FullScreen_RefreshRateInHz = 50;
 			OutputDebugString("using refresh of 50\n");
 		}
 	}
@@ -912,23 +840,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	{
 		LogDxErrorString("Could not set viewport");
 	}
-/*
-	LastError = d3d.lpD3DDevice->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &d3d.lpD3DBackSurface);
 
-	if (FAILED(LastError))
-	{
-		LogDxErrorString("Could not get a copy of the back buffer");
-		return FALSE;
-	}
-
-	LastError = d3d.lpD3DBackSurface->GetDesc(&d3d.BackSurface_desc);
-
-	if (FAILED(LastError))
-	{
-		LogDxErrorString("Could not get backbuffer surface description");
-		return FALSE;
-	}
-*/
 	ScreenDescriptorBlock.SDB_Width     = width;
 	ScreenDescriptorBlock.SDB_Height    = height;
 	ScreenDescriptorBlock.SDB_Depth		= depth;

@@ -16,8 +16,8 @@ typedef void (* AT_PFN_RESTORETEXTURE) (AvPTexture * pTexture, void * pUser);
 typedef void (* AT_PFN_RESTORESURFACE) (DDSurface * pSurface, void * pUser);
 
 #ifdef NDEBUG
-	extern void ATIncludeTexture(D3DTexture * pTexture, AW_BACKUPTEXTUREHANDLE hBackup);
-	extern void ATIncludeTextureEx(D3DTexture * pTexture, AT_PFN_RESTORETEXTURE pfnRestore, void * pUser);
+	extern void ATIncludeTexture(AvPTexture * pTexture, AW_BACKUPTEXTUREHANDLE hBackup);
+	extern void ATIncludeTextureEx(AvPTexture * pTexture, AT_PFN_RESTORETEXTURE pfnRestore, void * pUser);
 	extern void ATIncludeSurface(DDSurface * pSurface, AW_BACKUPTEXTUREHANDLE hBackup);
 	extern void ATIncludeSurfaceEx(DDSurface * pSurface, AT_PFN_RESTORESURFACE pfnRestore, void * pUser);
 #else

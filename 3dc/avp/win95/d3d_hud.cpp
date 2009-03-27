@@ -241,7 +241,7 @@ void D3D_InitialiseMarineHUD(void)
 	MotionTrackerCentreX = BlueBar.TopLeftX+(BlueBar.Width/2);
 	MotionTrackerScale = 65536;
 
-	HUDScaleFactor = DIV_FIXED(ScreenDescriptorBlock.SDB_Width,640);	
+	HUDScaleFactor = DIV_FIXED(ScreenDescriptorBlock.SDB_Width, 640);	
 
 	#if UseGadgets
 //	MotionTrackerGadget::SetCentre(r2pos(100,100));

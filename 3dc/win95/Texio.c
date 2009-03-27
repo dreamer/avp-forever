@@ -1564,7 +1564,9 @@ static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 
 	if (ihptr->Direct3DTexture)
 	{
-		ReleaseD3DTexture8(ihptr->Direct3DTexture);
+		ihptr->Direct3DTexture->lpVtbl->Release(ihptr->Direct3DTexture);
+		ihptr->Direct3DTexture = NULL;
+//		ReleaseD3DTexture8(ihptr->Direct3DTexture);
 	}
 }
 
@@ -1584,7 +1586,9 @@ static void MinimizeImageHeader(IMAGEHEADER * ihptr)
 
 	if (ihptr->Direct3DTexture)
 	{
-		ReleaseD3DTexture8(ihptr->Direct3DTexture);
+//		ReleaseD3DTexture8(ihptr->Direct3DTexture);
+		ihptr->Direct3DTexture->lpVtbl->Release(ihptr->Direct3DTexture);
+		ihptr->Direct3DTexture = NULL;
 	}
 }
 

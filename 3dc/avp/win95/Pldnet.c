@@ -9159,7 +9159,7 @@ void TeleportNetPlayerToAStartingPosition(STRATEGYBLOCK *playerSbPtr, int startO
 			{
 				VECTORCH seperationVec;
 				int distance;
-				
+
 				seperationVec = netGameData.playerData[playerIndex].lastKnownPosition;
 				seperationVec.vx -= startPositions[start_index].location.vx;
 				seperationVec.vy -= startPositions[start_index].location.vy;
@@ -9170,10 +9170,8 @@ void TeleportNetPlayerToAStartingPosition(STRATEGYBLOCK *playerSbPtr, int startO
 				{
 					closestDistance=distance;
 				}
-			}	
-
+			}
 		}
-		
 		
 		if(closestDistance>20000)				
 		{
@@ -9212,9 +9210,7 @@ void TeleportNetPlayerToAStartingPosition(STRATEGYBLOCK *playerSbPtr, int startO
 			AllNewModuleHandler();
 			DoObjectVisibilities();
 		}
-		
 	}
-
 }
 #endif
 
@@ -9325,10 +9321,7 @@ void StartOfGame_PlayerPlacement(STRATEGYBLOCK *playerSbPtr,int seed)
 			}
 			//don't care about the positioning of anyone further on in the list
 			return;
-
 		}
-
-		
 	}
 }
 
@@ -9450,7 +9443,6 @@ void CreatePlayersImageInMirror(void)
 	}
 		sbPtr->SBdptr->HModelControlBlock=&ghostData->HModelController;
 		ProveHModel(sbPtr->SBdptr->HModelControlBlock,sbPtr->SBdptr);
-
 }
 
 void DeallocatePlayersMirrorImage()
@@ -9595,11 +9587,9 @@ void RestartNetworkGame(int seed)
 	netGameData.numDeaths[1]=0;
 	netGameData.numDeaths[2]=0;
 
-
 	netGameData.lastPointsBasedRespawn=0;
 
 	AvP.RestartLevel=1;
-
 
 	
 	if(netGameData.gameType==NGT_LastManStanding)
@@ -9755,9 +9745,6 @@ static void Inform_NewHost(void)
 	NewOnScreenMessage(GetTextString(TEXTSTRING_MULTIPLAYERCONSOLE_NEWHOST));
 }
 
-
-
-
 static void WriteFragmentStatus(int fragmentNumber, int status)
 {
 	int n = fragmentNumber>>3;
@@ -9774,6 +9761,7 @@ static void WriteFragmentStatus(int fragmentNumber, int status)
 		*ptr &= ~mask;
 	}
 }
+
 static int ReadFragmentStatus(int fragmentNumber)
 {
 	int n = fragmentNumber>>3;
@@ -9795,6 +9783,7 @@ static void WriteStrategySynch(int objectNumber, int status)
 	*ptr |= (status & 3)<<shift;
 
 }
+
 static int ReadStrategySynch(int objectNumber)
 {
 	int n = objectNumber>>2;
@@ -9804,8 +9793,6 @@ static int ReadStrategySynch(int objectNumber)
 
 	return(((*ptr)&mask)>>shift);
 }
-
-
 
 #if 1
 static int GetDynamicScoreMultiplier(int playerKilledIndex,int killerIndex)
@@ -9849,9 +9836,7 @@ static int GetDynamicScoreMultiplier(int playerKilledIndex,int killerIndex)
 		if(mult>ONE_FIXED) mult=ONE_FIXED;
 	}
 
-
 	return mult;
-	
 }
 #else
 static int GetDynamicScoreMultiplier(int playerKilledIndex,int killerIndex)
@@ -10047,7 +10032,6 @@ static void CheckLastManStandingState()
 				Handle_LastManStanding_RestartTimer((char)secondsAfter);
 			}
 		}
-	
 	}
 	else
 	{
@@ -10090,9 +10074,7 @@ static void CheckLastManStandingState()
 				netGameData.LMS_RestartTimer=4*ONE_FIXED;
 			}
 		}
-
 	}
-	
 }
 
 static void Handle_LastManStanding_Restart(DPID alienID,int seed)
@@ -10186,12 +10168,7 @@ static void Handle_LastManStanding_RestartTimer(unsigned char time)
 		sprintf(OnScreenMessageBuffer,"%d...",time );
 		NewOnScreenMessage(OnScreenMessageBuffer);
 	}
-
 }
-
-
-
-
 
 static int CountPlayersOfType(NETGAME_CHARACTERTYPE species)
 {
@@ -10246,10 +10223,7 @@ static void CheckSpeciesTagState()
 		}
 		AddNetMsg_PlayerID(predID,NetMT_PredatorTag_NewPredator);
 		Handle_SpeciesTag_NewPersonIt(predID);
-		
-
-	}
-	
+	}	
 }
 
 

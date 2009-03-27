@@ -168,7 +168,7 @@ STICKYKEYS skOff;
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
 	char * instr;
-	#if debug
+	#if 1//debug
 	int level_to_load = I_Num_Environments;
 	char * command_line = lpCmdLine;
 	#endif
@@ -386,9 +386,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	InitGame();
 
-    /*** Define video mode for windows initialisation ***/
- //bjd	InitialVideoMode();
-
 	/****** Put in by John to sort out easy sub window mode ******/
 	/****** REMOVE FOR GAME!!!!! ******/
 
@@ -449,7 +446,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	
 	BuildMultiplayerLevelNameArray();//sort out multiplayer level names
 	
-//	ChangeDirectDrawObject();
 	AvP.LevelCompleted = 0;
 	LoadSounds("PLAYER"); 
 
@@ -494,17 +490,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			(not necessary if user selects EXIT)
 			So it is set here */
 
-		/********** Grab The Video mode **********/
-//		GetCorrectDirectDrawObject();
-
 		ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth);
-#if 0 // bjd resolution change?
-		if(!SetGameVideoMode())
-		{
-			VideoModeNotAvailable=1;
-			continue;
-		}
-#endif
 
 	    /* Dubious restart hack for DirectDraw problems */
 		/* JH - I'm not sure this is really necessary
@@ -546,6 +532,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
   			AvP.CurrentEnv = AvP.StartingEnv = level_to_load;
   		}
+		//#endif
+		#else
+			AvP.CurrentEnv = AvP.StartingEnv = 0;
 		#endif
 		
 		LoadRifFile(); /* sets up a map*/
@@ -601,8 +590,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		{
 
 			#if debug
-			#if 1
-			//DumpBoundsCheckInfo(DUMPTOSCREEN);
+			#if 0
+			DumpBoundsCheckInfo(DUMPTOSCREEN);
 			#endif
 			#endif
 
@@ -685,18 +674,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 						ReadUserInput();
 //						UpdateAllFMVTextures();	
 						SoundSys_Management();
-						#if SOFTWARE_RENDERER
-						FlushSoftwareZBuffer();
-						#else
 					
 						// bjd
 						ThisFramesRenderingHasBegun();
-//						FlushD3DZBuffer();
-						#endif
-						{
-							//extern void ThisFramesRenderingHasBegun(void);
-							//ThisFramesRenderingHasBegun();
-						}
 					}
 
 					{
@@ -922,7 +902,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	#endif
 
 	/* close dx logfile if open (has to be called after all calls to TimeStampedMessage() */
+#if debug
 	dx_log_close();
+#endif
 
  	CDDA_End();
 	ClearMemoryPool();

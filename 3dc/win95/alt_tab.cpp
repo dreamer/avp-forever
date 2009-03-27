@@ -243,7 +243,7 @@ struct AltTabDebugLists : AltTabLists
 		else
 			pNewNode->d.m_pszDebugString = NULL;
 	#else
-		pNewNode->d.m_pRestore = new AltTabUserRestore<D3DTexture>(pfnRestore,pUser);
+		pNewNode->d.m_pRestore = new AltTabUserRestore<AvPTexture>(pfnRestore,pUser);
 	#endif
 	g_atlists.m_listTextures.AddAsserted(pNewNode);
 }

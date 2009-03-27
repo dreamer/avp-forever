@@ -244,7 +244,9 @@ void InitMarineHUD(void)
 
 	{
 		int i;
-		for (i=0; i<MAX_NO_OF_MARINE_HUD_DIGITS; i++)
+//		for (i=0; i<MAX_NO_OF_MARINE_HUD_DIGITS; i++)
+		/* array size is 6, MAX_NO_OF_MARINE_HUD_DIGITS = 23.. */
+		for (i=0; i<MAX_NO_OF_COMMON_HUD_DIGITS; i++)
 			ValueOfHUDDigit[i]=0;
 	}
 	
@@ -526,24 +528,6 @@ void MaintainHUD(void)
 		if (PlayerDamagedOverlayIntensity<0) PlayerDamagedOverlayIntensity=0;
 	}
 	{
-		#if 0
-		if(DrawCompanyLogos && LogosAlphaLevel)
-		{
-			extern void D3D_DrawRebellionLogo(unsigned int alpha);
-			
-			if (LogosAlphaLevel<ONE_FIXED)
-			{
-				D3D_DrawRebellionLogo(LogosAlphaLevel);
-			}
-			else
-			{
-				D3D_DrawRebellionLogo(0xff00);
-			}
-			
-			LogosAlphaLevel-=NormalFrameTime;
-			if (LogosAlphaLevel<0) LogosAlphaLevel=0;
-		}
-		#endif
 		if(FadingGameInAfterLoading)
 		{
 			extern void D3D_FadeDownScreen(int brightness, int colour);

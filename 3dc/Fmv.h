@@ -46,6 +46,9 @@ void PlayMenuMusic();
 void StartMenuMusic();
 //int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr);
 int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr, int pitch);
+void ReleaseAllFMVTexturesForDeviceReset();
+void RecreateAllFMVTexturesAfterDeviceReset();
 
+extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
 
 #endif // #ifndef _FMV_

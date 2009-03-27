@@ -1,7 +1,6 @@
 //#undef USE_FMV
 //#ifndef USE_FMV
-//#if _XBOX
-#if 1
+#if 0
 
 extern "C" {
 
@@ -64,6 +63,11 @@ extern void StartMenuBackgroundBink()
 }
 
 void UpdateFMVAudioBuffer(void *arg) 
+{
+
+}
+
+void RecreateAllFMVTexturesAfterDeviceReset()
 {
 
 }

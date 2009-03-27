@@ -496,7 +496,7 @@ int mouseMoved = 0;
 // mode, and will not attempt to register
 // the windows class.
 
-BOOL InitialiseWindowsSystem(HANDLE hInstance, int nCmdShow,
+BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow,
      int WinInitMode)
 { 
 	WNDCLASS	wc;

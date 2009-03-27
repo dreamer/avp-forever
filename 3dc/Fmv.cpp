@@ -1,4 +1,4 @@
-//#define USE_FMV
+#define USE_FMV
 #ifdef USE_FMV
 
 #define	USE_AUDIO		1
@@ -22,10 +22,10 @@ int PanningOfNearestVideoScreen = 0;
 
 #define MAX_NO_FMVTEXTURES 10
 FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES] = {0};
-int NumberOfFMVTextures;
+int NumberOfFMVTextures = 0;
 
-extern int GotAnyKey;
-extern int DebouncedGotAnyKey;
+extern unsigned char GotAnyKey;
+extern unsigned char DebouncedGotAnyKey;
 extern HWND hWndMain;
 extern IMAGEHEADER ImageHeaderArray[];
 
@@ -73,8 +73,7 @@ extern void ThisFramesRenderingHasFinished(void);
 
 void drive_decoding(void *arg);
 void display_frame(void *arg);
-void handle_video_data (OggPlay * player, int track_num, OggPlayVideoData * video_data, int frame);
-bool FmvWait();
+void handle_video_data(OggPlay * player, int track_num, OggPlayVideoData * video_data, int frame);
 int NextFMVFrame();
 int FmvOpen(char *filenamePtr);
 void FmvClose();
@@ -108,7 +107,7 @@ DWORD					fmvaudioBytes2;
 int						fullBufferSize = 0;
 int						halfBufferSize = 0;
 
-DWORD					writeOffset = 0;
+long					writeOffset = 0;
 long					lastPlayCursor = 0;
 long					totalBytesPlayed = 0;
 long					totalBytesWritten = 0;
@@ -177,9 +176,9 @@ extern void PlayBinkedFMV(char *filenamePtr)
 	while(playing == 1)
 	{
 		CheckForWindowsMessages();
-//	    if (!BinkWait(binkHandle)) 
-		if (!FmvWait())
-			playing = NextFMVFrame();//NextBinkFrame(binkHandle);
+
+		if (frameReady)
+			playing = NextFMVFrame();
 
 		ThisFramesRenderingHasBegun();
 		ClearScreenToBlack();
@@ -346,7 +345,7 @@ void ScanImagesForFMVs()
 	extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
 	int i;
 	IMAGEHEADER *ihPtr;
-	NumberOfFMVTextures=0;
+	NumberOfFMVTextures = 0;
 
 	OutputDebugString("scan images for fmvs\n");
 
@@ -420,23 +419,25 @@ void ScanImagesForFMVs()
 						FMVTexture[NumberOfFMVTextures].StaticImageDrawn = 0;
 						SetupFMVTexture(&FMVTexture[NumberOfFMVTextures]);
 						NumberOfFMVTextures++;
+						OutputDebugString("NumberOfFMVTextures++;\n");
 					}
 				}
-			}		
+			}
 		}
 	}
 }
 
+/* called when player quits level and returns to main menu */
 void ReleaseAllFMVTextures()
 {
-	OutputDebugString("releasing fmv textures and also closing ingame fmv playback\n");
+	OutputDebugString("exiting level..closing FMV system\n");
 	FmvClose();
 
 	for(int i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].MessageNumber = 0;
-		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
 		SAFE_RELEASE(FMVTexture[i].DestTexture);
+		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
 	}
 	NumberOfFMVTextures = 0;
 }
@@ -447,8 +448,17 @@ void ReleaseAllFMVTexturesForDeviceReset()
 	{
 		FMVTexture[i].MessageNumber = 0;
 
-		SAFE_RELEASE(FMVTexture[i].DestTexture);
+//		SAFE_RELEASE(FMVTexture[i].DestTexture);
 		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
+	}
+}
+
+void RecreateAllFMVTexturesAfterDeviceReset()
+{
+	for(int i = 0; i < NumberOfFMVTextures; i++)
+	{	
+		//SetupFMVTexture(&FMVTexture[i]);
+		d3d.lpD3DDevice->CreateTexture(FMVTexture[i].ImagePtr->ImageWidth, FMVTexture[i].ImagePtr->ImageHeight, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &FMVTexture[i].ImagePtr->Direct3DTexture, NULL);
 	}
 }
 
@@ -564,7 +574,9 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr, int pitch)
 		ftPtr->SoundVolume = SmackerSoundVolume;
 	    
 //	    if (SmackWait(ftPtr->SmackHandle)) return 0;
-		if (FmvWait()) return 0;
+		//if (FmvWait()) return 0;
+
+		if (!frameReady) return 0;
 		/* unpack frame */
 
 		WriteFmvData((unsigned char*)bufferPtr, textureData, w, h, pitch);
@@ -587,16 +599,10 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr, int pitch)
 				delete ftPtr->SmackHandle;
 				ftPtr->SmackHandle = NULL;
 			}
-
-//			SmackClose(ftPtr->SmackHandle);
 			
 			ftPtr->MessageNumber = 0;
 		}
-		else
-		{
-			/* next frame, please */
-//			SmackNextFrame(ftPtr->SmackHandle);
-		}
+
 		ftPtr->StaticImageDrawn=0;
 	}
 
@@ -687,6 +693,16 @@ int GetVolumeOfNearestVideoScreen(void)
 
 int FmvOpen(char *filenamePtr)
 {
+	FILE *test;
+	test = fopen(filenamePtr, "r");
+	if (test == NULL)
+	{
+		sprintf(buf, "couldn't find fmv file: %s\n", filenamePtr);
+		OutputDebugString(buf);
+		return 1;
+	}
+	else fclose(test);
+
 	/* try to open our video file by filename*/
 	reader = oggplay_file_reader_new(filenamePtr);
 	if (reader == NULL)
@@ -1102,7 +1118,7 @@ int GetWritableBufferSize()
 //	sprintf(buf, "getWrite - playPosition: %d writePosition: %d\n", playPosition, writePosition);
 //	OutputDebugString(buf);
 
-	if(writeOffset <= playPosition)
+	if (writeOffset <= playPosition)
 	{
 		writeLen = playPosition - writeOffset;
 	}
@@ -1266,7 +1282,7 @@ int WriteToDsound(int dataSize)
 
 	/* update our write cursor to next write position */
 	writeOffset += dataWritten;
-	if (writeOffset > ring.bufferSize) writeOffset = writeOffset - ring.bufferSize;
+	if (writeOffset >= ring.bufferSize) writeOffset = writeOffset - ring.bufferSize;
 
 	return dataWritten;
 }
@@ -1329,18 +1345,6 @@ void handle_video_data (OggPlay * player, int track_num, OggPlayVideoData * vide
 	}
 }
 
-bool FmvWait()
-{
-	if (frameReady == true)
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-}
-
 void WriteFmvData(unsigned char *destData, unsigned char *srcData, int width, int height, int pitch)
 {
 	unsigned char *srcPtr, *destPtr;
@@ -1389,15 +1393,7 @@ int NextFMVFrame()
 	/* lock the d3d texture */
 	fmvDynamicTexture->LockRect( 0, &textureRect, NULL, NULL );
 
-	/* copy bink frame to texture */
-//	BinkCopyToBuffer(binkHandle, texture_rect.pBits, texture_rect.Pitch, 1024, 0, 0, BinkSurfaceType);
-//	unsigned char *srcPtr, *destPtr;
-
-	/* if src pointer is null, return 'error' */
-//	if (textureData == NULL) return -1;
-//
-//	srcPtr = (unsigned char *)textureData;
-
+	/* write frame image data to texture */
 	WriteFmvData((unsigned char*)textureRect.pBits, textureData, imageWidth, imageHeight, textureRect.Pitch);
 
 	/* unlock d3d texture */
