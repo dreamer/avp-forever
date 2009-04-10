@@ -41,8 +41,11 @@ void EmptyCDTrackList()
 	}
 }
 
+#ifdef _XBOX
+#define CDTrackFileName "D:\\CD Tracks.txt"
+#else
 #define CDTrackFileName "CD Tracks.txt"
-
+#endif
 
 static void ExtractTracksForLevel(char* &buffer, List<int> &track_list)
 {

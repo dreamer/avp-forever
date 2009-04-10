@@ -1309,14 +1309,12 @@ void SpriteResizing(SHAPEHEADER *sptr)
 */
 
 void FindImageExtents(IMAGEHEADER *ihdr, int numuvs, int *uvdata, IMAGEEXTENTS *e, IMAGEEXTENTS *e_curr)
-
 {
-
 	int i;
 	int *uvptr;
-	int u, v;
-	int startu, endu;
-	int startv, endv;
+//	int u, v;
+//	int startu, endu;
+//	int startv, endv;
 
 
 	/* Find the current UV extents */
@@ -1343,13 +1341,11 @@ void FindImageExtents(IMAGEHEADER *ihdr, int numuvs, int *uvdata, IMAGEEXTENTS *
 
 
 	/* Look for the actual UV extents, assuming that colour 0 is transparent */
-
+#if 0
 	switch(VideoModeType) {
 
 		case VideoModeType_8:
-
 			{
-
 				TEXTURE *tptr = ihdr->ImagePtr;
 				TEXTURE texel;
 
@@ -1374,11 +1370,8 @@ void FindImageExtents(IMAGEHEADER *ihdr, int numuvs, int *uvdata, IMAGEEXTENTS *
 
 							if(u < e->u_low) e->u_low = u;
 							if(v < e->v_low) e->v_low = v;
-
 						}
-
 					}
-
 				}
 
 				if(e->u_low == bigint) e->u_low = e_curr->u_low;
@@ -1402,9 +1395,7 @@ void FindImageExtents(IMAGEHEADER *ihdr, int numuvs, int *uvdata, IMAGEEXTENTS *
 							if(v > e->v_high) e->v_high = v;
 
 						}
-
 					}
-
 				}
 
 				if(e->u_high == smallint) e->u_high = e_curr->u_high;
@@ -1426,9 +1417,8 @@ void FindImageExtents(IMAGEHEADER *ihdr, int numuvs, int *uvdata, IMAGEEXTENTS *
 
 		case VideoModeType_8T:
 			break;
-
 	}
-
+#endif
 }
 
 
@@ -1525,6 +1515,7 @@ void ReturnTextureMemory(TEXTURE *txptr)
 
 static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 {
+#if 0
 	if (ihptr->hBackup)
 	{
 		if (ihptr->DDSurface)
@@ -1538,23 +1529,25 @@ static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 			ATRemoveTexture(ihptr->AvPTexture);
 		}
 		
-		AwDestroyBackupTexture(ihptr->hBackup);
-		ihptr->hBackup = 0;
+//		AwDestroyBackupTexture(ihptr->hBackup);
+//		ihptr->hBackup = 0;
 	}
-	
+#endif
+#if 0	
 	if (ihptr->ImagePtr) 
 	{
 		DeallocateMem(ihptr->ImagePtr);
 		ihptr->ImagePtr = 0;
 	}
-
+#endif
+#if 0
 	if (ihptr->DDSurface)
 	{
 //		ATRemoveSurface(ihptr->DDSurface);
 		ReleaseDDSurface(ihptr->DDSurface);
 		ihptr->DDSurface = (void*) 0;
 	}
-
+#endif
 	if (ihptr->AvPTexture)
 	{
 		ReleaseD3DTexture(ihptr->AvPTexture);
@@ -1564,20 +1557,24 @@ static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 
 	if (ihptr->Direct3DTexture)
 	{
+#ifdef _XBOX
+		ReleaseD3DTexture8(ihptr->Direct3DTexture);
+#else
 		ihptr->Direct3DTexture->lpVtbl->Release(ihptr->Direct3DTexture);
 		ihptr->Direct3DTexture = NULL;
-//		ReleaseD3DTexture8(ihptr->Direct3DTexture);
+#endif
 	}
 }
 
 static void MinimizeImageHeader(IMAGEHEADER * ihptr)
 {
+#if 0
 	if (ihptr->DDSurface)
 	{
 		ReleaseDDSurface(ihptr->DDSurface);
 		ihptr->DDSurface = (void*) 0;
 	}
-
+#endif
 	if (ihptr->AvPTexture)
 	{
 		ReleaseD3DTexture(ihptr->AvPTexture);
@@ -1586,9 +1583,12 @@ static void MinimizeImageHeader(IMAGEHEADER * ihptr)
 
 	if (ihptr->Direct3DTexture)
 	{
-//		ReleaseD3DTexture8(ihptr->Direct3DTexture);
+#ifdef _XBOX
+		ReleaseD3DTexture8(ihptr->Direct3DTexture);
+#else
 		ihptr->Direct3DTexture->lpVtbl->Release(ihptr->Direct3DTexture);
 		ihptr->Direct3DTexture = NULL;
+#endif
 	}
 }
 

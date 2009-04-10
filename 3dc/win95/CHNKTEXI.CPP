@@ -722,6 +722,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 		}
 		case LIO_DDSURFACE:
 		{
+#if 0 // bjd - this is never used as far as I can see
 			#if CL_SUPPORT_FASTFILE
 			unsigned nFastFileLen;
 			void const * pFastFileData = ffreadbuf(szBuf,&nFastFileLen);
@@ -750,8 +751,8 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					pImageHdr->ImageHeight = pSurface->height; //nHeight;
 					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
 					strcpy(pImageHdr->ImageName,szBuf);
-					pImageHdr->DDSurface = pSurface;
-					pImageHdr->hBackup = hBackup;
+//					pImageHdr->DDSurface = pSurface;
+//					pImageHdr->hBackup = hBackup;
 					pImageHdr->Direct3DTexture = NULL;
 					
 					db_logf4(("\tloaded to image number %d",NumImages-1));
@@ -815,8 +816,8 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					pImageHdr->ImageHeight = pSurface->height; //nHeight;
 					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
 					strcpy(pImageHdr->ImageName,szBuf);
-					pImageHdr->DDSurface = pSurface;
-					pImageHdr->hBackup = hBackup;
+//					pImageHdr->DDSurface = pSurface;
+//					pImageHdr->hBackup = hBackup;
 					pImageHdr->Direct3DTexture = NULL;
 
 					db_logf4(("\tloaded to image number %d",NumImages-1));
@@ -859,6 +860,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 				#endif // !CL_SUPPORTONLY_FASTFILE
 			}
 			//db_msg1("THIS CODE SHOULD BE UNREACHABLE");
+#endif // bjd
 		}
 		case LIO_D3DTEXTURE:
 		{
@@ -914,7 +916,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
 					strcpy(pImageHdr->ImageName,szBuf);
 					pImageHdr->AvPTexture = pTexture;
-					pImageHdr->hBackup = hBackup;
+//					pImageHdr->hBackup = hBackup;
 
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 
@@ -948,6 +950,12 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 							{
 								OutputDebugString("Direct3DTexture was Null!");
 							}
+
+							/* free this, as d3d now holds the texture */
+							//free(pImageHdr->AvPTexture);
+							free(pTexture->buffer);
+							//pImageHdr->AvPTexture = NULL;
+							pTexture->buffer = NULL;
 
 							int gotTextureHandle = 1;
 							//free(pTexture->buffer);
@@ -1004,7 +1012,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
 					strcpy(pImageHdr->ImageName,szBuf);
 					pImageHdr->AvPTexture = pTexture;
-					pImageHdr->hBackup = hBackup;
+//					pImageHdr->hBackup = hBackup;
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 
 					/* KJL 16:05:50 26/02/98 - attempt to get a texture handle */
@@ -1034,6 +1042,12 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 							{
 								OutputDebugString("Direct3DTexture was null!");
 							}
+
+							/* free this, as d3d now holds the texture */
+							//free(pImageHdr->AvPTexture);
+							free(pTexture->buffer);
+							//pImageHdr->AvPTexture = NULL;
+							pTexture->buffer = NULL;
 
 							/* 
 								the below allows us to basically check if a texture is in the D3D managed pool or not

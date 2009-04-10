@@ -73,8 +73,8 @@ enum HUD_RES_ID HUDResolution;
 
 
 
-static struct DDGraphicTag PauseDDInfo;															
-static struct DDGraphicTag E3FontDDInfo;
+//static struct DDGraphicTag PauseDDInfo;															
+//static struct DDGraphicTag E3FontDDInfo;
 
     
 /*KJL****************************************************************************************
@@ -267,7 +267,7 @@ void PlatformSpecificInitPredatorHUD(void)
 		D3D_InitialiseMarineHUD();
 	}
 	return;
-
+#if 0
 	int gfxID = NO_OF_PREDATOR_HUD_GFX;
 	
 	if (ScreenDescriptorBlock.SDB_Width>=640)
@@ -300,7 +300,8 @@ void PlatformSpecificInitPredatorHUD(void)
 		}
 		LoadDDGraphic(&E3FontDDInfo,"e3font");	
 	}
-  	LoadDDGraphic(&PauseDDInfo,"paused");	
+  	LoadDDGraphic(&PauseDDInfo,"paused");
+#endif
 }
 
 
@@ -323,7 +324,7 @@ void PlatformSpecificInitAlienHUD(void)
 	}
 
 	return;
-	
+#if 0
 	int gfxID = NO_OF_ALIEN_HUD_GFX;
 
 	if (ScreenDescriptorBlock.SDB_Width==640)
@@ -357,7 +358,8 @@ void PlatformSpecificInitAlienHUD(void)
 		}
 		LoadDDGraphic(&E3FontDDInfo,"e3font");	
 	}
-	LoadDDGraphic(&PauseDDInfo,"paused");	
+	LoadDDGraphic(&PauseDDInfo,"paused");
+#endif
 }
 
 
@@ -368,6 +370,7 @@ void PlatformSpecificInitAlienHUD(void)
 
 void PlatformSpecificKillMarineHUD(void)
 {
+#if 0
 	int gfxID = NO_OF_MARINE_HUD_GFX;
 	
 	while(gfxID--)			      
@@ -402,10 +405,12 @@ void PlatformSpecificKillMarineHUD(void)
 		//E3FontDDInfo.LPDDS->Release(); // BJD
 	E3FontDDInfo.LPDDS = 0;
 	E3FontDDInfo.hBackup = 0;
+#endif
 }
 
 void PlatformSpecificKillPredatorHUD(void)
 {
+#if 0
 	/* load HUD gfx */
 	int gfxID = NO_OF_PREDATOR_HUD_GFX;
 
@@ -441,11 +446,13 @@ void PlatformSpecificKillPredatorHUD(void)
 		//E3FontDDInfo.LPDDS->Release(); // BJD
 	E3FontDDInfo.LPDDS = 0;
 	E3FontDDInfo.hBackup = 0;
+#endif
 }
 
 
 void PlatformSpecificKillAlienHUD(void)
 {
+#if 0
 	int gfxID = NO_OF_ALIEN_HUD_GFX;
 	while(gfxID--)			      
     {
@@ -479,16 +486,16 @@ void PlatformSpecificKillAlienHUD(void)
 		//E3FontDDInfo.LPDDS->Release(); // BJD
 	E3FontDDInfo.LPDDS = 0;
 	E3FontDDInfo.hBackup = 0;
+#endif
 }
 
 
 /*********************/
 /* RUNTIME HUD STUFF */
 /*********************/
-
+#if 0
 void PlatformSpecificExitingHUD(void)
 {
-#if 0
 	/* KJL 11:37:19 06/14/97 - draw whatever is in the execute buffer */
 	if (ScanDrawMode != ScanDrawDirectDraw)
 	{
@@ -496,11 +503,13 @@ void PlatformSpecificExitingHUD(void)
 		ExecuteBuffer();
 		EndD3DScene();
 	}
-#endif
 }
+#endif
+
 
 void PlatformSpecificEnteringHUD(void)
 {
+#if 0
 	/* JH 13/5/97 */
 	/* Flush the ZBuffer so the weapons don't sink into the wall! */
 //	#if SupportZBuffering
@@ -521,7 +530,9 @@ void PlatformSpecificEnteringHUD(void)
 		LockExecuteBuffer();
 	}
 #endif
+#endif
 }
+
 
 /*KJL**********************
 * MARINE DRAWING ROUTINES *
@@ -769,6 +780,7 @@ void BLTPredatorNumericsToHUD(void)
 }	
 static void BLTPredatorDigitToHUD(char digit, int x, int y, int font)
 {
+#if 0 // bjd	
 //	HRESULT ddrval;
  	RECT srcRect;
 
@@ -777,7 +789,7 @@ static void BLTPredatorDigitToHUD(char digit, int x, int y, int font)
 	
    	srcRect.left = 0;
    	srcRect.right = HUDDDInfo[font].SrcRect.right;
-#if 0 // bjd	   
+   
    	ddrval = lpDDSBack->BltFast // DIRECT DRAW FUNCTION
    	(
    		x,
@@ -937,10 +949,9 @@ void BLTAlienNumericsToHUD(void)
 #endif
 
 
-
+#if 0 // bjd
 void BLTPausedToScreen(void)
 {
-#if 0 // bjd
 	lpDDSBack->BltFast // DIRECT DRAW FUNCTION
 	(
 	  	(ScreenDescriptorBlock.SDB_Width-PauseDDInfo.SrcRect.right)/2,
@@ -949,11 +960,10 @@ void BLTPausedToScreen(void)
 		&(PauseDDInfo.SrcRect),
         DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
     );
-#endif
 }
+#endif
 
-
-
+#if 0
 void LoadDDGraphic(struct DDGraphicTag *DDGfxPtr, char *Filename)
 {
 	/*
@@ -1019,7 +1029,7 @@ void LoadDDGraphic(struct DDGraphicTag *DDGfxPtr, char *Filename)
 	GLOBALASSERT((DDGfxPtr->SrcRect.right > 0));
 	GLOBALASSERT((DDGfxPtr->SrcRect.bottom > 0));
 }
-
+#endif
 	
 /* JH 3/6/97 functions to remove dd surfaces from hud graphics
    so that the video mode can be completely changed,
@@ -1028,6 +1038,7 @@ void LoadDDGraphic(struct DDGraphicTag *DDGfxPtr, char *Filename)
 
 void MinimizeAllDDGraphics(void)
 {
+#if 0
 	/* do all in array - don't care how many actually are used
 	   because the array is static (hence initially filled with zeros)
 	   The release functions should replace with NULL a pointer
@@ -1058,10 +1069,12 @@ void MinimizeAllDDGraphics(void)
 		//E3FontDDInfo.LPDDS->Release(); // BJD
 		E3FontDDInfo.LPDDS = 0;
 	}
+#endif
 }
 
 void RestoreAllDDGraphics(void)
 {
+#if 0
 	/* do all in array - don't care how many actually are used
 	   because the array is static (hence initially filled with zeros)
 	   The release functions should replace with NULL a pointer
@@ -1092,6 +1105,7 @@ void RestoreAllDDGraphics(void)
 		GLOBALASSERT(E3FontDDInfo.LPDDS);
 		ATIncludeSurface(E3FontDDInfo.LPDDS,E3FontDDInfo.hBackup);
 	}
+#endif
 }
 	
 
@@ -1178,7 +1192,7 @@ void BLTGraphicToScreen(HUDGRAPHIC* hgptr)
 //static int BLTFontCharToHUD(PFFONT* font , int xdest, int ydest, char todraw);
 
 //LPDIRECTDRAWSURFACE FontLPDDS[NUM_FONTS]; // DIRECT DRAW SURFACE
-DIRECTDRAWSURFACE FontLPDDS[NUM_FONTS];
+//DIRECTDRAWSURFACE FontLPDDS[NUM_FONTS];
 
 #if 0 // bjd
 PFFONT AvpFonts[] =

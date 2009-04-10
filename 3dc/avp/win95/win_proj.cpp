@@ -173,6 +173,11 @@ int mouseMoved = 0;
 		// it's intentional for this case to fall through to WM_SYSKEYDOWN
 		case WM_SYSKEYDOWN:
 		{	
+/*
+			char buf[100];
+			sprintf(buf, "key: %x\n", wParam);
+			OutputDebugString(buf);
+*/
 			if (Con_IsActive())
 			{
 /*

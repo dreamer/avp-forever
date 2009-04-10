@@ -49,10 +49,17 @@ RECT LoadingBarFull_SrcRect;
 
 D3DTEXTURE LoadingBarFullTexture;
 D3DTEXTURE LoadingBarEmptyTexture;
+
+/*
 DDSurface *image = 0;
 DDSurface *LoadingBarEmpty;
 DDSurface *LoadingBarFull;
 DDSurface *aa_font;
+*/
+AvPTexture *image = 0;
+AvPTexture *LoadingBarEmpty;
+AvPTexture *LoadingBarFull;
+AvPTexture *aa_font;
 
 int fullbarHeight, fullbarWidth, emptybarHeight, emptybarWidth;
 
@@ -72,7 +79,7 @@ void Start_Progress_Bar()
 		if(pFastFileData)
 		{
 			//load from fast file
-			LoadingBarEmpty = AwCreateSurface
+			LoadingBarEmpty = AwCreateTexture//Surface
 							(
 								"pxf",
 								pFastFileData,
@@ -83,7 +90,7 @@ void Start_Progress_Bar()
 		else
 		{
 			//load graphic from rim file
-			LoadingBarEmpty = AwCreateSurface
+			LoadingBarEmpty = AwCreateTexture//Surface
 							(
 								"sf",
 								buffer,
@@ -104,7 +111,7 @@ void Start_Progress_Bar()
 		if(pFastFileData)
 		{
 			//load from fast file
-			LoadingBarFull = AwCreateSurface
+			LoadingBarFull = AwCreateTexture//Surface
 							(
 								"pxf",
 								pFastFileData,
@@ -115,7 +122,7 @@ void Start_Progress_Bar()
 		else
 		{
 			//load graphic from rim file
-			LoadingBarFull = AwCreateSurface
+			LoadingBarFull = AwCreateTexture//Surface
 							(
 								"sf",
 								buffer,
@@ -145,7 +152,7 @@ void Start_Progress_Bar()
 	if(pFastFileData)
 	{
 		//load from fast file
-		image = AwCreateSurface
+		image = AwCreateTexture//Surface
 						(
 							"pxf",
 							pFastFileData,
@@ -156,7 +163,7 @@ void Start_Progress_Bar()
 	else
 	{
 		//load graphic from rim file
-		image = AwCreateSurface
+		image = AwCreateTexture//Surface
 						(
 							"sf",
 							buffer,

@@ -116,7 +116,7 @@ typedef struct
 } RENDERSTATES;
 
 LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL poolType);
-LPDIRECT3DSURFACE9 CreateD3DSurface(DDSurface *tex, int width, int height);
+//LPDIRECT3DSURFACE9 CreateD3DSurface(DDSurface *tex, int width, int height);
 LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int *real_width);
 LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex);
 
@@ -141,6 +141,7 @@ void ReleaseD3DTexture8(LPDIRECT3DTEXTURE9 d3dTexture);
 void DrawBinkFmv(int topX, int topY, int height, int width, LPDIRECT3DTEXTURE9 fmvTexture);
 void CreateScreenShotImage();
 LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int *height);
+LPDIRECT3DTEXTURE9 CreateFmvTexture(int width, int height, int usage, int pool);
 
 void LoadConsoleFont();
 

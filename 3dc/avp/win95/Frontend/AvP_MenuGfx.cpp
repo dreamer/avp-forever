@@ -191,7 +191,7 @@ static void LoadMenuFont(void)
 	pFastFileData = ffreadbuf(buffer, &fastFileLength);
 	
 	if (pFastFileData) {
-		gfxPtr->ImagePtr = AwCreateSurface(
+		gfxPtr->ImagePtr = AwCreateTexture(//Surface(
 			"pxfXY",
 			pFastFileData,
 			fastFileLength,
@@ -200,7 +200,7 @@ static void LoadMenuFont(void)
 			&(gfxPtr->Height)
 		);
 	} else {
-		gfxPtr->ImagePtr = AwCreateSurface(
+		gfxPtr->ImagePtr = AwCreateTexture(//Surface(
 			"sfXY",
 			buffer,
 			AW_TLF_TRANSP|AW_TLF_CHROMAKEY,
@@ -1221,7 +1221,7 @@ extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 		*/
 
 		//load from fast file
-		gfxPtr->ImagePtr = AwCreateSurface
+		gfxPtr->ImagePtr = AwCreateTexture//Surface
 							(
 								"pxfXYB",
 								pFastFileData,
@@ -1235,7 +1235,7 @@ extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 	else
 	{
 		//load graphic from rim file
-		gfxPtr->ImagePtr = AwCreateSurface
+		gfxPtr->ImagePtr = AwCreateTexture//Surface
 							(
 								"sfXYB",
 								buffer,

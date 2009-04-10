@@ -46,7 +46,7 @@
 
 		extern unsigned char *ScreenBuffer;
 		extern long BackBufferPitch;
-		extern LPDIRECTDRAWSURFACE lpDDSBack;
+//		extern LPDIRECTDRAWSURFACE lpDDSBack;
 //		extern DDPIXELFORMAT DisplayPixelFormat;
 		extern int CloudTable[128][128];
 		extern int CloakingPhase;
@@ -281,7 +281,7 @@ IndexedFont_Proportional_Column* IndexedFont_Proportional_Column :: Create
 IndexedFont_Proportional_Column :: ~IndexedFont_Proportional_Column()
 {
 	GLOBALASSERT(image_ptr);
-	ATRemoveSurface(image_ptr);
+//	ATRemoveSurface(image_ptr);
 	ReleaseDDSurface(image_ptr);
 	image_ptr = NULL;
 	
@@ -322,7 +322,7 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 		if(pFastFileData)
 		{
 			//load from fast file
-			image_ptr = AwCreateSurface
+			image_ptr = AwCreateTexture//Surface
 			(
 				"pxfXYB",
 				pFastFileData,
@@ -345,7 +345,7 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 		else
 		{
 		//load graphic from rim file
-			image_ptr = AwCreateSurface
+			image_ptr = AwCreateTexture//Surface
 			(
 				"sfXYB",
 				Filename,
@@ -373,7 +373,7 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 
 	GLOBALASSERT(R2Size_OverallImage . w>0);
 	GLOBALASSERT(R2Size_OverallImage . h>0);
-	ATIncludeSurface(image_ptr,hBackup);
+//	ATIncludeSurface(image_ptr,hBackup);
 
 //	DDCOLORKEY tempDDColorKey;
 
@@ -421,7 +421,6 @@ typedef struct _DDCOLORKEY{
 
 	Address of the DDCOLORKEY structure that contains the new color key values for the DirectDrawSurface object.
 #endif
-
 
 
 	
@@ -996,7 +995,7 @@ IndexedFont_Kerned_Column* IndexedFont_Kerned_Column :: Create
 IndexedFont_Kerned_Column :: ~IndexedFont_Kerned_Column()
 {
 	GLOBALASSERT(image_ptr);
-	ATRemoveSurface(image_ptr);
+//	ATRemoveSurface(image_ptr);
 	ReleaseDDSurface(image_ptr);
 	image_ptr = NULL;
 	
@@ -1037,7 +1036,7 @@ IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
 		if(pFastFileData)
 		{
 			//load from fast file
-			image_ptr = AwCreateSurface
+			image_ptr = AwCreateTexture//Surface
 			(
 				"pxfXYB",
 				pFastFileData,
@@ -1060,7 +1059,7 @@ IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
 		else
 		{
 			//load graphic from rim file
-			image_ptr = AwCreateSurface
+			image_ptr = AwCreateTexture//Surface
 			(
 				"sfXYB",
 				Filename,
@@ -1089,7 +1088,7 @@ IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
 
 	GLOBALASSERT(R2Size_OverallImage . w>0);
 	GLOBALASSERT(R2Size_OverallImage . h>0);
-	ATIncludeSurface(image_ptr,hBackup);
+//	ATIncludeSurface(image_ptr,hBackup);
 
 //	DDCOLORKEY tempDDColorKey;
 

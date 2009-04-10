@@ -306,6 +306,19 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AvPTexture *tex)
 	return swizTexture;
 }
 
+LPDIRECT3DTEXTURE8 CreateFmvTexture(int width, int height, int usage, int pool)
+{
+	LPDIRECT3DTEXTURE8 destTexture = NULL;
+
+	if(FAILED(d3d.lpD3DDevice->CreateTexture(width, height, 1, usage, D3DFMT_A8R8G8B8, (D3DPOOL)pool, &destTexture)))
+	{
+		OutputDebugString("CreateFmvTexture failed\n");
+		return NULL;
+	}
+
+	return destTexture;
+}
+
 // use this to make textures from non power of two images
 LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex,int *real_height, int *real_width) 
 {
@@ -313,6 +326,18 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex,int *real_height, int 
 	int original_height = tex->height;
 	int new_width = 0;
 	int new_height = 0;
+
+#if 1
+	#define MB	(1024*1024)
+	MEMORYSTATUS stat;
+	char buf[100];
+
+	// Get the memory status.
+    GlobalMemoryStatus( &stat );
+
+	sprintf(buf, "%4d  free MB of physical memory.\n", stat.dwAvailPhys / MB );
+	OutputDebugString( buf );
+#endif
 
 	D3DCOLOR pad_colour = D3DCOLOR_XRGB(0,0,0);
 
@@ -994,13 +1019,15 @@ void* ReloadImageIntoD3DTexture(IMAGEHEADER* iheader)
 {
 	// NOTE FIXME BUG HACK
 	// what if the image was a DD surface ??
-
+#if 0
 	if (iheader->hBackup)
 	{
 		iheader->AvPTexture = AwCreateTexture("rf",AW_TLF_PREVSRC|AW_TLF_COMPRESS);
 		return iheader->AvPTexture;
 	}
 	else return NULL;
+#endif
+	return NULL;
 }
 
 int GetTextureHandle(IMAGEHEADER *imageHeaderPtr)

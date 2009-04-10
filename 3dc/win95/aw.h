@@ -4,6 +4,7 @@
 struct AwBackupTexture;
 typedef struct AwBackupTexture * AW_BACKUPTEXTUREHANDLE;
 
+/*
 typedef struct DIRECTDRAWSURFACE
 {
 	unsigned char *buffer;
@@ -15,6 +16,7 @@ typedef struct DIRECTDRAWSURFACE
 
 typedef DIRECTDRAWSURFACE * LPDIRECTDRAWSURFACE;
 typedef DIRECTDRAWSURFACE DDSurface;
+*/
 
 typedef struct DIRECT3DTEXTURE
 {

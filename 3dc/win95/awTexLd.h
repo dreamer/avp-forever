@@ -209,11 +209,14 @@ struct AwCreateGraphicRegion
 {
 	unsigned left, top, right, bottom; /* rectangle to cut from the original image */
 	unsigned width, height; /* width and height of the resulting surface or texture */
+#if 0
 	union /* DDSurface or D3DTexture pointer depending on the context used */
 	{
 		DDSurface * pSurface; /* Direct Draw Surface object pointer */
 		AvPTexture * pTexture; /* Direct 3D Texture object pointer */
 	};
+#endif
+	AvPTexture * pTexture; /* Direct 3D Texture object pointer */
 };
 
 /* typedef to save typing 'struct' when not using C++ */
@@ -542,6 +545,8 @@ extern AvPTexture * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...);
 		t	The next argument is of type 'DDSurface *'
 		
 */
+
+#if 0
 extern DDSurface * _AWTL_VARARG AwCreateSurface(char const * _argFormatS, ...);
 
 /* AwDestroyBackupTexture(AW_BACKUPTEXTUREHANDLE _bH)
@@ -561,6 +566,8 @@ extern DDSurface * _AWTL_VARARG AwCreateSurface(char const * _argFormatS, ...);
 		AW_TLE_OK if the function succeeds.
 		AW_TLE_BADPARMS if the handle was not valid.
 */
+#endif
+
 extern AW_TL_ERC AwDestroyBackupTexture(AW_BACKUPTEXTUREHANDLE _bH);
 
 /* End Wrappers */

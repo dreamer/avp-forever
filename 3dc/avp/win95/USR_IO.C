@@ -69,12 +69,42 @@ PLAYER_INPUT_CONFIGURATION DefaultMarineInputPrimaryConfig =
 	KEY_VOID,			// Backward;
 	KEY_VOID, 			// Left;
 	KEY_VOID, 			// Right;
+
+	KEY_VOID,			// Strafe;
+	KEY_VOID,	 		// StrafeLeft;
+	KEY_VOID,	 		// StrafeRight;
+
+	KEY_VOID, 			// LookUp;
+	KEY_VOID, 			// LookDown;
+	KEY_VOID,			// CentreView;
+
+	KEY_VOID,			// Walk;
+	KEY_JOYSTICK_BUTTON_11, 		// Crouch;
+	KEY_JOYSTICK_BUTTON_2,		// Jump;
+
+	KEY_JOYSTICK_BUTTON_4,			// Operate;
+
+	KEY_JOYSTICK_BUTTON_6, 		// FirePrimaryWeapon;
+	KEY_JOYSTICK_BUTTON_5, 		// FireSecondaryWeapon;
+
+	KEY_JOYSTICK_BUTTON_16,  		// NextWeapon;
+	KEY_JOYSTICK_BUTTON_15,  		// PreviousWeapon;
+	KEY_VOID,		// FlashbackWeapon;
+
+	KEY_JOYSTICK_BUTTON_1,	  		// ImageIntensifier;
+	KEY_JOYSTICK_BUTTON_3,    		// ThrowFlare;
+	KEY_JOYSTICK_BUTTON_8,	  	// Jetpack;
+	KEY_VOID,		// Taunt
+	KEY_VOID,
+	KEY_VOID,
+	KEY_VOID,
+	KEY_VOID,
 #else
 	KEY_UP,				// Forward;
 	KEY_DOWN,			// Backward;
 	KEY_NUMPAD4, 		// Left;
 	KEY_NUMPAD6, 		// Right;
-#endif
+
 	KEY_RIGHTALT,		// Strafe;
 	KEY_LEFT,	 		// StrafeLeft;
 	KEY_RIGHT,	 		// StrafeRight;
@@ -104,20 +134,54 @@ PLAYER_INPUT_CONFIGURATION DefaultMarineInputPrimaryConfig =
 	KEY_F11,
 	KEY_F12,
 	KEY_TAB,
+#endif
 };
 PLAYER_INPUT_CONFIGURATION DefaultPredatorInputPrimaryConfig =
 {
 #ifdef _XBOX
-	KEY_VOID,			// Forward;
+	KEY_VOID,				// Forward;
 	KEY_VOID,			// Backward;
-	KEY_VOID, 			// Left;
-	KEY_VOID, 			// Right;
+	KEY_VOID, 		// Left;
+	KEY_VOID, 		// Right;
+
+	KEY_VOID,		// Strafe;
+	KEY_VOID,	 		// StrafeLeft;
+	KEY_VOID,	 		// StrafeRight;
+
+	KEY_VOID, 				// LookUp;
+	KEY_VOID, 				// LookDown;
+	KEY_VOID,				// CentreView;
+
+	KEY_VOID,		// Walk;
+	KEY_JOYSTICK_BUTTON_11, 		// Crouch;
+	KEY_JOYSTICK_BUTTON_2,		// Jump;
+
+	KEY_JOYSTICK_BUTTON_4,			// Operate;
+
+	KEY_JOYSTICK_BUTTON_6, 		// FirePrimaryWeapon;
+	KEY_JOYSTICK_BUTTON_5, 		// FireSecondaryWeapon;
+	
+	KEY_JOYSTICK_BUTTON_16,		// NextWeapon;
+	KEY_JOYSTICK_BUTTON_15, 			// PreviousWeapon;
+	KEY_VOID,		// FlashbackWeapon;
+	
+	KEY_JOYSTICK_BUTTON_7,	 		// Cloak;
+	KEY_JOYSTICK_BUTTON_8,	 		// CycleVisionMode;
+	KEY_JOYSTICK_BUTTON_13,			// ZoomIn;
+	KEY_JOYSTICK_BUTTON_14,		// ZoomOut;
+	KEY_JOYSTICK_BUTTON_1,	  	// GrapplingHook
+	KEY_JOYSTICK_BUTTON_3,			// RecallDisk
+	KEY_VOID,		// Taunt
+	KEY_VOID,
+	KEY_VOID,
+	KEY_VOID,
+	KEY_VOID,
 #else
 	KEY_UP,				// Forward;
 	KEY_DOWN,			// Backward;
 	KEY_NUMPAD4, 		// Left;
 	KEY_NUMPAD6, 		// Right;
-#endif
+
 	KEY_RIGHTALT,		// Strafe;
 	KEY_LEFT,	 		// StrafeLeft;
 	KEY_RIGHT,	 		// StrafeRight;
@@ -150,21 +214,46 @@ PLAYER_INPUT_CONFIGURATION DefaultPredatorInputPrimaryConfig =
 	KEY_F11,
 	KEY_F12,
 	KEY_TAB,
+#endif
 };
 
 PLAYER_INPUT_CONFIGURATION DefaultAlienInputPrimaryConfig =
 {
 #ifdef _XBOX
-	KEY_VOID,			// Forward;
+	KEY_VOID,				// Forward;
 	KEY_VOID,			// Backward;
-	KEY_VOID, 			// Left;
-	KEY_VOID, 			// Right;
+	KEY_VOID, 		// Left;
+	KEY_VOID, 		// Right;
+
+	KEY_VOID,		// Strafe;
+	KEY_VOID,	 		// StrafeLeft;
+	KEY_VOID,	 		// StrafeRight;
+
+	KEY_VOID, 				// LookUp;
+	KEY_VOID, 				// LookDown;
+	KEY_VOID,				// CentreView;
+
+	KEY_JOYSTICK_BUTTON_1,		// Walk;
+	KEY_JOYSTICK_BUTTON_5, 		// Crouch;
+	KEY_JOYSTICK_BUTTON_2,		// Jump;
+
+	KEY_JOYSTICK_BUTTON_4,			// Operate;
+
+	KEY_JOYSTICK_BUTTON_6, 		// FirePrimaryWeapon;
+	KEY_JOYSTICK_BUTTON_11, 		// FireSecondaryWeapon;
+
+	KEY_JOYSTICK_BUTTON_3,			// AlternateVision;
+	KEY_VOID,				// Taunt;
+	KEY_VOID,
+	KEY_VOID,
+	KEY_VOID,
+	KEY_VOID,
 #else
 	KEY_UP,				// Forward;
 	KEY_DOWN,			// Backward;
 	KEY_NUMPAD4, 		// Left;
 	KEY_NUMPAD6, 		// Right;
-#endif
+
 	KEY_RIGHTALT,		// Strafe;
 	KEY_LEFT,	 		// StrafeLeft;
 	KEY_RIGHT,	 		// StrafeRight;
@@ -188,6 +277,7 @@ PLAYER_INPUT_CONFIGURATION DefaultAlienInputPrimaryConfig =
 	KEY_F11,
 	KEY_F12,
 	KEY_TAB,
+#endif
 };
 #elif 0	// Dutch
 PLAYER_INPUT_CONFIGURATION DefaultMarineInputPrimaryConfig =
@@ -632,6 +722,43 @@ PLAYER_INPUT_CONFIGURATION DefaultAlienInputPrimaryConfig =
 #endif
 PLAYER_INPUT_CONFIGURATION DefaultMarineInputSecondaryConfig =
 {
+#ifdef _XBOX
+	KEY_VOID,			// Forward;
+	KEY_VOID,			// Backward;
+	KEY_VOID, 			// Left;
+	KEY_VOID, 			// Right;
+
+	KEY_VOID,			// Strafe;
+	KEY_VOID,	 		// StrafeLeft;
+	KEY_VOID,	 		// StrafeRight;
+
+	KEY_VOID,		// LookUp;
+	KEY_VOID,		// LookDown;
+	KEY_VOID,		// CentreView;
+
+	KEY_VOID,		// Walk;
+	KEY_VOID, 		// Crouch;
+	KEY_VOID,			// Jump;
+
+	KEY_VOID,				// Operate;
+
+	KEY_VOID, 		// FirePrimaryWeapon;
+	KEY_VOID, 		// FireSecondaryWeapon;
+
+	KEY_VOID,  		// NextWeapon;
+	KEY_VOID,		// PreviousWeapon;
+	KEY_VOID,			// FlashbackWeapon;
+
+	KEY_VOID,			// ImageIntensifier;
+	KEY_VOID, 			// ThrowFlare;
+	KEY_VOID, 			// Jetpack;
+	KEY_VOID,			// Taunt
+
+	KEY_VOID,
+	KEY_VOID,
+	KEY_VOID,
+	KEY_VOID,
+#else
 	KEY_VOID,			// Forward;
 	KEY_VOID,			// Backward;
 	KEY_VOID, 			// Left;
@@ -667,13 +794,53 @@ PLAYER_INPUT_CONFIGURATION DefaultMarineInputSecondaryConfig =
 	KEY_VOID,
 	KEY_VOID,
 	KEY_VOID,
+#endif
 };
-
-
 
 
 PLAYER_INPUT_CONFIGURATION DefaultPredatorInputSecondaryConfig =
 {
+#ifdef _XBOX
+	KEY_VOID,			// Forward;
+	KEY_VOID,			// Backward;
+	KEY_VOID, 			// Left;
+	KEY_VOID, 			// Right;
+
+	KEY_VOID,			// Strafe;
+	KEY_VOID,	 		// StrafeLeft;
+	KEY_VOID,	 		// StrafeRight;
+
+	KEY_VOID,		// LookUp;
+	KEY_VOID,		// LookDown;
+	KEY_VOID,		// CentreView;
+
+	KEY_VOID,		// Walk;
+	KEY_VOID, 		// Crouch;
+	KEY_VOID,			// Jump;
+
+	KEY_VOID,				// Operate;
+
+	KEY_VOID, 		// FirePrimaryWeapon;
+	KEY_VOID, 		// FireSecondaryWeapon;
+
+	KEY_VOID,			// NextWeapon;
+	KEY_VOID, 			// PreviousWeapon;
+	KEY_VOID,			// FlashbackWeapon;
+	
+	KEY_VOID,	 		// Cloak;
+	KEY_VOID,	 		// CycleVisionMode;
+	KEY_VOID,		// ZoomIn;
+	KEY_VOID,		// ZoomOut;
+	KEY_VOID,	 		// GrapplingHook;
+	KEY_VOID,			// RecallDisk
+	KEY_VOID,			// Taunt
+	
+	KEY_VOID,
+	KEY_VOID,
+	KEY_VOID,
+	KEY_VOID,
+
+#else
 	KEY_VOID,			// Forward;
 	KEY_VOID,			// Backward;
 	KEY_VOID, 			// Left;
@@ -712,11 +879,41 @@ PLAYER_INPUT_CONFIGURATION DefaultPredatorInputSecondaryConfig =
 	KEY_VOID,
 	KEY_VOID,
 	KEY_VOID,
-
+#endif
 };
 
 PLAYER_INPUT_CONFIGURATION DefaultAlienInputSecondaryConfig =
 {
+#ifdef _XBOX
+	KEY_VOID,				// Forward;
+	KEY_VOID,			// Backward;
+	KEY_VOID, 		// Left;
+	KEY_VOID, 		// Right;
+
+	KEY_VOID,		// Strafe;
+	KEY_VOID,	 		// StrafeLeft;
+	KEY_VOID,	 		// StrafeRight;
+
+	KEY_VOID,		// LookUp;
+	KEY_VOID,		// LookDown;
+	KEY_VOID,		// CentreView;
+
+	KEY_VOID,			// Walk;
+	KEY_VOID, 			// Crouch;
+	KEY_VOID,			// Jump;
+
+	KEY_VOID,				// Operate;
+
+	KEY_VOID, 		// FirePrimaryWeapon;
+	KEY_VOID, 		// FireSecondaryWeapon;
+	
+	KEY_VOID, 			// AlternateVision;
+	KEY_VOID,	 		// Taunt;
+	KEY_VOID,
+	KEY_VOID,
+	KEY_VOID,
+	KEY_VOID,
+#else
 	KEY_VOID,				// Forward;
 	KEY_VOID,			// Backward;
 	KEY_VOID, 		// Left;
@@ -745,6 +942,7 @@ PLAYER_INPUT_CONFIGURATION DefaultAlienInputSecondaryConfig =
 	KEY_VOID,
 	KEY_VOID,
 	KEY_VOID,
+#endif
 };
 
 

@@ -1,8 +1,12 @@
-#define USE_FMV
+
 #ifdef USE_FMV
 
 #define	USE_AUDIO		1
 #define USE_ARGB		1
+
+#include <oggplay/oggplay.h>
+#pragma comment(lib, "liboggz_static.lib")
+#pragma comment(lib, "liboggplay_static.lib")
 
 extern "C" {
 
@@ -39,9 +43,7 @@ int FmvColourRed;
 int FmvColourGreen;
 int FmvColourBlue;
 
-#include <oggplay/oggplay.h>
-#pragma comment(lib, "liboggplay_static.lib")
-#pragma comment(lib, "liboggz_static.lib")
+AvPFMV fmv;
 
 /* for threads */
 #include <process.h>
@@ -65,6 +67,7 @@ static int				n_frames	= 0;
 
 bool					fmvPlaying	= false;
 bool					frameReady	= false;
+bool					usingAudio	= false;
 
 static long				presentationTime = 0;
 
@@ -74,6 +77,7 @@ extern void ThisFramesRenderingHasFinished(void);
 void drive_decoding(void *arg);
 void display_frame(void *arg);
 void handle_video_data(OggPlay * player, int track_num, OggPlayVideoData * video_data, int frame);
+void handle_overlay_data (OggPlay * player, int track_num, OggPlayOverlayData * overlay_data, int frame);
 int NextFMVFrame();
 int FmvOpen(char *filenamePtr);
 void FmvClose();
@@ -94,11 +98,10 @@ int				textureHeight	= 0;
 int				playing = 0;
 
 extern			D3DINFO d3d;
-D3DTEXTURE		fmvTexture = NULL;
-D3DTEXTURE		fmvDynamicTexture = NULL;
 
 /* dsound stuff */
 extern LPDIRECTSOUND	DSObject;
+
 LPDIRECTSOUNDBUFFER		fmvAudioBuffer = NULL;
 LPVOID					fmvaudioPtr1;
 DWORD					fmvaudioBytes1;
@@ -142,10 +145,56 @@ char buf[100];
 
 extern void EndMenuBackgroundBink()
 {
+	return;
+
+	FmvClose();
 }
 
 extern void StartMenuBackgroundBink()
 {
+	return;
+
+	/* try to open file - quit this function if we can't */
+	if (FmvOpen("fmvs/menubackground.ogv") != 0) return;
+
+	/* create the d3d textures used to display the video */
+//	if(FAILED(d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &fmvTexture , NULL)))
+
+	fmv.fmvTexture = CreateFmvTexture(1024, 1024, NULL, D3DPOOL_DEFAULT);
+//	if(FAILED(d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &fmvTexture)))
+	if (fmv.fmvTexture == NULL)
+	{
+		OutputDebugString("problem creating fmv texture from d3d\n");
+		FmvClose();
+		return;
+	}
+
+//	if(FAILED(d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &fmvDynamicTexture, NULL)))
+//	if(FAILED(d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &fmvDynamicTexture)))
+	fmv.fmvDynamicTexture = CreateFmvTexture(1024, 1024, D3DUSAGE_DYNAMIC, D3DPOOL_SYSTEMMEM);
+	if (fmv.fmvDynamicTexture == NULL)
+	{
+		OutputDebugString("problem creating dynamic fmv texture from d3d\n");
+		FmvClose();
+		return;
+	}
+}
+
+extern int PlayMenuBackgroundBink()
+{
+	return 0;
+
+//	int newframe = 0;
+	int playing = 0;
+//	if(!MenuBackground) return 0;
+
+	if (frameReady)
+		playing = NextFMVFrame();
+
+	DrawBinkFmv((640-imageWidth)/2, (480-imageHeight)/2, imageHeight, imageWidth, fmv.fmvTexture);
+
+	return 1;
+//	return 0;
 }
 
 extern void PlayBinkedFMV(char *filenamePtr)
@@ -156,14 +205,20 @@ extern void PlayBinkedFMV(char *filenamePtr)
 	if (FmvOpen(filenamePtr) != 0) return;
 
 	/* create the d3d textures used to display the video */
-	if(FAILED(d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &fmvTexture, NULL)))
+//	if(FAILED(d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &fmvTexture, NULL)))
+//	if(FAILED(d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &fmvTexture)))
+	fmv.fmvTexture = CreateFmvTexture(1024, 1024, NULL, D3DPOOL_DEFAULT);
+	if (fmv.fmvTexture == NULL)
 	{
 		OutputDebugString("problem creating fmv texture from d3d\n");
 		FmvClose();
 		return;
 	}
 
-	if(FAILED(d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &fmvDynamicTexture, NULL)))
+//	if(FAILED(d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &fmvDynamicTexture, NULL)))
+//	if(FAILED(d3d.lpD3DDevice->CreateTexture(1024, 1024, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &fmvDynamicTexture)))
+	fmv.fmvDynamicTexture = CreateFmvTexture(1024, 1024, D3DUSAGE_DYNAMIC, D3DPOOL_SYSTEMMEM);
+	if (fmv.fmvDynamicTexture == NULL)
 	{
 		OutputDebugString("problem creating dynamic fmv texture from d3d\n");
 		FmvClose();
@@ -175,6 +230,8 @@ extern void PlayBinkedFMV(char *filenamePtr)
 	/* start the playback loop. */
 	while(playing == 1)
 	{
+//		OutputDebugString("playing a bink (should be intro movie or intro/outro game movie\n");
+
 		CheckForWindowsMessages();
 
 		if (frameReady)
@@ -183,7 +240,7 @@ extern void PlayBinkedFMV(char *filenamePtr)
 		ThisFramesRenderingHasBegun();
 		ClearScreenToBlack();
 
-			DrawBinkFmv((640-imageWidth)/2, (480-imageHeight)/2, imageHeight, imageWidth, fmvTexture);
+			DrawBinkFmv((640-imageWidth)/2, (480-imageHeight)/2, imageHeight, imageWidth, fmv.fmvTexture);
 
 		ThisFramesRenderingHasFinished();
 		FlipBuffers();
@@ -220,8 +277,8 @@ void FmvClose()
 	count = 0;
 
 	/* release d3d textures */
-	SAFE_RELEASE(fmvTexture);
-	SAFE_RELEASE(fmvDynamicTexture);
+	SAFE_RELEASE(fmv.fmvTexture);
+	SAFE_RELEASE(fmv.fmvDynamicTexture);
 
 	/* delete texture data buffer */
 	if (textureData != NULL)
@@ -262,15 +319,12 @@ void FmvClose()
 		SAFE_RELEASE(fmvAudioBuffer);
 	}
 
+	usingAudio = false;
+
 	/* clean up after liboggplay */
 	oggplay_close(player);
 
 	OutputDebugString("liboggplay is gone\n");
-}
-
-extern int PlayMenuBackgroundBink()
-{
-	return 0;
 }
 
 void UpdateAllFMVTextures()
@@ -293,7 +347,6 @@ extern void StartTriggerPlotFMV(int number)
 
 	if (CheatMode_Active != CHEATMODE_NONACTIVE) return;
 
-//	sprintf(buffer,"FMVs//message%d.smk",number);
 	sprintf(buffer,"FMVs//message%d.ogv",number);
 	{
 		FILE* file=fopen(buffer,"rb");
@@ -378,9 +431,6 @@ void ScanImagesForFMVs()
 						}
 						while(*strPtr++!='.');
 
-//						*filenamePtr++='s';
-//						*filenamePtr++='m';
-//						*filenamePtr++='k';
 						*filenamePtr++='o';
 						*filenamePtr++='g';
 						*filenamePtr++='v';
@@ -457,8 +507,10 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 {
 	for(int i = 0; i < NumberOfFMVTextures; i++)
 	{	
+		FMVTexture[i].ImagePtr->Direct3DTexture = CreateFmvTexture(FMVTexture[i].ImagePtr->ImageWidth, FMVTexture[i].ImagePtr->ImageHeight, NULL, D3DPOOL_DEFAULT);
 		//SetupFMVTexture(&FMVTexture[i]);
-		d3d.lpD3DDevice->CreateTexture(FMVTexture[i].ImagePtr->ImageWidth, FMVTexture[i].ImagePtr->ImageHeight, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &FMVTexture[i].ImagePtr->Direct3DTexture, NULL);
+//		d3d.lpD3DDevice->CreateTexture(FMVTexture[i].ImagePtr->ImageWidth, FMVTexture[i].ImagePtr->ImageHeight, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &FMVTexture[i].ImagePtr->Direct3DTexture, NULL);
+//		d3d.lpD3DDevice->CreateTexture(FMVTexture[i].ImagePtr->ImageWidth, FMVTexture[i].ImagePtr->ImageHeight, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &FMVTexture[i].ImagePtr->Direct3DTexture);
 	}
 }
 
@@ -534,6 +586,9 @@ void FindLightingValuesFromTriggeredFMV(unsigned char *bufferPtr, FMVTEXTURE *ft
 
 void FmvVolumePan(int volume, int pan)
 {
+	if (!usingAudio) return;
+
+#ifdef WIN32
 	/* 
 		have changed the code that calls this function to pass the pan value
 		in the rage of -32768 for left, 0 middle and 32768 for right.
@@ -542,18 +597,19 @@ void FmvVolumePan(int volume, int pan)
 		value to that format. the code below should do this. At least, it seems to pan and sound fine!
 	*/
 
-	int volume2 = (int)volume * .30517578125f;
+	int volume2 = (int)(volume * .30517578125f);
 	if (volume2 < 0) volume2 = 0;
 	if (volume2 > 10000) volume2 = 10000;
 
 //	fmvAudioBuffer->SetVolume(volume2);
 
-	int pan2 = (int)pan * .30517578125f;
+	int pan2 = (int)(pan * .30517578125f);
 
 	if (pan2 < -10000) pan2 = -10000;
 	if (pan2 > 10000) pan2 = 10000;
 
 	fmvAudioBuffer->SetPan(pan2);
+#endif
 }
 
 int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr, int pitch)
@@ -693,6 +749,8 @@ int GetVolumeOfNearestVideoScreen(void)
 
 int FmvOpen(char *filenamePtr)
 {
+	OutputDebugString("opening fmv file..\n");
+
 	FILE *test;
 	test = fopen(filenamePtr, "r");
 	if (test == NULL)
@@ -733,6 +791,9 @@ int FmvOpen(char *filenamePtr)
 			oggplay_set_callback_num_frames (player, i, 1);
 			video_track = i;
 			ret = oggplay_get_video_fps(player, i , &fps_denom, &fps_num);
+
+			oggplay_convert_video_to_rgb(player, video_track, 1, 0);
+
 			printf("fps: %d\n", fps_num);
 			printf("fps denom: %d\n", fps_denom);
 		}
@@ -746,6 +807,8 @@ int FmvOpen(char *filenamePtr)
 			ret = oggplay_get_audio_samplerate(player, i , &rate);
 			ret = oggplay_get_audio_channels(player, i, &channels);
 			printf("samplerate: %d channels: %d\n", rate, channels);
+
+//			usingAudio = true;
 		}
 		else if (oggplay_get_track_type (player, i) == OGGZ_CONTENT_KATE) 
 		{
@@ -772,9 +835,12 @@ int FmvOpen(char *filenamePtr)
 
 	oggplay_use_buffer(player, 20);
 
-	/* create the dsound buffer and set size variables */
-	fullBufferSize = CreateFMVAudioBuffer(channels, rate);
-	halfBufferSize = fullBufferSize / 2;
+	if (usingAudio)
+	{
+		/* create the dsound buffer and set size variables */
+		fullBufferSize = CreateFMVAudioBuffer(channels, rate);
+		halfBufferSize = fullBufferSize / 2;
+	}
 
 	fmvPlaying = true;
 
@@ -846,6 +912,7 @@ void display_frame(void *arg)
 	int                     j;
 	OggPlayDataHeader		**headers;
 	OggPlayVideoData		*video_data;
+	OggPlayOverlayData		*overlay_data;
 	#if USE_AUDIO
 	OggPlayAudioData		*audio_data;
 	int						samples;
@@ -878,18 +945,25 @@ void display_frame(void *arg)
 //		sprintf(buf, "presentationTime: %ld totalAudioTimePlayed: %ld\n", presentationTime, totalAudioTimePlayed);
 //		OutputDebugString(buf);
 
-		if (totalAudioTimePlayed < presentationTime)
+		if (usingAudio)
 		{
-//			OutputDebugString("totalAudioTimePlayed < presentationTime\n");
-			long temp = presentationTime - totalAudioTimePlayed;
-			//if (temp < delay)
+			if (totalAudioTimePlayed < presentationTime)
 			{
-				Sleep(temp);
+	//			OutputDebugString("totalAudioTimePlayed < presentationTime\n");
+				long temp = presentationTime - totalAudioTimePlayed;
+				//if (temp < delay)
+				{
+					Sleep(temp);
+				}
+			}
+			else 
+			{
+	//			Sleep(totalAudioTimePlayed - presentationTime);
 			}
 		}
-		else 
+		else
 		{
-//			Sleep(totalAudioTimePlayed - presentationTime);
+			Sleep(delay);
 		}
 
 		for (i = 0; i < num_tracks; i++) 
@@ -900,6 +974,17 @@ void display_frame(void *arg)
 			switch (type) 
 			{
 				case OGGPLAY_INACTIVE:
+					break;
+				case OGGPLAY_RGBA_VIDEO:
+					
+					required = oggplay_callback_info_get_required(track_info[i]);
+					if (required>0) 
+					{
+						overlay_data = oggplay_callback_info_get_overlay_data(headers[0]);
+						presentationTime = oggplay_callback_info_get_presentation_time(headers[0]);
+						handle_overlay_data(player, i, overlay_data, n_frames);
+					}
+
 					break;
 				case OGGPLAY_YUV_VIDEO:
 					/*
@@ -929,18 +1014,21 @@ void display_frame(void *arg)
 					break;
 				case OGGPLAY_FLOATS_AUDIO:
 					#if USE_AUDIO
-					required = oggplay_callback_info_get_required(track_info[i]);          
-       
-					for (j = 0; j < required; j++) 
-					{      
-						 /* Returns number of samples in the record. Note: the resulting data include samples for all audio channels */
-						samples = oggplay_callback_info_get_record_size(headers[j]);
-						audio_data = oggplay_callback_info_get_audio_data(headers[j]);  
-						handle_audio_data(player, i, audio_data, samples);            
-					}          
-//					printf("audio presentation time: %ld\n",
-//					        oggplay_callback_info_get_presentation_time(headers[j]));                    
-					#endif    
+					if (usingAudio)
+						{
+						required = oggplay_callback_info_get_required(track_info[i]);          
+	       
+						for (j = 0; j < required; j++) 
+						{      
+							 /* Returns number of samples in the record. Note: the resulting data include samples for all audio channels */
+							samples = (int)oggplay_callback_info_get_record_size(headers[j]);
+							audio_data = oggplay_callback_info_get_audio_data(headers[j]);  
+							handle_audio_data(player, i, audio_data, samples);            
+						}          
+	//					printf("audio presentation time: %ld\n",
+	//					        oggplay_callback_info_get_presentation_time(headers[j]));                    
+						#endif
+					}
 					break;
 				case OGGPLAY_CMML:
 					if (oggplay_callback_info_get_required(track_info[i]) > 0)
@@ -968,9 +1056,9 @@ next_frame: ;
 
 void float_to_short_array(const float* in, short* out, int len) 
 {
-	int i = 0;
 	float scaled_value = 0;		
-	for(i = 0; i < len; i++) 
+
+	for(int i = 0; i < len; i++) 
 	{				
 		scaled_value = floorf(0.5 + 32768 * in[i]);
 		if (in[i] < 0) 
@@ -1332,16 +1420,53 @@ void handle_video_data (OggPlay * player, int track_num, OggPlayVideoData * vide
 
 	frameReady = true;
 
-	/* probably a better place to put this..start playing dsound buffer once we hit video */
-	DWORD status;
-	fmvAudioBuffer->GetStatus(&status);
-	if (!(status & DSBSTATUS_PLAYING))
+	if (usingAudio)
 	{
-		if(FAILED(fmvAudioBuffer->Play(0, 0, DSBPLAY_LOOPING)))
+		/* probably a better place to put this..start playing dsound buffer once we hit video */
+		DWORD status;
+		fmvAudioBuffer->GetStatus(&status);
+		if (!(status & DSBSTATUS_PLAYING))
 		{
-			OutputDebugString("can't play dsound fmv buffer\n");
+			if(FAILED(fmvAudioBuffer->Play(0, 0, DSBPLAY_LOOPING)))
+			{
+				OutputDebugString("can't play dsound fmv buffer\n");
+			}
+			else OutputDebugString("started playing Dsound buffer\n");
 		}
-		else OutputDebugString("started playing Dsound buffer\n");
+	}
+}
+
+void handle_overlay_data (OggPlay * player, int track_num, 
+                     OggPlayOverlayData * overlay_data, int frame) 
+{
+	if (textureData == NULL) 
+	{
+		textureData = new unsigned char[overlay_data->width * overlay_data->height * 4];
+		imageWidth  = overlay_data->width;
+		imageHeight = overlay_data->height;
+	}
+
+	memcpy(textureData, overlay_data->rgb, imageWidth * imageHeight * 4);
+
+//	char buf[100];
+///	sprintf(buf, "new frame at: %d\n", timeGetTime());
+//	OutputDebugString(buf);
+
+	frameReady = true;
+
+	if (usingAudio)
+	{
+		/* probably a better place to put this..start playing dsound buffer once we hit video */
+		DWORD status;
+		fmvAudioBuffer->GetStatus(&status);
+		if (!(status & DSBSTATUS_PLAYING))
+		{
+			if(FAILED(fmvAudioBuffer->Play(0, 0, DSBPLAY_LOOPING)))
+			{
+				OutputDebugString("can't play dsound fmv buffer\n");
+			}
+			else OutputDebugString("started playing Dsound buffer\n");
+		}
 	}
 }
 
@@ -1386,21 +1511,37 @@ void WriteFmvData(unsigned char *destData, unsigned char *srcData, int width, in
 	}
 }
 
+int imageCount = 0;
+
 int NextFMVFrame()
 {
 	D3DLOCKED_RECT textureRect;
 
 	/* lock the d3d texture */
-	fmvDynamicTexture->LockRect( 0, &textureRect, NULL, NULL );
+	if (FAILED(fmv.fmvDynamicTexture->LockRect(0, &textureRect, NULL, NULL)) )
+	{
+		OutputDebugString("couldn't lock fmv.fmvTexture\n");
+		return 0;
+	}
 
 	/* write frame image data to texture */
-	WriteFmvData((unsigned char*)textureRect.pBits, textureData, imageWidth, imageHeight, textureRect.Pitch);
+	WriteFmvData((unsigned char*)textureRect.pBits, textureData, imageWidth, imageHeight, textureRect.Pitch );
 
 	/* unlock d3d texture */
-	fmvDynamicTexture->UnlockRect( 0 );
+	fmv.fmvDynamicTexture->UnlockRect(0);
 
 	/* update rendering texture with FMV image */
-	d3d.lpD3DDevice->UpdateTexture( fmvDynamicTexture, fmvTexture );
+#ifdef WIN32
+	d3d.lpD3DDevice->UpdateTexture(fmv.fmvDynamicTexture, fmv.fmvTexture);
+#endif
+/*
+	char char_buf[100];
+	sprintf(char_buf, "image_%d.png", imageCount);
+	if(FAILED(D3DXSaveTextureToFile(char_buf, D3DXIFF_PNG, fmv.fmvTexture, NULL))) {
+		OutputDebugString("couldnt save tex to file");
+	}
+*/
+	imageCount++;
 
 	frameReady = false;
 
@@ -1409,6 +1550,7 @@ int NextFMVFrame()
 
 int CreateFMVAudioBuffer(int channels, int rate)
 {
+#ifdef WIN32
 	WAVEFORMATEX waveFormat;
 	DSBUFFERDESC bufferFormat;
 
@@ -1469,6 +1611,8 @@ int CreateFMVAudioBuffer(int channels, int rate)
 	testBuffer = new unsigned char[bufferFormat.dwBufferBytes];
 
 	return bufferFormat.dwBufferBytes;
+#endif
+	return 0;
 }
 
 } // extern "C"

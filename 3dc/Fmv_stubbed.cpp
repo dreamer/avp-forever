@@ -1,6 +1,5 @@
-//#undef USE_FMV
-//#ifndef USE_FMV
-#if 0
+
+#ifndef USE_FMV
 
 extern "C" {
 
@@ -11,7 +10,7 @@ extern "C" {
 #include <math.h>
 
 #include <assert.h>
-#include "sndfile.h"
+//#include "sndfile.h"
 
 extern int GotAnyKey;
 

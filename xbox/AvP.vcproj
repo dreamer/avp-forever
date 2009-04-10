@@ -89,7 +89,7 @@
 				Optimization="0"
 				InlineFunctionExpansion="0"
 				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet-1.2-xbox\include&quot;"
-				PreprocessorDefinitions="_DEBUG;_XBOX;_WINDOWS;engine=1;DB_NOWINDOWS"
+				PreprocessorDefinitions="_DEBUG;_XBOX;_WINDOWS;USE_FMV;engine=1;DB_NOWINDOWS"
 				StringPooling="FALSE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -207,16 +207,16 @@
 			WholeProgramOptimization="TRUE">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
-				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="2"
+				Optimization="0"
+				GlobalOptimizations="FALSE"
+				InlineFunctionExpansion="0"
 				EnableIntrinsicFunctions="TRUE"
 				ImproveFloatingPointConsistency="TRUE"
 				FavorSizeOrSpeed="1"
-				OmitFramePointers="TRUE"
+				OmitFramePointers="FALSE"
 				EnableFiberSafeOptimizations="FALSE"
 				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet-1.2-xbox\include&quot;"
-				PreprocessorDefinitions="_XBOX;_WINDOWS;engine=1;NDEBUG;DB_NOWINDOWS"
+				PreprocessorDefinitions="_XBOX;_WINDOWS;engine=1;USE_FMV;DB_NOWINDOWS"
 				MinimalRebuild="TRUE"
 				ExceptionHandling="FALSE"
 				BasicRuntimeChecks="0"
@@ -236,7 +236,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="xapilib.lib d3d8.lib d3dx8.lib xgraphics.lib dsound.lib xboxkrnl.lib xbdm.lib xonline.lib"
 				AdditionalLibraryDirectories="..\xbox\enet-1.2-xbox\lib"
-				GenerateDebugInformation="FALSE"
+				GenerateDebugInformation="TRUE"
 				GenerateMapFile="FALSE"
 				MapExports="FALSE"
 				MapLines="FALSE"
@@ -2861,6 +2861,9 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\3dc\Fmv.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\Fmv_stubbed.cpp">

@@ -311,17 +311,9 @@ void LoadCommonTextures(void)
 		{
 			ChromeImageNumber = CL_LoadImageOnce("Envrnmts\\derelict\\water.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 		}
-		
 	}
-
-	#if 1
-	{
-		extern void InitDrawTest(void);
-		InitDrawTest();
-	}
-	#endif
-
 }
+
 void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 {
 	struct VertexTag quadVertices[4];

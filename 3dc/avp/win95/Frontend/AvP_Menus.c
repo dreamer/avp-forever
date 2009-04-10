@@ -2064,7 +2064,7 @@ static void ActUponUsersInput(void)
 	{
 		AVPMENU_ELEMENT *elementPtr = &AvPMenus.MenuElements[AvPMenus.CurrentlySelectedElement];
 
-		if (DebouncedKeyboardInput[KEY_ESCAPE] || DebouncedKeyboardInput[KEY_CR])
+		if (DebouncedKeyboardInput[KEY_ESCAPE] || DebouncedKeyboardInput[KEY_CR] || DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2])
 		{
 			elementPtr->TextPtr[AvPMenus.PositionInTextField] = 0;
 			AvPMenus.UserEnteringText = 0;
@@ -2352,7 +2352,7 @@ static void ActUponUsersInput(void)
 				switch (AvPMenus.CurrentMenu)
 				{
 					case AVPMENU_USERPROFILESELECT:
-			 	       case AVPMENU_MARINELEVELS:
+					case AVPMENU_MARINELEVELS:
 					case AVPMENU_PREDATORLEVELS:
 					case AVPMENU_ALIENLEVELS:
 					{
@@ -2413,7 +2413,7 @@ static void ActUponUsersInput(void)
 				KeyDepressedCounter += RealFrameTime;
 			}
 		}
-		else if (DebouncedKeyboardInput[KEY_BACKSPACE]) 
+		else if (DebouncedKeyboardInput[KEY_BACKSPACE] || DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_8])  // bjd
 		{
 			switch (AvPMenus.MenuElements[AvPMenus.CurrentlySelectedElement].ElementID)
 			{

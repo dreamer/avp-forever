@@ -35,6 +35,7 @@ class AltTabAwRestore : public AltTabRestore<DX_PTR>
 		virtual void DoRestore(DX_PTR * pDxGraphic);
 };
 
+#if 0
 void AltTabAwRestore<DDSurface>::DoRestore(DDSurface * pSurface)
 {
 #if 0 // bjd
@@ -47,6 +48,7 @@ void AltTabAwRestore<DDSurface>::DoRestore(DDSurface * pSurface)
 	pNewSurface->Release();
 #endif
 }
+#endif
 
 void AltTabAwRestore<AvPTexture>::DoRestore(AvPTexture * pTexture)
 {
@@ -115,7 +117,7 @@ struct AltTabEntry
 struct AltTabLists
 {
 	HashTable<AltTabEntry<AvPTexture> > m_listTextures;
-	HashTable<AltTabEntry<DDSurface> > m_listSurfaces;
+//	HashTable<AltTabEntry<DDSurface> > m_listSurfaces;
 };
 
 #ifdef NDEBUG
@@ -129,7 +131,8 @@ struct AltTabDebugLists : AltTabLists
 		// destructor for derived class will be called before destructor
 		// for base class, so we can make assersions about the base class:
 		// everything *should* have been removed from these lists before exiting
- 
+
+#if 0
 		if (m_listSurfaces.Size())
 		{
 			db_logf1(("ERROR: AltTab lists still referring to %u surface(s) on exiting",m_listSurfaces.Size()));
@@ -148,7 +151,7 @@ struct AltTabDebugLists : AltTabLists
 		{
 			db_logf1(("OK on exiting: AltTab surface lists are clean"));
 		}
-
+#endif
 		if (m_listTextures.Size())
 		{
 			db_logf1(("ERROR: AltTab lists still referring to %u texture(s) on exiting",m_listTextures.Size()));
@@ -196,6 +199,7 @@ struct AltTabDebugLists : AltTabLists
 	g_atlists.m_listTextures.AddAsserted(pNewNode);
 }
 
+#if 0
 #ifdef NDEBUG
 	void ATIncludeSurface(DDSurface * pSurface, AW_BACKUPTEXTUREHANDLE hBackup)
 #else
@@ -220,6 +224,7 @@ struct AltTabDebugLists : AltTabLists
 	#endif
 	g_atlists.m_listSurfaces.AddAsserted(pNewNode);
 }
+#endif
 
 #ifdef NDEBUG
 	void ATIncludeTextureEx(AvPTexture * pTexture, AT_PFN_RESTORETEXTURE pfnRestore, void * pUser)
@@ -248,6 +253,7 @@ struct AltTabDebugLists : AltTabLists
 	g_atlists.m_listTextures.AddAsserted(pNewNode);
 }
 
+#if 0
 #ifdef NDEBUG
 	void ATIncludeSurfaceEx(DDSurface * pSurface, AT_PFN_RESTORESURFACE pfnRestore, void * pUser)
 #else
@@ -274,6 +280,7 @@ struct AltTabDebugLists : AltTabLists
 	#endif
 	g_atlists.m_listSurfaces.AddAsserted(pNewNode);
 }
+#endif
 
 void ATRemoveTexture(AvPTexture * pTexture)
 {
@@ -291,6 +298,7 @@ void ATRemoveTexture(AvPTexture * pTexture)
 	g_atlists.m_listTextures.RemoveAsserted(ateRemove);
 }
 
+#if 0
 void ATRemoveSurface(DDSurface * pSurface)
 {
 	db_assert1(pSurface);
@@ -306,6 +314,7 @@ void ATRemoveSurface(DDSurface * pSurface)
 	#endif
 	g_atlists.m_listSurfaces.RemoveAsserted(ateRemove);
 }
+#endif
 
 void ATOnAppReactivate()
 {

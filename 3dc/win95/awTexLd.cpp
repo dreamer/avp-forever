@@ -278,9 +278,9 @@ namespace AwTl
 
 	struct LoadInfo
 	{
-		DDSurface * surfaceP;
-		bool surface_lockedB;
-		DDSurface * dst_surfaceP;
+//		DDSurface * surfaceP;
+//		bool surface_lockedB;
+//		DDSurface * dst_surfaceP;
 		AvPTexture * textureP;
 		AvPTexture * dst_textureP;
 
@@ -302,10 +302,10 @@ namespace AwTl
 		bool skipB; // used to indicate that a surface/texture was not lost and .`. does not need restoring
 
 		LoadInfo()
-			: surfaceP(NULL)
-			, surface_lockedB(false)
-			, dst_surfaceP(NULL)
-			, textureP(NULL)
+//			: surfaceP(NULL)
+//			, surface_lockedB(false)
+//			, dst_surfaceP(NULL)
+			: textureP(NULL)
 			, dst_textureP(NULL)
 			, skipB(false)
 		{
@@ -534,7 +534,6 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 	if (_parmsR.originalWidthP) *_parmsR.originalWidthP = m_nWidth;
 	if (_parmsR.originalHeightP) *_parmsR.originalHeightP = m_nHeight;
 
-	//AvPTexture *d3d_texture = new AvPTexture;
 	AvPTexture *d3d_texture = (AvPTexture*)malloc(sizeof(AvPTexture));
 
 	unsigned char *buffer = (unsigned char *)malloc(m_nWidth * m_nHeight * 4);
@@ -2260,11 +2259,13 @@ namespace AwTl {
 						pParams->prevTexP = va_arg(ap,AvPTexture *);
 						db_logf4(("\tPrevious D3DTexture * = %p",pParams->prevTexP.textureP));
 					}
+#if 0
 					else
 					{
 						pParams->prevTexP = va_arg(ap,DDSurface *);
 						db_logf4(("\tPrevious DDSurface * = %p",pParams->prevTexP.surfaceP));
 					}
+#endif
 					break;
 				case 'c':
 					if (pParams->callbackF)
@@ -2718,6 +2719,7 @@ AvPTexture * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...)
 	return bParmsOK ? LoadFromParams(&parms).textureP : NULL;
 }
 
+#if 0
 DDSurface * _AWTL_VARARG AwCreateSurface(char const * _argFormatS, ...)
 {
 	db_logf4(("AwCreateSurface(\"%s\") called",_argFormatS));
@@ -2749,6 +2751,7 @@ DDSurface * _AWTL_VARARG AwCreateSurface(char const * _argFormatS, ...)
 	va_end(ap);
 	return bParmsOK ? LoadFromParams(&parms).surfaceP : NULL;
 }
+#endif
 
 AW_TL_ERC AwDestroyBackupTexture(AW_BACKUPTEXTUREHANDLE _bH)
 {

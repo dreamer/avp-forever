@@ -105,7 +105,7 @@ int JoystickEnabled;
 
 DIJOYSTATE JoystickState;          // DirectInput joystick state 
 
-/* XInput stuff from dx sdk sameples */
+/* XInput stuff from dx sdk samples */
 int GotXPad = 0;
 
 /* XInput controller state */
@@ -400,6 +400,34 @@ void DirectReadKeyboard(void)
 		}
 	}
 #endif
+	if (IngameKeyboardInput[VK_OEM_7])
+	{
+		KeyboardInput[KEY_HASH] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_DIVIDE])
+	{
+		KeyboardInput[KEY_NUMPADDIVIDE] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_MULTIPLY])
+	{
+		KeyboardInput[KEY_NUMPADMULTIPLY] = TRUE;
+		GotAnyKey = TRUE;
+	}
+
+	if (IngameKeyboardInput[VK_OEM_MINUS])
+	{
+		KeyboardInput[KEY_MINUS] = TRUE;
+		GotAnyKey = TRUE;
+	}
+	if (IngameKeyboardInput[VK_OEM_PLUS])
+	{
+		KeyboardInput[KEY_EQUALS] = TRUE;
+		GotAnyKey = TRUE;
+	}
 
 	if (IngameKeyboardInput[VK_OEM_5])
 	{

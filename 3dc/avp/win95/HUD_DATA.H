@@ -4,7 +4,7 @@
 
 /* KJL 16:58:11 05/08/97 - the display data was getting quite long, so I moved it to 
 a header file to make things clearer. */
-static struct DDGraphicTag HUDDDInfo[NO_OF_MARINE_HUD_GFX];
+//static struct DDGraphicTag HUDDDInfo[NO_OF_MARINE_HUD_GFX];
 
 /* MARINE LO RES (width = 320) */
 static struct DigitPropertiesTag LoresMarineHUDDigitProperties[] =
