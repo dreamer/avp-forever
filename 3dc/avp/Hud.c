@@ -134,9 +134,9 @@ static float ScanlineLevel;
 //extern void SmartTarget(int speed);
 extern void SmartTarget(int speed,int projectile_speed);
 
-extern void PlatformSpecificKillMarineHUD(void);
-extern void PlatformSpecificKillAlienHUD(void);
-extern void PlatformSpecificKillPredatorHUD(void);
+//extern void PlatformSpecificKillMarineHUD(void);
+//extern void PlatformSpecificKillAlienHUD(void);
+//extern void PlatformSpecificKillPredatorHUD(void);
 extern void DrawScanlinesOverlay(float level);
 extern void RenderThisDisplayblock(DISPLAYBLOCK *dbPtr);
 void DisplayPredatorHealthAndEnergy(void);
@@ -212,6 +212,8 @@ void InitHUD(void)
 	/* KJL 11:18:36 04/25/97 - initialise HUD map code */
 	//InitHUDMap();
 }
+
+/* bjd
 void KillHUD(void)
 {
 	switch(AvP.PlayerType)
@@ -231,6 +233,8 @@ void KillHUD(void)
 			break;
 	}
 }
+*/
+
 void InitMarineHUD(void)
 {
 	/*KJL****************************************************************************************
@@ -305,13 +309,13 @@ void MaintainHUD(void)
 	GLOBALASSERT(playerStatusPtr);
 
 //	RenderSmokeTest();
-	PlatformSpecificEnteringHUD();
+//	PlatformSpecificEnteringHUD();
 	
 	HandleParticleSystem();
 
 	RenderGrapplingHook();
 	
-	SecondFlushD3DZBuffer();
+	FlushD3DZBuffer();
 
 	//DrawFontTest();
 	if (Observer)

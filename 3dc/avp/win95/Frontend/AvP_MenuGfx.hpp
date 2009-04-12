@@ -74,7 +74,7 @@ enum AVPMENUGFX_ID
 typedef struct
 {
 	char *FilenamePtr;
-	void *ImagePtr;
+	AvPTexture *ImagePtr;
 	D3DTEXTURE menuTexture;
 	AW_BACKUPTEXTUREHANDLE hBackup;
 	int Width;

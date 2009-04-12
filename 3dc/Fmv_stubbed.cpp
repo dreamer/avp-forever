@@ -198,9 +198,9 @@ void ReleaseAllFMVTextures()
 	for(int i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].MessageNumber = 0;
-//		ReleaseD3DTexture8(FMVTexture[i].SrcTexture);
-//		ReleaseD3DTexture8(FMVTexture[i].SrcSurface);
-		ReleaseD3DTexture8(FMVTexture[i].DestTexture);
+//		ReleaseD3DTexture(FMVTexture[i].SrcTexture);
+//		ReleaseD3DTexture(FMVTexture[i].SrcSurface);
+		ReleaseD3DTexture(FMVTexture[i].DestTexture);
 	}
 }
 
@@ -209,10 +209,10 @@ void ReleaseAllFMVTexturesForDeviceReset()
 	for(int i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].MessageNumber = 0;
-//		ReleaseD3DTexture8(FMVTexture[i].SrcTexture);
-//		ReleaseD3DTexture8(FMVTexture[i].SrcSurface);
-		ReleaseD3DTexture8(FMVTexture[i].DestTexture);
-//		ReleaseD3DTexture8(FMVTexture[i].ImagePtr->Direct3DTexture);
+//		ReleaseD3DTexture(FMVTexture[i].SrcTexture);
+//		ReleaseD3DTexture(FMVTexture[i].SrcSurface);
+		ReleaseD3DTexture(FMVTexture[i].DestTexture);
+//		ReleaseD3DTexture(FMVTexture[i].ImagePtr->Direct3DTexture);
 		if(FMVTexture[i].ImagePtr->Direct3DTexture != NULL)
 		{
 			FMVTexture[i].ImagePtr->Direct3DTexture->Release();
@@ -276,7 +276,7 @@ void CloseFMV()
 /* call this for res change, alt tabbing and whatnot */
 extern void ReleaseBinkTextures()
 {
-	//ReleaseD3DTexture8(&binkTexture);
+	//ReleaseD3DTexture(&binkTexture);
 }
 
 void FindLightingValuesFromTriggeredFMV(unsigned char *bufferPtr, FMVTEXTURE *ftPtr)

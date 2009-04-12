@@ -722,10 +722,6 @@ void _cdecl main()
 		DeallocatePlayersMirrorImage();
 		TimeStampedMessage("After DeallocatePlayersMirrorImage");
 
-		/* KJL 15:26:43 03/12/97 - clear data */
-		KillHUD();
-		TimeStampedMessage("After KillHUD");
-
 		Destroy_CurrentEnvironment();
 		TimeStampedMessage("After Destroy_CurrentEnvironment");
 		DeallocateAllImages();

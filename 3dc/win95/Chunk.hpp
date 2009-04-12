@@ -4,8 +4,6 @@
 #define _chunk_hpp 1
 
 
-#if engine
-
 	#include "3dc.h"
 	#include "mem3dc.h" // for debug new and delete
 	
@@ -19,9 +17,6 @@
 #endif
 
 	#include "list_tem.hpp"
-	
-
-#endif
 
 #if cencon
 

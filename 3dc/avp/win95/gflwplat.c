@@ -180,6 +180,7 @@ static int LastDisplayableXForChars(void)
 	return ScreenDescriptorBlock.SDB_Width-CharWidth;
 }
 
+#if 0
 void jtextprint (const char* t, ...)
 {
 	char buffer [1024];
@@ -233,3 +234,4 @@ void jtextprint (const char* t, ...)
 
 
 }
+#endif

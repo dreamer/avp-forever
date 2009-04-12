@@ -195,7 +195,6 @@ void Start_Progress_Bar()
 	LoadingBarEmpty_DestRect.top=((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset) *11)/12;
 	LoadingBarEmpty_DestRect.bottom=(ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)-1;
 
-//	for (int i=0; i<2; i++)
 	{
 		ThisFramesRenderingHasBegun();
 
@@ -207,16 +206,7 @@ void Start_Progress_Bar()
 
 		FlipBuffers();	
 	}
-/*
-	if(image)
-	{
-		ReleaseDDSurface(image);
-	}
-	if (LoadingBarEmpty) 
-	{
-		ReleaseDDSurface(LoadingBarEmpty);
-	}
-*/
+
 	CurrentPosition=0;
 }
 
@@ -363,16 +353,16 @@ void Game_Has_Loaded(void)
 
 	if(image)
 	{
-		ReleaseDDSurface(image);
+		ReleaseAvPTexture(image);
 	}
 
 	if (LoadingBarEmpty) 
 	{
-		ReleaseDDSurface(LoadingBarEmpty);
+		ReleaseAvPTexture(LoadingBarEmpty);
 	}
 	if (LoadingBarFull)
 	{
-		ReleaseDDSurface(LoadingBarFull);
+		ReleaseAvPTexture(LoadingBarFull);
 	}
 
 	SAFE_RELEASE(LoadingBarEmptyTexture);

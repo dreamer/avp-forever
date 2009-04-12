@@ -1,9 +1,7 @@
 #ifndef _chnktype_hpp
 #define _chnktype_hpp 1
 
-#if engine
 #include "3dc.h"
-#endif
 #include "list_tem.hpp"
 
 struct ChunkVectorInt;
@@ -11,27 +9,21 @@ struct ChunkVectorFloat;
 
 struct ChunkVector
 {
-
 	double x;
 	double y;
 	double z;
-  	
-  	
+  
   	ChunkVector friend operator+(const ChunkVector&, const ChunkVector&);
   	ChunkVector friend operator-(const ChunkVector&, const ChunkVector&);
   	ChunkVector& operator+=(const ChunkVector&);
   	ChunkVector& operator-=(const ChunkVector&);
-	
+
 	ChunkVector friend operator*(const ChunkVector&, const double);
  	ChunkVector friend operator/(const ChunkVector&, const double); 
-  	
+
   	ChunkVector friend operator*(const ChunkVector&, const ChunkVector&); //cross prod
 
-
-	
-	#if engine
 	operator VECTORCH () const;
-	#endif
 	operator ChunkVectorInt () const;
 	operator ChunkVectorFloat () const;
 
@@ -42,35 +34,29 @@ struct ChunkVector
 
 struct ChunkVectorInt
 {
-
 	int x;
 	int y;
 	int z;
-  	
   	
   	ChunkVectorInt friend operator+(const ChunkVectorInt&, const ChunkVectorInt&);
   	ChunkVectorInt friend operator-(const ChunkVectorInt&, const ChunkVectorInt&);
   	ChunkVectorInt& operator+=(const ChunkVectorInt&);
   	ChunkVectorInt& operator-=(const ChunkVectorInt&);
-	
+
 	ChunkVectorInt friend operator*(const ChunkVectorInt&, const double);
  	ChunkVectorInt friend operator/(const ChunkVectorInt&, const double); 
-  	
+
   	//ChunkVectorInt friend operator*(const ChunkVectorInt&, const ChunkVectorInt&); //cross prod
 
-
-	
-	#if engine
 	operator VECTORCH () const;
-	#endif
 
   	//friend double dot(const ChunkVector&, const ChunkVector&);//dot product
   	friend double mod(const ChunkVectorInt&);//magnitude of vector
   	int norm(); //normalize to 65536
 };
+
 struct ChunkVectorFloat
 {
-
 	float x;
 	float y;
 	float z;
@@ -84,9 +70,7 @@ struct ChunkVectorFloat
  	ChunkVectorFloat friend operator/(const ChunkVectorFloat&, const double); 
 	
 	//ChunkVectorInt friend operator*(const ChunkVectorInt&, const ChunkVectorInt&); //cross prod
-	#if engine
 	operator VECTORCH () const;
-	#endif
 
   	//friend double dot(const ChunkVector&, const ChunkVector&);//dot product
   	friend double mod(const ChunkVectorFloat&);//magnitude of vector

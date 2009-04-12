@@ -168,7 +168,7 @@ extern void PlatformSpecificExitingHUD(void);
 * to your GPU.                                                                                *
 ******************************************************************************************KJL*/
 
-extern void PlatformSpecificEnteringHUD(void);
+//extern void PlatformSpecificEnteringHUD(void);
 /*KJL**************************************************
 * Made to complement PlatformSpecificExitingHUD() fn. *
 **************************************************KJL*/
@@ -186,9 +186,9 @@ extern void BLTMotionTrackerBlipToHUD(int x, int y, int brightness);
 * brightness=65536 means brightest blip, 0 means darkest blip      		*
 ********************************************************************KJL*/
 
-extern void BLTMarineNumericsToHUD(enum MARINE_HUD_DIGIT digitsToDraw);
-extern void BLTPredatorNumericsToHUD(void);
-extern void BLTAlienNumericsToHUD(void);
+//extern void BLTMarineNumericsToHUD(enum MARINE_HUD_DIGIT digitsToDraw);
+//extern void BLTPredatorNumericsToHUD(void);
+//extern void BLTAlienNumericsToHUD(void);
 /*KJL********************************************************************
 * Draws ALL the numeric digits (pertinent to the Marine) to the HUD.    *
 *                                                                       *
@@ -207,7 +207,7 @@ extern void BLTAlienNumericsToHUD(void);
 * and does the actual blitting. This is in avp/win95/ddplat.cpp.        *
 ********************************************************************KJL*/
 
-extern void BLTGunSightToScreen(int screenX, int screenY, enum GUNSIGHT_SHAPE gunsightShape);
+//extern void BLTGunSightToScreen(int screenX, int screenY, enum GUNSIGHT_SHAPE gunsightShape);
 /*KJL****************************************************************
 * screenX & screenY are in pixels (scaled to SDB so should be okay) *
 * (centre hotspot)													*
@@ -228,7 +228,7 @@ extern void BLTPredatorOverlayToHUD(void);
 **************************KJL*/
 
 
-extern void KillHUD(void);
+//extern void KillHUD(void);
 /*KJL*********************
 * Free memory of HUD gfx *
 *********************KJL*/
@@ -245,7 +245,7 @@ extern void NewOnScreenMessage(unsigned char *messagePtr);
 * still being displayed will be overwritten.                            *
 ********************************************************************KJL*/
 
-extern void DrawOnScreenMessage(unsigned char *messagePtr);
+//extern void DrawOnScreenMessage(unsigned char *messagePtr);
 /*KJL*********************************************************************
 * This is a platform specific fn which draws the required message to the *
 * screen. Implemented in ddplat.cpp on the PC.                           *

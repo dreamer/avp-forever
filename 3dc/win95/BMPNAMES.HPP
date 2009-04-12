@@ -3,22 +3,9 @@
 
 #include "chunk.hpp"
 
-// for assert
-#if engine
-
 #define UseLocalAssert No
 #include "ourasert.h"
 #define assert(x) GLOBALASSERT(x)
-
-#else
-
-#if cencon
-#include "ccassert.h"
-#else
-#include <assert.h>
-#endif
-
-#endif
 
 enum BMPN_Flags
 {

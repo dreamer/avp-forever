@@ -203,7 +203,7 @@ Light_Chunk::Light_Chunk(Chunk_With_Children * parent, const char * data, size_t
 	data += 4;
 	light.pad2 = *((int *) data);
 	
-	#if engine || cencon
+	#if cencon
 	light_added_to_module = FALSE;
 	#endif
 		

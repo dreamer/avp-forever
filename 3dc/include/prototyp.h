@@ -2491,9 +2491,6 @@ void* LoadImageIntoD3DImmediateSurface(char *fname, IMAGEHEADER *iheader,
       int TextureFileType);
 void* LoadImageIntoD3DTexture(char *fname, IMAGEHEADER *iheader,
       int TextureFileType);
-void ReloadImageIntoD3DImmediateSurface(IMAGEHEADER* iheader);
-void* ReloadImageIntoD3DTexture(IMAGEHEADER* iheader);
-int GetTextureHandle(IMAGEHEADER *imageHeaderPtr);
 
 void* LoadFontIntoDirectDrawSurface(char *fname, IMAGEHEADER *iheader);
 void ClearScreen(SCREENDESCRIPTORBLOCK* sdb, int Colour);

@@ -49,6 +49,8 @@ extern "C"  {
 #endif
 //#include "fastfile.h"
 
+#include "aw.h"
+
 #define platform_pc		Yes
 #define Saturn			No
 
@@ -765,57 +767,10 @@ BOOL WaitForRasterThread();
 
 
 /* DirectDraw */
-void finiObjects(void);
-void GenerateDirectDrawSurface(void);
-void LockSurfaceAndGetBufferPointer(void);		
-void UnlockSurface(void);
-void finiObjects(void);
 void ColourFillBackBuffer(int FillColour);
-void ColourFillBackBufferQuad(int FillColour, int LeftX,
-     int TopY, int RightX, int BotY);
+void ColourFillBackBufferQuad(int FillColour, int LeftX, int TopY, int RightX, int BotY);
 void FlipBuffers(void);
-void BlitToBackBuffer(void* lpBackground, RECT* destRectPtr, RECT* srcRectPtr);
-void BlitToBackBufferWithoutTearing(void* lpBackground, RECT* destRectPtr, RECT* srcRectPtr);
-void BlitWin95Char(int x, int y, unsigned char toprint);
 void ReleaseDDSurface(void* DDSurface);
-BOOL InitialiseDirectDrawObject(void);
-//BOOL InitialiseDirect3DObject(void); // BJD 06/05/2007
-BOOL InitialiseDirect3DObject(HWND hWndMain);
-BOOL ChangeDirectDrawObject(void);
-BOOL CheckForVideoModes(int TestVideoMode);
-void finiObjectsExceptDD(void);
-BOOL TestMemoryAccess(void);
-int ChangePalette (unsigned char* NewPalette);
-int GetAvailableVideoMemory(void);
-void HandleVideoModeRestarts(HINSTANCE hInstance, int nCmdShow);
-void* MakeBackdropSurface(void);
-void ReleaseBackdropSurface(void);
-void LockBackdropSurface(void);
-void UnlockBackdropSurface(void);
-void ComposeBackdropBackBuffer(void);
-int GetSingleColourForPrimary(int Colour);
-
-/* 
-	DirectX functionality only available in 
-	C++ under Watcom at present
-*/
-#ifdef __cplusplus
-/*HRESULT CALLBACK EnumDisplayModesCallback(LPDDSURFACEDESC pddsd, LPVOID Context);
-BOOL FAR PASCAL EnumDDObjectsCallback(GUID FAR* lpGUID, LPSTR lpDriverDesc,
-                                      LPSTR lpDriverName, LPVOID lpContext);
-*/
-#if triplebuffer
-/* 
-	must be WINAPI to support Windows FAR PASCAL
-	calling convention.  Must be HRESULT to support
-	enumeration return value.  NOTE THIS FUNCTION
-	DOESN'T WORK (DOCS WRONG) AND TRIPLE BUFFERING
-	HAS BEEN REMOVED ANYWAY 'COS IT'S USELESS...
-*/
-HRESULT WINAPI InitTripleBuffers(LPDIRECTDRAWSURFACE lpdd, 
-	 LPDDSURFACEDESC lpsd, LPVOID lpc);
-#endif
-#endif
 
 /* Direct 3D Immediate Mode Rasterisation Module */
 BOOL InitialiseDirect3DImmediateMode(void);
@@ -833,7 +788,7 @@ void Write3dTexturedPolygonToExecuteBuffer(int* itemptr);
 void WriteGouraud3dTexturedPolygonToExecuteBuffer(int* itemptr);
 void WriteBackdrop2dTexturedPolygonToExecuteBuffer(int* itemptr);
 void WriteBackdrop3dTexturedPolygonToExecuteBuffer(int* itemptr);
-void ReleaseD3DTexture(void* texture);
+void ReleaseAvPTexture(AvPTexture* texture);
 void ReleaseDirect3DNotDD(void);
 void ReleaseDirect3DNotDDOrImages(void);
 BOOL SetExecuteBufferDefaults(void);
@@ -844,7 +799,6 @@ void SelectMMXOptions(void);
 BOOL TestInitD3DObject(void);
 
 #if SupportZBuffering
-BOOL CreateD3DZBuffer(void);
 void FlushD3DZBuffer(void);
 void WriteZBPolygonToExecuteBuffer(int* itemptr);
 void WriteZBGouraudPolygonToExecuteBuffer(int* itemptr);
@@ -854,18 +808,6 @@ void WriteZB3dTexturedPolygonToExecuteBuffer(int* itemptr);
 void WriteZBGouraud3dTexturedPolygonToExecuteBuffer(int* itemptr);
 #endif
 
-/*
-#ifdef __cplusplus
- //BJD
-   HRESULT WINAPI DeviceEnumerator(LPGUID lpGuid,
-   LPSTR lpDeviceDescription, LPSTR lpDeviceName,
-   LPD3DDEVICEDESC lpHWDesc, LPD3DDEVICEDESC lpHELDesc, LPVOID lpContext);
-
-	// BJD
-HRESULT CALLBACK TextureFormatsEnumerator
-   (LPDDSURFACEDESC lpDDSD, LPVOID lpContext);
-#endif
-*/
 /* KJL 11:28:31 9/9/97 - Direct Input prototypes */
 BOOL InitialiseDirectInput(void);
 void ReleaseDirectInput(void);

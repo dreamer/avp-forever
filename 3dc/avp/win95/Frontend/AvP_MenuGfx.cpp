@@ -273,14 +273,12 @@ static void LoadMenuFont(void)
 
 static void UnloadMenuFont(void)
 {
-#if 1
 //	IndexedFont :: UnloadFont( IntroFont_Light );
 
-	ReleaseDDSurface(IntroFont_Light.info.ImagePtr);
+	ReleaseAvPTexture(IntroFont_Light.info.ImagePtr);
 	IntroFont_Light.info.ImagePtr = NULL;
 
 	SAFE_RELEASE(IntroFont_Light.info.menuTexture);
-#endif
 }
 extern int LengthOfMenuText(const char *textPtr)
 {
@@ -1278,7 +1276,7 @@ static void ReleaseAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 	GLOBALASSERT(gfxPtr->ImagePtr);
 
   //	ATRemoveSurface(gfxPtr->ImagePtr);
-	ReleaseDDSurface(gfxPtr->ImagePtr);
+	ReleaseAvPTexture(gfxPtr->ImagePtr); // bjd
 	
 	gfxPtr->ImagePtr = NULL;
 

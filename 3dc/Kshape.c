@@ -5854,6 +5854,7 @@ int CuboidPolyVertexV[][4] =
 
 #include "chnktexi.h"
 
+#if 0 // bjd
 void CubeSky(void)
 {
 	#define CUBESCALE 1024
@@ -5886,9 +5887,9 @@ void CubeSky(void)
 
 	#if 1
 	{
-		extern int BackdropImage;
+//		extern int BackdropImage;
 		fakeHeader.PolyFlags = 0;
-		fakeHeader.PolyColour =BackdropImage;
+		fakeHeader.PolyColour = BackdropImage;
 	}
 
 	{
@@ -5949,7 +5950,7 @@ void CubeSky(void)
 		}
 	}	
 }
-				   
+#endif
 
 void RenderMirrorSurface(void)
 {

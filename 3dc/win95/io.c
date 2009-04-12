@@ -1778,7 +1778,7 @@ int ChangeDisplayModes(HINSTANCE hInst, int nCmd,
 	   on the rasterisation request mode and whether
 	   a hardware dd driver is selected or could be
 	   available */
-	ChangeDirectDrawObject();
+//	ChangeDirectDrawObject();
 
     /*
 	  Check that our new video mode exists,

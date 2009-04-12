@@ -63,6 +63,10 @@ BOOL BilinearTextureFilter = 1;
 
 //extern HWND hWndMain;
 
+int 					VideoModeColourDepth;
+int						NumAvailableVideoModes;
+VIDEOMODEINFO			AvailableVideoModes[MaxAvailableVideoModes];
+
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern int WindowMode;
 extern int ZBufferMode;
@@ -1002,60 +1006,16 @@ void ReleaseDirect3D()
 	ReleaseDirectInput();
 }
 
-// reload D3D image -- assumes a base pointer points to the image loaded
-// from disc, in a suitable format
-
-void ReloadImageIntoD3DImmediateSurface(IMAGEHEADER* iheader)
+void ReleaseAvPTexture(AvPTexture* texture)
 {
-
-    void *reloadedTexturePtr = ReloadImageIntoD3DTexture(iheader);
-	LOCALASSERT(reloadedTexturePtr != NULL);
-
-	int gotTextureHandle = GetTextureHandle(iheader);
-	LOCALASSERT(gotTextureHandle == TRUE);
-}
-
-void* ReloadImageIntoD3DTexture(IMAGEHEADER* iheader)
-{
-	// NOTE FIXME BUG HACK
-	// what if the image was a DD surface ??
-#if 0
-	if (iheader->hBackup)
+	if (texture->buffer)
 	{
-		iheader->AvPTexture = AwCreateTexture("rf",AW_TLF_PREVSRC|AW_TLF_COMPRESS);
-		return iheader->AvPTexture;
+		free(texture->buffer);
 	}
-	else return NULL;
-#endif
-	return NULL;
+	free(texture);
 }
 
-int GetTextureHandle(IMAGEHEADER *imageHeaderPtr)
-{
-#if 0 // bjd
- 	LPDIRECT3DTEXTURE Texture = (LPDIRECT3DTEXTURE) imageHeaderPtr->AvPTexture;
-
-
-	LastError = Texture->GetHandle(d3d.lpD3DDevice, (D3DTEXTUREHANDLE*)&(imageHeaderPtr->D3DHandle));
-
-	if (LastError != D3D_OK) return FALSE;
-
-	imageHeaderPtr->D3DHandle = imageHeaderPtr->AvPTexture;
-#endif
-	return TRUE;
-}
-
-
-
-void ReleaseD3DTexture(void* texture)
-{
-	AvPTexture *TextureHandle = (AvPTexture *)texture;
-
-	free(TextureHandle->buffer);
-	free(TextureHandle);
-}
-
-void ReleaseD3DTexture8(LPDIRECT3DTEXTURE8 d3dTexture) 
+void ReleaseD3DTexture(D3DTEXTURE d3dTexture)
 {
 	/* release d3d texture */
 	SAFE_RELEASE(d3dTexture);

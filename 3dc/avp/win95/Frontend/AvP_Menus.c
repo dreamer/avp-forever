@@ -273,7 +273,6 @@ int AvP_MainMenus(void)
 	
 	TimeScale = ONE_FIXED;
 
-
  	if (!LobbiedGame)  // Edmond
 		CheckForCredits();
 	

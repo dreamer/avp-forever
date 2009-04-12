@@ -72,12 +72,12 @@ void D3D_DrawHUDFontCharacter(HUDCharDesc *charDescPtr);
 void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr);
 
 extern void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2);
-extern void XClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2);
+//extern void XClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2);
 /* HUD globals */
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern int sine[],cosine[];
 
-extern enum HUD_RES_ID HUDResolution;
+//extern enum HUD_RES_ID HUDResolution;
 
 signed int HUDTranslucencyLevel=64;
 
@@ -97,8 +97,8 @@ int ChromeImageNumber;
 int CloudyImageNumber;
 int BurningImageNumber;
 int HUDFontsImageNumber;
-int RebellionLogoImageNumber;
-int FoxLogoImageNumber;
+//int RebellionLogoImageNumber;
+//int FoxLogoImageNumber;
 int MotionTrackerScale;
 int PredatorVisionChangeImageNumber;
 int PredatorNumbersImageNumber;
@@ -142,6 +142,51 @@ static struct HUDFontDescTag HUDFontDesc[] =
 
 void D3D_BLTDigitToHUD(char digit, int x, int y, int font);
 
+void LoadCommonTextures(void);
+void D3D_InitialiseMarineHUD(void);
+
+void PlatformSpecificInitMarineHUD()
+{
+	D3D_InitialiseMarineHUD();
+	LoadCommonTextures();
+}
+
+void PlatformSpecificInitAlienHUD()
+{
+	/* set game mode: different, though for multiplayer game */
+	if(AvP.Network==I_No_Network)
+	{
+		cl_pszGameMode = "alien";
+		LoadCommonTextures();
+	}
+	else
+	{
+		cl_pszGameMode = "multip";
+		/* load in sfx */
+		LoadCommonTextures();
+		//load marine stuff as well
+		D3D_InitialiseMarineHUD();
+	}
+}
+
+void PlatformSpecificInitPredatorHUD()
+{
+	/* set game mode: different, though for multiplayer game */
+	if(AvP.Network==I_No_Network)
+	{
+		cl_pszGameMode = "predator";
+		/* load in sfx */
+		LoadCommonTextures();
+	}
+	else
+	{
+		cl_pszGameMode = "multip";
+		/* load in sfx */
+		LoadCommonTextures();
+		//load marine stuff as well
+		D3D_InitialiseMarineHUD();
+	}
+}
 
 void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 {
@@ -207,7 +252,7 @@ void D3D_InitialiseMarineHUD(void)
 
 	/* load HUD gfx of correct resolution */
 	{
-		HUDResolution = HUD_RES_HI;//HUD_RES_MED;
+//		HUDResolution = HUD_RES_HI;//HUD_RES_MED;
 		HUDImageNumber = CL_LoadImageOnce("Huds\\Marine\\MarineHUD.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
 		MotionTrackerHalfWidth = 127/2;
 		MotionTrackerTextureSize = 128;
@@ -314,6 +359,43 @@ void LoadCommonTextures(void)
 	}
 }
 
+void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2)
+{
+	char vertex1Inside=0,vertex2Inside=0;
+
+	if (v1->Y<0) vertex1Inside = 1;
+	if (v2->Y<0) vertex2Inside = 1;
+
+	/* if both vertices inside clip region no clipping required */
+	if (vertex1Inside && vertex2Inside) return;
+
+	/* if both vertices outside clip region no action required 
+	(the other lines will be clipped) */
+	if (!vertex1Inside && !vertex2Inside) return;
+
+	/* okay, let's clip */
+	if (vertex1Inside)
+	{
+		int lambda = DIV_FIXED(v1->Y,v2->Y - v1->Y);
+
+		v2->X = v1->X - MUL_FIXED(v2->X - v1->X,lambda);
+		v2->Y=0;
+
+		v2->U = v1->U - MUL_FIXED(v2->U - v1->U,lambda);
+		v2->V = v1->V - MUL_FIXED(v2->V - v1->V,lambda);
+	}
+	else
+	{
+		int lambda = DIV_FIXED(v2->Y,v1->Y - v2->Y);
+
+		v1->X = v2->X - MUL_FIXED(v1->X - v2->X,lambda);
+		v1->Y=0;
+
+		v1->U = v2->U - MUL_FIXED(v1->U - v2->U,lambda);
+		v1->V = v2->V - MUL_FIXED(v1->V - v2->V,lambda);
+	}
+}
+
 void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 {
 	struct VertexTag quadVertices[4];
@@ -401,7 +483,6 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 		RGBALIGHT_MAKE(255,255,255,HUDTranslucencyLevel)
 		);
 	
-	#if 1
 	{
 		HUDImageDesc imageDesc;
 
@@ -420,7 +501,6 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 
  		Draw_HUDImage(&imageDesc);
 	}
-	#endif
 
 	/* KJL 16:14:29 30/01/98 - draw bottom bar of MT */
 	{
@@ -655,7 +735,7 @@ void D3D_BLTDigitToHUD(char digit, int x, int y, int font)
 			break;
 	}
 
-	
+/*	bjd
 	if (HUDResolution == HUD_RES_LO)
 	{
 		FontDescPtr = &HUDFontDesc[font];
@@ -668,8 +748,9 @@ void D3D_BLTDigitToHUD(char digit, int x, int y, int font)
 	{
 		FontDescPtr = &HUDFontDesc[font];
 	}
+*/
 
-
+	FontDescPtr = &HUDFontDesc[font];
 
 	imageDesc.ImageNumber = HUDImageNumber;
 	imageDesc.TopLeftX = x;
@@ -712,6 +793,7 @@ void D3D_BLTGunSightToHUD(int screenX, int screenY, enum GUNSIGHT_SHAPE gunsight
 	Draw_HUDImage(&imageDesc);
 }
 
+#if 0 // bjd
 void LoadBackdropImage(void)
 {
 #if 1
@@ -721,7 +803,7 @@ void LoadBackdropImage(void)
 	  	BackdropImage = CL_LoadImageOnce("Envrnmts\\Pred03\\backdrop.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
 #endif
 }
-
+#endif
 
 void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 {

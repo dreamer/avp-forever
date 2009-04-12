@@ -492,15 +492,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth);
 
-	    /* Dubious restart hack for DirectDraw problems */
-		/* JH - I'm not sure this is really necessary
-			- it only comes into play if you try and set
-			a video mode which is not supported
-			BUT we are never going to try and do that
-			- or are we? */
-//	    HandleVideoModeRestarts(hInstance, nCmdShow);
-
-
 		/* Check Gamma Settings are correct after video mode change */
 //bjd		InitialiseGammaSettings(RequestedGammaSetting);
 
@@ -706,7 +697,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 					#endif
 
 					
-					InGameFlipBuffers();
+					FlipBuffers();
 
 					FrameCounterHandler();
 					{
@@ -790,8 +781,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		TimeStampedMessage("After DeallocatePlayersMirrorImage");
 				
 		/* KJL 15:26:43 03/12/97 - clear data */
-		KillHUD();
-		TimeStampedMessage("After KillHUD");
+//		KillHUD();
+//		TimeStampedMessage("After KillHUD");
 
 		Destroy_CurrentEnvironment();
 		TimeStampedMessage("After Destroy_CurrentEnvironment");

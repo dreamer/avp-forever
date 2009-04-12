@@ -251,7 +251,7 @@ int AVP_ChangeDisplayMode
 	/* JH 3/6/97 - don't quit kill off the images - still keep buffers in system memory
 	   that are not linked to direct draw */
 	MinimizeAllImages();
-	MinimizeAllDDGraphics();
+//	MinimizeAllDDGraphics();
 
 	if (ChangeWindow)
 		ExitWindowsSystem(); 
@@ -276,7 +276,7 @@ int AVP_ChangeDisplayMode
 	   on the rasterisation request mode and whether
 	   a hardware dd driver is selected or could be
 	   available - JH 20/5/97 */
-	ChangeDirectDrawObject();
+//	ChangeDirectDrawObject();
 
 	/*
 		Recreate the window, allowing
@@ -813,7 +813,7 @@ void LoadRifFile()
 	
 	if(INVALID_RIFFHANDLE == env_rif)
 	{
-		finiObjects();
+//		finiObjects();
 		exit(0x3421);
 	};
 

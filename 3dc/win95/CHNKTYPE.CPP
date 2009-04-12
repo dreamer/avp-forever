@@ -2,21 +2,9 @@
 #include <math.h>
 #include "chnktype.hpp"
 
-#if engine
-
 #define UseLocalAssert No
 #include "ourasert.h"
 #define assert(x) GLOBALASSERT(x)
-
-#else
-
-#if cencon
-#include "ccassert.h"
-#else
-#include <assert.h>
-#endif
-
-#endif
 
 #ifdef cencon
 #define new my_new
@@ -173,9 +161,6 @@ ChunkVector& ChunkVector::operator-=(const ChunkVector& a)
   return *this;
 }
 
-
-
-#if engine
 ChunkVector::operator VECTORCH () const
 {
 	VECTORCH v;
@@ -185,7 +170,7 @@ ChunkVector::operator VECTORCH () const
 
 	return(v);
 }
-#endif
+
 ChunkVector::operator ChunkVectorInt () const
 {
 	ChunkVectorInt v;
@@ -297,9 +282,6 @@ ChunkVectorInt& ChunkVectorInt::operator-=(const ChunkVectorInt& a)
   return *this;
 }
 
-
-
-#if engine
 ChunkVectorInt::operator VECTORCH () const
 {
 	VECTORCH v;
@@ -309,7 +291,6 @@ ChunkVectorInt::operator VECTORCH () const
 
 	return(v);
 }
-#endif
 
 ChunkVectorInt operator*(const ChunkVectorInt & a, const double s)
 {
@@ -407,7 +388,6 @@ ChunkVectorFloat operator/(const ChunkVectorFloat & a, const double s)
 	return(v);
 }
 
-#if engine
 ChunkVectorFloat::operator VECTORCH () const
 {
 	VECTORCH v;
@@ -417,7 +397,7 @@ ChunkVectorFloat::operator VECTORCH () const
 
 	return(v);
 }
-#endif
+
 int ChunkVectorFloat::norm()
 {
   float modulos =(float) mod(*this);

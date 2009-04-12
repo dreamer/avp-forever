@@ -47,6 +47,10 @@ extern int ZBufferMode;
 extern int ScanDrawMode;
 extern int VideoModeColourDepth;
 
+int 					VideoModeColourDepth;
+int						NumAvailableVideoModes;
+VIDEOMODEINFO			AvailableVideoModes[MaxAvailableVideoModes];
+
 HRESULT LastError;
 
 D3DINFO d3d;
@@ -859,7 +863,6 @@ extern void ReleaseBinkTextures();
 /* smacker.c */
 extern void ReleaseAllFMVTextures(void);
 extern int NumberOfFMVTextures;
-//#include "smacker.h"
 #include "fmv.h"
 extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
 #define MAX_NO_FMVTEXTURES 10
@@ -925,9 +928,6 @@ BOOL CreateVolatileResources()
 BOOL ChangeGameResolution(int width, int height, int colourDepth)
 {
 	ReleaseVolatileResources();
-
-	/* location of this will need to be rechecked if we ever decide to add ingame res change.. */
-//	NumberOfFMVTextures = 0;
 
 	d3d.d3dpp.BackBufferHeight = height;
 	d3d.d3dpp.BackBufferWidth = width;
@@ -1354,20 +1354,6 @@ void FlipBuffers()
 	}
 }
 
-void InGameFlipBuffers()
-{
-	FlipBuffers();
-}
-
-// With a bit of luck this should automatically
-// release all the Direct3D and  DirectDraw
-// objects using their own functionality.
-// A separate call to finiObjects
-// is not required.
-// NOTE!!! This depends on Microsoft macros
-// in d3dmacs.h, which is in the win95 directory
-// and must be upgraded from sdk upgrades!!!
-
 void ReleaseDirect3D()
 {
     DeallocateAllImages();
@@ -1387,107 +1373,25 @@ void ReleaseDirect3D()
 	ReleaseDirectInput();
 }
 
-// reload D3D image -- assumes a base pointer points to the image loaded
-// from disc, in a suitable format
-
-void ReloadImageIntoD3DImmediateSurface(IMAGEHEADER* iheader)
+void ReleaseAvPTexture(AvPTexture* texture)
 {
-    void *reloadedTexturePtr = ReloadImageIntoD3DTexture(iheader);
-	LOCALASSERT(reloadedTexturePtr != NULL);
-
-	int gotTextureHandle = GetTextureHandle(iheader);
-	LOCALASSERT(gotTextureHandle == TRUE);
-}
-
-void* ReloadImageIntoD3DTexture(IMAGEHEADER* iheader)
-{
-	// NOTE FIXME BUG HACK
-	// what if the image was a DD surface ??
-#if 0
-	if (iheader->hBackup)
+	if (texture->buffer)
 	{
-		iheader->AvPTexture = AwCreateTexture("rf",AW_TLF_PREVSRC|AW_TLF_COMPRESS);
-		return iheader->AvPTexture;
+		free(texture->buffer);
 	}
-	else return NULL;
-#endif
-
-	return NULL;
+	free(texture);
 }
 
-int GetTextureHandle(IMAGEHEADER *imageHeaderPtr)
-{
-#if 0 // bjd
- 	LPDIRECT3DTEXTURE Texture = (LPDIRECT3DTEXTURE) imageHeaderPtr->D3DTexture;
-
-
-	LastError = Texture->GetHandle(d3d.lpD3DDevice, (D3DTEXTUREHANDLE*)&(imageHeaderPtr->D3DHandle));
-
-	if (LastError != D3D_OK) return FALSE;
-
-	imageHeaderPtr->D3DHandle = imageHeaderPtr->D3DTexture;
-#endif
-	return TRUE;
-}
-
-void ReleaseD3DTexture(void* texture)
-{
-	AvPTexture *TextureHandle = (AvPTexture *)texture;
-	
-	free(TextureHandle->buffer);
-	free(TextureHandle);
-}
-
-void ReleaseD3DTexture8(LPDIRECT3DTEXTURE9 d3dTexture) 
+void ReleaseD3DTexture(D3DTEXTURE d3dTexture) 
 {
 	/* release d3d texture */
 	SAFE_RELEASE(d3dTexture);
 }
 
-BOOL CreateD3DZBuffer()
-{
-	return TRUE;
-}
-
-#define ZFlushVal 0xffffffff
-
-// At present we are using my z flush function, with the
-// (undocumented) addition of a fill colour for the
-// actual depth fill, since it seems to work and at least
-// I know what it does.  If it starts failing we'll probably
-// have to go back to invoking the viewport clear through
-// Direct3D.
-
 void FlushD3DZBuffer()
 {
-//	OutputDebugString("\n clear first buffer");
 	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
 }
-
-void SecondFlushD3DZBuffer()
-{
-//	OutputDebugString("\n clear second buffer");
-	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
-}
-
-/* bjd - commented out
-void FlushZB()
-{
-	OutputDebugString(" FlushZB called ");
-    HRESULT hRes;
-    D3DRECT d3dRect;
-
-    d3dRect.x1 = 0;
-    d3dRect.x2 = 640;
-    d3dRect.x1 = 0;
-    d3dRect.x2 = 480;
-//    hRes = d3d.lpD3DViewport->Clear(1, &d3dRect, D3DCLEAR_ZBUFFER);
-	hRes = d3d.lpD3DDevice->Clear(1, &d3dRect, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(255,255,255),1.0f, 0);
-	if(FAILED(hRes)) {
-		OutputDebugString("Couldn't FlushZB");
-	}
-}
-*/
 
 // For extern "C"
 

@@ -570,7 +570,7 @@ void CloseFMV()
 /* call this for res change, alt tabbing and whatnot */
 extern void ReleaseBinkTextures()
 {
-	//ReleaseD3DTexture8(&binkTexture);
+	//ReleaseD3DTexture(&binkTexture);
 }
 
 void FindLightingValuesFromTriggeredFMV(unsigned char *bufferPtr, FMVTEXTURE *ftPtr)

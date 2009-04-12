@@ -99,7 +99,6 @@ extern int sine[];
 int LeanScale;
 EULER deathTargetOrientation={0,0,0};
 
-extern int GetSingleColourForPrimary(int Colour);
 extern void ColourFillBackBuffer(int FillColour);
 
 static void ModifyHeadOrientation(void);

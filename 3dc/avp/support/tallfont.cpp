@@ -282,7 +282,7 @@ IndexedFont_Proportional_Column :: ~IndexedFont_Proportional_Column()
 {
 	GLOBALASSERT(image_ptr);
 //	ATRemoveSurface(image_ptr);
-	ReleaseDDSurface(image_ptr);
+	ReleaseAvPTexture(image_ptr);
 	image_ptr = NULL;
 	
 	if (hBackup)
@@ -996,7 +996,7 @@ IndexedFont_Kerned_Column :: ~IndexedFont_Kerned_Column()
 {
 	GLOBALASSERT(image_ptr);
 //	ATRemoveSurface(image_ptr);
-	ReleaseDDSurface(image_ptr);
+	ReleaseAvPTexture(image_ptr);
 	image_ptr = NULL;
 	
 	if (hBackup)

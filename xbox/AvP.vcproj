@@ -89,7 +89,7 @@
 				Optimization="0"
 				InlineFunctionExpansion="0"
 				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet-1.2-xbox\include&quot;"
-				PreprocessorDefinitions="_DEBUG;_XBOX;_WINDOWS;USE_FMV;engine=1;DB_NOWINDOWS"
+				PreprocessorDefinitions="_DEBUG;_XBOX;_WINDOWS;USE_FMV;DB_NOWINDOWS"
 				StringPooling="FALSE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -216,7 +216,7 @@
 				OmitFramePointers="FALSE"
 				EnableFiberSafeOptimizations="FALSE"
 				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet-1.2-xbox\include&quot;"
-				PreprocessorDefinitions="_XBOX;_WINDOWS;engine=1;USE_FMV;DB_NOWINDOWS"
+				PreprocessorDefinitions="_XBOX;_WINDOWS;USE_FMV;DB_NOWINDOWS"
 				MinimalRebuild="TRUE"
 				ExceptionHandling="FALSE"
 				BasicRuntimeChecks="0"
@@ -2306,33 +2306,6 @@
 			</File>
 			<File
 				RelativePath="..\3dc\win95\db.c">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\Dd_func.cpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Ddplat.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release For Fox|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\3dc\avp\deaths.c">

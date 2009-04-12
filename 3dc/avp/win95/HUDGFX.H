@@ -115,8 +115,8 @@ struct LittleMDescTag
 /* JH 3/6/97 - these functions are to 
    release hud graphics with any links to direct draw
    but still keep them in memory, so they can be restored */
-extern void MinimizeAllDDGraphics(void);
-extern void RestoreAllDDGraphics(void);
+//extern void MinimizeAllDDGraphics(void);
+//extern void RestoreAllDDGraphics(void);
 
 /*KJL****************************************************************************************
 * 										 E X T E R N S 	  									*

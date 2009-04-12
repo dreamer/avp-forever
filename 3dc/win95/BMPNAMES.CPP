@@ -2,17 +2,9 @@
 #include "bmpnames.hpp"
 #include "mishchnk.hpp"
 
-#if engine
 #define UseLocalAssert No
 #include "ourasert.h"
 #define assert(x) GLOBALASSERT(x)
-#else
-#if cencon
-#include "ccassert.h"
-#else
-#include <assert.h>
-#endif
-#endif
 
 #ifdef cencon
 #define new my_new

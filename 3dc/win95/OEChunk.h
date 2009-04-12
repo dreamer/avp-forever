@@ -7,17 +7,6 @@
 #if objedit
 #include "Template.hpp"
 #endif
-//#if engine
-//#define VECTOR VECTORCH
-//#endif
-
-#if engine
-#else
-struct VECTORCH
-{
-	int vx, vy, vz;
-};
-#endif
 
 struct	ChunkMapBlock
 {
@@ -41,9 +30,6 @@ struct	ChunkMapBlock
 
 	int MapVDBData;
 	int SimShapeList;
-	
-
-
 };
 
 class Map_Block_Chunk : public Chunk
