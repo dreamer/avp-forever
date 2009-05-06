@@ -1,7 +1,7 @@
 // Chunk library
 
 #ifndef _chunk_hpp
-#define _chunk_hpp 1
+#define _chunk_hpp
 
 
 	#include "3dc.h"

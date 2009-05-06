@@ -1,5 +1,5 @@
 #ifndef EQUATES_INCLUDED
-
+#define EQUATES_INCLUDED
 
 /*
 
@@ -223,6 +223,6 @@ typedef enum {
 };
 #endif
 
-#define EQUATES_INCLUDED
+//#define EQUATES_INCLUDED
 
 #endif

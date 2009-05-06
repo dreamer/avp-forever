@@ -39,7 +39,6 @@ int NumOnScreenBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
 extern int NumActiveBlocks;
 
-extern int ScanDrawMode;
 /* JH 13/5/97 */
 extern int DrawMode;
 extern int ZBufferMode;
@@ -694,14 +693,9 @@ void AvpShowViews(void)
 
 	PlatformSpecificShowViewExit(Global_VDB_Ptr, &ScreenDescriptorBlock);
 
-//	#if (SupportWindows95 && SupportZBuffering)
-//	if ((ScanDrawMode != ScanDrawDirectDraw) &&	(ZBufferMode != ZBufferOff))
-	{
-		/* KJL 10:25:44 7/23/97 - this offset is used to push back the normal game gfx,
-		so that the HUD can be drawn over the top without sinking into walls, etc. */
-		HeadUpDisplayZOffset = 0;
-	}
-//	#endif
+	/* KJL 10:25:44 7/23/97 - this offset is used to push back the normal game gfx,
+	so that the HUD can be drawn over the top without sinking into walls, etc. */
+	HeadUpDisplayZOffset = 0;
 }
 
 

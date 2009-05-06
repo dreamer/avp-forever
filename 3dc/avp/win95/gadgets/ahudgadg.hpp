@@ -7,7 +7,7 @@
 */
 
 #ifndef _ahudgadg
-#define _ahudgadg 1
+#define _ahudgadg
 
 	#ifndef _hudgadg
 	#include "hudgadg.hpp"

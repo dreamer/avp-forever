@@ -35,7 +35,7 @@ extern "C" {
 extern "C++" 									  
 {
 #include "r2base.h"
-#include "pcmenus.h"
+//#include "pcmenus.h"
 //#include "projload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 #include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 extern void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour);

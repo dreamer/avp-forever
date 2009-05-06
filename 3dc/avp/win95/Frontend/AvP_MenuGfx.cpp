@@ -22,7 +22,7 @@ extern void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image
 extern "C"
 {
 #include "AvP_Menus.h"
-extern unsigned char *ScreenBuffer;
+//extern unsigned char *ScreenBuffer;
 extern long BackBufferPitch;
 //extern DDPIXELFORMAT DisplayPixelFormat; // BJD
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
@@ -156,12 +156,8 @@ static void LoadMenuFont(void)
 {
 	/* notes on converting to quad textured menu system:
 
-		This function will load a REALLY tall image. When passed to our function to create a 
-		power of 2 d3d texture, it'll try create a texture with the height of 8192, which 
-		is both insane and not supported by any videocard out there that I know of.
-
-		As we load the image as raw data, we COULD try re-order it into a square shaped
-		texture instead of this single character wide madness.
+		This function loads a font image with height 8192. We'll want to reorder this to a nice
+		compatible square 512 x 512 texture
 
 		224 characters, each 33 pixels high?
 		30 pixels wide
@@ -172,6 +168,8 @@ static void LoadMenuFont(void)
 
 		height:	495
 		width : 450
+
+		will fit nicely into a 512 x 512 d3d texture
 	*/
 
 	AVPMENUGFX *gfxPtr;
@@ -215,7 +213,7 @@ static void LoadMenuFont(void)
 	
 	gfxPtr->hBackup = 0;
 	
-	AvPTexture *image = (AvPTexture*)gfxPtr->ImagePtr;
+	AvPTexture *image = gfxPtr->ImagePtr;
 
 	unsigned char *srcPtr = image->buffer;
 
@@ -280,6 +278,7 @@ static void UnloadMenuFont(void)
 
 	SAFE_RELEASE(IntroFont_Light.info.menuTexture);
 }
+
 extern int LengthOfMenuText(const char *textPtr)
 {
 	int width = 0;
@@ -1365,7 +1364,7 @@ extern void ReleaseAllAvPMenuGfx(void)
 	UnloadMenuFont();
 }
 
-extern void DrawAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format)
+extern void DrawAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID, int topleftX, int topleftY, int alpha, enum AVPMENUFORMAT_ID format)
 {		
 	AVPMENUGFX *gfxPtr;
 //	D3DTexture *image;
@@ -1408,11 +1407,16 @@ extern void DrawAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID, int topleftX, int tople
 
 	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
 	{
-		DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, FALSE);
+//		DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, FALSE);
+		alpha = ONE_FIXED;
 	}
+
+	DrawAlphaMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
+/*
 	else {
 		DrawAlphaMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
 	}
+*/
 #if 0 // bjd
 	D3DInfo temp;
 
@@ -1520,15 +1524,21 @@ extern void DrawAvPMenuGlowyBar(int topleftX, int topleftY, int alpha, int lengt
 
 	// the image we're working with is only 1 pixel wide. we'll have to draw it a couple of 
 	//times shifting the x position over 1 pixel each time until we reach the length of the bar
-	for (int i = 0; i < length; i++) {
+	for (int i = 0; i < length; i++) 
+	{
 		if (alpha > ONE_FIXED) // ONE_FIXED = 65536
 		{
-			DrawMenuQuad(topleftX + i, topleftY, topleftX + i, topleftY, menuGfxID, FALSE);
+			alpha = ONE_FIXED;
+//			DrawMenuQuad(topleftX + i, topleftY, topleftX + i, topleftY, menuGfxID, FALSE);
 		}
+/*
 		else {
 			DrawAlphaMenuQuad(topleftX + i, topleftY, topleftX + i, topleftY, menuGfxID, alpha);
 		}
+*/
+		DrawAlphaMenuQuad(topleftX + i, topleftY, topleftX + i, topleftY, menuGfxID, alpha);
 	}
+		
 #if 0 // bjd
 	image = (D3DTexture*)gfxPtr->ImagePtr;
 	srcPtr = image->buf;
@@ -1628,7 +1638,8 @@ extern void DrawAvPMenuGlowyBar_Clipped(int topleftX, int topleftY, int alpha, i
 
 	// the image we're working with is only 1 pixel wide. we'll have to draw it a couple of 
 	//times shifting the x position over each time until we reach the length of the bar
-	for (int i = 0; i < length; i++) {
+	for (int i = 0; i < length; i++) 
+	{
 		if (alpha > ONE_FIXED) // ONE_FIXED = 65536
 		{
 			DrawMenuQuad(topleftX + i, topleftY, topleftX + i, topleftY, menuGfxID, FALSE);
@@ -1881,13 +1892,17 @@ extern void DrawAvPMenuGfx_Faded(enum AVPMENUGFX_ID menuGfxID, int topleftX, int
 
 	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
 	{
-		DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, FALSE);
+		alpha = ONE_FIXED;
+//		DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, FALSE);
 	}
+/*
 	else {
 		//DrawAlphaMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
 //		DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, FALSE);
 		DrawTexturedFadedQuad(topleftX, topleftY, menuGfxID, alpha);
 	}
+*/
+	DrawAlphaMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
 
 //	DrawTexturedFadedQuad(topleftX, topleftY, menuGfxID, alpha);
 
@@ -2011,7 +2026,8 @@ extern void DrawAvPMenuGfx_Clipped(enum AVPMENUGFX_ID menuGfxID, int topleftX, i
 
 	int length = gfxPtr->Width;
 
-	if (ScreenDescriptorBlock.SDB_Width - topleftX < length) {
+	if (ScreenDescriptorBlock.SDB_Width - topleftX < length) 
+	{
 		length = ScreenDescriptorBlock.SDB_Width - topleftX;
 	}
 	if (length <= 0) return;
@@ -2020,12 +2036,16 @@ extern void DrawAvPMenuGfx_Clipped(enum AVPMENUGFX_ID menuGfxID, int topleftX, i
 
 	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
 	{
-		DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, FALSE);
+		alpha = ONE_FIXED;
+//		DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, FALSE);
 	}
-	else {
+	else 
+	{
 //		DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, TRUE);
-		DrawAlphaMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
+//		DrawAlphaMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
 	}
+
+	DrawAlphaMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
 
 #if 0 // bjd
    	unsigned short *destPtr;
@@ -2172,9 +2192,7 @@ extern int HeightOfMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 
 extern void ClearScreenToBlack(void)
 { 
-
-	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER,
-		D3DCOLOR_XRGB(0,0,0), 1.0f, 0 );
+	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0 );
 
 /*
 	D3DSURFACE_DESC surface_desc;

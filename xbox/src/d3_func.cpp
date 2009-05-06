@@ -474,14 +474,7 @@ LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL
 		imageData[i] = buf[i+2];
 		imageData[i+3] = buf[i+3];
 	}
-#if 0
-	/* create direct3d texture */
-	if(FAILED(D3DXCreateTextureFromFileInMemory(d3d.lpD3DDevice,
-		buffer,
-		sizeof(TGA_HEADER) + imageSize,
-		&destTexture)))
-	{
-#endif
+
 	D3DXIMAGE_INFO image;
 	image.Depth = 32;
 	image.Width = tex->width;
@@ -884,8 +877,6 @@ BOOL InitialiseDirect3DImmediateMode()
 	ScreenDescriptorBlock.SDB_ClipUp    = 0;
 	ScreenDescriptorBlock.SDB_ClipDown  = height;
 
-	ScanDrawMode = ScanDrawD3DHardwareRGB;
-
 	/* use an offset for hud items to account for tv safe zones. just use width for now. 5%?  */
 	ScreenDescriptorBlock.SDB_SafeZoneWidthOffset = (width / 100) * 5;
 	ScreenDescriptorBlock.SDB_SafeZoneHeightOffset = (height / 100) * 5;
@@ -905,93 +896,12 @@ void FlipBuffers()
 {
 	LastError = d3d.lpD3DDevice->Present(NULL, NULL, NULL, NULL);
 	if (FAILED(LastError)) {
-//		OutputDebugString(" Present failed ");
+		LogDxErrorString("D3D Present failed\n");
 	}
 }
 
-void InGameFlipBuffers()
-{
-	FlipBuffers();
-}
-
-#if 1
-
-// Note that error conditions have been removed
-// on the grounds that an early exit will prevent
-// EndScene being run if this function is used,
-// which screws up all subsequent buffers
-
-BOOL RenderD3DScene()
-{
-	return TRUE;
-}
-
-#else
-
-int Time1, Time2, Time3, Time4;
-
-BOOL RenderD3DScene()
-{
-    // Begin scene
-	// My theory is that the functionality of this
-	// thing must invoke a DirectDraw surface lock
-	// on the back buffer without telling you.  However,
-	// we shall see...
-
-    Time1 = GetWindowsTickCount();
-
-	LastError = d3d.lpD3DDevice->BeginScene();
-	LOGDXERR(LastError);
-
-	if (LastError != D3D_OK)
-	  return FALSE;
-
-    Time2 = GetWindowsTickCount();
-
-	// Execute buffer
-	#if 1
-	LastError = d3d.lpD3DDevice->Execute(lpD3DExecCmdBuf,
-	          d3d.lpD3DViewport, D3DEXECUTE_UNCLIPPED);
-	LOGDXERR(LastError);
-	#else
-	LastError = d3d.lpD3DDevice->Execute(lpD3DExecCmdBuf,
-	          d3d.lpD3DViewport, D3DEXECUTE_CLIPPED);
-	LOGDXERR(LastError);
-	#endif
-
-	if (LastError != D3D_OK)
-	  return FALSE;
-
-    Time3 = GetWindowsTickCount();
-
-	// End scene
-    LastError = d3d.lpD3DDevice->EndScene();
-	LOGDXERR(LastError);
-
-	if (LastError != D3D_OK)
-	  return FALSE;
-
-    Time4 = GetWindowsTickCount();
-
-
-
-	return TRUE;
-
-#endif
-
-
-// With a bit of luck this should automatically
-// release all the Direct3D and  DirectDraw
-// objects using their own functionality.
-// A separate call to finiObjects
-// is not required.
-// NOTE!!! This depends on Microsoft macros
-// in d3dmacs.h, which is in the win95 directory
-// and must be upgraded from sdk upgrades!!!
-
 void ReleaseDirect3D()
 {
-	OutputDebugString("\n releasing direct3D!");
     DeallocateAllImages();
 
 	// release back-buffer copy surface, vertex buffer and index buffer
@@ -1021,59 +931,10 @@ void ReleaseD3DTexture(D3DTEXTURE d3dTexture)
 	SAFE_RELEASE(d3dTexture);
 }
 
-BOOL CreateD3DZBuffer()
-{
-	return TRUE;
-}
-
-#define ZFlushVal 0xffffffff
-
-// At present we are using my z flush function, with the
-// (undocumented) addition of a fill colour for the
-// actual depth fill, since it seems to work and at least
-// I know what it does.  If it starts failing we'll probably
-// have to go back to invoking the viewport clear through
-// Direct3D.
-
 void FlushD3DZBuffer()
 {
 	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
 }
 
-void SecondFlushD3DZBuffer()
-{
-	FlushD3DZBuffer();
-}
-
-/* bjd - commented out
-void FlushZB()
-{
-	OutputDebugString(" FlushZB called ");
-    HRESULT hRes;
-    D3DRECT d3dRect;
-
-    d3dRect.x1 = 0;
-    d3dRect.x2 = 640;
-    d3dRect.x1 = 0;
-    d3dRect.x2 = 480;
-//    hRes = d3d.lpD3DViewport->Clear(1, &d3dRect, D3DCLEAR_ZBUFFER);
-	hRes = d3d.lpD3DDevice->Clear(1, &d3dRect, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(255,255,255),1.0f, 0);
-	if(FAILED(hRes)) {
-		OutputDebugString("Couldn't FlushZB");
-	}
-}
-*/
-
 // For extern "C"
-
 };
-
-#if 0
-std::string LogInteger(int value)
-{
-	// returns a string containing value
-	std::ostringstream stream;
-	stream << value;
-	return stream.str();
-}
-#endif

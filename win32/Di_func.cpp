@@ -66,6 +66,7 @@ extern "C++"
 	Globals
 */
 
+/*
 static LPDIRECTINPUT8           lpdi;          // DirectInput interface
 static LPDIRECTINPUTDEVICE8     lpdiKeyboard;  // keyboard device interface
 static LPDIRECTINPUTDEVICE8     lpdiMouse;     // mouse device interface
@@ -73,6 +74,7 @@ static BOOL						DIKeyboardOkay;  // Is the keyboard acquired?
 
 static IDirectInputDevice*		g_pJoystick         = NULL;     
 static IDirectInputDevice2*		g_pJoystickDevice2  = NULL;  // needed to poll joystick
+*/
 
 static char bGravePressed = No;
 // added 14/1/98 by DHM as a temporary hack to debounce the GRAVE key
@@ -191,6 +193,7 @@ extern void IngameKeyboardInput_ClearBuffer(void);
 BOOL InitialiseDirectInput(void)
 {
 	return FALSE;
+#if 0
 	// try to create di object
 	if(FAILED(DirectInput8Create(hInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&lpdi, NULL)))
 	//if (DirectInputCreate(hInst, DIRECTINPUT_VERSION, &lpdi, NULL) != DI_OK)
@@ -204,6 +207,7 @@ BOOL InitialiseDirectInput(void)
 		#endif
 	}
 	return TRUE;
+#endif
 }
 
 
@@ -214,11 +218,13 @@ BOOL InitialiseDirectInput(void)
 */
 void ReleaseDirectInput(void)
 {
+#if 0
 	if (lpdi!= NULL)
 	{
 		lpdi->Release();
 		lpdi = NULL;
 	}
+#endif
 }
 
 
@@ -230,6 +236,8 @@ GUID     guid = GUID_SysKeyboard;
 BOOL InitialiseDirectKeyboard()
 {
 	return FALSE;
+
+#if 0
 	// try to create keyboard device
 	if (FAILED(lpdi->CreateDevice(guid, &lpdiKeyboard, NULL)))
 	{
@@ -292,7 +300,8 @@ BOOL InitialiseDirectKeyboard()
 	}
 
     // if we get here, all objects were created successfully
-    return TRUE;    
+    return TRUE;
+#endif
 }
 
 
@@ -1506,6 +1515,7 @@ to make F8 not count in a 'press any key' situation */
 void ReleaseDirectKeyboard(void)
 {
 	return;
+#if 0
 	if (DIKeyboardOkay)
 	{
 		lpdiKeyboard->Unacquire();
@@ -1517,6 +1527,7 @@ void ReleaseDirectKeyboard(void)
 		lpdiKeyboard->Release();
 		lpdiKeyboard = NULL;
 	}
+#endif
 }
 
 
@@ -1742,12 +1753,14 @@ void DirectReadMouse(void)
 
 void ReleaseDirectMouse(void)
 {
+#if 0
 	return;
 	if (lpdiMouse != NULL)
 	{
 		lpdiMouse->Release();
 		lpdiMouse = NULL;
 	}
+#endif
 }
 
 

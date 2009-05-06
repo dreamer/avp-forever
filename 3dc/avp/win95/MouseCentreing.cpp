@@ -4,13 +4,13 @@
 #include <windows.h>
 #include <process.h>
 
-#include <math.h>
+//#include <math.h>
 
 
 extern "C"
 {
- extern BOOL bActive;
- extern int WinLeftX, WinRightX, WinTopY, WinBotY;
+	extern BOOL bActive;
+	extern int WinLeftX, WinRightX, WinTopY, WinBotY;
 }
 
 static volatile int EndMouseThread=0;

@@ -23,7 +23,7 @@
 #include "language.h"
 #include "huddefs.h"
 #include "vision.h"
-#include "pcmenus.h"
+//#include "pcmenus.h"
 #include "avp_menus.h"
 #include "kshape.h"
 #define UseLocalAssert Yes
@@ -157,8 +157,6 @@ STICKYKEYS startupStickyKeys = {sizeof(STICKYKEYS), 0};
 
 int mainMenu = 1;
 
-#include <crtdbg.h>
-
 #include "VideoModes.h"
 extern DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
 
@@ -176,21 +174,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	AVP_HInstance = hInst = hInstance;
 	AVP_NCmd = nCmdShow;
 	skOff = startupStickyKeys;
-
-	// Enable run-time memory check for debug builds.
-#if defined(DEBUG) | defined(_DEBUG)
-//    _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-#endif
-
-/*
-	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF|_CRTDBG_ALLOC_MEM_DF);
-	_CrtSetReportMode(_CRT_ASSERT,_CRTDBG_MODE_FILE);
-	_CrtSetReportFile(_CRT_ASSERT,_CRTDBG_FILE_STDERR);
-*/
-//	_CrtSetBreakAlloc( 5235 );
-
-//	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF | _CRTDBG_DELAY_FREE_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-//	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF | _CRTDBG_DELAY_FREE_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	
 	if( (skOff.dwFlags & SKF_STICKYKEYSON) == 0 )
 	{
@@ -200,6 +183,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		SystemParametersInfo(SPI_SETSTICKYKEYS, sizeof(STICKYKEYS), &skOff, 0);
 	}
+
+	InitCentreMouseThread();
 
 	LoadDeviceAndVideoModePreferences();
 
@@ -423,7 +408,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		exit(-1);
 	}
 	
-	InitOptionsMenu(); /* by this time we know all about the video card, etc */
+//	InitOptionsMenu(); /* by this time we know all about the video card, etc */
 
 	LoadKeyConfiguration();
 	/********** Grab The Video mode **********/
@@ -468,14 +453,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		}
 		#endif
 
-		#if debug
-		if(UseMouseCentreing)
+//		#if debug
+//		if(UseMouseCentreing)
 		{
 			//Start thread that recentres mouse , making it easier to play
 			//in subwindow mode
-			InitCentreMouseThread();
+//			InitCentreMouseThread();
 		}
-		#endif
+//		#endif
 //		Env_List[0] = &(ELOLevelToLoad);
 //		level_to_load = 0;
 //		AvP.PlayerType = I_Marine;
@@ -829,14 +814,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 				
 		ClearMemoryPool();
 	
-		#if debug
-		if(UseMouseCentreing)
+//		#if debug
+//		if(UseMouseCentreing)
 		{
 			//Stop thread that recentres mouse , making it easier to play
 			//in subwindow mode
-			FinishCentreMouseThread();
+//			FinishCentreMouseThread();
 		}
-		#endif
+//		#endif
 		
 		if(LobbiedGame)
 		{
@@ -905,6 +890,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	/* 'shutdown' timer */
 	timeEndPeriod(1);
+
+	FinishCentreMouseThread();
 
 	return(0);
 }

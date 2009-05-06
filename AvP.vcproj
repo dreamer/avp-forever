@@ -49,7 +49,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="3dc;3dc\avp;3dc\avp\support;3dc\avp\win95;3dc\avp\win95\frontend;3dc\avp\win95\gadgets;3dc\include;3dc\win95;win32"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;USE_FMV;AVP_DEBUG_VERSION;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;AVP_DEBUG_VERSION;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="false"
@@ -83,7 +83,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib d3d9.lib dsound.lib dinput8.lib user32.lib xinput.lib $(NOINHERIT)"
+				AdditionalDependencies="winmm.lib d3d9.lib dsound.lib user32.lib xinput.lib $(NOINHERIT)"
 				OutputFile="debug_AvP.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -170,7 +170,7 @@
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="3dc;3dc\avp;3dc\avp\support;3dc\avp\win95;3dc\avp\win95\frontend;3dc\avp\win95\gadgets;3dc\include;3dc\win95;win32"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINNT=0x0501;_SECURE_SCL=0;_HAS_ITERATOR_DEBUGGING=0"
-				StringPooling="false"
+				StringPooling="true"
 				ExceptionHandling="1"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="0"
@@ -178,9 +178,9 @@
 				EnableFunctionLevelLinking="true"
 				EnableEnhancedInstructionSet="2"
 				FloatingPointModel="0"
-				DefaultCharIsUnsigned="false"
+				DefaultCharIsUnsigned="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\AvP___Win32_Release_For_Fox/AvP.pch"
+				PrecompiledHeaderFile=""
 				AssemblerListingLocation=".\AvP___Win32_Release_For_Fox/"
 				ObjectFile=".\AvP___Win32_Release_For_Fox/"
 				ProgramDataBaseFileName=".\AvP___Win32_Release_For_Fox/"
@@ -203,20 +203,20 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib d3d9.lib dsound.lib dinput8.lib user32.lib xinput.lib $(NOINHERIT)"
+				AdditionalDependencies="winmm.lib d3d9.lib dsound.lib user32.lib xinput.lib $(NOINHERIT)"
 				OutputFile="MyAvP.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="3dc"
 				GenerateManifest="true"
-				IgnoreDefaultLibraryNames="libcmtd.lib"
-				GenerateDebugInformation="false"
-				AssemblyDebug="2"
+				IgnoreDefaultLibraryNames=""
+				GenerateDebugInformation="true"
+				AssemblyDebug="0"
 				ProgramDatabaseFile=".\AvP___Win32_Release_For_Fox/MyAvP.pdb"
-				GenerateMapFile="false"
-				MapExports="false"
+				GenerateMapFile="true"
+				MapExports="true"
 				SubSystem="2"
-				OptimizeReferences="2"
+				OptimizeReferences="0"
 				OptimizeForWindows98="1"
 				LinkTimeCodeGeneration="1"
 				TargetMachine="1"
@@ -2579,6 +2579,15 @@
 			<File
 				RelativePath=".\3dc\Fmv_stubbed.cpp"
 				>
+				<FileConfiguration
+					Name="Release For Fox|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						StringPooling="true"
+						PrecompiledHeaderFile=""
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="3dc\win95\fragchnk.cpp"
@@ -3911,28 +3920,6 @@
 			</File>
 			<File
 				RelativePath="3dc\avp\win95\PathChnk.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release For Fox|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="3dc\avp\win95\Pcmenus.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -6069,10 +6056,6 @@
 			</File>
 			<File
 				RelativePath="3dc\avp\win95\PathChnk.hpp"
-				>
-			</File>
-			<File
-				RelativePath="3dc\avp\win95\Pcmenus.h"
 				>
 			</File>
 			<File

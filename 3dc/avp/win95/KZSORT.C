@@ -25,7 +25,6 @@
 extern int *ItemPointers[maxpolyptrs];
 extern int ItemCount;
 
-extern int ScanDrawMode;
 extern int ZBufferMode;
 extern int NumVertices;
 extern int WireFrameMode;

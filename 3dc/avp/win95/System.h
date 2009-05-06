@@ -1,4 +1,5 @@
-#ifndef SYSTEM_INCLUDED
+#ifndef _included_system_h_
+#define _included_system_h_
 
 /*   AVP - WIN95
 
@@ -17,6 +18,7 @@ extern "C" {
 
 /********************* SYSTEM, PLATFORM AND GAME************/
 
+/* redefined as visual studio 2008 uses Yes and No for sourceannotations.h */
 #define Yes 1
 #define No 0
 
@@ -31,9 +33,9 @@ extern "C" {
 #define SuppressWarnings 	Yes
 							
 #define SupportWindows95	Yes
-#define Saturn						No
-#define PSX								No
-#define platform_pc 			Yes
+#define Saturn				No
+#define PSX					No
+#define platform_pc 		Yes
 #define InterfaceEngine		No
 
 #define Term -1
@@ -97,17 +99,17 @@ typedef enum {
 
 #define oc_left			0x00000001
 #define oc_right		0x00000002
-#define oc_up				0x00000004
+#define oc_up			0x00000004
 #define oc_down			0x00000008
-#define oc_z				0x00000010
+#define oc_z			0x00000010
 
 #define oc_pntrot		0x00000020
 #define oc_xrot			0x00000040
 #define oc_yrot			0x00000080
 #define oc_zrot			0x00000100
 
-#define oc_z_lt_h1	0x00000200
-#define oc_z_gte_h2	0x00000400
+#define oc_z_lt_h1		0x00000200
+#define oc_z_gte_h2		0x00000400
 #define oc_z_haze		0x00000800
 #define oc_clampz		0x00001000
 
@@ -222,7 +224,7 @@ extern int maxshapes;
 
 #define SupportBSP						 	No
 
-#define SupportZBuffering				Yes
+#define SupportZBuffering					Yes
 #define ZBufferTest							No
 
 
@@ -231,15 +233,15 @@ extern int maxshapes;
 
 /***************** SHAPE DATA DEFINES************/
 
-#define StandardShapeLanguage						Yes
+#define StandardShapeLanguage					Yes
 
-#define CalcShapeExtents								No
-#define SupportModules 									Yes
-#define IncludeModuleFunctionPrototypes	Yes
-#define SupportDynamicModuleObjects			Yes
+#define CalcShapeExtents						No
+#define SupportModules 							Yes
+#define IncludeModuleFunctionPrototypes			Yes
+#define SupportDynamicModuleObjects				Yes
 
 
-#define SupportMorphing									Yes
+#define SupportMorphing							Yes
 #define LazyEvaluationForMorphing				No
 
 
@@ -351,7 +353,7 @@ extern int maxshapes;
 
 #endif
 
-#define SYSTEM_INCLUDED
+//#define SYSTEM_INCLUDED
 
 #endif
 

@@ -1,4 +1,5 @@
 #ifndef PLATFORM_INCLUDED
+#define PLATFORM_INCLUDED
 
 /*
 
@@ -10,27 +11,25 @@
 extern "C"  {
 #endif
 
-/*
-	Minimise header files to
-	speed compiles...
-*/
-
-#ifdef WIN32
-	#define WIN32_LEAN_AND_MEAN
-#endif
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdio.h>
 
 /*
 	Standard windows functionality
 */
 #ifdef WIN32
+	/*
+		Minimise header files to
+		speed compiles...
+	*/
+	#define WIN32_LEAN_AND_MEAN
+
 	#include <windows.h>
 	#include <windowsx.h>
 	#include <winuser.h>
 	#include <mmsystem.h>
 #endif
-#include <stdlib.h>
-#include <stdarg.h>
-#include <stdio.h>
 
 /*
 	DirectX functionality
@@ -890,6 +889,6 @@ void ProcessProjectWhileWaitingToBeFlippable();
 };
 #endif
 
-#define PLATFORM_INCLUDED
+//#define PLATFORM_INCLUDED
 
 #endif

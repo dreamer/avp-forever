@@ -4357,30 +4357,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Pcmenus.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release For Fox|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\3dc\avp\Pfarlocs.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -6407,9 +6383,6 @@
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\PathChnk.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Pcmenus.h">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\Pentime.h">

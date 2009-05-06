@@ -83,21 +83,6 @@ extern WINSCALEXY ExtentXYSubWindow;
 // by default, since various nifty hacks can always
 // be implemented directly via the windows procedure
 
-#define RESTORE_SURFACE(lpDDS) { \
-	if (lpDDS) { \
-		if (DDERR_SURFACELOST == (lpDDS)->IsLost()) { \
-    		HRESULT hResult = (lpDDS)->Restore(); \
-    		LOGDXFMT(("%s surface was restored", #lpDDS )); \
-    		LOGDXERR(hResult); \
-    	} else { \
-    		LOGDXFMT(("%s surface wasn't lost", #lpDDS )); \
-    	} \
-	} \
-	else { \
-     	LOGDXFMT(("?&@#! no %s surface", #lpDDS )); \
-	} \
-}
-
 extern void KeyboardEntryQueue_Add(char c);
 extern void IngameKeyboardInput_KeyDown(unsigned char key);
 extern void IngameKeyboardInput_KeyUp(unsigned char key);
@@ -110,8 +95,7 @@ int yPosRelative = 0;
 int mouseMoved = 0;
 
 
-/*long FAR PASCAL*/LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, 
-                            WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
     HDC         hdc;
@@ -540,36 +524,15 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow,
 	}
 	else if (WindowMode == WindowModeFullScreen)
 	{
-		#if 1
-			WinWidth = GetSystemMetrics(SM_CXSCREEN);
-			WinHeight = GetSystemMetrics(SM_CYSCREEN);
-		#else
-			// This version of the code MUST be
-			// kept up to date with new video modes!!!
-			if ((VideoMode == VideoMode_DX_320x200x8) ||
-			(VideoMode == VideoMode_DX_320x200x8T))
-			{
-				WinWidth = 320;
-				WinHeight = 200;
-			}
-			else if (VideoMode == VideoMode_DX_320x240x8)
-			{
-				WinWidth = 320;
-				WinHeight = 240;
-			}
-			else // Default to 640x480
-			{
-				WinWidth = 640;
-				WinHeight = 480;
-			}
-		#endif
+		WinWidth = 640;//GetSystemMetrics(SM_CXSCREEN);
+		WinHeight = 480;//GetSystemMetrics(SM_CYSCREEN);
 
 		// Set up globals for window corners
 		WinLeftX = 0;
 		WinTopY = 0;
 		WinRightX = WinWidth;
 		WinBotY = WinHeight;
-	 }
+	}
 	else
 		return FALSE;
 
@@ -815,6 +778,14 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow,
 
     return TRUE;
 
+}
+
+void ChangeWindowsSize(int width, int height)
+{
+	if (SetWindowPos(hWndMain, HWND_TOP, 0, 0, width, height, SWP_SHOWWINDOW) == 0)
+	{	
+		OutputDebugString("SetWindowPos failed\n");
+	}
 }
 
 void InitialiseRawInput()

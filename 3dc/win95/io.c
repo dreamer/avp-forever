@@ -116,7 +116,7 @@ extern int DXMemoryRequestMode;
 
 extern int TotalVideoMemory;
 extern int NumAvailableVideoModes;
-extern VIDEOMODEINFO AvailableVideoModes[];
+//extern VIDEOMODEINFO AvailableVideoModes[];
 
 extern int memoryInitialisationFailure;
 
@@ -130,16 +130,16 @@ extern IMAGEHEADER ImageHeaderArray[]; /* Array of Image Headers */
 */
 
 	int DrawMode = DrawPerVDB;
-/* Win95 default ought to be per frame */
+	/* Win95 default ought to be per frame */
+	
+	/* Timer */
+	long lastTickCount;
 
-/* Timer */
-   long lastTickCount;
-
-	unsigned char *ScreenBuffer    = 0;		/* Ensure initialised to Null */
-	unsigned char *ScreenBuffer2   = 0;
+//	unsigned char *ScreenBuffer    = 0;		/* Ensure initialised to Null */
+//	unsigned char *ScreenBuffer2   = 0;
 
 
-	unsigned char LPTestPalette[1024]; /* to cast to lp*/
+//	unsigned char LPTestPalette[1024]; /* to cast to lp*/
 	
 	int InputMode;
 
@@ -147,10 +147,10 @@ extern IMAGEHEADER ImageHeaderArray[]; /* Array of Image Headers */
 	int VideoModeType;
 	int VideoModeTypeScreen;
 	int WindowMode;
-	int ScanDrawMode;
+//	int ScanDrawMode;
 	int ZBufferMode;
-	int DXMemoryMode;
-    unsigned char AttemptVideoModeRestart;
+//	int DXMemoryMode;
+	unsigned char AttemptVideoModeRestart;
 	VIDEORESTARTMODES VideoRestartMode;
 
     PROCESSORTYPES ProcessorType;

@@ -2,21 +2,9 @@ extern "C" {
 
 #include "3dc.h"
 #include "inline.h"
-#include "module.h"
 #include "gamedef.h"
-#include "stratdef.h"
-//#include "vramtime.h"
-
 #include "dxlog.h"
-
 #include "d3_func.h"
-#include "d3dmacs.h"
-
-//#include "string.h"
-
-#include "kshape.h"
-#include "frustrum.h"
-
 #include "d3d_hud.h"
 #include "gamedef.h"
 
@@ -35,18 +23,16 @@ extern "C++"{
 // STL stuff
 #include <vector>
 #include <algorithm>
-//#include <string.h>
 
 #include "logString.h"
 
 };
 #include "HUD_layout.h"
 #define HAVE_VISION_H 1
-#include "vision.h"
+//#include "vision.h"
 #include "lighting.h"
 #include "showcmds.h"
 #include "frustrum.h"
-//#include "smacker.h"
 #include "fmv.h"
 #include "d3d_render.h"
 #include "avp_userprofile.h"
@@ -156,52 +142,14 @@ extern AVPMENUGFX AvPMenuGfxStorage[];
 #define RGBLIGHT_MAKE(r,g,b) RGB_MAKE(r,g,b)
 #define RGBALIGHT_MAKE(r,g,b,a) RGBA_MAKE(r,g,b,a)
 
-// Set to Yes to make default texture filter bilinear averaging rather
-// than nearest
-extern BOOL BilinearTextureFilter;
-
-
-
 #define FMV_ON 0
 #define FMV_EVERYWHERE 0
 #define WIBBLY_FMV_ON 0
 #define FMV_SIZE 128
-VECTORCH FmvPosition = {42985-3500,2765-5000,-35457};
 
 #define FOG_ON 0
-#if 1
-
 #define FOG_COLOUR 0x7f7f7f //0x404040
 #define FOG_SCALE 512
-#else
-#define FOG_COLOUR 0x7f7f7f//0xd282828 //0x404040
-#define FOG_SCALE 256
-#endif
-
-#define TriangleVertices   3
-
-#define LineVertices 2
-
-#define DefaultVertexIntensity 200
-#define TransparentAlphaValue 128
-
-#define DefaultColour (RGBLIGHT_MAKE(DefaultVertexIntensity,DefaultVertexIntensity,DefaultVertexIntensity))
-#define DefaultAlphaColour (RGBALIGHT_MAKE(DefaultVertexIntensity,DefaultVertexIntensity,DefaultVertexIntensity,TransparentAlphaValue))
-
-
-#if 0
-#define TxIntensityLShift 4
-#else
-#define TxIntensityLShift 0
-#endif
-
-#define TxIntensityLimit 255
-
-#define MaxVerticesInExecuteBuffer (MaxD3DVertices)
-// Colour is a 24-bit RGB colour, standard engine
-// internal format.
-// a is an 8 bit alpha value.
-#define MAKE_ALPHACOLOUR(colour, a)   ((D3DCOLOR) (((a) << 24) | (colour)))
 
 extern int SpecialFXImageNumber;
 extern int SmokyImageNumber;
@@ -223,19 +171,13 @@ int LightIntensityAtPoint(VECTORCH *pointPtr);
 
 extern int VideoMode;
 extern int WindowMode;
-extern int ScanDrawMode;
-extern int DXMemoryMode;
 extern int ZBufferRequestMode;
-extern int RasterisationRequestMode;
-extern int SoftwareScanDrawRequestMode;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern VIEWDESCRIPTORBLOCK* Global_VDB_Ptr;
-
 
 extern IMAGEHEADER ImageHeaderArray[];
 extern int NumImagesArray[];
 
-extern BOOL MMXAvailable;
 extern int NormalFrameTime;
 int WireFrameMode;
 
@@ -243,19 +185,11 @@ extern int HUDScaleFactor;
 
 //Globals
 
-int D3DDriverMode;
-
-#if SupportZBuffering
-#endif
-
 // keep track of set render states
-/*static unsigned char*/int D3DShadingMode;
-static unsigned char D3DTexturePerspective;
+static unsigned char D3DShadingMode;
 static unsigned char D3DTBlendMode;
 
-static bool			 D3DAlphaBlendEnable;
-//static unsigned char D3DSrcBlend;
-//static unsigned char D3DDestBlend;
+static bool	D3DAlphaBlendEnable;;
 D3DBLEND D3DSrcBlend;
 D3DBLEND D3DDestBlend;
 
@@ -264,22 +198,14 @@ bool D3DAlphaTestEnable = FALSE;
 static bool D3DStencilEnable;
 D3DCMPFUNC D3DStencilFunc;
 static unsigned int D3DStencilRef;
-
-
-
-//static unsigned char D3DAlphaMode;
-/*static unsigned char*/int D3DZFunc;
+static unsigned char D3DZFunc;
 static unsigned char D3DDitherEnable;
 static bool D3DZWriteEnable;
 
-static D3DTEXTUREHANDLE CurrTextureHandle;
 static unsigned char DefaultD3DTextureFilterMin;
 static unsigned char DefaultD3DTextureFilterMax;
 // Globals for frame by frame definition of
 // coloured materials for D3D rendering interface
-
-
-
 
 static int NumberOfRenderedTriangles=0;
 int NumberOfLandscapePolygons;
@@ -297,7 +223,6 @@ if (CurrentRenderStates.TranslucencyMode!=(x)) \
 #define CheckFilteringModeIsCorrect(x) \
 if (CurrentRenderStates.FilteringMode!=(x)) \
 	ChangeFilteringMode((x));
-
 
 /* OUTPUT_TRIANGLE - how this bugger works
 
@@ -323,6 +248,8 @@ if (CurrentRenderStates.FilteringMode!=(x)) \
 		IE.. 0, 2 order is forming. v1 is set to 11, so the '0,2,3' pattern emerged.
 
 		that's a 2am explanation for ya :p
+
+		edit: the above is probably really wrong. figure it out yourself :D
 */
 
 #if 0 // bjd
@@ -397,23 +324,26 @@ static void OUTPUT_TRIANGLE(int a, int b, int c, int n) {
 
 static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n) 
 {
-	if(NumVertices >= MAX_TOTAL_VERTS - 3) OutputDebugString("\n too many verts!");
+	if(NumVertices >= MAX_TOTAL_VERTS - 3) 
+	{
+		OutputDebugString("too many verts!\n");
+		return;
+	}
 
-	testVertex[NumVertices] = tempVertex[a];
-	NumVertices++;
-	testVertex[NumVertices] = tempVertex[b];
-	NumVertices++;
-	testVertex[NumVertices] = tempVertex[c];
-	NumVertices++;
+	testVertex[NumVertices]   = tempVertex[a];
+	testVertex[NumVertices+1] = tempVertex[b];
+	testVertex[NumVertices+2] = tempVertex[c];
+	NumVertices+=3;
 }
-static void SetNewTexture(int tex_id)
+
+static void SetNewTexture(const int tex_id)
 {
 	if(tex_id != currentTextureId)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, ImageHeaderArray[tex_id].Direct3DTexture);
 		if(FAILED(LastError)) 
 		{
-			OutputDebugString("Couldn't set menu quad texture");
+			OutputDebugString("Couldn't set menu quad texture\n");
 		}
 		currentTextureId = tex_id;
 	}
@@ -474,10 +404,10 @@ static inline void D3D_OutputTriangles()
 	switch(RenderPolygon.NumberOfVertices)
 	{
 		default:
-			OutputDebugString(" unexpected number of verts to render");
+			OutputDebugString("unexpected number of verts to render\n");
 			break;
 		case 0:
-			OutputDebugString( "Asked to render 0 verts ");
+			OutputDebugString("Asked to render 0 verts\n");
 			break;
 		case 3:
 		{
@@ -552,7 +482,6 @@ void D3D_DrawFMV(int xOrigin, int yOrigin, int zOrigin);
 int FMVParticleColour;
 
 void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr);
-
 
 int WaterXOrigin;
 int WaterZOrigin;
@@ -650,27 +579,8 @@ BOOL SetExecuteBufferDefaults()
 	d3d.lpD3DDevice->SetRenderState(D3DRS_FOGCOLOR, FOG_COLOUR);
 	#endif
 
-	#if 0
-	{
-		float fogStart = 2000.0f; // these values work on a Voodoo2, but not a G200. Hmm.
-		float fogEnd = 32000.0f;
-		OP_STATE_RENDER(2, ExecBufInstPtr);
-		STATE_DATA(D3DRENDERSTATE_FOGENABLE, TRUE, ExecBufInstPtr);
-		STATE_DATA(D3DRENDERSTATE_FOGCOLOR, 0x7f7f7f, ExecBufInstPtr);
-
-		#if 1
-		OP_STATE_RENDER(3, ExecBufInstPtr);
-		STATE_DATA(D3DRENDERSTATE_FOGTABLEMODE, D3DFOG_LINEAR, ExecBufInstPtr);
-		STATE_DATA(D3DRENDERSTATE_FOGTABLESTART, *(DWORD*)(&fogStart), ExecBufInstPtr);
-		STATE_DATA(D3DRENDERSTATE_FOGTABLEEND, *(DWORD*)(&fogEnd), ExecBufInstPtr);
-		#endif
-//		STATE_DATA(D3DRENDERSTATE_SPECULARENABLE, FALSE, ExecBufInstPtr);
-	}
-	#endif
-
     return TRUE;
 }
-static int NeedToClearExecuteBuffer=1;
 
 void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE translucency_mode) 
 {
@@ -798,35 +708,8 @@ BOOL UnlockExecuteBufferAndPrepareForUse()
 	return TRUE;
 }
 
-// Test for multiple execute buffers!!!!
 BOOL BeginD3DScene()
 {
-#if 0
-	// check for lost device
-	LastError = d3d.lpD3DDevice->TestCooperativeLevel();
-	if(FAILED(LastError)) {
-
-		while(1) {
-			if(LastError == D3DERR_DEVICENOTRESET) {
-//				OutputDebugString(" DEVICE NOT RESET ");
-				if (ReleaseVolatileResources() == TRUE) {
-					if(FAILED(d3d.lpD3DDevice->Reset(&d3d.d3dpp))) {
-//						OutputDebugString("\n Couldn't reset device");
-					}
-					else {
-						CreateVolatileResources();
-					}
-				}
-			}
-			else if (LastError == D3DERR_DEVICELOST ) {
-//				OutputDebugString(" DEVICE LOST ");
-			}
-			Sleep(100);
-			break;
-		}
-	}
-#endif
-
 	NumberOfRenderedTriangles = 0;
 	LastError = d3d.lpD3DDevice->BeginScene();
 
@@ -843,9 +726,6 @@ BOOL BeginD3DScene()
 //			OutputDebugString("Couldn't clear render target & Z buffer");
 //			LogDxError("Unable to clear render target and z buffer", LastError);
 		LogDxError(LastError);
-	}
-	else {
-//			OutputDebugString("\n Cleared Z-Buffer");
 	}
 
 	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_ON);
@@ -8399,6 +8279,7 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 */
 }
 
+#if 0
 void DrawTexturedFadedQuad(int topX, int topY, int image_num, int alpha) 
 {
 	if(currentTextureId = image_num)
@@ -8489,6 +8370,7 @@ void DrawTexturedFadedQuad(int topX, int topY, int image_num, int alpha)
 	}
 */
 }
+#endif
 
 /* more quad drawing functions than you can shake a stick at! */
 void DrawBinkFmv(int topX, int topY, int height, int width, LPDIRECT3DTEXTURE8 fmvTexture)
@@ -8629,6 +8511,7 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE8 bar_textu
 	}
 }
 
+#if 0
 void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, BOOL alpha) 
 {
 
@@ -8713,8 +8596,8 @@ void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, B
 	if(FAILED(LastError)) {
 		OutputDebugString(" draw menu quad failed ");
 	}
-
 }
+#endif
 
 void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, int alpha) 
 {

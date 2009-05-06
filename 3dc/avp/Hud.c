@@ -50,8 +50,6 @@
 #include "pldnet.h"
 #include "avp_userprofile.h"
 
-extern int ScanDrawMode;
-
 #define DO_PREDATOR_OVERLAY No
 #define DO_ALIEN_OVERLAY No
 

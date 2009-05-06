@@ -44,12 +44,11 @@ extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern void DeleteRenderMemory();
 extern int WindowMode;
 extern int ZBufferMode;
-extern int ScanDrawMode;
 extern int VideoModeColourDepth;
 
 int 					VideoModeColourDepth;
 int						NumAvailableVideoModes;
-VIDEOMODEINFO			AvailableVideoModes[MaxAvailableVideoModes];
+//VIDEOMODEINFO			AvailableVideoModes[MaxAvailableVideoModes];
 
 HRESULT LastError;
 
@@ -123,7 +122,7 @@ bool usingStencil = false;
 
 void LoadConsoleFont()
 {
-	D3DXIMAGE_INFO		imageInfo;
+	D3DXIMAGE_INFO imageInfo;
 
 	/* try find a png file at given path */
 	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice, 
@@ -344,7 +343,8 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 			{
 				destPtr = ((unsigned short *)(((unsigned char *)lock.pBits + offset) + (y*lock.Pitch)));
 
-				for (int x = 0; x < charWidth; x++) {
+				for (int x = 0; x < charWidth; x++)
+				{
 					*destPtr = RGB16(srcPtr[0], srcPtr[1], srcPtr[2]);
 /*
 					*destPtr =	((srcPtr[0]>>3)<<11) | // R
@@ -437,7 +437,7 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture(int width, int height, int usage, int pool)
 
 	if(FAILED(d3d.lpD3DDevice->CreateTexture(width, height, 1, usage, D3DFMT_A8R8G8B8, (D3DPOOL)pool, &destTexture, NULL)))
 	{
-		OutputDebugString("CreateFmvTexture failed\n");
+		LogDxErrorString("CreateFmvTexture failed\n");
 		return NULL;
 	}
 
@@ -473,12 +473,11 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 	(*real_width) = new_width;
 
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
-#if 1
 
 	D3DXIMAGE_INFO image;
 	image.Depth = 32;
 	image.Width = tex->width;
-	image.Height= tex->height;
+	image.Height = tex->height;
 	image.MipLevels = 1;
 	image.Depth = D3DFMT_A8R8G8B8;
 
@@ -489,13 +488,13 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 	TgaHeader->idlength = 0;
 	TgaHeader->x_origin = tex->width;
 	TgaHeader->y_origin = tex->height;
-	TgaHeader->colourmapdepth = 0;
-	TgaHeader->colourmaplength = 0;
-	TgaHeader->colourmaporigin = 0;
-	TgaHeader->colourmaptype = 0;
-	TgaHeader->datatypecode = 2;			// RGB
-	TgaHeader->bitsperpixel = 32;
-	TgaHeader->imagedescriptor = 0x20;		// set origin to top left
+	TgaHeader->colourmapdepth	= 0;
+	TgaHeader->colourmaplength	= 0;
+	TgaHeader->colourmaporigin	= 0;
+	TgaHeader->colourmaptype	= 0;
+	TgaHeader->datatypecode		= 2;			// RGB
+	TgaHeader->bitsperpixel		= 32;
+	TgaHeader->imagedescriptor	= 0x20;		// set origin to top left
 	TgaHeader->height = tex->height;
 	TgaHeader->width = tex->width;
 
@@ -517,22 +516,9 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 		// BGR
 		imageData[i+2] = tex->buffer[i];
 		imageData[i+1] = tex->buffer[i+1];
-		imageData[i] = tex->buffer[i+2];
+		imageData[i]   = tex->buffer[i+2];
 		imageData[i+3] = tex->buffer[i+3];
 	}
-#if 0
-	/* create direct3d texture */
-	if(FAILED(D3DXCreateTextureFromFileInMemory(d3d.lpD3DDevice,
-		buffer,
-		sizeof(TGA_HEADER) + imageSize,
-		&destTexture)))
-	{
-		OutputDebugString("\n no, didn't work");
-		delete TgaHeader;
-		delete[] buffer;
-		return NULL;
-	}
-#endif
 
 	if(FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
 		buffer,
@@ -561,122 +547,6 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 	delete[] buffer;
 
 	return destTexture;
-#endif
-#if 0	
-	// default colour format
-	D3DFORMAT colour_format = D3DFMT_R5G6B5;
-
-	if (ScreenDescriptorBlock.SDB_Depth == 16) {
-		colour_format = D3DFMT_R5G6B5;
-	}
-	if (ScreenDescriptorBlock.SDB_Depth == 32) {
-		colour_format = D3DFMT_A8R8G8B8;
-	}
-
-	LastError = d3d.lpD3DDevice->CreateTexture(new_width, new_height, 1, NULL, colour_format, D3DPOOL_MANAGED, &destTexture, NULL);
-	if(FAILED(LastError)) {
-//		LogDxError("Unable to create menu texture", LastError);
-		LogDxError(LastError);
-		OutputDebugString("\n Couldn't create padded texture");
-		return NULL;
-	}
-
-	D3DLOCKED_RECT lock;
-	
-	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
-	if(FAILED(LastError)) {
-//		LogDxError("Unable to lock menu texture for writing", LastError);
-		LogDxError(LastError);
-		SAFE_RELEASE(destTexture);
-//		destTexture->Release();
-		return NULL;
-	}
-
-	if (ScreenDescriptorBlock.SDB_Depth == 16) {
-		unsigned short *destPtr;
-		unsigned char *srcPtr;
-		
-		srcPtr = (unsigned char *)tex->buffer;
-
-		// lets pad the whole thing black first
-		for (int y = 0; y < new_height; y++)
-		{
-			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch));
-
-			for (int x = 0; x < new_width; x++)
-			{
-				*destPtr = RGB16(pad_colour, pad_colour, pad_colour);
-				destPtr+=1;
-			}
-		}
-
-		// then actual image data
-		for (int y = 0; y < original_height; y++)
-		{
-			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch));
-
-			for (int x = 0; x < original_width; x++)
-			{
-				*destPtr = RGB16(srcPtr[0], srcPtr[1], srcPtr[2]);
-
-				destPtr+=1;
-				srcPtr+=4;
-			}
-		}
-	}
-	if (ScreenDescriptorBlock.SDB_Depth == 32) { 
-		unsigned char *srcPtr, *destPtr;
-		
-		srcPtr = (unsigned char *)tex->buffer;
-
-		// lets pad the whole thing black first
-		for (int y = 0; y < new_height; y++)
-		{
-			destPtr = (((unsigned char  *)lock.pBits) + y*lock.Pitch);
-
-			for (int x = 0; x < new_width; x++)
-			{
-				*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(pad_colour,pad_colour,pad_colour,0xff);
-				destPtr+=4;
-			}
-		}
-
-		// then actual image data
-		for (int y = 0; y < original_height; y++)
-		{
-			destPtr = (((unsigned char *)lock.pBits) + y*lock.Pitch);
-
-//			memcpy(destPtr, srcPtr, original_width * 4);
-//			srcPtr+=original_width * 4;
-
-			for (int x = 0; x < original_width; x++)
-			{
-				*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], 255);
-
-				destPtr+=4;
-				srcPtr+=4;
-			}
-		}
-	}
-
-	LastError = destTexture->UnlockRect(0);
-	if(FAILED(LastError)) {
-		SAFE_RELEASE(destTexture);
-//		LogDxError("Unable to unlock menu texture", LastError);
-		LogDxError(LastError);
-		return NULL;
-	}
-
-//	char char_buf[100];
-//	sprintf(char_buf, "image_%d.png", image_num);
-//	if(FAILED(D3DXSaveTextureToFileA(char_buf, D3DXIFF_PNG, destTexture, NULL))) {
-//		OutputDebugString("couldnt save tex to file");
-//	}
-
-//	image_num++;
-
-	return destTexture;
-#endif
 }
 
 LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL poolType) 
@@ -688,13 +558,13 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL
 	TgaHeader.idlength = 0;
 	TgaHeader.x_origin = tex->width;
 	TgaHeader.y_origin = tex->height;
-	TgaHeader.colourmapdepth = 0;
-	TgaHeader.colourmaplength = 0;
-	TgaHeader.colourmaporigin = 0;
-	TgaHeader.colourmaptype = 0;
-	TgaHeader.datatypecode = 2;			// RGB
-	TgaHeader.bitsperpixel = 32;
-	TgaHeader.imagedescriptor = 0x20;	// set origin to top left
+	TgaHeader.colourmapdepth	= 0;
+	TgaHeader.colourmaplength	= 0;
+	TgaHeader.colourmaporigin	= 0;
+	TgaHeader.colourmaptype		= 0;
+	TgaHeader.datatypecode		= 2;			// RGB
+	TgaHeader.bitsperpixel		= 32;
+	TgaHeader.imagedescriptor	= 0x20;	// set origin to top left
 	TgaHeader.height = tex->height;
 	TgaHeader.width = tex->width;
 
@@ -716,28 +586,14 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL
 		// BGR
 		imageData[i+2] = buf[i];
 		imageData[i+1] = buf[i+1];
-		imageData[i] = buf[i+2];
+		imageData[i]   = buf[i+2];
 		imageData[i+3] = buf[i+3];
 	}
-
-#if 0
-	/* create direct3d texture */
-	if(FAILED(D3DXCreateTextureFromFileInMemory(d3d.lpD3DDevice,
-		buffer,
-		sizeof(TGA_HEADER) + imageSize,
-		&destTexture)))
-	{
-		OutputDebugString("\n no, didn't work");
-		delete TgaHeader;
-		delete[] buffer;
-		return NULL;
-	}
-#endif
 
 	D3DXIMAGE_INFO image;
 	image.Depth = 32;
 	image.Width = tex->width;
-	image.Height= tex->height;
+	image.Height = tex->height;
 	image.MipLevels = 1;
 	image.Depth = D3DFMT_A8R8G8B8;
 
@@ -764,103 +620,9 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL
 
 	delete[] buffer;
 	return destTexture;
-#if 0
-//	char char_buf[100];
-//	sprintf(char_buf, "image_%d.tga", image_num);
-//	if(FAILED(D3DXSaveTextureToFileA(char_buf, D3DXIFF_PNG, destTexture, NULL))) {
-//		OutputDebugString("couldnt save tex to file");
-//	}
-//	D3DXSaveTextureToFile(char_buf, D3DXIFF_TGA, destTexture, 0);
-
-	image_num++;
-
-	// default colour format
-	D3DFORMAT colour_format = D3DFMT_A1R5G5B5;
-
-	if (ScreenDescriptorBlock.SDB_Depth == 16) {
-		colour_format = D3DFMT_A1R5G5B5;
-	}
-	if (ScreenDescriptorBlock.SDB_Depth == 32) {
-		colour_format = D3DFMT_A8R8G8B8;
-	}
-
-	LastError = d3d.lpD3DDevice->CreateTexture(tex->width, tex->height, 1, NULL, colour_format, D3DPOOL_MANAGED, &destTexture, NULL);
-	if(FAILED(LastError)) {
-//		LogDxError("Unable to create in game texture", LastError);
-		LogDxError(LastError);
-		return NULL;
-	}
-
-	D3DLOCKED_RECT lock;
-
-	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
-	if(FAILED(LastError)) {
-//		LogDxError("Unable to lock in game texture for writing", LastError);
-		LogDxError(LastError);
-		destTexture->Release();
-		return NULL;
-	}
-
-	if ( ScreenDescriptorBlock.SDB_Depth == 16 ) {
-		unsigned short *destPtr;
-		unsigned char *srcPtr;
-
-		srcPtr = (unsigned char *)buf;
-
-		for (int y = 0; y < tex->height; y++)
-		{
-			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch));
-
-			for (int x = 0; x < tex->width; x++)
-			{
-				*destPtr = ARGB1555(srcPtr[3], srcPtr[0], srcPtr[1], srcPtr[2]);
-
-				destPtr+=1;
-				srcPtr+=4;
-			}
-		}
-	}
-	if ( ScreenDescriptorBlock.SDB_Depth == 32 ) {
-		unsigned char *destPtr, *srcPtr;
-
-		srcPtr = (unsigned char *)buf;
-
-		for (int y = 0; y < tex->height; y++)
-		{
-			destPtr = (((unsigned char *)lock.pBits) + y*lock.Pitch);
-
-			for (int x = 0; x < tex->width; x++)
-			{
-				*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], srcPtr[3]);
-
-				destPtr+=4;
-				srcPtr+=4;
-			}
-		}
-	}
-//#endif
-	LastError = destTexture->UnlockRect(0);
-	if(FAILED(LastError)) {
-//		LogDxError("Unable to unlock in game texture", LastError);
-		LogDxError(LastError);
-	}
-
-//	char char_buf[100];
-//	sprintf(char_buf, "image_%d.png", image_num);
-//	if(FAILED(D3DXSaveTextureToFileA(char_buf, D3DXIFF_PNG, destTexture, NULL))) {
-//		OutputDebugString("couldnt save tex to file");
-//	}
-	image_num++;
-
-	delete TgaHeader;
-	delete[] buffer;
-	return destTexture;
-#endif
 }
 
-/* defined in bink.c */
 extern void ReleaseBinkTextures();
-/* smacker.c */
 extern void ReleaseAllFMVTextures(void);
 extern int NumberOfFMVTextures;
 #include "fmv.h"
@@ -891,32 +653,31 @@ BOOL CreateVolatileResources()
 
 	/* create dynamic vertex buffer */
 	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DTLVERTEX),D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_TLVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
-	if(FAILED(LastError)) {
-		LogDxError(LastError);
+	if(FAILED(LastError)) 
+	{
+		LogDxErrorString("CreateVertexBuffer failed\n");
 		return FALSE;
 	}
 
 	/* create index buffer */
 	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DIndexBuffer, NULL);
-	if(FAILED(LastError)) {
-//		OutputDebugString("Couldn't create Index Buffer");
-//		LogDxError("Unable to create index buffer", LastError);
-		LogDxError(LastError);
+	if(FAILED(LastError)) 
+	{
+		LogDxErrorString("CreateIndexBuffer failed\n");
 		return FALSE;
 	}
 
-	LastError = d3d.lpD3DDevice->SetStreamSource( 0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DTLVERTEX));
-	if (FAILED(LastError)){
-//		OutputDebugString(" Couldn't set stream source");
-//		LogDxError("Unable to set stream source", LastError);
-		LogDxError(LastError);
+	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DTLVERTEX));
+	if (FAILED(LastError))
+	{
+		LogDxErrorString("SetStreamSource failed\n");
 		return FALSE;
 	}
 
 	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_TLVERTEX);
-	if(FAILED(LastError)) {
-//		LogDxError("Unable to set FVF", LastError);
-		LogDxError(LastError);
+	if(FAILED(LastError)) 
+	{
+		LogDxErrorString("SetFVF failed\n");
 		return FALSE;
 	}
 
@@ -925,19 +686,22 @@ BOOL CreateVolatileResources()
 	return TRUE;
 }
 
+extern void ChangeWindowsSize(int width, int height);
+
 BOOL ChangeGameResolution(int width, int height, int colourDepth)
 {
 	ReleaseVolatileResources();
 
-	d3d.d3dpp.BackBufferHeight = height;
 	d3d.d3dpp.BackBufferWidth = width;
+	d3d.d3dpp.BackBufferHeight = height;
+
+	ChangeWindowsSize(width, height);
 
 	LastError = d3d.lpD3DDevice->Reset(&d3d.d3dpp);
 
 	if(FAILED(LastError)) 
 	{
-		OutputDebugString("\n couldn't reset for res change");
-		LogDxError(LastError);
+		LogDxErrorString("D3D device reset failed\n");
 		return FALSE;
 	}
 	else
@@ -1084,8 +848,8 @@ BOOL InitialiseDirect3DImmediateMode()
 	if(windowed) 
 	{
 		d3dpp.Windowed = TRUE;
-		d3dpp.BackBufferWidth = 800;
-		d3dpp.BackBufferHeight = 600;
+		d3dpp.BackBufferWidth = width;//800;
+		d3dpp.BackBufferHeight = height;//600;
 		// setting this to interval one will cap the framerate to monitor refresh
 		// the timer goes a bit mad if this isnt capped!
 		d3dpp.PresentationInterval = 0;//D3DPRESENT_INTERVAL_IMMEDIATE;
@@ -1325,14 +1089,16 @@ BOOL InitialiseDirect3DImmediateMode()
 	ScreenDescriptorBlock.SDB_ClipUp    = 0;
 	ScreenDescriptorBlock.SDB_ClipDown  = height;
 
-	ScanDrawMode = ScanDrawD3DHardwareRGB;
-
 	/* use an offset for hud items to account for tv safe zones. just use width for now. 15%?  */
 	if(0)
 	{
 		ScreenDescriptorBlock.SDB_SafeZoneWidthOffset = (width / 100) * 15;
 	}
-	else ScreenDescriptorBlock.SDB_SafeZoneWidthOffset = 0;
+	else 
+	{
+		ScreenDescriptorBlock.SDB_SafeZoneWidthOffset = 0;
+		ScreenDescriptorBlock.SDB_SafeZoneHeightOffset = 0;
+	}
 
 	/* save a copy of the presentation parameters for use later (device reset, resolution/depth change) */
 	d3d.d3dpp = d3dpp;
@@ -1350,7 +1116,7 @@ void FlipBuffers()
 {
 	LastError = d3d.lpD3DDevice->Present(NULL, NULL, NULL, NULL);
 	if (FAILED(LastError)) {
-		OutputDebugString(" Present failed ");
+		LogDxErrorString("D3D Present failed\n");
 	}
 }
 
@@ -1379,7 +1145,10 @@ void ReleaseAvPTexture(AvPTexture* texture)
 	{
 		free(texture->buffer);
 	}
-	free(texture);
+	if (texture)
+	{
+		free(texture);
+	}
 }
 
 void ReleaseD3DTexture(D3DTEXTURE d3dTexture) 

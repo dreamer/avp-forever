@@ -3,7 +3,6 @@ extern "C"
 {
 	#include "3dc.h"
 	#include "inline.h"
-//	#include "smacker.h"
 	#include "fmv.h"
 	#include "AvP_Menus.h"
 	#include "avp_intro.h"

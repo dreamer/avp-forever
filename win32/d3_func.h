@@ -115,28 +115,23 @@ typedef struct
 
 } RENDERSTATES;
 
-LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL poolType);
-//LPDIRECT3DSURFACE9 CreateD3DSurface(DDSurface *tex, int width, int height);
-LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int *real_width);
-LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex);
+D3DTEXTURE CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL poolType);
+D3DTEXTURE CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int *real_width);
+D3DTEXTURE CreateD3DTallFontTexture(AvPTexture *tex);
 
 BOOL ReleaseVolatileResources();
 BOOL CreateVolatileResources();
 BOOL ChangeGameResolution(int width, int height, int colour_depth);
 
-void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, BOOL alpha);
 void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, int alpha);
 void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha);
 void DrawBigChar(char c, int x, int y, int colour);
 void DrawCloudTable(int topX, int topY, int word_length, int alpha);
 void DrawFadeQuad(int topX, int topY, int alpha);
 void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha);
-void DrawTexturedFadedQuad(int topX, int topY, int image_num, int alpha);
 void DrawProgressBar(RECT src_rect, RECT dest_rect, D3DTEXTURE bar_texture, int original_width, int original_height, int new_width, int new_height);
 void DrawQuad(int x, int y, int width, int height, int colour);
 void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired);
-//void LogDxError(HRESULT hr);
-//void LogDebugValue(int value);
 void ReleaseD3DTexture(D3DTEXTURE d3dTexture);
 void DrawBinkFmv(int topX, int topY, int height, int width, D3DTEXTURE fmvTexture);
 void CreateScreenShotImage();

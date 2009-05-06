@@ -98,14 +98,8 @@ extern void InitialiseLightIntensityStamps(void);
 
 extern int FindHeatSourcesInHModel(DISPLAYBLOCK *dispPtr);
 
-
 extern void TranslationSetup(void);
 extern void TranslatePointIntoViewspace(VECTORCH *pointPtr);
-
-
-//extern void CheckRenderStatesForModule(MODULE *modulePtr);
-
-
 
 extern void RenderDecal(DECAL *decalPtr);
 extern void RenderParticle(PARTICLE *particlePtr);

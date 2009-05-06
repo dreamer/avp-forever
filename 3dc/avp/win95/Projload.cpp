@@ -25,7 +25,7 @@
 #include "objsetup.hpp"
 #include "npcsetup.h"
 #include "sprchunk.hpp"
-#include "pcmenus.h"
+//#include "pcmenus.h"
 #include <math.h>
 #include "wpchunk.hpp"
 #include "hierchnk.hpp"
@@ -60,7 +60,6 @@ extern "C" {
 #include "inventry.h"
 
 extern int VideoMode;
-extern int ScanDrawMode;
 extern int ZBufferMode;
 //extern unsigned char *PaletteRemapTable;
 //extern unsigned char **PaletteShadingTableArray;

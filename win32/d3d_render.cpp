@@ -2,22 +2,10 @@ extern "C" {
 
 #include "3dc.h"
 #include "inline.h"
-//#include "module.h"
 #include "gamedef.h"
-//#include "stratdef.h"
-//#include "vramtime.h"
-
 #include "dxlog.h"
-
 #include "d3_func.h"
-
-//#include "d3dmacs.h"
-//#include "string.h"
-//#include "kshape.h"
-//#include "frustrum.h"
-
 #include "d3d_hud.h"
-
 #include "particle.h"
 
 #define UseLocalAssert No
@@ -44,11 +32,9 @@ extern "C++"{
 };
 #include "HUD_layout.h"
 #define HAVE_VISION_H 1
-//#include "vision.h"
 #include "lighting.h"
 #include "showcmds.h"
 #include "frustrum.h"
-//#include "smacker.h"
 #include "fmv.h"
 #include "d3d_render.h"
 #include "avp_userprofile.h"
@@ -126,7 +112,7 @@ const int TALLFONT_TEX = 999;
 const int CONSOLE	   = 998;
 
 RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
-std::vector<RENDER_STATES> renderTest;
+//std::vector<RENDER_STATES> renderTest;
 
 void DeleteRenderMemory()
 {
@@ -162,42 +148,11 @@ extern AVPMENUGFX AvPMenuGfxStorage[];
 #define FMV_EVERYWHERE 0
 #define WIBBLY_FMV_ON 0
 #define FMV_SIZE 128
-VECTORCH FmvPosition = {42985-3500,2765-5000,-35457};
 
 #define FOG_ON 0
-#if 1
 
 #define FOG_COLOUR 0x7f7f7f //0x404040
 #define FOG_SCALE 512
-#else
-#define FOG_COLOUR 0x7f7f7f//0xd282828 //0x404040
-#define FOG_SCALE 256
-#endif
-
-//#define TriangleVertices   3
-
-//#define LineVertices 2
-
-//#define DefaultVertexIntensity 200
-//#define TransparentAlphaValue 128
-
-#define DefaultColour (RGBLIGHT_MAKE(DefaultVertexIntensity,DefaultVertexIntensity,DefaultVertexIntensity))
-#define DefaultAlphaColour (RGBALIGHT_MAKE(DefaultVertexIntensity,DefaultVertexIntensity,DefaultVertexIntensity,TransparentAlphaValue))
-
-
-#if 0
-#define TxIntensityLShift 4
-#else
-#define TxIntensityLShift 0
-#endif
-
-#define TxIntensityLimit 255
-
-//#define MaxVerticesInExecuteBuffer (MaxD3DVertices)
-// Colour is a 24-bit RGB colour, standard engine
-// internal format.
-// a is an 8 bit alpha value.
-//#define MAKE_ALPHACOLOUR(colour, a)   ((D3DCOLOR) (((a) << 24) | (colour)))
 
 extern int SpecialFXImageNumber;
 extern int SmokyImageNumber;
@@ -219,19 +174,13 @@ int LightIntensityAtPoint(VECTORCH *pointPtr);
 
 extern int VideoMode;
 extern int WindowMode;
-//extern int ScanDrawMode;
-//extern int DXMemoryMode;
 extern int ZBufferRequestMode;
-//extern int RasterisationRequestMode;
-//extern int SoftwareScanDrawRequestMode;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern VIEWDESCRIPTORBLOCK* Global_VDB_Ptr;
-
 
 extern IMAGEHEADER ImageHeaderArray[];
 extern int NumImagesArray[];
 
-//extern BOOL MMXAvailable;
 extern int NormalFrameTime;
 int WireFrameMode;
 
@@ -241,17 +190,11 @@ extern int HUDScaleFactor;
 
 //int D3DDriverMode;
 
-#if SupportZBuffering
-#endif
-
 // keep track of set render states
 static unsigned char D3DShadingMode;
-static unsigned char D3DTexturePerspective;
 static unsigned char D3DTBlendMode;
 
-static bool			 D3DAlphaBlendEnable;
-//static unsigned char D3DSrcBlend;
-//static unsigned char D3DDestBlend;
+static bool	D3DAlphaBlendEnable;
 D3DBLEND D3DSrcBlend;
 D3DBLEND D3DDestBlend;
 
@@ -260,15 +203,10 @@ bool D3DAlphaTestEnable = FALSE;
 static bool D3DStencilEnable;
 D3DCMPFUNC D3DStencilFunc;
 static unsigned int D3DStencilRef;
-
-
-
-//static unsigned char D3DAlphaMode;
 static unsigned char D3DZFunc;
 static unsigned char D3DDitherEnable;
 static bool D3DZWriteEnable;
 
-static D3DTEXTUREHANDLE CurrTextureHandle;
 static unsigned char DefaultD3DTextureFilterMin;
 static unsigned char DefaultD3DTextureFilterMax;
 // Globals for frame by frame definition of
@@ -285,6 +223,7 @@ extern HRESULT LastError;
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
 void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 
+/*
 #define CheckTranslucencyModeIsCorrect(x) \
 if (CurrentRenderStates.TranslucencyMode!=(x)) \
 	ChangeTranslucencyMode((x));
@@ -292,7 +231,7 @@ if (CurrentRenderStates.TranslucencyMode!=(x)) \
 #define CheckFilteringModeIsCorrect(x) \
 if (CurrentRenderStates.FilteringMode!=(x)) \
 	ChangeFilteringMode((x));
-
+*/
 
 /* OUTPUT_TRIANGLE - how this bugger works
 
@@ -318,6 +257,8 @@ if (CurrentRenderStates.FilteringMode!=(x)) \
 		IE.. 0, 2 order is forming. v1 is set to 11, so the '0,2,3' pattern emerged.
 
 		that's a 2am explanation for ya :p
+
+		edit: the above is probably really wrong. figure it out yourself :D
 */
 
 #if 0 // bjd
@@ -382,22 +323,23 @@ etc
 	NumVertices++; \
 */
 
-static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n) {
-	mainIndex[NumIndicies] = (NumVertices - (n) + (a));
+static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n) 
+{
+	mainIndex[NumIndicies]   = (NumVertices - (n) + (a));
 	mainIndex[NumIndicies+1] = (NumVertices - (n) + (b));
 	mainIndex[NumIndicies+2] = (NumVertices - (n) + (c));
 	NumIndicies+=3;
 }
 
-static void D3D_OutputTriangles()
+static inline void D3D_OutputTriangles()
 {
 	switch(RenderPolygon.NumberOfVertices)
 	{
 		default:
-			OutputDebugString(" unexpected number of verts to render");
+			OutputDebugString("unexpected number of verts to render\n");
 			break;
 		case 0:
-			OutputDebugString( "Asked to render 0 verts ");
+			OutputDebugString("Asked to render 0 verts\n");
 			break;
 		case 3:
 		{
@@ -466,27 +408,13 @@ static void D3D_OutputTriangles()
 }
 
 /* KJL 15:12:02 10/05/98 - FMV stuff */
-static PALETTEENTRY FMVPalette[4][256];
-
-void D3D_DrawFMVOnWater(int xOrigin, int yOrigin, int zOrigin);
 static void UpdateFMVTextures(int maxTextureNumberToUpdate);
 extern int NextFMVFrame(void*bufferPtr, int x, int y, int w, int h, int fmvNumber);
-extern void UpdateFMVPalette(PALETTEENTRY *FMVPalette, int fmvNumber);
 
 void D3D_DrawFMV(int xOrigin, int yOrigin, int zOrigin);
 
-VECTORCH FMVParticleAbsPosition[450];
-VECTORCH FMVParticlePosition[450];
 int FMVParticleColour;
-
-void D3D_DrawSwirlyFMV(int xOrigin, int yOrigin, int zOrigin);
-void D3D_FMVParticle_Output(RENDERVERTEX *renderVerticesPtr);
-
-
-//void DrawFBM(void);
-
 void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr);
-
 
 int WaterXOrigin;
 int WaterZOrigin;
@@ -595,7 +523,6 @@ BOOL SetExecuteBufferDefaults()
 
     return TRUE;
 }
-//static int NeedToClearExecuteBuffer=1;
 
 void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE translucency_mode) {
 
@@ -652,7 +579,7 @@ void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE t
 		renderCount != 0) 
 	{
 		// ok, drop back to the previous data
-		renderTest.pop_back();
+//		renderTest.pop_back();
 		renderCount--;
 	}
 	else 
@@ -664,7 +591,7 @@ void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE t
 	renderList[renderCount].vert_end = NumVertices + num_verts;
 	renderList[renderCount].index_end = NumIndicies + real_num_verts;
 
-	renderTest.push_back(renderList[renderCount]);
+//	renderTest.push_back(renderList[renderCount]);
 	renderCount++;
 
 	NumVertices+=num_verts;
@@ -693,7 +620,7 @@ BOOL LockExecuteBuffer()
 	renderCount = 0;
 	vb = 0;
 
-	renderTest.resize(0);
+//	renderTest.resize(0);
 
     return TRUE;
 }
@@ -732,10 +659,10 @@ BOOL BeginD3DScene()
 		{
 			if( D3DERR_DEVICENOTRESET == LastError ) 
 			{
-				OutputDebugString("\n DEVICE NOT RESET ");
+				OutputDebugString("D3D device not reset\n");
 				if( ReleaseVolatileResources() == TRUE ) 
 				{
-					OutputDebugString("releasing resources for a device reset..\n");
+					OutputDebugString("Releasing resources for a device reset..\n");
 					/* release fmv textures */
 					//ReleaseAllFMVTexturesForDeviceReset();
 
@@ -744,11 +671,11 @@ BOOL BeginD3DScene()
 
 					if(FAILED( d3d.lpD3DDevice->Reset( &d3d.d3dpp ))) 
 					{
-						OutputDebugString("\n Couldn't reset device");
+						OutputDebugString("Couldn't reset device\n");
 					}
 					else 
 					{	
-						OutputDebugString("we have reset the device. recreating resources..\n");
+						OutputDebugString("We have reset the device. recreating resources..\n");
 						CreateVolatileResources();
 
 						/* reload fmv textures */
@@ -762,7 +689,7 @@ BOOL BeginD3DScene()
 			}
 			else if( D3DERR_DEVICELOST == LastError ) 
 			{
-				OutputDebugString("\n DEVICE LOST ");
+				OutputDebugString("D3D device lost\n");
 			}
 			Sleep(50);
 //			continue;
@@ -946,20 +873,20 @@ BOOL ExecuteBuffer()
 	// we can assume to keep this turned on
 	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
-//	for (int i = 0; i < renderCount; i++) {
+	for (int i = 0; i < renderCount; i++)
 #if 1
-	for (unsigned int i = 0; i < renderTest.size(); i++)
+//	for (unsigned int i = 0; i < renderTest.size(); i++)
 	{
-		tempTexture = renderTest[i].texture_id;
+		tempTexture = renderList[i].texture_id;
 
-		if (renderTest[i].translucency_type != TRANSLUCENCY_OFF) continue;
+		if (renderList[i].translucency_type != TRANSLUCENCY_OFF) continue;
 
 		// texture stuff here
 		ChangeTexture(tempTexture);
 
-		ChangeTranslucencyMode(renderTest[i].translucency_type);
+		ChangeTranslucencyMode(renderList[i].translucency_type);
 
-		unsigned int num_prims = (renderTest[i].index_end - renderTest[i].index_start) / 3;
+		unsigned int num_prims = (renderList[i].index_end - renderList[i].index_start) / 3;
 
 		if (num_prims > 0) 
 		{
@@ -967,7 +894,7 @@ BOOL ExecuteBuffer()
 				0, 
 				0, 
 				NumVertices,
-				renderTest[i].index_start,
+				renderList[i].index_start,
 				num_prims);
 
 			draw_calls_per_frame++;
@@ -979,16 +906,17 @@ BOOL ExecuteBuffer()
 
 /* do transparents here.. */
 
-	for (unsigned int i = 0; i < renderTest.size(); i++)
+//	for (unsigned int i = 0; i < renderTest.size(); i++)
+	for (unsigned int i = 0; i < renderCount; i++)
 	{
-		tempTexture = renderTest[i].texture_id;
+		tempTexture = renderList[i].texture_id;
 
-		if (renderTest[i].translucency_type == TRANSLUCENCY_OFF) continue;
+		if (renderList[i].translucency_type == TRANSLUCENCY_OFF) continue;
 
 		// texture stuff here
 		ChangeTexture(tempTexture);
 
-		ChangeTranslucencyMode(renderTest[i].translucency_type);
+		ChangeTranslucencyMode(renderList[i].translucency_type);
 
 		extern int HUDImageNumber;
 		extern int HUDFontsImageNumber;
@@ -1001,7 +929,7 @@ BOOL ExecuteBuffer()
 		}
 		else ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
-		unsigned int num_prims = (renderTest[i].index_end - renderTest[i].index_start) / 3;
+		unsigned int num_prims = (renderList[i].index_end - renderList[i].index_start) / 3;
 
 		if (num_prims > 0) 
 		{
@@ -1009,7 +937,7 @@ BOOL ExecuteBuffer()
 			   0, 
 			   0, 
 			   NumVertices,
-			   renderTest[i].index_start,
+			   renderList[i].index_start,
 			   num_prims);
 
 			draw_calls_per_frame++;
@@ -1101,20 +1029,6 @@ BOOL ExecuteBuffer()
 	return TRUE;
 }
 
-void CheckRenderStatesForModule(MODULE *modulePtr)
-{
-//  	textprint("fog %d\n",CurrentRenderStates.FogIsOn);
-
-	if (modulePtr->m_flags & MODULEFLAG_FOG)
-	{
-//		CurrentRenderStates.FogIsOn = 1;
-	}
-	else
-	{
-//		CurrentRenderStates.FogIsOn = 0;
-	}
-}
-
 void SetFogDistance(int fogDistance)
 {
 	if (fogDistance>10000) fogDistance = 10000;
@@ -1138,166 +1052,165 @@ void SetTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 {
 	if (CurrentRenderStates.TranslucencyMode == translucencyRequired) return;
-	{
-		CurrentRenderStates.TranslucencyMode = translucencyRequired;
-		switch(CurrentRenderStates.TranslucencyMode)
-		{
-		 	case TRANSLUCENCY_OFF:
-			{
-				if (TRIPTASTIC_CHEATMODE||MOTIONBLUR_CHEATMODE)
-				{
-					if (D3DAlphaBlendEnable != TRUE)
-					{
-						d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-						D3DAlphaBlendEnable = TRUE;
-					}
-					if (D3DSrcBlend != D3DBLEND_INVSRCALPHA)
-					{
-						d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_INVSRCALPHA);
-						D3DSrcBlend = D3DBLEND_INVSRCALPHA;
-					}
-					if (D3DDestBlend != D3DBLEND_SRCALPHA)
-					{
-						d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_SRCALPHA);
-						D3DDestBlend = D3DBLEND_SRCALPHA;
-					}
-				}
-				else
-				{
-					if (D3DAlphaBlendEnable != FALSE)
-					{
-						d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
-						D3DAlphaBlendEnable = FALSE;
-					}
-					if (D3DSrcBlend != D3DBLEND_ONE)
-					{
-						d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_ONE);
-						D3DSrcBlend = D3DBLEND_ONE;
-					}
-					if (D3DDestBlend != D3DBLEND_ZERO)
-					{
-						d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_ZERO);
-						D3DDestBlend = D3DBLEND_ZERO;
-					}
-				}
-				break;
-			}
-		 	case TRANSLUCENCY_NORMAL:
-			{
-				if (D3DAlphaBlendEnable != TRUE)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-					D3DAlphaBlendEnable = TRUE;
-				}
-				if (D3DSrcBlend != D3DBLEND_SRCALPHA)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
-					D3DSrcBlend = D3DBLEND_SRCALPHA;
-				}
-				if (D3DDestBlend != D3DBLEND_INVSRCALPHA)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_INVSRCALPHA);
-					D3DDestBlend = D3DBLEND_INVSRCALPHA;
-				}
-				break;
-			}
-		 	case TRANSLUCENCY_COLOUR:
-			{
-				if (D3DAlphaBlendEnable != TRUE)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-					D3DAlphaBlendEnable = TRUE;
-				}
-				if (D3DSrcBlend != D3DBLEND_ZERO)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_ZERO);
-					D3DSrcBlend = D3DBLEND_ZERO;
-				}
-				if (D3DDestBlend != D3DBLEND_SRCCOLOR)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_SRCCOLOR);
-					D3DDestBlend = D3DBLEND_SRCCOLOR;
-				}
-				break;
-			}
-		 	case TRANSLUCENCY_INVCOLOUR:
-			{
-				if (D3DAlphaBlendEnable != TRUE)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-					D3DAlphaBlendEnable = TRUE;
-				}
-				if (D3DSrcBlend != D3DBLEND_ZERO)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_ZERO);
-					D3DSrcBlend = D3DBLEND_ZERO;
-				}
-				if (D3DDestBlend != D3DBLEND_INVSRCCOLOR)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_INVSRCCOLOR);
-					D3DDestBlend = D3DBLEND_INVSRCCOLOR;
-				}
-				break;
-			}
-	  		case TRANSLUCENCY_GLOWING:
-			{
-				if (D3DAlphaBlendEnable != TRUE)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-					D3DAlphaBlendEnable = TRUE;
-				}
-				if (D3DSrcBlend != D3DBLEND_SRCALPHA)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
-					D3DSrcBlend = D3DBLEND_SRCALPHA;
-				}
-				if (D3DDestBlend != D3DBLEND_ONE) 
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_ONE);
-					D3DDestBlend = D3DBLEND_ONE;
-				}
-				break;
-			}
-	  		case TRANSLUCENCY_DARKENINGCOLOUR:
-			{
-				if (D3DAlphaBlendEnable != TRUE)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-					D3DAlphaBlendEnable = TRUE;
-				}
-				if (D3DSrcBlend != D3DBLEND_INVDESTCOLOR) 
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_INVDESTCOLOR);
-					D3DSrcBlend = D3DBLEND_INVDESTCOLOR;
-				}
 
-				if (D3DDestBlend != D3DBLEND_ZERO) 
+	CurrentRenderStates.TranslucencyMode = translucencyRequired;
+
+	switch(CurrentRenderStates.TranslucencyMode)
+	{
+	 	case TRANSLUCENCY_OFF:
+		{
+			if (TRIPTASTIC_CHEATMODE||MOTIONBLUR_CHEATMODE)
+			{
+				if (D3DAlphaBlendEnable != TRUE)
 				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_ZERO);
+					d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+					D3DAlphaBlendEnable = TRUE;
+				}
+				if (D3DSrcBlend != D3DBLEND_INVSRCALPHA)
+				{
+					d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_INVSRCALPHA);
+					D3DSrcBlend = D3DBLEND_INVSRCALPHA;
+				}
+				if (D3DDestBlend != D3DBLEND_SRCALPHA)
+				{
+					d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCALPHA);
+					D3DDestBlend = D3DBLEND_SRCALPHA;
+				}
+			}
+			else
+			{
+				if (D3DAlphaBlendEnable != FALSE)
+				{
+					d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+					D3DAlphaBlendEnable = FALSE;
+				}
+				if (D3DSrcBlend != D3DBLEND_ONE)
+				{
+					d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+					D3DSrcBlend = D3DBLEND_ONE;
+				}
+				if (D3DDestBlend != D3DBLEND_ZERO)
+				{
+					d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
 					D3DDestBlend = D3DBLEND_ZERO;
 				}
-				break;
 			}
-			case TRANSLUCENCY_JUSTSETZ:
-			{
-				if (D3DAlphaBlendEnable != TRUE)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-					D3DAlphaBlendEnable = TRUE;
-				}
-				if (D3DSrcBlend != D3DBLEND_ZERO)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_ZERO);
-					D3DSrcBlend = D3DBLEND_ZERO;
-				}
-				if (D3DDestBlend != D3DBLEND_ONE) {
-					d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_ONE);
-					D3DDestBlend = D3DBLEND_ONE;
-				}
-			}
-			default:
-				break;
+			break;
 		}
+	 	case TRANSLUCENCY_NORMAL:
+		{
+			if (D3DAlphaBlendEnable != TRUE)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				D3DAlphaBlendEnable = TRUE;
+			}
+			if (D3DSrcBlend != D3DBLEND_SRCALPHA)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				D3DSrcBlend = D3DBLEND_SRCALPHA;
+			}
+			if (D3DDestBlend != D3DBLEND_INVSRCALPHA)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+				D3DDestBlend = D3DBLEND_INVSRCALPHA;
+			}
+			break;
+		}
+	 	case TRANSLUCENCY_COLOUR:
+		{
+			if (D3DAlphaBlendEnable != TRUE)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				D3DAlphaBlendEnable = TRUE;
+			}
+			if (D3DSrcBlend != D3DBLEND_ZERO)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
+				D3DSrcBlend = D3DBLEND_ZERO;
+			}
+			if (D3DDestBlend != D3DBLEND_SRCCOLOR)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCCOLOR);
+				D3DDestBlend = D3DBLEND_SRCCOLOR;
+			}
+			break;
+		}
+	 	case TRANSLUCENCY_INVCOLOUR:
+		{
+			if (D3DAlphaBlendEnable != TRUE)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				D3DAlphaBlendEnable = TRUE;
+			}
+			if (D3DSrcBlend != D3DBLEND_ZERO)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
+				D3DSrcBlend = D3DBLEND_ZERO;
+			}
+			if (D3DDestBlend != D3DBLEND_INVSRCCOLOR)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
+				D3DDestBlend = D3DBLEND_INVSRCCOLOR;
+			}
+			break;
+		}
+  		case TRANSLUCENCY_GLOWING:
+		{
+			if (D3DAlphaBlendEnable != TRUE)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				D3DAlphaBlendEnable = TRUE;
+			}
+			if (D3DSrcBlend != D3DBLEND_SRCALPHA)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				D3DSrcBlend = D3DBLEND_SRCALPHA;
+			}
+			if (D3DDestBlend != D3DBLEND_ONE) 
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+				D3DDestBlend = D3DBLEND_ONE;
+			}
+			break;
+		}
+  		case TRANSLUCENCY_DARKENINGCOLOUR:
+		{
+			if (D3DAlphaBlendEnable != TRUE)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				D3DAlphaBlendEnable = TRUE;
+			}
+			if (D3DSrcBlend != D3DBLEND_INVDESTCOLOR) 
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_INVDESTCOLOR);
+				D3DSrcBlend = D3DBLEND_INVDESTCOLOR;
+			}
+
+			if (D3DDestBlend != D3DBLEND_ZERO) 
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+				D3DDestBlend = D3DBLEND_ZERO;
+			}
+			break;
+		}
+		case TRANSLUCENCY_JUSTSETZ:
+		{
+			if (D3DAlphaBlendEnable != TRUE)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				D3DAlphaBlendEnable = TRUE;
+			}
+			if (D3DSrcBlend != D3DBLEND_ZERO)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
+				D3DSrcBlend = D3DBLEND_ZERO;
+			}
+			if (D3DDestBlend != D3DBLEND_ONE) {
+				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+				D3DDestBlend = D3DBLEND_ONE;
+			}
+		}
+		default: break;
 	}
 }
 
@@ -1311,8 +1224,8 @@ void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired)
 	{
 		case FILTERING_BILINEAR_OFF:
 		{
-			d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_MAGFILTER,D3DTEXF_POINT);
-			d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_MINFILTER,D3DTEXF_POINT);
+			d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+			d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_MINFILTER, D3DTEXF_POINT);
 			break;
 		}
 		case FILTERING_BILINEAR_ON:
@@ -1324,7 +1237,7 @@ void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired)
 		default:
 		{
 			LOCALASSERT("Unrecognized filtering mode"==0);
-			OutputDebugString("Unrecognized filtering mode");
+			OutputDebugString("Unrecognized filtering mode\n");
 			break;
 		}
 	}
@@ -1347,60 +1260,6 @@ extern void CheckWireFrameMode(int shouldBeOn)
 	}
 }
 
-// doesnt seem to be called anywhere. Out she goes..
-#if 0
-void D3D_Line(VECTOR2D* LineStart, VECTOR2D* LineEnd, int LineColour)
-{
-	if (d3d.ThisDriver.dpcLineCaps.dwShadeCaps & D3DPSHADECAPS_COLORFLATRGB)
-	{
-		int x1, x2, y1, y2;
-
-		D3DTLVERTEX *vertexPtr = &((LPD3DTLVERTEX)ExecuteBufferDataArea)[NumVertices];
-
-	    // Test!!!
-		// LineColour = 0xffffffff;
-		vertexPtr->sx = LineStart->vx;
-		vertexPtr->sy = LineStart->vy;
-		vertexPtr[1].sx = LineEnd->vx;
-		vertexPtr[1].sy = LineEnd->vy;
-
-		NumVertices+=2;
-
-    	vertexPtr->color = LineColour;
-		vertexPtr[1].color = LineColour;
-
-	    // Always turn off translucency for the moment
-		CheckTranslucencyModeIsCorrect(TRANSLUCENCY_OFF);
-
-	    // Turn OFF texturing if it is on...
-	    if (CurrTextureHandle != NULL)
-		  {
-	       //OP_STATE_RENDER(1, ExecBufInstPtr);
-	       //   STATE_DATA(D3DRENDERSTATE_TEXTUREHANDLE, NULL, ExecBufInstPtr);
-		   CurrTextureHandle = NULL;
-		  }
-/*
-		OP_LINE_LIST(1, ExecBufInstPtr);
-	        ((LPD3DLINE)ExecBufInstPtr)->v1 = (NumVertices-2); // vertex index
-	        ((LPD3DLINE)ExecBufInstPtr)->v2 = (NumVertices-1); // vertex index
-	        ExecBufInstPtr = ((char*)ExecBufInstPtr) + sizeof(D3DLINE);
-*/
-	}
-
-	if (NumVertices > (MaxVerticesInExecuteBuffer-12))
-	{
-	   WriteEndCodeToExecuteBuffer();
-  	   UnlockExecuteBufferAndPrepareForUse();
-	   ExecuteBuffer();
-
-		d3d.lpD3DDevice->SetVertexShader(D3DFVF_TLVERTEX);
-		d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_LINELIST,NumVertices/2,vertexPtr,0);
-
-  	   LockExecuteBuffer();
-	}
-}
-#endif
-
 static void D3D_OutputTriangles(void);
 
 void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
@@ -1408,8 +1267,6 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 #if 1//FUNCTION_ON
 	int flags;
 	int texoffset;
-
-//	D3DTEXTUREHANDLE TextureHandle;
 
 	float ZNear;
 	float RecipW, RecipH;
@@ -7975,6 +7832,8 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
 {
+#ifdef USE_FMV
+
 	assert(ftPtr->DestTexture == NULL);
 /*
 	if (ftPtr->DestTexture)
@@ -7992,12 +7851,15 @@ void SetupFMVTexture(FMVTEXTURE *ftPtr)
 	}
 
 	ftPtr->SoundVolume = 0;
+#endif
 }
 
 #include <assert.h>
 
 void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 {
+#ifdef USE_FMV
+
 	assert(ftPtr);
 	assert(ftPtr->ImagePtr);
 	assert(ftPtr->DestTexture);
@@ -8037,6 +7899,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	{	
 		LogDxErrorString("Could not UpdateTexture in UpdateFMVTexture function\n");
 	}
+#endif
 }
 
 #if 0
@@ -8653,6 +8516,7 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 */
 }
 
+#if 0
 void DrawTexturedFadedQuad(int topX, int topY, int image_num, int alpha) 
 {
 /*
@@ -8738,6 +8602,7 @@ void DrawTexturedFadedQuad(int topX, int topY, int image_num, int alpha)
 	}
 */
 }
+#endif
 
 /* more quad drawing functions than you can shake a stick at! */
 void DrawBinkFmv(int topX, int topY, int height, int width, LPDIRECT3DTEXTURE9 fmvTexture)
@@ -8936,6 +8801,7 @@ void DrawQuad(int x, int y, int width, int height, int colour)
 	OUTPUT_TRIANGLE(1,2,3, 4);
 }
 
+#if 0
 void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, BOOL alpha) 
 {
 /*
@@ -9014,6 +8880,7 @@ void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, B
 	}
 */
 }
+#endif
 
 void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, int alpha) 
 {

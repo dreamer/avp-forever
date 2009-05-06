@@ -120,13 +120,13 @@ BOOL ReleaseVolatileResources();
 BOOL CreateVolatileResources();
 BOOL ChangeGameResolution(int width, int height, int colour_depth);
 
-void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, BOOL alpha);
+//void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, BOOL alpha);
 void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, int alpha);
 void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha);
 void DrawCloudTable(int topX, int topY, int word_length, int alpha);
 void DrawFadeQuad(int topX, int topY, int alpha);
 void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha);
-void DrawTexturedFadedQuad(int topX, int topY, int image_num, int alpha);
+//void DrawTexturedFadedQuad(int topX, int topY, int image_num, int alpha);
 void DrawProgressBar(RECT src_rect, RECT dest_rect, D3DTEXTURE bar_texture, int original_width, int original_height, int new_width, int new_height);
 void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 //void LogDxError(HRESULT hr);

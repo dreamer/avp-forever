@@ -67,7 +67,6 @@ int tripc = 0;
 	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 	extern unsigned char *ScreenBuffer;
 	extern char projectsubdirectory[];
-    extern int ScanDrawMode;
 	extern int VideoModeType;
 
 /*

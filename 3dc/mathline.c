@@ -476,6 +476,9 @@ __asm__("movl	0(%%esi), %%eax		\n\t"
 	them though.
 */
 
+// shift a to the right by 16, return the
+// return the lower 32 bits:
+
 int MUL_FIXED(int a, int b)
 {
 /*
@@ -499,12 +502,15 @@ __asm__("imull	%2			\n\t"
 	);
 	return retval;
 #else
+/*
 	__int64 aa = (__int64) a;
 	__int64 bb = (__int64) b;
 	
 	__int64 cc = aa * bb;
 	
 	return (int) ((cc >> 16) & 0xffffffff);
+*/
+	return((__int64)a * b) >> 16;
 #endif
 }
 

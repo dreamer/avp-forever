@@ -23,7 +23,6 @@
 #include "language.h"
 #include "huddefs.h"
 #include "vision.h"
-#include "pcmenus.h"
 #include "avp_menus.h"
 #include "kshape.h"
 #define UseLocalAssert Yes
@@ -373,8 +372,6 @@ void _cdecl main()
 		OutputDebugString("InitialiseDirect3DImmediateMode() OK");
 	}
 
-	InitOptionsMenu(); /* by this time we know all about the video card, etc */
-
 	LoadKeyConfiguration();
 	/********** Grab The Video mode **********/
 	/* JH - nope, not yet; not until we start the menus
@@ -642,8 +639,7 @@ void _cdecl main()
 					}
 					#endif
 
-
-					InGameFlipBuffers();
+					FlipBuffers();
 
 					FrameCounterHandler();
 					{

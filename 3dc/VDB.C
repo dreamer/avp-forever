@@ -15,10 +15,6 @@
 	extern int cosine[];
 	#endif
 
-    #if SupportWindows95
-	extern int ScanDrawMode;
-	#endif
-
 
 /*
 
@@ -427,21 +423,18 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 {
 
 
-
 	/* Initial setup */
-
 	vdb->VDB_Flags			= fl;
 	vdb->VDB_ViewType		= ty;
 
 
 	/* Ambience */
-
 	vdb->VDB_Ambience = amb;
+
 	/* KJL 14:30:57 05/14/97 - set globalAmbience here as well */
 	GlobalAmbience = amb;
 
 	/* Width and Height are set by the Clip Boundaries */
-
 	if(vdb->VDB_Flags & ViewDB_Flag_FullSize) {
 
 		vdb->VDB_Depth			= ScreenDescriptorBlock.SDB_Depth;
@@ -458,8 +451,8 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 		vdb->VDB_MaxProj		= ScreenDescriptorBlock.SDB_MaxProj;
 
 		vdb->VDB_ClipLeft		= ScreenDescriptorBlock.SDB_ClipLeft;
-		vdb->VDB_ClipRight	= ScreenDescriptorBlock.SDB_ClipRight;
-		vdb->VDB_ClipUp		= ScreenDescriptorBlock.SDB_ClipUp;
+		vdb->VDB_ClipRight		= ScreenDescriptorBlock.SDB_ClipRight;
+		vdb->VDB_ClipUp			= ScreenDescriptorBlock.SDB_ClipUp;
 		vdb->VDB_ClipDown		= ScreenDescriptorBlock.SDB_ClipDown;
 
 	}
@@ -467,9 +460,9 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 	else {
 
         #if SupportWindows95
-		 if (ScanDrawMode == ScanDrawDirectDraw)
-		   vdb->VDB_Depth			= d;
-		 else
+//		 if (ScanDrawMode == ScanDrawDirectDraw)
+//		   vdb->VDB_Depth			= d;
+//		 else
 		   vdb->VDB_Depth = VideoModeType_24;
 
         vdb->VDB_ScreenDepth    = ScreenDescriptorBlock.SDB_ScreenDepth;
@@ -548,7 +541,6 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 					200);
 
 		}
-
 	}
 
 
