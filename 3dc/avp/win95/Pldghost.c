@@ -26,7 +26,7 @@ d  ----------------------------------------------------------------------*/
 #include "bh_weap.h"
 #include "ShowCmds.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 /*----------------------------------------------------------------------
@@ -5052,7 +5052,7 @@ void UpdateAlienAIGhostAnimSequence(STRATEGYBLOCK *sbPtr,HMODEL_SEQUENCE_TYPES t
 
 	/* Are we already playing this one? */
 	if ((ghostData->HModelController.Sequence_Type==type)&&(ghostData->HModelController.Sub_Sequence==subtype)) {
-		/* Yes, but... */
+		/* TRUE, but... */
 		/*I think we only want to change speed if we're not tweening*/
 		if (tweeningtime<=0)
 		{

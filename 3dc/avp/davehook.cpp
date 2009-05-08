@@ -53,7 +53,7 @@
 	#include "consbtch.hpp"
 
 	
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 #include "frontend/avp_menus.h"
@@ -124,7 +124,7 @@
 
 	static void davehook_HandleStatusPanelControls(void);
 
-	static int bFirstFrame = No;
+	static int bFirstFrame = FALSE;
 
 /* Internal globals ************************************************/
 
@@ -418,7 +418,7 @@ void DAVEHOOK_Maintain(void)
 		// in the menu get through to the first frame of the game and 
 		// for example, switch to typing mode (for CR presses)
 		
-		bFirstFrame = No;
+		bFirstFrame = FALSE;
 	}
 	else
 	{
@@ -449,7 +449,7 @@ void DAVEHOOK_ScreenModeChange_Cleanup(void)
 	LoadPFFont(MENU_FONT_1);
 	#endif
 
-	bFirstFrame = Yes;
+	bFirstFrame = TRUE;
 		// to ensure a flush without processing of messages in first frame, so as to
 		// avoid carriage returns/enter from menu selections triggering typing mode
 

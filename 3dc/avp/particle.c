@@ -29,7 +29,7 @@
 #include "detaillevels.h"
 #include "psnd.h"
 #include "avp_userprofile.h"
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "savegame.h"
 #include "los.h"

@@ -15,7 +15,7 @@
 #include "load_shp.h"
 #include "huddefs.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 #include "dynblock.h"
@@ -260,7 +260,7 @@ DISPLAYBLOCK *HtoHDamageToHModel(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, i
 DISPLAYBLOCK *AlienTail_TargetSelect(void);
 STRATEGYBLOCK *GetBitingTarget(void);
 SECTION_DATA *CheckBiteIntegrity(void);
-/* Yes, whatever, but this was LESS TEDIOUS! */
+/* TRUE, whatever, but this was LESS TEDIOUS! */
 STRATEGYBLOCK *GetTrophyTarget(SECTION_DATA **head_section_data);
 
 extern void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplier,VECTORCH* incoming);
@@ -2234,7 +2234,7 @@ void HandleWeaponImpact(VECTORCH *positionPtr, STRATEGYBLOCK *sbPtr, enum AMMO_I
 
 					GLOBALASSERT(sbPtr->SBdptr->HModelControlBlock==this_section_data->my_controller);
 					CauseDamageToHModel(sbPtr->SBdptr->HModelControlBlock, sbPtr, &TemplateAmmo[AmmoID].MaxDamage[AvP.Difficulty], multiple, this_section_data,invec,positionPtr,0);
-					/* No longer return: do knockback. */
+					/* FALSE longer return: do knockback. */
 					//return;
 				} 
 				else
@@ -4475,7 +4475,7 @@ void GrenadeLauncher_EmergencyChangeAmmo(PLAYER_WEAPON_DATA *weaponPtr) {
 	
 
 	if ((change_to_ammo==original_ammo)||(change_to_ammo==AMMO_NONE)) {
-		/* No other ammo types! */
+		/* FALSE other ammo types! */
 		return;
 	}
 
@@ -4645,7 +4645,7 @@ int GrenadeLauncherChangeAmmo(PLAYER_WEAPON_DATA *weaponPtr) {
 	}
 
 	if (change_to_ammo==original_ammo) {
-		/* No other ammo types! */
+		/* FALSE other ammo types! */
 		return(0);
 	}
 
@@ -5372,7 +5372,7 @@ void MinigunStopSpin(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 
 	/* Think sounds. */
 	if (Minigun_SpinSpeed==0) {
-		/* No sound at all, ideally! */
+		/* FALSE sound at all, ideally! */
   		if(weaponHandle != SOUND_NOACTIVEINDEX) {
 			if (ActiveSounds[weaponHandle].soundIndex!=SID_MINIGUN_END) {
 				/* Allow SID_MINIGUN_END to stop if it's going. */
@@ -5492,7 +5492,7 @@ int FireEmptyMinigun(PLAYER_WEAPON_DATA *weaponPtr) {
 	
 		Minigun_SpinSpeed=MINIGUN_MAX_SPEED;
 
-		/* No bullets, no impulse. */
+		/* FALSE bullets, no impulse. */
 				
 		return(1);
 	} else {
@@ -5532,7 +5532,7 @@ void Maintain_Minigun(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 		}
 		/* Not firing - play empty or wind down sound.  Which one? */
 		if (Minigun_SpinSpeed==0) {
-			/* No sound at all, ideally! */
+			/* FALSE sound at all, ideally! */
 	   		if(weaponHandle != SOUND_NOACTIVEINDEX) {
 				if (ActiveSounds[weaponHandle].soundIndex!=SID_MINIGUN_END) {
 					/* Allow SID_MINIGUN_END to stop if it's going. */
@@ -5736,7 +5736,7 @@ void GrenadeLauncherReload_Change(void *playerStatus, PLAYER_WEAPON_DATA *weapon
 	if (PlayersWeaponHModelController.Sub_Sequence!=MHSS_Standard_Reload) {
 		InitHModelSequence(&PlayersWeaponHModelController,HMSQT_MarineHUD,(int)MHSS_Standard_Reload,(ONE_FIXED*4)/3);
 		PlayersWeaponHModelController.Looped=0;
-		/* No update bullets here. */
+		/* FALSE update bullets here. */
 	}
 	
 	if (PlayersWeaponHModelController.keyframe_flags) {
@@ -6993,7 +6993,7 @@ HITLOCATIONTABLEENTRY *Get_Sublocation(STRATEGYBLOCK *sbPtr) {
 			}
 			break;
 		default:
-			textprint("No hit table!\n");
+			textprint("FALSE hit table!\n");
 			hltable=NULL;
 			/* See ChrisF */
 			break;
@@ -8058,7 +8058,7 @@ void AlienGrab_Strike(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 
 		} else {
 			
-			/* No joy. */
+			/* FALSE joy. */
 
 		}
 
@@ -9767,7 +9767,7 @@ int FireSpikeyThing(PLAYER_WEAPON_DATA *weaponPtr) {
 
 	GLOBALASSERT(AvP.PlayerType==I_Predator);
 
-	/* No longer will we do that wussey instant healing thing! */
+	/* FALSE longer will we do that wussey instant healing thing! */
 	playerStatusPtr->FieldCharge-=MEDICOMP_DRAIN_BLOCK;
 	CurrentGameStats_ChargeUsed(MEDICOMP_DRAIN_BLOCK);
 	/* But we do do the instant charging thing. */
@@ -9807,7 +9807,7 @@ int FireExtinguisher(PLAYER_WEAPON_DATA *weaponPtr) {
 
 	GLOBALASSERT(AvP.PlayerType==I_Predator);
 
-	/* No longer will we do that wussey instant healing thing! */
+	/* FALSE longer will we do that wussey instant healing thing! */
 	playerStatusPtr->FieldCharge-=EXTINGUISHER_DRAIN_BLOCK;
 	CurrentGameStats_ChargeUsed(EXTINGUISHER_DRAIN_BLOCK);
 	/* But we do do the instant charging thing. */
@@ -10605,7 +10605,7 @@ void HandleSpearImpact(VECTORCH *positionPtr, STRATEGYBLOCK *sbPtr, enum AMMO_ID
 
 					GLOBALASSERT(sbPtr->SBdptr->HModelControlBlock==this_section_data->my_controller);
 					fragged_section=CauseDamageToHModel(sbPtr->SBdptr->HModelControlBlock, sbPtr, &TemplateAmmo[AmmoID].MaxDamage[AvP.Difficulty], multiple*ONE_FIXED, this_section_data,invec,positionPtr,0);
-					/* No longer return: do knockback. */
+					/* FALSE longer return: do knockback. */
 					//return;
 				} 
 				else
@@ -10919,7 +10919,7 @@ void BiteAttack_AwardHealth(STRATEGYBLOCK *sbPtr,AVP_BEHAVIOUR_TYPE pre_bite_typ
 			||(corpseDataPtr->Type==I_BehaviourSeal)
 			||(corpseDataPtr->Type==I_BehaviourPredator)
 			) {
-			/* No armour, just a bit of health. */
+			/* FALSE armour, just a bit of health. */
 			Player->ObStrategyBlock->SBDamageBlock.Health+=(20<<ONE_FIXED_SHIFT);
 			if (Player->ObStrategyBlock->SBDamageBlock.Health>(NpcData->StartingStats.Health<<ONE_FIXED_SHIFT)) {
 				Player->ObStrategyBlock->SBDamageBlock.Health=NpcData->StartingStats.Health<<ONE_FIXED_SHIFT;
@@ -11971,7 +11971,7 @@ static void MarineZeroAmmoFunctionality(PLAYER_STATUS *playerStatusPtr,PLAYER_WE
 	}
 
 	if (MarineWeaponHierarchy[weaponNum]==NULL_WEAPON) {
-		/* No possible action. */
+		/* FALSE possible action. */
 		return;
 	}
 	if (MarineWeaponHierarchy[weaponNum]==weaponPtr->WeaponIDNumber) {
@@ -12226,7 +12226,7 @@ static void PredatorZeroAmmoFunctionality(PLAYER_STATUS *playerStatusPtr,PLAYER_
 	}
 
 	if (PredatorWeaponHierarchy[weaponNum]==NULL_WEAPON) {
-		/* No possible action. */
+		/* FALSE possible action. */
 		return;
 	}
 	if (PredatorWeaponHierarchy[weaponNum]==weaponPtr->WeaponIDNumber) {

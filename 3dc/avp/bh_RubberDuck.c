@@ -22,7 +22,7 @@
 #include "bh_weap.h"
 #include "sfx.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;

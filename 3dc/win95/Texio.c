@@ -232,7 +232,7 @@ int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
 				
 				/* If there are already images, try and find this one */
 
-				NewImage = Yes;
+				NewImage = TRUE;
 
 				#ifdef MaxImageGroups
 
@@ -240,7 +240,7 @@ int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
 				
 				if(NumImagesArray[CurrentImageGroup]) {
 
-					for(i=NumImagesArray[CurrentImageGroup]; i!=0 && NewImage!=No; i--) {
+					for(i=NumImagesArray[CurrentImageGroup]; i!=0 && NewImage!=FALSE; i--) {
 
 				#else
 
@@ -248,7 +248,7 @@ int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
 				
 				if(NumImages) {
 
-					for(i=NumImages; i!=0 && NewImage!=No; i--) {
+					for(i=NumImages; i!=0 && NewImage!=FALSE; i--) {
 
 				#endif
 
@@ -258,7 +258,7 @@ int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
 
 						j = CompareFilenameCH(txfilesptr, iname);
 
-						if(j) NewImage = No;
+						if(j) NewImage = FALSE;
 
 						else TxIndex++;
 
@@ -321,7 +321,7 @@ int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
 	}
 
 
-	return Yes;
+	return TRUE;
 
 
 }
@@ -330,7 +330,7 @@ int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
 #else
 
 
-#define InitTexPrnt No
+#define InitTexPrnt FALSE
 
 int InitialiseTextures(void)
 
@@ -374,7 +374,7 @@ int InitialiseTextures(void)
 	*/
 	if ( NULL == mainshapelist )
 	{
-		return Yes;
+		return TRUE;
 			// early exit
 	}
 
@@ -455,7 +455,7 @@ int InitialiseTextures(void)
 				
 				/* If there are already images, try and find this one */
 
-				NewImage = Yes;
+				NewImage = TRUE;
 
 				#ifdef MaxImageGroups
 
@@ -463,7 +463,7 @@ int InitialiseTextures(void)
 				
 				if(NumImagesArray[CurrentImageGroup]) {
 
-					for(i=NumImagesArray[CurrentImageGroup]; i!=0 && NewImage!=No; i--) {
+					for(i=NumImagesArray[CurrentImageGroup]; i!=0 && NewImage!=FALSE; i--) {
 
 				#else
 
@@ -471,7 +471,7 @@ int InitialiseTextures(void)
 				
 				if(NumImages) {
 
-					for(i=NumImages; i!=0 && NewImage!=No; i--) {
+					for(i=NumImages; i!=0 && NewImage!=FALSE; i--) {
 
 				#endif
 
@@ -481,7 +481,7 @@ int InitialiseTextures(void)
 
 						j = CompareFilenameCH(txfilesptr, iname);
 
-						if(j) NewImage = No;
+						if(j) NewImage = FALSE;
 
 						else TxIndex++;
 
@@ -576,7 +576,7 @@ int InitialiseTextures(void)
 	#endif
 
 
-	return Yes;
+	return TRUE;
 
 
 }
@@ -958,7 +958,7 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr,
 
 */
 
-#define sr_print No
+#define sr_print FALSE
 
 void SpriteResizing(SHAPEHEADER *sptr)
 
@@ -1476,7 +1476,7 @@ void* GetTexture(int texindex)
 
     /* Ahem... */
 
-	return No;
+	return FALSE;
 
 }
 #endif
@@ -1493,7 +1493,7 @@ TEXTURE* GetTextureMemory(int txsize)
 {
 
     /* Err... */
-	return No;
+	return FALSE;
 
 }
 #endif
@@ -1628,7 +1628,7 @@ int DeallocateCurrentImages(void)
 		ImageGroupFreed(CurrentImageGroup);
 	}
 
-	return Yes; /* ok for the moment */
+	return TRUE; /* ok for the moment */
 }
 
 void NowDeleteImage(int img_group, int img_num_offset)
@@ -1659,7 +1659,7 @@ int DeallocateAllImages(void)
 	NumImages = CurrentImageGroup * MaxImages;
 	NextFreeImageHeaderPtr[CurrentImageGroup] = &ImageHeaderArray[CurrentImageGroup*MaxImages];
 
-	return Yes; /* ok for the moment */
+	return TRUE; /* ok for the moment */
 }
 
 static void MinimizeImageCallback(int i, void * gP)
@@ -1687,7 +1687,7 @@ int MinimizeAllImages(void)
 		EnumLeftoverImages(j,NumImagesArray[j],MinimizeImageCallback,&j);
 	}
 
-	return Yes; /* ok for the moment */
+	return TRUE; /* ok for the moment */
 }
 
 static void RestoreImageCallback(int i, void * gP)
@@ -1715,7 +1715,7 @@ int RestoreAllImages(void)
 		EnumLeftoverImages(j,NumImagesArray[j],RestoreImageCallback,&j);
 	}
 
-	return Yes; /* ok for the moment */
+	return TRUE; /* ok for the moment */
 }
 
 #if debug
@@ -1797,7 +1797,7 @@ int DeallocateAllImages(void)
 		NumImages = 0;
 		NextFreeImageHeaderPtr = ImageHeaderArray;
 	}
-	return Yes; /* ok for the moment */
+	return TRUE; /* ok for the moment */
 }
 
 int MinimizeAllImages(void)
@@ -1814,7 +1814,7 @@ int MinimizeAllImages(void)
 		}		
 	}
 
-	return Yes; /* ok for the moment */
+	return TRUE; /* ok for the moment */
 }
 
 #if 0 // bjd
@@ -1832,7 +1832,7 @@ int RestoreAllImages(void)
 		}		
 	}
 
-	return Yes; /* ok for the moment */
+	return TRUE; /* ok for the moment */
 }
 #endif
 

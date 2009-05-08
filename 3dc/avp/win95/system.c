@@ -6,7 +6,7 @@
 #include "gamedef.h"
 #include "bh_types.h"
 #include "gameplat.h"
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 /* patrick 5/12/96 */
@@ -183,7 +183,7 @@ void InitialVideoMode(void)
 	the user, to obtain your heart's fondest desires
 	by one simple call.  Money? Love? A better job?
 	It's all here, you have only to ask...
-	No, I was lying actually.
+	FALSE, I was lying actually.
 	In fact, this should allow you to change
 	display modes cleanly.  Pass your request modes
 	(as normally set up in system.c).  For all entries
@@ -234,7 +234,7 @@ int AVP_ChangeDisplayMode
 		int NewDXMemoryMode
 	)
 {
-	BOOL ChangeWindow = No;
+	BOOL ChangeWindow = FALSE;
 
 	/*
 		Shut down DirectX objects and destroy
@@ -243,7 +243,7 @@ int AVP_ChangeDisplayMode
 
 	if (NewWindowMode != WindowMode)
 	{
-		ChangeWindow = Yes;
+		ChangeWindow = TRUE;
 	}
 
     /* JH 30/5/97 - added this line back in so that d3d is cleaned up properly when the
@@ -680,7 +680,7 @@ void ProcessSystemObjects()
 	Global_ModulePtr = MainSceneArray;
 	PreprocessAllModules();
 	i = GetModuleVisArrays();
-	if(i == No) textprint("GetModuleVisArrays() failed\n");
+	if(i == FALSE) textprint("GetModuleVisArrays() failed\n");
 
 
 	/*WaitForReturn();*/
@@ -756,7 +756,7 @@ void IntegrateNewEnvironment()
 	Global_ModulePtr = MainSceneArray;
 	PreprocessAllModules();
 	i = GetModuleVisArrays();
-	if(i == No) textprint("GetModuleVisArrays() failed\n");
+	if(i == FALSE) textprint("GetModuleVisArrays() failed\n");
 
  
 	// elements from start game for AI
@@ -946,7 +946,7 @@ void InitEnvironmentFromLoad(void)
 	// Set the timer, or we have just taken
 	// 10 secs for the frame
 
-	/***** No need to do frame counter stuff in a computer! *****/
+	/***** FALSE need to do frame counter stuff in a computer! *****/
 
 	/* Patrick: 26/6/97
 	Load our sounds for the new env */	

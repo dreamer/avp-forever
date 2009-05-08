@@ -5,7 +5,7 @@
 #include "psndplat.h"
 #include "cd_player.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 /* KJL 12:40:35 07/05/98 - This is code derived from Patrick's original stuff &

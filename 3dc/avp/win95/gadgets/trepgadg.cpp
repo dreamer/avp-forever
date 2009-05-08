@@ -32,7 +32,7 @@
 	#include "font.h"
 		// for the font tests
 
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/
@@ -547,7 +547,7 @@ void TextReportGadget :: TeletypeCompletionHook(void)
 	}
 	else
 	{
-		// No more messages;
+		// FALSE more messages;
 		// Reset disappearance time, and "arm" the disappearance:
 		p666_Disappear -> SetFuse_FixP
 		(
@@ -851,7 +851,7 @@ TextReportDaemon_Disappear :: TextReportDaemon_Disappear
 	TextReportGadget* pTextReportGadg
 ) : PulsingTriggerDaemon
 	(
-		Yes, // OurBool fActive,
+		TRUE, // OurBool fActive,
 		FIXP_SECONDS_UNTIL_TEXT_REPORTS_DISAPPEAR // int FixP_Period // interval between triggers in seconds			
 	)
 {
@@ -882,7 +882,7 @@ CheesyDaemon_Flash :: CheesyDaemon_Flash
 		0, // int Int_InitialCoord,
 		1, // int Int_SecondCoord,
 		(ONE_FIXED * 4), // int FixP_Velocity,
-		Yes // OurBool fActive
+		TRUE // OurBool fActive
 	)
 {
 	// empty

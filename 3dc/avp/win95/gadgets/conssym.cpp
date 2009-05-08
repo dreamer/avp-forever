@@ -12,7 +12,7 @@
 #include "3dc.h"
 #include "conssym.hpp"
 
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/

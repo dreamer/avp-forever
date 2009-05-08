@@ -11,7 +11,7 @@
 #include "gamedef.h"
 
 #include "psndplat.h"
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "db.h"
 #include "showcmds.h"

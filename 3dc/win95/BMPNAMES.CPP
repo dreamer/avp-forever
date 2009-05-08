@@ -2,7 +2,7 @@
 #include "bmpnames.hpp"
 #include "mishchnk.hpp"
 
-#define UseLocalAssert No
+#define UseLocalAssert FALSE
 #include "ourasert.h"
 #define assert(x) GLOBALASSERT(x)
 

@@ -12,7 +12,7 @@
 #include "3dc.h"
 #include "strtab.hpp"
 
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/

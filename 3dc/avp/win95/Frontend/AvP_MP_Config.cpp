@@ -12,7 +12,7 @@
 #include "AvP_Menus.h"
 #include "list_tem.hpp"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 extern "C"

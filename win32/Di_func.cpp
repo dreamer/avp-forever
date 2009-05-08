@@ -76,7 +76,7 @@ static IDirectInputDevice*		g_pJoystick         = NULL;
 static IDirectInputDevice2*		g_pJoystickDevice2  = NULL;  // needed to poll joystick
 */
 
-static char bGravePressed = No;
+static char bGravePressed = FALSE;
 // added 14/1/98 by DHM as a temporary hack to debounce the GRAVE key
 
 /*
@@ -230,7 +230,7 @@ void ReleaseDirectInput(void)
 
 // see comments below
 
-#define UseForegroundKeyboard Yes//No
+#define UseForegroundKeyboard TRUE//FALSE
 
 GUID     guid = GUID_SysKeyboard;
 BOOL InitialiseDirectKeyboard()
@@ -1412,13 +1412,13 @@ to make F8 not count in a 'press any key' situation */
 			IOFOCUS_Toggle();
 		}
 
-		bGravePressed = Yes;
+		bGravePressed = TRUE;
 
 		GotAnyKey = TRUE;		
 	}
 	else
 	{
-		bGravePressed = No;
+		bGravePressed = FALSE;
 	}
 	#else
 	if (DiKeybd[DIK_GRAVE] & DikOn)
@@ -1610,7 +1610,7 @@ void DirectReadMouse(void)
 #if 1
 	int OldMouseX, OldMouseY, OldMouseZ;
 
-	GotMouse = No;
+	GotMouse = FALSE;
 
 	if(mouseMoved == 0) return;
 
@@ -1623,7 +1623,7 @@ void DirectReadMouse(void)
 	OldMouseY = MouseY;
 	OldMouseZ = MouseZ;
 
-	GotMouse = Yes;
+	GotMouse = TRUE;
 
 	MouseX += xPosRelative * 4;
 	MouseY += yPosRelative * 4;
@@ -1643,7 +1643,7 @@ void DirectReadMouse(void)
 	HRESULT hres;
 	int OldMouseX, OldMouseY, OldMouseZ;
 
- 	GotMouse = No;
+ 	GotMouse = FALSE;
 	MouseVelX = 0;
 	MouseVelY = 0;
 	MouseVelZ = 0;
@@ -1654,7 +1654,7 @@ void DirectReadMouse(void)
 	{
 		// We had acquisition, but lost it.  Try to reacquire it.
 		hres = lpdiMouse->Acquire();
-		// No data this time
+		// FALSE data this time
     	return;
     }
 
@@ -1662,7 +1662,7 @@ void DirectReadMouse(void)
 	if (hres != DI_OK) return;
 
     // Check for any data being picked up
-	GotMouse = Yes;
+	GotMouse = TRUE;
 	if (dwElements == 0) return;
 
     // Save mouse x and y for velocity determination
@@ -1892,44 +1892,44 @@ void ReadJoysticks(void)
 			/* handle d-pad */
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP )
 			{
-				GamePadButtons[DUP] = Yes;
+				GamePadButtons[DUP] = TRUE;
 				//OutputDebugString("xinput DPAD UP\n");
 			}
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN )
 			{
-				GamePadButtons[DDOWN] = Yes;
+				GamePadButtons[DDOWN] = TRUE;
 				//OutputDebugString("xinput DPAD DOWN\n");
 			}
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT )
 			{
-				GamePadButtons[DLEFT] = Yes;
+				GamePadButtons[DLEFT] = TRUE;
 				//OutputDebugString("xinput DPAD LEFT\n");
 			}
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT )
 			{
-				GamePadButtons[DRIGHT] = Yes;
+				GamePadButtons[DRIGHT] = TRUE;
 				//OutputDebugString("xinput DPAD RIGHT\n");
 			}
 
 			/* handle coloured buttons - X A Y B */
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_X)
 			{
-				GamePadButtons[X] = Yes;
+				GamePadButtons[X] = TRUE;
 //				OutputDebugString("xinput button X pressed\n");
 			}
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_A)
 			{
-				GamePadButtons[A] = Yes;
+				GamePadButtons[A] = TRUE;
 				//OutputDebugString("xinput button A pressed\n");
 			}
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_Y)
 			{
-				GamePadButtons[Y] = Yes;
+				GamePadButtons[Y] = TRUE;
 				//OutputDebugString("xinput button Y pressed\n");
 			}
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_B)
 			{
-				GamePadButtons[B] = Yes;
+				GamePadButtons[B] = TRUE;
 				//OutputDebugString("xinput button B pressed\n");
 			}
 
@@ -1937,51 +1937,51 @@ void ReadJoysticks(void)
 			if (g_Controllers[0].state.Gamepad.bLeftTrigger && 
 				g_Controllers[0].state.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
 			{
-				GamePadButtons[LT] = Yes;
+				GamePadButtons[LT] = TRUE;
 				//OutputDebugString("xinput left trigger pressed\n");
 			}
 
 			if (g_Controllers[0].state.Gamepad.bRightTrigger && 
 				g_Controllers[0].state.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
 			{
-				GamePadButtons[RT] = Yes;
+				GamePadButtons[RT] = TRUE;
 				//OutputDebugString("xinput right trigger pressed\n");
 			}
 
 			/* handle bumper buttons */
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER)
 			{
-				GamePadButtons[LB] = Yes;
+				GamePadButtons[LB] = TRUE;
 				//OutputDebugString("xinput left bumper pressed\n");
 			}
 
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER)
 			{
-				GamePadButtons[RB] = Yes;
+				GamePadButtons[RB] = TRUE;
 				//OutputDebugString("xinput right bumper pressed\n");
 			}
 
 			/* handle back and start */
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_START)
 			{
-				GamePadButtons[START] = Yes;
+				GamePadButtons[START] = TRUE;
 				//OutputDebugString("xinput start pressed\n");
 			}
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK)
 			{
-				GamePadButtons[BACK] = Yes;
+				GamePadButtons[BACK] = TRUE;
 				//OutputDebugString("xinput back pressed\n");
 			}
 
 			/* handle stick clicks */
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB)
 			{
-				GamePadButtons[LEFTCLICK] = Yes;
+				GamePadButtons[LEFTCLICK] = TRUE;
 				//OutputDebugString("xinput left stick clicked\n");
 			}
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB)
 			{
-				GamePadButtons[RIGHTCLICK] = Yes;
+				GamePadButtons[RIGHTCLICK] = TRUE;
 				//OutputDebugString("xinput right stick clicked\n");
 			}
 
@@ -2030,30 +2030,30 @@ void ReadJoysticks(void)
 
 int ReadJoystick(void)
 {
-	return No;
+	return FALSE;
 	MMRESULT joyreturn;
 
-	if(!JoystickControlMethods.JoystickEnabled) return No;
+	if(!JoystickControlMethods.JoystickEnabled) return FALSE;
 
 	joyreturn = joyGetPosEx(JOYSTICKID1,&JoystickData);
 
-	if (joyreturn == JOYERR_NOERROR) return Yes;
+	if (joyreturn == JOYERR_NOERROR) return TRUE;
 
-	return No;
+	return FALSE;
 }
 
 int CheckForJoystick(void)
 {
-	return No;
+	return FALSE;
 	MMRESULT joyreturn;
 
     joyreturn = joyGetDevCaps(JOYSTICKID1, 
                 &JoystickCaps,
                 sizeof(JOYCAPS));
 
-    if (joyreturn == JOYERR_NOERROR) return Yes;
+    if (joyreturn == JOYERR_NOERROR) return TRUE;
 
-	return No;
+	return FALSE;
 }
 #else
 // Eleventh hour rewrite of joystick code, to support PantherXL trackerball.
@@ -2064,7 +2064,7 @@ BOOL CALLBACK EnumJoysticksCallback( LPCDIDEVICEINSTANCE pInst, LPVOID lpvContex
 void InitJoysticks(void)
 {
 	HRESULT hr;
-	GotJoystick = No;
+	GotJoystick = FALSE;
 	g_pJoystick = NULL;
 
 	hr = lpdi->EnumDevices(DIDEVTYPE_JOYSTICK, EnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY);
@@ -2076,13 +2076,13 @@ void InitJoysticks(void)
     hr = g_pJoystick->SetCooperativeLevel( hWndMain, DISCL_EXCLUSIVE | DISCL_FOREGROUND);
     if ( FAILED(hr) ) return; 
 
-	GotJoystick = Yes;	
+	GotJoystick = TRUE;	
 }
 
 void ReadJoysticks(void)
 {
 
-	GotJoystick = No;
+	GotJoystick = FALSE;
 
 	if(!JoystickControlMethods.JoystickEnabled || g_pJoystick==NULL)
 	{
@@ -2115,7 +2115,7 @@ void ReadJoysticks(void)
 
     if ( FAILED(hr) ) return;
 
-	GotJoystick = Yes;
+	GotJoystick = TRUE;
 	PrintDebuggingText("%d %d\n",JoystickState.rglSlider[0],JoystickState.rglSlider[1]);
 	
 }

@@ -20,7 +20,7 @@
 #include "bh_marin.h"
 #include "bh_corpse.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 
 #include "ourasert.h"
 

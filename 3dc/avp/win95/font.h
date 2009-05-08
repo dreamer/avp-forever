@@ -144,13 +144,13 @@ typedef struct pffont
 
 		if ( (int)ProjCh < Offset )
 		{
-			return No;
+			return FALSE;
 		}
 		if ( (int)ProjCh >= Offset + num_chars_in_font )
 		{
-			return No;
+			return FALSE;
 		}
-		return Yes;
+		return TRUE;
 	}
 	inline int pffont::ProjCharToOffset(const ProjChar ProjCh) const
 	{

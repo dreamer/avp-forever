@@ -9,7 +9,7 @@
 #include "dynamics.h"
 #include "pldghost.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 #include "pmove.h"
@@ -205,7 +205,7 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	bs_bhv->switch_off_message_none=bs_tt->switch_off_message_none;	
 		
 	bs_bhv->soundHandle = SOUND_NOACTIVEINDEX;
-	bs_bhv->triggered_last = No;
+	bs_bhv->triggered_last = FALSE;
 
 	if(bs_bhv->bs_mode==I_bswitch_time_delay_autoexec)
 	{
@@ -338,12 +338,12 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 		}
 		else
 		{
-			bs_bhv->triggered_last = Yes;
+			bs_bhv->triggered_last = TRUE;
 		}
 	}
 	else
 	{
-		bs_bhv->triggered_last = No;
+		bs_bhv->triggered_last = FALSE;
 	}
 
 

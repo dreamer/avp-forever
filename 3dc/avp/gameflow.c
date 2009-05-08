@@ -13,7 +13,7 @@
 #include "bh_types.h"
 #include "bh_gener.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 
 #include "ourasert.h"
 

@@ -38,7 +38,7 @@ Source file for predator AI
 #include "bh_agun.h"
 #include "scream.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "extents.h"
 

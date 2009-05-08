@@ -40,7 +40,7 @@
 
 #include "pfarlocs.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 #define HMODEL_HACK 0
@@ -1080,7 +1080,7 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
         objectstatusptr->subType = toolsData->subType;                                  
         
         /* set default indestructibility */
-        objectstatusptr->Indestructable = No;
+        objectstatusptr->Indestructable = FALSE;
         objectstatusptr->ghosted_object=0;
 
         /* set the default inanimate object dynamics template: Inanimate for single player,
@@ -1144,7 +1144,7 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
                         sbPtr->DynPtr->Mass = toolsData->mass;
                         if (toolsData->integrity > 20)
                         {
-                                objectstatusptr->Indestructable = Yes;
+                                objectstatusptr->Indestructable = TRUE;
                                 sbPtr->integrity = DEFAULT_OBJECT_INTEGRITY;
                         }
                         else if (toolsData->integrity < 1)
@@ -1168,7 +1168,7 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
                         sbPtr->DynPtr->Mass = toolsData->mass;
                         if (toolsData->integrity > 20)
                         {
-                                objectstatusptr->Indestructable = Yes;
+                                objectstatusptr->Indestructable = TRUE;
                                 sbPtr->integrity = DEFAULT_OBJECT_INTEGRITY;
                         }
                         else if (toolsData->integrity < 1)
@@ -1317,7 +1317,7 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
                         }
                         if (toolsData->integrity > 20)
                         {
-                                objectstatusptr->Indestructable = Yes;
+                                objectstatusptr->Indestructable = TRUE;
                                 sbPtr->integrity = DEFAULT_OBJECT_INTEGRITY;
                         }
                         else if (toolsData->integrity < 1)
@@ -1888,9 +1888,9 @@ void SendRequestToInanimateObject(STRATEGYBLOCK* sbptr,BOOL state,int extended_d
                         sbptr->integrity = DEFAULT_OBJECT_INTEGRITY*new_integrity;
 
                         if(new_integrity>20)
-                                objectstatusptr->Indestructable = Yes;
+                                objectstatusptr->Indestructable = TRUE;
                         else
-                                objectstatusptr->Indestructable = No;
+                                objectstatusptr->Indestructable = FALSE;
                         
                         if(sbptr->integrity==0)
                         {

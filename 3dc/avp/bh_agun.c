@@ -19,7 +19,7 @@
 #include "triggers.h"
 #include "mslhand.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 
 #include "ourasert.h"
 
@@ -931,7 +931,7 @@ void AutoGunBehaveFun(STRATEGYBLOCK* sbPtr) {
 			Execute_AGun_Dying(sbPtr);
 			break;
 		default:
-			/* No action? */
+			/* FALSE action? */
 			break;
 	}
 

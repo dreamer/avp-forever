@@ -135,17 +135,17 @@
 		{
 			if (inProjCh < ASCIICodeForOffset0 )
 			{
-				return No;
+				return FALSE;
 			}
 
 			outputOffset = (inProjCh - ASCIICodeForOffset0);
 
 			if (outputOffset >= NumChars)
 			{
-				return No;
+				return FALSE;
 			}
 
-			return Yes;
+			return TRUE;
 
 		}
 	};
@@ -275,17 +275,17 @@
 		{
 			if (inProjCh < ASCIICodeForOffset0 )
 			{
-				return No;
+				return FALSE;
 			}
 
 			outputOffset = (inProjCh - ASCIICodeForOffset0);
 
 			if (outputOffset >= NumChars)
 			{
-				return No;
+				return FALSE;
 			}
 
-			return Yes;
+			return TRUE;
 
 		}
 

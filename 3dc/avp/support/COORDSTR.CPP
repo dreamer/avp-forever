@@ -16,7 +16,7 @@
 #endif
 
 	
-		#define UseLocalAssert Yes
+		#define UseLocalAssert TRUE
 		#include "ourasert.h"
 	
 #if 0 	
@@ -262,7 +262,7 @@ CyclicPulsingCoordinate :: CyclicPulsingCoordinate
 		fActive
 	)
 {
-	fGoingForSecondCoord = Yes;
+	fGoingForSecondCoord = TRUE;
 }
 
 CyclicPulsingCoordinate :: ~CyclicPulsingCoordinate()

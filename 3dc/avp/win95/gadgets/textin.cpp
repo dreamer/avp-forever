@@ -20,7 +20,7 @@
 		#include "strutil.h"
 	#endif
 
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/
@@ -55,7 +55,7 @@
 
 
 /* Exported globals ************************************************/
-	/*static*/ OurBool TextInputState :: bOverwrite_Val = No;
+	/*static*/ OurBool TextInputState :: bOverwrite_Val = FALSE;
 
 /* Internal type definitions ***************************************/
 
@@ -375,7 +375,7 @@ void TextInputState :: Key_Delete(void)
 		}
 		else
 		{
-			// No characters to delete:
+			// FALSE characters to delete:
 			TextEntryError();
 		}
 	}
@@ -534,12 +534,12 @@ int TextInputState :: bOvertypeAt
 					FullyManual();
 					#endif
 
-					return Yes;
+					return TRUE;
 				}
 				else
 				{
 					// can't; the line is full
-					return No;
+					return FALSE;
 				}
 			}
 			else
@@ -553,7 +553,7 @@ int TextInputState :: bOvertypeAt
 				FullyManual();
 				#endif
 
-				return Yes;
+				return TRUE;
 			}
 		}
 		#else
@@ -620,12 +620,12 @@ int TextInputState :: bInsertAt
 					FullyManual();
 					#endif
 
-					return Yes;
+					return TRUE;
 				}
 				else
 				{
 					// can't; the line is full
-					return No;
+					return FALSE;
 				}
 			}
 			else
@@ -661,12 +661,12 @@ int TextInputState :: bInsertAt
 					FullyManual();
 					#endif
 
-					return Yes;
+					return TRUE;
 				}
 				else
 				{
 					// can't insert; the line is full
-					return No;
+					return FALSE;
 				}
 			}
 		}
@@ -795,7 +795,7 @@ void TextInputState :: History_SelectNxt(void)
 	}
 	else
 	{
-		// No history available:
+		// FALSE history available:
 		GLOBALASSERT( NULL == pSCString_CurrentHistory );
 
 		TextEntryError();
@@ -830,7 +830,7 @@ void TextInputState :: History_SelectPrv(void)
 	}
 	else
 	{
-		// No history available:
+		// FALSE history available:
 		GLOBALASSERT( NULL == pSCString_CurrentHistory );
 
 		TextEntryError();
@@ -866,7 +866,7 @@ void TextInputState :: History_SelectPrv(void)
 	}
 	else
 	{
-		// No history available:
+		// FALSE history available:
 		GLOBALASSERT( NULL == pSCString_CurrentHistory );
 
 		TextEntryError();
@@ -946,7 +946,7 @@ OurBool TextInputState :: bManualMatch
 			(*String2)
 		)
 		{
-			return No;
+			return FALSE;
 		}
 		String1++;
 		String2++;
@@ -966,7 +966,7 @@ OurBool TextInputState :: bManualMatch
 	else
 	{
 		// There was a match in the first n characters...
-		return Yes;
+		return TRUE;
 	}
 
 }
@@ -1003,7 +1003,7 @@ OurBool TextInputState :: bManualMatchInsensitive
 			(tolower(*String2))
 		)
 		{
-			return No;
+			return FALSE;
 		}
 		String1++;
 		String2++;
@@ -1023,7 +1023,7 @@ OurBool TextInputState :: bManualMatchInsensitive
 	else
 	{
 		// There was a match in the first n characters...
-		return Yes;
+		return TRUE;
 	}
 
 }

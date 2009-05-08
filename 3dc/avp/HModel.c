@@ -28,7 +28,7 @@
 #include "plat_shp.h"
 #include "avp_userprofile.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "particle.h"
 #include "kshape.h"
@@ -978,7 +978,7 @@ void New_Analyse_Keyframe_Data(HMODELCONTROLLER *controller,SECTION_DATA *this_s
 		if (this_section_data->My_Parent) {
 			LOGDXFMT(("Parent Position %d,%d,%d\n",this_section_data->My_Parent->World_Offset.vx,this_section_data->My_Parent->World_Offset.vy,this_section_data->My_Parent->World_Offset.vz));
 		} else {
-			LOGDXFMT(("No parent.\n"));
+			LOGDXFMT(("FALSE parent.\n"));
 		}
 		LOGDXFMT(("This Position %d,%d,%d\n",this_section_data->World_Offset.vx,this_section_data->World_Offset.vy,this_section_data->World_Offset.vz));
 		LOGDXFMT(("This Keyframe Position %d,%d,%d\n",input_frame->Offset.vx,input_frame->Offset.vy,input_frame->Offset.vz));
@@ -1054,7 +1054,7 @@ void New_Analyse_Keyframe_Data(HMODELCONTROLLER *controller,SECTION_DATA *this_s
 			if (this_section_data->My_Parent) {
 				LOGDXFMT(("Parent Position %d,%d,%d\n",this_section_data->My_Parent->World_Offset.vx,this_section_data->My_Parent->World_Offset.vy,this_section_data->My_Parent->World_Offset.vz));
 				} else {
-				LOGDXFMT(("No parent.\n"));
+				LOGDXFMT(("FALSE parent.\n"));
 			}
 			LOGDXFMT(("This Position %d,%d,%d\n",this_section_data->World_Offset.vx,this_section_data->World_Offset.vy,this_section_data->World_Offset.vz));
 			LOGDXFMT(("This Keyframe Position %d,%d,%d\n",frame_offset.vx,frame_offset.vy,frame_offset.vz));
@@ -1159,7 +1159,7 @@ void New_Analyse_Keyframe_Data(HMODELCONTROLLER *controller,SECTION_DATA *this_s
 		if (this_section_data->My_Parent) {
 			LOGDXFMT(("Parent Position %d,%d,%d\n",this_section_data->My_Parent->World_Offset.vx,this_section_data->My_Parent->World_Offset.vy,this_section_data->My_Parent->World_Offset.vz));
 		} else {
-			LOGDXFMT(("No parent.\n"));
+			LOGDXFMT(("FALSE parent.\n"));
 		}
 		LOGDXFMT(("This Position %d,%d,%d\n",this_section_data->World_Offset.vx,this_section_data->World_Offset.vy,this_section_data->World_Offset.vz));
 		LOGDXFMT(("This Keyframe Position %d,%d,%d\n",frame_offset.vx,frame_offset.vy,frame_offset.vz));
@@ -2262,7 +2262,7 @@ void DoHModelTimer(HMODELCONTROLLER *controller) {
 
 	HMTimer_Kernel(controller);
 
-	/* That handled the timer.  No rendering this time. */
+	/* That handled the timer.  FALSE rendering this time. */
 
 	DoHModelTimer_Recursion(controller,controller->section_data,controller->sequence_timer,controller->Sequence_Type,controller->Sub_Sequence);
 	
@@ -3694,7 +3694,7 @@ void Transmogrification_Recursion(STRATEGYBLOCK *sbPtr,HMODELCONTROLLER *control
 				}
 				
 			} else if (newsections) {
-				/* No corresponding old section: create a new bit. */
+				/* FALSE corresponding old section: create a new bit. */
 				SECTION_DATA *new_child;
 			
 				new_child=Create_New_Section(*new_child_list_ptr);
@@ -3724,7 +3724,7 @@ void Transmogrification_Recursion(STRATEGYBLOCK *sbPtr,HMODELCONTROLLER *control
 			if (corresponding_section!=NULL) {
 				/* Section also exists in new template.  Do nothing, it should already have been dealt with. */
 			} else {
-				/* No corresponding new section: delete this branch. */
+				/* FALSE corresponding new section: delete this branch. */
 				SECTION_DATA *superfluous_section;
 
 				superfluous_section=GetThisSectionData_FromChildrenOnly(this_section_data,(*old_child_list_ptr)->Section_Name);
@@ -3852,7 +3852,7 @@ void TrimToTemplate_Recursion(STRATEGYBLOCK *sbPtr,HMODELCONTROLLER *controller,
 					TrimToTemplate_Recursion(sbPtr,controller,child_section_data,corresponding_section,*old_child_list_ptr, frag);
 				}
 			} else {
-				/* No corresponding new section: delete this branch. */
+				/* FALSE corresponding new section: delete this branch. */
 				SECTION_DATA *superfluous_section;
 
 				superfluous_section=GetThisSectionData_FromChildrenOnly(this_section_data,(*old_child_list_ptr)->Section_Name);
@@ -3930,7 +3930,7 @@ int HModelSequence_Exists(HMODELCONTROLLER *controller,int sequence_type,int sub
 	}
 	
 	if (a==controller->Root_Section->num_sequences) {
-		/* No such animal. */
+		/* FALSE such animal. */
 		return(0);
 	} else {
 		return(1);
@@ -3957,7 +3957,7 @@ int HModelSequence_Exists_FromRoot(SECTION *root,int sequence_type,int sub_seque
 	}
 	
 	if (a==root->num_sequences) {
-		/* No such animal. */
+		/* FALSE such animal. */
 		return(0);
 	} else {
 		return(1);
@@ -4216,7 +4216,7 @@ SECTION *Get_Corresponding_Section_Recursive(SECTION *this_section,char *Name) {
 		}
 	}
 
-	/* No luck. */
+	/* FALSE luck. */
 	return(NULL);
 }
 
@@ -4506,7 +4506,7 @@ void Verify_Positions_Recursion(HMODELCONTROLLER *controller,SECTION_DATA *this_
 		if (callCode) {
 			LOGDXFMT(("Call code %s\n",callCode));
 		} else {
-			LOGDXFMT(("No call code!\n"));
+			LOGDXFMT(("FALSE call code!\n"));
 		}
 		if (Global_HModel_Sptr) {
 			LOGDXFMT(("Misplaced object is of type %d\n",Global_HModel_Sptr->I_SBtype));
@@ -4790,7 +4790,7 @@ static void EnsureChildrenAreInAscendingIDOrder(SECTION_DATA* section)
 		}
 		else
 		{
-			//No problem with this section , go on to the next
+			//FALSE problem with this section , go on to the next
 			child_section = child_section->Next_Sibling;
 		}
 	}

@@ -9,7 +9,7 @@
 #include "kshape.h"
 
 #include "d3d_render.h"
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "avp_userprofile.h"
 
@@ -20,7 +20,7 @@
 #define ProfileStart();
 #define ProfileStop(x);
 #endif
-#define MultipleExecuteBuffers Yes
+#define MultipleExecuteBuffers TRUE
 
 extern int *ItemPointers[maxpolyptrs];
 extern int ItemCount;

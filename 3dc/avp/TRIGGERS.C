@@ -13,7 +13,7 @@
 #include "triggers.h"
 #include "pldnet.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 /* in mm */

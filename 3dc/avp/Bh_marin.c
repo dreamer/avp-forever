@@ -41,7 +41,7 @@
 
 #include "dxlog.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 #include "sequnces.h"
@@ -1839,7 +1839,7 @@ void InitMarineBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
 				switch (toolsData->textureID) {
 					case 1:
 					default:
-						/* No change. */
+						/* FALSE change. */
 						break;
 					case 2:
 						ChangeToAlternateShapeSet(sbPtr, "Face Four");
@@ -1863,7 +1863,7 @@ void InitMarineBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
 				switch (toolsData->textureID) {
 					case 1:
 					default:
-						/* No change. */
+						/* FALSE change. */
 						break;
 					case 2:
 						ChangeToAlternateShapeSet(sbPtr, "MedicalGuy");
@@ -4572,7 +4572,7 @@ void WanderMission_SwitchState(STRATEGYBLOCK *sbPtr,STATE_RETURN_CONDITION state
 	switch (real_state_result) {
 		case (SRC_No_Change):
 		{
-			/* No action. */
+			/* FALSE action. */
 			break;
 		}
 		case (SRC_Request_Taunt):
@@ -4673,7 +4673,7 @@ void PathfinderMission_SwitchState(STRATEGYBLOCK *sbPtr,STATE_RETURN_CONDITION s
 	switch (real_state_result) {
 		case (SRC_No_Change):
 		{
-			/* No action. */
+			/* FALSE action. */
 			break;
 		}
 		case (SRC_Request_Taunt):
@@ -4786,7 +4786,7 @@ void GuardMission_SwitchState(STRATEGYBLOCK *sbPtr,STATE_RETURN_CONDITION state_
 	switch (real_state_result) {
 		case (SRC_No_Change):
 		{
-			/* No action. */
+			/* FALSE action. */
 			break;
 		}
 		case (SRC_Request_Taunt):
@@ -4889,7 +4889,7 @@ void LocalGuardMission_SwitchState(STRATEGYBLOCK *sbPtr,STATE_RETURN_CONDITION s
 	switch (real_state_result) {
 		case (SRC_No_Change):
 		{
-			/* No action. */
+			/* FALSE action. */
 			break;
 		}
 		case (SRC_Request_Taunt):
@@ -5002,7 +5002,7 @@ void LoiterMission_SwitchState(STRATEGYBLOCK *sbPtr,STATE_RETURN_CONDITION state
 	switch (real_state_result) {
 		case (SRC_No_Change):
 		{
-			/* No action. */
+			/* FALSE action. */
 			break;
 		}
 		case (SRC_Request_Taunt):
@@ -6226,7 +6226,7 @@ static STATE_RETURN_CONDITION Execute_MFS_Return(STRATEGYBLOCK *sbPtr)
 	/* Examine target, and decide what to do */
 	if (AIModuleIsPhysical(targetModule)==0) {
 		#if 0
-		/* No longer a straight assert: not it's breakpointable. */
+		/* FALSE longer a straight assert: not it's breakpointable. */
 		GLOBALASSERT(0);
 		#else
 		/* We're probably fubared.  Change to Wander. */
@@ -8558,7 +8558,7 @@ static void HandleFidgetAnimations(STRATEGYBLOCK *sbPtr) {
 	/* A sub function for simplicity. */
 
 	if(marineStatusPointer->IAmCrouched) {
-		/* No crouch fidget yet. */
+		/* FALSE crouch fidget yet. */
 		if ((marineStatusPointer->HModelController.Sequence_Type!=HMSQT_MarineCrouch)
 			||(marineStatusPointer->HModelController.Sub_Sequence!=MCrSS_Standard)) {
 			SetMarineAnimationSequence_Null(sbPtr,HMSQT_MarineCrouch,MCrSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
@@ -8579,7 +8579,7 @@ static void HandleFidgetAnimations(STRATEGYBLOCK *sbPtr) {
 					SetMarineAnimationSequence_Null(sbPtr,HMSQT_MarineStand,MSSS_Fidget_A,ONE_FIXED<<3,(ONE_FIXED>>3));
 					marineStatusPointer->internalState=0;
 				} else {
-					/* No fidgets at all! */
+					/* FALSE fidgets at all! */
 					SetMarineAnimationSequence_Null(sbPtr,HMSQT_MarineStand,MSSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
 				}
 			} else if (HModelSequence_Exists(&marineStatusPointer->HModelController,(int)HMSQT_MarineStand,(int)MSSS_Stand_To_Fidget)) {
@@ -8589,7 +8589,7 @@ static void HandleFidgetAnimations(STRATEGYBLOCK *sbPtr) {
 			} else if (HModelSequence_Exists(&marineStatusPointer->HModelController,(int)HMSQT_MarineStand,(int)MSSS_Fidget_A)) {
 				SetMarineAnimationSequence_Null(sbPtr,HMSQT_MarineStand,MSSS_Fidget_A,ONE_FIXED<<3,(ONE_FIXED>>3));
 			} else {
-				/* No fidgets at all! */
+				/* FALSE fidgets at all! */
 				SetMarineAnimationSequence_Null(sbPtr,HMSQT_MarineStand,MSSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
 			}
 
@@ -8633,7 +8633,7 @@ static void HandleFidgetAnimations(STRATEGYBLOCK *sbPtr) {
 					/* Else do nothing, I guess. */
 				}
 			} else {
-				/* No stand to fidget. */
+				/* FALSE stand to fidget. */
 			}
 		}
 	}
@@ -9474,7 +9474,7 @@ static STATE_RETURN_CONDITION Execute_MNS_Wait(STRATEGYBLOCK *sbPtr)
 			return(SRC_Request_Wander);
 		}
 
-		/* No, I'm happy waiting. */
+		/* FALSE, I'm happy waiting. */
 		marineStatusPointer->stateTimer=MARINE_NEARWAITTIME;
 		return(SRC_No_Change);
 	}
@@ -10410,7 +10410,7 @@ static STATE_RETURN_CONDITION Execute_MNS_DischargeFlamethrower(STRATEGYBLOCK *s
 
 	/* look after the gun flash */
 	if(marineStatusPointer->myGunFlash) {
-		/* No gunflash, neither. */
+		/* FALSE gunflash, neither. */
 		RemoveNPCGunFlashEffect(marineStatusPointer->myGunFlash);
 	}
 
@@ -10501,7 +10501,7 @@ static STATE_RETURN_CONDITION Execute_MNS_DischargeFlamethrower(STRATEGYBLOCK *s
 	just started firing, or have become dis-orienated between bursts. This is a good
 	time to consider firing a grenade... */
 
-	/* No grenades with FT. */
+	/* FALSE grenades with FT. */
 		
 	/* look after the sound */
 	if(marineStatusPointer->soundHandle!=SOUND_NOACTIVEINDEX) Sound_Update3d(marineStatusPointer->soundHandle,&(sbPtr->DynPtr->Position));
@@ -12542,7 +12542,7 @@ static STATE_RETURN_CONDITION Execute_MNS_ThrowMolotov(STRATEGYBLOCK *sbPtr)
 		just started firing, or have become dis-orienated between bursts. This is a good
 		time to consider firing a grenade... */
 		
-		/* No muzzle flash. */
+		/* FALSE muzzle flash. */
 		
 		/* look after the sound */
 		if(marineStatusPointer->soundHandle!=SOUND_NOACTIVEINDEX) Sound_Update3d(marineStatusPointer->soundHandle,&(sbPtr->DynPtr->Position));
@@ -15528,7 +15528,7 @@ static STATE_RETURN_CONDITION Execute_MNS_PanicFireFlamethrower(STRATEGYBLOCK *s
 
 	/* look after the gun flash */
 	if(marineStatusPointer->myGunFlash) {
-		/* No gunflash, neither. */
+		/* FALSE gunflash, neither. */
 		RemoveNPCGunFlashEffect(marineStatusPointer->myGunFlash);
 	}
 
@@ -16813,7 +16813,7 @@ static STATE_RETURN_CONDITION Execute_MNS_PanicFireUnarmed(STRATEGYBLOCK *sbPtr)
 		if ((marineStatusPointer->HModelController.Sequence_Type!=HMSQT_MarineStand)
 			||((marineStatusPointer->HModelController.Sub_Sequence!=MSSS_Panic_One))
 				&&(marineStatusPointer->HModelController.Sub_Sequence!=MSSS_Panic_Two)) {
-			/* No, we're not.  See which level of panic to go into... */
+			/* FALSE, we're not.  See which level of panic to go into... */
 			if (MarineRetreatsInTheFaceOfDanger(sbPtr)) {
 				/* It's PaNiC tImE! */
 				Marine_EnterExtremePanicAnimation(sbPtr);
@@ -16822,7 +16822,7 @@ static STATE_RETURN_CONDITION Execute_MNS_PanicFireUnarmed(STRATEGYBLOCK *sbPtr)
 				Marine_EnterLesserPanicAnimation(sbPtr);
 			}
 		} else {
-			/* Yes, we are.  Is it getting worse? */
+			/* TRUE, we are.  Is it getting worse? */
 			int range;
 			STRATEGYBLOCK *threat;
 	
@@ -16870,7 +16870,7 @@ static STATE_RETURN_CONDITION Execute_MNS_PanicFireUnarmed(STRATEGYBLOCK *sbPtr)
 	if (marineStatusPointer->Target==NULL) {
 		/* Civvies with courage 0 get a bonus to shut up... */
 		if (marineStatusPointer->Courage==0) {
-			/* No reason to block this for Androids. */
+			/* FALSE reason to block this for Androids. */
 			marineStatusPointer->Courage=5000;
 		}
 
@@ -16958,7 +16958,7 @@ static STATE_RETURN_CONDITION Execute_MNS_PanicFireUnarmed(STRATEGYBLOCK *sbPtr)
 		return(SRC_No_Change);
 	}
 
-	/* No functionality in here... */
+	/* FALSE functionality in here... */
 
 	marineStatusPointer->stateTimer -= NormalFrameTime;
 

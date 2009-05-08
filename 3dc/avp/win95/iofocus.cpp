@@ -17,7 +17,7 @@
 extern "C"
 {
 	
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/
@@ -39,7 +39,7 @@ extern int InGameMenusAreRunning(void);
 /* Internal function prototypes ************************************/
 
 /* Internal globals ************************************************/
-	static OurBool iofocus_AcceptTyping = No;
+	static OurBool iofocus_AcceptTyping = FALSE;
 
 /* Exported function definitions ***********************************/
 OurBool IOFOCUS_AcceptControls(void)

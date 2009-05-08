@@ -60,7 +60,7 @@
 #define APPEND_TO_DUMPFILE  0  /* define as 0 if overwrite dbgdump.txt rather than append */
 #define FREEING_MEMORY    -1
 
-#define AllowedToDeleteNULL Yes
+#define AllowedToDeleteNULL TRUE
 	/*
 		Option added 7/4/98 by DHM:
 		---------------------------
@@ -691,7 +691,7 @@ void DumpBoundsCheckInfo(int type)
      if (bc_errcnt)
 	 	WaitForReturn();
 	 else
-     	textprint2("No bounds errors detected\n");
+     	textprint2("FALSE bounds errors detected\n");
 
    }
    else if (type==DUMPTOFILE)

@@ -17,7 +17,7 @@
 #include "dynblock.h"
 #include "dynamics.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 
 #include "ourasert.h"
 
@@ -1815,7 +1815,7 @@ static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
 	MORPHCTRL *mctrl;
 	DISPLAYBLOCK* dptr;
 	MODULE *mptr;
-	BOOL open_door = No;
+	BOOL open_door = FALSE;
 
  	GLOBALASSERT(sbptr);
 	doorbhv = (PROXDOOR_BEHAV_BLOCK*)sbptr->SBdataptr;
@@ -1848,7 +1848,7 @@ static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
  	NB Door could be either visible or not when triggered */
  	if ((doorbhv->alienTrigger == 1)||((doorbhv->marineTrigger == 1)))
 	{
-		open_door = Yes;
+		open_door = TRUE;
 		if (doorbhv->marineTrigger==1) {
 			doorbhv->triggeredByMarine = 1;
 		}
@@ -1859,7 +1859,7 @@ static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
 
 	if (doorbhv->door_locked)
 	{
-		open_door = No;
+		open_door = FALSE;
 	}
 
  	switch(doorbhv->door_state)
@@ -2061,7 +2061,7 @@ static int AnythingNearProxDoor(MODULE *doorModulePtr,PROXDOOR_BEHAV_BLOCK *door
 	/* loop thro' the strategy block list... 
 	looking for triggerable objects (please feel free to add any
 	sensible object types) */
-	retval=No;
+	retval=FALSE;
 
 	while(sbIndex < NumActiveStBlocks)
 	{	
@@ -2105,7 +2105,7 @@ static int AnythingNearProxDoor(MODULE *doorModulePtr,PROXDOOR_BEHAV_BLOCK *door
 							||(sbPtr->I_SBtype==I_BehaviourSeal)) {
 							doorbhv->triggeredByMarine = 1;
 						}
-						retval=Yes;	
+						retval=TRUE;	
 					}
 				}
 			}

@@ -15,7 +15,7 @@
 #include "dynblock.h"
 #include "dynamics.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 
 #include "ourasert.h"
 

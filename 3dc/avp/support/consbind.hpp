@@ -27,7 +27,7 @@
 
 /* Version settings *****************************************************/
 #ifdef __cplusplus
-	#define KeyBindingUses_WM_KEYDOWN	No
+	#define KeyBindingUses_WM_KEYDOWN	FALSE
 		// if this is set to yes, the system works off the WM_KEYDOWN
 		// messages, which provide a system for getting at the keyboard
 		// which is guaranteed to work for the codes in pp247-9 of
@@ -37,7 +37,7 @@
 		//	- won't lose keystrokes, even at low framerates
 		//	- provides ordering between all the keystrokes
 
-	#define KeyBindingUses_KEY_ID	Yes
+	#define KeyBindingUses_KEY_ID	TRUE
 		// if this is set, the system accesses the KeyboardInput[] array
 		// in IO.C  Currently (7/4/98) this comes from DirectInput, via
 		// DI_FUNC.CPP
@@ -155,7 +155,7 @@
 				// returns where in the input string to continue processing
 
 			ProjChar* pProjCh_In
-		);	// returns Yes if it understands the binding and fills out the output
+		);	// returns TRUE if it understands the binding and fills out the output
 
 
 	private:

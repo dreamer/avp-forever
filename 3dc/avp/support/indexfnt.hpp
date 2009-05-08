@@ -212,7 +212,7 @@
 
 		OurBool bCanRender( ProjChar ProjCh_In ) const
 		{
-			return Yes;
+			return TRUE;
 		}
 
 		inline int GetMaxWidth(void) const

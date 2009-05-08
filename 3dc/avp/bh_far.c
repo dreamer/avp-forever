@@ -24,7 +24,7 @@
 #include "weapons.h"
 #include "ShowCmds.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "dxlog.h"
 
@@ -399,7 +399,7 @@ static void Execute_AFS_Attack(STRATEGYBLOCK *sbPtr) {
 
 static void Execute_AFS_Avoidance(STRATEGYBLOCK *sbPtr) {
 
-	/* No obstacles in far behaviour. */
+	/* FALSE obstacles in far behaviour. */
 	ALIEN_STATUS_BLOCK *alienStatusPointer;    
 
 	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    

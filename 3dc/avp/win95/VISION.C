@@ -14,7 +14,7 @@
 #include "psnd.h"
 #include "psndplat.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 /*KJL****************************************************************************************

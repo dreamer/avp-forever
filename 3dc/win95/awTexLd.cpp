@@ -2295,7 +2295,7 @@ namespace AwTl {
 		if (!pParams->fileNameS && INVALID_HANDLE_VALUE==pParams->fileH && !pParams->dataP && !pParams->restoreH)
 		{
 			awTlLastErr = AW_TLE_BADPARMS;
-			db_log2("AwCreateGraphic(): ERROR: No data medium is specified");
+			db_log2("AwCreateGraphic(): ERROR: FALSE data medium is specified");
 			return false;
 		}
 		else if (bad_parmsB)
@@ -2783,7 +2783,7 @@ DWORD awTlLastWinErr;
 #ifndef NDEBUG
 char const * AwWinErrorToString(DWORD error)
 {
-	if (NO_ERROR==error) return "No error";
+	if (NO_ERROR==error) return "FALSE error";
 	static TCHAR buffer[1024];
 #ifdef WIN32
 	if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,NULL,error,MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),buffer,sizeof buffer/sizeof(TCHAR)-1,NULL))
@@ -2807,7 +2807,7 @@ char const * AwTlErrorToString(AwTlErc error)
 	switch (error)
 	{
 		case AW_TLE_OK:
-			return "No error";
+			return "FALSE error";
 		case AW_TLE_DXERROR:
 //			if (DD_OK==awTlLastDxErr)
 				return "Unknown DirectX error";
@@ -2849,7 +2849,7 @@ char const * AwDxErrorToString(HRESULT error)
 #if 0 // bjd
     switch(error) {
         case DD_OK:
-            return "No error.\0";
+            return "FALSE error.\0";
         case DDERR_ALREADYINITIALIZED:
             return "This object is already initialized.\0";
         case DDERR_BLTFASTCANTCLIP:
@@ -2865,7 +2865,7 @@ char const * AwDxErrorToString(HRESULT error)
         case DDERR_CLIPPERISUSINGHWND:
             return "An attempt was made to set a cliplist for a clipper object that is already monitoring an hwnd.\0";
         case DDERR_COLORKEYNOTSET:
-            return "No src color key specified for this operation.\0";
+            return "FALSE src color key specified for this operation.\0";
         case DDERR_CURRENTLYNOTAVAIL:
             return "Support is currently not available.\0";
         case DDERR_DIRECTDRAWALREADYCREATED:
@@ -2911,11 +2911,11 @@ char const * AwDxErrorToString(HRESULT error)
         case DDERR_NOALPHAHW:
             return "Operation could not be carried out because there is no alpha accleration hardware present or available.\0";
         case DDERR_NOBLTHW:
-            return "No blitter hardware present.\0";
+            return "FALSE blitter hardware present.\0";
         case DDERR_NOCLIPLIST:
-            return "No cliplist available.\0";
+            return "FALSE cliplist available.\0";
         case DDERR_NOCLIPPERATTACHED:
-            return "No clipper object attached to surface object.\0";
+            return "FALSE clipper object attached to surface object.\0";
         case DDERR_NOCOLORCONVHW:
             return "Operation could not be carried out because there is no color conversion hardware present or available.\0";
         case DDERR_NOCOLORKEY:
@@ -2925,9 +2925,9 @@ char const * AwDxErrorToString(HRESULT error)
         case DDERR_NOCOOPERATIVELEVELSET:
             return "Create function called without DirectDraw object method SetCooperativeLevel being called.\0";
         case DDERR_NODC:
-            return "No DC was ever created for this surface.\0";
+            return "FALSE DC was ever created for this surface.\0";
         case DDERR_NODDROPSHW:
-            return "No DirectDraw ROP hardware.\0";
+            return "FALSE DirectDraw ROP hardware.\0";
         case DDERR_NODIRECTDRAWHW:
             return "A hardware-only DirectDraw object creation was attempted but the driver did not support any hardware.\0";
         case DDERR_NOEMULATION:
@@ -2947,9 +2947,9 @@ char const * AwDxErrorToString(HRESULT error)
         case DDERR_NOOVERLAYHW:
             return "Operation could not be carried out because there is no overlay hardware present or available.\0";
         case DDERR_NOPALETTEATTACHED:
-            return "No palette object attached to this surface.\0";
+            return "FALSE palette object attached to this surface.\0";
         case DDERR_NOPALETTEHW:
-            return "No hardware support for 16 or 256 color palettes.\0";
+            return "FALSE hardware support for 16 or 256 color palettes.\0";
         case DDERR_NORASTEROPHW:
             return "Operation could not be carried out because there is no appropriate raster op hardware present or available.\0";
         case DDERR_NOROTATIONHW:

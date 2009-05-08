@@ -43,7 +43,7 @@
 
 #include "iofocus.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "ShowCmds.h"
 #define DB_LEVEL 3
@@ -5975,7 +5975,7 @@ static void ProcessNetMsg_PlayerState(NETMESSAGE_PLAYERSTATE *messagePtr, DPID s
 		   				Sound_Play(SID_MARINE_SMALLLANDING,"d",&position);
 						break;
 					case NGCT_Alien :
-						/* No sound for aliens. */
+						/* FALSE sound for aliens. */
 						break;
 					case NGCT_Predator :
 		   				Sound_Play(SID_PRED_SMALLLANDING,"d",&position);

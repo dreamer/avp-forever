@@ -15,11 +15,11 @@
 #include "inline.h"
 #include "trepgadg.hpp"
 
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/
-    #define SupportTeletypeSound    Yes
+    #define SupportTeletypeSound    TRUE
 
     #if UseGadgets
 		#include "indexfnt.hpp"
@@ -287,14 +287,14 @@ TeletypeDaemon :: TeletypeDaemon
 	TeletypeGadget* pTeletypeGadg
 ) : Daemon
 	(
-		Yes // OurBool fActive
+		TRUE // OurBool fActive
 	)
 {
 	GLOBALASSERT( pTeletypeGadg );
 
 	pTeletypeGadg_Val = pTeletypeGadg;
 
-	fFinished_Val = No;
+	fFinished_Val = FALSE;
 
 	FixP_TotalPixels = 
 	#if 1
@@ -376,7 +376,7 @@ ACTIVITY_RETURN_TYPE TeletypeDaemon :: Activity(ACTIVITY_INPUT)
 		// Teletype has finished:
 		FixP_PixelsCovered = FixP_TotalPixels;
 
-		fFinished_Val = Yes;		
+		fFinished_Val = TRUE;		
 		
 		Stop();
 

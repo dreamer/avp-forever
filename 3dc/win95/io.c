@@ -9,7 +9,7 @@
 
 #include "chnktexi.h"
 #include "d3d_hud.h"
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "hud_layout.h"
 
@@ -17,18 +17,18 @@
 
 
 #if SupportTLTFiles
-#define Output_TLT_File				No
+#define Output_TLT_File				FALSE
 #endif
 
-#define Output_VEA_File				No
+#define Output_VEA_File				FALSE
 
-#define Proper_8Bit_MIP No
+#define Proper_8Bit_MIP FALSE
 
-#define DontLet222ColoursGoToBlack Yes
+#define DontLet222ColoursGoToBlack TRUE
 
-#define textprintOn Yes
+#define textprintOn TRUE
 
-#define DHMtextprint Yes
+#define DHMtextprint TRUE
 	/* define to use Dave Malcolm's replacement textprint routines */
 
 
@@ -52,7 +52,7 @@
    mangled it hideously, so _don't blame him_!
 */
 
-#define KalmanTimer No
+#define KalmanTimer FALSE
 
 /*
   Experiment to try and fix mystery driver problems
@@ -63,7 +63,7 @@
   D3D initialisation is complete...
 */
 
-#define ChangePaletteOnVBAlways Yes
+#define ChangePaletteOnVBAlways TRUE
 
 /*
 	Turn on or off checking for the validity
@@ -80,7 +80,7 @@
 	something else sensible...
 */
 
-#define CheckVideoModes No
+#define CheckVideoModes FALSE
 
 
 /*
@@ -200,10 +200,10 @@ extern IMAGEHEADER ImageHeaderArray[]; /* Array of Image Headers */
 	IMAGEHEADER* fontHeader;
 
 	/* Added 28/11/97 by DHM: boolean for run-time switching on/off of textprint */
-	int bEnableTextprint = No;
+	int bEnableTextprint = FALSE;
 
 	/* Added 28/1/98 by DHM: as above, but applies specifically to textprintXY */
-	int bEnableTextprintXY = Yes;
+	int bEnableTextprintXY = TRUE;
 
 	/* Palette */
 
@@ -318,7 +318,7 @@ void GetDOSFilename(char *fnameptr)
 
  Compare two strings.
 
- Return Yes if they're the same, else No.
+ Return TRUE if they're the same, else FALSE.
 
 */
 
@@ -353,7 +353,7 @@ int CompareStringCH(char *string1, char *string2)
 	while(*srtmp++ != 0)
 		slen2++;
 
-	if(slen1 != slen2) return No;
+	if(slen1 != slen2) return FALSE;
 
 	else {
 
@@ -361,9 +361,9 @@ int CompareStringCH(char *string1, char *string2)
 		srtmp2 = string2;
 
 		for(i=slen1; i!=0; i--)
-			if(*srtmp++ != *srtmp2++) return No;
+			if(*srtmp++ != *srtmp2++) return FALSE;
 
-		return Yes;
+		return TRUE;
 
 	}
 
@@ -449,7 +449,7 @@ int CompareFilenameCH(char *string1, char *string2)
 
 	if(slen1 != slen2) {
 		/*textprint("not same\n");*/
-		return No;
+		return FALSE;
 	}
 
 	srtmp1 = fname1;
@@ -464,12 +464,12 @@ int CompareFilenameCH(char *string1, char *string2)
 	for(i = slen1; i!=0; i--) {
 		if(*srtmp1++ != *srtmp2++) {
 			/*textprint("not same\n");*/
-			return No;
+			return FALSE;
 		}
 	}
 
 	/*textprint("same\n");*/
-	return Yes;
+	return TRUE;
 
 }
 
@@ -491,8 +491,8 @@ int CompareFilenameCH(char *string1, char *string2)
 #define remap_table_size (1 << (remap_table_rgb_bits * 3))
 
 
-#define cprt_info No
-#define cprt_cnt No
+#define cprt_info FALSE
+#define cprt_cnt FALSE
 
 
 
@@ -632,7 +632,7 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 		and other problems
 	*/
 
-    AttemptVideoModeRestart = No;
+    AttemptVideoModeRestart = FALSE;
 
     VideoRestartMode = NoRestartRequired;
 
@@ -657,7 +657,7 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 	    == FALSE)
 	   /* 
 	     If we cannot get a video mode, 
-	     fail.  No point in a non debugging option
+	     fail.  FALSE point in a non debugging option
 	     for this.
 	   */
 	   {
@@ -689,8 +689,8 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 	rc = InitialiseWindowsSystem(hInstance, nCmdShow, WinInitFull);
 
     /* Initialise input interface */
-    memset((void*)KeyboardInput, No, MAX_NUMBER_OF_INPUT_KEYS);
-	GotAnyKey = No;
+    memset((void*)KeyboardInput, FALSE, MAX_NUMBER_OF_INPUT_KEYS);
+	GotAnyKey = FALSE;
 
 #ifdef WIN32
 	/* init raw input for mouse */
@@ -989,8 +989,8 @@ void ConvertToDDPalette(unsigned char* src, unsigned char* dst, int length, int 
 */
 
 	/* VERSION SETTINGS: */	
-		#define AutomaticNewLines	No
-			/* set this to Yes and you will get a \n inserted automatically at the end of each line */
+		#define AutomaticNewLines	FALSE
+			/* set this to TRUE and you will get a \n inserted automatically at the end of each line */
 			#if AutomaticNewLines
 				#error Not yet written...
 			#endif
@@ -1057,7 +1057,7 @@ void ConvertToDDPalette(unsigned char* src, unsigned char* dst, int length, int 
 	static DAVEPRINTCHAR DHM_PrintQueue[DHM_PRINT_QUEUE_SIZE];
 	static int DHM_NumCharsInQueue=0;
 
-	static int fTextLost=No;
+	static int fTextLost=FALSE;
 	static char TextLostMessage[]="textprint warning:TEXT LOST";
 	#define TEXT_LOST_X	(50)
 	#define TEXT_LOST_Y	(20)
@@ -1069,7 +1069,7 @@ void ConvertToDDPalette(unsigned char* src, unsigned char* dst, int length, int 
 void InitPrintQueue(void)
 {
 	DHM_NumCharsInQueue=0;
-	fTextLost=No;
+	fTextLost=FALSE;
 }
 
 /*
@@ -1128,7 +1128,7 @@ void FlushTextprintBuffer(void)
 	   //			   	BlitWin95Char(TEXT_LOST_X+(i*CharWidth),TEXT_LOST_Y,TextLostMessage[i]);
 				}
 
-				fTextLost=No;
+				fTextLost=FALSE;
 			}
 		}
 		DHM_NumCharsInQueue=0;
@@ -1169,13 +1169,13 @@ static void DHM_AddToQueue(int x,int y, char Ch)
 		else
 		{
 			/* Otherwise the queue if full, we will have to ignore this char; set an error flag so we get a message*/
-			fTextLost=Yes;
+			fTextLost=TRUE;
 		}
 	}
 	else
 	{
 		/* Otherwise the text is off the top or bottom of the screen; set an error flag to get a message up*/
-		fTextLost=Yes;
+		fTextLost=TRUE;
 	}
 }
 
@@ -1293,7 +1293,7 @@ int textprint(const char* t, ...)
 			LOWLEVELASSERT(strlen(TextprintBuffer)<TextprintBuffer);
 		}
 
-		return DHM_MoveBufferToQueue(&textprintPosX,&textprintPosY,Yes);
+		return DHM_MoveBufferToQueue(&textprintPosX,&textprintPosY,TRUE);
 	}
 	else
 	{
@@ -1325,7 +1325,7 @@ int PrintDebuggingText(const char* t, ...)
 		LOWLEVELASSERT(strlen(TextprintBuffer)<TextprintBuffer);
 	}
 
-	return DHM_MoveBufferToQueue(&textprintPosX,&textprintPosY,Yes);
+	return DHM_MoveBufferToQueue(&textprintPosX,&textprintPosY,TRUE);
 }
 int ReleasePrintDebuggingText(const char* t, ...)
 {
@@ -1347,7 +1347,7 @@ int ReleasePrintDebuggingText(const char* t, ...)
 		LOWLEVELASSERT(strlen(TextprintBuffer)<TextprintBuffer);
 	}
 
-	return DHM_MoveBufferToQueue(&textprintPosX,&textprintPosY,Yes);
+	return DHM_MoveBufferToQueue(&textprintPosX,&textprintPosY,TRUE);
 }
 
 
@@ -1381,7 +1381,7 @@ int textprintXY(int x, int y, const char* t, ...)
 			int localX=x;
 			int localY=y;
 
-			return DHM_MoveBufferToQueue(&localX,&localY,No);
+			return DHM_MoveBufferToQueue(&localX,&localY,FALSE);
 		}
 
 		
@@ -1698,7 +1698,7 @@ void InitPrintQueue(void)
 	the user, to obtain your heart's fondest desires
 	by one simple call.  Money? Love? A better job?
 	It's all here, you have only to ask...
-	No, I was lying actually.
+	FALSE, I was lying actually.
 	In fact, this should allow you to change
 	display modes cleanly.  Pass your request modes
 	(as normally set up in system.c).  For all entries
@@ -1742,7 +1742,7 @@ int ChangeDisplayModes(HINSTANCE hInst, int nCmd,
      int NewSoftwareScanDrawMode, int NewDXMemoryMode)
 {
     BOOL rc;
-	BOOL ChangeWindow = No;
+	BOOL ChangeWindow = FALSE;
 
 /*
 	Shut down DirectX objects and destroy
@@ -1750,7 +1750,7 @@ int ChangeDisplayModes(HINSTANCE hInst, int nCmd,
 */
 
     if (NewWindowMode != WindowMode)
-	  ChangeWindow = Yes;
+	  ChangeWindow = TRUE;
 
     DeallocateAllImages();
 

@@ -26,7 +26,7 @@
 #endif
 
 /* Version settings *****************************************************/
-	#define OnlyOneStringTable	Yes
+	#define OnlyOneStringTable	TRUE
 
 /* Constants  ***********************************************************/
 

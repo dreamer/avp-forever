@@ -38,7 +38,7 @@
 #include "bh_ais.h"
 #include "bh_alien.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 #include "vision.h"
@@ -50,10 +50,10 @@
 #include "pldnet.h"
 #include "avp_userprofile.h"
 
-#define DO_PREDATOR_OVERLAY No
-#define DO_ALIEN_OVERLAY No
+#define DO_PREDATOR_OVERLAY FALSE
+#define DO_ALIEN_OVERLAY FALSE
 
-#define DRAW_HUD Yes
+#define DRAW_HUD TRUE
 /*KJL****************************************************************************************
 *  										G L O B A L S 	            					    *
 ****************************************************************************************KJL*/

@@ -12,7 +12,7 @@
 #include "3dc.h"
 #include "equiputl.hpp"
 
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/

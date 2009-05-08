@@ -1822,16 +1822,16 @@ static void add_prox_door (Object_Chunk * ob, int shp1, int shp2, MODULE * mod,A
 
 	PROX_DOOR_TOOLS_TEMPLATE * pdtt =(PROX_DOOR_TOOLS_TEMPLATE *) PoolAllocateMem(sizeof(PROX_DOOR_TOOLS_TEMPLATE));
 
-	pdtt->has_lock_target = No;
+	pdtt->has_lock_target = FALSE;
 	pdtt->door_opening_speed=1<<16;
 	pdtt->door_closing_speed=1<<17;
 	if(asc)
 	{
 		DoorStrategy * ds = (DoorStrategy *)asc->Strategy;
 		if(ds->DoorFlags & DoorFlag_Locked)
-			pdtt->door_is_locked=Yes;
+			pdtt->door_is_locked=TRUE;
 		else
-			pdtt->door_is_locked=No;
+			pdtt->door_is_locked=FALSE;
 
 		if(ds->DoorFlags & DoorFlag_Horizontal)
 		{
@@ -1847,7 +1847,7 @@ static void add_prox_door (Object_Chunk * ob, int shp1, int shp2, MODULE * mod,A
 		}
 		
 	}
-	else pdtt->door_is_locked=No;
+	else pdtt->door_is_locked=FALSE;
 	pdtt->shape_open = shp1;
 	pdtt->shape_closed = shp2;
 	*((int *)pdtt->my_module.mref_name) = *((int *) mod->m_name);

@@ -10,7 +10,7 @@
 #include "stratdef.h"
 #include "gamedef.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 
 #include "ourasert.h"
 

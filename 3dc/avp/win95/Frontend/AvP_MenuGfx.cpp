@@ -10,7 +10,7 @@
 #include "chnktexi.h"
 #include "hud_layout.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "ffstdio.h"
 

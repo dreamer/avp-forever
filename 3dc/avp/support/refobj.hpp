@@ -24,7 +24,7 @@
 
 
 /* Version settings *****************************************************/
-	#define TrackReferenceCounted No
+	#define TrackReferenceCounted FALSE
 		/*
 			This is a debug option that has a fair amount of run-time
 			cost.

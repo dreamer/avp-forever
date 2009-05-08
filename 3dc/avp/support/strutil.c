@@ -25,16 +25,16 @@
 #include "davelog.h"
 #endif
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h" 
 
 
 
 /* VERSION DEFINES */
-#define LogStringTables		No
+#define LogStringTables		FALSE
 
 #define MAX_ENTRIES_PER_STRING_TABLE (200)
-#define LimitedStringLengths	Yes
+#define LimitedStringLengths	TRUE
 #if LimitedStringLengths
 #define MAX_STRING_LENGTH			(30000)
 #endif
@@ -286,7 +286,7 @@ OurBool STRUTIL_SC_Strequal
 			(*String2)
 		)
 		{
-			return No;
+			return FALSE;
 		}
 		String1++;
 		String2++;
@@ -321,7 +321,7 @@ OurBool STRUTIL_SC_Strequal_Insensitive
 			(tolower(*String2))
 		)
 		{
-			return No;
+			return FALSE;
 		}
 		String1++;
 		String2++;
@@ -607,7 +607,7 @@ OurBool fValidHHMCTS(HHMCTC* MCString)
 			if (MCString->LogCol>=NUM_BASE_COLOURS)
 			{
 				DAVELOG("Invalid colour in MC String");
-				return No;			
+				return FALSE;			
 			}
 			MCString++;
 		}
@@ -617,16 +617,16 @@ OurBool fValidHHMCTS(HHMCTC* MCString)
 			if (CharCount>=MAX_STRING_LENGTH)
 			{
 				DAVELOG("MC String too long...");
-				return No;
+				return FALSE;
 			}
 			else
 			{
-				return Yes;
+				return TRUE;
 			}
 		}
 		#else
 		{
-			return Yes;
+			return TRUE;
 		}
 		#endif
 

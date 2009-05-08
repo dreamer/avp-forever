@@ -27,7 +27,7 @@ rounds fired etc etc etc*/
 
 #include "AvP_UserProfile.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr);
@@ -1244,7 +1244,7 @@ static int AbleToPickupWeapon(enum WEAPON_ID weaponID)
 			if (weaponPtr->Possessed!=0) return 0;
 			/* add weapon to inventory */
 			weaponPtr->Possessed = 1;
-			/* No ammo to load. */
+			/* FALSE ammo to load. */
 		}
 		
 		#endif
@@ -1306,7 +1306,7 @@ static int AbleToPickupHealth(int healthID)
 			}
 			case(I_Alien):
 			{
-				/* CDF 24/2/99 No medipacks for aliens, either! */
+				/* CDF 24/2/99 FALSE medipacks for aliens, either! */
 				return 0;
 
 //				PlayerType=I_PC_Alien;
@@ -1648,7 +1648,7 @@ void Convert_Disc_To_Pickup(STRATEGYBLOCK *sbPtr) {
 	objectStatusPtr->subType = (int)AMMO_PRED_DISC;
 	
 	/* set default indestructibility */
-	objectStatusPtr->Indestructable = Yes;
+	objectStatusPtr->Indestructable = TRUE;
 	objectStatusPtr->event_target=NULL;
 	objectStatusPtr->fragments=NULL;
 	objectStatusPtr->num_frags=0;

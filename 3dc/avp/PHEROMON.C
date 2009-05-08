@@ -8,7 +8,7 @@
 #include "gamedef.h"
 #include "bh_types.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 #include "pheromon.h"
@@ -457,7 +457,7 @@ void PlayerPheromoneSystem(void)
 						unsigned int prop=DIV_FIXED(PherAls_WriteBuf[playerPherModule->m_aimodule->m_index],AlienPheromoneScale);
 						textprint("Alien readable pheromones in Player Module: %d\n",prop);
 					}
-					/* No scale for 'marine' pheromones, the player will never see it. */
+					/* FALSE scale for 'marine' pheromones, the player will never see it. */
 					#endif
 				}
 				#endif

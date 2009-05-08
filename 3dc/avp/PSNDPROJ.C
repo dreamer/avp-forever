@@ -15,7 +15,7 @@
 #include "avp_menus.h"
 #include "scream.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "ffstdio.h"
 #include "db.h"
@@ -23,14 +23,14 @@
 
 #define PRED_PISTOL_PITCH_CHANGE 300
 
-#define CDDA_TEST 			No
-#define CD_VOLUME_TEST 	No
-#define SOUND_TEST_3D 	No
+#define CDDA_TEST 			FALSE
+#define CD_VOLUME_TEST 	FALSE
+#define SOUND_TEST_3D 	FALSE
 
-#define LOAD_SOUND_FROM_FAST_FILE 	   Yes
+#define LOAD_SOUND_FROM_FAST_FILE 	   TRUE
 #if 1
 //allow loading from outside of fastfiles to help with custom levels
-#define LOAD_SOUND_FROM_FAST_FILE_ONLY No
+#define LOAD_SOUND_FROM_FAST_FILE_ONLY FALSE
 #else
 #define LOAD_SOUND_FROM_FAST_FILE_ONLY (LOAD_USING_FASTFILES)
 #endif

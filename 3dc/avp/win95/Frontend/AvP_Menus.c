@@ -15,7 +15,7 @@
 
 #include "hudgfx.h"
 #include "usr_io.h"
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "iofocus.h"
 #include <time.h>
@@ -188,7 +188,7 @@ extern char *GetGamePadButtonTextString(enum TEXTSTRING_ID stringID);
 
 
 	Need mouse position code (?) etc. In-game menus using mouse? Ugh.
-	No mouse then.
+	FALSE mouse then.
 
 */
 SAVE_SLOT_HEADER SaveGameSlot[NUMBER_OF_SAVE_SLOTS];

@@ -13,10 +13,10 @@
 
 
 /* Version settings *****************************************************/
-	#define UseGadgets Yes
-		/* If this is set to No all gadget code collapses to void macros */
+	#define UseGadgets TRUE
+		/* If this is set to FALSE all gadget code collapses to void macros */
 
-	#define EnableStatusPanels	No
+	#define EnableStatusPanels	FALSE
 
 /* Constants  ***********************************************************/
 	#define HUD_SPACING 20

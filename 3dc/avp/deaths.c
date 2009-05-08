@@ -30,7 +30,7 @@
 #include "dxlog.h"
 #include "ShowCmds.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 /* General Death Structures! */

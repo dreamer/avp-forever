@@ -12,7 +12,7 @@
 #include "bh_types.h"
 #include "comp_shp.h"
 #include "avpview.h"
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "dxlog.h"
 #include "showcmds.h"
@@ -256,7 +256,7 @@ void FindPolygonInLineOfSight(VECTORCH *viewpointDirectionPtr, VECTORCH *viewpoi
 	
 	/* Shell function. */
 	FindPolygonInLineOfSight_TwoIgnores(viewpointDirectionPtr,viewpointPositionPtr,useOnScreenBlockList,objectToIgnorePtr,NULL);
-	/* No, it's not recursive! */
+	/* FALSE, it's not recursive! */
 }
 
 

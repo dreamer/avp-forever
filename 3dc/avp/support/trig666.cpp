@@ -13,7 +13,7 @@
 #include "3dc.h"
 #include "trig666.hpp"
 	
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/

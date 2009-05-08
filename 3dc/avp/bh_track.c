@@ -8,7 +8,7 @@
 #include "bh_track.h"
 #include "dynamics.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "plat_shp.h"
 #include "pvisible.h"
@@ -119,17 +119,17 @@ void* TrackObjectBehaveInit(void* bhdata,STRATEGYBLOCK* sbptr)
 	
 	if (to_tt->integrity > 20)
 	{
-		to_bhv->Indestructable = Yes;
+		to_bhv->Indestructable = TRUE;
 		sbptr->integrity = DEFAULT_OBJECT_INTEGRITY;
 	}
 	else if (to_tt->integrity < 1)
 	{
-		to_bhv->Indestructable = No;
+		to_bhv->Indestructable = FALSE;
 		sbptr->integrity = 1; // die immediately
 	}	  
 	else
 	{
-		to_bhv->Indestructable = No;
+		to_bhv->Indestructable = FALSE;
 		sbptr->integrity = (DEFAULT_OBJECT_INTEGRITY)*(to_tt->integrity);
 	}
 

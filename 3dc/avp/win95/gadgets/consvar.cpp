@@ -13,7 +13,7 @@
 #include "consvar.hpp"
 #include "strutil.h"
 
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/
@@ -226,7 +226,7 @@ ConsoleVariable :: ~ConsoleVariable()
 			)
 			{
 				oi() -> Display();
-				return Yes;
+				return TRUE;
 			}
 		}				
 	}
@@ -255,12 +255,12 @@ ConsoleVariable :: ~ConsoleVariable()
 		{
 			// then there were no word breaks; stop
 
-			return No;
+			return FALSE;
 		}
 
 		if ( NumChars < 1 )
 		{
-			return No;
+			return FALSE;
 		}
 
 		for
@@ -289,7 +289,7 @@ ConsoleVariable :: ~ConsoleVariable()
 
 					oi() -> ProcessSetValue( NewValue );
 
-					return Yes;
+					return TRUE;
 				}
 				else
 				{
@@ -298,7 +298,7 @@ ConsoleVariable :: ~ConsoleVariable()
 
 					oi() -> ProcessSetValue( NewValue );
 
-					return Yes;
+					return TRUE;
 
 				}
 			}
@@ -307,7 +307,7 @@ ConsoleVariable :: ~ConsoleVariable()
 
 
 	// If you get here, no processing has been performed:
-	return No;
+	return FALSE;
 
 }
 

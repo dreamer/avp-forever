@@ -26,7 +26,7 @@
 #include "psnd.h"
 #include "load_shp.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "particle.h"
 
@@ -8942,7 +8942,7 @@ SECTION_ATTACHMENT Global_Section_Attachments[] = {
 				0,	/* Indestructable */
 			},
 		},
-		section_flag_head|section_has_sparkoflife, /* No longer sprays acid. */
+		section_flag_head|section_has_sparkoflife, /* FALSE longer sprays acid. */
 	},
 	{
 		"hnpc_xenoborg",

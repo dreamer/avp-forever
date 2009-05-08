@@ -9,7 +9,7 @@
 #include "dynamics.h"
 #include "pldghost.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 #include "pvisible.h"
@@ -55,7 +55,7 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 	/* these should be loaded */
 	
 	/* set default indestructibility */
-	pl_bhv->Indestructable = No;
+	pl_bhv->Indestructable = FALSE;
 
 	
 	/* Initialise object's stats */
@@ -121,7 +121,7 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 	sbPtr->DynPtr->Mass = toolsData->mass;
 	if (toolsData->integrity > 20)
 	{
-		pl_bhv->Indestructable = Yes;
+		pl_bhv->Indestructable = TRUE;
 		sbPtr->integrity = DEFAULT_OBJECT_INTEGRITY;
 	}
 	else if (toolsData->integrity < 1)
@@ -516,9 +516,9 @@ void SendRequestToPlacedLight(STRATEGYBLOCK* sbptr,BOOL state,int extended_data)
 				sbptr->integrity = DEFAULT_OBJECT_INTEGRITY*new_integrity;
 
 				if(new_integrity>20)
-					pl_bhv->Indestructable = Yes;
+					pl_bhv->Indestructable = TRUE;
 				else
-					pl_bhv->Indestructable = No;
+					pl_bhv->Indestructable = FALSE;
 				
 				if(sbptr->integrity==0)
 				{

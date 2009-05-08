@@ -334,7 +334,7 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 					break;
 
 				case ENET_EVENT_TYPE_NONE:
-					//OutputDebugString("Enet No Event\n");
+					//OutputDebugString("Enet FALSE Event\n");
 					return DPERR_NOMESSAGES;
 					break;
 			}
@@ -512,7 +512,7 @@ int DpExtSend(int lpDP2A, DPID idFrom, DPID idTo, DWORD dwFlags, unsigned char *
 {
 	if(lpData == NULL) 
 	{
-		LogDxErrorString("DpExtSend - No data\n");
+		LogDxErrorString("DpExtSend - FALSE data\n");
 		return DP_FAIL;
 	}
 		

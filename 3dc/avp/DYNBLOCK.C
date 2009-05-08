@@ -1,7 +1,7 @@
 #include "3dc.h"
 #include "dynblock.h"
 
-#define UseLocalAssert No
+#define UseLocalAssert FALSE
 #include "ourasert.h"
 
 

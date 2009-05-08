@@ -33,7 +33,7 @@
 #include "game_statistics.h"
 #include "scream.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "pldnet.h"
 #include "AvP_UserProfile.h"
@@ -1189,7 +1189,7 @@ void MakeAlienFar(STRATEGYBLOCK *sbPtr)
 	if ((alienStatusPointer->BehaviourState!=ABS_Dying) 
 		&&(alienStatusPointer->BehaviourState!=ABS_Dormant)
 		&&(alienStatusPointer->BehaviourState!=ABS_Awakening)) {
-		/* No zombie aliens here! */
+		/* FALSE zombie aliens here! */
 		if(AlienIsAwareOfTarget(sbPtr))
 		{
 			alienStatusPointer->BehaviourState = ABS_Hunt;

@@ -18,7 +18,7 @@
 #include "pfarlocs.h"
 #include "targeting.h"
 #include "weapons.h"
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 #include "psnd.h"
@@ -570,7 +570,7 @@ static enum AMMO_ID GetAttackDamageType(STRATEGYBLOCK *sbPtr,int flagnum) {
 	switch (alienStatusPointer->Type) {
 		case AT_Standard:
 		default:
-			/* No change. */
+			/* FALSE change. */
 			return(alienStatusPointer->current_attack->flag_damage[flagnum]);
 			break;
 		case AT_Predalien:
@@ -2551,7 +2551,7 @@ static int CheckJumpingAbility(STRATEGYBLOCK *sbPtr) {
 	LOCALASSERT(alienStatusPointer);
 
 	if (alienStatusPointer->JumpDetected==0) {
-		/* No jump sequence.  Always a bad start. */
+		/* FALSE jump sequence.  Always a bad start. */
 		return(0);
 	}
 
@@ -2991,7 +2991,7 @@ static int StartAlienTaunt(STRATEGYBLOCK *sbPtr) {
 			}
 			return(1);
 		} else {
-			/* No sequence - can't do it. */
+			/* FALSE sequence - can't do it. */
 			return(0);
 		}		
 	}

@@ -28,7 +28,7 @@
 #include "dplayext.h"
 
 /* Custom includes. */
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 /* C O N S T A N T S -------------------------------------------------- */
@@ -98,7 +98,7 @@ static struct DpExtGrntdMsgInfo ggmiReplies = { NULL, 0, 0 };
 
 /* Should all be static. */
 
-/* Perform any required processing on a received msg. No processing is 
+/* Perform any required processing on a received msg. FALSE processing is 
  * required if neither DpExt guaranteed msg system or the DpExt error 
  * checking system are on. Returns TRUE if the message was internal only,
  * FALSE if it should be passed to the user.
@@ -250,7 +250,7 @@ HRESULT DpExtRecv
 	 */
 	if( !( DPEXT_USER_BUFFER & dwFlags ) )
 	{
-		/* No. Set parameters to write to internal buffer. */
+		/* FALSE. Set parameters to write to internal buffer. */
 		*lplpData = gbufDpExtRecv;
 		*lpdwDataSize = DPEXT_MAX_MSG_SIZE;
 	}
@@ -323,7 +323,7 @@ HRESULT DpExtRecv
  * -------------------------------------------------------------------- */
 
 
-/* Perform any required processing on a received msg. No processing is 
+/* Perform any required processing on a received msg. FALSE processing is 
  * required if neither DpExt guaranteed msg system or the DpExt error 
  * checking system are on. Returns TRUE if the message was internal only,
  * FALSE if it should be passed to the user.
@@ -334,12 +334,12 @@ static BOOL DpExtProcessRecvdMsg(BOOL bIsSystemMsg, LPVOID lpData,
 	/* Is this a system message? */
 	if( bIsSystemMsg )
 	{
-		/* Yes. Do we need to intercept any system messages for our own
+		/* TRUE. Do we need to intercept any system messages for our own
 		 * nefarious purposes?
 		 */
 		if( gbDpExtDoGrntdMsgs )
 		{
-			/* Yes, we need to intercept messages about deleted players or
+			/* TRUE, we need to intercept messages about deleted players or
 			 * groups. Is this one?
 			 */
 			DPMSG_GENERIC *pmsgGeneric = (DPMSG_GENERIC *) lpData; 
@@ -353,7 +353,7 @@ static BOOL DpExtProcessRecvdMsg(BOOL bIsSystemMsg, LPVOID lpData,
 	}
 	else
 	{
-		/* No, this isn't a system message. Use DpExt header... */
+		/* FALSE, this isn't a system message. Use DpExt header... */
 		struct DpExtHeader *pmsghdr = (struct DpExtHeader *) lpData;
 		
 		LOCALASSERT( dwDataSize >= DPEXT_HEADER_SIZE );
@@ -379,7 +379,7 @@ static BOOL DpExtProcessRecvdMsg(BOOL bIsSystemMsg, LPVOID lpData,
  */ 
 static DWORD DpExtChecksumMsg(LPVOID lpData, DWORD dwDataSize)
 {
-	return 0;	/* No implementation yet. */
+	return 0;	/* FALSE implementation yet. */
 }
 
 
@@ -389,6 +389,6 @@ static DWORD DpExtChecksumMsg(LPVOID lpData, DWORD dwDataSize)
  */
 static void DpExtUseDestroyMsg(LPDPMSG_DESTROYPLAYERORGROUP pmsgDestroy)
 {
-	/* No implementation yet. */
+	/* FALSE implementation yet. */
 }
 #endif // #if 0

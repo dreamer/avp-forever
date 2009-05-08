@@ -19,7 +19,7 @@
 #include "pldghost.h"
 
 #include "load_shp.h" 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 #include "huddefs.h"

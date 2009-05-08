@@ -7,7 +7,7 @@
 
 #include "load_shp.h"
 
-#define UseLocalAssert No
+#define UseLocalAssert FALSE
 
 #include "ourasert.h"
 

@@ -9,7 +9,7 @@
 #include "dynamics.h"
 #include "bh_debri.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 #include "pvisible.h"
@@ -38,7 +38,7 @@ void* InitVideoScreen(void* bhdata,STRATEGYBLOCK *sbPtr)
 			
 	
 	/* set default indestructibility */
-	videoScreen->Indestructable = No;
+	videoScreen->Indestructable = FALSE;
 
 	
 	/* Initialise object's stats */
@@ -68,7 +68,7 @@ void* InitVideoScreen(void* bhdata,STRATEGYBLOCK *sbPtr)
 	//is this screen indestructable
 	if (toolsData->integrity > 20)
 	{
-		videoScreen->Indestructable = Yes;
+		videoScreen->Indestructable = TRUE;
 		sbPtr->integrity = DEFAULT_OBJECT_INTEGRITY;
 	}
 	else if (toolsData->integrity < 1)

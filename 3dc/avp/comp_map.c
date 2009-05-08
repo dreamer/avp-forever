@@ -5,7 +5,7 @@
 #include "gamedef.h"
 #include "comp_shp.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 
 #include "ourasert.h"
 
@@ -89,7 +89,7 @@ MAPBLOCK6 Empty_Landscape_Type6 = {
 
 	MapType_Default,
 
-	-1, /* No shape */
+	-1, /* FALSE shape */
 
 	0,0,0,		/* Loc */
 	0,0,0,				/* Orient */
@@ -123,7 +123,7 @@ MAPBLOCK6 Empty_Object_Type6 = {
 
 	MapType_Default,
 
-	-1,	/* No shape */
+	-1,	/* FALSE shape */
 
 	0,0,0,		/* Loc */
 	0,0,0,				/* Orient */

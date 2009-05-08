@@ -8,7 +8,7 @@
 #include "bh_types.h"
 #include "comp_shp.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 
 #include "ourasert.h"
 
@@ -796,7 +796,7 @@ extern void FrisbeeBehaviour(STRATEGYBLOCK *sbPtr)
 				}
 			}
 		} else {
-			//ReleasePrintDebuggingText("No disc section found!\n");
+			//ReleasePrintDebuggingText("FALSE disc section found!\n");
 		}
 		fbPtr->counter-=NormalFrameTime;
 	}
@@ -2575,7 +2575,7 @@ extern void SpeargunBoltBehaviour(STRATEGYBLOCK *sbPtr)
 	    	DestroyAnyStrategyBlock(sbPtr);	
 		}
 	} else {
-		/* No collisions. */
+		/* FALSE collisions. */
 		//dynPtr->IgnoreThePlayer=0;
 
 		bbPtr->counter -= NormalFrameTime;
@@ -3563,7 +3563,7 @@ void Disc_Hit_Environment(STRATEGYBLOCK *sbPtr,COLLISIONREPORT *reportPtr) {
 	}
 
 	if (bbPtr->Target==NULL) {
-		/* No target, so come home. */
+		/* FALSE target, so come home. */
 		bbPtr->Target=Player->ObStrategyBlock;
 		COPY_NAME(bbPtr->Target_SBname,bbPtr->Target->SBname);
 	}
@@ -3589,7 +3589,7 @@ extern void DiscBehaviour_SeekTrack(STRATEGYBLOCK *sbPtr)
 
 	/* Update target */
 	if (bbPtr->Stuck) {
-		/* No business doing anything. */
+		/* FALSE business doing anything. */
 		#if 0
 		bbPtr->HModelController.Playing=0;
 		if (sbPtr->SBdptr) {
@@ -3690,7 +3690,7 @@ extern void DiscBehaviour_SeekTrack(STRATEGYBLOCK *sbPtr)
 			bbPtr->Target=NULL;
 		}
 	} else {
-		/* No target.  Oh well... */
+		/* FALSE target.  Oh well... */
 		textprint("Disc in free flight.\n");
 	}
 
@@ -5417,7 +5417,7 @@ extern void FrisbeeEnergyBoltBehaviour(STRATEGYBLOCK *sbPtr)
 			
 			switch (reportPtr->ObstacleSBPtr->I_SBtype)
 			{
-				/* No specific location damage. */
+				/* FALSE specific location damage. */
 				default:
 				{
 					CauseDamageToObject(reportPtr->ObstacleSBPtr,&bbPtr->damage, ONE_FIXED,NULL);

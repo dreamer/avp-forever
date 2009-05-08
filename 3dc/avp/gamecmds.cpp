@@ -8,7 +8,7 @@
 //#include "textexp.hpp"
 //#include "trepgadg.hpp"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 extern "C"

@@ -13,7 +13,7 @@
 #include "wrapstr.hpp"
 #include "strutil.h"
 
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/
@@ -349,7 +349,7 @@ int WordWrap :: bWithinWord( ProjChar* pProjCh_Test )
 
 	if ( bWhitespace(*pProjCh_Test) )
 	{
-		return No;
+		return FALSE;
 	}
 
 	GLOBALASSERT

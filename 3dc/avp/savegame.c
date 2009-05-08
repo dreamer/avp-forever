@@ -34,7 +34,7 @@
 //#include "smacker.h"
 #include "fmv.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 static struct

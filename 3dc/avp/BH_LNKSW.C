@@ -11,7 +11,7 @@
 #include "dynamics.h"
 #include "pldghost.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 
 #include "ourasert.h"
 
@@ -33,7 +33,7 @@ static BOOL check_link_switch_states (LINK_SWITCH_BEHAV_BLOCK * lsbb)
 //	textprint ("Checking link states\n");
 
 	if (!lsbb->state)
-		return(No);
+		return(FALSE);
 
 //	textprint ("Link switch OK\n");
 
@@ -43,9 +43,9 @@ static BOOL check_link_switch_states (LINK_SWITCH_BEHAV_BLOCK * lsbb)
 		{
 			BINARY_SWITCH_BEHAV_BLOCK * bsbb = ((BINARY_SWITCH_BEHAV_BLOCK *)lsi[i].bswitch->SBdataptr);
 
-			// if it's off return No
+			// if it's off return FALSE
 			if (!bsbb->state)
-				return(No);
+				return(FALSE);
 //			textprint ("Switch %d OK\n", i);
 		
 		}
@@ -53,9 +53,9 @@ static BOOL check_link_switch_states (LINK_SWITCH_BEHAV_BLOCK * lsbb)
 		{
 			LINK_SWITCH_BEHAV_BLOCK * linked_lsbb = ((LINK_SWITCH_BEHAV_BLOCK *)lsi[i].bswitch->SBdataptr);
 
-			// if the system state is off return No
+			// if the system state is off return FALSE
 			if (!linked_lsbb->system_state)
-				return(No);
+				return(FALSE);
 		}
 		else
 		{
@@ -66,7 +66,7 @@ static BOOL check_link_switch_states (LINK_SWITCH_BEHAV_BLOCK * lsbb)
 
 //	textprint ("Link switchs activated\n");
 
-	return(Yes);
+	return(TRUE);
 }
 
 #if 0
@@ -120,12 +120,12 @@ void* LinkSwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	if (ls_tt->mode == I_lswitch_SELFDESTRUCT)
 	{
 		ls_bhv->ls_mode = I_lswitch_timer;
-		ls_bhv->IS_SELF_DESTRUCT = Yes;
+		ls_bhv->IS_SELF_DESTRUCT = TRUE;
 	}
 	else
 	{
 		ls_bhv->ls_mode = ls_tt->mode;
-		ls_bhv->IS_SELF_DESTRUCT = No;
+		ls_bhv->IS_SELF_DESTRUCT = FALSE;
 	}
 	
 	ls_bhv->num_targets=ls_tt->num_targets;
@@ -377,12 +377,12 @@ void LinkSwitchBehaveFun(STRATEGYBLOCK* sbptr)
 		}
 		else
 		{
-			ls_bhv->triggered_last = Yes;
+			ls_bhv->triggered_last = TRUE;
 		}
 	}
 	else
 	{
-		ls_bhv->triggered_last = No;
+		ls_bhv->triggered_last = FALSE;
 	}
 
 	if(ls_bhv->switch_always_on)
@@ -649,7 +649,7 @@ void LinkSwitchBehaveFun(STRATEGYBLOCK* sbptr)
 	{
 		if (!check_link_switch_states(ls_bhv))
 		{
-			ls_bhv->system_state = No;
+			ls_bhv->system_state = FALSE;
 			
 			//link switch system state is turning off
 			if(!ls_bhv->switch_off_message_none)
@@ -665,7 +665,7 @@ void LinkSwitchBehaveFun(STRATEGYBLOCK* sbptr)
 	{
 		if (check_link_switch_states(ls_bhv))
 		{
-			ls_bhv->system_state = Yes;
+			ls_bhv->system_state = TRUE;
 			//link switch system state is turning on
 			for(i=0;i<ls_bhv->num_targets;i++)
 			{

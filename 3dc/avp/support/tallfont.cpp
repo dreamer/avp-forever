@@ -21,11 +21,11 @@
 
 	#include "ffstdio.h"
 	
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/
-	#define UseSoftwareAlphaRendering Yes
+	#define UseSoftwareAlphaRendering TRUE
 		// an option which assumes you're in a 16-bit graphic mode...
 
 		#if UseSoftwareAlphaRendering
@@ -593,7 +593,7 @@ IndexedFont_Proportional_Column :: bAnyNonTransparentPixelsInColumn
 		#if 1
 		if (Pixel > 0 )
 		{
-			return Yes;
+			return TRUE;
 		}
 		#else
 		if
@@ -606,16 +606,16 @@ IndexedFont_Proportional_Column :: bAnyNonTransparentPixelsInColumn
 		)
 		{
 			// nasty hack to get it working...
-			return Yes;
+			return TRUE;
 		}
 		#endif
 
 		y++;
 	}
 
-	return No;
+	return FALSE;
 #endif
-	return Yes;
+	return TRUE;
 }
 
 
@@ -1469,7 +1469,7 @@ IndexedFont_Kerned_Column :: bAnyNonTransparentPixelsInColumn
 		#if 1
 		if (Pixel > 0 )
 		{
-			return Yes;
+			return TRUE;
 		}
 		#else
 		if
@@ -1482,14 +1482,14 @@ IndexedFont_Kerned_Column :: bAnyNonTransparentPixelsInColumn
 		)
 		{
 			// nasty hack to get it working...
-			return Yes;
+			return TRUE;
 		}
 		#endif
 
 		y++;
 	}
 #endif
-	return No;
+	return FALSE;
 }
 
 int
@@ -1585,7 +1585,7 @@ IndexedFont_Kerned_Column :: OverlapOnRow
 			// ought really to throw an exception
 
 			LOGDXERR(hrLock);
-			return Yes;
+			return TRUE;
 		}
 #endif
 		// Find right-most pixel in row of first character
@@ -1642,7 +1642,7 @@ IndexedFont_Kerned_Column :: OverlapOnRow
 		}
 	}
 	#else
-	return Yes;
+	return TRUE;
 		// for now
 	#endif
 }

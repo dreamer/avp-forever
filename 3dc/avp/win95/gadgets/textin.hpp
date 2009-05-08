@@ -44,13 +44,13 @@
 #endif
 
 /* Version settings *****************************************************/
-	#define LimitedLineLength	Yes
+	#define LimitedLineLength	TRUE
 
-	#define SupportHistory		Yes
+	#define SupportHistory		TRUE
 
-	#define SupportAutomation	Yes
+	#define SupportAutomation	TRUE
 
-	#define SupportCompletion	Yes
+	#define SupportCompletion	TRUE
 
 	#if !LimitedLineLength
 

@@ -15,7 +15,7 @@
 	#include "strutil.h"
 	#include "textin.hpp"
 
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/
@@ -51,7 +51,7 @@
 
 /* Exported globals ************************************************/
 	/*static*/ List<TextExpansion*> TextExpansion :: List_pTextExp;
-	/*static*/ int TextExpansion ::  bVerbose = No;
+	/*static*/ int TextExpansion ::  bVerbose = FALSE;
 
 /* Internal type definitions ***************************************/
 
@@ -259,7 +259,7 @@ void TextExpansion :: Display(void)
 
 			if ( !pTextExp_Found )
 			{
-				// No matches found:
+				// FALSE matches found:
 				return;
 			}			
 

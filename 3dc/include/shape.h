@@ -298,7 +298,6 @@ typedef struct zspzone {
 
 #if StandardShapeLanguage
 
-
 /*
 
  Extra Item Data.
@@ -438,7 +437,7 @@ typedef struct shapeheader {
 
 
 #else		/* StandardShapeLanguage */
-
+sssssssss
 
 	/*
 

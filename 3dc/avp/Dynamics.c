@@ -29,7 +29,7 @@ you should have seen the previous versions. */
 #include "avp_userprofile.h"
 #include "pfarlocs.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 #define TELEPORT_IF_OUTSIDE_ENV 1	   

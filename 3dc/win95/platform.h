@@ -50,10 +50,10 @@ extern "C"  {
 
 #include "aw.h"
 
-#define platform_pc		Yes
-#define Saturn			No
+#define platform_pc		TRUE
+#define Saturn			FALSE
 
-#define Hardware2dTextureClipping No
+#define Hardware2dTextureClipping FALSE
 
 /*
 

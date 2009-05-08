@@ -791,7 +791,7 @@ typedef struct lightblock {
 #define LFlag_CosSpreadAtten	0x00000002		/* Cosine spread attenuation */
 #define LFlag_Omni				0x00000004		/* Omnidirectional */
 #define LFlag_Deallocate		0x00000008		/* Deallocate at frame end */
-#define LFlag_NoShadows			0x00000010		/* Prelighting - No Shadows */
+#define LFlag_NoShadows			0x00000010		/* Prelighting - FALSE Shadows */
 #define LFlag_Off				0x00000020		/* Prelighting - Light OFF */
 
 #define LFlag_PreLitSource		0x00000040		/* WARNING: Not obj. specific */
@@ -1061,7 +1061,7 @@ typedef struct displayblock
 																	same from all angles */
 
 
-#define ObFlag3_Teleport				0x00000040	/* No motion vector! */
+#define ObFlag3_Teleport				0x00000040	/* FALSE motion vector! */
 
 #define ObFlag3_SurfaceAlignDeluxe	0x00000080	/* Better but slower */
 

@@ -26,7 +26,7 @@
 //#include "pcmenus.h"
 #include "avp_menus.h"
 #include "kshape.h"
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 
 #include "ourasert.h" 
 

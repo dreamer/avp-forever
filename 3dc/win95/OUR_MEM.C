@@ -2,7 +2,7 @@
 
 #include <malloc.h>
 
-#define UseLocalAssert  No
+#define UseLocalAssert  FALSE
 
 #include "ourasert.h"
 

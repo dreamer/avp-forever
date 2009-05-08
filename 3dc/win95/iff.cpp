@@ -35,7 +35,7 @@ namespace IFF
 				{
 					#ifdef _CPPRTTI // this works in MSVC 5.0 - ie. the macro is defined if RTTI is turned on
 						// but there appears to be no preprocessor way of determining if RTTI is turned on under Watcom
-						// No, I think it works in Watcom too, actually...
+						// FALSE, I think it works in Watcom too, actually...
 						#pragma message("Run-Time Type Identification (RTTI) is enabled")
 						for (Iterator itLeak(*this) ; !itLeak.Done() ; itLeak.Next())
 						{

@@ -19,7 +19,7 @@ extern "C" {
 // This is necessary to support full screen
 // ActiveMovie play.
 
-#define SupportAltTab Yes
+#define SupportAltTab TRUE
 
 // Globals
 
@@ -46,7 +46,7 @@ extern BOOL bActive;
 // millisecond time function, which isn't actually
 // accurate to a millisecond.  In order to get FRI
 // to work properly with GetTickCount at high frame 
-// rates, you will have to switch KalmanTimer to Yes
+// rates, you will have to switch KalmanTimer to TRUE
 // at the start of io.c to turn on a filtering algorithm
 // in the frame counter handler.  
 // Alternately, we can use the mm function 

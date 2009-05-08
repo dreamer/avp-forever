@@ -21,7 +21,7 @@
 #include "psndplat.h"
 #include "targeting.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "ShowCmds.h"
 #include "sfx.h"
@@ -203,7 +203,7 @@ void FacehuggerBehaviour(STRATEGYBLOCK *sbPtr)
 		Sound_Stop(facehuggerStatusPointer->soundHandle2);
 	}
 
-	/* No far behaviour for facehuggerss */
+	/* FALSE far behaviour for facehuggerss */
 	if(sbPtr->SBdptr) 
 	{
 		if(sbPtr->maintainVisibility) LOCALASSERT(ModuleCurrVisArray[(sbPtr->containingModule->m_index)]);						

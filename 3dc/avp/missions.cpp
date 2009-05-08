@@ -17,7 +17,7 @@
 #include "missions.hpp"
 #include "gadget.h"
 
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 extern "C"
@@ -450,7 +450,7 @@ void MissionHacks :: TestInit(void)
 	new MissionHint
 	(
 		TEXTSTRING_LEVELMSG_001, // ProjChar* pProjCh_Description,
-		Yes // OurBool bVisible
+		TRUE // OurBool bVisible
 	);
 	#endif
 
@@ -581,7 +581,7 @@ void MissionObjective :: TestCompleteNext(void)
 		"SECURITY DOORS RESTRICT ACCESS WITHIN THE COLONY.  FIND THE OPERATIONS ROOM IN THE MAIN BUILDING.  "
 		"INSIDE ARE FIVE SWITCHES.  TRIGGER ALL OF THEM TO OPEN THE SECURITY DOORS REMOTELY.  "
 			, // ProjChar* pProjCh_Description,
-		Yes, // OurBool bHidden
+		TRUE, // OurBool bHidden
 
 		"SECURITY DOOR EMERGENCY OVERRIDE TRIGGERED:  DOORS HAVE BEEN OPENED.  ", // ProjChar* pProjCh_TriggeringFeedback,
 		MissionFX_None // enum MissionEffects MissionFX,
@@ -592,7 +592,7 @@ void MissionObjective :: TestCompleteNext(void)
 		"MAKE YOUR WAY TO MEDLAB.  COLLECT COMPUTER ARCHIVES "
 		"DOCUMENTING THE COLONISTS WORK ON THE FACEHUGGERS.  "
 			,  // ProjChar* pProjCh_Description,
-		Yes, // OurBool bHidden
+		TRUE, // OurBool bHidden
 
 		"PARTIAL MEDLAB ARCHIVE COLLECTED", // ProjChar* pProjCh_TriggeringFeedback,
 		MissionFX_None // enum MissionEffects MissionFX,
@@ -606,7 +606,7 @@ void MissionObjective :: TestCompleteNext(void)
 		"SHE MIGHT BE ALIVE, BUT IT'S PROBABLY JUST HER REMAINS.  "
 		"MAKE YOUR WAY THERE AND TRY TO FIND MORE ARCHIVES.  "
 			,  // ProjChar* pProjCh_Description,
-		Yes, // OurBool bHidden
+		TRUE, // OurBool bHidden
 
 		"MEDLAB ARCHIVE COLLECTED", // ProjChar* pProjCh_TriggeringFeedback,
 		MissionFX_None // enum MissionEffects MissionFX,
@@ -618,7 +618,7 @@ void MissionObjective :: TestCompleteNext(void)
 		"GET BACK TO THE YARD.  THE LANDING BEACON CONTROLS ARE IN A RECESS TO THE LEFT OF THE "
 		"ATMOSPHERE PROCESSOR.  ACTIVATE THE BEACON AND PREPARE FOR EVAC."
 			,  // ProjChar* pProjCh_Description,
-		Yes, // OurBool bHidden
+		TRUE, // OurBool bHidden
 
 		"LANDING BEACON ACTIVATED.  STAND CLEAR AND PREPARE FOR EVAC.  ", // ProjChar* pProjCh_TriggeringFeedback,
 #endif

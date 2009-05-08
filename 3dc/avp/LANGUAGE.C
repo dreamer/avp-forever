@@ -16,7 +16,7 @@
 	#include "strtab.hpp"
 #endif
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "avp_menus.h"
 

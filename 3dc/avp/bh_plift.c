@@ -13,7 +13,7 @@
 #include "dynamics.h"
 #include "showcmds.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 
 #include "ourasert.h"
 #include "bh_plift.h"
@@ -129,7 +129,7 @@ void PlatformLiftBehaviour(STRATEGYBLOCK *sbPtr)
 				/* finished */
 				StopPlatformLift(sbPtr);
 				if (platformliftdata->OneUse)
-					platformliftdata->Enabled = No;
+					platformliftdata->Enabled = FALSE;
 			}
 			else
 			{
@@ -155,7 +155,7 @@ void PlatformLiftBehaviour(STRATEGYBLOCK *sbPtr)
 				/* finished */
 				StopPlatformLift(sbPtr);
 				if (platformliftdata->OneUse)
-					platformliftdata->Enabled = No;
+					platformliftdata->Enabled = FALSE;
 			}
 			else 
 			{

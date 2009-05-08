@@ -10,7 +10,7 @@
 #include "dynamics.h"
 #include "weapons.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "plat_shp.h"
 

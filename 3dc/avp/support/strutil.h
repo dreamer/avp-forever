@@ -46,7 +46,7 @@
 		);
 
 	/* Ansi to HHTS conversion ********************************************/
-		/* Return value = Yes iff no truncation occurred i.e. the whole string was copied */
+		/* Return value = TRUE iff no truncation occurred i.e. the whole string was copied */
 
  		#if 0
  		extern OurBool STRUTIL_ProjChar_To_ANSI

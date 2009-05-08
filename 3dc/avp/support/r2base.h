@@ -17,7 +17,7 @@
 //#endif
 
 /* Version settings *****************************************************/
-	#define UseTemplates	No
+	#define UseTemplates	FALSE
 
 /* Constants  ***********************************************************/
 
@@ -74,10 +74,10 @@
 			{
 				if (y==0)
 				{
-					return Yes;
+					return TRUE;
 				}
 			}
-			return No;
+			return FALSE;
 		}
 
 		inline void r2pos::operator+=
@@ -139,13 +139,13 @@
 				// Does this size have non-zero area?:
 				if (w<=0)
 				{
-					return No;
+					return FALSE;
 				}
 				if (h<=0)
 				{
-					return No;
+					return FALSE;
 				}
-				return Yes;
+				return TRUE;
 			}
 			void VCompose(const size2d& Size2D_Other )
 			{
@@ -220,13 +220,13 @@
 			// Does this size have non-zero area?:
 			if (w<=0)
 			{
-				return No;
+				return FALSE;
 			}
 			if (h<=0)
 			{
-				return No;
+				return FALSE;
 			}
-			return Yes;
+			return TRUE;
 		}
 		inline void r2size::VCompose(const r2size& R2Size_Other )
 		{
@@ -373,13 +373,13 @@
 		{
 			if (x1<=x0)
 			{
-				return No;
+				return FALSE;
 			}
 			if (y1<=y0)
 			{
-				return No;
+				return FALSE;
 			}
-			return Yes;
+			return TRUE;
 		}
 		inline struct r2pos r2rect::GetPos(void) const
 		{
@@ -412,70 +412,70 @@
 				R2Pos . x < x0
 			)
 			{
-				return No;
+				return FALSE;
 			}
 			if
 			(
 				R2Pos . y < y0
 			)
 			{
-				return No;
+				return FALSE;
 			}
 			if
 			(
 				R2Pos . x >= x1
 			)
 			{
-				return No;
+				return FALSE;
 			}
 			if
 			(
 				R2Pos . y >= y1
 			)
 			{
-				return No;
+				return FALSE;
 			}
-			return Yes;
+			return TRUE;
 		}
 		inline int r2rect::bFitsIn( const struct r2rect& R2Rect ) const
 		{
 			if ( x0 < R2Rect . x0)
 			{
-				return No;
+				return FALSE;
 			}
 			if ( y0 < R2Rect . y0)
 			{
-				return No;
+				return FALSE;
 			}
 			if ( x1 > R2Rect . x1)
 			{
-				return No;
+				return FALSE;
 			}
 			if ( y1 > R2Rect . y1)
 			{
-				return No;
+				return FALSE;
 			}
-			return Yes;
+			return TRUE;
 		}
 		inline int r2rect::bOverlap( const struct r2rect& R2Rect_ToTest ) const
 		{
 			if ( x0 >= R2Rect_ToTest . x1 )
 			{
-				return No;
+				return FALSE;
 			}
 			if ( y0 >= R2Rect_ToTest . y1 )
 			{
-				return No;
+				return FALSE;
 			}
 			if ( x1 <= R2Rect_ToTest . x0 )
 			{
-				return No;
+				return FALSE;
 			}
 			if ( y1 <= R2Rect_ToTest . y0 )
 			{
-				return No;
+				return FALSE;
 			}
-			return Yes;
+			return TRUE;
 		}
 		inline void r2rect::Clip( struct r2rect& R2Rect_ToClip ) const
 		{
@@ -512,31 +512,31 @@
 			// useful for asserting in a rendering routine
 			if ( x0 < 0 )
 			{
-				return No;
+				return FALSE;
 			}
 			if ( y0 < 0 )
 			{
-				return No;
+				return FALSE;
 			}
 			if ( x1 > R2Rect_PhysicalScreen . x1 )
 			{
-				return No;
+				return FALSE;
 			}
 			if ( y1 > R2Rect_PhysicalScreen . y1 )
 			{
-				return No;
+				return FALSE;
 			}
 			// Check for well-formedness:
 			if ( x0 > x1 )
 			{
-				return No;
+				return FALSE;
 			}
 			if ( y0 > y1 )
 			{
-				return No;
+				return FALSE;
 			}
 
-			return Yes;
+			return TRUE;
 		}
 		inline r2pos r2rect::Hotspot_TL(void) const
 		{

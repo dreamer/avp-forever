@@ -33,8 +33,8 @@
 	public:
 		static OurBool Run(char* Filename);
 			// Tries to find the file, if it finds it it reads it,
-			// adds the non-comment lines to the pending list, and returns Yes
-			// If it can't find the file, it returns No
+			// adds the non-comment lines to the pending list, and returns TRUE
+			// If it can't find the file, it returns FALSE
 
 	public:
 		static int bEcho;

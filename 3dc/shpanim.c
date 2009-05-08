@@ -1,6 +1,6 @@
 #include "3dc.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 extern int NormalFrameTime;

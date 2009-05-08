@@ -14,7 +14,7 @@
 #include "bh_pred.h"
 #include "bh_corpse.h"
 #include "lighting.h"
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 static SFXBLOCK SfxBlockStorage[MAX_NO_OF_SFX_BLOCKS];
@@ -58,7 +58,7 @@ SFXBLOCK* AllocateSfxBlock(void)
 		/* unable to allocate a sfxamics block I'm afraid; 
 		   MAX_NO_OF_SFX_BLOCKS is too low */
    	  //LOCALASSERT(NumFreeSfxBlocks);
-		textprint("No Free SFX blocks!\n");
+		textprint("FALSE Free SFX blocks!\n");
 	}
 
 	return sfxPtr;

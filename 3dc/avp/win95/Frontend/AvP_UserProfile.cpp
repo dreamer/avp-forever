@@ -13,7 +13,7 @@ extern "C"
 #include "psnd.h"
 #include "cd_player.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
  // Edmond
@@ -55,7 +55,7 @@ extern void ExamineSavedUserProfiles(void)
 	{
 	
 	}
-	else /* No user profile found. We'll have to make one */
+	else /* FALSE user profile found. We'll have to make one */
 	{
 	//	MakeNewUserProfile();
 	}

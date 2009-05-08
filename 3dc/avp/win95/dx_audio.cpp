@@ -20,7 +20,7 @@ extern "C" {
 #include "dynamics.h"
 
 #include "psndplat.h"
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "db.h"
 #include "dsound.h"
@@ -562,7 +562,7 @@ int PlatStartSoundSys()
 			);
 	   	if(hres != DS_OK)
 		{
-			/* No property set. */
+			/* FALSE property set. */
 			db_log1("Error: Failed to get the property set.");
 		}
 
@@ -604,7 +604,7 @@ int PlatStartSoundSys()
 			}
 			else
 			{
-				db_logf1(("No voice management. Support %x", support));
+				db_logf1(("FALSE voice management. Support %x", support));
 			}
 
 			/* EAX support. */
@@ -626,7 +626,7 @@ int PlatStartSoundSys()
 			}
 			else
 			{
-				db_logf1(("No EAX support. Support %x", support));
+				db_logf1(("FALSE EAX support. Support %x", support));
 			}
 		}
 
@@ -677,7 +677,7 @@ int PlatStartSoundSys()
 				);
 		   	if(hres != DS_OK)
 			{
-				/* No property set. */
+				/* FALSE property set. */
 				db_log1("Error: Failed to get the property set again.");
 			}
 
@@ -1240,7 +1240,7 @@ int PlatDo3dSound(int activeIndex)
 					DS3D_DEFERRED
 				);
 #if 0
-// No doppler for now.
+// FALSE doppler for now.
 			IDirectSound3DBuffer_SetVelocity
 				(
 					ActiveSounds[activeIndex].ds3DBufferP,
@@ -1520,7 +1520,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		}
 		else
 		{
-			/* No Voice Manager. */
+			/* FALSE Voice Manager. */
 			DSCAPS caps;
 			ZeroMemory(&caps, sizeof(DSCAPS));
 			caps.dwSize = sizeof(DSCAPS);
@@ -1747,7 +1747,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		}
 		else
 		{
-			/* No Voice Manager. */
+			/* FALSE Voice Manager. */
 			DSCAPS caps;
 			ZeroMemory(&caps, sizeof(DSCAPS));
 			caps.dwSize = sizeof(DSCAPS);
@@ -2218,7 +2218,7 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 		}
 		else
 		{
-			/* No Voice Manager. */
+			/* FALSE Voice Manager. */
 			DSCAPS caps;
 			ZeroMemory(&caps, sizeof(DSCAPS));
 			caps.dwSize = sizeof(DSCAPS);

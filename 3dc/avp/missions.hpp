@@ -28,7 +28,7 @@
 #endif
 
 /* Version settings *****************************************************/
-	#define WithinTheGame	Yes
+	#define WithinTheGame	TRUE
 		// as opposed to within the editor
 
 /* Constants  ***********************************************************/

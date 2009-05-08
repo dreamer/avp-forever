@@ -630,7 +630,7 @@ int GetModuleVisArrays(void)
 	int index, i;
 
 
-	if(Global_ModulePtr == 0) return No;
+	if(Global_ModulePtr == 0) return FALSE;
 
 	DeallocateModuleVisArrays();
 
@@ -664,18 +664,18 @@ int GetModuleVisArrays(void)
 		textprint("visibility arrays ok, size %d\n", ModuleArraySize);
 		#endif
 
-		return Yes;
+		return TRUE;
 
 	}
 
-	else return No;
+	else return FALSE;
 
 }
 
 
 
 
-#define ppma_print No
+#define ppma_print FALSE
 
 
 #if 1
@@ -852,7 +852,7 @@ void PreprocessVMODIDATA(VMODULE *v_ptr)
 */
 
 
-#define cmntp_print No
+#define cmntp_print FALSE
 
 
 void ConvertModuleNameToPointer(MREF *mref_ptr, MODULE **m_array_ptr)
@@ -888,7 +888,7 @@ void ConvertModuleNameToPointer(MREF *mref_ptr, MODULE **m_array_ptr)
 	textprint("Searching for name...\n");
 	#endif
 
-	StillSearching = Yes;
+	StillSearching = TRUE;
 
 	while(*m_array_ptr && StillSearching) {
 
@@ -903,7 +903,7 @@ void ConvertModuleNameToPointer(MREF *mref_ptr, MODULE **m_array_ptr)
 			#endif
 
 			mref_ptr->mref_ptr = m_ptr;
-			StillSearching = No;
+			StillSearching = FALSE;
 
 		}
 
@@ -926,7 +926,7 @@ void ConvertModuleNameToPointer(MREF *mref_ptr, MODULE **m_array_ptr)
 */
 
 
-#define cvmntp_print No
+#define cvmntp_print FALSE
 
 
 void ConvertVModuleNameToPointer(VMODIDATA *vmodidata_ptr, VMODULE *v_array_ptr)
@@ -961,7 +961,7 @@ void ConvertVModuleNameToPointer(VMODIDATA *vmodidata_ptr, VMODULE *v_array_ptr)
 	textprint("  Searching for name...\n");
 	#endif
 
-	StillSearching = Yes;
+	StillSearching = TRUE;
 
 	while((v_array_ptr->vmod_type != vmtype_term) && StillSearching) {
 
@@ -974,7 +974,7 @@ void ConvertVModuleNameToPointer(VMODIDATA *vmodidata_ptr, VMODULE *v_array_ptr)
 			#endif
 
 			vmodidata_ptr->vmodidata_ptr = v_array_ptr;
-			StillSearching = No;
+			StillSearching = FALSE;
 
 		}
 
@@ -1012,11 +1012,11 @@ int CompareName(char *name1, char *name2)
 
 	for(i = 4; i!=0; i--) {
 
-		if(*name1++ != *name2++) return No;
+		if(*name1++ != *name2++) return FALSE;
 
 	}
 
-	return Yes;
+	return TRUE;
 
 }
 

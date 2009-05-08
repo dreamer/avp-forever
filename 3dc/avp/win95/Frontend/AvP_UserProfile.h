@@ -104,7 +104,7 @@ typedef struct
 
 	/* This feels a bit bloaty. */
 	AvP_GameStats_Stored PersonalBests[I_MaxDifficulties][AVP_ENVIRONMENT_END_OF_LIST];
-	/* Yes, it contains impossible!  So sue me! */
+	/* TRUE, it contains impossible!  So sue me! */
 
 } AVP_USER_PROFILE;
 

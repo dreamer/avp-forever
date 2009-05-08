@@ -20,7 +20,7 @@
 #include "AvP_Menus.h"
 #include "AvP_MP_Config.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 GUID SPGuid;

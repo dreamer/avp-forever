@@ -15,7 +15,7 @@
 	#include "reflist.hpp"
 
 
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/
@@ -71,8 +71,8 @@ OurBool
 BatchFileProcessing :: Run(char* Filename)
 {
 	// Tries to find the file, if it finds it it reads it,
-	// adds the non-comment lines to the pending list, and returns Yes
-	// If it can't find the file, it returns No
+	// adds the non-comment lines to the pending list, and returns TRUE
+	// If it can't find the file, it returns FALSE
 
 	// LOCALISEME
 	// This code makes several uses of the assumption that char is type-equal
@@ -85,7 +85,7 @@ BatchFileProcessing :: Run(char* Filename)
 
 		if (NULL==pFile)
 		{
-			return No;
+			return FALSE;
 		}
 		
 		
@@ -204,12 +204,12 @@ BatchFileProcessing :: Run(char* Filename)
 		}
 	}
 
-	return Yes;
+	return TRUE;
 }
 
 // public:
 // static
-int BatchFileProcessing :: bEcho = No;
+int BatchFileProcessing :: bEcho = FALSE;
 
 
 /* Internal function definitions ***********************************/

@@ -25,7 +25,7 @@
 	#include "consbind.hpp"
 	#endif
 
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/

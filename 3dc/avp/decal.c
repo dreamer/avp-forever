@@ -24,7 +24,7 @@
 #include "detaillevels.h"
 #include "savegame.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 #define MAX_NO_OF_DECALS 1024

@@ -17,7 +17,7 @@
 #include "ahudgadg.hpp"
 #include "indexfnt.hpp"
 #include "trepgadg.hpp"
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/

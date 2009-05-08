@@ -13,7 +13,7 @@
 
 #include "dynblock.h"
 #include "dynamics.h"
-#define UseLocalAssert No
+#define UseLocalAssert FALSE
 #include "ourasert.h"
 
 /*
@@ -83,21 +83,21 @@ int MouseMode = MouseVelocityMode;
 #if 1
 int IDemandLookUp(void)
 {
-	return No;
+	return FALSE;
 }
 
 
 int IDemandLookDown(void)
 {
-	return No;
+	return FALSE;
 }
 
 int IDemandTurnLeft(void)
 {
 	InputMode = Digital;
 	if(KeyboardInput[KEY_LEFT] || KeyboardInput[KEY_JOYSTICK_BUTTON_15])
-		return Yes;
-	return No;
+		return TRUE;
+	return FALSE;
 }
 
 
@@ -105,8 +105,8 @@ int IDemandTurnRight(void)
 {
 	InputMode = Digital;
 	if(KeyboardInput[KEY_RIGHT] || KeyboardInput[KEY_JOYSTICK_BUTTON_16])
-		return Yes;
-	return No;
+		return TRUE;
+	return FALSE;
 }
 
 
@@ -114,8 +114,8 @@ int IDemandGoForward(void)
 {
 	InputMode = Digital;
 	if(KeyboardInput[KEY_UP] || KeyboardInput[KEY_JOYSTICK_BUTTON_13])
-		return Yes;
-	return No;
+		return TRUE;
+	return FALSE;
 }
 
 
@@ -123,8 +123,8 @@ int IDemandGoBackward(void)
 {
 	InputMode = Digital;
 	if(KeyboardInput[KEY_DOWN] || KeyboardInput[KEY_JOYSTICK_BUTTON_14])
-		return Yes;
-	return No;
+		return TRUE;
+	return FALSE;
 }
 
 
@@ -132,8 +132,8 @@ int IDemandJump(void)
 {
 	InputMode = Digital;
         if(KeyboardInput[KEY_CAPS])
-		return Yes;
-	return No;
+		return TRUE;
+	return FALSE;
 }
 
 
@@ -142,23 +142,23 @@ int IDemandCrouch(void)
 {
 	InputMode = Digital;
         if(KeyboardInput[KEY_Z])
-		return Yes;
-	return No;
+		return TRUE;
+	return FALSE;
 }
 
 int IDemandSelect(void)
 {
 	InputMode = Digital;
     
-    if(KeyboardInput[KEY_CR]) return Yes;
-    if(KeyboardInput[KEY_SPACE]) return Yes;
-	if(KeyboardInput[KEY_JOYSTICK_BUTTON_2]) return Yes; // bjd - A button?
-	else return No;
+    if(KeyboardInput[KEY_CR]) return TRUE;
+    if(KeyboardInput[KEY_SPACE]) return TRUE;
+	if(KeyboardInput[KEY_JOYSTICK_BUTTON_2]) return TRUE; // bjd - A button?
+	else return FALSE;
 }
 
 int IDemandStop(void)
 {
-	return No;
+	return FALSE;
 }
 
 
@@ -166,8 +166,8 @@ int IDemandFaster(void)
 {
 	InputMode = Digital;
 	if(KeyboardInput[KEY_LEFTSHIFT])
-		return Yes;
-	return No;
+		return TRUE;
+	return FALSE;
 }
 
 
@@ -175,40 +175,40 @@ int IDemandSideStep(void)
 {
 	InputMode = Digital;
 	if(KeyboardInput[KEY_LEFTALT])
-		return Yes;
-	return No;
+		return TRUE;
+	return FALSE;
 }
 
 int IDemandPickupItem(void)
 {
 	InputMode = Digital;
 	if(KeyboardInput[KEY_P])
-		return Yes;
-	return No;
+		return TRUE;
+	return FALSE;
 }
 
 int IDemandDropItem(void)
 {
 	InputMode = Digital;
 	if(KeyboardInput[KEY_D])
-		return Yes;
-	return No;
+		return TRUE;
+	return FALSE;
 }
 
 int IDemandMenu(void)
 {
 	InputMode = Digital;
 	if(KeyboardInput[KEY_M])
-		return Yes;
-	return No;
+		return TRUE;
+	return FALSE;
 }
 
 int IDemandOperate(void)
 {
 	InputMode = Digital;
 	if(KeyboardInput[KEY_SPACE])
-		return Yes;
-	return No;
+		return TRUE;
+	return FALSE;
 }
 
 
@@ -217,22 +217,22 @@ int IDemandFireWeapon(void)
 {
 	InputMode = Digital;
         if(KeyboardInput[KEY_CR])
-		return Yes;
-	return No;
+		return TRUE;
+	return FALSE;
 }
 
 /* KJL 11:29:12 10/07/96 - added by me */
 int IDemandPreviousWeapon(void)
 {
 	InputMode = Digital;
-   	if(KeyboardInput[KEY_1]) return Yes;
-    else return No;
+   	if(KeyboardInput[KEY_1]) return TRUE;
+    else return FALSE;
 }
 int IDemandNextWeapon(void)
 {
 	InputMode = Digital;
-   	if(KeyboardInput[KEY_2]) return Yes;
-    else return No;
+   	if(KeyboardInput[KEY_2]) return TRUE;
+    else return FALSE;
 }
 #endif
 

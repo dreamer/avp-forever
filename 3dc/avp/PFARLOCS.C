@@ -18,7 +18,7 @@
 #include "bh_far.h"
 #include "pfarlocs.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include <cassert> // remove
 
@@ -635,7 +635,7 @@ static void BuildFM_EntryPoints(MODULE *thisModule)
 	if(!(NumAdjacentModules(thisModule))) 
 	{
 		#if logFarLocData
-		fprintf(logfile, "No adjacent modules found for this module \n");
+		fprintf(logfile, "FALSE adjacent modules found for this module \n");
 		#endif
 		return;
 	}
@@ -1261,7 +1261,7 @@ static void BuildFM_AuxilaryLocs(MODULE *thisModule)
 	}
 	else
 	{
-		/* No valid locations */
+		/* FALSE valid locations */
 		#if logFarLocData
 		{
 			/* log an error */

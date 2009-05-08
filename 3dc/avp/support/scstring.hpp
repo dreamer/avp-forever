@@ -7,7 +7,7 @@
 #ifndef _scstring
 #define _scstring 1
 
-	#define SupportHHStuff	No
+	#define SupportHHStuff	FALSE
 
 	#ifndef _refobj
 	#include "refobj.hpp"
@@ -44,7 +44,7 @@
 	#include "list_tem.hpp"
 	#endif
 
-	#define EnableSizeData	Yes
+	#define EnableSizeData	TRUE
 
 	class SCString : public RefCountObject
 	{

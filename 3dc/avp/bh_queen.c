@@ -20,7 +20,7 @@
 #include "bh_paq.h"
 #include "bh_queen.h"
 #include "bh_debri.h"
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "psnd.h"
 #include "weapons.h"
@@ -277,7 +277,7 @@ void InitQueenBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
 		dynPtr->Displacement.vy = 0;
 		dynPtr->Displacement.vz = 0;
 
-		dynPtr->Mass=60000; /* No knockback, please. */
+		dynPtr->Mass=60000; /* FALSE knockback, please. */
 	}
 	else
 	{
@@ -3272,7 +3272,7 @@ void QueenBehaviour(STRATEGYBLOCK *sbPtr)
 	
 	
 	if (sbPtr->SBdptr==NULL) {
-		/* No far behaviour. */
+		/* FALSE far behaviour. */
 		return;
 	}
 

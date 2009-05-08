@@ -33,7 +33,7 @@
 #include "savegame.h"
 	// Added 18/11/97 by DHM: all hooks for my code
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 /* KJL 09:47:33 03/19/97 - vision stuff for marine and predator.
@@ -68,8 +68,8 @@ different way on the consoles, so I won't worry the PSX guys for now.
 #endif
 #endif
 
-#define	VERSION_DisableStartupMenus 	Yes
-#define VERSION_DisableStartupCredits	Yes
+#define	VERSION_DisableStartupMenus 	TRUE
+#define VERSION_DisableStartupCredits	TRUE
 #include "avp_menus.h"
 
 /******************

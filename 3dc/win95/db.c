@@ -160,7 +160,7 @@ static const char* db_assert_textA[ 3 ] =
 static const char* db_prompt_std =
 	"Quit program/force e(x)ception? [y/n/x]";
 static const char* db_prompt_windows =
-	"Quit program? [Yes/No]/force exception? [Cancel]";
+	"Quit program? [TRUE/FALSE]/force exception? [Cancel]";
 static const char* db_assert_log_begin_text =
 	"DB: FAILED ASSERTION BEGINS";
 static const char* db_assert_log_end_text =
@@ -654,7 +654,7 @@ static void db_do_win_prompt(const char* titleStrP, const char* bodyStrP)
 		NULL, 				/* Dialog has no KNOWN parent window. 			*/
 		bodyStrP,  			/* Message to go in box. 						*/
 		titleStrP,			/* Box title. 									*/
-		MB_YESNOCANCEL| 	/* Put up a 'Yes' and a 'No' button. 			*/
+		MB_YESNOCANCEL| 	/* Put up a 'TRUE' and a 'FALSE' button. 			*/
 		MB_SETFOREGROUND| 	/* Shove message box to front of display. 		*/
 		MB_ICONEXCLAMATION| /* Use an exclamation mark to decorate box. 	*/
 		MB_TASKMODAL 		/* Suspend current task until box is closed.	*/
@@ -863,7 +863,7 @@ static fontPtr CleanupFontLoadFail(HANDLE fH, fontPtr fontP)
 	/* Is the font struct allocated? */
 	if(fontP)
 	{
-		/* Yes. Is the bitmap allocated? If so, free it. */
+		/* TRUE. Is the bitmap allocated? If so, free it. */
 		if(fontP->bitmapP) GlobalFree(fontP->bitmapP);
 		
 		/* Is the proportional width data allocated. If so, free it. */

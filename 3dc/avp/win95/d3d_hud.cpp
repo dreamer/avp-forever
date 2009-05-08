@@ -46,7 +46,7 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 #include "d3d_hud.h"
 
 
-#define UseLocalAssert No
+#define UseLocalAssert FALSE
 #include "ourasert.h"
 											
 

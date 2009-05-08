@@ -2,7 +2,7 @@
 #include "inline.h"
 #include "module.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "psndplat.h"
 

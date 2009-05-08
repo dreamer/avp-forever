@@ -5,7 +5,7 @@
 #include "stratdef.h"
 #include "sfx.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 
@@ -462,17 +462,17 @@ LIGHTBLOCK* AddLightBlock(DISPLAYBLOCK *dptr, LIGHTBLOCK *lptr_to_add)
 
 	/* Are there any free slots? */
 
-	lfree = No;
+	lfree = FALSE;
 
 	larrayptr = &dptr->ObLights[0];
 	freelarrayptr = NULL;
 
-	for(i = MaxObjectLights; i!=0 && lfree == No; i--) {
+	for(i = MaxObjectLights; i!=0 && lfree == FALSE; i--) {
 
 		if(*larrayptr == 0) {
 
 			freelarrayptr = larrayptr;
-			lfree = Yes;
+			lfree = TRUE;
 
 		}
 

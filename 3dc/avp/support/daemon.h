@@ -17,9 +17,9 @@
 #endif
 
 /* Version settings *****************************************************/
-	#define SupportCallbackHooks	No
+	#define SupportCallbackHooks	FALSE
 
-	#define IndividualTiming		No
+	#define IndividualTiming		FALSE
 		/*
 			Should daemons get individually passed a time to run for,
 			or do they all share the same timing information?
@@ -30,8 +30,8 @@
 	#if SupportCallbackHooks
 		#define ACTIVITY_RETURN_TYPE	OurBool
 
-		#define ACTIVITY_RVAL_CHANGE	{return Yes;}
-		#define ACTIVITY_RVAL_NOCHANGE	{return No;}
+		#define ACTIVITY_RVAL_CHANGE	{return TRUE;}
+		#define ACTIVITY_RVAL_NOCHANGE	{return FALSE;}
 		#define ACTIVITY_RVAL_BOOL(b)	{return b;}
 	#else
 		#define ACTIVITY_RETURN_TYPE		void
@@ -97,7 +97,7 @@
 			OurBool bActive(void) const;
 
 			virtual ACTIVITY_RETURN_TYPE Activity(ACTIVITY_INPUT) = 0;
-				// the strategy to run when active; returns Yes if linked screen objects/gadgets will
+				// the strategy to run when active; returns TRUE if linked screen objects/gadgets will
 				// need updating
 			
 			#if SupportCallbackHooks

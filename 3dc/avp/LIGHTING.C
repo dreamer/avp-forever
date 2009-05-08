@@ -14,7 +14,7 @@
 #include "lighting.h"
 #include "particle.h"
 #include "dynamics.h"
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 static VECTORCH RotatingLightPosition;

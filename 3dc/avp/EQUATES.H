@@ -65,7 +65,7 @@ extern "C" {
 #define RScale 2
 #define VScale (6 + 3)
 
-#define Wibble Yes
+#define Wibble TRUE
 
 #define GlobalScale 1
 

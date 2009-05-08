@@ -26,7 +26,7 @@ CDOPERATIONSTATES;
 
 /* Patrick 10/6/97 --------------------------------------------------------------
   CDDA_Start/End are used to initialise and de-initialise the CDDA system.
-  No CDDA operations have any effect until the system has been initialised.
+  FALSE CDDA operations have any effect until the system has been initialised.
   -----------------------------------------------------------------------------*/
 extern void CDDA_Start(void);
 extern void CDDA_End(void);

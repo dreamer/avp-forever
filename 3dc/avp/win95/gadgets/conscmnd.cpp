@@ -13,7 +13,7 @@
 #include "conscmnd.hpp"
 #include "strutil.h"
 
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/
@@ -224,7 +224,7 @@
 
 	GLOBALASSERT( pProjCh_In );
 
-	OurBool bProcessed = No;
+	OurBool bProcessed = FALSE;
 
 	// Parse into words; find the first word.  Iterate through the commands
 	// looking for a match:
@@ -278,7 +278,7 @@
 					)
 					{
 						// Got match
-						bProcessed = Yes;
+						bProcessed = TRUE;
 
 						// Execute the function:
 						{

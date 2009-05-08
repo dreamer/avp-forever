@@ -20,7 +20,7 @@ so player.c is looking a bit bare at the moment. */
 #include "scream.h"
 #include "savegame.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 #include "psnd.h"
@@ -802,7 +802,7 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 	A little hack-et to make the predator tougher in multiplayer games
 	------------------------------------------------------------------*/
 	//if((AvP.Network!=I_No_Network)&&(AvP.PlayerType==I_Predator)) damage>>=1;
-	/* ChrisF 16/9/97 No, predators are now... wait for it... tough. */
+	/* ChrisF 16/9/97 FALSE, predators are now... wait for it... tough. */
 
 	if (playerStatusPtr->IsAlive)
 	{

@@ -13,7 +13,7 @@
 #include "bh_weap.h"
 #include "pldghost.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 #include "AvP_EnvInfo.h"

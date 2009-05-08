@@ -11,7 +11,7 @@
 #include "particle.h"
 #include "lighting.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 extern char *ModuleCurrVisArray;

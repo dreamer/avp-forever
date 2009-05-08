@@ -117,10 +117,10 @@
 */
 
 
-#define print_bfcro_stats No
+#define print_bfcro_stats FALSE
 
 #if SupportMorphing
-#define checkmorphpts No
+#define checkmorphpts FALSE
 #endif
 
 
@@ -1315,9 +1315,9 @@ int GT_LL(LONGLONGCH *a, LONGLONGCH *b)
 	int s = CMP_LL(a, b);		/* a-b */
 
 
-	if(s > 0) return (Yes);
+	if(s > 0) return (TRUE);
 
-	else return (No);
+	else return (FALSE);
 
 }
 
@@ -1341,9 +1341,9 @@ int LT_LL(LONGLONGCH *a, LONGLONGCH *b)
 	int s = CMP_LL(a, b);		/* a-b */
 
 
-	if(s < 0) return (Yes);
+	if(s < 0) return (TRUE);
 
-	else return (No);
+	else return (FALSE);
 
 }
 

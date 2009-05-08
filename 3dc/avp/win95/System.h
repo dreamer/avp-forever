@@ -18,25 +18,25 @@ extern "C" {
 
 /********************* SYSTEM, PLATFORM AND GAME************/
 
-/* redefined as visual studio 2008 uses Yes and No for sourceannotations.h */
-#define Yes 1
-#define No 0
+/* redefined as visual studio 2008 uses TRUE and FALSE for sourceannotations.h */
+#define TRUE 1
+#define FALSE 0
 
 #ifdef _DEBUG /* standard compiler command line debugging-ON switch */
-	#define debug Yes
+	#define debug TRUE
 #elif defined(NDEBUG) /* standard compiler command line debugging-OFF switch */
-	#define debug No
+	#define debug FALSE
 #else /* default switch */
-	#define debug Yes
+	#define debug TRUE
 #endif
 
-#define SuppressWarnings 	Yes
+#define SuppressWarnings 	TRUE
 							
-#define SupportWindows95	Yes
-#define Saturn				No
-#define PSX					No
-#define platform_pc 		Yes
-#define InterfaceEngine		No
+#define SupportWindows95	TRUE
+#define Saturn				FALSE
+#define PSX					FALSE
+#define platform_pc 		TRUE
+#define InterfaceEngine		FALSE
 
 #define Term -1
 
@@ -44,8 +44,8 @@ extern "C" {
 
 /********************  General *****************************/
 
-#define SupportFPMathsFunctions				Yes
-#define SupportFPSquareRoot					Yes
+#define SupportFPMathsFunctions				TRUE
+#define SupportFPSquareRoot					TRUE
 
 #define GlobalScale 1
 
@@ -56,8 +56,8 @@ extern "C" {
 #define ONE_FIXED 65536
 #define ONE_FIXED_SHIFT 16
 
-#define Analogue	Yes
-#define Digital	No
+#define Analogue	TRUE
+#define Digital	FALSE
 
 
 /* Offsets from *** int pointer *** for vectors and vertices */
@@ -70,15 +70,15 @@ typedef enum {
 
 } PTARRAYINDICES;
 
-#define StopCompilationOnMultipleInclusions No
-#define UseProjPlatAssert                   Yes /* assert fired functions are in dxlog.c */
+#define StopCompilationOnMultipleInclusions FALSE
+#define UseProjPlatAssert                   TRUE /* assert fired functions are in dxlog.c */
 
 
 /***************  CAMERA AND VIEW VOL********************/
 #define NearZ 	1024
 #define FarZ 	ONE_FIXED
 
-#define SupportMultiCamModules	Yes
+#define SupportMultiCamModules	TRUE
 
 
 
@@ -89,7 +89,7 @@ typedef enum {
 #define NormalFrame ONE_FIXED
 #define NormalFrameShift ONE_FIXED_SHIFT
 
-#define UseAlarmTimer							No
+#define UseAlarmTimer							FALSE
 
 
 
@@ -124,13 +124,13 @@ typedef struct oc_entry {
 } OC_ENTRY;
 
 /* now defunct - see next four defines*/
-#define Hardware2dTextureClipping No
+#define Hardware2dTextureClipping FALSE
 
-#define Texture3dClamping  No
-#define Texture2dClamping  No
-#define Texture3dSubdivide No
+#define Texture3dClamping  FALSE
+#define Texture2dClamping  FALSE
+#define Texture3dSubdivide FALSE
 
-#define SaturnHazing No
+#define SaturnHazing FALSE
 
 /***************** Angles  and VALUES ******************/
 
@@ -198,20 +198,20 @@ extern int maxshapes;
 
 /************** Some Shell and Loading Platform Compiler Options ******************/
 
-#define binary_loading						No
+#define binary_loading						FALSE
 #undef RIFF_SYSTEM
 #define RIFF_SYSTEM
-#define TestRiffLoaders Yes
-#define SupportFarStrategyModel				No
-#define LoadingMapsShapesAndTexturesEtc		No
+#define TestRiffLoaders TRUE
+#define SupportFarStrategyModel				FALSE
+#define LoadingMapsShapesAndTexturesEtc		FALSE
 
-#define pc_backdrops						No
+#define pc_backdrops						FALSE
 
-#define flic_player							Yes
+#define flic_player							TRUE
 
-#define SaturnCDQueueSystem					No
+#define SaturnCDQueueSystem					FALSE
 
-#define DynamicAdaptationToFrameRate		No
+#define DynamicAdaptationToFrameRate		FALSE
 
 
 /***************** DRAW SORT *******************/
@@ -219,13 +219,13 @@ extern int maxshapes;
 
 
 
-#define SupportTrackOptimisation			No
+#define SupportTrackOptimisation			FALSE
 
 
-#define SupportBSP						 	No
+#define SupportBSP						 	FALSE
 
-#define SupportZBuffering					Yes
-#define ZBufferTest							No
+#define SupportZBuffering					TRUE
+#define ZBufferTest							FALSE
 
 
 
@@ -233,16 +233,16 @@ extern int maxshapes;
 
 /***************** SHAPE DATA DEFINES************/
 
-#define StandardShapeLanguage					Yes
+#define StandardShapeLanguage					TRUE
 
-#define CalcShapeExtents						No
-#define SupportModules 							Yes
-#define IncludeModuleFunctionPrototypes			Yes
-#define SupportDynamicModuleObjects				Yes
+#define CalcShapeExtents						FALSE
+#define SupportModules 							TRUE
+#define IncludeModuleFunctionPrototypes			TRUE
+#define SupportDynamicModuleObjects				TRUE
 
 
-#define SupportMorphing							Yes
-#define LazyEvaluationForMorphing				No
+#define SupportMorphing							TRUE
+#define LazyEvaluationForMorphing				FALSE
 
 
 
@@ -253,15 +253,15 @@ extern int maxshapes;
 
 
 /***************** COLLISION DEFINES*************/
-#define StandardStrategyAndCollisions		No
-#define IntermediateSSACM	No		/* User preference */
+#define StandardStrategyAndCollisions		FALSE
+#define IntermediateSSACM	FALSE		/* User preference */
 
 
 
 /************** TEXTURE DEFINES*******************/
 
 
-#define LoadPGMPalettesFromAnywhere Yes
+#define LoadPGMPalettesFromAnywhere TRUE
 
 
 #define maxTxAnimblocks	100
@@ -273,19 +273,19 @@ extern int maxshapes;
 #define ClrTxIndex 0xffff0000	/* AND with this to clear the low 16-bits */
 #define ClrTxDefn 0x0000ffff	/* AND with this to clear the high 16-bits */
 
-#define draw_palette						No
+#define draw_palette						FALSE
 
-#define AssumeTextures256Wide				Yes
+#define AssumeTextures256Wide				TRUE
 
 #define remap_table_rgb_bits 4		/* Gives 4,096 entries */
 
-#define Remap24BitBMPFilesInRaw256Mode      No
-#define Remap8BitBMPFilesInRaw256Mode       No
+#define Remap24BitBMPFilesInRaw256Mode      FALSE
+#define Remap8BitBMPFilesInRaw256Mode       FALSE
 
-#define SupportMIPMapping					No
-#define UseMIPMax							No
-#define UseMIPMin							No
-#define UseMIPAvg							Yes
+#define SupportMIPMapping					FALSE
+#define UseMIPMax							FALSE
+#define UseMIPMin							FALSE
+#define UseMIPAvg							TRUE
 
 /* Jake's addition to mip-mapping */
 /* improves resolution of mip images chosen for the scandraws */
@@ -294,7 +294,7 @@ extern int maxshapes;
 /* What to do if the images are not the most suitable size for mip mapping ... */
 /* Set this if you have inappropriately sized images and you want */
 /* the mip maps' sizes to be rounded up eg. 161x82 -> 81x41 -> 21x11 -> 11x6 -> 6x3 -> 3x2 -> 2x1 */
-#define MIP_ROUNDUP        Yes
+#define MIP_ROUNDUP        TRUE
 
 #if 0
 #define num_shadetable_entries	256
@@ -317,9 +317,9 @@ extern int maxshapes;
  1/Z now reaches 0 at 2^29 = 537km
 */
 
-#define support3dtextures					Yes
-#define int3dtextures						No /* there is no D3D Zbuffer support for int 3d textures */
-#define SupportGouraud3dTextures  			Yes
+#define support3dtextures					TRUE
+#define int3dtextures						FALSE /* there is no D3D Zbuffer support for int 3d textures */
+#define SupportGouraud3dTextures  			TRUE
 
 
 
@@ -336,8 +336,8 @@ extern int maxshapes;
 #define MaxD3DInstructions 1000 // includes state change instructions!!!
 #define MaxD3DVertices     256
 
-#define optimiseflip No /* unstable at present */
-#define optimiseblit Yes /* unstable at present */
+#define optimiseflip FALSE /* unstable at present */
+#define optimiseblit TRUE /* unstable at present */
 
 
 

@@ -30,7 +30,7 @@
 #include "ShowCmds.h"
 #include "pfarlocs.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 #include "game_statistics.h"

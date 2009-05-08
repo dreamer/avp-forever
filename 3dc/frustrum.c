@@ -18,7 +18,7 @@
 
 #include "particle.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 /*KJL****************************************************************************************

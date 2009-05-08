@@ -2,7 +2,7 @@
 #include "bh_spcl.h"
 #include "dynblock.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 
 #include "ourasert.h"
 #include "vision.h"

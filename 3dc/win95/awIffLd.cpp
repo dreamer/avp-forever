@@ -385,7 +385,7 @@ void AwIffLoader::OnBeginRestoring(unsigned nMaxPaletteSize)
 		else
 		{
 	 		awTlLastErr = AW_TLE_CANTPALETTIZE; // no suitable chunk found
-		 	db_log3("AwCreateTexture(): ERROR: No suitable IFF body chunk found");
+		 	db_log3("AwCreateTexture(): ERROR: FALSE suitable IFF body chunk found");
 	 	}
 	}
 	else

@@ -18,11 +18,11 @@ extern "C"
 {
 	#include "d3d_hud.h"
 };
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/
-	#define Use_BLT	No	
+	#define Use_BLT	FALSE	
 
 /* Constants *******************************************************/
 
@@ -114,13 +114,13 @@ OurBool IndexedFont :: bCanRenderFully( ProjChar* pProjCh )
 			!bCanRender( *pProjCh )
 		)
 		{
-			return No;
+			return FALSE;
 		}
 		
 		pProjCh++;
 	}
 
-	return Yes;
+	return TRUE;
 }
 
 #if debug

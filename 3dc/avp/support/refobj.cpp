@@ -20,12 +20,12 @@
 		#endif
 	#endif
 
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Version settings ************************************************/
 	#if TrackReferenceCounted
-		#define OutputRefCountLogOnExit	Yes
+		#define OutputRefCountLogOnExit	TRUE
 	
 		
 		#if OutputRefCountLogOnExit

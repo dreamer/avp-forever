@@ -13,9 +13,9 @@
 #include "3dc.h"
 #include "inline.h"
 
-#define UseTimsPinp Yes
+#define UseTimsPinp TRUE
 
-#define trip_debugger No
+#define trip_debugger FALSE
 
 #if trip_debugger
 int testa = 0;
@@ -183,7 +183,7 @@ int VectorDistance(VECTORCH *v1, VECTORCH *v2)
 /*
 
  This function compares the distance between two vectors along each of
- the major axes and returns Yes or No if they are within the cube defined
+ the major axes and returns TRUE or FALSE if they are within the cube defined
  by the argument passed.
 
 */
@@ -196,19 +196,19 @@ int OutcodeVectorDistance(VECTORCH *v1, VECTORCH *v2, int d)
 	i = v1->vx - v2->vx;
 	if(i < 0) i = -i;
 
-	if(i >= d) return No;
+	if(i >= d) return FALSE;
 
 	i = v1->vy - v2->vy;
 	if(i < 0) i = -i;
 
-	if(i >= d) return No;
+	if(i >= d) return FALSE;
 
 	i = v1->vz - v2->vz;
 	if(i < 0) i = -i;
 
-	if(i >= d) return No;
+	if(i >= d) return FALSE;
 
-	return Yes;
+	return TRUE;
 }
 
 
@@ -972,7 +972,7 @@ void _RotateAndCopyVector(v1, v2, m)
 #define ONE_FIXED_S ((ONE_FIXED >> m2e_scale) - 1)
 #define m2e_shift 14
 
-#define j_and_r_change Yes
+#define j_and_r_change TRUE
 
 
 void MatrixToEuler(MATRIXCH *m, EULER *e)
@@ -1123,7 +1123,7 @@ void MatrixToEuler(MATRIXCH *m, EULER *e)
 			}
 		}
 
-		#if (j_and_r_change == No)
+		#if (j_and_r_change == FALSE)
 		x = -x;
 		x &= wrap360;
 		#endif
@@ -1156,7 +1156,7 @@ void MatrixToEuler(MATRIXCH *m, EULER *e)
 
 		}
 
-		#if (j_and_r_change == No)
+		#if (j_and_r_change == FALSE)
 		x = -x;
 		x &= wrap360;
 		#endif
@@ -1187,7 +1187,7 @@ void MatrixToEuler(MATRIXCH *m, EULER *e)
 			}
 		}
 
-		#if (j_and_r_change == No)
+		#if (j_and_r_change == FALSE)
 		x =  -x;
 		x &= wrap360;
 		#endif
@@ -1239,7 +1239,7 @@ void MatrixToEuler(MATRIXCH *m, EULER *e)
 
 		}
 
-		#if (j_and_r_change == No)
+		#if (j_and_r_change == FALSE)
 		x = -x;
 		x &= wrap360;
 		#endif
@@ -1269,7 +1269,7 @@ void MatrixToEuler(MATRIXCH *m, EULER *e)
 
 
 
-#define j_and_r_change_2 Yes
+#define j_and_r_change_2 TRUE
 
 void MatrixToEuler2(MATRIXCH *m, EULER *e)
 
@@ -1417,7 +1417,7 @@ void MatrixToEuler2(MATRIXCH *m, EULER *e)
 		}
 	}
 
-	#if (j_and_r_change_2 == No)
+	#if (j_and_r_change_2 == FALSE)
 	x = -x;
 	x &= wrap360;
 	#endif
@@ -1450,7 +1450,7 @@ void MatrixToEuler2(MATRIXCH *m, EULER *e)
 
 	}
 
-	#if (j_and_r_change_2 == No)
+	#if (j_and_r_change_2 == FALSE)
 	x = -x;
 	x &= wrap360;
 	#endif
@@ -1481,7 +1481,7 @@ void MatrixToEuler2(MATRIXCH *m, EULER *e)
 		}
 	}
 
-	#if (j_and_r_change_2 == No)
+	#if (j_and_r_change_2 == FALSE)
 	x =  -x;
 	x &= wrap360;
 	#endif
@@ -1783,9 +1783,9 @@ int ArcTan(height_x, width_z)
 	sign=0;
 
 	if((height_x<0 && width_z<0) || (height_x>=0 && width_z>=0))
-		signsame=Yes;
+		signsame=TRUE;
 	else
-		signsame=No;
+		signsame=FALSE;
 
 	abs_height_x=height_x;
 	if(abs_height_x<0) abs_height_x=-abs_height_x;
@@ -1837,7 +1837,7 @@ int ArcTan(height_x, width_z)
 
 	}
 
-	if(signsame==No) angle=-angle;
+	if(signsame==FALSE) angle=-angle;
 
 	if(width_z<=0) angle+=deg180;
 
@@ -2038,7 +2038,7 @@ void MakeVectorLocal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, MATRIXCH *m)
 
 /*
 
- Returns "Yes" if "point" is inside "polygon"
+ Returns "TRUE" if "point" is inside "polygon"
 
 
  **************************************************
@@ -2094,7 +2094,7 @@ int PointInPolygon(int *point, int *polygon, int c, int ppsize)
   LONGLONGCH a_ll, b_ll;
 
   /* reject lines and points */
-  if (c < 3) return(No);
+  if (c < 3) return(FALSE);
 
   intersects = 0;
 
@@ -2190,12 +2190,12 @@ int PointInPolygon(int *point, int *polygon, int c, int ppsize)
   if (intersects & 1)
   {
     /* Odd number of intersections -- point is inside polygon */
-    return(Yes);
+    return(TRUE);
   }
   else
   {
     /* even number of intersections -- point is outside polygon */
-    return(No);
+    return(FALSE);
   }
 
 
@@ -2224,7 +2224,7 @@ int PointInPolygon(int *point, int *polygon, int c, int ppsize)
 
 	/* Reject points and lines */
 
-	if(c < 3) return No;
+	if(c < 3) return FALSE;
 
 
 	/* Find the average point */
@@ -2378,12 +2378,12 @@ int PointInPolygon(int *point, int *polygon, int c, int ppsize)
 	/* Dot result monitor */
 
 	ivdotcnt = 0;
-	ivstate  = Yes;			/* assume inside */
+	ivstate  = TRUE;			/* assume inside */
 
 
 	/* Test v(s, t) against the vectors */
 
-	for(i = c; i!=0 && ivstate == Yes; i--) {
+	for(i = c; i!=0 && ivstate == TRUE; i--) {
 
 
 		/* second vector pointer wraps once */
@@ -2430,7 +2430,7 @@ int PointInPolygon(int *point, int *polygon, int c, int ppsize)
 
 		else {
 
-			if(sgn_ivdot != sgn_currivdot) ivstate = No;
+			if(sgn_ivdot != sgn_currivdot) ivstate = FALSE;
 			sgn_currivdot = sgn_ivdot;
 
 		}
@@ -2442,8 +2442,8 @@ int PointInPolygon(int *point, int *polygon, int c, int ppsize)
 
 	}
 
-	if(ivstate) return Yes;
-	else return No;
+	if(ivstate) return TRUE;
+	else return FALSE;
 
 
 #endif

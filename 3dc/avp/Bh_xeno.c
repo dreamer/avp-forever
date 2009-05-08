@@ -40,7 +40,7 @@
 #include "bh_corpse.h"
 #include "bh_dummy.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 #include "psnd.h"
@@ -885,7 +885,7 @@ void XenoborgBehaviour(STRATEGYBLOCK *sbPtr)
 			}
 			break;
 		default:
-			/* No action? */
+			/* FALSE action? */
 			break;
 	}
 
@@ -923,7 +923,7 @@ void XenoborgBehaviour(STRATEGYBLOCK *sbPtr)
 	Xeno_MaintainSounds(sbPtr);
 
 	if (xenoStatusPointer->IAmFar) {
-		/* No lasers if far. */
+		/* FALSE lasers if far. */
 		xenoStatusPointer->UseHeadLaser=0;
 		xenoStatusPointer->UseLALaser=0;
 		xenoStatusPointer->UseRALaser=0;
@@ -1230,7 +1230,7 @@ static void KillXeno(STRATEGYBLOCK *sbPtr,int wounds,DAMAGE_PROFILE *damage, int
 		deathtype=3;
 	}
 	
-	/* No gibbing for flamethrower. */
+	/* FALSE gibbing for flamethrower. */
 
 	{
 		SECTION_DATA *chest=GetThisSectionData(xenoStatusPointer->HModelController.section_data,"chest");
@@ -3385,7 +3385,7 @@ void Xeno_TorsoMovement_TrackToAngle(STRATEGYBLOCK *sbPtr,int rate,int in_anglex
 	xenoStatusPointer = (XENO_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
 	LOCALASSERT(xenoStatusPointer);
 
-	/* Turn the torso to face a certain way. No angley here. */
+	/* Turn the torso to face a certain way. FALSE angley here. */
 
 	anglex=in_anglex;
 
@@ -3429,7 +3429,7 @@ void Xeno_TorsoMovement_Centre(STRATEGYBLOCK *sbPtr,int rate)
 	xenoStatusPointer = (XENO_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
 	LOCALASSERT(xenoStatusPointer);
 
-	/* Turn the torso to face a certain way. No angley here. */
+	/* Turn the torso to face a certain way. FALSE angley here. */
 
 	if (xenoStatusPointer->Torso_Twist<0) {
 		xenoStatusPointer->Torso_Twist+=(NormalFrameTime>>rate);
@@ -4828,7 +4828,7 @@ void Xeno_MaintainSounds(STRATEGYBLOCK *sbPtr) {
 	/* Head. */
 	sec=GetThisSectionData(xenoStatusPointer->HModelController.section_data,"head");
 	if (sec==NULL) {
-		/* No sound. */
+		/* FALSE sound. */
 		if (xenoStatusPointer->head_whirr!=SOUND_NOACTIVEINDEX) {
 			Sound_Stop(xenoStatusPointer->head_whirr);
 		}
@@ -4852,7 +4852,7 @@ void Xeno_MaintainSounds(STRATEGYBLOCK *sbPtr) {
 	/* Left Arm. */
 	sec=GetThisSectionData(xenoStatusPointer->HModelController.section_data,"left bicep");
 	if (sec==NULL) {
-		/* No sound. */
+		/* FALSE sound. */
 		if (xenoStatusPointer->left_arm_whirr!=SOUND_NOACTIVEINDEX) {
 			Sound_Stop(xenoStatusPointer->left_arm_whirr);
 		}
@@ -4876,7 +4876,7 @@ void Xeno_MaintainSounds(STRATEGYBLOCK *sbPtr) {
 	/* Right Arm. */
 	sec=GetThisSectionData(xenoStatusPointer->HModelController.section_data,"right bicep");
 	if (sec==NULL) {
-		/* No sound. */
+		/* FALSE sound. */
 		if (xenoStatusPointer->right_arm_whirr!=SOUND_NOACTIVEINDEX) {
 			Sound_Stop(xenoStatusPointer->right_arm_whirr);
 		}
@@ -4900,7 +4900,7 @@ void Xeno_MaintainSounds(STRATEGYBLOCK *sbPtr) {
 	/* Torso Twist. */
 	sec=GetThisSectionData(xenoStatusPointer->HModelController.section_data,"chest");
 	if (sec==NULL) {
-		/* No sound. */
+		/* FALSE sound. */
 		if (xenoStatusPointer->torso_whirr!=SOUND_NOACTIVEINDEX) {
 			Sound_Stop(xenoStatusPointer->torso_whirr);
 		}

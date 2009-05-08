@@ -18,7 +18,7 @@
 #include "pfarlocs.h"
 #include "pvisible.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 

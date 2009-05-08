@@ -8,7 +8,7 @@
 
 #include "dynblock.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "bh_alien.h"
 #include "bh_marin.h"

@@ -8,7 +8,7 @@ extern "C" {
 #include "d3d_hud.h"
 #include "particle.h"
 
-#define UseLocalAssert No
+#define UseLocalAssert FALSE
 #include "ourasert.h"
 #include <assert.h>
 
@@ -138,7 +138,7 @@ extern AVPMENUGFX AvPMenuGfxStorage[];
 #define RGBLIGHT_MAKE(r,g,b) RGB_MAKE(r,g,b)
 #define RGBALIGHT_MAKE(r,g,b,a) RGBA_MAKE(r,g,b,a)
 
-// Set to Yes to make default texture filter bilinear averaging rather
+// Set to TRUE to make default texture filter bilinear averaging rather
 // than nearest
 //extern BOOL BilinearTextureFilter;
 
@@ -1919,9 +1919,9 @@ void D3D_CloakedPredatorPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *re
 // greater cost than the (rare) savings in floating pt divisions are worth.
 // Or so I claim...
 
-    if (D3DTexturePerspective != Yes)
+    if (D3DTexturePerspective != TRUE)
     {
-		D3DTexturePerspective = Yes;
+		D3DTexturePerspective = TRUE;
 		//OP_STATE_RENDER(1, ExecBufInstPtr);
 		//STATE_DATA(D3DRENDERSTATE_TEXTUREPERSPECTIVE, TRUE, ExecBufInstPtr);
 	}
@@ -2211,9 +2211,9 @@ void D3D_ZBufferedTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *
 	if ((flags & iflag_drawtx3das2d) ||
 		(Global_VDB_Ptr->VDB_Flags & ViewDB_Flag_drawtx3das2d))
 	{
-		if (D3DTexturePerspective != No)
+		if (D3DTexturePerspective != FALSE)
 		{
-			D3DTexturePerspective = No;
+			D3DTexturePerspective = FALSE;
 			//OP_STATE_RENDER(1, ExecBufInstPtr);
 			//STATE_DATA(D3DRENDERSTATE_TEXTUREPERSPECTIVE,
 			//FALSE, ExecBufInstPtr);
@@ -2221,9 +2221,9 @@ void D3D_ZBufferedTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *
 	}
 	else
 	{
-		if (D3DTexturePerspective != Yes)
+		if (D3DTexturePerspective != TRUE)
 		{
-			D3DTexturePerspective = Yes;
+			D3DTexturePerspective = TRUE;
 			//OP_STATE_RENDER(1, ExecBufInstPtr);
 			//STATE_DATA(D3DRENDERSTATE_TEXTUREPERSPECTIVE,
 			//TRUE, ExecBufInstPtr);
@@ -3046,9 +3046,9 @@ void D3D_FMVParticle_Output(RENDERVERTEX *renderVerticesPtr)
 
 		CheckTranslucencyModeIsCorrect(TRANSLUCENCY_NORMAL);
 
-	    if (D3DTexturePerspective != Yes)
+	    if (D3DTexturePerspective != TRUE)
 	    {
-			D3DTexturePerspective = Yes;
+			D3DTexturePerspective = TRUE;
 			//OP_STATE_RENDER(1, ExecBufInstPtr);
 			//STATE_DATA(D3DRENDERSTATE_TEXTUREPERSPECTIVE, TRUE, ExecBufInstPtr);
 		}
@@ -5707,9 +5707,9 @@ void DrawFBM(void)
 	        STATE_DATA(D3DRENDERSTATE_TEXTUREHANDLE, TextureHandle, ExecBufInstPtr);
 	        CurrTextureHandle = NoiseTextureHandle;
 		}
-	    if (D3DTexturePerspective != No)
+	    if (D3DTexturePerspective != FALSE)
 		{
-			D3DTexturePerspective = No;
+			D3DTexturePerspective = FALSE;
 			OP_STATE_RENDER(1, ExecBufInstPtr);
 			STATE_DATA(D3DRENDERSTATE_TEXTUREPERSPECTIVE, FALSE, ExecBufInstPtr);
 		}
@@ -8079,9 +8079,9 @@ void D3D_Polygon_Output(RENDERVERTEX *renderVerticesPtr)
 
 	CheckTranslucencyModeIsCorrect(RenderPolygon.TranslucencyMode);
 
-    if (D3DTexturePerspective != Yes)
+    if (D3DTexturePerspective != TRUE)
     {
-		D3DTexturePerspective = Yes;
+		D3DTexturePerspective = TRUE;
 		OP_STATE_RENDER(1, ExecBufInstPtr);
 		STATE_DATA(D3DRENDERSTATE_TEXTUREPERSPECTIVE, TRUE, ExecBufInstPtr);
 	}

@@ -25,11 +25,11 @@
 #include "weapons.h"
 #include "psnd.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 /*This allows ai not to go for the shortest all the time*/
-#define ALLOW_USE_OF_LONGER_PATHS Yes
+#define ALLOW_USE_OF_LONGER_PATHS TRUE
 
 int NPC_Waypoints;
 int Num_Target_Waypoints;

@@ -76,16 +76,16 @@ extern "C++"
 // to look better on the software RGB driver, anyway,
 // leading me to suspect that my runtime ppm quantiser
 // is, ahem, less than totally perfect...
-#define PreferPalettisedTextures Yes
+#define PreferPalettisedTextures TRUE
 
 // Test hack to force driver zero (mono
 // rather than RGB), plus others.  Should
-// all be No in theory.  Turn on only one
+// all be FALSE in theory.  Turn on only one
 // at a time!!!
-#define ForceRampDriver No
-#define ForceRGBDriver No
-#define ForceHardwareDriver No
-#define ForceDirectDraw No
+#define ForceRampDriver FALSE
+#define ForceRGBDriver FALSE
+#define ForceHardwareDriver FALSE
+#define ForceDirectDraw FALSE
 
 // Externs
 
@@ -111,7 +111,7 @@ extern BOOL MMXAvailable;
 
 // Globals
 // Test only!!!
-int TestHw = No;
+int TestHw = FALSE;
 
 
 // Callback function to enumerate texture
@@ -143,12 +143,12 @@ HRESULT CALLBACK TextureFormatsEnumerator
 
     if (lpDDSD->ddpfPixelFormat.dwFlags & DDPF_PALETTEINDEXED8)
 	  {
-       d3d.TextureFormat[d3d.NumTextureFormats].Palette = Yes;
+       d3d.TextureFormat[d3d.NumTextureFormats].Palette = TRUE;
        d3d.TextureFormat[d3d.NumTextureFormats].IndexBPP = 8;
       } 
     else if (lpDDSD->ddpfPixelFormat.dwFlags & DDPF_PALETTEINDEXED4) 
       {
-       d3d.TextureFormat[d3d.NumTextureFormats].Palette = Yes;
+       d3d.TextureFormat[d3d.NumTextureFormats].Palette = TRUE;
        d3d.TextureFormat[d3d.NumTextureFormats].IndexBPP = 4;
       } 
     else if (lpDDSD->ddpfPixelFormat.dwFlags & (DDPF_ALPHA|DDPF_ALPHAPIXELS|DDPF_FOURCC))
@@ -160,7 +160,7 @@ HRESULT CALLBACK TextureFormatsEnumerator
 	   // This bit is all fiendishly cunning, Dr Tringham,
 	   // but one has to wonder if it actually, as such,
 	   // works...
-       d3d.TextureFormat[d3d.NumTextureFormats].Palette = No;
+       d3d.TextureFormat[d3d.NumTextureFormats].Palette = FALSE;
        d3d.TextureFormat[d3d.NumTextureFormats].IndexBPP = 0;
        for (r = 0, m = lpDDSD->ddpfPixelFormat.dwRBitMask; 
           !(m & 1); r++, m >>= 1);
@@ -223,19 +223,19 @@ void SelectD3DDriverAndDrawMode(void)
 #if 0
 // Note that if we have requested default rasterisation and hw is 
 // available, we may want to pick the software RGB driver if MMXAvailable
-// is Yes!!! Fix later!!!
+// is TRUE!!! Fix later!!!
     if ((D3DHardwareAvailable) 
       && (RasterisationRequestMode != RequestSoftwareRasterisation))
 	  {
 	   int i=0;
-	   BOOL EarlyExit = No;
+	   BOOL EarlyExit = FALSE;
 
        do 
 	     {
 		  if (d3d.Driver[i].Hardware)
 		    {
 		     d3d.CurrentDriver = i;
-			 EarlyExit = Yes;
+			 EarlyExit = TRUE;
 			}
 		 }
 	   while ((++i < d3d.NumDrivers) && !EarlyExit);
@@ -244,11 +244,11 @@ void SelectD3DDriverAndDrawMode(void)
 	   ScanDrawMode = ScanDrawD3DHardwareRGB;
 	  }
 // Note that we may want to select the software RGB driver if default scan
-// draws have been requested, should MMXAvailable be Yes...
+// draws have been requested, should MMXAvailable be TRUE...
 	else if (SoftwareScanDrawRequestMode == RequestScanDrawSoftwareRGB)
 	  {
 	   int i=0;
-	   BOOL EarlyExit = No;
+	   BOOL EarlyExit = FALSE;
 #if 0 // bjd
        do 
 	     {
@@ -256,7 +256,7 @@ void SelectD3DDriverAndDrawMode(void)
 		    (d3d.Driver[i].Desc.dcmColorModel == D3DCOLOR_RGB))
 		    {
 		     d3d.CurrentDriver = i;
-			 EarlyExit = Yes;
+			 EarlyExit = TRUE;
 			}
 		 }
 	   while ((++i < d3d.NumDrivers) && !EarlyExit);
@@ -271,7 +271,7 @@ void SelectD3DDriverAndDrawMode(void)
 	else if (SoftwareScanDrawRequestMode == RequestScanDrawRamp)
 	  {
 	   int i=0;
-	   BOOL EarlyExit = No;
+	   BOOL EarlyExit = FALSE;
 #if 0 // bjd
        do 
 	     {
@@ -279,7 +279,7 @@ void SelectD3DDriverAndDrawMode(void)
 		    (d3d.Driver[i].Desc.dcmColorModel == D3DCOLOR_MONO))
 		    {
 		     d3d.CurrentDriver = i;
-			 EarlyExit = Yes;
+			 EarlyExit = TRUE;
 			}
 		 }
 	   while ((++i < d3d.NumDrivers) && !EarlyExit);
@@ -291,7 +291,7 @@ void SelectD3DDriverAndDrawMode(void)
 	     || (SoftwareScanDrawRequestMode == RequestScanDrawDefault))
 	  {
 	   int i=0;
-	   BOOL EarlyExit = No;
+	   BOOL EarlyExit = FALSE;
 
 #if 0 // bjd
        // Set ramp driver anyway for convenience
@@ -301,7 +301,7 @@ void SelectD3DDriverAndDrawMode(void)
 		    (d3d.Driver[i].Desc.dcmColorModel == D3DCOLOR_MONO))
 		    {
 		     d3d.CurrentDriver = i;
-			 EarlyExit = Yes;
+			 EarlyExit = TRUE;
 			}
 		 }
 	   while ((++i < d3d.NumDrivers) && !EarlyExit);
@@ -387,7 +387,7 @@ BOOL TestInitD3DObject(void)
 	return true;
 #if 0
     // Zero hardware available global
-	D3DHardwareAvailable = No;
+	D3DHardwareAvailable = FALSE;
 
 // Zero d3d structure
     memset(&d3d, 0, sizeof(D3DINFO));
@@ -467,9 +467,9 @@ BOOL TestInitD3DObject(void)
    // test only!!!
      {
 	  if (D3DHardwareAvailable)
-        TestHw = Yes;
+        TestHw = TRUE;
 	  else
-	    TestHw = No;
+	    TestHw = FALSE;
 	 }
    #endif
 

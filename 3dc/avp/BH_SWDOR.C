@@ -11,7 +11,7 @@
 #include "mslhand.h"
 #include "psnd.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 
 #include "ourasert.h"
 #include "pvisible.h"

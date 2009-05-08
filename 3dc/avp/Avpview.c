@@ -22,7 +22,7 @@
 #include "extents.h"
 #include "avp_userprofile.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 /* KJL 13:59:05 04/19/97 - avpview.c
@@ -552,11 +552,11 @@ void AVPGetInViewVolumeList(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 		DISPLAYBLOCK *dptr = *activeblocksptr++;
 	
 		if (dptr==Player) continue;
-		MVis = Yes;
+		MVis = TRUE;
 		if(dptr->ObMyModule)
 		{
 			MODULE *mptr = dptr->ObMyModule;
-			if(ModuleCurrVisArray[mptr->m_index] != 2) MVis = No;
+			if(ModuleCurrVisArray[mptr->m_index] != 2) MVis = FALSE;
 			else
 			{
 				extern int NumberOfLandscapePolygons;
@@ -833,7 +833,7 @@ void InitialiseRenderer(void)
 
  General View Volume Test for Objects and Sub-Object Trees
 
- This function returns returns "Yes" / "True" for an if()
+ This function returns returns "TRUE" / "True" for an if()
 
 */
 
@@ -849,10 +849,10 @@ int AVPViewVolumeTest(VIEWDESCRIPTORBLOCK *VDB_Ptr, DISPLAYBLOCK *dblockptr)
 	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipRightPlane, dblockptr, or) &&
 	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipUpPlane, dblockptr, or) &&
 	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipDownPlane, dblockptr, or))
-		return Yes;
+		return TRUE;
 
 	else
-		return No;
+		return FALSE;
 
 }
 /*
@@ -870,8 +870,8 @@ int AVPViewVolumePlaneTest(CLIPPLANEBLOCK *cpb, DISPLAYBLOCK *dblockptr, int or)
 
 	MakeVector(&dblockptr->ObView, &cpb->CPB_POP, &POPRelObView);
 
-	if(DotProduct(&POPRelObView, &cpb->CPB_Normal) < or) return Yes;
-	else return No;
+	if(DotProduct(&POPRelObView, &cpb->CPB_Normal) < or) return TRUE;
+	else return FALSE;
 }
 
 

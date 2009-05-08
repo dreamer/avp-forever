@@ -40,7 +40,7 @@ unsigned char ksarray[256];
 unsigned char ToAsciiTable[256][256];
 
 // Dubious
-#define grabmousecapture No
+#define grabmousecapture FALSE
 
 /*
 	Name of project window etc for Win95 interface

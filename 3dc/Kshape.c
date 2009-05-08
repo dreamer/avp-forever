@@ -13,7 +13,7 @@
 #include "kzsort.h"
 #include "frustrum.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "equipmnt.h"
 #include "bh_pred.h"
@@ -167,7 +167,7 @@ int ItemColour=1;
 
 #if SupportMorphing
 
-#if (LazyEvaluationForMorphing == No)
+#if (LazyEvaluationForMorphing == FALSE)
 VECTORCH MorphedPts[maxmorphPts];
 #endif
 
@@ -3408,14 +3408,14 @@ void ShapeSpritePointsInstr(SHAPEINSTR *shapeinstrptr)
 
 //I've put my alterations to the sprite rotation
 //in the #else part.Richard
-#define UseKevinsModifiedSSRPI No
+#define UseKevinsModifiedSSRPI FALSE
 
 
 #if UseKevinsModifiedSSRPI
 
 
 
-#define ssrpi_kill_py Yes
+#define ssrpi_kill_py TRUE
 
 void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 
@@ -3615,7 +3615,7 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 
 
 
-#define ssrpi_kill_py No
+#define ssrpi_kill_py FALSE
 
 void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 

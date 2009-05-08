@@ -18,11 +18,11 @@
 #include "scrobj.hpp"
 #endif
 	
-	#define UseLocalAssert Yes
+	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
 /* Constants *******************************************************/
-	#define UseRealFrameTime	Yes
+	#define UseRealFrameTime	TRUE
 
 /* Imported function prototypes ************************************/
 
@@ -126,7 +126,7 @@ Daemon :: Daemon
 	pFirstHook= NULL;
 	#endif
 	
-	fIsActive_Val = No;
+	fIsActive_Val = FALSE;
 
 	if (fActive)
 	{
@@ -181,7 +181,7 @@ void Daemon :: Start(void)
 
 		p666_FirstActive = this;
 
-		fIsActive_Val = Yes;
+		fIsActive_Val = TRUE;
 	}
 }
 
@@ -221,7 +221,7 @@ void Daemon :: Stop(void)
     		}
         }
 
-		fIsActive_Val = No;
+		fIsActive_Val = FALSE;
 	}
 }
 

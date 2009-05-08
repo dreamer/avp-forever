@@ -32,7 +32,7 @@
 #include "ShowCmds.h"
 #include "huddefs.h"
 
-#define UseLocalAssert Yes
+#define UseLocalAssert TRUE
 #include "ourasert.h"
 
 /* external global variables used in this file */
@@ -1999,7 +1999,7 @@ AIMODULE *GetNextModuleForLink_Core(AIMODULE *source,AIMODULE *target,int max_de
                                         )) {
                                         /* Is this the target? */
                                         if ( (*AdjModuleRefPtr)==target) {
-                                                /* Yes!!! */
+                                                /* TRUE!!! */
                                                 if (NearLink_Route_Queue[NL_Queue_Exec].first_step) {
                                                         return(NearLink_Route_Queue[NL_Queue_Exec].first_step);
                                                 } else {
@@ -2837,7 +2837,7 @@ AIMODULE *General_GetRetreatModule_Core(STRATEGYBLOCK *sbPtr,AIMODULE *source,in
                                 /* Probably want some validity test for the link. */
                                 if ((AIModuleIsPhysical(*AdjModuleRefPtr))
                                         &&(AIModuleAdmitsPheromones(*AdjModuleRefPtr))
-                                        /* No visibility check? */
+                                        /* FALSE visibility check? */
                                         ) {
                                         
                                         /* Consider depth? */
@@ -2966,11 +2966,11 @@ AIMODULE *General_GetAIModuleForRetreat(STRATEGYBLOCK *sbPtr,AIMODULE *fearModul
                                 /* Probably want some validity test for the link. */
                                 if ((AIModuleIsPhysical(*AdjModuleRefPtr))
                                         &&(AIModuleAdmitsPheromones(*AdjModuleRefPtr))
-                                        /* No visibility check. */
+                                        /* FALSE visibility check. */
                                         ) {
                                         /* Is this my_module? */
                                         if ( (*AdjModuleRefPtr)==my_module) {
-                                                /* Yes!!! Break out. */
+                                                /* TRUE!!! Break out. */
                                                 success=1;
                                                 break;
                                         } else if (
@@ -3240,7 +3240,7 @@ int New_NPC_IsObstructed(STRATEGYBLOCK *sbPtr, NPC_AVOIDANCEMANAGER *manager)
     }
 
     if (numObstructiveCollisions==0) {
-        /* No collisions!  Woohoo!  But don't reset the substate... */
+        /* FALSE collisions!  Woohoo!  But don't reset the substate... */
         return(0);
     }
     
@@ -3269,7 +3269,7 @@ int New_NPC_IsObstructed(STRATEGYBLOCK *sbPtr, NPC_AVOIDANCEMANAGER *manager)
             manager->aggregateNormal=aggregateNormal;
         
             if (New_GetAvoidanceDirection(sbPtr,manager,&aggregateNormal)==0) {
-                /* No valid directions in pass 1 - not dealt with yet! */
+                /* FALSE valid directions in pass 1 - not dealt with yet! */
                 GLOBALASSERT(0);
             }
         
@@ -3292,7 +3292,7 @@ int New_NPC_IsObstructed(STRATEGYBLOCK *sbPtr, NPC_AVOIDANCEMANAGER *manager)
             Normalise(&aggregateNormal);
             /* Then pass that number into the second direction system. */
             if (New_GetSecondAvoidanceDirection(sbPtr,manager,&aggregateNormal)==0) {
-                /* No valid directions in pass 2 - not dealt with yet! */
+                /* FALSE valid directions in pass 2 - not dealt with yet! */
                 GLOBALASSERT(0);
             }
         
