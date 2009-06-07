@@ -293,6 +293,7 @@ extern int LengthOfMenuText(const char *textPtr)
 
 extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum AVPMENUFORMAT_ID format) 
 {
+//	IndexedFont* pFont = IndexedFont :: GetFont(IntroFont_Light);
 	int width = LengthOfMenuText(textPtr);
 	int word_length = 0;
 
@@ -307,13 +308,13 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 		}
 		case AVPMENUFORMAT_RIGHTJUSTIFIED:
 		{
-			//x -= (pFont->CalcSize(textPtr).w);
+			//pX -= (pFont->CalcSize(textPtr).w);
 			pX -= width;
 			break;
 		}
 		case AVPMENUFORMAT_CENTREJUSTIFIED:
 		{
-			//x -= (pFont->CalcSize(textPtr).w)/2;
+			//pX -= (pFont->CalcSize(textPtr).w)/2;
 			pX -= width / 2;
 			break;
 		}

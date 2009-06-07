@@ -463,15 +463,27 @@ void HandlePreGameFMVs(void)
 		extern char LevelName[];
 		if (!stricmp("derelict",LevelName))
 		{
-			PlayBinkedFMV("FMVs/marineintro.ogv");
+			#ifdef _XBOX
+				PlayBinkedFMV("D:/FMVs/marineintro.ogv");
+			#else
+				PlayBinkedFMV("FMVs/marineintro.ogv");
+			#endif
 		}
 		else if (!stricmp("temple",LevelName))
 		{
-			PlayBinkedFMV("FMVs/alienintro.ogv");
+			#ifdef _XBOX
+				PlayBinkedFMV("D:/FMVs/alienintro.ogv");
+			#else
+				PlayBinkedFMV("FMVs/alienintro.ogv");
+			#endif
 		}
 		else if (!stricmp("fall",LevelName))
 		{
-			PlayBinkedFMV("FMVs/predatorintro.ogv");
+			#ifdef _XBOX
+				PlayBinkedFMV("D:/FMVs/predatorintro.ogv");
+			#else
+				PlayBinkedFMV("FMVs/predatorintro.ogv");
+			#endif
 		}
 	}
 }

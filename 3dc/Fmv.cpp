@@ -5,8 +5,13 @@
 #define USE_ARGB		1
 
 #include <oggplay/oggplay.h>
-#pragma comment(lib, "liboggz_static.lib")
-#pragma comment(lib, "liboggplay_static.lib")
+#ifdef _DEBUG
+	#pragma comment(lib, "liboggz_static_d.lib")
+	#pragma comment(lib, "liboggplay_static_d.lib")
+#else
+	#pragma comment(lib, "liboggz_static.lib")
+	#pragma comment(lib, "liboggplay_static.lib")
+#endif
 
 extern "C" {
 
@@ -1391,6 +1396,7 @@ void handle_video_data (OggPlay * player, int track_num, OggPlayVideoData * vide
 
 	if (textureData == NULL) 
 	{
+		OutputDebugString("handle_overlay_data is allocating new memory! in func handle_video_data\n");
 		textureData = new unsigned char[y_width * y_height * 4];
 		imageWidth  = y_width;
 		imageHeight = y_height;
@@ -1441,6 +1447,7 @@ void handle_overlay_data (OggPlay * player, int track_num,
 {
 	if (textureData == NULL) 
 	{
+		OutputDebugString("handle_overlay_data is allocating new memory!\n");
 		textureData = new unsigned char[overlay_data->width * overlay_data->height * 4];
 		imageWidth  = overlay_data->width;
 		imageHeight = overlay_data->height;

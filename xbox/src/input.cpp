@@ -5,7 +5,7 @@
 
 extern "C" {
 
-// Note: INITGUID has NOT been defined here,
+// FALSEte: INITGUID has NOT been defined here,
 // since the definition in d3_func.cpp is amply
 // sufficient.
 
@@ -212,7 +212,7 @@ void ReleaseDirectInput()
 
 // see comments below
 
-#define UseForegroundKeyboard No
+#define UseForegroundKeyboard FALSE
 
 //GUID     guid = GUID_SysKeyboard;
 
@@ -529,44 +529,44 @@ void ReadJoysticks()
 			/* handle d-pad */
 			if (g_Controllers[i].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP )
 			{
-				GamePadButtons[DUP] = Yes;
+				GamePadButtons[DUP] = TRUE;
 				//OutputDebugString("xinput DPAD UP\n");
 			}
 			if (g_Controllers[i].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN )
 			{
-				GamePadButtons[DDOWN] = Yes;
+				GamePadButtons[DDOWN] = TRUE;
 				//OutputDebugString("xinput DPAD DOWN\n");
 			}
 			if (g_Controllers[i].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT )
 			{
-				GamePadButtons[DLEFT] = Yes;
+				GamePadButtons[DLEFT] = TRUE;
 				//OutputDebugString("xinput DPAD LEFT\n");
 			}
 			if (g_Controllers[i].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT )
 			{
-				GamePadButtons[DRIGHT] = Yes;
+				GamePadButtons[DRIGHT] = TRUE;
 				//OutputDebugString("xinput DPAD RIGHT\n");
 			}
 
 			/* handle coloured buttons - X A Y B */
 			if (g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_X] > XINPUT_GAMEPAD_MAX_CROSSTALK)
 			{
-				GamePadButtons[X] = Yes;
+				GamePadButtons[X] = TRUE;
 				//OutputDebugString("xinput button X pressed\n");
 			}
 			if (g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_A] > XINPUT_GAMEPAD_MAX_CROSSTALK)
 			{
-				GamePadButtons[A] = Yes;
+				GamePadButtons[A] = TRUE;
 				//OutputDebugString("xinput button A pressed\n");
 			}
 			if (g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_Y] > XINPUT_GAMEPAD_MAX_CROSSTALK)
 			{
-				GamePadButtons[Y] = Yes;
+				GamePadButtons[Y] = TRUE;
 				//OutputDebugString("xinput button Y pressed\n");
 			}
 			if (g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_B] > XINPUT_GAMEPAD_MAX_CROSSTALK)
 			{
-				GamePadButtons[B] = Yes;
+				GamePadButtons[B] = TRUE;
 				//OutputDebugString("xinput button B pressed\n");
 			}
 
@@ -574,52 +574,52 @@ void ReadJoysticks()
 			if (g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_LEFT_TRIGGER] && 
 				g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_LEFT_TRIGGER] > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
 			{
-				GamePadButtons[LT] = Yes;
+				GamePadButtons[LT] = TRUE;
 				//OutputDebugString("xinput left trigger pressed\n");
 			}
 
 			if (g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_RIGHT_TRIGGER] && 
 				g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_RIGHT_TRIGGER] > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
 			{
-				GamePadButtons[RT] = Yes;
+				GamePadButtons[RT] = TRUE;
 				//OutputDebugString("xinput right trigger pressed\n");
 			}
 
 			/* handle black and white buttons */
 			if (g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_WHITE] > XINPUT_GAMEPAD_MAX_CROSSTALK)
 			{
-				GamePadButtons[WHITE] = Yes;
+				GamePadButtons[WHITE] = TRUE;
 				//OutputDebugString("xinput white button pressed\n");
 			}
 
 			if (g_Controllers[i].state.Gamepad.bAnalogButtons[XINPUT_GAMEPAD_BLACK] > XINPUT_GAMEPAD_MAX_CROSSTALK)
 			{
-				GamePadButtons[BLACK] = Yes;
+				GamePadButtons[BLACK] = TRUE;
 				//OutputDebugString("xinput black button pressed\n");
 			}
 
 			/* handle back and start */
 			if (g_Controllers[i].state.Gamepad.wButtons & XINPUT_GAMEPAD_START)
 			{
-				GamePadButtons[START] = Yes;
+				GamePadButtons[START] = TRUE;
 				//OutputDebugString("xinput start button clicked\n");
 			}
 
 			if (g_Controllers[i].state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK)
 			{
-				GamePadButtons[BACK] = Yes;
+				GamePadButtons[BACK] = TRUE;
 				//OutputDebugString("xinput back button clicked\n");
 			}
 
 			/* handle stick clicks */
 			if (g_Controllers[i].state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB)
 			{
-				GamePadButtons[LEFTCLICK] = Yes;
+				GamePadButtons[LEFTCLICK] = TRUE;
 				//OutputDebugString("xinput left stick clicked\n");
 			}
 			if (g_Controllers[i].state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB)
 			{
-				GamePadButtons[RIGHTCLICK] = Yes;
+				GamePadButtons[RIGHTCLICK] = TRUE;
 				//OutputDebugString("xinput right stick clicked\n");
 			}
 
@@ -668,12 +668,12 @@ void ReadJoysticks()
 
 int ReadJoystick()
 {
-	return No;
+	return FALSE;
 }
 
 int CheckForJoystick()
 {
-	return No;
+	return FALSE;
 }
 
 extern void IngameKeyboardInput_KeyDown(unsigned char key)

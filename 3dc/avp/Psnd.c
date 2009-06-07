@@ -383,7 +383,7 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 				}
 				case('e'):
 				{					
-					externalRef = va_arg(argPtr,int*);
+					externalRef = va_arg(argPtr, int*);
 					break;
 				}
 				case('l'):
@@ -571,7 +571,10 @@ void Sound_Stop(int activeSoundNumber)
 	db_assert1((GameSounds[soundNo].activeInstances>=0)&&
 				(GameSounds[soundNo].activeInstances<SOUND_MAXINSTANCES));
 	if(ActiveSounds[activeSoundNumber].externalRef)
-		*(ActiveSounds[activeSoundNumber].externalRef) = SOUND_NOACTIVEINDEX;      
+	
+	{}
+	/* FIXME - causes crash on end of level before queen for marine. commented out for now */
+//		*(ActiveSounds[activeSoundNumber].externalRef) = SOUND_NOACTIVEINDEX;      
 			
 	/* stop the sound: it may have already stopped, of course, but never mind */
 	PlatStopSound(activeSoundNumber);

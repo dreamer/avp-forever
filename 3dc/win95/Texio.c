@@ -1557,7 +1557,7 @@ static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 	if (ihptr->Direct3DTexture)
 	{
 #ifdef _XBOX
-		ReleaseAvPTexture(ihptr->Direct3DTexture);
+		ReleaseD3DTexture(ihptr->Direct3DTexture);
 #else
 		ihptr->Direct3DTexture->lpVtbl->Release(ihptr->Direct3DTexture);
 		ihptr->Direct3DTexture = NULL;
@@ -1583,21 +1583,13 @@ static void MinimizeImageHeader(IMAGEHEADER * ihptr)
 	if (ihptr->Direct3DTexture)
 	{
 #ifdef _XBOX
-		ReleaseAvPTexture(ihptr->Direct3DTexture);
+		ReleaseD3DTexture(ihptr->Direct3DTexture);
 #else
 		ihptr->Direct3DTexture->lpVtbl->Release(ihptr->Direct3DTexture);
 		ihptr->Direct3DTexture = NULL;
 #endif
 	}
 }
-
-/* bjd 
-static void RestoreImageHeader(IMAGEHEADER * ihptr)
-{
-	if (ScanDrawDirectDraw != ScanDrawMode)
-		ReloadImageIntoD3DImmediateSurface(ihptr);
-}
-*/
 
 #ifdef MaxImageGroups
 

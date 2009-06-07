@@ -35,24 +35,20 @@ unsigned int halfBufferSize = 0;
 
 std::vector<std::string> TrackList;
 
+#ifdef _DEBUG
+	#pragma comment(lib, "libvorbisfile_static_d.lib")
+	#pragma comment(lib, "libvorbis_static_d.lib")
+	#pragma comment(lib, "libogg_static_d.lib")
+#else
+	#pragma comment(lib, "libvorbisfile_static.lib")
+	#pragma comment(lib, "libvorbis_static.lib")
+	#pragma comment(lib, "libogg_static.lib")
+#endif
 #ifdef WIN32
-	#ifdef _DEBUG
-		#pragma comment(lib, "libvorbisfile_static_d.lib")
-		#pragma comment(lib, "libvorbis_static_d.lib")
-		#pragma comment(lib, "libogg_static_d.lib")
-	#else
-		#pragma comment(lib, "libvorbisfile_static.lib")
-		#pragma comment(lib, "libvorbis_static.lib")
-		#pragma comment(lib, "libogg_static.lib")
-	#endif
 	const std::string tracklistFilename = "Music/ogg_tracks.txt";
 	const std::string musicFolderName = "Music/";
 #endif
 #ifdef _XBOX
-	#pragma comment(lib, "libvorbisfile_static.lib")
-	#pragma comment(lib, "libvorbis_static.lib")
-	#pragma comment(lib, "libogg_static.lib")
-
 	const std::string tracklistFilename = "d:\\Music\\ogg_tracks.txt";
 	const std::string musicFolderName = "d:\\Music\\";
 #endif

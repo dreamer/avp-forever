@@ -14,15 +14,11 @@ extern "C" {
 #define INITGUID
 
 #include "3dc.h"
-
 #include "awTexLd.h"
-
 #include "dxlog.h"
 #include "module.h"
-#include "inline.h"
-
+//#include "inline.h"
 #include "d3_func.h"
-#include "d3dmacs.h"
 
 #include "string.h"
 
@@ -36,17 +32,11 @@ extern "C++" {
 	#include <string>
 	#include <fstream>
 	#include <sstream>
-
 	#include "logString.h"
 
-	#ifdef WIN32
-		#include <d3dx9.h>
-		#pragma comment(lib, "d3dx9d.lib")
-	#endif
-	#ifdef _XBOX
-		#include <xtl.h>
-		#include <xgraphics.h>
-	#endif
+	#include <xtl.h>
+	#include <xgraphics.h>
+
 /*
 	bool use_d3dx_tools = false;
 
@@ -60,8 +50,6 @@ int image_num = 0;
 // Set to Yes to make default texture filter bilinear averaging rather
 // than nearest
 BOOL BilinearTextureFilter = 1;
-
-//extern HWND hWndMain;
 
 int 					VideoModeColourDepth;
 int						NumAvailableVideoModes;
@@ -710,8 +698,6 @@ BOOL InitialiseDirect3DImmediateMode()
 	int height = 480;
 	int depth = 32;
 
-	D3DHardwareAvailable = Yes;
-
 	//	Zero d3d structure
     memset(&d3d, 0, sizeof(D3DINFO));
 
@@ -922,13 +908,17 @@ void ReleaseAvPTexture(AvPTexture* texture)
 	{
 		free(texture->buffer);
 	}
-	free(texture);
+	if (texture)
+	{
+		free(texture);
+	}
 }
 
 void ReleaseD3DTexture(D3DTEXTURE d3dTexture)
 {
 	/* release d3d texture */
 	SAFE_RELEASE(d3dTexture);
+	d3dTexture = NULL;
 }
 
 void FlushD3DZBuffer()

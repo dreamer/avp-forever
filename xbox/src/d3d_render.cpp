@@ -6194,7 +6194,7 @@ void ThisFramesRenderingHasFinished(void)
 
 	if ((stat.dwAvailPhys / MB) < 13)
 	{
-		OutputDebugString("break here plz\n");
+//		OutputDebugString("break here plz\n");
 	}
 
 	sprintf(buf, "%4d  free MB of physical memory.\n", stat.dwAvailPhys / MB );
@@ -7601,6 +7601,7 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
 {
+#ifdef USE_FMV
 	/* texture will generally be created with A8R8G8B8. Release so we can create with R5G6B5 format */
 	SAFE_RELEASE(ftPtr->ImagePtr->Direct3DTexture);
 
@@ -7621,10 +7622,13 @@ void SetupFMVTexture(FMVTEXTURE *ftPtr)
 	}
 
 	ftPtr->SoundVolume = 0;
+#endif
 }
 
 void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 {
+#ifdef USE_FMV
+
 	if(!ftPtr) return;
 
 	/* lock the d3d texture */
@@ -7660,206 +7664,12 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 		OutputDebugString("\n couldn't update texture in UpdateFMVTexture");
 	}
 #endif
-}
-
-#if 0
-static int GammaSetting;
-void UpdateGammaSettings(int g, int forceUpdate)
-{
-	LPDIRECTDRAWGAMMACONTROL handle;
-	DDGAMMARAMP gammaValues;
-
-	if (g==GammaSetting && !forceUpdate) return;
-
-	lpDDSPrimary->QueryInterface(IID_IDirectDrawGammaControl,(LPVOID*)&handle);
-
-//	handle->GetGammaRamp(0,&gammaValues);
-	for (int i=0; i<=255; i++)
-	{
-		int u = ((i*65536)/255);
-		int m = MUL_FIXED(u,u);
-		int l = MUL_FIXED(2*u,ONE_FIXED-u);
-
-		int a;
-
-		a = m/256+MUL_FIXED(g,l);
-		if (a<0) a=0;
-		if (a>255) a=255;
-
-		gammaValues.red[i]=a*256;
-		gammaValues.green[i]=a*256;
-		gammaValues.blue[i]=a*256;
-	}
-//	handle->SetGammaRamp(0,&gammaValues);
-	handle->SetGammaRamp(DDSGR_CALIBRATE,&gammaValues);
-	GammaSetting=g;
-//	handle->SetGammaRamp(DDSGR_CALIBRATE,&gammaValues);
-	//handle->GetGammaRamp(0,&gammaValues);
-	RELEASE(handle);
-}
 #endif
-
-
+}
 
 // For extern "C"
 
 };
-
-#if 0
-void D3D_Polygon_Output(RENDERVERTEX *renderVerticesPtr)
-{
-	D3DTEXTUREHANDLE TextureHandle;
-
-	float ZNear;
-	float RecipW, RecipH;
-
-
-	if(RenderPolygon.IsTextured)
-	{
-		int texoffset = RenderPolygon.ImageIndex;
-		TextureHandle = (D3DTEXTUREHANDLE) ImageHeaderArray[texoffset].D3DHandle;
-		if(ImageHeaderArray[texoffset].ImageWidth==128)
-		{
-			RecipW = 1.0 /128.0;
-		}
-		else
-		{
-			float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-			RecipW = (1.0 / width);
-		}
-		if(ImageHeaderArray[texoffset].ImageHeight==128)
-		{
-			RecipH = 1.0 / 128.0;
-		}
-		else
-		{
-			float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-			RecipH = (1.0 / height);
-		}
-	}
-
-
-	/* OUTPUT VERTICES TO EXECUTE BUFFER */
-	{
-		int i = RenderPolygon.NumberOfVertices;
-		RENDERVERTEX *vertices = renderVerticesPtr;
-
-		do
-		{
-			D3DTLVERTEX *vertexPtr = &((LPD3DTLVERTEX)ExecuteBufferDataArea)[NumVertices];
-		  	float oneOverZ;
-		  	oneOverZ = (1.0)/vertices->Z;
-			float zvalue;
-
-			{
-				int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-
-				if (x<Global_VDB_Ptr->VDB_ClipLeft)
-				{
-					x=Global_VDB_Ptr->VDB_ClipLeft;
-				}
-				else if (x>Global_VDB_Ptr->VDB_ClipRight)
-				{
-					x=Global_VDB_Ptr->VDB_ClipRight;
-				}
-
-				vertexPtr->sx=x;
-			}
-			{
-				int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-
-				if (y<Global_VDB_Ptr->VDB_ClipUp)
-				{
-					y=Global_VDB_Ptr->VDB_ClipUp;
-				}
-				else if (y>Global_VDB_Ptr->VDB_ClipDown)
-				{
-					y=Global_VDB_Ptr->VDB_ClipDown;
-				}
-				vertexPtr->sy=y;
-
-			}
-
-			if (RenderPolygon.IsTextured)
-			{
-				vertexPtr->tu = ((float)(vertices->U>>16)+0.5) * RecipW;
-				vertexPtr->tv = ((float)(vertices->V>>16)+0.5) * RecipH;
-				vertexPtr->rhw = oneOverZ;
-			}
-
-			{
-				zvalue = vertices->Z+HeadUpDisplayZOffset;
-	   //			zvalue /= 65536.0;
-	   		   	zvalue = ((zvalue-ZNear)/zvalue);
-			}
-
- 			if (RenderPolygon.TranslucencyMode!=TRANSLUCENCY_OFF)
-			{
-		  		vertexPtr->color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B, vertices->A);
-			}
-			else
-			{
-				vertexPtr->color = RGBLIGHT_MAKE(vertices->R,vertices->G,vertices->B);
-			}
-
- 			if (RenderPolygon.IsSpecularLit)
-			{
-		  		vertexPtr->specular = RGBALIGHT_MAKE(vertices->R/2,vertices->G/2,vertices->B/2, 0);
-			}
-			else
-			{
-				vertexPtr->specular=0;
-			}
-
-			vertexPtr->sz = zvalue;
-
-			#if FOG_ON
-			if(CurrentRenderStates.FogIsOn)
-			{
-				if (vertices->Z>CurrentRenderStates.FogDistance)
-				{
-					int fog = ((vertices->Z-CurrentRenderStates.FogDistance)/FOG_SCALE);
-					if (fog<0) fog=0;
-				 	if (fog>254) fog=254;
-				  	fog=255-fog;
-				   	vertexPtr->specular|=RGBALIGHT_MAKE(0,0,0,fog);
-				}
-				else
-				{
-				   	vertexPtr->specular|=RGBALIGHT_MAKE(0,0,0,255);
-				}
-			}
-			#endif
-
-			vertices++;
-			NumVertices++;
-		}
-	  	while(--i);
-	}
-
-	CheckTranslucencyModeIsCorrect(RenderPolygon.TranslucencyMode);
-
-    if (D3DTexturePerspective != Yes)
-    {
-		D3DTexturePerspective = Yes;
-		OP_STATE_RENDER(1, ExecBufInstPtr);
-		STATE_DATA(D3DRENDERSTATE_TEXTUREPERSPECTIVE, TRUE, ExecBufInstPtr);
-	}
-
-    if (TextureHandle != CurrTextureHandle)
-	{
-    	OP_STATE_RENDER(1, ExecBufInstPtr);
-        STATE_DATA(D3DRENDERSTATE_TEXTUREHANDLE, TextureHandle, ExecBufInstPtr);
-	   	CurrTextureHandle = TextureHandle;
-	}
-
-
-	D3D_OutputTriangles();
-}
-
-#endif
-
-
 
 void r2rect :: AlphaFill
 (

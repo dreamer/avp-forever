@@ -59,7 +59,11 @@ extern void PlayIntroSequence(void)
 //	ClearScreenToBlack();
 
 //	PlayBinkedFMV("FMVs/logos.bik");
+#ifdef _XBOX
+	PlayBinkedFMV("D:\\FMVs\\logos.ogv");
+#else
 	PlayBinkedFMV("FMVs/logos.ogv");
+#endif
 
 //	PlayFMV("FMVs/rebellion.smk");
 
