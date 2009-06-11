@@ -1,9 +1,10 @@
-#ifndef h_logstring
-#define h_logstring
+#ifndef LOGSTRING_H
+#define LOGSTRING_H
 
 #include <string>
 #include <sstream>
 #include <fstream>
+
 #ifdef WIN32
 	#include <windows.h>
 #endif
@@ -13,8 +14,8 @@
 
 void ClearLog();
 void WriteToLog(const std::string &logLine);
-void LogDxError(HRESULT hr, int LINE, char* FILE);
-void LogErrorString(const std::string &errorString, int LINE, char* FILE);
+void LogDxError(HRESULT hr, int LINE, const char* FILE);
+void LogErrorString(const std::string &errorString, int LINE, const char* FILE);
 void LogErrorString(const std::string &errorString);
 std::string IntToString(const int value);
 void LogString(const std::string &logString);

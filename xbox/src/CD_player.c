@@ -35,7 +35,7 @@ static enum CDCOMMANDID LastCommandGiven;
 
 int CDPlayerVolume; // volume control from menus
 
-int CDTrackMax=-1; //highest track number on cd
+int CDTrackMax = -1; //highest track number on cd
 
 void CDDA_Start(void)
 {
@@ -47,7 +47,8 @@ void CDDA_Start(void)
 
 void CDDA_End(void)
 {
-	if(!CDDAIsInitialised) return;
+	if (!CDDAIsInitialised) 
+		return;
 
 	CDDAIsInitialised = 0;
 }
@@ -68,11 +69,35 @@ void CDDA_PlayLoop(int CDDATrack)
 
 extern void CheckCDVolume(void)
 {
-
+	if (CDDAVolume != CDPlayerVolume)
+	{
+		CDDA_ChangeVolume(CDPlayerVolume);
+	}
 }
+
 void CDDA_ChangeVolume(int volume)
 {
+	/* set vorbis volume here for now */
+	if (SetVorbisBufferVolume(volume))
+	{
+		CDDAVolume = volume;
+		CDPlayerVolume = volume;
+		return;
+	}
 
+	if (!CDDASwitchedOn) return; /* CDDA is off */
+	if (volume < CDDA_VOLUME_MIN) return;
+	if (volume > CDDA_VOLUME_MAX) return;
+
+	if (CDDA_IsOn()) 
+	{
+		if (PlatChangeCDDAVolume(volume))
+		{
+			CDDAVolume = volume;
+			CDPlayerVolume = volume;
+			LastCommandGiven = CDCOMMANDID_ChangeVolume;
+		}
+	}
 }
 
 int CDDA_GetCurrentVolumeSetting(void)
@@ -87,7 +112,7 @@ void CDDA_Stop()
 
 void CDDA_SwitchOn()
 {
-	if(CDDAIsInitialised) CDDASwitchedOn = 1;
+	if (CDDAIsInitialised) CDDASwitchedOn = 1;
 }
 
 void CDDA_SwitchOff()

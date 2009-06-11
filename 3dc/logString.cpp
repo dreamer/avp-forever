@@ -3,10 +3,11 @@
 #include "d3_func.h"
 
 #ifdef _XBOX
-#include "D3dx8core.h"
+	#include "D3dx8core.h"
+	std::string logFilename = "d:\\avp_log.txt";
+#else
+	std::string logFilename = "avp_log.txt";
 #endif
-
-std::string logFilename = "avp_log.txt";
 
 /* converts an int to a string and returns it */
 std::string IntToString(const int value)
@@ -24,12 +25,12 @@ std::string IntToString(const int value)
 
 void ClearLog() 
 {
-	std::ofstream file(logFilename.c_str(), std::ios::out );
+	std::ofstream file(logFilename.c_str(), std::ios::out);
 }
 
 void WriteToLog(const std::string &logLine)
 {
-	std::ofstream file(logFilename.c_str(), std::ios::out | std::ios::app );
+	std::ofstream file(logFilename.c_str(), std::ios::out | std::ios::app);
 	file << logLine;
 #if _DEBUG
 	OutputDebugString(logLine.c_str());
@@ -37,9 +38,9 @@ void WriteToLog(const std::string &logLine)
 	file.close();
 }
 
-void LogDxError(HRESULT hr, int LINE, char* FILE)
+void LogDxError(HRESULT hr, int LINE, const char* FILE)
 {
-	std::string temp = "\t DirectX Error!: ";
+	std::string temp = "\t DirectX Error! : ";
 
 #ifdef _XBOX
 	char buffer[60];
@@ -50,7 +51,7 @@ void LogDxError(HRESULT hr, int LINE, char* FILE)
 	temp.append(" - ");
 	temp.append(DXGetErrorDescription9(hr));
 #endif
-	temp.append( "Line: ");
+	temp.append(" Line: ");
 	temp.append(IntToString(LINE));
 	temp.append(" File: ");
 	temp.append(FILE);
@@ -59,7 +60,7 @@ void LogDxError(HRESULT hr, int LINE, char* FILE)
 }
 
 /* logs a string to file, stating line number of error, and source file it occured in */
-void LogErrorString(const std::string &errorString, int LINE, char* FILE)
+void LogErrorString(const std::string &errorString, int LINE, const char* FILE)
 {
 	std::string temp = "\t Error: " + errorString + " Line: " + IntToString(LINE) + " File: " + FILE + "\n";
 	WriteToLog(temp);

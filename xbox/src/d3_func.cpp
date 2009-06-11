@@ -17,14 +17,8 @@ extern "C" {
 #include "awTexLd.h"
 #include "dxlog.h"
 #include "module.h"
-//#include "inline.h"
 #include "d3_func.h"
-
-#include "string.h"
-
 #include "kshape.h"
-#include "eax.h"
-//#include "vmanpset.h"
 
 extern "C++" {
 	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
@@ -36,13 +30,6 @@ extern "C++" {
 
 	#include <xtl.h>
 	#include <xgraphics.h>
-
-/*
-	bool use_d3dx_tools = false;
-
-	std::string LogInteger(int value);
-	std::string logFilename = "dx_log.txt";
-*/
 }
 
 int image_num = 0;
@@ -61,7 +48,7 @@ extern int ZBufferMode;
 extern int ScanDrawMode;
 extern int VideoModeColourDepth;
 
-HRESULT LastError;
+static HRESULT LastError;
 
 D3DINFO d3d;
 BOOL D3DHardwareAvailable;
@@ -302,9 +289,10 @@ LPDIRECT3DTEXTURE8 CreateFmvTexture(int width, int height, int usage, int pool)
 {
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
 
-	if(FAILED(d3d.lpD3DDevice->CreateTexture(width, height, 1, usage, D3DFMT_A8R8G8B8, (D3DPOOL)pool, &destTexture)))
+	LastError = d3d.lpD3DDevice->CreateTexture(width, height, 1, usage, D3DFMT_A8R8G8B8, (D3DPOOL)pool, &destTexture);
+	if(FAILED(LastError))
 	{
-		OutputDebugString("CreateFmvTexture failed\n");
+		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
 
@@ -312,7 +300,7 @@ LPDIRECT3DTEXTURE8 CreateFmvTexture(int width, int height, int usage, int pool)
 }
 
 // use this to make textures from non power of two images
-LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex,int *real_height, int *real_width) 
+LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int *real_width) 
 {
 	int original_width = tex->width;
 	int original_height = tex->height;
@@ -395,7 +383,7 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex,int *real_height, int 
 		imageData[i+3] = tex->buffer[i+3];
 	}
 
-	if(FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
+	LastError = D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
 		buffer,
 		sizeof(TGA_HEADER) + imageSize,
 		D3DX_DEFAULT,//tex->width,
@@ -409,9 +397,11 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex,int *real_height, int 
 		0,
 		&image,
 		0,
-		&destTexture)))
+		&destTexture);
+
+	if (FAILED(LastError))
 	{
-		OutputDebugString("COULD NOT CREATE TEXTURE?\n");
+		LogDxError(LastError, __LINE__, __FILE__);
 		delete[] buffer;
 		return NULL;
 
@@ -470,7 +460,7 @@ LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL
 	image.MipLevels = 1;
 	image.Depth = D3DFMT_A8R8G8B8;
 
-	if(FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
+	LastError = D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
 		buffer,
 		sizeof(TGA_HEADER) + imageSize,
 		tex->width,
@@ -485,9 +475,10 @@ LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL
 		0,
 		&image,
 		0,
-		&destTexture)))
+		&destTexture);
+	if (FAILED(LastError))
 	{
-		OutputDebugString("\n no, didn't work");
+		LogDxError(LastError, __LINE__, __FILE__);
 		delete[] buffer;
 		return NULL;
 	}
@@ -529,24 +520,27 @@ void CreateScreenShotImage()
 	}
 
 	/* create surface to copy screen to */
-	if(FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(ScreenDescriptorBlock.SDB_Width, ScreenDescriptorBlock.SDB_Height, D3DFMT_A8R8G8B8, D3DPOOL_SCRATCH, &frontBuffer, NULL)))
+	LastError = (d3d.lpD3DDevice->CreateOffscreenPlainSurface(ScreenDescriptorBlock.SDB_Width, ScreenDescriptorBlock.SDB_Height, D3DFMT_A8R8G8B8, D3DPOOL_SCRATCH, &frontBuffer, NULL);
+	if (FAILED(LastError)
 	{
-		OutputDebugString("\n Couldn't create screenshot surface");
+		LogDxError(LastError, __LINE__, __FILE__);
 		return;
 	}
 
 	/* copy front buffer screen to surface */
-	if(FAILED(d3d.lpD3DDevice->GetFrontBufferData(0, frontBuffer))) 
+	LastError = d3d.lpD3DDevice->GetFrontBufferData(0, frontBuffer);
+	if (FAILED(LastError))
 	{
-		OutputDebugString("\n Couldn't get a copy of the front buffer");
+		LogDxError(LastError, __LINE__, __FILE__);
 		SAFE_RELEASE(frontBuffer);
 		return;
 	}
 
 	/* save surface to image file */
-	if(FAILED(D3DXSaveSurfaceToFile(fileName.str().c_str(), D3DXIFF_JPG, frontBuffer, NULL, NULL))) 
+	LastError = D3DXSaveSurfaceToFile(fileName.str().c_str(), D3DXIFF_JPG, frontBuffer, NULL, NULL);
+	if (FAILED(LastError))
 	{
-		OutputDebugString("\n Save Surface to file failed!!!");
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
 	/* release surface */
@@ -635,8 +629,9 @@ BOOL CreateVolatileResources()
 	}
 */
 	LastError = d3d.lpD3DDevice->SetVertexShader(D3DFVF_TLVERTEX);
-	if (FAILED(LastError)){
-		OutputDebugString(" Couldn't set vertex shader");
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
 //	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_TLVERTEX);
@@ -651,7 +646,7 @@ BOOL CreateVolatileResources()
 	return true;
 }
 
-BOOL ChangeGameResolution(int width, int height, int colour_depth)
+BOOL ChangeGameResolution(int width, int height, int colourDepth)
 {
 //	ReleaseVolatileResources();
 
@@ -664,7 +659,7 @@ BOOL ChangeGameResolution(int width, int height, int colour_depth)
 	{
 		ScreenDescriptorBlock.SDB_Width     = width;
 		ScreenDescriptorBlock.SDB_Height    = height;
-		ScreenDescriptorBlock.SDB_Depth		= colour_depth;
+		ScreenDescriptorBlock.SDB_Depth		= colourDepth;
 		ScreenDescriptorBlock.SDB_Size      = width*height;
 		ScreenDescriptorBlock.SDB_CentreX   = width/2;
 		ScreenDescriptorBlock.SDB_CentreY   = height/2;
@@ -680,6 +675,7 @@ BOOL ChangeGameResolution(int width, int height, int colour_depth)
 	else 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
 	}
 	return true;
 }
@@ -742,7 +738,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 */
 	/* from SDL_x */
-	if(XGetVideoStandard() == XC_VIDEO_STANDARD_PAL_I)	// PAL user
+	if (XGetVideoStandard() == XC_VIDEO_STANDARD_PAL_I)	// PAL user
 	{
 		//get supported video flags
 
@@ -773,9 +769,10 @@ BOOL InitialiseDirect3DImmediateMode()
 	/* create our list of supported resolutions for D3DFMT_LIN_X8R8G8B8 format */
 	for (int i = 0; i < modeCount; i++)
 	{
-		if (FAILED(d3d.lpD3D->EnumAdapterModes( D3DADAPTER_DEFAULT, i, &tempMode )))
+		LastError = d3d.lpD3D->EnumAdapterModes( D3DADAPTER_DEFAULT, i, &tempMode );
+		if (FAILED(LastError))
 		{
-			OutputDebugString("EnumAdapterModes failed\n");
+			LogDxError(LastError, __LINE__, __FILE__);
 			continue;
 		}
 
@@ -828,6 +825,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	if (FAILED(LastError))
 	{
 		LogErrorString("Could not create Direct3D device");
+		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
 
@@ -918,7 +916,6 @@ void ReleaseD3DTexture(D3DTEXTURE d3dTexture)
 {
 	/* release d3d texture */
 	SAFE_RELEASE(d3dTexture);
-	d3dTexture = NULL;
 }
 
 void FlushD3DZBuffer()

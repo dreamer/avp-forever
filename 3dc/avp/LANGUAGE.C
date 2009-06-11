@@ -68,15 +68,19 @@ void InitTextStrings(void)
 
 	TextBufferPtr = LoadTextFile(filenamePtr);
 
-	if(TextBufferPtr == NULL) 
+	if (TextBufferPtr == NULL) 
 	{
 		/* have to quit if this file isn't available */
 		char message[100];
 		sprintf(message,"Unable to load language file: %s\n",filenamePtr);
+
 #ifdef WIN32
 		MessageBox(hWndMain, message, "AvP Error", MB_OK+MB_SYSTEMMODAL);
-#endif
 		exit(1);
+#else
+
+#endif
+		
 	}
 
 	if (!strncmp (TextBufferPtr, "REBCRIF1", 8))

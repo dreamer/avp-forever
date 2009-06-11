@@ -329,6 +329,7 @@ void SoundSys_ChangeVolume(int volume)
   ----------------------------------------------------------------------------*/
 void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 {	
+	char buf[100];
 	int newIndex;
 	int loop = 0;
 	int	*externalRef = NULL;
@@ -501,6 +502,18 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 	ActiveSounds[newIndex].volume = volume;
 	ActiveSounds[newIndex].pitch = pitch;
 	ActiveSounds[newIndex].externalRef = externalRef;
+
+	if (ActiveSounds[newIndex].externalRef)
+	{
+		if (ActiveSounds[newIndex].externalRef == (int*)0x0444AFA0)
+		{
+			OutputDebugString("blsfgdfg\n");
+		}
+		
+		sprintf(buf, "externalRef = %p\n", ActiveSounds[newIndex].externalRef);
+		OutputDebugString(buf);
+	}
+
 	ActiveSounds[newIndex].loop = 1;
 	ActiveSounds[newIndex].marine_ignore=marine_ignore;
 	ActiveSounds[newIndex].reverb_off=reverb_off;

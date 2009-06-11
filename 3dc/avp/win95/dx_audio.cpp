@@ -88,6 +88,8 @@ DWORD					audioBytes1;
 LPVOID					audioPtr2;   
 DWORD					audioBytes2;
 
+static HRESULT LastError;
+
 
 /* Patrick 5/6/97 -------------------------------------------------------------
   Internal global variables
@@ -2482,28 +2484,25 @@ int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
 
 int SetVorbisBufferVolume(int volume)
 {
-	if(vorbisBuffer == NULL)
-	{
+	if (vorbisBuffer == NULL)
 		return 0;
-	}
 
 	signed int attenuation;
-	HRESULT hres;
 
-	if(volume<VOLUME_MIN) volume=VOLUME_MIN;
-	if(volume>VOLUME_MAX) volume=VOLUME_MAX;
+	if(volume < VOLUME_MIN) volume = VOLUME_MIN;
+	if(volume > VOLUME_MAX) volume = VOLUME_MAX;
 
 	/* convert from intensity to attenuation */
 	attenuation = vol_to_atten_table[volume];
 
-	if(attenuation>VOLUME_MAXPLAT) attenuation=VOLUME_MAXPLAT;
-	if(attenuation<VOLUME_MINPLAT) attenuation=VOLUME_MINPLAT;
+	if(attenuation > VOLUME_MAXPLAT) attenuation = VOLUME_MAXPLAT;
+	if(attenuation < VOLUME_MINPLAT) attenuation = VOLUME_MINPLAT;
 
 	/* and apply it */
-	hres = vorbisBuffer->SetVolume(attenuation);
-	if(FAILED(hres))
+	LastError = vorbisBuffer->SetVolume(attenuation);
+	if (FAILED(LastError))
 	{
-		OutputDebugString("cant set vorbis volume..returning\n");
+		LogDxError(LastError, __LINE__, __FILE__);
 		return 0;
 	}
 
@@ -2530,14 +2529,13 @@ bool PlayVorbisBuffer()
 	return true;
 }
 
-int ReleaseVorbisBuffer()
+void ReleaseVorbisBuffer()
 {
-	if(vorbisBuffer != NULL) 
+	if (vorbisBuffer != NULL) 
 	{
 		vorbisBuffer->Release();
 		vorbisBuffer = NULL;
 	}
-	return 0;
 }
 
 } // extern "C"

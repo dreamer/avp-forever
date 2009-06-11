@@ -43,6 +43,8 @@ const int MAX_INDICES = 9216 * 2;
 
 bool useStaticBuffer = true;
 
+static HRESULT LastError;
+
 //D3DTLVERTEX *mainVertex;// = new D3DTLVERTEX[MAX_VERTEXES];
 //WORD *mainIndex;// = new WORD[MAX_INDICES];
 //D3DTLVERTEX *mainVertex = new D3DTLVERTEX[MAX_VERTEXES];

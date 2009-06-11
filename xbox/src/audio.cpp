@@ -69,18 +69,13 @@ LPDIRECTSOUND8			DSObject = NULL;
 int 					SoundMinBufferFree;
 
 /* for vorbis playback */
-//LPDIRECTSOUNDBUFFER		vorbisBuffer = NULL;
 LPDIRECTSOUNDSTREAM		vorbisAudioStream = NULL;
 const static int		PACKET_COUNT = 3;
 const static int		FILESTRM_PACKET_BYTES = 2 * 2 * 36 * 128;//22000;// * 3;
 DWORD					PacketStatus[PACKET_COUNT]; // Packet status array
-/*
-HANDLE					hHandles[2];
-LPVOID					audioPtr1;
-DWORD					audioBytes1;
-LPVOID					audioPtr2;   
-DWORD					audioBytes2;
-*/
+
+static HRESULT LastError;
+
 void ProcessStreamingAudio();
 
 static unsigned int SoundMaxHW;
@@ -321,12 +316,8 @@ extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 
 typedef float D3DVALUE, *LPD3DVALUE;
 
-//HRESULT LastError;
-
 int PlatStartSoundSys()
 {	
-	HRESULT LastError;
-
 	SoundActivated = 0;
 
 	/* Set the globals. */
@@ -398,7 +389,6 @@ int PlatPlaySound(int activeIndex)
 	if(!SoundActivated)
 		return 0;
 
-	HRESULT LastError;
 	SOUNDINDEX gameIndex;
 
 	/* check bounds of active sound index */
@@ -582,7 +572,6 @@ int PlatPlaySound(int activeIndex)
 static int PlatChangeSoundPan(int activeIndex, int pan)
 {
 #if 0
-	HRESULT LastError;
 	LOCALASSERT(ActiveSounds[activeIndex].dsBufferP);
 
 	if(pan>PAN_MAXPLAT) pan=PAN_MAXPLAT;
@@ -2053,25 +2042,26 @@ unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 }
 #endif
 
-BOOL FindFreePacket(DWORD* pdwPacketIndex)
+bool FindFreePacket(DWORD* pdwPacketIndex)
 {
-	for( DWORD dwPacketIndex = 0; dwPacketIndex < PACKET_COUNT; dwPacketIndex++ )
+	for (DWORD dwPacketIndex = 0; dwPacketIndex < PACKET_COUNT; dwPacketIndex++)
     {
-        if( XMEDIAPACKET_STATUS_PENDING != PacketStatus[dwPacketIndex] )
+        if (XMEDIAPACKET_STATUS_PENDING != PacketStatus[dwPacketIndex])
         {
-            if( pdwPacketIndex )
+            if (pdwPacketIndex)
                 (*pdwPacketIndex) = dwPacketIndex;
 
-            return TRUE;
+            return true;
         }
     }
 
-    return FALSE;
+    return false;
 }
 
 void ProcessStreamingAudio()
 {
-	if(!oggIsPlaying) return;
+	if (!oggIsPlaying) 
+		return;
 
 //	DirectSoundDoWork();
 
@@ -2095,12 +2085,13 @@ void ProcessStreamingAudio()
 
 			// offset into source data buffer
 			packet.pvBuffer  = (char*)audioData + (dwPacketIndex * FILESTRM_PACKET_BYTES);
-			packet.dwMaxSize = /*FILESTRM_PACKET_BYTES*/totalRead;
+			packet.dwMaxSize = totalRead;
 			packet.pdwStatus = &PacketStatus[dwPacketIndex];
 
-			if (FAILED(vorbisAudioStream->Process( &packet, NULL )))
+			LastError = vorbisAudioStream->Process( &packet, NULL );
+			if (FAILED(LastError))
 			{
-				OutputDebugString("vorbisAudioStream->Process( &packet, NULL ) failed!\n");
+				LogDxError(LastError, __LINE__, __FILE__);
 			}
 		}
 	}
@@ -2120,57 +2111,16 @@ int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
 	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
 	waveFormat.cbSize			= sizeof(waveFormat);	//how big this structure is
 
-/*
-	memset(&bufferFormat, 0, sizeof(DSBUFFERDESC));
-	bufferFormat.dwSize			= sizeof(DSBUFFERDESC);
-	bufferFormat.dwFlags		= DSBCAPS_CTRLPOSITIONNOTIFY;// | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_LOCSOFTWARE;
-	bufferFormat.dwBufferBytes	= waveFormat.nAvgBytesPerSec * 2;
-	bufferFormat.lpwfxFormat	= &waveFormat;
-
-	if(FAILED(DSObject->CreateSoundBuffer(&bufferFormat, &vorbisBuffer, NULL))) 
-	{
-		LogDxErrorString("couldn't create buffer for ogg vorbis\n");
-		return 1;
-	}
-
-	(*bufferSize) = bufferFormat.dwBufferBytes;
-*/
-#if 0
-	hHandles[0] = CreateEvent(NULL,FALSE,FALSE,NULL);
-	hHandles[1] = CreateEvent(NULL,FALSE,FALSE,NULL);
-
-	DSBPOSITIONNOTIFY notifyPosition[2];
-
-	/* set to notify at halfway point */
-	notifyPosition[0].dwOffset = (bufferFormat.dwBufferBytes / 2) ;
-	notifyPosition[0].hEventNotify = hHandles[0];
-
-	/* set to notify at end */
-	notifyPosition[1].dwOffset = bufferFormat.dwBufferBytes - 4;
-	notifyPosition[1].hEventNotify = hHandles[1];
-
-	if(FAILED(vorbisBuffer->SetNotificationPositions(2, notifyPosition)))
-	{
-		LogDxErrorString("couldn't set notifications for ogg vorbis buffer\n");
-		return 1;
-	}
-
-	hHandles[0] = notifyPosition[0].hEventNotify;
-	hHandles[1] = notifyPosition[1].hEventNotify;
-#endif
-
 	/* test code for dsound stream system */
 	DSSTREAMDESC streamDesc;
 	ZeroMemory(&streamDesc, sizeof(streamDesc));
 	streamDesc.dwMaxAttachedPackets		= PACKET_COUNT;
-//	streamDesc.lpMixBins				= NULL;
-//	streamDesc.dwFlags					= DSSTREAMCAPS_ACCURATENOTIFY; // ?? 
-//	streamDesc.lpfnCallback				= StreamCallback;
 	streamDesc.lpwfxFormat				= &waveFormat;
 
-	if(FAILED(DirectSoundCreateStream(&streamDesc, &vorbisAudioStream)))
+	LastError = DirectSoundCreateStream(&streamDesc, &vorbisAudioStream);
+	if (FAILED(LastError))
 	{
-		LogErrorString("couldn't create audio stream for ogg vorbis buffer\n");
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
 	/* Set the stream headroom to 0 */
@@ -2221,23 +2171,25 @@ int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
 
 int SetVorbisBufferVolume(int volume)
 {
-	if(vorbisAudioStream == NULL) return 0;
+	if (vorbisAudioStream == NULL) 
+		return 0;
 
 	signed int attenuation;
-	HRESULT hres;
 
-	if(volume<VOLUME_MIN) volume=VOLUME_MIN;
-	if(volume>VOLUME_MAX) volume=VOLUME_MAX;
+	if (volume < VOLUME_MIN) volume = VOLUME_MIN;
+	if (volume > VOLUME_MAX) volume = VOLUME_MAX;
 
 	/* convert from intensity to attenuation */
 	attenuation = vol_to_atten_table[volume];
 
-	if(attenuation>VOLUME_MAXPLAT) attenuation=VOLUME_MAXPLAT;
-	if(attenuation<VOLUME_MINPLAT) attenuation=VOLUME_MINPLAT;
+	if (attenuation > VOLUME_MAXPLAT) attenuation = VOLUME_MAXPLAT;
+	if (attenuation < VOLUME_MINPLAT) attenuation = VOLUME_MINPLAT;
 
 	/* and apply it */
-	if(FAILED(vorbisAudioStream->SetVolume(attenuation)))
+	LastError = vorbisAudioStream->SetVolume(attenuation);
+	if (FAILED(LastError))
 	{
+		LogDxError(LastError, __LINE__, __FILE__);
 		return 0;
 	}
 
@@ -2246,9 +2198,10 @@ int SetVorbisBufferVolume(int volume)
 
 int StopVorbisBuffer()
 {
-	if(FAILED(vorbisAudioStream->Flush()))
+	LastError = vorbisAudioStream->Flush();
+	if (FAILED(LastError))
 	{
-		OutputDebugString("couldn't stop vorbis buffer\n");
+		LogDxError(LastError, __LINE__, __FILE__);
 		return 1;
 	}
 
@@ -2268,15 +2221,13 @@ bool PlayVorbisBuffer()
 */
 }
 
-int ReleaseVorbisBuffer()
+void ReleaseVorbisBuffer()
 {
-	if(vorbisAudioStream != NULL) 
+	if (vorbisAudioStream != NULL) 
 	{
 		vorbisAudioStream->Release();
 		vorbisAudioStream = NULL;
 	}
-
-	return 0;
 }
 
 } // extern C

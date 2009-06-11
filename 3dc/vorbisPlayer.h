@@ -7,7 +7,7 @@ extern void LoadVorbisTrack(int track);
 extern void PlayVorbis();
 extern void StopVorbis();
 extern void UpdateVorbisBuffer(void *arg);
-int ReleaseVorbisBuffer();
+void ReleaseVorbisBuffer();
 extern bool LoadVorbisTrackList();
 bool IsVorbisPlaying();
 int CheckNumberOfVorbisTracks();

@@ -1,3 +1,8 @@
+
+#ifdef _XBOX
+	#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
+#endif
+
 #include <vorbis/vorbisfile.h>
 
 #include <stdio.h>
@@ -26,24 +31,12 @@ FILE* file;
 vorbis_info *pInfo;
 OggVorbis_File oggFile;
 
-//unsigned int bytesReadTotal		= 0; //keep track of how many bytes we have read so far
-//unsigned int bytesReadPerLoop	= 0; //keep track of how many bytes we read per ov_read invokation (1 to ensure that while loop is entered below)
-
 bool oggIsPlaying = false;
 unsigned int bufferSize = 0;
 unsigned int halfBufferSize = 0;
 
 std::vector<std::string> TrackList;
 
-#ifdef _DEBUG
-	#pragma comment(lib, "libvorbisfile_static_d.lib")
-	#pragma comment(lib, "libvorbis_static_d.lib")
-	#pragma comment(lib, "libogg_static_d.lib")
-#else
-	#pragma comment(lib, "libvorbisfile_static.lib")
-	#pragma comment(lib, "libvorbis_static.lib")
-	#pragma comment(lib, "libogg_static.lib")
-#endif
 #ifdef WIN32
 	const std::string tracklistFilename = "Music/ogg_tracks.txt";
 	const std::string musicFolderName = "Music/";
@@ -65,12 +58,12 @@ int ReadVorbisData(int sizeToRead, int offset)
 	while(bytesReadTotal < sizeToRead) 
 	{
 		bytesReadPerLoop = ov_read(
-			&oggFile,							//what file to read from
-			(audioData + offset) + bytesReadTotal,			//where to put the decoded data
-			sizeToRead - bytesReadTotal,		//how much data to read
-			0,									//0 specifies little endian decoding mode
-			2,									//2 specifies 16-bit samples
-			1,									//1 specifies signed data
+			&oggFile,									//what file to read from
+			(audioData + offset) + bytesReadTotal,		//where to put the decoded data
+			sizeToRead - bytesReadTotal,				//how much data to read
+			0,											//0 specifies little endian decoding mode
+			2,											//2 specifies 16-bit samples
+			1,											//1 specifies signed data
 			0
 		);
 
@@ -100,9 +93,6 @@ int ReadVorbisData(int sizeToRead, int offset)
 
 void LoadVorbisTrack(int track) 
 {
-	/* check if we have some files to play */
-//	if(!loadOggTrackList()) return;
-
 	/* if we're already playing a track, stop it */
 	if (oggIsPlaying) StopVorbis();
 
@@ -129,13 +119,13 @@ void LoadVorbisTrack(int track)
 	// get some audio info
 	pInfo = ov_info(&oggFile, -1);
 
-	LogString("Opening OGG Vorbis file...");
+	LogString("Opening OGG Vorbis file " + TrackList[track]);
 
 	/* Check the number of channels... always use 16-bit samples */
 	if (pInfo->channels == 1) 
-		LogString("\t Mono Vorbis file\n");
+		LogString("\t Mono Vorbis file");
 	else 
-		LogString("\t Stereo Vorbis file\n");
+		LogString("\t Stereo Vorbis file");
 
 	LogString("\t Vorbis frequency: " + IntToString(pInfo->rate));
 
@@ -157,36 +147,9 @@ void LoadVorbisTrack(int track)
 	ProcessStreamingAudio();
 #endif
 
-#if 0
-	while(bytesReadTotal < bufferSize) 
-	{
-		bytesReadPerLoop = ov_read(
-			&oggFile,							//what file to read from
-			audioData + bytesReadTotal,			//where to put the decoded data
-			bufferSize - bytesReadTotal,		//how much data to read
-			0,									//0 specifies little endian decoding mode
-			2,									//2 specifies 16-bit samples
-			1,									//1 specifies signed data
-			0
-		);
-
-		if(bytesReadPerLoop < 0) 
-		{
-			LogErrorString("ov_read encountered an error\n");
-		}
-		/* if we reach the end of the file, go back to start */
-		if(bytesReadPerLoop == 0)
-		{
-			ov_raw_seek(&oggFile, 0);
-		}
-
-		bytesReadTotal += bytesReadPerLoop;
-	}
-#endif
-
 	/* fill entire buffer initially */
 #ifdef WIN32
-	UpdateVorbisAudioBuffer(audioData, /*bytesReadTotal*/totalRead, 0);
+	UpdateVorbisAudioBuffer(audioData, totalRead, 0);
 #endif
 	/* start playing */
 	PlayVorbis();
@@ -195,8 +158,6 @@ void LoadVorbisTrack(int track)
 void UpdateVorbisBuffer(void *arg) 
 {
 	int lockOffset = 0;
-
-	char buf[100];
 
 	DWORD dwQuantum = 1000 / 60;
 
@@ -220,45 +181,8 @@ void UpdateVorbisBuffer(void *arg)
 			}
 
 			int totalRead = ReadVorbisData(halfBufferSize, 0);
-#if 0
-			bytesReadPerLoop = 0;
-			bytesReadTotal = 0;
 
-			while(bytesReadTotal < halfBufferSize) 
-			{
-				bytesReadPerLoop = ov_read(
-					&oggFile,								//what file to read from
-					audioData + bytesReadTotal,				//destination + offset into destination data
-					halfBufferSize - bytesReadTotal,		//how much data to read
-					0,										//0 specifies little endian decoding mode
-					2,										//2 specifies 16-bit samples
-					1,										//1 specifies signed data
-					0
-				);
-
-				bytesReadTotal += bytesReadPerLoop;
-
-				if (bytesReadPerLoop < 0) 
-				{
-					LogErrorString("ov_read encountered an error\n");
-				}
-				/* if we reach the end of the file, go back to start */
-				if (bytesReadPerLoop == 0)
-				{
-					OutputDebugString("end of ogg file\n");
-					ov_raw_seek(&oggFile, 0);
-				}
-				if (bytesReadPerLoop == OV_HOLE) 
-				{
-					LogErrorString("OV_HOLE\n");
-				}
-				if (bytesReadPerLoop == OV_EBADLINK) 
-				{
-					LogErrorString("OV_EBADLINK\n");
-				}
-			}
-#endif
-			UpdateVorbisAudioBuffer(audioData, /*bytesReadTotal*/totalRead, lockOffset);
+			UpdateVorbisAudioBuffer(audioData, totalRead, lockOffset);
 		}
 #endif
 	}
@@ -320,8 +244,6 @@ bool LoadVorbisTrackList()
 		{
 			trackName = trackName.substr(pos + 2);
 			TrackList.push_back(musicFolderName + trackName);
-//			OutputDebugString("\n Added track:");
-//			OutputDebugString(trackName.c_str());
 		}
 	}
 
