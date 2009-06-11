@@ -165,14 +165,6 @@
 		{
 			return pIndexedFont[ I_Font_ToGet ];
 		}
-
-	#if 0
-	class IndexedFont_FixedSpace : public IndexedFont
-	{
-	public:
-	private:
-	};
-	#endif
 	/*
 	   KJL 17:20:10 15/04/98 - May God have mercy on my soul
 	   fixed space HUD font
@@ -225,7 +217,7 @@
 			ProjChar ProjCh
 		) const
 		{
-			return AAFontWidths[ProjCh];
+			return AAFontWidths[(unsigned char)ProjCh];
 		}
 		
 		inline int GetHeight(void) const
@@ -250,13 +242,11 @@
 		) const;
 
 //	protected:
-		IndexedFont_HUD
-		(
-			FontIndex I_Font_New
-		) : IndexedFont
+		IndexedFont_HUD(FontIndex I_Font_New)
+		 : IndexedFont
 			(
 				I_Font_New
-			)
+			) 
 		{
 		}
 	};

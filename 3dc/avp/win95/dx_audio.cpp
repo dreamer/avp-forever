@@ -383,7 +383,7 @@ int PlatStartSoundSys()
  	DSCAPS caps;
 
 	db_log4("PlatStartSound called");
-	LogDxString("Starting to initialise DirectSound");
+	LogString("Starting to initialise DirectSound");
 
 	LOG_RC();
 
@@ -397,7 +397,7 @@ int PlatStartSoundSys()
 	hres = DirectSoundCreate(NULL, &DSObject, NULL);
 	if(hres!=DS_OK)
 	{		
-		LogDxErrorString("Couldn't create DirectSound object\n");
+		LogErrorString("Couldn't create DirectSound object", __LINE__, __FILE__);
 		PlatEndSoundSys();
 		return 0;
 	}
@@ -409,7 +409,7 @@ int PlatStartSoundSys()
     hres = IDirectSound_SetCooperativeLevel(DSObject, hWndMain, DSSCL_PRIORITY);
 	if(hres!=DS_OK)
 	{		
-		LogDxErrorString("Couldn't set DirectSound cooperative level\n");
+		LogErrorString("Couldn't set DirectSound cooperative level", __LINE__, __FILE__);
 		PlatEndSoundSys();
 		return 0;
 	}
@@ -439,7 +439,7 @@ int PlatStartSoundSys()
 		hres = IDirectSound_CreateSoundBuffer(DSObject, &dsBuffDesc, &DSPrimaryBuffer, NULL);	
 		if(hres!=DS_OK)
 		{		
-			LogDxErrorString("Couldn't create DirectSound primary buffer\n");
+			LogErrorString("Couldn't create DirectSound primary buffer", __LINE__, __FILE__);
 			PlatEndSoundSys();
 			return 0;
 		}
@@ -715,7 +715,7 @@ int PlatStartSoundSys()
 		return 0;
 	}
 
-	LogDxString("Initialised DirectSound8 successfully");
+	LogString("Initialised DirectSound8 successfully");
 
 	db_log4("PlatStartSound finished");
 	LOG_RC();
@@ -2399,15 +2399,15 @@ int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
 	waveFormat.cbSize			= sizeof(waveFormat);	//how big this structure is
 
 	memset(&bufferFormat, 0, sizeof(DSBUFFERDESC));
-	bufferFormat.dwSize = sizeof(DSBUFFERDESC);
+	bufferFormat.dwSize	 = sizeof(DSBUFFERDESC);
 	bufferFormat.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_LOCSOFTWARE;
 	bufferFormat.dwBufferBytes = waveFormat.nAvgBytesPerSec * 2;
 	bufferFormat.lpwfxFormat = &waveFormat;
 
 	if(FAILED(DSObject->CreateSoundBuffer(&bufferFormat, &vorbisBuffer, NULL))) 
 	{
-		LogDxErrorString("couldn't create buffer for ogg vorbis\n");
-		return 1;
+		LogErrorString("Couldn't create buffer for OGG Vorbis", __LINE__, __FILE__);
+		return -1;
 	}
 
 	(*bufferSize) = bufferFormat.dwBufferBytes;
@@ -2415,7 +2415,7 @@ int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
 		if(FAILED(vorbisBuffer->QueryInterface( IID_IDirectSoundNotify, 
                                         (void**)&pDSNotify ) ) )
 	{
-		LogDxErrorString("couldn't query interface for ogg vorbis buffer notifications\n");
+		LogErrorString("Couldn't query interface for OGG Vorbis buffer notifications", __LINE__, __FILE__);
 	}
 
 	DSBPOSITIONNOTIFY notifyPosition[2];
@@ -2433,9 +2433,9 @@ int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
 
 	if(FAILED(pDSNotify->SetNotificationPositions(2, notifyPosition)))
 	{
-		LogDxErrorString("couldn't set notifications for ogg vorbis buffer\n");
+		LogErrorString("Couldn't set notifications for OGG Vorbis buffer", __LINE__, __FILE__);
 		pDSNotify->Release();
-		return 1;
+		return -1;
 	}
 
 	hHandles[0] = notifyPosition[0].hEventNotify;
@@ -2455,7 +2455,7 @@ int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
 	/* lock the vorbis buffer */
 	if(FAILED(vorbisBuffer->Lock(offset, dataSize, &audioPtr1, &audioBytes1, &audioPtr2, &audioBytes2, NULL))) 
 	{
-		LogDxErrorString("couldn't lock ogg vorbis buffer for update\n");
+		LogErrorString("couldn't lock ogg vorbis buffer for update", __LINE__, __FILE__);
 		return 0;
 	}
 
@@ -2474,7 +2474,7 @@ int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
 
 	if(FAILED(vorbisBuffer->Unlock(audioPtr1, audioBytes1, audioPtr2, audioBytes2))) 
 	{
-		LogDxErrorString("couldn't unlock ogg vorbis buffer\n");
+		LogErrorString("couldn't unlock ogg vorbis buffer", __LINE__, __FILE__);
 	}
 
 	return bytesWritten;
@@ -2514,7 +2514,7 @@ int StopVorbisBuffer()
 {
 	if(FAILED(vorbisBuffer->Stop()))
 	{
-		LogDxErrorString("couldn't stop vorbis buffer\n");
+		LogErrorString("couldn't stop vorbis buffer", __LINE__, __FILE__);
 		return 1;
 	}
 	return 0;
@@ -2524,7 +2524,7 @@ bool PlayVorbisBuffer()
 {
 	if(FAILED(vorbisBuffer->Play(0,0,DSBPLAY_LOOPING)))
 	{
-		LogDxErrorString("PlayVorbisBuffer() - couldn't play vorbis buffer\n");
+		LogErrorString("PlayVorbisBuffer() - couldn't play vorbis buffer", __LINE__, __FILE__);
 		return false;
 	}
 	return true;

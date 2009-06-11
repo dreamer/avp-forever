@@ -198,7 +198,7 @@ BOOL InitialiseDirectInput(void)
 	if(FAILED(DirectInput8Create(hInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&lpdi, NULL)))
 	//if (DirectInputCreate(hInst, DIRECTINPUT_VERSION, &lpdi, NULL) != DI_OK)
 	{
-		LogDxErrorString("Can't create DirectInput8 object\n");
+		LogErrorString("Can't create DirectInput8 object\n");
 		#if debug
 		ReleaseDirect3D();
 		exit(0x4111);
@@ -241,7 +241,7 @@ BOOL InitialiseDirectKeyboard()
 	// try to create keyboard device
 	if (FAILED(lpdi->CreateDevice(guid, &lpdiKeyboard, NULL)))
 	{
-		LogDxErrorString("Couldn't create DirectInput keyboard\n");
+		LogErrorString("Couldn't create DirectInput keyboard\n");
 		#if debug
 		ReleaseDirect3D();
 		exit(0x4112);
@@ -253,7 +253,7 @@ BOOL InitialiseDirectKeyboard()
 	// Tell DirectInput that we want to receive data in keyboard format
 	if (FAILED(lpdiKeyboard->SetDataFormat(&c_dfDIKeyboard)))
 	{
-		LogDxErrorString("Couldn't set DirectInput keyboard data format\n");
+		LogErrorString("Couldn't set DirectInput keyboard data format\n");
 		#if debug
 		ReleaseDirect3D();
 		exit(0x4113);
@@ -278,7 +278,7 @@ BOOL InitialiseDirectKeyboard()
                          DISCL_NONEXCLUSIVE | DISCL_BACKGROUND)))
 	#endif
 	{
-		LogDxErrorString("Couldn't set DirectInput cooperative level\n");
+		LogErrorString("Couldn't set DirectInput cooperative level\n");
 		#if debug
 		ReleaseDirect3D();
 		exit(0x4114);
@@ -1543,14 +1543,14 @@ BOOL InitialiseDirectMouse()
     // Obtain an interface to the system mouse device.
 	if (FAILED(lpdi->CreateDevice(guid, &lpdiMouse, NULL)))
 	{
-		LogDxErrorString("Couldn't create DirectInput mouse device\n");
+		LogErrorString("Couldn't create DirectInput mouse device\n");
 		return FALSE;
 	}
 
 	// Set the data format to "mouse format".
 	if (FAILED(lpdiMouse->SetDataFormat(&c_dfDIMouse)))
 	{
-		LogDxErrorString("Couldn't set DirectInput mouse data format\n");
+		LogErrorString("Couldn't set DirectInput mouse data format\n");
 		return FALSE;
 	}
 
@@ -1569,7 +1569,7 @@ BOOL InitialiseDirectMouse()
 //    if (hres != DI_OK) return FALSE;
 	if(FAILED(hres))
 	{
-		LogDxErrorString("Couldn't set DirectInput mouse cooperative level\n");
+		LogErrorString("Couldn't set DirectInput mouse cooperative level\n");
 		return FALSE;
 	}
 
@@ -1590,7 +1590,7 @@ BOOL InitialiseDirectMouse()
 
 	if (FAILED(lpdiMouse->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph)))
 	{
-		LogDxErrorString("Couldn't set DirectInput mouse property\n");
+		LogErrorString("Couldn't set DirectInput mouse property\n");
 		return FALSE;
 	}
 

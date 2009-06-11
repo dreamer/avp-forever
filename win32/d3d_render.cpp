@@ -600,18 +600,20 @@ void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE t
 BOOL LockExecuteBuffer()
 {
 	LastError = d3d.lpD3DVertexBuffer->Lock(0, 0, (void**)&mainVertex, D3DLOCK_DISCARD);
-	if(FAILED(LastError)) {
+	if(FAILED(LastError)) 
+	{
 //			OutputDebugString("Couldn't lock vertex buffer");
-		LogDxError(LastError);
+		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
 
 
 	LastError = d3d.lpD3DIndexBuffer->Lock(0,0,(void**)&mainIndex,D3DLOCK_DISCARD);
-	if(FAILED(LastError)) {
+	if(FAILED(LastError)) 
+	{
 //		OutputDebugString("Couldn't lock index buffer");
-//		LogDxError("Unable to lock index buffer", LastError);
-		LogDxError(LastError);
+//		LogError("Unable to lock index buffer", LastError);
+		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
 
@@ -630,18 +632,20 @@ BOOL UnlockExecuteBufferAndPrepareForUse()
 //	DrawParticles();
 
 	LastError = d3d.lpD3DVertexBuffer->Unlock();
-	if(FAILED(LastError)) {
+	if(FAILED(LastError)) 
+	{
 //		OutputDebugString("Couldn't UNlock vertex buffer!");
-//		LogDxError("Unable to unlock vertex buffer", LastError);
-		LogDxError(LastError);
+//		LogError("Unable to unlock vertex buffer", LastError);
+		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
 
 	LastError = d3d.lpD3DIndexBuffer->Unlock();
-	if(FAILED(LastError)) {
+	if(FAILED(LastError)) 
+	{
 //		OutputDebugString("Couldn't UNlock vertex buffer!");
-//		LogDxError("Unable to unlock index buffer", LastError);
-		LogDxError(LastError);
+//		LogError("Unable to unlock index buffer", LastError);
+		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
 
@@ -700,24 +704,23 @@ BOOL BeginD3DScene()
 	LastError = d3d.lpD3DDevice->BeginScene();
 //	LOGDXERR(LastError);
 
-	if (FAILED(LastError)) {
+	if (FAILED(LastError)) 
+	{
 //		OutputDebugString("Couldn't Begin Scene!!");
-//		LogDxError("Unable to begin scene", LastError);
-		LogDxError(LastError);
+//		LogError("Unable to begin scene", LastError);
+		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
-	else {
-
+	else 
+	{
 		LastError = d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET /*| D3DCLEAR_ZBUFFER*/ /*|D3DCLEAR_STENCIL*/,
 			D3DCOLOR_XRGB(0,0,0), 1.0f, 0 );
 
-		if (FAILED(LastError)) {
+		if (FAILED(LastError)) 
+		{
 //			OutputDebugString("Couldn't clear render target & Z buffer");
-//			LogDxError("Unable to clear render target and z buffer", LastError);
-			LogDxError(LastError);
-		}
-		else {
-//			OutputDebugString("\n Cleared Z-Buffer");
+//			LogError("Unable to clear render target and z buffer", LastError);
+			LogDxError(LastError, __LINE__, __FILE__);
 		}
 	}
 
@@ -755,10 +758,11 @@ BOOL EndD3DScene()
 //	textprint ("NumberOfRenderedTrianglesPerSecond: %d\n",DIV_FIXED(NumberOfRenderedTriangles,NormalFrameTime));
 	NumberOfLandscapePolygons=0;
 
-	if (FAILED(LastError)) {
+	if (FAILED(LastError)) 
+	{
 //		OutputDebugString("Couldn't end scene");
-//		LogDxError("Unable to end scene", LastError);
-		LogDxError(LastError);
+//		LogError("Unable to end scene", LastError);
+		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
 	else
@@ -821,8 +825,8 @@ BOOL ExecuteBuffer()
 	LastError = d3d.lpD3DIndexBuffer->Lock(0,0,(void**)&tempIndex, D3DLOCK_DISCARD);
 	if(FAILED(LastError)) {
 //		OutputDebugString("Couldn't lock index buffer");
-//		LogDxError("Unable to lock index buffer", LastError);
-		LogDxError(LastError);
+//		LogError("Unable to lock index buffer", LastError);
+		LogError(LastError);
 		return FALSE;
 	}
 */
@@ -847,25 +851,28 @@ BOOL ExecuteBuffer()
 	LastError = d3d.lpD3DIndexBuffer->Unlock();
 	if(FAILED(LastError)) {
 //		OutputDebugString("Couldn't UNlock vertex buffer!");
-//		LogDxError("Unable to unlock index buffer", LastError);
-		LogDxError(LastError);
+//		LogError("Unable to unlock index buffer", LastError);
+		LogError(LastError);
 		return FALSE;
 	}
 */
 	// these two shouldn't be here!
 	LastError = d3d.lpD3DDevice->SetStreamSource( 0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DTLVERTEX));
-	if (FAILED(LastError)){
-		LogDxError(LastError);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
 	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_TLVERTEX);
-	if (FAILED(LastError)){
-		LogDxError(LastError);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
 	LastError = d3d.lpD3DDevice->SetIndices(d3d.lpD3DIndexBuffer);
-	if(FAILED(LastError)) {
-		LogDxError(LastError);
+	if(FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
 	int tempTexture = 0;
@@ -898,8 +905,9 @@ BOOL ExecuteBuffer()
 				num_prims);
 
 			draw_calls_per_frame++;
-			if (FAILED(LastError)){
-				LogDxError(LastError);
+			if (FAILED(LastError))
+			{
+				LogDxError(LastError, __LINE__, __FILE__);
 			}
 		}
 	}
@@ -941,8 +949,9 @@ BOOL ExecuteBuffer()
 			   num_prims);
 
 			draw_calls_per_frame++;
-			if (FAILED(LastError)){
-				LogDxError(LastError);
+			if (FAILED(LastError))
+			{
+				LogDxError(LastError, __LINE__, __FILE__);
 			}
 		}
 	}
@@ -974,7 +983,7 @@ BOOL ExecuteBuffer()
 			draw_calls_per_frame++;
 			if (FAILED(LastError)){
 //				OutputDebugString(" Couldn't Draw Primitive!");
-				LogDxError(LastError);
+				LogError(LastError);
 			}
 		}
 	}
@@ -1021,7 +1030,7 @@ BOOL ExecuteBuffer()
 			draw_calls_per_frame++;
 			if (FAILED(LastError)){
 //				OutputDebugString(" Couldn't Draw Primitive!");
-				LogDxError(LastError);
+				LogError(LastError);
 			}
 		}
 	}
@@ -7846,7 +7855,7 @@ void SetupFMVTexture(FMVTEXTURE *ftPtr)
 	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &ftPtr->DestTexture, NULL);
 	if(FAILED(LastError))
 	{
-		LogDxErrorString("Could not create Direct3D texture ftPtr->DestTexture\n");
+		LogErrorString("Could not create Direct3D texture ftPtr->DestTexture", __LINE__, __FILE__);
 		ftPtr->DestTexture = NULL;
 	}
 
@@ -7872,7 +7881,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	LastError = ftPtr->DestTexture->LockRect(0, &textureRect, NULL, D3DLOCK_DISCARD);
 	if(FAILED(LastError))
 	{
-		LogDxErrorString("Could not lock Direct3D texture ftPtr->DestTexture\n");
+		LogErrorString("Could not lock Direct3D texture ftPtr->DestTexture", __LINE__, __FILE__);
 		return;
 	}
 
@@ -7889,7 +7898,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	LastError = ftPtr->DestTexture->UnlockRect(0);
 	if(FAILED(LastError)) 
 	{
-		LogDxErrorString("Could not unlock Direct3D texture ftPtr->DestTexture\n");
+		LogErrorString("Could not unlock Direct3D texture ftPtr->DestTexture", __LINE__, __FILE__);
 		return;
 	}
 
@@ -7897,7 +7906,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	LastError = d3d.lpD3DDevice->UpdateTexture(ftPtr->DestTexture, ftPtr->ImagePtr->Direct3DTexture);
 	if(FAILED(LastError))
 	{	
-		LogDxErrorString("Could not UpdateTexture in UpdateFMVTexture function\n");
+		LogErrorString("Could not UpdateTexture in UpdateFMVTexture function", __LINE__, __FILE__);
 	}
 #endif
 }

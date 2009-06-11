@@ -76,7 +76,7 @@ int ReadVorbisData(int sizeToRead, int offset)
 
 		if(bytesReadPerLoop < 0) 
 		{
-			LogDxErrorString("ov_read encountered an error\n");
+			LogErrorString("ov_read encountered an error", __LINE__, __FILE__);
 		}
 		/* if we reach the end of the file, go back to start */
 		else if(bytesReadPerLoop == 0)
@@ -85,11 +85,11 @@ int ReadVorbisData(int sizeToRead, int offset)
 		}
 		else if (bytesReadPerLoop == OV_HOLE) 
 		{
-			LogDxErrorString("OV_HOLE\n");
+			LogErrorString("OV_HOLE", __LINE__, __FILE__);
 		}
 		else if (bytesReadPerLoop == OV_EBADLINK) 
 		{
-			LogDxErrorString("OV_EBADLINK\n");
+			LogErrorString("OV_EBADLINK", __LINE__, __FILE__);
 		}
 
 		bytesReadTotal += bytesReadPerLoop;
@@ -115,13 +115,13 @@ void LoadVorbisTrack(int track)
 	file = fopen(TrackList[track].c_str(),"rb");
 	if (!file) 
 	{
-		LogDxErrorString("ogg file not found\n");
+		LogErrorString("Can't find OGG Vorbis file " + TrackList[track]);
 		return;
 	}
 
 	if (ov_open_callbacks(file, &oggFile, NULL, 0, OV_CALLBACKS_DEFAULT) < 0) 
 	{
-		LogDxErrorString("file requested isn't a valid ogg file?\n");
+		LogErrorString("File " + TrackList[track] + "is not a valid OGG Vorbis file");
 		fclose(file);
 		return;
 	}
@@ -129,17 +129,21 @@ void LoadVorbisTrack(int track)
 	// get some audio info
 	pInfo = ov_info(&oggFile, -1);
 
-	/* Check the number of channels... always use 16-bit samples */
-	if (pInfo->channels == 1) OutputDebugString("Mono Vorbis\n");
-	else OutputDebugString("Stereo Vorbis\n");
+	LogString("Opening OGG Vorbis file...");
 
-//	freq = pInfo->rate;
-	char buf[100];
-	sprintf(buf, "Vorbis frequency: %d\n", pInfo->rate);
-	OutputDebugString(buf);
+	/* Check the number of channels... always use 16-bit samples */
+	if (pInfo->channels == 1) 
+		LogString("\t Mono Vorbis file\n");
+	else 
+		LogString("\t Stereo Vorbis file\n");
+
+	LogString("\t Vorbis frequency: " + IntToString(pInfo->rate));
 
 	/* create the audio buffer (directsound or whatever) */
-	CreateVorbisAudioBuffer(pInfo->channels, pInfo->rate, &bufferSize);
+	if (CreateVorbisAudioBuffer(pInfo->channels, pInfo->rate, &bufferSize) < 0)
+	{
+		LogErrorString("Can't create audio buffer for OGG Vorbis!");
+	}
 
 	/* init some temp audio data storage */
 	audioData = new char[bufferSize];
@@ -168,7 +172,7 @@ void LoadVorbisTrack(int track)
 
 		if(bytesReadPerLoop < 0) 
 		{
-			LogDxErrorString("ov_read encountered an error\n");
+			LogErrorString("ov_read encountered an error\n");
 		}
 		/* if we reach the end of the file, go back to start */
 		if(bytesReadPerLoop == 0)
@@ -236,7 +240,7 @@ void UpdateVorbisBuffer(void *arg)
 
 				if (bytesReadPerLoop < 0) 
 				{
-					LogDxErrorString("ov_read encountered an error\n");
+					LogErrorString("ov_read encountered an error\n");
 				}
 				/* if we reach the end of the file, go back to start */
 				if (bytesReadPerLoop == 0)
@@ -246,11 +250,11 @@ void UpdateVorbisBuffer(void *arg)
 				}
 				if (bytesReadPerLoop == OV_HOLE) 
 				{
-					LogDxErrorString("OV_HOLE\n");
+					LogErrorString("OV_HOLE\n");
 				}
 				if (bytesReadPerLoop == OV_EBADLINK) 
 				{
-					LogDxErrorString("OV_EBADLINK\n");
+					LogErrorString("OV_EBADLINK\n");
 				}
 			}
 #endif
@@ -270,7 +274,7 @@ void PlayVorbis()
 	}
 	else 
 	{
-		LogDxErrorString("couldn't play ogg vorbis buffer\n");
+		LogErrorString("couldn't play ogg vorbis buffer\n");
 	}
 }
 
@@ -302,7 +306,7 @@ bool LoadVorbisTrackList()
 
 	if(!file) 
 	{
-		LogDxErrorString("no music tracklist found - not using ogg vorbis music\n");
+		LogErrorString("no music tracklist found - not using ogg vorbis music\n");
 		return false;
 	}
 

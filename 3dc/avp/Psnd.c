@@ -572,9 +572,9 @@ void Sound_Stop(int activeSoundNumber)
 				(GameSounds[soundNo].activeInstances<SOUND_MAXINSTANCES));
 	if(ActiveSounds[activeSoundNumber].externalRef)
 	
-	{}
+//	{}
 	/* FIXME - causes crash on end of level before queen for marine. commented out for now */
-//		*(ActiveSounds[activeSoundNumber].externalRef) = SOUND_NOACTIVEINDEX;      
+		*(ActiveSounds[activeSoundNumber].externalRef) = SOUND_NOACTIVEINDEX;      
 			
 	/* stop the sound: it may have already stopped, of course, but never mind */
 	PlatStopSound(activeSoundNumber);

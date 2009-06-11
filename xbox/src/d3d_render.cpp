@@ -690,10 +690,10 @@ BOOL UnlockExecuteBufferAndPrepareForUse()
 {
 	return TRUE;
 	LastError = d3d.lpD3DVertexBuffer->Unlock();
-	if(FAILED(LastError)) {
-		OutputDebugString("Couldn't UNlock vertex buffer!");
+	if(FAILED(LastError)) 
+	{
 //		LogDxError("Unable to unlock vertex buffer", LastError);
-		LogDxError(LastError);
+		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
 /*
@@ -713,19 +713,17 @@ BOOL BeginD3DScene()
 	NumberOfRenderedTriangles = 0;
 	LastError = d3d.lpD3DDevice->BeginScene();
 
-	if (FAILED(LastError)) {
-//		OutputDebugString("Couldn't Begin Scene!!");
-//		LogDxError("Unable to begin scene", LastError);
-		LogDxError(LastError);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
 
 	LastError = d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, D3DCOLOR_ARGB(0,0,0,0), 1.0f, 0 );
 
-	if (FAILED(LastError)) {
-//			OutputDebugString("Couldn't clear render target & Z buffer");
-//			LogDxError("Unable to clear render target and z buffer", LastError);
-		LogDxError(LastError);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
 	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_ON);
@@ -764,10 +762,9 @@ BOOL EndD3DScene()
 //	textprint ("NumberOfRenderedTrianglesPerSecond: %d\n",DIV_FIXED(NumberOfRenderedTriangles,NormalFrameTime));
 	NumberOfLandscapePolygons=0;
 
-	if (FAILED(LastError)) {
-//		OutputDebugString("Couldn't end scene");
-//		LogDxError("Unable to end scene", LastError);
-		LogDxError(LastError);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
 	else

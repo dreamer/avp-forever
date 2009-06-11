@@ -364,7 +364,7 @@ void _cdecl main()
 
 	if(!InitialiseDirect3DImmediateMode())
 	{
-		LogDxErrorString("InitialiseDirect3DImmediateMode() didn't complete fully");
+		LogErrorString("InitialiseDirect3DImmediateMode() didn't complete fully");
 		ReleaseDirect3D();
 	}
 	else 

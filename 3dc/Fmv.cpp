@@ -61,20 +61,20 @@ int updateAudioThreadHandle = 0;
 static OggPlay			*player = NULL;
 static OggPlayReader	*reader = NULL;
 
-static int				video_track = 0;
-static int				audio_track = 0;
+static int	video_track = 0;
+static int	audio_track = 0;
 
-static int				channels	= 0;
-static int				rate		= 0;
-static int				fps_num		= 0;
-static int				fps_denom	= 0;
-static int				n_frames	= 0;
+static int	channels	= 0;
+static int	rate		= 0;
+static int	fps_num		= 0;
+static int	fps_denom	= 0;
+static int	n_frames	= 0;
 
-bool					fmvPlaying	= false;
-bool					frameReady	= false;
-bool					usingAudio	= false;
+bool		fmvPlaying	= false;
+bool		frameReady	= false;
+bool		usingAudio	= false;
 
-static long				presentationTime = 0;
+static long	presentationTime = 0;
 
 extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
@@ -115,11 +115,11 @@ DWORD					fmvaudioBytes2;
 int						fullBufferSize = 0;
 int						halfBufferSize = 0;
 
-long					writeOffset = 0;
-long					lastPlayCursor = 0;
-long					totalBytesPlayed = 0;
-long					totalBytesWritten = 0;
-long					totalAudioTimePlayed = 0;
+long writeOffset = 0;
+long lastPlayCursor = 0;
+long totalBytesPlayed = 0;
+long totalBytesWritten = 0;
+long totalAudioTimePlayed = 0;
 
 
 /* audio buffer for liboggplay */
@@ -1580,7 +1580,7 @@ int CreateFMVAudioBuffer(int channels, int rate)
 
 	if(FAILED(DSObject->CreateSoundBuffer(&bufferFormat, &fmvAudioBuffer, NULL))) 
 	{
-///		LogDxErrorString("couldn't create audio buffer for fmv\n");
+///		LogErrorString("couldn't create audio buffer for fmv\n");
 		OutputDebugString("couldn't create audio buffer for fmv\n");
 		return 0;
 	}

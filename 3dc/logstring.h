@@ -13,9 +13,11 @@
 
 void ClearLog();
 void WriteToLog(const std::string &logLine);
-void LogDxError(/*std::string errorString,*/ HRESULT hr);
-void LogDxErrorString(const std::string &errorString);
-void LogDxString(const std::string &logString);
+void LogDxError(HRESULT hr, int LINE, char* FILE);
+void LogErrorString(const std::string &errorString, int LINE, char* FILE);
+void LogErrorString(const std::string &errorString);
+std::string IntToString(const int value);
+void LogString(const std::string &logString);
 void LogDebugValue(int value);
 std::string LogInteger(int value);
 

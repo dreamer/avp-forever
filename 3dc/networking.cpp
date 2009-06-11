@@ -9,7 +9,7 @@ extern "C" {
 
 #include "assert.h"
 
-void LogDxErrorString(char *errorString)
+void LogErrorString(char *errorString)
 {
 	OutputDebugString(errorString);
 }
@@ -162,7 +162,7 @@ int DirectPlay_HostGame(char *playerName, char *sessionName, int species, int ga
 			/* initialise ENet */
 			if(enet_initialize() != 0)
 			{
-				LogDxErrorString("Failed to initialise ENet networking\n");
+				LogErrorString("Failed to initialise ENet networking\n");
 				return 0;
 			}
 //			else OutputDebugString("Initialised ENet\n");
@@ -176,7 +176,7 @@ int DirectPlay_HostGame(char *playerName, char *sessionName, int species, int ga
                                   0						/* assume any amount of outgoing bandwidth */);
 			if(Client == NULL)
 			{
-				LogDxErrorString("Failed to create ENet server\n");
+				LogErrorString("Failed to create ENet server\n");
 				return 0;
 			}
 
@@ -244,7 +244,7 @@ int DirectPlay_Disconnect()
 		int result = SendSystemMessage(AVP_SYSTEMMESSAGE, DPID_SYSMSG, DPSYS_DESTROYPLAYERORGROUP, (unsigned char*)&destroyPlayer, sizeof(DPMSG_DESTROYPLAYERORGROUP));
 		if(result != DP_OK)
 		{
-			LogDxErrorString("DirectPlay_Disconnect - Problem sending destroy player system message!\n");
+			LogErrorString("DirectPlay_Disconnect - Problem sending destroy player system message!\n");
 			return 0;
 		}
 	}
@@ -275,7 +275,7 @@ int DirectPlay_JoinGame()
 	/* initialise eNet */
 	if (enet_initialize () != 0)
 	{
-		LogDxErrorString("Failed to initialise ENet networking\n");
+		LogErrorString("Failed to initialise ENet networking\n");
 		return 0;
 	}
 //	else OutputDebugString("Initialised ENet\n");
@@ -375,7 +375,7 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 				/* send the packet */
 				if((enet_peer_send(event.peer, event.channelID, packet) < 0))
 				{
-					LogDxErrorString("problem sending session packet!\n");
+					LogErrorString("problem sending session packet!\n");
 				}
 
 				return DPERR_NOMESSAGES;
@@ -428,7 +428,7 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 			// send the packet
 			if((enet_peer_send(event.peer, event.channelID, packet) < 0))
 			{
-				LogDxErrorString("AVP_GETPLAYERNAME - problem sending player name packet!\n");
+				LogErrorString("AVP_GETPLAYERNAME - problem sending player name packet!\n");
 			}
 
 			return DPERR_NOMESSAGES;
@@ -487,20 +487,20 @@ int SendSystemMessage(int messageType, int idFrom, int idTo, unsigned char *lpDa
 
 	if(packet == NULL)
 	{
-		LogDxErrorString("SendSystemMessage - couldn't create packet\n");
+		LogErrorString("SendSystemMessage - couldn't create packet\n");
 		return DP_FAIL;
 	}
 
 	/* let us know if we're not connected */
 	if(ServerPeer->state != ENET_PEER_STATE_CONNECTED)
 	{
-		LogDxErrorString("SendSystemMessage - not connected to server peer!\n");
+		LogErrorString("SendSystemMessage - not connected to server peer!\n");
 	}
 
 	/* send the packet */
 	if(enet_peer_send(ServerPeer, 0, packet) != 0)
 	{
-		LogDxErrorString("SendSystemMessage - can't send peer packet\n");
+		LogErrorString("SendSystemMessage - can't send peer packet\n");
 	}
 
 	enet_host_flush(Client);
@@ -512,7 +512,7 @@ int DpExtSend(int lpDP2A, DPID idFrom, DPID idTo, DWORD dwFlags, unsigned char *
 {
 	if(lpData == NULL) 
 	{
-		LogDxErrorString("DpExtSend - FALSE data\n");
+		LogErrorString("DpExtSend - FALSE data\n");
 		return DP_FAIL;
 	}
 		
@@ -540,7 +540,7 @@ int DpExtSend(int lpDP2A, DPID idFrom, DPID idTo, DWORD dwFlags, unsigned char *
 
 	if(packet == NULL)
 	{
-		LogDxErrorString("DpExtSend - couldn't create packet\n");
+		LogErrorString("DpExtSend - couldn't create packet\n");
 		return DP_FAIL;
 	}
 
@@ -670,7 +670,7 @@ static BOOL DirectPlay_CreatePlayer(char* FormalName,char* FriendlyName)
 		int result = SendSystemMessage(AVP_SYSTEMMESSAGE, DPID_SYSMSG, DPSYS_CREATEPLAYERORGROUP, (unsigned char*)&newPlayer, sizeof(playerDetails));
 		if(result != DP_OK)
 		{
-			LogDxErrorString("CreatePlayer - Problem sending create player system message!\n");
+			LogErrorString("CreatePlayer - Problem sending create player system message!\n");
 			return 0;
 		}
 		else
@@ -710,14 +710,14 @@ int DPlayOpenSession(char *hostName)
 
 	if(Client == NULL)
     {
-		LogDxErrorString("DPlayOpenSession - Failed to create Enet client\n");
+		LogErrorString("DPlayOpenSession - Failed to create Enet client\n");
 		return DP_FAIL;
     }
 	
 	ServerPeer = enet_host_connect(Client, &ServerAddress, 2);
 	if(ServerPeer == NULL)
 	{
-		LogDxErrorString("DPlayOpenSession - Failed to init connection to server host\n");
+		LogErrorString("DPlayOpenSession - Failed to init connection to server host\n");
 		return DP_FAIL;
 	}
 
@@ -729,7 +729,7 @@ int DPlayOpenSession(char *hostName)
 	}
 	else
 	{
-		LogDxErrorString("DPlayOpenSession - failed to connect to server!\n");
+		LogErrorString("DPlayOpenSession - failed to connect to server!\n");
 		return DP_FAIL;
 	}
 	
@@ -765,7 +765,7 @@ void FindAvPSessions()
 
     if (Client == NULL)
     {
-		LogDxErrorString("Failed to create ENet client\n");
+		LogErrorString("Failed to create ENet client\n");
 		return;
     }
 	else OutputDebugString("Created ENet client to find sessions\n");
@@ -773,7 +773,7 @@ void FindAvPSessions()
 	Peer = enet_host_connect(Client, &BroadcastAddress, 2);
 	if (Peer == NULL)
 	{
-		LogDxErrorString("Failed to connect to ENet Broadcast peer\n");
+		LogErrorString("Failed to connect to ENet Broadcast peer\n");
 		return;
 	}
 	else OutputDebugString("Connected to ENet broadcast peer\n");

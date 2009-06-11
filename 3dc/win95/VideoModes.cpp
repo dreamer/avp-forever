@@ -160,7 +160,7 @@ void LoadDeviceAndVideoModePreferences()
 	// if the file doesn't exist
 	if(!file)
 	{
-		LogDxErrorString("Can't find file AliensVsPredator.cfg - creating and using basic display mode\n");
+		LogErrorString("Can't find file AliensVsPredator.cfg - creating and using basic display mode", __LINE__, __FILE__);
 		SelectBasicDeviceAndVideoMode();
 		return;
 	}

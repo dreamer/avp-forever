@@ -57,6 +57,7 @@
 				RuntimeLibrary="1"
 				StructMemberAlignment="0"
 				FloatingPointExceptions="true"
+				DefaultCharIsUnsigned="true"
 				RuntimeTypeInfo="true"
 				PrecompiledHeaderFile=""
 				ExpandAttributedSource="true"
@@ -3717,6 +3718,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\3dc\nedmalloc.c"
+				>
+			</File>
+			<File
 				RelativePath=".\3dc\networking.cpp"
 				>
 			</File>
@@ -5949,6 +5954,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\3dc\malloc.c.h"
+				>
+			</File>
+			<File
 				RelativePath=".\3dc\mathline.c"
 				>
 			</File>
@@ -5994,6 +6003,10 @@
 			</File>
 			<File
 				RelativePath="3dc\avp\win95\Multmenu.h"
+				>
+			</File>
+			<File
+				RelativePath=".\3dc\nedmalloc.h"
 				>
 			</File>
 			<File

@@ -152,19 +152,19 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AvPTexture *tex)
 	}
 */
 	LastError = d3d.lpD3DDevice->CreateTexture(pad_width, pad_height, 1, NULL, colour_format, D3DPOOL_MANAGED, &destTexture);
-	if(FAILED(LastError)) {
-//		LogDxError("Unable to create tall font texture", LastError);
-		LogDxError(LastError);
+	if(FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
 
 	D3DLOCKED_RECT lock;
 
 	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
-	if(FAILED(LastError)) {
+	if(FAILED(LastError)) 
+	{
 		destTexture->Release();
-//		LogDxError("Unable to lock tall font texture for writing", LastError);
-		LogDxError(LastError);
+		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
 
@@ -281,9 +281,9 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AvPTexture *tex)
 	XGSwizzleRect(lock.pBits, lock.Pitch, NULL, lock2.pBits, pad_width, pad_height, NULL, 4);
 
 	LastError = destTexture->UnlockRect(0);
-	if(FAILED(LastError)) {
-//		LogDxError("Unable to unlock tall font texture", LastError);
-		LogDxError(LastError);
+	if(FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
 	
 	LastError = swizTexture->UnlockRect(0);
@@ -640,9 +640,9 @@ BOOL CreateVolatileResources()
 	}
 
 //	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_TLVERTEX);
-	if(FAILED(LastError)) {
-//		LogDxError("Unable to set FVF", LastError);
-		LogDxError(LastError);
+	if(FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
 
@@ -653,7 +653,6 @@ BOOL CreateVolatileResources()
 
 BOOL ChangeGameResolution(int width, int height, int colour_depth)
 {
-#if 1
 //	ReleaseVolatileResources();
 
 	d3d.d3dpp.BackBufferHeight = height;
@@ -661,7 +660,8 @@ BOOL ChangeGameResolution(int width, int height, int colour_depth)
 
 	LastError = d3d.lpD3DDevice->Reset(&d3d.d3dpp);
 
-	if(!FAILED(LastError)) {
+	if(!FAILED(LastError)) 
+	{
 		ScreenDescriptorBlock.SDB_Width     = width;
 		ScreenDescriptorBlock.SDB_Height    = height;
 		ScreenDescriptorBlock.SDB_Depth		= colour_depth;
@@ -677,11 +677,10 @@ BOOL ChangeGameResolution(int width, int height, int colour_depth)
 
 //		CreateVolatileResources();
 	}
-	else {
-//		OutputDebugString("\n couldn't reset for res change");
-		LogDxError(LastError);
+	else 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
-#endif
 	return true;
 }
 
@@ -689,7 +688,7 @@ BOOL InitialiseDirect3DImmediateMode()
 {
 	// clear log file first, then write header text
 	ClearLog();
-	LogDxString("Starting to initialise Direct3D");
+	LogString("Starting to initialise Direct3D");
 
 //	int width = 720;
 //	int height = 576;
@@ -706,7 +705,7 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	if (!d3d.lpD3D)
 	{
-		LogDxErrorString("Could not create Direct3D object \n");
+		LogErrorString("Could not create Direct3D object \n");
 		return FALSE;
 	}
 	
@@ -828,12 +827,12 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	if (FAILED(LastError))
 	{
-		LogDxErrorString("Could not create Direct3D device");
+		LogErrorString("Could not create Direct3D device");
 		return FALSE;
 	}
 
 	// Log resolution set
-	LogDxString("\t Resolution set: " + LogInteger(d3dpp.BackBufferWidth) + " x " + LogInteger(d3dpp.BackBufferHeight));
+	LogString("\t Resolution set: " + LogInteger(d3dpp.BackBufferWidth) + " x " + LogInteger(d3dpp.BackBufferHeight));
 
 	ZeroMemory(&d3d.lpD3DViewport, sizeof(d3d.lpD3DViewport));
 	d3d.lpD3DViewport.X = 0;
@@ -846,7 +845,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	LastError = d3d.lpD3DDevice->SetViewport(&d3d.lpD3DViewport);
 	if (FAILED(LastError))
 	{
-		LogDxErrorString("Could not set viewport");
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
 	ScreenDescriptorBlock.SDB_Width     = width;
@@ -874,15 +873,16 @@ BOOL InitialiseDirect3DImmediateMode()
 	// create vertex and index buffers
 	CreateVolatileResources();
 
-	LogDxString("Initialised Direct3D succesfully");
+	LogString("Initialised Direct3D succesfully");
 	return TRUE;
 }
 
 void FlipBuffers()
 {
 	LastError = d3d.lpD3DDevice->Present(NULL, NULL, NULL, NULL);
-	if (FAILED(LastError)) {
-		LogDxErrorString("D3D Present failed\n");
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
 }
 

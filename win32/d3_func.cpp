@@ -46,9 +46,8 @@ extern int WindowMode;
 extern int ZBufferMode;
 extern int VideoModeColourDepth;
 
-int 					VideoModeColourDepth;
-int						NumAvailableVideoModes;
-//VIDEOMODEINFO			AvailableVideoModes[MaxAvailableVideoModes];
+int	VideoModeColourDepth;
+int	NumAvailableVideoModes;
 
 HRESULT LastError;
 
@@ -141,14 +140,11 @@ void LoadConsoleFont()
 		&consoleText
 		);	
 
-	if(FAILED(LastError))
+	if (FAILED(LastError))
 	{
-		OutputDebugString("Couldn't load console font!\n");
+		LogDxError(LastError, __LINE__, __FILE__);
+		//LogError("Couldn't load console font!\n");
 		consoleText = NULL;
-	}
-	else
-	{	
-		OutputDebugString("loaded console font ok\n");
 	}
 }
 
@@ -179,13 +175,15 @@ LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int
 
 	if(FAILED(LastError))
 	{
+		LogDxError(LastError, __LINE__, __FILE__);
 		*width = 0;
 		*height = 0;
 		return NULL;
 	}
 
-	OutputDebugString("\n made texture: ");
+	OutputDebugString("created user texture: ");
 	OutputDebugString(fullFileName.c_str());
+	OutputDebugString("\n");
 	
 	*width = imageInfo.Width;
 	*height = imageInfo.Height;
@@ -226,14 +224,16 @@ void CreateScreenShotImage()
 	/* create surface to copy screen to */
 	if(FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(ScreenDescriptorBlock.SDB_Width, ScreenDescriptorBlock.SDB_Height, D3DFMT_A8R8G8B8, D3DPOOL_SCRATCH, &frontBuffer, NULL)))
 	{
-		OutputDebugString("\n Couldn't create screenshot surface");
+		LogDxError(LastError, __LINE__, __FILE__);
+		OutputDebugString("Couldn't create screenshot surface\n");
 		return;
 	}
 
 	/* copy front buffer screen to surface */
 	if(FAILED(d3d.lpD3DDevice->GetFrontBufferData(0, frontBuffer))) 
 	{
-		OutputDebugString("\n Couldn't get a copy of the front buffer");
+		LogDxError(LastError, __LINE__, __FILE__);
+		OutputDebugString("Couldn't get a copy of the front buffer\n");
 		SAFE_RELEASE(frontBuffer);
 		return;
 	}
@@ -241,7 +241,8 @@ void CreateScreenShotImage()
 	/* save surface to image file */
 	if(FAILED(D3DXSaveSurfaceToFile(fileName.str().c_str(), D3DXIFF_JPG, frontBuffer, NULL, NULL))) 
 	{
-		OutputDebugString("\n Save Surface to file failed!!!");
+		LogDxError(LastError, __LINE__, __FILE__);
+		OutputDebugString("Save Surface to file failed!!!\n");
 	}
 
 	/* release surface */
@@ -284,9 +285,10 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 	
 
 	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, NULL, colourFormat, D3DPOOL_MANAGED, &destTexture, NULL);
-	if(FAILED(LastError)) {
-//		LogDxError("Unable to create tall font texture", LastError);
-		LogDxError(LastError);
+	if(FAILED(LastError)) 
+	{
+//		LogError("Unable to create tall font texture", LastError);
+		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
 
@@ -295,8 +297,8 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
 	if(FAILED(LastError)) {
 		destTexture->Release();
-//		LogDxError("Unable to lock tall font texture for writing", LastError);
-		LogDxError(LastError);
+//		LogError("Unable to lock tall font texture for writing", LastError);
+		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
 
@@ -418,9 +420,10 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 	}
 
 	LastError = destTexture->UnlockRect(0);
-	if(FAILED(LastError)) {
-//		LogDxError("Unable to unlock tall font texture", LastError);
-		LogDxError(LastError);
+	if(FAILED(LastError)) 
+	{
+//		LogError("Unable to unlock tall font texture", LastError);
+		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
 /*
@@ -437,7 +440,8 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture(int width, int height, int usage, int pool)
 
 	if(FAILED(d3d.lpD3DDevice->CreateTexture(width, height, 1, usage, D3DFMT_A8R8G8B8, (D3DPOOL)pool, &destTexture, NULL)))
 	{
-		LogDxErrorString("CreateFmvTexture failed\n");
+		LogDxError(LastError, __LINE__, __FILE__);
+		//LogErrorString("CreateFmvTexture failed\n");
 		return NULL;
 	}
 
@@ -536,6 +540,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 		0,
 		&destTexture)))
 	{
+		LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("COULD NOT CREATE TEXTURE?\n");
 		delete TgaHeader;
 		delete[] buffer;
@@ -613,6 +618,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL
 		0,
 		&destTexture)))
 	{
+		LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("COULD NOT CREATE TEXTURE?\n");
 		delete[] buffer;
 		return NULL;
@@ -655,7 +661,8 @@ BOOL CreateVolatileResources()
 	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DTLVERTEX),D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_TLVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
 	if(FAILED(LastError)) 
 	{
-		LogDxErrorString("CreateVertexBuffer failed\n");
+		LogDxError(LastError, __LINE__, __FILE__);
+		//LogErrorString("CreateVertexBuffer failed\n");
 		return FALSE;
 	}
 
@@ -663,21 +670,24 @@ BOOL CreateVolatileResources()
 	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DIndexBuffer, NULL);
 	if(FAILED(LastError)) 
 	{
-		LogDxErrorString("CreateIndexBuffer failed\n");
+		LogDxError(LastError, __LINE__, __FILE__);
+		//LogErrorString("CreateIndexBuffer failed\n");
 		return FALSE;
 	}
 
 	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DTLVERTEX));
 	if (FAILED(LastError))
 	{
-		LogDxErrorString("SetStreamSource failed\n");
+		LogDxError(LastError, __LINE__, __FILE__);
+		//LogErrorString("SetStreamSource failed\n");
 		return FALSE;
 	}
 
 	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_TLVERTEX);
 	if(FAILED(LastError)) 
 	{
-		LogDxErrorString("SetFVF failed\n");
+		LogDxError(LastError, __LINE__, __FILE__);
+		//LogErrorString("SetFVF failed\n");
 		return FALSE;
 	}
 
@@ -701,7 +711,8 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 
 	if(FAILED(LastError)) 
 	{
-		LogDxErrorString("D3D device reset failed\n");
+		LogDxError(LastError, __LINE__, __FILE__);
+		//LogErrorString("D3D device reset failed\n");
 		return FALSE;
 	}
 	else
@@ -730,7 +741,7 @@ BOOL InitialiseDirect3DImmediateMode()
 {
 	/* clear log file first, then write header text */
 	ClearLog();
-	LogDxString("Starting to initialise Direct3D");
+	LogString("Starting to initialise Direct3D");
 
 	int width = 640;
 	int height = 480;
@@ -748,7 +759,7 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	if (!d3d.lpD3D)
 	{
-		LogDxErrorString("Could not create Direct3D object\n");
+		LogErrorString("Could not create Direct3D object\n");
 		return FALSE;
 	}
 
@@ -757,17 +768,18 @@ BOOL InitialiseDirect3DImmediateMode()
 	// Get the number of devices in the system
 	d3d.NumDrivers = d3d.lpD3D->GetAdapterCount();
 
-	LogDxString("\t Found " + LogInteger(d3d.NumDrivers) + " video adapter(s)");
+	LogString("\t Found " + LogInteger(d3d.NumDrivers) + " video adapter(s)");
 
 	// Get adapter information
 	LastError = d3d.lpD3D->GetAdapterIdentifier(D3DADAPTER_DEFAULT, D3DENUM_WHQL_LEVEL, &d3d.AdapterInfo);
 	if(FAILED(LastError)) 
 	{
-		LogDxString("Could not get Adapter Identifier Information\n");
+		LogDxError(LastError, __LINE__, __FILE__);
+		//LogString("Could not get Adapter Identifier Information\n");
 		return FALSE;
 	}
 
-	LogDxString("\t Using device: " + std::string(d3d.AdapterInfo.Description));
+	LogString("\t Using device: " + std::string(d3d.AdapterInfo.Description));
 
 	/* taken from the DX SDK samples :) */
 
@@ -837,7 +849,8 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	if(FAILED(LastError)) 
 	{
-		LogDxErrorString("GetAdapterDisplayMode failed\n");
+		LogDxError(LastError, __LINE__, __FILE__);
+		//LogErrorString("GetAdapterDisplayMode failed\n");
 		return FALSE;
 	}
 
@@ -901,7 +914,8 @@ BOOL InitialiseDirect3DImmediateMode()
 									StencilFormats[i]);
 		if(FAILED(LastError)) 
 		{
-			LogDxErrorString("CheckDeviceFormat failed\n");
+			LogDxError(LastError, __LINE__, __FILE__);
+			//LogErrorString("CheckDeviceFormat failed\n");
 			continue;
 		}
 
@@ -913,7 +927,8 @@ BOOL InitialiseDirect3DImmediateMode()
 
 		if(FAILED(LastError))
 		{
-			LogDxErrorString("CheckDepthStencilMatch failed\n");
+			LogDxError(LastError, __LINE__, __FILE__);
+			//LogErrorString("CheckDepthStencilMatch failed\n");
 		}
 		else
 		{
@@ -922,14 +937,14 @@ BOOL InitialiseDirect3DImmediateMode()
 			break;
 		}
 
-		LogDxErrorString("couldn't get a usable depth buffer!\n");
+		LogErrorString("couldn't get a usable depth buffer!", __LINE__, __FILE__);
 		d3dpp.EnableAutoDepthStencil = false;
 	}
 	
 /*	
 	if(FAILED(LastError)) 
 	{
-		LogDxErrorString("Stencil and Depth format didn't match\n");
+		LogErrorString("Stencil and Depth format didn't match\n");
 		d3dpp.EnableAutoDepthStencil = false;
 	}
 	else d3dpp.EnableAutoDepthStencil = true;
@@ -992,36 +1007,37 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	if (FAILED(LastError)) 
 	{
-		LogDxErrorString("Could not create Direct3D device\n");
+		LogDxError(LastError, __LINE__, __FILE__);
+		//LogErrorString("Could not create Direct3D device\n");
 		return FALSE;
 	}
 
 	// Log resolution set
-	LogDxString("\t Resolution set: " + LogInteger(d3dpp.BackBufferWidth) + " x " + LogInteger(d3dpp.BackBufferHeight));
+	LogString("\t Resolution set: " + LogInteger(d3dpp.BackBufferWidth) + " x " + LogInteger(d3dpp.BackBufferHeight));
 
 	// Log format set
 	switch(d3dpp.BackBufferFormat)
 	{
 		case D3DFMT_A8R8G8B8:
-			LogDxString("\t Format set: 32bit - D3DFMT_A8R8G8B8");
+			LogString("\t Format set: 32bit - D3DFMT_A8R8G8B8");
 			break;
 		case D3DFMT_X8R8G8B8:
-			LogDxString("\t Format set: 32bit - D3DFMT_X8R8G8B8");
+			LogString("\t Format set: 32bit - D3DFMT_X8R8G8B8");
 			break;
 		case D3DFMT_R8G8B8:
-			LogDxString("\t Format set: 32bit - D3DFMT_R8G8B8");
+			LogString("\t Format set: 32bit - D3DFMT_R8G8B8");
 			break;
 		case D3DFMT_A1R5G5B5:
-			LogDxString("\t Format set: 16bit - D3DFMT_A1R5G5B5");
+			LogString("\t Format set: 16bit - D3DFMT_A1R5G5B5");
 			break;
 		case D3DFMT_R5G6B5:
-			LogDxString("\t Format set: 16bit - D3DFMT_R5G6B5");
+			LogString("\t Format set: 16bit - D3DFMT_R5G6B5");
 			break;
 		case D3DFMT_X1R5G5B5:
-			LogDxString("\t Format set: 16bit - D3DFMT_X1R5G5B5");
+			LogString("\t Format set: 16bit - D3DFMT_X1R5G5B5");
 			break;
 		default:
-			LogDxString("\t Format set: Unknown");
+			LogString("\t Format set: Unknown");
 			break;
 	}
 
@@ -1029,19 +1045,19 @@ BOOL InitialiseDirect3DImmediateMode()
 	switch(d3dpp.AutoDepthStencilFormat)
 	{
 		case D3DFMT_D24S8:
-			LogDxString("\t Depth Format set: 24bit and 8bit stencil - D3DFMT_D24S8");
+			LogString("\t Depth Format set: 24bit and 8bit stencil - D3DFMT_D24S8");
 			break;
 		case D3DFMT_D24X8:
-			LogDxString("\t Depth Format set: 24bit and 0bit stencil - D3DFMT_D24X8");
+			LogString("\t Depth Format set: 24bit and 0bit stencil - D3DFMT_D24X8");
 			break;
 		case D3DFMT_D32:
-			LogDxString("\t Depth Format set: 32bit and 0bit stencil - D3DFMT_D32");
+			LogString("\t Depth Format set: 32bit and 0bit stencil - D3DFMT_D32");
 			break;
 		case D3DFMT_D24FS8:
-			LogDxString("\t Depth Format set: 24bit and 8bit stencil - D3DFMT_D32");
+			LogString("\t Depth Format set: 24bit and 8bit stencil - D3DFMT_D32");
 			break;
 		default:
-			LogDxString("\t Depth Format set: Unknown");
+			LogString("\t Depth Format set: Unknown");
 			break;
 	}
 	
@@ -1056,14 +1072,15 @@ BOOL InitialiseDirect3DImmediateMode()
 	LastError = d3d.lpD3DDevice->SetViewport(&d3d.lpD3DViewport);
 	if (FAILED(LastError))
 	{
-		LogDxErrorString("Could not set viewport\n");
+		LogDxError(LastError, __LINE__, __FILE__);
+		//LogErrorString("Could not set viewport\n");
 	}
 /*
 	LastError = d3d.lpD3DDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &d3d.lpD3DBackSurface);
 
 	if (FAILED(LastError))
 	{
-		LogDxErrorString("Could not get a copy of the back buffer\n");
+		LogErrorString("Could not get a copy of the back buffer\n");
 		return FALSE;
 	}
 
@@ -1071,7 +1088,7 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	if (FAILED(LastError))
 	{
-		LogDxErrorString("Could not get backbuffer surface description\n");
+		LogErrorString("Could not get backbuffer surface description\n");
 		return FALSE;
 	}
 */
@@ -1108,15 +1125,17 @@ BOOL InitialiseDirect3DImmediateMode()
 
 //	Con_Init();
 
-	LogDxString("Initialise Direct3D succesfully");
+	LogString("Initialise Direct3D succesfully");
 	return TRUE;
 }
 
 void FlipBuffers()
 {
 	LastError = d3d.lpD3DDevice->Present(NULL, NULL, NULL, NULL);
-	if (FAILED(LastError)) {
-		LogDxErrorString("D3D Present failed\n");
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		//LogErrorString("D3D Present failed\n");
 	}
 }
 

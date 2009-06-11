@@ -2170,7 +2170,7 @@ int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
 
 	if(FAILED(DirectSoundCreateStream(&streamDesc, &vorbisAudioStream)))
 	{
-		LogDxErrorString("couldn't create audio stream for ogg vorbis buffer\n");
+		LogErrorString("couldn't create audio stream for ogg vorbis buffer\n");
 	}
 
 	/* Set the stream headroom to 0 */
