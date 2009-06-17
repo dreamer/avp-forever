@@ -1,18 +1,15 @@
 
+#include "enet\enet.h"
+#include "logString.h"
+
 extern "C" {
 
 #include "3dc.h"
 #include "AvP_Menus.h"
 #include "AvP_MP_Config.h"
-#include "enet\enet.h"
 #include "networking.h"
-
 #include "assert.h"
 
-void LogErrorString(char *errorString)
-{
-	OutputDebugString(errorString);
-}
 
 #ifdef _DEBUG
 	#pragma comment(lib, "enet_debug.lib")
@@ -303,7 +300,8 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 	BOOL	bIsSysMsg;
 	int		messageType = 0;
 
-	if (Client == NULL) return DPERR_NOMESSAGES;
+	if (Client == NULL) 
+		return DPERR_NOMESSAGES;
 
 	do
 	{

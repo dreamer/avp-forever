@@ -105,7 +105,7 @@ typedef enum {
  VGA Palette Entry
 
 */
-
+#if 0
 typedef struct vgapaletteentry {
 
 	unsigned char vga_r;
@@ -113,10 +113,7 @@ typedef struct vgapaletteentry {
 	unsigned char vga_b;
 
 } VGAPALETTEENTRY;
-
-
-extern void LoadAndChangeToPalette(char*);
-
+#endif
 /*
 	Video mode decsription (to be filled
 	in by DirectDraw callback).
@@ -379,7 +376,7 @@ typedef enum {
 /*
 	Video Modes
 */
-
+#if 0
 typedef enum {
 
 	VideoMode_DX_320x200x8,
@@ -415,46 +412,9 @@ typedef enum {
 	MaxVideoModes
 
 } VIDEOMODES;
-
+#endif
 
 #define MaxScreenWidth 1600		/* Don't get this wrong! */
-
-
-/*
-	Max no of palettes -- at present there is NO
-	code for palette switching and ALL palette
-	calls within the DirectDraw interface system
-	run on palette 0
-*/
-
-#define MaxPalettes 4 
-
-/*
-
- Video Mode Types
-
-*/
-
-typedef enum {
-
-	VideoModeType_8,
-	VideoModeType_15,
-	VideoModeType_24,
-	VideoModeType_8T
-
-} VIDEOMODETYPES;
-
-
-/*
-	Windows modes
-*/
-
-typedef enum {
-
-	WindowModeFullScreen,
-	WindowModeSubWindow
-
-} WINDOWMODES;
 
 typedef struct WinScaleXY {
 
@@ -463,147 +423,19 @@ typedef struct WinScaleXY {
 
 } WINSCALEXY;
 
+typedef enum {
 
-/*
-	Dubious hack for dubious
-	aspects of DirectDraw initialisation
-*/
+	WinInitFull,
+	WinInitChange
+
+} WININITMODES;
 
 typedef enum {
 
-    /* Default */
-	NoRestartRequired,
-	/* 
-	  Characteristic of driver which
-	  will not support changing to a different
-	  bit depth without rebooting
-	*/
-	RestartDisplayModeNotAvailable, 
-	/*
-	  Characteristic of ModeX emulation leading
-	  to no video memory being available because
-	  of the need to cooperate with a large existing
-	  GDI surface which cannot be reduced without a
-	  reboot
-	*/
-	RestartOutOfVidMemForPrimary
+	WindowModeFullScreen,
+	WindowModeSubWindow
 
-} VIDEORESTARTMODES;
-
-/*
-	Load modes for putting an image
-	in a DirectDraw surface --- either
-	do or do not deallocate the
-	system memory image, but always
-	keep the DirectDraw one
-*/
-
-typedef enum {
-
-	LoadModeDirectDrawOnly,
-	LoadModeFull
-
-} IMAGELOADMODES;
-
-
-/*
-	Direct3D driver modes
-*/
-
-typedef enum {
-
-	D3DSoftwareRGBDriver,
-	D3DSoftwareRampDriver,
-	D3DHardwareRGBDriver
-
-} D3DMODES;
-
-/*
-	Software scan draw request modes
-*/
-
-typedef enum {
-
-	RequestScanDrawDirectDraw,
-	RequestScanDrawSoftwareRGB,
-	RequestScanDrawRamp,
-	RequestScanDrawDefault
-
-} SOFTWARESCANDRAWREQUESTMODES;
-
-/*
-	Rasterisation request modes
-*/
-
-typedef enum {
-
-	RequestSoftwareRasterisation,
-	RequestDefaultRasterisation
-
-} RASTERREQUESTMODES;
-
-
-/*
-	Actual scan draw mode
-*/
-
-typedef enum {
-
-	ScanDrawDirectDraw,
-	ScanDrawD3DRamp,
-	ScanDrawD3DSoftwareRGB,
-	ScanDrawD3DHardwareRGB
-
-} SCANDRAWMODES;
-
-
-/*
-	Z buffering request modes
-*/
-
-typedef enum {
-
-	RequestZBufferNever,
-	RequestZBufferAlways,
-	RequestZBufferDefault
-
-} ZBUFFERREQUESTMODES;
-
-/*
-	Z buffering modes 
-*/
-
-typedef enum {
-
-    ZBufferOn,
-	ZBufferWriteOnly,
-	ZBufferOff
-
-} ZBUFFERMODES;
-
-/*
-	Request modes for DirectX 
-	memory usage
-*/
-
-typedef enum {
-
-	RequestSystemMemoryAlways,
-	RequestDefaultMemoryAllocation
-
-} DXMEMORYREQUESTMODES;
-
-
-/*
-	DirectX memory usage modes
-*/
-
-typedef enum {
-
-	SystemMemoryPreferred,
-	VideoMemoryPreferred
-
-} DXMEMORYMODES;
+} WINDOWMODES;
 
 /*
 
@@ -649,6 +481,7 @@ typedef struct bmpheader {
 #pragma pack (4)
 #endif
 
+#if 0
 /*
 	Types of texture files that can be
 	requested from the main D3D texture
@@ -699,47 +532,7 @@ typedef enum {
 /* header + xyuvwi + terminator */
 #define item_gouraud3dtexturedpolygon_trianglesize (1 + 1 + 1 + 1 + (6 * 3) + 1)
 
-/*
-
- Vertex sizes
-
- For copying vertices from item list polygons to triangles
-
- e.g.
-
- Vertex 2 (x component) of the quad would be (for Item_Polygon)
-
- q[2 * i_poly_vsize + i_vstart + ix]
-
- WARNING: If the item format changes these MUST be updated
-
-*/
-
-#define vstart          4
-
-#define poly_vsize      2
-#define gpoly_vsize     3
-#define t2poly_vsize    4
-#define gt2poly_vsize   5
-#define t3poly_vsize    5
-#define gt3poly_vsize   6
-
-
-
-/*
-
- Triangle Array Structure
-
-*/
-
-typedef struct trianglearray {
-
-	int TA_NumTriangles;
-	int *TA_ItemPtr;
-	int *TA_TriangleArray[maxarrtriangles];
-
-} TRIANGLEARRAY;
-
+#endif
 /*
 	Function prototypes
 */
@@ -769,7 +562,6 @@ BOOL WaitForRasterThread();
 void ColourFillBackBuffer(int FillColour);
 void ColourFillBackBufferQuad(int FillColour, int LeftX, int TopY, int RightX, int BotY);
 void FlipBuffers(void);
-void ReleaseDDSurface(void* DDSurface);
 
 /* Direct 3D Immediate Mode Rasterisation Module */
 BOOL InitialiseDirect3DImmediateMode(void);
@@ -788,14 +580,10 @@ void WriteGouraud3dTexturedPolygonToExecuteBuffer(int* itemptr);
 void WriteBackdrop2dTexturedPolygonToExecuteBuffer(int* itemptr);
 void WriteBackdrop3dTexturedPolygonToExecuteBuffer(int* itemptr);
 void ReleaseAvPTexture(AvPTexture* texture);
-void ReleaseDirect3DNotDD(void);
-void ReleaseDirect3DNotDDOrImages(void);
 BOOL SetExecuteBufferDefaults(void);
-void SelectD3DDriverAndDrawMode(void);
 #if SUPPORT_MMX
 void SelectMMXOptions(void);
 #endif
-BOOL TestInitD3DObject(void);
 
 #if SupportZBuffering
 void FlushD3DZBuffer(void);
@@ -826,9 +614,6 @@ int textprint(const char* t, ...);
 #define textprint(ignore)
 #endif
 
-
-void MakePaletteShades(VGAPALETTEENTRY *vga_palptr, int hue, int pal_shades_per_hue);
-void ConvertToDDPalette(unsigned char* src, unsigned char* dst, int length, int flags);
 int textprintXY(int x, int y, const char* t, ...);
 void LoadSystemFonts(char* fname);
 void DisplayWin95String(int x, int y, unsigned char *buffer);
@@ -844,20 +629,13 @@ int ChangeDisplayModes(HINSTANCE hInst, int nCmd,
 int DeallocateAllImages(void);
 int MinimizeAllImages(void);
 int RestoreAllImages(void);
-void ConvertDDToInternalPalette(unsigned char* src, unsigned char* dst, int length);
 PROCESSORTYPES ReadProcessorType(void);
-
-/* EXTERNS FOR GLOBALS GO HERE !!!!!! */
-//extern DDCAPS direct_draw_caps; // BJD
-//extern D3DCAPS9 *direct_draw_caps; // BJD
 
 /*
 
  Jake's image functions
 
 */
-
-void * CopyD3DTexture(struct imageheader *iheader);
 
 #ifdef MaxImageGroups
 

@@ -2953,7 +2953,7 @@ void post_process_shape (SHAPEHEADER * shp)
 		//shp->items[i][2] &= ~iflag_drawtx3das2d;
 		
 		#if SupportZBuffering
-		if (ZBufferOn==ZBufferMode)
+//		if (ZBufferOn==ZBufferMode)
 		{
 			switch (shp->items[i][0])
 			{

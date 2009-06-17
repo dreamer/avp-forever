@@ -21,5 +21,6 @@ std::string IntToString(const int value);
 void LogString(const std::string &logString);
 void LogDebugValue(int value);
 std::string LogInteger(int value);
+//void LogMessageBox(const std::string &errorString);
 
 #endif // include guard

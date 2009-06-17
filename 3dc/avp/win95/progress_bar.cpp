@@ -50,12 +50,6 @@ RECT LoadingBarFull_SrcRect;
 D3DTEXTURE LoadingBarFullTexture;
 D3DTEXTURE LoadingBarEmptyTexture;
 
-/*
-DDSurface *image = 0;
-DDSurface *LoadingBarEmpty;
-DDSurface *LoadingBarFull;
-DDSurface *aa_font;
-*/
 AvPTexture *image = 0;
 AvPTexture *LoadingBarEmpty;
 AvPTexture *LoadingBarFull;
@@ -351,7 +345,7 @@ void Game_Has_Loaded(void)
 
 	FadingGameInAfterLoading=ONE_FIXED;
 
-	if(image)
+	if (image)
 	{
 		ReleaseAvPTexture(image);
 	}

@@ -153,7 +153,9 @@ enum
 };
 
 #define NUMPADBUTTONS 16
-static char GamePadButtons[NUMPADBUTTONS];
+static unsigned char GamePadButtons[NUMPADBUTTONS];
+
+int blockGamepadInputTimer = 0;
 
 /*
 	8/4/98 DHM: A new array, analagous to KeyboardInput, except it's debounced
@@ -379,7 +381,7 @@ void DirectReadKeyboard(void)
 	GotAnyKey = FALSE;
 
 	/* letters */
-	for(int i = LETTER_A; i <= LETTER_Z; i++)
+	for (int i = LETTER_A; i <= LETTER_Z; i++)
 	{
 		if (IngameKeyboardInput[i])
 		{
@@ -389,7 +391,7 @@ void DirectReadKeyboard(void)
 	}
 
 	/* numbers */
-	for(int i = NUMBER_0; i <= NUMBER_9; i++)
+	for (int i = NUMBER_0; i <= NUMBER_9; i++)
 	{
 		if (IngameKeyboardInput[i])
 		{
@@ -1448,18 +1450,17 @@ to make F8 not count in a 'press any key' situation */
 	/* mouse wheel - read using windows messages */
 	{
 		extern signed int MouseWheelStatus;
-		if (MouseWheelStatus>0)
+		if (MouseWheelStatus > 0)
 		{
 			KeyboardInput[KEY_MOUSEWHEELUP] = TRUE;
 			GotAnyKey = TRUE;
 		}
-		else if (MouseWheelStatus<0)
+		else if (MouseWheelStatus < 0)
 		{
 			KeyboardInput[KEY_MOUSEWHEELDOWN] = TRUE;
 			GotAnyKey = TRUE;
 		}
 	}
-
 
 	/* joystick buttons */
 	if (GotJoystick)
@@ -1468,42 +1469,59 @@ to make F8 not count in a 'press any key' situation */
 
 		for (n=0,bit=1; n<16; n++,bit*=2)
 		{
-			if(JoystickData.dwButtons&bit)
+			if (JoystickData.dwButtons&bit)
 			{
-				KeyboardInput[KEY_JOYSTICK_BUTTON_1+n]=TRUE;
+				KeyboardInput[KEY_JOYSTICK_BUTTON_1+n] = TRUE;
 				GotAnyKey = TRUE;
 			}
 		}
 	}
-	 
-	/* xbox gamepad buttons */
-	for (int i = 0; i < NUMPADBUTTONS; i++)
+
+	/*  
+		ignore gamepad input if this timer is still running down. The game normally keeps processing input as it returns to game from main menu. This timer ensures any button presses on the menu
+		aren't carried into the game actions until timer elapses. eg if I bound 'A' to jump, then used 'A' button to select "Return to game" player would jump when ingame appeared as action carried through
+		Very hackish but couldn't think of a better way to handle this.
+	*/
+	if (blockGamepadInputTimer >= 0)
 	{
-		if (GamePadButtons[i])
+		blockGamepadInputTimer -= ONE_FIXED / 10;
+	}
+	/* ok to process the input */
+	else
+	{
+		/* xbox gamepad buttons */
+		for (int i = 0; i < NUMPADBUTTONS; i++)
 		{
-			KeyboardInput[KEY_JOYSTICK_BUTTON_1+i] = TRUE;
-			GotAnyKey = TRUE;
+			if (GamePadButtons[i])
+			{
+				KeyboardInput[KEY_JOYSTICK_BUTTON_1+i] = TRUE;
+				GotAnyKey = TRUE;
+			}
 		}
 	}
 
 	/* update debounced keys array */
 	{
-		for (int i=0;i<MAX_NUMBER_OF_INPUT_KEYS;i++)
+		for (int i = 0; i < MAX_NUMBER_OF_INPUT_KEYS; i++)
 		{ 
 			DebouncedKeyboardInput[i] =
 			(
 				KeyboardInput[i] && !LastFramesKeyboardInput[i]
 			);
 		}
+
+		if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2])
+		{
+			OutputDebugString("Got debounced Xbox_A\n");
+		}
+
 		DebouncedGotAnyKey = GotAnyKey && !LastGotAnyKey;
 	}
 
 	if (DebouncedKeyboardInput[KEY_TAB]) 
 	{	
 		Con_Toggle();
-		return;
 	}
-
 }
 
 /*
@@ -1882,7 +1900,7 @@ void ReadJoysticks(void)
 	/* check XInput pads */
 	GotXPad = UpdateControllerState();
 
-	memset(&GamePadButtons[0], 0, sizeof(GamePadButtons));
+	memset(&GamePadButtons[0], 0, NUMPADBUTTONS);
 
 	for( DWORD i = 0; i < MAX_CONTROLLERS; i++ )
 	{
@@ -2178,7 +2196,7 @@ extern void IngameKeyboardInput_ClearBuffer(void)
 {
 	int i;
 
-	for (i=0; i<=255; i++)
+	for (i = 0; i <= 255; i++)
 	{
 		IngameKeyboardInput[i] = 0;
 	}
@@ -2187,6 +2205,14 @@ extern void IngameKeyboardInput_ClearBuffer(void)
 	{
 		MouseButtons[i] = 0;
 	}
+
+	for (i = 0; i < NUMPADBUTTONS; i++)
+	{
+		GamePadButtons[i] = 0;
+	}
+
+	/* start timer to ignore gamepad input */
+	blockGamepadInputTimer = ONE_FIXED;
 }
 
 // For extern "C"

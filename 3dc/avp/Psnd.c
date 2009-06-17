@@ -511,7 +511,7 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 		}
 		
 		sprintf(buf, "externalRef = %p\n", ActiveSounds[newIndex].externalRef);
-		OutputDebugString(buf);
+//		OutputDebugString(buf);
 	}
 
 	ActiveSounds[newIndex].loop = 1;

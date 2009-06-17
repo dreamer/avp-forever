@@ -1,7 +1,5 @@
-#ifndef _FMV_
-#define _FMV_
-
-//typedef int Smack;
+#ifndef FMV_H
+#define FMV_H
 
 typedef struct Smack
 {
@@ -14,18 +12,14 @@ typedef struct Smack
 struct AvPFMV
 {
 	/* textures needed */
-	D3DTEXTURE	fmvTexture;
-	D3DTEXTURE	fmvDynamicTexture;
+	D3DTEXTURE	texture;
+	D3DTEXTURE	dynamicTexture;
 
 };
 
 #include "3dc.h"
 #include "module.h"
-//#include "inline.h"
 #include "stratdef.h"
-//#include "gamedef.h"
-//#include "avp_menus.h"
-//#include "avp_userprofile.h"
 #include "d3_func.h"
 
 typedef struct FMVTEXTURE
@@ -38,22 +32,13 @@ typedef struct FMVTEXTURE
 
 	int MessageNumber;
 
-//	D3DTEXTURE SrcSurface;
-//	D3DTEXTURE SrcTexture;
 	D3DTEXTURE DestTexture;
-
-//	PALETTEENTRY SrcPalette[256];
-
-	int RedScale;
-	int GreenScale;
-	int BlueScale;
 
 }FMVTEXTURE;
 
 extern void StartTriggerPlotFMV(int number);
 void PlayMenuMusic();
 void StartMenuMusic();
-//int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr);
 int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr, int pitch);
 void ReleaseAllFMVTexturesForDeviceReset();
 void RecreateAllFMVTexturesAfterDeviceReset();

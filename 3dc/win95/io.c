@@ -151,7 +151,7 @@ extern IMAGEHEADER ImageHeaderArray[]; /* Array of Image Headers */
 	int ZBufferMode;
 //	int DXMemoryMode;
 	unsigned char AttemptVideoModeRestart;
-	VIDEORESTARTMODES VideoRestartMode;
+//	VIDEORESTARTMODES VideoRestartMode;
 
     PROCESSORTYPES ProcessorType;
 	BOOL MMXAvailable;
@@ -207,12 +207,12 @@ extern IMAGEHEADER ImageHeaderArray[]; /* Array of Image Headers */
 
 	/* Palette */
 
-	unsigned char PaletteBuffer[768 + 1];
+//	unsigned char PaletteBuffer[768 + 1];
 
 /* Test Palette */
 
 unsigned char TestPalette[768];
-unsigned char TestPalette2[768];
+//unsigned char TestPalette2[768];
 
 
 
@@ -538,62 +538,6 @@ int NearestColour(int rs, int gs, int bs, unsigned char *palette)
 
 }
 
-
-
-
-
-
-
-
-
-
-/*************************************************************************/
-/*************************************************************************/
-
-
-
-
-
-/*
-
- PC Video Mode Array Functions
-
-*/
-
-
-#define m320diag (378 + 6)
-
-
-
-
-
-/*
-
- PC Video Mode Function Arrays
-
-*/
-
-void (*SetVideoMode[]) (void) = {
-
-0
-
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*
 
  Initialise System and System Variables
@@ -634,7 +578,7 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 
     AttemptVideoModeRestart = FALSE;
 
-    VideoRestartMode = NoRestartRequired;
+//    VideoRestartMode = NoRestartRequired;
 
     /*
 		Potentially a whole suite of caps
@@ -897,58 +841,6 @@ void GetProjectFilename(char *fname, char *image)
 	*dst = 0;
 
 }
-
-
-
-
-
-
-
-/*
-
- Attempts to load the image file.
-
- Returns a pointer to the image if successful, else zero.
-
- Image Header is filled out if successful, else ignore it.
-
- NOTE
-
- The pointer to the image data is also stored in the image
- header.
-
-*/
-
-TEXTURE* LoadImageCH(char *fname, IMAGEHEADER *iheader)
-{
-	return 0;
-}	
-
-
-
-
-
-
-
-
-
-void ConvertToDDPalette(unsigned char* src, unsigned char* dst, int length, int flags)
-{
-	int i;
-
-/*
-	Copy palette, introducing flags and shifting up
-	to 8 bit triple
-*/
-
-	for (i=0; i<length; i++)
-		{
-		 *dst++ = (*src++) << 2;
-		 *dst++ = (*src++) << 2;
-		 *dst++ = (*src++) << 2;
-		 *dst++ = flags; 
-		}
-}	
 		
 /*
 
@@ -1666,32 +1558,6 @@ void InitPrintQueue(void)
 #endif
 	/*end of old version of text routines */
 
-/*
-	Load main, 8 bit paletted, font 
-	(assumed to be on hard drive at present)
-	and create hi and true colour mode fonts
-	from it. Note that for this system to work 
-	properly all bits on must be white or similar 
-	in 8 bit mode 222 and Raw256 palettes as well
-	as mode 8T.
-*/
-
-/*
-	MUST be called after GenerateDirectDrawSurface,
-	i.e. AFTER SetVideoMode.
-	AND ONLY ONCE!!!!
-*/
-
-#if debug || PreBeta
-//extern LPDIRECTDRAWSURFACE lpDDDbgFont; // BJD
-#endif
-
-
-
-
-
-
-
 
 /*
 	This function is intended to allow YOU,
@@ -1810,37 +1676,14 @@ int ChangeDisplayModes(HINSTANCE hInst, int nCmd,
 	for possible change in WindowMode.
 */
 
-    if (ChangeWindow)
-	  {
-	   rc = InitialiseWindowsSystem(hInst, nCmd, 
-	      WinInitChange);
+	if (ChangeWindow)
+	{
+		rc = InitialiseWindowsSystem(hInst, nCmd, 
+		WinInitChange);
 
-       if (rc == FALSE)
-	     return rc;
-	  }
-
-/*
-	Set the video mode again.  This
-	will handle all changes to DirectDraw
-	objects, all Direct3D initialisation,
-	and other request modes such as
-	zbuffering.
-*/
-
-    /*
-		Err... shutting down and restarting
-		on a hardware driver appears to
-		screw up file handling somehow...
-		umm... but not for Microsoft demos,
-		obviously...
-		FIXME!!!
-	*/
-    /* test only!!! */
-    #if 0
-	chdir("d:\3dc");
-	#endif
-
-    SetVideoMode[VideoMode]();
+		if (rc == FALSE)
+			return rc;
+	}
 
 /*
 	Lose all the textures and reload the 
@@ -1856,28 +1699,3 @@ int ChangeDisplayModes(HINSTANCE hInst, int nCmd,
 
     return TRUE;
 }
-
-
-/*
-	Reverse of ConvertToDDPalette, introduced
-	to maintain internal interfaces only...
-*/
-
-void ConvertDDToInternalPalette(unsigned char* src, unsigned char* dst, int length)
-{
-	int i;
-
-/*
-	Copy palette, shifting down
-	to 5 bit triple
-*/
-
-	for (i=0; i<length; i++)
-		{
-		 *dst++ = (*src++) >> 2;
-		 *dst++ = (*src++) >> 2;
-		 *dst++ = (*src++) >> 2;
-		}
-}	
-
-

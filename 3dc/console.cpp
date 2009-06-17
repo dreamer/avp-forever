@@ -83,7 +83,8 @@ void Con_Init()
 void Con_ProcessCommand()
 {
 	/* if nothing typed, don't bother doing anything */
-	if (console.inputLine.length() == 0) return;
+	if (console.inputLine.length() == 0) 
+		return;
 
 	std::string temp;
 	std::stringstream stream(console.inputLine.c_str());
@@ -95,6 +96,9 @@ void Con_ProcessCommand()
 
 	/* grab the command itself (first word before space) */
 
+	Con_AddLine(temp);
+
+	console.inputLine.clear();
 }
 
 bool prevEnter = false;
@@ -118,7 +122,7 @@ void Con_Key_Backspace(bool state)
 
 void Con_Toggle()
 {
-	return;
+//	return;
 	OutputDebugString("console toggle\n");
 	console.isActive = !console.isActive;
 	console.time = 250;
@@ -144,7 +148,8 @@ void Con_CheckResize()
 
 void Con_AddTypedChar(char c)
 {
-	if(!console.isActive) return;
+	if(!console.isActive) 
+		return;
 
 	if (c == 0x08)
 	{
@@ -157,8 +162,8 @@ void Con_AddTypedChar(char c)
 		Con_Key_Enter(true);
 		return;
 	}
-	sprintf(buf, "Con_AddTypedChar: %c\n", c);
-	OutputDebugString(buf);
+//	sprintf(buf, "Con_AddTypedChar: %c\n", c);
+//	OutputDebugString(buf);
 
 	console.inputLine.push_back(c);
 }
@@ -178,16 +183,19 @@ void Con_Draw()
 	/* is console moving to a new position? */
 	if (console.destinationY > console.height)
 	{
-		console.height+=CHAR_HEIGHT;
+		console.height += CHAR_HEIGHT;
 	}
 	else if (console.destinationY < console.height)
 	{
-		console.height-=CHAR_HEIGHT;
+		console.height -= CHAR_HEIGHT;
 	}
 
 	DrawQuad(console.xPos, console.yPos, console.width, console.height, D3DCOLOR_ARGB(255, 80, 160, 120));
 
-	DrawQuad(console.xPos, console.yPos+console.height, console.width, 2, D3DCOLOR_ARGB(255, 128, 160, 25));
+	if (console.height > 0)
+	{
+		DrawQuad(console.xPos, console.yPos+console.height, console.width, 2, D3DCOLOR_ARGB(255, 128, 160, 25));
+	}
 
 	int charCount = 0;
 
@@ -202,7 +210,7 @@ void Con_Draw()
 	int lines = console.lines;
 	int xOffset = 0;
 
-	for (int i = rows; i >= 0; i--, y-=CHAR_HEIGHT)
+	for (int i = rows; i >= 0; i--, y -= CHAR_HEIGHT)
 	{
 		xOffset = 0;
 		charWidth = 0;

@@ -22,23 +22,15 @@
 
 extern int InputMode;
 extern unsigned char KeyboardInput[];
+extern unsigned char DebouncedKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
 
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern void (*SetVideoMode[]) (void);
-extern unsigned char *ScreenBuffer;
 
 extern  unsigned char KeyASCII;
-
-
-/* External functions */
-
-extern void D3D_Line(VECTOR2D* LineStart, VECTOR2D* LineEnd, int LineColour);
-extern void Draw_Line_VMType_8(VECTOR2D* LineStart, VECTOR2D* LineEnd, int LineColour);
 
 // Prototypes
 
 int IDemandFireWeapon(void);
-
 int IDemandNextWeapon(void);
 int IDemandPreviousWeapon(void);
 
@@ -80,7 +72,7 @@ int MouseMode = MouseVelocityMode;
   Real PC control functions
 
 */
-#if 1
+
 int IDemandLookUp(void)
 {
 	return FALSE;
@@ -127,7 +119,6 @@ int IDemandGoBackward(void)
 	return FALSE;
 }
 
-
 int IDemandJump(void)
 {
 	InputMode = Digital;
@@ -135,8 +126,6 @@ int IDemandJump(void)
 		return TRUE;
 	return FALSE;
 }
-
-
 
 int IDemandCrouch(void)
 {
@@ -150,10 +139,14 @@ int IDemandSelect(void)
 {
 	InputMode = Digital;
     
-    if(KeyboardInput[KEY_CR]) return TRUE;
-    if(KeyboardInput[KEY_SPACE]) return TRUE;
-	if(KeyboardInput[KEY_JOYSTICK_BUTTON_2]) return TRUE; // bjd - A button?
-	else return FALSE;
+    if (KeyboardInput[KEY_CR]) 
+		return TRUE;
+    if (KeyboardInput[KEY_SPACE]) 
+		return TRUE;
+	if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2])
+		return TRUE; // bjd - A button?
+	else 
+		return FALSE;
 }
 
 int IDemandStop(void)
@@ -234,8 +227,6 @@ int IDemandNextWeapon(void)
    	if(KeyboardInput[KEY_2]) return TRUE;
     else return FALSE;
 }
-#endif
-
 
 int IDemandChangeEnvironment()
 {

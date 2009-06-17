@@ -49,7 +49,7 @@ extern int VideoModeColourDepth;
 int	VideoModeColourDepth;
 int	NumAvailableVideoModes;
 
-HRESULT LastError;
+static HRESULT LastError;
 
 D3DINFO d3d;
 D3DTEXTURE consoleText;
@@ -438,7 +438,8 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture(int width, int height, int usage, int pool)
 {
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
 
-	if(FAILED(d3d.lpD3DDevice->CreateTexture(width, height, 1, usage, D3DFMT_A8R8G8B8, (D3DPOOL)pool, &destTexture, NULL)))
+	LastError = d3d.lpD3DDevice->CreateTexture(width, height, 1, usage, D3DFMT_A8R8G8B8, (D3DPOOL)pool, &destTexture, NULL);
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		//LogErrorString("CreateFmvTexture failed\n");
@@ -628,7 +629,6 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL
 	return destTexture;
 }
 
-extern void ReleaseBinkTextures();
 extern void ReleaseAllFMVTextures(void);
 extern int NumberOfFMVTextures;
 #include "fmv.h"
@@ -1123,9 +1123,9 @@ BOOL InitialiseDirect3DImmediateMode()
 	/* create vertex and index buffers */
 	CreateVolatileResources();
 
-//	Con_Init();
+	Con_Init();
 
-	LogString("Initialise Direct3D succesfully");
+	LogString("Initialised Direct3D succesfully");
 	return TRUE;
 }
 
@@ -1164,6 +1164,7 @@ void ReleaseAvPTexture(AvPTexture* texture)
 	{
 		free(texture->buffer);
 	}
+
 	if (texture)
 	{
 		free(texture);

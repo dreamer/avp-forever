@@ -2779,7 +2779,6 @@ int CompareFilenameCH(char *string1, char *string2);
 
 void CopyMemoryCH(void *source, void *dest, int c);
 
-TEXTURE* LoadImageCH(char *fname, IMAGEHEADER *iheader);
 TEXTURE* LoadBMP(char *fname, IMAGEHEADER *iheader);
 TEXTURE* LoadPGM(char *fname, IMAGEHEADER *iheader);
 int LoadPGMPalette(char *fname, unsigned char *palette);

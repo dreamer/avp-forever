@@ -14,6 +14,8 @@ extern D3DInfo d3d;
 int CurrentVideoMode = 0;
 DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
 
+std::string commandLineString;
+
 void NextVideoMode2() 
 {
 	if (++CurrentVideoMode >= d3d.NumModes)
@@ -158,7 +160,7 @@ void LoadDeviceAndVideoModePreferences()
 #endif
 	
 	// if the file doesn't exist
-	if(!file)
+	if (!file)
 	{
 		LogErrorString("Can't find file AliensVsPredator.cfg - creating and using basic display mode", __LINE__, __FILE__);
 		SelectBasicDeviceAndVideoMode();
@@ -168,7 +170,7 @@ void LoadDeviceAndVideoModePreferences()
 	std::string temp;
 
 	getline(file, temp);
-	if(temp != "[VideoMode]") 
+	if (temp != "[VideoMode]") 
 	{
 		OutputDebugString("didn't find [VideoMode] config header\n");
 	}
@@ -213,6 +215,31 @@ void LoadDeviceAndVideoModePreferences()
 	}
 	else {
 		OutputDebugString("nope, wasnt it\n");
+	}
+
+	getline (file,temp, '=');
+	if (temp == "CommandLine ") 
+	{
+		file.ignore(1);
+		getline(file, temp);
+
+		OutputDebugString("we got command line of: ");
+		OutputDebugString(temp.c_str());
+		OutputDebugString("\n");
+
+		/* make sure our command line string starts and ends with a double quote */
+		if ((temp.at(0) != '"') || (temp.at(temp.length() - 1) != '"'))
+		{
+			OutputDebugString("command line string is malformed!\n");
+			commandLineString = "";
+		}
+		else
+		{
+			OutputDebugString("Command line string OK\n");
+			/* generate substring, skipping first char which is our double quote, and grabbing length-2 which gives us the length of the string minus both double-quotes */
+			commandLineString = temp.substr(1, temp.length() - 2);
+			OutputDebugString(commandLineString.c_str());
+		}
 	}
 /*
 	char buf[100];
@@ -295,6 +322,7 @@ void SaveDeviceAndVideoModePreferences()
 	file << "Width = " << PreferredDeviceAndVideoMode.Width << "\n";
 	file << "Height = " << PreferredDeviceAndVideoMode.Height << "\n";
 	file << "ColourDepth = " << PreferredDeviceAndVideoMode.ColourDepth << "\n";
+	file << "CommandLine = " << '"' << commandLineString << '"' << "\n";
 	file.close();
 }
 

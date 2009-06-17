@@ -167,11 +167,11 @@ void UpdateVorbisBuffer(void *arg)
 		ProcessStreamingAudio();
 		Sleep( dwQuantum );
 #else
-		int wait_value = WaitForMultipleObjects(2, hHandles, FALSE, 1);
+		int waitValue = WaitForMultipleObjects(2, hHandles, FALSE, 1);
 
-		if((wait_value != WAIT_TIMEOUT) && (wait_value != WAIT_FAILED))
+		if((waitValue != WAIT_TIMEOUT) && (waitValue != WAIT_FAILED))
 		{
-			if (wait_value == 0) 
+			if (waitValue == 0) 
 			{
 				lockOffset = 0;
 			}

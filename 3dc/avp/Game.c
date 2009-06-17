@@ -79,11 +79,6 @@ Extern Engine Varibles
 extern void (*UpdateScreen[]) (void);
 extern int VideoMode;
 
-#if PSX
-#else
-extern void (*SetVideoMode[]) (void);
-#endif
-
 extern int FrameRate;
 extern int NormalFrameTime;
 extern int FrameRate;

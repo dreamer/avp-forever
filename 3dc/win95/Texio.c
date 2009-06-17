@@ -1539,14 +1539,7 @@ static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 		ihptr->ImagePtr = 0;
 	}
 #endif
-#if 0
-	if (ihptr->DDSurface)
-	{
-//		ATRemoveSurface(ihptr->DDSurface);
-		ReleaseDDSurface(ihptr->DDSurface);
-		ihptr->DDSurface = (void*) 0;
-	}
-#endif
+
 	if (ihptr->AvPTexture)
 	{
 		ReleaseAvPTexture(ihptr->AvPTexture);
@@ -1567,13 +1560,6 @@ static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 
 static void MinimizeImageHeader(IMAGEHEADER * ihptr)
 {
-#if 0
-	if (ihptr->DDSurface)
-	{
-		ReleaseDDSurface(ihptr->DDSurface);
-		ihptr->DDSurface = (void*) 0;
-	}
-#endif
 	if (ihptr->AvPTexture)
 	{
 		ReleaseAvPTexture(ihptr->AvPTexture);

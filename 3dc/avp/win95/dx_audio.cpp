@@ -381,7 +381,6 @@ extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
   ----------------------------------------------------------------------------*/
 int PlatStartSoundSys()
 {
-	HRESULT hres;
  	DSCAPS caps;
 
 	db_log4("PlatStartSound called");
@@ -396,10 +395,11 @@ int PlatStartSoundSys()
 	SoundConfig.env_index		= 1000;
 
 	/* Create the ds object */
-	hres = DirectSoundCreate(NULL, &DSObject, NULL);
-	if(hres!=DS_OK)
-	{		
-		LogErrorString("Couldn't create DirectSound object", __LINE__, __FILE__);
+	LastError = DirectSoundCreate(NULL, &DSObject, NULL);
+	if (FAILED(LastError))
+	{	
+		LogDxError(LastError, __LINE__, __FILE__);
+		//LogErrorString("Couldn't create DirectSound object", __LINE__, __FILE__);
 		PlatEndSoundSys();
 		return 0;
 	}
@@ -408,10 +408,11 @@ int PlatStartSoundSys()
 	LOG_RC();
 
 	/* Set cooperative level */
-    hres = IDirectSound_SetCooperativeLevel(DSObject, hWndMain, DSSCL_PRIORITY);
-	if(hres!=DS_OK)
+	LastError = IDirectSound_SetCooperativeLevel(DSObject, hWndMain, DSSCL_PRIORITY);
+	if (FAILED(LastError))
 	{		
-		LogErrorString("Couldn't set DirectSound cooperative level", __LINE__, __FILE__);
+		LogDxError(LastError, __LINE__, __FILE__);
+		//LogErrorString("Couldn't set DirectSound cooperative level", __LINE__, __FILE__);
 		PlatEndSoundSys();
 		return 0;
 	}
@@ -438,15 +439,16 @@ int PlatStartSoundSys()
 		dsBuffDesc.dwBufferBytes	= 0;
 		dsBuffDesc.lpwfxFormat		= NULL;
 	
-		hres = IDirectSound_CreateSoundBuffer(DSObject, &dsBuffDesc, &DSPrimaryBuffer, NULL);	
-		if(hres!=DS_OK)
-		{		
-			LogErrorString("Couldn't create DirectSound primary buffer", __LINE__, __FILE__);
+		LastError = IDirectSound_CreateSoundBuffer(DSObject, &dsBuffDesc, &DSPrimaryBuffer, NULL);	
+		if (FAILED(LastError))
+		{	
+			LogDxError(LastError, __LINE__, __FILE__);
+			//LogErrorString("Couldn't create DirectSound primary buffer", __LINE__, __FILE__);
 			PlatEndSoundSys();
 			return 0;
 		}
 
-		hres = IDirectSoundBuffer_SetFormat(DSPrimaryBuffer, &wfex);	
+		LastError = IDirectSoundBuffer_SetFormat(DSPrimaryBuffer, &wfex);	
 		/* If the format set failed just continue with the default format */ 
 	}
 
@@ -461,11 +463,12 @@ int PlatStartSoundSys()
 
 	db_logf1(("Number of HW buffers %i", caps.dwMaxHwMixingStaticBuffers));
 	db_logf1(("Number of HW 3D buffers %i", caps.dwFreeHw3DStaticBuffers));
-	if(caps.dwFreeHw3DStaticBuffers)
+
+	if (caps.dwFreeHw3DStaticBuffers)
 	{
 		SoundConfig.flags |= (SOUND_3DHW | SOUND_USE_3DHW);
 	}
-	if(caps.dwMaxHwMixingStaticBuffers)
+	if (caps.dwMaxHwMixingStaticBuffers)
 	{
 		SoundMaxHW = min(caps.dwMaxHwMixingStaticBuffers - 1,SOUND_MAXACTIVE); // Always leave one free. 
 	}
@@ -476,9 +479,10 @@ int PlatStartSoundSys()
 	SoundMinBufferFree = SoundMaxHW / 2;
 
 	/* Create a Listener. */
-	hres = IDirectSoundBuffer_QueryInterface(DSPrimaryBuffer, IID_IDirectSound3DListener, (void **) &DS3DListener);
-	if(hres!=DS_OK)
-	{		
+	LastError = IDirectSoundBuffer_QueryInterface(DSPrimaryBuffer, IID_IDirectSound3DListener, (void **) &DS3DListener);
+	if (FAILED(LastError))
+	{	
+		LogDxError(LastError, __LINE__, __FILE__);
 		PlatEndSoundSys();
 		return 0;
 	}
@@ -506,9 +510,11 @@ int PlatStartSoundSys()
 		listener.flDistanceFactor	= 0.001F;
 		listener.flRolloffFactor	= 0.0F;
 		listener.flDopplerFactor	= DS3D_DEFAULTDOPPLERFACTOR;
-		hres = IDirectSound3DListener_SetAllParameters(DS3DListener, &listener, DS3D_IMMEDIATE);
-		if(hres!=DS_OK)
-		{		
+
+		LastError = IDirectSound3DListener_SetAllParameters(DS3DListener, &listener, DS3D_IMMEDIATE);
+		if (FAILED(LastError))
+		{	
+			LogDxError(LastError, __LINE__, __FILE__);
 			PlatEndSoundSys();
 			return 0;
 		}
@@ -535,17 +541,19 @@ int PlatStartSoundSys()
 	   	wfex.wBitsPerSample			= 8;
 	  	wfex.cbSize					= 0;
 	   								
-		hres = IDirectSound_CreateSoundBuffer(DSObject, &dsBuffDesc, &NullDSBufferP, NULL);
-		if(hres!=DS_OK)
+		LastError = IDirectSound_CreateSoundBuffer(DSObject, &dsBuffDesc, &NullDSBufferP, NULL);
+		if (FAILED(LastError))
 		{		
+			LogDxError(LastError, __LINE__, __FILE__);
 			PlatEndSoundSys();
 			return 0;
 		}
 
 		/* Get the 3D Buffer. */
-		hres = IDirectSoundBuffer_QueryInterface(NullDSBufferP, IID_IDirectSound3DBuffer, (void **) &NullDS3DBufferP);
-		if(hres!=DS_OK)
-		{		
+		LastError = IDirectSoundBuffer_QueryInterface(NullDSBufferP, IID_IDirectSound3DBuffer, (void **) &NullDS3DBufferP);
+		if (FAILED(LastError))
+		{	
+			LogDxError(LastError, __LINE__, __FILE__);
 			PlatEndSoundSys();
 			return 0;
 		}
@@ -556,14 +564,15 @@ int PlatStartSoundSys()
 		db_logf1(("Number of HW 3D buffers %i", caps.dwFreeHw3DStaticBuffers));
 
 		/* Get the Property set. */
-		hres = IDirectSound3DBuffer_QueryInterface
+		LastError = IDirectSound3DBuffer_QueryInterface
 			(
 				NullDS3DBufferP,
 				IID_IKsPropertySet,
 				(void**) &PropSetP
 			);
-	   	if(hres != DS_OK)
+		if (FAILED(LastError))
 		{
+			LogDxError(LastError, __LINE__, __FILE__);
 			/* FALSE property set. */
 			db_log1("Error: Failed to get the property set.");
 		}
@@ -593,7 +602,7 @@ int PlatStartSoundSys()
 				SoundConfig.flags |= SOUND_VOICE_MGER;
 
 				// Set the mode we want.
-				hres = IKsPropertySet_Set
+				LastError = IKsPropertySet_Set
 				(
 					PropSetP,
 					DSPROPSETID_VoiceManager,
@@ -645,40 +654,43 @@ int PlatStartSoundSys()
 			PropSetP = NULL;
 
 			/* Release the Null buffers. */
-			if(NullDS3DBufferP)
+			if (NullDS3DBufferP)
 			{
 				IDirectSoundBuffer_Release(NullDS3DBufferP);
 				NullDS3DBufferP = NULL;
 			}
 
-			if(NullDSBufferP)
+			if (NullDSBufferP)
 			{
 				IDirectSoundBuffer_Release(NullDSBufferP);
 				NullDSBufferP = NULL;
 			}
 
 			/* Remake the buffers. */
-			hres = IDirectSound_CreateSoundBuffer(DSObject, &dsBuffDesc, &NullDSBufferP, NULL);
-			if(hres!=DS_OK)
-			{		
+			LastError = IDirectSound_CreateSoundBuffer(DSObject, &dsBuffDesc, &NullDSBufferP, NULL);
+			if (FAILED(LastError))
+			{	
+				LogDxError(LastError, __LINE__, __FILE__);
 				db_log1("Error: Remaking buffer.");
 			}
 
-			hres = IDirectSoundBuffer_QueryInterface(NullDSBufferP, IID_IDirectSound3DBuffer, (void **) &NullDS3DBufferP);
-			if(hres!=DS_OK)
+			LastError = IDirectSoundBuffer_QueryInterface(NullDSBufferP, IID_IDirectSound3DBuffer, (void **) &NullDS3DBufferP);
+			if (FAILED(LastError))
 			{		
+				LogDxError(LastError, __LINE__, __FILE__);
 				db_log1("Error: Remaking buffer.");
 			}
 
 			/* Get the Property set. */
-			hres = IDirectSound3DBuffer_QueryInterface
+			LastError = IDirectSound3DBuffer_QueryInterface
 				(
 					NullDS3DBufferP,
 					IID_IKsPropertySet,
 					(void**) &PropSetP
 				);
-		   	if(hres != DS_OK)
+		   	if (FAILED(LastError))
 			{
+				LogDxError(LastError, __LINE__, __FILE__);
 				/* FALSE property set. */
 				db_log1("Error: Failed to get the property set again.");
 			}
@@ -688,7 +700,7 @@ int PlatStartSoundSys()
 
 			db_logf1(("Number of HW buffers %i", caps.dwMaxHwMixingStaticBuffers));
 			db_logf1(("Number of HW 3D buffers %i", caps.dwFreeHw3DStaticBuffers));
-			if(caps.dwMaxHwMixingStaticBuffers)
+			if (caps.dwMaxHwMixingStaticBuffers)
 			{
 				SoundMaxHW = min(caps.dwMaxHwMixingStaticBuffers - 1,SOUND_MAXACTIVE); // Always leave one free. 
 			}
@@ -700,7 +712,7 @@ int PlatStartSoundSys()
 		}
 
 		/* Do we need the property set. */
-		if(PropSetP && (~SoundConfig.flags & SOUND_EAX) && (~SoundConfig.flags & SOUND_VOICE_MGER))
+		if (PropSetP && (~SoundConfig.flags & SOUND_EAX) && (~SoundConfig.flags & SOUND_VOICE_MGER))
 		{
 			IKsPropertySet_Release(PropSetP);
 			PropSetP = NULL;
@@ -710,9 +722,10 @@ int PlatStartSoundSys()
 	}
 
 	/* Play the primary buffer */
-	hres = IDirectSoundBuffer_Play(DSPrimaryBuffer,0,0,DSBPLAY_LOOPING);
-	if(hres!=DS_OK)
-	{		
+	LastError = IDirectSoundBuffer_Play(DSPrimaryBuffer, 0, 0, DSBPLAY_LOOPING);
+	if (FAILED(LastError))
+	{	
+		LogDxError(LastError, __LINE__, __FILE__);
 		PlatEndSoundSys();
 		return 0;
 	}

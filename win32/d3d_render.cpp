@@ -217,7 +217,8 @@ extern void ScanImagesForFMVs();
 static int NumberOfRenderedTriangles=0;
 int NumberOfLandscapePolygons;
 RENDERSTATES CurrentRenderStates;
-extern HRESULT LastError;
+
+static HRESULT LastError;
 
 
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
@@ -8672,7 +8673,7 @@ void DrawBinkFmv(int topX, int topY, int height, int width, LPDIRECT3DTEXTURE9 f
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
 	if(FAILED(LastError)) 
 	{
-		OutputDebugString(" Draw bink fmv quad failed ");
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
 }

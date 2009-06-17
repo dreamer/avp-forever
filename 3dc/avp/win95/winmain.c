@@ -441,8 +441,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	while(AvP_MainMenus())
 	#endif
 	{
-		int menusActive=0;
-		int thisLevelHasBeenCompleted=0;
+		int menusActive = 0;
+		int thisLevelHasBeenCompleted = 0;
 
 		mainMenu = 0;
 
@@ -544,9 +544,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		Game_Has_Loaded();
 		ResetFrameCounter();
 
-		// bjd..
-//		ThisFramesRenderingHasBegun();
-
 		if(AvP.Network!=I_No_Network)
 		{
 			/*Need to choose a starting position for the player , but first we must look
@@ -557,10 +554,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		}
 		
 		IngameKeyboardInput_ClearBuffer();
-
-		// bjd
-//		ThisFramesRenderingHasFinished();
-//		FlipBuffers();
 
 		while(AvP.MainLoopRunning) 
 		{
@@ -577,6 +570,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			#if debug
 			if (memoryInitialisationFailure)
 			{
+				OutputDebugString("Initialisation not completed - out of memory!\n");
 				textprint("Initialisation not completed - out of memory!\n");
 				GLOBALASSERT(1 == 0);
 			}
@@ -606,10 +600,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 						}
 						#endif  /* MainTextPrint */
 
-						// bjd
 						ThisFramesRenderingHasBegun();
-
-//						FlushD3DZBuffer();
 						
 						DoAllShapeAnimations();
 
@@ -650,14 +641,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 						ReadUserInput();
 //						UpdateAllFMVTextures();	
 						SoundSys_Management();
-					
-						// bjd
+
 						ThisFramesRenderingHasBegun();
 					}
 
 					{
 						menusActive = AvP_InGameMenus();
-						if(AvP.RestartLevel) menusActive=0;
+						if (AvP.RestartLevel) menusActive = 0;
 					}
 					if (AvP.LevelCompleted)
 					{
@@ -696,23 +686,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 					break;
 				}
 				case I_GM_Menus:
-				{	
+				{
 					AvP.GameMode = I_GM_Playing;
 					//StartGameMenus();
 					LOCALASSERT(AvP.Network == I_No_Network);
 					//AccessDatabase(0);
 					break;
 				}
-				#if 0
-				case I_GM_Paused:
-				{
-					{
-						extern void DoPcPause(void);
-						DoPcPause();
-					}
-					break;
-				}
-				#endif 
 
 				default:
 				{

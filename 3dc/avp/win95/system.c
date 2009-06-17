@@ -57,7 +57,6 @@ extern MAPBLOCK8 Player_and_Camera_Type8[];
 extern SCENEMODULE **Global_ModulePtr;
 extern SCENEMODULE *MainSceneArray[];
 
-extern void (*SetVideoMode[]) (void);
 extern int Resolution;
 extern void SetupVision(void);
 extern void ReInitHUD(void);
@@ -155,13 +154,13 @@ void InitialVideoMode(void)
 		about h/w direct draw and what video modes
 		will be available */
 
-	ZBufferRequestMode = RequestZBufferNever;
+//	ZBufferRequestMode = RequestZBufferNever;
 
-    RasterisationRequestMode = RequestDefaultRasterisation;
+//	RasterisationRequestMode = RequestDefaultRasterisation;
 
-    SoftwareScanDrawRequestMode = RequestScanDrawDirectDraw; 
+//    SoftwareScanDrawRequestMode = RequestScanDrawDirectDraw; 
 
-    DXMemoryRequestMode = RequestSystemMemoryAlways;
+//	DXMemoryRequestMode = RequestSystemMemoryAlways;
 
     /*
 		IMPORTANT!!!! In the Windows 95 version,
@@ -304,19 +303,8 @@ int AVP_ChangeDisplayMode
 		zbuffering.
 	*/
 
-	SetVideoMode[VideoMode]();
-
     return TRUE;
 }
-
-
-//void ReleaseDirect3DNotDDOrImages(void)
-//{
-//    RELEASE(d3d.lpD3DViewport);
-//    RELEASE(d3d.lpD3DDevice);
-//    RELEASE(d3d.lpD3D);
-//}
-
 
 //empty functions for hooks
 // hooks for doing stuff after drawing and

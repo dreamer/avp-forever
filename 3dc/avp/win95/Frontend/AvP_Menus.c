@@ -254,8 +254,6 @@ extern int mainMenu;
 
 int GetAvPMenuState()
 {
-//	if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS) return 1;
-//	else return 0;
 	return AvPMenus.MenusState;
 }
 
@@ -510,7 +508,7 @@ extern void AvP_TriggerInGameMenus(void)
 }
 extern int AvP_InGameMenus(void)
 {
-	if(AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
+	if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 	{
 		D3D_FadeDownScreen(ONE_FIXED/8,0);
 		AvP_UpdateMenus();
@@ -3115,6 +3113,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 		{
 			if (interactionID == AVPMENU_ELEMENT_INTERACTION_SELECT)
 			{
+				IngameKeyboardInput_ClearBuffer();
 				AvPMenus.MenusState = MENUSSTATE_STARTGAME;
 			}
 			break;

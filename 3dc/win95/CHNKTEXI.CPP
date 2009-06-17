@@ -712,9 +712,9 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 			IMAGEHEADER * pImageHdr = GetImageHeader();
 			db_assert1(pImageHdr);
 			memset(pImageHdr,0,sizeof(IMAGEHEADER));
-			if (LoadImageCH(szBuf,pImageHdr))
-				return NumImages-1;
-			else
+//			if (LoadImageCH(szBuf,pImageHdr))
+//				return NumImages-1;
+//			else
 			{
 				db_log1("CL_LoadImageOnce(): ERROR: LoadImageCH() failed");
 				return GEI_NOTLOADED;
@@ -953,6 +953,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 
 							/* free this, as d3d now holds the texture */
 							//free(pImageHdr->AvPTexture);
+
 							free(pTexture->buffer);
 							//pImageHdr->AvPTexture = NULL;
 							pTexture->buffer = NULL;
@@ -1045,6 +1046,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 
 							/* free this, as d3d now holds the texture */
 							//free(pImageHdr->AvPTexture);
+
 							free(pTexture->buffer);
 							//pImageHdr->AvPTexture = NULL;
 							pTexture->buffer = NULL;

@@ -1463,7 +1463,6 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			{
 				PaintBallMode_RemoveDecal();
 			}
-			
 		}
 		#endif
 	}
@@ -1544,7 +1543,6 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		   		if(playerStatusPtr->Mvt_TurnIncrement > ONE_FIXED)
 		   			playerStatusPtr->Mvt_TurnIncrement = ONE_FIXED;
 			}
-			
 		}
 		else // it's sidestep
 		{

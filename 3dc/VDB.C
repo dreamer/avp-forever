@@ -463,7 +463,7 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 //		 if (ScanDrawMode == ScanDrawDirectDraw)
 //		   vdb->VDB_Depth			= d;
 //		 else
-		   vdb->VDB_Depth = VideoModeType_24;
+//		   vdb->VDB_Depth = VideoModeType_24;
 
         vdb->VDB_ScreenDepth    = ScreenDescriptorBlock.SDB_ScreenDepth;
 		#else

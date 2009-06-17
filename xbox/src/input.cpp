@@ -98,6 +98,8 @@ enum
 static char GamePadButtons[NUMPADBUTTONS];
 #define XINPUT_GAMEPAD_TRIGGER_THRESHOLD    30
 
+int blockGamepadInputTimer = 0;
+
 /*
 	8/4/98 DHM: A new array, analagous to KeyboardInput, except it's debounced
 */
@@ -110,7 +112,6 @@ extern "C"
 // There's probably a more efficient way of getting it direct from DirectInput
 // but it's getting late and I can't face reading any more Microsoft documentation...
 static unsigned char LastFramesKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
-
 
 extern int NormalFrameTime;
 
@@ -266,13 +267,26 @@ void DirectReadKeyboard()
     memset((void*)KeyboardInput, FALSE, MAX_NUMBER_OF_INPUT_KEYS);
 	GotAnyKey = FALSE;
 
-	/* xbox gamepad buttons */
-	for (int i = 0; i < NUMPADBUTTONS; i++)
+	/*  
+		ignore gamepad input if this timer is still running down. The game normally keeps processing input as it returns to game from main menu. This timer ensures any button presses on the menu
+		aren't carried into the game actions until timer elapses. eg if I bound 'A' to jump, then used 'A' button to select "Return to game" player would jump when ingame appeared as action carried through
+		Very hackish but couldn't think of a better way to handle this.
+	*/
+
+	if (blockGamepadInputTimer >= 0)
 	{
-		if (GamePadButtons[i])
+		blockGamepadInputTimer -= ONE_FIXED / 10;
+	}
+	else
+	{
+		/* xbox gamepad buttons */
+		for (int i = 0; i < NUMPADBUTTONS; i++)
 		{
-			KeyboardInput[KEY_JOYSTICK_BUTTON_1+i] = TRUE;
-			GotAnyKey = TRUE;
+			if (GamePadButtons[i])
+			{
+				KeyboardInput[KEY_JOYSTICK_BUTTON_1+i] = TRUE;
+				GotAnyKey = TRUE;
+			}
 		}
 	}
 
@@ -690,10 +704,18 @@ extern void IngameKeyboardInput_ClearBuffer(void)
 {
 	int i;
 
-	for (i=0; i<=255; i++)
+	for (i = 0; i <= 255; i++)
 	{
 		IngameKeyboardInput[i] = 0;
 	}
+
+	for (i = 0; i < NUMPADBUTTONS; i++)
+	{
+		GamePadButtons[i] = 0;
+	}
+
+	/* start timer to ignore gamepad input */
+	blockGamepadInputTimer = ONE_FIXED;
 }
 
 // For extern "C"

@@ -1,8 +1,7 @@
 #ifdef WIN32
 /****
 
-Project specific (or potentially 
-project specific) windows functionality
+Project specific (or potentially project specific) windows functionality
 
 ****/
 
@@ -121,8 +120,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			UINT dwSize = 40;
 			static BYTE lpb[40];
 
-			GetRawInputData((HRAWINPUT)lParam, RID_INPUT, 
-			lpb, &dwSize, sizeof(RAWINPUTHEADER));
+			GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER));
 
 			RAWINPUT* raw = (RAWINPUT*)lpb;
 
@@ -164,6 +162,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 */
 			if (Con_IsActive())
 			{
+				break;
 /*
 				if(wParam == VK_BACK)
 				{
@@ -243,16 +242,16 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		case WM_SYSKEYUP:
 		case WM_KEYUP:						
 		{
-/*
+
 			if (Con_IsActive())
 			{
-				if(wParam == VK_BACK)
+//				if(wParam == VK_BACK)
 				{
-					Con_Key_Backspace(false);
+//					Con_Key_Backspace(false);
 					break;
 				}
 			}
-*/
+
 			/* handle left/right alt keys */
 			if(wParam == VK_MENU)
 			{	
