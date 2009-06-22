@@ -21,6 +21,11 @@
 	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
+extern "C" {
+	#include "prototyp.h"
+	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+}
+
 /* Version settings ************************************************/
 
 /* Constants *******************************************************/
@@ -87,10 +92,16 @@ void AlienHUDGadget :: Render
 
 	pTextReportGadg -> UpdateLineTimes();
 
-	struct r2pos R2Pos_TextReport = pTextReportGadg -> GetPos_Rel
-	(
-		R2Rect_Clip
-	);
+	struct r2pos R2Pos_TextReport = pTextReportGadg -> GetPos_Rel( R2Rect_Clip );
+
+//	char buf[100];
+//	sprintf(buf, "x: %d y: %d clip %d %d %d %d\n", R2Pos_TextReport.x, R2Pos_TextReport.y, R2Rect_Clip . x0, R2Rect_Clip . y0, R2Rect_Clip . x1, R2Rect_Clip . y1);
+//	OutputDebugString(buf);
+
+//	if (R2Pos_TextReport.y == 0)
+	{
+		R2Pos_TextReport.y += ScreenDescriptorBlock.SDB_SafeZoneHeightOffset * 2;
+	}
 
 	GLOBALASSERT( pTextReportGadg );
 	{

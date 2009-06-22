@@ -42,9 +42,8 @@ BOOL BilinearTextureFilter = 1;
 extern HWND hWndMain;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern void DeleteRenderMemory();
+extern void ChangeWindowsSize(int width, int height);
 extern int WindowMode;
-extern int ZBufferMode;
-extern int VideoModeColourDepth;
 
 int	VideoModeColourDepth;
 int	NumAvailableVideoModes;
@@ -54,8 +53,8 @@ static HRESULT LastError;
 D3DINFO d3d;
 D3DTEXTURE consoleText;
 
-int StartDriver = 0;
-int StartFormat = 0;
+//int StartDriver = 0;
+//int StartFormat = 0;
 
 /* TGA header structure */
 #pragma pack(1)
@@ -173,7 +172,7 @@ LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int
 		&tempTexture
 		);	
 
-	if(FAILED(LastError))
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		*width = 0;
@@ -205,7 +204,7 @@ void CreateScreenShotImage()
 	//	otherwise 9 seconds appears as '9' instead of '09'
 	{
 		bool prefixSeconds = false;
-		if(systemTime.wYear < 10) prefixSeconds = true;
+		if (systemTime.wYear < 10) prefixSeconds = true;
 
 		fileName << "AvP_" << systemTime.wDay << "-" << systemTime.wMonth << "-" << systemTime.wYear << "_" << systemTime.wHour << "-" << systemTime.wMinute << "-"; 
 
@@ -222,7 +221,7 @@ void CreateScreenShotImage()
 	}
 
 	/* create surface to copy screen to */
-	if(FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(ScreenDescriptorBlock.SDB_Width, ScreenDescriptorBlock.SDB_Height, D3DFMT_A8R8G8B8, D3DPOOL_SCRATCH, &frontBuffer, NULL)))
+	if (FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(ScreenDescriptorBlock.SDB_Width, ScreenDescriptorBlock.SDB_Height, D3DFMT_A8R8G8B8, D3DPOOL_SCRATCH, &frontBuffer, NULL)))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("Couldn't create screenshot surface\n");
@@ -230,7 +229,7 @@ void CreateScreenShotImage()
 	}
 
 	/* copy front buffer screen to surface */
-	if(FAILED(d3d.lpD3DDevice->GetFrontBufferData(0, frontBuffer))) 
+	if (FAILED(d3d.lpD3DDevice->GetFrontBufferData(0, frontBuffer))) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("Couldn't get a copy of the front buffer\n");
@@ -239,7 +238,7 @@ void CreateScreenShotImage()
 	}
 
 	/* save surface to image file */
-	if(FAILED(D3DXSaveSurfaceToFile(fileName.str().c_str(), D3DXIFF_JPG, frontBuffer, NULL, NULL))) 
+	if (FAILED(D3DXSaveSurfaceToFile(fileName.str().c_str(), D3DXIFF_JPG, frontBuffer, NULL, NULL))) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("Save Surface to file failed!!!\n");
@@ -266,6 +265,7 @@ int NearestSuperiorPow2(int i)
 LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex) 
 {
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
+	D3DLOCKED_RECT	   lock;
 
 	// default colour format
 	D3DFORMAT colourFormat = D3DFMT_R5G6B5;
@@ -285,17 +285,15 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 	
 
 	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, NULL, colourFormat, D3DPOOL_MANAGED, &destTexture, NULL);
-	if(FAILED(LastError)) 
+	if (FAILED(LastError)) 
 	{
 //		LogError("Unable to create tall font texture", LastError);
 		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
 
-	D3DLOCKED_RECT lock;
-
 	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
-	if(FAILED(LastError)) {
+	if (FAILED(LastError)) {
 		destTexture->Release();
 //		LogError("Unable to lock tall font texture for writing", LastError);
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -420,7 +418,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 	}
 
 	LastError = destTexture->UnlockRect(0);
-	if(FAILED(LastError)) 
+	if (FAILED(LastError)) 
 	{
 //		LogError("Unable to unlock tall font texture", LastError);
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -525,7 +523,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 		imageData[i+3] = tex->buffer[i+3];
 	}
 
-	if(FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
+	if (FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
 		buffer,
 		sizeof(TGA_HEADER) + imageSize,
 		D3DX_DEFAULT,//tex->width,
@@ -542,7 +540,6 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 		&destTexture)))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		OutputDebugString("COULD NOT CREATE TEXTURE?\n");
 		delete TgaHeader;
 		delete[] buffer;
 		return NULL;
@@ -603,7 +600,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL
 	image.MipLevels = 1;
 	image.Depth = D3DFMT_A8R8G8B8;
 
-	if(FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
+	if (FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
 		buffer,
 		sizeof(TGA_HEADER) + imageSize,
 		tex->width,
@@ -659,7 +656,7 @@ BOOL CreateVolatileResources()
 
 	/* create dynamic vertex buffer */
 	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DTLVERTEX),D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_TLVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
-	if(FAILED(LastError)) 
+	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		//LogErrorString("CreateVertexBuffer failed\n");
@@ -668,7 +665,7 @@ BOOL CreateVolatileResources()
 
 	/* create index buffer */
 	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DIndexBuffer, NULL);
-	if(FAILED(LastError)) 
+	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		//LogErrorString("CreateIndexBuffer failed\n");
@@ -684,7 +681,7 @@ BOOL CreateVolatileResources()
 	}
 
 	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_TLVERTEX);
-	if(FAILED(LastError)) 
+	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		//LogErrorString("SetFVF failed\n");
@@ -695,8 +692,6 @@ BOOL CreateVolatileResources()
 
 	return TRUE;
 }
-
-extern void ChangeWindowsSize(int width, int height);
 
 BOOL ChangeGameResolution(int width, int height, int colourDepth)
 {
@@ -709,7 +704,7 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 
 	LastError = d3d.lpD3DDevice->Reset(&d3d.d3dpp);
 
-	if(FAILED(LastError)) 
+	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		//LogErrorString("D3D device reset failed\n");
@@ -752,7 +747,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	if (WindowMode == WindowModeSubWindow) windowed = true;
 
 	//	Zero d3d structure
-    memset(&d3d, 0, sizeof(D3DINFO));
+    ZeroMemory(&d3d, 0, sizeof(D3DINFO));
 
 	/* Set up Direct3D interface object */
 	d3d.lpD3D = Direct3DCreate9(D3D_SDK_VERSION);
@@ -772,7 +767,7 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	// Get adapter information
 	LastError = d3d.lpD3D->GetAdapterIdentifier(D3DADAPTER_DEFAULT, D3DENUM_WHQL_LEVEL, &d3d.AdapterInfo);
-	if(FAILED(LastError)) 
+	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		//LogString("Could not get Adapter Identifier Information\n");
@@ -804,7 +799,7 @@ BOOL InitialiseDirect3DImmediateMode()
 			d3d.lpD3D->EnumAdapterModes( D3DADAPTER_DEFAULT, DisplayFormats[CurrentDisplayFormat], i, &DisplayMode );
 
 			// Filter out low-resolution modes
-			if( DisplayMode.Width  < 640 || DisplayMode.Height < 480 )
+			if (DisplayMode.Width  < 640 || DisplayMode.Height < 480)
 				continue;
 
 			int j = 0;
@@ -812,14 +807,14 @@ BOOL InitialiseDirect3DImmediateMode()
 			// Check if the mode already exists (to filter out refresh rates)
 			for(; j < d3d.NumModes; j++ ) 
 			{
-				if( ( d3d.DisplayMode[j].Width  == DisplayMode.Width  ) &&
-					( d3d.DisplayMode[j].Height == DisplayMode.Height ) &&
-					( d3d.DisplayMode[j].Format == DisplayMode.Format ) )
+				if (( d3d.DisplayMode[j].Width  == DisplayMode.Width ) &&
+					( d3d.DisplayMode[j].Height == DisplayMode.Height) &&
+					( d3d.DisplayMode[j].Format == DisplayMode.Format))
 						break;
 			}
 
 			// If we found a new mode, add it to the list of modes
-			if( j == d3d.NumModes ) 
+			if (j == d3d.NumModes) 
 			{
 				d3d.DisplayMode[d3d.NumModes].Width       = DisplayMode.Width;
 				d3d.DisplayMode[d3d.NumModes].Height      = DisplayMode.Height;
@@ -831,14 +826,14 @@ BOOL InitialiseDirect3DImmediateMode()
 				int f = 0;
 
 				// Check if the mode's format already exists
-				for(int f = 0; f < num_fomats; f++ ) 
+				for (int f = 0; f < num_fomats; f++ ) 
 				{
 					if( DisplayMode.Format == d3d.Formats[f] )
 						break;
 				}
 
 				// If the format is new, add it to the list
-				if( f == num_fomats )
+				if (f == num_fomats)
 					d3d.Formats[num_fomats++] = DisplayMode.Format;
 			}
 		}
@@ -847,7 +842,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	D3DDISPLAYMODE d3ddm;
 	LastError = d3d.lpD3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
 
-	if(FAILED(LastError)) 
+	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		//LogErrorString("GetAdapterDisplayMode failed\n");
@@ -855,10 +850,11 @@ BOOL InitialiseDirect3DImmediateMode()
 	}
 
 	D3DPRESENT_PARAMETERS d3dpp;
-	ZeroMemory( &d3dpp, sizeof(d3dpp) );
+	ZeroMemory (&d3dpp, sizeof(d3dpp));
 	d3dpp.hDeviceWindow = hWndMain;
     d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
-	if(windowed) 
+
+	if (windowed) 
 	{
 		d3dpp.Windowed = TRUE;
 		d3dpp.BackBufferWidth = width;//800;
@@ -881,7 +877,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	}
 	d3dpp.BackBufferCount = 1;
 
-	if(triple_buffer)
+	if (triple_buffer)
 	{
 		d3dpp.BackBufferCount = 2;
 		d3dpp.SwapEffect = D3DSWAPEFFECT_FLIP;
@@ -904,7 +900,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	// the timer goes a bit mad if this isnt capped!
 //	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;//D3DPRESENT_INTERVAL_IMMEDIATE;
 
-	for( int i = 0; i < (sizeof(StencilFormats) / sizeof(StencilFormats[0])); i++) 
+	for (int i = 0; i < (sizeof(StencilFormats) / sizeof(StencilFormats[0])); i++) 
 	{
 		LastError = d3d.lpD3D->CheckDeviceFormat(D3DADAPTER_DEFAULT, 
 									D3DDEVTYPE_HAL, 
@@ -912,7 +908,7 @@ BOOL InitialiseDirect3DImmediateMode()
 									D3DUSAGE_DEPTHSTENCIL, 
 									D3DRTYPE_SURFACE,
 									StencilFormats[i]);
-		if(FAILED(LastError)) 
+		if (FAILED(LastError)) 
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 			//LogErrorString("CheckDeviceFormat failed\n");
@@ -925,7 +921,7 @@ BOOL InitialiseDirect3DImmediateMode()
 									D3DFMT_X8R8G8B8,
 									SelectedDepthFormat);
 
-		if(FAILED(LastError))
+		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 			//LogErrorString("CheckDepthStencilMatch failed\n");
@@ -1107,9 +1103,10 @@ BOOL InitialiseDirect3DImmediateMode()
 	ScreenDescriptorBlock.SDB_ClipDown  = height;
 
 	/* use an offset for hud items to account for tv safe zones. just use width for now. 15%?  */
-	if(0)
+	if (0)
 	{
 		ScreenDescriptorBlock.SDB_SafeZoneWidthOffset = (width / 100) * 15;
+		ScreenDescriptorBlock.SDB_SafeZoneHeightOffset = (height / 100) * 15;
 	}
 	else 
 	{
@@ -1150,7 +1147,10 @@ void ReleaseDirect3D()
 	DeleteRenderMemory();
 
 	SAFE_RELEASE(d3d.lpD3DDevice);
+	LogString("Releasing Direct3D device...");
+
 	SAFE_RELEASE(d3d.lpD3D);
+	LogString("Releasing Direct3D object...");
 
 	/* release Direct Input stuff */
 	ReleaseDirectKeyboard();

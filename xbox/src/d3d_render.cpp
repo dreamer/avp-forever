@@ -6183,7 +6183,7 @@ void ThisFramesRenderingHasFinished(void)
 	ExecuteBuffer();
 	EndD3DScene();
 
-#if 1 // output how much memory is free
+#if 0 // output how much memory is free
 	#define MB	(1024*1024)
 	MEMORYSTATUS stat;
 	char buf[100];
@@ -8238,8 +8238,9 @@ void DrawBinkFmv(int topX, int topY, int height, int width, LPDIRECT3DTEXTURE8 f
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
-	if(FAILED(LastError)) {
-		OutputDebugString(" Draw bink fmv quad failed ");
+	if(FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
 }
 
@@ -8247,8 +8248,9 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE8 bar_textu
 {
 	LastError = d3d.lpD3DDevice->SetTexture(0, bar_texture);
 	currentTextureId = 998; // ho hum
-	if(FAILED(LastError)) {
-		OutputDebugString("Couldn't set DrawProgressBar texture");
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
 		return;
 	}
 
@@ -8315,8 +8317,80 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE8 bar_textu
 	}
 */
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
-	if(FAILED(LastError)) {
-		OutputDebugString(" Draw progress bar quad failed ");
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+}
+
+void DrawQuad(int x, int y, int width, int height, int colour) 
+{
+//	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_NORMAL);
+
+	LastError = d3d.lpD3DDevice->SetTexture(0, NULL);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+	currentTextureId = NULL;
+
+	ChangeTranslucencyMode(TRANSLUCENCY_NORMAL);
+
+	int index = 0;
+
+	// bottom left
+	quadVert[index].sx = (float)x - 0.5f;
+	quadVert[index].sy = (float)y + height - 0.5f;
+	quadVert[index].sz = 0.0f;
+	quadVert[index].rhw = 1.0f;
+	quadVert[index].color = colour;
+	quadVert[index].specular = RGBALIGHT_MAKE(0,0,0,255);
+	quadVert[index].tu = 0.0f;
+	quadVert[index].tv = 0.0f;
+
+	index++;
+
+	// top left
+	quadVert[index].sx = (float)x - 0.5f;
+	quadVert[index].sy = (float)y - 0.5f;
+	quadVert[index].sz = 0.0f;
+	quadVert[index].rhw = 1.0f;
+	quadVert[index].color = colour;
+	quadVert[index].specular = RGBALIGHT_MAKE(0,0,0,255);
+	quadVert[index].tu = 0.0f;
+	quadVert[index].tv = 0.0f;
+
+	index++;
+
+	// bottom right
+	quadVert[index].sx = (float)x + width - 0.5f;
+	quadVert[index].sy = (float)y + height - 0.5f;
+	quadVert[index].sz = 0.0f;
+	quadVert[index].rhw = 1.0f;
+	quadVert[index].color = colour;
+	quadVert[index].specular = RGBALIGHT_MAKE(0,0,0,255);
+	quadVert[index].tu = 0.0f;
+	quadVert[index].tv = 0.0f;
+
+	index++;
+
+	// top right
+	quadVert[index].sx = (float)x + width - 0.5f;
+	quadVert[index].sy = (float)y - 0.5f;
+	quadVert[index].sz = 0.0f;
+	quadVert[index].rhw = 1.0f;
+	quadVert[index].color = colour;
+	quadVert[index].specular = RGBALIGHT_MAKE(0,0,0,255);
+	quadVert[index].tu = 0.0f;
+	quadVert[index].tv = 0.0f;
+
+//	OUTPUT_TRIANGLE(0,1,2, 4);
+//	OUTPUT_TRIANGLE(1,2,3, 4);
+
+	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
 }
 

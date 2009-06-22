@@ -663,16 +663,16 @@ void ReadJoysticks()
 			tempY = g_Controllers[i].state.Gamepad.sThumbRY;
 
 			/* scale it down a bit */
-			xPadRightX += (int)(tempX / 600.0f);
-			xPadRightY += (int)(tempY / 600.0f);
+			xPadRightX += static_cast<int>(tempX * 0.002);
+			xPadRightY += static_cast<int>(tempY * 0.002);
 
 			xPadLookX = DIV_FIXED(xPadRightX - oldxPadLookX, NormalFrameTime);
 			xPadLookY = DIV_FIXED(xPadRightY - oldxPadLookY, NormalFrameTime);
-/*
-			char buf[100];
-			sprintf(buf,"xpad x: %d xpad y: %d\n", xPadLookX, xPadLookY);
-			OutputDebugString(buf);
-*/
+
+//			char buf[100];
+//			sprintf(buf,"xpad x: %d xpad y: %d\n", xPadLookX, xPadLookY);
+//			OutputDebugString(buf);
+
 			/* Left Stick - can grab this value directly */
 			xPadMoveX = g_Controllers[i].state.Gamepad.sThumbLX;
 			xPadMoveY = g_Controllers[i].state.Gamepad.sThumbLY;

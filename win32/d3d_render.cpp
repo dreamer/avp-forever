@@ -81,7 +81,8 @@ std::vector<renderParticle> particleArray;
 
 void DrawParticles()
 {
-	if(particleArray.size() == 0) return;
+	if (particleArray.size() == 0) 
+		return;
 
 	int backup = RenderPolygon.NumberOfVertices;
 
@@ -89,7 +90,7 @@ void DrawParticles()
 	std::sort(particleArray.begin(), particleArray.end());
 
 	/* loop particles and add them to vertex buffer */
-	for(int i = 0; i < particleArray.size(); i++)
+	for (int i = 0; i < particleArray.size(); i++)
 	{
 		RenderPolygon.NumberOfVertices = particleArray[i].numVerts;
 		D3D_Particle_Output(&particleArray[i].particle, &particleArray[i].vertices[0]);
@@ -2825,7 +2826,7 @@ void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	particleArray.push_back(tempParticle);
 }
 
-void D3D_Particle_Output(PARTICLE *particlePtr,RENDERVERTEX *renderVerticesPtr)
+void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 {
 	// steam jets, wall lights, fire (inc aliens on fire) etc
 #if 1 // bjd

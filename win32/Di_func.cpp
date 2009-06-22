@@ -1630,7 +1630,8 @@ void DirectReadMouse(void)
 
 	GotMouse = FALSE;
 
-	if(mouseMoved == 0) return;
+	if (mouseMoved == 0) 
+		return;
 
 	MouseVelX = 0;
 	MouseVelY = 0;
@@ -1650,8 +1651,8 @@ void DirectReadMouse(void)
 //	sprintf(buf, "x: %d, y: %d\n", xPosRelative, yPosRelative);
 //	OutputDebugString(buf);
 
-	MouseVelX = DIV_FIXED(MouseX-OldMouseX,NormalFrameTime);
-	MouseVelY = DIV_FIXED(MouseY-OldMouseY,NormalFrameTime);
+	MouseVelX = DIV_FIXED(MouseX-OldMouseX, NormalFrameTime);
+	MouseVelY = DIV_FIXED(MouseY-OldMouseY, NormalFrameTime);
 
 	mouseMoved = 0;
 
@@ -2029,8 +2030,8 @@ void ReadJoysticks(void)
 			tempY = g_Controllers[i].state.Gamepad.sThumbRY;
 
 			/* scale it down a bit */
-			xPadRightX += (int)(tempX / 600.0f);
-			xPadRightY += (int)(tempY / 600.0f);
+			xPadRightX += static_cast<int>(tempX * 0.002);
+			xPadRightY += static_cast<int>(tempY * 0.002);
 
 			xPadLookX = DIV_FIXED(xPadRightX - oldxPadLookX, NormalFrameTime);
 			xPadLookY = DIV_FIXED(xPadRightY - oldxPadLookY, NormalFrameTime);
