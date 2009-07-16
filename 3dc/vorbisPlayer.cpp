@@ -55,7 +55,7 @@ int ReadVorbisData(int sizeToRead, int offset)
 	int bytesReadTotal = 0;
 	int bytesReadPerLoop = 0;
 
-	while(bytesReadTotal < sizeToRead) 
+	while (bytesReadTotal < sizeToRead) 
 	{
 		bytesReadPerLoop = ov_read(
 			&oggFile,									//what file to read from
@@ -169,7 +169,7 @@ void UpdateVorbisBuffer(void *arg)
 #else
 		int waitValue = WaitForMultipleObjects(2, hHandles, FALSE, 1);
 
-		if((waitValue != WAIT_TIMEOUT) && (waitValue != WAIT_FAILED))
+		if ((waitValue != WAIT_TIMEOUT) && (waitValue != WAIT_FAILED))
 		{
 			if (waitValue == 0) 
 			{
@@ -228,9 +228,9 @@ bool LoadVorbisTrackList()
 
 	std::ifstream file(tracklistFilename.c_str());
 
-	if(!file) 
+	if (!file.is_open()) 
 	{
-		LogErrorString("no music tracklist found - not using ogg vorbis music\n");
+		LogErrorString("no music tracklist found - not using ogg vorbis music");
 		return false;
 	}
 
@@ -240,7 +240,7 @@ bool LoadVorbisTrackList()
 	while (std::getline(file, trackName)) 
 	{
 		pos = trackName.find(": ");
-		if(pos != 0)
+		if (pos != 0)
 		{
 			trackName = trackName.substr(pos + 2);
 			TrackList.push_back(musicFolderName + trackName);

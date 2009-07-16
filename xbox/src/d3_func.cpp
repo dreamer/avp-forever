@@ -273,7 +273,7 @@ LPDIRECT3DTEXTURE8 CreateFmvTexture(int width, int height, int usage, int pool)
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
 
 	LastError = d3d.lpD3DDevice->CreateTexture(width, height, 1, usage, D3DFMT_A8R8G8B8, (D3DPOOL)pool, &destTexture);
-	if(FAILED(LastError))
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;

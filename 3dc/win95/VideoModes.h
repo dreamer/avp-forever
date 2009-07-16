@@ -6,6 +6,7 @@ typedef struct
 	int  Width;
 	int  Height;
 	int  ColourDepth;
+	int	 SafeZoneOffset;
 	
 } DEVICEANDVIDEOMODE;
 

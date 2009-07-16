@@ -6,7 +6,6 @@
 
 */
 
-
 #include "shpanim.h"
 
 #ifdef __cplusplus
@@ -15,20 +14,13 @@
 
 #endif
 
-
-
 #include "mem3dc.h"
-
-
-
 
 /*
 
  Structures, Unions & Enums
 
 */
-
-
 
 /* Grrr!!  That's the last time these will be missing! */
 /* Oh, CDF 18/12/97 */
@@ -59,6 +51,10 @@ typedef struct vectorch {
 	int vy;
 	int vz;
 
+/*	float vx;
+	float vy;
+	float vz;
+*/
 } VECTORCH;
 
 typedef struct quat {

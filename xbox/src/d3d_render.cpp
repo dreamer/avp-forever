@@ -8,6 +8,8 @@ extern "C" {
 #include "d3d_hud.h"
 #include "gamedef.h"
 
+#include "assert.h"
+
 #include "particle.h"
 
 #define UseLocalAssert No
@@ -63,6 +65,7 @@ D3DTLVERTEX *quadVert = new D3DTLVERTEX[4];
 #include <d3d8perf.h>
 #pragma pack(pop)
 
+/*
 struct RENDER_STATES
 {
 	signed int texture_id;
@@ -79,6 +82,7 @@ struct RENDER_STATES
 	bool operator<(const RENDER_STATES& rhs) const {return texture_id < rhs.texture_id;}
 //	bool operator<(const RENDER_STATES& rhs) const {return translucency_type < rhs.translucency_type;}
 };
+*/
 
 struct renderParticle
 {
@@ -95,7 +99,8 @@ std::vector<renderParticle> particleArray;
 
 void DrawParticles()
 {
-	if(particleArray.size() == 0) return;
+	if (particleArray.size() == 0) 
+		return;
 
 	int backup = RenderPolygon.NumberOfVertices;
 
@@ -103,13 +108,13 @@ void DrawParticles()
 	std::sort(particleArray.begin(), particleArray.end());
 
 	/* loop particles and add them to vertex buffer */
-	for(int i = 0; i < particleArray.size(); i++)
+	for (int i = 0; i < particleArray.size(); i++)
 	{
 		RenderPolygon.NumberOfVertices = particleArray[i].numVerts;
 		D3D_Particle_Output(&particleArray[i].particle, &particleArray[i].vertices[0]);
 	}
 
-	particleArray.clear();
+	particleArray.resize(0);
 	/* restore RenderPolygon.NumberOfVertices value... */
 	RenderPolygon.NumberOfVertices = backup;
 }
@@ -121,6 +126,8 @@ signed int currentWaterTexture = NO_TEXTURE;
 
 // use 999 as a reference for the tallfont texture
 const int TALLFONT_TEX = 999;
+const int PROGRESS_TEX = 998;
+const int CONSOLE_TEX  = 997;
 
 //RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
 //std::vector<RENDER_STATES> renderTest;
@@ -146,12 +153,7 @@ extern AVPMENUGFX AvPMenuGfxStorage[];
 
 #define FMV_ON 0
 #define FMV_EVERYWHERE 0
-#define WIBBLY_FMV_ON 0
 #define FMV_SIZE 128
-
-#define FOG_ON 0
-#define FOG_COLOUR 0x7f7f7f //0x404040
-#define FOG_SCALE 512
 
 extern int SpecialFXImageNumber;
 extern int SmokyImageNumber;
@@ -226,107 +228,10 @@ if (CurrentRenderStates.TranslucencyMode!=(x)) \
 if (CurrentRenderStates.FilteringMode!=(x)) \
 	ChangeFilteringMode((x));
 
-/* OUTPUT_TRIANGLE - how this bugger works
-
-	For example, if this takes in the parameters:
-	( 0 , 2 , 3, 4)
-
-	Image we have already got 12 vertexes counted in NumVertices
-	What below does is construct a triangle in a certain order (ie as specified
-	by the first 3 params passed into the function) using the data already in our vertex buffer
-	so, for first parameter, set our first vertex to:
-
-		v1 = 12 + 0 - 4
-		v1 is therefore = 8;
-
-		8 refers to the 8th vertice in our vertex buffer, ie 4 back from the end (as 12 - 4 = 8)
-
-		then,
-		v2 = 12 + 2 - 4
-		v2 is therefore = 10;
-
-		10 is 2 back, and 2 above the previous value. We've stepped over 9 :)
-
-		IE.. 0, 2 order is forming. v1 is set to 11, so the '0,2,3' pattern emerged.
-
-		that's a 2am explanation for ya :p
-
-		edit: the above is probably really wrong. figure it out yourself :D
-*/
-
-#if 0 // bjd
-#define OUTPUT_TRIANGLE(a,b,c,n) \
-((LPD3DTRIANGLE)ExecBufInstPtr)->v1 = (NumVertices+(a)-(n)); \
-((LPD3DTRIANGLE)ExecBufInstPtr)->v2 = (NumVertices+(b)-(n)); \
-((LPD3DTRIANGLE)ExecBufInstPtr)->v3 = (NumVertices+(c)-(n)); \
-((LPD3DTRIANGLE)ExecBufInstPtr)->wFlags = D3DTRIFLAG_EDGEENABLETRIANGLE; \
-ExecBufInstPtr = ((char*)ExecBufInstPtr) + sizeof(D3DTRIANGLE); \
-NumberOfRenderedTriangles++;
-#endif
-
-/*
-	OUTPUT_TRIANGLE(0,6,7, 8);
-	OUTPUT_TRIANGLE(0,5,6, 8);
-	0, 1, 2, 3, 4, 5, 6, 7,
-
-// NumIndicies = 0;
-	NumVertices = 8
-
-	0 - 7 in Num Vertices inclusive
-
-// mainIndex[0] = 8 - 8 = 0, + 0 = 0
-// mainIndex[1] = 8 - 8 = 0, + 6 = 6;
-// mainIndex[2] = 8 - 8 = 0, + 7 = 7;
-
-// mainIndex[0] = 8 + 0 = 8, - 8 = 0
-// mainIndex[1] = 8 + 6 = 14 - 8 = 6
-// mainIndex[2] = 8 + 7 = 15 - 8 = 7
-
-// mainIndex[3] = 8 - 8 = 0, + 0 = 0
-// mainIndex[4] = 8 - 8 = 0, + 5 = 5;
-// mainIndex[5] = 8 - 8 = 0, + 6 = 6;
-
-etc
-	add 3 more vertices
-	NumVertices = 8 + 3 = 11
-	NumIndex = 18 from previous 8
-
-	OUTPUT_TRIANGLE(0,2,1, 3);
-
-	// mainIndex[18] = 11 - 3 = 8, + 0 = 8
-	// mainIndex[19] = 11 - 3 = 8, + 2 = 10;
-	// mainIndex[20] = 11 - 3 = 8, + 1 = 9;
-
-	the below should work..
-*/
-#if 0
-#define OUTPUT_TRIANGLE(a,b,c,n) \
-	mainIndex[NumIndicies] = (NumVertices - (n) + (a)); \
-	mainIndex[NumIndicies+1] = (NumVertices - (n) + (b)); \
-	mainIndex[NumIndicies+2] = (NumVertices - (n) + (c)); \
-	NumIndicies+=3;
-#endif
-/*
-#define OUTPUT_TRIANGLE(a,b,c,n) \
-	mainVertex[NumVertices] = mainVertex[a]; \
-	NumVertices++; \
-	mainVertex[NumVertices] = mainVertex[b]; \
-	NumVertices++; \
-	mainVertex[NumVertices] = mainVertex[c]; \
-	NumVertices++; \
-*/
-/*
-static void OUTPUT_TRIANGLE(int a, int b, int c, int n) {
-	mainIndex[NumIndicies] = (NumVertices - (n) + (a));
-	mainIndex[NumIndicies+1] = (NumVertices - (n) + (b));
-	mainIndex[NumIndicies+2] = (NumVertices - (n) + (c));
-	NumIndicies+=3;
-}
-*/
 
 static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n) 
 {
-	if(NumVertices >= MAX_TOTAL_VERTS - 3) 
+	if (NumVertices >= MAX_TOTAL_VERTS - 3) 
 	{
 		OutputDebugString("too many verts!\n");
 		return;
@@ -340,10 +245,10 @@ static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n)
 
 static void SetNewTexture(const int tex_id)
 {
-	if(tex_id != currentTextureId)
+	if (tex_id != currentTextureId)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, ImageHeaderArray[tex_id].Direct3DTexture);
-		if(FAILED(LastError)) 
+		if (FAILED(LastError)) 
 		{
 			OutputDebugString("Couldn't set menu quad texture\n");
 		}
@@ -353,7 +258,7 @@ static void SetNewTexture(const int tex_id)
 
 static inline void PushVerts()
 {
-	if((NumVertices * 8) > 2047)
+	if ((NumVertices * 8) > 2047)
 	{
 		OutputDebugString("too much data for BeginPush\n"); 
 		NumVertices = 0;
@@ -586,7 +491,6 @@ BOOL SetExecuteBufferDefaults()
 
 void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE translucency_mode) 
 {
-	return;
 #if 0
 	int real_num_verts = 0;
 
@@ -661,6 +565,7 @@ void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE t
 BOOL LockExecuteBuffer()
 {
 	return TRUE;
+#if 0
 /*
 	LastError = d3d.lpD3DVertexBuffer->Lock(0, 0, (byte**)&mainVertex, 0);
 	if(FAILED(LastError)) 
@@ -686,11 +591,13 @@ BOOL LockExecuteBuffer()
 //	renderTest.resize(0);
 
     return TRUE;
+#endif
 }
 
 BOOL UnlockExecuteBufferAndPrepareForUse()
 {
 	return TRUE;
+#if 0
 	LastError = d3d.lpD3DVertexBuffer->Unlock();
 	if(FAILED(LastError)) 
 	{
@@ -708,6 +615,7 @@ BOOL UnlockExecuteBufferAndPrepareForUse()
 	}
 */
 	return TRUE;
+#endif
 }
 
 BOOL BeginD3DScene()
@@ -1464,7 +1372,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 
 		/* need this so we can enable alpha test and not lose pred arms in green vision mode, and also not lose 
 		/* aliens in pred red alien vision mode */
-		if(vertices->A == 0) vertices->A = 1;
+		if (vertices->A == 0) vertices->A = 1;
 
 		tempVertex[i].color = RGBALIGHT_MAKE(GammaValues[vertices->R],GammaValues[vertices->G],GammaValues[vertices->B],vertices->A);
 		tempVertex[i].specular = RGBALIGHT_MAKE(GammaValues[vertices->SpecularR],GammaValues[vertices->SpecularG],GammaValues[vertices->SpecularB],255);
@@ -6177,13 +6085,15 @@ void ThisFramesRenderingHasBegun(void)
 	LockExecuteBuffer(); // lock vertex buffer
 }
 
+size_t lastMem = 0;
+
 void ThisFramesRenderingHasFinished(void)
 {
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
 	EndD3DScene();
 
-#if 0 // output how much memory is free
+#if 1 // output how much memory is free
 	#define MB	(1024*1024)
 	MEMORYSTATUS stat;
 	char buf[100];
@@ -6196,8 +6106,17 @@ void ThisFramesRenderingHasFinished(void)
 //		OutputDebugString("break here plz\n");
 	}
 
+	if (stat.dwAvailPhys != lastMem)
+	{
+
+	sprintf(buf, "%4d  free bytes of physical memory.\n", stat.dwAvailPhys);
+	OutputDebugString( buf );
+
 	sprintf(buf, "%4d  free MB of physical memory.\n", stat.dwAvailPhys / MB );
 	OutputDebugString( buf );
+
+	lastMem = stat.dwAvailPhys;
+	}
 #endif
 
 /*
@@ -7602,23 +7521,28 @@ void SetupFMVTexture(FMVTEXTURE *ftPtr)
 {
 #ifdef USE_FMV
 	/* texture will generally be created with A8R8G8B8. Release so we can create with R5G6B5 format */
-	SAFE_RELEASE(ftPtr->ImagePtr->Direct3DTexture);
+//	SAFE_RELEASE(ftPtr->ImagePtr->Direct3DTexture);
 
-	ftPtr->DestTexture = NULL;
+//	ftPtr->DestTexture = NULL;
 
 	/* this texture is what's used for rendering of ingame video monitors */
+/*
 	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, NULL, D3DFMT_R5G6B5, D3DPOOL_DEFAULT, &ftPtr->ImagePtr->Direct3DTexture);
-	if(FAILED(LastError))
+	if (FAILED(LastError))
 	{
-		LogDxErrorString("Could not create Direct3D texture ftPtr->ImagePtr->Direct3DTexture\n");
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
+*/
+	ftPtr->RGBBuffer = new unsigned char[128 * 128 * 4];
 
+#if 0
 	/* we use this texture to write fmv data to */
-	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, D3DUSAGE_DYNAMIC, D3DFMT_R5G6B5, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &ftPtr->DestTexture);
-	if(FAILED(LastError))
+	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &ftPtr->DestTexture);
+	if (FAILED(LastError))
 	{
-		LogDxErrorString("Could not create Direct3D texture ftPtr->DestTexture\n");
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
+#endif
 
 	ftPtr->SoundVolume = 0;
 #endif
@@ -7628,33 +7552,39 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 {
 #ifdef USE_FMV
 
-	if(!ftPtr) return;
+	assert(ftPtr);
+	assert(ftPtr->ImagePtr);
+//	assert(ftPtr->DestTexture);
+	assert(ftPtr->ImagePtr->Direct3DTexture);
 
+	if (!ftPtr) return;
+#if 0
 	/* lock the d3d texture */
-	D3DLOCKED_RECT texture_rect;
-	LastError = ftPtr->ImagePtr->Direct3DTexture->LockRect(0,&texture_rect,NULL,/*D3DLOCK_DISCARD*/NULL);
-	if(FAILED(LastError))
+	D3DLOCKED_RECT textureRect;
+	LastError = ftPtr->ImagePtr->Direct3DTexture->LockRect(0, &textureRect,NULL, NULL);
+	if (FAILED(LastError))
 	{
-		LogDxErrorString("Could not lock Direct3D texture ftPtr->ImagePtr->Direct3DTexture\n");
+		LogDxError(LastError, __LINE__, __FILE__);
 		return;
 	}
-
+#endif
 	// check for success
 	{
-		if (!NextFMVTextureFrame(ftPtr, (void*)texture_rect.pBits, texture_rect.Pitch))
+		if (!NextFMVTextureFrame(ftPtr/*, textureRect.pBits, textureRect.Pitch*/))
 		{
-			ftPtr->ImagePtr->Direct3DTexture->UnlockRect(0);
+			//ftPtr->ImagePtr->Direct3DTexture->UnlockRect(0);
 		 	return;
 		}
 	}
-
+#if 0
 	/* unlock d3d texture */
 	LastError = ftPtr->ImagePtr->Direct3DTexture->UnlockRect(0);
-	if(FAILED(LastError)) 
+	if (FAILED(LastError)) 
 	{
-		LogDxErrorString("Could not unlock Direct3D texture ftPtr->ImagePtr->Direct3DTexture\n");
+		LogDxError(LastError, __LINE__, __FILE__);
 		return;
 	}
+#endif
 #if 0
 	/* update rendering texture with FMV image */
 	LastError = d3d.lpD3DDevice->UpdateTexture(ftPtr->DestTexture, ftPtr->ImagePtr->Direct3DTexture);
@@ -7664,6 +7594,43 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	}
 #endif
 #endif
+
+
+	/* lock the d3d texture */
+	D3DLOCKED_RECT textureRect;
+	LastError = ftPtr->ImagePtr->Direct3DTexture->LockRect(0, &textureRect,NULL, NULL);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return;
+	}
+
+	unsigned char *destPtr = NULL;
+	unsigned char *srcPtr = &ftPtr->RGBBuffer[0];
+
+	for (int y = 0; y < 128; y++)
+	{
+		destPtr = (((unsigned char *)textureRect.pBits) + y * textureRect.Pitch);
+
+		for (int x = 0; x < 128; x++)
+		{
+			destPtr[0] = srcPtr[0];
+			destPtr[1] = srcPtr[1];
+			destPtr[2] = srcPtr[2];
+			destPtr[3] = srcPtr[3];
+
+			destPtr += 4;
+			srcPtr += 4;
+		}
+	}
+
+	/* unlock d3d texture */
+	LastError = ftPtr->ImagePtr->Direct3DTexture->UnlockRect(0);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return;
+	}
 }
 
 // For extern "C"

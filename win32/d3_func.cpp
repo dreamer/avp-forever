@@ -25,6 +25,7 @@ extern "C" {
 extern "C++" {
 	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 	#include "logString.h"
+	#include "configFile.h"
 	#include <d3dx9.h>
 	#include "console.h"
 
@@ -552,7 +553,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 	return destTexture;
 }
 
-LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL poolType) 
+LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, int usage, D3DPOOL poolType) 
 {
 	/* create our texture for returning */
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
@@ -606,7 +607,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL
 		tex->width,
 		tex->height,
 		1,
-		0,
+		usage,
 		D3DFMT_A8R8G8B8,
 		poolType,
 		D3DX_FILTER_NONE,
@@ -871,8 +872,8 @@ BOOL InitialiseDirect3DImmediateMode()
 		d3dpp.BackBufferHeight = height;
 		// setting this to interval one will cap the framerate to monitor refresh
 		// the timer goes a bit mad if this isnt capped!
-		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 //		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 	}
 	d3dpp.BackBufferCount = 1;
@@ -1156,6 +1157,9 @@ void ReleaseDirect3D()
 	ReleaseDirectKeyboard();
 	ReleaseDirectMouse();
 	ReleaseDirectInput();
+
+	/* find a better place to put this */
+	Config_Save();
 }
 
 void ReleaseAvPTexture(AvPTexture* texture)

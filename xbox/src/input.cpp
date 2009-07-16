@@ -668,11 +668,11 @@ void ReadJoysticks()
 
 			xPadLookX = DIV_FIXED(xPadRightX - oldxPadLookX, NormalFrameTime);
 			xPadLookY = DIV_FIXED(xPadRightY - oldxPadLookY, NormalFrameTime);
-
-//			char buf[100];
-//			sprintf(buf,"xpad x: %d xpad y: %d\n", xPadLookX, xPadLookY);
-//			OutputDebugString(buf);
-
+/*
+			char buf[100];
+			sprintf(buf,"xpad x: %d xpad y: %d\n", xPadLookX, xPadLookY);
+			OutputDebugString(buf);
+*/
 			/* Left Stick - can grab this value directly */
 			xPadMoveX = g_Controllers[i].state.Gamepad.sThumbLX;
 			xPadMoveY = g_Controllers[i].state.Gamepad.sThumbLY;

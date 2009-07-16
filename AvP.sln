@@ -1,5 +1,6 @@
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AvP", "AvP.vcproj", "{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}"
 EndProject
 Global
@@ -15,8 +16,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		AMDCaProjectFile = D:\Development\AvP_vc_dx9\CodeAnalyst\AvP.caw
 	EndGlobalSection
 EndGlobal

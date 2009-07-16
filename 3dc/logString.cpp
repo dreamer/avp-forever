@@ -30,6 +30,20 @@ std::string IntToString(const int value)
 	return temp;
 }
 
+/* parses an int from a string and returns it */
+int StringToInt(const std::string &string)
+{
+	std::stringstream ss;
+	int value = 0;
+
+	/* copy string to stringstream */
+	ss << string;
+	/* copy from stringstream to int */
+	ss >> value;
+	
+	return value;
+}
+
 void ClearLog() 
 {
 	std::ofstream file(logFilename.c_str(), std::ios::out);

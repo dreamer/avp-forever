@@ -89,7 +89,7 @@
 				Optimization="0"
 				InlineFunctionExpansion="0"
 				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet-1.2-xbox\include&quot;"
-				PreprocessorDefinitions="_DEBUG;_XBOX;_WINDOWS;DB_NOWINDOWS"
+				PreprocessorDefinitions="_DEBUG;_XBOX;_WINDOWS;DB_NOWINDOWS;USE_FMV"
 				StringPooling="FALSE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -213,11 +213,12 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="TRUE"
 				ImproveFloatingPointConsistency="TRUE"
-				FavorSizeOrSpeed="1"
+				FavorSizeOrSpeed="2"
 				OmitFramePointers="TRUE"
 				EnableFiberSafeOptimizations="FALSE"
 				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet-1.2-xbox\include&quot;"
-				PreprocessorDefinitions="_XBOX;_WINDOWS;DB_NOWINDOWS"
+				PreprocessorDefinitions="_XBOX;_WINDOWS;DB_NOWINDOWS;USE_FMV;_SECURE_SCL=0;_HAS_ITERATOR_DEBUGGING=0"
+				StringPooling="TRUE"
 				MinimalRebuild="TRUE"
 				ExceptionHandling="FALSE"
 				BasicRuntimeChecks="0"
@@ -2035,6 +2036,9 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\3dc\configFile.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\consbind.cpp">
@@ -6032,6 +6036,9 @@
 			</File>
 			<File
 				RelativePath="..\3dc\avp\Comp_shp.h">
+			</File>
+			<File
+				RelativePath="..\3dc\configFile.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\consbind.hpp">

@@ -932,13 +932,13 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 							{
 								OutputDebugString("found fmv texture.. \n");
 								/* is fmv texture, create in default pool so we can dynamically update it */
-								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, D3DPOOL_DEFAULT);
+								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 								/* will need to be restored on alt/tab or device loss */
 								pImageHdr->RequiresRestore = 1;
 							}
 							else
 							{
-								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, D3DPOOL_MANAGED);
+								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, 0, D3DPOOL_MANAGED);
 								/* don't need to restore on alt/tab or device loss */
 								pImageHdr->RequiresRestore = 0;
 							}
@@ -1026,13 +1026,13 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 							if (strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0)
 							{
 								/* is fmv texture, create in default pool so we can dynamically update it */
-								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, D3DPOOL_DEFAULT);
+								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 								/* will need to be restored on alt/tab or device loss */
 								pImageHdr->RequiresRestore = 1;
 							}
 							else
 							{
-								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, D3DPOOL_MANAGED);
+								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, 0, D3DPOOL_MANAGED);
 								/* don't need to restore on alt/tab or device loss */
 								pImageHdr->RequiresRestore = 0;
 							}

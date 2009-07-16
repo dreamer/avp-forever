@@ -11,11 +11,11 @@ extern "C" {
 #include "assert.h"
 
 
-#ifdef _DEBUG
-	#pragma comment(lib, "enet_debug.lib")
-#else
+//#ifdef _DEBUG
+//	#pragma comment(lib, "enet_debug.lib")
+//#else
 	#pragma comment(lib, "enet.lib")
-#endif
+//#endif
 
 #ifdef WIN32
 	#pragma comment(lib, "ws2_32.lib")

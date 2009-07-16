@@ -9,13 +9,15 @@ typedef struct Smack
 }Smack;
 
 /* fmv structure */
+
+#if 0
 struct AvPFMV
 {
 	/* textures needed */
 	D3DTEXTURE	texture;
 	D3DTEXTURE	dynamicTexture;
-
 };
+#endif
 
 #include "3dc.h"
 #include "module.h"
@@ -32,14 +34,15 @@ typedef struct FMVTEXTURE
 
 	int MessageNumber;
 
-	D3DTEXTURE DestTexture;
+//	D3DTEXTURE DestTexture;
+	unsigned char *RGBBuffer;
 
 }FMVTEXTURE;
 
 extern void StartTriggerPlotFMV(int number);
 void PlayMenuMusic();
 void StartMenuMusic();
-int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr, int pitch);
+int NextFMVTextureFrame(FMVTEXTURE *ftPtr/*, void *bufferPtr, int pitch*/);
 void ReleaseAllFMVTexturesForDeviceReset();
 void RecreateAllFMVTexturesAfterDeviceReset();
 

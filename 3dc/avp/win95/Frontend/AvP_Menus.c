@@ -432,7 +432,7 @@ void HandlePostGameFMVs(void)
 		{
 			if (MarineEpisodeToPlay==MAX_NO_OF_BASIC_MARINE_EPISODES-1)
 			{
-				PlayBinkedFMV("FMVs/marineoutro.ogv");
+				//PlayBinkedFMV("FMVs/marineoutro.ogv");
 			}
 			break;
 		}
@@ -462,7 +462,7 @@ void HandlePreGameFMVs(void)
 		if (!stricmp("derelict",LevelName))
 		{
 			#ifdef _XBOX
-				PlayBinkedFMV("D:/FMVs/marineintro.ogv");
+				//PlayBinkedFMV("D:/FMVs/marineintro.ogv");
 			#else
 				PlayBinkedFMV("FMVs/marineintro.ogv");
 			#endif
@@ -876,7 +876,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 		
 		case AVPMENU_VIDEOMODE:
 		{	
-			LoadDeviceAndVideoModePreferences();
+			//bjd LoadDeviceAndVideoModePreferences();
 			break;
 		}
 

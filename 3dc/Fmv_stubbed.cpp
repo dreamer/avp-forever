@@ -1,16 +1,18 @@
 
 #ifndef USE_FMV
 
+#include "d3_func.h"
+
+D3DTEXTURE BinkTexture;
+bool binkTextureCreated = false;
+
 extern "C" {
 
-#include "d3_func.h"
 #include "fmv.h"
 #include "avp_userprofile.h"
 #include "inline.h"
 #include <math.h>
-
 #include <assert.h>
-//#include "sndfile.h"
 
 extern int GotAnyKey;
 
@@ -40,7 +42,6 @@ extern void ThisFramesRenderingHasFinished(void);
 
 void drive_decoding(void *arg);
 void display_frame(void *arg);
-//void handle_video_data (OggPlay * player, int track_num, OggPlayVideoData * video_data, int frame);
 bool FmvWait();
 int NextFMVFrame();
 int FmvOpen(char *filenamePtr);
@@ -48,7 +49,6 @@ void FmvClose();
 int GetVolumeOfNearestVideoScreen(void);
 void writeFmvData(unsigned char *destData, unsigned char* srcData, int width, int height, int pitch);
 int CreateFMVAudioBuffer(int channels, int rate);
-//void handle_audio_data (OggPlay * player, int track, OggPlayAudioData * data, int samples);
 int WriteToDsound(int dataSize, int offset);
 int GetWritableBufferSize();
 int updateAudioBuffer(int numBytes, short *data);
@@ -109,12 +109,15 @@ extern void StartFMVAtFrame(int number, int frame)
 { 
 }
 
+/* bjd - called during each level load */
 void ScanImagesForFMVs()
 {
 	extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
 	int i;
 	IMAGEHEADER *ihPtr;
-	NumberOfFMVTextures=0;
+	NumberOfFMVTextures = 0;
+
+	OutputDebugString("scan images for fmvs\n");
 
 	#if MaxImageGroups>1
 	for (j=0; j<MaxImageGroups; j++)
@@ -145,28 +148,26 @@ void ScanImagesForFMVs()
 						}
 						while(*strPtr++!='.');
 
-//						*filenamePtr++='s';
-//						*filenamePtr++='m';
-//						*filenamePtr++='k';
 						*filenamePtr++='o';
 						*filenamePtr++='g';
 						*filenamePtr++='v';
 						*filenamePtr=0;
 					}
 
-					/* do check here to see if it's a theora file rather than just any old file with the right name? */
-					FILE* file=fopen(filename,"rb");
-					if(!file)
+					/* do a check here to see if it's a theora file rather than just any old file with the right name? */
+					FILE* file = fopen(filename, "rb");
+					if (!file)
 					{
 						OutputDebugString("cant find smacker file!\n");
 						OutputDebugString(filename);
 					}
 					else 
 					{	
+						smackHandle = new Smack;
+						OutputDebugString("alloc smack\n");
 						OutputDebugString("found smacker file!");
 						OutputDebugString(filename);
 						OutputDebugString("\n");
-						smackHandle = new Smack;
 						smackHandle->isValidFile = 1;
 						fclose(file);
 					}
@@ -183,42 +184,45 @@ void ScanImagesForFMVs()
 					{
 						FMVTexture[NumberOfFMVTextures].SmackHandle = smackHandle;
 						FMVTexture[NumberOfFMVTextures].ImagePtr = ihPtr;
-						FMVTexture[NumberOfFMVTextures].StaticImageDrawn=0;
+						FMVTexture[NumberOfFMVTextures].StaticImageDrawn = 0;
 						SetupFMVTexture(&FMVTexture[NumberOfFMVTextures]);
 						NumberOfFMVTextures++;
 					}
 				}
-			}		
+			}
 		}
 	}
 }
 
+/* called when player quits level and returns to main menu */
 void ReleaseAllFMVTextures()
 {
-	for(int i = 0; i < NumberOfFMVTextures; i++)
+	FmvClose();
+
+	for (int i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].MessageNumber = 0;
-//		ReleaseD3DTexture(FMVTexture[i].SrcTexture);
-//		ReleaseD3DTexture(FMVTexture[i].SrcSurface);
-		ReleaseD3DTexture(FMVTexture[i].DestTexture);
+
+		if (FMVTexture[i].RGBBuffer)
+		{
+			delete []FMVTexture[i].RGBBuffer;
+			FMVTexture[i].RGBBuffer = NULL;
+		}
+		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
 	}
+	NumberOfFMVTextures = 0;
 }
 
 void ReleaseAllFMVTexturesForDeviceReset()
 {
-	for(int i = 0; i < NumberOfFMVTextures; i++)
+	for (int i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].MessageNumber = 0;
-//		ReleaseD3DTexture(FMVTexture[i].SrcTexture);
-//		ReleaseD3DTexture(FMVTexture[i].SrcSurface);
-		ReleaseD3DTexture(FMVTexture[i].DestTexture);
-//		ReleaseD3DTexture(FMVTexture[i].ImagePtr->Direct3DTexture);
-		if(FMVTexture[i].ImagePtr->Direct3DTexture != NULL)
-		{
-			FMVTexture[i].ImagePtr->Direct3DTexture->Release();
-			FMVTexture[i].ImagePtr->Direct3DTexture = NULL;
-		}
+
+		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
 	}
+
+	SAFE_RELEASE(BinkTexture);
 }
 
 void PlayMenuMusic()
@@ -232,13 +236,12 @@ extern void InitialiseTriggeredFMVs()
 	{
 		if (FMVTexture[i].IsTriggeredPlotFMV)
 		{
-			if(FMVTexture[i].SmackHandle)
+			if (FMVTexture[i].SmackHandle)
 			{
-//				SmackClose(FMVTexture[i].SmackHandle);
+				delete FMVTexture[i].SmackHandle;
+				FMVTexture[i].SmackHandle = NULL;
 				FMVTexture[i].MessageNumber = 0;
 			}
-
-			FMVTexture[i].SmackHandle = 0;
 		}
 	}
 }
@@ -290,12 +293,13 @@ void FindLightingValuesFromTriggeredFMV(unsigned char *bufferPtr, FMVTEXTURE *ft
 	FmvColourBlue = totalBlue/48*16;
 }
 
-int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr, int pitch)
+int NextFMVTextureFrame(FMVTEXTURE *ftPtr/*, void *bufferPtr, int pitch*/)
 {
 //	OutputDebugString("NextFMVTextureFrame\n");
 	int smackerFormat = 1;
 	int w = 128;
 	int h = 96;
+	unsigned char *bufferPtr = ftPtr->RGBBuffer;
 	
 	{
 //		extern D3DINFO d3d;
@@ -349,18 +353,18 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr, int pitch)
 #endif
 	if(!ftPtr->StaticImageDrawn || smackerFormat)
 	{
-		int i = w*h;///2;
+		int i = w * h;
 		unsigned int seed = FastRandom();
 		int *ptr = (int*)bufferPtr;
 		do
 		{
-			seed = ((seed*1664525)+1013904223);
+			seed = ((seed * 1664525) + 1013904223);
 			*ptr++ = seed;
 		}
 		while(--i);
-		ftPtr->StaticImageDrawn=1;
+		ftPtr->StaticImageDrawn = 1;
 	}
-	FindLightingValuesFromTriggeredFMV((unsigned char*)bufferPtr,ftPtr);
+	FindLightingValuesFromTriggeredFMV((unsigned char*)bufferPtr, ftPtr);
 	return 1;
 }
 
@@ -446,6 +450,7 @@ void display_frame(void *arg)
 
 void float_to_short_array(const float* in, short* out, int len) 
 {
+/*
 	int i = 0;
 	float scaled_value = 0;		
 	for(i = 0; i < len; i++) {				
@@ -456,6 +461,7 @@ void float_to_short_array(const float* in, short* out, int len)
 			out[i] = (scaled_value > 32767.0) ? 32767 : (short)scaled_value;
 		}
 	}
+*/
 }
 /*
 void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int samples) 

@@ -17,9 +17,8 @@ extern "C"
 #include "ourasert.h"
 
  // Edmond
- #include "pldnet.h"
- #include "dp_func.h"
- #include <time.h>
+#include "pldnet.h"
+#include <time.h>
 
 static int LoadUserProfiles(void);
 

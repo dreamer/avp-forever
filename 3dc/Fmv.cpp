@@ -1,31 +1,34 @@
 
 #ifdef USE_FMV
 
-#define	USE_AUDIO		1
+#define	USE_AUDIO		0
 #define USE_ARGB		1
 
 #include <oggplay/oggplay.h>
 #ifdef _DEBUG
-	#pragma comment(lib, "liboggz_static_d.lib")
-	#pragma comment(lib, "liboggplay_static_d.lib")
+	#pragma comment(lib, "liboggz_static.lib")
+	#pragma comment(lib, "liboggplay_static.lib")
 #else
 	#pragma comment(lib, "liboggz_static.lib")
 	#pragma comment(lib, "liboggplay_static.lib")
 #endif
 
 #include "logString.h"
+#include "d3_func.h"
+
+D3DTEXTURE BinkTexture;
+bool binkTextureCreated = false;
+
+HRESULT LastError;
 
 extern "C" {
 
-#include "d3_func.h"
 #include "fmv.h"
 #include "avp_userprofile.h"
 #include "inline.h"
 #include <math.h>
 
 #include <assert.h>
-
-HRESULT LastError;
 
 int SmackerSoundVolume = 65536/512; // 128
 int MoviesAreActive;
@@ -51,8 +54,6 @@ extern IMAGEHEADER ImageHeaderArray[];
 int FmvColourRed;
 int FmvColourGreen;
 int FmvColourBlue;
-
-AvPFMV fmv;
 
 /* for threads */
 #include <process.h>
@@ -158,13 +159,14 @@ extern void EndMenuBackgroundBink()
 
 extern void StartMenuBackgroundBink()
 {
-	return;
+//	return;
 
 	/* try to open file - quit this function if we can't */
 	if (FmvOpen("fmvs/menubackground.ogv") != 0) 
 		return;
 
 	/* create the d3d textures used to display the video */
+/*
 	fmv.texture = CreateFmvTexture(1024, 1024, NULL, D3DPOOL_DEFAULT);
 	if (fmv.texture == NULL)
 	{
@@ -172,9 +174,10 @@ extern void StartMenuBackgroundBink()
 		FmvClose();
 		return;
 	}
+*/
 
-	fmv.dynamicTexture = CreateFmvTexture(1024, 1024, D3DUSAGE_DYNAMIC, D3DPOOL_SYSTEMMEM);
-	if (fmv.dynamicTexture == NULL)
+	BinkTexture = CreateFmvTexture(1024, 1024, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+	if (BinkTexture == NULL)
 	{
 		OutputDebugString("problem creating dynamic fmv texture from d3d\n");
 		FmvClose();
@@ -184,7 +187,7 @@ extern void StartMenuBackgroundBink()
 
 extern int PlayMenuBackgroundBink()
 {
-	return 0;
+//	return 0;
 
 //	int newframe = 0;
 	int playing = 0;
@@ -193,7 +196,7 @@ extern int PlayMenuBackgroundBink()
 	if (frameReady)
 		playing = NextFMVFrame();
 
-	DrawBinkFmv((640-imageWidth)/2, (480-imageHeight)/2, imageHeight, imageWidth, fmv.texture);
+	DrawBinkFmv((640-imageWidth)/2, (480-imageHeight)/2, imageHeight, imageWidth, BinkTexture);
 
 	return 1;
 //	return 0;
@@ -209,6 +212,7 @@ extern void PlayBinkedFMV(char *filenamePtr)
 		return;
 
 	/* create the d3d textures used to display the video */
+/*
 	fmv.texture = CreateFmvTexture(1024, 1024, NULL, D3DPOOL_DEFAULT);
 	if (fmv.texture == NULL)
 	{
@@ -216,15 +220,17 @@ extern void PlayBinkedFMV(char *filenamePtr)
 		FmvClose();
 		return;
 	}
+*/
 
-	fmv.dynamicTexture = CreateFmvTexture(1024, 1024, D3DUSAGE_DYNAMIC, D3DPOOL_SYSTEMMEM);
-	if (fmv.dynamicTexture == NULL)
+	BinkTexture = CreateFmvTexture(1024, 1024, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+	if (BinkTexture == NULL)
 	{
 		LogErrorString("Couldn't create dynamic FMV texture");
 		FmvClose();
 		return;
 	}
 
+	binkTextureCreated = true;
 	playing = 1;
 
 	/* start the playback loop. */
@@ -238,7 +244,7 @@ extern void PlayBinkedFMV(char *filenamePtr)
 		ThisFramesRenderingHasBegun();
 		ClearScreenToBlack();
 
-			DrawBinkFmv((640-imageWidth)/2, (480-imageHeight)/2, imageHeight, imageWidth, fmv.texture);
+			DrawBinkFmv((640-imageWidth)/2, (480-imageHeight)/2, imageHeight, imageWidth, BinkTexture);
 
 		ThisFramesRenderingHasFinished();
 		FlipBuffers();
@@ -251,6 +257,7 @@ extern void PlayBinkedFMV(char *filenamePtr)
 	}
 
 	FmvClose();
+	binkTextureCreated = false;
 }
 
 void FmvClose()
@@ -276,8 +283,9 @@ void FmvClose()
 	count = 0;
 
 	/* release d3d textures */
-	SAFE_RELEASE(fmv.texture);
-	SAFE_RELEASE(fmv.dynamicTexture);
+//	SAFE_RELEASE(fmv.texture);
+//	SAFE_RELEASE(fmv.dynamicTexture);
+	SAFE_RELEASE(BinkTexture);
 
 	/* delete texture data buffer */
 	if (textureData != NULL)
@@ -388,6 +396,7 @@ extern void StartTriggerPlotFMV(int number)
 			}
 
 			Smack *smackHandle = new Smack;
+			OutputDebugString("alloc smack\n");
 
 			OutputDebugString("opening..");
 			OutputDebugString(buffer);
@@ -467,6 +476,7 @@ void ScanImagesForFMVs()
 					else 
 					{	
 						smackHandle = new Smack;
+						OutputDebugString("alloc smack\n");
 						OutputDebugString("found smacker file!");
 						OutputDebugString(filename);
 						OutputDebugString("\n");
@@ -503,10 +513,15 @@ void ReleaseAllFMVTextures()
 	OutputDebugString("exiting level..closing FMV system\n");
 	FmvClose();
 
-	for(int i = 0; i < NumberOfFMVTextures; i++)
+	for (int i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].MessageNumber = 0;
-		SAFE_RELEASE(FMVTexture[i].DestTexture);
+		//SAFE_RELEASE(FMVTexture[i].DestTexture);
+		if (FMVTexture[i].RGBBuffer)
+		{
+			delete []FMVTexture[i].RGBBuffer;
+			FMVTexture[i].RGBBuffer = NULL;
+		}
 		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
 	}
 	NumberOfFMVTextures = 0;
@@ -514,19 +529,30 @@ void ReleaseAllFMVTextures()
 
 void ReleaseAllFMVTexturesForDeviceReset()
 {
-	for(int i = 0; i < NumberOfFMVTextures; i++)
+	for (int i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].MessageNumber = 0;
 
 		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
 	}
+
+	SAFE_RELEASE(BinkTexture);
 }
 
 void RecreateAllFMVTexturesAfterDeviceReset()
 {
-	for(int i = 0; i < NumberOfFMVTextures; i++)
+	for (int i = 0; i < NumberOfFMVTextures; i++)
 	{	
-		FMVTexture[i].ImagePtr->Direct3DTexture = CreateFmvTexture(FMVTexture[i].ImagePtr->ImageWidth, FMVTexture[i].ImagePtr->ImageHeight, NULL, D3DPOOL_DEFAULT);
+		FMVTexture[i].ImagePtr->Direct3DTexture = CreateFmvTexture(FMVTexture[i].ImagePtr->ImageWidth, FMVTexture[i].ImagePtr->ImageHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+	}
+
+	if (binkTextureCreated)
+	{
+		BinkTexture = CreateFmvTexture(1024, 1024, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+		if (BinkTexture == NULL)
+		{
+			OutputDebugString("problem creating dynamic fmv texture from d3d\n");
+		}
 	}
 }
 
@@ -621,11 +647,12 @@ void FmvVolumePan(int volume, int pan)
 #endif
 }
 
-int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr, int pitch)
+int NextFMVTextureFrame(FMVTEXTURE *ftPtr/*, void *bufferPtr, int pitch*/)
 {
 	int smackerFormat = 1;
 	int w = 128;
 	int h = 96;
+	unsigned char *bufferPtr = ftPtr->RGBBuffer;
 
 	if (MoviesAreActive && ftPtr->SmackHandle)
 	{
@@ -642,7 +669,9 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr, int pitch)
 			return 0;
 
 		/* write frame to texture */
-		WriteFmvData((unsigned char*)bufferPtr, textureData, w, h, pitch);
+//		WriteFmvData(ftPtr->RGBBuffer, textureData, w, h, pitch);
+
+		memcpy(ftPtr->RGBBuffer, textureData, 128*128*4);
 
 		/* are we at the last frame yet? */
 //		if (ftPtr->IsTriggeredPlotFMV && (ftPtr->SmackHandle->FrameNum==(ftPtr->SmackHandle->Frames-1)) )
@@ -663,20 +692,20 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr, void *bufferPtr, int pitch)
 		ftPtr->StaticImageDrawn=0;
 	}
 
-	else if(!ftPtr->StaticImageDrawn || smackerFormat)
+	else if (!ftPtr->StaticImageDrawn || smackerFormat)
 	{
-		int i = w*h;///2;
+		int i = w * h;//(h / 4);///2;
 		unsigned int seed = FastRandom();
 		int *ptr = (int*)bufferPtr;
 		do
 		{
-			seed = ((seed*1664525)+1013904223);
+			seed = ((seed * 1664525) + 1013904223);
 			*ptr++ = seed;
 		}
 		while(--i);
-		ftPtr->StaticImageDrawn=1;
+		ftPtr->StaticImageDrawn = 1;
 	}
-	FindLightingValuesFromTriggeredFMV((unsigned char*)bufferPtr,ftPtr);
+	FindLightingValuesFromTriggeredFMV((unsigned char*)bufferPtr, ftPtr);
 	return 1;
 }
 
@@ -753,18 +782,20 @@ int FmvOpen(char *filenamePtr)
 	OutputDebugString("opening fmv file..\n");
 
 	std::string fileName(filenamePtr);
-
+//	std::string fileName("D:\\");// + filenamePtr);
+//	fileName += filenamePtr;
+/*
 	FILE *test;
-	test = fopen(fileName.c_str(), "r");
+	test = fopen("D:\\FMVs\\message101.ogv", "r");
 	if (test == NULL)
 	{
 		LogErrorString("Couldn't find fmv file: " + fileName);
 		return -1;
 	}
 	else fclose(test);
-
+*/
 	/* try to open our video file by filename*/
-	reader = oggplay_file_reader_new(filenamePtr);
+	reader = oggplay_file_reader_new(/*"D:\\FMVs\\message101.ogv"*/filenamePtr);
 	if (reader == NULL)
 	{
 		LogErrorString("Couldn't create oggplay reader", __LINE__, __FILE__);
@@ -806,7 +837,7 @@ int FmvOpen(char *filenamePtr)
 			ret = oggplay_get_audio_channels(player, i, &channels);
 			printf("samplerate: %d channels: %d\n", rate, channels);
 
-			usingAudio = true;
+			usingAudio = false;//true;
 		}
 		else if (oggplay_get_track_type (player, i) == OGGZ_CONTENT_KATE) 
 		{
@@ -1028,8 +1059,8 @@ void display_frame(void *arg)
 						}          
 	//					printf("audio presentation time: %ld\n",
 	//					        oggplay_callback_info_get_presentation_time(headers[j]));                    
-#endif
 					}
+#endif
 					break;
 				case OGGPLAY_CMML:
 					if (oggplay_callback_info_get_required(track_info[i]) > 0)
@@ -1086,6 +1117,7 @@ void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int
 		}
 		
 		audioDataBuffer = new unsigned char[dataSize];
+		OutputDebugString("alloc audioDataBuffer\n");
 		OutputDebugString("creating audioDataBuffer\n");
 
 		if (!audioDataBuffer) 
@@ -1531,7 +1563,7 @@ int NextFMVFrame()
 	D3DLOCKED_RECT textureRect;
 
 	/* lock the d3d texture */
-	LastError = fmv.dynamicTexture->LockRect(0, &textureRect, NULL, NULL);
+	LastError = /*fmv.dynamicTexture*/BinkTexture->LockRect(0, &textureRect, NULL, NULL);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -1542,7 +1574,7 @@ int NextFMVFrame()
 	WriteFmvData((unsigned char*)textureRect.pBits, textureData, imageWidth, imageHeight, textureRect.Pitch );
 
 	/* unlock d3d texture */
-	LastError = fmv.dynamicTexture->UnlockRect(0);
+	LastError = /*fmv.dynamicTexture*/BinkTexture->UnlockRect(0);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -1551,12 +1583,14 @@ int NextFMVFrame()
 
 	/* update rendering texture with FMV image */
 #ifdef WIN32
+/*
 	LastError = d3d.lpD3DDevice->UpdateTexture(fmv.dynamicTexture, fmv.texture);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return 0;
 	}
+*/
 #endif
 /*
 	char char_buf[100];
@@ -1635,6 +1669,7 @@ int CreateFMVAudioBuffer(int channels, int rate)
 
 	/* test buffer for lazy copy */
 	testBuffer = new unsigned char[bufferFormat.dwBufferBytes];
+	OutputDebugString("alloc testBuffer\n");
 
 	return bufferFormat.dwBufferBytes;
 #else

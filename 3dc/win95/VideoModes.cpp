@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 #include "logString.h"
+#include "configFile.h"
 
 extern "C"
 {
@@ -13,8 +14,6 @@ extern D3DInfo d3d;
 
 int CurrentVideoMode = 0;
 DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
-
-std::string commandLineString;
 
 void NextVideoMode2() 
 {
@@ -35,7 +34,7 @@ void PreviousVideoMode2()
 char *GetVideoModeDescription2()
 {
 #ifdef _XBOX
-	char *description = "Microsoft Xbox";
+	static char description[15] = "Microsoft Xbox";
 	return description;
 #else
 	return d3d.AdapterInfo.Description;
@@ -80,7 +79,7 @@ void GetDeviceAndVideoModePrefences()
 {
 	int colourDepth = 0;
 
-	for (int i=0; i < d3d.NumModes; i++)
+	for (int i = 0; i < d3d.NumModes; i++)
 	{
 		// determine colour depth from d3d format
 		switch(d3d.DisplayMode[i].Format) 
@@ -119,139 +118,22 @@ void GetDeviceAndVideoModePrefences()
 
 void SelectBasicDeviceAndVideoMode() 
 {
-	// default to 640x480x16
+	// default to 640x480x32
 	PreferredDeviceAndVideoMode.Width = 640;
 	PreferredDeviceAndVideoMode.Height = 480;
-	PreferredDeviceAndVideoMode.ColourDepth = 16;
-	
-	// create new file here?
-#ifdef _XBOX
-	std::ofstream file("d:\\AliensVsPredator.cfg");
-#else
-	std::ofstream file("AliensVsPredator.cfg");
-#endif
-	file << "[VideoMode]\n";
-	file << "Width = " << PreferredDeviceAndVideoMode.Width << "\n";
-	file << "Height = " << PreferredDeviceAndVideoMode.Height << "\n";
-	file << "ColourDepth = " << PreferredDeviceAndVideoMode.ColourDepth << "\n";
-	file.close();
-}
-
-/* parses an int from a string and returns it */
-int StringToInt(const std::string &string)
-{
-	std::stringstream ss;
-	int value = 0;
-
-	/* copy string to stringstream */
-	ss << string;
-	/* copy from stringstream to int */
-	ss >> value;
-	
-	return value;
+	PreferredDeviceAndVideoMode.ColourDepth = 32;
 }
 
 void LoadDeviceAndVideoModePreferences() 
 {
-#ifdef _XBOX
-	std::ifstream file("d:\\AliensVsPredator.cfg");
-#else
-	std::ifstream file("AliensVsPredator.cfg");
-#endif
-	
-	// if the file doesn't exist
-	if (!file)
-	{
-		LogErrorString("Can't find file AliensVsPredator.cfg - creating and using basic display mode", __LINE__, __FILE__);
-		SelectBasicDeviceAndVideoMode();
-		return;
-	}
+	Config_Load();
 
-	std::string temp;
-
-	getline(file, temp);
-	if (temp != "[VideoMode]") 
-	{
-		OutputDebugString("didn't find [VideoMode] config header\n");
-	}
-
-	getline (file,temp, '=');
-	if (temp == "Width ") 
-	{
-		file.ignore(1);
-		getline(file, temp);
-
-		/* convert our string to an int */
-		PreferredDeviceAndVideoMode.Width = StringToInt(temp);
-	}
-	else {
-		OutputDebugString("nope, wasnt it\n");
-	}
-
-	getline (file,temp, '=');
-	if (temp == "Height ") 
-	{
-		file.ignore(1);
-		getline(file, temp);
-
-		/* convert our string to an int */
-		PreferredDeviceAndVideoMode.Height = StringToInt(temp);
-	}
-	else {
-		OutputDebugString("nope, wasnt it\n");
-	}
-
-	getline (file,temp, '=');
-	if (temp == "ColourDepth ") 
-	{
-		file.ignore(1);
-		getline(file, temp);
-
-		/* convert our string to an int */
-		int value = StringToInt(temp);
-
-		if(value == 32 || value == 16) PreferredDeviceAndVideoMode.ColourDepth = value;
-		else PreferredDeviceAndVideoMode.ColourDepth = 16;
-	}
-	else {
-		OutputDebugString("nope, wasnt it\n");
-	}
-
-	getline (file,temp, '=');
-	if (temp == "CommandLine ") 
-	{
-		file.ignore(1);
-		getline(file, temp);
-
-		OutputDebugString("we got command line of: ");
-		OutputDebugString(temp.c_str());
-		OutputDebugString("\n");
-
-		/* make sure our command line string starts and ends with a double quote */
-		if ((temp.at(0) != '"') || (temp.at(temp.length() - 1) != '"'))
-		{
-			OutputDebugString("command line string is malformed!\n");
-			commandLineString = "";
-		}
-		else
-		{
-			OutputDebugString("Command line string OK\n");
-			/* generate substring, skipping first char which is our double quote, and grabbing length-2 which gives us the length of the string minus both double-quotes */
-			commandLineString = temp.substr(1, temp.length() - 2);
-			OutputDebugString(commandLineString.c_str());
-		}
-	}
-/*
-	char buf[100];
-	sprintf(buf, "width: %d, height: %d depth: %d\n", PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth);
-	OutputDebugString(buf);
-*/
-	file.close();
+	PreferredDeviceAndVideoMode.Width = Config_GetInt("[VideoMode]", "Width", 640);
+	PreferredDeviceAndVideoMode.Height= Config_GetInt("[VideoMode]", "Height", 480);
+	PreferredDeviceAndVideoMode.ColourDepth = Config_GetInt("[VideoMode]", "ColourDepth", 32);
 
 	GetDeviceAndVideoModePrefences();
 }
-
-//const int TotalVideoModes = sizeof(VideoModeList) / sizeof(VideoModeList[0]);
 
 static void SetDeviceAndVideoModePreferences(void)
 {
@@ -286,44 +168,16 @@ static void SetDeviceAndVideoModePreferences(void)
 	}
 
 	PreferredDeviceAndVideoMode.ColourDepth = colourDepth;
-	/*
-	DEVICEANDVIDEOMODESDESC *dPtr = &DeviceDescriptions[CurrentlySelectedDevice];
-	VIDEOMODEDESC *vmPtr = &(dPtr->VideoModes[CurrentlySelectedVideoMode]);
 
-	PreferredDeviceAndVideoMode.DDGUID = dPtr->DDGUID;
-	PreferredDeviceAndVideoMode.DDGUIDIsSet = dPtr->DDGUIDIsSet;
-	PreferredDeviceAndVideoMode.Width = vmPtr->Width;
-	PreferredDeviceAndVideoMode.Height = vmPtr->Height;
-	PreferredDeviceAndVideoMode.ColourDepth = vmPtr->ColourDepth;
-	*/
+	Config_SetInt("[VideoMode]", "Height", PreferredDeviceAndVideoMode.Height);
+	Config_SetInt("[VideoMode]", "Width" , PreferredDeviceAndVideoMode.Width);
+	Config_SetInt("[VideoMode]", "ColourDepth", PreferredDeviceAndVideoMode.ColourDepth);
 }
 
 // called when you select "use selected settings" when selecting a video mode
 void SaveDeviceAndVideoModePreferences() 
 {
-	//	FILE* file=fopen("AliensVsPredator.cfg","rb");
-#ifdef _XBOX
-	std::ofstream file("d:\\AliensVsPredator.cfg");
-#else
-	std::ofstream file("AliensVsPredator.cfg");
-#endif
-	
-	// if the file doesn't exist
-	if(!file)
-	{
-		OutputDebugString("can't find file AliensVsPredator.cfg\n");
-		SelectBasicDeviceAndVideoMode();
-		return;
-	}
-
 	SetDeviceAndVideoModePreferences();
-
-	file << "[VideoMode]\n";
-	file << "Width = " << PreferredDeviceAndVideoMode.Width << "\n";
-	file << "Height = " << PreferredDeviceAndVideoMode.Height << "\n";
-	file << "ColourDepth = " << PreferredDeviceAndVideoMode.ColourDepth << "\n";
-	file << "CommandLine = " << '"' << commandLineString << '"' << "\n";
-	file.close();
 }
 
 };

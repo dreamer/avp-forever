@@ -62,7 +62,6 @@ typedef struct D3DTextureFormat {
     int IndexBPP;       /* number of bits in palette index */
 } D3DTEXTUREFORMAT;
 
-
 typedef struct D3DInfo {
     LPDIRECT3D9				lpD3D;
     LPDIRECT3DDEVICE9		lpD3DDevice; 
@@ -115,7 +114,7 @@ typedef struct
 
 } RENDERSTATES;
 
-D3DTEXTURE CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL poolType);
+D3DTEXTURE CreateD3DTexture(AvPTexture *tex, unsigned char *buf, int usage, D3DPOOL poolType);
 D3DTEXTURE CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int *real_width);
 D3DTEXTURE CreateD3DTallFontTexture(AvPTexture *tex);
 
