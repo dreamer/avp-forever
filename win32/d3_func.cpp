@@ -1121,7 +1121,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	/* create vertex and index buffers */
 	CreateVolatileResources();
 
-	Con_Init();
+//	Con_Init();
 
 	LogString("Initialised Direct3D succesfully");
 	return TRUE;

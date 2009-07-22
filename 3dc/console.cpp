@@ -133,7 +133,8 @@ void Con_Toggle()
 
 bool Con_IsActive()
 {
-	return console.isActive;
+	return false;
+//	return console.isActive;
 }
 
 void Con_CheckResize()

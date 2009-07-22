@@ -37,6 +37,11 @@
 	#include <xtl.h>
 #endif
 
+#ifdef WIN32
+	#include <shlobj.h>
+	#include <shlwapi.h>
+#endif
+
 //extern void StartMenuBackgroundBink(void);
 //extern int PlayMenuBackgroundBink(void);
 //extern void EndMenuBackgroundBink(void);
@@ -5433,7 +5438,28 @@ void ScanSaveSlots(void)
 
 extern void GetFilenameForSaveSlot(int i, unsigned char *filenamePtr)
 {
+#ifdef WIN32
+
+	/* 
+		for windows machines, check in the user profile AppData/Local folder for the save files, as 
+		users on limited accounts on Windows XP or Vista/Windows7 users won't have write access to the 
+		game folder if it's installed into c:\program files
+	*/
+	TCHAR strPath[MAX_PATH];
+
+	/* finds the path to the folder. On Win7, this would be "C:\Users\<username>\AppData\Local\ as an example */
+	if( FAILED(SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, strPath ) ) )
+	{
+		return 0;
+	}
+
+	PathAppend( strPath, TEXT( "Fox\\Aliens versus Predator\\" ) );
+
+	sprintf(filenamePtr,"%s%s%s_%d.sav",strPath, USER_PROFILES_PATH, UserProfilePtr->Name, i+1);
+
+#else
 	sprintf(filenamePtr,"%s%s_%d.sav",USER_PROFILES_PATH,UserProfilePtr->Name,i+1);
+#endif
 }
 
 

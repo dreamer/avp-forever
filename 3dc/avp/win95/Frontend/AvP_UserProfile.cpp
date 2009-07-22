@@ -20,6 +20,11 @@ extern "C"
 #include "pldnet.h"
 #include <time.h>
 
+#ifdef WIN32
+	#include <shlobj.h>
+	#include <shlwapi.h>
+#endif
+
 static int LoadUserProfiles(void);
 
 /*static*/ void EmptyUserProfilesList(void);
@@ -112,6 +117,39 @@ extern AVP_USER_PROFILE *GetNextUserProfile(void)
 
 extern int SaveUserProfile(AVP_USER_PROFILE *profilePtr)
 {
+#ifdef WIN32 // save profile files to user's AppData/Local folder
+	TCHAR strPath[MAX_PATH];
+
+	if( FAILED(SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, strPath ) ) )
+	{
+		return 0;
+	}
+
+	PathAppend( strPath, TEXT( "Fox\\Aliens versus Predator\\" ) );
+	PathAppend( strPath, USER_PROFILES_PATH);
+
+	if( !PathFileExists( strPath ) )
+	{
+		if( ERROR_SUCCESS != SHCreateDirectoryEx( NULL, strPath, NULL ) )
+			return E_FAIL;
+	}
+
+	strcat( strPath, profilePtr->Name);
+	strcat( strPath, USER_PROFILES_SUFFIX);
+
+	FILE* file = fopen(strPath, "wb");
+
+	if(!file)
+		return 0;
+
+	SaveSettingsToUserProfile(profilePtr);
+
+	fwrite(profilePtr, sizeof(AVP_USER_PROFILE), 1, file);
+	fclose(file);
+
+	return 1;
+#else // just save in the game folder for anything else
+
 	char *filename = new char [strlen(USER_PROFILES_PATH)+strlen(profilePtr->Name)+strlen(USER_PROFILES_SUFFIX)+1];
 	strcpy(filename,USER_PROFILES_PATH);
 	strcat(filename,profilePtr->Name);
@@ -128,7 +166,7 @@ extern int SaveUserProfile(AVP_USER_PROFILE *profilePtr)
 	fclose(file);
 
 	return 1;
-
+#endif
 }
 
 extern void DeleteUserProfile(int number)
@@ -190,7 +228,28 @@ static int ProfileIsMoreRecent(AVP_USER_PROFILE *profilePtr, AVP_USER_PROFILE *p
 
 static int LoadUserProfiles(void)
 {
+#ifdef WIN32
+
+	/* 
+		for windows machines, check in the user profile AppData/Local folder for the save files, as 
+		users on limited accounts on Windows XP or Vista/Windows7 users won't have write access to the 
+		game folder if it's installed into c:\program files
+	*/
+	TCHAR strPath[MAX_PATH];
+
+	/* finds the path to the folder. On Win7, this would be "C:\Users\<username>\AppData\Local\ as an example */
+	if( FAILED(SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, strPath ) ) )
+	{
+		return 0;
+	}
+
+	PathAppend( strPath, TEXT( "Fox\\Aliens versus Predator\\" ) );
+	strcat( strPath, USER_PROFILES_WILDCARD_NAME);
+
+	const char* load_name = &strPath[0];
+#else
 	const char* load_name=USER_PROFILES_WILDCARD_NAME;
+#endif
 	// allow a wildcard search
 	WIN32_FIND_DATA wfd;
 
@@ -360,11 +419,7 @@ static void SetDefaultProfileOptions(AVP_USER_PROFILE *profilePtr)
 
 	SaveSettingsToUserProfile(profilePtr);
 }
-
-
-
-
-			
+		
 extern void GetSettingsFromUserProfile(void)
 {
 	RequestedGammaSetting = UserProfilePtr->GammaSetting;

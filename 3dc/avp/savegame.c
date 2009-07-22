@@ -379,7 +379,6 @@ static BOOL SaveGameAllowed()
 
 	}
 
-
 	if(!NumberOfSavesLeft)
 	{
 		NewOnScreenMessage(GetTextString(TEXTSTRING_SAVEGAME_NOSAVESLEFT));
@@ -391,13 +390,11 @@ static BOOL SaveGameAllowed()
 
 	//saving is allowed then
 	return TRUE;
-
-
 }
 
 void SaveGame()
 {
-	char filename[100];
+	char filename[MAX_PATH];
 	HANDLE file;
 	DWORD bytes_written;
 	int headerLength;
@@ -473,22 +470,14 @@ void SaveGame()
 
 	CloseHandle(file);
 
-
 	NewOnScreenMessage(GetTextString(TEXTSTRING_SAVEGAME_GAMESAVED));
 	DisplaySavesLeft();
 
 }
 
-
- 
-
-
-
-
-
 static void EndLoadGame()
 {
-	if(LoadInfo.BufferStart)
+	if (LoadInfo.BufferStart)
 	{
 		DeallocateMem(LoadInfo.BufferStart);
 	}
@@ -547,7 +536,6 @@ void LoadSavedGame()
 		LoadGameRequest = SAVELOAD_REQUEST_NONE;		
 		return;
 	}
-	
 
 	//get the save_slot
 	save_slot = &SaveGameSlot[LoadGameRequest];
@@ -578,7 +566,6 @@ void LoadSavedGame()
 
 	//load the file
 	file = CreateFile(filename,GENERIC_READ, 0, 0, OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
-
 
 	if(file==INVALID_HANDLE_VALUE)
 	{
