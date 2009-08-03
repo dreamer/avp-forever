@@ -1009,6 +1009,21 @@ BOOL InitialiseDirect3DImmediateMode()
 		return FALSE;
 	}
 
+	/* get device capabilities */
+	D3DCAPS9 d3dCaps;
+	d3d.lpD3DDevice->GetDeviceCaps(&d3d.d3dCaps);
+
+	/* check and remember if we have dynamic texture support */
+	if (d3dCaps.Caps2 & D3DCAPS2_DYNAMICTEXTURES)
+	{
+		d3d.supportsDynamicTextures = TRUE;
+	}
+	else 
+	{
+		d3d.supportsDynamicTextures = FALSE;
+		LogErrorString("device can't use D3DUSAGE_DYNAMIC\n");
+	}
+
 	// Log resolution set
 	LogString("\t Resolution set: " + LogInteger(d3dpp.BackBufferWidth) + " x " + LogInteger(d3dpp.BackBufferHeight));
 
@@ -1058,15 +1073,15 @@ BOOL InitialiseDirect3DImmediateMode()
 			break;
 	}
 	
-	ZeroMemory( &d3d.lpD3DViewport, sizeof(d3d.lpD3DViewport) );
-	d3d.lpD3DViewport.X = 0;
-	d3d.lpD3DViewport.Y = 0;
-	d3d.lpD3DViewport.Width = width;
-	d3d.lpD3DViewport.Height = height;
-	d3d.lpD3DViewport.MinZ = 0.0f;
-	d3d.lpD3DViewport.MaxZ = 1.0f;
+	ZeroMemory( &d3d.D3DViewport, sizeof(d3d.D3DViewport) );
+	d3d.D3DViewport.X = 0;
+	d3d.D3DViewport.Y = 0;
+	d3d.D3DViewport.Width = width;
+	d3d.D3DViewport.Height = height;
+	d3d.D3DViewport.MinZ = 0.0f;
+	d3d.D3DViewport.MaxZ = 1.0f;
 
-	LastError = d3d.lpD3DDevice->SetViewport(&d3d.lpD3DViewport);
+	LastError = d3d.lpD3DDevice->SetViewport(&d3d.D3DViewport);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);

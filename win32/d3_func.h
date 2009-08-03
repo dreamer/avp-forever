@@ -65,11 +65,10 @@ typedef struct D3DTextureFormat {
 typedef struct D3DInfo {
     LPDIRECT3D9				lpD3D;
     LPDIRECT3DDEVICE9		lpD3DDevice; 
-    D3DVIEWPORT9			lpD3DViewport; 
+    D3DVIEWPORT9			D3DViewport; 
 	LPDIRECT3DSURFACE9		lpD3DBackSurface;// back buffer surface
 	D3DSURFACE_DESC			backSurfaceDesc; // back buffer surface description
 	D3DPRESENT_PARAMETERS	d3dpp;
-	D3DCAPS9				d3dCaps;
 
 	LPDIRECT3DVERTEXBUFFER9 lpD3DVertexBuffer;
 	LPDIRECT3DINDEXBUFFER9	lpD3DIndexBuffer;
@@ -83,6 +82,8 @@ typedef struct D3DInfo {
     int						CurrentTextureFormat;
     int						NumTextureFormats;
     D3DTEXTUREFORMAT		TextureFormat[MAX_TEXTURE_FORMATS];
+
+	BOOL					supportsDynamicTextures;
 } D3DINFO;
 
 /* KJL 14:24:45 12/4/97 - render state information */

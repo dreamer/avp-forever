@@ -1,23 +1,20 @@
 
 #ifdef USE_FMV
 
-#define	USE_AUDIO		0
+#define	USE_AUDIO		1
 #define USE_ARGB		1
 
 #include <oggplay/oggplay.h>
-#ifdef _DEBUG
-	#pragma comment(lib, "liboggz_static.lib")
-	#pragma comment(lib, "liboggplay_static.lib")
-#else
-	#pragma comment(lib, "liboggz_static.lib")
-	#pragma comment(lib, "liboggplay_static.lib")
-#endif
+
+#pragma comment(lib, "liboggz.lib")
+#pragma comment(lib, "liboggplay.lib")
 
 #include "logString.h"
 #include "d3_func.h"
 
 D3DTEXTURE BinkTexture;
 bool binkTextureCreated = false;
+bool MenuBackground = false;
 
 HRESULT LastError;
 
@@ -159,7 +156,8 @@ extern void EndMenuBackgroundBink()
 
 extern void StartMenuBackgroundBink()
 {
-//	return;
+	if(!MenuBackground) 
+		return;
 
 	/* try to open file - quit this function if we can't */
 	if (FmvOpen("fmvs/menubackground.ogv") != 0) 
@@ -187,11 +185,8 @@ extern void StartMenuBackgroundBink()
 
 extern int PlayMenuBackgroundBink()
 {
-//	return 0;
-
-//	int newframe = 0;
 	int playing = 0;
-//	if(!MenuBackground) return 0;
+	if(!MenuBackground) return 0;
 
 	if (frameReady)
 		playing = NextFMVFrame();
@@ -199,7 +194,6 @@ extern int PlayMenuBackgroundBink()
 	DrawBinkFmv((640-imageWidth)/2, (480-imageHeight)/2, imageHeight, imageWidth, BinkTexture);
 
 	return 1;
-//	return 0;
 }
 
 extern void PlayBinkedFMV(char *filenamePtr)
@@ -409,6 +403,12 @@ extern void StartTriggerPlotFMV(int number)
 
 			FMVTexture[i].SmackHandle = smackHandle;
 			FMVTexture[i].MessageNumber = number;
+
+			/* we need somewhere to store temp image data */
+			if (textureData == NULL) 
+			{
+				textureData = new unsigned char[128 * 128 * 4];
+			}
 		}
 	}
 }
@@ -656,6 +656,8 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr/*, void *bufferPtr, int pitch*/)
 
 	if (MoviesAreActive && ftPtr->SmackHandle)
 	{
+		assert(textureData != NULL);
+
 		int volume = MUL_FIXED(SmackerSoundVolume * 256, GetVolumeOfNearestVideoScreen());
 
 //		sprintf(buf, "vol of nearest screen: %d, volume: %d, pan: %d\n", GetVolumeOfNearestVideoScreen(), volume, PanningOfNearestVideoScreen);

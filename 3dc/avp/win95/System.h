@@ -18,8 +18,8 @@ extern "C" {
 
 /********************* SYSTEM, PLATFORM AND GAME************/
 
-/* redefined as visual studio 2008 uses TRUE and FALSE for sourceannotations.h */
-#define TRUE 1
+/* redefined as visual studio 2008 uses Yes and No for sourceannotations.h */
+#define TRUE  1
 #define FALSE 0
 
 #ifdef _DEBUG /* standard compiler command line debugging-ON switch */

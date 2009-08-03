@@ -7285,7 +7285,7 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
 {
-#ifdef USE_FMV
+//#ifdef USE_FMV
 
 //	assert(ftPtr->DestTexture == NULL);
 /*
@@ -7308,14 +7308,14 @@ void SetupFMVTexture(FMVTEXTURE *ftPtr)
 #endif
 
 	ftPtr->SoundVolume = 0;
-#endif
+//#endif
 }
 
 #include <assert.h>
 
 void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 {
-#ifdef USE_FMV
+//#ifdef USE_FMV
 
 	assert(ftPtr);
 	assert(ftPtr->ImagePtr);
@@ -7399,7 +7399,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 		return;
 	}
 
-#endif
+//#endif
 }
 
 #if 0
