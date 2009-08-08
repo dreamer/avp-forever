@@ -102,7 +102,6 @@ int PlatGetNumberOfCDTracks(int* numTracks);
   management function is provided for consoles, who need to poll the device,
   whilst the call back is provided for intercepting WIN95 MCI call backs. 
   ----------------------------------------------------------------------------*/
-extern void PlatCDDAManagement(void);
 extern void PlatCDDAManagementCallBack(WPARAM flags, LONG deviceId);
 
 

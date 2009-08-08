@@ -37,7 +37,7 @@ char *GetVideoModeDescription2()
 	static char description[15] = "Microsoft Xbox";
 	return description;
 #else
-	return d3d.AdapterInfo.Description;
+	return d3d.Driver[d3d.CurrentDriver].AdapterInfo.Description;
 #endif
 }
 
@@ -48,7 +48,7 @@ char *GetVideoModeDescription3()
 	int colourDepth = 0;
 	
 	// determine colour depth from d3d format
-	switch(d3d.DisplayMode[CurrentVideoMode].Format) 
+	switch(d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Format) 
 	{
 		case D3DFMT_X8R8G8B8:
 			colourDepth = 32;
@@ -71,7 +71,7 @@ char *GetVideoModeDescription3()
 			colourDepth = 16;
 			break;
 	}
-	sprintf(buf, "%dx%dx%d", d3d.DisplayMode[CurrentVideoMode].Width, d3d.DisplayMode[CurrentVideoMode].Height, colourDepth);
+	sprintf(buf, "%dx%dx%d", d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Width, d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Height, colourDepth);
 	return buf;
 }
 
@@ -82,7 +82,7 @@ void GetDeviceAndVideoModePrefences()
 	for (int i = 0; i < d3d.NumModes; i++)
 	{
 		// determine colour depth from d3d format
-		switch(d3d.DisplayMode[i].Format) 
+		switch(d3d.Driver[d3d.CurrentDriver].DisplayMode[i].Format) 
 		{
 			case D3DFMT_X8R8G8B8:
 				colourDepth = 32;
@@ -106,8 +106,8 @@ void GetDeviceAndVideoModePrefences()
 				break;
 		}
 
-		if ((PreferredDeviceAndVideoMode.Width == d3d.DisplayMode[i].Width)
-		  &&(PreferredDeviceAndVideoMode.Height == d3d.DisplayMode[i].Height)
+		if ((PreferredDeviceAndVideoMode.Width == d3d.Driver[d3d.CurrentDriver].DisplayMode[i].Width)
+		  &&(PreferredDeviceAndVideoMode.Height == d3d.Driver[d3d.CurrentDriver].DisplayMode[i].Height)
 		  &&(PreferredDeviceAndVideoMode.ColourDepth == colourDepth))
 		{
 			CurrentVideoMode = i;
@@ -137,13 +137,13 @@ void LoadDeviceAndVideoModePreferences()
 
 static void SetDeviceAndVideoModePreferences(void)
 {
-	PreferredDeviceAndVideoMode.Width = d3d.DisplayMode[CurrentVideoMode].Width;
-	PreferredDeviceAndVideoMode.Height = d3d.DisplayMode[CurrentVideoMode].Height;
+	PreferredDeviceAndVideoMode.Width = d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Width;
+	PreferredDeviceAndVideoMode.Height = d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Height;
 
 	int colourDepth = 0;
 	
 	// determine colour depth from d3d format
-	switch(d3d.DisplayMode[CurrentVideoMode].Format)
+	switch(d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Format)
 	{
 		case D3DFMT_X8R8G8B8:
 			colourDepth = 32;
@@ -172,6 +172,8 @@ static void SetDeviceAndVideoModePreferences(void)
 	Config_SetInt("[VideoMode]", "Height", PreferredDeviceAndVideoMode.Height);
 	Config_SetInt("[VideoMode]", "Width" , PreferredDeviceAndVideoMode.Width);
 	Config_SetInt("[VideoMode]", "ColourDepth", PreferredDeviceAndVideoMode.ColourDepth);
+
+	Config_Save();
 }
 
 // called when you select "use selected settings" when selecting a video mode

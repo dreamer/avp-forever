@@ -8,17 +8,6 @@ typedef struct Smack
 	int Frames;
 }Smack;
 
-/* fmv structure */
-
-#if 0
-struct AvPFMV
-{
-	/* textures needed */
-	D3DTEXTURE	texture;
-	D3DTEXTURE	dynamicTexture;
-};
-#endif
-
 #include "3dc.h"
 #include "module.h"
 #include "stratdef.h"

@@ -15,7 +15,7 @@ moved into it's own file. */
   CDDA Support
   ----------------------------------------------------------------------------*/
 #define NO_DEVICE -1
-int cdDeviceID = NO_DEVICE;
+/*int*/static MCIDEVICEID cdDeviceID = NO_DEVICE;
 int cdAuxDeviceID = NO_DEVICE;
 
 /* Patrick 9/6/97 -------------------------------------------------------------
@@ -75,25 +75,30 @@ void CDDA_Management(void)
 {
 	if(!CDDASwitchedOn) return; /* CDDA is off */
 	if(CDDAState==CDOp_Playing) return; /* already playing */
-	PlatCDDAManagement();
 }
 
 void CDDA_Play(int CDDATrack)
 {
 	int ok;
 	
-	if(!CDDASwitchedOn) return; /* CDDA is off */
-	if(CDDAState==CDOp_Playing) return; /* already playing */
-	if((CDDATrack<=0)||(CDDATrack>=CDTrackMax)) return; /* no such track */
+	if (!CDDASwitchedOn) 
+		return; /* CDDA is off */
+
+	if (CDDAState == CDOp_Playing) 
+		return; /* already playing */
+
+	if ((CDDATrack <= 0)||(CDDATrack >= CDTrackMax)) 
+		return; /* no such track */
 
 	ok = PlatPlayCDDA((int)CDDATrack);
-	if(ok!=SOUND_PLATFORMERROR)
+	if (ok != SOUND_PLATFORMERROR)
 	{
-		CDDAState=CDOp_Playing;
+		CDDAState = CDOp_Playing;
 		LastCommandGiven = CDCOMMANDID_Play;
 		TrackBeingPlayed = CDDATrack;
 	}
 }
+
 void CDDA_PlayLoop(int CDDATrack)
 {
 	int ok;
@@ -213,6 +218,7 @@ int PlatStartCDDA(void)
 	static void PlatGetCDDAVolumeControl(void);
 	DWORD dwReturn;
 	MCI_OPEN_PARMS mciOpenParms;
+	MCIDEVICEID devId = 0;
 
 	/* Initialise device handles */
 	cdDeviceID = NO_DEVICE;
@@ -220,8 +226,8 @@ int PlatStartCDDA(void)
 
 	/* try to open mci cd-audio device */
 	mciOpenParms.lpstrDeviceType = (LPCSTR) MCI_DEVTYPE_CD_AUDIO;
-	dwReturn = mciSendCommand(NULL,MCI_OPEN,MCI_OPEN_TYPE|MCI_OPEN_TYPE_ID,(DWORD)(LPVOID)&mciOpenParms);
-	if(dwReturn) 
+	dwReturn = mciSendCommand(devId, MCI_OPEN, MCI_OPEN_TYPE|MCI_OPEN_TYPE_ID, /*(DWORD)(LPVOID)*/(DWORD_PTR)&mciOpenParms);
+	if (dwReturn) 
 	{
 		/* error */
 		cdDeviceID = NO_DEVICE;
@@ -263,12 +269,14 @@ static void PlatGetCDDAVolumeControl(void)
 	int i;
 	int numDev = mixerGetNumDevs();
 
+	return;
 
+#if 0
 	//go through the mixer devices searching for one that can deal with the cd volume
-	for(i=0;i<numDev;i++)
+	for (i = 0; i < numDev; i++)
 	{
 		HMIXER handle;
-		if(mixerOpen(&handle,i,0,0,MIXER_OBJECTF_MIXER ) == MMSYSERR_NOERROR )
+		if (mixerOpen(&handle, i, 0, 0, MIXER_OBJECTF_MIXER ) == MMSYSERR_NOERROR )
 		{
 			
 			//try to get the compact disc mixer line
@@ -276,7 +284,7 @@ static void PlatGetCDDAVolumeControl(void)
 			line.cbStruct=sizeof(MIXERLINE);
 			line.dwComponentType=MIXERLINE_COMPONENTTYPE_SRC_COMPACTDISC;
 
-			if(mixerGetLineInfo(handle,&line,MIXER_GETLINEINFOF_COMPONENTTYPE) == MMSYSERR_NOERROR)
+			if(mixerGetLineInfo(handle, &line, MIXER_GETLINEINFOF_COMPONENTTYPE) == MMSYSERR_NOERROR)
 			{
 				MIXERLINECONTROLS lineControls;
 				MIXERCONTROL control;
@@ -316,14 +324,12 @@ static void PlatGetCDDAVolumeControl(void)
 					}
 				}
 			}
-			 
-			
 			mixerClose(handle);
 		}
-
 	}
 
 	return;
+#endif
 }
 #endif
 
@@ -333,10 +339,10 @@ void PlatEndCDDA(void)
 	DWORD dwReturn;
 
     /* check the cdDeviceId */
-    if(cdDeviceID==NO_DEVICE) return;	
+    if (cdDeviceID == NO_DEVICE) return;	
 
-	dwReturn = mciSendCommand((UINT)cdDeviceID,MCI_CLOSE,MCI_WAIT,NULL);	
-	cdDeviceID=NO_DEVICE;
+	dwReturn = mciSendCommand(cdDeviceID, MCI_CLOSE, MCI_WAIT, 0);	
+	cdDeviceID = NO_DEVICE;
 
 	/* reset the auxilary device handle */
 	cdAuxDeviceID = NO_DEVICE;
@@ -349,12 +355,14 @@ int PlatPlayCDDA(int track)
     MCI_PLAY_PARMS mciPlayParms = {0,0,0};
 	MCI_STATUS_PARMS mciStatusParms = {0,0,0,0};
 
+	return 0; // bjd
+#if 0
     /* check the cdDeviceId */
     if(cdDeviceID==NO_DEVICE) return SOUND_PLATFORMERROR;
     
     /* set the time format */
 	mciSetParms.dwTimeFormat = MCI_FORMAT_MSF;
-	dwReturn = mciSendCommand((UINT)cdDeviceID,MCI_SET,MCI_SET_TIME_FORMAT,(DWORD)(LPVOID) &mciSetParms);
+	dwReturn = mciSendCommand(/*(UINT)*/cdDeviceID, MCI_SET, MCI_SET_TIME_FORMAT, (DWORD_PTR) &mciSetParms);
 	if(dwReturn)
 	{
 //    	NewOnScreenMessage("CD ERROR - TIME FORMAT");
@@ -365,7 +373,7 @@ int PlatPlayCDDA(int track)
 	/* find the length of the track... */
 	mciStatusParms.dwItem = MCI_STATUS_LENGTH;
 	mciStatusParms.dwTrack = track;
-    dwReturn = mciSendCommand((UINT)cdDeviceID,MCI_STATUS,MCI_STATUS_ITEM|MCI_TRACK,(DWORD)(LPVOID)&mciStatusParms);
+    dwReturn = mciSendCommand(/*(UINT)*/cdDeviceID, MCI_STATUS, MCI_STATUS_ITEM|MCI_TRACK, (DWORD_PTR) &mciStatusParms);
 	if(dwReturn)
 	{
     	/* error */
@@ -375,7 +383,7 @@ int PlatPlayCDDA(int track)
 
     /* set the time format */
 	mciSetParms.dwTimeFormat = MCI_FORMAT_TMSF;
-	dwReturn = mciSendCommand((UINT)cdDeviceID,MCI_SET,MCI_SET_TIME_FORMAT,(DWORD)(LPVOID) &mciSetParms);
+	dwReturn = mciSendCommand(/*(UINT)*/cdDeviceID, MCI_SET, MCI_SET_TIME_FORMAT, (DWORD_PTR) &mciSetParms);
 	if(dwReturn)
 	{
     	/* error */
@@ -384,12 +392,12 @@ int PlatPlayCDDA(int track)
 	}  
 
 	/* play the track: set up for notification when track finishes, or an error occurs */ 
-    mciPlayParms.dwFrom=MCI_MAKE_TMSF(track,0,0,0);
-    mciPlayParms.dwTo=MCI_MAKE_TMSF(track,	MCI_MSF_MINUTE(mciStatusParms.dwReturn),
-    										MCI_MSF_SECOND(mciStatusParms.dwReturn),
-    										MCI_MSF_FRAME(mciStatusParms.dwReturn));
-    mciPlayParms.dwCallback=(DWORD)hWndMain;
-    dwReturn = mciSendCommand((UINT)cdDeviceID,MCI_PLAY,MCI_FROM|MCI_TO|MCI_NOTIFY,(DWORD)(LPVOID)&mciPlayParms);
+    mciPlayParms.dwFrom = MCI_MAKE_TMSF(track,0,0,0);
+    mciPlayParms.dwTo = MCI_MAKE_TMSF(track, MCI_MSF_MINUTE(mciStatusParms.dwReturn),
+    										 MCI_MSF_SECOND(mciStatusParms.dwReturn),
+    										 MCI_MSF_FRAME(mciStatusParms.dwReturn));
+    mciPlayParms.dwCallback = (DWORD)hWndMain;
+    dwReturn = mciSendCommand(/*(UINT)*/cdDeviceID, MCI_PLAY, MCI_FROM|MCI_TO|MCI_NOTIFY, (DWORD_PTR) &mciPlayParms);
 	if(dwReturn)
     {
     	/* error */
@@ -397,12 +405,15 @@ int PlatPlayCDDA(int track)
     	return SOUND_PLATFORMERROR;
     }
     return 0;
+#endif
 }
 
 int PlatGetNumberOfCDTracks(int* numTracks)
 {
 	DWORD dwReturn;
 	MCI_STATUS_PARMS mciStatusParms = {0,0,0,0};
+
+	return 0; // bjd
   
     /* check the cdDeviceId */
     if(cdDeviceID==NO_DEVICE) return SOUND_PLATFORMERROR;
@@ -411,7 +422,7 @@ int PlatGetNumberOfCDTracks(int* numTracks)
 
 	/* find the number tracks... */
 	mciStatusParms.dwItem = MCI_STATUS_NUMBER_OF_TRACKS ;
-    dwReturn = mciSendCommand((UINT)cdDeviceID,MCI_STATUS,MCI_STATUS_ITEM ,(DWORD)(LPVOID)&mciStatusParms);
+    dwReturn = mciSendCommand(/*(UINT)*/cdDeviceID, MCI_STATUS, MCI_STATUS_ITEM , (DWORD_PTR) &mciStatusParms);
 	if(dwReturn)
 	{
     	/* error */
@@ -431,18 +442,19 @@ int PlatStopCDDA(void)
 	DWORD dwReturn;
 
     /* check the cdDeviceId */
-    if(cdDeviceID==NO_DEVICE) 
+    if (cdDeviceID == NO_DEVICE) 
     {
     	return SOUND_PLATFORMERROR;
 	}
 
 	/* stop the cd player */
-	dwReturn = mciSendCommand((UINT)cdDeviceID,MCI_STOP,MCI_WAIT,NULL);
+	dwReturn = mciSendCommand(/*(UINT)*/cdDeviceID, MCI_STOP, MCI_WAIT, 0);
 	if(dwReturn)
     {
     	/* error */
     	return SOUND_PLATFORMERROR;
     }
+
     return 0;
 }
 #if 0
@@ -482,6 +494,8 @@ int PlatChangeCDDAVolume(int volume)
 	int i;
 	int numDev = mixerGetNumDevs();
 
+	return 0; // bjd
+#if 0
     /* check the cdDeviceId */
     if(cdDeviceID==NO_DEVICE) return SOUND_PLATFORMERROR;
 
@@ -551,37 +565,26 @@ int PlatChangeCDDAVolume(int volume)
 
 					if(mmres==MMSYSERR_NOERROR) return 1;
 					else return SOUND_PLATFORMERROR;	
-					
 				}
 			}
-			 
-			
 			mixerClose(handle);
 		}
-
 	}
 
 	return SOUND_PLATFORMERROR;
+#endif
 }
 
 #endif
-
-
-
-
-void PlatCDDAManagement(void)
-{
-	/* does nothing for Win95: use call back instead */ 
-}
 
 void PlatCDDAManagementCallBack(WPARAM flags, LONG deviceId)
 {
     extern CDOPERATIONSTATES CDDAState;
     
     /* check the cdDeviceId */
-    if(cdDeviceID==NO_DEVICE) return;
+    if(cdDeviceID == NO_DEVICE) return;
 	/* compare with the passed device id */
-	if((UINT)deviceId!=(UINT)cdDeviceID) return;
+	if((UINT)deviceId != /*(UINT)*/cdDeviceID) return;
 
 	if(flags&MCI_NOTIFY_SUCCESSFUL)
 	{

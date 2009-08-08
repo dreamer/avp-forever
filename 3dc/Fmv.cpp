@@ -1,7 +1,7 @@
 
 #ifdef USE_FMV
 
-#define	USE_AUDIO		1
+#define	USE_AUDIO		0
 #define USE_ARGB		1
 
 #include <oggplay/oggplay.h>
@@ -186,7 +186,9 @@ extern void StartMenuBackgroundBink()
 extern int PlayMenuBackgroundBink()
 {
 	int playing = 0;
-	if(!MenuBackground) return 0;
+
+	if(!MenuBackground) 
+		return 0;
 
 	if (frameReady)
 		playing = NextFMVFrame();
@@ -832,6 +834,7 @@ int FmvOpen(char *filenamePtr)
 				||
 				oggplay_get_track_type (player, i) == OGGZ_CONTENT_SPEEX) 
 		{
+#if USE_AUDIO
 			int ret;
 			audio_track = i;      
 			oggplay_set_offset(player, i, 250);
@@ -839,7 +842,8 @@ int FmvOpen(char *filenamePtr)
 			ret = oggplay_get_audio_channels(player, i, &channels);
 			printf("samplerate: %d channels: %d\n", rate, channels);
 
-			usingAudio = false;//true;
+			usingAudio = true;
+#endif
 		}
 		else if (oggplay_get_track_type (player, i) == OGGZ_CONTENT_KATE) 
 		{

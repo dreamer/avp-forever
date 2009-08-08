@@ -86,9 +86,9 @@ void ColourFillBackBuffer(int FillColour)
 
 char* GetDeviceName() 
 {
-	if (d3d.AdapterInfo.Description != NULL) 
+	if (d3d.Driver[d3d.CurrentDriver].AdapterInfo.Description != NULL) 
 	{
-		return d3d.AdapterInfo.Description;
+		return d3d.Driver[d3d.CurrentDriver].AdapterInfo.Description;
 	}
 	else return "Default Adapter";
 }
@@ -96,16 +96,16 @@ char* GetDeviceName()
 // list of allowed display formats
 const D3DFORMAT DisplayFormats[] =
 {
-	D3DFMT_A8R8G8B8,
 	D3DFMT_X8R8G8B8,
+	D3DFMT_A8R8G8B8,
 	D3DFMT_R8G8B8,
 	D3DFMT_A1R5G5B5,
-	D3DFMT_R5G6B5,
-	D3DFMT_X1R5G5B5
+	D3DFMT_X1R5G5B5,
+	D3DFMT_R5G6B5
 };
 
 // list of allowed depth buffer formats
-const D3DFORMAT StencilFormats[] =
+const D3DFORMAT DepthFormats[] =
 {
 	D3DFMT_D24S8,
 	D3DFMT_D32,
@@ -113,9 +113,10 @@ const D3DFORMAT StencilFormats[] =
 	D3DFMT_D16
 };
 
+/* set some defaults */
 D3DFORMAT SelectedDepthFormat = D3DFMT_D24S8;
 D3DFORMAT SelectedAdapterFormat = D3DFMT_X8R8G8B8;
-D3DFORMAT SelectedTextureFormat = D3DFMT_A8R8G8B8;
+D3DFORMAT SelectedDisplayFormat = D3DFMT_X8R8G8B8;
 
 bool usingStencil = false;
 
@@ -742,13 +743,14 @@ BOOL InitialiseDirect3DImmediateMode()
 	int width = 640;
 	int height = 480;
 	int depth = 32;
+	int defaultDevice = D3DADAPTER_DEFAULT;
 	bool windowed = false;
 	bool triple_buffer = false;
 
 	if (WindowMode == WindowModeSubWindow) windowed = true;
 
 	//	Zero d3d structure
-    ZeroMemory(&d3d, 0, sizeof(D3DINFO));
+    ZeroMemory(&d3d, sizeof(D3DINFO));
 
 	/* Set up Direct3D interface object */
 	d3d.lpD3D = Direct3DCreate9(D3D_SDK_VERSION);
@@ -759,89 +761,92 @@ BOOL InitialiseDirect3DImmediateMode()
 		return FALSE;
 	}
 
-//#define D3DADAPTER_DEFAULT 1
-
 	// Get the number of devices in the system
 	d3d.NumDrivers = d3d.lpD3D->GetAdapterCount();
 
 	LogString("\t Found " + LogInteger(d3d.NumDrivers) + " video adapter(s)");
 
-	// Get adapter information
-	LastError = d3d.lpD3D->GetAdapterIdentifier(D3DADAPTER_DEFAULT, D3DENUM_WHQL_LEVEL, &d3d.AdapterInfo);
-	if (FAILED(LastError)) 
+	// Get adapter information for all available devices
+	for (int i = 0; i < d3d.NumDrivers; i++)
 	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		//LogString("Could not get Adapter Identifier Information\n");
-		return FALSE;
+		LastError = d3d.lpD3D->GetAdapterIdentifier(i, D3DENUM_WHQL_LEVEL, &d3d.Driver[i].AdapterInfo);
+		if (FAILED(LastError)) 
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+			//LogString("Could not get Adapter Identifier Information\n");
+			return FALSE;
+		}
 	}
 
-	LogString("\t Using device: " + std::string(d3d.AdapterInfo.Description));
+	LogString("\t Using device: " + std::string(d3d.Driver[defaultDevice].AdapterInfo.Description));
 
 	/* taken from the DX SDK samples :) */
-
-//	for (int i = 0; i < d3d.NumDrivers; i++) {
-//		int num_adapter_modes = d3d.lpD3D->GetAdapterModeCount(D3DADAPTER_DEFAULT, D3DFMT_X8R8G8B8);
-//	}
 
 	// count number of display formats in our array
 	int NumDisplayFormats = sizeof(DisplayFormats) / sizeof(DisplayFormats[0]);
 	d3d.NumModes = 0;
 	int num_fomats = 0;
 
-	for (int CurrentDisplayFormat = 0; CurrentDisplayFormat < NumDisplayFormats; CurrentDisplayFormat++) 
+	/* loop through all the devices, getting the list of formats available for each */
+	for (int thisDevice = 0; thisDevice < d3d.NumDrivers; thisDevice++)
 	{
-		// Get available display modes
-		int num_adapter_modes = d3d.lpD3D->GetAdapterModeCount(D3DADAPTER_DEFAULT, DisplayFormats[CurrentDisplayFormat]);
-
-		for (int i = 0; i < num_adapter_modes; i++) 
+		for (int CurrentDisplayFormat = 0; CurrentDisplayFormat < NumDisplayFormats; CurrentDisplayFormat++) 
 		{
-			D3DDISPLAYMODE DisplayMode;
+			// Get available display modes
+			int num_adapter_modes = d3d.lpD3D->GetAdapterModeCount(thisDevice, DisplayFormats[CurrentDisplayFormat]);
 
-			d3d.lpD3D->EnumAdapterModes( D3DADAPTER_DEFAULT, DisplayFormats[CurrentDisplayFormat], i, &DisplayMode );
-
-			// Filter out low-resolution modes
-			if (DisplayMode.Width  < 640 || DisplayMode.Height < 480)
-				continue;
-
-			int j = 0;
-			
-			// Check if the mode already exists (to filter out refresh rates)
-			for(; j < d3d.NumModes; j++ ) 
+			for (int i = 0; i < num_adapter_modes; i++) 
 			{
-				if (( d3d.DisplayMode[j].Width  == DisplayMode.Width ) &&
-					( d3d.DisplayMode[j].Height == DisplayMode.Height) &&
-					( d3d.DisplayMode[j].Format == DisplayMode.Format))
-						break;
-			}
+				D3DDISPLAYMODE DisplayMode;
 
-			// If we found a new mode, add it to the list of modes
-			if (j == d3d.NumModes) 
-			{
-				d3d.DisplayMode[d3d.NumModes].Width       = DisplayMode.Width;
-				d3d.DisplayMode[d3d.NumModes].Height      = DisplayMode.Height;
-				d3d.DisplayMode[d3d.NumModes].Format      = DisplayMode.Format;
-				d3d.DisplayMode[d3d.NumModes].RefreshRate = 0;
+				d3d.lpD3D->EnumAdapterModes( thisDevice, DisplayFormats[CurrentDisplayFormat], i, &DisplayMode );
+
+				// Filter out low-resolution modes
+				if (DisplayMode.Width  < 640 || DisplayMode.Height < 480)
+					continue;
+
+				int j = 0;
 				
-				d3d.NumModes++;
-
-				int f = 0;
-
-				// Check if the mode's format already exists
-				for (int f = 0; f < num_fomats; f++ ) 
+				// Check if the mode already exists (to filter out refresh rates)
+				for(; j < d3d.NumModes; j++ ) 
 				{
-					if( DisplayMode.Format == d3d.Formats[f] )
-						break;
+					if (( d3d.Driver[thisDevice].DisplayMode[j].Width  == DisplayMode.Width ) &&
+						( d3d.Driver[thisDevice].DisplayMode[j].Height == DisplayMode.Height) &&
+						( d3d.Driver[thisDevice].DisplayMode[j].Format == DisplayMode.Format))
+							break;
 				}
 
-				// If the format is new, add it to the list
-				if (f == num_fomats)
-					d3d.Formats[num_fomats++] = DisplayMode.Format;
+				// If we found a new mode, add it to the list of modes
+				if (j == d3d.NumModes) 
+				{
+					d3d.Driver[thisDevice].DisplayMode[d3d.NumModes].Width       = DisplayMode.Width;
+					d3d.Driver[thisDevice].DisplayMode[d3d.NumModes].Height      = DisplayMode.Height;
+					d3d.Driver[thisDevice].DisplayMode[d3d.NumModes].Format      = DisplayMode.Format;
+					d3d.Driver[thisDevice].DisplayMode[d3d.NumModes].RefreshRate = 0;
+					
+					d3d.NumModes++;
+
+					int f = 0;
+
+					// Check if the mode's format already exists
+					for (int f = 0; f < num_fomats; f++ ) 
+					{
+						if( DisplayMode.Format == d3d.Driver[thisDevice].Formats[f] )
+							break;
+					}
+
+					// If the format is new, add it to the list
+					if (f == num_fomats)
+						d3d.Driver[thisDevice].Formats[num_fomats++] = DisplayMode.Format;
+				}
 			}
 		}
 	}
 
+	/* get the current display mode. sorta useless as we have to render the menus at 640x480 for now.. */
 	D3DDISPLAYMODE d3ddm;
-	LastError = d3d.lpD3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
+	LastError = d3d.lpD3D->GetAdapterDisplayMode(defaultDevice, &d3ddm);
+	SelectedAdapterFormat = d3ddm.Format;
 
 	if (FAILED(LastError)) 
 	{
@@ -858,12 +863,12 @@ BOOL InitialiseDirect3DImmediateMode()
 	if (windowed) 
 	{
 		d3dpp.Windowed = TRUE;
-		d3dpp.BackBufferWidth = width;//800;
-		d3dpp.BackBufferHeight = height;//600;
+		d3dpp.BackBufferWidth = width;
+		d3dpp.BackBufferHeight = height;
 		// setting this to interval one will cap the framerate to monitor refresh
 		// the timer goes a bit mad if this isnt capped!
 		d3dpp.PresentationInterval = 0;//D3DPRESENT_INTERVAL_IMMEDIATE;
-		SetWindowPos( hWndMain, HWND_TOP, 0, 0, d3dpp.BackBufferWidth, d3dpp.BackBufferHeight, SWP_DRAWFRAME | SWP_FRAMECHANGED | SWP_SHOWWINDOW );
+		ChangeWindowsSize(d3dpp.BackBufferWidth, d3dpp.BackBufferHeight);
 	}
 	else 
 	{
@@ -875,6 +880,7 @@ BOOL InitialiseDirect3DImmediateMode()
 //		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 //		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
+		//ChangeWindowsSize(d3dpp.BackBufferWidth, d3dpp.BackBufferHeight);
 	}
 	d3dpp.BackBufferCount = 1;
 
@@ -883,7 +889,7 @@ BOOL InitialiseDirect3DImmediateMode()
 		d3dpp.BackBufferCount = 2;
 		d3dpp.SwapEffect = D3DSWAPEFFECT_FLIP;
 	}
-
+/*
 	if (depth == 16)
 	{
 		d3dpp.BackBufferFormat = D3DFMT_R5G6B5; // 16 bit
@@ -893,64 +899,54 @@ BOOL InitialiseDirect3DImmediateMode()
 		d3dpp.BackBufferFormat = D3DFMT_X8R8G8B8; // 32 bit
 	}
 	SelectedAdapterFormat  = d3dpp.BackBufferFormat;
-
+*/
 //	d3dpp.Flags = D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
 	d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
 
-	// setting this to interval one will cap the framerate to monitor refresh
-	// the timer goes a bit mad if this isnt capped!
-//	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;//D3DPRESENT_INTERVAL_IMMEDIATE;
+	/* store the index of the driver we want to use */
+	d3d.CurrentDriver = defaultDevice;
 
-	for (int i = 0; i < (sizeof(StencilFormats) / sizeof(StencilFormats[0])); i++) 
+
+	bool gotValidFormats = false;
+
+	for (int i = 0; i < (sizeof(DisplayFormats) / sizeof(DisplayFormats[0])); i++)
 	{
-		LastError = d3d.lpD3D->CheckDeviceFormat(D3DADAPTER_DEFAULT, 
-									D3DDEVTYPE_HAL, 
-									SelectedAdapterFormat, 
-									D3DUSAGE_DEPTHSTENCIL, 
-									D3DRTYPE_SURFACE,
-									StencilFormats[i]);
-		if (FAILED(LastError)) 
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-			//LogErrorString("CheckDeviceFormat failed\n");
-			continue;
-		}
+		/* if we're found a usable backbuffer and depth buffer format, break out of the two loops */
+		if (gotValidFormats) break;
 
-		LastError = d3d.lpD3D->CheckDepthStencilMatch( D3DADAPTER_DEFAULT,
+		for (int j = 0; j < (sizeof(DepthFormats) / sizeof(DepthFormats[0])); j++)
+		{
+			LastError = d3d.lpD3D->CheckDeviceFormat( d3d.CurrentDriver, 
+										D3DDEVTYPE_HAL, 
+										SelectedDepthFormat, 
+										D3DUSAGE_DEPTHSTENCIL, 
+										D3DRTYPE_SURFACE,
+										DepthFormats[j]);
+
+			/* if the format wont work with this depth buffer, try another format */
+			if (FAILED(LastError)) continue;
+
+			LastError = d3d.lpD3D->CheckDepthStencilMatch( d3d.CurrentDriver,
 									D3DDEVTYPE_HAL,
-									SelectedAdapterFormat,
-									D3DFMT_X8R8G8B8,
-									SelectedDepthFormat);
+									SelectedDepthFormat,
+									DisplayFormats[i],
+									DepthFormats[j]);
 
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-			//LogErrorString("CheckDepthStencilMatch failed\n");
+			/* we got valid formats! */
+			if (!FAILED(LastError))
+			{
+				SelectedDepthFormat = DepthFormats[j];
+				SelectedDisplayFormat = DisplayFormats[i];
+				gotValidFormats = true;
+				break;
+			}
 		}
-		else
-		{
-			SelectedDepthFormat = StencilFormats[i];
-			d3dpp.EnableAutoDepthStencil = true;
-			break;
-		}
+	}
 
-		LogErrorString("couldn't get a usable depth buffer!", __LINE__, __FILE__);
-		d3dpp.EnableAutoDepthStencil = false;
-	}
-	
-/*	
-	if(FAILED(LastError)) 
-	{
-		LogErrorString("Stencil and Depth format didn't match\n");
-		d3dpp.EnableAutoDepthStencil = false;
-	}
-	else d3dpp.EnableAutoDepthStencil = true;
-*/
+	d3dpp.EnableAutoDepthStencil = true;
 	d3dpp.AutoDepthStencilFormat = SelectedDepthFormat;
-//	if(SelectedDepthFormat == D3DFMT_D24S8) UsingStencil = true;
+	d3dpp.BackBufferFormat = SelectedDisplayFormat;
 
-//	d3dpp.AutoDepthStencilFormat = D3DFMT_D16;//SelectedDepthFormat;
-//	if(SelectedDepthFormat == D3DFMT_D16) UsingStencil = true;
 
 //#endif
 #if 0 
@@ -981,22 +977,22 @@ BOOL InitialiseDirect3DImmediateMode()
 /*
 	LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWndMain,
 		D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
-*/	
+*/
 	/* create D3DCREATE_PUREDEVICE */
 	LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWndMain,
 		D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, &d3dpp, &d3d.lpD3DDevice);
 
-	if(FAILED(LastError)) 
+	if (FAILED(LastError)) 
 	{
 		LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWndMain,
 			D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
 	}
-	if(FAILED(LastError)) 
+	if (FAILED(LastError)) 
 	{
 		LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWndMain,
 			D3DCREATE_MIXED_VERTEXPROCESSING , &d3dpp, &d3d.lpD3DDevice);
 	}
-	if(FAILED(LastError)) 
+	if (FAILED(LastError)) 
 	{
 		LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWndMain,
 			D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
@@ -1011,7 +1007,7 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	/* get device capabilities */
 	D3DCAPS9 d3dCaps;
-	d3d.lpD3DDevice->GetDeviceCaps(&d3d.d3dCaps);
+	d3d.lpD3DDevice->GetDeviceCaps(&d3dCaps);
 
 	/* check and remember if we have dynamic texture support */
 	if (d3dCaps.Caps2 & D3DCAPS2_DYNAMICTEXTURES)

@@ -42,25 +42,15 @@ extern "C" {
 */
 
 typedef struct D3DDriverInfo {
+	D3DFORMAT Formats[20];
+	D3DADAPTER_IDENTIFIER9	AdapterInfo;
+	D3DDISPLAYMODE			DisplayMode[100];
     char Name[30]; /* short name of driver */
 	char About[50]; /* string about driver */
 	BOOL Hardware; /* accelerated driver? */
 	BOOL Textures; /* Texture mapping available? */
 	BOOL ZBuffer; /* Z Buffering available? */
 } D3DDRIVERINFO;
-
-/*
-  Description of a D3D driver texture 
-  format.
-*/
-
-typedef struct D3DTextureFormat {
-    BOOL Palette;   /* is Palettized? */
-    int RedBPP;         /* #red bits per pixel */
-    int BlueBPP;        /* #blue bits per pixel */
-    int GreenBPP;       /* #green bits per pixel */
-    int IndexBPP;       /* number of bits in palette index */
-} D3DTEXTUREFORMAT;
 
 typedef struct D3DInfo {
     LPDIRECT3D9				lpD3D;
@@ -74,14 +64,14 @@ typedef struct D3DInfo {
 	LPDIRECT3DINDEXBUFFER9	lpD3DIndexBuffer;
     int						NumDrivers;
     int						CurrentDriver;
-	D3DADAPTER_IDENTIFIER9	AdapterInfo;
+//	D3DADAPTER_IDENTIFIER9	AdapterInfo;
 	int						NumModes;
-	D3DDISPLAYMODE			DisplayMode[100];
-	D3DFORMAT				Formats[20];
+//	D3DDISPLAYMODE			DisplayMode[100];
+//	D3DFORMAT				Formats[20];
     D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS]; // BJD
     int						CurrentTextureFormat;
     int						NumTextureFormats;
-    D3DTEXTUREFORMAT		TextureFormat[MAX_TEXTURE_FORMATS];
+//    D3DTEXTUREFORMAT		TextureFormat[MAX_TEXTURE_FORMATS];
 
 	BOOL					supportsDynamicTextures;
 } D3DINFO;

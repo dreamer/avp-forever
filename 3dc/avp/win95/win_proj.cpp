@@ -484,14 +484,32 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 // mode, and will not attempt to register
 // the windows class.
 
-BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow,
-     int WinInitMode)
+BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 { 
-	WNDCLASS	wc;
+	WNDCLASSEX	wcex;
 	BOOL		rc;
 	RECT		clientRect;
 
-	MakeToAsciiTable();
+	memset(&wcex, 0, sizeof(WNDCLASSEX));
+	wcex.cbSize = sizeof(WNDCLASSEX);
+	wcex.style = CS_DBLCLKS;
+	wcex.lpfnWndProc = WindowProc;
+	wcex.cbClsExtra = 0; 
+	wcex.cbWndExtra = 0;
+	wcex.hInstance = hInstance;
+	wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wcex.hbrBackground = NULL;
+	wcex.lpszMenuName = NAME;
+	wcex.lpszClassName = NAME;
+
+	rc = RegisterClassEx(&wcex);
+
+	if (!rc)
+		return FALSE;
+
+
+//	MakeToAsciiTable();
 /*
 	Set up the width and height we want from
 	the VideoMode, taking account of WindowMode.
@@ -506,261 +524,62 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow,
 	if (WindowMode == WindowModeSubWindow)
 	{
 		//force window to be 640x480 to avoid stretch blits.
-		WinWidth = 800;//640;
-		WinHeight = 600;//480;	
+		WinWidth = 640;
+		WinHeight = 480;
 
 		clientRect.left = 0;
 		clientRect.top = 0;
-		clientRect.right = 800;
-		clientRect.bottom = 600;
+		clientRect.right = 640;
+		clientRect.bottom = 480;
 
-		WinLeftX = (int) (TopLeftSubWindow.x * 
-			(float) GetSystemMetrics(SM_CXSCREEN));
-		WinTopY = (int) (TopLeftSubWindow.y *
-			(float) GetSystemMetrics(SM_CYSCREEN));
-		WinRightX = (WinLeftX + WinWidth);
-		WinBotY = (WinTopY + WinHeight);
-	}
-	else if (WindowMode == WindowModeFullScreen)
-	{
-		WinWidth = 640;//GetSystemMetrics(SM_CXSCREEN);
-		WinHeight = 480;//GetSystemMetrics(SM_CYSCREEN);
-
-		// Set up globals for window corners
-		WinLeftX = 0;
-		WinTopY = 0;
-		WinRightX = WinWidth;
-		WinBotY = WinHeight;
-	}
-	else
-		return FALSE;
-
-// We only want to register the class in
-// WinInitFull mode!!!
-
-	if (WinInitMode == WinInitFull)
-	{
-		/* Set up and register window class */
-	
-		//	get double click messages from mouse if user double-clicks it 
-		wc.style = CS_DBLCLKS;
-		//	Name of window procedure (see above) 
-		wc.lpfnWndProc = WindowProc;
-		/*
-			Extra bytes for  obscure purposes bearing a sordid relationship to
-			dialog box conventions.  Zero for us.
-		*/
-		wc.cbClsExtra = 0;
-		wc.cbWndExtra = 0;
-		
-		// Instance which window is within 
-		wc.hInstance = (HINSTANCE) hInstance;
-		/*
-			System icon resource.  This one is generic.  For an actual
-			game this icon will be project specific.
-		*/
-		#if 1
-			wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-		#else
-			wc.hIcon = NULL;
-		#endif
-		// System cursor resource.  This one is generic.
-		#if 1
-			wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-		#else
-			wc.hCursor = NULL;
-		#endif
-		/*
-			NULL background forces application to redraw
-			the background ITSELF when it receives a WM_ERASEBKGND
-			message, leaving graphical control with the engine
-		*/
-		wc.hbrBackground = NULL;
-		
-		// Project name and class for windows menus etc.
-		wc.lpszMenuName = NAME;
-		wc.lpszClassName = NAME;
-		/*
-			Register the class we have constructed as a valid window that
-			can then be created.   Return code indicates success or
-			failure.
-		*/
-		rc = RegisterClass(&wc);
-
-		if (!rc)
-			return FALSE;
-	}
-
-/*
-  Create a window  (extended function  call) and return
-  handle.  Before  returning, WM_CREATE, WM_GETMINMAXINFO
-  and WM_NCCREATE messages will be sent to the window
-  procedure.
- 
-  NOTE!!! AT present even with debug on we get a
-  topmost full screen window.
-*/
-
-#if debug
-
-	if (WindowMode == WindowModeSubWindow)
-	{
-		AdjustWindowRect(&clientRect, wc.style, false);
 		hWndMain = CreateWindowEx(
-			0, // WS_EX_TOPMOST
+			WS_EX_TOPMOST,
 			NAME, //  Name of class (registered by RegisterClass call above) 
 			TITLE, // Name of window 
-			WS_OVERLAPPED |
-			WS_CAPTION |
-			WS_THICKFRAME,
-/*
-	Initial horizontal and  vertical position.  For a pop-up window,
-	these are the coordinates of the upper left corner.
-*/
+			WS_OVERLAPPEDWINDOW,
 			clientRect.left,
 			clientRect.top,
-			//WinLeftX,
-			//WinTopY,
-/*
-	Width and height of window. These are set to the current full
-	screen widths as determined by a Win32 GetSystemMetrics call
-	(GetSystemMetrics(SM_CXSCREEN) and 
-	GetSystemMetrics(SM_CYSCREEN)).
-*/
 			clientRect.right,
 			clientRect.bottom,
-			//WinWidth,
-			//WinHeight,
-// Parent window (could possibly be set in tools system?)
 			NULL,
-// Child/menu window (could possibly be set in tools system?) 
 			NULL,
-// Handle for module associated with window 
-			(HINSTANCE)hInstance,
-// Parameter for associated structure (null in this case)
+			hInstance,
 			NULL
 		);
+
+		AdjustWindowRect(&clientRect, GetWindowLong( hWndMain, GWL_STYLE ), FALSE );
+		SetWindowPos(hWndMain, 0, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, SWP_SHOWWINDOW);
 	}
 	else if (WindowMode == WindowModeFullScreen)
-	  {
-       hWndMain = CreateWindowEx(
-/*
-	WS_EX_TOPMOST forces this window to be topmost except
-	for other topmost	windows, even when deactivated.
-*/
-           WS_EX_TOPMOST,
-		   NAME, //  Name of class (registered by RegisterClass call above) 
-           TITLE, // Name of window 
-		   WS_VISIBLE | // kills Alt-Space and strews its entrails over fifteen miles.  Heh heh heh.
-           WS_POPUP, // i.e. specify window is style pop up, i.e. non-application 
-/*
-	Initial horizontal and  vertical position.  For a pop-up window,
-	these are the coordinates of the upper left corner.
-*/
-           WinLeftX,
-           WinTopY,
-/*
-	Width and height of window. These are set to the current full
-	screen widths as determined by a Win32 GetSystemMetrics call
-	(GetSystemMetrics(SM_CXSCREEN) and 
-	GetSystemMetrics(SM_CYSCREEN)).
-*/
-           WinWidth,
-		   WinHeight,
-// Parent window (null for a full screen game) 
-           NULL,
-// Child/menu window (null for a full screen game) 
-           NULL,
-// Handle for module associated with window 
-           (HINSTANCE)hInstance,
-// Parameter for associated structure (null in this case)
-           NULL);
-      }
-	else
-	  return FALSE;
-
-#else
-    if (WindowMode == WindowModeSubWindow)
-	  {
-       hWndMain = CreateWindowEx(
-          0, // WS_EX_TOPMOST
-          NAME, //  Name of class (registered by RegisterClass call above) 
-          TITLE, // Name of window
-		  WS_OVERLAPPED |
-		  WS_CAPTION |
-		  WS_THICKFRAME,
-/*
-	Initial horizontal and  vertical position.  For a pop-up window,
-	these are the coordinates of the upper left corner.
-*/
-          WinLeftX,
-          WinTopY,
-/*
-	Width and height of window. These are set to the current full
-	screen widths as determined by a Win32 GetSystemMetrics call
-	(GetSystemMetrics(SM_CXSCREEN) and 
-	GetSystemMetrics(SM_CYSCREEN)).
-*/
-          WinWidth,
-		  WinHeight,
-// Parent window (could be set in tools system?) 
-          NULL,
-// Child/menu window (could be set in tools system?) 
-          NULL,
-// Handle for module associated with window 
-          hInstance,
-// Parameter for associated structure (null in this case) 
-          NULL);
-	  }
-	else if (WindowMode == WindowModeFullScreen)
-	  {
-       hWndMain = CreateWindowEx(
-/*
-	WS_EX_TOPMOST forces this window to be topmost except
-	for other topmost	windows, even when deactivated.
-*/
-          WS_EX_TOPMOST,
-          NAME, //  Name of class (registered by RegisterClass call above) 
-          TITLE, // Name of window
-		  WS_VISIBLE | // kills Alt-Space and strews its entrails for fifteen miles.  Heh heh heh.
-          WS_POPUP, // Specify window is style pop up, i.e. non-application 
-/*
-	Initial horizontal and  vertical position.  For a pop-up window,
-	these are the coordinates of the upper left corner.
-*/
-          WinLeftX,
-          WinTopY,
-/*
-	Width and height of window. These are set to the current full
-	screen widths as determined by a Win32 GetSystemMetrics call
-	(GetSystemMetrics(SM_CXSCREEN) and 
-	GetSystemMetrics(SM_CYSCREEN)).
-*/
-          WinWidth,
-		  WinHeight,
-// Parent window (null for a full screen game) 
-          NULL,
-// Child/menu window (null for a full screen game) 
-          NULL,
-// Handle for module associated with window 
-          hInstance,
-// Parameter for associated structure (null in this case) 
-          NULL);
-	  }
-	else
-	  return FALSE;
-
-#endif
+	{
+		hWndMain = CreateWindowEx(
+			WS_EX_TOPMOST,
+			NAME, //  Name of class (registered by RegisterClass call above) 
+			TITLE, // Name of window 
+			WS_POPUP,
+			0,
+			0,
+			GetSystemMetrics(SM_CXSCREEN),
+			GetSystemMetrics(SM_CYSCREEN),
+			NULL,
+			NULL,
+			hInstance,
+			0
+		);
+	}
 
     if (!hWndMain)
-      return FALSE;
+	{
+		OutputDebugString("!hWndMain\n");
+		return FALSE;
+	}
 
 // Experiment only!!!!
 
-// Set the window up to be displayed 
-    ShowWindow(hWndMain, nCmdShow);
-// Update once (i.e. send WM_PAINT message to the window procedure) 
-    UpdateWindow(hWndMain);
+	// Set the window up to be displayed 
+	ShowWindow(hWndMain, nCmdShow);
+	// Update once (i.e. send WM_PAINT message to the window procedure)
+	UpdateWindow(hWndMain);
 
 // Grab ALL mouse messages for our window.
 // Note this will only work if the window is
@@ -773,18 +592,30 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow,
 // Load null cursor shape
 	SetCursor(NULL);
 	#endif
-//	MakeToAsciiTable();
 
     return TRUE;
-
 }
 
 void ChangeWindowsSize(int width, int height)
 {
-	if (SetWindowPos(hWndMain, HWND_TOP, 0, 0, width, height, SWP_SHOWWINDOW) == 0)
+	RECT testRect;
+	RECT newWindowSize;
+
+	newWindowSize.top = 0;
+	newWindowSize.left = 0;
+	newWindowSize.right = width;
+	newWindowSize.bottom = height;
+
+	AdjustWindowRect(&newWindowSize, GetWindowLong( hWndMain, GWL_STYLE ), FALSE );
+
+	if (SetWindowPos(hWndMain, 0, 0, 0, newWindowSize.right - newWindowSize.left, newWindowSize.bottom - newWindowSize.top, SWP_SHOWWINDOW) == 0)
 	{	
 		OutputDebugString("SetWindowPos failed\n");
 	}
+
+	GetClientRect(hWndMain, &testRect);
+
+	OutputDebugString("blah\n");
 }
 
 void InitialiseRawInput()
