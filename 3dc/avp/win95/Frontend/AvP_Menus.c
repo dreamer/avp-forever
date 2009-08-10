@@ -5450,7 +5450,7 @@ extern void GetFilenameForSaveSlot(int i, unsigned char *filenamePtr)
 	/* finds the path to the folder. On Win7, this would be "C:\Users\<username>\AppData\Local\ as an example */
 	if( FAILED(SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, strPath ) ) )
 	{
-		return 0;
+		return;
 	}
 
 	PathAppend( strPath, TEXT( "Fox\\Aliens versus Predator\\" ) );

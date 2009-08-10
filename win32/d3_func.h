@@ -42,14 +42,9 @@ extern "C" {
 */
 
 typedef struct D3DDriverInfo {
-	D3DFORMAT Formats[20];
+	D3DFORMAT				Formats[20];
 	D3DADAPTER_IDENTIFIER9	AdapterInfo;
 	D3DDISPLAYMODE			DisplayMode[100];
-    char Name[30]; /* short name of driver */
-	char About[50]; /* string about driver */
-	BOOL Hardware; /* accelerated driver? */
-	BOOL Textures; /* Texture mapping available? */
-	BOOL ZBuffer; /* Z Buffering available? */
 } D3DDRIVERINFO;
 
 typedef struct D3DInfo {

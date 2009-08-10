@@ -27,7 +27,7 @@ extern "C" {
   Maximum number of Direct3D drivers ever
   expected to be resident on the system.
 */
-#define MAX_D3D_DRIVERS 5
+#define MAX_D3D_DRIVERS 2
 /*
   Maximum number of texture formats ever
   expected to be reported by a Direct3D
@@ -40,25 +40,10 @@ extern "C" {
 */
 
 typedef struct D3DDriverInfo {
-    char Name[30]; /* short name of driver */
-	char About[50]; /* string about driver */
-	BOOL Hardware; /* accelerated driver? */
-	BOOL Textures; /* Texture mapping available? */
-	BOOL ZBuffer; /* Z Buffering available? */
+	D3DFORMAT				Formats[20];
+	D3DADAPTER_IDENTIFIER8	AdapterInfo;
+	D3DDISPLAYMODE			DisplayMode[100];
 } D3DDRIVERINFO;
-
-/*
-  Description of a D3D driver texture 
-  format.
-*/
-
-typedef struct D3DTextureFormat {
-    BOOL Palette;   /* is Palettized? */
-    int RedBPP;         /* #red bits per pixel */
-    int BlueBPP;        /* #blue bits per pixel */
-    int GreenBPP;       /* #green bits per pixel */
-    int IndexBPP;       /* number of bits in palette index */
-} D3DTEXTUREFORMAT;
 
 
 typedef struct D3DInfo {
@@ -73,10 +58,8 @@ typedef struct D3DInfo {
 	LPDIRECT3DINDEXBUFFER8	lpD3DIndexBuffer;
     int						NumDrivers;
     int						CurrentDriver;
-	D3DADAPTER_IDENTIFIER8	AdapterInfo;
 	int						NumModes;
-	D3DDISPLAYMODE			DisplayMode[100];
-	D3DFORMAT				Formats[20];
+	D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS];
     int						CurrentTextureFormat;
     int						NumTextureFormats;
 } D3DINFO;
@@ -111,7 +94,7 @@ typedef struct
 
 } RENDERSTATES;
 
-LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL poolType);
+LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, int usage, D3DPOOL poolType);
 LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int *real_width);
 LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture(AvPTexture *tex);
 

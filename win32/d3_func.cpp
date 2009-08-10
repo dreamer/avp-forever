@@ -979,22 +979,22 @@ BOOL InitialiseDirect3DImmediateMode()
 		D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
 */
 	/* create D3DCREATE_PUREDEVICE */
-	LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWndMain,
+	LastError = d3d.lpD3D->CreateDevice(defaultDevice, D3DDEVTYPE_HAL, hWndMain,
 		D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, &d3dpp, &d3d.lpD3DDevice);
 
 	if (FAILED(LastError)) 
 	{
-		LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWndMain,
+		LastError = d3d.lpD3D->CreateDevice(defaultDevice, D3DDEVTYPE_HAL, hWndMain,
 			D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
 	}
 	if (FAILED(LastError)) 
 	{
-		LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWndMain,
+		LastError = d3d.lpD3D->CreateDevice(defaultDevice, D3DDEVTYPE_HAL, hWndMain,
 			D3DCREATE_MIXED_VERTEXPROCESSING , &d3dpp, &d3d.lpD3DDevice);
 	}
 	if (FAILED(LastError)) 
 	{
-		LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWndMain,
+		LastError = d3d.lpD3D->CreateDevice(defaultDevice, D3DDEVTYPE_HAL, hWndMain,
 			D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
 	}
 
@@ -1018,6 +1018,12 @@ BOOL InitialiseDirect3DImmediateMode()
 	{
 		d3d.supportsDynamicTextures = FALSE;
 		LogErrorString("device can't use D3DUSAGE_DYNAMIC\n");
+	}
+
+	if (FAILED(d3d.lpD3D->CheckDeviceFormatConversion(defaultDevice, D3DDEVTYPE_HAL, 
+									/*MAKEFOURCC('Y', 'U', 'Y', '2')*/D3DFMT_YUY2, D3DFMT_X8R8G8B8)))
+	{
+		LogErrorString("No YUV->RGB support\n");
 	}
 
 	// Log resolution set

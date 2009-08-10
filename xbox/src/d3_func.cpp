@@ -79,9 +79,9 @@ void ColourFillBackBuffer(int FillColour)
 
 char* GetDeviceName() 
 {
-	if (d3d.AdapterInfo.Description != NULL) 
+	if (d3d.Driver[d3d.CurrentDriver].AdapterInfo.Description != NULL) 
 	{
-		return d3d.AdapterInfo.Description;
+		return d3d.Driver[d3d.CurrentDriver].AdapterInfo.Description;
 	}
 	else return "Default Adapter";
 }
@@ -395,7 +395,7 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 	return destTexture;
 }
 
-LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, D3DPOOL poolType) 
+LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, int usage, D3DPOOL poolType) 
 {
 	/* create our texture for returning */
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
@@ -676,6 +676,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	int width = 640;
 	int height = 480;
 	int depth = 32;
+	int defaultDevice = D3DADAPTER_DEFAULT;
 
 	//	Zero d3d structure
     memset(&d3d, 0, sizeof(D3DINFO));
@@ -690,7 +691,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	}
 	
 //	D3DDISPLAYMODE displayMode;
-	unsigned int modeCount = d3d.lpD3D->GetAdapterModeCount(D3DADAPTER_DEFAULT);
+	unsigned int modeCount = d3d.lpD3D->GetAdapterModeCount(defaultDevice);
 /*
 	char buf[100];
 	for(int i = 0; i < modeCount; i++)
@@ -746,14 +747,14 @@ BOOL InitialiseDirect3DImmediateMode()
 	}
 
 	D3DDISPLAYMODE d3ddm;
-	LastError = d3d.lpD3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
+	LastError = d3d.lpD3D->GetAdapterDisplayMode(defaultDevice, &d3ddm);
 
 	D3DDISPLAYMODE tempMode;
 
 	/* create our list of supported resolutions for D3DFMT_LIN_X8R8G8B8 format */
 	for (int i = 0; i < modeCount; i++)
 	{
-		LastError = d3d.lpD3D->EnumAdapterModes( D3DADAPTER_DEFAULT, i, &tempMode );
+		LastError = d3d.lpD3D->EnumAdapterModes( defaultDevice, i, &tempMode );
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
@@ -770,19 +771,19 @@ BOOL InitialiseDirect3DImmediateMode()
 			/* check if the more already exists */
 			for (; j < d3d.NumModes; j++)
 			{
-				if ((d3d.DisplayMode[j].Width == tempMode.Width) &&
-					(d3d.DisplayMode[j].Height == tempMode.Height) &&
-					(d3d.DisplayMode[j].Format == tempMode.Format))
+				if ((d3d.Driver[defaultDevice].DisplayMode[j].Width == tempMode.Width) &&
+					(d3d.Driver[defaultDevice].DisplayMode[j].Height == tempMode.Height) &&
+					(d3d.Driver[defaultDevice].DisplayMode[j].Format == tempMode.Format))
 					break;
 			}
 			
 			/* we looped all the way through but didn't break early due to already existing item */
 			if (j == d3d.NumModes)
 			{
-				d3d.DisplayMode[d3d.NumModes].Width       = tempMode.Width;
-				d3d.DisplayMode[d3d.NumModes].Height      = tempMode.Height;
-				d3d.DisplayMode[d3d.NumModes].Format      = tempMode.Format;
-				d3d.DisplayMode[d3d.NumModes].RefreshRate = 0;
+				d3d.Driver[defaultDevice].DisplayMode[d3d.NumModes].Width       = tempMode.Width;
+				d3d.Driver[defaultDevice].DisplayMode[d3d.NumModes].Height      = tempMode.Height;
+				d3d.Driver[defaultDevice].DisplayMode[d3d.NumModes].Format      = tempMode.Format;
+				d3d.Driver[defaultDevice].DisplayMode[d3d.NumModes].RefreshRate = 0;
 				d3d.NumModes++;
 			}
 		}

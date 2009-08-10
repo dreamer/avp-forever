@@ -419,7 +419,7 @@ void db_log_init(void)
 	sprintf( LogFileNameP, "%s", db_log_file_name ); 
 	#else
 	/* Append the log file name to the current working directory. */
-	sprintf( LogFileNameP, "%s\\%s", getcwd( LogFileNameP, 240 ),
+	sprintf( LogFileNameP, "%s\\%s", _getcwd( LogFileNameP, 240 ),
 		db_log_file_name );
 	#endif
 	
@@ -561,7 +561,7 @@ static void db_do_std_prompt(unsigned yOffset)
 			printf("\n");
 			do
 			{
-				ch = toupper(getch());
+				ch = toupper(_getch());
 			}
 			while((ch != 'N') && (ch != 'Y') && (ch != 'X'));
 #else
