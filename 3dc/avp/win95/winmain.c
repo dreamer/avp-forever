@@ -384,7 +384,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 //			RasterisationRequestMode = RequestSoftwareRasterisation;
 
 		// will stop mouse cursor moving outside game window
-		UseMouseCentreing = TRUE;
+		//UseMouseCentreing = TRUE;
 	}
 	if(instr = strstr(command_line, "-s"))
 		sscanf(instr, "-s%d", &level_to_load);

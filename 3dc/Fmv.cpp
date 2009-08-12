@@ -82,7 +82,8 @@ class OggDecoder
 public:
   StreamMap mStreams;  
 	LPDIRECT3DSURFACE9 mSurface;
-	LPDIRECT3DSURFACE9 mDestSurface;
+	LPDIRECT3DSURFACE9 mDestSurface; // needed?
+	LPDIRECT3DTEXTURE9 mDisplayTexture;
 
 private:
 	bool read_page(std::istream& stream, ogg_sync_state* state, ogg_page* page);
@@ -93,7 +94,8 @@ private:
 public:
   OggDecoder() :
 	mSurface(0),
-	mDestSurface(0)
+	mDestSurface(0),
+	mDisplayTexture(0)
   {
   }
 
@@ -107,6 +109,11 @@ public:
 		{
 			mDestSurface->Release();
 			mDestSurface = NULL;
+		}
+		if (mDisplayTexture)
+		{
+			mDisplayTexture->Release();
+			mDisplayTexture = NULL;
 		}
 	}
 	void play(std::istream& stream);
@@ -260,8 +267,10 @@ void OggDecoder::handle_theora_data(OggStream* stream, ogg_packet* packet)
 	int ret = th_decode_packetin(stream->mTheora.mCtx,
 				   packet,
 				   &granulepos);
+
 	assert(ret == 0);
 
+/*
 	switch (stream->mTheora.mInfo.pixel_fmt)
 	{
 		case TH_PF_420:
@@ -280,19 +289,19 @@ void OggDecoder::handle_theora_data(OggStream* stream, ogg_packet* packet)
 			OutputDebugString("Format: Unknown\n");
 			break;
 	}
-	
+*/	
 
-	OutputDebugString("handle_theora_data\n");
+//	OutputDebugString("handle_theora_data\n");
 
 	// We have a frame. Get the YUV data
 	th_ycbcr_buffer buffer;
 	ret = th_decode_ycbcr_out(stream->mTheora.mCtx, buffer);
 	assert(ret == 0);
-
+/*
 	char buf2[100];
 	sprintf(buf2, "buf0 h: %d w: %d buf1 h: %d w: %d buf2 h: %d w: %d\n", buffer[0].height, buffer[0].width, buffer[1].height, buffer[1].width, buffer[2].height, buffer[2].width);
 	OutputDebugString(buf2);
-
+*/
 	if (!mSurface)
 	{
 		if (FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(buffer[0].width, buffer[0].height, 
@@ -317,28 +326,48 @@ void OggDecoder::handle_theora_data(OggStream* stream, ogg_packet* packet)
 		}
 	}
 
+	/* TODO! create as power of 2 texture? */
+	if (!mDisplayTexture)
+	{
+		if (FAILED(d3d.lpD3DDevice->CreateTexture(buffer[0].width, buffer[0].height, 
+				1, 
+				D3DUSAGE_RENDERTARGET, 
+				D3DFMT_X8R8G8B8,
+				D3DPOOL_DEFAULT, 
+				&mDisplayTexture, 
+				NULL)))
+		{
+			OutputDebugString("can't create FMV texture\n");
+		}
+	}
+
 	D3DLOCKED_RECT surfaceLock;
 	if (FAILED(mSurface->LockRect(&surfaceLock, NULL, D3DLOCK_DISCARD)))
 	{
 		OutputDebugString("can't lock FMV surface\n");
 	}
 
+#if 0
+	sprintf(buf2, "dest pitch: %d\n", surfaceLock.Pitch);
+	OutputDebugString(buf2);
+
+	sprintf(buf2, "src u pitch: %d\n", buffer[1].stride);
+	OutputDebugString(buf2);
+
+	sprintf(buf2, "src v pitch: %d\n", buffer[2].stride);
+	OutputDebugString(buf2);
+#endif
+
 	unsigned char *destPtr, *srcPtr;
 
-	int Yoffset = 0;
-	int UVoffsets = 0;
-
-	int Urow = 0;
-	int Vrow = 0;
+	unsigned char* uPtr = buffer[1].data;
+	unsigned char* vPtr = buffer[2].data;
 
 	/*
 	D3DFMT_YUY2 
 	YUY2 format (PC98 compliance). Two pixels are stored in each YUY2 word. Each data value (Y0, U, Y1, V) is 8 bits. 
 	This format is identical to the UYVY format described except that the ordering of the bits is changed. Before 
 	this format can be used, it must be enabled using the render state D3DRS_YUVENABLE. 
-
-
-	#define SDL_YUY2_OVERLAY  0x32595559  // Packed mode: Y0+U0+Y1+V0
 
 	YUY2 = MEDIASUBTYPE_YUY2	YUY2	4:2:2	Packed	8bits per channel
 
@@ -347,37 +376,56 @@ void OggDecoder::handle_theora_data(OggStream* stream, ogg_packet* packet)
 	4:2:0 planar to 4:2:2 packed
 
 */
+
+	/* bjd - convert from 4:2:0 planar to 4:2:2 packed. had help from http://goldfishforthought.blogspot.com/2009/05/dealing-with-image-formats.html :) */
+	bool bMustIncrementUVPlanes = false;
+
 	for (int y = 0; y < buffer[0].height; y++)
 	{
-		destPtr = (((unsigned char *)surfaceLock.pBits) + y*surfaceLock.Pitch);
-
-		Yoffset = 0;
-		UVoffsets = 0;
+		destPtr = (((unsigned char *)surfaceLock.pBits) + y * surfaceLock.Pitch);
+		srcPtr = (((unsigned char*)buffer[0].data) + y * buffer[0].stride);
 
 		// Y U Y V
-
-		for (int x = 0; x > buffer[0].width; x++)
+		for (int x = 0; x < (buffer[0].width / 2); x++)
 		{
-			*destPtr = *(unsigned char*)buffer[0].data + Yoffset + (buffer[0].stride * y);
+			// Y0
+			*destPtr = *srcPtr;
 			destPtr++;
-			Yoffset++;
+			srcPtr++;
 
-			*destPtr = *(unsigned char*)buffer[1].data + UVoffsets + (buffer[1].stride * Urow);
+			// U
+			*destPtr = *uPtr;
 			destPtr++;
+			uPtr++;
 
-			*destPtr = *(unsigned char*)buffer[0].data + Yoffset + (buffer[0].stride * y);
+			// Y1
+			*destPtr = *srcPtr;
 			destPtr++;
-			Yoffset++;
+			srcPtr++;
 
-			*destPtr = *(unsigned char*)buffer[2].data + UVoffsets + (buffer[2].stride * Vrow);
+			// V
+			*destPtr = *vPtr;
 			destPtr++;
-
-			if (UVoffsets >= buffer[1].width)
-			{
-				Vrow++;
-				Urow++;
-			}
+			vPtr++;
 		}
+
+        // Since YV12 has half the UV data that YUY2 has, we reuse these  
+        // values--so we only increment these planes every other pass  
+        // through.  
+        if( bMustIncrementUVPlanes )  
+        {  
+			/* increment pointers down onto the next line, skipping any pitch/stride data */
+			uPtr += buffer[1].stride - buffer[1].width;
+			vPtr += buffer[2].stride - buffer[2].width;
+            bMustIncrementUVPlanes = false;  
+        }  
+        else  
+        {  
+			/* go back to the start of the row */
+			uPtr -= buffer[1].width;
+			vPtr -= buffer[2].width;
+            bMustIncrementUVPlanes = true;  
+        }
 	}
 
 	if (FAILED(mSurface->UnlockRect()))
@@ -390,7 +438,19 @@ void OggDecoder::handle_theora_data(OggStream* stream, ogg_packet* packet)
 		OutputDebugString("stretchrect failed\n");
 	}
 
-#if 0 
+	LPDIRECT3DSURFACE9 tempSurface;
+	if (FAILED(mDisplayTexture->GetSurfaceLevel(0, &tempSurface)))
+	{
+		OutputDebugString("can't get FMV texture top surface\n");
+	}
+
+	if (FAILED(d3d.lpD3DDevice->UpdateSurface(mDestSurface, NULL, tempSurface, NULL)))
+	{
+		OutputDebugString("update surface failed\n");
+	}
+	
+
+#if 0 // save frames to png files
 	char strPath[MAX_PATH];
 	char buf[100];
 
@@ -405,7 +465,7 @@ void OggDecoder::handle_theora_data(OggStream* stream, ogg_packet* packet)
 	PathAppend( strPath, buf);
 
 	/* save surface to image file */
-	if (FAILED(D3DXSaveSurfaceToFile(strPath, D3DXIFF_PNG, mDestSurface, NULL, NULL))) 
+	if (FAILED(D3DXSaveSurfaceToFile(strPath, D3DXIFF_PNG, mSurface, NULL, NULL))) 
 	{
 		//LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("Save Surface to file failed!!!\n");
@@ -414,60 +474,11 @@ void OggDecoder::handle_theora_data(OggStream* stream, ogg_packet* packet)
 	imageNum++;
 #endif
 
-
-
-/*
-	// Create an SDL surface to display if we haven't
-	// already got one.
-	if (!mSurface) {
-	int r = SDL_Init(SDL_INIT_VIDEO);
-	assert(r == 0);
-	mSurface = SDL_SetVideoMode(buffer[0].width, 
-				buffer[0].height,
-				32,
-				SDL_SWSURFACE);
-	assert(mSurface);
-	}
-   
-  // Create a YUV overlay to do the YUV to RGB conversion
-  if (!mOverlay) {
-    mOverlay = SDL_CreateYUVOverlay(buffer[0].width,
-				    buffer[0].height,
-				    SDL_YV12_OVERLAY,
-				    mSurface);
-    assert(mOverlay);
-  }
-
-  SDL_Rect rect;
-  rect.x = 0;
-  rect.y = 0;
-  rect.w = buffer[0].width;
-  rect.h = buffer[0].height;
-  
-  SDL_LockYUVOverlay(mOverlay);
-  for (int i=0; i < buffer[0].height; ++i)
-    memcpy(mOverlay->pixels[0]+(mOverlay->pitches[0]*i), 
-	   buffer[0].data+(buffer[0].stride*i), 
-	   mOverlay->pitches[0]);
-  
-  for (int i=0; i < buffer[2].height; ++i)
-    memcpy(mOverlay->pixels[2]+(mOverlay->pitches[2]*i), 
-	   buffer[1].data+(buffer[1].stride*i), 
-	   mOverlay->pitches[2]);
-	
-  for (int i=0; i < buffer[1].height; ++i)
-    memcpy(mOverlay->pixels[1]+(mOverlay->pitches[1]*i), 
-	   buffer[2].data+(buffer[2].stride*i), 
-	   mOverlay->pitches[1]);
-  
-  SDL_UnlockYUVOverlay(mOverlay);	  
-  SDL_DisplayYUVOverlay(mOverlay, &rect);
-*/
   // Sleep for the time period of 1 frame
 	float framerate = 
 	float(stream->mTheora.mInfo.fps_numerator) / 
 	float(stream->mTheora.mInfo.fps_denominator);
-	Sleep((1.0/framerate)*1000);
+//	Sleep((1.0/framerate)*1000);
 }
 
 extern "C" {
