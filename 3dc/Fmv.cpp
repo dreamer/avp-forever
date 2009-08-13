@@ -9,6 +9,7 @@
 #include <ogg/ogg.h>
 #include <theora/theora.h>
 #include <theora/theoradec.h>
+#include <process.h>
 
 #ifdef WIN32
 	#include <shlobj.h>
@@ -75,7 +76,9 @@ public:
   }
 };
 
-typedef std::map<int, OggStream*> StreamMap; 
+typedef std::map<int, OggStream*> StreamMap;
+
+std::istream *testStream;
 
 class OggDecoder
 {
@@ -84,12 +87,20 @@ public:
 	LPDIRECT3DSURFACE9 mSurface;
 	LPDIRECT3DSURFACE9 mDestSurface; // needed?
 	LPDIRECT3DTEXTURE9 mDisplayTexture;
+	bool fmvPlaying;
+	struct threadParamsStruct
+	{
+		std::istream *stream;
+		OggDecoder *decoder;
+	};
+	threadParamsStruct threadParams;
 
 private:
 	bool read_page(std::istream& stream, ogg_sync_state* state, ogg_page* page);
 	void handle_packet(OggStream* stream, ogg_packet* packet);
 	void handle_theora_data(OggStream* stream, ogg_packet* packet);
 	void handle_theora_header(OggStream* stream, ogg_packet* packet);
+	static unsigned int __stdcall decode_thread(void *arg);
 
 public:
   OggDecoder() :
@@ -125,7 +136,7 @@ bool OggDecoder::read_page(std::istream& stream, ogg_sync_state* state, ogg_page
 	if (!stream.good())
 		return false;
 
-	while(ogg_sync_pageout(state, page) != 1) 
+	while (ogg_sync_pageout(state, page) != 1) 
 	{
 		// Returns a buffer that can be written too
 		// with the given size. This buffer is stored
@@ -152,76 +163,76 @@ bool OggDecoder::read_page(std::istream& stream, ogg_sync_state* state, ogg_page
 
 void OggDecoder::play(std::istream& stream) 
 {
+	threadParams.stream = &stream;
+	threadParams.decoder = this;
+
+	testStream = &stream;
+
+	/* create decoding thread */
+	_beginthreadex(NULL, 0, &OggDecoder::decode_thread, (void*)&threadParams, 0, NULL);
+}
+
+unsigned int __stdcall OggDecoder::decode_thread(void *arg)
+{
 	ogg_sync_state state;
 	ogg_page page;
 	int packets = 0;
 
+	threadParamsStruct *tempParams = static_cast<threadParamsStruct*>(arg);
+
 	int ret = ogg_sync_init(&state);
 	assert(ret == 0);
   
-	while (read_page(stream, &state, &page)) 
+	while ((tempParams->decoder->read_page(*tempParams->stream, &state, &page)) && tempParams->decoder->fmvPlaying)
 	{
 		int serial = ogg_page_serialno(&page);
 		OggStream* stream = 0;
 
-	if (ogg_page_bos(&page)) 
-	{
-		// At the beginning of the stream, read headers
-		// Initialize the stream, giving it the serial
-		// number of the stream for this page.
-		stream = new OggStream(serial);
-		ret = ogg_stream_init(&stream->mState, serial);
+		if (ogg_page_bos(&page)) 
+		{
+			// At the beginning of the stream, read headers
+			// Initialize the stream, giving it the serial
+			// number of the stream for this page.
+			stream = new OggStream(serial);
+			ret = ogg_stream_init(&stream->mState, serial);
+			assert(ret == 0);
+			tempParams->decoder->mStreams[serial] = stream;
+		}
+
+		assert(tempParams->decoder->mStreams.find(serial) != tempParams->decoder->mStreams.end());
+		stream = tempParams->decoder->mStreams[serial];
+
+		// Add a complete page to the bitstream
+		ret = ogg_stream_pagein(&stream->mState, &page);
 		assert(ret == 0);
-		mStreams[serial] = stream;
-	}
 
-	assert(mStreams.find(serial) != mStreams.end());
-	stream = mStreams[serial];
+		// Return a complete packet of data from the stream
+		ogg_packet packet;
+		ret = ogg_stream_packetout(&stream->mState, &packet);
 
-	// Add a complete page to the bitstream
-	ret = ogg_stream_pagein(&stream->mState, &page);
-	assert(ret == 0);
+		if (ret == 0) 
+		{
+			// Need more data to be able to complete the packet
+			continue;
+		}
+		else if (ret == -1) 
+		{
+			// We are out of sync and there is a gap in the data.
+			// Exit
+			std::cout << "There is a gap in the data - we are out of sync" << std::endl;
+			break;
+		}
 
-	// Return a complete packet of data from the stream
-	ogg_packet packet;
-    ret = ogg_stream_packetout(&stream->mState, &packet);
-
-	if (ret == 0) 
-	{
-		// Need more data to be able to complete the packet
-		continue;
-	}
-	else if (ret == -1) 
-	{
-		// We are out of sync and there is a gap in the data.
-		// Exit
-		std::cout << "There is a gap in the data - we are out of sync" << std::endl;
-		break;
-	}
-
-	// A packet is available, this is what we pass to the vorbis or
-	// theora libraries to decode.
-	handle_packet(stream, &packet);
-
-/*
-    // Check for SDL events to exit
-    SDL_Event event;
-    if (SDL_PollEvent(&event) == 1) {
-      if (event.type == SDL_KEYDOWN &&
-	  event.key.keysym.sym == SDLK_ESCAPE)
-	break;
-      if (event.type == SDL_KEYDOWN &&
-	  event.key.keysym.sym == SDLK_SPACE)
-	SDL_WM_ToggleFullScreen(mSurface);
-    }
-*/
-  }
+		// A packet is available, this is what we pass to the vorbis or
+		// theora libraries to decode.
+		tempParams->decoder->handle_packet(stream, &packet);
+	}	
 
 	// Cleanup
 	ret = ogg_sync_clear(&state);
 	assert(ret == 0);
 
-//  SDL_Quit();
+	return 0;
 }
 
 void OggDecoder::handle_packet(OggStream* stream, ogg_packet* packet) 
@@ -297,11 +308,11 @@ void OggDecoder::handle_theora_data(OggStream* stream, ogg_packet* packet)
 	th_ycbcr_buffer buffer;
 	ret = th_decode_ycbcr_out(stream->mTheora.mCtx, buffer);
 	assert(ret == 0);
-/*
+
 	char buf2[100];
 	sprintf(buf2, "buf0 h: %d w: %d buf1 h: %d w: %d buf2 h: %d w: %d\n", buffer[0].height, buffer[0].width, buffer[1].height, buffer[1].width, buffer[2].height, buffer[2].width);
 	OutputDebugString(buf2);
-*/
+
 	if (!mSurface)
 	{
 		if (FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(buffer[0].width, buffer[0].height, 
@@ -331,7 +342,7 @@ void OggDecoder::handle_theora_data(OggStream* stream, ogg_packet* packet)
 	{
 		if (FAILED(d3d.lpD3DDevice->CreateTexture(buffer[0].width, buffer[0].height, 
 				1, 
-				D3DUSAGE_RENDERTARGET, 
+				D3DUSAGE_DYNAMIC, 
 				D3DFMT_X8R8G8B8,
 				D3DPOOL_DEFAULT, 
 				&mDisplayTexture, 
@@ -438,6 +449,42 @@ void OggDecoder::handle_theora_data(OggStream* stream, ogg_packet* packet)
 		OutputDebugString("stretchrect failed\n");
 	}
 
+	D3DLOCKED_RECT textureLock;
+	if (FAILED(mDisplayTexture->LockRect(0, &textureLock, NULL, D3DLOCK_DISCARD)))
+	{
+		OutputDebugString("can't lock FMV texture\n");
+	}
+
+	D3DLOCKED_RECT surfaceLock2;
+	if (FAILED(mDestSurface->LockRect(&surfaceLock2, NULL, D3DLOCK_READONLY)))
+	{
+		OutputDebugString("can't lock FMV surface\n");
+	}
+
+	/* FIXME - optimise.. */
+	for (int y = 0; y < buffer[0].height; y++)
+	{
+		srcPtr = (((unsigned char *)surfaceLock2.pBits) + y * surfaceLock2.Pitch);
+		destPtr = (((unsigned char *)textureLock.pBits) + y * textureLock.Pitch);
+
+		for (int x = 0; x < buffer[0].width; x++)
+		{
+			*destPtr = *srcPtr;
+			destPtr++;
+			srcPtr++;
+		}
+	}
+
+	if (FAILED(mDisplayTexture->UnlockRect(0)))
+	{
+		OutputDebugString("can't unlock FMV texture\n");
+	}
+
+	if (FAILED(mDestSurface->UnlockRect()))
+	{
+		OutputDebugString("can't unlock FMV surface\n");
+	}
+/*
 	LPDIRECT3DSURFACE9 tempSurface;
 	if (FAILED(mDisplayTexture->GetSurfaceLevel(0, &tempSurface)))
 	{
@@ -448,7 +495,7 @@ void OggDecoder::handle_theora_data(OggStream* stream, ogg_packet* packet)
 	{
 		OutputDebugString("update surface failed\n");
 	}
-	
+*/	
 
 #if 0 // save frames to png files
 	char strPath[MAX_PATH];
@@ -910,20 +957,24 @@ int GetVolumeOfNearestVideoScreen(void)
 	return VolumeOfNearestVideoScreen;
 }
 
+std::ifstream file;
+
 int FmvOpen(char *filenamePtr)
 {
-	std::ifstream file(filenamePtr, std::ios::in | std::ios::binary);
+	file.open(filenamePtr, std::ios::in | std::ios::binary);
 
 	if (file) 
 	{
 		OggDecoder decoder;
 		decoder.play(file);
+/*
 		file.close();
-		for(StreamMap::iterator it = decoder.mStreams.begin(); it != decoder.mStreams.end(); ++it) 
+		for (StreamMap::iterator it = decoder.mStreams.begin(); it != decoder.mStreams.end(); ++it) 
 		{
 			OggStream* stream = (*it).second;
 			delete stream;
 		}
+*/
 	}
 
 	return 1;
