@@ -7862,7 +7862,7 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 }
 
 /* more quad drawing functions than you can shake a stick at! */
-void DrawBinkFmv(int topX, int topY, int height, int width, LPDIRECT3DTEXTURE9 fmvTexture)
+void DrawBinkFmv(int topX, int topY, int width, int height, LPDIRECT3DTEXTURE9 fmvTexture)
 {
 //	OutputDebugString("drawing bink fmv\n");
 

@@ -26,6 +26,10 @@ extern D3DINFO d3d;
 D3DTEXTURE BinkTexture;
 bool binkTextureCreated = false;
 
+bool isPlaying = false;
+bool frameReady = false;
+bool playing = false;
+
 enum StreamType {
 	TYPE_THEORA,
 	TYPE_UNKNOWN
@@ -87,7 +91,11 @@ public:
 	LPDIRECT3DSURFACE9 mSurface;
 	LPDIRECT3DSURFACE9 mDestSurface; // needed?
 	LPDIRECT3DTEXTURE9 mDisplayTexture;
+	th_ycbcr_buffer YUVbuffer;
 	bool fmvPlaying;
+	int frameHeight;
+	int frameWidth;
+	CRITICAL_SECTION CriticalSection;
 	struct threadParamsStruct
 	{
 		std::istream *stream;
@@ -126,9 +134,198 @@ public:
 			mDisplayTexture->Release();
 			mDisplayTexture = NULL;
 		}
+		OutputDebugString("destroying OggDecoder\n");
 	}
 	void play(std::istream& stream);
+	int NextFMVFrame();
+	int FmvOpen(char *filenamePtr);
 };
+
+std::ifstream file;
+OggDecoder decoder;
+int imageNum = 0;
+
+int OggDecoder::NextFMVFrame()
+{
+	OutputDebugString("NextFMVFrame\n");
+	if (!mSurface)
+	{
+		if (FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(frameWidth, frameHeight, 
+				D3DFMT_YUY2,
+				D3DPOOL_DEFAULT,
+				&mSurface,
+				NULL)))
+		{
+			OutputDebugString("can't create FMV surface\n");
+		}
+	}
+
+	if (!mDestSurface)
+	{
+		if (FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(frameWidth, frameHeight, 
+				D3DFMT_X8R8G8B8,
+				D3DPOOL_DEFAULT,
+				&mDestSurface,
+				NULL)))
+		{
+			OutputDebugString("can't create FMV surface\n");
+		}
+	}
+
+	/* TODO! create as power of 2 texture? */
+	if (!mDisplayTexture)
+	{
+		if (FAILED(d3d.lpD3DDevice->CreateTexture(frameWidth, frameHeight, 
+				1, 
+				D3DUSAGE_DYNAMIC, 
+				D3DFMT_X8R8G8B8,
+				D3DPOOL_DEFAULT, 
+				&mDisplayTexture, 
+				NULL)))
+		{
+			OutputDebugString("can't create FMV texture\n");
+		}
+		BinkTexture = mDisplayTexture;
+	}
+
+	D3DLOCKED_RECT surfaceLock;
+	if (FAILED(mSurface->LockRect(&surfaceLock, NULL, D3DLOCK_DISCARD)))
+	{
+		OutputDebugString("can't lock FMV surface\n");
+	}
+
+	EnterCriticalSection(&CriticalSection);
+
+	unsigned char *destPtr, *srcPtr;
+
+	unsigned char* uPtr = YUVbuffer[1].data;
+	unsigned char* vPtr = YUVbuffer[2].data;
+
+	bool bMustIncrementUVPlanes = false;
+
+	for (int y = 0; y < frameHeight; y++)
+	{
+		destPtr = (((unsigned char *)surfaceLock.pBits) + y * surfaceLock.Pitch);
+		srcPtr = (((unsigned char*)YUVbuffer[0].data) + y * YUVbuffer[0].stride);
+
+		// Y U Y V
+		for (int x = 0; x < (frameWidth / 2); x++)
+		{
+			// Y0
+			*destPtr = *srcPtr;
+			destPtr++;
+			srcPtr++;
+
+			// U
+			*destPtr = *uPtr;
+			destPtr++;
+			uPtr++;
+
+			// Y1
+			*destPtr = *srcPtr;
+			destPtr++;
+			srcPtr++;
+
+			// V
+			*destPtr = *vPtr;
+			destPtr++;
+			vPtr++;
+		}
+
+        // Since YV12 has half the UV data that YUY2 has, we reuse these  
+        // values--so we only increment these planes every other pass  
+        // through.  
+        if( bMustIncrementUVPlanes )  
+        {  
+			/* increment pointers down onto the next line, skipping any pitch/stride data */
+			uPtr += YUVbuffer[1].stride - YUVbuffer[1].width;
+			vPtr += YUVbuffer[2].stride - YUVbuffer[2].width;
+            bMustIncrementUVPlanes = false;  
+        }  
+        else  
+        {  
+			/* go back to the start of the row */
+			uPtr -= YUVbuffer[1].width;
+			vPtr -= YUVbuffer[2].width;
+            bMustIncrementUVPlanes = true;  
+        }
+	}
+
+	LeaveCriticalSection(&CriticalSection);
+
+	if (FAILED(mSurface->UnlockRect()))
+	{
+		OutputDebugString("can't unlock FMV surface\n");
+	}
+
+
+	if (FAILED(d3d.lpD3DDevice->StretchRect(mSurface, NULL, mDestSurface, NULL, D3DTEXF_NONE)))
+	{
+		OutputDebugString("stretchrect failed\n");
+	}
+	
+	D3DLOCKED_RECT textureLock;
+	if (FAILED(mDisplayTexture->LockRect(0, &textureLock, NULL, D3DLOCK_DISCARD)))
+	{
+		OutputDebugString("can't lock FMV texture\n");
+	}
+	
+	D3DLOCKED_RECT surfaceLock2;
+	if (FAILED(mDestSurface->LockRect(&surfaceLock2, NULL, D3DLOCK_READONLY)))
+	{
+		OutputDebugString("can't lock FMV surface\n");
+	}
+
+	/* FIXME - optimise.. */
+	for (int y = 0; y < frameHeight; y++)
+	{
+		srcPtr = (((unsigned char *)surfaceLock2.pBits) + y * surfaceLock2.Pitch);
+		destPtr = (((unsigned char *)textureLock.pBits) + y * textureLock.Pitch);
+
+		for (int x = 0; x < frameWidth; x++)
+		{
+			*destPtr = *srcPtr;
+			destPtr++;
+			srcPtr++;
+		}
+	}
+	
+	if (FAILED(mDisplayTexture->UnlockRect(0)))
+	{
+		OutputDebugString("can't unlock FMV texture\n");
+	}
+
+	if (FAILED(mDestSurface->UnlockRect()))
+	{
+		OutputDebugString("can't unlock FMV surface\n");
+	}
+
+	char strPath[MAX_PATH];
+	char buf[100];
+
+	/* finds the path to the folder. On Win7, this would be "C:\Users\<username>\AppData\Local\ as an example */
+	if( FAILED(SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, strPath ) ) )
+	{
+		return 0;
+	}
+
+	PathAppend( strPath, TEXT( "Fox\\Aliens versus Predator\\" ) );
+	sprintf(buf, "image_%d.png", imageNum);
+	PathAppend( strPath, buf);
+
+	/* save surface to image file */
+	if (FAILED(D3DXSaveSurfaceToFile(strPath, D3DXIFF_PNG, mDestSurface, NULL, NULL))) 
+	{
+		//LogDxError(LastError, __LINE__, __FILE__);
+		OutputDebugString("Save texture to file failed!!!\n");
+	}
+
+	imageNum++;
+
+	frameReady = false;
+
+	return 1;
+}
 
 bool OggDecoder::read_page(std::istream& stream, ogg_sync_state* state, ogg_page* page) 
 {
@@ -168,8 +365,16 @@ void OggDecoder::play(std::istream& stream)
 
 	testStream = &stream;
 
+	if (!InitializeCriticalSectionAndSpinCount(&CriticalSection, 0x80000400) )
+	{
+		return;
+	}
+
 	/* create decoding thread */
 	_beginthreadex(NULL, 0, &OggDecoder::decode_thread, (void*)&threadParams, 0, NULL);
+
+	fmvPlaying = true;
+	isPlaying = true;
 }
 
 unsigned int __stdcall OggDecoder::decode_thread(void *arg)
@@ -270,8 +475,6 @@ void OggDecoder::handle_theora_header(OggStream* stream, ogg_packet* packet)
 	handle_theora_data(stream, packet);
 }
 
-int imageNum = 0;
-
 void OggDecoder::handle_theora_data(OggStream* stream, ogg_packet* packet) 
 {
 	ogg_int64_t granulepos = -1;
@@ -281,6 +484,7 @@ void OggDecoder::handle_theora_data(OggStream* stream, ogg_packet* packet)
 
 	assert(ret == 0);
 
+	OutputDebugString("handle_theora_data\n");
 /*
 	switch (stream->mTheora.mInfo.pixel_fmt)
 	{
@@ -304,228 +508,26 @@ void OggDecoder::handle_theora_data(OggStream* stream, ogg_packet* packet)
 
 //	OutputDebugString("handle_theora_data\n");
 
+	EnterCriticalSection(&CriticalSection); 
+
 	// We have a frame. Get the YUV data
-	th_ycbcr_buffer buffer;
-	ret = th_decode_ycbcr_out(stream->mTheora.mCtx, buffer);
+//	th_ycbcr_buffer buffer;
+	ret = th_decode_ycbcr_out(stream->mTheora.mCtx, YUVbuffer);
 	assert(ret == 0);
 
-	char buf2[100];
-	sprintf(buf2, "buf0 h: %d w: %d buf1 h: %d w: %d buf2 h: %d w: %d\n", buffer[0].height, buffer[0].width, buffer[1].height, buffer[1].width, buffer[2].height, buffer[2].width);
-	OutputDebugString(buf2);
+	frameHeight = YUVbuffer[0].height;
+	frameWidth = YUVbuffer[0].width;
 
-	if (!mSurface)
-	{
-		if (FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(buffer[0].width, buffer[0].height, 
-				D3DFMT_YUY2,
-				D3DPOOL_DEFAULT,
-				&mSurface,
-				NULL)))
-		{
-			OutputDebugString("can't create FMV surface\n");
-		}
-	}
 
-	if (!mDestSurface)
-	{
-		if (FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(buffer[0].width, buffer[0].height, 
-				D3DFMT_X8R8G8B8,
-				D3DPOOL_DEFAULT,
-				&mDestSurface,
-				NULL)))
-		{
-			OutputDebugString("can't create FMV surface\n");
-		}
-	}
+	frameReady = true;
 
-	/* TODO! create as power of 2 texture? */
-	if (!mDisplayTexture)
-	{
-		if (FAILED(d3d.lpD3DDevice->CreateTexture(buffer[0].width, buffer[0].height, 
-				1, 
-				D3DUSAGE_DYNAMIC, 
-				D3DFMT_X8R8G8B8,
-				D3DPOOL_DEFAULT, 
-				&mDisplayTexture, 
-				NULL)))
-		{
-			OutputDebugString("can't create FMV texture\n");
-		}
-	}
-
-	D3DLOCKED_RECT surfaceLock;
-	if (FAILED(mSurface->LockRect(&surfaceLock, NULL, D3DLOCK_DISCARD)))
-	{
-		OutputDebugString("can't lock FMV surface\n");
-	}
-
-#if 0
-	sprintf(buf2, "dest pitch: %d\n", surfaceLock.Pitch);
-	OutputDebugString(buf2);
-
-	sprintf(buf2, "src u pitch: %d\n", buffer[1].stride);
-	OutputDebugString(buf2);
-
-	sprintf(buf2, "src v pitch: %d\n", buffer[2].stride);
-	OutputDebugString(buf2);
-#endif
-
-	unsigned char *destPtr, *srcPtr;
-
-	unsigned char* uPtr = buffer[1].data;
-	unsigned char* vPtr = buffer[2].data;
-
-	/*
-	D3DFMT_YUY2 
-	YUY2 format (PC98 compliance). Two pixels are stored in each YUY2 word. Each data value (Y0, U, Y1, V) is 8 bits. 
-	This format is identical to the UYVY format described except that the ordering of the bits is changed. Before 
-	this format can be used, it must be enabled using the render state D3DRS_YUVENABLE. 
-
-	YUY2 = MEDIASUBTYPE_YUY2	YUY2	4:2:2	Packed	8bits per channel
-
-	th_info
-
-	4:2:0 planar to 4:2:2 packed
-
-*/
-
-	/* bjd - convert from 4:2:0 planar to 4:2:2 packed. had help from http://goldfishforthought.blogspot.com/2009/05/dealing-with-image-formats.html :) */
-	bool bMustIncrementUVPlanes = false;
-
-	for (int y = 0; y < buffer[0].height; y++)
-	{
-		destPtr = (((unsigned char *)surfaceLock.pBits) + y * surfaceLock.Pitch);
-		srcPtr = (((unsigned char*)buffer[0].data) + y * buffer[0].stride);
-
-		// Y U Y V
-		for (int x = 0; x < (buffer[0].width / 2); x++)
-		{
-			// Y0
-			*destPtr = *srcPtr;
-			destPtr++;
-			srcPtr++;
-
-			// U
-			*destPtr = *uPtr;
-			destPtr++;
-			uPtr++;
-
-			// Y1
-			*destPtr = *srcPtr;
-			destPtr++;
-			srcPtr++;
-
-			// V
-			*destPtr = *vPtr;
-			destPtr++;
-			vPtr++;
-		}
-
-        // Since YV12 has half the UV data that YUY2 has, we reuse these  
-        // values--so we only increment these planes every other pass  
-        // through.  
-        if( bMustIncrementUVPlanes )  
-        {  
-			/* increment pointers down onto the next line, skipping any pitch/stride data */
-			uPtr += buffer[1].stride - buffer[1].width;
-			vPtr += buffer[2].stride - buffer[2].width;
-            bMustIncrementUVPlanes = false;  
-        }  
-        else  
-        {  
-			/* go back to the start of the row */
-			uPtr -= buffer[1].width;
-			vPtr -= buffer[2].width;
-            bMustIncrementUVPlanes = true;  
-        }
-	}
-
-	if (FAILED(mSurface->UnlockRect()))
-	{
-		OutputDebugString("can't unlock FMV surface\n");
-	}
-
-	if (FAILED(d3d.lpD3DDevice->StretchRect(mSurface, NULL, mDestSurface, NULL, D3DTEXF_NONE)))
-	{
-		OutputDebugString("stretchrect failed\n");
-	}
-
-	D3DLOCKED_RECT textureLock;
-	if (FAILED(mDisplayTexture->LockRect(0, &textureLock, NULL, D3DLOCK_DISCARD)))
-	{
-		OutputDebugString("can't lock FMV texture\n");
-	}
-
-	D3DLOCKED_RECT surfaceLock2;
-	if (FAILED(mDestSurface->LockRect(&surfaceLock2, NULL, D3DLOCK_READONLY)))
-	{
-		OutputDebugString("can't lock FMV surface\n");
-	}
-
-	/* FIXME - optimise.. */
-	for (int y = 0; y < buffer[0].height; y++)
-	{
-		srcPtr = (((unsigned char *)surfaceLock2.pBits) + y * surfaceLock2.Pitch);
-		destPtr = (((unsigned char *)textureLock.pBits) + y * textureLock.Pitch);
-
-		for (int x = 0; x < buffer[0].width; x++)
-		{
-			*destPtr = *srcPtr;
-			destPtr++;
-			srcPtr++;
-		}
-	}
-
-	if (FAILED(mDisplayTexture->UnlockRect(0)))
-	{
-		OutputDebugString("can't unlock FMV texture\n");
-	}
-
-	if (FAILED(mDestSurface->UnlockRect()))
-	{
-		OutputDebugString("can't unlock FMV surface\n");
-	}
-/*
-	LPDIRECT3DSURFACE9 tempSurface;
-	if (FAILED(mDisplayTexture->GetSurfaceLevel(0, &tempSurface)))
-	{
-		OutputDebugString("can't get FMV texture top surface\n");
-	}
-
-	if (FAILED(d3d.lpD3DDevice->UpdateSurface(mDestSurface, NULL, tempSurface, NULL)))
-	{
-		OutputDebugString("update surface failed\n");
-	}
-*/	
-
-#if 0 // save frames to png files
-	char strPath[MAX_PATH];
-	char buf[100];
-
-	/* finds the path to the folder. On Win7, this would be "C:\Users\<username>\AppData\Local\ as an example */
-	if( FAILED(SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, strPath ) ) )
-	{
-		return;
-	}
-
-	PathAppend( strPath, TEXT( "Fox\\Aliens versus Predator\\" ) );
-	sprintf(buf, "image_%d.png", imageNum);
-	PathAppend( strPath, buf);
-
-	/* save surface to image file */
-	if (FAILED(D3DXSaveSurfaceToFile(strPath, D3DXIFF_PNG, mSurface, NULL, NULL))) 
-	{
-		//LogDxError(LastError, __LINE__, __FILE__);
-		OutputDebugString("Save Surface to file failed!!!\n");
-	}
-
-	imageNum++;
-#endif
+	LeaveCriticalSection(&CriticalSection);
 
   // Sleep for the time period of 1 frame
 	float framerate = 
 	float(stream->mTheora.mInfo.fps_numerator) / 
 	float(stream->mTheora.mInfo.fps_denominator);
-//	Sleep((1.0/framerate)*1000);
+	Sleep((1.0/framerate)*1000);
 }
 
 extern "C" {
@@ -536,6 +538,7 @@ extern "C" {
 #include <math.h>
 
 extern int GotAnyKey;
+extern unsigned char DebouncedGotAnyKey;
 
 int SmackerSoundVolume = 65536/512;
 int MoviesAreActive;
@@ -564,8 +567,6 @@ extern void ThisFramesRenderingHasFinished(void);
 void drive_decoding(void *arg);
 void display_frame(void *arg);
 bool FmvWait();
-int NextFMVFrame();
-int FmvOpen(char *filenamePtr);
 void FmvClose();
 int GetVolumeOfNearestVideoScreen(void);
 void writeFmvData(unsigned char *destData, unsigned char* srcData, int width, int height, int pitch);
@@ -594,7 +595,8 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 
 extern void PlayBinkedFMV(char *filenamePtr)
 {
-	FmvOpen(filenamePtr);
+	decoder.FmvOpen(filenamePtr);
+
 	return;
 }
 
@@ -793,17 +795,6 @@ extern void GetFMVInformation(int *messageNumberPtr, int *frameNumberPtr)
 	*frameNumberPtr = 0;
 }
 
-/* not needed */
-void CloseFMV()
-{
-}
-
-/* call this for res change, alt tabbing and whatnot */
-extern void ReleaseBinkTextures()
-{
-	//ReleaseD3DTexture(&binkTexture);
-}
-
 void FindLightingValuesFromTriggeredFMV(unsigned char *bufferPtr, FMVTEXTURE *ftPtr)
 {
 	unsigned int totalRed=0;
@@ -957,15 +948,12 @@ int GetVolumeOfNearestVideoScreen(void)
 	return VolumeOfNearestVideoScreen;
 }
 
-std::ifstream file;
-
-int FmvOpen(char *filenamePtr)
+int OggDecoder::FmvOpen(char *filenamePtr)
 {
 	file.open(filenamePtr, std::ios::in | std::ios::binary);
 
 	if (file) 
 	{
-		OggDecoder decoder;
 		decoder.play(file);
 /*
 		file.close();
@@ -977,74 +965,30 @@ int FmvOpen(char *filenamePtr)
 */
 	}
 
-	return 1;
-}
+	while (isPlaying)
+	{
+		OutputDebugString("in while (isPlaying)\n");
+		CheckForWindowsMessages();
 
-void drive_decoding(void *arg) 
-{
-}
+		if (frameReady)
+			/*playing = */NextFMVFrame();
 
-void display_frame(void *arg)  
-{	
-}
+		ThisFramesRenderingHasBegun();
+		ClearScreenToBlack();
 
-void float_to_short_array(const float* in, short* out, int len) 
-{
-/*
-	int i = 0;
-	float scaled_value = 0;		
-	for(i = 0; i < len; i++) {				
-		scaled_value = floorf(0.5 + 32768 * in[i]);
-		if (in[i] < 0) {
-			out[i] = (scaled_value < -32768.0) ? -32768 : (short)scaled_value;
-		} else {
-			out[i] = (scaled_value > 32767.0) ? 32767 : (short)scaled_value;
-		}
+			DrawBinkFmv((640-frameWidth)/2, (480-frameHeight)/2, frameWidth, frameHeight, BinkTexture);
+
+		ThisFramesRenderingHasFinished();
+		FlipBuffers();
+
+		DirectReadKeyboard();
+
+		/* added DebouncedGotAnyKey to ensure previous frame's key press for starting level doesn't count */
+		if (GotAnyKey && DebouncedGotAnyKey) 
+			isPlaying = false;
 	}
-*/
-}
-/*
-void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int samples) 
-{
-}
-*/
 
-int updateAudioBuffer(int numBytes, short *data)
-{
-	return 0;
-}
-
-int GetWritableBufferSize()
-{
-	return 0;
-}
-
-int WriteToDsound(/*char *audioData,*/ int dataSize, int offset)
-{
 	return 1;
-}
-/*
-void handle_video_data (OggPlay * player, int track_num, OggPlayVideoData * video_data, int frame) 
-{
-}
-*/
-bool FmvWait()
-{
-	return false;
-}
-
-void writeFmvData(unsigned char *destData, unsigned char* srcData, int width, int height, int pitch)
-{
-}
-
-int NextFMVFrame()
-{
-	return 0;
-}
-
-int CreateFMVAudioBuffer(int channels, int rate)
-{
-	return 0;
 }
 
 } // extern "C"

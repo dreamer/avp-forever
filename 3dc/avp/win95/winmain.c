@@ -728,7 +728,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		/* KJL 17:56:14 26/02/98 - unload a font required for Dave's HUD */
 //		UnloadFont(&AvpFonts[DATABASE_MESSAGE_FONT]);
 
-		CloseFMV();
+//		CloseFMV();
 		ReleaseAllFMVTextures();
 
 		/* DHM 23/3/98 */
