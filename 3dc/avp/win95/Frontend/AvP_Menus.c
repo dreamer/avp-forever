@@ -2032,10 +2032,10 @@ static void RenderHelpString()
 		RECT area;
 		//draw the attached string at the bottom of the screen
 
-		area.left=MENU_LEFTXEDGE;
-		area.right=MENU_RIGHTXEDGE;
-		area.top=420;
-		area.bottom=ScreenDescriptorBlock.SDB_Height;
+		area.left = MENU_LEFTXEDGE;
+		area.right = MENU_RIGHTXEDGE;
+		area.top = 420;
+		area.bottom = 480;//ScreenDescriptorBlock.SDB_Height; // bjd MENU
 
 		RenderSmallFontString_Wrapped(GetTextString(elementPtr->HelpString),&area,BRIGHTNESS_OF_HIGHLIGHTED_ELEMENT,0,0);
 	}
@@ -3372,7 +3372,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 		case AVPMENU_ELEMENT_SAVESETTINGS:
 		{
 			char *textPtr = GetTextString(elementPtr->TextDescription);
-			int menuCentreX = ScreenDescriptorBlock.SDB_Width / 2;
+			int menuCentreX = /*ScreenDescriptorBlock.SDB_Width*/640 / 2; // bjd - MENU
 			// general text rendering
 			if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 			{

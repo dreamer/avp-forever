@@ -9,6 +9,7 @@
 #include <ogg/ogg.h>
 #include <theora/theora.h>
 #include <theora/theoradec.h>
+#include <vorbis/codec.h>
 #include <process.h>
 
 #ifdef WIN32
@@ -30,26 +31,33 @@ bool isPlaying = false;
 bool frameReady = false;
 bool playing = false;
 
+bool mAudio = false; //fix
+
 enum StreamType {
+	TYPE_VORBIS,
 	TYPE_THEORA,
 	TYPE_UNKNOWN
 };
 
+class OggStream;
+
 class TheoraDecode {
 public:
-	th_info mInfo;
-	th_comment mComment;
-	th_setup_info *mSetup;
-	th_dec_ctx* mCtx;
+  th_info mInfo;
+  th_comment mComment;
+  th_setup_info *mSetup;
+  th_dec_ctx* mCtx;
 
 public:
-	TheoraDecode() :
-		mSetup(0),
-		mCtx(0)
+  TheoraDecode() :
+    mSetup(0),
+    mCtx(0)
   {
     th_info_init(&mInfo);
     th_comment_init(&mComment);
   }
+
+  void initForData(OggStream* stream);
 
   ~TheoraDecode() {
     th_setup_free(mSetup);
@@ -57,28 +65,76 @@ public:
   }   
 };
 
+class VorbisDecode {
+public:
+  vorbis_info mInfo;
+  vorbis_comment mComment;
+  vorbis_dsp_state mDsp;
+  vorbis_block mBlock;
+
+public:
+  VorbisDecode()
+  {
+    vorbis_info_init(&mInfo);
+    vorbis_comment_init(&mComment);    
+  }
+
+  void initForData(OggStream* stream);
+};
+
 class OggStream
 {
 public:
-	int mSerial;
-	ogg_stream_state mState;
-	StreamType mType;
-	bool mHeadersRead;
-	TheoraDecode mTheora;
+  int mSerial;
+  ogg_stream_state mState;
+  StreamType mType;
+  bool mActive;
+  TheoraDecode mTheora;
+  VorbisDecode mVorbis;
 
 public:
-	OggStream(int serial = -1) : 
-		mSerial(serial),
-		mType(TYPE_UNKNOWN),
-		mHeadersRead(false)
-	{
-	}
+  OggStream(int serial = -1) : 
+    mSerial(serial),
+    mType(TYPE_UNKNOWN),
+    mActive(true)
+  { 
+  }
 
   ~OggStream() {
     int ret = ogg_stream_clear(&mState);
     assert(ret == 0);
   }
 };
+
+void TheoraDecode::initForData(OggStream* stream) {
+	stream->mTheora.mCtx = 
+	th_decode_alloc(&stream->mTheora.mInfo, 
+			stream->mTheora.mSetup);
+	assert(stream->mTheora.mCtx != NULL);
+	int ppmax = 0;
+	int ret = th_decode_ctl(stream->mTheora.mCtx,
+			  TH_DECCTL_GET_PPLEVEL_MAX,
+			  &ppmax,
+			  sizeof(ppmax));
+	assert(ret == 0);
+
+	// Set to a value between 0 and ppmax inclusive to experiment with
+	// this parameter.
+	ppmax = 0;
+	ret = th_decode_ctl(stream->mTheora.mCtx,
+			  TH_DECCTL_SET_PPLEVEL,
+			  &ppmax,
+			  sizeof(ppmax));
+	assert(ret == 0);
+}
+
+void VorbisDecode::initForData(OggStream* stream) 
+{
+	int ret = vorbis_synthesis_init(&stream->mVorbis.mDsp, &stream->mVorbis.mInfo);
+	assert(ret == 0);
+	ret = vorbis_block_init(&stream->mVorbis.mDsp, &stream->mVorbis.mBlock);
+	assert(ret == 0);
+}
 
 typedef std::map<int, OggStream*> StreamMap;
 
@@ -87,7 +143,7 @@ std::istream *testStream;
 class OggDecoder
 {
 public:
-  StreamMap mStreams;  
+	StreamMap mStreams;  
 	LPDIRECT3DSURFACE9 mSurface;
 	LPDIRECT3DSURFACE9 mDestSurface; // needed?
 	LPDIRECT3DTEXTURE9 mDisplayTexture;
@@ -102,12 +158,16 @@ public:
 		OggDecoder *decoder;
 	};
 	threadParamsStruct threadParams;
+	ogg_int64_t  mGranulepos;
 
 private:
+	bool handle_theora_header(OggStream* stream, ogg_packet* packet);
+	bool handle_vorbis_header(OggStream* stream, ogg_packet* packet);
+	void read_headers(std::istream& stream, ogg_sync_state* state);
+
 	bool read_page(std::istream& stream, ogg_sync_state* state, ogg_page* page);
-	void handle_packet(OggStream* stream, ogg_packet* packet);
+	bool read_packet(std::istream& is, ogg_sync_state* state, OggStream* stream, ogg_packet* packet);
 	void handle_theora_data(OggStream* stream, ogg_packet* packet);
-	void handle_theora_header(OggStream* stream, ogg_packet* packet);
 	static unsigned int __stdcall decode_thread(void *arg);
 
 public:
@@ -186,6 +246,7 @@ int OggDecoder::NextFMVFrame()
 			OutputDebugString("can't create FMV texture\n");
 		}
 		BinkTexture = mDisplayTexture;
+		mDisplayTexture->AddRef();
 	}
 
 	D3DLOCKED_RECT surfaceLock;
@@ -284,9 +345,7 @@ int OggDecoder::NextFMVFrame()
 
 		for (int x = 0; x < frameWidth; x++)
 		{
-			*destPtr = *srcPtr;
-			destPtr++;
-			srcPtr++;
+			memcpy(destPtr, srcPtr, frameWidth * 4);
 		}
 	}
 	
@@ -299,7 +358,7 @@ int OggDecoder::NextFMVFrame()
 	{
 		OutputDebugString("can't unlock FMV surface\n");
 	}
-
+#if 1 
 	char strPath[MAX_PATH];
 	char buf[100];
 
@@ -314,12 +373,13 @@ int OggDecoder::NextFMVFrame()
 	PathAppend( strPath, buf);
 
 	/* save surface to image file */
-	if (FAILED(D3DXSaveSurfaceToFile(strPath, D3DXIFF_PNG, mDestSurface, NULL, NULL))) 
+	if (FAILED(D3DXSaveTextureToFile(strPath, D3DXIFF_PNG, mDisplayTexture, 
+		NULL))) 
 	{
 		//LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("Save texture to file failed!!!\n");
 	}
-
+#endif
 	imageNum++;
 
 	frameReady = false;
@@ -330,10 +390,13 @@ int OggDecoder::NextFMVFrame()
 bool OggDecoder::read_page(std::istream& stream, ogg_sync_state* state, ogg_page* page) 
 {
 	int ret = 0;
-	if (!stream.good())
-		return false;
 
-	while (ogg_sync_pageout(state, page) != 1) 
+	// If we've hit end of file we still need to continue processing
+	// any remaining pages that we've got buffered.
+	if (!stream.good())
+		return ogg_sync_pageout(state, page) == 1;
+
+	while ((ret = ogg_sync_pageout(state, page)) != 1) 
 	{
 		// Returns a buffer that can be written too
 		// with the given size. This buffer is stored
@@ -346,8 +409,8 @@ bool OggDecoder::read_page(std::istream& stream, ogg_sync_state* state, ogg_page
 		int bytes = stream.gcount();
 		if (bytes == 0) 
 		{
-			// End of file
-			return false;
+			// End of file. 
+			continue;
 		}
 
 		// Update the synchronisation layer with the number
@@ -356,6 +419,82 @@ bool OggDecoder::read_page(std::istream& stream, ogg_sync_state* state, ogg_page
 		assert(ret == 0);
 	}
 	return true;
+}
+
+bool OggDecoder::read_packet(std::istream& is, ogg_sync_state* state, OggStream* stream, ogg_packet* packet) 
+{
+	int ret = 0;
+
+	while ((ret = ogg_stream_packetout(&stream->mState, packet)) != 1) 
+	{
+		ogg_page page;
+		if (!read_page(is, state, &page))
+			return false;
+
+		int serial = ogg_page_serialno(&page);
+		assert(mStreams.find(serial) != mStreams.end());
+		OggStream* pageStream = mStreams[serial];
+
+		// Drop data for streams we're not interested in.
+		if (stream->mActive) 
+		{
+			ret = ogg_stream_pagein(&pageStream->mState, &page);
+			assert(ret == 0);
+		}
+	}
+	return true;
+}
+
+void OggDecoder::read_headers(std::istream& stream, ogg_sync_state* state) 
+{
+	ogg_page page;
+
+	bool headersDone = false;
+	while (!headersDone && read_page(stream, state, &page)) 
+	{
+		int ret = 0;
+		int serial = ogg_page_serialno(&page);
+		OggStream* stream = 0;
+
+		if (ogg_page_bos(&page)) 
+		{
+			// At the beginning of the stream, read headers
+			// Initialize the stream, giving it the serial
+			// number of the stream for this page.
+			stream = new OggStream(serial);
+			ret = ogg_stream_init(&stream->mState, serial);
+			assert(ret == 0);
+			mStreams[serial] = stream;
+		}
+
+		assert(mStreams.find(serial) != mStreams.end());
+		stream = mStreams[serial];
+
+		// Add a complete page to the bitstream
+		ret = ogg_stream_pagein(&stream->mState, &page);
+		assert(ret == 0);
+
+		// Process all available header packets in the stream. When we hit
+		// the first data stream we don't decode it, instead we
+		// return. The caller can then choose to process whatever data
+		// streams it wants to deal with.
+		ogg_packet packet;
+		while (!headersDone && (ret = ogg_stream_packetpeek(&stream->mState, &packet)) != 0) 
+		{
+			assert(ret == 1);
+
+			// A packet is available. If it is not a header packet we exit.
+			// If it is a header packet, process it as normal.
+			headersDone = headersDone || handle_theora_header(stream, &packet);
+			headersDone = headersDone || handle_vorbis_header(stream, &packet);
+			if (!headersDone) 
+			{
+				// Consume the packet
+				ret = ogg_stream_packetout(&stream->mState, &packet);
+				assert(ret == 1);
+			}
+		}
+	} 
 }
 
 void OggDecoder::play(std::istream& stream) 
@@ -377,61 +516,171 @@ void OggDecoder::play(std::istream& stream)
 	isPlaying = true;
 }
 
+OggStream* video = 0;
+OggStream* audio = 0;
+
 unsigned int __stdcall OggDecoder::decode_thread(void *arg)
 {
 	ogg_sync_state state;
-	ogg_page page;
-	int packets = 0;
 
 	threadParamsStruct *tempParams = static_cast<threadParamsStruct*>(arg);
 
 	int ret = ogg_sync_init(&state);
 	assert(ret == 0);
-  
-	while ((tempParams->decoder->read_page(*tempParams->stream, &state, &page)) && tempParams->decoder->fmvPlaying)
+
+	// Read headers for all streams
+	tempParams->decoder->read_headers(*tempParams->stream, &state);
+
+	// Find and initialize the first theora and vorbis
+	// streams. According to the Theora spec these can be considered the
+	// 'primary' streams for playback.
+	video = 0;
+	audio = 0;
+
+	double audioTime = timeGetTime();
+	char buf[100];
+	sprintf(buf, "start time: %f\n", audioTime);
+	OutputDebugString(buf);
+
+	for (StreamMap::iterator it = tempParams->decoder->mStreams.begin(); it != tempParams->decoder->mStreams.end(); ++it) 
 	{
-		int serial = ogg_page_serialno(&page);
-		OggStream* stream = 0;
+		OggStream* stream = (*it).second;
+		if (!video && stream->mType == TYPE_THEORA) {
+			video = stream;
+			video->mTheora.initForData(video);
+		}
+		else if (!audio && stream->mType == TYPE_VORBIS) {
+			audio = stream;
+			audio->mVorbis.initForData(audio);
+		}
+		else stream->mActive = false;
+	}
 
-		if (ogg_page_bos(&page)) 
+	assert(audio);
+
+	if (video) {
+		std::cout << "Video stream is " 
+		<< video->mSerial << " "
+		<< video->mTheora.mInfo.frame_width << "x" << video->mTheora.mInfo.frame_height
+		<< std::endl;
+	}
+
+	std::cout << "Audio stream is " 
+		<< audio->mSerial << " "
+		<< audio->mVorbis.mInfo.channels << " channels "
+		<< audio->mVorbis.mInfo.rate << "KHz"
+		<< std::endl;
+/*
+  ret = sa_stream_create_pcm(&mAudio,
+			     NULL,
+			     SA_MODE_WRONLY,
+			     SA_PCM_FORMAT_S16_NE,
+			     audio->mVorbis.mInfo.rate,
+			     audio->mVorbis.mInfo.channels);
+  assert(ret == SA_SUCCESS);
+	
+  ret = sa_stream_open(mAudio);
+  assert(ret == SA_SUCCESS);
+*/
+  // Read audio packets, sending audio data to the sound hardware.
+  // When it's time to display a frame, decode the frame and display it.
+	ogg_packet packet;
+	while ((tempParams->decoder->read_packet(*tempParams->stream, &state, audio, &packet)) && tempParams->decoder->fmvPlaying)
+	{
+		if (vorbis_synthesis(&audio->mVorbis.mBlock, &packet) == 0) 
 		{
-			// At the beginning of the stream, read headers
-			// Initialize the stream, giving it the serial
-			// number of the stream for this page.
-			stream = new OggStream(serial);
-			ret = ogg_stream_init(&stream->mState, serial);
+			ret = vorbis_synthesis_blockin(&audio->mVorbis.mDsp, &audio->mVorbis.mBlock);
 			assert(ret == 0);
-			tempParams->decoder->mStreams[serial] = stream;
 		}
 
-		assert(tempParams->decoder->mStreams.find(serial) != tempParams->decoder->mStreams.end());
-		stream = tempParams->decoder->mStreams[serial];
+		float** pcm = 0;
+		int samples = 0;
 
-		// Add a complete page to the bitstream
-		ret = ogg_stream_pagein(&stream->mState, &page);
-		assert(ret == 0);
-
-		// Return a complete packet of data from the stream
-		ogg_packet packet;
-		ret = ogg_stream_packetout(&stream->mState, &packet);
-
-		if (ret == 0) 
+		while ((samples = vorbis_synthesis_pcmout(&audio->mVorbis.mDsp, &pcm)) > 0) 
 		{
-			// Need more data to be able to complete the packet
-			continue;
-		}
-		else if (ret == -1) 
-		{
-			// We are out of sync and there is a gap in the data.
-			// Exit
-			std::cout << "There is a gap in the data - we are out of sync" << std::endl;
-			break;
-		}
+			if (mAudio) 
+			{
+				if (samples > 0) 
+				{
+					short *buffer = new short[samples * audio->mVorbis.mInfo.channels];
+					//short buffer[samples * audio->mVorbis.mInfo.channels];
+					short* p = buffer;
+					for (int i = 0; i < samples; ++i) 
+					{
+						for (int j = 0; j < audio->mVorbis.mInfo.channels; ++j) 
+						{
+							int v = static_cast<int>(floorf(0.5 + pcm[j][i]*32767.0));
+							if (v > 32767) v = 32767;
+							if (v <-32768) v = -32768;
+							*p++ = v;
+						}
+					}
+	  
+					//ret = sa_stream_write(mAudio, buffer, sizeof(buffer));
+					//assert(ret == SA_SUCCESS);
 
-		// A packet is available, this is what we pass to the vorbis or
-		// theora libraries to decode.
-		tempParams->decoder->handle_packet(stream, &packet);
-	}	
+					delete []buffer;
+					buffer = NULL;
+				}
+	
+				ret = vorbis_synthesis_read(&audio->mVorbis.mDsp, samples);
+				assert(ret == 0);
+			}
+
+			// At this point we've written some audio data to the sound
+			// system. Now we check to see if it's time to display a video
+			// frame.
+			//
+			// The granule position of a video frame represents the time
+			// that that frame should be displayed up to. So we get the
+			// current time, compare it to the last granule position read.
+			// If the time is greater than that it's time to display a new
+			// video frame.
+			//
+			// The time is obtained from the audio system - this represents
+			// the time of the audio data that the user is currently
+			// listening to. In this way the video frame should be synced up
+			// to the audio the user is hearing.
+			//
+			if (video) 
+			{
+				ogg_int64_t position = 0;
+				//int ret = sa_stream_get_position(mAudio, SA_POSITION_WRITE_SOFTWARE, &position);
+				//assert(ret == SA_SUCCESS);
+
+				/*
+					double audio_time = 
+						double(position) /
+						double(audio->mVorbis.mInfo.rate) /
+						double(audio->mVorbis.mInfo.channels) /
+						sizeof(short);
+				*/
+				double audio_time = timeGetTime() - audioTime;
+				double video_time = th_granule_time(video->mTheora.mCtx, tempParams->decoder->mGranulepos);
+				audio_time = audio_time / 1000;
+/*
+				char buf[100];
+				sprintf(buf, "audio_time: %f, video_time: %f\n", audio_time, video_time );
+				OutputDebugString(buf);
+*/
+				if (audio_time > video_time) 
+				{
+					// Decode one frame and display it. If no frame is available we
+					// don't do anything.
+					ogg_packet packet;
+					if (tempParams->decoder->read_packet(*tempParams->stream, &state, video, &packet)) 
+					{
+						tempParams->decoder->handle_theora_data(video, &packet);
+						video_time = th_granule_time(video->mTheora.mCtx, tempParams->decoder->mGranulepos);
+					}
+				}
+				else
+				{
+					Sleep(video_time - audio_time);
+				}
+			}
+		}
+	}
 
 	// Cleanup
 	ret = ogg_sync_clear(&state);
@@ -440,49 +689,34 @@ unsigned int __stdcall OggDecoder::decode_thread(void *arg)
 	return 0;
 }
 
-void OggDecoder::handle_packet(OggStream* stream, ogg_packet* packet) 
-{
-	if (stream->mHeadersRead && stream->mType == TYPE_THEORA)
-		handle_theora_data(stream, packet);
+bool OggDecoder::handle_theora_header(OggStream* stream, ogg_packet* packet) {
+  int ret = th_decode_headerin(&stream->mTheora.mInfo,
+			       &stream->mTheora.mComment,
+			       &stream->mTheora.mSetup,
+			       packet);
 
-	if (!stream->mHeadersRead && (stream->mType == TYPE_THEORA || stream->mType == TYPE_UNKNOWN))
-		handle_theora_header(stream, packet);
-}
+	if (ret == TH_ENOTFORMAT)
+		return false; // Not a theora header
 
-void OggDecoder::handle_theora_header(OggStream* stream, ogg_packet* packet) 
-{
-	int ret = th_decode_headerin(&stream->mTheora.mInfo,
-		&stream->mTheora.mComment,
-		&stream->mTheora.mSetup,
-		packet);
-
-	if (ret == OC_NOTFORMAT)
-		return; // Not a theora header
-
-	if (ret > 0) 
-	{
+	if (ret > 0) {
 		// This is a theora header packet
 		stream->mType = TYPE_THEORA;
-		return;
+		return false;
 	}
 
+	// Any other return value is treated as a fatal error
 	assert(ret == 0);
+
 	// This is not a header packet. It is the first 
 	// video data packet.
-	stream->mTheora.mCtx = th_decode_alloc(&stream->mTheora.mInfo, stream->mTheora.mSetup);
-	assert(stream->mTheora.mCtx != NULL);
-	stream->mHeadersRead = true;
-	handle_theora_data(stream, packet);
+	return true;
 }
 
 void OggDecoder::handle_theora_data(OggStream* stream, ogg_packet* packet) 
 {
-	ogg_int64_t granulepos = -1;
-	int ret = th_decode_packetin(stream->mTheora.mCtx,
-				   packet,
-				   &granulepos);
+	int ret = th_decode_packetin(stream->mTheora.mCtx, packet, &mGranulepos);
 
-	assert(ret == 0);
+	assert(ret == 0 || ret == TH_DUPFRAME);
 
 	OutputDebugString("handle_theora_data\n");
 /*
@@ -504,30 +738,39 @@ void OggDecoder::handle_theora_data(OggStream* stream, ogg_packet* packet)
 			OutputDebugString("Format: Unknown\n");
 			break;
 	}
-*/	
+*/
 
 //	OutputDebugString("handle_theora_data\n");
 
 	EnterCriticalSection(&CriticalSection); 
 
 	// We have a frame. Get the YUV data
-//	th_ycbcr_buffer buffer;
 	ret = th_decode_ycbcr_out(stream->mTheora.mCtx, YUVbuffer);
 	assert(ret == 0);
 
 	frameHeight = YUVbuffer[0].height;
 	frameWidth = YUVbuffer[0].width;
 
-
 	frameReady = true;
 
 	LeaveCriticalSection(&CriticalSection);
+}
 
-  // Sleep for the time period of 1 frame
-	float framerate = 
-	float(stream->mTheora.mInfo.fps_numerator) / 
-	float(stream->mTheora.mInfo.fps_denominator);
-	Sleep((1.0/framerate)*1000);
+bool OggDecoder::handle_vorbis_header(OggStream* stream, ogg_packet* packet) 
+{
+	int ret = vorbis_synthesis_headerin(&stream->mVorbis.mInfo, &stream->mVorbis.mComment, packet);
+	// Unlike libtheora, libvorbis does not provide a return value to
+	// indicate that we've finished loading the headers and got the
+	// first data packet. To detect this I check if I already know the
+	// stream type and if the vorbis_synthesis_headerin call failed.
+	if (stream->mType == TYPE_VORBIS && ret == OV_ENOTVORBIS) {
+		// First data packet
+		return true;
+	}
+	else if (ret == 0) {
+		stream->mType = TYPE_VORBIS;
+	}
+	return false;
 }
 
 extern "C" {
@@ -564,16 +807,9 @@ int FmvColourBlue;
 extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
 
-void drive_decoding(void *arg);
-void display_frame(void *arg);
 bool FmvWait();
 void FmvClose();
 int GetVolumeOfNearestVideoScreen(void);
-void writeFmvData(unsigned char *destData, unsigned char* srcData, int width, int height, int pitch);
-int CreateFMVAudioBuffer(int channels, int rate);
-int WriteToDsound(int dataSize, int offset);
-int GetWritableBufferSize();
-int updateAudioBuffer(int numBytes, short *data);
 
 extern void EndMenuBackgroundBink()
 {

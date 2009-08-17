@@ -22,9 +22,7 @@ extern void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image
 extern "C"
 {
 #include "AvP_Menus.h"
-//extern unsigned char *ScreenBuffer;
 extern long BackBufferPitch;
-//extern DDPIXELFORMAT DisplayPixelFormat; // BJD
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 
 char AAFontWidths[256];
@@ -96,9 +94,6 @@ AVPMENUGFX AvPMenuGfxStorage[MAX_NO_OF_AVPMENUGFXS] =
 	{"Menus\\bonus.rim"},
 	{"Menus\\bonus.rim"},
 
-//	{"Menus\\LoadingBar_Empty.rim"},
-//	{"Menus\\LoadingBar_Full.rim"},
-
 	// Splash screens
 	#if MARINE_DEMO
 	{"MarineSplash\\splash00.rim"},
@@ -122,10 +117,6 @@ AVPMENUGFX AvPMenuGfxStorage[MAX_NO_OF_AVPMENUGFXS] =
 	{"PredatorSplash\\splash04.rim"},
 	{"PredatorSplash\\splash05.rim"},
 	#endif
-/*
-	{"Menus\\LoadingBar_Empty.rim"},
-	{"Menus\\LoadingBar_Full.rim"},
-*/
 };
 
 static void LoadMenuFont(void);
@@ -324,7 +315,7 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 	
 	extern enum MENUSSTATE_ID;
 
-	if(GetAvPMenuState() == MENUSSTATE_INGAMEMENUS)
+	if (GetAvPMenuState() == MENUSSTATE_INGAMEMENUS)
 	{
 		// do nothing here for now
 	}
@@ -354,7 +345,7 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 //			int topLeftU = 1;
 //			int topLeftV = 1+(c-32)*33;
 //			int x, y;
-			int width = IntroFont_Light.FontWidth[(unsigned int) c];
+			int char_width = IntroFont_Light.FontWidth[(unsigned int) c];
 
 			c = c - 32;
 
@@ -371,7 +362,7 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 				need to fix the 'Cloud Table'
 				ie the moving hazy smoke/cloud effect behind the large font text on the menus
 			*/
-			DrawTallFontCharacter(positionX, positionY, topLeftU, topLeftV, width, alpha);
+			DrawTallFontCharacter(positionX, positionY, topLeftU, topLeftV, char_width, alpha);
 
 //			DrawCloudTable(pX, pY, word_length, 255);
 
@@ -410,8 +401,8 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 				srcPtr += (image->w - width) * 4;
 			}
 */
-			positionX += width;
-			word_length += width;
+			positionX += char_width;
+			word_length += char_width;
 		}
 	}
 //	DrawCloudTable(pX, pY, word_length, alpha);
@@ -547,7 +538,7 @@ extern int RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPM
 			while(*ptr)
 			{
 				//length+=AAFontWidths[*ptr++];
-				length+=AAFontWidths[(unsigned int) *ptr++];
+				length += AAFontWidths[(unsigned int) *ptr++];
 			}
 
 			x -= length;
@@ -561,7 +552,7 @@ extern int RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPM
 			while(*ptr)
 			{
 				//length+=AAFontWidths[*ptr++];
-				length+=AAFontWidths[(unsigned int) *ptr++];
+				length += AAFontWidths[(unsigned int) *ptr++];
 			}
 
 			x -= length/2;
@@ -1400,24 +1391,21 @@ extern void DrawAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID, int topleftX, int tople
 	}
 
 	int length = gfxPtr->Width;
-	if (ScreenDescriptorBlock.SDB_Width - topleftX < length)
+	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length)
 	{
-		length = ScreenDescriptorBlock.SDB_Width - topleftX;
+		length = /*ScreenDescriptorBlock.SDB_Width*/640 - topleftX;
 	}
-	if (length <= 0) return;
+
+	if (length <= 0) 
+	{
+		return;
+	}
 
 	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
-	{
-//		DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, FALSE);
-		alpha = ONE_FIXED;
-	}
+			alpha = ONE_FIXED;
 
-	DrawAlphaMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
-/*
-	else {
-		DrawAlphaMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
-	}
-*/
+	DrawAlphaMenuQuad(topleftX, topleftY, menuGfxID, alpha);
+
 #if 0 // bjd
 	D3DInfo temp;
 
@@ -1435,9 +1423,9 @@ extern void DrawAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID, int topleftX, int tople
 
 	int BackBufferPitch = 0;
 
-	if (ScreenDescriptorBlock.SDB_Width - topleftX < length)
+	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length)
 	{
-		length = ScreenDescriptorBlock.SDB_Width - topleftX;
+		length = /*ScreenDescriptorBlock.SDB_Width*/640 - topleftX;
 	}
 	if (length <= 0) return;
 
@@ -1505,6 +1493,7 @@ extern void DrawAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID, int topleftX, int tople
 extern void DrawAvPMenuGlowyBar(int topleftX, int topleftY, int alpha, int length)
 {	
 	enum AVPMENUGFX_ID menuGfxID = AVPMENUGFX_GLOWY_MIDDLE;										
+
 /*
    	unsigned short *destPtr;
 	unsigned char *srcPtr;
@@ -1514,30 +1503,24 @@ extern void DrawAvPMenuGlowyBar(int topleftX, int topleftY, int alpha, int lengt
 	//GLOBALASSERT(menuGfxID < MAX_NO_OF_AVPMENUGFXS);
 //	gfxPtr = &AvPMenuGfxStorage[menuGfxID];
 
-	if (ScreenDescriptorBlock.SDB_Width - topleftX < length)
+	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length)
 	{
-		length = ScreenDescriptorBlock.SDB_Width - topleftX;
+		length = /*ScreenDescriptorBlock.SDB_Width*/640 - topleftX;
 	}
 
-	if (length<0) length = 0;
-
-//	DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
+	if (length < 0)
+	{
+		length = 0;
+	}
 
 	// the image we're working with is only 1 pixel wide. we'll have to draw it a couple of 
 	//times shifting the x position over 1 pixel each time until we reach the length of the bar
 	for (int i = 0; i < length; i++) 
 	{
 		if (alpha > ONE_FIXED) // ONE_FIXED = 65536
-		{
 			alpha = ONE_FIXED;
-//			DrawMenuQuad(topleftX + i, topleftY, topleftX + i, topleftY, menuGfxID, FALSE);
-		}
-/*
-		else {
-			DrawAlphaMenuQuad(topleftX + i, topleftY, topleftX + i, topleftY, menuGfxID, alpha);
-		}
-*/
-		DrawAlphaMenuQuad(topleftX + i, topleftY, topleftX + i, topleftY, menuGfxID, alpha);
+
+		DrawAlphaMenuQuad(topleftX + i, topleftY, menuGfxID, alpha);
 	}
 		
 #if 0 // bjd
@@ -1555,9 +1538,9 @@ extern void DrawAvPMenuGlowyBar(int topleftX, int topleftY, int alpha, int lengt
 
 	temp.lpD3DBackSurface->LockRect(&lock, NULL, 0); if (lock.pBits == NULL) return;
 
-	if (ScreenDescriptorBlock.SDB_Width - topleftX < length)
+	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length)
 	{
-		length = ScreenDescriptorBlock.SDB_Width - topleftX;
+		length = /*ScreenDescriptorBlock.SDB_Width*/640 - topleftX;
 	}
 
 	if (length<0) length = 0;
@@ -1885,30 +1868,18 @@ extern void DrawAvPMenuGfx_Faded(enum AVPMENUGFX_ID menuGfxID, int topleftX, int
 	
 	int length = gfxPtr->Width;
 
-	if (ScreenDescriptorBlock.SDB_Width - topleftX < length) {
-		length = ScreenDescriptorBlock.SDB_Width - topleftX;
+	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length) {
+		length = /*ScreenDescriptorBlock.SDB_Width*/640 - topleftX;
 	}
-	if (length <= 0) return;
-
+	if (length <= 0) 
+	{
+		return;
+	}
 
 	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
-	{
 		alpha = ONE_FIXED;
-//		DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, FALSE);
-	}
-/*
-	else {
-		//DrawAlphaMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
-//		DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, FALSE);
-		DrawTexturedFadedQuad(topleftX, topleftY, menuGfxID, alpha);
-	}
-*/
-	DrawAlphaMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
 
-//	DrawTexturedFadedQuad(topleftX, topleftY, menuGfxID, alpha);
-
-//	DrawMenuQuad(topleftX, topleftY, 0, 0, menuGfxID, FALSE);
-
+	DrawAlphaMenuQuad(topleftX, topleftY, menuGfxID, alpha);
 
 #if 0 // bjd
    	unsigned short *destPtr;
@@ -1947,8 +1918,8 @@ extern void DrawAvPMenuGfx_Faded(enum AVPMENUGFX_ID menuGfxID, int topleftX, int
 	srcPtr = (unsigned char *)image->buf;
 	length = gfxPtr->Width;
 
-	if (ScreenDescriptorBlock.SDB_Width - topleftX < length) {
-		length = ScreenDescriptorBlock.SDB_Width - topleftX;
+	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length) {
+		length = /*ScreenDescriptorBlock.SDB_Width*/640 - topleftX;
 	}
 	if (length <= 0) return;
 
@@ -1999,6 +1970,7 @@ extern void DrawAvPMenuGfx_Faded(enum AVPMENUGFX_ID menuGfxID, int topleftX, int
 
 extern void DrawAvPMenuGfx_Clipped(enum AVPMENUGFX_ID menuGfxID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format, int topY, int bottomY)
 {	
+
 	GLOBALASSERT(menuGfxID < MAX_NO_OF_AVPMENUGFXS);
 
 	AVPMENUGFX *gfxPtr;
@@ -2027,26 +1999,21 @@ extern void DrawAvPMenuGfx_Clipped(enum AVPMENUGFX_ID menuGfxID, int topleftX, i
 
 	int length = gfxPtr->Width;
 
-	if (ScreenDescriptorBlock.SDB_Width - topleftX < length) 
+	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length) 
 	{
-		length = ScreenDescriptorBlock.SDB_Width - topleftX;
+		length = /*ScreenDescriptorBlock.SDB_Width*/640 - topleftX;
 	}
-	if (length <= 0) return;
+	if (length <= 0)
+	{	
+		return;
+	}
 
 //	DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
 
 	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
-	{
 		alpha = ONE_FIXED;
-//		DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, FALSE);
-	}
-	else 
-	{
-//		DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, TRUE);
-//		DrawAlphaMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
-	}
 
-	DrawAlphaMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
+	DrawAlphaMenuQuad(topleftX, topleftY, menuGfxID, alpha);
 
 #if 0 // bjd
    	unsigned short *destPtr;
@@ -2083,8 +2050,8 @@ extern void DrawAvPMenuGfx_Clipped(enum AVPMENUGFX_ID menuGfxID, int topleftX, i
 
 	int length = gfxPtr->Width;
 
-	if (ScreenDescriptorBlock.SDB_Width - topleftX < length) {
-		length = ScreenDescriptorBlock.SDB_Width - topleftX;
+	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length) {
+		length = /*ScreenDescriptorBlock.SDB_Width*/640 - topleftX;
 	}
 	if (length <= 0) return;
 

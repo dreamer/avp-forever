@@ -387,8 +387,8 @@ BOOL SetExecuteBufferDefaults()
 	d3d.lpD3DDevice->SetTextureStageState(1, D3DTSS_COLOROP,	D3DTOP_DISABLE);
 	d3d.lpD3DDevice->SetTextureStageState(1, D3DTSS_ALPHAOP,	D3DTOP_DISABLE);
 
-	d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_ADDRESSU,D3DTADDRESS_WRAP);
-	d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_ADDRESSV,D3DTADDRESS_WRAP);
+	d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+	d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF, (DWORD)0.5);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
@@ -7782,6 +7782,7 @@ extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, in
 
 void DrawFadeQuad(int topX, int topY, int alpha) 
 {
+	return;
 /*
 	// turn off texturing
 	LastError = d3d.lpD3DDevice->SetTexture(0,NULL);
@@ -8059,41 +8060,45 @@ void DrawQuad(int x, int y, int width, int height, int colour)
 	OUTPUT_TRIANGLE(1,2,3, 4);
 }
 
-void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, int alpha) 
+void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha) 
 {
-/*
-	LastError = d3d.lpD3DDevice->SetTexture(0,AvPMenuGfxStorage[image_num].menuTexture);
-	if(FAILED(LastError)) {
-		OutputDebugString("Couldn't set menu quad texture");
-	}
-	currentTextureId = image_num;
-*/
 	CheckVertexBuffer(4, image_num, TRANSLUCENCY_GLOWING);
 
-	// non power of 2 values
-	int width = AvPMenuGfxStorage[image_num].Width;
-	int height = AvPMenuGfxStorage[image_num].Height;
+	/* textures actual height/width (whether it's non power of two or not) */
+	int textureWidth = AvPMenuGfxStorage[image_num].Width;
+	int textureHeight = AvPMenuGfxStorage[image_num].Height;
 
-	// new, power of 2 values
-	int real_width = AvPMenuGfxStorage[image_num].newWidth;
-	int real_height = AvPMenuGfxStorage[image_num].newHeight;
+	/* we pad non power of two textures to pow2 */
+	int texturePOW2Width = AvPMenuGfxStorage[image_num].newWidth;
+	int texturePOW2Height = AvPMenuGfxStorage[image_num].newHeight;
 
 	alpha = (alpha / 256);
 	if (alpha > 255) alpha = 255;
-	D3DCOLOR colour = D3DCOLOR_ARGB(alpha,255,255,255);
+	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 
-	// alpha of 0 is transparent
-	// alpha of 256 is opaque
+	/* game used to render menus at 640x480. this allows us to use any resolution we want */
+	int quadWidth = ScreenDescriptorBlock.SDB_Width / ((1.0f / textureWidth) * 640);
+	int quadHeight = ScreenDescriptorBlock.SDB_Height / ((1.0f / textureHeight) * 480);
+
+	int quadX = (ScreenDescriptorBlock.SDB_Width / 640.0) * topX;
+	int quadY = (ScreenDescriptorBlock.SDB_Height / 480.0) * topY;
+
+//	char buf[200];
+//	sprintf(buf, "oldX: %d, oldY: %d - newX: %d, newY: %d\n", topX, topY, quadX, quadY);
+//	OutputDebugString(buf);
+
+	topX = quadX;
+	topY = quadY;
 
 	// bottom left
 	mainVertex[vb].sx = (float)topX - 0.5f;
-	mainVertex[vb].sy = (float)topY + height - 0.5f;
+	mainVertex[vb].sy = (float)topY + quadHeight - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = (1.0f / real_height) * height;
+	mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
 
 	vb++;
 
@@ -8110,25 +8115,25 @@ void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_n
 	vb++;
 
 	// bottom right
-	mainVertex[vb].sx = (float)topX + width - 0.5f;
-	mainVertex[vb].sy = (float)topY + height - 0.5f;
+	mainVertex[vb].sx = (float)topX + quadWidth - 0.5f;
+	mainVertex[vb].sy = (float)topY + quadHeight - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = (1.0f / real_width) * width;
-	mainVertex[vb].tv = (1.0f / real_height) * height;
+	mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
+	mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
 
 	vb++;
 
 	// top right
-	mainVertex[vb].sx = (float)topX + width - 0.5f;
+	mainVertex[vb].sx = (float)topX + quadWidth - 0.5f;
 	mainVertex[vb].sy = (float)topY - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = (1.0f / real_width) * width;
+	mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
 	mainVertex[vb].tv = 0.0f;
 
 	vb++;
@@ -8148,19 +8153,14 @@ void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_n
 
 void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha) 
 {
-/*
-	LastError = d3d.lpD3DDevice->SetTexture(0,AvPMenuGfxStorage[AVPMENUGFX_SMALL_FONT].menuTexture);
-	if(FAILED(LastError)) {
-		OutputDebugString("Couldn't set DrawSmallMenuCharacter texture");
-	}
-*/
+
 	CheckVertexBuffer(4, AVPMENUGFX_SMALL_FONT, TRANSLUCENCY_GLOWING);
 
-	alpha = (alpha / 256);// - 1;
+	alpha = (alpha / 256);
 
-	red = (red / 256);// - 1;
-	green = (green / 256);// - 1;
-	blue = (blue / 256);// - 1;
+	red = (red / 256);
+	green = (green / 256);
+	blue = (blue / 256);
 
 	// clamp if needed
 	if (alpha > 255) alpha = 255;
@@ -8182,9 +8182,18 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	float RecipW = 1.0f / image_width; // 0.00390625
 	float RecipH = 1.0f / image_height;
 
+	int quadWidth = ScreenDescriptorBlock.SDB_Width / ((1.0f / font_width) * 640);
+	int quadHeight = ScreenDescriptorBlock.SDB_Height / ((1.0f / font_height) * 480);
+
+	int quadX = (ScreenDescriptorBlock.SDB_Width / 640.0) * topX;
+	int quadY = (ScreenDescriptorBlock.SDB_Height / 480.0) * topY;
+
+	topX = quadX;
+	topY = quadY;
+
 	// bottom left
-	mainVertex[vb].sx = (float)topX - 0.5f;
-	mainVertex[vb].sy = (float)topY + font_height - 0.5f;
+	mainVertex[vb].sx = (float)topX;// - 0.5f;
+	mainVertex[vb].sy = (float)topY + quadHeight;// - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8195,8 +8204,8 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	vb++;
 
 	// top left
-	mainVertex[vb].sx = (float)topX - 0.5f;
-	mainVertex[vb].sy = (float)topY - 0.5f;
+	mainVertex[vb].sx = (float)topX;// - 0.5f;
+	mainVertex[vb].sy = (float)topY;// - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8207,8 +8216,8 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	vb++;
 
 	// bottom right
-	mainVertex[vb].sx = (float)topX + font_width - 0.5f;
-	mainVertex[vb].sy = (float)topY + font_height - 0.5f;
+	mainVertex[vb].sx = (float)topX + quadWidth;// - 0.5f;
+	mainVertex[vb].sy = (float)topY + quadHeight;// - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8219,8 +8228,8 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	vb++;
 
 	// top right
-	mainVertex[vb].sx = (float)topX + font_width - 0.5f;
-	mainVertex[vb].sy = (float)topY - 0.5f;
+	mainVertex[vb].sx = (float)topX + quadWidth;// - 0.5f;
+	mainVertex[vb].sy = (float)topY;// - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8245,6 +8254,7 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 
 void DrawBigChar(char c, int x, int y, int colour)
 {
+	return;
 	#define BIG_CHAR 30
 #if 0
 	/* realign it to our text image */
@@ -8328,7 +8338,8 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 	CheckVertexBuffer(4, TALLFONT_TEX, TRANSLUCENCY_GLOWING);
 
 	alpha = (alpha / 256);
-	if (alpha > 255) alpha = 255;
+	if (alpha > 255) 
+		alpha = 255;
 
 	D3DCOLOR colour = D3DCOLOR_ARGB(alpha,255,255,255);
 
@@ -8338,15 +8349,24 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 	int real_height = 512;
 	int real_width = 512;
 
-	int width_of_char = 30;
+//	int width_of_char = 30;
 	int height_of_char = 33;
+
+	int quadWidth = ScreenDescriptorBlock.SDB_Width / ((1.0f / char_width) * 640.0);
+	int quadHeight = ScreenDescriptorBlock.SDB_Height / ((1.0f / height_of_char) * 480.0);
+
+	int quadX = (ScreenDescriptorBlock.SDB_Width / 640.0) * topX;
+	int quadY = (ScreenDescriptorBlock.SDB_Height / 480.0) * topY;
+
+	topX = quadX;
+	topY = quadY;
 
 	float RecipW = (1.0f / real_width);
 	float RecipH = (1.0f / real_height);
 
 	// bottom left
 	mainVertex[vb].sx = (float)topX - 0.5f;
-	mainVertex[vb].sy = (float)topY + height_of_char - 0.5f;
+	mainVertex[vb].sy = (float)topY + quadHeight - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8369,8 +8389,8 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 	vb++;
 
 	// bottom right
-	mainVertex[vb].sx = (float)topX + char_width - 0.5f;
-	mainVertex[vb].sy = (float)topY + height_of_char - 0.5f;
+	mainVertex[vb].sx = (float)topX + quadWidth - 0.5f;
+	mainVertex[vb].sy = (float)topY + quadHeight - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8381,7 +8401,7 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 	vb++;
 
 	// top right
-	mainVertex[vb].sx = (float)topX + char_width - 0.5f;
+	mainVertex[vb].sx = (float)topX + quadWidth - 0.5f;
 	mainVertex[vb].sy = (float)topY - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;

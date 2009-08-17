@@ -740,8 +740,8 @@ BOOL InitialiseDirect3DImmediateMode()
 	ClearLog();
 	LogString("Starting to initialise Direct3D");
 
-	int width = 640;
-	int height = 480;
+	int width = 1024;//640;
+	int height = 768;//480;
 	int depth = 32;
 	int defaultDevice = D3DADAPTER_DEFAULT;
 	bool windowed = false;

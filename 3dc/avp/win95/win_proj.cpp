@@ -529,8 +529,8 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 
 		clientRect.left = 0;
 		clientRect.top = 0;
-		clientRect.right = 640;
-		clientRect.bottom = 480;
+		clientRect.right = WinWidth;
+		clientRect.bottom = WinHeight;
 
 		hWndMain = CreateWindowEx(
 			WS_EX_TOPMOST,
@@ -614,8 +614,6 @@ void ChangeWindowsSize(int width, int height)
 	}
 
 	GetClientRect(hWndMain, &testRect);
-
-	OutputDebugString("blah\n");
 }
 
 void InitialiseRawInput()

@@ -243,22 +243,19 @@ void Show_Presents(void)
 
 			if (timeRemaining > 6*ONE_FIXED)
 			{
-			  //	DrawGraphicWithFadingLevel(&Starfield_Backdrop,timeRemaining-7*ONE_FIXED);
-//				DrawAvPMenuGfx_Faded(AVPMENUGFX_BACKDROP, 0, 0, 15*ONE_FIXED-timeRemaining*2,AVPMENUFORMAT_LEFTJUSTIFIED);
-//				FadedScreen((15*ONE_FIXED-timeRemaining*2)/3);
 				DrawFadeQuad(0, 0, (15*ONE_FIXED-timeRemaining*2)/3);
 			}
 			else if (timeRemaining > 5*ONE_FIXED)
 			{
-				RenderMenuText(textPtr,MENU_CENTREX,y,6*ONE_FIXED-timeRemaining,AVPMENUFORMAT_CENTREJUSTIFIED);
+				RenderMenuText(textPtr, MENU_CENTREX, y, 6*ONE_FIXED-timeRemaining, AVPMENUFORMAT_CENTREJUSTIFIED);
 			}
 			else if (timeRemaining > 4*ONE_FIXED)
 			{
-				RenderMenuText(textPtr,MENU_CENTREX,y,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
+				RenderMenuText(textPtr, MENU_CENTREX, y, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
 			}
 			else if (timeRemaining > 3*ONE_FIXED)
 			{
-				RenderMenuText(textPtr,MENU_CENTREX,y,timeRemaining-3*ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
+				RenderMenuText(textPtr, MENU_CENTREX, y, timeRemaining-3*ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
 			}
 
 			ThisFramesRenderingHasFinished();

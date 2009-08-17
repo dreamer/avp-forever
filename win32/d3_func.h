@@ -109,7 +109,7 @@ BOOL ReleaseVolatileResources();
 BOOL CreateVolatileResources();
 BOOL ChangeGameResolution(int width, int height, int colour_depth);
 
-void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, int alpha);
+void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha);
 void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha);
 void DrawBigChar(char c, int x, int y, int colour);
 void DrawCloudTable(int topX, int topY, int word_length, int alpha);
