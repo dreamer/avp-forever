@@ -45,6 +45,7 @@ typedef struct D3DDriverInfo {
 	D3DFORMAT				Formats[20];
 	D3DADAPTER_IDENTIFIER9	AdapterInfo;
 	D3DDISPLAYMODE			DisplayMode[100];
+	int						NumModes;
 } D3DDRIVERINFO;
 
 typedef struct D3DInfo {
@@ -60,7 +61,7 @@ typedef struct D3DInfo {
     int						NumDrivers;
     int						CurrentDriver;
 //	D3DADAPTER_IDENTIFIER9	AdapterInfo;
-	int						NumModes;
+//	int						NumModes;
 //	D3DDISPLAYMODE			DisplayMode[100];
 //	D3DFORMAT				Formats[20];
     D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS]; // BJD

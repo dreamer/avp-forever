@@ -371,8 +371,8 @@ BOOL SetExecuteBufferDefaults()
 // module.  Note that Microsoft's software renderers do not support this,
 // unfortunately.
 
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC );
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC );
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 8);
 
@@ -396,7 +396,10 @@ BOOL SetExecuteBufferDefaults()
 
 	D3DShadingMode = D3DSHADE_GOURAUD;
 
-	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
+//	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
+//	d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+//	d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_MINFILTER, D3DTEXF_POINT);
+
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 
 	d3d.lpD3DDevice->SetRenderState(D3DRS_CULLMODE,	D3DCULL_NONE);
@@ -414,7 +417,7 @@ BOOL SetExecuteBufferDefaults()
 	D3DZWriteEnable = TRUE;
 
 	// set less + equal z buffer test
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_LESSEQUAL);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 	D3DZFunc = D3DCMP_LESSEQUAL;
 
 	// fill out first render list struct
@@ -800,7 +803,7 @@ BOOL ExecuteBuffer()
 	int tempTexture = 0;
 
 	// we can assume to keep this turned on
-	ChangeFilteringMode(FILTERING_BILINEAR_ON);
+//	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
 	for (int i = 0; i < renderCount; i++)
 #if 1
@@ -2171,6 +2174,18 @@ void D3D_ZBufferedTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a) 
 {
 	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
+
+	/* game used to render menus at 640x480. this allows us to use any resolution we want */
+	int quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / (x1 - x0)) * 640));
+	int quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / (y1 - y0)) * 480));
+
+	int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0) * x0);
+	int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0) * y0);
+
+	x0 = quadX;
+	x1 = quadX + quadWidth;
+	y0 = quadY;
+	y1 = quadY + quadHeight;
 
 	// top left - 0
 	mainVertex[vb].sx = (float)x0;
@@ -8077,16 +8092,16 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 
 	/* game used to render menus at 640x480. this allows us to use any resolution we want */
-	int quadWidth = ScreenDescriptorBlock.SDB_Width / ((1.0f / textureWidth) * 640);
-	int quadHeight = ScreenDescriptorBlock.SDB_Height / ((1.0f / textureHeight) * 480);
+	int quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / textureWidth) * 640));
+	int quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / textureHeight) * 480));
 
-	int quadX = (ScreenDescriptorBlock.SDB_Width / 640.0) * topX;
-	int quadY = (ScreenDescriptorBlock.SDB_Height / 480.0) * topY;
-
-//	char buf[200];
-//	sprintf(buf, "oldX: %d, oldY: %d - newX: %d, newY: %d\n", topX, topY, quadX, quadY);
-//	OutputDebugString(buf);
-
+	int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0) * topX);
+	int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0) * topY);
+/*
+	char buf[200];
+	sprintf(buf, "oldX: %d, oldY: %d - newX: %d, newY: %d\n", topX, topY, quadX, quadY);
+	OutputDebugString(buf);
+*/
 	topX = quadX;
 	topY = quadY;
 
@@ -8156,6 +8171,8 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 
 	CheckVertexBuffer(4, AVPMENUGFX_SMALL_FONT, TRANSLUCENCY_GLOWING);
 
+	SetFilteringMode(FILTERING_BILINEAR_OFF);
+
 	alpha = (alpha / 256);
 
 	red = (red / 256);
@@ -8182,18 +8199,18 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	float RecipW = 1.0f / image_width; // 0.00390625
 	float RecipH = 1.0f / image_height;
 
-	int quadWidth = ScreenDescriptorBlock.SDB_Width / ((1.0f / font_width) * 640);
-	int quadHeight = ScreenDescriptorBlock.SDB_Height / ((1.0f / font_height) * 480);
+	int quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / font_width) * 640));
+	int quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / font_height) * 480));
 
-	int quadX = (ScreenDescriptorBlock.SDB_Width / 640.0) * topX;
-	int quadY = (ScreenDescriptorBlock.SDB_Height / 480.0) * topY;
+	int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0) * topX);
+	int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0) * topY);
 
 	topX = quadX;
 	topY = quadY;
 
 	// bottom left
-	mainVertex[vb].sx = (float)topX;// - 0.5f;
-	mainVertex[vb].sy = (float)topY + quadHeight;// - 0.5f;
+	mainVertex[vb].sx = (float)topX - 0.5f;
+	mainVertex[vb].sy = (float)topY + quadHeight - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8204,8 +8221,8 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	vb++;
 
 	// top left
-	mainVertex[vb].sx = (float)topX;// - 0.5f;
-	mainVertex[vb].sy = (float)topY;// - 0.5f;
+	mainVertex[vb].sx = (float)topX - 0.5f;
+	mainVertex[vb].sy = (float)topY - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8216,8 +8233,8 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	vb++;
 
 	// bottom right
-	mainVertex[vb].sx = (float)topX + quadWidth;// - 0.5f;
-	mainVertex[vb].sy = (float)topY + quadHeight;// - 0.5f;
+	mainVertex[vb].sx = (float)topX + quadWidth - 0.5f;
+	mainVertex[vb].sy = (float)topY + quadHeight - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8228,8 +8245,8 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	vb++;
 
 	// top right
-	mainVertex[vb].sx = (float)topX + quadWidth;// - 0.5f;
-	mainVertex[vb].sy = (float)topY;// - 0.5f;
+	mainVertex[vb].sx = (float)topX + quadWidth - 0.5f;
+	mainVertex[vb].sy = (float)topY - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8352,11 +8369,11 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 //	int width_of_char = 30;
 	int height_of_char = 33;
 
-	int quadWidth = ScreenDescriptorBlock.SDB_Width / ((1.0f / char_width) * 640.0);
-	int quadHeight = ScreenDescriptorBlock.SDB_Height / ((1.0f / height_of_char) * 480.0);
+	int quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / char_width) * 640.0));
+	int quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / height_of_char) * 480.0));
 
-	int quadX = (ScreenDescriptorBlock.SDB_Width / 640.0) * topX;
-	int quadY = (ScreenDescriptorBlock.SDB_Height / 480.0) * topY;
+	int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0) * topX);
+	int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0) * topY);
 
 	topX = quadX;
 	topY = quadY;

@@ -610,14 +610,10 @@ void CheckIfMirroringIsRequired(void);
 
 void AvpShowViews(void)
 {
-	#if SOFTWARE_RENDERER
-	FlushSoftwareZBuffer();
-	#else
+
 	FlushD3DZBuffer();
-	#endif
 
 	UpdateAllFMVTextures();	
-
 
 	/* Update attached object positions and orientations etc. */
 	UpdateCamera();
@@ -637,11 +633,7 @@ void AvpShowViews(void)
 	PlatformSpecificShowViewEntry(Global_VDB_Ptr, &ScreenDescriptorBlock);
 	TranslationSetup();
 
-	{
-//		extern void ThisFramesRenderingHasBegun(void);
-//		ThisFramesRenderingHasBegun();
-		D3D_DrawBackdrop();
-	}
+	D3D_DrawBackdrop();
 
 	/* Now we know where the camera is, update the modules */
 

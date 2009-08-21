@@ -22,6 +22,11 @@ extern "C" {
 #include "eax.h"
 #include "vmanpset.h"
 
+#ifdef WIN32
+	#include <shlobj.h>
+	#include <shlwapi.h>
+#endif
+
 extern "C++" {
 	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 	#include "logString.h"
@@ -452,6 +457,8 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture(int width, int height, int usage, int pool)
 
 /* TODO: Pre-order source image data into ARGB order? */
 
+int imageNum = 0;
+
 // use this to make textures from non power of two images
 LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int *real_width) 
 {
@@ -517,8 +524,8 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 	/* loop, converting RGB to BGR for D3DX function */
 	for (int i = 0; i < imageSize; i+=4)
 	{
-		// RGB
-		// BGR
+
+		// BGRA			 // RGBA
 		imageData[i+2] = tex->buffer[i];
 		imageData[i+1] = tex->buffer[i+1];
 		imageData[i]   = tex->buffer[i+2];
@@ -547,7 +554,29 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 		return NULL;
 
 	}
+#if 0
+	TCHAR strPath[MAX_PATH];
 
+	/* finds the path to the folder. On Win7, this would be "C:\Users\<username>\AppData\Local\ as an example */
+	if ( FAILED(SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, strPath ) ) )
+	{
+		return false;
+	}
+
+	PathAppend( strPath, TEXT( "Fox\\Aliens versus Predator\\" ) );
+
+	char buf[100];
+	sprintf(buf, "image_%d.png", imageNum);
+
+	strcat( strPath, buf);
+
+	if (FAILED(D3DXSaveTextureToFileA(strPath, D3DXIFF_PNG, destTexture, NULL))) 
+	{
+		OutputDebugString("\n couldnt save tex to file");
+	}
+
+	imageNum++;
+#endif
 	delete TgaHeader;
 	delete[] buffer;
 
@@ -587,7 +616,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, int usa
 	/* loop, converting RGB to BGR for D3DX function */
 	for (int i = 0; i < imageSize; i+=4)
 	{
-		// RGB
+		// ARGB
 		// BGR
 		imageData[i+2] = buf[i];
 		imageData[i+1] = buf[i+1];
@@ -740,8 +769,8 @@ BOOL InitialiseDirect3DImmediateMode()
 	ClearLog();
 	LogString("Starting to initialise Direct3D");
 
-	int width = 1024;//640;
-	int height = 768;//480;
+	int width = 640;
+	int height = 480;
 	int depth = 32;
 	int defaultDevice = D3DADAPTER_DEFAULT;
 	bool windowed = false;
@@ -784,12 +813,14 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	// count number of display formats in our array
 	int NumDisplayFormats = sizeof(DisplayFormats) / sizeof(DisplayFormats[0]);
-	d3d.NumModes = 0;
+//	d3d.NumModes = 0;
 	int num_fomats = 0;
 
 	/* loop through all the devices, getting the list of formats available for each */
 	for (int thisDevice = 0; thisDevice < d3d.NumDrivers; thisDevice++)
 	{
+		d3d.Driver[thisDevice].NumModes = 0;
+
 		for (int CurrentDisplayFormat = 0; CurrentDisplayFormat < NumDisplayFormats; CurrentDisplayFormat++) 
 		{
 			// Get available display modes
@@ -808,7 +839,7 @@ BOOL InitialiseDirect3DImmediateMode()
 				int j = 0;
 				
 				// Check if the mode already exists (to filter out refresh rates)
-				for(; j < d3d.NumModes; j++ ) 
+				for(; j < d3d.Driver[thisDevice].NumModes; j++ ) 
 				{
 					if (( d3d.Driver[thisDevice].DisplayMode[j].Width  == DisplayMode.Width ) &&
 						( d3d.Driver[thisDevice].DisplayMode[j].Height == DisplayMode.Height) &&
@@ -817,14 +848,18 @@ BOOL InitialiseDirect3DImmediateMode()
 				}
 
 				// If we found a new mode, add it to the list of modes
-				if (j == d3d.NumModes) 
+				if (j == d3d.Driver[thisDevice].NumModes) 
 				{
-					d3d.Driver[thisDevice].DisplayMode[d3d.NumModes].Width       = DisplayMode.Width;
-					d3d.Driver[thisDevice].DisplayMode[d3d.NumModes].Height      = DisplayMode.Height;
-					d3d.Driver[thisDevice].DisplayMode[d3d.NumModes].Format      = DisplayMode.Format;
-					d3d.Driver[thisDevice].DisplayMode[d3d.NumModes].RefreshRate = 0;
+					assert (DisplayMode.Width != 0);
+					assert (DisplayMode.Height != 0);
+
+					d3d.Driver[thisDevice].DisplayMode[d3d.Driver[thisDevice].NumModes].Width       = DisplayMode.Width;
+					d3d.Driver[thisDevice].DisplayMode[d3d.Driver[thisDevice].NumModes].Height      = DisplayMode.Height;
+					d3d.Driver[thisDevice].DisplayMode[d3d.Driver[thisDevice].NumModes].Format      = DisplayMode.Format;
+					d3d.Driver[thisDevice].DisplayMode[d3d.Driver[thisDevice].NumModes].RefreshRate = 0;
 					
-					d3d.NumModes++;
+					//d3d.NumModes++;
+					d3d.Driver[thisDevice].NumModes++;
 
 					int f = 0;
 
@@ -877,10 +912,10 @@ BOOL InitialiseDirect3DImmediateMode()
 		d3dpp.BackBufferHeight = height;
 		// setting this to interval one will cap the framerate to monitor refresh
 		// the timer goes a bit mad if this isnt capped!
-//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 //		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
-		//ChangeWindowsSize(d3dpp.BackBufferWidth, d3dpp.BackBufferHeight);
+		ChangeWindowsSize(d3dpp.BackBufferWidth, d3dpp.BackBufferHeight);
 	}
 	d3dpp.BackBufferCount = 1;
 
@@ -1074,7 +1109,7 @@ BOOL InitialiseDirect3DImmediateMode()
 			LogString("\t Depth Format set: Unknown");
 			break;
 	}
-	
+
 	ZeroMemory( &d3d.D3DViewport, sizeof(d3d.D3DViewport) );
 	d3d.D3DViewport.X = 0;
 	d3d.D3DViewport.Y = 0;

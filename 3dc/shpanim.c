@@ -167,7 +167,6 @@ void DoShapeAnimation (DISPLAYBLOCK * dptr)
 			GLOBALASSERT (0);
 		}
 	}
-
 }
 
 
@@ -183,9 +182,7 @@ void DoAllShapeAnimations ()
 		{
 			DoShapeAnimation(dptr);
 		}
-
 	}
-
 }
 
 

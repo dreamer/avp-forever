@@ -1303,7 +1303,7 @@ static void RenderMenu(void)
 	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
 	{
 		char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
-		RenderMenuText(textPtr,MENU_CENTREX,70,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
+		RenderMenuText(textPtr, MENU_CENTREX, 70, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
 		
 #if 1 // and now we've been told to remove the "Gamers Edition" etc. :)
 		// main menu subtitle e.g. "Gamers Edition" etc.
@@ -1364,7 +1364,8 @@ static void RenderBriefingScreenInfo(void)
 	}
 	RenderMenuText(GetTextString(textID),MENU_LEFTXEDGE,180,ONE_FIXED/2,AVPMENUFORMAT_LEFTJUSTIFIED);
 #endif	
-	RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2,ONE_FIXED);
+
+	RenderBriefingText(/*ScreenDescriptorBlock.SDB_Height*/480 / 2, ONE_FIXED);
 }
 /* KJL 12:11:18 24/09/98 - specialised code to handle episode selection screen, which
 has features which make it too awkward to add to the general system */
@@ -1540,8 +1541,17 @@ static void RenderKeyConfigurationMenu(void)
 	AVPMENU_ELEMENT *elementPtr = AvPMenus.MenuElements;//AvPMenus.CurrentlySelectedElement];
 	int centrePosition;
 	int i;
-	int centreY = ScreenDescriptorBlock.SDB_Height/2+25;
 	int y;
+	int centreY;
+
+	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
+	{
+		 centreY = 480 / 2+25;
+	}
+	else
+	{
+		centreY = ScreenDescriptorBlock.SDB_Height/2+25;
+	}
 	
 	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
 	{
@@ -1602,7 +1612,6 @@ static void RenderKeyConfigurationMenu(void)
 			{
 				elementPtr->Brightness = targetBrightness;
 			}
-			
 		}
 		
 		RenderMenuElement(elementPtr,i,y);
@@ -1901,7 +1910,7 @@ static void RenderLoadGameMenu(void)
 
 		if (e==AvPMenus.CurrentlySelectedElement)
 		{
-			if(AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
+			if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 			{
 				Hardware_RenderHighlightRectangle(MENU_LEFTXEDGE,y-2,MENU_RIGHTXEDGE,y+4+HUD_FONT_HEIGHT*2,0,128,0);
 			}
@@ -3372,7 +3381,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 		case AVPMENU_ELEMENT_SAVESETTINGS:
 		{
 			char *textPtr = GetTextString(elementPtr->TextDescription);
-			int menuCentreX = /*ScreenDescriptorBlock.SDB_Width*/640 / 2; // bjd - MENU
+			int menuCentreX = ScreenDescriptorBlock.SDB_Width / 2;
 			// general text rendering
 			if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 			{
@@ -4750,107 +4759,6 @@ extern int VideoMode;
 extern int WindowMode;
 extern int WindowRequestMode;
 
-extern int DXMemoryMode;
-extern int DXMemoryRequestMode;
-
-/* bjd - commented this out
-extern void SelectMenuDisplayMode(void)
-{
-    MinimizeAllImages();
-	TimeStampedMessage("after MinimizeAllImages");
-	MinimizeAllDDGraphics();
-	TimeStampedMessage("after MinimizeAllDDGraphics");
-
-    finiObjectsExceptDD();
-	TimeStampedMessage("after finiObjectsExceptDD");
-
-  	finiObjects();
-	SelectDirectDrawObject(NULL);
-
-	DXMemoryRequestMode = RequestSystemMemoryAlways;
-	DXMemoryMode = SystemMemoryPreferred;
-
-	RasterisationRequestMode = RequestSoftwareRasterisation;
-	VideoMode = VideoMode_DX_640x480x15;
-	VideoModeTypeScreen = VideoModeType_15;
-	WindowMode = WindowRequestMode;
-	ScreenDescriptorBlock.SDB_Width = 640;
-	ScreenDescriptorBlock.SDB_Height = 480;
-	ScreenDescriptorBlock.SDB_ScreenDepth = VideoModeType_15;
-
-	#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
-	ChangeDirectDrawObject();
-	#endif
-	TimeStampedMessage("after ChangeDirectDrawObject");
-
-	GenerateDirectDrawSurface();
-	TimeStampedMessage("after GenerateDirectDrawSurface");
-
-	{
-		extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
-		Global_VDB_Ptr = 0;
-	}
-}
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#if 0
-	 
-
-
-struct STARDESC
-{       
-	int X;
-	int Y;
-	int Chasing;
-	int Fleeing;
-};
-#define NUMBER_OF_STARS 128
-
-struct STARDESC Star[NUMBER_OF_STARS];
-
-static void DrawStar(int x, int y)
-{
-	extern unsigned char *ScreenBuffer;
-	extern long BackBufferPitch;
-
-	int xi,xf,xfm,yi,yf,yfm;
-
-	xi=x/65536;
-	yi=y/65536;
-	xf = x - xi*65536;
-	yf = y - yi*65536;
-	xfm = ONE_FIXED - xf;
-	yfm = ONE_FIXED - yf;
-
-	*(unsigned short*)(ScreenBuffer + ((xi+0)*2 + (yi+0)*BackBufferPitch)) = (unsigned short)WhiteOfBrightness(MUL_FIXED(xfm,yfm));
-	*(unsigned short*)(ScreenBuffer + ((xi+0)*2 + (yi+1)*BackBufferPitch)) = (unsigned short)WhiteOfBrightness(MUL_FIXED(xfm,yf));
-	*(unsigned short*)(ScreenBuffer + ((xi+1)*2 + (yi+0)*BackBufferPitch)) = (unsigned short)WhiteOfBrightness(MUL_FIXED(xf,yfm));
-	*(unsigned short*)(ScreenBuffer + ((xi+1)*2 + (yi+1)*BackBufferPitch)) = (unsigned short)WhiteOfBrightness(MUL_FIXED(xf,yf));
-
-}
-#endif
-
 static void InitMainMenusBackdrop(void)
 {
 	#if 0
@@ -5292,7 +5200,16 @@ void RenderBriefingText(int centreY, int brightness)
 		}
 	}
 
-	x = (ScreenDescriptorBlock.SDB_Width-lengthOfLongestLine)/2;
+	/* bjd */
+	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
+	{
+		x = (640 - lengthOfLongestLine)/2;
+	}
+	else
+	{
+		x = (ScreenDescriptorBlock.SDB_Width-lengthOfLongestLine)/2;
+	}
+
 	y = centreY - 3*HUD_FONT_HEIGHT;
 
 	for(i=0; i<5; i++)

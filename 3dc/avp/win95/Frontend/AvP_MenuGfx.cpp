@@ -720,11 +720,15 @@ extern void Hardware_RenderKeyConfigRectangle(int alpha)
 	extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha);
 	D3D_DrawRectangle(10,ScreenDescriptorBlock.SDB_Height/2+25-115,ScreenDescriptorBlock.SDB_Width-20,250,alpha);
 }
+
 extern void RenderKeyConfigRectangle(int alpha)
 {
 	extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha);
+//	D3D_DrawRectangle(10, /*ScreenDescriptorBlock.SDB_Height*/480/2+25-115, /*ScreenDescriptorBlock.SDB_Width*/640-20 ,250 ,alpha);
+//	D3D_DrawRectangle(10, (480 / 2) + 25-115, 640 - 10 , (480 / 2) + 25-115+250 ,alpha);
 	D3D_DrawRectangle(10,ScreenDescriptorBlock.SDB_Height/2+25-115,ScreenDescriptorBlock.SDB_Width-20,250,alpha);
-//	return;
+
+
 /*
 	int x = 10;
 	int y = ScreenDescriptorBlock.SDB_Height/2+25-115;
@@ -798,12 +802,12 @@ extern void RenderKeyConfigRectangle(int alpha)
 	temp.lpD3DBackSurface->UnlockRect();
 #endif
 }
-extern void Hardware_RenderHighlightRectangle(int x1,int y1,int x2,int y2,int r, int g, int b)
+extern void Hardware_RenderHighlightRectangle(int x1, int y1, int x2, int y2, int r, int g, int b)
 {
 	D3D_Rectangle(x1, y1, x2, y2, r, g, b, 255);
 }
 
-extern void RenderHighlightRectangle(int x1,int y1,int x2,int y2, int r, int g, int b)
+extern void RenderHighlightRectangle(int x1, int y1, int x2, int y2, int r, int g, int b)
 {
 	// green rectangle highlight on load screen etc
 	D3D_Rectangle(x1, y1, x2, y2, r, g, b, 255);
@@ -1175,7 +1179,6 @@ extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 
 	gfxPtr = &AvPMenuGfxStorage[menuGfxID];
 
-//#if 0 // bjd	
 	CL_GetImageFileName(buffer, 100, gfxPtr->FilenamePtr, LIO_RELATIVEPATH);
 	
 	//see if graphic can be found in fast file
@@ -1240,7 +1243,7 @@ extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 	{
 		AvPMenuGfxStorage[menuGfxID].menuTexture = CreateD3DTexturePadded((AvPTexture*)gfxPtr->ImagePtr, &gfxPtr->newHeight, &gfxPtr->newWidth);
 
-		if( AvPMenuGfxStorage[menuGfxID].menuTexture == NULL) {
+		if (AvPMenuGfxStorage[menuGfxID].menuTexture == NULL) {
 			OutputDebugString("Texture in AvPMenuGfxStorage was NULL!");
 		}
 	}
@@ -1250,9 +1253,6 @@ extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 	GLOBALASSERT(gfxPtr->Width>0);
 	GLOBALASSERT(gfxPtr->Height>0);
 	gfxPtr->hBackup=0;
-
-//	ATIncludeSurface(gfxPtr->ImagePtr,gfxPtr->hBackup);
-//#endif
 }
 
 static void ReleaseAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)

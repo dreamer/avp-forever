@@ -114,8 +114,6 @@ int memoryInitialisationFailure = 0;
 
 void ProcessSystemObjects();
 
-void LevelSpecificChecks(void);
-
 /*runtime maintainance*/
 
 void FindObjectOfFocus();
@@ -479,8 +477,7 @@ void UpdateGame(void)
 	#if PENTIUM_PROFILING_ON 
   	ProfileStop("SOUND SYS");
 	#endif
- 
-	LevelSpecificChecks();
+
 //	NormaliseTest();
 	MessageHistory_Maintain();
 
@@ -523,8 +520,6 @@ void UpdateGame(void)
 		LeanScale+=(ONE_FIXED-TimeScale)*5;
 		
 	}
-	
-
 }
 
 
@@ -551,12 +546,6 @@ void NewAndOldModules(int num_new, MODULE **m_new, int num_old, MODULE **m_old, 
 	/* this is the important bit */
 	DoObjectVisibilities();
 
-}
-
-
-void LevelSpecificChecks(void)
-{
-/* ahem, level specific hacks might be more accurate */
 }
 
 extern void CheckCDStatus(void)

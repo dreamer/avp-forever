@@ -3,6 +3,7 @@
 #include <sstream>
 #include "logString.h"
 #include "configFile.h"
+#include <assert.h>
 
 extern "C"
 {
@@ -17,7 +18,7 @@ DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
 
 void NextVideoMode2() 
 {
-	if (++CurrentVideoMode >= d3d.NumModes)
+	if (++CurrentVideoMode >= d3d.Driver[d3d.CurrentDriver].NumModes)
 	{
 		CurrentVideoMode = 0;
 	}
@@ -27,7 +28,7 @@ void PreviousVideoMode2()
 {
 	if (--CurrentVideoMode < 0)
 	{
-		CurrentVideoMode = d3d.NumModes - 1;
+		CurrentVideoMode = d3d.Driver[d3d.CurrentDriver].NumModes - 1;
 	}
 }
 
@@ -71,6 +72,10 @@ char *GetVideoModeDescription3()
 			colourDepth = 16;
 			break;
 	}
+
+	assert (d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Width != 0);
+	assert (d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Height != 0);
+
 	sprintf(buf, "%dx%dx%d", d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Width, d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Height, colourDepth);
 	return buf;
 }
@@ -79,7 +84,7 @@ void GetDeviceAndVideoModePrefences()
 {
 	int colourDepth = 0;
 
-	for (int i = 0; i < d3d.NumModes; i++)
+	for (int i = 0; i < d3d.Driver[d3d.CurrentDriver].NumModes; i++)
 	{
 		// determine colour depth from d3d format
 		switch(d3d.Driver[d3d.CurrentDriver].DisplayMode[i].Format) 

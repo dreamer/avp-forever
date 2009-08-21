@@ -312,6 +312,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 	int numVisMods=0;
 	int numVisObjs=0;
 	ProfileStart();
+
 	while(numOfObjects)
 	{
 		extern DISPLAYBLOCK *Player;
@@ -322,7 +323,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 		/* if it's a module, which isn't inside another module */
 		if (modulePtr && !(modulePtr->m_flags & m_flag_slipped_inside))
 		{
-			#if 1
+			#if 0
  			if(PointIsInModule(&(VDBPtr->VDB_World),modulePtr))
 			{
 				VisibleModules[numVisMods].DispPtr = objectPtr;
