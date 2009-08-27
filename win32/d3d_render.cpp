@@ -217,7 +217,7 @@ static unsigned char DefaultD3DTextureFilterMax;
 
 extern void ScanImagesForFMVs();
 
-static int NumberOfRenderedTriangles=0;
+static int NumberOfRenderedTriangles = 0;
 int NumberOfLandscapePolygons;
 RENDERSTATES CurrentRenderStates;
 
@@ -623,7 +623,6 @@ BOOL BeginD3DScene()
 		}
 	}
 
-	NumberOfRenderedTriangles = 0;
 	LastError = d3d.lpD3DDevice->BeginScene();
 
 	if (FAILED(LastError)) 
@@ -674,7 +673,8 @@ BOOL EndD3DScene()
 		ReleasePrintDebuggingText("NumberOfRenderedTriangles: %d\n",NumberOfRenderedTriangles);
 	}
 //	textprint ("NumberOfRenderedTrianglesPerSecond: %d\n",DIV_FIXED(NumberOfRenderedTriangles,NormalFrameTime));
-	NumberOfLandscapePolygons=0;
+	NumberOfLandscapePolygons = 0;
+	NumberOfRenderedTriangles = 0;
 
 	if (FAILED(LastError)) 
 	{
@@ -683,8 +683,7 @@ BOOL EndD3DScene()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
-	else
-	  return TRUE;
+	else return TRUE;
 }
 
 extern int mainMenu;
@@ -834,6 +833,7 @@ BOOL ExecuteBuffer()
 				LogDxError(LastError, __LINE__, __FILE__);
 			}
 		}
+		NumberOfRenderedTriangles += num_prims / 3;
 	}
 
 /* do transparents here.. */
@@ -877,6 +877,7 @@ BOOL ExecuteBuffer()
 				LogDxError(LastError, __LINE__, __FILE__);
 			}
 		}
+		NumberOfRenderedTriangles += num_prims / 3;
 	}
 #else
 	for (unsigned int i = 0; i < /*renderTest.size()*/renderCount; i++)
@@ -2175,17 +2176,20 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 {
 	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
 
-	/* game used to render menus at 640x480. this allows us to use any resolution we want */
-	int quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / (x1 - x0)) * 640));
-	int quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / (y1 - y0)) * 480));
+	if (mainMenu)
+	{
+		/* game used to render menus at 640x480. this allows us to use any resolution we want */
+		int quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / (x1 - x0)) * 640));
+		int quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / (y1 - y0)) * 480));
 
-	int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0) * x0);
-	int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0) * y0);
+		int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0) * x0);
+		int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0) * y0);
 
-	x0 = quadX;
-	x1 = quadX + quadWidth;
-	y0 = quadY;
-	y1 = quadY + quadHeight;
+		x0 = quadX;
+		x1 = quadX + quadWidth;
+		y0 = quadY;
+		y1 = quadY + quadHeight;
+	}
 
 	// top left - 0
 	mainVertex[vb].sx = (float)x0;
@@ -7886,7 +7890,7 @@ void DrawBinkFmv(int topX, int topY, int width, int height, LPDIRECT3DTEXTURE9 f
 	LastError = d3d.lpD3DDevice->SetTexture(0, fmvTexture);
 
 	/* height and width of d3d texture */
-	int texSize = 1024;
+//	int texSize = width;//1024;
 
 //	float RecipW = (1.0f / texSize);
 //	float RecipH = (1.0f / texSize);
@@ -7899,7 +7903,7 @@ void DrawBinkFmv(int topX, int topY, int width, int height, LPDIRECT3DTEXTURE9 f
 	quadVert[0].color = D3DCOLOR_ARGB(255,255,255,255);
 	quadVert[0].specular = RGBALIGHT_MAKE(0,0,0,255);
 	quadVert[0].tu = 0.0f;
-	quadVert[0].tv = (1.0f / texSize) * height;
+	quadVert[0].tv = (1.0f / height) * height;
 
 	// top left
 	quadVert[1].sx = (float)topX - 0.5f;
@@ -7918,8 +7922,8 @@ void DrawBinkFmv(int topX, int topY, int width, int height, LPDIRECT3DTEXTURE9 f
 	quadVert[2].rhw = 1.0f;
 	quadVert[2].color = D3DCOLOR_ARGB(255,255,255,255);
 	quadVert[2].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[2].tu = (1.0f / texSize) * width;
-	quadVert[2].tv = (1.0f / texSize) * height;
+	quadVert[2].tu = (1.0f / width) * width;
+	quadVert[2].tv = (1.0f / height) * height;
 
 	// top right
 	quadVert[3].sx = (float)topX + width - 0.5f;
@@ -7928,7 +7932,7 @@ void DrawBinkFmv(int topX, int topY, int width, int height, LPDIRECT3DTEXTURE9 f
 	quadVert[3].rhw = 1.0f;
 	quadVert[3].color = D3DCOLOR_ARGB(255,255,255,255);
 	quadVert[3].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[3].tu = (1.0f / texSize) * width;
+	quadVert[3].tu = (1.0f / width) * width;
 	quadVert[3].tv = 0.0f;
 
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);

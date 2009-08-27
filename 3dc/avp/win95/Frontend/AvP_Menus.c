@@ -320,7 +320,7 @@ int AvP_MainMenus(void)
 	}
 	VideoModeNotAvailable = 0;
 
-	if(AvP.LevelCompleted && CheatMode_Active == CHEATMODE_NONACTIVE && !DebuggingCommandsActive)
+	if (AvP.LevelCompleted && CheatMode_Active == CHEATMODE_NONACTIVE && !DebuggingCommandsActive)
 	{
 		HandlePostGameFMVs();
 		OkayToPlayNextEpisode();

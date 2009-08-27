@@ -1155,7 +1155,6 @@ static int DHM_MoveBufferToQueue(int* pPosX,int* pPosY,int fZeroLeftMargin)
 
 		return NumLines;
 	}
-
 }
 
 
@@ -1602,6 +1601,7 @@ void InitPrintQueue(void)
 	WITHOUT A SHAPE RELOAD!!!
 */
 
+#if 0 // bjd
 int ChangeDisplayModes(HINSTANCE hInst, int nCmd, 
      int NewVideoMode, int NewWindowMode,
      int NewZBufferMode, int NewRasterisationMode, 
@@ -1699,3 +1699,4 @@ int ChangeDisplayModes(HINSTANCE hInst, int nCmd,
 
     return TRUE;
 }
+#endif

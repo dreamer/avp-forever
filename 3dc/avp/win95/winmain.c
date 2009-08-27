@@ -23,7 +23,6 @@
 #include "language.h"
 #include "huddefs.h"
 #include "vision.h"
-//#include "pcmenus.h"
 #include "avp_menus.h"
 #include "kshape.h"
 #define UseLocalAssert TRUE
@@ -175,7 +174,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	AVP_NCmd = nCmdShow;
 	skOff = startupStickyKeys;
 	
-	if( (skOff.dwFlags & SKF_STICKYKEYSON) == 0 )
+	if ((skOff.dwFlags & SKF_STICKYKEYSON) == 0)
 	{
 		// Disable the hotkey and the confirmation
 		skOff.dwFlags &= ~SKF_HOTKEYACTIVE;
@@ -193,7 +192,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	SetFastRandom();
 	
-	/**** 
+	/****
 		init game now ONLY sets up varibles for the whole
 		game. If you want to put something in it it must
 		be something that only needs to be called once
@@ -287,7 +286,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			QuickStartMultiplayer = 0;
 		}
 
-		if(strstr(command_line,"-keeprif"))
+		if (strstr(command_line,"-keeprif"))
 		{
 			KeepMainRifFile=TRUE;			
 		}
@@ -308,7 +307,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	}
 	#endif
 
-	if(strstr(command_line,"-server"))
+	if (strstr(command_line,"-server"))
 	{
 		extern int DirectPlay_InitLobbiedGame();
 		//game has been launched by mplayer , we best humour it
@@ -318,7 +317,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			exit(0x6364);
 		}		
 	}
-	else if(strstr(command_line,"-client"))
+	else if (strstr(command_line,"-client"))
 	{
 		extern int DirectPlay_InitLobbiedGame();
 		//ditto
@@ -333,7 +332,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		DebuggingCommandsActive = 1;
 	}
 
-	if(instr = strstr(command_line, "-ip"))
+	if (instr = strstr(command_line, "-ip"))
 	{								  
 		char buffer[100];
 		extern char CommandLineIPAddressString[]; 
@@ -582,7 +581,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 				{
 					if ((!menusActive || (AvP.Network!=I_No_Network && !netGameData.skirmishMode)) && !AvP.LevelCompleted)
 					{
-						#if MainTextPrint 		/* debugging stuff */
+						//#if MainTextPrint 		/* debugging stuff */
 						{
 							if (ShowDebuggingText.FPS) ReleasePrintDebuggingText("FrameRate = %d fps\n",FrameRate);
 							if (ShowDebuggingText.Environment) ReleasePrintDebuggingText("Environment %s\n", Env_List[AvP.CurrentEnv]->main);
@@ -598,7 +597,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 								}
 							}
 						}
-						#endif  /* MainTextPrint */
+						//#endif  /* MainTextPrint */
 
 						ThisFramesRenderingHasBegun();
 						
@@ -624,9 +623,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 					  	ProfileStop("RENDER HUD");
 						#endif
 
-						#if debug
+						//#if debug
 						FlushTextprintBuffer();
-						#endif
+						//#endif
 
 						//check cd status
 						CheckCDAndChooseTrackIfNeeded();
@@ -803,6 +802,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		}
 //		#endif
 		
+#if 0 //bjd - FIXME
 		if(LobbiedGame)
 		{
 			/*
@@ -811,6 +811,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			*/
 			break;
 		}
+#endif
 	}
 	#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
 	TimeStampedMessage("After Menus");

@@ -622,10 +622,12 @@ void FlushTextprintBuffer(void);
 void InitPrintQueue(void);
 void InitJoysticks(void);
 void ReadJoysticks(void);
+/* bjd
 int ChangeDisplayModes(HINSTANCE hInst, int nCmd, 
      int NewVideoMode, int NewWindowMode,
      int NewZBufferMode, int NewRasterisationMode, 
      int NewSoftwareScanDrawMode, int NewDXMemoryMode);
+ */
 int DeallocateAllImages(void);
 int MinimizeAllImages(void);
 int RestoreAllImages(void);

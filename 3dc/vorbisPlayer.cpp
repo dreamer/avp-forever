@@ -67,12 +67,12 @@ int ReadVorbisData(int sizeToRead, int offset)
 			0
 		);
 
-		if(bytesReadPerLoop < 0) 
+		if (bytesReadPerLoop < 0) 
 		{
 			LogErrorString("ov_read encountered an error", __LINE__, __FILE__);
 		}
 		/* if we reach the end of the file, go back to start */
-		else if(bytesReadPerLoop == 0)
+		else if (bytesReadPerLoop == 0)
 		{
 			ov_raw_seek(&oggFile, 0);
 		}
@@ -239,12 +239,15 @@ bool LoadVorbisTrackList()
 
 	while (std::getline(file, trackName)) 
 	{
+/*
 		pos = trackName.find(": ");
 		if (pos != 0)
 		{
 			trackName = trackName.substr(pos + 2);
 			TrackList.push_back(musicFolderName + trackName);
 		}
+*/
+		TrackList.push_back(musicFolderName + trackName);
 	}
 
 	file.close();
