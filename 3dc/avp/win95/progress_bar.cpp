@@ -92,7 +92,7 @@ void Start_Progress_Bar()
 							);
 		}
 		// create d3d texture here
-		LoadingBarEmptyTexture = CreateD3DTexturePadded((AvPTexture*)LoadingBarEmpty, &emptybarHeight, &emptybarWidth);
+		LoadingBarEmptyTexture = CreateD3DTexturePadded(LoadingBarEmpty, &emptybarWidth, &emptybarHeight);
 	}
 	{
 		char buffer[100];
@@ -124,7 +124,7 @@ void Start_Progress_Bar()
 							);
 		}
 		
-		LoadingBarFullTexture = CreateD3DTexturePadded((AvPTexture*)LoadingBarFull, &fullbarHeight, &fullbarWidth);
+		LoadingBarFullTexture = CreateD3DTexturePadded(LoadingBarFull, &fullbarWidth, &fullbarHeight);
 	}
 /*	
 	//set progress bar dimensions

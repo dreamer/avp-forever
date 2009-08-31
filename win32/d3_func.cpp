@@ -439,11 +439,13 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 	return destTexture;
 }
 
-LPDIRECT3DTEXTURE9 CreateFmvTexture(int width, int height, int usage, int pool)
+LPDIRECT3DTEXTURE9 CreateFmvTexture(int *width, int *height, int usage, int pool)
 {
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
 
-	LastError = d3d.lpD3DDevice->CreateTexture(width, height, 1, usage, D3DFMT_A8R8G8B8, (D3DPOOL)pool, &destTexture, NULL);
+	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)width, (UINT*)height, NULL, usage, NULL, (D3DPOOL)pool);
+
+	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, usage, D3DFMT_A8R8G8B8, (D3DPOOL)pool, &destTexture, NULL);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -460,15 +462,16 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture(int width, int height, int usage, int pool)
 int imageNum = 0;
 
 // use this to make textures from non power of two images
-LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int *real_width) 
+LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *realHeight) 
 {
 	int original_width = tex->width;
 	int original_height = tex->height;
-	int new_width = 0;
-	int new_height = 0;
+	int new_width = original_width;//0;
+	int new_height = original_height;//0;
 
 	D3DCOLOR pad_colour = D3DCOLOR_XRGB(0,0,0);
 
+/*
 	// check if passed value is already a power of 2
 	if (!IsPowerOf2(tex->width)) {
 		new_width = NearestSuperiorPow2(tex->width);
@@ -483,6 +486,11 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 	// set passed in width and height values to be used later
 	(*real_height) = new_height;
 	(*real_width) = new_width;
+*/
+	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)&new_width, (UINT*)&new_height, NULL, 0, NULL, D3DPOOL_MANAGED);
+
+	(*realHeight) = new_height;
+	(*realWidth) = new_width;
 
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
 

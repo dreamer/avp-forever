@@ -1241,7 +1241,7 @@ extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 
 	if (gfxPtr->ImagePtr) 
 	{
-		AvPMenuGfxStorage[menuGfxID].menuTexture = CreateD3DTexturePadded((AvPTexture*)gfxPtr->ImagePtr, &gfxPtr->newHeight, &gfxPtr->newWidth);
+		AvPMenuGfxStorage[menuGfxID].menuTexture = CreateD3DTexturePadded((AvPTexture*)gfxPtr->ImagePtr, &gfxPtr->newWidth, &gfxPtr->newHeight);
 
 		if (AvPMenuGfxStorage[menuGfxID].menuTexture == NULL) {
 			OutputDebugString("Texture in AvPMenuGfxStorage was NULL!");

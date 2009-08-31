@@ -60,14 +60,9 @@ typedef struct D3DInfo {
 	LPDIRECT3DINDEXBUFFER9	lpD3DIndexBuffer;
     int						NumDrivers;
     int						CurrentDriver;
-//	D3DADAPTER_IDENTIFIER9	AdapterInfo;
-//	int						NumModes;
-//	D3DDISPLAYMODE			DisplayMode[100];
-//	D3DFORMAT				Formats[20];
-    D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS]; // BJD
+    D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS];
     int						CurrentTextureFormat;
     int						NumTextureFormats;
-//    D3DTEXTUREFORMAT		TextureFormat[MAX_TEXTURE_FORMATS];
 
 	BOOL					supportsDynamicTextures;
 } D3DINFO;
@@ -103,7 +98,7 @@ typedef struct
 } RENDERSTATES;
 
 D3DTEXTURE CreateD3DTexture(AvPTexture *tex, unsigned char *buf, int usage, D3DPOOL poolType);
-D3DTEXTURE CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int *real_width);
+D3DTEXTURE CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *realHeight);
 D3DTEXTURE CreateD3DTallFontTexture(AvPTexture *tex);
 
 BOOL ReleaseVolatileResources();
@@ -120,10 +115,10 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, D3DTEXTURE bar_texture, int 
 void DrawQuad(int x, int y, int width, int height, int colour);
 void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 void ReleaseD3DTexture(D3DTEXTURE d3dTexture);
-void DrawBinkFmv(int topX, int topY, int width,int height, D3DTEXTURE fmvTexture);
+void DrawBinkFmv(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture);
 void CreateScreenShotImage();
 D3DTEXTURE CheckAndLoadUserTexture(const char *fileName, int *width, int *height);
-D3DTEXTURE CreateFmvTexture(int width, int height, int usage, int pool);
+D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool);
 
 void LoadConsoleFont();
 

@@ -43,6 +43,7 @@ typedef struct D3DDriverInfo {
 	D3DFORMAT				Formats[20];
 	D3DADAPTER_IDENTIFIER8	AdapterInfo;
 	D3DDISPLAYMODE			DisplayMode[100];
+	int						NumModes;
 } D3DDRIVERINFO;
 
 
@@ -58,7 +59,7 @@ typedef struct D3DInfo {
 	LPDIRECT3DINDEXBUFFER8	lpD3DIndexBuffer;
     int						NumDrivers;
     int						CurrentDriver;
-	int						NumModes;
+//	int						NumModes;
 	D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS];
     int						CurrentTextureFormat;
     int						NumTextureFormats;
@@ -102,7 +103,7 @@ BOOL ReleaseVolatileResources();
 BOOL CreateVolatileResources();
 BOOL ChangeGameResolution(int width, int height, int colour_depth);
 
-void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, int alpha);
+void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha);
 void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha);
 void DrawCloudTable(int topX, int topY, int word_length, int alpha);
 void DrawFadeQuad(int topX, int topY, int alpha);

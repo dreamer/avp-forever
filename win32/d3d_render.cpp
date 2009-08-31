@@ -7303,81 +7303,25 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 }
 
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
-{
-//#ifdef USE_FMV
-
-//	assert(ftPtr->DestTexture == NULL);
-/*
-	if (ftPtr->DestTexture)
-	{
-		OutputDebugString("A TEXTURE ALREADY EXISTS! we'll write over it..uh oh\n");
-		return;
-	}
-*/
-	
+{	
 	ftPtr->RGBBuffer = new unsigned char[128 * 128 * 4];
-#if 0
-	/* we use this texture to write fmv data to */
-	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &ftPtr->DestTexture, NULL);
-	if(FAILED(LastError))
-	{
-		LogErrorString("Could not create Direct3D texture ftPtr->DestTexture", __LINE__, __FILE__);
-		ftPtr->DestTexture = NULL;
-	}
-#endif
 
 	ftPtr->SoundVolume = 0;
-//#endif
 }
-
-#include <assert.h>
 
 void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 {
-//#ifdef USE_FMV
-
 	assert(ftPtr);
 	assert(ftPtr->ImagePtr);
-//	assert(ftPtr->DestTexture);
 	assert(ftPtr->ImagePtr->Direct3DTexture);
 
-	if(!ftPtr) return;
-#if 0
-	/* lock the d3d texture */
-	D3DLOCKED_RECT textureRect;
-	LastError = ftPtr->DestTexture->LockRect(0, &textureRect, NULL, D3DLOCK_DISCARD);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
+	if (!ftPtr) 
 		return;
-	}
-#endif
-	// check for success
-	{
-		if (!NextFMVTextureFrame(ftPtr/*, (void*)textureRect.pBits*//*, textureRect.Pitch)*/))
-		{
-			//ftPtr->DestTexture->UnlockRect(0);
-		 	return;
-		}
-	}
-#if 0
-	/* unlock d3d texture */
-	LastError = ftPtr->DestTexture->UnlockRect(0);
-	if(FAILED(LastError)) 
-	{
-		LogErrorString("Could not unlock Direct3D texture ftPtr->DestTexture", __LINE__, __FILE__);
-		return;
-	}
-#endif
 
-#if 0
-	/* update rendering texture with FMV image */
-	LastError = d3d.lpD3DDevice->UpdateTexture(ftPtr->DestTexture, ftPtr->ImagePtr->Direct3DTexture);
-	if(FAILED(LastError))
-	{	
-		LogErrorString("Could not UpdateTexture in UpdateFMVTexture function", __LINE__, __FILE__);
+	if (!NextFMVTextureFrame(ftPtr))
+	{
+	 	return;
 	}
-#endif
 
 	/* lock the d3d texture */
 	D3DLOCKED_RECT textureRect;
@@ -7393,7 +7337,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 
 	for (int y = 0; y < 96; y++)
 	{
-		destPtr = (((unsigned char *)textureRect.pBits) + y * textureRect.Pitch);
+		destPtr = static_cast<unsigned char*>(textureRect.pBits) + y * textureRect.Pitch;
 
 		for (int x = 0; x < 128; x++)
 		{
@@ -7417,8 +7361,6 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 		LogErrorString("Could not unlock Direct3D texture ftPtr->DestTexture", __LINE__, __FILE__);
 		return;
 	}
-
-//#endif
 }
 
 #if 0
@@ -7882,12 +7824,17 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 }
 
 /* more quad drawing functions than you can shake a stick at! */
-void DrawBinkFmv(int topX, int topY, int width, int height, LPDIRECT3DTEXTURE9 fmvTexture)
+void DrawBinkFmv(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture)
 {
 //	OutputDebugString("drawing bink fmv\n");
 
 	/* set the texture */
 	LastError = d3d.lpD3DDevice->SetTexture(0, fmvTexture);
+
+	int topX = (ScreenDescriptorBlock.SDB_Width - frameWidth) / 2;
+	int topY = (ScreenDescriptorBlock.SDB_Height - frameHeight) / 2;
+
+//	mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
 
 	/* height and width of d3d texture */
 //	int texSize = width;//1024;
@@ -7897,13 +7844,13 @@ void DrawBinkFmv(int topX, int topY, int width, int height, LPDIRECT3DTEXTURE9 f
 
 	// bottom left
 	quadVert[0].sx = (float)topX - 0.5f;
-	quadVert[0].sy = (float)topY + height - 0.5f;
+	quadVert[0].sy = (float)topY + frameHeight - 0.5f;
 	quadVert[0].sz = 0.0f;
 	quadVert[0].rhw = 1.0f;
 	quadVert[0].color = D3DCOLOR_ARGB(255,255,255,255);
 	quadVert[0].specular = RGBALIGHT_MAKE(0,0,0,255);
 	quadVert[0].tu = 0.0f;
-	quadVert[0].tv = (1.0f / height) * height;
+	quadVert[0].tv = (1.0f / textureHeight) * frameHeight;
 
 	// top left
 	quadVert[1].sx = (float)topX - 0.5f;
@@ -7916,23 +7863,23 @@ void DrawBinkFmv(int topX, int topY, int width, int height, LPDIRECT3DTEXTURE9 f
 	quadVert[1].tv = 0.0f;
 
 	// bottom right
-	quadVert[2].sx = (float)topX + width - 0.5f;
-	quadVert[2].sy = (float)topY + height - 0.5f;
+	quadVert[2].sx = (float)topX + frameWidth - 0.5f;
+	quadVert[2].sy = (float)topY + frameHeight - 0.5f;
 	quadVert[2].sz = 0.0f;
 	quadVert[2].rhw = 1.0f;
 	quadVert[2].color = D3DCOLOR_ARGB(255,255,255,255);
 	quadVert[2].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[2].tu = (1.0f / width) * width;
-	quadVert[2].tv = (1.0f / height) * height;
+	quadVert[2].tu = (1.0f / textureWidth) * frameWidth;
+	quadVert[2].tv = (1.0f / textureHeight) * frameHeight;
 
 	// top right
-	quadVert[3].sx = (float)topX + width - 0.5f;
+	quadVert[3].sx = (float)topX + frameWidth - 0.5f;
 	quadVert[3].sy = (float)topY - 0.5f;
 	quadVert[3].sz = 0.0f;
 	quadVert[3].rhw = 1.0f;
 	quadVert[3].color = D3DCOLOR_ARGB(255,255,255,255);
 	quadVert[3].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[3].tu = (1.0f / width) * width;
+	quadVert[3].tu = (1.0f / textureWidth) * frameWidth;
 	quadVert[3].tv = 0.0f;
 
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);

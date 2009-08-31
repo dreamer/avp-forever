@@ -8449,12 +8449,12 @@ void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, B
 }
 #endif
 
-void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, int alpha) 
+void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha) 
 {
-	if(currentTextureId != image_num)
+	if (currentTextureId != image_num)
 	{
-		LastError = d3d.lpD3DDevice->SetTexture(0,AvPMenuGfxStorage[image_num].menuTexture);
-		if(FAILED(LastError)) 
+		LastError = d3d.lpD3DDevice->SetTexture(0, AvPMenuGfxStorage[image_num].menuTexture);
+		if (FAILED(LastError)) 
 		{
 			OutputDebugString("Couldn't set menu quad texture");
 		}
@@ -8473,7 +8473,7 @@ void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_n
 
 	alpha = (alpha / 256);
 	if (alpha > 255) alpha = 255;
-	D3DCOLOR colour = D3DCOLOR_ARGB(alpha,255,255,255);
+	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 
 	// alpha of 0 is transparent
 	// alpha of 256 is opaque

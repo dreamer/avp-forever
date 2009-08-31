@@ -42,6 +42,8 @@ typedef std::map<int, OggStream*> StreamMap;
 
 StreamMap mStreams;
 
+#define CLAMP(v)    ((v) > 255 ? 255 : (v) < 0 ? 0 : (v))
+
 extern "C" {
 
 #include "fmv.h"
@@ -80,9 +82,8 @@ extern void ThisFramesRenderingHasFinished(void);
 
 extern unsigned char DebouncedGotAnyKey;
 
-bool FmvWait();
+//bool FmvWait();
 int NextFMVFrame();
-int FmvOpen(char *filenamePtr);
 void FmvClose();
 int GetVolumeOfNearestVideoScreen(void);
 
@@ -94,22 +95,43 @@ ogg_sync_state state;
 char buf[100];
 bool frameReady = false;
 bool fmvPlaying = false;
-int playing = false;
 
-#ifdef WIN32
-	#include <shlobj.h>
-	#include <shlwapi.h>
-#endif
+int textureWidth = 0;
+int textureHeight = 0;
+int frameWidth = 0;
+int frameHeight = 0;
+
+int playing = false;
 
 th_ycbcr_buffer buffer;
 
-LPDIRECT3DSURFACE9 mSurface;
-LPDIRECT3DSURFACE9 mDestSurface;
 LPDIRECT3DTEXTURE9 mDisplayTexture;
+unsigned char	*textureData	= NULL;
 
 CRITICAL_SECTION CriticalSection;
 
-int imageNum2 = 0;
+/* structure holds pointers to y, u, v channels */
+typedef struct _OggPlayYUVChannels {
+    unsigned char * ptry;
+    unsigned char * ptru;
+    unsigned char * ptrv;
+    int             y_width;
+    int             y_height;
+	int				y_pitch;
+    int             uv_width;
+    int             uv_height;
+	int				uv_pitch;
+} OggPlayYUVChannels;
+
+/* structure holds pointers to y, u, v channels */
+typedef struct _OggPlayRGBChannels {
+    unsigned char * ptro;
+    int             rgb_width;
+    int             rgb_height;
+	int				rgb_pitch;
+} OggPlayRGBChannels;
+
+void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb);
 
 
 void HandleTheoraData(OggStream* stream, ogg_packet* packet)
@@ -125,20 +147,26 @@ void HandleTheoraData(OggStream* stream, ogg_packet* packet)
 
 	assert (ret == 0);
 
+	/* enter critical section so we can update buffer variable */
+	EnterCriticalSection(&CriticalSection); 
+
 	// We have a frame. Get the YUV data
-//	th_ycbcr_buffer buffer;
 	ret = th_decode_ycbcr_out(stream->mTheora.mCtx, buffer);
 	assert(ret == 0);
 
+	/* we have a new frame and we're ready to use it */
 	frameReady = true;
 
+	LeaveCriticalSection(&CriticalSection);
+
+	
 //	OutputDebugString("handling some theora data...\n");
 
 	// Sleep for the time period of 1 frame
 	float framerate = float(stream->mTheora.mInfo.fps_numerator) /
 		float(stream->mTheora.mInfo.fps_denominator);
 
-	Sleep((1.0/framerate)*1000);
+	Sleep(static_cast<DWORD>((1.0f / framerate) * 1000));
 }
 
 void HandleOggPacket(OggStream* stream, ogg_packet* packet)
@@ -166,6 +194,10 @@ void HandleTheoraHeader(OggStream* stream, ogg_packet* packet)
 	{
 		// This is a theora header packet
 		stream->mType = TYPE_THEORA;
+	
+		frameWidth = stream->mTheora.mInfo.frame_width;
+		frameHeight = stream->mTheora.mInfo.frame_height;
+
 		return;
 	}
 
@@ -184,8 +216,10 @@ void HandleTheoraHeader(OggStream* stream, ogg_packet* packet)
 bool ReadOggPage(ogg_sync_state* state, ogg_page* page)
 {
 	if (!oggFile.good())
-//		return false;
+	{
+		OutputDebugString("file isnt good!\n");
 		return ogg_sync_pageout(state, page) == 1;
+	}
 
 	while (ogg_sync_pageout(state, page) != 1)
 	{
@@ -200,6 +234,7 @@ bool ReadOggPage(ogg_sync_state* state, ogg_page* page)
 		int bytes = oggFile.gcount();
 		if (bytes == 0)
 		{
+			OutputDebugString("EOF\n");
 			// End of file
 			return false;
 		}
@@ -215,8 +250,6 @@ void TheoraDecodeThread(void *args)
 {
 	int ret = 0;
 	ogg_page page; // store a complete page of ogg data in page
-
-	fmvPlaying = true;
 
 	while (ReadOggPage(&state, &page))
 	{
@@ -258,141 +291,65 @@ void TheoraDecodeThread(void *args)
 
 		// Return a complete packet of data from the stream, if we have one
 		ogg_packet packet;
-		ret = ogg_stream_packetout(&stream->mState, &packet);
-		if (ret == 0)
-		{
-			// Need more data to be able to complete the packet
-			continue;
-		}
-		else if (ret == -1)
-		{
-			// We are out of sync and there is a gap in the data.
-			// Exit
-			OutputDebugString("There is a gap in the data - we are out of sync\n");
-			break;
-		}
 
-		// A packet is available, this is what we pass to the vorbis or theora libraries to decode.
-		stream->mPacketCount++;
-		HandleOggPacket(stream, &packet);
-//		sprintf(buf, "mPacketCount: %d\n", stream->mPacketCount);
-//		OutputDebugString(buf);
+		while ((ret = ogg_stream_packetout(&stream->mState, &packet)) != 0) 
+		{
+			if (ret == -1)
+			{
+				// We are out of sync and there is a gap in the data.
+				OutputDebugString("There is a gap in the data - we are out of sync\n");
+				break;
+			}
 
-//		assert (stream->mPacketCount > 0);
+			HandleOggPacket(stream, &packet);
+		}
 	}
+	/* done */
 	fmvPlaying = false;
 }
 
-int OpenTheoraVideo(char *fileName)
+int OpenTheoraVideo(const char *fileName)
 {
+	oggFile.clear(); // to be sure all the file flags are reset
+
 	oggFile.open(fileName, std::ios::in | std::ios::binary);
-
-	/* find the first page of ogg data */
-//	ogg_sync_state state;
-
-	/* initialise our state struct in preparation for getting some data */
-	int ret = ogg_sync_init(&state);
-
-	assert(ret == 0);
 
 	if (!oggFile.is_open())
 		return 0;
 
-	if (!InitializeCriticalSectionAndSpinCount(&CriticalSection, 0x80000400) )
+	/* initialise our state struct in preparation for getting some data */
+	int ret = ogg_sync_init(&state);
+	assert(ret == 0);
+
+	if (!InitializeCriticalSectionAndSpinCount(&CriticalSection, 0x80000400))
 		return 0;
 
 	 _beginthread(TheoraDecodeThread, 0, 0);
 
-#if 0
-	ogg_page page; // store a complete page of ogg data in page
-	while (ReadOggPage(&state, &page))
-	{
-		/* grab the serial number of the page */
-		int serial = ogg_page_serialno(&page);
+	 fmvPlaying = true;
 
-		/* new pointer to OggStream struct */
-		OggStream* stream = 0;
-
-		/* check if this is the first page */
-		if (ogg_page_bos(&page))
-		{
-			// At the beginning of the stream, read headers
-			// Initialize the stream, giving it the serial
-			// number of the stream for this page.
-			stream = new OggStream;//(serial);
-			stream->mSerial = serial;
-			stream->mPacketCount = 0;
-			stream->mHeadersRead = false;
-			stream->mType = TYPE_UNKNOWN;
-
-			/* init the theora decode stuff */
-			th_info_init(&stream->mTheora.mInfo);
-			th_comment_init(&stream->mTheora.mComment);
-			stream->mTheora.mCtx = 0;
-			stream->mTheora.mSetup = 0;
-
-			/* init ogg_stream_state struct and allocates appropriate memory in preparation for encoding or decoding.*/
-			ret = ogg_stream_init(&stream->mState, serial);
-			assert(ret == 0);
-			mStreams[serial] = stream; // store our inited stream struct in the std::map
-		}
-		assert(mStreams.find(serial) != mStreams.end());
-		stream = mStreams[serial]; // grab an existing stream object?
-
-		/* Add a complete page to the bitstream */
-		ret = ogg_stream_pagein(&stream->mState, &page);
-		assert(ret == 0);
-
-		// Return a complete packet of data from the stream, if we have one
-		ogg_packet packet;
-		ret = ogg_stream_packetout(&stream->mState, &packet);
-		if (ret == 0)
-		{
-			// Need more data to be able to complete the packet
-			continue;
-		}
-		else if (ret == -1)
-		{
-			// We are out of sync and there is a gap in the data.
-			// Exit
-			OutputDebugString("There is a gap in the data - we are out of sync\n");
-			break;
-		}
-
-		// A packet is available, this is what we pass to the vorbis or theora libraries to decode.
-		stream->mPacketCount++;
-		HandleOggPacket(stream, &packet);
-//		sprintf(buf, "mPacketCount: %d\n", stream->mPacketCount);
-//		OutputDebugString(buf);
-
-//		assert (stream->mPacketCount > 0);
-	}
-#endif
-
-	// Cleanup
-/*
-	ret = ogg_sync_clear(&state);
-	assert(ret == 0);
-
-	CloseTheoraVideo();
-*/
 	return 0;
+}
+
+bool CheckTheoraPlayback()
+{
+	return fmvPlaying;
 }
 
 int CloseTheoraVideo()
 {
+	OutputDebugString("CloseTheoraVideo..\n");
+
 	int ret = ogg_sync_clear(&state);
 	assert(ret == 0);
 
 	oggFile.close();
+	oggFile.clear();
 
 	for (StreamMap::iterator it = mStreams.begin(); it != mStreams.end(); ++it)
 	{
 		OggStream* stream = (*it).second;
-//		char buf[100];
-		sprintf(buf, "%d has %d packets\n", stream->mSerial, stream->mPacketCount);
-		OutputDebugString(buf);
-		//cout << stream->mSerial << " has " << stream->mPacketCount << " packets" << endl;
+
 		//delete stream; we have no class so no destructor. do it manually
 		int ret = ogg_stream_clear(&stream->mState);
 		assert(ret == 0);
@@ -400,6 +357,25 @@ int CloseTheoraVideo()
 		th_decode_free(stream->mTheora.mCtx);
 		delete stream;
     }
+
+	/* clear the std::map */
+	mStreams.clear();
+
+	if (mDisplayTexture)
+	{
+		mDisplayTexture->Release();
+		mDisplayTexture = NULL;
+	}
+
+	DeleteCriticalSection(&CriticalSection);
+
+	frameReady = false;
+	fmvPlaying = false;
+	playing = false;
+	frameWidth = 0;
+	frameHeight = 0;
+	textureWidth = 0;
+	textureHeight = 0;
 
 	return 0;
 }
@@ -434,7 +410,11 @@ extern void PlayBinkedFMV(char *filenamePtr)
 
 	while (playing)
 	{
+//		OutputDebugString("while (playing)...\n");
 		CheckForWindowsMessages();
+
+		if (!CheckTheoraPlayback())
+			playing = 0;
 
 		if (frameReady)
 			playing = NextFMVFrame();
@@ -442,9 +422,10 @@ extern void PlayBinkedFMV(char *filenamePtr)
 		ThisFramesRenderingHasBegun();
 		ClearScreenToBlack();
 
-			int imageWidth = 640;
-			int imageHeight = 360;
-			DrawBinkFmv(0, 0, imageWidth, imageHeight, mDisplayTexture);
+		if ((frameWidth != 0) && (frameHeight != 0)) // don't draw if we don't know frame width or height
+		{
+			DrawBinkFmv(frameWidth, frameHeight, textureWidth, textureHeight, mDisplayTexture);
+		}
 
 		ThisFramesRenderingHasFinished();
 		FlipBuffers();
@@ -453,188 +434,74 @@ extern void PlayBinkedFMV(char *filenamePtr)
 
 		/* added DebouncedGotAnyKey to ensure previous frame's key press for starting level doesn't count */
 		if (GotAnyKey && DebouncedGotAnyKey)
+		{
 			playing = 0;
+			fmvPlaying = false;
+		}
 	}
+
+	CloseTheoraVideo();
 }
 
 int NextFMVFrame()
 {
-	if (!mSurface)
-	{
-		if (FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(buffer[0].width, buffer[0].height,
-				D3DFMT_YUY2,
-				D3DPOOL_DEFAULT,
-				&mSurface,
-				NULL)))
-		{
-			OutputDebugString("can't create FMV surface\n");
-		}
-	}
+	if (fmvPlaying == false)
+		return 0;
 
-	if (!mDestSurface)
-	{
-		if (FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(buffer[0].width, buffer[0].height,
-				D3DFMT_X8R8G8B8,
-				D3DPOOL_DEFAULT,
-				&mDestSurface,
-				NULL)))
-		{
-			OutputDebugString("can't create FMV surface\n");
-		}
-	}
-
-	/* TODO! create as power of 2 texture? */
 	if (!mDisplayTexture)
 	{
-		if (FAILED(d3d.lpD3DDevice->CreateTexture(buffer[0].width, buffer[0].height,
-				1,
-				D3DUSAGE_DYNAMIC,
-				D3DFMT_X8R8G8B8,
-				D3DPOOL_DEFAULT,
-				&mDisplayTexture,
-				NULL)))
+		/* assume we'll want our texture the same size as the frame. this isn't likely to be the case though */
+		textureWidth = frameWidth;
+		textureHeight = frameHeight;
+
+		/* create a new texture, passing width and height which will be set to the actual size of the created texture */
+		mDisplayTexture = CreateFmvTexture(&textureWidth, &textureHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+
+		if (!mDisplayTexture)
 		{
 			OutputDebugString("can't create FMV texture\n");
+			return 0;
+			fmvPlaying = false;
 		}
-//		BinkTexture = mDisplayTexture;
-//		frameHeight = buffer[0].height;
-//		frameWidth = buffer[0].width;
 	}
 
 	EnterCriticalSection(&CriticalSection);
 
-	D3DLOCKED_RECT surfaceLock;
-	if (FAILED(mSurface->LockRect(&surfaceLock, NULL, D3DLOCK_DISCARD)))
+	D3DLOCKED_RECT textureLock;
+	if (FAILED(mDisplayTexture->LockRect(0, &textureLock, NULL, D3DLOCK_DISCARD)))
 	{
-		OutputDebugString("can't lock FMV surface\n");
+		OutputDebugString("can't lock FMV texture\n");
+		return 0;
 	}
 
-#if 0
-	sprintf(buf2, "dest pitch: %d\n", surfaceLock.Pitch);
-	OutputDebugString(buf2);
+	OggPlayYUVChannels oggYuv;
+	oggYuv.ptry = buffer[0].data;
+	oggYuv.ptru = buffer[2].data;
+	oggYuv.ptrv = buffer[1].data;
 
-	sprintf(buf2, "src u pitch: %d\n", buffer[1].stride);
-	OutputDebugString(buf2);
+	oggYuv.y_width = buffer[0].width;
+	oggYuv.y_height = buffer[0].height;
+	oggYuv.y_pitch = buffer[0].stride;
 
-	sprintf(buf2, "src v pitch: %d\n", buffer[2].stride);
-	OutputDebugString(buf2);
-#endif
+	oggYuv.uv_width = buffer[1].width;
+	oggYuv.uv_height = buffer[1].height;
+	oggYuv.uv_pitch = buffer[1].stride;
 
-	unsigned char *destPtr, *srcPtr;
+	OggPlayRGBChannels oggRgb;
+	oggRgb.ptro = static_cast<unsigned char*>(textureLock.pBits);
+	oggRgb.rgb_height = frameHeight;
+	oggRgb.rgb_width = frameWidth;
+	oggRgb.rgb_pitch = textureLock.Pitch;
 
-	unsigned char* uPtr = buffer[1].data;
-	unsigned char* vPtr = buffer[2].data;
-
-	/*
-	D3DFMT_YUY2
-	YUY2 format (PC98 compliance). Two pixels are stored in each YUY2 word. Each data value (Y0, U, Y1, V) is 8 bits.
-	This format is identical to the UYVY format described except that the ordering of the bits is changed. Before
-	this format can be used, it must be enabled using the render state D3DRS_YUVENABLE.
-
-	YUY2 = MEDIASUBTYPE_YUY2	YUY2	4:2:2	Packed	8bits per channel
-
-	th_info
-
-	4:2:0 planar to 4:2:2 packed
-
-*/
-
-	/* bjd - convert from 4:2:0 planar to 4:2:2 packed. had help from http://goldfishforthought.blogspot.com/2009/05/dealing-with-image-formats.html :) */
-	bool bMustIncrementUVPlanes = false;
-
-	for (int y = 0; y < buffer[0].height; y++)
-	{
-		destPtr = (((unsigned char *)surfaceLock.pBits) + y * surfaceLock.Pitch);
-		srcPtr = (((unsigned char*)buffer[0].data) + y * buffer[0].stride);
-
-		// Y U Y V
-		for (int x = 0; x < (buffer[0].width / 2); x++)
-		{
-			// Y0
-			*destPtr = *srcPtr;
-			destPtr++;
-			srcPtr++;
-
-			// U
-			*destPtr = *uPtr;
-			destPtr++;
-			uPtr++;
-
-			// Y1
-			*destPtr = *srcPtr;
-			destPtr++;
-			srcPtr++;
-
-			// V
-			*destPtr = *vPtr;
-			destPtr++;
-			vPtr++;
-		}
-
-        // Since YV12 has half the UV data that YUY2 has, we reuse these
-        // values--so we only increment these planes every other pass
-        // through.
-        if( bMustIncrementUVPlanes )
-        {
-			/* increment pointers down onto the next line, skipping any pitch/stride data */
-			uPtr += buffer[1].stride - buffer[1].width;
-			vPtr += buffer[2].stride - buffer[2].width;
-            bMustIncrementUVPlanes = false;
-        }
-        else
-        {
-			/* go back to the start of the row */
-			uPtr -= buffer[1].width;
-			vPtr -= buffer[2].width;
-            bMustIncrementUVPlanes = true;
-        }
-	}
-
-	if (FAILED(mSurface->UnlockRect()))
-	{
-		OutputDebugString("can't unlock FMV surface\n");
-	}
+	oggplay_yuv2rgb(&oggYuv, &oggRgb);
 
 	LeaveCriticalSection(&CriticalSection);
 
-	if (FAILED(d3d.lpD3DDevice->StretchRect(mSurface, NULL, mDestSurface, NULL, D3DTEXF_NONE)))
+	if (FAILED(mDisplayTexture->UnlockRect(0)))
 	{
-		OutputDebugString("stretchRect failed\n");
-	}
-
-//	D3DLOCKED_RECT surfaceLock;
-	if (FAILED(mDestSurface->LockRect(&surfaceLock, NULL, 0)))
-	{
-		OutputDebugString("can't lockrect mDestSurface\n");
+		OutputDebugString("can't unlock FMV texture\n");
 		return 0;
 	}
-
-	D3DLOCKED_RECT textureLock;
-	if (FAILED(mDisplayTexture->LockRect(0, &textureLock, NULL, NULL )))
-	{
-		OutputDebugString("can't lockrect mDisplayTexture\n");
-		return 0;
-	}
-
-	srcPtr = static_cast<unsigned char*>(surfaceLock.pBits);
-	destPtr = static_cast<unsigned char*>(textureLock.pBits);
-
-	for (int y = 0; y < buffer[0].height; y++)
-	{
-		destPtr = (((unsigned char *)textureLock.pBits) + y*textureLock.Pitch);
-		srcPtr = (((unsigned char *)surfaceLock.pBits) + y*surfaceLock.Pitch);
-
-		for (int x = 0; x < buffer[0].width; x++)
-		{
-			memcpy(destPtr, srcPtr, 4);
-			destPtr += 4;
-			srcPtr += 4;
-		}
-	}
-
-	mDisplayTexture->UnlockRect(0);
-	mDestSurface->UnlockRect();
-
 
 #if 0 // save frames to png files
 	char strPath[MAX_PATH];
@@ -651,7 +518,7 @@ int NextFMVFrame()
 	PathAppend( strPath, buf);
 
 	/* save surface to image file */
-	if (FAILED(D3DXSaveTextureToFile(strPath, D3DXIFF_PNG, mDisplayTexture, NULL)))
+	if (FAILED(D3DXSaveTextureToFile(strPath, D3DXIFF_BMP, mDisplayTexture2, NULL)))
 	{
 		//LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("Save Surface to file failed!!!\n");
@@ -664,10 +531,62 @@ int NextFMVFrame()
 
 	frameReady = false;
 
-	if (fmvPlaying == false)
-		return 0;
-
 	return 1;
+}
+
+/* Vanilla implementation if YUV->RGB conversion */
+void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb)
+{
+	unsigned char * ptry = yuv->ptry;
+	unsigned char * ptru = yuv->ptru;
+	unsigned char * ptrv = yuv->ptrv;
+	unsigned char * ptro = rgb->ptro;
+	unsigned char * ptro2;
+	int i, j;
+  
+	for (i = 0; i < yuv->y_height; i++) 
+	{
+		ptro2 = ptro;
+		for (j = 0; j < yuv->y_width; j += 2) 
+		{
+			short pr, pg, pb, y;
+			short r, g, b;
+  
+			pr = (-56992 + ptrv[j/2] * 409) >> 8;
+			pg = (34784 - ptru[j/2] * 100 - ptrv[j/2] * 208) >> 8;
+			pb = (-70688 + ptru[j/2] * 516) >> 8;
+  
+			y = 298*ptry[j] >> 8;
+			r = y + pr;
+			g = y + pg;
+			b = y + pb;
+  
+			*ptro2++ = CLAMP(r);
+			*ptro2++ = CLAMP(g);
+			*ptro2++ = CLAMP(b);
+			*ptro2++ = 255;
+  
+			y = 298*ptry[j + 1] >> 8;
+			r = y + pr;
+			g = y + pg;
+			b = y + pb;
+  
+			*ptro2++ = CLAMP(r);
+			*ptro2++ = CLAMP(g);
+			*ptro2++ = CLAMP(b);
+			*ptro2++ = 255;
+		}
+
+		ptry += yuv->y_pitch;
+		
+		if (i & 1) 
+		{
+			ptru += yuv->uv_pitch;
+			ptrv += yuv->uv_pitch;
+		}
+
+		ptro += rgb->rgb_pitch;
+	}
 }
 
 void FmvClose()
@@ -692,7 +611,64 @@ void UpdateAllFMVTextures()
 
 extern void StartTriggerPlotFMV(int number)
 {
-	return;
+	OutputDebugString("StartTriggerPlotFMV\n");
+
+	int i = NumberOfFMVTextures;
+	char buffer[25];
+
+	if (CheatMode_Active != CHEATMODE_NONACTIVE) 
+		return;
+
+	sprintf(buffer, "FMVs//message%d.ogv", number);
+	{
+/*
+		FILE* file = fopen(buffer,"rb");
+		if (!file)
+		{
+			OutputDebugString("couldn't open fmv file: ");
+			OutputDebugString(buffer);
+			return;
+		}
+		fclose(file);
+*/
+	}
+	while(i--)
+	{
+		if (FMVTexture[i].IsTriggeredPlotFMV)
+		{
+			if (OpenTheoraVideo(buffer) < 0)
+			{
+				return;
+			}
+
+			if (FMVTexture[i].SmackHandle)
+			{
+				delete FMVTexture[i].SmackHandle;
+				FMVTexture[i].SmackHandle = NULL;
+			}
+
+			Smack *smackHandle = new Smack;
+			OutputDebugString("alloc smack\n");
+
+			OutputDebugString("opening..");
+			OutputDebugString(buffer);
+
+			smackHandle->FrameNum = 0;
+			smackHandle->Frames = 0;
+			smackHandle->isValidFile = 1;
+
+			playing = 1;
+
+			FMVTexture[i].SmackHandle = smackHandle;
+			FMVTexture[i].MessageNumber = number;
+
+			/* we need somewhere to store temp image data */
+			if (textureData == NULL) 
+			{
+				textureData = new unsigned char[128 * 128 * 4];
+			}
+		}
+	}
 }
 
 void StartMenuMusic()
@@ -755,8 +731,8 @@ void ScanImagesForFMVs()
 						OutputDebugString("cant find smacker file!\n");
 						OutputDebugString(filename);
 					}
-					else
-					{
+					else 
+					{	
 						smackHandle = new Smack;
 						OutputDebugString("alloc smack\n");
 						OutputDebugString("found smacker file!");
@@ -781,6 +757,7 @@ void ScanImagesForFMVs()
 						FMVTexture[NumberOfFMVTextures].StaticImageDrawn = 0;
 						SetupFMVTexture(&FMVTexture[NumberOfFMVTextures]);
 						NumberOfFMVTextures++;
+						OutputDebugString("NumberOfFMVTextures++;\n");
 					}
 				}
 			}
@@ -791,6 +768,7 @@ void ScanImagesForFMVs()
 /* called when player quits level and returns to main menu */
 void ReleaseAllFMVTextures()
 {
+	OutputDebugString("exiting level..closing FMV system\n");
 	FmvClose();
 
 	for (int i = 0; i < NumberOfFMVTextures; i++)
@@ -870,12 +848,6 @@ void CloseFMV()
 {
 }
 
-/* call this for res change, alt tabbing and whatnot */
-extern void ReleaseBinkTextures()
-{
-	//ReleaseD3DTexture(&binkTexture);
-}
-
 void FindLightingValuesFromTriggeredFMV(unsigned char *bufferPtr, FMVTEXTURE *ftPtr)
 {
 	unsigned int totalRed=0;
@@ -889,42 +861,29 @@ void FindLightingValuesFromTriggeredFMV(unsigned char *bufferPtr, FMVTEXTURE *ft
 
 int NextFMVTextureFrame(FMVTEXTURE *ftPtr/*, void *bufferPtr, int pitch*/)
 {
-//	OutputDebugString("NextFMVTextureFrame\n");
 	int smackerFormat = 1;
 	int w = 128;
 	int h = 96;
 	unsigned char *bufferPtr = ftPtr->RGBBuffer;
 
-	{
-//		extern D3DINFO d3d;
-//		smackerFormat = GetSmackerPixelFormat(&(d3d.TextureFormat[d3d.CurrentTextureFormat].ddsd.ddpfPixelFormat));
-	}
-//	if (smackerFormat) w*=2;
-
-#if 0
 	if (MoviesAreActive && ftPtr->SmackHandle)
 	{
-		int volume = MUL_FIXED(SmackerSoundVolume*256,GetVolumeOfNearestVideoScreen());
-//		SmackVolumePan(ftPtr->SmackHandle,SMACKTRACKS,volume,PanningOfNearestVideoScreen);
+		assert(textureData != NULL);
+
+		int volume = MUL_FIXED(SmackerSoundVolume*256, GetVolumeOfNearestVideoScreen());
+
+// FIXME		FmvVolumePan(volume, PanningOfNearestVideoScreen);
+
 		ftPtr->SoundVolume = SmackerSoundVolume;
 
-//	    if (SmackWait(ftPtr->SmackHandle)) return 0;
-		if (FmvWait()) return 0;
-		/* unpack frame */
+		if (!frameReady) 
+			return 0;
 
-		writeFmvData((unsigned char*)bufferPtr, textureData, w, h, pitch);
+		memcpy(ftPtr->RGBBuffer, textureData, 128*128*4);
 
-//		if (textureData == NULL) return -1;
-//		bufferPtr = textureData;
-//	  	SmackToBuffer(ftPtr->SmackHandle,0,0,w,96,bufferPtr,smackerFormat);
-
-//		SmackDoFrame(ftPtr->SmackHandle);
-
-		/* are we at the last frame yet? */
-//		if (ftPtr->IsTriggeredPlotFMV && (ftPtr->SmackHandle->FrameNum==(ftPtr->SmackHandle->Frames-1)) )
 		if (playing == 0)
 		{
-			if(ftPtr->SmackHandle)
+			if (ftPtr->SmackHandle)
 			{
 				OutputDebugString("closing ingame fmv..\n");
 				FmvClose();
@@ -932,22 +891,15 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr/*, void *bufferPtr, int pitch*/)
 				delete ftPtr->SmackHandle;
 				ftPtr->SmackHandle = NULL;
 			}
-
-//			SmackClose(ftPtr->SmackHandle);
-
+			
 			ftPtr->MessageNumber = 0;
 		}
-		else
-		{
-			/* next frame, please */
-//			SmackNextFrame(ftPtr->SmackHandle);
-		}
+
 		ftPtr->StaticImageDrawn=0;
 	}
-#endif
-	if(!ftPtr->StaticImageDrawn || smackerFormat)
+	else if (!ftPtr->StaticImageDrawn || smackerFormat)
 	{
-		int i = w * h;
+		int i = w * h;//(h / 4);///2;
 		unsigned int seed = FastRandom();
 		int *ptr = (int*)bufferPtr;
 		do
