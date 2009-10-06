@@ -4576,12 +4576,7 @@ void DisplayVideoModeUnavailableScreen(void)
 
 void CheckForCredits(void)
 {
-#ifdef WIN32
-	FILE *fp = fopen("credits.txt","rb");
-#endif
-#ifdef _XBOX
-	FILE *fp = fopen("d:\\credits.txt","rb");
-#endif
+	FILE *fp = avp_fopen("credits.txt", "rb");
 	
 	if (!fp)
 	{
@@ -4602,13 +4597,8 @@ void DoCredits(void)
 {
 	int position = 300*2048;
 	BOOL FinishedCredits = FALSE;
-
-#ifdef WIN32	
+	
 	char *creditsBufferPtr = LoadTextFile("credits.txt");
-#endif
-#ifdef _XBOX
-	char *creditsBufferPtr = LoadTextFile("D:\\credits.txt");
-#endif
 
 	char *creditsPtr;
 	

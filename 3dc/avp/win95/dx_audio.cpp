@@ -1,3 +1,4 @@
+#ifdef USE_DSOUND
 /* Patrick 5/6/97 -------------------------------------------------------------
   AvP platform specific sound management source
   ----------------------------------------------------------------------------*/
@@ -13,23 +14,22 @@ extern "C" {
 
 #include "3dc.h"
 #include "inline.h"
-
+#include <assert.h>
+#include "psndplat.h"
 #include "module.h"
 #include "stratdef.h"
 #include "gamedef.h"
 #include "dynamics.h"
-
-#include "psndplat.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "db.h"
-#include "dsound.h"
 #include "eax.h"
 #include "vmanpset.h"
 #include <windows.h>
 #include "ffstdio.h"
 
 #include "vorbisPlayer.h"
+#include "audioStreaming.h"
 
 /* Davew 27/7/98 --------------------------------------------------------------
 	Internal types.
@@ -80,7 +80,7 @@ LPKSPROPERTYSET 		PropSetP = NULL;
 unsigned int 			SoundMinBufferFree;
 
 /* for vorbis playback */
-LPDIRECTSOUNDBUFFER		vorbisBuffer = NULL;
+//LPDIRECTSOUNDBUFFER		vorbisBuffer = NULL;
 LPDIRECTSOUNDNOTIFY		pDSNotify = NULL;
 HANDLE					hHandles[2];
 LPVOID					audioPtr1;
@@ -741,6 +741,21 @@ void ResetEaxEnvironment(void)
 {
  	// Set a default value.
  	PlatSetEnviroment(EAX_ENVIRONMENT_DEFAULT, EAX_REVERBMIX_USEDISTANCE);
+}
+
+void SetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int position)
+{
+
+}
+
+void GetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int *position)
+{
+
+}
+
+int CheckBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
+{
+	return 1;
 }
 
 void PlatEndSoundSys(void)
@@ -1412,7 +1427,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 	size_t res;
 	int lengthInSeconds;
 
-	myFile = fopen(wavFileName,"rb");
+	myFile = avp_fopen(wavFileName,"rb");
 	if(!myFile)
 	{
 		GLOBALASSERT (0);
@@ -1906,15 +1921,18 @@ static int ToneToFrequency(int currentFrequency, int currentPitch, int newPitch)
 
 void PlatUpdatePlayer()
 {
-#if 0
-	IDirectSound3DListener_SetPosition
-		(
-			DS3DListener,
-			(D3DVALUE) Global_VDB_Ptr->VDB_World.vx,
-			(D3DVALUE) Global_VDB_Ptr->VDB_World.vy,
-			(D3DVALUE) Global_VDB_Ptr->VDB_World.vz,
-			DS3D_DEFERRED
-		);
+#if 1
+	if (Global_VDB_Ptr)
+	{
+		IDirectSound3DListener_SetPosition
+			(
+				DS3DListener,
+				(D3DVALUE) Global_VDB_Ptr->VDB_World.vx,
+				(D3DVALUE) Global_VDB_Ptr->VDB_World.vy,
+				(D3DVALUE) Global_VDB_Ptr->VDB_World.vz,
+				DS3D_DEFERRED
+			);
+	}
 #endif
 	if (Global_VDB_Ptr)
 	{
@@ -2399,6 +2417,42 @@ void UpdateSoundFrequencies(void)
 }
 #endif
 
+int WriteAudioStreamData(StreamingAudioBuffer *streamStruct, char *audioData, int size)
+{
+	return 1;
+}
+
+int GetNumFreeAudioStreamBuffers(StreamingAudioBuffer *streamStruct)
+{
+	return 1;
+}
+
+int GetWritableAudioStreamBufferSize(StreamingAudioBuffer *streamStruct)
+{
+	return 1;
+}
+
+int SetAudioStreamBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
+{
+	return 1;
+}
+
+int StopAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
+{
+	return 1;
+}
+
+int PlayAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
+{
+	return 1;
+}
+
+int ReleaseAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
+{
+	return 1;
+}
+
+#if 0
 int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
 {
 	WAVEFORMATEX waveFormat;
@@ -2419,7 +2473,7 @@ int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
 	bufferFormat.dwBufferBytes = waveFormat.nAvgBytesPerSec * 2;
 	bufferFormat.lpwfxFormat = &waveFormat;
 
-	if(FAILED(DSObject->CreateSoundBuffer(&bufferFormat, &vorbisBuffer, NULL))) 
+	if (FAILED(DSObject->CreateSoundBuffer(&bufferFormat, &vorbisBuffer, NULL))) 
 	{
 		LogErrorString("Couldn't create buffer for OGG Vorbis", __LINE__, __FILE__);
 		return -1;
@@ -2427,7 +2481,7 @@ int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
 
 	(*bufferSize) = bufferFormat.dwBufferBytes;
 
-		if(FAILED(vorbisBuffer->QueryInterface( IID_IDirectSoundNotify, 
+		if (FAILED(vorbisBuffer->QueryInterface( IID_IDirectSoundNotify, 
                                         (void**)&pDSNotify ) ) )
 	{
 		LogErrorString("Couldn't query interface for OGG Vorbis buffer notifications", __LINE__, __FILE__);
@@ -2446,7 +2500,7 @@ int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
 	notifyPosition[1].dwOffset = bufferFormat.dwBufferBytes - 1;
 	notifyPosition[1].hEventNotify = hHandles[1];
 
-	if(FAILED(pDSNotify->SetNotificationPositions(2, notifyPosition)))
+	if (FAILED(pDSNotify->SetNotificationPositions(2, notifyPosition)))
 	{
 		LogErrorString("Couldn't set notifications for OGG Vorbis buffer", __LINE__, __FILE__);
 		pDSNotify->Release();
@@ -2461,21 +2515,23 @@ int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
 
 	return 0;
 }
+#endif
 
+#if 0
 /* return the amount of data written to buffer */
 int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
 {
 	int bytesWritten = 0;
 
 	/* lock the vorbis buffer */
-	if(FAILED(vorbisBuffer->Lock(offset, dataSize, &audioPtr1, &audioBytes1, &audioPtr2, &audioBytes2, NULL))) 
+	if (FAILED(vorbisBuffer->Lock(offset, dataSize, &audioPtr1, &audioBytes1, &audioPtr2, &audioBytes2, NULL))) 
 	{
 		LogErrorString("couldn't lock ogg vorbis buffer for update", __LINE__, __FILE__);
 		return 0;
 	}
 
 	/* write data to buffer */
-	if(!audioPtr2) // buffer didn't wrap
+	if (!audioPtr2) // buffer didn't wrap
 	{
 		memcpy(audioPtr1, audioData, audioBytes1);
 		bytesWritten += audioBytes1;
@@ -2487,14 +2543,16 @@ int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
 		bytesWritten += audioBytes1+audioBytes2;
 	}
 
-	if(FAILED(vorbisBuffer->Unlock(audioPtr1, audioBytes1, audioPtr2, audioBytes2))) 
+	if (FAILED(vorbisBuffer->Unlock(audioPtr1, audioBytes1, audioPtr2, audioBytes2))) 
 	{
 		LogErrorString("couldn't unlock ogg vorbis buffer", __LINE__, __FILE__);
 	}
 
 	return bytesWritten;
 }
+#endif
 
+#if 0
 int SetVorbisBufferVolume(int volume)
 {
 	if (vorbisBuffer == NULL)
@@ -2502,14 +2560,14 @@ int SetVorbisBufferVolume(int volume)
 
 	signed int attenuation;
 
-	if(volume < VOLUME_MIN) volume = VOLUME_MIN;
-	if(volume > VOLUME_MAX) volume = VOLUME_MAX;
+	if (volume < VOLUME_MIN) volume = VOLUME_MIN;
+	if (volume > VOLUME_MAX) volume = VOLUME_MAX;
 
 	/* convert from intensity to attenuation */
 	attenuation = vol_to_atten_table[volume];
 
-	if(attenuation > VOLUME_MAXPLAT) attenuation = VOLUME_MAXPLAT;
-	if(attenuation < VOLUME_MINPLAT) attenuation = VOLUME_MINPLAT;
+	if (attenuation > VOLUME_MAXPLAT) attenuation = VOLUME_MAXPLAT;
+	if (attenuation < VOLUME_MINPLAT) attenuation = VOLUME_MINPLAT;
 
 	/* and apply it */
 	LastError = vorbisBuffer->SetVolume(attenuation);
@@ -2521,7 +2579,9 @@ int SetVorbisBufferVolume(int volume)
 
 	return 1;
 }
+#endif
 
+#if 0
 int StopVorbisBuffer()
 {
 	if(FAILED(vorbisBuffer->Stop()))
@@ -2550,5 +2610,71 @@ void ReleaseVorbisBuffer()
 		vorbisBuffer = NULL;
 	}
 }
+#endif
+
+int CreateAudioStreamBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate)
+{
+	WAVEFORMATEX waveFormat;
+	DSBUFFERDESC bufferFormat;
+
+	memset(&waveFormat, 0, sizeof(waveFormat));
+	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
+	waveFormat.nChannels		= channels;				//how many channels the OGG contains
+	waveFormat.wBitsPerSample	= 16;					//always 16 in OGG
+	waveFormat.nSamplesPerSec	= rate;	
+	waveFormat.nBlockAlign		= waveFormat.nChannels * waveFormat.wBitsPerSample / 8;	//what block boundaries exist
+	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
+	waveFormat.cbSize			= sizeof(waveFormat);	//how big this structure is
+
+	memset(&bufferFormat, 0, sizeof(DSBUFFERDESC));
+	bufferFormat.dwSize	 = sizeof(DSBUFFERDESC);
+	bufferFormat.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_LOCSOFTWARE;
+	bufferFormat.dwBufferBytes = waveFormat.nAvgBytesPerSec * 2;
+	bufferFormat.lpwfxFormat = &waveFormat;
+
+	if (FAILED(DSObject->CreateSoundBuffer(&bufferFormat, &streamStruct->dsBuffer, NULL))) 
+	{
+		LogErrorString("Couldn't create buffer for streaming audio", __LINE__, __FILE__);
+		return -1;
+	}
+
+/* FIXME
+	(*bufferSize) = bufferFormat.dwBufferBytes;
+
+		if (FAILED(vorbisBuffer->QueryInterface( IID_IDirectSoundNotify, 
+                                        (void**)&pDSNotify ) ) )
+	{
+		LogErrorString("Couldn't query interface for OGG Vorbis buffer notifications", __LINE__, __FILE__);
+	}
+
+	DSBPOSITIONNOTIFY notifyPosition[2];
+
+	hHandles[0] = CreateEvent(NULL,FALSE,FALSE,NULL);
+	hHandles[1] = CreateEvent(NULL,FALSE,FALSE,NULL);
+
+	// halfway
+	notifyPosition[0].dwOffset = bufferFormat.dwBufferBytes / 2;
+	notifyPosition[0].hEventNotify = hHandles[0];
+
+	// end
+	notifyPosition[1].dwOffset = bufferFormat.dwBufferBytes - 1;
+	notifyPosition[1].hEventNotify = hHandles[1];
+
+	if (FAILED(pDSNotify->SetNotificationPositions(2, notifyPosition)))
+	{
+		LogErrorString("Couldn't set notifications for OGG Vorbis buffer", __LINE__, __FILE__);
+		pDSNotify->Release();
+		return -1;
+	}
+
+	hHandles[0] = notifyPosition[0].hEventNotify;
+	hHandles[1] = notifyPosition[1].hEventNotify;
+
+	pDSNotify->Release();
+	pDSNotify = NULL;
+*/
+	return 0;
+}
 
 } // extern "C"
+#endif

@@ -199,7 +199,7 @@ const char* GetMultiplayerConfigDescription(int index)
 	else
 		sprintf(filename,"%s\\%s.cfg",MP_CONFIG_DIR,name);
 
-	file=fopen(filename,"rb");
+	file = avp_fopen(filename,"rb");
 	if(!file)
 	{
 		return 0;
@@ -237,7 +237,7 @@ void LoadMultiplayerConfiguration(const char* name)
 	else
 		sprintf(filename,"%s\\%s.cfg",MP_CONFIG_DIR,name);
 
-	file=fopen(filename,"rb");
+	file = avp_fopen(filename,"rb");
 	if(!file) return;
 
 
@@ -347,7 +347,7 @@ void SaveMultiplayerConfiguration(const char* name)
 		sprintf(filename,"%s\\%s.cfg",MP_CONFIG_DIR,name);
 	
 	CreateDirectory(MP_CONFIG_DIR,0);
-	file=fopen(filename,"wb");
+	file = avp_fopen(filename,"wb");
 	if(!file) return;
 
 	fwrite(&netGameData.gameType,sizeof(int),1,file);
@@ -555,7 +555,7 @@ void SaveIPAddress(const char* name,const char* address)
 	sprintf(filename,"%s\\%s.IP Address",IP_ADDRESS_DIR,name);
 	
 	CreateDirectory(IP_ADDRESS_DIR,0);
-	file=fopen(filename,"wb");
+	file = avp_fopen(filename,"wb");
 	if(!file) return;
 
 	fwrite(address,1,strlen(address)+1,file);
@@ -575,7 +575,7 @@ void LoadIPAddress(const char* name)
 	char filename[200];
 	sprintf(filename,"%s\\%s.IP Address",IP_ADDRESS_DIR,name);
 
-	file=fopen(filename,"rb");
+	file = avp_fopen(filename,"rb");
 	if(!file) return;
 	
 	fread(IPAddressString,1,16,file);

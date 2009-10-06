@@ -89,7 +89,7 @@
 				Optimization="0"
 				InlineFunctionExpansion="0"
 				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet-1.2-xbox\include&quot;"
-				PreprocessorDefinitions="_DEBUG;_XBOX;_WINDOWS;DB_NOWINDOWS;USE_FMV"
+				PreprocessorDefinitions="_DEBUG;AVP_DEBUG_VERSION;_XBOX;_WINDOWS;DB_NOWINDOWS"
 				StringPooling="FALSE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -111,9 +111,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="xapilibd.lib d3d8d.lib d3dx8d.lib xgraphicsd.lib dsoundd.lib libogg_static.lib libvorbis_static.lib libvorbisfile_static.lib xnetd.lib xboxkrnl.lib xbdm.lib"
+				AdditionalDependencies="xapilibd.lib d3d8d.lib d3dx8d.lib xgraphicsd.lib dsoundd.lib libogg_static.lib libvorbis_static.lib libvorbisfile_static.lib libtheora_static.lib xnetd.lib xboxkrnl.lib xbdm.lib"
 				AdditionalLibraryDirectories="..\xbox\enet-1.2-xbox\lib"
 				IgnoreDefaultLibraryNames="libcmt.lib"
+				ProgramDatabaseFile=".\Debug/debug_AvP.pdb"
 				MapExports="TRUE"
 				MapLines="TRUE"/>
 			<Tool
@@ -203,7 +204,7 @@
 		<Configuration
 			Name="Release For Fox|Xbox"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(temp)\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			WholeProgramOptimization="TRUE">
 			<Tool
@@ -217,7 +218,7 @@
 				OmitFramePointers="TRUE"
 				EnableFiberSafeOptimizations="FALSE"
 				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet-1.2-xbox\include&quot;"
-				PreprocessorDefinitions="_XBOX;_WINDOWS;DB_NOWINDOWS;USE_FMV;_SECURE_SCL=0;_HAS_ITERATOR_DEBUGGING=0"
+				PreprocessorDefinitions="_XBOX;_WINDOWS;DB_NOWINDOWS;_SECURE_SCL=0;_HAS_ITERATOR_DEBUGGING=0"
 				StringPooling="TRUE"
 				MinimalRebuild="TRUE"
 				ExceptionHandling="FALSE"
@@ -4798,6 +4799,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\3dc\ringbuffer.cpp">
+			</File>
+			<File
 				RelativePath="..\3dc\avp\win95\gadgets\rootgadg.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -5569,6 +5573,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\3dc\utilities.cpp">
+			</File>
+			<File
 				RelativePath="..\3dc\Vdb.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -5835,6 +5842,9 @@
 			</File>
 			<File
 				RelativePath="..\3dc\win95\animobs.hpp">
+			</File>
+			<File
+				RelativePath="..\3dc\audioStreaming.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\Frontend\AvP_EnvInfo.h">
@@ -6454,6 +6464,9 @@
 				RelativePath="..\3dc\avp\support\rentrntq.h">
 			</File>
 			<File
+				RelativePath="..\3dc\ringbuffer.h">
+			</File>
+			<File
 				RelativePath="..\3dc\avp\win95\gadgets\rootgadg.hpp">
 			</File>
 			<File
@@ -6557,6 +6570,9 @@
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\Usr_io.h">
+			</File>
+			<File
+				RelativePath="..\3dc\utilities.h">
 			</File>
 			<File
 				RelativePath="..\3dc\version.h">

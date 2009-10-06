@@ -14350,36 +14350,36 @@ void DoMarineHearing(STRATEGYBLOCK *sbPtr) {
 	for(a=0;a<SOUND_MAXACTIVE;a++) 
 	{
 		/* Ignore sounds with no position. */
-		if ((ActiveSounds[a].threedee)&&(ActiveSounds[a].loop==0)&&(ActiveSounds[a].marine_ignore==0)
-			&&(ActiveSounds[a].soundIndex!=SID_NOSOUND)) {
-			priority=Marine_SoundInterest(ActiveSounds[a].soundIndex);
+		if ((ActiveSounds[a].threedee) && (ActiveSounds[a].loop == 0) && (ActiveSounds[a].marine_ignore == 0)
+			&& (ActiveSounds[a].soundIndex != SID_NOSOUND)) {
+			priority = Marine_SoundInterest(ActiveSounds[a].soundIndex);
 			if (marineStatusPointer->Android==0) {
 				marineStatusPointer->Courage+=Marine_SoundCourageBonus(ActiveSounds[a].soundIndex);
 			}
 			if (priority) {
 				int test_dist;
 				/* Interesting sound... */
-				offset.vx=sbPtr->DynPtr->Position.vx-ActiveSounds[a].threedeedata.position.vx;
-				offset.vy=sbPtr->DynPtr->Position.vy-ActiveSounds[a].threedeedata.position.vy;
-				offset.vz=sbPtr->DynPtr->Position.vz-ActiveSounds[a].threedeedata.position.vz;
+				offset.vx = sbPtr->DynPtr->Position.vx - ActiveSounds[a].threedeedata.position.vx;
+				offset.vy = sbPtr->DynPtr->Position.vy - ActiveSounds[a].threedeedata.position.vy;
+				offset.vz = sbPtr->DynPtr->Position.vz - ActiveSounds[a].threedeedata.position.vz;
 
-				dist=Approximate3dMagnitude(&offset);
+				dist = Approximate3dMagnitude(&offset);
 
-				if (ActiveSounds[a].threedeedata.outer_range==-1) {
-					test_dist=100000;
+				if (ActiveSounds[a].threedeedata.outer_range == -1) {
+					test_dist = 100000;
 					/* 100 m. */
 				} else {
 					test_dist=ActiveSounds[a].threedeedata.outer_range;
 				}
 
-				if (dist<=test_dist) {
+				if (dist <= test_dist) {
 					/* In range.  Modify by priority. */
-					dist=MUL_FIXED(dist,priority);
+					dist = MUL_FIXED(dist,priority);
 
-					if (dist<neardist) {
+					if (dist < neardist) {
 						/* Got one! */
-						nearest=a;
-						neardist=dist;
+						nearest = a;
+						neardist = dist;
 					}
 				}
 			}
@@ -14406,7 +14406,6 @@ void DoMarineHearing(STRATEGYBLOCK *sbPtr) {
 					neardist=dist;
 				}
 			}
-		
 		}
 	}
 
@@ -14440,12 +14439,9 @@ void DoMarineHearing(STRATEGYBLOCK *sbPtr) {
 			} else {
 				level=2;
 			}
-		
 		}
-
 		PointAlert(level,&marineStatusPointer->suspect_point);
 	}
-
 }
 
 static STATE_RETURN_CONDITION Execute_MNS_Taunting(STRATEGYBLOCK *sbPtr)

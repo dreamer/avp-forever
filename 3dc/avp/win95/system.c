@@ -771,7 +771,6 @@ void IntegrateNewEnvironment()
 	ResetFrameCounter();
 }
 
-
 const char GameDataDirName[20] = {"avp_rifs"};
 const char FileNameExtension[5] =  {".rif"};
  
@@ -956,7 +955,7 @@ void LoadGameFromFile(void)
 {
 	// now we right to a file
 	char * savename = "slot1.AvP";
-	FILE* fp = fopen(savename, "rb");
+	FILE* fp = avp_fopen(savename, "rb");
 	if(fp == NULL)
 		return;
 	fread(&AvP, sizeof(AVP_GAME_DESC), 1, fp);
@@ -969,7 +968,7 @@ void LoadGameFromFile(void)
 void SaveGameToFile(void)
 {
 	char * savename = "slot1.AvP";
-	FILE* fp = fopen(savename, "wb");
+	FILE* fp = avp_fopen(savename, "wb");
 	CreateLevelMetablocks(AvP.CurrentEnv);
 	PackSaveBuffer();
 	fwrite(&AvP, sizeof(AVP_GAME_DESC), 1, fp);

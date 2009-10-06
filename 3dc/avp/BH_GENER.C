@@ -927,7 +927,7 @@ static void LoadGeneratorParams(void)
 	FILE* genParamsFile;
 	int numValsRead = 0;
 	
-	genParamsFile = fopen("GENPARAM.TXT","r");
+	genParamsFile = avp_fopen("GENPARAM.TXT","r");
 	
 	/* do nothing if we can't load the file */
 	if(!genParamsFile) return;

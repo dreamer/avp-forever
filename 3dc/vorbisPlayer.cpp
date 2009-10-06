@@ -9,31 +9,36 @@
 #include "vorbisPlayer.h"
 #include "logString.h"
 #include <process.h>
+#include "audioStreaming.h"
 
 #include <vector>
 #include <string>
 #include <fstream>
 #include <assert.h>
+#include "utilities.h" // avp_open()
 
 extern "C" 
 {
 	extern int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize);
 	extern int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset);
 	extern void ProcessStreamingAudio();
-	extern int SetVorbisBufferVolume(int volume);
+//	extern int SetVorbisBufferVolume(int volume);
+	extern int SetStreamingMusicVolume(int volume);
 	extern int StopVorbisBuffer();
 	extern int CDPlayerVolume; // volume control from menus
 	extern bool PlayVorbisBuffer();
-	extern HANDLE hHandles[2];
+//	extern HANDLE hHandles[2];
 }
 
 FILE* file;
 vorbis_info *pInfo;
 OggVorbis_File oggFile;
+StreamingAudioBuffer vorbisStream;
 
 bool oggIsPlaying = false;
 unsigned int bufferSize = 0;
 unsigned int halfBufferSize = 0;
+HANDLE hPlaybackThreadFinished;
 
 std::vector<std::string> TrackList;
 
@@ -46,11 +51,11 @@ std::vector<std::string> TrackList;
 	const std::string musicFolderName = "d:\\Music\\";
 #endif
 
-char *audioData = 0;
+static char *audioData = 0;
 
-int ReadVorbisData(int sizeToRead, int offset)
+int ReadVorbisData(char *audioBuffer, int sizeToRead, int offset)
 {
-	assert(offset < bufferSize);
+//	assert(offset < bufferSize);
 
 	int bytesReadTotal = 0;
 	int bytesReadPerLoop = 0;
@@ -59,7 +64,7 @@ int ReadVorbisData(int sizeToRead, int offset)
 	{
 		bytesReadPerLoop = ov_read(
 			&oggFile,									//what file to read from
-			(audioData + offset) + bytesReadTotal,		//where to put the decoded data
+			(audioBuffer + offset) + bytesReadTotal,	//where to put the decoded data
 			sizeToRead - bytesReadTotal,				//how much data to read
 			0,											//0 specifies little endian decoding mode
 			2,											//2 specifies 16-bit samples
@@ -102,7 +107,7 @@ void LoadVorbisTrack(int track)
 	/* if user enters 1, decrement to 0 to align to array (enters 2, decrement to 1 etc) */
 	if (track != 0) track--;
 
-	file = fopen(TrackList[track].c_str(),"rb");
+	file = avp_fopen(TrackList[track].c_str(),"rb");
 	if (!file) 
 	{
 		LogErrorString("Can't find OGG Vorbis file " + TrackList[track]);
@@ -130,26 +135,32 @@ void LoadVorbisTrack(int track)
 	LogString("\t Vorbis frequency: " + IntToString(pInfo->rate));
 
 	/* create the audio buffer (directsound or whatever) */
+	if (CreateAudioStreamBuffer(&vorbisStream, pInfo->channels, pInfo->rate) < 0)
+	{
+		LogErrorString("Can't create audio stream buffer for OGG Vorbis!");
+	}
+/*
 	if (CreateVorbisAudioBuffer(pInfo->channels, pInfo->rate, &bufferSize) < 0)
 	{
 		LogErrorString("Can't create audio buffer for OGG Vorbis!");
 	}
-
+*/
 	/* init some temp audio data storage */
-	audioData = new char[bufferSize];
+	audioData = new char[vorbisStream.bufferSize];
 
-	halfBufferSize = bufferSize / 2;
+//	halfBufferSize = bufferSize / 2;
 
 #ifdef WIN32
-	int totalRead = ReadVorbisData(bufferSize, 0);
+	int totalRead = ReadVorbisData(audioData, vorbisStream.bufferSize, 0);
 #endif
 #ifdef _XBOX
-	ProcessStreamingAudio();
+//	ProcessStreamingAudio();
 #endif
 
 	/* fill entire buffer initially */
 #ifdef WIN32
-	UpdateVorbisAudioBuffer(audioData, totalRead, 0);
+	WriteAudioStreamData(&vorbisStream, audioData, vorbisStream.bufferSize);
+//	UpdateVorbisAudioBuffer(audioData, totalRead, 0);
 #endif
 	/* start playing */
 	PlayVorbis();
@@ -161,11 +172,19 @@ void UpdateVorbisBuffer(void *arg)
 
 	DWORD dwQuantum = 1000 / 60;
 
-	while(oggIsPlaying)
+	while (oggIsPlaying)
 	{
-#ifdef _XBOX
-		ProcessStreamingAudio();
+#if 1//#ifdef _XBOX
+//		ProcessStreamingAudio();
 		Sleep( dwQuantum );
+
+		int numBuffersFree = GetNumFreeAudioStreamBuffers(&vorbisStream);
+
+		if (numBuffersFree)
+		{
+			ReadVorbisData(audioData, vorbisStream.bufferSize, 0);
+			WriteAudioStreamData(&vorbisStream, audioData, vorbisStream.bufferSize);
+		}
 #else
 		int waitValue = WaitForMultipleObjects(2, hHandles, FALSE, 1);
 
@@ -186,14 +205,16 @@ void UpdateVorbisBuffer(void *arg)
 		}
 #endif
 	}
+	SetEvent(hPlaybackThreadFinished);
 }
 
 void PlayVorbis() 
 {
-	if (PlayVorbisBuffer())
+	if (PlayAudioStreamBuffer(&vorbisStream))
 	{
 		oggIsPlaying = true;
-		SetVorbisBufferVolume(CDPlayerVolume);
+		SetAudioStreamBufferVolume(&vorbisStream, CDPlayerVolume);
+		hPlaybackThreadFinished = CreateEvent( NULL, FALSE, FALSE, NULL );
 		 _beginthread(UpdateVorbisBuffer, 0, 0);
 	}
 	else 
@@ -206,11 +227,16 @@ void StopVorbis()
 {
 	if (oggIsPlaying)
 	{
-		StopVorbisBuffer();
+		StopAudioStreamBuffer(&vorbisStream);
 		oggIsPlaying = false;
 	}
 
-	ReleaseVorbisBuffer();
+	/* wait until audio processing thread has finished running before continuing */ 
+	WaitForMultipleObjects(1, &hPlaybackThreadFinished, TRUE, INFINITE);
+
+	CloseHandle(hPlaybackThreadFinished);
+
+	ReleaseAudioStreamBuffer(&vorbisStream);
 
 	ov_clear(&oggFile);
 
@@ -262,4 +288,9 @@ int CheckNumberOfVorbisTracks()
 bool IsVorbisPlaying()
 {
 	return oggIsPlaying;
+}
+
+int SetStreamingMusicVolume(int volume)
+{
+	return SetAudioStreamBufferVolume(&vorbisStream, volume);
 }

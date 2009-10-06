@@ -1100,7 +1100,7 @@ BOOL File_Chunk::update_file()
 	
 	sprintf (dotpos, ".log");
 	
-	FILE * log = fopen (fname, "a");
+	FILE * log = avp_fopen (fname, "a");
 
 #endif
 

@@ -96,7 +96,6 @@ void SoundSys_End(void)
 	SoundSys_SwitchOff();
 	SoundInitialised = 0; /* forces call to Soundsys_Start to re-start sound system */	
 }
-
 void SoundSys_Management(void)
 {
 	int i;
@@ -131,10 +130,9 @@ void SoundSys_Management(void)
 		{
 			SoundSys_ChangeVolume(requestedVolume);
 		}
-
 	}
 	CheckCDVolume();
-	
+
 	PlatUpdatePlayer();
 	if (ShowDebuggingText.Sounds)
 	{
@@ -148,7 +146,6 @@ void SoundSys_Management(void)
 				PrintDebuggingText("%s\n",GameSounds[ActiveSounds[i].soundIndex].wavName);
 			}
 		}
-		
 	}
 
    	if(WARPSPEED_CHEATMODE || JOHNWOO_CHEATMODE || DebuggingCommandsActive)
@@ -328,7 +325,7 @@ void SoundSys_ChangeVolume(int volume)
   Functions for playing and controlling individual sounds
   ----------------------------------------------------------------------------*/
 void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
-{	
+{
 	char buf[100];
 	int newIndex;
 	int loop = 0;
@@ -559,10 +556,11 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 	GameSounds[soundNumber].activeInstances++;
 	if(externalRef) *externalRef = newIndex;
 
-	if(soundStartPosition && ActiveSounds[newIndex].dsBufferP)
+	if(soundStartPosition && /*ActiveSounds[newIndex].dsBufferP*/ CheckBufferIsValid(&ActiveSounds[newIndex]))
 	{
 		//sound starts part of the way in
-		IDirectSoundBuffer_SetCurrentPosition(ActiveSounds[newIndex].dsBufferP,soundStartPosition);
+		SetBufferCurrentPosition(&ActiveSounds[newIndex], soundStartPosition);
+//		IDirectSoundBuffer_SetCurrentPosition(ActiveSounds[newIndex].dsBufferP,soundStartPosition);
 	}
 }
 
@@ -845,8 +843,9 @@ void Save_SoundState(int* soundHandle)
 		block->volume<<=7;
 		block->volume/=VOLUME_PLAT2DSCALE;
 		
-		if(sound->dsBufferP)
-			IDirectSoundBuffer_GetCurrentPosition(sound->dsBufferP,(LPDWORD)&block->position,NULL);
+		if(/*sound->dsBufferP*/CheckBufferIsValid(sound))
+			GetBufferCurrentPosition(sound, &block->position);
+			//IDirectSoundBuffer_GetCurrentPosition(sound->dsBufferP,(LPDWORD)&block->position,NULL);
 		else
 			block->position = 0;
 
@@ -934,8 +933,9 @@ void Save_SoundsWithNoReference()
 				block->volume<<=7;
 				block->volume/=VOLUME_PLAT2DSCALE;
 
-				if(sound->dsBufferP)
-					IDirectSoundBuffer_GetCurrentPosition(sound->dsBufferP,(LPDWORD)&block->position,NULL);
+				if(/*sound->dsBufferP*/CheckBufferIsValid(sound))
+//					IDirectSoundBuffer_GetCurrentPosition(sound->dsBufferP,(LPDWORD)&block->position,NULL);
+					GetBufferCurrentPosition(sound, &block->position);
 //					GetBufferCurrentPosition(sound->dsBufferP, &block->position,NULL);
 				else
 					block->position = 0;

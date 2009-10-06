@@ -278,9 +278,21 @@ FFError FFHeaderI::Read(char const *_filename)
 		filename = new char [strlen(_filename)+1];
 		strcpy(filename,_filename);
 	}
-	
+#ifdef WIN32
 	HANDLE h = CreateFile (filename, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
-	
+#endif
+
+#ifdef _XBOX
+	char fullPathToFile[260];
+	fullPathToFile[0] = '\0';
+
+	strcat(fullPathToFile, "d:\\");
+	strcat(fullPathToFile, filename);
+
+	HANDLE h = CreateFile (fullPathToFile, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+
+#endif
+
 	if (INVALID_HANDLE_VALUE==h)
 	{
 		ReportError(_filename);

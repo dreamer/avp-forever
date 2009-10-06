@@ -221,10 +221,8 @@ void HandleSfxForObject(DISPLAYBLOCK *dispPtr)
 				velocity.vz = (FastRandom()&2047)-1024;
 				MakeParticle(&dispPtr->ObWorld,&velocity,PARTICLE_SPARK);	
 				MakeLightElement(&dispPtr->ObWorld,LIGHTELEMENT_ELECTRICAL_SPARKS);
-				
 			}
 		}
-		
 	}
 }
 
@@ -250,13 +248,11 @@ void HandleObjectOnFire(DISPLAYBLOCK *dispPtr)
 		dynPtr = sbPtr->DynPtr;
 		LOCALASSERT(sbPtr);
 
-		
 		velocity.vx = DIV_FIXED((dynPtr->Position.vx-dynPtr->PrevPosition.vx)*3,NormalFrameTime*4);
 		velocity.vy = DIV_FIXED((dynPtr->Position.vy-dynPtr->PrevPosition.vy)*3,NormalFrameTime*4);
 		velocity.vz = DIV_FIXED((dynPtr->Position.vz-dynPtr->PrevPosition.vz)*3,NormalFrameTime*4);
 
 		if (dispPtr==sbPtr->SBdptr)	noRequired = 5;
-
 	}
 	#else
 	velocity.vx = 0;

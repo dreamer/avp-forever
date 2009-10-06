@@ -1647,7 +1647,6 @@ SECTION * GetNamedHierarchyFromLibrary(const char * rif_name, const char * hier_
 					return(hdi()->hierarchy_root);
 				}
 			}
-			
 		}
 	}
 	return(0);
@@ -3079,61 +3078,10 @@ void avp_undo_rif_load(RIFFHANDLE h)
    	undo_rif_load(h);
 }
 
-/*
 RIFFHANDLE avp_load_rif (const char * fname)
 {
 	//see if there is a local copy of the rif file
-	FILE* rifFile=fopen(fname,"rb");
-
-	if(!rifFile && AvpCDPath)
-	{
-		//try and load rif file from cd instead
-		char RifName[200];
-		sprintf(RifName,"%s%s",AvpCDPath,fname);
-		return load_rif(RifName);
-	}
-
-	if(rifFile)
-	{
-		fclose(rifFile);
-	}
-
-	return load_rif(fname);
-}
-*/
-
-RIFFHANDLE avp_load_rif (const char * fname)
-{
-#ifdef _XBOX
-	char fileName[200];
-	sprintf(fileName, "%s%s","D:\\",fname);
-
-//	OutputDebugString("\n");
-//	OutputDebugString(fileName);
-
-	//see if there is a local copy of the rif file
-	FILE* rifFile=fopen(fileName,"rb");
-/*
-	if(!rifFile && AvpCDPath)
-	{
-		//try and load rif file from cd instead
-		char RifName[200];
-		sprintf(RifName,"%s%s",AvpCDPath,fname);
-		return load_rif(RifName);
-
-	}
-*/
-	// extra check
-	if(rifFile)
-	{
-		fclose(rifFile);
-	}
-	return load_rif(fileName); 
-
-#endif
-#ifdef WIN32
-	//see if there is a local copy of the rif file
-	FILE* rifFile=fopen(fname,"rb");
+	FILE *rifFile = avp_fopen(fname, "rb");
 
 	if(!rifFile && AvpCDPath)
 	{
@@ -3149,70 +3097,18 @@ RIFFHANDLE avp_load_rif (const char * fname)
 		fclose(rifFile);
 	}
 	return load_rif(fname); 
-#endif
 }
 
-
-/*
 RIFFHANDLE avp_load_rif_non_env (const char * fname)
 {
 	//see if there is a local copy of the rif file
-	FILE* rifFile=fopen(fname,"rb");
+	FILE* rifFile = avp_fopen(fname,"rb");
 	if(!rifFile && AvpCDPath)
 	{
 		//try and load rif file from cd instead
 		char RifName[200];
 		sprintf(RifName,"%s%s",AvpCDPath,fname);
 		return load_rif_non_env(RifName);
-
-	}
-
-	if(rifFile)
-	{
-		fclose(rifFile);
-	}
-
-	return load_rif_non_env(fname); 
-}
-*/
-
-RIFFHANDLE avp_load_rif_non_env (const char * fname)
-{
-#ifdef _XBOX
-	char fileName[200];
-	sprintf(fileName, "%s%s","D:\\",fname);
-
-//	OutputDebugString("\n");
-//	OutputDebugString(fileName);
-
-	//see if there is a local copy of the rif file
-	FILE* rifFile=fopen(fileName,"rb");
-/*
-	if(!rifFile && AvpCDPath)
-	{
-		//try and load rif file from cd instead
-		char RifName[200];
-		sprintf(RifName,"%s%s",AvpCDPath,fname);
-		return load_rif_non_env(RifName);
-	}
-*/
-	// extra check
-	if(rifFile)
-	{
-		fclose(rifFile);
-	}
-	return load_rif_non_env(fileName); 
-#endif
-#ifdef WIN32
-	//see if there is a local copy of the rif file
-	FILE* rifFile=fopen(fname,"rb");
-	if(!rifFile && AvpCDPath)
-	{
-		//try and load rif file from cd instead
-		char RifName[200];
-		sprintf(RifName,"%s%s",AvpCDPath,fname);
-		return load_rif_non_env(RifName);
-
 	}
 	// extra check
 	if(rifFile)
@@ -3220,7 +3116,6 @@ RIFFHANDLE avp_load_rif_non_env (const char * fname)
 		fclose(rifFile);
 	}
 	return load_rif_non_env(fname); 
-#endif
 }
 
 

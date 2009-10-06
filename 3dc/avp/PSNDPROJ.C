@@ -870,14 +870,14 @@ int FindAndLoadWavFile(int soundNum, char* wavFileName)
 	{
 		{
 			//check to see if file exists locally first
-			FILE* wavFile = fopen(sound_name,"rb");
+			FILE* wavFile = avp_fopen(sound_name,"rb");
 	
 			if(!wavFile && SecondSoundDir)
 			{
 				//look for sound over network
 				sprintf(sound_name, "%s%s", SecondSoundDir, wavFileName);
 	
-				wavFile = fopen(sound_name,"rb");
+				wavFile = avp_fopen(sound_name,"rb");
 				if(!wavFile)
 				{
 					OutputDebugString("failed to find sound\n");
@@ -908,7 +908,7 @@ void *LoadRebSndFile(char *filename)
 	void *bufferPtr;
 	long int save_pos, size_of_file;
 	FILE *fp;
-	fp = fopen(filename,"rb");
+	fp = avp_fopen(filename,"rb");
 	
 	if (!fp) goto error;
 
@@ -961,11 +961,10 @@ void LoadSounds(char *soundDirectory)
 		#if ALIEN_DEMO
 		strcpy(filename, ".\\alienfastfile");//CommonSoundDirectory);
 		#else
-#ifdef _XBOX
-		strcpy(filename, "d:\\fastfile");
-#else
-		strcpy(filename, ".\\fastfile");//CommonSoundDirectory);
-#endif
+
+//		strcpy(filename, ".\\fastfile");//CommonSoundDirectory);
+		strcpy(filename, "fastfile");//CommonSoundDirectory);
+
 		#endif
 //		strcat(filename, soundDirectory);
 		strcat(filename, "\\");

@@ -9335,7 +9335,7 @@ static FILE *netLogfile;
 void InitNetLog(void)
 {
 #if logNetGameProcesses
-		netLogfile = fopen("NETINFO.TXT","w");
+		netLogfile = avp_fopen("NETINFO.TXT","w");
 		fprintf(netLogfile, "NETGAME DEBUGGING LOG \n \n");
 		fclose(netLogfile);
 #endif
@@ -9345,7 +9345,7 @@ void LogNetInfo(char *msg)
 {
 #if logNetGameProcesses
 		if(!msg) return;
-		netLogfile = fopen("NETINFO.TXT","a");
+		netLogfile = avp_fopen("NETINFO.TXT","a");
 		fprintf(netLogfile, msg);
 		fclose(netLogfile);
 #endif

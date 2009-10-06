@@ -393,7 +393,6 @@ void InteriorType_Body()
 				ioff.vy = -100;
 			}
 		}
-
 				
 		ioff.vx = 0;
 		ioff.vz = 0;//-extentsPtr->CollisionRadius*2;
@@ -441,7 +440,6 @@ void InteriorType_Body()
 			CreateEulerMatrix(&orientation, &matrix);
 			MatrixMultiply(&Global_VDB_Ptr->VDB_Mat, &matrix, &Global_VDB_Ptr->VDB_Mat);
 	 	}
-
 	}
 	
 	{
@@ -527,9 +525,8 @@ void UpdateCamera(void)
 	mat.mat31 = 0;	  	
 	mat.mat32 = sin;	  	
 	mat.mat33 = cos;	  	
- 	MatrixMultiply(&Global_VDB_Ptr->VDB_Mat,&mat,&Global_VDB_Ptr->VDB_Mat);
+ 	MatrixMultiply(&Global_VDB_Ptr->VDB_Mat, &mat, &Global_VDB_Ptr->VDB_Mat);
 
-		
 	InteriorType_Body();
 }
 
@@ -594,7 +591,6 @@ void AVPGetInViewVolumeList(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 			}
 			#endif
 		}
-		
 	}
 }
 

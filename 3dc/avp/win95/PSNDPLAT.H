@@ -9,7 +9,13 @@
 extern "C" {
 #endif
 
-#include "psndproj.h"
+#ifdef USE_DSOUND
+#include <dsound.h>
+#endif
+#ifdef USE_XAUDIO2
+#include <xaudio2.h>
+#include <x3daudio.h>
+#endif
 #include "psnd.h"
 
 /* Patrick 10/6/97 -------------------------------------------------------------
@@ -25,8 +31,20 @@ typedef struct soundsampledata
   	int loaded;
 	int activeInstances;	 
 	int volume;		
-	int pitch;					
+	int pitch;
+#ifdef USE_DSOUND
 	LPDIRECTSOUNDBUFFER dsBufferP;
+#endif
+#ifdef _XBOX
+	LPDIRECTSOUNDBUFFER dsBufferP;
+#endif
+#ifdef USE_XAUDIO2
+	BOOL is3D;
+	unsigned char *audioBuffer;
+	XAUDIO2_BUFFER xa2Buffer;
+	X3DAUDIO_EMITTER xa2Emitter;
+	IXAudio2SourceVoice *pSourceVoice;
+#endif
 	unsigned int flags;
 	int dsFrequency;
 	char * wavName;
@@ -56,11 +74,21 @@ typedef struct activesoundsample
 	unsigned int marine_ignore	:1;
 	unsigned int reverb_off :1;
 	SOUND3DDATA threedeedata;
-	
+#ifdef USE_DSOUND
 	LPDIRECTSOUNDBUFFER dsBufferP;
 	LPDIRECTSOUND3DBUFFER ds3DBufferP;
-#ifdef WIN32
 	LPKSPROPERTYSET	PropSetP;
+#endif
+#ifdef _XBOX
+	LPDIRECTSOUNDBUFFER dsBufferP;
+	LPDIRECTSOUND3DBUFFER ds3DBufferP;
+#endif
+#ifdef USE_XAUDIO2
+	BOOL is3D;
+	unsigned char *audioBuffer;
+	XAUDIO2_BUFFER xa2Buffer;
+	X3DAUDIO_EMITTER xa2Emitter;
+	IXAudio2SourceVoice *pSourceVoice;
 #endif
 	
 }ACTIVESOUNDSAMPLE;
@@ -82,8 +110,6 @@ typedef struct pwavriffheader
 void InitialiseBaseFrequency(SOUNDINDEX soundNum);
 int LoadWavFile(int soundNum, char *);
 int LoadWavFromFastFile(int soundNum, char *);
-
-void GetBufferCurrentPosition(LPDIRECTSOUNDBUFFER pBuffer, LPDWORD currentPlayCursor, LPDWORD currentWriteCursor);
 
 /* Patrick 5/6/97 -------------------------------------------------------------
   Start and EndSoundSys: does any platform operations required to initialise
@@ -153,6 +179,10 @@ extern unsigned int PlatMaxHWSounds();
 	---------------------------------------------------------------------------*/
 extern int PlatUse3DSoundHW();
 extern int PlatDontUse3DSoundHW();
+
+extern void SetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int position);
+extern void GetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int *position);
+int CheckBufferIsValid(ACTIVESOUNDSAMPLE *activeSound);
 
 /* Patrick 5/6/97 -------------------------------------------------------------
   Defines for max number of sounds, and instances of sounds, allowed;

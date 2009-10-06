@@ -573,7 +573,9 @@ void InitNPCs(RIFFHANDLE h)
 	{
 		// as per linux port, check if mdisk.rif exists. if it does,
 		// we're using the gold version, else the regular
-		FILE * mdisk = fopen("\\avp_huds\\mdisk.rif","r");
+		//FILE * mdisk = avp_fopen("\\avp_huds\\mdisk.rif","r");
+		FILE * mdisk = avp_fopen("avp_huds\\mdisk.rif","r");
+
 		if(mdisk != NULL)
 		{
 			fclose(mdisk);

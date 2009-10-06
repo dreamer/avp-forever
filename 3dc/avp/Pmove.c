@@ -1656,7 +1656,7 @@ static void LoadInMovementValues(void)
 
 	FILE *fpInput;
 
-	fpInput = fopen("movement.txt","rb");
+	fpInput = avp_fopen("movement.txt","rb");
 
 	while(fgetc(fpInput) != '#');
 	while(fgetc(fpInput) != '#');

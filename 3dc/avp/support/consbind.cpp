@@ -381,7 +381,7 @@ void KeyBinding :: WriteToConfigFile(char* Filename)
 
 	GLOBALASSERT(Filename);
 
-	FILE* pFile = fopen(Filename,"w");
+	FILE* pFile = avp_fopen(Filename,"w");
 
 	if (!pFile)
 	{

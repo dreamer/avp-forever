@@ -5,6 +5,7 @@
 #include "list_tem.hpp"
 #include "dxlog.h"
 #include "system.h"
+#include "utilities.h" // avp_fopen
 
 class FFileDesc
 {
@@ -158,7 +159,7 @@ static List<FFILE *> openlist;
 
 int ffInit(char const * infofilename, char const * ffpath)
 {
-	FILE * fp = fopen(infofilename,"r");
+	FILE * fp = avp_fopen(infofilename,"r");
 	if (!fp) return 0;
 	
 	while (fdesclist.size())
@@ -370,7 +371,7 @@ FFILE * ffopen(char const * filename, char const * mode)
 	#if debug && 0 // dont do this, caller should handle this situation
 	LOGDXFMT(("%s not in any fastfile",filename));
 
-	FILE * sfp = fopen(filename,mode);
+	FILE * sfp = avp_fopen(filename,mode);
 	if (!sfp) return 0;
 
 	fseek(sfp,0,SEEK_END);

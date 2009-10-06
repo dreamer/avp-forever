@@ -518,7 +518,6 @@ void UpdateGame(void)
 		}
 
 		LeanScale+=(ONE_FIXED-TimeScale)*5;
-		
 	}
 }
 
@@ -559,12 +558,10 @@ extern void CheckCDStatus(void)
 
 void TimeStampedMessage(char *stringPtr)
 {
-//#if 0
 	static int time=0;
 	int t=timeGetTime();
 	LOGDXFMT(("%s %fs\n",stringPtr,(float)(t-time)/1000.0f ));
 	time = t;
-//#endif
 }
 
 

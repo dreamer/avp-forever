@@ -337,7 +337,7 @@ void _cdecl main()
 	#elif ALIEN_DEMO
 	ffInit("alienfastfile\\ffinfo.txt","alienfastfile\\");
 	#else
-	ffInit("d:\\fastfile\\ffinfo.txt","d:\\fastfile\\");
+	ffInit("fastfile\\ffinfo.txt","fastfile\\");
 	#endif
 
 	InitGame();

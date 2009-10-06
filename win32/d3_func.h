@@ -11,9 +11,9 @@ extern "C" {
 
 #ifdef WIN32
 	#include <d3d9.h>
-	#include "Dxerr9.h"
+	#include "Dxerr.h"
 
-	#pragma comment(lib, "Dxerr9.lib")
+	#pragma comment(lib, "Dxerr.lib")
 #endif
 
 #ifdef _XBOX

@@ -155,7 +155,7 @@ void ScanImagesForFMVs()
 					}
 
 					/* do a check here to see if it's a theora file rather than just any old file with the right name? */
-					FILE* file = fopen(filename, "rb");
+					FILE* file = avp_fopen(filename, "rb");
 					if (!file)
 					{
 						OutputDebugString("cant find smacker file!\n");

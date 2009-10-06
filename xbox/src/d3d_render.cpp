@@ -424,8 +424,8 @@ BOOL SetExecuteBufferDefaults()
 	d3d.lpD3DDevice->SetTextureStageState(1, D3DTSS_COLOROP,	D3DTOP_DISABLE);
 	d3d.lpD3DDevice->SetTextureStageState(1, D3DTSS_ALPHAOP,	D3DTOP_DISABLE);
 
-	d3d.lpD3DDevice->SetTextureStageState(0,D3DTSS_ADDRESSU,D3DTADDRESS_WRAP);
-	d3d.lpD3DDevice->SetTextureStageState(0,D3DTSS_ADDRESSV,D3DTADDRESS_WRAP);
+	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_WRAP);
+	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_WRAP);
 
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF, (DWORD)0.5);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
@@ -7550,6 +7550,7 @@ void SetupFMVTexture(FMVTEXTURE *ftPtr)
 
 void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 {
+	return;
 #ifdef USE_FMV
 
 	assert(ftPtr);
@@ -8149,28 +8150,26 @@ void DrawTexturedFadedQuad(int topX, int topY, int image_num, int alpha)
 #endif
 
 /* more quad drawing functions than you can shake a stick at! */
-void DrawBinkFmv(int topX, int topY, int height, int width, LPDIRECT3DTEXTURE8 fmvTexture)
+void DrawBinkFmv(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture)
 {
-//	OutputDebugString("drawing bink fmv\n");
-
 	/* set the texture */
 	LastError = d3d.lpD3DDevice->SetTexture(0, fmvTexture);
 
-	/* height and width of d3d texture */
-	int texSize = 1024;
+	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
+	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
 
-//	float RecipW = (1.0f / texSize);
-//	float RecipH = (1.0f / texSize);
+	int topX = (ScreenDescriptorBlock.SDB_Width - frameWidth) / 2;
+	int topY = (ScreenDescriptorBlock.SDB_Height - frameHeight) / 2;
 
 	// bottom left
 	quadVert[0].sx = (float)topX - 0.5f;
-	quadVert[0].sy = (float)topY + height - 0.5f;
+	quadVert[0].sy = (float)topY + frameHeight - 0.5f;
 	quadVert[0].sz = 0.0f;
 	quadVert[0].rhw = 1.0f;
 	quadVert[0].color = D3DCOLOR_ARGB(255,255,255,255);
 	quadVert[0].specular = RGBALIGHT_MAKE(0,0,0,255);
 	quadVert[0].tu = 0.0f;
-	quadVert[0].tv = (1.0f / texSize) * height;
+	quadVert[0].tv = (1.0f / textureHeight) * frameHeight;
 
 	// top left
 	quadVert[1].sx = (float)topX - 0.5f;
@@ -8183,23 +8182,23 @@ void DrawBinkFmv(int topX, int topY, int height, int width, LPDIRECT3DTEXTURE8 f
 	quadVert[1].tv = 0.0f;
 
 	// bottom right
-	quadVert[2].sx = (float)topX + width - 0.5f;
-	quadVert[2].sy = (float)topY + height - 0.5f;
+	quadVert[2].sx = (float)topX + frameWidth - 0.5f;
+	quadVert[2].sy = (float)topY + frameHeight - 0.5f;
 	quadVert[2].sz = 0.0f;
 	quadVert[2].rhw = 1.0f;
 	quadVert[2].color = D3DCOLOR_ARGB(255,255,255,255);
 	quadVert[2].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[2].tu = (1.0f / texSize) * width;
-	quadVert[2].tv = (1.0f / texSize) * height;
+	quadVert[2].tu = (1.0f / textureWidth) * frameWidth;
+	quadVert[2].tv = (1.0f / textureHeight) * frameHeight;
 
 	// top right
-	quadVert[3].sx = (float)topX + width - 0.5f;
+	quadVert[3].sx = (float)topX + frameWidth - 0.5f;
 	quadVert[3].sy = (float)topY - 0.5f;
 	quadVert[3].sz = 0.0f;
 	quadVert[3].rhw = 1.0f;
 	quadVert[3].color = D3DCOLOR_ARGB(255,255,255,255);
 	quadVert[3].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[3].tu = (1.0f / texSize) * width;
+	quadVert[3].tu = (1.0f / textureWidth) * frameWidth;
 	quadVert[3].tv = 0.0f;
 
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);

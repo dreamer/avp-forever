@@ -11,7 +11,8 @@
 	#include <xtl.h>
 #endif
 
-#include <stdio.h>
+//#include <stdio.h>
+#include "utilities.h"
 #include <conio.h>
 #include <limits.h>
 #include <string.h>
@@ -496,7 +497,7 @@ class MediaStdFileMedium : public MediaMedium
 		
 		void Open(char const * pszFileName, char const * pszOpenMode)
 		{
-			m_pFile = fopen(pszFileName,pszOpenMode);
+			m_pFile = avp_fopen(pszFileName,pszOpenMode);
 			if (!m_pFile)
 				m_fError |= MME_OPENFAIL;
 		}

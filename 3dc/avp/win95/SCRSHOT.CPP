@@ -37,7 +37,7 @@ void LogCameraPosForModuleLinking()
 	strcat(Filename,Env_List[AvP.CurrentEnv]->main);
 	strcat(Filename,".mlf");
 
-	FILE* file=fopen(Filename,"ab");
+	FILE* file = avp_fopen(Filename,"ab");
 	if(!file)return;
 
 	char output_buffer[300];
@@ -136,7 +136,7 @@ void ScreenShot()
 	{
 		Name[length]=i/10+'0';
 		Name[length+1]=(i%10)+'0';
-		FILE* tempfp=fopen(Name,"r");
+		FILE* tempfp=avp_fopen(Name,"r");
 		if(!tempfp)break;
 		else
 		{
@@ -146,7 +146,7 @@ void ScreenShot()
 	if(i==100) return;
 	
 
-	FILE * fp = fopen(Name,"wb");
+	FILE * fp = avp_fopen(Name,"wb");
 	if (!fp)
 	{
 		return;

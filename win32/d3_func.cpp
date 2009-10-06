@@ -255,6 +255,7 @@ void CreateScreenShotImage()
 	SAFE_RELEASE(frontBuffer);
 }
 
+/*
 bool IsPowerOf2(int i) 
 {
 	if ((i & -i) == i) {
@@ -268,6 +269,7 @@ int NearestSuperiorPow2(int i)
 	int x = ((i - 1) & i);
 	return x ? NearestSuperiorPow2(x) : i << 1;
 }
+*/
 
 LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex) 
 {
@@ -342,7 +344,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 			int row = i / 15; // get row
 			int column = i % 15; // get column from remainder value
 
-			int offset = ((column * charWidth) *2) + ((row * charHeight) * lock.Pitch);
+			int offset = ((column * charWidth) * 2) + ((row * charHeight) * lock.Pitch);
 
 			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits + offset)));
 
@@ -395,7 +397,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 			int row = i / 15; // get row
 			int column = i % 15; // get column from remainder value
 
-			int offset = ((column * charWidth) *4) + ((row * charHeight) * lock.Pitch);
+			int offset = ((column * charWidth) * 4) + ((row * charHeight) * lock.Pitch);
 
 			destPtr = (((unsigned char *)lock.pBits + offset));
 
@@ -456,9 +458,6 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture(int *width, int *height, int usage, int pool
 	return destTexture;
 }
 
-
-/* TODO: Pre-order source image data into ARGB order? */
-
 int imageNum = 0;
 
 // use this to make textures from non power of two images
@@ -466,8 +465,8 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *
 {
 	int original_width = tex->width;
 	int original_height = tex->height;
-	int new_width = original_width;//0;
-	int new_height = original_height;//0;
+	int new_width = original_width;
+	int new_height = original_height;
 
 	D3DCOLOR pad_colour = D3DCOLOR_XRGB(0,0,0);
 
@@ -512,7 +511,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *
 	TgaHeader->colourmaplength	= 0;
 	TgaHeader->colourmaporigin	= 0;
 	TgaHeader->colourmaptype	= 0;
-	TgaHeader->datatypecode		= 2;			// RGB
+	TgaHeader->datatypecode		= 2;		// RGB
 	TgaHeader->bitsperpixel		= 32;
 	TgaHeader->imagedescriptor	= 0x20;		// set origin to top left
 	TgaHeader->height = tex->height;
@@ -694,7 +693,7 @@ BOOL CreateVolatileResources()
 	RecreateAllFMVTexturesAfterDeviceReset();
 
 	/* create dynamic vertex buffer */
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DTLVERTEX),D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_TLVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DTLVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_TLVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);

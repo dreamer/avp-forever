@@ -50,7 +50,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="3dc;3dc\avp;3dc\avp\support;3dc\avp\win95;3dc\avp\win95\frontend;3dc\avp\win95\gadgets;3dc\include;3dc\win95;win32"
-				PreprocessorDefinitions="WIN32;USE_FMV;_DEBUG;_WINDOWS;AVP_DEBUG_VERSION;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501"
+				PreprocessorDefinitions="WIN32;USE_XAUDIO2;_DEBUG;_WINDOWS;AVP_DEBUG_VERSION;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="false"
@@ -86,7 +86,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib shell32.lib shlwapi.lib d3d9.lib dsound.lib libvorbisfile.lib libvorbis.lib libogg.lib libtheora.lib user32.lib xinput.lib $(NOINHERIT)"
+				AdditionalDependencies="winmm.lib shell32.lib shlwapi.lib d3d9.lib x3daudio.lib dxguid.lib libvorbisfile.lib libvorbis.lib libogg.lib libtheora.lib user32.lib xinput.lib libsndfile-1.lib $(NOINHERIT)"
 				OutputFile="debug_AvP.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -171,7 +171,7 @@
 				OmitFramePointers="true"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="3dc;3dc\avp;3dc\avp\support;3dc\avp\win95;3dc\avp\win95\frontend;3dc\avp\win95\gadgets;3dc\include;3dc\win95;win32"
-				PreprocessorDefinitions="WIN32;_WINDOWS;USE_FMV;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINNT=0x0501;_SECURE_SCL=0;_HAS_ITERATOR_DEBUGGING=0"
+				PreprocessorDefinitions="WIN32;_WINDOWS;USE_XAUDIO2;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINNT=0x0501;_SECURE_SCL=0;_HAS_ITERATOR_DEBUGGING=0"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="0"
@@ -205,7 +205,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib shell32.lib shlwapi.lib d3d9.lib dsound.lib libvorbisfile.lib libvorbis.lib libogg.lib libtheora.lib user32.lib xinput.lib $(NOINHERIT)"
+				AdditionalDependencies="winmm.lib shell32.lib shlwapi.lib d3d9.lib xaudio2.lib libvorbisfile.lib libvorbis.lib libogg.lib libtheora.lib user32.lib xinput.lib libsndfile-1.lib $(NOINHERIT)"
 				OutputFile="MyAvP.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -4347,6 +4347,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\3dc\ringbuffer.cpp"
+				>
+			</File>
+			<File
 				RelativePath="3dc\avp\win95\gadgets\rootgadg.cpp"
 				>
 				<FileConfiguration
@@ -5055,6 +5059,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\3dc\utilities.cpp"
+				>
+			</File>
+			<File
 				RelativePath="3dc\Vdb.c"
 				>
 				<FileConfiguration
@@ -5279,6 +5287,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\3dc\avp\win95\xa2_audio.cpp"
+				>
+			</File>
+			<File
 				RelativePath="3dc\win95\Zsp.cpp"
 				>
 				<FileConfiguration
@@ -5330,6 +5342,10 @@
 				</File>
 				<File
 					RelativePath="3dc\win95\animobs.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\3dc\audioStreaming.h"
 					>
 				</File>
 				<File
@@ -6149,6 +6165,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\3dc\ringbuffer.h"
+					>
+				</File>
+				<File
 					RelativePath="3dc\avp\win95\gadgets\rootgadg.hpp"
 					>
 				</File>
@@ -6286,6 +6306,10 @@
 				</File>
 				<File
 					RelativePath="3dc\avp\win95\Usr_io.h"
+					>
+				</File>
+				<File
+					RelativePath=".\3dc\utilities.h"
 					>
 				</File>
 				<File

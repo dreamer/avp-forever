@@ -108,11 +108,8 @@ void AllNewModuleHandler(void)
 						/*Since all modules visible by this player have now been linked , don't need
 						to check for any more aliens for this player*/
 						break;
-
 					}
-
 				}
-
 			}	
 		}
 	}
@@ -133,7 +130,6 @@ void AllNewModuleHandler(void)
 			if(playerPherModule->m_vmptr) FindVisibleModules(playerPherModule->m_vmptr,2);
 		}
 	}
-
 
 
 	/* handle AIMODULE visibility stuff */
@@ -171,15 +167,12 @@ void AllNewModuleHandler(void)
 				{
 					AllocateModuleObject(mptr);
 				}
-
 			}
 			else
 			{
 				if(mptr->m_dptr) DeallocateModuleObject(mptr);
 			}
-
 		}
-
 	}
 
 	/* call Patrick's code */

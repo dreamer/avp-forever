@@ -88,11 +88,11 @@ void DrawParticles()
 	if (particleArray.size() > maxParts) 
 	{
 		maxParts = particleArray.size();
-
+/*
 		char buf[100];
 		sprintf(buf, "particle size: %d\n", maxParts);
 		OutputDebugString(buf);
-
+*/
 	}
 	int backup = RenderPolygon.NumberOfVertices;
 
@@ -387,8 +387,8 @@ BOOL SetExecuteBufferDefaults()
 	d3d.lpD3DDevice->SetTextureStageState(1, D3DTSS_COLOROP,	D3DTOP_DISABLE);
 	d3d.lpD3DDevice->SetTextureStageState(1, D3DTSS_ALPHAOP,	D3DTOP_DISABLE);
 
-	d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-	d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF, (DWORD)0.5);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
@@ -2533,12 +2533,12 @@ void D3D_DecalSystem_Setup(void)
 	LockExecuteBuffer();
 
 	if (D3DDitherEnable != FALSE) {
-		d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE,FALSE);
+		d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE, FALSE);
 		D3DDitherEnable = FALSE;
 	}
 
 	if (D3DZWriteEnable != FALSE) {
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
+		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 		D3DZWriteEnable = FALSE;
 	}
 }
@@ -2552,12 +2552,12 @@ void D3D_DecalSystem_End(void)
 	LockExecuteBuffer();
 
 	if (D3DDitherEnable != TRUE) {
-		d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE,TRUE);
+		d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE, TRUE);
 		D3DDitherEnable = TRUE;
 	}
 
 	if (D3DZWriteEnable != TRUE) {
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 		D3DZWriteEnable = TRUE;
 	}
 }

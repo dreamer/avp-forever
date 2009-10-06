@@ -100,9 +100,9 @@ void LogDxError(HRESULT hr, int LINE, const char* FILE)
 	D3DXGetErrorString(hr, LPSTR(&buffer), 60);
 	temp.append(buffer);
 #else
-	temp.append(DXGetErrorString9(hr));
+	temp.append(DXGetErrorString(hr));
 	temp.append(" - ");
-	temp.append(DXGetErrorDescription9(hr));
+	temp.append(DXGetErrorDescription(hr));
 #endif
 	temp.append(" Line: ");
 	temp.append(IntToString(LINE));

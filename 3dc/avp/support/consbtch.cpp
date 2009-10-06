@@ -81,7 +81,7 @@ BatchFileProcessing :: Run(char* Filename)
 	RefList<SCString> PendingList;
 
 	{
-		FILE* pFile = fopen(Filename,"r");
+		FILE* pFile = avp_fopen(Filename,"r");
 
 		if (NULL==pFile)
 		{

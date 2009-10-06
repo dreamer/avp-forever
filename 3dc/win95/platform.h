@@ -36,7 +36,7 @@ extern "C"  {
 */
 #ifdef WIN32
 	#include <d3d9.h>
-	#include "dsound.h"
+//	#include "dsound.h"
 	typedef int DPID;
 
 	#define DIRECTINPUT_VERSION 0x0800

@@ -6611,7 +6611,7 @@ DISPLAYBLOCK *CauseDamageToHModel(HMODELCONTROLLER *HMC_Ptr, STRATEGYBLOCK *sbPt
 		} else if ( ((this_section_data->sempai->flags&section_is_master_root)==0) 
 			&&((this_section_data->sempai->flags&section_flag_never_frag)==0)
 			&&(((this_section_data->sempai->flags&section_sprays_acid)&&((this_section_data->sempai->flags&section_flag_fragonlyfordisks)==0))
-				||((this_section_data->sempai->StartingStats.Health<TotalKineticDamage(damage))&&(this_section_data->sempai->flags&section_flag_fragonlyfordisks==0))
+				||((this_section_data->sempai->StartingStats.Health<TotalKineticDamage(damage))&&(this_section_data->sempai->flags & section_flag_fragonlyfordisks==0))
 				||((damage->Slicing>2)&&(this_section_data->sempai->flags&section_flag_fragonlyfordisks))
 				||((damage->Slicing>0)&&((this_section_data->sempai->flags&section_flag_fragonlyfordisks)==0))
 			)

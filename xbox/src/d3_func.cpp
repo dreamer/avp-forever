@@ -268,11 +268,13 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AvPTexture *tex)
 	return swizTexture;
 }
 
-LPDIRECT3DTEXTURE8 CreateFmvTexture(int width, int height, int usage, int pool)
+LPDIRECT3DTEXTURE8 CreateFmvTexture(int *width, int *height, int usage, int pool)
 {
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
 
-	LastError = d3d.lpD3DDevice->CreateTexture(width, height, 1, usage, D3DFMT_A8R8G8B8, (D3DPOOL)pool, &destTexture);
+	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)width, (UINT*)height, NULL, usage, NULL, (D3DPOOL)pool);
+
+	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, usage, D3DFMT_LIN_X8R8G8B8, (D3DPOOL)pool, &destTexture);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -283,27 +285,16 @@ LPDIRECT3DTEXTURE8 CreateFmvTexture(int width, int height, int usage, int pool)
 }
 
 // use this to make textures from non power of two images
-LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int *real_width) 
+LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *realHeight) 
 {
 	int original_width = tex->width;
 	int original_height = tex->height;
-	int new_width = 0;
-	int new_height = 0;
-
-#if 0
-	#define MB	(1024*1024)
-	MEMORYSTATUS stat;
-	char buf[100];
-
-	// Get the memory status.
-    GlobalMemoryStatus( &stat );
-
-	sprintf(buf, "%4d  free MB of physical memory.\n", stat.dwAvailPhys / MB );
-	OutputDebugString( buf );
-#endif
+	int new_width = original_width;
+	int new_height = original_height;
 
 	D3DCOLOR pad_colour = D3DCOLOR_XRGB(0,0,0);
 
+/*
 	// check if passed value is already a power of 2
 	if (!IsPowerOf2(tex->width)) {
 		new_width = NearestSuperiorPow2(tex->width);
@@ -318,31 +309,37 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 	// set passed in width and height values to be used later
 	(*real_height) = new_height;
 	(*real_width) = new_width;
+*/
+	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)&new_width, (UINT*)&new_height, NULL, 0, NULL, D3DPOOL_MANAGED);
+
+	(*realHeight) = new_height;
+	(*realWidth) = new_width;
 
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
 
 	D3DXIMAGE_INFO image;
-	image.Depth  = 32;
-	image.Width  = tex->width;
+	image.Depth = 32;
+	image.Width = tex->width;
 	image.Height = tex->height;
 	image.MipLevels = 1;
 	image.Depth = D3DFMT_A8R8G8B8;
 
 	D3DPOOL poolType = D3DPOOL_MANAGED;
 
-	/* fill tga header */
-	TgaHeader.idlength = 0;
-	TgaHeader.x_origin = tex->width;
-	TgaHeader.y_origin = tex->height;
-	TgaHeader.colourmapdepth  = 0;
-	TgaHeader.colourmaplength = 0;
-	TgaHeader.colourmaporigin = 0;
-	TgaHeader.colourmaptype	  = 0;
-	TgaHeader.datatypecode    = 2;			// RGB
-	TgaHeader.bitsperpixel    = 32;
-	TgaHeader.imagedescriptor = 0x20;	// set origin to top left
-	TgaHeader.height = tex->height;
-	TgaHeader.width  = tex->width;
+	/* create and fill tga header */
+	TGA_HEADER *TgaHeader = new TGA_HEADER;
+	TgaHeader->idlength = 0;
+	TgaHeader->x_origin = tex->width;
+	TgaHeader->y_origin = tex->height;
+	TgaHeader->colourmapdepth	= 0;
+	TgaHeader->colourmaplength	= 0;
+	TgaHeader->colourmaporigin	= 0;
+	TgaHeader->colourmaptype	= 0;
+	TgaHeader->datatypecode		= 2;		// RGB
+	TgaHeader->bitsperpixel		= 32;
+	TgaHeader->imagedescriptor	= 0x20;		// set origin to top left
+	TgaHeader->height = tex->height;
+	TgaHeader->width = tex->width;
 
 	/* size of raw image data */
 	int imageSize = tex->height * tex->width * 4;
@@ -351,22 +348,22 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 	byte *buffer = new byte[sizeof(TGA_HEADER) + imageSize];
 
 	/* copy header and image data to buffer */
-	memcpy(buffer, &TgaHeader, sizeof(TGA_HEADER));
+	memcpy(buffer, TgaHeader, sizeof(TGA_HEADER));
 
 	byte *imageData = buffer + sizeof(TGA_HEADER);
 
 	/* loop, converting RGB to BGR for D3DX function */
 	for (int i = 0; i < imageSize; i+=4)
 	{
-		// RGB
-		// BGR
+
+		// BGRA			 // RGBA
 		imageData[i+2] = tex->buffer[i];
 		imageData[i+1] = tex->buffer[i+1];
-		imageData[i] = tex->buffer[i+2];
+		imageData[i]   = tex->buffer[i+2];
 		imageData[i+3] = tex->buffer[i+3];
 	}
 
-	LastError = D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
+	if (FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
 		buffer,
 		sizeof(TGA_HEADER) + imageSize,
 		D3DX_DEFAULT,//tex->width,
@@ -380,16 +377,15 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int
 		0,
 		&image,
 		0,
-		&destTexture);
-
-	if (FAILED(LastError))
+		&destTexture)))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
+		delete TgaHeader;
 		delete[] buffer;
 		return NULL;
-
 	}
 
+	delete TgaHeader;
 	delete[] buffer;
 
 	return destTexture;
@@ -670,13 +666,11 @@ BOOL InitialiseDirect3DImmediateMode()
 	ClearLog();
 	LogString("Starting to initialise Direct3D");
 
-//	int width = 720;
-//	int height = 576;
-
 	int width = 640;
 	int height = 480;
 	int depth = 32;
 	int defaultDevice = D3DADAPTER_DEFAULT;
+	int thisDevice = D3DADAPTER_DEFAULT;
 
 	//	Zero d3d structure
     memset(&d3d, 0, sizeof(D3DINFO));
@@ -702,7 +696,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	}
 */
 	DWORD standard = XGetVideoStandard();
-	if(standard == XC_VIDEO_STANDARD_PAL_I)
+	if (standard == XC_VIDEO_STANDARD_PAL_I)
 	{
 		OutputDebugString("\n using PAL");
 	}
@@ -729,7 +723,7 @@ BOOL InitialiseDirect3DImmediateMode()
 
 		DWORD videoFlags = XGetVideoFlags();
 
-		if(videoFlags & XC_VIDEO_FLAGS_PAL_60Hz)		// PAL 60 user
+		if (videoFlags & XC_VIDEO_FLAGS_PAL_60Hz)		// PAL 60 user
 		{
 			d3dpp.FullScreen_RefreshRateInHz = 60;
 			OutputDebugString("using refresh of 60\n");
@@ -741,7 +735,7 @@ BOOL InitialiseDirect3DImmediateMode()
 		}
 	}
 
-	if(XGetVideoFlags() == XC_VIDEO_FLAGS_PAL_60Hz)
+	if (XGetVideoFlags() == XC_VIDEO_FLAGS_PAL_60Hz)
 	{
 		OutputDebugString("XC_VIDEO_FLAGS_PAL_60Hz set\n");
 	}
@@ -769,7 +763,7 @@ BOOL InitialiseDirect3DImmediateMode()
 
 			int j = 0;
 			/* check if the more already exists */
-			for (; j < d3d.NumModes; j++)
+			for (; j < d3d.Driver[thisDevice].NumModes; j++)
 			{
 				if ((d3d.Driver[defaultDevice].DisplayMode[j].Width == tempMode.Width) &&
 					(d3d.Driver[defaultDevice].DisplayMode[j].Height == tempMode.Height) &&
@@ -778,13 +772,13 @@ BOOL InitialiseDirect3DImmediateMode()
 			}
 			
 			/* we looped all the way through but didn't break early due to already existing item */
-			if (j == d3d.NumModes)
+			if (j == d3d.Driver[thisDevice].NumModes)
 			{
-				d3d.Driver[defaultDevice].DisplayMode[d3d.NumModes].Width       = tempMode.Width;
-				d3d.Driver[defaultDevice].DisplayMode[d3d.NumModes].Height      = tempMode.Height;
-				d3d.Driver[defaultDevice].DisplayMode[d3d.NumModes].Format      = tempMode.Format;
-				d3d.Driver[defaultDevice].DisplayMode[d3d.NumModes].RefreshRate = 0;
-				d3d.NumModes++;
+				d3d.Driver[defaultDevice].DisplayMode[d3d.Driver[thisDevice].NumModes].Width       = tempMode.Width;
+				d3d.Driver[defaultDevice].DisplayMode[d3d.Driver[thisDevice].NumModes].Height      = tempMode.Height;
+				d3d.Driver[defaultDevice].DisplayMode[d3d.Driver[thisDevice].NumModes].Format      = tempMode.Format;
+				d3d.Driver[defaultDevice].DisplayMode[d3d.Driver[thisDevice].NumModes].RefreshRate = 0;
+				d3d.Driver[thisDevice].NumModes++;
 			}
 		}
 	}

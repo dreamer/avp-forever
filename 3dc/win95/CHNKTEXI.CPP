@@ -662,18 +662,18 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 extern "C" extern void CheckForWindowsMessages(void);
 
 /* folder to check for user textures */
-std::string newTextureFolder = "Textures\\";
-std::string newTextureFileName;
+//std::string newTextureFolder = "Textures\\";
+//std::string newTextureFileName;
 
 int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 {
 	// safe to handle windows messages at this point (I think - JCWH)
 	CheckForWindowsMessages();
-
+/*
 	newTextureFileName = newTextureFolder + pszFileName;
-	/* lop .RIM off the end of the filename */
+	// lop .RIM off the end of the filename
 	newTextureFileName = newTextureFileName.substr(0, newTextureFileName.length() - 4);
-	
+*/	
 	// get the filename
 	char szBuf[MAX_PATH];
 	if (!CL_GetImageFileName(szBuf,sizeof szBuf/sizeof szBuf[0],pszFileName,fFlagsEtc))

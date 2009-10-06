@@ -112,10 +112,10 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 void DrawProgressBar(RECT src_rect, RECT dest_rect, D3DTEXTURE bar_texture, int original_width, int original_height, int new_width, int new_height);
 void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 void ReleaseD3DTexture(D3DTEXTURE d3dTexture);
-void DrawBinkFmv(int topX, int topY, int height, int width, D3DTEXTURE fmvTexture);
+void DrawBinkFmv(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture);
 void CreateScreenShotImage();
 D3DTEXTURE CheckAndLoadUserTexture(const char *fileName, int *width, int *height);
-D3DTEXTURE CreateFmvTexture(int width, int height, int usage, int pool);
+D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool);
 
 D3DINFO GetD3DInfo();
 void InGameFlipBuffers(void);

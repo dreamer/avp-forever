@@ -39,7 +39,7 @@ int CDPlayerVolume; // volume control from menus
 
 int CDTrackMax=-1; //highest track number on cd
 
-extern int SetVorbisBufferVolume(int volume);
+extern int SetStreamingMusicVolume(int volume);
 
 void CDDA_Start(void)
 {
@@ -126,7 +126,7 @@ extern void CheckCDVolume(void)
 void CDDA_ChangeVolume(int volume)
 {
 	/* set vorbis volume here for now */
-	if(SetVorbisBufferVolume(volume))
+	if (SetStreamingMusicVolume(volume))
 	{
 		CDDAVolume=volume;
 		CDPlayerVolume = volume;
@@ -337,6 +337,8 @@ static void PlatGetCDDAVolumeControl(void)
 void PlatEndCDDA(void)
 {	
 	DWORD dwReturn;
+
+	return; // bjd
 
     /* check the cdDeviceId */
     if (cdDeviceID == NO_DEVICE) return;	

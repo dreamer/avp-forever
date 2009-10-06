@@ -359,7 +359,7 @@ char *LoadTextFile(char *filename)
 	long int save_pos, size_of_file;
 	FILE *fp;
 
-	fp = fopen(filename,"rb");
+	fp = avp_fopen(filename,"rb");
 	
 	if (!fp) goto error;
 

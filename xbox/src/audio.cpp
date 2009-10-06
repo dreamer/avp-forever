@@ -1,9 +1,6 @@
 /* directsound implementation for the xbox */
 
 #include "logString.h"
-extern int ReadVorbisData(int sizeToRead, int offset);
-extern char *audioData;
-extern bool oggIsPlaying;
 
 extern "C" {
 
@@ -20,7 +17,9 @@ extern "C" {
 #include "db.h"
 #include "ffstdio.h"
 
-#include "assert.h"
+#include <assert.h>
+#include "vorbisPlayer.h"
+#include "audioStreaming.h"
 
 static int SoundActivated = 0;
 
@@ -66,14 +65,15 @@ ACTIVESOUNDSAMPLE BlankActiveSound = {SID_NOSOUND,ASP_Minimum,0,0,NULL,0,0,0,0,0
 
 //	Direct sound globals
 LPDIRECTSOUND8			DSObject = NULL; 
-int 					SoundMinBufferFree;
+int 					SoundMinBufferFree = 0;
 
 /* for vorbis playback */
+/*
 LPDIRECTSOUNDSTREAM		vorbisAudioStream = NULL;
 const static int		PACKET_COUNT = 3;
-const static int		FILESTRM_PACKET_BYTES = 2 * 2 * 36 * 128;//22000;// * 3;
+const static int		FILESTRM_PACKET_BYTES = 18432;
 DWORD					PacketStatus[PACKET_COUNT]; // Packet status array
-
+*/
 static HRESULT LastError;
 
 void ProcessStreamingAudio();
@@ -453,7 +453,7 @@ int PlatPlaySound(int activeIndex)
 
 			/*set distance at which attenuation starts*/
 			if(ActiveSounds[activeIndex].threedeedata.inner_range == 0)
-				ActiveSounds[activeIndex].threedeedata.inner_range = DS3D_DEFAULTMINDISTANCE;
+				ActiveSounds[activeIndex].threedeedata.inner_range = static_cast<int>(DS3D_DEFAULTMINDISTANCE);
 
 			ActiveSounds[activeIndex].ds3DBufferP->SetMinDistance((float)ActiveSounds[activeIndex].threedeedata.inner_range, DS3D_DEFERRED);
 			ActiveSounds[activeIndex].ds3DBufferP->SetMaxDistance(DS3D_DEFAULTMAXDISTANCE, DS3D_DEFERRED);
@@ -1063,7 +1063,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 	size_t res;
 	int lengthInSeconds;
 
-	myFile = fopen(wavFileName,"rb");
+	myFile = avp_fopen(wavFileName,"rb");
 	if(!myFile)
 	{
 		GLOBALASSERT (0);
@@ -2042,6 +2042,198 @@ unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 }
 #endif
 
+void SetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int position)
+{
+
+}
+
+void GetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int *position)
+{
+
+}
+
+int CheckBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
+{
+	return 1;
+}
+
+int WriteAudioStreamData(StreamingAudioBuffer *streamStruct, char *audioData, int size)
+{
+	assert (streamStruct);
+	assert (audioData);
+
+	int amountWritten = 0;
+
+	/* then send some of that audio to directsound.. */
+	XMEDIAPACKET packet;
+	ZeroMemory( &packet, sizeof(packet) );
+
+	// offset into source data buffer
+	memcpy(&streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize], audioData, size);
+
+	packet.pvBuffer  = &streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize];//(char*)audioData + (dwPacketIndex * FILESTRM_PACKET_BYTES);
+	packet.dwMaxSize = size;
+	packet.pdwStatus = &streamStruct->PacketStatus[streamStruct->currentBuffer];
+
+	LastError = streamStruct->dsStreamBuffer->Process( &packet, NULL );
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+
+	streamStruct->currentBuffer++;
+	streamStruct->currentBuffer %= streamStruct->bufferCount;
+
+	return 1;
+}
+
+int GetNumFreeAudioStreamBuffers(StreamingAudioBuffer *streamStruct)
+{
+	assert (streamStruct);
+
+	int numFreeBuffers = 0;
+
+	for (DWORD dwPacketIndex = 0; dwPacketIndex < streamStruct->bufferCount; dwPacketIndex++)
+    {
+        if (XMEDIAPACKET_STATUS_PENDING != streamStruct->PacketStatus[dwPacketIndex])
+        {
+			numFreeBuffers++;
+        }
+    }
+
+	return numFreeBuffers;
+}
+
+int GetWritableAudioStreamBufferSize(StreamingAudioBuffer *streamStruct)
+{
+	return 1;
+}
+
+int SetAudioStreamBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
+{
+	assert (streamStruct);
+
+	if (streamStruct->dsStreamBuffer == NULL) 
+		return 0;
+
+	signed int attenuation;
+
+	if (volume < VOLUME_MIN) volume = VOLUME_MIN;
+	if (volume > VOLUME_MAX) volume = VOLUME_MAX;
+
+	/* convert from intensity to attenuation */
+	attenuation = vol_to_atten_table[volume];
+
+	if (attenuation > VOLUME_MAXPLAT) attenuation = VOLUME_MAXPLAT;
+	if (attenuation < VOLUME_MINPLAT) attenuation = VOLUME_MINPLAT;
+
+	/* and apply it */
+	LastError = streamStruct->dsStreamBuffer->SetVolume(attenuation);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return 0;
+	}
+	return 1;
+}
+
+int StopAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
+{
+	assert (streamStruct);
+
+	if (streamStruct->dsStreamBuffer)
+	{
+		streamStruct->dsStreamBuffer->Flush();
+	}
+
+	return 1;
+}
+
+int PlayAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
+{
+	return 1;
+}
+
+int ReleaseAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
+{
+	assert (streamStruct);
+
+	if (streamStruct->dsStreamBuffer)
+	{
+		LastError = streamStruct->dsStreamBuffer->Flush();
+		if (FAILED(LastError))
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+			//return 1;
+		}
+		LastError = streamStruct->dsStreamBuffer->Release();
+		if (FAILED(LastError))
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+			//return 1;
+		}
+		streamStruct->dsStreamBuffer = NULL;
+	}
+
+	// clear the new-ed memory
+	if (streamStruct->buffers)
+	{
+		delete []streamStruct->buffers;
+		streamStruct->buffers = NULL;
+	}
+
+	streamStruct->bufferCount = 0;
+	streamStruct->currentBuffer = 0;
+	streamStruct->bufferSize = 0;
+
+	return 1;
+}
+
+int CreateAudioStreamBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate)
+{
+	WAVEFORMATEX waveFormat;
+
+	memset(&waveFormat, 0, sizeof(waveFormat));
+	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
+	waveFormat.nChannels		= channels;
+	waveFormat.wBitsPerSample	= 16;
+	waveFormat.nSamplesPerSec	= rate;	
+	waveFormat.nBlockAlign		= waveFormat.nChannels * waveFormat.wBitsPerSample / 8;	//what block boundaries exist
+	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
+	waveFormat.cbSize			= sizeof(waveFormat);									//how big this structure is
+
+	/* test code for dsound stream system */
+	DSSTREAMDESC streamDesc;
+	ZeroMemory(&streamDesc, sizeof(streamDesc));
+	streamDesc.dwMaxAttachedPackets		= STREAMBUFFERCOUNT;
+	streamDesc.lpwfxFormat				= &waveFormat;
+
+	LastError = DirectSoundCreateStream(&streamDesc, &streamStruct->dsStreamBuffer);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+
+	/* Set the stream headroom to 0 */
+	streamStruct->dsStreamBuffer->SetHeadroom(0);
+
+	for( DWORD i = 0; i < STREAMBUFFERCOUNT; i++ )
+		streamStruct->PacketStatus[i] = XMEDIAPACKET_STATUS_SUCCESS;
+
+	streamStruct->buffers = new unsigned char[STREAMBUFFERSIZE * STREAMBUFFERCOUNT];
+	if (streamStruct->buffers == NULL)
+	{
+		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
+	}
+
+	streamStruct->currentBuffer = 0;
+	streamStruct->bufferSize = STREAMBUFFERSIZE;
+	streamStruct->bufferCount = STREAMBUFFERCOUNT;
+
+	return 1;
+}
+
+#if 0
 bool FindFreePacket(DWORD* pdwPacketIndex)
 {
 	for (DWORD dwPacketIndex = 0; dwPacketIndex < PACKET_COUNT; dwPacketIndex++)
@@ -2057,7 +2249,9 @@ bool FindFreePacket(DWORD* pdwPacketIndex)
 
     return false;
 }
+#endif
 
+#if 0
 void ProcessStreamingAudio()
 {
 	if (!oggIsPlaying) 
@@ -2096,7 +2290,9 @@ void ProcessStreamingAudio()
 		}
 	}
 }
+#endif
 
+#if 0
 int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
 {
 	WAVEFORMATEX waveFormat;
@@ -2133,6 +2329,7 @@ int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
 
 	return 0;
 }
+#endif
 
 /* return the amount of data written to buffer */
 int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
@@ -2169,6 +2366,7 @@ int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
 #endif
 }
 
+#if 0
 int SetVorbisBufferVolume(int volume)
 {
 	if (vorbisAudioStream == NULL) 
@@ -2195,7 +2393,9 @@ int SetVorbisBufferVolume(int volume)
 
 	return 1;
 }
+#endif
 
+#if 0
 int StopVorbisBuffer()
 {
 	LastError = vorbisAudioStream->Flush();
@@ -2207,6 +2407,7 @@ int StopVorbisBuffer()
 
 	return 0;
 }
+#endif
 
 bool PlayVorbisBuffer()
 {
@@ -2221,6 +2422,7 @@ bool PlayVorbisBuffer()
 */
 }
 
+#if 0
 void ReleaseVorbisBuffer()
 {
 	if (vorbisAudioStream != NULL) 
@@ -2229,5 +2431,6 @@ void ReleaseVorbisBuffer()
 		vorbisAudioStream = NULL;
 	}
 }
+#endif
 
 } // extern C

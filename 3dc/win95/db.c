@@ -63,6 +63,7 @@ int db_option = 0; /* Default is off. */
 		
 /* ANSI includes. */
 #include <stdio.h>
+#include "utilities.h"
 #include <stdlib.h>
 #include <ctype.h>
 #include <conio.h>
@@ -78,12 +79,7 @@ int db_option = 0; /* Default is off. */
 #define PROP_WIDTH 0
 
 /* Logfile name */
-#ifdef WIN32
-	#define LOGFILE_NAME "LOGFILE.TXT"
-#endif
-#ifdef _XBOX
-	#define LOGFILE_NAME "D:\\LOGFILE.TXT"
-#endif
+#define LOGFILE_NAME "LOGFILE.TXT"
 
 /* Set this to 1 if the logfile name is an absolute path. Otherwise the
  * logfile will go in the directory that is current when db_log_init() 
@@ -404,7 +400,7 @@ void db_log_fired(const char *strP)
 	if(!InitialisedLog) db_log_init();
 	{
 		/* Open a file for appending, creating one if it doesn't yet exist. */
-		FILE *fP = fopen(LogFileNameP, "a+");
+		FILE *fP = avp_fopen(LogFileNameP, "a+");
 
 		if(!fP) return;
 

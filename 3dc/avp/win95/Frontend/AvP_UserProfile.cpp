@@ -137,7 +137,7 @@ extern int SaveUserProfile(AVP_USER_PROFILE *profilePtr)
 	strcat( strPath, profilePtr->Name);
 	strcat( strPath, USER_PROFILES_SUFFIX);
 
-	FILE* file = fopen(strPath, "wb");
+	FILE* file = avp_fopen(strPath, "wb");
 
 	if(!file)
 		return 0;
@@ -155,7 +155,7 @@ extern int SaveUserProfile(AVP_USER_PROFILE *profilePtr)
 	strcat(filename,profilePtr->Name);
 	strcat(filename,USER_PROFILES_SUFFIX);
 
-	FILE* file=fopen(filename,"wb");
+	FILE* file = avp_fopen(filename,"wb");
 
 	delete [] filename;
 	if(!file) return 0;

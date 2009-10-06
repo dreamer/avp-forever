@@ -1606,20 +1606,24 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 	/* handle xbox controllers seperate from joysticks */
 	if (GotXPad)
 	{
+		char buf[100];
 		#define JOYSTICK_DEAD_ZONE 12000
 		int yAxis = xPadMoveY * 2;
 		int xAxis = xPadMoveX * 2;
 
-		xPadLookY=-xPadLookY;
+		xPadLookY =- xPadLookY;
+
+		sprintf(buf, "pad y: %d\n", xPadLookY);
+		OutputDebugString(buf);
 
 		/* looking up and down */
-		if(xPadLookY < 0)
+		if (xPadLookY < 0)
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookUp = 1;
 			playerStatusPtr->Mvt_AnaloguePitching = 1;
 			playerStatusPtr->Mvt_PitchIncrement = ((int)xPadLookY) * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
 		}
-		else if(xPadLookY > 0)
+		else if (xPadLookY > 0)
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookDown = 1;
 			playerStatusPtr->Mvt_AnaloguePitching = 1;
@@ -1627,23 +1631,23 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		}
 
 		/* looking left and right */
-		if(xPadLookX < 0)
+		if (xPadLookX < 0)
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_TurnLeft = 1;
 			playerStatusPtr->Mvt_AnaloguePitching = 1;
 			playerStatusPtr->Mvt_TurnIncrement = ((int)xPadLookX) * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
 		}
-		else if(xPadLookX > 0)
+		else if (xPadLookX > 0)
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_TurnRight = 1;
 			playerStatusPtr->Mvt_AnaloguePitching = 1;
 			playerStatusPtr->Mvt_TurnIncrement = ((int)xPadLookX) * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
 		}
 
-		if(JoystickControlMethods.JoystickFlipVerticalAxis) yAxis=-yAxis;
+		if (JoystickControlMethods.JoystickFlipVerticalAxis) yAxis=-yAxis;
 
 		/* forward and backward movement */
-		if(yAxis > JOYSTICK_DEAD_ZONE)
+		if (yAxis > JOYSTICK_DEAD_ZONE)
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Forward = 1;
 			playerStatusPtr->Mvt_MotionIncrement = yAxis;
@@ -1655,12 +1659,12 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		}
 
 		/* sidestep left and right */
-		if(xAxis < -JOYSTICK_DEAD_ZONE)
+		if (xAxis < -JOYSTICK_DEAD_ZONE)
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_SideStepLeft = 1;
 			playerStatusPtr->Mvt_SideStepIncrement = xAxis;
 		}
-		else if(xAxis > JOYSTICK_DEAD_ZONE)
+		else if (xAxis > JOYSTICK_DEAD_ZONE)
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_SideStepRight = 1;
 			playerStatusPtr->Mvt_SideStepIncrement = xAxis;
@@ -1990,7 +1994,7 @@ void SaveKeyConfiguration(void)
 void LoadAKeyConfiguration(char* Filename)
 {
 	#if 0
-	FILE* file=fopen(Filename,"rb");
+	FILE* file=avp_fopen(Filename,"rb");
 	if(!file)
 	{
 		MarineInputPrimaryConfig = DefaultMarineInputPrimaryConfig;
@@ -2018,7 +2022,7 @@ void LoadAKeyConfiguration(char* Filename)
 void SaveAKeyConfiguration(char* Filename)
 {
 	#if 0
-	FILE* file=fopen(Filename,"wb");
+	FILE* file=avp_fopen(Filename,"wb");
 	if(!file) return;
 
 	fwrite(&MarineInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
@@ -2037,7 +2041,7 @@ void SaveAKeyConfiguration(char* Filename)
 
 void SaveDefaultPrimaryConfigs(void)
 {
-	FILE* file=fopen("default.cfg","wb");
+	FILE* file = avp_fopen("default.cfg","wb");
 	if(!file) return;
 
 	fwrite(&DefaultMarineInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
@@ -2048,7 +2052,7 @@ void SaveDefaultPrimaryConfigs(void)
 }
 void LoadDefaultPrimaryConfigs(void)
 {
-	FILE* file=fopen("default.cfg","rb");
+	FILE* file = avp_fopen("default.cfg","rb");
 	if(!file) return;
 
 	fread(&DefaultMarineInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);

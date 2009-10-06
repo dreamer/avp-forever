@@ -461,7 +461,25 @@ extern "C"
 // load a rif file into memory
 RIFFHANDLE load_rif (const char * fname)
 {
+	// ugh..
+#ifdef WIN32
 	File_Chunk * fc = new File_Chunk (fname);
+#endif
+#ifdef _XBOX
+	char fullPathToFile[260];
+
+	fullPathToFile[0] = '\0';
+/*
+	for (int i = 0; i < 260; i++)
+	{
+		fullPathToFile[i] = '\0';
+	}
+*/
+	strcat(fullPathToFile, "d:\\");
+	strcat(fullPathToFile, fname);
+
+	File_Chunk * fc = new File_Chunk (fullPathToFile);
+#endif
 
 	if (fc->error_code != 0)
 	{

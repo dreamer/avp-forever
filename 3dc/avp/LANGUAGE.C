@@ -53,14 +53,7 @@ void InitTextStrings(void)
 	filenamePtr = "aenglish.txt";
 //	TextBufferPtr = LoadTextFile("aenglish.txt");
 	#elif USE_LANGUAGE_TXT
-#ifdef _XBOX
-	filenamePtr = "D:\\language.txt";
-//	TextBufferPtr = LoadTextFile("D:\\language.txt"); // xbox
-#endif
-#ifdef WIN32 
 	filenamePtr = "language.txt";
-//	TextBufferPtr = LoadTextFile("language.txt"); // win32
-#endif
 	#else
 	filenamePtr = LanguageFilename[AvP.Language];
 //	TextBufferPtr = LoadTextFile(LanguageFilename[AvP.Language]);

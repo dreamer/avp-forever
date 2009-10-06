@@ -60,7 +60,7 @@ extern void PlayIntroSequence(void)
 
 //	PlayBinkedFMV("FMVs/logos.bik");
 #ifdef _XBOX
-	//PlayBinkedFMV("D:\\FMVs\\logos.ogv");
+	PlayBinkedFMV("D:\\FMVs\\logos.ogv");
 #else
 	PlayBinkedFMV("FMVs/logos.ogv");
 #endif

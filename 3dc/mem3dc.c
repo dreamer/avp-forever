@@ -571,7 +571,7 @@ void DumpMallocInfo(int type)
      #if SupportWindows95
      FILE *fp;
 
-     if( (fp = fopen(MALLOCDUMPFILE,FILEPERM))== (FILE *)NULL) 
+     if( (fp = avp_fopen(MALLOCDUMPFILE,FILEPERM))== (FILE *)NULL) 
      {
        textprint2("\n\n\nfile open error %s", MALLOCDUMPFILE);
      }
@@ -700,7 +700,7 @@ void DumpBoundsCheckInfo(int type)
      #if SupportWindows95
      FILE *fp;
 
-     if( (fp = fopen(MALLOCDUMPFILE,FILEPERM))== (FILE *)NULL) 
+     if( (fp = avp_fopen(MALLOCDUMPFILE,FILEPERM))== (FILE *)NULL) 
      {
        textprint2("\n\n\nfile open error %s", MALLOCDUMPFILE);
      }
