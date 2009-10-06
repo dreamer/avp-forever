@@ -437,7 +437,7 @@ void HandlePostGameFMVs(void)
 		{
 			if (MarineEpisodeToPlay==MAX_NO_OF_BASIC_MARINE_EPISODES-1)
 			{
-				//PlayBinkedFMV("FMVs/marineoutro.ogv");
+				PlayBinkedFMV("FMVs/marineoutro.ogv");
 			}
 			break;
 		}
@@ -1985,12 +1985,23 @@ static void RenderLoadGameMenu(void)
 				//GetLocalTime(&slotPtr->TimeStamp);
 
 #ifdef WIN32
-				nLen = GetDateFormat(GetThreadLocale(), DATE_SHORTDATE, &slotPtr->TimeStamp,NULL,buffer,nLen);
-				nLen = GetTimeFormat(GetThreadLocale(), 0, &slotPtr->TimeStamp,NULL,buffer2,100);
-#endif
-
+				nLen = GetDateFormat(GetThreadLocale(), DATE_SHORTDATE, &slotPtr->TimeStamp ,NULL, buffer, nLen);
+				nLen = GetTimeFormat(GetThreadLocale(), 0, &slotPtr->TimeStamp, NULL, buffer2, 100);
+	
 				strcat(buffer2,"  ");
 				strcat(buffer2,buffer);
+#endif
+#ifdef _XBOX
+				// manually format the string as we don't have either GetDateFormat or GetTimeFormat
+				sprintf(buffer2, "%02d:%02d:%02d %02d/%02d/%02d", 
+							slotPtr->TimeStamp.wHour, 
+							slotPtr->TimeStamp.wMinute, 
+							slotPtr->TimeStamp.wSecond,
+							slotPtr->TimeStamp.wDay, 
+							slotPtr->TimeStamp.wMonth, 
+							slotPtr->TimeStamp.wYear
+						);
+#endif
 				RenderText(buffer2,MENU_RIGHTXEDGE-30,y+HUD_FONT_HEIGHT+1,elementPtr->Brightness,AVPMENUFORMAT_RIGHTJUSTIFIED);
 			}
 		}
@@ -5443,7 +5454,6 @@ static void GetHeaderInfoForSaveSlot(SAVE_SLOT_HEADER* save_slot,const char* fil
 		//obviously not much of a save file then...
 		CloseHandle(file);
 		return;
-
 	}
 
 	//get the time stamp for the file
@@ -5452,9 +5462,7 @@ static void GetHeaderInfoForSaveSlot(SAVE_SLOT_HEADER* save_slot,const char* fil
 		GetFileTime(file,0,0,&time);
 		FileTimeToLocalFileTime(&time,&localTime);
 		FileTimeToSystemTime(&localTime,&save_slot->TimeStamp);
-
 	}
-
    	
 	//load the level header
 	ReadFile(file,&block,sizeof(block),(LPDWORD)&bytes_read,0);

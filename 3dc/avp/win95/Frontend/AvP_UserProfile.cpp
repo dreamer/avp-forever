@@ -323,9 +323,7 @@ static int LoadUserProfiles(void)
 			InsertProfileIntoList(profilePtr);
 			CloseHandle (rif_file);
 			delete[] pszFullPath;
-
 		}
-
 	}
 	while (::FindNextFile(hFindFile,&wfd));
 

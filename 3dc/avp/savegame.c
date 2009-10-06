@@ -752,8 +752,6 @@ void LoadSavedGame()
 				terminal_error = TRUE;
 				break;
 		}
-		
-
 	}
 	
 	if(terminal_error)
@@ -801,7 +799,6 @@ void LoadSavedGame()
 		NewOnScreenMessage(GetTextString(TEXTSTRING_SAVEGAME_GAMELOADED));
 		DisplaySavesLeft();
 	}
-
 }
 
 SAVE_BLOCK_HEADER* GetNextBlockIfOfType(SAVE_BLOCK_TYPE type)
