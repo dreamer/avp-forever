@@ -3127,7 +3127,7 @@ void LoadModuleData()
 {
  	GLOBALASSERT(env_rif);
 
- 	HANDLE file = CreateFile ("avp_rifs\\module.bbb", GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 
+ 	HANDLE file = avp_CreateFile ("avp_rifs\\module.bbb", GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 
  					FILE_FLAG_RANDOM_ACCESS, 0);
 	unsigned long byteswritten;
 	WriteFile(file,&Global_VDB_Ptr->VDB_World,sizeof(VECTORCH),&byteswritten,0);
@@ -3135,7 +3135,7 @@ void LoadModuleData()
  	
  	CloseHandle(file);
 
- 	file = CreateFile ("avp_rifs\\module.aaa", GENERIC_READ, 0, 0, OPEN_EXISTING, 
+ 	file = avp_CreateFile ("avp_rifs\\module.aaa", GENERIC_READ, 0, 0, OPEN_EXISTING, 
  					FILE_FLAG_RANDOM_ACCESS, 0);
 
 	if(file==INVALID_HANDLE_VALUE) return;

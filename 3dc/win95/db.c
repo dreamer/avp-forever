@@ -89,7 +89,7 @@ int db_option = 0; /* Default is off. */
 	#define ABSOLUTE_PATH	0
 #endif
 #ifdef _XBOX
-	#define ABSOLUTE_PATH	1
+	#define ABSOLUTE_PATH	1 // bjd - CHECK STILL VALID
 #endif
 /* M A C R O S ******************************************************** */
 
@@ -687,7 +687,7 @@ static fontPtr guiload_font(char *new_fname)
 	DWORD bytesRead;
 
 	/* Open file for reading */
-	fH = CreateFile(new_fname, GENERIC_READ, 0, NULL, OPEN_EXISTING,
+	fH = avp_CreateFile(new_fname, GENERIC_READ, 0, NULL, OPEN_EXISTING,
 		FILE_ATTRIBUTE_NORMAL|FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 	if(!fH) 
 	{

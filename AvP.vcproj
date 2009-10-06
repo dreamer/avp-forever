@@ -86,7 +86,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib shell32.lib shlwapi.lib d3d9.lib x3daudio.lib dxguid.lib libvorbisfile.lib libvorbis.lib libogg.lib libtheora.lib user32.lib xinput.lib libsndfile-1.lib $(NOINHERIT)"
+				AdditionalDependencies="winmm.lib shell32.lib shlwapi.lib d3d9.lib x3daudio.lib dxguid.lib enet.lib libvorbisfile.lib libvorbis.lib libogg.lib libtheora.lib user32.lib xinput.lib libsndfile-1.lib $(NOINHERIT)"
 				OutputFile="debug_AvP.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"

@@ -12,16 +12,9 @@ extern char * SecondSoundDir;
 
 void GetPathFromRegistry()
 {
-//#ifdef WIN32
 	SecondTex_Directory = "graphics/";
 	SecondSoundDir = "sound/";
-//#endif
-/*
-#ifdef _XBOX
-        SecondTex_Directory = "graphics\\";
-        SecondSoundDir = "sound\\";
-#endif
-*/
+
 #if 0
 	HKEY hKey;
 	

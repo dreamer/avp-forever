@@ -141,14 +141,8 @@ typedef struct
 	}
 */
 
-#ifdef WIN32
-	#define USER_PROFILES_PATH "User_Profiles\\"
-	#define USER_PROFILES_WILDCARD_NAME "User_Profiles\\*.prf"
-#endif
-#ifdef _XBOX
-	#define USER_PROFILES_PATH "D:\\User_Profiles\\"
-	#define USER_PROFILES_WILDCARD_NAME "D:\\User_Profiles\\*.prf"
-#endif
+#define USER_PROFILES_PATH "User_Profiles\\"
+#define USER_PROFILES_WILDCARD_NAME "User_Profiles\\*.prf"
 #define USER_PROFILES_SUFFIX ".prf"
 
 

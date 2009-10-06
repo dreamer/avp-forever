@@ -414,7 +414,7 @@ class MediaWinFileMedium : public MediaMedium
 					dwCreationDistribution = OPEN_ALWAYS;
 					dwShareMode = 0;
 			}
-			m_hFile = CreateFile
+			m_hFile = avp_CreateFile
 			(
 				pszFileName,
 				dwDesiredAccess,

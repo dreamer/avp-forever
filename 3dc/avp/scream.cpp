@@ -59,12 +59,7 @@ static CharacterSoundEffects QueenSounds={0,0,0,SID_NOSOUND};
 #if ALIEN_DEMO
 #define ScreamFilePath "alienfastfile\\"
 #elif LOAD_SCREAMS_FROM_FASTFILES
-	#ifdef WIN32
-		#define ScreamFilePath "fastfile\\"
-	#endif
-	#ifdef _XBOX
-		#define ScreamFilePath "d:\\fastfile\\"
-	#endif
+#define ScreamFilePath "fastfile\\"
 #else
 #define ScreamFilePath "sound\\"
 #endif
@@ -165,8 +160,8 @@ void CharacterSoundEffects::LoadSounds(const char* filename,const char* director
 	char path[100]=ScreamFilePath;
 	strcat(path,filename);
 
-	HANDLE file=CreateFile(path,GENERIC_READ, 0, 0, OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
-	if(file==INVALID_HANDLE_VALUE)
+	HANDLE file = avp_CreateFile(path,GENERIC_READ, 0, 0, OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
+	if (file == INVALID_HANDLE_VALUE)
 	{
 		LOGDXFMT(("Failed to open %s",path));
 		return;

@@ -41,11 +41,7 @@ void EmptyCDTrackList()
 	}
 }
 
-#ifdef _XBOX
-#define CDTrackFileName "D:\\CD Tracks.txt"
-#else
 #define CDTrackFileName "CD Tracks.txt"
-#endif
 
 static void ExtractTracksForLevel(char* &buffer, List<int> &track_list)
 {
@@ -188,8 +184,8 @@ void LoadCDTrackList()
 	//clear out the old list first
 	EmptyCDTrackList();
 
-	HANDLE file=CreateFile(CDTrackFileName,GENERIC_READ, 0, 0, OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
-	if(file==INVALID_HANDLE_VALUE)
+	HANDLE file = avp_CreateFile(CDTrackFileName,GENERIC_READ, 0, 0, OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
+	if (file == INVALID_HANDLE_VALUE)
 	{
 		LOGDXFMT(("Failed to open %s",CDTrackFileName));
 		return;

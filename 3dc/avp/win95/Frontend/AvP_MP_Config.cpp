@@ -57,7 +57,7 @@ BOOL BuildLoadMPConfigMenu()
 	// allow a wildcard search
 	WIN32_FIND_DATA wfd;
 
-	HANDLE hFindFile = ::FindFirstFile(load_name,&wfd);
+	HANDLE hFindFile = avp_FindFirstFile(load_name, &wfd);
 	
 	if (INVALID_HANDLE_VALUE == hFindFile)
 	{
@@ -471,7 +471,7 @@ BOOL BuildLoadIPAddressMenu()
 	// allow a wildcard search
 	WIN32_FIND_DATA wfd;
 
-	HANDLE hFindFile = ::FindFirstFile(load_name,&wfd);
+	HANDLE hFindFile = avp_FindFirstFile(load_name, &wfd);
 	
 	if (INVALID_HANDLE_VALUE == hFindFile)
 	{
@@ -610,13 +610,9 @@ void BuildMultiplayerLevelNameArray()
 	// allow a wildcard search
 	WIN32_FIND_DATA wfd;
 
-#ifdef _XBOX
-	const char* load_name="d:\\avp_rifs\\custom\\*.rif";
-#else
 	const char* load_name="avp_rifs\\custom\\*.rif";
-#endif
 
-	HANDLE hFindFile = ::FindFirstFile(load_name,&wfd);
+	HANDLE hFindFile = avp_FindFirstFile(load_name, &wfd);
 	
 	if (INVALID_HANDLE_VALUE != hFindFile)
 	{

@@ -197,7 +197,7 @@ Sprite_Header_Chunk::Sprite_Header_Chunk(const char * file_name, Chunk_With_Chil
 	error_code = 0;
 
 
-	rif_file = CreateFileA (file_name, GENERIC_READ, 0, 0, OPEN_EXISTING, 
+	rif_file = avp_CreateFile (file_name, GENERIC_READ, 0, 0, OPEN_EXISTING, 
 					FILE_FLAG_RANDOM_ACCESS, 0);
 
 	if (rif_file == INVALID_HANDLE_VALUE) {
@@ -270,7 +270,7 @@ int Sprite_Header_Chunk::write_file(const char* fname)
 {
 	HANDLE rif_file;
 
-	rif_file = CreateFileA (fname, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 
+	rif_file = avp_CreateFile(fname, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 
 					FILE_FLAG_RANDOM_ACCESS, 0);
 
 	if (rif_file == INVALID_HANDLE_VALUE) {

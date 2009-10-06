@@ -2020,7 +2020,7 @@ namespace AwTl {
 		if (pParams->fileNameS)
 		{
 			// opens a file, not creates one ;)
-			pParams->fileH = CreateFile(pParams->fileNameS,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
+			pParams->fileH = avp_CreateFile(pParams->fileNameS,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
 
 			if (INVALID_HANDLE_VALUE==pParams->fileH)
 			{

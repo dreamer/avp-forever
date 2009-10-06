@@ -248,12 +248,12 @@ static int LoadUserProfiles(void)
 
 	const char* load_name = &strPath[0];
 #else
-	const char* load_name=USER_PROFILES_WILDCARD_NAME;
+	const char* load_name = USER_PROFILES_WILDCARD_NAME;
 #endif
 	// allow a wildcard search
 	WIN32_FIND_DATA wfd;
 
-	HANDLE hFindFile = ::FindFirstFile(load_name,&wfd);
+	HANDLE hFindFile = avp_FindFirstFile(load_name, &wfd);
 
 	if (INVALID_HANDLE_VALUE == hFindFile)
 	{
@@ -297,7 +297,7 @@ static int LoadUserProfiles(void)
 			
 			//make sure the file is a rif file
 			HANDLE rif_file;
-			rif_file = CreateFile (pszFullPath, GENERIC_READ, 0, 0, OPEN_EXISTING, 
+			rif_file = avp_CreateFile (pszFullPath, GENERIC_READ, 0, 0, OPEN_EXISTING, 
 					FILE_FLAG_RANDOM_ACCESS, 0);
 			if(rif_file==INVALID_HANDLE_VALUE)
 			{

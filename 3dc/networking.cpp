@@ -10,13 +10,6 @@ extern "C" {
 #include "networking.h"
 #include "assert.h"
 
-
-//#ifdef _DEBUG
-//	#pragma comment(lib, "enet_debug.lib")
-//#else
-	#pragma comment(lib, "enet.lib")
-//#endif
-
 #ifdef WIN32
 	#pragma comment(lib, "ws2_32.lib")
 	#pragma comment(lib, "ole32.lib")

@@ -466,27 +466,15 @@ void HandlePreGameFMVs(void)
 		extern char LevelName[];
 		if (!stricmp("derelict",LevelName))
 		{
-			#ifdef _XBOX
-				//PlayBinkedFMV("D:/FMVs/marineintro.ogv");
-			#else
-				PlayBinkedFMV("FMVs/marineintro.ogv");
-			#endif
+			PlayBinkedFMV("FMVs/marineintro.ogv");
 		}
 		else if (!stricmp("temple",LevelName))
 		{
-			#ifdef _XBOX
-				PlayBinkedFMV("D:/FMVs/alienintro.ogv");
-			#else
-				PlayBinkedFMV("FMVs/alienintro.ogv");
-			#endif
+			PlayBinkedFMV("FMVs/alienintro.ogv");
 		}
 		else if (!stricmp("fall",LevelName))
 		{
-			#ifdef _XBOX
-				PlayBinkedFMV("D:/FMVs/predatorintro.ogv");
-			#else
-				PlayBinkedFMV("FMVs/predatorintro.ogv");
-			#endif
+			PlayBinkedFMV("FMVs/predatorintro.ogv");
 		}
 	}
 }
@@ -5439,7 +5427,7 @@ static void GetHeaderInfoForSaveSlot(SAVE_SLOT_HEADER* save_slot,const char* fil
 
 	save_slot->SlotUsed = 0;
 
-	file = CreateFile(filename,GENERIC_READ, 0, 0, OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
+	file = avp_CreateFile(filename,GENERIC_READ, 0, 0, OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
 
 	if(file==INVALID_HANDLE_VALUE)
 	{

@@ -107,7 +107,7 @@ void LoadVorbisTrack(int track)
 	/* if user enters 1, decrement to 0 to align to array (enters 2, decrement to 1 etc) */
 	if (track != 0) track--;
 
-	file = avp_fopen(TrackList[track].c_str(),"rb");
+	file = fopen(TrackList[track].c_str(),"rb");
 	if (!file) 
 	{
 		LogErrorString("Can't find OGG Vorbis file " + TrackList[track]);

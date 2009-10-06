@@ -454,7 +454,7 @@ void SaveGame()
 	SaveGameRequest = SAVELOAD_REQUEST_NONE;
 
 	//write the file
- 	file = CreateFile(filename,GENERIC_WRITE, 0, 0, CREATE_ALWAYS,FILE_FLAG_RANDOM_ACCESS, 0);
+ 	file = avp_CreateFile(filename,GENERIC_WRITE, 0, 0, CREATE_ALWAYS,FILE_FLAG_RANDOM_ACCESS, 0);
 	
 	if (file == INVALID_HANDLE_VALUE)
 	{
@@ -565,7 +565,7 @@ void LoadSavedGame()
 	LoadGameRequest = SAVELOAD_REQUEST_NONE;
 
 	//load the file
-	file = CreateFile(filename,GENERIC_READ, 0, 0, OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
+	file = avp_CreateFile(filename,GENERIC_READ, 0, 0, OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
 
 	if(file==INVALID_HANDLE_VALUE)
 	{

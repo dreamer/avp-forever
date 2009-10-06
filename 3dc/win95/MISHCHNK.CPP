@@ -382,7 +382,7 @@ File_Chunk::File_Chunk(const char * file_name)
 
 	strcpy (filename, file_name);
 
-	rif_file = CreateFileA (file_name, GENERIC_READ, 0, 0, OPEN_EXISTING, 
+	rif_file = avp_CreateFile (file_name, GENERIC_READ, 0, 0, OPEN_EXISTING, 
 					FILE_FLAG_RANDOM_ACCESS, 0);
 
 	if (rif_file == INVALID_HANDLE_VALUE) {
@@ -570,7 +570,7 @@ BOOL File_Chunk::write_file (const char * fname)
 	if(!outPackage) return FALSE;
 
 	//and now try to write the file
-	rif_file = CreateFileA (temp_name, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 
+	rif_file = avp_CreateFile (temp_name, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 
 					FILE_FLAG_RANDOM_ACCESS, 0);
 
 	if (rif_file == INVALID_HANDLE_VALUE) {
@@ -1308,7 +1308,7 @@ BOOL File_Chunk::update_chunks_from_file()
 	HANDLE rif_file;
 	unsigned long bytes_read;
 	
-	rif_file = CreateFileA (filename, GENERIC_WRITE + GENERIC_READ, 0, 0, OPEN_EXISTING, 
+	rif_file = avp_CreateFile (filename, GENERIC_WRITE + GENERIC_READ, 0, 0, OPEN_EXISTING, 
 					FILE_FLAG_RANDOM_ACCESS, 0);
 
 	if (rif_file == INVALID_HANDLE_VALUE) {
@@ -1768,7 +1768,7 @@ RIF_File_Chunk::RIF_File_Chunk (Chunk_With_Children * parent, const char * file_
 	
 	error_code = 0;
 	
-	rif_file = CreateFileA (file_name, GENERIC_READ, 0, 0, OPEN_EXISTING, 
+	rif_file = avp_CreateFile (file_name, GENERIC_READ, 0, 0, OPEN_EXISTING, 
 					FILE_FLAG_RANDOM_ACCESS, 0);
 
 

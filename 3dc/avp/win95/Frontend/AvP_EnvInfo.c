@@ -5205,15 +5205,10 @@ static BOOL DoesNamedLevelExist(const char* level_name)
 	char filename[200];
 
 	OutputDebugString("DoesNamedLevelExist\n");
-	
-#ifdef WIN32
-	sprintf(filename,"avp_rifs\\%s.rif",level_name);
-#endif
-#ifdef _XBOX
-	sprintf(filename,"d:\\avp_rifs\\%s.rif",level_name);
-#endif
 
-	file_handle = CreateFile(filename,GENERIC_READ,0,0,OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
+	sprintf(filename, "avp_rifs\\%s.rif", level_name);
+
+	file_handle = avp_CreateFile(filename,GENERIC_READ,0,0,OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
 	if(file_handle == INVALID_HANDLE_VALUE)	return FALSE;
 	CloseHandle(file_handle);
 
