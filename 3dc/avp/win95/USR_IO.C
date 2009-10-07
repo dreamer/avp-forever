@@ -2052,6 +2052,7 @@ void SaveDefaultPrimaryConfigs(void)
 }
 void LoadDefaultPrimaryConfigs(void)
 {
+#ifdef WIN32
 	FILE* file = avp_fopen("default.cfg","rb");
 	if(!file) return;
 
@@ -2060,6 +2061,7 @@ void LoadDefaultPrimaryConfigs(void)
 	fread(&DefaultAlienInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
 
 	fclose(file);
+#endif
 }
 
 
