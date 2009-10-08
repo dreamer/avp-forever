@@ -7520,87 +7520,28 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
 {
-#ifdef USE_FMV
-	/* texture will generally be created with A8R8G8B8. Release so we can create with R5G6B5 format */
-//	SAFE_RELEASE(ftPtr->ImagePtr->Direct3DTexture);
-
-//	ftPtr->DestTexture = NULL;
-
-	/* this texture is what's used for rendering of ingame video monitors */
-/*
-	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, NULL, D3DFMT_R5G6B5, D3DPOOL_DEFAULT, &ftPtr->ImagePtr->Direct3DTexture);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
-*/
 	ftPtr->RGBBuffer = new unsigned char[128 * 128 * 4];
 
-#if 0
-	/* we use this texture to write fmv data to */
-	LastError = d3d.lpD3DDevice->CreateTexture(FMV_SIZE, FMV_SIZE, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, /*D3DPOOL_DEFAULT*/D3DPOOL_SYSTEMMEM, &ftPtr->DestTexture);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
-#endif
-
 	ftPtr->SoundVolume = 0;
-#endif
 }
 
 void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 {
-	return;
-#ifdef USE_FMV
-
 	assert(ftPtr);
 	assert(ftPtr->ImagePtr);
-//	assert(ftPtr->DestTexture);
 	assert(ftPtr->ImagePtr->Direct3DTexture);
 
-	if (!ftPtr) return;
-#if 0
-	/* lock the d3d texture */
-	D3DLOCKED_RECT textureRect;
-	LastError = ftPtr->ImagePtr->Direct3DTexture->LockRect(0, &textureRect,NULL, NULL);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
+	if (!ftPtr) 
 		return;
-	}
-#endif
-	// check for success
-	{
-		if (!NextFMVTextureFrame(ftPtr/*, textureRect.pBits, textureRect.Pitch*/))
-		{
-			//ftPtr->ImagePtr->Direct3DTexture->UnlockRect(0);
-		 	return;
-		}
-	}
-#if 0
-	/* unlock d3d texture */
-	LastError = ftPtr->ImagePtr->Direct3DTexture->UnlockRect(0);
-	if (FAILED(LastError)) 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return;
-	}
-#endif
-#if 0
-	/* update rendering texture with FMV image */
-	LastError = d3d.lpD3DDevice->UpdateTexture(ftPtr->DestTexture, ftPtr->ImagePtr->Direct3DTexture);
-	if(FAILED(LastError))
-	{	
-		OutputDebugString("\n couldn't update texture in UpdateFMVTexture");
-	}
-#endif
-#endif
 
+	if (!NextFMVTextureFrame(ftPtr))
+	{
+	 	return;
+	}
 
 	/* lock the d3d texture */
 	D3DLOCKED_RECT textureRect;
-	LastError = ftPtr->ImagePtr->Direct3DTexture->LockRect(0, &textureRect,NULL, NULL);
+	LastError = ftPtr->ImagePtr->Direct3DTexture->LockRect(0, &textureRect, NULL, /*D3DLOCK_DISCARD*/0);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -7610,27 +7551,30 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	unsigned char *destPtr = NULL;
 	unsigned char *srcPtr = &ftPtr->RGBBuffer[0];
 
-	for (int y = 0; y < 128; y++)
+	for (int y = 0; y < ftPtr->ImagePtr->ImageHeight; y++)
 	{
-		destPtr = (((unsigned char *)textureRect.pBits) + y * textureRect.Pitch);
+		destPtr = static_cast<unsigned char*>(textureRect.pBits) + y * textureRect.Pitch;
 
-		for (int x = 0; x < 128; x++)
+		for (int x = 0; x < ftPtr->ImagePtr->ImageWidth; x++)
 		{
+/*
 			destPtr[0] = srcPtr[0];
 			destPtr[1] = srcPtr[1];
 			destPtr[2] = srcPtr[2];
 			destPtr[3] = srcPtr[3];
+*/
+			memcpy(destPtr, srcPtr, 4);
 
 			destPtr += 4;
 			srcPtr += 4;
 		}
 	}
-
+	
 	/* unlock d3d texture */
 	LastError = ftPtr->ImagePtr->Direct3DTexture->UnlockRect(0);
 	if (FAILED(LastError)) 
 	{
-		LogDxError(LastError, __LINE__, __FILE__);
+		LogErrorString("Could not unlock Direct3D texture ftPtr->DestTexture", __LINE__, __FILE__);
 		return;
 	}
 }

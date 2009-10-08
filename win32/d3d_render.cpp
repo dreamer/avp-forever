@@ -7335,11 +7335,11 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	unsigned char *destPtr = NULL;
 	unsigned char *srcPtr = &ftPtr->RGBBuffer[0];
 
-	for (int y = 0; y < 96; y++)
+	for (int y = 0; y < ftPtr->ImagePtr->ImageHeight; y++)
 	{
 		destPtr = static_cast<unsigned char*>(textureRect.pBits) + y * textureRect.Pitch;
 
-		for (int x = 0; x < 128; x++)
+		for (int x = 0; x < ftPtr->ImagePtr->ImageWidth; x++)
 		{
 /*
 			destPtr[0] = srcPtr[0];

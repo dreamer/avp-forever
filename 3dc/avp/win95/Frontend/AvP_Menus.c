@@ -3308,7 +3308,6 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 						PlayerJoystickControlMethods = DefaultJoystickControlMethods;
 						break;
 					}
-
 				}
 			}
 			break;
@@ -3879,7 +3878,6 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 						elementPtr->Brightness,
 						AVPMENUFORMAT_RIGHTJUSTIFIED
 					);
-
 				}
 				else
 				{
@@ -3892,9 +3890,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 						AVPMENUFORMAT_RIGHTJUSTIFIED
 					);
 					RenderText("_",MENU_RIGHTXEDGE,y,MUL_FIXED(b,b),AVPMENUFORMAT_RIGHTJUSTIFIED);
-
 				}
-
 			}
 			else
 			{
@@ -4483,9 +4479,7 @@ static int OkayToPlayNextEpisode(void)
 		}
 	}       
 	return 0;
-	
 }
-
 
 
 int NumberOfAvailableLevels(I_PLAYER_TYPE playerID)
@@ -4566,6 +4560,7 @@ int NumberOfAvailableLevels(I_PLAYER_TYPE playerID)
 
 	return i;
 }
+
 int LevelMostLikelyToPlay(I_PLAYER_TYPE playerID)
 {
 	int i=0;
@@ -4601,6 +4596,7 @@ int MaxDifficultyLevelAllowed(I_PLAYER_TYPE playerID, int level)
 	if (level == 0) return 3;
 	else return UserProfilePtr->LevelCompleted[playerID][level-1];
 }
+
 void DisplayVideoModeUnavailableScreen(void)
 {
 	do

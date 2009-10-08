@@ -293,65 +293,16 @@ void FindLightingValuesFromTriggeredFMV(unsigned char *bufferPtr, FMVTEXTURE *ft
 	FmvColourBlue = totalBlue/48*16;
 }
 
-int NextFMVTextureFrame(FMVTEXTURE *ftPtr/*, void *bufferPtr, int pitch*/)
+int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 {
-//	OutputDebugString("NextFMVTextureFrame\n");
 	int smackerFormat = 1;
-	int w = 128;
-	int h = 96;
+
+	int w = ftPtr->ImagePtr->ImageWidth;
+	int h = ftPtr->ImagePtr->ImageHeight;
+
 	unsigned char *bufferPtr = ftPtr->RGBBuffer;
-	
-	{
-//		extern D3DINFO d3d;
-//		smackerFormat = GetSmackerPixelFormat(&(d3d.TextureFormat[d3d.CurrentTextureFormat].ddsd.ddpfPixelFormat));
-	}
-//	if (smackerFormat) w*=2;
 
-#if 0
-	if (MoviesAreActive && ftPtr->SmackHandle)
-	{
-		int volume = MUL_FIXED(SmackerSoundVolume*256,GetVolumeOfNearestVideoScreen());
-//		SmackVolumePan(ftPtr->SmackHandle,SMACKTRACKS,volume,PanningOfNearestVideoScreen);
-		ftPtr->SoundVolume = SmackerSoundVolume;
-	    
-//	    if (SmackWait(ftPtr->SmackHandle)) return 0;
-		if (FmvWait()) return 0;
-		/* unpack frame */
-
-		writeFmvData((unsigned char*)bufferPtr, textureData, w, h, pitch);
-
-//		if (textureData == NULL) return -1;
-//		bufferPtr = textureData;
-//	  	SmackToBuffer(ftPtr->SmackHandle,0,0,w,96,bufferPtr,smackerFormat);
-
-//		SmackDoFrame(ftPtr->SmackHandle);
-
-		/* are we at the last frame yet? */
-//		if (ftPtr->IsTriggeredPlotFMV && (ftPtr->SmackHandle->FrameNum==(ftPtr->SmackHandle->Frames-1)) )
-		if (playing == 0)
-		{
-			if(ftPtr->SmackHandle)
-			{
-				OutputDebugString("closing ingame fmv..\n");
-				FmvClose();
-
-				delete ftPtr->SmackHandle;
-				ftPtr->SmackHandle = NULL;
-			}
-
-//			SmackClose(ftPtr->SmackHandle);
-			
-			ftPtr->MessageNumber = 0;
-		}
-		else
-		{
-			/* next frame, please */
-//			SmackNextFrame(ftPtr->SmackHandle);
-		}
-		ftPtr->StaticImageDrawn=0;
-	}
-#endif
-	if(!ftPtr->StaticImageDrawn || smackerFormat)
+	if (!ftPtr->StaticImageDrawn || smackerFormat)
 	{
 		int i = w * h;
 		unsigned int seed = FastRandom();
@@ -361,7 +312,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr/*, void *bufferPtr, int pitch*/)
 			seed = ((seed * 1664525) + 1013904223);
 			*ptr++ = seed;
 		}
-		while(--i);
+		while (--i);
 		ftPtr->StaticImageDrawn = 1;
 	}
 	FindLightingValuesFromTriggeredFMV((unsigned char*)bufferPtr, ftPtr);

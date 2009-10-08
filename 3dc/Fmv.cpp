@@ -1790,8 +1790,10 @@ void FindLightingValuesFromTriggeredFMV(unsigned char *bufferPtr, FMVTEXTURE *ft
 int NextFMVTextureFrame(FMVTEXTURE *ftPtr/*, void *bufferPtr, int pitch*/)
 {
 	int smackerFormat = 1;
-	int w = 128;
-	int h = 96;
+
+	int w = ftPtr->ImagePtr->ImageWidth;
+	int h = ftPtr->ImagePtr->ImageHeight;
+
 	unsigned char *bufferPtr = ftPtr->RGBBuffer;
 
 	if (MoviesAreActive && ftPtr->SmackHandle)
@@ -1827,7 +1829,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr/*, void *bufferPtr, int pitch*/)
 	}
 	else if (!ftPtr->StaticImageDrawn || smackerFormat)
 	{
-		int i = w * h;//(h / 4);///2;
+		int i = w * h;
 		unsigned int seed = FastRandom();
 		int *ptr = (int*)bufferPtr;
 		do
