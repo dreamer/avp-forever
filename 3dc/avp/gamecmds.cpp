@@ -335,7 +335,7 @@ static void CompleteLevel(void)
 
 void CreateGameSpecificConsoleCommands(void)
 {
-	ShowDebuggingText.FPS = 1;
+	ShowDebuggingText.FPS = 0;
 	ShowDebuggingText.Environment = 0;
 	ShowDebuggingText.Coords = 0;
 	ShowDebuggingText.Module = 0;
@@ -344,7 +344,7 @@ void CreateGameSpecificConsoleCommands(void)
 	ShowDebuggingText.Dynamics = 0;
 	ShowDebuggingText.GunPos = 0;
 	ShowDebuggingText.Tears = 0;
-	ShowDebuggingText.PolyCount = 1;
+	ShowDebuggingText.PolyCount = 0;
 
 	#ifndef AVP_DEBUG_VERSION 
 	BOOL IsACheat = TRUE;

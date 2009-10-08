@@ -89,9 +89,6 @@ bool Config_Load()
 		}
 		else
 		{
-			/* assume we got a variable and value */
-			int lenOfVar = tempLine.find("=");
-
 			/* special case for strings such as command line */
 			int stringCheck = tempLine.find('"'); // check for a quote..
 
@@ -118,6 +115,9 @@ bool Config_Load()
 				/* remove whitespace */
 				tempLine.erase(std::remove(tempLine.begin(), tempLine.end(),' '), tempLine.end());
 			}
+
+			/* assume we got a variable and value */
+			int lenOfVar = tempLine.find("=");
 
 			/* if there's no equals sign in the string, don't add it */
 			if (lenOfVar == std::string::npos)

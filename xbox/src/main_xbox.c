@@ -140,11 +140,11 @@ int mainMenu = 1;
 void _cdecl main()
 {
 	char command_line[200 + 1];
+	char * instr;
 	int level_to_load = I_Num_Environments;
 
 	_controlfp(_PC_24,_MCW_PC); // bjd - CHECK
 /*
-	char * instr;
 	#if debug
 	int level_to_load = I_Num_Environments;
 	char * command_line = argv;
@@ -168,9 +168,10 @@ void _cdecl main()
 		game. If you want to put something in it it must
 		be something that only needs to be called once
 	****/
-#if 0
+#if 1
 	#if debug && 1//!PREDATOR_DEMO
 	{
+/*
 		#if OverrideOldMenus
 		{
 			HWAccel = 1;
@@ -181,7 +182,7 @@ void _cdecl main()
 			HWAccel = 1;
 		}
 		#endif
-
+*/
 		//see if any extra npc rif files should be loaded
 		{
 			char* strpos=strstr(command_line, "-l");
@@ -262,11 +263,12 @@ void _cdecl main()
 		{
 			KeepMainRifFile=TRUE;
 		}
-
+/*
 		if (strstr(command_line, "-m"))
 		{
 			UseMouseCentreing = 1;
 		}
+*/
 		#endif //AVP_DEBUG_VERSION
 	}
 	#else
