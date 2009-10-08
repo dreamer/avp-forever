@@ -63,18 +63,6 @@ enum HUD_RES_ID
 * 									 S T R U C T U R E S									*
 ****************************************************************************************KJL*/
 
-/* description of a single DD surface used for HUD gfx */
-#if 0
-struct DDGraphicTag 
-{
-	// BJD
-	//LPDIRECTDRAWSURFACE    LPDDS;
-	LPDIRECTDRAWSURFACE		 LPDDS;
-	AW_BACKUPTEXTUREHANDLE hBackup; // JH 12/2/98 changed for new gfx loading system
-    RECT				   SrcRect;
-};
-#endif
-
 /* description of a digit appearing on the HUD */
 struct DigitPropertiesTag
 {

@@ -39,8 +39,6 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr,int x,int y,int colour);
 #endif
 		extern unsigned char *ScreenBuffer;
 		extern long BackBufferPitch;
-//		extern LPDIRECTDRAWSURFACE lpDDSBack;
-// bjd		extern DDPIXELFORMAT DisplayPixelFormat;
 		extern int CloudTable[128][128];
 		extern int CloakingPhase;
 		#if 0

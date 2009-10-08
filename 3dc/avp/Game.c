@@ -152,18 +152,6 @@ void InitGame(void)
 	AvP.CurrentEnv = AvP.StartingEnv;
 	AvP.PlayerType = I_Marine;
 
-#if SupportWindows95
-
-#if 0 // bjd
-//game resolution change?
-
-	AvP.GameVideoRequestMode = VideoMode_DX_320x200x8; /* ignored */
-	AvP.MenuVideoRequestMode = VideoMode_DX_640x480x15;
-
-#endif
-
-#endif
-
 	AvP.ElapsedSeconds = 0;
 	AvP.ElapsedMinutes = 0;
 	AvP.ElapsedHours = 0;

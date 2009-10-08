@@ -211,28 +211,6 @@ void InitHUD(void)
 	//InitHUDMap();
 }
 
-/* bjd
-void KillHUD(void)
-{
-	switch(AvP.PlayerType)
-	{
-		case I_Marine:
-			PlatformSpecificKillMarineHUD();
-			break;
-       	case I_Predator:
-			PlatformSpecificKillPredatorHUD();
-			break;
-		case I_Alien:
-			PlatformSpecificKillAlienHUD();
-			break;
-
-		default:
-			LOCALASSERT(1==0);
-			break;
-	}
-}
-*/
-
 void InitMarineHUD(void)
 {
 	/*KJL****************************************************************************************

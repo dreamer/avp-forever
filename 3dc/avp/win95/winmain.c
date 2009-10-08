@@ -70,7 +70,7 @@ extern int PrintDebuggingText(const char* t, ...);
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern int FrameRate;
 
-extern HWND hWndMain; // bjd
+extern HWND hWndMain;
 
 extern int WindowRequestMode;
 

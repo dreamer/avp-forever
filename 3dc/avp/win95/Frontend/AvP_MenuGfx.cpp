@@ -244,20 +244,6 @@ static void LoadMenuFont(void)
 
 	// we're going to try create a square texture..
 	gfxPtr->menuTexture = CreateD3DTallFontTexture(image);
-
-#if 0 // bjd
-	// image width - 30 pixels
-	// image height -7392
-	char buffer[100];
-	IndexedFont_Kerned_Column :: Create
-	(
-		IntroFont_Light, // FontIndex I_Font_New,
-		CL_GetImageFileName(buffer, 100, "Menus\\IntroFont.rim", LIO_RELATIVEPATH),
-		33,//21, // int HeightPerChar_New,
-		5, // int SpaceWidth_New,
-		32 // ASCIICodeForInitialCharacter
-	);
-#endif
 }
 
 static void UnloadMenuFont(void)

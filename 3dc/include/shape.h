@@ -907,23 +907,6 @@ typedef struct imagepolyextents {
 
 } IMAGEPOLYEXTENTS;
 
-
-/*
-
- Structure for accessing 24-bit images
-
-*/
-
-/* bjd 
-typedef struct texture24 {
-
-	unsigned char r24;
-	unsigned char g24;
-	unsigned char b24;
-
-} TEXTURE24;
-*/
-
 /*
 
  Texture and Sprite Animation

@@ -4838,69 +4838,6 @@ int WhiteOfBrightness(int brightness)
 #endif
 }
 
-void RenderPixel(int x,int y,int r,int g,int b)
-{
-#if 0 // bjd
-	extern DDPIXELFORMAT DisplayPixelFormat;
-	extern unsigned char *ScreenBuffer;
-	extern long BackBufferPitch;
-
-	unsigned short colour;
-
-	colour  = MUL_FIXED(DisplayPixelFormat.dwRBitMask,r<<8) & DisplayPixelFormat.dwRBitMask;
-	colour |= MUL_FIXED(DisplayPixelFormat.dwGBitMask,g<<8) & DisplayPixelFormat.dwGBitMask;
-	colour |= MUL_FIXED(DisplayPixelFormat.dwBBitMask,b<<8) & DisplayPixelFormat.dwBBitMask;
-	
-	
-	*(unsigned short*) (ScreenBuffer + (x)*2 + (y)*BackBufferPitch)  = colour;
-#endif
-	
-}
-#if 0
-void BezierCurve(void)
-{
-	int i;
-	extern unsigned char *ScreenBuffer;
-	extern long BackBufferPitch;
-	static b=0;
-	for (i=0; i<=255; i++)
-	{
-		int u = ((i*65536)/255);
-		int m = MUL_FIXED(u,u);
-		int l = MUL_FIXED(2*u,ONE_FIXED-u);
-
-		int a;
-		
-		a = MUL_FIXED(255,m)+MUL_FIXED(b,l);
-		if (a<0) a=0;
-		if (a>255) a=255;
-
-		m = MUL_FIXED(a*256,a*256);
-		l = MUL_FIXED(2*a*256,ONE_FIXED-a*256);
-
-		a;
-		
-		a = MUL_FIXED(255,m)+MUL_FIXED(b,l);
-		if (a<0) a=0;
-		if (a>255) a=255;
-
-   		*(unsigned short*)(ScreenBuffer + ((i+0)*2 + (400-a)*BackBufferPitch)) = 0xffff;
-   		//*(unsigned short*)(ScreenBuffer + ((i+0)*2 + (400-i)*BackBufferPitch)) = 0xff;
-
-   		*(unsigned short*)(ScreenBuffer + ((i+0)*2 + (400-i)*BackBufferPitch)) = 0xffff;
-   		*(unsigned short*)(ScreenBuffer + ((i+50)*2 + (400-i)*BackBufferPitch)) = 0xffff;
-   		*(unsigned short*)(ScreenBuffer + ((i+100)*2 + (400-i)*BackBufferPitch)) = 0xffff;
-
-
-	}
-//		PlayWithGammaSettings(b);
-	b++;
-	if (b>=255) b=0;
-}			   
-#endif
-
-
-
 static void UpdateMultiplayerConfigurationMenu()
 {
 	/*update the displayed levels according to the cuurent game type*/

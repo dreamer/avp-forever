@@ -2376,10 +2376,8 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 	int lengthInSeconds = 0;
 
 	{
-//bjd		int length = strlen (bufferPtr) + 1;
 		int length = (int)strlen ((const char *)bufferPtr) + 1;
 		GameSounds[soundIndex].wavName = (char *)AllocateMem (length);
-//bjd		strcpy (GameSounds[soundIndex].wavName, bufferPtr);
 		strcpy (GameSounds[soundIndex].wavName, (const char *)bufferPtr);
 		bufferPtr += length;
 	}

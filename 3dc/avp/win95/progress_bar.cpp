@@ -313,7 +313,6 @@ void Game_Has_Loaded(void)
 			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
 
 			DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height, fullbarWidth, fullbarHeight);
-// bjd			if (LoadingBarFull) lpDDSBack->Blt(&LoadingBarFull_DestRect,LoadingBarFull,&LoadingBarFull_SrcRect,DDBLT_WAIT,0);
 			f-=NormalFrameTime;
 			if (f<0) f=0;
 		}

@@ -190,12 +190,6 @@ static fontPtr guiload_font(char *new_fname);
 /* Cleanup function for the above. */
 static fontPtr CleanupFontLoadFail(HANDLE fH, fontPtr fontP);
 
-#if 0 // bjd
-/* Outputs debugging text. */
-static void out_text(LPDIRECTDRAWSURFACE surfP, int xc, int yc, 
-	const char *text, short x_limit, fontPtr fP);
-#endif
-
 /* Debounce all the keys the Direct Draw stuff uses. */	
 static void Debounce(void);
 
