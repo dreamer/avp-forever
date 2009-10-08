@@ -2100,7 +2100,48 @@ static void ActUponUsersInput(void)
 			{
 				if(AvPMenus.PositionInTextField==0)
 				{
+#ifdef WIN32
 					strcpy(elementPtr->TextPtr,"DeadMeat");
+#endif
+#ifdef _XBOX
+					srand(time(NULL));
+ 					switch(rand()%11)
+ 					{
+ 						case 0:
+ 							strcpy(elementPtr->TextPtr, "DogMeat");
+ 							break;
+ 						case 1:
+ 							strcpy(elementPtr->TextPtr, "FreshMeat");
+ 							break;
+ 						case 2:
+ 							strcpy(elementPtr->TextPtr, "RancidMeat");
+ 							break;
+ 						case 3:
+ 							strcpy(elementPtr->TextPtr, "HorseMeat");
+ 							break;
+ 						case 4:
+ 							strcpy(elementPtr->TextPtr, "RawMeat");
+ 							break;
+ 						case 5:
+ 							strcpy(elementPtr->TextPtr, "LiveMeat");
+ 							break;
+ 						case 6:
+ 							strcpy(elementPtr->TextPtr, "M-m-m-meat");
+ 							break;
+ 						case 7:
+ 							strcpy(elementPtr->TextPtr, "LlamaMeat");
+ 							break;
+ 						case 8:
+ 							strcpy(elementPtr->TextPtr, "JustMeat");
+ 							break;
+ 						case 9:
+ 							strcpy(elementPtr->TextPtr, "TastyMeat");
+ 							break;
+ 						case 10:
+ 							strcpy(elementPtr->TextPtr, "MonkeyMeat");
+ 							break;
+ 					}
+#endif
 				}
 				AvPMenus.CurrentlySelectedElement++;
 			}

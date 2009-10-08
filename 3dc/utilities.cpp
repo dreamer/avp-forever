@@ -1,6 +1,8 @@
 
 #include "utilities.h"
 #include <string>
+#include "configFile.h"
+#include <assert.h>
 
 extern "C" {
 
@@ -51,6 +53,13 @@ HANDLE avp_FindFirstFile(LPCTSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData)
 #ifdef WIN32
 	return FindFirstFile(lpFileName, lpFindFileData);
 #endif	
+}
+
+void avp_GetCommandLineArgs(char *args, int size)
+{
+	assert (args);
+	std::string commandLine = Config_GetString("[Misc]", "CommandLine");
+	strcpy(args, commandLine.c_str());
 }
 
 };

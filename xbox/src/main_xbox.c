@@ -106,7 +106,7 @@ int AVP_NCmd;
 extern unsigned long TotalMemAllocated;
 
 char LevelName[] = {"predbit6\0QuiteALongNameActually"};
-static ELO ELOLevelToLoad = {&LevelName};
+static ELO ELOLevelToLoad = { LevelName };
 
 int QuickStartMultiplayer=1;
 
@@ -117,6 +117,7 @@ extern int DebuggingCommandsActive;
 extern void BuildMultiplayerLevelNameArray();
 void LoadDeviceAndVideoModePreferences();
 void CDDA_Start(void);
+
 
 void exit_break_point_fucntion ()
 {
@@ -138,10 +139,10 @@ int mainMenu = 1;
 
 void _cdecl main()
 {
+	char command_line[200 + 1];
 	int level_to_load = I_Num_Environments;
 
-	_controlfp(_PC_24,_MCW_PC);
-
+	_controlfp(_PC_24,_MCW_PC); // bjd - CHECK
 /*
 	char * instr;
 	#if debug
@@ -159,6 +160,8 @@ void _cdecl main()
 	LoadVorbisTrackList(); // do the same for any user ogg vorbis music files
 
 	SetFastRandom();
+
+	avp_GetCommandLineArgs(command_line, 200);
 
 	/**** 
 		init game now ONLY sets up varibles for the whole
@@ -829,8 +832,7 @@ BOOL ExitWindowsSystem(void)
 	return 0;
 }
 
-BOOL InitialiseWindowsSystem(HANDLE hInstance, int nCmdShow,
-     int WinInitMode)
+BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 { 
 	return 1;
 }

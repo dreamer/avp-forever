@@ -89,18 +89,42 @@ bool Config_Load()
 		}
 		else
 		{
-			/* remove whitespace */
-			tempLine.erase(std::remove(tempLine.begin(), tempLine.end(),' '), tempLine.end());
-
 			/* assume we got a variable and value */
 			int lenOfVar = tempLine.find("=");
+
+			/* special case for strings such as command line */
+			int stringCheck = tempLine.find('"'); // check for a quote..
+
+			if (stringCheck != std::string::npos)
+			{
+				// we want to remove the quotes
+				//tempLine.erase(std::remove(tempLine.begin(), tempLine.end(),'"'), tempLine.end());
+
+				// and also, the whitespace in the pre quotes section
+				std::string tempString = tempLine.substr(0, stringCheck);
+				std::string tempString2 = tempLine.substr(stringCheck, tempLine.length());
+
+				// remove spaces
+				tempString.erase(std::remove(tempString.begin(), tempString.end(),' '), tempString.end());
+
+				// remove quotes
+				tempString2.erase(std::remove(tempString2.begin(), tempString2.end(),'"'), tempString2.end());
+
+				// recreate original line string
+				tempLine = tempString + tempString2;
+			}
+			else
+			{
+				/* remove whitespace */
+				tempLine.erase(std::remove(tempLine.begin(), tempLine.end(),' '), tempLine.end());
+			}
 
 			/* if there's no equals sign in the string, don't add it */
 			if (lenOfVar == std::string::npos)
 				continue;
 
-			//std::cout << "got variable name: " << tempLine.substr(0, lenOfVar) << "\n";
-			//std::cout << "its value is: " << tempLine.substr(lenOfVar + 1) << "\n";
+//			std::cout << "got variable name: " << tempLine.substr(0, lenOfVar) << "\n";
+//			std::cout << "its value is: " << tempLine.substr(lenOfVar + 1) << "\n";
 
 			/* should only create a new key in AvPConfig if one doesn't already exists */
 			MapValue &tempValue = AvPConfig[currentHeading];
