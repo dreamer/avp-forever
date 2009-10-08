@@ -30,13 +30,6 @@
 #define BRIGHTNESS_CHANGE_SPEED (RealFrameTime/4)
 #endif
 
-// XBOX
-#ifdef _XBOX
-	#define DATE_SHORTDATE            0x00000001  // use short date picture
-	#define DATE_LONGDATE             0x00000002  // use long date picture
-	#include <xtl.h>
-#endif
-
 #ifdef WIN32
 	#include <shlobj.h>
 	#include <shlwapi.h>
@@ -726,8 +719,20 @@ extern void AvP_UpdateMenus(void)
 
 				strcat(buffer2,"  ");
 				strcat(buffer2,buffer);
-				RenderSmallMenuText(buffer2,MENU_CENTREX,MENU_CENTREY-70,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
 #endif
+#ifdef _XBOX
+				// manually format the string as we don't have either GetDateFormat or GetTimeFormat
+				sprintf(buffer2, "%02d:%02d:%02d %02d/%02d/%02d", 
+							profilePtr->TimeLastUpdated.wHour, 
+							profilePtr->TimeLastUpdated.wMinute, 
+							profilePtr->TimeLastUpdated.wSecond,
+							profilePtr->TimeLastUpdated.wDay, 
+							profilePtr->TimeLastUpdated.wMonth, 
+							profilePtr->TimeLastUpdated.wYear
+						);
+
+#endif
+				RenderSmallMenuText(buffer2,MENU_CENTREX,MENU_CENTREY-70,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
 			}
 			
 			RenderMenu();
@@ -1293,7 +1298,7 @@ static void RenderMenu(void)
 		char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
 		RenderMenuText(textPtr, MENU_CENTREX, 70, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
 		
-#if 1 // and now we've been told to remove the "Gamers Edition" etc. :)
+#if 0 // and now we've been told to remove the "Gamers Edition" etc. :)
 		// main menu subtitle e.g. "Gamers Edition" etc.
 		if (AvPMenusData[AvPMenus.CurrentMenu].MenuTitle==TEXTSTRING_MAINMENU_TITLE)
 			RenderMenuText(GetTextString(TEXTSTRING_MAINMENU_SUBTITLE),MENU_CENTREX,100,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
@@ -1848,8 +1853,20 @@ static void RenderUserProfileSelectMenu(void)
 				100);
 				strcat(buffer2,"  ");
 				strcat(buffer2,buffer);
-				RenderSmallMenuText(buffer2,MENU_CENTREX,MENU_CENTREY+y-30,b,AVPMENUFORMAT_CENTREJUSTIFIED);
 #endif
+#ifdef _XBOX
+				// manually format the string as we don't have either GetDateFormat or GetTimeFormat
+				sprintf(buffer2, "%02d:%02d:%02d %02d/%02d/%02d", 
+							profilePtr->TimeLastUpdated.wHour, 
+							profilePtr->TimeLastUpdated.wMinute, 
+							profilePtr->TimeLastUpdated.wSecond,
+							profilePtr->TimeLastUpdated.wDay, 
+							profilePtr->TimeLastUpdated.wMonth, 
+							profilePtr->TimeLastUpdated.wYear
+						);
+#endif
+				RenderSmallMenuText(buffer2,MENU_CENTREX,MENU_CENTREY+y-30,b,AVPMENUFORMAT_CENTREJUSTIFIED);
+
 			}
 		}
 	}

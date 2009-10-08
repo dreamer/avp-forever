@@ -115,6 +115,7 @@ void DrawParticles()
 	}
 
 	particleArray.resize(0);
+
 	/* restore RenderPolygon.NumberOfVertices value... */
 	RenderPolygon.NumberOfVertices = backup;
 }
