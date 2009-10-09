@@ -105,7 +105,7 @@ bool Config_Load()
 				tempString.erase(std::remove(tempString.begin(), tempString.end(),' '), tempString.end());
 
 				// remove quotes
-				tempString2.erase(std::remove(tempString2.begin(), tempString2.end(),'"'), tempString2.end());
+//				tempString2.erase(std::remove(tempString2.begin(), tempString2.end(),'"'), tempString2.end());
 
 				// recreate original line string
 				tempLine = tempString + tempString2;
@@ -239,7 +239,13 @@ std::string Config_GetString(const std::string &heading, const std::string &vari
 {
 	if (CheckValuesExist(heading, variable))
 	{
-		return (AvPConfig.find(heading)->second.find(variable)->second);
+		// grab a copy of the string
+		std::string tempString = AvPConfig.find(heading)->second.find(variable)->second;
+	
+		// if it has quotes, remove them
+		tempString.erase(std::remove(tempString.begin(), tempString.end(),'"'), tempString.end());
+
+		return tempString;
 	}
 	else
 	{
