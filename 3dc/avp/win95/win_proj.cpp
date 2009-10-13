@@ -18,6 +18,7 @@ extern unsigned char GotAnyKey;
 #include "psndplat.h"
 
 #include "console.h"
+#include "onscreenKeyboard.h"
 
 #include "rentrntq.h"
 	// Added 21/11/97 by DHM: support for a queue of Windows
@@ -242,13 +243,31 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		case WM_SYSKEYUP:
 		case WM_KEYUP:						
 		{
-
 			if (Con_IsActive())
 			{
 //				if(wParam == VK_BACK)
 				{
 //					Con_Key_Backspace(false);
 					break;
+				}
+			}
+
+			if (Osk_IsActive())
+			{
+				switch (wParam)
+				{
+					case VK_LEFT:
+						Osk_MoveLeft();
+						break;
+					case VK_RIGHT:
+						Osk_MoveRight();
+						break;
+					case VK_UP:
+						Osk_MoveUp();
+						break;
+					case VK_DOWN:
+						Osk_MoveDown();
+						break;
 				}
 			}
 

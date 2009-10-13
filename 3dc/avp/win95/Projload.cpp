@@ -2001,7 +2001,6 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 							GLOBALASSERT(0=="Shouldn't be any modules using imported shapes");
 						}
 					}
-
 				}
 				else
 				{
@@ -2035,7 +2034,6 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 								svic = temp_svic;
 								break;
 							}
-							
 						}
 				
 						if (svic)
@@ -2059,17 +2057,15 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 							 	mainshapelist[list_pos]->sh_extraitemdata[vn].EID_VertexI = svic->intensity_array[vn] + (mag<<24);
 								
 							}
-				
+
 							mainshapelist[list_pos]->shapeflags |= ShapeFlag_PreLit;
-				
 						}
-						#if 1
+
 						int AnimationShape=-1;
 						if (shplif()->lookup_single_child("TEXTANIM"))
 						{
 							AnimationShape=list_pos;
 						}
-						#endif
 				
 						if (ob->get_header()->flags & OBJECT_FLAG_PLACED_OBJECT)
 						{

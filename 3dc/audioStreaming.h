@@ -7,7 +7,7 @@ extern "C" {
 
 #include <xaudio2.h>
 
-const static int STREAMBUFFERSIZE = (8192 * 2);//32768
+const static int STREAMBUFFERSIZE = (4096);//32768
 const static int STREAMBUFFERCOUNT = 3;
 
 struct StreamingAudioBuffer
@@ -66,6 +66,7 @@ int SetAudioStreamBufferVolume(StreamingAudioBuffer *streamStruct, int volume);
 int ReleaseAudioStreamBuffer(StreamingAudioBuffer *streamStruct);
 int StopAudioStreamBuffer(StreamingAudioBuffer *streamStruct);
 int PlayAudioStreamBuffer(StreamingAudioBuffer *streamStruct);
+UINT64 GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct);
 
 };
 

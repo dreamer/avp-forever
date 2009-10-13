@@ -1,10 +1,8 @@
 
-#ifndef USE_FMV
+//#ifndef USE_FMV
+#if 1
 
 #include "d3_func.h"
-
-D3DTEXTURE BinkTexture;
-bool binkTextureCreated = false;
 
 extern "C" {
 
@@ -221,8 +219,6 @@ void ReleaseAllFMVTexturesForDeviceReset()
 
 		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
 	}
-
-	SAFE_RELEASE(BinkTexture);
 }
 
 void PlayMenuMusic()

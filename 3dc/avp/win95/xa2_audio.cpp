@@ -2732,14 +2732,14 @@ int CreateAudioStreamBuffer(StreamingAudioBuffer *streamStruct, int channels, in
 		LogDxError(LastError, __LINE__, __FILE__);
 		return -1;
 	}
-
+/*
 	LastError = streamStruct->pSourceVoice->Start(0, XAUDIO2_COMMIT_NOW);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return -1;
 	}
-
+*/
 	// 3 x 32768 chunk
 	streamStruct->buffers = new unsigned char[STREAMBUFFERSIZE * STREAMBUFFERCOUNT];
 	if (streamStruct->buffers == NULL)
@@ -2759,7 +2759,15 @@ int GetNumFreeAudioStreamBuffers(StreamingAudioBuffer *streamStruct)
 	XAUDIO2_VOICE_STATE state;
 	streamStruct->pSourceVoice->GetState( &state );
 
-	return streamStruct->bufferCount - state.BuffersQueued;
+	return streamStruct->bufferCount - (state.BuffersQueued - 1);
+}
+
+UINT64 GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
+{
+	XAUDIO2_VOICE_STATE state;
+	streamStruct->pSourceVoice->GetState( &state );
+
+	return state.SamplesPlayed;
 }
 
 int GetWritableAudioStreamBufferSize(StreamingAudioBuffer *streamStruct)

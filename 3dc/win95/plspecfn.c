@@ -123,9 +123,8 @@
 #define checkmorphpts FALSE
 #endif
 
-
+#if 0 // bjd - not called
 void ShapePointsInstr(SHAPEINSTR *shapeinstrptr)
-
 {
 
 	int **shapeitemarrayptr;
@@ -136,8 +135,6 @@ void ShapePointsInstr(SHAPEINSTR *shapeinstrptr)
 	#if print_bfcro_stats
 	int num_rot, num_not_rot;
 	#endif
-
-
 
 	/*
 
@@ -156,17 +153,14 @@ void ShapePointsInstr(SHAPEINSTR *shapeinstrptr)
 
 
 	/* Set up pointers */
-
 	shapeitemarrayptr = shapeinstrptr->sh_instr_data;
 	shapeitemptr      = *shapeitemarrayptr;
 	rotptsptr         = &RotatedPts[0];
 
 
-
 	#if SupportMorphing
 
 	if(Global_ODB_Ptr->ObMorphCtrl) {
-
 
 		#if LazyEvaluationForMorphing
 
@@ -266,7 +260,6 @@ void ShapePointsInstr(SHAPEINSTR *shapeinstrptr)
 				#if checkmorphpts
 				num_old_pts++;
 				#endif
-
 			}
 
 			else if(MorphDisplay.md_lerp == 0) {
@@ -274,7 +267,6 @@ void ShapePointsInstr(SHAPEINSTR *shapeinstrptr)
 				x = x1;
 				y = y1;
 				z = z1;
-
 			}
 
 			else if(MorphDisplay.md_lerp == 0xffff) {
@@ -282,7 +274,6 @@ void ShapePointsInstr(SHAPEINSTR *shapeinstrptr)
 				x = x2;
 				y = y2;
 				z = z2;
-
 			}
 
 			else
@@ -296,7 +287,6 @@ void ShapePointsInstr(SHAPEINSTR *shapeinstrptr)
 				#if checkmorphpts
 				num_new_pts++;
 				#endif
-
 			}
 
 			morphptsptr->vx = x;
@@ -359,7 +349,6 @@ void ShapePointsInstr(SHAPEINSTR *shapeinstrptr)
 			
 			rotptsptr->vy = MUL_FIXED(rotptsptr->vy,87381);
 			rotptsptr++;
-
 		}
 
 		#if checkmorphpts
@@ -367,10 +356,7 @@ void ShapePointsInstr(SHAPEINSTR *shapeinstrptr)
 		textprint("num_new_pts = %d\n", num_new_pts);
 		#endif
 
-
 		#endif	/* LazyEvaluationForMorphing */
-
-
 	}
 
 	else {
@@ -474,6 +460,7 @@ void ShapePointsInstr(SHAPEINSTR *shapeinstrptr)
 
 
 }
+#endif // bjd
 
 
 #endif	/* StandardShapeLanguage */
@@ -497,22 +484,16 @@ void ShapePointsInstr(SHAPEINSTR *shapeinstrptr)
 */
 
 int WideMul2NarrowDiv(int a, int b, int c, int d, int e)
-
 {
-
 	LONGLONGCH f;
 	LONGLONGCH g;
-
 
 	MUL_I_WIDE(a, b, &f);
 	MUL_I_WIDE(c, d, &g);
 	ADD_LL_PP(&f, &g);
 
 	return NarrowDivide(&f, e);
-
 }
-
-
 
 
 

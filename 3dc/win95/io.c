@@ -246,10 +246,8 @@ int ReleasePrintDebuggingText(const char* t, ...);
 */
 
 SHAPEHEADER* GetShapeData(int shapenum)
-
 {
-
-	if(shapenum>=0 && shapenum< maxshapes)
+	if(shapenum >= 0 && shapenum < maxshapes)
 	{
 		SHAPEHEADER *sptr = mainshapelist[shapenum];
 		return sptr;

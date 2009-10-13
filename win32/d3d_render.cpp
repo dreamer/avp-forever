@@ -18,6 +18,8 @@ extern D3DTEXTURE consoleText;
 extern "C++"{
 
 #include "console.h"
+#include "onscreenKeyboard.h"
+
 #include "r2base.h"
 #include <math.h> // for sqrt
 
@@ -6050,6 +6052,8 @@ void ThisFramesRenderingHasBegun(void)
 
 void ThisFramesRenderingHasFinished(void)
 {
+	Osk_Draw();
+
 	Con_Draw();
 
 	UnlockExecuteBufferAndPrepareForUse();

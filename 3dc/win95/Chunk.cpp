@@ -154,7 +154,7 @@ char * Chunk::make_data_block_from_chunk ()
 	{
 		return(0);
 	}
-	
+
 	data_block = new char [block_size];
 
 	this->fill_data_block(data_block);
@@ -234,7 +234,6 @@ data(NULL), data_size (_data_size)
 	{
 		data_store = NULL;
 	}
-
 }
 
 void Miscellaneous_Chunk::fill_data_block (char * data_start)
@@ -272,14 +271,15 @@ size_t Chunk_With_Children::size_chunk ()
 	
 	chunk_size = 12; // identifier + length
 
-	if (children) 
-		while (child_ptr != NULL) {
+	if (children)
+	{
+		while (child_ptr != NULL)
+		{
 			chunk_size += child_ptr->size_chunk();
 			child_ptr = child_ptr->next;
 		}
-
+	}
 	return chunk_size;
-
 }
 
 BOOL Chunk_With_Children::output_chunk (HANDLE &hand)
@@ -296,17 +296,18 @@ BOOL Chunk_With_Children::output_chunk (HANDLE &hand)
 
 	if (!ok) return FALSE;
 	
-	if (children) 
-		while (child_ptr != NULL && ok){
+	if (children)
+	{
+		while (child_ptr != NULL && ok)
+		{
 			ok = child_ptr->output_chunk(hand);
 			child_ptr = child_ptr->next;
 		}
+	}
 
 	if (!ok) return FALSE;
 
 	return TRUE;
-
-
 }
 
 
@@ -316,14 +317,15 @@ size_t Chunk_With_Children::size_chunk_for_process()
 	
 	chunk_size = 12; // identifier + length
 
-	if (children) 
-		while (child_ptr != NULL) {
+	if (children)
+	{
+		while (child_ptr != NULL) 
+		{
 			chunk_size += child_ptr->size_chunk_for_process();
 			child_ptr = child_ptr->next;
 		}
-
+	}
 	return chunk_size;
-
 }
 
 
@@ -340,15 +342,15 @@ void Chunk_With_Children::fill_data_block_for_process(char * data_start)
 	Chunk * child_ptr = children;
 
 	if (children)
-		while (child_ptr != NULL) {
+	{
+		while (child_ptr != NULL) 
+		{
 			child_ptr->fill_data_block_for_process (data_start);
 			data_start += child_ptr->chunk_size;
 			child_ptr = child_ptr->next;
 		}
-
+	}
 }
-
-
 
 void Chunk_With_Children::fill_data_block(char * data_start)
 {
@@ -363,12 +365,14 @@ void Chunk_With_Children::fill_data_block(char * data_start)
 	Chunk * child_ptr = children;
 
 	if (children)
-		while (child_ptr != NULL) {
+	{
+		while (child_ptr != NULL) 
+		{
 			child_ptr->fill_data_block (data_start);
 			data_start += child_ptr->chunk_size;
 			child_ptr = child_ptr->next;
 		}
-
+	}
 }
 
 #ifndef RIFF_OPTIMIZE
@@ -392,8 +396,10 @@ void Chunk_With_Children::lookup_child (const char * class_ident,List<Chunk*>& c
 
 	Chunk * child_ptr = children;
 
-	if (children)	
-		while	(child_ptr != NULL) {
+	if (children)
+	{
+		while (child_ptr != NULL) 
+		{
 			if (strncmp (class_ident, child_ptr->identifier, 8) == NULL)
 			{
 				assert (!child_ptr->r_u_miscellaneous());
@@ -401,8 +407,7 @@ void Chunk_With_Children::lookup_child (const char * class_ident,List<Chunk*>& c
 			}
 			child_ptr = child_ptr->next;
 		}
-
-	
+	}
 }
 
 unsigned Chunk_With_Children::count_children (char const * class_ident) const
@@ -411,8 +416,9 @@ unsigned Chunk_With_Children::count_children (char const * class_ident) const
 	
 	Chunk * child_ptr = children;
 
-	if (children)	
-		while	(child_ptr != NULL) {
+	if (children)
+	{
+		while (child_ptr != NULL) {
 			if (strncmp (class_ident, child_ptr->identifier, 8) == NULL)
 			{
 				assert (!child_ptr->r_u_miscellaneous());
@@ -420,6 +426,7 @@ unsigned Chunk_With_Children::count_children (char const * class_ident) const
 			}
 			child_ptr = child_ptr->next;
 		}
+	}
 
 	return nChildren;
 }
@@ -430,8 +437,10 @@ Chunk* Chunk_With_Children::lookup_single_child (const char * class_ident) const
 	//if debug make sure there is at most one of the required chunk type
 	Chunk * child_ptr = children;
 	Chunk * chunk_found=0;
-	if (children)	
-		while	(child_ptr != NULL) {
+	if (children)
+	{
+		while (child_ptr != NULL) 
+		{
 			if (strncmp (class_ident, child_ptr->identifier, 8) == NULL)
 			{
 				assert (!child_ptr->r_u_miscellaneous());
@@ -440,6 +449,7 @@ Chunk* Chunk_With_Children::lookup_single_child (const char * class_ident) const
 			}
 			child_ptr = child_ptr->next;
 		}
+	}
 	return chunk_found;
 	#else
 	Chunk * child_ptr = children;
@@ -455,29 +465,32 @@ Chunk* Chunk_With_Children::lookup_single_child (const char * class_ident) const
 		}
 	return 0;
 	#endif
-	
-
-	
 }
 
 void Chunk_With_Children::prepare_for_output()
 {
 	Chunk * child_ptr = children;
-	if (children) 
-		while (child_ptr != NULL){
+	if (children)
+	{
+		while (child_ptr != NULL)
+		{
 			child_ptr->prepare_for_output ();
 			child_ptr = child_ptr->next;
 		}
+	}
 }	
 
 void Chunk_With_Children::post_input_processing()
 {
 	Chunk * child_ptr = children;
-	if (children) 
-		while (child_ptr != NULL){
+	if (children)
+	{
+		while (child_ptr != NULL)
+		{
 			child_ptr->post_input_processing ();
 			child_ptr = child_ptr->next;
 		}
+	}
 }	
 
 ///////////////////////////////////////////////////

@@ -1,5 +1,6 @@
 
-#ifdef USE_FMV
+//#ifdef USE_FMV
+#if 0
 
 #include "d3_func.h"
 #include <fstream>
@@ -72,10 +73,20 @@ extern "C" {
 #include "inline.h"
 #include <math.h>
 #include <assert.h>
+#include "showcmds.h"
 
 extern	D3DINFO d3d;
-
 extern unsigned char GotAnyKey;
+extern int NumActiveBlocks;
+extern DISPLAYBLOCK *ActiveBlockList[];
+extern void ThisFramesRenderingHasBegun(void);
+extern void ThisFramesRenderingHasFinished(void);
+extern IMAGEHEADER ImageHeaderArray[];
+#if MaxImageGroups>1
+	extern int NumImagesArray[];
+#else
+	extern int NumImages;
+#endif
 
 int SmackerSoundVolume = 65536/512;
 int MoviesAreActive;
@@ -86,13 +97,6 @@ int PanningOfNearestVideoScreen = 0;
 #define MAX_NO_FMVTEXTURES 10
 FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 int NumberOfFMVTextures;
-
-extern IMAGEHEADER ImageHeaderArray[];
-#if MaxImageGroups>1
-	extern int NumImagesArray[];
-#else
-	extern int NumImages;
-#endif
 
 int FmvColourRed;
 int FmvColourGreen;
@@ -125,9 +129,6 @@ extern unsigned char DebouncedGotAnyKey;
 int NextFMVFrame();
 void FmvClose();
 int GetVolumeOfNearestVideoScreen(void);
-
-extern void ThisFramesRenderingHasBegun(void);
-extern void ThisFramesRenderingHasFinished(void);
 int CloseTheoraVideo();
 bool HandleTheoraHeader(OggStream* stream, ogg_packet* packet);
 bool HandleVorbisHeader(OggStream* stream, ogg_packet* packet);
@@ -169,18 +170,6 @@ OggStream* audio = NULL;
 
 StreamingAudioBuffer fmvAudioStream;
 
-/* dsound stuff */
-/*
-extern LPDIRECTSOUND	DSObject;
-
-LPDIRECTSOUNDBUFFER		fmvAudioBuffer = NULL;
-LPVOID					fmvaudioPtr1;
-DWORD					fmvaudioBytes1;
-LPVOID					fmvaudioPtr2;   
-DWORD					fmvaudioBytes2;
-int						fullBufferSize = 0;
-int						halfBufferSize = 0;
-*/
 bool initialFill = false;
 
 long writeOffset = 0;
@@ -191,10 +180,10 @@ long totalBytesWritten = 0;
 float totalAudioTimePlayed = 0.0f;
 
 /* audio buffer for liboggplay */
-static short			*audioDataBuffer = NULL;
-static int				audioDataBufferSize = 0;
-static int				audioBytesPerSec = 0;
-unsigned char			*testBuffer = NULL;
+static short	*audioDataBuffer = NULL;
+static int		audioDataBufferSize = 0;
+static int		audioBytesPerSec = 0;
+unsigned char	*testBuffer = NULL;
 
 int count = 0;
 
@@ -245,8 +234,6 @@ void VorbisInitForData(OggStream* stream)
 
 void HandleTheoraData(OggStream* stream, ogg_packet* packet)
 {
-//	ogg_int64_t granulepos = -1;
-
 	int ret = th_decode_packetin(stream->mTheora.mCtx,
 			packet,
 			&mGranulepos);
@@ -267,17 +254,6 @@ void HandleTheoraData(OggStream* stream, ogg_packet* packet)
 	frameReady = true;
 
 	LeaveCriticalSection(&CriticalSection);
-
-	
-//	OutputDebugString("handling some theora data...\n");
-
-	// Sleep for the time period of 1 frame
-/*
-	float framerate = float(stream->mTheora.mInfo.fps_numerator) /
-		float(stream->mTheora.mInfo.fps_denominator);
-
-	Sleep(static_cast<DWORD>((1.0f / framerate) * 1000));
-*/
 }
 
 bool ReadPacket(ogg_sync_state* state, OggStream* stream, ogg_packet* packet)
@@ -459,48 +435,63 @@ bool ReadOggPage(ogg_sync_state* state, ogg_page* page)
 	return true;
 }
 
+int buffersAdded = 0;
+bool started = false;
+
 void AudioGrabThread(void *args)
 {
 	DWORD dwQuantum = 1000 / 60;
 	char buf[100];
 
+	CoInitializeEx( NULL, COINIT_MULTITHREADED );
+
 	static int totalRead = 0;
 	static int lastRead = 0;
 
+	int startTime = 0;
+	int endTime = 0;
+	int timetoSleep = 0;
+
 	while (fmvPlaying)
 	{
+		startTime = timeGetTime();
+
 		int numBuffersFree = GetNumFreeAudioStreamBuffers(&fmvAudioStream);
 
-		if (numBuffersFree)
+		//if (numBuffersFree)
+		while (numBuffersFree)
 		{
 			int readableAudio = RingBuffer_GetReadableSpace();
-			if (readableAudio >= fmvAudioStream.bufferSize)
+
+			if (started == true)
 			{
-				RingBuffer_ReadData(audioData, fmvAudioStream.bufferSize);
-				WriteAudioStreamData(&fmvAudioStream, audioData, fmvAudioStream.bufferSize);
+				if (readableAudio >= fmvAudioStream.bufferSize)
+				{
+					RingBuffer_ReadData(audioData, fmvAudioStream.bufferSize);
+					WriteAudioStreamData(&fmvAudioStream, audioData, fmvAudioStream.bufferSize);
+
+					sprintf(buf, "send %d bytes to xaudio2\n", fmvAudioStream.bufferSize);
+					OutputDebugString(buf);
+
+					buffersAdded++;
+				}
 			}
-//			ReadVorbisData(audioData, fmvAudioStream.bufferSize, 0);
-			
+
+//			if ((buffersAdded == 2) && (started == false))
+			if ((readableAudio >= 8192 * 2) && (started == false))
+			{
+				PlayAudioStreamBuffer(&fmvAudioStream);
+				started = true;
+			}
+
+			numBuffersFree--;
 		}
 
-		Sleep( dwQuantum );
-/*
-		int writable = GetWritableBufferSize();
-		int readable = RingBuffer_GetWritableSpace();
+		endTime = timeGetTime();
 
-		totalRead += readable;
+		timetoSleep = endTime - startTime;
 
-		if ((totalRead - lastRead) >= 8192 * 2)
-		{
-			lastRead = totalRead;
-
-			if (readable > writable) 
-				readable = writable;
-
-			int wrote = WriteToDsound(8192 * 2);
-		}
-		Sleep(dwQuantum);
-*/
+		Sleep( timetoSleep );
 	}
 	SetEvent(hEvent2);
 }
@@ -591,19 +582,13 @@ void TheoraDecodeThread(void *args)
 //						audioSize = freeSpace;
 					}
 
-//					ReadVorbisData(audioSize, 0);
 					written += RingBuffer_WriteData((char*)&audioDataBuffer[0], audioSize);
-/*
-					if (written >= fmvAudioStream.bufferSize)
-					{
-						WriteToDsound(4096);
-						written = 0;
-					}
-*/
+
+					sprintf(buf, "send %d bytes to ring buffer\n", audioSize);
+					OutputDebugString(buf);
+
 					LeaveCriticalSection(&audioCriticalSection);
 				}
-
-//				OutputDebugString("read some audio...\n");
 				ret = vorbis_synthesis_read(&audio->mVorbis.mDsp, samples);
 				assert(ret == 0);
 			}
@@ -633,11 +618,16 @@ void TheoraDecodeThread(void *args)
 				// bjd - temporary! use above code when ready
 				float audio_time = static_cast<float>((timeGetTime() - startTime) / 100.0f);
 
+//				float audio_time = GetNumSamplesPlayed(&fmvAudioStream) / (float)44100;
+
 				float video_time = static_cast<float>(th_granule_time(video->mTheora.mCtx, mGranulepos));
 //				sprintf(buf, "video_time: %f audio_time: %f\n", video_time, audio_time);
 //				OutputDebugString(buf);
 
-//				if ((audio_time > video_time) || (!audio)) // do it anyway if we have no audio
+//				sprintf(buf, "time played: %f\n", GetNumSamplesPlayed(&fmvAudioStream) / (float)44100);
+//				OutputDebugString(buf);
+
+				if ((audio_time > video_time))// || (!audio)) // do it anyway if we have no audio
 				{
 					// Decode one frame and display it. If no frame is available we
 					// don't do anything.
@@ -646,6 +636,7 @@ void TheoraDecodeThread(void *args)
 					{
 						HandleTheoraData(video, &packet);
 
+/*
 						if (!audio)
 						{
 							// we have no audio, time playback based on video framerate.
@@ -656,14 +647,13 @@ void TheoraDecodeThread(void *args)
 						}
 
 						video_time = static_cast<float>(th_granule_time(video->mTheora.mCtx, mGranulepos));
+*/
 					}
 				}
-				float framerate = float(video->mTheora.mInfo.fps_numerator) /
-								float(video->mTheora.mInfo.fps_denominator);
+
+				float framerate = float(video->mTheora.mInfo.fps_numerator) / float(video->mTheora.mInfo.fps_denominator);
 				Sleep(static_cast<DWORD>((1.0f / framerate) * 1000));
-//				else Sleep(static_cast<DWORD>(video_time - audio_time));
 			}
-//			Sleep(1);
 		}
 	}
 
@@ -748,16 +738,7 @@ int OpenTheoraVideo(const char *fileName)
 		/* init some temp audio data storage */
 		audioData = new char[fmvAudioStream.bufferSize];
 
-		RingBuffer_Init(fmvAudioStream.bufferSize * fmvAudioStream.bufferCount);
-/*
-		fullBufferSize = CreateFMVAudioBuffer(audio->mVorbis.mInfo.channels, audio->mVorbis.mInfo.rate);
-		if (fullBufferSize < 0)
-		{
-			LogErrorString("CreateFMVAudioBuffer call failed", __LINE__ , __FILE__);
-			fullBufferSize = 0;
-		}
-		halfBufferSize = fullBufferSize / 2;
-*/
+		RingBuffer_Init((fmvAudioStream.bufferSize * fmvAudioStream.bufferCount) * 3);
 	}
 #endif
 	if (video) 
@@ -913,90 +894,6 @@ int CloseTheoraVideo()
 	return 0;
 }
 
-#if 0
-int CreateFMVAudioBuffer(int channels, int rate)
-{
-#ifdef WIN32
-	WAVEFORMATEX waveFormat;
-	DSBUFFERDESC bufferFormat;
-
-	memset(&waveFormat, 0, sizeof(waveFormat));
-	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
-	waveFormat.nChannels		= channels;
-	waveFormat.wBitsPerSample	= 16;
-	waveFormat.nSamplesPerSec	= rate;	
-	waveFormat.nBlockAlign		= waveFormat.nChannels * waveFormat.wBitsPerSample / 8;
-	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
-	waveFormat.cbSize			= sizeof(waveFormat);
-
-	memset(&bufferFormat, 0, sizeof(DSBUFFERDESC));
-	bufferFormat.dwSize			= sizeof(DSBUFFERDESC);
-	bufferFormat.dwFlags		= DSBCAPS_CTRLVOLUME | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_LOCSOFTWARE | DSBCAPS_CTRLPAN;
-	bufferFormat.dwBufferBytes	= waveFormat.nAvgBytesPerSec / 2;
-	bufferFormat.lpwfxFormat	= &waveFormat;
-
-	audioBytesPerSec = waveFormat.nAvgBytesPerSec;//(rate * channels * 16) / 8;
-
-	LastError = DSObject->CreateSoundBuffer(&bufferFormat, &fmvAudioBuffer, NULL);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return -1;
-	}
-//	else { OutputDebugString("created dsound fmv buffer....\n"); }
-
-	/* lock entire buffer */
-	LastError = fmvAudioBuffer->Lock(0, bufferFormat.dwBufferBytes, &fmvaudioPtr1, &fmvaudioBytes1, &fmvaudioPtr2, &fmvaudioBytes2, NULL);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return -1;
-	}
-
-	/* fill entire buffer with silence */
-	memset(fmvaudioPtr1, 0, fmvaudioBytes1);
-
-	/* unlock buffer */
-	LastError = fmvAudioBuffer->Unlock(fmvaudioPtr1, fmvaudioBytes1, fmvaudioPtr2, fmvaudioBytes2);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return -1;
-	}
-
-	char buf[100];
-	sprintf(buf, "DSound fmv buffer size: %d\n", bufferFormat.dwBufferBytes);
-	OutputDebugString(buf);
-
-	RingBuffer_Init(bufferFormat.dwBufferBytes * 2);
-
-	/* test buffer for lazy copy */
-	testBuffer = new unsigned char[bufferFormat.dwBufferBytes];
-	OutputDebugString("alloc testBuffer\n");
-
-//	fmvAudioBuffer->GetCurrentPosition(&playOffset, &writeOffset);
-
-	writeOffset = 0;
-
-	/* probably a better place to put this..start playing dsound buffer once we hit video */
-	LastError = fmvAudioBuffer->Play(0, 0, DSBPLAY_LOOPING);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		OutputDebugString("can't play dsound fmv buffer\n");
-	}
-	else
-	{
-		OutputDebugString("started playing Dsound buffer\n");
-	}
-
-	return bufferFormat.dwBufferBytes;
-#else
-	return 0;
-#endif
-}
-#endif
-
 extern void StartMenuBackgroundBink()
 {
 	return;
@@ -1029,12 +926,6 @@ extern void EndMenuBackgroundBink()
 	CloseTheoraVideo();
 
 	MenuBackground = false;
-}
-
-
-void UpdateFMVAudioBuffer(void *arg)
-{
-
 }
 
 void RecreateAllFMVTexturesAfterDeviceReset()
@@ -1095,7 +986,7 @@ int NextFMVFrame()
 	EnterCriticalSection(&CriticalSection);
 
 	D3DLOCKED_RECT textureLock;
-	if (FAILED(mDisplayTexture->LockRect(0, &textureLock, NULL, /*D3DLOCK_DISCARD*/0)))
+	if (FAILED(mDisplayTexture->LockRect(0, &textureLock, NULL, D3DLOCK_DISCARD)))
 	{
 		OutputDebugString("can't lock FMV texture\n");
 		return 0;
@@ -1218,7 +1109,7 @@ void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb)
 
 		ptro += rgb->rgb_pitch;
 	}
-#else
+#else // mmx
 	int               i;
 	unsigned char   * restrict ptry;
 	unsigned char   * restrict ptru;
@@ -1337,10 +1228,10 @@ void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb)
 		}
 		if (i & 0x1) 
 		{
-			ptru += yuv->uv_pitch;//uv_width;
-			ptrv += yuv->uv_pitch;//>uv_width;
+			ptru += yuv->uv_pitch;
+			ptrv += yuv->uv_pitch;
 		}
-		ptry += yuv->y_pitch;// y_width;
+		ptry += yuv->y_pitch;
 	}
 	_m_empty();
 #endif
@@ -1383,11 +1274,6 @@ int GetWritableBufferSize()
 */
 }
 #endif
-
-float GetDSoundTimePlayed()
-{
- 	return totalAudioTimePlayed;// = (totalBytesPlayed / (audioBytesPerSec * 1.0f));
-}
 
 #if 0
 int WriteToDsound(int dataSize)
@@ -1787,7 +1673,7 @@ void FindLightingValuesFromTriggeredFMV(unsigned char *bufferPtr, FMVTEXTURE *ft
 	FmvColourBlue = totalBlue/48*16;
 }
 
-int NextFMVTextureFrame(FMVTEXTURE *ftPtr/*, void *bufferPtr, int pitch*/)
+int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 {
 	int smackerFormat = 1;
 
@@ -1844,9 +1730,6 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr/*, void *bufferPtr, int pitch*/)
 	return 1;
 }
 
-extern int NumActiveBlocks;
-extern DISPLAYBLOCK *ActiveBlockList[];
-#include "showcmds.h"
 int GetVolumeOfNearestVideoScreen(void)
 {
 	extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
@@ -1885,22 +1768,16 @@ int GetVolumeOfNearestVideoScreen(void)
 					leastDistanceRecorded = dist;
 					VolumeOfNearestVideoScreen = ONE_FIXED + 1024 - dist/2;
 					if (VolumeOfNearestVideoScreen>ONE_FIXED) VolumeOfNearestVideoScreen = ONE_FIXED;
-
 					{
 						VECTORCH rightEarDirection;
-						#if 0
-						rightEarDirection.vx = Global_VDB_Ptr->VDB_Mat.mat11;
-						rightEarDirection.vy = Global_VDB_Ptr->VDB_Mat.mat12;
-						rightEarDirection.vz = Global_VDB_Ptr->VDB_Mat.mat13;
-						Normalise(&disp);
-						#else
+
 						rightEarDirection.vx = Global_VDB_Ptr->VDB_Mat.mat11;
 						rightEarDirection.vy = 0;
 						rightEarDirection.vz = Global_VDB_Ptr->VDB_Mat.mat31;
 						disp.vy=0;
 						Normalise(&disp);
 						Normalise(&rightEarDirection);
-						#endif
+
 						PanningOfNearestVideoScreen = 32768 + DotProduct(&disp,&rightEarDirection)/2;
 					}
 				}
