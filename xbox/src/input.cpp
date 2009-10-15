@@ -16,6 +16,12 @@ extern "C" {
 #include "gamedef.h"
 #include "gameplat.h"
 #include "usr_io.h"
+
+#include "onscreenKeyboard.h"
+#include "rentrntq.h"
+
+extern void KeyboardEntryQueue_Add(char c);
+
 extern "C++"{
 #include "iofocus.h"
 };
@@ -300,6 +306,33 @@ void DirectReadKeyboard()
 			);
 		}
 		DebouncedGotAnyKey = GotAnyKey && !LastGotAnyKey;
+	}
+
+	// handle the on screen keyboard input
+	if (Osk_IsActive())
+	{
+		if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_4]) // if osk active and user presses xbox A..
+		{
+			char key = Osk_GetSelectedKeyChar();
+			RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(key);
+			KeyboardEntryQueue_Add(key);
+		}
+		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_13]) // up
+		{
+			Osk_MoveUp();
+		}
+		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_14]) // down
+		{
+			Osk_MoveDown();
+		}
+		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_15]) // left
+		{
+			Osk_MoveLeft();
+		}
+		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_16]) // right
+		{
+			Osk_MoveRight();
+		}
 	}
 }
 

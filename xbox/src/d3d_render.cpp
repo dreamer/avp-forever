@@ -27,6 +27,7 @@ extern "C++"{
 #include <algorithm>
 
 #include "logString.h"
+#include "onscreenKeyboard.h"
 
 };
 #include "HUD_layout.h"
@@ -6090,6 +6091,8 @@ size_t lastMem = 0;
 
 void ThisFramesRenderingHasFinished(void)
 {
+	Osk_Draw();
+
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
 	EndD3DScene();

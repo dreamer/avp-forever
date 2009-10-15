@@ -119,7 +119,6 @@ static void GetHeaderInfoForSaveSlot(SAVE_SLOT_HEADER* save_slot,const char* fil
 
 static void PasteFromClipboard(char* Text,int MaxTextLength);
 
-/* buttload more function prototypes */
 void LoadDefaultPrimaryConfigs(void);
 void TimeStampedMessage(char *stringPtr);
 extern void InitialiseMenuGfx(void);
@@ -197,7 +196,6 @@ extern int VideoModeNotAvailable;
 extern int RealFrameTime;
 extern unsigned char KeyboardInput[];
 extern unsigned char DebouncedKeyboardInput[];
-//extern int DebouncedGotAnyKey;
 extern unsigned char DebouncedGotAnyKey;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern int TimeScale;
@@ -2099,6 +2097,15 @@ static void ActUponUsersInput(void)
 		BackspaceTimer=0;
 	}
 	
+	if ((AvPMenus.UserEnteringText) || (AvPMenus.UserEnteringNumber))
+	{
+		Osk_Activate();
+	}
+	else 
+	{
+		Osk_Deactivate();
+	}
+
 	if (AvPMenus.UserEnteringText)
 	{
 		AVPMENU_ELEMENT *elementPtr = &AvPMenus.MenuElements[AvPMenus.CurrentlySelectedElement];
@@ -2539,8 +2546,8 @@ static void ActUponUsersInput(void)
 		if (KeyDepressedCounter>ONE_FIXED)
 			InputIsDebounced = 1;
 	}
-
 }
+
 static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interactionID)
 {
 	AVPMENU_ELEMENT *elementPtr = &AvPMenus.MenuElements[AvPMenus.CurrentlySelectedElement];

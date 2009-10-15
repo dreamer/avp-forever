@@ -268,6 +268,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 					case VK_DOWN:
 						Osk_MoveDown();
 						break;
+					case VK_RETURN: // handle this as if it's a WM_CHAR
+						char key = Osk_GetSelectedKeyChar();
+						RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(key);
+						KeyboardEntryQueue_Add(key);
+						break;
 				}
 			}
 

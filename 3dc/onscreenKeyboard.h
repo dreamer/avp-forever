@@ -9,6 +9,9 @@ void Osk_MoveLeft();
 void Osk_MoveRight();
 void Osk_MoveUp();
 void Osk_MoveDown();
+void Osk_Activate();
+void Osk_Deactivate();
+char Osk_GetSelectedKeyChar();
 };
 
 #endif

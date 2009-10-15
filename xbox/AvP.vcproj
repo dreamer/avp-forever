@@ -4247,6 +4247,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\3dc\onscreenKeyboard.cpp">
+			</File>
+			<File
 				RelativePath="..\3dc\win95\Our_mem.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -6371,6 +6374,9 @@
 				RelativePath="..\3dc\win95\OEChunk.h">
 			</File>
 			<File
+				RelativePath="..\3dc\onscreenKeyboard.h">
+			</File>
+			<File
 				RelativePath="..\3dc\win95\Ourasert.h">
 			</File>
 			<File
@@ -6610,10 +6616,10 @@
 			<File
 				RelativePath="..\3dc\win95\Zsp.hpp">
 			</File>
-		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+			<Filter
+				Name="Resource Files"
+				Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

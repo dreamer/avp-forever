@@ -844,6 +844,17 @@ extern int RenderSmallChar(char c, int x, int y, int alpha, int red, int green, 
 	return AAFontWidths[(unsigned int) c];
 }
 
+extern int RenderTallChar(char c, int x, int y, int alpha, int red, int green, int blue)
+{
+	int char_width = IntroFont_Light.FontWidth[(unsigned int) c];
+
+	int topLeftU = 0;
+	int topLeftV = 0;
+
+	DrawTallFontCharacter(x, y, topLeftU, topLeftV, char_width, alpha);
+	return 0;
+}
+
 /*static*/extern int RenderSmallFontString(char *textPtr, int sx, int sy, int alpha, int red, int green, int blue)
 {
 //#if 0

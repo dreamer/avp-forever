@@ -15,16 +15,24 @@ extern "C"
 #define ONE_FIXED	65536
 
 static int Osk_GetCurrentLocation();
+char Osk_GetSelectedKeyChar();
+char Osk_GetSpecifiedKeyChar(int key);
 
 static int currentRow = 0;
 static int currentColumn = 0;
 
 static int currentValue = 0;
 
-static int oskX = 0;
-static int oskY = 0;
-static int oskWidth = 400; //?
-static int oskHeight = 200; //?
+static int osk_x = 0;
+static int osk_y = 0;
+static int oskWidth = 400;
+static int oskHeight = 200;
+
+static const int outline_square_width = 30;
+static const int outline_square_height = 30;
+static const int space_between_keys = 3;
+static const int outline_border_size = 1;
+static const int indent_space = 5;
 
 const int numTotalKeys = 40;//36; // 26 letters + 0 to 9
 
@@ -32,6 +40,8 @@ const int keysPerRow = 4;
 const int keysPerColumn = 10;
 
 static char buf[100];
+
+static bool is_active = false;
 
 const static char keyArray[numTotalKeys] = 
 {
@@ -49,63 +59,92 @@ void Osk_Init()
 {
 	currentRow = 0;
 	currentColumn = 0;
+
+	oskWidth = (outline_square_width * keysPerColumn) + (space_between_keys * keysPerColumn) + (indent_space * 2);
+	oskHeight = (outline_square_height * keysPerRow) + (space_between_keys * keysPerRow) + (indent_space * 2);
 }
 
 void Osk_Draw()
 {
+	if (!Osk_IsActive()) 
+		return;
+
 	int totalDrawn = 0;
 
 //	sprintf(buf, "currentRow: %d, currentColumn: %d, currentItem: %d\n", currentRow, currentColumn, Osk_GetCurrentLocation());
 //	OutputDebugString(buf);
 
 	// draw background rectangle
-	DrawQuad(oskX, oskY, oskWidth, oskHeight, D3DCOLOR_ARGB(255, 80, 160, 120));
+	DrawQuad(osk_x, osk_y, oskWidth, oskHeight, D3DCOLOR_ARGB(120, 80, 160, 120));
 
-	int pos_x = 5;
-	int pos_y = 5;
+	// start off with an indent to space things out nicely
+	int pos_x = indent_space;
+	int pos_y = indent_space;
 
-	// draw each key outline square
+	// draw each key
 	for (int y = 0; y < keysPerRow; y++)
 	{
-		pos_x = 5;
+		// reset x position each time we move to a new row
+		pos_x = indent_space;
 
 		for (int x = 0; x < keysPerColumn; x++)
 		{
-			if (totalDrawn >= numTotalKeys) goto stopdraw;
+			if (totalDrawn >= numTotalKeys) 
+				return; // just break out of the function if we've drawn all the keys
 
 			// draw background square first (for key outline)
-			DrawQuad(pos_x, pos_y, 30, 30, D3DCOLOR_ARGB(255, 255, 255, 255));
+			DrawQuad(pos_x, pos_y, outline_square_width, outline_square_height, D3DCOLOR_ARGB(200, 255, 255, 255));
 
-			if (Osk_GetCurrentLocation() == totalDrawn)
-				DrawQuad(pos_x+2, pos_y+2, 26, 26, D3DCOLOR_ARGB(255, 255, 255, 0));
+			int innerSquareWidth = outline_square_width - outline_border_size * 2;
+			int innerSquareHeight = outline_square_height - outline_border_size * 2;
+
+			// draw the inner background for key, highlighting if its the currently selected key
+			if (Osk_GetCurrentLocation() == totalDrawn) // draw the selected item differently (highlight it)
+				DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, innerSquareWidth, innerSquareHeight, D3DCOLOR_ARGB(220, 255, 255, 0));
 			else
-				DrawQuad(pos_x+2, pos_y+2, 26, 26, D3DCOLOR_ARGB(255, 128, 128, 128));
-
+				DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, innerSquareWidth, innerSquareHeight, D3DCOLOR_ARGB(220, 128, 128, 128));
 
 			// draw key letter
-			RenderSmallChar(keyArray[totalDrawn], pos_x+2, pos_y+2, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
+			RenderSmallChar(Osk_GetSpecifiedKeyChar(totalDrawn), pos_x + (26 / 2), pos_y + space_between_keys, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
 
-			pos_x += 35;
+			pos_x += (outline_square_width + space_between_keys);
 			totalDrawn++;
 		}
 
-		pos_y += 35;
+		pos_y += (outline_square_height + space_between_keys);
 	}
-
-stopdraw: {}
-
-	// draw selected key highlight? (or do it above if i == currentKey or whatever)
-
 }
 
 bool Osk_IsActive()
 {
-	return true; // sort this later to only appear for text entry on xbox
+	return is_active; // sort this later to only appear for text entry on xbox
+}
+
+char Osk_GetSelectedKeyChar()
+{
+	return keyArray[Osk_GetCurrentLocation()];
+}
+
+char Osk_GetSpecifiedKeyChar(int key)
+{
+	return keyArray[key];
+}
+
+void Osk_Activate()
+{
+	if (is_active == false)
+		Osk_Init();
+
+	is_active = true;
+}
+
+void Osk_Deactivate()
+{
+	is_active = false;
 }
 
 static int Osk_GetCurrentLocation()
 {
-//	return (currentRow * ) + 1;
 	return currentValue;
 }
 
@@ -118,15 +157,17 @@ void Osk_MoveLeft()
 //		currentColumn = (keysPerRow - 1); 
 		currentColumn = 0;
 */
-	currentValue--;
 
 	int currentColOffset = currentValue % keysPerColumn;
 
-	sprintf(buf, "currentColOffset %d currentPosition %d\n", currentColOffset, currentValue);
-	OutputDebugString(buf);
+//	sprintf(buf, "currentColOffset %d currentPosition %d\n", currentColOffset, currentValue);
+//	OutputDebugString(buf);
 
-	if (currentColOffset < 0)
-		currentValue += keysPerColumn;
+	if (currentColOffset == 0)
+	{
+		currentValue += keysPerColumn - 1;
+	}
+	else currentValue--;
 }
 
 void Osk_MoveRight()
@@ -137,17 +178,18 @@ void Osk_MoveRight()
 	if (currentColumn >= keysPerRow - 1)
 		currentColumn = keysPerRow - 1;//0;
 */
-	currentValue++;
 
 	int currentColOffset = currentValue % keysPerColumn;
 
 //	sprintf(buf, "currentColOffset %d currentPosition %d\n", currentColOffset, currentValue);
-//	OutputDebugString(buf);
+//
+	OutputDebugString(buf);
 
-	if (currentColOffset == 0)
+	if (currentColOffset == keysPerColumn - 1)
 	{
-		currentValue -= keysPerColumn;
+		currentValue -= keysPerColumn - 1;
 	}
+	else currentValue++;
 }
 
 void Osk_MoveUp()
