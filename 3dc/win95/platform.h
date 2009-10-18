@@ -36,7 +36,6 @@ extern "C"  {
 */
 #ifdef WIN32
 	#include <d3d9.h>
-//	#include "dsound.h"
 	typedef int DPID;
 
 	#define DIRECTINPUT_VERSION 0x0800
@@ -46,7 +45,6 @@ extern "C"  {
 	#include <xtl.h>
 	#include "xbox_defines.h"
 #endif
-//#include "fastfile.h"
 
 #include "aw.h"
 
@@ -99,21 +97,6 @@ typedef enum {
 
 } PROCESSORTYPES;
 
-
-/*
-
- VGA Palette Entry
-
-*/
-#if 0
-typedef struct vgapaletteentry {
-
-	unsigned char vga_r;
-	unsigned char vga_g;
-	unsigned char vga_b;
-
-} VGAPALETTEENTRY;
-#endif
 /*
 	Video mode decsription (to be filled
 	in by DirectDraw callback).
@@ -373,47 +356,6 @@ typedef enum {
 #define		ExtraMouse1		4
 #define		ExtraMouse2		5
 
-/*
-	Video Modes
-*/
-#if 0
-typedef enum {
-
-	VideoMode_DX_320x200x8,
-	VideoMode_DX_320x200x8T,
-	VideoMode_DX_320x200x15,
-	VideoMode_DX_320x240x8,
-
-	VideoMode_DX_640x480x8,
-	VideoMode_DX_640x480x8T,
-	VideoMode_DX_640x480x15,
-	VideoMode_DX_640x480x24,
-
-	VideoMode_DX_800x600x8,
-	VideoMode_DX_800x600x8T,
-	VideoMode_DX_800x600x15,
-	VideoMode_DX_800x600x24,
-
-	VideoMode_DX_1024x768x8,
-	VideoMode_DX_1024x768x8T,
-	VideoMode_DX_1024x768x15,
-	VideoMode_DX_1024x768x24,
-
-	VideoMode_DX_1280x1024x8,
-	VideoMode_DX_1280x1024x8T,
-	VideoMode_DX_1280x1024x15,
-	VideoMode_DX_1280x1024x24,
-
-	VideoMode_DX_1600x1200x8,
-	VideoMode_DX_1600x1200x8T,
-	VideoMode_DX_1600x1200x15,
-	VideoMode_DX_1600x1200x24,
-	
-	MaxVideoModes
-
-} VIDEOMODES;
-#endif
-
 #define MaxScreenWidth 1600		/* Don't get this wrong! */
 
 typedef struct WinScaleXY {
@@ -477,62 +419,6 @@ typedef struct bmpheader {
 
 } BMPHEADER;
 
-#ifdef __WATCOMC__
-#pragma pack (4)
-#endif
-
-#if 0
-/*
-	Types of texture files that can be
-	requested from the main D3D texture
-	loader.
-*/
-
-typedef enum {
-
-	TextureTypePGM,
-	TextureTypePPM
-
-} TEXTUREFILETYPE;
-
-/*
-	Windows initialisation modes.
-	See InitialiseWindowsSystem
-	in the default win_proj.cpp
-	for a full description.
-*/
-
-typedef enum {
-
-	WinInitFull,
-	WinInitChange
-
-} WININITMODES;
-
-/*
-
- Triangle Array Limits etc.
-
-*/
-
-#define maxarrtriangles 7 /* Could be 6 if all shape data in triangles */
-#define trianglesize (1 + 1 + 1 + 1 + (6 * 3) + 1)  /* largest, could be 5*3 if no 3d texturing */
-#define pta_max 9 /* Could be 8 if all shape data in triangles */
-
-/* header + xy + terminator */
-#define item_polygon_trianglesize (1 + 1 + 1 + 1 + (2 * 3) + 1)
-/* header + xyi + terminator */
-#define item_gouraudpolygon_trianglesize (1 + 1 + 1 + 1 + (3 * 3) + 1)
-/* header + xyuv + terminator */
-#define item_2dtexturedpolygon_trianglesize (1 + 1 + 1 + 1 + (4 * 3) + 1)
-/* header + xyuvi + terminator */
-#define item_gouraud2dtexturedpolygon_trianglesize (1 + 1 + 1 + 1 + (5 * 3) + 1)
-/* header + xyuvw + terminator */
-#define item_3dtexturedpolygon_trianglesize (1 + 1 + 1 + 1 + (5 * 3) + 1)
-/* header + xyuvwi + terminator */
-#define item_gouraud3dtexturedpolygon_trianglesize (1 + 1 + 1 + 1 + (6 * 3) + 1)
-
-#endif
 /*
 	Function prototypes
 */
@@ -558,12 +444,10 @@ BOOL SpawnRasterThread();
 BOOL WaitForRasterThread();
 
 
-/* DirectDraw */
+/* Direct 3D */
 void ColourFillBackBuffer(int FillColour);
 void ColourFillBackBufferQuad(int FillColour, int LeftX, int TopY, int RightX, int BotY);
 void FlipBuffers(void);
-
-/* Direct 3D Immediate Mode Rasterisation Module */
 BOOL InitialiseDirect3DImmediateMode(void);
 BOOL LockExecuteBuffer(void);
 BOOL UnlockExecuteBufferAndPrepareForUse(void);
@@ -583,16 +467,6 @@ void ReleaseAvPTexture(AvPTexture* texture);
 BOOL SetExecuteBufferDefaults(void);
 #if SUPPORT_MMX
 void SelectMMXOptions(void);
-#endif
-
-#if SupportZBuffering
-void FlushD3DZBuffer(void);
-void WriteZBPolygonToExecuteBuffer(int* itemptr);
-void WriteZBGouraudPolygonToExecuteBuffer(int* itemptr);
-void WriteZB2dTexturedPolygonToExecuteBuffer(int* itemptr);
-void WriteZBGouraud2dTexturedPolygonToExecuteBuffer(int* itemptr);
-void WriteZB3dTexturedPolygonToExecuteBuffer(int* itemptr);
-void WriteZBGouraud3dTexturedPolygonToExecuteBuffer(int* itemptr);
 #endif
 
 /* KJL 11:28:31 9/9/97 - Direct Input prototypes */
@@ -650,10 +524,6 @@ PROCESSORTYPES ReadProcessorType(void);
 */
 
 void ExitGame(void);
-
-void ProjectSpecificBufferFlipPostProcessing();
-
-void ProjectSpecificItemListPostProcessing();
 
 #if optimiseflip
 void ProcessProjectWhileWaitingToBeFlippable();

@@ -1,11 +1,7 @@
 
 #include "logString.h"
 #include "d3_func.h"
-
-#ifdef WIN32
-	#include <shlobj.h>
-	#include <shlwapi.h>
-#endif
+#include "utilities.h"
 
 #ifdef _XBOX
 	#include "D3dx8core.h"
@@ -47,13 +43,7 @@ void ClearLog()
 #ifdef WIN32
 	TCHAR strPath[MAX_PATH];
 
-	/* finds the path to the folder. On Win7, this would be "C:\Users\<username>\AppData\Local\ as an example */
-	if( FAILED(SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, strPath ) ) )
-	{
-		return;
-	}
-
-	PathAppend( strPath, TEXT( "Fox\\Aliens versus Predator\\" ) );
+	strcpy(strPath, GetSaveFolderPath());
 	strcat( strPath, logFilename.c_str());
 
 	std::ofstream file(strPath, std::ios::out);
@@ -68,17 +58,10 @@ void WriteToLog(const std::string &logLine)
 #ifdef WIN32
 	TCHAR strPath[MAX_PATH];
 
-	/* finds the path to the folder. On Win7, this would be "C:\Users\<username>\AppData\Local\ as an example */
-	if( FAILED(SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, strPath ) ) )
-	{
-		return;
-	}
-
-	PathAppend( strPath, TEXT( "Fox\\Aliens versus Predator\\" ) );
-	strcat( strPath, logFilename.c_str());
+	strcpy(strPath, GetSaveFolderPath());
+	strcat(strPath, logFilename.c_str());
 
 	std::ofstream file(strPath, std::ios::out | std::ios::app);
-
 #else
 	std::ofstream file(logFilename.c_str(), std::ios::out | std::ios::app);
 #endif

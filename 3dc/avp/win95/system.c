@@ -306,15 +306,6 @@ int AVP_ChangeDisplayMode
     return TRUE;
 }
 
-//empty functions for hooks
-// hooks for doing stuff after drawing and
-// after a flip
-
-void ProjectSpecificItemListPostProcessing(void){;}
-void ProjectSpecificBufferFlipPostProcessing(void){;}
-
-
-
 /*******************************************************************************************/
 /*******************************************************************************************/
 /***************		   GAME AND ENIVROMENT CONTROL 			  **************************/

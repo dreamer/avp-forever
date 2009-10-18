@@ -6,12 +6,8 @@
 #include <map>
 #include <algorithm>
 
-#ifdef WIN32
-	#include <shlobj.h>
-	#include <shlwapi.h>
-#endif
-
 #include "logString.h"
+#include "utilities.h"
 
 extern int StringToInt(const std::string &string);
 extern std::string IntToString(const int value);
@@ -34,14 +30,8 @@ bool Config_Load()
 #ifdef WIN32
 	TCHAR strPath[MAX_PATH];
 
-	/* finds the path to the folder. On Win7, this would be "C:\Users\<username>\AppData\Local\ as an example */
-	if( FAILED(SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, strPath ) ) )
-	{
-		return 0;
-	}
-
-	PathAppend( strPath, TEXT( "Fox\\Aliens versus Predator\\" ) );
-	strcat( strPath, FILENAME);
+	strcpy(strPath, GetSaveFolderPath());
+	strcat(strPath, FILENAME);
 
 	std::ifstream file(strPath);
 
@@ -142,23 +132,12 @@ bool Config_Load()
 
 bool Config_Save()
 {
-#ifdef WIN32
 	TCHAR strPath[MAX_PATH];
 
-	/* finds the path to the folder. On Win7, this would be "C:\Users\<username>\AppData\Local\ as an example */
-	if( FAILED(SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, strPath ) ) )
-	{
-		return 0;
-	}
-
-	PathAppend( strPath, TEXT( "Fox\\Aliens versus Predator\\" ) );
-	strcat( strPath, FILENAME);
+	strcpy(strPath, GetSaveFolderPath());
+	strcat(strPath, FILENAME);
 
 	std::ofstream file(strPath);
-
-#else
-	std::ofstream file(FILENAME);
-#endif
 
 	if (!file.is_open())
 	{
@@ -259,14 +238,9 @@ static bool Config_CreateDefault()
 #ifdef WIN32
 	TCHAR strPath[MAX_PATH];
 
-	/* finds the path to the folder. On Win7, this would be "C:\Users\<username>\AppData\Local\ as an example */
-	if ( FAILED(SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, strPath ) ) )
-	{
-		return false;
-	}
+	strcpy(strPath, GetSaveFolderPath());
 
-	PathAppend( strPath, TEXT( "Fox\\Aliens versus Predator\\" ) );
-	strcat( strPath, FILENAME);
+	strcat(strPath, FILENAME);
 
 	std::ofstream file(strPath);
 
