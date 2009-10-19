@@ -311,11 +311,12 @@ void DirectReadKeyboard()
 	// handle the on screen keyboard input
 	if (Osk_IsActive())
 	{
-		if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_4]) // if osk active and user presses xbox A..
+		if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2]) // if osk active and user presses xbox A..
 		{
 			char key = Osk_GetSelectedKeyChar();
 			RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(key);
 			KeyboardEntryQueue_Add(key);
+			//DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2] = 0;
 		}
 		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_13]) // up
 		{

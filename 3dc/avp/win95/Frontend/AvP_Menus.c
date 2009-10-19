@@ -2107,7 +2107,7 @@ static void ActUponUsersInput(void)
 	{
 		AVPMENU_ELEMENT *elementPtr = &AvPMenus.MenuElements[AvPMenus.CurrentlySelectedElement];
 
-		if (DebouncedKeyboardInput[KEY_ESCAPE] || DebouncedKeyboardInput[KEY_CR] || DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2])
+		if (DebouncedKeyboardInput[KEY_ESCAPE] || DebouncedKeyboardInput[KEY_CR] /*|| DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2]*/)
 		{
 			elementPtr->TextPtr[AvPMenus.PositionInTextField] = 0;
 			AvPMenus.UserEnteringText = 0;
