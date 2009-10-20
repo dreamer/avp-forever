@@ -1426,7 +1426,6 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 				svic = temp_svic;
 				break;
 			}
-			
 		}
 		
 		if (svic)
@@ -1442,19 +1441,16 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 			for (int vn = 0; vn < svic->num_vertices; vn++) 
 			{
 				//convert coloured light to a brightness value
-				int ir=svic->intensity_array[vn]>>16;
-			 	int ig=svic->intensity_array[vn]>>8 &0xff;
-			 	int ib=svic->intensity_array[vn] &0xff;
+				int ir = svic->intensity_array[vn]>>16;
+			 	int ig = svic->intensity_array[vn]>>8 &0xff;
+			 	int ib = svic->intensity_array[vn] &0xff;
 			 	int mag = (int)sqrt((double)(ir*ir+ig*ig+ib*ib)/3.0);
 				
 			 	mainshapelist[osnp->sh_num]->sh_extraitemdata[vn].EID_VertexI = svic->intensity_array[vn] + (mag<<24);
-				
 			}
 		
 			mainshapelist[osnp->sh_num]->shapeflags |= ShapeFlag_PreLit;
-		
 		}
-		
 	}
 	/*-----------------------------**
 	** Load shapes with no objects **
@@ -1477,8 +1473,8 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 		//	ChunkShape cs = tmpshp->shape_data;
 			copy_to_mainshapelist(h,tmpshp,flags);
 		}
-		
 	}
+
 	local_scale=temp_scale;
 	
 	if(!(flags & CCF_DONT_INITIALISE_TEXTURES))
@@ -2183,9 +2179,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 							aimodule_indeces[obj]=ai_mod_pos;
 							break;
 						}
-
 					}
-					
 				}
 				aim->m_module_ptrs[pos++]=0;
 			}
@@ -2243,13 +2237,13 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 				VECTORCH world_min=(oc->object_data.location+sc->shape_data.min)*local_scale;
 				VECTORCH world_max=(oc->object_data.location+sc->shape_data.max)*local_scale;
 
-				mod->m_maxx=world_max.vx-mod->m_world.vx;
-				mod->m_maxy=world_max.vy-mod->m_world.vy;
-				mod->m_maxz=world_max.vz-mod->m_world.vz;
+				mod->m_maxx=world_max.vx - mod->m_world.vx;
+				mod->m_maxy=world_max.vy - mod->m_world.vy;
+				mod->m_maxz=world_max.vz - mod->m_world.vz;
 
-				mod->m_minx=world_min.vx-mod->m_world.vx;
-				mod->m_miny=world_min.vy-mod->m_world.vy;
-				mod->m_minz=world_min.vz-mod->m_world.vz;
+				mod->m_minx=world_min.vx - mod->m_world.vx;
+				mod->m_miny=world_min.vy - mod->m_world.vy;
+				mod->m_minz=world_min.vz - mod->m_world.vz;
 			}
 			
 			Chunk * pChunk = o_chunk_array[i]->lookup_single_child ("MODULEDT");
@@ -2303,7 +2297,6 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 							MainScene.sm_module[i].m_sound_reverb=mod_ac->reverb;
 					}
 				}
-
 			}
 
 			//Deal with module linking
@@ -2361,7 +2354,6 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 					}
 
 					vmac_no ++;
-
 				}
 				MainScene.sm_module[i].m_vmptr[vmod_no].vmod_type = vmtype_term;
 				*((int *)MainScene.sm_module[i].m_vmptr[vmod_no].vmod_name) = vmac_no;
@@ -2715,7 +2707,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 			if ( ! tmpshp->list_assoc_objs().size() )
 			{
 		  //		ChunkShape cs = tmpshp->shape_data;
-				copy_to_mainshapelist(h,tmpshp,flags);
+				copy_to_mainshapelist(h, tmpshp, flags);
 			}
 			
 		}

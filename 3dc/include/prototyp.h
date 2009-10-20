@@ -51,10 +51,6 @@ typedef struct vectorch {
 	int vy;
 	int vz;
 
-/*	float vx;
-	float vy;
-	float vz;
-*/
 } VECTORCH;
 
 typedef struct quat {

@@ -753,7 +753,7 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk * tmpshp, int fla
 	setup_tex_conv_array (local_max_index, local_tex_index_nos, h, tmpshp);
 	
 	
-	Shape_Preprocessed_Data_Chunk* spdc=(Shape_Preprocessed_Data_Chunk*)tmpshp->lookup_single_child("SHPPRPRO");
+	Shape_Preprocessed_Data_Chunk* spdc = (Shape_Preprocessed_Data_Chunk*)tmpshp->lookup_single_child("SHPPRPRO");
 	if(spdc)
 	{
 		copy_preprocessed_to_shapeheader (
@@ -2334,7 +2334,6 @@ BOOL copy_to_shapeheader (
 			tptr[i*3+1]-=object_int.vy;
 			tptr[i*3+2]-=object_int.vz;
 		}
-
 	}
 	else
 	{
@@ -2402,8 +2401,6 @@ BOOL copy_to_shapeheader (
 					(shphd->sh_textures[UVIndex])[(j*2)] = ProcessUVCoord(h,UVC_POLY_U,(int)cshp_ptr->uv_list[UVIndex].vert[j].u,uv_imnums[UVIndex]);
 					(shphd->sh_textures[UVIndex])[(j*2)+1] = ProcessUVCoord(h,UVC_POLY_V,(int)cshp_ptr->uv_list[UVIndex].vert[j].v,uv_imnums[UVIndex]);
 				}
-				
-				
 			}
 			else
 			{
@@ -2426,25 +2423,13 @@ BOOL copy_to_shapeheader (
 
 	if (cshp_ptr->num_texfiles)
 	{
-		for (i=0; i<cshp_ptr->num_texfiles; i++) {
-			#if john
-			shphd->sh_localtextures[i] = 
-				(char *) PoolAllocateMem (sizeof(char) * (strlen(cshp_ptr->texture_fns[i]) + strlen(TexturesRoot) + 1) );
-			sprintf (shphd->sh_localtextures[i],"%s%s",TexturesRoot, cshp_ptr->texture_fns[i]);
-			char * dotpos;
-			dotpos = strrchr (shphd->sh_localtextures[i], '.');
-			sprintf (dotpos,".pg0");
-			#else
-			shphd->sh_localtextures[i] = 
-				(char *) PoolAllocateMem (sizeof(char) * (strlen(cshp_ptr->texture_fns[i]) + 1) );
+		for (i=0; i<cshp_ptr->num_texfiles; i++) 
+		{
+			shphd->sh_localtextures[i] = (char *) PoolAllocateMem (sizeof(char) * (strlen(cshp_ptr->texture_fns[i]) + 1) );
 			strcpy (shphd->sh_localtextures[i], cshp_ptr->texture_fns[i]);
-			#endif
 		}
 		shphd->sh_localtextures[i] = 0;
 	}
-
-
-
 
 	SHAPEINSTR * instruct = (SHAPEINSTR *)PoolAllocateMem(sizeof(SHAPEINSTR)*6);
 	
@@ -2495,9 +2480,8 @@ BOOL copy_to_shapeheader (
 	}
 
 	return TRUE;
-	
-	
 }
+
 BOOL copy_preprocessed_to_shapeheader (
 	RIFFHANDLE h, 
 	Shape_Preprocessed_Data_Chunk* spdc, 
@@ -2519,12 +2503,10 @@ BOOL copy_preprocessed_to_shapeheader (
 			int texno = shphd->items[i][3] & 0x7fff;
 			if (texno <= local_max_index &&
 				local_tex_index_nos[texno] != -1)
-				
+
 			{
 				shphd->items[i][3] &= 0xffff0000;
 				shphd->items[i][3] += local_tex_index_nos[texno];
-
-				
 			}
 			else
 			{
@@ -2535,10 +2517,7 @@ BOOL copy_preprocessed_to_shapeheader (
 		}
 	}
 
-
 	return TRUE;
-	
-	
 }
 
 BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Header_Chunk* shc, int listpos)

@@ -71,6 +71,15 @@ const static char keyArray[numTotalKeys] =
 
 int buttonsPerRow[5] = {11, 11, 11, 8, 4};
 
+
+template <class T> void Osk_AddKey(T name, int width)
+{
+	BUTTONS newButton = {0};
+	newButton.width = width;
+	newButton.name = name;
+	keyVector.push_back(newButton);
+}
+
 void Osk_Init()
 {
 	currentRow = 0;
@@ -81,84 +90,41 @@ void Osk_Init()
 	// do top row of numbers
 	for (int i = 9; i >= 0; i--)
 	{
-		newButton.height = 30;
-		newButton.width = 30;
-		newButton.name = IntToString(i);
-		keyVector.push_back(newButton);
+		Osk_AddKey(IntToString(i), 30);
 	}
 
-	newButton.height = 30;
-	newButton.width = (outline_square_width * 2) + (space_between_keys);
-	newButton.name = "Shift";
-	keyVector.push_back(newButton);
+	Osk_AddKey("Shift", (outline_square_width * 2) + (space_between_keys));
 
 	// second row..
 	for (char letter = 'a'; letter <= 'j'; letter++)
 	{
-		newButton.height = 30;
-		newButton.width = 30;
-		newButton.name = letter;
-		keyVector.push_back(newButton);
+		Osk_AddKey(letter, 30);
 	}
 
-	newButton.height = 30;
-	newButton.width = (outline_square_width * 2) + (space_between_keys);
-	newButton.name = "Symbols";
-	keyVector.push_back(newButton);
+	Osk_AddKey("Symbols", (outline_square_width * 2) + (space_between_keys));
 
 	// third row..
 	for (char letter = 'k'; letter <= 't'; letter++)
 	{
-		newButton.height = 30;
-		newButton.width = 30;
-		newButton.name = letter;
-		keyVector.push_back(newButton);
+		Osk_AddKey(letter, 30);
 	}
 
-	newButton.height = 30;
-	newButton.width = (outline_square_width * 2) + (space_between_keys);
-	newButton.name = "Dunno";
-	keyVector.push_back(newButton);
+	Osk_AddKey("Dunno", (outline_square_width * 2) + (space_between_keys));
 
 	// fourth row..
 	for (char letter = 'u'; letter <= 'z'; letter++)
 	{
-		newButton.height = 30;
-		newButton.width = 30;
-		newButton.name = letter;
-		keyVector.push_back(newButton);
+		Osk_AddKey(letter, 30);
 	}
 
-	newButton.height = 30;
-	newButton.width = (outline_square_width * 4) + (space_between_keys * 3);
-	newButton.name = "Backspace";
-	keyVector.push_back(newButton);
-
-	newButton.height = 30;
-	newButton.width = (outline_square_width * 2) + (space_between_keys * 1);
-	newButton.name = "Done";
-	keyVector.push_back(newButton);
+	Osk_AddKey("Backspace", (outline_square_width * 4) + (space_between_keys * 3));
+	Osk_AddKey("Done", (outline_square_width * 2) + (space_between_keys * 1));
 
 	// fifth row
-	newButton.height = 30;
-	newButton.width = (outline_square_width * 6) + (space_between_keys * 5);
-	newButton.name = "Space";
-	keyVector.push_back(newButton);
-
-	newButton.height = 30;
-	newButton.width = (outline_square_width * 2) + (space_between_keys * 1);
-	newButton.name = "<";
-	keyVector.push_back(newButton);
-
-	newButton.height = 30;
-	newButton.width = (outline_square_width * 2) + (space_between_keys * 1);
-	newButton.name = ">";
-	keyVector.push_back(newButton);
-
-	newButton.height = 30;
-	newButton.width = (outline_square_width * 2) + (space_between_keys * 1);
-	newButton.name = "Blank";
-	keyVector.push_back(newButton);
+	Osk_AddKey("Space", (outline_square_width * 6) + (space_between_keys * 5));
+	Osk_AddKey("<", (outline_square_width * 2) + (space_between_keys * 1));
+	Osk_AddKey(">", (outline_square_width * 2) + (space_between_keys * 1));
+	Osk_AddKey("Blank", (outline_square_width * 2) + (space_between_keys * 1));
 
 	sprintf(buf, "number of keys added to osk: %d\n", keyVector.size());
 	OutputDebugString(buf);
@@ -208,7 +174,7 @@ void Osk_Draw()
 			else
 				DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector[index].width - outline_border_size * 2, keyVector[index].height - outline_border_size * 2, D3DCOLOR_ARGB(220, 128, 128, 128));
 
-//			RenderSmallMenuText((char*)keyVector[index].name.c_str(), pos_x + (keyVector[index].width - outline_border_size * 2 / 2), pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
+			RenderSmallMenuText((char*)keyVector[index].name.c_str(), pos_x + (keyVector[index].width - outline_border_size * 2 / 2), pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
 
 			pos_x += (keyVector[index].width + space_between_keys);
 			index++;
@@ -347,7 +313,7 @@ void Osk_MoveUp()
 
 	while (widthCount > 0)
 	{
-		currentValue -= keyVector[currentValue].width / 30; // increment in blocks, where some keys are multiple blocks wide
+		currentValue--;// -= keyVector[currentValue].width / 30; // increment in blocks, where some keys are multiple blocks wide
 		widthCount -= keyVector[currentValue].width / 30;
 	}
 
@@ -359,10 +325,8 @@ void Osk_MoveUp()
 	OutputDebugString(buf);
 }
 
-void Osk_MoveDown()
+void Osk_MoveDown() 
 {
-//	previousColumn = currentValue % numHorizontalKeys;
-
 	int widthCount = numHorizontalKeys;
 
 	currentRow += 1;
@@ -374,7 +338,7 @@ void Osk_MoveDown()
 
 	while (widthCount > 0)
 	{
-		currentValue += keyVector[currentValue].width / 30; // increment in blocks, where some keys are multiple blocks wide
+		currentValue++;// += keyVector[currentValue].width / 30; // increment in blocks, where some keys are multiple blocks wide
 		widthCount -= keyVector[currentValue].width / 30;
 	}
 

@@ -767,6 +767,7 @@ const char FileNameExtension[5] =  {".rif"};
  
 void LoadRifFile()
 {
+
 	char file_and_path[100];
 	int i = 0;
 	
