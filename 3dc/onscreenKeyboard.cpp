@@ -26,14 +26,16 @@ static int currentColumn = 0;
 
 static int currentValue = 0;
 static int previousValue = 0;
+static int columnOffset = 0;
 
 static int osk_x = 320;
 static int osk_y = 320;
 static int oskWidth = 400;
 static int oskHeight = 200;
 
-static const int outline_square_width = 30; // rename
-static const int outline_square_height = 30;
+static const int keyWidth = 30;
+static const int keyHeight = 30;
+
 static const int space_between_keys = 3;
 static const int outline_border_size = 1;
 static const int indent_space = 5;
@@ -42,6 +44,7 @@ struct BUTTONS
 {
 	int height;
 	int width;
+	int positionOffset;
 	std::string name;
 };
 
@@ -49,7 +52,6 @@ std::vector<BUTTONS> keyVector;
 
 const int numVerticalKeys = 5;
 const int numHorizontalKeys = 11;
-const int numTotalKeys = 0;
 
 static char buf[100];
 
@@ -75,8 +77,12 @@ int buttonsPerRow[5] = {11, 11, 11, 8, 4};
 template <class T> void Osk_AddKey(T name, int width)
 {
 	BUTTONS newButton = {0};
-	newButton.width = width;
-	newButton.name = name;
+
+	newButton.width		= width;
+	newButton.height	= keyHeight;
+	newButton.name		= name;
+	newButton.positionOffset = 0;
+
 	keyVector.push_back(newButton);
 }
 
@@ -85,54 +91,52 @@ void Osk_Init()
 	currentRow = 0;
 	currentColumn = 0;
 
-	BUTTONS newButton = {0};
-
 	// do top row of numbers
 	for (int i = 9; i >= 0; i--)
 	{
-		Osk_AddKey(IntToString(i), 30);
+		Osk_AddKey(IntToString(i), keyWidth);
 	}
 
-	Osk_AddKey("Shift", (outline_square_width * 2) + (space_between_keys));
+	Osk_AddKey("Shift", (keyWidth * 2) + (space_between_keys));
 
 	// second row..
 	for (char letter = 'a'; letter <= 'j'; letter++)
 	{
-		Osk_AddKey(letter, 30);
+		Osk_AddKey(letter, keyWidth);
 	}
 
-	Osk_AddKey("Symbols", (outline_square_width * 2) + (space_between_keys));
+	Osk_AddKey("Symbols", (keyWidth * 2) + (space_between_keys));
 
 	// third row..
 	for (char letter = 'k'; letter <= 't'; letter++)
 	{
-		Osk_AddKey(letter, 30);
+		Osk_AddKey(letter, keyWidth);
 	}
 
-	Osk_AddKey("Dunno", (outline_square_width * 2) + (space_between_keys));
+	Osk_AddKey("Dunno", (keyWidth * 2) + (space_between_keys));
 
 	// fourth row..
 	for (char letter = 'u'; letter <= 'z'; letter++)
 	{
-		Osk_AddKey(letter, 30);
+		Osk_AddKey(letter, keyWidth);
 	}
 
-	Osk_AddKey("Backspace", (outline_square_width * 4) + (space_between_keys * 3));
-	Osk_AddKey("Done", (outline_square_width * 2) + (space_between_keys * 1));
+	Osk_AddKey("Backspace", (keyWidth * 4) + (space_between_keys * 3));
+	Osk_AddKey("Done",		(keyWidth * 2) + (space_between_keys * 1));
 
 	// fifth row
-	Osk_AddKey("Space", (outline_square_width * 6) + (space_between_keys * 5));
-	Osk_AddKey("<", (outline_square_width * 2) + (space_between_keys * 1));
-	Osk_AddKey(">", (outline_square_width * 2) + (space_between_keys * 1));
-	Osk_AddKey("Blank", (outline_square_width * 2) + (space_between_keys * 1));
+	Osk_AddKey("Space", (keyWidth * 6) + (space_between_keys * 5));
+	Osk_AddKey("<",		(keyWidth * 2) + (space_between_keys * 1));
+	Osk_AddKey(">",		(keyWidth * 2) + (space_between_keys * 1));
+	Osk_AddKey("Blank", (keyWidth * 2) + (space_between_keys * 1));
 
 	sprintf(buf, "number of keys added to osk: %d\n", keyVector.size());
 	OutputDebugString(buf);
 
 	currentValue = 0;
 
-	oskWidth = (outline_square_width * numHorizontalKeys) + (space_between_keys * numHorizontalKeys) + (indent_space * 2);
-	oskHeight = (outline_square_height * numVerticalKeys) + (space_between_keys * numVerticalKeys) + (indent_space * 2);
+	oskWidth = (keyWidth * numHorizontalKeys) + (space_between_keys * numHorizontalKeys) + (indent_space * 2);
+	oskHeight = (keyHeight * numVerticalKeys) + (space_between_keys * numVerticalKeys) + (indent_space * 2);
 }
 
 void Osk_Draw()
@@ -144,7 +148,7 @@ void Osk_Draw()
 
 	osk_x = (640 - oskWidth) / 2;
 
-//	sprintf(buf, "currentRow: %d, currentColumn: %d, currentItem: %d\n", currentRow, currentColumn, Osk_GetCurrentLocation());
+//	sprintf(buf, "currentRow: %d, currentColumn: %d, currentItem: %d curentChar: %s\n", currentRow, currentColumn, Osk_GetCurrentLocation(), keyVector.at(Osk_GetCurrentLocation()).name.c_str());
 //	OutputDebugString(buf);
 
 	// draw background rectangle
@@ -154,8 +158,8 @@ void Osk_Draw()
 	int pos_x = osk_x + indent_space;
 	int pos_y = osk_y + indent_space;
 
-	int innerSquareWidth = outline_square_width - outline_border_size * 2;
-	int innerSquareHeight = outline_square_height - outline_border_size * 2;
+	int innerSquareWidth = keyWidth - outline_border_size * 2;
+	int innerSquareHeight = keyHeight - outline_border_size * 2;
 
 	int index = 0;
 
@@ -166,62 +170,22 @@ void Osk_Draw()
 
 		for (int x = 0; x < buttonsPerRow[y]; x++)
 		{
-			DrawQuad(pos_x, pos_y, keyVector[index].width, keyVector[index].height, D3DCOLOR_ARGB(200, 255, 255, 255));
+			DrawQuad(pos_x, pos_y, keyVector.at(index).width, keyVector.at(index).height, D3DCOLOR_ARGB(200, 255, 255, 255));
 
 			// draw the inner background for key, highlighting if its the currently selected key
 			if (Osk_GetCurrentLocation() == index) // draw the selected item differently (highlight it)
-				DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector[index].width - outline_border_size * 2, keyVector[index].height - outline_border_size * 2, D3DCOLOR_ARGB(220, 255, 255, 0));
+				DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, D3DCOLOR_ARGB(220, 255, 255, 0));
 			else
-				DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector[index].width - outline_border_size * 2, keyVector[index].height - outline_border_size * 2, D3DCOLOR_ARGB(220, 128, 128, 128));
+				DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, D3DCOLOR_ARGB(220, 128, 128, 128));
 
-			RenderSmallMenuText((char*)keyVector[index].name.c_str(), pos_x + (keyVector[index].width - outline_border_size * 2 / 2), pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
+			RenderSmallMenuText((char*)keyVector.at(index).name.c_str(), pos_x + (keyVector.at(index).width - outline_border_size * 2 / 2), pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
 
-			pos_x += (keyVector[index].width + space_between_keys);
+			pos_x += (keyVector.at(index).width + space_between_keys);
 			index++;
 		}
 
-		pos_y += (outline_square_height + space_between_keys);
+		pos_y += (keyHeight + space_between_keys);
 	}
-#if 0
-	// draw each key
-	for (int y = 0; y < keysPerRow; y++)
-	{
-		// reset x position each time we move to a new row
-		pos_x = osk_x + indent_space;
-
-		for (int x = 0; x < keysPerColumn; x++)
-		{
-			if (totalDrawn >= numTotalKeys) 
-				return; // just break out of the function if we've drawn all the keys
-
-			// draw background square first (for key outline)
-			DrawQuad(pos_x, pos_y, outline_square_width, outline_square_height, D3DCOLOR_ARGB(200, 255, 255, 255));
-
-			// draw the inner background for key, highlighting if its the currently selected key
-			if (Osk_GetCurrentLocation() == totalDrawn) // draw the selected item differently (highlight it)
-				DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, innerSquareWidth, innerSquareHeight, D3DCOLOR_ARGB(220, 255, 255, 0));
-			else
-				DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, innerSquareWidth, innerSquareHeight, D3DCOLOR_ARGB(220, 128, 128, 128));
-
-			// draw key letter
-			RenderSmallChar(Osk_GetSpecifiedKeyChar(totalDrawn), pos_x + (26 / 2), pos_y + space_between_keys, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
-
-			pos_x += (outline_square_width + space_between_keys);
-			totalDrawn++;
-		}
-
-		pos_y += (outline_square_height + space_between_keys);
-	}
-
-	pos_x = osk_x + indent_space;
-
-	// draw extra button row
-	DrawQuad(pos_x, pos_y, outline_square_width * 5, outline_square_height, D3DCOLOR_ARGB(200, 255, 255, 255));
-
-	pos_x = osk_x + indent_space + outline_square_width * 5;
-
-	DrawQuad(pos_x, pos_y, outline_square_width * 5, outline_square_height, D3DCOLOR_ARGB(200, 255, 255, 255));
-#endif
 }
 
 bool Osk_IsActive()
@@ -271,32 +235,35 @@ void Osk_MoveLeft()
 	{
 		currentValue += buttonsPerRow[currentRow] - 1;
 	}
-	else currentValue--;
+	else 
+		currentValue--;
 
-	sprintf(buf, "currentValue %d\n", currentValue);
-	OutputDebugString(buf);
+	keyVector.at(currentValue).positionOffset = 0;
+
+//	sprintf(buf, "currentValue %d\n", currentValue);
+//	OutputDebugString(buf);
 }
 
 void Osk_MoveRight()
 {
-	int currentColOffset = currentValue % /*keysPerColumn*/buttonsPerRow[currentRow];
+	int currentColOffset = currentValue % buttonsPerRow[currentRow];
 
 	currentColumn += 1;
 
 	if (currentColumn >= numHorizontalKeys)
 		currentColumn = 0;
 
-//	sprintf(buf, "currentColOffset %d currentPosition %d\n", currentColOffset, currentValue);
-//	OutputDebugString(buf);
-
 	if (currentColOffset == buttonsPerRow[currentRow] - 1)
 	{
 		currentValue -= buttonsPerRow[currentRow] - 1;
 	}
-	else currentValue++;
+	else
+		currentValue++;
 
-	sprintf(buf, "currentValue %d\n", currentValue);
-	OutputDebugString(buf);
+	keyVector.at(currentValue).positionOffset = 0;
+
+//	sprintf(buf, "currentValue %d\n", currentValue);
+//	OutputDebugString(buf);
 }
 
 void Osk_MoveUp()
@@ -304,47 +271,114 @@ void Osk_MoveUp()
 	// keep a record of which column we've moved from so we can move back from a big button
 //	previousColumn = currentValue % numHorizontalKeys;
 
+	int addme = 0;
 	int widthCount = numHorizontalKeys;
+	int startValue = currentValue;
+
+	// are we moving upwards from a big button?
+	if (keyVector.at(currentValue).positionOffset)
+	{
+		addme = keyVector.at(currentValue).positionOffset;
+	}
 
 	currentRow -= 1;
 
 	if (currentRow < 0)
 		currentRow = 0;
 
-	while (widthCount > 0)
+	while (widthCount >= 0)
 	{
-		currentValue--;// -= keyVector[currentValue].width / 30; // increment in blocks, where some keys are multiple blocks wide
-		widthCount -= keyVector[currentValue].width / 30;
+		currentValue--;
+
+		if (currentValue < 0)
+			currentValue = keyVector.size() + currentValue;
+
+		widthCount -= keyVector.at(currentValue).width / keyWidth;
 	}
 
-//	currentValue -= numHorizontalKeys;
-	if (currentValue < 0)
-		currentValue = keyVector.size() + currentValue;
+	// did we land on a big button? remember which column from above that we came from
+//	if (keyVector.at(currentValue).width > 30)
+	{
+		// how far into button are we?
+		keyVector.at(currentValue).positionOffset = numHorizontalKeys - (startValue - currentValue);
+		sprintf(buf, "offset into big button is: %d\n", keyVector.at(currentValue).positionOffset);
+		OutputDebugString(buf);
+	}
 
-	sprintf(buf, "currentValue %d\n", currentValue);
-	OutputDebugString(buf);
+	if (keyVector.at(currentValue).width == keyWidth)
+	{
+		// we landed on a small button
+		currentValue += addme;
+		keyVector.at(currentValue).positionOffset = 0;
+	}
+//	sprintf(buf, "currentValue %d\n", currentValue);
+//	OutputDebugString(buf);
 }
 
 void Osk_MoveDown() 
 {
-	int widthCount = numHorizontalKeys;
+	int startValue = currentValue;
 
+	// what column are we currently on?
+	int thisColumn = currentValue % numHorizontalKeys;
+
+	sprintf(buf, "pre move, we're on column: %d\n", thisColumn);
+	OutputDebugString(buf);
+
+	sprintf(buf, "pre move, we're on key value: %d\n", currentValue);
+	OutputDebugString(buf);
+
+	// drop down a row
 	currentRow += 1;
-
-	if (currentRow >= numHorizontalKeys - 1)
+	if (currentRow > numHorizontalKeys - 1)
 		currentRow = numHorizontalKeys - 1;
 
-	previousValue = currentValue;
+	int widthCount = numHorizontalKeys;
 
-	while (widthCount > 0)
+	while (widthCount >= 0)
 	{
-		currentValue++;// += keyVector[currentValue].width / 30; // increment in blocks, where some keys are multiple blocks wide
-		widthCount -= keyVector[currentValue].width / 30;
+		currentValue++;
+
+		if (currentValue >= keyVector.size())
+			currentValue = currentValue - keyVector.size();
+
+		widthCount -= keyVector.at(currentValue).width / keyWidth;
 	}
 
-	if (currentValue >= keyVector.size())
-		currentValue = currentValue - keyVector.size();
+//	int tempCurrent = currentValue;
 
-	sprintf(buf, "currentValue %d\n", currentValue);
+//	currentValue += columnOffset;
+
+	// did we land on a big button? remember which column from above that we came from
+/*
+	if (keyVector.at(tempCurrent).width > keyWidth)
+	{
+		// how far into button are we?
+		columnOffset = numHorizontalKeys - (tempCurrent - startValue);
+
+//		keyVector.at(currentValue).positionOffset = numHorizontalKeys - (currentValue - startValue);
+//		sprintf(buf, "offset into big button is: %d\n", keyVector.at(currentValue).positionOffset);
+//		OutputDebugString(buf);
+	}
+	else columnOffset = 0;
+*/
+/*
+	if (keyVector.at(currentValue).width == 30)
+	{
+		// we landed on a small button
+		currentValue += addme;
+		keyVector.at(currentValue).positionOffset = 0;
+	}
+*/
+//	sprintf(buf, "currentValue %d\n", currentValue);
+//	OutputDebugString(buf);
+
+	// what column are we currently on?
+	thisColumn = currentValue % numHorizontalKeys;
+
+	sprintf(buf, "post move, we're on column: %d\n", thisColumn);
+	OutputDebugString(buf);
+
+	sprintf(buf, "post move, we're on key value: %d\n", currentValue);
 	OutputDebugString(buf);
 }
