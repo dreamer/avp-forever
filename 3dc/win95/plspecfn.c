@@ -606,15 +606,15 @@ void MakeNormal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, VECTORCH *v4)
 
 	/* vect0 = v2 - v1 */
 
-	vect0.vx = v2->vx - v1->vx;
-	vect0.vy = v2->vy - v1->vy;
-	vect0.vz = v2->vz - v1->vz;
+	vect0.vx = (float)(v2->vx - v1->vx);
+	vect0.vy = (float)(v2->vy - v1->vy);
+	vect0.vz = (float)(v2->vz - v1->vz);
 
 	/* vect1 = v3 - v1 */
 
-	vect1.vx = v3->vx - v1->vx;
-	vect1.vy = v3->vy - v1->vy;
-	vect1.vz = v3->vz - v1->vz;
+	vect1.vx = (float)(v3->vx - v1->vx);
+	vect1.vy = (float)(v3->vy - v1->vy);
+	vect1.vz = (float)(v3->vz - v1->vz);
 
 
 	/* nx = v0y.v1z - v0z.v1y */
@@ -813,9 +813,9 @@ void Normalise(VECTORCH *nvector)
 	float m;
 
 
-	n.vx = nvector->vx;
-	n.vy = nvector->vy;
-	n.vz = nvector->vz;
+	n.vx = (float)(nvector->vx);
+	n.vy = (float)(nvector->vy);
+	n.vz = (float)(nvector->vz);
 
 	m = 65536.0/sqrt((n.vx * n.vx) + (n.vy * n.vy) + (n.vz * n.vz));
 
@@ -907,8 +907,8 @@ void Normalise2d(VECTOR2D *nvector)
 	float m;
 
 
-	n.vx = nvector->vx;
-	n.vy = nvector->vy;
+	n.vx = (float)(nvector->vx);
+	n.vy = (float)(nvector->vy);
 
 	m = sqrt((n.vx * n.vx) + (n.vy * n.vy));
 
@@ -1030,9 +1030,9 @@ int Magnitude(VECTORCH *v)
 	int m;
 
 
-	n.vx = v->vx;
-	n.vy = v->vy;
-	n.vz = v->vz;
+	n.vx = (float)(v->vx);
+	n.vy = (float)(v->vy);
+	n.vz = (float)(v->vz);
 
 	f2i(m, sqrt((n.vx * n.vx) + (n.vy * n.vy) + (n.vz * n.vz)));
 

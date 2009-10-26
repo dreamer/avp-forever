@@ -28,6 +28,10 @@
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 extern int NormalFrameTime;
 
+#if defined(_MSC_VER)
+#define stricmp		_stricmp
+#endif
+
 void CreateRubberDuckBot(void)
 {
 	CreateRubberDuck(&(Global_VDB_Ptr->VDB_World));

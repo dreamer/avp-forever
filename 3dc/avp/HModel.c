@@ -94,16 +94,16 @@ MATRIXCH Identity_RotMat = {
 
 void QNormalise(QUAT *q)
 {
-	float nw = q->quatw;
-	float nx = q->quatx;
-	float ny = q->quaty;
-	float nz = q->quatz;
+	float nw = (float)q->quatw;
+	float nx = (float)q->quatx;
+	float ny = (float)q->quaty;
+	float nz = (float)q->quatz;
 	
-	float m = sqrt(nw*nw+nx*nx+ny*ny+nz*nz);
+	float m = (float)sqrt(nw*nw+nx*nx+ny*ny+nz*nz);
 	
 	if (!m) return;
 		
-	m = 65536.0/m;
+	m = 65536.0f/m;
 
 	f2i(q->quatw,nw * m);
 	f2i(q->quatx,nx * m);
@@ -1189,11 +1189,11 @@ SHAPEHEADER *Get_Degraded_Shape(SHAPEHEADER *base_shape)
 	MakeVector(worldposition, &Global_VDB_Ptr->VDB_World, &viewposition);
 	RotateVector(&viewposition, &Global_VDB_Ptr->VDB_Mat);
 
-
 	array_ptr=base_shape->shape_degradation_array;
 
 	{
-		lodScale = (float)GlobalLevelOfDetail_Hierarchical*CameraZoomScale;
+		//lodScale = (float)GlobalLevelOfDetail_Hierarchical*CameraZoomScale;
+		lodScale = GlobalLevelOfDetail_Hierarchical * (int)(CameraZoomScale);
 
 	}
 	/* Now walk array. */

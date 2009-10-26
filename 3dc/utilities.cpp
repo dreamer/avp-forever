@@ -93,7 +93,6 @@ char *GetSaveFolderPath()
 
 FILE *avp_fopen(const char *fileName, const char *mode)
 {
-	int blah;
 	FILE *theFile = 0;
 	std::string finalPath;
 #ifdef _XBOX
@@ -102,10 +101,6 @@ FILE *avp_fopen(const char *fileName, const char *mode)
 //	return fopen(finalPath.c_str(), mode);
 	theFile = fopen(finalPath.c_str(), mode);
 
-	if (!theFile)
-	{
-		blah = 0;
-	}
 	return theFile;
 #endif
 #ifdef WIN32

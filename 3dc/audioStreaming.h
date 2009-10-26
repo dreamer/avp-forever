@@ -58,15 +58,15 @@ struct StreamingAudioBuffer
 
 #endif
 
-int GetWritableAudioStreamBufferSize(StreamingAudioBuffer *streamStruct);
-int GetNumFreeAudioStreamBuffers(StreamingAudioBuffer *streamStruct);
-int CreateAudioStreamBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate);
-int WriteAudioStreamData(StreamingAudioBuffer *streamStruct, char *audioData, int size);
-int SetAudioStreamBufferVolume(StreamingAudioBuffer *streamStruct, int volume);
-int ReleaseAudioStreamBuffer(StreamingAudioBuffer *streamStruct);
-int StopAudioStreamBuffer(StreamingAudioBuffer *streamStruct);
-int PlayAudioStreamBuffer(StreamingAudioBuffer *streamStruct);
-UINT64 GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct);
+int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct);
+int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct);
+int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate);
+int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, int size);
+int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, int volume);
+int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct);
+int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct);
+int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct);
+UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct);
 
 };
 

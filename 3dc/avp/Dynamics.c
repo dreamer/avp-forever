@@ -3278,7 +3278,7 @@ static void TestObjectWithStaticBoundingBox(DISPLAYBLOCK *objectPtr)
 
 static int IsPolygonWithinDynamicBoundingBox(const struct ColPolyTag *polyPtr)
 {
-	VECTORCH *vertices = polyPtr->PolyPoint;
+	const VECTORCH *vertices = polyPtr->PolyPoint;
 
 	if (polyPtr->NumberOfVertices==4)
 	{
@@ -3317,7 +3317,6 @@ static int IsPolygonWithinDynamicBoundingBox(const struct ColPolyTag *polyPtr)
 	    		if (vertices[2].vy > DBBMaxY) 
 	    			if (vertices[3].vy > DBBMaxY) 
         			  	return 0;
-
     }
     else
 	{
@@ -3350,16 +3349,14 @@ static int IsPolygonWithinDynamicBoundingBox(const struct ColPolyTag *polyPtr)
 	    	if (vertices[1].vy > DBBMaxY) 
 	    		if (vertices[2].vy > DBBMaxY) 
           			return 0;
-
     }
-    
-    
+
     return 1;
 } 
 
 static int IsPolygonWithinStaticBoundingBox(const struct ColPolyTag *polyPtr)
 {
-	VECTORCH *vertices = polyPtr->PolyPoint;
+	const VECTORCH *vertices = polyPtr->PolyPoint;
 
 	if (polyPtr->NumberOfVertices==4)
 	{
@@ -3398,7 +3395,6 @@ static int IsPolygonWithinStaticBoundingBox(const struct ColPolyTag *polyPtr)
 	    		if (vertices[2].vy > SBBMaxY) 
 	    			if (vertices[3].vy > SBBMaxY) 
         			  	return 0;
-
     }
     else
 	{
@@ -3431,10 +3427,8 @@ static int IsPolygonWithinStaticBoundingBox(const struct ColPolyTag *polyPtr)
 	    	if (vertices[1].vy > SBBMaxY) 
 	    		if (vertices[2].vy > SBBMaxY) 
           			return 0;
-
     }
-    
-    
+
     return 1;
 } 
 

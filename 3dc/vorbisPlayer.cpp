@@ -135,7 +135,7 @@ void LoadVorbisTrack(int track)
 	LogString("\t Vorbis frequency: " + IntToString(pInfo->rate));
 
 	/* create the audio buffer (directsound or whatever) */
-	if (CreateAudioStreamBuffer(&vorbisStream, pInfo->channels, pInfo->rate) < 0)
+	if (AudioStream_CreateBuffer(&vorbisStream, pInfo->channels, pInfo->rate) < 0)
 	{
 		LogErrorString("Can't create audio stream buffer for OGG Vorbis!");
 	}
@@ -159,7 +159,7 @@ void LoadVorbisTrack(int track)
 
 	/* fill entire buffer initially */
 #ifdef WIN32
-	WriteAudioStreamData(&vorbisStream, audioData, vorbisStream.bufferSize);
+	AudioStream_WriteData(&vorbisStream, audioData, vorbisStream.bufferSize);
 //	UpdateVorbisAudioBuffer(audioData, totalRead, 0);
 #endif
 	/* start playing */
@@ -178,12 +178,12 @@ void UpdateVorbisBuffer(void *arg)
 //		ProcessStreamingAudio();
 		Sleep( dwQuantum );
 
-		int numBuffersFree = GetNumFreeAudioStreamBuffers(&vorbisStream);
+		int numBuffersFree = AudioStream_GetNumFreeBuffers(&vorbisStream);
 
 		if (numBuffersFree)
 		{
 			ReadVorbisData(audioData, vorbisStream.bufferSize, 0);
-			WriteAudioStreamData(&vorbisStream, audioData, vorbisStream.bufferSize);
+			AudioStream_WriteData(&vorbisStream, audioData, vorbisStream.bufferSize);
 		}
 #else
 		int waitValue = WaitForMultipleObjects(2, hHandles, FALSE, 1);
@@ -210,10 +210,10 @@ void UpdateVorbisBuffer(void *arg)
 
 void PlayVorbis() 
 {
-	if (PlayAudioStreamBuffer(&vorbisStream))
+	if (AudioStream_PlayBuffer(&vorbisStream))
 	{
 		oggIsPlaying = true;
-		SetAudioStreamBufferVolume(&vorbisStream, CDPlayerVolume);
+		AudioStream_SetBufferVolume(&vorbisStream, CDPlayerVolume);
 		hPlaybackThreadFinished = CreateEvent( NULL, FALSE, FALSE, NULL );
 		 _beginthread(UpdateVorbisBuffer, 0, 0);
 	}
@@ -227,7 +227,7 @@ void StopVorbis()
 {
 	if (oggIsPlaying)
 	{
-		StopAudioStreamBuffer(&vorbisStream);
+		AudioStream_StopBuffer(&vorbisStream);
 		oggIsPlaying = false;
 	}
 
@@ -236,7 +236,7 @@ void StopVorbis()
 
 	CloseHandle(hPlaybackThreadFinished);
 
-	ReleaseAudioStreamBuffer(&vorbisStream);
+	AudioStream_ReleaseBuffer(&vorbisStream);
 
 	ov_clear(&oggFile);
 
@@ -292,5 +292,5 @@ bool IsVorbisPlaying()
 
 int SetStreamingMusicVolume(int volume)
 {
-	return SetAudioStreamBufferVolume(&vorbisStream, volume);
+	return AudioStream_SetBufferVolume(&vorbisStream, volume);
 }

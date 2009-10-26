@@ -2056,7 +2056,7 @@ int CheckBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
 	return 1;
 }
 
-int WriteAudioStreamData(StreamingAudioBuffer *streamStruct, char *audioData, int size)
+int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, int size)
 {
 	assert (streamStruct);
 	assert (audioData);
@@ -2086,7 +2086,7 @@ int WriteAudioStreamData(StreamingAudioBuffer *streamStruct, char *audioData, in
 	return 1;
 }
 
-int GetNumFreeAudioStreamBuffers(StreamingAudioBuffer *streamStruct)
+int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);
 
@@ -2103,12 +2103,12 @@ int GetNumFreeAudioStreamBuffers(StreamingAudioBuffer *streamStruct)
 	return numFreeBuffers;
 }
 
-int GetWritableAudioStreamBufferSize(StreamingAudioBuffer *streamStruct)
+int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)
 {
 	return 1;
 }
 
-int SetAudioStreamBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
+int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
 {
 	assert (streamStruct);
 
@@ -2136,7 +2136,7 @@ int SetAudioStreamBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
 	return 1;
 }
 
-int StopAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
+int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);
 
@@ -2148,12 +2148,12 @@ int StopAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
 	return 1;
 }
 
-int PlayAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
+int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct)
 {
 	return 1;
 }
 
-int ReleaseAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
+int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);
 
@@ -2188,7 +2188,7 @@ int ReleaseAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
 	return 1;
 }
 
-int CreateAudioStreamBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate)
+int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate)
 {
 	WAVEFORMATEX waveFormat;
 
@@ -2231,205 +2231,5 @@ int CreateAudioStreamBuffer(StreamingAudioBuffer *streamStruct, int channels, in
 
 	return 1;
 }
-
-#if 0
-bool FindFreePacket(DWORD* pdwPacketIndex)
-{
-	for (DWORD dwPacketIndex = 0; dwPacketIndex < PACKET_COUNT; dwPacketIndex++)
-    {
-        if (XMEDIAPACKET_STATUS_PENDING != PacketStatus[dwPacketIndex])
-        {
-            if (pdwPacketIndex)
-                (*pdwPacketIndex) = dwPacketIndex;
-
-            return true;
-        }
-    }
-
-    return false;
-}
-#endif
-
-#if 0
-void ProcessStreamingAudio()
-{
-	if (!oggIsPlaying) 
-		return;
-
-//	DirectSoundDoWork();
-
-	int		totalRead = 0;
-	DWORD   dwPacketIndex = 0;
-
-	/* do stuff if we have free packets */
-	while ( FindFreePacket( &dwPacketIndex ) )
-    {
-		/* we need to get some data from the source (vorbis/theora) */
-		{
-			totalRead = ReadVorbisData(FILESTRM_PACKET_BYTES, dwPacketIndex * FILESTRM_PACKET_BYTES);
-		}
-
-		assert(totalRead == FILESTRM_PACKET_BYTES);
-
-		/* then send some of that audio to directsound.. */
-		{
-			XMEDIAPACKET packet;
-			ZeroMemory( &packet, sizeof(packet) );
-
-			// offset into source data buffer
-			packet.pvBuffer  = (char*)audioData + (dwPacketIndex * FILESTRM_PACKET_BYTES);
-			packet.dwMaxSize = totalRead;
-			packet.pdwStatus = &PacketStatus[dwPacketIndex];
-
-			LastError = vorbisAudioStream->Process( &packet, NULL );
-			if (FAILED(LastError))
-			{
-				LogDxError(LastError, __LINE__, __FILE__);
-			}
-		}
-	}
-}
-#endif
-
-#if 0
-int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
-{
-	WAVEFORMATEX waveFormat;
-//	DSBUFFERDESC bufferFormat;
-
-	memset(&waveFormat, 0, sizeof(waveFormat));
-	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
-	waveFormat.nChannels		= channels;				//how many channels the OGG contains
-	waveFormat.wBitsPerSample	= 16;					//always 16 in OGG
-	waveFormat.nSamplesPerSec	= rate;	
-	waveFormat.nBlockAlign		= waveFormat.nChannels * waveFormat.wBitsPerSample / 8;	//what block boundaries exist
-	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
-	waveFormat.cbSize			= sizeof(waveFormat);	//how big this structure is
-
-	/* test code for dsound stream system */
-	DSSTREAMDESC streamDesc;
-	ZeroMemory(&streamDesc, sizeof(streamDesc));
-	streamDesc.dwMaxAttachedPackets		= PACKET_COUNT;
-	streamDesc.lpwfxFormat				= &waveFormat;
-
-	LastError = DirectSoundCreateStream(&streamDesc, &vorbisAudioStream);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
-
-	/* Set the stream headroom to 0 */
-	vorbisAudioStream->SetHeadroom(0);
-
-	for( DWORD i = 0; i < PACKET_COUNT; i++ )
-		PacketStatus[i] = XMEDIAPACKET_STATUS_SUCCESS;
-
-	(*bufferSize) = FILESTRM_PACKET_BYTES * PACKET_COUNT;
-
-	return 0;
-}
-#endif
-
-/* return the amount of data written to buffer */
-int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
-{
-	return 0;
-#if 0
-	int bytesWritten = 0;
-
-	/* lock the vorbis buffer */
-	if(FAILED(vorbisBuffer->Lock(offset, dataSize, &audioPtr1, &audioBytes1, &audioPtr2, &audioBytes2, NULL))) 
-	{
-		LogDxErrorString("couldn't lock ogg vorbis buffer for update\n");
-	}
-
-	/* write data to buffer */
-	if(!audioPtr2) // buffer didn't wrap
-	{
-		memcpy(audioPtr1, audioData, audioBytes1);
-		bytesWritten += audioBytes1;
-	}
-	else // need to split memcpy
-	{
-		memcpy(audioPtr1, audioData, audioBytes1);
-		memcpy(audioPtr2, &audioData[audioBytes1], audioBytes2);
-		bytesWritten += audioBytes1+audioBytes2;
-	}
-
-	if(FAILED(vorbisBuffer->Unlock(audioPtr1, audioBytes1, audioPtr2, audioBytes2))) 
-	{
-		LogDxErrorString("couldn't unlock ogg vorbis buffer\n");
-	}
-
-	return bytesWritten;
-#endif
-}
-
-#if 0
-int SetVorbisBufferVolume(int volume)
-{
-	if (vorbisAudioStream == NULL) 
-		return 0;
-
-	signed int attenuation;
-
-	if (volume < VOLUME_MIN) volume = VOLUME_MIN;
-	if (volume > VOLUME_MAX) volume = VOLUME_MAX;
-
-	/* convert from intensity to attenuation */
-	attenuation = vol_to_atten_table[volume];
-
-	if (attenuation > VOLUME_MAXPLAT) attenuation = VOLUME_MAXPLAT;
-	if (attenuation < VOLUME_MINPLAT) attenuation = VOLUME_MINPLAT;
-
-	/* and apply it */
-	LastError = vorbisAudioStream->SetVolume(attenuation);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return 0;
-	}
-
-	return 1;
-}
-#endif
-
-#if 0
-int StopVorbisBuffer()
-{
-	LastError = vorbisAudioStream->Flush();
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return 1;
-	}
-
-	return 0;
-}
-#endif
-
-bool PlayVorbisBuffer()
-{
-	return true;
-/*
-	if(FAILED(vorbisBuffer->Play(0, 0, DSBPLAY_LOOPING)))
-	{
-		OutputDebugString("couldn't play vorbis buffer\n");
-		return false;
-	}
-	return true;
-*/
-}
-
-#if 0
-void ReleaseVorbisBuffer()
-{
-	if (vorbisAudioStream != NULL) 
-	{
-		vorbisAudioStream->Release();
-		vorbisAudioStream = NULL;
-	}
-}
-#endif
 
 } // extern C

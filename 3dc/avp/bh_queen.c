@@ -132,6 +132,10 @@ VECTORCH Queen_Waypoints[] = {
 	{-1,-1,-1}
 };
 
+#if defined(_MSC_VER)
+#define stricmp		_stricmp
+#endif
+
 void QComm_Stop(void) {
 	Queen_Next_Command=QM_Standby;
 	Queen_Next_Waypoint=-1;

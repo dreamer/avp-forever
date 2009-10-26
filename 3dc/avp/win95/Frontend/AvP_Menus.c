@@ -32,6 +32,10 @@
 
 #include "utilities.h"
 
+#if defined(_MSC_VER)
+#define stricmp		_stricmp
+#endif
+
 //extern void StartMenuBackgroundBink(void);
 //extern int PlayMenuBackgroundBink(void);
 //extern void EndMenuBackgroundBink(void);

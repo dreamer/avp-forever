@@ -102,7 +102,9 @@ extern void ColourFillBackBuffer(int FillColour);
 
 static void ModifyHeadOrientation(void);
 
-
+#if defined(_MSC_VER)
+#define stricmp		_stricmp
+#endif
 
 void UpdateRunTimeLights(void)
 {

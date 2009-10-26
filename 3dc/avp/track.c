@@ -816,9 +816,9 @@ static void LnQuat(QUAT *q)
 	float theta;
    	float m,x,y,z;
 		
-   	x = q->quatx;
-   	y = q->quaty;
-   	z = q->quatz;
+   	x = (float)(q->quatx);
+   	y = (float)(q->quaty);
+   	z = (float)(q->quatz);
 
 	if (x==0 && y==0 && z==0)
 	{
@@ -855,9 +855,9 @@ static void ExpPurelyImaginaryQuat(QUAT *q)
 	float x,y,z;
 	int theta;
 
-	x = q->quatx;
-	y = q->quaty;
-   	z = q->quatz;
+	x = (float)(q->quatx);
+	y = (float)(q->quaty);
+   	z = (float)(q->quatz);
 
 	if (x!=0||y!=0||z!=0)
 	{

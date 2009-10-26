@@ -8,10 +8,6 @@
 #include <vector>
 #include <assert.h>
 
-#ifdef _XBOX
-	#define VK_BACK	0x08
-#endif
-
 extern "C" {
 extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha);
 extern unsigned char KeyboardInput[];
@@ -244,7 +240,9 @@ void Osk_Deactivate()
 	is_active = false;
 }
 
+#ifdef _XBOX
 extern void AddKeyToQueue(char virtualKeyCode);
+#endif
 
 char Osk_HandleKeypress()
 {
@@ -254,7 +252,9 @@ char Osk_HandleKeypress()
 
 	if (buttonLabel == "Done")
 	{
-//		AddKeyToQueue(KEY_CR);
+#ifdef _XBOX
+		AddKeyToQueue(KEY_CR);
+#endif
 		return 0;
 	}
 
@@ -265,7 +265,9 @@ char Osk_HandleKeypress()
 
 	else if (buttonLabel == "Backspace")
 	{
-//		AddKeyToQueue(KEY_BACKSPACE);
+#ifdef _XBOX
+		AddKeyToQueue(KEY_BACKSPACE);
+#endif
 		return 0;
 	}
 

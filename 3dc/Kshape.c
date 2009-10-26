@@ -6343,7 +6343,7 @@ void CreateStarArray(void)
 
 		StarArray[i].Position.vy = ONE_FIXED-(SeededFastRandom()&131071);
 		{
-			float y = ((float)StarArray[i].Position.vy)/65536.0;
+			float y = ((float)StarArray[i].Position.vy)/65536.0f;
 			y = sqrt(1-y*y);
 
 			f2i(StarArray[i].Position.vx,(float)GetCos(phi)*y);

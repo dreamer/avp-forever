@@ -2694,7 +2694,7 @@ void UpdateSoundFrequencies(void)
 #endif
 }
 
-int WriteAudioStreamData(StreamingAudioBuffer *streamStruct, char *audioData, int size)
+int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, int size)
 {
 	assert (streamStruct);
 	assert (audioData);
@@ -2714,7 +2714,7 @@ int WriteAudioStreamData(StreamingAudioBuffer *streamStruct, char *audioData, in
 	return amountWritten;
 }
 
-int CreateAudioStreamBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate)
+int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate)
 {
 	WAVEFORMATEX waveFormat;
 	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
@@ -2754,7 +2754,7 @@ int CreateAudioStreamBuffer(StreamingAudioBuffer *streamStruct, int channels, in
 	return 0;
 }
 
-int GetNumFreeAudioStreamBuffers(StreamingAudioBuffer *streamStruct)
+int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
 {
 	XAUDIO2_VOICE_STATE state;
 	streamStruct->pSourceVoice->GetState( &state );
@@ -2762,7 +2762,7 @@ int GetNumFreeAudioStreamBuffers(StreamingAudioBuffer *streamStruct)
 	return streamStruct->bufferCount - (state.BuffersQueued - 1);
 }
 
-UINT64 GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
+UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
 {
 	XAUDIO2_VOICE_STATE state;
 	streamStruct->pSourceVoice->GetState( &state );
@@ -2770,7 +2770,7 @@ UINT64 GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
 	return state.SamplesPlayed;
 }
 
-int GetWritableAudioStreamBufferSize(StreamingAudioBuffer *streamStruct)
+int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)
 {
 	XAUDIO2_VOICE_STATE state;
 
@@ -2779,7 +2779,7 @@ int GetWritableAudioStreamBufferSize(StreamingAudioBuffer *streamStruct)
 	return ((STREAMBUFFERSIZE * STREAMBUFFERCOUNT) - (state.BuffersQueued * STREAMBUFFERSIZE));
 }
 
-int SetAudioStreamBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
+int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
 {
 	if (streamStruct->bufferSize == 0)
 		return 0;
@@ -2792,7 +2792,7 @@ int SetAudioStreamBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
 	else return 1;
 }
 
-int StopAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
+int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);
 
@@ -2803,7 +2803,7 @@ int StopAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
 	return 1;
 }
 
-int PlayAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
+int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);
 
@@ -2812,7 +2812,7 @@ int PlayAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
 	return 1;
 }
 
-int ReleaseAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
+int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);
 
@@ -2834,34 +2834,6 @@ int ReleaseAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
 	streamStruct->currentBuffer = 0;
 	streamStruct->bufferSize = 0;
 
-	return 1;
-}
-
-int SetVorbisBufferVolume(int volume)
-{
-#if 0
-	if (vorbisBuffer == NULL)
-		return 0;
-
-	signed int attenuation;
-
-	if (volume < VOLUME_MIN) volume = VOLUME_MIN;
-	if (volume > VOLUME_MAX) volume = VOLUME_MAX;
-
-	/* convert from intensity to attenuation */
-	attenuation = vol_to_atten_table[volume];
-
-	if (attenuation > VOLUME_MAXPLAT) attenuation = VOLUME_MAXPLAT;
-	if (attenuation < VOLUME_MINPLAT) attenuation = VOLUME_MINPLAT;
-
-	/* and apply it */
-	LastError = vorbisBuffer->SetVolume(attenuation);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return 0;
-	}
-#endif
 	return 1;
 }
 
