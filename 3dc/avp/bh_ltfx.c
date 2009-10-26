@@ -4,31 +4,15 @@
 #include "stratdef.h"
 #include "gamedef.h"
 #include "bh_types.h"
-
 #include "dynblock.h"
 #include "dynamics.h"
 
 #define UseLocalAssert TRUE
 
 #include "ourasert.h"
-
 #include "bh_ltfx.h"
 
 extern int NormalFrameTime;
-
-
-#if PSX
-
-void * LightFXBehaveInit (void * bhdata, STRATEGYBLOCK* sbptr)
-{
-	
-}	
-void LightFXBehaveFun (STRATEGYBLOCK* sbptr)
-{
-	
-}	
-
-#else
 
 void * LightFXBehaveInit (void * bhdata, STRATEGYBLOCK* sbptr)
 {
@@ -619,8 +603,6 @@ void LoadStrategy_LightFx(SAVE_BLOCK_STRATEGY_HEADER* header)
 			}
 		}
 	}
-
-	
 }
 
 void SaveStrategy_LightFx(STRATEGYBLOCK* sbPtr)
@@ -640,4 +622,3 @@ void SaveStrategy_LightFx(STRATEGYBLOCK* sbPtr)
 	COPYELEMENT_SAVE(timer2)
 	COPYELEMENT_SAVE(time_to_next_flicker_state)
 }
-#endif

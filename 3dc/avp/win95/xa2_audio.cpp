@@ -1348,8 +1348,8 @@ int PlatDo3dSound(int activeIndex)
 	ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vy);
 	ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vz);
 
-	sprintf(buf, "Sound Posn (%i, %i, %i)\n", ActiveSounds[activeIndex].threedeedata.position.vx, ActiveSounds[activeIndex].threedeedata.position.vy, ActiveSounds[activeIndex].threedeedata.position.vz);
-	OutputDebugString(buf);
+//	sprintf(buf, "Sound Posn (%i, %i, %i)\n", ActiveSounds[activeIndex].threedeedata.position.vx, ActiveSounds[activeIndex].threedeedata.position.vy, ActiveSounds[activeIndex].threedeedata.position.vz);
+//	OutputDebugString(buf);
 
 	db_logf5(("Sound Index %i", ActiveSounds[activeIndex].soundIndex));
 	db_logf5(("Global Player Posn (%i, %i, %i)",  Global_VDB_Ptr->VDB_World.vx, Global_VDB_Ptr->VDB_World.vy, Global_VDB_Ptr->VDB_World.vz));

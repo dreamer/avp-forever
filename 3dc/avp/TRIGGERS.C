@@ -117,15 +117,7 @@ void OperateObjectInLineOfSight(void)
 					#else
 					AvP.GameMode = I_GM_Menus;
 
-					#if PSX
-					{
-						extern int Global_Database_Num;
-						Global_Database_Num=((DATABASE_BLOCK *)nearestObjectPtr->ObStrategyBlock->SBdataptr)->num;
-					}
-					#else
-						AvP.DatabaseAccessNum=((DATABASE_BLOCK *)nearestObjectPtr->ObStrategyBlock->SBdataptr)->num;
-					#endif
-					
+					AvP.DatabaseAccessNum=((DATABASE_BLOCK *)nearestObjectPtr->ObStrategyBlock->SBdataptr)->num;
 
 					/* KJL 16:43:01 03/19/97 - CHANGE ME! Need to pass database number */
 					// RJHG - would be ((*DATABASEBLOCK)nearestObjectPtr->ObStrategyBlock->SBDataPtr)->num

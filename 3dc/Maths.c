@@ -1,15 +1,4 @@
 
-#if PSX
-#include <kernel.h>
-#include <sys/types.h>		   	  
-#include <libetc.h>
-#include <libgte.h>		
-#include <libgpu.h>
-#include <stdlib.h>					 
-#include <inline_c.h>
-#include <gtemac.h>
-#endif
-
 #include "3dc.h"
 #include "inline.h"
 
@@ -43,11 +32,6 @@ int testc = 0;
 
 	extern int NormalFrameTime;
 
-
-#if PSX
-extern unsigned long *scratchp;
-#endif
-
 /*
 
  Globals
@@ -71,37 +55,6 @@ extern unsigned long *scratchp;
 */
 
 
-
-#if PSX
-inline void ch2psx(MATRIXCH *chm, MATRIX *psxm)
-{
-  psxm->m[0][0] = chm->mat11 >> 4;
-  psxm->m[0][1] = chm->mat21 >> 4;
-  psxm->m[0][2] = chm->mat31 >> 4;
-  psxm->m[1][0] = chm->mat12 >> 4;
-  psxm->m[1][1] = chm->mat22 >> 4;
-  psxm->m[1][2] = chm->mat32 >> 4;
-  psxm->m[2][0] = chm->mat13 >> 4;
-  psxm->m[2][1] = chm->mat23 >> 4;
-  psxm->m[2][2] = chm->mat33 >> 4;
-}
-
-inline void psx2ch(MATRIX *psxm, MATRIXCH *chm)
-{
-  
-  chm->mat11 = psxm->m[0][0] << 4;
-  chm->mat21 = psxm->m[0][1] << 4;
-  chm->mat31 = psxm->m[0][2] << 4;
-  chm->mat12 = psxm->m[1][0] << 4;
-  chm->mat22 = psxm->m[1][1] << 4;
-  chm->mat32 = psxm->m[1][2] << 4;
-  chm->mat13 = psxm->m[2][0] << 4;
-  chm->mat23 = psxm->m[2][1] << 4;
-  chm->mat33 = psxm->m[2][2] << 4;
-}
-
-#endif
-
 /* One over sin functions - CDF 4/2/98 */
 
 extern int oneoversin[4096];
@@ -120,7 +73,6 @@ void ConstructOneOverSinTable(void) {
 			oneoversin[a]=DIV_FIXED(ONE_FIXED,sin);
 		}
 	}
-
 }
 
 int GetOneOverSin(int a) 

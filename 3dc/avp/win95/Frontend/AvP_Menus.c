@@ -1249,7 +1249,7 @@ static void RenderMenu(void)
 		// bjd - no more squinting to read text at high resolutions!
 //		AvPMenus.FontToUse = AVPMENU_FONT_BIG;
 //		y = (ScreenDescriptorBlock.SDB_Height - AvPMenus.MenuHeight * 2)/2;
-		y = (ScreenDescriptorBlock.SDB_Height - AvPMenus.MenuHeight)/2;
+		y = (ScreenDescriptorBlock.SDB_Height - AvPMenus.MenuHeight) / 2;
 	}
 
 	for (e = 0; e<AvPMenus.NumberOfElementsInMenu; e++, elementPtr++)
@@ -1280,7 +1280,6 @@ static void RenderMenu(void)
 			{
 				elementPtr->Brightness = targetBrightness;
 			}
-			
 		}
 		
 		RenderMenuElement(elementPtr,e,y);
@@ -1309,6 +1308,7 @@ static void RenderMenu(void)
 	#endif
 
 }
+
 static void RenderBriefingScreenInfo(void)
 {
 	enum TEXTSTRING_ID textID;
@@ -2121,48 +2121,7 @@ static void ActUponUsersInput(void)
 			{
 				if(AvPMenus.PositionInTextField==0)
 				{
-#ifdef WIN32
 					strcpy(elementPtr->TextPtr,"DeadMeat");
-#endif
-#ifdef _XBOX
-					srand(time(NULL));
- 					switch(rand()%11)
- 					{
- 						case 0:
- 							strcpy(elementPtr->TextPtr, "DogMeat");
- 							break;
- 						case 1:
- 							strcpy(elementPtr->TextPtr, "FreshMeat");
- 							break;
- 						case 2:
- 							strcpy(elementPtr->TextPtr, "RancidMeat");
- 							break;
- 						case 3:
- 							strcpy(elementPtr->TextPtr, "HorseMeat");
- 							break;
- 						case 4:
- 							strcpy(elementPtr->TextPtr, "RawMeat");
- 							break;
- 						case 5:
- 							strcpy(elementPtr->TextPtr, "LiveMeat");
- 							break;
- 						case 6:
- 							strcpy(elementPtr->TextPtr, "M-m-m-meat");
- 							break;
- 						case 7:
- 							strcpy(elementPtr->TextPtr, "LlamaMeat");
- 							break;
- 						case 8:
- 							strcpy(elementPtr->TextPtr, "JustMeat");
- 							break;
- 						case 9:
- 							strcpy(elementPtr->TextPtr, "TastyMeat");
- 							break;
- 						case 10:
- 							strcpy(elementPtr->TextPtr, "MonkeyMeat");
- 							break;
- 					}
-#endif
 				}
 				AvPMenus.CurrentlySelectedElement++;
 			}
@@ -2211,15 +2170,17 @@ static void ActUponUsersInput(void)
 							//the true amount used will be worked out when the font is drawn
 							//Might cause a slight glitch for fast typists , but I forgot about 
 							//the damned kerned fonts until after I'd written most of this
-							if(AvPMenus.WidthLeftForText<32) break;
-							AvPMenus.WidthLeftForText-=32;
+							if (AvPMenus.WidthLeftForText < 32)
+								break;
+							AvPMenus.WidthLeftForText -= 32;
 						}
 						else
 						{
 							extern char AAFontWidths[256];
 							//using small font
-							if(AvPMenus.WidthLeftForText<AAFontWidths[c]) break;
-							AvPMenus.WidthLeftForText-=AAFontWidths[c];
+							if (AvPMenus.WidthLeftForText < AAFontWidths[c]) 
+								break;
+							AvPMenus.WidthLeftForText -= AAFontWidths[c];
 						}
 
 						elementPtr->TextPtr[AvPMenus.PositionInTextField++] = c;
@@ -3405,7 +3366,6 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 		{
 			RenderText = Hardware_RenderSmallMenuText;
 			RenderText_Coloured = Hardware_RenderSmallMenuText_Coloured;
-
 		}
 		else
 		{

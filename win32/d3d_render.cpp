@@ -6644,7 +6644,6 @@ extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha)
 
 extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale)
 {
-#if 1//FUNCTION_ON
 	extern unsigned char GammaValues[256];
 
 //	CheckVertexBuffer(255, NO_TEXTURE, TRANSLUCENCY_OFF);
@@ -6710,14 +6709,9 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 
 		vb++;
 
-//		OP_TRIANGLE_LIST(2, ExecBufInstPtr);
 		OUTPUT_TRIANGLE(0,1,3, 4);
 		OUTPUT_TRIANGLE(1,2,3, 4);
 	}
-//	UnlockExecuteBufferAndPrepareForUse();
-//	ExecuteBuffer();
-//	LockExecuteBuffer();
-#endif
 }
 
 

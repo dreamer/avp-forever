@@ -1118,7 +1118,6 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		if((myChunkHeader.chunkName[0]=='d')&&(myChunkHeader.chunkName[1]=='a')&&
 	   		(myChunkHeader.chunkName[2]=='t')&&(myChunkHeader.chunkName[3]=='a'))
 		{
-			OutputDebugString(" WE BROKE ");
 			break;
 		}
 	

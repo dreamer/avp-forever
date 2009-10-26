@@ -122,7 +122,8 @@ void UpdateRunTimeLights(void)
 	}
 
 	HandleLightElementSystem();
-}																			
+}
+
 void LightSourcesInRangeOfObject(DISPLAYBLOCK *dptr)
 {
 
@@ -617,11 +618,6 @@ void AvpShowViews(void)
 	/* Initialise the global VMA */
 //	GlobalAmbience=655;
 //	textprint("Global Ambience: %d\n",GlobalAmbience);
-
-	#if PSX
-	// For PSX, GlobalAmbience is used in the render files
-	GlobalAmbience = Global_VDB_Ptr->VDB_Ambience >> 8;
-	#endif
 	
 	/* Prepare the View Descriptor Block for use in ShowView() */
 

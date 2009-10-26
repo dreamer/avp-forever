@@ -24,6 +24,50 @@ extern void KeyboardEntryQueue_Add(char c);
 
 extern "C++"{
 #include "iofocus.h"
+
+// keyboard queue stuff
+#include <queue>
+
+struct KEYPRESS
+{
+	char asciiCode;
+	char keyCode;
+};
+
+std::queue <KEYPRESS> keyboardQueue;
+
+void AddKeyToQueue(char virtualKeyCode)
+{
+	KEYPRESS newKeyPress = {0};
+	
+	newKeyPress.keyCode = virtualKeyCode;
+	
+	keyboardQueue.push(newKeyPress);
+}
+
+void AddCharToQueue(char asciiCode)
+{
+	KEYPRESS newKeyPress = {0};
+	
+	newKeyPress.asciiCode = asciiCode;
+	
+	keyboardQueue.push(newKeyPress);
+}
+
+KEYPRESS GetQueueItem()
+{
+	KEYPRESS newKeyPress = {0};
+	newKeyPress = keyboardQueue.front();
+	keyboardQueue.pop();
+
+	return newKeyPress;
+}
+
+int GetQueueSize()
+{
+	return keyboardQueue.size();
+}
+
 };
 
 #include <xtl.h>
@@ -296,6 +340,26 @@ void DirectReadKeyboard()
 		}
 	}
 
+	// check the queue
+	int queueSize = GetQueueSize();
+
+	KEYPRESS newKeyPress = {0};
+
+	for (int i = 0; i < queueSize; i++)
+	{
+		newKeyPress = GetQueueItem();
+
+		if (newKeyPress.asciiCode)
+		{
+
+		}
+		else if (newKeyPress.keyCode)
+		{
+			KeyboardInput[newKeyPress.keyCode] = TRUE;
+			GotAnyKey = TRUE;
+		}
+	}
+
 	/* update debounced keys array */
 	{
 		for (int i=0;i<MAX_NUMBER_OF_INPUT_KEYS;i++)
@@ -313,10 +377,14 @@ void DirectReadKeyboard()
 	{
 		if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2]) // if osk active and user presses xbox A..
 		{
-			char key = Osk_GetSelectedKeyChar();
-			RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(key);
-			KeyboardEntryQueue_Add(key);
-			//DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2] = 0;
+			int key = Osk_HandleKeypress();
+
+			if (key)
+			{
+				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR((char)key);
+				KeyboardEntryQueue_Add((char)key);
+				DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2] = 0;
+			}
 		}
 		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_13]) // up
 		{

@@ -46,13 +46,9 @@
 
 #include "ourasert.h"
 
-#if PSX || Saturn
-	#define MAXMALLOCS        600
-#else
-	#define MAXMALLOCS	2500000
-		/* assertion fires if max exceeded */
-		/* changed to 1000000 by DHM 7/4/98; was 70001 */
-#endif
+#define MAXMALLOCS	2500000
+	/* assertion fires if max exceeded */
+	/* changed to 1000000 by DHM 7/4/98; was 70001 */
 
 #define MALLOC_FILL_VALUE 0x21
 #define FREE_FILL_VALUE   0x89
@@ -113,15 +109,7 @@ extern int textprint(const char* string, ...);
 extern void ExitSystem(void);
 extern void WaitForReturn(void);
 
-/* textprint on psx impacts frame rate massively if not
-used just for error messages, so it is often turned off.
-Hence the use of textprint2 below */
-
-#if PSX
-#define textprint2 printf
-#else
 #define textprint2 textprint
-#endif
 
 /* function declarations */
 #if COPY_FILENAME

@@ -144,8 +144,12 @@ extern void DeleteUserProfile(int number)
 
 	for (int i=0; i<number; i++) profilePtr = GetNextUserProfile();
 
-	char *filename = new char [strlen(USER_PROFILES_PATH)+strlen(profilePtr->Name)+strlen(USER_PROFILES_SUFFIX)+1];
-	strcpy(filename,USER_PROFILES_PATH);
+	char *savePath = GetSaveFolderPath();
+	int savePathLength = strlen(savePath);
+
+	char *filename = new char [savePathLength + strlen(USER_PROFILES_PATH)+strlen(profilePtr->Name)+strlen(USER_PROFILES_SUFFIX)+1];
+	strcpy(filename, savePath);
+	strcat(filename,USER_PROFILES_PATH);
 	strcat(filename,profilePtr->Name);
 	strcat(filename,USER_PROFILES_SUFFIX);
 

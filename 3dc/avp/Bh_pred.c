@@ -1346,10 +1346,8 @@ void PredatorBehaviour(STRATEGYBLOCK *sbPtr)
                         
                         if(PointIsInModule(thisModule, &localCoords)==0)
                         {
-                                #if (!PSX)
                                 textprint("FAR PREDATOR MODULE CONTAINMENT FAILURE \n");
                                 LOCALASSERT(1==0);
-                                #endif
                         }  
                 }
                 #endif

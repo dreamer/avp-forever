@@ -174,32 +174,32 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			}
 
 			/* handle left/right alt keys */
-			if(wParam == VK_MENU)
+			if (wParam == VK_MENU)
 			{			
-				if(lParam&(1<<24))
+				if (lParam&(1<<24))
 					wParam = VK_RMENU;
 				else
 					wParam = VK_LMENU;
 			}
 
 			/* handle left/right control keys */
-			if(wParam == VK_CONTROL)
+			if (wParam == VK_CONTROL)
 			{			
-				if(lParam&(1<<24))
+				if (lParam&(1<<24))
 					wParam = VK_RCONTROL;
 				else
 					wParam = VK_LCONTROL;
 			}
 
 			/* handle left/right shift keys */	
-			if(wParam == VK_SHIFT)
+			if (wParam == VK_SHIFT)
 			{
-				if((GetKeyState(VK_RSHIFT) & 0x8000) && (KeyboardInput[KEY_RIGHTSHIFT] == FALSE))
+				if ((GetKeyState(VK_RSHIFT) & 0x8000) && (KeyboardInput[KEY_RIGHTSHIFT] == FALSE))
 				{
 //					OutputDebugString("caught right shift!\n");
 					wParam = VK_RSHIFT;
 				}
-				else if((GetKeyState(VK_LSHIFT) & 0x8000) && (KeyboardInput[KEY_LEFTSHIFT] == FALSE))
+				else if ((GetKeyState(VK_LSHIFT) & 0x8000) && (KeyboardInput[KEY_LEFTSHIFT] == FALSE))
 				{
 //					OutputDebugString("caught left shift!\n");
 					wParam = VK_LSHIFT;
@@ -269,9 +269,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 						Osk_MoveDown();
 						break;
 					case VK_RETURN: // handle this as if it's a WM_CHAR
-						char key = Osk_GetSelectedKeyChar();
-						RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(key);
-						KeyboardEntryQueue_Add(key);
+						//char key = Osk_GetSelectedKeyChar();
+						//RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(key);
+						//KeyboardEntryQueue_Add(key);
 						break;
 				}
 			}

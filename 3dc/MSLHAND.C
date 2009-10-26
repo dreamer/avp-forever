@@ -1,10 +1,5 @@
 #include "3dc.h"
-
 #include "mslhand.h"
-
-#if PSX
-#include "psx_inc.h"
-#endif
 
 #define UseLocalAssert 1
 #include "ourasert.h"

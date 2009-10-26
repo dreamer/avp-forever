@@ -31,10 +31,6 @@ extern "C" {
 #endif
 
 #define SuppressWarnings 	TRUE
-							
-#define SupportWindows95	TRUE
-#define Saturn				FALSE
-#define PSX					FALSE
 #define platform_pc 		TRUE
 #define InterfaceEngine		FALSE
 

@@ -11,7 +11,8 @@ void Osk_MoveUp();
 void Osk_MoveDown();
 void Osk_Activate();
 void Osk_Deactivate();
-char Osk_GetSelectedKeyChar();
+//char Osk_GetSelectedKeyChar();
+char Osk_HandleKeypress();
 };
 
 #endif

@@ -123,93 +123,7 @@ static void MergeObjects(struct KObject *src1, int n1, struct KObject *src2, int
 	   }
 	}
 }
-#if 0
-static void ZSortItems(void)
-{
-	unsigned int partitionSize;
-	unsigned int noOfPasses = 0;
-	unsigned int noOfItems = ItemCount;
-	struct KItem *mergeFrom = &KItemList[0];
-	struct KItem *mergeTo = &KItemList2[0];
-	struct KItem *mergeTemp;
-	unsigned int offSet;
 
-	for (partitionSize=1;partitionSize<noOfItems;partitionSize*=2)
-	{
-		/* for each partition size...
-		   loop through partition pairs and merge */
-
-		/* initialise partition and destination offsets */
-		offSet = 0;
-
-		/* do merges for this partition size,
-		omitting the last merge if the second partition is incomplete  */
-		while((offSet+(partitionSize*2)) <= noOfItems)
-		{
-			MergeItems(
-				(mergeFrom+offSet),
-				partitionSize,
-				(mergeFrom+offSet+partitionSize),
-				partitionSize,
-				(mergeTo+offSet) );
-
-			offSet += partitionSize*2;
-		}
-
-		/* At this stage, there's less than 2 whole partitions
-		left in the array.  If there's no data left at all, then
-		there's nothing left to do.  However, if there's any data
-		left at the end of the array, we need to do something with it:
-
-		If there's more than a full partition, merge it against the remaining
-		partial partition.  If there's less than a full partition, just copy
-		it across (via the MergeItems fn): it will be merged in again during a
-		later pass.
-
-		*/
-
-		if((offSet+partitionSize) < noOfItems)
-		{
-			/* merge full partition against a partial partition */
-			MergeItems(
-				(mergeFrom+offSet),
-				partitionSize,
-				(mergeFrom+offSet+partitionSize),
-				(noOfItems - (offSet+partitionSize)),
-				(mergeTo+offSet) );
-		}
-		else if(offSet < noOfItems)
-		{
-			/* pass the incomplete partition thro' the merge fn
-			   to copy it across */
-			MergeItems(
-				(mergeFrom+offSet),
-				(noOfItems-offSet),
-				(mergeFrom+offSet),	/* this is a dummy parameter ... */
-				0,
-				(mergeTo+offSet) );
-		}
-
-		/* count number of passes */
-		noOfPasses++;
-		/* swap source and destination */
-		mergeTemp = mergeFrom;
-		mergeFrom = mergeTo;
-		mergeTo = mergeTemp;
-	}
-
-	/* check where the final list is, and move if neccesary */
-	if (noOfPasses%2 == 1)
-	{
-		unsigned int i;
-		/* final list is in the auxiliary buffer, so move it back */
-		for(i=0;i<noOfItems;i++)
-		{
-			KItemList[i] = KItemList2[i];
-		}
-	}
-}
-#endif
 void SortModules(unsigned int noOfItems)
 {
 	unsigned int partitionSize;
@@ -299,9 +213,6 @@ void SortModules(unsigned int noOfItems)
 
 
 
-
-
-
 /* KJL 12:21:51 02/11/97 - This routine is too big and ugly. Split & clean up required! */
 void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 {
@@ -323,14 +234,6 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 		/* if it's a module, which isn't inside another module */
 		if (modulePtr && !(modulePtr->m_flags & m_flag_slipped_inside))
 		{
-			#if 0
- 			if(PointIsInModule(&(VDBPtr->VDB_World),modulePtr))
-			{
-				VisibleModules[numVisMods].DispPtr = objectPtr;
-				VisibleModules[numVisMods].SortKey = smallint;
-//				textprint("fog is %d in player's module\n",modulePtr->m_flags & MODULEFLAG_FOG);
-			}
-			#else
 			// these tests should really be done using the camera (VDB) position
 			extern MODULE *playerPherModule;
 			if (playerPherModule == modulePtr)
@@ -338,7 +241,6 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 				VisibleModules[numVisMods].DispPtr = objectPtr;
 				VisibleModules[numVisMods].SortKey = smallint;
 			}
-			#endif
 			else
 			{
 				VECTORCH position;
@@ -401,13 +303,9 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 				}
 
 				VisibleModules[numVisMods].DispPtr = objectPtr;
-				#if 1
+
 				VisibleModules[numVisMods].SortKey = Magnitude(&dist);
-				#else
-				VisibleModules[numVisMods].SortKey = MUL_FIXED(dist.vx,dist.vx)
-												   + MUL_FIXED(dist.vy,dist.vy)
-												   + MUL_FIXED(dist.vz,dist.vz);
-				#endif
+
 			}
 
    			if(numVisMods>MAX_NUMBER_OF_VISIBLE_MODULES)
@@ -436,7 +334,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 	textprint("numvisobjs %d\n",numVisObjs);
 
 	ProfileStart();
-	#if 1
+
 	{
 		int numMods = numVisMods;
 		
@@ -464,9 +362,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 			SortedModules = VisibleModules2;
 		}
 	}
-	#else
-	SortModules(numVisMods);
-	#endif
+
 	ProfileStop("MODULESORT");
 
 	ProfileStart();
@@ -501,14 +397,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 				}
 				numMods++;
 			}
-			 #if 0
-			/* find nearest module which is fogged */
-			if(modulePtr->m_flags & MODULEFLAG_FOG)
-			{
-				if (fogDistance>SortedModules[numMods].SortKey)
-					fogDistance = SortedModules[numMods].SortKey;
-			}
-			#endif
+
 			if (CurrentVisionMode == VISION_MODE_PRED_SEEALIENS && objectPtr->ObStrategyBlock)
 			{
 				if (objectPtr->ObStrategyBlock->I_SBtype == I_BehaviourAlien)
@@ -681,13 +570,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 		}
 //	 			OutputTranslucentPolyList();
 		#endif
-		#if 0
-		{
-			int numMods = numVisMods;
-			while(numMods--)
-		  		AddShape(SortedModules[numMods].DispPtr,VDBPtr);
-		}
-		#endif
+
 		/* KJL 12:51:00 13/08/98 - scan for hierarchical objects which aren't going to be drawn,
 		and update their timers */
 		{
@@ -793,386 +676,3 @@ void RenderThisHierarchicalDisplayblock(DISPLAYBLOCK *dbPtr)
 	}
 	#endif
 }
-
-
-
-
-
-/* KJL 10:33:03 7/9/97 - this code no longer used */
-
-#if 0
-void OutputKItem(int *shapeitemptr)
-{
-	/* Allocate space in the Item Data array */
-	if (IPtsArrSize)
-	{
-		int *itemDataPtr = AllocateItemData(IHdrSize + IPtsArrSize + ITrmSize);
-
-		if(itemDataPtr)
-		{
-	   		POLYHEADER *mypolyheader = (POLYHEADER*) itemDataPtr;
-			struct KItem * const currentItemPtr = &KItemList[ItemCount];
-
-			currentItemPtr->PolyPtr = mypolyheader;			   
-
-			{
-				POLYHEADER* polyheader = (POLYHEADER *)shapeitemptr;
-				int *offsetPtr = (int*) &polyheader->Poly1stPt;
-				
-				int maxZ = smallint;
-				int minZ = bigint;
-				
-				if (MorphedObjectPointsPtr)
-				{
-					while(*offsetPtr != Term)
-					{
-						VECTORCH v = *(VECTORCH*)((int *)MorphedObjectPointsPtr + *offsetPtr);
-						int z;
-
-						z =  MUL_FIXED(LToVMat.mat13, v.vx);
-						z += MUL_FIXED(LToVMat.mat23, v.vy);
-						z += MUL_FIXED(LToVMat.mat33, v.vz);
-						z += Global_ODB_Ptr->ObView.vz;
-						
-						if(z > maxZ) maxZ = z;
-						else if(z < minZ) minZ = z;
-						
-					   	offsetPtr++;
-					}
-				}
-				else
-				{
-					while(*offsetPtr != Term)
-					{
-						int z = *((int *)RotatedPts + *offsetPtr + iz);
-						
-						if(z > maxZ) maxZ = z;
-						else if(z < minZ) minZ = z;
-						
-					   	offsetPtr++;
-					}
-				}
-			
-				if (polyheader->PolyFlags & iflag_sortnearz) currentItemPtr->SortKey = minZ;
-				else if (polyheader->PolyFlags & iflag_sortfarz) currentItemPtr->SortKey = maxZ +10;
-				else currentItemPtr->SortKey = maxZ;
-			}
-
-			ItemCount++;
-
-			/* Write out the Item Header */
-
-			mypolyheader->PolyItemType    = *shapeitemptr++;
-			mypolyheader->PolyNormalIndex = *shapeitemptr++;
-			mypolyheader->PolyFlags       = *shapeitemptr++;
-			mypolyheader->PolyColour      = ItemColour;
-
-			/* Write out the Item Points Array */
-			{
-				int *ptsArrayPtr = &PointsArray[0];
-				int i = IPtsArrSize;
-
-				itemDataPtr = &mypolyheader->Poly1stPt;
-				
-				do
-				{
-					*itemDataPtr++ = *ptsArrayPtr++;
-				}
-				while(--i);
-			}
-
-			/* Write out the Item Terminator */
-			*itemDataPtr = Term;
-		}
-	}
-}
-
-void KShapeItemsInstr(SHAPEINSTR *shapeinstrptr)
-{
-	int numitems= shapeinstrptr->sh_numitems;
-	int **shapeitemarrayptr = shapeinstrptr->sh_instr_data;
-
-	while(numitems)
-	{
-		int clip_output;
-		int *shapeitemptr = *shapeitemarrayptr;
-		POLYHEADER *pheaderPtr = (POLYHEADER*) shapeitemptr;
-
-		GLOBALASSERT(*shapeitemptr < I_Last);
-	   
-
-		if((Global_ODB_Ptr->ObFlags & ObFlag_BFCRO)
-		 ||(Global_ODB_Ptr->ObFlags & ObFlag_ParrallelBFC))
-		{
-			if((pheaderPtr->PolyFlags & iflag_viewdotpos) == 0)
-			{
-				ItemOCSBlock.ocs_flags |= ocs_flag_outcoded;
-			}
-			else
-			{
-				ItemOCSBlock.ocs_flags = ocs_flag_nobfc;
-				OutcodeItem[*shapeitemptr](shapeitemptr, &ItemOCSBlock);
-			}
-		}
-		else
-		{
-			ItemOCSBlock.ocs_flags = 0;
-			OutcodeItem[*shapeitemptr](shapeitemptr, &ItemOCSBlock);
-		}
-
-
-		if((ItemOCSBlock.ocs_flags & ocs_flag_outcoded) == 0)
-		{
-			#if support3dtextures
-			if((pheaderPtr->PolyFlags & iflag_tx2dor3d)
-				&& pheaderPtr->PolyItemType == I_2dTexturedPolygon)
-				pheaderPtr->PolyItemType = I_3dTexturedPolygon;
-			#if SupportZBuffering
-			if((pheaderPtr->PolyFlags & iflag_tx2dor3d)
-				&& pheaderPtr->PolyItemType == I_ZB_2dTexturedPolygon)
-				pheaderPtr->PolyItemType = I_ZB_3dTexturedPolygon;
-			#endif
-			#endif
-
-			#if SupportGouraud3dTextures
-			if((pheaderPtr->PolyFlags & iflag_tx2dor3d)
-				&& pheaderPtr->PolyItemType == I_Gouraud2dTexturedPolygon)
-				pheaderPtr->PolyItemType = I_Gouraud3dTexturedPolygon;
-			#if SupportZBuffering
-			if((pheaderPtr->PolyFlags & iflag_tx2dor3d)
-				&& pheaderPtr->PolyItemType == I_ZB_Gouraud2dTexturedPolygon)
-				pheaderPtr->PolyItemType = I_ZB_Gouraud3dTexturedPolygon;
-			#endif
-			#endif
-	   		
-			/* KJL 14:08:52 04/26/97 - hack to draw everything as a certain poly type */
-			#if 0
-			pheaderPtr->PolyItemType = I_2dTexturedPolygon;
-			#endif
-
-			/* KJL 17:15:46 06/07/97 - I'm not sure that we need 3dTexturedPolys */
-			if(pheaderPtr->PolyItemType == I_3dTexturedPolygon)
-				pheaderPtr->PolyItemType = I_2dTexturedPolygon;
-
-			/* KJL 12:57:43 05/29/97 - E3DEMO hack to draw everything in 3d */
-			#if PC_E3DEMO
-			pheaderPtr->PolyFlags &= ~iflag_tx2dor3d;
-			if(pheaderPtr->PolyItemType == I_Gouraud2dTexturedPolygon)
-				pheaderPtr->PolyItemType = I_Gouraud3dTexturedPolygon;
-			#endif
-			
-
-			if(ItemOCSBlock.ocs_clipstate == ocs_cs_totally_on)
-			{
-				CreateItemPtsArray[*shapeitemptr](shapeitemptr, &PointsArray[0]);
-				
-				if(Global_ShapeNormals)
-					ItemColour = ItemLightingModel[*shapeitemptr](shapeitemptr);
-				else
-					ItemColour = pheaderPtr->PolyColour;
-
-				OutputKItem(shapeitemptr);
-			}
-			else
-			{
-				#if 0
-				/* Because in d3d polygons are rendered as triangles
-				   the splits made to turn n-gons into triangles must
-				   be invariant with the clipping performed on the poly,
-				   otherwise artefacts will occur as polygons are clipped
-				   to fit into screen space, such as the apparent intensity
-				   changing on a clipper-created vertex.
-				   This is difficult to achieve; the best way, which seems
-				   to work well is to split the quads into triangles before
-				   clipping - splitting them across the same diagonal as the
-				   renderer does. */
-				int num_verts = 0;
-				if (ScanDrawDirectDraw != ScanDrawMode)
-				{
-					/* count the number of verts - see if its a quad */
-					int * ptsptr = &((POLYHEADER *)shapeitemptr)->Poly1stPt;
-					while (Term != *ptsptr++)
-						++num_verts;
-					/* shouldn't have pentagons etc. at this stage */
-					GLOBALASSERT(num_verts<=4);
-				}
-				/* FIXME:
-				   I am not doing this quad splitting on textures with iflag_txanim set
-				   This is rather more complicated than I care to imagine - the uv
-				   co-ords which also need splitting are generated in a function
-				   called CreateTxAnimUVArray which also seems to do a lot more than
-				   just that. Bloody Chris Humphries.
-				   Anyway, I think the lighting artefact will be less noticeable if the texture is animating */
-				if (4==num_verts && !(((POLYHEADER *)shapeitemptr)->PolyFlags & iflag_txanim))
-					/* need to split quads in d3d mode -
-					   note that num_verts will be 0 in scandraw mode
-					   so this condition will always be false */
-				{
-					/* get pointers to the output items - we may need to adjust the sort key */
-					struct KItem * triangle1 = 0;
-					struct KItem * triangle2 = 0;
-					/* For a quad we create the triangles (0,1,3) and (1,2,3) */
-					/* (see item.c - PrepareTriangleArray_4 functions) */
-					/* copy the header data for the quad into this buffer */
-					int item_array_buf[sizeof(POLYHEADER)+sizeof(int)*4]; /* 4 verts + polyheader & term */
-					/* save the previous uv data in this buffer and modify the actual uv data */
-					int uv_array_store[8]; /* 4 verts, U and V foreach vert */
-					/* this points to the uv data we are going to save and modify */
-					int * uv_array_ptr = NULL; /* will set this non-null if we have a textured item type */
-					if (
-						I_2dTexturedPolygon == *shapeitemptr ||
-						I_Gouraud2dTexturedPolygon == *shapeitemptr ||
-						I_3dTexturedPolygon == *shapeitemptr ||
-						I_UnscaledSprite == *shapeitemptr ||
-						I_ScaledSprite == *shapeitemptr ||
-						I_ZB_2dTexturedPolygon == *shapeitemptr ||
-						I_ZB_Gouraud2dTexturedPolygon == *shapeitemptr ||
-						I_ZB_3dTexturedPolygon == *shapeitemptr ||
-						I_Gouraud3dTexturedPolygon == *shapeitemptr ||
-						I_ZB_Gouraud3dTexturedPolygon == *shapeitemptr
-					) /* textured item type - has uv coords */
-						uv_array_ptr = Global_ShapeTextures[((POLYHEADER *)shapeitemptr)->PolyColour >> TxDefn];
-					/* copy the header data for the quad into the buffer */
-					/* ...and the first two verts since these are the same for the first triangle as for the quad */
-					memcpy(item_array_buf,shapeitemptr,sizeof(POLYHEADER)-sizeof(int)+2*sizeof(int));
-					/* save the uv data */
-					if (uv_array_ptr) memcpy(uv_array_store,uv_array_ptr,sizeof uv_array_store);
-					/* select vertices for the first triangle */
-					#define PFP_OFFSET (sizeof(POLYHEADER)/sizeof(int)-1) /* normally 4 but what if polyheader changes */
-					LOCALASSERT(item_array_buf[PFP_OFFSET+0] == shapeitemptr[PFP_OFFSET+0]);
-					LOCALASSERT(item_array_buf[PFP_OFFSET+1] == shapeitemptr[PFP_OFFSET+1]);
-					item_array_buf[PFP_OFFSET+2] = shapeitemptr[PFP_OFFSET+3];
-					item_array_buf[PFP_OFFSET+3] = Term;
-					if (uv_array_ptr)
-					{
-						/* select the uv coords for the first triangle */
-						LOCALASSERT(uv_array_ptr[0] == uv_array_store[0]); /* U */
-						LOCALASSERT(uv_array_ptr[1] == uv_array_store[1]); /* V */
-						LOCALASSERT(uv_array_ptr[2] == uv_array_store[2]); /* U */
-						LOCALASSERT(uv_array_ptr[3] == uv_array_store[3]); /* V */
-						uv_array_ptr[4] = uv_array_store[6]; /* U */
-						uv_array_ptr[5] = uv_array_store[7]; /* V */
-					}
-					/* output it in the usual way */
-					if(ItemOCSBlock.ocs_ptsoutstate == ocs_pout_2d)
-					{
-						CreateItemPtsArray[*item_array_buf](item_array_buf, &ClipPointsArray0[0]);
-						clip_output = Clip2d[*item_array_buf](item_array_buf);
-					}
-					else
-					{
-						/* also ensure both polygons are rendered in 3d */
-						((POLYHEADER *)item_array_buf)->PolyFlags &= ~iflag_tx2dor3d;
-						CreateItemPtsArray_Clip3d[*item_array_buf](item_array_buf, &ClipPointsArray0[0]);
-						clip_output = Clip3d[*item_array_buf](item_array_buf);
-					}
-					if(clip_output)
-					{
-
-						if(Global_ShapeNormals)
-							ItemColour = ItemLightingModel[*item_array_buf](item_array_buf);
-						else
-							ItemColour = pheaderPtr->PolyColour;
-
-						triangle1 = OutputKItem(item_array_buf);
-					}
-					/* copy the header data for the quad into the buffer again
-					   because the outcode function fuck around with it,,, */
-					memcpy(item_array_buf,shapeitemptr,sizeof(POLYHEADER)-sizeof(int));
-					/* select vertices for the second triangle */
-					item_array_buf[PFP_OFFSET+0] = shapeitemptr[PFP_OFFSET+1];
-					item_array_buf[PFP_OFFSET+1] = shapeitemptr[PFP_OFFSET+2];
-					LOCALASSERT(item_array_buf[PFP_OFFSET+2] == shapeitemptr[PFP_OFFSET+3]);
-					LOCALASSERT(item_array_buf[PFP_OFFSET+3] == Term);
-					if (uv_array_ptr)
-					{
-						/* select the uv coords for the first triangle */
-						uv_array_ptr[0] = uv_array_store[2]; /* U */
-						uv_array_ptr[1] = uv_array_store[3]; /* V */
-						uv_array_ptr[2] = uv_array_store[4]; /* U */
-						uv_array_ptr[3] = uv_array_store[5]; /* V */
-						LOCALASSERT(uv_array_ptr[4] == uv_array_store[6]); /* U */
-						LOCALASSERT(uv_array_ptr[5] == uv_array_store[7]); /* V */
-					}
-					/* output it in the usual way */
-					if(ItemOCSBlock.ocs_ptsoutstate == ocs_pout_2d)
-					{
-						CreateItemPtsArray[*item_array_buf](item_array_buf, &ClipPointsArray0[0]);
-						clip_output = Clip2d[*item_array_buf](item_array_buf);
-					}
-					else
-					{
-						/* also ensure both polygons are rendered in 3d */
-						((POLYHEADER *)item_array_buf)->PolyFlags &= ~iflag_tx2dor3d;
-						CreateItemPtsArray_Clip3d[*item_array_buf](item_array_buf, &ClipPointsArray0[0]);
-						clip_output = Clip3d[*item_array_buf](item_array_buf);
-					}
-					if(clip_output)
-					{
-
-						if(Global_ShapeNormals)
-							ItemColour = ItemLightingModel[*item_array_buf](item_array_buf);
-						else
-							ItemColour = pheaderPtr->PolyColour;
-
-						triangle2 = OutputKItem(item_array_buf);
-					}
-					/* restore the uv data */
-					if (uv_array_ptr) memcpy(uv_array_ptr,uv_array_store,sizeof uv_array_store);
-					/* if both triangles have been output,
-					   we may need to change the sort keys on one or both,
-					   so that far z and near z values will hopefully be
-					   the same as if it was output as a quad */
-					if (triangle1 && triangle2)
-					{
-						if (((POLYHEADER *)shapeitemptr)->PolyFlags & iflag_sortnearz)
-						{
-							/* take minimum sort keys */
-							if (triangle1->SortKey < triangle2->SortKey)
-								triangle2->SortKey = triangle1->SortKey;
-							else
-								triangle1->SortKey = triangle2->SortKey;
-						}
-						else
-						{
-							/* since sortfarz and no sort flag both take the largest z value
-							   take maximum sort keys */
-							if (triangle1->SortKey > triangle2->SortKey)
-								triangle2->SortKey = triangle1->SortKey;
-							else
-								triangle1->SortKey = triangle2->SortKey;
-						}
-					}
-				}
-				else
-				#endif
-				{
-					if(ItemOCSBlock.ocs_ptsoutstate == ocs_pout_2d)
-					{
-						CreateItemPtsArray[*shapeitemptr](shapeitemptr, &ClipPointsArray0[0]);
-						clip_output = Clip2d[*shapeitemptr](shapeitemptr);
-					}
-					else
-					{
-						CreateItemPtsArray_Clip3d[*shapeitemptr](shapeitemptr, &ClipPointsArray0[0]);
-						clip_output = Clip3d[*shapeitemptr](shapeitemptr);
-					}
-					if(clip_output)
-					{
-
-						if(Global_ShapeNormals)
-							ItemColour = ItemLightingModel[*shapeitemptr](shapeitemptr);
-						else
-							ItemColour = pheaderPtr->PolyColour;
-
-						OutputKItem(shapeitemptr);
-					}
-				}
-			}
-		}
-
-		shapeitemarrayptr++;			/* next polygon etc. */
-		numitems--;
-	}
-}
-#endif

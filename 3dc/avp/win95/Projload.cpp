@@ -2592,25 +2592,6 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 					FALLP_EntryPoints[i].entryPointsList[adj_pos].donorIndex=ad_aim->aimodule_index;
 					FALLP_EntryPoints[i].entryPointsList[adj_pos].alien_only=ad_aim->alien_only;
 
-					#if 0
-					//test
-					{
-						VECTORCH loc=FALLP_EntryPoints[i].entryPointsList[adj_pos].position;
-
-						MODULE* mod=AIModuleArray[i].m_module_ptrs[0];
-						SHAPEHEADER* shp=mainshapelist[mod->m_mapptr->MapShape];
-
-						if(loc.vx< shp->shapeminx||
-						   loc.vy< shp->shapeminy||
-						   loc.vz< shp->shapeminz||
-						   loc.vx> shp->shapemaxx||
-						   loc.vy> shp->shapemaxy||
-						   loc.vz> shp->shapemaxz)
-						{
-							GLOBALASSERT(0=="The entry points probably need to be recalculated");
-						}
-					}
-					#endif
 					adj_pos++;
 					entry_points[i].delete_first_entry();
 					delete ad_aim;
@@ -2701,15 +2682,12 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 
 		for (LIF<Chunk *> shplst(&shps) ; !shplst.done() ; shplst.next())
 		{
-			
  			Shape_Chunk * tmpshp = (Shape_Chunk *)shplst();
 
 			if ( ! tmpshp->list_assoc_objs().size() )
 			{
-		  //		ChunkShape cs = tmpshp->shape_data;
 				copy_to_mainshapelist(h, tmpshp, flags);
 			}
-			
 		}
 		local_scale=temp_scale;
 	}
@@ -2718,7 +2696,6 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 ** Load sprites **
 **--------------*/
 	//SelectGenTexDirectory(ITI_SPRITE);
-
 	Chunk * pChunk = h->fc->lookup_single_child ("RSPRITES");
 	if (pChunk)
 	{
@@ -2740,10 +2717,8 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 				GLOBALASSERT(0=="RIF name not found in sprite");
 			}
 			
-			
 			copy_sprite_to_mainshapelist(h,shc,flags);
 		}
-		
 	}
 
 	//setup shape fragments;
@@ -2788,9 +2763,6 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_inte
 	
 		while (random_marine_texturings.size())random_marine_texturings.delete_first_entry();
 		while (random_civilian_texturings.size())random_civilian_texturings.delete_first_entry();
-		
-//		ChangePalette(TestPalette);
-   		/*ConvertToDDPalette(TestPalette, LPTestPalette, palch->width, 0);*/
 	}
 
 	//reset sound diretory pointer
@@ -2938,9 +2910,7 @@ void post_process_shape (SHAPEHEADER * shp)
 		shp->items[i][2] |= iflag_gsort_ptest | iflag_linear_s;
 		//shp->items[i][2] &= ~iflag_transparent; // this causes _translucency_ on direct 3d
 		//shp->items[i][2] &= ~iflag_drawtx3das2d;
-		
-		#if SupportZBuffering
-//		if (ZBufferOn==ZBufferMode)
+
 		{
 			switch (shp->items[i][0])
 			{
@@ -2967,7 +2937,6 @@ void post_process_shape (SHAPEHEADER * shp)
 					break;
 			}
 		}
-		#endif
 	}
 
 	shp->shapeflags |= ShapeFlag_AugZ | ShapeFlag_AugZ_Lite;

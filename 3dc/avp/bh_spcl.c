@@ -395,14 +395,10 @@ void XenoMorphRoomBehaviour (STRATEGYBLOCK * sbptr)
 
 					pis->items = ms->items;
 					pis->sh_textures = ms->sh_textures;
-#if PSX
-#else
-					pis->sh_instruction[4].sh_instr_data = ms->sh_instruction[4].sh_instr_data;
-#endif
 
-#if SupportWindows95
+					pis->sh_instruction[4].sh_instr_data = ms->sh_instruction[4].sh_instr_data;
+
 					sbptr->SBdptr->ObTxAnimCtrlBlks = xmrd->tacb;
-#endif
 
 					sbptr->SBdptr->ObShape = xmrd->ProbesInShape;
 					sbptr->SBdptr->ObShapeData = GetShapeData(xmrd->ProbesInShape);
@@ -493,16 +489,13 @@ void XenoMorphRoomBehaviour (STRATEGYBLOCK * sbptr)
 			{
 				SHAPEHEADER * pis = GetShapeData(xmrd->ProbesInShape);
 
-#if SupportWindows95
 				sbptr->SBdptr->ObTxAnimCtrlBlks = 0;
-#endif
+
 				pis->items = xmrd->pis_items_str;
 				pis->sh_textures = xmrd->pis_sht_str;
 
-#if PSX
-#else
 				pis->sh_instruction[4].sh_instr_data = xmrd->pis_items_str;
-#endif
+
 				xmrd->XMR_State = XMRS_Idle;
 			}
 			break;
@@ -511,8 +504,6 @@ void XenoMorphRoomBehaviour (STRATEGYBLOCK * sbptr)
 		default :
 			GLOBALASSERT (0 == "Shouldn't be here");
 			break;
-
 	}
-	
 }
 

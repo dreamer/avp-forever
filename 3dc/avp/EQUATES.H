@@ -22,12 +22,7 @@ extern "C" {
 
 #define maxlightblocks 100			/* This ought to be MORE than enough */
 
-#if PSX
-#define MaxLightsPerObject 10	/* Sources lighting the object */
-#else
 #define MaxLightsPerObject 100	/* Sources lighting the object */
-#endif
-
 
 /*
 
@@ -156,25 +151,6 @@ typedef enum {
  shape enum is in cnkhmaps.c in avp\win95
  
 */
-
-#if PSX
-#if BinaryLoading
-#else
-typedef enum {
-
-	Shape_bob,
-	Shape_Default,
-	Shape_Alien,
-	Shape_weapon,
-	Shape_terminal,
-	Shape_mmseg1,
-	Shape_Cube,
-
-} AVP_SHAPES;
-
-#endif
-#endif
-
 
 /* Map Types */
 

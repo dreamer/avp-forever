@@ -2460,11 +2460,7 @@ void BackFaceCullPointOutcodeFlagging(void);
 
 */
 
-#if SupportWindows95
 void InitialiseSystem(HINSTANCE hInstance, int nCmdShow);
-#else
-void InitialiseSystem(void);
-#endif
 
 void InitialiseRenderer(void);
 
@@ -2508,31 +2504,6 @@ void InitialiseParallelStrategy(void);
 void UpdateParallelStrategy(void);
 
 unsigned char* AllocateScreenBuffer(int sbuffersize);
-
-
-#if 0
-
-#if 0
-void *AllocateMem(size_t __size);
-void DeallocateMem(void *__ptr);
-#endif
-
-#if PSX
-  #ifdef DBGMALLOC
-  extern void *record_malloc(long size, char string[], unsigned long lineno);
-  extern void record_free(void *ptr,char string[], unsigned long lineno);
-  #define AllocateMem(x) record_malloc(x,__FILE__, __LINE__)
-  #define DeallocateMem(x) record_free(x,__FILE__, __LINE__)
-  #else
-  void *AllocateMem(size_t __size);
-  void DeallocateMem(void *__ptr);
-  #endif
-#else
-void *AllocateMem(size_t __size);
-void DeallocateMem(void *__ptr);
-#endif
-
-#endif
 
 
 void ScanDraw_Item_Polygon_VideoModeType_8(int *itemptr);

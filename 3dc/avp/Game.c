@@ -40,19 +40,12 @@
 Currently PC only because it will probably be implemented in a completely
 different way on the consoles, so I won't worry the PSX guys for now.
 */
-#if SupportWindows95
 
 #include "vision.h"
-
 #include "cheat.h"	
 #include "pldnet.h"								 
-
-#endif
-
-#if SupportWindows95 || Saturn
 #include "kshape.h"
 #include "krender.h"
-#endif
 
 /* KJL 16:00:13 11/22/96 - One of my evil experiments....   */
 #define PENTIUM_PROFILING_ON 0
@@ -232,12 +225,6 @@ void StartGame(void)
 	InitialiseSfxBlocks();
 	InitialiseLightElementSystem();
 
-	#if PSX
-	{
-	extern int RedOut;
-	RedOut=0;
-	}
-	#endif
 	AvP.DestructTimer=-1;
 
 	// DHM 18/11/97: I've put hooks for screen mode changes here for the moment:
@@ -438,16 +425,10 @@ void UpdateGame(void)
 	Player->ObWorld.vz = -42249;
 	#endif
 	/* netgame support */
-	#if SupportWindows95
 	if(AvP.Network != I_No_Network)	NetSendMessages();
 
 	/* KJL 11:50:18 03/21/97 - cheat modes */
 	HandleCheatModes();
-	#endif
-	
-	#if PSX
-	HandleCheatModes();
-	#endif
 
 	/*------------Patrick 1/6/97---------------
 	New sound system 

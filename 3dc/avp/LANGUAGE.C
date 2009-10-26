@@ -68,7 +68,7 @@ void InitTextStrings(void)
 		sprintf(message,"Unable to load language file: %s\n",filenamePtr);
 
 #ifdef WIN32
-		MessageBox(hWndMain, message, "AvP Error", MB_OK+MB_SYSTEMMODAL);
+		MessageBox(hWndMain, message, "AvP Error", MB_OK/*+MB_SYSTEMMODAL*/);
 		exit(1);
 #else
 

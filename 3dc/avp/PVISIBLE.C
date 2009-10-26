@@ -532,11 +532,7 @@ void DoObjectVisibility(STRATEGYBLOCK *sbPtr)
                                 }
                                 case(I_BehaviourNetGhost):
                                 {
-                                        #if PSX
-                                                GLOBALASSERT(1==2);
-                                        #else
-                                                MakeGhostFar(sbPtr); 
-                                        #endif
+										MakeGhostFar(sbPtr); 
                                         break;          
                                 }
                                 case(I_BehaviourTrackObject):
@@ -1088,13 +1084,10 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
         NB some objects are always static, and initialised using
         the static dynamics template directly
         NB2 PSX: all objects are static */
-        #if SupportWindows95
+
 //      if(AvP.Network==I_No_Network) inanimateDynamicsInitialiser = DYNAMICS_TEMPLATE_INANIMATE;
 //      else inanimateDynamicsInitialiser = DYNAMICS_TEMPLATE_STATIC;
         inanimateDynamicsInitialiser = DYNAMICS_TEMPLATE_INANIMATE;
-        #else
-        inanimateDynamicsInitialiser = DYNAMICS_TEMPLATE_STATIC;
-        #endif
         
         /* Initialise object's stats */
         {

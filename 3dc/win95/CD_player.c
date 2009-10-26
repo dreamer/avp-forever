@@ -123,6 +123,7 @@ extern void CheckCDVolume(void)
 		CDDA_ChangeVolume(CDPlayerVolume);
 	}
 }
+
 void CDDA_ChangeVolume(int volume)
 {
 	/* set vorbis volume here for now */
@@ -269,9 +270,6 @@ static void PlatGetCDDAVolumeControl(void)
 	int i;
 	int numDev = mixerGetNumDevs();
 
-	return;
-
-#if 0
 	//go through the mixer devices searching for one that can deal with the cd volume
 	for (i = 0; i < numDev; i++)
 	{
@@ -298,7 +296,6 @@ static void PlatGetCDDAVolumeControl(void)
 				lineControls.cbmxctrl=sizeof(MIXERCONTROL);
 				
 				 control.cbStruct=sizeof(MIXERCONTROL);
-
 
 				//try to get the volume control
 				if(mixerGetLineControls(handle,&lineControls,MIXER_GETLINECONTROLSF_ONEBYTYPE)==MMSYSERR_NOERROR)
@@ -327,9 +324,6 @@ static void PlatGetCDDAVolumeControl(void)
 			mixerClose(handle);
 		}
 	}
-
-	return;
-#endif
 }
 #endif
 
@@ -357,8 +351,6 @@ int PlatPlayCDDA(int track)
     MCI_PLAY_PARMS mciPlayParms = {0,0,0};
 	MCI_STATUS_PARMS mciStatusParms = {0,0,0,0};
 
-	return 0; // bjd
-#if 0
     /* check the cdDeviceId */
     if(cdDeviceID==NO_DEVICE) return SOUND_PLATFORMERROR;
     
@@ -407,7 +399,6 @@ int PlatPlayCDDA(int track)
     	return SOUND_PLATFORMERROR;
     }
     return 0;
-#endif
 }
 
 int PlatGetNumberOfCDTracks(int* numTracks)
@@ -496,8 +487,6 @@ int PlatChangeCDDAVolume(int volume)
 	int i;
 	int numDev = mixerGetNumDevs();
 
-	return 0; // bjd
-#if 0
     /* check the cdDeviceId */
     if(cdDeviceID==NO_DEVICE) return SOUND_PLATFORMERROR;
 
@@ -574,7 +563,6 @@ int PlatChangeCDDAVolume(int volume)
 	}
 
 	return SOUND_PLATFORMERROR;
-#endif
 }
 
 #endif
