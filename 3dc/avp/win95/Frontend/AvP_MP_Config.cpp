@@ -610,7 +610,7 @@ void BuildMultiplayerLevelNameArray()
 	// allow a wildcard search
 	WIN32_FIND_DATA wfd;
 
-	const char* load_name="avp_rifs\\custom\\*.rif";
+	const char* load_name = "avp_rifs\\custom\\*.rif";
 
 	HANDLE hFindFile = avp_FindFirstFile(load_name, &wfd);
 	
@@ -809,7 +809,6 @@ char* GetCustomMultiplayerLevelName(int index,int gameType)
 		*bracket_pos = 0;
 		
 	}
-
 
 	return return_string;
 }

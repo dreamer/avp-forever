@@ -101,6 +101,11 @@ FILE *avp_fopen(const char *fileName, const char *mode)
 //	return fopen(finalPath.c_str(), mode);
 	theFile = fopen(finalPath.c_str(), mode);
 
+	if (theFile == NULL)
+	{
+		int i = 0;
+	}
+
 	return theFile;
 #endif
 #ifdef WIN32
@@ -108,14 +113,40 @@ FILE *avp_fopen(const char *fileName, const char *mode)
 #endif
 }
 
-HANDLE avp_CreateFile(LPCTSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
+DWORD avp_GetFileAttributes(LPCTSTR lpFileName)
 {
+#ifdef _XBOX
+
 	std::string finalPath;
 
-#ifdef _XBOX
 	finalPath.append("d:\\");
 	finalPath.append(lpFileName);
-	return CreateFile(finalPath.c_str(), dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+
+	return GetFileAttributes(finalPath.c_str());
+#endif
+#ifdef WIN32
+	return GetFileAttributes(lpFileName);
+#endif
+}
+
+HANDLE avp_CreateFile(LPCTSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
+{
+#ifdef _XBOX
+
+	std::string finalPath;
+
+	finalPath.append("d:\\");
+	finalPath.append(lpFileName);
+
+	HANDLE theHandle = CreateFile(finalPath.c_str(), dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+
+	if (theHandle == INVALID_HANDLE_VALUE)
+	{
+		int i = 0;
+	}
+
+	return theHandle;
+
 #endif
 #ifdef WIN32
 	return CreateFile(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
@@ -124,8 +155,10 @@ HANDLE avp_CreateFile(LPCTSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMo
 
 HANDLE avp_FindFirstFile(LPCTSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData)
 {
-	std::string finalPath;
 #ifdef _XBOX
+
+	std::string finalPath;
+
 	finalPath.append("d:\\");
 	finalPath.append(lpFileName);
 	return FindFirstFile(finalPath.c_str(), lpFindFileData);

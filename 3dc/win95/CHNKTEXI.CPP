@@ -112,7 +112,7 @@ static inline bool IsFileInFastFile(char const * pszFileName)
 
 static bool DoesFileExist(char const * pszFileName)
 {
-	DWORD dwFileAttributes = GetFileAttributes(pszFileName);
+	DWORD dwFileAttributes = avp_GetFileAttributes(pszFileName);
 	
 	if (0xffffffff == dwFileAttributes || dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 		return false;

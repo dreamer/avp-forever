@@ -333,7 +333,6 @@ int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
 #define InitTexPrnt FALSE
 
 int InitialiseTextures(void)
-
 {
 
 	SHAPEHEADER **shlistptr;
@@ -448,7 +447,7 @@ int InitialiseTextures(void)
 				#ifdef RIFF_SYSTEM
 
 				/* This function calls GetExistingImageHeader to figure out if the image is already loaded */
-				TxIndex = CL_LoadImageOnce(fname,(/*ScanDrawDirectDraw == ScanDrawMode ? LIO_CHIMAGE : */LIO_D3DTEXTURE)|LIO_TRANSPARENT|LIO_RELATIVEPATH|LIO_RESTORABLE);
+				TxIndex = CL_LoadImageOnce(fname, LIO_D3DTEXTURE|LIO_TRANSPARENT|LIO_RELATIVEPATH|LIO_RESTORABLE);
 				GLOBALASSERT(GEI_NOTLOADED != TxIndex);
 				
 				#else
@@ -552,7 +551,6 @@ int InitialiseTextures(void)
 				MakeShapeTexturesGlobal(shptr, TxIndex, LTxIndex);
 
 				LTxIndex++;			/* Next Local Texture */
-
 			}
 
 			/* Is this shape a sprite that requires resizing? */
@@ -561,11 +559,8 @@ int InitialiseTextures(void)
 				(shptr->shapeflags & ShapeFlag_SpriteResizing)) {
 
 				SpriteResizing(shptr);
-
 			}
-
 		}
-
 	}
 
 	#if InitTexPrnt
@@ -575,10 +570,7 @@ int InitialiseTextures(void)
 
 	#endif
 
-
 	return TRUE;
-
-
 }
 
 

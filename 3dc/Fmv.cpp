@@ -1,6 +1,10 @@
 
 //#ifdef USE_FMV
-#if 0
+#if 1
+
+#ifdef _XBOX
+	#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
+#endif
 
 #include "d3_func.h"
 #include <fstream>
@@ -8,19 +12,19 @@
 #include <ogg/ogg.h>
 #include <theora/theora.h>
 #include <theora/theoradec.h>
-//#include <vorbis/codec.h>
 #include <vorbis/vorbisfile.h>
 #include <process.h>
 #ifdef _XBOX
 #include <d3dx8.h>
+#include <xtl.h>
 #else
 #include <d3dx9.h>
 #endif
 
 #include "logString.h"
 #ifdef WIN32
-#include <sndfile.h>
-SNDFILE *sndFile;
+//#include <sndfile.h>
+//SNDFILE *sndFile;
 #endif
 
 #include "ringbuffer.h"
@@ -443,7 +447,9 @@ void AudioGrabThread(void *args)
 	DWORD dwQuantum = 1000 / 60;
 	char buf[100];
 
+#ifdef USE_XAUDIO2
 	CoInitializeEx( NULL, COINIT_MULTITHREADED );
+#endif
 
 	static int totalRead = 0;
 	static int lastRead = 0;
@@ -456,7 +462,7 @@ void AudioGrabThread(void *args)
 	{
 		startTime = timeGetTime();
 
-		int numBuffersFree = GetNumFreeAudioStreamBuffers(&fmvAudioStream);
+		int numBuffersFree = AudioStream_GetNumFreeBuffers(&fmvAudioStream);
 
 		//if (numBuffersFree)
 		while (numBuffersFree)
@@ -468,7 +474,7 @@ void AudioGrabThread(void *args)
 				if (readableAudio >= fmvAudioStream.bufferSize)
 				{
 					RingBuffer_ReadData(audioData, fmvAudioStream.bufferSize);
-					WriteAudioStreamData(&fmvAudioStream, audioData, fmvAudioStream.bufferSize);
+					AudioStream_WriteData(&fmvAudioStream, audioData, fmvAudioStream.bufferSize);
 
 					sprintf(buf, "send %d bytes to xaudio2\n", fmvAudioStream.bufferSize);
 					OutputDebugString(buf);
@@ -480,7 +486,7 @@ void AudioGrabThread(void *args)
 //			if ((buffersAdded == 2) && (started == false))
 			if ((readableAudio >= 8192 * 2) && (started == false))
 			{
-				PlayAudioStreamBuffer(&fmvAudioStream);
+				AudioStream_PlayBuffer(&fmvAudioStream);
 				started = true;
 			}
 
@@ -667,13 +673,23 @@ bool running = false;
 int OpenTheoraVideo(const char *fileName)
 {
 	if (running) return 0;
+	
+	std::string filePath;
+
+#ifdef _XBOX
+	filePath += "D:\\";
+#endif
+	filePath += fileName;
 
 	oggFile.clear();// to be sure all the file flags are reset
 
-	oggFile.open(fileName/*"c://big_buck_bunny_480p_stereo.ogv"*/, std::ios::in | std::ios::binary);
+	oggFile.open(filePath.c_str()/*"c://big_buck_bunny_480p_stereo.ogv"*/, std::ios::in | std::ios::binary);
 
 	if (!oggFile.is_open())
+	{
+		OutputDebugString("can't find FMV file..\n");
 		return 0;
+	}
 
 	/* initialise our state struct in preparation for getting some data */
 	int ret = ogg_sync_init(&state);
@@ -701,7 +717,8 @@ int OpenTheoraVideo(const char *fileName)
 
 	if (audio)
 	{
-#ifdef WIN32
+#ifdef USE_LIBSNDFILE
+
 		SF_INFO sndInfo;
 		const int format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
 		const char* outfilename = "C:\\Users\\Barry\\AppData\\Local\\Fox\\test.wav";
@@ -723,6 +740,7 @@ int OpenTheoraVideo(const char *fileName)
 			int error = sf_error(sndFile);
 			OutputDebugString("can't open sndFile\n");
 		}
+#endif
 
 		sprintf(buf, "Audio stream is %d %d channels %d KHz\n", audio->mSerial, 
 								audio->mVorbis.mInfo.channels,
@@ -730,7 +748,7 @@ int OpenTheoraVideo(const char *fileName)
 		OutputDebugString(buf);
 
 		/* init audio buffer here */
-		if (CreateAudioStreamBuffer(&fmvAudioStream, audio->mVorbis.mInfo.channels, audio->mVorbis.mInfo.rate) < 0)
+		if (AudioStream_CreateBuffer(&fmvAudioStream, audio->mVorbis.mInfo.channels, audio->mVorbis.mInfo.rate) < 0)
 		{
 			LogErrorString("Can't create audio stream buffer for OGG Vorbis!");
 		}
@@ -740,7 +758,7 @@ int OpenTheoraVideo(const char *fileName)
 
 		RingBuffer_Init((fmvAudioStream.bufferSize * fmvAudioStream.bufferCount) * 3);
 	}
-#endif
+
 	if (video) 
 	{
 		sprintf(buf, "Video stream is %d %dx%d\n", video->mSerial, 
@@ -868,7 +886,7 @@ int CloseTheoraVideo()
 		fmvAudioBuffer = NULL;
 	}
 */
-#ifdef WIN32
+#ifdef USE_LIBSNDFILE
 	sf_close(sndFile);
 #endif
 
@@ -897,7 +915,7 @@ int CloseTheoraVideo()
 extern void StartMenuBackgroundBink()
 {
 	return;
-	const char *filenamePtr = "fmvs/menubackground.ogv";
+	const char *filenamePtr = "fmvs\\menubackground.ogv";
 
 	OpenTheoraVideo(filenamePtr);
 
@@ -959,6 +977,7 @@ extern void PlayBinkedFMV(char *filenamePtr)
 
 		if ((frameWidth != 0) && (frameHeight != 0)) // don't draw if we don't know frame width or height
 		{
+			OutputDebugString("got new texture..\n");
 			DrawBinkFmv(frameWidth, frameHeight, textureWidth, textureHeight, mDisplayTexture);
 		}
 
@@ -978,6 +997,8 @@ extern void PlayBinkedFMV(char *filenamePtr)
 	CloseTheoraVideo();
 }
 
+int imageNum2 = 0;
+
 int NextFMVFrame()
 {
 	if (fmvPlaying == false)
@@ -986,7 +1007,7 @@ int NextFMVFrame()
 	EnterCriticalSection(&CriticalSection);
 
 	D3DLOCKED_RECT textureLock;
-	if (FAILED(mDisplayTexture->LockRect(0, &textureLock, NULL, D3DLOCK_DISCARD)))
+	if (FAILED(mDisplayTexture->LockRect(0, &textureLock, NULL, /*D3DLOCK_DISCARD*/0)))
 	{
 		OutputDebugString("can't lock FMV texture\n");
 		return 0;
@@ -1024,7 +1045,7 @@ int NextFMVFrame()
 #if 0 // save frames to png files
 	char strPath[MAX_PATH];
 	char buf[100];
-
+#if 0
 	/* finds the path to the folder. On Win7, this would be "C:\Users\<username>\AppData\Local\ as an example */
 	if( FAILED(SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, strPath ) ) )
 	{
@@ -1034,9 +1055,14 @@ int NextFMVFrame()
 	PathAppend( strPath, TEXT( "Fox\\Aliens versus Predator\\" ) );
 	sprintf(buf, "image_%d.png", imageNum2);
 	PathAppend( strPath, buf);
+#endif
+
+	std::string thepath = "D:\\";
+	sprintf(buf, "image_%d.png", imageNum2);
+	thepath += buf;
 
 	/* save surface to image file */
-	if (FAILED(D3DXSaveTextureToFile(strPath, D3DXIFF_BMP, mDisplayTexture2, NULL)))
+	if (FAILED(D3DXSaveTextureToFile(thepath.c_str(), D3DXIFF_BMP, mDisplayTexture, NULL)))
 	{
 		//LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("Save Surface to file failed!!!\n");

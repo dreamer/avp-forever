@@ -3368,7 +3368,6 @@ extern "C"
 
 void save_preplaced_decals()
 {
-	
 	GLOBALASSERT(env_rif);
 	if(!env_rif->fc)
 	{
@@ -3377,8 +3376,7 @@ void save_preplaced_decals()
 	}
 	
 	{
-		
-		DWORD attributes = GetFileAttributes(env_rif->fc->filename);
+		DWORD attributes = avp_GetFileAttributes(env_rif->fc->filename);
 		if (0xffffffff!=attributes)
 		{
 			if (attributes & FILE_ATTRIBUTE_READONLY)

@@ -1,15 +1,9 @@
 #include "chunk.hpp"
 #include "chnktype.hpp"
 #include "mishchnk.hpp"
-
 #include "shpchunk.hpp"
 #include "obchunk.hpp"
-
-
-
 #include "huffman.hpp"
-
-
 #include <mbstring.h>
 
 #ifdef cencon
@@ -519,7 +513,7 @@ BOOL File_Chunk::write_file (const char * fname)
 {
 	if(!fname) return FALSE;
 	//if a read_only file exists with this filename , then abort attempt to save
-	DWORD attributes = GetFileAttributesA(fname);
+	DWORD attributes = avp_GetFileAttributes(fname);
 	if (0xffffffff!=attributes)
 	{
 		if (attributes & FILE_ATTRIBUTE_READONLY)
@@ -527,9 +521,7 @@ BOOL File_Chunk::write_file (const char * fname)
 			return FALSE;
 		}
 	}
-	
-	
-	
+
 	HANDLE rif_file;
 
 	if (filename) delete [] filename;

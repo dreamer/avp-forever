@@ -1,6 +1,6 @@
 
 //#ifndef USE_FMV
-#if 1
+#if 0
 
 #include "d3_func.h"
 

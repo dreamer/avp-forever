@@ -12,8 +12,8 @@ extern char * SecondSoundDir;
 
 void GetPathFromRegistry()
 {
-	SecondTex_Directory = "graphics/";
-	SecondSoundDir = "sound/";
+	SecondTex_Directory = "graphics\\";
+	SecondSoundDir = "sound\\";
 
 #if 0
 	HKEY hKey;

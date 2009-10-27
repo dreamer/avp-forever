@@ -272,9 +272,9 @@ LPDIRECT3DTEXTURE8 CreateFmvTexture(int *width, int *height, int usage, int pool
 {
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
 
-	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)width, (UINT*)height, NULL, usage, NULL, (D3DPOOL)pool);
+	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)width, (UINT*)height, NULL, 0, NULL, (D3DPOOL)pool);
 
-	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, usage, D3DFMT_LIN_X8R8G8B8, (D3DPOOL)pool, &destTexture);
+	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, usage, D3DFMT_LIN_X8R8G8B8, 0, &destTexture);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);

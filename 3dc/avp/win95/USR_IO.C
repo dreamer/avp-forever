@@ -1570,8 +1570,8 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 
 		xPadLookY =- xPadLookY;
 
-		sprintf(buf, "pad y: %d\n", xPadLookY);
-		OutputDebugString(buf);
+//		sprintf(buf, "pad y: %d\n", xPadLookY);
+//		OutputDebugString(buf);
 
 		/* looking up and down */
 		if (xPadLookY < 0)
