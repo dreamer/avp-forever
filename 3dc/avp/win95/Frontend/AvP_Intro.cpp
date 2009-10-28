@@ -26,7 +26,7 @@ void Show_ARebellionGame(void);
 void Show_AvPLogo(void);
 extern void ShowSplashScreens(void);
 extern void Show_WinnerScreen(void);
-extern void PlayBinkedFMV(char *filenamePtr);
+extern void PlayFMV(char *filenamePtr);
 extern void DrawMainMenusBackdrop(void);
 extern void FadedScreen(int alpha);
 
@@ -58,7 +58,7 @@ extern void PlayIntroSequence(void)
 //	ThisFramesRenderingHasBegun();
 //	ClearScreenToBlack();
 
-	PlayBinkedFMV("FMVs\\logos.ogv");
+	PlayFMV("FMVs\\logos.ogv");
 
 //	PlayFMV("FMVs/rebellion.smk");
 

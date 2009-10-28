@@ -164,7 +164,7 @@ HRESULT LastError;
 HANDLE hEvent1, hEvent2;
 
 D3DTEXTURE mDisplayTexture = NULL;
-unsigned char	*textureData = NULL;
+unsigned char *textureData = NULL;
 
 CRITICAL_SECTION CriticalSection;
 CRITICAL_SECTION audioCriticalSection;
@@ -464,7 +464,6 @@ void AudioGrabThread(void *args)
 
 		int numBuffersFree = AudioStream_GetNumFreeBuffers(&fmvAudioStream);
 
-		//if (numBuffersFree)
 		while (numBuffersFree)
 		{
 			int readableAudio = RingBuffer_GetReadableSpace();
@@ -619,19 +618,14 @@ void TheoraDecodeThread(void *args)
 			{
 				ogg_int64_t position = 0;
 
-//				float audio_time = totalAudioTimePlayed;
-
 				// bjd - temporary! use above code when ready
-				float audio_time = static_cast<float>((timeGetTime() - startTime) / 100.0f);
+//				float audio_time = static_cast<float>((timeGetTime() - startTime) / 100.0f);
 
-//				float audio_time = GetNumSamplesPlayed(&fmvAudioStream) / (float)44100;
+				float audio_time = float(AudioStream_GetNumSamplesPlayed(&fmvAudioStream)) / float(audio->mVorbis.mInfo.rate);
 
 				float video_time = static_cast<float>(th_granule_time(video->mTheora.mCtx, mGranulepos));
-//				sprintf(buf, "video_time: %f audio_time: %f\n", video_time, audio_time);
-//				OutputDebugString(buf);
-
-//				sprintf(buf, "time played: %f\n", GetNumSamplesPlayed(&fmvAudioStream) / (float)44100);
-//				OutputDebugString(buf);
+				sprintf(buf, "video_time: %f audio_time: %f\n", video_time, audio_time);
+				OutputDebugString(buf);
 
 				if ((audio_time > video_time))// || (!audio)) // do it anyway if we have no audio
 				{
@@ -656,9 +650,13 @@ void TheoraDecodeThread(void *args)
 */
 					}
 				}
+				else
+				{
+					Sleep((int)(audio_time - video_time));
+				}
 
-				float framerate = float(video->mTheora.mInfo.fps_numerator) / float(video->mTheora.mInfo.fps_denominator);
-				Sleep(static_cast<DWORD>((1.0f / framerate) * 1000));
+//				float framerate = float(video->mTheora.mInfo.fps_numerator) / float(video->mTheora.mInfo.fps_denominator);
+//				Sleep(static_cast<DWORD>((1.0f / framerate) * 1000));
 			}
 		}
 	}
@@ -912,46 +910,43 @@ int CloseTheoraVideo()
 	return 0;
 }
 
-extern void StartMenuBackgroundBink()
+extern void StartMenuBackgroundFmv()
 {
 	return;
-	const char *filenamePtr = "fmvs\\menubackground.ogv";
+	const char *filenamePtr = "fmvs\\MarineIntro.ogv";
 
 	OpenTheoraVideo(filenamePtr);
 
 	MenuBackground = true;
 }
 
-extern int PlayMenuBackgroundBink()
+extern int PlayMenuBackgroundFmv()
 {
-	if (!MenuBackground) return 0;
+	if (!MenuBackground)
+		return 0;
 
 	int playing = 0;
 
 	if (frameReady)
 	{
 		playing = NextFMVFrame();
-		DrawBinkFmv(frameWidth, frameHeight, textureWidth, textureHeight, mDisplayTexture);
+		DrawFmvFrame(frameWidth, frameHeight, textureWidth, textureHeight, mDisplayTexture);
 	}
 
 	return 1;
 }
 
-extern void EndMenuBackgroundBink()
+extern void EndMenuBackgroundFmv()
 {
-	if (!MenuBackground) return;
+	if (!MenuBackground) 
+		return;
 
 	CloseTheoraVideo();
 
 	MenuBackground = false;
 }
 
-void RecreateAllFMVTexturesAfterDeviceReset()
-{
-
-}
-
-extern void PlayBinkedFMV(char *filenamePtr)
+extern void PlayFMV(char *filenamePtr)
 {
 	if (!IntroOutroMoviesAreActive)
 		return;
@@ -977,8 +972,8 @@ extern void PlayBinkedFMV(char *filenamePtr)
 
 		if ((frameWidth != 0) && (frameHeight != 0)) // don't draw if we don't know frame width or height
 		{
-			OutputDebugString("got new texture..\n");
-			DrawBinkFmv(frameWidth, frameHeight, textureWidth, textureHeight, mDisplayTexture);
+//			OutputDebugString("got new texture..\n");
+			DrawFmvFrame(frameWidth, frameHeight, textureWidth, textureHeight, mDisplayTexture);
 		}
 
 		ThisFramesRenderingHasFinished();
@@ -1629,12 +1624,18 @@ void ReleaseAllFMVTexturesForDeviceReset()
 {
 	for (int i = 0; i < NumberOfFMVTextures; i++)
 	{
-		FMVTexture[i].MessageNumber = 0;
+//		FMVTexture[i].MessageNumber = 0;
 
 		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
 	}
+}
 
-//	SAFE_RELEASE(BinkTexture);
+void RecreateAllFMVTexturesAfterDeviceReset()
+{
+	for (int i = 0; i < NumberOfFMVTextures; i++)
+	{
+		FMVTexture[i].ImagePtr->Direct3DTexture = CreateFmvTexture(&FMVTexture[i].ImagePtr->ImageWidth, &FMVTexture[i].ImagePtr->ImageHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+	}
 }
 
 void PlayMenuMusic()

@@ -349,10 +349,6 @@ void const * ffreadbuf(char const * filename, size_t * p_len)
 FFILE * ffopen(char const * filename, char const * mode)
 {
 	if (mode[0]!='r' || mode[1]!='b') return 0;
-
-	char buf[100];
-	sprintf(buf, "ffopen - %s\n",filename);
-	OutputDebugString(buf);
 	
 	size_t length;
 	void const * data = ffreadbuf(filename,&length);

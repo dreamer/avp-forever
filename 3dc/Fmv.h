@@ -23,7 +23,6 @@ typedef struct FMVTEXTURE
 
 	int MessageNumber;
 
-//	D3DTEXTURE DestTexture;
 	unsigned char *RGBBuffer;
 
 }FMVTEXTURE;

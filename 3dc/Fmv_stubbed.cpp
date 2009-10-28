@@ -51,11 +51,11 @@ int WriteToDsound(int dataSize, int offset);
 int GetWritableBufferSize();
 int updateAudioBuffer(int numBytes, short *data);
 
-extern void EndMenuBackgroundBink()
+extern void EndMenuBackgroundFmv()
 {
 }
 
-extern void StartMenuBackgroundBink()
+extern void StartMenuBackgroundFmv()
 {
 }
 
@@ -69,7 +69,7 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 
 }
 
-extern void PlayBinkedFMV(char *filenamePtr)
+extern void PlayFMV(char *filenamePtr)
 {
 	return;
 }
@@ -78,7 +78,7 @@ void FmvClose()
 {
 }
 
-extern int PlayMenuBackgroundBink()
+extern int StartMenuBackgroundFmv()
 {
 	return 0;
 }
@@ -270,12 +270,6 @@ extern void GetFMVInformation(int *messageNumberPtr, int *frameNumberPtr)
 /* not needed */
 void CloseFMV()
 {
-}
-
-/* call this for res change, alt tabbing and whatnot */
-extern void ReleaseBinkTextures()
-{
-	//ReleaseD3DTexture(&binkTexture);
 }
 
 void FindLightingValuesFromTriggeredFMV(unsigned char *bufferPtr, FMVTEXTURE *ftPtr)

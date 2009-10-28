@@ -7822,10 +7822,8 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 }
 
 /* more quad drawing functions than you can shake a stick at! */
-void DrawBinkFmv(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture)
+void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture)
 {
-//	OutputDebugString("drawing bink fmv\n");
-
 	/* set the texture */
 	LastError = d3d.lpD3DDevice->SetTexture(0, fmvTexture);
 

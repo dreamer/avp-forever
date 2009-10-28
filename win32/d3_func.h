@@ -115,7 +115,7 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, D3DTEXTURE bar_texture, int 
 void DrawQuad(int x, int y, int width, int height, int colour);
 void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 void ReleaseD3DTexture(D3DTEXTURE d3dTexture);
-void DrawBinkFmv(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture);
+void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture);
 void CreateScreenShotImage();
 D3DTEXTURE CheckAndLoadUserTexture(const char *fileName, int *width, int *height);
 D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool);

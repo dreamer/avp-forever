@@ -36,11 +36,6 @@
 #define stricmp		_stricmp
 #endif
 
-//extern void StartMenuBackgroundBink(void);
-//extern int PlayMenuBackgroundBink(void);
-//extern void EndMenuBackgroundBink(void);
-
-
 /* KJL 11:22:37 23/06/98 - Hopefully these will be the final menus! */
 
 extern int IDemandSelect(void);
@@ -127,8 +122,8 @@ void ThisFramesRenderingHasFinished(void);
 void PlayMenuMusic(void);
 void ThisFramesRenderingHasFinished(void);
 void EndMenuMusic(void);
-extern void EndMenuBackgroundBink(void);
-void PlayBinkedFMV(char *filenamePtr);
+extern void EndMenuBackgroundFmv(void);
+void PlayFMV(char *filenamePtr);
 int DirectPlay_ConnectingToLobbiedGame(char* playerName);
 int DirectPlay_ConnectingToSession();
 extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale);
@@ -396,7 +391,7 @@ int AvP_MainMenus(void)
 	TimeStampedMessage("ready to exit menus");
 
 	EndMenuMusic();
-	EndMenuBackgroundBink();
+	EndMenuBackgroundFmv();
 	TimeStampedMessage("after EndMenuMusic");
 
 	#if 0
@@ -429,7 +424,7 @@ void HandlePostGameFMVs(void)
 		{
 			if (MarineEpisodeToPlay==MAX_NO_OF_BASIC_MARINE_EPISODES-1)
 			{
-				PlayBinkedFMV("FMVs\\marineoutro.ogv");
+				PlayFMV("FMVs\\marineoutro.ogv");
 			}
 			break;
 		}
@@ -437,7 +432,7 @@ void HandlePostGameFMVs(void)
 		{
 			if (AlienEpisodeToPlay==MAX_NO_OF_BASIC_ALIEN_EPISODES-1)
 			{
-				PlayBinkedFMV("FMVs\\alienoutro.ogv");
+				PlayFMV("FMVs\\alienoutro.ogv");
 			}
 			break;
 		}
@@ -445,7 +440,7 @@ void HandlePostGameFMVs(void)
 		{
 			if (PredatorEpisodeToPlay==MAX_NO_OF_BASIC_PREDATOR_EPISODES-1)
 			{
-				PlayBinkedFMV("FMVs\\predatoroutro.ogv");
+				PlayFMV("FMVs\\predatoroutro.ogv");
 			}
 			break;
 		}
@@ -458,15 +453,15 @@ void HandlePreGameFMVs(void)
 		extern char LevelName[];
 		if (!stricmp("derelict",LevelName))
 		{
-			PlayBinkedFMV("FMVs\\marineintro.ogv");
+			PlayFMV("FMVs\\marineintro.ogv");
 		}
 		else if (!stricmp("temple",LevelName))
 		{
-			PlayBinkedFMV("FMVs\\alienintro.ogv");
+			PlayFMV("FMVs\\alienintro.ogv");
 		}
 		else if (!stricmp("fall",LevelName))
 		{
-			PlayBinkedFMV("FMVs\\predatorintro.ogv");
+			PlayFMV("FMVs\\predatorintro.ogv");
 		}
 	}
 }
@@ -4790,18 +4785,18 @@ static void InitMainMenusBackdrop(void)
 		CloudTable[x][y]=(FastRandom()&32767)+32768;
 	}
 	#endif
-	StartMenuBackgroundBink();
+	StartMenuBackgroundFmv();
 }
 
 
 
 extern void DrawMainMenusBackdrop(void)
 {
-	if (!PlayMenuBackgroundBink())
+	if (!PlayMenuBackgroundFmv())
 	{
 		DrawAvPMenuGfx(AVPMENUGFX_BACKDROP,0,0,ONE_FIXED+1,AVPMENUFORMAT_LEFTJUSTIFIED);
 	}
-	/* PlayMenuBackgroundBink takes care of rendering to screen */
+	/* PlayMenuBackgroundFmv takes care of rendering to screen */
 }
 
 int WhiteOfBrightness(int brightness)
