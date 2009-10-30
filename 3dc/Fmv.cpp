@@ -475,15 +475,16 @@ void AudioGrabThread(void *args)
 					RingBuffer_ReadData(audioData, fmvAudioStream.bufferSize);
 					AudioStream_WriteData(&fmvAudioStream, audioData, fmvAudioStream.bufferSize);
 
-					sprintf(buf, "send %d bytes to xaudio2\n", fmvAudioStream.bufferSize);
-					OutputDebugString(buf);
+//					sprintf(buf, "send %d bytes to xaudio2\n", fmvAudioStream.bufferSize);
+//					OutputDebugString(buf);
 
 					buffersAdded++;
 				}
 			}
 
 //			if ((buffersAdded == 2) && (started == false))
-			if ((readableAudio >= 8192 * 2) && (started == false))
+			//if ((readableAudio >= 8192) && (started == false))
+			if (started == false)
 			{
 				AudioStream_PlayBuffer(&fmvAudioStream);
 				started = true;
@@ -496,7 +497,7 @@ void AudioGrabThread(void *args)
 
 		timetoSleep = endTime - startTime;
 
-		Sleep( timetoSleep );
+		Sleep(dwQuantum - timetoSleep);
 	}
 	SetEvent(hEvent2);
 }
@@ -508,95 +509,95 @@ void TheoraDecodeThread(void *args)
 	int ret = 0;
 	int audioSize = 0;
 	int written = 0;
+	float** pcm = 0;
+	int samples = 0;
+	ogg_packet packet;
 
 	float startTime = static_cast<float>(timeGetTime());
 
 	// Read audio packets, sending audio data to the sound hardware.
 	// When it's time to display a frame, decode the frame and display it.
-	ogg_packet packet;
-
 	while (ReadPacket(&state, audio, &packet)) 
 	{
-		if (!fmvPlaying) break;
+		if (!fmvPlaying) 
+			break;
 
 		if (vorbis_synthesis(&audio->mVorbis.mBlock, &packet) == 0) 
 		{
+			// copy data from packet into vorbis objects for decoding
 			ret = vorbis_synthesis_blockin(&audio->mVorbis.mDsp, &audio->mVorbis.mBlock);
 			assert(ret == 0);
 		}
 
-		float** pcm = 0;
-		int samples = 0;
+		// get pointer to array of floating point values for sound samples
 		while ((samples = vorbis_synthesis_pcmout(&audio->mVorbis.mDsp, &pcm)) > 0) 
 		{
-//			if (fmvAudioBuffer) 
+			if (samples > 0) 
 			{
-				if (samples > 0) 
+				int dataSize = samples * audio->mVorbis.mInfo.channels;
+
+				if (audioDataBuffer == NULL)
+				{	
+					audioDataBuffer = new short[dataSize * 2];
+					audioDataBufferSize = dataSize * 2;
+				}	
+
+				if (audioDataBufferSize < dataSize)
 				{
-					int dataSize = samples * audio->mVorbis.mInfo.channels;
-
-					if (audioDataBuffer == NULL)
-					{	
-						audioDataBuffer = new short[dataSize * 2];
-						audioDataBufferSize = dataSize * 2;
-					}	
-
-					if (audioDataBufferSize < dataSize)
+					if (audioDataBuffer != NULL)
 					{
-						if (audioDataBuffer != NULL)
-						{
-							delete []audioDataBuffer;
-							OutputDebugString("deleted audioDataBuffer to resize\n");
-						}
-
-						audioDataBuffer = new short[dataSize * 2];
-						OutputDebugString("alloc audioDataBuffer\n");
-
-						if (!audioDataBuffer) 
-						{
-							OutputDebugString("Out of memory\n");
-							break;
-						}
-						audioDataBufferSize = dataSize * 2;
+						delete []audioDataBuffer;
+						OutputDebugString("deleted audioDataBuffer to resize\n");
 					}
 
-					short* p = audioDataBuffer;
-					for (int i = 0; i < samples; ++i) 
+					audioDataBuffer = new short[dataSize * 2];
+					OutputDebugString("alloc audioDataBuffer\n");
+
+					if (!audioDataBuffer) 
 					{
-						for (int j = 0; j < audio->mVorbis.mInfo.channels; ++j) 
-						{
-							int v = static_cast<int>(floorf(0.5f + pcm[j][i]*32767.0f));
-							if (v > 32767) v = 32767;
-							if (v < -32768) v = -32768;
-							*p++ = v;
-						}
+						OutputDebugString("Out of memory\n");
+						break;
 					}
-
-					audioSize = samples * audio->mVorbis.mInfo.channels * sizeof(short);
-
-					EnterCriticalSection(&audioCriticalSection);
-
-					int freeSpace = RingBuffer_GetWritableSpace();
-
-					/* if we can't fit all our data.. */
-					if (audioSize > freeSpace) 
-					{
-						char buf[100];
-						sprintf(buf, "not enough room for all data. need %d, have free %d\n", audioSize, freeSpace);
-						OutputDebugString(buf);
-//						audioSize = freeSpace;
-					}
-
-					written += RingBuffer_WriteData((char*)&audioDataBuffer[0], audioSize);
-
-					sprintf(buf, "send %d bytes to ring buffer\n", audioSize);
-					OutputDebugString(buf);
-
-					LeaveCriticalSection(&audioCriticalSection);
+					audioDataBufferSize = dataSize * 2;
 				}
-				ret = vorbis_synthesis_read(&audio->mVorbis.mDsp, samples);
-				assert(ret == 0);
+
+				short* p = audioDataBuffer;
+				for (int i = 0; i < samples; ++i) 
+				{
+					for (int j = 0; j < audio->mVorbis.mInfo.channels; ++j) 
+					{
+						int v = static_cast<int>(floorf(0.5f + pcm[j][i]*32767.0f));
+						if (v > 32767) v = 32767;
+						if (v < -32768) v = -32768;
+						*p++ = v;
+					}
+				}
+
+				audioSize = samples * audio->mVorbis.mInfo.channels * sizeof(short);
+
+				EnterCriticalSection(&audioCriticalSection);
+
+				int freeSpace = RingBuffer_GetWritableSpace();
+
+				/* if we can't fit all our data.. */
+				if (audioSize > freeSpace) 
+				{
+					char buf[100];
+					sprintf(buf, "not enough room for all data. need %d, have free %d\n", audioSize, freeSpace);
+					OutputDebugString(buf);
+				}
+
+				written += RingBuffer_WriteData((char*)&audioDataBuffer[0], audioSize);
+
+//					sprintf(buf, "send %d bytes to ring buffer\n", audioSize);
+//					OutputDebugString(buf);
+
+				LeaveCriticalSection(&audioCriticalSection);
 			}
+
+			// tell vorbis how many samples we consumed
+			ret = vorbis_synthesis_read(&audio->mVorbis.mDsp, samples);
+			assert(ret == 0);
 
 			// At this point we've written some audio data to the sound
 			// system. Now we check to see if it's time to display a video
@@ -618,15 +619,18 @@ void TheoraDecodeThread(void *args)
 			{
 				ogg_int64_t position = 0;
 
-				// bjd - temporary! use above code when ready
-//				float audio_time = static_cast<float>((timeGetTime() - startTime) / 100.0f);
-
 				float audio_time = float(AudioStream_GetNumSamplesPlayed(&fmvAudioStream)) / float(audio->mVorbis.mInfo.rate);
 
 				float video_time = static_cast<float>(th_granule_time(video->mTheora.mCtx, mGranulepos));
-				sprintf(buf, "video_time: %f audio_time: %f\n", video_time, audio_time);
+//				sprintf(buf, "video_time: %f audio_time: %f\n", video_time, audio_time);
+//				OutputDebugString(buf);
+
+				float timewritten = float(AudioStream_GetNumSamplesWritten(&fmvAudioStream)) / float(audio->mVorbis.mInfo.rate);
+
+				sprintf(buf, "audio_time: %f, timeWritten: %f\n", audio_time, timewritten);
 				OutputDebugString(buf);
 
+				// if audio is ahead of frame time, display a new frame
 				if ((audio_time > video_time))// || (!audio)) // do it anyway if we have no audio
 				{
 					// Decode one frame and display it. If no frame is available we
@@ -635,28 +639,8 @@ void TheoraDecodeThread(void *args)
 					if (ReadPacket(&state, video, &packet)) 
 					{
 						HandleTheoraData(video, &packet);
-
-/*
-						if (!audio)
-						{
-							// we have no audio, time playback based on video framerate.
-							float framerate = float(video->mTheora.mInfo.fps_numerator) /
-								float(video->mTheora.mInfo.fps_denominator);
-
-							Sleep(static_cast<DWORD>((1.0f / framerate) * 1000));
-						}
-
-						video_time = static_cast<float>(th_granule_time(video->mTheora.mCtx, mGranulepos));
-*/
 					}
 				}
-				else
-				{
-					Sleep((int)(audio_time - video_time));
-				}
-
-//				float framerate = float(video->mTheora.mInfo.fps_numerator) / float(video->mTheora.mInfo.fps_denominator);
-//				Sleep(static_cast<DWORD>((1.0f / framerate) * 1000));
 			}
 		}
 	}
@@ -992,8 +976,6 @@ extern void PlayFMV(char *filenamePtr)
 	CloseTheoraVideo();
 }
 
-int imageNum2 = 0;
-
 int NextFMVFrame()
 {
 	if (fmvPlaying == false)
@@ -1036,37 +1018,6 @@ int NextFMVFrame()
 		OutputDebugString("can't unlock FMV texture\n");
 		return 0;
 	}
-
-#if 0 // save frames to png files
-	char strPath[MAX_PATH];
-	char buf[100];
-#if 0
-	/* finds the path to the folder. On Win7, this would be "C:\Users\<username>\AppData\Local\ as an example */
-	if( FAILED(SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, strPath ) ) )
-	{
-		return 0;
-	}
-
-	PathAppend( strPath, TEXT( "Fox\\Aliens versus Predator\\" ) );
-	sprintf(buf, "image_%d.png", imageNum2);
-	PathAppend( strPath, buf);
-#endif
-
-	std::string thepath = "D:\\";
-	sprintf(buf, "image_%d.png", imageNum2);
-	thepath += buf;
-
-	/* save surface to image file */
-	if (FAILED(D3DXSaveTextureToFile(thepath.c_str(), D3DXIFF_BMP, mDisplayTexture, NULL)))
-	{
-		//LogDxError(LastError, __LINE__, __FILE__);
-		OutputDebugString("Save Surface to file failed!!!\n");
-	}
-
-	imageNum2++;
-#endif
-
-//	OutputDebugString("NextFMVFrame processed a frame\n");
 
 	frameReady = false;
 

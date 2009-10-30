@@ -2711,6 +2711,9 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, i
 	streamStruct->currentBuffer++;
 	streamStruct->currentBuffer %= streamStruct->bufferCount;
 
+	// size in bytes divided by bits per sample (divided by 8 to get the bytes per sample) also dividded by the number of channels
+	streamStruct->totalSamplesWritten += ((size / (streamStruct->bitsPerSample / 8)) / streamStruct->numChannels);
+
 	return amountWritten;
 }
 
@@ -2718,8 +2721,8 @@ int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, i
 {
 	WAVEFORMATEX waveFormat;
 	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
-	waveFormat.nChannels		= channels;				//how many channels the OGG contains
-	waveFormat.wBitsPerSample	= 16;					//always 16 in OGG
+	waveFormat.nChannels		= channels;	
+	waveFormat.wBitsPerSample	= 16;					//we'll be using 16
 	waveFormat.nSamplesPerSec	= rate;	
 	waveFormat.nBlockAlign		= waveFormat.nChannels * waveFormat.wBitsPerSample / 8;	//what block boundaries exist
 	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
@@ -2747,9 +2750,14 @@ int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, i
 		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
 	}
 
+	streamStruct->bitsPerSample = waveFormat.wBitsPerSample;
+	streamStruct->numChannels = waveFormat.nChannels;
+	streamStruct->rate = waveFormat.nSamplesPerSec;
+
 	streamStruct->currentBuffer = 0;
 	streamStruct->bufferSize = STREAMBUFFERSIZE;
 	streamStruct->bufferCount = STREAMBUFFERCOUNT;
+	streamStruct->totalSamplesWritten = 0;
 
 	return 0;
 }
@@ -2768,6 +2776,11 @@ UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
 	streamStruct->pSourceVoice->GetState( &state );
 
 	return state.SamplesPlayed;
+}
+
+UINT64 AudioStream_GetNumSamplesWritten(StreamingAudioBuffer *streamStruct)
+{
+	return streamStruct->totalSamplesWritten;
 }
 
 int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)

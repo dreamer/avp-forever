@@ -15,6 +15,10 @@ struct StreamingAudioBuffer
 	int bufferSize;
 	int bufferCount;
 	int currentBuffer;
+	int numChannels;
+	int rate;
+	int bitsPerSample;
+	UINT64 totalSamplesWritten;
 	unsigned char *buffers;
 	IXAudio2SourceVoice *pSourceVoice;
 };
@@ -67,6 +71,7 @@ int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct);
 int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct);
 int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct);
 UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct);
+UINT64 AudioStream_GetNumSamplesWritten(StreamingAudioBuffer *streamStruct);
 
 };
 
