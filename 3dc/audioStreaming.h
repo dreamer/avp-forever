@@ -7,9 +7,6 @@ extern "C" {
 
 #include <xaudio2.h>
 
-const static int STREAMBUFFERSIZE = (4096);//32768
-const static int STREAMBUFFERCOUNT = 3;
-
 struct StreamingAudioBuffer
 {
 	int bufferSize;
@@ -62,14 +59,14 @@ struct StreamingAudioBuffer
 
 #endif
 
+int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate, int bufferSize, int numBuffers);
+int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct);
+int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct);
+int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct);
+int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, int volume);
+int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, int size);
 int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct);
 int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct);
-int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate);
-int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, int size);
-int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, int volume);
-int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct);
-int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct);
-int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct);
 UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct);
 UINT64 AudioStream_GetNumSamplesWritten(StreamingAudioBuffer *streamStruct);
 

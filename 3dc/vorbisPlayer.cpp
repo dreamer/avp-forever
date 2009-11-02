@@ -22,12 +22,10 @@ extern "C"
 	extern int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize);
 	extern int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset);
 	extern void ProcessStreamingAudio();
-//	extern int SetVorbisBufferVolume(int volume);
 	extern int SetStreamingMusicVolume(int volume);
 	extern int StopVorbisBuffer();
 	extern int CDPlayerVolume; // volume control from menus
 	extern bool PlayVorbisBuffer();
-//	extern HANDLE hHandles[2];
 }
 
 FILE* file;
@@ -55,8 +53,6 @@ static char *audioData = 0;
 
 int ReadVorbisData(char *audioBuffer, int sizeToRead, int offset)
 {
-//	assert(offset < bufferSize);
-
 	int bytesReadTotal = 0;
 	int bytesReadPerLoop = 0;
 
@@ -135,27 +131,15 @@ void LoadVorbisTrack(int track)
 	LogString("\t Vorbis frequency: " + IntToString(pInfo->rate));
 
 	/* create the audio buffer (directsound or whatever) */
-	if (AudioStream_CreateBuffer(&vorbisStream, pInfo->channels, pInfo->rate) < 0)
+	if (AudioStream_CreateBuffer(&vorbisStream, pInfo->channels, pInfo->rate, 32768, 3) < 0)
 	{
 		LogErrorString("Can't create audio stream buffer for OGG Vorbis!");
 	}
-/*
-	if (CreateVorbisAudioBuffer(pInfo->channels, pInfo->rate, &bufferSize) < 0)
-	{
-		LogErrorString("Can't create audio buffer for OGG Vorbis!");
-	}
-*/
+
 	/* init some temp audio data storage */
 	audioData = new char[vorbisStream.bufferSize];
 
-//	halfBufferSize = bufferSize / 2;
-
-#ifdef WIN32
 	int totalRead = ReadVorbisData(audioData, vorbisStream.bufferSize, 0);
-#endif
-#ifdef _XBOX
-//	ProcessStreamingAudio();
-#endif
 
 	/* fill entire buffer initially */
 #ifdef WIN32
@@ -174,8 +158,6 @@ void UpdateVorbisBuffer(void *arg)
 
 	while (oggIsPlaying)
 	{
-#if 1//#ifdef _XBOX
-//		ProcessStreamingAudio();
 		Sleep( dwQuantum );
 
 		int numBuffersFree = AudioStream_GetNumFreeBuffers(&vorbisStream);
@@ -185,25 +167,6 @@ void UpdateVorbisBuffer(void *arg)
 			ReadVorbisData(audioData, vorbisStream.bufferSize, 0);
 			AudioStream_WriteData(&vorbisStream, audioData, vorbisStream.bufferSize);
 		}
-#else
-		int waitValue = WaitForMultipleObjects(2, hHandles, FALSE, 1);
-
-		if ((waitValue != WAIT_TIMEOUT) && (waitValue != WAIT_FAILED))
-		{
-			if (waitValue == 0) 
-			{
-				lockOffset = 0;
-			}
-			else 
-			{
-				lockOffset = halfBufferSize;
-			}
-
-			int totalRead = ReadVorbisData(halfBufferSize, 0);
-
-			UpdateVorbisAudioBuffer(audioData, totalRead, lockOffset);
-		}
-#endif
 	}
 	SetEvent(hPlaybackThreadFinished);
 }

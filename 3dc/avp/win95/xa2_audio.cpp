@@ -379,9 +379,6 @@ enum
 static unsigned int SoundMaxHW;
 extern int GlobalFrameCounter;
 
-// Test.
-//LPDIRECTSOUNDBUFFER		NullDSBufferP = NULL;
-//LPDIRECTSOUND3DBUFFER	NullDS3DBufferP = NULL;
 /* Patrick 5/6/97 -------------------------------------------------------------
   Internal functions
   ----------------------------------------------------------------------------*/
@@ -489,344 +486,6 @@ int PlatStartSoundSys()
 	XA2DSPSettings.SrcChannelCount = 1;
 	XA2DSPSettings.DstChannelCount = deviceDetails.OutputFormat.Format.nChannels;
 	XA2DSPSettings.pMatrixCoefficients = matrix;
-
-#if 0
-	/* Create the ds object */
-	LastError = DirectSoundCreate(NULL, &DSObject, NULL);
-	if (FAILED(LastError))
-	{	
-		LogDxError(LastError, __LINE__, __FILE__);
-		//LogErrorString("Couldn't create DirectSound object", __LINE__, __FILE__);
-		PlatEndSoundSys();
-		return 0;
-	}
-
-	db_log5("Made DSO");
-	LOG_RC();
-
-	/* Set cooperative level */
-	LastError = IDirectSound_SetCooperativeLevel(DSObject, hWndMain, DSSCL_PRIORITY);
-	if (FAILED(LastError))
-	{		
-		LogDxError(LastError, __LINE__, __FILE__);
-		//LogErrorString("Couldn't set DirectSound cooperative level", __LINE__, __FILE__);
-		PlatEndSoundSys();
-		return 0;
-	}
-
-	/* Create primary buffer & set format */
-	{
-		DSBUFFERDESC dsBuffDesc;
-		WAVEFORMATEX wfex;		
-    	
-		/* set format description */
-    	memset(&wfex, 0, sizeof(WAVEFORMATEX));
-    	wfex.wFormatTag			= WAVE_FORMAT_PCM;
-    	wfex.nChannels			= 2;
-    	wfex.nSamplesPerSec		= 44100;//22050;
-    	wfex.nBlockAlign		= 4;
-    	wfex.nAvgBytesPerSec	= wfex.nSamplesPerSec * wfex.nBlockAlign;
-    	wfex.wBitsPerSample		= 16;
-		wfex.cbSize				= 0;
-
-		/* set buffer description */
-		memset(&dsBuffDesc,0,sizeof(DSBUFFERDESC));
-		dsBuffDesc.dwSize			= sizeof(DSBUFFERDESC);
-		dsBuffDesc.dwFlags			= (DSBCAPS_PRIMARYBUFFER | DSBCAPS_CTRL3D | DSBCAPS_LOCHARDWARE | DSBCAPS_CTRLVOLUME);
-		dsBuffDesc.dwBufferBytes	= 0;
-		dsBuffDesc.lpwfxFormat		= NULL;
-	
-		LastError = IDirectSound_CreateSoundBuffer(DSObject, &dsBuffDesc, &DSPrimaryBuffer, NULL);	
-		if (FAILED(LastError))
-		{	
-			LogDxError(LastError, __LINE__, __FILE__);
-			//LogErrorString("Couldn't create DirectSound primary buffer", __LINE__, __FILE__);
-			PlatEndSoundSys();
-			return 0;
-		}
-
-		LastError = IDirectSoundBuffer_SetFormat(DSPrimaryBuffer, &wfex);	
-		/* If the format set failed just continue with the default format */ 
-	}
-
-	db_log5("Make DSPB");
-	LOG_RC();
-
-	/* Get and log some caps. */
-	ZeroMemory(&caps, sizeof(DSCAPS));
-	caps.dwSize = sizeof(DSCAPS);
-
-	IDirectSound_GetCaps(DSObject, &caps);
-
-	db_logf1(("Number of HW buffers %i", caps.dwMaxHwMixingStaticBuffers));
-	db_logf1(("Number of HW 3D buffers %i", caps.dwFreeHw3DStaticBuffers));
-
-	if (caps.dwFreeHw3DStaticBuffers)
-	{
-		SoundConfig.flags |= (SOUND_3DHW | SOUND_USE_3DHW);
-	}
-	if (caps.dwMaxHwMixingStaticBuffers)
-	{
-		SoundMaxHW = min(caps.dwMaxHwMixingStaticBuffers - 1,SOUND_MAXACTIVE); // Always leave one free. 
-	}
-	else
-	{
-		SoundMaxHW = 0;
-	}
-	SoundMinBufferFree = SoundMaxHW / 2;
-
-	/* Create a Listener. */
-	LastError = IDirectSoundBuffer_QueryInterface(DSPrimaryBuffer, IID_IDirectSound3DListener, (void **) &DS3DListener);
-	if (FAILED(LastError))
-	{	
-		LogDxError(LastError, __LINE__, __FILE__);
-		PlatEndSoundSys();
-		return 0;
-	}
-
-	db_log5("Made a DS3DL");
-	LOG_RC();
-
-	/* Set the Listener's data. */
-	{
-		DS3DLISTENER listener;
-		memset(&listener, 0, sizeof(DS3DLISTENER));
-		listener.dwSize				= sizeof(DS3DLISTENER);
-		listener.vPosition.x		= 0.0F;
-		listener.vPosition.y		= 0.0F;
-		listener.vPosition.z		= 0.0F;
-		listener.vVelocity.x		= 0.0F;
-		listener.vVelocity.y		= 0.0F;
-		listener.vVelocity.z		= 0.0F;
-		listener.vOrientFront.x		= 0.0F;
-		listener.vOrientFront.y		= 0.0F;
-		listener.vOrientFront.z		= 1.0F;
-		listener.vOrientTop.x		= 0.0F;
-		listener.vOrientTop.y		= -1.0F;
-		listener.vOrientTop.z		= 0.0F;
-		listener.flDistanceFactor	= 0.001F;
-		listener.flRolloffFactor	= 0.0F;
-		listener.flDopplerFactor	= DS3D_DEFAULTDOPPLERFACTOR;
-
-		LastError = IDirectSound3DListener_SetAllParameters(DS3DListener, &listener, DS3D_IMMEDIATE);
-		if (FAILED(LastError))
-		{	
-			LogDxError(LastError, __LINE__, __FILE__);
-			PlatEndSoundSys();
-			return 0;
-		}
-	}
-
-	/* Create a NULL secondary buffer. */
-	{
-		DSBUFFERDESC			dsBuffDesc;
-		WAVEFORMATEX			wfex;		
-
-		/* Set buffer desciption. */
-		memset(&dsBuffDesc, 0, sizeof(DSBUFFERDESC));
-		dsBuffDesc.dwSize			= sizeof(DSBUFFERDESC);
-		dsBuffDesc.dwFlags			= (DSBCAPS_STATIC | DSBCAPS_CTRL3D | DSBCAPS_MUTE3DATMAXDISTANCE);
-		dsBuffDesc.dwBufferBytes	= 8;
-		dsBuffDesc.lpwfxFormat		= &wfex;
-
-		/* Set the format. */
-		wfex.wFormatTag				= WAVE_FORMAT_PCM;
-		wfex.nChannels				= 1;
-		wfex.nSamplesPerSec			= 11025;
-		wfex.nBlockAlign			= 1;
-	    wfex.nAvgBytesPerSec		= wfex.nSamplesPerSec * wfex.nBlockAlign;
-	   	wfex.wBitsPerSample			= 8;
-	  	wfex.cbSize					= 0;
-	   								
-		LastError = IDirectSound_CreateSoundBuffer(DSObject, &dsBuffDesc, &NullDSBufferP, NULL);
-		if (FAILED(LastError))
-		{		
-			LogDxError(LastError, __LINE__, __FILE__);
-			PlatEndSoundSys();
-			return 0;
-		}
-
-		/* Get the 3D Buffer. */
-		LastError = IDirectSoundBuffer_QueryInterface(NullDSBufferP, IID_IDirectSound3DBuffer, (void **) &NullDS3DBufferP);
-		if (FAILED(LastError))
-		{	
-			LogDxError(LastError, __LINE__, __FILE__);
-			PlatEndSoundSys();
-			return 0;
-		}
-
-		IDirectSound_GetCaps(DSObject, &caps);
-
-		db_logf1(("Number of HW buffers %i", caps.dwMaxHwMixingStaticBuffers));
-		db_logf1(("Number of HW 3D buffers %i", caps.dwFreeHw3DStaticBuffers));
-
-		/* Get the Property set. */
-		LastError = IDirectSound3DBuffer_QueryInterface
-			(
-				NullDS3DBufferP,
-				IID_IKsPropertySet,
-				(void**) &PropSetP
-			);
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-			/* FALSE property set. */
-			db_log1("Error: Failed to get the property set.");
-		}
-
-		db_log5("Made a PropSet");
-		LOG_RC();
-
-		/* Test for the property set we want to use. */
-		if(PropSetP)
-		{
-			unsigned long support;
-
-  			/* Voice Management. */
-			IKsPropertySet_QuerySupport
-				(
-					PropSetP,								   
-					DSPROPSETID_VoiceManager,
-					DSPROPERTY_VMANAGER_MODE,
-					&support
-				);
-
-			if(support == (KSPROPERTY_SUPPORT_GET | KSPROPERTY_SUPPORT_SET))
-			{
-				VmMode mode = DSPROPERTY_VMANAGER_MODE_AUTO;
-
-				db_log1("Voice Management active.");
-				SoundConfig.flags |= SOUND_VOICE_MGER;
-
-				// Set the mode we want.
-				LastError = IKsPropertySet_Set
-				(
-					PropSetP,
-					DSPROPSETID_VoiceManager,
-		        	DSPROPERTY_VMANAGER_MODE,
-			        NULL,
-		    	    0,
-		        	&mode,
-			        sizeof(VmMode)
-				);
-			}
-			else
-			{
-				db_logf1(("FALSE voice management. Support %x", support));
-			}
-
-			/* EAX support. */
-			IKsPropertySet_QuerySupport
-				(
-					PropSetP,
-					DSPROPSETID_EAX_ReverbProperties,
-					DSPROPERTY_EAX_ALL,
-					&support
-				);
-
-			if(support == (KSPROPERTY_SUPPORT_GET | KSPROPERTY_SUPPORT_SET))
-			{
-				db_log1("EAX suppport.");
-				SoundConfig.flags |= SOUND_EAX;
-
-				// Set a default value.
-				PlatSetEnviroment(EAX_ENVIRONMENT_DEFAULT, EAX_REVERBMIX_USEDISTANCE);
-			}
-			else
-			{
-				db_logf1(("FALSE EAX support. Support %x", support));
-			}
-		}
-
-		/* If we have Voice Management release everything and reaquire to free up one buffer. */
-		if(SoundConfig.flags & SOUND_VOICE_MGER)
-		{
-			IDirectSound_GetCaps(DSObject, &caps);
-
-			db_logf1(("Number of HW buffers %i", caps.dwMaxHwMixingStaticBuffers));
-			db_logf1(("Number of HW 3D buffers %i", caps.dwFreeHw3DStaticBuffers));
-
-			/* Release the Property Set. */
-			IKsPropertySet_Release(PropSetP);
-			PropSetP = NULL;
-
-			/* Release the Null buffers. */
-			if (NullDS3DBufferP)
-			{
-				IDirectSoundBuffer_Release(NullDS3DBufferP);
-				NullDS3DBufferP = NULL;
-			}
-
-			if (NullDSBufferP)
-			{
-				IDirectSoundBuffer_Release(NullDSBufferP);
-				NullDSBufferP = NULL;
-			}
-
-			/* Remake the buffers. */
-			LastError = IDirectSound_CreateSoundBuffer(DSObject, &dsBuffDesc, &NullDSBufferP, NULL);
-			if (FAILED(LastError))
-			{	
-				LogDxError(LastError, __LINE__, __FILE__);
-				db_log1("Error: Remaking buffer.");
-			}
-
-			LastError = IDirectSoundBuffer_QueryInterface(NullDSBufferP, IID_IDirectSound3DBuffer, (void **) &NullDS3DBufferP);
-			if (FAILED(LastError))
-			{		
-				LogDxError(LastError, __LINE__, __FILE__);
-				db_log1("Error: Remaking buffer.");
-			}
-
-			/* Get the Property set. */
-			LastError = IDirectSound3DBuffer_QueryInterface
-				(
-					NullDS3DBufferP,
-					IID_IKsPropertySet,
-					(void**) &PropSetP
-				);
-		   	if (FAILED(LastError))
-			{
-				LogDxError(LastError, __LINE__, __FILE__);
-				/* FALSE property set. */
-				db_log1("Error: Failed to get the property set again.");
-			}
-
-			/* Now recheck the number of free buffers. */
-			IDirectSound_GetCaps(DSObject, &caps);
-
-			db_logf1(("Number of HW buffers %i", caps.dwMaxHwMixingStaticBuffers));
-			db_logf1(("Number of HW 3D buffers %i", caps.dwFreeHw3DStaticBuffers));
-			if (caps.dwMaxHwMixingStaticBuffers)
-			{
-				SoundMaxHW = min(caps.dwMaxHwMixingStaticBuffers - 1,SOUND_MAXACTIVE); // Always leave one free. 
-			}
-			else
-			{
-				SoundMaxHW = 0;
-			}
-			SoundMinBufferFree = SoundMaxHW / 2;
-		}
-
-		/* Do we need the property set. */
-		if (PropSetP && (~SoundConfig.flags & SOUND_EAX) && (~SoundConfig.flags & SOUND_VOICE_MGER))
-		{
-			IKsPropertySet_Release(PropSetP);
-			PropSetP = NULL;
-			db_log1("Releasing the property set.");
-		}		
-
-	}
-
-	/* Play the primary buffer */
-	LastError = IDirectSoundBuffer_Play(DSPrimaryBuffer, 0, 0, DSBPLAY_LOOPING);
-	if (FAILED(LastError))
-	{	
-		LogDxError(LastError, __LINE__, __FILE__);
-		PlatEndSoundSys();
-		return 0;
-	}
-#endif
 
 	LogString("Initialised XAudio2 successfully");
 
@@ -2693,6 +2352,109 @@ void UpdateSoundFrequencies(void)
 	}
 #endif
 }
+/*
+class VoiceCallback : public IXAudio2VoiceCallback
+{
+public:
+    HANDLE hBufferEndEvent;
+    VoiceCallback(): hBufferEndEvent( CreateEvent( NULL, FALSE, FALSE, NULL ) ){}
+    ~VoiceCallback(){ CloseHandle( hBufferEndEvent ); }
+
+    //Called when the voice has just finished playing a contiguous audio stream.
+    void OnStreamEnd() { SetEvent( hBufferEndEvent ); }
+
+    //Unused methods are stubs
+    void OnVoiceProcessingPassEnd() { }
+    void OnVoiceProcessingPassStart(UINT32 SamplesRequired) {    }
+    void OnBufferEnd(void * pBufferContext)    { }
+    void OnBufferStart(void * pBufferContext) {    }
+    void OnLoopEnd(void * pBufferContext) {    }
+    void OnVoiceError(void * pBufferContext, HRESULT Error) { }
+};
+*/
+struct StreamingVoiceContext : public IXAudio2VoiceCallback
+{
+	STDMETHOD_( void, OnVoiceProcessingPassStart )( UINT32 )
+	{
+	}
+	STDMETHOD_( void, OnVoiceProcessingPassEnd )()
+	{
+	}
+	STDMETHOD_( void, OnStreamEnd )()
+	{
+	}
+	STDMETHOD_( void, OnBufferStart )( void* )
+	{
+	}
+	STDMETHOD_( void, OnBufferEnd )( void* )
+	{
+//		OutputDebugString("OnBufferEnd signalled...\n");
+		SetEvent( hBufferEndEvent );
+	}
+	STDMETHOD_( void, OnLoopEnd )( void* )
+	{
+	}
+	STDMETHOD_( void, OnVoiceError )( void*, HRESULT )
+	{
+	}
+
+    HANDLE hBufferEndEvent;
+
+            StreamingVoiceContext() : hBufferEndEvent( CreateEvent( NULL, FALSE, FALSE, NULL ) )
+            {
+            }
+    virtual ~StreamingVoiceContext()
+    {
+        CloseHandle( hBufferEndEvent );
+    }
+};
+
+int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate, int bufferSize, int numBuffers)
+{
+	WAVEFORMATEX waveFormat;
+	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
+	waveFormat.nChannels		= channels;	
+	waveFormat.wBitsPerSample	= 16;					//we'll be using 16
+	waveFormat.nSamplesPerSec	= rate;	
+	waveFormat.nBlockAlign		= waveFormat.nChannels * waveFormat.wBitsPerSample / 8;	//what block boundaries exist
+	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
+	waveFormat.cbSize			= sizeof(waveFormat);	//how big this structure is
+
+	StreamingVoiceContext voiceContext;
+
+	// create the source voice for playing the sound
+	LastError = pXAudio2->CreateSourceVoice(&streamStruct->pSourceVoice, &waveFormat);
+//	LastError = pXAudio2->CreateSourceVoice(&streamStruct->pSourceVoice, &waveFormat, 0, 1.0f, &voiceContext);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return -1;
+	}
+/*
+	LastError = streamStruct->pSourceVoice->Start(0, XAUDIO2_COMMIT_NOW);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return -1;
+	}
+*/
+	streamStruct->buffers = new unsigned char[bufferSize * numBuffers];
+	if (streamStruct->buffers == NULL)
+	{
+		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
+	}
+
+	streamStruct->bitsPerSample = waveFormat.wBitsPerSample;
+	streamStruct->numChannels = waveFormat.nChannels;
+	streamStruct->rate = waveFormat.nSamplesPerSec;
+
+	streamStruct->currentBuffer = 0;
+	streamStruct->bufferSize = bufferSize;
+	streamStruct->bufferCount = numBuffers;
+	streamStruct->totalSamplesWritten = 0;
+
+	return 0;
+}
 
 int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, int size)
 {
@@ -2715,51 +2477,6 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, i
 	streamStruct->totalSamplesWritten += ((size / (streamStruct->bitsPerSample / 8)) / streamStruct->numChannels);
 
 	return amountWritten;
-}
-
-int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate)
-{
-	WAVEFORMATEX waveFormat;
-	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
-	waveFormat.nChannels		= channels;	
-	waveFormat.wBitsPerSample	= 16;					//we'll be using 16
-	waveFormat.nSamplesPerSec	= rate;	
-	waveFormat.nBlockAlign		= waveFormat.nChannels * waveFormat.wBitsPerSample / 8;	//what block boundaries exist
-	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
-	waveFormat.cbSize			= sizeof(waveFormat);	//how big this structure is
-
-	// create the source voice for playing the sound
-	LastError = pXAudio2->CreateSourceVoice(&streamStruct->pSourceVoice, &waveFormat);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return -1;
-	}
-/*
-	LastError = streamStruct->pSourceVoice->Start(0, XAUDIO2_COMMIT_NOW);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return -1;
-	}
-*/
-	// 3 x 32768 chunk
-	streamStruct->buffers = new unsigned char[STREAMBUFFERSIZE * STREAMBUFFERCOUNT];
-	if (streamStruct->buffers == NULL)
-	{
-		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
-	}
-
-	streamStruct->bitsPerSample = waveFormat.wBitsPerSample;
-	streamStruct->numChannels = waveFormat.nChannels;
-	streamStruct->rate = waveFormat.nSamplesPerSec;
-
-	streamStruct->currentBuffer = 0;
-	streamStruct->bufferSize = STREAMBUFFERSIZE;
-	streamStruct->bufferCount = STREAMBUFFERCOUNT;
-	streamStruct->totalSamplesWritten = 0;
-
-	return 0;
 }
 
 int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
@@ -2789,7 +2506,7 @@ int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)
 
 	streamStruct->pSourceVoice->GetState( &state );
 
-	return ((STREAMBUFFERSIZE * STREAMBUFFERCOUNT) - (state.BuffersQueued * STREAMBUFFERSIZE));
+	return ((streamStruct->bufferSize * streamStruct->bufferCount) - (state.BuffersQueued * streamStruct->bufferSize));
 }
 
 int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, int volume)

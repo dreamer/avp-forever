@@ -129,7 +129,6 @@ typedef struct _OggPlayRGBChannels {
 
 extern unsigned char DebouncedGotAnyKey;
 
-//bool FmvWait();
 int NextFMVFrame();
 void FmvClose();
 int GetVolumeOfNearestVideoScreen(void);
@@ -147,7 +146,7 @@ std::ifstream oggFile;
 ogg_sync_state state;
 char buf[100];
 bool frameReady = false;
-bool audioReady = false;
+//bool audioReady = false;
 bool fmvPlaying = false;
 bool MenuBackground = false;
 
@@ -156,7 +155,7 @@ int textureHeight = 0;
 int frameWidth = 0;
 int frameHeight = 0;
 
-int playing = false;
+int playing = 0;
 
 th_ycbcr_buffer buffer;
 
@@ -174,30 +173,16 @@ OggStream* audio = NULL;
 
 StreamingAudioBuffer fmvAudioStream;
 
-bool initialFill = false;
-
-long writeOffset = 0;
-long playOffset = 0;
-long lastPlayCursor = 0;
-long totalBytesPlayed = 0;
-long totalBytesWritten = 0;
-float totalAudioTimePlayed = 0.0f;
-
 /* audio buffer for liboggplay */
 static short	*audioDataBuffer = NULL;
 static int		audioDataBufferSize = 0;
-static int		audioBytesPerSec = 0;
-unsigned char	*testBuffer = NULL;
-
-int count = 0;
+char *audioData = NULL;
 
 FILE* file;
 vorbis_info *pInfo;
 OggVorbis_File oggFile2;
 
 bool oggIsPlaying = false;
-unsigned int bufferSize2 = 0;
-static char *audioData = 0;
 
 void TheoraInitForData(OggStream* stream) 
 {
@@ -445,7 +430,6 @@ bool started = false;
 void AudioGrabThread(void *args)
 {
 	DWORD dwQuantum = 1000 / 60;
-	char buf[100];
 
 #ifdef USE_XAUDIO2
 	CoInitializeEx( NULL, COINIT_MULTITHREADED );
@@ -513,8 +497,6 @@ void TheoraDecodeThread(void *args)
 	int samples = 0;
 	ogg_packet packet;
 
-	float startTime = static_cast<float>(timeGetTime());
-
 	// Read audio packets, sending audio data to the sound hardware.
 	// When it's time to display a frame, decode the frame and display it.
 	while (ReadPacket(&state, audio, &packet)) 
@@ -540,7 +522,7 @@ void TheoraDecodeThread(void *args)
 				{	
 					audioDataBuffer = new short[dataSize * 2];
 					audioDataBufferSize = dataSize * 2;
-				}	
+				}
 
 				if (audioDataBufferSize < dataSize)
 				{
@@ -579,12 +561,18 @@ void TheoraDecodeThread(void *args)
 
 				int freeSpace = RingBuffer_GetWritableSpace();
 
+				// Sleep here if we cant fill the ring buffer?
+
 				/* if we can't fit all our data.. */
 				if (audioSize > freeSpace) 
 				{
-					char buf[100];
-					sprintf(buf, "not enough room for all data. need %d, have free %d\n", audioSize, freeSpace);
-					OutputDebugString(buf);
+					while (audioSize > RingBuffer_GetWritableSpace())
+					{
+						Sleep(16);
+					}
+					//char buf[100];
+					//sprintf(buf, "not enough room for all data. need %d, have free %d\n", audioSize, freeSpace);
+					//OutputDebugString(buf);
 				}
 
 				written += RingBuffer_WriteData((char*)&audioDataBuffer[0], audioSize);
@@ -627,8 +615,8 @@ void TheoraDecodeThread(void *args)
 
 				float timewritten = float(AudioStream_GetNumSamplesWritten(&fmvAudioStream)) / float(audio->mVorbis.mInfo.rate);
 
-				sprintf(buf, "audio_time: %f, timeWritten: %f\n", audio_time, timewritten);
-				OutputDebugString(buf);
+//				sprintf(buf, "audio_time: %f, timeWritten: %f\n", audio_time, timewritten);
+//				OutputDebugString(buf);
 
 				// if audio is ahead of frame time, display a new frame
 				if ((audio_time > video_time))// || (!audio)) // do it anyway if we have no audio
@@ -730,7 +718,7 @@ int OpenTheoraVideo(const char *fileName)
 		OutputDebugString(buf);
 
 		/* init audio buffer here */
-		if (AudioStream_CreateBuffer(&fmvAudioStream, audio->mVorbis.mInfo.channels, audio->mVorbis.mInfo.rate) < 0)
+		if (AudioStream_CreateBuffer(&fmvAudioStream, audio->mVorbis.mInfo.channels, audio->mVorbis.mInfo.rate, 4096, 3) < 0)
 		{
 			LogErrorString("Can't create audio stream buffer for OGG Vorbis!");
 		}
@@ -748,27 +736,6 @@ int OpenTheoraVideo(const char *fileName)
 								video->mTheora.mInfo.frame_height);
 		OutputDebugString(buf);
 	}
-#if 0
-	file = avp_fopen("","rb");
-	if (!file) 
-	{
-
-		LogErrorString("Can't find OGG Vorbis file ");
-//		return;
-	}
-
-	if (ov_open_callbacks(file, &oggFile2, NULL, 0, OV_CALLBACKS_DEFAULT) < 0) 
-	{
-//		LogErrorString("File " + TrackList[track] + "is not a valid OGG Vorbis file");
-		fclose(file);
-//		return;
-	}
-
-	// get some audio info
-	pInfo = ov_info(&oggFile2, -1);
-
-	bufferSize2 = 32768;
-#endif
 
 	if (!mDisplayTexture)
 	{
@@ -781,7 +748,6 @@ int OpenTheoraVideo(const char *fileName)
 
 		/* create a new texture, passing width and height which will be set to the actual size of the created texture */
 		mDisplayTexture = CreateFmvTexture(&textureWidth, &textureHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
-
 		if (!mDisplayTexture)
 		{
 			OutputDebugString("can't create FMV texture\n");
@@ -827,7 +793,7 @@ int CloseTheoraVideo()
 
 	/* wait until TheoraDecodeThread has finished running before continuing */ 
 	WaitForMultipleObjects(1, &hEvent1, TRUE, INFINITE);
-//	WaitForMultipleObjects(1, &hEvent2, TRUE, INFINITE);
+	WaitForMultipleObjects(1, &hEvent2, TRUE, INFINITE);
 
 	OutputDebugString("CloseTheoraVideo..\n");
 
@@ -861,24 +827,15 @@ int CloseTheoraVideo()
 		mDisplayTexture->Release();
 		mDisplayTexture = NULL;
 	}
-/*
-	if (fmvAudioBuffer)
-	{
-		fmvAudioBuffer->Release();
-		fmvAudioBuffer = NULL;
-	}
-*/
+
 #ifdef USE_LIBSNDFILE
 	sf_close(sndFile);
 #endif
 
-	RingBuffer_Unload();
+	AudioStream_StopBuffer(&fmvAudioStream);
+	AudioStream_ReleaseBuffer(&fmvAudioStream);
 
-	if (testBuffer != NULL)
-	{
-		delete []testBuffer;
-		testBuffer = NULL;
-	}
+	RingBuffer_Unload();
 
 	DeleteCriticalSection(&CriticalSection);
 	DeleteCriticalSection(&audioCriticalSection);
@@ -1208,177 +1165,6 @@ void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb)
 	_m_empty();
 #endif
 }
-
-#if 0
-int GetWritableBufferSize()
-{
-	DWORD playPosition = 0;
-	DWORD writePosition = 0;
-
-	int writeableSpace = 0;
-
-	fmvAudioBuffer->GetCurrentPosition(&playPosition, &writePosition);
-
-//	if (!playPosition && !writePosition)
-//		return fullBufferSize;
-
-	
-	writeableSpace = fullBufferSize - (writeOffset - playPosition);
-
-	if (writeableSpace > fullBufferSize)
-		writeableSpace -= fullBufferSize;
-
-	if (writeableSpace < 0)
-		return 0;
-
-	return writeableSpace;
-
-/*
-	if (playPosition > writeOffset)
-	{
-		writeableSpace = playPosition - writeOffset;
-	}
-	else if (playPosition < writeOffset)
-	{
-		// Play cursor has wrapped
-		writeableSpace = (fullBufferSize - writeOffset) + playPosition;
-	}
-*/
-}
-#endif
-
-#if 0
-int WriteToDsound(int dataSize)
-{
-//	int startTime = timeGetTime();
-
-	DWORD playPosition, writePosition;
-	signed long bytesPlayed = 0;
-
-	int initialSize = dataSize;
-
-//	OutputDebugString("WriteToDsound\n");
-
-	/* update playback time */
-	fmvAudioBuffer->GetCurrentPosition(&playPosition, &writePosition);
-
-	if (writeOffset == 0)
-	{
-		writeOffset = writePosition;
-		OutputDebugString("SET WRITEOFFSET TO WRITE POSITION!!\n");
-	}
-
-	sprintf(buf, "playPosition: %d, writePosition: %d, my write cursor: %d\n", playPosition, writePosition, writeOffset);
-	OutputDebugString(buf);
-
-	bytesPlayed = playPosition - lastPlayCursor;
-	if ( bytesPlayed < 0 )
-		bytesPlayed += fullBufferSize; // unwrap
-
-	lastPlayCursor = playPosition;
-	totalBytesPlayed += bytesPlayed;
-
-	totalAudioTimePlayed = static_cast<float>(totalBytesPlayed / (audioBytesPerSec * 1.0f));
-
-//	sprintf(buf, "totalBytesPlayed %lu, totalAudioTimePlayed %f\n", totalBytesPlayed, totalAudioTimePlayed);
-//	OutputDebugString(buf);
-
-//	int writeableSpace = GetWritableBufferSize();
-
-//	char buf[100];
-//	sprintf(buf, "dsound can take: %d bytes, we have: %d\n", writeableSpace, dataSize);
-//	OutputDebugString(buf);
-
-/*
-	if (dataSize > writeableSpace) 
-		dataSize = writeableSpace;
-*/
-	EnterCriticalSection(&audioCriticalSection);
-
-	int read = RingBuffer_ReadData(&testBuffer[0], dataSize);
-
-	if (read <= 0)
-		return 0;
-
-	if (read < dataSize)
-		dataSize = read;
-
-	LeaveCriticalSection(&audioCriticalSection);
-
-//	sprintf(buf, "writeOffset %d, dataSize: %d\n", writeOffset, dataSize);
-//	OutputDebugString(buf);
-
-//	if (dataSize == 0) 
-//		return 0;
-
-	sf_write_raw(sndFile, &testBuffer[0], read);
-	sprintf(buf, "read - :%d\n", read);
-	OutputDebugString(buf);
-
-	/* lock the fmv buffer at our write offset */
-	LastError = fmvAudioBuffer->Lock(writeOffset, dataSize, &fmvaudioPtr1, &fmvaudioBytes1, &fmvaudioPtr2, &fmvaudioBytes2, NULL);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return 0;
-	}
-
-	/* copy first section */
-	memcpy(fmvaudioPtr1, &testBuffer[0], fmvaudioBytes1);
-
-	/* copy second section if necessary */
-	if (fmvaudioPtr2 != NULL)
-	{
-		memcpy(fmvaudioPtr2, &testBuffer[fmvaudioBytes1], fmvaudioBytes2);
-	}
-
-	LastError = fmvAudioBuffer->Unlock(fmvaudioPtr1, fmvaudioBytes1, fmvaudioPtr2, fmvaudioBytes2);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		OutputDebugString("couldn't unlock fmv audio buffer\n");
-	}
-
-	/* update our write cursor to next write position */
-	writeOffset += fmvaudioBytes1 + fmvaudioBytes2;
-	if (writeOffset >= fullBufferSize) 
-		writeOffset = writeOffset - fullBufferSize;
-
-	totalBytesWritten += fmvaudioBytes1 + fmvaudioBytes2;
-#if 0
-	/* probably a better place to put this..start playing dsound buffer once we hit video */
-	DWORD status;
-	fmvAudioBuffer->GetStatus(&status);
-	if (status & DSBSTATUS_BUFFERLOST)
-	{
-		OutputDebugString("DSOUND BUFFER LOST!\n");
-	}
-	else if (!(status & DSBSTATUS_PLAYING))
-	{
-		fmvAudioBuffer->SetCurrentPosition(0);
-		LastError = fmvAudioBuffer->Play(0, 0, DSBPLAY_LOOPING);
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-			OutputDebugString("can't play dsound fmv buffer\n");
-		}
-		else
-		{
-			OutputDebugString("started playing Dsound buffer\n");
-		}
-	}
-#endif
-//	sprintf(buf, "wrote %d bytes to dsound\n", dataWritten);
-//	OutputDebugString(buf);
-
-//	assert (initialSize == dataWritten);
-
-//	sprintf(buf, "WriteToDsound took %d ms\n", timeGetTime() - startTime);
-//	OutputDebugString(buf);
-
-	return fmvaudioBytes1 + fmvaudioBytes2;
-}
-#endif
 
 void FmvClose()
 {

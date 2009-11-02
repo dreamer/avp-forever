@@ -205,7 +205,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib shell32.lib shlwapi.lib d3d9.lib xaudio2.lib libvorbisfile.lib libvorbis.lib libogg.lib libtheora.lib user32.lib xinput.lib $(NOINHERIT)"
+				AdditionalDependencies="winmm.lib shell32.lib shlwapi.lib d3d9.lib x3daudio.lib enet.lib libvorbisfile.lib libvorbis.lib libogg.lib libtheora.lib user32.lib xinput.lib $(NOINHERIT)"
 				OutputFile="MyAvP.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
