@@ -178,11 +178,6 @@ static short	*audioDataBuffer = NULL;
 static int		audioDataBufferSize = 0;
 char *audioData = NULL;
 
-FILE* file;
-vorbis_info *pInfo;
-OggVorbis_File oggFile2;
-
-bool oggIsPlaying = false;
 
 void TheoraInitForData(OggStream* stream) 
 {
@@ -466,9 +461,8 @@ void AudioGrabThread(void *args)
 				}
 			}
 
-//			if ((buffersAdded == 2) && (started == false))
-			//if ((readableAudio >= 8192) && (started == false))
-			if (started == false)
+			if ((readableAudio >= 8192) && (started == false))
+//			if (started == false)
 			{
 				AudioStream_PlayBuffer(&fmvAudioStream);
 				started = true;
@@ -607,7 +601,7 @@ void TheoraDecodeThread(void *args)
 			{
 				ogg_int64_t position = 0;
 
-				float audio_time = float(AudioStream_GetNumSamplesPlayed(&fmvAudioStream)) / float(audio->mVorbis.mInfo.rate);
+				float audio_time = static_cast<float>(AudioStream_GetNumSamplesPlayed(&fmvAudioStream)) / static_cast<float>(audio->mVorbis.mInfo.rate);
 
 				float video_time = static_cast<float>(th_granule_time(video->mTheora.mCtx, mGranulepos));
 //				sprintf(buf, "video_time: %f audio_time: %f\n", video_time, audio_time);
@@ -787,15 +781,22 @@ bool CheckTheoraPlayback()
 
 int CloseTheoraVideo()
 {
+	if (!fmvPlaying)
+		return 0;
+
+	OutputDebugString("CloseTheoraVideo..\n");
+
 	frameReady = false;
 	fmvPlaying = false;
-	playing = false;
+	playing = 0;
+	running = false;
 
 	/* wait until TheoraDecodeThread has finished running before continuing */ 
 	WaitForMultipleObjects(1, &hEvent1, TRUE, INFINITE);
 	WaitForMultipleObjects(1, &hEvent2, TRUE, INFINITE);
 
-	OutputDebugString("CloseTheoraVideo..\n");
+	CloseHandle(hEvent1);
+	CloseHandle(hEvent2);
 
 	int ret = ogg_sync_clear(&state);
 	assert(ret == 0);
@@ -822,20 +823,33 @@ int CloseTheoraVideo()
 	/* clear the std::map */
 	mStreams.clear();
 
-	if (mDisplayTexture)
+	AudioStream_StopBuffer(&fmvAudioStream);
+	AudioStream_ReleaseBuffer(&fmvAudioStream);
+
+	if (audioData)
 	{
-		mDisplayTexture->Release();
-		mDisplayTexture = NULL;
+		delete []audioData;
+		audioData = NULL;
+	}
+
+	if (audioDataBuffer)
+	{
+		delete []audioDataBuffer;
+		audioDataBuffer = NULL;
+		audioDataBufferSize = 0;
 	}
 
 #ifdef USE_LIBSNDFILE
 	sf_close(sndFile);
 #endif
 
-	AudioStream_StopBuffer(&fmvAudioStream);
-	AudioStream_ReleaseBuffer(&fmvAudioStream);
-
 	RingBuffer_Unload();
+
+	if (mDisplayTexture)
+	{
+		mDisplayTexture->Release();
+		mDisplayTexture = NULL;
+	}
 
 	DeleteCriticalSection(&CriticalSection);
 	DeleteCriticalSection(&audioCriticalSection);
@@ -844,9 +858,6 @@ int CloseTheoraVideo()
 	frameHeight = 0;
 	textureWidth = 0;
 	textureHeight = 0;
-
-	CloseHandle(hEvent1);
-	CloseHandle(hEvent2);
 
 	return 0;
 }

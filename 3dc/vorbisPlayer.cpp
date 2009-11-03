@@ -142,10 +142,8 @@ void LoadVorbisTrack(int track)
 	int totalRead = ReadVorbisData(audioData, vorbisStream.bufferSize, 0);
 
 	/* fill entire buffer initially */
-#ifdef WIN32
 	AudioStream_WriteData(&vorbisStream, audioData, vorbisStream.bufferSize);
-//	UpdateVorbisAudioBuffer(audioData, totalRead, 0);
-#endif
+
 	/* start playing */
 	PlayVorbis();
 }
