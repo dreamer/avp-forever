@@ -3,6 +3,7 @@
   AvP platform specific sound management source
   ----------------------------------------------------------------------------*/
 #include "logString.h"
+#include "audioStreaming.h"
 
 extern "C" {
 
@@ -29,7 +30,6 @@ extern "C" {
 #include "ffstdio.h"
 
 #include "vorbisPlayer.h"
-#include "audioStreaming.h"
 
 /* Davew 27/7/98 --------------------------------------------------------------
 	Internal types.
@@ -89,6 +89,7 @@ LPVOID					audioPtr2;
 DWORD					audioBytes2;
 
 static HRESULT LastError;
+static char buf[100];
 
 
 /* Patrick 5/6/97 -------------------------------------------------------------
@@ -2417,105 +2418,163 @@ void UpdateSoundFrequencies(void)
 }
 #endif
 
-int WriteAudioStreamData(StreamingAudioBuffer *streamStruct, char *audioData, int size)
+} // extern "C"
+
+int lastPlayCursor = 0;
+
+int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, int size)
 {
-	return 1;
-}
+	assert (streamStruct);
+	assert (audioData);
 
-int GetNumFreeAudioStreamBuffers(StreamingAudioBuffer *streamStruct)
-{
-	return 1;
-}
+	LPVOID	audioPtr1;
+	DWORD	audioBytes1;
+	LPVOID	audioPtr2;   
+	DWORD	audioBytes2;
 
-int GetWritableAudioStreamBufferSize(StreamingAudioBuffer *streamStruct)
-{
-	return 1;
-}
+	DWORD playPosition = 0;
+	DWORD writePosition = 0;
+	signed long bytesPlayed = 0;
+	int fullBufferSize = streamStruct->bufferCount * streamStruct->bufferSize;
 
-int SetAudioStreamBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
-{
-	return 1;
-}
+	// 1: Update number of bytes played.
+	streamStruct->dsBuffer->GetCurrentPosition(&playPosition, &writePosition);
+	bytesPlayed = playPosition - lastPlayCursor;
+	if ( bytesPlayed < 0 )
+		bytesPlayed += fullBufferSize; // unwrap
 
-int StopAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
-{
-	return 1;
-}
+	lastPlayCursor = playPosition;
+	streamStruct->totalBytesPlayed += bytesPlayed;
 
-int PlayAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
-{
-	return 1;
-}
-
-int ReleaseAudioStreamBuffer(StreamingAudioBuffer *streamStruct)
-{
-	return 1;
-}
-
-#if 0
-int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize)
-{
-	WAVEFORMATEX waveFormat;
-	DSBUFFERDESC bufferFormat;
-
-	memset(&waveFormat, 0, sizeof(waveFormat));
-	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
-	waveFormat.nChannels		= channels;				//how many channels the OGG contains
-	waveFormat.wBitsPerSample	= 16;					//always 16 in OGG
-	waveFormat.nSamplesPerSec	= rate;	
-	waveFormat.nBlockAlign		= waveFormat.nChannels * waveFormat.wBitsPerSample / 8;	//what block boundaries exist
-	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
-	waveFormat.cbSize			= sizeof(waveFormat);	//how big this structure is
-
-	memset(&bufferFormat, 0, sizeof(DSBUFFERDESC));
-	bufferFormat.dwSize	 = sizeof(DSBUFFERDESC);
-	bufferFormat.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_LOCSOFTWARE;
-	bufferFormat.dwBufferBytes = waveFormat.nAvgBytesPerSec * 2;
-	bufferFormat.lpwfxFormat = &waveFormat;
-
-	if (FAILED(DSObject->CreateSoundBuffer(&bufferFormat, &vorbisBuffer, NULL))) 
+	// 2: Write the audio data into the dsound buffer
+	LastError = streamStruct->dsBuffer->Lock(streamStruct->writeOffset, size, &audioPtr1, &audioBytes1, &audioPtr2, &audioBytes2, NULL);
+	if (FAILED(LastError))
 	{
-		LogErrorString("Couldn't create buffer for OGG Vorbis", __LINE__, __FILE__);
-		return -1;
+		LogDxError(LastError, __LINE__, __FILE__);
+		return 0;
 	}
 
-	(*bufferSize) = bufferFormat.dwBufferBytes;
+	// copy first section
+	memcpy(audioPtr1, audioData, audioBytes1);
 
-		if (FAILED(vorbisBuffer->QueryInterface( IID_IDirectSoundNotify, 
-                                        (void**)&pDSNotify ) ) )
+	// copy second section if necessary ( I don't think this should happen..)
+	if (audioPtr2 != NULL)
 	{
-		LogErrorString("Couldn't query interface for OGG Vorbis buffer notifications", __LINE__, __FILE__);
+		memcpy(audioPtr2, &audioData[audioBytes1], audioBytes2);
 	}
 
-	DSBPOSITIONNOTIFY notifyPosition[2];
-
-	hHandles[0] = CreateEvent(NULL,FALSE,FALSE,NULL);
-	hHandles[1] = CreateEvent(NULL,FALSE,FALSE,NULL);
-
-	// halfway
-	notifyPosition[0].dwOffset = bufferFormat.dwBufferBytes / 2;
-	notifyPosition[0].hEventNotify = hHandles[0];
-
-	// end
-	notifyPosition[1].dwOffset = bufferFormat.dwBufferBytes - 1;
-	notifyPosition[1].hEventNotify = hHandles[1];
-
-	if (FAILED(pDSNotify->SetNotificationPositions(2, notifyPosition)))
+	LastError = streamStruct->dsBuffer->Unlock(audioPtr1, audioBytes1, audioPtr2, audioBytes2);
+	if (FAILED(LastError))
 	{
-		LogErrorString("Couldn't set notifications for OGG Vorbis buffer", __LINE__, __FILE__);
-		pDSNotify->Release();
-		return -1;
+		LogDxError(LastError, __LINE__, __FILE__);
+		OutputDebugString("couldn't unlock fmv audio buffer\n");
 	}
 
-	hHandles[0] = notifyPosition[0].hEventNotify;
-	hHandles[1] = notifyPosition[1].hEventNotify;
+	// update our write cursor to next write position */
+	streamStruct->writeOffset += audioBytes1 + audioBytes2;
+	if (streamStruct->writeOffset >= fullBufferSize) 
+		streamStruct->writeOffset = streamStruct->writeOffset - fullBufferSize;
 
-	pDSNotify->Release();
-	pDSNotify = NULL;
-
-	return 0;
+	return audioBytes1 + audioBytes2;
 }
-#endif
+
+UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
+{
+	UINT64 temp = ((streamStruct->totalBytesPlayed / streamStruct->bytesPerSample) / streamStruct->numChannels);
+	sprintf(buf, "we have played %d samples\n", temp);
+	OutputDebugString(buf);
+//	return ((streamStruct->totalBytesPlayed / streamStruct->bytesPerSample) / streamStruct->numChannels);
+	return temp;
+
+}
+
+UINT64 AudioStream_GetNumSamplesWritten(StreamingAudioBuffer *streamStruct)
+{
+	// not needed yet
+	return streamStruct->totalSamplesWritten;
+}
+
+int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
+{
+	DWORD playPosition = 0;
+	DWORD writePosition = 0;
+	int writeableSpace = 0;
+	int fullBufferSize = streamStruct->bufferCount * streamStruct->bufferSize;
+
+	streamStruct->dsBuffer->GetCurrentPosition(&playPosition, &writePosition);
+
+	writeableSpace = fullBufferSize - (streamStruct->writeOffset - playPosition);
+
+	if (writeableSpace > fullBufferSize)
+		writeableSpace -= fullBufferSize;
+
+	if (writeableSpace < 0)
+		return 0;
+
+	int temp = writeableSpace / streamStruct->bufferSize;
+//	return writeableSpace / streamStruct->bufferSize;
+	sprintf(buf, "reporting %d free sound buffers\n", temp);
+	OutputDebugString(buf);
+	return temp;
+}
+
+int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)
+{
+	// not used for anything yet
+	return 1;
+}
+
+int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
+{
+	return 1;
+}
+
+int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct)
+{
+	assert (streamStruct);
+
+	streamStruct->dsBuffer->Stop();
+
+	return 1;
+}
+
+int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct)
+{
+	assert (streamStruct);
+
+	if(FAILED(streamStruct->dsBuffer->Play(0, 0, DSBPLAY_LOOPING)))
+	{
+		LogErrorString("AudioStream_PlayBuffer() - couldn't start playing streaming audio buffer", __LINE__, __FILE__);
+		return 0;
+	}
+
+	return 1;
+}
+
+int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
+{
+	assert (streamStruct);
+
+	if (streamStruct->dsBuffer != NULL) 
+	{
+		streamStruct->dsBuffer->Stop();
+		streamStruct->dsBuffer->Release();
+		streamStruct->dsBuffer = NULL;
+	}
+
+	// clear the new-ed memory
+	if (streamStruct->buffers)
+	{
+		delete []streamStruct->buffers;
+		streamStruct->buffers = NULL;
+	}
+
+	streamStruct->bufferCount = 0;
+	streamStruct->currentBuffer = 0;
+	streamStruct->bufferSize = 0;
+
+	return 1;
+}
 
 #if 0
 /* return the amount of data written to buffer */
@@ -2612,15 +2671,15 @@ void ReleaseVorbisBuffer()
 }
 #endif
 
-int CreateAudioStreamBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate)
+int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate, int bufferSize, int numBuffers)
 {
 	WAVEFORMATEX waveFormat;
 	DSBUFFERDESC bufferFormat;
 
 	memset(&waveFormat, 0, sizeof(waveFormat));
 	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
-	waveFormat.nChannels		= channels;				//how many channels the OGG contains
-	waveFormat.wBitsPerSample	= 16;					//always 16 in OGG
+	waveFormat.nChannels		= channels;
+	waveFormat.wBitsPerSample	= 16;					//we'll be using 16
 	waveFormat.nSamplesPerSec	= rate;	
 	waveFormat.nBlockAlign		= waveFormat.nChannels * waveFormat.wBitsPerSample / 8;	//what block boundaries exist
 	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
@@ -2629,7 +2688,7 @@ int CreateAudioStreamBuffer(StreamingAudioBuffer *streamStruct, int channels, in
 	memset(&bufferFormat, 0, sizeof(DSBUFFERDESC));
 	bufferFormat.dwSize	 = sizeof(DSBUFFERDESC);
 	bufferFormat.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_LOCSOFTWARE;
-	bufferFormat.dwBufferBytes = waveFormat.nAvgBytesPerSec * 2;
+	bufferFormat.dwBufferBytes = bufferSize * numBuffers;//waveFormat.nAvgBytesPerSec * 2;
 	bufferFormat.lpwfxFormat = &waveFormat;
 
 	if (FAILED(DSObject->CreateSoundBuffer(&bufferFormat, &streamStruct->dsBuffer, NULL))) 
@@ -2637,6 +2696,22 @@ int CreateAudioStreamBuffer(StreamingAudioBuffer *streamStruct, int channels, in
 		LogErrorString("Couldn't create buffer for streaming audio", __LINE__, __FILE__);
 		return -1;
 	}
+
+	streamStruct->buffers = new unsigned char[bufferSize * numBuffers];
+	if (streamStruct->buffers == NULL)
+	{
+		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
+	}
+
+	streamStruct->bytesPerSample = waveFormat.wBitsPerSample / 8;
+	streamStruct->numChannels = waveFormat.nChannels;
+	streamStruct->rate = waveFormat.nSamplesPerSec;
+	streamStruct->totalBytesPlayed = 0;
+	streamStruct->writeOffset = 0;
+	streamStruct->currentBuffer = 0;
+	streamStruct->bufferSize = bufferSize;
+	streamStruct->bufferCount = numBuffers;
+	streamStruct->totalSamplesWritten = 0;
 
 /* FIXME
 	(*bufferSize) = bufferFormat.dwBufferBytes;
@@ -2675,6 +2750,4 @@ int CreateAudioStreamBuffer(StreamingAudioBuffer *streamStruct, int channels, in
 */
 	return 0;
 }
-
-} // extern "C"
 #endif

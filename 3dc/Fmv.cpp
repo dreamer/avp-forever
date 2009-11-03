@@ -613,7 +613,7 @@ void TheoraDecodeThread(void *args)
 //				sprintf(buf, "video_time: %f audio_time: %f\n", video_time, audio_time);
 //				OutputDebugString(buf);
 
-				float timewritten = float(AudioStream_GetNumSamplesWritten(&fmvAudioStream)) / float(audio->mVorbis.mInfo.rate);
+//				float timewritten = float(AudioStream_GetNumSamplesWritten(&fmvAudioStream)) / float(audio->mVorbis.mInfo.rate);
 
 //				sprintf(buf, "audio_time: %f, timeWritten: %f\n", audio_time, timewritten);
 //				OutputDebugString(buf);

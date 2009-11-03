@@ -1,6 +1,7 @@
 /* directsound implementation for the xbox */
 
 #include "logString.h"
+#include "audioStreaming.h"
 
 extern "C" {
 
@@ -19,7 +20,6 @@ extern "C" {
 
 #include <assert.h>
 #include "vorbisPlayer.h"
-#include "audioStreaming.h"
 
 static int SoundActivated = 0;
 
@@ -2056,6 +2056,8 @@ int CheckBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
 	return 1;
 }
 
+} // extern C
+
 int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, int size)
 {
 	assert (streamStruct);
@@ -2101,6 +2103,14 @@ int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
     }
 
 	return numFreeBuffers;
+}
+
+UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
+{
+	XAUDIO2_VOICE_STATE state;
+	streamStruct->pSourceVoice->GetState( &state );
+
+	return state.SamplesPlayed;
 }
 
 int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)
@@ -2188,7 +2198,7 @@ int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 	return 1;
 }
 
-int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate)
+int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate, int bufferSize, int numBuffers)
 {
 	WAVEFORMATEX waveFormat;
 
@@ -2204,7 +2214,7 @@ int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, i
 	/* test code for dsound stream system */
 	DSSTREAMDESC streamDesc;
 	ZeroMemory(&streamDesc, sizeof(streamDesc));
-	streamDesc.dwMaxAttachedPackets		= STREAMBUFFERCOUNT;
+	streamDesc.dwMaxAttachedPackets		= numBuffers;
 	streamDesc.lpwfxFormat				= &waveFormat;
 
 	LastError = DirectSoundCreateStream(&streamDesc, &streamStruct->dsStreamBuffer);
@@ -2216,20 +2226,20 @@ int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, i
 	/* Set the stream headroom to 0 */
 	streamStruct->dsStreamBuffer->SetHeadroom(0);
 
-	for( DWORD i = 0; i < STREAMBUFFERCOUNT; i++ )
+	streamStruct->PacketStatus.resize(numBuffers);
+
+	for( DWORD i = 0; i < numBuffers; i++ )
 		streamStruct->PacketStatus[i] = XMEDIAPACKET_STATUS_SUCCESS;
 
-	streamStruct->buffers = new unsigned char[STREAMBUFFERSIZE * STREAMBUFFERCOUNT];
+	streamStruct->buffers = new unsigned char[bufferSize * numBuffers];
 	if (streamStruct->buffers == NULL)
 	{
 		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
 	}
 
 	streamStruct->currentBuffer = 0;
-	streamStruct->bufferSize = STREAMBUFFERSIZE;
-	streamStruct->bufferCount = STREAMBUFFERCOUNT;
+	streamStruct->bufferSize = bufferSize;
+	streamStruct->bufferCount = numBuffers;
 
 	return 1;
 }
-
-} // extern C

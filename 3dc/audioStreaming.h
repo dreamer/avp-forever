@@ -1,7 +1,7 @@
 #ifndef _audioStreaming_h_
 #define _audioStreaming_h_
 
-extern "C" {
+//extern "C" {
 
 #ifdef USE_XAUDIO2
 
@@ -26,14 +26,17 @@ struct StreamingAudioBuffer
 
 #include <dsound.h>
 
-const static int STREAMBUFFERSIZE = (8192 * 2);//32768
-const static int STREAMBUFFERCOUNT = 3;
-
 struct StreamingAudioBuffer
 {
 	int bufferSize;
 	int bufferCount;
 	int currentBuffer;
+	int numChannels;
+	int rate;
+	int bytesPerSample;
+	int writeOffset;
+	UINT64 totalBytesPlayed;
+	UINT64 totalSamplesWritten;
 	unsigned char *buffers;
 	LPDIRECTSOUNDBUFFER	dsBuffer;
 };
@@ -43,9 +46,7 @@ struct StreamingAudioBuffer
 #ifdef _XBOX
 
 #include <xtl.h>
-
-const static int STREAMBUFFERCOUNT = 3;
-const static int STREAMBUFFERSIZE = 18432;
+#include <vector>
 
 struct StreamingAudioBuffer
 {
@@ -53,7 +54,7 @@ struct StreamingAudioBuffer
 	int bufferCount;
 	int currentBuffer;
 	unsigned char *buffers;
-	DWORD PacketStatus[STREAMBUFFERCOUNT]; // Packet status array
+	std::vector<DWORD> PacketStatus;
 	LPDIRECTSOUNDSTREAM	dsStreamBuffer;
 };
 
@@ -70,6 +71,6 @@ int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct);
 UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct);
 UINT64 AudioStream_GetNumSamplesWritten(StreamingAudioBuffer *streamStruct);
 
-};
+//};
 
 #endif
