@@ -783,14 +783,14 @@ BOOL InitialiseDirect3DImmediateMode()
 	bool windowed = false;
 	bool triple_buffer = false;
 
-	if (WindowMode == WindowModeSubWindow) windowed = true;
+	if (WindowMode == WindowModeSubWindow) 
+		windowed = true;
 
 	//	Zero d3d structure
     ZeroMemory(&d3d, sizeof(D3DINFO));
 
 	/* Set up Direct3D interface object */
 	d3d.lpD3D = Direct3DCreate9(D3D_SDK_VERSION);
-
 	if (!d3d.lpD3D)
 	{
 		LogErrorString("Could not create Direct3D object\n");
@@ -820,7 +820,7 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	// count number of display formats in our array
 	int NumDisplayFormats = sizeof(DisplayFormats) / sizeof(DisplayFormats[0]);
-//	d3d.NumModes = 0;
+
 	int num_fomats = 0;
 
 	/* loop through all the devices, getting the list of formats available for each */
@@ -1062,12 +1062,6 @@ BOOL InitialiseDirect3DImmediateMode()
 	{
 		d3d.supportsDynamicTextures = FALSE;
 		LogErrorString("device can't use D3DUSAGE_DYNAMIC\n");
-	}
-
-	if (FAILED(d3d.lpD3D->CheckDeviceFormatConversion(defaultDevice, D3DDEVTYPE_HAL, 
-									/*MAKEFOURCC('Y', 'U', 'Y', '2')*/D3DFMT_YUY2, D3DFMT_X8R8G8B8)))
-	{
-		LogErrorString("No YUV->RGB support\n");
 	}
 
 	// Log resolution set

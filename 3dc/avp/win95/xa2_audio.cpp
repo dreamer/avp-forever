@@ -3,6 +3,7 @@
   AvP platform specific sound management source
   ----------------------------------------------------------------------------*/
 #include "logString.h"
+#include "audioStreaming.h"
 
 extern "C" {
 
@@ -30,7 +31,6 @@ extern "C" {
 #include <windows.h>
 #include "ffstdio.h"
 #include "vorbisPlayer.h"
-#include "audioStreaming.h"
 
 /* Davew 27/7/98 --------------------------------------------------------------
 	Internal types.
@@ -1849,10 +1849,14 @@ void PlatUpdatePlayer()
 	{
 		extern int NormalFrameTime;
 		extern int DopplerShiftIsOn;
-
+/*
 		XA2Listener.Position.x = static_cast<float>(Global_VDB_Ptr->VDB_World.vx);
 		XA2Listener.Position.y = static_cast<float>(Global_VDB_Ptr->VDB_World.vy);
 		XA2Listener.Position.z = static_cast<float>(Global_VDB_Ptr->VDB_World.vz);
+*/
+		XA2Listener.Position.x = 0.0f;
+		XA2Listener.Position.y = 0.0f;
+		XA2Listener.Position.z = 0.0f;
 
 		if (AvP.PlayerType != I_Alien)
 		{
@@ -2353,6 +2357,8 @@ void UpdateSoundFrequencies(void)
 #endif
 }
 
+} // extern "C"
+
 int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate, int bufferSize, int numBuffers)
 {
 	WAVEFORMATEX waveFormat;
@@ -2364,11 +2370,8 @@ int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, i
 	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
 	waveFormat.cbSize			= sizeof(waveFormat);	//how big this structure is
 
-	StreamingVoiceContext voiceContext;
-
 	// create the source voice for playing the sound
 	LastError = pXAudio2->CreateSourceVoice(&streamStruct->pSourceVoice, &waveFormat);
-//	LastError = pXAudio2->CreateSourceVoice(&streamStruct->pSourceVoice, &waveFormat, 0, 1.0f, &voiceContext);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -2511,5 +2514,4 @@ int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 	return 1;
 }
 
-} // extern "C"
 #endif

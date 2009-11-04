@@ -461,8 +461,8 @@ void AudioGrabThread(void *args)
 				}
 			}
 
-			if ((readableAudio >= 8192) && (started == false))
-//			if (started == false)
+//			if ((readableAudio >= 8192) && (started == false))
+			if (started == false)
 			{
 				AudioStream_PlayBuffer(&fmvAudioStream);
 				started = true;
@@ -599,7 +599,7 @@ void TheoraDecodeThread(void *args)
 
 			if (video) 
 			{
-				ogg_int64_t position = 0;
+//				ogg_int64_t position = 0;
 
 				float audio_time = static_cast<float>(AudioStream_GetNumSamplesPlayed(&fmvAudioStream)) / static_cast<float>(audio->mVorbis.mInfo.rate);
 
@@ -647,7 +647,7 @@ int OpenTheoraVideo(const char *fileName)
 
 	oggFile.clear();// to be sure all the file flags are reset
 
-	oggFile.open(filePath.c_str()/*"c://big_buck_bunny_480p_stereo.ogv"*/, std::ios::in | std::ios::binary);
+	oggFile.open(/*filePath.c_str()*/"D://Development//experiments//Debug//big_buck_bunny_480p_stereo.ogv", std::ios::in | std::ios::binary);
 
 	if (!oggFile.is_open())
 	{
@@ -952,7 +952,7 @@ int NextFMVFrame()
 	EnterCriticalSection(&CriticalSection);
 
 	D3DLOCKED_RECT textureLock;
-	if (FAILED(mDisplayTexture->LockRect(0, &textureLock, NULL, /*D3DLOCK_DISCARD*/0)))
+	if (FAILED(mDisplayTexture->LockRect(0, &textureLock, NULL, D3DLOCK_DISCARD)))
 	{
 		OutputDebugString("can't lock FMV texture\n");
 		return 0;
@@ -1270,8 +1270,6 @@ void ScanImagesForFMVs()
 	IMAGEHEADER *ihPtr;
 	NumberOfFMVTextures = 0;
 
-	OutputDebugString("scan images for fmvs\n");
-
 	#if MaxImageGroups>1
 	for (j=0; j<MaxImageGroups; j++)
 	{
@@ -1372,9 +1370,14 @@ void ReleaseAllFMVTexturesForDeviceReset()
 {
 	for (int i = 0; i < NumberOfFMVTextures; i++)
 	{
-//		FMVTexture[i].MessageNumber = 0;
-
 		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
+	}
+
+	// non ingame fmv?
+	if (mDisplayTexture)
+	{
+		mDisplayTexture->Release();
+		mDisplayTexture = NULL;
 	}
 }
 
@@ -1383,6 +1386,12 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 	for (int i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].ImagePtr->Direct3DTexture = CreateFmvTexture(&FMVTexture[i].ImagePtr->ImageWidth, &FMVTexture[i].ImagePtr->ImageHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+	}
+
+	// non ingame fmv? - use a better way to determine this..
+	if (textureWidth && textureHeight)
+	{
+		mDisplayTexture = CreateFmvTexture(&textureWidth, &textureHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 	}
 }
 
@@ -1455,7 +1464,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 	int w = ftPtr->ImagePtr->ImageWidth;
 	int h = ftPtr->ImagePtr->ImageHeight;
 
-	unsigned char *bufferPtr = ftPtr->RGBBuffer;
+	unsigned char *DestBufferPtr = ftPtr->RGBBuffer;
 
 	if (MoviesAreActive && ftPtr->SmackHandle)
 	{
@@ -1470,7 +1479,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 		if (!frameReady) 
 			return 0;
 
-		memcpy(ftPtr->RGBBuffer, textureData, 128*128*4);
+		memcpy(DestBufferPtr, textureData, 128*128*4);
 
 		if (playing == 0)
 		{
@@ -1492,7 +1501,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 	{
 		int i = w * h;
 		unsigned int seed = FastRandom();
-		int *ptr = (int*)bufferPtr;
+		int *ptr = (int*)DestBufferPtr;
 		do
 		{
 			seed = ((seed * 1664525) + 1013904223);
@@ -1501,7 +1510,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 		while(--i);
 		ftPtr->StaticImageDrawn = 1;
 	}
-	FindLightingValuesFromTriggeredFMV((unsigned char*)bufferPtr, ftPtr);
+	FindLightingValuesFromTriggeredFMV((unsigned char*)ftPtr->RGBBuffer, ftPtr);
 	return 1;
 }
 
