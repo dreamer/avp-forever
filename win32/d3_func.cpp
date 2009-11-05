@@ -909,7 +909,7 @@ BOOL InitialiseDirect3DImmediateMode()
 		d3dpp.BackBufferHeight = height;
 		// setting this to interval one will cap the framerate to monitor refresh
 		// the timer goes a bit mad if this isnt capped!
-		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 		ChangeWindowsSize(d3dpp.BackBufferWidth, d3dpp.BackBufferHeight);
 	}
 	else 
@@ -919,8 +919,8 @@ BOOL InitialiseDirect3DImmediateMode()
 		d3dpp.BackBufferHeight = height;
 		// setting this to interval one will cap the framerate to monitor refresh
 		// the timer goes a bit mad if this isnt capped!
-//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 //		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 		ChangeWindowsSize(d3dpp.BackBufferWidth, d3dpp.BackBufferHeight);
 	}
@@ -1176,7 +1176,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	/* create vertex and index buffers */
 	CreateVolatileResources();
 
-//	Con_Init();
+	Con_Init();
 
 	LogString("Initialised Direct3D succesfully");
 	return TRUE;

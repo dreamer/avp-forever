@@ -146,7 +146,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR((char)wParam);
 			KeyboardEntryQueue_Add((char)wParam);
 
-			//return 0;
 			break;
 		}
 		case WM_KEYDOWN:
@@ -252,6 +251,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 				}
 			}
 
+			// Handle on screen keyboard input
 			if (Osk_IsActive())
 			{
 				switch (wParam)

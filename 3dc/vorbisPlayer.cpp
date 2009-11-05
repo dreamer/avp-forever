@@ -130,6 +130,8 @@ void LoadVorbisTrack(int track)
 
 	LogString("\t Vorbis frequency: " + IntToString(pInfo->rate));
 
+	int numSamples = ov_pcm_total(&oggFile, -1);
+
 	/* create the audio buffer (directsound or whatever) */
 	if (AudioStream_CreateBuffer(&vorbisStream, pInfo->channels, pInfo->rate, 32768, 3) < 0)
 	{

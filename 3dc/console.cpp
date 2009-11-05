@@ -21,6 +21,18 @@ extern "C"
 
 char buf[100];
 
+typedef void (*funcPointer) (void);
+
+struct Command 
+{
+	char *cmdName;
+	char *cmdDescription;
+	funcPointer cmdFuncPointer;
+};
+
+std::vector<Command> cmdList;
+std::vector<Command>::iterator cmdIt;
+
 struct Console 
 {
 	bool isActive;
@@ -50,6 +62,31 @@ void Con_AddLine(std::string temp)
 	console.text.push_back(temp);
 }
 
+void Con_AddCommand(char *command, funcPointer function)
+{
+	for (cmdIt = cmdList.begin(); cmdIt < cmdList.end(); cmdIt++)
+	{
+		if (!strcmp(command, cmdIt->cmdName))
+		{
+			OutputDebugString("command already exists\n");
+			return;
+		}
+	}
+	
+	Command newCommand;
+	
+	newCommand.cmdName = command;
+	newCommand.cmdDescription = "no description yet";
+	newCommand.cmdFuncPointer = function;
+
+	cmdList.push_back(newCommand);
+}
+
+void Blah()
+{
+	OutputDebugString("Blah was called!\n");
+}
+
 void Con_Init()
 {
 	console.isActive = false;
@@ -75,6 +112,8 @@ void Con_Init()
 	Con_AddLine("2");
 	Con_AddLine("big long test string");
 
+	Con_AddCommand("blah", Blah);
+
 //	LoadConsoleFont();
 
 	OutputDebugString("console initialised\n");
@@ -86,17 +125,17 @@ void Con_ProcessCommand()
 	if (console.inputLine.length() == 0) 
 		return;
 
-	std::string temp;
+	std::string commandName;
 	std::stringstream stream(console.inputLine.c_str());
 //	std::istream stream(&console.inputLine);
 
-	getline(stream, temp, ' ');
+	getline(stream, commandName, ' ');
 
-	OutputDebugString(temp.c_str());
+	OutputDebugString(commandName.c_str());
 
 	/* grab the command itself (first word before space) */
 
-	Con_AddLine(temp);
+	Con_AddLine(commandName);
 
 	console.inputLine.clear();
 }
@@ -122,7 +161,6 @@ void Con_Key_Backspace(bool state)
 
 void Con_Toggle()
 {
-//	return;
 	OutputDebugString("console toggle\n");
 	console.isActive = !console.isActive;
 	console.time = 250;
@@ -133,8 +171,7 @@ void Con_Toggle()
 
 bool Con_IsActive()
 {
-	return false;
-//	return console.isActive;
+	return console.isActive;
 }
 
 void Con_CheckResize()
@@ -149,7 +186,7 @@ void Con_CheckResize()
 
 void Con_AddTypedChar(char c)
 {
-	if(!console.isActive) 
+	if (!console.isActive) 
 		return;
 
 	if (c == 0x08)
