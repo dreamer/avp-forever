@@ -32,6 +32,7 @@ struct Command
 
 std::vector<Command> cmdList;
 std::vector<Command>::iterator cmdIt;
+std::vector<std::string>cmdArgs;
 
 struct Console 
 {
@@ -54,7 +55,6 @@ struct Console
 	std::string	inputLine;
 };
 
-//extern Console console;
 Console console;
 
 void Con_AddLine(std::string temp)
@@ -125,17 +125,33 @@ void Con_ProcessCommand()
 	if (console.inputLine.length() == 0) 
 		return;
 
-	std::string commandName;
-	std::stringstream stream(console.inputLine.c_str());
-//	std::istream stream(&console.inputLine);
+	// clear the arg vector
+	cmdArgs.clear();
 
+	// find the command name first
+	std::string commandName;
+	std::stringstream stream(console.inputLine);
+
+	// the command will be first word up to first space
 	getline(stream, commandName, ' ');
 
-	OutputDebugString(commandName.c_str());
+	// debug print command name
+//	OutputDebugString(commandName.c_str());
 
-	/* grab the command itself (first word before space) */
+	// parse the rest of the string for arguments
+	std::string currentArg;
 
-	Con_AddLine(commandName);
+	while (getline(stream, currentArg, ' '))
+	{
+/*
+		OutputDebugString("arg:");
+		OutputDebugString(currentArg.c_str());
+		OutputDebugString("\n");
+*/
+		cmdArgs.push_back(currentArg);
+	}
+
+	Con_AddLine(console.inputLine);
 
 	console.inputLine.clear();
 }
