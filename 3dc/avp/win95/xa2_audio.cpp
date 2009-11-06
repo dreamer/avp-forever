@@ -2361,6 +2361,8 @@ void UpdateSoundFrequencies(void)
 
 int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate, int bufferSize, int numBuffers)
 {
+	assert (streamStruct);
+
 	WAVEFORMATEX waveFormat;
 	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
 	waveFormat.nChannels		= channels;	
@@ -2391,7 +2393,7 @@ int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, i
 		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
 	}
 
-	streamStruct->bitsPerSample = waveFormat.wBitsPerSample;
+	streamStruct->bytesPerSample = waveFormat.wBitsPerSample / 8;
 	streamStruct->numChannels = waveFormat.nChannels;
 	streamStruct->rate = waveFormat.nSamplesPerSec;
 
@@ -2409,10 +2411,10 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, i
 	assert (audioData);
 
 	int amountWritten = 0;
-
 	XAUDIO2_BUFFER buf = {0};
-	buf.AudioBytes = size;
+
 	memcpy(&streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize], audioData, size);
+	buf.AudioBytes = size;
 	buf.pAudioData = &streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize];
 
 	streamStruct->pSourceVoice->SubmitSourceBuffer(&buf);
@@ -2421,13 +2423,15 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, i
 	streamStruct->currentBuffer %= streamStruct->bufferCount;
 
 	// size in bytes divided by bits per sample (divided by 8 to get the bytes per sample) also dividded by the number of channels
-	streamStruct->totalSamplesWritten += ((size / (streamStruct->bitsPerSample / 8)) / streamStruct->numChannels);
+	streamStruct->totalSamplesWritten += ((size / streamStruct->bytesPerSample) / streamStruct->numChannels);
 
 	return amountWritten;
 }
 
 int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
 {
+	assert (streamStruct);
+
 	XAUDIO2_VOICE_STATE state;
 	streamStruct->pSourceVoice->GetState( &state );
 
@@ -2436,6 +2440,8 @@ int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
 
 UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
 {
+	assert (streamStruct);
+
 	XAUDIO2_VOICE_STATE state;
 	streamStruct->pSourceVoice->GetState( &state );
 
@@ -2444,11 +2450,15 @@ UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
 
 UINT64 AudioStream_GetNumSamplesWritten(StreamingAudioBuffer *streamStruct)
 {
+	assert (streamStruct);
+
 	return streamStruct->totalSamplesWritten;
 }
 
 int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)
 {
+	assert (streamStruct);
+
 	XAUDIO2_VOICE_STATE state;
 
 	streamStruct->pSourceVoice->GetState( &state );
@@ -2458,6 +2468,8 @@ int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)
 
 int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
 {
+	assert (streamStruct);
+
 	if (streamStruct->bufferSize == 0)
 		return 0;
 

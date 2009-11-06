@@ -85,6 +85,8 @@ void Con_AddCommand(char *command, funcPointer function)
 void Blah()
 {
 	OutputDebugString("Blah was called!\n");
+
+	// we're testing and expect 3 ints
 }
 
 void Con_Init()
@@ -102,7 +104,7 @@ void Con_Init()
 
 	sprintf(buf, "console height: %d num lines: %d\n", console.lines * CHAR_HEIGHT, console.lines);
 	OutputDebugString(buf);
-
+/*
 	Con_AddLine("Blah");
 	Con_AddLine("here is another line");
 	Con_AddLine("Initialisation failed! stuff broke horribly :(");
@@ -111,7 +113,7 @@ void Con_Init()
 	Con_AddLine("1");
 	Con_AddLine("2");
 	Con_AddLine("big long test string");
-
+*/
 	Con_AddCommand("blah", Blah);
 
 //	LoadConsoleFont();
@@ -130,30 +132,46 @@ void Con_ProcessCommand()
 
 	// find the command name first
 	std::string commandName;
+	Command theCommand = {0};
 	std::stringstream stream(console.inputLine);
 
 	// the command will be first word up to first space
 	getline(stream, commandName, ' ');
 
-	// debug print command name
-//	OutputDebugString(commandName.c_str());
+	// see if the command actually exists first.
+	for (cmdIt = cmdList.begin(); cmdIt < cmdList.end(); cmdIt++)
+	{
+		if (commandName == cmdIt->cmdName)
+		{
+			// found it
+			theCommand = *cmdIt;
+			break;
+		}
+	}
+	
+	// in case we didnt find it
+	if (theCommand.cmdFuncPointer == NULL)
+	{
+		Con_AddLine("Unknown command \"" + commandName + "\"");
+		console.inputLine.clear();
+		return;
+	}
 
 	// parse the rest of the string for arguments
 	std::string currentArg;
 
 	while (getline(stream, currentArg, ' '))
 	{
-/*
-		OutputDebugString("arg:");
-		OutputDebugString(currentArg.c_str());
-		OutputDebugString("\n");
-*/
+		// add the current parameter to the arguments list
 		cmdArgs.push_back(currentArg);
 	}
 
 	Con_AddLine(console.inputLine);
 
 	console.inputLine.clear();
+
+	// lets call the function now..
+	theCommand.cmdFuncPointer();
 }
 
 bool prevEnter = false;
@@ -280,7 +298,7 @@ void Con_Draw()
 	xOffset = CHAR_WIDTH * 2;
 	charWidth = 0;
 
-	for(int j = 0; j < console.inputLine.length(); j++)
+	for (int j = 0; j < console.inputLine.length(); j++)
 	{
 		//if ((j * CHAR_WIDTH) > console.lineWidth) break;
 		charWidth = RenderSmallChar(console.inputLine.at(j), console.indent + /*(xOffset * j)*/xOffset, console.height - CHAR_HEIGHT, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);

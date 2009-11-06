@@ -17,6 +17,11 @@
 #include <assert.h>
 #include "utilities.h" // avp_open()
 
+#include <sndfile.h>
+SNDFILE *sndFile;
+
+#pragma comment(lib, "libsndfile-1.lib")
+
 extern "C" 
 {
 	extern int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize);
@@ -132,6 +137,28 @@ void LoadVorbisTrack(int track)
 
 	int numSamples = ov_pcm_total(&oggFile, -1);
 
+	SF_INFO sndInfo;
+	const int format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+	const char* outfilename = "C:\\Users\\Barry\\Documents\\My Games\\Aliens versus Predator\\test.wav";
+
+	memset(&sndInfo, 0, sizeof(SF_INFO));
+	sndInfo.channels = pInfo->channels;
+	sndInfo.format = format;
+	sndInfo.samplerate = pInfo->rate;
+
+	if (!(sf_format_check(&sndInfo)))
+	{
+		OutputDebugString("sf_format_check failed\n");
+	}
+
+	sndFile = sf_open(outfilename, SFM_WRITE, &sndInfo);
+
+	if (!sndFile)
+	{
+		int error = sf_error(sndFile);
+		OutputDebugString("can't open sndFile\n");
+	}
+
 	/* create the audio buffer (directsound or whatever) */
 	if (AudioStream_CreateBuffer(&vorbisStream, pInfo->channels, pInfo->rate, 32768, 3) < 0)
 	{
@@ -143,7 +170,7 @@ void LoadVorbisTrack(int track)
 
 	int totalRead = ReadVorbisData(audioData, vorbisStream.bufferSize, 0);
 
-	/* fill entire buffer initially */
+	/* fill the first buffer */
 	AudioStream_WriteData(&vorbisStream, audioData, vorbisStream.bufferSize);
 
 	/* start playing */
@@ -152,14 +179,10 @@ void LoadVorbisTrack(int track)
 
 void UpdateVorbisBuffer(void *arg) 
 {
-	int lockOffset = 0;
-
 	DWORD dwQuantum = 1000 / 60;
 
 	while (oggIsPlaying)
 	{
-		Sleep( dwQuantum );
-
 		int numBuffersFree = AudioStream_GetNumFreeBuffers(&vorbisStream);
 
 		if (numBuffersFree)
@@ -167,6 +190,8 @@ void UpdateVorbisBuffer(void *arg)
 			ReadVorbisData(audioData, vorbisStream.bufferSize, 0);
 			AudioStream_WriteData(&vorbisStream, audioData, vorbisStream.bufferSize);
 		}
+
+		Sleep( dwQuantum );
 	}
 	SetEvent(hPlaybackThreadFinished);
 }

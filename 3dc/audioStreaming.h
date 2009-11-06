@@ -14,7 +14,7 @@ struct StreamingAudioBuffer
 	int currentBuffer;
 	int numChannels;
 	int rate;
-	int bitsPerSample;
+	int bytesPerSample;
 	UINT64 totalSamplesWritten;
 	unsigned char *buffers;
 	IXAudio2SourceVoice *pSourceVoice;
