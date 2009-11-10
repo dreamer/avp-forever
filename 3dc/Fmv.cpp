@@ -424,11 +424,12 @@ bool started = false;
 
 void AudioGrabThread(void *args)
 {
-	DWORD dwQuantum = 1000 / 60;
 
 #ifdef USE_XAUDIO2
 	CoInitializeEx( NULL, COINIT_MULTITHREADED );
 #endif
+
+	DWORD dwQuantum = 1000 / 60;
 
 	static int totalRead = 0;
 	static int lastRead = 0;
@@ -647,7 +648,7 @@ int OpenTheoraVideo(const char *fileName)
 
 	oggFile.clear();// to be sure all the file flags are reset
 
-	oggFile.open(/*filePath.c_str()*/"D://Development//experiments//Debug//big_buck_bunny_480p_stereo.ogv", std::ios::in | std::ios::binary);
+	oggFile.open(filePath.c_str()/*"D://Development//experiments//Debug//big_buck_bunny_480p_stereo.ogv"*/, std::ios::in | std::ios::binary);
 
 	if (!oggFile.is_open())
 	{
@@ -823,7 +824,7 @@ int CloseTheoraVideo()
 	/* clear the std::map */
 	mStreams.clear();
 
-	AudioStream_StopBuffer(&fmvAudioStream);
+//	AudioStream_StopBuffer(&fmvAudioStream);
 	AudioStream_ReleaseBuffer(&fmvAudioStream);
 
 	if (audioData)

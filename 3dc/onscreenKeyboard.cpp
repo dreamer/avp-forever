@@ -48,6 +48,7 @@ struct ButtonStruct
 	int width;
 	int positionOffset;
 	int stringId;
+	bool isBlank;
 };
 std::vector<ButtonStruct> keyVector;
 
@@ -73,7 +74,6 @@ template <class T> void Osk_AddKey(T buttonLabel, int numWidthBlocks)
 
 	stringStream << buttonLabel;
 
-//	newButton.id = buttonId;
 	newButton.stringId = buttonId;
 	newButton.numWidthBlocks = numWidthBlocks;
 	newButton.width = (numWidthBlocks * keyWidth) + space_between_keys * (numWidthBlocks - 1);
@@ -81,6 +81,11 @@ template <class T> void Osk_AddKey(T buttonLabel, int numWidthBlocks)
 
 	// store the string in its own vector
 	stringVector.push_back(stringStream.str());
+
+	if (stringStream.str() == "BLANK")
+	{
+		newButton.isBlank = true;
+	}
 
 	int positionOffset = 0;
 
@@ -110,7 +115,7 @@ void Osk_Init()
 		Osk_AddKey(i, 1);
 	}
 
-	Osk_AddKey("Shift", 2);
+	Osk_AddKey("Done", 2);
 
 	// second row..
 	for (char letter = 'a'; letter <= 'j'; letter++)
@@ -118,7 +123,7 @@ void Osk_Init()
 		Osk_AddKey(letter, 1);
 	}
 
-	Osk_AddKey("Symbols", 2);
+	Osk_AddKey("Shift", 2);
 
 	// third row..
 	for (char letter = 'k'; letter <= 't'; letter++)
@@ -126,7 +131,7 @@ void Osk_Init()
 		Osk_AddKey(letter, 1);
 	}
 
-	Osk_AddKey("Dunno", 2);
+	Osk_AddKey("Caps Lock", 2);
 
 	// fourth row..
 	for (char letter = 'u'; letter <= 'z'; letter++)
@@ -135,13 +140,13 @@ void Osk_Init()
 	}
 
 	Osk_AddKey("Backspace", 4);
-	Osk_AddKey("Done",		2);
+	Osk_AddKey("Symbols",	2);
 
 	// fifth row
 	Osk_AddKey("Space", 6);
 	Osk_AddKey("<",		2);
 	Osk_AddKey(">",		2);
-	Osk_AddKey("Blank", 2);
+	Osk_AddKey("BLANK", 2);
 
 //	sprintf(buf, "number of keys added to osk: %d\n", keyVector.size());
 //	OutputDebugString(buf);
@@ -186,15 +191,19 @@ void Osk_Draw()
 
 		while (widthCount)
 		{
-			DrawQuad(pos_x, pos_y, keyVector.at(index).width, keyVector.at(index).height, D3DCOLOR_ARGB(200, 255, 255, 255));
+			// only draw keys not marked as blank keys
+			if (!keyVector.at(index).isBlank)
+			{
+				DrawQuad(pos_x, pos_y, keyVector.at(index).width, keyVector.at(index).height, D3DCOLOR_ARGB(200, 255, 255, 255));
 
-			if (Osk_GetCurrentLocation() == index) // draw the selected item differently (highlight it)
-				DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, D3DCOLOR_ARGB(220, 38, 80, 145));
-			else
-				DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, D3DCOLOR_ARGB(220, 128, 128, 128));
+				if (Osk_GetCurrentLocation() == index) // draw the selected item differently (highlight it)
+					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, D3DCOLOR_ARGB(220, 38, 80, 145));
+				else
+					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, D3DCOLOR_ARGB(220, 128, 128, 128));
 
-			RenderSmallMenuText((char*)Osk_GetKeyLabel(index).c_str(), pos_x + (keyVector.at(index).width / 2)/*(keyVector.at(index).width - outline_border_size * 2 / 2)*/, pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
-			//RenderMenuText((char*)Osk_GetKeyLabel(index).c_str(), pos_x + (keyVector.at(index).width / 2), pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
+				RenderSmallMenuText((char*)Osk_GetKeyLabel(index).c_str(), pos_x + (keyVector.at(index).width / 2)/*(keyVector.at(index).width - outline_border_size * 2 / 2)*/, pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
+				//RenderMenuText((char*)Osk_GetKeyLabel(index).c_str(), pos_x + (keyVector.at(index).width / 2), pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
+			}
 
 			pos_x += (keyVector.at(index).width + space_between_keys);
 			widthCount -= keyVector.at(index).numWidthBlocks;
@@ -213,18 +222,6 @@ bool Osk_IsActive()
 std::string Osk_GetKeyLabel(int buttonIndex)
 {
 	return stringVector.at(keyVector.at(buttonIndex).stringId);
-}
-
-/*
-char Osk_GetSelectedKeyChar()
-{
-//	return keyVector[Osk_GetCurrentLocation()].name;
-	return 'a';//keyVector[Osk_GetCurrentLocation()].name;
-}
-*/
-char Osk_GetSpecifiedKeyChar(int key)
-{
-	return 'a';//keyArray[key];
 }
 
 void Osk_Activate()
@@ -258,6 +255,21 @@ char Osk_HandleKeypress()
 		return 0;
 	}
 
+	else if (buttonLabel == "Shift")
+	{
+		return 0;
+	}
+
+	else if (buttonLabel == "Caps Lock")
+	{
+		return 0;
+	}
+
+	else if (buttonLabel == "Symbols")
+	{
+		return 0;
+	}
+
 	else if (buttonLabel == "Space")
 	{
 		return ' ';
@@ -268,26 +280,6 @@ char Osk_HandleKeypress()
 #ifdef _XBOX
 		AddKeyToQueue(KEY_BACKSPACE);
 #endif
-		return 0;
-	}
-
-	else if (buttonLabel == "Symbols")
-	{
-		return 0;
-	}
-
-	else if (buttonLabel == "Shift")
-	{
-		return 0;
-	}
-
-	else if (buttonLabel == "Dunno")
-	{
-		return 0;
-	}
-
-	else if (buttonLabel == "Blank")
-	{
 		return 0;
 	}
 
@@ -321,9 +313,11 @@ void Osk_MoveLeft()
 	// where are we now?
 	int currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
 
+	// store some information about current key
 	int buttonOffset = keyVector.at(currentPosition).positionOffset;
 	int width = keyVector.at(currentPosition).numWidthBlocks;
 
+	// lets do the actual left move
 	currentColumn -= buttonOffset + 1;
 
 	// wrap?
@@ -332,6 +326,21 @@ void Osk_MoveLeft()
 
 	// where are we now?
 	currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+
+	// handle moving over any blank keys
+	while (keyVector.at(currentPosition).isBlank)
+	{
+		buttonOffset = keyVector.at(currentPosition).positionOffset;
+
+		currentColumn -= buttonOffset + 1;
+
+		// wrap?
+		if (currentColumn < 0)
+			currentColumn = numHorizontalKeys - 1;
+
+		// where are we now?
+		currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+	}
 
 	currentValue = currentPosition;
 
@@ -356,6 +365,21 @@ void Osk_MoveRight()
 	// where are we now?
 	currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
 
+	// handle moving over any blank keys
+	while (keyVector.at(currentPosition).isBlank)
+	{
+		buttonOffset = keyVector.at(currentPosition).positionOffset;
+
+		currentColumn += width - buttonOffset;
+
+		// wrap?
+		if (currentColumn >= numHorizontalKeys) // add some sort of numColumns?
+			currentColumn = 0;
+
+		// where are we now?
+		currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+	}
+
 	currentValue = currentPosition;
 
 	// then align to button left..
@@ -370,7 +394,23 @@ void Osk_MoveUp()
 	if (currentRow < 0)
 		currentRow = 4;
 
-	currentValue = (currentRow * numHorizontalKeys) + currentColumn;
+	// where are we now?
+	int currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+
+	// handle moving over any blank keys
+	while (keyVector.at(currentPosition).isBlank)
+	{
+		currentRow--;
+
+		// make sure we're not outside the grid
+		if (currentRow < 0)
+			currentRow = 4;
+
+		// where are we now?
+		currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+	}
+
+	currentValue = currentPosition;
 
 	// left align button value
 	currentValue -= keyVector.at(currentValue).positionOffset;
@@ -384,7 +424,23 @@ void Osk_MoveDown()
 	if (currentRow > 4)
 		currentRow = 0;
 
-	currentValue = (currentRow * numHorizontalKeys) + currentColumn;
+	// where are we now?
+	int currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+
+	// handle moving over any blank keys
+	while (keyVector.at(currentPosition).isBlank)
+	{
+		currentRow++;
+
+		// make sure we're not outside the grid
+		if (currentRow > 4)
+			currentRow = 0;
+
+		// where are we now?
+		currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+	}
+
+	currentValue = currentPosition;
 
 	// left align button value
 	currentValue -= keyVector.at(currentValue).positionOffset;

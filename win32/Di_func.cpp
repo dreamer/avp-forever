@@ -157,6 +157,8 @@ static unsigned char GamePadButtons[NUMPADBUTTONS];
 
 int blockGamepadInputTimer = 0;
 
+void ClearAllKeyArrays();
+
 /*
 	8/4/98 DHM: A new array, analagous to KeyboardInput, except it's debounced
 */
@@ -1518,9 +1520,15 @@ to make F8 not count in a 'press any key' situation */
 		DebouncedGotAnyKey = GotAnyKey && !LastGotAnyKey;
 	}
 
-	if (DebouncedKeyboardInput[KEY_TAB]) 
-	{	
+	if ((KeyboardInput[KEY_LEFTSHIFT]) && (DebouncedKeyboardInput[KEY_ESCAPE]))
+	{
 		Con_Toggle();
+	}
+
+	if (Con_IsOpen())
+	{
+		Con_ProcessInput();
+//		ClearAllKeyArrays();
 	}
 }
 
@@ -2172,6 +2180,13 @@ BOOL CALLBACK EnumJoysticksCallback( LPCDIDEVICEINSTANCE pInst,
 }
 #endif
 
+void ClearAllKeyArrays()
+{
+	memset(KeyboardInput, 0, MAX_NUMBER_OF_INPUT_KEYS);
+	memset(DebouncedKeyboardInput, 0, MAX_NUMBER_OF_INPUT_KEYS);
+	GotAnyKey = 0;
+	DebouncedGotAnyKey = 0;
+}
 
 extern void IngameKeyboardInput_KeyDown(unsigned char key)
 {

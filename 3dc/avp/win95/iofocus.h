@@ -45,6 +45,15 @@
 		#define IOFOCUS_Toggle() ((void) 0)
 	#endif /* UseGadgets */
 
+	// bjd
+	#define IOFOCUS_GAME		0x0001
+	#define	IOFOCUS_NEWCONSOLE	0x0002
+	#define	IOFOCUS_OLDCONSOLE	0x0004
+	#define	IOFOCUS_OSK			0x0008
+
+	void IOFOCUS_Set(int focus);
+	int IOFOCUS_Get();
+
 
 /* End of the header ****************************************************/
 

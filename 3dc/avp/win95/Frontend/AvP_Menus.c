@@ -2084,7 +2084,11 @@ static void ActUponUsersInput(void)
 	static int BackspaceTimer=0;
 	//Set up a keyboard repeat rate thingy for deleting long strings
 
-	if(KeyboardInput[KEY_BACKSPACE])
+	// dont process input for the menus if i'm in the console
+	if (IOFOCUS_Get() & (IOFOCUS_NEWCONSOLE))
+		return;
+
+	if (KeyboardInput[KEY_BACKSPACE])
 	{
 		BackspaceTimer+=RealFrameTime;
 	}

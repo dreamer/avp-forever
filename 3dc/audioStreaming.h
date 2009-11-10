@@ -35,6 +35,9 @@ struct StreamingAudioBuffer
 	int rate;
 	int bytesPerSample;
 	int writeOffset;
+	int lastPlayCursor;
+	int msPerBuffer;
+	int lastCheckedTime;
 	UINT64 totalBytesPlayed;
 	UINT64 totalSamplesWritten;
 	unsigned char *buffers;

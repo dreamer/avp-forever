@@ -5,6 +5,9 @@
 #include "logString.h"
 #include "audioStreaming.h"
 
+#include <sndfile.h>
+SNDFILE *sndFile;
+
 extern "C" {
 
 #ifdef DAVEW
@@ -2372,6 +2375,28 @@ int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, i
 	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
 	waveFormat.cbSize			= sizeof(waveFormat);	//how big this structure is
 
+	SF_INFO sndInfo;
+	const int format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+	const char* outfilename = "C:\\Users\\Barry\\Documents\\My Games\\Aliens versus Predator\\test.wav";
+
+	memset(&sndInfo, 0, sizeof(SF_INFO));
+	sndInfo.channels = channels;
+	sndInfo.format = format;
+	sndInfo.samplerate = rate;
+
+	if (!(sf_format_check(&sndInfo)))
+	{
+		OutputDebugString("sf_format_check failed\n");
+	}
+
+	sndFile = sf_open(outfilename, SFM_WRITE, &sndInfo);
+
+	if (!sndFile)
+	{
+		int error = sf_error(sndFile);
+		OutputDebugString("can't open sndFile\n");
+	}
+
 	// create the source voice for playing the sound
 	LastError = pXAudio2->CreateSourceVoice(&streamStruct->pSourceVoice, &waveFormat);
 	if (FAILED(LastError))
@@ -2416,6 +2441,8 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, i
 	memcpy(&streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize], audioData, size);
 	buf.AudioBytes = size;
 	buf.pAudioData = &streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize];
+
+	sf_write_raw(sndFile, &streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize], size);
 
 	streamStruct->pSourceVoice->SubmitSourceBuffer(&buf);
 
@@ -2504,6 +2531,8 @@ int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct)
 int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);
+
+	sf_close(sndFile);
 
 	if (streamStruct->pSourceVoice)
 	{

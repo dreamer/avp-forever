@@ -107,7 +107,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		wParam <<= 16;
 	}
 
-	switch(message)
+	switch (message)
     {
 		case WM_MOUSEWHEEL:
 		{
@@ -160,17 +160,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			sprintf(buf, "key: %x\n", wParam);
 			OutputDebugString(buf);
 */
-			if (Con_IsActive())
-			{
-				break;
-/*
-				if(wParam == VK_BACK)
-				{
-					Con_Key_Backspace(true);
-					break;
-				}
-*/
-			}
 
 			/* handle left/right alt keys */
 			if (wParam == VK_MENU)
@@ -242,15 +231,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		case WM_SYSKEYUP:
 		case WM_KEYUP:						
 		{
-			if (Con_IsActive())
-			{
-//				if(wParam == VK_BACK)
-				{
-//					Con_Key_Backspace(false);
-					break;
-				}
-			}
-
 			// Handle on screen keyboard input
 			if (Osk_IsActive())
 			{
@@ -277,31 +257,31 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			}
 
 			/* handle left/right alt keys */
-			if(wParam == VK_MENU)
+			if (wParam == VK_MENU)
 			{	
-				if(lParam&(1<<24))
+				if (lParam&(1<<24))
 					wParam = VK_RMENU;
 				else
 					wParam = VK_LMENU;
 			}
 
 			/* handle left/right control keys */
-			if(wParam == VK_CONTROL)
+			if (wParam == VK_CONTROL)
 			{			
-				if(lParam&(1<<24))
+				if (lParam&(1<<24))
 					wParam = VK_RCONTROL;
 				else
 					wParam = VK_LCONTROL;
 			}
 
 			/* handle left/right shift keys */	
-			if(wParam == VK_SHIFT)
+			if (wParam == VK_SHIFT)
 			{
-				if((!(GetKeyState(VK_RSHIFT) & 0x8000)) && (KeyboardInput[KEY_RIGHTSHIFT] == TRUE))
+				if ((!(GetKeyState(VK_RSHIFT) & 0x8000)) && (KeyboardInput[KEY_RIGHTSHIFT] == TRUE))
 				{
 					wParam = VK_RSHIFT;
 				}
-				else if((!(GetKeyState(VK_LSHIFT) & 0x8000)) && (KeyboardInput[KEY_LEFTSHIFT] == TRUE))
+				else if ((!(GetKeyState(VK_LSHIFT) & 0x8000)) && (KeyboardInput[KEY_LEFTSHIFT] == TRUE))
 				{
 					wParam = VK_LSHIFT;
 				}

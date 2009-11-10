@@ -2420,8 +2420,6 @@ void UpdateSoundFrequencies(void)
 
 } // extern "C"
 
-int lastPlayCursor = 0;
-
 int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, int size)
 {
 	assert (streamStruct);
@@ -2439,11 +2437,11 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, i
 
 	// 1: Update number of bytes played.
 	streamStruct->dsBuffer->GetCurrentPosition(&playPosition, &writePosition);
-	bytesPlayed = playPosition - lastPlayCursor;
+	bytesPlayed = playPosition - streamStruct->lastPlayCursor;
 	if ( bytesPlayed < 0 )
 		bytesPlayed += fullBufferSize; // unwrap
 
-	lastPlayCursor = playPosition;
+	streamStruct->lastPlayCursor = playPosition;
 	streamStruct->totalBytesPlayed += bytesPlayed;
 
 	// 2: Write the audio data into the dsound buffer
@@ -2460,6 +2458,7 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, i
 	// copy second section if necessary ( I don't think this should happen..)
 	if (audioPtr2 != NULL)
 	{
+		OutputDebugString("second pointer audio write..\n");
 		memcpy(audioPtr2, &audioData[audioBytes1], audioBytes2);
 	}
 
@@ -2501,6 +2500,14 @@ int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
 	int writeableSpace = 0;
 	int fullBufferSize = streamStruct->bufferCount * streamStruct->bufferSize;
 
+	if ((timeGetTime() - streamStruct->lastCheckedTime) < streamStruct->msPerBuffer)
+	{
+		// i think it's too early to check
+		return 0;
+	}
+
+	streamStruct->lastCheckedTime = timeGetTime();
+
 	streamStruct->dsBuffer->GetCurrentPosition(&playPosition, &writePosition);
 
 	writeableSpace = fullBufferSize - (streamStruct->writeOffset - playPosition);
@@ -2511,11 +2518,11 @@ int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
 	if (writeableSpace < 0)
 		return 0;
 
-	int temp = writeableSpace / streamStruct->bufferSize;
-//	return writeableSpace / streamStruct->bufferSize;
-	sprintf(buf, "reporting %d free sound buffers\n", temp);
-	OutputDebugString(buf);
-	return temp;
+//	int temp = writeableSpace / streamStruct->bufferSize;
+	return writeableSpace / streamStruct->bufferSize;
+//	sprintf(buf, "reporting %d free sound buffers\n", temp);
+//	OutputDebugString(buf);
+//	return temp;
 }
 
 int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)
@@ -2553,6 +2560,8 @@ int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct)
 
 int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 {
+
+
 	assert (streamStruct);
 
 	if (streamStruct->dsBuffer != NULL) 
@@ -2568,108 +2577,16 @@ int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 		delete []streamStruct->buffers;
 		streamStruct->buffers = NULL;
 	}
-
+/*
 	streamStruct->bufferCount = 0;
 	streamStruct->currentBuffer = 0;
 	streamStruct->bufferSize = 0;
+*/
+
+	memset(streamStruct, 0, sizeof(StreamingAudioBuffer));
 
 	return 1;
 }
-
-#if 0
-/* return the amount of data written to buffer */
-int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset)
-{
-	int bytesWritten = 0;
-
-	/* lock the vorbis buffer */
-	if (FAILED(vorbisBuffer->Lock(offset, dataSize, &audioPtr1, &audioBytes1, &audioPtr2, &audioBytes2, NULL))) 
-	{
-		LogErrorString("couldn't lock ogg vorbis buffer for update", __LINE__, __FILE__);
-		return 0;
-	}
-
-	/* write data to buffer */
-	if (!audioPtr2) // buffer didn't wrap
-	{
-		memcpy(audioPtr1, audioData, audioBytes1);
-		bytesWritten += audioBytes1;
-	}
-	else // need to split memcpy
-	{
-		memcpy(audioPtr1, audioData, audioBytes1);
-		memcpy(audioPtr2, &audioData[audioBytes1], audioBytes2);
-		bytesWritten += audioBytes1+audioBytes2;
-	}
-
-	if (FAILED(vorbisBuffer->Unlock(audioPtr1, audioBytes1, audioPtr2, audioBytes2))) 
-	{
-		LogErrorString("couldn't unlock ogg vorbis buffer", __LINE__, __FILE__);
-	}
-
-	return bytesWritten;
-}
-#endif
-
-#if 0
-int SetVorbisBufferVolume(int volume)
-{
-	if (vorbisBuffer == NULL)
-		return 0;
-
-	signed int attenuation;
-
-	if (volume < VOLUME_MIN) volume = VOLUME_MIN;
-	if (volume > VOLUME_MAX) volume = VOLUME_MAX;
-
-	/* convert from intensity to attenuation */
-	attenuation = vol_to_atten_table[volume];
-
-	if (attenuation > VOLUME_MAXPLAT) attenuation = VOLUME_MAXPLAT;
-	if (attenuation < VOLUME_MINPLAT) attenuation = VOLUME_MINPLAT;
-
-	/* and apply it */
-	LastError = vorbisBuffer->SetVolume(attenuation);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return 0;
-	}
-
-	return 1;
-}
-#endif
-
-#if 0
-int StopVorbisBuffer()
-{
-	if(FAILED(vorbisBuffer->Stop()))
-	{
-		LogErrorString("couldn't stop vorbis buffer", __LINE__, __FILE__);
-		return 1;
-	}
-	return 0;
-}
-
-bool PlayVorbisBuffer()
-{
-	if(FAILED(vorbisBuffer->Play(0,0,DSBPLAY_LOOPING)))
-	{
-		LogErrorString("PlayVorbisBuffer() - couldn't play vorbis buffer", __LINE__, __FILE__);
-		return false;
-	}
-	return true;
-}
-
-void ReleaseVorbisBuffer()
-{
-	if (vorbisBuffer != NULL) 
-	{
-		vorbisBuffer->Release();
-		vorbisBuffer = NULL;
-	}
-}
-#endif
 
 int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate, int bufferSize, int numBuffers)
 {
@@ -2687,7 +2604,7 @@ int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, i
 
 	memset(&bufferFormat, 0, sizeof(DSBUFFERDESC));
 	bufferFormat.dwSize	 = sizeof(DSBUFFERDESC);
-	bufferFormat.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_LOCSOFTWARE;
+	bufferFormat.dwFlags = DSBCAPS_CTRLVOLUME | /*DSBCAPS_CTRLPOSITIONNOTIFY |*/ DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_LOCSOFTWARE;
 	bufferFormat.dwBufferBytes = bufferSize * numBuffers;//waveFormat.nAvgBytesPerSec * 2;
 	bufferFormat.lpwfxFormat = &waveFormat;
 
@@ -2708,10 +2625,16 @@ int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, i
 	streamStruct->rate = waveFormat.nSamplesPerSec;
 	streamStruct->totalBytesPlayed = 0;
 	streamStruct->writeOffset = 0;
+	streamStruct->lastPlayCursor = 0;
 	streamStruct->currentBuffer = 0;
 	streamStruct->bufferSize = bufferSize;
 	streamStruct->bufferCount = numBuffers;
 	streamStruct->totalSamplesWritten = 0;
+	streamStruct->msPerBuffer = ((bufferSize / streamStruct->bytesPerSample) * 1000 ) / streamStruct->rate;
+	streamStruct->lastCheckedTime = 0;
+
+	sprintf(buf, "msPerBuffer: %d\n", streamStruct->msPerBuffer);
+	OutputDebugString(buf);
 
 /* FIXME
 	(*bufferSize) = bufferFormat.dwBufferBytes;

@@ -41,6 +41,8 @@ extern int InGameMenusAreRunning(void);
 /* Internal globals ************************************************/
 	static OurBool iofocus_AcceptTyping = FALSE;
 
+	static int ioFocus = 0;
+
 /* Exported function definitions ***********************************/
 OurBool IOFOCUS_AcceptControls(void)
 {
@@ -50,6 +52,16 @@ OurBool IOFOCUS_AcceptControls(void)
 OurBool IOFOCUS_AcceptTyping(void)
 {
 	return iofocus_AcceptTyping;
+}
+
+int IOFOCUS_Get()
+{
+	return ioFocus;
+}
+
+void IOFOCUS_Set(int focus)
+{
+	ioFocus = focus;
 }
 
 void IOFOCUS_Toggle(void)

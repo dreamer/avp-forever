@@ -8,10 +8,14 @@
 
 #include "console.h"
 #include "d3_func.h"
+#include "iofocus.h"
 
 extern "C" 
 {
 	#include "avp_menugfx.hpp"
+	#include "platform.h"
+	extern unsigned char DebouncedKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
+	extern int RealFrameTime;
 }
 
 #define CHAR_WIDTH	15
@@ -37,6 +41,7 @@ std::vector<std::string>cmdArgs;
 struct Console 
 {
 	bool isActive;
+	bool isOpen;
 
 	int xPos;
 	int yPos;
@@ -102,18 +107,11 @@ void Con_Init()
 	console.height = console.lines * CHAR_HEIGHT;
 	console.indent = CHAR_WIDTH / 2;
 
+	console.destinationY = 0;
+
 	sprintf(buf, "console height: %d num lines: %d\n", console.lines * CHAR_HEIGHT, console.lines);
 	OutputDebugString(buf);
-/*
-	Con_AddLine("Blah");
-	Con_AddLine("here is another line");
-	Con_AddLine("Initialisation failed! stuff broke horribly :(");
-	Con_AddLine("fooooooooooood!");
-	Con_AddLine("testing");
-	Con_AddLine("1");
-	Con_AddLine("2");
-	Con_AddLine("big long test string");
-*/
+
 	Con_AddCommand("blah", Blah);
 
 //	LoadConsoleFont();
@@ -152,6 +150,7 @@ void Con_ProcessCommand()
 	// in case we didnt find it
 	if (theCommand.cmdFuncPointer == NULL)
 	{
+		Con_AddLine(commandName);
 		Con_AddLine("Unknown command \"" + commandName + "\"");
 		console.inputLine.clear();
 		return;
@@ -172,6 +171,15 @@ void Con_ProcessCommand()
 
 	// lets call the function now..
 	theCommand.cmdFuncPointer();
+}
+
+void Con_ProcessInput()
+{
+	if (DebouncedKeyboardInput[KEY_BACKSPACE])
+		Con_RemoveTypedChar();
+
+	if (DebouncedKeyboardInput[KEY_CR])
+		Con_ProcessCommand();
 }
 
 bool prevEnter = false;
@@ -201,11 +209,19 @@ void Con_Toggle()
 
 	if (console.height > 0) console.destinationY = 0;
 	else console.destinationY = console.lines * CHAR_HEIGHT;
+
+	// toggle on/off
+	IOFOCUS_Set( IOFOCUS_Get() ^ IOFOCUS_NEWCONSOLE);
 }
 
 bool Con_IsActive()
 {
 	return console.isActive;
+}
+
+bool Con_IsOpen()
+{
+	return console.isOpen;
 }
 
 void Con_CheckResize()
@@ -255,18 +271,31 @@ void Con_Draw()
 	/* is console moving to a new position? */
 	if (console.destinationY > console.height)
 	{
-		console.height += CHAR_HEIGHT;
+		console.height += RealFrameTime * 0.01;
+		if (console.height > console.destinationY)
+			console.height = console.destinationY;
+
+		console.isOpen = false;
 	}
 	else if (console.destinationY < console.height)
 	{
-		console.height -= CHAR_HEIGHT;
+		console.height -= RealFrameTime * 0.01;
+		if (console.height < console.destinationY)
+			console.height = console.destinationY;
+
+		console.isOpen = false;
 	}
 
-	DrawQuad(console.xPos, console.yPos, console.width, console.height, D3DCOLOR_ARGB(255, 80, 160, 120));
+	if (console.destinationY == console.height)
+		console.isOpen = true;
+
+	// draw the background quad
+	DrawQuad(console.xPos, console.yPos, console.width, console.height, D3DCOLOR_ARGB(255, 38, 80, 145));
 
 	if (console.height > 0)
 	{
-		DrawQuad(console.xPos, console.yPos+console.height, console.width, 2, D3DCOLOR_ARGB(255, 128, 160, 25));
+		// draw the outline bar that runs along the bottom of the console
+		DrawQuad(console.xPos, console.yPos+console.height, console.width, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
 	}
 
 	int charCount = 0;
@@ -290,7 +319,7 @@ void Con_Draw()
 		for(int j = 0; j < console.text[i].length(); j++)
 		{
 			//if ((j * CHAR_WIDTH) > console.lineWidth) break;
-			charWidth = RenderSmallChar(console.text[i].at(j), console.indent + /*(xOffset * j)*/xOffset, y, ONE_FIXED, ONE_FIXED / 2, ONE_FIXED, ONE_FIXED);
+			charWidth = RenderSmallChar(console.text.at(i).at(j), console.indent + /*(xOffset * j)*/xOffset, y, ONE_FIXED, ONE_FIXED / 2, ONE_FIXED, ONE_FIXED);
 			xOffset+=charWidth;
 		}
 	}
