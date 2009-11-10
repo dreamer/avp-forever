@@ -113,7 +113,7 @@ void Con_Init()
 	OutputDebugString(buf);
 
 	Con_AddCommand("blah", Blah);
-
+	Con_AddCommand("toggleconsole", Con_Toggle);
 //	LoadConsoleFont();
 
 	OutputDebugString("console initialised\n");
@@ -182,33 +182,16 @@ void Con_ProcessInput()
 		Con_ProcessCommand();
 }
 
-bool prevEnter = false;
-bool prevBackspace = false;
-
-/* handle user pressing enter key. make this less horrible */
-void Con_Key_Enter(bool state)
-{
-//	if (prevEnter == false && state == true)
-	{
-		Con_ProcessCommand();
-		OutputDebugString("console ENTER\n");
-	}
-	prevEnter = state;
-}
-
-void Con_Key_Backspace(bool state)
-{
-	Con_RemoveTypedChar();
-}
-
 void Con_Toggle()
 {
 	OutputDebugString("console toggle\n");
 	console.isActive = !console.isActive;
 	console.time = 250;
 
-	if (console.height > 0) console.destinationY = 0;
-	else console.destinationY = console.lines * CHAR_HEIGHT;
+	if (console.height > 0) 
+		console.destinationY = 0;
+	else 
+		console.destinationY = console.lines * CHAR_HEIGHT;
 
 	// toggle on/off
 	IOFOCUS_Set( IOFOCUS_Get() ^ IOFOCUS_NEWCONSOLE);
@@ -241,19 +224,22 @@ void Con_AddTypedChar(char c)
 
 	if (c == 0x08)
 	{
-		Con_Key_Backspace(true);
-		return;
+//		Con_Key_Backspace(true);
+		Con_RemoveTypedChar();
 	}
 
-	if (c == 13)
+	else if (c == 13)
 	{	
-		Con_Key_Enter(true);
-		return;
+//		Con_Key_Enter(true);
+		Con_ProcessCommand();
 	}
-//	sprintf(buf, "Con_AddTypedChar: %c\n", c);
-//	OutputDebugString(buf);
+	else
+	{
+	//	sprintf(buf, "Con_AddTypedChar: %c\n", c);
+	//	OutputDebugString(buf);
 
-	console.inputLine.push_back(c);
+		console.inputLine.push_back(c);
+	}
 }
 
 void Con_RemoveTypedChar()
@@ -299,10 +285,16 @@ void Con_Draw()
 	}
 
 	int charCount = 0;
+	static int alpha = ONE_FIXED;
+
+	alpha -= RealFrameTime * 1.2f;
+	if (alpha < 0) alpha = ONE_FIXED;
 
 	/* draw input cusor */
 	charWidth = RenderSmallChar('>', console.indent, console.height - CHAR_HEIGHT, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
-	RenderSmallChar('_', console.indent + charWidth, console.height - CHAR_HEIGHT, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
+
+
+	RenderSmallChar('_', console.indent + charWidth, console.height - CHAR_HEIGHT, alpha, ONE_FIXED, ONE_FIXED, ONE_FIXED);
 
 	int rows = console.text.size() - 1;
 
