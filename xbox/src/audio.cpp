@@ -2107,10 +2107,13 @@ int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
 
 UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
 {
+/*
 	XAUDIO2_VOICE_STATE state;
 	streamStruct->pSourceVoice->GetState( &state );
 
 	return state.SamplesPlayed;
+*/
+	return 1;
 }
 
 int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)

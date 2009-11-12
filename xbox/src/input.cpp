@@ -27,13 +27,13 @@ extern "C++"{
 
 // keyboard queue stuff
 #include <queue>
-
+/*
 struct KEYPRESS
 {
 	char asciiCode;
 	char keyCode;
 };
-
+*/
 std::queue <KEYPRESS> keyboardQueue;
 
 void AddKeyToQueue(char virtualKeyCode)
@@ -377,14 +377,30 @@ void DirectReadKeyboard()
 	{
 		if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2]) // if osk active and user presses xbox A..
 		{
-			int key = Osk_HandleKeypress();
+			KEYPRESS keyPress = Osk_HandleKeypress();
 
+			if (keyPress.asciiCode)
+			{
+				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(keyPress.asciiCode);
+				KeyboardEntryQueue_Add(keyPress.asciiCode);
+				DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2] = 0;
+			}
+			else if (keyPress.keyCode)
+			{
+				DebouncedKeyboardInput[keyPress.keyCode] = TRUE;
+			}
+/*
 			if (key)
 			{
 				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR((char)key);
 				KeyboardEntryQueue_Add((char)key);
 				DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2] = 0;
 			}
+*/
+		}
+		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_4]) // users presses B so we go back
+		{
+			DebouncedKeyboardInput[KEY_ESCAPE] = TRUE;
 		}
 		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_13]) // up
 		{

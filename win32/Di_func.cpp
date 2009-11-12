@@ -19,10 +19,14 @@ extern "C" {
 #include "gamedef.h"
 #include "gameplat.h"
 #include "usr_io.h"
+#include "rentrntq.h"
+
+extern void KeyboardEntryQueue_Add(char c);
 
 extern "C++"
 {
 	#include "console.h"
+	#include "onscreenKeyboard.h"
 	#include "iofocus.h"
 };
 
@@ -134,22 +138,27 @@ int xPadMoveY;
 
 enum
 {
-	X,
-	A,
-	Y,
-	B,
-	LT,
-	RT,
-	LB,
-	RB,
-	BACK,
-	START,
-	LEFTCLICK,
-	RIGHTCLICK,
-	DUP,
-	DDOWN,
-	DLEFT,
-	DRIGHT
+	X,				// KEY_JOYSTICK_BUTTON_1
+	A,				// KEY_JOYSTICK_BUTTON_2
+	Y,				// KEY_JOYSTICK_BUTTON_3
+	B,				// KEY_JOYSTICK_BUTTON_4
+	LT,				// KEY_JOYSTICK_BUTTON_5
+	RT,				// KEY_JOYSTICK_BUTTON_6
+	LB,				// KEY_JOYSTICK_BUTTON_7
+	RB,				// KEY_JOYSTICK_BUTTON_8
+	BACK,			// KEY_JOYSTICK_BUTTON_9
+	START,			// KEY_JOYSTICK_BUTTON_10
+	LEFTCLICK,		// KEY_JOYSTICK_BUTTON_11
+	RIGHTCLICK,		// KEY_JOYSTICK_BUTTON_12
+	DUP,			// KEY_JOYSTICK_BUTTON_13
+	DDOWN,			// KEY_JOYSTICK_BUTTON_14
+	DLEFT,			// KEY_JOYSTICK_BUTTON_15
+	DRIGHT			// KEY_JOYSTICK_BUTTON_16
+};
+
+enum
+{
+	XBOX2KEYARRAY_A
 };
 
 #define NUMPADBUTTONS 16
@@ -1512,12 +1521,43 @@ to make F8 not count in a 'press any key' situation */
 			);
 		}
 
-		if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2])
+		DebouncedGotAnyKey = GotAnyKey && !LastGotAnyKey;
+	}
+
+	if (Osk_IsActive())
+	{
+		if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_15])
+			Osk_MoveLeft();
+
+		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_16])
+			Osk_MoveRight();
+
+		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_13])
+			Osk_MoveUp();
+
+		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_14])
+			Osk_MoveDown();
+
+		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2])
 		{
-			OutputDebugString("Got debounced Xbox_A\n");
+			KEYPRESS keyPress = Osk_HandleKeypress();
+
+			if (keyPress.asciiCode)
+			{
+				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(keyPress.asciiCode);
+				KeyboardEntryQueue_Add(keyPress.asciiCode);
+				DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2] = 0;
+			}
+			else if (keyPress.keyCode)
+			{
+				DebouncedKeyboardInput[keyPress.keyCode] = TRUE;
+			}
 		}
 
-		DebouncedGotAnyKey = GotAnyKey && !LastGotAnyKey;
+		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_4])
+		{
+			DebouncedKeyboardInput[KEY_ESCAPE] = TRUE;
+		}
 	}
 
 	if ((KeyboardInput[KEY_LEFTSHIFT]) && (DebouncedKeyboardInput[KEY_ESCAPE]))

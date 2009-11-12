@@ -231,6 +231,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		case WM_SYSKEYUP:
 		case WM_KEYUP:						
 		{
+/*
 			// Handle on screen keyboard input
 			if (Osk_IsActive())
 			{
@@ -255,7 +256,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 						break;
 				}
 			}
-
+*/
 			/* handle left/right alt keys */
 			if (wParam == VK_MENU)
 			{	

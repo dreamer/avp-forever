@@ -17,7 +17,7 @@
 #include <assert.h>
 #include "utilities.h" // avp_open()
 
-#pragma comment(lib, "libsndfile-1.lib")
+//#pragma comment(lib, "libsndfile-1.lib")
 
 extern "C" 
 {

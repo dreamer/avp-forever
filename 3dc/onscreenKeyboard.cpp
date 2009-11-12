@@ -6,15 +6,25 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 #include <assert.h>
 
-extern "C" {
-extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha);
-extern unsigned char KeyboardInput[];
-};
+/* TODO:
+	
+	- align text properly
+	- add Shift
+	- add Caps lock
+	- Symbols (can I be bothered?...)
+	- xbox specific graphics to indicate press B to go back, A to select..
 
-extern "C" 
+
+*/
+
+extern "C"
 {
+	extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha);
+	extern unsigned char KeyboardInput[];
+
 	#include "avp_menugfx.hpp"
 	#include "platform.h"
 }
@@ -61,6 +71,9 @@ const int numKeys = numVerticalKeys * numHorizontalKeys;
 
 static bool is_active = false;
 static bool is_inited = false;
+
+bool shift = false;
+bool capsLock = false;
 
 static int buttonId = 0;
 
@@ -197,9 +210,9 @@ void Osk_Draw()
 				DrawQuad(pos_x, pos_y, keyVector.at(index).width, keyVector.at(index).height, D3DCOLOR_ARGB(200, 255, 255, 255));
 
 				if (Osk_GetCurrentLocation() == index) // draw the selected item differently (highlight it)
-					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, D3DCOLOR_ARGB(220, 38, 80, 145));
+					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, D3DCOLOR_ARGB(220, 0, 128, 0));
 				else
-					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, D3DCOLOR_ARGB(220, 128, 128, 128));
+					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, D3DCOLOR_ARGB(220, 38, 80, 145));
 
 				RenderSmallMenuText((char*)Osk_GetKeyLabel(index).c_str(), pos_x + (keyVector.at(index).width / 2)/*(keyVector.at(index).width - outline_border_size * 2 / 2)*/, pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
 				//RenderMenuText((char*)Osk_GetKeyLabel(index).c_str(), pos_x + (keyVector.at(index).width / 2), pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
@@ -221,6 +234,17 @@ bool Osk_IsActive()
 
 std::string Osk_GetKeyLabel(int buttonIndex)
 {
+	// quick test for shift and caps lock..
+
+	if ((shift || capsLock) && ((stringVector.at(keyVector.at(buttonIndex).stringId).length() == 1)))
+	{
+		std::string tempString = stringVector.at(keyVector.at(buttonIndex).stringId);
+
+		std::transform(tempString.begin(), tempString.end(), tempString.begin(), toupper);
+
+		return tempString;
+	}
+
 	return stringVector.at(keyVector.at(buttonIndex).stringId);
 }
 
@@ -241,66 +265,76 @@ void Osk_Deactivate()
 extern void AddKeyToQueue(char virtualKeyCode);
 #endif
 
-char Osk_HandleKeypress()
+KEYPRESS Osk_HandleKeypress()
 {
 	std::string buttonLabel = Osk_GetKeyLabel(Osk_GetCurrentLocation());
 
-	char selectedChar;
+	//char selectedChar;
+	KEYPRESS newKeypress = {0};
 
 	if (buttonLabel == "Done")
 	{
+		newKeypress.keyCode = KEY_CR;
+		return newKeypress;
+/*
 #ifdef _XBOX
 		AddKeyToQueue(KEY_CR);
 #endif
-		return 0;
+//		return 0;
+		return newKeypress;
+*/
 	}
 
 	else if (buttonLabel == "Shift")
 	{
-		return 0;
+		shift = !shift;
+		return newKeypress;
 	}
 
 	else if (buttonLabel == "Caps Lock")
 	{
-		return 0;
+		capsLock = !capsLock;
+		return newKeypress;
 	}
 
 	else if (buttonLabel == "Symbols")
 	{
-		return 0;
+		return newKeypress;
 	}
 
 	else if (buttonLabel == "Space")
 	{
-		return ' ';
+		newKeypress.asciiCode = ' ';
+		return newKeypress;
 	}
 
 	else if (buttonLabel == "Backspace")
 	{
-#ifdef _XBOX
-		AddKeyToQueue(KEY_BACKSPACE);
-#endif
-		return 0;
+		newKeypress.keyCode = KEY_BACKSPACE;
+		return newKeypress;
 	}
 
 	else if (buttonLabel == "<")
 	{
-		return 0;
+		return newKeypress;
 	}
 
 	else if (buttonLabel == ">")
 	{
-		return 0;
+		return newKeypress;
 	}
 
-	else 
+	else
 	{
-		//return StringToInt(buttonLabel);
-		selectedChar = buttonLabel.at(0);
-		return selectedChar;
+		newKeypress.asciiCode = buttonLabel.at(0);
+
+		if (shift) // turn it off, as it's a use-once thing
+			shift = false;
+		
+		return newKeypress;
 	}
 
-	return 0;
+	return newKeypress;
 }
 
 static int Osk_GetCurrentLocation()

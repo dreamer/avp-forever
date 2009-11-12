@@ -94,6 +94,7 @@ static unsigned long MakeFlag (unsigned long num)
 	return(1<<num);
 }
 
+#if 0 // bjd - unused
 int ChangingLevelGameFlowUpdate (I_AVP_ENVIRONMENTS current, I_AVP_ENVIRONMENTS next)
 {
 	int retval = 0;
@@ -368,6 +369,7 @@ int ChangingLevelGameFlowUpdate (I_AVP_ENVIRONMENTS current, I_AVP_ENVIRONMENTS 
 	return(retval);
 	
 }
+#endif
 
 void InitGameFlowSystem (struct player_status * ps, INITGAMEFLOWTYPE igft)
 {

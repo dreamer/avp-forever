@@ -1,3 +1,4 @@
+#if 0 // bjd - unused
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
@@ -234,4 +235,6 @@ void jtextprint (const char* t, ...)
 
 
 }
+#endif
+
 #endif

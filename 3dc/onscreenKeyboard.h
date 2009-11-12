@@ -3,6 +3,13 @@
 
 extern "C"
 {
+
+struct KEYPRESS
+{
+	char asciiCode;
+	char keyCode;
+};
+
 void Osk_Draw();
 bool Osk_IsActive();
 void Osk_MoveLeft();
@@ -11,8 +18,7 @@ void Osk_MoveUp();
 void Osk_MoveDown();
 void Osk_Activate();
 void Osk_Deactivate();
-//char Osk_GetSelectedKeyChar();
-char Osk_HandleKeypress();
+KEYPRESS Osk_HandleKeypress();
 };
 
 #endif
