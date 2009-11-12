@@ -24,6 +24,7 @@ extern "C"
 {
 	extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha);
 	extern unsigned char KeyboardInput[];
+	extern char AAFontWidths[256];
 
 	#include "avp_menugfx.hpp"
 	#include "platform.h"
@@ -214,7 +215,20 @@ void Osk_Draw()
 				else
 					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, D3DCOLOR_ARGB(220, 38, 80, 145));
 
-				RenderSmallMenuText((char*)Osk_GetKeyLabel(index).c_str(), pos_x + (keyVector.at(index).width / 2)/*(keyVector.at(index).width - outline_border_size * 2 / 2)*/, pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
+				// now draw text, but figure out how wide the string is first.. do this once on init?
+				const char *tempPtr = Osk_GetKeyLabel(index).c_str();
+				int labelWidth = 0;
+				int positionX = 0;
+
+				while (*tempPtr)
+				{
+					labelWidth += AAFontWidths[(unsigned char)*tempPtr++];
+				}
+
+				positionX = pos_x + ((keyVector.at(index).width - labelWidth) / 2);
+
+//				RenderSmallMenuText((char*)Osk_GetKeyLabel(index).c_str(), pos_x + (keyVector.at(index).width / 2)/*(keyVector.at(index).width - outline_border_size * 2 / 2)*/, pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
+				RenderSmallMenuText((char*)Osk_GetKeyLabel(index).c_str(), positionX, pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
 				//RenderMenuText((char*)Osk_GetKeyLabel(index).c_str(), pos_x + (keyVector.at(index).width / 2), pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
 			}
 

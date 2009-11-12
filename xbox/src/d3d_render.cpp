@@ -8156,6 +8156,9 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
+
+	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_WRAP);
+	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_WRAP);
 }
 
 void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE8 bar_texture, int original_width, int original_height, int new_width, int new_height) 
