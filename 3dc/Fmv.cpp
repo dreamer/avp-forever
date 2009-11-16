@@ -163,6 +163,8 @@ th_ycbcr_buffer buffer;
 HRESULT LastError;
 HANDLE hEvent1, hEvent2;
 
+HANDLE callbackEvent;
+
 D3DTEXTURE mDisplayTexture = NULL;
 unsigned char *textureData = NULL;
 
@@ -177,7 +179,7 @@ StreamingAudioBuffer fmvAudioStream;
 /* audio buffer for liboggplay */
 static short	*audioDataBuffer = NULL;
 static int		audioDataBufferSize = 0;
-char *audioData = NULL;
+byte *audioData = NULL;
 
 
 void TheoraInitForData(OggStream* stream) 
@@ -449,29 +451,35 @@ void AudioGrabThread(void *args)
 		{
 			int readableAudio = RingBuffer_GetReadableSpace();
 
-			if (started == true)
+			// we can fill a buffer
+			if (readableAudio >= fmvAudioStream.bufferSize)
 			{
-				if (readableAudio >= fmvAudioStream.bufferSize)
-				{
-					RingBuffer_ReadData(audioData, fmvAudioStream.bufferSize);
-					AudioStream_WriteData(&fmvAudioStream, audioData, fmvAudioStream.bufferSize);
+				RingBuffer_ReadData(audioData, fmvAudioStream.bufferSize);
+				AudioStream_WriteData(&fmvAudioStream, audioData, fmvAudioStream.bufferSize);
 
 //					sprintf(buf, "send %d bytes to xaudio2\n", fmvAudioStream.bufferSize);
 //					OutputDebugString(buf);
 
-					buffersAdded++;
-				}
+				buffersAdded++;
+				numBuffersFree--;
+			}
+			else
+			{
+				// not enough audio available this time
+				break;
 			}
 
 //			if ((readableAudio >= 8192) && (started == false))
-			if (started == false)
-			{
-				AudioStream_PlayBuffer(&fmvAudioStream);
-				started = true;
-			}
-
-			numBuffersFree--;
 		}
+
+		if (started == false)
+		{
+			AudioStream_PlayBuffer(&fmvAudioStream);
+			started = true;
+		}
+
+		if (numBuffersFree)
+			SetEvent(callbackEvent);
 
 		endTime = timeGetTime();
 
@@ -488,6 +496,7 @@ void TheoraDecodeThread(void *args)
 {
 	int ret = 0;
 	int audioSize = 0;
+	int dataSize = 0;
 	int written = 0;
 	float** pcm = 0;
 	int samples = 0;
@@ -512,7 +521,7 @@ void TheoraDecodeThread(void *args)
 		{
 			if (samples > 0) 
 			{
-				int dataSize = samples * audio->mVorbis.mInfo.channels;
+				dataSize = samples * audio->mVorbis.mInfo.channels;
 
 				if (audioDataBuffer == NULL)
 				{	
@@ -540,6 +549,7 @@ void TheoraDecodeThread(void *args)
 				}
 
 				short* p = audioDataBuffer;
+
 				for (int i = 0; i < samples; ++i) 
 				{
 					for (int j = 0; j < audio->mVorbis.mInfo.channels; ++j) 
@@ -553,13 +563,17 @@ void TheoraDecodeThread(void *args)
 
 				audioSize = samples * audio->mVorbis.mInfo.channels * sizeof(short);
 
+				while (!(AudioStream_GetNumFreeBuffers(&fmvAudioStream)))
+					WaitForSingleObject(callbackEvent, INFINITE);
+
 				EnterCriticalSection(&audioCriticalSection);
+
 
 				int freeSpace = RingBuffer_GetWritableSpace();
 
 				// Sleep here if we cant fill the ring buffer?
-
-				/* if we can't fit all our data.. */
+#if 0
+				// if we can't fit all our data..
 				if (audioSize > freeSpace) 
 				{
 					while (audioSize > RingBuffer_GetWritableSpace())
@@ -570,8 +584,8 @@ void TheoraDecodeThread(void *args)
 					//sprintf(buf, "not enough room for all data. need %d, have free %d\n", audioSize, freeSpace);
 					//OutputDebugString(buf);
 				}
-
-				written += RingBuffer_WriteData((char*)&audioDataBuffer[0], audioSize);
+#endif
+				written += RingBuffer_WriteData((byte*)&audioDataBuffer[0], audioSize);
 
 //					sprintf(buf, "send %d bytes to ring buffer\n", audioSize);
 //					OutputDebugString(buf);
@@ -714,13 +728,13 @@ int OpenTheoraVideo(const char *fileName)
 		OutputDebugString(buf);
 
 		/* init audio buffer here */
-		if (AudioStream_CreateBuffer(&fmvAudioStream, audio->mVorbis.mInfo.channels, audio->mVorbis.mInfo.rate, 4096, 3) < 0)
+		if (AudioStream_CreateBuffer(&fmvAudioStream, audio->mVorbis.mInfo.channels, audio->mVorbis.mInfo.rate, 4096, 3) != AUDIOSTREAM_OK)
 		{
 			LogErrorString("Can't create audio stream buffer for OGG Vorbis!");
 		}
 
 		/* init some temp audio data storage */
-		audioData = new char[fmvAudioStream.bufferSize];
+		audioData = new byte[fmvAudioStream.bufferSize];
 
 		RingBuffer_Init((fmvAudioStream.bufferSize * fmvAudioStream.bufferCount) * 3);
 	}
@@ -767,6 +781,8 @@ int OpenTheoraVideo(const char *fileName)
 	
 	hEvent1 = CreateEvent( NULL, FALSE, FALSE, NULL );
 	hEvent2 = CreateEvent( NULL, FALSE, FALSE, NULL );
+
+	callbackEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
 
 	_beginthread(TheoraDecodeThread, 0, 0);
 	_beginthread(AudioGrabThread, 0, 0);

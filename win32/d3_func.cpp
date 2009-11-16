@@ -27,18 +27,13 @@ extern "C" {
 	#include <shlwapi.h>
 #endif
 
-extern "C++" {
+extern "C++"
+{
 	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 	#include "logString.h"
 	#include "configFile.h"
 	#include <d3dx9.h>
 	#include "console.h"
-
-#ifdef _DEBUG
-	#pragma comment(lib, "d3dx9d.lib")
-#else
-	#pragma comment(lib, "d3dx9.lib")
-#endif
 }
 
 int image_num = 0;
@@ -59,8 +54,6 @@ static HRESULT LastError;
 D3DINFO d3d;
 D3DTEXTURE consoleText;
 
-//int StartDriver = 0;
-//int StartFormat = 0;
 
 /* TGA header structure */
 #pragma pack(1)

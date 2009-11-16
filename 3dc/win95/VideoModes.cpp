@@ -129,7 +129,7 @@ void SelectBasicDeviceAndVideoMode()
 	PreferredDeviceAndVideoMode.ColourDepth = 32;
 }
 
-void LoadDeviceAndVideoModePreferences() 
+void LoadDeviceAndVideoModePreferences()
 {
 	Config_Load();
 

@@ -127,7 +127,7 @@ extern void CheckCDVolume(void)
 void CDDA_ChangeVolume(int volume)
 {
 	/* set vorbis volume here for now */
-	if (SetStreamingMusicVolume(volume))
+	if (SetStreamingMusicVolume(volume) == 0) // ok
 	{
 		CDDAVolume=volume;
 		CDPlayerVolume = volume;

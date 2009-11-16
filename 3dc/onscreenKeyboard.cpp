@@ -216,7 +216,8 @@ void Osk_Draw()
 					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, D3DCOLOR_ARGB(220, 38, 80, 145));
 
 				// now draw text, but figure out how wide the string is first.. do this once on init?
-				const char *tempPtr = Osk_GetKeyLabel(index).c_str();
+				std::string tempString = Osk_GetKeyLabel(index);
+				const char *tempPtr = tempString.c_str();
 				int labelWidth = 0;
 				int positionX = 0;
 
@@ -228,7 +229,7 @@ void Osk_Draw()
 				positionX = pos_x + ((keyVector.at(index).width - labelWidth) / 2);
 
 //				RenderSmallMenuText((char*)Osk_GetKeyLabel(index).c_str(), pos_x + (keyVector.at(index).width / 2)/*(keyVector.at(index).width - outline_border_size * 2 / 2)*/, pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
-				RenderSmallMenuText((char*)Osk_GetKeyLabel(index).c_str(), positionX, pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
+				RenderSmallMenuText((char*)tempString.c_str(), positionX, pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
 				//RenderMenuText((char*)Osk_GetKeyLabel(index).c_str(), pos_x + (keyVector.at(index).width / 2), pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
 			}
 
@@ -283,31 +284,33 @@ KEYPRESS Osk_HandleKeypress()
 {
 	std::string buttonLabel = Osk_GetKeyLabel(Osk_GetCurrentLocation());
 
-	//char selectedChar;
 	KEYPRESS newKeypress = {0};
 
 	if (buttonLabel == "Done")
 	{
 		newKeypress.keyCode = KEY_CR;
 		return newKeypress;
-/*
-#ifdef _XBOX
-		AddKeyToQueue(KEY_CR);
-#endif
-//		return 0;
-		return newKeypress;
-*/
 	}
 
 	else if (buttonLabel == "Shift")
 	{
 		shift = !shift;
+
+		// if capslock on, turn it off?
+		if (capsLock) 
+			capsLock = false;
+
 		return newKeypress;
 	}
 
 	else if (buttonLabel == "Caps Lock")
 	{
 		capsLock = !capsLock;
+
+		// if shift is on, turn it off?
+		if (shift) 
+			shift = false;
+
 		return newKeypress;
 	}
 

@@ -21,13 +21,8 @@
 
 extern "C" 
 {
-	extern int CreateVorbisAudioBuffer(int channels, int rate, unsigned int *bufferSize);
-	extern int UpdateVorbisAudioBuffer(char *audioData, int dataSize, int offset);
-	extern void ProcessStreamingAudio();
 	extern int SetStreamingMusicVolume(int volume);
-	extern int StopVorbisBuffer();
 	extern int CDPlayerVolume; // volume control from menus
-	extern bool PlayVorbisBuffer();
 }
 
 FILE* file;
@@ -51,9 +46,9 @@ std::vector<std::string> TrackList;
 	const std::string musicFolderName = "d:\\Music\\";
 #endif
 
-static char *audioData = 0;
+static byte *audioData = 0;
 
-int ReadVorbisData(char *audioBuffer, int sizeToRead, int offset)
+int ReadVorbisData(byte *audioBuffer, int sizeToRead, int offset)
 {
 	int bytesReadTotal = 0;
 	int bytesReadPerLoop = 0;
@@ -62,7 +57,10 @@ int ReadVorbisData(char *audioBuffer, int sizeToRead, int offset)
 	{
 		bytesReadPerLoop = ov_read(
 			&oggFile,									//what file to read from
-			(audioBuffer + offset) + bytesReadTotal,	//where to put the decoded data
+//			(audioBuffer + offset) + bytesReadTotal),	//where to put the decoded data
+			//reinterpret_cast<char*>(audioBuffer + offset + bytesReadTotal),
+			reinterpret_cast<char*>(audioBuffer + bytesReadTotal),
+			//(((char*)audioBuffer) + offset) + bytesReadTotal,
 			sizeToRead - bytesReadTotal,				//how much data to read
 			0,											//0 specifies little endian decoding mode
 			2,											//2 specifies 16-bit samples
@@ -97,13 +95,16 @@ int ReadVorbisData(char *audioBuffer, int sizeToRead, int offset)
 void LoadVorbisTrack(int track) 
 {
 	/* if we're already playing a track, stop it */
-	if (oggIsPlaying) StopVorbis();
+	if (oggIsPlaying) 
+		StopVorbis();
 
 	/* TODO? rather than return, pick a random track or just play last? */
-	if (track > TrackList.size()) return;
+	if (track > TrackList.size()) 
+		return;
 
 	/* if user enters 1, decrement to 0 to align to array (enters 2, decrement to 1 etc) */
-	if (track != 0) track--;
+	if (track != 0) 
+		track--;
 
 	file = fopen(TrackList[track].c_str(),"rb");
 	if (!file) 
@@ -132,16 +133,16 @@ void LoadVorbisTrack(int track)
 
 	LogString("\t Vorbis frequency: " + IntToString(pInfo->rate));
 
-	int numSamples = ov_pcm_total(&oggFile, -1);
+	ogg_int64_t numSamples = ov_pcm_total(&oggFile, -1);
 
 	/* create the audio buffer (directsound or whatever) */
-	if (AudioStream_CreateBuffer(&vorbisStream, pInfo->channels, pInfo->rate, 32768, 3) < 0)
+	if (AudioStream_CreateBuffer(&vorbisStream, pInfo->channels, pInfo->rate, 32768, 3) != AUDIOSTREAM_OK)
 	{
 		LogErrorString("Can't create audio stream buffer for OGG Vorbis!");
 	}
 
 	/* init some temp audio data storage */
-	audioData = new char[vorbisStream.bufferSize];
+	audioData = new byte[vorbisStream.bufferSize];
 
 	int totalRead = ReadVorbisData(audioData, vorbisStream.bufferSize, 0);
 
@@ -178,7 +179,7 @@ void UpdateVorbisBuffer(void *arg)
 
 void PlayVorbis() 
 {
-	if (AudioStream_PlayBuffer(&vorbisStream))
+	if (AudioStream_PlayBuffer(&vorbisStream) == AUDIOSTREAM_OK)
 	{
 		oggIsPlaying = true;
 		AudioStream_SetBufferVolume(&vorbisStream, CDPlayerVolume);
@@ -210,9 +211,6 @@ void StopVorbis()
 
 	delete[] audioData;
 	audioData = 0;
-
-//	bytesReadTotal = 0;
-//	bytesReadPerLoop = 0;
 }
 
 bool LoadVorbisTrackList()

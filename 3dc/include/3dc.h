@@ -4,3 +4,5 @@
 #include "shape.h"
 #include "prototyp.h"
 #include "utilities.h"
+
+typedef unsigned char	byte;

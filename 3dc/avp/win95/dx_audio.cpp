@@ -2480,8 +2480,8 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, i
 UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
 {
 	UINT64 temp = ((streamStruct->totalBytesPlayed / streamStruct->bytesPerSample) / streamStruct->numChannels);
-	sprintf(buf, "we have played %d samples\n", temp);
-	OutputDebugString(buf);
+//	sprintf(buf, "we have played %d samples\n", temp);
+//	OutputDebugString(buf);
 //	return ((streamStruct->totalBytesPlayed / streamStruct->bytesPerSample) / streamStruct->numChannels);
 	return temp;
 

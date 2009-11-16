@@ -192,7 +192,7 @@ extern int HUDScaleFactor;
 //Globals
 
 // keep track of set render states
-static unsigned char D3DShadingMode;
+static D3DSHADEMODE D3DShadingMode;
 static unsigned char D3DTBlendMode;
 
 static bool	D3DAlphaBlendEnable;;
@@ -204,7 +204,7 @@ bool D3DAlphaTestEnable = FALSE;
 static bool D3DStencilEnable;
 D3DCMPFUNC D3DStencilFunc;
 static unsigned int D3DStencilRef;
-static unsigned char D3DZFunc;
+static D3DCMPFUNC D3DZFunc;
 static unsigned char D3DDitherEnable;
 static bool D3DZWriteEnable;
 

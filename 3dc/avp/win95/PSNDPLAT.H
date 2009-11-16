@@ -40,7 +40,7 @@ typedef struct soundsampledata
 #endif
 #ifdef USE_XAUDIO2
 	BOOL is3D;
-	unsigned char *audioBuffer;
+	byte *audioBuffer;
 	XAUDIO2_BUFFER xa2Buffer;
 	X3DAUDIO_EMITTER xa2Emitter;
 	IXAudio2SourceVoice *pSourceVoice;

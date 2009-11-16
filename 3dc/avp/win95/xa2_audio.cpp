@@ -8,6 +8,8 @@
 #include <sndfile.h>
 SNDFILE *sndFile;
 
+#pragma comment(lib, "libsndfile-1.lib")
+
 extern "C" {
 
 #ifdef DAVEW
@@ -1454,7 +1456,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 			return 0;
 		}
 */		
-		GameSounds[soundNum].audioBuffer = new unsigned char[myChunkHeader.chunkLength];
+		GameSounds[soundNum].audioBuffer = new byte[myChunkHeader.chunkLength];
 
 		/* Read data from file to buffer */
 		res = fread(GameSounds[soundNum].audioBuffer, 1, myChunkHeader.chunkLength, myFile);
@@ -1712,7 +1714,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 			return 0;
 		}
 */
-		GameSounds[soundNum].audioBuffer = new unsigned char[myChunkHeader.chunkLength];
+		GameSounds[soundNum].audioBuffer = new byte[myChunkHeader.chunkLength];
 
 		/* Read data from file to buffer */
 		res = ffread(GameSounds[soundNum].audioBuffer, 1, myChunkHeader.chunkLength, myFile);
@@ -2194,7 +2196,7 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 			return 0;
 		}
 */
-		GameSounds[soundIndex].audioBuffer = new unsigned char[myChunkHeader.chunkLength];
+		GameSounds[soundIndex].audioBuffer = new byte[myChunkHeader.chunkLength];
 
 		/* Read data from file to buffer */
 		RebSndRead(GameSounds[soundIndex].audioBuffer, 1, myChunkHeader.chunkLength, bufferPtr);
@@ -2367,14 +2369,15 @@ int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, i
 	assert (streamStruct);
 
 	WAVEFORMATEX waveFormat;
+	ZeroMemory (&waveFormat, sizeof(waveFormat));
 	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
 	waveFormat.nChannels		= channels;	
 	waveFormat.wBitsPerSample	= 16;					//we'll be using 16
 	waveFormat.nSamplesPerSec	= rate;	
-	waveFormat.nBlockAlign		= waveFormat.nChannels * waveFormat.wBitsPerSample / 8;	//what block boundaries exist
+	waveFormat.nBlockAlign		= waveFormat.nChannels * (waveFormat.wBitsPerSample / 8);	//what block boundaries exist
 	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
-	waveFormat.cbSize			= sizeof(waveFormat);	//how big this structure is
-
+	waveFormat.cbSize			= 0;//sizeof(waveFormat);	//how big this structure is
+/*
 	SF_INFO sndInfo;
 	const int format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
 	const char* outfilename = "C:\\Users\\Barry\\Documents\\My Games\\Aliens versus Predator\\test.wav";
@@ -2396,13 +2399,13 @@ int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, i
 		int error = sf_error(sndFile);
 		OutputDebugString("can't open sndFile\n");
 	}
-
+*/
 	// create the source voice for playing the sound
 	LastError = pXAudio2->CreateSourceVoice(&streamStruct->pSourceVoice, &waveFormat);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		return -1;
+		return AUDIOSTREAM_ERROR;
 	}
 /*
 	LastError = streamStruct->pSourceVoice->Start(0, XAUDIO2_COMMIT_NOW);
@@ -2412,10 +2415,12 @@ int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, i
 		return -1;
 	}
 */
-	streamStruct->buffers = new unsigned char[bufferSize * numBuffers];
+	streamStruct->buffers = new byte[bufferSize * numBuffers];
 	if (streamStruct->buffers == NULL)
 	{
 		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
+		AudioStream_ReleaseBuffer(streamStruct);
+		return AUDIOSTREAM_OUTOFMEMORY;
 	}
 
 	streamStruct->bytesPerSample = waveFormat.wBitsPerSample / 8;
@@ -2427,10 +2432,10 @@ int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, i
 	streamStruct->bufferCount = numBuffers;
 	streamStruct->totalSamplesWritten = 0;
 
-	return 0;
+	return AUDIOSTREAM_OK;
 }
 
-int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, int size)
+int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, byte *audioData, int size)
 {
 	assert (streamStruct);
 	assert (audioData);
@@ -2438,13 +2443,18 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, i
 	int amountWritten = 0;
 	XAUDIO2_BUFFER buf = {0};
 
+	assert (size == streamStruct->bufferSize);
+
 	memcpy(&streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize], audioData, size);
 	buf.AudioBytes = size;
-	buf.pAudioData = &streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize];
+	buf.pAudioData = static_cast<BYTE*>(&streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize]);
 
-	sf_write_raw(sndFile, &streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize], size);
+//	sf_write_raw(sndFile, &streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize], size);
 
 	streamStruct->pSourceVoice->SubmitSourceBuffer(&buf);
+
+	// this is so redundant..
+	amountWritten += size;
 
 	streamStruct->currentBuffer++;
 	streamStruct->currentBuffer %= streamStruct->bufferCount;
@@ -2503,9 +2513,10 @@ int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
 	LastError = streamStruct->pSourceVoice->SetVolume(vol_to_gain_table[volume]);
 	if (FAILED(LastError))
 	{
-		return SOUND_PLATFORMERROR;
+		return AUDIOSTREAM_ERROR;
 	}
-	else return 1;
+	
+	return AUDIOSTREAM_OK;
 }
 
 int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct)
@@ -2514,18 +2525,28 @@ int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct)
 
 	if (streamStruct->pSourceVoice)
 	{
-		streamStruct->pSourceVoice->Stop();
+		LastError = streamStruct->pSourceVoice->Stop();
+		if (FAILED(LastError))
+		{
+			return AUDIOSTREAM_ERROR;
+		}
 	}
-	return 1;
+
+	return AUDIOSTREAM_OK;
 }
 
 int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);
 
-	streamStruct->pSourceVoice->Start();
+	LastError = streamStruct->pSourceVoice->Start();
 
-	return 1;
+	if (FAILED(LastError))
+	{
+		return AUDIOSTREAM_ERROR;
+	}
+
+	return AUDIOSTREAM_OK;
 }
 
 int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
@@ -2552,7 +2573,7 @@ int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 	streamStruct->currentBuffer = 0;
 	streamStruct->bufferSize = 0;
 
-	return 1;
+	return AUDIOSTREAM_OK;
 }
 
 #endif

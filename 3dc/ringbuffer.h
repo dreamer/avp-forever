@@ -7,7 +7,7 @@ struct ringBuffer
 	int		writePos;
 	int		amountFilled;
 	bool	initialFill;
-	char	*buffer;
+	byte	*buffer;
 	int		bufferCapacity;
 };
 
@@ -15,5 +15,5 @@ bool RingBuffer_Init(int size);
 void RingBuffer_Unload();
 int RingBuffer_GetWritableSpace();
 int RingBuffer_GetReadableSpace();
-int RingBuffer_ReadData(char *destData, int amountToRead);
-int RingBuffer_WriteData(char *srcData, int srcDataSize);
+int RingBuffer_ReadData(byte *destData, int amountToRead);
+int RingBuffer_WriteData(byte *srcData, int srcDataSize);

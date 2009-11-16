@@ -14,7 +14,7 @@ static ringBuffer ring = {0};
 bool RingBuffer_Init(int size)
 {
 	/* initalise data buffer in ring buffer */
-	ring.buffer = new char[size];
+	ring.buffer = new byte[size];
 
 	if (ring.buffer == NULL)
 		return false;
@@ -108,7 +108,7 @@ int RingBuffer_GetReadableSpace()
 	return readableSpace;
 }
 
-int RingBuffer_ReadData(char *destData, int amountToRead)
+int RingBuffer_ReadData(byte *destData, int amountToRead)
 {
 	assert (ring.buffer);
 	assert (destData != NULL);
@@ -152,7 +152,7 @@ int RingBuffer_ReadData(char *destData, int amountToRead)
 	return totalRead;
 }
 
-int RingBuffer_WriteData(char *srcData, int srcDataSize)
+int RingBuffer_WriteData(byte *srcData, int srcDataSize)
 {
 	assert (ring.buffer);
 	assert (srcData != NULL);
