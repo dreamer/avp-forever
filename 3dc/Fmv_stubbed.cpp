@@ -11,7 +11,10 @@ extern "C" {
 #include "inline.h"
 #include <math.h>
 #include <assert.h>
+#include "showcmds.h"
 
+extern int NumActiveBlocks;
+extern DISPLAYBLOCK *ActiveBlockList[];
 extern int GotAnyKey;
 
 int SmackerSoundVolume = 65536/512;
@@ -38,18 +41,10 @@ int FmvColourBlue;
 extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
 
-void drive_decoding(void *arg);
-void display_frame(void *arg);
 bool FmvWait();
 int NextFMVFrame();
-int FmvOpen(char *filenamePtr);
 void FmvClose();
 int GetVolumeOfNearestVideoScreen(void);
-void writeFmvData(unsigned char *destData, unsigned char* srcData, int width, int height, int pitch);
-int CreateFMVAudioBuffer(int channels, int rate);
-int WriteToDsound(int dataSize, int offset);
-int GetWritableBufferSize();
-int updateAudioBuffer(int numBytes, short *data);
 
 extern void EndMenuBackgroundFmv()
 {
@@ -57,11 +52,6 @@ extern void EndMenuBackgroundFmv()
 
 extern void StartMenuBackgroundFmv()
 {
-}
-
-void UpdateFMVAudioBuffer(void *arg) 
-{
-
 }
 
 void RecreateAllFMVTexturesAfterDeviceReset()
@@ -78,7 +68,7 @@ void FmvClose()
 {
 }
 
-extern int StartMenuBackgroundFmv()
+extern int PlayMenuBackgroundFmv()
 {
 	return 0;
 }
@@ -114,8 +104,6 @@ void ScanImagesForFMVs()
 	int i;
 	IMAGEHEADER *ihPtr;
 	NumberOfFMVTextures = 0;
-
-	OutputDebugString("scan images for fmvs\n");
 
 	#if MaxImageGroups>1
 	for (j=0; j<MaxImageGroups; j++)
@@ -267,11 +255,6 @@ extern void GetFMVInformation(int *messageNumberPtr, int *frameNumberPtr)
 	*frameNumberPtr = 0;
 }
 
-/* not needed */
-void CloseFMV()
-{
-}
-
 void FindLightingValuesFromTriggeredFMV(unsigned char *bufferPtr, FMVTEXTURE *ftPtr)
 {
 	unsigned int totalRed=0;
@@ -309,9 +292,6 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 	return 1;
 }
 
-extern int NumActiveBlocks;
-extern DISPLAYBLOCK *ActiveBlockList[];
-#include "showcmds.h"
 int GetVolumeOfNearestVideoScreen(void)
 {											  
 	extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
@@ -353,19 +333,13 @@ int GetVolumeOfNearestVideoScreen(void)
 
 					{
 						VECTORCH rightEarDirection;
-						#if 0
-						rightEarDirection.vx = Global_VDB_Ptr->VDB_Mat.mat11;
-						rightEarDirection.vy = Global_VDB_Ptr->VDB_Mat.mat12;
-						rightEarDirection.vz = Global_VDB_Ptr->VDB_Mat.mat13;
-						Normalise(&disp);
-						#else
 						rightEarDirection.vx = Global_VDB_Ptr->VDB_Mat.mat11;
 						rightEarDirection.vy = 0;
 						rightEarDirection.vz = Global_VDB_Ptr->VDB_Mat.mat31;
 						disp.vy=0;
+
 						Normalise(&disp);
 						Normalise(&rightEarDirection);
-						#endif
 						PanningOfNearestVideoScreen = 32768 + DotProduct(&disp,&rightEarDirection)/2;
 					}
 				}
@@ -381,69 +355,7 @@ int FmvOpen(char *filenamePtr)
 	return 1;
 }
 
-void drive_decoding(void *arg) 
-{
-}
-
-void display_frame(void *arg)  
-{	
-}
-
-void float_to_short_array(const float* in, short* out, int len) 
-{
-/*
-	int i = 0;
-	float scaled_value = 0;		
-	for(i = 0; i < len; i++) {				
-		scaled_value = floorf(0.5 + 32768 * in[i]);
-		if (in[i] < 0) {
-			out[i] = (scaled_value < -32768.0) ? -32768 : (short)scaled_value;
-		} else {
-			out[i] = (scaled_value > 32767.0) ? 32767 : (short)scaled_value;
-		}
-	}
-*/
-}
-/*
-void handle_audio_data(OggPlay * player, int track, OggPlayAudioData * data, int samples) 
-{
-}
-*/
-
-int updateAudioBuffer(int numBytes, short *data)
-{
-	return 0;
-}
-
-int GetWritableBufferSize()
-{
-	return 0;
-}
-
-int WriteToDsound(/*char *audioData,*/ int dataSize, int offset)
-{
-	return 1;
-}
-/*
-void handle_video_data (OggPlay * player, int track_num, OggPlayVideoData * video_data, int frame) 
-{
-}
-*/
-bool FmvWait()
-{
-	return false;
-}
-
-void writeFmvData(unsigned char *destData, unsigned char* srcData, int width, int height, int pitch)
-{
-}
-
 int NextFMVFrame()
-{
-	return 0;
-}
-
-int CreateFMVAudioBuffer(int channels, int rate)
 {
 	return 0;
 }

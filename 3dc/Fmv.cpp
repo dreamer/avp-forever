@@ -478,7 +478,7 @@ void AudioGrabThread(void *args)
 			started = true;
 		}
 
-		if (numBuffersFree)
+		if (numBuffersFree == 1)
 			SetEvent(callbackEvent);
 
 		endTime = timeGetTime();
@@ -562,17 +562,17 @@ void TheoraDecodeThread(void *args)
 				}
 
 				audioSize = samples * audio->mVorbis.mInfo.channels * sizeof(short);
-
+/*
 				while (!(AudioStream_GetNumFreeBuffers(&fmvAudioStream)))
 					WaitForSingleObject(callbackEvent, INFINITE);
-
+*/
 				EnterCriticalSection(&audioCriticalSection);
 
 
 				int freeSpace = RingBuffer_GetWritableSpace();
 
 				// Sleep here if we cant fill the ring buffer?
-#if 0
+#if 1
 				// if we can't fit all our data..
 				if (audioSize > freeSpace) 
 				{
