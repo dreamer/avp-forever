@@ -62,7 +62,7 @@ struct Console
 
 Console console;
 
-void Con_AddLine(std::string temp)
+void Con_AddLine(const std::string &temp)
 {
 	console.text.push_back(temp);
 }

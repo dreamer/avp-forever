@@ -147,7 +147,6 @@ std::ifstream oggFile;
 ogg_sync_state state;
 char buf[100];
 bool frameReady = false;
-//bool audioReady = false;
 bool fmvPlaying = false;
 bool MenuBackground = false;
 
@@ -468,8 +467,6 @@ void AudioGrabThread(void *args)
 				// not enough audio available this time
 				break;
 			}
-
-//			if ((readableAudio >= 8192) && (started == false))
 		}
 
 		if (started == false)
@@ -525,6 +522,7 @@ void TheoraDecodeThread(void *args)
 
 				if (audioDataBuffer == NULL)
 				{	
+					// make it twice the size we currently need to avoid future reallocations
 					audioDataBuffer = new short[dataSize * 2];
 					audioDataBufferSize = dataSize * 2;
 				}
@@ -615,21 +613,12 @@ void TheoraDecodeThread(void *args)
 
 			if (video) 
 			{
-//				ogg_int64_t position = 0;
-
 				float audio_time = static_cast<float>(AudioStream_GetNumSamplesPlayed(&fmvAudioStream)) / static_cast<float>(audio->mVorbis.mInfo.rate);
 
 				float video_time = static_cast<float>(th_granule_time(video->mTheora.mCtx, mGranulepos));
-//				sprintf(buf, "video_time: %f audio_time: %f\n", video_time, audio_time);
-//				OutputDebugString(buf);
-
-//				float timewritten = float(AudioStream_GetNumSamplesWritten(&fmvAudioStream)) / float(audio->mVorbis.mInfo.rate);
-
-//				sprintf(buf, "audio_time: %f, timeWritten: %f\n", audio_time, timewritten);
-//				OutputDebugString(buf);
 
 				// if audio is ahead of frame time, display a new frame
-				if ((audio_time > video_time))// || (!audio)) // do it anyway if we have no audio
+				if ((audio_time > video_time))
 				{
 					// Decode one frame and display it. If no frame is available we
 					// don't do anything.
@@ -652,8 +641,10 @@ bool running = false;
 
 int OpenTheoraVideo(const char *fileName)
 {
-	if (running) return 0;
-	
+/*
+	if (running) 
+		return 0;
+*/	
 	std::string filePath;
 
 #ifdef _XBOX
@@ -799,8 +790,8 @@ bool CheckTheoraPlayback()
 
 int CloseTheoraVideo()
 {
-	if (!fmvPlaying)
-		return 0;
+//	if (!fmvPlaying)
+//		return 0;
 
 	OutputDebugString("CloseTheoraVideo..\n");
 
@@ -877,6 +868,8 @@ int CloseTheoraVideo()
 	textureWidth = 0;
 	textureHeight = 0;
 
+	running = true;
+
 	return 0;
 }
 
@@ -940,7 +933,8 @@ extern void PlayFMV(char *filenamePtr)
 		ThisFramesRenderingHasBegun();
 		ClearScreenToBlack();
 
-		if ((frameWidth != 0) && (frameHeight != 0)) // don't draw if we don't know frame width or height
+		//if ((frameWidth != 0) && (frameHeight != 0)) // don't draw if we don't know frame width or height
+		if (mDisplayTexture)
 		{
 //			OutputDebugString("got new texture..\n");
 			DrawFmvFrame(frameWidth, frameHeight, textureWidth, textureHeight, mDisplayTexture);
