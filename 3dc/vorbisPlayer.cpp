@@ -57,10 +57,7 @@ int ReadVorbisData(byte *audioBuffer, int sizeToRead, int offset)
 	{
 		bytesReadPerLoop = ov_read(
 			&oggFile,									//what file to read from
-//			(audioBuffer + offset) + bytesReadTotal),	//where to put the decoded data
-			//reinterpret_cast<char*>(audioBuffer + offset + bytesReadTotal),
 			reinterpret_cast<char*>(audioBuffer + bytesReadTotal),
-			//(((char*)audioBuffer) + offset) + bytesReadTotal,
 			sizeToRead - bytesReadTotal,				//how much data to read
 			0,											//0 specifies little endian decoding mode
 			2,											//2 specifies 16-bit samples

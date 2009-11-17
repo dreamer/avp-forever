@@ -2371,9 +2371,9 @@ int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, i
 	WAVEFORMATEX waveFormat;
 	ZeroMemory (&waveFormat, sizeof(waveFormat));
 	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
-	waveFormat.nChannels		= channels;	
+	waveFormat.nChannels		= channels;
 	waveFormat.wBitsPerSample	= 16;					//we'll be using 16
-	waveFormat.nSamplesPerSec	= rate;	
+	waveFormat.nSamplesPerSec	= rate;
 	waveFormat.nBlockAlign		= waveFormat.nChannels * (waveFormat.wBitsPerSample / 8);	//what block boundaries exist
 	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
 	waveFormat.cbSize			= 0;//sizeof(waveFormat);	//how big this structure is
