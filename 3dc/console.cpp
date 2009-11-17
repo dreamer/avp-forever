@@ -69,7 +69,7 @@ void Con_AddLine(const std::string &temp)
 
 void Con_AddCommand(char *command, funcPointer function)
 {
-	for (cmdIt = cmdList.begin(); cmdIt < cmdList.end(); cmdIt++)
+	for (cmdIt = cmdList.begin(); cmdIt < cmdList.end(); ++cmdIt)
 	{
 		if (!strcmp(command, cmdIt->cmdName))
 		{
@@ -137,7 +137,7 @@ void Con_ProcessCommand()
 	getline(stream, commandName, ' ');
 
 	// see if the command actually exists first.
-	for (cmdIt = cmdList.begin(); cmdIt < cmdList.end(); cmdIt++)
+	for (cmdIt = cmdList.begin(); cmdIt < cmdList.end(); ++cmdIt)
 	{
 		if (commandName == cmdIt->cmdName)
 		{
@@ -257,7 +257,7 @@ void Con_Draw()
 	/* is console moving to a new position? */
 	if (console.destinationY > console.height)
 	{
-		console.height += RealFrameTime * 0.01;
+		console.height += static_cast<int>(RealFrameTime * 0.01f);
 		if (console.height > console.destinationY)
 			console.height = console.destinationY;
 
@@ -265,7 +265,7 @@ void Con_Draw()
 	}
 	else if (console.destinationY < console.height)
 	{
-		console.height -= RealFrameTime * 0.01;
+		console.height -= static_cast<int>(RealFrameTime * 0.01f);
 		if (console.height < console.destinationY)
 			console.height = console.destinationY;
 
@@ -287,12 +287,11 @@ void Con_Draw()
 	int charCount = 0;
 	static int alpha = ONE_FIXED;
 
-	alpha -= RealFrameTime * 1.2f;
+	alpha -= static_cast<int>(RealFrameTime * 1.2f);
 	if (alpha < 0) alpha = ONE_FIXED;
 
 	/* draw input cusor */
 	charWidth = RenderSmallChar('>', console.indent, console.height - CHAR_HEIGHT, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
-
 
 	RenderSmallChar('_', console.indent + charWidth, console.height - CHAR_HEIGHT, alpha, ONE_FIXED, ONE_FIXED, ONE_FIXED);
 

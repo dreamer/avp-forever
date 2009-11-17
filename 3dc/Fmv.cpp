@@ -235,7 +235,7 @@ void HandleTheoraData(OggStream* stream, ogg_packet* packet)
 	assert (ret == 0);
 
 	/* enter critical section so we can update buffer variable */
-	EnterCriticalSection(&frameCriticalSection); 
+	EnterCriticalSection(&frameCriticalSection);
 
 	// We have a frame. Get the YUV data
 	ret = th_decode_ycbcr_out(stream->mTheora.mCtx, buffer);
@@ -506,6 +506,7 @@ void TheoraDecodeThread(void *args)
 		if (!fmvPlaying) 
 			break;
 
+		OutputDebugString("we're reading audio from vorbis.\n");
 		if (vorbis_synthesis(&audio->mVorbis.mBlock, &packet) == 0) 
 		{
 			// copy data from packet into vorbis objects for decoding
@@ -722,14 +723,21 @@ int OpenTheoraVideo(const char *fileName)
 			OutputDebugString("can't create FMV texture\n");
 			return 0;
 		}
+		else OutputDebugString("created FMV texture OK\n");
 	}
 
 #ifdef WIN32
 	if (!InitializeCriticalSectionAndSpinCount(&frameCriticalSection, 0x80000400))
+	{
+		OutputDebugString("can't create frameCriticalSection\n");
 		return 0;
+	}
 
 	if (!InitializeCriticalSectionAndSpinCount(&audioCriticalSection, 0x80000400))
+	{
+		OutputDebugString("can't create audioCriticalSection\n");
 		return 0;
+	}
 #endif
 #ifdef _XBOX
 	InitializeCriticalSection(&CriticalSection);
@@ -740,13 +748,14 @@ int OpenTheoraVideo(const char *fileName)
 	
 	decodeThreadHandle = CreateEvent( NULL, FALSE, FALSE, NULL );
 	audioThreadHandle = CreateEvent( NULL, FALSE, FALSE, NULL );
-
 	callbackEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
 
 	_beginthread(TheoraDecodeThread, 0, 0);
 	_beginthread(AudioGrabThread, 0, 0);
 
 //	running = true;
+
+	OutputDebugString("fmv should be playing now.\n");
 
 	return 0;
 }
