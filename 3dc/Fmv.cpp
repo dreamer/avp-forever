@@ -73,6 +73,12 @@ ogg_int64_t  mGranulepos;
 
 #define CLAMP(v)    ((v) > 255 ? 255 : (v) < 0 ? 0 : (v))
 
+enum
+{
+	PLAYONCE,
+	PLAYLOOP
+};
+
 extern "C" {
 
 #include "fmv.h"
@@ -151,9 +157,10 @@ char buf[100];
 bool frameReady = false;
 bool fmvPlaying = false;
 bool MenuBackground = false;
-bool running = false;
 bool started = false;
+bool loop = false;
 
+long postHeaderFileOffset = 0;
 int textureWidth = 0;
 int textureHeight = 0;
 int frameWidth = 0;
@@ -184,7 +191,6 @@ StreamingAudioBuffer fmvAudioStream;
 static short	*audioDataBuffer = NULL;
 static int		audioDataBufferSize = 0;
 byte *audioData = NULL;
-
 
 void TheoraInitForData(OggStream* stream) 
 {
@@ -346,6 +352,10 @@ void ReadHeaders(ogg_sync_state* state)
 			}
 		}
 	} 
+	// store this so we can loop videos
+	postHeaderFileOffset = oggFile.tellg();
+	sprintf(buf, "headers end at offset %d\n", postHeaderFileOffset);
+	OutputDebugString(buf);
 }
 
 bool HandleVorbisHeader(OggStream* stream, ogg_packet* packet)
@@ -414,6 +424,11 @@ bool ReadOggPage(ogg_sync_state* state, ogg_page* page)
 		int bytes = oggFile.gcount();
 		if (bytes == 0)
 		{
+			if (loop)
+			{
+				oggFile.seekg(postHeaderFileOffset , std::ios_base::beg);
+			}
+			else
 //			OutputDebugString("EOF\n");
 			// End of file
 			//continue;
@@ -494,138 +509,157 @@ void TheoraDecodeThread(void *args)
 	int ret = 0;
 	int audioSize = 0;
 	int dataSize = 0;
-	int written = 0;
 	float** pcm = 0;
 	int samples = 0;
 	ogg_packet packet;
 
-	// Read audio packets, sending audio data to the sound hardware.
-	// When it's time to display a frame, decode the frame and display it.
-	while (ReadPacket(&state, audio, &packet)) 
+	if (!audio)
 	{
-		if (!fmvPlaying) 
-			break;
-
-		OutputDebugString("we're reading audio from vorbis.\n");
-		if (vorbis_synthesis(&audio->mVorbis.mBlock, &packet) == 0) 
+		// we have no audio
+		ogg_packet packet;
+		while (ReadPacket(&state, video, &packet)) 
 		{
-			// copy data from packet into vorbis objects for decoding
-			ret = vorbis_synthesis_blockin(&audio->mVorbis.mDsp, &audio->mVorbis.mBlock);
-			assert(ret == 0);
+			if (!fmvPlaying) 
+				break;
+
+			HandleTheoraData(video, &packet);
+
+			float framerate = float(video->mTheora.mInfo.fps_numerator) / 
+				float(video->mTheora.mInfo.fps_denominator);
+
+				Sleep(static_cast<DWORD>((1.0f / framerate) * 1000));
 		}
+	}
+	else
+	{
 
-		// get pointer to array of floating point values for sound samples
-		while ((samples = vorbis_synthesis_pcmout(&audio->mVorbis.mDsp, &pcm)) > 0) 
+		// Read audio packets, sending audio data to the sound hardware.
+		// When it's time to display a frame, decode the frame and display it.
+		while (ReadPacket(&state, audio, &packet)) 
 		{
-			if (samples > 0) 
+			if (!fmvPlaying) 
+				break;
+
+			if (vorbis_synthesis(&audio->mVorbis.mBlock, &packet) == 0) 
 			{
-				dataSize = samples * audio->mVorbis.mInfo.channels;
-
-				if (audioDataBuffer == NULL)
-				{	
-					// make it twice the size we currently need to avoid future reallocations
-					audioDataBuffer = new short[dataSize * 2];
-					audioDataBufferSize = dataSize * 2;
-				}
-
-				if (audioDataBufferSize < dataSize)
-				{
-					if (audioDataBuffer != NULL)
-					{
-						delete []audioDataBuffer;
-						OutputDebugString("deleted audioDataBuffer to resize\n");
-					}
-
-					audioDataBuffer = new short[dataSize * 2];
-					OutputDebugString("alloc audioDataBuffer\n");
-
-					if (!audioDataBuffer) 
-					{
-						OutputDebugString("Out of memory\n");
-						break;
-					}
-					audioDataBufferSize = dataSize * 2;
-				}
-
-				short* p = audioDataBuffer;
-
-				for (int i = 0; i < samples; ++i) 
-				{
-					for (int j = 0; j < audio->mVorbis.mInfo.channels; ++j) 
-					{
-						int v = static_cast<int>(floorf(0.5f + pcm[j][i]*32767.0f));
-						if (v > 32767) v = 32767;
-						if (v < -32768) v = -32768;
-						*p++ = v;
-					}
-				}
-
-				audioSize = samples * audio->mVorbis.mInfo.channels * sizeof(short);
-/*
-				while (!(AudioStream_GetNumFreeBuffers(&fmvAudioStream)))
-					WaitForSingleObject(callbackEvent, INFINITE);
-*/
-				EnterCriticalSection(&audioCriticalSection);
-
-				int freeSpace = RingBuffer_GetWritableSpace();
-
-				// Sleep here if we cant fill the ring buffer?
-#if 1
-				// if we can't fit all our data..
-				if (audioSize > freeSpace) 
-				{
-					while (audioSize > RingBuffer_GetWritableSpace())
-					{
-						Sleep(16);
-					}
-					//char buf[100];
-					//sprintf(buf, "not enough room for all data. need %d, have free %d\n", audioSize, freeSpace);
-					//OutputDebugString(buf);
-				}
-#endif
-				written += RingBuffer_WriteData((byte*)&audioDataBuffer[0], audioSize);
-
-//					sprintf(buf, "send %d bytes to ring buffer\n", audioSize);
-//					OutputDebugString(buf);
-
-				LeaveCriticalSection(&audioCriticalSection);
+				// copy data from packet into vorbis objects for decoding
+				ret = vorbis_synthesis_blockin(&audio->mVorbis.mDsp, &audio->mVorbis.mBlock);
+				assert(ret == 0);
 			}
 
-			// tell vorbis how many samples we consumed
-			ret = vorbis_synthesis_read(&audio->mVorbis.mDsp, samples);
-			assert(ret == 0);
-
-			// At this point we've written some audio data to the sound
-			// system. Now we check to see if it's time to display a video
-			// frame.
-			//
-			// The granule position of a video frame represents the time
-			// that that frame should be displayed up to. So we get the
-			// current time, compare it to the last granule position read.
-			// If the time is greater than that it's time to display a new
-			// video frame.
-			//
-			// The time is obtained from the audio system - this represents
-			// the time of the audio data that the user is currently
-			// listening to. In this way the video frame should be synced up
-			// to the audio the user is hearing.
-			//
-
-			if (video) 
+			// get pointer to array of floating point values for sound samples
+			while ((samples = vorbis_synthesis_pcmout(&audio->mVorbis.mDsp, &pcm)) > 0) 
 			{
-				float audio_time = static_cast<float>(AudioStream_GetNumSamplesPlayed(&fmvAudioStream)) / static_cast<float>(audio->mVorbis.mInfo.rate);
-
-				float video_time = static_cast<float>(th_granule_time(video->mTheora.mCtx, mGranulepos));
-
-				// if audio is ahead of frame time, display a new frame
-				if ((audio_time > video_time))
+				if (samples > 0) 
 				{
-					// Decode one frame and display it. If no frame is available we
-					// don't do anything.
-					ogg_packet packet;
-					if (ReadPacket(&state, video, &packet)) 
+					dataSize = samples * audio->mVorbis.mInfo.channels;
+
+					if (audioDataBuffer == NULL)
+					{	
+						// make it twice the size we currently need to avoid future reallocations
+						audioDataBuffer = new short[dataSize * 2];
+						audioDataBufferSize = dataSize * 2;
+					}
+
+					if (audioDataBufferSize < dataSize)
 					{
-						HandleTheoraData(video, &packet);
+						if (audioDataBuffer != NULL)
+						{
+							delete []audioDataBuffer;
+							OutputDebugString("deleted audioDataBuffer to resize\n");
+						}
+
+						audioDataBuffer = new short[dataSize * 2];
+						OutputDebugString("alloc audioDataBuffer\n");
+
+						if (!audioDataBuffer) 
+						{
+							OutputDebugString("Out of memory\n");
+							break;
+						}
+						audioDataBufferSize = dataSize * 2;
+					}
+
+					short* p = audioDataBuffer;
+
+					for (int i = 0; i < samples; ++i) 
+					{
+						for (int j = 0; j < audio->mVorbis.mInfo.channels; ++j) 
+						{
+							int v = static_cast<int>(floorf(0.5f + pcm[j][i]*32767.0f));
+							if (v > 32767) v = 32767;
+							if (v < -32768) v = -32768;
+							*p++ = v;
+						}
+					}
+
+					audioSize = samples * audio->mVorbis.mInfo.channels * sizeof(short);
+	/*
+					while (!(AudioStream_GetNumFreeBuffers(&fmvAudioStream)))
+						WaitForSingleObject(callbackEvent, INFINITE);
+	*/
+					EnterCriticalSection(&audioCriticalSection);
+
+					int freeSpace = RingBuffer_GetWritableSpace();
+
+					// Sleep here if we cant fill the ring buffer?
+	#if 1
+					// if we can't fit all our data..
+					if (audioSize > freeSpace) 
+					{
+						while (audioSize > RingBuffer_GetWritableSpace())
+						{
+							Sleep(16);
+						}
+						//char buf[100];
+						//sprintf(buf, "not enough room for all data. need %d, have free %d\n", audioSize, freeSpace);
+						//OutputDebugString(buf);
+					}
+	#endif
+					RingBuffer_WriteData((byte*)&audioDataBuffer[0], audioSize);
+
+	//					sprintf(buf, "send %d bytes to ring buffer\n", audioSize);
+	//					OutputDebugString(buf);
+
+					LeaveCriticalSection(&audioCriticalSection);
+				}
+
+				// tell vorbis how many samples we consumed
+				ret = vorbis_synthesis_read(&audio->mVorbis.mDsp, samples);
+				assert(ret == 0);
+
+				// At this point we've written some audio data to the sound
+				// system. Now we check to see if it's time to display a video
+				// frame.
+				//
+				// The granule position of a video frame represents the time
+				// that that frame should be displayed up to. So we get the
+				// current time, compare it to the last granule position read.
+				// If the time is greater than that it's time to display a new
+				// video frame.
+				//
+				// The time is obtained from the audio system - this represents
+				// the time of the audio data that the user is currently
+				// listening to. In this way the video frame should be synced up
+				// to the audio the user is hearing.
+				//
+
+				if (video) 
+				{
+					float audio_time = static_cast<float>(AudioStream_GetNumSamplesPlayed(&fmvAudioStream)) / static_cast<float>(audio->mVorbis.mInfo.rate);
+
+					float video_time = static_cast<float>(th_granule_time(video->mTheora.mCtx, mGranulepos));
+
+					// if audio is ahead of frame time, display a new frame
+					if ((audio_time > video_time))
+					{
+						// Decode one frame and display it. If no frame is available we
+						// don't do anything.
+						ogg_packet packet;
+						if (ReadPacket(&state, video, &packet)) 
+						{
+							HandleTheoraData(video, &packet);
+						}
 					}
 				}
 			}
@@ -634,19 +668,23 @@ void TheoraDecodeThread(void *args)
 
 	/* signal that our thread is finished, so we can close */
 	SetEvent(decodeThreadHandle);
-//	fmvPlaying = false;
 }
 
-int OpenTheoraVideo(const char *fileName)
+int OpenTheoraVideo(const char *fileName, int playMode = PLAYONCE)
 {	
+	if (fmvPlaying)
+		return -1;
+
 	std::string filePath;
+	loop = false;
+
+	if (playMode == PLAYONCE)
+		loop = true;
 
 #ifdef _XBOX
 	filePath += "D:\\";
 #endif
 	filePath += fileName;
-
-	oggFile.clear();// to be sure all the file flags are reset
 
 	oggFile.open(filePath.c_str()/*"D://Development//experiments//Debug//big_buck_bunny_480p_stereo.ogv"*/, std::ios::in | std::ios::binary);
 
@@ -730,13 +768,13 @@ int OpenTheoraVideo(const char *fileName)
 	if (!InitializeCriticalSectionAndSpinCount(&frameCriticalSection, 0x80000400))
 	{
 		OutputDebugString("can't create frameCriticalSection\n");
-		return 0;
+		return -1;
 	}
 
 	if (!InitializeCriticalSectionAndSpinCount(&audioCriticalSection, 0x80000400))
 	{
 		OutputDebugString("can't create audioCriticalSection\n");
-		return 0;
+		return -1;
 	}
 #endif
 #ifdef _XBOX
@@ -745,15 +783,17 @@ int OpenTheoraVideo(const char *fileName)
 #endif
 	
 	fmvPlaying = true;
+	frameReady = false;
+	started = false;
 	
 	decodeThreadHandle = CreateEvent( NULL, FALSE, FALSE, NULL );
-	audioThreadHandle = CreateEvent( NULL, FALSE, FALSE, NULL );
-	callbackEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
-
 	_beginthread(TheoraDecodeThread, 0, 0);
-	_beginthread(AudioGrabThread, 0, 0);
 
-//	running = true;
+	if (audio)
+	{
+		audioThreadHandle = CreateEvent( NULL, FALSE, FALSE, NULL );
+		_beginthread(AudioGrabThread, 0, 0);
+	}
 
 	OutputDebugString("fmv should be playing now.\n");
 
@@ -767,17 +807,11 @@ bool CheckTheoraPlayback()
 
 int CloseTheoraVideo()
 {
-//	if (!fmvPlaying)
-//		return 0;
+	assert (fmvPlaying == false); // this should be false if we reach here
 
 	OutputDebugString("CloseTheoraVideo..\n");
 
-	frameReady = false;
-//	fmvPlaying = false;
-	playing = 0;
-	running = false;
-
-	/* wait until TheoraDecodeThread has finished running before continuing */ 
+	/* wait until both threads have finished running before continuing */ 
 	WaitForMultipleObjects(1, &decodeThreadHandle, TRUE, INFINITE);
 	WaitForMultipleObjects(1, &audioThreadHandle, TRUE, INFINITE);
 
@@ -803,13 +837,12 @@ int CloseTheoraVideo()
 		stream = NULL;
     }
 
+	// clear the std::map
+	mStreams.clear();
+
 	audio = NULL;
 	video = NULL;
 
-	/* clear the std::map */
-	mStreams.clear();
-
-//	AudioStream_StopBuffer(&fmvAudioStream);
 	AudioStream_ReleaseBuffer(&fmvAudioStream);
 
 	if (audioData)
@@ -831,6 +864,11 @@ int CloseTheoraVideo()
 
 	RingBuffer_Unload();
 
+	frameWidth = 0;
+	frameHeight = 0;
+	textureWidth = 0;
+	textureHeight = 0;
+
 	if (mDisplayTexture)
 	{
 		mDisplayTexture->Release();
@@ -840,22 +878,14 @@ int CloseTheoraVideo()
 	DeleteCriticalSection(&frameCriticalSection);
 	DeleteCriticalSection(&audioCriticalSection);
 
-	frameWidth = 0;
-	frameHeight = 0;
-	textureWidth = 0;
-	textureHeight = 0;
-
-	running = true;
-
 	return 0;
 }
 
 extern void StartMenuBackgroundFmv()
 {
-	return;
-	const char *filenamePtr = "fmvs\\MarineIntro.ogv";
+	const char *filenamePtr = "fmvs\\menubackground.ogv";
 
-	OpenTheoraVideo(filenamePtr);
+	OpenTheoraVideo(filenamePtr, PLAYLOOP);
 
 	MenuBackground = true;
 }
@@ -880,6 +910,9 @@ extern void EndMenuBackgroundFmv()
 {
 	if (!MenuBackground) 
 		return;
+
+	playing = 0;
+	fmvPlaying = false;
 
 	CloseTheoraVideo();
 
@@ -1240,10 +1273,6 @@ extern void StartTriggerPlotFMV(int number)
 	}
 }
 
-void StartMenuMusic()
-{
-}
-
 extern void StartFMVAtFrame(int number, int frame)
 {
 }
@@ -1381,8 +1410,20 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 	}
 }
 
+// bjd - the below three functions could be moved out of this file altogether as vorbisPlayer can handle it
+void StartMenuMusic()
+{
+	// we need to load IntroSound.ogg here using vorbisPlayer
+}
+
 void PlayMenuMusic()
 {
+	// we can probably just leave this blank as a thread will handle the updates
+}
+
+void EndMenuMusic()
+{
+
 }
 
 extern void InitialiseTriggeredFMVs()
@@ -1400,10 +1441,6 @@ extern void InitialiseTriggeredFMVs()
 			}
 		}
 	}
-}
-
-void EndMenuMusic()
-{
 }
 
 extern void GetFMVInformation(int *messageNumberPtr, int *frameNumberPtr)
@@ -1561,6 +1598,41 @@ int GetVolumeOfNearestVideoScreen(void)
 }; // extern C
 
 #endif
+
+// this code contains code from the liboggplay library. the yuv->rgb routines are taken from their source code. Below is the license that is 
+// included with liboggplay
+
+/*
+   Copyright (C) 2003 CSIRO Australia
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+   
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+   
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+   
+   - Neither the name of the CSIRO nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+   
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+   PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE ORGANISATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 
 // this code is based on plogg by Chris Double. Also contains code written by Rebellion and myself. Below is the license from plogg
 
