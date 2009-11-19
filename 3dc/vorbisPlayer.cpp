@@ -89,6 +89,26 @@ int ReadVorbisData(byte *audioBuffer, int sizeToRead, int offset)
 	return bytesReadTotal;
 }
 
+void PlayVorbisFile(const std::string &fileName)
+{
+	FILE *file;
+
+	file = fopen(fileName.c_str(),"rb");
+	if (!file) 
+	{
+		LogErrorString("Can't find OGG Vorbis file " + fileName);
+		return;
+	}
+/*
+	if (ov_open_callbacks(file, &oggFile, NULL, 0, OV_CALLBACKS_DEFAULT) < 0) 
+	{
+		LogErrorString("File " + TrackList[track] + "is not a valid OGG Vorbis file");
+		fclose(file);
+		return;
+	}
+*/
+}
+
 void LoadVorbisTrack(int track) 
 {
 	/* if we're already playing a track, stop it */

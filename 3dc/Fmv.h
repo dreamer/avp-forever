@@ -23,16 +23,17 @@ typedef struct FMVTEXTURE
 
 	int MessageNumber;
 
-	unsigned char *RGBBuffer;
+	byte *RGBBuffer;
 
 }FMVTEXTURE;
 
 extern void StartTriggerPlotFMV(int number);
 void PlayMenuMusic();
 void StartMenuMusic();
-int NextFMVTextureFrame(FMVTEXTURE *ftPtr/*, void *bufferPtr, int pitch*/);
+int NextFMVTextureFrame(FMVTEXTURE *ftPtr);
 void ReleaseAllFMVTexturesForDeviceReset();
 void RecreateAllFMVTexturesAfterDeviceReset();
+extern void StartMenuBackgroundFmv();
 
 extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
 

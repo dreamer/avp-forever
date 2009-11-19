@@ -31,7 +31,6 @@
 
 #include "savegame.h"
 #include "huffman.hpp"
-//#include "smacker.h"
 #include "fmv.h"
 
 #define UseLocalAssert TRUE

@@ -86,7 +86,7 @@ typedef struct
 
 	char MultiplayerCallsign[16];
 
-	int SmackerSoundVolume;
+	int FmvSoundVolume;
 	int EffectsSoundVolume;
 	int MoviesAreActive;
 	int IntroOutroMoviesAreActive;

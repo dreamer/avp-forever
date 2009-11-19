@@ -17,7 +17,7 @@ extern int NumActiveBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
 extern int GotAnyKey;
 
-int SmackerSoundVolume = 65536/512;
+int FmvSoundVolume = 65536/512;
 int MoviesAreActive;
 int IntroOutroMoviesAreActive = 1;
 int VolumeOfNearestVideoScreen = 0;

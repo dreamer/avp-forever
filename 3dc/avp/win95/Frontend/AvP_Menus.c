@@ -123,7 +123,7 @@ void PlayMenuMusic(void);
 void ThisFramesRenderingHasFinished(void);
 void EndMenuMusic(void);
 extern void EndMenuBackgroundFmv(void);
-void PlayFMV(char *filenamePtr);
+void PlayFMV(const char *filenamePtr);
 int DirectPlay_ConnectingToLobbiedGame(char* playerName);
 int DirectPlay_ConnectingToSession();
 extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale);
@@ -4789,7 +4789,7 @@ static void InitMainMenusBackdrop(void)
 		CloudTable[x][y]=(FastRandom()&32767)+32768;
 	}
 	#endif
-	StartMenuBackgroundFmv();
+// bjd - lets relocate this call -	StartMenuBackgroundFmv();
 }
 
 

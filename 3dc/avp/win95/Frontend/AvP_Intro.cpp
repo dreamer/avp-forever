@@ -26,7 +26,7 @@ void Show_ARebellionGame(void);
 void Show_AvPLogo(void);
 extern void ShowSplashScreens(void);
 extern void Show_WinnerScreen(void);
-extern void PlayFMV(char *filenamePtr);
+extern void PlayFMV(const char *filenamePtr);
 extern void DrawMainMenusBackdrop(void);
 extern void FadedScreen(int alpha);
 
@@ -78,7 +78,9 @@ extern void PlayIntroSequence(void)
 	Show_AvPLogo();
 	#endif
 
+	StartMenuBackgroundFmv();
 }
+
 extern void ShowSplashScreens(void)
 {
 	LoadAllSplashScreenGfx();

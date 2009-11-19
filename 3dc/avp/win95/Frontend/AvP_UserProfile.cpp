@@ -34,7 +34,7 @@ static void InsertProfileIntoList(AVP_USER_PROFILE *profilePtr);
 static int ProfileIsMoreRecent(AVP_USER_PROFILE *profilePtr, AVP_USER_PROFILE *profileToTestAgainstPtr);
 static void SetDefaultProfileOptions(AVP_USER_PROFILE *profilePtr);
 
-extern int SmackerSoundVolume;
+extern int FmvSoundVolume;
 extern int EffectsSoundVolume;
 extern int MoviesAreActive;
 extern int IntroOutroMoviesAreActive;
@@ -313,7 +313,7 @@ static void SetDefaultProfileOptions(AVP_USER_PROFILE *profilePtr)
 	ControlMethods = DefaultControlMethods;
 	JoystickControlMethods = DefaultJoystickControlMethods;
 	
-	SmackerSoundVolume = ONE_FIXED/512;
+	FmvSoundVolume = ONE_FIXED/512;
 	EffectsSoundVolume = VOLUME_DEFAULT;
 	CDPlayerVolume = CDDA_VOLUME_DEFAULT;
 	MoviesAreActive = 1;
@@ -389,7 +389,7 @@ extern void GetSettingsFromUserProfile(void)
 	ControlMethods = 				UserProfilePtr->ControlMethods;
 	JoystickControlMethods = 		UserProfilePtr->JoystickControlMethods;
 	MenuDetailLevelOptions = 		UserProfilePtr->DetailLevelSettings;
-	SmackerSoundVolume =			UserProfilePtr->SmackerSoundVolume;
+	FmvSoundVolume =			UserProfilePtr->FmvSoundVolume;
 	EffectsSoundVolume =			UserProfilePtr->EffectsSoundVolume;
 	CDPlayerVolume = 				UserProfilePtr->CDPlayerVolume;
 	MoviesAreActive =				UserProfilePtr->MoviesAreActive;
@@ -414,7 +414,7 @@ extern void SaveSettingsToUserProfile(AVP_USER_PROFILE *profilePtr)
 	profilePtr->ControlMethods =				ControlMethods;
 	profilePtr->JoystickControlMethods =		JoystickControlMethods;
 	profilePtr->DetailLevelSettings =			MenuDetailLevelOptions;
-	profilePtr->SmackerSoundVolume =			SmackerSoundVolume;	
+	profilePtr->FmvSoundVolume =			FmvSoundVolume;	
 	profilePtr->EffectsSoundVolume =			EffectsSoundVolume;
 	profilePtr->CDPlayerVolume = 				CDPlayerVolume;
 	profilePtr->MoviesAreActive =				MoviesAreActive;

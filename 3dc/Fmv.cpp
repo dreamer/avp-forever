@@ -88,7 +88,6 @@ extern "C" {
 #include <assert.h>
 #include "showcmds.h"
 
-extern	D3DINFO d3d;
 extern unsigned char GotAnyKey;
 extern int NumActiveBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
@@ -101,7 +100,7 @@ extern IMAGEHEADER ImageHeaderArray[];
 	extern int NumImages;
 #endif
 
-int SmackerSoundVolume = 65536/512;
+int FmvSoundVolume = 65536/512;
 int MoviesAreActive;
 int IntroOutroMoviesAreActive = 1;
 int VolumeOfNearestVideoScreen = 0;
@@ -142,10 +141,10 @@ int NextFMVFrame();
 void FmvClose();
 int GetVolumeOfNearestVideoScreen(void);
 int CloseTheoraVideo();
-bool HandleTheoraHeader(OggStream* stream, ogg_packet* packet);
-bool HandleVorbisHeader(OggStream* stream, ogg_packet* packet);
-bool ReadOggPage(ogg_sync_state* state, ogg_page* page);
-bool ReadPacket(ogg_sync_state* state, OggStream* stream, ogg_packet* packet);
+bool HandleTheoraHeader(OggStream *stream, ogg_packet *packet);
+bool HandleVorbisHeader(OggStream *stream, ogg_packet *packet);
+bool ReadOggPage(ogg_sync_state *state, ogg_page *page);
+bool ReadPacket(ogg_sync_state *state, OggStream *stream, ogg_packet *packet);
 int CreateFMVAudioBuffer(int channels, int rate);
 int GetWritableBufferSize();
 int WriteToDsound(int dataSize);
@@ -177,13 +176,13 @@ byte *textureData = NULL;
 
 HRESULT LastError;
 
-HANDLE decodeThreadHandle;
-HANDLE audioThreadHandle;
+HANDLE decodeThreadHandle = NULL;
+HANDLE audioThreadHandle = NULL;
 CRITICAL_SECTION frameCriticalSection;
 CRITICAL_SECTION audioCriticalSection;
 
-OggStream* video = NULL;
-OggStream* audio = NULL;
+OggStream *video = NULL;
+OggStream *audio = NULL;
 
 StreamingAudioBuffer fmvAudioStream;
 
@@ -786,12 +785,12 @@ int OpenTheoraVideo(const char *fileName, int playMode = PLAYONCE)
 	frameReady = false;
 	started = false;
 	
-	decodeThreadHandle = CreateEvent( NULL, FALSE, FALSE, NULL );
+	decodeThreadHandle = CreateEvent( NULL, FALSE, FALSE, "decodeThreadHandle" );
 	_beginthread(TheoraDecodeThread, 0, 0);
 
 	if (audio)
 	{
-		audioThreadHandle = CreateEvent( NULL, FALSE, FALSE, NULL );
+		audioThreadHandle = CreateEvent( NULL, FALSE, FALSE, "audioThreadHandle" );
 		_beginthread(AudioGrabThread, 0, 0);
 	}
 
@@ -826,9 +825,9 @@ int CloseTheoraVideo()
 
 	for (StreamMap::iterator it = mStreams.begin(); it != mStreams.end(); ++it)
 	{
-		OggStream* stream = (*it).second;
+		OggStream *stream = (*it).second;
 
-		//delete stream; we have no class so no destructor. do it manually
+		// delete stream; we have no class so no destructor. do it manually.
 		int ret = ogg_stream_clear(&stream->mState);
 		assert(ret == 0);
 		th_setup_free(stream->mTheora.mSetup);
@@ -919,7 +918,7 @@ extern void EndMenuBackgroundFmv()
 	MenuBackground = false;
 }
 
-extern void PlayFMV(char *filenamePtr)
+extern void PlayFMV(const char *filenamePtr)
 {
 	if (!IntroOutroMoviesAreActive)
 		return;
@@ -1493,11 +1492,11 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 	{
 		assert(textureData != NULL);
 
-		int volume = MUL_FIXED(SmackerSoundVolume*256, GetVolumeOfNearestVideoScreen());
+		int volume = MUL_FIXED(FmvSoundVolume*256, GetVolumeOfNearestVideoScreen());
 
 // FIXME		FmvVolumePan(volume, PanningOfNearestVideoScreen);
 
-		ftPtr->SoundVolume = SmackerSoundVolume;
+		ftPtr->SoundVolume = FmvSoundVolume;
 
 		if (!frameReady) 
 			return 0;
