@@ -56,16 +56,18 @@ VorbisCodec * Vorbis_LoadFile(const std::string &fileName)
 
 	newVorbisStream->file = fopen(fileName.c_str(),"rb");
 	if (!newVorbisStream->file) 
+//	if (1) // testing fail early
 	{
 		Con_PrintError("Can't find OGG Vorbis file " + fileName);
-		delete newVorbisStream;
+		//delete newVorbisStream;
+		Vorbis_Release(newVorbisStream);
 		return NULL;
 	}
 
 	if (ov_open_callbacks(newVorbisStream->file, &newVorbisStream->oggFile, NULL, 0, OV_CALLBACKS_DEFAULT) < 0) 
 	{
 		Con_PrintError("File " + fileName + "is not a valid OGG Vorbis file");
-		fclose(newVorbisStream->file);
+		Vorbis_Release(newVorbisStream);
 		return NULL;
 	}
 
@@ -90,10 +92,16 @@ VorbisCodec * Vorbis_LoadFile(const std::string &fileName)
 	if (AudioStream_CreateBuffer(&newVorbisStream->audioStream, newVorbisStream->pInfo->channels, newVorbisStream->pInfo->rate, 32768, 3) != AUDIOSTREAM_OK)
 	{
 		Con_PrintError("Can't create audio stream buffer for OGG Vorbis!");
+		Vorbis_Release(newVorbisStream);
 	}
 
 	/* init some temp audio data storage */
 	newVorbisStream->audioData = new byte[newVorbisStream->audioStream.bufferSize];
+	if (newVorbisStream->audioData == NULL)
+	{
+		// report major system error here?
+		Vorbis_Release(newVorbisStream);
+	}
 
 	Vorbis_ReadData(newVorbisStream, newVorbisStream->audioStream.bufferSize);
 
@@ -206,14 +214,22 @@ void Vorbis_Stop(VorbisCodec *VorbisStream)
 
 void Vorbis_Release(VorbisCodec *VorbisStream)
 {
+	assert (VorbisStream);
+
 	Vorbis_Stop(VorbisStream);
 	
-	AudioStream_ReleaseBuffer(&VorbisStream->audioStream);
+//	if (VorbisStream->audioStream)
+	{
+		AudioStream_ReleaseBuffer(&VorbisStream->audioStream);
+	}
 
 	ov_clear(&VorbisStream->oggFile);
 
-	delete[] VorbisStream->audioData;
-	VorbisStream->audioData = 0;
+	if (VorbisStream->audioData)
+	{
+		delete[] VorbisStream->audioData;
+		VorbisStream->audioData = 0;
+	}
 
 	delete[] VorbisStream;
 	VorbisStream = NULL;
