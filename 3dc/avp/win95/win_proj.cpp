@@ -5,7 +5,9 @@ Project specific (or potentially project specific) windows functionality
 
 ****/
 
-// To link code to main C functions 
+// To link code to main C functions
+
+#include "console.h"
 
 extern "C" {
 
@@ -16,8 +18,6 @@ extern unsigned char GotAnyKey;
 #include "inline.h"
 #include "cd_player.h"
 #include "psndplat.h"
-
-#include "console.h"
 #include "onscreenKeyboard.h"
 
 #include "rentrntq.h"

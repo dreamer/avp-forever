@@ -35,7 +35,6 @@ extern "C" {
 #include "vmanpset.h"
 #include <windows.h>
 #include "ffstdio.h"
-#include "vorbisPlayer.h"
 
 /* Davew 27/7/98 --------------------------------------------------------------
 	Internal types.

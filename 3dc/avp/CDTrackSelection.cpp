@@ -1,4 +1,6 @@
 
+#include "vorbisPlayer.h"
+
 extern "C"
 {
 #include "3dc.h"
@@ -14,8 +16,6 @@ extern "C"
 };
 
 #include "list_tem.hpp"
-
-#include "vorbisPlayer.h"
 
 //lists of tracks for each level
 List<int> LevelCDTracks[AVP_ENVIRONMENT_END_OF_LIST];

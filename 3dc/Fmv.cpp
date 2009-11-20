@@ -23,6 +23,8 @@
 #endif
 
 #include "logString.h"
+#include "vorbisPlayer.h"
+
 #ifdef WIN32
 //#include <sndfile.h>
 //SNDFILE *sndFile;
@@ -190,6 +192,8 @@ StreamingAudioBuffer fmvAudioStream;
 static short	*audioDataBuffer = NULL;
 static int		audioDataBufferSize = 0;
 byte *audioData = NULL;
+
+VorbisCodec *menuMusic = NULL;
 
 void TheoraInitForData(OggStream* stream) 
 {
@@ -1413,6 +1417,9 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 void StartMenuMusic()
 {
 	// we need to load IntroSound.ogg here using vorbisPlayer
+	menuMusic = Vorbis_LoadFile("fmvs//IntroSound.ogg");
+
+	assert(menuMusic);
 }
 
 void PlayMenuMusic()
@@ -1422,7 +1429,7 @@ void PlayMenuMusic()
 
 void EndMenuMusic()
 {
-
+	Vorbis_Release(menuMusic);
 }
 
 extern void InitialiseTriggeredFMVs()

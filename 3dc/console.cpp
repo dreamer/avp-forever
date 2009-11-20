@@ -9,6 +9,7 @@
 #include "console.h"
 #include "d3_func.h"
 #include "iofocus.h"
+#include "logString.h"
 
 extern "C" 
 {
@@ -61,6 +62,23 @@ struct Console
 };
 
 Console console;
+
+void Con_PrintError(const std::string &errorString)
+{
+	console.text.push_back(errorString);
+
+	// write to log file for now
+	LogErrorString(errorString);
+}
+
+void Con_PrintMessage(const std::string &messageString)
+{
+	console.text.push_back(messageString);
+
+	// write to log file for now
+	LogString(messageString);
+}
+
 
 void Con_AddLine(const std::string &temp)
 {

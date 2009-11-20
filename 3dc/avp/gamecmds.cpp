@@ -10,6 +10,7 @@
 
 #define UseLocalAssert TRUE
 #include "ourasert.h"
+#include "vorbisPlayer.h"
 
 extern "C"
 {
@@ -42,10 +43,6 @@ extern "C"
 #include "fmv.h"
 #include "detaillevels.h"
 #include "savegame.h"
-
-/* BJD - 27/10/08 */
-#include "vorbisPlayer.h"
-
 
 int DebuggingCommandsActive=0;
 extern void GimmeCharge(void);
