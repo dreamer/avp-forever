@@ -849,7 +849,11 @@ int CloseTheoraVideo()
 	audio = NULL;
 	video = NULL;
 
-	AudioStream_ReleaseBuffer(fmvAudioStream);
+	if (fmvAudioStream)
+	{
+		AudioStream_ReleaseBuffer(fmvAudioStream);
+		fmvAudioStream = NULL;
+	}
 
 	if (audioData)
 	{
@@ -1431,6 +1435,7 @@ void PlayMenuMusic()
 void EndMenuMusic()
 {
 	Vorbis_Release(menuMusic);
+	menuMusic = NULL;
 }
 
 extern void InitialiseTriggeredFMVs()

@@ -245,8 +245,11 @@ static BOOL PickCDTrack(List<int>& track_list)
 static bool PickOGGTrack(List<int>& track_list)
 {
 	//make sure we have some tracks in the list
-	if(!CheckNumberOfVorbisTracks()) return false;
-	if(!track_list.size()) return false;
+	if (!CheckNumberOfVorbisTracks()) 
+		return false;
+
+	if (!track_list.size()) 
+		return false;
 
 	//pick the next track in the list
 	unsigned int index=TrackSelectCounter % track_list.size();
@@ -271,42 +274,40 @@ void CheckCDAndChooseTrackIfNeeded()
 	static enum playertypes lastPlayerType;
 	
 	//are we bothering with cd tracks
-	if(!CDDA_IsOn()) return;
+	if (!CDDA_IsOn()) 
+		return;
+
 	//is our current track still playing
-	if(CDDA_IsPlaying() || IsVorbisPlaying()) // check this is ok
+	if (CDDA_IsPlaying() || IsVorbisPlaying()) // check this is ok
 	{
 		//if in a multiplayer game see if we have changed character type
-		if(AvP.Network == I_No_Network || AvP.PlayerType==lastPlayerType) 
+		if (AvP.Network == I_No_Network || AvP.PlayerType==lastPlayerType) 
 			return;
 		
 		//have changed character type , is the current track in the list for this character type
-		if(MultiplayerCDTracks[AvP.PlayerType].contains(LastTrackChosen)) 
+		if (MultiplayerCDTracks[AvP.PlayerType].contains(LastTrackChosen)) 
 			return;
 
 		//Lets choose a new track then
 	}
-
 		
-	if(AvP.Network == I_No_Network)
+	if (AvP.Network == I_No_Network)
 	{
 		int level=NumberForCurrentLevel();
-		if(level>=0 && level<AVP_ENVIRONMENT_END_OF_LIST)
+		if (level>=0 && level<AVP_ENVIRONMENT_END_OF_LIST)
 		{
-			if((CDDA_IsOn()) && (CDTrackMax > 0))
+			if ((CDDA_IsOn()) && (CDTrackMax > 0))
 			{
 				OutputDebugString("USING CDDA\n");
 				//pick track based on level
-				if(PickCDTrack(LevelCDTracks[level]))
+				if (PickCDTrack(LevelCDTracks[level]))
 				{
 					return;
 				}
 			}
 			else
-
-			// if use ogg
 			{
-//				OutputDebugString("USING OGG\n");
-				if(PickOGGTrack(LevelCDTracks[level]))
+				if (PickOGGTrack(LevelCDTracks[level]))
 				{
 					return;
 				}
@@ -323,9 +324,10 @@ void CheckCDAndChooseTrackIfNeeded()
 void ResetCDPlayForLevel()
 {
 	//check the number of tracks available while we're at it
+
 	CDDA_CheckNumberOfTracks();
 
-	TrackSelectCounter=0;
+	TrackSelectCounter = 0;
 	CDDA_Stop();
 }
 

@@ -2367,6 +2367,8 @@ StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int buff
 {
 	StreamingAudioBuffer *newStreamingAudioBuffer = new StreamingAudioBuffer;
 
+	memset(newStreamingAudioBuffer, 0, sizeof(StreamingAudioBuffer));
+
 	WAVEFORMATEX waveFormat;
 	ZeroMemory (&waveFormat, sizeof(waveFormat));
 	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
@@ -2397,6 +2399,7 @@ StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int buff
 	{
 		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
 		AudioStream_ReleaseBuffer(newStreamingAudioBuffer);
+		newStreamingAudioBuffer = NULL;
 		return NULL;
 	}
 
@@ -2551,7 +2554,6 @@ int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 	streamStruct->bufferSize = 0;
 
 	delete []streamStruct;
-	streamStruct = NULL;
 
 	return AUDIOSTREAM_OK;
 }
