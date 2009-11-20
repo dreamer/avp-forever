@@ -120,7 +120,7 @@ void TimeStampedMessage(char *stringPtr);
 void ReleaseAllFMVTextures();
 void ResetEaxEnvironment(void);
 void CDDA_Stop();
-void StopVorbis();
+void Vorbis_CloseSystem();
 void FinishCentreMouseThread();
 void EmptyUserProfilesList(void);
 void dx_log_close();
@@ -775,7 +775,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		TimeStampedMessage("After SoundSys_RemoveAll");
 		CDDA_Stop();
-		StopVorbis(); // stop ogg player
+		Vorbis_CloseSystem(); // stop ogg vorbis player
 		TimeStampedMessage("After CDDA_Stop");
 
 		/* netgame support */

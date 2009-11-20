@@ -10,7 +10,6 @@
 
 #define UseLocalAssert TRUE
 #include "ourasert.h"
-#include "vorbisPlayer.h"
 
 extern "C"
 {
@@ -808,24 +807,6 @@ void CreateGameSpecificConsoleCommands(void)
 		"",
 		DisplaySavesLeft
 	);
-/*
-	ConsoleCommand::Make
-	(
-		"PLAYOGG",
-		"",
-		LoadVorbis
-	);
-*/
-	ConsoleCommand::Make
-	(
-		"STOPOGG",
-		"",
-		StopVorbis
-	);
-}	
-
-
-
-						
+}
 
 } // extern "C"

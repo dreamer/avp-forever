@@ -68,7 +68,7 @@ struct StreamingAudioBuffer
 
 #endif
 
-int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate, int bufferSize, int numBuffers);
+StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int bufferSize, int numBuffers);
 int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct);
 int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct);
 int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct);

@@ -186,7 +186,7 @@ CRITICAL_SECTION audioCriticalSection;
 OggStream *video = NULL;
 OggStream *audio = NULL;
 
-StreamingAudioBuffer fmvAudioStream;
+StreamingAudioBuffer *fmvAudioStream;
 
 /* audio buffer for liboggplay */
 static short	*audioDataBuffer = NULL;
@@ -465,17 +465,17 @@ void AudioGrabThread(void *args)
 	{
 		startTime = timeGetTime();
 
-		int numBuffersFree = AudioStream_GetNumFreeBuffers(&fmvAudioStream);
+		int numBuffersFree = AudioStream_GetNumFreeBuffers(fmvAudioStream);
 
 		while (numBuffersFree)
 		{
 			int readableAudio = RingBuffer_GetReadableSpace();
 
 			// we can fill a buffer
-			if (readableAudio >= fmvAudioStream.bufferSize)
+			if (readableAudio >= fmvAudioStream->bufferSize)
 			{
-				RingBuffer_ReadData(audioData, fmvAudioStream.bufferSize);
-				AudioStream_WriteData(&fmvAudioStream, audioData, fmvAudioStream.bufferSize);
+				RingBuffer_ReadData(audioData, fmvAudioStream->bufferSize);
+				AudioStream_WriteData(fmvAudioStream, audioData, fmvAudioStream->bufferSize);
 
 //					sprintf(buf, "send %d bytes to xaudio2\n", fmvAudioStream.bufferSize);
 //					OutputDebugString(buf);
@@ -491,7 +491,7 @@ void AudioGrabThread(void *args)
 
 		if (started == false)
 		{
-			AudioStream_PlayBuffer(&fmvAudioStream);
+			AudioStream_PlayBuffer(fmvAudioStream);
 			started = true;
 		}
 
@@ -649,7 +649,7 @@ void TheoraDecodeThread(void *args)
 
 				if (video) 
 				{
-					float audio_time = static_cast<float>(AudioStream_GetNumSamplesPlayed(&fmvAudioStream)) / static_cast<float>(audio->mVorbis.mInfo.rate);
+					float audio_time = static_cast<float>(AudioStream_GetNumSamplesPlayed(fmvAudioStream)) / static_cast<float>(audio->mVorbis.mInfo.rate);
 
 					float video_time = static_cast<float>(th_granule_time(video->mTheora.mCtx, mGranulepos));
 
@@ -729,15 +729,18 @@ int OpenTheoraVideo(const char *fileName, int playMode = PLAYONCE)
 		OutputDebugString(buf);
 
 		/* init audio buffer here */
-		if (AudioStream_CreateBuffer(&fmvAudioStream, audio->mVorbis.mInfo.channels, audio->mVorbis.mInfo.rate, 4096, 3) != AUDIOSTREAM_OK)
+//		if (AudioStream_CreateBuffer(&fmvAudioStream, audio->mVorbis.mInfo.channels, audio->mVorbis.mInfo.rate, 4096, 3) != AUDIOSTREAM_OK)
+
+		fmvAudioStream = AudioStream_CreateBuffer(audio->mVorbis.mInfo.channels, audio->mVorbis.mInfo.rate, 4096, 3);
+		if (fmvAudioStream == NULL)
 		{
 			LogErrorString("Can't create audio stream buffer for OGG Vorbis!");
 		}
 
 		/* init some temp audio data storage */
-		audioData = new byte[fmvAudioStream.bufferSize];
+		audioData = new byte[fmvAudioStream->bufferSize];
 
-		RingBuffer_Init(fmvAudioStream.bufferSize * fmvAudioStream.bufferCount);
+		RingBuffer_Init(fmvAudioStream->bufferSize * fmvAudioStream->bufferCount);
 	}
 
 	if (video) 
@@ -846,7 +849,7 @@ int CloseTheoraVideo()
 	audio = NULL;
 	video = NULL;
 
-	AudioStream_ReleaseBuffer(&fmvAudioStream);
+	AudioStream_ReleaseBuffer(fmvAudioStream);
 
 	if (audioData)
 	{
@@ -1413,13 +1416,11 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 	}
 }
 
-// bjd - the below three functions could be moved out of this file altogether as vorbisPlayer can handle it
+// bjd - the below three functions could maybe be moved out of this file altogether as vorbisPlayer can handle it
 void StartMenuMusic()
 {
 	// we need to load IntroSound.ogg here using vorbisPlayer
 	menuMusic = Vorbis_LoadFile("fmvs//IntroSound.ogg");
-
-	assert(menuMusic);
 }
 
 void PlayMenuMusic()

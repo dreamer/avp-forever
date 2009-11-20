@@ -11,7 +11,7 @@ struct VorbisCodec
 	FILE *file;
 	vorbis_info *pInfo;
 	OggVorbis_File oggFile;
-	StreamingAudioBuffer audioStream;
+	StreamingAudioBuffer *audioStream;
 	bool oggIsPlaying;
 
 	unsigned int bufferSize;
@@ -29,11 +29,12 @@ void Vorbis_Release(VorbisCodec *VorbisStream);
 extern "C" {
 #endif
 
+void Vorbis_CloseSystem();
 extern void LoadVorbisTrack(int track);
-extern void PlayVorbis();
-extern void StopVorbis();
-extern void UpdateVorbisBuffer(void *arg);
-void ReleaseVorbisBuffer();
+//extern void PlayVorbis();
+//extern void StopVorbis();
+//extern void UpdateVorbisBuffer(void *arg);
+//void ReleaseVorbisBuffer();
 extern bool LoadVorbisTrackList();
 bool IsVorbisPlaying();
 int CheckNumberOfVorbisTracks();

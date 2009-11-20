@@ -16,7 +16,7 @@
 #include "utilities.h" // avp_open()
 #include "console.h"
 
-int ReadVorbisData(byte *audioBuffer, int sizeToRead, int offset);
+//int ReadVorbisData(byte *audioBuffer, int sizeToRead, int offset);
 void Vorbis_Play(VorbisCodec *VorbisStream);
 int Vorbis_ReadData(VorbisCodec *VorbisStream, int sizeToRead);
 void Vorbis_UpdateThread(void *arg);
@@ -27,6 +27,7 @@ extern "C"
 	extern int CDPlayerVolume; // volume control from menus
 }
 
+/*
 FILE *file;
 vorbis_info *pInfo;
 OggVorbis_File oggFile;
@@ -36,7 +37,7 @@ bool oggIsPlaying = false;
 unsigned int bufferSize = 0;
 unsigned int halfBufferSize = 0;
 HANDLE hPlaybackThreadFinished;
-
+*/
 std::vector<std::string> TrackList;
 
 #ifdef WIN32
@@ -48,7 +49,9 @@ std::vector<std::string> TrackList;
 	const std::string musicFolderName = "d:\\Music\\";
 #endif
 
-static byte *audioData = 0;
+//static byte *audioData = 0;
+
+static VorbisCodec *inGameMusic = NULL;
 
 VorbisCodec * Vorbis_LoadFile(const std::string &fileName)
 {
@@ -89,24 +92,26 @@ VorbisCodec * Vorbis_LoadFile(const std::string &fileName)
 */
 
 	// create the streaming audio buffer
-	if (AudioStream_CreateBuffer(&newVorbisStream->audioStream, newVorbisStream->pInfo->channels, newVorbisStream->pInfo->rate, 32768, 3) != AUDIOSTREAM_OK)
+	newVorbisStream->audioStream = AudioStream_CreateBuffer(newVorbisStream->pInfo->channels, newVorbisStream->pInfo->rate, 32768, 3);
+	if (newVorbisStream->audioStream == NULL)
+//	if (AudioStream_CreateBuffer(&newVorbisStream->audioStream, newVorbisStream->pInfo->channels, newVorbisStream->pInfo->rate, 32768, 3) != AUDIOSTREAM_OK)
 	{
 		Con_PrintError("Can't create audio stream buffer for OGG Vorbis!");
 		Vorbis_Release(newVorbisStream);
 	}
 
 	/* init some temp audio data storage */
-	newVorbisStream->audioData = new byte[newVorbisStream->audioStream.bufferSize];
+	newVorbisStream->audioData = new byte[newVorbisStream->audioStream->bufferSize];
 	if (newVorbisStream->audioData == NULL)
 	{
 		// report major system error here?
 		Vorbis_Release(newVorbisStream);
 	}
 
-	Vorbis_ReadData(newVorbisStream, newVorbisStream->audioStream.bufferSize);
+	Vorbis_ReadData(newVorbisStream, newVorbisStream->audioStream->bufferSize);
 
 	/* fill the first buffer */
-	AudioStream_WriteData(&newVorbisStream->audioStream, newVorbisStream->audioData, newVorbisStream->audioStream.bufferSize);
+	AudioStream_WriteData(newVorbisStream->audioStream, newVorbisStream->audioData, newVorbisStream->audioStream->bufferSize);
 
 	// start playing
 	Vorbis_Play(newVorbisStream);
@@ -118,10 +123,10 @@ VorbisCodec * Vorbis_LoadFile(const std::string &fileName)
 
 void Vorbis_Play(VorbisCodec *VorbisStream)
 {
-	if (AudioStream_PlayBuffer(&VorbisStream->audioStream) == AUDIOSTREAM_OK)
+	if (AudioStream_PlayBuffer(VorbisStream->audioStream) == AUDIOSTREAM_OK)
 	{
 		VorbisStream->oggIsPlaying = true;
-		AudioStream_SetBufferVolume(&VorbisStream->audioStream, CDPlayerVolume);
+		AudioStream_SetBufferVolume(VorbisStream->audioStream, CDPlayerVolume);
 		VorbisStream->hPlaybackThreadFinished = CreateEvent( NULL, FALSE, FALSE, NULL );
 		 _beginthread(Vorbis_UpdateThread, 0, static_cast<void*>(VorbisStream));
 	}
@@ -144,12 +149,12 @@ void Vorbis_UpdateThread(void *arg)
 	while (VorbisStream->oggIsPlaying)
 	{
 		OutputDebugString("thread running..\n");
-		int numBuffersFree = AudioStream_GetNumFreeBuffers(&VorbisStream->audioStream);
+		int numBuffersFree = AudioStream_GetNumFreeBuffers(VorbisStream->audioStream);
 
 		if (numBuffersFree)
 		{
-			Vorbis_ReadData(VorbisStream, VorbisStream->audioStream.bufferSize);
-			AudioStream_WriteData(&VorbisStream->audioStream, VorbisStream->audioData, VorbisStream->audioStream.bufferSize);
+			Vorbis_ReadData(VorbisStream, VorbisStream->audioStream->bufferSize);
+			AudioStream_WriteData(VorbisStream->audioStream, VorbisStream->audioData, VorbisStream->audioStream->bufferSize);
 		}
 
 		Sleep( dwQuantum );
@@ -202,7 +207,7 @@ void Vorbis_Stop(VorbisCodec *VorbisStream)
 {
 	if (VorbisStream->oggIsPlaying)
 	{
-		AudioStream_StopBuffer(&VorbisStream->audioStream);
+		AudioStream_StopBuffer(VorbisStream->audioStream);
 		VorbisStream->oggIsPlaying = false;
 	}
 
@@ -220,7 +225,7 @@ void Vorbis_Release(VorbisCodec *VorbisStream)
 	
 //	if (VorbisStream->audioStream)
 	{
-		AudioStream_ReleaseBuffer(&VorbisStream->audioStream);
+		AudioStream_ReleaseBuffer(VorbisStream->audioStream);
 	}
 
 	ov_clear(&VorbisStream->oggFile);
@@ -235,23 +240,128 @@ void Vorbis_Release(VorbisCodec *VorbisStream)
 	VorbisStream = NULL;
 }
 
+void LoadVorbisTrack(int track) 
+{
+	/* if we're already playing a track, stop it */
+	if (inGameMusic->oggIsPlaying) 
+		Vorbis_Stop(inGameMusic);
 
+	/* TODO? rather than return, pick a random track or just play last? */
+	if (track > TrackList.size()) 
+		return;
 
+	/* if user enters 1, decrement to 0 to align to array (enters 2, decrement to 1 etc) */
+	if (track != 0) 
+		track--;
 
+	inGameMusic = Vorbis_LoadFile(TrackList[track].c_str());
 
+/*
+	file = fopen(TrackList[track].c_str(),"rb");
+	if (!file) 
+	{
+		LogErrorString("Can't find OGG Vorbis file " + TrackList[track]);
+		return;
+	}
 
+	if (ov_open_callbacks(file, &oggFile, NULL, 0, OV_CALLBACKS_DEFAULT) < 0) 
+	{
+		LogErrorString("File " + TrackList[track] + "is not a valid OGG Vorbis file");
+		fclose(file);
+		return;
+	}
 
+	// get some audio info
+	pInfo = ov_info(&oggFile, -1);
 
+	LogString("Opening OGG Vorbis file " + TrackList[track]);
 
+	// Check the number of channels... always use 16-bit samples
+	if (pInfo->channels == 1) 
+		LogString("\t Mono Vorbis file");
+	else 
+		LogString("\t Stereo Vorbis file");
 
+	LogString("\t Vorbis frequency: " + IntToString(pInfo->rate));
 
+	ogg_int64_t numSamples = ov_pcm_total(&oggFile, -1);
 
+	// create the audio buffer (directsound or whatever)
+	if (AudioStream_CreateBuffer(&vorbisStream, pInfo->channels, pInfo->rate, 32768, 3) != AUDIOSTREAM_OK)
+	{
+		LogErrorString("Can't create audio stream buffer for OGG Vorbis!");
+	}
 
+	// init some temp audio data storage
+	audioData = new byte[vorbisStream.bufferSize];
 
+	int totalRead = ReadVorbisData(audioData, vorbisStream.bufferSize, 0);
 
+	// fill the first buffer
+	AudioStream_WriteData(&vorbisStream, audioData, vorbisStream.bufferSize);
 
+	// start playing
+	PlayVorbis();
+*/
+}
 
+bool LoadVorbisTrackList()
+{
+	//clear out the old list first
+//	EmptyCDTrackList();
 
+	std::ifstream file(tracklistFilename.c_str());
+
+	if (!file.is_open()) 
+	{
+		LogErrorString("no music tracklist found - not using ogg vorbis music");
+		return false;
+	}
+
+	std::string trackName;
+	unsigned int pos = 0;
+
+	while (std::getline(file, trackName)) 
+	{
+/*
+		pos = trackName.find(": ");
+		if (pos != 0)
+		{
+			trackName = trackName.substr(pos + 2);
+			TrackList.push_back(musicFolderName + trackName);
+		}
+*/
+		TrackList.push_back(musicFolderName + trackName);
+	}
+
+	file.close();
+	return true;
+}
+
+int CheckNumberOfVorbisTracks()
+{
+	return (int)TrackList.size();
+}
+
+bool IsVorbisPlaying()
+{
+	return inGameMusic->oggIsPlaying;
+}
+
+int SetStreamingMusicVolume(int volume)
+{
+	if (inGameMusic) // hack to stop this call before the audio stream is initialised
+		return AudioStream_SetBufferVolume(inGameMusic->audioStream, volume);
+	else
+		return 0;
+}
+
+void Vorbis_CloseSystem()
+{
+	Vorbis_Release(inGameMusic);
+}
+
+#if 0
 int ReadVorbisData(byte *audioBuffer, int sizeToRead, int offset)
 {
 	int bytesReadTotal = 0;
@@ -291,67 +401,6 @@ int ReadVorbisData(byte *audioBuffer, int sizeToRead, int offset)
 	}
 
 	return bytesReadTotal;
-}
-
-void LoadVorbisTrack(int track) 
-{
-	/* if we're already playing a track, stop it */
-	if (oggIsPlaying) 
-		StopVorbis();
-
-	/* TODO? rather than return, pick a random track or just play last? */
-	if (track > TrackList.size()) 
-		return;
-
-	/* if user enters 1, decrement to 0 to align to array (enters 2, decrement to 1 etc) */
-	if (track != 0) 
-		track--;
-
-	file = fopen(TrackList[track].c_str(),"rb");
-	if (!file) 
-	{
-		LogErrorString("Can't find OGG Vorbis file " + TrackList[track]);
-		return;
-	}
-
-	if (ov_open_callbacks(file, &oggFile, NULL, 0, OV_CALLBACKS_DEFAULT) < 0) 
-	{
-		LogErrorString("File " + TrackList[track] + "is not a valid OGG Vorbis file");
-		fclose(file);
-		return;
-	}
-
-	// get some audio info
-	pInfo = ov_info(&oggFile, -1);
-
-	LogString("Opening OGG Vorbis file " + TrackList[track]);
-
-	/* Check the number of channels... always use 16-bit samples */
-	if (pInfo->channels == 1) 
-		LogString("\t Mono Vorbis file");
-	else 
-		LogString("\t Stereo Vorbis file");
-
-	LogString("\t Vorbis frequency: " + IntToString(pInfo->rate));
-
-	ogg_int64_t numSamples = ov_pcm_total(&oggFile, -1);
-
-	/* create the audio buffer (directsound or whatever) */
-	if (AudioStream_CreateBuffer(&vorbisStream, pInfo->channels, pInfo->rate, 32768, 3) != AUDIOSTREAM_OK)
-	{
-		LogErrorString("Can't create audio stream buffer for OGG Vorbis!");
-	}
-
-	/* init some temp audio data storage */
-	audioData = new byte[vorbisStream.bufferSize];
-
-	int totalRead = ReadVorbisData(audioData, vorbisStream.bufferSize, 0);
-
-	/* fill the first buffer */
-	AudioStream_WriteData(&vorbisStream, audioData, vorbisStream.bufferSize);
-
-	/* start playing */
-	PlayVorbis();
 }
 
 void UpdateVorbisBuffer(void *arg) 
@@ -413,51 +462,4 @@ void StopVorbis()
 	delete[] audioData;
 	audioData = 0;
 }
-
-bool LoadVorbisTrackList()
-{
-	//clear out the old list first
-//	EmptyCDTrackList();
-
-	std::ifstream file(tracklistFilename.c_str());
-
-	if (!file.is_open()) 
-	{
-		LogErrorString("no music tracklist found - not using ogg vorbis music");
-		return false;
-	}
-
-	std::string trackName;
-	unsigned int pos = 0;
-
-	while (std::getline(file, trackName)) 
-	{
-/*
-		pos = trackName.find(": ");
-		if (pos != 0)
-		{
-			trackName = trackName.substr(pos + 2);
-			TrackList.push_back(musicFolderName + trackName);
-		}
-*/
-		TrackList.push_back(musicFolderName + trackName);
-	}
-
-	file.close();
-	return true;
-}
-
-int CheckNumberOfVorbisTracks()
-{
-	return (int)TrackList.size();
-}
-
-bool IsVorbisPlaying()
-{
-	return oggIsPlaying;
-}
-
-int SetStreamingMusicVolume(int volume)
-{
-	return AudioStream_SetBufferVolume(&vorbisStream, volume);
-}
+#endif
