@@ -124,7 +124,6 @@ void ScanImagesForFMVs()
 				char *strPtr;
 				if(strPtr = strstr(ihPtr->ImageName,"FMVs"))
 				{
-					Smack *smackHandle = NULL;
 					char filename[30];
 					{
 						char *filenamePtr = filename;
@@ -147,18 +146,13 @@ void ScanImagesForFMVs()
 						OutputDebugString("cant find smacker file!\n");
 						OutputDebugString(filename);
 					}
-					else 
-					{	
-						smackHandle = new Smack;
-						OutputDebugString("alloc smack\n");
-						OutputDebugString("found smacker file!");
-						OutputDebugString(filename);
-						OutputDebugString("\n");
-						smackHandle->isValidFile = 1;
+					else
+					{
+						FMVTexture[NumberOfFMVTextures].SmackHandle = 1;
 						fclose(file);
 					}
 
-					if (smackHandle)
+					if (FMVTexture[NumberOfFMVTextures].SmackHandle)
 					{
 						FMVTexture[NumberOfFMVTextures].IsTriggeredPlotFMV = 0;
 					}
@@ -168,7 +162,6 @@ void ScanImagesForFMVs()
 					}
 
 					{
-						FMVTexture[NumberOfFMVTextures].SmackHandle = smackHandle;
 						FMVTexture[NumberOfFMVTextures].ImagePtr = ihPtr;
 						FMVTexture[NumberOfFMVTextures].StaticImageDrawn = 0;
 						SetupFMVTexture(&FMVTexture[NumberOfFMVTextures]);
@@ -222,8 +215,7 @@ extern void InitialiseTriggeredFMVs()
 		{
 			if (FMVTexture[i].SmackHandle)
 			{
-				delete FMVTexture[i].SmackHandle;
-				FMVTexture[i].SmackHandle = NULL;
+				FMVTexture[i].SmackHandle = 0;
 				FMVTexture[i].MessageNumber = 0;
 			}
 		}

@@ -7302,7 +7302,7 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
 {	
-	ftPtr->RGBBuffer = new unsigned char[128 * 128 * 4];
+	ftPtr->RGBBuffer = new byte[128 * 128 * 4];
 
 	ftPtr->SoundVolume = 0;
 }
@@ -7330,12 +7330,12 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 		return;
 	}
 
-	unsigned char *destPtr = NULL;
-	unsigned char *srcPtr = &ftPtr->RGBBuffer[0];
+	byte *destPtr = NULL;
+	byte *srcPtr = &ftPtr->RGBBuffer[0];
 
 	for (int y = 0; y < ftPtr->ImagePtr->ImageHeight; y++)
 	{
-		destPtr = static_cast<unsigned char*>(textureRect.pBits) + y * textureRect.Pitch;
+		destPtr = static_cast<byte*>(textureRect.pBits) + y * textureRect.Pitch;
 
 		for (int x = 0; x < ftPtr->ImagePtr->ImageWidth; x++)
 		{

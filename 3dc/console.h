@@ -5,6 +5,7 @@
 
 void Con_PrintError(const std::string &errorString);
 void Con_PrintMessage(const std::string &messageString);
+void Com_PrintDebugMessage(const std::string &messageString);
 
 #ifdef __cplusplus
 extern "C" {

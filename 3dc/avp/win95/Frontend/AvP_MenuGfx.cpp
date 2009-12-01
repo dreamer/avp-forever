@@ -1264,8 +1264,7 @@ static void ReleaseAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 	GLOBALASSERT(gfxPtr->ImagePtr);
 
   //	ATRemoveSurface(gfxPtr->ImagePtr);
-	ReleaseAvPTexture(gfxPtr->ImagePtr); // bjd
-	
+	ReleaseAvPTexture(gfxPtr->ImagePtr);
 	gfxPtr->ImagePtr = NULL;
 
 	#if 0

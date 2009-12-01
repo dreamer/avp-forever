@@ -3,8 +3,6 @@
 	#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
 #endif
 
-//#include <vorbis/vorbisfile.h>
-
 #include <stdio.h>
 #include "vorbisPlayer.h"
 #include "logString.h"
@@ -16,10 +14,9 @@
 #include "utilities.h" // avp_open()
 #include "console.h"
 
-//int ReadVorbisData(byte *audioBuffer, int sizeToRead, int offset);
 void Vorbis_Play(VorbisCodec *VorbisStream);
 int Vorbis_ReadData(VorbisCodec *VorbisStream, int sizeToRead);
-void Vorbis_UpdateThread(void *arg);
+unsigned int __stdcall Vorbis_UpdateThread(void *args);
 
 extern "C" 
 {
@@ -27,17 +24,6 @@ extern "C"
 	extern int CDPlayerVolume; // volume control from menus
 }
 
-/*
-FILE *file;
-vorbis_info *pInfo;
-OggVorbis_File oggFile;
-StreamingAudioBuffer vorbisStream;
-
-bool oggIsPlaying = false;
-unsigned int bufferSize = 0;
-unsigned int halfBufferSize = 0;
-HANDLE hPlaybackThreadFinished;
-*/
 std::vector<std::string> TrackList;
 
 #ifdef WIN32
@@ -48,8 +34,6 @@ std::vector<std::string> TrackList;
 	const std::string tracklistFilename = "d:\\Music\\ogg_tracks.txt";
 	const std::string musicFolderName = "d:\\Music\\";
 #endif
-
-//static byte *audioData = 0;
 
 static VorbisCodec *inGameMusic = NULL;
 
@@ -130,8 +114,8 @@ void Vorbis_Play(VorbisCodec *VorbisStream)
 	{
 		VorbisStream->oggIsPlaying = true;
 		AudioStream_SetBufferVolume(VorbisStream->audioStream, CDPlayerVolume);
-		VorbisStream->hPlaybackThreadFinished = CreateEvent( NULL, FALSE, FALSE, NULL );
-		 _beginthread(Vorbis_UpdateThread, 0, static_cast<void*>(VorbisStream));
+		//VorbisStream->hPlaybackThreadFinished = CreateEvent( NULL, FALSE, FALSE, NULL );
+		VorbisStream->hPlaybackThreadFinished = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, Vorbis_UpdateThread, static_cast<void*>(VorbisStream), 0, NULL));
 	}
 	else 
 	{
@@ -139,9 +123,9 @@ void Vorbis_Play(VorbisCodec *VorbisStream)
 	}
 }
 
-void Vorbis_UpdateThread(void *arg) 
+unsigned int __stdcall Vorbis_UpdateThread(void *args)
 {
-	VorbisCodec *VorbisStream = static_cast<VorbisCodec*>(arg);
+	VorbisCodec *VorbisStream = static_cast<VorbisCodec*>(args);
 
 #ifdef USE_XAUDIO2
 	CoInitializeEx( NULL, COINIT_MULTITHREADED );
@@ -161,7 +145,9 @@ void Vorbis_UpdateThread(void *arg)
 
 		Sleep( dwQuantum );
 	}
-	SetEvent(VorbisStream->hPlaybackThreadFinished);
+
+	_endthreadex(0);
+	return 0;
 }
 
 int Vorbis_ReadData(VorbisCodec *VorbisStream, int sizeToRead)
@@ -216,10 +202,13 @@ void Vorbis_Stop(VorbisCodec *VorbisStream)
 		VorbisStream->oggIsPlaying = false;
 	}
 
-	/* wait until audio processing thread has finished running before continuing */ 
-	WaitForMultipleObjects(1, &VorbisStream->hPlaybackThreadFinished, TRUE, INFINITE);
-
-	CloseHandle(VorbisStream->hPlaybackThreadFinished);
+	// wait until audio processing thread has finished running before continuing
+	if (VorbisStream->hPlaybackThreadFinished)
+	{
+		WaitForSingleObject(VorbisStream->hPlaybackThreadFinished, INFINITE);
+		CloseHandle(VorbisStream->hPlaybackThreadFinished);
+		VorbisStream->hPlaybackThreadFinished = NULL;
+	}
 }
 
 void Vorbis_Release(VorbisCodec *VorbisStream)

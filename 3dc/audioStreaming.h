@@ -76,6 +76,7 @@ int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, int volume);
 int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, byte *audioData, int size);
 int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct);
 int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct);
+int AudioStream_SetPan(StreamingAudioBuffer *streamStruct, int pan);
 UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct);
 UINT64 AudioStream_GetNumSamplesWritten(StreamingAudioBuffer *streamStruct);
 

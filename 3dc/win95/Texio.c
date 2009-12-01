@@ -1541,12 +1541,15 @@ static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 
 	if (ihptr->Direct3DTexture)
 	{
+		ReleaseD3DTexture(&ihptr->Direct3DTexture);
+/*
 #ifdef _XBOX
 		ReleaseD3DTexture(ihptr->Direct3DTexture);
 #else
 		ihptr->Direct3DTexture->lpVtbl->Release(ihptr->Direct3DTexture);
 		ihptr->Direct3DTexture = NULL;
 #endif
+*/
 	}
 }
 
@@ -1560,12 +1563,15 @@ static void MinimizeImageHeader(IMAGEHEADER * ihptr)
 
 	if (ihptr->Direct3DTexture)
 	{
+		ReleaseD3DTexture(&ihptr->Direct3DTexture);
+/*
 #ifdef _XBOX
 		ReleaseD3DTexture(ihptr->Direct3DTexture);
 #else
 		ihptr->Direct3DTexture->lpVtbl->Release(ihptr->Direct3DTexture);
 		ihptr->Direct3DTexture = NULL;
 #endif
+*/
 	}
 }
 

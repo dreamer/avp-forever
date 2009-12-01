@@ -1210,7 +1210,7 @@ void ReleaseDirect3D()
 	Config_Save();
 }
 
-void ReleaseAvPTexture(AvPTexture* texture)
+void ReleaseAvPTexture(AvPTexture *texture)
 {
 	if (texture->buffer)
 	{
@@ -1223,10 +1223,10 @@ void ReleaseAvPTexture(AvPTexture* texture)
 	}
 }
 
-void ReleaseD3DTexture(D3DTEXTURE d3dTexture) 
+void ReleaseD3DTexture(D3DTEXTURE *d3dTexture) 
 {
 	/* release d3d texture */
-	SAFE_RELEASE(d3dTexture);
+	SAFE_RELEASE(*d3dTexture);
 }
 
 void FlushD3DZBuffer()

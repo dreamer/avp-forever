@@ -961,9 +961,7 @@ IndexedFont_Kerned_Column :: GetXInc
 	{
 		return 0;
 	}		
-
 }
-
 
 // static
 IndexedFont_Kerned_Column* IndexedFont_Kerned_Column :: Create

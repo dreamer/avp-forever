@@ -347,20 +347,22 @@ void Game_Has_Loaded(void)
 	if (image)
 	{
 		ReleaseAvPTexture(image);
+		image = NULL;
 	}
 
 	if (LoadingBarEmpty) 
 	{
 		ReleaseAvPTexture(LoadingBarEmpty);
+		LoadingBarEmpty = NULL;
 	}
 	if (LoadingBarFull)
 	{
 		ReleaseAvPTexture(LoadingBarFull);
+		LoadingBarFull = NULL;
 	}
 
 	SAFE_RELEASE(LoadingBarEmptyTexture);
 	SAFE_RELEASE(LoadingBarFullTexture);
 }
 
-
-};
+} // extern C

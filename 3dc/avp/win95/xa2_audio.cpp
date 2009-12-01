@@ -2499,6 +2499,11 @@ int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
 	return AUDIOSTREAM_OK;
 }
 
+int AudioStream_SetPan(StreamingAudioBuffer *streamStruct, int pan)
+{
+	return AUDIOSTREAM_OK;
+}
+
 int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);

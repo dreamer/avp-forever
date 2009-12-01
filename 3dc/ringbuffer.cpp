@@ -5,7 +5,6 @@
 #ifdef _XBOX
 #include <xtl.h>
 #endif
-#include <iostream>
 
 #include "ringbuffer.h"
 
@@ -123,7 +122,6 @@ int RingBuffer_ReadData(byte *destData, int amountToRead)
 	if (amountToRead > readableSpace)
 	{
 		amountToRead = readableSpace;
-		std::cout << "not enough readable in ringBuffer..adjusting\n" << std::endl;
 	}
 
 	firstSize = ring.bufferCapacity - ring.readPos;
@@ -167,7 +165,6 @@ int RingBuffer_WriteData(byte *srcData, int srcDataSize)
 	if (srcDataSize > availableSpace)
 	{
 		srcDataSize = availableSpace;
-		std::cout << "not enough space in ringBuffer..adjusting\n" << std::endl;
 	}
 
 	/* space free from write cursor to end of buffer */
@@ -198,7 +195,7 @@ int RingBuffer_WriteData(byte *srcData, int srcDataSize)
 
 	if (ring.amountFilled > ring.bufferCapacity)
 	{
-		std::cout << "fillSize greater than store size!\n" << std::endl;
+		//std::cout << "fillSize greater than store size!\n" << std::endl;
 	}
 
 	return totalWritten;
