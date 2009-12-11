@@ -1,14 +1,11 @@
 #ifdef USE_XAUDIO2
+#define XAUDIO2_HELPER_FUNCTIONS
 /* Patrick 5/6/97 -------------------------------------------------------------
   AvP platform specific sound management source
   ----------------------------------------------------------------------------*/
 #include "logString.h"
 #include "audioStreaming.h"
-
-#include <sndfile.h>
-SNDFILE *sndFile;
-
-#pragma comment(lib, "libsndfile-1.lib")
+#include <d3dx9math.h>
 
 extern "C" {
 
@@ -35,6 +32,7 @@ extern "C" {
 #include "vmanpset.h"
 #include <windows.h>
 #include "ffstdio.h"
+#include <math.h>
 
 /* Davew 27/7/98 --------------------------------------------------------------
 	Internal types.
@@ -85,7 +83,7 @@ X3DAUDIO_HANDLE			x3DInstance = {0};
 X3DAUDIO_LISTENER		XA2Listener = {0};
 X3DAUDIO_DSP_SETTINGS	XA2DSPSettings = {0};
 static int				numOutputChannels = 0;
-
+static DWORD			channelMask;
 unsigned int 			SoundMinBufferFree;
 
 /* for vorbis playback */
@@ -337,7 +335,6 @@ static const float pitch_to_frequency_mult_table [] =
 	1.978456026F,	1.979349041F,	1.980242459F,	1.98113628F,	1.982030505F,	1.982925133F,	1.983820165F,	1.984715601F,
 	1.985611441F,	1.986507685F,	1.987404335F,	1.988301388F,	1.989198847F,	1.990096711F,	1.99099498F,	1.991893654F,
 	1.992792734F,	1.99369222F,	1.994592112F,	1.99549241F,	1.996393115F,	1.997294226F,	1.998195744F,	1.999097668F,
-
 };
 
 /* Enviromental Presets. */
@@ -464,6 +461,10 @@ int PlatStartSoundSys()
 		return 0;
 	}
 
+	OutputDebugString("using audio device ");
+	OutputDebugString(reinterpret_cast<LPCSTR>(deviceDetails.DisplayName));
+	OutputDebugString("\n");
+
 	numOutputChannels = deviceDetails.OutputFormat.Format.nChannels;
 
 	// Initialise X3DAudio
@@ -474,22 +475,28 @@ int PlatStartSoundSys()
 	XA2Listener.Position.x = 0.0f;
 	XA2Listener.Position.y = 0.0f;
 	XA2Listener.Position.z = 0.0f;
+
 	XA2Listener.OrientFront.x = 0.0f;
 	XA2Listener.OrientFront.y = 0.0f;
 	XA2Listener.OrientFront.z = 1.0f;
+
 	XA2Listener.OrientTop.x = 0.0f;
-	XA2Listener.OrientTop.y = -1.0f;
+	XA2Listener.OrientTop.y = 1.0f;//-1.0f; bjd - check
 	XA2Listener.OrientTop.z = 0.0f;
+
 	XA2Listener.Velocity.x = 0.0f;
 	XA2Listener.Velocity.y = 0.0f;
 	XA2Listener.Velocity.z = 0.0f;
 	XA2Listener.pCone = NULL;
 
-	memset(&XA2DSPSettings, 0, sizeof(X3DAUDIO_DSP_SETTINGS));
 	FLOAT32 *matrix = new FLOAT32[deviceDetails.OutputFormat.Format.nChannels];
+	matrix[0] = 0.5f;
+	matrix[1] = 0.5f;
+
 	XA2DSPSettings.SrcChannelCount = 1;
 	XA2DSPSettings.DstChannelCount = deviceDetails.OutputFormat.Format.nChannels;
 	XA2DSPSettings.pMatrixCoefficients = matrix;
+	XA2DSPSettings.pDelayTimes = NULL;
 
 	LogString("Initialised XAudio2 successfully");
 
@@ -511,108 +518,51 @@ void SetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int position)
 
 void GetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int *position)
 {
-
+	*position = 0;
 }
 
-int CheckBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
+int CheckSoundBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
 {
-	return 1;
+	if (activeSound->pSourceVoice && activeSound->audioBuffer)
+		return 1;
+	else
+		return 0;
 }
 
-void PlatEndSoundSys(void)
+void PlatEndSoundSys()
 {
-#if 0
-	HRESULT hres;
-
-	db_log3("PlatEndSoundSys called.");
-	LOG_RC();
-	
-	if(PropSetP)
+	if (pSourceVoice)
 	{
-		IKsPropertySet_Release(PropSetP);
-		PropSetP = NULL;
+		pSourceVoice->DestroyVoice();
+		pSourceVoice = NULL;
+	}
+	if (pMasteringVoice)
+	{
+		pMasteringVoice->DestroyVoice();
+		pMasteringVoice = NULL;
 	}
 
-	db_log5("Released the PS");
-	LOG_RC();
-
-	if(DS3DListener)
+	if (XA2DSPSettings.pMatrixCoefficients)
 	{
-		IDirectSound3DListener_Release(DS3DListener);
-		DS3DListener = NULL;
+		delete []XA2DSPSettings.pMatrixCoefficients;
+		XA2DSPSettings.pMatrixCoefficients = NULL;
 	}
 
-	db_log5("Released the DSL");
-	LOG_RC();
-
-	if(NullDS3DBufferP)
-	{
-		IDirectSoundBuffer_Release(NullDS3DBufferP);
-		NullDS3DBufferP = NULL;
-	}
-
-	if(NullDSBufferP)
-	{
-		IDirectSoundBuffer_Release(NullDSBufferP);
-		NullDSBufferP = NULL;
-	}
-
-	db_log5("Released the last buffers");
-	LOG_RC();
-
-	if(DSPrimaryBuffer)
-	{
-		hres = IDirectSoundBuffer_Stop(DSPrimaryBuffer);
-		hres = IDirectSoundBuffer_Release(DSPrimaryBuffer);
-		DSPrimaryBuffer = NULL;
-	}
-
-	db_log5("Released the Primary Buffer.");
-	LOG_RC();
-
-	if(DSObject)
-	{		
-		hres = IDirectSound_Release(DSObject);
-		DSObject = NULL;
-	}	
-
-	db_log5("Released the sodding lot.");
-	LOG_RC();
-
-	db_log3("PlatEndSoundSys finished.");
-#endif
+	pXAudio2->StopEngine();
+	SAFE_RELEASE(pXAudio2);
+	CoUninitialize();
 }
 
 int PlatChangeGlobalVolume(int volume)
 {
-#if 0
-	return 1; // tough shit, turn your speakers up/down
-	int attenuation;
-	HRESULT hres;
-	LOCALASSERT((volume>=VOLUME_MIN)&&(volume<=VOLUME_MAX));
+	LOCALASSERT((volume >= VOLUME_MIN) && (volume <= VOLUME_MAX));
 
-	/* convert from intensity to attenuation: 
-	see comment for PLATCHANGEVOLUME to see how this works  */
-	if(volume == VOLUME_MIN) attenuation = VOLUME_MINPLAT;
-	else if(volume == VOLUME_MAX) attenuation = VOLUME_MAXPLAT;	
-	else if(volume <(VOLUME_MAX>>4)) attenuation = ((3000*volume)>>3)-7000;
-	else if(volume <(VOLUME_MAX>>3)) attenuation = ((1000*(volume-(VOLUME_MAX>>4)))>>3)-4000;
-	else if(volume <(VOLUME_MAX>>2)) attenuation = ((1000*(volume-(VOLUME_MAX>>3)))>>4)-3000;
-	else if(volume <(VOLUME_MAX>>1)) attenuation = ((1000*(volume-(VOLUME_MAX>>2)))>>5)-2000;
-	else if(volume <VOLUME_MAX) attenuation = ((1000*(volume-(VOLUME_MAX>>1)))>>6)-1000;
-
-	if(attenuation>VOLUME_MAXPLAT) attenuation=VOLUME_MAXPLAT;
-	if(attenuation<VOLUME_MINPLAT) attenuation=VOLUME_MINPLAT;
-
-	hres = IDirectSoundBuffer_SetVolume(DSPrimaryBuffer,attenuation);
-	if(hres==DS_OK)
+	LastError = pMasteringVoice->SetVolume(vol_to_gain_table[volume], XAUDIO2_COMMIT_NOW);
+	if (FAILED(LastError))
 	{
-		return 1;	
+		return SOUND_PLATFORMERROR;
 	}
-	
-	return SOUND_PLATFORMERROR;
-#endif
-	return 1;
+	else return 1;
 }
  
 int PlatPlaySound(int activeIndex)
@@ -624,45 +574,17 @@ int PlatPlaySound(int activeIndex)
 	gameIndex = ActiveSounds[activeIndex].soundIndex;
 	LOCALASSERT((gameIndex>=0)&&(gameIndex<SID_MAXIMUM));	
 	LOCALASSERT(GameSounds[gameIndex].loaded);
-	 
-
-	// duplicate the game sound buffer
-/*
-	hres = IDirectSound_DuplicateSoundBuffer(DSObject,GameSounds[gameIndex].dsBufferP,
-		&(ActiveSounds[activeIndex].dsBufferP));
-	if(hres!=DS_OK) 
-	{
-		db_logf3(("Error: Failed to duplicate a sound buffer. Index %i", gameIndex));
-		return SOUND_PLATFORMERROR;
-	}
-*/
 
 	// duplicate the game sound buffer
 	ActiveSounds[activeIndex].audioBuffer = GameSounds[gameIndex].audioBuffer;
 	memcpy(&ActiveSounds[activeIndex].xa2Buffer, &GameSounds[gameIndex].xa2Buffer, sizeof(XAUDIO2_BUFFER));
 	ActiveSounds[activeIndex].pSourceVoice = GameSounds[gameIndex].pSourceVoice;
+	ActiveSounds[activeIndex].xa2Emitter = GameSounds[gameIndex].xa2Emitter;
 
 	/* Do we need to get a DirectSound3D buffer. */
-	if ((ActiveSounds[activeIndex].threedee))/* &&
-		(GameSounds[gameIndex].flags & SAMPLE_IN_HW) &&
-		(SoundConfig.flags & SOUND_EAX) &&
-		(SoundConfig.flags & SOUND_USE_3DHW)) */
+	if ((ActiveSounds[activeIndex].threedee))
 	{
 		ActiveSounds[activeIndex].is3D = TRUE;
-		//db_log5("Going for a DirectSound3DBuffer.");
-/*
-		hres = IDirectSoundBuffer_QueryInterface
-			(
-				ActiveSounds[activeIndex].dsBufferP,
-				IID_IDirectSound3DBuffer,
-				(LPVOID *)&ActiveSounds[activeIndex].ds3DBufferP
-			);
-
-		if(hres != DS_OK)
-		{
-			db_logf5(("Error: Failed to get a DirectSound3DBuffer. res %x", hres));
-		}
-*/
 	}
 /*
 	if((SoundConfig.flags & SOUND_EAX) &&
@@ -698,7 +620,6 @@ int PlatPlaySound(int activeIndex)
 	{
 		int ok;
 
-//		if (ActiveSounds[activeIndex].ds3DBufferP)
 		if (ActiveSounds[activeIndex].is3D)
 		{
 			/*set 3d sound mode*/
@@ -707,7 +628,7 @@ int PlatPlaySound(int activeIndex)
 			/*set distance at which attenuation starts*/
 			if (ActiveSounds[activeIndex].threedeedata.inner_range == 0)
 				ActiveSounds[activeIndex].threedeedata.inner_range = static_cast<int>(1.0f);//DS3D_DEFAULTMINDISTANCE;
-			
+
 /*
 			hres = IDirectSound3DBuffer_SetMinDistance(ActiveSounds[activeIndex].ds3DBufferP,(D3DVALUE)ActiveSounds[activeIndex].threedeedata.inner_range,DS3D_DEFERRED);
 			if(FAILED(hres))
@@ -805,7 +726,7 @@ int PlatPlaySound(int activeIndex)
 		{
 			loopCount = XAUDIO2_LOOP_INFINITE;
 		}
-//		hres = IDirectSoundBuffer_Play(ActiveSounds[activeIndex].dsBufferP,0,0,flags);
+
 		ActiveSounds[activeIndex].xa2Buffer.LoopCount = loopCount;
 
 		LastError = ActiveSounds[activeIndex].pSourceVoice->SubmitSourceBuffer(&ActiveSounds[activeIndex].xa2Buffer);
@@ -848,31 +769,15 @@ void PlatStopSound(int activeIndex)
 {
 	db_logf5(("Stopping Sound %i in slot %i on frame %i", ActiveSounds[activeIndex].soundIndex, activeIndex, GlobalFrameCounter));
 
-//	if(!(ActiveSounds[activeIndex].dsBufferP)) return;
+	if (!(ActiveSounds[activeIndex].audioBuffer))
+		return;
 	
 	if (!ActiveSounds[activeIndex].paused)
-//		hres = IDirectSoundBuffer_Stop(ActiveSounds[activeIndex].dsBufferP);
 		ActiveSounds[activeIndex].pSourceVoice->Stop();
-	
-/*
-	db_logf4(("RefCount before StopSound %i, activeIndex %i", GET_REF_COUNT(ActiveSounds[activeIndex].PropSetP), activeIndex));
-	if(ActiveSounds[activeIndex].PropSetP)
-	{
-		IKsPropertySet_Release(ActiveSounds[activeIndex].PropSetP);
-		ActiveSounds[activeIndex].PropSetP = NULL;
-	}
 
-	if(ActiveSounds[activeIndex].ds3DBufferP)
-	{
-		IDirectSound3DBuffer_Release(ActiveSounds[activeIndex].ds3DBufferP);
-		ActiveSounds[activeIndex].ds3DBufferP = NULL;
-	}
-*/
 	ActiveSounds[activeIndex].is3D = FALSE;
+	ActiveSounds[activeIndex].audioBuffer = NULL; // GameSounds has the original reference to this memory
 	memset(&ActiveSounds[activeIndex].xa2Emitter, 0, sizeof(X3DAUDIO_EMITTER));
-
-//	IDirectSoundBuffer_Release(ActiveSounds[activeIndex].dsBufferP);
-//	ActiveSounds[activeIndex].dsBufferP = NULL;
 }
 
 /* Patrick 15/6/97 -------------------------------------------------------------
@@ -892,51 +797,34 @@ int PlatChangeSoundVolume(int activeIndex, int volume)
 		return SOUND_PLATFORMERROR;
 	}
 	else return 1;
-#if 0
-	signed int attenuation;
-	HRESULT hres;
-	LOCALASSERT(ActiveSounds[activeIndex].dsBufferP);
-	if(volume<VOLUME_MIN) volume=VOLUME_MIN;
-	if(volume>VOLUME_MAX) volume=VOLUME_MAX;
-
-	/* convert from intensity to attenuation */
-	attenuation = vol_to_atten_table[volume];
-
-	if(attenuation>VOLUME_MAXPLAT) attenuation=VOLUME_MAXPLAT;
-	if(attenuation<VOLUME_MINPLAT) attenuation=VOLUME_MINPLAT;
-
-	/* and apply it */
-	hres = IDirectSoundBuffer_SetVolume(ActiveSounds[activeIndex].dsBufferP,attenuation);
-	if(hres==DS_OK) return 1;	
-	else return SOUND_PLATFORMERROR;
-#endif
 }
 
 int PlatChangeSoundPitch(int activeIndex, int pitch)
 {
-	return 1;
 	int frequency = 0;
 
-//	LOCALASSERT(ActiveSounds[activeIndex].dsBufferP);
 	LOCALASSERT((pitch >= PITCH_MIN) && (pitch <= PITCH_MAX));
 
 	/* calculate new frequency from base pitch for game sound
 	(NB don't need to scale pitch values...) */
 
+	SOUNDINDEX gameSoundIndex = ActiveSounds[activeIndex].soundIndex;
+
 	/* default pitch is a special case in ds */
 	if (pitch == PITCH_DEFAULTPLAT)
 	{
-		frequency = 0;
+		frequency = GameSounds[gameSoundIndex].dsFrequency;
+		//frequency = 0;
 	}
 	else 
 	{
-		SOUNDINDEX gameSoundIndex = ActiveSounds[activeIndex].soundIndex;
 		frequency = ToneToFrequency(GameSounds[gameSoundIndex].dsFrequency, 
 			GameSounds[gameSoundIndex].pitch, pitch);	
 	}
 
-	sprintf(buf, "frequency: %d\n", frequency);
+	sprintf(buf, "frequency: %d xaudio2 value: %f\n", frequency, XAudio2SemitonesToFrequencyRatio(frequency));
 	OutputDebugString(buf);
+
 /*
 	ActiveSounds[activeIndex].pitch = pitch;
 	LastError = IDirectSoundBuffer_SetFrequency(ActiveSounds[activeIndex].dsBufferP, frequency);
@@ -954,10 +842,6 @@ int PlatChangeSoundPitch(int activeIndex, int pitch)
 
 int PlatSoundHasStopped(int activeIndex)
 {
-//	DWORD status = 0;
-
-//	LOCALASSERT(ActiveSounds[activeIndex].dsBufferP);
-
 	XAUDIO2_VOICE_STATE voiceState = {0};
 	ActiveSounds[activeIndex].pSourceVoice->GetState(&voiceState);
 
@@ -971,27 +855,6 @@ int PlatSoundHasStopped(int activeIndex)
 	}
 	else 
 		return SOUND_PLATFORMERROR;
-
-//	hres = IDirectSoundBuffer_GetStatus(ActiveSounds[activeIndex].dsBufferP,&status);
-/*
-	if(hres==DS_OK)
-	{
-		if(status&DSBSTATUS_BUFFERLOST)
-		{
-			return SOUND_PLATFORMERROR;
-		}
-		if(status&DSBSTATUS_PLAYING)
-		{
-			return 0;
-		}
-		else
-		{
-			return 1;
-		}
-	}
-
-	return SOUND_PLATFORMERROR;
-*/
 }
 
 int PlatDo3dSound(int activeIndex)
@@ -1027,7 +890,6 @@ int PlatDo3dSound(int activeIndex)
 		if (distance < (ActiveSounds[activeIndex].threedeedata.outer_range + SOUND_DEACTIVATERANGE))
 		{
 			int loopCount = 0;
-//			GLOBALASSERT (ActiveSounds[activeIndex].dsBufferP);
 			if (ActiveSounds[activeIndex].loop)
 			{
 				loopCount = XAUDIO2_LOOP_INFINITE;
@@ -1042,7 +904,6 @@ int PlatDo3dSound(int activeIndex)
 			}
 */
 			ActiveSounds[activeIndex].pSourceVoice->Start(0, XAUDIO2_COMMIT_NOW);
-//			IDirectSoundBuffer_Play(ActiveSounds[activeIndex].dsBufferP,0,0,flags);
 			newVolume = 0;
 			ActiveSounds[activeIndex].paused = 0;
 		}
@@ -1082,7 +943,6 @@ int PlatDo3dSound(int activeIndex)
 				ActiveSounds[activeIndex].loop)
 			{
 				LastError = ActiveSounds[activeIndex].pSourceVoice->Stop();
-//				hres = IDirectSoundBuffer_Stop(ActiveSounds[activeIndex].dsBufferP);
 				if (FAILED(LastError))
 				{
 					textprint ("Error stopping sound\n");
@@ -1107,7 +967,6 @@ int PlatDo3dSound(int activeIndex)
 	/* Now deal with the panning issues. */
 	if (distance < ActiveSounds[activeIndex].threedeedata.outer_range)
 	{
-//		if (ActiveSounds[activeIndex].ds3DBufferP)
 		if (ActiveSounds[activeIndex].is3D)
 		{
 			ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(relativePosn.vx);
@@ -1386,75 +1245,10 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		LOCALASSERT(1==0);
 		fclose(myFile);
 		return 0;	
-	}	
+	}
 		
 	{
-
-#if 1
-		/* Now set the buffer description and make a sound object */
-/*
-		DSBUFFERDESC dsBuffDesc;
-		LPDIRECTSOUNDBUFFER sndBuffer;
-		HRESULT hres;
-		LPVOID audioPtr1;
-		DWORD audioBytes1;
-		LPVOID audioPtr2;   
-		DWORD audioBytes2;
-
-		memset(&dsBuffDesc,0,sizeof(DSBUFFERDESC));
-		dsBuffDesc.dwSize = sizeof(DSBUFFERDESC);
-		dsBuffDesc.dwFlags = (DSBCAPS_CTRLDEFAULT | DSBCAPS_STATIC);		
-		dsBuffDesc.dwBufferBytes = myChunkHeader.chunkLength;
-		dsBuffDesc.lpwfxFormat = &myWaveFormat;
-
-		// Do we need to specify 3D.
-		if(SoundConfig.flags & SOUND_3DHW)
-		{
-			dsBuffDesc.dwFlags |= DSBCAPS_CTRL3D;
-		}
-
-		// If we have no Voice Manager support we must leave some hardware buffers free.
-		if(SoundConfig.flags & SOUND_VOICE_MGER)
-		{
-			// Do nothing for the moment.
-		}
-		else
-		{
-			// FALSE Voice Manager.
-			DSCAPS caps;
-			ZeroMemory(&caps, sizeof(DSCAPS));
-			caps.dwSize = sizeof(DSCAPS);
-
-			IDirectSound_GetCaps(DSObject, &caps);
-			db_logf5(("caps.dwFreeHwMixingStaticBuffers %i SoundMinBufferFree %i",caps.dwFreeHwMixingStaticBuffers, SoundMinBufferFree));
-			if(caps.dwFreeHwMixingStaticBuffers < SoundMinBufferFree)
-			{
-				// Force to software.
-				db_log3("Forcing buffer to software.");
-				dsBuffDesc.dwFlags |= DSBCAPS_LOCSOFTWARE;
-			}
-		}
-
-		// Create the Direct Sound buffer for this sound
-		hres = IDirectSound_CreateSoundBuffer(DSObject,&dsBuffDesc,&sndBuffer,NULL); 
-		if(hres != DS_OK)
-		{
-			LOCALASSERT(1==0);
-			fclose(myFile);
-			return 0;
-		}
-
-		// Lock the buffer to allow the write
-		hres = IDirectSoundBuffer_Lock(sndBuffer,0,myChunkHeader.chunkLength,
-			&audioPtr1,&audioBytes1,&audioPtr2,&audioBytes2,0); 
-		if((hres!=DS_OK)||(audioPtr2 != NULL))
-		{
-			LOCALASSERT(1==0);
-			IDirectSoundBuffer_Release(sndBuffer);		
-			fclose(myFile);
-			return 0;
-		}
-*/		
+		/* Now set the buffer description and make a sound object */	
 		GameSounds[soundNum].audioBuffer = new byte[myChunkHeader.chunkLength];
 
 		/* Read data from file to buffer */
@@ -1462,7 +1256,8 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		if (res != (size_t)myChunkHeader.chunkLength)
 		{
 			LOCALASSERT(1==0);
-			// release xaudio buffer?
+			delete []GameSounds[soundNum].audioBuffer;
+			GameSounds[soundNum].audioBuffer = NULL;
 			fclose(myFile);
 			return 0;
 		}
@@ -1482,22 +1277,16 @@ int LoadWavFile(int soundNum, char * wavFileName)
 
 		// Set the emitter stuff
 		memset(&GameSounds[soundNum].xa2Emitter, 0, sizeof(X3DAUDIO_EMITTER));
-		GameSounds[soundNum].xa2Emitter.ChannelCount = myWaveFormat.nChannels;
+		GameSounds[soundNum].xa2Emitter.ChannelCount = 1;//myWaveFormat.nChannels; bjd - check
 		GameSounds[soundNum].xa2Emitter.CurveDistanceScaler = FLT_MIN;
 
-/*
-		// then unlock it and close the file
-		hres = IDirectSoundBuffer_Unlock(sndBuffer,audioPtr1,audioBytes1,audioPtr2,audioBytes2);
-		if (hres!=DS_OK)
-		{
-			LOCALASSERT(1==0);
-			IDirectSoundBuffer_Release(sndBuffer);		
-			fclose(myFile);
-			return 0;
-		}
-		// Finally, put a pointer the the buffer into the sound data
-		GameSounds[soundNum].dsBufferP = sndBuffer;
-*/
+		GameSounds[soundNum].xa2Emitter.OrientFront = D3DXVECTOR3( 0, 0, 1 );
+		GameSounds[soundNum].xa2Emitter.OrientTop = D3DXVECTOR3( 0, 1, 0 );
+		GameSounds[soundNum].xa2Emitter.ChannelRadius = 1.0f;
+		GameSounds[soundNum].xa2Emitter.InnerRadius = 0.0f;
+		GameSounds[soundNum].xa2Emitter.InnerRadiusAngle = 0.0f;//X3DAUDIO_PI/4.0f;
+		GameSounds[soundNum].xa2Emitter.pChannelAzimuths = GameSounds[soundNum].emitterAzimuths;
+
 		{
 			char * wavname = strrchr (wavFileName, '\\');
 			if (wavname)
@@ -1513,32 +1302,9 @@ int LoadWavFile(int soundNum, char * wavFileName)
 			strcpy (GameSounds[soundNum].wavName, wavname);
 		}
 
-		/* Log it's position. */
-		{
-/*
-			DSBCAPS caps;
-			ZeroMemory(&caps, sizeof(DSBCAPS));
-			caps.dwSize = sizeof(DSBCAPS);
-			IDirectSoundBuffer_GetCaps(sndBuffer, &caps);
-			
-			if(caps.dwFlags & DSBCAPS_LOCHARDWARE)
-			{
-				GameSounds[soundNum].flags = SAMPLE_IN_HW;
-				db_logf3(("Sound %s loaded into hardware slot %i by LoadWavFile.", GameSounds[soundNum].wavName, soundNum));
-			}
-			else
-			{
-				GameSounds[soundNum].flags = SAMPLE_IN_SW;
-				db_logf3(("Sound %s loaded into software slot %i by LoadWavFile.", GameSounds[soundNum].wavName, soundNum));
-			}
-*/
-		}
-
 		/* need to save this here for later use */
 		GameSounds[soundNum].dsFrequency = myWaveFormat.nSamplesPerSec;
-
-		GameSounds[soundNum].length=lengthInSeconds;
-#endif
+		GameSounds[soundNum].length = lengthInSeconds;
 	}
 
 	fclose(myFile);
@@ -1649,70 +1415,6 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	}	
 		
 	{
-/*
-		// Now set the buffer description and make a sound object
-		DSBUFFERDESC dsBuffDesc;
-		LPDIRECTSOUNDBUFFER sndBuffer;
-		HRESULT hres;
-		LPVOID audioPtr1;
-		DWORD audioBytes1;
-		LPVOID audioPtr2;   
-		DWORD audioBytes2;
-
-		memset(&dsBuffDesc,0,sizeof(DSBUFFERDESC));
-		dsBuffDesc.dwSize = sizeof(DSBUFFERDESC);
-		dsBuffDesc.dwFlags = (DSBCAPS_CTRLDEFAULT | DSBCAPS_STATIC);		
-		dsBuffDesc.dwBufferBytes = myChunkHeader.chunkLength;
-		dsBuffDesc.lpwfxFormat = &myWaveFormat;
-
-		// Do we need to specify 3D.
-		if(SoundConfig.flags & SOUND_3DHW)
-		{
-			dsBuffDesc.dwFlags |= DSBCAPS_CTRL3D;
-		}
-
-		// If we have no Voice Manager support we must leave some hardware buffers free.
-		if(SoundConfig.flags & SOUND_VOICE_MGER)
-		{
-			// Do nothing for the moment.
-		}
-		else
-		{
-			// FALSE Voice Manager.
-			DSCAPS caps;
-			ZeroMemory(&caps, sizeof(DSCAPS));
-			caps.dwSize = sizeof(DSCAPS);
-
-			IDirectSound_GetCaps(DSObject, &caps);
-			db_logf5(("caps.dwFreeHwMixingStaticBuffers %i SoundMinBufferFree %i",caps.dwFreeHwMixingStaticBuffers, SoundMinBufferFree));
-			if(caps.dwFreeHwMixingStaticBuffers < SoundMinBufferFree)
-			{
-				// Force to software.
-				db_log3("Forcing buffer to software.");
-				dsBuffDesc.dwFlags |= DSBCAPS_LOCSOFTWARE;
-			}
-		}
-
-		// Create the Direct Sound buffer for this sound
-		hres = IDirectSound_CreateSoundBuffer(DSObject,&dsBuffDesc,&sndBuffer,NULL); 
-		if(hres != DS_OK)
-		{
-			LOCALASSERT(1==0);
-			ffclose(myFile);
-			return 0;
-		}
-
-		// Lock the buffer to allow the write
-		hres = IDirectSoundBuffer_Lock(sndBuffer,0,myChunkHeader.chunkLength,
-			&audioPtr1,&audioBytes1,&audioPtr2,&audioBytes2,0); 
-		if((hres!=DS_OK)||(audioPtr2 != NULL))
-		{
-			LOCALASSERT(1==0);
-			IDirectSoundBuffer_Release(sndBuffer);		
-			ffclose(myFile);
-			return 0;
-		}
-*/
 		GameSounds[soundNum].audioBuffer = new byte[myChunkHeader.chunkLength];
 
 		/* Read data from file to buffer */
@@ -1720,7 +1422,8 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		if (res != (size_t)myChunkHeader.chunkLength)
 		{
 			LOCALASSERT(1==0);
-//			IDirectSoundBuffer_Release(sndBuffer);		
+			delete []GameSounds[soundNum].audioBuffer;
+			GameSounds[soundNum].audioBuffer = NULL;	
 			ffclose(myFile);
 			return 0;
 		}
@@ -1740,21 +1443,16 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 
 		// Set the emitter stuff
 		memset(&GameSounds[soundNum].xa2Emitter, 0, sizeof(X3DAUDIO_EMITTER));
-		GameSounds[soundNum].xa2Emitter.ChannelCount = myWaveFormat.nChannels;
+		GameSounds[soundNum].xa2Emitter.ChannelCount = 1;// myWaveFormat.nChannels; bjd - check
 		GameSounds[soundNum].xa2Emitter.CurveDistanceScaler = FLT_MIN;
-/*
-		// then unlock it and close the file.
-		hres = IDirectSoundBuffer_Unlock(sndBuffer,audioPtr1,audioBytes1,audioPtr2,audioBytes2);
-		if (hres!=DS_OK)
-		{
-			LOCALASSERT(1==0);
-			IDirectSoundBuffer_Release(sndBuffer);		
-			ffclose(myFile);
-			return 0;
-		}
-		// Finally, put a pointer the the buffer into the sound data
-		GameSounds[soundNum].dsBufferP = sndBuffer;
-*/
+
+		GameSounds[soundNum].xa2Emitter.OrientFront = D3DXVECTOR3( 0, 0, 1 );
+		GameSounds[soundNum].xa2Emitter.OrientTop = D3DXVECTOR3( 0, 1, 0 );
+		GameSounds[soundNum].xa2Emitter.ChannelRadius = 1.0f;
+		GameSounds[soundNum].xa2Emitter.InnerRadius = 0.0f;
+		GameSounds[soundNum].xa2Emitter.InnerRadiusAngle = 0.0f;//X3DAUDIO_PI/4.0f;
+		GameSounds[soundNum].xa2Emitter.pChannelAzimuths = GameSounds[soundNum].emitterAzimuths;
+
 		{
 			char * wavname = strrchr (wavFileName, '\\');
 			if (wavname)
@@ -1769,30 +1467,10 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 			GameSounds[soundNum].wavName = (char *)AllocateMem (strlen (wavname) + 1);
 			strcpy (GameSounds[soundNum].wavName, wavname);
 		}
-/*
-		// Log it's position.
-		{
-			DSBCAPS caps;
-			ZeroMemory(&caps, sizeof(DSBCAPS));
-			caps.dwSize = sizeof(DSBCAPS);
-			IDirectSoundBuffer_GetCaps(sndBuffer, &caps);
-			
-			if(caps.dwFlags & DSBCAPS_LOCHARDWARE)
-			{
-				GameSounds[soundNum].flags = SAMPLE_IN_HW;
-				db_logf3(("Sound %s loaded into hardware slot %i by LoadWavFromFastFile.", GameSounds[soundNum].wavName, soundNum));
-			}
-			else
-			{
-				GameSounds[soundNum].flags = SAMPLE_IN_SW;
-				db_logf3(("Sound %s loaded into software slot %i by LoadWavFromFastFile.", GameSounds[soundNum].wavName, soundNum));
-			}
-		}
-*/
+
 		/* need to save this here for later use */
 		GameSounds[soundNum].dsFrequency = myWaveFormat.nSamplesPerSec;
-
-		GameSounds[soundNum].length=lengthInSeconds;
+		GameSounds[soundNum].length = lengthInSeconds;
 	}
 
 	ffclose(myFile);
@@ -1851,22 +1529,31 @@ void PlatUpdatePlayer()
 	// update the listener (ie the player)
 	if (Global_VDB_Ptr)
 	{
+		if ((Global_VDB_Ptr->VDB_World.vx == 0) &&
+				(Global_VDB_Ptr->VDB_World.vy == 0) &&
+				(Global_VDB_Ptr->VDB_World.vz == 0))
+			return;
+
 		extern int NormalFrameTime;
 		extern int DopplerShiftIsOn;
-/*
+
 		XA2Listener.Position.x = static_cast<float>(Global_VDB_Ptr->VDB_World.vx);
 		XA2Listener.Position.y = static_cast<float>(Global_VDB_Ptr->VDB_World.vy);
 		XA2Listener.Position.z = static_cast<float>(Global_VDB_Ptr->VDB_World.vz);
-*/
+
+/*
 		XA2Listener.Position.x = 0.0f;
 		XA2Listener.Position.y = 0.0f;
 		XA2Listener.Position.z = 0.0f;
-
+*/
 		if (AvP.PlayerType != I_Alien)
 		{
-			XA2Listener.OrientFront.x =  (float) ((Global_VDB_Ptr->VDB_Mat.mat13) / 65536.0F);
+//			XA2Listener.OrientFront = D3DXVECTOR3( 0, 0, 1 );
+
+			XA2Listener.OrientFront.x = (float) ((Global_VDB_Ptr->VDB_Mat.mat13) / 65536.0F);
 			XA2Listener.OrientFront.y = 0.0f;
 			XA2Listener.OrientFront.z = (float) ((Global_VDB_Ptr->VDB_Mat.mat33) / 65536.0F);
+
 			XA2Listener.OrientTop.x = 0.0f;
 			XA2Listener.OrientTop.y = 1.0f;
 			XA2Listener.OrientTop.z = 0.0f;
@@ -1898,7 +1585,7 @@ void PlatUpdatePlayer()
 			XA2Listener.Velocity.z = 0.0f;
 		}
 	}
-
+#if 0 // not doing reverb stuff yet
 	if (SoundConfig.reverb_changed)
 	{
 		unsigned int count = SoundMaxHW;
@@ -1948,19 +1635,31 @@ void PlatUpdatePlayer()
 		SoundConfig.reverb_changed = FALSE;
 		XA2Listener.pCone = NULL;
 	}
+#endif
+
 #if 0
-	UINT32 calcFlags = X3DAUDIO_CALCULATE_MATRIX;// | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT | X3DAUDIO_CALCULATE_REVERB; // ????????????????????????????
+	char buf[100];
+	//	UINT32 calcFlags = X3DAUDIO_CALCULATE_MATRIX/* | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT | X3DAUDIO_CALCULATE_REVERB*/; // ????????????????????????????
 	for (int i = 0; i < SOUND_MAXACTIVE; i++)
 	{
-		if (ActiveSounds[i]./*threedee*/is3D)
+		if (ActiveSounds[i].is3D)
 		{
-			X3DAudioCalculate(x3DInstance, &XA2Listener, &ActiveSounds[i].xa2Emitter, calcFlags, &XA2DSPSettings);
-			ActiveSounds[i].pSourceVoice->SetOutputMatrix(pMasteringVoice, 1, numOutputChannels, XA2DSPSettings.pMatrixCoefficients);
+			if (ActiveSounds[i].soundIndex == SID_NOSOUND)
+				continue;
+
+			ActiveSounds[i].xa2Emitter.Position = D3DXVECTOR3( 0, 0, 0 );
+
+			X3DAudioCalculate(x3DInstance, &XA2Listener, &ActiveSounds[i].xa2Emitter, /*calcFlags*/X3DAUDIO_CALCULATE_MATRIX, &XA2DSPSettings);
+
+			sprintf(buf, "1: %f 2: %f\n", XA2DSPSettings.pMatrixCoefficients[0], XA2DSPSettings.pMatrixCoefficients[1]);
+			OutputDebugString(buf);
+
+			ActiveSounds[i].pSourceVoice->SetOutputMatrix(pMasteringVoice, 1, 2, XA2DSPSettings.pMatrixCoefficients);
 //			ActiveSounds[i].pSourceVoice->SetFrequencyRatio(XA2DSPSettings.DopplerFactor);
 		}
 	}
 #endif
-//	IDirectSound3DListener_CommitDeferredSettings(DS3DListener);
+
 //	pXAudio2->CommitChanges(XAUDIO2_COMMIT_ALL);
 }
 
@@ -2132,69 +1831,6 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 	}	
 		
 	{
-/*
-		// Now set the buffer description and make a sound object
-		DSBUFFERDESC dsBuffDesc;
-		LPDIRECTSOUNDBUFFER sndBuffer;
-		HRESULT hres;
-		LPVOID audioPtr1;
-		DWORD audioBytes1;
-		LPVOID audioPtr2;   
-		DWORD audioBytes2;
-
-		memset(&dsBuffDesc,0,sizeof(DSBUFFERDESC));
-		dsBuffDesc.dwSize = sizeof(DSBUFFERDESC);
-		dsBuffDesc.dwFlags = (DSBCAPS_CTRLDEFAULT | DSBCAPS_STATIC);		
-		dsBuffDesc.dwBufferBytes = myChunkHeader.chunkLength;
-		dsBuffDesc.lpwfxFormat = &myWaveFormat;
-
-		// Do we need to specify 3D.
-		if(SoundConfig.flags & SOUND_3DHW)
-		{
-			dsBuffDesc.dwFlags |= DSBCAPS_CTRL3D;
-		}
-
-		// If we have no Voice Manager support we must leave some hardware buffers free.
-		if(SoundConfig.flags & SOUND_VOICE_MGER)
-		{
-			// Do nothing for the moment.
-		}
-		else
-		{
-			// FALSE Voice Manager.
-			DSCAPS caps;
-			ZeroMemory(&caps, sizeof(DSCAPS));
-			caps.dwSize = sizeof(DSCAPS);
-
-			IDirectSound_GetCaps(DSObject, &caps);
-			db_logf5(("caps.dwFreeHwMixingStaticBuffers %i SoundMinBufferFree %i",caps.dwFreeHwMixingStaticBuffers, SoundMinBufferFree));
-			if(caps.dwFreeHwMixingStaticBuffers < SoundMinBufferFree)
-			{
-				// Force to software.
-				db_log3("Forcing buffer to software.");
-				dsBuffDesc.dwFlags |= DSBCAPS_LOCSOFTWARE;
-			}
-		}
-
-		// Create the Direct Sound buffer for this sound
-		hres = IDirectSound_CreateSoundBuffer(DSObject,&dsBuffDesc,&sndBuffer,NULL); 
-		if(hres != DS_OK)
-		{
-			LOCALASSERT(1==0);
-			return 0;
-		}
-
-		// Lock the buffer to allow the write
-		hres = IDirectSoundBuffer_Lock(sndBuffer,0,myChunkHeader.chunkLength,
-			&audioPtr1,&audioBytes1,&audioPtr2,&audioBytes2,0); 
-
-		if((hres!=DS_OK)||(audioPtr2 != NULL))
-		{
-			LOCALASSERT(1==0);
-			IDirectSoundBuffer_Release(sndBuffer);		
-			return 0;
-		}
-*/
 		GameSounds[soundIndex].audioBuffer = new byte[myChunkHeader.chunkLength];
 
 		/* Read data from file to buffer */
@@ -2215,12 +1851,17 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 
 		// Set the emitter stuff
 		memset(&GameSounds[soundIndex].xa2Emitter, 0, sizeof(X3DAUDIO_EMITTER));
-		GameSounds[soundIndex].xa2Emitter.ChannelCount = myWaveFormat.nChannels;
+		GameSounds[soundIndex].xa2Emitter.ChannelCount = 1;// myWaveFormat.nChannels; bjd - check
 		GameSounds[soundIndex].xa2Emitter.CurveDistanceScaler = FLT_MIN;
+		//GameSounds[soundIndex].xa2Emitter.InnerRadius = 0.0f;
+		//GameSounds[soundIndex].xa2Emitter.InnerRadiusAngle = 0.0f;
 
+		GameSounds[soundIndex].xa2Emitter.OrientFront = D3DXVECTOR3( 0, 0, 1 );
+		GameSounds[soundIndex].xa2Emitter.OrientTop = D3DXVECTOR3( 0, 1, 0 );
+		GameSounds[soundIndex].xa2Emitter.ChannelRadius = 1.0f;
 		GameSounds[soundIndex].xa2Emitter.InnerRadius = 0.0f;
-		GameSounds[soundIndex].xa2Emitter.InnerRadiusAngle = 0.0f;
-
+		GameSounds[soundIndex].xa2Emitter.InnerRadiusAngle = 0.0f;//X3DAUDIO_PI/4.0f;
+		GameSounds[soundIndex].xa2Emitter.pChannelAzimuths = GameSounds[soundIndex].emitterAzimuths;
 
 		#if 0
 		if(res != (size_t)myChunkHeader.chunkLength)
@@ -2230,37 +1871,7 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 			return 0;
 		}
 		#endif
-/*
-		// then unlock it and close the file
-		hres = IDirectSoundBuffer_Unlock(sndBuffer,audioPtr1,audioBytes1,audioPtr2,audioBytes2);
-		if (hres!=DS_OK)
-		{
-			LOCALASSERT(1==0);
-			IDirectSoundBuffer_Release(sndBuffer);		
-			return 0;
-		}
-		// Finally, put a pointer the the buffer into the sound data
-		GameSounds[soundIndex].dsBufferP = sndBuffer;
 
-		// Log it's position.
-		{
-			DSBCAPS caps;
-			ZeroMemory(&caps, sizeof(DSBCAPS));
-			caps.dwSize = sizeof(DSBCAPS);
-			IDirectSoundBuffer_GetCaps(sndBuffer, &caps);
-			
-			if(caps.dwFlags & DSBCAPS_LOCHARDWARE)
-			{
-				GameSounds[soundIndex].flags = SAMPLE_IN_HW;
-				db_logf3(("Sound %s loaded into hardware slot %i by ExtractWavFile.", GameSounds[soundIndex].wavName, soundIndex));
-			}
-			else
-			{
-				GameSounds[soundIndex].flags = SAMPLE_IN_SW;
-				db_logf3(("Sound %s loaded into software slot %i by ExtractWavFile.", GameSounds[soundIndex].wavName, soundIndex));
-			}
-		}
-*/
 		GameSounds[soundIndex].length = lengthInSeconds;
 
 		/* need to save this here for later use */
@@ -2377,13 +1988,15 @@ StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int buff
 	waveFormat.nSamplesPerSec	= rate;
 	waveFormat.nBlockAlign		= waveFormat.nChannels * (waveFormat.wBitsPerSample / 8);	//what block boundaries exist
 	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
-	waveFormat.cbSize			= 0;//sizeof(waveFormat);	//how big this structure is
+	waveFormat.cbSize			= sizeof(waveFormat);	//how big this structure is
 
 	// create the source voice for playing the sound
 	LastError = pXAudio2->CreateSourceVoice(&newStreamingAudioBuffer->pSourceVoice, &waveFormat);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
+		AudioStream_ReleaseBuffer(newStreamingAudioBuffer);
+		newStreamingAudioBuffer = NULL;
 		return NULL;
 	}
 /*
@@ -2391,6 +2004,8 @@ StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int buff
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
+		AudioStream_ReleaseBuffer(newStreamingAudioBuffer);
+		newStreamingAudioBuffer = NULL;
 		return -1;
 	}
 */
@@ -2406,6 +2021,7 @@ StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int buff
 	newStreamingAudioBuffer->bytesPerSample = waveFormat.wBitsPerSample / 8;
 	newStreamingAudioBuffer->numChannels = waveFormat.nChannels;
 	newStreamingAudioBuffer->rate = waveFormat.nSamplesPerSec;
+	newStreamingAudioBuffer->isPaused = true;
 
 	newStreamingAudioBuffer->currentBuffer = 0;
 	newStreamingAudioBuffer->bufferSize = bufferSize;
@@ -2428,8 +2044,6 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, byte *audioData, i
 	memcpy(&streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize], audioData, size);
 	buf.AudioBytes = size;
 	buf.pAudioData = static_cast<BYTE*>(&streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize]);
-
-//	sf_write_raw(sndFile, &streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize], size);
 
 	streamStruct->pSourceVoice->SubmitSourceBuffer(&buf);
 
@@ -2524,11 +2138,15 @@ int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);
 
-	LastError = streamStruct->pSourceVoice->Start();
-
-	if (FAILED(LastError))
+	if (streamStruct->isPaused)
 	{
-		return AUDIOSTREAM_ERROR;
+		LastError = streamStruct->pSourceVoice->Start();
+
+		if (FAILED(LastError))
+		{
+			return AUDIOSTREAM_ERROR;
+		}
+		streamStruct->isPaused = false;
 	}
 
 	return AUDIOSTREAM_OK;
@@ -2537,8 +2155,6 @@ int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct)
 int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);
-
-	sf_close(sndFile);
 
 	if (streamStruct->pSourceVoice)
 	{
@@ -2558,7 +2174,7 @@ int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 	streamStruct->currentBuffer = 0;
 	streamStruct->bufferSize = 0;
 
-	delete []streamStruct;
+	delete streamStruct;
 
 	return AUDIOSTREAM_OK;
 }

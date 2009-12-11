@@ -1,7 +1,12 @@
 #ifndef _vorbisPlayer_h_
 #define _vorbisPlayer_h_
 
-#include "windows.h"
+#include "os_header.h"
+
+#ifdef _XBOX
+	#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
+#endif
+
 #include <vorbis/vorbisfile.h>
 #include "audioStreaming.h"
 #include <string>
@@ -31,10 +36,6 @@ extern "C" {
 
 void Vorbis_CloseSystem();
 extern void LoadVorbisTrack(int track);
-//extern void PlayVorbis();
-//extern void StopVorbis();
-//extern void UpdateVorbisBuffer(void *arg);
-//void ReleaseVorbisBuffer();
 extern bool LoadVorbisTrackList();
 bool IsVorbisPlaying();
 int CheckNumberOfVorbisTracks();

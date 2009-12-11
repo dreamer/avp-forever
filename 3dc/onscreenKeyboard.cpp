@@ -20,6 +20,16 @@
 
 */
 
+struct TextureResource
+{
+	std::string fileName;
+	int width;
+	int height;
+	D3DTEXTURE texture;
+};
+
+std::vector<TextureResource> oskTextures;
+
 extern "C"
 {
 	extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha);
@@ -122,7 +132,17 @@ void Osk_Init()
 {
 	currentRow = 0;
 	currentColumn = 0;
+/*
+	// load the button textures
+	TextureResource newTexture;
+	newTexture.fileName = "images//a.png";
+	newTexture.texture = CheckAndLoadUserTexture(newTexture.fileName.c_str(), &newTexture.width, &newTexture.height);
+	oskTextures.push_back(newTexture);
 
+	newTexture.fileName = "images//b.png";
+	newTexture.texture = CheckAndLoadUserTexture(newTexture.fileName.c_str(), &newTexture.width, &newTexture.height);
+	oskTextures.push_back(newTexture);
+*/
 	// do top row of numbers
 	for (int i = 9; i >= 0; i--)
 	{

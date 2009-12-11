@@ -1064,15 +1064,12 @@ int LoadWavFile(int soundNum, char * wavFileName)
 	int lengthInSeconds;
 
 	myFile = avp_fopen(wavFileName,"rb");
-	if(!myFile)
+	if (!myFile)
 	{
 		GLOBALASSERT (0);
 		return(0);
 	}
-/*
-	OutputDebugString("\n");
-	OutputDebugString(wavFileName);
-*/
+
 	/* Read the WAV RIFF header */
 	res = fread(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,myFile);
 	res = fread(&myRiffHeader,sizeof(PWAVRIFFHEADER),1,myFile);
@@ -1081,7 +1078,6 @@ int LoadWavFile(int soundNum, char * wavFileName)
 	res = fread(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,myFile);
 	if(myChunkHeader.chunkLength==16)
 	{
-		OutputDebugString("\n standard wav file");
 		/* a standard PCM wave format chunk */
 		PCMWAVEFORMAT tmpWaveFormat;
 		res = fread(&tmpWaveFormat,sizeof(PCMWAVEFORMAT),1,myFile);	
@@ -1095,7 +1091,6 @@ int LoadWavFile(int soundNum, char * wavFileName)
 	}
 	else if(myChunkHeader.chunkLength==18)
 	{
-		OutputDebugString("\n extended wav file");
 		/* an extended PCM wave format chunk */
 		res = fread(&myWaveFormat,sizeof(WAVEFORMATEX),1,myFile);	
 		myWaveFormat.cbSize = 0;
@@ -1125,47 +1120,39 @@ int LoadWavFile(int soundNum, char * wavFileName)
 	}while(res);
 
 	/* Now do a few checks */
-	if((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
+	if ((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
 	   (myChunkHeader.chunkName[2]!='t')||(myChunkHeader.chunkName[3]!='a'))
 	{
 		/* chunk alignment disaster */
-//		LOCALASSERT(1==0);
-		char buf[100];
-		sprintf(buf, "\n chunkName: %c%c%c%c", myChunkHeader.chunkName[0], myChunkHeader.chunkName[1], myChunkHeader.chunkName[2],myChunkHeader.chunkName[3]);
-		OutputDebugString(buf);
-		OutputDebugString("\n line 893 - audio.cpp");
+		LOCALASSERT(1==0);
 		fclose(myFile);
 		return 0;	
 	}
 	
 	//calculate length of sample
-	lengthInSeconds=DIV_FIXED(myChunkHeader.chunkLength,myWaveFormat.nAvgBytesPerSec);
+	lengthInSeconds = DIV_FIXED(myChunkHeader.chunkLength,myWaveFormat.nAvgBytesPerSec);
 
-	if((myChunkHeader.chunkLength<0)||(myChunkHeader.chunkLength > SOUND_MAXSIZE))
+	if ((myChunkHeader.chunkLength<0)||(myChunkHeader.chunkLength > SOUND_MAXSIZE))
 	{
-//		LOCALASSERT(1==0);
-		OutputDebugString("\n line 906 - audio.cpp");
+		LOCALASSERT(1==0);
 		fclose(myFile);
 		return 0;	
 	}	
-	if(myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
+	if (myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
 	{
-//		LOCALASSERT(1==0);
-		OutputDebugString("\n line 913 - audio.cpp");
+		LOCALASSERT(1==0);
 		fclose(myFile);
 		return 0;	
 	}	
-	if((myWaveFormat.nChannels != 1)&&(myWaveFormat.nChannels != 2))
+	if ((myWaveFormat.nChannels != 1)&&(myWaveFormat.nChannels != 2))
 	{
-//		LOCALASSERT(1==0);
-		OutputDebugString("\n line 920 - audio.cpp");
+		LOCALASSERT(1==0);
 		fclose(myFile);
 		return 0;	
 	}	
-	if((myWaveFormat.wBitsPerSample != 8)&&(myWaveFormat.wBitsPerSample != 16))
+	if ((myWaveFormat.wBitsPerSample != 8)&&(myWaveFormat.wBitsPerSample != 16))
 	{
-//		LOCALASSERT(1==0);
-		OutputDebugString("\n line 927 - audio.cpp");
+		LOCALASSERT(1==0);
 		fclose(myFile);
 		return 0;	
 	}	
@@ -1181,8 +1168,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		DWORD audioBytes2;
 
 		memset(&dsBuffDesc,0,sizeof(DSBUFFERDESC));
-		dsBuffDesc.dwSize = sizeof(DSBUFFERDESC);
-//		dsBuffDesc.dwFlags = (DSBCAPS_CTRLDEFAULT | DSBCAPS_STATIC);		
+		dsBuffDesc.dwSize = sizeof(DSBUFFERDESC);	
 		dsBuffDesc.dwBufferBytes = myChunkHeader.chunkLength;
 		dsBuffDesc.lpwfxFormat = &myWaveFormat;
 
@@ -1197,7 +1183,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		DSCAPS DSCaps;
 		DSObject->GetCaps(&DSCaps);
 
-		if(DSCaps.dwFree2DBuffers + DSCaps.dwFree3DBuffers <= 0)
+		if (DSCaps.dwFree2DBuffers + DSCaps.dwFree3DBuffers <= 0)
 		{
 			dsBuffDesc.dwFlags |= DSBCAPS_LOCDEFER;
 		}
@@ -1222,7 +1208,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		if((LastError!=DS_OK)||(audioPtr2 != NULL))
 		{
 			LOCALASSERT(1==0);	
-			sndBuffer->Release();
+			SAFE_RELEASE(sndBuffer);
 			fclose(myFile);
 			return 0;
 		}
@@ -1232,16 +1218,16 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		if(res != (size_t)myChunkHeader.chunkLength)
 		{
 			LOCALASSERT(1==0);	
-			sndBuffer->Release();
+			SAFE_RELEASE(sndBuffer);
 			fclose(myFile);
 			return 0;
 		}
 		/* then unlock it and close the file */
 		LastError = sndBuffer->Unlock(audioPtr1, audioBytes1, audioPtr2, audioBytes2);
-		if(FAILED(LastError))
+		if (FAILED(LastError))
 		{
 			LOCALASSERT(1==0);		
-			sndBuffer->Release();
+			SAFE_RELEASE(sndBuffer);
 			fclose(myFile);
 			return 0;
 		}
@@ -1300,7 +1286,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	int lengthInSeconds;
 
 	myFile = ffopen(wavFileName,"rb");
-	if(!myFile)
+	if (!myFile)
 	{
 		GLOBALASSERT (0);
 		return(0);
@@ -1315,7 +1301,6 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	if(myChunkHeader.chunkLength==16)
 	{
 		/* a standard PCM wave format chunk */
-//		WAVEFORMATEX tmpWaveFormat;
 		PCMWAVEFORMAT tmpWaveFormat;
 		res = ffread(&tmpWaveFormat,sizeof(PCMWAVEFORMAT),1,myFile);
 
@@ -1337,8 +1322,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	else
 	{
 		/* uh oh: a different chunk type */
-//		LOCALASSERT(1==0);
-		OutputDebugString("\n line 1118 - audio.cpp");
+		LOCALASSERT(1==0);
 		ffclose(myFile);
 		return 0;
 	}
@@ -1366,12 +1350,11 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	}while(res);
 
 	/* Now do a few checks */
-	if((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
+	if ((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
 	   (myChunkHeader.chunkName[2]!='t')||(myChunkHeader.chunkName[3]!='a'))
 	{
 		/* chunk alignment disaster */
-//		LOCALASSERT(1==0);
-		OutputDebugString("\n line 1148 - audio.cpp");
+		LOCALASSERT(1==0);
 		ffclose(myFile);
 		return 0;	
 	}
@@ -1379,31 +1362,27 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	//calculate length of sample
 	lengthInSeconds=DIV_FIXED(myChunkHeader.chunkLength,myWaveFormat.nAvgBytesPerSec);
 
-	if((myChunkHeader.chunkLength<0)||(myChunkHeader.chunkLength > SOUND_MAXSIZE))
+	if ((myChunkHeader.chunkLength<0)||(myChunkHeader.chunkLength > SOUND_MAXSIZE))
 	{
-//		LOCALASSERT(1==0);
-		OutputDebugString("\n line 1156 - audio.cpp");
+		LOCALASSERT(1==0);
 		ffclose(myFile);
 		return 0;	
 	}	
-	if(myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
+	if (myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
 	{
-//		LOCALASSERT(1==0);
-		OutputDebugString("\n line 1163 - audio.cpp");
+		LOCALASSERT(1==0);
 		ffclose(myFile);
 		return 0;	
 	}	
-	if((myWaveFormat.nChannels != 1)&&(myWaveFormat.nChannels != 2))
+	if ((myWaveFormat.nChannels != 1)&&(myWaveFormat.nChannels != 2))
 	{
-//		LOCALASSERT(1==0);
-		OutputDebugString("\n line 1170 - audio.cpp");
+		LOCALASSERT(1==0);
 		ffclose(myFile);
 		return 0;	
 	}	
-	if((myWaveFormat.wBitsPerSample != 8)&&(myWaveFormat.wBitsPerSample != 16))
+	if ((myWaveFormat.wBitsPerSample != 8)&&(myWaveFormat.wBitsPerSample != 16))
 	{
-//		LOCALASSERT(1==0);
-		OutputDebugString("\n line 1177 - audio.cpp");
+		LOCALASSERT(1==0);
 		ffclose(myFile);
 		return 0;	
 	}	
@@ -1420,13 +1399,12 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 
 		memset(&dsBuffDesc,0,sizeof(DSBUFFERDESC));
 		dsBuffDesc.dwSize = sizeof(DSBUFFERDESC);
-//		dsBuffDesc.dwFlags = (DSBCAPS_CTRLDEFAULT | DSBCAPS_STATIC);
 		dsBuffDesc.dwFlags = DSBCAPS_LOCDEFER;
 		dsBuffDesc.dwBufferBytes = myChunkHeader.chunkLength;
 		dsBuffDesc.lpwfxFormat = &myWaveFormat;
 
 		/* Do we need to specify 3D. */
-		if(SoundConfig.flags & SOUND_3DHW)
+		if (SoundConfig.flags & SOUND_3DHW)
 		{
 			dsBuffDesc.dwFlags |= DSBCAPS_CTRL3D;
 		}
@@ -1435,14 +1413,14 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		DSCAPS DSCaps;
 		DSObject->GetCaps(&DSCaps);
 
-		if(DSCaps.dwFree2DBuffers + DSCaps.dwFree3DBuffers == 0)
+		if (DSCaps.dwFree2DBuffers + DSCaps.dwFree3DBuffers == 0)
 		{
 			dsBuffDesc.dwFlags |= DSBCAPS_LOCDEFER;
 		}
 
 		/* Create the Direct Sound buffer for this sound */
-		LastError = DSObject->CreateSoundBuffer(&dsBuffDesc,&sndBuffer,NULL);
-		if(FAILED(LastError))
+		LastError = DSObject->CreateSoundBuffer(&dsBuffDesc, &sndBuffer, NULL);
+		if (FAILED(LastError))
 		{
 			LOCALASSERT(1==0);
 			ffclose(myFile);
@@ -1450,32 +1428,30 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		}
 
 		/* Lock the buffer to allow the write */ 
-		LastError = sndBuffer->Lock(0,myChunkHeader.chunkLength,
-			&audioPtr1,&audioBytes1,&audioPtr2,&audioBytes2,0); 
-		if((LastError!=DS_OK)||(audioPtr2 != NULL))
+		LastError = sndBuffer->Lock(0,myChunkHeader.chunkLength, &audioPtr1, &audioBytes1, &audioPtr2, &audioBytes2, 0); 
+		if ((FAILED(LastError)) || (audioPtr2 != NULL))
 		{
 			LOCALASSERT(1==0);	
-			sndBuffer->Release();
+			SAFE_RELEASE(sndBuffer);
 			ffclose(myFile);
 			return 0;
 		}
 		
 		/* Read data from file to buffer */
-		res = ffread(audioPtr1,1,myChunkHeader.chunkLength,myFile);
-		if(res != (size_t)myChunkHeader.chunkLength)
+		res = ffread(audioPtr1, 1, myChunkHeader.chunkLength, myFile);
+		if (res != (size_t)myChunkHeader.chunkLength)
 		{
 			LOCALASSERT(1==0);		
-			sndBuffer->Release();
+			SAFE_RELEASE(sndBuffer);
 			ffclose(myFile);
 			return 0;
 		}
-		/* then unlock it and close the file */
-//		hres = IDirectSoundBuffer_Unlock(sndBuffer,audioPtr1,audioBytes1,audioPtr2,audioBytes2);
-		LastError = sndBuffer->Unlock(audioPtr1,audioBytes1,audioPtr2,audioBytes2);
-		if (LastError!=DS_OK)
+		// then unlock it and close the file
+		LastError = sndBuffer->Unlock(audioPtr1, audioBytes1, audioPtr2, audioBytes2);
+		if (FAILED(LastError))
 		{
 			LOCALASSERT(1==0);	
-			sndBuffer->Release();
+			SAFE_RELEASE(sndBuffer);
 			ffclose(myFile);
 			return 0;
 		}
@@ -1561,7 +1537,7 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 
 	/* Read the WAV format chunk */
 	RebSndRead(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,bufferPtr);
-	if(myChunkHeader.chunkLength==16)
+	if (myChunkHeader.chunkLength==16)
 	{
 		/* a standard PCM wave format chunk */
 		PCMWAVEFORMAT tmpWaveFormat;
@@ -1577,7 +1553,7 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 	else if(myChunkHeader.chunkLength==18)
 	{
 		/* an extended PCM wave format chunk */
-		RebSndRead(&myWaveFormat,sizeof(WAVEFORMATEX),1,bufferPtr);	
+		RebSndRead(&myWaveFormat, sizeof(WAVEFORMATEX), 1, bufferPtr);	
 		myWaveFormat.cbSize = 0;
 	}
 	else
@@ -1603,7 +1579,7 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 	}while(TRUE);
 
 	/* Now do a few checks */
-	if((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
+	if ((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
 	   (myChunkHeader.chunkName[2]!='t')||(myChunkHeader.chunkName[3]!='a'))
 	{
 		/* chunk alignment disaster */
@@ -1614,29 +1590,29 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 	//calculate length of sample
 	lengthInSeconds=DIV_FIXED(myChunkHeader.chunkLength,myWaveFormat.nAvgBytesPerSec);
 	
-	if((myChunkHeader.chunkLength<0)||(myChunkHeader.chunkLength > SOUND_MAXSIZE))
+	if ((myChunkHeader.chunkLength<0)||(myChunkHeader.chunkLength > SOUND_MAXSIZE))
 	{
 		LOCALASSERT(1==0);
 		return 0;	
 	}	
-	if(myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
+	if (myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
 	{
 		LOCALASSERT(1==0);
 		return 0;	
 	}	
-	if((myWaveFormat.nChannels != 1)&&(myWaveFormat.nChannels != 2))
+	if ((myWaveFormat.nChannels != 1)&&(myWaveFormat.nChannels != 2))
 	{
 		LOCALASSERT(1==0);
 		return 0;	
 	}	
-	if((myWaveFormat.wBitsPerSample != 8)&&(myWaveFormat.wBitsPerSample != 16))
+	if ((myWaveFormat.wBitsPerSample != 8)&&(myWaveFormat.wBitsPerSample != 16))
 	{
 		LOCALASSERT(1==0);
 		return 0;	
 	}	
 		
 	{
-		/* Now set the buffer description and make a sound object */
+		// Now set the buffer description and make a sound object
 		DSBUFFERDESC dsBuffDesc;
 		LPDIRECTSOUNDBUFFER sndBuffer;
 		HRESULT hres;
@@ -1647,13 +1623,12 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 
 		memset(&dsBuffDesc,0,sizeof(DSBUFFERDESC));
 		dsBuffDesc.dwSize = sizeof(DSBUFFERDESC);
-//		dsBuffDesc.dwFlags = (DSBCAPS_CTRLDEFAULT | DSBCAPS_STATIC);
 		dsBuffDesc.dwFlags = DSBCAPS_LOCDEFER;
 		dsBuffDesc.dwBufferBytes = myChunkHeader.chunkLength;
 		dsBuffDesc.lpwfxFormat = &myWaveFormat;
 
 		/* Do we need to specify 3D. */
-		if(SoundConfig.flags & SOUND_3DHW)
+		if (SoundConfig.flags & SOUND_3DHW)
 		{
 			dsBuffDesc.dwFlags |= DSBCAPS_CTRL3D;
 		}
@@ -1662,30 +1637,25 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 		DSCAPS DSCaps;
 		DSObject->GetCaps(&DSCaps);
 
-		if(DSCaps.dwFree2DBuffers + DSCaps.dwFree3DBuffers == 0)
+		if (DSCaps.dwFree2DBuffers + DSCaps.dwFree3DBuffers == 0)
 		{
 			dsBuffDesc.dwFlags |= DSBCAPS_LOCDEFER;
 		}
 
-		/* Create the Direct Sound buffer for this sound */
-//		hres = IDirectSound_CreateSoundBuffer(DSObject,&dsBuffDesc,&sndBuffer,NULL); 
-		hres = DSObject->CreateSoundBuffer(&dsBuffDesc,&sndBuffer,NULL);
-		if(hres != DS_OK)
+		// Create the Direct Sound buffer for this sound
+		LastError = DSObject->CreateSoundBuffer(&dsBuffDesc, &sndBuffer, NULL);
+		if (FAILED(LastError))
 		{
 			LOCALASSERT(1==0);
 			return 0;
 		}
 
-		/* Lock the buffer to allow the write */
-		hres = sndBuffer->Lock(0,myChunkHeader.chunkLength,
-			&audioPtr1,&audioBytes1,&audioPtr2,&audioBytes2,0); 
-//		hres = IDirectSoundBuffer_Lock(sndBuffer,0,myChunkHeader.chunkLength,
-//			&audioPtr1,&audioBytes1,&audioPtr2,&audioBytes2,0); 
-		if((hres!=DS_OK)||(audioPtr2 != NULL))
+		// Lock the buffer to allow the write
+		hres = sndBuffer->Lock(0, myChunkHeader.chunkLength, &audioPtr1, &audioBytes1, &audioPtr2, &audioBytes2, 0); 
+		if ((FAILED(LastError)) || (audioPtr2 != NULL))
 		{
 			LOCALASSERT(1==0);
-//			IDirectSoundBuffer_Release(sndBuffer);		
-			sndBuffer->Release();
+			SAFE_RELEASE(sndBuffer);
 			return 0;
 		}
 		
@@ -1695,19 +1665,17 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 		if(res != (size_t)myChunkHeader.chunkLength)
 		{
 			LOCALASSERT(1==0);
-//			IDirectSoundBuffer_Release(sndBuffer);		
-			sndBuffer->Release();
+			SAFE_RELEASE(sndBuffer);
 			return 0;
 		}
 		#endif
-		/* then unlock it and close the file */
-//		hres = IDirectSoundBuffer_Unlock(sndBuffer,audioPtr1,audioBytes1,audioPtr2,audioBytes2);
-		hres = sndBuffer->Unlock(audioPtr1,audioBytes1,audioPtr2,audioBytes2);
-		if (hres!=DS_OK)
+
+		// then unlock it and close the file
+		LastError = sndBuffer->Unlock(audioPtr1,audioBytes1,audioPtr2,audioBytes2);
+		if (FAILED(LastError))
 		{
 			LOCALASSERT(1==0);
-//			IDirectSoundBuffer_Release(sndBuffer);		
-			sndBuffer->Release();
+			SAFE_RELEASE(sndBuffer);	
 			return 0;
 		}
 		/* Finally, put a pointer the the buffer into the sound data */
@@ -1720,7 +1688,7 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 			caps.dwSize = sizeof(DSBCAPS);
 			IDirectSoundBuffer_GetCaps(sndBuffer, &caps);
 			
-			if(caps.dwFlags & DSBCAPS_LOCHARDWARE)
+			if (caps.dwFlags & DSBCAPS_LOCHARDWARE)
 			{
 				GameSounds[soundIndex].flags = SAMPLE_IN_HW;
 				db_logf3(("Sound %s loaded into hardware slot %i by ExtractWavFile.", GameSounds[soundIndex].wavName, soundIndex));
@@ -1735,7 +1703,7 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 		GameSounds[soundIndex].flags = SAMPLE_IN_SW;
 		GameSounds[soundIndex].length=lengthInSeconds;
 
-		/* need to save this as we have no GetFrequency function on the xbox */
+		// need to save this as we have no GetFrequency function on the xbox
 		GameSounds[soundIndex].dsFrequency = myWaveFormat.nSamplesPerSec;
 	}
 
@@ -1784,8 +1752,6 @@ void ResetEaxEnvironment()
 
 int PlatChangeSoundPitch(int activeIndex, int pitch)
 {
-//	return 1;
-	HRESULT LastError;
 	int frequency;
 
 	LOCALASSERT(ActiveSounds[activeIndex].dsBufferP);
@@ -1795,7 +1761,7 @@ int PlatChangeSoundPitch(int activeIndex, int pitch)
 	(NB don't need to scale pitch values...) */
 	
 	/* default pitch is a special case in ds */
-	if(pitch==PITCH_DEFAULTPLAT) frequency=0;
+	if (pitch==PITCH_DEFAULTPLAT) frequency=0;
 	else
 	{
 		SOUNDINDEX gameSoundIndex = ActiveSounds[activeIndex].soundIndex;
@@ -1804,9 +1770,8 @@ int PlatChangeSoundPitch(int activeIndex, int pitch)
 	}
 
 	ActiveSounds[activeIndex].pitch = pitch;
-//	hres = IDirectSoundBuffer_SetFrequency(ActiveSounds[activeIndex].dsBufferP,frequency);
 	LastError = ActiveSounds[activeIndex].dsBufferP->SetFrequency(frequency);
-	if(FAILED(LastError))
+	if (FAILED(LastError))
 	{
 		return SOUND_PLATFORMERROR;
 	}
@@ -1816,27 +1781,24 @@ int PlatChangeSoundPitch(int activeIndex, int pitch)
 
 int PlatChangeSoundVolume(int activeIndex, int volume)
 {
-	if(!SoundActivated)
+	if (!SoundActivated)
 		return 0;
-
-	HRESULT LastError;
 
 	signed int attenuation;
 	LOCALASSERT(ActiveSounds[activeIndex].dsBufferP);
-	if(volume<VOLUME_MIN) volume=VOLUME_MIN;
-	if(volume>VOLUME_MAX) volume=VOLUME_MAX;
+	if (volume < VOLUME_MIN) volume = VOLUME_MIN;
+	if (volume > VOLUME_MAX) volume = VOLUME_MAX;
 
-	/* convert from intensity to attenuation */
+	// convert from intensity to attenuation
 	attenuation = vol_to_atten_table[volume];
 
-	if(attenuation>VOLUME_MAXPLAT) attenuation=VOLUME_MAXPLAT;
-	if(attenuation<VOLUME_MINPLAT) attenuation=VOLUME_MINPLAT;
+	if (attenuation > VOLUME_MAXPLAT) attenuation = VOLUME_MAXPLAT;
+	if (attenuation < VOLUME_MINPLAT) attenuation = VOLUME_MINPLAT;
 
-	/* and apply it */
-//	hres = IDirectSoundBuffer_SetVolume(ActiveSounds[activeIndex].dsBufferP,attenuation);
+	// and apply it
 	LastError = ActiveSounds[activeIndex].dsBufferP->SetVolume(attenuation);
 
-	if(FAILED(LastError))
+	if (FAILED(LastError))
 	{
 		return SOUND_PLATFORMERROR;
 	}
@@ -1846,24 +1808,24 @@ int PlatChangeSoundVolume(int activeIndex, int volume)
 
 void UpdateSoundFrequencies()
 {
-	if(!SoundActivated)
+	if (!SoundActivated)
 		return;
 
 	extern int SoundSwitchedOn;
 	extern int TimeScale;
 	int i;
 
-	if(!SoundSwitchedOn) return;
+	if (!SoundSwitchedOn) 
+		return;
 
-	for(i=0;i<SOUND_MAXACTIVE;i++)
+	for (i = 0;i < SOUND_MAXACTIVE; i++)
 	{
 		int gameIndex = ActiveSounds[i].soundIndex;
 
-		if (gameIndex==SID_NOSOUND) continue;
+		if (gameIndex == SID_NOSOUND) continue;
 
 		ActiveSounds[i].dsBufferP->SetFrequency(MUL_FIXED(GameSounds[gameIndex].dsFrequency,TimeScale));
-//		IDirectSoundBuffer_SetFrequency(ActiveSounds[i].dsBufferP,MUL_FIXED(GameSounds[gameIndex].dsFrequency,TimeScale));
-		if(ActiveSounds[i].pitch != GameSounds[gameIndex].pitch)
+		if (ActiveSounds[i].pitch != GameSounds[gameIndex].pitch)
 		{
 			PlatChangeSoundPitch(i,ActiveSounds[i].pitch);
 		}
@@ -1881,16 +1843,9 @@ int PlatSoundHasStopped(int activeIndex)
 	LOCALASSERT(ActiveSounds[activeIndex].dsBufferP);
 
 	LastError = ActiveSounds[activeIndex].dsBufferP->GetStatus(&status);
-//	hres = IDirectSoundBuffer_GetStatus(ActiveSounds[activeIndex].dsBufferP,&status);
 	if(LastError == DS_OK)
 	{
-/* not for xbox
-		if(status&DSBSTATUS_BUFFERLOST)
-		{
-			return SOUND_PLATFORMERROR;
-		}
-*/
-		if(status&DSBSTATUS_PLAYING)
+		if (status & DSBSTATUS_PLAYING)
 		{
 			return 0;
 		}
@@ -1908,7 +1863,8 @@ void PlatStopSound(int activeIndex)
 	if(!SoundActivated)
 		return;
 
-	if(!(ActiveSounds[activeIndex].dsBufferP)) return;
+	if(!(ActiveSounds[activeIndex].dsBufferP)) 
+		return;
 
 	DWORD dwStatus;
 
@@ -1939,126 +1895,99 @@ void PlatStopSound(int activeIndex)
 	ActiveSounds[activeIndex].dsBufferP = NULL;
 }
 
-#if 0
-
-unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
-{
-	PWAVCHUNKHEADER myChunkHeader;
-	PWAVRIFFHEADER myRiffHeader;
-	WAVEFORMATEX myWaveFormat;
-	unsigned char *endOfBufferPtr;   
-	int lengthInSeconds;
-
-	{
-		int length = strlen (bufferPtr) + 1;
-		GameSounds[soundIndex].wavName = (char *)AllocateMem (length);
-		strcpy (GameSounds[soundIndex].wavName, bufferPtr);
-		bufferPtr += length;
-	}
-
-	/* Read the WAV RIFF header */
-	RebSndRead(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,bufferPtr);
-	endOfBufferPtr = bufferPtr+myChunkHeader.chunkLength;
-
-	RebSndRead(&myRiffHeader,sizeof(PWAVRIFFHEADER),1,bufferPtr);
-
-	/* Read the WAV format chunk */
-	RebSndRead(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,bufferPtr);
-	if(myChunkHeader.chunkLength==16)
-	{
-		/* a standard PCM wave format chunk */
-		PCMWAVEFORMAT tmpWaveFormat;
-		RebSndRead(&tmpWaveFormat,sizeof(PCMWAVEFORMAT),1,bufferPtr);	
-		myWaveFormat.wFormatTag = tmpWaveFormat.wf.wFormatTag;        
-		myWaveFormat.nChannels = tmpWaveFormat.wf.nChannels;
-		myWaveFormat.nSamplesPerSec = tmpWaveFormat.wf.nSamplesPerSec;;
-		myWaveFormat.nAvgBytesPerSec = tmpWaveFormat.wf.nAvgBytesPerSec;   
-		myWaveFormat.nBlockAlign = tmpWaveFormat.wf.nBlockAlign;
-		myWaveFormat.wBitsPerSample = tmpWaveFormat.wBitsPerSample;
-		myWaveFormat.cbSize = 0;
-	}
-	else if(myChunkHeader.chunkLength==18)
-	{
-		/* an extended PCM wave format chunk */
-		RebSndRead(&myWaveFormat,sizeof(WAVEFORMATEX),1,bufferPtr);	
-		myWaveFormat.cbSize = 0;
-	}
-	else
-	{
-		/* uh oh: a different chunk type */
-		LOCALASSERT(1==0);
-		return 0;
-	}
-
-	/* Read	the data chunk header */
-	//skip chunks until we reach the 'data' chunk
-	do
-	{
-		/* Read	the data chunk header */
-		RebSndRead(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,bufferPtr);
-		if((myChunkHeader.chunkName[0]=='d')&&(myChunkHeader.chunkName[1]=='a')&&
-	   		(myChunkHeader.chunkName[2]=='t')&&(myChunkHeader.chunkName[3]=='a'))
-		{
-			break;
-		}
-		//skip to next chunk
-		bufferPtr+=myChunkHeader.chunkLength;
-	}while(TRUE);
-
-	/* Now do a few checks */
-	if((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
-	   (myChunkHeader.chunkName[2]!='t')||(myChunkHeader.chunkName[3]!='a'))
-	{
-		/* chunk alignment disaster */
-		LOCALASSERT(1==0);
-		return 0;	
-	}
-	
-	//calculate length of sample
-	lengthInSeconds=DIV_FIXED(myChunkHeader.chunkLength,myWaveFormat.nAvgBytesPerSec);
-	
-	if((myChunkHeader.chunkLength<0)||(myChunkHeader.chunkLength > SOUND_MAXSIZE))
-	{
-		LOCALASSERT(1==0);
-		return 0;	
-	}	
-	if(myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
-	{
-		LOCALASSERT(1==0);
-		return 0;	
-	}	
-	if((myWaveFormat.nChannels != 1)&&(myWaveFormat.nChannels != 2))
-	{
-		LOCALASSERT(1==0);
-		return 0;	
-	}	
-	if((myWaveFormat.wBitsPerSample != 8)&&(myWaveFormat.wBitsPerSample != 16))
-	{
-		LOCALASSERT(1==0);
-		return 0;	
-	}	
-	return 0;
-}
-#endif
-
 void SetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int position)
 {
-
+	position = 0;
 }
 
 void GetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int *position)
 {
-
+	*position = 0;
 }
 
-int CheckBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
+int CheckSoundBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
 {
-	return 1;
+	if (activeSound->dsBufferP)
+		return 1;
+	else
+		return 0;
 }
 
 } // extern C
 
-int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, int size)
+void CALLBACK AudioStream_Callback( VOID* pStreamContext, VOID* pPacketContext, DWORD dwStatus )
+{
+	StreamingAudioBuffer *streamStruct = static_cast<StreamingAudioBuffer*>(pStreamContext);
+
+	streamStruct->totalBytesPlayed += streamStruct->bufferSize;
+	OutputDebugString("finished playing a packet\n");
+}
+
+StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int bufferSize, int numBuffers)
+{
+	StreamingAudioBuffer *newStreamingAudioBuffer = new StreamingAudioBuffer;
+	memset(newStreamingAudioBuffer, 0, sizeof(StreamingAudioBuffer));
+
+	WAVEFORMATEX waveFormat;
+	memset(&waveFormat, 0, sizeof(waveFormat));
+	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
+	waveFormat.nChannels		= channels;
+	waveFormat.wBitsPerSample	= 16;
+	waveFormat.nSamplesPerSec	= rate;	
+	waveFormat.nBlockAlign		= waveFormat.nChannels * waveFormat.wBitsPerSample / 8;	//what block boundaries exist
+	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
+	waveFormat.cbSize			= sizeof(waveFormat);									//how big this structure is
+
+	// create streaming buffer description
+	DSSTREAMDESC streamDesc;
+	ZeroMemory(&streamDesc, sizeof(streamDesc));
+	streamDesc.dwMaxAttachedPackets		= numBuffers;
+	streamDesc.lpwfxFormat				= &waveFormat;
+	streamDesc.lpfnCallback = AudioStream_Callback;
+	streamDesc.lpvContext = newStreamingAudioBuffer;
+
+	LastError = DirectSoundCreateStream(&streamDesc, &newStreamingAudioBuffer->dsStreamBuffer);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		AudioStream_ReleaseBuffer(newStreamingAudioBuffer);
+		newStreamingAudioBuffer = NULL;
+		return NULL;
+	}
+
+	newStreamingAudioBuffer->dsStreamBuffer->Pause(DSSTREAMPAUSE_PAUSE);
+	newStreamingAudioBuffer->isPaused = true;
+
+	// Set the stream headroom to 0
+	newStreamingAudioBuffer->dsStreamBuffer->SetHeadroom(0);
+
+	newStreamingAudioBuffer->PacketStatus.resize(numBuffers);
+
+	for (int i = 0; i < newStreamingAudioBuffer->PacketStatus.size(); i++ )
+		newStreamingAudioBuffer->PacketStatus[i] = XMEDIAPACKET_STATUS_SUCCESS;
+
+	newStreamingAudioBuffer->buffers = new byte[bufferSize * numBuffers];
+	if (newStreamingAudioBuffer->buffers == NULL)
+	{
+		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
+		AudioStream_ReleaseBuffer(newStreamingAudioBuffer);
+		newStreamingAudioBuffer = NULL;
+		return NULL;
+	}
+
+	newStreamingAudioBuffer->bytesPerSample = waveFormat.wBitsPerSample / 8;
+	newStreamingAudioBuffer->numChannels = waveFormat.nChannels;
+	newStreamingAudioBuffer->rate = waveFormat.nSamplesPerSec; 
+
+	newStreamingAudioBuffer->currentBuffer = 0;
+	newStreamingAudioBuffer->bufferSize = bufferSize;
+	newStreamingAudioBuffer->bufferCount = numBuffers;
+	newStreamingAudioBuffer->totalSamplesWritten = 0;
+
+	return newStreamingAudioBuffer;
+}
+
+int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, byte *audioData, int size)
 {
 	assert (streamStruct);
 	assert (audioData);
@@ -2072,7 +2001,7 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, i
 	// offset into source data buffer
 	memcpy(&streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize], audioData, size);
 
-	packet.pvBuffer  = &streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize];//(char*)audioData + (dwPacketIndex * FILESTRM_PACKET_BYTES);
+	packet.pvBuffer  = &streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize];
 	packet.dwMaxSize = size;
 	packet.pdwStatus = &streamStruct->PacketStatus[streamStruct->currentBuffer];
 
@@ -2082,10 +2011,17 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, i
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
+	// this is so redundant..
+	amountWritten += size;
+
 	streamStruct->currentBuffer++;
 	streamStruct->currentBuffer %= streamStruct->bufferCount;
 
-	return 1;
+	// size in bytes divided by bits per sample (divided by 8 to get the bytes per sample) also dividded by the number of channels
+	streamStruct->totalSamplesWritten += ((size / streamStruct->bytesPerSample) / streamStruct->numChannels);
+
+	OutputDebugString("wrote to audio buffer..\n");
+	return amountWritten;
 }
 
 int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
@@ -2094,9 +2030,9 @@ int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
 
 	int numFreeBuffers = 0;
 
-	for (DWORD dwPacketIndex = 0; dwPacketIndex < streamStruct->bufferCount; dwPacketIndex++)
+	for (int i = 0; i < streamStruct->PacketStatus.size(); i++)
     {
-        if (XMEDIAPACKET_STATUS_PENDING != streamStruct->PacketStatus[dwPacketIndex])
+        if (XMEDIAPACKET_STATUS_PENDING != streamStruct->PacketStatus[i])
         {
 			numFreeBuffers++;
         }
@@ -2107,17 +2043,19 @@ int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
 
 UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
 {
-/*
-	XAUDIO2_VOICE_STATE state;
-	streamStruct->pSourceVoice->GetState( &state );
+	return ((streamStruct->totalBytesPlayed / streamStruct->bytesPerSample) / streamStruct->numChannels);
+}
 
-	return state.SamplesPlayed;
-*/
-	return 1;
+UINT64 AudioStream_GetNumSamplesWritten(StreamingAudioBuffer *streamStruct)
+{
+	assert (streamStruct);
+
+	return streamStruct->totalSamplesWritten;
 }
 
 int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)
 {
+	assert (1 == 0); // blow up here as not implemented yet
 	return 1;
 }
 
@@ -2133,20 +2071,20 @@ int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
 	if (volume < VOLUME_MIN) volume = VOLUME_MIN;
 	if (volume > VOLUME_MAX) volume = VOLUME_MAX;
 
-	/* convert from intensity to attenuation */
+	// convert from intensity to attenuation
 	attenuation = vol_to_atten_table[volume];
 
 	if (attenuation > VOLUME_MAXPLAT) attenuation = VOLUME_MAXPLAT;
 	if (attenuation < VOLUME_MINPLAT) attenuation = VOLUME_MINPLAT;
 
-	/* and apply it */
+	// and apply it
 	LastError = streamStruct->dsStreamBuffer->SetVolume(attenuation);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		return 0;
+		return AUDIOSTREAM_ERROR;
 	}
-	return 1;
+	return AUDIOSTREAM_OK;
 }
 
 int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct)
@@ -2156,19 +2094,34 @@ int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct)
 	if (streamStruct->dsStreamBuffer)
 	{
 		streamStruct->dsStreamBuffer->Flush();
+		streamStruct->dsStreamBuffer->Pause(DSSTREAMPAUSE_PAUSE);
+		streamStruct->isPaused = true;
 	}
 
-	return 1;
+	for (int i = 0; i < streamStruct->PacketStatus.size(); i++)
+	{
+		streamStruct->PacketStatus[i] = XMEDIAPACKET_STATUS_SUCCESS;
+	}
+
+	return AUDIOSTREAM_OK;
 }
 
 int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct)
 {
-	return 1;
+	if (streamStruct->isPaused)
+	{
+		OutputDebugString("starting FMV audio..\n"); 
+		streamStruct->dsStreamBuffer->Pause(DSSTREAMPAUSE_RESUME);
+		streamStruct->isPaused = false;
+	}
+
+	return AUDIOSTREAM_OK;
 }
 
 int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);
+	DWORD dwStatus;
 
 	if (streamStruct->dsStreamBuffer)
 	{
@@ -2176,13 +2129,22 @@ int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
-			//return 1;
 		}
+
+		do
+		{
+			// Perform other tasks while waiting for FlushEx to complete
+			
+			streamStruct->dsStreamBuffer->GetStatus( &dwStatus );
+		} while( dwStatus & DSSTREAMSTATUS_PLAYING );
+
+
+		LastError = streamStruct->dsStreamBuffer->Pause(DSSTREAMPAUSE_PAUSE);
+
 		LastError = streamStruct->dsStreamBuffer->Release();
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
-			//return 1;
 		}
 		streamStruct->dsStreamBuffer = NULL;
 	}
@@ -2198,51 +2160,9 @@ int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 	streamStruct->currentBuffer = 0;
 	streamStruct->bufferSize = 0;
 
-	return 1;
-}
+//	streamStruct->PacketStatus.clear();
 
-int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate, int bufferSize, int numBuffers)
-{
-	WAVEFORMATEX waveFormat;
+	delete streamStruct;
 
-	memset(&waveFormat, 0, sizeof(waveFormat));
-	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
-	waveFormat.nChannels		= channels;
-	waveFormat.wBitsPerSample	= 16;
-	waveFormat.nSamplesPerSec	= rate;	
-	waveFormat.nBlockAlign		= waveFormat.nChannels * waveFormat.wBitsPerSample / 8;	//what block boundaries exist
-	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
-	waveFormat.cbSize			= sizeof(waveFormat);									//how big this structure is
-
-	/* test code for dsound stream system */
-	DSSTREAMDESC streamDesc;
-	ZeroMemory(&streamDesc, sizeof(streamDesc));
-	streamDesc.dwMaxAttachedPackets		= numBuffers;
-	streamDesc.lpwfxFormat				= &waveFormat;
-
-	LastError = DirectSoundCreateStream(&streamDesc, &streamStruct->dsStreamBuffer);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
-
-	/* Set the stream headroom to 0 */
-	streamStruct->dsStreamBuffer->SetHeadroom(0);
-
-	streamStruct->PacketStatus.resize(numBuffers);
-
-	for( DWORD i = 0; i < numBuffers; i++ )
-		streamStruct->PacketStatus[i] = XMEDIAPACKET_STATUS_SUCCESS;
-
-	streamStruct->buffers = new unsigned char[bufferSize * numBuffers];
-	if (streamStruct->buffers == NULL)
-	{
-		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
-	}
-
-	streamStruct->currentBuffer = 0;
-	streamStruct->bufferSize = bufferSize;
-	streamStruct->bufferCount = numBuffers;
-
-	return 1;
+	return AUDIOSTREAM_OK;
 }

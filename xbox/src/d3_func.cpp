@@ -894,10 +894,10 @@ void ReleaseAvPTexture(AvPTexture* texture)
 	}
 }
 
-void ReleaseD3DTexture(D3DTEXTURE d3dTexture)
+void ReleaseD3DTexture(D3DTEXTURE *d3dTexture)
 {
 	/* release d3d texture */
-	SAFE_RELEASE(d3dTexture);
+	SAFE_RELEASE(*d3dTexture);
 }
 
 void FlushD3DZBuffer()

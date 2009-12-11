@@ -1,11 +1,5 @@
 #include <assert.h>
-#ifdef WIN32
-#include <windows.h>
-#endif
-#ifdef _XBOX
-#include <xtl.h>
-#endif
-
+#include "os_header.h"
 #include "ringbuffer.h"
 
 static ringBuffer ring = {0};

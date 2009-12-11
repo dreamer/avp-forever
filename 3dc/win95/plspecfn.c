@@ -592,17 +592,13 @@ int SqRoot32(int A)
 */
 
 void MakeNormal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, VECTORCH *v4)
-
 {
 
-
 #if SupportFPMathsFunctions
-
 
 	VECTORCHF vect0;
 	VECTORCHF vect1;
 	VECTORCHF n;
-
 
 	/* vect0 = v2 - v1 */
 
@@ -616,7 +612,6 @@ void MakeNormal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, VECTORCH *v4)
 	vect1.vy = (float)(v3->vy - v1->vy);
 	vect1.vz = (float)(v3->vz - v1->vz);
 
-
 	/* nx = v0y.v1z - v0z.v1y */
 
 	n.vx = (vect0.vy * vect1.vz) - (vect0.vz * vect1.vy);
@@ -629,23 +624,18 @@ void MakeNormal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, VECTORCH *v4)
 
 	n.vz = (vect0.vx * vect1.vy) - (vect0.vy * vect1.vx);
 
-
 	FNormalise(&n);
 
 	f2i(v4->vx, n.vx * ONE_FIXED);
 	f2i(v4->vy, n.vy * ONE_FIXED);
 	f2i(v4->vz, n.vz * ONE_FIXED);
 
-
 	#if 0
 	textprint("Magnitude of v4 = %d\n", Magnitude(v4));
 	WaitForReturn();
 	#endif
 
-
-
 #else	/* SupportFPMathsFunctions */
-
 
 	LONGLONGCH x;
 	LONGLONGCH y;
@@ -802,16 +792,12 @@ void MakeNormal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, VECTORCH *v4)
 */
 
 void Normalise(VECTORCH *nvector)
-
 {
-
 
 #if SupportFPMathsFunctions
 
-
 	VECTORCHF n;
 	float m;
-
 
 	n.vx = (float)(nvector->vx);
 	n.vy = (float)(nvector->vy);
@@ -885,27 +871,16 @@ void Normalise(VECTORCH *nvector)
 
 
 #endif	/* SupportFPMathsFunctions */
-
-
 }
 
 
-
-
-
-
-
 void Normalise2d(VECTOR2D *nvector)
-
 {
-
 
 #if SupportFPMathsFunctions
 
-
 	VECTOR2DF n;
 	float m;
-
 
 	n.vx = (float)(nvector->vx);
 	n.vy = (float)(nvector->vy);
@@ -914,7 +889,6 @@ void Normalise2d(VECTOR2D *nvector)
 
 	nvector->vx = (n.vx * ONE_FIXED) / m;
 	nvector->vy = (n.vy * ONE_FIXED) / m;
-
 
 #else	/* SupportFPMathsFunctions */
 
@@ -967,45 +941,31 @@ void Normalise2d(VECTOR2D *nvector)
 
 
 #endif	/* SupportFPMathsFunctions */
-
-
 }
-
-
-
-
 
 
 
 #if SupportFPMathsFunctions
 
 void FNormalise(VECTORCHF *n)
-
 {
-
 	float m;
-
 
 	m = sqrt((n->vx * n->vx) + (n->vy * n->vy) + (n->vz * n->vz));
 
 	n->vx /= m;
 	n->vy /= m;
 	n->vz /= m;
-
 }
 
 void FNormalise2d(VECTOR2DF *n)
-
 {
-
 	float m;
-
 
 	m = sqrt((n->vx * n->vx) + (n->vy * n->vy));
 
 	n->vx /= m;
 	n->vy /= m;
-
 }
 
 #endif	/* SupportFPMathsFunctions */

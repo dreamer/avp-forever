@@ -238,7 +238,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="xapilib.lib d3d8.lib d3dx8.lib xgraphics.lib dsound.lib libogg_static.lib libvorbis_static.lib libvorbisfile_static.lib xboxkrnl.lib xbdm.lib xonline.lib"
+				AdditionalDependencies="xapilib.lib d3d8.lib d3dx8.lib xgraphics.lib dsound.lib libogg_static.lib libvorbis_static.lib libvorbisfile_static.lib libtheora_static.lib xboxkrnl.lib xbdm.lib xonline.lib"
 				AdditionalLibraryDirectories="..\xbox\enet-1.2-xbox\lib"
 				GenerateDebugInformation="TRUE"
 				GenerateMapFile="FALSE"
@@ -3860,6 +3860,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\MemMgr.cpp">
+			</File>
+			<File
 				RelativePath="..\3dc\avp\mempool.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -6329,6 +6332,9 @@
 				RelativePath="..\3dc\win95\media.hpp">
 			</File>
 			<File
+				RelativePath=".\src\MemMgr.h">
+			</File>
+			<File
 				RelativePath="..\3dc\avp\mempool.h">
 			</File>
 			<File
@@ -6375,6 +6381,9 @@
 			</File>
 			<File
 				RelativePath="..\3dc\onscreenKeyboard.h">
+			</File>
+			<File
+				RelativePath="..\3dc\os_header.h">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\Ourasert.h">

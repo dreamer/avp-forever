@@ -1,11 +1,6 @@
 #include <string.h>
 #include <malloc.h>
-#ifdef WIN32
-	#include <windows.h>
-#endif
-#ifdef _XBOX
-	#include <xtl.h>
-#endif
+#include "os_header.h"
 #include <stdio.h>
 #include "utilities.h"
 

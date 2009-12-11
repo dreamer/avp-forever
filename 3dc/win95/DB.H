@@ -76,7 +76,6 @@
 	#endif
 	#ifdef _XBOX
 		#include "xbox_defines.h"
-//		#include <xtl.h>
 	#endif
 #endif
 

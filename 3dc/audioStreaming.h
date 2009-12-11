@@ -1,16 +1,16 @@
 #ifndef _audioStreaming_h_
 #define _audioStreaming_h_
 
-#ifdef USE_XAUDIO2
-
-#include <xaudio2.h>
-
 enum
 {
 	AUDIOSTREAM_OK,
 	AUDIOSTREAM_ERROR,
 	AUDIOSTREAM_OUTOFMEMORY
 };
+
+#ifdef USE_XAUDIO2
+
+#include <xaudio2.h>
 
 struct StreamingAudioBuffer
 {
@@ -20,7 +20,9 @@ struct StreamingAudioBuffer
 	int numChannels;
 	int rate;
 	int bytesPerSample;
+	UINT64 totalBytesPlayed;
 	UINT64 totalSamplesWritten;
+	bool isPaused;
 	byte *buffers;
 	IXAudio2SourceVoice *pSourceVoice;
 };
@@ -61,7 +63,13 @@ struct StreamingAudioBuffer
 	int bufferSize;
 	int bufferCount;
 	int currentBuffer;
-	unsigned char *buffers;
+	int numChannels;
+	int rate;
+	int bytesPerSample;
+	byte *buffers;
+	UINT64 totalBytesPlayed;
+	UINT64 totalSamplesWritten;
+	bool isPaused;
 	std::vector<DWORD> PacketStatus;
 	LPDIRECTSOUNDSTREAM	dsStreamBuffer;
 };

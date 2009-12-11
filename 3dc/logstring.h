@@ -4,13 +4,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-
-#ifdef WIN32
-	#include <windows.h>
-#endif
-#ifdef _XBOX
-	#include <xtl.h>
-#endif
+#include "os_header.h"
 
 void ClearLog();
 void WriteToLog(const std::string &logLine);
@@ -22,6 +16,5 @@ int StringToInt(const std::string &string);
 void LogString(const std::string &logString);
 void LogDebugValue(int value);
 std::string LogInteger(int value);
-//void LogMessageBox(const std::string &errorString);
 
 #endif // include guard

@@ -369,12 +369,7 @@ void _cdecl main()
 
 	if(!InitialiseDirect3DImmediateMode())
 	{
-//		LogErrorString("InitialiseDirect3DImmediateMode() didn't complete fully");
 		ReleaseDirect3D();
-	}
-	else 
-	{
-		OutputDebugString("InitialiseDirect3DImmediateMode() OK");
 	}
 
 	LoadKeyConfiguration();
@@ -706,7 +701,6 @@ void _cdecl main()
 		/* KJL 17:56:14 26/02/98 - unload a font required for Dave's HUD */
 //		UnloadFont(&AvpFonts[DATABASE_MESSAGE_FONT]);
 
-		CloseFMV();
 		ReleaseAllFMVTextures();
 
 		/* DHM 23/3/98 */
@@ -748,7 +742,7 @@ void _cdecl main()
 
 		TimeStampedMessage("After SoundSys_RemoveAll");
 		CDDA_Stop();
-		StopVorbis(); // stop ogg vorbis player
+		Vorbis_CloseSystem(); // stop ogg vorbis player
 		TimeStampedMessage("After CDDA_Stop");
 
 		/* netgame support */

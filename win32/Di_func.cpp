@@ -1563,12 +1563,14 @@ to make F8 not count in a 'press any key' situation */
 	if ((KeyboardInput[KEY_LEFTSHIFT]) && (DebouncedKeyboardInput[KEY_ESCAPE]))
 	{
 		Con_Toggle();
+		DebouncedKeyboardInput[KEY_ESCAPE] = 0;
+		KeyboardInput[KEY_LEFTSHIFT] = 0;
 	}
 
 	if (Con_IsOpen())
 	{
 		Con_ProcessInput();
-//		ClearAllKeyArrays();
+		//ClearAllKeyArrays();
 	}
 }
 

@@ -790,13 +790,10 @@ void MakeVector(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3)
 */
 
 void AddVector(VECTORCH *v1, VECTORCH *v2)
-
 {
-
 	v2->vx += v1->vx;
 	v2->vy += v1->vy;
 	v2->vz += v1->vz;
-
 }
 
 

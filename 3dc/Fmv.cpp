@@ -461,7 +461,6 @@ bool ReadOggPage(ogg_sync_state* state, ogg_page* page)
 
 unsigned int __stdcall AudioGrabThread(void *args)
 {
-
 #ifdef USE_XAUDIO2
 	CoInitializeEx( NULL, COINIT_MULTITHREADED );
 #endif
@@ -493,7 +492,7 @@ unsigned int __stdcall AudioGrabThread(void *args)
 				RingBuffer_ReadData(audioData, fmvAudioStream->bufferSize);
 				AudioStream_WriteData(fmvAudioStream, audioData, fmvAudioStream->bufferSize);
 
-//					sprintf(buf, "send %d bytes to xaudio2\n", fmvAudioStream.bufferSize);
+//					sprintf(buf, "send %d bytes to xaudio2\n", fmvAudioStream->bufferSize);
 //					OutputDebugString(buf);
 
 				numBuffersFree--;
@@ -676,6 +675,9 @@ unsigned int __stdcall TheoraDecodeThread(void *args)
 					float audio_time = static_cast<float>(AudioStream_GetNumSamplesPlayed(fmvAudioStream)) / static_cast<float>(audio->mVorbis.mInfo.rate);
 
 					float video_time = static_cast<float>(th_granule_time(video->mTheora.mCtx, mGranulepos));
+
+//					sprintf(buf, "audio_time: %f, video_time: %f\n", audio_time, video_time);
+//					OutputDebugString(buf);
 
 					// if audio is ahead of frame time, display a new frame
 					if ((audio_time > video_time))
@@ -877,10 +879,6 @@ int CloseTheoraVideo()
 		audioDataBuffer = NULL;
 		audioDataBufferSize = 0;
 	}
-
-#ifdef USE_LIBSNDFILE
-	sf_close(sndFile);
-#endif
 
 	RingBuffer_Unload();
 
@@ -1442,7 +1440,7 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 void StartMenuMusic()
 {
 	// we need to load IntroSound.ogg here using vorbisPlayer
-	menuMusic = Vorbis_LoadFile("fmvs//IntroSound.ogg");
+	menuMusic = Vorbis_LoadFile("D:\\FMVs\\IntroSound.ogg");
 }
 
 void PlayMenuMusic()

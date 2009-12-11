@@ -87,7 +87,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib shell32.lib shlwapi.lib d3d9.lib d3dx9d.lib dsound.lib x3daudio.lib dxguid.lib enet.lib libvorbisfile.lib libvorbis.lib libogg.lib libtheora.lib user32.lib xinput.lib $(NOINHERIT)"
+				AdditionalDependencies="winmm.lib shell32.lib shlwapi.lib d3d9.lib d3dx9d.lib dxerr.lib dsound.lib x3daudio.lib dxguid.lib enet.lib libvorbisfile.lib libvorbis.lib libogg.lib libtheora.lib user32.lib xinput.lib $(NOINHERIT)"
 				OutputFile="debug_AvP.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -206,7 +206,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib shell32.lib shlwapi.lib d3d9.lib d3dx9.lib x3daudio.lib enet.lib libvorbisfile.lib libvorbis.lib libogg.lib libtheora.lib user32.lib xinput.lib $(NOINHERIT)"
+				AdditionalDependencies="winmm.lib shell32.lib shlwapi.lib d3d9.lib d3dx9.lib Dxerr.lib x3daudio.lib enet.lib libvorbisfile.lib libvorbis.lib libogg.lib libtheora.lib user32.lib xinput.lib $(NOINHERIT)"
 				OutputFile="MyAvP.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -6043,6 +6043,10 @@
 				</File>
 				<File
 					RelativePath=".\3dc\onscreenKeyboard.h"
+					>
+				</File>
+				<File
+					RelativePath=".\3dc\os_header.h"
 					>
 				</File>
 				<File

@@ -6097,7 +6097,7 @@ void ThisFramesRenderingHasFinished(void)
 	ExecuteBuffer();
 	EndD3DScene();
 
-#if 1 // output how much memory is free
+#if 0 // output how much memory is free
 	#define MB	(1024*1024)
 	MEMORYSTATUS stat;
 	char buf[100];
@@ -7551,12 +7551,12 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 		return;
 	}
 
-	unsigned char *destPtr = NULL;
-	unsigned char *srcPtr = &ftPtr->RGBBuffer[0];
+	byte *destPtr = NULL;
+	byte *srcPtr = &ftPtr->RGBBuffer[0];
 
 	for (int y = 0; y < ftPtr->ImagePtr->ImageHeight; y++)
 	{
-		destPtr = static_cast<unsigned char*>(textureRect.pBits) + y * textureRect.Pitch;
+		destPtr = static_cast<byte*>(textureRect.pBits) + y * textureRect.Pitch;
 
 		for (int x = 0; x < ftPtr->ImagePtr->ImageWidth; x++)
 		{

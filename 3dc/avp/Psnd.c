@@ -102,20 +102,23 @@ void SoundSys_Management(void)
 	int numActive = 0;
 	int num3dUpdates = 0;
 
-	if(!SoundSwitchedOn) return;
+	if (!SoundSwitchedOn) 
+		return;
 
 	/* go through all the active sounds */
-	for(i=0;i<SOUND_MAXACTIVE;i++)
+	for (i = 0;i < SOUND_MAXACTIVE; i++)
 	{
-		if(ActiveSounds[i].soundIndex==SID_NOSOUND) continue; /* empty slot */
+		if (ActiveSounds[i].soundIndex == SID_NOSOUND) 
+			continue; /* empty slot */
+		
 		numActive++;
 
-		if(PlatSoundHasStopped(i)!=0 && !ActiveSounds[i].paused)
+		if (PlatSoundHasStopped(i)!=0 && !ActiveSounds[i].paused)
 		{
 			Sound_Stop(i);
 			continue;			
 		}
-		if(ActiveSounds[i].threedee) 
+		if (ActiveSounds[i].threedee) 
 		{
 			PlatDo3dSound(i);
 			num3dUpdates++;
@@ -141,14 +144,14 @@ void SoundSys_Management(void)
 		//display a list of all sounds being played as well
 		while(i-- > 0)
 		{
-			if(ActiveSounds[i].soundIndex != SID_NOSOUND)
+			if (ActiveSounds[i].soundIndex != SID_NOSOUND)
 			{
 				PrintDebuggingText("%s\n",GameSounds[ActiveSounds[i].soundIndex].wavName);
 			}
 		}
 	}
 
-   	if(WARPSPEED_CHEATMODE || JOHNWOO_CHEATMODE || DebuggingCommandsActive)
+   	if (WARPSPEED_CHEATMODE || JOHNWOO_CHEATMODE || DebuggingCommandsActive)
    		UpdateSoundFrequencies();
 }
 
@@ -475,7 +478,6 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 				//failed to find a free hardware slot , so try software slot instead.
 				//mainly to cope with cards that can load sounds into hardware , but can't play them there
 				newIndex = FindLowerPriorityActiveSound(priority, 0, SOUND_MAXACTIVE_SW);
-
 			}
 
 			if(newIndex==SOUND_NOACTIVEINDEX)
@@ -556,11 +558,10 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 	GameSounds[soundNumber].activeInstances++;
 	if(externalRef) *externalRef = newIndex;
 
-	if(soundStartPosition && /*ActiveSounds[newIndex].dsBufferP*/ CheckBufferIsValid(&ActiveSounds[newIndex]))
+	if(soundStartPosition && CheckSoundBufferIsValid(&ActiveSounds[newIndex]))
 	{
 		//sound starts part of the way in
 		SetBufferCurrentPosition(&ActiveSounds[newIndex], soundStartPosition);
-//		IDirectSoundBuffer_SetCurrentPosition(ActiveSounds[newIndex].dsBufferP,soundStartPosition);
 	}
 }
 
@@ -843,16 +844,13 @@ void Save_SoundState(int* soundHandle)
 		block->volume<<=7;
 		block->volume/=VOLUME_PLAT2DSCALE;
 		
-		if(/*sound->dsBufferP*/CheckBufferIsValid(sound))
+		if (CheckSoundBufferIsValid(sound))
 			GetBufferCurrentPosition(sound, &block->position);
-			//IDirectSoundBuffer_GetCurrentPosition(sound->dsBufferP,(LPDWORD)&block->position,NULL);
 		else
 			block->position = 0;
 
 		strcpy((char*)(block+1),name);
-		
 	}	
-
 }
 
 void Load_SoundState_NoRef(SAVE_BLOCK_HEADER* header)
@@ -933,10 +931,8 @@ void Save_SoundsWithNoReference()
 				block->volume<<=7;
 				block->volume/=VOLUME_PLAT2DSCALE;
 
-				if(/*sound->dsBufferP*/CheckBufferIsValid(sound))
-//					IDirectSoundBuffer_GetCurrentPosition(sound->dsBufferP,(LPDWORD)&block->position,NULL);
+				if (CheckSoundBufferIsValid(sound))
 					GetBufferCurrentPosition(sound, &block->position);
-//					GetBufferCurrentPosition(sound->dsBufferP, &block->position,NULL);
 				else
 					block->position = 0;
 

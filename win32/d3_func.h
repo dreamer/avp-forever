@@ -9,17 +9,8 @@ extern "C" {
 
 #endif
 
-#ifdef WIN32
-	#include <d3d9.h>
-	#include "Dxerr.h"
-
-	#pragma comment(lib, "Dxerr.lib")
-#endif
-
-#ifdef _XBOX
-	#include <xtl.h>
-#endif
-
+#include <d3d9.h>
+#include "Dxerr.h"
 #include "aw.h"
 /*
   Direct3D globals

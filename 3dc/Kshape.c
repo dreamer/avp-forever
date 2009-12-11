@@ -6055,8 +6055,7 @@ int FogValue(VECTORCH *vertexPtr)
 			m = Approximate3dMagnitude(vertexPtr);
 			f2i(f,(lMax)*m);
 			return f;
-		}		
-
+		}
 	}
 }
 #endif

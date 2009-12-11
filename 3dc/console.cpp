@@ -207,7 +207,6 @@ void Con_ProcessInput()
 
 void Con_Toggle()
 {
-	OutputDebugString("console toggle\n");
 	console.isActive = !console.isActive;
 	console.time = 250;
 

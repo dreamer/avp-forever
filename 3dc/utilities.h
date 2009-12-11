@@ -3,12 +3,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#ifdef WIN32
-	#include <windows.h>
-#endif
-#ifdef _XBOX
-	#include <xtl.h>
-#endif
+#include "os_header.h"
 
 #ifdef __cplusplus
 extern "C" {

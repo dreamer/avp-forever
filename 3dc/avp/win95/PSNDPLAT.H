@@ -44,6 +44,7 @@ typedef struct soundsampledata
 	XAUDIO2_BUFFER xa2Buffer;
 	X3DAUDIO_EMITTER xa2Emitter;
 	IXAudio2SourceVoice *pSourceVoice;
+	FLOAT32 emitterAzimuths[1];
 #endif
 	unsigned int flags;
 	int dsFrequency;
@@ -182,7 +183,7 @@ extern int PlatDontUse3DSoundHW();
 
 extern void SetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int position);
 extern void GetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int *position);
-int CheckBufferIsValid(ACTIVESOUNDSAMPLE *activeSound);
+int CheckSoundBufferIsValid(ACTIVESOUNDSAMPLE *activeSound);
 
 /* Patrick 5/6/97 -------------------------------------------------------------
   Defines for max number of sounds, and instances of sounds, allowed;

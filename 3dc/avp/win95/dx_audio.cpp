@@ -754,9 +754,12 @@ void GetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int *position)
 
 }
 
-int CheckBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
+int CheckSoundBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
 {
-	return 1;
+	if (activeSound->dsBufferP)
+		return 1;
+	else
+		return 0;
 }
 
 void PlatEndSoundSys(void)
@@ -1922,7 +1925,7 @@ static int ToneToFrequency(int currentFrequency, int currentPitch, int newPitch)
 
 void PlatUpdatePlayer()
 {
-#if 1
+#if 0
 	if (Global_VDB_Ptr)
 	{
 		IDirectSound3DListener_SetPosition
@@ -2047,10 +2050,6 @@ void PlatUpdatePlayer()
 	}
 
 	IDirectSound3DListener_CommitDeferredSettings(DS3DListener);
-
-	/* update ogg buffer */
-//	UpdateVorbisBuffer();
-//	UpdateVorbisBuffer(0);
 }
 
 void PlatSetEnviroment(unsigned int env_index, float reverb_mix)
@@ -2420,7 +2419,7 @@ void UpdateSoundFrequencies(void)
 
 } // extern "C"
 
-int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, char *audioData, int size)
+int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, byte *audioData, int size)
 {
 	assert (streamStruct);
 	assert (audioData);
@@ -2588,8 +2587,13 @@ int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 	return 1;
 }
 
-int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, int rate, int bufferSize, int numBuffers)
+StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int bufferSize, int numBuffers)
 {
+
+	StreamingAudioBuffer *newStreamingAudioBuffer = new StreamingAudioBuffer;
+
+	memset(newStreamingAudioBuffer, 0, sizeof(StreamingAudioBuffer));
+
 	WAVEFORMATEX waveFormat;
 	DSBUFFERDESC bufferFormat;
 
@@ -2608,32 +2612,37 @@ int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, i
 	bufferFormat.dwBufferBytes = bufferSize * numBuffers;//waveFormat.nAvgBytesPerSec * 2;
 	bufferFormat.lpwfxFormat = &waveFormat;
 
-	if (FAILED(DSObject->CreateSoundBuffer(&bufferFormat, &streamStruct->dsBuffer, NULL))) 
+	if (FAILED(DSObject->CreateSoundBuffer(&bufferFormat, &newStreamingAudioBuffer->dsBuffer, NULL))) 
 	{
 		LogErrorString("Couldn't create buffer for streaming audio", __LINE__, __FILE__);
-		return -1;
+		AudioStream_ReleaseBuffer(newStreamingAudioBuffer);
+		newStreamingAudioBuffer = NULL;
+		return NULL;
 	}
 
-	streamStruct->buffers = new unsigned char[bufferSize * numBuffers];
-	if (streamStruct->buffers == NULL)
+	newStreamingAudioBuffer->buffers = new byte[bufferSize * numBuffers];
+	if (newStreamingAudioBuffer->buffers == NULL)
 	{
 		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
+		AudioStream_ReleaseBuffer(newStreamingAudioBuffer);
+		newStreamingAudioBuffer = NULL;
+		return NULL;
 	}
 
-	streamStruct->bytesPerSample = waveFormat.wBitsPerSample / 8;
-	streamStruct->numChannels = waveFormat.nChannels;
-	streamStruct->rate = waveFormat.nSamplesPerSec;
-	streamStruct->totalBytesPlayed = 0;
-	streamStruct->writeOffset = 0;
-	streamStruct->lastPlayCursor = 0;
-	streamStruct->currentBuffer = 0;
-	streamStruct->bufferSize = bufferSize;
-	streamStruct->bufferCount = numBuffers;
-	streamStruct->totalSamplesWritten = 0;
-	streamStruct->msPerBuffer = ((bufferSize / streamStruct->bytesPerSample) * 1000 ) / streamStruct->rate;
-	streamStruct->lastCheckedTime = 0;
+	newStreamingAudioBuffer->bytesPerSample = waveFormat.wBitsPerSample / 8;
+	newStreamingAudioBuffer->numChannels = waveFormat.nChannels;
+	newStreamingAudioBuffer->rate = waveFormat.nSamplesPerSec;
+	newStreamingAudioBuffer->totalBytesPlayed = 0;
+	newStreamingAudioBuffer->writeOffset = 0;
+	newStreamingAudioBuffer->lastPlayCursor = 0;
+	newStreamingAudioBuffer->currentBuffer = 0;
+	newStreamingAudioBuffer->bufferSize = bufferSize;
+	newStreamingAudioBuffer->bufferCount = numBuffers;
+	newStreamingAudioBuffer->totalSamplesWritten = 0;
+	newStreamingAudioBuffer->msPerBuffer = ((bufferSize / newStreamingAudioBuffer->bytesPerSample) * 1000 ) / newStreamingAudioBuffer->rate;
+	newStreamingAudioBuffer->lastCheckedTime = 0;
 
-	sprintf(buf, "msPerBuffer: %d\n", streamStruct->msPerBuffer);
+	sprintf(buf, "msPerBuffer: %d\n", newStreamingAudioBuffer->msPerBuffer);
 	OutputDebugString(buf);
 
 /* FIXME
@@ -2671,6 +2680,6 @@ int AudioStream_CreateBuffer(StreamingAudioBuffer *streamStruct, int channels, i
 	pDSNotify->Release();
 	pDSNotify = NULL;
 */
-	return 0;
+	return newStreamingAudioBuffer;
 }
 #endif

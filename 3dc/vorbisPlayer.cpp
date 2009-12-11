@@ -1,8 +1,3 @@
-
-#ifdef _XBOX
-	#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
-#endif
-
 #include <stdio.h>
 #include "vorbisPlayer.h"
 #include "logString.h"
@@ -45,7 +40,6 @@ VorbisCodec * Vorbis_LoadFile(const std::string &fileName)
 
 	newVorbisStream->file = fopen(fileName.c_str(),"rb");
 	if (!newVorbisStream->file) 
-//	if (1) // testing fail early
 	{
 		Con_PrintError("Can't find OGG Vorbis file " + fileName);
 		Vorbis_Release(newVorbisStream);
@@ -81,7 +75,6 @@ VorbisCodec * Vorbis_LoadFile(const std::string &fileName)
 	// create the streaming audio buffer
 	newVorbisStream->audioStream = AudioStream_CreateBuffer(newVorbisStream->pInfo->channels, newVorbisStream->pInfo->rate, 32768, 3);
 	if (newVorbisStream->audioStream == NULL)
-//	if (AudioStream_CreateBuffer(&newVorbisStream->audioStream, newVorbisStream->pInfo->channels, newVorbisStream->pInfo->rate, 32768, 3) != AUDIOSTREAM_OK)
 	{
 		Con_PrintError("Can't create audio stream buffer for OGG Vorbis!");
 		Vorbis_Release(newVorbisStream);
@@ -114,7 +107,7 @@ void Vorbis_Play(VorbisCodec *VorbisStream)
 	{
 		VorbisStream->oggIsPlaying = true;
 		AudioStream_SetBufferVolume(VorbisStream->audioStream, CDPlayerVolume);
-		//VorbisStream->hPlaybackThreadFinished = CreateEvent( NULL, FALSE, FALSE, NULL );
+		AudioStream_PlayBuffer(VorbisStream->audioStream);
 		VorbisStream->hPlaybackThreadFinished = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, Vorbis_UpdateThread, static_cast<void*>(VorbisStream), 0, NULL));
 	}
 	else 
@@ -232,7 +225,7 @@ void Vorbis_Release(VorbisCodec *VorbisStream)
 		VorbisStream->audioData = 0;
 	}
 
-	delete[] VorbisStream;
+	delete VorbisStream;
 }
 
 void LoadVorbisTrack(int track) 
