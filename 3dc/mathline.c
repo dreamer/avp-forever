@@ -707,6 +707,8 @@ __asm__ volatile
 volatile float fti_fptmp;
 volatile int fti_itmp;
 
+#include <intrin.h>
+
 void FloatToInt()
 {
 #if defined(ASM386)
@@ -718,6 +720,14 @@ __asm__ volatile
 	: "memory", "cc"
 	);
 #else
-	fti_itmp = (int)fti_fptmp;	
+//	fti_itmp = (int)fti_fptmp;
 #endif
+/*
+__asm
+{
+	fld		fti_fptmp
+	fistp	fti_itmp
+}
+*/
+	fti_itmp = _mm_cvt_ss2si( _mm_load_ss(&fti_fptmp) );
 }

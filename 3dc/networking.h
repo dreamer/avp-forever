@@ -9,9 +9,9 @@
 int Net_Initialise();
 int Net_Deinitialise();
 int Net_ConnectingToSession();
-int DpExtSend(int lpDP2A, DPID idFrom, DPID idTo, DWORD dwFlags, unsigned char *lpData, int dwDataSize);
-int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned char *lplpData, int *lpdwDataSize);
-int Net_SendSystemMessage(int messageType, int idFrom, int idTo, unsigned char *lpData, int dwDataSize);
+int DpExtSend(int lpDP2A, int idFrom, int idTo, DWORD dwFlags, uint8_t *lpData, int dwDataSize);
+int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, uint8_t *lplpData, int *lpdwDataSize);
+int Net_SendSystemMessage(int messageType, int idFrom, int idTo, uint8_t *lpData, int dwDataSize);
 
 extern int glpDP;
 extern int AvPNetID;
@@ -20,9 +20,9 @@ extern int AvPNetID;
 Version 0 - Original multiplayer + save patch
 Version 100 - Added pistol,skeeter (and new levels)
 */
-#define AVP_MULTIPLAYER_VERSION 100
+#define AVP_MULTIPLAYER_VERSION 101 // bjd - my version, not directplay compatible
 
-static const int MESSAGEHEADERSIZE = sizeof(unsigned char) + (sizeof(int) * 2);
+extern const int MESSAGEHEADERSIZE;
 
 // system messages
 #define NET_CREATEPLAYERORGROUP			1
@@ -77,52 +77,48 @@ enum
 };
 
 #pragma pack(1)
-typedef struct {
-    DWORD dwSize;
-    DWORD dwFlags;
-    GUID  guidInstance;
-    GUID  guidApplication;
-    DWORD dwMaxPlayers;
-    DWORD dwCurrentPlayers;
 
+typedef struct 
+{
+    uint32_t	size;
+    GUID		guidInstance;
+    GUID		guidApplication;
+    uint8_t		maxPlayers;
+    uint8_t		currentPlayers;
+	uint8_t		version;
+	uint32_t	level;
+
+	char		sessionName[40];
+/*
 	union
 	{
 		char lpszSessionName[40];
 		char lpszSessionNameA[40];
 	};
-
-	DWORD dwUser1;
-	DWORD dwUser2;
+*/
 } NET_SESSIONDESC;
 
 typedef struct playerDetails
 {
-	int playerId;
-	int playerType;
-	char playerName[40];
+	uint32_t	playerID;
+	uint8_t		playerType; // redundant?
+	char		playerName[40];
 } playerDetails;
 
 typedef struct 
 {
-	int dwSize;
-	union
-	{
-		char *lpszShortName;
-		char *lpszShortNameA;
-	};
-	union
-	{
-		char *lpszLongName;	
-		char *lpszLongNameA;
-	};
-} DPNAME, FAR *LPDPNAME;
+	uint32_t	size;
+	char		*shortName;
+	char		*longName;
+
+} DPNAME;
 
 // easily sendable version of above
 typedef struct playerName
 {
-	int dwSize;
-	char LongNameA[40];
-	char ShortNameA[40];
+	uint32_t	size;
+	char		shortName[40];
+	char		longName[40];
 } playerName;
 
 extern DPNAME AVPDPplayerName;
@@ -132,18 +128,20 @@ extern DPNAME AVPDPplayerName;
  * System message generated when a player is being added
  * to a group.
  */
+/*
 typedef struct
 {
     DWORD       dwType;         // Message type
     DPID        dpIdGroup;      // group ID being added to
     DPID        dpIdPlayer;     // player ID being added
-} DPMSG_ADDPLAYERTOGROUP, FAR *LPDPMSG_ADDPLAYERTOGROUP;
-
+} DPMSG_ADDPLAYERTOGROUP;
+*/
 /*
  * DPMSG_SETPLAYERORGROUPDATA
  * System message generated when remote data for a player or
  * group has changed.
  */
+/*
 typedef struct
 {
     DWORD       dwType;         // Message type
@@ -151,46 +149,45 @@ typedef struct
     DPID        dpId;           // ID of player or group
     LPVOID      lpData;         // pointer to remote data
     DWORD       dwDataSize;     // size of remote data
-} DPMSG_SETPLAYERORGROUPDATA, FAR *LPDPMSG_SETPLAYERORGROUPDATA;
-
+} DPMSG_SETPLAYERORGROUPDATA;
+*/
 /*
  * DPMSG_SETPLAYERORGROUPNAME
  * System message generated when the name of a player or
  * group has changed.
  */
+/*
 typedef struct
 {
     DWORD       dwType;         // Message type
     DWORD       dwPlayerType;   // Is it a player or group
     DPID        dpId;           // ID of player or group
     DPNAME      dpnName;        // structure with new name info
-} DPMSG_SETPLAYERORGROUPNAME, FAR *LPDPMSG_SETPLAYERORGROUPNAME;
-
+} DPMSG_SETPLAYERORGROUPNAME;
+*/
 /* The maximum length of a message that can be received by the system, in
  * bytes. DPEXT_MAX_MSG_SIZE bytes will be required to hold the message, so
  * you can't just set this to a huge number.
  */
-#pragma pack()
 
-#define DPEXT_MAX_MSG_SIZE	3072
+//#define DPEXT_MAX_MSG_SIZE	3072
 
-/* Buffer used to store incoming messages. */
-static unsigned char gbufDpExtRecv[ DPEXT_MAX_MSG_SIZE ];
+// Buffer used to store incoming messages.
+//static uint8_t gbufDpExtRecv[ DPEXT_MAX_MSG_SIZE ];
 
-#define DPEXT_NEXT_GRNTD_MSG_COUNT() \
-	if( ++gnCurrGrntdMsgId < 1 ) gnCurrGrntdMsgId = 1
+//#define DPEXT_NEXT_GRNTD_MSG_COUNT() \
+//	if( ++gnCurrGrntdMsgId < 1 ) gnCurrGrntdMsgId = 1
 
-static BOOL gbDpExtDoGrntdMsgs = FALSE;
-static BOOL gbDpExtDoErrChcks = FALSE;
+//static BOOL gbDpExtDoGrntdMsgs = FALSE;
+//static BOOL gbDpExtDoErrChcks = FALSE;
 
-static int gnCurrGrntdMsgId = 1;
+//static int gnCurrGrntdMsgId = 1;
 
-#pragma pack(1)
+/*
 typedef struct DPMSG_GENERIC
 {
 	int dwType;
 } DPMSG_GENERIC;
-typedef DPMSG_GENERIC * LPDPMSG_GENERIC;
 
 typedef struct DPMSG_CREATEPLAYERORGROUP
 {
@@ -198,19 +195,18 @@ typedef struct DPMSG_CREATEPLAYERORGROUP
 	
 	DPID dpId;
 	int dwPlayerType;
-	
+
 	DPNAME dpnName;
 } DPMSG_CREATEPLAYERORGROUP;
-typedef DPMSG_CREATEPLAYERORGROUP * LPDPMSG_CREATEPLAYERORGROUP;
-
+*/
 typedef struct DPMSG_DESTROYPLAYERORGROUP
 {
-	int dwType;
-	
-	DPID dpId;
-	int dwPlayerType;	
+	uint32_t	type;
+	uint32_t	ID;
+	uint32_t	playerType;	
 } DPMSG_DESTROYPLAYERORGROUP;
-typedef DPMSG_DESTROYPLAYERORGROUP * LPDPMSG_DESTROYPLAYERORGROUP;
+
+
 #pragma pack()
 
 #endif // #ifndef _NETWORKING_

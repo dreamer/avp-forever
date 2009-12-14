@@ -953,15 +953,15 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 		{
 			extern char MP_Config_Description[];
 			//skirmishMode must be false
-			netGameData.skirmishMode=FALSE;
+			netGameData.skirmishMode = FALSE;
 			
 			LoadMultiplayerConfiguration(GetTextString(TEXTSTRING_PREVIOUSGAME_FILENAME));
 			MP_Config_Description[0]=0;
 			
-			if(LobbiedGame)
+			if (LobbiedGame)
 			{
 				//use alternative multiplayer menus for lobbied games
-				if(LobbiedGame==LobbiedGame_Server)
+				if (LobbiedGame == LobbiedGame_Server)
 				{
 					SetupNewMenu(AVPMENU_MULTIPLAYER_LOBBIEDSERVER);
 				}
@@ -974,6 +974,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 
 			Net_EnumConnections();
 			MakeConnectionSelectMenu();
+
 			break;
 		}
 

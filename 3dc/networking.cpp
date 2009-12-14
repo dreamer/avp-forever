@@ -3,7 +3,6 @@
 #include "logString.h"
 #include "console.h"
 #include "configFile.h"
-#include <vector>
 
 extern "C" {
 
@@ -23,9 +22,8 @@ int glpDP;
 int AvPNetID;
 DPNAME AVPDPplayerName;
 
-// used to hold message data */
-static unsigned char packetBuffer[NET_MESSAGEBUFFERSIZE];
-static std::vector<uint8_t> packetBuffer2;
+// used to hold message data
+static uint8_t packetBuffer[NET_MESSAGEBUFFERSIZE];
 
 static int netPortNumber = 1234;
 static int incomingBandwidth = 0;
@@ -44,10 +42,10 @@ static bool Net_CreatePlayer(char* FormalName,char* FriendlyName);
 int Net_GetNextPlayerID();
 void Net_FindAvPSessions();
 static BOOL DpExtProcessRecvdMsg(BOOL bIsSystemMsg, LPVOID lpData, DWORD dwDataSize);
-HRESULT Net_CreateSession(LPTSTR lptszSessionName,int maxPlayers, int dwUser1, int dwUser2);
+HRESULT Net_CreateSession(LPTSTR lptszSessionName, int maxPlayers, int version, int level);
 BOOL Net_UpdateSessionDescForLobbiedGame(int gamestyle, int level);
 int Net_OpenSession(const char *hostName);
-int Net_SendSystemMessage(int messageType, int idFrom, int idTo, unsigned char *lpData, int dwDataSize);
+int Net_SendSystemMessage(int messageType, int idFrom, int idTo, uint8_t *lpData, int dwDataSize);
 
 /* KJL 14:58:18 03/07/98 - AvP's Guid */
 // {379CCA80-8BDD-11d0-A078-004095E16EA5}
@@ -59,6 +57,8 @@ struct messageHeader
 	uint32_t	fromID;
 	uint32_t	toID;
 };
+
+const int MESSAGEHEADERSIZE = sizeof(messageHeader);
 
 BOOL Net_UpdateSessionList(int *SelectedItem)
 {
@@ -244,9 +244,9 @@ int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle
 		AvPNetID = 100;
 
 		ZeroMemory(&AVPDPplayerName,sizeof(DPNAME));
-		AVPDPplayerName.dwSize = sizeof(DPNAME);
-		AVPDPplayerName.lpszShortNameA	= playerName;
-		AVPDPplayerName.lpszLongNameA = playerName;
+		AVPDPplayerName.size = sizeof(DPNAME);
+		AVPDPplayerName.shortName = playerName;
+		AVPDPplayerName.longName = playerName;
 	}
 
 	InitAVPNetGameForHost(species, gamestyle, level);
@@ -259,13 +259,13 @@ int Net_Disconnect()
 
 	// need to let everyone know we're disconnecting
 	DPMSG_DESTROYPLAYERORGROUP destroyPlayer;
-	destroyPlayer.dpId = AvPNetID;
-	destroyPlayer.dwPlayerType = DPPLAYERTYPE_PLAYER;
-	destroyPlayer.dwType = 0; // ?
+	destroyPlayer.ID = AvPNetID;
+	destroyPlayer.playerType = DPPLAYERTYPE_PLAYER;
+	destroyPlayer.type = 0; // ?
 
 	if (AvP.Network != I_Host) // don't do this if this is the host
 	{
-		if (Net_SendSystemMessage(AVP_SYSTEMMESSAGE, DPID_SYSMSG, NET_DESTROYPLAYERORGROUP, (unsigned char*)&destroyPlayer, sizeof(DPMSG_DESTROYPLAYERORGROUP)) != NET_OK)
+		if (Net_SendSystemMessage(AVP_SYSTEMMESSAGE, DPID_SYSMSG, NET_DESTROYPLAYERORGROUP, reinterpret_cast<uint8_t*>(&destroyPlayer), sizeof(DPMSG_DESTROYPLAYERORGROUP)) != NET_OK)
 		{
 			Con_PrintError("Net_Disconnect - Problem sending destroy player system message!");
 			return NET_FAIL;
@@ -309,7 +309,7 @@ BOOL DpExtInit(DWORD cGrntdBufs, DWORD cBytesPerBuf, BOOL bErrChcks)
 	return TRUE;
 }
 
-int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned char *lplpData, int *lpdwDataSize)
+int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, uint8_t *lplpData, int *lpdwDataSize)
 {
 	BOOL	bInternalOnly;
 	BOOL	bIsSysMsg;
@@ -336,7 +336,7 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 
 				case ENET_EVENT_TYPE_RECEIVE:
 					//OutputDebugString("Enet received a packet!\n");
-					memcpy(lplpData, (unsigned char*)event.packet->data, event.packet->dataLength);
+					memcpy(lplpData, static_cast<uint8_t*> (event.packet->data), event.packet->dataLength);
 					*lpdwDataSize = event.packet->dataLength;
 					enet_packet_destroy(event.packet);
 					break;
@@ -358,23 +358,36 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 			return DPERR_NOMESSAGES;
 		}
 
+		messageHeader newHeader;
+		memcpy(&newHeader, lplpData, sizeof(messageHeader));
+
+		messageType = newHeader.messageType;
+		*lpidFrom = newHeader.fromID;
+		*lpidTo = newHeader.toID;
+/*
 		messageType = (char)lplpData[0];
 		*lpidFrom = *(int*)&lplpData[1];
 		*lpidTo   = *(int*)&lplpData[5];
-
+*/
 		// check for broadcast message
 		if (messageType == AVP_BROADCAST)
 		{
 			// double check..
-			if ((*lpidFrom == 255) && (*lpidTo == 255))
+			if ((newHeader.fromID == 255) && (newHeader.toID == 255))
 			{
 				OutputDebugString("Someone sent us a broadcast packet!\n");
 
 				// reply to it? handle this properly..dont send something from a receive function??
+				messageHeader newReplyHeader;
+				newReplyHeader.messageType = AVP_SESSIONDATA;
+				newReplyHeader.fromID = 0;
+				newReplyHeader.toID = 0;
+				memcpy(packetBuffer, &newReplyHeader, sizeof(messageHeader));
+/*
 				packetBuffer[0] = AVP_SESSIONDATA;
 				*(int*)&packetBuffer[1] = 0;
 				*(int*)&packetBuffer[5] = 0;
-
+*/
 				assert(sizeof(netSession) == sizeof(NET_SESSIONDESC));
 				memcpy(&packetBuffer[MESSAGEHEADERSIZE], &netSession, sizeof(NET_SESSIONDESC));
 
@@ -412,9 +425,9 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 
 			int id = PlayerIdInPlayerList(idOfPlayerToGet);
 
-			strcpy(tempName.LongNameA, netGameData.playerData[id].name);
-			strcpy(tempName.ShortNameA, netGameData.playerData[id].name);
-			tempName.dwSize = 1; // dont need this
+			strcpy(tempName.longName, netGameData.playerData[id].name);
+			strcpy(tempName.shortName, netGameData.playerData[id].name);
+			tempName.size = sizeof(playerName);
 
 			if (id == NET_IDNOTINPLAYERLIST)
 			{
@@ -422,26 +435,29 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 			}
 
 			// pass it back..
+			messageHeader newReplyHeader;
+			newReplyHeader.messageType = AVP_SENTPLAYERNAME;
+			newReplyHeader.fromID = playerFrom;
+			newReplyHeader.toID = idOfPlayerToGet;
+/*
 			packetBuffer[0] = AVP_SENTPLAYERNAME;
 			*(int*)&packetBuffer[1] = playerFrom;
 			*(int*)&packetBuffer[5] = idOfPlayerToGet; 
-
+*/
 			int length = MESSAGEHEADERSIZE + sizeof(playerName);
 
 			// copy the struct in after the header
-			memcpy(&packetBuffer[MESSAGEHEADERSIZE], (unsigned char*)&tempName, sizeof(playerName));
+			memcpy(&packetBuffer[MESSAGEHEADERSIZE], reinterpret_cast<uint8_t*>(&tempName), sizeof(playerName));
 
 			// create a packet with player name struct inside
-			ENetPacket * packet = enet_packet_create(&packetBuffer, 
-				length, 
-				ENET_PACKET_FLAG_RELIABLE);
+			ENetPacket * packet = enet_packet_create(&packetBuffer, length, ENET_PACKET_FLAG_RELIABLE);
 
 			OutputDebugString("we got player name request, going to send it back\n");
 
 			// send the packet
 			if ((enet_peer_send(event.peer, event.channelID, packet) < 0))
 			{
-				LogErrorString("AVP_GETPLAYERNAME - problem sending player name packet!\n");
+				Con_PrintError("AVP_GETPLAYERNAME - problem sending player name packet!");
 			}
 
 			return DPERR_NOMESSAGES;
@@ -455,11 +471,11 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 			memcpy(&tempName, &lplpData[MESSAGEHEADERSIZE], sizeof(playerName));
 
 			char buf[100];
-			sprintf(buf, "sent player id: %d and player name: %s from: %d", idOfPlayerWeGot, tempName.LongNameA, playerFrom);
+			sprintf(buf, "sent player id: %d and player name: %s from: %d", idOfPlayerWeGot, tempName.longName, playerFrom);
 			OutputDebugString(buf);
 
 			int id = PlayerIdInPlayerList(idOfPlayerWeGot);
-			strcpy(netGameData.playerData[id].name, tempName.LongNameA);
+			strcpy(netGameData.playerData[id].name, tempName.longName);
 
 			return DPERR_NOMESSAGES;
 		}
@@ -481,21 +497,25 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 	return NET_OK;
 }
 
-int Net_SendSystemMessage(int messageType, int idFrom, int idTo, unsigned char *lpData, int dwDataSize)
+int Net_SendSystemMessage(int messageType, int idFrom, int idTo, uint8_t *lpData, int dwDataSize)
 {
+	messageHeader newMessageHeader;
+	newMessageHeader.messageType = messageType;
+	newMessageHeader.fromID = idFrom;
+	newMessageHeader.toID = idTo;
+	memcpy(packetBuffer, &newMessageHeader, sizeof(newMessageHeader));
+/*
 	packetBuffer[0] = messageType;
 	*(int*)&packetBuffer[1] = idFrom;
 	*(int*)&packetBuffer[5] = idTo;
-
+*/
 	// put data after header
 	memcpy(&packetBuffer[MESSAGEHEADERSIZE], lpData, dwDataSize);
 
 	int length = MESSAGEHEADERSIZE + dwDataSize;
 
 	// create Enet packet
-	ENetPacket * packet = enet_packet_create (packetBuffer, 
-					length, 
-					ENET_PACKET_FLAG_RELIABLE);
+	ENetPacket * packet = enet_packet_create (packetBuffer, length, ENET_PACKET_FLAG_RELIABLE);
 
 	if (packet == NULL)
 	{
@@ -520,35 +540,40 @@ int Net_SendSystemMessage(int messageType, int idFrom, int idTo, unsigned char *
 	return NET_OK;
 }
 
-int DpExtSend(int lpDP2A, DPID idFrom, DPID idTo, DWORD dwFlags, unsigned char *lpData, int dwDataSize)
+int DpExtSend(int lpDP2A, int idFrom, int idTo, DWORD dwFlags, uint8_t *lpData, int dwDataSize)
 {
 	if (lpData == NULL) 
 	{
 		Con_PrintError("DpExtSend - lpData was NULL");
 		return NET_FAIL;
 	}
+
+	messageHeader newMessageHeader;
 		
 	if (idFrom == DPID_SYSMSG)
 	{
 		Com_PrintDebugMessage("DpExtSend - sending system message\n");
-		packetBuffer[0] = AVP_SYSTEMMESSAGE;
+		//packetBuffer[0] = AVP_SYSTEMMESSAGE;
+		newMessageHeader.messageType = AVP_SYSTEMMESSAGE;
 	}
 	else 
 	{
-		packetBuffer[0] = AVP_GAMEDATA;
+		//packetBuffer[0] = AVP_GAMEDATA;
+		newMessageHeader.messageType = AVP_GAMEDATA;
 	}
 
-	*(int*)&packetBuffer[1] = idFrom;
-	*(int*)&packetBuffer[5] = idTo;
+//	*(int*)&packetBuffer[1] = idFrom;
+//	*(int*)&packetBuffer[5] = idTo;
+	newMessageHeader.fromID = idFrom;
+	newMessageHeader.toID = idTo;
+	memcpy(packetBuffer, &newMessageHeader, sizeof(messageHeader));
 
 	memcpy(&packetBuffer[MESSAGEHEADERSIZE], lpData, dwDataSize);
 
 	int length = MESSAGEHEADERSIZE + dwDataSize;
 
 	// create ENet packet
-	ENetPacket * packet = enet_packet_create (packetBuffer, 
-					length, 
-					ENET_PACKET_FLAG_RELIABLE);
+	ENetPacket * packet = enet_packet_create (packetBuffer, length, ENET_PACKET_FLAG_RELIABLE);
 
 	if (packet == NULL)
 	{
@@ -655,22 +680,22 @@ int IDirectPlayX_GetPlayerName(int glpDP, DPID id, unsigned char *data, int *siz
 }
 #endif
 
-static bool Net_CreatePlayer(char* FormalName,char* FriendlyName)
+static bool Net_CreatePlayer(char* FormalName, char* FriendlyName)
 {
 	// Initialise static name structure to refer to the names:
 	ZeroMemory(&AVPDPplayerName,sizeof(DPNAME));
-	AVPDPplayerName.dwSize = sizeof(DPNAME);
-	AVPDPplayerName.lpszShortNameA	= FriendlyName;
-	AVPDPplayerName.lpszLongNameA = FormalName;
+	AVPDPplayerName.size = sizeof(DPNAME);
+	AVPDPplayerName.shortName = FriendlyName;
+	AVPDPplayerName.longName = FormalName;
 
 	// get next available player ID
 	AvPNetID = Net_GetNextPlayerID(); 
 
 	// create struct to send player data
 	playerDetails newPlayer;
-	newPlayer.playerId = AvPNetID;
+	newPlayer.playerID = AvPNetID;
 	newPlayer.playerType = DPPLAYERTYPE_PLAYER;
-	strcpy(&newPlayer.playerName[0], AVPDPplayerName.lpszShortNameA);
+	strcpy(&newPlayer.playerName[0], AVPDPplayerName.shortName);
 
 	OutputDebugString("CreatePlayer - Sending player struct\n");
 
@@ -678,7 +703,7 @@ static bool Net_CreatePlayer(char* FormalName,char* FriendlyName)
 	if (AvP.Network != I_Host)
 	{
 		// send struct as system message
-		if (Net_SendSystemMessage(AVP_SYSTEMMESSAGE, DPID_SYSMSG, NET_CREATEPLAYERORGROUP, (unsigned char*)&newPlayer, sizeof(playerDetails)) != NET_OK)
+		if (Net_SendSystemMessage(AVP_SYSTEMMESSAGE, DPID_SYSMSG, NET_CREATEPLAYERORGROUP, reinterpret_cast<uint8_t*>(&newPlayer), sizeof(playerDetails)) != NET_OK)
 		{
 			Con_PrintError("CreatePlayer - Problem sending create player system message!\n");
 			return false;
@@ -755,23 +780,24 @@ void Net_FindAvPSessions()
 
 	ENetPeer *Peer;
 	ENetEvent event;
-	unsigned char receiveBuffer[NET_MESSAGEBUFFERSIZE];
+	uint8_t receiveBuffer[NET_MESSAGEBUFFERSIZE];
 	int messageType;
 	NET_SESSIONDESC tempSession;
 	char sessionName[100] = "";
 	char levelName[100] = "";
 	int gamestyle;
 	int level;
+	char buf[100];
 
 	// set up broadcast address
 	BroadcastAddress.host = ENET_HOST_BROADCAST;
 	BroadcastAddress.port = netPortNumber; // can I reuse port?? :\
 
 	// create Enet client
-	Client = enet_host_create (NULL /* create a client host */,
-                1 /* only allow 1 outgoing connection */,
-                incomingBandwidth,//57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth */,
-                outgoingBandwidth);//14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth */);
+	Client = enet_host_create (NULL,	// create a client host
+                1,						// only allow 1 outgoing connection
+                incomingBandwidth,		//57600 / 8 - 56K modem with 56 Kbps downstream bandwidth
+                outgoingBandwidth);		//14400 / 8 - 56K modem with 14 Kbps upstream bandwidth
 
     if (Client == NULL)
     {
@@ -815,8 +841,6 @@ void Net_FindAvPSessions()
 			enet_host_flush(Client);
 		}
 	}
-
-	char buf[100];
 	
 	// need to wait here for servers to respond with session info
 
@@ -841,15 +865,15 @@ void Net_FindAvPSessions()
 				assert(sizeof(NET_SESSIONDESC) == (event.packet->dataLength - MESSAGEHEADERSIZE));
 				memcpy((NET_SESSIONDESC*)&tempSession, &receiveBuffer[MESSAGEHEADERSIZE], (event.packet->dataLength - MESSAGEHEADERSIZE));
 
-				gamestyle = (tempSession.dwUser2 >> 8) & 0xff;
-				level = tempSession.dwUser2  & 0xff;
+				gamestyle = (tempSession.level >> 8) & 0xff;
+				level = tempSession.level  & 0xff;
 
 				// split the session name up into its parts
 				if (level>=100)
 				{
 					char* colon_pos;
 					// custom level name may be at the start
-					strcpy(levelName,tempSession.lpszSessionNameA);
+					strcpy(levelName, tempSession.sessionName);
 
 					colon_pos = strchr(levelName,':');
 					if (colon_pos)
@@ -859,28 +883,28 @@ void Net_FindAvPSessions()
 					}
 					else
 					{
-						strcpy(sessionName,tempSession.lpszSessionNameA);
+						strcpy(sessionName, tempSession.sessionName);
 						levelName[0] = 0;
 					}
 				}
 				else
 				{
-					strcpy(sessionName,tempSession.lpszSessionNameA);
+					strcpy(sessionName, tempSession.sessionName);
 				}
 
-				sprintf(SessionData[NumberOfSessionsFound].Name,"%s (%d/%d)",sessionName,tempSession.dwCurrentPlayers,tempSession.dwMaxPlayers);
+				sprintf(SessionData[NumberOfSessionsFound].Name,"%s (%d/%d)",sessionName,tempSession.currentPlayers,tempSession.maxPlayers);
 
 				SessionData[NumberOfSessionsFound].Guid	= tempSession.guidInstance;
 
-				if (tempSession.dwCurrentPlayers < tempSession.dwMaxPlayers)
+				if (tempSession.currentPlayers < tempSession.maxPlayers)
 					SessionData[NumberOfSessionsFound].AllowedToJoin = TRUE;
 				else
 					SessionData[NumberOfSessionsFound].AllowedToJoin = FALSE;
 
 				// multiplayer version number (possibly)
-				if (tempSession.dwUser1 != AVP_MULTIPLAYER_VERSION)
+				if (tempSession.version != AVP_MULTIPLAYER_VERSION)
 				{
-					float version = 1.0f + tempSession.dwUser1 / 100.0f;
+					float version = 1.0f + tempSession.version / 100.0f;
 					SessionData[NumberOfSessionsFound].AllowedToJoin = FALSE;
  					sprintf(SessionData[NumberOfSessionsFound].Name,"%s (V %.2f)", sessionName, version);
 				}
@@ -910,23 +934,20 @@ void Net_FindAvPSessions()
 	enet_host_destroy(Client);
 }
 
-HRESULT Net_CreateSession(LPTSTR lptszSessionName, int maxPlayers, int dwUser1, int dwUser2)
+HRESULT Net_CreateSession(LPTSTR lptszSessionName, int maxPlayers, int version, int level)
 {
 	ZeroMemory(&netSession, sizeof(NET_SESSIONDESC));
-	netSession.dwSize = sizeof(NET_SESSIONDESC);
+	netSession.size = sizeof(NET_SESSIONDESC);
 
-#ifdef UNICODE
-	strcpy(dpDesc.lpszSessionName, lptszSessionName);
-#else
-	strcpy(netSession.lpszSessionNameA, lptszSessionName);
-#endif
-	netSession.dwMaxPlayers = maxPlayers;
+	strcpy(netSession.sessionName, lptszSessionName);
 
-	netSession.dwUser1 = dwUser1;
-	netSession.dwUser2 = dwUser2;
+	netSession.maxPlayers = maxPlayers;
 
-	// should this be done here? */
-	netSession.dwCurrentPlayers = 1;
+	netSession.version = version;
+	netSession.level = level;
+
+	// should this be done here?
+	netSession.currentPlayers = 1;
 
 #ifdef WIN32
 	CoCreateGuid(&netSession.guidInstance);

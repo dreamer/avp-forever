@@ -1,8 +1,8 @@
 #ifndef _included_decal_h_ /* Is this your first time? */
 #define _included_decal_h_ 1
 
-//#include "d3_func.h"
 #include "vision.h"
+
 enum DECAL_ID
 {
 	DECAL_FMV=0,

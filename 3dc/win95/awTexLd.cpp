@@ -28,8 +28,6 @@
 	#include <typeinfo.h>
 #endif
 
-//#include "d3_func.h"
-
 /* awTexLd.cpp - Author: Jake Hotson */
 
 /*****************************************/
@@ -132,7 +130,7 @@ namespace AwTl
 	static
 	struct DriverDesc
 	{
-		DriverDesc() : validB(false), ddP(NULL) {}
+		DriverDesc() : validB(false)/*, ddP(NULL)*/ {}
 
 		bool validB : 1;
 		bool needSquareB : 1;
@@ -145,7 +143,7 @@ namespace AwTl
 
 		DWORD memFlag;
 
-		void * ddP; // BJD
+//		void * ddP; // BJD
 	}
 		driverDesc;
 
@@ -279,13 +277,13 @@ namespace AwTl
 	struct LoadInfo
 	{
 		AvPTexture * textureP;
-		AvPTexture * dst_textureP;
+//		AvPTexture * dst_textureP;
 
 		unsigned surface_width;
 		unsigned surface_height;
-		PtrUnion surface_dataP;
+//		PtrUnion surface_dataP;
 		LONG surface_pitch;
-		DWORD dwCapsCaps;
+//		DWORD dwCapsCaps;
 
 		unsigned * widthP;
 		unsigned * heightP;
@@ -303,7 +301,7 @@ namespace AwTl
 //			, surface_lockedB(false)
 //			, dst_surfaceP(NULL)
 			: textureP(NULL)
-			, dst_textureP(NULL)
+//			, dst_textureP(NULL)
 			, skipB(false)
 		{
 		}
@@ -387,10 +385,10 @@ AwTl::SurfUnion AwBackupTexture::Restore(AwTl::CreateTextureParms const & rParam
 
 	if (!pixelFormat.validB)
 		db_log3("AwCreateGraphic(): ERROR: pixel format not valid");
-	if (!driverDesc.ddP || !driverDesc.validB && rParams.loadTextureB)
+	if (/*!driverDesc.ddP ||*/ !driverDesc.validB && rParams.loadTextureB)
 		db_log3("AwCreateGraphic(): ERROR: driver description not valid");
 
-	awTlLastErr = pixelFormat.validB && driverDesc.ddP && (driverDesc.validB || !rParams.loadTextureB) ? AW_TLE_OK : AW_TLE_NOINIT;
+	awTlLastErr = pixelFormat.validB /*&& driverDesc.ddP*/ && (driverDesc.validB || !rParams.loadTextureB) ? AW_TLE_OK : AW_TLE_NOINIT;
 
 	ON_ERROR_RETURN_NULL("initializing restore")
 
@@ -562,7 +560,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 //					ConvertRow(pLoadInfo->surface_dataP,pLoadInfo->surface_width,src_rowP,pLoadInfo->left,pLoadInfo->width,paletteP db_code1(DB_COMMA m_nPaletteSize));
 					PtrUnion my_data = &buffer[y*m_nWidth*4];
 							
-					ConvertRow(my_data,m_nWidth,src_rowP,0,m_nWidth,paletteP db_code1(DB_COMMA m_nPaletteSize));					
+					ConvertRow(my_data, m_nWidth, src_rowP, 0, m_nWidth, paletteP db_code1(DB_COMMA m_nPaletteSize));					
 				}
 			}
 		}

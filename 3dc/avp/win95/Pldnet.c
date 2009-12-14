@@ -450,7 +450,7 @@ void InitAVPNetGame(void)
 	if(AvP.Network==I_Host)
 	{
 		netGameData.playerData[0].playerId = AvPNetID;
-		strncpy(netGameData.playerData[0].name,AVPDPplayerName.lpszShortNameA,NET_PLAYERNAMELENGTH-1);
+		strncpy(netGameData.playerData[0].name,AVPDPplayerName.shortName, NET_PLAYERNAMELENGTH-1);
 		netGameData.playerData[0].name[NET_PLAYERNAMELENGTH-1] = '\0';
 //		ConvertNetNameToUpperCase(netGameData.playerData[0].name);
 	}
@@ -569,7 +569,7 @@ void InitAVPNetGameForHost(int species, int gamestyle, int level)
 
 	/* If I'm the host, add myself to the game data */
 	netGameData.playerData[0].playerId = AvPNetID;
-	strncpy(netGameData.playerData[0].name,AVPDPplayerName.lpszShortNameA,NET_PLAYERNAMELENGTH-1);
+	strncpy(netGameData.playerData[0].name,AVPDPplayerName.shortName, NET_PLAYERNAMELENGTH-1);
 	netGameData.playerData[0].name[NET_PLAYERNAMELENGTH-1] = '\0';
 //	ConvertNetNameToUpperCase(netGameData.playerData[0].name);
 
@@ -970,7 +970,7 @@ static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize)
 				memcpy(/*(playerDetails*)*/&newPlayer, &msgP[MESSAGEHEADERSIZE], sizeof(playerDetails));
 				if(newPlayer.playerType == DPPLAYERTYPE_PLAYER)
 				{
-					int id = newPlayer.playerId;
+					int id = newPlayer.playerID;
 					char name[40];
 
 					strcpy(&name[0], &newPlayer.playerName[0]);
@@ -1002,9 +1002,9 @@ static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize)
 				DPMSG_DESTROYPLAYERORGROUP destroyMessage;
 				memcpy(&destroyMessage, &msgP[MESSAGEHEADERSIZE], sizeof(DPMSG_DESTROYPLAYERORGROUP));
 
-				if(destroyMessage.dwPlayerType == DPPLAYERTYPE_PLAYER)
+				if(destroyMessage.playerType == DPPLAYERTYPE_PLAYER)
 				{
-					DPID id = destroyMessage.dpId;
+					DPID id = destroyMessage.ID;
 					OutputDebugString("going to drop a player as they disconnected\n");
 					RemovePlayerFromGame(id);
 					NewOnScreenMessage("A PLAYER HAS DISCONNECTED");
