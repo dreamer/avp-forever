@@ -4594,7 +4594,7 @@ void MakeFlechetteExplosionAt(VECTORCH *positionPtr,int seed)
 		velocity.vy = -(SeededFastRandom()&65535);
 		{
 			float y = ((float)velocity.vy)/65536.0f;
-			y = sqrt(1-y*y);
+			y = (float)(sqrt(1-y*y));
 
 			f2i(velocity.vx,(float)GetCos(phi)*y);
 			f2i(velocity.vz,(float)GetSin(phi)*y);
@@ -4645,7 +4645,7 @@ void MakeMolotovExplosionAt(VECTORCH *positionPtr,int seed)
 		velocity.vy = -(SeededFastRandom()&65535);
 		{
 			float y = ((float)velocity.vy)/65536.0f;
-			y = sqrt(1-y*y);
+			y = (float)(sqrt(1-y*y));
 
 			f2i(velocity.vx,(float)GetCos(phi)*y);
 			f2i(velocity.vz,(float)GetSin(phi)*y);
@@ -4749,7 +4749,7 @@ void MakeOldVolumetricExplosionAt(VECTORCH *positionPtr)
 		velocity.vz = (FastRandom()&131071) - ONE_FIXED;
 		{
 			float z = ((float)velocity.vz)/65536.0f;
-			z = sqrt(1-z*z);
+			z = (float)(sqrt(1-z*z));
 
 			f2i(velocity.vx,(float)GetCos(phi)*z);
 			f2i(velocity.vy,(float)GetSin(phi)*z);
@@ -4824,7 +4824,7 @@ void MakeBloodExplosion(VECTORCH *originPtr, int creationRadius, VECTORCH *blast
 		velocity.vz = (FastRandom()&131071) - ONE_FIXED;
 		{
 			float z = ((float)velocity.vz)/65536.0f;
-			z = sqrt(1-z*z);
+			z = (float)(sqrt(1-z*z));
 
 			f2i(velocity.vx,(float)GetCos(phi)*z);
 			f2i(velocity.vy,(float)GetSin(phi)*z);
@@ -4872,7 +4872,7 @@ void MakeFocusedExplosion(VECTORCH *originPtr, VECTORCH *blastPositionPtr, int n
 		velocity.vz = (FastRandom()&131071) - ONE_FIXED;
 		{
 			float z = ((float)velocity.vz)/65536.0f;
-			z = sqrt(1-z*z);
+			z = (float)(sqrt(1-z*z));
 
 			f2i(velocity.vx,(float)GetCos(phi)*z);
 			f2i(velocity.vy,(float)GetSin(phi)*z);
@@ -4925,7 +4925,7 @@ void MakePlasmaTrailParticles(DYNAMICSBLOCK *dynPtr, int number)
 			velocity.vz = (FastRandom()&131071) - ONE_FIXED;
 			{
 				float z = ((float)velocity.vz)/65536.0f;
-				z = sqrt(1-z*z);
+				z = (float)(sqrt(1-z*z));
 
 				f2i(velocity.vx,(float)GetCos(phi)*z);
 				f2i(velocity.vy,(float)GetSin(phi)*z);

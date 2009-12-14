@@ -839,7 +839,7 @@ static void LnQuat(QUAT *q)
 		theta = (float)acos(cosine);
 	}
 
-	m = (65536.0/sqrt((x*x) + (y*y) + (z*z)) );
+	m = (float)((65536.0/sqrt((x*x) + (y*y) + (z*z))));
 
 	x *= m;
 	y *= m;

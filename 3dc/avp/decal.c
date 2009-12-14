@@ -880,7 +880,7 @@ void HandleDecalSystem(void)
 						GLOBALASSERT(AvP.Network!=I_No_Network);
 						if (ghostData->type == I_BehaviourPredatorPlayer)
 						{
-							extern DPID AVPDPNetID;
+							extern DPID AvPNetID;
 							int playerIndex = PlayerIdInPlayerList(ghostData->playerId);
 							if(playerIndex==NET_IDNOTINPLAYERLIST)
 							{
@@ -892,7 +892,7 @@ void HandleDecalSystem(void)
 								continue;
 							}
 
-							if (AVPDPNetID==PredatorLaserSights[playerIndex].TargetID)
+							if (AvPNetID==PredatorLaserSights[playerIndex].TargetID)
 							{
 								SECTION_DATA *plasma_muzzle;
 								plasma_muzzle=GetThisSectionData(ghostData->HModelController.section_data,"dum flash");

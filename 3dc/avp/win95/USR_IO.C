@@ -1563,7 +1563,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 	/* handle xbox controllers seperate from joysticks */
 	if (GotXPad)
 	{
-		char buf[100];
+//		char buf[100];
 		#define JOYSTICK_DEAD_ZONE 12000
 		int yAxis = xPadMoveY * 2;
 		int xAxis = xPadMoveX * 2;

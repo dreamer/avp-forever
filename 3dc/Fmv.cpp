@@ -715,7 +715,7 @@ int OpenTheoraVideo(const char *fileName, int playMode = PLAYONCE)
 #endif
 	filePath += fileName;
 
-	oggFile.open(filePath.c_str()/*"D://Development//experiments//Debug//big_buck_bunny_720p_stereo.ogv"*/, std::ios::in | std::ios::binary);
+	oggFile.open(filePath.c_str(), std::ios::in | std::ios::binary);
 
 	if (!oggFile.is_open())
 	{
@@ -761,7 +761,7 @@ int OpenTheoraVideo(const char *fileName, int playMode = PLAYONCE)
 			return -1;
 		}
 
-		/* init some temp audio data storage */
+		// init some temp audio data storage
 		audioData = new byte[fmvAudioStream->bufferSize];
 		RingBuffer_Init(fmvAudioStream->bufferSize * fmvAudioStream->bufferCount);
 	}
@@ -982,7 +982,7 @@ extern void PlayFMV(const char *filenamePtr)
 
 		DirectReadKeyboard();
 
-		/* added DebouncedGotAnyKey to ensure previous frame's key press for starting level doesn't count */
+		// added DebouncedGotAnyKey to ensure previous frames key press for starting level doesn't count
 		if (GotAnyKey && DebouncedGotAnyKey)
 		{
 			playing = 0;
@@ -1322,7 +1322,7 @@ extern void StartFMVAtFrame(int number, int frame)
 {
 }
 
-/* bjd - called during each level load */
+// called during each level load */
 void ScanImagesForFMVs()
 {
 	extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
@@ -1386,7 +1386,7 @@ void ScanImagesForFMVs()
 	}
 }
 
-/* called when player quits level and returns to main menu */
+// called when player quits level and returns to main menu
 void ReleaseAllFMVTextures()
 {
 	OutputDebugString("exiting level..closing FMV system\n");
@@ -1430,7 +1430,7 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 	}
 
 	// non ingame fmv? - use a better way to determine this..
-	if (textureWidth && textureHeight)
+	if ((textureWidth && textureHeight) && (!mDisplayTexture))
 	{
 		mDisplayTexture = CreateFmvTexture(&textureWidth, &textureHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 	}

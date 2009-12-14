@@ -916,11 +916,11 @@ void AlienBehaviour(STRATEGYBLOCK *sbPtr)
 		//(that would be the person who set the alien on fire in the first place)
 		{
 			extern DPID myNetworkKillerId;
-			extern DPID AVPDPNetID;
+			extern DPID AvPNetID;
 
 			myNetworkKillerId=alienStatusPointer->aliensIgniterId;
 			CauseDamageToObject(sbPtr,&firedamage,NormalFrameTime,NULL);
-			myNetworkKillerId=AVPDPNetID;
+			myNetworkKillerId=AvPNetID;
 		}
 		if (sbPtr->I_SBtype==I_BehaviourNetCorpse) {
 			/* Gettin' out of here... */

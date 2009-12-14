@@ -727,8 +727,8 @@ void AssignNewSBName(STRATEGYBLOCK *sbPtr) {
 	if(AvP.Network != I_No_Network)
 	{
 		//modify name to ensure uniqueness between players
-		extern DPID AVPDPNetID;
-		sbPtr->SBname[SB_NAME_LENGTH-1]=+10+PlayerIdInPlayerList(AVPDPNetID); /* Just to make sure... */
+		extern DPID AvPNetID;
+		sbPtr->SBname[SB_NAME_LENGTH-1]=+10+PlayerIdInPlayerList(AvPNetID); /* Just to make sure... */
 
 	}
 	else

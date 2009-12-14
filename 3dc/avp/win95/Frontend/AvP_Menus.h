@@ -294,7 +294,7 @@ typedef struct
 #define MENU_TOPY		(150)
 #define MENU_CENTREY	(280)
 #define MENU_HEIGHT		(255)
-#define MENU_CENTREX	(ScreenDescriptorBlock.SDB_Width / 2)//(/*ScreenDescriptorBlock.SDB_Width*/640 / 2)
+#define MENU_CENTREX	(320)//(ScreenDescriptorBlock.SDB_Width / 2)//(/*ScreenDescriptorBlock.SDB_Width*/640 / 2)
 
 #define MENU_ELEMENT_SPACING	(9)
 #define MENU_FONT_HEIGHT		(21)

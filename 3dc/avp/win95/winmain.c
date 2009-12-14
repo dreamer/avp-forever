@@ -309,20 +309,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	if (strstr(command_line,"-server"))
 	{
-		extern int DirectPlay_InitLobbiedGame();
+		extern int Net_InitLobbiedGame();
 		//game has been launched by mplayer , we best humour it
 		LobbiedGame=LobbiedGame_Server;	
-		if(!DirectPlay_InitLobbiedGame())
+		if(!Net_InitLobbiedGame())
 		{
 			exit(0x6364);
 		}		
 	}
 	else if (strstr(command_line,"-client"))
 	{
-		extern int DirectPlay_InitLobbiedGame();
+		extern int Net_InitLobbiedGame();
 		//ditto
 		LobbiedGame=LobbiedGame_Client;			
-		if(!DirectPlay_InitLobbiedGame())
+		if(!Net_InitLobbiedGame())
 		{
 			exit(0x6364);
 		}		

@@ -1,6 +1,9 @@
 
 #include "enet\enet.h"
 #include "logString.h"
+#include "console.h"
+#include "configFile.h"
+#include <vector>
 
 extern "C" {
 
@@ -10,91 +13,100 @@ extern "C" {
 #include "networking.h"
 #include "assert.h"
 
-#ifdef WIN32
-	#pragma comment(lib, "ws2_32.lib")
-	#pragma comment(lib, "ole32.lib")
-#endif
+static ENetHost		*Client;
+static ENetAddress	ServerAddress;
+static ENetAddress	BroadcastAddress;
+static ENetPeer		*ServerPeer;
+static bool net_IsInitialised = false;
 
-ENetHost		*Client;
-ENetAddress		ServerAddress;
-ENetAddress		BroadcastAddress;
-ENetPeer		*ServerPeer;
+int glpDP;
+int AvPNetID;
+DPNAME AVPDPplayerName;
 
-/* used to hold message data */
-static unsigned char packetBuffer[NET_MESSAGEBUFFERSIZE]; 
+// used to hold message data */
+static unsigned char packetBuffer[NET_MESSAGEBUFFERSIZE];
+static std::vector<uint8_t> packetBuffer2;
 
-int AvPDefaultPort = 1234;
+static int netPortNumber = 1234;
+static int incomingBandwidth = 0;
+static int outgoingBandwidth = 0;
 
-DPSESSIONDESC2 dpSession; // main game session
+NET_SESSIONDESC netSession; // main game session
 
 extern void MinimalNetCollectMessages(void);
 extern void InitAVPNetGameForHost(int species, int gamestyle, int level);
 extern void InitAVPNetGameForJoin(void);
 extern int DetermineAvailableCharacterTypes(BOOL ConsiderUsedCharacters);
 extern char* GetCustomMultiplayerLevelName(int index, int gameType);
+extern unsigned char DebouncedKeyboardInput[];
 
-static BOOL DirectPlay_CreatePlayer(char* FormalName,char* FriendlyName);
-int GetNextPlayerID();
-void FindAvPSessions();
+static bool Net_CreatePlayer(char* FormalName,char* FriendlyName);
+int Net_GetNextPlayerID();
+void Net_FindAvPSessions();
 static BOOL DpExtProcessRecvdMsg(BOOL bIsSystemMsg, LPVOID lpData, DWORD dwDataSize);
-HRESULT DPlayCreateSession(LPTSTR lptszSessionName,int maxPlayers, int dwUser1, int dwUser2);
-BOOL DirectPlay_UpdateSessionDescForLobbiedGame(int gamestyle, int level);
-int DPlayOpenSession(char *hostName);
-int SendSystemMessage(int messageType, int idFrom, int idTo, unsigned char *lpData, int dwDataSize);
-void findPlayerName(int playerId, char *playerName, int size);
+HRESULT Net_CreateSession(LPTSTR lptszSessionName,int maxPlayers, int dwUser1, int dwUser2);
+BOOL Net_UpdateSessionDescForLobbiedGame(int gamestyle, int level);
+int Net_OpenSession(const char *hostName);
+int Net_SendSystemMessage(int messageType, int idFrom, int idTo, unsigned char *lpData, int dwDataSize);
 
 /* KJL 14:58:18 03/07/98 - AvP's Guid */
 // {379CCA80-8BDD-11d0-A078-004095E16EA5}
-static const GUID AvPGuid = 
-{ 0x379cca80, 0x8bdd, 0x11d0, { 0xa0, 0x78, 0x0, 0x40, 0x95, 0xe1, 0x6e, 0xa5 } };
+static const GUID AvPGuid = { 0x379cca80, 0x8bdd, 0x11d0, { 0xa0, 0x78, 0x0, 0x40, 0x95, 0xe1, 0x6e, 0xa5 } };
 
-BOOL DirectPlay_UpdateSessionList(int *SelectedItem)
+struct messageHeader
+{
+	uint8_t		messageType;
+	uint32_t	fromID;
+	uint32_t	toID;
+};
+
+BOOL Net_UpdateSessionList(int *SelectedItem)
 {
 	GUID OldSessionGuids[MAX_NO_OF_SESSIONS];
 	int OldNumberOfSessions = NumberOfSessionsFound;
 	BOOL changed = FALSE;
 
 	/* bjd -test, remove */
-	if (NumberOfSessionsFound == 1) return FALSE;
+	if (NumberOfSessionsFound == 1) 
+		return FALSE;
 
-	//take a list of the old session guids
-	for(int i = 0; i < NumberOfSessionsFound; i++)
+	// take a list of the old session guids
+	for (int i = 0; i < NumberOfSessionsFound; i++)
 	{
 		OldSessionGuids[i] = SessionData[i].Guid;
 	}
 
-	//do the session enumeration thing
-	FindAvPSessions();
+	// do the session enumeration thing
+	Net_FindAvPSessions();
 
-	//Have the available sessions changed?
-	//first check number of sessions
-	if(NumberOfSessionsFound != OldNumberOfSessions)
+	// Have the available sessions changed? first check number of sessions
+	if (NumberOfSessionsFound != OldNumberOfSessions)
 	{
 		changed = TRUE;
 	}
 	else
 	{
-		//now check the guids of the new sessions against our previous list
-		for(int i = 0; i < NumberOfSessionsFound; i++)
+		// now check the guids of the new sessions against our previous list
+		for (int i = 0; i < NumberOfSessionsFound; i++)
 		{
-			if(!IsEqualGUID(OldSessionGuids[i], SessionData[i].Guid))
+			if (!IsEqualGUID(OldSessionGuids[i], SessionData[i].Guid))
 			{
 				changed = TRUE;
 			}
 		}
 	}
 
-	if(changed && OldNumberOfSessions > 0)
+	if (changed && OldNumberOfSessions > 0)
 	{
-		//See if our previously selected session is in the new session list
+		// See if our previously selected session is in the new session list
 		int OldSelection = *SelectedItem;
 		*SelectedItem=0;
 
-		for(int i = 0; i < NumberOfSessionsFound; i++)
+		for (int i = 0; i < NumberOfSessionsFound; i++)
 		{
-			if(IsEqualGUID(OldSessionGuids[OldSelection], SessionData[i].Guid))
+			if (IsEqualGUID(OldSessionGuids[OldSelection], SessionData[i].Guid))
 			{
-				//found the session
+				// found the session
 				*SelectedItem = i;
 				break;
 			}
@@ -104,110 +116,132 @@ BOOL DirectPlay_UpdateSessionList(int *SelectedItem)
 	return changed;
 }
 
-int DirectPlay_ConnectingToSession()
+int Net_Initialise()
 {
-	OutputDebugString("DirectPlay_ConnectingToSession\n");
-	extern unsigned char DebouncedKeyboardInput[];
+	Con_PrintMessage("Initialising ENet networking");
 
-	//see if the player has got bored of waiting
-	if(DebouncedKeyboardInput[KEY_ESCAPE])
+	// initialise ENet
+	if (enet_initialize() != 0)
 	{
-		//abort attempt to join game
-		if(AVPDPNetID)
+		Con_PrintMessage("Failed to initialise ENet networking");
+		return NET_FAIL;
+	}
+
+	netPortNumber = Config_GetInt("[Networking]", "PortNumber", 1234);
+	incomingBandwidth = Config_GetInt("[Networking]", "IncomingBandwidth", 0);
+	outgoingBandwidth = Config_GetInt("[Networking]", "OutgoingBandwidth", 0);
+
+	net_IsInitialised = true;
+
+	return NET_OK;
+}
+
+int Net_Deinitialise()
+{
+	Con_PrintMessage("Deinitialising ENet networking");
+
+	// de-initialise ENet
+	enet_deinitialize();
+
+	net_IsInitialised = false;
+
+	return NET_OK;
+}
+
+int Net_ConnectingToSession()
+{
+	OutputDebugString("Net_ConnectingToSession\n");
+
+	// see if the player has got bored of waiting
+	if (DebouncedKeyboardInput[KEY_ESCAPE])
+	{
+		// abort attempt to join game
+		if (AvPNetID)
 		{
-//			IDirectPlayX_DestroyPlayer(glpDP, AVPDPNetID);
-			AVPDPNetID = 0;
+//			IDirectPlayX_DestroyPlayer(glpDP, AvPNetID);
+			AvPNetID = 0;
 		}
 		//DPlayClose();
 		AvP.Network = I_No_Network;	
-		return 0;
+		return NET_FAIL;
 	}
 
 	MinimalNetCollectMessages();
-	if(!netGameData.needGameDescription)
+	if (!netGameData.needGameDescription)
 	{
-	  	//we now have the game description , so we can go to the configuration menu
+	  	// we now have the game description , so we can go to the configuration menu
 	  	return AVPMENU_MULTIPLAYER_CONFIG_JOIN;
 	}
-	return 1;
+	return NET_OK;
 }
 
-int DirectPlay_ConnectingToLobbiedGame(char* playerName)
+int Net_ConnectingToLobbiedGame(char* playerName)
 {
-	OutputDebugString("\n DirectPlay_ConnectingToLobbiedGame");
+	OutputDebugString("Net_ConnectingToLobbiedGame\n");
 	return 0;
 }
 
-int DirectPlay_HostGame(char *playerName, char *sessionName, int species, int gamestyle, int level)
+int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle, int level)
 {
-	/* has to return 1 on success so can't use DP defines */
-	int maxPlayers=DetermineAvailableCharacterTypes(FALSE);
-	if(maxPlayers<1) maxPlayers=1;
-	if(maxPlayers>8) maxPlayers=8;
+	assert (net_IsInitialised);
 
-	if(!netGameData.skirmishMode)
+	int maxPlayers = DetermineAvailableCharacterTypes(FALSE);
+	if (maxPlayers < 1) maxPlayers = 1;
+	if (maxPlayers > 8) maxPlayers = 8;
+
+	if (!netGameData.skirmishMode)
 	{
-		if(!LobbiedGame)
+		if (!LobbiedGame)
 		{
-			/* initialise ENet */
-			if(enet_initialize() != 0)
-			{
-				LogErrorString("Failed to initialise ENet networking\n");
-				return 0;
-			}
-//			else OutputDebugString("Initialised ENet\n");
-
 			ServerAddress.host = ENET_HOST_ANY;
-			ServerAddress.port = AvPDefaultPort;
+			ServerAddress.port = netPortNumber;
 
-			Client = enet_host_create(&ServerAddress	/* the address to bind the server host to */, 
-                                 32						/* allow up to 32 clients and/or outgoing connections */,
-                                  0						/* assume any amount of incoming bandwidth */,
-                                  0						/* assume any amount of outgoing bandwidth */);
-			if(Client == NULL)
+			Client = enet_host_create(&ServerAddress,	// the address to bind the server host to, 
+                                 32,					// allow up to 32 clients and/or outgoing connections,
+                                 incomingBandwidth,		// assume any amount of incoming bandwidth,
+                                 outgoingBandwidth);	// assume any amount of outgoing bandwidth;
+			if (Client == NULL)
 			{
-				LogErrorString("Failed to create ENet server\n");
-				return 0;
+				Con_PrintError("Failed to create ENet server");
+				return NET_FAIL;
 			}
 
-//			else OutputDebugString("Created ENet server\n");
-
-			/* create session */
+			// create session
 			{
-				char* customLevelName = GetCustomMultiplayerLevelName(level,gamestyle);
-				if(customLevelName[0])
+				char* customLevelName = GetCustomMultiplayerLevelName(level, gamestyle);
+				if (customLevelName[0])
 				{
-					//add the level name to the beginning of the session name
+					// add the level name to the beginning of the session name
 					char name_buffer[100];
-					sprintf(name_buffer,"%s:%s",customLevelName,sessionName);
-//					if ((DPlayCreateSession(name_buffer,maxPlayers,AVP_MULTIPLAYER_VERSION,(gamestyle<<8)|100)) != DP_OK) return 0;
+					sprintf(name_buffer, "%s:%s", customLevelName, sessionName);
+//					if ((Net_CreateSession(name_buffer,maxPlayers,AVP_MULTIPLAYER_VERSION,(gamestyle<<8)|100)) != NET_OK) return 0;
 				}
 				else
 				{
- //					static TCHAR sessionName[] = "AvP test session";
-					if ((DPlayCreateSession(sessionName,maxPlayers,AVP_MULTIPLAYER_VERSION,(gamestyle<<8)|level)) != DP_OK) return 0;
+					if ((Net_CreateSession(sessionName, maxPlayers, AVP_MULTIPLAYER_VERSION, (gamestyle<<8)|level)) != NET_OK) 
+						return NET_FAIL;
 				}
 			}
-			/* Try to create a DP player */
 		}
 		else
 		{
-			//for lobbied games we need to fill in the level number into the existing session description
-			if(!DirectPlay_UpdateSessionDescForLobbiedGame(gamestyle,level)) return 0;
+			// for lobbied games we need to fill in the level number into the existing session description
+			if (!Net_UpdateSessionDescForLobbiedGame(gamestyle, level)) 
+				return NET_FAIL;
 		}
 
 		AvP.Network = I_Host;
 
-		if(!DirectPlay_CreatePlayer(playerName,playerName)) return 0;
+		if (!Net_CreatePlayer(playerName, playerName)) 
+			return NET_FAIL;
 
-		/* dplay initialised.. */
+		// need to replace this..
 		glpDP = 1;
 	}
 	else
 	{
-		//fake multiplayer
-		//need to set the id to an non zero value
-		AVPDPNetID = 100;
+		// fake multiplayer - need to set the id to an non zero value
+		AvPNetID = 100;
 
 		ZeroMemory(&AVPDPplayerName,sizeof(DPNAME));
 		AVPDPplayerName.dwSize = sizeof(DPNAME);
@@ -216,26 +250,25 @@ int DirectPlay_HostGame(char *playerName, char *sessionName, int species, int ga
 	}
 
 	InitAVPNetGameForHost(species, gamestyle, level);
-	return 1;
+	return NET_OK;
 }
 
-int DirectPlay_Disconnect()
+int Net_Disconnect()
 {
 	OutputDebugString("Deinitialising ENet\n");
 
-	/* need to let everyone know we're disconnecting */
+	// need to let everyone know we're disconnecting
 	DPMSG_DESTROYPLAYERORGROUP destroyPlayer;
-	destroyPlayer.dpId = AVPDPNetID;
+	destroyPlayer.dpId = AvPNetID;
 	destroyPlayer.dwPlayerType = DPPLAYERTYPE_PLAYER;
 	destroyPlayer.dwType = 0; // ?
 
-	if(AvP.Network != I_Host) // don't do this if this is the host
+	if (AvP.Network != I_Host) // don't do this if this is the host
 	{
-		int result = SendSystemMessage(AVP_SYSTEMMESSAGE, DPID_SYSMSG, DPSYS_DESTROYPLAYERORGROUP, (unsigned char*)&destroyPlayer, sizeof(DPMSG_DESTROYPLAYERORGROUP));
-		if(result != DP_OK)
+		if (Net_SendSystemMessage(AVP_SYSTEMMESSAGE, DPID_SYSMSG, NET_DESTROYPLAYERORGROUP, (unsigned char*)&destroyPlayer, sizeof(DPMSG_DESTROYPLAYERORGROUP)) != NET_OK)
 		{
-			LogErrorString("DirectPlay_Disconnect - Problem sending destroy player system message!\n");
-			return 0;
+			Con_PrintError("Net_Disconnect - Problem sending destroy player system message!");
+			return NET_FAIL;
 		}
 	}
 	else
@@ -243,41 +276,30 @@ int DirectPlay_Disconnect()
 		// DPSYS_HOST or DPSYS_SESSIONLOST ?
 	}
 
-	/* destroy client, check if exists first? */
+	// destroy client, check if exists first?
 	enet_host_destroy(Client);
 
-	/* de-init ENet */
-	enet_deinitialize();
-
-	return 1;
+	return NET_OK;
 }
 
-void DirectPlay_EnumConnections()
+void Net_EnumConnections()
 {
-	/* just set this here for now */
+	// just set this here for now
 	netGameData.tcpip_available = 1;
 }
 
-int DirectPlay_JoinGame()
+int Net_JoinGame()
 {	
-//	OutputDebugString("DirectPlay_JoinGame\n");
+	assert (net_IsInitialised);
 
-	/* initialise eNet */
-	if (enet_initialize () != 0)
-	{
-		LogErrorString("Failed to initialise ENet networking\n");
-		return 0;
-	}
-//	else OutputDebugString("Initialised ENet\n");
-
-	/* enum sessions */
-	FindAvPSessions();
+	// enumerate sessions
+	Net_FindAvPSessions();
 	return NumberOfSessionsFound;
 }
 
-int DirectPlay_InitLobbiedGame()
+int Net_InitLobbiedGame()
 {
-	OutputDebugString("\n DirectPlay_InitLobbiedGame");
+	OutputDebugString("\n Net_InitLobbiedGame");
 	extern char MP_PlayerName[];
 	return 0;
 }
@@ -298,7 +320,7 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 
 	do
 	{
-		bInternalOnly = FALSE;	/* Default. */
+		bInternalOnly = FALSE;	// Default.
 
 		ENetEvent event;
 
@@ -306,7 +328,7 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 		{
 			switch (event.type)
 			{
-				/* not interested yet */
+				// not interested yet
 				case ENET_EVENT_TYPE_CONNECT:
 					OutputDebugString("Enet got a connection!\n");
 					return DPERR_NOMESSAGES;
@@ -331,7 +353,7 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 			}
 		}
 
-		else /* no message */
+		else // no message
 		{
 			return DPERR_NOMESSAGES;
 		}
@@ -341,30 +363,30 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 		*lpidTo   = *(int*)&lplpData[5];
 
 		// check for broadcast message
-		if(messageType == AVP_BROADCAST)
+		if (messageType == AVP_BROADCAST)
 		{
 			// double check..
-			if((*lpidFrom == 255) && (*lpidTo == 255))
+			if ((*lpidFrom == 255) && (*lpidTo == 255))
 			{
 				OutputDebugString("Someone sent us a broadcast packet!\n");
 
-				/* reply to it? handle this properly..dont send something from a receive function?? */
+				// reply to it? handle this properly..dont send something from a receive function??
 				packetBuffer[0] = AVP_SESSIONDATA;
 				*(int*)&packetBuffer[1] = 0;
 				*(int*)&packetBuffer[5] = 0;
 
-				assert(sizeof(dpSession) == sizeof(DPSESSIONDESC2));
-				memcpy(&packetBuffer[MESSAGEHEADERSIZE], &dpSession, sizeof(DPSESSIONDESC2));
+				assert(sizeof(netSession) == sizeof(NET_SESSIONDESC));
+				memcpy(&packetBuffer[MESSAGEHEADERSIZE], &netSession, sizeof(NET_SESSIONDESC));
 
-				int length = MESSAGEHEADERSIZE + sizeof(DPSESSIONDESC2);
+				int length = MESSAGEHEADERSIZE + sizeof(NET_SESSIONDESC);
 
-				/* create a packet with session struct inside */
+				// create a packet with session struct inside
 				ENetPacket * packet = enet_packet_create(&packetBuffer, 
 					length, 
 					ENET_PACKET_FLAG_RELIABLE);
 
-				/* send the packet */
-				if((enet_peer_send(event.peer, event.channelID, packet) < 0))
+				// send the packet
+				if ((enet_peer_send(event.peer, event.channelID, packet) < 0))
 				{
 					LogErrorString("problem sending session packet!\n");
 				}
@@ -373,13 +395,13 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 			}
 		}
 
-		else if(messageType == AVP_SYSTEMMESSAGE)
+		else if (messageType == AVP_SYSTEMMESSAGE)
 		{
 			OutputDebugString("We received a system message!\n");
 			bIsSysMsg = TRUE;
 		}
 
-		else if(messageType == AVP_GETPLAYERNAME)
+		else if (messageType == AVP_GETPLAYERNAME)
 		{
 			OutputDebugString("message check - AVP_GETPLAYERNAME\n");
 
@@ -394,22 +416,22 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 			strcpy(tempName.ShortNameA, netGameData.playerData[id].name);
 			tempName.dwSize = 1; // dont need this
 
-			if(id == NET_IDNOTINPLAYERLIST)
+			if (id == NET_IDNOTINPLAYERLIST)
 			{
 				OutputDebugString("player not in the list!\n");
 			}
 
-			/* pass it back.. */
+			// pass it back..
 			packetBuffer[0] = AVP_SENTPLAYERNAME;
 			*(int*)&packetBuffer[1] = playerFrom;
 			*(int*)&packetBuffer[5] = idOfPlayerToGet; 
 
 			int length = MESSAGEHEADERSIZE + sizeof(playerName);
 
-			/* copy the struct in after the header */
+			// copy the struct in after the header
 			memcpy(&packetBuffer[MESSAGEHEADERSIZE], (unsigned char*)&tempName, sizeof(playerName));
 
-			/* create a packet with player name struct inside */
+			// create a packet with player name struct inside
 			ENetPacket * packet = enet_packet_create(&packetBuffer, 
 				length, 
 				ENET_PACKET_FLAG_RELIABLE);
@@ -417,14 +439,14 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 			OutputDebugString("we got player name request, going to send it back\n");
 
 			// send the packet
-			if((enet_peer_send(event.peer, event.channelID, packet) < 0))
+			if ((enet_peer_send(event.peer, event.channelID, packet) < 0))
 			{
 				LogErrorString("AVP_GETPLAYERNAME - problem sending player name packet!\n");
 			}
 
 			return DPERR_NOMESSAGES;
 		}
-		else if(messageType == AVP_SENTPLAYERNAME)
+		else if (messageType == AVP_SENTPLAYERNAME)
 		{
 			int playerFrom = *lpidFrom;
 			int idOfPlayerWeGot = *lpidTo;
@@ -441,9 +463,9 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 
 			return DPERR_NOMESSAGES;
 		}
-		else if(messageType == AVP_GAMEDATA)
+		else if (messageType == AVP_GAMEDATA)
 		{
-			/* do nothing here */
+			// do nothing here
 		}
 		else
 		{
@@ -453,63 +475,62 @@ int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned ch
 			OutputDebugString(buf);
 			return DPERR_NOMESSAGES;
 		}
-
 	}
-	while( bInternalOnly );
+	while (bInternalOnly);
 
-	return DP_OK;
+	return NET_OK;
 }
 
-int SendSystemMessage(int messageType, int idFrom, int idTo, unsigned char *lpData, int dwDataSize)
+int Net_SendSystemMessage(int messageType, int idFrom, int idTo, unsigned char *lpData, int dwDataSize)
 {
 	packetBuffer[0] = messageType;
 	*(int*)&packetBuffer[1] = idFrom;
 	*(int*)&packetBuffer[5] = idTo;
 
-	/* put data after header */
+	// put data after header
 	memcpy(&packetBuffer[MESSAGEHEADERSIZE], lpData, dwDataSize);
 
 	int length = MESSAGEHEADERSIZE + dwDataSize;
 
-	/* create Enet packet */
+	// create Enet packet
 	ENetPacket * packet = enet_packet_create (packetBuffer, 
 					length, 
 					ENET_PACKET_FLAG_RELIABLE);
 
-	if(packet == NULL)
+	if (packet == NULL)
 	{
-		LogErrorString("SendSystemMessage - couldn't create packet\n");
-		return DP_FAIL;
+		Con_PrintError("Net_SendSystemMessage - couldn't create packet");
+		return NET_FAIL;
 	}
 
-	/* let us know if we're not connected */
-	if(ServerPeer->state != ENET_PEER_STATE_CONNECTED)
+	// let us know if we're not connected
+	if (ServerPeer->state != ENET_PEER_STATE_CONNECTED)
 	{
-		LogErrorString("SendSystemMessage - not connected to server peer!\n");
+		Con_PrintError("Net_SendSystemMessage - not connected to server peer!");
 	}
 
-	/* send the packet */
-	if(enet_peer_send(ServerPeer, 0, packet) != 0)
+	// send the packet
+	if (enet_peer_send(ServerPeer, 0, packet) != 0)
 	{
-		LogErrorString("SendSystemMessage - can't send peer packet\n");
+		Con_PrintError("Net_SendSystemMessage - can't send peer packet");
 	}
 
 	enet_host_flush(Client);
 
-	return DP_OK;
+	return NET_OK;
 }
 
 int DpExtSend(int lpDP2A, DPID idFrom, DPID idTo, DWORD dwFlags, unsigned char *lpData, int dwDataSize)
 {
-	if(lpData == NULL) 
+	if (lpData == NULL) 
 	{
-		LogErrorString("DpExtSend - FALSE data\n");
-		return DP_FAIL;
+		Con_PrintError("DpExtSend - lpData was NULL");
+		return NET_FAIL;
 	}
 		
-	if(idFrom == DPID_SYSMSG)
+	if (idFrom == DPID_SYSMSG)
 	{
-		OutputDebugString("DpExtSend - sending system message\n");
+		Com_PrintDebugMessage("DpExtSend - sending system message\n");
 		packetBuffer[0] = AVP_SYSTEMMESSAGE;
 	}
 	else 
@@ -524,47 +545,46 @@ int DpExtSend(int lpDP2A, DPID idFrom, DPID idTo, DWORD dwFlags, unsigned char *
 
 	int length = MESSAGEHEADERSIZE + dwDataSize;
 
-	/* create ENet packet */
+	// create ENet packet
 	ENetPacket * packet = enet_packet_create (packetBuffer, 
 					length, 
 					ENET_PACKET_FLAG_RELIABLE);
 
-	if(packet == NULL)
+	if (packet == NULL)
 	{
-		LogErrorString("DpExtSend - couldn't create packet\n");
-		return DP_FAIL;
+		Con_PrintError("DpExtSend - couldn't create packet");
+		return NET_FAIL;
 	}
 
-	/* send to all peers */
+	// send to all peers
 	enet_host_broadcast(Client, 0, packet);
 
  	enet_host_flush(Client);
 
-	return DP_OK;
+	return NET_OK;
 }
 
-int DirectPlay_ConnectToSession(int sessionNumber, char *playerName)
+int Net_ConnectToSession(int sessionNumber, char *playerName)
 {
 	OutputDebugString("Step 1: Connect To Session\n");
-	if(DPlayOpenSession(SessionData[sessionNumber].hostAddress) != DP_OK) return 0;
+
+	if (Net_OpenSession(SessionData[sessionNumber].hostAddress) != NET_OK) 
+		return NET_FAIL;
 
 	OutputDebugString("Step 2: connecting to host: ");
 	OutputDebugString(SessionData[sessionNumber].hostAddress);
 	
-	if(!DirectPlay_CreatePlayer(playerName,playerName)) return 0;
+	if (!Net_CreatePlayer(playerName,playerName))
+		return NET_FAIL;
 
 	InitAVPNetGameForJoin();
 
 	netGameData.levelNumber = SessionData[sessionNumber].levelIndex;
 	netGameData.joiningGameStatus = JOINNETGAME_WAITFORSTART;
 	
-	return 1;
+	return NET_OK;
 }
 
-int LaunchMplayer()
-{
-	return 0;
-}
 #if 0
 // IDirectPlayX_GetPlayerName(glpDP,messagePtr->players[i].playerId,data,&size);
 int IDirectPlayX_GetPlayerName(int glpDP, DPID id, unsigned char *data, int *size)
@@ -581,7 +601,7 @@ int IDirectPlayX_GetPlayerName(int glpDP, DPID id, unsigned char *data, int *siz
 	playerName tempName;
 	
 	/* need to request this from the server - just send back to sending eNet peer */
-	SendSystemMessage(AVP_GETPLAYERNAME, id, DPSYS_GETPLAYERNAME, (unsigned char*)&tempPlayerDetails, sizeof(playerDetails));
+	Net_SendSystemMessage(AVP_GETPLAYERNAME, id, DPSYS_GETPLAYERNAME, (unsigned char*)&tempPlayerDetails, sizeof(playerDetails));
 
 	// just wait here for reply? I think this is ok as we only get called from ProcessNetMsg_GameDescription 
 	// which states it'll only get called for non hosts who are in game startup mode. Recheck this if players get
@@ -607,7 +627,7 @@ int IDirectPlayX_GetPlayerName(int glpDP, DPID id, unsigned char *data, int *siz
 	}
 	else
 	{
-		return DP_FAIL;
+		return NET_FAIL;
 	}
 
 	/* just return size if pointer was null, as per original function */
@@ -625,51 +645,50 @@ int IDirectPlayX_GetPlayerName(int glpDP, DPID id, unsigned char *data, int *siz
 	if(data == NULL)
 	{
 		*size = 9;
-		return DP_OK;
+		return NET_OK;
 	}
 
 	strcpy((char*)data, "DeadMeat");
 	*size = 9;
 #endif
-	return DP_OK;
+	return NET_OK;
 }
 #endif
 
-static BOOL DirectPlay_CreatePlayer(char* FormalName,char* FriendlyName)
+static bool Net_CreatePlayer(char* FormalName,char* FriendlyName)
 {
-	// Initialise static DP name structure to refer to the names:
+	// Initialise static name structure to refer to the names:
 	ZeroMemory(&AVPDPplayerName,sizeof(DPNAME));
 	AVPDPplayerName.dwSize = sizeof(DPNAME);
 	AVPDPplayerName.lpszShortNameA	= FriendlyName;
 	AVPDPplayerName.lpszLongNameA = FormalName;
 
-	/* get next available player ID */
-	AVPDPNetID = GetNextPlayerID(); 
+	// get next available player ID
+	AvPNetID = Net_GetNextPlayerID(); 
 
-	/* create struct to send player data */
+	// create struct to send player data
 	playerDetails newPlayer;
-	newPlayer.playerId = AVPDPNetID;
+	newPlayer.playerId = AvPNetID;
 	newPlayer.playerType = DPPLAYERTYPE_PLAYER;
 	strcpy(&newPlayer.playerName[0], AVPDPplayerName.lpszShortNameA);
 
 	OutputDebugString("CreatePlayer - Sending player struct\n");
 
-	/* dont think we do this if we're the server :) */
-	if(AvP.Network != I_Host)
+	// dont think we do this if we're the server :)
+	if (AvP.Network != I_Host)
 	{
-		/* send struct as system message */
-		int result = SendSystemMessage(AVP_SYSTEMMESSAGE, DPID_SYSMSG, DPSYS_CREATEPLAYERORGROUP, (unsigned char*)&newPlayer, sizeof(playerDetails));
-		if(result != DP_OK)
+		// send struct as system message
+		if (Net_SendSystemMessage(AVP_SYSTEMMESSAGE, DPID_SYSMSG, NET_CREATEPLAYERORGROUP, (unsigned char*)&newPlayer, sizeof(playerDetails)) != NET_OK)
 		{
-			LogErrorString("CreatePlayer - Problem sending create player system message!\n");
-			return 0;
+			Con_PrintError("CreatePlayer - Problem sending create player system message!\n");
+			return false;
 		}
 		else
 		{
-			OutputDebugString("CreatePlayer - sent create player system message!\n");
+			Con_PrintMessage("CreatePlayer - sent create player system message!\n");
 		}
 	}
-	return 1;
+	return true;
 }
 
 /*	
@@ -677,7 +696,7 @@ static BOOL DirectPlay_CreatePlayer(char* FormalName,char* FriendlyName)
 	it's probably fairly safe to assume two players will never 
 	get the same values for this... 
 */
-int GetNextPlayerID()
+static int Net_GetNextPlayerID()
 {
 	int val = timeGetTime();
 //	char buf[100];
@@ -686,103 +705,111 @@ int GetNextPlayerID()
 	return val;
 }
 
-int DPlayOpenSession(char *hostName)
+int Net_OpenSession(const char *hostName)
 {
 	ENetEvent event;
 
 	enet_address_set_host(&ServerAddress, hostName);
-	ServerAddress.port = AvPDefaultPort;
+	ServerAddress.port = netPortNumber;
 
-	/* create Enet client */
+	// create Enet client
 	Client = enet_host_create(NULL /* create a client host */,
                 1 /* only allow 1 outgoing connection */,
-                0,//57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth */,
-                0);//14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth */);
+                incomingBandwidth,//57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth */,
+                outgoingBandwidth);//14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth */);
 
-	if(Client == NULL)
+	if (Client == NULL)
     {
-		LogErrorString("DPlayOpenSession - Failed to create Enet client\n");
-		return DP_FAIL;
+		LogErrorString("Net_OpenSession - Failed to create Enet client\n");
+		return NET_FAIL;
     }
 	
 	ServerPeer = enet_host_connect(Client, &ServerAddress, 2);
-	if(ServerPeer == NULL)
+	if (ServerPeer == NULL)
 	{
-		LogErrorString("DPlayOpenSession - Failed to init connection to server host\n");
-		return DP_FAIL;
+		LogErrorString("Net_OpenSession - Failed to init connection to server host\n");
+		return NET_FAIL;
 	}
 
 	/* see if we actually connected */
 	/* Wait up to 3 seconds for the connection attempt to succeed. */
-	if((enet_host_service (Client, &event, 3000) > 0) && (event.type == ENET_EVENT_TYPE_CONNECT))
+	if ((enet_host_service (Client, &event, 3000) > 0) && (event.type == ENET_EVENT_TYPE_CONNECT))
 	{	
-		OutputDebugString("DPlayOpenSession - we connected to server!\n");
+		OutputDebugString("Net_OpenSession - we connected to server!\n");
 	}
 	else
 	{
-		LogErrorString("DPlayOpenSession - failed to connect to server!\n");
-		return DP_FAIL;
+		LogErrorString("Net_OpenSession - failed to connect to server!\n");
+		return NET_FAIL;
 	}
 	
 	glpDP = 1;
 
-	return DP_OK;
+	return NET_OK;
 }
 
-void FindAvPSessions()
+void Net_FindAvPSessions()
 {
-	OutputDebugString("FindAvPSessions called\n");
+	OutputDebugString("Net_FindAvPSessions called\n");
 	NumberOfSessionsFound = 0;
 
 	ENetPeer *Peer;
 	ENetEvent event;
 	unsigned char receiveBuffer[NET_MESSAGEBUFFERSIZE];
 	int messageType;
-	DPSESSIONDESC2 tempSession;
+	NET_SESSIONDESC tempSession;
 	char sessionName[100] = "";
 	char levelName[100] = "";
 	int gamestyle;
 	int level;
 
-	/* set up broadcast address */
+	// set up broadcast address
 	BroadcastAddress.host = ENET_HOST_BROADCAST;
-	BroadcastAddress.port = AvPDefaultPort; /* can I reuse port?? :\ */
+	BroadcastAddress.port = netPortNumber; // can I reuse port?? :\
 
-	/* create Enet client */
+	// create Enet client
 	Client = enet_host_create (NULL /* create a client host */,
                 1 /* only allow 1 outgoing connection */,
-                0,//57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth */,
-                0);//14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth */);
+                incomingBandwidth,//57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth */,
+                outgoingBandwidth);//14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth */);
 
     if (Client == NULL)
     {
-		LogErrorString("Failed to create ENet client\n");
+		Con_PrintError("Failed to create ENet client");
 		return;
     }
-	else OutputDebugString("Created ENet client to find sessions\n");
 
 	Peer = enet_host_connect(Client, &BroadcastAddress, 2);
 	if (Peer == NULL)
 	{
-		LogErrorString("Failed to connect to ENet Broadcast peer\n");
+		Con_PrintError("Failed to connect to ENet Broadcast peer");
 		return;
 	}
-	else OutputDebugString("Connected to ENet broadcast peer\n");
 
 	if (enet_host_service(Client, &event, 1000) > 0)
 	{
 		if (event.type == ENET_EVENT_TYPE_CONNECT)
 		{
-			OutputDebugString("Connected for broadcast!!\n");
+			Com_PrintDebugMessage("Connected for Broadcast");
 
+			messageHeader newHeader;
+			newHeader.messageType = AVP_BROADCAST;
+			newHeader.fromID = 255;
+			newHeader.toID = 255;
+
+			memcpy(packetBuffer, &newHeader, sizeof(messageHeader));
+/*
 			packetBuffer[0] = AVP_BROADCAST;
 			*(int*)&packetBuffer[1] = 255;
 			*(int*)&packetBuffer[5] = 255;
 
-			/* create ENet packet */
+			// create ENet packet
 			ENetPacket * packet = enet_packet_create(packetBuffer, 
 					MESSAGEHEADERSIZE, // size of packet 
 					ENET_PACKET_FLAG_RELIABLE);
+*/
+			// create ENet packet
+			ENetPacket * packet = enet_packet_create(packetBuffer, sizeof(messageHeader), ENET_PACKET_FLAG_RELIABLE);
 
 			enet_peer_send(Peer, 0, packet);
 			enet_host_flush(Client);
@@ -793,39 +820,39 @@ void FindAvPSessions()
 	
 	// need to wait here for servers to respond with session info
 
-	/* each server SHOULD only reply once? */
+	// each server SHOULD only reply once?
 	while (enet_host_service (Client, &event, 2000) > 0)
 	{
 		if (event.type == ENET_EVENT_TYPE_RECEIVE)
 		{
 //			OutputDebugString("received session info?\n");
 
-			memcpy(&receiveBuffer[0], (unsigned char*)event.packet->data, event.packet->dataLength);
-			messageType = (char)receiveBuffer[0];
+			memcpy(&receiveBuffer[0], static_cast<uint8_t*> (event.packet->data), event.packet->dataLength);
+			messageType = static_cast<uint8_t> (receiveBuffer[0]);
 
 			if (messageType == AVP_SESSIONDATA)
 			{
-				OutputDebugString("server sent us session data\n");
+				Com_PrintDebugMessage("server sent us session data");
 
-				/* get the hosts ip address for later use */
+				// get the hosts ip address for later use
 				enet_address_get_host_ip(&event.peer->address, SessionData[NumberOfSessionsFound].hostAddress, 16);
 
-				/* grab the session description struct */
-				assert(sizeof(DPSESSIONDESC2) == (event.packet->dataLength - MESSAGEHEADERSIZE));
-				memcpy((DPSESSIONDESC2*)&tempSession, &receiveBuffer[MESSAGEHEADERSIZE], (event.packet->dataLength - MESSAGEHEADERSIZE));
+				// grab the session description struct
+				assert(sizeof(NET_SESSIONDESC) == (event.packet->dataLength - MESSAGEHEADERSIZE));
+				memcpy((NET_SESSIONDESC*)&tempSession, &receiveBuffer[MESSAGEHEADERSIZE], (event.packet->dataLength - MESSAGEHEADERSIZE));
 
 				gamestyle = (tempSession.dwUser2 >> 8) & 0xff;
 				level = tempSession.dwUser2  & 0xff;
 
-				//split the session name up into its parts
-				if(level>=100)
+				// split the session name up into its parts
+				if (level>=100)
 				{
 					char* colon_pos;
-					//custom level name may be at the start
+					// custom level name may be at the start
 					strcpy(levelName,tempSession.lpszSessionNameA);
 
 					colon_pos = strchr(levelName,':');
-					if(colon_pos)
+					if (colon_pos)
 					{
 						*colon_pos = 0;
 						strcpy(sessionName,colon_pos+1);
@@ -845,26 +872,26 @@ void FindAvPSessions()
 
 				SessionData[NumberOfSessionsFound].Guid	= tempSession.guidInstance;
 
-				if(tempSession.dwCurrentPlayers < tempSession.dwMaxPlayers)
-					SessionData[NumberOfSessionsFound].AllowedToJoin =TRUE;
+				if (tempSession.dwCurrentPlayers < tempSession.dwMaxPlayers)
+					SessionData[NumberOfSessionsFound].AllowedToJoin = TRUE;
 				else
-					SessionData[NumberOfSessionsFound].AllowedToJoin =FALSE;
+					SessionData[NumberOfSessionsFound].AllowedToJoin = FALSE;
 
-				//multiplayer version number (possibly)
-				if(tempSession.dwUser1 != AVP_MULTIPLAYER_VERSION)
+				// multiplayer version number (possibly)
+				if (tempSession.dwUser1 != AVP_MULTIPLAYER_VERSION)
 				{
-					float version = 1.0f + tempSession.dwUser1/100.0f;
-					SessionData[NumberOfSessionsFound].AllowedToJoin =FALSE;
- 					sprintf(SessionData[NumberOfSessionsFound].Name,"%s (V %.2f)",sessionName,version);
+					float version = 1.0f + tempSession.dwUser1 / 100.0f;
+					SessionData[NumberOfSessionsFound].AllowedToJoin = FALSE;
+ 					sprintf(SessionData[NumberOfSessionsFound].Name,"%s (V %.2f)", sessionName, version);
 				}
 				else
 				{
-					//get the level number in our list of levels (assuming we have the level)
-					int local_index = GetLocalMultiplayerLevelIndex(level,levelName,gamestyle);
+					// get the level number in our list of levels (assuming we have the level)
+					int local_index = GetLocalMultiplayerLevelIndex(level, levelName, gamestyle);
 
-					if(local_index<0)
+					if (local_index < 0)
 					{
-						//we don't have the level , so ignore this session
+						// we don't have the level , so ignore this session
 						return;
 					}
 						
@@ -883,39 +910,38 @@ void FindAvPSessions()
 	enet_host_destroy(Client);
 }
 
-HRESULT DPlayCreateSession(LPTSTR lptszSessionName, int maxPlayers, int dwUser1, int dwUser2)
+HRESULT Net_CreateSession(LPTSTR lptszSessionName, int maxPlayers, int dwUser1, int dwUser2)
 {
-	ZeroMemory(&dpSession, sizeof(DPSESSIONDESC2));
-	dpSession.dwSize = sizeof(DPSESSIONDESC2);
+	ZeroMemory(&netSession, sizeof(NET_SESSIONDESC));
+	netSession.dwSize = sizeof(NET_SESSIONDESC);
 
 #ifdef UNICODE
 	strcpy(dpDesc.lpszSessionName, lptszSessionName);
 #else
-	strcpy(dpSession.lpszSessionNameA, lptszSessionName);
+	strcpy(netSession.lpszSessionNameA, lptszSessionName);
 #endif
-	dpSession.dwMaxPlayers = maxPlayers;
+	netSession.dwMaxPlayers = maxPlayers;
 
-	dpSession.dwUser1 = dwUser1;
-	dpSession.dwUser2 = dwUser2;
+	netSession.dwUser1 = dwUser1;
+	netSession.dwUser2 = dwUser2;
 
-	/* should this be done here? */
-	dpSession.dwCurrentPlayers = 1;
+	// should this be done here? */
+	netSession.dwCurrentPlayers = 1;
 
 #ifdef WIN32
-	CoCreateGuid(&dpSession.guidInstance);
+	CoCreateGuid(&netSession.guidInstance);
 #endif
 
 	// set the application guid
-	dpSession.guidApplication = AvPGuid;
+	netSession.guidApplication = AvPGuid;
 
-	/* return 0 on success */
-	return DP_OK;
+	return NET_OK;
 }
 
-BOOL DirectPlay_UpdateSessionDescForLobbiedGame(int gamestyle,int level)
+BOOL Net_UpdateSessionDescForLobbiedGame(int gamestyle,int level)
 {
 #if 0
-	DPSESSIONDESC2 sessionDesc;
+	NET_SESSIONDESC sessionDesc;
 	HRESULT hr;
 	if(!DirectPlay_GetSessionDesc(&sessionDesc)) return 0;
 
@@ -943,7 +969,7 @@ BOOL DirectPlay_UpdateSessionDescForLobbiedGame(int gamestyle,int level)
 		sessionDesc.dwUser1 = AVP_MULTIPLAYER_VERSION;
 		
 		hr = IDirectPlayX_SetSessionDesc(glpDP,&sessionDesc,0);
-		if(hr!=DP_OK)
+		if(hr!=NET_OK)
 		{
 			return FALSE;
 		}

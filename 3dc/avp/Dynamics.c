@@ -5984,8 +5984,8 @@ int ParticleDynamics(PARTICLE *particlePtr, VECTORCH *obstacleNormalPtr, int *mo
 									ALIEN_STATUS_BLOCK *alienStatus = (ALIEN_STATUS_BLOCK *)sbPtr->SBdataptr;
 									if(particlePtr->ParticleID==PARTICLE_FLAME)
 									{
-										extern DPID AVPDPNetID;
-										alienStatus->aliensIgniterId=AVPDPNetID;
+										extern DPID AvPNetID;
+										alienStatus->aliensIgniterId=AvPNetID;
 									}
 									else
 									{

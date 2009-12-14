@@ -19,11 +19,11 @@
 #include "ourasert.h"
 #include "iofocus.h"
 #include <time.h>
-//#include "winnls.h"
 #include "GammaControl.h"
 #include "AvP_MP_Config.h"
 #include "psnd.h"
 #include "savegame.h"
+#include "networking.h"
 
 #if 0
 #undef BRIGHTNESS_CHANGE_SPEED
@@ -63,12 +63,12 @@ extern void D3D_FadeDownScreen(int brightness, int colour);
 extern void PlayIntroSequence(void);
 
 extern void MinimalNetCollectMessages(void);
-
-extern int DirectPlay_HostGame(char *playerName, char *sessionName,int species,int gamestyle,int level);
-extern int DirectPlay_JoinGame(void);
-extern int DirectPlay_ConnectToSession(int sessionNumber, char *playerName);
-extern int DirectPlay_Disconnect(void);
-
+/*
+extern int Net_HostGame(char *playerName, char *sessionName,int species,int gamestyle,int level);
+extern int Net_JoinGame(void);
+extern int Net_ConnectToSession(int sessionNumber, char *playerName);
+extern int Net_Disconnect(void);
+*/
 extern void ShowSplashScreens(void);
 extern void Show_WinnerScreen(void);
 
@@ -124,14 +124,14 @@ void ThisFramesRenderingHasFinished(void);
 void EndMenuMusic(void);
 extern void EndMenuBackgroundFmv(void);
 void PlayFMV(const char *filenamePtr);
-int DirectPlay_ConnectingToLobbiedGame(char* playerName);
-int DirectPlay_ConnectingToSession();
+int Net_ConnectingToLobbiedGame(char* playerName);
+int Net_ConnectingToSession();
 extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale);
 extern int AnyCheatModesAllowed(void);
 void LoadDeviceAndVideoModePreferences() ;
 int NumberOfAvailableLevels(I_PLAYER_TYPE playerID);
 int LevelMostLikelyToPlay(I_PLAYER_TYPE playerID);
-void DirectPlay_EnumConnections();
+void Net_EnumConnections();
 extern void MakeConnectionSelectMenu();
 int MaxDifficultyLevelAllowed(I_PLAYER_TYPE playerID, int level);
 static int HeightOfMenuElement(AVPMENU_ELEMENT *elementPtr);
@@ -557,7 +557,7 @@ extern void AvP_UpdateMenus(void)
 			This is bad.
 			Best leave the game and return to the main menus.
 			*/
-			DirectPlay_Disconnect();
+			Net_Disconnect();
 			SetupNewMenu(AVPMENU_MAIN);
 			return;
 		}
@@ -625,7 +625,7 @@ extern void AvP_UpdateMenus(void)
 		if(LobbiedGame)
 		{
 			extern char MP_PlayerName[];
-			retval=DirectPlay_ConnectingToLobbiedGame(MP_PlayerName);
+			retval=Net_ConnectingToLobbiedGame(MP_PlayerName);
 			if(!retval)
 			{
 				//player has aborted , go back a menu
@@ -635,8 +635,9 @@ extern void AvP_UpdateMenus(void)
 		}
 		else
 		{
-			retval=DirectPlay_ConnectingToSession();
-			if(!retval)
+			//retval = Net_ConnectingToSession();
+			//if(!retval)
+			if (Net_ConnectingToSession() != NET_FAIL)
 			{
 				//player has aborted , go back a menu
 				SetupNewMenu(AVPMENU_MULTIPLAYER);
@@ -652,10 +653,10 @@ extern void AvP_UpdateMenus(void)
 	}
 	else if (AvPMenus.CurrentMenu == AVPMENU_MULTIPLAYERSELECTSESSION)
 	{
-		extern BOOL DirectPlay_UpdateSessionList(int * SelectedItem);
+		extern BOOL Net_UpdateSessionList(int * SelectedItem);
 		int selection=AvPMenus.CurrentlySelectedElement;
 
-		if(DirectPlay_UpdateSessionList(&selection))
+		if(Net_UpdateSessionList(&selection))
 		{
 			//session list has changed , so we need to set the menu again
 			SetupNewMenu(AVPMENU_MULTIPLAYERSELECTSESSION);
@@ -933,7 +934,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 				//save ip address (if it has been set)
 				extern char IPAddressString[]; 
 				SaveIPAddress(IP_Address_Name,IPAddressString);
-				DirectPlay_JoinGame();
+				Net_JoinGame();
 			}
 			MakeSelectSessionMenu();
 			break;
@@ -971,7 +972,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 				return;
 			}
 
-			DirectPlay_EnumConnections();
+			Net_EnumConnections();
 			MakeConnectionSelectMenu();
 			break;
 		}
@@ -2294,7 +2295,7 @@ static void ActUponUsersInput(void)
 					NetSendMessages();
 					if(!LobbiedGame)
 					{
-						DirectPlay_Disconnect();
+						Net_Disconnect();
 					}
 					break;
 				}
@@ -3002,7 +3003,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 		{
 			if (interactionID == AVPMENU_ELEMENT_INTERACTION_SELECT)
 			{
-				extern int DirectPlay_HostGame(char *playerName, char *sessionName,int species,int gamestyle,int level);
+				extern int Net_HostGame(char *playerName, char *sessionName,int species,int gamestyle,int level);
 				extern char MP_PlayerName[];
 				extern char MP_SessionName[];
 				extern int MP_Species;
@@ -3017,10 +3018,10 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 				
 				AvP.Difficulty = 1;
 
-				if(DirectPlay_HostGame(MP_PlayerName,MP_SessionName,MP_Species,netGameData.gameType,netGameData.levelNumber))
+				if (Net_HostGame(MP_PlayerName,MP_SessionName,MP_Species,netGameData.gameType,netGameData.levelNumber) == NET_OK)
 				{
 					AvPMenus.MenusState = MENUSSTATE_STARTGAME;
-					if(netGameData.gameType==NGT_Coop)
+					if (netGameData.gameType==NGT_Coop)
 						SetLevelToLoadForCooperative(netGameData.levelNumber);
 					else
 						SetLevelToLoadForMultiplayer(netGameData.levelNumber);
@@ -3064,7 +3065,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 					braket_pos=strrchr(MP_SessionName,'(');
 					if(braket_pos) *braket_pos=0;
 
-					if(DirectPlay_ConnectToSession(s,MP_PlayerName))
+					if (Net_ConnectToSession(s,MP_PlayerName) != NET_FAIL)
 						SetupNewMenu(elementPtr->MenuToGoTo);
 				}
 			}
@@ -3108,6 +3109,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 			if (interactionID == AVPMENU_ELEMENT_INTERACTION_SELECT)
 			{
  				netGameData.connectionType=elementPtr->Value;
+/*
 				if(netGameData.connectionType == CONN_Mplayer)
 				{
 					//exit the game and launch the mplayer stuff
@@ -3118,6 +3120,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 					break;
 				}											   
 				else
+*/
 				{
  					SetupNewMenu(elementPtr->MenuToGoTo);
 				}

@@ -21,11 +21,7 @@ extern "C" {
 #include "kshape.h"
 #include "eax.h"
 #include "vmanpset.h"
-
-#ifdef WIN32
-	#include <shlobj.h>
-	#include <shlwapi.h>
-#endif
+#include "networking.h"
 
 extern "C++"
 {
@@ -45,15 +41,10 @@ extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern void DeleteRenderMemory();
 extern void ChangeWindowsSize(int width, int height);
 extern int WindowMode;
-
 int	VideoModeColourDepth;
 int	NumAvailableVideoModes;
-
 static HRESULT LastError;
-
 D3DINFO d3d;
-D3DTEXTURE consoleText;
-
 
 /* TGA header structure */
 #pragma pack(1)
@@ -74,12 +65,11 @@ struct TGA_HEADER
 };
 #pragma pack()
 
-TGA_HEADER TgaHeader = {0};
+static TGA_HEADER TgaHeader = {0};
 
 void ColourFillBackBuffer(int FillColour) 
 {
-	D3DCOLOR colour = FillColour;
-	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET, colour, 1.0f, 0 );
+	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET, FillColour, 1.0f, 0 );
 }
 
 char* GetDeviceName() 
@@ -117,12 +107,12 @@ D3DFORMAT SelectedAdapterFormat = D3DFMT_X8R8G8B8;
 D3DFORMAT SelectedDisplayFormat = D3DFMT_X8R8G8B8;
 
 bool usingStencil = false;
-
+/*
 void LoadConsoleFont()
 {
 	D3DXIMAGE_INFO imageInfo;
 
-	/* try find a png file at given path */
+	// try find a png file at given path
 	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice, 
 		"aa_font.png", 
 		D3DX_DEFAULT,			// width
@@ -146,7 +136,7 @@ void LoadConsoleFont()
 		consoleText = NULL;
 	}
 }
-
+*/
 LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int *height)
 {
 	LPDIRECT3DTEXTURE9	tempTexture = NULL;
@@ -155,7 +145,7 @@ LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int
 	std::string fullFileName(fileName);
 	fullFileName += ".png";
 
-	/* try find a png file at given path */
+	// try find a png file at given path
 	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice, 
 		fullFileName.c_str(), 
 		D3DX_DEFAULT,			// width
@@ -1170,6 +1160,7 @@ BOOL InitialiseDirect3DImmediateMode()
 	CreateVolatileResources();
 
 	Con_Init();
+	Net_Initialise();
 
 	LogString("Initialised Direct3D succesfully");
 	return TRUE;

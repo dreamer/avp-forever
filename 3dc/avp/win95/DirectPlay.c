@@ -40,7 +40,7 @@ extern int DetermineAvailableCharacterTypes(BOOL ConsiderUsedCharacters);
 										 
 extern BOOL GetGDISurface();
 extern BOOL LeaveGDISurface();
-void FindAvPSessions(void);
+void Net_FindAvPSessions(void);
 
 LPDIRECTPLAYLOBBY3 lpDPlayLobby;
 
@@ -58,10 +58,10 @@ BOOL DirectPlay_GetSessionDesc(LPDPSESSIONDESC2 lpSessionDesc)
 
 	//now get the session description
 	hr=IDirectPlayX_GetSessionDesc(glpDP,sessionDescBuffer,&dwSize);
-	if(hr==DP_OK)
+	if(hr==NET_OK)
 	{
 		//copy the contents of the description
-		memcpy(lpSessionDesc,sessionDescBuffer,sizeof(DPSESSIONDESC2));
+		memcpy(lpSessionDesc,sessionDescBuffer,sizeof(NET_SESSIONDESC));
 		DeallocateMem(sessionDescBuffer);
 		return TRUE;
 	}
@@ -70,9 +70,9 @@ BOOL DirectPlay_GetSessionDesc(LPDPSESSIONDESC2 lpSessionDesc)
 	return 0;
 }
 
-BOOL DirectPlay_UpdateSessionDescForLobbiedGame(int gamestyle,int level)
+BOOL Net_UpdateSessionDescForLobbiedGame(int gamestyle,int level)
 {
-	DPSESSIONDESC2 sessionDesc;
+	NET_SESSIONDESC sessionDesc;
 	HRESULT hr;
 	if(!DirectPlay_GetSessionDesc(&sessionDesc)) return 0;
 
@@ -100,7 +100,7 @@ BOOL DirectPlay_UpdateSessionDescForLobbiedGame(int gamestyle,int level)
 		sessionDesc.dwUser1 = AVP_MULTIPLAYER_VERSION;
 		
 		hr = IDirectPlayX_SetSessionDesc(glpDP,&sessionDesc,0);
-		if(hr!=DP_OK)
+		if(hr!=NET_OK)
 		{
 			return FALSE;
 		}
@@ -111,7 +111,7 @@ BOOL DirectPlay_UpdateSessionDescForLobbiedGame(int gamestyle,int level)
 	return TRUE;
 }
 
-int DirectPlay_HostGame(char *playerName, char *sessionName,int species,int gamestyle,int level)
+int Net_HostGame(char *playerName, char *sessionName,int species,int gamestyle,int level)
 {
 	int maxPlayers=DetermineAvailableCharacterTypes(FALSE);
 	if(maxPlayers<1) maxPlayers=1;
@@ -143,12 +143,12 @@ int DirectPlay_HostGame(char *playerName, char *sessionName,int species,int game
 					//add the level name to the beginning of the session name
 					char name_buffer[100];
 					sprintf(name_buffer,"%s:%s",customLevelName,sessionName);
-					if ((DPlayCreateSession(name_buffer,maxPlayers,AVP_MULTIPLAYER_VERSION,(gamestyle<<8)|100)) != DP_OK) return 0;
+					if ((Net_CreateSession(name_buffer,maxPlayers,AVP_MULTIPLAYER_VERSION,(gamestyle<<8)|100)) != NET_OK) return 0;
 				}
 				else
 				{
  //					static TCHAR sessionName[] = "AvP test session";
-					if ((DPlayCreateSession(sessionName,maxPlayers,AVP_MULTIPLAYER_VERSION,(gamestyle<<8)|level)) != DP_OK) return 0;
+					if ((Net_CreateSession(sessionName,maxPlayers,AVP_MULTIPLAYER_VERSION,(gamestyle<<8)|level)) != NET_OK) return 0;
 				}
 			}
 
@@ -157,17 +157,17 @@ int DirectPlay_HostGame(char *playerName, char *sessionName,int species,int game
 		else
 		{
 			//for lobbied games we need to fill in the level number into the existing session description
-			if(!DirectPlay_UpdateSessionDescForLobbiedGame(gamestyle,level)) return 0;
+			if(!Net_UpdateSessionDescForLobbiedGame(gamestyle,level)) return 0;
 		}
 
-		if(!DirectPlay_CreatePlayer(playerName,playerName)) return 0;
+		if(!Net_CreatePlayer(playerName,playerName)) return 0;
 
 	}
 	else
 	{
 		//fake multiplayer
 		//need to set the id to an non zero value
-		AVPDPNetID=100;
+		AvPNetID=100;
 
 		ZeroMemory(&AVPDPplayerName,sizeof(DPNAME));
 		AVPDPplayerName.dwSize = sizeof(DPNAME);
@@ -179,7 +179,7 @@ int DirectPlay_HostGame(char *playerName, char *sessionName,int species,int game
 	return 1;
 }
 
-int DirectPlay_JoinGame(void)
+int Net_JoinGame(void)
 {
 	/* This function is intended to handle everything that is required to start a new multiplayer game. */
 	CoInitialize(NULL);
@@ -195,17 +195,17 @@ int DirectPlay_JoinGame(void)
 	
 
 	/* enum sessions */
-	FindAvPSessions();
+	Net_FindAvPSessions();
 	return NumberOfSessionsFound;
 }
 
-int DirectPlay_ConnectToSession(int sessionNumber, char *playerName)
+int Net_ConnectToSession(int sessionNumber, char *playerName)
 {
 	extern unsigned char DebouncedKeyboardInput[];
 	
-	if (FAILED(DPlayOpenSession((LPGUID)&SessionData[sessionNumber].Guid))) return 0;
+	if (FAILED(Net_OpenSession((LPGUID)&SessionData[sessionNumber].Guid))) return 0;
 	
-	if(!DirectPlay_CreatePlayer(playerName,playerName)) return 0;
+	if(!Net_CreatePlayer(playerName,playerName)) return 0;
 	
 	InitAVPNetGameForJoin();
 
@@ -224,10 +224,10 @@ int DirectPlay_ConnectingToSession()
 	if(DebouncedKeyboardInput[KEY_ESCAPE])
 	{
 		//abort attempt to join game
-		if(AVPDPNetID)
+		if(AvPNetID)
 		{
-			IDirectPlayX_DestroyPlayer(glpDP, AVPDPNetID);
-			AVPDPNetID = NULL;
+			IDirectPlayX_DestroyPlayer(glpDP, AvPNetID);
+			AvPNetID = NULL;
 		}
 		DPlayClose();
 		AvP.Network = I_No_Network;	
@@ -243,7 +243,7 @@ int DirectPlay_ConnectingToSession()
 	return 1;
 }
 
-int DirectPlay_InitLobbiedGame()
+int Net_InitLobbiedGame()
 {
 	HRESULT hr;
 	DWORD dwSize;
@@ -267,7 +267,7 @@ int DirectPlay_InitLobbiedGame()
     
  	hr= IDirectPlayLobby_GetConnectionSettings(lpDPlayLobby,0,lpConnectionSettings, &dwSize);    
 	
-	if(hr!=DP_OK) return 0;
+	if(hr!=NET_OK) return 0;
 
 
 	//Make sure the host migrration , and keep alive flags are set for this session
@@ -276,7 +276,7 @@ int DirectPlay_InitLobbiedGame()
 		lpConnectionSettings->lpSessionDesc->dwFlags|=(DPSESSION_KEEPALIVE|DPSESSION_MIGRATEHOST);
 		lpConnectionSettings->lpSessionDesc->dwUser1 = AVP_MULTIPLAYER_VERSION;
 		hr=IDirectPlayLobby_SetConnectionSettings(lpDPlayLobby,0,0,lpConnectionSettings);
-		if(hr!=DP_OK)
+		if(hr!=NET_OK)
 		{
 			LOGDXFMT(("Set connection settings : %x",hr));	
 		}
@@ -290,7 +290,7 @@ int DirectPlay_InitLobbiedGame()
 	//connect to the lobbied game
 	hr = IDirectPlayLobby_ConnectEx(lpDPlayLobby,0,&IID_IDirectPlay4A, &glpDP, NULL);
 
-	if(hr!=DP_OK)
+	if(hr!=NET_OK)
 	{
 		LOGDXFMT(("Connect Ex %x\n",hr));	
 		return 0;
@@ -327,7 +327,7 @@ int DirectPlay_ConnectToLobbiedGame(char *playerName)
 	
 	
 	//create our player
-	if(!DirectPlay_CreatePlayer(playerName,playerName))
+	if(!Net_CreatePlayer(playerName,playerName))
 	{
 		LOGDXFMT(("Failed to create player"));	
 		
@@ -345,8 +345,8 @@ int DirectPlay_ConnectToLobbiedGame(char *playerName)
 		if(DebouncedKeyboardInput[KEY_ESCAPE])
 		{
 			//abort attempt to join game
-			IDirectPlayX_DestroyPlayer(glpDP, AVPDPNetID);
-			AVPDPNetID = NULL;
+			IDirectPlayX_DestroyPlayer(glpDP, AvPNetID);
+			AvPNetID = NULL;
 			AvP.Network = I_No_Network;	
 			return 0;
 		}
@@ -354,19 +354,19 @@ int DirectPlay_ConnectToLobbiedGame(char *playerName)
 	return 1;
 }
 #else
-int DirectPlay_ConnectingToLobbiedGame(char* playerName)
+int Net_ConnectingToLobbiedGame(char* playerName)
 {
 	extern unsigned char DebouncedKeyboardInput[];
-	DPSESSIONDESC2 sessionDesc;
+	NET_SESSIONDESC sessionDesc;
 
 	//see if the player has got bored of waiting
 	if(DebouncedKeyboardInput[KEY_ESCAPE])
 	{
 		//abort attempt to join game
-		if(AVPDPNetID)
+		if(AvPNetID)
 		{
-			IDirectPlayX_DestroyPlayer(glpDP, AVPDPNetID);
-			AVPDPNetID = NULL;
+			IDirectPlayX_DestroyPlayer(glpDP, AvPNetID);
+			AvPNetID = NULL;
 		}
 		AvP.Network = I_No_Network;	
 		return 0;
@@ -420,7 +420,7 @@ int DirectPlay_ConnectingToLobbiedGame(char* playerName)
 			netGameData.joiningGameStatus = JOINNETGAME_WAITFORDESC;
 
 			//we can now create our player
-			if(!DirectPlay_CreatePlayer(playerName,playerName))
+			if(!Net_CreatePlayer(playerName,playerName))
 			{
 				LOGDXFMT(("Failed to create player"));	
 				return 0;
@@ -443,7 +443,7 @@ int DirectPlay_ConnectingToLobbiedGame(char* playerName)
 
 #endif
 
-int DirectPlay_Disconnect(void)
+int Net_Disconnect(void)
 {
 	DPlayClose();
 	if (glpDP) IDirectPlayX_Release(glpDP);
@@ -533,12 +533,12 @@ BOOL FAR PASCAL EnumSessionsCallback(
     return (TRUE);
 }
 
-void FindAvPSessions(void)
+void Net_FindAvPSessions(void)
 {
-	DPSESSIONDESC2 sessionDesc;
+	NET_SESSIONDESC sessionDesc;
 
-	ZeroMemory(&sessionDesc, sizeof(DPSESSIONDESC2));
-	sessionDesc.dwSize = sizeof(DPSESSIONDESC2);
+	ZeroMemory(&sessionDesc, sizeof(NET_SESSIONDESC));
+	sessionDesc.dwSize = sizeof(NET_SESSIONDESC);
 	sessionDesc.guidApplication = *glpGuid;
 
 
@@ -566,7 +566,7 @@ BOOL FAR PASCAL EnumSPCallback(
 {
 	HRESULT hr = DPlayCreate(lpConnection);
 	//make sure we can actually use this service provider
-	if(hr==DP_OK)
+	if(hr==NET_OK)
 	{
 		if (IsEqualGUID(lpguidSP, &DPSPGUID_TCPIP))
 		{
@@ -608,7 +608,7 @@ BOOL FAR PASCAL EnumSPAndConnectCallback(
 		//switch to gdi surface in case any dialog boxes are brought up
 		GetGDISurface();
 		hr=DPlayCreate(lpConnection);
-		if(hr==DP_OK)
+		if(hr==NET_OK)
 		{
 			ConnectionOk=TRUE;
 		}
@@ -618,7 +618,7 @@ BOOL FAR PASCAL EnumSPAndConnectCallback(
 	return(TRUE);
 }
 
-void DirectPlay_EnumConnections()
+void Net_EnumConnections()
 {
 	netGameData.tcpip_available=0;
 	netGameData.ipx_available=0;
@@ -737,7 +737,7 @@ BOOL InitialiseConnection()
 			
 			if (lpAddress) DeallocateMem(lpAddress);
 
-			return hr==DP_OK;
+			return hr==NET_OK;
 
 			FAILURE:
 
@@ -761,7 +761,7 @@ BOOL InitialiseConnection()
 	return ConnectionOk;
 }
 
-static BOOL DirectPlay_CreatePlayer(char* FormalName,char* FriendlyName)
+static BOOL Net_CreatePlayer(char* FormalName,char* FriendlyName)
 {
 	HRESULT hr;
 
@@ -774,7 +774,7 @@ static BOOL DirectPlay_CreatePlayer(char* FormalName,char* FriendlyName)
 	hr = IDirectPlayX_CreatePlayer
 	(
 		glpDP,			   /* our dp object*/
-		&AVPDPNetID,	   /* our ID */	
+		&AvPNetID,	   /* our ID */	
 		&AVPDPplayerName,  /* our name */	
 		NULL, 			   /* event */	
 		NULL,			   /* player data */
@@ -782,7 +782,7 @@ static BOOL DirectPlay_CreatePlayer(char* FormalName,char* FriendlyName)
 		0				   /* flags */
 	);
 
-	if (hr == DP_OK) return 1;
+	if (hr == NET_OK) return 1;
 	else return 0;	
 }
 
@@ -792,7 +792,7 @@ static BOOL DirectPlay_CreatePlayer(char* FormalName,char* FriendlyName)
 #if 0
 void DirectPlay_ExitLobbiedGame()
 {
-	HRESULT hres = IDirectPlayX_DestroyPlayer(glpDP, AVPDPNetID);
+	HRESULT hres = IDirectPlayX_DestroyPlayer(glpDP, AvPNetID);
 
 	if(AvP.Network == I_Host)
 	{
@@ -809,7 +809,7 @@ void DirectPlay_ExitLobbiedGame()
 
 				CoCreateInstance(&CLSID_DirectPlayLobby, NULL, CLSCTX_INPROC_SERVER, &IID_IDirectPlayLobby3A, (LPVOID*)&lpDPlayLobby);
 			    hr = IDirectPlayLobby_ConnectEx(lpDPlayLobby,0,&IID_IDirectPlay4A, &glpDP, NULL);
-				if(hr!=DP_OK)
+				if(hr!=NET_OK)
 				{
 					LOGDXFMT(("Connect Ex : %x",hr));	
 				}
@@ -817,8 +817,8 @@ void DirectPlay_ExitLobbiedGame()
 				//now been demoted to a client
 				LobbiedGame=LobbiedGame_Client;
 
-//				DirectPlay_Disconnect();
-//				DirectPlay_InitLobbiedGame();
+//				Net_Disconnect();
+//				Net_InitLobbiedGame();
 			
 //				DPlayCreate(NULL);
 				
@@ -828,12 +828,12 @@ void DirectPlay_ExitLobbiedGame()
 		}
 
 	}
-	AVPDPNetID = NULL;
+	AvPNetID = NULL;
 }
 #endif
 
 
-BOOL DirectPlay_UpdateSessionList(int * SelectedItem)
+BOOL Net_UpdateSessionList(int * SelectedItem)
 {
 	int i;
 	GUID OldSessionGuids[MAX_NO_OF_SESSIONS];
@@ -847,7 +847,7 @@ BOOL DirectPlay_UpdateSessionList(int * SelectedItem)
 	}
 
 	//do the session enumeration thing
-	FindAvPSessions();
+	Net_FindAvPSessions();
 
 	//Have the available sessions changed?
 	//first check number of sessions

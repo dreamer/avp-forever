@@ -13,7 +13,7 @@ extern "C" {
 #include <assert.h>
 
 extern D3DINFO d3d;
-extern D3DTEXTURE consoleText;
+//extern D3DTEXTURE consoleText;
 
 extern "C++"{
 
@@ -584,6 +584,58 @@ BOOL BeginD3DScene()
 	LastError = d3d.lpD3DDevice->TestCooperativeLevel();
 	if (FAILED(LastError)) 
 	{
+
+		ReleaseVolatileResources();
+		
+		/* disable XInput */
+		XInputEnable( false );
+
+		while (1) 
+		{
+			if (D3DERR_DEVICENOTRESET == LastError) 
+			{
+//				OutputDebugString("D3D device not reset\n");
+//				if (ReleaseVolatileResources() == TRUE) 
+				{
+					OutputDebugString("Releasing resources for a device reset..\n");
+					/* release fmv textures */
+					//ReleaseAllFMVTexturesForDeviceReset();
+
+					/* disable XInput */
+//					XInputEnable( false );
+
+					if (FAILED( d3d.lpD3DDevice->Reset(&d3d.d3dpp))) 
+					{
+						OutputDebugString("Couldn't reset device\n");
+					}
+					else 
+					{	
+						OutputDebugString("We have reset the device. recreating resources..\n");
+						CreateVolatileResources();
+
+						/* reload fmv textures */
+						//RecreateAllFMVTexturesAfterDeviceReset();
+
+						/* re-enable XInput */
+						XInputEnable( true );
+						break;
+					}
+				}
+			}
+			else if (D3DERR_DEVICELOST == LastError)
+			{
+				OutputDebugString("D3D device lost\n");
+			}
+			Sleep(50);
+//			continue;
+		}
+	}
+
+#if 0
+	// check for lost device
+	LastError = d3d.lpD3DDevice->TestCooperativeLevel();
+	if (FAILED(LastError)) 
+	{
 		while (1) 
 		{
 			if (D3DERR_DEVICENOTRESET == LastError) 
@@ -624,7 +676,7 @@ BOOL BeginD3DScene()
 //			continue;
 		}
 	}
-
+#endif
 	LastError = d3d.lpD3DDevice->BeginScene();
 
 	if (FAILED(LastError)) 
@@ -705,8 +757,10 @@ void ChangeTexture(const int texture_id)
 
 	else if (texture_id == CONSOLE_TEX)
 	{
+/*
 		LastError = d3d.lpD3DDevice->SetTexture(0, consoleText);
 		if (!FAILED(LastError)) currentTextureId = CONSOLE_TEX;
+*/
 		return;
 	}
 
@@ -8022,39 +8076,46 @@ void DrawQuad(int x, int y, int width, int height, int colour)
 	OUTPUT_TRIANGLE(1,2,3, 4);
 }
 
-void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha) 
+void DrawGlowyTest(int topX, int topY, int length, int alpha)
 {
+	int image_num = AVPMENUGFX_GLOWY_MIDDLE;
+
 	CheckVertexBuffer(4, image_num, TRANSLUCENCY_GLOWING);
 
-	/* textures actual height/width (whether it's non power of two or not) */
 	int textureWidth = AvPMenuGfxStorage[image_num].Width;
 	int textureHeight = AvPMenuGfxStorage[image_num].Height;
 
-	/* we pad non power of two textures to pow2 */
 	int texturePOW2Width = AvPMenuGfxStorage[image_num].newWidth;
 	int texturePOW2Height = AvPMenuGfxStorage[image_num].newHeight;
 
 	alpha = (alpha / 256);
-	if (alpha > 255) alpha = 255;
+	if (alpha > 255) 
+		alpha = 255;
 	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 
-	/* game used to render menus at 640x480. this allows us to use any resolution we want */
+	// game used to render menus at 640x480. this allows us to use any resolution we want
+//	int quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / textureWidth) * 640));
+//	int quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / textureHeight) * 480));
+
 	int quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / textureWidth) * 640));
 	int quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / textureHeight) * 480));
 
-	int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0) * topX);
-	int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0) * topY);
-/*
-	char buf[200];
-	sprintf(buf, "oldX: %d, oldY: %d - newX: %d, newY: %d\n", topX, topY, quadX, quadY);
-	OutputDebugString(buf);
-*/
-	topX = quadX;
-	topY = quadY;
+	length = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / length) * 640));
+
+//	int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0) * topX);
+//	int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0) * topY);
+
+//	topX = quadX;
+//	topY = quadY;
+
+	int testX, testY;
+
+	testX = ((ScreenDescriptorBlock.SDB_Width / 640.0f) * topX);
+	testY = ((ScreenDescriptorBlock.SDB_Height / 480.0f) * topY);
 
 	// bottom left
-	mainVertex[vb].sx = (float)topX - 0.5f;
-	mainVertex[vb].sy = (float)topY + quadHeight - 0.5f;
+	mainVertex[vb].sx = (float)(testX - 0.5f);
+	mainVertex[vb].sy = (float)(testY + quadHeight) - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8065,8 +8126,8 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 	vb++;
 
 	// top left
-	mainVertex[vb].sx = (float)topX - 0.5f;
-	mainVertex[vb].sy = (float)topY - 0.5f;
+	mainVertex[vb].sx = (float)(testX - 0.5f);
+	mainVertex[vb].sy = (float)(testY - 0.5f);
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8077,8 +8138,8 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 	vb++;
 
 	// bottom right
-	mainVertex[vb].sx = (float)topX + quadWidth - 0.5f;
-	mainVertex[vb].sy = (float)topY + quadHeight - 0.5f;
+	mainVertex[vb].sx = (float)((testX + (quadWidth * length)) - 0.5f);
+	mainVertex[vb].sy = (float)((testY + quadHeight) - 0.5f);
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8089,8 +8150,113 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 	vb++;
 
 	// top right
-	mainVertex[vb].sx = (float)topX + quadWidth - 0.5f;
-	mainVertex[vb].sy = (float)topY - 0.5f;
+	mainVertex[vb].sx = (float)((testX + (quadWidth * length)) - 0.5f);
+	mainVertex[vb].sy = (float)(testY - 0.5f);
+	mainVertex[vb].sz = 0.0f;
+	mainVertex[vb].rhw = 1.0f;
+	mainVertex[vb].color = colour;
+	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+	mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
+	mainVertex[vb].tv = 0.0f;
+
+	vb++;
+	
+	OUTPUT_TRIANGLE(0,1,2, 4);
+	OUTPUT_TRIANGLE(1,2,3, 4);
+}
+
+void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha) 
+{
+/*
+	if ((image_num == AVPMENUGFX_GLOWY_LEFT) || (image_num == AVPMENUGFX_GLOWY_RIGHT))
+	{
+		CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
+	}
+	else CheckVertexBuffer(4, image_num, TRANSLUCENCY_GLOWING);
+*/
+	
+	CheckVertexBuffer(4, image_num, TRANSLUCENCY_GLOWING);
+
+	// textures actual height/width (whether it's non power of two or not)
+	int textureWidth = AvPMenuGfxStorage[image_num].Width;
+	int textureHeight = AvPMenuGfxStorage[image_num].Height;
+
+	// we pad non power of two textures to pow2
+	int texturePOW2Width = AvPMenuGfxStorage[image_num].newWidth;
+	int texturePOW2Height = AvPMenuGfxStorage[image_num].newHeight;
+
+	alpha = (alpha / 256);
+	if (alpha > 255) 
+		alpha = 255;
+	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
+
+	// game used to render menus at 640x480. this allows us to use any resolution we want
+	int quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / textureWidth) * 640));
+	int quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / textureHeight) * 480));
+
+//	float quadWidth = (ScreenDescriptorBlock.SDB_Width / ((1.0f / textureWidth) * 640.0f));
+//	float quadHeight = (ScreenDescriptorBlock.SDB_Height / ((1.0f / textureHeight) * 480.0f));
+
+//	int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0) * topX);
+//	int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0) * topY);
+/*
+	char buf[200];
+	sprintf(buf, "oldX: %d, oldY: %d - newX: %d, newY: %d\n", topX, topY, quadX, quadY);
+	OutputDebugString(buf);
+*/
+//	topX = quadX;
+//	topY = quadY;
+/*
+	float testX, testY;
+
+	testX = ((ScreenDescriptorBlock.SDB_Width / 640.0f) * topX);
+	testY = ((ScreenDescriptorBlock.SDB_Height / 480.0f) * topY);
+*/
+
+	int testX, testY;
+
+	testX = ((ScreenDescriptorBlock.SDB_Width / 640.0f) * topX);
+	testY = ((ScreenDescriptorBlock.SDB_Height / 480.0f) * topY);
+
+	// bottom left
+	mainVertex[vb].sx = (float)(testX - 0.5f);
+	mainVertex[vb].sy = (float)((testY + quadHeight) - 0.5f);
+	mainVertex[vb].sz = 0.0f;
+	mainVertex[vb].rhw = 1.0f;
+	mainVertex[vb].color = colour;
+	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+	mainVertex[vb].tu = 0.0f;
+	mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
+
+	vb++;
+
+	// top left
+	mainVertex[vb].sx = (float)(testX - 0.5f);
+	mainVertex[vb].sy = (float)(testY - 0.5f);
+	mainVertex[vb].sz = 0.0f;
+	mainVertex[vb].rhw = 1.0f;
+	mainVertex[vb].color = colour;
+	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+	mainVertex[vb].tu = 0.0f;
+	mainVertex[vb].tv = 0.0f;
+
+	vb++;
+
+	// bottom right
+	mainVertex[vb].sx = (float)((testX + quadWidth) - 0.5f);
+	mainVertex[vb].sy = (float)((testY + quadHeight) - 0.5f);
+	mainVertex[vb].sz = 0.0f;
+	mainVertex[vb].rhw = 1.0f;
+	mainVertex[vb].color = colour;
+	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+	mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
+	mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
+
+	vb++;
+
+	// top right
+	mainVertex[vb].sx = (float)((testX + quadWidth) - 0.5f);
+	mainVertex[vb].sy = (float)(testY - 0.5f);
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8434,7 +8600,7 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 
 void DrawCloudTable(int topX, int topY, int word_length, int alpha) {
 #if 0
-	LastError = d3d.lpD3DDevice->SetTexture(0,AvPMenuGfxStorage[AVPMENUGFX_CLOUDY].menuTexture);
+	LastError = d3d.lpD3DDevice->SetTexture(0, AvPMenuGfxStorage[AVPMENUGFX_CLOUDY].menuTexture);
 	if(FAILED(LastError)) {
 		OutputDebugString("Couldn't set cloudy texture");
 	}

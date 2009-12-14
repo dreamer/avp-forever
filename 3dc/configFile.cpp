@@ -194,6 +194,10 @@ int Config_GetInt(const std::string &heading, const std::string &variable, int d
 	}
 	else
 	{
+		// should we be adding this to the map if it doesn't exist using default value? i guess so..
+		MapValue &tempValue = AvPConfig[heading];
+		tempValue.insert(std::make_pair(variable, IntToString(defaultValue)));
+
 		return defaultValue;
 	}
 }
@@ -262,6 +266,8 @@ static bool Config_CreateDefault()
 	file << "\n";
 	file << "[Misc]\n";
 	file << "CommandLine = \"\"\n";
+	file << "[Networking]\n";
+	file << "PortNumber = 1234\n";
 
 	file.close();
 

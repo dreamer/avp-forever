@@ -10,7 +10,6 @@
 #include "bh_types.h"
 #include "dynblock.h"
 #include "dynamics.h"
-//#include "menugfx.h"
 #include "bh_debri.h"
 #include "pvisible.h"
 #include "bh_plift.h"
@@ -20,7 +19,6 @@
 #include "pldghost.h"
 #include "equipmnt.h"
 #include "weapons.h"
-//#include "multmenu.h"
 #include "bh_gener.h"
 #include "psnd.h"
 #include "kshape.h"
@@ -443,7 +441,7 @@ void InitAVPNetGame(void)
 		netGameData.LMS_RestartTimer=0;
 	}
 
-	myNetworkKillerId = AVPDPNetID;	/* init global id of player who killed me last */
+	myNetworkKillerId = AvPNetID;	/* init global id of player who killed me last */
 	netNextLocalObjectId = 1;	/* init local object network id */
 	numMessagesReceived = 0;	/* these are for testing */
 	numMessagesTransmitted = 0;
@@ -451,7 +449,7 @@ void InitAVPNetGame(void)
 	/* If I'm the host, add myself to the game data */
 	if(AvP.Network==I_Host)
 	{
-		netGameData.playerData[0].playerId = AVPDPNetID;
+		netGameData.playerData[0].playerId = AvPNetID;
 		strncpy(netGameData.playerData[0].name,AVPDPplayerName.lpszShortNameA,NET_PLAYERNAMELENGTH-1);
 		netGameData.playerData[0].name[NET_PLAYERNAMELENGTH-1] = '\0';
 //		ConvertNetNameToUpperCase(netGameData.playerData[0].name);
@@ -564,20 +562,20 @@ void InitAVPNetGameForHost(int species, int gamestyle, int level)
 		}
 	}
 
-	myNetworkKillerId = AVPDPNetID;	/* init global id of player who killed me last */
+	myNetworkKillerId = AvPNetID;	/* init global id of player who killed me last */
 	netNextLocalObjectId = 1;	/* init local object network id */
 	numMessagesReceived = 0;	/* these are for testing */
 	numMessagesTransmitted = 0;
 
 	/* If I'm the host, add myself to the game data */
-	netGameData.playerData[0].playerId = AVPDPNetID;
+	netGameData.playerData[0].playerId = AvPNetID;
 	strncpy(netGameData.playerData[0].name,AVPDPplayerName.lpszShortNameA,NET_PLAYERNAMELENGTH-1);
 	netGameData.playerData[0].name[NET_PLAYERNAMELENGTH-1] = '\0';
 //	ConvertNetNameToUpperCase(netGameData.playerData[0].name);
 
 	{
 		int myIndex;
-		myIndex = PlayerIdInPlayerList(AVPDPNetID);
+		myIndex = PlayerIdInPlayerList(AvPNetID);
 		LOCALASSERT(myIndex!=NET_IDNOTINPLAYERLIST);
 		netGameData.playerData[myIndex].characterType = netGameData.myCharacterType;
 		netGameData.playerData[myIndex].characterSubType = netGameData.myCharacterSubType;
@@ -675,7 +673,7 @@ void InitAVPNetGameForJoin(void)
 		netGameData.needGameDescription=1;
 	}
 
-	myNetworkKillerId = AVPDPNetID;	/* init global id of player who killed me last */
+	myNetworkKillerId = AvPNetID;	/* init global id of player who killed me last */
 	netNextLocalObjectId = 1;	/* init local object network id */
 	numMessagesReceived = 0;	/* these are for testing */
 	numMessagesTransmitted = 0;
@@ -698,20 +696,20 @@ static unsigned char msg[NET_MESSAGEBUFFERSIZE];
   ----------------------------------------------------------------------*/
 void MinimalNetCollectMessages(void)
 {			
-	int		res = DP_OK;
+	int		res = NET_OK;
 	DPID	dPlayFromId = 0;
 	DPID 	dPlayToId = 0;
 //	unsigned char *msgP = NULL;
 //	unsigned char msg[NET_MESSAGEBUFFERSIZE];
 	int msgSize = 0;
 		
-	/* collects messages until something other than DP_OK is returned (eg DP_NoMessages) */
+	/* collects messages until something other than NET_OK is returned (eg DP_NoMessages) */
 	if(!netGameData.skirmishMode)
 	{
-		while((res==DP_OK) && glpDP && AVPDPNetID)
+		while((res==NET_OK) && glpDP && AvPNetID)
 		{
 			res = DpExtRecv(glpDP, &dPlayFromId, &dPlayToId, DPRECEIVE_ALL, &msg[0], /*(LPDWORD)*/&msgSize);				
-			if(res==DP_OK)
+			if(res==NET_OK)
 			{
 				/* process last message, if there is one */
 				if(dPlayFromId == DPID_SYSMSG)
@@ -723,9 +721,10 @@ void MinimalNetCollectMessages(void)
 		}
 	}
 }
+
 void NetCollectMessages(void)
 {			
-	int res = DP_OK;
+	int res = NET_OK;
 	DPID	dPlayFromId = 0;
 	DPID 	dPlayToId = 0;
 //	unsigned char *msgP = NULL;
@@ -745,13 +744,13 @@ void NetCollectMessages(void)
 	LogNetInfo("Collecting Messages... \n");
 //	OutputDebugString("Connecting Messages...\n");
 
-	/* collects messages until something other than DP_OK is returned (eg DP_NoMessages) */
+	/* collects messages until something other than NET_OK is returned (eg DP_NoMessages) */
 	if(!netGameData.skirmishMode)
 	{
-		while((res==DP_OK) && glpDP && AVPDPNetID)
+		while((res==NET_OK) && glpDP && AvPNetID)
 		{
 			res = DpExtRecv(glpDP,&dPlayFromId,&dPlayToId,DPRECEIVE_ALL,&msg[0],/*(LPDWORD)*/&msgSize);				
-			if(res==DP_OK)
+			if(res==NET_OK)
 			{
 				numMessagesReceived++;
 				/* process last message, if there is one */
@@ -905,7 +904,7 @@ void NetCollectMessages(void)
 	{
 		#if 0
 		int myScore;
-		int myIndex = PlayerIdInPlayerList(AVPDPNetID);
+		int myIndex = PlayerIdInPlayerList(AvPNetID);
 		myScore = AddUpPlayerFrags(myIndex);
 		LOCALASSERT(myIndex!=NET_IDNOTINPLAYERLIST);		
 		#if PreBeta
@@ -952,12 +951,12 @@ static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize)
 
 	switch(systemMessage/*->dwType*/)
 	{
-		case DPSYS_ADDPLAYERTOGROUP:
+		case NET_ADDPLAYERTOGROUP:
 		{
 			/* ignore */
 			break;
 		}
-		case DPSYS_CREATEPLAYERORGROUP:
+		case NET_CREATEPLAYERORGROUP:
 		{
 			OutputDebugString("will try adding a player to our server game\n");
 
@@ -978,20 +977,20 @@ static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize)
 					AddPlayerToGame(id,&name[0]);
 				}
 			}
-			LogNetInfo("system message:  DPSYS_CREATEPLAYERORGROUP \n");
+			LogNetInfo("system message:  NET_CREATEPLAYERORGROUP \n");
 			NewOnScreenMessage("A PLAYER HAS CONNECTED");
 			OutputDebugString("A PLAYER HAS CONNECTED\n");
 			break;
 		}
-		case DPSYS_DELETEPLAYERFROMGROUP:
+		case NET_DELETEPLAYERFROMGROUP:
 		{
 			NewOnScreenMessage("A PLAYER HAS DISCONNECTED");
 			/* ignore */
 			break;
 		}
-		case DPSYS_DESTROYPLAYERORGROUP:
+		case NET_DESTROYPLAYERORGROUP:
 		{
-			OutputDebugString("DPSYS_DESTROYPLAYERORGROUP\n");
+			OutputDebugString("NET_DESTROYPLAYERORGROUP\n");
 
 			/* Aha. Either a player has left (should have sent a leaving message)
 			or s/he has exited abnormally. In either case, only need to act on
@@ -1012,10 +1011,10 @@ static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize)
 				}
 			}
 
-			LogNetInfo("system message:  DPSYS_DESTROYPLAYERORGROUP \n");
+			LogNetInfo("system message:  NET_DESTROYPLAYERORGROUP \n");
 			break;
 		}
-		case DPSYS_HOST:
+		case NET_HOST:
 		{
 			/* Aha... the host has died, then. This is a terminal game state,
 			as the host was managing the game. Thefore, temporarily adopt host
@@ -1041,10 +1040,10 @@ static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize)
 					LobbiedGame=LobbiedGame_Server;
 				}
 			}
-			LogNetInfo("system message:  DPSYS_HOST \n");
+			LogNetInfo("system message:  NET_HOST \n");
 			break;
 		}
-		case DPSYS_SESSIONLOST:
+		case NET_SESSIONLOST:
 		{
 			/* Aha. I have lost my connection. Time to exit the game gracefully.*/
 			NewOnScreenMessage("Session lost!!");
@@ -1054,16 +1053,16 @@ static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize)
 				netGameData.myGameState = NGS_Error_HostLost;
 			}
 			
-			LogNetInfo("system message:  DPSYS_SESSIONLOST \n");
+			LogNetInfo("system message:  NET_SESSIONLOST \n");
 			*/
 			break;
 		}
-		case DPSYS_SETPLAYERORGROUPDATA:
+		case NET_SETPLAYERORGROUPDATA:
 		{
 			/* ignore */
 			break;
 		}
-		case DPSYS_SETPLAYERORGROUPNAME:
+		case NET_SETPLAYERORGROUPNAME:
 		{
 			/* ignore */
 			break;
@@ -1702,15 +1701,15 @@ void NetSendMessages(void)
 		LOCALASSERT(numBytes <= NET_MESSAGEBUFFERSIZE);
 		if(!netGameData.skirmishMode)
 		{
-			if(glpDP && AVPDPNetID)
+			if(glpDP && AvPNetID)
 			{
-				res = DpExtSend(glpDP,AVPDPNetID,DPID_ALLPLAYERS,0,&sendBuffer[0],numBytes);
-				if(res!=DP_OK)
+				res = DpExtSend(glpDP,AvPNetID,DPID_ALLPLAYERS,0,&sendBuffer[0],numBytes);
+				if(res!=NET_OK)
 				{
 					//we have some problem sending...
 					switch(res)
 					{
-						case DP_FAIL:
+						case NET_FAIL:
 							OutputDebugString("some problem sending\n");
 
 						case DPERR_BUSY :
@@ -1888,20 +1887,20 @@ static void AddPlayerAndObjectUpdateMessages(void)
 void EndAVPNetGame(void)
 {
 	//netGameData.myGameState=NGS_Leaving;
-	RemovePlayerFromGame(AVPDPNetID);
+	RemovePlayerFromGame(AvPNetID);
 	TransmitPlayerLeavingNetMsg();
 	
 	if(!netGameData.skirmishMode)
 	{
-		DirectPlay_Disconnect();
+		Net_Disconnect();
 	}
 
 	#if 0
 	/* terminate our player */
-	if(AVPDPNetID) 
+	if(AvPNetID) 
 	{
-		hres = IDirectPlay4_DestroyPlayer(glpDP, AVPDPNetID);
-		AVPDPNetID = NULL;
+		hres = IDirectPlay4_DestroyPlayer(glpDP, AvPNetID);
+		AvPNetID = NULL;
 	}
 	/* terminate the dp object */
 	if(glpDP) 
@@ -2245,7 +2244,7 @@ void AddNetMsg_PlayerState(STRATEGYBLOCK *sbPtr)
 				break;
 		}
 		
-		playerIndex = PlayerIdInPlayerList(AVPDPNetID);
+		playerIndex = PlayerIdInPlayerList(AvPNetID);
 		GLOBALASSERT(playerIndex!=NET_IDNOTINPLAYERLIST);
 
 		messagePtr->characterType=netGameData.myCharacterType;
@@ -2557,7 +2556,7 @@ void AddNetMsg_PlayerState_Minimal(STRATEGYBLOCK *sbPtr,BOOL sendOrient)
 		headerPtr->type = (unsigned char)NetMT_PlayerState_Minimal;
 		
 
-	playerIndex = PlayerIdInPlayerList(AVPDPNetID);
+	playerIndex = PlayerIdInPlayerList(AvPNetID);
 	GLOBALASSERT(playerIndex!=NET_IDNOTINPLAYERLIST);
 	
 	/* KJL 17:04:22 26/01/98 - elevation (for weapon, etc.) */
@@ -2936,12 +2935,12 @@ void AddNetMsg_PlayerKilled(int objectId,DAMAGE_PROFILE* damage)
 		{
 			//the player doing the damage has either left the game , or never existed.
 			//call it suicide then.
-			myNetworkKillerId=AVPDPNetID;	
+			myNetworkKillerId=AvPNetID;	
 			messagePtr->killerId=0;
 		}
 	}
 	
-	if(!myNetworkKillerId || myNetworkKillerId==AVPDPNetID)
+	if(!myNetworkKillerId || myNetworkKillerId==AvPNetID)
 	{
 		//suicide (or killed by alien , in which case this will be corrected a few lines later)
 		messagePtr->killerType=messagePtr->myType;
@@ -2974,7 +2973,7 @@ void AddNetMsg_PlayerKilled(int objectId,DAMAGE_PROFILE* damage)
 				break;
 		}
 	}
-	Inform_PlayerHasDied(myNetworkKillerId,AVPDPNetID,messagePtr->killerType,messagePtr->weaponIcon);
+	Inform_PlayerHasDied(myNetworkKillerId,AvPNetID,messagePtr->killerType,messagePtr->weaponIcon);
 
 	if(AvP.Network==I_Host)
 	{
@@ -4189,7 +4188,7 @@ void AddNetMsg_ChatBroadcast(char *string,BOOL same_species_only)
 	
 	
 	{
-		sprintf(OnScreenMessageBuffer,"%s: %s",netGameData.playerData[PlayerIdInPlayerList(AVPDPNetID)].name,string);
+		sprintf(OnScreenMessageBuffer,"%s: %s",netGameData.playerData[PlayerIdInPlayerList(AvPNetID)].name,string);
 		NewOnScreenMessage(OnScreenMessageBuffer);
 	}
 
@@ -5487,7 +5486,7 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
 			{
 				if(messagePtr->players[i].playerId)
 				{
-					SendSystemMessage(AVP_GETPLAYERNAME, AVPDPNetID, messagePtr->players[i].playerId, 0, 0);
+					Net_SendSystemMessage(AVP_GETPLAYERNAME, AvPNetID, messagePtr->players[i].playerId, 0, 0);
 					//AddNetMsg_PlayerGetName(messagePtr->players[i].playerId); // pass request through internal message system?
 
 					//tempPlayerDetails.
@@ -5498,14 +5497,14 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
 					//need to find out this player's name
 					//first find the size of buffer required
   					hr=IDirectPlayX_GetPlayerName(glpDP,messagePtr->players[i].playerId,0,&size);
-					if(hr==DP_OK || hr==DPERR_BUFFERTOOSMALL)
+					if(hr==NET_OK || hr==DPERR_BUFFERTOOSMALL)
 					{
 						//allocate buffer to receive the name
 						data=AllocateMem(size);
 						*data=0;
 						hr=IDirectPlayX_GetPlayerName(glpDP,messagePtr->players[i].playerId,data,&size);
 
-						if(hr==DP_OK)
+						if(hr==NET_OK)
 						{
 							strncpy(netGameData.playerData[i].name,/*((DPNAME*)data)->lpszShortNameA*/data,NET_PLAYERNAMELENGTH-1);	
 							netGameData.playerData[i].name[NET_PLAYERNAMELENGTH-1]='\0';
@@ -5554,7 +5553,7 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
 		{
 			/*We were waiting for the game description , best make sure that our player id appears
 			int the player list*/
-			if(PlayerIdInPlayerList(AVPDPNetID)!=NET_IDNOTINPLAYERLIST)
+			if(PlayerIdInPlayerList(AvPNetID)!=NET_IDNOTINPLAYERLIST)
 			{			
 				/*we now have the game description, so we can stop waiting if we were 
 				trying to join*/
@@ -5691,7 +5690,7 @@ static void ProcessNetMsg_StartGame(void)
 
 	/* switch our game state... if we are in the player list, switch to start, otherwise
 	switch to error */
-	if(PlayerIdInPlayerList(AVPDPNetID)!=NET_IDNOTINPLAYERLIST)
+	if(PlayerIdInPlayerList(AvPNetID)!=NET_IDNOTINPLAYERLIST)
 		netGameData.myGameState=NGS_Playing;
 	else 
 	{
@@ -6540,7 +6539,7 @@ static void ProcessNetMsg_LocalObjectDamaged(char *messagePtr, DPID senderId)
 
 	/* This message is for the player who owns the object, so first check 
 	if the message is meant for us */
-	if(messageHeader->playerId != AVPDPNetID)
+	if(messageHeader->playerId != AvPNetID)
 	{
 		//however we may need to play a delta sequence on the ghost
 		if(messageDelta)
@@ -6579,7 +6578,7 @@ static void ProcessNetMsg_LocalObjectDamaged(char *messagePtr, DPID senderId)
 		/* we set this global to remember the id of the player who sent this damage message,
 		so that if the player is killed, we know the id of the killer. this is a bit of
 		a nasty hack, but means that we don't have to make any changes to the core damage functions */
-		LOCALASSERT(myNetworkKillerId==0 || myNetworkKillerId ==AVPDPNetID);
+		LOCALASSERT(myNetworkKillerId==0 || myNetworkKillerId ==AvPNetID);
 		/*
 		Don't bother setting the killer id for molotov damage. This is because the only source of this damage
 		is explosions from flamethrowers. This damage will always come from the net host , and we don't want to credit the 
@@ -6721,7 +6720,7 @@ static void ProcessNetMsg_LocalObjectDamaged(char *messagePtr, DPID senderId)
 				CauseDamageToObject(sbPtr, (&damage), multiple,incoming_ptr);
 			}
 		}
-		myNetworkKillerId = AVPDPNetID;
+		myNetworkKillerId = AvPNetID;
 		MyHitBodyPartId=-1;
 	}
 	
@@ -6737,7 +6736,7 @@ static void ProcessNetMsg_LocalObjectDestroyed_Request(NETMESSAGE_LOBDESTROYED_R
 
 	/* This message is for the player who owns the object, so first check 
 	if the message is meant for us */
-	if(messagePtr->playerId != AVPDPNetID) return;
+	if(messagePtr->playerId != AvPNetID) return;
 
 	/* next we have to find this object in our strategyblock list */
 	{
@@ -6971,7 +6970,7 @@ static void ProcessNetMsg_EndGame(void)
 	/* only do this if we're playing or in startup */
 			/* check start flags on all players (including ourselves) */
 			{
-				if(netGameData.playerData[PlayerIdInPlayerList(AVPDPNetID)].startFlag)
+				if(netGameData.playerData[PlayerIdInPlayerList(AvPNetID)].startFlag)
 				{
 					netGameData.myGameState = NGS_Playing;
 				}
@@ -7423,7 +7422,7 @@ static void ProcessNetMsg_LocalObjectOnFire(NETMESSAGE_LOBONFIRE *messagePtr, DP
 
 	/* This message is for the player who owns the object, so first check 
 	if the message is meant for us */
-	if(messagePtr->playerId != AVPDPNetID) return;
+	if(messagePtr->playerId != AvPNetID) return;
 
 	/* next we have to find this object in our strategyblock list */
 	{
@@ -8314,11 +8313,11 @@ void DoNetScoresForHostDeath(NETGAME_CHARACTERTYPE myType,NETGAME_CHARACTERTYPE 
 		{
 			//the player doing the damage has either left the game , or never existed.
 			//call it suicide then.
-			myNetworkKillerId=AVPDPNetID;	
+			myNetworkKillerId=AvPNetID;	
 		}
 		
 	}
-	UpdateNetworkGameScores(AVPDPNetID,myNetworkKillerId,myType,killerType);
+	UpdateNetworkGameScores(AvPNetID,myNetworkKillerId,myType,killerType);
 }
 
 int AddUpPlayerFrags(int playerId)
@@ -9035,12 +9034,12 @@ void TeleportNetPlayerToAStartingPosition(STRATEGYBLOCK *playerSbPtr, int startO
 	/* pick a starting point*/
 	if(startOfGame)
 	{
-		numReadThro = (PlayerIdInPlayerList(AVPDPNetID))%8;
+		numReadThro = (PlayerIdInPlayerList(AvPNetID))%8;
 		while(numReadThro<0)
 		{
 			//Probably haven't received the details of all the players yet
 			MinimalNetCollectMessages();
-			numReadThro = (PlayerIdInPlayerList(AVPDPNetID))%8;
+			numReadThro = (PlayerIdInPlayerList(AvPNetID))%8;
 		}
 	}
 	else numReadThro = FastRandom()%numStartPositions;
@@ -9154,7 +9153,7 @@ void TeleportNetPlayerToAStartingPosition(STRATEGYBLOCK *playerSbPtr, int startO
 		for(playerIndex=0;playerIndex<NET_MAXPLAYERS;playerIndex++)
 		{
 			if(netGameData.playerData[playerIndex].playerId &&
-			   netGameData.playerData[playerIndex].playerId!=AVPDPNetID &&	
+			   netGameData.playerData[playerIndex].playerId!=AvPNetID &&	
 			   netGameData.playerData[playerIndex].playerAlive)
 			{
 				VECTORCH seperationVec;
@@ -9295,7 +9294,7 @@ void StartOfGame_PlayerPlacement(STRATEGYBLOCK *playerSbPtr,int seed)
 		ChosenPositions[NumChosen]=startPositions[index].location;
 		NumChosen++;
 		
-		if(netGameData.playerData[i].playerId==AVPDPNetID)
+		if(netGameData.playerData[i].playerId==AvPNetID)
 		{
 			extern MODULE * playerPherModule;
 			//this was our new start position
@@ -9415,7 +9414,7 @@ void CreatePlayersImageInMirror(void)
 	}
 	else
 	{
-		ghostData->playerId=AVPDPNetID;
+		ghostData->playerId=AvPNetID;
 	}
 
 	/* set the shape */
@@ -10082,7 +10081,7 @@ static void Handle_LastManStanding_Restart(DPID alienID,int seed)
 	int i;
 	/* if we're not playing, ignore it */
 	if(netGameData.myGameState!=NGS_Playing) return;	
-	if(AVPDPNetID==alienID)
+	if(AvPNetID==alienID)
 	{
 		//become an alien
 		extern void ChangeToAlien();
@@ -10232,7 +10231,7 @@ static void Handle_SpeciesTag_NewPersonIt(DPID predatorID)
 	/* if we're not playing, ignore it */
 	if(netGameData.myGameState!=NGS_Playing) return;
 		
-	if(AVPDPNetID==predatorID)
+	if(AvPNetID==predatorID)
 	{
 		//become aa predator or alien
 		if(netGameData.gameType==NGT_PredatorTag)
@@ -10441,7 +10440,7 @@ int DetermineAvailableCharacterTypes(BOOL ConsiderUsedCharacters)
 			//(it will still be I_No_Network while the host is setting things up)
 			for(i=0;i<NET_MAXPLAYERS;i++)
 			{
-				if(netGameData.playerData[i].playerId && netGameData.playerData[i].playerId!=AVPDPNetID)
+				if(netGameData.playerData[i].playerId && netGameData.playerData[i].playerId!=AvPNetID)
 				{
 					switch(netGameData.playerData[i].characterType)	
 					{
@@ -10641,7 +10640,7 @@ void SpeciesTag_DetermineMyNextCharacterType()
 
 	
 
-	if(myNetworkKillerId && myNetworkKillerId!=AVPDPNetID && CountPlayersOfType(tagSpecies)==1)
+	if(myNetworkKillerId && myNetworkKillerId!=AvPNetID && CountPlayersOfType(tagSpecies)==1)
 	{
 		//become the character that killed me
 		int killer_index=PlayerIdInPlayerList(myNetworkKillerId);
@@ -10659,7 +10658,7 @@ void SpeciesTag_DetermineMyNextCharacterType()
 		
 	}
 
-	if(!(myNetworkKillerId && myNetworkKillerId!=AVPDPNetID && CountPlayersOfType(tagSpecies)==1))
+	if(!(myNetworkKillerId && myNetworkKillerId!=AvPNetID && CountPlayersOfType(tagSpecies)==1))
 	{
 		int total=0;
 		//either suicide , or we have too many predators for some reason
@@ -10903,7 +10902,7 @@ static int CountMultiplayerLivesLeft()
 	}
 	else
 	{
-		int index=PlayerIdInPlayerList(AVPDPNetID);
+		int index=PlayerIdInPlayerList(AvPNetID);
 		if(index==NET_IDNOTINPLAYERLIST) return FALSE;		
 
 		for(i=0;i<NET_MAXPLAYERS;i++)	
@@ -11263,7 +11262,7 @@ void DoMultiplayerSpecificHud()
 		/*
 		{		
 			int i;
-			int myIndex = PlayerIdInPlayerList(AVPDPNetID);
+			int myIndex = PlayerIdInPlayerList(AvPNetID);
 			LOCALASSERT(myIndex!=NET_IDNOTINPLAYERLIST);		
 			for(i=0;i<NET_MAXPLAYERS;i++)
 			{
@@ -11432,7 +11431,7 @@ void CheckStateOfObservedPlayer()
 
 static int CalculateMyScore()
 {
-	int myIndex=PlayerIdInPlayerList(AVPDPNetID);
+	int myIndex=PlayerIdInPlayerList(AvPNetID);
 	if(myIndex==NET_IDNOTINPLAYERLIST) return 0;
 
 	if(netGameData.gameType==NGT_Coop)

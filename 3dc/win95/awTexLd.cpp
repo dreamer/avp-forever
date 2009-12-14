@@ -1773,7 +1773,6 @@ namespace AwTl {
 		}
 		else
 		{
-			// bjd - menu graphics loading gets us here
 			SurfUnion pTex = pLoader->Load(pMedium,rParams);
 			pLoader->Release();
 			return pTex;

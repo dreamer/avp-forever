@@ -63,7 +63,7 @@ int CloakPowerOnDrain=(2*ONE_FIXED);
 
 extern DPID myNetworkKillerId;
 extern DPID myIgniterId;
-extern DPID AVPDPNetID; // bjd
+extern DPID AvPNetID; // bjd
 
 extern int MyHitBodyPartId;
 extern HMODELCONTROLLER PlayersWeaponHModelController;
@@ -566,7 +566,7 @@ void MaintainPlayer(void)
 
 		myNetworkKillerId=myIgniterId;
 		CauseDamageToObject(Player->ObStrategyBlock,&firedamage,NormalFrameTime,NULL);
-		myNetworkKillerId=AVPDPNetID;
+		myNetworkKillerId=AvPNetID;
 
 		if (playerStatusPtr->soundHandle3!=SOUND_NOACTIVEINDEX) {
 			if (ActiveSounds[playerStatusPtr->soundHandle3].soundIndex!=SID_FIRE) {
@@ -1283,7 +1283,7 @@ static void PlayerIsDead(DAMAGE_PROFILE* damage,int multiplier,VECTORCH* incomin
 			if(AvP.PlayerType!=I_Alien)
 			{
 				//was I killed by an alien?
-				if(myNetworkKillerId && myNetworkKillerId!=AVPDPNetID)
+				if(myNetworkKillerId && myNetworkKillerId!=AvPNetID)
 				{
 					int killer_index=PlayerIdInPlayerList(myNetworkKillerId);
 					GLOBALASSERT(killer_index!=NET_IDNOTINPLAYERLIST);

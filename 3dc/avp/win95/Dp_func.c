@@ -36,7 +36,7 @@ LPGUID					glpGuid = (LPGUID)&AvPGuid;
 LPDIRECTPLAY4			glpDP	= NULL;		// directplay object pointer
 LPDPSESSIONDESC2		glpdpSD;			// current session description
 
-DPID AVPDPNetID;
+DPID AvPNetID;
 DPNAME AVPDPplayerName;
 
 
@@ -176,14 +176,14 @@ HRESULT DPlayCreatePlayer(LPDPID lppidID, LPTSTR lptszPlayerName, HANDLE hEvent,
 #endif
 
 /*
- * DPlayCreateSession
+ * Net_CreateSession
  *
  * Wrapper for DirectPlay CreateSession API.Uses the global application guid (glpGuid).
  */
-HRESULT DPlayCreateSession(LPTSTR lptszSessionName,int maxPlayers,int dwUser1,int dwUser2)
+HRESULT Net_CreateSession(LPTSTR lptszSessionName,int maxPlayers,int dwUser1,int dwUser2)
 {
 	HRESULT hr = E_FAIL;
-	DPSESSIONDESC2 dpDesc;
+	NET_SESSIONDESC dpDesc;
 
 	if (!glpDP)
 		return DPERR_NOINTERFACE;
@@ -262,7 +262,7 @@ HRESULT DPlayEnumSessions(DWORD dwTimeout, LPDPENUMSESSIONSCALLBACK2 lpEnumCallb
 						  LPVOID lpContext, DWORD dwFlags)
 {
 	HRESULT hr = E_FAIL;
-	DPSESSIONDESC2 dpDesc;
+	NET_SESSIONDESC dpDesc;
 
 	ZeroMemory(&dpDesc, sizeof(dpDesc));
 	dpDesc.dwSize = sizeof(dpDesc);
@@ -349,14 +349,14 @@ BOOL IsDPlay(void)
 #endif
 
 /*
- * DPlayOpenSession
+ * Net_OpenSession
  *
  * Wrapper for DirectPlay OpenSession API. 
  */
-HRESULT DPlayOpenSession(LPGUID lpSessionGuid)
+HRESULT Net_OpenSession(LPGUID lpSessionGuid)
 {
 	HRESULT hr = E_FAIL;
-	DPSESSIONDESC2 dpDesc;
+	NET_SESSIONDESC dpDesc;
 
 	if (!glpDP)
 		return DPERR_NOINTERFACE;

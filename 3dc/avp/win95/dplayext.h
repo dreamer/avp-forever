@@ -26,7 +26,7 @@ extern "C" {
 //#include "dplay8.h"
 
 //typedef int DPID;
-//typedef int AVPDPNetID;
+//typedef int AvPNetID;
 
 /* C O N S T A N T S -------------------------------------------------- */
 

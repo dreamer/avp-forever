@@ -4945,8 +4945,8 @@ STRATEGYBLOCK *MakeNewCorpse()
 				}
 				Create_HModel(&corpseData->HModelController,root_section);
 				{
-					extern DPID AVPDPNetID;
-					ChangeGhostMarineAccoutrementSet(&corpseData->HModelController,AVPDPNetID);
+					extern DPID AvPNetID;
+					ChangeGhostMarineAccoutrementSet(&corpseData->HModelController,AvPNetID);
 				}
 				//choose a default sequence , the proper death anim will be set later	
 				InitHModelSequence(&corpseData->HModelController,(int)HMSQT_MarineStand,(int)MSSS_Standard,ONE_FIXED);

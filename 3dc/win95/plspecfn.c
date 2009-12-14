@@ -803,7 +803,7 @@ void Normalise(VECTORCH *nvector)
 	n.vy = (float)(nvector->vy);
 	n.vz = (float)(nvector->vz);
 
-	m = 65536.0/sqrt((n.vx * n.vx) + (n.vy * n.vy) + (n.vz * n.vz));
+	m = (float)(65536.0/sqrt((n.vx * n.vx) + (n.vy * n.vy) + (n.vz * n.vz)));
 
 	f2i(nvector->vx, (n.vx * m) );
 	f2i(nvector->vy, (n.vy * m) );
@@ -885,10 +885,10 @@ void Normalise2d(VECTOR2D *nvector)
 	n.vx = (float)(nvector->vx);
 	n.vy = (float)(nvector->vy);
 
-	m = sqrt((n.vx * n.vx) + (n.vy * n.vy));
+	m = (float)(sqrt((n.vx * n.vx) + (n.vy * n.vy)));
 
-	nvector->vx = (n.vx * ONE_FIXED) / m;
-	nvector->vy = (n.vy * ONE_FIXED) / m;
+	nvector->vx = (int)((n.vx * ONE_FIXED) / m);
+	nvector->vy = (int)((n.vy * ONE_FIXED) / m);
 
 #else	/* SupportFPMathsFunctions */
 
@@ -951,7 +951,7 @@ void FNormalise(VECTORCHF *n)
 {
 	float m;
 
-	m = sqrt((n->vx * n->vx) + (n->vy * n->vy) + (n->vz * n->vz));
+	m = (float)(sqrt((n->vx * n->vx) + (n->vy * n->vy) + (n->vz * n->vz)));
 
 	n->vx /= m;
 	n->vy /= m;
@@ -962,7 +962,7 @@ void FNormalise2d(VECTOR2DF *n)
 {
 	float m;
 
-	m = sqrt((n->vx * n->vx) + (n->vy * n->vy));
+	m = (float)(sqrt((n->vx * n->vx) + (n->vy * n->vy)));
 
 	n->vx /= m;
 	n->vy /= m;
@@ -994,7 +994,7 @@ int Magnitude(VECTORCH *v)
 	n.vy = (float)(v->vy);
 	n.vz = (float)(v->vz);
 
-	f2i(m, sqrt((n.vx * n.vx) + (n.vy * n.vy) + (n.vz * n.vz)));
+	f2i(m, (float)(sqrt((n.vx * n.vx) + (n.vy * n.vy) + (n.vz * n.vz))));
 
 	return m;
 

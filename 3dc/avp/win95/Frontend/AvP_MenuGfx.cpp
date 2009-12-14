@@ -128,19 +128,6 @@ extern void DrawAvPMenuGlowyBar_Clipped(int topleftX, int topleftY, int alpha, i
 
 extern void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a);
 
-#if 0 // moved to header file (AvP_MenuGfx.hpp)
-typedef struct AVPIndexedFont
-{
-	AVPMENUGFX info;	/* graphic info */
-	int swidth;		/* width for space */
-	int ascii;		/* ascii code for initial character */
-	int height;		/* height per character */
-	
-	int numchars;
-	int FontWidth[256];
-} AVPIndexedFont;
-#endif
-
 AVPIndexedFont IntroFont_Light;
 
 static void LoadMenuFont(void)
@@ -171,7 +158,7 @@ static void LoadMenuFont(void)
 	IntroFont_Light.height = 33;
 	IntroFont_Light.swidth = 5;
 	IntroFont_Light.ascii = 32;
-		
+
 	gfxPtr = &IntroFont_Light.info;
 	gfxPtr->menuTexture = NULL;
 	
@@ -312,9 +299,9 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 			int size = width - 18;
 			if (size<18) size = 18;
 
-			DrawAvPMenuGfx(AVPMENUGFX_GLOWY_LEFT,pX+18,pY-8,alpha,AVPMENUFORMAT_RIGHTJUSTIFIED);
-			DrawAvPMenuGlowyBar(pX+18,pY-8,alpha,size-18);
-			DrawAvPMenuGfx(AVPMENUGFX_GLOWY_RIGHT,pX+size,pY-8,alpha,AVPMENUFORMAT_LEFTJUSTIFIED);
+			DrawAvPMenuGfx(AVPMENUGFX_GLOWY_LEFT, pX+18, pY-8, alpha, AVPMENUFORMAT_RIGHTJUSTIFIED);
+			DrawAvPMenuGlowyBar(pX+18, pY-8 ,alpha, size-18);
+			DrawAvPMenuGfx(AVPMENUGFX_GLOWY_RIGHT, pX+size, pY-8, alpha, AVPMENUFORMAT_LEFTJUSTIFIED);
 		}
 	}
 
@@ -344,7 +331,8 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 			int topLeftU = tex_x;
 			int topLeftV = tex_y;
 
-			/* bjd note
+			/* 
+				bjd note
 				need to fix the 'Cloud Table'
 				ie the moving hazy smoke/cloud effect behind the large font text on the menus
 			*/
@@ -1355,15 +1343,10 @@ extern void ReleaseAllAvPMenuGfx(void)
 extern void DrawAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID, int topleftX, int topleftY, int alpha, enum AVPMENUFORMAT_ID format)
 {		
 	AVPMENUGFX *gfxPtr;
-//	D3DTexture *image;
-	
-//	unsigned short *destPtr;
-//	unsigned char *srcPtr;
 	
 	GLOBALASSERT(menuGfxID < MAX_NO_OF_AVPMENUGFXS);
 
 	gfxPtr = &AvPMenuGfxStorage[menuGfxID];
-//	image = (D3DTexture*)gfxPtr->ImagePtr; // image is our texture
 
 	switch(format)
 	{
@@ -1401,103 +1384,13 @@ extern void DrawAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID, int topleftX, int tople
 			alpha = ONE_FIXED;
 
 	DrawAlphaMenuQuad(topleftX, topleftY, menuGfxID, alpha);
-
-#if 0 // bjd
-	D3DInfo temp;
-
-	temp = GetD3DInfo();
-
-	D3DSURFACE_DESC surface_desc;
-	temp.lpD3DBackSurface->GetDesc(&surface_desc);
-
-	D3DLOCKED_RECT lock = {0,NULL};
-
-	temp.lpD3DBackSurface->LockRect(&lock, NULL, 0); if (lock.pBits == NULL) return;
-
-	srcPtr = (unsigned char *)image->buf;
-	int length = gfxPtr->Width;
-
-	int BackBufferPitch = 0;
-
-	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length)
-	{
-		length = /*ScreenDescriptorBlock.SDB_Width*/640 - topleftX;
-	}
-	if (length <= 0) return;
-
-	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
-	{
-		int x,y;
-
-		for (y = topleftY; y < gfxPtr->Height+topleftY; y++)
-		{
-			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch)) + topleftX;
-			//destPtr = (unsigned short *)(ScreenBuffer + topleftX*2 + y*BackBufferPitch);
-
-			for (x=0; x<length; x++)
-			{
-				*destPtr =	((srcPtr[0]>>3)<<11) |
-					((srcPtr[1]>>2)<<5 ) |
-					((srcPtr[2]>>3));
-				srcPtr += 4;
-				destPtr++;
-			}
-			srcPtr += (image->w - length) * 4; 
-		}
-	}
-	else
-	{
-		int x,y;
-
-		for (y=topleftY; y<gfxPtr->Height+topleftY; y++)
-		{
-			//destPtr = (unsigned short *)(ScreenBuffer + topleftX*2 + y*BackBufferPitch);
-			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch)) + topleftX;
-
-			for (x=0; x<length; x++)
-			{
-				if (srcPtr[0] || srcPtr[1] || srcPtr[2]) {
-					unsigned int destR, destG, destB;
-						
-					destR = (*destPtr & 0xF800)>>8;
-					destG = (*destPtr & 0x07E0)>>3;
-					destB = (*destPtr & 0x001F)<<3;
-						
-					destR += MUL_FIXED(alpha, srcPtr[0]);
-					destG += MUL_FIXED(alpha, srcPtr[1]);
-					destB += MUL_FIXED(alpha, srcPtr[2]);
-					if (destR > 0x00FF) destR = 0x00FF;
-					if (destG > 0x00FF) destG = 0x00FF;
-					if (destB > 0x00FF) destB = 0x00FF;
-						
-					*destPtr =	((destR>>3)<<11) |
-							((destG>>2)<<5 ) |
-							((destB>>3));
-				}
-
-				srcPtr += 4;
-				destPtr++;
-			}
-			srcPtr += (image->w - length) * 4; 
-		}
-	}
-
-	temp.lpD3DBackSurface->UnlockRect();
-#endif
 }
+
+extern void DrawGlowyTest(int topX, int topY, int length, int alpha);
 
 extern void DrawAvPMenuGlowyBar(int topleftX, int topleftY, int alpha, int length)
 {	
-	enum AVPMENUGFX_ID menuGfxID = AVPMENUGFX_GLOWY_MIDDLE;										
-
-/*
-   	unsigned short *destPtr;
-	unsigned char *srcPtr;
-	AVPMENUGFX *gfxPtr;
-	D3DTexture *image;
-*/
-	//GLOBALASSERT(menuGfxID < MAX_NO_OF_AVPMENUGFXS);
-//	gfxPtr = &AvPMenuGfxStorage[menuGfxID];
+	enum AVPMENUGFX_ID menuGfxID = AVPMENUGFX_GLOWY_MIDDLE;
 
 	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length)
 	{
@@ -1511,13 +1404,16 @@ extern void DrawAvPMenuGlowyBar(int topleftX, int topleftY, int alpha, int lengt
 
 	// the image we're working with is only 1 pixel wide. we'll have to draw it a couple of 
 	//times shifting the x position over 1 pixel each time until we reach the length of the bar
+/*
 	for (int i = 0; i < length; i++) 
 	{
 		if (alpha > ONE_FIXED) // ONE_FIXED = 65536
 			alpha = ONE_FIXED;
 
-		DrawAlphaMenuQuad(topleftX + i, topleftY, menuGfxID, alpha);
+//		DrawAlphaMenuQuad(topleftX + i, topleftY, menuGfxID, alpha);
 	}
+*/
+	DrawGlowyTest(topleftX, topleftY, length, alpha);
 		
 #if 0 // bjd
 	image = (D3DTexture*)gfxPtr->ImagePtr;
@@ -1876,93 +1772,7 @@ extern void DrawAvPMenuGfx_Faded(enum AVPMENUGFX_ID menuGfxID, int topleftX, int
 		alpha = ONE_FIXED;
 
 	DrawAlphaMenuQuad(topleftX, topleftY, menuGfxID, alpha);
-
-#if 0 // bjd
-   	unsigned short *destPtr;
-	unsigned char *srcPtr;
-
-	AVPMENUGFX *gfxPtr;
-	D3DTexture *image;
-
-	int length;
-
-	GLOBALASSERT(menuGfxID < MAX_NO_OF_AVPMENUGFXS);
-	gfxPtr = &AvPMenuGfxStorage[menuGfxID];
-	image = (D3DTexture*)gfxPtr->ImagePtr;
-
-	switch(format)
-	{
-		default:
-		GLOBALASSERT("UNKNOWN TEXT FORMAT"==0);
-		case AVPMENUFORMAT_LEFTJUSTIFIED:
-		{
-			// supplied x is correct
-			break;
-		}
-		case AVPMENUFORMAT_RIGHTJUSTIFIED:
-		{
-			topleftX -= gfxPtr->Width;
-			break;
-		}
-		case AVPMENUFORMAT_CENTREJUSTIFIED:
-		{
-			topleftX -= gfxPtr->Width/2;
-			break;
-		}
-	}
-
-	srcPtr = (unsigned char *)image->buf;
-	length = gfxPtr->Width;
-
-	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length) {
-		length = /*ScreenDescriptorBlock.SDB_Width*/640 - topleftX;
-	}
-	if (length <= 0) return;
-
-	D3DInfo temp;
-
-	temp = GetD3DInfo();
-
-	D3DSURFACE_DESC surface_desc;
-	temp.lpD3DBackSurface->GetDesc(&surface_desc);
-
-	D3DLOCKED_RECT lock = {0,NULL};
-
-	temp.lpD3DBackSurface->LockRect(&lock, NULL, 0); if (lock.pBits == NULL) return;
-
-	int x, y;
-
-		for (y=topleftY; y<gfxPtr->Height+topleftY; y++)
-		{
-			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch)) + topleftX;
-
-			for (x=0; x<gfxPtr->Width; x++)
-			{
-				unsigned int srcR,srcG,srcB;
-
-				if (srcPtr[0] || srcPtr[1] || srcPtr[2])
-				{
-					srcR = MUL_FIXED(srcPtr[0], alpha);
-					srcG = MUL_FIXED(srcPtr[1], alpha);
-					srcB = MUL_FIXED(srcPtr[2], alpha);
-					*destPtr =	((srcR>>3)<<11) |
-							((srcG>>2)<<5 ) |
-							((srcB>>3));
-				}
-				else
-				{
-					*destPtr = 0;
-				}
-
-				destPtr++;
-				srcPtr += 4;
-			}
-			srcPtr += (image->w - length) * 4;
-		}
-	temp.lpD3DBackSurface->UnlockRect();
-#endif
 }
-
 
 extern void DrawAvPMenuGfx_Clipped(enum AVPMENUGFX_ID menuGfxID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format, int topY, int bottomY)
 {	
@@ -2010,143 +1820,6 @@ extern void DrawAvPMenuGfx_Clipped(enum AVPMENUGFX_ID menuGfxID, int topleftX, i
 		alpha = ONE_FIXED;
 
 	DrawAlphaMenuQuad(topleftX, topleftY, menuGfxID, alpha);
-
-#if 0 // bjd
-   	unsigned short *destPtr;
-	unsigned char *srcPtr;
-	AVPMENUGFX *gfxPtr;
-	D3DTexture *image;
-
-	GLOBALASSERT(menuGfxID < MAX_NO_OF_AVPMENUGFXS);
-	gfxPtr = &AvPMenuGfxStorage[menuGfxID];
-	image = (D3DTexture*)gfxPtr->ImagePtr;
-
-	switch(format)
-	{
-		default:
-		GLOBALASSERT("UNKNOWN TEXT FORMAT"==0);
-		case AVPMENUFORMAT_LEFTJUSTIFIED:
-		{
-			// supplied x is correct
-			break;
-		}
-		case AVPMENUFORMAT_RIGHTJUSTIFIED:
-		{
-			topleftX -= gfxPtr->Width;
-			break;
-		}
-		case AVPMENUFORMAT_CENTREJUSTIFIED:
-		{
-			topleftX -= gfxPtr->Width/2;
-			break;
-		}
-	}
-
-	srcPtr = (unsigned char *)image->buf;
-
-	int length = gfxPtr->Width;
-
-	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length) {
-		length = /*ScreenDescriptorBlock.SDB_Width*/640 - topleftX;
-	}
-	if (length <= 0) return;
-
-	D3DInfo temp;
-
-	temp = GetD3DInfo();
-
-	D3DSURFACE_DESC surface_desc;
-	temp.lpD3DBackSurface->GetDesc(&surface_desc);
-
-	D3DLOCKED_RECT lock = {0,NULL};
-
-	temp.lpD3DBackSurface->LockRect(&lock, NULL, 0); if (lock.pBits == NULL) return;
-
-
-	if (alpha>ONE_FIXED)
-	{
-		int x,y;
-
-		for (y=topleftY; y<gfxPtr->Height+topleftY; y++)
-		{
-			//destPtr = (unsigned short *)(ScreenBuffer + topleftX*2 + y*BackBufferPitch);
-			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch)) + topleftX;
-			if(y>=topY && y<=bottomY)
-			{
-				for (x=0; x<length; x++)
-				{
-					*destPtr =	((srcPtr[0]>>3)<<11) |
-							((srcPtr[1]>>2)<<5 ) |
-							((srcPtr[2]>>3));
-					srcPtr += 4;
-					destPtr++;
-/*
-					*destPtr = *srcPtr;
-					destPtr++;
-					srcPtr++;
-*/
-				}
-				//srcPtr += (ddsdimage.lPitch/2) - gfxPtr->Width; 
-				srcPtr += (image->w - length) * 4;
-			}
-			else
-			{
-				//srcPtr+=(ddsdimage.lPitch/2);
-				srcPtr += image->w * 4;
-			}
-		}
-	}
-	else
-	{
-		int x,y;
-
-		for (y=topleftY; y<gfxPtr->Height+topleftY; y++)
-		{
-			//destPtr = (unsigned short *)(ScreenBuffer + topleftX*2 + y*BackBufferPitch);
-			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch)) + topleftX;
-
-			if(y>=topY && y<=bottomY)
-			{
-				for (x=0; x<length; x++)
-				{
-					//if (*srcPtr)
-					if (srcPtr[0] || srcPtr[1] || srcPtr[2])
-					{
-						unsigned int destR, destG, destB;
-						
-						destR = (*destPtr & 0xF800)>>8;
-						destG = (*destPtr & 0x07E0)>>3;
-						destB = (*destPtr & 0x001F)<<3;
-						
-						destR += MUL_FIXED(alpha, srcPtr[0]);
-						destG += MUL_FIXED(alpha, srcPtr[1]);
-						destB += MUL_FIXED(alpha, srcPtr[2]);
-						if (destR > 0x00FF) destR = 0x00FF;
-						if (destG > 0x00FF) destG = 0x00FF;
-						if (destB > 0x00FF) destB = 0x00FF;
-						
-						*destPtr =	((destR>>3)<<11) |
-								((destG>>2)<<5 ) |
-								((destB>>3));
-
-					}
-					//destPtr++;
-					//srcPtr++;
-					srcPtr += 4;
-					destPtr++;
-				}
-				//srcPtr += (ddsdimage.lPitch/2) - gfxPtr->Width; 
-				srcPtr += (image->w - length) * 4;
-			}
-			else
-			{
-				//srcPtr += (ddsdimage.lPitch/2);
-				srcPtr += image->w * 4;
-			}
-		}
-	}  
-	temp.lpD3DBackSurface->UnlockRect();
-#endif
 }
 
 extern int HeightOfMenuGfx(enum AVPMENUGFX_ID menuGfxID)
@@ -2157,29 +1830,6 @@ extern int HeightOfMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 extern void ClearScreenToBlack(void)
 { 
 	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0 );
-
-/*
-	D3DSURFACE_DESC surface_desc;
-	temp.lpD3DBackSurface->GetDesc(&surface_desc);
-
-	D3DLOCKED_RECT lock = {0,NULL};
-
-	temp.lpD3DBackSurface->LockRect(&lock, NULL, 0); if (lock.pBits == NULL) return;
-
-	unsigned int x, y;
-	unsigned short *ptr;
-
-	for (y = 0; y < surface_desc.Height; y++) {
-		ptr = (unsigned short *)(((unsigned char *)lock.pBits)+y*lock.Pitch);
-		for (x = 0; x < surface_desc.Width; x++) {
-			*ptr = 0;
-			
-			ptr++;
-		}
-	}
-
-	temp.lpD3DBackSurface->UnlockRect();
-*/
 }
 
 extern void FadedScreen(int alpha)

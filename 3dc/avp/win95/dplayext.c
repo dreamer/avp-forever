@@ -266,7 +266,7 @@ HRESULT DpExtRecv
 		 * automatically for some system messages.
 		 */
 		if( ( DPID_SYSMSG == *lpidFrom ) && 
-			( DP_OK == hrRecv ) )
+			( NET_OK == hrRecv ) )
 		{
 		   	DPMSG_GENERIC msgGenSys	= *( (LPDPMSG_GENERIC) *lplpData );
 			
@@ -301,7 +301,7 @@ HRESULT DpExtRecv
 		else bIsSysMsg = FALSE;
 		
 		/* Might we need to process this message? */
-		if( ( DP_OK == hrRecv ) && 
+		if( ( NET_OK == hrRecv ) && 
 			( gbDpExtDoGrntdMsgs || gbDpExtDoErrChcks ) )
 		{
 			bInternalOnly = DpExtProcessRecvdMsg

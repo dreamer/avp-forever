@@ -997,7 +997,7 @@ extern void GetNextMultiplayerObservedPlayer();
 extern void TurnOffMultiplayerObserveMode();
 extern void CheckStateOfObservedPlayer();
 
-extern int DirectPlay_Disconnect(void);
+extern int Net_Disconnect(void);
 static int MyPlayerHasAMuzzleFlash(STRATEGYBLOCK *sbPtr);
 int LinkSwitchGetSynchData(STRATEGYBLOCK* sbPtr);
 int TrackObjectGetSynchData(STRATEGYBLOCK* sbPtr);

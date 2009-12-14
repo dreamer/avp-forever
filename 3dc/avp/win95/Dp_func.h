@@ -14,7 +14,7 @@ extern LPDIRECTPLAY4 glpDP;
 extern LPGUID glpGuid;
 
 extern DPNAME AVPDPplayerName;
-extern DPID AVPDPNetID;
+extern DPID AvPNetID;
 
 
 /* Constants */ 
@@ -26,7 +26,7 @@ HRESULT DPlayClose(void);
 HRESULT DPlayCreate(LPVOID lpCon);
 HRESULT DPlayCreatePlayer(LPDPID lppidID, LPTSTR lptszPlayerName, HANDLE hEvent, 
 						  LPVOID lpData, DWORD dwDataSize);
-HRESULT DPlayCreateSession(LPTSTR lptszSessionName,int maxPlayers,int dwUser1,int dwUser2);
+HRESULT Net_CreateSession(LPTSTR lptszSessionName,int maxPlayers,int dwUser1,int dwUser2);
 HRESULT DPlayDestroyPlayer(DPID pid);
 HRESULT DPlayEnumPlayers(LPGUID lpSessionGuid, LPDPENUMPLAYERSCALLBACK2 lpEnumCallback, 
 						 LPVOID lpContext, DWORD dwFlags);
@@ -43,7 +43,7 @@ HRESULT DPlayEnumSessions(DWORD dwTimeout, LPDPENUMSESSIONSCALLBACK2 lpEnumCallb
 HRESULT DPlayGetPlayerData(DPID pid, LPVOID lpData, LPDWORD lpdwDataSize, DWORD dwFlags);
 HRESULT DPlayGetSessionDesc(void);
 BOOL IsDPlay(void);
-HRESULT DPlayOpenSession(LPGUID lpSessionGuid);
+HRESULT Net_OpenSession(LPGUID lpSessionGuid);
 HRESULT DPlayReceive(LPDPID lpidFrom, LPDPID lpidTo, DWORD dwFlags, LPVOID lpData, LPDWORD lpdwDataSize);
 HRESULT DPlayRelease(void);
 HRESULT DPlaySend(DPID idFrom, DPID idTo, DWORD dwFlags, LPVOID lpData, DWORD dwDataSize);

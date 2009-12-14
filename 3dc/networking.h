@@ -6,10 +6,15 @@
 #include "equipmnt.h"
 #include "pldnet.h"
 
-int DirectPlay_ConnectingToSession();
+int Net_Initialise();
+int Net_Deinitialise();
+int Net_ConnectingToSession();
 int DpExtSend(int lpDP2A, DPID idFrom, DPID idTo, DWORD dwFlags, unsigned char *lpData, int dwDataSize);
 int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, unsigned char *lplpData, int *lpdwDataSize);
-int SendSystemMessage(int messageType, int idFrom, int idTo, unsigned char *lpData, int dwDataSize);
+int Net_SendSystemMessage(int messageType, int idFrom, int idTo, unsigned char *lpData, int dwDataSize);
+
+extern int glpDP;
+extern int AvPNetID;
 
 /*
 Version 0 - Original multiplayer + save patch
@@ -17,31 +22,29 @@ Version 100 - Added pistol,skeeter (and new levels)
 */
 #define AVP_MULTIPLAYER_VERSION 100
 
-const int MESSAGEHEADERSIZE = sizeof(unsigned char) + (sizeof(int) * 2);
+static const int MESSAGEHEADERSIZE = sizeof(unsigned char) + (sizeof(int) * 2);
 
-DPID AVPDPNetID;
-
-/* system messages */
-#define DPSYS_CREATEPLAYERORGROUP		1
-#define DPSYS_DESTROYPLAYERORGROUP		2
-#define DPSYS_ADDPLAYERTOGROUP			3
-#define DPSYS_DELETEPLAYERFROMGROUP		4
-#define DPSYS_SESSIONLOST				5
-#define DPSYS_HOST						6
-#define DPSYS_SETPLAYERORGROUPDATA		7
-#define DPSYS_SETPLAYERORGROUPNAME		8
-#define DPSYS_SETSESSIONDESC			9
-#define DPSYS_ADDGROUPTOGROUP			10
-#define DPSYS_DELETEGROUPFROMGROUP		11
-#define DPSYS_SECUREMESSAGE				12
-#define DPSYS_STARTSESSION				13
-#define DPSYS_CHAT						14
-#define DPSYS_SETGROUPOWNER				15
-#define DPSYS_SENDCOMPLETE				16
+// system messages
+#define NET_CREATEPLAYERORGROUP			1
+#define NET_DESTROYPLAYERORGROUP		2
+#define NET_ADDPLAYERTOGROUP			3
+#define NET_DELETEPLAYERFROMGROUP		4
+#define NET_SESSIONLOST					5
+#define NET_HOST						6
+#define NET_SETPLAYERORGROUPDATA		7
+#define NET_SETPLAYERORGROUPNAME		8
+#define NET_SETSESSIONDESC				9
+#define NET_ADDGROUPTOGROUP				10
+#define NET_DELETEGROUPFROMGROUP		11
+#define NET_SECUREMESSAGE				12
+#define NET_STARTSESSION				13
+#define NET_CHAT						14
+#define NET_SETGROUPOWNER				15
+#define NET_SENDCOMPLETE				16
 #define DPPLAYERTYPE_GROUP				17
 #define DPPLAYERTYPE_PLAYER				18
 
-/* other crap */
+// other stuff
 #define DPRECEIVE_ALL					19
 #define DPERR_BUSY						20
 #define DPERR_CONNECTIONLOST			21
@@ -57,11 +60,11 @@ DPID AVPDPNetID;
 #define DPSEND_GUARANTEED				30
 #define DPEXT_NOT_GUARANTEED			31
 
-/* HRESULT types */
-#define DP_OK							0
-#define DP_FAIL							1
+// error return types
+#define NET_OK							0
+#define NET_FAIL						1
 
-/* enum for message types */
+// enum for message types
 enum
 {
 	AVP_BROADCAST,
@@ -90,7 +93,7 @@ typedef struct {
 
 	DWORD dwUser1;
 	DWORD dwUser2;
-} DPSESSIONDESC2, FAR *LPDPSESSIONDESC2;
+} NET_SESSIONDESC;
 
 typedef struct playerDetails
 {
@@ -114,7 +117,7 @@ typedef struct
 	};
 } DPNAME, FAR *LPDPNAME;
 
-/* easily sendable version of above */
+// easily sendable version of above
 typedef struct playerName
 {
 	int dwSize;
@@ -122,7 +125,7 @@ typedef struct playerName
 	char ShortNameA[40];
 } playerName;
 
-DPNAME AVPDPplayerName;
+extern DPNAME AVPDPplayerName;
 
 /*
  * DPMSG_ADDPLAYERTOGROUP
@@ -209,7 +212,5 @@ typedef struct DPMSG_DESTROYPLAYERORGROUP
 } DPMSG_DESTROYPLAYERORGROUP;
 typedef DPMSG_DESTROYPLAYERORGROUP * LPDPMSG_DESTROYPLAYERORGROUP;
 #pragma pack()
-
-int glpDP;
 
 #endif // #ifndef _NETWORKING_
