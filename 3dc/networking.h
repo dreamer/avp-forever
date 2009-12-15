@@ -9,12 +9,19 @@
 int Net_Initialise();
 int Net_Deinitialise();
 int Net_ConnectingToSession();
-int DpExtSend(int lpDP2A, int idFrom, int idTo, DWORD dwFlags, uint8_t *lpData, int dwDataSize);
-int DpExtRecv(int lpDP2A, int *lpidFrom, int *lpidTo, DWORD dwFlags, uint8_t *lplpData, int *lpdwDataSize);
+int Net_Send(int fromID, int toID, int flags, uint8_t *lpData, int dataSize);
+int Net_Receive(int *fromID, int *toID, int flags, uint8_t *lplpData, int *dataSize);
 int Net_SendSystemMessage(int messageType, int idFrom, int idTo, uint8_t *lpData, int dwDataSize);
 
 extern int glpDP;
 extern int AvPNetID;
+
+typedef struct messageHeader
+{
+	uint8_t		messageType;
+	uint32_t	fromID;
+	uint32_t	toID;
+} messageHeader;
 
 /*
 Version 0 - Original multiplayer + save patch
@@ -22,6 +29,7 @@ Version 100 - Added pistol,skeeter (and new levels)
 */
 #define AVP_MULTIPLAYER_VERSION 101 // bjd - my version, not directplay compatible
 
+struct messageHeader; // forward declare the structure
 extern const int MESSAGEHEADERSIZE;
 
 // system messages
@@ -45,20 +53,20 @@ extern const int MESSAGEHEADERSIZE;
 #define DPPLAYERTYPE_PLAYER				18
 
 // other stuff
-#define DPRECEIVE_ALL					19
-#define DPERR_BUSY						20
-#define DPERR_CONNECTIONLOST			21
-#define DPERR_INVALIDPARAMS				22
-#define DPERR_INVALIDPLAYER				23
-#define DPERR_NOTLOGGEDIN				24
-#define DPERR_SENDTOOBIG				25
-#define DPERR_BUFFERTOOSMALL			26
-#define DPID_SYSMSG						27
+#define NET_RECEIVE_ALL					19
+#define NET_ERR_BUSY					20
+#define NET_ERR_CONNECTIONLOST			21
+#define NET_ERR_INVALIDPARAMS			22
+#define NET_ERR_INVALIDPLAYER			23
+#define NET_ERR_NOTLOGGEDIN				24
+#define NET_ERR_SENDTOOBIG				25
+#define NET_ERR_BUFFERTOOSMALL			26
+#define NET_SYSTEM_MESSAGE  			27
 #define DPID_ALLPLAYERS					28
-#define DPERR_NOMESSAGES				29
+#define NET_ERR_NOMESSAGES				29
 
-#define DPSEND_GUARANTEED				30
-#define DPEXT_NOT_GUARANTEED			31
+//#define DPSEND_GUARANTEED				30
+//#define DPEXT_NOT_GUARANTEED			31
 
 // error return types
 #define NET_OK							0

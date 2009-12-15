@@ -349,8 +349,6 @@ void InitCharacter()
 	#endif
 	
 	Start_Progress_Bar();
-
-	OutputDebugString("Start_Progress_Bar();\n");
 	
 	Set_Progress_Bar_Position(PBAR_HUD_START);
 

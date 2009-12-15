@@ -752,7 +752,7 @@ int OpenTheoraVideo(const char *fileName, int playMode = PLAYONCE)
 	if (audio)
 	{
 		message << "Audio stream is " << audio->mSerial << ", " << audio->mVorbis.mInfo.channels << "channels and " << audio->mVorbis.mInfo.rate << "KHz";
-		Com_PrintDebugMessage(message.str());
+		Con_PrintDebugMessage(message.str());
 
 		fmvAudioStream = AudioStream_CreateBuffer(audio->mVorbis.mInfo.channels, audio->mVorbis.mInfo.rate, 4096, 3);
 		if (fmvAudioStream == NULL)
@@ -770,7 +770,7 @@ int OpenTheoraVideo(const char *fileName, int playMode = PLAYONCE)
 	{
 		message.clear();
 		message << "Video stream is " << video->mSerial << ", " << video->mTheora.mInfo.frame_width << "x" << video->mTheora.mInfo.frame_height;
-		Com_PrintDebugMessage(message.str());
+		Con_PrintDebugMessage(message.str());
 	}
 
 	if (!mDisplayTexture)

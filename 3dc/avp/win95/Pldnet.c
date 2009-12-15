@@ -270,9 +270,9 @@ extern void NewOnScreenMessage(unsigned char *messagePtr);
 /*----------------------------------------------------------------------
   Some protoypes for this file
   ----------------------------------------------------------------------*/
-static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize);
-static void ProcessGameMessage(DPID senderId, unsigned char *msgP,unsigned int msgSize);
-static void AddPlayerToGame(DPID id, char*name);
+static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize);
+static void ProcessGameMessage(DPID senderId, uint8_t *msgP, unsigned int msgSize);
+static void AddPlayerToGame(DPID id, char *name);
 static void AddPlayerAndObjectUpdateMessages(void);
 static void UpdateNetworkGameScores(DPID playerKilledId, DPID killerId,NETGAME_CHARACTERTYPE playerKilledType,NETGAME_CHARACTERTYPE killerType);
 static void InitFinalNetGameScores(void);
@@ -381,8 +381,6 @@ void CheckStateOfObservedPlayer();
 void InitAVPNetGame(void)
 {
 	extern int QuickStartMultiplayer;
-	/* init garry's dp extended */
-	DpExtInit(0,0,0);
 
 	/* init the send message buffer */
 	InitialiseSendMessageBuffer();
@@ -463,11 +461,6 @@ void InitAVPNetGameForHost(int species, int gamestyle, int level)
 	AvP.GameMode = I_GM_Playing;
 	AvP.Network = I_Host;
 	AvP.NetworkAIServer = (gamestyle==NGT_Coop);
-	/* init garry's dp extended */
-	if(!netGameData.skirmishMode)
-	{
-		DpExtInit(0,0,0);
-	}
 
 	/* init the send message buffer */
 	InitialiseSendMessageBuffer();
@@ -620,9 +613,6 @@ void InitAVPNetGameForJoin(void)
 	
 	AvP.NetworkAIServer = 0;
 
-	/* init garry's dp extended */
-	DpExtInit(0,0,0);
-
 	/* init the send message buffer */
 	InitialiseSendMessageBuffer();
 
@@ -696,27 +686,25 @@ static unsigned char msg[NET_MESSAGEBUFFERSIZE];
   ----------------------------------------------------------------------*/
 void MinimalNetCollectMessages(void)
 {			
-	int		res = NET_OK;
-	DPID	dPlayFromId = 0;
-	DPID 	dPlayToId = 0;
-//	unsigned char *msgP = NULL;
-//	unsigned char msg[NET_MESSAGEBUFFERSIZE];
-	int msgSize = 0;
+	int	 res = NET_OK;
+	DPID dPlayFromId = 0;
+	DPID dPlayToId = 0;
+	int	 msgSize = 0;
 		
 	/* collects messages until something other than NET_OK is returned (eg DP_NoMessages) */
-	if(!netGameData.skirmishMode)
+	if (!netGameData.skirmishMode)
 	{
-		while((res==NET_OK) && glpDP && AvPNetID)
+		while ((res == NET_OK) && glpDP && AvPNetID)
 		{
-			res = DpExtRecv(glpDP, &dPlayFromId, &dPlayToId, DPRECEIVE_ALL, &msg[0], /*(LPDWORD)*/&msgSize);				
-			if(res==NET_OK)
+			res = Net_Receive(&dPlayFromId, &dPlayToId, NET_RECEIVE_ALL, &msg[0], &msgSize);				
+			if (NET_OK == res)
 			{
 				/* process last message, if there is one */
-				if(dPlayFromId == DPID_SYSMSG)
-				{			
-					ProcessSystemMessage(&msg[0],msgSize);
+				if (NET_SYSTEM_MESSAGE == dPlayFromId)
+				{
+					ProcessSystemMessage(&msg[0], msgSize);
 				}
-				else ProcessGameMessage(dPlayFromId,&msg[0],msgSize);										
+				else ProcessGameMessage(dPlayFromId, &msg[0], msgSize);										
 			}		
 		}
 	}
@@ -725,10 +713,8 @@ void MinimalNetCollectMessages(void)
 void NetCollectMessages(void)
 {			
 	int res = NET_OK;
-	DPID	dPlayFromId = 0;
-	DPID 	dPlayToId = 0;
-//	unsigned char *msgP = NULL;
-//	unsigned char msg[NET_MESSAGEBUFFERSIZE];
+	int	dPlayFromId = 0;
+	int	dPlayToId = 0;
 	int msgSize = 0;
 		
 	/* first off, some assertions about our game state */
@@ -738,28 +724,28 @@ void NetCollectMessages(void)
 	LOCALASSERT(!((AvP.Network==I_Host)&&(netGameData.myGameState==NGS_Error_HostLost)));
 
 	/* only bother colecting messages under certain game conditions... */
-	if((netGameData.myGameState!=NGS_StartUp)&&(netGameData.myGameState!=NGS_Playing)&&(netGameData.myGameState!=NGS_Joining)&&(netGameData.myGameState!=NGS_EndGameScreen)) return;
+	if ((netGameData.myGameState!=NGS_StartUp)&&(netGameData.myGameState!=NGS_Playing)&&(netGameData.myGameState!=NGS_Joining)&&(netGameData.myGameState!=NGS_EndGameScreen)) 
+		return;
 
 	InitNetLog();
 	LogNetInfo("Collecting Messages... \n");
-//	OutputDebugString("Connecting Messages...\n");
 
 	/* collects messages until something other than NET_OK is returned (eg DP_NoMessages) */
-	if(!netGameData.skirmishMode)
+	if (!netGameData.skirmishMode)
 	{
-		while((res==NET_OK) && glpDP && AvPNetID)
+		while ((NET_OK == res) && glpDP && AvPNetID)
 		{
-			res = DpExtRecv(glpDP,&dPlayFromId,&dPlayToId,DPRECEIVE_ALL,&msg[0],/*(LPDWORD)*/&msgSize);				
-			if(res==NET_OK)
+			res = Net_Receive(&dPlayFromId, &dPlayToId, NET_RECEIVE_ALL, &msg[0], &msgSize);				
+			if (NET_OK == res)
 			{
 				numMessagesReceived++;
 				/* process last message, if there is one */
-				if(dPlayFromId == DPID_SYSMSG)
-				{			
-					ProcessSystemMessage(&msg[0],msgSize);
+				if (NET_SYSTEM_MESSAGE == dPlayFromId)
+				{
+					ProcessSystemMessage(&msg[0], msgSize);
 				}
-				else ProcessGameMessage(dPlayFromId,&msg[0],msgSize);										
-			}	
+				else ProcessGameMessage(dPlayFromId, &msg[0] ,msgSize);										
+			}
 		}
 	}
 	LogNetInfo("... Finished collecting Messages\n");
@@ -939,17 +925,23 @@ void NetCollectMessages(void)
 /*----------------------------------------------------------------------
   Functions for processing system messages
   ----------------------------------------------------------------------*/
-static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize)
+static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 {
-	int systemMessage = *(int*)&msgP[5]; // get from 'lpidTo'
+	int systemMessage;
+	char buf[100];
+	messageHeader newMessageHeader;
 
 	/* currently, only the host deals with system mesages */
 	/* check for invalid parameters */
-	if((msgSize==0)||(msgP==NULL)) return;
+	if ((msgSize == 0) || (msgP == NULL)) 
+		return;
 
-	OutputDebugString("\n we're going to process a system message\n");
+	memcpy(&newMessageHeader, &msgP[0], sizeof(messageHeader));
+	systemMessage = newMessageHeader.toID;
 
-	switch(systemMessage/*->dwType*/)
+	OutputDebugString("we're going to process a system message\n");
+
+	switch(systemMessage)
 	{
 		case NET_ADDPLAYERTOGROUP:
 		{
@@ -962,19 +954,19 @@ static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize)
 
 			/* only useful during startup: during main game, connecting player should
 			detect game state and exit immediately */
-			if((AvP.Network==I_Host))
+			if ((AvP.Network == I_Host))
 			{	
 				playerDetails newPlayer;
 
-				/* copy message data to player struct */
-				memcpy(/*(playerDetails*)*/&newPlayer, &msgP[MESSAGEHEADERSIZE], sizeof(playerDetails));
-				if(newPlayer.playerType == DPPLAYERTYPE_PLAYER)
+				// copy message data to player struct
+				memcpy(&newPlayer, &msgP[MESSAGEHEADERSIZE], sizeof(playerDetails));
+				if (DPPLAYERTYPE_PLAYER == newPlayer.playerType)
 				{
 					int id = newPlayer.playerID;
 					char name[40];
 
 					strcpy(&name[0], &newPlayer.playerName[0]);
-					AddPlayerToGame(id,&name[0]);
+					AddPlayerToGame(id, &name[0]);
 				}
 			}
 			LogNetInfo("system message:  NET_CREATEPLAYERORGROUP \n");
@@ -1034,7 +1026,7 @@ static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize)
 //				netGameData.myGameState = NGS_EndGame;
 //				AvP.MainLoopRunning = 0;
 
-				if(LobbiedGame)
+				if (LobbiedGame)
 				{
 					//no longer a lowly client
 					LobbiedGame=LobbiedGame_Server;
@@ -1069,7 +1061,8 @@ static void ProcessSystemMessage(unsigned char *msgP,unsigned int msgSize)
 		}
 		default:
 		{
-			OutputDebugString("invalid system message type: ignore\n");
+			sprintf(buf, "invalid system message type: %d\n", systemMessage);
+			OutputDebugString(buf);
 			/* invalid system message type: ignore */
 			break;
 		}
@@ -1086,7 +1079,8 @@ static void AddPlayerToGame(DPID id, char* name)
 
 	/* find a free slot for the player */
 	freePlayerIndex = EmptySlotInPlayerList();
-	if(freePlayerIndex == NET_NOEMPTYSLOTINPLAYERLIST) return;
+	if (freePlayerIndex == NET_NOEMPTYSLOTINPLAYERLIST) 
+		return;
 
 	/* initialise the slot */
 	netGameData.playerData[freePlayerIndex].playerId = id;		
@@ -1703,7 +1697,7 @@ void NetSendMessages(void)
 		{
 			if(glpDP && AvPNetID)
 			{
-				res = DpExtSend(glpDP,AvPNetID,DPID_ALLPLAYERS,0,&sendBuffer[0],numBytes);
+				res = Net_Send(AvPNetID, DPID_ALLPLAYERS, 0, &sendBuffer[0], numBytes);
 				if(res!=NET_OK)
 				{
 					//we have some problem sending...
@@ -1712,7 +1706,7 @@ void NetSendMessages(void)
 						case NET_FAIL:
 							OutputDebugString("some problem sending\n");
 
-						case DPERR_BUSY :
+						case NET_ERR_BUSY :
 							/*
 							failed to send this frame , try preserving the contents of the send buffer ,
 							unless it is getting to full.
@@ -1723,23 +1717,23 @@ void NetSendMessages(void)
 							}
 							break; 
 						
-						case DPERR_CONNECTIONLOST :
+						case NET_ERR_CONNECTIONLOST :
 							NewOnScreenMessage("Connection lost!!");
 							break;
 						
-						case DPERR_INVALIDPARAMS  :
+						case NET_ERR_INVALIDPARAMS  :
 							LOCALASSERT(0=="Send - Invalid parameters");
 							break;
 						
-						case DPERR_INVALIDPLAYER : 
+						case NET_ERR_INVALIDPLAYER : 
 							LOCALASSERT(0=="Send - Invalid player");
 							break;
 						
-						case DPERR_NOTLOGGEDIN : 
+						case NET_ERR_NOTLOGGEDIN : 
 							LOCALASSERT(0=="Send - Not logged in");
 							break;
 						
-						case DPERR_SENDTOOBIG : 
+						case NET_ERR_SENDTOOBIG : 
 							LOCALASSERT(0=="Send - Send to big");
 							break;
 
@@ -9734,7 +9728,8 @@ static void Inform_PlayerHasConnected(DPID player)
 	int playerIndex = PlayerIdInPlayerList(player);
 
 	/* KJL 15:35:38 09/04/98 - not knowing who the player is what make things a bit awkward... */
-	if(playerIndex==NET_IDNOTINPLAYERLIST) return;
+	if (playerIndex==NET_IDNOTINPLAYERLIST) 
+		return;
 
 	NetworkGameConsoleMessage(TEXTSTRING_MULTIPLAYERCONSOLE_CONNECTGAME,netGameData.playerData[playerIndex].name,0);
 }

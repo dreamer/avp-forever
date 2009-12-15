@@ -822,8 +822,8 @@ int PlatChangeSoundPitch(int activeIndex, int pitch)
 			GameSounds[gameSoundIndex].pitch, pitch);	
 	}
 
-	sprintf(buf, "frequency: %d xaudio2 value: %f\n", frequency, XAudio2SemitonesToFrequencyRatio(frequency));
-	OutputDebugString(buf);
+//	sprintf(buf, "frequency: %d xaudio2 value: %f\n", frequency, XAudio2SemitonesToFrequencyRatio(frequency));
+//	OutputDebugString(buf);
 
 /*
 	ActiveSounds[activeIndex].pitch = pitch;

@@ -65,19 +65,6 @@ struct DpExtHeader
 
 /* P R O T O S -------------------------------------------------------- */
 
-/* Call this fn to initialise the DpExt module. cGrntdBufs sets the number
- * of guaranteed message buffers to use and cBytesPerBuf is the number of
- * bytes to allocate to each buffer, and thus the maximum length 
- * (including DpExt header) for a guaranteed msg. cGrntdBufs should be 0 
- * if you don't want DpExt's guaranteed msg sending system to be turned on.
- * bErrChcks should be TRUE if you require DpExt's error checking system,
- * otherwise FALSE.
- */
-extern BOOL DpExtInit(DWORD cGrntdBufs, DWORD cBytesPerBuf, BOOL bErrChcks);
-
-/* Un-initialises the DpExt module. */ 
-extern void DpExtUnInit(void);
-
 /* This fn has the same parameters as the standard DirectPlay Send() fn. 
  * However, you *must* leave DPEXT_HEADER_SIZE bytes free at the start of
  * your data buffer. The dwDataSize byte count must includes these bytes. 

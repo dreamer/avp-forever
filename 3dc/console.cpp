@@ -79,7 +79,7 @@ void Con_PrintMessage(const std::string &messageString)
 	LogString(messageString);
 }
 
-void Com_PrintDebugMessage(const std::string &messageString)
+void Con_PrintDebugMessage(const std::string &messageString)
 {
 	// for now
 	Con_PrintMessage(messageString);
