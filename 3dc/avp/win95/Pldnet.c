@@ -272,7 +272,7 @@ extern void NewOnScreenMessage(unsigned char *messagePtr);
   ----------------------------------------------------------------------*/
 static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize);
 static void ProcessGameMessage(DPID senderId, uint8_t *msgP, unsigned int msgSize);
-static void AddPlayerToGame(DPID id, char *name);
+static void AddPlayerToGame(int id, char *name);
 static void AddPlayerAndObjectUpdateMessages(void);
 static void UpdateNetworkGameScores(DPID playerKilledId, DPID killerId,NETGAME_CHARACTERTYPE playerKilledType,NETGAME_CHARACTERTYPE killerType);
 static void InitFinalNetGameScores(void);
@@ -445,10 +445,10 @@ void InitAVPNetGame(void)
 	numMessagesTransmitted = 0;
 
 	/* If I'm the host, add myself to the game data */
-	if(AvP.Network==I_Host)
+	if (AvP.Network==I_Host)
 	{
 		netGameData.playerData[0].playerId = AvPNetID;
-		strncpy(netGameData.playerData[0].name,AVPDPplayerName.shortName, NET_PLAYERNAMELENGTH-1);
+		strncpy(netGameData.playerData[0].name, thisClientPlayer.name, NET_PLAYERNAMELENGTH-1);
 		netGameData.playerData[0].name[NET_PLAYERNAMELENGTH-1] = '\0';
 //		ConvertNetNameToUpperCase(netGameData.playerData[0].name);
 	}
@@ -562,7 +562,7 @@ void InitAVPNetGameForHost(int species, int gamestyle, int level)
 
 	/* If I'm the host, add myself to the game data */
 	netGameData.playerData[0].playerId = AvPNetID;
-	strncpy(netGameData.playerData[0].name,AVPDPplayerName.shortName, NET_PLAYERNAMELENGTH-1);
+	strncpy(netGameData.playerData[0].name, thisClientPlayer.name, NET_PLAYERNAMELENGTH-1);
 	netGameData.playerData[0].name[NET_PLAYERNAMELENGTH-1] = '\0';
 //	ConvertNetNameToUpperCase(netGameData.playerData[0].name);
 
@@ -955,17 +955,17 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 			/* only useful during startup: during main game, connecting player should
 			detect game state and exit immediately */
 			if ((AvP.Network == I_Host))
-			{	
-				playerDetails newPlayer;
+			{
+				PlayerDetails newPlayer;
 
 				// copy message data to player struct
-				memcpy(&newPlayer, &msgP[MESSAGEHEADERSIZE], sizeof(playerDetails));
-				if (DPPLAYERTYPE_PLAYER == newPlayer.playerType)
+				memcpy(&newPlayer, &msgP[MESSAGEHEADERSIZE], sizeof(PlayerDetails));
+				// FIXME if (DPPLAYERTYPE_PLAYER == newPlayer.playerType)
 				{
 					int id = newPlayer.playerID;
 					char name[40];
 
-					strcpy(&name[0], &newPlayer.playerName[0]);
+					strcpy(&name[0], &newPlayer.name[0]);
 					AddPlayerToGame(id, &name[0]);
 				}
 			}
@@ -989,7 +989,7 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 			this during start-up. During the main game, the ghosts will time-out
 			anyway */
 
-			if((AvP.Network==I_Host))
+			if ((AvP.Network == I_Host))
 			{	
 				DPMSG_DESTROYPLAYERORGROUP destroyMessage;
 				memcpy(&destroyMessage, &msgP[MESSAGEHEADERSIZE], sizeof(DPMSG_DESTROYPLAYERORGROUP));
@@ -1069,13 +1069,13 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 	}
 }
 
-static void AddPlayerToGame(DPID id, char* name)
+static void AddPlayerToGame(int id, char* name)
 {
 	int freePlayerIndex;
 
-	OutputDebugString("add player to game\n");
+	OutputDebugString("AddPlayerToGame() called\n");
 
-	LOCALASSERT(AvP.Network==I_Host);			
+	LOCALASSERT(AvP.Network == I_Host);			
 
 	/* find a free slot for the player */
 	freePlayerIndex = EmptySlotInPlayerList();
@@ -1094,7 +1094,7 @@ static void AddPlayerToGame(DPID id, char* name)
 	netGameData.playerData[freePlayerIndex].startFlag = 0;		
 	{
 		int i;
-		for(i=0;i<NET_MAXPLAYERS;i++)
+		for (i = 0; i < NET_MAXPLAYERS; i++)
 		{
 			netGameData.playerData[freePlayerIndex].playerFrags[i] = 0;
 		}
@@ -1107,9 +1107,9 @@ static void AddPlayerToGame(DPID id, char* name)
 		netGameData.playerData[freePlayerIndex].playerAlive = 1;
 		netGameData.playerData[freePlayerIndex].playerHasLives = 1;
 
-		netGameData.playerData[freePlayerIndex].lastKnownPosition.vx=0;
-		netGameData.playerData[freePlayerIndex].lastKnownPosition.vy=100000000;
-		netGameData.playerData[freePlayerIndex].lastKnownPosition.vz=0;
+		netGameData.playerData[freePlayerIndex].lastKnownPosition.vx = 0;
+		netGameData.playerData[freePlayerIndex].lastKnownPosition.vy = 100000000;
+		netGameData.playerData[freePlayerIndex].lastKnownPosition.vz = 0;
 	}
 
 	Inform_PlayerHasConnected(id);

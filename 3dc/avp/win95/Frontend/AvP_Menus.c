@@ -3057,7 +3057,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 				extern char MP_SessionName[];
 				int s = AvPMenus.CurrentlySelectedElement;
 
-				if(SessionData[s].AllowedToJoin)
+				if (SessionData[s].AllowedToJoin)
 				{
 					//copy the session name , leaving of the player count information
 					char * braket_pos;
@@ -3066,7 +3066,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 					braket_pos=strrchr(MP_SessionName,'(');
 					if(braket_pos) *braket_pos=0;
 
-					if (Net_ConnectToSession(s,MP_PlayerName) != NET_FAIL)
+					if (Net_ConnectToSession(s, MP_PlayerName) != NET_FAIL)
 						SetupNewMenu(elementPtr->MenuToGoTo);
 				}
 			}

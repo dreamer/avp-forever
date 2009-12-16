@@ -11,7 +11,7 @@ int Net_Deinitialise();
 int Net_ConnectingToSession();
 int Net_Send(int fromID, int toID, int flags, uint8_t *lpData, int dataSize);
 int Net_Receive(int *fromID, int *toID, int flags, uint8_t *lplpData, int *dataSize);
-int Net_SendSystemMessage(int messageType, int idFrom, int idTo, uint8_t *lpData, int dwDataSize);
+int Net_SendSystemMessage(int messageType, int idFrom, int idTo, uint8_t *lpData, int dataSize);
 
 extern int glpDP;
 extern int AvPNetID;
@@ -97,39 +97,22 @@ typedef struct
 	uint32_t	level;
 
 	char		sessionName[40];
-/*
-	union
-	{
-		char lpszSessionName[40];
-		char lpszSessionNameA[40];
-	};
-*/
+
 } NET_SESSIONDESC;
 
-typedef struct playerDetails
-{
-	uint32_t	playerID;
-	uint8_t		playerType; // redundant?
-	char		playerName[40];
-} playerDetails;
-
-typedef struct 
-{
-	uint32_t	size;
-	char		*shortName;
-	char		*longName;
-
-} DPNAME;
+#define PLAYER_NAME_SIZE	40
+#define PLAYER_CLANTAG_SIZE	5
 
 // easily sendable version of above
-typedef struct playerName
+typedef struct PlayerDetails
 {
-	uint32_t	size;
-	char		shortName[40];
-	char		longName[40];
-} playerName;
+	uint32_t	playerID;
+	uint8_t		playerType;
+	char		name[PLAYER_NAME_SIZE];
+	char		clanTag[PLAYER_CLANTAG_SIZE];
+} PlayerDetails;
 
-extern DPNAME AVPDPplayerName;
+extern PlayerDetails thisClientPlayer;
 
 /*
  * DPMSG_ADDPLAYERTOGROUP
