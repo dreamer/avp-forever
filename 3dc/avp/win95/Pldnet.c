@@ -687,8 +687,8 @@ static unsigned char msg[NET_MESSAGEBUFFERSIZE];
 void MinimalNetCollectMessages(void)
 {			
 	int	 res = NET_OK;
-	DPID dPlayFromId = 0;
-	DPID dPlayToId = 0;
+	int  dPlayFromId = 0;
+	int  dPlayToId = 0;
 	int	 msgSize = 0;
 		
 	/* collects messages until something other than NET_OK is returned (eg DP_NoMessages) */

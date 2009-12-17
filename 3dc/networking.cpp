@@ -42,8 +42,8 @@ static bool Net_CreatePlayer(char *playerName, char *clanTag);
 int Net_GetNextPlayerID();
 void Net_FindAvPSessions();
 static BOOL DpExtProcessRecvdMsg(BOOL bIsSystemMsg, LPVOID lpData, DWORD dwDataSize);
-HRESULT Net_CreateSession(LPTSTR lptszSessionName, int maxPlayers, int version, int level);
-BOOL Net_UpdateSessionDescForLobbiedGame(int gamestyle, int level);
+int Net_CreateSession(LPTSTR lptszSessionName, int maxPlayers, int version, int level);
+int Net_UpdateSessionDescForLobbiedGame(int gamestyle, int level);
 int Net_OpenSession(const char *hostName);
 int Net_SendSystemMessage(int messageType, int idFrom, int idTo, uint8_t *lpData, int dwDataSize);
 
@@ -66,9 +66,9 @@ BOOL Net_UpdateSessionList(int *SelectedItem)
 	int OldNumberOfSessions = NumberOfSessionsFound;
 	BOOL changed = FALSE;
 
-	/* bjd -test, remove */
-	if (NumberOfSessionsFound == 1) 
-		return FALSE;
+	// test, remove
+//	if (NumberOfSessionsFound == 1) 
+//		return FALSE;
 
 	// take a list of the old session guids
 	for (int i = 0; i < NumberOfSessionsFound; i++)
@@ -144,6 +144,7 @@ int Net_Deinitialise()
 	enet_deinitialize();
 
 	net_IsInitialised = false;
+	glpDP = 0;
 
 	return NET_OK;
 }
@@ -227,17 +228,17 @@ int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle
 		else
 		{
 			// for lobbied games we need to fill in the level number into the existing session description
-			if (!Net_UpdateSessionDescForLobbiedGame(gamestyle, level)) 
+			if (Net_UpdateSessionDescForLobbiedGame(gamestyle, level) != NET_OK) 
 				return NET_FAIL;
 		}
 
 		AvP.Network = I_Host;
 
+		// need to remove this and use the above..
+		glpDP = 1;
+
 		if (!Net_CreatePlayer(playerName, /*clanTag - ADDME!*/ NULL)) 
 			return NET_FAIL;
-
-		// need to replace this..
-		glpDP = 1;
 	}
 	else
 	{
@@ -247,7 +248,7 @@ int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle
 		ZeroMemory(&thisClientPlayer, sizeof(PlayerDetails));
 		strncpy(thisClientPlayer.name, playerName, PLAYER_NAME_SIZE);
 		thisClientPlayer.clanTag[0] = '\0';
-		thisClientPlayer.playerID = 100;
+		thisClientPlayer.playerID = AvPNetID;
 		thisClientPlayer.playerType = 0; // ??
 	}
 
@@ -318,7 +319,7 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *lplpData, int *dataS
 	*dataSize = 0;
 
 	if (Client == NULL) 
-		return NET_ERR_NOMESSAGES;
+		return NET_FAIL;
 
 	do
 	{
@@ -326,7 +327,7 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *lplpData, int *dataS
 
 		ENetEvent event;
 
-		if (enet_host_service(Client, &event, 5) > 0) // play with time value
+		if (enet_host_service(Client, &event, 1) > 0) // play with time value
 		{
 			switch (event.type)
 			{
@@ -338,7 +339,7 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *lplpData, int *dataS
 				}
 				case ENET_EVENT_TYPE_RECEIVE:
 				{
-					//OutputDebugString("Enet received a packet!\n");
+					OutputDebugString("Enet received a packet!\n");
 					memcpy(lplpData, static_cast<uint8_t*> (event.packet->data), event.packet->dataLength);
 					*dataSize = event.packet->dataLength;
 					enet_packet_destroy(event.packet);
@@ -364,7 +365,7 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *lplpData, int *dataS
 		}
 
 		messageHeader newHeader;
-		memcpy(&newHeader, lplpData, sizeof(messageHeader));
+		memcpy(&newHeader, &lplpData[0], sizeof(messageHeader));
 
 		messageType = newHeader.messageType;
 		*fromID = newHeader.fromID;
@@ -381,9 +382,9 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *lplpData, int *dataS
 				// reply to it? handle this properly..dont send something from a receive function??
 				messageHeader newReplyHeader;
 				newReplyHeader.messageType = AVP_SESSIONDATA;
-				newReplyHeader.fromID = 0;
+				newReplyHeader.fromID = AvPNetID;
 				newReplyHeader.toID = 0;
-				memcpy(packetBuffer, &newReplyHeader, sizeof(messageHeader));
+				memcpy(&packetBuffer[0], &newReplyHeader, sizeof(messageHeader));
 
 				assert(sizeof(netSession) == sizeof(NET_SESSIONDESC));
 				memcpy(&packetBuffer[MESSAGEHEADERSIZE], &netSession, sizeof(NET_SESSIONDESC));
@@ -391,15 +392,17 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *lplpData, int *dataS
 				int length = MESSAGEHEADERSIZE + sizeof(NET_SESSIONDESC);
 
 				// create a packet with session struct inside
-				ENetPacket * packet = enet_packet_create(&packetBuffer, length, ENET_PACKET_FLAG_RELIABLE);
+				ENetPacket * packet = enet_packet_create(&packetBuffer[0], length, ENET_PACKET_FLAG_RELIABLE);
 
 				// send the packet
 				if ((enet_peer_send(event.peer, event.channelID, packet) < 0))
 				{
 					Con_PrintError("problem sending session packet!");
 				}
+				else Con_PrintMessage("sent session details to client");
 
-				return NET_ERR_NOMESSAGES;
+				//return NET_ERR_NOMESSAGES;
+				return NET_OK;
 			}
 		}
 
@@ -453,9 +456,9 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *lplpData, int *dataS
 				Con_PrintError("AVP_GETPLAYERNAME - problem sending player name packet!");
 			}
 
-			return NET_ERR_NOMESSAGES;
+			return NET_OK;//NET_ERR_NOMESSAGES;
 		}
-		else if (messageType == AVP_SENTPLAYERNAME)
+		else if (AVP_SENTPLAYERNAME == messageType)
 		{
 			int playerFrom = *fromID;
 			int idOfPlayerWeGot = *toID;
@@ -470,9 +473,9 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *lplpData, int *dataS
 			int id = PlayerIdInPlayerList(idOfPlayerWeGot);
 			strcpy(netGameData.playerData[id].name, newPlayerDetails.name);
 
-			return NET_ERR_NOMESSAGES;
+			return NET_OK; //NET_ERR_NOMESSAGES;
 		}
-		else if (messageType == AVP_GAMEDATA)
+		else if (AVP_GAMEDATA == messageType)
 		{
 			// do nothing here
 		}
@@ -713,6 +716,7 @@ static int Net_GetNextPlayerID()
 
 int Net_OpenSession(const char *hostName)
 {
+	OutputDebugString("Net_OpenSession()\n");
 	ENetEvent event;
 
 	enet_address_set_host(&ServerAddress, hostName);
@@ -754,14 +758,218 @@ int Net_OpenSession(const char *hostName)
 	return NET_OK;
 }
 
+int running = 0;
+#include <process.h>
+
+unsigned int __stdcall SessionSearch(void *args)
+{
+	ENetPeer *Peer = NULL;
+	ENetEvent event;
+	uint8_t receiveBuffer[NET_MESSAGEBUFFERSIZE]; // can reduce this in size?
+	int messageType;
+	NET_SESSIONDESC tempSession;
+	char sessionName[100] = "";
+	char levelName[100] = "";
+	int gamestyle;
+	int level;
+	char buf[100];
+
+	running = 1;
+
+	OutputDebugString("in thread\n");
+
+	// set up broadcast address
+	BroadcastAddress.host = ENET_HOST_BROADCAST;
+	BroadcastAddress.port = netPortNumber; // can I reuse port?? :\
+
+	// create Enet client
+	Client = enet_host_create (NULL,	// create a client host
+				1,						// only allow 1 outgoing connection
+				incomingBandwidth,		// 57600 / 8 - 56K modem with 56 Kbps downstream bandwidth
+				outgoingBandwidth);		// 14400 / 8 - 56K modem with 14 Kbps upstream bandwidth
+
+	if (Client == NULL)
+    {
+		Con_PrintError("Failed to create ENet client");
+		return -1;
+    }
+
+	Peer = enet_host_connect(Client, &BroadcastAddress, 2);
+	if (Peer == NULL)
+	{
+		Con_PrintError("Failed to connect to ENet Broadcast peer");
+		return -1;
+	}
+
+	// lets send a message out saying we're looking for available game sessions
+	if (enet_host_service(Client, &event, 1000) > 0) // this could probably be lower?
+	{
+		if (event.type == ENET_EVENT_TYPE_CONNECT)
+		{
+			Con_PrintDebugMessage("Net - Connected for Broadcast");
+
+            // create broadcast header
+			messageHeader newHeader;
+			newHeader.messageType = AVP_BROADCAST;
+			newHeader.fromID = 255;
+			newHeader.toID = 255;
+
+			memcpy(packetBuffer, &newHeader, sizeof(messageHeader));
+
+			// create ENet packet
+			ENetPacket * packet = enet_packet_create(packetBuffer, sizeof(messageHeader), ENET_PACKET_FLAG_RELIABLE);
+
+			enet_peer_send(Peer, 0, packet);
+			enet_host_flush(Client);
+		}
+	}
+
+	// need to wait here for servers to respond with session info
+	while (enet_host_service (Client, &event, 10000) > 0) // 10 secs
+	{
+		if (event.type == ENET_EVENT_TYPE_RECEIVE)
+		{
+			memcpy(&receiveBuffer[0], static_cast<uint8_t*> (event.packet->data), event.packet->dataLength);
+
+            // grab the header from the packet
+            messageHeader newHeader;
+            memcpy(&newHeader, &receiveBuffer[0], sizeof(messageHeader));
+            messageType = newHeader.messageType;
+
+			if (AVP_SESSIONDATA == messageType)
+			{
+				Con_PrintDebugMessage("Net - server sent us session data");
+
+				// get the hosts ip address for later use
+				enet_address_get_host_ip(&event.peer->address, SessionData[NumberOfSessionsFound].hostAddress, 16);
+
+				// grab the session description struct
+				assert(sizeof(NET_SESSIONDESC) == (event.packet->dataLength - MESSAGEHEADERSIZE));
+				memcpy(&tempSession, &receiveBuffer[MESSAGEHEADERSIZE], sizeof(NET_SESSIONDESC));
+
+				gamestyle = (tempSession.level >> 8) & 0xff;
+				level = tempSession.level  & 0xff;
+
+				// split the session name up into its parts
+				if (level >= 100)
+				{
+					char* colon_pos;
+					// custom level name may be at the start
+					strcpy(levelName, tempSession.sessionName);
+
+					colon_pos = strchr(levelName,':');
+					if (colon_pos)
+					{
+						*colon_pos = 0;
+						strcpy(sessionName,colon_pos+1);
+					}
+					else
+					{
+						strcpy(sessionName, tempSession.sessionName);
+						levelName[0] = 0;
+					}
+				}
+				else
+				{
+					strcpy(sessionName, tempSession.sessionName);
+				}
+
+				sprintf(SessionData[NumberOfSessionsFound].Name,"%s (%d/%d)", sessionName, tempSession.currentPlayers, tempSession.maxPlayers);
+
+				SessionData[NumberOfSessionsFound].Guid	= tempSession.guidInstance;
+
+				if (tempSession.currentPlayers < tempSession.maxPlayers)
+					SessionData[NumberOfSessionsFound].AllowedToJoin = TRUE;
+				else
+					SessionData[NumberOfSessionsFound].AllowedToJoin = FALSE;
+
+				// multiplayer version number (possibly)
+				if (tempSession.version != AVP_MULTIPLAYER_VERSION)
+				{
+					float version = 1.0f + tempSession.version / 100.0f;
+					SessionData[NumberOfSessionsFound].AllowedToJoin = FALSE;
+ 					sprintf(SessionData[NumberOfSessionsFound].Name, "%s (V %.2f)", sessionName, version);
+				}
+				else
+				{
+					// get the level number in our list of levels (assuming we have the level)
+					int local_index = GetLocalMultiplayerLevelIndex(level, levelName, gamestyle);
+
+					if (local_index < 0)
+					{
+						// we don't have the level, so ignore this session
+						//return;
+					}
+						
+					SessionData[NumberOfSessionsFound].levelIndex = local_index;
+				}
+
+				NumberOfSessionsFound++;
+				sprintf(buf,"num sessions found: %d", NumberOfSessionsFound);
+				OutputDebugString(buf);
+				break;
+			} // if AVP_SESSIONDATA
+			else
+			{
+				char message[100];
+				sprintf(buf, "Net - server sent us unknown data type: %d\n", messageType);
+				std::string strMessage = message;
+				//Con_PrintError("Net - server sent us unknown data");
+				Con_PrintError(strMessage);
+				break;
+			}
+		}
+	}
+
+	// ok done
+
+	// close connection
+	enet_host_destroy(Client);
+
+	OutputDebugString("leaving thread\n");
+
+	_endthreadex(0);
+
+	return 0;
+}
+
 void Net_FindAvPSessions()
 {
-	OutputDebugString("Net_FindAvPSessions called\n");
+//	OutputDebugString("Net_FindAvPSessions called\n");
 	NumberOfSessionsFound = 0;
+
+	static bool busy = false;
+	static int timer = 0;
+	static HANDLE threadHandle;
+
+	if (!busy)
+	{
+		// grab the current time
+		timer = timeGetTime();
+
+		// start the thread
+		OutputDebugString("creating thread\n");
+		threadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, SessionSearch, /*static_cast<void*>(VorbisStream)*/NULL, 0, NULL));
+		busy = true;
+	}
+
+	if (DebouncedKeyboardInput[KEY_ESCAPE])
+	{
+		busy = false;
+	}
+
+	if (WaitForSingleObject(threadHandle, 30) == WAIT_OBJECT_0)
+	{
+		OutputDebugString("we know the thread is dead\n");
+		// thread is finished
+		busy = false;
+	}
+
+#if 0
 
 	ENetPeer *Peer = NULL;
 	ENetEvent event;
-	uint8_t receiveBuffer[NET_MESSAGEBUFFERSIZE];
+	uint8_t receiveBuffer[NET_MESSAGEBUFFERSIZE]; // can reduce this in size?
 	int messageType;
 	NET_SESSIONDESC tempSession;
 	char sessionName[100] = "";
@@ -817,15 +1025,15 @@ void Net_FindAvPSessions()
 	}
 	
 	// need to wait here for servers to respond with session info
-	while (enet_host_service (Client, &event, 2000) > 0)
+	while (enet_host_service (Client, &event, 3000) > 0)
 	{
 		if (event.type == ENET_EVENT_TYPE_RECEIVE)
 		{
-			memcpy(receiveBuffer, static_cast<uint8_t*> (event.packet->data), event.packet->dataLength);
+			memcpy(&receiveBuffer[0], static_cast<uint8_t*> (event.packet->data), event.packet->dataLength);
 
             // grab the header from the packet
             messageHeader newHeader;
-            memcpy(&newHeader, receiveBuffer, sizeof(messageHeader));
+            memcpy(&newHeader, &receiveBuffer[0], sizeof(messageHeader));
             messageType = newHeader.messageType;
 
 			if (AVP_SESSIONDATA == messageType)
@@ -837,7 +1045,7 @@ void Net_FindAvPSessions()
 
 				// grab the session description struct
 				assert(sizeof(NET_SESSIONDESC) == (event.packet->dataLength - MESSAGEHEADERSIZE));
-				memcpy((NET_SESSIONDESC*)&tempSession, &receiveBuffer[MESSAGEHEADERSIZE], sizeof(NET_SESSIONDESC)/*(event.packet->dataLength - MESSAGEHEADERSIZE)*/);
+				memcpy(&tempSession, &receiveBuffer[MESSAGEHEADERSIZE], sizeof(NET_SESSIONDESC));
 
 				gamestyle = (tempSession.level >> 8) & 0xff;
 				level = tempSession.level  & 0xff;
@@ -880,7 +1088,7 @@ void Net_FindAvPSessions()
 				{
 					float version = 1.0f + tempSession.version / 100.0f;
 					SessionData[NumberOfSessionsFound].AllowedToJoin = FALSE;
- 					sprintf(SessionData[NumberOfSessionsFound].Name,"%s (V %.2f)", sessionName, version);
+ 					sprintf(SessionData[NumberOfSessionsFound].Name, "%s (V %.2f)", sessionName, version);
 				}
 				else
 				{
@@ -903,7 +1111,11 @@ void Net_FindAvPSessions()
 			} // if AVP_SESSIONDATA
 			else
 			{
-				Con_PrintError("Net - server sent us unknown data");
+				char message[100];
+				sprintf(buf, "Net - server sent us unknown data type: %d\n", messageType);
+				std::string strMessage = message;
+				//Con_PrintError("Net - server sent us unknown data");
+				Con_PrintError(strMessage);
 				break;
 			}
 		}
@@ -911,9 +1123,10 @@ void Net_FindAvPSessions()
 	
 	// close connection
 	enet_host_destroy(Client);
+#endif
 }
 
-HRESULT Net_CreateSession(LPTSTR lptszSessionName, int maxPlayers, int version, int level)
+int Net_CreateSession(LPTSTR lptszSessionName, int maxPlayers, int version, int level)
 {
 	ZeroMemory(&netSession, sizeof(NET_SESSIONDESC));
 	netSession.size = sizeof(NET_SESSIONDESC);
@@ -938,7 +1151,7 @@ HRESULT Net_CreateSession(LPTSTR lptszSessionName, int maxPlayers, int version, 
 	return NET_OK;
 }
 
-BOOL Net_UpdateSessionDescForLobbiedGame(int gamestyle,int level)
+int Net_UpdateSessionDescForLobbiedGame(int gamestyle, int level)
 {
 #if 0
 	NET_SESSIONDESC sessionDesc;
@@ -976,7 +1189,7 @@ BOOL Net_UpdateSessionDescForLobbiedGame(int gamestyle,int level)
 
 	}
 #endif
-	return TRUE;
+	return NET_OK;
 }
 
 } // extern C

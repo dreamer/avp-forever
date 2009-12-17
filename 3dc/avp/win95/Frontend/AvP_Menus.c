@@ -622,7 +622,7 @@ extern void AvP_UpdateMenus(void)
 	{
 		//check status of joining game
 		int retval=0;
-		if(LobbiedGame)
+		if (LobbiedGame)
 		{
 			extern char MP_PlayerName[];
 			retval=Net_ConnectingToLobbiedGame(MP_PlayerName);
@@ -635,9 +635,7 @@ extern void AvP_UpdateMenus(void)
 		}
 		else
 		{
-			//retval = Net_ConnectingToSession();
-			//if(!retval)
-			if (Net_ConnectingToSession() != NET_FAIL)
+			if (Net_ConnectingToSession() != NET_OK)
 			{
 				//player has aborted , go back a menu
 				SetupNewMenu(AVPMENU_MULTIPLAYER);
@@ -645,7 +643,7 @@ extern void AvP_UpdateMenus(void)
 			}	
 		}
 
-		if(retval==AVPMENU_MULTIPLAYER_CONFIG_JOIN)
+		if (retval == AVPMENU_MULTIPLAYER_CONFIG_JOIN)
 		{
 			//successfully joined
 			SetupNewMenu(AVPMENU_MULTIPLAYER_CONFIG_JOIN);
@@ -664,8 +662,6 @@ extern void AvP_UpdateMenus(void)
 			AvPMenus.CurrentlySelectedElement=selection;
 		}
 	}
-
-
 
 	/* render menu; episode select goes through a separate system */
 	switch (AvPMenus.CurrentMenu)
@@ -3019,14 +3015,13 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 				
 				AvP.Difficulty = 1;
 
-				if (Net_HostGame(MP_PlayerName,MP_SessionName,MP_Species,netGameData.gameType,netGameData.levelNumber) == NET_OK)
+				if (Net_HostGame(MP_PlayerName,MP_SessionName,MP_Species,netGameData.gameType,netGameData.levelNumber) != NET_FAIL)
 				{
 					AvPMenus.MenusState = MENUSSTATE_STARTGAME;
 					if (netGameData.gameType==NGT_Coop)
 						SetLevelToLoadForCooperative(netGameData.levelNumber);
 					else
 						SetLevelToLoadForMultiplayer(netGameData.levelNumber);
-	
 					
 					SetBriefingTextForMultiplayer();
 				}
