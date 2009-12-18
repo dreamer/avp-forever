@@ -286,9 +286,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			QuickStartMultiplayer = 0;
 		}
 
-		if (strstr(command_line,"-keeprif"))
+		if (strstr(command_line, "-keeprif"))
 		{
-			KeepMainRifFile=TRUE;			
+			KeepMainRifFile = TRUE;			
 		}
 
 		if (strstr(command_line, "-m"))
@@ -307,22 +307,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	}
 	#endif
 
-	if (strstr(command_line,"-server"))
+	if (strstr(command_line, "-server"))
 	{
 		extern int Net_InitLobbiedGame();
 		//game has been launched by mplayer , we best humour it
 		LobbiedGame=LobbiedGame_Server;	
-		if(!Net_InitLobbiedGame())
+		if (!Net_InitLobbiedGame())
 		{
 			exit(0x6364);
 		}		
 	}
-	else if (strstr(command_line,"-client"))
+	else if (strstr(command_line, "-client"))
 	{
 		extern int Net_InitLobbiedGame();
 		//ditto
-		LobbiedGame=LobbiedGame_Client;			
-		if(!Net_InitLobbiedGame())
+		LobbiedGame = LobbiedGame_Client;			
+		if (!Net_InitLobbiedGame())
 		{
 			exit(0x6364);
 		}		
@@ -385,7 +385,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		// will stop mouse cursor moving outside game window
 		//UseMouseCentreing = TRUE;
 	}
-	if(instr = strstr(command_line, "-s"))
+	if (instr = strstr(command_line, "-s"))
 		sscanf(instr, "-s%d", &level_to_load);
 	
 	#endif
@@ -401,7 +401,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	InitialiseSystem(hInstance, nCmdShow);
 	InitialiseRenderer();
 
-	if(!InitialiseDirect3DImmediateMode()){
+	if (!InitialiseDirect3DImmediateMode()){
 		MessageBox(hWndMain, "Couldn't create a Direct3D device. See dx_log.txt for details", "Couldn't create render device!", MB_OK | MB_ICONSTOP);
 		ReleaseDirect3D();
 		exit(-1);
@@ -437,7 +437,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	if(AvP_MainMenus())
 	#else
 
-	while(AvP_MainMenus())
+	while (AvP_MainMenus())
 	#endif
 	{
 		int menusActive = 0;
@@ -496,9 +496,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		/***********  Read in the env Map	 **************/
 
 		#if debug
-  		if(level_to_load != I_Num_Environments)
+  		if (level_to_load != I_Num_Environments)
   		{
-  			if((level_to_load < 0) || (level_to_load > I_Num_Environments))
+  			if ((level_to_load < 0) || (level_to_load > I_Num_Environments))
  				#ifdef MPLAYER_DEMO
  					level_to_load = I_Dml1;
  				#else

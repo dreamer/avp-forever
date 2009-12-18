@@ -26,8 +26,6 @@ extern "C"
 
 char buf[100];
 
-typedef void (*funcPointer) (void);
-
 struct Command 
 {
 	char *cmdName;
@@ -62,6 +60,16 @@ struct Console
 };
 
 Console console;
+
+std::string& Con_GetArgument(int argNum)
+{
+	return cmdArgs.at(argNum);
+}
+
+int Con_GetNumArguments()
+{
+	return cmdArgs.size();
+}
 
 void Con_PrintError(const std::string &errorString)
 {
@@ -110,13 +118,6 @@ void Con_AddCommand(char *command, funcPointer function)
 	cmdList.push_back(newCommand);
 }
 
-void Blah()
-{
-	OutputDebugString("Blah was called!\n");
-
-	// we're testing and expect 3 ints
-}
-
 void Con_Init()
 {
 	console.isActive = false;
@@ -135,7 +136,6 @@ void Con_Init()
 	sprintf(buf, "console height: %d num lines: %d\n", console.lines * CHAR_HEIGHT, console.lines);
 	OutputDebugString(buf);
 
-	Con_AddCommand("blah", Blah);
 	Con_AddCommand("toggleconsole", Con_Toggle);
 //	LoadConsoleFont();
 
@@ -144,7 +144,7 @@ void Con_Init()
 
 void Con_ProcessCommand()
 {
-	/* if nothing typed, don't bother doing anything */
+	// if nothing typed, don't bother doing anything
 	if (console.inputLine.length() == 0) 
 		return;
 
@@ -276,7 +276,7 @@ void Con_Draw()
 {
 	int charWidth = 0;
 
-	/* is console moving to a new position? */
+	// is console moving to a new position?
 	if (console.destinationY > console.height)
 	{
 		console.height += static_cast<int>(RealFrameTime * 0.01f);
@@ -312,9 +312,8 @@ void Con_Draw()
 	alpha -= static_cast<int>(RealFrameTime * 1.2f);
 	if (alpha < 0) alpha = ONE_FIXED;
 
-	/* draw input cusor */
+	// draw input cusor
 	charWidth = RenderSmallChar('>', console.indent, console.height - CHAR_HEIGHT, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
-
 	RenderSmallChar('_', console.indent + charWidth, console.height - CHAR_HEIGHT, alpha, ONE_FIXED, ONE_FIXED, ONE_FIXED);
 
 	int rows = console.text.size() - 1;
@@ -324,12 +323,13 @@ void Con_Draw()
 	int lines = console.lines;
 	int xOffset = 0;
 
+	// draw all the lines of text
 	for (int i = rows; i >= 0; i--, y -= CHAR_HEIGHT)
 	{
 		xOffset = 0;
 		charWidth = 0;
 
-		for(int j = 0; j < console.text[i].length(); j++)
+		for (int j = 0; j < console.text[i].length(); j++)
 		{
 			//if ((j * CHAR_WIDTH) > console.lineWidth) break;
 			charWidth = RenderSmallChar(console.text.at(i).at(j), console.indent + /*(xOffset * j)*/xOffset, y, ONE_FIXED, ONE_FIXED / 2, ONE_FIXED, ONE_FIXED);
@@ -337,13 +337,14 @@ void Con_Draw()
 		}
 	}
 
-	xOffset = CHAR_WIDTH * 2;
+	xOffset = CHAR_WIDTH;//CHAR_WIDTH * 2;
 	charWidth = 0;
 
+	// draw the line of text we're currently typing
 	for (int j = 0; j < console.inputLine.length(); j++)
 	{
 		//if ((j * CHAR_WIDTH) > console.lineWidth) break;
-		charWidth = RenderSmallChar(console.inputLine.at(j), console.indent + /*(xOffset * j)*/xOffset, console.height - CHAR_HEIGHT, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
-		xOffset+=charWidth;
+		charWidth = RenderSmallChar(console.inputLine.at(j), console.indent + xOffset, console.height - CHAR_HEIGHT, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
+		xOffset += charWidth;
 	}
 }

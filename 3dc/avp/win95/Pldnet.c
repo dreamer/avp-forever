@@ -610,7 +610,7 @@ void InitAVPNetGameForJoin(void)
 {
 	AvP.GameMode = I_GM_Playing;
 	AvP.Network = I_Peer;
-	
+
 	AvP.NetworkAIServer = 0;
 
 	/* init the send message buffer */
@@ -994,7 +994,7 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 				DPMSG_DESTROYPLAYERORGROUP destroyMessage;
 				memcpy(&destroyMessage, &msgP[MESSAGEHEADERSIZE], sizeof(DPMSG_DESTROYPLAYERORGROUP));
 
-				if(destroyMessage.playerType == DPPLAYERTYPE_PLAYER)
+				if (destroyMessage.playerType == NET_PLAYERTYPE_PLAYER)
 				{
 					DPID id = destroyMessage.ID;
 					OutputDebugString("going to drop a player as they disconnected\n");
@@ -1684,21 +1684,21 @@ void NetSendMessages(void)
 		BOOL clearSendBuffer=TRUE;
 		numBytes = (int)(endSendBuffer - &sendBuffer[0]);
 
-		if(netGameData.myGameState==NGS_EndGameScreen || netGameData.myGameState==NGS_Joining)
+		if (netGameData.myGameState == NGS_EndGameScreen || netGameData.myGameState == NGS_Joining)
 		{
 			//there may not be any messages while showing the end game screen
-			if(numBytes==DPEXT_HEADER_SIZE) return;
+			if (numBytes == 0/*DPEXT_HEADER_SIZE*/) 
+				return;
 		}
-		
-		
+
 		LOCALASSERT(numBytes > DPEXT_HEADER_SIZE);			
 		LOCALASSERT(numBytes <= NET_MESSAGEBUFFERSIZE);
-		if(!netGameData.skirmishMode)
+		if (!netGameData.skirmishMode)
 		{
-			if(glpDP && AvPNetID)
+			if (glpDP && AvPNetID)
 			{
-				res = Net_Send(AvPNetID, DPID_ALLPLAYERS, 0, &sendBuffer[0], numBytes);
-				if(res!=NET_OK)
+				res = Net_Send(AvPNetID, NET_ID_ALLPLAYERS, 0, &sendBuffer[0], numBytes);
+				if (res != NET_OK)
 				{
 					//we have some problem sending...
 					switch(res)
@@ -1711,9 +1711,9 @@ void NetSendMessages(void)
 							failed to send this frame , try preserving the contents of the send buffer ,
 							unless it is getting to full.
 							*/
-							if(numBytes<NET_MESSAGEBUFFERSIZE/2)
+							if (numBytes < NET_MESSAGEBUFFERSIZE / 2)
 							{
-								clearSendBuffer=FALSE;
+								clearSendBuffer = FALSE;
 							}
 							break; 
 						
@@ -1747,7 +1747,7 @@ void NetSendMessages(void)
 		numMessagesTransmitted++;
 		/* re-initialise the send message buffer */
 		/*(unless the send failed because it was to busy)*/
-		if(clearSendBuffer)
+		if (clearSendBuffer)
 		{
 			InitialiseSendMessageBuffer();
 		}
@@ -5476,11 +5476,11 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
 				}
 			}
 
-			if(netGameData.playerData[i].playerId != messagePtr->players[i].playerId)
+			if (netGameData.playerData[i].playerId != messagePtr->players[i].playerId)
 			{
-				if(messagePtr->players[i].playerId)
+				if (messagePtr->players[i].playerId)
 				{
-					Net_SendSystemMessage(AVP_GETPLAYERNAME, AvPNetID, messagePtr->players[i].playerId, 0, 0);
+					Net_SendSystemMessage(AVP_GETPLAYERNAME, AvPNetID, messagePtr->players[i].playerId, NULL, 0);
 					//AddNetMsg_PlayerGetName(messagePtr->players[i].playerId); // pass request through internal message system?
 
 					//tempPlayerDetails.

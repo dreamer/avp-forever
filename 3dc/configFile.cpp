@@ -66,7 +66,7 @@ bool Config_Load()
 		}
 	}
 
-	/* go through the cfg file line by line */
+	// go through the cfg file line by line
 	while (getline(file, tempLine))
 	{	
 		if (tempLine.length() == 0)
@@ -79,7 +79,7 @@ bool Config_Load()
 		}
 		else
 		{
-			/* special case for strings such as command line */
+			// special case for strings such as command line
 			int stringCheck = tempLine.find('"'); // check for a quote..
 
 			if (stringCheck != std::string::npos)
@@ -102,24 +102,24 @@ bool Config_Load()
 			}
 			else
 			{
-				/* remove whitespace */
+				// remove whitespace
 				tempLine.erase(std::remove(tempLine.begin(), tempLine.end(),' '), tempLine.end());
 			}
 
-			/* assume we got a variable and value */
+			// assume we got a variable and value
 			int lenOfVar = tempLine.find("=");
 
-			/* if there's no equals sign in the string, don't add it */
+			// if there's no equals sign in the string, don't add it
 			if (lenOfVar == std::string::npos)
 				continue;
 
 //			std::cout << "got variable name: " << tempLine.substr(0, lenOfVar) << "\n";
 //			std::cout << "its value is: " << tempLine.substr(lenOfVar + 1) << "\n";
 
-			/* should only create a new key in AvPConfig if one doesn't already exists */
+			// should only create a new key in AvPConfig if one doesn't already exists
 			MapValue &tempValue = AvPConfig[currentHeading];
 
-			/* +1 to skip over the equals sign */
+			// +1 to skip over the equals sign
 			tempValue.insert(std::make_pair(tempLine.substr(0, lenOfVar),
 												tempLine.substr(lenOfVar + 1)));
 		}

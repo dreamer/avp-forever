@@ -63,12 +63,6 @@ extern void D3D_FadeDownScreen(int brightness, int colour);
 extern void PlayIntroSequence(void);
 
 extern void MinimalNetCollectMessages(void);
-/*
-extern int Net_HostGame(char *playerName, char *sessionName,int species,int gamestyle,int level);
-extern int Net_JoinGame(void);
-extern int Net_ConnectToSession(int sessionNumber, char *playerName);
-extern int Net_Disconnect(void);
-*/
 extern void ShowSplashScreens(void);
 extern void Show_WinnerScreen(void);
 
@@ -251,7 +245,6 @@ int GetAvPMenuState()
 
 int AvP_MainMenus(void)
 {
-//	ThisFramesRenderingHasBegun();
 	#if 0
 	SaveDefaultPrimaryConfigs();
 	#else
@@ -273,7 +266,6 @@ int AvP_MainMenus(void)
 	// bjd resolution change
 //	SelectMenuDisplayMode();
 	TimeStampedMessage("after SelectMenuDisplayMode");
-
 
 	InitialiseMenuGfx();
 	TimeStampedMessage("after InitialiseMenuGfx");
@@ -299,7 +291,6 @@ int AvP_MainMenus(void)
  	if (!LobbiedGame)	// Edmond
 		PlayIntroSequence();
 
-	
 	if (VideoModeNotAvailable)
 	{	
 		LoadGameRequest = SAVELOAD_REQUEST_NONE;
@@ -314,7 +305,7 @@ int AvP_MainMenus(void)
 		AvP.LevelCompleted = 0;
 		AvPMenus.MenusState = MENUSSTATE_MAINMENUS;
 	}
-	else if(!LobbiedGame)
+	else if (!LobbiedGame)
 	{
 		if (UserProfileNumber==-1)
 		{
@@ -330,16 +321,11 @@ int AvP_MainMenus(void)
 	{
  		SetupNewMenu(AVPMENU_USERPROFILESELECT);
 	  //AvPMenus.MenusState = MENUSSTATE_STARTGAME;	
-		
 	}
 
 	CheatMode_Active = CHEATMODE_NONACTIVE;
-	
 
 	TimeStampedMessage("starting general menus");
-
-//	ThisFramesRenderingHasFinished();
-//	FlipBuffers();
 
 	while(AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
 	{
@@ -376,12 +362,12 @@ int AvP_MainMenus(void)
 		FlipBuffers();
 	}
 	
-	if (AvPMenus.MenusState==MENUSSTATE_OUTSIDEMENUS)
+	if (AvPMenus.MenusState == MENUSSTATE_OUTSIDEMENUS)
 	{
 		//Don't bother showing credits if we are just exiting in order to start a game
 		//using mplayer. The credits will get shown later after the player has actually
 		//played the game
-		if(!LaunchingMplayer)
+		if (!LaunchingMplayer)
 		{
  			if (!LobbiedGame)	// Edmond
 				DoCredits();
@@ -652,14 +638,14 @@ extern void AvP_UpdateMenus(void)
 	else if (AvPMenus.CurrentMenu == AVPMENU_MULTIPLAYERSELECTSESSION)
 	{
 		extern BOOL Net_UpdateSessionList(int * SelectedItem);
-		int selection=AvPMenus.CurrentlySelectedElement;
+		int selection = AvPMenus.CurrentlySelectedElement;
 
-		if(Net_UpdateSessionList(&selection))
+		if (Net_UpdateSessionList(&selection))
 		{
 			//session list has changed , so we need to set the menu again
 			SetupNewMenu(AVPMENU_MULTIPLAYERSELECTSESSION);
 			//adjust the selected menu item
-			AvPMenus.CurrentlySelectedElement=selection;
+			AvPMenus.CurrentlySelectedElement = selection;
 		}
 	}
 
@@ -812,7 +798,6 @@ extern void AvP_UpdateMenus(void)
 		}
 	}
 	ActUponUsersInput();
-
 }
 
 static void SetupNewMenu(enum AVPMENU_ID menuID)

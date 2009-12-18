@@ -3,6 +3,10 @@
 
 #include <string>
 
+typedef void (*funcPointer) (void);
+std::string& Con_GetArgument(int argNum);
+int Con_GetNumArguments();
+void Con_AddCommand(char *command, funcPointer function);
 void Con_PrintError(const std::string &errorString);
 void Con_PrintMessage(const std::string &messageString);
 void Con_PrintDebugMessage(const std::string &messageString);

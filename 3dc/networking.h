@@ -18,7 +18,7 @@ extern int AvPNetID;
 
 typedef struct messageHeader
 {
-	uint8_t		messageType;
+	uint32_t	messageType;
 	uint32_t	fromID;
 	uint32_t	toID;
 } messageHeader;
@@ -49,8 +49,8 @@ extern const int MESSAGEHEADERSIZE;
 #define NET_CHAT						14
 #define NET_SETGROUPOWNER				15
 #define NET_SENDCOMPLETE				16
-#define DPPLAYERTYPE_GROUP				17
-#define DPPLAYERTYPE_PLAYER				18
+#define NET_PLAYERTYPE_GROUP			17
+#define NET_PLAYERTYPE_PLAYER			18
 
 // other stuff
 #define NET_RECEIVE_ALL					19
@@ -62,11 +62,9 @@ extern const int MESSAGEHEADERSIZE;
 #define NET_ERR_SENDTOOBIG				25
 #define NET_ERR_BUFFERTOOSMALL			26
 #define NET_SYSTEM_MESSAGE  			27
-#define DPID_ALLPLAYERS					28
-#define NET_ERR_NOMESSAGES				29
-
-//#define DPSEND_GUARANTEED				30
-//#define DPEXT_NOT_GUARANTEED			31
+#define NET_ID_ALLPLAYERS				28
+#define NET_ID_SERVERPLAYER				29
+#define NET_ERR_NOMESSAGES				30
 
 // error return types
 #define NET_OK							0
@@ -76,9 +74,10 @@ extern const int MESSAGEHEADERSIZE;
 enum
 {
 	AVP_BROADCAST,
+	AVP_REQUEST_SESSION_DATA,
 	AVP_SYSTEMMESSAGE,
 	AVP_SESSIONDATA,
-	AVP_GAMEDATA,
+	AVP_GAMEDATA = 666,
 	AVP_PING,
 	AVP_GETPLAYERNAME,
 	AVP_SENTPLAYERNAME
@@ -112,7 +111,12 @@ typedef struct PlayerDetails
 	char		clanTag[PLAYER_CLANTAG_SIZE];
 } PlayerDetails;
 
-extern PlayerDetails thisClientPlayer;
+typedef struct DPMSG_DESTROYPLAYERORGROUP
+{
+	uint32_t	type;
+	uint32_t	ID;
+	uint32_t	playerType;	
+} DPMSG_DESTROYPLAYERORGROUP;
 
 /*
  * DPMSG_ADDPLAYERTOGROUP
@@ -190,14 +194,9 @@ typedef struct DPMSG_CREATEPLAYERORGROUP
 	DPNAME dpnName;
 } DPMSG_CREATEPLAYERORGROUP;
 */
-typedef struct DPMSG_DESTROYPLAYERORGROUP
-{
-	uint32_t	type;
-	uint32_t	ID;
-	uint32_t	playerType;	
-} DPMSG_DESTROYPLAYERORGROUP;
-
 
 #pragma pack()
+
+extern PlayerDetails thisClientPlayer;
 
 #endif // #ifndef _NETWORKING_

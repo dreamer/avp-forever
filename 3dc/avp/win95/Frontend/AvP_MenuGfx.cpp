@@ -1882,33 +1882,40 @@ static void CalculateWidthsOfAAFont(void)
 	int c;
 	
 	gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_SMALL_FONT];
-	image = (AvPTexture*)gfxPtr->ImagePtr;
+	image = gfxPtr->ImagePtr;
 	
 	srcPtr = image->buffer;
 	
-	AAFontWidths[32]=3;
+	AAFontWidths[32] = 3;
 	
-	for (c=33; c<255; c++) {
+	for (c = 33; c < 255; c++) 
+	{
 		int x,y;
 		int x1 = 1+((c-32)&15)*16;
 		int y1 = 1+((c-32)>>4)*16;
 		
-		AAFontWidths[c]=17;
+		AAFontWidths[c] = 17;
 		
-		for (x=x1+HUD_FONT_WIDTH; x>x1; x--) {
+		for (x = x1 + HUD_FONT_WIDTH; x > x1; x--) 
+		{
 			int blank = 1;
 			
-			for (y=y1; y<y1+HUD_FONT_HEIGHT; y++) {
+			for (y = y1; y < y1 + HUD_FONT_HEIGHT; y++) 
+			{
 				unsigned char *s = &srcPtr[(x + y*image->width) * 4];
-				if (s[2] >= 0x80) {
+				if (s[2] >= 0x80)
+				{
 					blank = 0;
 					break;
 				}
 			}
 			
-			if (blank) {
+			if (blank) 
+			{
 				AAFontWidths[c]--;
-			} else {
+			} 
+			else 
+			{
 				break;
 			}
 		}
