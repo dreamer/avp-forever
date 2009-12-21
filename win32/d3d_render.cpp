@@ -51,6 +51,18 @@ WORD *mainIndex;
 // for quad rendering
 D3DTLVERTEX *quadVert = new D3DTLVERTEX[4];
 
+//Custom vertex format
+const DWORD D3DFVF_CUSTOMVERTEX = D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1;
+
+struct CUSTOMVERTEX 
+{
+	float x, y, z; // Position in 3d space 
+	DWORD colour;   // Colour  
+	float u, v;    // Texture coordinates 
+};
+
+CUSTOMVERTEX conVerts[4];
+
 struct RENDER_STATES
 {
 	signed int texture_id;
@@ -791,7 +803,6 @@ BOOL ExecuteBuffer()
 {
 	if (NumVertices < 3)
 		return FALSE;
-
 /*
 	char buf[100];
 	sprintf(buf, "sizeof: %d\n", sizeof(renderParticle));
@@ -8278,6 +8289,39 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 		OutputDebugString(" draw menu quad failed ");
 	}
 */
+}
+
+void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
+{
+//	float x = topLeftX;
+//	float y = topLeftY;
+
+	float X, Y;
+
+	float quadX = 0.0f;
+	float quadY = 0.0f;
+	int textureWidth = 0;
+	int textureHeight = 0;
+	int texturePOW2Width = 0;
+	int texturePOW2Height = 0;
+	int quadWidth = 0;
+	int quadHeight = 0;
+		
+	D3DXMATRIX matTranslation;
+    D3DXMATRIX matScaling;
+    D3DXMATRIX matTransform;
+
+	//Get coordinates
+	X = topLeftX - (float)(ScreenDescriptorBlock.SDB_Width) / 2;
+	Y = topLeftY + (float)(ScreenDescriptorBlock.SDB_Height) / 2;
+
+	D3DXMatrixScaling (&matScaling, (float)(800), (float)(250), 1.0f);
+
+    D3DXMatrixTranslation (&matTranslation, X, Y, 0.0f);
+    matTransform = matScaling * matTranslation;
+
+	D3DXMatrixTranslation (&matTranslation, X, Y, 0.0f);
+
 }
 
 void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)

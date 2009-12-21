@@ -448,7 +448,7 @@ BOOL WaitForRasterThread();
 void ColourFillBackBuffer(int FillColour);
 void ColourFillBackBufferQuad(int FillColour, int LeftX, int TopY, int RightX, int BotY);
 void FlipBuffers(void);
-BOOL InitialiseDirect3DImmediateMode(void);
+BOOL InitialiseDirect3D(void);
 BOOL LockExecuteBuffer(void);
 BOOL UnlockExecuteBufferAndPrepareForUse(void);
 BOOL BeginD3DScene(void);

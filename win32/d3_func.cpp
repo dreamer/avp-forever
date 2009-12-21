@@ -30,6 +30,9 @@ extern "C++"
 	#include "configFile.h"
 	#include <d3dx9.h>
 	#include "console.h"
+
+	D3DXMATRIX matOrtho;
+	D3DXMATRIX matIdentity;
 }
 
 int image_num = 0;
@@ -664,6 +667,9 @@ BOOL ReleaseVolatileResources()
 {
 	ReleaseAllFMVTexturesForDeviceReset();
 
+	d3d.lpD3DDevice->SetStreamSource(0, NULL, 0, 0);
+	d3d.lpD3DDevice->SetTexture(0, NULL);
+
 	SAFE_RELEASE(d3d.lpD3DBackSurface);
 	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
 	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
@@ -753,14 +759,14 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 }
 
 /* need to redo all the enumeration code here, as it's not very good.. */
-BOOL InitialiseDirect3DImmediateMode()
+BOOL InitialiseDirect3D()
 {
 	/* clear log file first, then write header text */
 	ClearLog();
 	LogString("Starting to initialise Direct3D");
 
-	int width = 1280;//640;
-	int height = 1024;//480;
+	int width = 800;//640;
+	int height = 600;//480;
 	int depth = 32;
 	int defaultDevice = D3DADAPTER_DEFAULT;
 	bool windowed = false;
@@ -1158,6 +1164,13 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	/* create vertex and index buffers */
 	CreateVolatileResources();
+
+	//Setup orthographic projection matrix
+	D3DXMatrixOrthoLH(&matOrtho, width, height, 1.0f, 10.0f);
+	D3DXMatrixIdentity(&matIdentity);
+	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matOrtho);
+	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD, &matIdentity);
+	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW, &matIdentity);
 
 	Con_Init();
 	Net_Initialise();

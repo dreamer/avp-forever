@@ -17,6 +17,7 @@ extern "C"
 	#include "platform.h"
 	extern unsigned char DebouncedKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
 	extern int RealFrameTime;
+	extern D3DINFO d3d;
 }
 
 #define CHAR_WIDTH	15
@@ -272,6 +273,72 @@ void Con_RemoveTypedChar()
 	}
 }
 
+void Con_DrawQuadTest()
+{
+#if 0
+	float X;
+	float Y;
+	D3DXMATRIX matTranslation;
+    D3DXMATRIX matScaling;
+    D3DXMATRIX matTransform;
+
+	//Get coordinates
+	X = 0 - (float)(800) / 2;
+	Y = 0 + (float)(600) / 2;
+
+	D3DXMatrixScaling (&matScaling, (float)(800),
+        (float)(250), 1.0f);
+
+    D3DXMatrixTranslation (&matTranslation, X, Y, 0.0f);
+    matTransform = matScaling * matTranslation;
+
+	D3DXMatrixTranslation (&matTranslation, X, Y, 0.0f);
+
+	D3DCOLOR colour = D3DCOLOR_ARGB(200, 255, 0, 255);
+
+	// bottom left
+	conVerts[0].colour = colour;
+	conVerts[0].x = -1.0f;
+	conVerts[0].y = 1.0f;
+	conVerts[0].z = 1.0f;
+	conVerts[0].u = 0.0f;
+	conVerts[0].v = 0.0f;
+
+	// top left
+	conVerts[1].colour = colour;
+	conVerts[1].x = -1.0f;
+	conVerts[1].y = -1.0f;
+	conVerts[1].z = 1.0f;
+	conVerts[1].u = 1.0f;
+	conVerts[1].v = 0.0f;
+
+	// bottom right
+	conVerts[2].colour = colour;
+	conVerts[2].x = 1.0f;
+	conVerts[2].y = 1.0f;
+	conVerts[2].z = 1.0f;
+	conVerts[2].u = 1.0f;
+	conVerts[2].v = 1.0f;
+
+	// top right
+	conVerts[3].colour = colour;
+	conVerts[3].x = 1.0f;
+	conVerts[3].y = -1.0f;
+	conVerts[3].z = 1.0f;
+	conVerts[3].u = 0.0f;
+	conVerts[3].v = 1.0f;
+
+	d3d.lpD3DDevice->SetFVF(D3DFVF_CUSTOMVERTEX);
+	d3d.lpD3DDevice->SetTransform (D3DTS_WORLD, &matTransform);
+	d3d.lpD3DDevice->SetTexture(0, NULL);
+	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &conVerts[0], sizeof(CUSTOMVERTEX));
+	if (FAILED(LastError))
+	{
+		OutputDebugString("DrawPrimitiveUP failed\n");
+	}
+#endif
+}
+
 void Con_Draw()
 {
 	int charWidth = 0;
@@ -298,7 +365,8 @@ void Con_Draw()
 		console.isOpen = true;
 
 	// draw the background quad
-	DrawQuad(console.xPos, console.yPos, console.width, console.height, D3DCOLOR_ARGB(255, 38, 80, 145));
+//	DrawQuad(console.xPos, console.yPos, console.width, console.height, D3DCOLOR_ARGB(255, 38, 80, 145));
+	Con_DrawQuadTest();
 
 	if (console.height > 0)
 	{
