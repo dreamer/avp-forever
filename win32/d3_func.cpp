@@ -451,7 +451,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *
 	int new_width = original_width;
 	int new_height = original_height;
 
-	D3DCOLOR pad_colour = D3DCOLOR_XRGB(0,0,0);
+	D3DCOLOR pad_colour = D3DCOLOR_XRGB(255,0,255);
 
 /*
 	// check if passed value is already a power of 2
@@ -759,8 +759,8 @@ BOOL InitialiseDirect3DImmediateMode()
 	ClearLog();
 	LogString("Starting to initialise Direct3D");
 
-	int width = 640;
-	int height = 480;
+	int width = 1280;//640;
+	int height = 1024;//480;
 	int depth = 32;
 	int defaultDevice = D3DADAPTER_DEFAULT;
 	bool windowed = false;

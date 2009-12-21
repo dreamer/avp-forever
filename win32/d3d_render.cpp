@@ -8188,6 +8188,7 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 	alpha = (alpha / 256);
 	if (alpha > 255) 
 		alpha = 255;
+
 	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 
 	// game used to render menus at 640x480. this allows us to use any resolution we want
@@ -8277,6 +8278,246 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 		OutputDebugString(" draw menu quad failed ");
 	}
 */
+}
+
+void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
+{
+	float x = topLeftX;
+	float y = topLeftY;
+	float quadX = 0.0f;
+	float quadY = 0.0f;
+	int textureWidth = 0;
+	int textureHeight = 0;
+	int texturePOW2Width = 0;
+	int texturePOW2Height = 0;
+	int quadWidth = 0;
+	int quadHeight = 0;
+
+	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
+		alpha = ONE_FIXED;
+
+	alpha = (alpha / 256);
+	if (alpha > 255)
+		alpha = 255;
+
+	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
+
+	// draw the left glow
+	CheckVertexBuffer(4, AVPMENUGFX_GLOWY_LEFT, TRANSLUCENCY_GLOWING);
+
+	// textures actual height/width (whether it's non power of two or not)
+	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Width;
+	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Height;
+
+	// do the justification
+	//case AVPMENUFORMAT_RIGHTJUSTIFIED:
+	topLeftX -= textureWidth;
+	x -= textureWidth;
+
+	// we pad non power of two textures to pow2
+	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newWidth;
+	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newHeight;
+
+	// game used to render menus at 640x480. this allows us to use any resolution we want
+	quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / textureWidth) * 640));
+	quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / textureHeight) * 480));
+
+	quadX = ((ScreenDescriptorBlock.SDB_Width / 640.0f) * x);
+	quadY = ((ScreenDescriptorBlock.SDB_Height / 480.0f) * y);
+
+	{
+		// bottom left
+		mainVertex[vb].sx = (float)(quadX - 0.5f);
+		mainVertex[vb].sy = (float)((quadY + quadHeight) - 0.5f);
+		mainVertex[vb].sz = 0.0f;
+		mainVertex[vb].rhw = 1.0f;
+		mainVertex[vb].color = colour;
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].tu = 0.0f;
+		mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
+
+		vb++;
+
+		// top left
+		mainVertex[vb].sx = (float)(quadX - 0.5f);
+		mainVertex[vb].sy = (float)(quadY - 0.5f);
+		mainVertex[vb].sz = 0.0f;
+		mainVertex[vb].rhw = 1.0f;
+		mainVertex[vb].color = colour;
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].tu = 0.0f;
+		mainVertex[vb].tv = 0.0f;
+
+		vb++;
+
+		// bottom right
+		mainVertex[vb].sx = (float)((quadX + quadWidth) - 0.5f);
+		mainVertex[vb].sy = (float)((quadY + quadHeight) - 0.5f);
+		mainVertex[vb].sz = 0.0f;
+		mainVertex[vb].rhw = 1.0f;
+		mainVertex[vb].color = colour;
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
+		mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
+
+		vb++;
+
+		// top right
+		mainVertex[vb].sx = (float)((quadX + quadWidth) - 0.5f);
+		mainVertex[vb].sy = (float)(quadY - 0.5f);
+		mainVertex[vb].sz = 0.0f;
+		mainVertex[vb].rhw = 1.0f;
+		mainVertex[vb].color = colour;
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
+		mainVertex[vb].tv = 0.0f;
+
+		vb++;
+
+		OUTPUT_TRIANGLE(0,1,2, 4);
+		OUTPUT_TRIANGLE(1,2,3, 4);
+	}
+
+	// do the middle glow
+	x = (float)(quadX + quadWidth); // set new x based on the top right value above (without the 0.5 offset)
+
+	CheckVertexBuffer(4, AVPMENUGFX_GLOWY_MIDDLE, TRANSLUCENCY_GLOWING);
+
+	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Width;
+	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Height;
+
+	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].newWidth;
+	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].newHeight;
+
+	quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / textureWidth) * 640));
+	quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / textureHeight) * 480));
+
+	quadX = x; // position ourselves where we left off doing left glow
+
+	{
+		// bottom left
+		mainVertex[vb].sx = (float)(quadX - 0.5f);
+		mainVertex[vb].sy = (float)(quadY + quadHeight) - 0.5f;
+		mainVertex[vb].sz = 0.0f;
+		mainVertex[vb].rhw = 1.0f;
+		mainVertex[vb].color = colour;
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].tu = 0.0f;
+		mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
+
+		vb++;
+
+		// top left
+		mainVertex[vb].sx = (float)(quadX - 0.5f);
+		mainVertex[vb].sy = (float)(quadY - 0.5f);
+		mainVertex[vb].sz = 0.0f;
+		mainVertex[vb].rhw = 1.0f;
+		mainVertex[vb].color = colour;
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].tu = 0.0f;
+		mainVertex[vb].tv = 0.0f;
+
+		vb++;
+
+		// bottom right
+		mainVertex[vb].sx = (float)((quadX + (quadWidth * size)) - 0.5f);
+		mainVertex[vb].sy = (float)((quadY + quadHeight) - 0.5f);
+		mainVertex[vb].sz = 0.0f;
+		mainVertex[vb].rhw = 1.0f;
+		mainVertex[vb].color = colour;
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
+		mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
+
+		vb++;
+
+		// top right
+		mainVertex[vb].sx = (float)((quadX + (quadWidth * size)) - 0.5f);
+		mainVertex[vb].sy = (float)(quadY - 0.5f);
+		mainVertex[vb].sz = 0.0f;
+		mainVertex[vb].rhw = 1.0f;
+		mainVertex[vb].color = colour;
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
+		mainVertex[vb].tv = 0.0f;
+
+		vb++;
+
+		OUTPUT_TRIANGLE(0,1,2, 4);
+		OUTPUT_TRIANGLE(1,2,3, 4);
+	}
+
+	// right glow
+	x = (float)(quadX + (quadWidth * size)); // set new x based on the top right value above without the 0.5f offset
+
+	CheckVertexBuffer(4, AVPMENUGFX_GLOWY_RIGHT, TRANSLUCENCY_GLOWING);
+
+	// textures actual height/width (whether it's non power of two or not)
+	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Width;
+	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Height;
+
+	// we pad non power of two textures to pow2
+	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].newWidth;
+	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].newHeight;
+
+	// game used to render menus at 640x480. this allows us to use any resolution we want
+	quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / textureWidth) * 640));
+	quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / textureHeight) * 480));
+
+	quadX = x;
+
+	{
+		// bottom left
+		mainVertex[vb].sx = (float)(quadX - 0.5f);
+		mainVertex[vb].sy = (float)((quadY + quadHeight) - 0.5f);
+		mainVertex[vb].sz = 0.0f;
+		mainVertex[vb].rhw = 1.0f;
+		mainVertex[vb].color = colour;
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].tu = 0.0f;
+		mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
+
+		vb++;
+
+		// top left
+		mainVertex[vb].sx = (float)(quadX - 0.5f);
+		mainVertex[vb].sy = (float)(quadY - 0.5f);
+		mainVertex[vb].sz = 0.0f;
+		mainVertex[vb].rhw = 1.0f;
+		mainVertex[vb].color = colour;
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].tu = 0.0f;
+		mainVertex[vb].tv = 0.0f;
+
+		vb++;
+
+		// bottom right
+		mainVertex[vb].sx = (float)((quadX + quadWidth) - 0.5f);
+		mainVertex[vb].sy = (float)((quadY + quadHeight) - 0.5f);
+		mainVertex[vb].sz = 0.0f;
+		mainVertex[vb].rhw = 1.0f;
+		mainVertex[vb].color = colour;
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
+		mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
+
+		vb++;
+
+		// top right
+		mainVertex[vb].sx = (float)((quadX + quadWidth) - 0.5f);
+		mainVertex[vb].sy = (float)(quadY - 0.5f);
+		mainVertex[vb].sz = 0.0f;
+		mainVertex[vb].rhw = 1.0f;
+		mainVertex[vb].color = colour;
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
+		mainVertex[vb].tv = 0.0f;
+
+		vb++;
+
+		OUTPUT_TRIANGLE(0,1,2, 4);
+		OUTPUT_TRIANGLE(1,2,3, 4);
+	}
 }
 
 void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha) 

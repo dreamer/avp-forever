@@ -294,14 +294,18 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 	}
 	else
 	{
-		if (alpha >BRIGHTNESS_OF_DARKENED_ELEMENT)
+		if (alpha > BRIGHTNESS_OF_DARKENED_ELEMENT)
 		{
 			int size = width - 18;
 			if (size<18) size = 18;
-
+/*
 			DrawAvPMenuGfx(AVPMENUGFX_GLOWY_LEFT, pX+18, pY-8, alpha, AVPMENUFORMAT_RIGHTJUSTIFIED);
-			DrawAvPMenuGlowyBar(pX+18, pY-8 ,alpha, size-18);
+			DrawAvPMenuGlowyBar(pX+18, pY-8, alpha, size-18);
 			DrawAvPMenuGfx(AVPMENUGFX_GLOWY_RIGHT, pX+size, pY-8, alpha, AVPMENUFORMAT_LEFTJUSTIFIED);
+*/
+			extern void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha);
+
+			DrawMenuTextGlow(pX+18, pY-8, size-18, alpha);
 		}
 	}
 
@@ -1880,27 +1884,27 @@ static void CalculateWidthsOfAAFont(void)
 	AVPMENUGFX *gfxPtr;
 	AvPTexture *image;
 	int c;
-	
+
 	gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_SMALL_FONT];
 	image = gfxPtr->ImagePtr;
-	
+
 	srcPtr = image->buffer;
-	
+
 	AAFontWidths[32] = 3;
-	
+
 	for (c = 33; c < 255; c++) 
 	{
 		int x,y;
 		int x1 = 1+((c-32)&15)*16;
 		int y1 = 1+((c-32)>>4)*16;
-		
+
 		AAFontWidths[c] = 17;
-		
-		for (x = x1 + HUD_FONT_WIDTH; x > x1; x--) 
+
+		for (x = x1 + HUD_FONT_WIDTH; x > x1; x--)
 		{
 			int blank = 1;
-			
-			for (y = y1; y < y1 + HUD_FONT_HEIGHT; y++) 
+
+			for (y = y1; y < y1 + HUD_FONT_HEIGHT; y++)
 			{
 				unsigned char *s = &srcPtr[(x + y*image->width) * 4];
 				if (s[2] >= 0x80)
@@ -1909,17 +1913,17 @@ static void CalculateWidthsOfAAFont(void)
 					break;
 				}
 			}
-			
-			if (blank) 
+
+			if (blank)
 			{
 				AAFontWidths[c]--;
-			} 
-			else 
+			}
+			else
 			{
 				break;
 			}
 		}
 	}
 }
-	 
+
 };
