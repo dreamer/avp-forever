@@ -32,7 +32,7 @@ extern int FadingGameInAfterLoading;
 extern void RenderBriefingText(int centreY, int brightness);
 };
 
-static int CurrentPosition=0;
+static int CurrentPosition = 0;
 static int BarLeft;
 static int BarRight;
 static int BarTop;
@@ -59,16 +59,16 @@ int fullbarHeight, fullbarWidth, emptybarHeight, emptybarWidth;
 
 void Start_Progress_Bar()
 {
-	AAFontImageNumber = CL_LoadImageOnce("Common\\aa_font.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
+	AAFontImageNumber = CL_LoadImageOnce("Common\\aa_font.RIM", LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
 	
 	/* load other graphics */
 	{
 		char buffer[100];
-		CL_GetImageFileName(buffer, 100,Loading_Bar_Empty_Image_Name, LIO_RELATIVEPATH);
+		CL_GetImageFileName(buffer, 100, Loading_Bar_Empty_Image_Name, LIO_RELATIVEPATH);
 		
 		//see if graphic can be found in fast file
 		unsigned int fastFileLength;
-		void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
+		void const * pFastFileData = ffreadbuf(buffer, &fastFileLength);
 		
 		if(pFastFileData)
 		{
@@ -126,15 +126,7 @@ void Start_Progress_Bar()
 		
 		LoadingBarFullTexture = CreateD3DTexturePadded(LoadingBarFull, &fullbarWidth, &fullbarHeight);
 	}
-/*	
-	//set progress bar dimensions
-	BarLeft=ScreenDescriptorBlock.SDB_Width/6;
-	BarRight=(ScreenDescriptorBlock.SDB_Width*5)/6;
-//	BarTop=(ScreenDescriptorBlock.SDB_Height*19)/22;
-	BarTop = ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)) * 19/22;
-//	BarBottom=(ScreenDescriptorBlock.SDB_Height*21)/22;
-	BarBottom=((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*21)/22;
-*/	
+	
 	//load background image for bar
 	char buffer[100];
 	CL_GetImageFileName(buffer, 100,Loading_Image_Name, LIO_RELATIVEPATH);
@@ -164,22 +156,8 @@ void Start_Progress_Bar()
 							0
 						);
 	}
-	#if 0
-	if(image)
-	{
-		//draw background image
-		lpDDSBack->Blt(0,image,0,DDBLT_WAIT,0);
-	}
-	else
-	{
-		//failed to load background graphic , make do with black background
-		ColourFillBackBuffer(0);
-	}
-	#endif
 
-	//RenderGrabbedScreen();
 	//draw initial progress bar
-
 	LoadingBarEmpty_SrcRect.left=0;
 	LoadingBarEmpty_SrcRect.right=639;
 	LoadingBarEmpty_SrcRect.top=0;
@@ -206,14 +184,11 @@ void Start_Progress_Bar()
 
 void Set_Progress_Bar_Position(int pos)
 {
-//	AAFontImageNumber = CL_LoadImageOnce("Common\\aa_font.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
-//	int NewPosition=((BarRight-BarLeft)*pos)/PBAR_LENGTH;
 	int NewPosition = DIV_FIXED(pos,PBAR_LENGTH);
 	if(NewPosition>CurrentPosition)
 	{
 
-		CurrentPosition=NewPosition;
-//		ColourFillBackBufferQuad(GetSingleColourForPrimary(0xff0000),BarLeft,BarTop,BarLeft+CurrentPosition,BarBottom);
+		CurrentPosition = NewPosition;
 		LoadingBarFull_SrcRect.left=0;
 		LoadingBarFull_SrcRect.right=MUL_FIXED(639,NewPosition);
 		LoadingBarFull_SrcRect.top=0;
@@ -232,11 +207,8 @@ void Set_Progress_Bar_Position(int pos)
 		// also need this here again, or else the text disappears!
 		RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
 
-//		FlipBuffers();
-
 		// now render the green percent loaded overlay
 		DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height, fullbarWidth, fullbarHeight);
-//		if (LoadingBarFull) lpDDSBack->Blt(&LoadingBarFull_DestRect,LoadingBarFull,&LoadingBarFull_SrcRect,DDBLT_WAIT,0);
 		
 		ThisFramesRenderingHasFinished();
 		
@@ -283,19 +255,8 @@ void Game_Has_Loaded(void)
 	{
 		CheckForWindowsMessages();
 		ReadUserInput();
-	
-//		FlipBuffers();
 		ThisFramesRenderingHasBegun();
-/*
-		ColourFillBackBufferQuad
-		(
-			0,
-			0,
-			(ScreenDescriptorBlock.SDB_Height*11)/12,
-			ScreenDescriptorBlock.SDB_Width-1,
-			ScreenDescriptorBlock.SDB_Height-1
-		);
-*/
+
 		if (f)
 		{
 			LoadingBarFull_SrcRect.left=0;
@@ -316,22 +277,15 @@ void Game_Has_Loaded(void)
 			f-=NormalFrameTime;
 			if (f<0) f=0;
 		}
-		{
-//			extern void ThisFramesRenderingHasBegun(void);
-//			ThisFramesRenderingHasBegun();
-		}
-		RenderStringCentred(GetTextString(TEXTSTRING_INGAME_PRESSANYKEYTOCONTINUE), ScreenDescriptorBlock.SDB_Width/2, ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*23)/24-9, 0xffffffff);
-//		{
-			/* after this call, no more graphics can be drawn until the next frame */
-//			extern void ThisFramesRenderingHasFinished(void);
-			ThisFramesRenderingHasFinished();
-//		}
 
+		RenderStringCentred(GetTextString(TEXTSTRING_INGAME_PRESSANYKEYTOCONTINUE), ScreenDescriptorBlock.SDB_Width/2, ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*23)/24-9, 0xffffffff);
+
+		ThisFramesRenderingHasFinished();
 		FlipBuffers();	
 		FrameCounterHandler();
 
 		/* If in a network game then we may as well check the network messages while waiting*/
-		if(AvP.Network != I_No_Network)
+		if (AvP.Network != I_No_Network)
 		{
 			MinimalNetCollectMessages();
 			//send messages , mainly  needed so that the host will send the game description
@@ -340,7 +294,7 @@ void Game_Has_Loaded(void)
 		}
 	}
 
-	while(!DebouncedGotAnyKey);
+	while (!DebouncedGotAnyKey && AvP.Network != I_Host);
 
 	FadingGameInAfterLoading=ONE_FIXED;
 

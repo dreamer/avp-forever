@@ -31,6 +31,20 @@ extern "C++"{
 
 #include "logString.h"
 
+#include <d3dx9math.h>
+
+//Custom vertex format
+const DWORD D3DFVF_CUSTOMVERTEX = D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1;
+
+struct CUSTOMVERTEX 
+{
+	float x, y, z; // Position in 3d space 
+	DWORD colour;   // Colour  
+	float u, v;    // Texture coordinates 
+};
+
+CUSTOMVERTEX conVerts[4];
+
 };
 #include "HUD_layout.h"
 #define HAVE_VISION_H 1
@@ -50,18 +64,6 @@ WORD *mainIndex;
 
 // for quad rendering
 D3DTLVERTEX *quadVert = new D3DTLVERTEX[4];
-
-//Custom vertex format
-const DWORD D3DFVF_CUSTOMVERTEX = D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1;
-
-struct CUSTOMVERTEX 
-{
-	float x, y, z; // Position in 3d space 
-	DWORD colour;   // Colour  
-	float u, v;    // Texture coordinates 
-};
-
-CUSTOMVERTEX conVerts[4];
 
 struct RENDER_STATES
 {
@@ -8087,6 +8089,7 @@ void DrawQuad(int x, int y, int width, int height, int colour)
 	OUTPUT_TRIANGLE(1,2,3, 4);
 }
 
+#if 0
 void DrawGlowyTest(int topX, int topY, int length, int alpha)
 {
 	int image_num = AVPMENUGFX_GLOWY_MIDDLE;
@@ -8102,6 +8105,7 @@ void DrawGlowyTest(int topX, int topY, int length, int alpha)
 	alpha = (alpha / 256);
 	if (alpha > 255) 
 		alpha = 255;
+
 	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 
 	// game used to render menus at 640x480. this allows us to use any resolution we want
@@ -8175,17 +8179,10 @@ void DrawGlowyTest(int topX, int topY, int length, int alpha)
 	OUTPUT_TRIANGLE(0,1,2, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
 }
+#endif
 
 void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha) 
-{
-/*
-	if ((image_num == AVPMENUGFX_GLOWY_LEFT) || (image_num == AVPMENUGFX_GLOWY_RIGHT))
-	{
-		CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
-	}
-	else CheckVertexBuffer(4, image_num, TRANSLUCENCY_GLOWING);
-*/
-	
+{	
 	CheckVertexBuffer(4, image_num, TRANSLUCENCY_GLOWING);
 
 	// textures actual height/width (whether it's non power of two or not)
@@ -8291,37 +8288,149 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 */
 }
 
-void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
+void DrawMenuTextGlow2(int topLeftX, int topLeftY, int size, int alpha)
 {
-//	float x = topLeftX;
-//	float y = topLeftY;
-
-	float X, Y;
-
-	float quadX = 0.0f;
-	float quadY = 0.0f;
+	float X;
+	float Y;
 	int textureWidth = 0;
 	int textureHeight = 0;
 	int texturePOW2Width = 0;
 	int texturePOW2Height = 0;
-	int quadWidth = 0;
-	int quadHeight = 0;
-		
 	D3DXMATRIX matTranslation;
     D3DXMATRIX matScaling;
     D3DXMATRIX matTransform;
 
-	//Get coordinates
-	X = topLeftX - (float)(ScreenDescriptorBlock.SDB_Width) / 2;
-	Y = topLeftY + (float)(ScreenDescriptorBlock.SDB_Height) / 2;
+	// textures original resolution (if it's a non power of 2, these will be the non power of 2 values
+	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Width;
+	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Height;
 
-	D3DXMatrixScaling (&matScaling, (float)(800), (float)(250), 1.0f);
+	// these values are the texture width and height as power of two values
+	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newWidth;
+	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newHeight;
+
+	// do the text alignment justification
+	topLeftX -= textureWidth;
+
+	int left = topLeftX;
+	int right = topLeftX + textureWidth;
+	int top = topLeftY;
+	int bottom = topLeftY + textureHeight;
+
+	// Get coordinates
+	X = left - (float)(640) / 2;
+	Y = -top + (float)(480) / 2;
+
+	D3DXMatrixScaling (&matScaling, (float)(right - left), (float)(bottom - top), 1.0f);
 
     D3DXMatrixTranslation (&matTranslation, X, Y, 0.0f);
     matTransform = matScaling * matTranslation;
 
-	D3DXMatrixTranslation (&matTranslation, X, Y, 0.0f);
+	D3DCOLOR colour = D3DCOLOR_ARGB(200, 255, 255, 255);
 
+	// bottom left
+	conVerts[0].colour = colour;
+	conVerts[0].x = -1.0f;
+	conVerts[0].y = 1.0f;
+	conVerts[0].z = 1.0f;
+	conVerts[0].u = 0.0f;
+	conVerts[0].v = (1.0f / texturePOW2Height) * textureHeight;
+
+	// top left
+	conVerts[1].colour = colour;
+	conVerts[1].x = -1.0f;
+	conVerts[1].y = -1.0f;
+	conVerts[1].z = 1.0f;
+	conVerts[1].u = 0.0f;
+	conVerts[1].v = 0.0f;
+
+	// bottom right
+	conVerts[2].colour = colour;
+	conVerts[2].x = 1.0f;
+	conVerts[2].y = 1.0f;
+	conVerts[2].z = 1.0f;
+	conVerts[2].u = (1.0f / texturePOW2Width) * textureWidth;
+	conVerts[2].v = (1.0f / texturePOW2Height) * textureHeight;
+
+	// top right
+	conVerts[3].colour = colour;
+	conVerts[3].x = 1.0f;
+	conVerts[3].y = -1.0f;
+	conVerts[3].z = 1.0f;
+	conVerts[3].u = (1.0f / texturePOW2Width) * textureWidth;
+	conVerts[3].v = 0.0f;
+
+	d3d.lpD3DDevice->SetFVF (D3DFVF_CUSTOMVERTEX);
+	d3d.lpD3DDevice->SetTransform (D3DTS_WORLD, &matTransform);
+	d3d.lpD3DDevice->SetTexture (0, AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].menuTexture);
+
+	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &conVerts[0], sizeof(CUSTOMVERTEX));
+	if (FAILED(LastError))
+	{
+		OutputDebugString("DrawPrimitiveUP failed\n");
+	}
+
+	left = right;
+
+	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Width;
+	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Height;
+
+	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].newWidth;
+	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].newHeight;
+
+	right += textureWidth * size;
+
+	// Get coordinates
+	X = left - (float)(640) / 2;
+	Y = -top + (float)(480) / 2;
+
+	D3DXMatrixScaling (&matScaling, (float)(right - left), (float)(bottom - top), 1.0f);
+
+    D3DXMatrixTranslation (&matTranslation, X, Y, 0.0f);
+    matTransform = matScaling * matTranslation;
+
+	colour = D3DCOLOR_ARGB(200, 255, 255, 255);
+
+	// bottom left
+	conVerts[0].colour = colour;
+	conVerts[0].x = -1.0f;
+	conVerts[0].y = 1.0f;
+	conVerts[0].z = 1.0f;
+	conVerts[0].u = 0.0f;
+	conVerts[0].v = (1.0f / texturePOW2Height) * textureHeight;
+
+	// top left
+	conVerts[1].colour = colour;
+	conVerts[1].x = -1.0f;
+	conVerts[1].y = -1.0f;
+	conVerts[1].z = 1.0f;
+	conVerts[1].u = 0.0f;
+	conVerts[1].v = 0.0f;
+
+	// bottom right
+	conVerts[2].colour = colour;
+	conVerts[2].x = 1.0f;
+	conVerts[2].y = 1.0f;
+	conVerts[2].z = 1.0f;
+	conVerts[2].u = (1.0f / texturePOW2Width) * textureWidth;
+	conVerts[2].v = (1.0f / texturePOW2Height) * textureHeight;
+
+	// top right
+	conVerts[3].colour = colour;
+	conVerts[3].x = 1.0f;
+	conVerts[3].y = -1.0f;
+	conVerts[3].z = 1.0f;
+	conVerts[3].u = (1.0f / texturePOW2Width) * textureWidth;
+	conVerts[3].v = 0.0f;
+
+	d3d.lpD3DDevice->SetFVF (D3DFVF_CUSTOMVERTEX);
+	d3d.lpD3DDevice->SetTransform (D3DTS_WORLD, &matTransform);
+	d3d.lpD3DDevice->SetTexture (0, AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].menuTexture);
+
+	LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &conVerts[0], sizeof(CUSTOMVERTEX));
+	if (FAILED(LastError))
+	{
+		OutputDebugString("DrawPrimitiveUP failed\n");
+	}
 }
 
 void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
@@ -8337,6 +8446,7 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 	int quadWidth = 0;
 	int quadHeight = 0;
 
+	// the game passes alpha in as a value between 0 and 65536, so we scale it down to something d3d likes
 	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
 		alpha = ONE_FIXED;
 
@@ -8346,29 +8456,31 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 
 	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 
-	// draw the left glow
+	// draw the left glow. this function tells the backend vertex buffer we're going to draw 4 verts to it (just a quad. 
+	// AVPMENUGFX_GLOWY_LEFT is the texture id, TRANSLUCENCY_GLOWING is a render state set
 	CheckVertexBuffer(4, AVPMENUGFX_GLOWY_LEFT, TRANSLUCENCY_GLOWING);
 
-	// textures actual height/width (whether it's non power of two or not)
+	// textures original resolution (if it's a non power of 2, these will be the non power of 2 values
 	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Width;
 	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Height;
 
-	// do the justification
-	//case AVPMENUFORMAT_RIGHTJUSTIFIED:
+	// do the text alignment justification
 	topLeftX -= textureWidth;
 	x -= textureWidth;
 
-	// we pad non power of two textures to pow2
+	// these values are the texture width and height as power of two values
 	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newWidth;
 	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newHeight;
 
-	// game used to render menus at 640x480. this allows us to use any resolution we want
+	// game used to render menus at 640x480. this scales the width and height to the correct values
 	quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / textureWidth) * 640));
 	quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / textureHeight) * 480));
 
+	// do the same for the actual x and y positions, scaling them to the actual backbuffer resolution
 	quadX = ((ScreenDescriptorBlock.SDB_Width / 640.0f) * x);
 	quadY = ((ScreenDescriptorBlock.SDB_Height / 480.0f) * y);
 
+	// draw the first quad
 	{
 		// bottom left
 		mainVertex[vb].sx = (float)(quadX - 0.5f);
@@ -8423,8 +8535,9 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 	}
 
 	// do the middle glow
-	x = (float)(quadX + quadWidth); // set new x based on the top right value above (without the 0.5 offset)
+	x = (float)(quadX + quadWidth); // set new x based on the top right value above (without the 0.5 offset) so we start rendering again exactly where we left off above
 
+	// do all the calculations again for the new piece
 	CheckVertexBuffer(4, AVPMENUGFX_GLOWY_MIDDLE, TRANSLUCENCY_GLOWING);
 
 	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Width;

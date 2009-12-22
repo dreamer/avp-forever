@@ -11,6 +11,22 @@
 #include "iofocus.h"
 #include "logString.h"
 
+#if 0
+#include <d3dx9math.h>
+
+//Custom vertex format
+const DWORD D3DFVF_CUSTOMVERTEX = D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1;
+
+struct CUSTOMVERTEX 
+{
+	float x, y, z; // Position in 3d space 
+	DWORD colour;   // Colour  
+	float u, v;    // Texture coordinates 
+};
+
+CUSTOMVERTEX conVerts[4];
+#endif
+
 extern "C" 
 {
 	#include "avp_menugfx.hpp"
@@ -282,17 +298,19 @@ void Con_DrawQuadTest()
     D3DXMATRIX matScaling;
     D3DXMATRIX matTransform;
 
-	//Get coordinates
-	X = 0 - (float)(800) / 2;
-	Y = 0 + (float)(600) / 2;
+	int left = 0;
+	int right = 640;
+	int top = 0;
+	int bottom = 240;
 
-	D3DXMatrixScaling (&matScaling, (float)(800),
-        (float)(250), 1.0f);
+	// Get coordinates
+	X = left - (float)(640) / 2;
+	Y = -top + (float)(480) / 2;
+
+	D3DXMatrixScaling (&matScaling, (float)(right - left), (float)(bottom - top), 1.0f);
 
     D3DXMatrixTranslation (&matTranslation, X, Y, 0.0f);
     matTransform = matScaling * matTranslation;
-
-	D3DXMatrixTranslation (&matTranslation, X, Y, 0.0f);
 
 	D3DCOLOR colour = D3DCOLOR_ARGB(200, 255, 0, 255);
 
@@ -328,10 +346,11 @@ void Con_DrawQuadTest()
 	conVerts[3].u = 0.0f;
 	conVerts[3].v = 1.0f;
 
-	d3d.lpD3DDevice->SetFVF(D3DFVF_CUSTOMVERTEX);
+	d3d.lpD3DDevice->SetFVF (D3DFVF_CUSTOMVERTEX);
 	d3d.lpD3DDevice->SetTransform (D3DTS_WORLD, &matTransform);
-	d3d.lpD3DDevice->SetTexture(0, NULL);
-	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &conVerts[0], sizeof(CUSTOMVERTEX));
+	d3d.lpD3DDevice->SetTexture (0, NULL);
+
+	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &conVerts[0], sizeof(CUSTOMVERTEX));
 	if (FAILED(LastError))
 	{
 		OutputDebugString("DrawPrimitiveUP failed\n");

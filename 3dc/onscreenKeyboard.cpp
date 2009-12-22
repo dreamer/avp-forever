@@ -16,8 +16,6 @@
 	- add Caps lock
 	- Symbols (can I be bothered?...)
 	- xbox specific graphics to indicate press B to go back, A to select..
-
-
 */
 
 struct TextureResource
@@ -270,7 +268,6 @@ bool Osk_IsActive()
 std::string Osk_GetKeyLabel(int buttonIndex)
 {
 	// quick test for shift and caps lock..
-
 	if ((shift || capsLock) && ((stringVector.at(keyVector.at(buttonIndex).stringId).length() == 1)))
 	{
 		std::string tempString = stringVector.at(keyVector.at(buttonIndex).stringId);

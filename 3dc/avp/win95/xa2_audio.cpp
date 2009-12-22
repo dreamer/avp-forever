@@ -461,10 +461,6 @@ int PlatStartSoundSys()
 		return 0;
 	}
 
-	OutputDebugString("using audio device ");
-	OutputDebugString(reinterpret_cast<LPCSTR>(deviceDetails.DisplayName));
-	OutputDebugString("\n");
-
 	numOutputChannels = deviceDetails.OutputFormat.Format.nChannels;
 
 	// Initialise X3DAudio

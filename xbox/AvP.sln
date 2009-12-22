@@ -12,16 +12,21 @@ Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
 		Release For Fox = Release For Fox
+		Release_SSE = Release_SSE
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
 		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Debug.ActiveCfg = Debug|Xbox
 		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Debug.Build.0 = Debug|Xbox
 		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Release For Fox.ActiveCfg = Release For Fox|Xbox
 		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Release For Fox.Build.0 = Release For Fox|Xbox
+		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Release_SSE.ActiveCfg = Release|Xbox
+		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Release_SSE.Build.0 = Release|Xbox
 		{98034BF8-AE8C-4226-B84C-1F932834661D}.Debug.ActiveCfg = Debug|Xbox
 		{98034BF8-AE8C-4226-B84C-1F932834661D}.Debug.Build.0 = Debug|Xbox
 		{98034BF8-AE8C-4226-B84C-1F932834661D}.Release For Fox.ActiveCfg = Release|Xbox
 		{98034BF8-AE8C-4226-B84C-1F932834661D}.Release For Fox.Build.0 = Release|Xbox
+		{98034BF8-AE8C-4226-B84C-1F932834661D}.Release_SSE.ActiveCfg = Release|Xbox
+		{98034BF8-AE8C-4226-B84C-1F932834661D}.Release_SSE.Build.0 = Release|Xbox
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		AMDCaProjectFile = D:\Development\AvP_vc\CodeAnalyst\AvP.caw

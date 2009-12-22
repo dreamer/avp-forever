@@ -667,9 +667,6 @@ BOOL ReleaseVolatileResources()
 {
 	ReleaseAllFMVTexturesForDeviceReset();
 
-	d3d.lpD3DDevice->SetStreamSource(0, NULL, 0, 0);
-	d3d.lpD3DDevice->SetTexture(0, NULL);
-
 	SAFE_RELEASE(d3d.lpD3DBackSurface);
 	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
 	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
@@ -765,8 +762,8 @@ BOOL InitialiseDirect3D()
 	ClearLog();
 	LogString("Starting to initialise Direct3D");
 
-	int width = 800;//640;
-	int height = 600;//480;
+	int width = 640;
+	int height = 480;
 	int depth = 32;
 	int defaultDevice = D3DADAPTER_DEFAULT;
 	bool windowed = false;
@@ -942,7 +939,7 @@ BOOL InitialiseDirect3D()
 
 	for (int i = 0; i < (sizeof(DisplayFormats) / sizeof(DisplayFormats[0])); i++)
 	{
-		/* if we're found a usable backbuffer and depth buffer format, break out of the two loops */
+		// if we're found a usable backbuffer and depth buffer format, break out of the two loops
 		if (gotValidFormats) break;
 
 		for (int j = 0; j < (sizeof(DepthFormats) / sizeof(DepthFormats[0])); j++)
@@ -954,7 +951,7 @@ BOOL InitialiseDirect3D()
 										D3DRTYPE_SURFACE,
 										DepthFormats[j]);
 
-			/* if the format wont work with this depth buffer, try another format */
+			// if the format wont work with this depth buffer, try another format
 			if (FAILED(LastError)) continue;
 
 			LastError = d3d.lpD3D->CheckDepthStencilMatch( d3d.CurrentDriver,
@@ -963,7 +960,7 @@ BOOL InitialiseDirect3D()
 									DisplayFormats[i],
 									DepthFormats[j]);
 
-			/* we got valid formats! */
+			// we got valid formats
 			if (!FAILED(LastError))
 			{
 				SelectedDepthFormat = DepthFormats[j];
@@ -1034,15 +1031,14 @@ BOOL InitialiseDirect3D()
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		//LogErrorString("Could not create Direct3D device\n");
 		return FALSE;
 	}
 
-	/* get device capabilities */
+	// get device capabilities
 	D3DCAPS9 d3dCaps;
 	d3d.lpD3DDevice->GetDeviceCaps(&d3dCaps);
 
-	/* check and remember if we have dynamic texture support */
+	// check and remember if we have dynamic texture support
 	if (d3dCaps.Caps2 & D3DCAPS2_DYNAMICTEXTURES)
 	{
 		d3d.supportsDynamicTextures = TRUE;
@@ -1114,7 +1110,6 @@ BOOL InitialiseDirect3D()
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		//LogErrorString("Could not set viewport\n");
 	}
 /*
 	LastError = d3d.lpD3DDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &d3d.lpD3DBackSurface);
@@ -1137,7 +1132,6 @@ BOOL InitialiseDirect3D()
 	ScreenDescriptorBlock.SDB_Height    = height;
 	ScreenDescriptorBlock.SDB_Depth		= depth;
 	ScreenDescriptorBlock.SDB_Size      = width*height;
-//	ScreenDescriptorBlock.SDB_DiagonalWidth = sqrt((float)width*width+height*height)+0.5;
 	ScreenDescriptorBlock.SDB_CentreX   = width/2;
 	ScreenDescriptorBlock.SDB_CentreY   = height/2;
 	ScreenDescriptorBlock.SDB_ProjX     = width/2;
@@ -1147,7 +1141,7 @@ BOOL InitialiseDirect3D()
 	ScreenDescriptorBlock.SDB_ClipUp    = 0;
 	ScreenDescriptorBlock.SDB_ClipDown  = height;
 
-	/* use an offset for hud items to account for tv safe zones. just use width for now. 15%?  */
+	// use an offset for hud items to account for tv safe zones. just use width for now. 15%?
 	if (0)
 	{
 		ScreenDescriptorBlock.SDB_SafeZoneWidthOffset = (width / 100) * 15;
@@ -1159,18 +1153,21 @@ BOOL InitialiseDirect3D()
 		ScreenDescriptorBlock.SDB_SafeZoneHeightOffset = 0;
 	}
 
-	/* save a copy of the presentation parameters for use later (device reset, resolution/depth change) */
+	// save a copy of the presentation parameters for use later (device reset, resolution/depth change)
 	d3d.d3dpp = d3dpp;
 
-	/* create vertex and index buffers */
+	// create vertex and index buffers
 	CreateVolatileResources();
 
 	//Setup orthographic projection matrix
-	D3DXMatrixOrthoLH(&matOrtho, width, height, 1.0f, 10.0f);
-	D3DXMatrixIdentity(&matIdentity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matOrtho);
-	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD, &matIdentity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW, &matIdentity);
+	D3DXMatrixOrthoLH( &matOrtho, 640, 480, 1.0f, 10.0f );
+
+//	D3DXMatrixOrthoOffCenterLH( &matOrtho, 0.0f, width, 0.0f, height, 1.0f, 10.0f);
+
+	D3DXMatrixIdentity( &matIdentity );
+	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
+	d3d.lpD3DDevice->SetTransform( D3DTS_WORLD, &matIdentity );
+	d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matIdentity );
 
 	Con_Init();
 	Net_Initialise();
@@ -1196,7 +1193,7 @@ void ReleaseDirect3D()
 	// release back-buffer copy surface, vertex buffer and index buffer
 	ReleaseVolatileResources();
 
-	/* delete up any new()-ed memory in d3d_render.cpp */
+	// delete up any new()-ed memory in d3d_render.cpp
 	DeleteRenderMemory();
 
 	SAFE_RELEASE(d3d.lpD3DDevice);
@@ -1205,12 +1202,12 @@ void ReleaseDirect3D()
 	SAFE_RELEASE(d3d.lpD3D);
 	LogString("Releasing Direct3D object...");
 
-	/* release Direct Input stuff */
+	// release Direct Input stuff
 	ReleaseDirectKeyboard();
 	ReleaseDirectMouse();
 	ReleaseDirectInput();
 
-	/* find a better place to put this */
+	// find a better place to put this
 	Config_Save();
 }
 

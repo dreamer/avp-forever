@@ -163,7 +163,7 @@ struct Fmv
 	HANDLE callbackEvent;
 
 	D3DTEXTURE mDisplayTexture;
-	byte *textureData;
+	uint8_t *textureData;
 
 	HANDLE decodeThreadHandle;
 	HANDLE audioThreadHandle;
@@ -175,9 +175,9 @@ struct Fmv
 
 	StreamingAudioBuffer *fmvAudioStream;
 
-	static short	*audioDataBuffer;
-	static int		audioDataBufferSize;
-	byte *audioData;
+	uint16_t *audioDataBuffer;
+	int		 audioDataBufferSize;
+	uint8_t	 *audioData;
 
 };
 
@@ -206,15 +206,16 @@ CRITICAL_SECTION audioCriticalSection;
 OggStream *video = NULL;
 OggStream *audio = NULL;
 StreamingAudioBuffer *fmvAudioStream;
-static short *audioDataBuffer = NULL;
-static int audioDataBufferSize = 0;
-byte *audioData = NULL;
+uint16_t *audioDataBuffer = NULL;
+int audioDataBufferSize = 0;
+uint8_t *audioData = NULL;
 StreamMap mStreams;
 ogg_int64_t mGranulepos;
 
 VorbisCodec *menuMusic = NULL;
 
-void TheoraInitForData(OggStream* stream)
+// standalone
+void TheoraInitForData(OggStream *stream)
 {
 	stream->mTheora.mCtx = th_decode_alloc(&stream->mTheora.mInfo, stream->mTheora.mSetup);
 
@@ -231,15 +232,13 @@ void TheoraInitForData(OggStream* stream)
 	// Set to a value between 0 and ppmax inclusive to experiment with
 	// this parameter.
 	ppmax = 0;
-	ret = th_decode_ctl(stream->mTheora.mCtx,
-		      TH_DECCTL_SET_PPLEVEL,
-		      &ppmax,
-		      sizeof(ppmax));
+	ret = th_decode_ctl(stream->mTheora.mCtx, TH_DECCTL_SET_PPLEVEL, &ppmax, sizeof(ppmax));
 
 	assert(ret == 0);
 }
 
-void VorbisInitForData(OggStream* stream)
+// standalone
+void VorbisInitForData(OggStream *stream)
 {
 	int ret = vorbis_synthesis_init(&stream->mVorbis.mDsp, &stream->mVorbis.mInfo);
 	assert(ret == 0);
@@ -248,7 +247,8 @@ void VorbisInitForData(OggStream* stream)
 	assert(ret == 0);
 }
 
-void HandleTheoraData(OggStream* stream, ogg_packet* packet)
+// not standalone
+void HandleTheoraData(OggStream *stream, ogg_packet *packet)
 {
 	int ret = th_decode_packetin(stream->mTheora.mCtx,
 			packet,
@@ -272,7 +272,7 @@ void HandleTheoraData(OggStream* stream, ogg_packet* packet)
 	LeaveCriticalSection(&frameCriticalSection);
 }
 
-bool ReadPacket(ogg_sync_state* state, OggStream* stream, ogg_packet* packet)
+bool ReadPacket(ogg_sync_state *state, OggStream *stream, ogg_packet *packet)
 {
 	int ret = 0;
 
@@ -579,7 +579,7 @@ unsigned int __stdcall TheoraDecodeThread(void *args)
 					if (audioDataBuffer == NULL)
 					{
 						// make it twice the size we currently need to avoid future reallocations
-						audioDataBuffer = new short[dataSize * 2];
+						audioDataBuffer = new uint16_t[dataSize * 2];
 						audioDataBufferSize = dataSize * 2;
 					}
 
@@ -591,7 +591,7 @@ unsigned int __stdcall TheoraDecodeThread(void *args)
 							OutputDebugString("deleted audioDataBuffer to resize\n");
 						}
 
-						audioDataBuffer = new short[dataSize * 2];
+						audioDataBuffer = new uint16_t[dataSize * 2];
 						OutputDebugString("alloc audioDataBuffer\n");
 
 						if (!audioDataBuffer)
@@ -602,7 +602,7 @@ unsigned int __stdcall TheoraDecodeThread(void *args)
 						audioDataBufferSize = dataSize * 2;
 					}
 
-					short* p = audioDataBuffer;
+					uint16_t* p = audioDataBuffer;
 
 					for (int i = 0; i < samples; ++i)
 					{
@@ -615,7 +615,7 @@ unsigned int __stdcall TheoraDecodeThread(void *args)
 						}
 					}
 
-					audioSize = samples * audio->mVorbis.mInfo.channels * sizeof(short);
+					audioSize = samples * audio->mVorbis.mInfo.channels * sizeof(uint16_t);
 	/*
 					while (!(AudioStream_GetNumFreeBuffers(&fmvAudioStream)))
 						WaitForSingleObject(callbackEvent, INFINITE);
@@ -642,7 +642,7 @@ unsigned int __stdcall TheoraDecodeThread(void *args)
 						//OutputDebugString(buf);
 					}
 	#endif
-					RingBuffer_WriteData((byte*)&audioDataBuffer[0], audioSize);
+					RingBuffer_WriteData((uint8_t*)&audioDataBuffer[0], audioSize);
 
 	//					sprintf(buf, "send %d bytes to ring buffer\n", audioSize);
 	//					OutputDebugString(buf);
@@ -762,7 +762,7 @@ int OpenTheoraVideo(const char *fileName, int playMode = PLAYONCE)
 		}
 
 		// init some temp audio data storage
-		audioData = new byte[fmvAudioStream->bufferSize];
+		audioData = new uint8_t[fmvAudioStream->bufferSize];
 		RingBuffer_Init(fmvAudioStream->bufferSize * fmvAudioStream->bufferCount);
 	}
 
@@ -992,7 +992,7 @@ extern void PlayFMV(const char *filenamePtr)
 	FmvClose();
 }
 
-int NextFMVFrame2(byte *frameBuffer, int pitch)
+int NextFMVFrame2(uint8_t *frameBuffer, int pitch)
 {
 	if (fmvPlaying == false)
 		return 0;
@@ -1015,7 +1015,7 @@ int NextFMVFrame2(byte *frameBuffer, int pitch)
 	oggYuv.uv_pitch = buffer[1].stride;
 
 	OggPlayRGBChannels oggRgb;
-	oggRgb.ptro = static_cast<unsigned char*>(frameBuffer);
+	oggRgb.ptro = static_cast<uint8_t*>(frameBuffer);
 	oggRgb.rgb_height = frameHeight;
 	oggRgb.rgb_width = frameWidth;
 	oggRgb.rgb_pitch = pitch;
@@ -1057,7 +1057,7 @@ int NextFMVFrame()
 	oggYuv.uv_pitch = buffer[1].stride;
 
 	OggPlayRGBChannels oggRgb;
-	oggRgb.ptro = static_cast<unsigned char*>(textureLock.pBits);
+	oggRgb.ptro = static_cast<uint8_t*>(textureLock.pBits);
 	oggRgb.rgb_height = frameHeight;
 	oggRgb.rgb_width = frameWidth;
 	oggRgb.rgb_pitch = textureLock.Pitch;
@@ -1440,7 +1440,7 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 void StartMenuMusic()
 {
 	// we need to load IntroSound.ogg here using vorbisPlayer
-	menuMusic = Vorbis_LoadFile("D:\\FMVs\\IntroSound.ogg");
+	menuMusic = Vorbis_LoadFile("IntroSound.ogg");
 }
 
 void PlayMenuMusic()
@@ -1495,7 +1495,7 @@ extern void GetFMVInformation(int *messageNumberPtr, int *frameNumberPtr)
 	*frameNumberPtr = 0;
 }
 
-void FindLightingValuesFromTriggeredFMV(byte *bufferPtr, FMVTEXTURE *ftPtr)
+void FindLightingValuesFromTriggeredFMV(uint8_t *bufferPtr, FMVTEXTURE *ftPtr)
 {
 	unsigned int totalRed=0;
 	unsigned int totalBlue=0;
@@ -1553,7 +1553,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 		while(--i);
 		ftPtr->StaticImageDrawn = 1;
 	}
-	FindLightingValuesFromTriggeredFMV((byte*)ftPtr->RGBBuffer, ftPtr);
+	FindLightingValuesFromTriggeredFMV((uint8_t*)ftPtr->RGBBuffer, ftPtr);
 	return 1;
 }
 
@@ -1601,7 +1601,7 @@ int GetVolumeOfNearestVideoScreen(void)
 						rightEarDirection.vx = Global_VDB_Ptr->VDB_Mat.mat11;
 						rightEarDirection.vy = 0;
 						rightEarDirection.vz = Global_VDB_Ptr->VDB_Mat.mat31;
-						disp.vy=0;
+						disp.vy = 0;
 						Normalise(&disp);
 						Normalise(&rightEarDirection);
 

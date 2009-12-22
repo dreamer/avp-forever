@@ -1151,6 +1151,8 @@ void Net_FindAvPSessions()
 //	OutputDebugString("Net_FindAvPSessions called\n");
 	NumberOfSessionsFound = 0;
 
+	return;
+
 	static bool busy = false;
 	static int timer = 0;
 	static HANDLE threadHandle;

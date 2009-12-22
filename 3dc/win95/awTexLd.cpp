@@ -130,7 +130,7 @@ namespace AwTl
 	static
 	struct DriverDesc
 	{
-		DriverDesc() : validB(false)/*, ddP(NULL)*/ {}
+		DriverDesc() : validB(false) {}
 
 		bool validB : 1;
 		bool needSquareB : 1;
@@ -142,8 +142,6 @@ namespace AwTl
 		unsigned maxHeight;
 
 		DWORD memFlag;
-
-//		void * ddP; // BJD
 	}
 		driverDesc;
 
@@ -277,13 +275,10 @@ namespace AwTl
 	struct LoadInfo
 	{
 		AvPTexture * textureP;
-//		AvPTexture * dst_textureP;
 
 		unsigned surface_width;
 		unsigned surface_height;
-//		PtrUnion surface_dataP;
 		LONG surface_pitch;
-//		DWORD dwCapsCaps;
 
 		unsigned * widthP;
 		unsigned * heightP;
@@ -297,11 +292,7 @@ namespace AwTl
 		bool skipB; // used to indicate that a surface/texture was not lost and .`. does not need restoring
 
 		LoadInfo()
-//			: surfaceP(NULL)
-//			, surface_lockedB(false)
-//			, dst_surfaceP(NULL)
 			: textureP(NULL)
-//			, dst_textureP(NULL)
 			, skipB(false)
 		{
 		}
@@ -543,8 +534,8 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 		y = m_nHeight-1;
 	}
 
-	for (int i = 0, rowcount = m_nHeight; rowcount; --rowcount, i++) {
-	
+	for (int i = 0, rowcount = m_nHeight; rowcount; --rowcount, i++)
+	{	
 		PtrUnion src_rowP = GetRowPtr(y);
 		db_assert1(src_rowP.voidP);
 				
@@ -559,7 +550,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 					// convert and copy the section of the row to the direct draw surface
 //					ConvertRow(pLoadInfo->surface_dataP,pLoadInfo->surface_width,src_rowP,pLoadInfo->left,pLoadInfo->width,paletteP db_code1(DB_COMMA m_nPaletteSize));
 					PtrUnion my_data = &buffer[y*m_nWidth*4];
-							
+
 					ConvertRow(my_data, m_nWidth, src_rowP, 0, m_nWidth, paletteP db_code1(DB_COMMA m_nPaletteSize));					
 				}
 			}
