@@ -15,6 +15,8 @@ HANDLE avp_FindFirstFile(LPCTSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData);
 DWORD avp_GetFileAttributes(LPCTSTR lpFileName);
 void avp_GetCommandLineArgs(char *args, int size);
 char *GetSaveFolderPath();
+void avp_MessageBox(const char* message, int type);
+void avp_exit(int code);
 
 #ifdef __cplusplus
 };

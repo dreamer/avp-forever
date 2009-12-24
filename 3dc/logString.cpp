@@ -121,16 +121,7 @@ void LogDebugValue(int value)
 	stream << "\n value was: " << value;
 	OutputDebugString(stream.str().c_str());
 }
-/*
-void LogMessageBox(const std::string &errorString)
-{
-#ifdef _WIN32
 
-	MessageBox(hWndMain, errorString.c_str(), "AvP Error", MB_OK+MB_SYSTEMMODAL);
-
-#endif
-}
-*/
 std::string LogInteger(int value)
 {
 	// returns a string containing value

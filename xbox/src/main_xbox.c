@@ -283,6 +283,7 @@ void _cdecl main()
 
 	if(strstr(command_line,"-server"))
 	{
+/*
 		extern int DirectPlay_InitLobbiedGame();
 		//game has been launched by mplayer , we best humour it
 		LobbiedGame=LobbiedGame_Server;
@@ -291,9 +292,11 @@ void _cdecl main()
 			//exit(0x6364);
 			OutputDebugString("\n line 312 main_xbox.c");
 		}
+*/
 	}
 	else if(strstr(command_line,"-client"))
 	{
+/*
 		extern int DirectPlay_InitLobbiedGame();
 		//ditto
 		LobbiedGame=LobbiedGame_Client;
@@ -302,6 +305,7 @@ void _cdecl main()
 			//exit(0x6364);
 			OutputDebugString("\n line 323 main_xbox.c");
 		}
+*/
 	}
 	else if (strstr(command_line, "-debug"))
 	{
@@ -367,7 +371,7 @@ void _cdecl main()
 
 	InitialiseRenderer();
 
-	if(!InitialiseDirect3DImmediateMode())
+	if (!InitialiseDirect3D())
 	{
 		ReleaseDirect3D();
 	}

@@ -1388,7 +1388,8 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 	// properly cleared this time...
 	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-	if(!texoffset) texoffset = currentTextureId;
+	if (!texoffset) 
+		texoffset = currentTextureId;
 
 	RecipW = (1.0f/65536.0f)/(float) ImageHeaderArray[texoffset].ImageWidth;
 	RecipH = (1.0f/65536.0f)/(float) ImageHeaderArray[texoffset].ImageHeight;
@@ -7226,145 +7227,90 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 	}
 }
 
-#define NUMBER_OF_CABLE_SEGMENTS 25
-//int CableTheta[NUMBER_OF_CABLE_SEGMENTS];
-//int CablePhi[NUMBER_OF_CABLE_SEGMENTS];
-
-//int CableThetaVelocity[NUMBER_OF_CABLE_SEGMENTS];
-//int CablePhiVelocity[NUMBER_OF_CABLE_SEGMENTS];
-
-//VECTORCH CableForce[NUMBER_OF_CABLE_SEGMENTS];
-//VECTORCH CableDirection[NUMBER_OF_CABLE_SEGMENTS];
-//VECTORCH CableThetaDirection[NUMBER_OF_CABLE_SEGMENTS];
-//VECTORCH CablePhiDirection[NUMBER_OF_CABLE_SEGMENTS];
-
-extern void MakeMatrixFromDirection(VECTORCH *directionPtr, MATRIXCH *matrixPtr);
-
 /* D3D_DrawCable - draws predator grappling hook */
 void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
-{	/* TODO - not disabling zwrites. probably need to do this but double check (be handy if we didn't have to) */
+{	
+	/* TODO - not disabling zwrites. probably need to do this but double check (be handy if we didn't have to) */
 
 	currentWaterTexture = NO_TEXTURE;
-#if 1 // bjd
-	{
-/*
-	// Turn OFF texturing if it is on...
-	if (CurrTextureHandle != NULL)
-	{
-		d3d.lpD3DDevice->SetTexture(0,NULL);
-		CurrTextureHandle = NULL;
-	}
 
-	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_GLOWING);
-
-	if (NumVertices)
-	{
-//	   WriteEndCodeToExecuteBuffer();
-  	   UnlockExecuteBufferAndPrepareForUse();
-	   ExecuteBuffer();
-  	   LockExecuteBuffer();
-	}
-
-	//OP_STATE_RENDER(1, ExecBufInstPtr);
-	//STATE_DATA(D3DRENDERSTATE_ZWRITEENABLE, FALSE, ExecBufInstPtr);
-
-	if (D3DZWriteEnable != FALSE) {
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
-		D3DZWriteEnable = FALSE;
-	}
-*/
-	}
 	MeshXScale = 4096/16;
 	MeshZScale = 4096/16;
 
 	for (int field=0; field<3; field++)
 	{
-	int i=0;
-	int x;
-	for (x=(0+field*15); x<(16+field*15); x++)
-	{
-		int z;
-		for(z=0; z<16; z++)
+		int i=0;
+		int x;
+		for (x=(0+field*15); x<(16+field*15); x++)
 		{
-			VECTORCH *point = &MeshVertex[i];
+			int z;
+			for(z=0; z<16; z++)
 			{
-				int innerRadius = 20;
-				VECTORCH radius;
-				int theta = ((4096*z)/15)&4095;
-				int rOffset = GetSin((x*64+theta/32-CloakingPhase)&4095);
-				rOffset = MUL_FIXED(rOffset,rOffset)/512;
-
-				radius.vx = MUL_FIXED(innerRadius+rOffset/8,GetSin(theta));
-				radius.vy = MUL_FIXED(innerRadius+rOffset/8,GetCos(theta));
-				radius.vz = 0;
-
-				RotateVector(&radius,orientationPtr);
-
-				point->vx = centrePtr[x].vx+radius.vx;
-				point->vy = centrePtr[x].vy+radius.vy;
-				point->vz = centrePtr[x].vz+radius.vz;
-
-				MeshVertexColour[i] = RGBALIGHT_MAKE(0,rOffset,255,128);
-
-			}
-
-			TranslatePointIntoViewspace(point);
-
-			/* is particle within normal view frustrum ? */
-			if(AvP.PlayerType==I_Alien)	/* wide frustrum */
-			{
-				if(( (-point->vx <= point->vz*2)
-		   			&&(point->vx <= point->vz*2)
-					&&(-point->vy <= point->vz*2)
-					&&(point->vy <= point->vz*2) ))
+				VECTORCH *point = &MeshVertex[i];
 				{
-					MeshVertexOutcode[i]=1;
+					int innerRadius = 20;
+					VECTORCH radius;
+					int theta = ((4096*z)/15)&4095;
+					int rOffset = GetSin((x*64+theta/32-CloakingPhase)&4095);
+					rOffset = MUL_FIXED(rOffset,rOffset)/512;
+
+					radius.vx = MUL_FIXED(innerRadius+rOffset/8,GetSin(theta));
+					radius.vy = MUL_FIXED(innerRadius+rOffset/8,GetCos(theta));
+					radius.vz = 0;
+
+					RotateVector(&radius,orientationPtr);
+
+					point->vx = centrePtr[x].vx+radius.vx;
+					point->vy = centrePtr[x].vy+radius.vy;
+					point->vz = centrePtr[x].vz+radius.vz;
+
+					MeshVertexColour[i] = RGBALIGHT_MAKE(0,rOffset,255,128);
+				}
+
+				TranslatePointIntoViewspace(point);
+
+				/* is particle within normal view frustrum ? */
+				if(AvP.PlayerType==I_Alien)	/* wide frustrum */
+				{
+					if(( (-point->vx <= point->vz*2)
+		   				&&(point->vx <= point->vz*2)
+						&&(-point->vy <= point->vz*2)
+						&&(point->vy <= point->vz*2) ))
+					{
+						MeshVertexOutcode[i]=1;
+					}
+					else
+					{
+						MeshVertexOutcode[i]=0;
+					}
 				}
 				else
 				{
-					MeshVertexOutcode[i]=0;
+					if(( (-point->vx <= point->vz)
+		   				&&(point->vx <= point->vz)
+						&&(-point->vy <= point->vz)
+						&&(point->vy <= point->vz) ))
+					{
+						MeshVertexOutcode[i]=1;
+					}
+					else
+					{
+						MeshVertexOutcode[i]=0;
+					}
 				}
+				i++;
 			}
-			else
-			{
-				if(( (-point->vx <= point->vz)
-		   			&&(point->vx <= point->vz)
-					&&(-point->vy <= point->vz)
-					&&(point->vy <= point->vz) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-
-			i++;
+		}
+   		if ((MeshVertexOutcode[0]&&MeshVertexOutcode[15]&&MeshVertexOutcode[240]&&MeshVertexOutcode[255]))
+		{
+			D3D_DrawMoltenMetalMesh_Unclipped();
+		   //	D3D_DrawWaterMesh_Unclipped();
+		}
+		else
+		{
+			D3D_DrawMoltenMetalMesh_Clipped();
 		}
 	}
-	//textprint("\n");
-   	if ((MeshVertexOutcode[0]&&MeshVertexOutcode[15]&&MeshVertexOutcode[240]&&MeshVertexOutcode[255]))
-	{
-		D3D_DrawMoltenMetalMesh_Unclipped();
-	   //	D3D_DrawWaterMesh_Unclipped();
-	}
-	else
-//	else if (MeshVertexOutcode[0]||MeshVertexOutcode[15]||MeshVertexOutcode[240]||MeshVertexOutcode[255])
-	{
-		D3D_DrawMoltenMetalMesh_Clipped();
-  	   //	D3D_DrawWaterMesh_Clipped();
-	}
-	}
-/*
-	//OP_STATE_RENDER(1, ExecBufInstPtr);
-	//STATE_DATA(D3DRENDERSTATE_ZWRITEENABLE, TRUE, ExecBufInstPtr);
-	if (D3DZWriteEnable != TRUE) {
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-		D3DZWriteEnable = TRUE;
-	}
-*/
-#endif
 }
 
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
@@ -8311,6 +8257,7 @@ void DrawMenuTextGlow2(int topLeftX, int topLeftY, int size, int alpha)
 	// do the text alignment justification
 	topLeftX -= textureWidth;
 
+	// set our 'rect'
 	int left = topLeftX;
 	int right = topLeftX + textureWidth;
 	int top = topLeftY;
@@ -8320,7 +8267,7 @@ void DrawMenuTextGlow2(int topLeftX, int topLeftY, int size, int alpha)
 	X = left - (float)(640) / 2;
 	Y = -top + (float)(480) / 2;
 
-	D3DXMatrixScaling (&matScaling, (float)(right - left), (float)(bottom - top), 1.0f);
+	D3DXMatrixScaling (&matScaling, (float)(right - left) / 2, (float)(bottom - top) / 2, 1.0f);
 
     D3DXMatrixTranslation (&matTranslation, X, Y, 0.0f);
     matTransform = matScaling * matTranslation;
@@ -8368,6 +8315,8 @@ void DrawMenuTextGlow2(int topLeftX, int topLeftY, int size, int alpha)
 	{
 		OutputDebugString("DrawPrimitiveUP failed\n");
 	}
+
+	return;
 
 	left = right;
 
@@ -8679,7 +8628,6 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 
 void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha) 
 {
-
 	CheckVertexBuffer(4, AVPMENUGFX_SMALL_FONT, TRANSLUCENCY_GLOWING);
 
 	SetFilteringMode(FILTERING_BILINEAR_OFF);
@@ -8939,14 +8887,7 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 	mainVertex[vb].tv = (float)((texV) * RecipH);
 
 	vb++;
-/*
-	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_GLOWING);
 
-	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
-	if(FAILED(LastError)) {
-		OutputDebugString(" draw menu quad failed ");
-	}
-*/
 	OUTPUT_TRIANGLE(0,1,2, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
 

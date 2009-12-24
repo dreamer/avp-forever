@@ -4586,10 +4586,8 @@ void CheckForCredits(void)
 	{
 		char message[100];
 		sprintf(message,"Unable to access credits.txt\n");
-#ifdef WIN32
-		MessageBox(NULL,message,"AvP Error",MB_OK+MB_SYSTEMMODAL);
-#endif
-		exit(0x111);
+		avp_MessageBox(message, MB_OK+MB_SYSTEMMODAL);
+		avp_exit(0x111);
 		return;
 	}
 	else

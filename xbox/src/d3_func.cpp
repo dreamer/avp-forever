@@ -15,14 +15,15 @@ extern "C" {
 
 #include "3dc.h"
 #include "awTexLd.h"
-//#include "dxlog.h"
 #include "module.h"
 #include "d3_func.h"
 #include "kshape.h"
+#include "networking.h"
 
 extern "C++" {
 	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 	#include "logString.h"
+	#include "configFile.h"
 
 	#include <xtl.h>
 	#include <xgraphics.h>
@@ -47,12 +48,9 @@ static HRESULT LastError;
 
 D3DINFO d3d;
 
-//int StartDriver;
-//int StartFormat;
-
 /* TGA header structure */
 #pragma pack(1)
-struct TGA_HEADER 
+struct TGA_HEADER
 {
 	char		idlength;
 	char		colourmaptype;
@@ -71,22 +69,21 @@ struct TGA_HEADER
 
 TGA_HEADER TgaHeader = {0};
 
-void ColourFillBackBuffer(int FillColour) 
+void ColourFillBackBuffer(int FillColour)
 {
-	D3DCOLOR colour = FillColour;
-	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET, colour, 1.0f, 0 );
+	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET, FillColour, 1.0f, 0 );
 }
 
-char* GetDeviceName() 
+char* GetDeviceName()
 {
-	if (d3d.Driver[d3d.CurrentDriver].AdapterInfo.Description != NULL) 
+	if (d3d.Driver[d3d.CurrentDriver].AdapterInfo.Description != NULL)
 	{
 		return d3d.Driver[d3d.CurrentDriver].AdapterInfo.Description;
 	}
 	else return "Default Adapter";
 }
-
-bool IsPowerOf2(int i) 
+/*
+bool IsPowerOf2(int i)
 {
 	if ((i & -i) == i) {
 		return true;
@@ -99,8 +96,9 @@ int NearestSuperiorPow2(int i)
 	int x = ((i - 1) & i);
 	return x ? NearestSuperiorPow2(x) : i << 1;
 }
+*/
 
-LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AvPTexture *tex) 
+LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AvPTexture *tex)
 {
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
 	LPDIRECT3DTEXTURE8 swizTexture = NULL;
@@ -124,21 +122,21 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AvPTexture *tex)
 	int padHeight = 512;
 
 	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, NULL, colourFormat, D3DPOOL_MANAGED, &destTexture);
-	if(FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
 
 	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
-	if(FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		destTexture->Release();
 		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
 
-	if (ScreenDescriptorBlock.SDB_Depth == 16) 
+	if (ScreenDescriptorBlock.SDB_Depth == 16)
 	{
 		unsigned short *destPtr;
 		unsigned char *srcPtr;
@@ -156,35 +154,37 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AvPTexture *tex)
 			{
 				// >> 3 for red and blue in a 16 bit texture, 2 for green
 				*destPtr = RGB16(pad_colour, pad_colour, pad_colour);
-				destPtr+=1;
+				destPtr += 1;
 			}
 		}
 
 		int charWidth = 30;
 		int charHeight = 33;
 
-		for (int i = 0; i < 224; i++) 
+		for (int i = 0; i < 224; i++)
 		{
 			int row = i / 15; // get row
 			int column = i % 15; // get column from remainder value
 
-			int offset = ((column * charWidth) *2) + ((row * charHeight) * lock.Pitch);
+			int offset = ((column * charWidth) * 2) + ((row * charHeight) * lock.Pitch);
 
 			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits + offset)));
 
-			for (int y = 0; y < charHeight; y++) 
+			for (int y = 0; y < charHeight; y++)
 			{
 				destPtr = ((unsigned short *)(((unsigned char *)lock.pBits + offset) + (y*lock.Pitch)));
 
-				for (int x = 0; x < charWidth; x++) {
+				for (int x = 0; x < charWidth; x++)
+				{
 					*destPtr = RGB16(srcPtr[0], srcPtr[1], srcPtr[2]);
+
 					destPtr+=1;
 					srcPtr+=4;
 				}
 			}
 		}
 	}
-	if (ScreenDescriptorBlock.SDB_Depth == 32) 
+	if (ScreenDescriptorBlock.SDB_Depth == 32)
 	{
 		unsigned char *destPtr, *srcPtr;
 
@@ -201,29 +201,28 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AvPTexture *tex)
 			{
 				// >> 3 for red and blue in a 16 bit texture, 2 for green
 				*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(pad_colour, pad_colour, pad_colour, pad_colour);
-//					*destPtr = pad_colour;
 
-				destPtr+=4;
+				destPtr += 4;
 			}
 		}
 
 		int charWidth = 30;
 		int charHeight = 33;
 
-		for (int i = 0; i < 224; i++) 
+		for (int i = 0; i < 224; i++)
 		{
 			int row = i / 15; // get row
 			int column = i % 15; // get column from remainder value
 
-			int offset = ((column * charWidth) *4) + ((row * charHeight) * lock.Pitch);
+			int offset = ((column * charWidth) * 4) + ((row * charHeight) * lock.Pitch);
 
 			destPtr = (((unsigned char *)lock.pBits + offset));
 
-			for (int y = 0; y < charHeight; y++) 
+			for (int y = 0; y < charHeight; y++)
 			{
 				destPtr = (((unsigned char *)lock.pBits + offset) + (y*lock.Pitch));
 
-				for (int x = 0; x < charWidth; x++) 
+				for (int x = 0; x < charWidth; x++)
 				{
 //					*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], srcPtr[3]);
 
@@ -237,8 +236,8 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AvPTexture *tex)
 						*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], 0xff);
 					}
 
-					destPtr+=4;
-					srcPtr+=4;
+					destPtr += 4;
+					srcPtr += 4;
 				}
 			}
 		}
@@ -251,12 +250,17 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AvPTexture *tex)
 	XGSwizzleRect(lock.pBits, lock.Pitch, NULL, lock2.pBits, padWidth, padHeight, NULL, 4);
 
 	LastError = destTexture->UnlockRect(0);
-	if(FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
-	
+
 	LastError = swizTexture->UnlockRect(0);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+
 	destTexture->Release();
 
 /*
@@ -285,7 +289,7 @@ LPDIRECT3DTEXTURE8 CreateFmvTexture(int *width, int *height, int usage, int pool
 }
 
 // use this to make textures from non power of two images
-LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *realHeight) 
+LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *realHeight)
 {
 	int original_width = tex->width;
 	int original_height = tex->height;
@@ -326,20 +330,19 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *
 
 	D3DPOOL poolType = D3DPOOL_MANAGED;
 
-	/* create and fill tga header */
-	TGA_HEADER *TgaHeader = new TGA_HEADER;
-	TgaHeader->idlength = 0;
-	TgaHeader->x_origin = tex->width;
-	TgaHeader->y_origin = tex->height;
-	TgaHeader->colourmapdepth	= 0;
-	TgaHeader->colourmaplength	= 0;
-	TgaHeader->colourmaporigin	= 0;
-	TgaHeader->colourmaptype	= 0;
-	TgaHeader->datatypecode		= 2;		// RGB
-	TgaHeader->bitsperpixel		= 32;
-	TgaHeader->imagedescriptor	= 0x20;		// set origin to top left
-	TgaHeader->height = tex->height;
-	TgaHeader->width = tex->width;
+	/* fill tga header */
+	TgaHeader.idlength = 0;
+	TgaHeader.x_origin = tex->width;
+	TgaHeader.y_origin = tex->height;
+	TgaHeader.colourmapdepth  = 0;
+	TgaHeader.colourmaplength = 0;
+	TgaHeader.colourmaporigin = 0;
+	TgaHeader.colourmaptype   = 0;
+	TgaHeader.datatypecode    = 2;			// RGB
+	TgaHeader.bitsperpixel    = 32;
+	TgaHeader.imagedescriptor = 0x20;		// set origin to top left
+	TgaHeader.height = tex->height;
+	TgaHeader.width  = tex->width;
 
 	/* size of raw image data */
 	int imageSize = tex->height * tex->width * 4;
@@ -348,7 +351,7 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *
 	byte *buffer = new byte[sizeof(TGA_HEADER) + imageSize];
 
 	/* copy header and image data to buffer */
-	memcpy(buffer, TgaHeader, sizeof(TGA_HEADER));
+	memcpy(buffer, &TgaHeader, sizeof(TGA_HEADER));
 
 	byte *imageData = buffer + sizeof(TGA_HEADER);
 
@@ -380,18 +383,16 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *
 		&destTexture)))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		delete TgaHeader;
 		delete[] buffer;
 		return NULL;
 	}
 
-	delete TgaHeader;
 	delete[] buffer;
 
 	return destTexture;
 }
 
-LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, int usage, D3DPOOL poolType) 
+LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, int usage, D3DPOOL poolType)
 {
 	/* create our texture for returning */
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
@@ -474,7 +475,7 @@ void CreateScreenShotImage()
 	LPDIRECT3DSURFACE8 frontBuffer = NULL;
 
 	std::ostringstream fileName;
-	
+
 	/* get current system time */
 	GetSystemTime(&systemTime);
 
@@ -484,7 +485,7 @@ void CreateScreenShotImage()
 		bool prefixSeconds = false;
 		if(systemTime.wYear < 10) prefixSeconds = true;
 
-		fileName << "AvP_" << systemTime.wDay << "-" << systemTime.wMonth << "-" << systemTime.wYear << "_" << systemTime.wHour << "-" << systemTime.wMinute << "-"; 
+		fileName << "AvP_" << systemTime.wDay << "-" << systemTime.wMonth << "-" << systemTime.wYear << "_" << systemTime.wHour << "-" << systemTime.wMinute << "-";
 
 		if (systemTime.wSecond < 10)
 		{
@@ -536,12 +537,12 @@ LPDIRECT3DTEXTURE8 CheckAndLoadUserTexture(const char *fileName, int *width, int
 	fullFileName += ".png";
 
 	/* try find a png file at given path */
-	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice, 
-		fullFileName.c_str(), 
+	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice,
+		fullFileName.c_str(),
 		D3DX_DEFAULT,	// width
 		D3DX_DEFAULT,	// height
 		1,	// mip levels
-		0,				// usage	
+		0,				// usage
 		D3DFMT_UNKNOWN,	// format
 		D3DPOOL_MANAGED,
 		D3DX_FILTER_NONE,
@@ -550,7 +551,7 @@ LPDIRECT3DTEXTURE8 CheckAndLoadUserTexture(const char *fileName, int *width, int
 		&imageInfo,
 		NULL,
 		&tempTexture
-		);	
+		);
 
 	if(FAILED(LastError))
 	{
@@ -562,7 +563,7 @@ LPDIRECT3DTEXTURE8 CheckAndLoadUserTexture(const char *fileName, int *width, int
 
 	OutputDebugString("\n made texture: ");
 	OutputDebugString(fullFileName.c_str());
-	
+
 	*width = imageInfo.Width;
 	*height = imageInfo.Height;
 	return tempTexture;
@@ -580,7 +581,7 @@ BOOL ReleaseVolatileResources()
 const int MAX_VERTEXES = 4096 * 2;
 //const int MAX_INDICES = 9216 * 2;
 
-BOOL CreateVolatileResources() 
+BOOL CreateVolatileResources()
 {
 /*
 	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DTLVERTEX),D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_TLVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer);
@@ -615,7 +616,7 @@ BOOL CreateVolatileResources()
 
 /*
 	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_TLVERTEX);
-	if(FAILED(LastError)) 
+	if(FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
@@ -628,14 +629,18 @@ BOOL CreateVolatileResources()
 
 BOOL ChangeGameResolution(int width, int height, int colourDepth)
 {
-//	ReleaseVolatileResources();
 
 	d3d.d3dpp.BackBufferHeight = height;
 	d3d.d3dpp.BackBufferWidth = width;
 
 	LastError = d3d.lpD3DDevice->Reset(&d3d.d3dpp);
 
-	if (!FAILED(LastError)) 
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return FALSE;
+	}
+	else
 	{
 		ScreenDescriptorBlock.SDB_Width     = width;
 		ScreenDescriptorBlock.SDB_Height    = height;
@@ -649,22 +654,16 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 		ScreenDescriptorBlock.SDB_ClipRight = width;
 		ScreenDescriptorBlock.SDB_ClipUp    = 0;
 		ScreenDescriptorBlock.SDB_ClipDown  = height;
+	}
 
-//		CreateVolatileResources();
-	}
-	else 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-	return true;
+	return TRUE;
 }
 
-BOOL InitialiseDirect3DImmediateMode()
+BOOL InitialiseDirect3D()
 {
 	// clear log file first, then write header text
 	ClearLog();
-	LogString("Starting to initialise Direct3D");
+	Con_PrintMessage("Starting to initialise Direct3D");
 
 	int width = 640;
 	int height = 480;
@@ -677,16 +676,16 @@ BOOL InitialiseDirect3DImmediateMode()
 
 	//  Set up Direct3D interface object
 	d3d.lpD3D = Direct3DCreate8(D3D_SDK_VERSION);
-
 	if (!d3d.lpD3D)
 	{
 		LogErrorString("Could not create Direct3D object \n");
 		return FALSE;
 	}
-	
-//	D3DDISPLAYMODE displayMode;
-	unsigned int modeCount = d3d.lpD3D->GetAdapterModeCount(defaultDevice);
+
+
 /*
+	unsigned int modeCount = d3d.lpD3D->GetAdapterModeCount(defaultDevice);
+
 	char buf[100];
 	for(int i = 0; i < modeCount; i++)
 	{
@@ -695,57 +694,106 @@ BOOL InitialiseDirect3DImmediateMode()
 		OutputDebugString(buf);
 	}
 */
-	DWORD standard = XGetVideoStandard();
-	if (standard == XC_VIDEO_STANDARD_PAL_I)
+	DWORD videoStandard = XGetVideoStandard();
+
+	switch (videoStandard)
 	{
-		OutputDebugString("\n using PAL");
+		case XC_VIDEO_STANDARD_NTSC_M:
+		{
+			Con_PrintMessage("Using video standard XC_VIDEO_STANDARD_NTSC_M");
+			break;
+		}
+		case XC_VIDEO_STANDARD_NTSC_J:
+		{
+			Con_PrintMessage("Using video standard XC_VIDEO_STANDARD_NTSC_J");
+			break;
+		}
+		case XC_VIDEO_STANDARD_PAL_I:
+		{
+			Con_PrintMessage("Using video standard XC_VIDEO_STANDARD_PAL_I");
+			break;
+		}
+		default:
+		{
+			Con_PrintError("Unknown video standard!");
+			break;
+		}
 	}
-	DWORD flags = XGetVideoFlags();
+
+	DWORD videoFlags = XGetVideoFlags();
+
+	if (videoFlags & XC_VIDEO_FLAGS_WIDESCREEN)
+	{
+		Con_PrintMessage("Using video setting XC_VIDEO_FLAGS_WIDESCREEN");
+	}
+	else if (videoFlags & XC_VIDEO_FLAGS_HDTV_720p)
+	{
+		Con_PrintMessage("Using video setting XC_VIDEO_FLAGS_HDTV_720p");
+	}
+	else if (videoFlags & XC_VIDEO_FLAGS_HDTV_1080i)
+	{
+		Con_PrintMessage("Using video setting XC_VIDEO_FLAGS_HDTV_1080i");
+	}
+	else if (videoFlags & XC_VIDEO_FLAGS_HDTV_480p)
+	{
+		Con_PrintMessage("Using video setting XC_VIDEO_FLAGS_HDTV_480p");
+	}
+	else if (videoFlags & XC_VIDEO_FLAGS_LETTERBOX)
+	{
+		Con_PrintMessage("Using video setting XC_VIDEO_FLAGS_LETTERBOX");
+	}
+	else if (videoFlags & XC_VIDEO_FLAGS_PAL_60Hz)
+	{
+		Con_PrintMessage("Using video setting XC_VIDEO_FLAGS_PAL_60Hz");
+	}
+	else
+	{
+		Con_PrintError("Unknown video setting!");
+	}
+
+	DWORD AVPack = XGetAVPack();
+
+	switch (AVPack)
+	{
+		case XC_AV_PACK_SCART:
+		{
+			Con_PrintMessage("Using av pack XC_AV_PACK_SCART");
+			break;
+		}
+		case XC_AV_PACK_HDTV:
+		{
+			Con_PrintMessage("Using av pack XC_AV_PACK_HDTV");
+			break;
+		}
+		case XC_AV_PACK_RFU:
+		{
+			Con_PrintMessage("Using av pack XC_AV_PACK_RFU");
+			break;
+		}
+		case XC_AV_PACK_SVIDEO:
+		{
+			Con_PrintMessage("Using av pack XC_AV_PACK_SVIDEO");
+			break;
+		}
+		case XC_AV_PACK_STANDARD:
+		{
+			Con_PrintMessage("Using av pack XC_AV_PACK_STANDARD");
+			break;
+		}
+		case XC_AV_PACK_VGA: // this was in the header file but not the docs..
+		{
+			Con_PrintMessage("Using av pack XC_AV_PACK_VGA");
+			break;
+		}
+	}
 
 //	D3DDISPLAYMODE d3ddm;
+//	LastError = d3d.lpD3D->GetAdapterDisplayMode(defaultDevice, &d3ddm);
 
-	D3DPRESENT_PARAMETERS d3dpp;
-	ZeroMemory(&d3dpp, sizeof(d3dpp));
-/*
-	d3dpp.BackBufferWidth        = width;
-    d3dpp.BackBufferHeight       = height;
-    d3dpp.BackBufferFormat       = D3DFMT_X8R8G8B8;
-    d3dpp.BackBufferCount        = 1;
-    d3dpp.EnableAutoDepthStencil = TRUE;
-    d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8;
-	d3dpp.SwapEffect             = D3DSWAPEFFECT_DISCARD;
-	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-*/
-	/* from SDL_x */
-	if (XGetVideoStandard() == XC_VIDEO_STANDARD_PAL_I)	// PAL user
-	{
-		//get supported video flags
-
-		DWORD videoFlags = XGetVideoFlags();
-
-		if (videoFlags & XC_VIDEO_FLAGS_PAL_60Hz)		// PAL 60 user
-		{
-			d3dpp.FullScreen_RefreshRateInHz = 60;
-			OutputDebugString("using refresh of 60\n");
-		}
-		else
-		{
-			d3dpp.FullScreen_RefreshRateInHz = 50;
-			OutputDebugString("using refresh of 50\n");
-		}
-	}
-
-	if (XGetVideoFlags() == XC_VIDEO_FLAGS_PAL_60Hz)
-	{
-		OutputDebugString("XC_VIDEO_FLAGS_PAL_60Hz set\n");
-	}
-
-	D3DDISPLAYMODE d3ddm;
-	LastError = d3d.lpD3D->GetAdapterDisplayMode(defaultDevice, &d3ddm);
-
+	unsigned int modeCount = d3d.lpD3D->GetAdapterModeCount(defaultDevice);
 	D3DDISPLAYMODE tempMode;
 
-	/* create our list of supported resolutions for D3DFMT_LIN_X8R8G8B8 format */
+	// create our list of supported resolutions for D3DFMT_LIN_X8R8G8B8 format
 	for (int i = 0; i < modeCount; i++)
 	{
 		LastError = d3d.lpD3D->EnumAdapterModes( defaultDevice, i, &tempMode );
@@ -755,14 +803,11 @@ BOOL InitialiseDirect3DImmediateMode()
 			continue;
 		}
 
-		/* we only want D3DFMT_LIN_X8R8G8B8 format */
+		// we only want D3DFMT_LIN_X8R8G8B8 format
 		if (tempMode.Format == D3DFMT_LIN_X8R8G8B8)
 		{
-			if (tempMode.Height < 480 || tempMode.Width < 640) 
-				continue;
-
 			int j = 0;
-			/* check if the more already exists */
+			// check if the mode already exists
 			for (; j < d3d.Driver[thisDevice].NumModes; j++)
 			{
 				if ((d3d.Driver[defaultDevice].DisplayMode[j].Width == tempMode.Width) &&
@@ -770,8 +815,8 @@ BOOL InitialiseDirect3DImmediateMode()
 					(d3d.Driver[defaultDevice].DisplayMode[j].Format == tempMode.Format))
 					break;
 			}
-			
-			/* we looped all the way through but didn't break early due to already existing item */
+
+			// we looped all the way through but didn't break early due to already existing item
 			if (j == d3d.Driver[thisDevice].NumModes)
 			{
 				d3d.Driver[defaultDevice].DisplayMode[d3d.Driver[thisDevice].NumModes].Width       = tempMode.Width;
@@ -783,6 +828,9 @@ BOOL InitialiseDirect3DImmediateMode()
 		}
 	}
 
+	D3DPRESENT_PARAMETERS d3dpp;
+	ZeroMemory(&d3dpp, sizeof(d3dpp));
+
 	d3dpp.BackBufferWidth = width;
 	d3dpp.BackBufferHeight = height;
 	d3dpp.BackBufferFormat = D3DFMT_LIN_X8R8G8B8;
@@ -793,10 +841,6 @@ BOOL InitialiseDirect3DImmediateMode()
 //	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 //	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE_OR_IMMEDIATE;
-//	d3dpp.Flags = D3DPRESENTFLAG_10X11PIXELASPECTRATIO;
-//	UsingStencil = true;
-
-//#endif
 
 	LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, NULL,
 			D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
@@ -809,27 +853,12 @@ BOOL InitialiseDirect3DImmediateMode()
 	}
 
 	// Log resolution set
-	LogString("\t Resolution set: " + LogInteger(d3dpp.BackBufferWidth) + " x " + LogInteger(d3dpp.BackBufferHeight));
-/*
-	ZeroMemory(&d3d.lpD3DViewport, sizeof(d3d.lpD3DViewport));
-	d3d.lpD3DViewport.X = 0;
-	d3d.lpD3DViewport.Y = 0;
-	d3d.lpD3DViewport.Width = width;
-	d3d.lpD3DViewport.Height = height;
-	d3d.lpD3DViewport.MinZ = 0.0f;
-	d3d.lpD3DViewport.MaxZ = 1.0f;
+	Con_PrintMessage("\t Resolution set: " + LogInteger(d3dpp.BackBufferWidth) + " x " + LogInteger(d3dpp.BackBufferHeight));
 
-	LastError = d3d.lpD3DDevice->SetViewport(&d3d.lpD3DViewport);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
-*/
 	ScreenDescriptorBlock.SDB_Width     = width;
 	ScreenDescriptorBlock.SDB_Height    = height;
 	ScreenDescriptorBlock.SDB_Depth		= depth;
 	ScreenDescriptorBlock.SDB_Size      = width*height;
-//	ScreenDescriptorBlock.SDB_DiagonalWidth = sqrt((float)width*width+height*height)+0.5;
 	ScreenDescriptorBlock.SDB_CentreX   = width/2;
 	ScreenDescriptorBlock.SDB_CentreY   = height/2;
 	ScreenDescriptorBlock.SDB_ProjX     = width/2;
@@ -839,9 +868,10 @@ BOOL InitialiseDirect3DImmediateMode()
 	ScreenDescriptorBlock.SDB_ClipUp    = 0;
 	ScreenDescriptorBlock.SDB_ClipDown  = height;
 
-	/* use an offset for hud items to account for tv safe zones. just use width for now. 5%?  */
-	ScreenDescriptorBlock.SDB_SafeZoneWidthOffset = (width / 100) * 5;
-	ScreenDescriptorBlock.SDB_SafeZoneHeightOffset = (height / 100) * 5;
+	// use an offset for hud items to account for tv safe zones. just use width for now. 5%?
+	int safeOffset = Config_GetInt("[VideoMode]", "SafeZoneOffset", 5);
+	ScreenDescriptorBlock.SDB_SafeZoneWidthOffset = (width / 100) * safeOffset;
+	ScreenDescriptorBlock.SDB_SafeZoneHeightOffset = (height / 100) * safeOffset;
 
 	// save a copy of the presentation parameters for use
 	// later (device reset, resolution/depth change)
@@ -850,6 +880,9 @@ BOOL InitialiseDirect3DImmediateMode()
 	// create vertex and index buffers
 	CreateVolatileResources();
 
+	Con_Init();
+	Net_Initialise();
+
 	LogString("Initialised Direct3D succesfully");
 	return TRUE;
 }
@@ -857,7 +890,7 @@ BOOL InitialiseDirect3DImmediateMode()
 void FlipBuffers()
 {
 	LastError = d3d.lpD3DDevice->Present(NULL, NULL, NULL, NULL);
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
@@ -876,13 +909,16 @@ void ReleaseDirect3D()
 	SAFE_RELEASE(d3d.lpD3D);
 	LogString("Releasing Direct3D object...");
 
-	/* release Direct Input stuff */
+	// release Direct Input stuff
 	ReleaseDirectKeyboard();
 	ReleaseDirectMouse();
 	ReleaseDirectInput();
+
+	// find a better place to put this
+	Config_Save();
 }
 
-void ReleaseAvPTexture(AvPTexture* texture)
+void ReleaseAvPTexture(AvPTexture *texture)
 {
 	if (texture->buffer)
 	{
@@ -902,7 +938,7 @@ void ReleaseD3DTexture(D3DTEXTURE *d3dTexture)
 
 void FlushD3DZBuffer()
 {
-	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
+	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
 }
 
 // For extern "C"

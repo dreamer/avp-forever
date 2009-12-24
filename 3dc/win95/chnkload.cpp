@@ -469,13 +469,11 @@ RIFFHANDLE load_rif (const char * fname)
 		#if OUTPUT_LOG
 		CL_LogFile.lprintf("FAILED TO LOAD RIF: %s\n",fname);
 		#endif
-//	   	ReleaseDirect3D();
 		char message[200];
 		sprintf(message,"Error loading %s",fname);
-#ifdef WIN32
-		MessageBox(NULL,message,"AvP",MB_OK+MB_SYSTEMMODAL);
-		exit(0x111);
-#endif
+		avp_MessageBox(message, MB_OK+MB_SYSTEMMODAL);
+		avp_exit(0x111);
+
 		return INVALID_RIFFHANDLE;
 	}
 	#if OUTPUT_LOG
@@ -504,14 +502,11 @@ RIFFHANDLE load_rif_non_env (const char * fname)
 		#if OUTPUT_LOG
 		CL_LogFile.lprintf("FAILED TO LOAD RIF: %s\n",fname);
 		#endif
-		
-//	   	ReleaseDirect3D();
 		char message[200];
 		sprintf(message,"Error loading %s",fname);
-#ifdef WIN32
-		MessageBox(NULL,message,"AvP",MB_OK+MB_SYSTEMMODAL);
-		exit(0x111);
-#endif
+		avp_MessageBox(message, MB_OK+MB_SYSTEMMODAL);
+		avp_exit(0x111);
+
 		return INVALID_RIFFHANDLE;
 	}
 	#if OUTPUT_LOG

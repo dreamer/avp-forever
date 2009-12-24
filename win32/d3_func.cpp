@@ -282,15 +282,14 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, NULL, colourFormat, D3DPOOL_MANAGED, &destTexture, NULL);
 	if (FAILED(LastError)) 
 	{
-//		LogError("Unable to create tall font texture", LastError);
 		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
 
 	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
-	if (FAILED(LastError)) {
+	if (FAILED(LastError)) 
+	{
 		destTexture->Release();
-//		LogError("Unable to lock tall font texture for writing", LastError);
 		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
@@ -313,12 +312,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 			{
 				// >> 3 for red and blue in a 16 bit texture, 2 for green
 				*destPtr = RGB16(padColour, padColour, padColour);
-/*
-				*destPtr =	((pad_colour>>3)<<11) | // R
-						((pad_colour>>2)<<5 ) | // G
-						((pad_colour>>3)); // B
-*/
-				destPtr+=1;
+				destPtr += 1;
 			}
 		}
 
@@ -341,13 +335,9 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 				for (int x = 0; x < charWidth; x++)
 				{
 					*destPtr = RGB16(srcPtr[0], srcPtr[1], srcPtr[2]);
-/*
-					*destPtr =	((srcPtr[0]>>3)<<11) | // R
-						((srcPtr[1]>>2)<<5 ) | // G
-						((srcPtr[2]>>3)); // B
-*/
-					destPtr+=1;
-					srcPtr+=4;
+
+					destPtr += 1;
+					srcPtr += 4;
 				}
 			}
 		}
@@ -369,9 +359,8 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 			{
 				// >> 3 for red and blue in a 16 bit texture, 2 for green
 				*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(padColour, padColour, padColour, padColour);
-//					*destPtr = pad_colour;
 
-				destPtr+=4;
+				destPtr += 4;
 			}
 		}
 
@@ -405,8 +394,8 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 						*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], 0xff);
 					}
 
-					destPtr+=4;
-					srcPtr+=4;
+					destPtr += 4;
+					srcPtr += 4;
 				}
 			}
 		}
@@ -415,7 +404,6 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 	LastError = destTexture->UnlockRect(0);
 	if (FAILED(LastError)) 
 	{
-//		LogError("Unable to unlock tall font texture", LastError);
 		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
@@ -437,7 +425,6 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture(int *width, int *height, int usage, int pool
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		//LogErrorString("CreateFmvTexture failed\n");
 		return NULL;
 	}
 
@@ -488,20 +475,19 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *
 
 	D3DPOOL poolType = D3DPOOL_MANAGED;
 
-	/* create and fill tga header */
-	TGA_HEADER *TgaHeader = new TGA_HEADER;
-	TgaHeader->idlength = 0;
-	TgaHeader->x_origin = tex->width;
-	TgaHeader->y_origin = tex->height;
-	TgaHeader->colourmapdepth	= 0;
-	TgaHeader->colourmaplength	= 0;
-	TgaHeader->colourmaporigin	= 0;
-	TgaHeader->colourmaptype	= 0;
-	TgaHeader->datatypecode		= 2;		// RGB
-	TgaHeader->bitsperpixel		= 32;
-	TgaHeader->imagedescriptor	= 0x20;		// set origin to top left
-	TgaHeader->height = tex->height;
-	TgaHeader->width = tex->width;
+	/* fill tga header */
+	TgaHeader.idlength = 0;
+	TgaHeader.x_origin = tex->width;
+	TgaHeader.y_origin = tex->height;
+	TgaHeader.colourmapdepth  = 0;
+	TgaHeader.colourmaplength = 0;
+	TgaHeader.colourmaporigin = 0;
+	TgaHeader.colourmaptype   = 0;
+	TgaHeader.datatypecode    = 2;			// RGB
+	TgaHeader.bitsperpixel    = 32;
+	TgaHeader.imagedescriptor = 0x20;		// set origin to top left
+	TgaHeader.height = tex->height;
+	TgaHeader.width  = tex->width;
 
 	/* size of raw image data */
 	int imageSize = tex->height * tex->width * 4;
@@ -510,7 +496,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *
 	byte *buffer = new byte[sizeof(TGA_HEADER) + imageSize];
 
 	/* copy header and image data to buffer */
-	memcpy(buffer, TgaHeader, sizeof(TGA_HEADER));
+	memcpy(buffer, &TgaHeader, sizeof(TGA_HEADER));
 
 	byte *imageData = buffer + sizeof(TGA_HEADER);
 
@@ -542,7 +528,6 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *
 		&destTexture)))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		delete TgaHeader;
 		delete[] buffer;
 		return NULL;
 
@@ -570,7 +555,6 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *
 
 	imageNum++;
 #endif
-	delete TgaHeader;
 	delete[] buffer;
 
 	return destTexture;
@@ -728,7 +712,7 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 
 	LastError = d3d.lpD3DDevice->Reset(&d3d.d3dpp);
 
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		//LogErrorString("D3D device reset failed\n");
@@ -758,9 +742,9 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 /* need to redo all the enumeration code here, as it's not very good.. */
 BOOL InitialiseDirect3D()
 {
-	/* clear log file first, then write header text */
+	// clear log file first, then write header text
 	ClearLog();
-	LogString("Starting to initialise Direct3D");
+	Con_PrintMessage("Starting to initialise Direct3D");
 
 	int width = 640;
 	int height = 480;
@@ -1079,7 +1063,7 @@ BOOL InitialiseDirect3D()
 	}
 
 	// Log format set
-	switch(d3dpp.AutoDepthStencilFormat)
+	switch (d3dpp.AutoDepthStencilFormat)
 	{
 		case D3DFMT_D24S8:
 			LogString("\t Depth Format set: 24bit and 8bit stencil - D3DFMT_D24S8");
@@ -1182,7 +1166,6 @@ void FlipBuffers()
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		//LogErrorString("D3D Present failed\n");
 	}
 }
 

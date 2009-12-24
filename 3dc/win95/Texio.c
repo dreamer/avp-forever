@@ -1,5 +1,3 @@
-#if 1
-
 
 #include "3dc.h"
 
@@ -15,26 +13,6 @@
 #define UseLocalAssert 0
 #include "ourasert.h"
 
-#else
-
-#include <stdio.h>
-#include <conio.h>
-#include <sys\stat.h>
-
-#include "system.h"
-#include "equates.h"
-#include "platform.h"
-#include "shape.h"
-#include "prototyp.h"
-#include "inline.h"
-
-#ifdef RIFF_SYSTEM
-#include "chnktexi.h"
-#endif
-
-
-#endif
-
 #include "awTexLd.h"
 #include "alt_tab.h"
 
@@ -44,17 +22,6 @@
 */
 
 #define DefinedTextureType TextureTypePPM
-
-
-#if 0
-#if debug
-int tripa = 100;
-int tripb = 100;
-int tripc = 0;
-#define trip_up tripa = tripb / tripc;
-#endif
-#endif
-
 
 /*
 
@@ -75,7 +42,7 @@ int tripc = 0;
 
 */
 
-	TEXTURE *ImageBuffer;							/* Memory Resident Image Data */
+//	TEXTURE *ImageBuffer;							/* Memory Resident Image Data */
 
 	#ifdef MaxImageGroups
 	#if MaxImageGroups < 2 /* optimize if this multiple groups are not required */
@@ -134,7 +101,6 @@ int tripc = 0;
 
 
 void InitialiseImageHeaders(void)
-
 {
 	#ifdef MaxImageGroups
 
@@ -151,7 +117,6 @@ void InitialiseImageHeaders(void)
 
 
 int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
-
 {
 
 	SHAPEHEADER **shlistptr;
@@ -261,11 +226,8 @@ int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
 						if(j) NewImage = FALSE;
 
 						else TxIndex++;
-
 					}
-
 				}
-
 
 				/* If this is a new image, add it */
 
@@ -282,9 +244,7 @@ int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
 						else
 						  im = LoadImageIntoD3DImmediateSurface
 						     (&fname[0], new_ihptr, DefinedTextureType);
-
 					}
-
 				}
 
 				#endif
@@ -304,7 +264,6 @@ int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
 				MakeShapeTexturesGlobal(shptr, TxIndex, LTxIndex);
 
 				LTxIndex++;			/* Next Local Texture */
-
 			}
 
 			/* Is this shape a sprite that requires resizing? */
@@ -313,17 +272,10 @@ int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
 				(shptr->shapeflags & ShapeFlag_SpriteResizing)) {
 
 				SpriteResizing(shptr);
-
 			}
-
 		}
-
 	}
-
-
 	return TRUE;
-
-
 }
 
 
@@ -483,11 +435,8 @@ int InitialiseTextures(void)
 						if(j) NewImage = FALSE;
 
 						else TxIndex++;
-
 					}
-
 				}
-
 
 				/* If this is a new image, add it */
 
@@ -516,13 +465,9 @@ int InitialiseTextures(void)
 							textprint("Load OK, NumImages = %d\n", NumImages);
 							WaitForReturn();
 							#endif
-
 						}
-
 					}
-
 				}
-
 
 				/* test */
 
@@ -623,9 +568,7 @@ int CUBE_item3[]={
 */
 
 void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
-
 {
-
 	int **ShapeItemArrayPtr;
 	POLYHEADER *ShapeItemPtr;
 
@@ -692,15 +635,10 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 
 						ShapeItemPtr->PolyColour &= ClrTxIndex;
 						ShapeItemPtr->PolyColour |= TxIndex;
-
 					}
-
 				}
-
 			}
-
 		}
-
 	}
 
 	#if SupportBSP
@@ -796,28 +734,18 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 								#if InitTexPrnt
 								textprint("Local %d, Global %d\n", LTxIndex, TxIndex);
 								#endif
-
 							}
-
 						}
-
 					}
-
 				}
-
 				ShapeBSPPtr++;
-
 			}
-
 		}
-
 	}
 
 	#endif	/* SupportBSP */
 
 	/* Otherwise the shape has no item data */
-
-
 }
 
 
@@ -894,15 +822,10 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr,
 							if(txi == LTxIndex) {
 
 								*txf_imageptr = TxIndex;
-
 							}
-
 						}
-
 						txf_imageptr++;
-
 					}
-
 				}
 
 				else {
@@ -915,21 +838,13 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr,
 						if(txi == LTxIndex) {
 
 							txaf->txf_image = TxIndex;
-
 						}
-
 					}
-
 				}
-
 				txaf++;
-
 			}
-
 		}
-
 	}
-
 }
 
 
@@ -1014,8 +929,8 @@ void SpriteResizing(SHAPEHEADER *sptr)
 	iptr = polypts;
 	mypolystart = &pheader->Poly1stPt;
 
-	for(i = 4; i!=0; i--) {
-
+	for(i = 4; i!=0; i--) 
+	{
 		iptr[ix] = ((VECTORCH*)ShapePoints)[*mypolystart].vx;
 		iptr[iy] = ((VECTORCH*)ShapePoints)[*mypolystart].vy;
 		iptr[iz] = ((VECTORCH*)ShapePoints)[*mypolystart].vz;
@@ -1027,7 +942,6 @@ void SpriteResizing(SHAPEHEADER *sptr)
 
 		iptr += vsize;
 		mypolystart++;
-
 	}
 
 
@@ -1251,17 +1165,12 @@ void SpriteResizing(SHAPEHEADER *sptr)
 						iptr[1] += tv.vy;
 
 						iptr += 2;
-
 					}
-
 
 					#if sr_print
 					textprint(" (image done)\n");
 					#endif
-
-
 				}
-
 
 				#if sr_print
 				textprint("\n");
@@ -1271,18 +1180,13 @@ void SpriteResizing(SHAPEHEADER *sptr)
 				/* Next Texture Animation Frame */
 
 				txaf++;
-
 			}
-
 		}
-
 	}
-
 
 	#if sr_print
 	textprint("\nResize done\n\n");
 	#endif
-
 }
 
 
@@ -1318,7 +1222,8 @@ void FindImageExtents(IMAGEHEADER *ihdr, int numuvs, int *uvdata, IMAGEEXTENTS *
 
 	uvptr = uvdata;
 
-	for(i = numuvs; i!=0; i--) {
+	for(i = numuvs; i!=0; i--) 
+	{
 
 		if(uvptr[0] < e_curr->u_low) e_curr->u_low = uvptr[0];
 		if(uvptr[1] < e_curr->v_low) e_curr->v_low = uvptr[1];
@@ -1327,7 +1232,6 @@ void FindImageExtents(IMAGEHEADER *ihdr, int numuvs, int *uvdata, IMAGEEXTENTS *
 		if(uvptr[1] > e_curr->v_high) e_curr->v_high = uvptr[1];
 
 		uvptr += 2;
-
 	}
 
 
@@ -1395,7 +1299,6 @@ void FindImageExtents(IMAGEHEADER *ihdr, int numuvs, int *uvdata, IMAGEEXTENTS *
 
 				/* TEST */
 				/*trip_up;*/
-
 			}
 
 			break;

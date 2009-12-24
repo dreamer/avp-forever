@@ -13,6 +13,10 @@ static char saveFolder[MAX_PATH] = {0};
 
 extern "C" {
 
+#ifdef WIN32
+	extern HWND	hWndMain;
+#endif
+
 char *GetSaveFolderPath()
 {
 	// check if we've got the path previously and use it again
@@ -173,6 +177,20 @@ void avp_GetCommandLineArgs(char *args, int size)
 	assert (args);
 	std::string commandLine = Config_GetString("[Misc]", "CommandLine");
 	strcpy(args, commandLine.c_str());
+}
+
+void avp_MessageBox(const char* message, int type)
+{
+#ifdef WIN32
+	MessageBox(hWndMain, message, "AvP Error", type);
+#endif
+}
+
+void avp_exit(int code)
+{
+#ifdef WIN32
+	exit(code);
+#endif
 }
 
 };

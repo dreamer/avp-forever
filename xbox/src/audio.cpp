@@ -1,6 +1,7 @@
 /* directsound implementation for the xbox */
 
 #include "logString.h"
+#include "console.h"
 #include "audioStreaming.h"
 
 extern "C" {
@@ -31,22 +32,24 @@ static int SoundActivated = 0;
 #define SOUND_USE_3DHW		0x00000008
 
 #pragma pack(1)
-typedef struct waveformat_tag {
-    WORD    wFormatTag;        /* format type */
-    WORD    nChannels;         /* number of channels (i.e. mono, stereo, etc.) */
-    DWORD   nSamplesPerSec;    /* sample rate */
-    DWORD   nAvgBytesPerSec;   /* for buffer estimation */
-    WORD    nBlockAlign;       /* block size of data */
-} WAVEFORMAT, *PWAVEFORMAT, NEAR *NPWAVEFORMAT, FAR *LPWAVEFORMAT;
 
-/* flags for wFormatTag field of WAVEFORMAT */
+struct WAVEFORMAT 
+{
+    uint16_t    wFormatTag;
+    uint16_t    nChannels;
+    uint32_t	nSamplesPerSec;
+    uint32_t	nAvgBytesPerSec;
+    uint16_t    nBlockAlign;
+};
+
 #define WAVE_FORMAT_PCM     1
 
-/* specific waveform format structure for PCM data */
-typedef struct pcmwaveformat_tag {
-    WAVEFORMAT  wf;
-    WORD        wBitsPerSample;
-} PCMWAVEFORMAT, *PPCMWAVEFORMAT, NEAR *NPPCMWAVEFORMAT, FAR *LPPCMWAVEFORMAT;
+struct PCMWAVEFORMAT 
+{
+    WAVEFORMAT	wf;
+    uint16_t    wBitsPerSample;
+};
+
 #pragma pack()
 
 struct SoundConfigTag
@@ -320,15 +323,17 @@ int PlatStartSoundSys()
 {	
 	SoundActivated = 0;
 
+	Con_PrintMessage("Starting to initialise audio system");
+
 	/* Set the globals. */
 	SoundConfig.flags			= SOUND_DEFAULT;
 	SoundConfig.reverb_changed	= TRUE;
 	SoundConfig.reverb_mix		= 0.0F;
 	SoundConfig.env_index		= 1000;
 
-	/* Create the ds object */
-	LastError = DirectSoundCreate(NULL,&DSObject,NULL);
-	if(FAILED(LastError)) 
+	// Create the DirectSound object
+	LastError = DirectSoundCreate(NULL, &DSObject, NULL);
+	if (FAILED(LastError)) 
 	{	
 		PlatEndSoundSys();
 		return 0;
@@ -348,9 +353,9 @@ int PlatStartSoundSys()
 	sprintf(buf, "free2d: %d, free3d: %d\n", DSCaps.dwFree2DBuffers, DSCaps.dwFree3DBuffers);
 	OutputDebugString(buf);
 
-	if(DSCaps.dwFree2DBuffers)
+	if (DSCaps.dwFree2DBuffers)
 	{
-		SoundMaxHW = min(DSCaps.dwFree2DBuffers - 1,SOUND_MAXACTIVE); // Always leave one free. 
+		SoundMaxHW = min(DSCaps.dwFree2DBuffers - 1, SOUND_MAXACTIVE); // Always leave one free. 
 	}
 	else
 	{
@@ -381,12 +386,15 @@ int PlatStartSoundSys()
 
 	// ok?
 	SoundActivated = 1;
+
+	Con_PrintMessage("Initialised audio system successfully");
+
 	return 1;
 }
 
 int PlatPlaySound(int activeIndex)
 {
-	if(!SoundActivated)
+	if (!SoundActivated)
 		return 0;
 
 	SOUNDINDEX gameIndex;

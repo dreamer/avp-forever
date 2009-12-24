@@ -3,6 +3,7 @@
 /* Patrick 5/6/97 -------------------------------------------------------------
   AvP platform specific sound management source
   ----------------------------------------------------------------------------*/
+#include "console.h"
 #include "logString.h"
 #include "audioStreaming.h"
 #include <d3dx9math.h>
@@ -399,7 +400,7 @@ extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 int PlatStartSoundSys()
 {
 	db_log4("PlatStartSound called");
-	LogString("Starting to initialise XAudio2");
+	Con_PrintMessage("Starting to initialise XAudio2");
 
 	LOG_RC();
 
@@ -494,7 +495,7 @@ int PlatStartSoundSys()
 	XA2DSPSettings.pMatrixCoefficients = matrix;
 	XA2DSPSettings.pDelayTimes = NULL;
 
-	LogString("Initialised XAudio2 successfully");
+	Con_PrintMessage("Initialised XAudio2 successfully");
 
 	db_log4("PlatStartSound finished");
 	LOG_RC();
