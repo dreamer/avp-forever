@@ -23,6 +23,9 @@ extern "C" {
 #include "vmanpset.h"
 #include "networking.h"
 
+#include "avp_menugfx.hpp"
+extern AVPMENUGFX AvPMenuGfxStorage[];
+
 extern "C++"
 {
 	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
@@ -30,7 +33,8 @@ extern "C++"
 	#include "configFile.h"
 	#include <d3dx9.h>
 	#include "console.h"
-
+	extern void Font_Init();
+	extern void Font_Release();
 	D3DXMATRIX matOrtho;
 	D3DXMATRIX matIdentity;
 }
@@ -48,6 +52,27 @@ int	VideoModeColourDepth;
 int	NumAvailableVideoModes;
 static HRESULT LastError;
 D3DINFO d3d;
+
+// byte order macros for A8R8G8B8 d3d texture
+enum 
+{
+	BO_BLUE,
+	BO_GREEN,
+	BO_RED,
+	BO_ALPHA
+};
+
+void WriteMenuTextures()
+{
+	char *filename = new char[strlen(GetSaveFolderPath()) + MAX_PATH];
+
+	for (int i = 0; i < 54; i++)
+	{
+		sprintf(filename, "%s%d.png", GetSaveFolderPath(), i);
+
+		D3DXSaveTextureToFileA(filename, D3DXIFF_PNG, AvPMenuGfxStorage[i].menuTexture, NULL);
+	}
+}
 
 /* TGA header structure */
 #pragma pack(1)
@@ -104,42 +129,14 @@ const D3DFORMAT DepthFormats[] =
 	D3DFMT_D16
 };
 
-/* set some defaults */
+// set some defaults
 D3DFORMAT SelectedDepthFormat = D3DFMT_D24S8;
 D3DFORMAT SelectedAdapterFormat = D3DFMT_X8R8G8B8;
-D3DFORMAT SelectedDisplayFormat = D3DFMT_X8R8G8B8;
+D3DFORMAT SelectedDisplayFormat = D3DFMT_X8R8G8B8; // back buffer format
 
 bool usingStencil = false;
-/*
-void LoadConsoleFont()
-{
-	D3DXIMAGE_INFO imageInfo;
 
-	// try find a png file at given path
-	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice, 
-		"aa_font.png", 
-		D3DX_DEFAULT,			// width
-		D3DX_DEFAULT,			// height
-		1,						// mip levels
-		0,						// usage	
-		D3DFMT_UNKNOWN,			// format
-		D3DPOOL_MANAGED,
-		D3DX_FILTER_NONE,
-		D3DX_FILTER_NONE,
-		0,
-		&imageInfo,
-		NULL,
-		&consoleText
-		);	
-
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		//LogError("Couldn't load console font!\n");
-		consoleText = NULL;
-	}
-}
-*/
+#if 0
 LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int *height)
 {
 	LPDIRECT3DTEXTURE9	tempTexture = NULL;
@@ -181,8 +178,9 @@ LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int
 	*height = imageInfo.Height;
 	return tempTexture;
 }
+#endif
 
-/* called from Scrshot.cpp */
+// called from Scrshot.cpp
 void CreateScreenShotImage()
 {
 	SYSTEMTIME systemTime;
@@ -190,7 +188,7 @@ void CreateScreenShotImage()
 
 	std::ostringstream fileName;
 	
-	/* get current system time */
+	// get current system time
 	GetSystemTime(&systemTime);
 
 	//	creates filename from date and time, adding a prefix '0' to seconds value
@@ -213,7 +211,7 @@ void CreateScreenShotImage()
 		fileName << ".jpg";
 	}
 
-	/* create surface to copy screen to */
+	// create surface to copy screen to
 	if (FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(ScreenDescriptorBlock.SDB_Width, ScreenDescriptorBlock.SDB_Height, D3DFMT_A8R8G8B8, D3DPOOL_SCRATCH, &frontBuffer, NULL)))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -221,7 +219,7 @@ void CreateScreenShotImage()
 		return;
 	}
 
-	/* copy front buffer screen to surface */
+	// copy front buffer screen to surface
 	if (FAILED(d3d.lpD3DDevice->GetFrontBufferData(0, frontBuffer))) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -230,14 +228,14 @@ void CreateScreenShotImage()
 		return;
 	}
 
-	/* save surface to image file */
+	// save surface to image file
 	if (FAILED(D3DXSaveSurfaceToFile(fileName.str().c_str(), D3DXIFF_JPG, frontBuffer, NULL, NULL))) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("Save Surface to file failed!!!\n");
 	}
 
-	/* release surface */
+	// release surface
 	SAFE_RELEASE(frontBuffer);
 }
 
@@ -257,9 +255,9 @@ int NearestSuperiorPow2(int i)
 }
 */
 
-LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex) 
+D3DTEXTURE CreateD3DTallFontTexture(AVPTEXTURE *tex) 
 {
-	LPDIRECT3DTEXTURE9 destTexture = NULL;
+	D3DTEXTURE destTexture = NULL;
 	D3DLOCKED_RECT	   lock;
 
 	// default colour format
@@ -277,7 +275,6 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 
 	int padWidth = 512;
 	int padHeight = 512;
-	
 
 	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, NULL, colourFormat, D3DPOOL_MANAGED, &destTexture, NULL);
 	if (FAILED(LastError)) 
@@ -296,23 +293,24 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 
 	if (ScreenDescriptorBlock.SDB_Depth == 16) 
 	{
-		unsigned short *destPtr;
-		unsigned char *srcPtr;
+		uint16_t *destPtr;
+		uint8_t  *srcPtr;
 
-		srcPtr = (unsigned char *)tex->buffer;
+		srcPtr = (uint8_t*)tex->buffer;
 
-		D3DCOLOR padColour = D3DCOLOR_XRGB(0,0,0);
+		//D3DCOLOR padColour = D3DCOLOR_XRGB(0,0,0);
+		D3DCOLOR padColour = D3DCOLOR_ARGB(255, 255, 0, 255);
 
 		// lets pad the whole thing black first
 		for (int y = 0; y < padHeight; y++)
 		{
-			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch));
+			destPtr = ((uint16_t*)(((uint8_t*)lock.pBits) + y*lock.Pitch));
 
 			for (int x = 0; x < padWidth; x++)
 			{
 				// >> 3 for red and blue in a 16 bit texture, 2 for green
-				*destPtr = RGB16(padColour, padColour, padColour);
-				destPtr += 1;
+				*destPtr = static_cast<uint16_t> (RGB16(padColour, padColour, padColour));
+				destPtr += sizeof(uint16_t);
 			}
 		}
 
@@ -324,43 +322,44 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 			int row = i / 15; // get row
 			int column = i % 15; // get column from remainder value
 
-			int offset = ((column * charWidth) * 2) + ((row * charHeight) * lock.Pitch);
+			int offset = ((column * charWidth) * sizeof(uint16_t)) + ((row * charHeight) * lock.Pitch);
 
-			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits + offset)));
+			destPtr = ((uint16_t*)(((uint8_t*)lock.pBits + offset)));
 
 			for (int y = 0; y < charHeight; y++) 
 			{
-				destPtr = ((unsigned short *)(((unsigned char *)lock.pBits + offset) + (y*lock.Pitch)));
+				destPtr = ((uint16_t*)(((uint8_t*)lock.pBits + offset) + (y*lock.Pitch)));
 
 				for (int x = 0; x < charWidth; x++)
 				{
 					*destPtr = RGB16(srcPtr[0], srcPtr[1], srcPtr[2]);
 
-					destPtr += 1;
-					srcPtr += 4;
+					destPtr += sizeof(uint16_t);
+					srcPtr += sizeof(uint32_t); // our source is 32 bit, move over an entire 4 byte pixel
 				}
 			}
 		}
 	}
 	if (ScreenDescriptorBlock.SDB_Depth == 32) 
 	{
-		unsigned char *destPtr, *srcPtr;
+		uint8_t *destPtr, *srcPtr;
 
-		srcPtr = (unsigned char *)tex->buffer;
+		srcPtr = (uint8_t*)tex->buffer;
 
-		D3DCOLOR padColour = D3DCOLOR_XRGB(0,0,0);
+		//D3DCOLOR padColour = D3DCOLOR_XRGB(0,0,0);
+		D3DCOLOR padColour = D3DCOLOR_ARGB(255, 255, 0, 255);
 
 		// lets pad the whole thing black first
 		for (int y = 0; y < padHeight; y++)
 		{
-			destPtr = (((unsigned char *)lock.pBits) + y*lock.Pitch);
+			destPtr = (((uint8_t*)lock.pBits) + y*lock.Pitch);
 
 			for (int x = 0; x < padWidth; x++)
 			{
 				// >> 3 for red and blue in a 16 bit texture, 2 for green
 				*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(padColour, padColour, padColour, padColour);
 
-				destPtr += 4;
+				destPtr += sizeof(uint32_t); // move over an entire 4 byte pixel
 			}
 		}
 
@@ -372,13 +371,13 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 			int row = i / 15; // get row
 			int column = i % 15; // get column from remainder value
 
-			int offset = ((column * charWidth) * 4) + ((row * charHeight) * lock.Pitch);
+			int offset = ((column * charWidth) * sizeof(uint32_t)) + ((row * charHeight) * lock.Pitch);
 
-			destPtr = (((unsigned char *)lock.pBits + offset));
+			destPtr = (((uint8_t*)lock.pBits + offset));
 
 			for (int y = 0; y < charHeight; y++) 
 			{
-				destPtr = (((unsigned char *)lock.pBits + offset) + (y*lock.Pitch));
+				destPtr = (((uint8_t*)lock.pBits + offset) + (y*lock.Pitch));
 
 				for (int x = 0; x < charWidth; x++) 
 				{
@@ -394,8 +393,8 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 						*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], 0xff);
 					}
 
-					destPtr += 4;
-					srcPtr += 4;
+					destPtr += sizeof(uint32_t); // move over an entire 4 byte pixel
+					srcPtr += sizeof(uint32_t);
 				}
 			}
 		}
@@ -415,9 +414,9 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AvPTexture *tex)
 	return destTexture;
 }
 
-LPDIRECT3DTEXTURE9 CreateFmvTexture(int *width, int *height, int usage, int pool)
+D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool)
 {
-	LPDIRECT3DTEXTURE9 destTexture = NULL;
+	D3DTEXTURE destTexture = NULL;
 
 	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)width, (UINT*)height, NULL, usage, NULL, (D3DPOOL)pool);
 
@@ -433,15 +432,48 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture(int *width, int *height, int usage, int pool
 
 int imageNum = 0;
 
+
+// removes pure red colour from a texture. used to remove red outline grid on small font texture.
+// we remove the grid as it can sometimes bleed onto text when we use texture filtering.
+void DeRedTexture(D3DTEXTURE texture)
+{
+	D3DLOCKED_RECT	lock;
+
+	LastError = texture->LockRect(0, &lock, NULL, NULL );
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return;
+	}
+
+	uint8_t *destPtr = NULL;
+
+	for (int y = 0; y < 256; y++)
+	{
+		destPtr = (((uint8_t*)lock.pBits) + y*lock.Pitch);
+
+		for (int x = 0; x < 256; x++)
+		{
+			if ((destPtr[BO_RED] == 255) && (destPtr[BO_BLUE] == 0) && (destPtr[BO_GREEN] == 0))
+			{
+				destPtr[BO_RED] = 0;
+			}
+
+			destPtr += sizeof(uint32_t); // move over an entire 4 byte pixel
+		}
+	}
+}
+
 // use this to make textures from non power of two images
-LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *realHeight) 
+D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *realHeight) 
 {
 	int original_width = tex->width;
 	int original_height = tex->height;
 	int new_width = original_width;
 	int new_height = original_height;
 
-	D3DCOLOR pad_colour = D3DCOLOR_XRGB(255,0,255);
+//	D3DCOLOR pad_colour = D3DCOLOR_XRGB(255,0,255);
+	D3DCOLOR pad_colour = D3DCOLOR_ARGB(255, 255, 0, 255);
 
 /*
 	// check if passed value is already a power of 2
@@ -464,7 +496,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *
 	(*realHeight) = new_height;
 	(*realWidth) = new_width;
 
-	LPDIRECT3DTEXTURE9 destTexture = NULL;
+	D3DTEXTURE destTexture = NULL;
 
 	D3DXIMAGE_INFO image;
 	image.Depth = 32;
@@ -475,7 +507,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *
 
 	D3DPOOL poolType = D3DPOOL_MANAGED;
 
-	/* fill tga header */
+	// fill tga header
 	TgaHeader.idlength = 0;
 	TgaHeader.x_origin = tex->width;
 	TgaHeader.y_origin = tex->height;
@@ -489,18 +521,18 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *
 	TgaHeader.height = tex->height;
 	TgaHeader.width  = tex->width;
 
-	/* size of raw image data */
-	int imageSize = tex->height * tex->width * 4;
+	// size of raw image data
+	int imageSize = tex->height * tex->width * sizeof(uint32_t);
 
-	/* create new buffer for header and image data */
-	byte *buffer = new byte[sizeof(TGA_HEADER) + imageSize];
+	// create new buffer for header and image data
+	uint8_t *buffer = new uint8_t[sizeof(TGA_HEADER) + imageSize];
 
-	/* copy header and image data to buffer */
+	// copy header and image data to buffer
 	memcpy(buffer, &TgaHeader, sizeof(TGA_HEADER));
 
-	byte *imageData = buffer + sizeof(TGA_HEADER);
+	uint8_t *imageData = buffer + sizeof(TGA_HEADER);
 
-	/* loop, converting RGB to BGR for D3DX function */
+	// loop, converting RGB to BGR for D3DX function
 	for (int i = 0; i < imageSize; i+=4)
 	{
 
@@ -560,12 +592,11 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *
 	return destTexture;
 }
 
-LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, int usage, D3DPOOL poolType) 
+D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL poolType) 
 {
-	/* create our texture for returning */
-	LPDIRECT3DTEXTURE9 destTexture = NULL;
+	D3DTEXTURE destTexture = NULL;
 
-	/* fill tga header */
+	// fill tga header
 	TgaHeader.idlength = 0;
 	TgaHeader.x_origin = tex->width;
 	TgaHeader.y_origin = tex->height;
@@ -579,18 +610,18 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, int usa
 	TgaHeader.height = tex->height;
 	TgaHeader.width = tex->width;
 
-	/* size of raw image data */
-	int imageSize = tex->height * tex->width * 4;
+	// size of raw image data
+	int imageSize = tex->height * tex->width * sizeof(uint32_t);
 
-	/* create new buffer for header and image data */
-	byte *buffer = new byte[sizeof(TGA_HEADER) + imageSize];
+	// create new buffer for header and image data
+	uint8_t *buffer = new uint8_t[sizeof(TGA_HEADER) + imageSize];
 
-	/* copy header and image data to buffer */
+	// copy header and image data to buffer
 	memcpy(buffer, &TgaHeader, sizeof(TGA_HEADER));
 
-	byte *imageData = buffer + sizeof(TGA_HEADER);
+	uint8_t *imageData = buffer + sizeof(TGA_HEADER);
 
-	/* loop, converting RGB to BGR for D3DX function */
+	// loop, converting RGB to BGR for D3DX function
 	for (int i = 0; i < imageSize; i+=4)
 	{
 		// ARGB
@@ -643,7 +674,7 @@ extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 
 extern int mainMenu;
 
-/* size of vertex and index buffers */
+// size of vertex and index buffers
 const int MAX_VERTEXES = 4096;
 const int MAX_INDICES = 9216;
 
@@ -662,21 +693,19 @@ BOOL CreateVolatileResources()
 {
 	RecreateAllFMVTexturesAfterDeviceReset();
 
-	/* create dynamic vertex buffer */
+	// create dynamic vertex buffer
 	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DTLVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_TLVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		//LogErrorString("CreateVertexBuffer failed\n");
 		return FALSE;
 	}
 
-	/* create index buffer */
+	// create index buffer
 	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DIndexBuffer, NULL);
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		//LogErrorString("CreateIndexBuffer failed\n");
 		return FALSE;
 	}
 
@@ -684,7 +713,6 @@ BOOL CreateVolatileResources()
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		//LogErrorString("SetStreamSource failed\n");
 		return FALSE;
 	}
 
@@ -692,7 +720,6 @@ BOOL CreateVolatileResources()
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		//LogErrorString("SetFVF failed\n");
 		return FALSE;
 	}
 
@@ -703,6 +730,8 @@ BOOL CreateVolatileResources()
 
 BOOL ChangeGameResolution(int width, int height, int colourDepth)
 {
+	return TRUE;
+
 	ReleaseVolatileResources();
 
 	d3d.d3dpp.BackBufferWidth = width;
@@ -714,42 +743,75 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 
 	if (FAILED(LastError))
 	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		//LogErrorString("D3D device reset failed\n");
-		return FALSE;
-	}
-	else
-	{
-		ScreenDescriptorBlock.SDB_Width     = width;
-		ScreenDescriptorBlock.SDB_Height    = height;
-		ScreenDescriptorBlock.SDB_Depth		= colourDepth;
-		ScreenDescriptorBlock.SDB_Size      = width*height;
-		ScreenDescriptorBlock.SDB_CentreX   = width/2;
-		ScreenDescriptorBlock.SDB_CentreY   = height/2;
-		ScreenDescriptorBlock.SDB_ProjX     = width/2;
-		ScreenDescriptorBlock.SDB_ProjY     = height/2;
-		ScreenDescriptorBlock.SDB_ClipLeft  = 0;
-		ScreenDescriptorBlock.SDB_ClipRight = width;
-		ScreenDescriptorBlock.SDB_ClipUp    = 0;
-		ScreenDescriptorBlock.SDB_ClipDown  = height;
+		// this'll occur if the resolution width and height passed arent usable on this devices attatched monitor
+		if (LastError = D3DERR_INVALIDCALL)
+		{
+			// set some default, safe resolution?
+			width = 800;
+			height = 600;
 
-		CreateVolatileResources();
+			ChangeWindowsSize(width, height);
+
+			d3d.d3dpp.BackBufferWidth = width;
+			d3d.d3dpp.BackBufferHeight = height;
+
+			// try reset again, if it doesnt work, bail out
+			LastError = d3d.lpD3DDevice->Reset(&d3d.d3dpp);
+			if (FAILED(LastError))
+			{
+				LogDxError(LastError, __LINE__, __FILE__);
+				return FALSE;
+			}
+		}
+		else
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+			return FALSE;
+		}
 	}
+
+	d3d.D3DViewport.Width = width;
+	d3d.D3DViewport.Height = height;
+
+	LastError = d3d.lpD3DDevice->SetViewport(&d3d.D3DViewport);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+
+	ScreenDescriptorBlock.SDB_Width     = width;
+	ScreenDescriptorBlock.SDB_Height    = height;
+	ScreenDescriptorBlock.SDB_Depth		= colourDepth;
+	ScreenDescriptorBlock.SDB_Size      = width*height;
+	ScreenDescriptorBlock.SDB_CentreX   = width/2;
+	ScreenDescriptorBlock.SDB_CentreY   = height/2;
+
+	ScreenDescriptorBlock.SDB_ProjX     = width/2;
+	ScreenDescriptorBlock.SDB_ProjY     = height/2;
+
+	ScreenDescriptorBlock.SDB_ClipLeft  = 0;
+	ScreenDescriptorBlock.SDB_ClipRight = width;
+	ScreenDescriptorBlock.SDB_ClipUp    = 0;
+	ScreenDescriptorBlock.SDB_ClipDown  = height;
+
+	CreateVolatileResources();
 
 	return TRUE;
 }
 
-/* need to redo all the enumeration code here, as it's not very good.. */
+// need to redo all the enumeration code here, as it's not very good..
 BOOL InitialiseDirect3D()
 {
 	// clear log file first, then write header text
 	ClearLog();
-	Con_PrintMessage("Starting to initialise Direct3D");
+	Con_PrintMessage("Starting to initialise Direct3D9");
 
-	int width = 640;
-	int height = 480;
+//	int width = Config_GetInt("[VideoMode]", "Width", 800);
+//	int height = Config_GetInt("[VideoMode]", "Height", 600);
+	int width = 1920;
+	int height = 1080;
 	int depth = 32;
-	int defaultDevice = D3DADAPTER_DEFAULT;
+	int defaultDevice = 1;//D3DADAPTER_DEFAULT;
 	bool windowed = false;
 	bool triple_buffer = false;
 
@@ -759,18 +821,18 @@ BOOL InitialiseDirect3D()
 	//	Zero d3d structure
     ZeroMemory(&d3d, sizeof(D3DINFO));
 
-	/* Set up Direct3D interface object */
+	// Set up Direct3D interface object
 	d3d.lpD3D = Direct3DCreate9(D3D_SDK_VERSION);
 	if (!d3d.lpD3D)
 	{
-		LogErrorString("Could not create Direct3D object\n");
+		Con_PrintError("Could not create Direct3D9 object!");
 		return FALSE;
 	}
 
 	// Get the number of devices in the system
 	d3d.NumDrivers = d3d.lpD3D->GetAdapterCount();
 
-	LogString("\t Found " + LogInteger(d3d.NumDrivers) + " video adapter(s)");
+	Con_PrintMessage("\t Found " + LogInteger(d3d.NumDrivers) + " video adapter(s)");
 
 	// Get adapter information for all available devices
 	for (int i = 0; i < d3d.NumDrivers; i++)
@@ -779,12 +841,11 @@ BOOL InitialiseDirect3D()
 		if (FAILED(LastError)) 
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
-			//LogString("Could not get Adapter Identifier Information\n");
 			return FALSE;
 		}
 	}
 
-	LogString("\t Using device: " + std::string(d3d.Driver[defaultDevice].AdapterInfo.Description));
+	Con_PrintMessage("\t Using device: " + std::string(d3d.Driver[defaultDevice].AdapterInfo.Description));
 
 	/* taken from the DX SDK samples :) */
 
@@ -834,8 +895,7 @@ BOOL InitialiseDirect3D()
 					d3d.Driver[thisDevice].DisplayMode[d3d.Driver[thisDevice].NumModes].Height      = DisplayMode.Height;
 					d3d.Driver[thisDevice].DisplayMode[d3d.Driver[thisDevice].NumModes].Format      = DisplayMode.Format;
 					d3d.Driver[thisDevice].DisplayMode[d3d.Driver[thisDevice].NumModes].RefreshRate = 0;
-					
-					//d3d.NumModes++;
+
 					d3d.Driver[thisDevice].NumModes++;
 
 					int f = 0;
@@ -855,7 +915,7 @@ BOOL InitialiseDirect3D()
 		}
 	}
 
-	/* get the current display mode. sorta useless as we have to render the menus at 640x480 for now.. */
+	// get the current display mode. sorta useless as we have to render the menus at 640x480 for now..
 	D3DDISPLAYMODE d3ddm;
 	LastError = d3d.lpD3D->GetAdapterDisplayMode(defaultDevice, &d3ddm);
 	SelectedAdapterFormat = d3ddm.Format;
@@ -863,7 +923,6 @@ BOOL InitialiseDirect3D()
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		//LogErrorString("GetAdapterDisplayMode failed\n");
 		return FALSE;
 	}
 
@@ -889,8 +948,8 @@ BOOL InitialiseDirect3D()
 		d3dpp.BackBufferHeight = height;
 		// setting this to interval one will cap the framerate to monitor refresh
 		// the timer goes a bit mad if this isnt capped!
-//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 //		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 		ChangeWindowsSize(d3dpp.BackBufferWidth, d3dpp.BackBufferHeight);
 	}
@@ -901,30 +960,19 @@ BOOL InitialiseDirect3D()
 		d3dpp.BackBufferCount = 2;
 		d3dpp.SwapEffect = D3DSWAPEFFECT_FLIP;
 	}
-/*
-	if (depth == 16)
-	{
-		d3dpp.BackBufferFormat = D3DFMT_R5G6B5; // 16 bit
-	}
-	if (depth == 32) 
-	{
-		d3dpp.BackBufferFormat = D3DFMT_X8R8G8B8; // 32 bit
-	}
-	SelectedAdapterFormat  = d3dpp.BackBufferFormat;
-*/
-//	d3dpp.Flags = D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
+
 	d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
 
-	/* store the index of the driver we want to use */
+	// store the index of the driver we want to use
 	d3d.CurrentDriver = defaultDevice;
-
 
 	bool gotValidFormats = false;
 
 	for (int i = 0; i < (sizeof(DisplayFormats) / sizeof(DisplayFormats[0])); i++)
 	{
 		// if we're found a usable backbuffer and depth buffer format, break out of the two loops
-		if (gotValidFormats) break;
+		if (gotValidFormats) 
+			break;
 
 		for (int j = 0; j < (sizeof(DepthFormats) / sizeof(DepthFormats[0])); j++)
 		{
@@ -986,11 +1034,13 @@ BOOL InitialiseDirect3D()
 	}
 }
 #endif
-/*
+
+#ifdef USEREFDEVICE
 	LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWndMain,
 		D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
-*/
-	/* create D3DCREATE_PUREDEVICE */
+#else
+
+	// create D3DCREATE_PUREDEVICE
 /*
 	LastError = d3d.lpD3D->CreateDevice(defaultDevice, D3DDEVTYPE_HAL, hWndMain,
 		D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, &d3dpp, &d3d.lpD3DDevice);
@@ -1011,7 +1061,7 @@ BOOL InitialiseDirect3D()
 		LastError = d3d.lpD3D->CreateDevice(defaultDevice, D3DDEVTYPE_HAL, hWndMain,
 			D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
 	}
-
+#endif
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -1030,35 +1080,35 @@ BOOL InitialiseDirect3D()
 	else 
 	{
 		d3d.supportsDynamicTextures = FALSE;
-		LogErrorString("device can't use D3DUSAGE_DYNAMIC\n");
+		Con_PrintError("device can't use D3DUSAGE_DYNAMIC");
 	}
 
 	// Log resolution set
-	LogString("\t Resolution set: " + LogInteger(d3dpp.BackBufferWidth) + " x " + LogInteger(d3dpp.BackBufferHeight));
+	Con_PrintMessage("\t Resolution set: " + LogInteger(d3dpp.BackBufferWidth) + " x " + LogInteger(d3dpp.BackBufferHeight));
 
 	// Log format set
-	switch(d3dpp.BackBufferFormat)
+	switch (d3dpp.BackBufferFormat)
 	{
 		case D3DFMT_A8R8G8B8:
-			LogString("\t Format set: 32bit - D3DFMT_A8R8G8B8");
+			Con_PrintMessage("\t Format set: 32bit - D3DFMT_A8R8G8B8");
 			break;
 		case D3DFMT_X8R8G8B8:
-			LogString("\t Format set: 32bit - D3DFMT_X8R8G8B8");
+			Con_PrintMessage("\t Format set: 32bit - D3DFMT_X8R8G8B8");
 			break;
 		case D3DFMT_R8G8B8:
-			LogString("\t Format set: 32bit - D3DFMT_R8G8B8");
+			Con_PrintMessage("\t Format set: 32bit - D3DFMT_R8G8B8");
 			break;
 		case D3DFMT_A1R5G5B5:
-			LogString("\t Format set: 16bit - D3DFMT_A1R5G5B5");
+			Con_PrintMessage("\t Format set: 16bit - D3DFMT_A1R5G5B5");
 			break;
 		case D3DFMT_R5G6B5:
-			LogString("\t Format set: 16bit - D3DFMT_R5G6B5");
+			Con_PrintMessage("\t Format set: 16bit - D3DFMT_R5G6B5");
 			break;
 		case D3DFMT_X1R5G5B5:
-			LogString("\t Format set: 16bit - D3DFMT_X1R5G5B5");
+			Con_PrintMessage("\t Format set: 16bit - D3DFMT_X1R5G5B5");
 			break;
 		default:
-			LogString("\t Format set: Unknown");
+			Con_PrintMessage("\t Format set: Unknown");
 			break;
 	}
 
@@ -1066,19 +1116,19 @@ BOOL InitialiseDirect3D()
 	switch (d3dpp.AutoDepthStencilFormat)
 	{
 		case D3DFMT_D24S8:
-			LogString("\t Depth Format set: 24bit and 8bit stencil - D3DFMT_D24S8");
+			Con_PrintMessage("\t Depth Format set: 24bit and 8bit stencil - D3DFMT_D24S8");
 			break;
 		case D3DFMT_D24X8:
-			LogString("\t Depth Format set: 24bit and 0bit stencil - D3DFMT_D24X8");
+			Con_PrintMessage("\t Depth Format set: 24bit and 0bit stencil - D3DFMT_D24X8");
 			break;
 		case D3DFMT_D32:
-			LogString("\t Depth Format set: 32bit and 0bit stencil - D3DFMT_D32");
+			Con_PrintMessage("\t Depth Format set: 32bit and 0bit stencil - D3DFMT_D32");
 			break;
 		case D3DFMT_D24FS8:
-			LogString("\t Depth Format set: 24bit and 8bit stencil - D3DFMT_D32");
+			Con_PrintMessage("\t Depth Format set: 24bit and 8bit stencil - D3DFMT_D32");
 			break;
 		default:
-			LogString("\t Depth Format set: Unknown");
+			Con_PrintMessage("\t Depth Format set: Unknown");
 			break;
 	}
 
@@ -1095,31 +1145,24 @@ BOOL InitialiseDirect3D()
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
-/*
-	LastError = d3d.lpD3DDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &d3d.lpD3DBackSurface);
 
-	if (FAILED(LastError))
-	{
-		LogErrorString("Could not get a copy of the back buffer\n");
-		return FALSE;
-	}
-
-	LastError = d3d.lpD3DBackSurface->GetDesc(&d3d.backSurfaceDesc);
-
-	if (FAILED(LastError))
-	{
-		LogErrorString("Could not get backbuffer surface description\n");
-		return FALSE;
-	}
-*/
 	ScreenDescriptorBlock.SDB_Width     = width;
 	ScreenDescriptorBlock.SDB_Height    = height;
 	ScreenDescriptorBlock.SDB_Depth		= depth;
 	ScreenDescriptorBlock.SDB_Size      = width*height;
 	ScreenDescriptorBlock.SDB_CentreX   = width/2;
 	ScreenDescriptorBlock.SDB_CentreY   = height/2;
+
 	ScreenDescriptorBlock.SDB_ProjX     = width/2;
 	ScreenDescriptorBlock.SDB_ProjY     = height/2;
+
+	int fov = 90;
+
+	float testW = 1.3 * ( cosf(fov/2.0f)/sinf(fov/2.0f) );
+
+//	w = aspect * ( cosf(fov/2.0f)/sinf(fov/2.0f) );
+//h = cosf(fov/2.0f)/sinf(fov/2.0f);
+
 	ScreenDescriptorBlock.SDB_ClipLeft  = 0;
 	ScreenDescriptorBlock.SDB_ClipRight = width;
 	ScreenDescriptorBlock.SDB_ClipUp    = 0;
@@ -1143,10 +1186,12 @@ BOOL InitialiseDirect3D()
 	// create vertex and index buffers
 	CreateVolatileResources();
 
-	//Setup orthographic projection matrix
-	D3DXMatrixOrthoLH( &matOrtho, 640, 480, 1.0f, 10.0f );
+	// Setup orthographic projection matrix
+	int standardWidth = 640;
+	int wideScreenWidth = 852;
 
-//	D3DXMatrixOrthoOffCenterLH( &matOrtho, 0.0f, width, 0.0f, height, 1.0f, 10.0f);
+//	D3DXMatrixOrthoOffCenterLH( &matOrtho, 0.0f, wideScreenWidth, 0.0f, 480, 1.0f, 10.0f);
+	D3DXMatrixOrthoLH( &matOrtho, standardWidth, 480, 1.0f, 10.0f);
 
 	D3DXMatrixIdentity( &matIdentity );
 	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
@@ -1155,8 +1200,11 @@ BOOL InitialiseDirect3D()
 
 	Con_Init();
 	Net_Initialise();
+	Font_Init();
 
-	LogString("Initialised Direct3D succesfully");
+	Con_AddCommand("dumptex", WriteMenuTextures);
+
+	Con_PrintMessage("Initialised Direct3D9 succesfully");
 	return TRUE;
 }
 
@@ -1172,6 +1220,8 @@ void FlipBuffers()
 void ReleaseDirect3D()
 {
     DeallocateAllImages();
+
+	Font_Release();
 
 	// release back-buffer copy surface, vertex buffer and index buffer
 	ReleaseVolatileResources();
@@ -1194,7 +1244,7 @@ void ReleaseDirect3D()
 	Config_Save();
 }
 
-void ReleaseAvPTexture(AvPTexture *texture)
+void ReleaseAvPTexture(AVPTEXTURE *texture)
 {
 	if (texture->buffer)
 	{
@@ -1209,7 +1259,7 @@ void ReleaseAvPTexture(AvPTexture *texture)
 
 void ReleaseD3DTexture(D3DTEXTURE *d3dTexture) 
 {
-	/* release d3d texture */
+	// release d3d texture
 	SAFE_RELEASE(*d3dTexture);
 }
 
@@ -1218,6 +1268,4 @@ void FlushD3DZBuffer()
 	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
 }
 
-// For extern "C"
-
-};
+} // For extern "C"

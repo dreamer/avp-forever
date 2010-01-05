@@ -191,7 +191,7 @@ static void LoadMenuFont(void)
 	
 	gfxPtr->hBackup = 0;
 	
-	AvPTexture *image = gfxPtr->ImagePtr;
+	AVPTEXTURE *image = gfxPtr->ImagePtr;
 
 	unsigned char *srcPtr = image->buffer;
 
@@ -348,6 +348,7 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 				need to fix the 'Cloud Table'
 				ie the moving hazy smoke/cloud effect behind the large font text on the menus
 			*/
+
 			DrawTallFontCharacter(positionX, positionY, topLeftU, topLeftV, char_width, alpha);
 
 //			DrawCloudTable(pX, pY, word_length, 255);
@@ -879,20 +880,19 @@ extern int RenderTallChar(char c, int x, int y, int alpha, int red, int green, i
 	return sx;
 }
 
-extern void RenderSmallFontString_Wrapped(const char *textPtr,RECT* area,int alpha,int* output_x,int* output_y)
+extern void RenderSmallFontString_Wrapped(const char *textPtr, RECT* area, int alpha, int* output_x, int* output_y)
 {
 	// text on menus in bottom black space
 
-	unsigned char *srcPtr;
-//	unsigned short *destPtr;
-	AVPMENUGFX *gfxPtr;
-	AvPTexture *image;
+//	unsigned char *srcPtr;
+//	AVPMENUGFX *gfxPtr;
+//	AvPTexture *image;
 	int wordWidth;
 	int sx = area->left;
 	int sy = area->top;
 	
-	gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_SMALL_FONT];
-	image = (AvPTexture*)gfxPtr->ImagePtr;
+//	gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_SMALL_FONT];
+//	image = (AvPTexture*)gfxPtr->ImagePtr;
 
 /*
 Determine area used by text , so we can draw it centrally
@@ -987,12 +987,15 @@ Determine area used by text , so we can draw it centrally
 			}
 		}
 		
-		while(*textPtr && *textPtr==' ') {
+		while(*textPtr && *textPtr==' ') 
+		{
 			sx+=AAFontWidths[(unsigned int) *textPtr++];
 		}
 		
-		if(sx>area->right) {
-			while(sx>area->right) {
+		if(sx>area->right) 
+		{
+			while(sx>area->right) 
+			{
 				sx-=(area->right-area->left);
 				sy+=HUD_FONT_HEIGHT;
 			}
@@ -1000,31 +1003,35 @@ Determine area used by text , so we can draw it centrally
 			if(sy+HUD_FONT_HEIGHT> area->bottom) break;
 		}
 		
-		while(*textPtr && *textPtr!=' ') {
+		while(*textPtr && *textPtr!=' ') 
+		{
 			char c = *textPtr++;
 			int letterWidth = AAFontWidths[(unsigned int) c];
 			
-			if(sx+letterWidth>area->right) {
+			if(sx+letterWidth>area->right) 
+			{
 				sx=area->left;
 				sy+=HUD_FONT_HEIGHT;
 				
 				if(sy+HUD_FONT_HEIGHT> area->bottom) break;
 			}
 			
-			if (c>=' ' || c<='z') {
+			if (c>=' ' || c<='z') 
+			{
 				int topLeftU = 1+((c-32)&15)*16;
 				int topLeftV = 1+((c-32)>>4)*16;
-				int x, y;
+//				int x, y;
 				
-				srcPtr = &image->buffer[(topLeftU+topLeftV*image->width)*4];
+//				srcPtr = &image->buffer[(topLeftU+topLeftV*image->width)*4];
 
 				DrawSmallMenuCharacter(sx, sy, topLeftU, topLeftV, ONE_FIXED, ONE_FIXED, ONE_FIXED, alpha);
-				
-				for (y=sy; y<HUD_FONT_HEIGHT+sy; y++) {
-
+#if 0	
+				for (y=sy; y<HUD_FONT_HEIGHT+sy; y++) 
+				{
 //					destPtr = (unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch) + sx;
 					
-					for (x=0; x<HUD_FONT_WIDTH; x++) {
+					for (x=0; x<HUD_FONT_WIDTH; x++) 
+					{
 /*
 						if (srcPtr[0] || srcPtr[1] || srcPtr[2]) {
 							unsigned int destR, destG, destB;
@@ -1050,7 +1057,7 @@ Determine area used by text , so we can draw it centrally
 					}
 //					srcPtr += (image->w - HUD_FONT_WIDTH) * 4;	
 				}
-
+#endif
 				sx += AAFontWidths[(unsigned int) c];
 			}
 		}
@@ -1131,11 +1138,17 @@ extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 
 	if (gfxPtr->ImagePtr) 
 	{
-		AvPMenuGfxStorage[menuGfxID].menuTexture = CreateD3DTexturePadded((AvPTexture*)gfxPtr->ImagePtr, &gfxPtr->newWidth, &gfxPtr->newHeight);
+		AvPMenuGfxStorage[menuGfxID].menuTexture = CreateD3DTexturePadded(gfxPtr->ImagePtr, &gfxPtr->newWidth, &gfxPtr->newHeight);
 
 		if (AvPMenuGfxStorage[menuGfxID].menuTexture == NULL) {
 			OutputDebugString("Texture in AvPMenuGfxStorage was NULL!");
 		}
+	}
+
+	// remove the red outline grid from the font texture
+	if (menuGfxID == AVPMENUGFX_SMALL_FONT)
+	{
+		DeRedTexture(AvPMenuGfxStorage[menuGfxID].menuTexture);
 	}
 
 	GLOBALASSERT(gfxPtr->ImagePtr);
@@ -1188,9 +1201,9 @@ extern void LoadAllAvPMenuGfx(void)
 
 		AVPMENUGFX *gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_CLOUDY];
 		
-		AvPTexture *image;
+		AVPTEXTURE *image;
 
-		image = (AvPTexture*)gfxPtr->ImagePtr;
+		image = gfxPtr->ImagePtr;
 		srcPtr = image->buffer;
 	  		
 		int x,y;
@@ -1781,7 +1794,7 @@ static void CalculateWidthsOfAAFont(void)
 {
 	unsigned char *srcPtr;
 	AVPMENUGFX *gfxPtr;
-	AvPTexture *image;
+	AVPTEXTURE *image;
 	int c;
 
 	gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_SMALL_FONT];
@@ -1806,7 +1819,7 @@ static void CalculateWidthsOfAAFont(void)
 			for (y = y1; y < y1 + HUD_FONT_HEIGHT; y++)
 			{
 				unsigned char *s = &srcPtr[(x + y*image->width) * 4];
-				if (s[2] >= 0x80)
+				if (s[2] >= 0x80) // checking red.
 				{
 					blank = 0;
 					break;

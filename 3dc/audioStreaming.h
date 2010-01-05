@@ -1,6 +1,8 @@
 #ifndef _audioStreaming_h_
 #define _audioStreaming_h_
 
+#include <stdint.h>
+
 enum
 {
 	AUDIOSTREAM_OK,
@@ -23,7 +25,7 @@ struct StreamingAudioBuffer
 	UINT64 totalBytesPlayed;
 	UINT64 totalSamplesWritten;
 	bool isPaused;
-	byte *buffers;
+	uint8_t *buffers;
 	IXAudio2SourceVoice *pSourceVoice;
 };
 
@@ -47,7 +49,7 @@ struct StreamingAudioBuffer
 	int lastCheckedTime;
 	UINT64 totalBytesPlayed;
 	UINT64 totalSamplesWritten;
-	unsigned char *buffers;
+	uint8_t *buffers;
 	LPDIRECTSOUNDBUFFER	dsBuffer;
 };
 
@@ -66,7 +68,7 @@ struct StreamingAudioBuffer
 	int numChannels;
 	int rate;
 	int bytesPerSample;
-	byte *buffers;
+	uint8_t *buffers;
 	UINT64 totalBytesPlayed;
 	UINT64 totalSamplesWritten;
 	bool isPaused;
@@ -81,7 +83,7 @@ int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct);
 int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct);
 int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct);
 int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, int volume);
-int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, byte *audioData, int size);
+int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, uint8_t *audioData, int size);
 int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct);
 int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct);
 int AudioStream_SetPan(StreamingAudioBuffer *streamStruct, int pan);

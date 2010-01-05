@@ -4,10 +4,8 @@ extern "C"
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
-#include "d3dmacs.h"
 #include "GammaControl.h"
 
-//extern LPDIRECTDRAWSURFACE lpDDSPrimary; // BJD
 static int ActualGammaSetting;
 int RequestedGammaSetting;
 

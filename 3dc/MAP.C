@@ -183,15 +183,8 @@ void MapSetVDB(DISPLAYBLOCK *dptr, MAPSETVDB *mapvdbdata)
 		#if ProjectSpecificVDBs
 		ProjectSpecificVDBInit(vdb);
 		#endif
-
-
 	}
-
 }
-
-
-
-
 
 
 
@@ -239,8 +232,5 @@ void MapBlockInit(DISPLAYBLOCK *dptr)
 
 	dptr->ObMaxZ = sptr->shapemaxz;
 	dptr->ObMinZ = sptr->shapeminz;
-
-
-   
 }
 

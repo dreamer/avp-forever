@@ -50,10 +50,10 @@ RECT LoadingBarFull_SrcRect;
 D3DTEXTURE LoadingBarFullTexture;
 D3DTEXTURE LoadingBarEmptyTexture;
 
-AvPTexture *image = 0;
-AvPTexture *LoadingBarEmpty;
-AvPTexture *LoadingBarFull;
-AvPTexture *aa_font;
+AVPTEXTURE *image = 0;
+AVPTEXTURE *LoadingBarEmpty;
+AVPTEXTURE *LoadingBarFull;
+AVPTEXTURE *aa_font;
 
 int fullbarHeight, fullbarWidth, emptybarHeight, emptybarWidth;
 

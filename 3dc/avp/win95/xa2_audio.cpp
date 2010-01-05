@@ -2006,7 +2006,7 @@ StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int buff
 		return -1;
 	}
 */
-	newStreamingAudioBuffer->buffers = new byte[bufferSize * numBuffers];
+	newStreamingAudioBuffer->buffers = new uint8_t[bufferSize * numBuffers];
 	if (newStreamingAudioBuffer->buffers == NULL)
 	{
 		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
@@ -2028,7 +2028,7 @@ StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int buff
 	return newStreamingAudioBuffer;
 }
 
-int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, byte *audioData, int size)
+int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, uint8_t *audioData, int size)
 {
 	assert (streamStruct);
 	assert (audioData);

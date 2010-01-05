@@ -887,9 +887,7 @@ typedef struct displayblock
 
 	SHAPEHEADER* ObShapeData;
 
-	#if SupportWindows95
 	char * name;
-	#endif
 	
 	#if (SupportMorphing && LazyEvaluationForMorphing)
 	VECTORCH *ObMorphedPts;
@@ -2471,30 +2469,10 @@ void InitialVideoMode(void);
 void ResetFrameCounter(void);
 void FrameCounterHandler(void);
 
-#if SupportWindows95
-void DirectWriteD3DLine(VECTOR2D* LineStart, VECTOR2D* LineEnd, int LineColour);
-void* LoadImageIntoDirectDrawSurface(char *fname, IMAGEHEADER *iheader,
-      int ImageLoadMode, BOOL Sysmem);
-void* LoadImageIntoD3DImmediateSurface(char *fname, IMAGEHEADER *iheader,
-      int TextureFileType);
-void* LoadImageIntoD3DTexture(char *fname, IMAGEHEADER *iheader,
-      int TextureFileType);
-
 void* LoadFontIntoDirectDrawSurface(char *fname, IMAGEHEADER *iheader);
 void ClearScreen(SCREENDESCRIPTORBLOCK* sdb, int Colour);
 #ifdef __cplusplus
-/*LPDirect3DSurface8 LoadPPMInD3DMode(char* fname,
-        LPDDSURFACEDESC lpFormat, IMAGEHEADER* iheader,
-        int MemoryType);*/
-/*LPDirect3DSurface8 LoadPPMIntoDDSurface(LPDirect3DSurface8 lpDDS,
-        DDSURFACEDESC format, int Height, int Width,
-        IMAGEHEADER* iheader, BOOL Quantise, FILE* fp, 
-        int psize, int pcaps, char* fname, int MipNum);*/
-/*LPDirect3DSurface8 LoadPGMInD3DMode(char* fname,
-        LPDDSURFACEDESC lpFormat, IMAGEHEADER* iheader,
-        int MemoryType);*/
 #endif // for __cplusplus
-#endif // for SupportWindows95
 
 void InitGame(void);
 void StartGame(void);

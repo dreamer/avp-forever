@@ -209,14 +209,8 @@ struct AwCreateGraphicRegion
 {
 	unsigned left, top, right, bottom; /* rectangle to cut from the original image */
 	unsigned width, height; /* width and height of the resulting surface or texture */
-#if 0
-	union /* DDSurface or D3DTexture pointer depending on the context used */
-	{
-		DDSurface * pSurface; /* Direct Draw Surface object pointer */
-		AvPTexture * pTexture; /* Direct 3D Texture object pointer */
-	};
-#endif
-	AvPTexture * pTexture; /* Direct 3D Texture object pointer */
+
+	AVPTEXTURE * pTexture; /* Direct 3D Texture object pointer */
 };
 
 /* typedef to save typing 'struct' when not using C++ */
@@ -529,7 +523,7 @@ extern AW_TL_ERC AwGetTextureSize(unsigned * _widthP, unsigned * _heightP, unsig
 			parameters were correct but another error
 			occurred.
 */
-extern AvPTexture * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...);
+extern AVPTEXTURE * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...);
 
 /* AwCreateSurface(char const * _argFormatS, ...)
 

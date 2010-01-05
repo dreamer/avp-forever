@@ -652,12 +652,8 @@ void PSXAccurateMatrixMultiply(m1, m2, m3)
 
 */
 
-void TransposeMatrixCH(m1)
-
-	MATRIXCH *m1;
-
+void TransposeMatrixCH(MATRIXCH *m1)
 {
-
 	int t;
 
 	t=m1->mat12;
@@ -671,7 +667,6 @@ void TransposeMatrixCH(m1)
 	t=m1->mat23;
 	m1->mat23=m1->mat32;
 	m1->mat32=t;
-
 }
 
 

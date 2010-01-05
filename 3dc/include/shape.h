@@ -837,14 +837,9 @@ typedef struct imageheader {
 
 	int ImageWidthShift;				/* Image Width as a power of 2 */
 
-//	TEXTURE *ImagePtr;					/* Pointer to texture in memory */
+	AVPTEXTURE *AvPTexture;
 
-//	LPDIRECTDRAWSURFACE DDSurface;
-	LPDIRECT3DTEXTURE AvPTexture;
-
-//	AW_BACKUPTEXTUREHANDLE hBackup;
-
-	/* graphics api texture */
+	// graphics api texture
 	D3DTEXTURE Direct3DTexture;
 
 	int UserTexture;

@@ -50,21 +50,7 @@ extern void PlayIntroSequence(void)
 	ResetFrameCounter();
 	Show_CopyrightInfo();
 
-//	ThisFramesRenderingHasBegun();
-
-	/* play the Fox Interactive FMV */
-//	ClearScreenToBlack();
-
-//	ThisFramesRenderingHasBegun();
-//	ClearScreenToBlack();
-
 	PlayFMV("FMVs\\logos.ogv");
-
-//	PlayFMV("FMVs/rebellion.smk");
-
-//	ThisFramesRenderingHasFinished();
-
-//	FlipBuffers();
 
 	StartMenuMusic();
 	ResetFrameCounter();

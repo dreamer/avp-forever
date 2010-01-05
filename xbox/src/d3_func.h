@@ -95,9 +95,9 @@ typedef struct
 
 } RENDERSTATES;
 
-LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, int usage, D3DPOOL poolType);
-LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex, int *real_height, int *real_width);
-LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture(AvPTexture *tex);
+LPDIRECT3DTEXTURE8 CreateD3DTexture(AVPTEXTURE *tex, unsigned char *buf, int usage, D3DPOOL poolType);
+LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AVPTEXTURE *tex, int *real_height, int *real_width);
+LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
 BOOL ReleaseVolatileResources();
 BOOL CreateVolatileResources();

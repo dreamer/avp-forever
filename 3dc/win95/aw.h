@@ -4,43 +4,24 @@
 struct AwBackupTexture;
 typedef struct AwBackupTexture * AW_BACKUPTEXTUREHANDLE;
 
-/*
-typedef struct DIRECTDRAWSURFACE
+typedef struct AVPTEXTURE
 {
 	unsigned char *buffer;
 
 	int width;
 	int height;
 
-} DIRECTDRAWSURFACE;
-
-typedef DIRECTDRAWSURFACE * LPDIRECTDRAWSURFACE;
-typedef DIRECTDRAWSURFACE DDSurface;
-*/
-
-typedef struct DIRECT3DTEXTURE
-{
-	unsigned char *buffer;
-
-	int width;
-	int height;
-
-} DIRECT3DTEXTURE;
-
-typedef DIRECT3DTEXTURE * LPDIRECT3DTEXTURE;
-typedef DIRECT3DTEXTURE AvPTexture;
+} AVPTEXTURE;
 
 #ifdef WIN32
-typedef LPDIRECT3DTEXTURE9 D3DTEXTUREHANDLE; 
 typedef LPDIRECT3DTEXTURE9 D3DTEXTURE;
 #endif
 
 #ifdef _XBOX
-typedef LPDIRECT3DTEXTURE8 D3DTEXTUREHANDLE; 
 typedef LPDIRECT3DTEXTURE8 D3DTEXTURE;
 #endif
 
-//typedef int D3DTEXTUREHANDLE;
+typedef int D3DTEXTUREHANDLE;
 
 /* Pre-DX8 vertex formats
 	taken from http://www.mvps.org/directx/articles/definitions_for_dx7_vertex_types.htm
@@ -82,7 +63,7 @@ typedef struct _D3DTLVERTEX {
 
 } D3DTLVERTEX, *LPD3DTLVERTEX;
 
-#define D3DFVF_TLVERTEX	(D3DFVF_XYZRHW|/*D3DFVF_RESERVED0|*/D3DFVF_DIFFUSE|D3DFVF_SPECULAR|D3DFVF_TEX1)
+#define D3DFVF_TLVERTEX	(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_SPECULAR | D3DFVF_TEX1)
 
 // 32bit RGBA to 32bit D3DFMT_A8R8G8B8 format
 #define RGB16(r, g, b) ( ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3))

@@ -305,7 +305,6 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 				VisibleModules[numVisMods].DispPtr = objectPtr;
 
 				VisibleModules[numVisMods].SortKey = Magnitude(&dist);
-
 			}
 
    			if(numVisMods>MAX_NUMBER_OF_VISIBLE_MODULES)
@@ -446,7 +445,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 			}
 		}
 
-				ClearTranslucentPolyList();
+		ClearTranslucentPolyList();
 
 		if (MOTIONBLUR_CHEATMODE)
 		{
@@ -562,10 +561,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 					}
 				}
 
-
-				{
-		 			D3D_DrawWaterTest(modulePtr);
-				}
+		 		D3D_DrawWaterTest(modulePtr);
 			}
 		}
 //	 			OutputTranslucentPolyList();

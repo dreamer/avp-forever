@@ -463,7 +463,7 @@ void Write3dTexturedPolygonToExecuteBuffer(int* itemptr);
 void WriteGouraud3dTexturedPolygonToExecuteBuffer(int* itemptr);
 void WriteBackdrop2dTexturedPolygonToExecuteBuffer(int* itemptr);
 void WriteBackdrop3dTexturedPolygonToExecuteBuffer(int* itemptr);
-void ReleaseAvPTexture(AvPTexture* texture);
+void ReleaseAvPTexture(AVPTEXTURE *texture);
 BOOL SetExecuteBufferDefaults(void);
 #if SUPPORT_MMX
 void SelectMMXOptions(void);

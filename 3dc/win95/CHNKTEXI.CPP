@@ -888,7 +888,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 				db_log4("\tfile is in a fast file");
 				unsigned nWidth, nHeight;
 				AW_BACKUPTEXTUREHANDLE hBackup = NULL;
-				AvPTexture * pTexture =
+				AVPTEXTURE * pTexture =
 					AwCreateTexture
 					(
 						fFlagsEtc & LIO_RESTORABLE ? "pxfWHB" : "pxfWH",
@@ -986,7 +986,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 				db_log4("\tloading the actual file");
 				unsigned nWidth, nHeight;
 				AW_BACKUPTEXTUREHANDLE hBackup = NULL;
-				AvPTexture * pTexture =
+				AVPTEXTURE * pTexture =
 					AwCreateTexture
 					(
 						fFlagsEtc & LIO_RESTORABLE ? "sfWHB" : "sfWH",

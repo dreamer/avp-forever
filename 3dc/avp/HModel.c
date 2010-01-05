@@ -1451,13 +1451,11 @@ void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_dat
 		RotateVector(&dummy_displayblock.ObView, &Global_VDB_Ptr->VDB_Mat);
 
 		/* Whilst we're here... */
-
 		this_section_data->View_Offset=dummy_displayblock.ObView;
 		this_section_data->flags|=section_data_view_init;
 		controller->View_FrameStamp=GlobalFrameCounter;
 
 		/* Ho hum. */
-
 		if (dummy_displayblock.ShapeAnimControlBlock) {
 			DoShapeAnimation(&dummy_displayblock);
 		}
@@ -1466,8 +1464,7 @@ void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_dat
 		{
 			dummy_displayblock.SpecialFXFlags|=SFXFLAG_ISAFFECTEDBYHEAT;
 		}
-	   
-		#if 1
+
 		if (PIPECLEANER_CHEATMODE)
 		if (Global_HModel_Sptr)
 		if (Global_HModel_Sptr->SBdptr)
@@ -1491,10 +1488,8 @@ void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_dat
 
 			particle.Size = shape_to_use->shaperadius/8;
 			RenderParticle(&particle);
-			D3D_DecalSystem_End();
-				
-		}	
-		#endif
+			D3D_DecalSystem_End();		
+		}
 		
 		RenderThisHierarchicalDisplayblock(&dummy_displayblock);						  
 

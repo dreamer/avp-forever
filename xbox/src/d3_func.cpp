@@ -98,7 +98,7 @@ int NearestSuperiorPow2(int i)
 }
 */
 
-LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AvPTexture *tex)
+LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AVPTEXTURE *tex)
 {
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
 	LPDIRECT3DTEXTURE8 swizTexture = NULL;
@@ -289,7 +289,7 @@ LPDIRECT3DTEXTURE8 CreateFmvTexture(int *width, int *height, int usage, int pool
 }
 
 // use this to make textures from non power of two images
-LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *realHeight)
+LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *realHeight)
 {
 	int original_width = tex->width;
 	int original_height = tex->height;
@@ -392,7 +392,7 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *
 	return destTexture;
 }
 
-LPDIRECT3DTEXTURE8 CreateD3DTexture(AvPTexture *tex, unsigned char *buf, int usage, D3DPOOL poolType)
+LPDIRECT3DTEXTURE8 CreateD3DTexture(AVPTEXTURE *tex, unsigned char *buf, int usage, D3DPOOL poolType)
 {
 	/* create our texture for returning */
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
@@ -918,7 +918,7 @@ void ReleaseDirect3D()
 	Config_Save();
 }
 
-void ReleaseAvPTexture(AvPTexture *texture)
+void ReleaseAvPTexture(AVPTEXTURE *texture)
 {
 	if (texture->buffer)
 	{

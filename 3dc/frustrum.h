@@ -63,6 +63,4 @@ using the following defines */
 
 extern char FrustrumFlagForVertex[maxrotpts];
 
-#define USE_FOV_53 0
-
 #endif

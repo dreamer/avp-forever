@@ -165,7 +165,7 @@ namespace AwTl
 				, widthP(NULL)
 				, heightP(NULL)
 				, backupHP(NULL)
-				, prevTexP(static_cast<AvPTexture *>(NULL))
+				, prevTexP(static_cast<AVPTEXTURE *>(NULL))
 				, prevTexB(false)
 				, loadTextureB(false)
 				, callbackF(NULL)
@@ -274,7 +274,7 @@ namespace AwTl
 
 	struct LoadInfo
 	{
-		AvPTexture * textureP;
+		AVPTEXTURE * textureP;
 
 		unsigned surface_width;
 		unsigned surface_height;
@@ -334,7 +334,7 @@ namespace AwTl
 	if (awTlLastErr != AW_TLE_OK) { \
 		db_logf3(("AwCreateGraphic() failed whilst %s",s)); \
 		db_logf1(("AwCreateGraphic(): ERROR: %s",AwTlErrorToString())); \
-		return static_cast<AvPTexture *>(NULL); \
+		return static_cast<AVPTEXTURE *>(NULL); \
 	} else { \
 		db_logf5(("\tsuccessfully completed %s",s)); \
 	}
@@ -519,7 +519,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 	if (_parmsR.originalWidthP) *_parmsR.originalWidthP = m_nWidth;
 	if (_parmsR.originalHeightP) *_parmsR.originalHeightP = m_nHeight;
 
-	AvPTexture *d3d_texture = (AvPTexture*)malloc(sizeof(AvPTexture));
+	AVPTEXTURE *d3d_texture = (AVPTEXTURE*)malloc(sizeof(AVPTEXTURE));
 
 	unsigned char *buffer = (unsigned char *)malloc(m_nWidth * m_nHeight * 4);
 
@@ -1758,7 +1758,7 @@ namespace AwTl {
 		{
 			awTlLastErr = AW_TLE_BADFILEFORMAT;
 			db_log1("AwCreateGraphic(): ERROR: file format not recognized");
-			return static_cast<AvPTexture *>(NULL);
+			return static_cast<AVPTEXTURE *>(NULL);
 		}
 		else
 		{
@@ -1946,7 +1946,7 @@ namespace AwTl {
 					}
 					else if (pParams->loadTextureB)
 					{
-						pParams->prevTexP = va_arg(ap,AvPTexture *);
+						pParams->prevTexP = va_arg(ap,AVPTEXTURE *);
 						db_logf4(("\tPrevious D3DTexture * = %p",pParams->prevTexP.textureP));
 					}
 #if 0
@@ -2016,7 +2016,7 @@ namespace AwTl {
 				awTlLastWinErr = GetLastError();
 				db_logf1(("AwCreateGraphic(): ERROR opening file \"%s\"",pParams->fileNameS));
 				db_log2(AwTlErrorToString());
-				return static_cast<AvPTexture *>(NULL);
+				return static_cast<AVPTEXTURE *>(NULL);
 			}
 
 			SurfUnion textureP = pParams->DoCreate();
@@ -2362,7 +2362,7 @@ AW_TL_ERC AwGetTextureSize(register unsigned * _widthP, register unsigned * _hei
 /* PUBLIC: AwCreate functions */
 /******************************/
 
-AvPTexture * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...)
+AVPTEXTURE * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...)
 {
 	db_logf4(("AwCreateTexture(\"%s\") called",_argFormatS));
 

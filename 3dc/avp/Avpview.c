@@ -434,7 +434,6 @@ void InteriorType_Body()
 		}
 		// The next test drops the matrix multiply if the orientation is close to zero
 		// There is an inaccuracy problem with the Z angle at this point
-					 
 		if (orientation.EulerX != 0 || orientation.EulerY != 0 || 
 					(orientation.EulerZ > 1 && orientation.EulerZ <	4095))
 		{
@@ -517,7 +516,7 @@ void UpdateCamera(void)
 	Global_VDB_Ptr->VDB_World = dptr_s->ObWorld;
 	Global_VDB_Ptr->VDB_Mat = dptr_s->ObMat;
 
-	mat.mat11 = ONE_FIXED;		 
+	mat.mat11 = ONE_FIXED;
 	mat.mat12 = 0;
 	mat.mat13 = 0;
 	mat.mat21 = 0;	  	
@@ -711,13 +710,12 @@ void PrepareVDBForShowView(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 {
 	EULER e;
 
-	
 	/* Get the View Object Matrix, transposed */
  	TransposeMatrixCH(&VDB_Ptr->VDB_Mat);
 
 	/* Get the Matrix Euler Angles */
 	MatrixToEuler(&VDB_Ptr->VDB_Mat, &VDB_Ptr->VDB_MatrixEuler);
-	
+
 	/* Get the Matrix Euler Angles */
 	MatrixToEuler(&VDB_Ptr->VDB_Mat, &e);
 
@@ -725,7 +723,7 @@ void PrepareVDBForShowView(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	e.EulerX = 0;
 	e.EulerY = 0;
 	e.EulerZ = (-e.EulerZ) & wrap360;
-	
+
 	CreateEulerMatrix(&e, &VDB_Ptr->VDB_SpriteMat);
 }
 
@@ -761,8 +759,6 @@ void UpdateObjectLights(DISPLAYBLOCK *dptr)
 		LOCALASSERT(lptr->LightRange!=0);
 		lptr->BrightnessOverRange = DIV_FIXED(MUL_FIXED(lptr->LightBright,LightScale),lptr->LightRange);
 	}
-	
-
 }
 
 
@@ -924,10 +920,11 @@ void CheckIfMirroringIsRequired(void)
 #endif
 
 #define MinChangeInXSize 8
+
 void MakeViewingWindowSmaller(void)
 {
 	extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
-	int MinChangeInYSize = (ScreenDescriptorBlock.SDB_Height*MinChangeInXSize)/ScreenDescriptorBlock.SDB_Width;
+	int MinChangeInYSize = (ScreenDescriptorBlock.SDB_Height * MinChangeInXSize) / ScreenDescriptorBlock.SDB_Width;
 	
 	if (Global_VDB_Ptr->VDB_ClipLeft<ScreenDescriptorBlock.SDB_Width/2-16)
 	{
@@ -943,7 +940,7 @@ void MakeViewingWindowSmaller(void)
 	}
 	else
 	{
-		Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/2;
+		Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/3;
 		Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)/2;
 	}
 	//BlankScreen(); 
@@ -952,7 +949,7 @@ void MakeViewingWindowSmaller(void)
 void MakeViewingWindowLarger(void)
 {
 	extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
-	int MinChangeInYSize = (ScreenDescriptorBlock.SDB_Height*MinChangeInXSize)/ScreenDescriptorBlock.SDB_Width;
+	int MinChangeInYSize = (ScreenDescriptorBlock.SDB_Height * MinChangeInXSize) / ScreenDescriptorBlock.SDB_Width;
 
 	if (Global_VDB_Ptr->VDB_ClipLeft>0)
 	{
@@ -961,14 +958,14 @@ void MakeViewingWindowLarger(void)
 		Global_VDB_Ptr->VDB_ClipUp -=MinChangeInYSize;
 		Global_VDB_Ptr->VDB_ClipDown +=MinChangeInYSize;
 	}
-	if(AvP.PlayerType == I_Alien)
+	if (AvP.PlayerType == I_Alien)
 	{
 		Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/4;
 		Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)/4;
 	}
 	else
 	{
-		Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/2;
+		Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/3;
 		Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)/2;
 	}
 }

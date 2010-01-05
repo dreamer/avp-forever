@@ -281,7 +281,6 @@ IndexedFont_Proportional_Column* IndexedFont_Proportional_Column :: Create
 IndexedFont_Proportional_Column :: ~IndexedFont_Proportional_Column()
 {
 	GLOBALASSERT(image_ptr);
-//	ATRemoveSurface(image_ptr);
 	ReleaseAvPTexture(image_ptr);
 	image_ptr = NULL;
 	

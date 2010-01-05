@@ -24,7 +24,7 @@ struct VorbisCodec
 
 	HANDLE hPlaybackThreadFinished;
 
-	byte *audioData;
+	uint8_t *audioData;
 };
 
 VorbisCodec * Vorbis_LoadFile(const std::string &fileName);

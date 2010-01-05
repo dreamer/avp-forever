@@ -2575,6 +2575,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\3dc\font.cpp"
+				>
+			</File>
+			<File
 				RelativePath="3dc\win95\fragchnk.cpp"
 				>
 				<FileConfiguration
@@ -5795,6 +5799,10 @@
 				</File>
 				<File
 					RelativePath="3dc\avp\win95\font.h"
+					>
+				</File>
+				<File
+					RelativePath=".\3dc\font2.h"
 					>
 				</File>
 				<File

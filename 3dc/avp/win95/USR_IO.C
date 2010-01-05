@@ -1914,7 +1914,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 	}
 	#endif
 	/* KJL 10:55:32 10/9/97 - screen size */
-	#if 0
+	#if 1
 	if(KeyboardInput[KEY_F3])
 		MakeViewingWindowLarger();
 	else if(KeyboardInput[KEY_F4])

@@ -283,8 +283,6 @@ void HandleMarineOVision(void)
 	{
 		visionModeDebounced = 1;
 	}
-
-
 }
 
 

@@ -8,10 +8,10 @@
 extern "C" {
 
 #endif
-
 #include <d3d9.h>
 #include "Dxerr.h"
 #include "aw.h"
+#include <stdint.h>
 /*
   Direct3D globals
 */
@@ -58,6 +58,8 @@ typedef struct D3DInfo {
 	BOOL					supportsDynamicTextures;
 } D3DINFO;
 
+extern D3DINFO d3d;
+
 /* KJL 14:24:45 12/4/97 - render state information */
 enum TRANSLUCENCY_TYPE
 {
@@ -88,9 +90,9 @@ typedef struct
 
 } RENDERSTATES;
 
-D3DTEXTURE CreateD3DTexture(AvPTexture *tex, unsigned char *buf, int usage, D3DPOOL poolType);
-D3DTEXTURE CreateD3DTexturePadded(AvPTexture *tex, int *realWidth, int *realHeight);
-D3DTEXTURE CreateD3DTallFontTexture(AvPTexture *tex);
+D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL poolType);
+D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *realHeight);
+D3DTEXTURE CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
 BOOL ReleaseVolatileResources();
 BOOL CreateVolatileResources();
@@ -108,6 +110,7 @@ void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 void ReleaseD3DTexture(D3DTEXTURE *d3dTexture);
 void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture);
 void CreateScreenShotImage();
+void DeRedTexture(D3DTEXTURE texture);
 D3DTEXTURE CheckAndLoadUserTexture(const char *fileName, int *width, int *height);
 D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool);
 

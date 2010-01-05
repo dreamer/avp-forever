@@ -81,8 +81,8 @@ VorbisCodec * Vorbis_LoadFile(const std::string &fileName)
 		newVorbisStream = NULL;
 	}
 
-	/* init some temp audio data storage */
-	newVorbisStream->audioData = new byte[newVorbisStream->audioStream->bufferSize];
+	// init some temp audio data storage
+	newVorbisStream->audioData = new uint8_t[newVorbisStream->audioStream->bufferSize];
 	if (newVorbisStream->audioData == NULL)
 	{
 		// report major system error here?
@@ -92,7 +92,7 @@ VorbisCodec * Vorbis_LoadFile(const std::string &fileName)
 
 	Vorbis_ReadData(newVorbisStream, newVorbisStream->audioStream->bufferSize);
 
-	/* fill the first buffer */
+	// fill the first buffer
 	AudioStream_WriteData(newVorbisStream->audioStream, newVorbisStream->audioData, newVorbisStream->audioStream->bufferSize);
 
 	// start playing
@@ -106,8 +106,8 @@ void Vorbis_Play(VorbisCodec *VorbisStream)
 	if (AudioStream_PlayBuffer(VorbisStream->audioStream) == AUDIOSTREAM_OK)
 	{
 		VorbisStream->oggIsPlaying = true;
-		AudioStream_SetBufferVolume(VorbisStream->audioStream, CDPlayerVolume);
 		AudioStream_PlayBuffer(VorbisStream->audioStream);
+		AudioStream_SetBufferVolume(VorbisStream->audioStream, CDPlayerVolume);
 		VorbisStream->hPlaybackThreadFinished = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, Vorbis_UpdateThread, static_cast<void*>(VorbisStream), 0, NULL));
 	}
 	else 
@@ -244,61 +244,10 @@ void LoadVorbisTrack(int track)
 		track--;
 
 	inGameMusic = Vorbis_LoadFile(TrackList[track].c_str());
-
-/*
-	file = fopen(TrackList[track].c_str(),"rb");
-	if (!file) 
-	{
-		LogErrorString("Can't find OGG Vorbis file " + TrackList[track]);
-		return;
-	}
-
-	if (ov_open_callbacks(file, &oggFile, NULL, 0, OV_CALLBACKS_DEFAULT) < 0) 
-	{
-		LogErrorString("File " + TrackList[track] + "is not a valid OGG Vorbis file");
-		fclose(file);
-		return;
-	}
-
-	// get some audio info
-	pInfo = ov_info(&oggFile, -1);
-
-	LogString("Opening OGG Vorbis file " + TrackList[track]);
-
-	// Check the number of channels... always use 16-bit samples
-	if (pInfo->channels == 1) 
-		LogString("\t Mono Vorbis file");
-	else 
-		LogString("\t Stereo Vorbis file");
-
-	LogString("\t Vorbis frequency: " + IntToString(pInfo->rate));
-
-	ogg_int64_t numSamples = ov_pcm_total(&oggFile, -1);
-
-	// create the audio buffer (directsound or whatever)
-	if (AudioStream_CreateBuffer(&vorbisStream, pInfo->channels, pInfo->rate, 32768, 3) != AUDIOSTREAM_OK)
-	{
-		LogErrorString("Can't create audio stream buffer for OGG Vorbis!");
-	}
-
-	// init some temp audio data storage
-	audioData = new byte[vorbisStream.bufferSize];
-
-	int totalRead = ReadVorbisData(audioData, vorbisStream.bufferSize, 0);
-
-	// fill the first buffer
-	AudioStream_WriteData(&vorbisStream, audioData, vorbisStream.bufferSize);
-
-	// start playing
-	PlayVorbis();
-*/
 }
 
 bool LoadVorbisTrackList()
 {
-	//clear out the old list first
-//	EmptyCDTrackList();
-
 	std::ifstream file(tracklistFilename.c_str());
 
 	if (!file.is_open()) 
@@ -353,106 +302,3 @@ void Vorbis_CloseSystem()
 	Vorbis_Release(inGameMusic);
 	inGameMusic = NULL;
 }
-
-#if 0
-int ReadVorbisData(byte *audioBuffer, int sizeToRead, int offset)
-{
-	int bytesReadTotal = 0;
-	int bytesReadPerLoop = 0;
-
-	while (bytesReadTotal < sizeToRead) 
-	{
-		bytesReadPerLoop = ov_read(
-			&oggFile,									//what file to read from
-			reinterpret_cast<char*>(audioBuffer + bytesReadTotal),
-			sizeToRead - bytesReadTotal,				//how much data to read
-			0,											//0 specifies little endian decoding mode
-			2,											//2 specifies 16-bit samples
-			1,											//1 specifies signed data
-			0
-		);
-
-		if (bytesReadPerLoop < 0) 
-		{
-			LogErrorString("ov_read encountered an error", __LINE__, __FILE__);
-		}
-		/* if we reach the end of the file, go back to start */
-		else if (bytesReadPerLoop == 0)
-		{
-			ov_raw_seek(&oggFile, 0);
-		}
-		else if (bytesReadPerLoop == OV_HOLE) 
-		{
-			LogErrorString("OV_HOLE", __LINE__, __FILE__);
-		}
-		else if (bytesReadPerLoop == OV_EBADLINK) 
-		{
-			LogErrorString("OV_EBADLINK", __LINE__, __FILE__);
-		}
-
-		bytesReadTotal += bytesReadPerLoop;
-	}
-
-	return bytesReadTotal;
-}
-
-void UpdateVorbisBuffer(void *arg) 
-{
-
-#ifdef USE_XAUDIO2
-	CoInitializeEx( NULL, COINIT_MULTITHREADED );
-#endif
-
-	DWORD dwQuantum = 1000 / 60;
-
-	while (oggIsPlaying)
-	{
-		int numBuffersFree = AudioStream_GetNumFreeBuffers(&vorbisStream);
-
-		if (numBuffersFree)
-		{
-			ReadVorbisData(audioData, vorbisStream.bufferSize, 0);
-			AudioStream_WriteData(&vorbisStream, audioData, vorbisStream.bufferSize);
-		}
-
-		Sleep( dwQuantum );
-	}
-	SetEvent(hPlaybackThreadFinished);
-}
-
-void PlayVorbis() 
-{
-	if (AudioStream_PlayBuffer(&vorbisStream) == AUDIOSTREAM_OK)
-	{
-		oggIsPlaying = true;
-		AudioStream_SetBufferVolume(&vorbisStream, CDPlayerVolume);
-		hPlaybackThreadFinished = CreateEvent( NULL, FALSE, FALSE, NULL );
-		 _beginthread(UpdateVorbisBuffer, 0, 0);
-	}
-	else 
-	{
-		LogErrorString("couldn't play ogg vorbis buffer\n");
-	}
-}
-
-void StopVorbis() 
-{
-	if (oggIsPlaying)
-	{
-		AudioStream_StopBuffer(&vorbisStream);
-		oggIsPlaying = false;
-	}
-
-	/* wait until audio processing thread has finished running before continuing */ 
-	WaitForMultipleObjects(1, &hPlaybackThreadFinished, TRUE, INFINITE);
-
-	CloseHandle(hPlaybackThreadFinished);
-
-	AudioStream_ReleaseBuffer(&vorbisStream);
-
-	ov_clear(&oggFile);
-
-	delete[] audioData;
-	audioData = 0;
-}
-#endif

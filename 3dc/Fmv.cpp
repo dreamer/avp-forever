@@ -6,6 +6,10 @@
 	#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
 #endif
 
+#include "TheoraPlayer.h"
+TheoraVideoManager *mgr;
+TheoraVideoClip *clip;
+
 #include "d3_func.h"
 #include <fstream>
 #include <map>
@@ -910,6 +914,10 @@ int CloseTheoraVideo()
 
 extern void StartMenuBackgroundFmv()
 {
+//	mgr = new TheoraVideoManager();
+
+//	clip = mgr->createVideoClip("fmvs\\MarineIntro.ogv");
+
 	return;
 
 	const char *filenamePtr = "fmvs\\menubackground.ogv";
@@ -921,6 +929,8 @@ extern void StartMenuBackgroundFmv()
 
 extern int PlayMenuBackgroundFmv()
 {
+//	TheoraVideoFrame *frame = clip->getNextFrame();
+
 	return 0;
 
 	if (!MenuBackground)

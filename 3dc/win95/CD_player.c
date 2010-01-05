@@ -126,23 +126,25 @@ extern void CheckCDVolume(void)
 
 void CDDA_ChangeVolume(int volume)
 {
-	/* set vorbis volume here for now */
+	// set vorbis volume here for now
 	if (SetStreamingMusicVolume(volume) == 0) // ok
 	{
 		CDDAVolume=volume;
 		CDPlayerVolume = volume;
-		return;
+//		return;
 	}
 
-	if(!CDDASwitchedOn) return; /* CDDA is off */
-	if(volume<CDDA_VOLUME_MIN) return;
-	if(volume>CDDA_VOLUME_MAX) return;
+	if (!CDDASwitchedOn) 
+		return; /* CDDA is off */
 
-	if(CDDA_IsOn()) 
+	if (volume < CDDA_VOLUME_MIN) return;
+	if (volume > CDDA_VOLUME_MAX) return;
+
+	if (CDDA_IsOn()) 
 	{
-		if(PlatChangeCDDAVolume(volume))
+		if (PlatChangeCDDAVolume(volume))
 		{
-			CDDAVolume=volume;
+			CDDAVolume = volume;
 			CDPlayerVolume = volume;
 			LastCommandGiven = CDCOMMANDID_ChangeVolume;
 		}
@@ -332,8 +334,6 @@ void PlatEndCDDA(void)
 {	
 	DWORD dwReturn;
 
-	return; // bjd
-
     /* check the cdDeviceId */
     if (cdDeviceID == NO_DEVICE) return;	
 
@@ -406,7 +406,7 @@ int PlatGetNumberOfCDTracks(int* numTracks)
 	DWORD dwReturn;
 	MCI_STATUS_PARMS mciStatusParms = {0,0,0,0};
 
-	return 0; // bjd
+//	return 0; // bjd
   
     /* check the cdDeviceId */
     if(cdDeviceID==NO_DEVICE) return SOUND_PLATFORMERROR;

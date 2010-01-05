@@ -3657,7 +3657,6 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	ChooseLightingModel(dptr);
 
 	/* Texture Animation Control */
-
 	if(dptr->ObTxAnimCtrlBlks) ControlTextureAnimation(dptr);
 
 	/* Global Variables */
@@ -3668,7 +3667,7 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	/* Shape Language Specific Setup */
 	SetupShapePipeline();
 
-		/*
+	/*
 																		   
 	Create the Local -> View Matrix
 	
@@ -4059,7 +4058,7 @@ extern void TranslationSetup(void)
 	float p = PredatorVisionChangeCounter/65536.0f;
 	float o = 1.0f;
 	p = 1.0f+p;
-	
+
 	if (NAUSEA_CHEATMODE)
 	{
 		p = (GetSin((CloakingPhase/3)&4095))/65536.0f;
@@ -4381,7 +4380,6 @@ void RenderParticle(PARTICLE *particlePtr)
 {
 //	PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
 	int particleSize = particlePtr->Size;
-	
 	{
 		VECTORCH translatedPosition = particlePtr->Position;
 		TranslatePointIntoViewspace(&translatedPosition);
@@ -4423,37 +4421,37 @@ void RenderParticle(PARTICLE *particlePtr)
 			int deltaY = VerticesBuffer[1].Y - VerticesBuffer[0].Y;
 			int splitY = 0;
 
-			if (deltaX>=0)
+			if (deltaX >= 0)
 			{	
-				if (deltaY>=0)
+				if (deltaY >= 0)
 				{
-					if (deltaX>deltaY)
+					if (deltaX > deltaY)
 					{
 						splitY = 1;
 					}
 				}
-				else if (deltaX>-deltaY)
+				else if (deltaX > -deltaY)
 				{
 					splitY = 1;
 				}
 			}
 			else
 			{	
-				if (deltaY>=0)
+				if (deltaY >= 0)
 				{
-					if (-deltaX>deltaY)
+					if (-deltaX > deltaY)
 					{
 						splitY = 1;
 					}
 				}
-				else if (-deltaX>-deltaY)
+				else if (-deltaX > -deltaY)
 				{
 					splitY = 1;
 				}
 			}
 			if (splitY)
 			{
-				if (deltaX>0)
+				if (deltaX > 0)
 				{
 					/* 1 & 2 are more +ve in X */
 					VerticesBuffer[0].X -= particleSize;
@@ -4480,7 +4478,7 @@ void RenderParticle(PARTICLE *particlePtr)
 			}
 			else
 			{
-				if (deltaY>0)
+				if (deltaY > 0)
 				{
 					/* 1 & 2 are more +ve in Y */
 					VerticesBuffer[0].X -= particleSize;

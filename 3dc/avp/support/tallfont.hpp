@@ -94,7 +94,7 @@
 		int HeightPerChar_Val;
 		int SpaceWidth_Val;
 
-		LPDIRECT3DTEXTURE image_ptr;
+		AVPTEXTURE *image_ptr;
 		AW_BACKUPTEXTUREHANDLE hBackup;
 
 		r2size R2Size_OverallImage;
@@ -212,13 +212,8 @@
 		~IndexedFont_Kerned_Column();
 
 		int FullWidthForOffset[ MAX_CHARS_IN_TALLFONT ];
-		
-/*		LPDIRECTDRAWSURFACE GetImagePtr(void) const
-		{
-			return (LPDIRECTDRAWSURFACE) image_ptr;
-		}
-*/
-		LPDIRECT3DTEXTURE image_ptr;
+
+		AVPTEXTURE *image_ptr;
 
 	private:
 		IndexedFont_Kerned_Column
