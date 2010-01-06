@@ -1231,8 +1231,8 @@ SHAPEHEADER *Get_Degraded_Shape(SHAPEHEADER *base_shape)
 	return(array_ptr->shape);
 }
 
-void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_data,VECTORCH *parent_position,MATRIXCH *parent_orientation,int frame_timer, int sequence_type, int subsequence, int render) {
-
+void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_data,VECTORCH *parent_position,MATRIXCH *parent_orientation,int frame_timer, int sequence_type, int subsequence, int render) 
+{
 	KEYFRAME_DATA *sequence_start;
 	SECTION *this_section;
 	SEQUENCE *this_sequence;
@@ -1293,7 +1293,7 @@ void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_dat
 
 		/* For this section, find the interpolated offset and eulers. */
 		this_section_data->Last_World_Offset=this_section_data->World_Offset;
-		
+
 		if (this_section_data->Tweening) {
 			Analyse_Tweening_Data(controller,this_section_data,frame_timer,&(this_section_data->World_Offset),&(this_section_data->RelSecMat));
 		} else {
@@ -1490,7 +1490,7 @@ void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_dat
 			RenderParticle(&particle);
 			D3D_DecalSystem_End();		
 		}
-		
+
 		RenderThisHierarchicalDisplayblock(&dummy_displayblock);						  
 
 	} else if (controller->View_FrameStamp!=GlobalFrameCounter) {
@@ -1830,7 +1830,6 @@ void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_dat
 			}
 		}
 	}
-
 }
 
 void Init_Sequence_Recursion(SECTION_DATA *this_section_data, int sequence_type,int subsequence, int seconds_for_sequence) {

@@ -671,7 +671,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 			while(--numitems);
 			return;
 		}
-	
 	}
 
 	do
@@ -788,7 +787,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						{
 							D3D_ZBufferedGouraudTexturedPolygon_Output(polyPtr,RenderPolygon.Vertices);
 						}
-		  			
 		  			}
 					else
 					{
@@ -3652,8 +3650,7 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 			}
 		}
 	}
-  	
-  	
+
 	ChooseLightingModel(dptr);
 
 	/* Texture Animation Control */
@@ -3951,7 +3948,7 @@ static void FindAlienEnergySource_Recursion(HMODELCONTROLLER *controllerPtr, SEC
 
 void AddHierarchicalShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 {
-	// players gun, player models..
+	// players gun, player, alien, predator models..
 	SHAPEHEADER *shapeheaderptr;
 	SHAPEINSTR *shapeinstrptr;
 
@@ -4030,7 +4027,7 @@ void AddHierarchicalShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 		{
 			TranslateShapeVertices(shapeinstrptr);
 		}
-		
+
 		/* call polygon pipeline */
 	  	ShapePipeline(shapeheaderptr);
 	}
@@ -4069,9 +4066,9 @@ extern void TranslationSetup(void)
 	}
 
 	#if 1
-	ViewMatrix[0+0*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat11)/65536.0f*o;
-	ViewMatrix[1+0*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat21)/65536.0f*o;
-	ViewMatrix[2+0*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat31)/65536.0f*o;
+	ViewMatrix[/*0+0*4*/0] = (float)(Global_VDB_Ptr->VDB_Mat.mat11)/65536.0f*o;
+	ViewMatrix[/*1+0*4*/1] = (float)(Global_VDB_Ptr->VDB_Mat.mat21)/65536.0f*o;
+	ViewMatrix[/*2+0*4*/2] = (float)(Global_VDB_Ptr->VDB_Mat.mat31)/65536.0f*o;
 	#else
 	ViewMatrix[0+0*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat11)/65536.0f;
 	ViewMatrix[1+0*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat21)/65536.0f;
@@ -4079,23 +4076,23 @@ extern void TranslationSetup(void)
 	#endif
 
 	#if 1
-	ViewMatrix[0+1*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat12)*4.0f/(65536.0f*3.0f)*p;
-	ViewMatrix[1+1*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat22)*4.0f/(65536.0f*3.0f)*p;
-	ViewMatrix[2+1*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat32)*4.0f/(65536.0f*3.0f)*p;
+	ViewMatrix[/*0+1*4*/4] = (float)(Global_VDB_Ptr->VDB_Mat.mat12)*4.0f/(65536.0f*3.0f)*p;
+	ViewMatrix[/*1+1*4*/5] = (float)(Global_VDB_Ptr->VDB_Mat.mat22)*4.0f/(65536.0f*3.0f)*p;
+	ViewMatrix[/*2+1*4*/6] = (float)(Global_VDB_Ptr->VDB_Mat.mat32)*4.0f/(65536.0f*3.0f)*p;
 	#else
 	ViewMatrix[0+1*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat12)/(65536.0f);
 	ViewMatrix[1+1*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat22)/(65536.0f);
 	ViewMatrix[2+1*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat32)/(65536.0f);
 	#endif
-	ViewMatrix[0+2*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat13)/65536.0f*CameraZoomScale;
-	ViewMatrix[1+2*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat23)/65536.0f*CameraZoomScale;
-	ViewMatrix[2+2*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat33)/65536.0f*CameraZoomScale;
+	ViewMatrix[/*0+2*4*/8] = (float)(Global_VDB_Ptr->VDB_Mat.mat13)/65536.0f*CameraZoomScale;
+	ViewMatrix[/*1+2*4*/9] = (float)(Global_VDB_Ptr->VDB_Mat.mat23)/65536.0f*CameraZoomScale;
+	ViewMatrix[/*2+2*4*/10] = (float)(Global_VDB_Ptr->VDB_Mat.mat33)/65536.0f*CameraZoomScale;
 
-	RotateVector(&v,&Global_VDB_Ptr->VDB_Mat);
+	RotateVector(&v, &Global_VDB_Ptr->VDB_Mat);
 
-	ViewMatrix[3+0*4] = ((float)-v.vx)*o;
-	ViewMatrix[3+1*4] = ((float)-v.vy)*4.0f/3.0f*p;
-	ViewMatrix[3+2*4] = ((float)-v.vz)*CameraZoomScale;
+	ViewMatrix[/*3+0*4*/3] = ((float)-v.vx)*o;
+	ViewMatrix[/*3+1*4*/7] = ((float)-v.vy)*4.0f/3.0f*p;
+	ViewMatrix[/*3+2*4*/11] = ((float)-v.vz)*CameraZoomScale;
 
 	if (MIRROR_CHEATMODE)
 	{
@@ -5649,13 +5646,12 @@ void DrawWaterFallPoly(VECTORCH *v)
 			VerticesBuffer[a].SpecularR = 0;
 			VerticesBuffer[a].SpecularG = 0;
 			VerticesBuffer[a].SpecularB = 0;
+		}
 
-
-		}	
  		wv+=NormalFrameTime*2;
 		RenderPolygon.NumberOfVertices=4;
 	}
-			
+
 	GouraudTexturedPolygon_ClipWithZ();
 	if(RenderPolygon.NumberOfVertices>=3)
 	{

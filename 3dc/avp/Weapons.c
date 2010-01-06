@@ -2888,7 +2888,6 @@ void PositionPlayersWeapon(void)
 				CreateEulerMatrix(&dir, &mat);
 				TransposeMatrixCH(&mat);
 				MatrixMultiply(&PlayersWeapon.ObMat,&mat,&PlayersWeapon.ObMat);
-	 			 			 
 		 	}
 		}
 	} else {

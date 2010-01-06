@@ -808,10 +808,10 @@ BOOL InitialiseDirect3D()
 
 //	int width = Config_GetInt("[VideoMode]", "Width", 800);
 //	int height = Config_GetInt("[VideoMode]", "Height", 600);
-	int width = 1920;
-	int height = 1080;
+	int width = 1280;
+	int height = 1024;
 	int depth = 32;
-	int defaultDevice = 1;//D3DADAPTER_DEFAULT;
+	int defaultDevice = D3DADAPTER_DEFAULT;
 	bool windowed = false;
 	bool triple_buffer = false;
 
@@ -1189,6 +1189,7 @@ BOOL InitialiseDirect3D()
 	// Setup orthographic projection matrix
 	int standardWidth = 640;
 	int wideScreenWidth = 852;
+	int test = 600;
 
 //	D3DXMatrixOrthoOffCenterLH( &matOrtho, 0.0f, wideScreenWidth, 0.0f, 480, 1.0f, 10.0f);
 	D3DXMatrixOrthoLH( &matOrtho, standardWidth, 480, 1.0f, 10.0f);

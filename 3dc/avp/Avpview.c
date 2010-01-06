@@ -459,8 +459,7 @@ void InteriorType_Body()
 			/* rotate into object space */
 
 			RotateVector(&relativeVelocity,&worldToLocalMatrix);
-		}	 
-		
+		}
 		{
 			int targetingSpeed = 10*NormalFrameTime;
 	

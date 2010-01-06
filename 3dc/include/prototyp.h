@@ -2142,11 +2142,6 @@ typedef struct i_gouraud3dtexturepolygon_scan {
 
 */
 
-#if SupportWindows95
-void ClearScreen(SCREENDESCRIPTORBLOCK *sdb, int Colour);
-#endif
-
-
 void PlatformSpecificShowViewEntry(VIEWDESCRIPTORBLOCK *vdb, SCREENDESCRIPTORBLOCK *sdb);
 void PlatformSpecificShowViewExit(VIEWDESCRIPTORBLOCK *vdb, SCREENDESCRIPTORBLOCK *sdb);
 void AddShape(DISPLAYBLOCK *dblockptr, VIEWDESCRIPTORBLOCK *VDB_Ptr);
@@ -2470,7 +2465,6 @@ void ResetFrameCounter(void);
 void FrameCounterHandler(void);
 
 void* LoadFontIntoDirectDrawSurface(char *fname, IMAGEHEADER *iheader);
-void ClearScreen(SCREENDESCRIPTORBLOCK* sdb, int Colour);
 #ifdef __cplusplus
 #endif // for __cplusplus
 
