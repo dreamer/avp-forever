@@ -28,7 +28,7 @@ extern "C" {
 #include "vision.h"
 #include "avp_menus.h"
 #include "kshape.h"
-#define UseLocalAssert TRUE
+//#define UseLocalAssert TRUE
 
 #include "ourasert.h" 
 
@@ -133,6 +133,7 @@ extern char CommandLineIPAddressString[];
 extern int AvP_MainMenus(void);
 extern int AvP_InGameMenus(void);
 extern int InGameMenusAreRunning(void);
+extern void LoadDeviceAndVideoModePreferences();
 
 #include "VideoModes.h"
 extern DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
@@ -151,7 +152,6 @@ void exit_break_point_fucntion ()
 }
 
 extern void LoadKeyConfiguration();
-void LoadDeviceAndVideoModePreferences();
 
 HINSTANCE AVP_HInstance, hInst;
 int AVP_NCmd;
@@ -186,12 +186,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	InitCentreMouseThread();
 
+	// load AliensVsPredator.cfg
 	Config_Load();
 
-//	LoadDeviceAndVideoModePreferences();
-
 	LoadCDTrackList(); //load list of cd tracks assigned to levels , from a text file
-	LoadVorbisTrackList(); // do the same for any user ogg music files
+	LoadVorbisTrackList(); // do the same for any user ogg vorbis music files
 
 	SetFastRandom();
 	
@@ -406,6 +405,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		ReleaseDirect3D();
 		exit(-1);
 	}
+
+	LoadDeviceAndVideoModePreferences();
 	
 //	InitOptionsMenu(); /* by this time we know all about the video card, etc */
 
@@ -842,6 +843,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	//TimeStampedMessage("after ExitWindowsSystem");
 
 	#endif
+
+	Config_Save();
 
 	// close dx logfile if open (has to be called after all calls to TimeStampedMessage()
 #if debug
