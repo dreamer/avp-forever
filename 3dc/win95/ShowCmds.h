@@ -1,3 +1,6 @@
+#ifndef _included_showcmds_h_ /* Is this your first time? */
+#define _included_showcmds_h_ 1
+
 /* KJL 14:42:10 29/03/98 - ShowCmds.h
 
 	defines the variables that describe the status of the debugging text 
@@ -6,6 +9,11 @@
 	eg. if ShowDebuggingText.FPS == 1, then the frame-rate show be displayed.
 
 */
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 struct DEBUGGINGTEXTOPTIONS
 {
 	unsigned int FPS :1;
@@ -42,4 +50,10 @@ extern int PrintDebuggingText(const char* t, ...);
 extern int ReleasePrintDebuggingText(const char* t, ...);
 #else
 #define PrintDebuggingText(ignore)
+#endif
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
+
 #endif

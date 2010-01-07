@@ -14,9 +14,9 @@
 /* JH 27/1/97 */
 extern "C" {
 #include "comp_shp.h"
-#include "Gameplat.h"
 }
 
+#include "Gameplat.h"
 #include "chnkload.hpp"
 #include "npcsetup.h" /* JH 30/4/97 */
 #include "krender.h"
@@ -101,7 +101,7 @@ BOOL UseMouseCentreing = FALSE;
 #define MainTextPrint 0
 #endif
 
-BOOL KeepMainRifFile=FALSE;
+BOOL KeepMainRifFile = FALSE;
 
 char LevelName[] = {"predbit6\0QuiteALongNameActually"};
 static ELO ELOLevelToLoad = { LevelName };
@@ -158,11 +158,8 @@ int AVP_NCmd;
 
 extern unsigned long TotalMemAllocated;
 
-/* so we can disable/enable stickey keys */
+// so we can disable/enable stickey keys
 STICKYKEYS startupStickyKeys = {sizeof(STICKYKEYS), 0};
-
-//int mainMenu = 1;
-
 STICKYKEYS skOff;
  
 // entry point
@@ -378,7 +375,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	#if debug && 1//!PREDATOR_DEMO
 
 	// windowed mode?
-	if(strstr(command_line, "-w"))
+	if (strstr(command_line, "-w"))
 	{
 		WindowRequestMode = WindowModeSubWindow;
 //		if (!HWAccel)
@@ -397,7 +394,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	/*******	System initialisation **********/
 	
-	/* timer init test */
+	// timer init test
 	timeBeginPeriod(1); 
 
 	InitialiseSystem(hInstance, nCmdShow);
@@ -425,10 +422,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	SoundSys_Start();
 	CDDA_Start();
 	
-	/* kill mouse cursor */
+	// get rid of the mouse cursor
 	SetCursor(NULL);
 
-	/* load language file and setup text string access */
+	// load language file and setup text string access
 	InitTextStrings();
 	
 	BuildMultiplayerLevelNameArray();//sort out multiplayer level names
@@ -546,7 +543,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		Game_Has_Loaded();
 		ResetFrameCounter();
 
-		if(AvP.Network!=I_No_Network)
+		if (AvP.Network!=I_No_Network)
 		{
 			/*Need to choose a starting position for the player , but first we must look
 			through the network messages to find out which generator spots are currently clear*/
@@ -559,13 +556,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		while(AvP.MainLoopRunning) 
 		{
-
-			#if debug
-			#if 0
-			DumpBoundsCheckInfo(DUMPTOSCREEN);
-			#endif
-			#endif
-
 		 	CheckForWindowsMessages();
 			CursorHome();
 
@@ -703,7 +693,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 				}
 			}
 			
-			if(AvP.RestartLevel)
+			if (AvP.RestartLevel)
 			{
 				AvP.RestartLevel=0;
 				AvP.LevelCompleted = 0;
@@ -716,12 +706,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			AvP.LevelCompleted = thisLevelHasBeenCompleted;
 			mainMenu = 1;
 		}
-/*
-		ThisFramesRenderingHasBegun();
-		ColourFillBackBuffer(0);
-		ThisFramesRenderingHasFinished();
-		InGameFlipBuffers();
-*/
+
 		FixCheatModesInUserProfile(UserProfilePtr);
 
 		#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
@@ -780,16 +765,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		Vorbis_CloseSystem(); // stop ogg vorbis player
 		TimeStampedMessage("After CDDA_Stop");
 
-		/* netgame support */
-		#if SupportWindows95 /* call me paranoid */
-		if(AvP.Network != I_No_Network) 
+		// netgame support
+		if (AvP.Network != I_No_Network) 
 		{
 			/* we cleanup and reset our game mode here, at the end of the game loop, as other 
 			clean-up functions need to know if we've just exited a netgame */
 			EndAVPNetGame();
 			//EndOfNetworkGameScreen();
 		}
-		#endif
 
 		//need to get rid of the player rifs before we can clear the memory pool
 				
@@ -860,7 +843,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	#endif
 
-	/* close dx logfile if open (has to be called after all calls to TimeStampedMessage() */
+	// close dx logfile if open (has to be called after all calls to TimeStampedMessage()
 #if debug
 	dx_log_close();
 #endif
@@ -868,10 +851,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
  	CDDA_End();
 	ClearMemoryPool();
 
-	/* restore stickey keys setting */
+	// restore stickey keys setting
 	SystemParametersInfo(SPI_SETSTICKYKEYS, sizeof(STICKYKEYS), &startupStickyKeys, 0);
 
-	/* 'shutdown' timer */
+	// 'shutdown' timer
 	timeEndPeriod(1);
 
 	FinishCentreMouseThread();

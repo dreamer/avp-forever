@@ -1,6 +1,17 @@
 #ifndef _included_AvP_Menus_h_
 #define _included_AvP_Menus_h_
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
+	extern int mainMenu;
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
+
+
 #define MARINE_DEMO 0
 #define PREDATOR_DEMO 0
 #define ALIEN_DEMO 0
@@ -46,7 +57,6 @@ enum MENUSSTATE_ID
 	MENUSSTATE_STARTGAME,
 };
 
-extern int mainMenu;
 int GetAvPMenuState();
 
 enum AVPMENU_ID
