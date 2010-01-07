@@ -112,7 +112,6 @@ extern int VideoRequestMode;
 extern int ZBufferRequestMode;
 extern int RasterisationRequestMode;
 extern int SoftwareScanDrawRequestMode;
-extern int DXMemoryRequestMode;
 
 extern int TotalVideoMemory;
 extern int NumAvailableVideoModes;

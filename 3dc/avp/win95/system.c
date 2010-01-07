@@ -72,7 +72,6 @@ int VideoRequestMode;
 int ZBufferRequestMode;
 int RasterisationRequestMode;
 int SoftwareScanDrawRequestMode;
-int DXMemoryRequestMode;
 WINSCALEXY TopLeftSubWindow;
 WINSCALEXY ExtentXYSubWindow;
 
@@ -266,7 +265,6 @@ int AVP_ChangeDisplayMode
 	ZBufferRequestMode = NewZBufferMode;
 	RasterisationRequestMode = NewRasterisationMode;
 	SoftwareScanDrawRequestMode = NewSoftwareScanDrawMode;
-	DXMemoryRequestMode = NewDXMemoryMode;
 
     VideoMode = VideoRequestMode;
 	WindowMode = WindowRequestMode;
@@ -762,7 +760,7 @@ void IntegrateNewEnvironment()
 
 const char GameDataDirName[20] = {"avp_rifs"};
 const char FileNameExtension[5] =  {".rif"};
- 
+
 void LoadRifFile()
 {
 

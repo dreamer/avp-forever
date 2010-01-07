@@ -9,8 +9,8 @@ extern "C" {
 #include "3dc.h"
 #include "AvP_Menus.h"
 #include "AvP_MP_Config.h"
-#include "networking.h"
 #include "assert.h"
+#include "networking.h"
 
 static ENetHost		*Client = NULL; // if we're a client
 static ENetAddress	ServerAddress;

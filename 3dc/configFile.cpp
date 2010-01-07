@@ -18,26 +18,19 @@ typedef std::map<std::string, std::string> MapValue;
 typedef std::map<std::string, MapValue> MapHeading;
 
 #ifdef _XBOX
-	#define FILENAME "d:\\AliensVsPredator.cfg"
+	const char* FILENAME = "d:\\AliensVsPredator.cfg"
 #else
-	#define FILENAME "AliensVsPredator.cfg"
+	const char* FILENAME = "AliensVsPredator.cfg";
 #endif
 
 MapHeading AvPConfig;
 
 bool Config_Load()
 {
-#ifdef WIN32
-	TCHAR strPath[MAX_PATH];
+	std::string filePath(GetSaveFolderPath());
+	filePath += FILENAME;
 
-	strcpy(strPath, GetSaveFolderPath());
-	strcat(strPath, FILENAME);
-
-	std::ifstream file(strPath);
-
-#else
-	std::ifstream file(FILENAME);
-#endif
+	std::ifstream file(filePath.c_str());
 
 	std::string tempLine;
 	std::string currentHeading;
@@ -52,11 +45,7 @@ bool Config_Load()
 		}
 		else
 		{
-#ifdef WIN32
-			file.open(strPath);
-#else
-			file.open(FILENAME);
-#endif
+			file.open(filePath.c_str());
 			if (!file.is_open())
 			{
 				LogErrorString("Error opening config file!");
@@ -132,12 +121,10 @@ bool Config_Load()
 
 bool Config_Save()
 {
-	TCHAR strPath[MAX_PATH];
+	std::string filePath(GetSaveFolderPath());
+	filePath += FILENAME;
 
-	strcpy(strPath, GetSaveFolderPath());
-	strcat(strPath, FILENAME);
-
-	std::ofstream file(strPath);
+	std::ofstream file(filePath.c_str());
 
 	if (!file.is_open())
 	{
@@ -236,22 +223,13 @@ std::string Config_GetString(const std::string &heading, const std::string &vari
 	}
 }
 
-/* create a new config file if one doesn't exist, with defaults */
+// create a new config file if one doesn't exist, with defaults
 static bool Config_CreateDefault()
 {
-#ifdef WIN32
-	TCHAR strPath[MAX_PATH];
+	std::string filePath(GetSaveFolderPath());
+	filePath += FILENAME;
 
-	strcpy(strPath, GetSaveFolderPath());
-
-	strcat(strPath, FILENAME);
-
-	std::ofstream file(strPath);
-
-#else
-	std::ofstream file(FILENAME);
-#endif
-
+	std::ofstream file(filePath.c_str());
 	if (!file.is_open())
 	{
 		LogErrorString("Couldn't create default config file!");

@@ -5230,7 +5230,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="3dc\avp\win95\winmain.c"
+				RelativePath=".\3dc\avp\win95\winmain.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"

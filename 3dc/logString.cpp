@@ -40,33 +40,19 @@ int StringToInt(const std::string &string)
 
 void ClearLog() 
 {
-#ifdef WIN32
-	TCHAR strPath[MAX_PATH];
+	std::string filePath(GetSaveFolderPath());
+	filePath += logFilename;
 
-	strcpy(strPath, GetSaveFolderPath());
-	strcat( strPath, logFilename.c_str());
-
-	std::ofstream file(strPath, std::ios::out);
-
-#else
 	std::ofstream file(logFilename.c_str(), std::ios::out);
-#endif
 }
 
 void WriteToLog(const std::string &logLine)
 {
-#ifdef WIN32
-	TCHAR strPath[MAX_PATH];
+	std::string filePath(GetSaveFolderPath());
+	filePath += logFilename;
 
-	strcpy(strPath, GetSaveFolderPath());
-	strcat(strPath, logFilename.c_str());
-
-	std::ofstream file(strPath, std::ios::out | std::ios::app);
-#else
 	std::ofstream file(logFilename.c_str(), std::ios::out | std::ios::app);
-#endif
 
-//	std::ofstream file(logFilename.c_str(), std::ios::out | std::ios::app);
 	file << logLine;
 #if _DEBUG
 	OutputDebugString(logLine.c_str());

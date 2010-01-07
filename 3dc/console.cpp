@@ -303,9 +303,8 @@ void Con_RemoveTypedChar()
 	}
 }
 
-void Con_DrawQuadTest(int x, int y, int width, int height)
+void Con_DrawQuadTest(int x, int y, int width, int height, int colour)
 {
-#if 1
 	D3DXMATRIX matTranslation;
     D3DXMATRIX matScaling;
     D3DXMATRIX matTransform;
@@ -317,7 +316,7 @@ void Con_DrawQuadTest(int x, int y, int width, int height)
 	D3DXMatrixTranslation (&matTranslation, (float)X, (float)Y, 0.0f);
     matTransform = matScaling * matTranslation;
 
-	D3DCOLOR colour = D3DCOLOR_ARGB(255, 38, 80, 145);
+//	D3DCOLOR colour = colour;//D3DCOLOR_ARGB(255, 38, 80, 145);
 
 	// bottom left
 	conVerts[0].x = -1.0f;
@@ -361,7 +360,6 @@ void Con_DrawQuadTest(int x, int y, int width, int height)
 	{
 		OutputDebugString("DrawPrimitiveUP failed\n");
 	}
-#endif
 }
 
 void Con_Draw()
@@ -390,13 +388,14 @@ void Con_Draw()
 		console.isOpen = true;
 
 	// draw the background quad
-//	DrawQuad(console.xPos, console.yPos, console.width, console.height, D3DCOLOR_ARGB(255, 38, 80, 145));
-	Con_DrawQuadTest(console.xPos, console.yPos, console.width, console.height);
+	DrawQuad(console.xPos, console.yPos, console.width, console.height, D3DCOLOR_ARGB(255, 38, 80, 145));
+//	Con_DrawQuadTest(console.xPos, console.yPos, console.width, console.height, D3DCOLOR_ARGB(255, 38, 80, 145));
 
 	if (console.height > 0)
 	{
 		// draw the outline bar that runs along the bottom of the console
 		DrawQuad(console.xPos, console.yPos+console.height, console.width, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
+		//Con_DrawQuadTest(console.xPos, console.yPos + console.height, console.width, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
 	}
 
 	int charCount = 0;
@@ -422,13 +421,13 @@ void Con_Draw()
 		xOffset = 0;
 		charWidth = 0;
 
-		Font_DrawText(console.text[i].c_str(), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
-#if 0
+//		Font_DrawText(console.text[i].c_str(), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
+#if 1
 		for (int j = 0; j < console.text[i].length(); j++)
 		{
 			//if ((j * CHAR_WIDTH) > console.lineWidth) break;
 			charWidth = RenderSmallChar(console.text.at(i).at(j), console.indent + /*(xOffset * j)*/xOffset, y, ONE_FIXED, ONE_FIXED / 2, ONE_FIXED, ONE_FIXED);
-			Font_DrawText(console.text.at(i).at(j), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
+			//Font_DrawText(console.text.at(i).at(j), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 			xOffset+=charWidth;
 		}
 #endif

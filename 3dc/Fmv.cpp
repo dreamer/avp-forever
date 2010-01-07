@@ -6,10 +6,6 @@
 	#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
 #endif
 
-#include "TheoraPlayer.h"
-TheoraVideoManager *mgr;
-TheoraVideoClip *clip;
-
 #include "d3_func.h"
 #include <fstream>
 #include <map>

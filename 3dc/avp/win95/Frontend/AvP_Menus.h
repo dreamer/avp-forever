@@ -46,6 +46,7 @@ enum MENUSSTATE_ID
 	MENUSSTATE_STARTGAME,
 };
 
+extern int mainMenu;
 int GetAvPMenuState();
 
 enum AVPMENU_ID

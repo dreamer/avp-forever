@@ -236,7 +236,7 @@ static const char* MultiplayerConfigurationName=0; //ditto
 
 extern int DebuggingCommandsActive;
 
-extern int mainMenu;
+int mainMenu = 1;
 
 int GetAvPMenuState()
 {
@@ -489,6 +489,7 @@ extern int InGameMenusAreRunning(void)
 {
 	return (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS);
 }
+
 extern void AvP_UpdateMenus(void)
 {
 //      DrawAvPMenuGfx(AVPMENUGFX_BIG_AVP_LOGO,50,50,16384);

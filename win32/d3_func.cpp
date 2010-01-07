@@ -17,6 +17,7 @@ extern "C" {
 #include "awTexLd.h"
 #include "module.h"
 #include "d3_func.h"
+#include "avp_menus.h"
 
 #include "kshape.h"
 #include "eax.h"
@@ -672,7 +673,7 @@ extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
 #define MAX_NO_FMVTEXTURES 10
 extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 
-extern int mainMenu;
+//extern int mainMenu;
 
 // size of vertex and index buffers
 const int MAX_VERTEXES = 4096;
@@ -1155,13 +1156,6 @@ BOOL InitialiseDirect3D()
 
 	ScreenDescriptorBlock.SDB_ProjX     = width/2;
 	ScreenDescriptorBlock.SDB_ProjY     = height/2;
-
-	int fov = 90;
-
-	float testW = 1.3 * ( cosf(fov/2.0f)/sinf(fov/2.0f) );
-
-//	w = aspect * ( cosf(fov/2.0f)/sinf(fov/2.0f) );
-//h = cosf(fov/2.0f)/sinf(fov/2.0f);
 
 	ScreenDescriptorBlock.SDB_ClipLeft  = 0;
 	ScreenDescriptorBlock.SDB_ClipRight = width;

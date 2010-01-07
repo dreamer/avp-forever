@@ -1,14 +1,17 @@
+#ifndef _included_gameplat_h_ /* Is this your first time? */
+#define _included_gameplat_h_ 1
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 /* 
 	This contains project platfrom specifc externs 
 	and prototypes. Only valid when we are calling one
 	p\p function from another.
 */
 
-
-
 extern void LoadRifFile();
-
-
 
 /* record of the histance passed to winmain */
 
@@ -34,6 +37,9 @@ extern int WindowMode;
 extern int WindowRequestMode;
 extern int VideoRequestMode;
 extern int ZBufferRequestMode;
-extern int RasterisationRequestMode;
-extern int SoftwareScanDrawRequestMode;
-extern int DXMemoryRequestMode;
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
+
+#endif

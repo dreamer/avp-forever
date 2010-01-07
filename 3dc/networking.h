@@ -1,5 +1,9 @@
-#ifndef _NETWORKING_
-#define _NETWORKING_
+#ifndef _NETWORKING_H_
+#define _NETWORKING_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
 
 #include "module.h"
 #include "stratdef.h"
@@ -12,6 +16,7 @@ int Net_ConnectingToSession();
 int Net_Send(int fromID, int toID, int flags, uint8_t *lpData, int dataSize);
 int Net_Receive(int *fromID, int *toID, int flags, uint8_t *lplpData, int *dataSize);
 int Net_SendSystemMessage(int messageType, int idFrom, int idTo, uint8_t *lpData, int dataSize);
+int Net_InitLobbiedGame();
 
 extern int glpDP;
 extern int AvPNetID;
@@ -198,5 +203,9 @@ typedef struct DPMSG_CREATEPLAYERORGROUP
 #pragma pack()
 
 extern PlayerDetails thisClientPlayer;
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif // #ifndef _NETWORKING_

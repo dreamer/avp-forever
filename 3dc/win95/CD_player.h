@@ -1,5 +1,12 @@
+#ifndef CD_PLAYER_H
+#define CD_PLAYER_H
+
 /* KJL 12:40:35 07/05/98 - This is code derived from Patrick's original stuff &
 moved into it's own file. */
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
 
 
 /* Patrick 10/6/97 --------------------------------------------------------------
@@ -103,7 +110,10 @@ int PlatGetNumberOfCDTracks(int* numTracks);
   whilst the call back is provided for intercepting WIN95 MCI call backs. 
   ----------------------------------------------------------------------------*/
 extern void PlatCDDAManagementCallBack(WPARAM flags, LONG deviceId);
-
-
-
 extern int CDPlayerVolume;
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
+
+#endif
