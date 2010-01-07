@@ -48,6 +48,15 @@ static HRESULT LastError;
 
 D3DINFO d3d;
 
+// byte order macros for A8R8G8B8 d3d texture
+enum 
+{
+	BO_BLUE,
+	BO_GREEN,
+	BO_RED,
+	BO_ALPHA
+};
+
 /* TGA header structure */
 #pragma pack(1)
 struct TGA_HEADER
@@ -286,6 +295,37 @@ LPDIRECT3DTEXTURE8 CreateFmvTexture(int *width, int *height, int usage, int pool
 	}
 
 	return destTexture;
+}
+
+// removes pure red colour from a texture. used to remove red outline grid on small font texture.
+// we remove the grid as it can sometimes bleed onto text when we use texture filtering.
+void DeRedTexture(D3DTEXTURE texture)
+{
+	D3DLOCKED_RECT	lock;
+
+	LastError = texture->LockRect(0, &lock, NULL, NULL );
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return;
+	}
+
+	uint8_t *destPtr = NULL;
+
+	for (int y = 0; y < 256; y++)
+	{
+		destPtr = (((uint8_t*)lock.pBits) + y*lock.Pitch);
+
+		for (int x = 0; x < 256; x++)
+		{
+			if ((destPtr[BO_RED] == 255) && (destPtr[BO_BLUE] == 0) && (destPtr[BO_GREEN] == 0))
+			{
+				destPtr[BO_RED] = 0;
+			}
+
+			destPtr += sizeof(uint32_t); // move over an entire 4 byte pixel
+		}
+	}
 }
 
 // use this to make textures from non power of two images

@@ -114,6 +114,7 @@ void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 void ReleaseD3DTexture(D3DTEXTURE *d3dTexture);
 void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture);
 void CreateScreenShotImage();
+void DeRedTexture(D3DTEXTURE texture);
 D3DTEXTURE CheckAndLoadUserTexture(const char *fileName, int *width, int *height);
 D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool);
 

@@ -235,7 +235,7 @@ int ChunkVector::norm()
   
   if(modulos == 0)return(0);
 
-  x /=modulos;
+  x /= modulos;
   y /= modulos;
   z /= modulos;
 
@@ -1123,7 +1123,6 @@ void ChunkAnimSequence::UpdateNormalsAndExtents(ChunkShape const * cs,List<int>*
 			{
 				vert_in_bb[cp->vert_ind[j]]=1;
 			}
-		
 		}
 	}
 	for(i=0;i<NumFrames;i++)

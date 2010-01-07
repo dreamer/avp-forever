@@ -16,7 +16,6 @@ extern "C" {
 #include "comp_shp.h"
 }
 
-#include "Gameplat.h"
 #include "chnkload.hpp"
 #include "npcsetup.h" /* JH 30/4/97 */
 #include "krender.h"
@@ -29,22 +28,15 @@ extern "C" {
 #include "avp_menus.h"
 #include "kshape.h"
 //#define UseLocalAssert TRUE
-
 #include "ourasert.h" 
-
 #include "ffstdio.h" // fast file stdio
-
 #include "davehook.h"
-
 #include "showcmds.h"
-
 #include "consbind.hpp"
-
 #include "AvpReg.hpp"
 #include "mempool.h"
 #include "GammaControl.h"
 #include "avp_intro.h"
-
 #include "CDTrackSelection.h"
 #include "CD_Player.h"
 

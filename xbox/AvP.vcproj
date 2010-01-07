@@ -3686,7 +3686,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\main_xbox.c">
+				RelativePath=".\src\main_xbox.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\Map.c">

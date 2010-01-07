@@ -44,7 +44,7 @@ extern BOOL copy_preprocessed_to_shapeheader (
 extern BOOL copy_sprite_to_shapeheader (RIFFHANDLE, SHAPEHEADER *& shphd,Sprite_Header_Chunk* shc, int listpos = GLS_NOTINLIST);
 
 
-extern BOOL copy_to_map6(Object_Chunk *,MAPBLOCK6*, int shplst_pos);
+// bjd - not used // extern BOOL copy_to_map6(Object_Chunk *,MAPBLOCK6*, int shplst_pos);
 
 extern void merge_polygons_in_chunkshape (ChunkShape & shp, Shape_Merge_Data_Chunk * smdc);
 

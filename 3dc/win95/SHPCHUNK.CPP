@@ -126,6 +126,7 @@ Shape_Chunk::Shape_Chunk (Chunk_With_Children * parent, ChunkShape &shp_dat)
 	//calculate the shape's centre and radius_about_centre
 	shape_data_store->centre=(shape_data_store->min+shape_data_store->max)/2;
 	shape_data_store->radius_about_centre=0;
+
 	for(int i=0;i<shape_data_store->num_verts;i++)
 	{
 		float length = (float) mod(shape_data_store->v_list[i]-shape_data_store->centre);
@@ -528,7 +529,6 @@ BOOL Shape_Chunk::update_my_chunkshape (ChunkShape & cshp)
 	{
 		new Shape_Centre_Chunk(this);
 	}	
-	
 
 	return TRUE;
 }
@@ -581,7 +581,6 @@ Shape_Vertex_Chunk::Shape_Vertex_Chunk(Shape_Chunk * parent, const char * vtdata
 		parent->shape_data_store->v_list[i] = *((ChunkVectorInt *) vtdata );
 		vtdata+=sizeof(ChunkVectorInt);
 	}
-	
 }
 
 
@@ -601,7 +600,6 @@ Shape_Vertex_Chunk::Shape_Vertex_Chunk(Shape_Sub_Shape_Chunk * parent, const cha
 		parent->shape_data_store->v_list[i] = *((ChunkVectorInt *) vtdata );
 		vtdata+=sizeof(ChunkVectorInt);
 	}
-	
 }
 
 
@@ -619,7 +617,6 @@ Shape_Vertex_Chunk::Shape_Vertex_Chunk(Anim_Shape_Frame_Chunk * parent, const ch
 		v_list[i] = *((ChunkVectorInt *) vtdata );
 		vtdata+=sizeof(ChunkVectorInt);
 	}
-	
 }
 
 BOOL Shape_Vertex_Chunk::output_chunk (HANDLE &hand)
@@ -637,7 +634,6 @@ BOOL Shape_Vertex_Chunk::output_chunk (HANDLE &hand)
 	if (!ok) return FALSE;
 
 	return TRUE;
-		
 }
 
 void Shape_Vertex_Chunk::fill_data_block(char * data_start)
@@ -682,7 +678,6 @@ Shape_Vertex_Normal_Chunk::Shape_Vertex_Normal_Chunk(Shape_Chunk * parent, const
 		parent->shape_data_store->v_normal_list[i] = *((ChunkVectorFloat *) vtdata);
 		vtdata+=sizeof(ChunkVectorFloat);
 	}
-	
 }
 
 Shape_Vertex_Normal_Chunk::Shape_Vertex_Normal_Chunk(Shape_Sub_Shape_Chunk * parent, const char * vtdata , size_t vtsize)
@@ -699,7 +694,6 @@ Shape_Vertex_Normal_Chunk::Shape_Vertex_Normal_Chunk(Shape_Sub_Shape_Chunk * par
 		parent->shape_data_store->v_normal_list[i] = *((ChunkVectorFloat *) vtdata );
 		vtdata+=sizeof(ChunkVectorFloat);
 	}
-	
 }
 
 BOOL Shape_Vertex_Normal_Chunk::output_chunk (HANDLE &hand)
@@ -717,7 +711,6 @@ BOOL Shape_Vertex_Normal_Chunk::output_chunk (HANDLE &hand)
 	if (!ok) return FALSE;
 
 	return TRUE;
-		
 }
 
 void Shape_Vertex_Normal_Chunk::fill_data_block(char * data_start)
@@ -735,7 +728,6 @@ void Shape_Vertex_Normal_Chunk::fill_data_block(char * data_start)
 		*((ChunkVectorFloat *) data_start ) = vert_norm_data[i];
 		data_start+=sizeof(ChunkVectorFloat);
 	}
-
 }
 /////////////////////////////////////////
 
@@ -762,7 +754,6 @@ Shape_Polygon_Normal_Chunk::Shape_Polygon_Normal_Chunk(Shape_Chunk * parent, con
 		parent->shape_data_store->p_normal_list[i] = *((ChunkVectorFloat *) pndata  );
 		pndata+=sizeof(ChunkVectorFloat);
 	}
-	
 }
 
 Shape_Polygon_Normal_Chunk::Shape_Polygon_Normal_Chunk(Shape_Sub_Shape_Chunk * parent, const char * pndata , size_t pnsize)
@@ -779,7 +770,6 @@ Shape_Polygon_Normal_Chunk::Shape_Polygon_Normal_Chunk(Shape_Sub_Shape_Chunk * p
 		parent->shape_data_store->p_normal_list[i] = *((ChunkVectorFloat *) pndata  );
 		pndata+=sizeof(ChunkVectorFloat);
 	}
-
 }
 
 Shape_Polygon_Normal_Chunk::Shape_Polygon_Normal_Chunk(Anim_Shape_Frame_Chunk * parent, const char * pndata , size_t pnsize)
@@ -796,7 +786,6 @@ Shape_Polygon_Normal_Chunk::Shape_Polygon_Normal_Chunk(Anim_Shape_Frame_Chunk * 
 		p_normal_list[i] = *((ChunkVectorFloat *) pndata  );
 		pndata+=sizeof(ChunkVectorFloat);
 	}
-	
 }
 
 BOOL Shape_Polygon_Normal_Chunk::output_chunk (HANDLE &hand)
@@ -814,7 +803,6 @@ BOOL Shape_Polygon_Normal_Chunk::output_chunk (HANDLE &hand)
 	if (!ok) return FALSE;
 
 	return TRUE;
-		
 }
 
 void Shape_Polygon_Normal_Chunk::fill_data_block(char * data_start)
@@ -832,7 +820,6 @@ void Shape_Polygon_Normal_Chunk::fill_data_block(char * data_start)
 		*(ChunkVectorFloat *) data_start  = poly_norm_data[i];
 		data_start+=sizeof(ChunkVectorFloat);
 	}
-
 }
 
 /////////////////////////////////////////
@@ -872,9 +859,7 @@ Shape_Polygon_Chunk::Shape_Polygon_Chunk (Shape_Chunk * parent, const char * pda
 			parent->shape_data_store->poly_list[i].vert_ind[j] = *((int *) (pdata + (36*i) + 16 + (j*4)));
 			parent->shape_data_store->poly_list[i].num_verts++;
 		}
-
 	}
-
 }
 
 Shape_Polygon_Chunk::Shape_Polygon_Chunk (Shape_Sub_Shape_Chunk * parent, const char * pdata, size_t psize)
@@ -902,9 +887,7 @@ Shape_Polygon_Chunk::Shape_Polygon_Chunk (Shape_Sub_Shape_Chunk * parent, const 
 			parent->shape_data_store->poly_list[i].vert_ind[j] = *((int *) (pdata + (36*i) + 16 + (j*4)));
 			parent->shape_data_store->poly_list[i].num_verts++;
 		}
-
 	}
-
 }
 
 Shape_Polygon_Chunk::Shape_Polygon_Chunk (Console_Shape_Chunk * parent, const char * pdata, size_t psize)
@@ -931,9 +914,7 @@ Shape_Polygon_Chunk::Shape_Polygon_Chunk (Console_Shape_Chunk * parent, const ch
 			poly_list[i].vert_ind[j] = *((int *) (pdata + (36*i) + 16 + (j*4)));
 			poly_list[i].num_verts++;
 		}
-
 	}
-
 }
 
 BOOL Shape_Polygon_Chunk::output_chunk (HANDLE &hand)

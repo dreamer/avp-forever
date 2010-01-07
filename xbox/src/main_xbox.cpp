@@ -6,13 +6,14 @@
 #include "stratdef.h"
 #include "gamedef.h"
 #include "gameplat.h"
-
 #include "bh_types.h"
 #include "usr_io.h"
 #include "font.h"
 
 /* JH 27/1/97 */
+extern "C" {
 #include "comp_shp.h"
+}
 
 #include "chnkload.hpp"
 #include "npcsetup.h" /* JH 30/4/97 */
@@ -25,23 +26,18 @@
 #include "vision.h"
 #include "avp_menus.h"
 #include "kshape.h"
-#define UseLocalAssert Yes
-
-#include "ourasert.h"
-
+//#define UseLocalAssert TRUE
+#include "ourasert.h" 
 #include "ffstdio.h" // fast file stdio
-
 #include "davehook.h"
-
 #include "showcmds.h"
-
 #include "consbind.hpp"
-
 #include "AvpReg.hpp"
 #include "mempool.h"
 #include "GammaControl.h"
-
+#include "avp_intro.h"
 #include "CDTrackSelection.h"
+#include "CD_Player.h"
 
 /*------------Patrick 1/6/97---------------
 New sound system
@@ -51,23 +47,23 @@ New sound system
 #define FRAMEAV 100
 
 #include "AvP_UserProfile.h"
+#include "avp_menus.h"
+#include "configFile.h"
+#include "vorbisPlayer.h"
+#include "networking.h"
+#include "avpview.h"
+
+#define PROFILING_ON 0
+#if PROFILING_ON
+#include "pentime.h"
+#endif
 
 /*
 
  externs for commonly used global variables and arrays
 
 */
-
-extern int FrameRate;
-
-/* Extern for global keyboard buffer */
-extern unsigned char KeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
-//extern unsigned char DebouncedKeyboardInput[];
-unsigned char DebouncedKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
-extern unsigned char GotAnyKey;
-extern unsigned char DebouncedGotAnyKey;
-
-extern int NumActiveBlocks;
+extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 
 #if debug
 #define MainTextPrint 1
@@ -75,6 +71,11 @@ extern int alloc_cnt, deall_cnt;
 extern int ItemCount;
 int DebugFontLoaded = 0;
 
+extern "C" {
+
+extern int PrintDebuggingText(const char* t, ...);
+extern int WindowRequestMode;
+extern int FrameRate;
 extern BOOL ForceLoad_Alien;
 extern BOOL ForceLoad_Marine;
 extern BOOL ForceLoad_Predator;
@@ -86,62 +87,69 @@ extern BOOL ForceLoad_Xenoborg;
 extern BOOL ForceLoad_Pretorian;
 extern BOOL ForceLoad_SentryGun;
 
+BOOL UseMouseCentreing = FALSE;
 #else
 #define MainTextPrint 0
 #endif
 
-BOOL KeepMainRifFile=FALSE;
-
-extern void LoadKeyConfiguration();
-extern void DeInitialisePlayer();
-
-extern int AvP_MainMenus(void);
-extern int AvP_InGameMenus(void);
-
-extern IngameKeyboardInput_ClearBuffer(void);
-
-HINSTANCE AVP_HInstance, hInst;
-int AVP_NCmd;
-
-extern unsigned long TotalMemAllocated;
+BOOL KeepMainRifFile = FALSE;
 
 char LevelName[] = {"predbit6\0QuiteALongNameActually"};
 static ELO ELOLevelToLoad = { LevelName };
 
-int QuickStartMultiplayer=1;
+int VideoModeNotAvailable = 0;
+int QuickStartMultiplayer = 1;
 
-int VideoModeNotAvailable=0;
-
+extern HWND hWndMain;
+extern int WindowMode;
 extern int DebuggingCommandsActive;
-
+extern void dx_log_close();
+extern void TimeStampedMessage(char *stringPtr);
+extern void ThisFramesRenderingHasBegun(void);
+extern void ThisFramesRenderingHasFinished(void);
+extern void ScanImagesForFMVs();
+extern void RestartLevel();
+extern void ResetEaxEnvironment(void);
+extern void ReleaseAllFMVTextures();
+extern void MinimalNetCollectMessages(void);
+extern void InitCentreMouseThread();
+extern void IngameKeyboardInput_ClearBuffer(void);
+extern void Game_Has_Loaded(void);
+extern void FinishCentreMouseThread();
+extern void DoCompletedLevelStatisticsScreen(void);
+extern void DeInitialisePlayer();
 extern void BuildMultiplayerLevelNameArray();
-void LoadDeviceAndVideoModePreferences();
-void CDDA_Start(void);
+extern void EmptyUserProfilesList(void);
+extern char CommandLineIPAddressString[];
+extern int AvP_MainMenus(void);
+extern int AvP_InGameMenus(void);
+extern int InGameMenusAreRunning(void);
+extern void LoadDeviceAndVideoModePreferences();
 
+#include "VideoModes.h"
+extern DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
+extern struct DEBUGGINGTEXTOPTIONS ShowDebuggingText;
 
 void exit_break_point_fucntion ()
 {
-	#if debug
+#if debug
 	if (WindowMode == WindowModeSubWindow)
 	{
 		__asm int 3;
 	}
-	#endif
+#endif
 }
 
-#include "VideoModes.h"
-extern DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
-
-char buf[100];
 extern int GotMouse;
+}
 
-int mainMenu = 1;
+static char buf[100];
 
 void _cdecl main()
 {
 	char command_line[200 + 1];
 	char * instr;
-	int level_to_load = I_Num_Environments;
+	I_AVP_ENVIRONMENTS level_to_load = I_Num_Environments;
 
 	_controlfp(_PC_24,_MCW_PC); // bjd - CHECK
 /*
@@ -362,7 +370,7 @@ void _cdecl main()
 	#endif
 
 	Env_List[0] = &(ELOLevelToLoad);
-	level_to_load = 0;
+	level_to_load = I_Gen1;
 
 	/*******	System initialisation **********/
 
@@ -443,7 +451,7 @@ void _cdecl main()
 
 
 		/* Check Gamma Settings are correct after video mode change */
-		InitialiseGammaSettings(RequestedGammaSetting);
+//bjd		InitialiseGammaSettings(RequestedGammaSetting);
 
 		/**** init the chunk loaders ***************/
 

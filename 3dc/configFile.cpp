@@ -18,7 +18,7 @@ typedef std::map<std::string, std::string> MapValue;
 typedef std::map<std::string, MapValue> MapHeading;
 
 #ifdef _XBOX
-	const char* FILENAME = "d:\\AliensVsPredator.cfg"
+	const char* FILENAME = "d:\\AliensVsPredator.cfg";
 #else
 	const char* FILENAME = "AliensVsPredator.cfg";
 #endif

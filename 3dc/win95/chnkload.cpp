@@ -483,7 +483,7 @@ RIFFHANDLE load_rif (const char * fname)
 	RIFFHANDLE h = current_rif_handle = new _RifHandle;
 	h->fc = Env_Chunk = fc;
 	
-	Chunk * pChunk = fc->lookup_single_child("REBENVDT");
+	Chunk * pChunk = fc->lookup_single_child("REBENVDT"); // Environment_Data_Chunk
 	if (pChunk)
 	{
 		h->envd = (Environment_Data_Chunk *)pChunk;
@@ -2851,7 +2851,7 @@ BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Heade
 }
 
 
-
+#if 0 // bjd - not used
 BOOL copy_to_map6(Object_Chunk * ob,MAPBLOCK6* mapblock, int shplst_pos)
 {
 	
@@ -2944,8 +2944,7 @@ BOOL copy_to_map6(Object_Chunk * ob,MAPBLOCK6* mapblock, int shplst_pos)
 
 	return TRUE;
 }
-
-
+#endif
 
 
 
