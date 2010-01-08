@@ -94,14 +94,14 @@ extern IMAGEHEADER ImageHeaderArray[];
 #endif
 
 int FmvSoundVolume = 65536/512;
-int MoviesAreActive;
+int MoviesAreActive = 1;
 int IntroOutroMoviesAreActive = 1;
 int VolumeOfNearestVideoScreen = 0;
 int PanningOfNearestVideoScreen = 0;
 
 #define MAX_NO_FMVTEXTURES 10
 FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
-int NumberOfFMVTextures;
+int NumberOfFMVTextures = 0;
 
 int FmvColourRed;
 int FmvColourGreen;
@@ -196,7 +196,7 @@ int textureHeight = 0;
 int frameWidth = 0;
 int frameHeight = 0;
 th_ycbcr_buffer buffer;
-HANDLE callbackEvent;
+HANDLE callbackEvent = NULL;
 D3DTEXTURE mDisplayTexture = NULL;
 HRESULT LastError;
 HANDLE decodeThreadHandle = NULL;
@@ -205,7 +205,7 @@ CRITICAL_SECTION frameCriticalSection;
 CRITICAL_SECTION audioCriticalSection;
 OggStream *video = NULL;
 OggStream *audio = NULL;
-StreamingAudioBuffer *fmvAudioStream;
+StreamingAudioBuffer *fmvAudioStream = NULL;
 uint16_t *audioDataBuffer = NULL;
 int audioDataBufferSize = 0;
 uint8_t *audioData = NULL;
@@ -213,6 +213,8 @@ StreamMap mStreams;
 ogg_int64_t mGranulepos;
 
 VorbisCodec *menuMusic = NULL;
+
+RingBuffer *ringBuffer = NULL;
 
 // standalone
 void TheoraInitForData(OggStream *stream)
@@ -484,12 +486,13 @@ unsigned int __stdcall AudioGrabThread(void *args)
 		{
 //			EnterCriticalSection(&audioCriticalSection);
 
-			int readableAudio = RingBuffer_GetReadableSpace();
+			int readableAudio = ringBuffer->GetReadableSize();//RingBuffer_GetReadableSpace();
 
 			// we can fill a buffer
 			if (readableAudio >= fmvAudioStream->bufferSize)
 			{
-				RingBuffer_ReadData(audioData, fmvAudioStream->bufferSize);
+				//RingBuffer_ReadData(audioData, fmvAudioStream->bufferSize);
+				ringBuffer->ReadData(audioData, fmvAudioStream->bufferSize);
 				AudioStream_WriteData(fmvAudioStream, audioData, fmvAudioStream->bufferSize);
 
 //					sprintf(buf, "send %d bytes to xaudio2\n", fmvAudioStream->bufferSize);
@@ -622,14 +625,15 @@ unsigned int __stdcall TheoraDecodeThread(void *args)
 	*/
 					EnterCriticalSection(&audioCriticalSection);
 
-					int freeSpace = RingBuffer_GetWritableSpace();
+					int freeSpace = ringBuffer->GetWritableSize();//RingBuffer_GetWritableSpace();
 
 					// Sleep here if we cant fill the ring buffer?
 	#if 1
 					// if we can't fit all our data..
 					if (audioSize > freeSpace)
 					{
-						while (audioSize > RingBuffer_GetWritableSpace())
+						//while (audioSize > RingBuffer_GetWritableSpace())
+						while (audioSize > ringBuffer->GetWritableSize())
 						{
 							// little bit of insurance in case we get stuck in here
 							if (!fmvPlaying)
@@ -642,7 +646,8 @@ unsigned int __stdcall TheoraDecodeThread(void *args)
 						//OutputDebugString(buf);
 					}
 	#endif
-					RingBuffer_WriteData((uint8_t*)&audioDataBuffer[0], audioSize);
+					//RingBuffer_WriteData((uint8_t*)&audioDataBuffer[0], audioSize);
+					ringBuffer->WriteData((uint8_t*)&audioDataBuffer[0], audioSize);
 
 	//					sprintf(buf, "send %d bytes to ring buffer\n", audioSize);
 	//					OutputDebugString(buf);
@@ -723,7 +728,7 @@ int OpenTheoraVideo(const char *fileName, int playMode = PLAYONCE)
 		return -1;
 	}
 
-	/* initialise our state struct in preparation for getting some data */
+	// initialise our state struct in preparation for getting some data
 	int ret = ogg_sync_init(&state);
 	assert(ret == 0);
 
@@ -763,7 +768,8 @@ int OpenTheoraVideo(const char *fileName, int playMode = PLAYONCE)
 
 		// init some temp audio data storage
 		audioData = new uint8_t[fmvAudioStream->bufferSize];
-		RingBuffer_Init(fmvAudioStream->bufferSize * fmvAudioStream->bufferCount);
+//		RingBuffer_Init(fmvAudioStream->bufferSize * fmvAudioStream->bufferCount);
+		ringBuffer = new RingBuffer(fmvAudioStream->bufferSize * fmvAudioStream->bufferCount);
 	}
 
 	if (video)
@@ -880,7 +886,8 @@ int CloseTheoraVideo()
 		audioDataBufferSize = 0;
 	}
 
-	RingBuffer_Unload();
+//	RingBuffer_Unload();
+	delete ringBuffer;
 
 	frameWidth = 0;
 	frameHeight = 0;

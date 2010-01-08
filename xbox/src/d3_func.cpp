@@ -49,7 +49,7 @@ static HRESULT LastError;
 D3DINFO d3d;
 
 // byte order macros for A8R8G8B8 d3d texture
-enum 
+enum
 {
 	BO_BLUE,
 	BO_GREEN,
@@ -304,7 +304,7 @@ void DeRedTexture(D3DTEXTURE texture)
 	D3DLOCKED_RECT	lock;
 
 	LastError = texture->LockRect(0, &lock, NULL, NULL );
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return;
@@ -325,6 +325,13 @@ void DeRedTexture(D3DTEXTURE texture)
 
 			destPtr += sizeof(uint32_t); // move over an entire 4 byte pixel
 		}
+	}
+
+	LastError = texture->UnlockRect(0);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return;
 	}
 }
 

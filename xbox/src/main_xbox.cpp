@@ -27,7 +27,7 @@ extern "C" {
 #include "avp_menus.h"
 #include "kshape.h"
 //#define UseLocalAssert TRUE
-#include "ourasert.h" 
+#include "ourasert.h"
 #include "ffstdio.h" // fast file stdio
 #include "davehook.h"
 #include "showcmds.h"
@@ -70,6 +70,9 @@ extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern int alloc_cnt, deall_cnt;
 extern int ItemCount;
 int DebugFontLoaded = 0;
+#else
+#define MainTextPrint 0
+#endif
 
 extern "C" {
 
@@ -88,10 +91,6 @@ extern BOOL ForceLoad_Pretorian;
 extern BOOL ForceLoad_SentryGun;
 
 BOOL UseMouseCentreing = FALSE;
-#else
-#define MainTextPrint 0
-#endif
-
 BOOL KeepMainRifFile = FALSE;
 
 char LevelName[] = {"predbit6\0QuiteALongNameActually"};
@@ -171,7 +170,7 @@ void _cdecl main()
 
 	avp_GetCommandLineArgs(command_line, 200);
 
-	/**** 
+	/****
 		init game now ONLY sets up varibles for the whole
 		game. If you want to put something in it it must
 		be something that only needs to be called once
@@ -481,6 +480,8 @@ void _cdecl main()
 
   			AvP.CurrentEnv = AvP.StartingEnv = level_to_load;
   		}
+		#else
+			AvP.CurrentEnv = AvP.StartingEnv = I_Gen1;
 		#endif
 
 		LoadRifFile(); /* sets up a map*/
@@ -841,7 +842,7 @@ BOOL ExitWindowsSystem(void)
 }
 
 BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
-{ 
+{
 	return 1;
 }
 

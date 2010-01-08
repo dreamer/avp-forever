@@ -6,7 +6,6 @@
 #include "stratdef.h"
 #include "gamedef.h"
 #include "gameplat.h"
-
 #include "bh_types.h"
 #include "usr_io.h"
 #include "font.h"
@@ -71,6 +70,9 @@ extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern int alloc_cnt, deall_cnt;
 extern int ItemCount;
 int DebugFontLoaded = 0;
+#else
+#define MainTextPrint 0
+#endif
 
 extern "C" {
 
@@ -89,10 +91,6 @@ extern BOOL ForceLoad_Pretorian;
 extern BOOL ForceLoad_SentryGun;
 
 BOOL UseMouseCentreing = FALSE;
-#else
-#define MainTextPrint 0
-#endif
-
 BOOL KeepMainRifFile = FALSE;
 
 char LevelName[] = {"predbit6\0QuiteALongNameActually"};
@@ -502,7 +500,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
   		}
 		//#endif
 		#else
-			AvP.CurrentEnv = AvP.StartingEnv = 0;
+			AvP.CurrentEnv = AvP.StartingEnv = I_Gen1;
 		#endif
 		
 		LoadRifFile(); /* sets up a map*/
@@ -643,7 +641,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 					{
 						/* after this call, no more graphics can be drawn until the next frame */
-						//extern void ThisFramesRenderingHasFinished(void);
+						//extern void ThisFramesRend eringHasFinished(void);
 						ThisFramesRenderingHasFinished();
 					}
 

@@ -134,14 +134,14 @@ void Font_Init()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return;
 	}
-
+/*
 	char buf[100];
 	for (int i = 0; i < 256; i++)
 	{
 		sprintf(buf, "Fonts[FONT_SMALL].fontWidths[%d] == %d\n", i, Fonts[FONT_SMALL].fontWidths[i]);
 		OutputDebugString(buf);
 	}
-
+*/
 }
 
 int Font_DrawText(const char* text, int x, int y, int colour, int fontType)

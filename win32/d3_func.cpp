@@ -463,6 +463,13 @@ void DeRedTexture(D3DTEXTURE texture)
 			destPtr += sizeof(uint32_t); // move over an entire 4 byte pixel
 		}
 	}
+
+	LastError = texture->UnlockRect(0);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return;
+	}
 }
 
 // use this to make textures from non power of two images
