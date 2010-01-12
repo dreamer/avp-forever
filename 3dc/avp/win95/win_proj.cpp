@@ -155,13 +155,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		// it's intentional for this case to fall through to WM_SYSKEYDOWN
 		case WM_SYSKEYDOWN:
 		{	
-/*
-			char buf[100];
-			sprintf(buf, "key: %x\n", wParam);
-			OutputDebugString(buf);
-*/
-
-			/* handle left/right alt keys */
+			// handle left/right alt keys
 			if (wParam == VK_MENU)
 			{			
 				if (lParam&(1<<24))
@@ -170,7 +164,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 					wParam = VK_LMENU;
 			}
 
-			/* handle left/right control keys */
+			// handle left/right control keys
 			if (wParam == VK_CONTROL)
 			{			
 				if (lParam&(1<<24))
@@ -179,17 +173,15 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 					wParam = VK_LCONTROL;
 			}
 
-			/* handle left/right shift keys */	
+			// handle left/right shift keys
 			if (wParam == VK_SHIFT)
 			{
 				if ((GetKeyState(VK_RSHIFT) & 0x8000) && (KeyboardInput[KEY_RIGHTSHIFT] == FALSE))
 				{
-//					OutputDebugString("caught right shift!\n");
 					wParam = VK_RSHIFT;
 				}
 				else if ((GetKeyState(VK_LSHIFT) & 0x8000) && (KeyboardInput[KEY_LEFTSHIFT] == FALSE))
 				{
-//					OutputDebugString("caught left shift!\n");
 					wParam = VK_LSHIFT;
 				}
 			}

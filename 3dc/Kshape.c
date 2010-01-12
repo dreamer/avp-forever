@@ -4050,18 +4050,19 @@ float Dest[3];
 
 extern void TranslationSetup(void)
 {
+
 	VECTORCH v = Global_VDB_Ptr->VDB_World;
 	extern int PredatorVisionChangeCounter;
-	float p = PredatorVisionChangeCounter/65536.0f;
+	float p = PredatorVisionChangeCounter / 65536.0f;
 	float o = 1.0f;
 	p = 1.0f+p;
 
 	if (NAUSEA_CHEATMODE)
 	{
-		p = (GetSin((CloakingPhase/3)&4095))/65536.0f;
+		p = (GetSin((CloakingPhase / 3)&4095)) / 65536.0f;
 		p = 1.0f + p*p;
 
-		o = (GetCos((CloakingPhase/5)&4095))/65536.0f;
+		o = (GetCos((CloakingPhase / 5)&4095)) / 65536.0f;
 		o = 1.0f + o*o;
 	}
 

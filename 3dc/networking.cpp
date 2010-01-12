@@ -306,6 +306,7 @@ int Net_JoinGame()
 	return NumberOfSessionsFound;
 }
 
+// called from the console
 void Net_ConnectToAddress()
 {
 	if (Con_GetNumArguments() == 0)
@@ -490,20 +491,28 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *lplpData, int *dataS
 	if (Client == NULL) 
 		return NET_FAIL;
 
+	enet_host_service (Client, NULL, 0);
+
 	do
 	{
 		isInternalOnly = false;	// Default.
 
 		ENetEvent event;
 
-		if (enet_host_service(Client, &event, 1) > 0) // play with time value
+		//if (enet_host_service(Client, &event, 1) > 0) // play with time value
+		if (enet_host_check_events (Client, &event) > 0)
 		{
 			switch (event.type)
 			{
 				// not interested yet
 				case ENET_EVENT_TYPE_CONNECT:
 				{
-					OutputDebugString("Enet got a connection!\n");
+					char buf[100];
+					char ipaddr[32];
+					enet_address_get_host_ip(&event.peer->address, ipaddr, sizeof(ipaddr));
+					sprintf(buf, "Enet got a connection from %s:%u\n", ipaddr, event.peer->address.port);
+					OutputDebugString(buf);
+
 					return NET_ERR_NOMESSAGES;
 				}
 				case ENET_EVENT_TYPE_RECEIVE:
@@ -564,12 +573,16 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *lplpData, int *dataS
 					// create a packet with session struct inside
 					ENetPacket * packet = enet_packet_create(&packetBuffer[0], length, ENET_PACKET_FLAG_RELIABLE);
 
+					//event.peer->state = ENET_PEER_STATE_DISCONNECTED;
+
 					// send the packet
 					if ((enet_peer_send(event.peer, event.channelID, packet) < 0))
 					{
 						Con_PrintError("problem sending session packet!");
 					}
 					else Con_PrintMessage("sent session details to client");
+
+					//event.peer->state = ENET_PEER_STATE_CONNECTED;
 
 					return NET_OK;
 				}
@@ -1151,7 +1164,7 @@ void Net_FindAvPSessions()
 //	OutputDebugString("Net_FindAvPSessions called\n");
 	NumberOfSessionsFound = 0;
 
-	return;
+//	return;
 
 	static bool busy = false;
 	static int timer = 0;

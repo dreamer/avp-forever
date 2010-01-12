@@ -6,6 +6,8 @@
 	#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
 #endif
 
+extern void fmvTest(const char* file);
+
 #include "d3_func.h"
 #include <fstream>
 #include <map>
@@ -309,6 +311,8 @@ void ReadHeaders(ogg_sync_state* state)
 	ogg_page page;
 
 	bool headersDone = false;
+	bool gotTheora = false;
+	bool gotVorbis = false;
 
 	while (!headersDone && ReadOggPage(state, &page))
 	{
@@ -356,7 +360,7 @@ void ReadHeaders(ogg_sync_state* state)
 		while (!headersDone && (ret = ogg_stream_packetpeek(&stream->mState, &packet)) != 0)
 		{
 			assert(ret == 1);
-
+#if 0
 			// A packet is available. If it is not a header packet we exit.
 			// If it is a header packet, process it as normal.
 			headersDone = headersDone || HandleTheoraHeader(stream, &packet);
@@ -364,6 +368,49 @@ void ReadHeaders(ogg_sync_state* state)
 			if (!headersDone)
 			{
 				// Consume the packet
+				ret = ogg_stream_packetout(&stream->mState, &packet);
+				assert(ret == 1);
+			}
+#endif
+			// check for a theora header first
+			if (!gotTheora)
+			{
+				ret = th_decode_headerin(&stream->mTheora.mInfo, &stream->mTheora.mComment, &stream->mTheora.mSetup, &packet);
+				if (ret > 0)
+				{
+					// we found the header packet
+					stream->mType = TYPE_THEORA;
+					//gotTheora = true;
+					//Con_PrintDebugMessage("got theora header");
+				}
+				else if (stream->mType == TYPE_THEORA && ret == 0)
+				{
+					gotTheora = true;
+					Con_PrintDebugMessage("got theora header");
+				}
+			}
+
+			// check for a vorbis header
+			if (!gotVorbis)
+			{
+				ret = vorbis_synthesis_headerin(&stream->mVorbis.mInfo, &stream->mVorbis.mComment, &packet);
+				if (ret == 0)
+				{
+					stream->mType = TYPE_VORBIS;
+				}
+				else if (stream->mType == TYPE_VORBIS && ret == OV_ENOTVORBIS)
+				{
+					gotVorbis = true;
+					Con_PrintDebugMessage("got vorbis header");
+				}
+			}
+
+			if (gotVorbis && gotTheora)
+				headersDone = true;
+
+			if (!headersDone)
+			{
+				// we need to move forward and grab the next packet
 				ret = ogg_stream_packetout(&stream->mState, &packet);
 				assert(ret == 1);
 			}
@@ -964,6 +1011,9 @@ extern void EndMenuBackgroundFmv()
 
 extern void PlayFMV(const char *filenamePtr)
 {
+	fmvTest(filenamePtr);
+	return;
+
 	if (!IntroOutroMoviesAreActive)
 		return;
 

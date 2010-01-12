@@ -10,7 +10,7 @@
  *
  */
 
-enum FrustrumType 
+enum FrustrumType
 {
 	FRUSTRUM_TYPE_NORMAL,
 	FRUSTRUM_TYPE_WIDE

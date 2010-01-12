@@ -656,17 +656,23 @@ void TransposeMatrixCH(MATRIXCH *m1)
 {
 	int t;
 
-	t=m1->mat12;
-	m1->mat12=m1->mat21;
-	m1->mat21=t;
+	/*
+		11	21	31
+		12	22	32
+		13	23	33
+	*/
 
-	t=m1->mat13;
-	m1->mat13=m1->mat31;
-	m1->mat31=t;
+	t = m1->mat12;
+	m1->mat12 = m1->mat21;
+	m1->mat21 = t;
 
-	t=m1->mat23;
-	m1->mat23=m1->mat32;
-	m1->mat32=t;
+	t = m1->mat13;
+	m1->mat13 = m1->mat31;
+	m1->mat31 = t;
+
+	t = m1->mat23;
+	m1->mat23 = m1->mat32;
+	m1->mat32 = t;
 }
 
 
@@ -677,15 +683,11 @@ void TransposeMatrixCH(MATRIXCH *m1)
 */
 
 void CopyVector(VECTORCH *v1, VECTORCH *v2)
-
 {
-
-/* Copy VECTORCH v1 -> VECTORCH v2 */
-
-	v2->vx=v1->vx;
-	v2->vy=v1->vy;
-	v2->vz=v1->vz;
-
+	/* Copy VECTORCH v1 -> VECTORCH v2 */
+	v2->vx = v1->vx;
+	v2->vy = v1->vy;
+	v2->vz = v1->vz;
 }
 
 
@@ -696,18 +698,12 @@ void CopyVector(VECTORCH *v1, VECTORCH *v2)
 */
 
 void CopyLocation(VECTORCH *v1, VECTORCH *v2)
-
 {
-
-/* Copy VECTORCH v1 -> VECTORCH v2 */
-
-	v2->vx=v1->vx;
-	v2->vy=v1->vy;
-	v2->vz=v1->vz;
-
+	/* Copy VECTORCH v1 -> VECTORCH v2 */
+	v2->vx = v1->vx;
+	v2->vy = v1->vy;
+	v2->vz = v1->vz;
 }
-
-
 
 
 
@@ -718,42 +714,31 @@ void CopyLocation(VECTORCH *v1, VECTORCH *v2)
 */
 
 void CopyEuler(EULER *e1, EULER *e2)
-
 {
-
-/* Copy EULER e1 -> EULER e2 */
-
-	e2->EulerX=e1->EulerX;
-	e2->EulerY=e1->EulerY;
-	e2->EulerZ=e1->EulerZ;
-
+	/* Copy EULER e1 -> EULER e2 */
+	e2->EulerX = e1->EulerX;
+	e2->EulerY = e1->EulerY;
+	e2->EulerZ = e1->EulerZ;
 }
 
 
 /*
-
- Copy Matrix
-
+	Copy Matrix
 */
-
 void CopyMatrix(MATRIXCH *m1, MATRIXCH *m2)
-
 {
+	/* Copy MATRIXCH m1 -> MATRIXCH m2 */
+	m2->mat11 = m1->mat11;
+	m2->mat12 = m1->mat12;
+	m2->mat13 = m1->mat13;
 
-/* Copy MATRIXCH m1 -> MATRIXCH m2 */
+	m2->mat21 = m1->mat21;
+	m2->mat22 = m1->mat22;
+	m2->mat23 = m1->mat23;
 
-	m2->mat11=m1->mat11;
-	m2->mat12=m1->mat12;
-	m2->mat13=m1->mat13;
-
-	m2->mat21=m1->mat21;
-	m2->mat22=m1->mat22;
-	m2->mat23=m1->mat23;
-
-	m2->mat31=m1->mat31;
-	m2->mat32=m1->mat32;
-	m2->mat33=m1->mat33;
-
+	m2->mat31 = m1->mat31;
+	m2->mat32 = m1->mat32;
+	m2->mat33 = m1->mat33;
 }
 
 
@@ -766,13 +751,10 @@ void CopyMatrix(MATRIXCH *m1, MATRIXCH *m2)
 */
 
 void MakeVector(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3)
-
 {
-
 	v3->vx = v1->vx - v2->vx;
 	v3->vy = v1->vy - v2->vy;
 	v3->vz = v1->vz - v2->vz;
-
 }
 
 
@@ -801,15 +783,11 @@ void AddVector(VECTORCH *v1, VECTORCH *v2)
 */
 
 void SubVector(VECTORCH *v1, VECTORCH *v2)
-
 {
-
 	v2->vx -= v1->vx;
 	v2->vy -= v1->vy;
 	v2->vz -= v1->vz;
-
 }
-
 
 
 /*
@@ -826,9 +804,7 @@ void SubVector(VECTORCH *v1, VECTORCH *v2)
 
 void _RotateVector(VECTORCH *v, MATRIXCH*  m)
 {
-
 	int x, y, z;
-	
 
 	x =  MUL_FIXED(m->mat11, v->vx);
 	x += MUL_FIXED(m->mat21, v->vy);
@@ -859,26 +835,19 @@ void _RotateVector(VECTORCH *v, MATRIXCH*  m)
 
 */
 
-void _RotateAndCopyVector(v1, v2, m)
-
-	VECTORCH *v1;
-	VECTORCH *v2;
-	MATRIXCH *m;
-
+void _RotateAndCopyVector(VECTORCH *v1, VECTORCH *v2, MATRIXCH *m)
 {
+	v2->vx = MUL_FIXED(m->mat11, v1->vx);
+	v2->vx += MUL_FIXED(m->mat21, v1->vy);
+	v2->vx += MUL_FIXED(m->mat31, v1->vz);
 
-	v2->vx=MUL_FIXED(m->mat11,v1->vx);
-	v2->vx+=MUL_FIXED(m->mat21,v1->vy);
-	v2->vx+=MUL_FIXED(m->mat31,v1->vz);
+	v2->vy = MUL_FIXED(m->mat12, v1->vx);
+	v2->vy += MUL_FIXED(m->mat22, v1->vy);
+	v2->vy += MUL_FIXED(m->mat32, v1->vz);
 
-	v2->vy=MUL_FIXED(m->mat12,v1->vx);
-	v2->vy+=MUL_FIXED(m->mat22,v1->vy);
-	v2->vy+=MUL_FIXED(m->mat32,v1->vz);
-
-	v2->vz=MUL_FIXED(m->mat13,v1->vx);
-	v2->vz+=MUL_FIXED(m->mat23,v1->vy);
-	v2->vz+=MUL_FIXED(m->mat33,v1->vz);
-
+	v2->vz = MUL_FIXED(m->mat13, v1->vx);
+	v2->vz += MUL_FIXED(m->mat23, v1->vy);
+	v2->vz += MUL_FIXED(m->mat33, v1->vz);
 }
 
 
@@ -1461,9 +1430,7 @@ void MatrixToEuler2(MATRIXCH *m, EULER *e)
 */
 
 void MNormalise(MATRIXCH *m)
-
 {
-
 	VECTORCH *x = (VECTORCH *) &m->mat11;
 	VECTORCH *y = (VECTORCH *) &m->mat21;
 	VECTORCH *z = (VECTORCH *) &m->mat31;
@@ -1513,8 +1480,8 @@ void MNormalise(MATRIXCH *m)
 
 
 	/* Find the two vectors nearest 90ø */
-
-	if(dotxy > dotxz && dotxy > dotyz) {
+	if (dotxy > dotxz && dotxy > dotyz) 
+	{
 
 		/* xy are the closest to 90ø */
 
@@ -1532,11 +1499,10 @@ void MNormalise(MATRIXCH *m)
 
 		CopyVector(&u, z);
 		CopyVector(&v, y);
-
 	}
 
-	else if(dotxz > dotxy && dotxz > dotyz) {
-
+	else if(dotxz > dotxy && dotxz > dotyz) 
+	{
 		/* xz are the closest to 90ø */
 
 		/*textprint("xz\n");*/
@@ -1555,9 +1521,8 @@ void MNormalise(MATRIXCH *m)
 		CopyVector(&v, z);
 
 	}
-
-	else {
-
+	else 
+	{
 		/* yz are the closest to 90ø */
 
 		/*textprint("yz\n");*/
@@ -1574,7 +1539,6 @@ void MNormalise(MATRIXCH *m)
 
 		CopyVector(&u, x);
 		CopyVector(&v, z);
-
 	}
 
 
@@ -1605,8 +1569,6 @@ void MNormalise(MATRIXCH *m)
 	#endif
 
 	/*WaitForReturn();*/
-
-
 }
 
 
@@ -1636,9 +1598,7 @@ void MNormalise(MATRIXCH *m)
 */
 
 int ArcCos(int c)
-
 {
-
 	short acos;
 
 	if(c < (-(ONE_FIXED - 1))) c = -(ONE_FIXED - 1);
@@ -1652,7 +1612,6 @@ int ArcCos(int c)
 	acos = ArcCosTable[(c >> 5) + 2048];
 
 	return (int) (acos & wrap360);
-
 }
 
 
@@ -1680,11 +1639,8 @@ int ArcCos(int c)
 */
 
 int ArcSin(int s)
-
 {
-
 	short asin;
-
 
 	if(s < (-(ONE_FIXED - 1))) s = -(ONE_FIXED - 1);
 	else if(s > (ONE_FIXED - 1)) s = ONE_FIXED - 1;
@@ -1697,7 +1653,6 @@ int ArcSin(int s)
 	asin = ArcSineTable[(s >> 5) + 2048];
 
 	return (int) (asin & wrap360);
-
 }
 
 
@@ -1716,10 +1671,7 @@ int ArcSin(int s)
 
 */
 
-int ArcTan(height_x, width_z)
-
-	int height_x,width_z;
-
+int ArcTan(int height_x, int width_z)
 {
 
 	int abs_height_x, abs_width_z, angle, sign, signsame, temp;
@@ -1799,9 +1751,7 @@ int ArcTan(height_x, width_z)
 */
 
 void MatrixFromZVector(VECTORCH *v, MATRIXCH *m)
-
 {
-
 	VECTORCH XVector;
 	VECTORCH YVector;
 
@@ -1827,7 +1777,6 @@ void MatrixFromZVector(VECTORCH *v, MATRIXCH *m)
 	m->mat31 = v->vx;
 	m->mat32 = v->vy;
 	m->mat33 = v->vz;
-
 }
 
 
@@ -1861,7 +1810,6 @@ void MatrixFromZVector(VECTORCH *v, MATRIXCH *m)
 */
 
 int FandVD_Distance_2d(VECTOR2D *v0, VECTOR2D *v1)
-
 {
 
 	int max;
@@ -1895,7 +1843,6 @@ int FandVD_Distance_2d(VECTOR2D *v0, VECTOR2D *v1)
 */
 
 int FandVD_Distance_3d(VECTORCH *v0, VECTORCH *v1)
-
 {
 
 	int dxy, max;
@@ -1912,7 +1859,6 @@ int FandVD_Distance_3d(VECTORCH *v0, VECTORCH *v1)
 	else max = dz;
 
 	return (dxy + dz + (max * 2));
-
 }
 
 
@@ -1925,7 +1871,6 @@ int FandVD_Distance_3d(VECTORCH *v0, VECTORCH *v1)
 */
 
 int NextLowPower2(int i)
-
 {
 
 	int n = 1;
@@ -1935,7 +1880,6 @@ int NextLowPower2(int i)
 		n <<= 1;
 
 	return n >> 1;
-
 }
 
 
@@ -1959,11 +1903,9 @@ int NextLowPower2(int i)
 */
 
 void MakeVectorLocal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, MATRIXCH *m)
-
 {
 
 	MATRIXCH transmat;
-
 
 	CopyMatrix(m, &transmat);
 	TransposeMatrixCH(&transmat);
@@ -1973,7 +1915,6 @@ void MakeVectorLocal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, MATRIXCH *m)
 	v2->vz = v1->vz - v3->vz;
 
 	RotateVector(v2, &transmat);
-
 }
 
 
@@ -2005,10 +1946,10 @@ void MakeVectorLocal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, MATRIXCH *m)
  I_Polygon							2
  I_GouraudPolygon					3
  I_2dTexturedPolygon				4
- I_3dTexturedPolygon,			5
- I_Gouraud2dTexturedPolygon	5
- I_Polygon_ZBuffer				3
- I_GouraudPolygon_ZBuffer		4
+ I_3dTexturedPolygon,				5
+ I_Gouraud2dTexturedPolygon			5
+ I_Polygon_ZBuffer					3
+ I_GouraudPolygon_ZBuffer			4
 
 
  PASS ONLY POSITIVE COORDINATES!
@@ -2016,9 +1957,7 @@ void MakeVectorLocal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, MATRIXCH *m)
 */
 
 int PointInPolygon(int *point, int *polygon, int c, int ppsize)
-
 {
-
 
 	#if UseTimsPinp
 
@@ -2603,7 +2542,6 @@ void SetSeededFastRandom(int seed)
 */
 
 void PolyAveragePoint(POLYHEADER *pheader, int *spts, VECTORCH *apt)
-
 {
 
 	int x, y, z;
@@ -2625,8 +2563,8 @@ void PolyAveragePoint(POLYHEADER *pheader, int *spts, VECTORCH *apt)
 
 	numpolypts = 0;
 
-	while(*mypolystart != Term) {
-
+	while(*mypolystart != Term) 
+	{
 		x = *(spts + *mypolystart + ix);
 		y = *(spts + *mypolystart + iy);
 		z = *(spts + *mypolystart + iz);
@@ -2641,13 +2579,11 @@ void PolyAveragePoint(POLYHEADER *pheader, int *spts, VECTORCH *apt)
 
 		numpolypts++;
 		mypolystart++;
-
 	}
 
 	apt->vx = NarrowDivide(&xx, numpolypts);
 	apt->vy = NarrowDivide(&yy, numpolypts);
 	apt->vz = NarrowDivide(&zz, numpolypts);
-
 }
 
 #endif	/* StandardShapeLanguage */
@@ -2660,7 +2596,6 @@ void PolyAveragePoint(POLYHEADER *pheader, int *spts, VECTORCH *apt)
 /* KJL 15:07:39 01/08/97 - Returns the magnitude of the 
    cross product of two vectors a and b. */
 int MagnitudeOfCrossProduct(VECTORCH *a, VECTORCH *b)
-
 {
 	VECTORCH c;				 
     
@@ -2674,7 +2609,6 @@ int MagnitudeOfCrossProduct(VECTORCH *a, VECTORCH *b)
 /* KJL 15:08:01 01/08/97 - sets the vector c to be the
    cross product of the vectors a and b. */
 void CrossProduct(VECTORCH *a, VECTORCH *b, VECTORCH *c)
-
 {
 	c->vx = MUL_FIXED(a->vy,b->vz) - MUL_FIXED(a->vz,b->vy);
 	c->vy = MUL_FIXED(a->vz,b->vx) - MUL_FIXED(a->vx,b->vz);
@@ -2739,7 +2673,7 @@ int Approximate3dMagnitude(VECTORCH *v)
 
 */
 
-void QuatToMat(QUAT *q,MATRIXCH *m)
+void QuatToMat(QUAT *q, MATRIXCH *m)
 {
 
 	int q_w, q_x, q_y, q_z;
@@ -2764,14 +2698,14 @@ void QuatToMat(QUAT *q,MATRIXCH *m)
 
 */
 
-	q_w=q->quatw;
-	q_x=q->quatx;
-	q_y=q->quaty;
-	q_z=q->quatz;
+	q_w = q->quatw;
+	q_x = q->quatx;
+	q_y = q->quaty;
+	q_z = q->quatz;
 
-	q_2x=q_x*2;
-	q_2y=q_y*2;
-	q_2z=q_z*2;
+	q_2x = q_x * 2;
+	q_2y = q_y * 2;
+	q_2z = q_z * 2;
 
 /*
 
@@ -2836,4 +2770,3 @@ void QuatToMat(QUAT *q,MATRIXCH *m)
 	m->mat33=ONE_FIXED-q_2xx-q_2yy;
 
 }
-

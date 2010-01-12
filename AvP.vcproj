@@ -3728,6 +3728,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\3dc\myFmv.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\3dc\networking.cpp"
 				>
 			</File>

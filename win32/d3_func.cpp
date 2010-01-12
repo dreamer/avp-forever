@@ -740,6 +740,13 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 {
 	return TRUE;
 
+	// don't bother resetting device if we're already using the requested settings
+	if ((width == d3d.d3dpp.BackBufferWidth) &&
+	   (height == d3d.d3dpp.BackBufferHeight))
+	{
+		return TRUE;
+	}
+
 	ReleaseVolatileResources();
 
 	d3d.d3dpp.BackBufferWidth = width;
@@ -816,8 +823,8 @@ BOOL InitialiseDirect3D()
 
 //	int width = Config_GetInt("[VideoMode]", "Width", 800);
 //	int height = Config_GetInt("[VideoMode]", "Height", 600);
-	int width = 1280;
-	int height = 1024;
+	int width = 1024;
+	int height = 768;
 	int depth = 32;
 	int defaultDevice = D3DADAPTER_DEFAULT;
 	bool windowed = false;
@@ -1193,7 +1200,7 @@ BOOL InitialiseDirect3D()
 	int test = 600;
 
 //	D3DXMatrixOrthoOffCenterLH( &matOrtho, 0.0f, wideScreenWidth, 0.0f, 480, 1.0f, 10.0f);
-	D3DXMatrixOrthoLH( &matOrtho, standardWidth, 480, 1.0f, 10.0f);
+	D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 
 	D3DXMatrixIdentity( &matIdentity );
 	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );

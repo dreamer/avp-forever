@@ -263,7 +263,6 @@ SHAPEHEADER* GetShapeData(int shapenum)
 */
 
 void PlatformSpecificVDBInit(VIEWDESCRIPTORBLOCK *vdb)
-
 {
 	#if SuppressWarnings
 	vdb_tmp = vdb;
@@ -272,7 +271,6 @@ void PlatformSpecificVDBInit(VIEWDESCRIPTORBLOCK *vdb)
 
 
 void PlatformSpecificShowViewEntry(VIEWDESCRIPTORBLOCK *vdb, SCREENDESCRIPTORBLOCK *sdb)
-
 {
 	#if SuppressWarnings
 	vdb_tmp = vdb;
@@ -282,7 +280,6 @@ void PlatformSpecificShowViewEntry(VIEWDESCRIPTORBLOCK *vdb, SCREENDESCRIPTORBLO
 
 
 void PlatformSpecificShowViewExit(VIEWDESCRIPTORBLOCK *vdb, SCREENDESCRIPTORBLOCK *sdb)
-
 {
 	#if SuppressWarnings
 	vdb_tmp = vdb;
@@ -298,16 +295,12 @@ void PlatformSpecificShowViewExit(VIEWDESCRIPTORBLOCK *vdb, SCREENDESCRIPTORBLOC
 */
 
 void GetDOSFilename(char *fnameptr)
-
 {
-
-	while(*fnameptr) {
-
+	while(*fnameptr) 
+	{
 		if(*fnameptr == 0x2f) *fnameptr = 0x5c;
 		fnameptr++;
-
 	}
-
 }
 
 

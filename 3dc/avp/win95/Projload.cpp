@@ -1773,7 +1773,7 @@ struct Adjacent_AIModule_EP
 };
 
 // copies all shapes and objects etc
-BOOL copy_rif_data (RIFFHANDLE h, int flags,int progress_start,int progress_interval)
+BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_interval)
 {
 	/*close all fastfiles so we don't end up with too many open at once*/
 	if(!(flags & CCF_DONT_INITIALISE_TEXTURES))

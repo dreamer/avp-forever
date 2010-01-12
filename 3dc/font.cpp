@@ -146,6 +146,8 @@ void Font_Init()
 
 int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 {
+	return 0;
+
 	d3d.lpD3DDevice->SetTexture(0, Fonts[FONT_SMALL].texture);
 
 //	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);

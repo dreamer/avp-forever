@@ -111,10 +111,10 @@ int JoystickEnabled;
 
 DIJOYSTATE JoystickState;          // DirectInput joystick state 
 
-/* XInput stuff from dx sdk samples */
+// XInput stuff from dx sdk samples
 int GotXPad = 0;
 
-/* XInput controller state */
+// XInput controller state
 struct CONTROLER_STATE
 {
     XINPUT_STATE state;
@@ -186,13 +186,13 @@ extern int NormalFrameTime;
 
 static char IngameKeyboardInput[256];
 
-/* mouse - 5 buttons? */
+// mouse - 5 buttons?
 unsigned char MouseButtons[5] = {0};
 extern void IngameKeyboardInput_KeyDown(unsigned char key);
 extern void IngameKeyboardInput_KeyUp(unsigned char key);
 extern void IngameKeyboardInput_ClearBuffer(void);
 
-/* defines to make the keyboard buffer code a little more readable - taken from http://msdn.microsoft.com/en-us/library/ms645540.aspx */
+// defines to make the keyboard buffer code a little more readable - taken from http://msdn.microsoft.com/en-us/library/ms645540.aspx
 #define LETTER_A	0x41
 #define LETTER_Z	0x5A
 #define NUMBER_0	0x30
@@ -379,7 +379,7 @@ void DirectReadKeyboard(void)
 	}
 #endif
 
-	/* read gamepad/joystick input */
+	// read gamepad/joystick input
 	ReadJoysticks();
 
 	// Take a copy of last frame's inputs:
@@ -391,7 +391,7 @@ void DirectReadKeyboard(void)
     memset((void*)KeyboardInput, FALSE, MAX_NUMBER_OF_INPUT_KEYS);
 	GotAnyKey = FALSE;
 
-	/* letters */
+	// letters
 	for (int i = LETTER_A; i <= LETTER_Z; i++)
 	{
 		if (IngameKeyboardInput[i])
@@ -401,7 +401,7 @@ void DirectReadKeyboard(void)
 		}
 	}
 
-	/* numbers */
+	// numbers
 	for (int i = NUMBER_0; i <= NUMBER_9; i++)
 	{
 		if (IngameKeyboardInput[i])
@@ -786,7 +786,7 @@ void DirectReadKeyboard(void)
 		GotAnyKey = TRUE;
 	}
 
-	/* subtract/minus symbol on keypad */
+	// subtract/minus symbol on keypad
 	if (IngameKeyboardInput[VK_SUBTRACT])
 	{
 		KeyboardInput[KEY_NUMPADSUB] = TRUE;
@@ -823,7 +823,7 @@ void DirectReadKeyboard(void)
 		GotAnyKey = TRUE;
 	}
 
-	/* mouse buttons */
+	// mouse buttons
 	if (MouseButtons[LeftMouse])
 	{
 		KeyboardInput[KEY_LMOUSE] = TRUE;
@@ -1458,7 +1458,7 @@ to make F8 not count in a 'press any key' situation */
 		GotAnyKey = TRUE;
 	}
 #endif
-	/* mouse wheel - read using windows messages */
+	// mouse wheel - read using windows messages
 	{
 		extern signed int MouseWheelStatus;
 		if (MouseWheelStatus > 0)
@@ -1473,12 +1473,12 @@ to make F8 not count in a 'press any key' situation */
 		}
 	}
 
-	/* joystick buttons */
+	// joystick buttons
 	if (GotJoystick)
 	{
-		unsigned int n,bit;
+		unsigned int n, bit;
 
-		for (n=0,bit=1; n<16; n++,bit*=2)
+		for (n = 0, bit = 1; n < 16; n++, bit *= 2)
 		{
 			if (JoystickData.dwButtons&bit)
 			{
@@ -1497,10 +1497,10 @@ to make F8 not count in a 'press any key' situation */
 	{
 		blockGamepadInputTimer -= ONE_FIXED / 10;
 	}
-	/* ok to process the input */
+	// ok to process the input
 	else
 	{
-		/* xbox gamepad buttons */
+		// xbox gamepad buttons
 		for (int i = 0; i < NUMPADBUTTONS; i++)
 		{
 			if (GamePadButtons[i])
@@ -1511,7 +1511,7 @@ to make F8 not count in a 'press any key' situation */
 		}
 	}
 
-	/* update debounced keys array */
+	// update debounced keys array
 	{
 		for (int i = 0; i < MAX_NUMBER_OF_INPUT_KEYS; i++)
 		{ 
@@ -1566,12 +1566,12 @@ to make F8 not count in a 'press any key' situation */
 		DebouncedKeyboardInput[KEY_ESCAPE] = 0;
 		KeyboardInput[KEY_LEFTSHIFT] = 0;
 	}
-
+/* dont do this - use WM_CHAR messages
 	if (Con_IsOpen())
 	{
 		Con_ProcessInput();
-		//ClearAllKeyArrays();
 	}
+*/
 }
 
 /*

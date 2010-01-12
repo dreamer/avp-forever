@@ -786,7 +786,10 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk * tmpshp, int fla
 	if (pChunk) 
 	{
 		seflc = (Shape_External_File_Chunk *)pChunk;
+		char buf[100];
 		rif_name = seflc->get_shape_name();
+		sprintf(buf, "\t rif_name: %s\n", rif_name.c_str());
+		OutputDebugString(buf);
 		msl_shapes.add_entry(new ShapeInMSL(mainshapelist[list_pos],rif_name,list_pos));
 	}
 	else
@@ -1391,7 +1394,6 @@ static SHAPEHEADER * CreateShapeFromRif (RIFFHANDLE h, char const * shapename, i
 					return shptr;
 				}
 			}
-
 		}
 	}
 	return 0; // could not match shape
@@ -2220,16 +2222,16 @@ BOOL copy_to_shapeheader (
 	ChunkShape merged_cshp;
 	const ChunkShape* cshp_ptr;
 
-	if(shape->lookup_single_child("SHPMRGDT"))
+	if (shape->lookup_single_child("SHPMRGDT"))
 	{
-		merged_cshp=cshp;
-		pre_process_shape(h,merged_cshp,shape,flags);
+		merged_cshp = cshp;
+		pre_process_shape(h, merged_cshp, shape, flags);
 		
-		cshp_ptr=&merged_cshp;
+		cshp_ptr = &merged_cshp;
 	}
 	else
 	{
-		cshp_ptr=&cshp;
+		cshp_ptr = &cshp;
 	}
 	
 	shphd = (SHAPEHEADER *) PoolAllocateMem(sizeof(SHAPEHEADER));
@@ -2277,9 +2279,15 @@ BOOL copy_to_shapeheader (
 
 	tptr = *(shphd->points);
 
+	static char buffer[100];
+
+	if (strcmp(h->fc->filename, buffer) != 0)
+	{
+		sprintf(buffer, "filename: %s numpoints: %d\n", h->fc->filename, shphd->numpoints);
+		OutputDebugString(buffer);
+	}
 	
-	
-	if(object && local_scale!=1)
+	if (object && local_scale != 1)
 	{
 		//convert from floating point to integers using world coordinates  in an attempt to stop
 		//tears from being generated
@@ -2293,7 +2301,8 @@ BOOL copy_to_shapeheader (
 		object_int.vy = (int)(object_float.y*local_scale);
 		object_int.vz = (int)(object_float.z*local_scale);
 
-		for (i=0; i<shphd->numpoints; i++) {
+		for (i=0; i<shphd->numpoints; i++) 
+		{
 			tptr[i*3] = (int) ((cshp_ptr->v_list[i].x+object_float.x)*local_scale);
 			tptr[i*3 + 1] = (int) ((cshp_ptr->v_list[i].y+object_float.y)*local_scale);
 			tptr[i*3 + 2] = (int) ((cshp_ptr->v_list[i].z+object_float.z)*local_scale);
@@ -2305,7 +2314,8 @@ BOOL copy_to_shapeheader (
 	}
 	else
 	{
-		for (i=0; i<shphd->numpoints; i++) {
+		for (i=0; i<shphd->numpoints; i++) 
+		{
 			tptr[i*3] = (int) (cshp_ptr->v_list[i].x*local_scale);
 			tptr[i*3 + 1] = (int) (cshp_ptr->v_list[i].y*local_scale);
 			tptr[i*3 + 2] = (int) (cshp_ptr->v_list[i].z*local_scale);
@@ -2314,7 +2324,8 @@ BOOL copy_to_shapeheader (
 	
 	tptr = *(shphd->sh_vnormals);
 
-	for (i=0; i<shphd->numpoints; i++) {
+	for (i=0; i<shphd->numpoints; i++) 
+	{
 		tptr[i*3]     =(int) (cshp_ptr->v_normal_list[i].x*ONE_FIXED);
 		tptr[i*3 + 1] =(int) (cshp_ptr->v_normal_list[i].y*ONE_FIXED);
 		tptr[i*3 + 2] =(int) (cshp_ptr->v_normal_list[i].z*ONE_FIXED);
@@ -2322,7 +2333,8 @@ BOOL copy_to_shapeheader (
 
 	tptr = *(shphd->sh_normals);
 
-	for (i=0; i<shphd->numitems; i++) {
+	for (i=0; i<shphd->numitems; i++) 
+	{
 		tptr[i*3]     =(int) (cshp_ptr->p_normal_list[i].x*ONE_FIXED);
 		tptr[i*3 + 1] =(int) (cshp_ptr->p_normal_list[i].y*ONE_FIXED);
 		tptr[i*3 + 2] =(int) (cshp_ptr->p_normal_list[i].z*ONE_FIXED);
@@ -2343,7 +2355,8 @@ BOOL copy_to_shapeheader (
 		}
 	}
 	
-	for (i=0; i<shphd->numitems; i++) {
+	for (i=0; i<shphd->numitems; i++) 
+	{
 
 		item_list[i*9] = (cshp_ptr->poly_list[i].engine_type);
 		item_list[i*9 + 1] = (cshp_ptr->poly_list[i].normal_index * 3);

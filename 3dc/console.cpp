@@ -275,19 +275,18 @@ void Con_AddTypedChar(char c)
 	if (!console.isActive) 
 		return;
 
-	if (c == 0x08)
+	if (c == 0x08) // backspace
 	{
-//		Con_Key_Backspace(true);
 		Con_RemoveTypedChar();
 	}
-
-	else if (c == 13)
+	else if (c == 13) // enter/return key
 	{	
-//		Con_Key_Enter(true);
 		Con_ProcessCommand();
 	}
 	else
 	{
+		if (c < 32)
+			return;
 	//	sprintf(buf, "Con_AddTypedChar: %c\n", c);
 	//	OutputDebugString(buf);
 
@@ -299,7 +298,7 @@ void Con_RemoveTypedChar()
 {
 	if (console.inputLine.length())
 	{
-		console.inputLine.resize(console.inputLine.length() - 1, 1);
+		console.inputLine.erase(console.inputLine.length() -1, 1);
 	}
 }
 

@@ -43,7 +43,7 @@ void ClearLog()
 	std::string filePath(GetSaveFolderPath());
 	filePath += logFilename;
 
-	std::ofstream file(logFilename.c_str(), std::ios::out);
+	std::ofstream file(filePath.c_str(), std::ios::out);
 }
 
 void WriteToLog(const std::string &logLine)
@@ -51,7 +51,7 @@ void WriteToLog(const std::string &logLine)
 	std::string filePath(GetSaveFolderPath());
 	filePath += logFilename;
 
-	std::ofstream file(logFilename.c_str(), std::ios::out | std::ios::app);
+	std::ofstream file(filePath.c_str(), std::ios::out | std::ios::app);
 
 	file << logLine;
 #if _DEBUG

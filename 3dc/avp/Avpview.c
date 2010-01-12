@@ -94,10 +94,10 @@ extern int cosine[];
 extern int sine[];
 
 int LeanScale;
-EULER deathTargetOrientation={0,0,0};
+EULER deathTargetOrientation = {0,0,0};
 
 extern void ColourFillBackBuffer(int FillColour);
-
+void CheckIfMirroringIsRequired(void);
 static void ModifyHeadOrientation(void);
 
 #if defined(_MSC_VER)
@@ -381,7 +381,7 @@ void InteriorType_Body()
 
 		if (LANDOFTHEGIANTS_CHEATMODE)
 		{
-			ioff.vy/=4;
+			ioff.vy/=4; //sets player eye level to the floor level
 		}
 		if (!playerStatusPtr->IsAlive && !MultiplayerObservedPlayer)
 		{
@@ -412,8 +412,6 @@ void InteriorType_Body()
 
 			RotateVector(&ioff, &subjectPtr->ObMat);
 			AddVector(&ioff, &Global_VDB_Ptr->VDB_World);
-
-
 		}
 		#endif
 	}
@@ -423,8 +421,8 @@ void InteriorType_Body()
 
 		orientation = HeadOrientation;
 
-	  orientation.EulerZ += (zAxisTilt>>8);
-	  orientation.EulerZ &= 4095;
+		orientation.EulerZ += (zAxisTilt>>8);
+		orientation.EulerZ &= 4095;
 		
 		if (NAUSEA_CHEATMODE)
 		{
@@ -601,8 +599,6 @@ void ReflectObject(DISPLAYBLOCK *dPtr)
 	dPtr->ObMat.mat31 = -dPtr->ObMat.mat31;
 }
 
-void CheckIfMirroringIsRequired(void);
-
 void AvpShowViews(void)
 {
 
@@ -618,7 +614,6 @@ void AvpShowViews(void)
 //	textprint("Global Ambience: %d\n",GlobalAmbience);
 	
 	/* Prepare the View Descriptor Block for use in ShowView() */
-
 	PrepareVDBForShowView(Global_VDB_Ptr);
 	PlatformSpecificShowViewEntry(Global_VDB_Ptr, &ScreenDescriptorBlock);
 	TranslationSetup();
@@ -691,7 +686,7 @@ void InitCameraValues(void)
 	HeadOrientation.EulerZ = 0;
 
 	CameraZoomScale = 1.0f;
-	CameraZoomLevel=0;
+	CameraZoomLevel = 0;
 }
 
 
@@ -705,6 +700,8 @@ void InitCameraValues(void)
 
 */
 
+#include <assert.h>
+
 void PrepareVDBForShowView(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 {
 	EULER e;
@@ -716,12 +713,19 @@ void PrepareVDBForShowView(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	MatrixToEuler(&VDB_Ptr->VDB_Mat, &VDB_Ptr->VDB_MatrixEuler);
 
 	/* Get the Matrix Euler Angles */
-	MatrixToEuler(&VDB_Ptr->VDB_Mat, &e);
+//	MatrixToEuler(&VDB_Ptr->VDB_Mat, &e);
+
+	// bjd - commented out above function call, and do below instead?
+	e = VDB_Ptr->VDB_MatrixEuler;
+
+	assert(e.EulerX == VDB_Ptr->VDB_MatrixEuler.EulerX);
+	assert(e.EulerY == VDB_Ptr->VDB_MatrixEuler.EulerY);
+	assert(e.EulerZ == VDB_Ptr->VDB_MatrixEuler.EulerZ);
 
 	/* Create the "sprite" matrix" */
 	e.EulerX = 0;
 	e.EulerY = 0;
-	e.EulerZ = (-e.EulerZ) & wrap360;
+	e.EulerZ = (-e.EulerZ) & wrap360; // wrap360 = 4095
 
 	CreateEulerMatrix(&e, &VDB_Ptr->VDB_SpriteMat);
 }
