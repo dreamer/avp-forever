@@ -9,6 +9,7 @@
 extern void fmvTest(const char* file);
 
 #include "d3_func.h"
+/*
 #include <fstream>
 #include <map>
 #include <ogg/ogg.h>
@@ -16,6 +17,7 @@ extern void fmvTest(const char* file);
 #include <theora/theoradec.h>
 #include <vorbis/vorbisfile.h>
 #include <process.h>
+*/
 #ifdef _XBOX
 #include <d3dx8.h>
 #include <xtl.h>
@@ -26,12 +28,13 @@ extern void fmvTest(const char* file);
 
 #include "logString.h"
 #include "vorbisPlayer.h"
-#include "ringbuffer.h"
-#include "audioStreaming.h"
+//#include "ringbuffer.h"
+//#include "audioStreaming.h"
 #include "console.h"
 #define restrict
 #include <emmintrin.h>
 
+#if 0 
 enum StreamType
 {
 	TYPE_VORBIS,
@@ -74,6 +77,7 @@ enum
 	PLAYONCE,
 	PLAYLOOP
 };
+#endif
 
 extern "C" {
 
@@ -135,53 +139,19 @@ extern unsigned char DebouncedGotAnyKey;
 int NextFMVFrame();
 void FmvClose();
 int GetVolumeOfNearestVideoScreen(void);
+/*
 int CloseTheoraVideo();
 bool HandleTheoraHeader(OggStream *stream, ogg_packet *packet);
 bool HandleVorbisHeader(OggStream *stream, ogg_packet *packet);
 bool ReadOggPage(ogg_sync_state *state, ogg_page *page);
 bool ReadPacket(ogg_sync_state *state, OggStream *stream, ogg_packet *packet);
+*/
 void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb);
 
-struct Fmv
-{
-	std::ifstream oggFile;
-	ogg_sync_state state;
+VorbisCodec *menuMusic = NULL;
+bool MenuBackground = false;
 
-	bool frameReady;
-	bool fmvPlaying;
-	bool MenuBackground;
-	bool started;
-	bool loop;
-
-	long postHeaderFileOffset;
-	int textureWidth;
-	int textureHeight;
-	int frameWidth;
-	int frameHeight;
-	int playing;
-
-	th_ycbcr_buffer buffer;
-
-	HANDLE callbackEvent;
-
-	D3DTEXTURE mDisplayTexture;
-	uint8_t *textureData;
-
-	HANDLE decodeThreadHandle;
-	HANDLE audioThreadHandle;
-	CRITICAL_SECTION frameCriticalSection;
-	CRITICAL_SECTION audioCriticalSection;
-
-	OggStream *video;
-	OggStream *audio;
-
-	StreamingAudioBuffer *fmvAudioStream;
-
-	uint16_t *audioDataBuffer;
-	int		 audioDataBufferSize;
-	uint8_t	 *audioData;
-
-};
+#if 0
 
 std::ifstream oggFile;
 ogg_sync_state state;
@@ -213,8 +183,6 @@ int audioDataBufferSize = 0;
 uint8_t *audioData = NULL;
 StreamMap mStreams;
 ogg_int64_t mGranulepos;
-
-VorbisCodec *menuMusic = NULL;
 
 RingBuffer *ringBuffer = NULL;
 
@@ -961,28 +929,23 @@ int CloseTheoraVideo()
 
 	return 0;
 }
+#endif
 
 extern void StartMenuBackgroundFmv()
 {
-//	mgr = new TheoraVideoManager();
-
-//	clip = mgr->createVideoClip("fmvs\\MarineIntro.ogv");
-
 	return;
 
 	const char *filenamePtr = "fmvs\\menubackground.ogv";
 
-	OpenTheoraVideo(filenamePtr, PLAYLOOP);
+//	OpenTheoraVideo(filenamePtr, PLAYLOOP);
 
 	MenuBackground = true;
 }
 
 extern int PlayMenuBackgroundFmv()
 {
-//	TheoraVideoFrame *frame = clip->getNextFrame();
-
 	return 0;
-
+#if 0 // temporarily disabled
 	if (!MenuBackground)
 		return 0;
 
@@ -995,23 +958,26 @@ extern int PlayMenuBackgroundFmv()
 	}
 
 	return 1;
+#endif
 }
 
 extern void EndMenuBackgroundFmv()
 {
 	return;
-
+#if 0 // temporarily disabled
 	if (!MenuBackground)
 		return;
 
 	FmvClose();
 
 	MenuBackground = false;
+#endif
 }
 
 extern void PlayFMV(const char *filenamePtr)
 {
 	fmvTest(filenamePtr);
+#if 0 // temporarily disabled
 	return;
 
 	if (!IntroOutroMoviesAreActive)
@@ -1053,10 +1019,13 @@ extern void PlayFMV(const char *filenamePtr)
 	}
 
 	FmvClose();
+#endif
 }
 
 int NextFMVFrame2(uint8_t *frameBuffer, int pitch)
 {
+	return 1;
+#if 0 // temporarily disabled
 	if (fmvPlaying == false)
 		return 0;
 
@@ -1090,10 +1059,13 @@ int NextFMVFrame2(uint8_t *frameBuffer, int pitch)
 	LeaveCriticalSection(&frameCriticalSection);
 
 	return 1;
+#endif
 }
 
 int NextFMVFrame()
 {
+	return 1;
+#if 0 // temporarily disabled
 	if (fmvPlaying == false)
 		return 0;
 
@@ -1138,6 +1110,7 @@ int NextFMVFrame()
 	LeaveCriticalSection(&frameCriticalSection);
 
 	return 1;
+#endif
 }
 
 /* Vanilla implementation if YUV->RGB conversion */
@@ -1324,8 +1297,10 @@ void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb)
 
 void FmvClose()
 {
+#if 0 // temporarily disabled
 	fmvPlaying = false;
 	CloseTheoraVideo();
+#endif
 }
 
 void UpdateAllFMVTextures()
@@ -1370,11 +1345,12 @@ extern void StartTriggerPlotFMV(int number)
 	{
 		if (FMVTexture[i].IsTriggeredPlotFMV)
 		{
+#if 0 // temporarily disabled
 			if (OpenTheoraVideo(buffer) < 0)
 			{
 				return;
 			}
-
+#endif
 			FMVTexture[i].SmackHandle = 1;
 			FMVTexture[i].MessageNumber = number;
 		}
@@ -1476,13 +1452,14 @@ void ReleaseAllFMVTexturesForDeviceReset()
 	{
 		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
 	}
-
+#if 0 // temporarily disabled
 	// non ingame fmv?
 	if (mDisplayTexture)
 	{
 		mDisplayTexture->Release();
 		mDisplayTexture = NULL;
 	}
+#endif
 }
 
 void RecreateAllFMVTexturesAfterDeviceReset()
@@ -1491,12 +1468,13 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 	{
 		FMVTexture[i].ImagePtr->Direct3DTexture = CreateFmvTexture(&FMVTexture[i].ImagePtr->ImageWidth, &FMVTexture[i].ImagePtr->ImageHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 	}
-
+#if 0 // temporarily disabled
 	// non ingame fmv? - use a better way to determine this..
 	if ((textureWidth && textureHeight) && (!mDisplayTexture))
 	{
 		mDisplayTexture = CreateFmvTexture(&textureWidth, &textureHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 	}
+#endif
 }
 
 // bjd - the below three functions could maybe be moved out of this file altogether as vorbisPlayer can handle it
@@ -1576,6 +1554,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 
 	byte *DestBufferPtr = ftPtr->RGBBuffer;
 
+#if 0 // temporarily disabled
 	if (MoviesAreActive && ftPtr->SmackHandle)
 	{
 		int volume = MUL_FIXED(FmvSoundVolume*256, GetVolumeOfNearestVideoScreen());
@@ -1603,7 +1582,9 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 
 		ftPtr->StaticImageDrawn = 0;
 	}
-	else if (!ftPtr->StaticImageDrawn || /*smackerFormat*/1)
+	else
+#endif
+	if (!ftPtr->StaticImageDrawn || /*smackerFormat*/1)
 	{
 		int i = w * h;
 		unsigned int seed = FastRandom();
