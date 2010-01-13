@@ -30,239 +30,311 @@ enum streamType
 	TYPE_UNKNOWN
 };
 
-// forward declare struct
-struct oggStream;
+// forward declare classes
+class VorbisDecode;
+class TheoraDecode;
 
-typedef std::map<int, oggStream*> streamMap;
-
-struct fmv
+class TheoraDecode
 {
-	std::string 	fileName;
-	std::ifstream 	fileStream;
+	public:
+		th_info 		mInfo;
+		th_comment 		mComment;
+		th_setup_info 	*mSetupInfo;
+		th_dec_ctx		*mDecodeContext;
 
-	ogg_sync_state 	state;
-	ogg_int64_t		granulePos;
-	th_ycbcr_buffer yuvBuffer;
-
-	streamMap		streams;
-
-	// audio
-	StreamingAudioBuffer *audioStream;
-	RingBuffer *ringBuffer;
-	uint8_t	*audioData;
-	uint16_t *audioDataBuffer;
-	int	audioDataBufferSize;
-	CRITICAL_SECTION audioCriticalSection;
-
-	// video
-	D3DTEXTURE displayTexture;
-	int textureWidth;
-	int textureHeight;
-	int frameWidth;
-	int frameHeight;
-	CRITICAL_SECTION frameCriticalSection;
-
-	// thread handles
-	HANDLE decodeThreadHandle;
-	HANDLE audioThreadHandle;
-
-	// so we can easily reference these from the threads.
-	oggStream *video;
-	oggStream *audio;
-
-	bool fmvPlaying;
-	bool frameReady;
-	bool audioStarted;
-
-	int open(const char* file);
-	bool readPage(ogg_page *page);
-	bool readPacket(oggStream *stream, ogg_packet *packet);
-	void readHeaders();
-	void handleTheoraData(oggStream *stream, ogg_packet *packet);
+		TheoraDecode() :
+			mSetupInfo(0),
+			mDecodeContext(0)
+		{
+			th_info_init(&mInfo);
+			th_comment_init(&mComment);
+		}
+		~TheoraDecode()
+		{
+			th_setup_free(mSetupInfo);
+			th_decode_free(mDecodeContext);
+		}
+		void Init();
 };
 
-struct theoraDecode
+class VorbisDecode
 {
-	th_info 		info;
-	th_comment 		comment;
-	th_setup_info 	*setupInfo;
-	th_dec_ctx		*decodeContext;
+	public:
+		vorbis_info 		mInfo;
+		vorbis_comment 		mComment;
+		vorbis_dsp_state 	mDspState;
+		vorbis_block 		mBlock;
 
-	void init();
+		VorbisDecode()
+		{
+			vorbis_info_init(&mInfo);
+			vorbis_comment_init(&mComment);
+		}
+
+		void Init();
 };
 
-void theoraDecode::init()
+class OggStream
 {
-	decodeContext = th_decode_alloc(&info, setupInfo);
-	assert(decodeContext != NULL);
+	public:
+		int 				mSerialNumber;
+		ogg_stream_state	mStreamState;
+		bool				mHeadersRead;
+		bool				mActive;
+		streamType			mType;
+		TheoraDecode		mTheora;
+		VorbisDecode		mVorbis;
+
+		OggStream(int serialNumber) :
+			mSerialNumber(-1),
+			mType(TYPE_UNKNOWN),
+			mActive(true)
+		{
+		}
+		~OggStream()
+		{
+			int ret = ogg_stream_clear(&mStreamState);
+			assert (ret == 0);
+		}
+};
+
+typedef std::map<int, OggStream*> streamMap;
+
+class TheoraFMV
+{
+	public:
+		std::string 	mFileName;
+		std::ifstream 	mFileStream;
+
+		ogg_sync_state 	mState;
+		ogg_int64_t		mGranulePos;
+		th_ycbcr_buffer mYuvBuffer;
+
+		streamMap		mStreams;
+
+		// audio
+		StreamingAudioBuffer *mAudioStream;
+		RingBuffer *mRingBuffer;
+		uint8_t	*mAudioData;
+		uint16_t *mAudioDataBuffer;
+		int	mAudioDataBufferSize;
+		CRITICAL_SECTION mAudioCriticalSection;
+
+		// video
+		D3DTEXTURE mDisplayTexture;
+		int mTextureWidth;
+		int mTextureHeight;
+		int mFrameWidth;
+		int mFrameHeight;
+		CRITICAL_SECTION mFrameCriticalSection;
+
+		// thread handles
+		HANDLE mDecodeThreadHandle;
+		HANDLE mAudioThreadHandle;
+
+		// so we can easily reference these from the threads.
+		OggStream *mVideo;
+		OggStream *mAudio;
+
+		bool mFmvPlaying;
+		bool mFrameReady;
+		bool mAudioStarted;
+
+		TheoraFMV(/*const char* fileName*/) :
+			mGranulePos(0),
+				mAudioStream(0),
+				mRingBuffer(0),
+				mAudioData(0),
+				mAudioDataBuffer(0),
+				mAudioDataBufferSize(0),
+				mDisplayTexture(0),
+				mTextureWidth(0),
+				mTextureHeight(0),
+				mFrameWidth(0),
+				mFrameHeight(0),
+				mDecodeThreadHandle(0),
+				mAudioThreadHandle(0),
+				mVideo(0),
+				mAudio(0),
+				mFmvPlaying(false),
+				mFrameReady(false),
+				mAudioStarted(false)
+		{
+
+		}
+		~TheoraFMV()
+		{
+			if (mDecodeThreadHandle)
+			{
+				WaitForSingleObject(mDecodeThreadHandle, INFINITE);
+				CloseHandle(mDecodeThreadHandle);
+			}
+			if (mAudioThreadHandle)
+			{
+				WaitForSingleObject(mAudioThreadHandle, INFINITE);
+				CloseHandle(mAudioThreadHandle);
+			}
+			
+			int ret = ogg_sync_clear(&mState);
+			assert(ret == 0);
+
+			for (streamMap::iterator it = mStreams.begin(); it != mStreams.end(); ++it)
+			{
+				OggStream *tempStream = (*it).second;
+
+				// delete stream; we have no class so no destructor. do it manually.
+				int ret = ogg_stream_clear(&tempStream->mStreamState);
+				assert(ret == 0);
+				th_setup_free(tempStream->mTheora.mSetupInfo);
+				th_decode_free(tempStream->mTheora.mDecodeContext);
+				delete tempStream;
+			}
+			if (mAudioStream)
+			{
+				AudioStream_ReleaseBuffer(mAudioStream);
+			}
+			if (mAudioData)
+			{
+				delete []mAudioData;
+			}
+			if (mAudioDataBuffer)
+			{
+				delete []mAudioDataBuffer;
+			}
+			if (mDisplayTexture)
+			{
+				mDisplayTexture->Release();
+			}
+		}
+
+		int	Open(const char* fileName);
+		bool ReadPage(ogg_page *page);
+		bool ReadPacket(OggStream *stream, ogg_packet *packet);
+		void ReadHeaders();
+		void HandleTheoraData(OggStream *stream, ogg_packet *packet);
+};
+
+void TheoraDecode::Init()
+{
+	mDecodeContext = th_decode_alloc(&mInfo, mSetupInfo);
+	assert(mDecodeContext != NULL);
 
 	int ppmax = 0;
-	int ret = th_decode_ctl(decodeContext, TH_DECCTL_GET_PPLEVEL_MAX, &ppmax, sizeof(ppmax));
+	int ret = th_decode_ctl(mDecodeContext, TH_DECCTL_GET_PPLEVEL_MAX, &ppmax, sizeof(ppmax));
 	assert (ret == 0);
 
 	ppmax = 0;
 
-	ret = th_decode_ctl(decodeContext, TH_DECCTL_SET_PPLEVEL, &ppmax, sizeof(ppmax));
+	ret = th_decode_ctl(mDecodeContext, TH_DECCTL_SET_PPLEVEL, &ppmax, sizeof(ppmax));
 	assert(ret == 0);
 }
 
-struct vorbisDecode
+void VorbisDecode::Init()
 {
-	vorbis_info 		info;
-	vorbis_comment 		comment;
-	vorbis_dsp_state 	dspState;
-	vorbis_block 		block;
-
-	void init();
-};
-
-void vorbisDecode::init()
-{
-	int ret = vorbis_synthesis_init(&dspState, &info);
+	int ret = vorbis_synthesis_init(&mDspState, &mInfo);
 	assert(ret == 0);
 
-	ret = vorbis_block_init(&dspState, &block);
+	ret = vorbis_block_init(&mDspState, &mBlock);
 	assert(ret == 0);
 }
 
-struct oggStream
-{
-	int 				serialNumber;
-	ogg_stream_state	streamState;
-	bool				headersRead;
-	bool				active;
-	streamType			type;
-	theoraDecode		theora;
-	vorbisDecode		vorbis;
-
-	void streamInit(int serialNumber);
-};
-
-void oggStream::streamInit(int serialNo)
-{
-	serialNumber = serialNo;
-	type = TYPE_UNKNOWN;
-	headersRead = false;
-	active = true;
-
-	// init theora stuff
-	th_info_init(&theora.info);
-	th_comment_init(&theora.comment);
-	theora.decodeContext = 0;
-	theora.setupInfo = 0;
-
-	// init vorbis stuff
-	vorbis_info_init(&vorbis.info);
-	vorbis_comment_init(&vorbis.comment);
-}
-
-fmv *newFmv;
+TheoraFMV *newFmv;
 
 void fmvTest(const char* file)
 {
-	newFmv = new fmv;
-
-	newFmv->open(file);
-
-//	delete newFmv;
+	newFmv = new TheoraFMV();
+	newFmv->Open(file);
 }
 
-int fmv::open(const char* file)
+int TheoraFMV::Open(const char* fileName)
 {
-	fileName = file;
+	mFileName = fileName;
 
 	// open the file
-	fileStream.open(fileName.c_str(), std::ios::in | std::ios::binary);
+	mFileStream.open(mFileName.c_str(), std::ios::in | std::ios::binary);
 
-	if (!fileStream.is_open())
+	if (!mFileStream.is_open())
 	{
-		Con_PrintError("can't find FMV file " + fileName);
+		Con_PrintError("can't find FMV file " + mFileName);
 		return FMV_INVALID_FILE;
 	}
 
-	if (ogg_sync_init(&state) != 0)
+	if (ogg_sync_init(&mState) != 0)
 	{
 		Con_PrintError("ogg_sync_init failed");
 		return FMV_ERROR;
 	}
 
 	// now read the headers in the ogg file
-	readHeaders();
+	ReadHeaders();
 
-//	oggStream *video = 0;
-//	oggStream *audio = 0;
-	video = 0;
-	audio = 0;
-	displayTexture = 0;
-	granulePos = 0;
-
-	// initialise the streams we found while reading the headers
-	for (streamMap::iterator it = streams.begin(); it != streams.end(); ++it)
+	// initialise the mStreams we found while reading the headers
+	for (streamMap::iterator it = mStreams.begin(); it != mStreams.end(); ++it)
 	{
-		oggStream *stream = (*it).second;
+		OggStream *stream = (*it).second;
 
-		if (!video && stream->type == TYPE_THEORA)
+		if (!mVideo && stream->mType == TYPE_THEORA)
 		{
-			video = stream;
-			video->theora.init();
+			mVideo = stream;
+			mVideo->mTheora.Init();
 		}
 
-		if (!audio && stream->type == TYPE_VORBIS)
+		if (!mAudio && stream->mType == TYPE_VORBIS)
 		{
-			audio = stream;
-			audio->vorbis.init();
+			mAudio = stream;
+			mAudio->mVorbis.Init();
 		}
-		else stream->active = false;
+		else stream->mActive = false;
 	}
 
-	// init the sound and video api stuff we need
-	if (audio)
+	// init the sound and mVideo api stuff we need
+	if (mAudio)
 	{
-		// create audio streaming buffer
-		audioStream = AudioStream_CreateBuffer(audio->vorbis.info.channels, audio->vorbis.info.rate, 4096, 3);
-		if (audioStream == NULL)
+		// create mAudio streaming buffer
+		mAudioStream = AudioStream_CreateBuffer(mAudio->mVorbis.mInfo.channels, mAudio->mVorbis.mInfo.rate, 4096, 3);
+		if (mAudioStream == NULL)
 		{
-			Con_PrintError("Failed to create audio stream buffer for fmv playback");
+			Con_PrintError("Failed to create mAudio stream buffer for fmv playback");
 			return FMV_ERROR;
 		}
 
-		// we need some temporary audio data storage space and a ring buffer instance
-		audioData = new uint8_t[audioStream->bufferSize];
-		ringBuffer = new RingBuffer(audioStream->bufferSize * audioStream->bufferCount);
+		// we need some temporary mAudio data storage space and a ring buffer instance
+		mAudioData = new uint8_t[mAudioStream->bufferSize];
+		mRingBuffer = new RingBuffer(mAudioStream->bufferSize * mAudioStream->bufferCount);
 
-		audioDataBuffer = NULL;
+		mAudioDataBuffer = NULL;
 	}
 
-	if (!displayTexture)
+	if (!mDisplayTexture)
 	{
-		frameWidth = video->theora.info.frame_width;
-		frameHeight = video->theora.info.frame_height;
+		mFrameWidth = mVideo->mTheora.mInfo.frame_width;
+		mFrameHeight = mVideo->mTheora.mInfo.frame_height;
 
-		textureWidth = frameWidth;
-		textureHeight = textureHeight;
+		mTextureWidth = mFrameWidth;
+		mTextureHeight = mTextureHeight;
 
 		// create a new texture, passing width and height which will be set to the actual size of the created texture
-		displayTexture = CreateFmvTexture(&textureWidth, &textureHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
-		if (!displayTexture)
+		mDisplayTexture = CreateFmvTexture(&mTextureWidth, &mTextureHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+		if (!mDisplayTexture)
 		{
 			Con_PrintError("can't create FMV texture");
 			return FMV_ERROR;
 		}
 	}
 
-	fmvPlaying = true;
-	audioStarted = false;
-	frameReady = false;
+	mFmvPlaying = true;
+	mAudioStarted = false;
+	mFrameReady = false;
 
-	InitializeCriticalSection(&frameCriticalSection);
-	InitializeCriticalSection(&audioCriticalSection);
+	InitializeCriticalSection(&mFrameCriticalSection);
+	InitializeCriticalSection(&mAudioCriticalSection);
 
 	// time to start our threads
-	decodeThreadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, decodeThread, static_cast<void*>(this), 0, NULL));
+	mDecodeThreadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, decodeThread, static_cast<void*>(this), 0, NULL));
 
-	if (audio)
+	if (mAudio)
 	{
-		audioThreadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, audioThread, static_cast<void*>(this), 0, NULL));
+		mAudioThreadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, audioThread, static_cast<void*>(this), 0, NULL));
 	}
 
 	Con_PrintMessage("fmv should be playing now");
@@ -270,22 +342,22 @@ int fmv::open(const char* file)
 	return FMV_OK;
 }
 
-bool fmv::readPage(ogg_page *page)
+bool TheoraFMV::ReadPage(ogg_page *page)
 {
 	int amountRead = 0;
 	int ret = 0;
 
 	// if end of file, keep processing any remaining buffered pages
-	if (!fileStream.good())
-		return ogg_sync_pageout(&state, page) == 1;
+	if (!mFileStream.good())
+		return ogg_sync_pageout(&mState, page) == 1;
 
-	while (ogg_sync_pageout(&state, page) != 1)
+	while (ogg_sync_pageout(&mState, page) != 1)
 	{
-		char *buffer = ogg_sync_buffer(&state, 4096);
+		char *buffer = ogg_sync_buffer(&mState, 4096);
 		assert(buffer);
 
-		fileStream.read(buffer, 4096);
-		amountRead = fileStream.gcount();
+		mFileStream.read(buffer, 4096);
+		amountRead = mFileStream.gcount();
 
 		if (amountRead == 0)
 		{
@@ -293,41 +365,39 @@ bool fmv::readPage(ogg_page *page)
 			continue;
 		}
 
-		ret = ogg_sync_wrote(&state, amountRead);
+		ret = ogg_sync_wrote(&mState, amountRead);
 		assert(ret == 0);
 	}
 
 	return true;
 }
 
-bool fmv::readPacket(oggStream *stream, ogg_packet *packet)
+bool TheoraFMV::ReadPacket(OggStream *stream, ogg_packet *packet)
 {
 	int ret = 0;
 
-	while ((ret = ogg_stream_packetout(&stream->streamState, packet)) != 1)
+	while ((ret = ogg_stream_packetout(&stream->mStreamState, packet)) != 1)
 	{
-		OutputDebugString("in readpacket\n");
 		ogg_page page;
 
-		if (!readPage(&page))
+		if (!ReadPage(&page))
 			return false;
 
 		int serialNumber = ogg_page_serialno(&page);
-		assert(streams.find(serialNumber) != streams.end());
-		oggStream *pageStream = streams[serialNumber];
+		assert(mStreams.find(serialNumber) != mStreams.end());
+		OggStream *pageStream = mStreams[serialNumber];
 
-		// Drop data for streams we're not interested in.
-		if (stream->active)
+		// Drop data for mStreams we're not interested in.
+		if (stream->mActive)
 		{
-			ret = ogg_stream_pagein(&pageStream->streamState, &page);
+			ret = ogg_stream_pagein(&pageStream->mStreamState, &page);
 			assert(ret == 0);
     	}
 	}
-	OutputDebugString("leaving readpacket\n");
 	return true;
 }
 
-void fmv::readHeaders()
+void TheoraFMV::ReadHeaders()
 {
 	ogg_page page;
 	int ret = 0;
@@ -336,55 +406,52 @@ void fmv::readHeaders()
 	bool gotTheora = false;
 	bool gotVorbis = false;
 
-	while (!gotAllHeaders && readPage(&page))
+	while (!gotAllHeaders && ReadPage(&page))
 	{
-		oggStream *stream = 0;
+		OggStream *stream = 0;
 
 		int serialNumber = ogg_page_serialno(&page);
 
 		if (ogg_page_bos(&page))
 		{
-			stream = new oggStream;
-			stream->streamInit(serialNumber);
-			ret = ogg_stream_init(&stream->streamState, serialNumber);
+			stream = new OggStream(serialNumber);
+			ret = ogg_stream_init(&stream->mStreamState, serialNumber);
 			assert(ret == 0);
 
 			// store in the stream std::map
-			streams[serialNumber] = stream;
+			mStreams[serialNumber] = stream;
 		}
 
-		assert(streams.find(serialNumber) != streams.end());
+		assert(mStreams.find(serialNumber) != mStreams.end());
 
-		if (streams.find(serialNumber) != streams.end())
+		if (mStreams.find(serialNumber) != mStreams.end())
 		{
 			// change our stream pointer to the one now in the map
-//			stream = streams[serialNumber];
+//			stream = mStreams[serialNumber];
 		}
 
-		stream = streams[serialNumber];
+		stream = mStreams[serialNumber];
 
 		// add the completed page to the bitstream
-		ret = ogg_stream_pagein(&stream->streamState, &page);
+		ret = ogg_stream_pagein(&stream->mStreamState, &page);
 		assert(ret == 0);
 
 		ogg_packet packet;
 
-		while (!gotAllHeaders && (ret = ogg_stream_packetpeek(&stream->streamState, &packet)) != 0)
+		while (!gotAllHeaders && (ret = ogg_stream_packetpeek(&stream->mStreamState, &packet)) != 0)
 		{
 			assert(ret == 1);
-
-			// we have a packet, check if its a header packet
 
 			// check for a theora header first
 			if (!gotTheora)
 			{
-				ret = th_decode_headerin(&stream->theora.info, &stream->theora.comment, &stream->theora.setupInfo, &packet);
+				ret = th_decode_headerin(&stream->mTheora.mInfo, &stream->mTheora.mComment, &stream->mTheora.mSetupInfo, &packet);
 				if (ret > 0)
 				{
 					// we found the header packet
-					stream->type = TYPE_THEORA;
+					stream->mType = TYPE_THEORA;
 				}
-				else if (stream->type == TYPE_THEORA && ret == 0)
+				else if (stream->mType == TYPE_THEORA && ret == 0)
 				{
 					gotTheora = true;
 				}
@@ -393,12 +460,12 @@ void fmv::readHeaders()
 			// check for a vorbis header
 			if (!gotVorbis)
 			{
-				ret = vorbis_synthesis_headerin(&stream->vorbis.info, &stream->vorbis.comment, &packet);
+				ret = vorbis_synthesis_headerin(&stream->mVorbis.mInfo, &stream->mVorbis.mComment, &packet);
 				if (ret == 0)
 				{
-					stream->type = TYPE_VORBIS;
+					stream->mType = TYPE_VORBIS;
 				}
-				else if (stream->type == TYPE_VORBIS && ret == OV_ENOTVORBIS)
+				else if (stream->mType == TYPE_VORBIS && ret == OV_ENOTVORBIS)
 				{
 					gotVorbis = true;
 				}
@@ -410,16 +477,16 @@ void fmv::readHeaders()
 			if (!gotAllHeaders)
 			{
 				// we need to move forward and grab the next packet
-				ret = ogg_stream_packetout(&stream->streamState, &packet);
+				ret = ogg_stream_packetout(&stream->mStreamState, &packet);
 				assert(ret == 1);
 			}
 		}
 	}
 }
 
-void fmv::handleTheoraData(oggStream *stream, ogg_packet *packet)
+void TheoraFMV::HandleTheoraData(OggStream *stream, ogg_packet *packet)
 {
-	int ret = th_decode_packetin(stream->theora.decodeContext, packet, &granulePos);
+	int ret = th_decode_packetin(stream->mTheora.mDecodeContext, packet, &mGranulePos);
 
 	if (ret == TH_DUPFRAME)  // same as previous frame, don't bother decoding it
 		return;
@@ -429,72 +496,70 @@ void fmv::handleTheoraData(oggStream *stream, ogg_packet *packet)
 	// critical section
 
 	// We have a frame. Get the YUV data
-	ret = th_decode_ycbcr_out(stream->theora.decodeContext, yuvBuffer);
+	ret = th_decode_ycbcr_out(stream->mTheora.mDecodeContext, mYuvBuffer);
 	assert (ret == 0);
 
-	OutputDebugString("got a frame\n");
-
 	// we have a new frame and we're ready to use it
-//	frameReady = true;
+//	mFrameReady = true;
 
 	// leave critical section
 }
 
 unsigned int __stdcall decodeThread(void *args)
 {
-	fmv *fmvInstance = static_cast<fmv*>(args);
+	TheoraFMV *fmv = static_cast<TheoraFMV*>(args);
 
 	ogg_packet packet;
 	int ret = 0;
     float** pcm = 0;
     int samples = 0;
 
-	while (fmvInstance->readPacket(fmvInstance->audio, &packet))
+	while (fmv->ReadPacket(fmv->mAudio, &packet))
 	{
-		if (vorbis_synthesis(&fmvInstance->audio->vorbis.block, &packet) == 0)
+		if (vorbis_synthesis(&fmv->mAudio->mVorbis.mBlock, &packet) == 0)
 		{
-			ret = vorbis_synthesis_blockin(&fmvInstance->audio->vorbis.dspState, &fmvInstance->audio->vorbis.block);
+			ret = vorbis_synthesis_blockin(&fmv->mAudio->mVorbis.mDspState, &fmv->mAudio->mVorbis.mBlock);
 			assert(ret == 0);
 		}
 
 		// get pointer to array of floating point values for sound samples
-		while ((samples = vorbis_synthesis_pcmout(&fmvInstance->audio->vorbis.dspState, &pcm)) > 0)
+		while ((samples = vorbis_synthesis_pcmout(&fmv->mAudio->mVorbis.mDspState, &pcm)) > 0)
 		{
 			if (samples > 0)
 			{
-				int dataSize = samples * fmvInstance->audio->vorbis.info.channels;
+				int dataSize = samples * fmv->mAudio->mVorbis.mInfo.channels;
 
-				if (fmvInstance->audioDataBuffer == NULL)
+				if (fmv->mAudioDataBuffer == NULL)
 				{
 					// make it twice the size we currently need to avoid future reallocations
-					fmvInstance->audioDataBuffer = new uint16_t[dataSize * 2];
-					fmvInstance->audioDataBufferSize = dataSize * 2;
+					fmv->mAudioDataBuffer = new uint16_t[dataSize * 2];
+					fmv->mAudioDataBufferSize = dataSize * 2;
 				}
 
-				if (fmvInstance->audioDataBufferSize < dataSize)
+				if (fmv->mAudioDataBufferSize < dataSize)
 				{
-					if (fmvInstance->audioDataBuffer != NULL)
+					if (fmv->mAudioDataBuffer != NULL)
 					{
-						delete []fmvInstance->audioDataBuffer;
-						OutputDebugString("deleted audioDataBuffer to resize\n");
+						delete []fmv->mAudioDataBuffer;
+						OutputDebugString("deleted mAudioDataBuffer to resize\n");
 					}
 
-					fmvInstance->audioDataBuffer = new uint16_t[dataSize * 2];
-					OutputDebugString("alloc audioDataBuffer\n");
+					fmv->mAudioDataBuffer = new uint16_t[dataSize * 2];
+					OutputDebugString("alloc mAudioDataBuffer\n");
 
-					if (!fmvInstance->audioDataBuffer)
+					if (!fmv->mAudioDataBuffer)
 					{
 						OutputDebugString("Out of memory\n");
 						break;
 					}
-					fmvInstance->audioDataBufferSize = dataSize * 2;
+					fmv->mAudioDataBufferSize = dataSize * 2;
 				}
 
-				uint16_t* p = fmvInstance->audioDataBuffer;
+				uint16_t* p = fmv->mAudioDataBuffer;
 
 				for (int i = 0; i < samples; ++i)
 				{
-					for (int j = 0; j < fmvInstance->audio->vorbis.info.channels; ++j)
+					for (int j = 0; j < fmv->mAudio->mVorbis.mInfo.channels; ++j)
 					{
 						int v = static_cast<int>(floorf(0.5f + pcm[j][i]*32767.0f));
 						if (v > 32767) v = 32767;
@@ -503,56 +568,55 @@ unsigned int __stdcall decodeThread(void *args)
 					}
 				}
 
-				int audioSize = samples * fmvInstance->audio->vorbis.info.channels * sizeof(uint16_t);
+				int audioSize = samples * fmv->mAudio->mVorbis.mInfo.channels * sizeof(uint16_t);
 
 				// move the critical section stuff into the ring buffer code itself?
-				EnterCriticalSection(&fmvInstance->audioCriticalSection);
+				EnterCriticalSection(&fmv->mAudioCriticalSection);
 
-				int freeSpace = fmvInstance->ringBuffer->GetWritableSize();
+				int freeSpace = fmv->mRingBuffer->GetWritableSize();
 
 				// if we can't fit all our data..
 				if (audioSize > freeSpace)
 				{
 					//while (audioSize > RingBuffer_GetWritableSpace())
-					while (audioSize > fmvInstance->ringBuffer->GetWritableSize())
+					while (audioSize > fmv->mRingBuffer->GetWritableSize())
 					{
 						// little bit of insurance in case we get stuck in here
-						//if (!fmvInstance->fmvPlaying)
+						//if (!fmvInstance->mFmvPlaying)
 						//	break;
 
 						Sleep(16);
 					}
 				}
 
-				fmvInstance->ringBuffer->WriteData((uint8_t*)&fmvInstance->audioDataBuffer[0], audioSize);
+				fmv->mRingBuffer->WriteData((uint8_t*)&fmv->mAudioDataBuffer[0], audioSize);
 
-				LeaveCriticalSection(&fmvInstance->audioCriticalSection);
+				LeaveCriticalSection(&fmv->mAudioCriticalSection);
 			}
 
 			// tell vorbis how many samples we consumed
-			ret = vorbis_synthesis_read(&fmvInstance->audio->vorbis.dspState, samples);
+			ret = vorbis_synthesis_read(&fmv->mAudio->mVorbis.mDspState, samples);
 			assert(ret == 0);
 
-			if (fmvInstance->video)
+			if (fmv->mVideo)
 			{
-				// video stuff
-				float audio_time = static_cast<float>(AudioStream_GetNumSamplesPlayed(fmvInstance->audioStream)) / static_cast<float>(fmvInstance->audio->vorbis.info.rate);
-				float video_time = static_cast<float>(th_granule_time(fmvInstance->video->theora.decodeContext, fmvInstance->granulePos));
+				float audio_time = static_cast<float>(AudioStream_GetNumSamplesPlayed(fmv->mAudioStream)) / static_cast<float>(fmv->mAudio->mVorbis.mInfo.rate);
+				float video_time = static_cast<float>(th_granule_time(fmv->mVideo->mTheora.mDecodeContext, fmv->mGranulePos));
 
-				char buf[100];
-				sprintf(buf, "audio_time: %f video_time: %f\n", audio_time, video_time);
-				OutputDebugString(buf);
+//				char buf[100];
+//				sprintf(buf, "audio_time: %f video_time: %f\n", audio_time, video_time);
+//				OutputDebugString(buf);
 
-				// if audio is ahead of frame time, display a new frame
+				// if mAudio is ahead of frame time, display a new frame
 				if ((audio_time > video_time))
 				{
 					// Decode one frame and display it. If no frame is available we
 					// don't do anything.
 					ogg_packet packet;
-					if (fmvInstance->readPacket(fmvInstance->video, &packet))
+					if (fmv->ReadPacket(fmv->mVideo, &packet))
 					{
-						fmvInstance->handleTheoraData(fmvInstance->video, &packet);
-						video_time = th_granule_time(fmvInstance->video->theora.decodeContext, fmvInstance->granulePos);
+						fmv->HandleTheoraData(fmv->mVideo, &packet);
+						video_time = th_granule_time(fmv->mVideo->mTheora.mDecodeContext, fmv->mGranulePos);
 					}
 				}
 			}
@@ -569,7 +633,7 @@ unsigned int __stdcall audioThread(void *args)
 		CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	#endif
 
-	fmv *fmvInstance = static_cast<fmv*>(args);
+	TheoraFMV *fmv = static_cast<TheoraFMV*>(args);
 
 	DWORD dwQuantum = 1000 / 60;
 
@@ -580,35 +644,35 @@ unsigned int __stdcall audioThread(void *args)
 	int endTime = 0;
 	int timetoSleep = 0;
 
-	while (fmvInstance->fmvPlaying)
+	while (fmv->mFmvPlaying)
 	{
 		startTime = timeGetTime();
 
-		int numBuffersFree = AudioStream_GetNumFreeBuffers(fmvInstance->audioStream);
+		int numBuffersFree = AudioStream_GetNumFreeBuffers(fmv->mAudioStream);
 
 		while (numBuffersFree)
 		{
-			int readableAudio = fmvInstance->ringBuffer->GetReadableSize();
+			int readableAudio = fmv->mRingBuffer->GetReadableSize();
 
 			// we can fill a buffer
-			if (readableAudio >= fmvInstance->audioStream->bufferSize)
+			if (readableAudio >= fmv->mAudioStream->bufferSize)
 			{
-				fmvInstance->ringBuffer->ReadData(fmvInstance->audioData, fmvInstance->audioStream->bufferSize);
-				AudioStream_WriteData(fmvInstance->audioStream, fmvInstance->audioData, fmvInstance->audioStream->bufferSize);
+				fmv->mRingBuffer->ReadData(fmv->mAudioData, fmv->mAudioStream->bufferSize);
+				AudioStream_WriteData(fmv->mAudioStream, fmv->mAudioData, fmv->mAudioStream->bufferSize);
 
 				numBuffersFree--;
 			}
 			else
 			{
-				// not enough audio available this time
+				// not enough mAudio available this time
 				break;
 			}
 		}
 
-		if (fmvInstance->audioStarted == false)
+		if (fmv->mAudioStarted == false)
 		{
-			AudioStream_PlayBuffer(fmvInstance->audioStream);
-			fmvInstance->audioStarted = true;
+			AudioStream_PlayBuffer(fmv->mAudioStream);
+			fmv->mAudioStarted = true;
 		}
 
 		endTime = timeGetTime();
