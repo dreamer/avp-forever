@@ -7960,7 +7960,7 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 	OUTPUT_TRIANGLE(1,2,3, 4);
 }
 
-void DrawMenuTextGlow2(int topLeftX, int topLeftY, int size, int alpha)
+void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 {
 	int textureWidth = 0;
 	int textureHeight = 0;
@@ -8000,8 +8000,8 @@ void DrawMenuTextGlow2(int topLeftX, int topLeftY, int size, int alpha)
 	// do the text alignment justification
 	topLeftX -= textureWidth;
 
-	float x = (float(topLeftX / 640.0f) * 2) - 1;
-	float y = (float(topLeftY / 480.0f) * 2) - 1;
+	float x1 = (float(topLeftX / 640.0f) * 2) - 1;
+	float y1 = (float(topLeftY / 480.0f) * 2) - 1;
 
 	float x2 = ((float(topLeftX + textureWidth) / 640.0f) * 2) - 1;
 	float y2 = ((float(topLeftY + textureHeight) / 480.0f) * 2) - 1;
@@ -8016,32 +8016,32 @@ void DrawMenuTextGlow2(int topLeftX, int topLeftY, int size, int alpha)
 	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 
 	// bottom left
-	orthoVerts[0].x = x;//-1.0f;
-	orthoVerts[0].y = y2;//1.0f;
+	orthoVerts[0].x = x1;
+	orthoVerts[0].y = y2;
 	orthoVerts[0].z = 1.0f;
 	orthoVerts[0].colour = colour;
 	orthoVerts[0].u = 0.0f;
 	orthoVerts[0].v = (1.0f / texturePOW2Height) * textureHeight;
 
 	// top left
-	orthoVerts[1].x = x;//-1.0f;
-	orthoVerts[1].y = y;//-1.0f;
+	orthoVerts[1].x = x1;
+	orthoVerts[1].y = y1;
 	orthoVerts[1].z = 1.0f;
 	orthoVerts[1].colour = colour;
 	orthoVerts[1].u = 0.0f;
 	orthoVerts[1].v = 0.0f;
 
 	// bottom right
-	orthoVerts[2].x = x2;//1.0f;
-	orthoVerts[2].y = y2;//1.0f;
+	orthoVerts[2].x = x2;
+	orthoVerts[2].y = y2;
 	orthoVerts[2].z = 1.0f;
 	orthoVerts[2].colour = colour;
 	orthoVerts[2].u = (1.0f / texturePOW2Width) * textureWidth;
 	orthoVerts[2].v = (1.0f / texturePOW2Height) * textureHeight;
 
 	// top right
-	orthoVerts[3].x = x2;//1.0f;
-	orthoVerts[3].y = y;//-1.0f;
+	orthoVerts[3].x = x2;
+	orthoVerts[3].y = y1;
 	orthoVerts[3].z = 1.0f;
 	orthoVerts[3].colour = colour;
 	orthoVerts[3].u = (1.0f / texturePOW2Width) * textureWidth;
@@ -8060,32 +8060,23 @@ void DrawMenuTextGlow2(int topLeftX, int topLeftY, int size, int alpha)
 	// now do the middle section
 	topLeftX += textureWidth;
 
-	// work with x2 and y2
-//	x = x2;
-//	y = y2;
-
 	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Width;
 	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Height;
 
 	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].newWidth;
 	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].newHeight;
 
-	x = (float(topLeftX / 640.0f) * 2) - 1;
-	y = (float(topLeftY / 480.0f) * 2) - 1;
+	x1 = (float(topLeftX / 640.0f) * 2) - 1;
+	y1 = (float(topLeftY / 480.0f) * 2) - 1;
 
-	float xoffset = x - x2;
-	float yoffset = y - y2;
-
-//	x2 = x + ((float(0 + textureWidth * size) / 640.0f) * 2) - 1;
-//	y2 = y + ((float(0 + textureHeight) / 480.0f) * 2) - 1;
+	float xoffset = x1 - x2;
+	float yoffset = y1 - y2;
 
 	x2 = ((float(topLeftX + textureWidth * size) / 640.0f) * 2) - 1;
 	y2 = ((float(topLeftY + textureHeight) / 480.0f) * 2) - 1;
 
-	x -= xoffset;
-//	y -= yoffset;
+	x1 -= xoffset;
 	x2 -= xoffset;
-//	y2 -= yoffset;
 
 //	D3DXMatrixScaling (&matScaling, (float)textureWidth * size, (float)textureHeight, 1.0f);
 //	D3DXMatrixTranslation (&matTranslation, topLeftX, topLeftY, 0.0f);
@@ -8093,33 +8084,33 @@ void DrawMenuTextGlow2(int topLeftX, int topLeftY, int size, int alpha)
 
 	colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 
-		// bottom left
-	orthoVerts[0].x = x;//-1.0f;
-	orthoVerts[0].y = y2;//1.0f;
+	// bottom left
+	orthoVerts[0].x = x1;
+	orthoVerts[0].y = y2;
 	orthoVerts[0].z = 1.0f;
 	orthoVerts[0].colour = colour;
 	orthoVerts[0].u = 0.0f;
 	orthoVerts[0].v = (1.0f / texturePOW2Height) * textureHeight;
 
 	// top left
-	orthoVerts[1].x = x;//-1.0f;
-	orthoVerts[1].y = y;//-1.0f;
+	orthoVerts[1].x = x1;
+	orthoVerts[1].y = y1;
 	orthoVerts[1].z = 1.0f;
 	orthoVerts[1].colour = colour;
 	orthoVerts[1].u = 0.0f;
 	orthoVerts[1].v = 0.0f;
 
 	// bottom right
-	orthoVerts[2].x = x2;//1.0f;
-	orthoVerts[2].y = y2;//1.0f;
+	orthoVerts[2].x = x2;
+	orthoVerts[2].y = y2;
 	orthoVerts[2].z = 1.0f;
 	orthoVerts[2].colour = colour;
 	orthoVerts[2].u = (1.0f / texturePOW2Width) * textureWidth;
 	orthoVerts[2].v = (1.0f / texturePOW2Height) * textureHeight;
 
 	// top right
-	orthoVerts[3].x = x2;//1.0f;
-	orthoVerts[3].y = y;//-1.0f;
+	orthoVerts[3].x = x2;
+	orthoVerts[3].y = y1;
 	orthoVerts[3].z = 1.0f;
 	orthoVerts[3].colour = colour;
 	orthoVerts[3].u = (1.0f / texturePOW2Width) * textureWidth;
@@ -8134,7 +8125,6 @@ void DrawMenuTextGlow2(int topLeftX, int topLeftY, int size, int alpha)
 	{
 		OutputDebugString("DrawPrimitiveUP failed\n");
 	}
-	return;
 
 	// now do the right section
 	topLeftX += textureWidth * size;
@@ -8145,44 +8135,56 @@ void DrawMenuTextGlow2(int topLeftX, int topLeftY, int size, int alpha)
 	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].newWidth;
 	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].newHeight;
 
-	D3DXMatrixScaling (&matScaling, (float)textureWidth, (float)textureHeight, 1.0f);
-	D3DXMatrixTranslation (&matTranslation, topLeftX, topLeftY, 0.0f);
-	D3DXMatrixMultiply(&matTransform, &matScaling, &matTranslation);
+	x1 = (float(topLeftX / 640.0f) * 2) - 1;
+	y1 = (float(topLeftY / 480.0f) * 2) - 1;
+
+	xoffset = x1 - x2;
+	yoffset = y1 - y2;
+
+	x2 = ((float(topLeftX + textureWidth) / 640.0f) * 2) - 1;
+	y2 = ((float(topLeftY + textureHeight) / 480.0f) * 2) - 1;
+
+	x1 -= xoffset;
+	x2 -= xoffset;
+
+//	D3DXMatrixScaling (&matScaling, (float)textureWidth, (float)textureHeight, 1.0f);
+//	D3DXMatrixTranslation (&matTranslation, topLeftX, topLeftY, 0.0f);
+//	D3DXMatrixMultiply(&matTransform, &matScaling, &matTranslation);
 
 	// bottom left
-	orthoVerts[0].x = 0.0f;
-	orthoVerts[0].y = 1.0f;
+	orthoVerts[0].x = x1;
+	orthoVerts[0].y = y2;
 	orthoVerts[0].z = 1.0f;
 	orthoVerts[0].colour = colour;
 	orthoVerts[0].u = 0.0f;
 	orthoVerts[0].v = (1.0f / texturePOW2Height) * textureHeight;
 
 	// top left
-	orthoVerts[1].x = 0.0f;
-	orthoVerts[1].y = 0.0f;
+	orthoVerts[1].x = x1;
+	orthoVerts[1].y = y1;
 	orthoVerts[1].z = 1.0f;
 	orthoVerts[1].colour = colour;
 	orthoVerts[1].u = 0.0f;
 	orthoVerts[1].v = 0.0f;
 
 	// bottom right
-	orthoVerts[2].x = 1.0f;
-	orthoVerts[2].y = 1.0f;
+	orthoVerts[2].x = x2;
+	orthoVerts[2].y = y2;
 	orthoVerts[2].z = 1.0f;
 	orthoVerts[2].colour = colour;
 	orthoVerts[2].u = (1.0f / texturePOW2Width) * textureWidth;
 	orthoVerts[2].v = (1.0f / texturePOW2Height) * textureHeight;
 
 	// top right
-	orthoVerts[3].x = 1.0f;
-	orthoVerts[3].y = 0.0f;
+	orthoVerts[3].x = x2;
+	orthoVerts[3].y = y1;
 	orthoVerts[3].z = 1.0f;
 	orthoVerts[3].colour = colour;
 	orthoVerts[3].u = (1.0f / texturePOW2Width) * textureWidth;
 	orthoVerts[3].v = 0.0f;
 
 	d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
-	d3d.lpD3DDevice->SetTransform (D3DTS_WORLD, &matTransform);
+//	d3d.lpD3DDevice->SetTransform (D3DTS_WORLD, &matTransform);
 	d3d.lpD3DDevice->SetTexture (0, AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].menuTexture);
 
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &orthoVerts[0], sizeof(ORTHOVERTEX));
@@ -8192,6 +8194,7 @@ void DrawMenuTextGlow2(int topLeftX, int topLeftY, int size, int alpha)
 	}
 }
 
+#if 0
 void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 {
 //	return;
@@ -8436,6 +8439,7 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 		OUTPUT_TRIANGLE(1,2,3, 4);
 	}
 }
+#endif
 
 void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha) 
 {

@@ -237,7 +237,6 @@ extern void PlayFMV(const char *filenamePtr)
 
 	TheoraFMV *newFmv = new TheoraFMV();
 	newFmv->Open(filenamePtr);
-//	newFmv->Open(/*file*/"d:\\Fmvs\\MarineIntro.ogv");
 
 	int playing = 1;
 

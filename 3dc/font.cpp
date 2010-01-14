@@ -110,7 +110,7 @@ void Font_Init()
 			{
 				uint8_t *s = &srcPtr[((x * 4) + y * lock.Pitch)];
 
-				if ((s[0] >= 240) && (s[1] >= 240) && (s[2] >= 240))
+				if ((s[2] == 255))// && (s[1] >= 240) && (s[2] >= 240))
 				{
 					blank = 0;
 					break;

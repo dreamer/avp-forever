@@ -311,9 +311,8 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 			DrawAvPMenuGfx(AVPMENUGFX_GLOWY_RIGHT, pX+size, pY-8, alpha, AVPMENUFORMAT_LEFTJUSTIFIED);
 */
 			extern void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha);
-			extern void DrawMenuTextGlow2(int topLeftX, int topLeftY, int size, int alpha);
 
-			DrawMenuTextGlow2(pX+18, pY-8, size-18, alpha);
+			DrawMenuTextGlow(pX+18, pY-8, size-18, alpha);
 		}
 	}
 

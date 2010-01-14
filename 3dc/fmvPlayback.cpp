@@ -531,12 +531,8 @@ unsigned int __stdcall decodeThread(void *args)
 
 			if (fmv->mVideo)
 			{
-				float audio_time = static_cast<float>(AudioStream_GetNumSamplesPlayed(fmv->mAudioStream)) / static_cast<float>(fmv->mAudio->mVorbis.mInfo.rate);
-				float video_time = static_cast<float>(th_granule_time(fmv->mVideo->mTheora.mDecodeContext, fmv->mGranulePos));
-
-//				char buf[100];
-//				sprintf(buf, "audio_time: %f video_time: %f\n", audio_time, video_time);
-//				OutputDebugString(buf);
+				double audio_time = static_cast<double>(AudioStream_GetNumSamplesPlayed(fmv->mAudioStream)) / static_cast<double>(fmv->mAudio->mVorbis.mInfo.rate);
+				double video_time = static_cast<double>(th_granule_time(fmv->mVideo->mTheora.mDecodeContext, fmv->mGranulePos));
 
 				// if mAudio is ahead of frame time, display a new frame
 				if ((audio_time > video_time))
