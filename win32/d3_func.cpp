@@ -5,7 +5,7 @@
 
 extern int NumberOfFMVTextures;
 #include "fmvCutscenes.h"
-extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
+//extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
 #define MAX_NO_FMVTEXTURES 10
 extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 

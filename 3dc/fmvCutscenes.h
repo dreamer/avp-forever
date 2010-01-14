@@ -6,6 +6,19 @@
 #include "stratdef.h"
 #include "d3_func.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+void PlayMenuMusic(void);
+extern void PlayFMV(const char *filenamePtr);
+void StartMenuMusic();
+extern void StartTriggerPlotFMV(int number);
+void UpdateAllFMVTextures();
+#ifdef __cplusplus
+}
+#endif
+
 typedef struct FMVTEXTURE
 {
 	IMAGEHEADER *ImagePtr;
@@ -20,15 +33,10 @@ typedef struct FMVTEXTURE
 
 }FMVTEXTURE;
 
-extern void PlayFMV(const char *filenamePtr);
-extern void StartTriggerPlotFMV(int number);
-void PlayMenuMusic();
-void StartMenuMusic();
 int NextFMVTextureFrame(FMVTEXTURE *ftPtr);
 void ReleaseAllFMVTexturesForDeviceReset();
 void RecreateAllFMVTexturesAfterDeviceReset();
-extern void StartMenuBackgroundFmv();
-
-extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
+void StartMenuBackgroundFmv();
+void SetupFMVTexture(FMVTEXTURE *ftPtr);
 
 #endif // #ifndef _FMV_

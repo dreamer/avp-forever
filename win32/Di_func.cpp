@@ -245,7 +245,7 @@ void ReleaseDirectInput(void)
 
 #define UseForegroundKeyboard TRUE//FALSE
 
-GUID     guid = GUID_SysKeyboard;
+//GUID     guid = GUID_SysKeyboard;
 BOOL InitialiseDirectKeyboard()
 {
 	return FALSE;

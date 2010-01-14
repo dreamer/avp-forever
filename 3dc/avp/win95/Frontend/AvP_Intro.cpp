@@ -38,7 +38,6 @@ void WeWantAnIntro(void)
 	IntroHasAlreadyBeenPlayed = 0;
 }
 
-
 extern void PlayIntroSequence(void)
 {
 	if (IntroHasAlreadyBeenPlayed)

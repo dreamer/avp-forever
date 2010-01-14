@@ -21,8 +21,128 @@
 #define restrict
 #include <emmintrin.h>
 
+#define MAX_NO_FMVTEXTURES 10
+FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
+int NumberOfFMVTextures = 0;
+
+extern void UpdateFMVTexture(FMVTEXTURE *ftPtr);
+
+extern "C" {
+int FmvColourRed;
+int FmvColourGreen;
+int FmvColourBlue;
+}
+
 VorbisCodec *menuMusic = NULL;
 bool MenuBackground = false;
+
+void ReleaseAllFMVTexturesForDeviceReset()
+{
+	for (int i = 0; i < NumberOfFMVTextures; i++)
+	{
+		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
+	}
+#if 0 // temporarily disabled
+	// non ingame fmv?
+	if (mDisplayTexture)
+	{
+		mDisplayTexture->Release();
+		mDisplayTexture = NULL;
+	}
+#endif
+}
+
+void RecreateAllFMVTexturesAfterDeviceReset()
+{
+	for (int i = 0; i < NumberOfFMVTextures; i++)
+	{
+		FMVTexture[i].ImagePtr->Direct3DTexture = CreateFmvTexture(&FMVTexture[i].ImagePtr->ImageWidth, &FMVTexture[i].ImagePtr->ImageHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+	}
+#if 0 // temporarily disabled
+	// non ingame fmv? - use a better way to determine this..
+	if ((textureWidth && textureHeight) && (!mDisplayTexture))
+	{
+		mDisplayTexture = CreateFmvTexture(&textureWidth, &textureHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+	}
+#endif
+}
+
+void FindLightingValuesFromTriggeredFMV(uint8_t *bufferPtr, FMVTEXTURE *ftPtr)
+{
+	unsigned int totalRed = 0;
+	unsigned int totalBlue = 0;
+	unsigned int totalGreen = 0;
+
+	FmvColourRed = totalRed/48*16;
+	FmvColourGreen = totalGreen/48*16;
+	FmvColourBlue = totalBlue/48*16;
+}
+
+int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
+{
+	int w = ftPtr->ImagePtr->ImageWidth;
+	int h = ftPtr->ImagePtr->ImageHeight;
+
+	byte *DestBufferPtr = ftPtr->RGBBuffer;
+
+#if 0 // temporarily disabled
+	if (MoviesAreActive && ftPtr->SmackHandle)
+	{
+		int volume = MUL_FIXED(FmvSoundVolume*256, GetVolumeOfNearestVideoScreen());
+
+//		AudioStream_SetBufferVolume(fmvAudioStream, volume);
+//		AudioStream_SetPan(fmvAudioStream, PanningOfNearestVideoScreen);
+
+		ftPtr->SoundVolume = FmvSoundVolume;
+
+		if (!frameReady)
+			return 0;
+
+		if (ftPtr->IsTriggeredPlotFMV && (!CheckTheoraPlayback()))
+		{
+			OutputDebugString("closing ingame fmv..\n");
+
+			ftPtr->SmackHandle = 0;
+			ftPtr->MessageNumber = 0;
+			FmvClose();
+		}
+		else
+		{
+			NextFMVFrame2(DestBufferPtr, w * 4);
+		}
+
+		ftPtr->StaticImageDrawn = 0;
+	}
+	else
+#endif
+	if (!ftPtr->StaticImageDrawn || /*smackerFormat*/1)
+	{
+		int i = w * h;
+		unsigned int seed = FastRandom();
+		int *ptr = (int*)DestBufferPtr;
+		do
+		{
+			seed = ((seed * 1664525) + 1013904223);
+			*ptr++ = seed;
+		}
+		while(--i);
+		ftPtr->StaticImageDrawn = 1;
+	}
+	FindLightingValuesFromTriggeredFMV((uint8_t*)ftPtr->RGBBuffer, ftPtr);
+	return 1;
+}
+
+void StartMenuBackgroundFmv()
+{
+	return;
+
+	const char *filenamePtr = "fmvs\\menubackground.ogv";
+
+//	OpenTheoraVideo(filenamePtr, PLAYLOOP);
+
+	MenuBackground = true;
+}
+
 
 extern "C" {
 
@@ -48,14 +168,6 @@ int MoviesAreActive = 1;
 int IntroOutroMoviesAreActive = 1;
 int VolumeOfNearestVideoScreen = 0;
 int PanningOfNearestVideoScreen = 0;
-
-#define MAX_NO_FMVTEXTURES 10
-FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
-int NumberOfFMVTextures = 0;
-
-int FmvColourRed;
-int FmvColourGreen;
-int FmvColourBlue;
 
 /* structure holds pointers to y, u, v channels */
 typedef struct _OggPlayYUVChannels {
@@ -85,17 +197,6 @@ void FmvClose();
 int GetVolumeOfNearestVideoScreen(void);
 
 void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb);
-
-extern void StartMenuBackgroundFmv()
-{
-	return;
-
-	const char *filenamePtr = "fmvs\\menubackground.ogv";
-
-//	OpenTheoraVideo(filenamePtr, PLAYLOOP);
-
-	MenuBackground = true;
-}
 
 extern int PlayMenuBackgroundFmv()
 {
@@ -138,29 +239,26 @@ extern void PlayFMV(const char *filenamePtr)
 	newFmv->Open(filenamePtr);
 //	newFmv->Open(/*file*/"d:\\Fmvs\\MarineIntro.ogv");
 
-//	if (OpenTheoraVideo(filenamePtr) != 0)
-//		return;
-
 	int playing = 1;
 
 	while (playing)
 	{
 		CheckForWindowsMessages();
 
-		if (!CheckTheoraPlayback())
+		if (!newFmv->IsPlaying())
 			playing = 0;
 
-		if (frameReady)
-			playing = NextFMVFrame();
+//		if (frameReady)
+//			playing = NextFMVFrame();
 
 		ThisFramesRenderingHasBegun();
 		ClearScreenToBlack();
-
+/*
 		if (mDisplayTexture)
 		{
 			DrawFmvFrame(frameWidth, frameHeight, textureWidth, textureHeight, mDisplayTexture);
 		}
-
+*/
 		ThisFramesRenderingHasFinished();
 		FlipBuffers();
 
@@ -600,37 +698,6 @@ void ReleaseAllFMVTextures()
 	NumberOfFMVTextures = 0;
 }
 
-void ReleaseAllFMVTexturesForDeviceReset()
-{
-	for (int i = 0; i < NumberOfFMVTextures; i++)
-	{
-		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
-	}
-#if 0 // temporarily disabled
-	// non ingame fmv?
-	if (mDisplayTexture)
-	{
-		mDisplayTexture->Release();
-		mDisplayTexture = NULL;
-	}
-#endif
-}
-
-void RecreateAllFMVTexturesAfterDeviceReset()
-{
-	for (int i = 0; i < NumberOfFMVTextures; i++)
-	{
-		FMVTexture[i].ImagePtr->Direct3DTexture = CreateFmvTexture(&FMVTexture[i].ImagePtr->ImageWidth, &FMVTexture[i].ImagePtr->ImageHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
-	}
-#if 0 // temporarily disabled
-	// non ingame fmv? - use a better way to determine this..
-	if ((textureWidth && textureHeight) && (!mDisplayTexture))
-	{
-		mDisplayTexture = CreateFmvTexture(&textureWidth, &textureHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
-	}
-#endif
-}
-
 // bjd - the below three functions could maybe be moved out of this file altogether as vorbisPlayer can handle it
 void StartMenuMusic()
 {
@@ -638,7 +705,7 @@ void StartMenuMusic()
 	menuMusic = Vorbis_LoadFile("IntroSound.ogg");
 }
 
-void PlayMenuMusic()
+void PlayMenuMusic(void)
 {
 	// we can just leave this blank as a thread will handle the updates
 }
@@ -688,71 +755,6 @@ extern void GetFMVInformation(int *messageNumberPtr, int *frameNumberPtr)
 */
 	*messageNumberPtr = 0;
 	*frameNumberPtr = 0;
-}
-
-void FindLightingValuesFromTriggeredFMV(uint8_t *bufferPtr, FMVTEXTURE *ftPtr)
-{
-	unsigned int totalRed=0;
-	unsigned int totalBlue=0;
-	unsigned int totalGreen=0;
-
-	FmvColourRed = totalRed/48*16;
-	FmvColourGreen = totalGreen/48*16;
-	FmvColourBlue = totalBlue/48*16;
-}
-
-int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
-{
-	int w = ftPtr->ImagePtr->ImageWidth;
-	int h = ftPtr->ImagePtr->ImageHeight;
-
-	byte *DestBufferPtr = ftPtr->RGBBuffer;
-
-#if 0 // temporarily disabled
-	if (MoviesAreActive && ftPtr->SmackHandle)
-	{
-		int volume = MUL_FIXED(FmvSoundVolume*256, GetVolumeOfNearestVideoScreen());
-
-//		AudioStream_SetBufferVolume(fmvAudioStream, volume);
-//		AudioStream_SetPan(fmvAudioStream, PanningOfNearestVideoScreen);
-
-		ftPtr->SoundVolume = FmvSoundVolume;
-
-		if (!frameReady)
-			return 0;
-
-		if (ftPtr->IsTriggeredPlotFMV && (!CheckTheoraPlayback()))
-		{
-			OutputDebugString("closing ingame fmv..\n");
-
-			ftPtr->SmackHandle = 0;
-			ftPtr->MessageNumber = 0;
-			FmvClose();
-		}
-		else
-		{
-			NextFMVFrame2(DestBufferPtr, w * 4);
-		}
-
-		ftPtr->StaticImageDrawn = 0;
-	}
-	else
-#endif
-	if (!ftPtr->StaticImageDrawn || /*smackerFormat*/1)
-	{
-		int i = w * h;
-		unsigned int seed = FastRandom();
-		int *ptr = (int*)DestBufferPtr;
-		do
-		{
-			seed = ((seed * 1664525) + 1013904223);
-			*ptr++ = seed;
-		}
-		while(--i);
-		ftPtr->StaticImageDrawn = 1;
-	}
-	FindLightingValuesFromTriggeredFMV((uint8_t*)ftPtr->RGBBuffer, ftPtr);
-	return 1;
 }
 
 int GetVolumeOfNearestVideoScreen(void)

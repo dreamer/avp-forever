@@ -268,6 +268,11 @@ int TheoraFMV::Open(const char* fileName)
 	return FMV_OK;
 }
 
+bool TheoraFMV::IsPlaying()
+{
+	return mFmvPlaying;
+}
+
 bool TheoraFMV::ReadPage(ogg_page *page)
 {
 	int amountRead = 0;

@@ -7063,8 +7063,10 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 	}
 }
 
+extern "C++" { // sort this out sometime..
+
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
-{	
+{
 	ftPtr->RGBBuffer = new uint8_t[128 * 128 * 4];
 
 	ftPtr->SoundVolume = 0;
@@ -7123,6 +7125,8 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 		return;
 	}
 }
+
+} // extern "C"
 
 #if 0
 static int GammaSetting;

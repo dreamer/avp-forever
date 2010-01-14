@@ -102,6 +102,7 @@ class TheoraFMV
 		bool ReadPacket(OggStream *stream, ogg_packet *packet);
 		void ReadHeaders();
 		void HandleTheoraData(OggStream *stream, ogg_packet *packet);
+		bool IsPlaying();
 };
 
 #endif
