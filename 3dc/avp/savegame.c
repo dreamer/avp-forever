@@ -31,7 +31,7 @@
 
 #include "savegame.h"
 #include "huffman.hpp"
-#include "fmv.h"
+#include "fmvCutscenes.h"
 
 #define UseLocalAssert TRUE
 #include "ourasert.h"

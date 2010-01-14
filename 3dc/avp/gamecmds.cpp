@@ -39,7 +39,7 @@ extern "C"
 #include "ConsoleLog.hpp"
 #include "psndplat.h"
 #include "avp_menus.h"
-#include "fmv.h"
+#include "fmvCutscenes.h"
 #include "detaillevels.h"
 #include "savegame.h"
 

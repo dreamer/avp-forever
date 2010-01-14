@@ -151,7 +151,7 @@ int Vorbis_ReadData(VorbisCodec *VorbisStream, int sizeToRead)
 	while (bytesReadTotal < sizeToRead) 
 	{
 		bytesReadPerLoop = ov_read(
-			&VorbisStream->oggFile,									//what file to read from
+			&VorbisStream->oggFile,						//what file to read from
 			reinterpret_cast<char*>(VorbisStream->audioData + bytesReadTotal),
 			sizeToRead - bytesReadTotal,				//how much data to read
 			0,											//0 specifies little endian decoding mode

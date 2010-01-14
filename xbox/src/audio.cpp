@@ -70,17 +70,7 @@ ACTIVESOUNDSAMPLE BlankActiveSound = {SID_NOSOUND,ASP_Minimum,0,0,NULL,0,0,0,0,0
 LPDIRECTSOUND8			DSObject = NULL; 
 int 					SoundMinBufferFree = 0;
 
-/* for vorbis playback */
-/*
-LPDIRECTSOUNDSTREAM		vorbisAudioStream = NULL;
-const static int		PACKET_COUNT = 3;
-const static int		FILESTRM_PACKET_BYTES = 18432;
-DWORD					PacketStatus[PACKET_COUNT]; // Packet status array
-*/
 static HRESULT LastError;
-
-void ProcessStreamingAudio();
-
 static unsigned int SoundMaxHW;
 
 /* Patrick 5/6/97 -------------------------------------------------------------
@@ -313,7 +303,6 @@ static float pitch_to_frequency_mult_table [] =
 /* Patrick 5/6/97 -------------------------------------------------------------
   External references
   ----------------------------------------------------------------------------*/
-//extern HWND hWndMain;
 extern DISPLAYBLOCK *Player;
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 
@@ -449,18 +438,18 @@ int PlatPlaySound(int activeIndex)
 	}
 
 	/* Initialise volume before playing */
-	if(ActiveSounds[activeIndex].threedee)
+	if (ActiveSounds[activeIndex].threedee)
 	{
 //		OutputDebugString("3d sound\n");
 		int ok;
 
-		if(ActiveSounds[activeIndex].ds3DBufferP)
+		if (ActiveSounds[activeIndex].ds3DBufferP)
 		{
-			/*set 3d sound mode*/
+			// set 3d sound mode
 			ActiveSounds[activeIndex].ds3DBufferP->SetMode(DS3DMODE_NORMAL, DS3D_DEFERRED);
 
-			/*set distance at which attenuation starts*/
-			if(ActiveSounds[activeIndex].threedeedata.inner_range == 0)
+			// set distance at which attenuation starts
+			if (ActiveSounds[activeIndex].threedeedata.inner_range == 0)
 				ActiveSounds[activeIndex].threedeedata.inner_range = static_cast<int>(DS3D_DEFAULTMINDISTANCE);
 
 			ActiveSounds[activeIndex].ds3DBufferP->SetMinDistance((float)ActiveSounds[activeIndex].threedeedata.inner_range, DS3D_DEFERRED);
@@ -469,7 +458,7 @@ int PlatPlaySound(int activeIndex)
 
 		/* 3d sounds always need initialising */
 		ok = PlatDo3dSound(activeIndex);
-		if(ok==SOUND_PLATFORMERROR)
+		if (ok==SOUND_PLATFORMERROR)
 		{
 		   	PlatStopSound(activeIndex);
 			return SOUND_PLATFORMERROR;
@@ -487,7 +476,7 @@ int PlatPlaySound(int activeIndex)
 		ActiveSounds[activeIndex].volume = newVolume;		
 		
 		ok = PlatChangeSoundVolume(activeIndex, ActiveSounds[activeIndex].volume);
-		if(ok==SOUND_PLATFORMERROR)
+		if (ok==SOUND_PLATFORMERROR)
 		{
 		   	PlatStopSound(activeIndex);
 			return SOUND_PLATFORMERROR;
@@ -536,13 +525,13 @@ int PlatPlaySound(int activeIndex)
 
    //	IDirectSound3DListener_CommitDeferredSettings(DS3DListener);
 #endif
-	/* play the buffer then... */
+	// play the buffer then...
 	if (!ActiveSounds[activeIndex].paused)
 	{
 		DWORD flags = 0;
-		if(ActiveSounds[activeIndex].loop)
+		if (ActiveSounds[activeIndex].loop)
 		{
-			flags|= DSBPLAY_LOOPING;
+			flags |= DSBPLAY_LOOPING;
 		}
 
 		// play buffer
@@ -552,7 +541,7 @@ int PlatPlaySound(int activeIndex)
 		if(FAILED(LastError))
 		{
 			OutputDebugString("couldn't play sound\n");
-			if(GameSounds[gameIndex].flags & SAMPLE_IN_HW)
+			if (GameSounds[gameIndex].flags & SAMPLE_IN_HW)
 			{
 				db_log3("Failed to play a sample in Hardware");
 			}
@@ -564,7 +553,7 @@ int PlatPlaySound(int activeIndex)
 		}
 
 		/* success */
-		if(ActiveSounds[activeIndex].loop)
+		if (ActiveSounds[activeIndex].loop)
 		{
 			db_logf5(("Playing Sound %i looping in slot %i on frame %i", ActiveSounds[activeIndex].soundIndex, activeIndex, GlobalFrameCounter));
 		}
@@ -632,7 +621,7 @@ void PlatUpdatePlayer()
 					0.0f,
 					DS3D_DEFERRED
 				);
-				if(FAILED(LastError))
+				if (FAILED(LastError))
 				{
 					OutputDebugString("Couldn't set orientation\n");
 				}
@@ -640,15 +629,13 @@ void PlatUpdatePlayer()
 		}
 		else
 		{
-			/* dsound on the xbox seems to barf on 0 values..*/
-			if((float) (((Global_VDB_Ptr->VDB_Mat.mat13) / 65536.0f) != 0.0f)
+			// dsound on the xbox seems to barf on 0 values..
+			if ((float) (((Global_VDB_Ptr->VDB_Mat.mat13) / 65536.0f) != 0.0f)
 				&& 
 			   (float) (((Global_VDB_Ptr->VDB_Mat.mat33) / 65536.0f) != 0.0f))
 			{
-	//			IDirectSound3DListener_SetOrientation
 				LastError = DSObject->SetOrientation
 					(
-	//					DS3DListener,
 						(float) ((Global_VDB_Ptr->VDB_Mat.mat13) / 65536.0F),
 						(float) ((Global_VDB_Ptr->VDB_Mat.mat23) / 65536.0F),
 						(float) ((Global_VDB_Ptr->VDB_Mat.mat33) / 65536.0F),
@@ -657,7 +644,7 @@ void PlatUpdatePlayer()
 						(float) ((Global_VDB_Ptr->VDB_Mat.mat32) / 65536.0F),
 						DS3D_DEFERRED
 					);
-				if(FAILED(LastError))
+				if (FAILED(LastError))
 				{
 					OutputDebugString("Couldn't set orientation\n");
 				}
@@ -674,25 +661,11 @@ void PlatUpdatePlayer()
 			vy = (float)(dynPtr->Position.vy - dynPtr->PrevPosition.vy)*invFrameTime;
 			vz = (float)(dynPtr->Position.vz - dynPtr->PrevPosition.vz)*invFrameTime;
 			
-		
-//			IDirectSound3DListener_SetVelocity
-			DSObject->SetVelocity
-				(
-//					DS3DListener,
-					vx,vy,vz,
-					DS3D_DEFERRED
-				);
+			DSObject->SetVelocity(vx, vy, vz, DS3D_DEFERRED);
 		}
 		else
 		{
-//			IDirectSound3DListener_SetVelocity
-			DSObject->SetVelocity
-				(
-//					DS3DListener,
-					0.0f,0.0f,0.0f,
-					DS3D_DEFERRED
-				);
-
+			DSObject->SetVelocity(0.0f, 0.0f, 0.0f, DS3D_DEFERRED);
 		}
 	}
 #if 0 // reverb?
@@ -746,7 +719,7 @@ void PlatUpdatePlayer()
 
 	DSObject->CommitDeferredSettings();
 
-	DirectSoundDoWork();
+//	DirectSoundDoWork();
 }
 
 void PlatEndSoundSys()
@@ -756,7 +729,7 @@ void PlatEndSoundSys()
 
 int PlatDo3dSound(int activeIndex)
 {
-	if(!SoundActivated)
+	if (!SoundActivated)
 		return 0;
 
 	int distance;
@@ -779,15 +752,15 @@ int PlatDo3dSound(int activeIndex)
 	db_logf5(("range (%i, %i)", ActiveSounds[activeIndex].threedeedata.inner_range, ActiveSounds[activeIndex].threedeedata.outer_range));
 
 	/* Deal with paused looping sounds. */
-	if(ActiveSounds[activeIndex].paused)
+	if (ActiveSounds[activeIndex].paused)
 	{
-		if(distance < (ActiveSounds[activeIndex].threedeedata.outer_range + SOUND_DEACTIVATERANGE))
+		if (distance < (ActiveSounds[activeIndex].threedeedata.outer_range + SOUND_DEACTIVATERANGE))
 		{
 			DWORD flags = 0;
 			GLOBALASSERT (ActiveSounds[activeIndex].dsBufferP);
-			if(ActiveSounds[activeIndex].loop)
+			if (ActiveSounds[activeIndex].loop)
 			{
-				flags|= DSBPLAY_LOOPING;
+				flags |= DSBPLAY_LOOPING;
 			}
 			IDirectSoundBuffer_Play(ActiveSounds[activeIndex].dsBufferP,0,0,flags);
 			newVolume = 0;
@@ -799,13 +772,13 @@ int PlatDo3dSound(int activeIndex)
 		}
 	}
 
-	if(distance < ActiveSounds[activeIndex].threedeedata.inner_range)
+	if (distance < ActiveSounds[activeIndex].threedeedata.inner_range)
 	{
 		newVolume = ActiveSounds[activeIndex].volume;
 	}
 	else
 	{
-		if(distance < ActiveSounds[activeIndex].threedeedata.outer_range)
+		if (distance < ActiveSounds[activeIndex].threedeedata.outer_range)
 		{
 			/* Use proper 3D, but our own attenuation. */
 			float in_to_dis_to_out = (float)(ActiveSounds[activeIndex].threedeedata.outer_range - distance);
@@ -826,7 +799,7 @@ int PlatDo3dSound(int activeIndex)
 			newVolume = 0;
 
 			/* Deal with looping sounds. */
-			if((distance < (ActiveSounds[activeIndex].threedeedata.outer_range + SOUND_DEACTIVATERANGE)) &&
+			if ((distance < (ActiveSounds[activeIndex].threedeedata.outer_range + SOUND_DEACTIVATERANGE)) &&
 				ActiveSounds[activeIndex].loop)
 			{
 				hres = IDirectSoundBuffer_Stop(ActiveSounds[activeIndex].dsBufferP);
@@ -842,18 +815,18 @@ int PlatDo3dSound(int activeIndex)
 		}
 	}
 
-	if(newVolume>VOLUME_MAX) newVolume=VOLUME_MAX;
-	if(newVolume<VOLUME_MIN) newVolume=VOLUME_MIN;
+	if (newVolume > VOLUME_MAX) newVolume =VOLUME_MAX;
+	if (newVolume < VOLUME_MIN) newVolume = VOLUME_MIN;
 	
-	if(PlatChangeSoundVolume(activeIndex, newVolume) == SOUND_PLATFORMERROR)
+	if (PlatChangeSoundVolume(activeIndex, newVolume) == SOUND_PLATFORMERROR)
 	{
 		return SOUND_PLATFORMERROR;
 	}
 
 	/* Now deal with the panning issues. */
-	if(distance < ActiveSounds[activeIndex].threedeedata.outer_range)
+	if (distance < ActiveSounds[activeIndex].threedeedata.outer_range)
 	{
-		if(ActiveSounds[activeIndex].ds3DBufferP)
+		if (ActiveSounds[activeIndex].ds3DBufferP)
 		{
 			/* Use the Hardware. */
 			IDirectSound3DBuffer_SetPosition
@@ -886,7 +859,7 @@ int PlatDo3dSound(int activeIndex)
 			LOCALASSERT((angle>=0)&&(angle<=4095)); 
 		
 			/* map angle to range +- 1024 */
-			if(angle>1024)
+			if (angle>1024)
 			{
 				if(angle<=3072) angle = (2048-angle); /*quadrants 2 & 3*/
 				else angle = (angle-4096);	  /* quadrant 4 */
@@ -1928,7 +1901,7 @@ void CALLBACK AudioStream_Callback( VOID* pStreamContext, VOID* pPacketContext, 
 	StreamingAudioBuffer *streamStruct = static_cast<StreamingAudioBuffer*>(pStreamContext);
 
 	streamStruct->totalBytesPlayed += streamStruct->bufferSize;
-	OutputDebugString("finished playing a packet\n");
+//	OutputDebugString("finished playing a packet\n");
 }
 
 StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int bufferSize, int numBuffers)
@@ -1983,13 +1956,13 @@ StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int buff
 		return NULL;
 	}
 
-	newStreamingAudioBuffer->bytesPerSample = waveFormat.wBitsPerSample / 8;
-	newStreamingAudioBuffer->numChannels = waveFormat.nChannels;
-	newStreamingAudioBuffer->rate = waveFormat.nSamplesPerSec; 
-
-	newStreamingAudioBuffer->currentBuffer = 0;
 	newStreamingAudioBuffer->bufferSize = bufferSize;
 	newStreamingAudioBuffer->bufferCount = numBuffers;
+	newStreamingAudioBuffer->currentBuffer = 0;
+	newStreamingAudioBuffer->numChannels = waveFormat.nChannels;
+	newStreamingAudioBuffer->rate = waveFormat.nSamplesPerSec;
+	newStreamingAudioBuffer->bytesPerSample = waveFormat.wBitsPerSample / 8;
+	newStreamingAudioBuffer->totalBytesPlayed = 0;
 	newStreamingAudioBuffer->totalSamplesWritten = 0;
 
 	return newStreamingAudioBuffer;
@@ -2002,9 +1975,9 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, byte *audioData, i
 
 	int amountWritten = 0;
 
-	/* then send some of that audio to directsound.. */
+	// then send some of that audio to directsound
 	XMEDIAPACKET packet;
-	ZeroMemory( &packet, sizeof(packet) );
+	ZeroMemory(&packet, sizeof(packet));
 
 	// offset into source data buffer
 	memcpy(&streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize], audioData, size);
@@ -2013,7 +1986,7 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, byte *audioData, i
 	packet.dwMaxSize = size;
 	packet.pdwStatus = &streamStruct->PacketStatus[streamStruct->currentBuffer];
 
-	LastError = streamStruct->dsStreamBuffer->Process( &packet, NULL );
+	LastError = streamStruct->dsStreamBuffer->Process(&packet, NULL);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -2028,7 +2001,8 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, byte *audioData, i
 	// size in bytes divided by bits per sample (divided by 8 to get the bytes per sample) also dividded by the number of channels
 	streamStruct->totalSamplesWritten += ((size / streamStruct->bytesPerSample) / streamStruct->numChannels);
 
-	OutputDebugString("wrote to audio buffer..\n");
+//	OutputDebugString("wrote to audio buffer..\n");
+
 	return amountWritten;
 }
 

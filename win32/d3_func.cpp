@@ -3,6 +3,12 @@
 
 // Must link to C code in main engine system
 
+extern int NumberOfFMVTextures;
+#include "fmvCutscenes.h"
+extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
+#define MAX_NO_FMVTEXTURES 10
+extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
+
 extern "C" {
 
 // Mysterious definition required by objbase.h
@@ -674,11 +680,6 @@ D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL po
 }
 
 extern void ReleaseAllFMVTextures(void);
-extern int NumberOfFMVTextures;
-#include "fmv.h"
-extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
-#define MAX_NO_FMVTEXTURES 10
-extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 
 //extern int mainMenu;
 

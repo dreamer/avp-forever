@@ -36,6 +36,7 @@ extern int Font_DrawText(const char* text, int x, int y, int colour, int fontTyp
 #include "logString.h"
 
 #include <d3dx9math.h>
+#include "fmvCutscenes.h"
 
 } //extern "C++"
 
@@ -44,7 +45,6 @@ extern int Font_DrawText(const char* text, int x, int y, int colour, int fontTyp
 #include "lighting.h"
 #include "showcmds.h"
 #include "frustrum.h"
-#include "fmv.h"
 #include "d3d_render.h"
 #include "avp_userprofile.h"
 #include "bh_types.h"
@@ -7065,7 +7065,7 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
 {	
-	ftPtr->RGBBuffer = new byte[128 * 128 * 4];
+	ftPtr->RGBBuffer = new uint8_t[128 * 128 * 4];
 
 	ftPtr->SoundVolume = 0;
 }
@@ -7084,7 +7084,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	 	return;
 	}
 
-	/* lock the d3d texture */
+	// lock the d3d texture
 	D3DLOCKED_RECT textureRect;
 	LastError = ftPtr->ImagePtr->Direct3DTexture->LockRect(0, &textureRect, NULL, D3DLOCK_DISCARD);
 	if (FAILED(LastError))
@@ -7098,7 +7098,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 
 	for (int y = 0; y < ftPtr->ImagePtr->ImageHeight; y++)
 	{
-		destPtr = static_cast<byte*>(textureRect.pBits) + y * textureRect.Pitch;
+		destPtr = static_cast<uint8_t*>(textureRect.pBits) + y * textureRect.Pitch;
 
 		for (int x = 0; x < ftPtr->ImagePtr->ImageWidth; x++)
 		{
@@ -7115,7 +7115,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 		}
 	}
 	
-	/* unlock d3d texture */
+	// unlock d3d texture
 	LastError = ftPtr->ImagePtr->Direct3DTexture->UnlockRect(0);
 	if (FAILED(LastError)) 
 	{

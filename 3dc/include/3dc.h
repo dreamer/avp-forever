@@ -5,5 +5,3 @@
 #include "prototyp.h"
 #include "utilities.h"
 #include "stdint.h"
-
-typedef unsigned char	byte;

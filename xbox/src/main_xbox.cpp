@@ -515,10 +515,7 @@ void _cdecl main()
 		Game_Has_Loaded();
 		ResetFrameCounter();
 
-		// bjd..
-//		ThisFramesRenderingHasBegun();
-
-		if(AvP.Network!=I_No_Network)
+		if (AvP.Network != I_No_Network)
 		{
 			/*Need to choose a starting position for the player , but first we must look
 			through the network messages to find out which generator spots are currently clear*/
@@ -528,10 +525,6 @@ void _cdecl main()
 		}
 
 		IngameKeyboardInput_ClearBuffer();
-
-		// bjd
-//		ThisFramesRenderingHasFinished();
-//		FlipBuffers();
 
 		while(AvP.MainLoopRunning)
 		{
@@ -830,9 +823,9 @@ void _cdecl main()
 	/* bye bye! */
 }
 
-/* just a stub */
 void CheckForWindowsMessages()
 {
+	DirectSoundDoWork();
 }
 
 BOOL ExitWindowsSystem(void)

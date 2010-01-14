@@ -6,7 +6,7 @@
 
 extern "C" {
 
-#include "fmv.h"
+#include "fmvCutscenes.h"
 #include "avp_userprofile.h"
 #include "inline.h"
 #include <math.h>

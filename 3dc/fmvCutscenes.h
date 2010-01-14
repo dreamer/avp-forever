@@ -1,5 +1,5 @@
-#ifndef FMV_H
-#define FMV_H
+#ifndef _fmvCutscenes_h_
+#define _fmvCutscenes_h_
 
 #include "3dc.h"
 #include "module.h"
@@ -16,10 +16,11 @@ typedef struct FMVTEXTURE
 	int StaticImageDrawn;
 	int MessageNumber;
 
-	byte *RGBBuffer;
+	uint8_t *RGBBuffer;
 
 }FMVTEXTURE;
 
+extern void PlayFMV(const char *filenamePtr);
 extern void StartTriggerPlotFMV(int number);
 void PlayMenuMusic();
 void StartMenuMusic();

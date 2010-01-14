@@ -2558,10 +2558,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\3dc\Fmv.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\3dc\Fmv_stubbed.cpp"
 				>
 				<FileConfiguration
@@ -2573,6 +2569,14 @@
 						PrecompiledHeaderFile=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\3dc\fmvCutscenes.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\3dc\fmvPlayback.cpp"
+				>
 			</File>
 			<File
 				RelativePath=".\3dc\font.cpp"
@@ -3726,10 +3730,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\3dc\myFmv.cpp"
-				>
 			</File>
 			<File
 				RelativePath=".\3dc\networking.cpp"
@@ -5798,7 +5798,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\3dc\Fmv.h"
+					RelativePath=".\3dc\fmvCutscenes.h"
+					>
+				</File>
+				<File
+					RelativePath=".\3dc\fmvPlayback.h"
 					>
 				</File>
 				<File

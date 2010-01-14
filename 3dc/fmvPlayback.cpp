@@ -1,21 +1,18 @@
+#include "fmvPlayback.h"
 #include "console.h"
-#include "d3_func.h"
 #include "stdint.h"
 #include "assert.h"
 #include <process.h>
-#include "ringbuffer.h"
-#include "audioStreaming.h"
-#include <fstream>
-#include <map>
-#include <ogg/ogg.h>
-#include <theora/theora.h>
-#include <theora/theoradec.h>
-#include <vorbis/vorbisfile.h>
+
+#ifdef _XBOX
+#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
+#endif
+
 #include <math.h>
 
 unsigned int __stdcall decodeThread(void *args);
 unsigned int __stdcall audioThread(void *args);
-
+/*
 enum fmvErrors
 {
 	FMV_OK,
@@ -29,10 +26,10 @@ enum streamType
 	TYPE_THEORA,
 	TYPE_UNKNOWN
 };
-
+*/
 // forward declare classes
-class VorbisDecode;
-class TheoraDecode;
+//class VorbisDecode;
+//class TheoraDecode;
 
 class TheoraDecode
 {
@@ -98,121 +95,50 @@ class OggStream
 		}
 };
 
-typedef std::map<int, OggStream*> streamMap;
-
-class TheoraFMV
+TheoraFMV::~TheoraFMV()
 {
-	public:
-		std::string 	mFileName;
-		std::ifstream 	mFileStream;
+	if (mDecodeThreadHandle)
+	{
+		WaitForSingleObject(mDecodeThreadHandle, INFINITE);
+		CloseHandle(mDecodeThreadHandle);
+	}
+	if (mAudioThreadHandle)
+	{
+		WaitForSingleObject(mAudioThreadHandle, INFINITE);
+		CloseHandle(mAudioThreadHandle);
+	}
+	
+	int ret = ogg_sync_clear(&mState);
+	assert(ret == 0);
 
-		ogg_sync_state 	mState;
-		ogg_int64_t		mGranulePos;
-		th_ycbcr_buffer mYuvBuffer;
+	for (streamMap::iterator it = mStreams.begin(); it != mStreams.end(); ++it)
+	{
+		OggStream *tempStream = (*it).second;
 
-		streamMap		mStreams;
-
-		// audio
-		StreamingAudioBuffer *mAudioStream;
-		RingBuffer *mRingBuffer;
-		uint8_t	*mAudioData;
-		uint16_t *mAudioDataBuffer;
-		int	mAudioDataBufferSize;
-		CRITICAL_SECTION mAudioCriticalSection;
-
-		// video
-		D3DTEXTURE mDisplayTexture;
-		int mTextureWidth;
-		int mTextureHeight;
-		int mFrameWidth;
-		int mFrameHeight;
-		CRITICAL_SECTION mFrameCriticalSection;
-
-		// thread handles
-		HANDLE mDecodeThreadHandle;
-		HANDLE mAudioThreadHandle;
-
-		// so we can easily reference these from the threads.
-		OggStream *mVideo;
-		OggStream *mAudio;
-
-		bool mFmvPlaying;
-		bool mFrameReady;
-		bool mAudioStarted;
-
-		TheoraFMV(/*const char* fileName*/) :
-			mGranulePos(0),
-				mAudioStream(0),
-				mRingBuffer(0),
-				mAudioData(0),
-				mAudioDataBuffer(0),
-				mAudioDataBufferSize(0),
-				mDisplayTexture(0),
-				mTextureWidth(0),
-				mTextureHeight(0),
-				mFrameWidth(0),
-				mFrameHeight(0),
-				mDecodeThreadHandle(0),
-				mAudioThreadHandle(0),
-				mVideo(0),
-				mAudio(0),
-				mFmvPlaying(false),
-				mFrameReady(false),
-				mAudioStarted(false)
-		{
-
-		}
-		~TheoraFMV()
-		{
-			if (mDecodeThreadHandle)
-			{
-				WaitForSingleObject(mDecodeThreadHandle, INFINITE);
-				CloseHandle(mDecodeThreadHandle);
-			}
-			if (mAudioThreadHandle)
-			{
-				WaitForSingleObject(mAudioThreadHandle, INFINITE);
-				CloseHandle(mAudioThreadHandle);
-			}
-			
-			int ret = ogg_sync_clear(&mState);
-			assert(ret == 0);
-
-			for (streamMap::iterator it = mStreams.begin(); it != mStreams.end(); ++it)
-			{
-				OggStream *tempStream = (*it).second;
-
-				// delete stream; we have no class so no destructor. do it manually.
-				int ret = ogg_stream_clear(&tempStream->mStreamState);
-				assert(ret == 0);
-				th_setup_free(tempStream->mTheora.mSetupInfo);
-				th_decode_free(tempStream->mTheora.mDecodeContext);
-				delete tempStream;
-			}
-			if (mAudioStream)
-			{
-				AudioStream_ReleaseBuffer(mAudioStream);
-			}
-			if (mAudioData)
-			{
-				delete []mAudioData;
-			}
-			if (mAudioDataBuffer)
-			{
-				delete []mAudioDataBuffer;
-			}
-			if (mDisplayTexture)
-			{
-				mDisplayTexture->Release();
-			}
-		}
-
-		int	Open(const char* fileName);
-		bool ReadPage(ogg_page *page);
-		bool ReadPacket(OggStream *stream, ogg_packet *packet);
-		void ReadHeaders();
-		void HandleTheoraData(OggStream *stream, ogg_packet *packet);
-};
+		// delete stream; we have no class so no destructor. do it manually.
+		int ret = ogg_stream_clear(&tempStream->mStreamState);
+		assert(ret == 0);
+		th_setup_free(tempStream->mTheora.mSetupInfo);
+		th_decode_free(tempStream->mTheora.mDecodeContext);
+		delete tempStream;
+	}
+	if (mAudioStream)
+	{
+		AudioStream_ReleaseBuffer(mAudioStream);
+	}
+	if (mAudioData)
+	{
+		delete []mAudioData;
+	}
+	if (mAudioDataBuffer)
+	{
+		delete []mAudioDataBuffer;
+	}
+	if (mDisplayTexture)
+	{
+		mDisplayTexture->Release();
+	}
+}
 
 void TheoraDecode::Init()
 {
@@ -243,7 +169,7 @@ TheoraFMV *newFmv;
 void fmvTest(const char* file)
 {
 	newFmv = new TheoraFMV();
-	newFmv->Open(file);
+	newFmv->Open(/*file*/"d:\\Fmvs\\MarineIntro.ogv");
 }
 
 int TheoraFMV::Open(const char* fileName)
@@ -685,3 +611,30 @@ unsigned int __stdcall audioThread(void *args)
 	_endthreadex(0);
 	return 0;
 }
+
+// this code is based on plogg by Chris Double. Also contains code written by Rebellion and myself. Below is the license from plogg
+
+// Copyright (C) 2009 Chris Double. All Rights Reserved.
+// The original author of this code can be contacted at: chris.double@double.co.nz
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+// INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+// FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+// DEVELOPERS AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+// OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+// WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+// ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
