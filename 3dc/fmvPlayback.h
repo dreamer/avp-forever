@@ -97,7 +97,8 @@ class TheoraFMV
 		}
 		~TheoraFMV();
 
-		int	Open(const char* fileName);
+		int	Open(/*const char* fileName*/const std::string &fileName);
+		void Close();
 		bool ReadPage(ogg_page *page);
 		bool ReadPacket(OggStream *stream, ogg_packet *packet);
 		void ReadHeaders();

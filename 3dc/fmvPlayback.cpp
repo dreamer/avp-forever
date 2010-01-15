@@ -12,24 +12,6 @@
 
 unsigned int __stdcall decodeThread(void *args);
 unsigned int __stdcall audioThread(void *args);
-/*
-enum fmvErrors
-{
-	FMV_OK,
-	FMV_INVALID_FILE,
-	FMV_ERROR
-};
-
-enum streamType
-{
-	TYPE_VORBIS,
-	TYPE_THEORA,
-	TYPE_UNKNOWN
-};
-*/
-// forward declare classes
-//class VorbisDecode;
-//class TheoraDecode;
 
 class TheoraDecode
 {
@@ -164,15 +146,7 @@ void VorbisDecode::Init()
 	assert(ret == 0);
 }
 
-TheoraFMV *newFmv;
-
-void fmvTest(const char* file)
-{
-	newFmv = new TheoraFMV();
-	newFmv->Open(/*file*/"d:\\Fmvs\\MarineIntro.ogv");
-}
-
-int TheoraFMV::Open(const char* fileName)
+int TheoraFMV::Open(/*const char* fileName*/const std::string &fileName)
 {
 	mFileName = fileName;
 
@@ -266,6 +240,11 @@ int TheoraFMV::Open(const char* fileName)
 	Con_PrintMessage("fmv should be playing now");
 
 	return FMV_OK;
+}
+
+void TheoraFMV::Close()
+{
+
 }
 
 bool TheoraFMV::IsPlaying()
