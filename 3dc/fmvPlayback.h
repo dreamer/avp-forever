@@ -39,6 +39,10 @@ class TheoraFMV
 		std::string 	mFileName;
 		std::ifstream 	mFileStream;
 
+		// so we can easily reference these from the threads.
+		OggStream *mVideo;
+		OggStream *mAudio;
+
 		ogg_sync_state 	mState;
 		ogg_int64_t		mGranulePos;
 		th_ycbcr_buffer mYuvBuffer;
@@ -65,15 +69,11 @@ class TheoraFMV
 		HANDLE mDecodeThreadHandle;
 		HANDLE mAudioThreadHandle;
 
-		// so we can easily reference these from the threads.
-		OggStream *mVideo;
-		OggStream *mAudio;
-
 		bool mFmvPlaying;
 		bool mFrameReady;
 		bool mAudioStarted;
 
-		TheoraFMV(/*const char* fileName*/) :
+		TheoraFMV() :
 			mGranulePos(0),
 				mAudioStream(0),
 				mRingBuffer(0),
@@ -97,13 +97,14 @@ class TheoraFMV
 		}
 		~TheoraFMV();
 
-		int	Open(/*const char* fileName*/const std::string &fileName);
+		int	Open(const std::string &fileName);
 		void Close();
 		bool ReadPage(ogg_page *page);
 		bool ReadPacket(OggStream *stream, ogg_packet *packet);
 		void ReadHeaders();
 		void HandleTheoraData(OggStream *stream, ogg_packet *packet);
 		bool IsPlaying();
+		bool NextFrame();
 };
 
 #endif

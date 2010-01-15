@@ -7591,67 +7591,60 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 /* more quad drawing functions than you can shake a stick at! */
 void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture)
 {
-	/* set the texture */
-	LastError = d3d.lpD3DDevice->SetTexture(0, fmvTexture);
 
-	int topX = (ScreenDescriptorBlock.SDB_Width - frameWidth) / 2;
-	int topY = (ScreenDescriptorBlock.SDB_Height - frameHeight) / 2;
+	int topX = (640 - frameWidth) / 2;
+	int topY = (480 - frameHeight) / 2;
 
-//	mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
+	float x1 = (float(topX / 640.0f) * 2) - 1;
+	float y1 = (float(topY / 480.0f) * 2) - 1;
 
-	/* height and width of d3d texture */
-//	int texSize = width;//1024;
+	float x2 = ((float(topX + textureWidth) / 640.0f) * 2) - 1;
+	float y2 = ((float(topY + textureHeight) / 480.0f) * 2) - 1;
 
-//	float RecipW = (1.0f / texSize);
-//	float RecipH = (1.0f / texSize);
+	D3DCOLOR colour = D3DCOLOR_ARGB(255, 255, 255, 255);
 
 	// bottom left
-	quadVert[0].sx = (float)topX - 0.5f;
-	quadVert[0].sy = (float)topY + frameHeight - 0.5f;
-	quadVert[0].sz = 0.0f;
-	quadVert[0].rhw = 1.0f;
-	quadVert[0].color = D3DCOLOR_ARGB(255,255,255,255);
-	quadVert[0].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[0].tu = 0.0f;
-	quadVert[0].tv = (1.0f / textureHeight) * frameHeight;
+	orthoVerts[0].x = x1;
+	orthoVerts[0].y = y2;
+	orthoVerts[0].z = 1.0f;
+	orthoVerts[0].colour = colour;
+	orthoVerts[0].u = 0.0f;
+	orthoVerts[0].v = 1.0f;
 
 	// top left
-	quadVert[1].sx = (float)topX - 0.5f;
-	quadVert[1].sy = (float)topY - 0.5f;
-	quadVert[1].sz = 0.0f;
-	quadVert[1].rhw = 1.0f;
-	quadVert[1].color = D3DCOLOR_ARGB(255,255,255,255);
-	quadVert[1].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[1].tu = 0.0f;
-	quadVert[1].tv = 0.0f;
+	orthoVerts[1].x = x1;
+	orthoVerts[1].y = y1;
+	orthoVerts[1].z = 1.0f;
+	orthoVerts[1].colour = colour;
+	orthoVerts[1].u = 0.0f;
+	orthoVerts[1].v = 0.0f;
 
 	// bottom right
-	quadVert[2].sx = (float)topX + frameWidth - 0.5f;
-	quadVert[2].sy = (float)topY + frameHeight - 0.5f;
-	quadVert[2].sz = 0.0f;
-	quadVert[2].rhw = 1.0f;
-	quadVert[2].color = D3DCOLOR_ARGB(255,255,255,255);
-	quadVert[2].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[2].tu = (1.0f / textureWidth) * frameWidth;
-	quadVert[2].tv = (1.0f / textureHeight) * frameHeight;
+	orthoVerts[2].x = x2;
+	orthoVerts[2].y = y2;
+	orthoVerts[2].z = 1.0f;
+	orthoVerts[2].colour = colour;
+	orthoVerts[2].u = 1.0f;
+	orthoVerts[2].v = 1.0f;
 
 	// top right
-	quadVert[3].sx = (float)topX + frameWidth - 0.5f;
-	quadVert[3].sy = (float)topY - 0.5f;
-	quadVert[3].sz = 0.0f;
-	quadVert[3].rhw = 1.0f;
-	quadVert[3].color = D3DCOLOR_ARGB(255,255,255,255);
-	quadVert[3].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[3].tu = (1.0f / textureWidth) * frameWidth;
-	quadVert[3].tv = 0.0f;
+	orthoVerts[3].x = x2;
+	orthoVerts[3].y = y1;
+	orthoVerts[3].z = 1.0f;
+	orthoVerts[3].colour = colour;
+	orthoVerts[3].u = 1.0f;
+	orthoVerts[3].v = 0.0f;
 
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
+		
+	// set the texture
+	LastError = d3d.lpD3DDevice->SetTexture(0, fmvTexture);
 
-	d3d.lpD3DDevice->SetFVF (D3DFVF_TLVERTEX);
-	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
-	if (FAILED(LastError)) 
+	d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
+	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &orthoVerts[0], sizeof(ORTHOVERTEX));
+	if (FAILED(LastError))
 	{
-		LogDxError(LastError, __LINE__, __FILE__);
+		OutputDebugString("DrawPrimitiveUP failed\n");
 	}
 }
 

@@ -140,6 +140,7 @@ void LoadDeviceAndVideoModePreferences()
 
 static void SetDeviceAndVideoModePreferences(void)
 {
+
 	PreferredDeviceAndVideoMode.Width = d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Width;
 	PreferredDeviceAndVideoMode.Height = d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Height;
 

@@ -124,6 +124,7 @@ extern int AvP_MainMenus(void);
 extern int AvP_InGameMenus(void);
 extern int InGameMenusAreRunning(void);
 extern void LoadDeviceAndVideoModePreferences();
+extern void InitFmvCutscenes();
 
 #include "VideoModes.h"
 extern DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
@@ -175,6 +176,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	}
 
 	InitCentreMouseThread();
+	InitFmvCutscenes();
 
 	// load AliensVsPredator.cfg
 	Config_Load();

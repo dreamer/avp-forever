@@ -739,8 +739,6 @@ BOOL CreateVolatileResources()
 
 BOOL ChangeGameResolution(int width, int height, int colourDepth)
 {
-	return TRUE;
-
 	// don't bother resetting device if we're already using the requested settings
 	if ((width == d3d.d3dpp.BackBufferWidth) &&
 	   (height == d3d.d3dpp.BackBufferHeight))
@@ -824,8 +822,8 @@ BOOL InitialiseDirect3D()
 
 //	int width = Config_GetInt("[VideoMode]", "Width", 800);
 //	int height = Config_GetInt("[VideoMode]", "Height", 600);
-	int width = 1024;
-	int height = 768;
+	int width = 1280;
+	int height = 1024;
 	int depth = 32;
 	int defaultDevice = D3DADAPTER_DEFAULT;
 	bool windowed = false;
