@@ -723,11 +723,13 @@ void PrepareVDBForShowView(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	assert(e.EulerZ == VDB_Ptr->VDB_MatrixEuler.EulerZ);
 
 	/* Create the "sprite" matrix" */
+/* // bjd - only referenced in commented out code
 	e.EulerX = 0;
 	e.EulerY = 0;
 	e.EulerZ = (-e.EulerZ) & wrap360; // wrap360 = 4095
 
 	CreateEulerMatrix(&e, &VDB_Ptr->VDB_SpriteMat);
+*/
 }
 
    

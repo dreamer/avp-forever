@@ -635,7 +635,7 @@ typedef struct viewdescriptorblock {
 
 	MATRIXCH VDB_Mat;
 	MATRIXCH VDB_HorizonMat;
-	MATRIXCH VDB_SpriteMat;
+//	MATRIXCH VDB_SpriteMat; // bjd - only referenced in commented out code
 
 	EULER VDB_MatrixEuler;
 
