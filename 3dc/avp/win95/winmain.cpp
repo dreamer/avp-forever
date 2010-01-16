@@ -399,15 +399,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	}
 
 	LoadDeviceAndVideoModePreferences();
-	
-//	InitOptionsMenu(); /* by this time we know all about the video card, etc */
 
 	LoadKeyConfiguration();
-	/********** Grab The Video mode **********/
-	/* JH - nope, not yet; not until we start the menus
-		(or if debugging, start the game), do we need to 
-		set the initial video mode */
-	
   	
 	/*-------------------Patrick 2/6/97-----------------------
 	Start the sound system
@@ -482,9 +475,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		/***********  Load up the character stuff *******/
 
 		InitCharacter();
-
-		/* KJL 17:56:14 26/02/98 - load a font required for Dave's HUD */
-//		LoadPFFont(DATABASE_MESSAGE_FONT);
 
 		/***********  Read in the env Map	 **************/
 

@@ -2558,19 +2558,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\3dc\Fmv_stubbed.cpp"
-				>
-				<FileConfiguration
-					Name="Release For Fox|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						StringPooling="true"
-						PrecompiledHeaderFile=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\3dc\fmvCutscenes.cpp"
 				>
 			</File>

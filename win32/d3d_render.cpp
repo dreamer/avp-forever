@@ -7095,8 +7095,8 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 		return;
 	}
 
-	byte *destPtr = NULL;
-	byte *srcPtr = &ftPtr->RGBBuffer[0];
+	uint8_t *destPtr = NULL;
+	uint8_t *srcPtr = &ftPtr->RGBBuffer[0];
 
 	for (int y = 0; y < ftPtr->ImagePtr->ImageHeight; y++)
 	{
@@ -8466,8 +8466,9 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	float RecipW = 1.0f / image_width; // 0.00390625
 	float RecipH = 1.0f / image_height;
 
-	int quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / font_width) * 640));
-	int quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / font_height) * 480));
+	// game used to render menus at 640x480. this allows us to use any resolution we want
+	int quadWidth = (ScreenDescriptorBlock.SDB_Width / 640.0f) * font_width;
+	int quadHeight = (ScreenDescriptorBlock.SDB_Height / 480.0f) * font_height;
 
 	int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0) * topX);
 	int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0) * topY);

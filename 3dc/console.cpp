@@ -60,8 +60,8 @@ std::vector<Command> cmdList;
 std::vector<Command>::iterator cmdIt;
 std::vector<std::string>cmdArgs;
 
-const int CON_TEXTSIZE = 32768;
-char consoleTextArray[CON_TEXTSIZE];
+//const int CON_TEXTSIZE = 32768;
+//char consoleTextArray[CON_TEXTSIZE];
 
 struct Console 
 {
@@ -164,12 +164,12 @@ void Con_Init()
 
 	Con_AddCommand("toggleconsole", Con_Toggle);
 //	LoadConsoleFont();
-
+/*
 	for (int i = 0; i < CON_TEXTSIZE; i++)
 	{
 		consoleTextArray[i] = ' ';
 	}
-
+*/
 	OutputDebugString("console initialised\n");
 }
 

@@ -40,9 +40,18 @@ extern "C" {
 int FmvColourRed;
 int FmvColourGreen;
 int FmvColourBlue;
+int OpenFMV(const char *filenamePtr);
+int GetVolumeOfNearestVideoScreen(void);
+
+int FmvSoundVolume = 65536 / 512;
+int MoviesAreActive = 1;
+int IntroOutroMoviesAreActive = 1;
+int VolumeOfNearestVideoScreen = 0;
+int PanningOfNearestVideoScreen = 0;
+#include "inline.h"
 }
 
-VorbisCodec *menuMusic = NULL;
+VorbisPlayback *menuMusic = NULL;
 bool MenuBackground = false;
 
 void ReleaseAllFMVTexturesForDeviceReset()
@@ -104,39 +113,37 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 	int w = ftPtr->ImagePtr->ImageWidth;
 	int h = ftPtr->ImagePtr->ImageHeight;
 
-	byte *DestBufferPtr = ftPtr->RGBBuffer;
+	uint8_t *DestBufferPtr = ftPtr->RGBBuffer;
 
-#if 0 // temporarily disabled
-	if (MoviesAreActive && ftPtr->SmackHandle)
+	if (MoviesAreActive && ftPtr->fmvHandle != -1)
 	{
 		int volume = MUL_FIXED(FmvSoundVolume*256, GetVolumeOfNearestVideoScreen());
 
-//		AudioStream_SetBufferVolume(fmvAudioStream, volume);
-//		AudioStream_SetPan(fmvAudioStream, PanningOfNearestVideoScreen);
+//fixme		AudioStream_SetBufferVolume(fmvList[ftPtr->fmvHandle].fmvClass->mAudioStream, volume);
+//fixme		AudioStream_SetPan(fmvList[ftPtr->fmvHandle].fmvClass->mAudioStream, PanningOfNearestVideoScreen);
 
 		ftPtr->SoundVolume = FmvSoundVolume;
 
-		if (!frameReady)
+		if (!fmvList[ftPtr->fmvHandle].fmvClass->mFrameReady)
 			return 0;
 
-		if (ftPtr->IsTriggeredPlotFMV && (!CheckTheoraPlayback()))
+		if (ftPtr->IsTriggeredPlotFMV && (!fmvList[ftPtr->fmvHandle].fmvClass->IsPlaying()))
 		{
 			OutputDebugString("closing ingame fmv..\n");
 
-			ftPtr->SmackHandle = 0;
 			ftPtr->MessageNumber = 0;
-			FmvClose();
+			fmvList[ftPtr->fmvHandle].fmvClass->Close();
+			fmvList[ftPtr->fmvHandle].isPlaying = 0;
+			ftPtr->fmvHandle = -1;
 		}
 		else
 		{
-			NextFMVFrame2(DestBufferPtr, w * 4);
+			fmvList[ftPtr->fmvHandle].fmvClass->NextFrame(w, h, DestBufferPtr, w * 4);
 		}
 
 		ftPtr->StaticImageDrawn = 0;
 	}
-	else
-#endif
-	if (!ftPtr->StaticImageDrawn || /*smackerFormat*/1)
+	else if (!ftPtr->StaticImageDrawn || /*smackerFormat*/1)
 	{
 		int i = w * h;
 		unsigned int seed = FastRandom();
@@ -166,7 +173,6 @@ void StartMenuBackgroundFmv()
 extern "C" {
 
 #include "avp_userprofile.h"
-#include "inline.h"
 #include <math.h>
 #include <assert.h>
 
@@ -181,12 +187,6 @@ extern IMAGEHEADER ImageHeaderArray[];
 #else
 	extern int NumImages;
 #endif
-
-int FmvSoundVolume = 65536/512;
-int MoviesAreActive = 1;
-int IntroOutroMoviesAreActive = 1;
-int VolumeOfNearestVideoScreen = 0;
-int PanningOfNearestVideoScreen = 0;
 
 extern unsigned char DebouncedGotAnyKey;
 
@@ -243,27 +243,34 @@ int FindFreeFmvHandle()
 	return -1;
 }
 
-extern void PlayFMV(const char *filenamePtr)
+int OpenFMV(const char *filenamePtr)
 {
-	if (!IntroOutroMoviesAreActive)
-		return;
-
-	TheoraFMV *fmv = NULL;
+	// find a free handle in our fmv list to use
 	int fmvHandle = FindFreeFmvHandle();
 
-	if (fmvHandle > -1)
+	if (fmvHandle != -1)
 	{
 		// found a free slot
 		fmvList[fmvHandle].fmvClass = new TheoraFMV();
 		fmvList[fmvHandle].fmvClass->Open(filenamePtr);
 		fmvList[fmvHandle].isPlaying = 1;
-		fmv = fmvList[fmvHandle].fmvClass;
 	}
 	else
 	{
 		Con_PrintError("No more free fmv slots");
-		return;
+		return -1;
 	}
+	
+	return fmvHandle;
+}
+
+extern void PlayFMV(const char *filenamePtr)
+{
+	if (!IntroOutroMoviesAreActive)
+		return;
+
+	TheoraFMV fmv;
+	fmv.Open(filenamePtr);
 
 	bool playing = true;
 
@@ -271,18 +278,18 @@ extern void PlayFMV(const char *filenamePtr)
 	{
 		CheckForWindowsMessages();
 
-		if (!fmv->IsPlaying())
+		if (!fmv.IsPlaying())
 			playing = false;
 
-		if (fmv->mFrameReady)
-			playing = fmv->NextFrame();
+		if (fmv.mFrameReady)
+			playing = fmv.NextFrame();
 
 		ThisFramesRenderingHasBegun();
 		ClearScreenToBlack();
 
-		if (fmv->mDisplayTexture)
+		if (fmv.mDisplayTexture)
 		{
-			DrawFmvFrame(fmv->mFrameWidth, fmv->mFrameHeight, fmv->mTextureWidth, fmv->mTextureHeight, fmv->mDisplayTexture);
+			DrawFmvFrame(fmv.mFrameWidth, fmv.mFrameHeight, fmv.mTextureWidth, fmv.mTextureHeight, fmv.mDisplayTexture);
 		}
 
 		ThisFramesRenderingHasFinished();
@@ -293,54 +300,10 @@ extern void PlayFMV(const char *filenamePtr)
 		// added DebouncedGotAnyKey to ensure previous frames key press for starting level doesn't count
 		if (GotAnyKey && DebouncedGotAnyKey)
 		{
+			fmv.Close();
 			playing = false;
 		}
 	}
-
-	fmv->Close();
-	delete fmv;
-	fmv = NULL;
-	fmvList[fmvHandle].isPlaying = 0;
-}
-
-int NextFMVFrame2(uint8_t *frameBuffer, int pitch)
-{
-	return 1;
-#if 0 // temporarily disabled
-	if (fmvPlaying == false)
-		return 0;
-
-	assert (frameBuffer);
-
-	EnterCriticalSection(&frameCriticalSection);
-
-	OggPlayYUVChannels oggYuv;
-	oggYuv.ptry = buffer[0].data;
-	oggYuv.ptru = buffer[2].data;
-	oggYuv.ptrv = buffer[1].data;
-
-	oggYuv.y_width = buffer[0].width;
-	oggYuv.y_height = buffer[0].height;
-	oggYuv.y_pitch = buffer[0].stride;
-
-	oggYuv.uv_width = buffer[1].width;
-	oggYuv.uv_height = buffer[1].height;
-	oggYuv.uv_pitch = buffer[1].stride;
-
-	OggPlayRGBChannels oggRgb;
-	oggRgb.ptro = static_cast<uint8_t*>(frameBuffer);
-	oggRgb.rgb_height = frameHeight;
-	oggRgb.rgb_width = frameWidth;
-	oggRgb.rgb_pitch = pitch;
-
-	oggplay_yuv2rgb(&oggYuv, &oggRgb);
-
-	frameReady = false;
-
-	LeaveCriticalSection(&frameCriticalSection);
-
-	return 1;
-#endif
 }
 
 void FmvClose()
@@ -364,8 +327,6 @@ void UpdateAllFMVTextures()
 
 extern void StartTriggerPlotFMV(int number)
 {
-	OutputDebugString("StartTriggerPlotFMV\n");
-
 	int i = NumberOfFMVTextures;
 	char buffer[25];
 
@@ -377,29 +338,26 @@ extern void StartTriggerPlotFMV(int number)
 		FILE *file = avp_fopen(buffer, "rb");
 		if (!file)
 		{
-			//OutputDebugString("couldn't open fmv file: ");
-			//OutputDebugString(buffer);
-			Con_PrintError("Couldn't open fmv file ");// + buffer);
+			Con_PrintError("Couldn't open triggered plot fmv file");
 			return;
 		}
 		fclose(file);
 	}
 
-	OutputDebugString("going to open ");
-	OutputDebugString(buffer);
-	OutputDebugString("\n");
-
-	while(i--)
+	while (i--)
 	{
 		if (FMVTexture[i].IsTriggeredPlotFMV)
 		{
-#if 0 // temporarily disabled
-			if (OpenTheoraVideo(buffer) < 0)
+			int fmvHandle = OpenFMV(buffer);
+
+			// couldn't open it
+			if (fmvHandle == -1)
 			{
+				FMVTexture[i].fmvHandle = -1;
 				return;
 			}
-#endif
-			FMVTexture[i].SmackHandle = 1;
+
+			FMVTexture[i].fmvHandle = fmvHandle;
 			FMVTexture[i].MessageNumber = number;
 		}
 	}
@@ -477,12 +435,20 @@ void ScanImagesForFMVs()
 void ReleaseAllFMVTextures()
 {
 	OutputDebugString("exiting level..closing FMV system\n");
-	FmvClose();
 
 	for (int i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].MessageNumber = 0;
-		FMVTexture[i].SmackHandle = 0;
+
+		if (FMVTexture[i].fmvHandle != -1)
+		{
+			if (fmvList[FMVTexture[i].fmvHandle].isPlaying)
+			{
+				fmvList[FMVTexture[i].fmvHandle].fmvClass->Close();
+			}
+
+			FMVTexture[i].fmvHandle = -1;
+		}
 
 		if (FMVTexture[i].RGBBuffer)
 		{
@@ -498,7 +464,8 @@ void ReleaseAllFMVTextures()
 void StartMenuMusic()
 {
 	// we need to load IntroSound.ogg here using vorbisPlayer
-	menuMusic = Vorbis_LoadFile("IntroSound.ogg");
+	menuMusic = new VorbisPlayback;
+	menuMusic->Open("IntroSound.ogg");
 }
 
 void PlayMenuMusic(void)
@@ -508,7 +475,7 @@ void PlayMenuMusic(void)
 
 void EndMenuMusic()
 {
-	Vorbis_Release(menuMusic);
+	delete menuMusic;
 	menuMusic = NULL;
 }
 
@@ -518,17 +485,7 @@ extern void InitialiseTriggeredFMVs()
 	while (i--)
 	{
 		FMVTexture[i].MessageNumber = 0;
-		FMVTexture[i].SmackHandle = 0;
-/*
-		if (FMVTexture[i].IsTriggeredPlotFMV)
-		{
-			if (FMVTexture[i].SmackHandle)
-			{
-				FMVTexture[i].MessageNumber = 0;
-				FMVTexture[i].SmackHandle = 0;
-			}
-		}
-*/
+		FMVTexture[i].fmvHandle = -1;
 	}
 }
 

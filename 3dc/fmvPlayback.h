@@ -75,23 +75,23 @@ class TheoraFMV
 
 		TheoraFMV() :
 			mGranulePos(0),
-				mAudioStream(0),
-				mRingBuffer(0),
-				mAudioData(0),
-				mAudioDataBuffer(0),
-				mAudioDataBufferSize(0),
-				mDisplayTexture(0),
-				mTextureWidth(0),
-				mTextureHeight(0),
-				mFrameWidth(0),
-				mFrameHeight(0),
-				mDecodeThreadHandle(0),
-				mAudioThreadHandle(0),
-				mVideo(0),
-				mAudio(0),
-				mFmvPlaying(false),
-				mFrameReady(false),
-				mAudioStarted(false)
+			mAudioStream(0),
+			mRingBuffer(0),
+			mAudioData(0),
+			mAudioDataBuffer(0),
+			mAudioDataBufferSize(0),
+			mDisplayTexture(0),
+			mTextureWidth(0),
+			mTextureHeight(0),
+			mFrameWidth(0),
+			mFrameHeight(0),
+			mDecodeThreadHandle(0),
+			mAudioThreadHandle(0),
+			mVideo(0),
+			mAudio(0),
+			mFmvPlaying(false),
+			mFrameReady(false),
+			mAudioStarted(false)
 		{
 
 		}
@@ -105,6 +105,7 @@ class TheoraFMV
 		void HandleTheoraData(OggStream *stream, ogg_packet *packet);
 		bool IsPlaying();
 		bool NextFrame();
+		bool NextFrame(int width, int height, uint8_t *bufferPtr, int pitch);
 };
 
 #endif

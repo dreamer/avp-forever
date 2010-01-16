@@ -185,7 +185,6 @@ typedef struct pffont
 
 // platform independent externs
 extern void LoadAllFonts();
-extern void LoadPFFont(int fontnum);
 
  // platform dependent callbacks for loading
 //extern void LoadFont(PFFONT *pffont);

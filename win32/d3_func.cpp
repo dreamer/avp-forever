@@ -739,6 +739,8 @@ BOOL CreateVolatileResources()
 
 BOOL ChangeGameResolution(int width, int height, int colourDepth)
 {
+	return TRUE;
+
 	// don't bother resetting device if we're already using the requested settings
 	if ((width == d3d.d3dpp.BackBufferWidth) &&
 	   (height == d3d.d3dpp.BackBufferHeight))

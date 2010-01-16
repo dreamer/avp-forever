@@ -445,10 +445,6 @@ void DAVEHOOK_ScreenModeChange_Cleanup(void)
 	R2BASE_ScreenModeChange_Cleanup();
 	GADGET_ScreenModeChange_Cleanup();
 
-	#if 0
-	LoadPFFont(MENU_FONT_1);
-	#endif
-
 	bFirstFrame = TRUE;
 		// to ensure a flush without processing of messages in first frame, so as to
 		// avoid carriage returns/enter from menu selections triggering typing mode

@@ -138,10 +138,15 @@ TheoraFMV::~TheoraFMV()
 		delete []mAudioDataBuffer;
 	}
 
+	delete mRingBuffer;
+
 	if (mDisplayTexture)
 	{
 		mDisplayTexture->Release();
 	}
+
+	DeleteCriticalSection(&mFrameCriticalSection);
+	DeleteCriticalSection(&mAudioCriticalSection);
 }
 
 void TheoraDecode::Init()
@@ -168,7 +173,7 @@ void VorbisDecode::Init()
 	assert(ret == 0);
 }
 
-int TheoraFMV::Open(/*const char* fileName*/const std::string &fileName)
+int TheoraFMV::Open(const std::string &fileName)
 {
 	mFileName = fileName;
 
@@ -267,13 +272,49 @@ int TheoraFMV::Open(/*const char* fileName*/const std::string &fileName)
 void TheoraFMV::Close()
 {
 	mFmvPlaying = false;
-
 }
 
 bool TheoraFMV::IsPlaying()
 {
 	return mFmvPlaying;
 }
+
+bool TheoraFMV::NextFrame(int width, int height, uint8_t *bufferPtr, int pitch)
+{
+	if (mFmvPlaying == false)
+		return false;
+
+	// critical section
+	EnterCriticalSection(&mFrameCriticalSection);
+
+	OggPlayYUVChannels oggYuv;
+	oggYuv.ptry = mYuvBuffer[0].data;
+	oggYuv.ptru = mYuvBuffer[2].data;
+	oggYuv.ptrv = mYuvBuffer[1].data;
+
+	oggYuv.y_width = mYuvBuffer[0].width;
+	oggYuv.y_height = mYuvBuffer[0].height;
+	oggYuv.y_pitch = mYuvBuffer[0].stride;
+
+	oggYuv.uv_width = mYuvBuffer[1].width;
+	oggYuv.uv_height = mYuvBuffer[1].height;
+	oggYuv.uv_pitch = mYuvBuffer[1].stride;
+
+	OggPlayRGBChannels oggRgb;
+	oggRgb.ptro = static_cast<uint8_t*>(bufferPtr);
+	oggRgb.rgb_height = height;
+	oggRgb.rgb_width = width;
+	oggRgb.rgb_pitch = pitch;
+
+	oggplay_yuv2rgb(&oggYuv, &oggRgb);
+
+	LeaveCriticalSection(&mFrameCriticalSection);
+
+	mFrameReady = false;
+
+	return true;
+}
+
 bool TheoraFMV::NextFrame()
 {
 	if (mFmvPlaying == false)
@@ -283,7 +324,7 @@ bool TheoraFMV::NextFrame()
 	if (FAILED(mDisplayTexture->LockRect(0, &textureLock, NULL, D3DLOCK_DISCARD)))
 	{
 		OutputDebugString("can't lock FMV texture\n");
-		return 0;
+		return false;
 	}
 
 	// critical section
@@ -315,7 +356,7 @@ bool TheoraFMV::NextFrame()
 	if (FAILED(mDisplayTexture->UnlockRect(0)))
 	{
 		OutputDebugString("can't unlock FMV texture\n");
-		return 0;
+		return false;
 	}
 
 	mFrameReady = false;
@@ -369,7 +410,7 @@ bool TheoraFMV::ReadPacket(OggStream *stream, ogg_packet *packet)
 		OggStream *pageStream = mStreams[serialNumber];
 
 		// Drop data for mStreams we're not interested in.
-		if (stream->mActive)
+//		if (stream->mActive)
 		{
 			ret = ogg_stream_pagein(&pageStream->mStreamState, &page);
 			assert(ret == 0);
@@ -584,8 +625,8 @@ unsigned int __stdcall decodeThread(void *args)
 						while (audioSize > fmv->mRingBuffer->GetWritableSize())
 						{
 							// little bit of insurance in case we get stuck in here
-							//if (!fmvInstance->mFmvPlaying)
-							//	break;
+							if (!fmv->mFmvPlaying)
+								break;
 
 							Sleep(16);
 						}
@@ -622,6 +663,7 @@ unsigned int __stdcall decodeThread(void *args)
 		}
 	}
 
+	fmv->mFmvPlaying = false;
 	_endthreadex(0);
 	return 0;
 }

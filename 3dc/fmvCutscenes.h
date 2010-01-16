@@ -22,8 +22,7 @@ void UpdateAllFMVTextures();
 typedef struct FMVTEXTURE
 {
 	IMAGEHEADER *ImagePtr;
-	//Smack *SmackHandle;
-	int SmackHandle;
+	int32_t fmvHandle;
 	int SoundVolume;
 	int IsTriggeredPlotFMV;
 	int StaticImageDrawn;
