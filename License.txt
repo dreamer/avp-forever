@@ -92,3 +92,6 @@ This package also contains code written by CSIRO Australia
    NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
+This package also contains code written by Steven Fuller used with permission, from his Linux port of the Rebellion code.
+His source code can be located at http://git.icculus.org/?p=relnev/avp.git
