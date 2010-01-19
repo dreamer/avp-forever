@@ -422,6 +422,7 @@ void ScanImagesForFMVs()
 					}
 
 					FMVTexture[NumberOfFMVTextures].ImagePtr = ihPtr;
+					FMVTexture[NumberOfFMVTextures].fmvHandle = -1; // just to be sure
 					FMVTexture[NumberOfFMVTextures].StaticImageDrawn = 0;
 					SetupFMVTexture(&FMVTexture[NumberOfFMVTextures]);
 					NumberOfFMVTextures++;

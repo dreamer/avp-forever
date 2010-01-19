@@ -4050,7 +4050,7 @@ float Dest[3];
 
 extern void TranslationSetup(void)
 {
-
+	char buf[200];
 	VECTORCH v = Global_VDB_Ptr->VDB_World;
 	extern int PredatorVisionChangeCounter;
 	float p = PredatorVisionChangeCounter / 65536.0f;
@@ -4094,6 +4094,19 @@ extern void TranslationSetup(void)
 	ViewMatrix[/*3+0*4*/3] = ((float)-v.vx)*o;
 	ViewMatrix[/*3+1*4*/7] = ((float)-v.vy)*4.0f/3.0f*p;
 	ViewMatrix[/*3+2*4*/11] = ((float)-v.vz)*CameraZoomScale;
+/*
+	sprintf(buf, 
+	"\t %f \t %f \t %f\n"
+	"\t %f \t %f \t %f\n"
+	"\t %f \t %f \t %f\n"
+	"\t %f \t %f \t %f\n",
+	ViewMatrix[0], ViewMatrix[1], ViewMatrix[2], 
+	ViewMatrix[3], ViewMatrix[4], ViewMatrix[5],
+	ViewMatrix[6], ViewMatrix[7], ViewMatrix[8], 
+	ViewMatrix[9], ViewMatrix[10], ViewMatrix[11]);
+	OutputDebugString(buf);
+*/
+
 
 	if (MIRROR_CHEATMODE)
 	{

@@ -2822,10 +2822,10 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\Fmv.cpp">
+				RelativePath="..\3dc\fmvCutscenes.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\Fmv_stubbed.cpp">
+				RelativePath="..\3dc\fmvPlayback.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\fragchnk.cpp">
@@ -4125,9 +4125,6 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\myFmv.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\networking.cpp">
@@ -6141,7 +6138,10 @@
 				RelativePath="..\3dc\avp\win95\Ffstdio.h">
 			</File>
 			<File
-				RelativePath="..\3dc\Fmv.h">
+				RelativePath="..\3dc\fmvCutscenes.h">
+			</File>
+			<File
+				RelativePath="..\3dc\fmvPlayback.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\font.h">

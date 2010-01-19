@@ -1,7 +1,26 @@
-// Interface  functions (written in C++) for
-// Direct3D immediate mode system
+// Copyright (C) 2010 Barry Duncan. All Rights Reserved.
+// The original author of this code can be contacted at: bduncan22@hotmail.com
 
-// Must link to C code in main engine system
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+// INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+// FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+// DEVELOPERS AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+// OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+// WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+// ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 extern int NumberOfFMVTextures;
 #include "fmvCutscenes.h"
@@ -10,12 +29,6 @@ extern int NumberOfFMVTextures;
 extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 
 extern "C" {
-
-// Mysterious definition required by objbase.h
-// (included via one of the include files below)
-// to start definition of obscure unique in the
-// universe IDs required  by Direct3D before it
-// will deign to cough up with anything useful...
 
 #define INITGUID
 
@@ -43,6 +56,9 @@ extern "C++"
 	extern void Font_Init();
 	extern void Font_Release();
 	D3DXMATRIX matOrtho;
+	D3DXMATRIX matProjection;
+	D3DXMATRIX matViewProjection;
+	D3DXMATRIX matView; 
 	D3DXMATRIX matIdentity;
 }
 
@@ -186,6 +202,23 @@ LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int
 	return tempTexture;
 }
 #endif
+
+void PrintD3DMatrix(const char* name, D3DXMATRIX &mat)
+{
+	char buf[300];
+	sprintf(buf, "Printing D3D Matrix: - %s\n"
+//	"\t 1 \t 2 \t 3 \t 4\n"
+	"\t %f \t %f \t %f \t %f\n"
+	"\t %f \t %f \t %f \t %f\n"
+	"\t %f \t %f \t %f \t %f\n"
+	"\t %f \t %f \t %f \t %f\n", name,
+	mat._11, mat._12, mat._13, mat._14,
+	mat._21, mat._22, mat._23, mat._24,
+	mat._31, mat._32, mat._33, mat._34,
+	mat._41, mat._42, mat._43, mat._44);
+
+	OutputDebugString(buf);
+}
 
 // called from Scrshot.cpp
 void CreateScreenShotImage()
@@ -824,8 +857,8 @@ BOOL InitialiseDirect3D()
 
 //	int width = Config_GetInt("[VideoMode]", "Width", 800);
 //	int height = Config_GetInt("[VideoMode]", "Height", 600);
-	int width = 1280;
-	int height = 1024;
+	int width = 1920;
+	int height = 1080;
 	int depth = 32;
 	int defaultDevice = D3DADAPTER_DEFAULT;
 	bool windowed = false;
@@ -1096,7 +1129,7 @@ BOOL InitialiseDirect3D()
 	else 
 	{
 		d3d.supportsDynamicTextures = FALSE;
-		Con_PrintError("device can't use D3DUSAGE_DYNAMIC");
+		Con_PrintError("Device can't use D3DUSAGE_DYNAMIC");
 	}
 
 	// Log resolution set
@@ -1200,8 +1233,28 @@ BOOL InitialiseDirect3D()
 	int wideScreenWidth = 852;
 	int test = 600;
 
+	// se tup view matrix
+	D3DXMatrixIdentity( &matView );
+	D3DXVECTOR3 position = D3DXVECTOR3(-64.0f, 280.0f, -1088.0f);
+	D3DXVECTOR3 lookAt = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	D3DXVECTOR3 up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+	D3DXMatrixLookAtLH( &matView, &position, &lookAt, &up );
+	PrintD3DMatrix("View", matView);
+
+	// set up orthographic projection matrix
 //	D3DXMatrixOrthoOffCenterLH( &matOrtho, 0.0f, wideScreenWidth, 0.0f, 480, 1.0f, 10.0f);
 	D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
+
+	// set up projection matrix
+	D3DXMatrixPerspectiveFovLH( &matProjection, width / height, D3DX_PI / 2, 1.0f, 100.0f);
+
+	// print projection matrix?
+	PrintD3DMatrix("Projection", matProjection);
+
+	// multiply view and projection
+	D3DXMatrixMultiply( &matViewProjection, &matView, &matProjection);
+	PrintD3DMatrix("View and Projection", matViewProjection);
+
 
 	D3DXMatrixIdentity( &matIdentity );
 	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );

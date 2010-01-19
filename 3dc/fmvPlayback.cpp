@@ -284,6 +284,8 @@ bool TheoraFMV::NextFrame(int width, int height, uint8_t *bufferPtr, int pitch)
 	if (mFmvPlaying == false)
 		return false;
 
+	int startTime = timeGetTime();
+
 	// critical section
 	EnterCriticalSection(&mFrameCriticalSection);
 
@@ -309,6 +311,10 @@ bool TheoraFMV::NextFrame(int width, int height, uint8_t *bufferPtr, int pitch)
 	oggplay_yuv2rgb(&oggYuv, &oggRgb);
 
 	LeaveCriticalSection(&mFrameCriticalSection);
+
+	char buf[100];
+	sprintf(buf, "total time: %d\n", timeGetTime() - startTime);
+	OutputDebugString(buf);
 
 	mFrameReady = false;
 

@@ -401,19 +401,6 @@ void InteriorType_Body()
 
 		RotateVector(&ioff, &subjectPtr->ObMat);
 		AddVector(&ioff, &Global_VDB_Ptr->VDB_World);
-		
-		#if 0
-		{
-			static int i=-10;
-			i=-i;
-			ioff.vx = MUL_FIXED(GetSin((CloakingPhase/5)&4095),i);
-			ioff.vy = MUL_FIXED(GetCos((CloakingPhase/3)&4095),i);
-			ioff.vz = 0;
-
-			RotateVector(&ioff, &subjectPtr->ObMat);
-			AddVector(&ioff, &Global_VDB_Ptr->VDB_World);
-		}
-		#endif
 	}
 	{
 		EULER orientation;
@@ -439,7 +426,7 @@ void InteriorType_Body()
 			MatrixMultiply(&Global_VDB_Ptr->VDB_Mat, &matrix, &Global_VDB_Ptr->VDB_Mat);
 	 	}
 	}
-	
+
 	{
 		VECTORCH relativeVelocity;
 		
@@ -504,27 +491,43 @@ void InteriorType_Body()
 
 void UpdateCamera(void)
 {
-	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
-	int cos = GetCos(playerStatusPtr->ViewPanX);
-	int sin = GetSin(playerStatusPtr->ViewPanX);
+	char buf[300];
+	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+	int cos = GetCos(/*playerStatusPtr->ViewPanX*/0); // the looking up/down value that used to be in displayblock
+	int sin = GetSin(0);
 	MATRIXCH mat;
 	DISPLAYBLOCK *dptr_s = Player;
 
-	Global_VDB_Ptr->VDB_World = dptr_s->ObWorld;
-	Global_VDB_Ptr->VDB_Mat = dptr_s->ObMat;
+	// update the two globals
+	Global_VDB_Ptr->VDB_World = dptr_s->ObWorld; // world space location
+	Global_VDB_Ptr->VDB_Mat = dptr_s->ObMat; // local -> world orientation matrix
+
+	// world position
+	sprintf(buf, "player world location - x: %d y: %d z: %d\n", Global_VDB_Ptr->VDB_World.vx,
+		Global_VDB_Ptr->VDB_World.vy, Global_VDB_Ptr->VDB_World.vz);
+//	OutputDebugString(buf);
+
+	sprintf(buf, 
+	"\t %d \t %d \t %d\n"
+	"\t %d \t %d \t %d\n"
+	"\t %d \t %d \t %d\n",
+	Global_VDB_Ptr->VDB_Mat.mat11, Global_VDB_Ptr->VDB_Mat.mat12, Global_VDB_Ptr->VDB_Mat.mat13,
+	Global_VDB_Ptr->VDB_Mat.mat21, Global_VDB_Ptr->VDB_Mat.mat22, Global_VDB_Ptr->VDB_Mat.mat23,
+	Global_VDB_Ptr->VDB_Mat.mat31, Global_VDB_Ptr->VDB_Mat.mat32, Global_VDB_Ptr->VDB_Mat.mat33);
+	OutputDebugString(buf);
 
 	mat.mat11 = ONE_FIXED;
 	mat.mat12 = 0;
 	mat.mat13 = 0;
-	mat.mat21 = 0;	  	
-	mat.mat22 = cos;	  	
-	mat.mat23 = -sin;	  	
-	mat.mat31 = 0;	  	
-	mat.mat32 = sin;	  	
-	mat.mat33 = cos;	  	
+	mat.mat21 = 0;
+	mat.mat22 = cos;
+	mat.mat23 = -sin;
+	mat.mat31 = 0;
+	mat.mat32 = sin;
+	mat.mat33 = cos;
  	MatrixMultiply(&Global_VDB_Ptr->VDB_Mat, &mat, &Global_VDB_Ptr->VDB_Mat);
 
-	InteriorType_Body();
+//	InteriorType_Body();
 }
 
 void AVPGetInViewVolumeList(VIEWDESCRIPTORBLOCK *VDB_Ptr)

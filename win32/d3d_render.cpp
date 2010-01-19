@@ -619,7 +619,7 @@ BOOL BeginD3DScene()
 
 		ReleaseVolatileResources();
 		
-		/* disable XInput */
+		// disable XInput
 		XInputEnable( false );
 
 		while (1) 
@@ -630,11 +630,6 @@ BOOL BeginD3DScene()
 //				if (ReleaseVolatileResources() == TRUE) 
 				{
 					OutputDebugString("Releasing resources for a device reset..\n");
-					/* release fmv textures */
-					//ReleaseAllFMVTexturesForDeviceReset();
-
-					/* disable XInput */
-//					XInputEnable( false );
 
 					if (FAILED( d3d.lpD3DDevice->Reset(&d3d.d3dpp))) 
 					{
@@ -645,10 +640,7 @@ BOOL BeginD3DScene()
 						OutputDebugString("We have reset the device. recreating resources..\n");
 						CreateVolatileResources();
 
-						/* reload fmv textures */
-						//RecreateAllFMVTexturesAfterDeviceReset();
-
-						/* re-enable XInput */
+						// re-enable XInput
 						XInputEnable( true );
 						break;
 					}

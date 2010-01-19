@@ -36,7 +36,7 @@ extern "C++"{
 #include "lighting.h"
 #include "showcmds.h"
 #include "frustrum.h"
-#include "fmv.h"
+#include "fmvCutscenes.h"
 #include "d3d_render.h"
 #include "avp_userprofile.h"
 #include "bh_types.h"
