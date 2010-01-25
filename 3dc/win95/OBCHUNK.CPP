@@ -339,10 +339,8 @@ void Object_Chunk::destroy(File_Chunk * fc)
 				{
 					//excess entries should be properly deleted when the array is deleted
 					vmac->num_array_items=pos;
-				}
-					
+				}	
 			}
-				
 		}
 
 		//now remove this object from any adjacency data
@@ -1313,7 +1311,7 @@ Object_Track_Sound_Chunk::Object_Track_Sound_Chunk(Chunk_With_Children* const pa
 
 Object_Track_Sound_Chunk::~Object_Track_Sound_Chunk()
 {
-	if(wav_name) delete wav_name;
+	if(wav_name) delete[] wav_name;
 }											 
 
 void Object_Track_Sound_Chunk::fill_data_block(char* data_start)

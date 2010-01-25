@@ -17,33 +17,22 @@ extern "C" {
 #include "stratdef.h"
 #include "gamedef.h"
 #include "bh_types.h"
-//#include "string.h"
-
 #include "hudgfx.h"
 #include "huddefs.h"
-//#include "hud_data.h"
 #include "kshape.h"
 #include "chnktexi.h"
-
-
 #include "HUD_layout.h"
 #include "language.h"
-
-
 
 extern "C++" 									  
 {
 #include "r2base.h"
-//#include "pcmenus.h"
-//#include "projload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 #include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 extern void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour);
 extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colour);
-
 };
 
 #include "d3d_hud.h"
-
 
 #define UseLocalAssert FALSE
 #include "ourasert.h"
@@ -239,12 +228,8 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 
 void D3D_InitialiseMarineHUD(void)
 {
-	//SelectGenTexDirectory(ITI_TEXTURE);
-
-//	extern unsigned char *ScreenBuffer;
-
 	/* set game mode: different though for multiplayer game */
-	if(AvP.Network==I_No_Network)
+	if (AvP.Network==I_No_Network)
 		cl_pszGameMode = "marine";
 	else
 		cl_pszGameMode = "multip";

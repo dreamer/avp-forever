@@ -261,10 +261,6 @@ int AvP_MainMenus(void)
 	
 	TimeStampedMessage("start of menus");
 
-	// open a 640x480x16 screen     
-
-	// bjd resolution change
-//	SelectMenuDisplayMode();
 	TimeStampedMessage("after SelectMenuDisplayMode");
 
 	InitialiseMenuGfx();
@@ -361,7 +357,7 @@ int AvP_MainMenus(void)
 		ThisFramesRenderingHasFinished();
 		FlipBuffers();
 	}
-	
+
 	if (AvPMenus.MenusState == MENUSSTATE_OUTSIDEMENUS)
 	{
 		//Don't bother showing credits if we are just exiting in order to start a game
@@ -2997,11 +2993,10 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 				//save the 'Previous Game' multiplayer configuration
 				strcpy(MP_Config_Description,GetTextString(TEXTSTRING_PREVIOUSGAME_FILENAME));
 				SaveMultiplayerConfiguration(GetTextString(TEXTSTRING_PREVIOUSGAME_FILENAME));
-
 				
 				AvP.Difficulty = 1;
 
-				if (Net_HostGame(MP_PlayerName,MP_SessionName,MP_Species,netGameData.gameType,netGameData.levelNumber) != NET_FAIL)
+				if (Net_HostGame(MP_PlayerName, MP_SessionName, MP_Species, netGameData.gameType, netGameData.levelNumber) != NET_FAIL)
 				{
 					AvPMenus.MenusState = MENUSSTATE_STARTGAME;
 					if (netGameData.gameType==NGT_Coop)

@@ -81,36 +81,33 @@ void Font_Init()
 	}
 
 	srcPtr = static_cast<uint8_t*> (lock.pBits);
-	
-	Fonts[FONT_SMALL].fontWidths[32] = 6; // size of space character
+
+	Fonts[FONT_SMALL].fontWidths[32] = 12; // size of space character
 
 	for (c = 33; c < 255; c++) 
 	{
 		int x, y;
 
-		int x1 = 1+((c-32)&15) * Fonts[FONT_SMALL].blockWidth;
-		int y1 = 1+((c-32)>>4) * Fonts[FONT_SMALL].blockHeight;
+//		int x1 = 1+((c-32)&15) * Fonts[FONT_SMALL].blockWidth;
+//		int y1 = 1+((c-32)>>4) * Fonts[FONT_SMALL].blockHeight;
 
 		int row = (int)((c-32) / 16);
 		int column = (c-32) % 16;
 
-		int x12 = column * Fonts[FONT_SMALL].blockWidth;
-		int y12 = row * Fonts[FONT_SMALL].blockHeight;
-
-		x1 = x12+1;
-		y1 = y12+1;
+		int x2 = column * Fonts[FONT_SMALL].blockWidth;
+		int y2 = row * Fonts[FONT_SMALL].blockHeight;
 
 		Fonts[FONT_SMALL].fontWidths[c] = Fonts[FONT_SMALL].blockWidth + 1;
 
-		for (x = x1 + Fonts[FONT_SMALL].blockWidth; x > x1; x--)
+		for (x = x2 + Fonts[FONT_SMALL].blockWidth; x > x2; x--)
 		{
 			int blank = 1;
 
-			for (y = y1; y < y1 + Fonts[FONT_SMALL].blockHeight; y++)
+			for (y = y2; y < y2 + Fonts[FONT_SMALL].blockHeight; y++)
 			{
 				uint8_t *s = &srcPtr[((x * 4) + y * lock.Pitch)];
 
-				if ((s[2] == 255))// && (s[1] >= 240) && (s[2] >= 240))
+				if ((s[2] >= 0x80))// && (s[1] >= 240) && (s[2] >= 240))
 				{
 					blank = 0;
 					break;
@@ -144,6 +141,10 @@ void Font_Init()
 */
 }
 
+extern "C" {
+extern char AAFontWidths[256];
+}
+
 int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 {
 	return 0;
@@ -164,7 +165,8 @@ int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 	{
 		char c = *text++;
 
-		int charWidth = Fonts[FONT_SMALL].fontWidths[c];
+//		int charWidth = Fonts[FONT_SMALL].fontWidths[c];
+		int charWidth = AAFontWidths[c] * 2;
 
 		c = c - 32;
 

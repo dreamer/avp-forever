@@ -95,7 +95,7 @@ public:
 	}
 	Object_Animation_Sequence_Frame_Chunk (Chunk_With_Children * parent,const char *, size_t);
 
-	~Object_Animation_Sequence_Frame_Chunk(){if(extra_data) delete extra_data;}
+	~Object_Animation_Sequence_Frame_Chunk(){if(extra_data) delete[] extra_data;}
 	
 	ChunkQuat orientation;
 	ChunkVectorInt transform;

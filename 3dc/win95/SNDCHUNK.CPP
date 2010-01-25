@@ -234,7 +234,7 @@ Sound_Object_Extra_Name_Chunk::Sound_Object_Extra_Name_Chunk(Chunk_With_Children
 
 Sound_Object_Extra_Name_Chunk::~Sound_Object_Extra_Name_Chunk()
 {
-	delete name;
+	if (name) delete[] name;
 }
 
 void Sound_Object_Extra_Name_Chunk::fill_data_block(char* data_start)

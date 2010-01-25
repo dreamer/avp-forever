@@ -442,8 +442,6 @@ void SmartTarget(int speed,int projectile_speed)
 							{
 								targetView=solution;
 							}
-							
-
 						}
 					}
 				}
@@ -479,8 +477,7 @@ void SmartTarget(int speed,int projectile_speed)
 	   	{
 	   		screenX=0;
 	   		screenY=0;	   
-	   	}
-	   	
+		}
 		
 		{
 			extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
@@ -533,7 +530,6 @@ void SmartTarget(int speed,int projectile_speed)
         	    else SmartTargetSightY = targetY<<16;
 			}
 	 	}
-     	
     }
 	
 	Old_SmartTarget_Object=SmartTarget_Object;
@@ -628,7 +624,6 @@ DISPLAYBLOCK *SmartTarget_GetNewTarget(void) {
 					notFar=a;
 				}
 			}
-
 		}
 		
 		if (nearestObjectPtr) {

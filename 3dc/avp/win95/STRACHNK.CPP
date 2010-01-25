@@ -384,7 +384,7 @@ Virtual_Object_Properties_Chunk::Virtual_Object_Properties_Chunk(Chunk_With_Chil
 
 Virtual_Object_Properties_Chunk::~Virtual_Object_Properties_Chunk()
 {
-	if(name)delete name;
+	if(name) delete[] name;
 }
 
 size_t Virtual_Object_Properties_Chunk::size_chunk()
@@ -1608,7 +1608,7 @@ TrackStrategy::~TrackStrategy()
 		delete point_effects[i];
 	}
 	if(point_effects) 
-		delete point_effects;
+		delete[] point_effects;
 }
 
 size_t TrackStrategy::GetStrategySize()

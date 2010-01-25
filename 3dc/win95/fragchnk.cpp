@@ -56,7 +56,7 @@ Fragment_Type_Data_Chunk::Fragment_Type_Data_Chunk(Chunk_With_Children* const pa
 
 Fragment_Type_Data_Chunk::~Fragment_Type_Data_Chunk()
 {
-	if(frag_type_name) delete frag_type_name;
+	if(frag_type_name) delete[] frag_type_name;
 }											 
 
 void Fragment_Type_Data_Chunk::fill_data_block(char* data_start)
@@ -149,7 +149,7 @@ Fragment_Type_Shape_Chunk::Fragment_Type_Shape_Chunk(Chunk_With_Children* const 
 
 Fragment_Type_Shape_Chunk::~Fragment_Type_Shape_Chunk()
 {
-	if(name) delete name;
+	if(name) delete[] name;
 }											 
 
 void Fragment_Type_Shape_Chunk::fill_data_block(char* data_start)
@@ -220,7 +220,7 @@ Fragment_Type_Sound_Chunk::Fragment_Type_Sound_Chunk(Chunk_With_Children* const 
 
 Fragment_Type_Sound_Chunk::~Fragment_Type_Sound_Chunk()
 {
-	if(wav_name) delete wav_name;
+	if(wav_name) delete[] wav_name;
 }											 
 
 void Fragment_Type_Sound_Chunk::fill_data_block(char* data_start)

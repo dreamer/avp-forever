@@ -105,6 +105,28 @@ void Con_PrintError(const std::string &errorString)
 	LogErrorString(errorString);
 }
 
+void Con_PrintHRESULTError(HRESULT hr, const std::string &errorString, int lineNumber = 0, const char *fileName = 0)
+{
+#if 0
+	if (lineNumber && fileName)
+	{
+		std::stringstream sstream = "\t Error:" << errorString << DXGetErrorString(hr) << " - " << DXGetErrorDescription(hr) << "Line: " << lineNumber << "File: " << fileName;
+	}
+/*
+	if (lineNumber && fileName)
+	{
+		console.text.push_back("\t Error:" + errorString + DXGetErrorString(hr) + " - " + DXGetErrorDescription(hr) + "Line: " + lineNumber + "File: " + fileName);
+		LogString("\t Error:" + errorString + DXGetErrorString(hr) + " - " + DXGetErrorDescription(hr) + "Line: " + lineNumber + "File: " + fileName);
+	}
+	else
+	{
+		console.text.push_back("\t Error:" + errorString + DXGetErrorString(hr) + " - " + DXGetErrorDescription(hr));
+		LogString("\t Error:" + errorString + DXGetErrorString(hr) + " - " + DXGetErrorDescription(hr));
+	}
+*/
+#endif
+}
+
 void Con_PrintMessage(const std::string &messageString)
 {
 	console.text.push_back(messageString);
@@ -304,54 +326,50 @@ void Con_RemoveTypedChar()
 
 void Con_DrawQuadTest(int x, int y, int width, int height, int colour)
 {
-	D3DXMATRIX matTranslation;
-    D3DXMATRIX matScaling;
-    D3DXMATRIX matTransform;
+	float x1 = (float(x / 640.0f) * 2) - 1;
+	float y1 = (float(y / 480.0f) * 2) - 1;
 
-	int X = x - 640 / 2;
-	int Y = -y + 480 / 2;
-
-	D3DXMatrixScaling (&matScaling, (float)width - x, (float)height - y, 1.0f);
-	D3DXMatrixTranslation (&matTranslation, (float)X, (float)Y, 0.0f);
-    matTransform = matScaling * matTranslation;
+	float x2 = ((float(x + width) / 640.0f) * 2) - 1;
+	float y2 = ((float(y + height) / 480.0f) * 2) - 1;
 
 //	D3DCOLOR colour = colour;//D3DCOLOR_ARGB(255, 38, 80, 145);
 
 	// bottom left
-	conVerts[0].x = -1.0f;
-	conVerts[0].y = 1.0f;
+	conVerts[0].x = x1;
+	conVerts[0].y = y2;
 	conVerts[0].z = 1.0f;
 	conVerts[0].colour = colour;
 	conVerts[0].u = 0.0f;
-	conVerts[0].v = 0.0f;
+	conVerts[0].v = 1.0f;
 
 	// top left
-	conVerts[1].x = -1.0f;
-	conVerts[1].y = -1.0f;
+	conVerts[1].x = x1;
+	conVerts[1].y = y1;
 	conVerts[1].z = 1.0f;
 	conVerts[1].colour = colour;
-	conVerts[1].u = 1.0f;
+	conVerts[1].u = 0.0f;
 	conVerts[1].v = 0.0f;
 
 	// bottom right
-	conVerts[2].x = 1.0f;
-	conVerts[2].y = 1.0f;
+	conVerts[2].x = x2;
+	conVerts[2].y = y2;
 	conVerts[2].z = 1.0f;
 	conVerts[2].colour = colour;
 	conVerts[2].u = 1.0f;
 	conVerts[2].v = 1.0f;
 
 	// top right
-	conVerts[3].x = 1.0f;
-	conVerts[3].y = -1.0f;
+	conVerts[3].x = x2;
+	conVerts[3].y = y1;
 	conVerts[3].z = 1.0f;
 	conVerts[3].colour = colour;
-	conVerts[3].u = 0.0f;
-	conVerts[3].v = 1.0f;
+	conVerts[3].u = 1.0f;
+	conVerts[3].v = 0.0f;
+
 #ifdef WIN32
 	d3d.lpD3DDevice->SetFVF (D3DFVF_CUSTOMVERTEX);
 #endif
-	d3d.lpD3DDevice->SetTransform (D3DTS_WORLD, &matTransform);
+//	d3d.lpD3DDevice->SetTransform (D3DTS_WORLD, &matTransform);
 	d3d.lpD3DDevice->SetTexture (0, NULL);
 
 	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &conVerts[0], sizeof(CUSTOMVERTEX));
@@ -387,8 +405,8 @@ void Con_Draw()
 		console.isOpen = true;
 
 	// draw the background quad
-	DrawQuad(console.xPos, console.yPos, console.width, console.height, D3DCOLOR_ARGB(255, 38, 80, 145));
-//	Con_DrawQuadTest(console.xPos, console.yPos, console.width, console.height, D3DCOLOR_ARGB(255, 38, 80, 145));
+//	DrawQuad(console.xPos, console.yPos, console.width, console.height, D3DCOLOR_ARGB(255, 38, 80, 145));
+	Con_DrawQuadTest(console.xPos, console.yPos, console.width, console.height, D3DCOLOR_ARGB(255, 38, 80, 145));
 
 	if (console.height > 0)
 	{

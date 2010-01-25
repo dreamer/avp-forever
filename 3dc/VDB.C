@@ -425,8 +425,8 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 		vdb->VDB_ClipUp			= cu;
 		vdb->VDB_ClipDown		= cd;
 
-		if(vdb->VDB_Flags & ViewDB_Flag_AdjustScale) {
-
+		if (vdb->VDB_Flags & ViewDB_Flag_AdjustScale) 
+		{
 			vdb->VDB_CentreX =
 				WideMulNarrowDiv(
 					vdb->VDB_CentreX,

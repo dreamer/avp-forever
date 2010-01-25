@@ -11,6 +11,7 @@ class RingBuffer
 		bool	initialFill;
 		uint8_t	*buffer;
 		int		bufferCapacity;
+		CRITICAL_SECTION mCriticalSection;
 	public:
 		RingBuffer(int size);
 		~RingBuffer();

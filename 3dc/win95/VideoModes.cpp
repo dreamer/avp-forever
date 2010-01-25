@@ -123,16 +123,16 @@ void GetDeviceAndVideoModePrefences()
 
 void SelectBasicDeviceAndVideoMode() 
 {
-	// default to 640x480x32
-	PreferredDeviceAndVideoMode.Width = 640;
-	PreferredDeviceAndVideoMode.Height = 480;
+	// default to 800x600x32
+	PreferredDeviceAndVideoMode.Width = 800;
+	PreferredDeviceAndVideoMode.Height = 600;
 	PreferredDeviceAndVideoMode.ColourDepth = 32;
 }
 
 void LoadDeviceAndVideoModePreferences()
 {
-	PreferredDeviceAndVideoMode.Width = Config_GetInt("[VideoMode]", "Width", 640);
-	PreferredDeviceAndVideoMode.Height= Config_GetInt("[VideoMode]", "Height", 480);
+	PreferredDeviceAndVideoMode.Width = Config_GetInt("[VideoMode]", "Width", 800);
+	PreferredDeviceAndVideoMode.Height= Config_GetInt("[VideoMode]", "Height", 600);
 	PreferredDeviceAndVideoMode.ColourDepth = Config_GetInt("[VideoMode]", "ColourDepth", 32);
 
 	GetDeviceAndVideoModePrefences();
@@ -178,6 +178,8 @@ static void SetDeviceAndVideoModePreferences(void)
 	Config_SetInt("[VideoMode]", "ColourDepth", PreferredDeviceAndVideoMode.ColourDepth);
 
 	Config_Save();
+
+	ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth);
 }
 
 // called when you select "use selected settings" when selecting a video mode

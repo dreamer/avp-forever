@@ -596,7 +596,6 @@ void InitAVPNetGameForHost(int species, int gamestyle, int level)
 		case NETGAMESPEED_100PERCENT :
 			TimeScale=(ONE_FIXED*100)/100;
 			break;
-
 	}
 
 	netGameData.myStrategyCheckSum=0;
@@ -604,8 +603,8 @@ void InitAVPNetGameForHost(int species, int gamestyle, int level)
 	netGameData.numDeaths[0]=0;
 	netGameData.numDeaths[1]=0;
 	netGameData.numDeaths[2]=0;
-	
 }
+
 void InitAVPNetGameForJoin(void)
 {
 	AvP.GameMode = I_GM_Playing;
@@ -685,27 +684,29 @@ static unsigned char msg[NET_MESSAGEBUFFERSIZE];
   Core message collection function
   ----------------------------------------------------------------------*/
 void MinimalNetCollectMessages(void)
-{			
+{
 	int	 res = NET_OK;
-	int  dPlayFromId = 0;
-	int  dPlayToId = 0;
+	int  fromID = 0;
+	int  toID = 0;
 	int	 msgSize = 0;
 		
-	/* collects messages until something other than NET_OK is returned (eg DP_NoMessages) */
+	/* collects messages until something other than NET_OK is returned (eg NET_NO_MESSAGES) */
 	if (!netGameData.skirmishMode)
 	{
+		Net_ServiceNetwork();
+
 		while ((res == NET_OK) && glpDP && AvPNetID)
 		{
-			res = Net_Receive(&dPlayFromId, &dPlayToId, NET_RECEIVE_ALL, &msg[0], &msgSize);				
+			res = Net_Receive(&fromID, &toID, NET_RECEIVE_ALL, &msg[0], &msgSize);				
 			if (NET_OK == res)
 			{
 				/* process last message, if there is one */
-				if (NET_SYSTEM_MESSAGE == dPlayFromId)
+				if (NET_SYSTEM_MESSAGE == fromID)
 				{
 					ProcessSystemMessage(&msg[0], msgSize);
 				}
-				else ProcessGameMessage(dPlayFromId, &msg[0], msgSize);										
-			}		
+				else ProcessGameMessage(fromID, &msg[0], msgSize);										
+			}
 		}
 	}
 }
@@ -730,9 +731,11 @@ void NetCollectMessages(void)
 	InitNetLog();
 	LogNetInfo("Collecting Messages... \n");
 
-	/* collects messages until something other than NET_OK is returned (eg DP_NoMessages) */
+	/* collects messages until something other than NET_OK is returned (eg NET_NO_MESSAGES) */
 	if (!netGameData.skirmishMode)
 	{
+		Net_ServiceNetwork();
+
 		while ((NET_OK == res) && glpDP && AvPNetID)
 		{
 			res = Net_Receive(&dPlayFromId, &dPlayToId, NET_RECEIVE_ALL, &msg[0], &msgSize);				
@@ -10800,7 +10803,6 @@ void ShowNearestPlayersName()
 								}
 							}
 						}
-						
 					}
 				}
 			}
@@ -10816,7 +10818,6 @@ void ShowNearestPlayersName()
 			NetworkGameConsoleMessage(TEXTSTRING_MULTIPLAYERCONSOLE_PLAYERSEEN,netGameData.playerData[nearestIndex].name,0);
 		}
 	}
-
 }
 
 
@@ -10825,7 +10826,6 @@ static void CheckForPointBasedObjectRespawn()
 	int score=0;
 	int i;
 	if(netGameData.pointsForRespawn==0) return;
-	
 	
 
 	for(i=0;i<NET_MAXPLAYERS;i++)

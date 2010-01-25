@@ -4066,34 +4066,25 @@ extern void TranslationSetup(void)
 		o = 1.0f + o*o;
 	}
 
-	#if 1
-	ViewMatrix[/*0+0*4*/0] = (float)(Global_VDB_Ptr->VDB_Mat.mat11)/65536.0f*o;
-	ViewMatrix[/*1+0*4*/1] = (float)(Global_VDB_Ptr->VDB_Mat.mat21)/65536.0f*o;
-	ViewMatrix[/*2+0*4*/2] = (float)(Global_VDB_Ptr->VDB_Mat.mat31)/65536.0f*o;
-	#else
-	ViewMatrix[0+0*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat11)/65536.0f;
-	ViewMatrix[1+0*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat21)/65536.0f;
-	ViewMatrix[2+0*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat31)/65536.0f;
-	#endif
+	ViewMatrix[0] = (float)(Global_VDB_Ptr->VDB_Mat.mat11)/65536.0f*o;
+	ViewMatrix[1] = (float)(Global_VDB_Ptr->VDB_Mat.mat21)/65536.0f*o;
+	ViewMatrix[2] = (float)(Global_VDB_Ptr->VDB_Mat.mat31)/65536.0f*o;
 
-	#if 1
-	ViewMatrix[/*0+1*4*/4] = (float)(Global_VDB_Ptr->VDB_Mat.mat12)*4.0f/(65536.0f*3.0f)*p;
-	ViewMatrix[/*1+1*4*/5] = (float)(Global_VDB_Ptr->VDB_Mat.mat22)*4.0f/(65536.0f*3.0f)*p;
-	ViewMatrix[/*2+1*4*/6] = (float)(Global_VDB_Ptr->VDB_Mat.mat32)*4.0f/(65536.0f*3.0f)*p;
-	#else
-	ViewMatrix[0+1*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat12)/(65536.0f);
-	ViewMatrix[1+1*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat22)/(65536.0f);
-	ViewMatrix[2+1*4] = (float)(Global_VDB_Ptr->VDB_Mat.mat32)/(65536.0f);
-	#endif
-	ViewMatrix[/*0+2*4*/8] = (float)(Global_VDB_Ptr->VDB_Mat.mat13)/65536.0f*CameraZoomScale;
-	ViewMatrix[/*1+2*4*/9] = (float)(Global_VDB_Ptr->VDB_Mat.mat23)/65536.0f*CameraZoomScale;
-	ViewMatrix[/*2+2*4*/10] = (float)(Global_VDB_Ptr->VDB_Mat.mat33)/65536.0f*CameraZoomScale;
+	// orient-top?
+	ViewMatrix[4] = (float)(Global_VDB_Ptr->VDB_Mat.mat12)*4.0f/(65536.0f*3.0f)*p;
+	ViewMatrix[5] = (float)(Global_VDB_Ptr->VDB_Mat.mat22)*4.0f/(65536.0f*3.0f)*p;
+	ViewMatrix[6] = (float)(Global_VDB_Ptr->VDB_Mat.mat32)*4.0f/(65536.0f*3.0f)*p;
+
+	// orient-front?
+	ViewMatrix[8] = (float)(Global_VDB_Ptr->VDB_Mat.mat13)/65536.0f*CameraZoomScale;
+	ViewMatrix[9] = (float)(Global_VDB_Ptr->VDB_Mat.mat23)/65536.0f*CameraZoomScale;
+	ViewMatrix[10] = (float)(Global_VDB_Ptr->VDB_Mat.mat33)/65536.0f*CameraZoomScale;
 
 	RotateVector(&v, &Global_VDB_Ptr->VDB_Mat);
 
-	ViewMatrix[/*3+0*4*/3] = ((float)-v.vx)*o;
-	ViewMatrix[/*3+1*4*/7] = ((float)-v.vy)*4.0f/3.0f*p;
-	ViewMatrix[/*3+2*4*/11] = ((float)-v.vz)*CameraZoomScale;
+	ViewMatrix[3] = ((float)-v.vx)*o;
+	ViewMatrix[7] = ((float)-v.vy)*4.0f/3.0f*p;
+	ViewMatrix[11] = ((float)-v.vz)*CameraZoomScale;
 /*
 	sprintf(buf, 
 	"\t %f \t %f \t %f\n"
@@ -4285,30 +4276,31 @@ void TranslateShapeVertices(SHAPEINSTR *shapeinstrptr)
 	}
 	else
 	{
-		ObjectViewMatrix[0+0*4] = (float)(Global_ODB_Ptr->ObMat.mat11)/65536.0f;
-		ObjectViewMatrix[1+0*4] = (float)(Global_ODB_Ptr->ObMat.mat21)/65536.0f;
-		ObjectViewMatrix[2+0*4] = (float)(Global_ODB_Ptr->ObMat.mat31)/65536.0f;
+		ObjectViewMatrix[0] = (float)(Global_ODB_Ptr->ObMat.mat11)/65536.0f;
+		ObjectViewMatrix[1] = (float)(Global_ODB_Ptr->ObMat.mat21)/65536.0f;
+		ObjectViewMatrix[2] = (float)(Global_ODB_Ptr->ObMat.mat31)/65536.0f;
 
-		ObjectViewMatrix[0+1*4] = (float)(Global_ODB_Ptr->ObMat.mat12)/(65536.0f);
-		ObjectViewMatrix[1+1*4] = (float)(Global_ODB_Ptr->ObMat.mat22)/(65536.0f);
-		ObjectViewMatrix[2+1*4] = (float)(Global_ODB_Ptr->ObMat.mat32)/(65536.0f);
+		ObjectViewMatrix[4] = (float)(Global_ODB_Ptr->ObMat.mat12)/(65536.0f);
+		ObjectViewMatrix[5] = (float)(Global_ODB_Ptr->ObMat.mat22)/(65536.0f);
+		ObjectViewMatrix[6] = (float)(Global_ODB_Ptr->ObMat.mat32)/(65536.0f);
 
-		ObjectViewMatrix[0+2*4] = (float)(Global_ODB_Ptr->ObMat.mat13)/65536.0f;
-		ObjectViewMatrix[1+2*4] = (float)(Global_ODB_Ptr->ObMat.mat23)/65536.0f;
-		ObjectViewMatrix[2+2*4] = (float)(Global_ODB_Ptr->ObMat.mat33)/65536.0f;
+		ObjectViewMatrix[8] = (float)(Global_ODB_Ptr->ObMat.mat13)/65536.0f;
+		ObjectViewMatrix[9] = (float)(Global_ODB_Ptr->ObMat.mat23)/65536.0f;
+		ObjectViewMatrix[10] = (float)(Global_ODB_Ptr->ObMat.mat33)/65536.0f;
 
-		ObjectViewMatrix[3+0*4] = (float)Global_ODB_Ptr->ObWorld.vx;
-		ObjectViewMatrix[3+1*4] = (float)Global_ODB_Ptr->ObWorld.vy;
-		ObjectViewMatrix[3+2*4] = (float)Global_ODB_Ptr->ObWorld.vz;
+		ObjectViewMatrix[3] = (float)Global_ODB_Ptr->ObWorld.vx;
+		ObjectViewMatrix[7] = (float)Global_ODB_Ptr->ObWorld.vy;
+		ObjectViewMatrix[11] = (float)Global_ODB_Ptr->ObWorld.vz;
 
 		for(i = shapeinstrptr->sh_numitems; i!=0; i--)
 		{
 			Source[0] = (float)srcPtr->vx;
 			Source[1] = (float)srcPtr->vy;
 			Source[2] = (float)srcPtr->vz;
-
-			TranslatePoint(Source, Dest, ObjectViewMatrix);
-			TranslatePoint(Dest, Source, ViewMatrix);
+	
+			// static void TranslatePoint(const float *source, float *dest, const float *matrix)
+			TranslatePoint(Source, Dest, ObjectViewMatrix); // local to world?
+			TranslatePoint(Dest, Source, ViewMatrix); // world to view?
 
 			f2i(destPtr->vx,Source[0]);
 			f2i(destPtr->vy,Source[1]);
@@ -5699,14 +5691,14 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 	{
 		extern int SmartTargetSightX, SmartTargetSightY;
 		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-		centreY = MUL_FIXED( (SmartTargetSightY-(ScreenDescriptorBlock.SDB_Height<<15)) /Global_VDB_Ptr->VDB_ProjY,z);
+		centreY = MUL_FIXED( (SmartTargetSightY-(ScreenDescriptorBlock.SDB_Height<<15)) / Global_VDB_Ptr->VDB_ProjY,z);
 		if (MIRROR_CHEATMODE)
 		{
-			centreX = MUL_FIXED( ( - (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width<<15)))  /Global_VDB_Ptr->VDB_ProjX,z);
+			centreX = MUL_FIXED( ( - (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width<<15))) / Global_VDB_Ptr->VDB_ProjX,z);
 		}
 		else
 		{
-			centreX = MUL_FIXED( (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width<<15))  /Global_VDB_Ptr->VDB_ProjX,z);
+			centreX = MUL_FIXED( (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width<<15)) / Global_VDB_Ptr->VDB_ProjX,z);
 		}
 	}
 	z = (float)z*CameraZoomScale;

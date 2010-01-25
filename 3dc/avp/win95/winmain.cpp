@@ -454,26 +454,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		/* turn off any special effects */
 		d3d_light_ctrl.ctrl = LCCM_NORMAL;
 		d3d_overlay_ctrl.ctrl = OCCM_NORMAL;
-	
-		/* JH 20/5/97
-			The video mode is no longer set when exiting the menus
-			(not necessary if user selects EXIT)
-			So it is set here */
 
-		ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth);
+/* // bjd - we should be able to run menus at any resolution user selects now
+		if (!ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth))
+		{
+			MessageBox(hWndMain, "Couldn't set new resolution for device!", "Couldn't set new resolution", MB_OK | MB_ICONSTOP);
+			ReleaseDirect3D();
+			exit(-1);
+		}
+*/
 
 		/* Check Gamma Settings are correct after video mode change */
 //bjd		InitialiseGammaSettings(RequestedGammaSetting);
-
-		/**** init the chunk loaders ***************/
-
-		// no longer required here
 
 		// Load precompiled shapes 
 	    start_of_loaded_shapes = load_precompiled_shapes();
 
 		/***********  Load up the character stuff *******/
-
 		InitCharacter();
 
 		/***********  Read in the env Map	 **************/
@@ -503,14 +500,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		/*********** Process the data ************/
 		AssignAllSBNames();
 		StartGame();
-
-//		UnloadRifFile();//deletes environment File_Chunk since it is no longer needed
-		
-
-		/* Patrick 26/6/97 
-		Load the game sounds here: should be done after loading everthing
-		else, incase sounds take up system memory */
-//		LoadSounds("PLAYER"); 
 
 		/* JH 28/5/97 */
 		/* remove resident loaded 'fast' files */
@@ -682,7 +671,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 				AvP.LevelCompleted = 0;
 				FixCheatModesInUserProfile(UserProfilePtr);
 				RestartLevel();
-			}			
+			}
+
 
 		}// end of main game loop
 		{
@@ -694,14 +684,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
 		TimeStampedMessage("We're out of the main loop");
-	
-		/* KJL 17:56:14 26/02/98 - unload a font required for Dave's HUD */
-//		UnloadFont(&AvpFonts[DATABASE_MESSAGE_FONT]);
 
 		ReleaseAllFMVTextures();
-
-		/* DHM 23/3/98 */
-//		REBMENUS_ProjectSpecific_EndOfMainLoopHook();
 
 		/* DHM 8/4/98 */
 		CONSBIND_WriteKeyBindingsToConfigFile();
@@ -713,10 +697,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		DeallocatePlayersMirrorImage();
 		TimeStampedMessage("After DeallocatePlayersMirrorImage");
-				
-		/* KJL 15:26:43 03/12/97 - clear data */
-//		KillHUD();
-//		TimeStampedMessage("After KillHUD");
 
 		Destroy_CurrentEnvironment();
 		TimeStampedMessage("After Destroy_CurrentEnvironment");
@@ -728,8 +708,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		ExitGame();
 
 		// set menu resolution
+/* // bjd - we should be able to run menus at any resolution user selects now
 		ChangeGameResolution(640, 480, 32);
-//		ChangeGameResolution(1024, 768, 32);
+*/
 
 		#endif
 		/* Patrick 26/6/97
@@ -844,5 +825,5 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	FinishCentreMouseThread();
 
-	return(0);
+	return 0;
 }

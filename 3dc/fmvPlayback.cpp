@@ -145,8 +145,13 @@ TheoraFMV::~TheoraFMV()
 		mDisplayTexture->Release();
 	}
 
-	DeleteCriticalSection(&mFrameCriticalSection);
-	DeleteCriticalSection(&mAudioCriticalSection);
+	if (mFrameCriticalSectionInited)
+	{
+		DeleteCriticalSection(&mFrameCriticalSection);
+		mFrameCriticalSectionInited = false;
+	}
+
+	OutputDebugString("CALLED DECONSTRUCTOR FOR FMV!\n");
 }
 
 void TheoraDecode::Init()
@@ -254,7 +259,7 @@ int TheoraFMV::Open(const std::string &fileName)
 	mFrameReady = false;
 
 	InitializeCriticalSection(&mFrameCriticalSection);
-	InitializeCriticalSection(&mAudioCriticalSection);
+	mFrameCriticalSectionInited = true;
 
 	// time to start our threads
 	mDecodeThreadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, decodeThread, static_cast<void*>(this), 0, NULL));
@@ -312,9 +317,9 @@ bool TheoraFMV::NextFrame(int width, int height, uint8_t *bufferPtr, int pitch)
 
 	LeaveCriticalSection(&mFrameCriticalSection);
 
-	char buf[100];
-	sprintf(buf, "total time: %d\n", timeGetTime() - startTime);
-	OutputDebugString(buf);
+//	char buf[100];
+//	sprintf(buf, "total time: %d\n", timeGetTime() - startTime);
+//	OutputDebugString(buf);
 
 	mFrameReady = false;
 
@@ -620,7 +625,7 @@ unsigned int __stdcall decodeThread(void *args)
 					int audioSize = samples * fmv->mAudio->mVorbis.mInfo.channels * sizeof(uint16_t);
 
 					// move the critical section stuff into the ring buffer code itself?
-					EnterCriticalSection(&fmv->mAudioCriticalSection);
+//					EnterCriticalSection(&fmv->mAudioCriticalSection);
 
 					int freeSpace = fmv->mRingBuffer->GetWritableSize();
 
@@ -640,7 +645,7 @@ unsigned int __stdcall decodeThread(void *args)
 
 					fmv->mRingBuffer->WriteData((uint8_t*)&fmv->mAudioDataBuffer[0], audioSize);
 
-					LeaveCriticalSection(&fmv->mAudioCriticalSection);
+//					LeaveCriticalSection(&fmv->mAudioCriticalSection);
 				}
 
 				// tell vorbis how many samples we consumed

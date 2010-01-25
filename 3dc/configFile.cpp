@@ -31,6 +31,7 @@
 
 #include "logString.h"
 #include "utilities.h"
+#include "configFile.h"
 
 extern int StringToInt(const std::string &string);
 extern std::string IntToString(const int value);
@@ -58,6 +59,7 @@ bool Config_Load()
 	std::string tempLine;
 	std::string currentHeading;
 
+	// open the config file firstly
 	if (!file.is_open())
 	{
 		LogErrorString("Can't find file AliensVsPredator.cfg - creating file with default values");
@@ -81,10 +83,10 @@ bool Config_Load()
 	// go through the cfg file line by line
 	while (getline(file, tempLine))
 	{	
-		if (tempLine.length() == 0)
+		if (tempLine.length() == 0) // skip empty lines
 			continue;
 
-		if ((tempLine.at(0) == '[') || (tempLine.at(tempLine.length() - 1) == ']'))
+		if ((tempLine.at(0) == '[') || (tempLine.at(tempLine.length() - 1) == ']')) // found a header block
 		{
 			//std::cout << "Found header: " << tempLine << "\n";
 			currentHeading = tempLine;
@@ -228,7 +230,7 @@ void Config_SetString(const std::string &heading, const std::string &variable, c
 	}
 }
 
-std::string Config_GetString(const std::string &heading, const std::string &variable)
+std::string Config_GetString(const std::string &heading, const std::string &variable, const std::string &defaultString)
 {
 	if (CheckValuesExist(heading, variable))
 	{
@@ -242,7 +244,64 @@ std::string Config_GetString(const std::string &heading, const std::string &vari
 	}
 	else
 	{
-		return "";
+		// should we be adding this to the map if it doesn't exist using default value? i guess so..
+		MapValue &tempValue = AvPConfig[heading];
+		tempValue.insert(std::make_pair(variable, defaultString));
+
+		return defaultString;
+	}
+}
+
+bool Config_GetBool(const std::string &heading, const std::string &variable, bool defaultValue)
+{
+	// just treat it as a string I guess?
+	if (CheckValuesExist(heading, variable))
+	{
+		// grab a copy of the string
+		std::string tempString = AvPConfig.find(heading)->second.find(variable)->second;
+	
+		// if it has quotes, remove them
+		tempString.erase(std::remove(tempString.begin(), tempString.end(),'"'), tempString.end());
+
+		if (tempString == "true")
+		{
+			return true;
+		}
+		else if (tempString == "false")
+		{
+			return false;
+		}
+	}
+	else
+	{
+		// should we be adding this to the map if it doesn't exist using default value? i guess so..
+		MapValue &tempValue = AvPConfig[heading];
+
+		if (defaultValue == true)
+		{
+			tempValue.insert(std::make_pair(variable, "true"));
+		}
+		else if (defaultValue == false)
+		{
+			tempValue.insert(std::make_pair(variable, "false"));
+		}
+	}
+
+	return defaultValue;
+}
+
+void Config_SetBool(const std::string &heading, const std::string &variable, bool newValue)
+{
+	if (CheckValuesExist(heading, variable))
+	{
+		if (newValue == true)
+		{
+			AvPConfig.find(heading)->second.find(variable)->second = "true";
+		}
+		else if (newValue == false)
+		{
+			AvPConfig.find(heading)->second.find(variable)->second = "false";
+		}
 	}
 }
 
@@ -258,18 +317,20 @@ static bool Config_CreateDefault()
 		LogErrorString("Couldn't create default config file!");
 		return false;
 	}
-
+/*
 	file << "[VideoMode]\n";
 	file << "Width = 640\n";
 	file << "Height = 480\n";
 	file << "ColourDepth = 32\n";
+	file << "UseTripleBuffering = false\n";
 	file << "SafeZoneOffset = 0\n";
 	file << "\n";
 	file << "[Misc]\n";
 	file << "CommandLine = \"\"\n";
+	file << "\n";
 	file << "[Networking]\n";
 	file << "PortNumber = 1234\n";
-
+*/
 	file.close();
 
 	return true;

@@ -36,6 +36,8 @@ static char saveFolder[MAX_PATH] = {0};
 
 extern "C" {
 
+extern void ReleaseDirect3D();
+
 #ifdef WIN32
 	extern HWND	hWndMain;
 #endif
@@ -198,13 +200,14 @@ HANDLE avp_FindFirstFile(LPCTSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData)
 void avp_GetCommandLineArgs(char *args, int size)
 {
 	assert (args);
-	std::string commandLine = Config_GetString("[Misc]", "CommandLine");
+	std::string commandLine = Config_GetString("[Misc]", "CommandLine", "");
 	strcpy(args, commandLine.c_str());
 }
 
 void avp_MessageBox(const char* message, int type)
 {
 #ifdef WIN32
+	ReleaseDirect3D();
 	MessageBox(hWndMain, message, "AvP Error", type);
 #endif
 }

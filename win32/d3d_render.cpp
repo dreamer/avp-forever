@@ -1428,7 +1428,6 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 			zvalue = 0.0f;
 
 		int x = (vertices->X * (Global_VDB_Ptr->VDB_ProjX + 1)) / vertices->Z + Global_VDB_Ptr->VDB_CentreX;
-
 		int y = (vertices->Y * (Global_VDB_Ptr->VDB_ProjY + 1)) / vertices->Z + Global_VDB_Ptr->VDB_CentreY;
 
 		mainVertex[vb].sx = (float)x;
@@ -2279,22 +2278,22 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 
 void D3D_HUD_Setup(void)
 {
-	if (D3DZFunc != D3DCMP_LESSEQUAL) {
+	if (D3DZFunc != D3DCMP_LESSEQUAL) 
+	{
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_LESSEQUAL);
 		D3DZFunc = D3DCMP_LESSEQUAL;
 	}
 }
 
-
 void D3D_HUDQuad_Output(int imageNumber, struct VertexTag *quadVerticesPtr, unsigned int colour)
 {
 	float RecipW, RecipH;
 
-	float width = (float) ImageHeaderArray[imageNumber].ImageWidth; //- 0.0f;
-	RecipW = 1.0f / width;
+	float texWidth = (float) ImageHeaderArray[imageNumber].ImageWidth;
+	RecipW = 1.0f / texWidth;
 
-	float height = (float) ImageHeaderArray[imageNumber].ImageHeight;// - 0.0f;
-	RecipH = 1.0f / height;
+	float texHeight = (float) ImageHeaderArray[imageNumber].ImageHeight;
+	RecipH = 1.0f / texHeight;
 
 	CheckVertexBuffer(4, imageNumber, TRANSLUCENCY_GLOWING);
 
@@ -7253,9 +7252,8 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 }
 
 
-extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour)
+extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour)
 {
-#if 1//FUNCTION_ON
 	// mission briefing text?
 	if (stringPtr == NULL)
 		return;
@@ -7273,7 +7271,6 @@ extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour)
 	while( *stringPtr )
 	{
 		char c = *stringPtr++;
-
 		{
 			int topLeftU = 1+((c-32)&15)*16;
 			int topLeftV = 1+((c-32)>>4)*16;
@@ -7301,11 +7298,9 @@ extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour)
 		}
 		x += AAFontWidths[(unsigned char)c];
 	}
-#endif
 }
 extern void D3D_RenderHUDString_Clipped(char *stringPtr,int x,int y,int colour)
 {
-#if 1//FUNCTION_ON
 	if (stringPtr == NULL)
 		return;
 
@@ -7353,7 +7348,6 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr,int x,int y,int colour)
 		}
 		x += AAFontWidths[(unsigned char)c];
 	}
-#endif
 }
 
 void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour)
@@ -7435,7 +7429,7 @@ extern "C"
 
 extern void RenderString(char *stringPtr, int x, int y, int colour)
 {
-	D3D_RenderHUDString(stringPtr,x,y,colour);
+	D3D_RenderHUDString(stringPtr, x, y, colour);
 }
 
 extern void RenderStringCentred(char *stringPtr, int centreX, int y, int colour)
@@ -7722,6 +7716,54 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_textu
 
 void DrawQuad(int x, int y, int width, int height, int colour) 
 {
+	float x1 = (float(x / 640.0f) * 2) - 1;
+	float y1 = (float(y / 480.0f) * 2) - 1;
+
+	float x2 = ((float(x + width) / 640.0f) * 2) - 1;
+	float y2 = ((float(y + height) / 480.0f) * 2) - 1;
+
+	// bottom left
+	orthoVerts[0].x = x1;
+	orthoVerts[0].y = y2;
+	orthoVerts[0].z = 1.0f;
+	orthoVerts[0].colour = colour;
+	orthoVerts[0].u = 0.0f;
+	orthoVerts[0].v = 1.0f;//(1.0f / texturePOW2Height) * textureHeight;
+
+	// top left
+	orthoVerts[1].x = x1;
+	orthoVerts[1].y = y1;
+	orthoVerts[1].z = 1.0f;
+	orthoVerts[1].colour = colour;
+	orthoVerts[1].u = 0.0f;
+	orthoVerts[1].v = 0.0f;
+
+	// bottom right
+	orthoVerts[2].x = x2;
+	orthoVerts[2].y = y2;
+	orthoVerts[2].z = 1.0f;
+	orthoVerts[2].colour = colour;
+	orthoVerts[2].u = 1.0f;//(1.0f / texturePOW2Width) * textureWidth;
+	orthoVerts[2].v = 1.0f;//(1.0f / texturePOW2Height) * textureHeight;
+
+	// top right
+	orthoVerts[3].x = x2;
+	orthoVerts[3].y = y1;
+	orthoVerts[3].z = 1.0f;
+	orthoVerts[3].colour = colour;
+	orthoVerts[3].u = 1.0f;//(1.0f / texturePOW2Width) * textureWidth;
+	orthoVerts[3].v = 0.0f;
+
+	d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
+	d3d.lpD3DDevice->SetTexture (0, /*AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].menuTexture*/NULL);
+
+	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &orthoVerts[0], sizeof(ORTHOVERTEX));
+	if (FAILED(LastError))
+	{
+		OutputDebugString("DrawPrimitiveUP failed\n");
+	}
+
+#if 0
 	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_NORMAL);
 
 	// bottom left
@@ -7774,6 +7816,7 @@ void DrawQuad(int x, int y, int width, int height, int colour)
 
 	OUTPUT_TRIANGLE(0,1,2, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
+#endif
 }
 
 #if 0
@@ -7951,9 +7994,9 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 	int textureHeight = 0;
 	int texturePOW2Width = 0;
 	int texturePOW2Height = 0;
-	D3DXMATRIX matTranslation;
-    D3DXMATRIX matScaling;
-    D3DXMATRIX matTransform;
+//	D3DXMATRIX matTranslation;
+//  D3DXMATRIX matScaling;
+//  D3DXMATRIX matTransform;
 
 	LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
 	if (FAILED(LastError))
@@ -8625,8 +8668,9 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 
 	int height_of_char = 33;
 
-	int quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / char_width) * 640.0));
-	int quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / height_of_char) * 480.0));
+	// game used to render menus at 640x480. this allows us to use any resolution we want
+	int quadWidth = (ScreenDescriptorBlock.SDB_Width / 640.0f) * char_width;
+	int quadHeight = (ScreenDescriptorBlock.SDB_Height / 480.0f) * height_of_char;
 
 	int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0) * topX);
 	int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0) * topY);

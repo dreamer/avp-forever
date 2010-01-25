@@ -124,20 +124,25 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 
 		ftPtr->SoundVolume = FmvSoundVolume;
 
-		if (!fmvList[ftPtr->fmvHandle].fmvClass->mFrameReady)
-			return 0;
+//		if (!fmvList[ftPtr->fmvHandle].fmvClass->mFrameReady)
+//			return 0;
 
 		if (ftPtr->IsTriggeredPlotFMV && (!fmvList[ftPtr->fmvHandle].fmvClass->IsPlaying()))
 		{
 			OutputDebugString("closing ingame fmv..\n");
 
 			ftPtr->MessageNumber = 0;
-			fmvList[ftPtr->fmvHandle].fmvClass->Close();
+//			fmvList[ftPtr->fmvHandle].fmvClass->Close();
+			delete fmvList[ftPtr->fmvHandle].fmvClass;
+			fmvList[ftPtr->fmvHandle].fmvClass = NULL;
 			fmvList[ftPtr->fmvHandle].isPlaying = 0;
 			ftPtr->fmvHandle = -1;
 		}
 		else
 		{
+			if (!fmvList[ftPtr->fmvHandle].fmvClass->mFrameReady)
+				return 0;
+
 			fmvList[ftPtr->fmvHandle].fmvClass->NextFrame(w, h, DestBufferPtr, w * 4);
 		}
 
@@ -252,7 +257,12 @@ int OpenFMV(const char *filenamePtr)
 	{
 		// found a free slot
 		fmvList[fmvHandle].fmvClass = new TheoraFMV();
-		fmvList[fmvHandle].fmvClass->Open(filenamePtr);
+		if (fmvList[fmvHandle].fmvClass->Open(filenamePtr) != FMV_OK)
+		{
+			delete fmvList[fmvHandle].fmvClass;
+			fmvList[fmvHandle].fmvClass = NULL;
+			return -1;
+		}
 		fmvList[fmvHandle].isPlaying = 1;
 	}
 	else
@@ -270,7 +280,8 @@ extern void PlayFMV(const char *filenamePtr)
 		return;
 
 	TheoraFMV fmv;
-	fmv.Open(filenamePtr);
+	if (fmv.Open(filenamePtr) != FMV_OK)
+		return;
 
 	bool playing = true;
 
@@ -445,7 +456,9 @@ void ReleaseAllFMVTextures()
 		{
 			if (fmvList[FMVTexture[i].fmvHandle].isPlaying)
 			{
-				fmvList[FMVTexture[i].fmvHandle].fmvClass->Close();
+//				fmvList[FMVTexture[i].fmvHandle].fmvClass->Close();
+				delete fmvList[FMVTexture[i].fmvHandle].fmvClass;
+				fmvList[FMVTexture[i].fmvHandle].fmvClass = NULL;
 			}
 
 			FMVTexture[i].fmvHandle = -1;
@@ -485,6 +498,11 @@ extern void InitialiseTriggeredFMVs()
 	int i = NumberOfFMVTextures;
 	while (i--)
 	{
+		if (FMVTexture[i].fmvHandle != -1)
+		{
+			delete fmvList[FMVTexture[i].fmvHandle].fmvClass;
+			fmvList[FMVTexture[i].fmvHandle].fmvClass = NULL;
+		}
 		FMVTexture[i].MessageNumber = 0;
 		FMVTexture[i].fmvHandle = -1;
 	}

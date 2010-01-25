@@ -88,7 +88,7 @@ Shape_Fragment_Type::~Shape_Fragment_Type()
 		#endif
 
 	}
-	if(name) delete name;
+	if(name) delete[] name;
 }
 
 void Shape_Fragment_Type::AddShape(SHAPEHEADER* shp)

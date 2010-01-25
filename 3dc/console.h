@@ -2,6 +2,12 @@
 #define _console_h_
 
 #include <string>
+#ifdef WIN32
+#include <windows.h>
+#endif
+#ifdef _XBOX
+#include <xtl.h>
+#endif
 
 typedef void (*funcPointer) (void);
 std::string& Con_GetArgument(int argNum);
@@ -10,6 +16,7 @@ void Con_AddCommand(char *command, funcPointer function);
 void Con_PrintError(const std::string &errorString);
 void Con_PrintMessage(const std::string &messageString);
 void Con_PrintDebugMessage(const std::string &messageString);
+void Con_PrintHRESULTError(HRESULT hr, const std::string &errorString, int lineNumber, const char *fileName);
 
 #ifdef __cplusplus
 extern "C" {

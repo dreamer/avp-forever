@@ -232,7 +232,7 @@ void SetupMarineOVision(void)
 {
 	/* setup in-game data */
 	MarineOVision.VisionMode = MARINEOVISION_NORMAL;
-	MarineOVision.VisionIsChanging=0;
+	MarineOVision.VisionIsChanging = 0;
 	/* JH - 29/5/97 for d3d */
 	d3d_light_ctrl.ctrl = LCCM_NORMAL;
 }

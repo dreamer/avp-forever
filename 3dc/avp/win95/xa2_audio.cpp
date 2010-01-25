@@ -53,19 +53,6 @@ struct SoundConfigTag
 	unsigned int env_index;
 };
 
-#ifndef IUnknown_AddRef
-	#define IUnknown_AddRef(This) (This)->lpVtbl -> AddRef(This)
-#endif
-#ifndef IUnknown_Release
-	#define IUnknown_Release(This) (This)->lpVtbl -> Release(This)
-#endif
-#define GET_REF_COUNT(x) (x ? IUnknown_AddRef(x), IUnknown_Release(x) : -1)
-#define LOG_RC() db_logf4(("DSO %i, DSPB %i, DS3DL %i, PS %i", GET_REF_COUNT(DSObject), GET_REF_COUNT(DSPrimaryBuffer), GET_REF_COUNT(DS3DListener), GET_REF_COUNT(PropSetP)));
-
-#ifndef DSBCAPS_CTRLDEFAULT
-	#define DSBCAPS_CTRLDEFAULT (DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPAN | DSBCAPS_CTRLFREQUENCY)
-#endif
-
 /* Patrick 5/6/97 -------------------------------------------------------------
   Sound system globals
   ----------------------------------------------------------------------------*/
@@ -74,9 +61,8 @@ ACTIVESOUNDSAMPLE ActiveSounds[SOUND_MAXACTIVE];
 SOUNDSAMPLEDATA BlankGameSound = {0,0,0,0,NULL,0,NULL};
 ACTIVESOUNDSAMPLE BlankActiveSound = {SID_NOSOUND,ASP_Minimum,0,0,NULL,0,0,0,0,0,{{0,0,0},0,0},NULL, NULL, NULL};
 
-/* Patrick 5/6/97 -------------------------------------------------------------
-  Direct sound globals
-  ----------------------------------------------------------------------------*/
+
+// XAudio2 globals
 IXAudio2				*pXAudio2 = NULL;
 IXAudio2MasteringVoice	*pMasteringVoice = NULL;
 IXAudio2SourceVoice		*pSourceVoice = NULL;
@@ -84,10 +70,10 @@ X3DAUDIO_HANDLE			x3DInstance = {0};
 X3DAUDIO_LISTENER		XA2Listener = {0};
 X3DAUDIO_DSP_SETTINGS	XA2DSPSettings = {0};
 static int				numOutputChannels = 0;
-static DWORD			channelMask;
-unsigned int 			SoundMinBufferFree;
+static DWORD			channelMask = 0;
+unsigned int 			SoundMinBufferFree = 0;
+static bool				soundEnabled = false;
 
-/* for vorbis playback */
 static HRESULT LastError;
 static char buf[100];
 
@@ -402,13 +388,15 @@ int PlatStartSoundSys()
 	db_log4("PlatStartSound called");
 	Con_PrintMessage("Starting to initialise XAudio2");
 
-	LOG_RC();
+//	LOG_RC();
 
 	/* Set the globals. */
 	SoundConfig.flags			= SOUND_DEFAULT;
 	SoundConfig.reverb_changed	= TRUE;
 	SoundConfig.reverb_mix		= 0.0F;
 	SoundConfig.env_index		= 1000;
+
+//	return 0;
 
 	CoInitializeEx( NULL, COINIT_MULTITHREADED );
 
@@ -422,6 +410,7 @@ int PlatStartSoundSys()
 	LastError = XAudio2Create( &pXAudio2, flags );
 	if (FAILED(LastError))
 	{
+		Con_PrintError("Couldn't initialise XAudio2");
 		LogDxError(LastError, __LINE__, __FILE__);
 		PlatEndSoundSys();
 		return 0;
@@ -447,6 +436,7 @@ int PlatStartSoundSys()
 	LastError = pXAudio2->CreateMasteringVoice( &pMasteringVoice );
 	if (FAILED(LastError))
 	{
+		Con_PrintError("Couldn't create XAudio2 Mastering Voice");
 		LogDxError(LastError, __LINE__, __FILE__);
 		PlatEndSoundSys();
 		return 0;
@@ -457,6 +447,7 @@ int PlatStartSoundSys()
 	LastError = pXAudio2->GetDeviceDetails(0, &deviceDetails);
 	if (FAILED(LastError))
 	{
+		Con_PrintError("Couldn't get XAudio2 device details");
 		LogDxError(LastError, __LINE__, __FILE__);
 		PlatEndSoundSys();
 		return 0;
@@ -498,7 +489,9 @@ int PlatStartSoundSys()
 	Con_PrintMessage("Initialised XAudio2 successfully");
 
 	db_log4("PlatStartSound finished");
-	LOG_RC();
+//	LOG_RC();
+
+	soundEnabled = true;
 
 	return 1;
 }
@@ -552,6 +545,9 @@ void PlatEndSoundSys()
 
 int PlatChangeGlobalVolume(int volume)
 {
+	if (!soundEnabled)
+		return 1; // keep quiet about it?
+
 	LOCALASSERT((volume >= VOLUME_MIN) && (volume <= VOLUME_MAX));
 
 	LastError = pMasteringVoice->SetVolume(vol_to_gain_table[volume], XAUDIO2_COMMIT_NOW);
@@ -1483,6 +1479,9 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
   ----------------------------------------------------------------------------*/
 static int ToneToFrequency(int currentFrequency, int currentPitch, int newPitch)
 {
+	if (!soundEnabled)
+		return 0;
+
 	int newFrequency = currentFrequency;
 
 	LOCALASSERT((currentPitch>=PITCH_MINPLAT)&&(currentPitch<=PITCH_MAXPLAT));
@@ -1732,6 +1731,9 @@ void PlatSetEnviroment(unsigned int env_index, float reverb_mix)
 except that it takes data from a memory buffer, rather than through file access. */
 extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 {
+	if (!soundEnabled)
+		return NULL;
+
 	PWAVCHUNKHEADER myChunkHeader = {0};
 	PWAVRIFFHEADER myRiffHeader = {0};
 	WAVEFORMATEX myWaveFormat = {0};
@@ -1973,6 +1975,9 @@ void UpdateSoundFrequencies(void)
 
 StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int bufferSize, int numBuffers)
 {
+	if (!soundEnabled)
+		return NULL;
+
 	StreamingAudioBuffer *newStreamingAudioBuffer = new StreamingAudioBuffer;
 
 	memset(newStreamingAudioBuffer, 0, sizeof(StreamingAudioBuffer));

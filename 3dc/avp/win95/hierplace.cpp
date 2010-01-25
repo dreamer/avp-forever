@@ -237,11 +237,11 @@ Placed_Hierarchy_Sequence_Chunk::~Placed_Hierarchy_Sequence_Chunk()
 {
 	if(extra_data)
 	{
-		delete extra_data;
+		delete[] extra_data;
 	}
 	if(sound_list)
 	{
-		delete sound_list;
+		delete[] sound_list;
 	}		
 }
 

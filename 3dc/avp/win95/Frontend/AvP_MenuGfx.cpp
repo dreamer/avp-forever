@@ -615,7 +615,7 @@ extern int Hardware_RenderSmallMenuText(char *textPtr, int x, int y, int alpha, 
 
 			while(*ptr)
 			{
-				length+=AAFontWidths[*ptr++];
+				length += AAFontWidths[*ptr++];
 			}
 
 			x -= length;
@@ -628,7 +628,7 @@ extern int Hardware_RenderSmallMenuText(char *textPtr, int x, int y, int alpha, 
 
 			while(*ptr)
 			{
-				length+=AAFontWidths[*ptr++];
+				length += AAFontWidths[*ptr++];
 			}
 
 			x -= length/2;

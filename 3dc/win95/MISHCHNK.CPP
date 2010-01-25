@@ -653,12 +653,11 @@ void File_Chunk::post_input_processing()
 		ol()->assoc_with_shape(shape_array[ol()->get_header()->shape_id_no]);
 	}
 
-	delete shape_array;
+	delete[] shape_array;
 	
 
 	Chunk_With_Children::post_input_processing();	
 }
-
 
 
 BOOL File_Chunk::check_file()
@@ -1386,12 +1385,8 @@ BOOL File_Chunk::update_chunks_from_file()
 						if (tmpobptr->get_header()->associated_shape)
 							tmpobptr->deassoc_with_shape(tmpobptr->get_header()->associated_shape);
 					delete tmpobptr;
-
 				}
-
-
 			}
-
 		}
 
 //	go through the list of shape chunks looking for shape chunks to input

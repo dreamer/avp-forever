@@ -17,6 +17,7 @@ int Net_Send(int fromID, int toID, int flags, uint8_t *lpData, int dataSize);
 int Net_Receive(int *fromID, int *toID, int flags, uint8_t *lplpData, int *dataSize);
 int Net_SendSystemMessage(int messageType, int idFrom, int idTo, uint8_t *lpData, int dataSize);
 int Net_InitLobbiedGame();
+void Net_ServiceNetwork();
 
 extern int glpDP;
 extern int AvPNetID;
@@ -69,11 +70,13 @@ extern const int MESSAGEHEADERSIZE;
 #define NET_SYSTEM_MESSAGE  			27
 #define NET_ID_ALLPLAYERS				28
 #define NET_ID_SERVERPLAYER				29
-#define NET_ERR_NOMESSAGES				30
+#define NET_NO_MESSAGES					30
 
 // error return types
 #define NET_OK							0
 #define NET_FAIL						1
+
+#define NET_BROADCAST_ID				255
 
 // enum for message types
 enum

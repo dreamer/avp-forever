@@ -129,14 +129,14 @@ BOOL BuildLoadMPConfigMenu()
 	
 
 	//delete the old menu
-	if(AvPMenu_Multiplayer_LoadConfig) delete AvPMenu_Multiplayer_LoadConfig;
+	if(AvPMenu_Multiplayer_LoadConfig) delete[] AvPMenu_Multiplayer_LoadConfig;
 
 	AvPMenu_Multiplayer_LoadConfig=0;
 
 	if(!ConfigurationFilenameList.size()) return FALSE;
 
 	//create a new menu from the list of filenames
-	AvPMenu_Multiplayer_LoadConfig=new AVPMENU_ELEMENT[ConfigurationFilenameList.size()+1];
+	AvPMenu_Multiplayer_LoadConfig = new AVPMENU_ELEMENT[ConfigurationFilenameList.size()+1];
 
 	int i;
 	for(i=0;i<ConfigurationFilenameList.size();i++)

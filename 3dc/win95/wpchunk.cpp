@@ -20,7 +20,7 @@ ChunkWaypoint::~ChunkWaypoint()
 }
 ModuleLink::~ModuleLink()
 {
-	if(module_name) delete module_name;
+	if(module_name) delete[] module_name;
 }
 
 RIF_IMPLEMENT_DYNCREATE("WAYPOINT",Module_Waypoint_Chunk)

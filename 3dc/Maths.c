@@ -2391,19 +2391,16 @@ static long * rear_ptr = table;
 /* x**31 + x**3 + 1. */
 
 void SetSeededFastRandom(int seed);
+
 void SetFastRandom(void)
-
 {
-
 	int i;
-	long number = GetTickCount();
+	long number = timeGetTime();//GetTickCount();
 
-
-	for(i = 0; i < DEG_3; ++i) {
-
-      number   = 1103515145 * number + 12345;
-      table[i] = number;
-
+	for (i = 0; i < DEG_3; ++i) 
+	{
+		number = 1103515145 * number + 12345;
+		table[i] = number;
 	}
 
 	front_ptr = table + SEP_3;
@@ -2413,7 +2410,6 @@ void SetFastRandom(void)
 		(void) FastRandom ();
 
 	SetSeededFastRandom(FastRandom());
-
 }
 
 

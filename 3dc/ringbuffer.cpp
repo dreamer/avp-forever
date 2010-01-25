@@ -10,6 +10,8 @@ RingBuffer::RingBuffer(int size)
 	writePos = 0;
 	amountFilled = 0;
 	initialFill = false;
+
+	InitializeCriticalSection(&mCriticalSection);
 }
 
 RingBuffer::~RingBuffer()
@@ -18,6 +20,8 @@ RingBuffer::~RingBuffer()
 	{
 		delete[] buffer;
 	}
+
+	DeleteCriticalSection(&mCriticalSection);
 }
 
 int RingBuffer::GetWritableSize()
@@ -26,6 +30,8 @@ int RingBuffer::GetWritableSize()
 	int freeSpace = 0;
 	int firstSize = 0;
 	int secondSize = 0;
+
+	EnterCriticalSection(&mCriticalSection);
 
 	// if our read and write positions are at the same location, does that mean the buffer is empty or full?
 	if (readPos == writePos)
@@ -50,6 +56,8 @@ int RingBuffer::GetWritableSize()
 			freeSpace += bufferCapacity;
 	}
 
+	LeaveCriticalSection(&mCriticalSection);
+
 	return freeSpace;
 }
 
@@ -59,6 +67,8 @@ int RingBuffer::GetReadableSize()
 	int firstSize = 0;
 	int secondSize = 0;
 	int readableSpace = 0;
+
+	EnterCriticalSection(&mCriticalSection);
 
 	// if our read and write positions are at the same location, does that mean the buffer is empty or full?
 	if (readPos == writePos)
@@ -83,6 +93,8 @@ int RingBuffer::GetReadableSize()
 			readableSpace += bufferCapacity;
 	}
 
+	LeaveCriticalSection(&mCriticalSection);
+
 	return readableSpace;
 }
 
@@ -97,6 +109,8 @@ int RingBuffer::ReadData(uint8_t *destData, int amountToRead)
 
 	// grab how much readable data there is
 	int readableSpace = GetReadableSize();
+
+	EnterCriticalSection(&mCriticalSection);
 
 	if (amountToRead > readableSpace)
 	{
@@ -126,6 +140,8 @@ int RingBuffer::ReadData(uint8_t *destData, int amountToRead)
 	readPos = (readPos + totalRead) % bufferCapacity;
 	amountFilled -= totalRead;
 
+	LeaveCriticalSection(&mCriticalSection);
+
 	return totalRead;
 }
 
@@ -140,6 +156,8 @@ int RingBuffer::WriteData(uint8_t *srcData, int srcDataSize)
 
 	// grab how much writable space there is
 	int availableSpace = GetWritableSize();
+
+	EnterCriticalSection(&mCriticalSection);
 
 	if (srcDataSize > availableSpace)
 	{
@@ -169,6 +187,8 @@ int RingBuffer::WriteData(uint8_t *srcData, int srcDataSize)
 
 	writePos = (writePos + firstSize + secondSize) % bufferCapacity;
 	amountFilled += firstSize + secondSize;
+
+	LeaveCriticalSection(&mCriticalSection);
 
 	return totalWritten;
 }

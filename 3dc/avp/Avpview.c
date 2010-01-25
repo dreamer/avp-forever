@@ -263,12 +263,11 @@ static void ModifyHeadOrientation(void)
     if (!playerStatusPtr->IsAlive && !MultiplayerObservedPlayer)
 	{
 		int decay = NormalFrameTime>>6;
-		
+
 		HeadOrientation.EulerX &= 4095;
 	   	HeadOrientation.EulerX -= decay;
 		if(HeadOrientation.EulerX < 3072)
 			HeadOrientation.EulerX = 3072;
-
 	}
 	else
 	{
@@ -493,8 +492,8 @@ void UpdateCamera(void)
 {
 	char buf[300];
 	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
-	int cos = GetCos(/*playerStatusPtr->ViewPanX*/0); // the looking up/down value that used to be in displayblock
-	int sin = GetSin(0);
+	int cos = GetCos(playerStatusPtr->ViewPanX); // the looking up/down value that used to be in displayblock
+	int sin = GetSin(playerStatusPtr->ViewPanX);
 	MATRIXCH mat;
 	DISPLAYBLOCK *dptr_s = Player;
 
@@ -514,7 +513,7 @@ void UpdateCamera(void)
 	Global_VDB_Ptr->VDB_Mat.mat11, Global_VDB_Ptr->VDB_Mat.mat12, Global_VDB_Ptr->VDB_Mat.mat13,
 	Global_VDB_Ptr->VDB_Mat.mat21, Global_VDB_Ptr->VDB_Mat.mat22, Global_VDB_Ptr->VDB_Mat.mat23,
 	Global_VDB_Ptr->VDB_Mat.mat31, Global_VDB_Ptr->VDB_Mat.mat32, Global_VDB_Ptr->VDB_Mat.mat33);
-	OutputDebugString(buf);
+//	OutputDebugString(buf);
 
 	mat.mat11 = ONE_FIXED;
 	mat.mat12 = 0;
@@ -527,7 +526,7 @@ void UpdateCamera(void)
 	mat.mat33 = cos;
  	MatrixMultiply(&Global_VDB_Ptr->VDB_Mat, &mat, &Global_VDB_Ptr->VDB_Mat);
 
-//	InteriorType_Body();
+	InteriorType_Body();
 }
 
 void AVPGetInViewVolumeList(VIEWDESCRIPTORBLOCK *VDB_Ptr)
@@ -948,7 +947,7 @@ void MakeViewingWindowSmaller(void)
 	}
 	else
 	{
-		Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/3;
+		Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/2;
 		Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)/2;
 	}
 	//BlankScreen(); 
@@ -973,7 +972,7 @@ void MakeViewingWindowLarger(void)
 	}
 	else
 	{
-		Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/3;
+		Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/2;
 		Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)/2;
 	}
 }

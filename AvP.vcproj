@@ -4189,10 +4189,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\3dc\avp\win95\Psndplat.c"
-				>
-			</File>
-			<File
 				RelativePath="3dc\avp\Psndproj.c"
 				>
 				<FileConfiguration

@@ -291,7 +291,7 @@ AVP_Generator_Extra_Name_Chunk::AVP_Generator_Extra_Name_Chunk(Chunk_With_Childr
 
 AVP_Generator_Extra_Name_Chunk::~AVP_Generator_Extra_Name_Chunk()
 {
-	delete name;
+	delete[] name;
 }
 
 void AVP_Generator_Extra_Name_Chunk::fill_data_block(char* data_start)
@@ -554,7 +554,7 @@ AVP_Power_Cable_Chunk::AVP_Power_Cable_Chunk(Chunk_With_Children* parent,const c
 
 AVP_Power_Cable_Chunk::~AVP_Power_Cable_Chunk()
 {
-	if(name) delete name;
+	if(name) delete[] name;
 }
 
 void AVP_Power_Cable_Chunk::fill_data_block(char* data)
@@ -663,7 +663,7 @@ AVP_Environment_Settings_Chunk::AVP_Environment_Settings_Chunk(Chunk_With_Childr
 
 AVP_Environment_Settings_Chunk::~AVP_Environment_Settings_Chunk()
 {
-	delete  settings;
+	delete[] settings;
 }
 
 void AVP_Environment_Settings_Chunk::fill_data_block (char * data_start)
@@ -916,7 +916,7 @@ Rainbow6_Generator_Extra_Data_Chunk::Rainbow6_Generator_Extra_Data_Chunk(Chunk_W
 
 Rainbow6_Generator_Extra_Data_Chunk::~Rainbow6_Generator_Extra_Data_Chunk()
 {
-	if(extra_data) delete extra_data;
+	if(extra_data) delete[] extra_data;
 }
 
 

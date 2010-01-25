@@ -1524,7 +1524,7 @@ Shape_Merge_Data_Chunk::Shape_Merge_Data_Chunk (Shape_Sub_Shape_Chunk * parent, 
 
 Shape_Merge_Data_Chunk::~Shape_Merge_Data_Chunk()
 {
-	if (num_polys) delete merge_data;
+	if (num_polys) delete[] merge_data;
 }
 
 void Shape_Merge_Data_Chunk::fill_data_block(char * data_start)
@@ -3074,7 +3074,7 @@ Shape_Fragment_Type_Chunk::Shape_Fragment_Type_Chunk(Chunk_With_Children* const 
 
 Shape_Fragment_Type_Chunk::~Shape_Fragment_Type_Chunk()
 {
-	if(frag_type_name) delete frag_type_name;
+	if(frag_type_name) delete[] frag_type_name;
 }											 
 
 void Shape_Fragment_Type_Chunk::fill_data_block(char* data_start)
@@ -3783,7 +3783,7 @@ Shape_Preprocessed_Data_Chunk::Shape_Preprocessed_Data_Chunk (Chunk_With_Childre
 	
 	if(num_extra_data)
 	{
-		extra_data=new int[num_extra_data];
+		extra_data = new int[num_extra_data];
 		memcpy(extra_data,data,num_extra_data*4);	
 	}	
 	else

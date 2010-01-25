@@ -55,7 +55,7 @@ class TheoraFMV
 		uint8_t	*mAudioData;
 		uint16_t *mAudioDataBuffer;
 		int	mAudioDataBufferSize;
-		CRITICAL_SECTION mAudioCriticalSection;
+//		CRITICAL_SECTION mAudioCriticalSection;
 
 		// video
 		D3DTEXTURE mDisplayTexture;
@@ -64,6 +64,7 @@ class TheoraFMV
 		int mFrameWidth;
 		int mFrameHeight;
 		CRITICAL_SECTION mFrameCriticalSection;
+		bool mFrameCriticalSectionInited;
 
 		// thread handles
 		HANDLE mDecodeThreadHandle;
@@ -91,7 +92,8 @@ class TheoraFMV
 			mAudio(0),
 			mFmvPlaying(false),
 			mFrameReady(false),
-			mAudioStarted(false)
+			mAudioStarted(false),
+			mFrameCriticalSectionInited(false)
 		{
 
 		}

@@ -436,7 +436,7 @@ class _base_HashTable
 					{
 						HT_FAIL("HTT: Tried to Remove() via an iterator which was Done()");
 					}
-					Node * oldP = *nodePP;
+					Node *oldP = *nodePP;
 					*nodePP = oldP->nextP;
 					delete oldP;
 					if (!*nodePP)

@@ -50,10 +50,10 @@ RECT LoadingBarFull_SrcRect;
 D3DTEXTURE LoadingBarFullTexture;
 D3DTEXTURE LoadingBarEmptyTexture;
 
-AVPTEXTURE *image = 0;
-AVPTEXTURE *LoadingBarEmpty;
-AVPTEXTURE *LoadingBarFull;
-AVPTEXTURE *aa_font;
+AVPTEXTURE *image = NULL;
+AVPTEXTURE *LoadingBarEmpty = NULL;
+AVPTEXTURE *LoadingBarFull = NULL;
+AVPTEXTURE *aa_font = NULL;
 
 int fullbarHeight, fullbarWidth, emptybarHeight, emptybarWidth;
 
@@ -70,26 +70,15 @@ void Start_Progress_Bar()
 		unsigned int fastFileLength;
 		void const * pFastFileData = ffreadbuf(buffer, &fastFileLength);
 		
-		if(pFastFileData)
+		if (pFastFileData)
 		{
 			//load from fast file
-			LoadingBarEmpty = AwCreateTexture//Surface
-							(
-								"pxf",
-								pFastFileData,
-								fastFileLength,
-								0
-							);
+			LoadingBarEmpty = AwCreateTexture("pxf", pFastFileData, fastFileLength, 0);
 		}
 		else
 		{
 			//load graphic from rim file
-			LoadingBarEmpty = AwCreateTexture//Surface
-							(
-								"sf",
-								buffer,
-								0
-							);
+			LoadingBarEmpty = AwCreateTexture("sf", buffer, 0);
 		}
 		// create d3d texture here
 		LoadingBarEmptyTexture = CreateD3DTexturePadded(LoadingBarEmpty, &emptybarWidth, &emptybarHeight);
@@ -102,26 +91,15 @@ void Start_Progress_Bar()
 		unsigned int fastFileLength;
 		void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
 		
-		if(pFastFileData)
+		if (pFastFileData)
 		{
 			//load from fast file
-			LoadingBarFull = AwCreateTexture//Surface
-							(
-								"pxf",
-								pFastFileData,
-								fastFileLength,
-								0
-							);
+			LoadingBarFull = AwCreateTexture("pxf", pFastFileData, fastFileLength, 0);
 		}
 		else
 		{
 			//load graphic from rim file
-			LoadingBarFull = AwCreateTexture//Surface
-							(
-								"sf",
-								buffer,
-								0
-							);
+			LoadingBarFull = AwCreateTexture("sf", buffer, 0);
 		}
 		
 		LoadingBarFullTexture = CreateD3DTexturePadded(LoadingBarFull, &fullbarWidth, &fullbarHeight);
@@ -135,37 +113,26 @@ void Start_Progress_Bar()
 	unsigned int fastFileLength;
 	void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
 	
-	if(pFastFileData)
+	if (pFastFileData)
 	{
 		//load from fast file
-		image = AwCreateTexture//Surface
-						(
-							"pxf",
-							pFastFileData,
-							fastFileLength,
-							0
-						);
+		image = AwCreateTexture("pxf", pFastFileData, fastFileLength, 0);
 	}
 	else
 	{
 		//load graphic from rim file
-		image = AwCreateTexture//Surface
-						(
-							"sf",
-							buffer,
-							0
-						);
+		image = AwCreateTexture("sf", buffer, 0);
 	}
 
 	//draw initial progress bar
-	LoadingBarEmpty_SrcRect.left=0;
-	LoadingBarEmpty_SrcRect.right=639;
-	LoadingBarEmpty_SrcRect.top=0;
-	LoadingBarEmpty_SrcRect.bottom=39;
-	LoadingBarEmpty_DestRect.left=0;
-	LoadingBarEmpty_DestRect.right=ScreenDescriptorBlock.SDB_Width-1;
-	LoadingBarEmpty_DestRect.top=((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset) *11)/12;
-	LoadingBarEmpty_DestRect.bottom=(ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)-1;
+	LoadingBarEmpty_SrcRect.left = 0;
+	LoadingBarEmpty_SrcRect.right = 639;
+	LoadingBarEmpty_SrcRect.top = 0;
+	LoadingBarEmpty_SrcRect.bottom = 39;
+	LoadingBarEmpty_DestRect.left = 0;
+	LoadingBarEmpty_DestRect.right = ScreenDescriptorBlock.SDB_Width-1;
+	LoadingBarEmpty_DestRect.top = ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*11)/12;
+	LoadingBarEmpty_DestRect.bottom = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)-1;
 
 	{
 		ThisFramesRenderingHasBegun();
@@ -189,14 +156,14 @@ void Set_Progress_Bar_Position(int pos)
 	{
 
 		CurrentPosition = NewPosition;
-		LoadingBarFull_SrcRect.left=0;
-		LoadingBarFull_SrcRect.right=MUL_FIXED(639,NewPosition);
-		LoadingBarFull_SrcRect.top=0;
-		LoadingBarFull_SrcRect.bottom=39;
-		LoadingBarFull_DestRect.left=0;
-		LoadingBarFull_DestRect.right=MUL_FIXED(ScreenDescriptorBlock.SDB_Width-1,NewPosition);
-		LoadingBarFull_DestRect.top=((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset) *11)/12;
-		LoadingBarFull_DestRect.bottom=(ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)-1;
+		LoadingBarFull_SrcRect.left = 0;
+		LoadingBarFull_SrcRect.right = MUL_FIXED(639,NewPosition);
+		LoadingBarFull_SrcRect.top = 0;
+		LoadingBarFull_SrcRect.bottom = 39;
+		LoadingBarFull_DestRect.left = 0;
+		LoadingBarFull_DestRect.right = MUL_FIXED(ScreenDescriptorBlock.SDB_Width-1,NewPosition);
+		LoadingBarFull_DestRect.top = ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*11)/12;
+		LoadingBarFull_DestRect.bottom = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)-1;
 		
 		ThisFramesRenderingHasBegun();
 
@@ -220,14 +187,14 @@ void Set_Progress_Bar_Position(int pos)
 		do the check.
 		*/
 		
-		if(AvP.Network != I_No_Network)
+		if (AvP.Network != I_No_Network)
 		{
 			static int LastSendTime;
-			int time=GetTickCount();
-			if(time-LastSendTime>1000 || time<LastSendTime)
+			int time = timeGetTime();
+			if (time - LastSendTime > 1000 || time < LastSendTime)
 			{
 				//time to check our messages 
-				LastSendTime=time;
+				LastSendTime = time;
 				MinimalNetCollectMessages();
 				//send messages , mainly  needed so that the host will send the game description
 				//allowing people to join while the host is loading
