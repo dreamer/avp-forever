@@ -479,7 +479,12 @@ void StartMenuMusic()
 {
 	// we need to load IntroSound.ogg here using vorbisPlayer
 	menuMusic = new VorbisPlayback;
-	menuMusic->Open("IntroSound.ogg");
+	if (!menuMusic->Open("IntroSound.ogg"))
+	{
+		Con_PrintError("Can't located IntroSound.ogg");
+		delete menuMusic;
+		menuMusic = NULL;
+	}
 }
 
 void PlayMenuMusic(void)
@@ -489,8 +494,11 @@ void PlayMenuMusic(void)
 
 void EndMenuMusic()
 {
-	delete menuMusic;
-	menuMusic = NULL;
+	if (menuMusic)
+	{
+		delete menuMusic;
+		menuMusic = NULL;
+	}
 }
 
 extern void InitialiseTriggeredFMVs()

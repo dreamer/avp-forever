@@ -24,7 +24,6 @@
 
 extern int NumberOfFMVTextures;
 #include "fmvCutscenes.h"
-//extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
 #define MAX_NO_FMVTEXTURES 10
 extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 
@@ -838,7 +837,7 @@ BOOL InitialiseDirect3D()
 	bool windowed = false;
 	D3DFORMAT SelectedDepthFormat = D3DFMT_D24S8;
 	D3DFORMAT SelectedAdapterFormat = D3DFMT_X8R8G8B8;
-	D3DFORMAT SelectedDisplayFormat = D3DFMT_X8R8G8B8; // back buffer format
+	D3DFORMAT SelectedBackbufferFormat = D3DFMT_X8R8G8B8; // back buffer format
 
 	if (WindowMode == WindowModeSubWindow) 
 		windowed = true;
@@ -914,10 +913,10 @@ BOOL InitialiseDirect3D()
 				D3DDISPLAYMODE DisplayMode;
 
 				// does this adapter support the requested format?
-				d3d.lpD3D->EnumAdapterModes( thisDevice, DisplayFormats[displayFormatIndex], modeIndex, &DisplayMode );
+				d3d.lpD3D->EnumAdapterModes(thisDevice, DisplayFormats[displayFormatIndex], modeIndex, &DisplayMode);
 
 				// Filter out low-resolution modes
-				if (DisplayMode.Width  < 640 || DisplayMode.Height < 480)
+				if (DisplayMode.Width < 640 || DisplayMode.Height < 480)
 					continue;
 
 				int j = 0;
@@ -964,9 +963,53 @@ BOOL InitialiseDirect3D()
 	// check that the resolution and colour depth the user wants is supported
 	bool gotOne = false;
 	bool gotValidFormats = false;
-	
-	for (int i = 0; i < d3d.Driver[defaultDevice].NumModes; i++)
+
+	for (int i = 0; i < (sizeof(DisplayFormats) / sizeof(DisplayFormats[0])); i++)
 	{
+		for (int j = 0; i < d3d.Driver[defaultDevice].NumModes; j++)
+		{
+			// found a usable mode
+			if ((d3d.Driver[defaultDevice].DisplayMode[j].Width == width) && (d3d.Driver[defaultDevice].DisplayMode[j].Height == height))
+			{
+				// try find a matching depth buffer format
+				for (int d = 0; d < (sizeof(DepthFormats) / sizeof(DepthFormats[0])); d++)
+				{
+					LastError = d3d.lpD3D->CheckDeviceFormat( d3d.CurrentDriver, 
+												D3DDEVTYPE_HAL, 
+												SelectedAdapterFormat, 
+												D3DUSAGE_DEPTHSTENCIL, 
+												D3DRTYPE_SURFACE,
+												DepthFormats[d]);
+
+					// if the format wont work with this depth buffer, try another format
+					if (FAILED(LastError)) 
+						continue;
+
+					LastError = d3d.lpD3D->CheckDepthStencilMatch( d3d.CurrentDriver,
+											D3DDEVTYPE_HAL,
+											SelectedAdapterFormat,
+											DisplayFormats[i],
+											DepthFormats[d]);
+
+					// we got valid formats
+					if (!FAILED(LastError))
+					{
+						SelectedDepthFormat = DepthFormats[d];
+						SelectedBackbufferFormat = DisplayFormats[i];
+						gotValidFormats = true;
+						gotOne = true;
+						//break;
+						goto blah;
+					}
+				}
+			}
+		}
+	}
+
+	blah:
+
+#if 0
+
 		// check for a match on height and width
 		if ((d3d.Driver[defaultDevice].DisplayMode[i].Width == width) && (d3d.Driver[defaultDevice].DisplayMode[i].Height == height))
 		{
@@ -1013,6 +1056,7 @@ BOOL InitialiseDirect3D()
 			break;
 		}
 	}
+#endif
 	if (!gotOne)
 	{
 		Con_PrintError("Couldn't find match for user requested resolution!");
@@ -1020,7 +1064,7 @@ BOOL InitialiseDirect3D()
 		// set some default values?
 		width = 800;
 		height = 600;
-		SelectedDisplayFormat = DisplayFormats32[0]; // use the first in the list
+		SelectedBackbufferFormat = DisplayFormats32[0]; // use the first in the list
 	}
 
 	// set up the presentation parameters
@@ -1031,7 +1075,7 @@ BOOL InitialiseDirect3D()
 
 	d3dpp.EnableAutoDepthStencil = true;
 	d3dpp.AutoDepthStencilFormat = SelectedDepthFormat;
-	d3dpp.BackBufferFormat = SelectedDisplayFormat;
+	d3dpp.BackBufferFormat = SelectedBackbufferFormat;
 
 	if (windowed) 
 	{
@@ -1235,7 +1279,7 @@ BOOL InitialiseDirect3D()
 			break;
 	}
 
-	ZeroMemory( &d3d.D3DViewport, sizeof(d3d.D3DViewport) );
+	ZeroMemory (&d3d.D3DViewport, sizeof(d3d.D3DViewport));
 	d3d.D3DViewport.X = 0;
 	d3d.D3DViewport.Y = 0;
 	d3d.D3DViewport.Width = width;

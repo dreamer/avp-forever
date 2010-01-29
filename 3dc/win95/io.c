@@ -669,6 +669,7 @@ void FrameCounterHandler(void)
 {
 	int newTickCount = timeGetTime();
 	int fcnt;
+	char buf[100];
 
 	fcnt = newTickCount - lastTickCount;
 	lastTickCount = newTickCount;
@@ -693,6 +694,9 @@ void FrameCounterHandler(void)
 	if (NormalFrameTime>16384) NormalFrameTime=16384;
 	GlobalFrameCounter++;
 	CloakingPhase += NormalFrameTime>>5;
+
+//	sprintf(buf, "NormalFrameTime: %d\n", NormalFrameTime);
+//	OutputDebugString(buf);
 
 	RouteFinder_CallsThisFrame=0;
 }

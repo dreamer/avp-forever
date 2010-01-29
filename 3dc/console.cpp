@@ -12,7 +12,6 @@
 #include "logString.h"
 #include "font2.h"
 
-#if 1
 #ifdef WIN32
 #include <d3dx9math.h>
 #endif
@@ -25,13 +24,12 @@ static const DWORD D3DFVF_CUSTOMVERTEX = D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TE
 
 struct CUSTOMVERTEX 
 {
-	float x, y, z; // Position in 3d space 
+	float x, y, z;  // Position in 3d space 
 	DWORD colour;   // Colour  
-	float u, v;    // Texture coordinates 
+	float u, v;     // Texture coordinates 
 };
 
 static CUSTOMVERTEX conVerts[4];
-#endif
 
 extern "C" 
 {
@@ -42,8 +40,8 @@ extern "C"
 	extern D3DINFO d3d;
 }
 
-#define CHAR_WIDTH	32
-#define CHAR_HEIGHT	32
+#define CHAR_WIDTH	16
+#define CHAR_HEIGHT	16
 
 #define ONE_FIXED	65536
 
@@ -369,7 +367,6 @@ void Con_DrawQuadTest(int x, int y, int width, int height, int colour)
 #ifdef WIN32
 	d3d.lpD3DDevice->SetFVF (D3DFVF_CUSTOMVERTEX);
 #endif
-//	d3d.lpD3DDevice->SetTransform (D3DTS_WORLD, &matTransform);
 	d3d.lpD3DDevice->SetTexture (0, NULL);
 
 	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &conVerts[0], sizeof(CUSTOMVERTEX));
@@ -405,21 +402,20 @@ void Con_Draw()
 		console.isOpen = true;
 
 	// draw the background quad
-//	DrawQuad(console.xPos, console.yPos, console.width, console.height, D3DCOLOR_ARGB(255, 38, 80, 145));
 	Con_DrawQuadTest(console.xPos, console.yPos, console.width, console.height, D3DCOLOR_ARGB(255, 38, 80, 145));
 
 	if (console.height > 0)
 	{
 		// draw the outline bar that runs along the bottom of the console
-		DrawQuad(console.xPos, console.yPos+console.height, console.width, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
-		//Con_DrawQuadTest(console.xPos, console.yPos + console.height, console.width, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
+		Con_DrawQuadTest(console.xPos, console.yPos + console.height, console.width, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
 	}
 
 	int charCount = 0;
 	static int alpha = ONE_FIXED;
 
 	alpha -= static_cast<int>(RealFrameTime * 1.2f);
-	if (alpha < 0) alpha = ONE_FIXED;
+	if (alpha < 0) 
+		alpha = ONE_FIXED;
 
 	// draw input cusor
 	charWidth = RenderSmallChar('>', console.indent, console.height - CHAR_HEIGHT, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
@@ -442,10 +438,9 @@ void Con_Draw()
 #if 1
 		for (int j = 0; j < console.text[i].length(); j++)
 		{
-			//if ((j * CHAR_WIDTH) > console.lineWidth) break;
-			charWidth = RenderSmallChar(console.text.at(i).at(j), console.indent + /*(xOffset * j)*/xOffset, y, ONE_FIXED, ONE_FIXED / 2, ONE_FIXED, ONE_FIXED);
+			charWidth = RenderSmallChar(console.text.at(i).at(j), console.indent + xOffset, y, ONE_FIXED, ONE_FIXED / 2, ONE_FIXED, ONE_FIXED);
 			//Font_DrawText(console.text.at(i).at(j), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
-			xOffset+=charWidth;
+			xOffset += charWidth;
 		}
 #endif
 	}

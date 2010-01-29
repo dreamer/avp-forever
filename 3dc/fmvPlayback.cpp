@@ -1,4 +1,5 @@
 #include "fmvPlayback.h"
+#include "3dc.h"
 #include "console.h"
 #include "stdint.h"
 #include "assert.h"
@@ -279,6 +280,53 @@ void TheoraFMV::Close()
 	mFmvPlaying = false;
 }
 
+bool TheoraFMV::HandleTheoraHeader(OggStream* stream, ogg_packet* packet)
+{
+	int ret = th_decode_headerin(&stream->mTheora.mInfo,
+		&stream->mTheora.mComment,
+		&stream->mTheora.mSetupInfo,
+		packet);
+
+	if (ret == TH_ENOTFORMAT)
+		return false; // Not a theora header
+
+	if (ret > 0) 
+	{
+		// This is a theora header packet
+		stream->mType = TYPE_THEORA;
+		return false;
+	}
+
+	// Any other return value is treated as a fatal error
+	assert(ret == 0);
+
+	// This is not a header packet. It is the first 
+	// video data packet.
+	return true;
+}
+
+bool TheoraFMV::HandleVorbisHeader(OggStream* stream, ogg_packet* packet)
+{
+	int ret = vorbis_synthesis_headerin(&stream->mVorbis.mInfo,
+		&stream->mVorbis.mComment,
+		packet);
+
+	// Unlike libtheora, libvorbis does not provide a return value to
+	// indicate that we've finished loading the headers and got the
+	// first data packet. To detect this I check if I already know the
+	// stream type and if the vorbis_synthesis_headerin call failed.
+	if (stream->mType == TYPE_VORBIS && ret == OV_ENOTVORBIS) 
+	{
+		// First data packet
+		return true;
+	}
+	else if (ret == 0) 
+	{
+		stream->mType = TYPE_VORBIS;
+	}
+	return false;
+}
+
 bool TheoraFMV::IsPlaying()
 {
 	return mFmvPlaying;
@@ -436,6 +484,7 @@ void TheoraFMV::ReadHeaders()
 	int ret = 0;
 
 	bool gotAllHeaders = false;
+	bool headersDone = false;
 	bool gotTheora = false;
 	bool gotVorbis = false;
 
@@ -471,10 +520,10 @@ void TheoraFMV::ReadHeaders()
 
 		ogg_packet packet;
 
-		while (!gotAllHeaders && (ret = ogg_stream_packetpeek(&stream->mStreamState, &packet)) != 0)
+		while (!/*gotAllHeaders*/headersDone && (ret = ogg_stream_packetpeek(&stream->mStreamState, &packet)) != 0)
 		{
 			assert(ret == 1);
-
+#if 0
 			// check for a theora header first
 			if (!gotTheora)
 			{
@@ -510,6 +559,17 @@ void TheoraFMV::ReadHeaders()
 			if (!gotAllHeaders)
 			{
 				// we need to move forward and grab the next packet
+				ret = ogg_stream_packetout(&stream->mStreamState, &packet);
+				assert(ret == 1);
+			}
+#endif
+			// A packet is available. If it is not a header packet we exit.
+			// If it is a header packet, process it as normal.
+			headersDone = headersDone || HandleTheoraHeader(stream, &packet);
+			headersDone = headersDone || HandleVorbisHeader(stream, &packet);
+			if (!headersDone) 
+			{
+				// Consume the packet
 				ret = ogg_stream_packetout(&stream->mStreamState, &packet);
 				assert(ret == 1);
 			}

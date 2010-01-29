@@ -657,9 +657,9 @@ void InitAVPNetGameForJoin(void)
 			netGameData.sendFrequency=0;//ONE_FIXED/15;
    	   		netGameData.sendDecals=TRUE;
 		}
-		netGameData.sendTimer=0;
+		netGameData.sendTimer = 0;
 		
-		netGameData.needGameDescription=1;
+		netGameData.needGameDescription = 1;
 	}
 
 	myNetworkKillerId = AvPNetID;	/* init global id of player who killed me last */
@@ -667,7 +667,6 @@ void InitAVPNetGameForJoin(void)
 	numMessagesReceived = 0;	/* these are for testing */
 	numMessagesTransmitted = 0;
 	InitNetLog();
-
 	
 	netGameData.myStrategyCheckSum=0;
 
@@ -678,17 +677,17 @@ void InitAVPNetGameForJoin(void)
 	netGameData.joiningGameStatus = JOINNETGAME_WAITFORSTART;
 }
 
-static unsigned char msg[NET_MESSAGEBUFFERSIZE];
+static uint8_t msg[NET_MESSAGEBUFFERSIZE];
 
 /*----------------------------------------------------------------------
   Core message collection function
   ----------------------------------------------------------------------*/
 void MinimalNetCollectMessages(void)
 {
-	int	 res = NET_OK;
-	int  fromID = 0;
-	int  toID = 0;
-	int	 msgSize = 0;
+	int	res = NET_OK;
+	int fromID = 0;
+	int toID = 0;
+	int	msgSize = 0;
 		
 	/* collects messages until something other than NET_OK is returned (eg NET_NO_MESSAGES) */
 	if (!netGameData.skirmishMode)
@@ -882,7 +881,6 @@ void NetCollectMessages(void)
 					TransmitEndOfGameNetMsg();
 					netGameData.myGameState = NGS_EndGameScreen;
 				}
-
 			}
 		}
 	}
@@ -922,7 +920,6 @@ void NetCollectMessages(void)
 	{
 		CheckStateOfObservedPlayer();
 	}
-
 }
 
 /*----------------------------------------------------------------------
@@ -1032,7 +1029,7 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 				if (LobbiedGame)
 				{
 					//no longer a lowly client
-					LobbiedGame=LobbiedGame_Server;
+					LobbiedGame = LobbiedGame_Server;
 				}
 			}
 			LogNetInfo("system message:  NET_HOST \n");
@@ -1164,19 +1161,17 @@ void RemovePlayerFromGame(DPID id)
 /*----------------------------------------------------------------------
   Core function for processing game messages
   ----------------------------------------------------------------------*/
-static void ProcessGameMessage(DPID senderId, unsigned char *msgP,unsigned int msgSize)
+static void ProcessGameMessage(DPID senderId, uint8_t *msgP, unsigned int msgSize)
 {
-	unsigned char* subMessagePtr;
-	NETMESSAGEHEADER *headerPtr;
-	unsigned char *endOfMessage;
+	uint8_t *subMessagePtr = NULL;
+	uint8_t *endOfMessage = NULL;
+	NETMESSAGEHEADER *headerPtr = NULL;
 		
 	LogNetInfo("Processing a game message \n");
 
-	/* check the dp message */
-	{
-		/* check for invalid parameters */
-		if((msgSize==0)||(msgP==NULL)) return;
-	}	
+	/* check for invalid parameters */
+	if ((msgSize == 0) || (msgP == NULL))
+		return;
 		
 	/* some assertions about our game state */
 	LOCALASSERT(!((AvP.Network==I_Host)&&(netGameData.myGameState==NGS_Leaving)));
@@ -1185,325 +1180,315 @@ static void ProcessGameMessage(DPID senderId, unsigned char *msgP,unsigned int m
 	LOCALASSERT(!((AvP.Network==I_Host)&&(netGameData.myGameState==NGS_Error_HostLost)));
 		
 	/* In leaving or error states, we can ignore game messages */
-	if((netGameData.myGameState!=NGS_StartUp)&&(netGameData.myGameState!=NGS_Playing)&&(netGameData.myGameState!=NGS_Joining)&&(netGameData.myGameState!=NGS_EndGameScreen)) return;
-
-	/* validate the sender from our player list, unless we're in startup mode */
-//	if((netGameData.myGameState!=NGS_StartUp)&&
-//	   (PlayerIdInPlayerList(senderId)==NET_IDNOTINPLAYERLIST)) return;
-	
-	/* the message includes garry's dp extented header, so skip past this
-	and find the end of the message (for checking integrity) */
+	if ((netGameData.myGameState != NGS_StartUp)
+			&&(netGameData.myGameState != NGS_Playing)
+			&&(netGameData.myGameState != NGS_Joining)
+			&&(netGameData.myGameState != NGS_EndGameScreen)) 
+		return;
 
 	/* skip past our header */
-	subMessagePtr = &msgP[MESSAGEHEADERSIZE];// + DPEXT_HEADER_SIZE;
+	subMessagePtr = &msgP[MESSAGEHEADERSIZE];
 	endOfMessage = &msgP[msgSize];
-//	endOfMessage = (unsigned char *)(subMessagePtr + msgSize);//(msgSize - DPEXT_HEADER_SIZE));	
 
 	/* Read through to the end of the message... */
-	while(subMessagePtr<endOfMessage)
+	while (subMessagePtr < endOfMessage)
 	{		
 		headerPtr = (NETMESSAGEHEADER *)subMessagePtr;
 		subMessagePtr += sizeof(NETMESSAGEHEADER);		
 
-		switch(headerPtr->type)
+		switch (headerPtr->type)
 		{
-			case(NetMT_GameDescription):
+			case (NetMT_GameDescription):
 			{
 				ProcessNetMsg_GameDescription((NETMESSAGE_GAMEDESCRIPTION *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_GAMEDESCRIPTION);
 				break;
 			}
-			case(NetMT_PlayerDescription):
+			case (NetMT_PlayerDescription):
 			{
 				ProcessNetMsg_PlayerDescription((NETMESSAGE_PLAYERDESCRIPTION *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_PLAYERDESCRIPTION);
 				break;
 			}
-			case(NetMT_StartGame):
+			case (NetMT_StartGame):
 			{
 				ProcessNetMsg_StartGame();
 				break;
 			}
-			case(NetMT_PlayerState):
+			case (NetMT_PlayerState):
 			{
 				ProcessNetMsg_PlayerState((NETMESSAGE_PLAYERSTATE *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_PLAYERSTATE);
 				break;
 			}
-			case(NetMT_PlayerState_Minimal):
+			case (NetMT_PlayerState_Minimal):
 			{
 				ProcessNetMsg_PlayerState_Minimal((NETMESSAGE_PLAYERSTATE_MINIMAL *)subMessagePtr, senderId,FALSE);
 				subMessagePtr += sizeof(NETMESSAGE_PLAYERSTATE_MINIMAL);
 				break;
 			}
-			case(NetMT_PlayerState_Medium):
+			case (NetMT_PlayerState_Medium):
 			{
 				ProcessNetMsg_PlayerState_Minimal((NETMESSAGE_PLAYERSTATE_MINIMAL *)subMessagePtr, senderId,TRUE);
 				subMessagePtr += sizeof(NETMESSAGE_PLAYERSTATE_MEDIUM);
 				break;
 			}
-			case (NetMT_FrameTimer) :
+			case (NetMT_FrameTimer):
 			{
 				ProcessNetMsg_FrameTimer(((NETMESSAGE_FRAMETIMER *)subMessagePtr)->frame_time, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_FRAMETIMER);
 				break;
 			}
-			case(NetMT_PlayerKilled):
+			case (NetMT_PlayerKilled):
 			{
 				ProcessNetMsg_PlayerKilled((NETMESSAGE_PLAYERKILLED *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_PLAYERKILLED);
 				break;
 			}
-			case(NetMT_CorpseDeathAnim):
+			case (NetMT_CorpseDeathAnim):
 			{
 				ProcessNetMsg_PlayerDeathAnim((NETMESSAGE_CORPSEDEATHANIM *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_CORPSEDEATHANIM);
 				break;
 			}
-			case(NetMT_PlayerLeaving):
+			case (NetMT_PlayerLeaving):
 			{
 				ProcessNetMsg_PlayerLeaving(senderId);
 				break;
 			}
-			case(NetMT_AllGameScores):
+			case (NetMT_AllGameScores):
 			{
 				ProcessNetMsg_AllGameScores((NETMESSAGE_ALLGAMESCORES *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_ALLGAMESCORES);
 				break;
 			}
-			case(NetMT_PlayerScores):
+			case (NetMT_PlayerScores):
 			{
 				ProcessNetMsg_PlayerScores((NETMESSAGE_PLAYERSCORES *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_PLAYERSCORES);
 				break;
 			}
-			case(NetMT_LocalRicochet):
+			case (NetMT_LocalRicochet):
 			{
 				ProcessNetMsg_LocalRicochet((NETMESSAGE_LOCALRICOCHET *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_LOCALRICOCHET);
 				break;
 			}
-			case(NetMT_LocalObjectState):
+			case (NetMT_LocalObjectState):
 			{
 				ProcessNetMsg_LocalObjectState((NETMESSAGE_LOBSTATE *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_LOBSTATE);
 				break;
 			}
-			case(NetMT_LocalObjectDamaged):
+			case (NetMT_LocalObjectDamaged):
 			{
 				ProcessNetMsg_LocalObjectDamaged((char*)subMessagePtr, senderId);
 				subMessagePtr += GetSizeOfLocalObjectDamagedMessage((char*)subMessagePtr);
 				break;
 			}
-			case(NetMT_LocalObjectDestroyed):
+			case (NetMT_LocalObjectDestroyed):
 			{
 				ProcessNetMsg_LocalObjectDestroyed((NETMESSAGE_LOBDESTROYED *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_LOBDESTROYED);
 				break;
 			}
-			case(NetMT_ObjectPickedUp):
+			case (NetMT_ObjectPickedUp):
 			{
 				ProcessNetMsg_ObjectPickedUp((NETMESSAGE_OBJECTPICKEDUP *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_OBJECTPICKEDUP);
 				break;
 			}
-			case(NetMT_EndGame):
+			case (NetMT_EndGame):
 			{
 				ProcessNetMsg_EndGame();
 				break;
 			}
-			case(NetMT_InanimateObjectDamaged):
+			case (NetMT_InanimateObjectDamaged):
 			{
 				ProcessNetMsg_InanimateObjectDamaged((char *)subMessagePtr);
 				subMessagePtr += GetSizeOfInanimateDamagedMessage((char *)subMessagePtr);
 				break;
 			}
-			case(NetMT_InanimateObjectDestroyed):
+			case (NetMT_InanimateObjectDestroyed):
 			{
 				ProcessNetMsg_InanimateObjectDestroyed((NETMESSAGE_INANIMATEDESTROYED *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_INANIMATEDESTROYED);
 				break;
 			}
-			case(NetMT_LOSRequestBinarySwitch):
+			case (NetMT_LOSRequestBinarySwitch):
 			{
 				ProcessNetMsg_LOSRequestBinarySwitch((NETMESSAGE_LOSREQUESTBINARYSWITCH *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_LOSREQUESTBINARYSWITCH);
 				break;
 			}
-			case(NetMT_PlatformLiftState):
+			case (NetMT_PlatformLiftState):
 			{
 				ProcessNetMsg_PlatformLiftState((NETMESSAGE_PLATFORMLIFTSTATE *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_PLATFORMLIFTSTATE);
 				break;
 			}
-			case(NetMT_RequestPlatformLiftActivate):
+			case (NetMT_RequestPlatformLiftActivate):
 			{
 				ProcessNetMsg_RequestPlatformLiftActivate((NETMESSAGE_REQUESTPLATFORMLIFTACTIVATE *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_REQUESTPLATFORMLIFTACTIVATE);
 				break;
 			}
-			case(NetMT_PlayerAutoGunState):
+			case (NetMT_PlayerAutoGunState):
 			{
 				ProcessNetMsg_PlayerAutoGunState((NETMESSAGE_AGUNSTATE *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_AGUNSTATE);
 				break;
 			}
-			case(NetMT_MakeDecal):
+			case (NetMT_MakeDecal):
 			{
 				ProcessNetMsg_MakeDecal((NETMESSAGE_MAKEDECAL *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_MAKEDECAL);
 				break;
 			}
-			case(NetMT_ChatBroadcast):
+			case (NetMT_ChatBroadcast):
 			{
 				subMessagePtr = ProcessNetMsg_ChatBroadcast(subMessagePtr, senderId);
 				break;
 			}
-			case(NetMT_MakeExplosion):
+			case (NetMT_MakeExplosion):
 			{
 				ProcessNetMsg_MakeExplosion((NETMESSAGE_MAKEEXPLOSION *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_MAKEEXPLOSION);
 				break;
 			}
-			case(NetMT_MakeFlechetteExplosion):
+			case (NetMT_MakeFlechetteExplosion):
 			{
 				ProcessNetMsg_MakeFlechetteExplosion((NETMESSAGE_MAKEFLECHETTEEXPLOSION *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_MAKEFLECHETTEEXPLOSION);
 				break;
 			}
-			case(NetMT_MakePlasmaExplosion):
+			case (NetMT_MakePlasmaExplosion):
 			{
 				ProcessNetMsg_MakePlasmaExplosion((NETMESSAGE_MAKEPLASMAEXPLOSION *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_MAKEPLASMAEXPLOSION);
 				break;
 			}
-			case(NetMT_PredatorSights):
+			case (NetMT_PredatorSights):
 			{
 				ProcessNetMsg_PredatorSights((NETMESSAGE_PREDATORSIGHTS *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_PREDATORSIGHTS);
 				break;
 			}
-			case(NetMT_LocalObjectOnFire):
+			case (NetMT_LocalObjectOnFire):
 			{
 				ProcessNetMsg_LocalObjectOnFire((NETMESSAGE_LOBONFIRE *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_LOBONFIRE);
 				break;
 			}
-			case(NetMT_RestartNetworkGame):
+			case (NetMT_RestartNetworkGame):
 			{
 				RestartNetworkGame(((NETMESSAGE_RESTARTGAME*)subMessagePtr)->seed);
 				subMessagePtr += sizeof(NETMESSAGE_RESTARTGAME);
 				break;
 			}
-			case(NetMT_FragmentalObjectsStatus):
+			case (NetMT_FragmentalObjectsStatus):
 			{
 				ProcessNetMsg_FragmentalObjectsStatus((NETMESSAGE_FRAGMENTALOBJECTSSTATUS *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_FRAGMENTALOBJECTSSTATUS);
 				break;
 			}
-			case(NetMT_StrategySynch):
+			case (NetMT_StrategySynch):
 			{
 				ProcessNetMsg_StrategySynch((NETMESSAGE_STRATEGYSYNCH *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_STRATEGYSYNCH);
 				break;
 			}
-			case(NetMT_AlienAIState):
+			case (NetMT_AlienAIState):
 			{
 				ProcessNetMsg_AlienAIState((NETMESSAGE_ALIENAISTATE *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_ALIENAISTATE);
 				break;
 			}
-			case(NetMT_AlienAISequenceChange):
+			case (NetMT_AlienAISequenceChange):
 			{
 				ProcessNetMsg_AlienAISequenceChange((NETMESSAGE_ALIENSEQUENCECHANGE *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_ALIENSEQUENCECHANGE);
 				break;
 			}
-			case(NetMT_AlienAIKilled):
+			case (NetMT_AlienAIKilled):
 			{
 				ProcessNetMsg_AlienAIKilled((NETMESSAGE_ALIENAIKILLED *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_ALIENAIKILLED);
 				break;
 			}
-			case(NetMT_FarAlienPosition):
+			case (NetMT_FarAlienPosition):
 			{
 				ProcessNetMsg_FarAlienPosition((NETMESSAGE_FARALIENPOSITION *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_FARALIENPOSITION);
 				break;
 			}
-			case(NetMT_GhostHierarchyDamaged):
+			case (NetMT_GhostHierarchyDamaged):
 			{
 				ProcessNetMsg_GhostHierarchyDamaged((char *)subMessagePtr, senderId);
 				subMessagePtr += GetSizeOfGhostHierarchyDamagedMessage((char *)subMessagePtr) ;
 				break;
 			}
-			case(NetMT_Gibbing):
+			case (NetMT_Gibbing):
 			{
 				ProcessNetMsg_Gibbing((NETMESSAGE_GIBBING *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_GIBBING);
 				break;
 			}
-			case(NetMT_SpotAlienSound):
+			case (NetMT_SpotAlienSound):
 			{
 				ProcessNetMsg_SpotAlienSound((NETMESSAGE_SPOTALIENSOUND *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_SPOTALIENSOUND);
 				break;
 			}
-			case(NetMT_SpotOtherSound):
+			case (NetMT_SpotOtherSound):
 			{
 				ProcessNetMsg_SpotOtherSound((NETMESSAGE_SPOTOTHERSOUND *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_SPOTOTHERSOUND);
 				break;
 			}
-			case(NetMT_LocalObjectDestroyed_Request):
+			case (NetMT_LocalObjectDestroyed_Request):
 			{
 				ProcessNetMsg_LocalObjectDestroyed_Request((NETMESSAGE_LOBDESTROYED_REQUEST *)subMessagePtr, senderId);
 				subMessagePtr += sizeof(NETMESSAGE_LOBDESTROYED_REQUEST);
 				break;
 			}
-
-			case(NetMT_LastManStanding_Restart):
+			case (NetMT_LastManStanding_Restart):
 			{
 				Handle_LastManStanding_Restart(((NETMESSAGE_LMS_RESTART*)subMessagePtr)->playerID,((NETMESSAGE_LMS_RESTART*)subMessagePtr)->seed);
 				subMessagePtr += sizeof(NETMESSAGE_LMS_RESTART);
 				break;
 			}
-			
-			case(NetMT_LastManStanding_RestartInfo):
+			case (NetMT_LastManStanding_RestartInfo):
 			{
 				Handle_LastManStanding_RestartInfo(((NETMESSAGE_PLAYERID*)subMessagePtr)->playerID);
 				subMessagePtr += sizeof(NETMESSAGE_PLAYERID);
 				break;
 			}
-
-			case(NetMT_LastManStanding_LastMan):
+			case (NetMT_LastManStanding_LastMan):
 			{
 				Handle_LastManStanding_LastMan(((NETMESSAGE_PLAYERID*)subMessagePtr)->playerID);
 				subMessagePtr += sizeof(NETMESSAGE_PLAYERID);
 				break;
 			}
-			
-			case(NetMT_LastManStanding_RestartCountDown):
+			case (NetMT_LastManStanding_RestartCountDown):
 			{
 				Handle_LastManStanding_RestartTimer(((NETMESSAGE_LMS_RESTARTTIMER*)subMessagePtr)->timer);
 				subMessagePtr += sizeof(NETMESSAGE_LMS_RESTARTTIMER);
 				break;
 			}
-
-			case(NetMT_PredatorTag_NewPredator):
+			case (NetMT_PredatorTag_NewPredator):
 			{
 				Handle_SpeciesTag_NewPersonIt(((NETMESSAGE_PLAYERID*)subMessagePtr)->playerID);
 				subMessagePtr += sizeof(NETMESSAGE_PLAYERID);
 				break;
 			}
-
-			case(NetMT_CreateWeapon):
+			case (NetMT_CreateWeapon):
 			{
 				ProcessNetMsg_CreateWeapon((NETMESSAGE_CREATEWEAPON*)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_CREATEWEAPON);
 				break;
 			}
-			case(NetMT_RespawnPickups):
+			case (NetMT_RespawnPickups):
 			{
 				if(netGameData.myGameState==NGS_Playing || 
 				   netGameData.myGameState==NGS_EndGameScreen)
@@ -1513,21 +1498,18 @@ static void ProcessGameMessage(DPID senderId, unsigned char *msgP,unsigned int m
 				}
 				break;
 			}
-			
-			case(NetMT_ScoreChange):
+			case (NetMT_ScoreChange):
 			{
 				ProcessNetMsg_ScoreChange((NETMESSAGE_SCORECHANGE *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_SCORECHANGE);
 				break;
 			}
-			 
-			case(NetMT_SpeciesScores):
+			case (NetMT_SpeciesScores):
 			{
 				ProcessNetMsg_SpeciesScores((NETMESSAGE_SPECIESSCORES *)subMessagePtr);
 				subMessagePtr += sizeof(NETMESSAGE_SPECIESSCORES);
 				break;
 			}
-			
 			default:
 			{
 				OutputDebugString("default case hit in ProcessGameMessage\n");
@@ -1541,7 +1523,6 @@ static void ProcessGameMessage(DPID senderId, unsigned char *msgP,unsigned int m
 	LOCALASSERT(subMessagePtr==endOfMessage);
 
 	LogNetInfo("Finished processing a game message \n");
-
 }
 
 #if CalculateBytesSentPerSecond
@@ -5442,26 +5423,24 @@ void AddNetMsg_SpotOtherSound(enum soundindex SoundIndex,VECTORCH *position,int 
 static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr)
 {	
 	/* should only get this if we're not the host, and we're in start-up state */
-	if(AvP.Network!=I_Peer)
+	if (AvP.Network != I_Peer)
 	{
 		//Vaguely possible that a host could receive a message that is only intended for peers
 		//if this computer has only just become the host.
-		LOCALASSERT(AvP.Network==I_Host);
+		LOCALASSERT(AvP.Network == I_Host);
 		return;
 	}
-
-	//if(netGameData.myGameState!=NGS_Joining) return;	
 
 	/* fill out the game description player list with the new player id's */
 	{ 
 		int i;
-		for(i=0;i<NET_MAXPLAYERS;i++)
+		for (i = 0; i < NET_MAXPLAYERS; i++)
 		{
 			int playerChanged = 0;
 
-			if ( (netGameData.playerData[i].playerId != messagePtr->players[i].playerId)
-			   ||(netGameData.playerData[i].startFlag != messagePtr->players[i].startFlag) )
-				playerChanged=1;
+			if ((netGameData.playerData[i].playerId != messagePtr->players[i].playerId)
+					||(netGameData.playerData[i].startFlag != messagePtr->players[i].startFlag))
+				playerChanged = 1;
 
 			if (netGameData.myGameState==NGS_Playing && playerChanged)
 			{
@@ -5481,9 +5460,14 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
 
 			if (netGameData.playerData[i].playerId != messagePtr->players[i].playerId)
 			{
+				// bjd - FIXME
 				if (messagePtr->players[i].playerId)
 				{
 					Net_SendSystemMessage(AVP_GETPLAYERNAME, AvPNetID, messagePtr->players[i].playerId, NULL, 0);
+
+					strncpy(netGameData.playerData[i].name, "APLAYER", NET_PLAYERNAMELENGTH-1);	
+					netGameData.playerData[i].name[NET_PLAYERNAMELENGTH-1] = '\0';
+
 					//AddNetMsg_PlayerGetName(messagePtr->players[i].playerId); // pass request through internal message system?
 
 					//tempPlayerDetails.
@@ -5508,11 +5492,11 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
 						}
 						DeallocateMem(data);
 					}
+#endif
 				}
 				else
 				{
-#endif
-					netGameData.playerData[i].name[0]='\0'; // set this for now
+					netGameData.playerData[i].name[0] = '\0'; // set this for now
 				}
 			}		
 
@@ -5528,7 +5512,7 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
 		netGameData.timeLimit = messagePtr->timeLimit;
 		netGameData.invulnerableTime = messagePtr->invulnerableTime;
 
-		for(i=0;i<3;i++)
+		for (i=0;i<3;i++)
 		{
 			netGameData.characterKillValues[i]=messagePtr->characterKillValues[i];
 			netGameData.aiKillValues[i]=messagePtr->aiKillValues[i];
@@ -5546,20 +5530,20 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
 		netGameData.pistolInfiniteAmmo=messagePtr->pistolInfiniteAmmo;
 		netGameData.specialistPistols=messagePtr->specialistPistols;
 
-		if(netGameData.needGameDescription)
+		if (netGameData.needGameDescription)
 		{
 			/*We were waiting for the game description , best make sure that our player id appears
 			int the player list*/
-			if(PlayerIdInPlayerList(AvPNetID)!=NET_IDNOTINPLAYERLIST)
+			if (PlayerIdInPlayerList(AvPNetID) != NET_IDNOTINPLAYERLIST)
 			{			
 				/*we now have the game description, so we can stop waiting if we were 
 				trying to join*/
-				netGameData.needGameDescription=0;
+				netGameData.needGameDescription = 0;
 				/*
 				make sure our time scale is set correctly
 				(Only set it the once , so that it can be overridden for debugging purposes)
 				*/
-				switch(netGameData.gameSpeed)
+				switch (netGameData.gameSpeed)
 				{
 					case NETGAMESPEED_70PERCENT :
 						TimeScale=(ONE_FIXED*70)/100;
@@ -5775,7 +5759,6 @@ static void ProcessNetMsg_PlayerState(NETMESSAGE_PLAYERSTATE *messagePtr, DPID s
 				}
 				break;
 		}
-
 	}
 
 	if(!MultiplayerObservedPlayer)
@@ -7968,12 +7951,14 @@ int PlayerIdInPlayerList(DPID Id)
 	int i;
 	
 	/* check first, if we've been passed a null id */
-	if(Id==0) return NET_IDNOTINPLAYERLIST;
+	if (Id == 0) 
+		return NET_IDNOTINPLAYERLIST;
 
 	/* check player list */
-	for(i=0;i<NET_MAXPLAYERS;i++)
+	for (i=0;i<NET_MAXPLAYERS;i++)
 	{
-		if(netGameData.playerData[i].playerId == Id) return i;
+		if (netGameData.playerData[i].playerId == Id) 
+			return i;
 	}
 
 	/* failed to find Id */

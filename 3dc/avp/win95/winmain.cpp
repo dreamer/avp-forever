@@ -130,6 +130,8 @@ extern void InitFmvCutscenes();
 extern DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
 extern struct DEBUGGINGTEXTOPTIONS ShowDebuggingText;
 
+int unlimitedSaves = 0;
+
 void exit_break_point_fucntion ()
 {
 	#if debug
@@ -422,6 +424,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	#if PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO
 	if(AvP_MainMenus())
 	#else
+
+	// support removing limit on number of game saves
+	if (!Config_GetBool("[Misc]", "UnlimitedSaves", false))
+	{
+		unlimitedSaves = 0;
+	}
+	else unlimitedSaves = 1;
 
 	while (AvP_MainMenus())
 	#endif

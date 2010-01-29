@@ -43,14 +43,14 @@ class VorbisPlayback
 		OggVorbis_File mOggFile;
 		StreamingAudioBuffer *mAudioStream;
 		bool mIsPlaying;
-		
+
 		unsigned int mBufferSize;
 		unsigned int mHalfBufferSize;
-		
+
 		HANDLE mPlaybackThreadFinished;
-		
+
 		uint8_t *mAudioData;
-		
+
 		VorbisPlayback() :
 			mVorbisFile(0),
 			mVorbisInfo(0),
@@ -68,25 +68,6 @@ class VorbisPlayback
 		void Stop();
 		int GetVorbisData(int sizeToRead);
 };
-
-struct VorbisCodec
-{
-	FILE *file;
-	vorbis_info *pInfo;
-	OggVorbis_File oggFile;
-	StreamingAudioBuffer *audioStream;
-	bool oggIsPlaying;
-
-	unsigned int bufferSize;
-	unsigned int halfBufferSize;
-
-	HANDLE hPlaybackThreadFinished;
-
-	uint8_t *audioData;
-};
-
-VorbisCodec * Vorbis_LoadFile(const std::string &fileName);
-void Vorbis_Release(VorbisCodec *VorbisStream);
 
 #ifdef __cplusplus
 extern "C" {

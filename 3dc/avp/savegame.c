@@ -36,6 +36,8 @@
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 
+extern int unlimitedSaves;
+
 static struct
 {
 	char* BufferStart;
@@ -265,8 +267,7 @@ the moment.
 
 struct aimodule * GetPointerFromAIModuleIndex(int index)
 {
-	
-	if(index>=0 && index<AIModuleArraySize)
+	if (index>=0 && index<AIModuleArraySize)
 	{
 		return &AIModuleArray[index];
 	}
@@ -283,10 +284,6 @@ int GetIndexFromAIModulePointer(struct aimodule* module)
 	else
 		return -1;
 }
-
-
-
-
 
 void* GetPointerForSaveBlock(unsigned int size)
 {
@@ -307,7 +304,6 @@ void* GetPointerForSaveBlock(unsigned int size)
 		SaveInfo.BufferPos = SaveInfo.BufferStart + SaveInfo.BufferSpaceUsed;
 		SaveInfo.BufferSpaceLeft += (newBufferSize - SaveInfo.BufferSize);
 		SaveInfo.BufferSize = newBufferSize;
-	
 	}
 
 	//get the pointer to the next part of the save buffer
@@ -320,14 +316,11 @@ void* GetPointerForSaveBlock(unsigned int size)
 	return retPointer;
 }
 
-
-
 static void InitSaveGame()
 {
 	SaveInfo.BufferPos = SaveInfo.BufferStart;
 	SaveInfo.BufferSpaceLeft = SaveInfo.BufferSize;
 	SaveInfo.BufferSpaceUsed = 0;
-	
 }
 
 
@@ -359,7 +352,9 @@ static BOOL SaveGameAllowed()
 	//now check the number of saves left
 	//first some validation
 	
-	if(NumberOfSavesLeft<0) NumberOfSavesLeft =0;
+	if (NumberOfSavesLeft < 0) 
+		NumberOfSavesLeft = 0;
+
 	switch(AvP.Difficulty)
 	{
 		case I_Easy :
@@ -375,17 +370,18 @@ static BOOL SaveGameAllowed()
 			if(NumberOfSavesLeft > NUM_SAVES_FOR_HARD_MODE) 
 				NumberOfSavesLeft = NUM_SAVES_FOR_HARD_MODE;
 			break;
-
 	}
 
-	if(!NumberOfSavesLeft)
+	if (!unlimitedSaves)
 	{
-		NewOnScreenMessage(GetTextString(TEXTSTRING_SAVEGAME_NOSAVESLEFT));
-		return FALSE;
+		if (!NumberOfSavesLeft)
+		{
+			NewOnScreenMessage(GetTextString(TEXTSTRING_SAVEGAME_NOSAVESLEFT));
+			return FALSE;
+		}
+		
+		NumberOfSavesLeft--;
 	}
-	
-	NumberOfSavesLeft--;
-
 
 	//saving is allowed then
 	return TRUE;
@@ -1216,7 +1212,6 @@ static void LoadStrategy(SAVE_BLOCK_STRATEGY_HEADER* header)
 		case I_BehaviourFrisbee :
 			LoadStrategy_Frisbee(header);
 			break;
-
 	}
 }
 
@@ -1250,7 +1245,6 @@ static void SaveDeadStrategies()
 			block->header.size = sizeof(*block);
 
 			COPY_NAME(block->SBname,sbPtr->SBname);
-			
 		}	
 	}
 }
@@ -1265,7 +1259,6 @@ static void LoadDeadStrategy(SAVE_BLOCK_HEADER* header)
 		DestroyAnyStrategyBlock(sbPtr);
 	}
 }
-
 
 
 /*--------------------------------------------------------------------------------**
@@ -1322,21 +1315,14 @@ static void SaveMiscGlobalStuff()
 	GetFMVInformation(&block->FMV_MessageNumber,&block->FMV_FrameNumber);
 }
 
-
-
-
-
 extern void DisplaySavesLeft()
 {
 	char text [100];
 
-	sprintf(text, "%s: %d",GetTextString(TEXTSTRING_SAVEGAME_SAVESLEFT),NumberOfSavesLeft);
+	sprintf(text, "%s: %d", GetTextString(TEXTSTRING_SAVEGAME_SAVESLEFT), NumberOfSavesLeft);
 
 	NewOnScreenMessage(text);
 }
-
-
-
 
 extern void ResetNumberOfSaves()
 {
@@ -1352,6 +1338,5 @@ extern void ResetNumberOfSaves()
 		case I_Impossible :
 			NumberOfSavesLeft = NUM_SAVES_FOR_HARD_MODE;
 			break;
-
 	}
 }

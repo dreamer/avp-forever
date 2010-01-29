@@ -33,6 +33,10 @@
 #include "utilities.h" // avp_open()
 #include "console.h"
 
+#ifdef _XBOX
+	#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
+#endif
+
 unsigned int __stdcall VorbisUpdateThread(void *args);
 
 extern "C" 
@@ -113,9 +117,20 @@ VorbisPlayback::~VorbisPlayback()
 {
 	Stop();
 
-	AudioStream_ReleaseBuffer(mAudioStream);
-	ov_clear(&mOggFile);
-	delete[] mAudioData;
+	if (mAudioStream)
+	{
+		AudioStream_ReleaseBuffer(mAudioStream);
+	}
+
+	if (mVorbisInfo) // hmm..
+	{
+		ov_clear(&mOggFile);
+	}
+
+	if (mAudioData)
+	{
+		delete[] mAudioData;
+	}
 }
 
 int VorbisPlayback::GetVorbisData(int sizeToRead)
@@ -216,11 +231,15 @@ void LoadVorbisTrack(int track)
 		return;
 
 	// if user enters 1, decrement to 0 to align to array (enters 2, decrement to 1 etc)
-	if (track != 0) 
+	if (track != 0)
 		track--;
 
 	inGameMusic = new VorbisPlayback;
-	inGameMusic->Open(TrackList[track]);
+	if (!inGameMusic->Open(TrackList[track]))
+	{
+		delete inGameMusic;
+		inGameMusic = NULL;
+	}
 }
 
 bool LoadVorbisTrackList()

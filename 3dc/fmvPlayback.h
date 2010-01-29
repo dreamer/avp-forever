@@ -1,6 +1,10 @@
 #ifndef _fmvPlayback_h_
 #define _fmvPlayback_h_
 
+#ifdef _XBOX
+	#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
+#endif
+
 #include "d3_func.h"
 #include <fstream>
 #include <map>
@@ -55,7 +59,6 @@ class TheoraFMV
 		uint8_t	*mAudioData;
 		uint16_t *mAudioDataBuffer;
 		int	mAudioDataBufferSize;
-//		CRITICAL_SECTION mAudioCriticalSection;
 
 		// video
 		D3DTEXTURE mDisplayTexture;
@@ -108,6 +111,8 @@ class TheoraFMV
 		bool IsPlaying();
 		bool NextFrame();
 		bool NextFrame(int width, int height, uint8_t *bufferPtr, int pitch);
+		bool HandleTheoraHeader(OggStream* stream, ogg_packet* packet);
+		bool HandleVorbisHeader(OggStream* stream, ogg_packet* packet);
 };
 
 #endif

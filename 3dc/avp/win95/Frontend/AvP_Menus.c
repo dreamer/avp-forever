@@ -608,21 +608,22 @@ extern void AvP_UpdateMenus(void)
 		if (LobbiedGame)
 		{
 			extern char MP_PlayerName[];
-			retval=Net_ConnectingToLobbiedGame(MP_PlayerName);
-			if(!retval)
+			retval = Net_ConnectingToLobbiedGame(MP_PlayerName);
+			if (!retval)
 			{
-				//player has aborted , go back a menu
+				//player has aborted, go back a menu
 				SetupNewMenu(AVPMENU_MULTIPLAYER_LOBBIEDCLIENT);
-				return ;
+				return;
 			}	
 		}
 		else
 		{
-			if (Net_ConnectingToSession() != NET_OK)
+			retval = Net_ConnectingToSession();
+			if (retval == NET_FAIL)
 			{
-				//player has aborted , go back a menu
+				//player has aborted, go back a menu
 				SetupNewMenu(AVPMENU_MULTIPLAYER);
-				return ;
+				return;
 			}	
 		}
 
@@ -2311,7 +2312,6 @@ static void ActUponUsersInput(void)
 				}
 			}
 
-
 			if(AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 			{
 				SetupNewMenu(AVPMENU_INGAME);
@@ -2359,7 +2359,7 @@ static void ActUponUsersInput(void)
 						AvPMenus.CurrentlySelectedElement--;
 						if (AvPMenus.CurrentlySelectedElement<0)
 						{
-							AvPMenus.CurrentlySelectedElement= AvPMenus.NumberOfElementsInMenu-1;
+							AvPMenus.CurrentlySelectedElement = AvPMenus.NumberOfElementsInMenu-1;
 						}
 						Sound_Play(SID_MENUS_CHANGE_ITEM,"r");
 						break;
@@ -2371,7 +2371,6 @@ static void ActUponUsersInput(void)
 			{
 				KeyDepressedCounter += RealFrameTime;
 			}
-
 		}
 		else if (IDemandGoBackward()) // next element
 		{
@@ -2569,7 +2568,6 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 				{
 					*elementPtr->NumberPtr=elementPtr->MaxValue;
 				}
-				
 			}
 			else
 			{
@@ -2799,7 +2797,6 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 				DeleteMultiplayerConfigurationByIndex(MultiplayerConfigurationIndex);
 				//go back to the load config menu
 				SetupNewMenu(AVPMENU_MULTIPLAYER_LOADCONFIG);
-				
 			}
 			break;  
 		}
@@ -2840,7 +2837,6 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 				break;
 			}
 			/* else let it fall through */
-
 		}
 		case AVPMENU_ELEMENT_MARINEEPISODE:
 		{
@@ -2982,7 +2978,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 		{
 			if (interactionID == AVPMENU_ELEMENT_INTERACTION_SELECT)
 			{
-				extern int Net_HostGame(char *playerName, char *sessionName,int species,int gamestyle,int level);
+				extern int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle, int level);
 				extern char MP_PlayerName[];
 				extern char MP_SessionName[];
 				extern int MP_Species;
@@ -2999,7 +2995,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 				if (Net_HostGame(MP_PlayerName, MP_SessionName, MP_Species, netGameData.gameType, netGameData.levelNumber) != NET_FAIL)
 				{
 					AvPMenus.MenusState = MENUSSTATE_STARTGAME;
-					if (netGameData.gameType==NGT_Coop)
+					if (netGameData.gameType == NGT_Coop)
 						SetLevelToLoadForCooperative(netGameData.levelNumber);
 					else
 						SetLevelToLoadForMultiplayer(netGameData.levelNumber);
@@ -3037,10 +3033,11 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 				{
 					//copy the session name , leaving of the player count information
 					char * braket_pos;
-					strcpy(MP_SessionName,SessionData[s].Name);
+					strcpy(MP_SessionName, SessionData[s].Name);
 										
-					braket_pos=strrchr(MP_SessionName,'(');
-					if(braket_pos) *braket_pos=0;
+					braket_pos = strrchr(MP_SessionName,'(');
+					if (braket_pos) 
+						*braket_pos = 0;
 
 					if (Net_ConnectToSession(s, MP_PlayerName) != NET_FAIL)
 						SetupNewMenu(elementPtr->MenuToGoTo);
@@ -4646,9 +4643,7 @@ BOOL RollCreditsText(int position, unsigned char *textPtr)
 		char buffer1[96];
 		char buffer2[96];
 		int i;
-		int centredText,splitText;
-		
-										
+		int centredText,splitText;						
 		{
 			int yy = 60+y+position/2048;
 			
@@ -4690,7 +4685,6 @@ BOOL RollCreditsText(int position, unsigned char *textPtr)
 
 					textPtr++;
 					while(*textPtr=='\n') textPtr++;
-
 				}
 				
 				if (yy<92)
@@ -4722,7 +4716,6 @@ BOOL RollCreditsText(int position, unsigned char *textPtr)
 						RenderSmallMenuText(buffer1,MENU_LEFTXEDGE,yy,b,AVPMENUFORMAT_LEFTJUSTIFIED);
 					}
 				}
-
 			}
 			else
 			{

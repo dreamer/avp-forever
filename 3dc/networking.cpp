@@ -251,7 +251,8 @@ int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle
 		AvPNetID = 100;
 
 		ZeroMemory(&thisClientPlayer, sizeof(PlayerDetails));
-		strncpy(thisClientPlayer.name, playerName, PLAYER_NAME_SIZE);
+		strncpy(thisClientPlayer.name, playerName, PLAYER_NAME_SIZE-1);
+		thisClientPlayer.name[PLAYER_NAME_SIZE-1] = '\0';
 		thisClientPlayer.clanTag[0] = '\0';
 		thisClientPlayer.playerID = AvPNetID;
 		thisClientPlayer.playerType = 0; // ??
@@ -338,25 +339,25 @@ void Net_ConnectToAddress()
 	tempString = addressString.substr(0, colonPos);
 
 	enet_address_set_host(&connectionAddress, tempString.c_str());
-	connectionAddress.port = (short)StringToInt(addressString.substr(colonPos + 1));
+	connectionAddress.port = (uint16_t)StringToInt(addressString.substr(colonPos + 1));
 
 	// try connect
 	Client = enet_host_create(NULL,     // create a client host
                 1,                      // only allow 1 outgoing connection
-                incomingBandwidth,      // 57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth
-                outgoingBandwidth);     // 14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth
+                incomingBandwidth,      // 57600 / 8 - 56K modem with 56 Kbps downstream bandwidth
+                outgoingBandwidth);     // 14400 / 8 - 56K modem with 14 Kbps upstream bandwidth
 
 	if (Client == NULL)
     {
 		Con_PrintError("Net_ConnectToAddress - Failed to create Enet client");
-		return;// NET_FAIL;
+		return;
     }
 	
 	ServerPeer = enet_host_connect(Client, &connectionAddress, 2);
 	if (ServerPeer == NULL)
 	{
 		Con_PrintError("Net_ConnectToAddress - Failed to init connection to server host");
-		return;// NET_FAIL;
+		return;
 	}
 
 	// Wait up to 3 seconds for the connection attempt to succeed.
@@ -366,8 +367,8 @@ void Net_ConnectToAddress()
 	}
 	else
 	{
-		Con_PrintError("Net_ConnectToAddress - failed to connect to server!\n");
-		return;// NET_FAIL;
+		Con_PrintError("Net_ConnectToAddress - failed to connect to server!");
+		return;
 	}
 	
 	glpDP = 1;
@@ -463,8 +464,6 @@ void Net_ConnectToAddress()
 
 			netGameData.levelNumber = SessionData[NumberOfSessionsFound].levelIndex;
 			netGameData.joiningGameStatus = JOINNETGAME_WAITFORSTART;
-
-			return;
 		}
 	}
 
@@ -526,7 +525,7 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, int *da
 						enet_address_get_host_ip(&eEvent.peer->address, ipaddr, sizeof(ipaddr));
 
 						std::stringstream sstream;
-						sstream << "Enet got a connection from " << /*std::string(ipaddr)*/ipaddr << eEvent.peer->address.port;
+						sstream << "Enet got a connection from " << /*std::string(ipaddr)*/ipaddr << ":" << eEvent.peer->address.port;
 						OutputDebugString(sstream.str().c_str());
 						//sprintf(buf, "Enet got a connection from %s:%u\n", ipaddr, eEvent.peer->address.port);
 						//OutputDebugString(buf);
@@ -880,7 +879,7 @@ int Net_ConnectToSession(int sessionNumber, char *playerName)
 	InitAVPNetGameForJoin();
 
 	netGameData.levelNumber = SessionData[sessionNumber].levelIndex;
-	netGameData.joiningGameStatus = JOINNETGAME_WAITFORSTART;
+	netGameData.joiningGameStatus = JOINNETGAME_WAITFORDESC;
 	
 	return NET_OK;
 }
@@ -1265,9 +1264,8 @@ void Net_FindAvPSessions()
 #if 1
 
 	ENetPeer *Peer = NULL;
-	ENetEvent event;
+	ENetEvent eEvent;
 	uint8_t receiveBuffer[NET_MESSAGEBUFFERSIZE]; // can reduce this in size?
-	int messageType;
 	NET_SESSIONDESC tempSession;
 	char sessionName[100] = "";
 	char levelName[100] = "";
@@ -1299,22 +1297,22 @@ void Net_FindAvPSessions()
 	}
 
     // lets send a message out saying we're looking for available game sessions
-	if (enet_host_service(Client, &event, 1000) > 0) // this could probably be lower?
+	if (enet_host_service(Client, &eEvent, 1000) > 0) // this could probably be lower?
 	{
-		if (event.type == ENET_EVENT_TYPE_CONNECT)
+		if (ENET_EVENT_TYPE_CONNECT == eEvent.type)
 		{
 			Con_PrintDebugMessage("Net - Connected for Broadcast");
 
             // create broadcast header
 			messageHeader newHeader;
 			newHeader.messageType = AVP_BROADCAST;
-			newHeader.fromID = 255;
-			newHeader.toID = 255;
+			newHeader.fromID = NET_BROADCAST_ID;
+			newHeader.toID = NET_BROADCAST_ID;
 
 			memcpy(packetBuffer, &newHeader, sizeof(messageHeader));
 
 			// create ENet packet
-			ENetPacket * packet = enet_packet_create(packetBuffer, sizeof(messageHeader), ENET_PACKET_FLAG_RELIABLE);
+			ENetPacket *packet = enet_packet_create(packetBuffer, sizeof(messageHeader), ENET_PACKET_FLAG_RELIABLE);
 
 			enet_peer_send(Peer, 0, packet);
 			enet_host_flush(Client);
@@ -1322,26 +1320,25 @@ void Net_FindAvPSessions()
 	}
 	
 	// need to wait here for servers to respond with session info
-	while (enet_host_service (Client, &event, 3000) > 0)
+	while (enet_host_service (Client, &eEvent, 3000) > 0)
 	{
-		if (event.type == ENET_EVENT_TYPE_RECEIVE)
+		if (ENET_EVENT_TYPE_RECEIVE == eEvent.type)
 		{
-			memcpy(&receiveBuffer[0], static_cast<uint8_t*> (event.packet->data), event.packet->dataLength);
+			memcpy(&receiveBuffer[0], static_cast<uint8_t*> (eEvent.packet->data), eEvent.packet->dataLength);
 
             // grab the header from the packet
             messageHeader newHeader;
             memcpy(&newHeader, &receiveBuffer[0], sizeof(messageHeader));
-            messageType = newHeader.messageType;
 
-			if (AVP_SESSIONDATA == messageType)
+			if (AVP_SESSIONDATA == newHeader.messageType)
 			{
 				Con_PrintDebugMessage("Net - server sent us session data");
 
 				// get the hosts ip address for later use
-				enet_address_get_host_ip(&event.peer->address, SessionData[NumberOfSessionsFound].hostAddress, 16);
+				enet_address_get_host_ip(&eEvent.peer->address, SessionData[NumberOfSessionsFound].hostAddress, 16);
 
 				// grab the session description struct
-				assert(sizeof(NET_SESSIONDESC) == (event.packet->dataLength - MESSAGEHEADERSIZE));
+				assert(sizeof(NET_SESSIONDESC) == (eEvent.packet->dataLength - MESSAGEHEADERSIZE));
 				memcpy(&tempSession, &receiveBuffer[MESSAGEHEADERSIZE], sizeof(NET_SESSIONDESC));
 
 				gamestyle = (tempSession.level >> 8) & 0xff;
@@ -1409,7 +1406,7 @@ void Net_FindAvPSessions()
 			else
 			{
 				char message[100];
-				sprintf(buf, "Net - server sent us unknown data type: %d\n", messageType);
+				sprintf(buf, "Net - server sent us unknown data type: %d\n", newHeader.messageType);
 				std::string strMessage = message;
 				//Con_PrintError("Net - server sent us unknown data");
 				Con_PrintError(strMessage);

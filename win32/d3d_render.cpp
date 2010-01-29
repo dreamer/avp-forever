@@ -63,9 +63,9 @@ const DWORD D3DFVF_ORTHOVERTEX = D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1;
 
 struct ORTHOVERTEX 
 {
-	float x, y, z; // Position in 3d space 
-	DWORD colour;   // Colour  
-	float u, v;    // Texture coordinates 
+	float x, y, z;	 // Position in 3d space 
+	DWORD colour;    // Colour  
+	float u, v;      // Texture coordinates 
 };
 
 ORTHOVERTEX orthoVerts[4];
@@ -117,10 +117,10 @@ void DrawParticles()
 	}
 	int backup = RenderPolygon.NumberOfVertices;
 
-	/* sort particle array */
+	// sort particle array
 	std::sort(particleArray.begin(), particleArray.end());
 
-	/* loop particles and add them to vertex buffer */
+	// loop particles and add them to vertex buffer
 	for (int i = 0; i < particleArray.size(); i++)
 	{
 		RenderPolygon.NumberOfVertices = particleArray[i].numVerts;
@@ -129,7 +129,7 @@ void DrawParticles()
 
 	particleArray.resize(0);
 
-	/* restore RenderPolygon.NumberOfVertices value... */
+	// restore RenderPolygon.NumberOfVertices value...
 	RenderPolygon.NumberOfVertices = backup;
 }
 
@@ -7494,7 +7494,7 @@ extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, in
 
 void DrawFadeQuad(int topX, int topY, int alpha) 
 {
-	return;
+//	return;
 /*
 	// turn off texturing
 	LastError = d3d.lpD3DDevice->SetTexture(0,NULL);
@@ -8483,7 +8483,6 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 
 	// clamp if needed
 	if (alpha > 255) alpha = 255;
-
 	if (red > 255) red = 255;
 	if (green > 255) green = 255;
 	if (blue > 255) blue = 255;
@@ -8508,12 +8507,9 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0) * topX);
 	int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0) * topY);
 
-	topX = quadX;
-	topY = quadY;
-
 	// bottom left
-	mainVertex[vb].sx = (float)(topX) - 0.5f;
-	mainVertex[vb].sy = (float)(topY + quadHeight) - 0.5f;
+	mainVertex[vb].sx = (float)(quadX) - 0.5f;
+	mainVertex[vb].sy = (float)(quadY + quadHeight) - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8524,8 +8520,8 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	vb++;
 
 	// top left
-	mainVertex[vb].sx = (float)(topX) - 0.5f;
-	mainVertex[vb].sy = (float)(topY) - 0.5f;
+	mainVertex[vb].sx = (float)(quadX) - 0.5f;
+	mainVertex[vb].sy = (float)(quadY) - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8536,8 +8532,8 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	vb++;
 
 	// bottom right
-	mainVertex[vb].sx = (float)(topX + quadWidth) - 0.5f;
-	mainVertex[vb].sy = (float)(topY + quadHeight) - 0.5f;
+	mainVertex[vb].sx = (float)(quadX + quadWidth) - 0.5f;
+	mainVertex[vb].sy = (float)(quadY + quadHeight) - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8548,8 +8544,8 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	vb++;
 
 	// top right
-	mainVertex[vb].sx = (float)(topX + quadWidth) - 0.5f;
-	mainVertex[vb].sy = (float)(topY) - 0.5f;
+	mainVertex[vb].sx = (float)(quadX + quadWidth) - 0.5f;
+	mainVertex[vb].sy = (float)(quadY) - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8561,15 +8557,6 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 
 	OUTPUT_TRIANGLE(0,1,2, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
-
-/*
-	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_GLOWING);
-
-	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
-	if(FAILED(LastError)) {
-		OutputDebugString(" draw menu quad failed ");
-	}
-*/
 }
 
 void DrawBigChar(char c, int x, int y, int colour)
