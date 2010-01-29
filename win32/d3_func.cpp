@@ -1182,6 +1182,8 @@ BOOL InitialiseDirect3D()
 }
 #endif
 
+//#define USEREFDEVICE
+
 #ifdef USEREFDEVICE
 	LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWndMain,
 		D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);

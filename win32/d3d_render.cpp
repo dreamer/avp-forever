@@ -7912,7 +7912,7 @@ void DrawGlowyTest(int topX, int topY, int length, int alpha)
 #endif
 
 void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha) 
-{	
+{
 	CheckVertexBuffer(4, image_num, TRANSLUCENCY_GLOWING);
 
 	// textures actual height/width (whether it's non power of two or not)
@@ -7937,8 +7937,8 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 	int quadY = ((ScreenDescriptorBlock.SDB_Height / 480.0f) * topY);
 
 	// bottom left
-	mainVertex[vb].sx = (float)(quadX - 0.5f);
-	mainVertex[vb].sy = (float)((quadY + quadHeight) - 0.5f);
+	mainVertex[vb].sx = (float)(quadX) - 0.5f;
+	mainVertex[vb].sy = (float)(quadY + quadHeight) - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -7949,8 +7949,8 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 	vb++;
 
 	// top left
-	mainVertex[vb].sx = (float)(quadX - 0.5f);
-	mainVertex[vb].sy = (float)(quadY - 0.5f);
+	mainVertex[vb].sx = (float)(quadX) - 0.5f;
+	mainVertex[vb].sy = (float)(quadY) - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -7961,8 +7961,8 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 	vb++;
 
 	// bottom right
-	mainVertex[vb].sx = (float)((quadX + quadWidth) - 0.5f);
-	mainVertex[vb].sy = (float)((quadY + quadHeight) - 0.5f);
+	mainVertex[vb].sx = (float)(quadX + quadWidth) - 0.5f;
+	mainVertex[vb].sy = (float)(quadY + quadHeight) - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -7973,8 +7973,8 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 	vb++;
 
 	// top right
-	mainVertex[vb].sx = (float)((quadX + quadWidth) - 0.5f);
-	mainVertex[vb].sy = (float)(quadY - 0.5f);
+	mainVertex[vb].sx = (float)(quadX + quadWidth) - 0.5f;
+	mainVertex[vb].sy = (float)(quadY) - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -7983,7 +7983,7 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 	mainVertex[vb].tv = 0.0f;
 
 	vb++;
-	
+
 	OUTPUT_TRIANGLE(0,1,2, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
 }
@@ -7994,10 +7994,7 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 	int textureHeight = 0;
 	int texturePOW2Width = 0;
 	int texturePOW2Height = 0;
-//	D3DXMATRIX matTranslation;
-//  D3DXMATRIX matScaling;
-//  D3DXMATRIX matTransform;
-
+/*
 	LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
 	if (FAILED(LastError))
 	{
@@ -8009,7 +8006,7 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 	{
 		OutputDebugString("fail");
 	}
-
+*/
 	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
 		alpha = ONE_FIXED;
 
@@ -8033,13 +8030,6 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 
 	float x2 = ((float(topLeftX + textureWidth) / 640.0f) * 2) - 1;
 	float y2 = ((float(topLeftY + textureHeight) / 480.0f) * 2) - 1;
-
-
-//	D3DXMatrixScaling (&matScaling, (float)textureWidth - topLeftX, (float)textureHeight - topLeftY, 1.0f);
-//	D3DXMatrixTranslation (&matTranslation, topLeftX, topLeftY, 0.0f);
-//	D3DXMatrixTranslation (&matTranslation, X, Y, 0.0f);
-//	//D3DXMatrixMultiply(&matTransform, &matScaling, &matTranslation);
-//	matTransform = matScaling * matTranslation;
 
 	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 
@@ -8076,7 +8066,6 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 	orthoVerts[3].v = 0.0f;
 
 	d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
-	//d3d.lpD3DDevice->SetTransform (D3DTS_WORLD, &matTransform);
 	d3d.lpD3DDevice->SetTexture (0, AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].menuTexture);
 
 	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &orthoVerts[0], sizeof(ORTHOVERTEX));
@@ -8105,10 +8094,6 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 
 	x1 -= xoffset;
 	x2 -= xoffset;
-
-//	D3DXMatrixScaling (&matScaling, (float)textureWidth * size, (float)textureHeight, 1.0f);
-//	D3DXMatrixTranslation (&matTranslation, topLeftX, topLeftY, 0.0f);
-//	D3DXMatrixMultiply(&matTransform, &matScaling, &matTranslation);
 
 	colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 
@@ -8145,7 +8130,6 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 	orthoVerts[3].v = 0.0f;
 
 	d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
-//	d3d.lpD3DDevice->SetTransform (D3DTS_WORLD, &matTransform);
 	d3d.lpD3DDevice->SetTexture (0, AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].menuTexture);
 
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &orthoVerts[0], sizeof(ORTHOVERTEX));
@@ -8174,10 +8158,6 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 
 	x1 -= xoffset;
 	x2 -= xoffset;
-
-//	D3DXMatrixScaling (&matScaling, (float)textureWidth, (float)textureHeight, 1.0f);
-//	D3DXMatrixTranslation (&matTranslation, topLeftX, topLeftY, 0.0f);
-//	D3DXMatrixMultiply(&matTransform, &matScaling, &matTranslation);
 
 	// bottom left
 	orthoVerts[0].x = x1;
@@ -8212,7 +8192,6 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 	orthoVerts[3].v = 0.0f;
 
 	d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
-//	d3d.lpD3DDevice->SetTransform (D3DTS_WORLD, &matTransform);
 	d3d.lpD3DDevice->SetTexture (0, AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].menuTexture);
 
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &orthoVerts[0], sizeof(ORTHOVERTEX));

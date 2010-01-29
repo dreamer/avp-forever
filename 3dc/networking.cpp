@@ -1212,6 +1212,9 @@ unsigned int __stdcall SessionSearch(void *args)
 				Con_PrintError(strMessage);
 				break;
 			}
+			
+			// destroy the packet
+			enet_packet_destroy(eEvent.packet);
 		}
 	}
 
