@@ -27,6 +27,20 @@ extern int NumberOfFMVTextures;
 #define MAX_NO_FMVTEXTURES 10
 extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 
+bool IsPowerOf2(int i) 
+{
+	if ((i & -i) == i) {
+		return true;
+	}
+	else return false;
+}
+
+int NearestSuperiorPow2(int i)
+{
+	int x = ((i - 1) & i);
+	return x ? NearestSuperiorPow2(x) : i << 1;
+}
+
 extern "C" {
 
 #define INITGUID
@@ -445,14 +459,33 @@ D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool)
 {
 	D3DTEXTURE destTexture = NULL;
 
-	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)width, (UINT*)height, NULL, usage, NULL, (D3DPOOL)pool);
+	int newWidth, newHeight;
 
-	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, usage, D3DFMT_X8R8G8B8, (D3DPOOL)pool, &destTexture, NULL);
+	// check if passed value is already a power of 2
+	if (!IsPowerOf2(*width)) 
+	{
+		newWidth = NearestSuperiorPow2(*width);
+	}
+	else { newWidth = *width; }
+
+	if (!IsPowerOf2(*height)) 
+	{
+		newHeight = NearestSuperiorPow2(*height);
+	}
+	else { newHeight = *height; }
+
+//	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)width, (UINT*)height, NULL, usage, NULL, (D3DPOOL)pool);
+
+//	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, usage, D3DFMT_X8R8G8B8, (D3DPOOL)pool, &destTexture, NULL);
+	LastError = d3d.lpD3DDevice->CreateTexture(newWidth, newHeight, 1, usage, D3DFMT_X8R8G8B8, (D3DPOOL)pool, &destTexture, NULL);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
+
+	*width = newWidth;
+	*height = newHeight;
 
 	return destTexture;
 }
@@ -508,23 +541,24 @@ D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *realHeig
 
 	D3DCOLOR pad_colour = D3DCOLOR_ARGB(255, 255, 0, 255);
 
-/*
 	// check if passed value is already a power of 2
-	if (!IsPowerOf2(tex->width)) {
+	if (!IsPowerOf2(tex->width)) 
+	{
 		new_width = NearestSuperiorPow2(tex->width);
 	}
 	else { new_width = original_width; }
 
-	if (!IsPowerOf2(tex->height)) {
+	if (!IsPowerOf2(tex->height)) 
+	{
 		new_height = NearestSuperiorPow2(tex->height);
 	}
 	else { new_height = original_height; }
 
 	// set passed in width and height values to be used later
-	(*real_height) = new_height;
-	(*real_width) = new_width;
-*/
-	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)&new_width, (UINT*)&new_height, NULL, 0, NULL, D3DPOOL_MANAGED);
+//	(*real_height) = new_height;
+//	(*real_width) = new_width;
+
+//	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)&new_width, (UINT*)&new_height, NULL, 0, NULL, D3DPOOL_MANAGED);
 
 	(*realHeight) = new_height;
 	(*realWidth) = new_width;
@@ -1181,8 +1215,6 @@ BOOL InitialiseDirect3D()
 	}
 }
 #endif
-
-//#define USEREFDEVICE
 
 #ifdef USEREFDEVICE
 	LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWndMain,

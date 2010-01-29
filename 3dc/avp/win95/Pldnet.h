@@ -151,7 +151,7 @@ typedef enum netgame_specialistcharactertype
 	NGSCT_Frisbee,
 	NGSCT_Pistols,
 }NETGAME_SPECIALISTCHARACTERTYPE;
-
+/*
 typedef enum netgame_connectiontype
 {
 	CONN_TCPIP,
@@ -160,7 +160,7 @@ typedef enum netgame_connectiontype
 	CONN_Modem,
 	CONN_Mplayer,
 }NETGAME_CONNECTIONTYPE;
-
+*/
 /* ---------------------------------------------------------------------
   Player data structure, and game description data structure
   ----------------------------------------------------------------------*/
@@ -263,8 +263,6 @@ typedef struct netgame_gamedata
 	int timeForRespawn; //seconds
 
 	int lastPointsBasedRespawn;
-		
-	
 	
 	BOOL sendDecals;
 	unsigned int needGameDescription :1;
@@ -283,13 +281,13 @@ typedef struct netgame_gamedata
 
 	//don't bother tring to synch strategies if the checksum values are different
 	int myStrategyCheckSum; 
-
+/*
 	unsigned int tcpip_available :1;
 	unsigned int ipx_available :1;
 	unsigned int modem_available :1;
 	unsigned int serial_available :1;
-
-	NETGAME_CONNECTIONTYPE connectionType;
+*/
+//	NETGAME_CONNECTIONTYPE connectionType;
 	
 	unsigned int landingNoise:1;
 

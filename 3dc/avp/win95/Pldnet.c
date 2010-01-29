@@ -54,7 +54,7 @@
 /*----------------------------------------------------------------------
   Some globals for use in this file
   ----------------------------------------------------------------------*/
-NETGAME_GAMEDATA netGameData=
+NETGAME_GAMEDATA netGameData =
 {
 	0,	//NETGAME_STATES myGameState;
 	0,	//NETGAME_CHARACTERTYPE myCharacterType;
@@ -142,12 +142,13 @@ NETGAME_GAMEDATA netGameData=
 	1,	//BOOL pistolInfiniteAmmo;
 	1,	//BOOL specialistPistols;
 	0,	//int myStrategyCheckSum; 
-
+/*
 	0,	//unsigned int tcpip_available :1;
 	0,	//unsigned int ipx_available :1;
 	0,	//unsigned int modem_available :1;
 	0,	//unsigned int serial_available :1;
-	0,	//NETGAME_CONNECTIONTYPE connectionType;
+*/
+//	0,	//NETGAME_CONNECTIONTYPE connectionType;
 
 	0,	//landingNoise:1;
 	0,	//int joiningGameStatus;
@@ -543,7 +544,7 @@ void InitAVPNetGameForHost(int species, int gamestyle, int level)
 		netGameData.gameDescriptionTimeDelay=0;
 
 		netGameData.sendTimer=0;
-		if(LobbiedGame || netGameData.connectionType==CONN_Modem)
+		if(LobbiedGame/* || netGameData.connectionType==CONN_Modem*/)
 		{
 			netGameData.sendFrequency=ONE_FIXED/15;
    	   		netGameData.sendDecals=FALSE;
@@ -647,7 +648,7 @@ void InitAVPNetGameForJoin(void)
 		netGameData.stateCheckTimeDelay=0;
 		netGameData.gameDescriptionTimeDelay=0;
 	
-		if(LobbiedGame || netGameData.connectionType==CONN_Modem)
+		if (LobbiedGame/* || netGameData.connectionType==CONN_Modem*/)
 		{
 			netGameData.sendFrequency=ONE_FIXED/15;
    	   		netGameData.sendDecals=FALSE;

@@ -774,7 +774,7 @@ AVPMENU AvPMenusData[]=
 	{AVPMENU_FONT_BIG,	TEXTSTRING_LEVELSELECT_TITLE,			AvPMenu_PredatorLevels,			AVPMENU_SINGLEPLAYER,	0},
 	
 	// AVPMENU_MULTIPLAYER
-	{AVPMENU_FONT_BIG,	TEXTSTRING_MAINMENU_MULTIPLAYER,		AvPMenu_Multiplayer,				AVPMENU_MULTIPLAYER_CONNECTION,	0},
+	{AVPMENU_FONT_BIG,	TEXTSTRING_MAINMENU_MULTIPLAYER,		AvPMenu_Multiplayer,				AVPMENU_MAIN,	0},
 
 	// AVPMENU_MULTIPLAYER_LOBBIEDSERVER
 	{AVPMENU_FONT_BIG,	TEXTSTRING_MAINMENU_MULTIPLAYER,		AvPMenu_Multiplayer_LobbiedServer,				AVPMENU_MAIN,	0},
@@ -904,12 +904,12 @@ extern void MakeSelectSessionMenu(void)
 		AvPMenu_MultiplayerSelectSession[0].TextDescription = TEXTSTRING_MULTIPLAYER_NOSESSIONSFOUND;
 		AvPMenu_MultiplayerSelectSession[0].MenuToGoTo = AVPMENU_MULTIPLAYERJOINGAME;
 		AvPMenu_MultiplayerSelectSession[0].HelpString = TEXTSTRING_MULTIPLAYER_NOSESSIONSFOUND_HELP;
-
+/*
 		if(netGameData.connectionType!=CONN_TCPIP)
 		{
 			AvPMenu_MultiplayerSelectSession[0].MenuToGoTo = AVPMENU_MULTIPLAYER;
 		}
-			
+*/			
 		i=1;
 	}
 	AvPMenu_MultiplayerSelectSession[i].ElementID = AVPMENU_ELEMENT_ENDOFMENU;
@@ -919,14 +919,17 @@ extern void MakeSelectSessionMenu(void)
 	For tcpip go back to chance to choose ip address.
 	Otherwise skip back to host/join menu
 	*/
-	if(netGameData.connectionType==CONN_TCPIP)
+
+//	if(netGameData.connectionType==CONN_TCPIP)
 	{
 		AvPMenusData[AVPMENU_MULTIPLAYERSELECTSESSION].ParentMenu=AVPMENU_MULTIPLAYERJOINGAME;
 	}
+/*
 	else
 	{
 		AvPMenusData[AVPMENU_MULTIPLAYERSELECTSESSION].ParentMenu=AVPMENU_MULTIPLAYER;
 	}
+*/
 }
 
 
@@ -1086,82 +1089,25 @@ extern void MakeUserProfileSelectMenu(void)
 
 extern void MakeConnectionSelectMenu()
 {
-	int pos=0;
+	AvPMenu_MultiplayerConnection[0].ElementID = AVPMENU_ELEMENT_CONNECTIONCHOICE;
+	AvPMenu_MultiplayerConnection[0].TextDescription = TEXTSTRING_MULTIPLAYER_TCPIP;
+	AvPMenu_MultiplayerConnection[0].MenuToGoTo = AVPMENU_MULTIPLAYER;
+//	AvPMenu_MultiplayerConnection[0].Value = CONN_TCPIP;
+	AvPMenu_MultiplayerConnection[0].HelpString = TEXTSTRING_MULTIPLAYER_PROTOCOL_HELP;
 
-//	if(netGameData.tcpip_available)
-	{
-		AvPMenu_MultiplayerConnection[pos].ElementID = AVPMENU_ELEMENT_CONNECTIONCHOICE;
-		AvPMenu_MultiplayerConnection[pos].TextDescription = TEXTSTRING_MULTIPLAYER_TCPIP;
-		AvPMenu_MultiplayerConnection[pos].MenuToGoTo = AVPMENU_MULTIPLAYER;
-		AvPMenu_MultiplayerConnection[pos].Value = CONN_TCPIP;
-		AvPMenu_MultiplayerConnection[pos].HelpString = TEXTSTRING_MULTIPLAYER_PROTOCOL_HELP;
-		pos++;
-	}
-/*
-	if(netGameData.ipx_available)
-	{
-		AvPMenu_MultiplayerConnection[pos].ElementID = AVPMENU_ELEMENT_CONNECTIONCHOICE;
-		AvPMenu_MultiplayerConnection[pos].TextDescription = TEXTSTRING_MULTIPLAYER_IPX;
-		AvPMenu_MultiplayerConnection[pos].MenuToGoTo = AVPMENU_MULTIPLAYER;
-		AvPMenu_MultiplayerConnection[pos].Value = CONN_IPX;
-		AvPMenu_MultiplayerConnection[pos].HelpString = TEXTSTRING_MULTIPLAYER_PROTOCOL_HELP;
-		pos++;
-	}
-	if(netGameData.modem_available)
-	{
-		AvPMenu_MultiplayerConnection[pos].ElementID = AVPMENU_ELEMENT_CONNECTIONCHOICE;
-		AvPMenu_MultiplayerConnection[pos].TextDescription = TEXTSTRING_MULTIPLAYER_MODEM;
-		AvPMenu_MultiplayerConnection[pos].MenuToGoTo = AVPMENU_MULTIPLAYER;
-		AvPMenu_MultiplayerConnection[pos].Value = CONN_Modem;
-		AvPMenu_MultiplayerConnection[pos].HelpString = TEXTSTRING_MULTIPLAYER_PROTOCOL_HELP;
-		pos++;
-	}
-	if(netGameData.serial_available)
-	{
-		AvPMenu_MultiplayerConnection[pos].ElementID = AVPMENU_ELEMENT_CONNECTIONCHOICE;
-		AvPMenu_MultiplayerConnection[pos].TextDescription = TEXTSTRING_MULTIPLAYER_SERIAL;
-		AvPMenu_MultiplayerConnection[pos].MenuToGoTo = AVPMENU_MULTIPLAYER;
-		AvPMenu_MultiplayerConnection[pos].Value = CONN_Serial;
-		AvPMenu_MultiplayerConnection[pos].HelpString = TEXTSTRING_MULTIPLAYER_PROTOCOL_HELP;
-		pos++;
-	}
-	#if MPLAYER_SUPPORT
-	//if(!LobbiedGame)
-    //Add an option for launching a game using mplayer
-    {
-		AvPMenu_MultiplayerConnection[pos].ElementID =	AVPMENU_ELEMENT_CONNECTIONCHOICE;
-		AvPMenu_MultiplayerConnection[pos].TextDescription = TEXTSTRING_MPLAYER_TEXT_1;
-		AvPMenu_MultiplayerConnection[pos].MenuToGoTo = AVPMENU_MULTIPLAYER;
-		AvPMenu_MultiplayerConnection[pos].Value = CONN_Mplayer;
-		 pos++;           
-    }
-	#endif
-*/	
-	if(pos==0)
-	{
-		//no available connections
-		AvPMenu_MultiplayerConnection[0].ElementID = AVPMENU_ELEMENT_GOTOMENU;
-		AvPMenu_MultiplayerConnection[0].TextDescription = TEXTSTRING_MULTIPLAYER_NOCONNECTIONS;
-		AvPMenu_MultiplayerConnection[0].MenuToGoTo = AVPMENU_MAIN;
-		AvPMenu_MultiplayerConnection[pos].HelpString = TEXTSTRING_MULTIPLAYER_NOCONNECTIONS_HELP;
-
-		pos=1;			
-	}
-	AvPMenu_MultiplayerConnection[pos].ElementID = AVPMENU_ELEMENT_ENDOFMENU;
+	AvPMenu_MultiplayerConnection[1].ElementID = AVPMENU_ELEMENT_ENDOFMENU;
 }
-
-
 
 extern void MakeOpenIPAddressMenu()
 {
-	IP_Address_Name[0]=0;
+	IP_Address_Name[0] = 0;
 	//determine whether the load ip address option should be available
-	if(BuildLoadIPAddressMenu())	
+	if (BuildLoadIPAddressMenu())	
 	{
-		AvPMenu_MultiplayerOpenAddress[3].ElementID=AVPMENU_ELEMENT_GOTOMENU;
+		AvPMenu_MultiplayerOpenAddress[3].ElementID = AVPMENU_ELEMENT_GOTOMENU;
 	}
 	else
 	{
-		AvPMenu_MultiplayerOpenAddress[3].ElementID=AVPMENU_ELEMENT_ENDOFMENU;
+		AvPMenu_MultiplayerOpenAddress[3].ElementID = AVPMENU_ELEMENT_ENDOFMENU;
 	}
 }

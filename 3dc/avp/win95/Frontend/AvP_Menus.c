@@ -935,7 +935,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 			netGameData.skirmishMode = FALSE;
 			
 			LoadMultiplayerConfiguration(GetTextString(TEXTSTRING_PREVIOUSGAME_FILENAME));
-			MP_Config_Description[0]=0;
+			MP_Config_Description[0] = 0;
 			
 			if (LobbiedGame)
 			{
@@ -951,8 +951,10 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 				return;
 			}
 
-			Net_EnumConnections();
-			MakeConnectionSelectMenu();
+			SetupNewMenu(AVPMENU_MULTIPLAYER);
+
+//			Net_EnumConnections();
+//			MakeConnectionSelectMenu();
 
 			break;
 		}
@@ -1015,19 +1017,40 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 			extern char CommandLineIPAddressString[]; 
 			strcpy(IPAddressString,CommandLineIPAddressString);
 			IP_Address_Name[0] = 0;
-
+/*
 			if(netGameData.connectionType!=CONN_TCPIP)  
 			{
 				////for non tcpip games skip to the select session menu
 				SetupNewMenu(AVPMENU_MULTIPLAYERSELECTSESSION);
 				return;
 			}
-
+*/
 			break;
 		}
 
 		case AVPMENU_MULTIPLAYER :
 		{
+			extern char MP_Config_Description[];
+			
+			//skirmishMode must be false
+			netGameData.skirmishMode = FALSE;
+
+			LoadMultiplayerConfiguration(GetTextString(TEXTSTRING_PREVIOUSGAME_FILENAME));
+			MP_Config_Description[0] = 0;
+
+			if (LobbiedGame)
+			{
+				//use alternative multiplayer menus for lobbied games
+				if (LobbiedGame == LobbiedGame_Server)
+				{
+					SetupNewMenu(AVPMENU_MULTIPLAYER_LOBBIEDSERVER);
+				}
+				else
+				{
+					SetupNewMenu(AVPMENU_MULTIPLAYER_LOBBIEDCLIENT);
+				}
+				return;
+			}
 			break;
 		}
 
@@ -3082,7 +3105,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 		{
 			if (interactionID == AVPMENU_ELEMENT_INTERACTION_SELECT)
 			{
- 				netGameData.connectionType=elementPtr->Value;
+// 				netGameData.connectionType=elementPtr->Value;
 /*
 				if(netGameData.connectionType == CONN_Mplayer)
 				{
