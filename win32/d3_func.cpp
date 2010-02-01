@@ -309,10 +309,12 @@ D3DTEXTURE CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	// default colour format
 	D3DFORMAT colourFormat = D3DFMT_R5G6B5;
 
-	if (ScreenDescriptorBlock.SDB_Depth == 16) {
+	if (ScreenDescriptorBlock.SDB_Depth == 16) 
+	{
 		colourFormat = D3DFMT_R5G6B5;
 	}
-	if (ScreenDescriptorBlock.SDB_Depth == 32) {
+	if (ScreenDescriptorBlock.SDB_Depth == 32)
+	{
 		colourFormat = D3DFMT_A8R8G8B8;
 	}
 
@@ -448,7 +450,8 @@ D3DTEXTURE CreateD3DTallFontTexture(AVPTEXTURE *tex)
 		return NULL;
 	}
 /*
-	if(FAILED(D3DXSaveTextureToFileA("tallfont.png", D3DXIFF_PNG, destTexture, NULL))) {
+	if (FAILED(D3DXSaveTextureToFileA("c:\\temp\\tallfont.png", D3DXIFF_PNG, destTexture, NULL)))
+	{
 		OutputDebugString("\n couldnt save tex to file");
 	}
 */
@@ -718,9 +721,9 @@ BOOL ReleaseVolatileResources()
 {
 	ReleaseAllFMVTexturesForDeviceReset();
 
-	SAFE_RELEASE(d3d.lpD3DBackSurface);
 	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
 	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
+	SAFE_RELEASE(d3d.lpD3DOrthoVertexBuffer);
 
 	return TRUE;
 }
@@ -739,6 +742,14 @@ BOOL CreateVolatileResources()
 
 	// create index buffer
 	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DIndexBuffer, NULL);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return FALSE;
+	}
+
+	// create our 2D vertex buffer
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(4 * 20 * sizeof(ORTHOVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_ORTHOVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoVertexBuffer, NULL);
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -777,7 +788,7 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 	d3d.d3dpp.BackBufferWidth = width;
 	d3d.d3dpp.BackBufferHeight = height;
 
-	// change the win32 window size
+	// change the window size
 	ChangeWindowsSize(width, height);
 
 	// try reset the device
@@ -787,10 +798,13 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 		// log an error message
 		std::stringstream sstream;
 		sstream << "Can't set resolution " << width << " x " << height << ". Setting default safe values";
-
 		Con_PrintError(sstream.str());
 
-		// this'll occur if the resolution width and height passed aren't usable on this devices attatched monitor
+		OutputDebugString(DXGetErrorString(LastError));
+		OutputDebugString(DXGetErrorDescription(LastError));
+		OutputDebugString("\n");
+
+		// this'll occur if the resolution width and height passed aren't usable on this device
 		if (D3DERR_INVALIDCALL == LastError)
 		{
 			// set some default, safe resolution?
@@ -842,6 +856,7 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 	ScreenDescriptorBlock.SDB_ClipDown  = height;
 
 	CreateVolatileResources();
+	SetExecuteBufferDefaults();
 
 	// set up projection matrix
 	D3DXMatrixPerspectiveFovLH( &matProjection, width / height, D3DX_PI / 2, 1.0f, 100.0f);
@@ -895,7 +910,7 @@ BOOL InitialiseDirect3D()
 	// Get adapter information for all available devices (vid card name, etc)
 	for (int i = 0; i < d3d.NumDrivers; i++)
 	{
-		LastError = d3d.lpD3D->GetAdapterIdentifier(i, D3DENUM_WHQL_LEVEL, &d3d.Driver[i].AdapterInfo);
+		LastError = d3d.lpD3D->GetAdapterIdentifier(i, /*D3DENUM_WHQL_LEVEL*/0, &d3d.Driver[i].AdapterInfo);
 		if (FAILED(LastError)) 
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
@@ -1216,6 +1231,8 @@ BOOL InitialiseDirect3D()
 }
 #endif
 
+//#define USEREFDEVICE
+
 #ifdef USEREFDEVICE
 	LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWndMain,
 		D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
@@ -1364,7 +1381,7 @@ BOOL InitialiseDirect3D()
 //	int standardWidth = 640;
 //	int wideScreenWidth = 852;
 
-	// se tup view matrix
+	// setup view matrix
 	D3DXMatrixIdentity( &matView );
 	D3DXVECTOR3 position = D3DXVECTOR3(-64.0f, 280.0f, -1088.0f);
 	D3DXVECTOR3 lookAt = D3DXVECTOR3(0.0f, 0.0f, 0.0f);

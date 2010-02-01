@@ -45,7 +45,6 @@ different way on the consoles, so I won't worry the PSX guys for now.
 #include "cheat.h"	
 #include "pldnet.h"								 
 #include "kshape.h"
-#include "krender.h"
 
 /* KJL 16:00:13 11/22/96 - One of my evil experiments....   */
 #define PENTIUM_PROFILING_ON 0

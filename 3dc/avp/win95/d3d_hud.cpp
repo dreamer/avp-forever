@@ -85,8 +85,6 @@ int ChromeImageNumber;
 int CloudyImageNumber;
 int BurningImageNumber;
 int HUDFontsImageNumber;
-//int RebellionLogoImageNumber;
-//int FoxLogoImageNumber;
 int MotionTrackerScale;
 int PredatorVisionChangeImageNumber;
 int PredatorNumbersImageNumber;

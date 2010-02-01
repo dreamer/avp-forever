@@ -329,7 +329,6 @@ void SoundSys_ChangeVolume(int volume)
   ----------------------------------------------------------------------------*/
 void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 {
-	char buf[100];
 	int newIndex;
 	int loop = 0;
 	int	*externalRef = NULL;
@@ -501,18 +500,6 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 	ActiveSounds[newIndex].volume = volume;
 	ActiveSounds[newIndex].pitch = pitch;
 	ActiveSounds[newIndex].externalRef = externalRef;
-
-	if (ActiveSounds[newIndex].externalRef)
-	{
-		if (ActiveSounds[newIndex].externalRef == (int*)0x0444AFA0)
-		{
-			OutputDebugString("blsfgdfg\n");
-		}
-		
-		sprintf(buf, "externalRef = %p\n", ActiveSounds[newIndex].externalRef);
-//		OutputDebugString(buf);
-	}
-
 	ActiveSounds[newIndex].loop = 1;
 	ActiveSounds[newIndex].marine_ignore=marine_ignore;
 	ActiveSounds[newIndex].reverb_off=reverb_off;
@@ -569,23 +556,27 @@ void Sound_Stop(int activeSoundNumber)
 {
 	SOUNDINDEX soundNo;
 
-	if(!SoundSwitchedOn) return;
+	if (!SoundSwitchedOn) 
+		return;
+
 	/* validate argument */
-	if(activeSoundNumber<0) return;
-	if(activeSoundNumber>=SOUND_MAXACTIVE) return;
+	if (activeSoundNumber < 0) 
+		return;
+
+	if (activeSoundNumber >= SOUND_MAXACTIVE)
+		return;
 
 	/* Check there's a sound in this slot */
-	if(ActiveSounds[activeSoundNumber].soundIndex == SID_NOSOUND) return;
+	if (ActiveSounds[activeSoundNumber].soundIndex == SID_NOSOUND)
+		return;
 
 	/* update game sound instances, and external reference */
 	soundNo = ActiveSounds[activeSoundNumber].soundIndex;
 	GameSounds[soundNo].activeInstances--;
-	db_assert1((GameSounds[soundNo].activeInstances>=0)&&
-				(GameSounds[soundNo].activeInstances<SOUND_MAXINSTANCES));
-	if(ActiveSounds[activeSoundNumber].externalRef)
+	db_assert1((GameSounds[soundNo].activeInstances>=0) && (GameSounds[soundNo].activeInstances<SOUND_MAXINSTANCES));
 	
-//	{}
-	/* FIXME - causes crash on end of level before queen for marine. commented out for now */
+	// FIXME - TYRARGO CRASH. causes crash on end of level before queen for marine. commented out for now.
+	if (ActiveSounds[activeSoundNumber].externalRef)
 		*(ActiveSounds[activeSoundNumber].externalRef) = SOUND_NOACTIVEINDEX;      
 			
 	/* stop the sound: it may have already stopped, of course, but never mind */

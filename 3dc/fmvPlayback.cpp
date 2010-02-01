@@ -106,6 +106,8 @@ TheoraFMV::~TheoraFMV()
 {
 	if (mFmvPlaying)
 		mFmvPlaying = false;
+
+	OutputDebugString("CALLED DECONSTRUCTOR FOR FMV!\n");
 		
 	// wait for decode thread to finish
 	if (mDecodeThreadHandle)
@@ -121,8 +123,8 @@ TheoraFMV::~TheoraFMV()
 		CloseHandle(mAudioThreadHandle);
 	}
 	
-	int ret = ogg_sync_clear(&mState);
-	assert(ret == 0);
+//FIXME	int ret = ogg_sync_clear(&mState);
+//	assert(ret == 0);
 
 	if (mAudioStream)
 	{
@@ -151,8 +153,6 @@ TheoraFMV::~TheoraFMV()
 		DeleteCriticalSection(&mFrameCriticalSection);
 		mFrameCriticalSectionInited = false;
 	}
-
-	OutputDebugString("CALLED DECONSTRUCTOR FOR FMV!\n");
 }
 
 void TheoraDecode::Init()

@@ -65,6 +65,16 @@ typedef struct _D3DTLVERTEX {
 
 #define D3DFVF_TLVERTEX	(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_SPECULAR | D3DFVF_TEX1)
 
+// orthographic quad vertex format
+#define D3DFVF_ORTHOVERTEX (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1)
+
+typedef struct ORTHOVERTEX 
+{
+	float x, y, z;	 // Position in 3d space 
+	DWORD colour;    // Colour  
+	float u, v;      // Texture coordinates 
+} ORTHOVERTEX;
+
 // 32bit RGBA to 32bit D3DFMT_A8R8G8B8 format
 #define RGB16(r, g, b) ( ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3))
 

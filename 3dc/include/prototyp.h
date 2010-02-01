@@ -645,10 +645,6 @@ typedef struct viewdescriptorblock {
 	int VDB_HInterval;
 
 	int VDB_HColour;						/* "Sky" */
-	int VDB_HColour8;						/* For 8-bit colour indirected modes */
-
-	int VDB_HGColour;						/* "Ground" */
-	int VDB_HGColour8;					/* For 8-bit colour indirected modes */
 
 	int VDB_Ambience;
 

@@ -394,7 +394,7 @@ void Convert_Marine_To_Corpse(STRATEGYBLOCK *sbPtr,DEATH_DATA *this_death) {
 	if(marineStatusPointer->soundHandle2!=SOUND_NOACTIVEINDEX) {
 		/* soundHandle2 is the voice! */
 		corpseDataPtr->SoundHandle2=marineStatusPointer->soundHandle2;
-		ActiveSounds[marineStatusPointer->soundHandle2].externalRef=&corpseDataPtr->SoundHandle2;
+		ActiveSounds[marineStatusPointer->soundHandle2].externalRef = &corpseDataPtr->SoundHandle2;
 	}
 	Dispel_HModel(&marineStatusPointer->HModelController);
 	DeallocateMem(sbPtr->SBdataptr);

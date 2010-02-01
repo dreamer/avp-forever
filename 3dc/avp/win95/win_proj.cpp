@@ -544,7 +544,7 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 			NULL
 		);
 
-		AdjustWindowRect(&clientRect, GetWindowLong( hWndMain, GWL_STYLE ), FALSE );
+		AdjustWindowRect(&clientRect, GetWindowLongPtr( hWndMain, GWL_STYLE ), FALSE );
 		SetWindowPos(hWndMain, 0, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, SWP_SHOWWINDOW);
 	}
 	else if (WindowMode == WindowModeFullScreen)
@@ -603,7 +603,7 @@ void ChangeWindowsSize(int width, int height)
 	newWindowSize.right = width;
 	newWindowSize.bottom = height;
 
-	AdjustWindowRect(&newWindowSize, GetWindowLong( hWndMain, GWL_STYLE ), FALSE );
+	AdjustWindowRect(&newWindowSize, GetWindowLongPtr( hWndMain, GWL_STYLE ), FALSE );
 
 	if (SetWindowPos(hWndMain, 0, 0, 0, newWindowSize.right - newWindowSize.left, newWindowSize.bottom - newWindowSize.top, SWP_SHOWWINDOW) == 0)
 	{	

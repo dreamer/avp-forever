@@ -5,8 +5,6 @@
 
 #include "inline.h"
 #include "module.h"
-#include "krender.h"
-
 #include "chnktexi.h"
 #include "d3d_hud.h"
 #define UseLocalAssert TRUE
@@ -20,73 +18,13 @@
 #define Output_TLT_File				FALSE
 #endif
 
-#define Output_VEA_File				FALSE
-
-#define Proper_8Bit_MIP FALSE
-
-#define DontLet222ColoursGoToBlack TRUE
-
 #define textprintOn TRUE
 
-#define DHMtextprint TRUE
-	/* define to use Dave Malcolm's replacement textprint routines */
-
-
-/* As specified by Roxby */
-#define ClearScreenColour 1000
-
-/*
-   To filter frame rate values from
-   Windows timer to provide a smoother
-   ride.  This may make some AI systems
-   etc behave better, though it will take
-   some time to catch up if there is a genuine
-   abrupt transition in the frame rate.
-
-   There may also be some sort of convergence
-   instability here!!!! IMPORTANT
-   FIXME!!!! (possibly)
-
-   Although this code was derived from
-   some of Jamie's filter algorithms, I have
-   mangled it hideously, so _don't blame him_!
-*/
-
-#define KalmanTimer FALSE
-
-/*
-  Experiment to try and fix mystery driver problems
-  Don't set with ForceWindowsPalette on!!!
-  Leave this on!!!
-  On some video cards it seems necessary not only to
-  set palette on vblanking interval, but also AFTER
-  D3D initialisation is complete...
-*/
-
-#define ChangePaletteOnVBAlways TRUE
-
-/*
-	Turn on or off checking for the validity
-	of a video mode before switching to it.
-	Actually causes problems on some systems
-	because the DirectDraw enumerator fails to
-	report valid modes (although on other systems
-	it can report ones that can't be reached, ho
-	hum), so at least for Chris H. it needs to be
-	turned off.
-	NOTE THAT THIS SHOULD HAVE THE SAME SETTING AS
-	CheckVideoModes at the start of dd_func.cpp, at
-	least until we make it a system.h value or
-	something else sensible...
-*/
-
-#define CheckVideoModes FALSE
+#define DHMtextprint TRUE /* define to use Dave Malcolm's replacement textprint routines */
 
 
 /*
-
- externs for commonly used global variables and arrays
-
+	externs for commonly used global variables and arrays
 */
 
 extern SCENE Global_Scene;

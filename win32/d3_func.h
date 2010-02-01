@@ -43,12 +43,13 @@ typedef struct D3DInfo {
     LPDIRECT3D9				lpD3D;
     LPDIRECT3DDEVICE9		lpD3DDevice; 
     D3DVIEWPORT9			D3DViewport; 
-	LPDIRECT3DSURFACE9		lpD3DBackSurface;// back buffer surface
-	D3DSURFACE_DESC			backSurfaceDesc; // back buffer surface description
 	D3DPRESENT_PARAMETERS	d3dpp;
 
 	LPDIRECT3DVERTEXBUFFER9 lpD3DVertexBuffer;
 	LPDIRECT3DINDEXBUFFER9	lpD3DIndexBuffer;
+
+	LPDIRECT3DVERTEXBUFFER9 lpD3DOrthoVertexBuffer;
+
     int						NumDrivers;
     int						CurrentDriver;
     D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS];
@@ -105,7 +106,7 @@ void DrawCloudTable(int topX, int topY, int word_length, int alpha);
 void DrawFadeQuad(int topX, int topY, int alpha);
 void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha);
 void DrawProgressBar(RECT src_rect, RECT dest_rect, D3DTEXTURE bar_texture, int original_width, int original_height, int new_width, int new_height);
-void DrawQuad(int x, int y, int width, int height, int colour);
+void DrawQuad(int x, int y, int width, int height, int textureID, int colour);
 void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 void ReleaseD3DTexture(D3DTEXTURE *d3dTexture);
 void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture);

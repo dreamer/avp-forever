@@ -398,27 +398,27 @@ int PlatStartSoundSys()
 
 //	return 0;
 
-	CoInitializeEx( NULL, COINIT_MULTITHREADED );
+	CoInitializeEx (NULL, COINIT_MULTITHREADED);
 
 	UINT32 flags = 0;
 
 #ifdef _DEBUG
-	flags |= XAUDIO2_DEBUG_ENGINE;
+//	flags |= XAUDIO2_DEBUG_ENGINE;
 #endif
 
 	// Initialise XAudio2
-	LastError = XAudio2Create( &pXAudio2, flags );
+	LastError = XAudio2Create (&pXAudio2, flags);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Couldn't initialise XAudio2");
-		LogDxError(LastError, __LINE__, __FILE__);
+		LogDxError (LastError, __LINE__, __FILE__);
 		PlatEndSoundSys();
 		return 0;
 	}
 
 	// Enumerate devices
 	UINT32 deviceCount;
-	pXAudio2->GetDeviceCount(&deviceCount);
+	pXAudio2->GetDeviceCount (&deviceCount);
 /*
 	XAUDIO2_DEVICE_DETAILS deviceDetails;
 	int preferredDevice = 0;
@@ -433,22 +433,22 @@ int PlatStartSoundSys()
 	}
 */
 	// Create a mastering voice
-	LastError = pXAudio2->CreateMasteringVoice( &pMasteringVoice );
+	LastError = pXAudio2->CreateMasteringVoice (&pMasteringVoice);
 	if (FAILED(LastError))
 	{
-		Con_PrintError("Couldn't create XAudio2 Mastering Voice");
-		LogDxError(LastError, __LINE__, __FILE__);
+		Con_PrintError ("Couldn't create XAudio2 Mastering Voice");
+		LogDxError (LastError, __LINE__, __FILE__);
 		PlatEndSoundSys();
 		return 0;
 	}
 
 	// Get the device details
 	XAUDIO2_DEVICE_DETAILS deviceDetails;
-	LastError = pXAudio2->GetDeviceDetails(0, &deviceDetails);
+	LastError = pXAudio2->GetDeviceDetails (0, &deviceDetails);
 	if (FAILED(LastError))
 	{
-		Con_PrintError("Couldn't get XAudio2 device details");
-		LogDxError(LastError, __LINE__, __FILE__);
+		Con_PrintError ("Couldn't get XAudio2 device details");
+		LogDxError (LastError, __LINE__, __FILE__);
 		PlatEndSoundSys();
 		return 0;
 	}
@@ -457,7 +457,7 @@ int PlatStartSoundSys()
 
 	// Initialise X3DAudio
 	const float SPEEDOFSOUND = X3DAUDIO_SPEED_OF_SOUND;
-	X3DAudioInitialize( deviceDetails.OutputFormat.dwChannelMask, SPEEDOFSOUND, x3DInstance );
+	X3DAudioInitialize (deviceDetails.OutputFormat.dwChannelMask, SPEEDOFSOUND, x3DInstance);
 
 	// Set up the listener
 	XA2Listener.Position.x = 0.0f;
@@ -534,12 +534,12 @@ void PlatEndSoundSys()
 
 	if (XA2DSPSettings.pMatrixCoefficients)
 	{
-		delete []XA2DSPSettings.pMatrixCoefficients;
+		delete[] XA2DSPSettings.pMatrixCoefficients;
 		XA2DSPSettings.pMatrixCoefficients = NULL;
 	}
 
 	pXAudio2->StopEngine();
-	SAFE_RELEASE(pXAudio2);
+	SAFE_RELEASE (pXAudio2);
 	CoUninitialize();
 }
 
@@ -550,7 +550,7 @@ int PlatChangeGlobalVolume(int volume)
 
 	LOCALASSERT((volume >= VOLUME_MIN) && (volume <= VOLUME_MAX));
 
-	LastError = pMasteringVoice->SetVolume(vol_to_gain_table[volume], XAUDIO2_COMMIT_NOW);
+	LastError = pMasteringVoice->SetVolume (vol_to_gain_table[volume], XAUDIO2_COMMIT_NOW);
 	if (FAILED(LastError))
 	{
 		return SOUND_PLATFORMERROR;
@@ -563,10 +563,10 @@ int PlatPlaySound(int activeIndex)
 	SOUNDINDEX gameIndex;
 
 	/* check bounds of active sound index */
-	LOCALASSERT((activeIndex>=0)||(activeIndex<SOUND_MAXACTIVE));
+	LOCALASSERT ((activeIndex >= 0) || (activeIndex < SOUND_MAXACTIVE));
 	gameIndex = ActiveSounds[activeIndex].soundIndex;
-	LOCALASSERT((gameIndex>=0)&&(gameIndex<SID_MAXIMUM));	
-	LOCALASSERT(GameSounds[gameIndex].loaded);
+	LOCALASSERT ((gameIndex >= 0) && (gameIndex < SID_MAXIMUM));	
+	LOCALASSERT (GameSounds[gameIndex].loaded);
 
 	// duplicate the game sound buffer
 	ActiveSounds[activeIndex].audioBuffer = GameSounds[gameIndex].audioBuffer;
@@ -600,10 +600,10 @@ int PlatPlaySound(int activeIndex)
 	/* may need to initialise pitch before playing */
 	if (ActiveSounds[activeIndex].pitch != GameSounds[gameIndex].pitch)
 	{
-		int ok = PlatChangeSoundPitch(activeIndex, ActiveSounds[activeIndex].pitch);
+		int ok = PlatChangeSoundPitch (activeIndex, ActiveSounds[activeIndex].pitch);
 		if (ok == SOUND_PLATFORMERROR)
 		{
-		   	PlatStopSound(activeIndex);
+		   	PlatStopSound (activeIndex);
 			return SOUND_PLATFORMERROR;
 		}
 	}
@@ -637,10 +637,10 @@ int PlatPlaySound(int activeIndex)
 		}
 
 		/* 3d sounds always need initialising */
-		ok = PlatDo3dSound(activeIndex);
+		ok = PlatDo3dSound (activeIndex);
 		if (ok == SOUND_PLATFORMERROR)
 		{
-		   	PlatStopSound(activeIndex);
+		   	PlatStopSound (activeIndex);
 			return SOUND_PLATFORMERROR;
 		}
 	}
@@ -662,10 +662,10 @@ int PlatPlaySound(int activeIndex)
 		ActiveSounds[activeIndex].xa2Emitter.Velocity.y = 0.0f; //?
 		ActiveSounds[activeIndex].xa2Emitter.Velocity.z = 0.0f; //?
 		
-		ok = PlatChangeSoundVolume(activeIndex, ActiveSounds[activeIndex].volume);
+		ok = PlatChangeSoundVolume (activeIndex, ActiveSounds[activeIndex].volume);
 		if (ok == SOUND_PLATFORMERROR)
 		{
-		   	PlatStopSound(activeIndex);
+		   	PlatStopSound (activeIndex);
 			return SOUND_PLATFORMERROR;
 		}
 	}
@@ -725,14 +725,14 @@ int PlatPlaySound(int activeIndex)
 		LastError = ActiveSounds[activeIndex].pSourceVoice->SubmitSourceBuffer(&ActiveSounds[activeIndex].xa2Buffer);
 		if (FAILED(LastError))
 		{
-			LogDxError(LastError, __LINE__, __FILE__);
+			LogDxError (LastError, __LINE__, __FILE__);
 			return SOUND_PLATFORMERROR;	
 		}
 
 		LastError = ActiveSounds[activeIndex].pSourceVoice->Start(0, XAUDIO2_COMMIT_NOW);
 		if (FAILED(LastError))
 		{
-			LogDxError(LastError, __LINE__, __FILE__);
+			LogDxError (LastError, __LINE__, __FILE__);
 			if (GameSounds[gameIndex].flags & SAMPLE_IN_HW)
 			{
 				db_log3("Failed to play a sample in Hardware");
@@ -766,11 +766,14 @@ void PlatStopSound(int activeIndex)
 		return;
 	
 	if (!ActiveSounds[activeIndex].paused)
+	{
 		ActiveSounds[activeIndex].pSourceVoice->Stop();
+		ActiveSounds[activeIndex].pSourceVoice->FlushSourceBuffers();
+	}
 
 	ActiveSounds[activeIndex].is3D = FALSE;
 	ActiveSounds[activeIndex].audioBuffer = NULL; // GameSounds has the original reference to this memory
-	memset(&ActiveSounds[activeIndex].xa2Emitter, 0, sizeof(X3DAUDIO_EMITTER));
+	ActiveSounds[activeIndex].pSourceVoice = NULL;
 }
 
 /* Patrick 15/6/97 -------------------------------------------------------------
@@ -784,7 +787,7 @@ void PlatStopSound(int activeIndex)
   ----------------------------------------------------------------------------*/
 int PlatChangeSoundVolume(int activeIndex, int volume)
 {
-	LastError = ActiveSounds[activeIndex].pSourceVoice->SetVolume(vol_to_gain_table[volume], XAUDIO2_COMMIT_NOW);
+	LastError = ActiveSounds[activeIndex].pSourceVoice->SetVolume (vol_to_gain_table[volume], XAUDIO2_COMMIT_NOW);
 	if (FAILED(LastError))
 	{
 		return SOUND_PLATFORMERROR;
@@ -999,10 +1002,10 @@ int PlatDo3dSound(int activeIndex)
 			LOCALASSERT((angle>=0)&&(angle<=4095)); 
 		
 			/* map angle to range +- 1024 */
-			if (angle>1024)
+			if (angle > 1024)
 			{
-				if(angle<=3072) angle = (2048-angle); /*quadrants 2 & 3*/
-				else angle = (angle-4096);	  /* quadrant 4 */
+				if (angle <= 3072) angle = (2048 - angle); /*quadrants 2 & 3*/
+				else angle = (angle - 4096);	  /* quadrant 4 */
 			}
 			LOCALASSERT((angle>=-1024)&&(angle<=1024));	
 			/* now scale pan to angle */
@@ -1040,7 +1043,7 @@ void PlatEndGameSound(SOUNDINDEX index)
 
 	if (GameSounds[index].audioBuffer)
 	{
-		delete []GameSounds[index].audioBuffer;
+		delete[] GameSounds[index].audioBuffer;
 		GameSounds[index].audioBuffer = NULL;
 	}
 
@@ -1242,14 +1245,14 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		
 	{
 		/* Now set the buffer description and make a sound object */	
-		GameSounds[soundNum].audioBuffer = new byte[myChunkHeader.chunkLength];
+		GameSounds[soundNum].audioBuffer = new uint8_t[myChunkHeader.chunkLength];
 
 		/* Read data from file to buffer */
 		res = fread(GameSounds[soundNum].audioBuffer, 1, myChunkHeader.chunkLength, myFile);
 		if (res != (size_t)myChunkHeader.chunkLength)
 		{
 			LOCALASSERT(1==0);
-			delete []GameSounds[soundNum].audioBuffer;
+			delete[] GameSounds[soundNum].audioBuffer;
 			GameSounds[soundNum].audioBuffer = NULL;
 			fclose(myFile);
 			return 0;
@@ -1408,7 +1411,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	}	
 		
 	{
-		GameSounds[soundNum].audioBuffer = new byte[myChunkHeader.chunkLength];
+		GameSounds[soundNum].audioBuffer = new uint8_t[myChunkHeader.chunkLength];
 
 		/* Read data from file to buffer */
 		res = ffread(GameSounds[soundNum].audioBuffer, 1, myChunkHeader.chunkLength, myFile);
@@ -1830,7 +1833,7 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 	}	
 		
 	{
-		GameSounds[soundIndex].audioBuffer = new byte[myChunkHeader.chunkLength];
+		GameSounds[soundIndex].audioBuffer = new uint8_t[myChunkHeader.chunkLength];
 
 		/* Read data from file to buffer */
 		RebSndRead(GameSounds[soundIndex].audioBuffer, 1, myChunkHeader.chunkLength, bufferPtr);
@@ -2066,7 +2069,7 @@ int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
 	assert (streamStruct);
 
 	XAUDIO2_VOICE_STATE state;
-	streamStruct->pSourceVoice->GetState( &state );
+	streamStruct->pSourceVoice->GetState(&state);
 
 	return streamStruct->bufferCount - state.BuffersQueued;
 }
@@ -2076,7 +2079,7 @@ UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
 	assert (streamStruct);
 
 	XAUDIO2_VOICE_STATE state;
-	streamStruct->pSourceVoice->GetState( &state );
+	streamStruct->pSourceVoice->GetState(&state);
 
 	return state.SamplesPlayed;
 }
@@ -2094,7 +2097,7 @@ int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)
 
 	XAUDIO2_VOICE_STATE state;
 
-	streamStruct->pSourceVoice->GetState( &state );
+	streamStruct->pSourceVoice->GetState(&state);
 
 	return ((streamStruct->bufferSize * streamStruct->bufferCount) - (state.BuffersQueued * streamStruct->bufferSize));
 }

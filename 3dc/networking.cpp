@@ -299,13 +299,7 @@ void Net_Disconnect()
 
 	return;
 }
-/*
-void Net_EnumConnections()
-{
-	// just set this here for now
-	netGameData.tcpip_available = 1;
-}
-*/
+
 int Net_JoinGame()
 {	
 	assert (net_IsInitialised);

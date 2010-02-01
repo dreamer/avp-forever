@@ -32,7 +32,6 @@
 #include "equipmnt.h"
 #include "bh_agun.h"
 #include "los.h"
-#include "krender.h"
 #include "pldnet.h"
 #include "BonusAbilities.h"
 #include "avp_menus.h"

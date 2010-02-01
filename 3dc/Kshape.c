@@ -32,6 +32,8 @@
 #include "detaillevels.h"
 #include "avp_userprofile.h"
 
+#include "d3dx9.h"
+
 #define ALIENS_LIFEFORCE_GLOW_COLOUR 0x20ff8080
 #define MARINES_LIFEFORCE_GLOW_COLOUR 0x208080ff
 #define PREDATORS_LIFEFORCE_GLOW_COLOUR 0x2080ff80
@@ -4057,6 +4059,9 @@ extern void TranslationSetup(void)
 	float o = 1.0f;
 	p = 1.0f+p;
 
+	sprintf(buf, "CameraZoomScale: %f\n", CameraZoomScale);
+	OutputDebugString(buf);
+
 	if (NAUSEA_CHEATMODE)
 	{
 		p = (GetSin((CloakingPhase / 3)&4095)) / 65536.0f;
@@ -4066,25 +4071,28 @@ extern void TranslationSetup(void)
 		o = 1.0f + o*o;
 	}
 
+	// right vector
 	ViewMatrix[0] = (float)(Global_VDB_Ptr->VDB_Mat.mat11)/65536.0f*o;
 	ViewMatrix[1] = (float)(Global_VDB_Ptr->VDB_Mat.mat21)/65536.0f*o;
 	ViewMatrix[2] = (float)(Global_VDB_Ptr->VDB_Mat.mat31)/65536.0f*o;
 
-	// orient-top?
+	// up vector
 	ViewMatrix[4] = (float)(Global_VDB_Ptr->VDB_Mat.mat12)*4.0f/(65536.0f*3.0f)*p;
 	ViewMatrix[5] = (float)(Global_VDB_Ptr->VDB_Mat.mat22)*4.0f/(65536.0f*3.0f)*p;
 	ViewMatrix[6] = (float)(Global_VDB_Ptr->VDB_Mat.mat32)*4.0f/(65536.0f*3.0f)*p;
 
-	// orient-front?
+	// front vector
 	ViewMatrix[8] = (float)(Global_VDB_Ptr->VDB_Mat.mat13)/65536.0f*CameraZoomScale;
 	ViewMatrix[9] = (float)(Global_VDB_Ptr->VDB_Mat.mat23)/65536.0f*CameraZoomScale;
 	ViewMatrix[10] = (float)(Global_VDB_Ptr->VDB_Mat.mat33)/65536.0f*CameraZoomScale;
 
 	RotateVector(&v, &Global_VDB_Ptr->VDB_Mat);
 
+	// position
 	ViewMatrix[3] = ((float)-v.vx)*o;
 	ViewMatrix[7] = ((float)-v.vy)*4.0f/3.0f*p;
 	ViewMatrix[11] = ((float)-v.vz)*CameraZoomScale;
+
 /*
 	sprintf(buf, 
 	"\t %f \t %f \t %f\n"
@@ -4093,19 +4101,21 @@ extern void TranslationSetup(void)
 	"\t %f \t %f \t %f\n",
 	ViewMatrix[0], ViewMatrix[1], ViewMatrix[2], 
 	ViewMatrix[3], ViewMatrix[4], ViewMatrix[5],
-	ViewMatrix[6], ViewMatrix[7], ViewMatrix[8], 
+	ViewMatrix[6], ViewMatrix[7], ViewMatrix[8],
 	ViewMatrix[9], ViewMatrix[10], ViewMatrix[11]);
 	OutputDebugString(buf);
-*/
 
+	ViewMatrix[0], ViewMatrix[1], ViewMatrix[2], ViewMatrix[3],
+	ViewMatrix[4], ViewMatrix[5], ViewMatrix[6], ViewMatrix[7],
+	ViewMatrix[8], ViewMatrix[9], ViewMatrix[10], ViewMatrix[11]
+*/
 
 	if (MIRROR_CHEATMODE)
 	{
-		ViewMatrix[0+0*4] = -ViewMatrix[0+0*4];
-		ViewMatrix[1+0*4] =	-ViewMatrix[1+0*4];
-		ViewMatrix[2+0*4] =	-ViewMatrix[2+0*4];
-		
-		ViewMatrix[3+0*4] =	-ViewMatrix[3+0*4];
+		ViewMatrix[0] = -ViewMatrix[0];
+		ViewMatrix[1] =	-ViewMatrix[1];
+		ViewMatrix[2] =	-ViewMatrix[2];
+		ViewMatrix[3] =	-ViewMatrix[3];
 	}
 }
 

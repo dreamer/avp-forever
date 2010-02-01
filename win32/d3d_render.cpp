@@ -52,23 +52,16 @@ extern int Font_DrawText(const char* text, int x, int y, int colour, int fontTyp
 const int MAX_VERTEXES = 4096;
 const int MAX_INDICES = 9216;
 
-D3DTLVERTEX *mainVertex;
-WORD *mainIndex;
+D3DTLVERTEX *mainVertex = NULL;
+WORD *mainIndex = NULL;
+
+ORTHOVERTEX *orthoVerts = NULL;
+static int numOrthoVerts = 0;
+static int orthoOffset = 0;
+static int orthoListCount = 0;
 
 // for quad rendering
 D3DTLVERTEX quadVert[4];
-
-// orthographic quad vertex format
-const DWORD D3DFVF_ORTHOVERTEX = D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1;
-
-struct ORTHOVERTEX 
-{
-	float x, y, z;	 // Position in 3d space 
-	DWORD colour;    // Colour  
-	float u, v;      // Texture coordinates 
-};
-
-ORTHOVERTEX orthoVerts[4];
 
 struct RENDER_STATES
 {
@@ -86,6 +79,19 @@ struct RENDER_STATES
 	bool operator<(const RENDER_STATES& rhs) const {return texture_id < rhs.texture_id;}
 //	bool operator<(const RENDER_STATES& rhs) const {return translucency_type < rhs.translucency_type;}
 };
+
+struct ORTHO_OBJECTS
+{
+	int32_t		textureID;
+	uint32_t	vertStart;
+	uint32_t	vertEnd;
+
+	enum TRANSLUCENCY_TYPE translucency_type;
+	enum FILTERING_MODE_ID filtering_type;
+};
+
+// array of 2d objects
+ORTHO_OBJECTS orthoList[40];
 
 struct renderParticle
 {
@@ -142,13 +148,14 @@ signed int currentWaterTexture = NO_TEXTURE;
 const int TALLFONT_TEX = 999;
 const int PROGRESS_TEX = 998;
 const int CONSOLE_TEX  = 997;
+const int FMV_TEX	   = 996;
 
 RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
 //std::vector<RENDER_STATES> renderTest;
 
 void DeleteRenderMemory()
 {
-	delete [] renderList;
+	delete[] renderList;
 }
 
 int NumVertices = 0;
@@ -158,8 +165,6 @@ int particleIndex = 0;
 unsigned int renderCount = 0;
 
 extern AVPIndexedFont IntroFont_Light;
-
-#define FUNCTION_ON 1
 
 const float Zoffset = 2.0f;
 
@@ -190,8 +195,11 @@ extern int StaticImageNumber;
 extern int AAFontImageNumber;
 extern int WaterShaftImageNumber;
 
-D3DTEXTURE FMVTextureHandle[4];
-D3DTEXTURE NoiseTextureHandle;
+//D3DTEXTURE FMVTextureHandle[4];
+//D3DTEXTURE NoiseTextureHandle;
+
+AVPTEXTURE FMVTextureHandle[4];
+AVPTEXTURE NoiseTextureHandle;
 
 int LightIntensityAtPoint(VECTORCH *pointPtr);
 
@@ -407,20 +415,8 @@ BOOL SetExecuteBufferDefaults()
 	d3d.lpD3DDevice->SetTextureStageState(1, D3DTSS_COLOROP,	D3DTOP_DISABLE);
 	d3d.lpD3DDevice->SetTextureStageState(1, D3DTSS_ALPHAOP,	D3DTOP_DISABLE);
 
-//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
-
-	LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
-	if (FAILED(LastError))
-	{
-		OutputDebugString("fail");
-	}
-
-	LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
-	if (FAILED(LastError))
-	{
-		OutputDebugString("fail");
-	}
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 
 	LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
 
@@ -541,7 +537,7 @@ void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE t
 //		renderTest.pop_back();
 		renderCount--;
 	}
-	else 
+	else
 	{
 		renderList[renderCount].vert_start = NumVertices;
 		renderList[renderCount].index_start = NumIndicies;
@@ -561,26 +557,28 @@ BOOL LockExecuteBuffer()
 	LastError = d3d.lpD3DVertexBuffer->Lock(0, 0, (void**)&mainVertex, D3DLOCK_DISCARD);
 	if (FAILED(LastError)) 
 	{
-//			OutputDebugString("Couldn't lock vertex buffer");
 		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
 
 
-	LastError = d3d.lpD3DIndexBuffer->Lock(0,0,(void**)&mainIndex,D3DLOCK_DISCARD);
+	LastError = d3d.lpD3DIndexBuffer->Lock(0, 0, (void**)&mainIndex, D3DLOCK_DISCARD);
 	if (FAILED(LastError)) 
 	{
-//		OutputDebugString("Couldn't lock index buffer");
-//		LogError("Unable to lock index buffer", LastError);
 		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
+
+	LastError = d3d.lpD3DOrthoVertexBuffer->Lock(0, 0, (void**)&orthoVerts, D3DLOCK_DISCARD);
 
 	NumVertices = 0;
 	NumIndicies = 0;
 	renderCount = 0;
 	vb = 0;
-
+	
+	orthoOffset = 0;
+	orthoListCount = 0;
+	
 //	renderTest.resize(0);
 
     return TRUE;
@@ -591,8 +589,6 @@ BOOL UnlockExecuteBufferAndPrepareForUse()
 	LastError = d3d.lpD3DVertexBuffer->Unlock();
 	if (FAILED(LastError)) 
 	{
-//		OutputDebugString("Couldn't UNlock vertex buffer!");
-//		LogError("Unable to unlock vertex buffer", LastError);
 		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
@@ -600,8 +596,13 @@ BOOL UnlockExecuteBufferAndPrepareForUse()
 	LastError = d3d.lpD3DIndexBuffer->Unlock();
 	if (FAILED(LastError)) 
 	{
-//		OutputDebugString("Couldn't UNlock vertex buffer!");
-//		LogError("Unable to unlock index buffer", LastError);
+		LogDxError(LastError, __LINE__, __FILE__);
+		return FALSE;
+	}
+
+	LastError = d3d.lpD3DOrthoVertexBuffer->Unlock();
+	if (FAILED(LastError)) 
+	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
@@ -609,14 +610,12 @@ BOOL UnlockExecuteBufferAndPrepareForUse()
 	return TRUE;
 }
 
-// Test for multiple execute buffers!!!!
 BOOL BeginD3DScene()
 {
 	// check for lost device
 	LastError = d3d.lpD3DDevice->TestCooperativeLevel();
 	if (FAILED(LastError)) 
 	{
-
 		ReleaseVolatileResources();
 		
 		// disable XInput
@@ -626,24 +625,20 @@ BOOL BeginD3DScene()
 		{
 			if (D3DERR_DEVICENOTRESET == LastError) 
 			{
-//				OutputDebugString("D3D device not reset\n");
-//				if (ReleaseVolatileResources() == TRUE) 
+				OutputDebugString("Releasing resources for a device reset..\n");
+
+				if (FAILED(d3d.lpD3DDevice->Reset(&d3d.d3dpp))) 
 				{
-					OutputDebugString("Releasing resources for a device reset..\n");
+					OutputDebugString("Couldn't reset device\n");
+				}
+				else 
+				{	
+					OutputDebugString("We have reset the device. recreating resources..\n");
+					CreateVolatileResources();
 
-					if (FAILED( d3d.lpD3DDevice->Reset(&d3d.d3dpp))) 
-					{
-						OutputDebugString("Couldn't reset device\n");
-					}
-					else 
-					{	
-						OutputDebugString("We have reset the device. recreating resources..\n");
-						CreateVolatileResources();
-
-						// re-enable XInput
-						XInputEnable( true );
-						break;
-					}
+					// re-enable XInput
+					XInputEnable( true );
+					break;
 				}
 			}
 			else if (D3DERR_DEVICELOST == LastError)
@@ -651,71 +646,27 @@ BOOL BeginD3DScene()
 				OutputDebugString("D3D device lost\n");
 			}
 			Sleep(50);
-//			continue;
 		}
 	}
 
-#if 0
-	// check for lost device
-	LastError = d3d.lpD3DDevice->TestCooperativeLevel();
-	if (FAILED(LastError)) 
-	{
-		while (1) 
-		{
-			if (D3DERR_DEVICENOTRESET == LastError) 
-			{
-				OutputDebugString("D3D device not reset\n");
-				if (ReleaseVolatileResources() == TRUE) 
-				{
-					OutputDebugString("Releasing resources for a device reset..\n");
-					/* release fmv textures */
-					//ReleaseAllFMVTexturesForDeviceReset();
-
-					/* disable XInput */
-					XInputEnable( false );
-
-					if (FAILED( d3d.lpD3DDevice->Reset(&d3d.d3dpp))) 
-					{
-						OutputDebugString("Couldn't reset device\n");
-					}
-					else 
-					{	
-						OutputDebugString("We have reset the device. recreating resources..\n");
-						CreateVolatileResources();
-
-						/* reload fmv textures */
-						//RecreateAllFMVTexturesAfterDeviceReset();
-
-						/* re-enable XInput */
-						XInputEnable( true );
-						break;
-					}
-				}
-			}
-			else if (D3DERR_DEVICELOST == LastError)
-			{
-				OutputDebugString("D3D device lost\n");
-			}
-			Sleep(50);
-//			continue;
-		}
-	}
-#endif
 	LastError = d3d.lpD3DDevice->BeginScene();
-
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
-	else 
-	{
-		LastError = d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0,0,0), 1.0f, 0 );
+/*
+	// set up projection matrix
+	D3DXMatrixPerspectiveFovLH( &matProjection, ScreenDescriptorBlock.SDB_Width / ScreenDescriptorBlock.SDB_Height, D3DX_PI / 2, 1.0f, 100.0f);
 
-		if (FAILED(LastError)) 
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-		}
+	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
+	d3d.lpD3DDevice->SetTransform( D3DTS_WORLD, &matIdentity );
+	d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matIdentity );
+*/
+	LastError = d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
 	return TRUE;
@@ -723,7 +674,6 @@ BOOL BeginD3DScene()
 
 void D3D_SetupSceneDefaults()
 {
-//	return;
 	/* force translucency state to be reset */
 	CurrentRenderStates.TranslucencyMode = TRANSLUCENCY_NOT_SET;
 	CurrentRenderStates.FilteringMode = FILTERING_NOT_SET;
@@ -744,7 +694,7 @@ BOOL EndD3DScene()
 	extern int NormalFrameTime;
 
     LastError = d3d.lpD3DDevice->EndScene();
-//	LOGDXERR(LastError);
+
 	if (ShowDebuggingText.PolyCount)
 	{
 		ReleasePrintDebuggingText("NumberOfLandscapePolygons: %d\n",NumberOfLandscapePolygons);
@@ -756,12 +706,11 @@ BOOL EndD3DScene()
 
 	if (FAILED(LastError)) 
 	{
-//		OutputDebugString("Couldn't end scene");
-//		LogError("Unable to end scene", LastError);
 		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
-	else return TRUE;
+	
+	return TRUE;
 }
 
 //extern int mainMenu;
@@ -771,12 +720,12 @@ void ChangeTexture(const int texture_id)
 	if (texture_id == currentTextureId) 
 		return;
 
-	/* menu large font */
+	// menu large font
 	else if (texture_id == TALLFONT_TEX)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, IntroFont_Light.info.menuTexture);
 		if (!FAILED(LastError)) currentTextureId = TALLFONT_TEX;
-		return;
+			return;
 	}
 
 	else if (texture_id == CONSOLE_TEX)
@@ -788,7 +737,7 @@ void ChangeTexture(const int texture_id)
 		return;
 	}
 
-	/* if texture was specified as 'null' */
+	// if texture was specified as 'null'
 	else if (texture_id == NO_TEXTURE)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, NULL);
@@ -796,7 +745,7 @@ void ChangeTexture(const int texture_id)
 		return;
 	}
 
-	/* if in menus (outside game) */
+	// if in menus (outside game)
 	if (mainMenu)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, AvPMenuGfxStorage[texture_id].menuTexture);
@@ -864,7 +813,6 @@ BOOL ExecuteBuffer()
 	Font_DrawText("blah", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
 #endif
 
-	// these two shouldn't be here!
 	LastError = d3d.lpD3DDevice->SetStreamSource (0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DTLVERTEX));
 	if (FAILED(LastError))
 	{
@@ -882,6 +830,28 @@ BOOL ExecuteBuffer()
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
+
+//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+
+			// clamp texture addresses
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("fail");
+		}
+	
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("fail");
+		}
+
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("fail");
+		}
 
 	int tempTexture = 0;
 
@@ -963,6 +933,62 @@ BOOL ExecuteBuffer()
 		}
 		NumberOfRenderedTriangles += num_prims / 3;
 	}
+
+	// render any orthographic quads
+	if (orthoListCount)
+	{
+		LastError = d3d.lpD3DDevice->SetStreamSource (0, d3d.lpD3DOrthoVertexBuffer, 0, sizeof(ORTHOVERTEX));
+		if (FAILED(LastError))
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+
+		LastError = d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
+		if (FAILED(LastError))
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+
+		// clamp texture addresses
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("fail");
+		}
+	
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("fail");
+		}
+
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("fail");
+		}
+
+		// texture stuff here
+		ChangeTexture(NO_TEXTURE);
+
+		// loop through list drawing the quads
+		for (int i = 0; i < orthoListCount; i++)
+		{
+			if (orthoList[i].textureID != NO_TEXTURE)
+			{
+				ChangeTexture(orthoList[i].textureID);
+			}
+
+			LastError = d3d.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, orthoList[i].vertStart, 2);
+			if (FAILED(LastError))
+			{
+				LogDxError(LastError, __LINE__, __FILE__);
+			}
+
+			ChangeTexture(NO_TEXTURE);
+		}
+	}
+
 #else
 	for (unsigned int i = 0; i < /*renderTest.size()*/renderCount; i++)
 	{
@@ -1053,7 +1079,6 @@ void SetFogDistance(int fogDistance)
 	fogDistance=2000;
 	CurrentRenderStates.FogDistance = fogDistance;
 //	textprint("fog distance %d\n",fogDistance);
-
 }
 
 void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired) 
@@ -1264,8 +1289,10 @@ void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired)
 
 extern void CheckWireFrameMode(int shouldBeOn)
 {
-	if (shouldBeOn) shouldBeOn = 1;
-	if(CurrentRenderStates.WireFrameModeIsOn!=shouldBeOn)
+	if (shouldBeOn) 
+		shouldBeOn = 1;
+
+	if (CurrentRenderStates.WireFrameModeIsOn!=shouldBeOn)
 	{
 		CurrentRenderStates.WireFrameModeIsOn=shouldBeOn;
 		if (shouldBeOn)
@@ -1283,7 +1310,6 @@ static void D3D_OutputTriangles(void);
 
 void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
 {
-#if 1//FUNCTION_ON
 	int flags;
 	int texoffset;
 
@@ -1293,7 +1319,6 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
     // Get ZNear
 	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
 
-
 	// Take header information
 	flags = inputPolyPtr->PolyFlags;
 
@@ -1301,25 +1326,16 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 	// properly cleared this time...
 	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-//	TextureHandle = (D3DTEXTUREHANDLE)
-//				ImageHeaderArray[texoffset].Direct3DTexture9;
-
-    // Check for textures that have not loaded
-	// properly
-
- //   if (TextureHandle == (D3DTEXTUREHANDLE) 0)
-//	  return;
-
-	if(ImageHeaderArray[texoffset].ImageWidth==128)
+	if (ImageHeaderArray[texoffset].ImageWidth==128)
 	{
-		RecipW = 1.0f /128;
+		RecipW = 1.0f / 128;
 	}
 	else
 	{
 		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
 		RecipW = 1.0f / width;
 	}
-	if(ImageHeaderArray[texoffset].ImageHeight==128)
+	if (ImageHeaderArray[texoffset].ImageHeight==128)
 	{
 		RecipH = 1.0f / 128;
 	}
@@ -1329,63 +1345,33 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 		RecipH = 1.0f / height;
 	}
 
-	/* OUTPUT VERTICES TO EXECUTE BUFFER */
-	{
-
 	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, TRANSLUCENCY_OFF);
 
-		for(unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
-		{
-			RENDERVERTEX *vertices = &renderVerticesPtr[i];
+	for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
+	{
+		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 
-		  	float oneOverZ;
-		  	oneOverZ = (1.0f)/vertices->Z;
-//			float zvalue;
+	  	float oneOverZ;
+	  	oneOverZ = (1.0f)/vertices->Z;
 
-			{
-				int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
+		int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
+		mainVertex[vb].sx = (float)x;
+			
+		int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
+		mainVertex[vb].sy = (float)y;
 
-				if (x<Global_VDB_Ptr->VDB_ClipLeft)
-				{
-					x=Global_VDB_Ptr->VDB_ClipLeft;
-				}
-				else if (x>Global_VDB_Ptr->VDB_ClipRight)
-				{
-					x=Global_VDB_Ptr->VDB_ClipRight;
-				}
+		mainVertex[vb].sz = 1.0f;
+		mainVertex[vb].rhw = oneOverZ;
+		mainVertex[vb].color = RGBLIGHT_MAKE(vertices->R,vertices->G,vertices->B);
+		mainVertex[vb].specular=RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
+		mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
 
-				mainVertex[vb].sx = (float)x;
-			}
-			{
-				int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-
-				if (y<Global_VDB_Ptr->VDB_ClipUp)
-				{
-					y=Global_VDB_Ptr->VDB_ClipUp;
-				}
-				else if (y>Global_VDB_Ptr->VDB_ClipDown)
-				{
-					y=Global_VDB_Ptr->VDB_ClipDown;
-				}
-				mainVertex[vb].sy = (float)y;
-
-			}
-
-			mainVertex[vb].sz = 1.0f;
-			mainVertex[vb].rhw = oneOverZ;
-			mainVertex[vb].color = RGBLIGHT_MAKE(vertices->R,vertices->G,vertices->B);
-			mainVertex[vb].specular=RGBALIGHT_MAKE(0,0,0,255);
-			mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
-			mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
-
-			vb++;
-		}
-//	  	while(--i);
+		vb++;
 	}
 
 	D3D_OutputTriangles();
-#endif
 }
 
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
@@ -1427,6 +1413,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 		if (zvalue < 0.0f) 
 			zvalue = 0.0f;
 
+		// project into screen space
 		int x = (vertices->X * (Global_VDB_Ptr->VDB_ProjX + 1)) / vertices->Z + Global_VDB_Ptr->VDB_CentreX;
 		int y = (vertices->Y * (Global_VDB_Ptr->VDB_ProjY + 1)) / vertices->Z + Global_VDB_Ptr->VDB_CentreY;
 
@@ -1460,7 +1447,6 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
 {
 	/* responsible for drawing predators lock on triangle, for one */
-#if 1//FUNCTION_ON
 	int flags;
 
 	float ZNear;
@@ -1473,72 +1459,42 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, NO_TEXTURE, RenderPolygon.TranslucencyMode);
 
-	/* OUTPUT VERTICES TO EXECUTE BUFFER */
+	for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
-		for(unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
+		RENDERVERTEX *vertices = &renderVerticesPtr[i];
+
+		float zvalue;
+		float rhw = 1.0f/(float)vertices->Z;
+
+		int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
+		mainVertex[vb].sx = (float)x;
+
+		int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
+		mainVertex[vb].sy = (float)y;
+
+		zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
+		zvalue = 1.0f - Zoffset * ZNear/zvalue;
+
+		mainVertex[vb].sz = zvalue;
+		mainVertex[vb].rhw = rhw;
+
+		if (flags & iflag_transparent)
 		{
-			RENDERVERTEX *vertices = &renderVerticesPtr[i];
-
-//		  	float oneOverZ;
-//		  	oneOverZ = (1.0)/vertices->Z;
-			float zvalue;
-			float rhw = 1.0f/(float)vertices->Z;
-
-			{
-				int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-				if (x<Global_VDB_Ptr->VDB_ClipLeft)
-				{
-					x=Global_VDB_Ptr->VDB_ClipLeft;
-				}
-				else if (x>Global_VDB_Ptr->VDB_ClipRight)
-				{
-					x=Global_VDB_Ptr->VDB_ClipRight;
-				}
-
-				mainVertex[vb].sx = (float)x;
-			}
-			{
-				int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-				if (y<Global_VDB_Ptr->VDB_ClipUp)
-				{
-					y=Global_VDB_Ptr->VDB_ClipUp;
-				}
-				else if (y>Global_VDB_Ptr->VDB_ClipDown)
-				{
-					y=Global_VDB_Ptr->VDB_ClipDown;
-				}
-				mainVertex[vb].sy = (float)y;
-			}
-			{
-				zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
-				//zvalue = ((zvalue-ZNear)/zvalue);
-				zvalue = 1.0f - Zoffset * ZNear/zvalue;
-			}
-
-			mainVertex[vb].sz = zvalue;
-			mainVertex[vb].rhw = rhw;
-
-			{
-				if (flags & iflag_transparent)
-				{
-			  		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B, vertices->A);
-				}
-				else
-				{
-					mainVertex[vb].color = RGBLIGHT_MAKE(vertices->R,vertices->G,vertices->B);
-				}
-			}
-
-			mainVertex[vb].specular = (D3DCOLOR)1.0f;
-			mainVertex[vb].tu = 0.0f;
-			mainVertex[vb].tv = 0.0f;
-
-			vb++;
+	  		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B, vertices->A);
 		}
+		else
+		{
+			mainVertex[vb].color = RGBLIGHT_MAKE(vertices->R,vertices->G,vertices->B);
+		}
+
+		mainVertex[vb].specular = (D3DCOLOR)1.0f;
+		mainVertex[vb].tu = 0.0f;
+		mainVertex[vb].tv = 0.0f;
+
+		vb++;
 	}
 
 	D3D_OutputTriangles();
-#endif
 }
 
 void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
@@ -1581,79 +1537,9 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
 
 	D3D_OutputTriangles();
 }
-#if 0 // not used
-void D3D_PredatorSeeAliensVisionPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
-{
-//#if 0 // bjd
-	float ZNear;
-
-    // Get ZNear
-	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
-
-	/* OUTPUT VERTICES TO EXECUTE BUFFER */
-	{
-		CheckVertexBuffer(RenderPolygon.NumberOfVertices, NO_TEXTURE, TRANSLUCENCY_GLOWING);
-
-		for(unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
-		{
-			RENDERVERTEX *vertices = &renderVerticesPtr[i];
-
-		  	float oneOverZ;
-		  	oneOverZ = (1.0)/vertices->Z;
-			float zvalue;
-
-			{
-				int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-				if (x<Global_VDB_Ptr->VDB_ClipLeft)
-				{
-					x=Global_VDB_Ptr->VDB_ClipLeft;
-				}
-				else if (x>Global_VDB_Ptr->VDB_ClipRight)
-				{
-					x=Global_VDB_Ptr->VDB_ClipRight;
-				}
-
-				mainVertex[i].sx=x;
-			}
-			{
-				int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-				if (y<Global_VDB_Ptr->VDB_ClipUp)
-				{
-					y=Global_VDB_Ptr->VDB_ClipUp;
-				}
-				else if (y>Global_VDB_Ptr->VDB_ClipDown)
-				{
-					y=Global_VDB_Ptr->VDB_ClipDown;
-				}
-				mainVertex[i].sy=y;
-			}
-			{
-				zvalue = vertices->Z+HeadUpDisplayZOffset;
-				zvalue = ((zvalue-ZNear)/zvalue);
-			}
-
-			mainVertex[i].color = RGBALIGHT_MAKE(255,0,0,255);//255,255,255,255);
-			mainVertex[i].sz = zvalue;
-			mainVertex[i].rhw = zvalue;
-		}
-	}
-//	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_GLOWING)//JUSTSETZ);
-
-/*
-    // Turn OFF texturing if it is on...
-    if (CurrTextureHandle != NULL)
-	{
-		CurrTextureHandle = NULL;
-	}
-*/
-	D3D_OutputTriangles();
-//#endif
-}
-#endif
 
 void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
 {
-#if 1//FUNCTION_ON
 	extern int CloakingMode;
 	extern char CloakedPredatorIsMoving;
 	int uOffset = FastRandom()&255;
@@ -1662,14 +1548,11 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 	int flags;
 	int texoffset;
 
-//	D3DTEXTUREHANDLE TextureHandle;
-
 	float ZNear;
 	float RecipW, RecipH;
 
     // Get ZNear
 	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
-
 
 	// Take header information
 	flags = inputPolyPtr->PolyFlags;
@@ -1678,26 +1561,16 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 	// properly cleared this time...
 	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-//	TextureHandle = (D3DTEXTUREHANDLE)
-//				ImageHeaderArray[texoffset].Direct3DTexture9;
-
-    // Check for textures that have not loaded
-	// properly
-
-//    if (TextureHandle == NULL)
-//	  return;
-
-
-	if(ImageHeaderArray[texoffset].ImageWidth==128)
+	if (ImageHeaderArray[texoffset].ImageWidth == 128)
 	{
-		RecipW = (1.0 /128.0);
+		RecipW = (1.0 / 128.0);
 	}
 	else
 	{
 		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
 		RecipW = (1.0f / width);
 	}
-	if(ImageHeaderArray[texoffset].ImageHeight==128)
+	if (ImageHeaderArray[texoffset].ImageHeight == 128)
 	{
 		RecipH = (1.0f / 128.0);
 	}
@@ -1709,498 +1582,45 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, TRANSLUCENCY_NORMAL);
 
-	/* OUTPUT VERTICES TO EXECUTE BUFFER */
+	for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
-		for(unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
+		RENDERVERTEX *vertices = &renderVerticesPtr[i];
+
+	  	float oneOverZ;
+	  	oneOverZ = (1.0f)/vertices->Z;
+		float zvalue;
+
+		int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
+		mainVertex[vb].sx = (float)x;
+
+		int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
+		mainVertex[vb].sy = (float)y;
+
+		zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
+		zvalue= 1.0f - Zoffset * ZNear/zvalue;
+
+		mainVertex[vb].sz = zvalue;
+		mainVertex[vb].rhw = oneOverZ;
+
+		if (CloakedPredatorIsMoving)
 		{
-			RENDERVERTEX *vertices = &renderVerticesPtr[i];
-
-		  	float oneOverZ;
-		  	oneOverZ = (1.0f)/vertices->Z;
-			float zvalue;
-
-			{
-				int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-				if (x<Global_VDB_Ptr->VDB_ClipLeft)
-				{
-					x=Global_VDB_Ptr->VDB_ClipLeft;
-				}
-				else if (x>Global_VDB_Ptr->VDB_ClipRight)
-				{
-					x=Global_VDB_Ptr->VDB_ClipRight;
-				}
-
-				mainVertex[vb].sx = (float)x;
-			}
-			{
-				int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-				if (y<Global_VDB_Ptr->VDB_ClipUp)
-				{
-					y=Global_VDB_Ptr->VDB_ClipUp;
-				}
-				else if (y>Global_VDB_Ptr->VDB_ClipDown)
-				{
-					y=Global_VDB_Ptr->VDB_ClipDown;
-				}
-				mainVertex[vb].sy = (float)y;
-			}
-
-			{
-				zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
-				//zvalue = ((zvalue-ZNear)/zvalue);
-				zvalue= 1.0f - Zoffset * ZNear/zvalue;
-			}
-
-			mainVertex[vb].sz = zvalue;
-			mainVertex[vb].rhw = oneOverZ;
-
-			if (CloakedPredatorIsMoving)
-			{
-		   		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
-			}
-			else
-			{
-		   		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
-			}
+	   		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
+		}
+		else
+		{
+	   		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
+		}
 //		   	mainVertex[vb].specular=RGBALIGHT_MAKE(vertices->SpecularR,vertices->SpecularG,vertices->SpecularB,255);
-			mainVertex[vb].specular=RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].specular=RGBALIGHT_MAKE(0,0,0,255);
 
-			mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
-			mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
+		mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
+		mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
 
-			vb++;
-		}
+		vb++;
 	}
 
 	D3D_OutputTriangles();
-#endif
 }
-#if 0
-// doesnt ever get called
-void D3D_CloakedPredatorPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
-{
-//#if 0 // bjd
-	float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
-
-	int texoffset = SpecialFXImageNumber;
-
-//	D3DTEXTUREHANDLE TextureHandle = (D3DTEXTUREHANDLE)ImageHeaderArray[texoffset].Direct3DTexture9;
-
-	float RecipW, RecipH;
-
-	if(ImageHeaderArray[texoffset].ImageWidth==256)
-	{
-		RecipW = 1.0 /256.0;
-	}
-	else
-	{
-		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-		RecipW = (1.0 / width);
-	}
-	if(ImageHeaderArray[texoffset].ImageHeight==256)
-	{
-		RecipH = 1.0 / 256.0;
-	}
-	else
-	{
-		float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-		RecipH = (1.0 / height);
-	}
-
-	/* OUTPUT VERTICES TO EXECUTE BUFFER */
-	{
-		CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, TRANSLUCENCY_GLOWING);
-
-		for(unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
-		{
-			RENDERVERTEX *vertices = &renderVerticesPtr[i];
-
-		  	float oneOverZ;
-		  	oneOverZ = (1.0)/(vertices->Z);
-			float zvalue;
-
-			mainVertex[i].tu = ((float)vertices->U) * RecipW;
-			mainVertex[i].tv = ((float)vertices->V) * RecipH;
-			mainVertex[i].rhw = oneOverZ;
-
-			{
-				zvalue = vertices->Z+HeadUpDisplayZOffset;
-	   //			zvalue /= 65536.0;
-	   		   	zvalue = 1.0 - ZNear/zvalue;
-			}
-
-			{
-				int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-
-				#if 1
-				if (x<Global_VDB_Ptr->VDB_ClipLeft)
-				{
-					x=Global_VDB_Ptr->VDB_ClipLeft;
-				}
-				else if (x>Global_VDB_Ptr->VDB_ClipRight)
-				{
-					x=Global_VDB_Ptr->VDB_ClipRight;
-				}
-				#endif
-				mainVertex[i].sx=x;
-			}
-			{
-				int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-
-				#if 1
-				if (y<Global_VDB_Ptr->VDB_ClipUp)
-				{
-					y=Global_VDB_Ptr->VDB_ClipUp;
-				}
-				else if (y>Global_VDB_Ptr->VDB_ClipDown)
-				{
-					y=Global_VDB_Ptr->VDB_ClipDown;
-				}
-				#endif
-				mainVertex[i].sy=y;
-
-			}
-			mainVertex[i].color = RGBALIGHT_MAKE(255,255,255,32);
-			mainVertex[i].sz = zvalue;
-		}
-	}
-
-//	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_GLOWING);
-
-	// Insert state change for shading model if required
-	if (D3DShadingMode != D3DSHADE_GOURAUD)
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_SHADEMODE,D3DSHADE_GOURAUD);
-		D3DShadingMode = D3DSHADE_GOURAUD;
-	}
-
-// Insert state change for texturing perspective value
-// Note that drawtx3das2d options have ONLY been allowed for here,
-// not when the rhw values are generated.  This is a deliberate choice,
-// based on the assumption that drawtx3das2d will not be used very often
-// and the extra branching at the top of this function will impose a
-// greater cost than the (rare) savings in floating pt divisions are worth.
-// Or so I claim...
-
-    if (D3DTexturePerspective != TRUE)
-    {
-		D3DTexturePerspective = TRUE;
-		//OP_STATE_RENDER(1, ExecBufInstPtr);
-		//STATE_DATA(D3DRENDERSTATE_TEXTUREPERSPECTIVE, TRUE, ExecBufInstPtr);
-	}
-/*
-	#if 1
-    if (TextureHandle != CurrTextureHandle)
-	{
-	   	CurrTextureHandle = TextureHandle;
-	}
-	#else
-    if (CurrTextureHandle != NoiseTextureHandle)
-	{
-    	//OP_STATE_RENDER(1, ExecBufInstPtr);
-        //STATE_DATA(D3DRENDERSTATE_TEXTUREHANDLE, NoiseTextureHandle, ExecBufInstPtr);
-//		d3d.lpD3DDevice->SetTexture(0,NoiseTextureHandle);
-  //      CurrTextureHandle = NoiseTextureHandle;
-	}
-	#endif
-*/
-	D3D_OutputTriangles();
-//#endif
-}
-#endif
-void ColourFillBackBufferQuad(int FillColour, int LeftX,
-     int TopY, int RightX, int BotY)
-{
-	OutputDebugString("\n colour fill back buffer quad");
-#if 0 // bjd
-	D3DTLVERTEX *vertexPtr = new D3DTLVERTEX[3];
-	D3DTLVERTEX *vertexPtr2 = new D3DTLVERTEX[3];
-
-	// first triangle
-	vertexPtr[0].sx = LeftX;
-	vertexPtr[0].sy = TopY;
-	vertexPtr[0].color = FillColour;
-	vertexPtr[0].rhw = 1.0f;
-
-	vertexPtr[1].sx = RightX - 1;
-	vertexPtr[1].sy = TopY;
-	vertexPtr[1].color = FillColour;
-	vertexPtr[1].rhw = 1.0f;
-
-	vertexPtr[2].sx = LeftX;
-	vertexPtr[2].sy = BotY - 1;
-	vertexPtr[2].color = FillColour;
-	vertexPtr[2].rhw = 1.0f;
-
-	// second triangle
-	vertexPtr2[0].sx = RightX - 1;
-	vertexPtr2[0].sy = TopY;
-	vertexPtr2[0].color = FillColour;
-	vertexPtr2[0].rhw = 1.0f;
-
-	vertexPtr2[1].sx = RightX;
-	vertexPtr2[1].sy = BotY - 1;
-	vertexPtr2[1].color = FillColour;
-	vertexPtr2[1].rhw = 1.0f;
-
-	vertexPtr2[2].sx = LeftX;
-	vertexPtr2[2].sy = BotY - 1;
-	vertexPtr2[2].color = FillColour;
-	vertexPtr2[2].rhw = 1.0f;
-
-	// turn off texturing
-    if (CurrTextureHandle != NULL)
-	{
-		d3d.lpD3DDevice->SetTexture(0,NULL);
-		CurrTextureHandle = NULL;
-	}
-
-	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_GLOWING);
-
-	d3d.lpD3DDevice->SetVertexShader(D3DFVF_TLVERTEX);
-
-	d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,1,vertexPtr,sizeof(D3DTLVERTEX));
-	d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,1,vertexPtr2,sizeof(D3DTLVERTEX));
-
-	delete(vertexPtr);
-	delete(vertexPtr2);
-#endif
-}
-
-#if 0 // bjd
-void D3D_ZBufferedTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
-{
-	int flags;
-	int texoffset;
-	int intensity;
-
-//	D3DTEXTUREHANDLE TextureHandle;
-
-	float ZNear;
-	float RecipW, RecipH;
-
-    // Get ZNear
-	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
-
-
-	// Take header information
-	flags = inputPolyPtr->PolyFlags;
-
-	intensity = (inputPolyPtr->PolyColour >> TxDefn);
-	intensity >>= TxDefn;
-
-	// We assume bit 15 (TxLocal) HAS been
-	// properly cleared this time...
-	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
-
-//	CheckSetTexture(texoffset, );
-
-//	TextureHandle = (D3DTEXTUREHANDLE)
-//				ImageHeaderArray[texoffset].Direct3DTexture9;
-
-    // Check for textures that have not loaded
-	// properly
-
-//    if (TextureHandle == NULL)
-//	  return;
-
-	if(ImageHeaderArray[texoffset].ImageWidth==128)
-	{
-		RecipW = 1.0f / 128;
-	}
-	else
-	{
-		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-		RecipW = 1.0f / width;
-	}
-	if(ImageHeaderArray[texoffset].ImageHeight==128)
-	{
-		RecipH = 1.0f / 128;
-	}
-	else
-	{
-		float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-		RecipH = (1.0f / height);
-	}
-
-	/* OUTPUT VERTICES TO EXECUTE BUFFER */
-	{
-		for(unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
-		{
-			RENDERVERTEX *vertices = &renderVerticesPtr[i];
-
-		  	float oneOverZ;
-		  	oneOverZ = (1.0f)/vertices->Z;
-			float zvalue;
-
-			{
-				int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-				if (x<Global_VDB_Ptr->VDB_ClipLeft)
-				{
-					x=Global_VDB_Ptr->VDB_ClipLeft;
-				}
-				else if (x>Global_VDB_Ptr->VDB_ClipRight)
-				{
-					x=Global_VDB_Ptr->VDB_ClipRight;
-				}
-				mainVertex[i].sx = (float)x;
-			}
-			{
-				int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-				if (y<Global_VDB_Ptr->VDB_ClipUp)
-				{
-					y=Global_VDB_Ptr->VDB_ClipUp;
-				}
-				else if (y>Global_VDB_Ptr->VDB_ClipDown)
-				{
-					y=Global_VDB_Ptr->VDB_ClipDown;
-				}
-				mainVertex[i].sy = (float)y;
-			}
-			mainVertex[i].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
-			mainVertex[i].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
-			mainVertex[i].rhw = oneOverZ;
-
-			{
-				zvalue = (float)vertices->Z+HeadUpDisplayZOffset;
-				zvalue = ((zvalue-ZNear)/zvalue);
-			}
-
-		  	 // Different behaviour for different driver modes
-/*
-			switch (D3DDriverMode)
-			{
-				case D3DSoftwareRGBDriver:
-				{
-					if (flags & iflag_nolight)
-					{
-						mainVertex[i].color = DefaultColour;
-					}
-					else
-					{
-						int i1shift = intensity;
-					  	mainVertex[i].color = RGBLIGHT_MAKE(i1shift, i1shift,i1shift);
-					}
-					break;
-				}
-
-				case D3DSoftwareRampDriver:
-				{
-					// Blue component only valid for ramp driver
-					if (flags & iflag_nolight)
-					{
-						mainVertex[i].color = RGB_MAKE(0,0,DefaultVertexIntensity);
-					}
-					else
-					{
-						mainVertex[i].color = RGB_MAKE(0,0,intensity);
-					}
-
-					break;
-				}
-
-				case D3DHardwareRGBDriver:
-				{
-*/
-					if (flags & iflag_transparent)
-					{
-						if (flags & iflag_nolight)
-						{
-							mainVertex[i].color = DefaultAlphaColour;
-						}
-						else
-						{
-					  		mainVertex[i].color = RGBALIGHT_MAKE(intensity,intensity,intensity, TransparentAlphaValue);
-						}
-					}
-					else
-					{
-						if (flags & iflag_nolight)
-						{
-							mainVertex[i].color = DefaultColour;
-						}
-						else
-						{
-							mainVertex[i].color = RGBLIGHT_MAKE(intensity,intensity,intensity);
-						}
-					}
-/*
-					break;
-				}
-
-
-				default:
-				{
-					mainVertex[i].color = 0;
-					break;
-				}
-			}
-*/
-			mainVertex[i].sz = zvalue;
-			mainVertex[i].specular=RGBALIGHT_MAKE(0,0,0,255);;
-		}
-	}
-
-	if (flags & iflag_transparent)
-	{
-//		CheckTranslucencyModeIsCorrect(TRANSLUCENCY_NORMAL);
-//		SetTranslucencyMode(TRANSLUCENCY_NORMAL);
-		CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, TRANSLUCENCY_NORMAL);
-	}
-	else
-	{
-//		CheckTranslucencyModeIsCorrect(TRANSLUCENCY_OFF);
-//		SetTranslucencyMode(TRANSLUCENCY_OFF);
-		CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, TRANSLUCENCY_OFF);
-	}
-
-	// Insert state change for shading model if required
-//	CheckShadingMode(D3DSHADE_GOURAUD);
-/*
-    if (D3DShadingMode != D3DSHADE_GOURAUD)
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_SHADEMODE,D3DSHADE_GOURAUD);
-		D3DShadingMode = D3DSHADE_GOURAUD;
-	}
-*/
-// Insert state change for texturing perspective value
-// Note that drawtx3das2d options have ONLY been allowed for here,
-// not when the rhw values are generated.  This is a deliberate choice,
-// based on the assumption that drawtx3das2d will not be used very often
-// and the extra branching at the top of this function will impose a
-// greater cost than the (rare) savings in floating pt divisions are worth.
-// Or so I claim...
-
-	if ((flags & iflag_drawtx3das2d) ||
-		(Global_VDB_Ptr->VDB_Flags & ViewDB_Flag_drawtx3das2d))
-	{
-		if (D3DTexturePerspective != FALSE)
-		{
-			D3DTexturePerspective = FALSE;
-			//OP_STATE_RENDER(1, ExecBufInstPtr);
-			//STATE_DATA(D3DRENDERSTATE_TEXTUREPERSPECTIVE,
-			//FALSE, ExecBufInstPtr);
-		}
-	}
-	else
-	{
-		if (D3DTexturePerspective != TRUE)
-		{
-			D3DTexturePerspective = TRUE;
-			//OP_STATE_RENDER(1, ExecBufInstPtr);
-			//STATE_DATA(D3DRENDERSTATE_TEXTUREPERSPECTIVE,
-			//TRUE, ExecBufInstPtr);
-		}
-	}
-/*
-	if (TextureHandle != CurrTextureHandle)
-	{
-		CurrTextureHandle = TextureHandle;
-	}
-*/
-	D3D_OutputTriangles();
-}
-#endif
 
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a) 
 {
@@ -2511,13 +1931,14 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 	DECAL_DESC *decalDescPtr = &DecalDescription[decalPtr->DecalID];
 
 	int texoffset;
-	signed int tex_id;
-	D3DTEXTURE TextureHandle; // FIXME
+	int32_t textureID;
+
+	AVPTEXTURE *textureHandle = NULL;
 
 	float ZNear;
 	float RecipW, RecipH;
 	int colour;
-	int specular=RGBALIGHT_MAKE(0,0,0,0);//255);
+	int specular = RGBALIGHT_MAKE(0, 0, 0, 0);//255);
 
     // Get ZNear
 	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
@@ -2527,9 +1948,11 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 		#if !FMV_ON
 		return;
 		#endif
-		TextureHandle = FMVTextureHandle[decalPtr->Centre.vx];
-		RecipW = 1.0 /128.0;
-		RecipH = 1.0 /128.0;
+
+//		textureHandle = FMVTextureHandle[decalPtr->Centre.vx];
+
+		RecipW = 1.0 / 128.0;
+		RecipH = 1.0 / 128.0;
 /*
 	    if (TextureHandle != CurrTextureHandle)
 		{
@@ -2537,33 +1960,18 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 		   	CurrTextureHandle = TextureHandle;
 		}
 */
-		tex_id = NO_TEXTURE;
+		textureID = NO_TEXTURE;
 	}
 
-	else if (decalPtr->DecalID == DECAL_SHAFTOFLIGHT||decalPtr->DecalID == DECAL_SHAFTOFLIGHT_OUTER)
+	else if (decalPtr->DecalID == DECAL_SHAFTOFLIGHT || decalPtr->DecalID == DECAL_SHAFTOFLIGHT_OUTER)
 	{
-/*
-	    if (NULL != CurrTextureHandle)
-		{
-			d3d.lpD3DDevice->SetTexture(0,NULL);
-			CurrTextureHandle = NULL;
-		}
-*/
-//		CheckSetTexture(-1);
-		tex_id = NO_TEXTURE;
+		textureID = NO_TEXTURE;
 	}
 	else
 	{
 		texoffset = SpecialFXImageNumber;
-//		TextureHandle = (D3DTEXTUREHANDLE)ImageHeaderArray[texoffset].Direct3DTexture9;
 
-	    // Check for textures that have not loaded
-		// properly
-/*
-	    if (TextureHandle == NULL)
-		 return;
-*/
-		if(ImageHeaderArray[texoffset].ImageWidth == 256)
+		if (ImageHeaderArray[texoffset].ImageWidth == 256)
 		{
 			RecipW = 1.0f / 256.0;
 		}
@@ -2572,7 +1980,7 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 			float width = (float) ImageHeaderArray[texoffset].ImageWidth;
 			RecipW = 1.0f / width;
 		}
-		if(ImageHeaderArray[texoffset].ImageHeight == 256)
+		if (ImageHeaderArray[texoffset].ImageHeight == 256)
 		{
 			RecipH = 1.0f / 256.0;
 		}
@@ -2581,14 +1989,8 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 			float height = (float) ImageHeaderArray[texoffset].ImageHeight;
 			RecipH = 1.0f / height;
 		}
-/*
-	    if (TextureHandle != CurrTextureHandle)
-		{
-			d3d.lpD3DDevice->SetTexture(0,TextureHandle);
-		   	CurrTextureHandle = TextureHandle;
-		}
-*/
-		tex_id = texoffset;
+
+		textureID = texoffset;
 	}
 
 	if (decalDescPtr->IsLit)
@@ -2624,13 +2026,11 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 							  );
 	}
 
-	/* OUTPUT VERTICES TO EXECUTE BUFFER */
-
 	SetFilteringMode(FILTERING_BILINEAR_ON);
-	CheckVertexBuffer(RenderPolygon.NumberOfVertices, tex_id, decalDescPtr->TranslucencyType);
+	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, decalDescPtr->TranslucencyType);
 
 	{
-		for(unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
+		for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
 		{
 			RENDERVERTEX *vertices = &renderVerticesPtr[i];
 
@@ -4738,7 +4138,6 @@ void DrawNoiseOverlay(int t)
 
 void DrawScanlinesOverlay(float level)
 {
-#if 1//FUNCTION_ON
 	float u = 0.0f;//FastRandom()&255;
 	float v = 128.0f;//FastRandom()&255;
 	int c = 255;
@@ -4819,7 +4218,6 @@ void DrawScanlinesOverlay(float level)
 	}
 */
 	if (level==1.0f) DrawNoiseOverlay(128);
-#endif
 }
 
 //assuming not used
@@ -7577,7 +6975,6 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 /* more quad drawing functions than you can shake a stick at! */
 void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture)
 {
-
 	int topX = (640 - frameWidth) / 2;
 	int topY = (480 - frameHeight) / 2;
 
@@ -7589,37 +6986,39 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 
 	D3DCOLOR colour = D3DCOLOR_ARGB(255, 255, 255, 255);
 
+	ORTHOVERTEX fmvVerts[4];
+
 	// bottom left
-	orthoVerts[0].x = x1;
-	orthoVerts[0].y = y2;
-	orthoVerts[0].z = 1.0f;
-	orthoVerts[0].colour = colour;
-	orthoVerts[0].u = 0.0f;
-	orthoVerts[0].v = 1.0f;
+	fmvVerts[0].x = x1;
+	fmvVerts[0].y = y2;
+	fmvVerts[0].z = 1.0f;
+	fmvVerts[0].colour = colour;
+	fmvVerts[0].u = 0.0f;
+	fmvVerts[0].v = 1.0f;
 
 	// top left
-	orthoVerts[1].x = x1;
-	orthoVerts[1].y = y1;
-	orthoVerts[1].z = 1.0f;
-	orthoVerts[1].colour = colour;
-	orthoVerts[1].u = 0.0f;
-	orthoVerts[1].v = 0.0f;
+	fmvVerts[1].x = x1;
+	fmvVerts[1].y = y1;
+	fmvVerts[1].z = 1.0f;
+	fmvVerts[1].colour = colour;
+	fmvVerts[1].u = 0.0f;
+	fmvVerts[1].v = 0.0f;
 
 	// bottom right
-	orthoVerts[2].x = x2;
-	orthoVerts[2].y = y2;
-	orthoVerts[2].z = 1.0f;
-	orthoVerts[2].colour = colour;
-	orthoVerts[2].u = 1.0f;
-	orthoVerts[2].v = 1.0f;
+	fmvVerts[2].x = x2;
+	fmvVerts[2].y = y2;
+	fmvVerts[2].z = 1.0f;
+	fmvVerts[2].colour = colour;
+	fmvVerts[2].u = 1.0f;
+	fmvVerts[2].v = 1.0f;
 
 	// top right
-	orthoVerts[3].x = x2;
-	orthoVerts[3].y = y1;
-	orthoVerts[3].z = 1.0f;
-	orthoVerts[3].colour = colour;
-	orthoVerts[3].u = 1.0f;
-	orthoVerts[3].v = 0.0f;
+	fmvVerts[3].x = x2;
+	fmvVerts[3].y = y1;
+	fmvVerts[3].z = 1.0f;
+	fmvVerts[3].colour = colour;
+	fmvVerts[3].u = 1.0f;
+	fmvVerts[3].v = 0.0f;
 
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 		
@@ -7627,7 +7026,7 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 	LastError = d3d.lpD3DDevice->SetTexture(0, fmvTexture);
 
 	d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
-	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &orthoVerts[0], sizeof(ORTHOVERTEX));
+	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(ORTHOVERTEX));
 	if (FAILED(LastError))
 	{
 		OutputDebugString("DrawPrimitiveUP failed\n");
@@ -7714,7 +7113,7 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_textu
 	}
 }
 
-void DrawQuad(int x, int y, int width, int height, int colour) 
+void DrawQuad(int x, int y, int width, int height, int textureID, int colour) 
 {
 	float x1 = (float(x / 640.0f) * 2) - 1;
 	float y1 = (float(y / 480.0f) * 2) - 1;
@@ -7722,194 +7121,67 @@ void DrawQuad(int x, int y, int width, int height, int colour)
 	float x2 = ((float(x + width) / 640.0f) * 2) - 1;
 	float y2 = ((float(y + height) / 480.0f) * 2) - 1;
 
-	// bottom left
-	orthoVerts[0].x = x1;
-	orthoVerts[0].y = y2;
-	orthoVerts[0].z = 1.0f;
-	orthoVerts[0].colour = colour;
-	orthoVerts[0].u = 0.0f;
-	orthoVerts[0].v = 1.0f;//(1.0f / texturePOW2Height) * textureHeight;
-
-	// top left
-	orthoVerts[1].x = x1;
-	orthoVerts[1].y = y1;
-	orthoVerts[1].z = 1.0f;
-	orthoVerts[1].colour = colour;
-	orthoVerts[1].u = 0.0f;
-	orthoVerts[1].v = 0.0f;
-
-	// bottom right
-	orthoVerts[2].x = x2;
-	orthoVerts[2].y = y2;
-	orthoVerts[2].z = 1.0f;
-	orthoVerts[2].colour = colour;
-	orthoVerts[2].u = 1.0f;//(1.0f / texturePOW2Width) * textureWidth;
-	orthoVerts[2].v = 1.0f;//(1.0f / texturePOW2Height) * textureHeight;
-
-	// top right
-	orthoVerts[3].x = x2;
-	orthoVerts[3].y = y1;
-	orthoVerts[3].z = 1.0f;
-	orthoVerts[3].colour = colour;
-	orthoVerts[3].u = 1.0f;//(1.0f / texturePOW2Width) * textureWidth;
-	orthoVerts[3].v = 0.0f;
-
-	d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
-	d3d.lpD3DDevice->SetTexture (0, /*AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].menuTexture*/NULL);
-
-	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &orthoVerts[0], sizeof(ORTHOVERTEX));
-	if (FAILED(LastError))
+	int texturePOW2Width, texturePOW2Height;
+	
+	// if in menus (outside game)
+	if (mainMenu)
 	{
-		OutputDebugString("DrawPrimitiveUP failed\n");
+		texturePOW2Width = AvPMenuGfxStorage[textureID].newWidth;
+		texturePOW2Height = AvPMenuGfxStorage[textureID].newHeight;
+	}
+	else
+	{
+		texturePOW2Width = ImageHeaderArray[textureID].ImageWidth;
+		texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
 	}
 
-#if 0
-	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_NORMAL);
+	// create a new list item for it
+	orthoList[orthoListCount].textureID = textureID;
+	orthoList[orthoListCount].vertStart = orthoOffset;
+	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
+	orthoList[orthoListCount].translucency_type = TRANSLUCENCY_OFF;
+	orthoListCount++;
 
 	// bottom left
-	mainVertex[vb].sx = (float)x - 0.5f;
-	mainVertex[vb].sy = (float)y + height - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
+	orthoVerts[orthoOffset].x = x1;
+	orthoVerts[orthoOffset].y = y2;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = 0.0f;
+	orthoVerts[orthoOffset].v = (1.0f / texturePOW2Height) * height;
 
-	vb++;
+	orthoOffset++;
 
 	// top left
-	mainVertex[vb].sx = (float)x - 0.5f;
-	mainVertex[vb].sy = (float)y - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
+	orthoVerts[orthoOffset].x = x1;
+	orthoVerts[orthoOffset].y = y1;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = 0.0f;
+	orthoVerts[orthoOffset].v = 0.0f;
 
-	vb++;
+	orthoOffset++;
 
 	// bottom right
-	mainVertex[vb].sx = (float)x + width - 0.5f;
-	mainVertex[vb].sy = (float)y + height - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
+	orthoVerts[orthoOffset].x = x2;
+	orthoVerts[orthoOffset].y = y2;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVerts[orthoOffset].v = (1.0f / texturePOW2Height) * height;
 
-	vb++;
+	orthoOffset++;
 
 	// top right
-	mainVertex[vb].sx = (float)x + width - 0.5f;
-	mainVertex[vb].sy = (float)y - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
+	orthoVerts[orthoOffset].x = x2;
+	orthoVerts[orthoOffset].y = y1;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVerts[orthoOffset].v = 0.0f;
 
-	vb++;
-
-	OUTPUT_TRIANGLE(0,1,2, 4);
-	OUTPUT_TRIANGLE(1,2,3, 4);
-#endif
+	orthoOffset++;
 }
-
-#if 0
-void DrawGlowyTest(int topX, int topY, int length, int alpha)
-{
-	int image_num = AVPMENUGFX_GLOWY_MIDDLE;
-
-	CheckVertexBuffer(4, image_num, TRANSLUCENCY_GLOWING);
-
-	int textureWidth = AvPMenuGfxStorage[image_num].Width;
-	int textureHeight = AvPMenuGfxStorage[image_num].Height;
-
-	int texturePOW2Width = AvPMenuGfxStorage[image_num].newWidth;
-	int texturePOW2Height = AvPMenuGfxStorage[image_num].newHeight;
-
-	alpha = (alpha / 256);
-	if (alpha > 255) 
-		alpha = 255;
-
-	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
-
-	// game used to render menus at 640x480. this allows us to use any resolution we want
-//	int quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / textureWidth) * 640));
-//	int quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / textureHeight) * 480));
-
-	int quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / textureWidth) * 640));
-	int quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / textureHeight) * 480));
-
-	length = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / length) * 640));
-
-//	int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0) * topX);
-//	int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0) * topY);
-
-//	topX = quadX;
-//	topY = quadY;
-
-	int testX, testY;
-
-	testX = ((ScreenDescriptorBlock.SDB_Width / 640.0f) * topX);
-	testY = ((ScreenDescriptorBlock.SDB_Height / 480.0f) * topY);
-
-	// bottom left
-	mainVertex[vb].sx = (float)(testX - 0.5f);
-	mainVertex[vb].sy = (float)(testY + quadHeight) - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
-
-	vb++;
-
-	// top left
-	mainVertex[vb].sx = (float)(testX - 0.5f);
-	mainVertex[vb].sy = (float)(testY - 0.5f);
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	// bottom right
-	mainVertex[vb].sx = (float)((testX + (quadWidth * length)) - 0.5f);
-	mainVertex[vb].sy = (float)((testY + quadHeight) - 0.5f);
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
-	mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
-
-	vb++;
-
-	// top right
-	mainVertex[vb].sx = (float)((testX + (quadWidth * length)) - 0.5f);
-	mainVertex[vb].sy = (float)(testY - 0.5f);
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-	
-	OUTPUT_TRIANGLE(0,1,2, 4);
-	OUTPUT_TRIANGLE(1,2,3, 4);
-}
-#endif
 
 void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha) 
 {
@@ -7994,19 +7266,7 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 	int textureHeight = 0;
 	int texturePOW2Width = 0;
 	int texturePOW2Height = 0;
-/*
-	LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
-	if (FAILED(LastError))
-	{
-		OutputDebugString("fail");
-	}
 
-	LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
-	if (FAILED(LastError))
-	{
-		OutputDebugString("fail");
-	}
-*/
 	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
 		alpha = ONE_FIXED;
 
@@ -8019,11 +7279,31 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Height;
 
 	// these values are the texture width and height as power of two values
-	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newWidth;
-	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newHeight;
+//	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newWidth;
+//	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newHeight;
 
 	// do the text alignment justification
 	topLeftX -= textureWidth;
+
+	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_LEFT, D3DCOLOR_ARGB(alpha, 255, 255, 255));
+
+	// now do the middle section
+	topLeftX += textureWidth;
+
+	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Width;
+	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Height;
+
+	DrawQuad(topLeftX, topLeftY, textureWidth * size, textureHeight, AVPMENUGFX_GLOWY_MIDDLE, D3DCOLOR_ARGB(alpha, 255, 255, 255));
+
+	// now do the right section
+	topLeftX += textureWidth * size;
+
+	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Width;
+	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Height;
+
+	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_RIGHT, D3DCOLOR_ARGB(alpha, 255, 255, 255));
+
+#if 0
 
 	float x1 = (float(topLeftX / 640.0f) * 2) - 1;
 	float y1 = (float(topLeftY / 480.0f) * 2) - 1;
@@ -8073,7 +7353,9 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 	{
 		OutputDebugString("DrawPrimitiveUP failed\n");
 	}
- 
+
+	return;
+
 	// now do the middle section
 	topLeftX += textureWidth;
 
@@ -8199,254 +7481,8 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 	{
 		OutputDebugString("DrawPrimitiveUP failed\n");
 	}
-}
-
-#if 0
-void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
-{
-//	return;
-	float x = topLeftX;
-	float y = topLeftY;
-	float quadX = 0.0f;
-	float quadY = 0.0f;
-	int textureWidth = 0;
-	int textureHeight = 0;
-	int texturePOW2Width = 0;
-	int texturePOW2Height = 0;
-	int quadWidth = 0;
-	int quadHeight = 0;
-
-	// the game passes alpha in as a value between 0 and 65536, so we scale it down to something d3d likes
-	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
-		alpha = ONE_FIXED;
-
-	alpha = (alpha / 256);
-	if (alpha > 255)
-		alpha = 255;
-
-	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
-
-	// draw the left glow. this function tells the backend vertex buffer we're going to draw 4 verts to it (just a quad. 
-	// AVPMENUGFX_GLOWY_LEFT is the texture id, TRANSLUCENCY_GLOWING is a render state set
-	CheckVertexBuffer(4, AVPMENUGFX_GLOWY_LEFT, TRANSLUCENCY_GLOWING);
-
-	// textures original resolution (if it's a non power of 2, these will be the non power of 2 values
-	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Width;
-	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Height;
-
-	// do the text alignment justification
-	topLeftX -= textureWidth;
-	x -= textureWidth;
-
-	// these values are the texture width and height as power of two values
-	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newWidth;
-	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newHeight;
-
-	// game used to render menus at 640x480. this scales the width and height to the correct values
-	quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / textureWidth) * 640));
-	quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / textureHeight) * 480));
-
-	// do the same for the actual x and y positions, scaling them to the actual backbuffer resolution
-	quadX = ((ScreenDescriptorBlock.SDB_Width / 640.0f) * x);
-	quadY = ((ScreenDescriptorBlock.SDB_Height / 480.0f) * y);
-
-	// draw the first quad
-	{
-		// bottom left
-		mainVertex[vb].sx = (float)(quadX - 0.5f);
-		mainVertex[vb].sy = (float)((quadY + quadHeight) - 0.5f);
-		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = 0.0f;
-		mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
-
-		vb++;
-
-		// top left
-		mainVertex[vb].sx = (float)(quadX - 0.5f);
-		mainVertex[vb].sy = (float)(quadY - 0.5f);
-		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = 0.0f;
-		mainVertex[vb].tv = 0.0f;
-
-		vb++;
-
-		// bottom right
-		mainVertex[vb].sx = (float)((quadX + quadWidth) - 0.5f);
-		mainVertex[vb].sy = (float)((quadY + quadHeight) - 0.5f);
-		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
-		mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
-
-		vb++;
-
-		// top right
-		mainVertex[vb].sx = (float)((quadX + quadWidth) - 0.5f);
-		mainVertex[vb].sy = (float)(quadY - 0.5f);
-		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
-		mainVertex[vb].tv = 0.0f;
-
-		vb++;
-
-		OUTPUT_TRIANGLE(0,1,2, 4);
-		OUTPUT_TRIANGLE(1,2,3, 4);
-	}
-
-	// do the middle glow
-	x = (float)(quadX + quadWidth); // set new x based on the top right value above (without the 0.5 offset) so we start rendering again exactly where we left off above
-
-	// do all the calculations again for the new piece
-	CheckVertexBuffer(4, AVPMENUGFX_GLOWY_MIDDLE, TRANSLUCENCY_GLOWING);
-
-	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Width;
-	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Height;
-
-	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].newWidth;
-	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].newHeight;
-
-	quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / textureWidth) * 640));
-	quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / textureHeight) * 480));
-
-	quadX = x; // position ourselves where we left off doing left glow
-
-	{
-		// bottom left
-		mainVertex[vb].sx = (float)(quadX - 0.5f);
-		mainVertex[vb].sy = (float)(quadY + quadHeight) - 0.5f;
-		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = 0.0f;
-		mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
-
-		vb++;
-
-		// top left
-		mainVertex[vb].sx = (float)(quadX - 0.5f);
-		mainVertex[vb].sy = (float)(quadY - 0.5f);
-		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = 0.0f;
-		mainVertex[vb].tv = 0.0f;
-
-		vb++;
-
-		// bottom right
-		mainVertex[vb].sx = (float)((quadX + (quadWidth * size)) - 0.5f);
-		mainVertex[vb].sy = (float)((quadY + quadHeight) - 0.5f);
-		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
-		mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
-
-		vb++;
-
-		// top right
-		mainVertex[vb].sx = (float)((quadX + (quadWidth * size)) - 0.5f);
-		mainVertex[vb].sy = (float)(quadY - 0.5f);
-		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
-		mainVertex[vb].tv = 0.0f;
-
-		vb++;
-
-		OUTPUT_TRIANGLE(0,1,2, 4);
-		OUTPUT_TRIANGLE(1,2,3, 4);
-	}
-
-	// right glow
-	x = (float)(quadX + (quadWidth * size)); // set new x based on the top right value above without the 0.5f offset
-
-	CheckVertexBuffer(4, AVPMENUGFX_GLOWY_RIGHT, TRANSLUCENCY_GLOWING);
-
-	// textures actual height/width (whether it's non power of two or not)
-	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Width;
-	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Height;
-
-	// we pad non power of two textures to pow2
-	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].newWidth;
-	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].newHeight;
-
-	// game used to render menus at 640x480. this allows us to use any resolution we want
-	quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / textureWidth) * 640));
-	quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / textureHeight) * 480));
-
-	quadX = x;
-
-	{
-		// bottom left
-		mainVertex[vb].sx = (float)(quadX - 0.5f);
-		mainVertex[vb].sy = (float)((quadY + quadHeight) - 0.5f);
-		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = 0.0f;
-		mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
-
-		vb++;
-
-		// top left
-		mainVertex[vb].sx = (float)(quadX - 0.5f);
-		mainVertex[vb].sy = (float)(quadY - 0.5f);
-		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = 0.0f;
-		mainVertex[vb].tv = 0.0f;
-
-		vb++;
-
-		// bottom right
-		mainVertex[vb].sx = (float)((quadX + quadWidth) - 0.5f);
-		mainVertex[vb].sy = (float)((quadY + quadHeight) - 0.5f);
-		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
-		mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
-
-		vb++;
-
-		// top right
-		mainVertex[vb].sx = (float)((quadX + quadWidth) - 0.5f);
-		mainVertex[vb].sy = (float)(quadY - 0.5f);
-		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
-		mainVertex[vb].tv = 0.0f;
-
-		vb++;
-
-		OUTPUT_TRIANGLE(0,1,2, 4);
-		OUTPUT_TRIANGLE(1,2,3, 4);
-	}
-}
 #endif
+}
 
 void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha) 
 {
@@ -8627,7 +7663,7 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 	if (alpha > 255) 
 		alpha = 255;
 
-	D3DCOLOR colour = D3DCOLOR_ARGB(alpha,255,255,255);
+	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 
 	int real_height = 512;
 	int real_width = 512;
@@ -8638,18 +7674,15 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 	int quadWidth = (ScreenDescriptorBlock.SDB_Width / 640.0f) * char_width;
 	int quadHeight = (ScreenDescriptorBlock.SDB_Height / 480.0f) * height_of_char;
 
-	int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0) * topX);
-	int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0) * topY);
+	int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0f) * topX);
+	int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0f) * topY);
 
-	topX = quadX;
-	topY = quadY;
-
-	float RecipW = (1.0f / real_width);
-	float RecipH = (1.0f / real_height);
+	float RecipW = 1.0f / real_width;
+	float RecipH = 1.0f / real_height;
 
 	// bottom left
-	mainVertex[vb].sx = (float)topX - 0.5f;
-	mainVertex[vb].sy = (float)topY + quadHeight - 0.5f;
+	mainVertex[vb].sx = (float)(quadX) - 0.5f;
+	mainVertex[vb].sy = (float)(quadY + quadHeight) - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8660,8 +7693,8 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 	vb++;
 
 	// top left
-	mainVertex[vb].sx = (float)topX - 0.5f;
-	mainVertex[vb].sy = (float)topY - 0.5f;
+	mainVertex[vb].sx = (float)(quadX) - 0.5f;
+	mainVertex[vb].sy = (float)(quadY) - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8672,8 +7705,8 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 	vb++;
 
 	// bottom right
-	mainVertex[vb].sx = (float)topX + quadWidth - 0.5f;
-	mainVertex[vb].sy = (float)topY + quadHeight - 0.5f;
+	mainVertex[vb].sx = (float)(quadX + quadWidth) - 0.5f;
+	mainVertex[vb].sy = (float)(quadY + quadHeight) - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -8684,8 +7717,8 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 	vb++;
 
 	// top right
-	mainVertex[vb].sx = (float)topX + quadWidth - 0.5f;
-	mainVertex[vb].sy = (float)topY - 0.5f;
+	mainVertex[vb].sx = (float)(quadX + quadWidth) - 0.5f;
+	mainVertex[vb].sy = (float)(quadY) - 0.5f;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;

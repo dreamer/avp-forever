@@ -9,22 +9,16 @@
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
-
 #include "stratdef.h"
 #include "gamedef.h"
 #include "gameplat.h"
-
 #include "bh_types.h"
 #include "ourasert.h"
 #include "comp_shp.h"
-
 #include "pmove.h"
 #include "usr_io.h"
 #include "hud_map.h"
-#include "krender.h"
-
 #include "iofocus.h"
-
 #include "paintball.h"
 #include "avp_menus.h"
 
@@ -32,8 +26,6 @@ extern int InGameMenusAreRunning(void);
 extern void AvP_TriggerInGameMenus(void);
 extern void Recall_Disc(void);
 extern void ShowMultiplayerScores(void);
-
-//#include "console.h"
 
 extern int NormalFrameTime;
 

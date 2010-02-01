@@ -446,7 +446,6 @@ BOOL WaitForRasterThread();
 
 /* Direct 3D */
 void ColourFillBackBuffer(int FillColour);
-void ColourFillBackBufferQuad(int FillColour, int LeftX, int TopY, int RightX, int BotY);
 void FlipBuffers(void);
 BOOL InitialiseDirect3D(void);
 BOOL LockExecuteBuffer(void);
@@ -455,14 +454,6 @@ BOOL BeginD3DScene(void);
 BOOL EndD3DScene(void);
 BOOL ExecuteBuffer(void);
 void ReleaseDirect3D(void);
-void WritePolygonToExecuteBuffer(int* itemptr);
-void WriteGouraudPolygonToExecuteBuffer(int* itemptr);
-void Write2dTexturedPolygonToExecuteBuffer(int* itemptr);
-void WriteGouraud2dTexturedPolygonToExecuteBuffer(int* itemptr);
-void Write3dTexturedPolygonToExecuteBuffer(int* itemptr);
-void WriteGouraud3dTexturedPolygonToExecuteBuffer(int* itemptr);
-void WriteBackdrop2dTexturedPolygonToExecuteBuffer(int* itemptr);
-void WriteBackdrop3dTexturedPolygonToExecuteBuffer(int* itemptr);
 void ReleaseAvPTexture(AVPTEXTURE *texture);
 BOOL SetExecuteBufferDefaults(void);
 #if SUPPORT_MMX
@@ -524,10 +515,6 @@ PROCESSORTYPES ReadProcessorType(void);
 */
 
 void ExitGame(void);
-
-#if optimiseflip
-void ProcessProjectWhileWaitingToBeFlippable();
-#endif
 
 #ifdef __cplusplus
 };

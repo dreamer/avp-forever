@@ -76,7 +76,6 @@ struct Console
 	int width;
 	int height;
 
-	int time;
 	int destinationY;
 
 	std::vector<std::string> text;
@@ -259,7 +258,6 @@ void Con_ProcessInput()
 void Con_Toggle()
 {
 	console.isActive = !console.isActive;
-	console.time = 250;
 
 	if (console.height > 0) 
 		console.destinationY = 0;
@@ -267,7 +265,7 @@ void Con_Toggle()
 		console.destinationY = console.lines * CHAR_HEIGHT;
 
 	// toggle on/off
-	IOFOCUS_Set( IOFOCUS_Get() ^ IOFOCUS_NEWCONSOLE);
+	IOFOCUS_Set(IOFOCUS_Get() ^ IOFOCUS_NEWCONSOLE);
 }
 
 bool Con_IsActive()
@@ -322,63 +320,12 @@ void Con_RemoveTypedChar()
 	}
 }
 
-void Con_DrawQuadTest(int x, int y, int width, int height, int colour)
-{
-	float x1 = (float(x / 640.0f) * 2) - 1;
-	float y1 = (float(y / 480.0f) * 2) - 1;
-
-	float x2 = ((float(x + width) / 640.0f) * 2) - 1;
-	float y2 = ((float(y + height) / 480.0f) * 2) - 1;
-
-//	D3DCOLOR colour = colour;//D3DCOLOR_ARGB(255, 38, 80, 145);
-
-	// bottom left
-	conVerts[0].x = x1;
-	conVerts[0].y = y2;
-	conVerts[0].z = 1.0f;
-	conVerts[0].colour = colour;
-	conVerts[0].u = 0.0f;
-	conVerts[0].v = 1.0f;
-
-	// top left
-	conVerts[1].x = x1;
-	conVerts[1].y = y1;
-	conVerts[1].z = 1.0f;
-	conVerts[1].colour = colour;
-	conVerts[1].u = 0.0f;
-	conVerts[1].v = 0.0f;
-
-	// bottom right
-	conVerts[2].x = x2;
-	conVerts[2].y = y2;
-	conVerts[2].z = 1.0f;
-	conVerts[2].colour = colour;
-	conVerts[2].u = 1.0f;
-	conVerts[2].v = 1.0f;
-
-	// top right
-	conVerts[3].x = x2;
-	conVerts[3].y = y1;
-	conVerts[3].z = 1.0f;
-	conVerts[3].colour = colour;
-	conVerts[3].u = 1.0f;
-	conVerts[3].v = 0.0f;
-
-#ifdef WIN32
-	d3d.lpD3DDevice->SetFVF (D3DFVF_CUSTOMVERTEX);
-#endif
-	d3d.lpD3DDevice->SetTexture (0, NULL);
-
-	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &conVerts[0], sizeof(CUSTOMVERTEX));
-	if (FAILED(LastError))
-	{
-		OutputDebugString("DrawPrimitiveUP failed\n");
-	}
-}
-
 void Con_Draw()
 {
 	int charWidth = 0;
+
+	if (!console.isActive)
+		return;
 
 	// is console moving to a new position?
 	if (console.destinationY > console.height)
@@ -402,12 +349,12 @@ void Con_Draw()
 		console.isOpen = true;
 
 	// draw the background quad
-	Con_DrawQuadTest(console.xPos, console.yPos, console.width, console.height, D3DCOLOR_ARGB(255, 38, 80, 145));
+	DrawQuad(console.xPos, console.yPos, console.width, console.height, -1, D3DCOLOR_ARGB(255, 38, 80, 145));
 
 	if (console.height > 0)
 	{
 		// draw the outline bar that runs along the bottom of the console
-		Con_DrawQuadTest(console.xPos, console.yPos + console.height, console.width, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
+		DrawQuad(console.xPos, console.yPos + console.height, console.width, 2, -1, D3DCOLOR_ARGB(255, 255, 255, 255));
 	}
 
 	int charCount = 0;
@@ -435,23 +382,21 @@ void Con_Draw()
 		charWidth = 0;
 
 //		Font_DrawText(console.text[i].c_str(), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
-#if 1
+
 		for (int j = 0; j < console.text[i].length(); j++)
 		{
 			charWidth = RenderSmallChar(console.text.at(i).at(j), console.indent + xOffset, y, ONE_FIXED, ONE_FIXED / 2, ONE_FIXED, ONE_FIXED);
 			//Font_DrawText(console.text.at(i).at(j), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 			xOffset += charWidth;
 		}
-#endif
 	}
 
-	xOffset = CHAR_WIDTH;//CHAR_WIDTH * 2;
+	xOffset = CHAR_WIDTH;
 	charWidth = 0;
 
 	// draw the line of text we're currently typing
 	for (int j = 0; j < console.inputLine.length(); j++)
 	{
-		//if ((j * CHAR_WIDTH) > console.lineWidth) break;
 		charWidth = RenderSmallChar(console.inputLine.at(j), console.indent + xOffset, console.height - CHAR_HEIGHT, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
 		xOffset += charWidth;
 	}
