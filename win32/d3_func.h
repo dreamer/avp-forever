@@ -81,10 +81,17 @@ enum FILTERING_MODE_ID
 	FILTERING_NOT_SET
 };
 
+enum TEXTURE_ADDRESS_MODE
+{
+	TEXTURE_WRAP,
+	TEXTURE_CLAMP
+};
+
 typedef struct
 {
 	enum TRANSLUCENCY_TYPE TranslucencyMode;
 	enum FILTERING_MODE_ID FilteringMode;
+	enum TEXTURE_ADDRESS_MODE TextureAddressMode;
 	int FogDistance;
 	unsigned int FogIsOn :1;
 	unsigned int WireFrameModeIsOn :1;

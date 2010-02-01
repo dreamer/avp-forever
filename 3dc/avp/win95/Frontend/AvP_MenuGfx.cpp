@@ -1285,7 +1285,7 @@ extern void DrawAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID, int topleftX, int tople
 			break;
 		}
 	}
-/*
+
 	int width = gfxPtr->Width;
 	if (640 - topleftX < width)
 	{
@@ -1296,7 +1296,7 @@ extern void DrawAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID, int topleftX, int tople
 	{
 		return;
 	}
-*/
+
 	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
 			alpha = ONE_FIXED;
 
@@ -1647,8 +1647,7 @@ extern void DrawAvPMenuGfx_CrossFade(enum AVPMENUGFX_ID menuGfxID,enum AVPMENUGF
 }
 
 extern void DrawAvPMenuGfx_Faded(enum AVPMENUGFX_ID menuGfxID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format)
-{	
-
+{
 	AVPMENUGFX *gfxPtr;
 	gfxPtr = &AvPMenuGfxStorage[menuGfxID];
 

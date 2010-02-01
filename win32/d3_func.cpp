@@ -856,7 +856,7 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 	ScreenDescriptorBlock.SDB_ClipDown  = height;
 
 	CreateVolatileResources();
-	SetExecuteBufferDefaults();
+//	SetExecuteBufferDefaults();
 
 	// set up projection matrix
 	D3DXMatrixPerspectiveFovLH( &matProjection, width / height, D3DX_PI / 2, 1.0f, 100.0f);
@@ -1392,7 +1392,6 @@ BOOL InitialiseDirect3D()
 	// set up orthographic projection matrix
 //	D3DXMatrixOrthoOffCenterLH( &matOrtho, 0.0f, wideScreenWidth, 0.0f, 480, 1.0f, 10.0f);
 	D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
-
 	// set up projection matrix
 	D3DXMatrixPerspectiveFovLH( &matProjection, width / height, D3DX_PI / 2, 1.0f, 100.0f);
 

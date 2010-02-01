@@ -254,6 +254,7 @@ static HRESULT LastError;
 
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
 void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
+void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
 
 /*
 #define CheckTranslucencyModeIsCorrect(x) \
@@ -394,15 +395,16 @@ float WaterVScale;
 BOOL SetExecuteBufferDefaults()
 {
     NumVertices = 0;
-
-// If we can, we want to turn off culling at the level of the rasterisation
-// module.  Note that Microsoft's software renderers do not support this,
-// unfortunatelhahay.
-
+/*
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC );
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC );
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 8);
+*/
+//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 8);
+
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
 
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP,	D3DTOP_MODULATE);
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1,	D3DTA_TEXTURE);
@@ -417,8 +419,7 @@ BOOL SetExecuteBufferDefaults()
 
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
-
-	LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
 
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF, (DWORD)0.5);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
@@ -831,27 +832,7 @@ BOOL ExecuteBuffer()
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
-//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
-
-			// clamp texture addresses
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
-		if (FAILED(LastError))
-		{
-			OutputDebugString("fail");
-		}
-	
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
-		if (FAILED(LastError))
-		{
-			OutputDebugString("fail");
-		}
-
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
-		if (FAILED(LastError))
-		{
-			OutputDebugString("fail");
-		}
+	ChangeTextureAddressMode(TEXTURE_WRAP);
 
 	int tempTexture = 0;
 
@@ -949,24 +930,7 @@ BOOL ExecuteBuffer()
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
 
-		// clamp texture addresses
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
-		if (FAILED(LastError))
-		{
-			OutputDebugString("fail");
-		}
-	
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
-		if (FAILED(LastError))
-		{
-			OutputDebugString("fail");
-		}
-
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
-		if (FAILED(LastError))
-		{
-			OutputDebugString("fail");
-		}
+		ChangeTextureAddressMode(TEXTURE_CLAMP);
 
 		// texture stuff here
 		ChangeTexture(NO_TEXTURE);
@@ -1089,6 +1053,58 @@ void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired)
 void SetTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 {
 	renderList[renderCount].translucency_type = translucencyRequired;
+}
+
+void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode)
+{
+	if (CurrentRenderStates.TextureAddressMode == textureAddressMode)
+		return;
+
+	CurrentRenderStates.TextureAddressMode = textureAddressMode;
+
+	if (textureAddressMode == TEXTURE_WRAP)
+	{
+		// wrap texture addresses
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSU Wrap fail");
+		}
+
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSV Wrap fail");
+		}
+
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSW Wrap fail");
+		}
+
+	}
+	else if (textureAddressMode == TEXTURE_CLAMP)
+	{
+		// clamp texture addresses
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSU Clamp fail");
+		}
+
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSV Clamp fail");
+		}
+
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSW Clamp fail");
+		}
+	}
 }
 
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
@@ -7139,7 +7155,7 @@ void DrawQuad(int x, int y, int width, int height, int textureID, int colour)
 	orthoList[orthoListCount].textureID = textureID;
 	orthoList[orthoListCount].vertStart = orthoOffset;
 	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
-	orthoList[orthoListCount].translucency_type = TRANSLUCENCY_OFF;
+	orthoList[orthoListCount].translucency_type = TRANSLUCENCY_NORMAL;
 	orthoListCount++;
 
 	// bottom left
@@ -7185,8 +7201,9 @@ void DrawQuad(int x, int y, int width, int height, int textureID, int colour)
 
 void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha) 
 {
+/*
 	CheckVertexBuffer(4, image_num, TRANSLUCENCY_GLOWING);
-
+*/
 	// textures actual height/width (whether it's non power of two or not)
 	int textureWidth = AvPMenuGfxStorage[image_num].Width;
 	int textureHeight = AvPMenuGfxStorage[image_num].Height;
@@ -7198,6 +7215,10 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 	alpha = (alpha / 256);
 	if (alpha > 255) 
 		alpha = 255;
+
+	DrawQuad(topX, topY, textureWidth, textureHeight, image_num, D3DCOLOR_ARGB(alpha, 255, 255, 255));
+
+	return;
 
 	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 
