@@ -473,10 +473,7 @@ void AllocateModuleObject(MODULE *mptr)
 		dptr->ObEIDPtr = mptr->m_extraitemdata;
 
 		/* Added Name to DISPLAYBLOCK */
-
-		#if SupportWindows95
 		dptr->name = mptr->name;
-		#endif
 
 		MapPostProcessing(dptr);
 

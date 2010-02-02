@@ -376,7 +376,6 @@ void DAVEHOOK_Maintain(void)
 	#endif
 
 	// Hacked in input support:
-	#if SupportWindows95
 	{
 		#if EnableStatusPanels
 		davehook_HandleStatusPanelControls();
@@ -408,9 +407,7 @@ void DAVEHOOK_Maintain(void)
 		}
 		#endif
 	}
-	#endif // SupportWindows95
 
-	#if SupportWindows95
 	if ( bFirstFrame )
 	{
 		RE_ENTRANT_QUEUE_WinMain_FlushMessagesWithoutProcessing();
@@ -425,7 +422,6 @@ void DAVEHOOK_Maintain(void)
 		// Flush the WinProc messages:
 		RE_ENTRANT_QUEUE_WinMain_FlushMessages();
 	}
-	#endif // SupportWindows95
 
 	/* KJL 20:14:23 28/03/98 - for now I've disabled the calls to the menus while in-game */
 	#if 0//UseRebMenus

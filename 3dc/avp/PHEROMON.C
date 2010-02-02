@@ -442,7 +442,6 @@ void PlayerPheromoneSystem(void)
    			if(playerStatusPtr->IsAlive)
 			{
    				PherPl_WriteBuf[playerPherModule->m_aimodule->m_index] = PlayerSmell;
-				#if SupportWindows95 
 				if(playerPherModule->name)
 				{
 					if (ShowDebuggingText.Module)
@@ -460,7 +459,6 @@ void PlayerPheromoneSystem(void)
 					/* FALSE scale for 'marine' pheromones, the player will never see it. */
 					#endif
 				}
-				#endif
 			}
 		}
 	}

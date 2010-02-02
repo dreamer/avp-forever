@@ -214,15 +214,12 @@ void SetDefaultMultiplayerConfig()
 
 int LobbiedGame=0;
 
-
-
-
-static unsigned char sendBuffer[NET_MESSAGEBUFFERSIZE];
-static unsigned char *endSendBuffer;
+static uint8_t sendBuffer[NET_MESSAGEBUFFERSIZE];
+static uint8_t *endSendBuffer = NULL;
 static int netNextLocalObjectId = 1;
 DPID myNetworkKillerId = 0;
 DPID myIgniterId = 0;
-int MyHitBodyPartId=-1;
+int MyHitBodyPartId = -1;
 DPID MultiplayerObservedPlayer=0;
 
 /* for testing */
@@ -262,7 +259,6 @@ extern void UpdateAlienAIGhostAnimSequence(STRATEGYBLOCK *sbPtr,HMODEL_SEQUENCE_
 extern void RemovePickedUpObject(STRATEGYBLOCK *objectPtr);
 extern void PrintStringTableEntryInConsole(enum TEXTSTRING_ID string_id);
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-//extern int DebouncedGotAnyKey;
 extern unsigned char DebouncedGotAnyKey;
 extern int LastHand;  // For alien claws and two pistols
 
@@ -714,8 +710,8 @@ void MinimalNetCollectMessages(void)
 void NetCollectMessages(void)
 {			
 	int res = NET_OK;
-	int	dPlayFromId = 0;
-	int	dPlayToId = 0;
+	int	fromID = 0;
+	int	toID = 0;
 	int msgSize = 0;
 		
 	/* first off, some assertions about our game state */
@@ -738,16 +734,16 @@ void NetCollectMessages(void)
 
 		while ((NET_OK == res) && glpDP && AvPNetID)
 		{
-			res = Net_Receive(&dPlayFromId, &dPlayToId, NET_RECEIVE_ALL, &msg[0], &msgSize);				
+			res = Net_Receive(&fromID, &toID, NET_RECEIVE_ALL, &msg[0], &msgSize);				
 			if (NET_OK == res)
 			{
 				numMessagesReceived++;
 				/* process last message, if there is one */
-				if (NET_SYSTEM_MESSAGE == dPlayFromId)
+				if (NET_SYSTEM_MESSAGE == fromID)
 				{
 					ProcessSystemMessage(&msg[0], msgSize);
 				}
-				else ProcessGameMessage(dPlayFromId, &msg[0] ,msgSize);										
+				else ProcessGameMessage(fromID, &msg[0] ,msgSize);										
 			}
 		}
 	}
@@ -928,9 +924,9 @@ void NetCollectMessages(void)
   ----------------------------------------------------------------------*/
 static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 {
-	int systemMessage;
+	int systemMessageType;
 	char buf[100];
-	messageHeader newMessageHeader;
+	messageHeader newMessageHeader = {0};
 
 	/* currently, only the host deals with system mesages */
 	/* check for invalid parameters */
@@ -938,11 +934,11 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 		return;
 
 	memcpy(&newMessageHeader, &msgP[0], sizeof(messageHeader));
-	systemMessage = newMessageHeader.toID;
+	systemMessageType = newMessageHeader.toID;
 
 	OutputDebugString("we're going to process a system message\n");
 
-	switch(systemMessage)
+	switch (systemMessageType)
 	{
 		case NET_ADDPLAYERTOGROUP:
 		{
@@ -951,13 +947,13 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 		}
 		case NET_CREATEPLAYERORGROUP:
 		{
-			OutputDebugString("will try adding a player to our server game\n");
+			OutputDebugString("in NET_CREATEPLAYERORGROUP\n");
 
 			/* only useful during startup: during main game, connecting player should
 			detect game state and exit immediately */
 			if ((AvP.Network == I_Host))
 			{
-				PlayerDetails newPlayer;
+				PlayerDetails newPlayer = {0};
 
 				// copy message data to player struct
 				memcpy(&newPlayer, &msgP[MESSAGEHEADERSIZE], sizeof(PlayerDetails));
@@ -966,7 +962,8 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 					int id = newPlayer.playerID;
 					char name[40];
 
-					strcpy(&name[0], &newPlayer.name[0]);
+					strncpy(&name[0], &newPlayer.name[0], 40-1);
+					name[40-1] = '\0';
 					AddPlayerToGame(id, &name[0]);
 				}
 			}
@@ -1015,8 +1012,8 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 			This is most important during the playing state, but also happens in
 			startup. In startup, peers keep a host timeout which should fire before
 			this message arrives anyway. */
-			LOCALASSERT(AvP.Network==I_Peer);
-			if((netGameData.myGameState==NGS_StartUp)||(netGameData.myGameState==NGS_Playing)||(netGameData.myGameState==NGS_Joining)||(netGameData.myGameState==NGS_EndGameScreen))
+			LOCALASSERT(AvP.Network == I_Peer);
+			if ((netGameData.myGameState==NGS_StartUp)||(netGameData.myGameState==NGS_Playing)||(netGameData.myGameState==NGS_Joining)||(netGameData.myGameState==NGS_EndGameScreen))
 			{
 				AvP.Network=I_Host;
 				/* Eek, I guess the old AIs bite the dust? */
@@ -1062,7 +1059,7 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 		}
 		default:
 		{
-			sprintf(buf, "invalid system message type: %d\n", systemMessage);
+			sprintf(buf, "invalid system message type: %d\n", systemMessageType);
 			OutputDebugString(buf);
 			/* invalid system message type: ignore */
 			break;
@@ -1086,7 +1083,7 @@ static void AddPlayerToGame(int id, char* name)
 	/* initialise the slot */
 	netGameData.playerData[freePlayerIndex].playerId = id;		
 	
-	strncpy(netGameData.playerData[freePlayerIndex].name,name,NET_PLAYERNAMELENGTH-1);
+	strncpy(netGameData.playerData[freePlayerIndex].name, name, NET_PLAYERNAMELENGTH-1);
 	netGameData.playerData[freePlayerIndex].name[NET_PLAYERNAMELENGTH-1] = '\0';
 //	ConvertNetNameToUpperCase(netGameData.playerData[freePlayerIndex].name);
 				
@@ -1118,13 +1115,13 @@ static void AddPlayerToGame(int id, char* name)
 
 void RemovePlayerFromGame(DPID id)
 {
-	int playerIndex,j;
+	int playerIndex, j;
 	
 	//LOCALASSERT(AvP.Network==I_Host);			
 
 	/* get player index from dpid */
 	playerIndex = PlayerIdInPlayerList(id);
-	if(playerIndex==NET_IDNOTINPLAYERLIST)
+	if (playerIndex == NET_IDNOTINPLAYERLIST)
 	{
 		/* the player is not actually in the game, so do nothing. This might occur, for
 		example if a player tries to join when the game is full */
@@ -1666,7 +1663,7 @@ void NetSendMessages(void)
 		NB it should always be non-empty, and always less than the maximum message size */
 		int res;
 		int numBytes;
-		BOOL clearSendBuffer=TRUE;
+		BOOL clearSendBuffer = TRUE;
 		numBytes = (int)(endSendBuffer - &sendBuffer[0]);
 
 		if (netGameData.myGameState == NGS_EndGameScreen || netGameData.myGameState == NGS_Joining)
@@ -1741,7 +1738,6 @@ void NetSendMessages(void)
 		#if CalculateBytesSentPerSecond
 		PrintDebuggingText("Bytes/Second: %d\n",GetBytesPerSecond(numBytes));
 		#endif
-		
 	}
 	
 	LogNetInfo("...Finished sending net message \n");
@@ -1869,7 +1865,7 @@ void EndAVPNetGame(void)
 	RemovePlayerFromGame(AvPNetID);
 	TransmitPlayerLeavingNetMsg();
 	
-	if(!netGameData.skirmishMode)
+	if (!netGameData.skirmishMode)
 	{
 		Net_Disconnect();
 	}
@@ -1893,12 +1889,12 @@ void EndAVPNetGame(void)
 	/* reset our game mode here */
 	AvP.Network = I_No_Network;	
 	AvP.NetworkAIServer = 0;
-	netGameData.skirmishMode=FALSE;
+	netGameData.skirmishMode = FALSE;
 
 	TurnOffMultiplayerObserveMode();
 
 	//reset time scale to default value
-	TimeScale=ONE_FIXED;
+	TimeScale = ONE_FIXED;
 }
 
 /*----------------------------------------------------------------------
@@ -1912,7 +1908,7 @@ void AddNetMsg_GameDescription(void)
 	int messageSize = sizeof(NETMESSAGE_GAMEDESCRIPTION);
 
 	/* some conditions */
-	LOCALASSERT(AvP.Network==I_Host);
+	LOCALASSERT(AvP.Network == I_Host);
 
 	/* check there's enough room in the send buffer */
 	{
@@ -1959,11 +1955,8 @@ void AddNetMsg_GameDescription(void)
 		messagePtr->useDynamicScoring=(unsigned char)netGameData.useDynamicScoring;
 		messagePtr->useCharacterKillValues=(unsigned char)netGameData.useCharacterKillValues;
 
-		
-		
 		messagePtr->sendDecals=netGameData.sendDecals;
 
-	
 		messagePtr->allowSmartgun=netGameData.allowSmartgun;
 		messagePtr->allowFlamer=netGameData.allowFlamer;
 		messagePtr->allowSadar=netGameData.allowSadar;
@@ -2011,11 +2004,10 @@ void AddNetMsg_GameDescription(void)
 		messagePtr->pistolInfiniteAmmo=netGameData.pistolInfiniteAmmo;
 		messagePtr->specialistPistols=netGameData.specialistPistols;
 
-		if(netGameData.myGameState==NGS_EndGameScreen)
-			messagePtr->endGame=1;
+		if (netGameData.myGameState == NGS_EndGameScreen)
+			messagePtr->endGame = 1;
 		else
-			messagePtr->endGame=0;
-		
+			messagePtr->endGame = 0;
 	}
 }
 
@@ -2129,7 +2121,6 @@ void AddNetMsg_PlayerState(STRATEGYBLOCK *sbPtr)
 				*/
 				sendMinimalState=FALSE;
 			}	
-				
 		}
 		
 		if(sendMinimalState)
@@ -2143,7 +2134,6 @@ void AddNetMsg_PlayerState(STRATEGYBLOCK *sbPtr)
 				sendMinimalState=FALSE;
 			}
 		}
-
 		
 		if(sendMinimalState)
 		{
@@ -2180,7 +2170,6 @@ void AddNetMsg_PlayerState(STRATEGYBLOCK *sbPtr)
 			previousVelocity=sbPtr->DynPtr->LinVelocity;
 			previousOrient=sbPtr->DynPtr->OrientEuler;
 			TimeOfLastPlayerState=TimeCounterForExtrapolation;
-		
 		}
 	}
 	#endif
@@ -2230,7 +2219,6 @@ void AddNetMsg_PlayerState(STRATEGYBLOCK *sbPtr)
 		messagePtr->characterSubType=netGameData.myCharacterSubType;
 		messagePtr->nextCharacterType=netGameData.myNextCharacterType;
 		netGameData.playerData[playerIndex].characterType=messagePtr->nextCharacterType;
-
 	}
 	
 	/* fill out our position and orientation */
@@ -2506,8 +2494,6 @@ void AddNetMsg_PlayerState_Minimal(STRATEGYBLOCK *sbPtr,BOOL sendOrient)
 		messageSize = sizeof(NETMESSAGE_PLAYERSTATE_MEDIUM);
 	}
 
-
-
 	if(netGameData.myGameState!=NGS_Playing) return;
 
 	/* check there's enough room in the send buffer */
@@ -2595,8 +2581,6 @@ void AddNetMsg_PlayerState_Minimal(STRATEGYBLOCK *sbPtr,BOOL sendOrient)
 	}
 	
 	netGameData.playerData[playerIndex].playerHasLives=messagePtr->IHaveLifeLeft;
-	
-
 
 	
 	/* whether or not I'm a cloaked predator */
@@ -6056,7 +6040,6 @@ static void ProcessNetMsg_PlayerState_Minimal(NETMESSAGE_PLAYERSTATE_MINIMAL *me
 				orientation.EulerZ = (mediumMessage->zOrient<<NET_EULERSCALESHIFT);			
 
 				UpdateGhost(sbPtr,&sbPtr->DynPtr->Position,&orientation,-1,messagePtr->Special);
-
 			}
 			
 			/* We are not a dead alien */
@@ -6124,8 +6107,6 @@ static void ProcessNetMsg_FrameTimer(unsigned short frame_time,DPID senderId)
 	if(senderPlayerIndex==NET_IDNOTINPLAYERLIST) return;
 
 	netGameData.playerData[senderPlayerIndex].timer+=frame_time;
-	
-
 }
 
 static void ProcessNetMsg_PlayerKilled(NETMESSAGE_PLAYERKILLED *messagePtr, DPID senderId)
@@ -8921,12 +8902,12 @@ Functions for transmitting state changes
 void TransmitEndOfGameNetMsg(void)
 {
 	int i;
-	/* first of, initialise the send buffer: this means that we may loose some stacked
+	/* first off, initialise the send buffer: this means that we may loose some stacked
 	messages, but this should be ok.*/
 	InitialiseSendMessageBuffer();
 
-	netGameData.myGameState=NGS_EndGameScreen;
-	for(i=0;i<NET_MESSAGEITERATIONS;i++)
+	netGameData.myGameState = NGS_EndGameScreen;
+	for (i =0; i < NET_MESSAGEITERATIONS; i++)
 	{
 		AddNetMsg_AllGameScores();
 	 //	AddNetMsg_EndGame();

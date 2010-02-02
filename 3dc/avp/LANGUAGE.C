@@ -9,10 +9,8 @@
 #include "language.h"
 #include "huffman.hpp"
 
-#if SupportWindows95
-	// DHM 12 Nov 97: hooks for C++ string handling code:
-	#include "strtab.hpp"
-#endif
+// DHM 12 Nov 97: hooks for C++ string handling code:
+#include "strtab.hpp"
 
 #define UseLocalAssert TRUE
 #include "ourasert.h"

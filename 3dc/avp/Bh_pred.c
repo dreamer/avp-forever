@@ -5129,30 +5129,27 @@ int Predator_TargetFilter(STRATEGYBLOCK *candidate) {
                         return(0);
                         #endif
                         break;
-        #if SupportWindows95
                 case I_BehaviourNetGhost:
                         {
-                                NETGHOSTDATABLOCK *dataptr;
-                                dataptr=candidate->SBdataptr;
-                                switch (dataptr->type) {
-                                        case I_BehaviourMarinePlayer:
-                                        case I_BehaviourAlienPlayer:
-                                        case I_BehaviourPredatorPlayer:
-                                                //return(1);
-                                                return(0);
-                                                break;
-                                        default:
-                                                return(0);
-                                                break;
+                        NETGHOSTDATABLOCK *dataptr;
+                        dataptr=candidate->SBdataptr;
+                        switch (dataptr->type) {
+                                case I_BehaviourMarinePlayer:
+                                case I_BehaviourAlienPlayer:
+                                case I_BehaviourPredatorPlayer:
+                                        //return(1);
+                                        return(0);
+                                        break;
+                                default:
+                                        return(0);
+                                        break;
                                 }
                         }
                         break;
-        #endif
                 default:
                         return(0);
                         break;
         }
-
 }
 
 

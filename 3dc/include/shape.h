@@ -6,18 +6,8 @@
 
 */
 
-#ifndef SupportWindows95
-//	#if defined(_WIN32)||defined(WIN32)
-		#define SupportWindows95 1
-//	#else
-//		#define SupportWindows95 0
-//	#endif
-#endif
-
-#if SupportWindows95
-	#ifdef WIN32
-		#include <d3d9.h>
-	#endif
+#ifdef WIN32
+	#include <d3d9.h>
 #endif
 
 #ifdef _XBOX

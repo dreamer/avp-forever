@@ -757,19 +757,19 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, int *da
 }
 
 // used to send a message to the server only
-int Net_SendSystemMessage(int messageType, int idFrom, int idTo, uint8_t *lpData, int dataSize)
+int Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messageData, int dataSize)
 {
 	// create a new header and copy it into the packet buffer
 	messageHeader newMessageHeader;
 	newMessageHeader.messageType = messageType;
-	newMessageHeader.fromID = idFrom;
-	newMessageHeader.toID = idTo;
+	newMessageHeader.fromID = fromID;
+	newMessageHeader.toID = toID;
 	memcpy(&packetBuffer[0], &newMessageHeader, sizeof(newMessageHeader));
 
 	// put data after header
-	if (dataSize && lpData)
+	if (dataSize && messageData)
 	{
-		memcpy(&packetBuffer[MESSAGEHEADERSIZE], lpData, dataSize);
+		memcpy(&packetBuffer[MESSAGEHEADERSIZE], messageData, dataSize);
 	}
 
 	int length = MESSAGEHEADERSIZE + dataSize;
@@ -800,9 +800,9 @@ int Net_SendSystemMessage(int messageType, int idFrom, int idTo, uint8_t *lpData
 	return NET_OK;
 }
 
-int Net_Send(int fromID, int toID, int flags, uint8_t *lpData, int dataSize)
+int Net_Send(int fromID, int toID, int flags, uint8_t *messageData, int dataSize)
 {
-	if (lpData == NULL) 
+	if (messageData == NULL) 
 	{
 		Con_PrintError("Net_Send - lpData was NULL");
 		return NET_FAIL;
@@ -828,7 +828,7 @@ int Net_Send(int fromID, int toID, int flags, uint8_t *lpData, int dataSize)
 
 	memcpy(&packetBuffer[0], &newMessageHeader, sizeof(messageHeader));
 
-	memcpy(&packetBuffer[MESSAGEHEADERSIZE], lpData, dataSize);
+	memcpy(&packetBuffer[MESSAGEHEADERSIZE], messageData, dataSize);
 
 	int length = MESSAGEHEADERSIZE + dataSize;
 

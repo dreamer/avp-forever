@@ -11166,7 +11166,6 @@ int Marine_TargetFilter(STRATEGYBLOCK *candidate) {
 			return(0);
 			#endif
 			break;
-	#if SupportWindows95
 		case I_BehaviourNetGhost:
 			{
 				NETGHOSTDATABLOCK *dataptr;
@@ -11184,17 +11183,14 @@ int Marine_TargetFilter(STRATEGYBLOCK *candidate) {
 				}
 			}
 			break;
-	#endif
 		default:
 			return(0);
 			break;
 	}
-
 }
 
-
-STRATEGYBLOCK *Marine_GetNewTarget(VECTORCH *marinepos, STRATEGYBLOCK *me) {
-
+STRATEGYBLOCK *Marine_GetNewTarget(VECTORCH *marinepos, STRATEGYBLOCK *me) 
+{
 	int neardist, newblip;
 	STRATEGYBLOCK *nearest;
 	#if 1

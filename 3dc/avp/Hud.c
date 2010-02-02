@@ -2141,9 +2141,7 @@ int Fast2dMagnitude(int dx, int dy)
 
 extern void NewOnScreenMessage(unsigned char *messagePtr)
 {
-	#if SupportWindows95
-	GADGET_NewOnScreenMessage( messagePtr );	
-	#endif
+	GADGET_NewOnScreenMessage( messagePtr );
 }
 
 static void AimGunSight(int aimingSpeed, TEMPLATE_WEAPON_DATA *twPtr)

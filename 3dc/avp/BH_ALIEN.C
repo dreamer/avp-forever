@@ -1010,7 +1010,7 @@ void AlienBehaviour(STRATEGYBLOCK *sbPtr)
 	if(sbPtr->SBdptr) 
 	{
 		LOCALASSERT(ModuleCurrVisArray[(sbPtr->containingModule->m_index)]);
-		#if 0/*SupportWindows95 */
+		#if 0
 		textprint("Near Alien in module %s \n",sbPtr->containingModule->name);
 		#endif
 		NearAlienBehaviour(sbPtr);
@@ -1020,7 +1020,7 @@ void AlienBehaviour(STRATEGYBLOCK *sbPtr)
 	{
 		/* NB if this assert fires, we may just have run out of displayblocks */
 		LOCALASSERT(ModuleCurrVisArray[(sbPtr->containingModule->m_index)] == 0);
-		#if 0/*SupportWindows95 */
+		#if 0
 		textprint("Far Alien in module %s \n",sbPtr->containingModule->name);
 		#endif
 		FarAlienBehaviour(sbPtr);	
@@ -2094,7 +2094,6 @@ int Alien_TargetFilter(STRATEGYBLOCK *candidate) {
 			/* Valid. */
 			return(1);
 			break;
-	#if SupportWindows95
 		case I_BehaviourNetGhost:
 			{
 				NETGHOSTDATABLOCK *dataptr;
@@ -2112,7 +2111,6 @@ int Alien_TargetFilter(STRATEGYBLOCK *candidate) {
 				}
 			}
 			break;
-	#endif
 		default:
 			return(0);
 			break;

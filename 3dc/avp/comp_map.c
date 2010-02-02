@@ -416,10 +416,7 @@ MODULE Empty_Module = {
 	0,0,0,
 	0,0,0,
 	
-	#if SupportWindows95
 	0,
-	#endif
-
 };
 
 

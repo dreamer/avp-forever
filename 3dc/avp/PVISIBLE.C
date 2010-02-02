@@ -33,10 +33,8 @@
 #include "bh_videoscreen.h"
 #include "bh_plift.h"
 
-#if SupportWindows95
 /* for win95 net game support */
 #include "pldghost.h"
-#endif
 
 #include "pfarlocs.h"
 
@@ -1532,7 +1530,6 @@ void InanimateObjectIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int 
         INANIMATEOBJECT_STATUSBLOCK* objectstatusptr = sbPtr->SBdataptr;
         LOCALASSERT(objectstatusptr);
 
-        #if SupportWindows95
         if((AvP.Network==I_Peer)&&(!InanimateDamageFromNetHost))
         {
                 /* this means that the damage was generated locally in a net-game:
@@ -1545,7 +1542,6 @@ void InanimateObjectIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int 
                 /* if we're the host, inform everyone that the object is dead */
                 if(sbPtr->SBDamageBlock.Health <= 0) AddNetMsg_InanimateObjectDestroyed(sbPtr);
         }
-        #endif
 
 		if(sbPtr->SBflags.please_destroy_me)
 		{

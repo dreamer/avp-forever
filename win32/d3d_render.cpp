@@ -601,7 +601,6 @@ BOOL UnlockExecuteBufferAndPrepareForUse()
 		return FALSE;
 	}
 
-
 	LastError = d3d.lpD3DOrthoVertexBuffer->Unlock();
 	if (FAILED(LastError)) 
 	{
@@ -715,8 +714,6 @@ BOOL EndD3DScene()
 	return TRUE;
 }
 
-//extern int mainMenu;
-
 void ChangeTexture(const int texture_id)
 {
 	if (texture_id == currentTextureId) 
@@ -769,12 +766,6 @@ BOOL ExecuteBuffer()
 
 //	std::sort(renderTest.begin(), renderTest.end());
 //	std::sort(renderList.begin(), renderList.end());
-/*
-	int index = 0;
-	int pos = 0;
-	int new_ind_start = 0;
-	int new_ind_end = 0;
-*/
 
 #ifdef WIN32
 	Font_DrawText("blah", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);

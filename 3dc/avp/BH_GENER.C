@@ -920,7 +920,7 @@ void ForceAGenerator(void)
 }
 
 
-#if (SupportWindows95 && LOAD_PC_GENERATORPARAMS)
+#if (LOAD_PC_GENERATORPARAMS)
 static char genFileLine[128];
 static void LoadGeneratorParams(void)
 {

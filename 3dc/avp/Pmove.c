@@ -68,7 +68,7 @@ extern unsigned char DebouncedGotAnyKey;
 *****************************************************KJL*/
 #define LOAD_IN_MOVEMENT_VALUES 0
 
-#if SupportWindows95 && LOAD_IN_MOVEMENT_VALUES	
+#if LOAD_IN_MOVEMENT_VALUES	
 
 static int AlienForwardSpeed;
 static int AlienStrafeSpeed;
@@ -98,12 +98,7 @@ extern int cosine[], sine[];
 extern int predHUDSoundHandle;
 extern int predOVision_SoundHandle;
 extern int TauntSoundPlayed;
-
-#if SupportWindows95
 extern unsigned char GotAnyKey;
-#else
-unsigned char GotAnyKey;
-#endif
 
 static char FlyModeOn = 0;			
 static char FlyModeDebounced = 0;
@@ -166,7 +161,7 @@ void InitPlayerMovementData(STRATEGYBLOCK* sbPtr)
 	
 	timeInContactWithFloor=(ONE_FIXED/10);
 
-	#if SupportWindows95 && LOAD_IN_MOVEMENT_VALUES	
+	#if LOAD_IN_MOVEMENT_VALUES	
 	LoadInMovementValues();
 	#endif
 
@@ -374,7 +369,7 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 		int turnSpeed; 	
 		int jumpSpeed;
 
-		#if SupportWindows95 && LOAD_IN_MOVEMENT_VALUES	
+		#if LOAD_IN_MOVEMENT_VALUES	
 		switch (AvP.PlayerType)
 		{
 			case I_Alien:
@@ -918,12 +913,10 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 			AllowedLookDownAngle = 2048-128;
 		}
 
-		#if SupportWindows95
 		if (!ControlMethods.AutoCentreOnMovement)
 		{
 			timeBeenContinuouslyMoving = 0;
 		}
-		#endif
 
 		if (playerStatusPtr->Mvt_MotionIncrement == 0)
 		{
@@ -1181,7 +1174,6 @@ static void NetPlayerDeadProcessing(STRATEGYBLOCK *sbPtr)
 {
 //	SECTION *root_section;
 
-	#if SupportWindows95
 	PLAYER_STATUS *psPtr= (PLAYER_STATUS *) (sbPtr->SBdataptr);
 
 	/* call the read input function so that we can still respawn/quit, etc */
@@ -1211,8 +1203,7 @@ static void NetPlayerDeadProcessing(STRATEGYBLOCK *sbPtr)
 
 					default :
 						GLOBALASSERT("dodgy character type"==0);
-						break;
-						
+						break;	
 				}
 
 				netGameData.myCharacterType=netGameData.myNextCharacterType;
@@ -1255,7 +1246,6 @@ static void NetPlayerDeadProcessing(STRATEGYBLOCK *sbPtr)
 			
 		}
 	}
-	#endif
 }
 
 extern void InitPlayerCloakingSystem(void);
@@ -1265,7 +1255,6 @@ void NetPlayerRespawn(STRATEGYBLOCK *sbPtr)
 	extern int LeanScale;
 //	SECTION *root_section;
 
-	#if SupportWindows95
 	PLAYER_STATUS *psPtr= (PLAYER_STATUS *) (sbPtr->SBdataptr);
 
 
@@ -1440,7 +1429,6 @@ void NetPlayerRespawn(STRATEGYBLOCK *sbPtr)
 	//reset the player's elasticity (which gets altered upon death)
 	sbPtr->DynPtr->Elasticity = 0;
 	
-
 	InitPlayerCloakingSystem();
 		
 	SetupVision();
@@ -1452,7 +1440,6 @@ void NetPlayerRespawn(STRATEGYBLOCK *sbPtr)
 	
 	//The player's dropped weapon (if there was one) can now be drawn
 	MakePlayersWeaponPickupVisible();
-#endif
 }
 
 
@@ -1649,7 +1636,7 @@ static void AlienContactWeapon(void)
 
 /* Demo code removed, CDF 28/9/98, by order of Kevin */
 
-#if SupportWindows95 && LOAD_IN_MOVEMENT_VALUES	
+#if LOAD_IN_MOVEMENT_VALUES	
 static void LoadInMovementValues(void)
 {
 

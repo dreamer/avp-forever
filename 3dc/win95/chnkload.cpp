@@ -1989,7 +1989,6 @@ void SetupAnimatedTextures(Shape_Chunk* sc,SHAPEHEADER* shp,Animation_Chunk* ac,
 					j++;
 				}
 			}
-			
 		}
 
 		for(int i=0;i<ac->NumPolys;i++)
@@ -2074,9 +2073,7 @@ void SetupAnimatingShape(Shape_Chunk* sc,SHAPEHEADER* shp, Shape_Merge_Data_Chun
 					j++;
 				}
 			}
-			
 		}
-
 	}
 	else
 	{
@@ -2117,8 +2114,6 @@ void SetupAnimatingShape(Shape_Chunk* sc,SHAPEHEADER* shp, Shape_Merge_Data_Chun
 		sah->anim_sequences[i].anim_frames=0;
 	}
 
-
-	
 	for(chlif.restart();!chlif.done();chlif.next())
 	{
 		Anim_Shape_Sequence_Chunk* assc=(Anim_Shape_Sequence_Chunk*)chlif();
@@ -2174,7 +2169,6 @@ void SetupAnimatingShape(Shape_Chunk* sc,SHAPEHEADER* shp, Shape_Merge_Data_Chun
 				saf->item_normals[PolyConv[j]*3]=(int)(caf->p_normal_list[j].x*ONE_FIXED);
 				saf->item_normals[PolyConv[j]*3+1]=(int)(caf->p_normal_list[j].y*ONE_FIXED);
 				saf->item_normals[PolyConv[j]*3+2]=(int)(caf->p_normal_list[j].z*ONE_FIXED);
-
 			}
 		}
 	}
@@ -2190,7 +2184,6 @@ void SetupAnimatingShape(Shape_Chunk* sc,SHAPEHEADER* shp, Shape_Merge_Data_Chun
 		sas=&shp->animation_header->anim_sequences[i];
 		if(sas->num_frames)
 			break;
-		
 	}
 	GLOBALASSERT(i<shp->animation_header->num_sequences);
 	
@@ -2256,7 +2249,6 @@ BOOL copy_to_shapeheader (
 	shphd->shapeminz = (int) (cshp_ptr->min.z*local_scale);
 
 	// AllocateMem arrays
-
 	shphd->points = (int **) PoolAllocateMem (sizeof(int *));
 	*(shphd->points) = (int *) PoolAllocateMem (sizeof(int) * shphd->numpoints * 3);
 	
@@ -2280,13 +2272,13 @@ BOOL copy_to_shapeheader (
 	tptr = *(shphd->points);
 
 	static char buffer[100];
-
+/*
 	if (strcmp(h->fc->filename, buffer) != 0)
 	{
 		sprintf(buffer, "filename: %s numpoints: %d\n", h->fc->filename, shphd->numpoints);
 		OutputDebugString(buffer);
 	}
-	
+*/	
 	if (object && local_scale != 1)
 	{
 		//convert from floating point to integers using world coordinates  in an attempt to stop

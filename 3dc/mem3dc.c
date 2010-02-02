@@ -73,7 +73,7 @@
 #define FILEPERM "w"
 #endif
 
-#if SupportWindows95 && !defined(_MSC_VER) /* not required for MS C since MS C has CRT debugging available */
+#if !defined(_MSC_VER) /* not required for MS C since MS C has CRT debugging available */
 #define OVERRUN_SIZEMIN 2
 #define OVERRUN_SIZEMAX 128
 #define OVERRUN_SIZEFACTOR 2 /* this is a shift down */
@@ -556,7 +556,6 @@ void DumpMallocInfo(int type)
    else if (type==DUMPTOFILE)
    {
 
-     #if SupportWindows95
      FILE *fp;
 
      if( (fp = avp_fopen(MALLOCDUMPFILE,FILEPERM))== (FILE *)NULL) 
@@ -587,7 +586,6 @@ void DumpMallocInfo(int type)
          
          fclose(fp); 
      }
-     #endif
 
      #if PSX
      long fd;
@@ -684,8 +682,6 @@ void DumpBoundsCheckInfo(int type)
    }
    else if (type==DUMPTOFILE)
    {
-
-     #if SupportWindows95
      FILE *fp;
 
      if( (fp = avp_fopen(MALLOCDUMPFILE,FILEPERM))== (FILE *)NULL) 
@@ -721,7 +717,6 @@ void DumpBoundsCheckInfo(int type)
          
          fclose(fp); 
      }
-     #endif
 
      #if PSX
      long fd;

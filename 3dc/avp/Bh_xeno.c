@@ -2596,7 +2596,6 @@ int Xenoborg_TargetFilter(STRATEGYBLOCK *candidate) {
 		case I_BehaviourXenoborg:
 			return(0);
 			break;
-		#if SupportWindows95
 		case I_BehaviourNetGhost:
 			{
 				NETGHOSTDATABLOCK *dataptr;
@@ -2613,15 +2612,14 @@ int Xenoborg_TargetFilter(STRATEGYBLOCK *candidate) {
 				}
 			}
 			break;
-		#endif
 		default:
 			return(0);
 			break;
 	}
-
 }
 
-STRATEGYBLOCK *Xenoborg_GetNewTarget(VECTORCH *xenopos, STRATEGYBLOCK *me) {
+STRATEGYBLOCK *Xenoborg_GetNewTarget(VECTORCH *xenopos, STRATEGYBLOCK *me) 
+{
 
 	int neardist;
 	STRATEGYBLOCK *nearest;

@@ -19,11 +19,9 @@ rounds fired etc etc etc*/
 #include "weapons.h"
 #include "inventry.h"
 
-#if SupportWindows95
 /* for win95 net game support */
 #include "pldnet.h"
 #include "pldghost.h"
-#endif
 
 #include "AvP_UserProfile.h"
 
@@ -1495,9 +1493,8 @@ extern void RemovePickedUpObject(STRATEGYBLOCK *objectPtr)
 
 	if (objStatPtr->ghosted_object) {
 		/* Must be a runtime pickup... */
-		#if SupportWindows95
 		AddNetMsg_LocalObjectDestroyed(objectPtr);
-		#endif
+
 		DestroyAnyStrategyBlock(objectPtr);
 		return;
 	}
@@ -1514,12 +1511,10 @@ extern void RemovePickedUpObject(STRATEGYBLOCK *objectPtr)
 	if(AvP.Network==I_No_Network) DestroyAnyStrategyBlock(objectPtr);
 	else
 	{
-		#if SupportWindows95
 		AddNetMsg_ObjectPickedUp(&objectPtr->SBname[0]);
-		#endif
+
 		KillInanimateObjectForRespawn(objectPtr);
 	}
-
 }
 
 int SlotForThisWeapon(enum WEAPON_ID weaponID) {
@@ -1821,14 +1816,13 @@ void Recall_Disc(void) {
 					Sound_Stop(bbPtr->soundHandle);
 					Sound_Play(SID_PREDATOR_DISK_RECOVERED,"h");
 
-					#if SupportWindows95
 					if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(nearest);
-					#endif
-				    DestroyAnyStrategyBlock(nearest);	
-				
-				}
 
-			} else {
+				    DestroyAnyStrategyBlock(nearest);	
+				}
+			} 
+			else 
+			{
 				GLOBALASSERT(0);
 			}
 		} else {
@@ -1839,7 +1833,8 @@ void Recall_Disc(void) {
 	}
 }
 
-int ObjectIsPlayersDisc(STRATEGYBLOCK *sbPtr) {
+int ObjectIsPlayersDisc(STRATEGYBLOCK *sbPtr) 
+{
 
 	if (sbPtr->I_SBtype == I_BehaviourInanimateObject) {
 
@@ -1876,9 +1871,8 @@ void RemoveAllThisPlayersDiscs(void) {
 
 			/* Are we the right type? */
 			if (ObjectIsPlayersDisc(candidate)) {
-				#if SupportWindows95
 				AddNetMsg_LocalObjectDestroyed(candidate);
-				#endif
+
 				DestroyAnyStrategyBlock(candidate);
 			}
 		}

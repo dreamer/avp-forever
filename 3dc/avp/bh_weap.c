@@ -35,11 +35,9 @@
 #include "los.h"
 #include "DetailLevels.h"
 
-#if SupportWindows95
 /* for win95 net game support */
 #include "pldghost.h"
 #include "pldnet.h"
-#endif
 
 #define FLAMETHROWER_PARTICLES_PER_FRAME (MUL_FIXED(120,NormalFrameTime))
 #define PREDPISTOLFLECHETTES_PARTICLES_PER_FRAME (MUL_FIXED(50,NormalFrameTime))
@@ -304,7 +302,6 @@ int Frisbee_TargetFilter(STRATEGYBLOCK *candidate) {
 		case I_BehaviourMarine:
 			return(0);
 			break;
-	#if SupportWindows95
 		case I_BehaviourNetGhost:
 			{
 				NETGHOSTDATABLOCK *dataptr;
@@ -346,12 +343,10 @@ int Frisbee_TargetFilter(STRATEGYBLOCK *candidate) {
 				}
 			}
 			break;
-	#endif
 		default:
 			return(0);
 			break;
 	}
-
 }
 
 /*
@@ -523,12 +518,9 @@ STRATEGYBLOCK* CreateFrisbeeKernel(VECTORCH *position, MATRIXCH *orient, int fro
 	#endif
 
 	/* for net game support */
-	#if SupportWindows95
 	if(AvP.Network != I_No_Network)	AddNetGameObjectID(dispPtr->ObStrategyBlock);
-	#endif
 
 	return dispPtr->ObStrategyBlock; 
-
 }
 
 extern void FrisbeeBehaviour(STRATEGYBLOCK *sbPtr) 
@@ -621,12 +613,10 @@ extern void FrisbeeBehaviour(STRATEGYBLOCK *sbPtr)
     	}
  			
 		/* for net game support: send a message saying we've blown up... */
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	{
 			AddNetMsg_LocalObjectDestroyed(sbPtr);
  			AddNetMsg_SpotOtherSound(SID_NICE_EXPLOSION,&dynPtr->Position,1);
 		}
-		#endif
 
 		/* destroy rocket */
     	DestroyAnyStrategyBlock(sbPtr);
@@ -784,12 +774,10 @@ extern void FrisbeeBehaviour(STRATEGYBLOCK *sbPtr)
 			    	}
 			 			
 					/* for net game support: send a message saying we've blown up... */
-					#if SupportWindows95
 					if(AvP.Network != I_No_Network)	{
 						AddNetMsg_LocalObjectDestroyed(sbPtr);
 						AddNetMsg_SpotOtherSound(SID_ED_SKEETERPLASMAFIRE,&dynPtr->Position,1);
 					}
-					#endif
 
 					/* destroy rocket */
 			    	DestroyAnyStrategyBlock(sbPtr);
@@ -869,12 +857,9 @@ STRATEGYBLOCK* CreateRocketKernel(VECTORCH *position, MATRIXCH *orient, int from
     dynPtr->LinVelocity.vz = MUL_FIXED(dynPtr->LinVelocity.vz, MISSILE_SPEED);
 
 	/* for net game support */
-	#if SupportWindows95
 	if(AvP.Network != I_No_Network)	AddNetGameObjectID(dispPtr->ObStrategyBlock);
-	#endif
 
 	return dispPtr->ObStrategyBlock; 
-
 }
 
 static void InitialiseFrisbeeBehaviour(void)
@@ -976,9 +961,7 @@ extern void RocketBehaviour(STRATEGYBLOCK *sbPtr)
     	}
  			
 		/* for net game support: send a message saying we've blown up... */
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
 
 		/* destroy rocket */
     	DestroyAnyStrategyBlock(sbPtr);
@@ -1096,9 +1079,7 @@ STRATEGYBLOCK* CreateGrenadeKernel(AVP_BEHAVIOUR_TYPE behaviourID, VECTORCH *pos
 		}
 	}
 
-	#if SupportWindows95
 	if(AvP.Network != I_No_Network)	AddNetGameObjectID(dispPtr->ObStrategyBlock);
-	#endif
 
 	return dispPtr->ObStrategyBlock;
 }
@@ -1182,7 +1163,6 @@ extern void GrenadeBehaviour(STRATEGYBLOCK *sbPtr)
 				explodeNow = 1; /* kaboom */
 			}
 		
-			#if SupportWindows95
 			if(sbPtr->I_SBtype == I_BehaviourNetGhost)
 			{ 
 				NETGHOSTDATABLOCK *ghostData = sbPtr->SBdataptr;
@@ -1197,7 +1177,6 @@ extern void GrenadeBehaviour(STRATEGYBLOCK *sbPtr)
 			   		explodeNow = 1;
 				}				
 			}
-			#endif
 		} else {
 			dynPtr->IgnoreThePlayer=0;
 		}	
@@ -1227,10 +1206,10 @@ extern void GrenadeBehaviour(STRATEGYBLOCK *sbPtr)
 			Explosion_SoundData.position=dynPtr->Position;
 		    Sound_Play(SID_ED_GRENADE_EXPLOSION,"n",&Explosion_SoundData);
     	}
- 		
-		#if SupportWindows95
-		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
+		if (AvP.Network != I_No_Network)	
+			AddNetMsg_LocalObjectDestroyed(sbPtr);
+
 		/* destroy rocket */
     	DestroyAnyStrategyBlock(sbPtr);
     }
@@ -1285,7 +1264,6 @@ extern void ClusterGrenadeBehaviour(STRATEGYBLOCK *sbPtr)
 			{
 				explodeNow = 1; /* kaboom */
 			}
-			#if SupportWindows95
 			if(sbPtr->I_SBtype == I_BehaviourNetGhost)
 			{ 
 				NETGHOSTDATABLOCK *ghostData = sbPtr->SBdataptr;
@@ -1300,7 +1278,6 @@ extern void ClusterGrenadeBehaviour(STRATEGYBLOCK *sbPtr)
 			   		explodeNow = 1;
 				}				
 			}
-			#endif
 		} else {
 			dynPtr->IgnoreThePlayer=0;
 		}	
@@ -1333,9 +1310,9 @@ extern void ClusterGrenadeBehaviour(STRATEGYBLOCK *sbPtr)
 		    Sound_Play(SID_NADEEXPLODE,"n",&Explosion_SoundData);
     	}
 		/* for net game support: send a message saying we've blown up... */
-		#if SupportWindows95
-		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+		if (AvP.Network != I_No_Network)	
+			AddNetMsg_LocalObjectDestroyed(sbPtr);
+
 		/* destroy rocket */
     	DestroyAnyStrategyBlock(sbPtr);
     }
@@ -1402,9 +1379,7 @@ static void InitialiseFragmentationGrenade(VECTORCH *originPtr)
     dynPtr->AngImpulse.EulerY = ((FastRandom()&2047)-1024)*4;
     dynPtr->AngImpulse.EulerZ = ((FastRandom()&2047)-1024)*8;
 
-	#if SupportWindows95
 	if(AvP.Network != I_No_Network)	AddNetGameObjectID(dispPtr->ObStrategyBlock);
-	#endif
 }
 extern void ProximityGrenadeBehaviour(STRATEGYBLOCK *sbPtr) 
 {
@@ -1588,9 +1563,8 @@ extern void FlareGrenadeBehaviour(STRATEGYBLOCK *sbPtr)
 		}
 		
 		/* for net game support: send a message saying we've blown up... */
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
 		/* destroy rocket */
     	DestroyAnyStrategyBlock(sbPtr);
 
@@ -1749,9 +1723,7 @@ static STRATEGYBLOCK* InitialisePulseGrenadeBehaviour(void)
     dynPtr->LinVelocity.vy = MUL_FIXED(dynPtr->LinVelocity.vy, PULSEGRENADE_SPEED);
     dynPtr->LinVelocity.vz = MUL_FIXED(dynPtr->LinVelocity.vz, PULSEGRENADE_SPEED);
  
-	#if SupportWindows95
 	if(AvP.Network != I_No_Network)	AddNetGameObjectID(dispPtr->ObStrategyBlock);
-	#endif
 
 	return dispPtr->ObStrategyBlock; 
 }
@@ -1811,9 +1783,8 @@ extern void PulseGrenadeBehaviour(STRATEGYBLOCK *sbPtr)
     	}
 			
 		/* for net game support: send a message saying we've blown up... */
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
 		/* destroy rocket */
     	DestroyAnyStrategyBlock(sbPtr);
     }
@@ -1907,10 +1878,7 @@ STRATEGYBLOCK* InitialiseEnergyBoltBehaviourKernel(VECTORCH *position,MATRIXCH *
     dynPtr->LinVelocity.vy = MUL_FIXED(dynPtr->LinVelocity.vy, ENERGY_BOLT_SPEED);
     dynPtr->LinVelocity.vz = MUL_FIXED(dynPtr->LinVelocity.vz, ENERGY_BOLT_SPEED);
 
-
-	#if SupportWindows95
 	if(AvP.Network != I_No_Network)	AddNetGameObjectID(dispPtr->ObStrategyBlock);
-	#endif
 
 	/* Extra cunning! */
 	Sound_Play(SID_PRED_LAUNCHER,"hpd",(FastRandom()&255)-128,&dynPtr->Position);
@@ -2009,9 +1977,7 @@ void InitialiseEnergyBoltBehaviour(DAMAGE_PROFILE *damage, int factor)
 	MatrixToEuler(&dynPtr->OrientMat, &dynPtr->OrientEuler);
 	dynPtr->PrevOrientMat = dynPtr->OrientMat;
 
-	#if SupportWindows95
 	if(AvP.Network != I_No_Network)	AddNetGameObjectID(dispPtr->ObStrategyBlock);
-	#endif
 
 	/* Extra cunning! */
 	Sound_Play(SID_PRED_LAUNCHER,"hpd",(FastRandom()&255)-128,&dynPtr->Position);
@@ -2108,9 +2074,8 @@ STRATEGYBLOCK* CreatePPPlasmaBoltKernel(VECTORCH *position,MATRIXCH *orient, int
 		dynPtr->IgnoreThePlayer=0;
 	}
 
-	#if SupportWindows95
 	if(AvP.Network != I_No_Network)	AddNetGameObjectID(dispPtr->ObStrategyBlock);
-	#endif
+
 	return dispPtr->ObStrategyBlock;
 }
 #else
@@ -2189,9 +2154,7 @@ void CreatePPPlasmaBoltKernel(VECTORCH *position,MATRIXCH *orient, int player)
 		dynPtr->IgnoreThePlayer=0;
 	}
 
-	#if SupportWindows95
 	if(AvP.Network != I_No_Network)	AddNetGameObjectID(dispPtr->ObStrategyBlock);
-	#endif
 }
 #endif
 
@@ -2283,9 +2246,8 @@ extern void PPPlasmaBoltBehaviour(STRATEGYBLOCK *sbPtr)
 		MakeBloodExplosion(&dynPtr->Position,50,&dynPtr->Position,100,PARTICLE_PREDPISTOL_FLECHETTE);
 		#endif
 
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
     	DestroyAnyStrategyBlock(sbPtr);	
 	}
 }
@@ -2300,9 +2262,8 @@ extern void PPPlasmaBoltBehaviour(STRATEGYBLOCK *sbPtr)
 	if (bbPtr->counter <= 0) 
 	{
 		/* for net game support: send a message saying we've blown up... */
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
 		DestroyAnyStrategyBlock(sbPtr); /* timed-out */			
 	}
 	else if (reportPtr)
@@ -2312,9 +2273,9 @@ extern void PPPlasmaBoltBehaviour(STRATEGYBLOCK *sbPtr)
 			GetDirectionOfAttack(reportPtr->ObstacleSBPtr,&dynPtr->LinVelocity,&attack_dir);
 			CauseDamageToObject(reportPtr->ObstacleSBPtr,&TemplateAmmo[AMMO_PRED_PISTOL].MaxDamage[AvP.Difficulty], ONE_FIXED,NULL);
 		}
-		#if SupportWindows95
+
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
     	DestroyAnyStrategyBlock(sbPtr);	
 
 	} else {
@@ -2414,9 +2375,7 @@ static void InitialiseSpeargunBoltBehaviour(void)
 	
 	dynPtr->Mass=1000;
 
-	#if SupportWindows95
 	if(AvP.Network != I_No_Network)	AddNetGameObjectID(dispPtr->ObStrategyBlock);
-	#endif
 }
 
 static DISPLAYBLOCK* InitialiseSpeargunBoltBehaviour_ForLoad(void)
@@ -2758,9 +2717,8 @@ extern void PredatorEnergyBoltBehaviour(STRATEGYBLOCK *sbPtr)
 	if (bbPtr->counter <= 0) 
 	{
 		/* for net game support: send a message saying we've blown up... */
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
 		DestroyAnyStrategyBlock(sbPtr); /* timed-out */			
 	}
 	else if (reportPtr)
@@ -2882,9 +2840,8 @@ extern void PredatorEnergyBoltBehaviour(STRATEGYBLOCK *sbPtr)
 			}
 		}
 
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
     	/* Splash damage? */
 		HandleEffectsOfExplosion
 		(
@@ -2921,19 +2878,17 @@ extern void XenoborgEnergyBoltBehaviour(STRATEGYBLOCK *sbPtr)
 	if (bbPtr->counter <= 0) 
 	{
 		/* for net game support: send a message saying we've blown up... */
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
 		DestroyAnyStrategyBlock(sbPtr); /* timed-out */			
 	}
 	else if (reportPtr)
 	{
   		if(reportPtr->ObstacleSBPtr)
 			CauseDamageToObject(reportPtr->ObstacleSBPtr,&TemplateAmmo[AMMO_XENOBORG].MaxDamage[AvP.Difficulty], ONE_FIXED,NULL);
-	
-		#if SupportWindows95
+
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
     	DestroyAnyStrategyBlock(sbPtr);	
 	}
 	else bbPtr->counter -= NormalFrameTime;  
@@ -3086,11 +3041,9 @@ void InitialiseDiscBehaviour(STRATEGYBLOCK *target,SECTION_DATA *disc_section) {
 	}
 
 	/* for net game support */
-	#if SupportWindows95
 	if(AvP.Network != I_No_Network)	{
 		AddNetGameObjectID(dispPtr->ObStrategyBlock);
 	}
-	#endif
 }
 
 /*
@@ -3190,9 +3143,7 @@ extern void NPCDiscBehaviour(STRATEGYBLOCK *sbPtr)
     	
 			
 		/* for net game support: send a message saying we've blown up... */
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
 
 		/* destroy rocket */
     	DestroyAnyStrategyBlock(sbPtr);
@@ -3214,9 +3165,8 @@ extern void NPCDiscBehaviour(STRATEGYBLOCK *sbPtr)
 	if(bbPtr->counter <= 0) 
 	{
 		/* for net game support: send a message saying we've blown up... */
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
 		DestroyAnyStrategyBlock(sbPtr); /* timed-out */			
 	}
 	else if(reportPtr)
@@ -3228,9 +3178,8 @@ extern void NPCDiscBehaviour(STRATEGYBLOCK *sbPtr)
 			}
 		}
 
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
     	DestroyAnyStrategyBlock(sbPtr);	
 	} else {
 		bbPtr->counter -= NormalFrameTime;
@@ -3335,9 +3284,7 @@ static void InitialiseAlienSpitBehaviour(void)
 		MatrixToEuler(&PlayersWeapon.ObMat, &PlayersWeapon.ObEuler);
 		
 		/* for net game support */
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetGameObjectID(dispPtr->ObStrategyBlock);
-		#endif
 	}
 }
 
@@ -3350,9 +3297,7 @@ extern void AlienSpitBehaviour(STRATEGYBLOCK *sbPtr)
 	if (bbPtr->counter<=0)
 	{
 		/* for net game support: send a message saying we've blown up... */
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
 
 		/* destroy rocket */
     	DestroyAnyStrategyBlock(sbPtr);
@@ -3373,9 +3318,8 @@ extern void AlienSpitBehaviour(STRATEGYBLOCK *sbPtr)
    		Sound_Play(SID_PRED_NEWROAR,"d",&(dynPtr->Position));
 
 		/* for net game support: send a message saying we've blown up... */
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
 		/* destroy rocket */
    		DestroyAnyStrategyBlock(sbPtr);
     }
@@ -3647,9 +3591,8 @@ extern void DiscBehaviour_SeekTrack(STRATEGYBLOCK *sbPtr)
 					Sound_Stop(bbPtr->soundHandle);
 					Sound_Play(SID_PREDATOR_DISK_BEING_CAUGHT,"h");
 
-					#if SupportWindows95
 					if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-					#endif
+
 			    	DestroyAnyStrategyBlock(sbPtr);	
 
 					return;
@@ -3712,17 +3655,16 @@ extern void DiscBehaviour_SeekTrack(STRATEGYBLOCK *sbPtr)
 	{
 		#if 0
 		/* for net game support: send a message saying we've blown up... */
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
 		DestroyAnyStrategyBlock(sbPtr); /* timed-out */			
 		return;
 		#else
 		/* For now, do nothing... */
 		if (bbPtr->counter<-DISC_LIFETIME) {
-			#if SupportWindows95
+
 			if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-			#endif
+
 			DestroyAnyStrategyBlock(sbPtr); /* timed-out */			
 			return;
 		}
@@ -3761,9 +3703,8 @@ extern void DiscBehaviour_SeekTrack(STRATEGYBLOCK *sbPtr)
 						Sound_Stop(bbPtr->soundHandle);
 						Sound_Play(SID_PREDATOR_DISK_RECOVERED,"h");
 
-						#if SupportWindows95
 						if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-						#endif
+
 				    	DestroyAnyStrategyBlock(sbPtr);	
 	
 					}
@@ -3901,9 +3842,8 @@ extern void DiscBehaviour_SeekTrack(STRATEGYBLOCK *sbPtr)
 					Sound_Stop(bbPtr->soundHandle);
 					Sound_Play(SID_PREDATOR_DISK_BEING_CAUGHT,"h");
 
-					#if SupportWindows95
 					if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-					#endif
+
 			    	DestroyAnyStrategyBlock(sbPtr);	
 
 				}
@@ -4092,7 +4032,6 @@ int PredDisc_TargetFilter(STRATEGYBLOCK *candidate) {
 			/* Valid. */
 			return(1);
 			break;
-	#if SupportWindows95
 		case I_BehaviourNetGhost:
 			{
 				NETGHOSTDATABLOCK *dataptr;
@@ -4109,12 +4048,10 @@ int PredDisc_TargetFilter(STRATEGYBLOCK *candidate) {
 				}
 			}
 			break;
-	#endif
 		default:
 			return(0);
 			break;
 	}
-
 }
 
 void PredDisc_GetFirstTarget(PC_PRED_DISC_BEHAV_BLOCK *bptr, DISPLAYBLOCK *target, VECTORCH *position) {
@@ -4403,7 +4340,6 @@ extern void MolotovBehaviour(STRATEGYBLOCK *sbPtr)
 				//explodeNow = 0; /* kaboom */
 			}
 		
-			#if SupportWindows95
 			if(sbPtr->I_SBtype == I_BehaviourNetGhost)
 			{ 
 				NETGHOSTDATABLOCK *ghostData = sbPtr->SBdataptr;
@@ -4417,7 +4353,6 @@ extern void MolotovBehaviour(STRATEGYBLOCK *sbPtr)
 			   		explodeNow = 1;
 				}				
 			}
-			#endif
 		} else {	
 			/* What the hell! */
 			explodeNow=1;
@@ -4443,10 +4378,9 @@ extern void MolotovBehaviour(STRATEGYBLOCK *sbPtr)
 			Explosion_SoundData.position=dynPtr->Position;
 		    Sound_Play(SID_ED_MOLOTOV_EXPLOSION,"n",&Explosion_SoundData);
     	}
- 		
-		#if SupportWindows95
+ 
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
 		/* destroy rocket */
     	DestroyAnyStrategyBlock(sbPtr);
     }
@@ -5370,10 +5304,7 @@ STRATEGYBLOCK* InitialiseFrisbeeBoltBehaviourKernel(VECTORCH *position,MATRIXCH 
     dynPtr->LinVelocity.vy = MUL_FIXED(dynPtr->LinVelocity.vy, ENERGY_BOLT_SPEED);
     dynPtr->LinVelocity.vz = MUL_FIXED(dynPtr->LinVelocity.vz, ENERGY_BOLT_SPEED);
 
-
-	#if SupportWindows95
 	if(AvP.Network != I_No_Network)	AddNetGameObjectID(dispPtr->ObStrategyBlock);
-	#endif
 
 	/* Extra cunning! */
 	Sound_Play(SID_PRED_LAUNCHER,"hpd",(FastRandom()&255)-128,&dynPtr->Position);
@@ -5400,9 +5331,8 @@ extern void FrisbeeEnergyBoltBehaviour(STRATEGYBLOCK *sbPtr)
 	if (bbPtr->counter <= 0) 
 	{
 		/* for net game support: send a message saying we've blown up... */
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
 		DestroyAnyStrategyBlock(sbPtr); /* timed-out */			
 	}
 	else if (reportPtr)
@@ -5458,9 +5388,8 @@ extern void FrisbeeEnergyBoltBehaviour(STRATEGYBLOCK *sbPtr)
 		}
 		#endif
 
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(sbPtr);
-		#endif
+
     	/* Splash damage? */
 		HandleEffectsOfExplosion
 		(

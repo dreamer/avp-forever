@@ -48,10 +48,8 @@
 #include "showcmds.h"
 
 /* for win 95 net support */
-#if SupportWindows95
 #include "pldghost.h"
 #include "pldnet.h"
-#endif
 
 #include "los.h"
 #include "kshape.h"
@@ -6757,9 +6755,7 @@ DISPLAYBLOCK *CauseDamageToHModel(HMODELCONTROLLER *HMC_Ptr, STRATEGYBLOCK *sbPt
 		/* Whoa, positive feedback! */
 		case I_BehaviourNetGhost:
 		{
-			#if SupportWindows95
 			DamageNetworkGhost(sbPtr, damage, multiple,this_section_data,incoming);
-			#endif
 			break;
 		}
 		#endif
@@ -10836,9 +10832,7 @@ void CreateSpearPossiblyWithFragment(DISPLAYBLOCK *dispPtr, VECTORCH *spearPosit
 		}
 		
 		#if 0 // no network yet!
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetGameObjectID(dispPtr->ObStrategyBlock);
-		#endif
 		#endif
 	    Sound_Play(SID_SPEARGUN_HITTING_WALL,"d",&dynPtr->Position);  
 		return;

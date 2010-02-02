@@ -54,10 +54,8 @@ different way on the consoles, so I won't worry the PSX guys for now.
 #if PENTIUM_PROFILING_ON
 #include "pentime.h"
 #else
-#if SupportWindows95
 #define gProfileStart();
 #define ProfileStop(x);
-#endif
 #endif
 
 #define	VERSION_DisableStartupMenus 	TRUE
@@ -382,9 +380,7 @@ void UpdateGame(void)
 	/* netgame support: it seems necessary to collect all our messages here, as some
 	things depend on the player's behaviour running before anything else... 
 	including firing the player's weapon */
-	#if SupportWindows95
 	if(AvP.Network != I_No_Network)	NetCollectMessages();
-	#endif
 
 	RemoveDestroyedStrategyBlocks();
 

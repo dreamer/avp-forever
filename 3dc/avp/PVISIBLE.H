@@ -73,10 +73,9 @@
 		int explosionTimer; //slight time delay after destruction for explosion
 		int explosionStartFrame; //frame that explosion started
 
-		#if SupportWindows95
 		INAN_FRAG * fragments;
 		int num_frags;
-		#endif
+
 		unsigned int ghosted_object:1;
 
 	} INANIMATEOBJECT_STATUSBLOCK;
@@ -100,10 +99,8 @@
 
 		int explosionType;
 
-		#if SupportWindows95
 		INAN_FRAG * fragments;
 		int num_frags;
-		#endif
 		
 	} TOOLS_DATA_INANIMATEOBJECT;
 
