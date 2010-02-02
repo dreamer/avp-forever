@@ -91,7 +91,7 @@ struct ORTHO_OBJECTS
 };
 
 // array of 2d objects
-ORTHO_OBJECTS orthoList[40];
+ORTHO_OBJECTS *orthoList = new ORTHO_OBJECTS[120]; // lower me!
 
 struct renderParticle
 {
@@ -601,6 +601,7 @@ BOOL UnlockExecuteBufferAndPrepareForUse()
 		return FALSE;
 	}
 
+
 	LastError = d3d.lpD3DOrthoVertexBuffer->Unlock();
 	if (FAILED(LastError)) 
 	{
@@ -763,51 +764,16 @@ void ChangeTexture(const int texture_id)
 
 BOOL ExecuteBuffer()
 {
-	if (NumVertices < 3)
-		return FALSE;
-/*
-	char buf[100];
-	sprintf(buf, "sizeof: %d\n", sizeof(renderParticle));
-	OutputDebugString(buf);
-*/
+//	if (NumVertices < 3)
+//		return FALSE;
 
 //	std::sort(renderTest.begin(), renderTest.end());
 //	std::sort(renderList.begin(), renderList.end());
-
 /*
-	LastError = d3d.lpD3DIndexBuffer->Lock(0,0,(void**)&tempIndex, D3DLOCK_DISCARD);
-	if(FAILED(LastError)) {
-//		OutputDebugString("Couldn't lock index buffer");
-//		LogError("Unable to lock index buffer", LastError);
-		LogError(LastError);
-		return FALSE;
-	}
-*/
 	int index = 0;
 	int pos = 0;
 	int new_ind_start = 0;
 	int new_ind_end = 0;
-
-/*
-	if (Global_VDB_Ptr)
-	{
-		char buf[100];
-		sprintf(buf, "world x: %d y: %d z: %d\n", 
-			Global_VDB_Ptr->VDB_World.vx,
-			Global_VDB_Ptr->VDB_World.vy,
-			Global_VDB_Ptr->VDB_World.vz);
-
-		OutputDebugString(buf);
-	}
-*/
-/*
-	LastError = d3d.lpD3DIndexBuffer->Unlock();
-	if(FAILED(LastError)) {
-//		OutputDebugString("Couldn't UNlock vertex buffer!");
-//		LogError("Unable to unlock index buffer", LastError);
-		LogError(LastError);
-		return FALSE;
-	}
 */
 
 #ifdef WIN32
@@ -834,21 +800,18 @@ BOOL ExecuteBuffer()
 
 	ChangeTextureAddressMode(TEXTURE_WRAP);
 
-	int tempTexture = 0;
-
 	// we can assume to keep this turned on
 //	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
-	for (int i = 0; i < renderCount; i++)
 #if 1
+	for (int i = 0; i < renderCount; i++)
 //	for (unsigned int i = 0; i < renderTest.size(); i++)
 	{
-		tempTexture = renderList[i].texture_id;
-
-		if (renderList[i].translucency_type != TRANSLUCENCY_OFF) continue;
+		if (renderList[i].translucency_type != TRANSLUCENCY_OFF) 
+			continue;
 
 		// texture stuff here
-		ChangeTexture(tempTexture);
+		ChangeTexture(renderList[i].texture_id);
 
 		ChangeTranslucencyMode(renderList[i].translucency_type);
 
@@ -876,12 +839,11 @@ BOOL ExecuteBuffer()
 //	for (unsigned int i = 0; i < renderTest.size(); i++)
 	for (unsigned int i = 0; i < renderCount; i++)
 	{
-		tempTexture = renderList[i].texture_id;
-
-		if (renderList[i].translucency_type == TRANSLUCENCY_OFF) continue;
+		if (renderList[i].translucency_type == TRANSLUCENCY_OFF) 
+			continue;
 
 		// texture stuff here
-		ChangeTexture(tempTexture);
+		ChangeTexture(renderList[i].texture_id);
 
 		ChangeTranslucencyMode(renderList[i].translucency_type);
 
@@ -889,8 +851,10 @@ BOOL ExecuteBuffer()
 		extern int HUDFontsImageNumber;
 		extern int AAFontImageNumber;
 
+		int textureID = renderList[i].texture_id;
+
 		/* lazy way to get the filtering working correctly :) */
-		if ( tempTexture == AAFontImageNumber || tempTexture == HUDFontsImageNumber || tempTexture == HUDImageNumber)
+		if ( textureID == AAFontImageNumber || textureID == HUDFontsImageNumber || textureID == HUDImageNumber)
 		{
 			ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 		}
@@ -932,24 +896,17 @@ BOOL ExecuteBuffer()
 
 		ChangeTextureAddressMode(TEXTURE_CLAMP);
 
-		// texture stuff here
-		ChangeTexture(NO_TEXTURE);
-
 		// loop through list drawing the quads
 		for (int i = 0; i < orthoListCount; i++)
 		{
-			if (orthoList[i].textureID != NO_TEXTURE)
-			{
-				ChangeTexture(orthoList[i].textureID);
-			}
+			ChangeTexture(orthoList[i].textureID);
+			ChangeTranslucencyMode(orthoList[i].translucency_type);
 
 			LastError = d3d.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, orthoList[i].vertStart, 2);
 			if (FAILED(LastError))
 			{
 				LogDxError(LastError, __LINE__, __FILE__);
 			}
-
-			ChangeTexture(NO_TEXTURE);
 		}
 	}
 
@@ -6595,19 +6552,18 @@ void r2rect :: AlphaFill
 	D3D_Rectangle(x0, y0, x1, y1, R, G, B, translucency);
 }
 
-extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colour);
-extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour);
-extern void D3D_RenderHUDString_Clipped(char *stringPtr,int x,int y,int colour);
+extern void D3D_RenderHUDNumber_Centred(unsigned int number, int x, int y, int colour);
+extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour);
+extern void D3D_RenderHUDString_Clipped(char *stringPtr, int x, int y, int colour);
 extern void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour);
 
 extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colour)
 {
-#if 1//FUNCTION_ON
 	// green and red ammo numbers
 	struct VertexTag quadVertices[4];
-	int noOfDigits=3;
-	int h = MUL_FIXED(HUDScaleFactor,HUD_DIGITAL_NUMBERS_HEIGHT);
-	int w = MUL_FIXED(HUDScaleFactor,HUD_DIGITAL_NUMBERS_WIDTH);
+	int noOfDigits = 3;
+	int h = MUL_FIXED(HUDScaleFactor, HUD_DIGITAL_NUMBERS_HEIGHT);
+	int w = MUL_FIXED(HUDScaleFactor, HUD_DIGITAL_NUMBERS_WIDTH);
 
 	quadVertices[0].Y = y;
 	quadVertices[1].Y = y;
@@ -6662,9 +6618,7 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 		}
 	}
 	while(--noOfDigits);
-#endif
 }
-
 
 extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour)
 {
@@ -7129,7 +7083,7 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_textu
 	}
 }
 
-void DrawQuad(int x, int y, int width, int height, int textureID, int colour) 
+void DrawQuad(int x, int y, int width, int height, int textureID, int colour, enum TRANSLUCENCY_TYPE translucencyType) 
 {
 	float x1 = (float(x / 640.0f) * 2) - 1;
 	float y1 = (float(y / 480.0f) * 2) - 1;
@@ -7155,7 +7109,7 @@ void DrawQuad(int x, int y, int width, int height, int textureID, int colour)
 	orthoList[orthoListCount].textureID = textureID;
 	orthoList[orthoListCount].vertStart = orthoOffset;
 	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
-	orthoList[orthoListCount].translucency_type = TRANSLUCENCY_NORMAL;
+	orthoList[orthoListCount].translucency_type = translucencyType;
 	orthoListCount++;
 
 	// bottom left
@@ -7216,7 +7170,7 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 	if (alpha > 255) 
 		alpha = 255;
 
-	DrawQuad(topX, topY, textureWidth, textureHeight, image_num, D3DCOLOR_ARGB(alpha, 255, 255, 255));
+	DrawQuad(topX, topY, textureWidth, textureHeight, image_num, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
 
 	return;
 
@@ -7306,7 +7260,7 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 	// do the text alignment justification
 	topLeftX -= textureWidth;
 
-	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_LEFT, D3DCOLOR_ARGB(alpha, 255, 255, 255));
+	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_LEFT, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
 
 	// now do the middle section
 	topLeftX += textureWidth;
@@ -7314,7 +7268,7 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Width;
 	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Height;
 
-	DrawQuad(topLeftX, topLeftY, textureWidth * size, textureHeight, AVPMENUGFX_GLOWY_MIDDLE, D3DCOLOR_ARGB(alpha, 255, 255, 255));
+	DrawQuad(topLeftX, topLeftY, textureWidth * size, textureHeight, AVPMENUGFX_GLOWY_MIDDLE, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
 
 	// now do the right section
 	topLeftX += textureWidth * size;
@@ -7322,7 +7276,7 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Width;
 	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Height;
 
-	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_RIGHT, D3DCOLOR_ARGB(alpha, 255, 255, 255));
+	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_RIGHT, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
 
 #if 0
 
@@ -7678,7 +7632,7 @@ void DrawBigChar(char c, int x, int y, int colour)
 
 void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha) 
 {
-	CheckVertexBuffer(4, TALLFONT_TEX, TRANSLUCENCY_GLOWING);
+//	CheckVertexBuffer(4, TALLFONT_TEX, TRANSLUCENCY_GLOWING);
 
 	alpha = (alpha / 256);
 	if (alpha > 255) 
@@ -7689,8 +7643,61 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 	int real_height = 512;
 	int real_width = 512;
 
+	float RecipW = 1.0f / real_width;
+	float RecipH = 1.0f / real_height;
+
 	int height_of_char = 33;
 
+	float x1 = (float(topX / 640.0f) * 2) - 1;
+	float y1 = (float(topY / 480.0f) * 2) - 1;
+
+	float x2 = ((float(topX + char_width) / 640.0f) * 2) - 1;
+	float y2 = ((float(topY + height_of_char) / 480.0f) * 2) - 1;
+
+	// create a new list item for it
+	orthoList[orthoListCount].textureID = TALLFONT_TEX;
+	orthoList[orthoListCount].vertStart = orthoOffset;
+	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
+	orthoList[orthoListCount].translucency_type = TRANSLUCENCY_GLOWING;
+	orthoListCount++;
+
+	// bottom left
+	orthoVerts[orthoOffset].x = x1;
+	orthoVerts[orthoOffset].y = y2;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = (float)((texU) * RecipW);
+	orthoVerts[orthoOffset].v = (float)((texV + height_of_char) * RecipH);
+	orthoOffset++;
+
+	// top left
+	orthoVerts[orthoOffset].x = x1;
+	orthoVerts[orthoOffset].y = y1;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = (float)((texU) * RecipW);
+	orthoVerts[orthoOffset].v = (float)((texV) * RecipH);
+	orthoOffset++;
+
+	// bottom right
+	orthoVerts[orthoOffset].x = x2;
+	orthoVerts[orthoOffset].y = y2;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = (float)((texU + char_width) * RecipW);
+	orthoVerts[orthoOffset].v = (float)((texV + height_of_char) * RecipH);
+	orthoOffset++;
+
+	// top right
+	orthoVerts[orthoOffset].x = x2;
+	orthoVerts[orthoOffset].y = y1;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = (float)((texU + char_width) * RecipW);
+	orthoVerts[orthoOffset].v = (float)((texV) * RecipH);
+	orthoOffset++;
+
+#if 0
 	// game used to render menus at 640x480. this allows us to use any resolution we want
 	int quadWidth = (ScreenDescriptorBlock.SDB_Width / 640.0f) * char_width;
 	int quadHeight = (ScreenDescriptorBlock.SDB_Height / 480.0f) * height_of_char;
@@ -7751,7 +7758,7 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 
 	OUTPUT_TRIANGLE(0,1,2, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
-
+#endif
 #if 0
 //	d3d.lpD3DDevice->SetRenderState(D3DRS_COLORWRITEENABLE, 0x00000000);
 /*

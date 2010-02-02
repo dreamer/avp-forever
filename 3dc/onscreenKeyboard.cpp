@@ -229,7 +229,7 @@ void Osk_Draw()
 //	OutputDebugString(buf);
 
 	// draw background rectangle
-	DrawQuad(osk_x, osk_y, oskWidth, oskHeight, -1, D3DCOLOR_ARGB(120, 80, 160, 120));
+	DrawQuad(osk_x, osk_y, oskWidth, oskHeight, -1, D3DCOLOR_ARGB(120, 80, 160, 120), TRANSLUCENCY_GLOWING);
 
 	// start off with an indent to space things out nicely
 	int pos_x = osk_x + indent_space;
@@ -251,12 +251,12 @@ void Osk_Draw()
 			// only draw keys not marked as blank keys
 			if (!keyVector.at(index).isBlank)
 			{
-				DrawQuad(pos_x, pos_y, keyVector.at(index).width, keyVector.at(index).height, -1, D3DCOLOR_ARGB(200, 255, 255, 255));
+				DrawQuad(pos_x, pos_y, keyVector.at(index).width, keyVector.at(index).height, -1, D3DCOLOR_ARGB(200, 255, 255, 255), TRANSLUCENCY_GLOWING);
 
 				if (Osk_GetCurrentLocation() == index) // draw the selected item differently (highlight it)
-					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, -1, D3DCOLOR_ARGB(220, 0, 128, 0));
+					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, -1, D3DCOLOR_ARGB(220, 0, 128, 0), TRANSLUCENCY_GLOWING);
 				else
-					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, -1, D3DCOLOR_ARGB(220, 38, 80, 145));
+					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, -1, D3DCOLOR_ARGB(220, 38, 80, 145), TRANSLUCENCY_GLOWING);
 
 				// now draw text, but figure out how wide the string is first.. do this once on init?
 				std::string tempString = Osk_GetKeyLabel(index);

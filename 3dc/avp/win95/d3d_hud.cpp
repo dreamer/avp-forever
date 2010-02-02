@@ -35,8 +35,7 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 #include "d3d_hud.h"
 
 #define UseLocalAssert FALSE
-#include "ourasert.h"
-											
+#include "ourasert.h"									
 
 #include "vision.h"
 #define RGBLIGHT_MAKE(rr,gg,bb) \
@@ -54,21 +53,15 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 )
 #include "kshape.h"
 
-
-
 void D3D_DrawHUDFontCharacter(HUDCharDesc *charDescPtr);
 void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr);
 
 extern void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2);
-//extern void XClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2);
 /* HUD globals */
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern int sine[],cosine[];
-
-//extern enum HUD_RES_ID HUDResolution;
+extern int sine[], cosine[];
 
 signed int HUDTranslucencyLevel=64;
-
 static int MotionTrackerHalfWidth;
 static int MotionTrackerTextureSize;
 static int MotionTrackerCentreY;
@@ -123,6 +116,7 @@ static struct HUDFontDescTag HUDFontDesc[] =
 		14,//Width
 	},
 };
+
 #define BLUE_BAR_WIDTH ((203-0)+1)
 #define BLUE_BAR_HEIGHT ((226-195)+1)
 
@@ -140,7 +134,7 @@ void PlatformSpecificInitMarineHUD()
 void PlatformSpecificInitAlienHUD()
 {
 	/* set game mode: different, though for multiplayer game */
-	if(AvP.Network==I_No_Network)
+	if (AvP.Network == I_No_Network)
 	{
 		cl_pszGameMode = "alien";
 		LoadCommonTextures();
@@ -150,7 +144,7 @@ void PlatformSpecificInitAlienHUD()
 		cl_pszGameMode = "multip";
 		/* load in sfx */
 		LoadCommonTextures();
-		//load marine stuff as well
+		// load marine stuff as well
 		D3D_InitialiseMarineHUD();
 	}
 }
@@ -158,7 +152,7 @@ void PlatformSpecificInitAlienHUD()
 void PlatformSpecificInitPredatorHUD()
 {
 	/* set game mode: different, though for multiplayer game */
-	if(AvP.Network==I_No_Network)
+	if (AvP.Network == I_No_Network)
 	{
 		cl_pszGameMode = "predator";
 		/* load in sfx */
@@ -187,8 +181,8 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 	}
 	else
 	{
-		scaledWidth = MUL_FIXED(imageDescPtr->Scale,imageDescPtr->Width);
-		scaledHeight = MUL_FIXED(imageDescPtr->Scale,imageDescPtr->Height);
+		scaledWidth = MUL_FIXED(imageDescPtr->Scale, imageDescPtr->Width);
+		scaledHeight = MUL_FIXED(imageDescPtr->Scale, imageDescPtr->Height);
 	}
 
 	quadVertices[0].U = imageDescPtr->TopLeftU;
@@ -227,7 +221,7 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 void D3D_InitialiseMarineHUD(void)
 {
 	/* set game mode: different though for multiplayer game */
-	if (AvP.Network==I_No_Network)
+	if (AvP.Network == I_No_Network)
 		cl_pszGameMode = "marine";
 	else
 		cl_pszGameMode = "multip";
@@ -257,10 +251,6 @@ void D3D_InitialiseMarineHUD(void)
 
 		/* load in sfx */
 		SpecialFXImageNumber = CL_LoadImageOnce("Common\\partclfx.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
-
-//		SpecialFXImageNumber = CL_LoadImageOnceEx("flame1",IRF_D3D,DDSCAPS_SYSTEMMEMORY,0);;
-//		SpecialFXImageNumber = CL_LoadImageOnceEx("star",IRF_D3D,DDSCAPS_SYSTEMMEMORY,0);;
-//		SmokyImageNumber = CL_LoadImageOnceEx("smoky",IRF_D3D,DDSCAPS_SYSTEMMEMORY,0);
 	}
 
 	/* centre of motion tracker */
@@ -278,9 +268,9 @@ void D3D_InitialiseMarineHUD(void)
 void LoadCommonTextures(void)
 {
 //	PredatorVisionChangeImageNumber = CL_LoadImageOnce("HUDs\\Predator\\predvisfx.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
-	if(AvP.Network==I_No_Network)
+	if (AvP.Network == I_No_Network)
 	{
-		switch(AvP.PlayerType)
+		switch (AvP.PlayerType)
 		{
 			case I_Predator:
 			{
@@ -777,8 +767,7 @@ void D3D_BLTGunSightToHUD(int screenX, int screenY, enum GUNSIGHT_SHAPE gunsight
 
 void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 {
-//	HUDCharDesc charDesc;
-	int i=MAX_NO_OF_COMMON_HUD_DIGITS;
+	int i = MAX_NO_OF_COMMON_HUD_DIGITS;
 	unsigned int healthColour;
 	unsigned int armourColour;
 
@@ -818,7 +807,7 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 	}
 	else
 	{										  
-		if (health>100)
+		if (health > 100)
 		{
 			healthColour = HUDLayout_Colour_BrightWhite;
 		}
@@ -882,8 +871,9 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 				0xff003fff
 			);
 		
-			health = (health/2);
-			if (health<0) health=0;
+			health = (health / 2);
+			if (health < 0) 
+				health = 0;
 
 			if (health<100)
 			{
@@ -920,10 +910,10 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 
 void Render_MarineAmmo(enum TEXTSTRING_ID ammoText, enum TEXTSTRING_ID magazinesText, unsigned int magazines, enum TEXTSTRING_ID roundsText, unsigned int rounds, int primaryAmmo)
 {
-//	HUDCharDesc charDesc;
-	int i=MAX_NO_OF_COMMON_HUD_DIGITS;
+	int i = MAX_NO_OF_COMMON_HUD_DIGITS;
 	int xCentre = (MUL_FIXED(HUDLayout_RightmostTextCentre,HUDScaleFactor)+ScreenDescriptorBlock.SDB_Width) - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
-	if(!primaryAmmo) xCentre+=MUL_FIXED(HUDScaleFactor,HUDLayout_RightmostTextCentre*2);
+	if (!primaryAmmo) 
+		xCentre += MUL_FIXED(HUDScaleFactor, HUDLayout_RightmostTextCentre * 2);
 
 	D3D_RenderHUDString_Centred
 	(
@@ -964,7 +954,7 @@ void Render_MarineAmmo(enum TEXTSTRING_ID ammoText, enum TEXTSTRING_ID magazines
 
 void DrawPredatorEnergyBar(void)
 {
-	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 	PLAYER_WEAPON_DATA *weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
 	int maxHeight = ScreenDescriptorBlock.SDB_Height*3/4;
 	int h;
@@ -987,7 +977,6 @@ void DrawPredatorEnergyBar(void)
 			0x00,// unsigned char B,
 		   	128 // unsigned char translucency
 		);
-
 	}
 	if (weaponPtr->WeaponIDNumber == WEAPON_PRED_SHOULDERCANNON)
 	{

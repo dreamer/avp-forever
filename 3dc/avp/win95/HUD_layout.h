@@ -4,8 +4,8 @@
 //5
 #define HUD_FONT_HEIGHT 15
 //8
-#define HUD_DIGITAL_NUMBERS_WIDTH 14
-#define HUD_DIGITAL_NUMBERS_HEIGHT 22
+#define HUD_DIGITAL_NUMBERS_WIDTH		14
+#define HUD_DIGITAL_NUMBERS_HEIGHT		22
 
 #define HUDLayout_RightmostTextCentre	-40
 
@@ -20,7 +20,7 @@
 
 #define HUDLayout_Colour_BrightWhite	0xffffffff
 #define HUDLayout_Colour_MarineGreen	((255<<24)+(95<<16)+(179<<8)+(39))
-#define HUDLayout_Colour_MarineRed	((255<<24)+(255<<16))
+#define HUDLayout_Colour_MarineRed		((255<<24)+(255<<16))
 #define HUDLayout_Linespacing			16
 
 #ifdef __cplusplus

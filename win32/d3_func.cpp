@@ -749,7 +749,7 @@ BOOL CreateVolatileResources()
 	}
 
 	// create our 2D vertex buffer
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(4 * 20 * sizeof(ORTHOVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_ORTHOVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoVertexBuffer, NULL);
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(4 * 800 * sizeof(ORTHOVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_ORTHOVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoVertexBuffer, NULL);
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);

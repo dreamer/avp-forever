@@ -349,12 +349,12 @@ void Con_Draw()
 		console.isOpen = true;
 
 	// draw the background quad
-	DrawQuad(console.xPos, console.yPos, console.width, console.height, -1, D3DCOLOR_ARGB(255, 38, 80, 145));
+	DrawQuad(console.xPos, console.yPos, console.width, console.height, -1, D3DCOLOR_ARGB(255, 38, 80, 145), TRANSLUCENCY_GLOWING);
 
 	if (console.height > 0)
 	{
 		// draw the outline bar that runs along the bottom of the console
-		DrawQuad(console.xPos, console.yPos + console.height, console.width, 2, -1, D3DCOLOR_ARGB(255, 255, 255, 255));
+		DrawQuad(console.xPos, console.yPos + console.height, console.width, 2, -1, D3DCOLOR_ARGB(255, 255, 255, 255), TRANSLUCENCY_GLOWING);
 	}
 
 	int charCount = 0;
