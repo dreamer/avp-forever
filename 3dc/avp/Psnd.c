@@ -113,6 +113,7 @@ void SoundSys_Management(void)
 		
 		numActive++;
 
+
 		if (PlatSoundHasStopped(i)!=0 && !ActiveSounds[i].paused)
 		{
 			Sound_Stop(i);
