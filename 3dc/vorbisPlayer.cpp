@@ -217,7 +217,7 @@ void VorbisPlayback::Stop()
 	}
 }
 
-void LoadVorbisTrack(int track) 
+void LoadVorbisTrack(size_t track) 
 {
 	// if we're already playing a track, stop it
 	if (inGameMusic)
@@ -272,9 +272,9 @@ bool LoadVorbisTrackList()
 	return true;
 }
 
-int CheckNumberOfVorbisTracks()
+size_t CheckNumberOfVorbisTracks()
 {
-	return (int)TrackList.size();
+	return TrackList.size();
 }
 
 bool IsVorbisPlaying()

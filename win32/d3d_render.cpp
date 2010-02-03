@@ -105,7 +105,7 @@ struct renderParticle
 
 std::vector<renderParticle> particleArray;
 
-int maxParts = 0;
+size_t maxParts = 0;
 
 void DrawParticles()
 {
@@ -127,7 +127,7 @@ void DrawParticles()
 	std::sort(particleArray.begin(), particleArray.end());
 
 	// loop particles and add them to vertex buffer
-	for (int i = 0; i < particleArray.size(); i++)
+	for (size_t i = 0; i < particleArray.size(); i++)
 	{
 		RenderPolygon.NumberOfVertices = particleArray[i].numVerts;
 		D3D_Particle_Output(&particleArray[i].particle, &particleArray[i].vertices[0]);
@@ -796,7 +796,7 @@ BOOL ExecuteBuffer()
 //	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
 #if 1
-	for (int i = 0; i < renderCount; i++)
+	for (size_t i = 0; i < renderCount; i++)
 //	for (unsigned int i = 0; i < renderTest.size(); i++)
 	{
 		if (renderList[i].translucency_type != TRANSLUCENCY_OFF) 

@@ -1015,58 +1015,59 @@ int NPCOrientateToVector(STRATEGYBLOCK *sbPtr, VECTORCH *zAxisVector,int turnspe
   --------------------------------------------------------------------*/
 int NPCFindTargetEP(STRATEGYBLOCK *sbPtr, VECTORCH *targetPosn, AIMODULE **targetModule, int alien)
 {
-        AIMODULE **AdjModuleRefPtr;
-        FARENTRYPOINT *bestEp;
-        int bestSmell = 0;
-        int aTargetExists = 0;
-        AIMODULE *bestModule = (AIMODULE *)0;
+	AIMODULE **AdjModuleRefPtr;
+	FARENTRYPOINT *bestEp;
+	int bestSmell = 0;
+	int aTargetExists = 0;
+	AIMODULE *bestModule = (AIMODULE *)0;
 
-        LOCALASSERT(sbPtr);
-        LOCALASSERT(targetPosn);
-        LOCALASSERT(targetModule);
-                                
-        if(!(sbPtr->containingModule)) return 0; /* just in case */
-        AdjModuleRefPtr = sbPtr->containingModule->m_aimodule->m_link_ptrs;
-        
-        /* check if there is a module adjacency list */ 
-        if(!AdjModuleRefPtr) return 0;
+	LOCALASSERT(sbPtr);
+	LOCALASSERT(targetPosn);
+	LOCALASSERT(targetModule);
+	                    
+	if(!(sbPtr->containingModule)) return 0; /* just in case */
+	AdjModuleRefPtr = sbPtr->containingModule->m_aimodule->m_link_ptrs;
 
-        /* go through each adjacent module */                   
-        while(*AdjModuleRefPtr != 0)
-        {
-                AIMODULE *nextAdjModule = *AdjModuleRefPtr;                             
-                if (AIModuleIsVisible(nextAdjModule))
-                {
-                        /* it is adjacent & visible ... */
-                        FARENTRYPOINT *thisEp = GetAIModuleEP(nextAdjModule, sbPtr->containingModule->m_aimodule);
-                        if(thisEp)
-                        {
-                                if (!((!alien)&(thisEp->alien_only))) {
-                                        /* ... and has an ep, so test it's pheromone level */
-                                        if(PherPl_ReadBuf[(nextAdjModule->m_index)] > bestSmell)
-                                        {
-                                                bestSmell = PherPl_ReadBuf[(nextAdjModule->m_index)];
-                                                bestEp = thisEp;
-                                                bestModule = nextAdjModule;
-                                                aTargetExists = 1;
-                                        }
-                                }
-                        }
-                }
-                AdjModuleRefPtr++;
-        }
+	/* check if there is a module adjacency list */ 
+	if(!AdjModuleRefPtr) return 0;
 
-        /* return the result, if there is one */
-        if(aTargetExists)
-        {
-                *targetPosn = bestEp->position;
-                *targetModule = bestModule;
-                targetPosn->vx += bestModule->m_world.vx;
-                targetPosn->vy += bestModule->m_world.vy;
-                targetPosn->vz += bestModule->m_world.vz;                       
-                LOCALASSERT(bestEp->donorIndex == sbPtr->containingModule->m_aimodule->m_index);                
-        }
-        return aTargetExists;
+	/* go through each adjacent module */                   
+	while(*AdjModuleRefPtr != 0)
+	{
+		AIMODULE *nextAdjModule = *AdjModuleRefPtr;                             
+		if (AIModuleIsVisible(nextAdjModule))
+		{
+			/* it is adjacent & visible ... */
+			FARENTRYPOINT *thisEp = GetAIModuleEP(nextAdjModule, sbPtr->containingModule->m_aimodule);
+			if(thisEp)
+			{
+				if (!((!alien)&(thisEp->alien_only))) 
+				{
+					/* ... and has an ep, so test it's pheromone level */
+					if(PherPl_ReadBuf[(nextAdjModule->m_index)] > bestSmell)
+					{
+						bestSmell = PherPl_ReadBuf[(nextAdjModule->m_index)];
+						bestEp = thisEp;
+						bestModule = nextAdjModule;
+						aTargetExists = 1;
+					}
+				}
+			}
+		}
+		AdjModuleRefPtr++;
+	}
+
+	/* return the result, if there is one */
+	if(aTargetExists)
+	{
+		*targetPosn = bestEp->position;
+		*targetModule = bestModule;
+		targetPosn->vx += bestModule->m_world.vx;
+		targetPosn->vy += bestModule->m_world.vy;
+		targetPosn->vz += bestModule->m_world.vz;                       
+		LOCALASSERT(bestEp->donorIndex == sbPtr->containingModule->m_aimodule->m_index);                
+	}
+	return aTargetExists;
 }
 
 

@@ -88,7 +88,8 @@
 /* Exported globals *****************************************************/
 
 /* Function prototypes **************************************************/
-
+void BringDownConsoleWithSayTypedIn();
+void BringDownConsoleWithSaySpeciesTypedIn();
 
 
 /* End of the header ****************************************************/

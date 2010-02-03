@@ -9314,8 +9314,6 @@ void LogNetInfo(char *msg)
 #endif
 }
 
-
-
 DISPLAYBLOCK PlayersMirrorImage;
 STRATEGYBLOCK PlayersMirrorImageSB;		  
 NETGHOSTDATABLOCK PlayersMirrorGhost;
@@ -9330,7 +9328,6 @@ BOOL Current_Level_Requires_Mirror_Image()
 	}
 	return FALSE;
 }
-
 
 void CreatePlayersImageInMirror(void)
 {

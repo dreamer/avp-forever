@@ -11,7 +11,7 @@
 
 typedef void (*funcPointer) (void);
 std::string& Con_GetArgument(int argNum);
-int Con_GetNumArguments();
+size_t Con_GetNumArguments();
 void Con_AddCommand(char *command, funcPointer function);
 void Con_PrintError(const std::string &errorString);
 void Con_PrintMessage(const std::string &messageString);

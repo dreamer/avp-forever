@@ -74,10 +74,10 @@ extern "C" {
 #endif
 
 void Vorbis_CloseSystem();
-extern void LoadVorbisTrack(int track);
+extern void LoadVorbisTrack(size_t track);
 extern bool LoadVorbisTrackList();
 bool IsVorbisPlaying();
-int CheckNumberOfVorbisTracks();
+size_t CheckNumberOfVorbisTracks();
 
 #ifdef __cplusplus
 }

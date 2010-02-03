@@ -74,6 +74,9 @@ extern void InitPlayerMovementData(STRATEGYBLOCK* sbPtr);
 extern void PlayerBehaviour(STRATEGYBLOCK* sbptr);
 extern void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr);
 
+extern void ThrowAFlare(void);
+void StartPlayerTaunt(void);
+
 
 #ifdef __cplusplus
 

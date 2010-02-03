@@ -21,13 +21,19 @@
 #include "iofocus.h"
 #include "paintball.h"
 #include "avp_menus.h"
+#include "avpview.h"
 
 extern int InGameMenusAreRunning(void);
 extern void AvP_TriggerInGameMenus(void);
 extern void Recall_Disc(void);
 extern void ShowMultiplayerScores(void);
+extern void BringDownConsoleWithSayTypedIn();
+void BringDownConsoleWithSaySpeciesTypedIn();
+void MessageHistory_DisplayPrevious(void);
+void MaintainZoomingLevel(void);
 
 extern int NormalFrameTime;
+
 
 FIXED_INPUT_CONFIGURATION FixedInputConfig =
 {

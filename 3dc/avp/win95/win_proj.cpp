@@ -114,7 +114,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			MouseWheelStatus = wParam;
 			MouseWheelStatus>>=16;
 			return 0;
-		}	
+		}
 
 		case WM_INPUT: 
 		{

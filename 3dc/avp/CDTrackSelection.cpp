@@ -252,7 +252,7 @@ static bool PickOGGTrack(List<int>& track_list)
 		return false;
 
 	//pick the next track in the list
-	unsigned int index=TrackSelectCounter % track_list.size();
+	size_t index = TrackSelectCounter % track_list.size();
 
 	if (index > CheckNumberOfVorbisTracks())
 	{
@@ -314,8 +314,7 @@ void CheckCDAndChooseTrackIfNeeded()
 			}
 		}
 	}
-	
-	
+
 	//multiplayer (or their weren't ant level specific tracks)
 	lastPlayerType=AvP.PlayerType;
 	PickCDTrack(MultiplayerCDTracks[AvP.PlayerType]); 	

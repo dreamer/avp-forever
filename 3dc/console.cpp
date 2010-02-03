@@ -70,7 +70,7 @@ std::string& Con_GetArgument(int argNum)
 	return cmdArgs.at(argNum);
 }
 
-int Con_GetNumArguments()
+size_t Con_GetNumArguments()
 {
 	return cmdArgs.size();
 }
@@ -364,7 +364,7 @@ void Con_Draw()
 	charWidth = RenderSmallChar('>', console.indent, console.height - CHAR_HEIGHT, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
 	RenderSmallChar('_', console.indent + charWidth, console.height - CHAR_HEIGHT, alpha, ONE_FIXED, ONE_FIXED, ONE_FIXED);
 
-	int rows = console.text.size() - 1;
+	size_t rows = console.text.size() - 1;
 
 	int y = console.height - CHAR_HEIGHT * 2;
 
@@ -372,14 +372,14 @@ void Con_Draw()
 	int xOffset = 0;
 
 	// draw all the lines of text
-	for (int i = rows; i >= 0; i--, y -= CHAR_HEIGHT)
+	for (size_t i = rows; i >= 0; i--, y -= CHAR_HEIGHT)
 	{
 		xOffset = 0;
 		charWidth = 0;
 
 //		Font_DrawText(console.text[i].c_str(), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 
-		for (int j = 0; j < console.text[i].length(); j++)
+		for (size_t j = 0; j < console.text[i].length(); j++)
 		{
 			charWidth = RenderSmallChar(console.text.at(i).at(j), console.indent + xOffset, y, ONE_FIXED, ONE_FIXED / 2, ONE_FIXED, ONE_FIXED);
 			//Font_DrawText(console.text.at(i).at(j), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
@@ -391,7 +391,7 @@ void Con_Draw()
 	charWidth = 0;
 
 	// draw the line of text we're currently typing
-	for (int j = 0; j < console.inputLine.length(); j++)
+	for (size_t j = 0; j < console.inputLine.length(); j++)
 	{
 		charWidth = RenderSmallChar(console.inputLine.at(j), console.indent + xOffset, console.height - CHAR_HEIGHT, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
 		xOffset += charWidth;

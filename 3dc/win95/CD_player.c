@@ -281,40 +281,39 @@ static void PlatGetCDDAVolumeControl(void)
 			
 			//try to get the compact disc mixer line
 			MIXERLINE line;
-			line.cbStruct=sizeof(MIXERLINE);
-			line.dwComponentType=MIXERLINE_COMPONENTTYPE_SRC_COMPACTDISC;
+			line.cbStruct = sizeof(MIXERLINE);
+			line.dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_COMPACTDISC;
 
-			if(mixerGetLineInfo(handle, &line, MIXER_GETLINEINFOF_COMPONENTTYPE) == MMSYSERR_NOERROR)
+			// bjd - everyone seems to just casts to HMIXEROBJ
+			if (mixerGetLineInfo((HMIXEROBJ)handle, &line, MIXER_GETLINEINFOF_COMPONENTTYPE) == MMSYSERR_NOERROR)
 			{
 				MIXERLINECONTROLS lineControls;
 				MIXERCONTROL control;
 
-
-				lineControls.cbStruct=sizeof(MIXERLINECONTROLS);
-				lineControls.dwLineID=line.dwLineID;
-				lineControls.pamxctrl=&control;
-				lineControls.dwControlType=MIXERCONTROL_CONTROLTYPE_VOLUME ;
-				lineControls.cControls=1;
-				lineControls.cbmxctrl=sizeof(MIXERCONTROL);
+				lineControls.cbStruct = sizeof(MIXERLINECONTROLS);
+				lineControls.dwLineID = line.dwLineID;
+				lineControls.pamxctrl = &control;
+				lineControls.dwControlType = MIXERCONTROL_CONTROLTYPE_VOLUME;
+				lineControls.cControls = 1;
+				lineControls.cbmxctrl = sizeof(MIXERCONTROL);
 				
-				 control.cbStruct=sizeof(MIXERCONTROL);
+				control.cbStruct = sizeof(MIXERCONTROL);
 
 				//try to get the volume control
-				if(mixerGetLineControls(handle,&lineControls,MIXER_GETLINECONTROLSF_ONEBYTYPE)==MMSYSERR_NOERROR)
+				if (mixerGetLineControls((HMIXEROBJ)handle, &lineControls, MIXER_GETLINECONTROLSF_ONEBYTYPE) == MMSYSERR_NOERROR)
 				{
-
 					MIXERCONTROLDETAILS details;
 					MIXERCONTROLDETAILS_UNSIGNED detailValue;
 
-					details.cbStruct=sizeof(MIXERCONTROLDETAILS);
-					details.dwControlID=control.dwControlID;
-					details.cChannels=1;
-					details.cMultipleItems=0;
-					details.cbDetails=sizeof(MIXERCONTROLDETAILS_UNSIGNED);
-					details.paDetails=&detailValue;
+					details.cbStruct = sizeof(MIXERCONTROLDETAILS);
+					details.dwControlID = control.dwControlID;
+					details.cChannels = 1;
+					details.cMultipleItems = 0;
+					details.cbDetails = sizeof(MIXERCONTROLDETAILS_UNSIGNED);
+					details.paDetails = &detailValue;
 					
 					//get the current volume so that we can restore it later
-					if(mixerGetControlDetails(handle,&details,MIXER_GETCONTROLDETAILSF_VALUE)==MMSYSERR_NOERROR)
+					if (mixerGetControlDetails((HMIXEROBJ)handle, &details, MIXER_GETCONTROLDETAILSF_VALUE) == MMSYSERR_NOERROR)
 					{
 						PreGameCDVolume = detailValue.dwValue;
 						mixerClose(handle);
@@ -390,7 +389,7 @@ int PlatPlayCDDA(int track)
     mciPlayParms.dwTo = MCI_MAKE_TMSF(track, MCI_MSF_MINUTE(mciStatusParms.dwReturn),
     										 MCI_MSF_SECOND(mciStatusParms.dwReturn),
     										 MCI_MSF_FRAME(mciStatusParms.dwReturn));
-    mciPlayParms.dwCallback = (DWORD)hWndMain;
+    mciPlayParms.dwCallback = (DWORD_PTR)hWndMain;
     dwReturn = mciSendCommand(/*(UINT)*/cdDeviceID, MCI_PLAY, MCI_FROM|MCI_TO|MCI_NOTIFY, (DWORD_PTR) &mciPlayParms);
 	if(dwReturn)
     {
@@ -405,29 +404,27 @@ int PlatGetNumberOfCDTracks(int* numTracks)
 {
 	DWORD dwReturn;
 	MCI_STATUS_PARMS mciStatusParms = {0,0,0,0};
-
-//	return 0; // bjd
   
     /* check the cdDeviceId */
-    if(cdDeviceID==NO_DEVICE) return SOUND_PLATFORMERROR;
-	if(!numTracks) return SOUND_PLATFORMERROR;	
+    if (cdDeviceID == NO_DEVICE) 
+		return SOUND_PLATFORMERROR;
 
+	if (!numTracks) 
+		return SOUND_PLATFORMERROR;	
 
 	/* find the number tracks... */
 	mciStatusParms.dwItem = MCI_STATUS_NUMBER_OF_TRACKS ;
     dwReturn = mciSendCommand(/*(UINT)*/cdDeviceID, MCI_STATUS, MCI_STATUS_ITEM , (DWORD_PTR) &mciStatusParms);
-	if(dwReturn)
+	if (dwReturn)
 	{
     	/* error */
     	return SOUND_PLATFORMERROR;
 	}  
 
 	//number of tracks is in the dwReturn member
-	*numTracks=mciStatusParms.dwReturn;
-	
+	*numTracks = (int)mciStatusParms.dwReturn;
 
 	return 0;
-	
 }
 
 int PlatStopCDDA(void)
@@ -488,52 +485,50 @@ int PlatChangeCDDAVolume(int volume)
 	int numDev = mixerGetNumDevs();
 
     /* check the cdDeviceId */
-    if(cdDeviceID==NO_DEVICE) return SOUND_PLATFORMERROR;
+    if (cdDeviceID == NO_DEVICE) 
+		return SOUND_PLATFORMERROR;
 
 	//go through the mixer devices searching for one that can deal with the cd volume
-	for(i=0;i<numDev;i++)
+	for (i = 0; i < numDev; i++)
 	{
 		HMIXER handle;
-		if(mixerOpen(&handle,i,0,0,MIXER_OBJECTF_MIXER ) == MMSYSERR_NOERROR )
+		if( mixerOpen(&handle, i, 0, 0, MIXER_OBJECTF_MIXER ) == MMSYSERR_NOERROR )
 		{
 			
 			//try to get the compact disc mixer line
 			MIXERLINE line;
-			line.cbStruct=sizeof(MIXERLINE);
-			line.dwComponentType=MIXERLINE_COMPONENTTYPE_SRC_COMPACTDISC;
+			line.cbStruct = sizeof(MIXERLINE);
+			line.dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_COMPACTDISC;
 
-			if(mixerGetLineInfo(handle,&line,MIXER_GETLINEINFOF_COMPONENTTYPE) == MMSYSERR_NOERROR)
+			if (mixerGetLineInfo((HMIXEROBJ)handle,&line,MIXER_GETLINEINFOF_COMPONENTTYPE) == MMSYSERR_NOERROR)
 			{
 				MIXERLINECONTROLS lineControls;
 				MIXERCONTROL control;
 
-
-				lineControls.cbStruct=sizeof(MIXERLINECONTROLS);
-				lineControls.dwLineID=line.dwLineID;
-				lineControls.pamxctrl=&control;
-				lineControls.dwControlType=MIXERCONTROL_CONTROLTYPE_VOLUME ;
-				lineControls.cControls=1;
-				lineControls.cbmxctrl=sizeof(MIXERCONTROL);
+				lineControls.cbStruct = sizeof(MIXERLINECONTROLS);
+				lineControls.dwLineID = line.dwLineID;
+				lineControls.pamxctrl = &control;
+				lineControls.dwControlType = MIXERCONTROL_CONTROLTYPE_VOLUME ;
+				lineControls.cControls = 1;
+				lineControls.cbmxctrl = sizeof(MIXERCONTROL);
 				
-				control.cbStruct=sizeof(MIXERCONTROL);
-
+				control.cbStruct = sizeof(MIXERCONTROL);
 
 				//try to get the volume control
-				if(mixerGetLineControls(handle,&lineControls,MIXER_GETLINECONTROLSF_ONEBYTYPE)==MMSYSERR_NOERROR)
+				if (mixerGetLineControls((HMIXEROBJ)handle, &lineControls, MIXER_GETLINECONTROLSF_ONEBYTYPE) == MMSYSERR_NOERROR)
 				{
 
 					MIXERCONTROLDETAILS details;
 					MIXERCONTROLDETAILS_UNSIGNED detailValue;
 
-					details.cbStruct=sizeof(MIXERCONTROLDETAILS);
-					details.dwControlID=control.dwControlID;
-					details.cChannels=1;
-					details.cMultipleItems=0;
-					details.cbDetails=sizeof(MIXERCONTROLDETAILS_UNSIGNED);
-					details.paDetails=&detailValue;
+					details.cbStruct = sizeof(MIXERCONTROLDETAILS);
+					details.dwControlID = control.dwControlID;
+					details.cChannels = 1;
+					details.cMultipleItems = 0;
+					details.cbDetails = sizeof(MIXERCONTROLDETAILS_UNSIGNED);
+					details.paDetails = &detailValue;
 										
-					
-					if(volume==CDDA_VOLUME_RESTOREPREGAMEVALUE)
+					if (volume == CDDA_VOLUME_RESTOREPREGAMEVALUE)
 					{
 						//set the volume to what it was before the game started
 						newVolume=PreGameCDVolume;
@@ -550,8 +545,7 @@ int PlatChangeCDDAVolume(int volume)
 					//fill in the volume in the control details structure
 					detailValue.dwValue=newVolume;
 	
-	
-					mmres = mixerSetControlDetails(handle,&details,MIXER_SETCONTROLDETAILSF_VALUE);
+					mmres = mixerSetControlDetails((HMIXEROBJ)handle,&details,MIXER_SETCONTROLDETAILSF_VALUE);
 					mixerClose(handle);
 
 					if(mmres==MMSYSERR_NOERROR) return 1;

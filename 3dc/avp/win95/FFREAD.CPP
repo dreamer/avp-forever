@@ -313,7 +313,7 @@ FFError FFHeaderI::Read(char const *_filename)
 	}
 	
 	void * header = malloc(total_headsize);
-	
+
 	READ_FILE(filename,(void)0,CloseHandle(h),h,header,total_headsize,bytes_read,0)
 	
 	data = malloc(length);

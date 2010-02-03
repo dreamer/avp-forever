@@ -145,13 +145,13 @@ extern void DeleteUserProfile(int number)
 	for (int i=0; i<number; i++) profilePtr = GetNextUserProfile();
 
 	char *savePath = GetSaveFolderPath();
-	int savePathLength = strlen(savePath);
+	size_t savePathLength = strlen(savePath);
 
 	char *filename = new char [savePathLength + strlen(USER_PROFILES_PATH)+strlen(profilePtr->Name)+strlen(USER_PROFILES_SUFFIX)+1];
 	strcpy(filename, savePath);
-	strcat(filename,USER_PROFILES_PATH);
-	strcat(filename,profilePtr->Name);
-	strcat(filename,USER_PROFILES_SUFFIX);
+	strcat(filename, USER_PROFILES_PATH);
+	strcat(filename, profilePtr->Name);
+	strcat(filename, USER_PROFILES_SUFFIX);
 
 	DeleteFile(filename);
 
@@ -319,47 +319,8 @@ static void SetDefaultProfileOptions(AVP_USER_PROFILE *profilePtr)
 	MoviesAreActive = 1;
 	IntroOutroMoviesAreActive = 1; 
 	AutoWeaponChangeOn = TRUE;
-	
- 
- 	// Edmond to add in network name
- 	srand(time(NULL));
- 	switch(rand()%11)
- 	{
- 		case 0:
- 			strcpy(MP_PlayerName, "DogMeat");
- 			break;
- 		case 1:
- 			strcpy(MP_PlayerName, "FreshMeat");
- 			break;
- 		case 2:
- 			strcpy(MP_PlayerName, "RancidMeat");
- 			break;
- 		case 3:
- 			strcpy(MP_PlayerName, "HorseMeat");
- 			break;
- 		case 4:
- 			strcpy(MP_PlayerName, "RawMeat");
- 			break;
- 		case 5:
- 			strcpy(MP_PlayerName, "LiveMeat");
- 			break;
- 		case 6:
- 			strcpy(MP_PlayerName, "M-m-m-meat");
- 			break;
- 		case 7:
- 			strcpy(MP_PlayerName, "LlamaMeat");
- 			break;
- 		case 8:
- 			strcpy(MP_PlayerName, "JustMeat");
- 			break;
- 		case 9:
- 			strcpy(MP_PlayerName, "TastyMeat");
- 			break;
- 		case 10:
- 			strcpy(MP_PlayerName, "MonkeyMeat");
- 			break;
- 	}
-	strcpy(MP_PlayerName,"DeadMeat");
+
+	strcpy(MP_PlayerName, "DeadMeat");
 
 	SetToDefaultDetailLevels();
 	

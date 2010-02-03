@@ -9,7 +9,8 @@ extern "C" {
 extern void AvpShowViews(void);
 extern void InitCameraValues(void);
 extern void LightSourcesInRangeOfObject(DISPLAYBLOCK *dptr);
-
+void MakeViewingWindowLarger(void);
+void MakeViewingWindowSmaller(void);
 
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 

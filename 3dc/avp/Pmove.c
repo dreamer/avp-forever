@@ -1676,19 +1676,6 @@ static void LoadInMovementValues(void)
 }
 #endif
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern void ThrowAFlare(void)
 {
 	extern int NumberOfFlaresActive;
@@ -1706,5 +1693,4 @@ extern void ThrowAFlare(void)
 		CreateGrenadeKernel(I_BehaviourFlareGrenade,&position,&mat,1);
 	   	Sound_Play(SID_THROW_FLARE,"h");
 	}
-
 }

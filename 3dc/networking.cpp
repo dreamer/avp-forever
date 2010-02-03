@@ -50,8 +50,6 @@ void Net_Disconnect();
 void Net_ConnectToAddress();
 int Net_CreateSession(const char* sessionName, int maxPlayers, int version, int level);
 int Net_UpdateSessionDescForLobbiedGame(int gamestyle, int level);
-int Net_OpenSession(const char *hostName);
-int Net_SendSystemMessage(int messageType, int idFrom, int idTo, uint8_t *lpData, int dwDataSize);
 
 /* KJL 14:58:18 03/07/98 - AvP's Guid */
 // {379CCA80-8BDD-11d0-A078-004095E16EA5}
@@ -325,7 +323,7 @@ void Net_ConnectToAddress()
 	std::string addressString = Con_GetArgument(0);
 	std::string tempString;
 	static ENetAddress connectionAddress;
-	int colonPos = 0;
+	size_t colonPos = 0;
 	ENetEvent eEvent;
 	uint8_t receiveBuffer[3072];
 
@@ -374,7 +372,7 @@ void Net_ConnectToAddress()
 	{	
 		Con_PrintDebugMessage("Net_ConnectToAddress - we got something from the server!");
 		memcpy(&receiveBuffer[0], static_cast<uint8_t*> (eEvent.packet->data), eEvent.packet->dataLength);
-		int size = eEvent.packet->dataLength;
+		size_t size = eEvent.packet->dataLength;
 		enet_packet_destroy(eEvent.packet);
 
 		messageHeader newHeader;
@@ -492,7 +490,7 @@ void Net_ServiceNetwork()
 	}
 }
 
-int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, int *dataSize)
+int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, size_t *dataSize)
 {
 	// this function is called from a loop. only return something other than NET_OK when we've no more messages
 	bool	isInternalOnly = false;
@@ -514,7 +512,6 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, int *da
 				{
 					case ENET_EVENT_TYPE_CONNECT:
 					{
-						char buf[100];
 						char ipaddr[32];
 						enet_address_get_host_ip(&eEvent.peer->address, ipaddr, sizeof(ipaddr));
 
@@ -757,7 +754,7 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, int *da
 }
 
 // used to send a message to the server only
-int Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messageData, int dataSize)
+int Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messageData, size_t dataSize)
 {
 	// create a new header and copy it into the packet buffer
 	messageHeader newMessageHeader;
@@ -772,7 +769,7 @@ int Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messag
 		memcpy(&packetBuffer[MESSAGEHEADERSIZE], messageData, dataSize);
 	}
 
-	int length = MESSAGEHEADERSIZE + dataSize;
+	size_t length = MESSAGEHEADERSIZE + dataSize;
 
 	// create Enet packet
 	ENetPacket * packet = enet_packet_create (packetBuffer, length, ENET_PACKET_FLAG_RELIABLE);
@@ -800,7 +797,7 @@ int Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messag
 	return NET_OK;
 }
 
-int Net_Send(int fromID, int toID, int flags, uint8_t *messageData, int dataSize)
+int Net_Send(int fromID, int toID, int flags, uint8_t *messageData, size_t dataSize)
 {
 	if (messageData == NULL) 
 	{
@@ -830,7 +827,7 @@ int Net_Send(int fromID, int toID, int flags, uint8_t *messageData, int dataSize
 
 	memcpy(&packetBuffer[MESSAGEHEADERSIZE], messageData, dataSize);
 
-	int length = MESSAGEHEADERSIZE + dataSize;
+	size_t length = MESSAGEHEADERSIZE + dataSize;
 
 	// create ENet packet
 	ENetPacket * packet = enet_packet_create(packetBuffer, length, ENET_PACKET_FLAG_RELIABLE);
