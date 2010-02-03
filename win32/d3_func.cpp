@@ -60,6 +60,9 @@ extern "C" {
 extern AVPMENUGFX AvPMenuGfxStorage[];
 extern void ReleaseAllFMVTextures(void);
 
+extern void ThisFramesRenderingHasBegun(void);
+extern void ThisFramesRenderingHasFinished(void);
+
 extern "C++"
 {
 	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
@@ -783,6 +786,8 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 		return TRUE;
 	}
 
+	ThisFramesRenderingHasFinished();
+
 	ReleaseVolatileResources();
 
 	d3d.d3dpp.BackBufferWidth = width;
@@ -857,6 +862,8 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 
 	CreateVolatileResources();
 //	SetExecuteBufferDefaults();
+
+	ThisFramesRenderingHasBegun();
 
 	// set up projection matrix
 	D3DXMatrixPerspectiveFovLH( &matProjection, width / height, D3DX_PI / 2, 1.0f, 100.0f);
@@ -1378,8 +1385,8 @@ BOOL InitialiseDirect3D()
 	CreateVolatileResources();
 
 	// Setup orthographic projection matrix
-//	int standardWidth = 640;
-//	int wideScreenWidth = 852;
+	int standardWidth = 640;
+	int wideScreenWidth = 852;
 
 	// setup view matrix
 	D3DXMatrixIdentity( &matView );
@@ -1392,6 +1399,7 @@ BOOL InitialiseDirect3D()
 	// set up orthographic projection matrix
 //	D3DXMatrixOrthoOffCenterLH( &matOrtho, 0.0f, wideScreenWidth, 0.0f, 480, 1.0f, 10.0f);
 	D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
+
 	// set up projection matrix
 	D3DXMatrixPerspectiveFovLH( &matProjection, width / height, D3DX_PI / 2, 1.0f, 100.0f);
 

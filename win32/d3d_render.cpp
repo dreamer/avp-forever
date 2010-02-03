@@ -91,7 +91,7 @@ struct ORTHO_OBJECTS
 };
 
 // array of 2d objects
-ORTHO_OBJECTS *orthoList = new ORTHO_OBJECTS[120]; // lower me!
+ORTHO_OBJECTS *orthoList = new ORTHO_OBJECTS[240]; // lower me!
 
 struct renderParticle
 {
@@ -155,6 +155,7 @@ RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
 
 void DeleteRenderMemory()
 {
+	delete[] orthoList;
 	delete[] renderList;
 }
 

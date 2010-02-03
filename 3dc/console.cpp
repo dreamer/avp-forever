@@ -12,25 +12,6 @@
 #include "logString.h"
 #include "font2.h"
 
-#ifdef WIN32
-#include <d3dx9math.h>
-#endif
-#ifdef _XBOX
-#include <xtl.h>
-#endif
-
-//Custom vertex format
-static const DWORD D3DFVF_CUSTOMVERTEX = D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1;
-
-struct CUSTOMVERTEX 
-{
-	float x, y, z;  // Position in 3d space 
-	DWORD colour;   // Colour  
-	float u, v;     // Texture coordinates 
-};
-
-static CUSTOMVERTEX conVerts[4];
-
 extern "C" 
 {
 	#include "avp_menugfx.hpp"
@@ -323,10 +304,25 @@ void Con_RemoveTypedChar()
 void Con_Draw()
 {
 	int charWidth = 0;
-
-	if (!console.isActive)
-		return;
-
+/*
+	if (IOFOCUS_Get() == IOFOCUS_GAME)
+	{
+		OutputDebugString("IOFOCUS_GAME\n");
+	}
+	else if (IOFOCUS_Get() == IOFOCUS_NEWCONSOLE)
+	{
+		OutputDebugString("IOFOCUS_NEWCONSOLE\n");
+	}
+	else if (IOFOCUS_Get() == IOFOCUS_OLDCONSOLE)
+	{
+		OutputDebugString("IOFOCUS_OLDCONSOLE\n");
+	}
+	else if (IOFOCUS_Get() == IOFOCUS_OSK)
+	{
+		OutputDebugString("IOFOCUS_OSK\n");
+	}
+	else OutputDebugString("no focus?\n");
+*/
 	// is console moving to a new position?
 	if (console.destinationY > console.height)
 	{
