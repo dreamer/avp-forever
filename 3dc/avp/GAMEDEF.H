@@ -1,7 +1,5 @@
 #ifndef GAMEDEF_INCLUDED
 
-
-
 /*
 	Contains game specific defininitions of structures
 */
@@ -116,8 +114,7 @@ typedef enum environments
   	I_Mps4,
   	I_Surface,
   	I_Entrance,
-#if PSX || Saturn
-#else
+
  	I_Dml1,	// 25- Vertigo.rif for Al
  // #ifndef MPLAYER_DEMO
  	I_Dml2, // KJL 16:59:58 05/1/97 - fruitbat.rif for Al 
@@ -130,7 +127,7 @@ typedef enum environments
  	I_Dml9, // KJL 16:59:58 05/19/97 - mu.rif for Jake 
  	I_Dml10, // KJL 16:59:58 05/19/97 - mu.rif for Jake 
  // #endif
-#endif
+
  	I_Num_Environments  // 34
 
 }I_AVP_ENVIRONMENTS;
@@ -196,29 +193,6 @@ extern int IDemandGoForward();
 extern int IDemandTurnRight();
 extern int IDemandTurnLeft();
 
-//extern int IDemandLookUp(void);
-//extern int IDemandLookDown(void);
-//extern int IDemandTurnLeft(void);
-//extern int IDemandTurnRight(void);
-//extern int IDemandGoForward(void);
-//extern int IDemandGoBackward(void);
-//extern int IDemandFaster(void);
-//extern int IDemandSideStep(void);
-//extern int IDemandStop(void);
-
-//extern int IDemandNextWeapon(void);		/* KJL 11:45:40 10/07/96 */
-//extern int IDemandPreviousWeapon(void);	/* KJL 11:45:44 10/07/96 */
-
-
-//extern int IDemandPickupItem(void);
-//extern int IDemandDropItem(void);
-//extern int IDemandOperate(void);
-//extern int IDemandMenu(void);
-//extern int IDemandChangeEnvironment(void);
-
-
-
-
 /*************************************************
 ************* ENVIRONMENT STUFF
 **************************************************/
@@ -236,76 +210,11 @@ typedef struct environment_list_object{
 extern ELO* Env_List[];
 extern int EnvToLoad;
 
-extern void ChnageEnvironment();
 extern void ChangeEnvironmentToEnv(I_AVP_ENVIRONMENTS);
 extern int Destroy_CurrentEnvironment();
 extern void LoadGameFromFile();
 extern void SaveGameToFile();
 extern void InitCharacter();
-/*************************************************************/
-
-/* KJL 15:42:46 10/02/96 - Okay, I don't use HUDGRAPHIC on the PC anymore and I suggest
-you don't use it on your platform either 'cos it's a mess. (Sorry Roxby, no offense...) */
-
-/************ HUD GRAPHIC STUFF *********************/
-
-typedef struct 
-{
-   	void*  data;					/* just about anything you feel like points to the file name*/
-	char*	filename;
-	int 	xdest, ydest;		 /*screen x y*/
-	int   width, height;	 /*depth and height of dest incase of shrink*/
-	RECT_AVP  *srcRect;
-	int hg_flags;
-	
-}HUDGRAPHIC;
-
-/* where to put the grahic*/
-
-#define HGflag_NotInVRAM 0x0000001		/*saturn only*/
-#define HGflag_LoadIntoVDP2 0x0000002	/*saturn only*/
-#define HGflag_LoadIntoVDP1	0x0000004	/*saturn only*/
-
-/* how to get the graphic */
-
-#define HGflag_AlwaysLoadOffDisk 0x00000200  /*cd or HD*/
-#define HGflag_LoadedIntoMemory  0x00000400	 /*loaded into memory*/
-
-/* source directory for the graphic */
-
-#define HGflag_MenuDir	0x00010000
-
-
-
-/********************************************************/
-/************************ Menu Code ***************/
-
-extern void ChooseLanguage(void);
-extern void CharacterChoice(void);
-
-extern void InitDataBaseMenus(void);
-extern void DoMainMenu(void);
-
-extern int UsingDataBase;
-
-/* How many info screens will there be? */
-#define MAXINFOSCREENS 10
-/* How many different info screen backgrounds there may be*/
-#define MAXBACKGROUNDS 10 
-/* How many overlay items can be in existence at a  time */
-#define MAXSCREENITEMS 10 
-
-#define NUM_CREDIT_SCREENS 2
-
-extern HUDGRAPHIC Menu[];
-extern HUDGRAPHIC CreditScreen[];
-
-typedef enum
-{
-    UNLIT,
-    LITUP,
-
-} LIGHTSTATE;
 
 /****************** MISC Game Externs ****/
 
@@ -317,9 +226,6 @@ extern int memoryInitialisationFailure;
 /*******************MISC extern functions ***/
 
 extern void DealWithElapsedTime();
-extern void FadeScreen(int colour, int screen, int rate);
-extern volatile char StillFading;
-
 
 #ifdef __cplusplus
 

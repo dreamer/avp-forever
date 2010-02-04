@@ -19,12 +19,8 @@ extern "C" {
 #include "npcsetup.h" /* JH 30/4/97 */
 #include "pldnet.h"
 #include "avpview.h"
-#include "scrshot.hpp"
-#include "language.h"
-#include "huddefs.h"
 #include "vision.h"
 #include "avp_menus.h"
-#include "kshape.h"
 //#define UseLocalAssert TRUE
 #include "ourasert.h" 
 #include "ffstdio.h" // fast file stdio
@@ -52,15 +48,8 @@ New sound system
 #include "networking.h"
 #include "avpview.h"
 
-#define PROFILING_ON 0
-#if PROFILING_ON
-#include "pentime.h"
-#endif
-
 /*
-
- externs for commonly used global variables and arrays
-
+	externs for commonly used global variables and arrays
 */
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 
@@ -93,7 +82,6 @@ BOOL UseMouseCentreing = FALSE;
 BOOL KeepMainRifFile = FALSE;
 
 char LevelName[] = {"predbit6\0QuiteALongNameActually"};
-static ELO ELOLevelToLoad = { LevelName };
 
 int VideoModeNotAvailable = 0;
 int QuickStartMultiplayer = 1;
@@ -147,8 +135,6 @@ extern void LoadKeyConfiguration();
 
 HINSTANCE AVP_HInstance, hInst;
 int AVP_NCmd;
-
-extern unsigned long TotalMemAllocated;
 
 // so we can disable/enable stickey keys
 STICKYKEYS startupStickyKeys = {sizeof(STICKYKEYS), 0};
@@ -370,8 +356,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	if (strstr(command_line, "-w"))
 	{
 		WindowRequestMode = WindowModeSubWindow;
-//		if (!HWAccel)
-//			RasterisationRequestMode = RequestSoftwareRasterisation;
 
 		// will stop mouse cursor moving outside game window
 		//UseMouseCentreing = TRUE;
@@ -381,12 +365,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	
 	#endif
 
-	Env_List[0] = &(ELOLevelToLoad);
-	level_to_load = I_Gen1;
+	Env_List[0]->main = LevelName;
 
-	/*******	System initialisation **********/
-	
-	// timer init test
+	// as per linux port
+	AvP.CurrentEnv = AvP.StartingEnv = I_Gen1;
+
+	/******* System initialisation **********/
+
 	timeBeginPeriod(1); 
 
 	InitialiseSystem(hInstance, nCmdShow);
@@ -394,7 +379,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	if (!InitialiseDirect3D())
 	{
-		MessageBox(hWndMain, "Couldn't create a Direct3D device. See dx_log.txt for details", "Couldn't create render device!", MB_OK | MB_ICONSTOP);
+		MessageBox(hWndMain, "Couldn't create a Direct3D device. See avp_log.txt for details", "Couldn't create render device!", MB_OK | MB_ICONSTOP);
 		ReleaseDirect3D();
 		exit(-1);
 	}
@@ -481,8 +466,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		/***********  Load up the character stuff *******/
 		InitCharacter();
 
-		/***********  Read in the env Map	 **************/
-
+/*
+		//  Read in the env Map
 		#if debug
   		if (level_to_load != I_Num_Environments)
   		{
@@ -499,7 +484,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		#else
 			AvP.CurrentEnv = AvP.StartingEnv = I_Gen1;
 		#endif
-		
+*/
+
 		LoadRifFile(); /* sets up a map*/
 		#if debug
 		DebugFontLoaded = 1;
@@ -683,10 +669,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 
 		}// end of main game loop
-		{
-			AvP.LevelCompleted = thisLevelHasBeenCompleted;
-			mainMenu = 1;
-		}
+
+		AvP.LevelCompleted = thisLevelHasBeenCompleted;
+		mainMenu = 1;
 
 		FixCheatModesInUserProfile(UserProfilePtr);
 
@@ -697,22 +682,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		/* DHM 8/4/98 */
 		CONSBIND_WriteKeyBindingsToConfigFile();
-		TimeStampedMessage("After key bindings writen");
 
 		/* CDF 2/10/97 */
 		DeInitialisePlayer();
-		TimeStampedMessage("After DeInitialisePlayer");
 
 		DeallocatePlayersMirrorImage();
-		TimeStampedMessage("After DeallocatePlayersMirrorImage");
+
+		// bjd - here temporarily as a test
+		SoundSys_StopAll();
 
 		Destroy_CurrentEnvironment();
-		TimeStampedMessage("After Destroy_CurrentEnvironment");
+
 		DeallocateAllImages();
 
-		TimeStampedMessage("After DeallocateAllImages");
 		EndNPCs(); /* JH 30/4/97 - unload npc rifs */
-		TimeStampedMessage("After EndNPCs");
 		ExitGame();
 
 		// set menu resolution
@@ -723,19 +706,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		#endif
 		/* Patrick 26/6/97
 		Stop and remove all game sounds here, since we are returning to the menus */
-		SoundSys_StopAll();
+//		SoundSys_StopAll();
 		ResetEaxEnvironment();
 		//make sure the volume gets reset for the menus
 		SoundSys_ResetFadeLevel();
 
-		TimeStampedMessage("After SoundSys_StopAll");
-
-//		SoundSys_RemoveAll(); 
-
-		TimeStampedMessage("After SoundSys_RemoveAll");
 		CDDA_Stop();
 		Vorbis_CloseSystem(); // stop ogg vorbis player
-		TimeStampedMessage("After CDDA_Stop");
 
 		// netgame support
 		if (AvP.Network != I_No_Network) 
@@ -758,7 +735,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 //			FinishCentreMouseThread();
 		}
 //		#endif
-		
+
 #if 0 //bjd - FIXME
 		if(LobbiedGame)
 		{
@@ -777,7 +754,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	{
 		DAVEHOOK_UnInit();
 	}
-	TimeStampedMessage("After DAVEHOOK_UnInit");
 	
 	/*-------------------Patrick 2/6/97-----------------------
 	End the sound system
@@ -792,18 +768,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	QuickSplashScreens();
 	#endif
 	#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
-	TimeStampedMessage("After SoundSys_End");
-	TimeStampedMessage("After CDDA_End");
 
-	/* unload language file */
-//	KillTextStrings();
-
-// 	TimeStampedMessage("After KillTextStrings");
 	ExitSystem();
-	TimeStampedMessage("After ExitSystem");
 
-//	ffKill(); /* to avoid misreported memory leaks */
-	TimeStampedMessage("After ffKill");
 	#else
 	SoundSys_End();
 	ReleaseDirect3D();

@@ -1223,7 +1223,6 @@ SHAPEHEADER *Get_Degraded_Shape(SHAPEHEADER *base_shape)
 			{
 				array_ptr++;
 			}
-			
 		}
 		while (array_ptr->distance>objectDistance) array_ptr++;
 	}

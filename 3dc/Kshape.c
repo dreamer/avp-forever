@@ -4059,8 +4059,8 @@ extern void TranslationSetup(void)
 	float o = 1.0f;
 	p = 1.0f+p;
 
-	sprintf(buf, "CameraZoomScale: %f\n", CameraZoomScale);
-	OutputDebugString(buf);
+//	sprintf(buf, "CameraZoomScale: %f\n", CameraZoomScale);
+//	OutputDebugString(buf);
 
 	if (NAUSEA_CHEATMODE)
 	{

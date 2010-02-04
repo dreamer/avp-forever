@@ -113,7 +113,6 @@ void SoundSys_Management(void)
 		
 		numActive++;
 
-
 		if (PlatSoundHasStopped(i)!=0 && !ActiveSounds[i].paused)
 		{
 			Sound_Stop(i);
@@ -496,6 +495,11 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 	}
 	
 	/* fill out the active sound */
+	if (soundNumber == SID_ED_SENTRYTURN01)
+	{
+		OutputDebugString("break here, ta\n");
+	}
+
 	ActiveSounds[newIndex].soundIndex = soundNumber;
 	ActiveSounds[newIndex].priority = priority;
 	ActiveSounds[newIndex].volume = volume;
