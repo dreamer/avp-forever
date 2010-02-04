@@ -11,17 +11,17 @@ EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
-		Release For Fox = Release For Fox
+		Release = Release
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
 		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Debug.ActiveCfg = Debug|Xbox
 		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Debug.Build.0 = Debug|Xbox
-		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Release For Fox.ActiveCfg = Release For Fox|Xbox
-		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Release For Fox.Build.0 = Release For Fox|Xbox
+		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Release.ActiveCfg = Release|Xbox
+		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Release.Build.0 = Release|Xbox
 		{98034BF8-AE8C-4226-B84C-1F932834661D}.Debug.ActiveCfg = Debug|Xbox
 		{98034BF8-AE8C-4226-B84C-1F932834661D}.Debug.Build.0 = Debug|Xbox
-		{98034BF8-AE8C-4226-B84C-1F932834661D}.Release For Fox.ActiveCfg = Release|Xbox
-		{98034BF8-AE8C-4226-B84C-1F932834661D}.Release For Fox.Build.0 = Release|Xbox
+		{98034BF8-AE8C-4226-B84C-1F932834661D}.Release.ActiveCfg = Release|Xbox
+		{98034BF8-AE8C-4226-B84C-1F932834661D}.Release.Build.0 = Release|Xbox
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		AMDCaProjectFile = D:\Development\AvP_vc\CodeAnalyst\AvP.caw
@@ -30,14 +30,14 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
-		Release For Fox|Win32 = Release For Fox|Win32
+		Release|Win32 = Release|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Debug|Win32.ActiveCfg = Debug|Win32
 		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Debug|Win32.Build.0 = Debug|Win32
-		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Release For Fox|Win32.ActiveCfg = Release For Fox|Win32
-		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Release For Fox|Win32.Build.0 = Release For Fox|Win32
+		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Release|Win32.ActiveCfg = Release|Win32
+		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Release|Win32.Build.0 = Release|Win32
 		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Release|Win32.ActiveCfg = Release|Win32
 		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection

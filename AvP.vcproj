@@ -131,9 +131,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release For Fox|Win32"
-			OutputDirectory=".\AvP___Win32_Release_For_Fox"
-			IntermediateDirectory=".\AvP___Win32_Release_For_Fox"
+			Name="Release|Win32"
+			OutputDirectory=".\Release"
+			IntermediateDirectory=".\Release"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -159,7 +159,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\AvP___Win32_Release_For_Fox/AvP.tlb"
+				TypeLibraryName=".\Release/AvP.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -183,9 +183,9 @@
 				DefaultCharIsUnsigned="true"
 				RuntimeTypeInfo="true"
 				PrecompiledHeaderFile=""
-				AssemblerListingLocation=".\AvP___Win32_Release_For_Fox/"
-				ObjectFile=".\AvP___Win32_Release_For_Fox/"
-				ProgramDataBaseFileName=".\AvP___Win32_Release_For_Fox/"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="0"
@@ -214,7 +214,7 @@
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="false"
 				AssemblyDebug="2"
-				ProgramDatabaseFile=".\AvP___Win32_Release_For_Fox/MyAvP.pdb"
+				ProgramDatabaseFile=".\Release/MyAvP.pdb"
 				GenerateMapFile="false"
 				MapExports="false"
 				SubSystem="2"
@@ -237,7 +237,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\AvP___Win32_Release_For_Fox/AvP.bsc"
+				OutputFile=".\Release/AvP.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -270,7 +270,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -292,7 +292,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -314,7 +314,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -336,7 +336,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -358,7 +358,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -384,7 +384,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -406,7 +406,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -429,7 +429,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -451,7 +451,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -473,7 +473,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -495,7 +495,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -517,7 +517,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -539,7 +539,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -561,7 +561,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -583,7 +583,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -605,7 +605,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -627,7 +627,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -649,7 +649,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -671,7 +671,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -693,7 +693,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -715,7 +715,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -737,7 +737,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -759,7 +759,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -781,7 +781,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -803,7 +803,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -825,7 +825,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -847,7 +847,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -869,7 +869,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -891,7 +891,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -913,7 +913,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -935,7 +935,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -957,7 +957,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -979,7 +979,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1001,7 +1001,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1023,7 +1023,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1045,7 +1045,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1067,7 +1067,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1089,7 +1089,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1111,7 +1111,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1133,7 +1133,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1155,7 +1155,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1177,7 +1177,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1199,7 +1199,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1221,7 +1221,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1243,7 +1243,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1265,7 +1265,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1287,7 +1287,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1309,7 +1309,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1331,7 +1331,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1353,7 +1353,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1375,7 +1375,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1397,7 +1397,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1419,7 +1419,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1441,7 +1441,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1463,7 +1463,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1485,7 +1485,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1507,7 +1507,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1529,7 +1529,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1551,7 +1551,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1573,7 +1573,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1595,7 +1595,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1617,7 +1617,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1639,7 +1639,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1661,7 +1661,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1683,7 +1683,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1705,7 +1705,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1727,7 +1727,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1749,7 +1749,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1771,7 +1771,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1793,7 +1793,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1815,7 +1815,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1841,7 +1841,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1863,7 +1863,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1885,7 +1885,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1911,7 +1911,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1933,7 +1933,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1955,7 +1955,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1977,7 +1977,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1999,7 +1999,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2025,7 +2025,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2051,7 +2051,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2073,7 +2073,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2099,7 +2099,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2121,7 +2121,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2143,7 +2143,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2165,7 +2165,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2191,7 +2191,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2213,7 +2213,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2235,7 +2235,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2257,7 +2257,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2283,7 +2283,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2305,7 +2305,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2327,7 +2327,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2349,7 +2349,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2371,7 +2371,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2393,7 +2393,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2415,7 +2415,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2437,7 +2437,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2459,7 +2459,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2481,7 +2481,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2503,7 +2503,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2525,7 +2525,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2547,7 +2547,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2581,7 +2581,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2603,7 +2603,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2625,7 +2625,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2647,7 +2647,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2669,7 +2669,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2691,7 +2691,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2713,7 +2713,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2735,7 +2735,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2757,7 +2757,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2779,7 +2779,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2801,7 +2801,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2823,7 +2823,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2845,7 +2845,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2867,7 +2867,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2889,7 +2889,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2911,7 +2911,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2933,7 +2933,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2955,7 +2955,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2977,7 +2977,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2999,7 +2999,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3021,7 +3021,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3043,7 +3043,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3065,7 +3065,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3087,7 +3087,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3109,7 +3109,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3131,7 +3131,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3153,7 +3153,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3175,7 +3175,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3197,7 +3197,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3219,7 +3219,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3242,7 +3242,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3264,7 +3264,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3290,7 +3290,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3312,7 +3312,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3334,7 +3334,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3356,7 +3356,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3378,7 +3378,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3400,7 +3400,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3422,7 +3422,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3444,7 +3444,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3466,7 +3466,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3488,7 +3488,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3510,7 +3510,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3532,7 +3532,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3554,7 +3554,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3576,7 +3576,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3598,7 +3598,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3620,7 +3620,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3642,7 +3642,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3664,7 +3664,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3686,7 +3686,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3708,7 +3708,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3734,7 +3734,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3756,7 +3756,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3778,7 +3778,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3800,7 +3800,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3822,7 +3822,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3848,7 +3848,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3870,7 +3870,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3892,7 +3892,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3914,7 +3914,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3936,7 +3936,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3958,7 +3958,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3980,7 +3980,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4002,7 +4002,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4024,7 +4024,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4046,7 +4046,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4068,7 +4068,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4090,7 +4090,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4112,7 +4112,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4134,7 +4134,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4156,7 +4156,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4178,7 +4178,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4200,7 +4200,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4222,7 +4222,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4244,7 +4244,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4266,7 +4266,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4288,7 +4288,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4310,7 +4310,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4332,7 +4332,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4358,7 +4358,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4380,7 +4380,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4402,7 +4402,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4424,7 +4424,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4446,7 +4446,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4468,7 +4468,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4490,7 +4490,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4512,7 +4512,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4534,7 +4534,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4556,7 +4556,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4578,7 +4578,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4600,7 +4600,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4622,7 +4622,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4644,7 +4644,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4666,7 +4666,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4688,7 +4688,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4710,7 +4710,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4732,7 +4732,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4754,7 +4754,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4776,7 +4776,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4802,7 +4802,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4824,7 +4824,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4846,7 +4846,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4868,7 +4868,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4890,7 +4890,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4912,7 +4912,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4934,7 +4934,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4956,7 +4956,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4978,7 +4978,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5000,7 +5000,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5022,7 +5022,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5044,7 +5044,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5070,7 +5070,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5092,7 +5092,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5114,7 +5114,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5136,7 +5136,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5162,7 +5162,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5184,7 +5184,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5206,7 +5206,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5228,7 +5228,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5250,7 +5250,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5272,7 +5272,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5298,7 +5298,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release For Fox|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
