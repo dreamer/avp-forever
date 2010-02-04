@@ -61,7 +61,7 @@ extern void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern int sine[], cosine[];
 
-signed int HUDTranslucencyLevel=64;
+signed int HUDTranslucencyLevel = 64;
 static int MotionTrackerHalfWidth;
 static int MotionTrackerTextureSize;
 static int MotionTrackerCentreY;
@@ -298,7 +298,7 @@ void LoadCommonTextures(void)
    		PredatorNumbersImageNumber = CL_LoadImageOnce("HUDs\\Predator\\predNumbers.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
    		StaticImageNumber = CL_LoadImageOnce("Common\\static.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 		AlienTongueImageNumber = CL_LoadImageOnce("HUDs\\Alien\\AlienTongue.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
-	  //	ChromeImageNumber = CL_LoadImageOnce("Common\\water2.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+//		ChromeImageNumber = CL_LoadImageOnce("Common\\water2.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 	}
 	
 	HUDFontsImageNumber = CL_LoadImageOnce("Common\\HUDfonts.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
@@ -307,8 +307,7 @@ void LoadCommonTextures(void)
 	BurningImageNumber = CL_LoadImageOnce("Common\\burn.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
 //	RebellionLogoImageNumber = CL_LoadImageOnce("Common\\logo.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 //	FoxLogoImageNumber = CL_LoadImageOnce("Common\\foxlogo.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
-	
-	
+
 	{
 		extern char LevelName[];
 		if (!strcmp(LevelName,"invasion_a"))
@@ -320,7 +319,7 @@ void LoadCommonTextures(void)
 		{
 			WaterShaftImageNumber = CL_LoadImageOnce("Envrnmts\\GenShd1\\colonywater.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 		}
-		else if (!strcmp(LevelName,"fall")||!strcmp(LevelName,"fall_m"))
+		else if (!strcmp(LevelName,"fall") || !strcmp(LevelName,"fall_m"))
 		{
 			ChromeImageNumber = CL_LoadImageOnce("Envrnmts\\fall\\stream_water.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 		}

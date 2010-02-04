@@ -396,14 +396,12 @@ int PlatStartSoundSys()
 	SoundConfig.reverb_mix		= 0.0F;
 	SoundConfig.env_index		= 1000;
 
-//	return 0;
-
 	CoInitializeEx (NULL, COINIT_MULTITHREADED);
 
 	UINT32 flags = 0;
 
 #ifdef _DEBUG
-//	flags |= XAUDIO2_DEBUG_ENGINE;
+	flags |= XAUDIO2_DEBUG_ENGINE;
 #endif
 
 	// Initialise XAudio2

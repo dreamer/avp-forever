@@ -124,15 +124,11 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 
 		ftPtr->SoundVolume = FmvSoundVolume;
 
-//		if (!fmvList[ftPtr->fmvHandle].fmvClass->mFrameReady)
-//			return 0;
-
 		if (ftPtr->IsTriggeredPlotFMV && (!fmvList[ftPtr->fmvHandle].fmvClass->IsPlaying()))
 		{
 			OutputDebugString("closing ingame fmv..\n");
 
 			ftPtr->MessageNumber = 0;
-//			fmvList[ftPtr->fmvHandle].fmvClass->Close();
 			delete fmvList[ftPtr->fmvHandle].fmvClass;
 			fmvList[ftPtr->fmvHandle].fmvClass = NULL;
 			fmvList[ftPtr->fmvHandle].isPlaying = 0;
@@ -570,7 +566,7 @@ int GetVolumeOfNearestVideoScreen(void)
 				disp.vz = objectPtr->ObWorld.vz - Global_VDB_Ptr->VDB_World.vz;
 
 				dist = Approximate3dMagnitude(&disp);
-				if (dist<leastDistanceRecorded && dist<ONE_FIXED)
+				if (dist < leastDistanceRecorded && dist < ONE_FIXED)
 				{
 					leastDistanceRecorded = dist;
 					VolumeOfNearestVideoScreen = ONE_FIXED + 1024 - dist/2;

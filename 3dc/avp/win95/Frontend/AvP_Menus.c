@@ -3227,7 +3227,6 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 						break;
 					}
 				}
-								
 				
 				SaveUserProfile(UserProfilePtr);
 

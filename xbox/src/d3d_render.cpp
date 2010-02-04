@@ -6,37 +6,39 @@ extern "C" {
 #include "dxlog.h"
 #include "d3_func.h"
 #include "d3d_hud.h"
-#include "gamedef.h"
-
-#include "assert.h"
-
 #include "particle.h"
+#include "avp_menus.h"
 
-#define UseLocalAssert No
+#define UseLocalAssert FALSE
 #include "ourasert.h"
+#include <assert.h>
 
 extern D3DINFO d3d;
 
 extern "C++"{
 
+#include "console.h"
+#include "onscreenKeyboard.h"
+
 #include "r2base.h"
 #include <math.h> // for sqrt
+
+#ifdef WIN32
+extern int Font_DrawText(const char* text, int x, int y, int colour, int fontType);
+#endif
 
 // STL stuff
 #include <vector>
 #include <algorithm>
 
-#include "logString.h"
-#include "onscreenKeyboard.h"
-
 };
+
 #include "HUD_layout.h"
 #define HAVE_VISION_H 1
 //#include "vision.h"
 #include "lighting.h"
 #include "showcmds.h"
 #include "frustrum.h"
-#include "fmvCutscenes.h"
 #include "d3d_render.h"
 #include "avp_userprofile.h"
 #include "bh_types.h"
@@ -57,7 +59,6 @@ static HRESULT LastError;
 #define MAX_TOTAL_VERTS 1360
 D3DTLVERTEX testVertex[MAX_TOTAL_VERTS];
 D3DTLVERTEX tempVertex[256];
-//int testCount = 0;
 
 // for quad rendering
 D3DTLVERTEX *quadVert = new D3DTLVERTEX[4];
@@ -105,11 +106,11 @@ void DrawParticles()
 
 	int backup = RenderPolygon.NumberOfVertices;
 
-	/* sort particle array */
+	// sort particle array
 	std::sort(particleArray.begin(), particleArray.end());
 
-	/* loop particles and add them to vertex buffer */
-	for (int i = 0; i < particleArray.size(); i++)
+	// loop particles and add them to vertex buffer
+	for (size_t i = 0; i < particleArray.size(); i++)
 	{
 		RenderPolygon.NumberOfVertices = particleArray[i].numVerts;
 		D3D_Particle_Output(&particleArray[i].particle, &particleArray[i].vertices[0]);
@@ -117,7 +118,7 @@ void DrawParticles()
 
 	particleArray.resize(0);
 
-	/* restore RenderPolygon.NumberOfVertices value... */
+	// restore RenderPolygon.NumberOfVertices value...
 	RenderPolygon.NumberOfVertices = backup;
 }
 
@@ -141,13 +142,9 @@ unsigned int renderCount = 0;
 
 extern AVPIndexedFont IntroFont_Light;
 
-#define FUNCTION_ON 1
-
 const float Zoffset = 2.0f;
 
-// to tell what texture array type to access
-//extern AVP_MENUS AvPMenus;
-//extern enum MENUSSTATE_ID;
+// menu graphics arrat
 extern AVPMENUGFX AvPMenuGfxStorage[];
 
 #define RGBLIGHT_MAKE(r,g,b) RGB_MAKE(r,g,b)
@@ -168,8 +165,8 @@ extern int StaticImageNumber;
 extern int AAFontImageNumber;
 extern int WaterShaftImageNumber;
 
-D3DTEXTUREHANDLE FMVTextureHandle[4];
-D3DTEXTUREHANDLE NoiseTextureHandle;
+AVPTEXTURE FMVTextureHandle[4];
+AVPTEXTURE NoiseTextureHandle;
 
 int LightIntensityAtPoint(VECTORCH *pointPtr);
 
@@ -213,7 +210,7 @@ static unsigned char DefaultD3DTextureFilterMax;
 // Globals for frame by frame definition of
 // coloured materials for D3D rendering interface
 
-static int NumberOfRenderedTriangles=0;
+static int NumberOfRenderedTriangles = 0;
 int NumberOfLandscapePolygons;
 RENDERSTATES CurrentRenderStates;
 extern HRESULT LastError;
@@ -221,14 +218,7 @@ extern HRESULT LastError;
 
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
 void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
-
-#define CheckTranslucencyModeIsCorrect(x) \
-if (CurrentRenderStates.TranslucencyMode!=(x)) \
-	ChangeTranslucencyMode((x));
-
-#define CheckFilteringModeIsCorrect(x) \
-if (CurrentRenderStates.FilteringMode!=(x)) \
-	ChangeFilteringMode((x));
+void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
 
 
 static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n)
@@ -433,9 +423,7 @@ BOOL SetExecuteBufferDefaults()
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
 
-#ifdef _XBOX
 	d3d.lpD3DDevice->SetRenderState(D3DRS_OCCLUSIONCULLENABLE, FALSE);
-#endif
 
 	D3DShadingMode = D3DSHADE_GOURAUD;
 

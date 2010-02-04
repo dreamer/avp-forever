@@ -1,19 +1,14 @@
 #include "3dc.h"
 #include "inline.h"
-
 #include "tallfont.hpp"
 #include "strtab.hpp"
-
 #include "awTexLd.h"
 #include "alt_tab.h"
-
 #include "chnktexi.h"
 #include "hud_layout.h"
-
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "ffstdio.h"
-
 #include "d3_func.h"
 
 extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour);

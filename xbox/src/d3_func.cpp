@@ -1,15 +1,47 @@
-// Interface  functions (written in C++) for
-// Direct3D immediate mode system
+// Copyright (C) 2010 Barry Duncan. All Rights Reserved.
+// The original author of this code can be contacted at: bduncan22@hotmail.com
 
-// Must link to C code in main engine system
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+// INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+// FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+// DEVELOPERS AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+// OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+// WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+// ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+extern int NumberOfFMVTextures;
+#include "fmvCutscenes.h"
+#define MAX_NO_FMVTEXTURES 10
+extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
+
+bool IsPowerOf2(int i)
+{
+	if ((i & -i) == i) {
+		return true;
+	}
+	else return false;
+}
+
+int NearestSuperiorPow2(int i)
+{
+	int x = ((i - 1) & i);
+	return x ? NearestSuperiorPow2(x) : i << 1;
+}
 
 extern "C" {
-
-// Mysterious definition required by objbase.h
-// (included via one of the include files below)
-// to start definition of obscure unique in the
-// universe IDs required  by Direct3D before it
-// will deign to cough up with anything useful...
 
 #define INITGUID
 
@@ -20,25 +52,28 @@ extern "C" {
 #include "kshape.h"
 #include "networking.h"
 
+#include "avp_menugfx.hpp"
+extern AVPMENUGFX AvPMenuGfxStorage[];
+extern void ReleaseAllFMVTextures(void);
+
+extern void ThisFramesRenderingHasBegun(void);
+extern void ThisFramesRenderingHasFinished(void);
+
 extern "C++" {
 	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 	#include "logString.h"
 	#include "configFile.h"
-
 	#include <xtl.h>
 	#include <xgraphics.h>
 	#include "console.h"
+	extern void Font_Init();
+	extern void Font_Release();
+	D3DXMATRIX matOrtho;
+	D3DXMATRIX matProjection;
+	D3DXMATRIX matViewProjection;
+	D3DXMATRIX matView;
+	D3DXMATRIX matIdentity;
 }
-
-int image_num = 0;
-
-// Set to Yes to make default texture filter bilinear averaging rather
-// than nearest
-BOOL BilinearTextureFilter = 1;
-
-int 					VideoModeColourDepth;
-int						NumAvailableVideoModes;
-VIDEOMODEINFO			AvailableVideoModes[MaxAvailableVideoModes];
 
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern int WindowMode;
@@ -57,7 +92,7 @@ enum
 	BO_ALPHA
 };
 
-/* TGA header structure */
+// TGA header structure
 #pragma pack(1)
 struct TGA_HEADER
 {
@@ -76,7 +111,7 @@ struct TGA_HEADER
 };
 #pragma pack()
 
-TGA_HEADER TgaHeader = {0};
+static TGA_HEADER TgaHeader = {0};
 
 void ColourFillBackBuffer(int FillColour)
 {
@@ -91,23 +126,8 @@ char* GetDeviceName()
 	}
 	else return "Default Adapter";
 }
-/*
-bool IsPowerOf2(int i)
-{
-	if ((i & -i) == i) {
-		return true;
-	}
-	else return false;
-}
 
-int NearestSuperiorPow2(int i)
-{
-	int x = ((i - 1) & i);
-	return x ? NearestSuperiorPow2(x) : i << 1;
-}
-*/
-
-LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AVPTEXTURE *tex)
+D3DTEXTURE CreateD3DTallFontTexture (AVPTEXTURE *tex)
 {
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
 	LPDIRECT3DTEXTURE8 swizTexture = NULL;
@@ -116,11 +136,12 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AVPTEXTURE *tex)
 	// default colour format
 	D3DFORMAT colourFormat = D3DFMT_R5G6B5;
 
-	if (ScreenDescriptorBlock.SDB_Depth == 16) {
-		colourFormat = D3DFMT_R5G6B5;
+	if (ScreenDescriptorBlock.SDB_Depth == 16)
+	{
+		colourFormat = D3DFMT_LIN_R5G6B5;
 	}
-	if (ScreenDescriptorBlock.SDB_Depth == 32) {
-//		colour_format = D3DFMT_A8R8G8B8;
+	if (ScreenDescriptorBlock.SDB_Depth == 32)
+	{
 		colourFormat = D3DFMT_LIN_A8R8G8B8;
 	}
 
@@ -147,23 +168,23 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AVPTEXTURE *tex)
 
 	if (ScreenDescriptorBlock.SDB_Depth == 16)
 	{
-		unsigned short *destPtr;
-		unsigned char *srcPtr;
+		uint16_t *destPtr;
+		uint8_t  *srcPtr;
 
-		srcPtr = (unsigned char *)tex->buffer;
+		srcPtr = (uint8_t*)tex->buffer;
 
-		D3DCOLOR pad_colour = D3DCOLOR_XRGB(0,0,0);
+		D3DCOLOR padColour = D3DCOLOR_XRGB(0,0,0);
 
 		// lets pad the whole thing black first
 		for (int y = 0; y < padHeight; y++)
 		{
-			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch));
+			destPtr = ((uint16_t*)(((uint8_t*)lock.pBits) + y*lock.Pitch));
 
 			for (int x = 0; x < padWidth; x++)
 			{
 				// >> 3 for red and blue in a 16 bit texture, 2 for green
-				*destPtr = RGB16(pad_colour, pad_colour, pad_colour);
-				destPtr += 1;
+				*destPtr = static_cast<uint16_t> (RGB16(padColour, padColour, padColour));
+				destPtr += sizeof(uint16_t);
 			}
 		}
 
@@ -175,43 +196,43 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AVPTEXTURE *tex)
 			int row = i / 15; // get row
 			int column = i % 15; // get column from remainder value
 
-			int offset = ((column * charWidth) * 2) + ((row * charHeight) * lock.Pitch);
+			int offset = ((column * charWidth) * sizeof(uint16_t)) + ((row * charHeight) * lock.Pitch);
 
-			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits + offset)));
+			destPtr = ((uint16_t*)(((uint8_t*)lock.pBits + offset)));
 
 			for (int y = 0; y < charHeight; y++)
 			{
-				destPtr = ((unsigned short *)(((unsigned char *)lock.pBits + offset) + (y*lock.Pitch)));
+				destPtr = ((uint16_t*)(((uint8_t*)lock.pBits + offset) + (y*lock.Pitch)));
 
 				for (int x = 0; x < charWidth; x++)
 				{
 					*destPtr = RGB16(srcPtr[0], srcPtr[1], srcPtr[2]);
 
-					destPtr+=1;
-					srcPtr+=4;
+					destPtr += sizeof(uint16_t);
+					srcPtr += sizeof(uint32_t); // our source is 32 bit, move over an entire 4 byte pixel
 				}
 			}
 		}
 	}
 	if (ScreenDescriptorBlock.SDB_Depth == 32)
 	{
-		unsigned char *destPtr, *srcPtr;
+		uint8_t *destPtr, *srcPtr;
 
-		srcPtr = (unsigned char *)tex->buffer;
+		srcPtr = (uint8_t*)tex->buffer;
 
 		D3DCOLOR pad_colour = D3DCOLOR_XRGB(0,0,0);
 
 		// lets pad the whole thing black first
 		for (int y = 0; y < padHeight; y++)
 		{
-			destPtr = (((unsigned char *)lock.pBits) + y*lock.Pitch);
+			destPtr = (((uint8_t*)lock.pBits) + y*lock.Pitch);
 
 			for (int x = 0; x < padWidth; x++)
 			{
 				// >> 3 for red and blue in a 16 bit texture, 2 for green
-				*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(pad_colour, pad_colour, pad_colour, pad_colour);
+				*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(padColour, padColour, padColour, padColour);
 
-				destPtr += 4;
+				destPtr += sizeof(uint32_t); // move over an entire 4 byte pixel
 			}
 		}
 
@@ -223,30 +244,27 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AVPTEXTURE *tex)
 			int row = i / 15; // get row
 			int column = i % 15; // get column from remainder value
 
-			int offset = ((column * charWidth) * 4) + ((row * charHeight) * lock.Pitch);
+			int offset = ((column * charWidth) * sizeof(uint32_t)) + ((row * charHeight) * lock.Pitch);
 
-			destPtr = (((unsigned char *)lock.pBits + offset));
+			destPtr = (((uint8_t*)lock.pBits + offset));
 
 			for (int y = 0; y < charHeight; y++)
 			{
-				destPtr = (((unsigned char *)lock.pBits + offset) + (y*lock.Pitch));
+				destPtr = (((uint8_t*)lock.pBits + offset) + (y*lock.Pitch));
 
 				for (int x = 0; x < charWidth; x++)
 				{
-//					*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], srcPtr[3]);
-
-					if (srcPtr[0] == 0x00 && srcPtr[1] == 0x00 && srcPtr[2] == 0x00) {
+					if (srcPtr[0] == 0x00 && srcPtr[1] == 0x00 && srcPtr[2] == 0x00)
+					{
 						*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], 0x00);
 					}
-//					if (srcPtr[0] == 0xff && srcPtr[1] == 0xff && srcPtr[2] == 0xff) {
-//						*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], 0xff);
-//					}
-					else {
+					else
+					{
 						*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], 0xff);
 					}
 
-					destPtr += 4;
-					srcPtr += 4;
+					destPtr += sizeof(uint32_t); // move over an entire 4 byte pixel
+					srcPtr += sizeof(uint32_t);
 				}
 			}
 		}
@@ -256,7 +274,7 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AVPTEXTURE *tex)
 	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &swizTexture);
 	LastError = swizTexture->LockRect(0, &lock2, NULL, NULL );
 
-	XGSwizzleRect(lock.pBits, lock.Pitch, NULL, lock2.pBits, padWidth, padHeight, NULL, 4);
+	XGSwizzleRect(lock.pBits, lock.Pitch, NULL, lock2.pBits, padWidth, padHeight, NULL, sizeof(uint32_t));
 
 	LastError = destTexture->UnlockRect(0);
 	if (FAILED(LastError))
@@ -281,18 +299,36 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AVPTEXTURE *tex)
 	return swizTexture;
 }
 
-LPDIRECT3DTEXTURE8 CreateFmvTexture(int *width, int *height, int usage, int pool)
+D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool)
 {
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
 
-	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)width, (UINT*)height, NULL, 0, NULL, (D3DPOOL)pool);
+	int newWidth, newHeight;
 
-	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, usage, D3DFMT_LIN_X8R8G8B8, 0, &destTexture);
+	// check if passed value is already a power of 2
+	if (!IsPowerOf2(*width))
+	{
+		newWidth = NearestSuperiorPow2(*width);
+	}
+	else { newWidth = *width; }
+
+	if (!IsPowerOf2(*height))
+	{
+		newHeight = NearestSuperiorPow2(*height);
+	}
+	else { newHeight = *height; }
+
+//	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)width, (UINT*)height, NULL, 0, NULL, (D3DPOOL)pool);
+
+	LastError = d3d.lpD3DDevice->CreateTexture(newWidth, newHeight, 1, usage, D3DFMT_LIN_X8R8G8B8, 0, &destTexture);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
+
+	*width = newWidth;
+	*height = newHeight;
 
 	return destTexture;
 }
@@ -336,7 +372,7 @@ void DeRedTexture(D3DTEXTURE texture)
 }
 
 // use this to make textures from non power of two images
-LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *realHeight)
+D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *realHeight)
 {
 	int original_width = tex->width;
 	int original_height = tex->height;
@@ -345,7 +381,7 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *
 
 	D3DCOLOR pad_colour = D3DCOLOR_XRGB(0,0,0);
 
-/*
+
 	// check if passed value is already a power of 2
 	if (!IsPowerOf2(tex->width)) {
 		new_width = NearestSuperiorPow2(tex->width);
@@ -356,12 +392,6 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *
 		new_height = NearestSuperiorPow2(tex->height);
 	}
 	else { new_height = original_height; }
-
-	// set passed in width and height values to be used later
-	(*real_height) = new_height;
-	(*real_width) = new_width;
-*/
-	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)&new_width, (UINT*)&new_height, NULL, 0, NULL, D3DPOOL_MANAGED);
 
 	(*realHeight) = new_height;
 	(*realWidth) = new_width;
@@ -377,7 +407,7 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *
 
 	D3DPOOL poolType = D3DPOOL_MANAGED;
 
-	/* fill tga header */
+	// fill tga header
 	TgaHeader.idlength = 0;
 	TgaHeader.x_origin = tex->width;
 	TgaHeader.y_origin = tex->height;
@@ -391,18 +421,18 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *
 	TgaHeader.height = tex->height;
 	TgaHeader.width  = tex->width;
 
-	/* size of raw image data */
-	int imageSize = tex->height * tex->width * 4;
+	// size of raw image data
+	int imageSize = tex->height * tex->width * sizeof(uint32_t);
 
-	/* create new buffer for header and image data */
-	byte *buffer = new byte[sizeof(TGA_HEADER) + imageSize];
+	// create new buffer for header and image data
+	uint8_t *buffer = new uint8_t[sizeof(TGA_HEADER) + imageSize];
 
-	/* copy header and image data to buffer */
+	// copy header and image data to buffer
 	memcpy(buffer, &TgaHeader, sizeof(TGA_HEADER));
 
-	byte *imageData = buffer + sizeof(TGA_HEADER);
+	uint8_t *imageData = buffer + sizeof(TGA_HEADER);
 
-	/* loop, converting RGB to BGR for D3DX function */
+	// loop, converting RGB to BGR for D3DX function
 	for (int i = 0; i < imageSize; i+=4)
 	{
 
@@ -439,12 +469,11 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *
 	return destTexture;
 }
 
-LPDIRECT3DTEXTURE8 CreateD3DTexture(AVPTEXTURE *tex, unsigned char *buf, int usage, D3DPOOL poolType)
+D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, unsigned char *buf, int usage, D3DPOOL poolType)
 {
-	/* create our texture for returning */
-	LPDIRECT3DTEXTURE8 destTexture = NULL;
+	D3DTEXTURE destTexture = NULL;
 
-	/* fill tga header */
+	// fill tga header
 	TgaHeader.idlength = 0;
 	TgaHeader.x_origin = tex->width;
 	TgaHeader.y_origin = tex->height;
@@ -458,18 +487,18 @@ LPDIRECT3DTEXTURE8 CreateD3DTexture(AVPTEXTURE *tex, unsigned char *buf, int usa
 	TgaHeader.height = tex->height;
 	TgaHeader.width  = tex->width;
 
-	/* size of raw image data */
-	int imageSize = tex->height * tex->width * 4;
+	// size of raw image data
+	int imageSize = tex->height * tex->width * sizeof(uint32_t);
 
-	/* create new buffer for header and image data */
-	byte *buffer = new byte[sizeof(TGA_HEADER) + imageSize];
+	// create new buffer for header and image data
+	uint8_t *buffer = new uint8_t[sizeof(TGA_HEADER) + imageSize];
 
-	/* copy header and image data to buffer */
+	// copy header and image data to buffer
 	memcpy(buffer, &TgaHeader, sizeof(TGA_HEADER));
 
-	byte *imageData = buffer + sizeof(TGA_HEADER);
+	uint8_t *imageData = buffer + sizeof(TGA_HEADER);
 
-	/* loop, converting RGB to BGR for D3DX function */
+	// loop, converting RGB to BGR for D3DX function
 	for (int i = 0; i < imageSize; i+=4)
 	{
 		// RGB
@@ -618,10 +647,11 @@ LPDIRECT3DTEXTURE8 CheckAndLoadUserTexture(const char *fileName, int *width, int
 
 BOOL ReleaseVolatileResources()
 {
+/*
 	SAFE_RELEASE(d3d.lpD3DBackSurface);
 	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
 	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
-
+*/
 	return true;
 }
 
@@ -632,25 +662,22 @@ BOOL CreateVolatileResources()
 {
 /*
 	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DTLVERTEX),D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_TLVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer);
-	if(FAILED(LastError)) {
+	if(FAILED(LastError))
+	{
 		LogDxError(LastError);
 		return FALSE;
 	}
-*/
-/*
+
 	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DIndexBuffer);
-	if(FAILED(LastError)) {
-//		OutputDebugString("Couldn't create Index Buffer");
-//		LogDxError("Unable to create index buffer", LastError);
+	if(FAILED(LastError))
+	{
 		LogDxError(LastError);
 		return FALSE;
 	}
-*/
-/*
+
 	LastError = d3d.lpD3DDevice->SetStreamSource( 0, d3d.lpD3DVertexBuffer, sizeof(D3DTLVERTEX));
-	if (FAILED(LastError)){
-//		OutputDebugString(" Couldn't set stream source");
-//		LogDxError("Unable to set stream source", LastError);
+	if (FAILED(LastError))
+	{
 		LogDxError(LastError);
 		return FALSE;
 	}
@@ -677,31 +704,93 @@ BOOL CreateVolatileResources()
 BOOL ChangeGameResolution(int width, int height, int colourDepth)
 {
 
-	d3d.d3dpp.BackBufferHeight = height;
+	// don't bother resetting device if we're already using the requested settings
+	if ((width == d3d.d3dpp.BackBufferWidth) && (height == d3d.d3dpp.BackBufferHeight))
+	{
+		return TRUE;
+	}
+
+	ThisFramesRenderingHasFinished();
+
+	ReleaseVolatileResources();
+
 	d3d.d3dpp.BackBufferWidth = width;
+	d3d.d3dpp.BackBufferHeight = height;
 
+	// try reset the device
 	LastError = d3d.lpD3DDevice->Reset(&d3d.d3dpp);
+	if (FAILED(LastError))
+	{
+		// log an error message
+		std::stringstream sstream;
+		sstream << "Can't set resolution " << width << " x " << height << ". Setting default safe values";
+		Con_PrintError(sstream.str());
 
+		OutputDebugString(DXGetErrorString8(LastError));
+		OutputDebugString(DXGetErrorDescription8(LastError));
+		OutputDebugString("\n");
+
+		// this'll occur if the resolution width and height passed aren't usable on this device
+		if (D3DERR_INVALIDCALL == LastError)
+		{
+			// set some default, safe resolution?
+			width = 800;
+			height = 600;
+
+			ChangeWindowsSize(width, height);
+
+			d3d.d3dpp.BackBufferWidth = width;
+			d3d.d3dpp.BackBufferHeight = height;
+
+			// try reset again, if it doesnt work, bail out
+			LastError = d3d.lpD3DDevice->Reset(&d3d.d3dpp);
+			if (FAILED(LastError))
+			{
+				LogDxError(LastError, __LINE__, __FILE__);
+				return FALSE;
+			}
+		}
+		else
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+			return FALSE;
+		}
+	}
+
+	d3d.D3DViewport.Width = width;
+	d3d.D3DViewport.Height = height;
+
+	LastError = d3d.lpD3DDevice->SetViewport(&d3d.D3DViewport);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		return FALSE;
 	}
-	else
-	{
-		ScreenDescriptorBlock.SDB_Width     = width;
-		ScreenDescriptorBlock.SDB_Height    = height;
-		ScreenDescriptorBlock.SDB_Depth		= colourDepth;
-		ScreenDescriptorBlock.SDB_Size      = width*height;
-		ScreenDescriptorBlock.SDB_CentreX   = width/2;
-		ScreenDescriptorBlock.SDB_CentreY   = height/2;
-		ScreenDescriptorBlock.SDB_ProjX     = width/2;
-		ScreenDescriptorBlock.SDB_ProjY     = height/2;
-		ScreenDescriptorBlock.SDB_ClipLeft  = 0;
-		ScreenDescriptorBlock.SDB_ClipRight = width;
-		ScreenDescriptorBlock.SDB_ClipUp    = 0;
-		ScreenDescriptorBlock.SDB_ClipDown  = height;
-	}
+
+	ScreenDescriptorBlock.SDB_Width     = width;
+	ScreenDescriptorBlock.SDB_Height    = height;
+	ScreenDescriptorBlock.SDB_Depth		= colourDepth;
+	ScreenDescriptorBlock.SDB_Size      = width*height;
+	ScreenDescriptorBlock.SDB_CentreX   = width/2;
+	ScreenDescriptorBlock.SDB_CentreY   = height/2;
+
+	ScreenDescriptorBlock.SDB_ProjX     = width/2;
+	ScreenDescriptorBlock.SDB_ProjY     = height/2;
+
+	ScreenDescriptorBlock.SDB_ClipLeft  = 0;
+	ScreenDescriptorBlock.SDB_ClipRight = width;
+	ScreenDescriptorBlock.SDB_ClipUp    = 0;
+	ScreenDescriptorBlock.SDB_ClipDown  = height;
+
+	CreateVolatileResources();
+
+	ThisFramesRenderingHasBegun();
+
+	// set up projection matrix
+	D3DXMatrixPerspectiveFovLH( &matProjection, width / height, D3DX_PI / 2, 1.0f, 100.0f);
+
+	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
+	d3d.lpD3DDevice->SetTransform( D3DTS_WORLD, &matIdentity );
+	d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matIdentity );
 
 	return TRUE;
 }
@@ -902,6 +991,20 @@ BOOL InitialiseDirect3D()
 	// Log resolution set
 	Con_PrintMessage("\t Resolution set: " + LogInteger(d3dpp.BackBufferWidth) + " x " + LogInteger(d3dpp.BackBufferHeight));
 
+	ZeroMemory (&d3d.D3DViewport, sizeof(d3d.D3DViewport));
+	d3d.D3DViewport.X = 0;
+	d3d.D3DViewport.Y = 0;
+	d3d.D3DViewport.Width = width;
+	d3d.D3DViewport.Height = height;
+	d3d.D3DViewport.MinZ = 0.0f;
+	d3d.D3DViewport.MaxZ = 1.0f;
+
+	LastError = d3d.lpD3DDevice->SetViewport(&d3d.D3DViewport);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+
 	ScreenDescriptorBlock.SDB_Width     = width;
 	ScreenDescriptorBlock.SDB_Height    = height;
 	ScreenDescriptorBlock.SDB_Depth		= depth;
@@ -927,10 +1030,42 @@ BOOL InitialiseDirect3D()
 	// create vertex and index buffers
 	CreateVolatileResources();
 
+	// Setup orthographic projection matrix
+	int standardWidth = 640;
+	int wideScreenWidth = 852;
+
+	// setup view matrix
+	D3DXMatrixIdentity( &matView );
+	D3DXVECTOR3 position = D3DXVECTOR3(-64.0f, 280.0f, -1088.0f);
+	D3DXVECTOR3 lookAt = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	D3DXVECTOR3 up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+	D3DXMatrixLookAtLH( &matView, &position, &lookAt, &up );
+	PrintD3DMatrix("View", matView);
+
+	// set up orthographic projection matrix
+//	D3DXMatrixOrthoOffCenterLH( &matOrtho, 0.0f, wideScreenWidth, 0.0f, 480, 1.0f, 10.0f);
+	D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
+
+	// set up projection matrix
+	D3DXMatrixPerspectiveFovLH( &matProjection, width / height, D3DX_PI / 2, 1.0f, 100.0f);
+
+	// print projection matrix?
+	PrintD3DMatrix("Projection", matProjection);
+
+	// multiply view and projection
+	D3DXMatrixMultiply( &matViewProjection, &matView, &matProjection);
+	PrintD3DMatrix("View and Projection", matViewProjection);
+
+	D3DXMatrixIdentity( &matIdentity );
+	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
+	d3d.lpD3DDevice->SetTransform( D3DTS_WORLD, &matIdentity );
+	d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matIdentity );
+
 	Con_Init();
 	Net_Initialise();
+	Font_Init();
 
-	LogString("Initialised Direct3D succesfully");
+	Con_PrintMessage("Initialised Direct3D9 succesfully");
 	return TRUE;
 }
 
@@ -946,6 +1081,8 @@ void FlipBuffers()
 void ReleaseDirect3D()
 {
     DeallocateAllImages();
+
+    Font_Release();
 
 	// release back-buffer copy surface, vertex buffer and index buffer
 	ReleaseVolatileResources();
@@ -979,7 +1116,7 @@ void ReleaseAvPTexture(AVPTEXTURE *texture)
 
 void ReleaseD3DTexture(D3DTEXTURE *d3dTexture)
 {
-	/* release d3d texture */
+	// release d3d texture
 	SAFE_RELEASE(*d3dTexture);
 }
 

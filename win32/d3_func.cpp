@@ -50,7 +50,6 @@ extern "C" {
 #include "module.h"
 #include "d3_func.h"
 #include "avp_menus.h"
-
 #include "kshape.h"
 #include "eax.h"
 #include "vmanpset.h"
