@@ -175,12 +175,6 @@ extern AVPMENUGFX AvPMenuGfxStorage[];
 #define RGBLIGHT_MAKE(r,g,b) RGB_MAKE(r,g,b)
 #define RGBALIGHT_MAKE(r,g,b,a) RGBA_MAKE(r,g,b,a)
 
-// Set to TRUE to make default texture filter bilinear averaging rather
-// than nearest
-//extern BOOL BilinearTextureFilter;
-
-
-
 #define FMV_ON 0
 #define FMV_EVERYWHERE 0
 #define FMV_SIZE 128
@@ -195,9 +189,6 @@ extern int PredatorNumbersImageNumber;
 extern int StaticImageNumber;
 extern int AAFontImageNumber;
 extern int WaterShaftImageNumber;
-
-//D3DTEXTURE FMVTextureHandle[4];
-//D3DTEXTURE NoiseTextureHandle;
 
 AVPTEXTURE FMVTextureHandle[4];
 AVPTEXTURE NoiseTextureHandle;
@@ -241,8 +232,6 @@ static bool D3DZWriteEnable;
 
 static unsigned char DefaultD3DTextureFilterMin;
 static unsigned char DefaultD3DTextureFilterMax;
-// Globals for frame by frame definition of
-// coloured materials for D3D rendering interface
 
 extern void ScanImagesForFMVs();
 
@@ -256,16 +245,6 @@ static HRESULT LastError;
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
 void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
-
-/*
-#define CheckTranslucencyModeIsCorrect(x) \
-if (CurrentRenderStates.TranslucencyMode!=(x)) \
-	ChangeTranslucencyMode((x));
-
-#define CheckFilteringModeIsCorrect(x) \
-if (CurrentRenderStates.FilteringMode!=(x)) \
-	ChangeFilteringMode((x));
-*/
 
 /* OUTPUT_TRIANGLE - how this bugger works
 
@@ -316,19 +295,12 @@ static inline void D3D_OutputTriangles()
 		case 3:
 		{
 			OUTPUT_TRIANGLE(0,2,1, 3);
-			// Clockwise render order
-			//OUTPUT_TRIANGLE(2,1,0, 3);
-
 			break;
 		}
 		case 4:
 		{
 			OUTPUT_TRIANGLE(0,1,2, 4);
 			OUTPUT_TRIANGLE(0,2,3, 4);
-			// clockwise
-			//OUTPUT_TRIANGLE(2,1,0, 4);
-			//OUTPUT_TRIANGLE(3,2,0, 4);
-
 			break;
 		}
 		case 5:
@@ -659,14 +631,7 @@ BOOL BeginD3DScene()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
-/*
-	// set up projection matrix
-	D3DXMatrixPerspectiveFovLH( &matProjection, ScreenDescriptorBlock.SDB_Width / ScreenDescriptorBlock.SDB_Height, D3DX_PI / 2, 1.0f, 100.0f);
 
-	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
-	d3d.lpD3DDevice->SetTransform( D3DTS_WORLD, &matIdentity );
-	d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matIdentity );
-*/
 	LastError = d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
 	if (FAILED(LastError)) 
 	{
@@ -1344,7 +1309,6 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
 {
 	// bjd - This is the function responsible for drawing level geometry and the players weapon
-
 	int texoffset;
 
 	float ZNear;
@@ -1413,7 +1377,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 
 void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
 {
-	/* responsible for drawing predators lock on triangle, for one */
+	// responsible for drawing predators lock on triangle, for one
 	int flags;
 
 	float ZNear;
@@ -1489,7 +1453,6 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
 		mainVertex[vb].sy = (float)y;
 			
 		zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
-		//zvalue = ((zvalue-ZNear)/zvalue);
 		zvalue = 1.0f - Zoffset * ZNear/zvalue;
 
 		mainVertex[vb].sz = zvalue;
@@ -1655,9 +1618,6 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	mainVertex[vb].tv = 0.0f;
 
 	vb++;
-
-//	OUTPUT_TRIANGLE(0,1,3, 4);
-//	OUTPUT_TRIANGLE(1,2,3, 4);
 
 	OUTPUT_TRIANGLE(0,1,2, 4);
 	OUTPUT_TRIANGLE(0,3,2, 4);
@@ -1827,7 +1787,6 @@ void D3D_DrawParticle_Smoke(PARTICLE *particlePtr)
 
 			do
 			{
-				//D3DTLVERTEX *vertexPtr = &((LPD3DTLVERTEX)ExecuteBufferDataArea)[NumVertices];
 				int x = (verticesPtr->vx*(Global_VDB_Ptr->VDB_ProjX))/verticesPtr->vz+Global_VDB_Ptr->VDB_CentreX;
 				int y = (verticesPtr->vy*(Global_VDB_Ptr->VDB_ProjY))/verticesPtr->vz+Global_VDB_Ptr->VDB_CentreY;
 				
@@ -2053,7 +2012,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 	float RecipW, RecipH;
 
-	if(ImageHeaderArray[texoffset].ImageWidth == 256)
+	if (ImageHeaderArray[texoffset].ImageWidth == 256)
 	{
 		RecipW = (1.0f / 256.0);
 	}
@@ -2062,7 +2021,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
 		RecipW = (1.0f / width);
 	}
-	if(ImageHeaderArray[texoffset].ImageHeight == 256)
+	if (ImageHeaderArray[texoffset].ImageHeight == 256)
 	{
 		RecipH = 1.0f / 256.0;
 	}
@@ -2278,28 +2237,17 @@ void InitRandomArrays(void);
 int Turbulence(int x, int y, int t);
 
 void UpdateForceField(void);
-void D3D_DrawForceField(int xOrigin, int yOrigin, int zOrigin, int fieldType);
 
 void UpdateWaterFall(void);
 void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin);
 void D3D_DrawPowerFence(int xOrigin, int yOrigin, int zOrigin, int xScale, int yScale, int zScale);
-void D3D_DrawExplosion(int xOrigin, int yOrigin, int zOrigin, int size);
-
 void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin);
 
-void D3D_DrawWaterOctagonPatch(int xOrigin, int yOrigin, int zOrigin, int xOffset, int zOffset);
-
 int LightSourceWaterPoint(VECTORCH *pointPtr,int offset);
-void D3D_DrawWaterMesh_Unclipped(void);
-void D3D_DrawWaterMesh_Clipped(void);
-
 
 void D3D_DrawMoltenMetal(int xOrigin, int yOrigin, int zOrigin);
 void D3D_DrawMoltenMetalMesh_Unclipped(void);
-void D3D_DrawMoltenMetalMesh_Clipped(void);
 
-
-//#define WATER_POLY_SCALE 256
 int MeshXScale;
 int MeshZScale;
 int WaterFallBase;
@@ -2589,7 +2537,6 @@ void PostLandscapeRendering()
 					break;
 				}
 			}
-
 		}
 	}
 }
@@ -2623,7 +2570,7 @@ void D3D_DrawWaterTest(MODULE *testModulePtr)
 				WaterZOrigin=z;
 				WaterUScale = 4.0f/(float)(MeshXScale);
 				WaterVScale = 4.0f/(float)MeshZScale;
-				#if 1
+
 				MeshXScale/=2;
 				MeshZScale/=2;
 				D3D_DrawWaterPatch(x, y, z);
@@ -2633,81 +2580,9 @@ void D3D_DrawWaterTest(MODULE *testModulePtr)
 
 				extern void HandleRainShaft(MODULE *modulePtr, int bottomY, int topY, int numberOfRaindrops);
 				HandleRainShaft(modulePtr, y,-21000,1);
-				#else
-				MeshXScale/=4;
-				MeshZScale/=4;
-				D3D_DrawWaterPatch(x, y, z);
-				D3D_DrawWaterPatch(x, y, z+MeshZScale);
-				D3D_DrawWaterPatch(x, y, z+MeshZScale*2);
-				D3D_DrawWaterPatch(x, y, z+MeshZScale*3);
-				D3D_DrawWaterPatch(x+MeshXScale, y, z);
-				D3D_DrawWaterPatch(x+MeshXScale, y, z+MeshZScale);
-				D3D_DrawWaterPatch(x+MeshXScale, y, z+MeshZScale*2);
-				D3D_DrawWaterPatch(x+MeshXScale, y, z+MeshZScale*3);
-				D3D_DrawWaterPatch(x+MeshXScale*2, y, z);
-				D3D_DrawWaterPatch(x+MeshXScale*2, y, z+MeshZScale);
-				D3D_DrawWaterPatch(x+MeshXScale*2, y, z+MeshZScale*2);
-				D3D_DrawWaterPatch(x+MeshXScale*2, y, z+MeshZScale*3);
-				D3D_DrawWaterPatch(x+MeshXScale*3, y, z);
-				D3D_DrawWaterPatch(x+MeshXScale*3, y, z+MeshZScale);
-				D3D_DrawWaterPatch(x+MeshXScale*3, y, z+MeshZScale*2);
-				D3D_DrawWaterPatch(x+MeshXScale*3, y, z+MeshZScale*3);
-				HandleRainDrops(modulePtr,2);
-				#endif
 			}
 		}
 	}
-	#if 0
-	else if ( (!_stricmp(LevelName,"e3demo")) || (!_stricmp(LevelName,"e3demosp")) )
-	{
-		if (testModulePtr && testModulePtr->name)
-		{
-			#if 0
-			if(!_stricmp(testModulePtr->name,"watermid"))
-			{
-				DECAL fmvDecal =
-				{
-					DECAL_FMV,
-					{
-					{0,-2500,29000},
-					{2000,-2500,29000},
-					{2000,-2500+750*2,29000},
-					{0,-2500+750*2,29000}
-					},
-					0
-				};
-				fmvDecal.ModuleIndex = testModulePtr->m_index;
-				fmvDecal.Centre.vx = 0;
-				fmvDecal.UOffset = 0;
-
-				RenderDecal(&fmvDecal);
-			}
-			#endif
-			if(!_stricmp(testModulePtr->name,"lowlowlo03"))
-			{
-				VECTORCH position = {6894,469,-13203};
-				VECTORCH disp = position;
-				int i,d;
-
-				disp.vx -= Player->ObWorld.vx;
-				disp.vy -= Player->ObWorld.vy;
-				disp.vz -= Player->ObWorld.vz;
-				d = ONE_FIXED - Approximate3dMagnitude(&disp)*2;
-				if (d<0) d = 0;
-
-				i = MUL_FIXED(10,d);
-				while(i--)
-				{
-					VECTORCH velocity;
-					velocity.vx = ((FastRandom()&1023) - 512);
-					velocity.vy = ((FastRandom()&1023) - 512)+2000;
-					velocity.vz = (1000+(FastRandom()&255))*2;
-					MakeParticle(&(position),&(velocity),PARTICLE_STEAM);
-				}
-			}
-		}
-	}
-	#endif
 }
 
 VECTORCH MeshVertex[256];
@@ -2715,7 +2590,6 @@ VECTORCH MeshVertex[256];
 
 VECTORCH MeshWorldVertex[256];
 unsigned int MeshVertexColour[256];
-//unsigned int MeshVertexSpecular[256];
 char MeshVertexOutcode[256];
 
 void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
@@ -2811,250 +2685,8 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 		}
 	}
 
-	if ((MeshVertexOutcode[0]&&MeshVertexOutcode[15]&&MeshVertexOutcode[240]&&MeshVertexOutcode[255]))
-	{
-		D3D_DrawMoltenMetalMesh_Unclipped();
-	}	
-	else
-	{
-		D3D_DrawMoltenMetalMesh_Clipped();
-	}
+	D3D_DrawMoltenMetalMesh_Unclipped();	
 }
-
-void D3D_DrawWaterMesh_Unclipped(void)
-{
-#if 0//FUNCTION_ON
-	float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
-
-	/* OUTPUT VERTICES TO EXECUTE BUFFER */
-	{
-		VECTORCH *point = MeshVertex;
-		#if TEXTURE_WATER
-		VECTORCH *pointWS = MeshWorldVertex;
-		#endif
-		int i;
-		for (i=0; i<256; i++)
-		{
-
-			if (point->vz<=1) point->vz = 1;
-			int x = (point->vx*(Global_VDB_Ptr->VDB_ProjX))/point->vz+Global_VDB_Ptr->VDB_CentreX;
-			int y = (point->vy*(Global_VDB_Ptr->VDB_ProjY))/point->vz+Global_VDB_Ptr->VDB_CentreY;
-  //			textprint("%d, %d\n",x,y);
-			{
-				if (x<Global_VDB_Ptr->VDB_ClipLeft)
-				{
-					x=Global_VDB_Ptr->VDB_ClipLeft;
-				}
-				else if (x>Global_VDB_Ptr->VDB_ClipRight)
-				{
-					x=Global_VDB_Ptr->VDB_ClipRight;
-				}
-
-				mainVertex[vb].sx=x;
-			}
-			{
-				if (y<Global_VDB_Ptr->VDB_ClipUp)
-				{
-					y=Global_VDB_Ptr->VDB_ClipUp;
-				}
-				else if (y>Global_VDB_Ptr->VDB_ClipDown)
-				{
-					y=Global_VDB_Ptr->VDB_ClipDown;
-				}
-				mainVertex[vb].sy=y;
-			}
-			#if FOG_ON
-			{
-				int fog = (point->vz)/FOG_SCALE;
-				if (fog<0) fog=0;
-			 	if (fog>254) fog=254;
-				fog=255-fog;
-			   	mainVertex[vb].specular=RGBALIGHT_MAKE(0,0,0,fog);
-			}
-			#endif
-			point->vz+=HeadUpDisplayZOffset;
-		  	float oneOverZ = ((float)(point->vz)-ZNear)/(float)(point->vz);
-		  //vertexPtr->color = RGBALIGHT_MAKE(66,70,0,127+(FastRandom()&63));
-			mainVertex[vb].color = MeshVertexColour[i];
-			mainVertex[vb].sz = oneOverZ;
-			#if TEXTURE_WATER
-			mainVertex[vb].tu = pointWS->vx/128.0;
-			mainVertex[vb].tv =	pointWS->vz/128.0;
-			#endif
-
-			vb++;
-
-//			vertexPtr++;
-			point++;
-			#if TEXTURE_WATER
-			pointWS++;
-			#endif
-		}
-	}
- //	textprint("numvertices %d\n",NumVertices);
-
-
-    /*
-     * Make sure that the triangle data (not OP) will be QWORD aligned
-     */
-/*
-	if (QWORD_ALIGNED(ExecBufInstPtr))
-    {
-        OP_NOP(ExecBufInstPtr);
-    }
-
-  	OP_TRIANGLE_LIST(450, ExecBufInstPtr);
-*/
-	/* CONSTRUCT POLYS */
-	{
-		int x;
-		for (x=0; x<15; x++)
-		{
-			int y;
-			for(y=0; y<15; y++)
-			{
-				OUTPUT_TRIANGLE(0+x+(16*y),1+x+(16*y),16+x+(16*y), 256);
-				OUTPUT_TRIANGLE(1+x+(16*y),17+x+(16*y),16+x+(16*y), 256);
-			}
-		}
-	}
-	#if 1
-	{
-	   WriteEndCodeToExecuteBuffer();
-  	   UnlockExecuteBufferAndPrepareForUse();
-	   ExecuteBuffer();
-  	   LockExecuteBuffer();
-	}
-	#endif
-#endif
-}
-
-void D3D_DrawWaterMesh_Clipped(void)
-{
-#if 0//FUNCTION_ON
-	float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
-
-//	CheckVertexBuffer(256, -1, TRANSLUCENCY_OFF);
-	/* OUTPUT VERTICES TO EXECUTE BUFFER */
-	{
-		VECTORCH *point = MeshVertex;
-		#if TEXTURE_WATER
-		VECTORCH *pointWS = MeshWorldVertex;
-		#endif
-		int i;
-		for (i=0; i<256; i++)
-		{
-			{
-				if (point->vz<=1) point->vz = 1;
-				int x = (point->vx*(Global_VDB_Ptr->VDB_ProjX))/point->vz+Global_VDB_Ptr->VDB_CentreX;
-				int y = (point->vy*(Global_VDB_Ptr->VDB_ProjY))/point->vz+Global_VDB_Ptr->VDB_CentreY;
-				{
-					if (x<Global_VDB_Ptr->VDB_ClipLeft)
-					{
-						x=Global_VDB_Ptr->VDB_ClipLeft;
-					}
-					else if (x>Global_VDB_Ptr->VDB_ClipRight)
-					{
-						x=Global_VDB_Ptr->VDB_ClipRight;
-					}
-
-					mainVertex[vb].sx=x;
-				}
-				{
-					if (y<Global_VDB_Ptr->VDB_ClipUp)
-					{
-						y=Global_VDB_Ptr->VDB_ClipUp;
-					}
-					else if (y>Global_VDB_Ptr->VDB_ClipDown)
-					{
-						y=Global_VDB_Ptr->VDB_ClipDown;
-					}
-					mainVertex[vb].sy=y;
-				}
-				#if FOG_ON
-				{
-					int fog = ((point->vz)/FOG_SCALE);
-					if (fog<0) fog=0;
-				 	if (fog>254) fog=254;
-					fog=255-fog;
-				   	mainVertex[vb].specular=RGBALIGHT_MAKE(0,0,0,fog);
-				}
-				#endif
-				#if TEXTURE_WATER
-				mainVertex[vb].tu = pointWS->vx/128.0;
-				mainVertex[vb].tv =	pointWS->vz/128.0;
-				#endif
-				point->vz+=HeadUpDisplayZOffset;
-			  	float oneOverZ = ((float)(point->vz)-ZNear)/(float)(point->vz);
-			  //	vertexPtr->color = RGBALIGHT_MAKE(66,70,0,127+(FastRandom()&63));
-				mainVertex[vb].color = MeshVertexColour[i];
-				mainVertex[vb].sz = oneOverZ;
-			}
-			vb++;
-
-			point++;
-			#if TEXTURE_WATER
-			pointWS++;
-			#endif
-		}
-	}
-//	textprint("numvertices %d\n",NumVertices);
-	/* CONSTRUCT POLYS */
-	{
-		int x;
-		for (x=0; x<15; x++)
-		{
-			int y;
-			for(y=0; y<15; y++)
-			{
-				#if 1
-				int p1 = 0+x+(16*y);
-				int p2 = 1+x+(16*y);
-				int p3 = 16+x+(16*y);
-				int p4 = 17+x+(16*y);
-
-				if (MeshVertexOutcode[p1]||MeshVertexOutcode[p2]||MeshVertexOutcode[p3])
-				{
-					///OP_TRIANGLE_LIST(1, ExecBufInstPtr);
-					OUTPUT_TRIANGLE(p1,p2,p3, 256);
-				}
-				if (MeshVertexOutcode[p2]||MeshVertexOutcode[p3]||MeshVertexOutcode[p4])
-				{
-					//OP_TRIANGLE_LIST(1, ExecBufInstPtr);
-					OUTPUT_TRIANGLE(p2,p4,p3, 256);
-				}
-				#else
-				int p2 = 1+x+(16*y);
-				int p3 = 16+x+(16*y);
-
-				if (MeshVertexOutcode[p2]&&MeshVertexOutcode[p3])
-				{
-					int p1 = 0+x+(16*y);
-					int p4 = 17+x+(16*y);
-					if (MeshVertexOutcode[p1])
-					{
-						OP_TRIANGLE_LIST(1, ExecBufInstPtr);
-						OUTPUT_TRIANGLE(p1,p2,p3, 256);
-					}
-					if (MeshVertexOutcode[p4])
-					{
-						OP_TRIANGLE_LIST(1, ExecBufInstPtr);
-						OUTPUT_TRIANGLE(p2,p4,p3, 256);
-					}
-				}
-				#endif
-			}
-		}
-	}
-	{
-	   WriteEndCodeToExecuteBuffer();
-  	   UnlockExecuteBufferAndPrepareForUse();
-	   ExecuteBuffer();
-  	   LockExecuteBuffer();
-	}
-#endif
-}
-
 
 int LightSourceWaterPoint(VECTORCH *pointPtr, int offset)
 {
@@ -3143,6 +2775,7 @@ int LightIntensityAtPoint(VECTORCH *pointPtr)
 
 	return intensity;
 }
+
 signed int ForceFieldPointDisplacement[15*3+1][16];
 signed int ForceFieldPointDisplacement2[15*3+1][16];
 signed int ForceFieldPointVelocity[15*3+1][16];
@@ -3162,121 +2795,7 @@ void InitForceField(void)
 		}
 	ForceFieldPhase=0;
 }
-#if 1
 
-void UpdateForceField(void)
-{
-	#if 1
-	Phase+=NormalFrameTime>>6;
-	ForceFieldPhase+=NormalFrameTime>>5;
-	int x;
-	for (x=1; x<15*3; x++)
-	{
-		int y;
-		for (y=1; y<15; y++)
-		{
-
-			int acceleration =32*(-8*ForceFieldPointDisplacement[x][y]
-								+ForceFieldPointDisplacement[x-1][y-1]
-								+ForceFieldPointDisplacement[x-1][y]
-								+ForceFieldPointDisplacement[x-1][y+1]
-								+ForceFieldPointDisplacement[x][y-1]
-								+ForceFieldPointDisplacement[x][y+1]
-#if 0
-								)
-#else
-
-								+ForceFieldPointDisplacement[x+1][y-1]
-								+ForceFieldPointDisplacement[x+1][y]
-								+ForceFieldPointDisplacement[x+1][y+1])
-#endif
-								-(ForceFieldPointVelocity[x][y]*5);
-
-			ForceFieldPointVelocity[x][y] += MUL_FIXED(acceleration,NormalFrameTime);
-			ForceFieldPointDisplacement2[x][y] += MUL_FIXED(ForceFieldPointVelocity[x][y],NormalFrameTime);
-#if 1
-			if(ForceFieldPointDisplacement2[x][y]>200) ForceFieldPointDisplacement2[x][y]=200;
-			if(ForceFieldPointDisplacement2[x][y]<-200) ForceFieldPointDisplacement2[x][y]=-200;
-#else
-			if(ForceFieldPointDisplacement2[x][y]>512) ForceFieldPointDisplacement2[x][y]=512;
-			if(ForceFieldPointDisplacement2[x][y]<-512) ForceFieldPointDisplacement2[x][y]=-512;
-
-#endif
-			{
-				int offset = ForceFieldPointDisplacement2[x][y];
-				int colour = ForceFieldPointVelocity[x][y]/4;
-
-				if (offset<0) offset =-offset;
-				if (colour<0) colour =-colour;
-				colour=(colour+offset)/2;
-
-				if(colour>255) colour=255;
-				colour++;
-
-				ForceFieldPointColour1[x][y]=FastRandom()%colour;
-				ForceFieldPointColour2[x][y]=FastRandom()%colour;
-			}
-		}
-
-	}
-	for (x=1; x<15*3; x++)
-	{
-		int y;
-		for (y=1; y<15; y++)
-		{
-			ForceFieldPointDisplacement[x][y] = ForceFieldPointDisplacement2[x][y];
-		}
-	}
-	{
-		#if 1
-	  	if(ForceFieldPhase>1000)
-		{
-			ForceFieldPhase=0;
-			int x = 1+(FastRandom()%(15*3-2));
-			int y = 1+(FastRandom()%13);
-			ForceFieldPointVelocity[x][y] = 10000;
-			ForceFieldPointVelocity[x][y+1] = 10000;
-			ForceFieldPointVelocity[x+1][y] = 10000;
-			ForceFieldPointVelocity[x+1][y+1] = 10000;
-		}
-		#else
-	   //	if(ForceFieldPhase>1000)
-		{
-			ForceFieldPhase=0;
-			int x = 1+(FastRandom()%(15*3-2));
-			int y = 1+(FastRandom()%13);
-			ForceFieldPointVelocity[x][y] = (FastRandom()&16383)+8192;
-		}
-		#endif
-	}
-	#else
-	int x;
-	int y;
-	for (y=0; y<=15; y++)
-	{
-		ForceFieldPointDisplacement[0][y] += (FastRandom()&127)-64;
-		if(ForceFieldPointDisplacement[0][y]>512) ForceFieldPointDisplacement[0][y]=512;
-		if(ForceFieldPointDisplacement[0][y]<-512) ForceFieldPointDisplacement[0][y]=-512;
-		ForceFieldPointVelocity[0][y] = (FastRandom()&16383)-8192;
-	}
-	for (x=15*3-1; x>0; x--)
-	{
-		for (y=0; y<=15; y++)
-		{
-			ForceFieldPointDisplacement[x][y] = ForceFieldPointDisplacement[x-1][y];
-			ForceFieldPointVelocity[x][y] = ForceFieldPointVelocity[x-1][y];
-		}
-
-	}
-	for (x=15*3-1; x>1; x--)
-	{
-		y = FastRandom()&15;
-	 	ForceFieldPointDisplacement[x][y] = ForceFieldPointDisplacement[x-1][y];
-		y = (FastRandom()&15)-1;
-	 	ForceFieldPointDisplacement[x][y] = ForceFieldPointDisplacement[x-1][y];
-	}
-	#endif
-}
 void UpdateWaterFall(void)
 {
 	int x;
@@ -3306,221 +2825,6 @@ void UpdateWaterFall(void)
 	}
 }
 
-#endif
-
-#if 0
-void D3D_DrawForceField(int xOrigin, int yOrigin, int zOrigin, int fieldType)
-{
-	MeshXScale = 4096/16;
-	MeshZScale = 4096/16;
-
-	for (int field=0; field<3; field++)
-	{
-	int i=0;
-	int x;
-	for (x=(0+field*15); x<(16+field*15); x++)
-	{
-		int z;
-		for(z=0; z<16; z++)
-		{
-			VECTORCH *point = &MeshVertex[i];
-			int offset = ForceFieldPointDisplacement[x][z];
-
-			switch(fieldType)
-			{
-				case 0:
-				{
-				 	point->vx = xOrigin+(x*MeshXScale);
-				 	point->vy = yOrigin+(z*MeshZScale);
-				 	point->vz = zOrigin+offset;
-					break;
-				}
-				case 1:
-				{
-
-					int theta = (z*4095)/15;
-					int u = (x*65536)/45;
-
-					int b = MUL_FIXED(2*u,(65536-u));
-					int c = MUL_FIXED(u,u);
-					int phi = (Phase&4095);
-					int x3 = (GetSin(phi))/64;
-					int y3 = 5000-(GetCos((phi*3+1000)&4095)/128);
-					int z3 = (GetSin((3*phi+1324)&4095))/32;
-					int x2 = -x3/2;
-					int y2 = 3000;
-					int z2 = -z3/4;
-					int innerRadius = 100;//GetSin(u/32)/16+offset;
-
-					point->vx = xOrigin+(b*x2+c*x3)/65536+MUL_FIXED(innerRadius,GetSin(theta));
-					point->vy = yOrigin-5000+(b*y2+c*y3)/65536;
-					point->vz = zOrigin+(b*z2+c*z3)/65536+MUL_FIXED(innerRadius,GetCos(theta));
-					break;
-				}
-				case 2:
-				{
-					int theta = (z*4095)/15;
-					int phi = (x*4095)/45;
-					int innerRadius = 1000+offset;
-					int outerRadius = 4000;
-
-
-					point->vx = xOrigin+MUL_FIXED(outerRadius-MUL_FIXED(innerRadius,GetSin(theta)),GetCos(phi));
-					point->vy = yOrigin+MUL_FIXED(innerRadius,GetCos(theta));
-					point->vz = zOrigin+MUL_FIXED(outerRadius-MUL_FIXED(innerRadius,GetSin(theta)),GetSin(phi));
-					break;
-				}
-				case 3:
-				{
-
-					int theta = (x*4095)/45;
-					int radius = offset+2000;
-					point->vx = xOrigin+MUL_FIXED(radius,GetCos(theta));
-					point->vy = yOrigin+(z*MeshZScale);
-					point->vz = zOrigin+MUL_FIXED(radius,GetSin(theta));
-					break;
-				}
-			}
-
-			if (offset<0) offset =-offset;
-			offset+=16;
-
-//			offset-=32;
-//			if (offset<0) offset = 0;
-
-			if(offset>255) offset=255;
-
-			MeshVertexColour[i] = RGBALIGHT_MAKE(ForceFieldPointColour1[x][z],ForceFieldPointColour2[x][z],255,offset);
-			#if TEXTURE_WATER
-			MeshWorldVertex[i].vx = point->vx;
-			MeshWorldVertex[i].vz = point->vz;
-			#endif
-
-			TranslatePointIntoViewspace(point);
-
-			/* is particle within normal view frustrum ? */
-			if(AvP.PlayerType==I_Alien)	/* wide frustrum */
-			{
-				if(( (-point->vx <= point->vz*2)
-		   			&&(point->vx <= point->vz*2)
-					&&(-point->vy <= point->vz*2)
-					&&(point->vy <= point->vz*2) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-			else
-			{
-				if(( (-point->vx <= point->vz)
-		   			&&(point->vx <= point->vz)
-					&&(-point->vy <= point->vz)
-					&&(point->vy <= point->vz) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-
-			i++;
-		}
-	}
-	//textprint("\n");
-	if ((MeshVertexOutcode[0]&&MeshVertexOutcode[15]&&MeshVertexOutcode[240]&&MeshVertexOutcode[255]))
-	{
-		D3D_DrawWaterMesh_Unclipped();
-	}
-	else
-//	else if (MeshVertexOutcode[0]||MeshVertexOutcode[15]||MeshVertexOutcode[240]||MeshVertexOutcode[255])
-	{
-		D3D_DrawWaterMesh_Clipped();
-	}
-	}
-}
-#endif
-
-#if 0
-void D3D_DrawPowerFence(int xOrigin, int yOrigin, int zOrigin, int xScale, int yScale, int zScale)
-{
-	for (int field=0; field<3; field++)
-	{
-	int i=0;
-	int x;
-	for (x=(0+field*15); x<(16+field*15); x++)
-	{
-		int z;
-		for(z=0; z<16; z++)
-		{
-			VECTORCH *point = &MeshVertex[i];
-			int offset = ForceFieldPointDisplacement[x][z];
-
-		 	point->vx = xOrigin+(x*xScale);
-		 	point->vy = yOrigin+(z*yScale);
-		 	point->vz = zOrigin+(x*zScale);
-
-			if (offset<0) offset =-offset;
-			offset+=16;
-
-			if(offset>255) offset=255;
-
-			MeshVertexColour[i] = RGBALIGHT_MAKE(ForceFieldPointColour1[x][z],ForceFieldPointColour2[x][z],255,offset);
-
-			/* translate particle into view space */
-			TranslatePointIntoViewspace(point);
-
-			/* is particle within normal view frustrum ? */
-			if(AvP.PlayerType==I_Alien)	/* wide frustrum */
-			{
-				if(( (-point->vx <= point->vz*2)
-		   			&&(point->vx <= point->vz*2)
-					&&(-point->vy <= point->vz*2)
-					&&(point->vy <= point->vz*2) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-			else
-			{
-				if(( (-point->vx <= point->vz)
-		   			&&(point->vx <= point->vz)
-					&&(-point->vy <= point->vz)
-					&&(point->vy <= point->vz) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-
-			i++;
-		}
-	}
-	//textprint("\n");
-	if ((MeshVertexOutcode[0]&&MeshVertexOutcode[15]&&MeshVertexOutcode[240]&&MeshVertexOutcode[255]))
-	{
-		D3D_DrawWaterMesh_Unclipped();
-	}
-	else
-//	else if (MeshVertexOutcode[0]||MeshVertexOutcode[15]||MeshVertexOutcode[240]||MeshVertexOutcode[255])
-	{
-		D3D_DrawWaterMesh_Clipped();
-	}
-	}
-}
-#endif
-
 void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin)
 {
 	int noRequired = MUL_FIXED(250,NormalFrameTime);
@@ -3539,224 +2843,9 @@ void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin)
 	}
 }
 
-// Another function never called?
-#if 0
-void D3D_DrawParticleBeam(DISPLAYBLOCK *muzzlePtr, VECTORCH *targetPositionPtr)
-{
-	VECTORCH vertices[6];
-	int beamRadius = 45+(FastRandom()&15);
-	vertices[0] = *targetPositionPtr;
-	vertices[1] = *targetPositionPtr;
-	vertices[2] = *targetPositionPtr;
-
-	vertices[3] = muzzlePtr->ObWorld;
-	vertices[4] = muzzlePtr->ObWorld;
-	vertices[5] = muzzlePtr->ObWorld;
-
-	vertices[1].vy += beamRadius;
-	vertices[2].vy -= beamRadius;
-	vertices[4].vy += beamRadius;
-	vertices[5].vy -= beamRadius;
-
-	/* translate vertices into vxew space */
-	TranslatePointIntoViewspace(&vertices[0]);
-	TranslatePointIntoViewspace(&vertices[1]);
-	TranslatePointIntoViewspace(&vertices[2]);
-	TranslatePointIntoViewspace(&vertices[3]);
-	TranslatePointIntoViewspace(&vertices[4]);
-	TranslatePointIntoViewspace(&vertices[5]);
-
-	float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
-
-	/* OUTPUT VERTICES TO EXECUTE BUFFER */
-	{
-		int i = 6;
-		VECTORCH *verticesPtr = vertices;
-		do
-		{
-			D3DTLVERTEX *vertexPtr = &((LPD3DTLVERTEX)ExecuteBufferDataArea)[NumVertices];
-			int x = (verticesPtr->vx*(Global_VDB_Ptr->VDB_ProjX))/verticesPtr->vz+Global_VDB_Ptr->VDB_CentreX;
-			int y = (verticesPtr->vy*(Global_VDB_Ptr->VDB_ProjY))/verticesPtr->vz+Global_VDB_Ptr->VDB_CentreY;
-			{
-				if (x<Global_VDB_Ptr->VDB_ClipLeft)
-				{
-					x=Global_VDB_Ptr->VDB_ClipLeft;
-				}
-				else if (x>Global_VDB_Ptr->VDB_ClipRight)
-				{
-					x=Global_VDB_Ptr->VDB_ClipRight;
-				}
-
-				vertexPtr->sx=x;
-			}
-			{
-				if (y<Global_VDB_Ptr->VDB_ClipUp)
-				{
-					y=Global_VDB_Ptr->VDB_ClipUp;
-				}
-				else if (y>Global_VDB_Ptr->VDB_ClipDown)
-				{
-					y=Global_VDB_Ptr->VDB_ClipDown;
-				}
-				vertexPtr->sy=y;
-			}
-
-		  	float oneOverZ = ((float)verticesPtr->vz-ZNear)/(float)verticesPtr->vz;
-
-		  	 // Different behavxour for different driver modes
-			switch (D3DDriverMode)
-			{
-				default:
-				case D3DSoftwareRGBDriver:
-				case D3DSoftwareRampDriver:
-				break;
-				case D3DHardwareRGBDriver:
-				{
-					if (i==6 || i==3) vertexPtr->color = RGBALIGHT_MAKE(255,255,255,255);
-					else vertexPtr->color = RGBALIGHT_MAKE(0,0,255,32);
-
-					break;
-				}
-			}
-			vertexPtr->sz = oneOverZ;
-			NumVertices++;
-			verticesPtr++;
-		}
-	  	while(--i);
-	}
-	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_GLOWING);
-
-	OP_TRIANGLE_LIST(4, ExecBufInstPtr);
-	OUTPUT_TRIANGLE(0,3,5, 6);
-	OUTPUT_TRIANGLE(0,3,4, 6);
-	OUTPUT_TRIANGLE(0,2,5, 6);
-	OUTPUT_TRIANGLE(0,1,4, 6);
-	if (NumVertices > (MaxVerticesInExecuteBuffer-12))
-	{
-	   WriteEndCodeToExecuteBuffer();
-  	   UnlockExecuteBufferAndPrepareForUse();
-	   ExecuteBuffer();
-  	   LockExecuteBuffer();
-	}
-}
-#endif
-
-// not used?
-void D3D_DrawExplosion(int xOrigin, int yOrigin, int zOrigin, int size)
-{
-#if 0
-			if (NumVertices)
-			{
-			   WriteEndCodeToExecuteBuffer();
-		  	   UnlockExecuteBufferAndPrepareForUse();
-			   ExecuteBuffer();
-		  	   LockExecuteBuffer();
-			}
-
-			// Turn OFF texturing if it is on...
-			if (CurrTextureHandle != NULL)
-			{
-				OP_STATE_RENDER(1, ExecBufInstPtr);
-				STATE_DATA(D3DRENDERSTATE_TEXTUREHANDLE, NULL, ExecBufInstPtr);
-				CurrTextureHandle = NULL;
-			}
-
-			CheckTranslucencyModeIsCorrect(TRANSLUCENCY_GLOWING);
-
-
-		 	OP_STATE_RENDER(1, ExecBufInstPtr);
-		 	STATE_DATA(D3DRENDERSTATE_ZWRITEENABLE, FALSE, ExecBufInstPtr);
-	MeshXScale = 4096/16;
-	MeshZScale = 4096/16;
-
-	int i=0;
-	int x;
-	for (x=0; x<16; x++)
-	{
-		int z;
-		for(z=0; z<16; z++)
-		{
-			VECTORCH *point = &MeshVertex[i];
-			int offset;// = MUL_FIXED((FastRandom()&1023)-512,CloakingPhase&65535);//MUL_FIXED(255,GetSin((point->vx+point->vy+point->vz+CloakingPhase)&4095));
-			int sd;
-			{
-				int theta = ((z*2048)/15)&4095;
-				int phi = ((x*4096)/15)&4095;
-				if (theta==0) sd = 0;
-				else sd = phi+theta;
-				if (phi==0 || phi==2048) sd = 0;
-				else sd = phi+theta;
-
-				int outerRadius = MUL_FIXED(4000,size);
-
-				if (sd)
-				offset = MUL_FIXED((FastRandom()&511)-255,size);
-
-				offset=0;
-
-				point->vx = xOrigin+MUL_FIXED(outerRadius+offset,MUL_FIXED(GetSin(theta),GetCos(phi)));
-				point->vy = yOrigin+MUL_FIXED(outerRadius+offset,MUL_FIXED(GetSin(theta),GetSin(phi)));
-				point->vz = zOrigin+MUL_FIXED(outerRadius+offset,GetCos(theta));
-			}
-
-			if(offset<0) offset = -offset;
-			MeshVertexColour[i] = RGBALIGHT_MAKE(255,GetSin((sd+CloakingPhase)&4095)&255,0,32);
-
-			TranslatePointIntoViewspace(point);
-
-			/* is particle within normal view frustrum ? */
-			if(AvP.PlayerType==I_Alien)	/* wide frustrum */
-			{
-				if(( (-point->vx <= point->vz*2)
-		   			&&(point->vx <= point->vz*2)
-					&&(-point->vy <= point->vz*2)
-					&&(point->vy <= point->vz*2) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-			else
-			{
-				if(( (-point->vx <= point->vz)
-		   			&&(point->vx <= point->vz)
-					&&(-point->vy <= point->vz)
-					&&(point->vy <= point->vz) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-
-			i++;
-		}
-	}
-	textprint("drawing explosion\n");
-	if ((MeshVertexOutcode[0]&&MeshVertexOutcode[15]&&MeshVertexOutcode[240]&&MeshVertexOutcode[255]))
-	{
-		D3D_DrawWaterMesh_Unclipped();
-	}
-	else
-//	else if (MeshVertexOutcode[0]||MeshVertexOutcode[15]||MeshVertexOutcode[240]||MeshVertexOutcode[255])
-	{
-		D3D_DrawWaterMesh_Clipped();
-	}
-			OP_STATE_RENDER(1, ExecBufInstPtr);
-			STATE_DATA(D3DRENDERSTATE_ZWRITEENABLE, TRUE, ExecBufInstPtr);
-#endif
-}
-
-
 void DrawFrameRateBar(void)
 {
 	extern int NormalFrameTime;
-	#if 1
 	{
 		int width = DIV_FIXED(ScreenDescriptorBlock.SDB_Width/120,NormalFrameTime);
 		if (width>ScreenDescriptorBlock.SDB_Width) width=ScreenDescriptorBlock.SDB_Width;
@@ -3777,8 +2866,8 @@ void DrawFrameRateBar(void)
 		   	128 // unsigned char translucency
 		);
 	}
-	#endif
 }
+
 void D3D_DrawAlienRedBlipIndicatingJawAttack(void)
 {
 	r2rect rectangle
@@ -3852,7 +2941,6 @@ void D3D_DrawBackdrop(void)
 		}
 	}
 
-
 	/* if the player is outside the environment, clear the screen! */
 	{
 		extern MODULE *playerPherModule;
@@ -3874,155 +2962,7 @@ void D3D_DrawBackdrop(void)
 	}
 }
 
-// not used.
-#if 0
-void MakeNoiseTexture(void)
-{
-// 	return;
-	DDSURFACEDESC ddsd;
-	LPDIRECTDRAWSURFACE tempSurface;
-	LPDIRECT3DTEXTURE tempTexture;
-
-	LPDIRECTDRAWSURFACE destSurface;
-	LPDIRECT3DTEXTURE destTexture;
-
-
-	memcpy(&ddsd, &(d3d.TextureFormat[d3d.CurrentTextureFormat].ddsd), sizeof(ddsd));
-
-	ddsd.dwSize = sizeof(ddsd);
-
-	ddsd.dwFlags = (DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT);
-	ddsd.ddsCaps.dwCaps = (DDSCAPS_SYSTEMMEMORY|DDSCAPS_TEXTURE);
-
-	ddsd.dwHeight = 256;
-	ddsd.dwWidth = 256;
-
-	LastError = lpDD->CreateSurface(&ddsd, &tempSurface, NULL);
-	LOGDXERR(LastError);
-
-
-
-	LastError = tempSurface->QueryInterface(IID_IDirect3DTexture, (LPVOID*) &tempTexture);
-	LOGDXERR(LastError);
-
-	// Query destination surface for a texture interface.
-	memset(&ddsd, 0, sizeof(DDSURFACEDESC));
-	ddsd.dwSize = sizeof(DDSURFACEDESC);
-
-	LastError = tempSurface->GetSurfaceDesc(&ddsd);
-	LOGDXERR(LastError);
-
-	ddsd.dwFlags = (DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT);
-	ddsd.ddsCaps.dwCaps = (DDSCAPS_TEXTURE | DDSCAPS_ALLOCONLOAD );
-
-	LastError = lpDD->CreateSurface(&ddsd, &destSurface, NULL);
-	LOGDXERR(LastError);
-
-	/* KJL 11:59:21 09/02/98 - check for palettised modes */
-	{
-		int PalCaps;
-
-		if (ddsd.ddpfPixelFormat.dwFlags & DDPF_PALETTEINDEXED8)
-		{
-			PalCaps = (DDPCAPS_8BIT | DDPCAPS_ALLOW256);
-		}
-		#if 0
-		else if (ddsd.ddpfPixelFormat.dwFlags &	DDPF_PALETTEINDEXED4)
-		{
-			PalCaps = DDPCAPS_4BIT;
-		}
-		else
-		#endif
-		{
-			PalCaps = 0;
-		}
-
-		if (PalCaps)
-		{
-			LPDIRECTDRAWPALETTE destPalette = NULL;
-			PALETTEENTRY palette[256];
-			memset(palette, 0, sizeof(PALETTEENTRY) * 256);
-			for(int i=0;i<256;i++)
-			{
-				palette[i].peRed = i;
-				palette[i].peGreen = i;
-				palette[i].peBlue = i;
-			}
-
-			LastError = lpDD->CreatePalette(PalCaps, palette, &destPalette, NULL);
-			LOGDXERR(LastError);
-
-			LastError = destSurface->SetPalette(destPalette);
-			LastError = tempSurface->SetPalette(destPalette);
-			LOGDXERR(LastError);
-			{
-		   		memset(&ddsd, 0, sizeof(DDSURFACEDESC));
-				ddsd.dwSize = sizeof(DDSURFACEDESC);
-				LastError = tempSurface->Lock(NULL, &ddsd, 0, NULL);
-				LOGDXERR(LastError);
-
-
-				unsigned char *dst = (unsigned char *)ddsd.lpSurface;
-				LOCALASSERT(dst);
-			 	for(int i = 0; i < 256; i ++)
-			 	{
-		 			for(int j = 0; j < 256; j ++)
-			 		{
-						int c = FastRandom()&255;
-						*dst++ = (c);
-					}
-			 		/* move the pitch to width difference */
-			 		//dst += ddsd.lPitch - 256;
-			 	}
-
-				LastError = tempSurface->Unlock(NULL);
-				LOGDXERR(LastError);
-			}
-		}
-		else
-		{
-			{
-		   		memset(&ddsd, 0, sizeof(DDSURFACEDESC));
-				ddsd.dwSize = sizeof(DDSURFACEDESC);
-				LastError = tempSurface->Lock(NULL, &ddsd, 0, NULL);
-				LOGDXERR(LastError);
-
-
-				unsigned short *dst = (unsigned short *)ddsd.lpSurface;
-				LOCALASSERT(dst);
-			 	for(int i = 0; i < 256; i ++)
-			 	{
-					int density = FastRandom()&31;
-					{
-			 			for(int j = 0; j < 256; j ++)
-				 		{
-							int c = FastRandom()&31;
-							*dst++ = (c)+(c<<6)+(c<<11);
-				 		}
-					}
-			 		/* move the pitch to width difference */
-			 		//dst += ddsd.lPitch - 256;
-			 	}
-
-				LastError = tempSurface->Unlock(NULL);
-				LOGDXERR(LastError);
-			}
-		}
-	}
-
-	LastError = destSurface->QueryInterface(IID_IDirect3DTexture,(LPVOID*) &destTexture);
-	LOGDXERR(LastError);
-
-	LastError = destTexture->Load(tempTexture);
- 	LOGDXERR(LastError);
-
-	// Clean up surfaces etc
-//	RELEASE(SrcTexture);
-	LastError = destTexture->GetHandle(d3d.lpD3DDevice, &NoiseTextureHandle);
-	RELEASE(tempSurface);
-	RELEASE(tempTexture);
-}
-#endif
+// bjd - removed function void MakeNoiseTexture(void)
 
 void DrawNoiseOverlay(int t)
 {
@@ -4113,17 +3053,7 @@ void DrawScanlinesOverlay(float level)
    	f2i(t,64.0f+level*64.0f);
 
 	float size = 128.0f*(1.0f-level*0.8f);//*CameraZoomScale;
-/*
-	UnlockExecuteBufferAndPrepareForUse();
-	ExecuteBuffer();
-	LockExecuteBuffer();
 
-	if(D3DZFunc != D3DCMP_ALWAYS) 
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_ALWAYS);
-		D3DZFunc = D3DCMP_ALWAYS;
-	}
-*/
 	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(4, PredatorNumbersImageNumber, TRANSLUCENCY_NORMAL);
 
@@ -4173,396 +3103,15 @@ void DrawScanlinesOverlay(float level)
 
 	OUTPUT_TRIANGLE(0,1,3, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
-/*
-	UnlockExecuteBufferAndPrepareForUse();
-	ExecuteBuffer();
-	LockExecuteBuffer();
 
-	if (D3DZFunc != D3DCMP_LESSEQUAL) 
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_LESSEQUAL);
-		D3DZFunc = D3DCMP_LESSEQUAL;
-	}
-*/
-	if (level==1.0f) DrawNoiseOverlay(128);
+	if (level == 1.0f)
+		DrawNoiseOverlay(128);
 }
-
-//assuming not used
-void DrawPredatorVisionChangeOverlay(int time)
-{
-	OutputDebugString("\n DrawPredatorVisionChangeOverlay");
-#if 0 // bjd
-//	return;
-	{
-	if (time>ONE_FIXED)
-	for(int i=0; i<8; i++)
-	{
-//		D3DTLVERTEX *vertexPtr;// = &((LPD3DTLVERTEX)ExecuteBufferDataArea)[NumVertices];
-		int t = (time-ONE_FIXED-((i+3)&7)*2048)*2;
-		if (t<0) t = 0;
-
-		float rightU;
-		float leftU;
-		if (t>ONE_FIXED)
-		{
-			leftU = 0.0f;
-			rightU = 0.5f;
-		}
-		else if (t>ONE_FIXED/2)
-		{
-			leftU = 1.0f - ((float)(t))/65536.0f;
-			rightU = 1.0f - ((float)(t-ONE_FIXED/2))/65536.0f;
-		}
-		else
-		{
-			leftU = 1.0f - ((float)(t))/65536.0f;
-			rightU = 1.0f;
-		}
-
-		float topV = 44.0f/128.0f;
-		float bottomV = 119.0f/128.0f;
-		if (leftU<0) leftU=0;
-		PrintDebuggingText("%f %f\n",leftU,rightU);
-		int rightX = MUL_FIXED((Global_VDB_Ptr->VDB_ClipRight-Global_VDB_Ptr->VDB_ClipLeft),t)+Global_VDB_Ptr->VDB_ClipLeft;
-		if (rightX>Global_VDB_Ptr->VDB_ClipRight) rightX = Global_VDB_Ptr->VDB_ClipRight;
-		int y = i*60;
-		int h = 60;//+MUL_FIXED(10,time-ONE_FIXED);
-		int c = 255;
-
-	  	mainVertex->sx =	Global_VDB_Ptr->VDB_ClipLeft;
-	  	mainVertex->sy =	y;
-		mainVertex->sz = 0;
-		mainVertex->rhw = 1.0f;
-		mainVertex->tu = leftU;
-		mainVertex->tv = topV;
-		mainVertex->color = RGBALIGHT_MAKE(c,c,c,255);
-		mainVertex->specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex++;
-
-	  	mainVertex->sx =	rightX;
-	  	mainVertex->sy =	y;
-		mainVertex->sz = 0;
-		mainVertex->rhw = 1.0f;
-		mainVertex->tu = rightU;
-		mainVertex->tv = topV;
-		mainVertex->color = RGBALIGHT_MAKE(c,c,c,255);
-		mainVertex->specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex++;
-
-	  	mainVertex->sx =	rightX;
-	  	mainVertex->sy = y+h;
-		mainVertex->sz = 0;
-		mainVertex->rhw = 1.0f;
-		mainVertex->tu = rightU;
-		mainVertex->tv = bottomV;
-		mainVertex->color = RGBALIGHT_MAKE(c,c,c,255);
-		mainVertex->specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex++;
-
-	  	mainVertex->sx =	Global_VDB_Ptr->VDB_ClipLeft;
-	  	mainVertex->sy =	y+h;
-		mainVertex = 0;
-		mainVertex->rhw = 1.0f;
-		mainVertex->tu = leftU;
-		mainVertex->tv = bottomV;
-		mainVertex->color = RGBALIGHT_MAKE(255,255,255,255);
-		mainVertex->specular = RGBALIGHT_MAKE(0,0,0,255);
-
-		NumVertices+=4;
-		CheckTranslucencyModeIsCorrect(TRANSLUCENCY_COLOUR);
-		CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
-
-	 //	NoiseTextureHandle = 0;
-		D3DTEXTUREHANDLE TextureHandle = (D3DTEXTUREHANDLE)ImageHeaderArray[PredatorVisionChangeImageNumber].Direct3DTexture9;
-
-	    if (CurrTextureHandle != TextureHandle)
-		{
-	    	//OP_STATE_RENDER(1, ExecBufInstPtr);
-	        //STATE_DATA(D3DRENDERSTATE_TEXTUREHANDLE, TextureHandle, ExecBufInstPtr);
-			d3d.lpD3DDevice->SetTexture(0,TextureHandle);
-	        CurrTextureHandle = TextureHandle;
-		}
-/*
-		OP_TRIANGLE_LIST(2, ExecBufInstPtr);
-		OUTPUT_TRIANGLE(0,1,3, 4);
-		OUTPUT_TRIANGLE(1,2,3, 4);
-*/
-//		d3d.lpD3DDevice->SetVertexShader(D3DFVF_TLVERTEX);
-//		d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vertexPtr,0);
-
-		if (NumVertices > (MAX_VERTEXES-12))
-		{
-		   WriteEndCodeToExecuteBuffer();
-	  	   UnlockExecuteBufferAndPrepareForUse();
-		   ExecuteBuffer();
-	  	   LockExecuteBuffer();
-		}
-	}
-	}
-
-	{
-	if (time>ONE_FIXED+8192) time = ONE_FIXED+8192;
-	{
-//		D3DTLVERTEX *vertexPtr;// = &((LPD3DTLVERTEX)ExecuteBufferDataArea)[NumVertices];
-
-		float rightU = 1.0f;
-		float leftU = 1.0f - ((float)time)/65536.0f;
-		float v = 0;
-		if (leftU<0) leftU=0;
-		PrintDebuggingText("%f %f\n",leftU,rightU);
-		int rightX = MUL_FIXED((Global_VDB_Ptr->VDB_ClipRight-Global_VDB_Ptr->VDB_ClipLeft),time)+Global_VDB_Ptr->VDB_ClipLeft;
-		int c=128;
-
-		int size = 256/4;
-	  	mainVertex->sx =	Global_VDB_Ptr->VDB_ClipLeft;
-	  	mainVertex->sy =	Global_VDB_Ptr->VDB_ClipUp;
-		mainVertex->sz = 0.001;
-		mainVertex->rhw = 1.0f;
-		mainVertex->tu = leftU;
-		mainVertex->tv = v/256.0;
-		mainVertex->color = RGBALIGHT_MAKE(c,c,c,255);
-		mainVertex->specular = 0;
-		mainVertex++;
-
-	  	mainVertex->sx =	rightX;
-	  	mainVertex->sy =	Global_VDB_Ptr->VDB_ClipUp;
-		mainVertex->sz = 0.001;
-		mainVertex->rhw = 1.0f;
-		mainVertex->tu = rightU;
-		mainVertex->tv = v/256.0;
-		mainVertex->color = RGBALIGHT_MAKE(c,c,c,255);
-		mainVertex->specular = 0;
-		mainVertex++;
-
-	  	mainVertex->sx =	rightX;
-	  	mainVertex->sy =	Global_VDB_Ptr->VDB_ClipDown;
-		mainVertex->sz = 0.001;
-		mainVertex->rhw = 1.0f;
-		mainVertex->tu = rightU;
-		mainVertex->tv = (v+size)/256.0;
-		mainVertex->color = RGBALIGHT_MAKE(c,c,c,255);
-		mainVertex->specular = 0;
-		mainVertex++;
-
-	  	mainVertex->sx =	Global_VDB_Ptr->VDB_ClipLeft;
-	  	mainVertex->sy =	Global_VDB_Ptr->VDB_ClipDown;
-		mainVertex->sz = 0.001;
-		mainVertex->rhw = 1.0f;
-		mainVertex->tu = leftU;
-		mainVertex->tv = (v+size)/256.0;
-		mainVertex->color = RGBALIGHT_MAKE(c,c,c,255);
-		mainVertex->specular = 0;
-
-		NumVertices+=4;
-	}
-	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_OFF);
-	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_ON);
-
- //	NoiseTextureHandle = 0;
-	D3DTEXTUREHANDLE TextureHandle = (D3DTEXTUREHANDLE)ImageHeaderArray[PredatorVisionChangeImageNumber].Direct3DTexture9;
-
-    if (CurrTextureHandle != TextureHandle)
-	{
-    	//OP_STATE_RENDER(1, ExecBufInstPtr);
-        //STATE_DATA(D3DRENDERSTATE_TEXTUREHANDLE, TextureHandle, ExecBufInstPtr);
-		d3d.lpD3DDevice->SetTexture(0,TextureHandle);
-        CurrTextureHandle = TextureHandle;
-	}
-/*
-	OP_TRIANGLE_LIST(2, ExecBufInstPtr);
-	OUTPUT_TRIANGLE(0,1,3, 4);
-	OUTPUT_TRIANGLE(1,2,3, 4);
-*/
-//	d3d.lpD3DDevice->SetVertexShader(D3DFVF_TLVERTEX);
-//	d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vertexPtr,0);
-
-	if (NumVertices > (MAX_VERTEXES-12))
-	{
-	   WriteEndCodeToExecuteBuffer();
-  	   UnlockExecuteBufferAndPrepareForUse();
-	   ExecuteBuffer();
-  	   LockExecuteBuffer();
-	}
-	}
-#endif
-}
-#if 0
-#define OCTAVES 1
-float u[OCTAVES];
-float v[OCTAVES];
-float du[OCTAVES];
-float dv[OCTAVES];
-int setup=0;
-void DrawFBM(void)
-{
-	extern int CloudyImageNumber;
-
-//bjd	D3DTEXTUREHANDLE TextureHandle = (D3DTEXTUREHANDLE)ImageHeaderArray[CloudyImageNumber].D3DHandle;
-	D3DTEXTUREHANDLE TextureHandle = (D3DTEXTUREHANDLE)ImageHeaderArray[CloudyImageNumber].Direct3DTexture9;
-
-//	return;		   1
-	int i;
-	int size = 256;
-//	float u = FastRandom()&255;
-//	float v = FastRandom()&255;
-	int t =255;
-	if(!setup)
-	{
-		setup=1;
-		for(i=OCTAVES-1;i>=0;i--)
-		{
-			du[i] = ( (float)((FastRandom()&65535)-32768)*(i+1) )/16384.0;
-			dv[i] = ( (float)((FastRandom()&65535)-32768)*(i+1) )/16384.0;
-		}
-	}
-
-	float timeScale = ((float)NormalFrameTime)/65536.0;
-	for(i=0; i<OCTAVES; i++)
-	{
-		u[i]+=du[i]*timeScale;
-		v[i]+=dv[i]*timeScale;
-		#if 1
-		{
-			MATRIXCH mat = (Global_VDB_Ptr->VDB_Mat);
-			VECTORCH v[4]=
-			{
-				{-ONE_FIXED,-ONE_FIXED,ONE_FIXED},
-				{ ONE_FIXED,-ONE_FIXED,ONE_FIXED},
-				{ ONE_FIXED, 0,	ONE_FIXED},
-				{-ONE_FIXED, 0,	ONE_FIXED},
-			};
-			TransposeMatrixCH(&mat);
-			RotateVector(&v[0],&mat);
-			RotateVector(&v[1],&mat);
-			RotateVector(&v[2],&mat);
-			RotateVector(&v[3],&mat);
-			if (v[0].vy=0) v[0].vy=-1;
-			if (v[1].vy=0) v[1].vy=-1;
-			if (v[2].vy=0) v[2].vy=-1;
-			if (v[3].vy=0) v[3].vy=-1;
-			if (v[0].vy>0) v[0].vy=-v[0].vy;
-			if (v[1].vy>0) v[1].vy=-v[1].vy;
-			if (v[2].vy>0) v[2].vy=-v[2].vy;
-			if (v[3].vy>0) v[3].vy=-v[3].vy;
-
-			D3DTLVERTEX *vertexPtr = &((LPD3DTLVERTEX)ExecuteBufferDataArea)[NumVertices];
-
-			vertexPtr->sx =	Global_VDB_Ptr->VDB_ClipLeft;
-		  	vertexPtr->sy =	Global_VDB_Ptr->VDB_ClipUp;
-			vertexPtr->sz = 1;
-			vertexPtr->tu = -((float)v[0].vx)/((float)v[0].vy)/1.0;
-			vertexPtr->tv = -((float)v[0].vz)/((float)v[0].vy)/1.0;
-			vertexPtr->color = RGBALIGHT_MAKE(200,255,255,t);
-			vertexPtr->specular = RGBALIGHT_MAKE(0,0,0,255);
-			vertexPtr++;
-		  	vertexPtr->sx =	Global_VDB_Ptr->VDB_ClipRight;
-		  	vertexPtr->sy =	Global_VDB_Ptr->VDB_ClipUp;
-			vertexPtr->sz = 1;
-			vertexPtr->tu = -((float)v[1].vx)/((float)v[1].vy)/1.0;
-			vertexPtr->tv = -((float)v[1].vz)/((float)v[1].vy)/1.0;
-			vertexPtr->color = RGBALIGHT_MAKE(200,255,255,t);
-			vertexPtr->specular = RGBALIGHT_MAKE(0,0,0,255);
-			vertexPtr++;
-		  	vertexPtr->sx =	Global_VDB_Ptr->VDB_ClipRight;
-		  	vertexPtr->sy =	(Global_VDB_Ptr->VDB_ClipUp+Global_VDB_Ptr->VDB_ClipDown)/2;
-			vertexPtr->sz = 1;
-			vertexPtr->tu = -((float)v[2].vx)/((float)v[2].vy)/1.0;
-			vertexPtr->tv = -((float)v[2].vz)/((float)v[2].vy)/1.0;
-			vertexPtr->color = RGBALIGHT_MAKE(200,255,255,t);
-			vertexPtr->specular = RGBALIGHT_MAKE(0,0,0,255);
-			vertexPtr++;
-		  	vertexPtr->sx =	Global_VDB_Ptr->VDB_ClipLeft;
-		  	vertexPtr->sy =	(Global_VDB_Ptr->VDB_ClipUp+Global_VDB_Ptr->VDB_ClipDown)/2;
-			vertexPtr->sz = 1;
-			vertexPtr->tu = -((float)v[3].vx)/((float)v[3].vy)/1.0;
-			vertexPtr->tv = -((float)v[3].vz)/((float)v[3].vy)/1.0;
-			vertexPtr->color = RGBALIGHT_MAKE(200,255,255,t);
-			vertexPtr->specular = RGBALIGHT_MAKE(0,0,0,255);
-
-			NumVertices+=4;
-		}
-
-		#else
-		{
-			D3DTLVERTEX *vertexPtr = &((LPD3DTLVERTEX)ExecuteBufferDataArea)[NumVertices];
-
-			vertexPtr->sx =	Global_VDB_Ptr->VDB_ClipLeft;
-		  	vertexPtr->sy =	Global_VDB_Ptr->VDB_ClipUp;
-			vertexPtr->sz = 1;
-			vertexPtr->tu = u[i]/256.0;
-			vertexPtr->tv = v[i]/256.0;
-			vertexPtr->color = RGBALIGHT_MAKE(200,255,255,t);
-			vertexPtr->specular = RGBALIGHT_MAKE(0,0,0,255);
-			vertexPtr++;
-		  	vertexPtr->sx =	Global_VDB_Ptr->VDB_ClipRight;
-		  	vertexPtr->sy =	Global_VDB_Ptr->VDB_ClipUp;
-			vertexPtr->sz = 1;
-			vertexPtr->tu = (u[i]+size)/256.0;
-			vertexPtr->tv = v[i]/256.0;
-			vertexPtr->color = RGBALIGHT_MAKE(200,255,255,t);
-			vertexPtr->specular = RGBALIGHT_MAKE(0,0,0,255);
-			vertexPtr++;
-		  	vertexPtr->sx =	Global_VDB_Ptr->VDB_ClipRight;
-		  	vertexPtr->sy =	Global_VDB_Ptr->VDB_ClipDown;
-			vertexPtr->sz = 1;
-			vertexPtr->tu = (u[i]+size)/256.0;
-			vertexPtr->tv = (v[i]+size)/256.0;
-			vertexPtr->color = RGBALIGHT_MAKE(200,255,255,t);
-			vertexPtr->specular = RGBALIGHT_MAKE(0,0,0,255);
-			vertexPtr++;
-		  	vertexPtr->sx =	Global_VDB_Ptr->VDB_ClipLeft;
-		  	vertexPtr->sy =	Global_VDB_Ptr->VDB_ClipDown;
-			vertexPtr->sz = 1;
-			vertexPtr->tu = u[i]/256.0;
-			vertexPtr->tv = (v[i]+size)/256.0;
-			vertexPtr->color = RGBALIGHT_MAKE(200,255,255,t);
-			vertexPtr->specular = RGBALIGHT_MAKE(0,0,0,255);
-
-			NumVertices+=4;
-		}
-		#endif
-		size*=2;
-		t/=2;
-		CheckTranslucencyModeIsCorrect(TRANSLUCENCY_GLOWING);
-		CheckFilteringModeIsCorrect(FILTERING_BILINEAR_ON);
-
-	 //	NoiseTextureHandle = 0;
-	    if (CurrTextureHandle != TextureHandle)
-		{
-	    	OP_STATE_RENDER(1, ExecBufInstPtr);
-	        STATE_DATA(D3DRENDERSTATE_TEXTUREHANDLE, TextureHandle, ExecBufInstPtr);
-	        CurrTextureHandle = NoiseTextureHandle;
-		}
-	    if (D3DTexturePerspective != FALSE)
-		{
-			D3DTexturePerspective = FALSE;
-			OP_STATE_RENDER(1, ExecBufInstPtr);
-			STATE_DATA(D3DRENDERSTATE_TEXTUREPERSPECTIVE, FALSE, ExecBufInstPtr);
-		}
-
-
-		OP_TRIANGLE_LIST(2, ExecBufInstPtr);
-		OUTPUT_TRIANGLE(0,1,3, 4);
-		OUTPUT_TRIANGLE(1,2,3, 4);
-		if (NumVertices > (MaxVerticesInExecuteBuffer-12))
-		{
-		   WriteEndCodeToExecuteBuffer();
-	  	   UnlockExecuteBufferAndPrepareForUse();
-		   ExecuteBuffer();
-	  	   LockExecuteBuffer();
-		}
-	}
-
-}
-#endif
 
 void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
 {
-#if 1//FUNCTION_ON
 	int flags;
 	int texoffset;
-
-//	D3DTEXTUREHANDLE TextureHandle;
 
 	float ZNear;
 	float RecipW, RecipH;
@@ -4578,17 +3127,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 	// properly cleared this time...
 	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-//	TextureHandle = ImageHeaderArray[texoffset].Direct3DTexture9;
-
-    // Check for textures that have not loaded
-	// properly
-/*
-    if (TextureHandle == NULL)
-		return;
-*/
-
-//	#ifdef AVP_DEBUG_VERSION
-	if(ImageHeaderArray[texoffset].ImageWidth == 128)
+	if (ImageHeaderArray[texoffset].ImageWidth == 128)
 	{
 		RecipW = (1.0f /128.0f) / 65536.0f;
 	}
@@ -4597,7 +3136,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
 		RecipW = (1.0f / width) / 65536.0f;
 	}
-	if(ImageHeaderArray[texoffset].ImageHeight == 128)
+	if (ImageHeaderArray[texoffset].ImageHeight == 128)
 	{
 		RecipH = (1.0f / 128.0f) / 65536.0f;
 	}
@@ -4606,14 +3145,6 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 		float height = (float) ImageHeaderArray[texoffset].ImageHeight;
 		RecipH = (1.0f / height) / 65536.0f;
 	}
-//	#else
-//	RecipW = (1.0/65536.0)/128.0;
-//	RecipH = (1.0/65536.0)/128.0;
-//	#endif
-//	RecipW = (1.0/65536.0)/(float) ImageHeaderArray[texoffset].ImageWidth;
-//	RecipH = (1.0/65536.0)/(float) ImageHeaderArray[texoffset].ImageHeight;
-
-	/* OUTPUT VERTICES TO EXECUTE BUFFER */
 
 	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, RenderPolygon.TranslucencyMode);
@@ -4625,46 +3156,15 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 	  	float oneOverZ;
 	  	oneOverZ = (1.0f)/(vertices->Z);
 		float zvalue;
-		{
-			zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
-   //		zvalue /= 65536.0;
-   		   	zvalue = 1.0f - ZNear/zvalue;
-		}
 
-		{
-			int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
+		zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
+	   	zvalue = 1.0f - ZNear/zvalue;
 
-			#if 1
-			if (x<Global_VDB_Ptr->VDB_ClipLeft)
-			{
-				x=Global_VDB_Ptr->VDB_ClipLeft;
-			}
-			else if (x>Global_VDB_Ptr->VDB_ClipRight)
-			{
-				x=Global_VDB_Ptr->VDB_ClipRight;
-			}
-			#endif
-			mainVertex[vb].sx = (float)x;
-		}
-		{
-			int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
+		int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
+		mainVertex[vb].sx = (float)x;
 
-			#if 1
-			if (y<Global_VDB_Ptr->VDB_ClipUp)
-			{
-				y=Global_VDB_Ptr->VDB_ClipUp;
-			}
-			else if (y>Global_VDB_Ptr->VDB_ClipDown)
-			{
-				y=Global_VDB_Ptr->VDB_ClipDown;
-			}
-			#endif
-			mainVertex[vb].sy = (float)y;
-
-		}
-//			vertexPtr->tu = ((float)(vertices->U>>16)+0.5) * RecipW;
-//			vertexPtr->tv = ((float)(vertices->V>>16)+0.5) * RecipH;
-//			vertexPtr->rhw = oneOverZ;
+		int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
+		mainVertex[vb].sy = (float)y;
 
 		mainVertex[vb].sz = 1.0f;
 		mainVertex[vb].rhw = oneOverZ;
@@ -4682,299 +3182,12 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 	#endif
 
 	D3D_OutputTriangles();
-#endif
 }
-
-// not used
-void D3D_DrawFMVOnWater(int xOrigin, int yOrigin, int zOrigin)
-{
-#if 0
-	int colour;
-	switch (CurrentVisionMode)
-	{
-		default:
-		case VISION_MODE_NORMAL:
-		{
-			colour = RGBLIGHT_MAKE(128,128,128);
-			break;
-		}
-		case VISION_MODE_IMAGEINTENSIFIER:
-		{
-			colour = RGBLIGHT_MAKE(0,255,0);
-			break;
-		}
-		case VISION_MODE_PRED_THERMAL:
-		case VISION_MODE_PRED_SEEALIENS:
-		case VISION_MODE_PRED_SEEPREDTECH:
-		{
-			colour = RGBLIGHT_MAKE(128,0,128);
-		  	break;
-		}
-	}
-	int i=0;
-	int x;
-	for (x=0; x<16; x++)
-	{
-		int z;
-		for(z=0; z<16; z++)
-		{
-			VECTORCH *point = &MeshVertex[i];
-
-			point->vz = zOrigin + (z*MeshZScale)/15;
-			point->vz += (FastRandom()&31);
-
-			point->vx = (x*MeshXScale)/15;
-			point->vx -= MeshXScale/2;
-			point->vx = (point->vx * (32-z))/16 + (FastRandom()&31);
-			point->vx += xOrigin + MeshXScale/2;
-
-			int offset = EffectOfRipples(point);
-	 		point->vy = yOrigin+offset;
-
-
-			{
-				int alpha = 192-offset*4;
-				if (alpha>255) alpha = 255;
-				if (alpha<128) alpha = 128;
-				MeshVertexColour[i] = colour + (alpha<<24);
-			}
-
-			#if 1
-			TranslatePointIntoViewspace(point);
-			#else
-			point->vx -= Global_VDB_Ptr->VDB_World.vx;
-			point->vy -= Global_VDB_Ptr->VDB_World.vy;
-			point->vz -= Global_VDB_Ptr->VDB_World.vz;
-			MeshWorldVertex[i] = *point;
-			RotateVector(point,&(Global_VDB_Ptr->VDB_Mat));
-			point->vy = MUL_FIXED(point->vy,87381);
-
-			#endif
-			/* is particle within normal view frustrum ? */
-			if(AvP.PlayerType==I_Alien)	/* wide frustrum */
-			{
-				if(( (-point->vx <= point->vz*2)
-		   			&&(point->vx <= point->vz*2)
-					&&(-point->vy <= point->vz*2)
-					&&(point->vy <= point->vz*2) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-			else
-			{
-				if(( (-point->vx <= point->vz)
-		   			&&(point->vx <= point->vz)
-					&&(-point->vy <= point->vz)
-					&&(point->vy <= point->vz) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-
-			{
-				// u
-				MeshWorldVertex[i].vx = (x*4096)/15;
-				// v
-				MeshWorldVertex[i].vy = (z*2048)/20;
-
-			}
-		   	i++;
-		}
-	}
-
-	D3DTEXTUREHANDLE TextureHandle = FMVTextureHandle[0];
-	if (CurrTextureHandle != TextureHandle)
-	{
-		OP_STATE_RENDER(1, ExecBufInstPtr);
-		STATE_DATA(D3DRENDERSTATE_TEXTUREHANDLE, TextureHandle, ExecBufInstPtr);
-		CurrTextureHandle = TextureHandle;
-	}
-	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_GLOWING);
-	if (NumVertices)
-	{
-	   WriteEndCodeToExecuteBuffer();
-  	   UnlockExecuteBufferAndPrepareForUse();
-	   ExecuteBuffer();
-  	   LockExecuteBuffer();
-	}
-	OP_STATE_RENDER(1, ExecBufInstPtr);
-    STATE_DATA(D3DRENDERSTATE_ZWRITEENABLE, FALSE, ExecBufInstPtr);
-
-	if ((MeshVertexOutcode[0]&&MeshVertexOutcode[15]&&MeshVertexOutcode[240]&&MeshVertexOutcode[255]))
-	{
-		D3D_DrawMoltenMetalMesh_Unclipped();
-	}
-	else
-//	else if (MeshVertexOutcode[0]||MeshVertexOutcode[15]||MeshVertexOutcode[240]||MeshVertexOutcode[255])
-	{
-		D3D_DrawMoltenMetalMesh_Clipped();
-	}
-
-	OP_STATE_RENDER(1, ExecBufInstPtr);
-    STATE_DATA(D3DRENDERSTATE_ZWRITEENABLE, TRUE, ExecBufInstPtr);
-#endif
-}
-#if 0
-void D3D_DrawMoltenMetal(int xOrigin, int yOrigin, int zOrigin)
-{
-	int i=0;
-	int x;
-	for (x=0; x<16; x++)
-	{
-		int z;
-		for(z=0; z<16; z++)
-		{
-			VECTORCH *point = &MeshVertex[i];
-
-			point->vx = xOrigin+(x*MeshXScale)/15;
-			point->vz = zOrigin+(z*MeshZScale)/15;
-		 #if 0
-
-			int offset=0;
-
-		 	offset = MUL_FIXED(32,GetSin(  (point->vx+point->vz+CloakingPhase)&4095 ) );
-		 	offset += MUL_FIXED(16,GetSin(  (point->vx-point->vz*2+CloakingPhase/2)&4095 ) );
-			{
-				float dx=point->vx-22704;
-				float dz=point->vz+20652;
-				float a = dx*dx+dz*dz;
-				a=sqrt(a);
-
-				offset+= MUL_FIXED(200,GetSin( (((int)a-CloakingPhase)&4095)  ));
-			}
-		#endif
-		 #if 1
-			int offset=0;
-
-			/* basic noise ripples */
-		 	offset = MUL_FIXED(128,GetSin(  ((point->vx+point->vz)/16+CloakingPhase)&4095 ) );
-		 	offset += MUL_FIXED(64,GetSin(  ((point->vx-point->vz*2)/4+CloakingPhase/2)&4095 ) );
-		 	offset += MUL_FIXED(64,GetSin(  ((point->vx*5-point->vz)/32+CloakingPhase/5)&4095 ) );
-
-		#endif
-			if (offset>450) offset = 450;
-			if (offset<-1000) offset = -1000;
-			point->vy = yOrigin+offset;
-
-			{
-				int shade = 191+(offset+256)/8;
-				MeshVertexColour[i] = RGBLIGHT_MAKE(shade,shade,shade);
-			}
-
-			#if 1
-			TranslatePointIntoViewspace(point);
-			#else
-			point->vx -= Global_VDB_Ptr->VDB_World.vx;
-			point->vy -= Global_VDB_Ptr->VDB_World.vy;
-			point->vz -= Global_VDB_Ptr->VDB_World.vz;
-			MeshWorldVertex[i] = *point;
-			RotateVector(point,&(Global_VDB_Ptr->VDB_Mat));
-			point->vy = MUL_FIXED(point->vy,87381);
-
-			#endif
-			/* is particle within normal view frustrum ? */
-			if(AvP.PlayerType==I_Alien)	/* wide frustrum */
-			{
-				if(( (-point->vx <= point->vz*2)
-		   			&&(point->vx <= point->vz*2)
-					&&(-point->vy <= point->vz*2)
-					&&(point->vy <= point->vz*2) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-			else
-			{
-				if(( (-point->vx <= point->vz)
-		   			&&(point->vx <= point->vz)
-					&&(-point->vy <= point->vz)
-					&&(point->vy <= point->vz) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-
-			#if 0
-			{
-				// v
-				MeshWorldVertex[i].vy = (offset+256)*4;
-				// u
-				MeshWorldVertex[i].vx = ((MeshWorldVertex[i].vx)&4095);
-
-			}
-			#else
-			{
-				Normalise(&MeshWorldVertex[i]);
-				// v
-				int theta = (MeshWorldVertex[i].vy+offset);
-				if (theta<0) theta=0;
-				if (theta>ONE_FIXED) theta=ONE_FIXED;
-
-				// u
-				int arctan = (int)((atan2((double)MeshWorldVertex[i].vx,(double)MeshWorldVertex[i].vz)/ 6.28318530718))*4095;
-				MeshWorldVertex[i].vx = (arctan+offset)&4095;
-
-				MeshWorldVertex[i].vy = ArcCos(theta);
-
-			}
-			#endif
-
-
-			i++;
-		}
-	}
-
-	D3DTEXTUREHANDLE TextureHandle = (D3DTEXTUREHANDLE)ImageHeaderArray[StaticImageNumber].Direct3DTexture9;
-
-	if (CurrTextureHandle != TextureHandle)
-	{
-		CurrTextureHandle = TextureHandle;
-		d3d.lpD3DDevice->SetTexture(0,TextureHandle);
-	}
-//	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_OFF);
-	SetTranslucencyMode(TRANSLUCENCY_OFF);
-	if (NumVertices)
-	{
-	   WriteEndCodeToExecuteBuffer();
-  	   UnlockExecuteBufferAndPrepareForUse();
-	   ExecuteBuffer();
-  	   LockExecuteBuffer();
-	}
-	if ((MeshVertexOutcode[0]&&MeshVertexOutcode[15]&&MeshVertexOutcode[240]&&MeshVertexOutcode[255]))
-	{
-		D3D_DrawMoltenMetalMesh_Unclipped();
-	}
-	else
-//	else if (MeshVertexOutcode[0]||MeshVertexOutcode[15]||MeshVertexOutcode[240]||MeshVertexOutcode[255])
-	{
-		D3D_DrawMoltenMetalMesh_Clipped();
-	}
-}
-#endif
 
 void D3D_DrawMoltenMetalMesh_Unclipped(void)
 {
-#if 1//FUNCTION_ON
 	float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
 
-	/* OUTPUT VERTICES TO EXECUTE BUFFER */
 	VECTORCH *point = MeshVertex;
 	VECTORCH *pointWS = MeshWorldVertex;
 
@@ -4989,31 +3202,9 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 		int x = (point->vx*(Global_VDB_Ptr->VDB_ProjX+1))/point->vz+Global_VDB_Ptr->VDB_CentreX;
 		int y = (point->vy*(Global_VDB_Ptr->VDB_ProjY+1))/point->vz+Global_VDB_Ptr->VDB_CentreY;
 //			textprint("%d, %d\n",x,y);
-		{
-			if (x < Global_VDB_Ptr->VDB_ClipLeft)
-			{
-				x = Global_VDB_Ptr->VDB_ClipLeft;
-			}
-			else if (x>Global_VDB_Ptr->VDB_ClipRight)
-			{
-				x = Global_VDB_Ptr->VDB_ClipRight;
-			}
 
-			mainVertex[vb].sx = (float)x;
-		}
-		{
-			if (y < Global_VDB_Ptr->VDB_ClipUp)
-			{
-				y = Global_VDB_Ptr->VDB_ClipUp;
-			}
-			else if (y>Global_VDB_Ptr->VDB_ClipDown)
-			{
-				y = Global_VDB_Ptr->VDB_ClipDown;
-			}
-			mainVertex[vb].sy = (float)y;
-		}
-
-//		point->vz+=HeadUpDisplayZOffset;
+		mainVertex[vb].sx = (float)x;
+		mainVertex[vb].sy = (float)y;
 
 		int z = point->vz + HeadUpDisplayZOffset;
 		float rhw = 1.0f / (float)point->vz;
@@ -5021,8 +3212,8 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 
 	  	float oneOverZ = ((float)(point->vz)-ZNear)/(float)(point->vz);
 
-		mainVertex[vb].sz = zf;//oneOverZ;// - 0.1f;
-		mainVertex[vb].rhw = rhw;///1.0/point->vz;
+		mainVertex[vb].sz = zf;
+		mainVertex[vb].rhw = rhw;
 	   	mainVertex[vb].color = MeshVertexColour[i];
 		mainVertex[vb].specular = 0;
 
@@ -5036,17 +3227,6 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 
  //	textprint("numvertices %d\n",NumVertices);
 
-
-    /*
-     * Make sure that the triangle data (not OP) will be QWORD aligned
-     */
-/*
-	if (QWORD_ALIGNED(ExecBufInstPtr))
-    {
-        OP_NOP(ExecBufInstPtr);
-    }
-*/
-//  	OP_TRIANGLE_LIST(450, ExecBufInstPtr);
 	/* CONSTRUCT POLYS */
 	int count = 0;
 	{
@@ -5055,7 +3235,6 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 
 		for (x=0; x<15; x++)
 		{
-//			int y;
 			for(y=0; y<15; y++)
 			{
 				OUTPUT_TRIANGLE(0+x+(16*y),1+x+(16*y),16+x+(16*y), 256);
@@ -5064,233 +3243,7 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 			}
 		}
 	}
-
-	{
-//	   UnlockExecuteBufferAndPrepareForUse();
-//	   ExecuteBuffer();
-//	   LockExecuteBuffer();
-	}
-#endif
 }
-
-void D3D_DrawMoltenMetalMesh_Clipped(void)
-{
-	D3D_DrawMoltenMetalMesh_Unclipped();
-#if 0 // bjd
-	float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
-
-	int triangle_count = 0;
-
-	/* OUTPUT VERTICES TO EXECUTE BUFFER */
-	{
-//		D3DTLVERTEX *vertexPtr = new D3DTLVERTEX;
-		VECTORCH *point = MeshVertex;
-		VECTORCH *pointWS = MeshWorldVertex;
-
-//		int i;
-
-		CheckVertexBuffer(450, currentWaterTexture, TRANSLUCENCY_NORMAL, FILTERING_BILINEAR_OFF);
-
-		for (int i=0; i<256; i++)
-		{
-			{
-				int z = point->vz;
-				if (z<=0) z = 1;
-				int x = (point->vx*(Global_VDB_Ptr->VDB_ProjX+1))/z+Global_VDB_Ptr->VDB_CentreX;
-				int y = (point->vy*(Global_VDB_Ptr->VDB_ProjY+1))/z+Global_VDB_Ptr->VDB_CentreY;
-				#if 1
-				{
-					if (x<Global_VDB_Ptr->VDB_ClipLeft)
-					{
-						x=Global_VDB_Ptr->VDB_ClipLeft;
-					}
-					else if (x>Global_VDB_Ptr->VDB_ClipRight)
-					{
-						x=Global_VDB_Ptr->VDB_ClipRight;
-					}
-
-					mainVertex[i].sx = x;
-				}
-				{
-					if (y<Global_VDB_Ptr->VDB_ClipUp)
-					{
-						y=Global_VDB_Ptr->VDB_ClipUp;
-					}
-					else if (y>Global_VDB_Ptr->VDB_ClipDown)
-					{
-						y=Global_VDB_Ptr->VDB_ClipDown;
-					}
-					mainVertex[i].sy = y;
-				}
-				#else
-				mainVertex[i].sx=x;
-				mainVertex[i].sy=y;
-				#endif
-
-				mainVertex[i].tu = pointWS->vx*WaterUScale+(1.0f/256.0f);
-				mainVertex[i].tv = pointWS->vy*WaterVScale+(1.0f/256.0f);
-
-				z = point->vz + HeadUpDisplayZOffset;
-		  		float rhw = 1.0f / (float)point->vz;
-				float zf = 1.0f - 6.0f*ZNear/(float)z;
-
-//				point->vz+=HeadUpDisplayZOffset;
-//			  	float oneOverZ = ((float)(z)-ZNear)/(float)(z);
-				mainVertex[i].color = MeshVertexColour[i];
-				mainVertex[i].specular = 0;
-
-
-				mainVertex[i].sz = zf;//oneOverZ - 0.1f;
-				mainVertex[i].rhw = rhw;//1.0f/(float)z;
-
-			}
-			point++;
-
-			pointWS++;
-		}
-	}
-
-//	textprint("numvertices %d\n",NumVertices);
-	/* CONSTRUCT POLYS */
-	{
-//		OP_TRIANGLE_LIST(450, ExecBufInstPtr);
-//		int x;
-		for (int x=0; x<15; x++)
-		{
-//			int y;
-			for(int y=0; y<15; y++)
-			{
-				int p1 = 0+x+(16*y);
-				int p2 = 1+x+(16*y);
-				int p3 = 16+x+(16*y);
-				int p4 = 17+x+(16*y);
-
-				#if 0
-				if (MeshVertexOutcode[p1]&&MeshVertexOutcode[p2]&&MeshVertexOutcode[p3])
-				{
-					OP_TRIANGLE_LIST(1, ExecBufInstPtr);
-					OUTPUT_TRIANGLE(p1,p2,p3, 256);
-				}
-				if (MeshVertexOutcode[p2]&&MeshVertexOutcode[p3]&&MeshVertexOutcode[p4])
-				{
-					OP_TRIANGLE_LIST(1, ExecBufInstPtr);
-					OUTPUT_TRIANGLE(p2,p4,p3, 256);
-				}
-				#else
-				if (MeshVertexOutcode[p1]&&MeshVertexOutcode[p2]&&MeshVertexOutcode[p3]&&MeshVertexOutcode[p4])
-				{
-					OUTPUT_TRIANGLE(p1,p2,p3, 256);
-					OUTPUT_TRIANGLE(p2,p4,p3, 256);
-					triangle_count+=2;
-				}
-
-				#endif
-			}
-		}
-	}
-	#if 1
-	{
-	   WriteEndCodeToExecuteBuffer();
-  	   UnlockExecuteBufferAndPrepareForUse();
-	   ExecuteBuffer();
-	   LockExecuteBuffer();
-	}
-	#endif
-	#if 1
-	{
-//		OP_TRIANGLE_LIST(450, ExecBufInstPtr);
-		POLYHEADER fakeHeader;
-
-		fakeHeader.PolyFlags = 0;
-		fakeHeader.PolyColour = 0;
-		RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
-//		int x;
-		for (int x=0; x<15; x++)
-		{
-//			int y;
-			for(int y=0; y<15; y++)
-			{
-				int p[4];
-				p[0] = 0+x+(16*y);
-				p[1] = 1+x+(16*y);
-				p[2] = 17+x+(16*y);
-				p[3] = 16+x+(16*y);
-
-				if (!(MeshVertexOutcode[p[0]]&&MeshVertexOutcode[p[1]]&&MeshVertexOutcode[p[2]]&&MeshVertexOutcode[p[3]]))
-				{
-				   {
-//						int i;
-						for (int i=0; i<4; i++)
-						{
-							VerticesBuffer[i].X	= MeshVertex[p[i]].vx;
-							VerticesBuffer[i].Y	= MeshVertex[p[i]].vy - 0.1f;
-							VerticesBuffer[i].Z	= MeshVertex[p[i]].vz;
-							VerticesBuffer[i].U = MeshWorldVertex[p[i]].vx*(WaterUScale*128.0f*65536.0f);
-							VerticesBuffer[i].V = MeshWorldVertex[p[i]].vy*(WaterVScale*128.0f*65536.0f);
-
-							VerticesBuffer[i].A = (MeshVertexColour[p[i]]&0xff000000)>>24;
-							VerticesBuffer[i].R = (MeshVertexColour[p[i]]&0x00ff0000)>>16;
-							VerticesBuffer[i].G	= (MeshVertexColour[p[i]]&0x0000ff00)>>8;
-							VerticesBuffer[i].B = MeshVertexColour[p[i]]&0x000000ff;
-							VerticesBuffer[i].SpecularR = 0;
-							VerticesBuffer[i].SpecularG = 0;
-							VerticesBuffer[i].SpecularB = 0;
-						}
-						RenderPolygon.NumberOfVertices=4;
-					}
-					{
-						int outcode = QuadWithinFrustrum();
-
-						if (outcode)
-						{
-							GouraudTexturedPolygon_ClipWithZ();
-							if(RenderPolygon.NumberOfVertices<3) continue;
-							GouraudTexturedPolygon_ClipWithNegativeX();
-							if(RenderPolygon.NumberOfVertices<3) continue;
-							GouraudTexturedPolygon_ClipWithPositiveY();
-							if(RenderPolygon.NumberOfVertices<3) continue;
-							GouraudTexturedPolygon_ClipWithNegativeY();
-							if(RenderPolygon.NumberOfVertices<3) continue;
-							GouraudTexturedPolygon_ClipWithPositiveX();
-							if(RenderPolygon.NumberOfVertices<3) continue;
-					   //	D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
-					   		D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
-						}
-					}
-				}
-			}
-		}
-	}
-	#endif
-	#if 1
-	{
-	   WriteEndCodeToExecuteBuffer();
-	   UnlockExecuteBufferAndPrepareForUse();
-	   ExecuteBuffer();
-	   LockExecuteBuffer();
-	}
-	#endif
-	char buf[100];
-	sprintf(buf, "\n num tris: %d", triangle_count);
-	OutputDebugString(buf);
-#endif
-}
-
-void KillFMVTexture(void)
-{
-#if 0
-	int surface = NUMBER_OF_SMACK_SURFACES;
-
-	while(surface--)
-	{
-		RELEASE(SrcDDSurface[surface]);
-		RELEASE(SrcTexture[surface]);
-		RELEASE(DstDDSurface[surface]);
-		RELEASE(DstTexture[surface]);
-	}
-#endif
-}
-
 
 void ThisFramesRenderingHasBegun(void)
 {
@@ -5312,150 +3265,8 @@ void ThisFramesRenderingHasFinished(void)
 	LightBlockDeallocation();
 }
 
-void D3D_DrawWaterOctagonPatch(int xOrigin, int yOrigin, int zOrigin, int xOffset, int zOffset)
-{
-#if 1//FUNCTION_ON
-	float grad = (float)2.414213562373;
-	int i=0;
-	int x;
-	for (x=xOffset; x<16+xOffset; x++)
-	{
-		int z;
-		for(z=zOffset; z<16+zOffset; z++)
-		{
-			VECTORCH *point = &MeshVertex[i];
-
-		  	if (x>z)
-			{
-				float m,xs;
-				if (x!=0)
-				{
-					m = (float)(z)/(float)(x);
-					xs = grad/(grad+m);
-				}
-				else
-				{
-					xs = 0;
-				}
-				#if 1
-				f2i(point->vx , xs*x*MeshXScale);
-				f2i(point->vz , (grad-grad*xs)*x*MeshZScale);
-				#else
-				point->vx = xs*x*MeshXScale;
-				point->vz = (grad-grad*xs)*x*MeshZScale;
-				#endif
-			}
-			else
-			{
-				float m,xs;
-				if (z!=0)
-				{
-					m = (float)(x)/(float)(z);
-					xs = grad/(grad+m);
-				}
-				else
-				{
-					xs = 0;
-				}
-				#if 1
-				f2i(point->vz ,	xs*z*MeshZScale);
-				f2i(point->vx ,	(grad-grad*xs)*z*MeshXScale);
-				#else
-				point->vz =	xs*z*MeshZScale;
-				point->vx =	(grad-grad*xs)*z*MeshXScale;
-				#endif
-			}
-
-			point->vx += xOrigin;
-			point->vz += zOrigin;
-
-			int offset = EffectOfRipples(point);
-
-			point->vy = yOrigin+offset;
-
-			#if 0
-			MeshVertexColour[i] = LightSourceWaterPoint(point,offset);
-			#else
-			{
-				int alpha = 128-offset/4;
-		//		if (alpha>255) alpha = 255;
-		//		if (alpha<128) alpha = 128;
-				switch (CurrentVisionMode)
-				{
-					default:
-					case VISION_MODE_NORMAL:
-					{
-						MeshVertexColour[i] = RGBALIGHT_MAKE(10,51,28,alpha);
-						break;
-					}
-					case VISION_MODE_IMAGEINTENSIFIER:
-					{
-						MeshVertexColour[i] = RGBALIGHT_MAKE(0,51,0,alpha);
-						break;
-					}
-					case VISION_MODE_PRED_THERMAL:
-					case VISION_MODE_PRED_SEEALIENS:
-					case VISION_MODE_PRED_SEEPREDTECH:
-					{
-						MeshVertexColour[i] = RGBALIGHT_MAKE(0,0,28,alpha);
-					  	break;
-					}
-				}
-
-			}
-			#endif
-			TranslatePointIntoViewspace(point);
-			/* is particle within normal view frustrum ? */
-			if(AvP.PlayerType==I_Alien)	/* wide frustrum */
-			{
-				if(( (-point->vx <= point->vz*2)
-		   			&&(point->vx <= point->vz*2)
-					&&(-point->vy <= point->vz*2)
-					&&(point->vy <= point->vz*2) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-			else
-			{
-				if(( (-point->vx <= point->vz)
-		   			&&(point->vx <= point->vz)
-					&&(-point->vy <= point->vz)
-					&&(point->vy <= point->vz) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-
-			i++;
-		}
-	}
-
-	if ((MeshVertexOutcode[0]&&MeshVertexOutcode[15]&&MeshVertexOutcode[240]&&MeshVertexOutcode[255]))
-	{
-		D3D_DrawWaterMesh_Unclipped();
-	}
-	else
-//	else if (MeshVertexOutcode[0]||MeshVertexOutcode[15]||MeshVertexOutcode[240]||MeshVertexOutcode[255])
-	{
-		D3D_DrawWaterMesh_Clipped();
-	}
-
-#endif
-}
-
-
 extern void D3D_DrawSliderBar(int x, int y, int alpha)
 {
-#if 1//FUNCTION_ON
 	struct VertexTag quadVertices[4];
 	int sliderHeight = 11;
 	unsigned int colour = alpha>>8;
@@ -5577,14 +3388,11 @@ extern void D3D_DrawSliderBar(int x, int y, int alpha)
 			colour
 		);
 	}
-#endif
 }
 
 extern void D3D_DrawSlider(int x, int y, int alpha)
 {
-#if 1//FUNCTION_ON
 	// the little thingy that slides through the rectangle
-
 	struct VertexTag quadVertices[4];
 	int sliderHeight = 5;
 	unsigned int colour = alpha>>8;
@@ -5622,48 +3430,10 @@ extern void D3D_DrawSlider(int x, int y, int alpha)
 			colour
 		);
 	}
-#endif
 }
-
-#if 0
-void DrawFontTest(void)
-{
-//	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
-	SetFilteringMode(FILTERING_BILINEAR_OFF);
-
-	struct VertexTag quadVertices[4];
-
-	quadVertices[0].Y = 0;
-	quadVertices[1].Y = 0;
-	quadVertices[2].Y = 256;
-	quadVertices[3].Y = 256;
-
-	quadVertices[0].U = 0;
-	quadVertices[0].V = 0;
-	quadVertices[1].U = 256;
-	quadVertices[1].V = 0;
-	quadVertices[2].U = 256;
-	quadVertices[2].V = 256;
-	quadVertices[3].U = 0;
-	quadVertices[3].V = 256;
-
-	quadVertices[0].X = 0;
-	quadVertices[3].X = 0;
-	quadVertices[1].X = 256;
-	quadVertices[2].X = 256;
-
-	D3D_HUDQuad_Output
-	(
-		AAFontImageNumber,
-		quadVertices,
-		0xffffffff
-	);
-}
-#endif
 
 extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha)
 {
-#if 1//FUNCTION_ON
 	struct VertexTag quadVertices[4];
 	int sliderHeight = 11;
 	unsigned int colour = alpha>>8;
@@ -5887,7 +3657,6 @@ extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha)
 			colour
 		);
 	}
-#endif
 }
 
 extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale)
@@ -5896,7 +3665,7 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 
 //	CheckVertexBuffer(255, NO_TEXTURE, TRANSLUCENCY_OFF);
 
-	for (int i=0; i<255; )
+	for (int i = 0; i < 255; )
 	{
 		/* this'll do.. */
 		CheckVertexBuffer(/*1530*/4, NO_TEXTURE, TRANSLUCENCY_OFF);
@@ -5965,7 +3734,6 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 
 extern void D3D_FadeDownScreen(int brightness, int colour)
 {
-#if 1//FUNCTION_ON
 	int t = 255 - (brightness>>8);
 	if (t < 0) t = 0;
 
@@ -6021,13 +3789,6 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
 
 	OUTPUT_TRIANGLE(0,1,3, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
-
-#endif
-}
-
-extern void ClearZBufferWithPolygon(void)
-{
-	OutputDebugString(" ClearZBufferWithPolygon ");
 }
 
 extern void D3D_PlayerOnFireOverlay(void)
@@ -6407,15 +4168,8 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 				i++;
 			}
 		}
-   		if ((MeshVertexOutcode[0]&&MeshVertexOutcode[15]&&MeshVertexOutcode[240]&&MeshVertexOutcode[255]))
-		{
-			D3D_DrawMoltenMetalMesh_Unclipped();
-		   //	D3D_DrawWaterMesh_Unclipped();
-		}
-		else
-		{
-			D3D_DrawMoltenMetalMesh_Clipped();
-		}
+		
+		D3D_DrawMoltenMetalMesh_Unclipped();
 	}
 }
 
@@ -6714,7 +4468,6 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr,int x,int y,int colour)
 
 void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour)
 {
-#if 1//FUNCTION_ON
 	// white text only of marine HUD ammo, health numbers etc
 	if (stringPtr == NULL)
 		return;
@@ -6749,7 +4502,7 @@ void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour
 		{
 			int topLeftU = 1+((c-32)&15)*16;
 			int topLeftV = 1+((c-32)>>4)*16;
-			#if 1
+
 			quadVertices[0].U = topLeftU - 1;
 			quadVertices[0].V = topLeftV - 1;
 			quadVertices[1].U = topLeftU + HUD_FONT_WIDTH + 1;
@@ -6758,16 +4511,7 @@ void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour
 			quadVertices[2].V = topLeftV + HUD_FONT_HEIGHT + 1;
 			quadVertices[3].U = topLeftU - 1;
 			quadVertices[3].V = topLeftV + HUD_FONT_HEIGHT + 1;
-			#else
-			quadVertices[0].U = topLeftU ;
-			quadVertices[0].V = topLeftV ;
-			quadVertices[1].U = topLeftU + HUD_FONT_WIDTH ;
-			quadVertices[1].V = topLeftV ;
-			quadVertices[2].U = topLeftU + HUD_FONT_WIDTH ;
-			quadVertices[2].V = topLeftV + HUD_FONT_HEIGHT ;
-			quadVertices[3].U = topLeftU ;
-			quadVertices[3].V = topLeftV + HUD_FONT_HEIGHT ;
-			#endif
+
 			quadVertices[0].X = x - MUL_FIXED(HUDScaleFactor,1);
 			quadVertices[3].X = x - MUL_FIXED(HUDScaleFactor,1);
 			quadVertices[1].X = x + MUL_FIXED(HUDScaleFactor,HUD_FONT_WIDTH + 1);
@@ -6783,7 +4527,6 @@ void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour
 		x += MUL_FIXED(HUDScaleFactor,AAFontWidths[(unsigned char)c]);
 	}
 }
-#endif
 }
 
 extern "C"
@@ -6808,7 +4551,6 @@ extern void RenderStringCentred(char *stringPtr, int centreX, int y, int colour)
 
 extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, int colour)
 {
-#if 1//FUNCTION_ON
 	struct VertexTag quadVertices[4];
 	int y = bottomY;
 
@@ -6851,21 +4593,10 @@ extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, in
 		}
 	   	y -= AAFontWidths[(unsigned char)c];
 	}
-#endif
 }
 
 void DrawFadeQuad(int topX, int topY, int alpha) 
 {
-//	return;
-/*
-	// turn off texturing
-	LastError = d3d.lpD3DDevice->SetTexture(0,NULL);
-	currentTextureId = -1;
-
-	if(FAILED(LastError)) {
-		OutputDebugString("Couldn't turn off texture for DrawFadeQuad");
-	}
-*/
 	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
 
 	int height = ScreenDescriptorBlock.SDB_Height;
@@ -6925,15 +4656,6 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 
 	OUTPUT_TRIANGLE(0,1,2, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
-
-/*
-	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_NORMAL);
-
-	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
-	if(FAILED(LastError)) {
-		OutputDebugString(" draw DrawFadeQuad failed ");
-	}
-*/
 }
 
 /* more quad drawing functions than you can shake a stick at! */
@@ -7007,14 +4729,10 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_textu
 	}
 	currentTextureId = PROGRESS_TEX;
 
-//	int width = AvPMenuGfxStorage[image_num].Width;
-//	int height = AvPMenuGfxStorage[image_num].Height;
 	int width = original_width;
 	int height = original_height;
 
 	// new, power of 2 values
-//	int real_width = AvPMenuGfxStorage[image_num].newWidth;
-//	int real_height = AvPMenuGfxStorage[image_num].newHeight;
 	int real_width = new_width;
 	int real_height = new_height;
 
@@ -7063,12 +4781,7 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_textu
 
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 	ChangeFilteringMode(FILTERING_BILINEAR_ON);
-/*
-	if (D3DAlphaBlendEnable != FALSE) {
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-		D3DAlphaBlendEnable = FALSE;
-	}
-*/
+
 	d3d.lpD3DDevice->SetFVF (D3DFVF_TLVERTEX);
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
 	if (FAILED(LastError)) 
