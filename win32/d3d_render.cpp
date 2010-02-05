@@ -638,6 +638,8 @@ BOOL BeginD3DScene()
 					OutputDebugString("We have reset the device. recreating resources..\n");
 					CreateVolatileResources();
 
+					SetTransforms();
+
 					// re-enable XInput
 					XInputEnable( true );
 					break;

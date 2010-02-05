@@ -862,6 +862,8 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 	CreateVolatileResources();
 //	SetExecuteBufferDefaults();
 
+	SetTransforms();
+
 	ThisFramesRenderingHasBegun();
 
 	// set up projection matrix
@@ -1383,6 +1385,20 @@ BOOL InitialiseDirect3D()
 	// create vertex and index buffers
 	CreateVolatileResources();
 
+	SetTransforms();
+
+	Con_Init();
+	Net_Initialise();
+	Font_Init();
+
+	Con_AddCommand("dumptex", WriteMenuTextures);
+
+	Con_PrintMessage("Initialised Direct3D9 succesfully");
+	return TRUE;
+}
+
+void SetTransforms()
+{
 	// Setup orthographic projection matrix
 	int standardWidth = 640;
 	int wideScreenWidth = 852;
@@ -1400,7 +1416,7 @@ BOOL InitialiseDirect3D()
 	D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 
 	// set up projection matrix
-	D3DXMatrixPerspectiveFovLH( &matProjection, width / height, D3DX_PI / 2, 1.0f, 100.0f);
+	D3DXMatrixPerspectiveFovLH( &matProjection, ScreenDescriptorBlock.SDB_Width / ScreenDescriptorBlock.SDB_Width, D3DX_PI / 2, 1.0f, 100.0f);
 
 	// print projection matrix?
 	PrintD3DMatrix("Projection", matProjection);
@@ -1413,15 +1429,6 @@ BOOL InitialiseDirect3D()
 	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
 	d3d.lpD3DDevice->SetTransform( D3DTS_WORLD, &matIdentity );
 	d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matIdentity );
-
-	Con_Init();
-	Net_Initialise();
-	Font_Init();
-
-	Con_AddCommand("dumptex", WriteMenuTextures);
-
-	Con_PrintMessage("Initialised Direct3D9 succesfully");
-	return TRUE;
 }
 
 void FlipBuffers()

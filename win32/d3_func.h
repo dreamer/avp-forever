@@ -121,6 +121,7 @@ void CreateScreenShotImage();
 void DeRedTexture(D3DTEXTURE texture);
 D3DTEXTURE CheckAndLoadUserTexture(const char *fileName, int *width, int *height);
 D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool);
+void SetTransforms();
 
 void LoadConsoleFont();
 
