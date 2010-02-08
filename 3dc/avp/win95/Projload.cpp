@@ -3346,7 +3346,7 @@ static void MakeBackupFile(File_Chunk* fc)
 	strncpy(Name2,Name1,length);
 	strncpy(&Name1[length],"B0.rif",7);
 	strncpy(&Name2[length],"B1.rif",7);
-	
+
 	DeleteFile(Name1);
 	
 	for (int i=0;i<9;i++)
@@ -3416,14 +3416,12 @@ void save_preplaced_decals()
 				ad->Vertices[j].x=fd->Vertices[j].vx;
 				ad->Vertices[j].y=fd->Vertices[j].vy;
 				ad->Vertices[j].z=fd->Vertices[j].vz;
-
 			}
 
 			ad->UOffset=fd->UOffset;
 
 			ad->object_index=get_object_index_from_module_index(ob_list,fd->ModuleIndex-2);
 		}
-
 	}
 
 	if(!env_rif->fc->update_file())

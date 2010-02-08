@@ -2231,8 +2231,6 @@ extern int cosine[];
 extern int NumActiveBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
 extern int GlobalAmbience;
-extern unsigned char *ScreenBuffer;
-extern long BackBufferPitch;
 
 unsigned short FlameFunction(int x, int y);
 void InitRandomArrays(void);

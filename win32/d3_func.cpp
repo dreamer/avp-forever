@@ -1480,7 +1480,7 @@ void ReleaseAvPTexture(AVPTEXTURE *texture)
 	}
 }
 
-void ReleaseD3DTexture(D3DTEXTURE *d3dTexture) 
+void ReleaseD3DTexture(D3DTEXTURE *d3dTexture)
 {
 	// release d3d texture
 	SAFE_RELEASE(*d3dTexture);

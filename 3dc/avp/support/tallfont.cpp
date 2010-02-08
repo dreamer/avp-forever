@@ -43,11 +43,6 @@
 	extern "C"
 	{
 #endif
-
-		extern unsigned char *ScreenBuffer;
-		extern long BackBufferPitch;
-//		extern LPDIRECTDRAWSURFACE lpDDSBack;
-//		extern DDPIXELFORMAT DisplayPixelFormat;
 		extern int CloudTable[128][128];
 		extern int CloakingPhase;
 

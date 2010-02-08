@@ -14,7 +14,7 @@
 #define USE_LEVEL_MEMORY_POOL 1
 
 #if USE_LEVEL_MEMORY_POOL
-void* PoolAllocateMem(unsigned int amount);
+void* PoolAllocateMem(/*unsigned int*/size_t amount);
 void ClearMemoryPool();
 #else
 #define PoolAllocateMem AllocateMem

@@ -13,8 +13,6 @@ extern "C"{
 // extern DDPIXELFORMAT DisplayPixelFormat;
  extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
  extern int VideoModeTypeScreen;
- extern long BackBufferPitch;
- extern unsigned char *ScreenBuffer;
  extern unsigned char TestPalette[];
  extern unsigned char KeyboardInput[];
  extern unsigned char DebouncedKeyboardInput[];

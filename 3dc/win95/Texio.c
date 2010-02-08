@@ -32,9 +32,9 @@
 	extern SHAPEHEADER **mainshapelist;
 	extern (*ShapeLanguageFunctions[])(SHAPEINSTR *shapeinstrptr);
 	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-	extern unsigned char *ScreenBuffer;
 	extern char projectsubdirectory[];
 	extern int VideoModeType;
+	void ReleaseD3DTexture(D3DTEXTURE *d3dTexture);
 
 /*
 
