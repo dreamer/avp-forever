@@ -25,8 +25,9 @@
 #ifndef _onscreenKeyboard_h_
 #define _onscreenKeyboard_h_
 
-extern "C"
-{
+#ifdef __cplusplus
+	extern "C" {
+#endif
 
 struct KEYPRESS
 {
@@ -43,6 +44,9 @@ void Osk_MoveDown();
 void Osk_Activate();
 void Osk_Deactivate();
 KEYPRESS Osk_HandleKeypress();
-};
+
+#ifdef __cplusplus
+	}
+#endif
 
 #endif

@@ -6,7 +6,6 @@ extern "C"
 #include "inline.h"
 #include "module.h"
 #include "stratdef.h"
-
 #include "AvP_UserProfile.h"
 #include "language.h"
 #include "GammaControl.h"
@@ -54,17 +53,9 @@ extern void ExamineSavedUserProfiles(void)
 	// delete any existing profiles
 	EmptyUserProfilesList();
 	
-//	UserProfilesList.add_entry(profilePtr);
-//	SaveUserProfile(profilePtr);
-	if (LoadUserProfiles())
-	{
-	
-	}
-	else /* FALSE user profile found. We'll have to make one */
-	{
-	//	MakeNewUserProfile();
-	}
+	LoadUserProfiles();
 
+	// this creates the "New Profile" entry which allows you to make new profiles ingame
 	AVP_USER_PROFILE *profilePtr = new AVP_USER_PROFILE;
 	*profilePtr = DefaultUserProfile;
 
@@ -76,7 +67,6 @@ extern void ExamineSavedUserProfiles(void)
 	SetDefaultProfileOptions(profilePtr);
 
 	InsertProfileIntoList(profilePtr);
-
 }
 
 extern int NumberOfUserProfiles(void)
@@ -128,7 +118,8 @@ extern int SaveUserProfile(AVP_USER_PROFILE *profilePtr)
 
 	delete [] filename;
 
-	if(!file) return 0;
+	if (!file)
+		return 0;
 	
 	SaveSettingsToUserProfile(profilePtr);
 	
@@ -296,8 +287,6 @@ static int LoadUserProfiles(void)
 	return 1;
 }
 
-
-
 static void SetDefaultProfileOptions(AVP_USER_PROFILE *profilePtr)
 {
 	// set Gamma
@@ -323,14 +312,14 @@ static void SetDefaultProfileOptions(AVP_USER_PROFILE *profilePtr)
 	strcpy(MP_PlayerName, "DeadMeat");
 
 	SetToDefaultDetailLevels();
-	
-	{
-		int a,b;
 
-		for (a=0; a<I_MaxDifficulties; a++) {
-			for (b=0; b<AVP_ENVIRONMENT_END_OF_LIST; b++) {
-				profilePtr->PersonalBests[a][b]=DefaultLevelGameStats;
-			}
+	int a,b;
+
+	for (a=0; a<I_MaxDifficulties; a++) 
+	{
+		for (b=0; b<AVP_ENVIRONMENT_END_OF_LIST; b++) 
+		{
+			profilePtr->PersonalBests[a][b]=DefaultLevelGameStats;
 		}
 	}
 
@@ -350,13 +339,13 @@ extern void GetSettingsFromUserProfile(void)
 	ControlMethods = 				UserProfilePtr->ControlMethods;
 	JoystickControlMethods = 		UserProfilePtr->JoystickControlMethods;
 	MenuDetailLevelOptions = 		UserProfilePtr->DetailLevelSettings;
-	FmvSoundVolume =			UserProfilePtr->FmvSoundVolume;
+	FmvSoundVolume =				UserProfilePtr->FmvSoundVolume;
 	EffectsSoundVolume =			UserProfilePtr->EffectsSoundVolume;
 	CDPlayerVolume = 				UserProfilePtr->CDPlayerVolume;
 	MoviesAreActive =				UserProfilePtr->MoviesAreActive;
 	IntroOutroMoviesAreActive =		UserProfilePtr->IntroOutroMoviesAreActive;
 	AutoWeaponChangeOn = 			!UserProfilePtr->AutoWeaponChangeDisabled;
-   	strncpy(MP_PlayerName,UserProfilePtr->MultiplayerCallsign,15);
+   	strncpy(MP_PlayerName, UserProfilePtr->MultiplayerCallsign, 15);
 
 	SetDetailLevelsFromMenu();
 }
@@ -375,21 +364,23 @@ extern void SaveSettingsToUserProfile(AVP_USER_PROFILE *profilePtr)
 	profilePtr->ControlMethods =				ControlMethods;
 	profilePtr->JoystickControlMethods =		JoystickControlMethods;
 	profilePtr->DetailLevelSettings =			MenuDetailLevelOptions;
-	profilePtr->FmvSoundVolume =			FmvSoundVolume;	
+	profilePtr->FmvSoundVolume =				FmvSoundVolume;	
 	profilePtr->EffectsSoundVolume =			EffectsSoundVolume;
 	profilePtr->CDPlayerVolume = 				CDPlayerVolume;
 	profilePtr->MoviesAreActive =				MoviesAreActive;
 	profilePtr->IntroOutroMoviesAreActive =		IntroOutroMoviesAreActive;
-	profilePtr->AutoWeaponChangeDisabled=   !AutoWeaponChangeOn;
-   	strncpy(profilePtr->MultiplayerCallsign,MP_PlayerName,15);
+	profilePtr->AutoWeaponChangeDisabled =		!AutoWeaponChangeOn;
+   	strncpy(profilePtr->MultiplayerCallsign, MP_PlayerName, 15);
 }
 
 extern void FixCheatModesInUserProfile(AVP_USER_PROFILE *profilePtr)
 {
 	int a;
 
-	for (a=0; a<MAX_NUMBER_OF_CHEATMODES; a++) {
-		if (profilePtr->CheatMode[a]==2) {
+	for (a=0; a<MAX_NUMBER_OF_CHEATMODES; a++) 
+	{
+		if (profilePtr->CheatMode[a]==2)
+		{
 			profilePtr->CheatMode[a]=1;
 		}
 	}

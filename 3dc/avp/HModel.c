@@ -978,7 +978,7 @@ void New_Analyse_Keyframe_Data(HMODELCONTROLLER *controller,SECTION_DATA *this_s
 		if (this_section_data->My_Parent) {
 			LOGDXFMT(("Parent Position %d,%d,%d\n",this_section_data->My_Parent->World_Offset.vx,this_section_data->My_Parent->World_Offset.vy,this_section_data->My_Parent->World_Offset.vz));
 		} else {
-			LOGDXFMT(("FALSE parent.\n"));
+			LOGDXFMT(("No parent.\n"));
 		}
 		LOGDXFMT(("This Position %d,%d,%d\n",this_section_data->World_Offset.vx,this_section_data->World_Offset.vy,this_section_data->World_Offset.vz));
 		LOGDXFMT(("This Keyframe Position %d,%d,%d\n",input_frame->Offset.vx,input_frame->Offset.vy,input_frame->Offset.vz));
@@ -1054,7 +1054,7 @@ void New_Analyse_Keyframe_Data(HMODELCONTROLLER *controller,SECTION_DATA *this_s
 			if (this_section_data->My_Parent) {
 				LOGDXFMT(("Parent Position %d,%d,%d\n",this_section_data->My_Parent->World_Offset.vx,this_section_data->My_Parent->World_Offset.vy,this_section_data->My_Parent->World_Offset.vz));
 				} else {
-				LOGDXFMT(("FALSE parent.\n"));
+				LOGDXFMT(("No parent.\n"));
 			}
 			LOGDXFMT(("This Position %d,%d,%d\n",this_section_data->World_Offset.vx,this_section_data->World_Offset.vy,this_section_data->World_Offset.vz));
 			LOGDXFMT(("This Keyframe Position %d,%d,%d\n",frame_offset.vx,frame_offset.vy,frame_offset.vz));
@@ -1159,7 +1159,7 @@ void New_Analyse_Keyframe_Data(HMODELCONTROLLER *controller,SECTION_DATA *this_s
 		if (this_section_data->My_Parent) {
 			LOGDXFMT(("Parent Position %d,%d,%d\n",this_section_data->My_Parent->World_Offset.vx,this_section_data->My_Parent->World_Offset.vy,this_section_data->My_Parent->World_Offset.vz));
 		} else {
-			LOGDXFMT(("FALSE parent.\n"));
+			LOGDXFMT(("No parent.\n"));
 		}
 		LOGDXFMT(("This Position %d,%d,%d\n",this_section_data->World_Offset.vx,this_section_data->World_Offset.vy,this_section_data->World_Offset.vz));
 		LOGDXFMT(("This Keyframe Position %d,%d,%d\n",frame_offset.vx,frame_offset.vy,frame_offset.vz));
@@ -1192,8 +1192,7 @@ SHAPEHEADER *Get_Degraded_Shape(SHAPEHEADER *base_shape)
 	array_ptr=base_shape->shape_degradation_array;
 
 	{
-		//lodScale = (float)GlobalLevelOfDetail_Hierarchical*CameraZoomScale;
-		lodScale = GlobalLevelOfDetail_Hierarchical * (int)(CameraZoomScale);
+		lodScale = (float)GlobalLevelOfDetail_Hierarchical*CameraZoomScale;
 
 	}
 	/* Now walk array. */
@@ -1386,8 +1385,6 @@ void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_dat
 	if ((this_section_data->Shape!=NULL)&&((this_section_data->flags&section_data_notreal)==0)
 		&&(render)) {
 		/* Unreal things don't get plotted, either. */
-	
-		extern MATRIXCH IdentityMatrix;
 
 		DISPLAYBLOCK dummy_displayblock;
 		SHAPEHEADER *shape_to_use;
@@ -1487,7 +1484,7 @@ void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_dat
 
 			particle.Size = shape_to_use->shaperadius/8;
 			RenderParticle(&particle);
-			D3D_DecalSystem_End();		
+			D3D_DecalSystem_End();
 		}
 
 		RenderThisHierarchicalDisplayblock(&dummy_displayblock);						  
@@ -2109,10 +2106,8 @@ static void HMTimer_Kernel(HMODELCONTROLLER *controller) {
 
 }
 
-void DoHModel(HMODELCONTROLLER *controller, DISPLAYBLOCK *dptr) {
-
-	extern int NormalFrameTime;
-
+void DoHModel(HMODELCONTROLLER *controller, DISPLAYBLOCK *dptr) 
+{
 	GLOBALASSERT(controller);
 	GLOBALASSERT(dptr);
 
@@ -2236,10 +2231,8 @@ void DoHModelTimer_Recursion(HMODELCONTROLLER *controller,SECTION_DATA *this_sec
 
 }
 
-void DoHModelTimer(HMODELCONTROLLER *controller) {
-
-	extern int NormalFrameTime;
-
+void DoHModelTimer(HMODELCONTROLLER *controller) 
+{
 	/* Be VERY careful with this function - it can put the timer and the
 	position computations out of step.  Once you've called this, call NO
 	OTHER HMODEL FUNCTIONS on this model until the next frame! */
@@ -2255,7 +2248,7 @@ void DoHModelTimer(HMODELCONTROLLER *controller) {
 
 	HMTimer_Kernel(controller);
 
-	/* That handled the timer.  FALSE rendering this time. */
+	/* That handled the timer.  No rendering this time. */
 
 	DoHModelTimer_Recursion(controller,controller->section_data,controller->sequence_timer,controller->Sequence_Type,controller->Sub_Sequence);
 	
@@ -3687,7 +3680,7 @@ void Transmogrification_Recursion(STRATEGYBLOCK *sbPtr,HMODELCONTROLLER *control
 				}
 				
 			} else if (newsections) {
-				/* FALSE corresponding old section: create a new bit. */
+				/* No corresponding old section: create a new bit. */
 				SECTION_DATA *new_child;
 			
 				new_child=Create_New_Section(*new_child_list_ptr);
@@ -3717,7 +3710,7 @@ void Transmogrification_Recursion(STRATEGYBLOCK *sbPtr,HMODELCONTROLLER *control
 			if (corresponding_section!=NULL) {
 				/* Section also exists in new template.  Do nothing, it should already have been dealt with. */
 			} else {
-				/* FALSE corresponding new section: delete this branch. */
+				/* No corresponding new section: delete this branch. */
 				SECTION_DATA *superfluous_section;
 
 				superfluous_section=GetThisSectionData_FromChildrenOnly(this_section_data,(*old_child_list_ptr)->Section_Name);
@@ -3845,7 +3838,7 @@ void TrimToTemplate_Recursion(STRATEGYBLOCK *sbPtr,HMODELCONTROLLER *controller,
 					TrimToTemplate_Recursion(sbPtr,controller,child_section_data,corresponding_section,*old_child_list_ptr, frag);
 				}
 			} else {
-				/* FALSE corresponding new section: delete this branch. */
+				/* No corresponding new section: delete this branch. */
 				SECTION_DATA *superfluous_section;
 
 				superfluous_section=GetThisSectionData_FromChildrenOnly(this_section_data,(*old_child_list_ptr)->Section_Name);
@@ -3923,7 +3916,7 @@ int HModelSequence_Exists(HMODELCONTROLLER *controller,int sequence_type,int sub
 	}
 	
 	if (a==controller->Root_Section->num_sequences) {
-		/* FALSE such animal. */
+		/* No such animal. */
 		return(0);
 	} else {
 		return(1);
@@ -3950,7 +3943,7 @@ int HModelSequence_Exists_FromRoot(SECTION *root,int sequence_type,int sub_seque
 	}
 	
 	if (a==root->num_sequences) {
-		/* FALSE such animal. */
+		/* No such animal. */
 		return(0);
 	} else {
 		return(1);
@@ -4209,7 +4202,7 @@ SECTION *Get_Corresponding_Section_Recursive(SECTION *this_section,char *Name) {
 		}
 	}
 
-	/* FALSE luck. */
+	/* No luck. */
 	return(NULL);
 }
 
@@ -4499,7 +4492,7 @@ void Verify_Positions_Recursion(HMODELCONTROLLER *controller,SECTION_DATA *this_
 		if (callCode) {
 			LOGDXFMT(("Call code %s\n",callCode));
 		} else {
-			LOGDXFMT(("FALSE call code!\n"));
+			LOGDXFMT(("No call code!\n"));
 		}
 		if (Global_HModel_Sptr) {
 			LOGDXFMT(("Misplaced object is of type %d\n",Global_HModel_Sptr->I_SBtype));
@@ -4783,7 +4776,7 @@ static void EnsureChildrenAreInAscendingIDOrder(SECTION_DATA* section)
 		}
 		else
 		{
-			//FALSE problem with this section , go on to the next
+			//No problem with this section , go on to the next
 			child_section = child_section->Next_Sibling;
 		}
 	}
@@ -4940,7 +4933,7 @@ void LoadHierarchy(SAVE_BLOCK_HEADER* header,HMODELCONTROLLER* controller)
 	{
 		SAVE_BLOCK_HEADER* delta_header;
 
-		while(delta_header = GetNextBlockIfOfType(SaveBlock_HierarchyDelta))
+		while((delta_header = GetNextBlockIfOfType(SaveBlock_HierarchyDelta)))
 		{
 			LoadHierarchyDelta(delta_header,controller);
 		}

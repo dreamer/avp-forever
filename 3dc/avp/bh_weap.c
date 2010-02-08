@@ -77,6 +77,8 @@ STRATEGYBLOCK *PredDisc_GetNewTarget(PC_PRED_DISC_BEHAV_BLOCK *bptr,VECTORCH *di
 int ObjectIsOnScreen(DISPLAYBLOCK *object);
 void Frisbee_Hit_Environment(STRATEGYBLOCK *sbPtr,COLLISIONREPORT *reportPtr);
 void Crunch_Position_For_Players_Weapon(VECTORCH *position);
+static int SBForcesBounce(STRATEGYBLOCK *sbPtr);
+static int Reflect(VECTORCH *Incident, VECTORCH *Normal, EULER *Output);
 
 /*KJL****************************************************************************************
 *  										G L O B A L S 	            					    *
@@ -237,11 +239,10 @@ int FrisbeeSight_FrustrumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRAT
  		)) {
 		/* 90 horizontal, 90 vertical? */
 	#else
-	if ((fixed_offset.vx <0) && (
-		((fixed_offset.vy) < (-fixed_offset.vx))&&(fixed_offset.vy>=0))
- 		||((fixed_offset.vy<0)&&((-fixed_offset.vy) < (-fixed_offset.vx))
- 		)&&(
-		(fixed_offset.vz>0)
+	if (((fixed_offset.vx <0) && (
+		((fixed_offset.vy) < (-fixed_offset.vx))&&(fixed_offset.vy>=0)))
+ 		|| (((fixed_offset.vy<0)&&((-fixed_offset.vy) < (-fixed_offset.vx))
+ 		)&&((fixed_offset.vz>0))
  		)) {
 		/* 90 horizontal, 90 vertical? */
 	#endif
@@ -358,8 +359,6 @@ static STRATEGYBLOCK* InitialiseFrisbeeBehaviour_ForLoad() {
 	DISPLAYBLOCK *dispPtr;
 	DYNAMICSBLOCK *dynPtr;
   	FRISBEE_BEHAV_BLOCK *bblk;
-//	int a;
-	
 		
 	/* make displayblock with correct shape, etc */
 	dispPtr = MakeObject(I_BehaviourFrisbee,&zeroVect);
@@ -464,7 +463,6 @@ STRATEGYBLOCK* CreateFrisbeeKernel(VECTORCH *position, MATRIXCH *orient, int fro
 	/* Create HModel. */
 	{
 		SECTION *root_section;
-//		SECTION_DATA *local_disc;
 
 		root_section=GetNamedHierarchyFromLibrary("mdisk","Mdisk");
 				
@@ -784,7 +782,7 @@ extern void FrisbeeBehaviour(STRATEGYBLOCK *sbPtr)
 				}
 			}
 		} else {
-			//ReleasePrintDebuggingText("FALSE disc section found!\n");
+			//ReleasePrintDebuggingText("No disc section found!\n");
 		}
 		fbPtr->counter-=NormalFrameTime;
 	}
@@ -1323,6 +1321,7 @@ extern void ClusterGrenadeBehaviour(STRATEGYBLOCK *sbPtr)
 	}
 }
 
+#if 0
 static void InitialiseFragmentationGrenade(VECTORCH *originPtr)
 {
 	DISPLAYBLOCK *dispPtr;
@@ -1381,6 +1380,7 @@ static void InitialiseFragmentationGrenade(VECTORCH *originPtr)
 
 	if(AvP.Network != I_No_Network)	AddNetGameObjectID(dispPtr->ObStrategyBlock);
 }
+#endif
 extern void ProximityGrenadeBehaviour(STRATEGYBLOCK *sbPtr) 
 {
 	DYNAMICSBLOCK *dynPtr = sbPtr->DynPtr;
@@ -2534,7 +2534,7 @@ extern void SpeargunBoltBehaviour(STRATEGYBLOCK *sbPtr)
 	    	DestroyAnyStrategyBlock(sbPtr);	
 		}
 	} else {
-		/* FALSE collisions. */
+		/* No collisions. */
 		//dynPtr->IgnoreThePlayer=0;
 
 		bbPtr->counter -= NormalFrameTime;
@@ -3055,8 +3055,6 @@ static STRATEGYBLOCK* InitialiseDiscBehaviour_ForLoad() {
 	DISPLAYBLOCK *dispPtr;
 	DYNAMICSBLOCK *dynPtr;
   	PC_PRED_DISC_BEHAV_BLOCK *bblk;
-//	int a;
-	
 		
 	/* make displayblock with correct shape, etc */
 	dispPtr = MakeObject(I_BehaviourPredatorDisc_SeekTrack,&zeroVect);
@@ -3338,7 +3336,7 @@ static void GetGunDirection(VECTORCH *gunDirectionPtr, VECTORCH *positionPtr)
 	Normalise(gunDirectionPtr);
 }
 
-int Reflect(VECTORCH *Incident, VECTORCH *Normal, EULER *Output) {
+static int Reflect(VECTORCH *Incident, VECTORCH *Normal, EULER *Output) {
 	
 	int dot,retval;
 	VECTORCH outVec,normInc;
@@ -3367,7 +3365,7 @@ int Reflect(VECTORCH *Incident, VECTORCH *Normal, EULER *Output) {
 	return(retval);
 }
 
-int SBForcesBounce(STRATEGYBLOCK *sbPtr) {
+static int SBForcesBounce(STRATEGYBLOCK *sbPtr) {
 
 	if (sbPtr==NULL) {
 		return(0);
@@ -3507,7 +3505,7 @@ void Disc_Hit_Environment(STRATEGYBLOCK *sbPtr,COLLISIONREPORT *reportPtr) {
 	}
 
 	if (bbPtr->Target==NULL) {
-		/* FALSE target, so come home. */
+		/* No target, so come home. */
 		bbPtr->Target=Player->ObStrategyBlock;
 		COPY_NAME(bbPtr->Target_SBname,bbPtr->Target->SBname);
 	}
@@ -3533,7 +3531,7 @@ extern void DiscBehaviour_SeekTrack(STRATEGYBLOCK *sbPtr)
 
 	/* Update target */
 	if (bbPtr->Stuck) {
-		/* FALSE business doing anything. */
+		/* No business doing anything. */
 		#if 0
 		bbPtr->HModelController.Playing=0;
 		if (sbPtr->SBdptr) {
@@ -3633,7 +3631,7 @@ extern void DiscBehaviour_SeekTrack(STRATEGYBLOCK *sbPtr)
 			bbPtr->Target=NULL;
 		}
 	} else {
-		/* FALSE target.  Oh well... */
+		/* No target.  Oh well... */
 		textprint("Disc in free flight.\n");
 	}
 
@@ -5347,7 +5345,7 @@ extern void FrisbeeEnergyBoltBehaviour(STRATEGYBLOCK *sbPtr)
 			
 			switch (reportPtr->ObstacleSBPtr->I_SBtype)
 			{
-				/* FALSE specific location damage. */
+				/* No specific location damage. */
 				default:
 				{
 					CauseDamageToObject(reportPtr->ObstacleSBPtr,&bbPtr->damage, ONE_FIXED,NULL);

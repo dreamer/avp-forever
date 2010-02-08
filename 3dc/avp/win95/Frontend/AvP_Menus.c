@@ -343,12 +343,7 @@ int AvP_MainMenus(void)
 //		FlipBuffers();
 		FrameCounterHandler();
 		PlayMenuMusic();
-		#if 0
-		{
-			extern int EffectsSoundVolume;
-			SoundSys_ChangeVolume(EffectsSoundVolume);
-		}
-		#endif
+
 		SoundSys_Management();
 		UpdateGammaSettings();
 
@@ -1232,7 +1227,6 @@ static void RenderMenu(void)
 	AVPMENU_ELEMENT *elementPtr = AvPMenus.MenuElements;
 	int e;
 	int y;
-	
 	
 	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
 	{
@@ -4933,21 +4927,22 @@ static char MultiplayerBriefing[3][100];
 
 static void AddMultiplayerBriefingString(const char* text)
 {
-	int shortest = 0;
-	int shortest_length =1000;
+	size_t shortest = 0;
+	size_t shortest_length = 1000;
 	int i;
 
 	for(i=0;i<3;i++)
 	{
-		int length = strlen(MultiplayerBriefing[i]);
-		if(length<shortest_length)
+		size_t length = strlen(MultiplayerBriefing[i]);
+		if (length < shortest_length)
 		{
 			shortest = i;
 			shortest_length = length;
 		}
 	}
 
-	if(shortest_length + 3 + strlen(text)>=100) return;
+	if (shortest_length + 3 + strlen(text)>=100) 
+		return;
 
 	if(shortest_length>0)
 	{

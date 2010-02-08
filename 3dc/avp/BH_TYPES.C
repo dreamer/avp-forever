@@ -104,6 +104,8 @@ extern void HierarchicalFragmentBehaviour(STRATEGYBLOCK *sptr);
 extern void Xeno_Enter_PowerUp_State(STRATEGYBLOCK *sbPtr);
 extern void Xeno_Enter_PowerDown_State(STRATEGYBLOCK *sbPtr);
 
+extern void GrapplingHookBehaviour(STRATEGYBLOCK *sbPtr);
+
 /************************ FUNCTIONS TO FILL OUT SBS ***************/
 /* essentially these are the old entity type functions ******/
 
@@ -2385,9 +2387,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 								lfxbb->current_state = LFXS_Flicking;
 							}
 							break;
-							
-
-					
+						default: ;
 					}
 				}
 				

@@ -684,7 +684,7 @@ void MinimalNetCollectMessages(void)
 	int	res = NET_OK;
 	int fromID = 0;
 	int toID = 0;
-	int	msgSize = 0;
+	size_t msgSize = 0;
 		
 	/* collects messages until something other than NET_OK is returned (eg NET_NO_MESSAGES) */
 	if (!netGameData.skirmishMode)
@@ -712,7 +712,7 @@ void NetCollectMessages(void)
 	int res = NET_OK;
 	int	fromID = 0;
 	int	toID = 0;
-	int msgSize = 0;
+	size_t msgSize = 0;
 		
 	/* first off, some assertions about our game state */
 	LOCALASSERT(!((AvP.Network==I_Host)&&(netGameData.myGameState==NGS_Leaving)));	

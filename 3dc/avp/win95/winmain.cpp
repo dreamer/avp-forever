@@ -318,8 +318,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		strncpy(CommandLineIPAddressString,buffer,15);
 		CommandLineIPAddressString[15] = 0;
 	}
-	
-		
+
  	// Modified by Edmond for mplayer demo
  	#if MPLAYER_DEMO
  	if (!LobbiedGame)

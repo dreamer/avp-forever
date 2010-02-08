@@ -19,6 +19,8 @@ int Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messag
 int Net_InitLobbiedGame();
 void Net_ServiceNetwork();
 int Net_OpenSession(const char *hostName);
+int Net_JoinGame();
+int Net_ConnectToSession(int sessionNumber, char *playerName);
 
 extern int glpDP;
 extern int AvPNetID;

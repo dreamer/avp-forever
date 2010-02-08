@@ -17,7 +17,6 @@ extern void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image
 extern "C"
 {
 #include "AvP_Menus.h"
-extern long BackBufferPitch;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 
 char AAFontWidths[256];
@@ -696,93 +695,42 @@ extern int Hardware_RenderSmallMenuText_Coloured(char *textPtr, int x, int y, in
 	return x;
 }
 
-extern void Hardware_RenderKeyConfigRectangle(int alpha)
-{
-	extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha);
-	D3D_DrawRectangle(10,ScreenDescriptorBlock.SDB_Height/2+25-115,ScreenDescriptorBlock.SDB_Width-20,250,alpha);
-}
-
 extern void RenderKeyConfigRectangle(int alpha)
 {
-	extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha);
-//	D3D_DrawRectangle(10, /*ScreenDescriptorBlock.SDB_Height*/480/2+25-115, /*ScreenDescriptorBlock.SDB_Width*/640-20 ,250 ,alpha);
-//	D3D_DrawRectangle(10, (480 / 2) + 25-115, 640 - 10 , (480 / 2) + 25-115+250 ,alpha);
-	D3D_DrawRectangle(10,ScreenDescriptorBlock.SDB_Height/2+25-115,ScreenDescriptorBlock.SDB_Width-20,250,alpha);
+	unsigned int colour = alpha>>8;
 
+	if (colour > 255)
+		colour = 255;
 
-/*
+	colour = (colour<<24)+0xffffff;
+
+	int segHeight = 2;
+	int segWidth = 2;
+
+	int totalWidth = 620;
+	int totalHeight = 250;
+
 	int x = 10;
-	int y = ScreenDescriptorBlock.SDB_Height/2+25-115;
-	int width = ScreenDescriptorBlock.SDB_Width-20;
-	int height = 250;
-*/
-/*
-	char buf[100];
-	sprintf(buf, "\n x: %d y: %d width: %d height: %d", x,y,width,height);
-	OutputDebugString(buf);
-*/
-//	extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha);
-//	D3D_DrawRectangle(x, y, width, height, alpha);
+	int y = 150;
 
-#if 0
-	int x,y;
-	unsigned short c, *destPtr;
+	// top horizonal segment
+	DrawQuad(x, y, totalWidth, segHeight, -1, colour, TRANSLUCENCY_NORMAL);
 
-	c =	((MUL_FIXED(0xFF,alpha)>>3)<<11) |
-		((MUL_FIXED(0xFF,alpha)>>2)<<5 ) |
-		((MUL_FIXED(0xFF,alpha)>>3));
+	// draw left segment
+	DrawQuad(x, y + segHeight, segWidth, (totalHeight-segHeight*2), -1, colour, TRANSLUCENCY_NORMAL);
 
-	D3DInfo temp;
+	// right segment
+	DrawQuad(x + totalWidth - segWidth, y + segHeight, segWidth, (totalHeight-segHeight*2), -1, colour, TRANSLUCENCY_NORMAL);
 
-	temp = GetD3DInfo();
-
-	D3DSURFACE_DESC surface_desc;
-	temp.lpD3DBackSurface->GetDesc(&surface_desc);
-
-	D3DLOCKED_RECT lock = {0,NULL};
-
-	temp.lpD3DBackSurface->LockRect(&lock, NULL, 0); if (lock.pBits == NULL) return;
-		
-	y = y1;
-	{
-		destPtr = (unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch) + x1;
-
-		for (x=x1; x<=x2; x++)
-		{
-			*destPtr |= c;
-			destPtr++;
-		}
-	}
-
-	y = y2;
-	{
-		destPtr = (unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch) + x1;
-
-		for (x=x1; x<=x2; x++)
-		{
-			*destPtr |= c;
-			destPtr++;
-		}
-	}
-	{
-
-		for (y=y1+1; y<y2; y++)
-		{
-			destPtr = (unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch) + x1;
-			*destPtr |= c;
-		}
-	}
-	{
-
-		for (y=y1+1; y<y2; y++)
-		{
-			destPtr = (unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch) + x2;
-			*destPtr |= c;
-		}
-	}
-	temp.lpD3DBackSurface->UnlockRect();
-#endif
+	// bottom segment
+	DrawQuad(x, y + totalHeight-segHeight, totalWidth, segHeight, -1, colour, TRANSLUCENCY_NORMAL);
 }
+
+extern void Hardware_RenderKeyConfigRectangle(int alpha)
+{
+	RenderKeyConfigRectangle(alpha);
+}
+
 extern void Hardware_RenderHighlightRectangle(int x1, int y1, int x2, int y2, int r, int g, int b)
 {
 	D3D_Rectangle(x1, y1, x2, y2, r, g, b, 255);

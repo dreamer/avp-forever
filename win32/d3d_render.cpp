@@ -584,6 +584,8 @@ BOOL UnlockExecuteBufferAndPrepareForUse()
 	return TRUE;
 }
 
+int counter = 0;
+
 BOOL BeginD3DScene()
 {
 	// check for lost device
