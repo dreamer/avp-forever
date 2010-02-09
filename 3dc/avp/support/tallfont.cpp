@@ -25,12 +25,7 @@
 	#include "ourasert.h"
 
 /* Version settings ************************************************/
-	#define UseSoftwareAlphaRendering TRUE
-		// an option which assumes you're in a 16-bit graphic mode...
-
-		#if UseSoftwareAlphaRendering
-			#include "inline.h"
-		#endif
+	#include "inline.h"
 
 /* Constants *******************************************************/
 
@@ -46,18 +41,6 @@
 		extern int CloudTable[128][128];
 		extern int CloakingPhase;
 
-		#if 0
-		extern OurBool			DaveDebugOn;
-		extern FDIEXTENSIONTAG	FDIET_Dummy;
-		extern IFEXTENSIONTAG	IFET_Dummy;
-		extern FDIQUAD			FDIQuad_WholeScreen;
-		extern FDIPOS			FDIPos_Origin;
-		extern FDIPOS			FDIPos_ScreenCentre;
-		extern IFOBJECTLOCATION IFObjLoc_Origin;
-		extern UncompressedGlobalPlotAtomID UGPAID_StandardNull;
-		extern IFCOLOUR			IFColour_Dummy;
- 		extern IFVECTOR			IFVec_Zero;
-		#endif
 #ifdef __cplusplus
 	};
 #endif
@@ -152,53 +135,6 @@ IndexedFont_Proportional_Column :: RenderChar_Unclipped
 			destRect.bottom = R2Pos_Cursor . y + GetHeight();
 
 			RECT tempnonConstRECTSoThatItCanWorkWithMicrosoft = WindowsRectForOffset[ theOffset ];
-
-			#if 0
-			DDBLTFX tempDDBltFx;
-
-			memset(&tempDDBltFx,0,sizeof(DDBLTFX));
-			tempDDBltFx . dwSize = sizeof(DDBLTFX);
-
-			tempDDBltFx . ddckSrcColorkey . dwColorSpaceLowValue = 0;
-			tempDDBltFx . ddckSrcColorkey . dwColorSpaceHighValue = 0;
-			#endif
-#if 0 // bjd
-			HRESULT ddrval = lpDDSBack->Blt
-			(
-				&destRect,
-				image_ptr,
-				&tempnonConstRECTSoThatItCanWorkWithMicrosoft,
-				(
-					DDBLT_WAIT
-					#if 1
-					| DDBLT_KEYSRC
-					#else
-					| DDBLT_KEYSRCOVERRIDE
-					#endif
-
-					#if 0
-					| DDBLT_ALPHADEST
-					#endif
-				),
-				NULL
-				// &tempDDBltFx // LPDDBLTFX lpDDBltFx 
-			);
-#endif
-
-			#if 0
-				// or even:
-				ddrval = lpDDSBack->BltFast(x, y,
-						 lpDDDbgFont, &source, 
-						 DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-			#endif
-
-			#if 0
-			if(ddrval != DD_OK)
-			{
-				ReleaseDirect3D();
-				exit(0x666009);
-			}
-			#endif
 		}
 	}
 	#else
@@ -307,13 +243,13 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 	NumChars(0)
 {
 	{
-		unsigned nWidth,nHeight;
+		unsigned nWidth, nHeight;
 	
 		//see if graphic can be found in fast file
 		unsigned int fastFileLength;
 		void const * pFastFileData = ffreadbuf(Filename,&fastFileLength);
 		
-		if(pFastFileData)
+		if (pFastFileData)
 		{
 			//load from fast file
 			image_ptr = AwCreateTexture//Surface
@@ -322,14 +258,7 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 				pFastFileData,
 				fastFileLength,
 				(
-					#if 1
 					0
-					#else
-					AW_TLF_TRANSP
-					#endif
-					#if 0
-					| AW_TLF_CHROMAKEY
-					#endif
 				),
 				&nWidth,
 				&nHeight,
@@ -344,14 +273,7 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 				"sfXYB",
 				Filename,
 				(
-					#if 1
 					0
-					#else
-					AW_TLF_TRANSP
-					#endif
-					#if 0
-					| AW_TLF_CHROMAKEY
-					#endif
 				),
 				&nWidth,
 				&nHeight,
@@ -367,57 +289,7 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 
 	GLOBALASSERT(R2Size_OverallImage . w>0);
 	GLOBALASSERT(R2Size_OverallImage . h>0);
-//	ATIncludeSurface(image_ptr,hBackup);
 
-//	DDCOLORKEY tempDDColorKey;
-
-//    tempDDColorKey . dwColorSpaceLowValue = 0;
-//    tempDDColorKey . dwColorSpaceHighValue = 0;
-
-#if 0 // bjd
-	HRESULT hrSetColorKey = image_ptr -> SetColorKey
-	(
-		(
-			DDCKEY_SRCBLT
-		), // DWORD dwFlags,
-		&tempDDColorKey // LPDDCOLORKEY lpDDColorKey  
-	);
-
-	if ( hrSetColorKey != DD_OK )
-	{
-		LOGDXERR(hrSetColorKey);
-	}
-#endif	 
-#if 0
-
-typedef struct _DDCOLORKEY{ 
-    DWORD dwColorSpaceLowValue; 
-    DWORD dwColorSpaceHighValue; 
-} DDCOLORKEY,FAR* LPDDCOLORKEY; 
-
-	Parameters
-
-	dwFlags
-
-	Determines which color key is requested. 
-
-	DDCKEY_COLORSPACE 
-	Set if the structure contains a color space. Not set if the structure contains a single color key. 
-	DDCKEY_DESTBLT 
-	Set if the structure specifies a color key or color space to be used as a destination color key for blit operations. 
-	DDCKEY_DESTOVERLAY
-	Set if the structure specifies a color key or color space to be used as a destination color key for overlay operations. 
-	DDCKEY_SRCBLT
-	Set if the structure specifies a color key or color space to be used as a source color key for blit operations. 
-	DDCKEY_SRCOVERLAY
-	Set if the structure specifies a color key or color space to be used as a source color key for overlay operations. 
-	lpDDColorKey
-
-	Address of the DDCOLORKEY structure that contains the new color key values for the DirectDrawSurface object.
-#endif
-
-
-	
 	NumChars = (R2Size_OverallImage . h)/HeightPerChar_Val;
 
 	GLOBALASSERT( NumChars < MAX_CHARS_IN_TALLFONT );
@@ -443,37 +315,6 @@ IndexedFont_Proportional_Column :: UpdateWidths(void)
 
 	// Test: read the surface:
 	{
-#if 0 // bjd
-		// LPDIRECTDRAWSURFACE image_ptr;
-
-		DDSURFACEDESC tempDDSurfaceDesc;
-
-		tempDDSurfaceDesc . dwSize = sizeof(DDSURFACEDESC);
-
-
-		HRESULT hrLock = image_ptr -> Lock
-		(
-			NULL, // LPRECT lpDestRect,                
-			&tempDDSurfaceDesc, // LPDDSURFACEDESC lpDDSurfaceDesc,
-			(
-				DDLOCK_READONLY
-				| DDLOCK_SURFACEMEMORYPTR
-				#if 0
-				| DDLOCK_WAIT
-				| DDLOCK_NOSYSLOCK
-				#endif
-			), // DWORD dwFlags,
-			NULL // HANDLE hEvent
-		);
-
-		if ( hrLock != DD_OK )
-		{
-			// ought really to throw an exception
-
-			LOGDXERR(hrLock);
-			return;
-		}
-#endif
 		// Read the data...
 		{
 			for (int iOffset=0;iOffset<NumChars;iOffset++)
@@ -507,22 +348,6 @@ IndexedFont_Proportional_Column :: UpdateWidths(void)
 				SetWidth(iOffset,x+1);
 			}
 		}
-
-#if 0 // bjd
-		HRESULT hrUnlock = image_ptr -> Unlock
-		(
-			NULL // LPVOID lpSurfaceData  
-		);
-
-
-		if ( hrUnlock != DD_OK )
-		{
-			// ought really to throw an exception
-
-			LOGDXERR(hrUnlock);
-			return;
-		}
-#endif
 	}
 }
 
@@ -532,89 +357,10 @@ IndexedFont_Proportional_Column :: bAnyNonTransparentPixelsInColumn
 (
 	r2pos R2Pos_TopOfColumn,
 	int HeightOfColumn
-//	void* lpDDSurfaceDesc // bjd
-		// assumes you have a read lock
 )
 {
-#if 0 // bjd
-	GLOBALASSERT( lpDDSurfaceDesc );
-
-	void* pSurface = lpDDSurfaceDesc -> lpSurface;
-
-	int BytesPerPixel = lpDDSurfaceDesc -> ddpfPixelFormat . dwRGBBitCount /8;
-
-	int BytesPerRow =
-	(
-		#if 0
-		(BytesPerPixel * lpDDSurfaceDesc -> dwWidth)
-		+
-		#endif
-		lpDDSurfaceDesc -> lPitch
-	);
-
-	int y = R2Pos_TopOfColumn . y;
-
-	#if 0
-	db_logf1(("x=%i",R2Pos_TopOfColumn . x));
-	#endif
-
-	while ( y < R2Pos_TopOfColumn . y + HeightOfColumn )
-	{
-		int Pixel =
-		(
-			*(int*)
-			(
-				((char*)pSurface)
-				+
-				( y * BytesPerRow )
-				+
-				(R2Pos_TopOfColumn . x * BytesPerPixel)
-			)
-		);
-
-		int R = Pixel & lpDDSurfaceDesc -> ddpfPixelFormat . dwRBitMask;
-		int G = Pixel & lpDDSurfaceDesc -> ddpfPixelFormat . dwGBitMask;
-		int B = Pixel & lpDDSurfaceDesc -> ddpfPixelFormat . dwBBitMask;
-
-		#if 0
-		db_logf1(("y=%i",y));
-		db_logf1(("Pixel=0x%x",Pixel));
-		db_logf1(("R=0x%x",R));
-		db_logf1(("G=0x%x",G));
-		db_logf1(("B=0x%x",B));
-		#endif
-
-		#if 1
-		if (Pixel > 0 )
-		{
-			return TRUE;
-		}
-		#else
-		if
-		(
-			(R > 32)
-			||
-			(G > 32)
-			||
-			(B > 32)
-		)
-		{
-			// nasty hack to get it working...
-			return TRUE;
-		}
-		#endif
-
-		y++;
-	}
-
-	return FALSE;
-#endif
 	return TRUE;
 }
-
-
-
-
 
 
 /////////////////////////////////////////////////////////////////
@@ -655,7 +401,8 @@ IndexedFont_Kerned_Column :: RenderChar_Clipped
 		)
 		{
 			{
-#if 0 // bjd
+#if 0 // bjd - leaving here for cloud table reference..
+
 				// This code adapted from DrawGraphicWithAlphaChannel();
 				// it assumes you're in a 16-bit mode...
 				DDSURFACEDESC ddsdimage;
@@ -1025,7 +772,7 @@ IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
 		unsigned int fastFileLength;
 		void const * pFastFileData = ffreadbuf(Filename,&fastFileLength);
 		
-		if(pFastFileData)
+		if (pFastFileData)
 		{
 			//load from fast file
 			image_ptr = AwCreateTexture//Surface
@@ -1034,14 +781,7 @@ IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
 				pFastFileData,
 				fastFileLength,
 				(
-					#if 1
 					0
-					#else
-					AW_TLF_TRANSP
-					#endif
-					#if 0
-					| AW_TLF_CHROMAKEY
-					#endif
 				),
 				&nWidth,
 				&nHeight,
@@ -1056,14 +796,7 @@ IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
 				"sfXYB",
 				Filename,
 				(
-					#if 1
 					0
-					#else
-					AW_TLF_TRANSP
-					#endif
-					#if 0
-					| AW_TLF_CHROMAKEY
-					#endif
 				),
 				&nWidth,
 				&nHeight,
@@ -1079,59 +812,7 @@ IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
 	GLOBALASSERT(hBackup);
 
 	GLOBALASSERT(R2Size_OverallImage . w>0);
-	GLOBALASSERT(R2Size_OverallImage . h>0);
-//	ATIncludeSurface(image_ptr,hBackup);
-
-//	DDCOLORKEY tempDDColorKey;
-
-//    tempDDColorKey . dwColorSpaceLowValue = 0;
-//    tempDDColorKey . dwColorSpaceHighValue = 0;
-
-#if 0 // bjd
-	HRESULT hrSetColorKey = image_ptr -> SetColorKey
-	(
-		(
-			DDCKEY_SRCBLT
-		), // DWORD dwFlags,
-		&tempDDColorKey // LPDDCOLORKEY lpDDColorKey  
-	);
-
-	if ( hrSetColorKey != DD_OK )
-	{
-		LOGDXERR(hrSetColorKey);
-	}
-#endif	 
-
-#if 0
-
-typedef struct _DDCOLORKEY{ 
-    DWORD dwColorSpaceLowValue; 
-    DWORD dwColorSpaceHighValue; 
-} DDCOLORKEY,FAR* LPDDCOLORKEY; 
-
-	Parameters
-
-	dwFlags
-
-	Determines which color key is requested. 
-
-	DDCKEY_COLORSPACE 
-	Set if the structure contains a color space. Not set if the structure contains a single color key. 
-	DDCKEY_DESTBLT 
-	Set if the structure specifies a color key or color space to be used as a destination color key for blit operations. 
-	DDCKEY_DESTOVERLAY
-	Set if the structure specifies a color key or color space to be used as a destination color key for overlay operations. 
-	DDCKEY_SRCBLT
-	Set if the structure specifies a color key or color space to be used as a source color key for blit operations. 
-	DDCKEY_SRCOVERLAY
-	Set if the structure specifies a color key or color space to be used as a source color key for overlay operations. 
-	lpDDColorKey
-
-	Address of the DDCOLORKEY structure that contains the new color key values for the DirectDrawSurface object.
-#endif
-
-
-
+	GLOBALASSERT(R2Size_OverallImage . h>0); 
 	
 	NumChars = (R2Size_OverallImage . h)/HeightPerChar_Val;
 
@@ -1158,36 +839,6 @@ IndexedFont_Kerned_Column :: UpdateWidths(void)
 
 	// Test: read the surface:
 	{
-#if 0 // bjd
-		// LPDIRECTDRAWSURFACE image_ptr;
-
-		DDSURFACEDESC tempDDSurfaceDesc;
-
-		tempDDSurfaceDesc . dwSize = sizeof(DDSURFACEDESC);
-
-		HRESULT hrLock = image_ptr -> Lock
-		(
-			NULL, // LPRECT lpDestRect,                
-			&tempDDSurfaceDesc, // LPDDSURFACEDESC lpDDSurfaceDesc,
-			(
-				DDLOCK_READONLY
-				| DDLOCK_SURFACEMEMORYPTR
-				#if 0
-				| DDLOCK_WAIT
-				| DDLOCK_NOSYSLOCK
-				#endif
-			), // DWORD dwFlags,
-			NULL // HANDLE hEvent
-		);
-
-		if ( hrLock != DD_OK )
-		{
-			// ought really to throw an exception
-
-			LOGDXERR(hrLock);
-			return;
-		}
-#endif
 		// Read the data...
 		{
 			for (int iOffset=0;iOffset<NumChars;iOffset++)
@@ -1221,64 +872,12 @@ IndexedFont_Kerned_Column :: UpdateWidths(void)
 				SetWidth(iOffset,x+1);
 			}
 		}
-
-#if 0 // bjd
-		HRESULT hrUnlock = image_ptr -> Unlock
-		(
-			NULL // LPVOID lpSurfaceData  
-		);
-
-
-		if ( hrUnlock != DD_OK )
-		{
-			// ought really to throw an exception
-
-			LOGDXERR(hrUnlock);
-			return;
-		}
-#endif
 	}
 }
 
 void
 IndexedFont_Kerned_Column :: UpdateXIncs(void)
 {
-#if 0 // bjd
-	DDSURFACEDESC tempDDSurfaceDesc;
-
-	tempDDSurfaceDesc . dwSize = sizeof(DDSURFACEDESC);
-
-	HRESULT hrLock = image_ptr -> Lock
-	(
-		NULL, // LPRECT lpDestRect,                
-		&tempDDSurfaceDesc, // LPDDSURFACEDESC lpDDSurfaceDesc,
-		(
-			DDLOCK_READONLY
-			| DDLOCK_SURFACEMEMORYPTR
-			#if 0
-			| DDLOCK_WAIT
-			| DDLOCK_NOSYSLOCK
-			#endif
-		), // DWORD dwFlags,
-		NULL // HANDLE hEvent
-	);
-
-	if ( hrLock != DD_OK )
-	{
-		// ought really to throw an exception
-		LOGDXERR(hrLock);
-
-		// fill table up with sensible values:
-		for (int i=0;i<NumChars;i++)
-		{
-			for (int j=0;j<NumChars;j++)
-			{
-				XIncForOffset[i][j] = FullWidthForOffset[i];
-			}		
-		}
-		return;
-	}
-#endif
 	int RowsToProcess = NumChars*GetHeight();
 	int* minOpaqueX = new int[RowsToProcess];
 	int* maxOpaqueX = new int[RowsToProcess];
@@ -1345,32 +944,6 @@ IndexedFont_Kerned_Column :: UpdateXIncs(void)
 			}
 		}		
 	}
-/* bjd
-	HRESULT hrUnlock = image_ptr -> Unlock
-	(
-		NULL // LPVOID lpSurfaceData  
-	);
-
-
-	if ( hrUnlock != DD_OK )
-	{
-		// ought really to throw an exception
-		LOGDXERR(hrUnlock);
-
-		// fill table up with sensible values:
-		for (int i=0;i<NumChars;i++)
-		{
-			for (int j=0;j<NumChars;j++)
-			{
-				XIncForOffset[i][j] = FullWidthForOffset[i];
-			}		
-		}
-		return;
-	}
-
-	else
-	{
-*/
 		// Use the table of opaque extents:
 
 		for (int i=0;i<NumChars;i++)
@@ -1400,7 +973,6 @@ IndexedFont_Kerned_Column :: UpdateXIncs(void)
 		delete[] maxOpaqueX;
 		delete[] minOpaqueX;
 	}
-
 }
 
 
@@ -1410,77 +982,8 @@ IndexedFont_Kerned_Column :: bAnyNonTransparentPixelsInColumn
 (
 	r2pos R2Pos_TopOfColumn,
 	int HeightOfColumn
-//	void* lpDDSurfaceDesc // bjd
-		// assumes you have a read lock
 )
 {
-#if 0 // bjd
-	GLOBALASSERT( lpDDSurfaceDesc );
-
-	void* pSurface = lpDDSurfaceDesc -> lpSurface;
-
-	int BytesPerPixel = lpDDSurfaceDesc -> ddpfPixelFormat . dwRGBBitCount /8;
-
-	int BytesPerRow =
-	(
-		lpDDSurfaceDesc -> lPitch
-	);
-
-	int y = R2Pos_TopOfColumn . y;
-
-	#if 0
-	db_logf1(("x=%i",R2Pos_TopOfColumn . x));
-	#endif
-
-	while ( y < R2Pos_TopOfColumn . y + HeightOfColumn )
-	{
-		int Pixel =
-		(
-			*(int*)
-			(
-				((char*)pSurface)
-				+
-				( y * BytesPerRow )
-				+
-				(R2Pos_TopOfColumn . x * BytesPerPixel)
-			)
-		);
-
-		int R = Pixel & lpDDSurfaceDesc -> ddpfPixelFormat . dwRBitMask;
-		int G = Pixel & lpDDSurfaceDesc -> ddpfPixelFormat . dwGBitMask;
-		int B = Pixel & lpDDSurfaceDesc -> ddpfPixelFormat . dwBBitMask;
-
-		#if 0
-		db_logf1(("y=%i",y));
-		db_logf1(("Pixel=0x%x",Pixel));
-		db_logf1(("R=0x%x",R));
-		db_logf1(("G=0x%x",G));
-		db_logf1(("B=0x%x",B));
-		#endif
-
-		#if 1
-		if (Pixel > 0 )
-		{
-			return TRUE;
-		}
-		#else
-		if
-		(
-			(R > 32)
-			||
-			(G > 32)
-			||
-			(B > 32)
-		)
-		{
-			// nasty hack to get it working...
-			return TRUE;
-		}
-		#endif
-
-		y++;
-	}
-#endif
 	return FALSE;
 }
 
@@ -1511,7 +1014,6 @@ IndexedFont_Kerned_Column :: CalcXInc
 	// for each row, and maintaining what is the biggest "smallest X-inc"
 	// you have so far.  This will be the return value.
 
-	#if 1
 	{
 		int Biggest_MinXInc = 0;
 		for (int Row=0;Row<GetHeight();Row++)
@@ -1533,9 +1035,6 @@ IndexedFont_Kerned_Column :: CalcXInc
 
 		return Biggest_MinXInc;
 	}
-	#else
-	return FullWidthForOffset[currentOffset];
-	#endif
 }
 
 OurBool
@@ -1552,34 +1051,6 @@ IndexedFont_Kerned_Column :: OverlapOnRow
 	
 	#if 1
 	{
-#if 0 // bjd
-		DDSURFACEDESC tempDDSurfaceDesc;
-
-		tempDDSurfaceDesc . dwSize = sizeof(DDSURFACEDESC);
-
-		HRESULT hrLock = image_ptr -> Lock
-		(
-			NULL, // LPRECT lpDestRect,                
-			&tempDDSurfaceDesc, // LPDDSURFACEDESC lpDDSurfaceDesc,
-			(
-				DDLOCK_READONLY
-				| DDLOCK_SURFACEMEMORYPTR
-				#if 0
-				| DDLOCK_WAIT
-				| DDLOCK_NOSYSLOCK
-				#endif
-			), // DWORD dwFlags,
-			NULL // HANDLE hEvent
-		);
-
-		if ( hrLock != DD_OK )
-		{
-			// ought really to throw an exception
-
-			LOGDXERR(hrLock);
-			return TRUE;
-		}
-#endif
 		// Find right-most pixel in row of first character
 		int rightmostX;
 		int firstoffsetY = Row+(currentOffset*GetHeight());
@@ -1677,40 +1148,11 @@ IndexedFont_Kerned_Column :: GetSmallestXIncForRow
 OurBool
 IndexedFont_Kerned_Column :: bOpaque
 (
-	void* lpDDSurfaceDesc, // bjd
-		// assumes you have a read lock
 	int x,
 	int y
 		// must be in range
 )
 {
-#if 0 // bjd
-	GLOBALASSERT(lpDDSurfaceDesc);
-
-	void* pSurface = lpDDSurfaceDesc -> lpSurface;
-
-	GLOBALASSERT(pSurface);
-
-	int BytesPerPixel = lpDDSurfaceDesc -> ddpfPixelFormat . dwRGBBitCount /8;
-
-	int BytesPerRow =
-	(
-		lpDDSurfaceDesc -> lPitch
-	);
-
-	int Pixel =
-	(
-		*(int*)
-		(
-			((char*)pSurface)
-			+
-			( y * BytesPerRow )
-			+
-			( x * BytesPerPixel)
-		)
-	);
-	return (Pixel != 0 );
-#endif
 	return true;
 }
 

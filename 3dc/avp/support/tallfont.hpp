@@ -258,8 +258,6 @@
 		(
 			r2pos R2Pos_TopOfColumn,
 			int HeightOfColumn
-//			void* lpDDSurfaceDesc
-				// assumes you have a read lock
 		);
 
 		OurBool GetOffset
@@ -281,7 +279,6 @@
 			}
 
 			return TRUE;
-
 		}
 
 		int CalcXInc
@@ -311,8 +308,6 @@
 
 		OurBool bOpaque
 		(
-			void* lpDDSurfaceDesc, // bjd
-				// assumes you have a read lock
 			int x,
 			int y
 				// must be in range
