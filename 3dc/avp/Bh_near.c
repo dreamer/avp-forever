@@ -32,7 +32,6 @@
 #include "particle.h"
 #include "scream.h"
 
-extern int cosine[], sine[];
 extern int NormalFrameTime;
 extern int ShowHiveState;
 extern ACTIVESOUNDSAMPLE ActiveSounds[];
@@ -61,6 +60,8 @@ extern void Execute_Alien_Dying(STRATEGYBLOCK *sbPtr);
 
 int AlienIsAbleToClimb(STRATEGYBLOCK *sbPtr);
 int AlienIsAbleToStand(STRATEGYBLOCK *sbPtr);
+static int StartAlienPounce(STRATEGYBLOCK *sbPtr);
+static int AlienHasPathToTarget(STRATEGYBLOCK *sbPtr);
 
 extern ATTACK_DATA Alien_Special_Gripping_Attack;
 
@@ -570,7 +571,7 @@ static enum AMMO_ID GetAttackDamageType(STRATEGYBLOCK *sbPtr,int flagnum) {
 	switch (alienStatusPointer->Type) {
 		case AT_Standard:
 		default:
-			/* FALSE change. */
+			/* No change. */
 			return(alienStatusPointer->current_attack->flag_damage[flagnum]);
 			break;
 		case AT_Predalien:
@@ -612,6 +613,7 @@ static enum AMMO_ID GetAttackDamageType(STRATEGYBLOCK *sbPtr,int flagnum) {
 
 }
 
+#if 0
 static void DoAlienAIAttackSound(STRATEGYBLOCK *sbPtr) {
 
 	DYNAMICSBLOCK *dynPtr;
@@ -642,6 +644,7 @@ static void DoAlienAIAttackSound(STRATEGYBLOCK *sbPtr) {
 	#endif
 
 }
+#endif
 
 static void DoAlienAIRandomHiss(STRATEGYBLOCK *sbPtr) {
 
@@ -830,7 +833,6 @@ static void AlienNearState_Approach(STRATEGYBLOCK *sbPtr)
  	
  	/* target acquisition ? */
 	{
-		extern DISPLAYBLOCK *Player;
 		if(VectorDistance(&(alienStatusPointer->Target->DynPtr->Position),&(dynPtr->Position)) < ALIEN_CURVETOPLAYERDIST)		  
 		{
 			curveToPlayer = 1;	
@@ -1327,7 +1329,6 @@ static void AlienNearState_Wander(STRATEGYBLOCK *sbPtr)
 {
 	ALIEN_STATUS_BLOCK *alienStatusPointer;    
 	DYNAMICSBLOCK *dynPtr;
-	int approachingAirDuct = 0;
 	VECTORCH velocityDirection = {0,0,0};
 
 	LOCALASSERT(sbPtr);
@@ -1604,7 +1605,6 @@ static void AlienNearState_Retreat(STRATEGYBLOCK *sbPtr)
 {
 	ALIEN_STATUS_BLOCK *alienStatusPointer;    
 	DYNAMICSBLOCK *dynPtr;
-	int approachingAirDuct = 0;
 	VECTORCH velocityDirection = {0,0,0};
 
 	LOCALASSERT(sbPtr);
@@ -2140,7 +2140,7 @@ int AlienIsAwareOfTarget(STRATEGYBLOCK *sbPtr) {
 	return 1;
 }
 
-int AlienHasPathToTarget(STRATEGYBLOCK *sbPtr) {
+static int AlienHasPathToTarget(STRATEGYBLOCK *sbPtr) {
 
 	ALIEN_STATUS_BLOCK *alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 
@@ -2150,10 +2150,10 @@ int AlienHasPathToTarget(STRATEGYBLOCK *sbPtr) {
 	{
 		GLOBALASSERT(alienStatusPointer->Target->containingModule);
 		{
+			#if 0
 			PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 			LOCALASSERT(playerStatusPtr);
 
-			#if 0
 			if((playerStatusPtr->cloakOn==1)&&(playerStatusPtr->cloakPositionGivenAway==0)) {
 				return 0;
 			}
@@ -2551,7 +2551,7 @@ static int CheckJumpingAbility(STRATEGYBLOCK *sbPtr) {
 	LOCALASSERT(alienStatusPointer);
 
 	if (alienStatusPointer->JumpDetected==0) {
-		/* FALSE jump sequence.  Always a bad start. */
+		/* No jump sequence.  Always a bad start. */
 		return(0);
 	}
 
@@ -2991,7 +2991,7 @@ static int StartAlienTaunt(STRATEGYBLOCK *sbPtr) {
 			}
 			return(1);
 		} else {
-			/* FALSE sequence - can't do it. */
+			/* No sequence - can't do it. */
 			return(0);
 		}		
 	}

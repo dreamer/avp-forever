@@ -467,7 +467,7 @@ int PlatStartSoundSys()
 	XA2Listener.OrientFront.z = 1.0f;
 
 	XA2Listener.OrientTop.x = 0.0f;
-	XA2Listener.OrientTop.y = 1.0f;//-1.0f; bjd - check
+	XA2Listener.OrientTop.y = 1.0f;
 	XA2Listener.OrientTop.z = 0.0f;
 
 	XA2Listener.Velocity.x = 0.0f;
@@ -817,25 +817,17 @@ int PlatChangeSoundPitch(int activeIndex, int pitch)
 
 	frequency = frequency / GameSounds[gameSoundIndex].dsFrequency;
 
-	ActiveSounds[activeIndex].pSourceVoice->SetFrequencyRatio(frequency);
-
-	ActiveSounds[activeIndex].pitch = pitch;
-
-//	sprintf(buf, "frequency: %d xaudio2 value: %f\n", frequency, XAudio2SemitonesToFrequencyRatio(frequency));
-//	OutputDebugString(buf);
-
-/*
-	ActiveSounds[activeIndex].pitch = pitch;
-	LastError = IDirectSoundBuffer_SetFrequency(ActiveSounds[activeIndex].dsBufferP, frequency);
+	LastError = ActiveSounds[activeIndex].pSourceVoice->SetFrequencyRatio(frequency);
 	if (FAILED(LastError))
 	{
-		return SOUND_PLATFORMERROR;
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
-	else
-	{
-		return 1;
-	}
-*/
+
+	ActiveSounds[activeIndex].pitch = pitch;
+
+	sprintf(buf, "frequency we got: %f, xaudio2 XAudio2SemitonesToFrequencyRatio: %f\n", frequency, (pitch));
+	OutputDebugString(buf);
+
 	return 1;
 }
 
@@ -1101,39 +1093,30 @@ void InitialiseBaseFrequency(SOUNDINDEX soundNum)
 	if (GameSounds[soundNum].pitch > PITCH_MAXPLAT) GameSounds[soundNum].pitch = PITCH_MAXPLAT;
 	if (GameSounds[soundNum].pitch < PITCH_MINPLAT) GameSounds[soundNum].pitch = PITCH_MINPLAT;
 
-#if 0 // bjd - FIXME
-	/* get and set the loaded frequency */
-	hres = IDirectSoundBuffer_GetFrequency(GameSounds[soundNum].dsBufferP,(LPDWORD)&frequency);
-	if(hres!=DS_OK)
-	{
-		/* error */
-		LOCALASSERT(1==0);
-		PlatEndGameSound(soundNum);
-		GameSounds[soundNum] = BlankGameSound;
-		return;
-	}
-#endif
-//	GameSounds[soundNum].dsFrequency = frequency;
+	// get the frequency
+	frequency = GameSounds[soundNum].dsFrequency;
 	
 	/* if the pitch is default, just return at this point */
 	if (GameSounds[soundNum].pitch == PITCH_DEFAULTPLAT) 
 		return;
 
+	float tempF;
+	GameSounds[soundNum].pSourceVoice->GetFrequencyRatio(&tempF);
+	sprintf(buf, "frequency ratio: %f\n", tempF);
+	OutputDebugString(buf);
+
 	/* otherwise, we have to set a new frequency, for our non-default pitch,
 	taking the current frequency as corresponding to the default pitch */
 	frequency = ToneToFrequency(GameSounds[soundNum].dsFrequency, PITCH_DEFAULTPLAT, GameSounds[soundNum].pitch);
-	
-#if 0 // bjd - FIXME
-	hres = IDirectSoundBuffer_SetFrequency(GameSounds[soundNum].dsBufferP,(DWORD)frequency);
-	if(hres!=DS_OK)
+
+	// set it?
+	LastError = GameSounds[soundNum].pSourceVoice->SetFrequencyRatio((float)GameSounds[soundNum].dsFrequency / frequency);
+	if (FAILED(LastError))
 	{
-		/* error */
-		LOCALASSERT(1==0);
-		PlatEndGameSound(soundNum);
-		GameSounds[soundNum] = BlankGameSound;
-		return;
+		LogDxError(LastError, __LINE__, __FILE__);
 	}
-#endif
+
+	// store it
 	GameSounds[soundNum].dsFrequency = frequency;
 }
 
@@ -1968,26 +1951,26 @@ int PlatDontUse3DSoundHW()
 
 void UpdateSoundFrequencies(void)
 {
-#if 0
 	extern int SoundSwitchedOn;
 	extern int TimeScale;
 	int i;
 
-	if(!SoundSwitchedOn) return;
+	if (!SoundSwitchedOn) 
+		return;
 
-	for(i=0;i<SOUND_MAXACTIVE;i++)
+	for(i = 0; i < SOUND_MAXACTIVE; i++)
 	{
 		int gameIndex = ActiveSounds[i].soundIndex;
 
-		if (gameIndex==SID_NOSOUND) continue;
+		if (gameIndex == SID_NOSOUND) 
+			continue;
 
-		IDirectSoundBuffer_SetFrequency(ActiveSounds[i].dsBufferP,MUL_FIXED(GameSounds[gameIndex].dsFrequency,TimeScale));
-		if(ActiveSounds[i].pitch != GameSounds[gameIndex].pitch)
+//		IDirectSoundBuffer_SetFrequency(ActiveSounds[i].dsBufferP,MUL_FIXED(GameSounds[gameIndex].dsFrequency,TimeScale));
+		if (ActiveSounds[i].pitch != GameSounds[gameIndex].pitch)
 		{
-			PlatChangeSoundPitch(i,ActiveSounds[i].pitch);
+			PlatChangeSoundPitch(i, ActiveSounds[i].pitch);
 		}
 	}
-#endif
 }
 
 } // extern "C"

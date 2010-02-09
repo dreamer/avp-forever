@@ -456,7 +456,7 @@ void PlayerPheromoneSystem(void)
 						unsigned int prop=DIV_FIXED(PherAls_WriteBuf[playerPherModule->m_aimodule->m_index],AlienPheromoneScale);
 						textprint("Alien readable pheromones in Player Module: %d\n",prop);
 					}
-					/* FALSE scale for 'marine' pheromones, the player will never see it. */
+					/* No scale for 'marine' pheromones, the player will never see it. */
 					#endif
 				}
 			}

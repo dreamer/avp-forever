@@ -27,8 +27,6 @@ extern void MulQuat(QUAT *q1, QUAT *q2, QUAT *output);
 extern int NormalFrameTime;
 extern void QNormalise(QUAT*);
 extern int QDot(QUAT *, QUAT *);
-extern int sine[];
-extern int cosine[];
 
 static void TrackSlerp(TRACK_SECTION_DATA* tsd,int lerp,MATRIXCH* output_mat)
 {
@@ -816,9 +814,9 @@ static void LnQuat(QUAT *q)
 	float theta;
    	float m,x,y,z;
 		
-   	x = (float)(q->quatx);
-   	y = (float)(q->quaty);
-   	z = (float)(q->quatz);
+   	x = q->quatx;
+   	y = q->quaty;
+   	z = q->quatz;
 
 	if (x==0 && y==0 && z==0)
 	{
@@ -839,7 +837,7 @@ static void LnQuat(QUAT *q)
 		theta = (float)acos(cosine);
 	}
 
-	m = (float)((65536.0/sqrt((x*x) + (y*y) + (z*z))));
+	m = (65536.0/sqrt((x*x) + (y*y) + (z*z)));
 
 	x *= m;
 	y *= m;
@@ -855,9 +853,9 @@ static void ExpPurelyImaginaryQuat(QUAT *q)
 	float x,y,z;
 	int theta;
 
-	x = (float)(q->quatx);
-	y = (float)(q->quaty);
-   	z = (float)(q->quatz);
+	x = q->quatx;
+	y = q->quaty;
+   	z = q->quatz;
 
 	if (x!=0||y!=0||z!=0)
 	{

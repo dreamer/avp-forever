@@ -71,8 +71,8 @@ MODULEMAPBLOCK VisibilityDefaultObjectMap =
 {
         MapType_Default,
         I_ShapeCube, /* this is a default value */
-    0,0,0,
-        0,0,0,
+    	{0,0,0},
+        {0,0,0},
         #if StandardStrategyAndCollisions
         ObFlag_Dynamic|ObFlag_NewtonMovement|ObFlag_MatMul,
         #else
@@ -94,14 +94,16 @@ MODULEMAPBLOCK VisibilityDefaultObjectMap =
         0,                                                      
         0,0,0,                                  
         #endif
-        0,0,0,                                  
+        {0,0,0},
         0,                                               
         0,                                               
         #if StandardStrategyAndCollisions
         0,                                               
         0,
-        #endif                                           
-        0,0,0,                                  
+        #endif
+		0,
+		0,
+        {0,0,0},
 };
 
 
@@ -596,9 +598,8 @@ void MakeObjectNear(STRATEGYBLOCK *sbPtr)
         tempModule.m_lightarray = (struct lightblock *)0;
         tempModule.m_extraitemdata = (struct extraitemdata *)0;
         tempModule.m_dptr = NULL; /* this is important */
-        #if SupportWIndows95
         tempModule.name = NULL; /* this is important */
-        #endif
+
         AllocateModuleObject(&tempModule); 
         dPtr = tempModule.m_dptr;               
         if(dPtr==NULL) return; /* cannot create displayblock, so leave object "far" */
@@ -677,7 +678,7 @@ of reasons, eg: an object is blown out of the visible part of the
 environment, or an npc falls out...
 NB returns 0 if relocation failed.
 --------------------------------------------------------------------*/
-static EmergRelocCalls = 0;
+static int EmergRelocCalls = 0;
 static int EmergencyRelocateObject(STRATEGYBLOCK *sbPtr)
 {
 		OutputDebugString("EmergencyRelocateObject\n");
@@ -712,8 +713,8 @@ static int EmergencyRelocateObject(STRATEGYBLOCK *sbPtr)
         nearest invisible module that has entry point locations, and relocate to one of 
         these locations. */
         {       
-                extern SCENE Global_Scene;
-                extern SCENEMODULE **Global_ModulePtr;
+                //extern SCENE Global_Scene;
+                //extern SCENEMODULE **Global_ModulePtr;
                 
                 AIMODULE *targetModule = 0;
                 int targetModuleDistance = 0;
@@ -1080,8 +1081,7 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
         /* set the default inanimate object dynamics template: Inanimate for single player,
         and Static for multiplayer 
         NB some objects are always static, and initialised using
-        the static dynamics template directly
-        NB2 PSX: all objects are static */
+        the static dynamics template directly*/
 
 //      if(AvP.Network==I_No_Network) inanimateDynamicsInitialiser = DYNAMICS_TEMPLATE_INANIMATE;
 //      else inanimateDynamicsInitialiser = DYNAMICS_TEMPLATE_STATIC;

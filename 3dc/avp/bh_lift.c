@@ -9,7 +9,6 @@
 #include "comp_shp.h"
 #include "inventry.h"
 #include "triggers.h"
-#include "mslhand.h"
 #include "huddefs.h"
 
 #include "dynblock.h"
@@ -292,32 +291,16 @@ void LiftBehaveFun(STRATEGYBLOCK* sbptr)
 		 		{
 		 			// if there is a dest, set the lift to go
 		 			// close current stations 
-					#if PC_E3DEMO
-					LIFT_STATION* dest_stn = lift_ctrl->lift_stations[lift_ctrl->dest_station];
-		 			#endif
 
 		 			lift_stn = lift_ctrl->lift_stations[lift_ctrl->curr_station];
 
-					#if PC_E3DEMO
-					if(dest_stn->env != AvP.CurrentEnv)
-					{
-					// turn off inter env lifts
-						NewOnScreenMessage(GetTextString(TEXTSTRING_DB_ACCESSDENIED));
-						RequestState(dest_stn->lift_floor_switch, 0, 0);
-			 			lift_ctrl->dest_station = -1;
-			 			dest_stn->called = 0;
-					}
-					else
-					#endif				
-					{				
-			 			lift_ctrl->prev_station = lift_ctrl->curr_station;
-			 			if(lift_stn->lift_door)
-	 					{
-	 						// no door - must be on another env
-	 						RequestState(lift_stn->lift_door, 0, 0);
-	 					}
-			 			lift_ctrl->state = I_ls_closing_door;
-					}
+		 			lift_ctrl->prev_station = lift_ctrl->curr_station;
+		 			if(lift_stn->lift_door)
+ 					{
+ 						// no door - must be on another env
+ 						RequestState(lift_stn->lift_door, 0, 0);
+ 					}
+		 			lift_ctrl->state = I_ls_closing_door;
 		 		}
 			 		
 			 	break;
@@ -586,7 +569,7 @@ void LiftBehaveFun(STRATEGYBLOCK* sbptr)
 
 
 // this function reposts anything that would prevent 
-// The palyer most be in the module and nothing
+// The player most be in the module and nothing
 // else can be
 
 
@@ -813,4 +796,4 @@ static void TeleportFloorSwitches
 	{
 		TeleportContents(dest, src, 0);
 	}
-}	
+}

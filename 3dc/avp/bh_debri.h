@@ -1,3 +1,6 @@
+#ifndef BH_DEBRI_H
+#define BH_DEBRI_H
+
 typedef struct OneShotAnimBehaviourType
 {
 	int counter;
@@ -42,3 +45,5 @@ extern void MakeFragments (STRATEGYBLOCK *sbptr);
 #define EXPLOSION_ANIM_SPEED (ONE_FIXED*16)
 #define	EXPLOSION_LIGHTING_SCALE (ONE_FIXED*16/3)
 #define NO_OF_SPRITES_IN_BIG_EXPLOSION 10
+
+#endif

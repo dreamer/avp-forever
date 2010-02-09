@@ -153,7 +153,7 @@ void MaintainPlayersInventory(void)
 						break;
 					}
 
-
+					default: ;
 				}
 			}
 		} else if((collidedWith) && (collidedWith->I_SBtype == I_BehaviourNetGhost)) {
@@ -588,6 +588,7 @@ void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr)
 				playerStatusPtr->WeaponSlot[a].Possessed=1;
 			}
 			a=SlotForThisWeapon(WEAPON_PRED_STAFF);
+			// bjd - big crash. 08/02/10
 			/* bjd - below line added. MUST break here or else we index WeaponSlot array at index -1! */
 			if (a < 0) break;
 			playerStatusPtr->WeaponSlot[a].PrimaryMagazinesRemaining=0;
@@ -1242,7 +1243,7 @@ static int AbleToPickupWeapon(enum WEAPON_ID weaponID)
 			if (weaponPtr->Possessed!=0) return 0;
 			/* add weapon to inventory */
 			weaponPtr->Possessed = 1;
-			/* FALSE ammo to load. */
+			/* No ammo to load. */
 		}
 		
 		#endif
@@ -1304,7 +1305,7 @@ static int AbleToPickupHealth(int healthID)
 			}
 			case(I_Alien):
 			{
-				/* CDF 24/2/99 FALSE medipacks for aliens, either! */
+				/* CDF 24/2/99 No medipacks for aliens, either! */
 				return 0;
 
 //				PlayerType=I_PC_Alien;

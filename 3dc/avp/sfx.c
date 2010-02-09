@@ -23,9 +23,6 @@ static SFXBLOCK *FreeSfxBlockList[MAX_NO_OF_SFX_BLOCKS];
 static SFXBLOCK **FreeSfxBlockListPtr;
 
 
-void HandleObjectOnFire(DISPLAYBLOCK *dispPtr);
-
-
 /*KJL***************************************************************************
 * FUNCTIONS TO ALLOCATE AND DEALLOCATE SFX BLOCKS - KJL 12:02:14 11/13/96 *
 ***************************************************************************KJL*/
@@ -58,7 +55,7 @@ SFXBLOCK* AllocateSfxBlock(void)
 		/* unable to allocate a sfxamics block I'm afraid; 
 		   MAX_NO_OF_SFX_BLOCKS is too low */
    	  //LOCALASSERT(NumFreeSfxBlocks);
-		textprint("FALSE Free SFX blocks!\n");
+		textprint("No Free SFX blocks!\n");
 	}
 
 	return sfxPtr;

@@ -256,7 +256,7 @@ void FindPolygonInLineOfSight(VECTORCH *viewpointDirectionPtr, VECTORCH *viewpoi
 	
 	/* Shell function. */
 	FindPolygonInLineOfSight_TwoIgnores(viewpointDirectionPtr,viewpointPositionPtr,useOnScreenBlockList,objectToIgnorePtr,NULL);
-	/* FALSE, it's not recursive! */
+	/* No, it's not recursive! */
 }
 
 

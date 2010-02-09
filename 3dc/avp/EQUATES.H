@@ -11,13 +11,6 @@
 extern "C" {
 #endif
 
-#define default_global_h1 5000000
-#define default_global_h2 (5000000 + (ONE_FIXED << 5))
-#define default_global_hs 5
-
-
-#define default_zratio_threshold 320	/* 1.25 */
-
 #define MaxObjectLights 50			/* Sources attached to the object */
 
 #define maxlightblocks 100			/* This ought to be MORE than enough */
@@ -30,37 +23,8 @@ extern "C" {
 
 */
 
-#define lin_s_max 5
-
-#if 0
-
-	#define lin_s_zthr 320		/* 1.25 */
-
-#else
-
-	#if 1
-
-		#define lin_s_zthr 281		/* 1.1 */
-
-	#else
-
-		#define lin_s_zthr 260		/* 1.01 */
-
-	#endif
-
-#endif
-
-
 
 /* AH Table */
-
-
-
-
-#define RScale 2
-#define VScale (6 + 3)
-
-#define Wibble TRUE
 
 #define GlobalScale 1
 
@@ -75,16 +39,6 @@ extern "C" {
 typedef enum {
 
 	AVP_Scene0,		/* environments*/
-	AVP_Scene1,
-	AVP_Scene2,
-	AVP_Scene3,
-	AVP_Scene4,
-	AVP_Scene5,
-	AVP_Scene6,
-	AVP_Scene7,
-	AVP_Scene8,
-	AVP_Scene9,
-	AVP_Scene10
 
 } SCENE;
 
@@ -116,14 +70,6 @@ typedef enum {
 
 } VIEWSTATES;
 
-#define CameraTrackingNormal  0x00000000
-#define CameraTrackingSlew    0x00000001
-#define CameraTrackingFollow  0x00000002
-#define CameraTrackingTrakBak 0x00000004
-
-#define PanChange             128
-
-
 /*
 
  View Interior Types
@@ -140,17 +86,6 @@ typedef enum {
 	IType_Last
 
 } ITYPES;
-
-
-/*
-
- Shape enum for mainshapelist[]	 
-
- We don't need this except for compiled in
- shapes. For pc riff loading the comipled in
- shape enum is in cnkhmaps.c in avp\win95
- 
-*/
 
 /* Map Types */
 
@@ -184,21 +119,10 @@ typedef enum {
 
 } AVP_STRATEGIES;
 
-
-
-
-
-
-#define MaxSint5SortArraySize 50 /* was 100, must be at least ml_shm_maxheights */
-
-
-
 /***********end for C++************/
 
 #ifdef __cplusplus
 };
 #endif
-
-//#define EQUATES_INCLUDED
 
 #endif

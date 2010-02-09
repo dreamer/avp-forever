@@ -805,7 +805,7 @@ void CorpseIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple,
 				if (damage->ForceBoom) {
 					deathtype+=damage->ForceBoom;
 				}
-				/* FALSE additional gibbing for flamethrowers. */
+				/* No additional gibbing for flamethrowers. */
 
 				if (damage->Id==AMMO_PREDPISTOL_STRIKE) {
 					/* Blow up if hit by the bolt? */

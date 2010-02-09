@@ -56,6 +56,7 @@ I'm going to try storing the quaternions as shorts within the keyframes ,
 because there are loads of them.
 -Richard.
 */
+#pragma pack(push,1) 
 typedef struct quat_short
 {
 	short quatx;
@@ -63,6 +64,7 @@ typedef struct quat_short
 	short quatz;
 	short quatw;
 }QUAT_SHORT;
+#pragma pack(pop)
 /*A couple of conversion functions */
 extern void CopyShortQuatToInt(QUAT_SHORT* qs_from,QUAT* q_to);
 extern void CopyIntQuatToShort(QUAT* q_from,QUAT_SHORT* qs_to);

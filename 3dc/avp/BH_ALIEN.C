@@ -73,18 +73,20 @@ MODULEMAPBLOCK AlienDefaultMap =
 {
 	MapType_Sprite,
 	I_ShapeCube, /* default value */
-    0,0,0,
-	0,0,0,
+    {0,0,0},
+	{0,0,0},
 	ObFlag_NoInfLSrc|ObFlag_MultLSrc,
 	0,
 	0,
 	0,							
 	0,							
 	0,	
-	0,0,0,					
+	{0,0,0},
+	0,
+	0,
+	0,
 	0,						 
-	0,						 
-	0,0,0,					
+	{0,0,0},
 };
 
 /* CDF 12/2/98 */
@@ -1189,7 +1191,7 @@ void MakeAlienFar(STRATEGYBLOCK *sbPtr)
 	if ((alienStatusPointer->BehaviourState!=ABS_Dying) 
 		&&(alienStatusPointer->BehaviourState!=ABS_Dormant)
 		&&(alienStatusPointer->BehaviourState!=ABS_Awakening)) {
-		/* FALSE zombie aliens here! */
+		/* No zombie aliens here! */
 		if(AlienIsAwareOfTarget(sbPtr))
 		{
 			alienStatusPointer->BehaviourState = ABS_Hunt;

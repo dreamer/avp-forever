@@ -159,13 +159,7 @@ void BuildFarModuleLocs(void)
 		ThisModuleIndex = thisModule->m_index;
 		LOCALASSERT(ThisModuleIndex >= 0);
 		LOCALASSERT(ThisModuleIndex < ModuleArraySize);
-		
-		#if PSX
-		#ifndef CDEMUL
-		pollhost();
-		#endif
-		#endif
-		
+
 		#if logFarLocData
 		fprintf(logfile, "********************************* \n");
 		fprintf(logfile, "Module Index: %d %s\n", ThisModuleIndex,thisModule->name);
@@ -349,7 +343,6 @@ static void InitFarLocDataAreas(MODULE **moduleList, int numModules)
 	}
 }
 
-extern void DeleteArrayMem(void *ptr);
 /*-----------------------Patrick 28/11/96---------------------------
 This function deallocates the location lists for each module,
 and must be called at some point before the environment re-load
@@ -380,8 +373,6 @@ void KillFarModuleLocs(void)
 		int i;
 		for(i=0;i<AIModuleArraySize;i++)
 		{
-			FALLP_EntryPoints[i].numEntryPoints = 0;
-
 			if(FALLP_EntryPoints[i].entryPointsList)
 			{
 				DeallocateMem(FALLP_EntryPoints[i].entryPointsList);
@@ -595,6 +586,7 @@ typedef struct epbbextents
 	int	minZ;
 } EPBBEXTENTS;
 
+#if 0
 static EPBBEXTENTS MI_Volume1;
 static EPBBEXTENTS MI_Volume2;
 static EPBBEXTENTS MI_Volume3;
@@ -602,6 +594,7 @@ static EPBBEXTENTS MI_Volume3;
 static int GetModulesIntersection(MODULE *thisModule, MODULE *targetModule);
 static int GetModulePointBox(MODULE *thisModule, EPBBEXTENTS *extents);
 static void AddModuleEP(MODULE* thisModule, MODULE*fromModule, VECTORCH *posn);
+#endif
 
 /*-----------------------Patrick 16/12/96---------------------------
 This Function checks if a module has any adjacent modules, and if
@@ -622,7 +615,7 @@ static void BuildFM_EntryPoints(MODULE *thisModule)
 	if(!(NumAdjacentModules(thisModule))) 
 	{
 		#if logFarLocData
-		fprintf(logfile, "FALSE adjacent modules found for this module \n");
+		fprintf(logfile, "No adjacent modules found for this module \n");
 		#endif
 		return;
 	}
@@ -933,6 +926,7 @@ static void BuildFM_ASingleEP(MODULE *thisModule, MODULE *targetModule)
   
   Returns 1 if the bounding box is valis, 0 if not.
   ------------------------------------------------------------------*/ 
+#if 0
 static int GetModulesIntersection(MODULE *thisModule, MODULE *targetModule)
 {
 	int thisExtent, targetExtent;
@@ -1059,7 +1053,7 @@ static void AddModuleEP(MODULE* thisModule, MODULE*fromModule, VECTORCH *posn)
 	(epHeader->numEntryPoints)++;
 
 }
-
+#endif
 
 /*-----------------------Patrick 20/12/96---------------------------
 LOCAL FUNCTIONS FOR AUXILARY MODULE LOCATION SUPPORT
@@ -1243,7 +1237,7 @@ static void BuildFM_AuxilaryLocs(MODULE *thisModule)
 	}
 	else
 	{
-		/* FALSE valid locations */
+		/* No valid locations */
 		#if logFarLocData
 		{
 			/* log an error */
@@ -1261,10 +1255,6 @@ static void BuildFM_AuxilaryLocs(MODULE *thisModule)
   the location iiiiis inside the shape): if there is no up &
   down polygon, the location is invalidated, and an error code
   returned (either no up poly, no down poly, no up-or-down poly)
-
-  NB PSX!!!: uses kevin's shape access functions in platsup.c
-  I have added a new short one for Win95 - PSX needs it's own
-  version.
   ----------------------------------------------------------------*/
 static void GetFarLocHeight(FARVALIDATEDLOCATION *location, MODULE *thisModule)
 {

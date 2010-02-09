@@ -81,8 +81,6 @@
 *  										G L O B A L S 	            					    *
 ****************************************************************************************KJL*/
 
-//static char tempstring[256];
-
 static int WBStrikeTime=(ONE_FIXED>>1);
 static int ACStrikeTime=(ONE_FIXED/6);
 int AutoSwap=-1;
@@ -258,7 +256,7 @@ DISPLAYBLOCK *HtoHDamageToHModel(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, i
 DISPLAYBLOCK *AlienTail_TargetSelect(void);
 STRATEGYBLOCK *GetBitingTarget(void);
 SECTION_DATA *CheckBiteIntegrity(void);
-/* TRUE, whatever, but this was LESS TEDIOUS! */
+/* Yes, whatever, but this was LESS TEDIOUS! */
 STRATEGYBLOCK *GetTrophyTarget(SECTION_DATA **head_section_data);
 
 extern void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplier,VECTORCH* incoming);
@@ -287,7 +285,6 @@ int FireEmptyMinigun(PLAYER_WEAPON_DATA *weaponPtr);
 int Staff_Manager(DAMAGE_PROFILE *damage,SECTION_DATA *section1,SECTION_DATA *section2,SECTION_DATA *section3,
 	STRATEGYBLOCK *wielder);
 
-static void FireLineOfSightAmmo(enum AMMO_ID AmmoID, VECTORCH* sourcePtr, VECTORCH* directionPtr, int multiple);
 static void PlayerFireLineOfSightAmmo(enum AMMO_ID AmmoID, int multiple);
 extern void FireProjectileAmmo(enum AMMO_ID AmmoID);
 
@@ -295,7 +292,6 @@ void HandleWeaponImpact(VECTORCH *positionPtr, STRATEGYBLOCK *sbPtr, enum AMMO_I
 
 
 void FireAutoGun(STRATEGYBLOCK *sbPtr);
-void MakeMatrixFromDirection(VECTORCH *directionPtr, MATRIXCH *matrixPtr);
 void FindEndOfShape(VECTORCH* endPositionPtr, int shapeIndex);
 static void CalculateTorque(EULER *rotationPtr, VECTORCH *directionPtr, STRATEGYBLOCK *sbPtr);
 static void CalculateTorqueAtPoint(EULER *rotationPtr, VECTORCH *pointPtr, STRATEGYBLOCK *sbPtr);
@@ -326,8 +322,6 @@ void WeaponCreateStartFrame(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr);
 #endif
 int PC_Alien_Eat_Attack(int hits);
 int FirePredatorDisc(PLAYER_WEAPON_DATA *weaponPtr,SECTION_DATA *disc_section);
-
-void SmartTarget_GetCofM(DISPLAYBLOCK *target,VECTORCH *viewSpaceOutput);
 
 void BiteAttack_AwardHealth(STRATEGYBLOCK *sbPtr,AVP_BEHAVIOUR_TYPE pre_bite_type);
 void LimbRip_AwardHealth(void);
@@ -1359,8 +1353,8 @@ static void WeaponStateIdle(PLAYER_STATUS *playerStatusPtr,PLAYER_WEAPON_DATA *w
 			}
 		}
     } else if ((RequestChangeOfWeapon(playerStatusPtr,weaponPtr))
-    	||((playerStatusPtr->SelectedWeaponSlot!=playerStatusPtr->SwapToWeaponSlot))
-    		&&(playerStatusPtr->SwapToWeaponSlot!=WEAPON_FINISHED_SWAPPING)) {
+    	||((playerStatusPtr->SelectedWeaponSlot!=playerStatusPtr->SwapToWeaponSlot)
+    		&&(playerStatusPtr->SwapToWeaponSlot!=WEAPON_FINISHED_SWAPPING))) {
 		weaponPtr->CurrentState = WEAPONSTATE_UNREADYING;
 	    weaponPtr->StateTimeOutCounter = WEAPONSTATE_INITIALTIMEOUTCOUNT;
 		NewOnScreenMessage
@@ -2232,7 +2226,7 @@ void HandleWeaponImpact(VECTORCH *positionPtr, STRATEGYBLOCK *sbPtr, enum AMMO_I
 
 					GLOBALASSERT(sbPtr->SBdptr->HModelControlBlock==this_section_data->my_controller);
 					CauseDamageToHModel(sbPtr->SBdptr->HModelControlBlock, sbPtr, &TemplateAmmo[AmmoID].MaxDamage[AvP.Difficulty], multiple, this_section_data,invec,positionPtr,0);
-					/* FALSE longer return: do knockback. */
+					/* No longer return: do knockback. */
 					//return;
 				} 
 				else
@@ -2342,7 +2336,7 @@ void HandleWeaponImpact(VECTORCH *positionPtr, STRATEGYBLOCK *sbPtr, enum AMMO_I
 			if (dispPtr) 
 			{
  				if(AvP.Network!=I_No_Network) 
- 					AddNetMsg_LocalRicochet(I_BehaviourBulletRicochet,positionPtr,&LOS_ObjectNormal);		            				
+ 					AddNetMsg_LocalRicochet(I_BehaviourBulletRicochet,positionPtr,&LOS_ObjectNormal);
 				MakeMatrixFromDirection(&LOS_ObjectNormal,&dispPtr->ObMat);
 			}
 			break;
@@ -3003,7 +2997,6 @@ void PositionPlayersWeaponMuzzleFlash(void)
 	/* rotate flash around in random multiples of 60 degrees */
 	{
 		MATRIXCH mat;
-		extern int cosine[], sine[];
    		int angle = (FastRandom()%6)*683;
  	  	int cos = GetCos(angle);
  	  	int sin = GetSin(angle);
@@ -4472,7 +4465,7 @@ void GrenadeLauncher_EmergencyChangeAmmo(PLAYER_WEAPON_DATA *weaponPtr) {
 	
 
 	if ((change_to_ammo==original_ammo)||(change_to_ammo==AMMO_NONE)) {
-		/* FALSE other ammo types! */
+		/* No other ammo types! */
 		return;
 	}
 
@@ -4642,7 +4635,7 @@ int GrenadeLauncherChangeAmmo(PLAYER_WEAPON_DATA *weaponPtr) {
 	}
 
 	if (change_to_ammo==original_ammo) {
-		/* FALSE other ammo types! */
+		/* No other ammo types! */
 		return(0);
 	}
 
@@ -5369,7 +5362,7 @@ void MinigunStopSpin(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 
 	/* Think sounds. */
 	if (Minigun_SpinSpeed==0) {
-		/* FALSE sound at all, ideally! */
+		/* No sound at all, ideally! */
   		if(weaponHandle != SOUND_NOACTIVEINDEX) {
 			if (ActiveSounds[weaponHandle].soundIndex!=SID_MINIGUN_END) {
 				/* Allow SID_MINIGUN_END to stop if it's going. */
@@ -5489,7 +5482,7 @@ int FireEmptyMinigun(PLAYER_WEAPON_DATA *weaponPtr) {
 	
 		Minigun_SpinSpeed=MINIGUN_MAX_SPEED;
 
-		/* FALSE bullets, no impulse. */
+		/* No bullets, no impulse. */
 				
 		return(1);
 	} else {
@@ -5529,7 +5522,7 @@ void Maintain_Minigun(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 		}
 		/* Not firing - play empty or wind down sound.  Which one? */
 		if (Minigun_SpinSpeed==0) {
-			/* FALSE sound at all, ideally! */
+			/* No sound at all, ideally! */
 	   		if(weaponHandle != SOUND_NOACTIVEINDEX) {
 				if (ActiveSounds[weaponHandle].soundIndex!=SID_MINIGUN_END) {
 					/* Allow SID_MINIGUN_END to stop if it's going. */
@@ -5733,7 +5726,7 @@ void GrenadeLauncherReload_Change(void *playerStatus, PLAYER_WEAPON_DATA *weapon
 	if (PlayersWeaponHModelController.Sub_Sequence!=MHSS_Standard_Reload) {
 		InitHModelSequence(&PlayersWeaponHModelController,HMSQT_MarineHUD,(int)MHSS_Standard_Reload,(ONE_FIXED*4)/3);
 		PlayersWeaponHModelController.Looped=0;
-		/* FALSE update bullets here. */
+		/* No update bullets here. */
 	}
 	
 	if (PlayersWeaponHModelController.keyframe_flags) {
@@ -6353,9 +6346,8 @@ void PredPistol_Firing(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 
 }
 
-int PlayerFireFlameThrower(PLAYER_WEAPON_DATA *weaponPtr) {
-
-	extern VECTORCH CentreOfMuzzleOffset;
+int PlayerFireFlameThrower(PLAYER_WEAPON_DATA *weaponPtr) 
+{
 	VECTORCH *firingpos;
 
 	TEMPLATE_WEAPON_DATA *twPtr=&TemplateWeapon[weaponPtr->WeaponIDNumber];
@@ -6608,7 +6600,7 @@ DISPLAYBLOCK *CauseDamageToHModel(HMODELCONTROLLER *HMC_Ptr, STRATEGYBLOCK *sbPt
 		} else if ( ((this_section_data->sempai->flags&section_is_master_root)==0) 
 			&&((this_section_data->sempai->flags&section_flag_never_frag)==0)
 			&&(((this_section_data->sempai->flags&section_sprays_acid)&&((this_section_data->sempai->flags&section_flag_fragonlyfordisks)==0))
-				||((this_section_data->sempai->StartingStats.Health<TotalKineticDamage(damage))&&(this_section_data->sempai->flags & section_flag_fragonlyfordisks==0))
+				||((this_section_data->sempai->StartingStats.Health<TotalKineticDamage(damage))&&((this_section_data->sempai->flags&section_flag_fragonlyfordisks)==0))
 				||((damage->Slicing>2)&&(this_section_data->sempai->flags&section_flag_fragonlyfordisks))
 				||((damage->Slicing>0)&&((this_section_data->sempai->flags&section_flag_fragonlyfordisks)==0))
 			)
@@ -6988,7 +6980,7 @@ HITLOCATIONTABLEENTRY *Get_Sublocation(STRATEGYBLOCK *sbPtr) {
 			}
 			break;
 		default:
-			textprint("FALSE hit table!\n");
+			textprint("No hit table!\n");
 			hltable=NULL;
 			/* See ChrisF */
 			break;
@@ -8053,7 +8045,7 @@ void AlienGrab_Strike(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 
 		} else {
 			
-			/* FALSE joy. */
+			/* No joy. */
 
 		}
 
@@ -9762,7 +9754,7 @@ int FireSpikeyThing(PLAYER_WEAPON_DATA *weaponPtr) {
 
 	GLOBALASSERT(AvP.PlayerType==I_Predator);
 
-	/* FALSE longer will we do that wussey instant healing thing! */
+	/* No longer will we do that wussey instant healing thing! */
 	playerStatusPtr->FieldCharge-=MEDICOMP_DRAIN_BLOCK;
 	CurrentGameStats_ChargeUsed(MEDICOMP_DRAIN_BLOCK);
 	/* But we do do the instant charging thing. */
@@ -9802,7 +9794,7 @@ int FireExtinguisher(PLAYER_WEAPON_DATA *weaponPtr) {
 
 	GLOBALASSERT(AvP.PlayerType==I_Predator);
 
-	/* FALSE longer will we do that wussey instant healing thing! */
+	/* No longer will we do that wussey instant healing thing! */
 	playerStatusPtr->FieldCharge-=EXTINGUISHER_DRAIN_BLOCK;
 	CurrentGameStats_ChargeUsed(EXTINGUISHER_DRAIN_BLOCK);
 	/* But we do do the instant charging thing. */
@@ -10567,7 +10559,6 @@ extern void AutoSwapToDisc_OutOfSequence(void) {
 
 #define SPEAR_NPC_IMPULSE	(20000)
 
-void CreateSpearPossiblyWithFragment(DISPLAYBLOCK *dispPtr, VECTORCH *spearPositionPtr, VECTORCH *spearDirectionPtr);
 void HandleSpearImpact(VECTORCH *positionPtr, STRATEGYBLOCK *sbPtr, enum AMMO_ID AmmoID, VECTORCH *directionPtr, int multiple, SECTION_DATA *this_section_data) 
 {
 	VECTORCH incoming,*invec;
@@ -10600,7 +10591,7 @@ void HandleSpearImpact(VECTORCH *positionPtr, STRATEGYBLOCK *sbPtr, enum AMMO_ID
 
 					GLOBALASSERT(sbPtr->SBdptr->HModelControlBlock==this_section_data->my_controller);
 					fragged_section=CauseDamageToHModel(sbPtr->SBdptr->HModelControlBlock, sbPtr, &TemplateAmmo[AmmoID].MaxDamage[AvP.Difficulty], multiple*ONE_FIXED, this_section_data,invec,positionPtr,0);
-					/* FALSE longer return: do knockback. */
+					/* No longer return: do knockback. */
 					//return;
 				} 
 				else
@@ -10912,7 +10903,7 @@ void BiteAttack_AwardHealth(STRATEGYBLOCK *sbPtr,AVP_BEHAVIOUR_TYPE pre_bite_typ
 			||(corpseDataPtr->Type==I_BehaviourSeal)
 			||(corpseDataPtr->Type==I_BehaviourPredator)
 			) {
-			/* FALSE armour, just a bit of health. */
+			/* No armour, just a bit of health. */
 			Player->ObStrategyBlock->SBDamageBlock.Health+=(20<<ONE_FIXED_SHIFT);
 			if (Player->ObStrategyBlock->SBDamageBlock.Health>(NpcData->StartingStats.Health<<ONE_FIXED_SHIFT)) {
 				Player->ObStrategyBlock->SBDamageBlock.Health=NpcData->StartingStats.Health<<ONE_FIXED_SHIFT;
@@ -11041,7 +11032,6 @@ int PlayerFirePredPistolFlechettes(PLAYER_WEAPON_DATA *weaponPtr) {
 int PredPistolSecondaryFire(PLAYER_WEAPON_DATA *weaponPtr) {
 
 	TEMPLATE_WEAPON_DATA *twPtr=&TemplateWeapon[weaponPtr->WeaponIDNumber];
-//  	TEMPLATE_AMMO_DATA *templateAmmoPtr = &TemplateAmmo[twPtr->SecondaryAmmoID];
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 
 	LOCALASSERT(playerStatusPtr);
@@ -11692,18 +11682,6 @@ int AreTwoPistolsInTertiaryFire(void) {
 
 }
 
-int FireMarineTwoPistolsPrimary(PLAYER_WEAPON_DATA *weaponPtr) {
-	
-	return(FireMarineTwoPistols(weaponPtr,0));
-
-}
-
-int FireMarineTwoPistolsSecondary(PLAYER_WEAPON_DATA *weaponPtr) {
-	
-	return(FireMarineTwoPistols(weaponPtr,1));
-
-}
-
 int FireMarineTwoPistols(PLAYER_WEAPON_DATA *weaponPtr, int secondary)
 {
 	TEMPLATE_WEAPON_DATA *twPtr=&TemplateWeapon[weaponPtr->WeaponIDNumber];
@@ -11711,9 +11689,6 @@ int FireMarineTwoPistols(PLAYER_WEAPON_DATA *weaponPtr, int secondary)
 
 	DELTA_CONTROLLER *FireRight;
 	DELTA_CONTROLLER *FireLeft;
-
-//	EULER judder;
-//	MATRIXCH juddermat;
 
 	/* Deduce which pistol can fire, if either? */
 
@@ -11805,6 +11780,18 @@ int FireMarineTwoPistols(PLAYER_WEAPON_DATA *weaponPtr, int secondary)
 	}	
 	return(1);	
 }	
+
+int FireMarineTwoPistolsPrimary(PLAYER_WEAPON_DATA *weaponPtr) {
+	
+	return(FireMarineTwoPistols(weaponPtr,0));
+
+}
+
+int FireMarineTwoPistolsSecondary(PLAYER_WEAPON_DATA *weaponPtr) {
+	
+	return(FireMarineTwoPistols(weaponPtr,1));
+
+}
 
 void MarineTwoPistols_Fidget(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 
@@ -11964,7 +11951,7 @@ static void MarineZeroAmmoFunctionality(PLAYER_STATUS *playerStatusPtr,PLAYER_WE
 	}
 
 	if (MarineWeaponHierarchy[weaponNum]==NULL_WEAPON) {
-		/* FALSE possible action. */
+		/* No possible action. */
 		return;
 	}
 	if (MarineWeaponHierarchy[weaponNum]==weaponPtr->WeaponIDNumber) {
@@ -12219,7 +12206,7 @@ static void PredatorZeroAmmoFunctionality(PLAYER_STATUS *playerStatusPtr,PLAYER_
 	}
 
 	if (PredatorWeaponHierarchy[weaponNum]==NULL_WEAPON) {
-		/* FALSE possible action. */
+		/* No possible action. */
 		return;
 	}
 	if (PredatorWeaponHierarchy[weaponNum]==weaponPtr->WeaponIDNumber) {

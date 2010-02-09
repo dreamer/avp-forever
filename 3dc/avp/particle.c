@@ -1754,8 +1754,6 @@ void HandleParticleSystem(void)
 			}
 			case PARTICLE_FLARESMOKE:
 			{
-				extern sine[],cosine[];
-
 //				particlePtr->Position.vy -= MUL_FIXED(1000+(FastRandom()&511),NormalFrameTime);
 				particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
 				
@@ -1822,8 +1820,6 @@ void HandleParticleSystem(void)
 			}
 			case PARTICLE_STEAM:
 			{
-				extern sine[],cosine[];
-
 //				particlePtr->Position.vy -= MUL_FIXED(1000+(FastRandom()&511),NormalFrameTime);
 				particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
 				
@@ -1889,8 +1885,6 @@ void HandleParticleSystem(void)
 			case PARTICLE_BLACKSMOKE:
 			case PARTICLE_IMPACTSMOKE:
 			{
-				extern sine[],cosine[];
-
 //				particlePtr->Position.vy -= MUL_FIXED(1000+(FastRandom()&511),NormalFrameTime);
 				particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
 				
@@ -1953,8 +1947,6 @@ void HandleParticleSystem(void)
 			}
 			case PARTICLE_GUNMUZZLE_SMOKE:
 			{
-				extern sine[],cosine[];
-
 //				particlePtr->Position.vy -= MUL_FIXED(1000+(FastRandom()&511),NormalFrameTime);
 				particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
 				#if 1
@@ -3787,10 +3779,8 @@ void HandleRainShaft(MODULE *modulePtr, int bottomY, int topY, int numberOfRaind
 	
 }
 
-#include <math.h>
 void HandleRipples(void)
 {
-	extern int sine[];
 	int i;
 
 	for(i=0; i<MAX_NO_OF_RIPPLES; i++)
@@ -3811,7 +3801,6 @@ void HandleRipples(void)
 
 int EffectOfRipples(VECTORCH *point)
 {
-	extern int sine[];
 	int offset;
 	int i;
  	offset = GetSin((point->vx+point->vz+CloakingPhase)&4095)>>11;
@@ -4030,7 +4019,6 @@ void DrawMuzzleFlash(VECTORCH *positionPtr,VECTORCH *directionPtr, enum MUZZLE_F
 			MATRIXCH rotmat;
 			MakeMatrixFromDirection(directionPtr,&muzzleMatrix);
 			{
-				extern int cosine[], sine[];
 		   		int angle = 4096/12;
 		 	  	int cos = GetCos(angle);
 		 	  	int sin = GetSin(angle);
@@ -4593,8 +4581,8 @@ void MakeFlechetteExplosionAt(VECTORCH *positionPtr,int seed)
 
 		velocity.vy = -(SeededFastRandom()&65535);
 		{
-			float y = ((float)velocity.vy)/65536.0f;
-			y = (float)(sqrt(1-y*y));
+			float y = ((float)velocity.vy)/65536.0;
+			y = sqrt(1-y*y);
 
 			f2i(velocity.vx,(float)GetCos(phi)*y);
 			f2i(velocity.vz,(float)GetSin(phi)*y);
@@ -4644,8 +4632,8 @@ void MakeMolotovExplosionAt(VECTORCH *positionPtr,int seed)
 
 		velocity.vy = -(SeededFastRandom()&65535);
 		{
-			float y = ((float)velocity.vy)/65536.0f;
-			y = (float)(sqrt(1-y*y));
+			float y = ((float)velocity.vy)/65536.0;
+			y = sqrt(1-y*y);
 
 			f2i(velocity.vx,(float)GetCos(phi)*y);
 			f2i(velocity.vz,(float)GetSin(phi)*y);
@@ -4748,8 +4736,8 @@ void MakeOldVolumetricExplosionAt(VECTORCH *positionPtr)
 
 		velocity.vz = (FastRandom()&131071) - ONE_FIXED;
 		{
-			float z = ((float)velocity.vz)/65536.0f;
-			z = (float)(sqrt(1-z*z));
+			float z = ((float)velocity.vz)/65536.0;
+			z = sqrt(1-z*z);
 
 			f2i(velocity.vx,(float)GetCos(phi)*z);
 			f2i(velocity.vy,(float)GetSin(phi)*z);
@@ -4823,8 +4811,8 @@ void MakeBloodExplosion(VECTORCH *originPtr, int creationRadius, VECTORCH *blast
 
 		velocity.vz = (FastRandom()&131071) - ONE_FIXED;
 		{
-			float z = ((float)velocity.vz)/65536.0f;
-			z = (float)(sqrt(1-z*z));
+			float z = ((float)velocity.vz)/65536.0;
+			z = sqrt(1-z*z);
 
 			f2i(velocity.vx,(float)GetCos(phi)*z);
 			f2i(velocity.vy,(float)GetSin(phi)*z);
@@ -4871,8 +4859,8 @@ void MakeFocusedExplosion(VECTORCH *originPtr, VECTORCH *blastPositionPtr, int n
 
 		velocity.vz = (FastRandom()&131071) - ONE_FIXED;
 		{
-			float z = ((float)velocity.vz)/65536.0f;
-			z = (float)(sqrt(1-z*z));
+			float z = ((float)velocity.vz)/65536.0;
+			z = sqrt(1-z*z);
 
 			f2i(velocity.vx,(float)GetCos(phi)*z);
 			f2i(velocity.vy,(float)GetSin(phi)*z);
@@ -4924,8 +4912,8 @@ void MakePlasmaTrailParticles(DYNAMICSBLOCK *dynPtr, int number)
 
 			velocity.vz = (FastRandom()&131071) - ONE_FIXED;
 			{
-				float z = ((float)velocity.vz)/65536.0f;
-				z = (float)(sqrt(1-z*z));
+				float z = ((float)velocity.vz)/65536.0;
+				z = sqrt(1-z*z);
 
 				f2i(velocity.vx,(float)GetCos(phi)*z);
 				f2i(velocity.vy,(float)GetSin(phi)*z);
@@ -4972,7 +4960,7 @@ void MakeDewlineTrailParticles(DYNAMICSBLOCK *dynPtr, int number)
 
 			velocity.vz = (FastRandom()&131071) - ONE_FIXED;
 			{
-				float z = ((float)velocity.vz)/65536.0f;
+				float z = ((float)velocity.vz)/65536.0;
 				z = sqrt(1-z*z);
 
 				f2i(velocity.vx,(float)GetCos(phi)*z);
@@ -5308,7 +5296,6 @@ extern void RenderParticlesInMirror(void)
 		while(numOfObjects)
 		{
 			DISPLAYBLOCK *objectPtr = OnScreenBlockList[--numOfObjects];
-			STRATEGYBLOCK *sbPtr = objectPtr->ObStrategyBlock;
 
 			if (!objectPtr->ObShape && objectPtr->SfxPtr)
 			{
@@ -5428,6 +5415,7 @@ void TimeScaleThingy()
 				case I_BehaviourMolotov :
 					DesiredTimeScale=MUL_FIXED(DesiredTimeScale,ONE_FIXED*.7);
 					break;
+				default: ;
 			}
 		}
 	}

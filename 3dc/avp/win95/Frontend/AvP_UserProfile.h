@@ -104,7 +104,7 @@ typedef struct
 
 	/* This feels a bit bloaty. */
 	AvP_GameStats_Stored PersonalBests[I_MaxDifficulties][AVP_ENVIRONMENT_END_OF_LIST];
-	/* TRUE, it contains impossible!  So sue me! */
+	/* Yes, it contains impossible!  So sue me! */
 
 } AVP_USER_PROFILE;
 
@@ -167,9 +167,6 @@ extern AVP_USER_PROFILE *UserProfilePtr;
 extern int CheatMode_Active;
 extern int CheatMode_Species;
 extern int CheatMode_Environment;
-
-
-extern int EdmondsTest();
 
 #ifdef __cplusplus									 
 }; // extern "C"

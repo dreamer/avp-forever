@@ -105,8 +105,6 @@ void InitPlayer(STRATEGYBLOCK* sbPtr, int sb_type)
 	* InitPlayer() was written by me. It attaches the extra player data to the strategy block *
 	* and fills in some initial values.                                                       *
 	**************************************************************************************KJL*/
-
-//	SECTION *root_section;
 	PLAYER_STATUS *psPtr = &PlayerStatusBlock;
 	GLOBALASSERT(psPtr);
  	GLOBALASSERT(sbPtr);
@@ -797,7 +795,7 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 	A little hack-et to make the predator tougher in multiplayer games
 	------------------------------------------------------------------*/
 	//if((AvP.Network!=I_No_Network)&&(AvP.PlayerType==I_Predator)) damage>>=1;
-	/* ChrisF 16/9/97 FALSE, predators are now... wait for it... tough. */
+	/* ChrisF 16/9/97 No, predators are now... wait for it... tough. */
 
 	if (playerStatusPtr->IsAlive)
 	{
@@ -1327,7 +1325,9 @@ void DeInitialisePlayer(void) {
 	/* I thought it would be logical to put it here... */
 
   	int slot = MAX_NO_OF_WEAPON_SLOTS;
+#if 0
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+#endif
 
     do {
 		TXACTRLBLK *txactrl,*txactrl_next;

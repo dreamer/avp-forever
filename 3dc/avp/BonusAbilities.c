@@ -149,9 +149,8 @@ static DISPLAYBLOCK* CreateGrapplingHook(void)
 		tempModule.m_lightarray = (struct lightblock *)0;
 		tempModule.m_extraitemdata = (struct extraitemdata *)0;
 		tempModule.m_dptr = NULL; /* this is important */
-		#if SupportWIndows95
 		tempModule.name = NULL; /* this is important */
-		#endif
+
 		AllocateModuleObject(&tempModule); 
 		dPtr = tempModule.m_dptr;		
 		if(dPtr==NULL)
@@ -184,7 +183,7 @@ static DISPLAYBLOCK* CreateGrapplingHook(void)
 
 }
 
-extern void GrapplingHookBehaviour(STRATEGYBLOCK *sbPtr)
+void GrapplingHookBehaviour(STRATEGYBLOCK *sbPtr)
 {
 	DYNAMICSBLOCK *dynPtr = sbPtr->DynPtr;
 

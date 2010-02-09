@@ -25,10 +25,6 @@
 #include "savegame.h"
 #include "networking.h"
 
-#if 0
-#undef BRIGHTNESS_CHANGE_SPEED
-#define BRIGHTNESS_CHANGE_SPEED (RealFrameTime/4)
-#endif
 
 #include "utilities.h"
 
@@ -175,7 +171,7 @@ extern char *GetGamePadButtonTextString(enum TEXTSTRING_ID stringID);
 
 
 	Need mouse position code (?) etc. In-game menus using mouse? Ugh.
-	FALSE mouse then.
+	No mouse then.
 
 */
 SAVE_SLOT_HEADER SaveGameSlot[NUMBER_OF_SAVE_SLOTS];

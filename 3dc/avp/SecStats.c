@@ -8942,7 +8942,7 @@ SECTION_ATTACHMENT Global_Section_Attachments[] = {
 				0,	/* Indestructable */
 			},
 		},
-		section_flag_head|section_has_sparkoflife, /* FALSE longer sprays acid. */
+		section_flag_head|section_has_sparkoflife, /* No longer sprays acid. */
 	},
 	{
 		"hnpc_xenoborg",

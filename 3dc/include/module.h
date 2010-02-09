@@ -159,23 +159,11 @@ typedef struct modulemapblock {
 	int MapFlags2;
 	int MapFlags3;
 
-
-
 	MAPSETVDB *MapVDBData;
 
 	int MapInteriorType;
 
-	#if InterfaceEngine
-
-	/* This will point to the Object_Chunk, it will have to be */
-	/* cast within C++ though */
-	
-	void * o_chunk;
-
-	#endif
-
 	int MapLightType;			/* See LIGHTTYPES */
-
 
 	VECTORCH MapOrigin;			/* Origin of Rotation */
 

@@ -167,7 +167,6 @@ extern int NPCSetVelocity(STRATEGYBLOCK *sbPtr, VECTORCH* targetDirn, int in_spe
 extern int NPCOrientateToVector(STRATEGYBLOCK *sbPtr, VECTORCH *zAxisVector, int turnspeed, VECTORCH *offset);
 extern void NPCGetMovementTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, VECTORCH *targetPosition, int* targetIsAirduct,int alien);
 extern void NPCGetMovementDirection(STRATEGYBLOCK *sbPtr, VECTORCH *velocityDirection, VECTORCH* target, WAYPOINT_MANAGER *waypointManager);
-extern int FindMyFloorPoly(VECTORCH* currentPosition, MODULE* currentModule);
 extern void NPC_InitWanderData(NPC_WANDERDATA *wanderData);
 extern void NPC_FindWanderTarget(STRATEGYBLOCK *sbPtr, NPC_WANDERDATA *wanderData, NPC_MOVEMENTDATA *moveData);
 extern void NPC_FindAIWanderTarget(STRATEGYBLOCK *sbPtr, NPC_WANDERDATA *wanderData, NPC_MOVEMENTDATA *moveData, int alien);
@@ -210,7 +209,7 @@ extern int New_NPC_IsObstructed(STRATEGYBLOCK *sbPtr, NPC_AVOIDANCEMANAGER *mana
 extern void Initialise_AvoidanceManager(STRATEGYBLOCK *sbPtr, NPC_AVOIDANCEMANAGER *manager);
 extern AVOIDANCE_RETURN_CONDITION AllNewAvoidanceKernel(STRATEGYBLOCK *sbPtr,NPC_AVOIDANCEMANAGER *manager);
 /* All New Avoidance Code! */
-extern MOVEMENT_DATA *GetThisMovementData(MOVEMENT_DATA_INDEX index);
+extern const MOVEMENT_DATA *GetThisMovementData(MOVEMENT_DATA_INDEX index);
 extern void AlignVelocityToGravity(STRATEGYBLOCK *sbPtr,VECTORCH *velocity);
 
 extern int NPC_targetIsPlayer; 

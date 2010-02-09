@@ -731,7 +731,7 @@ int NPCSetVelocity(STRATEGYBLOCK *sbPtr, VECTORCH* targetDirn, int in_speed)
         } else {
                 int accelerationThisFrame,deltaVMag,dotProduct;
                 VECTORCH deltaV,targetV,yDirection,movementOffset;
-                MOVEMENT_DATA *movementData;
+                const MOVEMENT_DATA *movementData;
 
                 /* Mode 2, for marines 'n' predators.  And xenoborgs. */
                 
@@ -891,8 +891,6 @@ int NPCSetVelocity(STRATEGYBLOCK *sbPtr, VECTORCH* targetDirn, int in_speed)
   -----------------------------------------------------------------------*/
 int NPCOrientateToVector(STRATEGYBLOCK *sbPtr, VECTORCH *zAxisVector,int turnspeed, VECTORCH *offset)
 {
-        extern int cosine[], sine[];
-
         int maxTurnThisFrame;
         int turnThisFrame;
         VECTORCH localZAxisVector;
@@ -1414,9 +1412,7 @@ void NPCGetMovementDirection(STRATEGYBLOCK *sbPtr, VECTORCH *velocityDirection, 
                                         (GMD_myPolyPoints[point1].vy == GMD_myPolyPoints[point2].vy) && 
                                         (GMD_myPolyPoints[point1].vz == GMD_myPolyPoints[point2].vz))
                                         {
-                                                #if (!Saturn)
                                                 LOCALASSERT(1==0);
-                                                #endif
                                                 myPolyEdgeMoveDistances[i] = 0;
                                         }                       
                         }
@@ -1597,7 +1593,7 @@ static int VectorIntersects2dZVector(VECTORCH *vecStart,VECTORCH *vecEnd, int zE
   Tries to find a floor polygon for a given world space location in
   a given module
   --------------------------------------------------------------------*/
-int FindMyFloorPoly(VECTORCH* currentPosition, MODULE* currentModule)
+static int FindMyFloorPoly(VECTORCH* currentPosition, MODULE* currentModule)
 {
         struct ColPolyTag polygonData;
         int positionPoints[2];
@@ -1996,7 +1992,7 @@ AIMODULE *GetNextModuleForLink_Core(AIMODULE *source,AIMODULE *target,int max_de
                                         )) {
                                         /* Is this the target? */
                                         if ( (*AdjModuleRefPtr)==target) {
-                                                /* TRUE!!! */
+                                                /* Yes!!! */
                                                 if (NearLink_Route_Queue[NL_Queue_Exec].first_step) {
                                                         return(NearLink_Route_Queue[NL_Queue_Exec].first_step);
                                                 } else {
@@ -2834,7 +2830,7 @@ AIMODULE *General_GetRetreatModule_Core(STRATEGYBLOCK *sbPtr,AIMODULE *source,in
                                 /* Probably want some validity test for the link. */
                                 if ((AIModuleIsPhysical(*AdjModuleRefPtr))
                                         &&(AIModuleAdmitsPheromones(*AdjModuleRefPtr))
-                                        /* FALSE visibility check? */
+                                        /* No visibility check? */
                                         ) {
                                         
                                         /* Consider depth? */
@@ -2963,11 +2959,11 @@ AIMODULE *General_GetAIModuleForRetreat(STRATEGYBLOCK *sbPtr,AIMODULE *fearModul
                                 /* Probably want some validity test for the link. */
                                 if ((AIModuleIsPhysical(*AdjModuleRefPtr))
                                         &&(AIModuleAdmitsPheromones(*AdjModuleRefPtr))
-                                        /* FALSE visibility check. */
+                                        /* No visibility check. */
                                         ) {
                                         /* Is this my_module? */
                                         if ( (*AdjModuleRefPtr)==my_module) {
-                                                /* TRUE!!! Break out. */
+                                                /* Yes!!! Break out. */
                                                 success=1;
                                                 break;
                                         } else if (
@@ -3237,7 +3233,7 @@ int New_NPC_IsObstructed(STRATEGYBLOCK *sbPtr, NPC_AVOIDANCEMANAGER *manager)
     }
 
     if (numObstructiveCollisions==0) {
-        /* FALSE collisions!  Woohoo!  But don't reset the substate... */
+        /* No collisions!  Woohoo!  But don't reset the substate... */
         return(0);
     }
     
@@ -3266,7 +3262,7 @@ int New_NPC_IsObstructed(STRATEGYBLOCK *sbPtr, NPC_AVOIDANCEMANAGER *manager)
             manager->aggregateNormal=aggregateNormal;
         
             if (New_GetAvoidanceDirection(sbPtr,manager,&aggregateNormal)==0) {
-                /* FALSE valid directions in pass 1 - not dealt with yet! */
+                /* No valid directions in pass 1 - not dealt with yet! */
                 GLOBALASSERT(0);
             }
         
@@ -3289,7 +3285,7 @@ int New_NPC_IsObstructed(STRATEGYBLOCK *sbPtr, NPC_AVOIDANCEMANAGER *manager)
             Normalise(&aggregateNormal);
             /* Then pass that number into the second direction system. */
             if (New_GetSecondAvoidanceDirection(sbPtr,manager,&aggregateNormal)==0) {
-                /* FALSE valid directions in pass 2 - not dealt with yet! */
+                /* No valid directions in pass 2 - not dealt with yet! */
                 GLOBALASSERT(0);
             }
         
@@ -3518,7 +3514,6 @@ int New_GetAvoidanceDirection(STRATEGYBLOCK *sbPtr, NPC_AVOIDANCEMANAGER *manage
                         {
                                 // What follows is an attempt to make sure we don't jump off any cliffs...
                                 VECTORCH test_location;
-                                int test_distance = this_distance / 2;
                                 testDirn.vx *= this_distance;
                                 testDirn.vy *= this_distance;
                                 testDirn.vz *= this_distance;

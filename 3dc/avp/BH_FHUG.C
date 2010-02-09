@@ -7,6 +7,7 @@
 #include "module.h"
 #include "stratdef.h"
 #include "gamedef.h"
+#include "game_statistics.h"
 #include "dynblock.h"
 #include "dynamics.h"
 #include "comp_shp.h"
@@ -32,7 +33,6 @@
 extern int ModuleArraySize;
 extern char *ModuleCurrVisArray;
 extern int NormalFrameTime;
-extern int cosine[], sine[];
 
 extern ACTIVESOUNDSAMPLE ActiveSounds[];
 
@@ -52,7 +52,6 @@ static int HuggerShouldAttackPlayer(void);
 static void SetHuggerAnimationSequence(STRATEGYBLOCK *sbPtr, HUGGER_SUBSEQUENCES seq, int length);
 static void KillFaceHugger(STRATEGYBLOCK *sbPtr,DAMAGE_PROFILE *damage);
 
-static int InContactWithPlayer(DYNAMICSBLOCK *dynPtr);
 static void JumpAtPlayer(STRATEGYBLOCK *sbPtr);
 
 extern SECTION *GetHierarchyFromLibrary(const char *rif_name);
@@ -203,7 +202,7 @@ void FacehuggerBehaviour(STRATEGYBLOCK *sbPtr)
 		Sound_Stop(facehuggerStatusPointer->soundHandle2);
 	}
 
-	/* FALSE far behaviour for facehuggerss */
+	/* No far behaviour for facehuggerss */
 	if(sbPtr->SBdptr) 
 	{
 		if(sbPtr->maintainVisibility) LOCALASSERT(ModuleCurrVisArray[(sbPtr->containingModule->m_index)]);						
@@ -616,28 +615,6 @@ static void Execute_FHNS_Approach(STRATEGYBLOCK *sbPtr)
 		}
 	}		
 
-	/* check for state changes: 
-	firstly, are we in contact with the player? */
-	#if 0
-	if(InContactWithPlayer(dynPtr)&&HuggerShouldAttackPlayer())
-	{
-		fhugStatusPointer->nearBehaviourState = FHNS_Attack;
-		fhugStatusPointer->stateTimer = FACEHUGGER_NEARATTACKTIME;
-		SetHuggerAnimationSequence(sbPtr,HSS_Attack,ONE_FIXED);		
-		dynPtr->DynamicsType = DYN_TYPE_NO_COLLISIONS; 	/* turn off collisons */	
-		dynPtr->GravityOn = 0;							/* turn off gravity */
-		sbPtr->maintainVisibility = 0;					/* turn off visibility support- be carefull! */
-
-		/* Attach to player! */
-		{
-			PLAYER_STATUS *playerStatusPointer= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
-			
-			playerStatusPointer->MyFaceHugger=sbPtr;
-		}
-		return;
-	}
-	#endif
-
 	/* is player visible?: if not, go to wait */
 	if(!HuggerShouldAttackPlayer())
 	{
@@ -776,8 +753,6 @@ void PlotFaceHugger(STRATEGYBLOCK *sbPtr) {
 
 static void Execute_FHNS_Attack(STRATEGYBLOCK *sbPtr)
 {
-	extern VIEWDESCRIPTORBLOCK *ActiveVDBList[];
-
 	DYNAMICSBLOCK *dynPtr;
 	FACEHUGGER_STATUS_BLOCK *facehuggerStatusPointer;    
 	
@@ -931,23 +906,6 @@ static int HuggerShouldAttackPlayer(void)
 	if(AvP.PlayerType==I_Alien) return 0;
 
 	return 1;
-}
-
-static int InContactWithPlayer(DYNAMICSBLOCK *dynPtr)
-{
-	struct collisionreport *nextReport;
-
-	LOCALASSERT(dynPtr);
-	nextReport = dynPtr->CollisionReportPtr;
-	
-	/* walk the collision report list, looking for collisions against the player */
-	while(nextReport)
-	{
-		if(nextReport->ObstacleSBPtr == Player->ObStrategyBlock) return 1;
-		nextReport = nextReport->NextCollisionReportPtr;
-	}
-	
-	return 0;	
 }
 
 static void JumpAtPlayer(STRATEGYBLOCK *sbPtr)

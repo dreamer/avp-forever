@@ -101,7 +101,6 @@
 
 		INAN_FRAG * fragments;
 		int num_frags;
-		
 	} TOOLS_DATA_INANIMATEOBJECT;
 
 	#define DEFAULT_OBJECT_INTEGRITY (100)

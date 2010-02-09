@@ -1,23 +1,16 @@
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
-
 #include "stratdef.h"
 #include "gamedef.h"
-
 #include "bh_types.h"
-//#include "comp_shp.h"
 #include "dynblock.h"
 #include "dynamics.h"
-//#include "lighting.h"
-
 #include "pfarlocs.h"
 
 #include "pvisible.h"
 #include "load_shp.h"
 #include "particle.h"
-
-#include "bh_types.h"
 #include "bh_RubberDuck.h"			   
 #include "bh_weap.h"
 #include "sfx.h"
@@ -284,9 +277,8 @@ extern void CreateFlamingDebris(VECTORCH *positionPtr, VECTORCH *dirPtr)
 		tempModule.m_lightarray = (struct lightblock *)0;
 		tempModule.m_extraitemdata = (struct extraitemdata *)0;
 		tempModule.m_dptr = NULL; /* this is important */
-		#if SupportWIndows95
 		tempModule.name = NULL; /* this is important */
-		#endif
+
 		AllocateModuleObject(&tempModule); 
 		dPtr = tempModule.m_dptr;		
 		if(dPtr==NULL)
@@ -343,4 +335,3 @@ void CreateRubberDucks(void)
 		while(--i);
 	}
 }
-	

@@ -892,10 +892,10 @@ void FlushTextprintBuffer(void)
 			if (fTextLost)
 			{
 				/* Display error message in case test has been lost due to clipping of Y edge, or buffer overflow */
-				int i;
-				int NumChars=strlen(TextLostMessage);
+				size_t NumChars = strlen(TextLostMessage);
+				size_t i;
 
-				for (i=0;i<NumChars;i++)
+				for (i = 0; i < NumChars; i++)
 				{
 	   //			   	BlitWin95Char(TEXT_LOST_X+(i*CharWidth),TEXT_LOST_Y,TextLostMessage[i]);
 				}

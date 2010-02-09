@@ -7,7 +7,7 @@
 #ifndef _missions
 #define _missions 1
 
-	#if ( defined( __WATCOMC__ ) || defined( _MSC_VER ) )
+	#if defined( _MSC_VER )
 		#pragma once
 	#endif
 
@@ -79,7 +79,6 @@
 			enum TEXTSTRING_ID I_TextString_Description,
 			OurBool bVisible_New
 		);
-		virtual ~MissionHint();
 
 		SCString* GetDesc(void) const;
 
@@ -104,7 +103,8 @@
 		OurBool bVisible_Val;
 
 		static List<MissionHint*> List_pMissionHint;
-
+	public:
+		virtual ~MissionHint();
 	};
 	// Inline methods:
 		inline SCString* MissionHint::GetDesc(void) const
@@ -180,8 +180,6 @@
 			enum MissionEffects MissionFX
 		);
 
-		~MissionObjective();
-
 		static void TestCompleteNext(void);
 
 		int bAchieved(void) const;
@@ -241,7 +239,8 @@
 		{
 			return ( MOS_In == MOS_VisibleAndAchieved );
 		}
-
+	public:
+		~MissionObjective();
 	};
 
 		inline int MissionObjective::bAchieved(void) const

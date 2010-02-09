@@ -1,3 +1,5 @@
+#ifndef INVENTRY_H
+#define INVENTRY_H
 /*KJL*****************************************************
 * INVENTRY.H - contains externs to the fns in INVENTRY.C *
 *****************************************************KJL*/
@@ -34,3 +36,5 @@ typedef struct player_starting_equipment
 extern PLAYER_STARTING_EQUIPMENT StartingEquipment;
 
 #define PISTOL_INFINITE_AMMO	(netGameData.pistolInfiniteAmmo)
+
+#endif

@@ -59,7 +59,6 @@ static void AlienContactWeapon(void);
 extern unsigned char KeyboardInput[];
 #endif
 
-//extern int DebouncedGotAnyKey;
 extern unsigned char DebouncedGotAnyKey;
 
 /*KJL*****************************************************
@@ -94,7 +93,6 @@ int executeDemo;
 /* Global Externs */
 extern DISPLAYBLOCK* Player;
 extern int NormalFrameTime;
-extern int cosine[], sine[];
 extern int predHUDSoundHandle;
 extern int predOVision_SoundHandle;
 extern int TauntSoundPlayed;
@@ -102,9 +100,6 @@ extern unsigned char GotAnyKey;
 
 static char FlyModeOn = 0;			
 static char FlyModeDebounced = 0;
-
-static char BonusAbilityDebounced = 0;
-
 extern int deathFadeLevel;
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 
@@ -114,7 +109,6 @@ extern void DeInitialisePlayer(void);
 
 /* some prototypes for this source file */
 static void MakePlayerCrouch(STRATEGYBLOCK* sbPtr);
-static void MakePlayerLieDown(STRATEGYBLOCK* sbPtr);
 static void MaintainPlayerShape(STRATEGYBLOCK* sbPtr);
 static void NetPlayerDeadProcessing(STRATEGYBLOCK* sbPtr);
 static void CorpseMovement(STRATEGYBLOCK *sbPtr);
@@ -122,12 +116,6 @@ static void CorpseMovement(STRATEGYBLOCK *sbPtr);
 extern SECTION * GetNamedHierarchyFromLibrary(const char * rif_name, const char * hier_name);
 extern void NewOnScreenMessage(unsigned char *messagePtr);
 extern void RemoveAllThisPlayersDiscs(void);
-void NetPlayerRespawn(STRATEGYBLOCK *sbPtr);
-
-extern void ChangeToMarine();
-extern void ChangeToAlien();
-extern void ChangeToPredator();
-extern STRATEGYBLOCK* CreateGrenadeKernel(AVP_BEHAVIOUR_TYPE behaviourID, VECTORCH *position, MATRIXCH *orient,int fromplayer);
 int timeInContactWithFloor;
 
 extern int weaponHandle;
@@ -1172,8 +1160,6 @@ static void CorpseMovement(STRATEGYBLOCK *sbPtr)
   ------------------------------------------------------*/
 static void NetPlayerDeadProcessing(STRATEGYBLOCK *sbPtr)
 {
-//	SECTION *root_section;
-
 	PLAYER_STATUS *psPtr= (PLAYER_STATUS *) (sbPtr->SBdataptr);
 
 	/* call the read input function so that we can still respawn/quit, etc */
@@ -1203,7 +1189,7 @@ static void NetPlayerDeadProcessing(STRATEGYBLOCK *sbPtr)
 
 					default :
 						GLOBALASSERT("dodgy character type"==0);
-						break;	
+						break;
 				}
 
 				netGameData.myCharacterType=netGameData.myNextCharacterType;
@@ -1253,7 +1239,6 @@ extern void InitPlayerCloakingSystem(void);
 void NetPlayerRespawn(STRATEGYBLOCK *sbPtr)
 {
 	extern int LeanScale;
-//	SECTION *root_section;
 
 	PLAYER_STATUS *psPtr= (PLAYER_STATUS *) (sbPtr->SBdataptr);
 
@@ -1676,7 +1661,7 @@ static void LoadInMovementValues(void)
 }
 #endif
 
-extern void ThrowAFlare(void)
+void ThrowAFlare(void)
 {
 	extern int NumberOfFlaresActive;
 	

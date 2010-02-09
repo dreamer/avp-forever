@@ -141,18 +141,11 @@ void DeathVolumeBehaveFun(STRATEGYBLOCK* vol_sbptr)
 
 					//reset network killer id
 					myNetworkKillerId = AvPNetID;
-		
 				}
-			
 			}
 		}
-		
-		
 	}
-
 }
-
-
 
 /*--------------------**
 ** Loading and Saving **

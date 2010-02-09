@@ -147,6 +147,7 @@ void FarAlienBehaviour(STRATEGYBLOCK *sbPtr)
 		}
 		default:
 		{
+			descriptor = NULL;
 			LOCALASSERT(1==0); /* should never get here */
 		}
 	}
@@ -397,7 +398,7 @@ static void Execute_AFS_Attack(STRATEGYBLOCK *sbPtr) {
 
 static void Execute_AFS_Avoidance(STRATEGYBLOCK *sbPtr) {
 
-	/* FALSE obstacles in far behaviour. */
+	/* No obstacles in far behaviour. */
 	ALIEN_STATUS_BLOCK *alienStatusPointer;    
 
 	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    

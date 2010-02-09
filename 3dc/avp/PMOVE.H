@@ -73,9 +73,9 @@ typedef enum player_morph_state
 extern void InitPlayerMovementData(STRATEGYBLOCK* sbPtr);
 extern void PlayerBehaviour(STRATEGYBLOCK* sbptr);
 extern void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr);
-
-extern void ThrowAFlare(void);
+void ThrowAFlare(void);
 void StartPlayerTaunt(void);
+void NetPlayerRespawn(STRATEGYBLOCK *sbPtr);
 
 
 #ifdef __cplusplus

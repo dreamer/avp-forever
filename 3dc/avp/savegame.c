@@ -1024,6 +1024,7 @@ static void SaveStrategies()
 				SaveStrategy_Frisbee(sbPtr);
 				break;
 
+			default: ;
 		}
 	}
 	
@@ -1212,6 +1213,7 @@ static void LoadStrategy(SAVE_BLOCK_STRATEGY_HEADER* header)
 		case I_BehaviourFrisbee :
 			LoadStrategy_Frisbee(header);
 			break;
+		default: ;
 	}
 }
 
@@ -1337,6 +1339,8 @@ extern void ResetNumberOfSaves()
 		case I_Hard :
 		case I_Impossible :
 			NumberOfSavesLeft = NUM_SAVES_FOR_HARD_MODE;
+			break;
+		default:
 			break;
 	}
 }

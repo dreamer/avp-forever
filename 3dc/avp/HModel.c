@@ -45,7 +45,6 @@ int Simplify_HModel_Rendering=0;
 extern enum PARTICLE_ID GetBloodType(STRATEGYBLOCK *sbPtr);
 extern void DoShapeAnimation (DISPLAYBLOCK * dptr);
 extern void RenderThisHierarchicalDisplayblock(DISPLAYBLOCK *dbPtr);
-extern void MakeSprayOfSparks(MATRIXCH *orientationPtr, VECTORCH *positionPtr);
 void MatToQuat (MATRIXCH *m, QUAT *quat);
 
 /* protos for this file */
@@ -58,8 +57,6 @@ void Budge_HModel(HMODELCONTROLLER *controller,VECTORCH *offset);
 
 /* external globals */
 extern int NormalFrameTime;
-extern int sine[];
-extern int cosine[];
 extern int GlobalFrameCounter;
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 
@@ -94,16 +91,16 @@ MATRIXCH Identity_RotMat = {
 
 void QNormalise(QUAT *q)
 {
-	float nw = (float)q->quatw;
-	float nx = (float)q->quatx;
-	float ny = (float)q->quaty;
-	float nz = (float)q->quatz;
+	float nw = q->quatw;
+	float nx = q->quatx;
+	float ny = q->quaty;
+	float nz = q->quatz;
 	
-	float m = (float)sqrt(nw*nw+nx*nx+ny*ny+nz*nz);
+	float m = sqrt(nw*nw+nx*nx+ny*ny+nz*nz);
 	
 	if (!m) return;
 		
-	m = 65536.0f/m;
+	m = 65536.0/m;
 
 	f2i(q->quatw,nw * m);
 	f2i(q->quatx,nx * m);

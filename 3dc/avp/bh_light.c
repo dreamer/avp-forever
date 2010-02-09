@@ -337,9 +337,8 @@ void MakePlacedLightNear(STRATEGYBLOCK *sbPtr)
 	tempModule.m_lightarray = pl_bhv->light;
 	tempModule.m_extraitemdata = (struct extraitemdata *)0;
 	tempModule.m_dptr = NULL; /* this is important */
-	#if SupportWIndows95
 	tempModule.name = NULL; /* this is important */
-	#endif
+
 	AllocateModuleObject(&tempModule); 
 	dPtr = tempModule.m_dptr;		
 	if(dPtr==NULL) return; /* cannot create displayblock, so leave object "far" */
@@ -366,8 +365,7 @@ void MakePlacedLightNear(STRATEGYBLOCK *sbPtr)
 
 void KillLightForRespawn(STRATEGYBLOCK *sbPtr)
 {
-	PLACED_LIGHT_BEHAV_BLOCK* pl_bhv = sbPtr->SBdataptr;
-	LOCALASSERT(pl_bhv);
+	LOCALASSERT(sbPtr->SBdptr);
 	LOCALASSERT(AvP.Network!=I_No_Network);
 
 	/* make the light invisible, and remove it from visibility management */
@@ -545,6 +543,7 @@ void SendRequestToPlacedLight(STRATEGYBLOCK* sbptr,BOOL state,int extended_data)
 					
 					case Light_State_StrobeDownDelay:
 						pl_bhv->timer+=pl_bhv->fade_down_time;
+					default: ;
 				}
 			}
 		

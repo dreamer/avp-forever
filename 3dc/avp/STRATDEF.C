@@ -37,10 +37,6 @@ static STRATEGYBLOCK  **ActiveStBlockListPtr = &ActiveStBlockList[0];
 
 unsigned int IncrementalSBname;
 
-/**** improted globals ************/
-
-extern int cosine[], sine[];
-
 /*
 
  Support functions for Strategy Blocks

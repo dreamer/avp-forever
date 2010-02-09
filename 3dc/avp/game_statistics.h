@@ -52,10 +52,7 @@ typedef struct
 	int Killed[STATS_VICTIM_MAXIMUM];
 	int Decapitated[STATS_VICTIM_MAXIMUM];
 
-	union {
-		int Trophies[STATS_VICTIM_MAXIMUM];
-		int LiveHeadBites[STATS_VICTIM_MAXIMUM];
-	};
+	int TrophiesOrLiveHeadBites[STATS_VICTIM_MAXIMUM];
 
 	int DeadHeadBites[STATS_VICTIM_MAXIMUM];
 	int ShotsFired;
@@ -99,6 +96,9 @@ extern void CurrentGameStats_CreatureKilled(STRATEGYBLOCK *sbPtr,SECTION_DATA *s
 extern void CurrentGameStats_TrophyCollected(STRATEGYBLOCK *sbPtr);
 extern void CurrentGameStats_HeadBitten(STRATEGYBLOCK *sbPtr);
 extern void InitialiseCurrentGameStatistics(void);
+extern void CurrentGameStats_Initialise(void);
+extern void DoFailedLevelStatisticsScreen(void);
+extern void DoStatisticsScreen(int completed_level);
 
 #ifdef __cplusplus
 }
