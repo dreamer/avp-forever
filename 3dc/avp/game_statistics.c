@@ -1299,8 +1299,7 @@ extern void DoStatisticsScreen(int completed_level)
 						if ((completed_level)&&(level_num<AVP_ENVIRONMENT_END_OF_LIST)&&(NotCheating)) {
 							/* Is it a new best? */
 							if (UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].TrophiesOrLiveHeadBites[i]<=CurrentGameStatistics.LiveHeadBites[i]) {
-								UserPr
-									ofilePtr->PersonalBests[AvP.Difficulty][level_num].TrophiesOrLiveHeadBites[i]=CurrentGameStatistics.LiveHeadBites[i];
+								UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].TrophiesOrLiveHeadBites[i]=CurrentGameStatistics.LiveHeadBites[i];
 								colour_to_draw=COLOUR_GREEN;
 							}
 						}
