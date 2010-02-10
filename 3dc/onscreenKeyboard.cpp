@@ -151,8 +151,6 @@ template <class T> void Osk_AddKey(T buttonLabel, int numWidthBlocks)
 
 void Osk_Init()
 {
-	return;
-
 	currentRow = 0;
 	currentColumn = 0;
 /*
@@ -307,8 +305,6 @@ std::string Osk_GetKeyLabel(int buttonIndex)
 
 void Osk_Activate()
 {
-	return;
-
 	if (is_inited == false)
 		Osk_Init();
 

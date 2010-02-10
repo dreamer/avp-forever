@@ -521,7 +521,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 
 	AVPTEXTURE *d3d_texture = (AVPTEXTURE*)malloc(sizeof(AVPTEXTURE));
 
-	unsigned char *buffer = (unsigned char *)malloc(m_nWidth * m_nHeight * 4);
+	uint8_t *buffer = (uint8_t *)malloc(m_nWidth * m_nHeight * sizeof(uint32_t));
 
 	unsigned int y = 0;
 

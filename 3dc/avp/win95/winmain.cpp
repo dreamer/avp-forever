@@ -371,7 +371,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	/******* System initialisation **********/
 
-	timeBeginPeriod(1); 
+	timeBeginPeriod(1);
 
 	InitialiseSystem(hInstance, nCmdShow);
 	InitialiseRenderer();

@@ -28,6 +28,7 @@
 /*  typedef IDirect3DSurface    DDSurface;   */
 /*********************************************/
 #include "aw.h"
+#include "stdint.h"
 
 /***********************************************************************************/
 /* awTexLd.h - Author: Jake Hotson                                                 */

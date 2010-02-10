@@ -170,7 +170,6 @@ void Animation_Chunk::fill_data_block(char* data_start)
 				data_start+=4;
 			}
 		}
-
 	}
 }
 

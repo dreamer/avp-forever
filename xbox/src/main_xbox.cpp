@@ -53,11 +53,6 @@ New sound system
 #include "networking.h"
 #include "avpview.h"
 
-#define PROFILING_ON 0
-#if PROFILING_ON
-#include "pentime.h"
-#endif
-
 /*
 
  externs for commonly used global variables and arrays
@@ -94,7 +89,6 @@ BOOL UseMouseCentreing = FALSE;
 BOOL KeepMainRifFile = FALSE;
 
 char LevelName[] = {"predbit6\0QuiteALongNameActually"};
-static ELO ELOLevelToLoad = { LevelName };
 
 int VideoModeNotAvailable = 0;
 int QuickStartMultiplayer = 1;
@@ -124,10 +118,13 @@ extern int AvP_MainMenus(void);
 extern int AvP_InGameMenus(void);
 extern int InGameMenusAreRunning(void);
 extern void LoadDeviceAndVideoModePreferences();
+extern void InitFmvCutscenes();
 
 #include "VideoModes.h"
 extern DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
 extern struct DEBUGGINGTEXTOPTIONS ShowDebuggingText;
+
+int unlimitedSaves = 0;
 
 void exit_break_point_fucntion ()
 {
@@ -151,17 +148,11 @@ void _cdecl main()
 	I_AVP_ENVIRONMENTS level_to_load = I_Num_Environments;
 
 	_controlfp(_PC_24,_MCW_PC); // bjd - CHECK
-/*
-	#if debug
-	int level_to_load = I_Num_Environments;
-	char * command_line = argv;
-	#endif
 
-//	AVP_HInstance = hInst = hInstance;
-//	AVP_NCmd = nCmdShow;
-*/
+	InitFmvCutscenes();
 
-	LoadDeviceAndVideoModePreferences();
+	// load AliensVsPredator.cfg
+	Config_Load();
 
 	LoadCDTrackList(); //load list of cd tracks assigned to levels , from a text file
 	LoadVorbisTrackList(); // do the same for any user ogg vorbis music files
@@ -368,8 +359,10 @@ void _cdecl main()
 */
 	#endif
 
-	Env_List[0] = &(ELOLevelToLoad);
-	level_to_load = I_Gen1;
+	Env_List[0]->main = LevelName;
+
+	// as per linux port
+	AvP.CurrentEnv = AvP.StartingEnv = I_Gen1;
 
 	/*******	System initialisation **********/
 
@@ -383,7 +376,10 @@ void _cdecl main()
 		ReleaseDirect3D();
 	}
 
+	LoadDeviceAndVideoModePreferences();
+
 	LoadKeyConfiguration();
+
 	/********** Grab The Video mode **********/
 	/* JH - nope, not yet; not until we start the menus
 		(or if debugging, start the game), do we need to
@@ -424,10 +420,12 @@ void _cdecl main()
 */
 		#endif
 
-//		Env_List[0] = &(ELOLevelToLoad);
-//		level_to_load = 0;
-//		AvP.PlayerType = I_Marine;
-
+		// support removing limit on number of game saves
+		if (!Config_GetBool("[Misc]", "UnlimitedSaves", false))
+		{
+			unlimitedSaves = 0;
+		}
+		else unlimitedSaves = 1;
 
 		/* turn off any special effects */
 		d3d_light_ctrl.ctrl = LCCM_NORMAL;
@@ -438,23 +436,7 @@ void _cdecl main()
 			(not necessary if user selects EXIT)
 			So it is set here */
 
-		ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth);
-
-	    /* Dubious restart hack for DirectDraw problems */
-		/* JH - I'm not sure this is really necessary
-			- it only comes into play if you try and set
-			a video mode which is not supported
-			BUT we are never going to try and do that
-			- or are we? */
-//	    HandleVideoModeRestarts(hInstance, nCmdShow);
-
-
-		/* Check Gamma Settings are correct after video mode change */
-//bjd		InitialiseGammaSettings(RequestedGammaSetting);
-
-		/**** init the chunk loaders ***************/
-
-		// no longer required here
+//		ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth);
 
 		// Load precompiled shapes
 	    start_of_loaded_shapes = load_precompiled_shapes();
@@ -462,27 +444,6 @@ void _cdecl main()
 		/***********  Load up the character stuff *******/
 
 		InitCharacter();
-
-		/* KJL 17:56:14 26/02/98 - load a font required for Dave's HUD */
-//		LoadPFFont(DATABASE_MESSAGE_FONT);
-
-		/***********  Read in the env Map	 **************/
-
-		#if debug
-  		if(level_to_load != I_Num_Environments)
-  		{
-  			if((level_to_load < 0) || (level_to_load > I_Num_Environments))
- 				#ifdef MPLAYER_DEMO
- 					level_to_load = I_Dml1;
- 				#else
- 					level_to_load = I_Sp1;
- 				#endif
-
-  			AvP.CurrentEnv = AvP.StartingEnv = level_to_load;
-  		}
-		#else
-			AvP.CurrentEnv = AvP.StartingEnv = I_Gen1;
-		#endif
 
 		LoadRifFile(); /* sets up a map*/
 		#if debug
@@ -528,12 +489,6 @@ void _cdecl main()
 
 		while(AvP.MainLoopRunning)
 		{
-			#if debug
-			#if 0
-			DumpBoundsCheckInfo(DUMPTOSCREEN);
-			#endif
-			#endif
-
 		 	CheckForWindowsMessages();
 			CursorHome();
 
@@ -694,65 +649,48 @@ void _cdecl main()
 
 
 		}// end of main game loop
-		{
-			AvP.LevelCompleted = thisLevelHasBeenCompleted;
-			mainMenu = 1;
-		}
+
+		AvP.LevelCompleted = thisLevelHasBeenCompleted;
+		mainMenu = 1;
 
 		FixCheatModesInUserProfile(UserProfilePtr);
 
 		#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
 		TimeStampedMessage("We're out of the main loop");
 
-		/* KJL 17:56:14 26/02/98 - unload a font required for Dave's HUD */
-//		UnloadFont(&AvpFonts[DATABASE_MESSAGE_FONT]);
-
 		ReleaseAllFMVTextures();
-
-		/* DHM 23/3/98 */
-//		REBMENUS_ProjectSpecific_EndOfMainLoopHook();
 
 		/* DHM 8/4/98 */
 		CONSBIND_WriteKeyBindingsToConfigFile();
-		TimeStampedMessage("After key bindings writen");
 
 		/* CDF 2/10/97 */
 		DeInitialisePlayer();
-		TimeStampedMessage("After DeInitialisePlayer");
 
 		DeallocatePlayersMirrorImage();
-		TimeStampedMessage("After DeallocatePlayersMirrorImage");
+
+		// bjd - here temporarily as a test
+		SoundSys_StopAll();
 
 		Destroy_CurrentEnvironment();
-		TimeStampedMessage("After Destroy_CurrentEnvironment");
-		DeallocateAllImages();
-		TimeStampedMessage("After DeallocateAllImages");
-		EndNPCs(); /* JH 30/4/97 - unload npc rifs */
-		TimeStampedMessage("After EndNPCs");
-		ExitGame();
 
-		// set menu resolution
-		ChangeGameResolution(640, 480, 32);
+		DeallocateAllImages();
+
+		EndNPCs(); /* JH 30/4/97 - unload npc rifs */
+
+		ExitGame();
 
 		#endif
 		/* Patrick 26/6/97
 		Stop and remove all game sounds here, since we are returning to the menus */
-		SoundSys_StopAll();
+//		SoundSys_StopAll();
 		ResetEaxEnvironment();
 		//make sure the volume gets reset for the menus
 		SoundSys_ResetFadeLevel();
 
-		TimeStampedMessage("After SoundSys_StopAll");
-
-//		SoundSys_RemoveAll();
-
-		TimeStampedMessage("After SoundSys_RemoveAll");
 		CDDA_Stop();
 		Vorbis_CloseSystem(); // stop ogg vorbis player
-		TimeStampedMessage("After CDDA_Stop");
 
-		/* netgame support */
-		#if SupportWindows95 /* call me paranoid */
+		// netgame support
 		if(AvP.Network != I_No_Network)
 		{
 			/* we cleanup and reset our game mode here, at the end of the game loop, as other
@@ -760,7 +698,6 @@ void _cdecl main()
 			EndAVPNetGame();
 			//EndOfNetworkGameScreen();
 		}
-		#endif
 
 		//need to get rid of the player rifs before we can clear the memory pool
 
@@ -797,24 +734,17 @@ void _cdecl main()
 	QuickSplashScreens();
 	#endif
 	#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
-	TimeStampedMessage("After SoundSys_End");
-	TimeStampedMessage("After CDDA_End");
-	/* unload language file */
-//	KillTextStrings();
-// 	TimeStampedMessage("After KillTextStrings");
-	ExitSystem();
-	TimeStampedMessage("After ExitSystem");
 
-//	ffKill(); /* to avoid misreported memory leaks */
-	TimeStampedMessage("After ffKill");
+	ExitSystem();
+
+	Config_Save();
+
 	#else
 	SoundSys_End();
 	ReleaseDirect3D();
-	//TimeStampedMessage("after ReleaseDirect3D");
 
 	/* Kill windows procedures */
 	ExitWindowsSystem();
-	//TimeStampedMessage("after ExitWindowsSystem");
 
 	#endif
  	CDDA_End();
