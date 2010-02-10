@@ -324,7 +324,7 @@ void const * ffreadbuf(char const * filename, size_t * p_len)
 		data = i_ff()->FindFile(filename,p_len);
 		if (data) return data;
 	}
-		
+
 	// try loading another big catfile
 	
 	for (LIF<FFileDesc> i_fdesc(&fdesclist); !i_fdesc.done(); i_fdesc.next())

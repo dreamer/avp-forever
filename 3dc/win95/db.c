@@ -97,7 +97,8 @@ int db_option = 0; /* Default is off. */
 #define DB_FORCE_EXCEPTION()	( db_vol_zero = 1 / db_vol_zero )
 
 /* Cause a brakepoint. */
-#define DB_FORCE_BRAKEPOINT()	do {__asm int 3} while(0)
+//#define DB_FORCE_BRAKEPOINT()	do {__asm int 3} while(0)
+#define DB_FORCE_BRAKEPOINT()	__debugbreak()
 
 /* T Y P E S ********************************************************** */
 
