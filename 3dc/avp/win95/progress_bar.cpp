@@ -69,7 +69,7 @@ void Start_Progress_Bar()
 		//see if graphic can be found in fast file
 		unsigned int fastFileLength;
 		void const * pFastFileData = ffreadbuf(buffer, &fastFileLength);
-		
+
 		if (pFastFileData)
 		{
 			//load from fast file

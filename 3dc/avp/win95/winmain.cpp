@@ -124,7 +124,7 @@ void exit_break_point_fucntion ()
 	#if debug
 	if (WindowMode == WindowModeSubWindow)
 	{
-		__asm int 3;
+		__debugbreak();
 	}
 	#endif
 }
