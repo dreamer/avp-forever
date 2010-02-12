@@ -4790,7 +4790,7 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_textu
 	}
 }
 
-void DrawQuad(int x, int y, int width, int height, int textureID, int colour, enum TRANSLUCENCY_TYPE translucencyType) 
+void DrawQuad(int x, int y, int width, int height, int textureID, int colour, enum TRANSLUCENCY_TYPE translucencyType)
 {
 	float x1 = (float(x / 640.0f) * 2) - 1;
 	float y1 = (float(y / 480.0f) * 2) - 1;

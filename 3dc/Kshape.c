@@ -32,8 +32,6 @@
 #include "detaillevels.h"
 #include "avp_userprofile.h"
 
-#include "d3dx9.h"
-
 #define ALIENS_LIFEFORCE_GLOW_COLOUR 0x20ff8080
 #define MARINES_LIFEFORCE_GLOW_COLOUR 0x208080ff
 #define PREDATORS_LIFEFORCE_GLOW_COLOUR 0x2080ff80

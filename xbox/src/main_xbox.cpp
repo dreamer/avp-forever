@@ -17,7 +17,6 @@ extern "C" {
 
 #include "chnkload.hpp"
 #include "npcsetup.h" /* JH 30/4/97 */
-#include "krender.h"
 #include "pldnet.h"
 #include "avpview.h"
 #include "scrshot.hpp"

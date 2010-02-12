@@ -11,6 +11,7 @@
 #include "iofocus.h"
 #include "logString.h"
 #include "font2.h"
+#include "stdint.h"
 
 extern "C" 
 {

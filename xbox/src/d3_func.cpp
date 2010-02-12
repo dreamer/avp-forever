@@ -220,7 +220,7 @@ D3DTEXTURE CreateD3DTallFontTexture (AVPTEXTURE *tex)
 
 		srcPtr = (uint8_t*)tex->buffer;
 
-		D3DCOLOR pad_colour = D3DCOLOR_XRGB(0,0,0);
+		D3DCOLOR padColour = D3DCOLOR_XRGB(0,0,0);
 
 		// lets pad the whole thing black first
 		for (int y = 0; y < padHeight; y++)
@@ -737,7 +737,7 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 			width = 800;
 			height = 600;
 
-			ChangeWindowsSize(width, height);
+//			ChangeWindowsSize(width, height);
 
 			d3d.d3dpp.BackBufferWidth = width;
 			d3d.d3dpp.BackBufferHeight = height;

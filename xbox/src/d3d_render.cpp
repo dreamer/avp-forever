@@ -7259,75 +7259,74 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE8 bar_textu
 	}
 }
 
-void DrawQuad(int x, int y, int width, int height, int colour)
+void DrawQuad(int x, int y, int width, int height, int textureID, int colour, enum TRANSLUCENCY_TYPE translucencyType)
 {
-//	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_NORMAL);
+	float x1 = (float(x / 640.0f) * 2) - 1;
+	float y1 = (float(y / 480.0f) * 2) - 1;
 
-	LastError = d3d.lpD3DDevice->SetTexture(0, NULL);
-	if (FAILED(LastError))
+	float x2 = ((float(x + width) / 640.0f) * 2) - 1;
+	float y2 = ((float(y + height) / 480.0f) * 2) - 1;
+
+	int texturePOW2Width, texturePOW2Height;
+
+	// if in menus (outside game)
+	if (mainMenu)
 	{
-		LogDxError(LastError, __LINE__, __FILE__);
+		texturePOW2Width = AvPMenuGfxStorage[textureID].newWidth;
+		texturePOW2Height = AvPMenuGfxStorage[textureID].newHeight;
 	}
-	currentTextureId = NULL;
+	else
+	{
+		texturePOW2Width = ImageHeaderArray[textureID].ImageWidth;
+		texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
+	}
 
-	ChangeTranslucencyMode(TRANSLUCENCY_NORMAL);
-
-	int index = 0;
+	// create a new list item for it
+	orthoList[orthoListCount].textureID = textureID;
+	orthoList[orthoListCount].vertStart = orthoOffset;
+	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
+	orthoList[orthoListCount].translucency_type = translucencyType;
+	orthoListCount++;
 
 	// bottom left
-	quadVert[index].sx = (float)x - 0.5f;
-	quadVert[index].sy = (float)y + height - 0.5f;
-	quadVert[index].sz = 0.0f;
-	quadVert[index].rhw = 1.0f;
-	quadVert[index].color = colour;
-	quadVert[index].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[index].tu = 0.0f;
-	quadVert[index].tv = 0.0f;
+	orthoVerts[orthoOffset].x = x1;
+	orthoVerts[orthoOffset].y = y2;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = 0.0f;
+	orthoVerts[orthoOffset].v = (1.0f / texturePOW2Height) * height;
 
-	index++;
+	orthoOffset++;
 
 	// top left
-	quadVert[index].sx = (float)x - 0.5f;
-	quadVert[index].sy = (float)y - 0.5f;
-	quadVert[index].sz = 0.0f;
-	quadVert[index].rhw = 1.0f;
-	quadVert[index].color = colour;
-	quadVert[index].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[index].tu = 0.0f;
-	quadVert[index].tv = 0.0f;
+	orthoVerts[orthoOffset].x = x1;
+	orthoVerts[orthoOffset].y = y1;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = 0.0f;
+	orthoVerts[orthoOffset].v = 0.0f;
 
-	index++;
+	orthoOffset++;
 
 	// bottom right
-	quadVert[index].sx = (float)x + width - 0.5f;
-	quadVert[index].sy = (float)y + height - 0.5f;
-	quadVert[index].sz = 0.0f;
-	quadVert[index].rhw = 1.0f;
-	quadVert[index].color = colour;
-	quadVert[index].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[index].tu = 0.0f;
-	quadVert[index].tv = 0.0f;
+	orthoVerts[orthoOffset].x = x2;
+	orthoVerts[orthoOffset].y = y2;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVerts[orthoOffset].v = (1.0f / texturePOW2Height) * height;
 
-	index++;
+	orthoOffset++;
 
 	// top right
-	quadVert[index].sx = (float)x + width - 0.5f;
-	quadVert[index].sy = (float)y - 0.5f;
-	quadVert[index].sz = 0.0f;
-	quadVert[index].rhw = 1.0f;
-	quadVert[index].color = colour;
-	quadVert[index].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[index].tu = 0.0f;
-	quadVert[index].tv = 0.0f;
+	orthoVerts[orthoOffset].x = x2;
+	orthoVerts[orthoOffset].y = y1;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVerts[orthoOffset].v = 0.0f;
 
-//	OUTPUT_TRIANGLE(0,1,2, 4);
-//	OUTPUT_TRIANGLE(1,2,3, 4);
-
-	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
+	orthoOffset++;
 }
 
 #if 0
