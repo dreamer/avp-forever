@@ -151,6 +151,7 @@ template <class T> void Osk_AddKey(T buttonLabel, int numWidthBlocks)
 
 void Osk_Init()
 {
+
 	currentRow = 0;
 	currentColumn = 0;
 /*

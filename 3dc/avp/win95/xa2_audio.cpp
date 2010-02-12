@@ -58,8 +58,8 @@ struct SoundConfigTag
   ----------------------------------------------------------------------------*/
 SOUNDSAMPLEDATA GameSounds[SID_MAXIMUM];		   
 ACTIVESOUNDSAMPLE ActiveSounds[SOUND_MAXACTIVE];
-SOUNDSAMPLEDATA BlankGameSound = {0,0,0,0,NULL,0,NULL};
-ACTIVESOUNDSAMPLE BlankActiveSound = {SID_NOSOUND,ASP_Minimum,0,0,NULL,0,0,0,0,0,{{0,0,0},0,0},NULL, NULL, NULL};
+SOUNDSAMPLEDATA BlankGameSound = {0,0,0,0,FALSE,NULL,0,0,NULL,/*0.0f,*/0,0,NULL,0};
+ACTIVESOUNDSAMPLE BlankActiveSound = {SID_NOSOUND,ASP_Minimum,0,0,NULL,0,0,0,0,0,{{0,0,0},0,0},FALSE, 0, 0, NULL};
 
 
 // XAudio2 globals
@@ -98,7 +98,7 @@ static const signed int vol_to_atten_table[] =
 	-574, -552, -531, -511, -490, -470, -449, -429,
 	-410, -390, -371, -351, -332, -314, -295, -276,
 	-258, -240, -222, -204, -186, -168, -151, -134,
-	-117, -100, -83, -66, -49, -33, -17, 0,
+	-117, -100, -83, -66, -49, -33, -17, 0
 };
 
 
@@ -321,7 +321,7 @@ static const float pitch_to_frequency_mult_table [] =
 	1.971326397F,	1.972216194F,	1.973106392F,	1.973996992F,	1.974887994F,	1.975779399F,	1.976671205F,	1.977563415F,
 	1.978456026F,	1.979349041F,	1.980242459F,	1.98113628F,	1.982030505F,	1.982925133F,	1.983820165F,	1.984715601F,
 	1.985611441F,	1.986507685F,	1.987404335F,	1.988301388F,	1.989198847F,	1.990096711F,	1.99099498F,	1.991893654F,
-	1.992792734F,	1.99369222F,	1.994592112F,	1.99549241F,	1.996393115F,	1.997294226F,	1.998195744F,	1.999097668F,
+	1.992792734F,	1.99369222F,	1.994592112F,	1.99549241F,	1.996393115F,	1.997294226F,	1.998195744F,	1.999097668F
 };
 
 /* Enviromental Presets. */
@@ -393,7 +393,7 @@ int PlatStartSoundSys()
 	/* Set the globals. */
 	SoundConfig.flags			= SOUND_DEFAULT;
 	SoundConfig.reverb_changed	= TRUE;
-	SoundConfig.reverb_mix		= 0.0F;
+	SoundConfig.reverb_mix		= 0.0f;
 	SoundConfig.env_index		= 1000;
 
 	if (FAILED(CoInitializeEx (NULL, COINIT_MULTITHREADED)))
@@ -436,8 +436,8 @@ int PlatStartSoundSys()
 	}
 */
 	// Create a mastering voice
-//	LastError = pXAudio2->CreateMasteringVoice(&pMasteringVoice, 0, 44100, 0, 0, 0);
-	LastError = pXAudio2->CreateMasteringVoice(&pMasteringVoice);
+	LastError = pXAudio2->CreateMasteringVoice(&pMasteringVoice, 0, 44100, 0, 0, 0);
+//	LastError = pXAudio2->CreateMasteringVoice(&pMasteringVoice);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Couldn't create XAudio2 Mastering Voice");
@@ -482,8 +482,8 @@ int PlatStartSoundSys()
 	XA2Listener.pCone = NULL;
 
 	FLOAT32 *matrix = new FLOAT32[deviceDetails.OutputFormat.Format.nChannels];
-	matrix[0] = 0.5f;
-	matrix[1] = 0.5f;
+//	matrix[0] = 0.5f;
+//	matrix[1] = 0.5f;
 
 	XA2DSPSettings.SrcChannelCount = 1;
 	XA2DSPSettings.DstChannelCount = deviceDetails.OutputFormat.Format.nChannels;
@@ -583,24 +583,10 @@ int PlatPlaySound(int activeIndex)
 	{
 		ActiveSounds[activeIndex].is3D = TRUE;
 	}
-/*
-	if((SoundConfig.flags & SOUND_EAX) &&
-		(GameSounds[gameIndex].flags & SAMPLE_IN_HW) &&
-		(ActiveSounds[activeIndex].ds3DBufferP))
-	{
-		db_log5("Going for a EAX property set.");
-		hres = IDirectSound3DBuffer_QueryInterface
-			(
-				ActiveSounds[activeIndex].ds3DBufferP,
-				&IID_IKsPropertySet,
-				(void**) &(ActiveSounds[activeIndex].PropSetP)
-			);
-		if(hres != DD_OK)
-		{
-			db_logf3(("Failed to get the property set for a DirectSoundBuffer. res %x", hres));
-		}
-	}
-*/
+
+	// reverb stuff here
+
+
 	/* may need to initialise pitch before playing */
 	if (ActiveSounds[activeIndex].pitch != GameSounds[gameIndex].pitch)
 	{
@@ -625,6 +611,8 @@ int PlatPlaySound(int activeIndex)
 			/*set distance at which attenuation starts*/
 			if (ActiveSounds[activeIndex].threedeedata.inner_range == 0)
 				ActiveSounds[activeIndex].threedeedata.inner_range = static_cast<int>(1.0f);//DS3D_DEFAULTMINDISTANCE;
+
+//			ActiveSounds[activeIndex].xa2Emitter.pCone
 
 /*
 			hres = IDirectSound3DBuffer_SetMinDistance(ActiveSounds[activeIndex].ds3DBufferP,(D3DVALUE)ActiveSounds[activeIndex].threedeedata.inner_range,DS3D_DEFERRED);
@@ -1244,7 +1232,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		GameSounds[soundNum].xa2Emitter.InnerRadiusAngle = 0.0f;
 		GameSounds[soundNum].xa2Emitter.CurveDistanceScaler = 1.0f;
 		GameSounds[soundNum].xa2Emitter.DopplerScaler = 1.0f;
-		GameSounds[soundNum].xa2Emitter.pChannelAzimuths = GameSounds[soundNum].emitterAzimuths;
+//		GameSounds[soundNum].xa2Emitter.pChannelAzimuths = GameSounds[soundNum].emitterAzimuths;
 
 		{
 			char * wavname = strrchr (wavFileName, '\\');
@@ -1416,7 +1404,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		GameSounds[soundNum].xa2Emitter.InnerRadiusAngle = 0.0f;
 		GameSounds[soundNum].xa2Emitter.CurveDistanceScaler = 1.0f;
 		GameSounds[soundNum].xa2Emitter.DopplerScaler = 1.0f;
-		GameSounds[soundNum].xa2Emitter.pChannelAzimuths = GameSounds[soundNum].emitterAzimuths;
+//		GameSounds[soundNum].xa2Emitter.pChannelAzimuths = GameSounds[soundNum].emitterAzimuths;
 
 		{
 			char * wavname = strrchr (wavFileName, '\\');
@@ -1518,6 +1506,16 @@ void PlatUpdatePlayer()
 			XA2Listener.OrientTop.x = 0.0f;
 			XA2Listener.OrientTop.y = 1.0f;
 			XA2Listener.OrientTop.z = 0.0f;
+
+			char buf2[250];
+			sprintf(buf2, "of:x %f of:y %f of:z :%f - ot:x %f ot:y %f ot:z :%f\n", 
+				XA2Listener.OrientFront.x,
+				XA2Listener.OrientFront.y,
+				XA2Listener.OrientFront.z,
+				XA2Listener.OrientTop.x,
+				XA2Listener.OrientTop.y,
+				XA2Listener.OrientTop.z);
+			OutputDebugString(buf2);
 		}
 		else
 		{
@@ -1527,6 +1525,16 @@ void PlatUpdatePlayer()
 			XA2Listener.OrientTop.x = (float) ((Global_VDB_Ptr->VDB_Mat.mat12) / 65536.0F);
 			XA2Listener.OrientTop.y = (float) ((Global_VDB_Ptr->VDB_Mat.mat22) / 65536.0F);
 			XA2Listener.OrientTop.z = (float) ((Global_VDB_Ptr->VDB_Mat.mat32) / 65536.0F);
+
+			char buf2[250];
+			sprintf(buf2, "of:x %f of:y %f of:z :%f - ot:x %f ot:y %f ot:z :%f\n", 
+				XA2Listener.OrientFront.x,
+				XA2Listener.OrientFront.y,
+				XA2Listener.OrientFront.z,
+				XA2Listener.OrientTop.x,
+				XA2Listener.OrientTop.y,
+				XA2Listener.OrientTop.z);
+			OutputDebugString(buf2);
 		}
 
 		if (AvP.PlayerType == I_Alien && DopplerShiftIsOn && NormalFrameTime)
@@ -1552,7 +1560,8 @@ void PlatUpdatePlayer()
 #endif
 
 	char buf[100];
-	//	UINT32 calcFlags = X3DAUDIO_CALCULATE_MATRIX/* | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT | X3DAUDIO_CALCULATE_REVERB*/; // ????????????????????????????
+	UINT32 calcFlags = X3DAUDIO_CALCULATE_MATRIX/* | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT | X3DAUDIO_CALCULATE_REVERB*/; // ????????????????????????????
+
 	for (int i = 0; i < SOUND_MAXACTIVE; i++)
 	{
 		if (ActiveSounds[i].is3D)
@@ -1560,13 +1569,14 @@ void PlatUpdatePlayer()
 			if (ActiveSounds[i].soundIndex == SID_NOSOUND)
 				continue;
 
-			X3DAudioCalculate(x3DInstance, &XA2Listener, &ActiveSounds[i].xa2Emitter, /*calcFlags*/X3DAUDIO_CALCULATE_MATRIX, &XA2DSPSettings);
+			X3DAudioCalculate(x3DInstance, &XA2Listener, &ActiveSounds[i].xa2Emitter, calcFlags, &XA2DSPSettings);
 
 			sprintf(buf, "1: %f 2: %f\n", XA2DSPSettings.pMatrixCoefficients[0], XA2DSPSettings.pMatrixCoefficients[1]);
 			OutputDebugString(buf);
 
 			ActiveSounds[i].pSourceVoice->SetOutputMatrix(pMasteringVoice, 1, 2, XA2DSPSettings.pMatrixCoefficients);
-//			ActiveSounds[i].pSourceVoice->SetFrequencyRatio(XA2DSPSettings.DopplerFactor);
+
+			ActiveSounds[i].pSourceVoice->SetFrequencyRatio(XA2DSPSettings.DopplerFactor);
 		}
 	}
 
@@ -1776,7 +1786,7 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 		GameSounds[soundIndex].xa2Emitter.ChannelRadius = 1.0f;
 		GameSounds[soundIndex].xa2Emitter.InnerRadius = 0.0f;
 		GameSounds[soundIndex].xa2Emitter.InnerRadiusAngle = 0.0f;
-		GameSounds[soundIndex].xa2Emitter.pChannelAzimuths = GameSounds[soundIndex].emitterAzimuths;
+//		GameSounds[soundIndex].xa2Emitter.pChannelAzimuths = GameSounds[soundIndex].emitterAzimuths;
 
 		#if 0
 		if(res != (size_t)myChunkHeader.chunkLength)

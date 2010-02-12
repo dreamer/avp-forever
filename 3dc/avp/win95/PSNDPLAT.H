@@ -44,7 +44,7 @@ typedef struct soundsampledata
 	XAUDIO2_BUFFER xa2Buffer;
 	X3DAUDIO_EMITTER xa2Emitter;
 	IXAudio2SourceVoice *pSourceVoice;
-	FLOAT32 emitterAzimuths[1];
+//	FLOAT32 emitterAzimuths;//[1];
 #endif
 	unsigned int flags;
 	int dsFrequency;
@@ -91,7 +91,7 @@ typedef struct activesoundsample
 	X3DAUDIO_EMITTER xa2Emitter;
 	IXAudio2SourceVoice *pSourceVoice;
 #endif
-	
+
 }ACTIVESOUNDSAMPLE;
 
 /* Patrick 5/6/97 -------------------------------------------------------------
