@@ -4,12 +4,11 @@
 #ifdef WIN32
 
 #ifdef __cplusplus
-
-extern "C" {
-
+	extern "C" {
 #endif
+
 #include <d3d9.h>
-#include "Dxerr.h"
+#include <Dxerr.h>
 #include "aw.h"
 #include <stdint.h>
 /*

@@ -41,6 +41,7 @@
 	- xbox specific graphics to indicate press B to go back, A to select..
 */
 
+/*
 struct TextureResource
 {
 	std::string fileName;
@@ -50,6 +51,7 @@ struct TextureResource
 };
 
 std::vector<TextureResource> oskTextures;
+*/
 
 extern "C"
 {

@@ -12,8 +12,19 @@
 #define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
 #endif
 
+#define VANILLA
+
 unsigned int __stdcall decodeThread(void *args);
 unsigned int __stdcall audioThread(void *args);
+
+inline int CLAMP(int value)
+{
+	if (value > 255)
+		return 255;
+	else if (value < 0)
+		return 0;
+	else return value;
+}
 
 /* structure holds pointers to y, u, v channels */
 typedef struct _OggPlayYUVChannels {
@@ -116,32 +127,36 @@ TheoraFMV::~TheoraFMV()
 		CloseHandle(mDecodeThreadHandle);
 	}
 
-	// wait for audio thread to finish
-	if (mAudioThreadHandle)
+	if (mAudio)
 	{
-		WaitForSingleObject(mAudioThreadHandle, INFINITE);
-		CloseHandle(mAudioThreadHandle);
-	}
-	
-//FIXME	int ret = ogg_sync_clear(&mState);
-//	assert(ret == 0);
 
-	if (mAudioStream)
-	{
-		AudioStream_ReleaseBuffer(mAudioStream);
-	}
+		// wait for audio thread to finish
+		if (mAudioThreadHandle)
+		{
+			WaitForSingleObject(mAudioThreadHandle, INFINITE);
+			CloseHandle(mAudioThreadHandle);
+		}
+		
+	//FIXME	int ret = ogg_sync_clear(&mState);
+	//	assert(ret == 0);
 
-	if (mAudioData)
-	{
-		delete []mAudioData;
-	}
+		if (mAudioStream)
+		{
+			AudioStream_ReleaseBuffer(mAudioStream);
+		}
 
-	if (mAudioDataBuffer)
-	{
-		delete []mAudioDataBuffer;
-	}
+		if (mAudioData)
+		{
+			delete []mAudioData;
+		}
 
-	delete mRingBuffer;
+		if (mAudioDataBuffer)
+		{
+			delete []mAudioDataBuffer;
+		}
+
+		delete mRingBuffer;
+	}
 
 	if (mDisplayTexture)
 	{
@@ -369,6 +384,8 @@ bool TheoraFMV::NextFrame(int width, int height, uint8_t *bufferPtr, int pitch)
 //	sprintf(buf, "total time: %d\n", timeGetTime() - startTime);
 //	OutputDebugString(buf);
 
+	OutputDebugString("decoded a frame\n");
+
 	mFrameReady = false;
 
 	return true;
@@ -417,6 +434,8 @@ bool TheoraFMV::NextFrame()
 		OutputDebugString("can't unlock FMV texture\n");
 		return false;
 	}
+
+	OutputDebugString("decoded a frame\n");
 
 	mFrameReady = false;
 

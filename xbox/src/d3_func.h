@@ -2,23 +2,13 @@
 #define _included_d3_func_h_
 
 #ifdef __cplusplus
-
-extern "C" {
-
+	extern "C" {
 #endif
 
-#ifdef WIN32
-	#include <d3d9.h>
-	#include "Dxerr9.h"
-
-	#pragma comment(lib, "Dxerr9.lib")
-#endif
-
-#ifdef _XBOX
-	#include <xtl.h>
-#endif
-
+#include <xtl.h>
 #include "aw.h"
+#include "stdint.h"
+
 /*
   Direct3D globals
 */
@@ -50,20 +40,22 @@ typedef struct D3DDriverInfo {
 typedef struct D3DInfo {
     LPDIRECT3D8				lpD3D;
     LPDIRECT3DDEVICE8		lpD3DDevice; 
-    D3DVIEWPORT8			lpD3DViewport; 
-	LPDIRECT3DSURFACE8		lpD3DBackSurface;// back buffer surface
-	D3DSURFACE_DESC			BackSurface_desc; // back buffer surface description
+    D3DVIEWPORT8			D3DViewport; 
 	D3DPRESENT_PARAMETERS	d3dpp;
 
 	LPDIRECT3DVERTEXBUFFER8 lpD3DVertexBuffer;
 	LPDIRECT3DINDEXBUFFER8	lpD3DIndexBuffer;
+
+	LPDIRECT3DVERTEXBUFFER8 lpD3DOrthoVertexBuffer;
+
     int						NumDrivers;
     int						CurrentDriver;
-//	int						NumModes;
 	D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS];
     int						CurrentTextureFormat;
     int						NumTextureFormats;
 } D3DINFO;
+
+extern D3DINFO d3d;
 
 /* KJL 14:24:45 12/4/97 - render state information */
 enum TRANSLUCENCY_TYPE
@@ -85,17 +77,24 @@ enum FILTERING_MODE_ID
 	FILTERING_NOT_SET
 };
 
+enum TEXTURE_ADDRESS_MODE
+{
+	TEXTURE_WRAP,
+	TEXTURE_CLAMP
+};
+
 typedef struct
 {
 	enum TRANSLUCENCY_TYPE TranslucencyMode;
 	enum FILTERING_MODE_ID FilteringMode;
+	enum TEXTURE_ADDRESS_MODE TextureAddressMode;
 	int FogDistance;
 	unsigned int FogIsOn :1;
 	unsigned int WireFrameModeIsOn :1;
 
 } RENDERSTATES;
 
-LPDIRECT3DTEXTURE8 CreateD3DTexture(AVPTEXTURE *tex, unsigned char *buf, int usage, D3DPOOL poolType);
+LPDIRECT3DTEXTURE8 CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL poolType);
 LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AVPTEXTURE *tex, int *real_height, int *real_width);
 LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
@@ -126,7 +125,6 @@ char* GetDeviceName();
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 
 #ifdef __cplusplus
-
 }
 #endif
 

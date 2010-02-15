@@ -31,11 +31,13 @@ extern int Font_DrawText(const char* text, int x, int y, int colour, int fontTyp
 #include <vector>
 #include <algorithm>
 
+#include "logString.h"
+#include "fmvCutscenes.h"
+
 };
 
 #include "HUD_layout.h"
 #define HAVE_VISION_H 1
-//#include "vision.h"
 #include "lighting.h"
 #include "showcmds.h"
 #include "frustrum.h"
@@ -55,6 +57,11 @@ static HRESULT LastError;
 //D3DTLVERTEX *mainVertex = new D3DTLVERTEX[MAX_VERTEXES];
 //WORD *mainIndex = new WORD[MAX_INDICES];
 //WORD *tempIndex = new WORD[MAX_INDICES];
+
+ORTHOVERTEX *orthoVerts = NULL;
+static int numOrthoVerts = 0;
+static int orthoOffset = 0;
+static int orthoListCount = 0;
 
 #define MAX_TOTAL_VERTS 1360
 D3DTLVERTEX testVertex[MAX_TOTAL_VERTS];
@@ -85,6 +92,19 @@ struct RENDER_STATES
 //	bool operator<(const RENDER_STATES& rhs) const {return translucency_type < rhs.translucency_type;}
 };
 */
+
+struct ORTHO_OBJECTS
+{
+	int32_t		textureID;
+	uint32_t	vertStart;
+	uint32_t	vertEnd;
+
+	enum TRANSLUCENCY_TYPE translucency_type;
+	enum FILTERING_MODE_ID filtering_type;
+};
+
+// array of 2d objects
+ORTHO_OBJECTS *orthoList = new ORTHO_OBJECTS[480]; // lower me!
 
 struct renderParticle
 {
@@ -554,6 +574,11 @@ void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE t
 
 BOOL LockExecuteBuffer()
 {
+	LastError = d3d.lpD3DOrthoVertexBuffer->Lock(0, 0, (byte**)&orthoVerts, D3DLOCK_DISCARD);
+	
+	orthoOffset = 0;
+	orthoListCount = 0;
+
 	return TRUE;
 #if 0
 /*
@@ -586,6 +611,13 @@ BOOL LockExecuteBuffer()
 
 BOOL UnlockExecuteBufferAndPrepareForUse()
 {
+	LastError = d3d.lpD3DOrthoVertexBuffer->Unlock();
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return FALSE;
+	}
+
 	return TRUE;
 #if 0
 	LastError = d3d.lpD3DVertexBuffer->Unlock();
@@ -619,6 +651,12 @@ BOOL BeginD3DScene()
 		return FALSE;
 	}
 
+	LastError = d3d.lpD3DDevice->SetVertexShader(D3DFVF_TLVERTEX);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+
 	LastError = d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, D3DCOLOR_ARGB(0,0,0,0), 1.0f, 0 );
 
 	if (FAILED(LastError))
@@ -626,7 +664,8 @@ BOOL BeginD3DScene()
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
-	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_ON);
+	ChangeTextureAddressMode(TEXTURE_WRAP);
+	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
 	return TRUE;
 }
@@ -636,14 +675,14 @@ void D3D_SetupSceneDefaults()
 	/* force translucency state to be reset */
 	CurrentRenderStates.TranslucencyMode = TRANSLUCENCY_NOT_SET;
 	CurrentRenderStates.FilteringMode = FILTERING_NOT_SET;
-	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_ON);
+	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
 	CheckWireFrameMode(0);
 
 	// this defaults to FALSE
 	if (D3DDitherEnable != TRUE)
 	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE,TRUE);
+		d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE, TRUE);
 		D3DDitherEnable = TRUE;
 	}
 }
@@ -714,6 +753,37 @@ void ChangeTexture(const int texture_id)
 
 BOOL ExecuteBuffer()
 {
+	// render any orthographic quads
+	if (orthoListCount)
+	{
+		LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DOrthoVertexBuffer, sizeof(ORTHOVERTEX));
+		if (FAILED(LastError))
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+
+		LastError = d3d.lpD3DDevice->SetVertexShader(D3DFVF_ORTHOVERTEX);
+		if (FAILED(LastError))
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+
+		ChangeTextureAddressMode(TEXTURE_CLAMP);
+
+		// loop through list drawing the quads
+		for (int i = 0; i < orthoListCount; i++)
+		{
+			ChangeTexture(orthoList[i].textureID);
+			ChangeTranslucencyMode(orthoList[i].translucency_type);
+
+			LastError = d3d.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, orthoList[i].vertStart, 2);
+			if (FAILED(LastError))
+			{
+				LogDxError(LastError, __LINE__, __FILE__);
+			}
+		}
+	}
+
 	return TRUE;
 #if 0
 	if (NumVertices < 3)
@@ -944,6 +1014,58 @@ void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired)
 void SetTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 {
 //	renderList[renderCount].translucency_type = translucencyRequired;
+}
+
+void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode)
+{
+	if (CurrentRenderStates.TextureAddressMode == textureAddressMode)
+		return;
+
+	CurrentRenderStates.TextureAddressMode = textureAddressMode;
+
+	if (textureAddressMode == TEXTURE_WRAP)
+	{
+		// wrap texture addresses
+		LastError = d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_WRAP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSU Wrap fail");
+		}
+
+		LastError = d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_WRAP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSV Wrap fail");
+		}
+
+		LastError = d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSW, D3DTADDRESS_WRAP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSW Wrap fail");
+		}
+
+	}
+	else if (textureAddressMode == TEXTURE_CLAMP)
+	{
+		// clamp texture addresses
+		LastError = d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSU Clamp fail");
+		}
+
+		LastError = d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSV Clamp fail");
+		}
+
+		LastError = d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSW, D3DTADDRESS_CLAMP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSW Clamp fail");
+		}
+	}
 }
 
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
@@ -1827,8 +1949,9 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 	DECAL_DESC *decalDescPtr = &DecalDescription[decalPtr->DecalID];
 
 	int texoffset;
-	signed int tex_id;
-	D3DTEXTUREHANDLE TextureHandle;
+	int32_t textureID;
+
+	AVPTEXTURE *textureHandle = NULL;
 
 	float ZNear;
 	float RecipW, RecipH;
@@ -1843,44 +1966,28 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 		#if !FMV_ON
 		return;
 		#endif
-		TextureHandle = FMVTextureHandle[decalPtr->Centre.vx];
+//		TextureHandle = FMVTextureHandle[decalPtr->Centre.vx];
 		RecipW = 1.0 /128.0;
 		RecipH = 1.0 /128.0;
 
-		tex_id = NO_TEXTURE;
+		textureID = NO_TEXTURE;
 	}
 
 	else if (decalPtr->DecalID == DECAL_SHAFTOFLIGHT||decalPtr->DecalID == DECAL_SHAFTOFLIGHT_OUTER)
 	{
-		tex_id = NO_TEXTURE;
+		textureID = NO_TEXTURE;
 	}
 	else
 	{
 		texoffset = SpecialFXImageNumber;
-/*
-		if(ImageHeaderArray[texoffset].ImageWidth == 256)
-		{
-			RecipW = 1.0f / 256.0;
-		}
-		else
-		{
-*/
-			float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-			RecipW = 1.0f / width;
-/*
-		}
-		if(ImageHeaderArray[texoffset].ImageHeight == 256)
-		{
-			RecipH = 1.0f / 256.0;
-		}
-		else
-		{
-*/
-			float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-			RecipH = 1.0f / height;
-//		}
 
-		tex_id = texoffset;
+		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
+		RecipW = 1.0f / width;
+
+		float height = (float) ImageHeaderArray[texoffset].ImageHeight;
+		RecipH = 1.0f / height;
+
+		textureID = texoffset;
 	}
 
 	if (decalDescPtr->IsLit)
@@ -1916,12 +2023,12 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 							  );
 	}
 
-	SetNewTexture(tex_id);
+	SetNewTexture(textureID);
 	ChangeTranslucencyMode(decalDescPtr->TranslucencyType);
 
 //	CheckVertexBuffer(RenderPolygon.NumberOfVertices, tex_id, decalDescPtr->TranslucencyType);
 	{
-		for(unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
+		for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
 		{
 			RENDERVERTEX *vertices = &renderVerticesPtr[i];
 
@@ -1929,41 +2036,14 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 		  	oneOverZ = (1.0f)/vertices->Z;
 			float zvalue;
 
-			{
-				int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-/*
-				if (x < Global_VDB_Ptr->VDB_ClipLeft)
-				{
-					x = Global_VDB_Ptr->VDB_ClipLeft;
-				}
-				else if (x>Global_VDB_Ptr->VDB_ClipRight)
-				{
-					x = Global_VDB_Ptr->VDB_ClipRight;
-				}
-*/
-				tempVertex[i].sx = (float)x;
+			int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
+			tempVertex[i].sx = (float)x;
 
-			}
-			{
-				int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-/*
-				if (y < Global_VDB_Ptr->VDB_ClipUp)
-				{
-					y = Global_VDB_Ptr->VDB_ClipUp;
-				}
-				else if (y > Global_VDB_Ptr->VDB_ClipDown)
-				{
-					y = Global_VDB_Ptr->VDB_ClipDown;
-				}
-*/
-				tempVertex[i].sy = (float)y;
+			int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
+			tempVertex[i].sy = (float)y;
 
-			}
-			{
-				zvalue = (float)((vertices->Z)+HeadUpDisplayZOffset-50);
-			   	//zvalue = ((zvalue-ZNear)/zvalue);
-				zvalue = 1.0f - Zoffset * ZNear/zvalue;
-			}
+			zvalue = (float)((vertices->Z)+HeadUpDisplayZOffset-50);
+			zvalue = 1.0f - Zoffset * ZNear/zvalue;
 
 			tempVertex[i].sz = zvalue;
 			tempVertex[i].rhw = oneOverZ;
@@ -1972,7 +2052,6 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 
 			tempVertex[i].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
 			tempVertex[i].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
-//			vb++;
 		}
 	}
 
@@ -4287,7 +4366,7 @@ void DrawNoiseOverlay(int t)
 */
 	ChangeTranslucencyMode(TRANSLUCENCY_GLOWING);
 	SetNewTexture(StaticImageNumber);
-	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_ON);
+	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
 	tempVertex[0].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
   	tempVertex[0].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
@@ -5618,7 +5697,7 @@ extern void D3D_DrawSliderBar(int x, int y, int alpha)
 	int sliderHeight = 11;
 	unsigned int colour = alpha>>8;
 
-	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
+	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 
 	if (colour>255) colour = 255;
 	colour = (colour<<24)+0xffffff;
@@ -5752,7 +5831,7 @@ extern void D3D_DrawSlider(int x, int y, int alpha)
 	if (colour>255) colour = 255;
 	colour = (colour<<24)+0xffffff;
 
-	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
+	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 
 	quadVertices[0].Y = y;
 	quadVertices[1].Y = y;
@@ -6238,7 +6317,7 @@ extern void D3D_ScreenInversionOverlay()
 
 	SetNewTexture(SpecialFXImageNumber);
 	ChangeTranslucencyMode(TRANSLUCENCY_DARKENINGCOLOUR);
-	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_ON);
+	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
 	for (i = 0; i < 2; i++)
 	{
@@ -6389,7 +6468,7 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 
 	SetNewTexture(SpecialFXImageNumber);
 	ChangeTranslucencyMode(TRANSLUCENCY_INVCOLOUR);
-	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_ON);
+	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
 	for(i = 0; i < 2; i++)
 	{
@@ -6535,9 +6614,11 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 	}
 }
 
+extern "C++" {
+
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
 {
-	ftPtr->RGBBuffer = new unsigned char[128 * 128 * 4];
+	ftPtr->RGBBuffer = new uint8_t[128 * 128 * 4];
 
 	ftPtr->SoundVolume = 0;
 }
@@ -6556,7 +6637,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	 	return;
 	}
 
-	/* lock the d3d texture */
+	// lock the d3d texture
 	D3DLOCKED_RECT textureRect;
 	LastError = ftPtr->ImagePtr->Direct3DTexture->LockRect(0, &textureRect, NULL, /*D3DLOCK_DISCARD*/0);
 	if (FAILED(LastError))
@@ -6565,12 +6646,12 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 		return;
 	}
 
-	byte *destPtr = NULL;
-	byte *srcPtr = &ftPtr->RGBBuffer[0];
+	uint8_t *destPtr = NULL;
+	uint8_t *srcPtr = &ftPtr->RGBBuffer[0];
 
 	for (int y = 0; y < ftPtr->ImagePtr->ImageHeight; y++)
 	{
-		destPtr = static_cast<byte*>(textureRect.pBits) + y * textureRect.Pitch;
+		destPtr = static_cast<uint8_t*>(textureRect.pBits) + y * textureRect.Pitch;
 
 		for (int x = 0; x < ftPtr->ImagePtr->ImageWidth; x++)
 		{
@@ -6587,7 +6668,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 		}
 	}
 
-	/* unlock d3d texture */
+	// unlock d3d texture
 	LastError = ftPtr->ImagePtr->Direct3DTexture->UnlockRect(0);
 	if (FAILED(LastError))
 	{
@@ -6596,9 +6677,8 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	}
 }
 
-// For extern "C"
-
-};
+} // extern "C"
+}
 
 void r2rect :: AlphaFill
 (
@@ -6640,7 +6720,7 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 
 //	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
 //	SetFilteringMode(FILTERING_BILINEAR_OFF);
-	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
+	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 
 	do
 	{
@@ -6703,7 +6783,7 @@ extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour)
 	quadVertices[2].Y = y + HUD_FONT_HEIGHT + 1;
 	quadVertices[3].Y = y + HUD_FONT_HEIGHT + 1;
 
-	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
+	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 //	SetFilteringMode(FILTERING_BILINEAR_OFF);
 
 	while( *stringPtr )
@@ -6749,7 +6829,7 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr,int x,int y,int colour)
 
  	LOCALASSERT(y<=0);
 
-	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
+	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 //	SetFilteringMode(FILTERING_BILINEAR_OFF);
 
 	quadVertices[2].Y = y + HUD_FONT_HEIGHT + 1;
@@ -6819,7 +6899,7 @@ void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour
 	quadVertices[2].Y = y + MUL_FIXED(HUDScaleFactor,HUD_FONT_HEIGHT + 1);
 	quadVertices[3].Y = y + MUL_FIXED(HUDScaleFactor,HUD_FONT_HEIGHT + 1);
 
-	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
+	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 //	SetFilteringMode(FILTERING_BILINEAR_OFF);
 
 	while( *stringPtr )
@@ -6934,9 +7014,228 @@ extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, in
 #endif
 }
 
-void DrawMenuTextGlow2(int topLeftX, int topLeftY, int size, int alpha)
+void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 {
-	// nothing here yet (or ever..)
+	int textureWidth = 0;
+	int textureHeight = 0;
+	int texturePOW2Width = 0;
+	int texturePOW2Height = 0;
+
+	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
+		alpha = ONE_FIXED;
+
+	alpha = (alpha / 256);
+	if (alpha > 255) 
+		alpha = 255;
+
+	// textures original resolution (if it's a non power of 2, these will be the non power of 2 values)
+	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Width;
+	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Height;
+
+	// these values are the texture width and height as power of two values
+//	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newWidth;
+//	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newHeight;
+
+	// do the text alignment justification
+	topLeftX -= textureWidth;
+
+	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_LEFT, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
+
+	// now do the middle section
+	topLeftX += textureWidth;
+
+	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Width;
+	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Height;
+
+	DrawQuad(topLeftX, topLeftY, textureWidth * size, textureHeight, AVPMENUGFX_GLOWY_MIDDLE, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
+
+	// now do the right section
+	topLeftX += textureWidth * size;
+
+	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Width;
+	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Height;
+
+	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_RIGHT, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
+
+#if 0
+
+	float x1 = (float(topLeftX / 640.0f) * 2) - 1;
+	float y1 = (float(topLeftY / 480.0f) * 2) - 1;
+
+	float x2 = ((float(topLeftX + textureWidth) / 640.0f) * 2) - 1;
+	float y2 = ((float(topLeftY + textureHeight) / 480.0f) * 2) - 1;
+
+	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
+
+	// bottom left
+	orthoVerts[0].x = x1;
+	orthoVerts[0].y = y2;
+	orthoVerts[0].z = 1.0f;
+	orthoVerts[0].colour = colour;
+	orthoVerts[0].u = 0.0f;
+	orthoVerts[0].v = (1.0f / texturePOW2Height) * textureHeight;
+
+	// top left
+	orthoVerts[1].x = x1;
+	orthoVerts[1].y = y1;
+	orthoVerts[1].z = 1.0f;
+	orthoVerts[1].colour = colour;
+	orthoVerts[1].u = 0.0f;
+	orthoVerts[1].v = 0.0f;
+
+	// bottom right
+	orthoVerts[2].x = x2;
+	orthoVerts[2].y = y2;
+	orthoVerts[2].z = 1.0f;
+	orthoVerts[2].colour = colour;
+	orthoVerts[2].u = (1.0f / texturePOW2Width) * textureWidth;
+	orthoVerts[2].v = (1.0f / texturePOW2Height) * textureHeight;
+
+	// top right
+	orthoVerts[3].x = x2;
+	orthoVerts[3].y = y1;
+	orthoVerts[3].z = 1.0f;
+	orthoVerts[3].colour = colour;
+	orthoVerts[3].u = (1.0f / texturePOW2Width) * textureWidth;
+	orthoVerts[3].v = 0.0f;
+
+	d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
+	d3d.lpD3DDevice->SetTexture (0, AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].menuTexture);
+
+	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &orthoVerts[0], sizeof(ORTHOVERTEX));
+	if (FAILED(LastError))
+	{
+		OutputDebugString("DrawPrimitiveUP failed\n");
+	}
+
+	return;
+
+	// now do the middle section
+	topLeftX += textureWidth;
+
+	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Width;
+	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Height;
+
+	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].newWidth;
+	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].newHeight;
+
+	x1 = (float(topLeftX / 640.0f) * 2) - 1;
+	y1 = (float(topLeftY / 480.0f) * 2) - 1;
+
+	float xoffset = x1 - x2;
+	float yoffset = y1 - y2;
+
+	x2 = ((float(topLeftX + textureWidth * size) / 640.0f) * 2) - 1;
+	y2 = ((float(topLeftY + textureHeight) / 480.0f) * 2) - 1;
+
+	x1 -= xoffset;
+	x2 -= xoffset;
+
+	colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
+
+	// bottom left
+	orthoVerts[0].x = x1;
+	orthoVerts[0].y = y2;
+	orthoVerts[0].z = 1.0f;
+	orthoVerts[0].colour = colour;
+	orthoVerts[0].u = 0.0f;
+	orthoVerts[0].v = (1.0f / texturePOW2Height) * textureHeight;
+
+	// top left
+	orthoVerts[1].x = x1;
+	orthoVerts[1].y = y1;
+	orthoVerts[1].z = 1.0f;
+	orthoVerts[1].colour = colour;
+	orthoVerts[1].u = 0.0f;
+	orthoVerts[1].v = 0.0f;
+
+	// bottom right
+	orthoVerts[2].x = x2;
+	orthoVerts[2].y = y2;
+	orthoVerts[2].z = 1.0f;
+	orthoVerts[2].colour = colour;
+	orthoVerts[2].u = (1.0f / texturePOW2Width) * textureWidth;
+	orthoVerts[2].v = (1.0f / texturePOW2Height) * textureHeight;
+
+	// top right
+	orthoVerts[3].x = x2;
+	orthoVerts[3].y = y1;
+	orthoVerts[3].z = 1.0f;
+	orthoVerts[3].colour = colour;
+	orthoVerts[3].u = (1.0f / texturePOW2Width) * textureWidth;
+	orthoVerts[3].v = 0.0f;
+
+	d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
+	d3d.lpD3DDevice->SetTexture (0, AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].menuTexture);
+
+	LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &orthoVerts[0], sizeof(ORTHOVERTEX));
+	if (FAILED(LastError))
+	{
+		OutputDebugString("DrawPrimitiveUP failed\n");
+	}
+
+	// now do the right section
+	topLeftX += textureWidth * size;
+
+	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Width;
+	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Height;
+
+	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].newWidth;
+	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].newHeight;
+
+	x1 = (float(topLeftX / 640.0f) * 2) - 1;
+	y1 = (float(topLeftY / 480.0f) * 2) - 1;
+
+	xoffset = x1 - x2;
+	yoffset = y1 - y2;
+
+	x2 = ((float(topLeftX + textureWidth) / 640.0f) * 2) - 1;
+	y2 = ((float(topLeftY + textureHeight) / 480.0f) * 2) - 1;
+
+	x1 -= xoffset;
+	x2 -= xoffset;
+
+	// bottom left
+	orthoVerts[0].x = x1;
+	orthoVerts[0].y = y2;
+	orthoVerts[0].z = 1.0f;
+	orthoVerts[0].colour = colour;
+	orthoVerts[0].u = 0.0f;
+	orthoVerts[0].v = (1.0f / texturePOW2Height) * textureHeight;
+
+	// top left
+	orthoVerts[1].x = x1;
+	orthoVerts[1].y = y1;
+	orthoVerts[1].z = 1.0f;
+	orthoVerts[1].colour = colour;
+	orthoVerts[1].u = 0.0f;
+	orthoVerts[1].v = 0.0f;
+
+	// bottom right
+	orthoVerts[2].x = x2;
+	orthoVerts[2].y = y2;
+	orthoVerts[2].z = 1.0f;
+	orthoVerts[2].colour = colour;
+	orthoVerts[2].u = (1.0f / texturePOW2Width) * textureWidth;
+	orthoVerts[2].v = (1.0f / texturePOW2Height) * textureHeight;
+
+	// top right
+	orthoVerts[3].x = x2;
+	orthoVerts[3].y = y1;
+	orthoVerts[3].z = 1.0f;
+	orthoVerts[3].colour = colour;
+	orthoVerts[3].u = (1.0f / texturePOW2Width) * textureWidth;
+	orthoVerts[3].v = 0.0f;
+
+	d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
+	d3d.lpD3DDevice->SetTexture (0, AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].menuTexture);
+
+	LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &orthoVerts[0], sizeof(ORTHOVERTEX));
+	if (FAILED(LastError))
+	{
+		OutputDebugString("DrawPrimitiveUP failed\n");
+	}
+#endif
 }
 
 void DrawFadeQuad(int topX, int topY, int alpha)
@@ -7119,12 +7418,71 @@ void DrawTexturedFadedQuad(int topX, int topY, int image_num, int alpha)
 /* more quad drawing functions than you can shake a stick at! */
 void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture)
 {
-	/* set the texture */
+	// set the texture
 	LastError = d3d.lpD3DDevice->SetTexture(0, fmvTexture);
 
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
 
+	int topX = (640 - frameWidth) / 2;
+	int topY = (480 - frameHeight) / 2;
+
+	float x1 = (float(topX / 640.0f) * 2) - 1;
+	float y1 = (float(topY / 480.0f) * 2) - 1;
+
+	float x2 = ((float(topX + textureWidth) / 640.0f) * 2) - 1;
+	float y2 = ((float(topY + textureHeight) / 480.0f) * 2) - 1;
+
+	D3DCOLOR colour = D3DCOLOR_ARGB(255, 128, 0, 128);
+
+	ORTHOVERTEX fmvVerts[4];
+
+	// bottom left
+	fmvVerts[0].x = x1;
+	fmvVerts[0].y = y2;
+	fmvVerts[0].z = 1.0f;
+	fmvVerts[0].colour = colour;
+	fmvVerts[0].u = 0.0f;
+	fmvVerts[0].v = 1.0f;
+
+	// top left
+	fmvVerts[1].x = x1;
+	fmvVerts[1].y = y1;
+	fmvVerts[1].z = 1.0f;
+	fmvVerts[1].colour = colour;
+	fmvVerts[1].u = 0.0f;
+	fmvVerts[1].v = 0.0f;
+
+	// bottom right
+	fmvVerts[2].x = x2;
+	fmvVerts[2].y = y2;
+	fmvVerts[2].z = 1.0f;
+	fmvVerts[2].colour = colour;
+	fmvVerts[2].u = 1.0f;
+	fmvVerts[2].v = 1.0f;
+
+	// top right
+	fmvVerts[3].x = x2;
+	fmvVerts[3].y = y1;
+	fmvVerts[3].z = 1.0f;
+	fmvVerts[3].colour = colour;
+	fmvVerts[3].u = 1.0f;
+	fmvVerts[3].v = 0.0f;
+
+	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
+		
+	// set the texture
+	LastError = d3d.lpD3DDevice->SetTexture(0, fmvTexture);
+
+	d3d.lpD3DDevice->SetVertexShader (D3DFVF_ORTHOVERTEX);
+	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(ORTHOVERTEX));
+	if (FAILED(LastError))
+	{
+		OutputDebugString("DrawPrimitiveUP failed\n");
+	}
+
+	OutputDebugString("drew fmv frame\n");
+/*
 	int topX = (ScreenDescriptorBlock.SDB_Width - frameWidth) / 2;
 	int topY = (ScreenDescriptorBlock.SDB_Height - frameHeight) / 2;
 
@@ -7171,11 +7529,11 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
-	if(FAILED(LastError))
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
-
+*/
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_WRAP);
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_WRAP);
 }
@@ -7497,11 +7855,12 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 //	OUTPUT_TRIANGLE(0,1,2, 4);
 //	OUTPUT_TRIANGLE(1,2,3, 4);
 
-	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_GLOWING);
+	ChangeTranslucencyMode(TRANSLUCENCY_GLOWING);
 
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
-	if(FAILED(LastError)) {
-		OutputDebugString(" draw menu quad failed ");
+	if(FAILED(LastError)) 
+	{
+		OutputDebugString("draw menu quad failed\n");
 	}
 }
 
@@ -7660,7 +8019,7 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 	quadVert[3].tu = (float)((texU + char_width) * RecipW);
 	quadVert[3].tv = (float)((texV) * RecipH);
 
-	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_GLOWING);
+	ChangeTranslucencyMode(TRANSLUCENCY_GLOWING);
 
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
 	if (FAILED(LastError))

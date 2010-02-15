@@ -22,8 +22,10 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "d3dx9.h"
 #include "d3_func.h"
+#ifdef WIN32
+#include <d3dx9.h>
+#endif
 #include "logString.h"
 #include "stdint.h"
 #include "font2.h"
@@ -240,7 +242,12 @@ int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 		fontQuad[3].tu = (float)((tex_x + Fonts[FONT_SMALL].blockWidth) * RecipW);
 		fontQuad[3].tv = (float)((tex_y) * RecipH);
 
+#ifdef _XBOX
+		d3d.lpD3DDevice->SetVertexShader(D3DFVF_TLVERTEX);
+#else
 		d3d.lpD3DDevice->SetFVF (D3DFVF_TLVERTEX);
+#endif
+
 		LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, fontQuad, sizeof(D3DTLVERTEX));
 		if (FAILED(LastError)) 
 		{

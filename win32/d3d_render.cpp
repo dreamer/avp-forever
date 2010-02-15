@@ -91,7 +91,7 @@ struct ORTHO_OBJECTS
 };
 
 // array of 2d objects
-ORTHO_OBJECTS *orthoList = new ORTHO_OBJECTS[240]; // lower me!
+ORTHO_OBJECTS *orthoList = new ORTHO_OBJECTS[480]; // lower me!
 
 struct renderParticle
 {
@@ -5168,9 +5168,9 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 
 void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha) 
 {
-	CheckVertexBuffer(4, AVPMENUGFX_SMALL_FONT, TRANSLUCENCY_GLOWING);
+//	CheckVertexBuffer(4, AVPMENUGFX_SMALL_FONT, TRANSLUCENCY_GLOWING);
 
-	SetFilteringMode(FILTERING_BILINEAR_OFF);
+//	SetFilteringMode(FILTERING_BILINEAR_OFF);
 
 	alpha = (alpha / 256);
 
@@ -5197,6 +5197,61 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	float RecipW = 1.0f / image_width; // 0.00390625
 	float RecipH = 1.0f / image_height;
 
+	float x1 = (float(topX / 640.0f) * 2) - 1;
+	float y1 = (float(topY / 480.0f) * 2) - 1;
+
+	float x2 = ((float(topX + font_width) / 640.0f) * 2) - 1;
+	float y2 = ((float(topY + font_height) / 480.0f) * 2) - 1;
+
+	// create a new list item for it
+	orthoList[orthoListCount].textureID = AVPMENUGFX_SMALL_FONT;
+	orthoList[orthoListCount].vertStart = orthoOffset;
+	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
+	orthoList[orthoListCount].translucency_type = TRANSLUCENCY_GLOWING;
+	orthoListCount++;
+
+	// bottom left
+	orthoVerts[orthoOffset].x = x1;
+	orthoVerts[orthoOffset].y = y2;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = (float)((texU) * RecipW);
+	orthoVerts[orthoOffset].v = (float)((texV + font_height) * RecipH);
+
+	orthoOffset++;
+
+	// top left
+	orthoVerts[orthoOffset].x = x1;
+	orthoVerts[orthoOffset].y = y1;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = (float)((texU) * RecipW);
+	orthoVerts[orthoOffset].v = (float)((texV) * RecipH);
+
+	orthoOffset++;
+
+	// bottom right
+	orthoVerts[orthoOffset].x = x2;
+	orthoVerts[orthoOffset].y = y2;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = (float)((texU + font_height) * RecipW);
+	orthoVerts[orthoOffset].v = (float)((texV + font_height) * RecipH);
+
+	orthoOffset++;
+
+	// top right
+	orthoVerts[orthoOffset].x = x2;
+	orthoVerts[orthoOffset].y = y1;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = (float)((texU + font_width) * RecipW);
+	orthoVerts[orthoOffset].v = (float)((texV) * RecipH);
+
+	orthoOffset++;
+
+
+#if 0
 	// game used to render menus at 640x480. this allows us to use any resolution we want
 	int quadWidth = (ScreenDescriptorBlock.SDB_Width / 640.0f) * font_width;
 	int quadHeight = (ScreenDescriptorBlock.SDB_Height / 480.0f) * font_height;
@@ -5254,6 +5309,7 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 
 	OUTPUT_TRIANGLE(0,1,2, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
+#endif
 }
 
 void DrawBigChar(char c, int x, int y, int colour)

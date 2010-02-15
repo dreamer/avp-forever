@@ -77,8 +77,7 @@ extern "C++" {
 
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern int WindowMode;
-extern int VideoModeColourDepth;
-
+int	VideoModeColourDepth;
 static HRESULT LastError;
 
 D3DINFO d3d;
@@ -116,6 +115,23 @@ static TGA_HEADER TgaHeader = {0};
 void ColourFillBackBuffer(int FillColour)
 {
 	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET, FillColour, 1.0f, 0 );
+}
+
+void PrintD3DMatrix(const char* name, D3DXMATRIX &mat)
+{
+	char buf[300];
+	sprintf(buf, "Printing D3D Matrix: - %s\n"
+//	"\t 1 \t 2 \t 3 \t 4\n"
+	"\t %f \t %f \t %f \t %f\n"
+	"\t %f \t %f \t %f \t %f\n"
+	"\t %f \t %f \t %f \t %f\n"
+	"\t %f \t %f \t %f \t %f\n", name,
+	mat._11, mat._12, mat._13, mat._14,
+	mat._21, mat._22, mat._23, mat._24,
+	mat._31, mat._32, mat._33, mat._34,
+	mat._41, mat._42, mat._43, mat._44);
+
+	OutputDebugString(buf);
 }
 
 char* GetDeviceName()
@@ -301,7 +317,7 @@ D3DTEXTURE CreateD3DTallFontTexture (AVPTEXTURE *tex)
 
 D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool)
 {
-	LPDIRECT3DTEXTURE8 destTexture = NULL;
+	D3DTEXTURE destTexture = NULL;
 
 	int newWidth, newHeight;
 
@@ -682,6 +698,15 @@ BOOL CreateVolatileResources()
 		return FALSE;
 	}
 */
+
+	// create our 2D vertex buffer
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(4 * 2000 * sizeof(ORTHOVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_ORTHOVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoVertexBuffer);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return FALSE;
+	}
+
 	LastError = d3d.lpD3DDevice->SetVertexShader(D3DFVF_TLVERTEX);
 	if (FAILED(LastError))
 	{
@@ -725,11 +750,11 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 		std::stringstream sstream;
 		sstream << "Can't set resolution " << width << " x " << height << ". Setting default safe values";
 		Con_PrintError(sstream.str());
-
+/*
 		OutputDebugString(DXGetErrorString8(LastError));
 		OutputDebugString(DXGetErrorDescription8(LastError));
 		OutputDebugString("\n");
-
+*/
 		// this'll occur if the resolution width and height passed aren't usable on this device
 		if (D3DERR_INVALIDCALL == LastError)
 		{
@@ -1065,7 +1090,7 @@ BOOL InitialiseDirect3D()
 	Net_Initialise();
 	Font_Init();
 
-	Con_PrintMessage("Initialised Direct3D9 succesfully");
+	Con_PrintMessage("Initialised Direct3D succesfully");
 	return TRUE;
 }
 

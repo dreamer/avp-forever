@@ -24,6 +24,8 @@
   set it in ReadPlayerGameInput.
   -------------------------------------------------*/ 
 #include "avp_menus.h"
+#include "stratdef.h"
+
 #if 0
 typedef struct player_input_configuration
 {
