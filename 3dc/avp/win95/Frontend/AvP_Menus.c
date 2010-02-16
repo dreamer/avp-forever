@@ -5269,7 +5269,7 @@ static char KeyboardEntryQueue_ProcessCharacter(void)
 
 void ScanSaveSlots(void)
 {
-	unsigned char filename[100];
+	unsigned char filename[MAX_PATH];
 	int i;
 	SAVE_SLOT_HEADER *slotPtr = SaveGameSlot;
 

@@ -519,7 +519,7 @@ BOOL ValidateLevelForLoadGameRequest(SAVE_SLOT_HEADER* save_slot)
 void LoadSavedGame()
 {
 	SAVE_SLOT_HEADER* save_slot;
-	char filename[100];
+	char filename[MAX_PATH];
 	HANDLE file;
 	BOOL terminal_error = FALSE;
 	unsigned int bytes_read;
