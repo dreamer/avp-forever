@@ -257,7 +257,7 @@ static int LoadUserProfiles(void)
 			}
 
 			AVP_USER_PROFILE *profilePtr = new AVP_USER_PROFILE;
-			size_t bytes_read;
+			DWORD bytes_read;
 			
 			if (!ReadFile(rif_file, profilePtr, sizeof(AVP_USER_PROFILE), &bytes_read, 0))
 			{

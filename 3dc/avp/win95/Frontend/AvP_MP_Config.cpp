@@ -193,7 +193,7 @@ const char* GetMultiplayerConfigDescription(int index)
 	
 	
 	FILE* file;
-	char filename[200];
+	char filename[MAX_PATH];
 	if(netGameData.skirmishMode)
 		sprintf(filename,"%s\\%s.skirmish_cfg",MP_CONFIG_DIR,name);
 	else
@@ -231,7 +231,7 @@ void LoadMultiplayerConfigurationByIndex(int index)
 void LoadMultiplayerConfiguration(const char* name)
 {
 	FILE* file;
-	char filename[200];
+	char filename[MAX_PATH];
 	if(netGameData.skirmishMode)
 		sprintf(filename,"%s\\%s.skirmish_cfg",MP_CONFIG_DIR,name);
 	else
@@ -340,7 +340,7 @@ void LoadMultiplayerConfiguration(const char* name)
 void SaveMultiplayerConfiguration(const char* name)
 {
 	FILE* file;
-	char filename[200];
+	char filename[MAX_PATH];
 	if(netGameData.skirmishMode)
 		sprintf(filename,"%s\\%s.skirmish_cfg",MP_CONFIG_DIR,name);
 	else
@@ -439,7 +439,7 @@ void DeleteMultiplayerConfigurationByIndex(int index)
 {
 	if(index<0 || index>= ConfigurationFilenameList.size()) return;
 
-	char filename[200];
+	char filename[MAX_PATH];
 	if(netGameData.skirmishMode)
 		sprintf(filename,"%s\\%s.skirmish_cfg",MP_CONFIG_DIR,ConfigurationFilenameList[index]);
 	else
@@ -551,7 +551,7 @@ void SaveIPAddress(const char* name,const char* address)
 	if(!strlen(address)) return;
 
 	FILE* file;
-	char filename[200];
+	char filename[MAX_PATH];
 	sprintf(filename,"%s\\%s.IP Address",IP_ADDRESS_DIR,name);
 	
 	CreateDirectory(IP_ADDRESS_DIR,0);
@@ -572,7 +572,7 @@ void LoadIPAddress(const char* name)
 	if(!name) return;
 
 	FILE* file;
-	char filename[200];
+	char filename[MAX_PATH];
 	sprintf(filename,"%s\\%s.IP Address",IP_ADDRESS_DIR,name);
 
 	file = avp_fopen(filename,"rb");

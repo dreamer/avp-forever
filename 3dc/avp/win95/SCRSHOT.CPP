@@ -30,7 +30,7 @@ void LogCameraPosForModuleLinking()
 	if(!playerPherModule) return;
 	if(!playerPherModule->name) return;
 	
-	char Filename[100]={"avp_rifs\\"};
+	char Filename[MAX_PATH]={"avp_rifs\\"};
 	
 	strcat(Filename,Env_List[AvP.CurrentEnv]->main);
 	strcat(Filename,".mlf");
