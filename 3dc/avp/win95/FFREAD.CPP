@@ -3,7 +3,7 @@
 #include "os_header.h"
 #include <stdio.h>
 #include "utilities.h"
-
+#include "stdint.h"
 #include "ffread.hpp"
 
 /******************/
@@ -101,7 +101,7 @@ FFDataI::FFDataI(char const *_filename, void *_data, size_t _length)
 
 FFDataI::FFDataI(FFDataI const & ffd, ptrdiff_t offset)
 : filename(0)
-, data((void *)((size_t)ffd.data + offset))
+, data((void *)((ptrdiff_t)ffd.data + offset))
 , length(ffd.length)
 {
 	if (ffd.filename)
@@ -199,7 +199,7 @@ FFHeaderI::FFHeaderI(FFHeaderI const & ffh)
 		data = malloc(length);
 		memcpy(data,ffh.data,length);
 	}
-	ptrdiff_t offset = (size_t)data - (size_t)ffh.data;
+	ptrdiff_t offset = (ptrdiff_t)data - (ptrdiff_t)ffh.data;
 	for (int i=0; i<FFHI_HASHTABLESIZE; ++i)
 	{
 		for (CLIF<FFDataI> i_file(&ffh.files[i]); !i_file.done(); i_file.next())
@@ -230,7 +230,7 @@ FFHeaderI & FFHeaderI::operator = (FFHeaderI const & ffh)
 			data = malloc(length);
 			memcpy(data,ffh.data,length);
 		}
-		ptrdiff_t offset = (size_t)data - (size_t)ffh.data;
+		ptrdiff_t offset = (ptrdiff_t)data - (ptrdiff_t)ffh.data;
 		for (int i=0; i<FFHI_HASHTABLESIZE; ++i)
 		{
 			for (CLIF<FFDataI> i_file(&ffh.files[i]); !i_file.done(); i_file.next())
@@ -287,17 +287,21 @@ FFError FFHeaderI::Read(char const *_filename)
 	Clear();
 	
 	char magic[4];
-	unsigned long rffl_version;
-	size_t num_files;
-	size_t total_headsize;
-	
+
+	uint32_t rffl_version;
+	uint32_t num_files;
+	uint32_t total_headsize;
+	uint32_t data_length;
+
 	DWORD bytes_read;
 	
 	READ_FILE(filename,(void)0,CloseHandle(h),h,magic,4,bytes_read,0)
 	READ_FILE(filename,(void)0,CloseHandle(h),h,&rffl_version,4,bytes_read,0)
 	READ_FILE(filename,(void)0,CloseHandle(h),h,&num_files,4,bytes_read,0)
 	READ_FILE(filename,(void)0,CloseHandle(h),h,&total_headsize,4,bytes_read,0)
-	READ_FILE(filename,(void)0,CloseHandle(h),h,&length,4,bytes_read,0)
+	READ_FILE(filename,(void)0,CloseHandle(h),h,&data_length,4,bytes_read,0)
+
+	length = data_length;
 	
 	if (strncmp(magic,"RFFL",4))
 	{
@@ -318,7 +322,7 @@ FFError FFHeaderI::Read(char const *_filename)
 	
 	data = malloc(length);
 	
-	READ_FILE(filename,(void)0,CloseHandle(h),h,data,length,bytes_read,0)
+	READ_FILE(filename,(void)0,CloseHandle(h),h,data,data_length,bytes_read,0)
 	
 	CloseHandle(h);
 	
@@ -326,16 +330,16 @@ FFError FFHeaderI::Read(char const *_filename)
 	
 	void * headerP = header;
 	
-	for (int i=0; i<num_files; ++i)
+	for (uint32_t i = 0; i < num_files; ++i)
 	{
-		char const * fnameP = (char *)((size_t)headerP + 8);
-		size_t leng = *(size_t *)((size_t)headerP + 4);
-		void * dataP = (void *)((size_t)data + *(size_t *)headerP);
+		char const * fnameP = (char *)((intptr_t)headerP + 8);
+		uint32_t leng = *(uint32_t *)((intptr_t)headerP + 4);
+		void * dataP = (void *)((intptr_t)data + *(uint32_t *)headerP);
 		
 		files[HashFunction(fnameP)].add_entry(FFDataI(fnameP,dataP,leng));
 		
 		// increment pointer
-		headerP = (void *)((size_t)headerP + 8 + strlen(fnameP) +4&~3);
+		headerP = (void *)(((intptr_t)headerP + 8 + strlen(fnameP) +4)&~3);
 	}
 	
 	free(header);

@@ -856,8 +856,8 @@ int FindAndLoadWavFile(int soundNum, char* wavFileName)
 #if LOAD_SOUND_FROM_FAST_FILE
 	//first look in fast file
 	{
-		unsigned nLen;
-		if(ffreadbuf(sound_name,&nLen))
+		size_t nLen;
+		if (ffreadbuf(sound_name,&nLen))
 		{
 			return LoadWavFromFastFile(soundNum, sound_name);
 		}
@@ -871,13 +871,13 @@ int FindAndLoadWavFile(int soundNum, char* wavFileName)
 			//check to see if file exists locally first
 			FILE* wavFile = avp_fopen(sound_name,"rb");
 	
-			if(!wavFile && SecondSoundDir)
+			if (!wavFile && SecondSoundDir)
 			{
 				//look for sound over network
 				sprintf(sound_name, "%s%s", SecondSoundDir, wavFileName);
 	
 				wavFile = avp_fopen(sound_name,"rb");
-				if(!wavFile)
+				if (!wavFile)
 				{
 					OutputDebugString("failed to find sound\n");
 					LOGDXFMT(("Failed to find %s\n",wavFileName));	
