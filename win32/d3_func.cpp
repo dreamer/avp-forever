@@ -1453,10 +1453,10 @@ void ReleaseDirect3D()
 	DeleteRenderMemory();
 
 	SAFE_RELEASE(d3d.lpD3DDevice);
-	LogString("Releasing Direct3D device...");
+	LogString("Releasing Direct3D9 device...");
 
 	SAFE_RELEASE(d3d.lpD3D);
-	LogString("Releasing Direct3D object...");
+	LogString("Releasing Direct3D9 object...");
 
 	// release Direct Input stuff
 	ReleaseDirectKeyboard();

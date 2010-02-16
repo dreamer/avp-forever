@@ -65,20 +65,22 @@ D3DTLVERTEX quadVert[4];
 
 struct RENDER_STATES
 {
-	signed int texture_id;
+	int32_t		textureID;
 
-	unsigned int vert_start;
-	unsigned int vert_end;
+	uint32_t	vertStart;
+	uint32_t	vertEnd;
+	uint32_t	indexStart;
+	uint32_t	indexEnd;
 
-	unsigned int index_start;
-	unsigned int index_end;
+	enum TRANSLUCENCY_TYPE translucencyType;
+	enum FILTERING_MODE_ID filteringType;
 
-	enum TRANSLUCENCY_TYPE translucency_type;
-	enum FILTERING_MODE_ID filtering_type;
-
-	bool operator<(const RENDER_STATES& rhs) const {return texture_id < rhs.texture_id;}
+	bool operator<(const RENDER_STATES& rhs) const {return textureID < rhs.textureID;}
 //	bool operator<(const RENDER_STATES& rhs) const {return translucency_type < rhs.translucency_type;}
 };
+
+RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
+//std::vector<RENDER_STATES> renderTest;
 
 struct ORTHO_OBJECTS
 {
@@ -86,19 +88,19 @@ struct ORTHO_OBJECTS
 	uint32_t	vertStart;
 	uint32_t	vertEnd;
 
-	enum TRANSLUCENCY_TYPE translucency_type;
-	enum FILTERING_MODE_ID filtering_type;
+	enum TRANSLUCENCY_TYPE translucencyType;
+	enum FILTERING_MODE_ID filteringType;
 };
 
 // array of 2d objects
-ORTHO_OBJECTS *orthoList = new ORTHO_OBJECTS[480]; // lower me!
+ORTHO_OBJECTS *orthoList = new ORTHO_OBJECTS[MAX_VERTEXES]; // lower me!
 
 struct renderParticle
 {
-	PARTICLE particle;
-	RENDERVERTEX vertices[9];
-	int numVerts;
-	int translucency;
+	PARTICLE		particle;
+	RENDERVERTEX	vertices[9];
+	size_t			numVerts;
+	int				translucency;
 
 	inline bool operator<(const renderParticle& rhs) const {return translucency < rhs.translucency;}
 };
@@ -121,7 +123,8 @@ void DrawParticles()
 		OutputDebugString(buf);
 */
 	}
-	int backup = RenderPolygon.NumberOfVertices;
+
+	unsigned int backup = RenderPolygon.NumberOfVertices;
 
 	// sort particle array
 	std::sort(particleArray.begin(), particleArray.end());
@@ -141,8 +144,8 @@ void DrawParticles()
 
 const signed int NO_TEXTURE = -1;
 // set them to 'null' texture initially
-signed int currentTextureId = NO_TEXTURE;
-signed int currentWaterTexture = NO_TEXTURE;
+int32_t	currentTextureID	= NO_TEXTURE;
+int32_t	currentWaterTexture = NO_TEXTURE;
 
 // use 999 as a reference for the tallfont texture
 const int TALLFONT_TEX = 999;
@@ -150,20 +153,17 @@ const int PROGRESS_TEX = 998;
 const int CONSOLE_TEX  = 997;
 const int FMV_TEX	   = 996;
 
-RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
-//std::vector<RENDER_STATES> renderTest;
-
 void DeleteRenderMemory()
 {
 	delete[] orthoList;
 	delete[] renderList;
 }
 
-int NumVertices = 0;
-int NumIndicies = 0;
-int vb = 0;
-int particleIndex = 0;
-unsigned int renderCount = 0;
+int		NumVertices = 0;
+int		NumIndicies = 0;
+int		vb = 0;
+int		particleIndex = 0;
+size_t	renderCount = 0;
 
 extern AVPIndexedFont IntroFont_Light;
 
@@ -425,11 +425,11 @@ BOOL SetExecuteBufferDefaults()
 	D3DZFunc = D3DCMP_LESSEQUAL;
 
 	// fill out first render list struct
-	renderList[0].texture_id = NO_TEXTURE;
-	renderList[0].vert_start = 0;
-	renderList[0].vert_end = 0;
-	renderList[0].filtering_type = FILTERING_BILINEAR_OFF;
-	renderList[0].translucency_type = TRANSLUCENCY_OFF;
+	renderList[0].textureID = NO_TEXTURE;
+	renderList[0].vertStart = 0;
+	renderList[0].vertEnd = 0;
+	renderList[0].filteringType = FILTERING_BILINEAR_OFF;
+	renderList[0].translucencyType = TRANSLUCENCY_OFF;
 
 //	renderTest.push_back(renderList[0]);
 
@@ -445,42 +445,42 @@ BOOL SetExecuteBufferDefaults()
     return TRUE;
 }
 
-void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE translucency_mode) 
+void CheckVertexBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode) 
 {
-	int real_num_verts = 0;
+	size_t realNumVerts = 0;
 
-	switch (num_verts) 
+	switch (numVerts) 
 	{
 		case 3:
-			real_num_verts = 3; 
+			realNumVerts = 3; 
 			break;
 		case 4:
-			real_num_verts = 6; 
+			realNumVerts = 6; 
 			break;
 		case 5:
-			real_num_verts = 9; 
+			realNumVerts = 9; 
 			break;
 		case 6:
-			real_num_verts = 12; 
+			realNumVerts = 12; 
 			break;
 		case 7:
-			real_num_verts = 15; 
+			realNumVerts = 15; 
 			break;
 		case 8:
-			real_num_verts = 18; 
+			realNumVerts = 18; 
 			break;
 		case 0:
 			return;
 		case 256:
-			real_num_verts = 1350; 
+			realNumVerts = 1350; 
 			break;
 		default:
 			// need to check this is ok!!
-			real_num_verts = num_verts;
+			realNumVerts = numVerts;
 	}
 
 	// check if we've got enough room. if not, flush
-	if (NumVertices + num_verts> (MAX_VERTEXES-12))
+	if (NumVertices + numVerts> (MAX_VERTEXES-12))
 	{
 		UnlockExecuteBufferAndPrepareForUse();
 		ExecuteBuffer();
@@ -490,20 +490,20 @@ void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE t
 	// in case we get a bad value..
 //	if (tex > MaxImages) return;
 
-	renderList[renderCount].texture_id = tex;
-	renderList[renderCount].vert_start = 0;
-	renderList[renderCount].vert_end = 0;
+	renderList[renderCount].textureID = textureID;
+	renderList[renderCount].vertStart = 0;
+	renderList[renderCount].vertEnd = 0;
 
-	renderList[renderCount].index_start = 0;
-	renderList[renderCount].index_end = 0;
+	renderList[renderCount].indexStart = 0;
+	renderList[renderCount].indexEnd = 0;
 
-	renderList[renderCount].translucency_type = translucency_mode;
+	renderList[renderCount].translucencyType = translucencyMode;
 
 	// check if current vertexes use the same texture and render states as the previous
 	// if they do, we can 'merge' the two together
 
-	if ((tex == renderList[renderCount-1].texture_id && 
-		translucency_mode == renderList[renderCount-1].translucency_type) && 
+	if ((textureID == renderList[renderCount-1].textureID && 
+		translucencyMode == renderList[renderCount-1].translucencyType) && 
 //		renderList[renderCount].filtering_type == renderList[renderCount-1].filtering_type) &&
 		renderCount != 0) 
 	{
@@ -513,17 +513,17 @@ void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE t
 	}
 	else
 	{
-		renderList[renderCount].vert_start = NumVertices;
-		renderList[renderCount].index_start = NumIndicies;
+		renderList[renderCount].vertStart = NumVertices;
+		renderList[renderCount].indexStart = NumIndicies;
 	}
 
-	renderList[renderCount].vert_end = NumVertices + num_verts;
-	renderList[renderCount].index_end = NumIndicies + real_num_verts;
+	renderList[renderCount].vertEnd = NumVertices + numVerts;
+	renderList[renderCount].indexEnd = NumIndicies + realNumVerts;
 
 //	renderTest.push_back(renderList[renderCount]);
 	renderCount++;
 
-	NumVertices += num_verts;
+	NumVertices += numVerts;
 }
 
 BOOL LockExecuteBuffer()
@@ -583,8 +583,6 @@ BOOL UnlockExecuteBufferAndPrepareForUse()
 
 	return TRUE;
 }
-
-int counter = 0;
 
 BOOL BeginD3DScene()
 {
@@ -684,47 +682,47 @@ BOOL EndD3DScene()
 	return TRUE;
 }
 
-void ChangeTexture(const int texture_id)
+void ChangeTexture(const int32_t textureID)
 {
-	if (texture_id == currentTextureId) 
+	if (textureID == currentTextureID) 
 		return;
 
 	// menu large font
-	else if (texture_id == TALLFONT_TEX)
+	else if (textureID == TALLFONT_TEX)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, IntroFont_Light.info.menuTexture);
-		if (!FAILED(LastError)) currentTextureId = TALLFONT_TEX;
+		if (!FAILED(LastError)) currentTextureID = TALLFONT_TEX;
 			return;
 	}
 
-	else if (texture_id == CONSOLE_TEX)
+	else if (textureID == CONSOLE_TEX)
 	{
 /*
 		LastError = d3d.lpD3DDevice->SetTexture(0, consoleText);
-		if (!FAILED(LastError)) currentTextureId = CONSOLE_TEX;
+		if (!FAILED(LastError)) currentTextureID = CONSOLE_TEX;
 */
 		return;
 	}
 
 	// if texture was specified as 'null'
-	else if (texture_id == NO_TEXTURE)
+	else if (textureID == NO_TEXTURE)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, NULL);
-		if (!FAILED(LastError)) currentTextureId = NO_TEXTURE;
+		if (!FAILED(LastError)) currentTextureID = NO_TEXTURE;
 		return;
 	}
 
 	// if in menus (outside game)
 	if (mainMenu)
 	{
-		LastError = d3d.lpD3DDevice->SetTexture(0, AvPMenuGfxStorage[texture_id].menuTexture);
-		if (!FAILED(LastError)) currentTextureId = texture_id;
+		LastError = d3d.lpD3DDevice->SetTexture(0, AvPMenuGfxStorage[textureID].menuTexture);
+		if (!FAILED(LastError)) currentTextureID = textureID;
 		return;
 	}
 	else
 	{
-		LastError = d3d.lpD3DDevice->SetTexture(0, ImageHeaderArray[texture_id].Direct3DTexture);
-		if (!FAILED(LastError)) currentTextureId = texture_id;
+		LastError = d3d.lpD3DDevice->SetTexture(0, ImageHeaderArray[textureID].Direct3DTexture);
+		if (!FAILED(LastError)) currentTextureID = textureID;
 		return;
 	}
 }
@@ -754,7 +752,7 @@ BOOL ExecuteBuffer()
 	}
 
 	LastError = d3d.lpD3DDevice->SetIndices (d3d.lpD3DIndexBuffer);
-	if(FAILED(LastError)) 
+	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
@@ -762,82 +760,79 @@ BOOL ExecuteBuffer()
 	ChangeTextureAddressMode(TEXTURE_WRAP);
 
 	// we can assume to keep this turned on
-//	ChangeFilteringMode(FILTERING_BILINEAR_ON);
+	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
 #if 1
 	for (size_t i = 0; i < renderCount; i++)
-//	for (unsigned int i = 0; i < renderTest.size(); i++)
 	{
-		if (renderList[i].translucency_type != TRANSLUCENCY_OFF) 
+		if (renderList[i].translucencyType != TRANSLUCENCY_OFF) 
 			continue;
 
 		// texture stuff here
-		ChangeTexture(renderList[i].texture_id);
+		ChangeTexture(renderList[i].textureID);
 
-		ChangeTranslucencyMode(renderList[i].translucency_type);
+		ChangeTranslucencyMode(renderList[i].translucencyType);
 
-		unsigned int num_prims = (renderList[i].index_end - renderList[i].index_start) / 3;
+		UINT numPrimitives = (renderList[i].indexEnd - renderList[i].indexStart) / 3;
 
-		if (num_prims > 0) 
+		if (numPrimitives > 0) 
 		{
 			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 
 				0, 
 				0, 
 				NumVertices,
-				renderList[i].index_start,
-				num_prims);
+				renderList[i].indexStart,
+				numPrimitives);
 
 			if (FAILED(LastError))
 			{
 				LogDxError(LastError, __LINE__, __FILE__);
 			}
 		}
-		NumberOfRenderedTriangles += num_prims / 3;
+		NumberOfRenderedTriangles += numPrimitives / 3;
 	}
 
-/* do transparents here.. */
-
-//	for (unsigned int i = 0; i < renderTest.size(); i++)
-	for (unsigned int i = 0; i < renderCount; i++)
+	// do transparents here..
+	for (size_t i = 0; i < renderCount; i++)
 	{
-		if (renderList[i].translucency_type == TRANSLUCENCY_OFF) 
+		if (renderList[i].translucencyType == TRANSLUCENCY_OFF) 
 			continue;
 
 		// texture stuff here
-		ChangeTexture(renderList[i].texture_id);
+		ChangeTexture(renderList[i].textureID);
 
-		ChangeTranslucencyMode(renderList[i].translucency_type);
+		ChangeTranslucencyMode(renderList[i].translucencyType);
 
 		extern int HUDImageNumber;
 		extern int HUDFontsImageNumber;
 		extern int AAFontImageNumber;
 
-		int textureID = renderList[i].texture_id;
-
 		/* lazy way to get the filtering working correctly :) */
-		if ( textureID == AAFontImageNumber || textureID == HUDFontsImageNumber || textureID == HUDImageNumber)
+		if (renderList[i].textureID == AAFontImageNumber 
+			|| renderList[i].textureID == HUDFontsImageNumber 
+			|| renderList[i].textureID == HUDImageNumber)
 		{
 			ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 		}
 		else ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
-		unsigned int num_prims = (renderList[i].index_end - renderList[i].index_start) / 3;
+		UINT numPrimitives = (renderList[i].indexEnd - renderList[i].indexStart) / 3;
 
-		if (num_prims > 0) 
+		if (numPrimitives > 0) 
 		{
 			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 
 			   0, 
 			   0, 
 			   NumVertices,
-			   renderList[i].index_start,
-			   num_prims);
+			   renderList[i].indexStart,
+			   numPrimitives);
 
 			if (FAILED(LastError))
 			{
 				LogDxError(LastError, __LINE__, __FILE__);
 			}
 		}
-		NumberOfRenderedTriangles += num_prims / 3;
+		NumberOfRenderedTriangles += numPrimitives / 3;
 	}
 
 	// render any orthographic quads
@@ -858,10 +853,10 @@ BOOL ExecuteBuffer()
 		ChangeTextureAddressMode(TEXTURE_CLAMP);
 
 		// loop through list drawing the quads
-		for (int i = 0; i < orthoListCount; i++)
+		for (size_t i = 0; i < orthoListCount; i++)
 		{
 			ChangeTexture(orthoList[i].textureID);
-			ChangeTranslucencyMode(orthoList[i].translucency_type);
+			ChangeTranslucencyMode(orthoList[i].translucencyType);
 
 			LastError = d3d.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, orthoList[i].vertStart, 2);
 			if (FAILED(LastError))
@@ -965,12 +960,12 @@ void SetFogDistance(int fogDistance)
 
 void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired) 
 {
-	renderList[renderCount].filtering_type = filteringRequired;
+	renderList[renderCount].filteringType = filteringRequired;
 }
 
 void SetTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 {
-	renderList[renderCount].translucency_type = translucencyRequired;
+	renderList[renderCount].translucencyType = translucencyRequired;
 }
 
 void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode)
@@ -1324,7 +1319,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
 
 	if (!texoffset) 
-		texoffset = currentTextureId;
+		texoffset = currentTextureID;
 
 	RecipW = (1.0f/65536.0f)/(float) ImageHeaderArray[texoffset].ImageWidth;
 	RecipH = (1.0f/65536.0f)/(float) ImageHeaderArray[texoffset].ImageHeight;
@@ -4727,7 +4722,7 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_textu
 		LogDxError(LastError, __LINE__, __FILE__);
 		return;
 	}
-	currentTextureId = PROGRESS_TEX;
+	currentTextureID = PROGRESS_TEX;
 
 	int width = original_width;
 	int height = original_height;
@@ -4816,7 +4811,7 @@ void DrawQuad(int x, int y, int width, int height, int textureID, int colour, en
 	orthoList[orthoListCount].textureID = textureID;
 	orthoList[orthoListCount].vertStart = orthoOffset;
 	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
-	orthoList[orthoListCount].translucency_type = translucencyType;
+	orthoList[orthoListCount].translucencyType = translucencyType;
 	orthoListCount++;
 
 	// bottom left
@@ -5207,7 +5202,7 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	orthoList[orthoListCount].textureID = AVPMENUGFX_SMALL_FONT;
 	orthoList[orthoListCount].vertStart = orthoOffset;
 	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
-	orthoList[orthoListCount].translucency_type = TRANSLUCENCY_GLOWING;
+	orthoList[orthoListCount].translucencyType = TRANSLUCENCY_GLOWING;
 	orthoListCount++;
 
 	// bottom left
@@ -5421,7 +5416,7 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 	orthoList[orthoListCount].textureID = TALLFONT_TEX;
 	orthoList[orthoListCount].vertStart = orthoOffset;
 	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
-	orthoList[orthoListCount].translucency_type = TRANSLUCENCY_GLOWING;
+	orthoList[orthoListCount].translucencyType = TRANSLUCENCY_GLOWING;
 	orthoListCount++;
 
 	// bottom left

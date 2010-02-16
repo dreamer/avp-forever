@@ -5,6 +5,8 @@
   ----------------------------------------------------------------------------*/
 #include "console.h"
 #include "logString.h"
+#include "configFile.h"
+
 #include "audioStreaming.h"
 #include <d3dx9math.h>
 
@@ -58,7 +60,7 @@ struct SoundConfigTag
   ----------------------------------------------------------------------------*/
 SOUNDSAMPLEDATA GameSounds[SID_MAXIMUM];		   
 ACTIVESOUNDSAMPLE ActiveSounds[SOUND_MAXACTIVE];
-SOUNDSAMPLEDATA BlankGameSound = {0,0,0,0,FALSE,NULL,0,0,NULL,/*0.0f,*/0,0,NULL,0};
+SOUNDSAMPLEDATA BlankGameSound = {0,0,0,0,FALSE,NULL,0,0,NULL,0,0,NULL,0};
 ACTIVESOUNDSAMPLE BlankActiveSound = {SID_NOSOUND,ASP_Minimum,0,0,NULL,0,0,0,0,0,{{0,0,0},0,0},FALSE, 0, 0, NULL};
 
 
@@ -390,6 +392,8 @@ int PlatStartSoundSys()
 
 //	LOG_RC();
 
+	int sampleRate = Config_GetInt("[Audio]", "SampleRate", 44100);
+
 	/* Set the globals. */
 	SoundConfig.flags			= SOUND_DEFAULT;
 	SoundConfig.reverb_changed	= TRUE;
@@ -436,7 +440,7 @@ int PlatStartSoundSys()
 	}
 */
 	// Create a mastering voice
-	LastError = pXAudio2->CreateMasteringVoice(&pMasteringVoice, 0, 44100, 0, 0, 0);
+	LastError = pXAudio2->CreateMasteringVoice(&pMasteringVoice, 0, sampleRate, 0, 0, 0);
 //	LastError = pXAudio2->CreateMasteringVoice(&pMasteringVoice);
 	if (FAILED(LastError))
 	{
@@ -473,7 +477,7 @@ int PlatStartSoundSys()
 	XA2Listener.OrientFront.z = 1.0f;
 
 	XA2Listener.OrientTop.x = 0.0f;
-	XA2Listener.OrientTop.y = 1.0f;
+	XA2Listener.OrientTop.y = -1.0f;
 	XA2Listener.OrientTop.z = 0.0f;
 
 	XA2Listener.Velocity.x = 0.0f;
@@ -482,8 +486,8 @@ int PlatStartSoundSys()
 	XA2Listener.pCone = NULL;
 
 	FLOAT32 *matrix = new FLOAT32[deviceDetails.OutputFormat.Format.nChannels];
-//	matrix[0] = 0.5f;
-//	matrix[1] = 0.5f;
+	matrix[0] = 0.5f;
+	matrix[1] = 0.5f;
 
 	XA2DSPSettings.SrcChannelCount = 1;
 	XA2DSPSettings.DstChannelCount = deviceDetails.OutputFormat.Format.nChannels;
@@ -499,28 +503,11 @@ int PlatStartSoundSys()
 
 	return 1;
 }
+
 void ResetEaxEnvironment(void)
 {
  	// Set a default value.
  	PlatSetEnviroment(EAX_ENVIRONMENT_DEFAULT, EAX_REVERBMIX_USEDISTANCE);
-}
-
-void SetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int position)
-{
-
-}
-
-void GetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int *position)
-{
-	*position = 0;
-}
-
-int CheckSoundBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
-{
-	if (activeSound->pSourceVoice && activeSound->audioBuffer)
-		return 1;
-	else
-		return 0;
 }
 
 void PlatEndSoundSys()
@@ -542,9 +529,33 @@ void PlatEndSoundSys()
 		XA2DSPSettings.pMatrixCoefficients = NULL;
 	}
 
-	pXAudio2->StopEngine();
-	SAFE_RELEASE (pXAudio2);
+	if (pXAudio2)
+	{
+		pXAudio2->StopEngine();
+		SAFE_RELEASE (pXAudio2);
+	}
+
 	CoUninitialize();
+
+	Con_PrintMessage("Uninitialised XAudio2 successfully");
+}
+
+void SetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int position)
+{
+
+}
+
+void GetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int *position)
+{
+	*position = 0;
+}
+
+int CheckSoundBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
+{
+	if (activeSound->pSourceVoice && activeSound->audioBuffer)
+		return 1;
+	else
+		return 0;
 }
 
 int PlatChangeGlobalVolume(int volume)
@@ -554,7 +565,7 @@ int PlatChangeGlobalVolume(int volume)
 
 	LOCALASSERT((volume >= VOLUME_MIN) && (volume <= VOLUME_MAX));
 
-	LastError = pMasteringVoice->SetVolume (vol_to_gain_table[volume], XAUDIO2_COMMIT_NOW);
+	LastError = pMasteringVoice->SetVolume(vol_to_gain_table[volume], XAUDIO2_COMMIT_NOW);
 	if (FAILED(LastError))
 	{
 		return SOUND_PLATFORMERROR;
@@ -645,14 +656,6 @@ int PlatPlaySound(int activeIndex)
 		newVolume = ActiveSounds[activeIndex].volume;
 		newVolume = (newVolume * VOLUME_PLAT2DSCALE) >> 7;
 		ActiveSounds[activeIndex].volume = newVolume;
-
-		ActiveSounds[activeIndex].xa2Emitter.Position.x = 0.0f; //?
-		ActiveSounds[activeIndex].xa2Emitter.Position.y = 0.0f; //?
-		ActiveSounds[activeIndex].xa2Emitter.Position.z = 0.0f; //?
-
-		ActiveSounds[activeIndex].xa2Emitter.Velocity.x = 0.0f; //?
-		ActiveSounds[activeIndex].xa2Emitter.Velocity.y = 0.0f; //?
-		ActiveSounds[activeIndex].xa2Emitter.Velocity.z = 0.0f; //?
 		
 		ok = PlatChangeSoundVolume (activeIndex, ActiveSounds[activeIndex].volume);
 		if (ok == SOUND_PLATFORMERROR)
@@ -788,7 +791,8 @@ int PlatChangeSoundPitch(int activeIndex, int pitch)
 
 int PlatSoundHasStopped(int activeIndex)
 {
-	XAUDIO2_VOICE_STATE voiceState = {0};
+	XAUDIO2_VOICE_STATE voiceState;
+
 	ActiveSounds[activeIndex].pSourceVoice->GetState(&voiceState);
 
 	if (voiceState.BuffersQueued)
@@ -1033,7 +1037,7 @@ static int PlatChangeSoundPan(int activeIndex, int pan)
 
 unsigned int PlatMaxHWSounds()
 {
-	return SoundMaxHW;
+	return 128;//SoundMaxHW;
 }
 
 /* Patrick 15/6/97 -------------------------------------------------------------
@@ -1163,7 +1167,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		fclose(myFile);
 		return 0;	
 	}
-	
+
 	// Calculate length of sample
 	lengthInSeconds = DIV_FIXED(myChunkHeader.chunkLength, myWaveFormat.nAvgBytesPerSec);
 
@@ -1193,10 +1197,10 @@ int LoadWavFile(int soundNum, char * wavFileName)
 	}
 		
 	{
-		/* Now set the buffer description and make a sound object */	
+		// Now set the buffer description and make a sound object
 		GameSounds[soundNum].audioBuffer = new uint8_t[myChunkHeader.chunkLength];
 
-		/* Read data from file to buffer */
+		// Read data from file to buffer
 		res = fread(GameSounds[soundNum].audioBuffer, 1, myChunkHeader.chunkLength, myFile);
 		if (res != (size_t)myChunkHeader.chunkLength)
 		{
@@ -1222,7 +1226,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 
 		// Set the emitter stuff
 		memset(&GameSounds[soundNum].xa2Emitter, 0, sizeof(X3DAUDIO_EMITTER));
-		GameSounds[soundNum].xa2Emitter.ChannelCount = 1;//myWaveFormat.nChannels; bjd - check
+		GameSounds[soundNum].xa2Emitter.ChannelCount = myWaveFormat.nChannels;
 		GameSounds[soundNum].xa2Emitter.CurveDistanceScaler = FLT_MIN;
 
 		GameSounds[soundNum].xa2Emitter.OrientFront = D3DXVECTOR3( 0, 0, 1 );
@@ -1293,10 +1297,11 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		myWaveFormat.nBlockAlign = tmpWaveFormat.wf.nBlockAlign;
 		myWaveFormat.wBitsPerSample = tmpWaveFormat.wBitsPerSample;
 		myWaveFormat.cbSize = 0;
-
+/*
 		char buf[200];
 		sprintf(buf, "name: %s channels: %d samsPerSec: %d\n", wavFileName, myWaveFormat.nChannels, myWaveFormat.nSamplesPerSec);
 		OutputDebugString(buf);
+*/
 	}
 	else if(myChunkHeader.chunkLength==18)
 	{
@@ -1394,7 +1399,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 
 		// Set the emitter stuff
 		memset(&GameSounds[soundNum].xa2Emitter, 0, sizeof(X3DAUDIO_EMITTER));
-		GameSounds[soundNum].xa2Emitter.ChannelCount = 1;// myWaveFormat.nChannels; bjd - check
+		GameSounds[soundNum].xa2Emitter.ChannelCount = myWaveFormat.nChannels;
 //		GameSounds[soundNum].xa2Emitter.CurveDistanceScaler = FLT_MIN;
 
 		GameSounds[soundNum].xa2Emitter.OrientFront = D3DXVECTOR3( 0, 0, 1 );
@@ -1506,7 +1511,7 @@ void PlatUpdatePlayer()
 			XA2Listener.OrientTop.x = 0.0f;
 			XA2Listener.OrientTop.y = 1.0f;
 			XA2Listener.OrientTop.z = 0.0f;
-
+/*
 			char buf2[250];
 			sprintf(buf2, "of:x %f of:y %f of:z :%f - ot:x %f ot:y %f ot:z :%f\n", 
 				XA2Listener.OrientFront.x,
@@ -1516,6 +1521,7 @@ void PlatUpdatePlayer()
 				XA2Listener.OrientTop.y,
 				XA2Listener.OrientTop.z);
 			OutputDebugString(buf2);
+*/
 		}
 		else
 		{
@@ -1525,7 +1531,7 @@ void PlatUpdatePlayer()
 			XA2Listener.OrientTop.x = (float) ((Global_VDB_Ptr->VDB_Mat.mat12) / 65536.0F);
 			XA2Listener.OrientTop.y = (float) ((Global_VDB_Ptr->VDB_Mat.mat22) / 65536.0F);
 			XA2Listener.OrientTop.z = (float) ((Global_VDB_Ptr->VDB_Mat.mat32) / 65536.0F);
-
+/*
 			char buf2[250];
 			sprintf(buf2, "of:x %f of:y %f of:z :%f - ot:x %f ot:y %f ot:z :%f\n", 
 				XA2Listener.OrientFront.x,
@@ -1535,6 +1541,7 @@ void PlatUpdatePlayer()
 				XA2Listener.OrientTop.y,
 				XA2Listener.OrientTop.z);
 			OutputDebugString(buf2);
+*/
 		}
 
 		if (AvP.PlayerType == I_Alien && DopplerShiftIsOn && NormalFrameTime)
@@ -1558,7 +1565,7 @@ void PlatUpdatePlayer()
 #if 0 // not doing reverb stuff yet
 //
 #endif
-
+#if 0
 	char buf[100];
 	UINT32 calcFlags = X3DAUDIO_CALCULATE_MATRIX/* | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT | X3DAUDIO_CALCULATE_REVERB*/; // ????????????????????????????
 
@@ -1579,7 +1586,7 @@ void PlatUpdatePlayer()
 			ActiveSounds[i].pSourceVoice->SetFrequencyRatio(XA2DSPSettings.DopplerFactor);
 		}
 	}
-
+#endif
 	pXAudio2->CommitChanges(XAUDIO2_COMMIT_ALL);
 }
 
@@ -1778,7 +1785,7 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 
 		// Set the emitter stuff
 		memset(&GameSounds[soundIndex].xa2Emitter, 0, sizeof(X3DAUDIO_EMITTER));
-		GameSounds[soundIndex].xa2Emitter.ChannelCount = 1;// myWaveFormat.nChannels; bjd - check
+		GameSounds[soundIndex].xa2Emitter.ChannelCount = myWaveFormat.nChannels;
 		GameSounds[soundIndex].xa2Emitter.CurveDistanceScaler = 1.0f;
 		GameSounds[soundIndex].xa2Emitter.DopplerScaler = 1.0f;
 		GameSounds[soundIndex].xa2Emitter.OrientFront = D3DXVECTOR3( 0, 0, 1 );

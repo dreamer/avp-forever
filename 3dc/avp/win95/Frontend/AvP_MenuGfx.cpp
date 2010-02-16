@@ -145,7 +145,7 @@ static void LoadMenuFont(void)
 	*/
 
 	AVPMENUGFX *gfxPtr;
-	unsigned int fastFileLength;
+	size_t fastFileLength;
 	char buffer[100];
 	void const *pFastFileData;
 	
@@ -1021,7 +1021,7 @@ extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 	CL_GetImageFileName(buffer, 100, gfxPtr->FilenamePtr, LIO_RELATIVEPATH);
 	
 	//see if graphic can be found in fast file
-	unsigned int fastFileLength;
+	size_t fastFileLength;
 	void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
 
 	if(pFastFileData)

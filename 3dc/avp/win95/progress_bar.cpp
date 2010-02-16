@@ -67,7 +67,7 @@ void Start_Progress_Bar()
 		CL_GetImageFileName(buffer, 100, Loading_Bar_Empty_Image_Name, LIO_RELATIVEPATH);
 		
 		//see if graphic can be found in fast file
-		unsigned int fastFileLength;
+		size_t fastFileLength;
 		void const * pFastFileData = ffreadbuf(buffer, &fastFileLength);
 
 		if (pFastFileData)
@@ -88,7 +88,7 @@ void Start_Progress_Bar()
 		CL_GetImageFileName(buffer, 100,Loading_Bar_Full_Image_Name, LIO_RELATIVEPATH);
 		
 		//see if graphic can be found in fast file
-		unsigned int fastFileLength;
+		size_t fastFileLength;
 		void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
 		
 		if (pFastFileData)
@@ -110,7 +110,7 @@ void Start_Progress_Bar()
 	CL_GetImageFileName(buffer, 100,Loading_Image_Name, LIO_RELATIVEPATH);
 	
 	//see if graphic can be found in fast file
-	unsigned int fastFileLength;
+	size_t fastFileLength;
 	void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
 	
 	if (pFastFileData)

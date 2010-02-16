@@ -246,13 +246,13 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 		unsigned nWidth, nHeight;
 	
 		//see if graphic can be found in fast file
-		unsigned int fastFileLength;
+		size_t fastFileLength;
 		void const * pFastFileData = ffreadbuf(Filename,&fastFileLength);
 		
 		if (pFastFileData)
 		{
 			//load from fast file
-			image_ptr = AwCreateTexture//Surface
+			image_ptr = AwCreateTexture
 			(
 				"pxfXYB",
 				pFastFileData,
@@ -267,8 +267,8 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 		}
 		else
 		{
-		//load graphic from rim file
-			image_ptr = AwCreateTexture//Surface
+			//load graphic from rim file
+			image_ptr = AwCreateTexture
 			(
 				"sfXYB",
 				Filename,
@@ -280,32 +280,31 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 				&hBackup
 			);
 		}
-		R2Size_OverallImage . w = nWidth;
-		R2Size_OverallImage . h = nHeight;
+		R2Size_OverallImage.w = nWidth;
+		R2Size_OverallImage.h = nHeight;
 	}
 
 	GLOBALASSERT(image_ptr);
 	GLOBALASSERT(hBackup);
 
-	GLOBALASSERT(R2Size_OverallImage . w>0);
-	GLOBALASSERT(R2Size_OverallImage . h>0);
+	GLOBALASSERT(R2Size_OverallImage.w > 0);
+	GLOBALASSERT(R2Size_OverallImage.h > 0);
 
-	NumChars = (R2Size_OverallImage . h)/HeightPerChar_Val;
+	NumChars = (R2Size_OverallImage.h)/HeightPerChar_Val;
 
 	GLOBALASSERT( NumChars < MAX_CHARS_IN_TALLFONT );
 
 	for (int i=0;i<NumChars;i++)
 	{
-		WindowsRectForOffset[ i ] . top = (i*HeightPerChar_Val);
-		WindowsRectForOffset[ i ] . bottom = ((i+1)*HeightPerChar_Val);
-		WindowsRectForOffset[ i ] . left = 0;
-		WindowsRectForOffset[ i ] . right = R2Size_OverallImage . w;
+		WindowsRectForOffset[ i ].top = (i*HeightPerChar_Val);
+		WindowsRectForOffset[ i ].bottom = ((i+1)*HeightPerChar_Val);
+		WindowsRectForOffset[ i ].left = 0;
+		WindowsRectForOffset[ i ].right = R2Size_OverallImage . w;
 
 		WidthForOffset[ i ] = R2Size_OverallImage . w;
 	}
 
 	UpdateWidths();
-
 }
 
 void
@@ -320,7 +319,7 @@ IndexedFont_Proportional_Column :: UpdateWidths(void)
 			for (int iOffset=0;iOffset<NumChars;iOffset++)
 			{
 				int y = iOffset * HeightPerChar_Val;
-				int x = ( R2Size_OverallImage . w - 1);
+				int x = ( R2Size_OverallImage.w - 1);
 
 				#if 0
 				db_logf1(("Character offset %i",iOffset));
@@ -328,13 +327,11 @@ IndexedFont_Proportional_Column :: UpdateWidths(void)
 
 				while (x>0)
 				{
-					if
-					(
+					if (
 						bAnyNonTransparentPixelsInColumn
 						(
 							r2pos(x,y), // r2pos R2Pos_TopOfColumn,
 							HeightPerChar_Val // int HeightOfColumn
-							 // LPDDSURFACEDESC lpDDSurfaceDesc
 						)
 					)
 					{
@@ -769,7 +766,7 @@ IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
 		unsigned nWidth,nHeight;
 		
 		//see if graphic can be found in fast file
-		unsigned int fastFileLength;
+		size_t fastFileLength;
 		void const * pFastFileData = ffreadbuf(Filename,&fastFileLength);
 		
 		if (pFastFileData)
