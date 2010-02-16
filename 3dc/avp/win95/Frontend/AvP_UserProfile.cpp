@@ -146,14 +146,15 @@ extern void DeleteUserProfile(int number)
 
 	DeleteFile(filename);
 
+	// now delete all the user's savegame files
 	delete [] filename;
 	{
 		int i;
-		filename = new char [100];
+		filename = new char [MAX_PATH];
 
 		for (i=0; i<NUMBER_OF_SAVE_SLOTS; i++)
 		{
-			sprintf(filename,"%s%s_%d.sav",USER_PROFILES_PATH,profilePtr->Name,i+1);
+			sprintf(filename,"%s%s%s_%d.sav",savePath,USER_PROFILES_PATH,profilePtr->Name,i+1);
 			DeleteFile(filename);
 		}
 		delete [] filename;
@@ -256,7 +257,7 @@ static int LoadUserProfiles(void)
 			}
 
 			AVP_USER_PROFILE *profilePtr = new AVP_USER_PROFILE;
-			unsigned long bytes_read;
+			size_t bytes_read;
 			
 			if (!ReadFile(rif_file, profilePtr, sizeof(AVP_USER_PROFILE), &bytes_read, 0))
 			{
