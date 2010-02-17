@@ -143,18 +143,21 @@ FILE *avp_fopen(const char *fileName, const char *mode)
 {
 	FILE *theFile = 0;
 	std::string finalPath;
-#ifdef _XBOX
-	finalPath.append("d:\\");
-	finalPath.append(fileName);
-//	return fopen(finalPath.c_str(), mode);
-	theFile = fopen(finalPath.c_str(), mode);
 
-	if (theFile == NULL)
+#ifdef _XBOX
+
+	// if write mode, direct to home path
+	if (strcmp(mode, "wb") == 0)
 	{
-		int i = 0;
+		finalPath.append("d:\\");
+		finalPath.append(fileName);
+	}
+	else
+	{
+		finalPath += fileName;
 	}
 
-	return theFile;
+	return fopen(finalPath.c_str(), mode);
 #endif
 #ifdef WIN32
 
@@ -198,14 +201,7 @@ HANDLE avp_CreateFile(LPCTSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMo
 	finalPath.append("d:\\");
 	finalPath.append(lpFileName);
 
-	HANDLE theHandle = CreateFile(finalPath.c_str(), dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
-
-	if (theHandle == INVALID_HANDLE_VALUE)
-	{
-		int i = 0;
-	}
-
-	return theHandle;
+	return CreateFile(finalPath.c_str(), dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 
 #endif
 #ifdef WIN32
