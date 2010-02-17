@@ -28,8 +28,8 @@ extern char MP_Config_Description[];
 
 static List<char*> ConfigurationFilenameList;
 static List<char*> ConfigurationLocalisedFilenameList;
-char* LastDescriptionFile=0;
-char* LastDescriptionText=0;
+char* LastDescriptionFile = 0;
+char* LastDescriptionText = 0;
 
 
 AVPMENU_ELEMENT* AvPMenu_Multiplayer_LoadConfig=0;
@@ -37,27 +37,33 @@ AVPMENU_ELEMENT* AvPMenu_Multiplayer_LoadConfig=0;
 BOOL BuildLoadMPConfigMenu()
 {
 	//delete the old list of filenames
-	while(ConfigurationFilenameList.size())
+	while (ConfigurationFilenameList.size())
 	{
-		delete [] ConfigurationFilenameList.first_entry();
+		delete[] ConfigurationFilenameList.first_entry();
 		ConfigurationFilenameList.delete_first_entry();
 	}
-	while(ConfigurationLocalisedFilenameList.size())
+	while (ConfigurationLocalisedFilenameList.size())
 	{
 		ConfigurationLocalisedFilenameList.delete_first_entry();
 	}
 
-	//do a search for all the configuration in the configuration directory
-	
-	const char* load_name=MP_CONFIG_WILDCARD;
-	if(netGameData.skirmishMode)
+	// grab the home directory path
+	char filePath[MAX_PATH];
+	strcpy(filePath, GetSaveFolderPath());
+
+	// do a search for all the configuration in the configuration directory
+	const char* load_name = MP_CONFIG_WILDCARD;
+	if (netGameData.skirmishMode)
 	{
-		load_name=SKIRMISH_CONFIG_WILDCARD;
+		load_name = SKIRMISH_CONFIG_WILDCARD;
 	}
+
+	strcat(filePath, load_name);
+
 	// allow a wildcard search
 	WIN32_FIND_DATA wfd;
 
-	HANDLE hFindFile = avp_FindFirstFile(load_name, &wfd);
+	HANDLE hFindFile = avp_FindFirstFile(filePath, &wfd);
 	
 	if (INVALID_HANDLE_VALUE == hFindFile)
 	{
@@ -92,32 +98,33 @@ BOOL BuildLoadMPConfigMenu()
 				// not a directory, hidden or system file
 		)
 		{
-			char* name=new char[strlen(wfd.cFileName)+1];
+			char* name = new char[strlen(wfd.cFileName)+1];
 			strcpy(name,wfd.cFileName);
-			char* dotpos=strchr(name,'.');
-			if(dotpos) *dotpos=0;
+			char* dotpos = strchr(name,'.');
+			if (dotpos) 
+				*dotpos = 0;
+
 			ConfigurationFilenameList.add_entry(name);
 
-			BOOL localisedFilename=FALSE;
+			BOOL localisedFilename = FALSE;
 			
 			//seeif this is one of the default language localised configurations
-			if(!strncmp(name,"Config",6))
+			if (!strncmp(name, "Config", 6))
 			{
-				if(name[6]>='1' && name[6]<='7' && name[7]=='\0')
+				if (name[6] >= '1' && name[6] <= '7' && name[7] == '\0')
 				{
-					TEXTSTRING_ID string_index=(TEXTSTRING_ID)(TEXTSTRING_MPCONFIG1_FILENAME+(name[6]-'1'));
+					TEXTSTRING_ID string_index = (TEXTSTRING_ID)(TEXTSTRING_MPCONFIG1_FILENAME+(name[6]-'1'));
 					ConfigurationLocalisedFilenameList.add_entry(GetTextString(string_index));
-					localisedFilename=TRUE;
+					localisedFilename = TRUE;
 				}
 			}
-			if(!localisedFilename)
+			if (!localisedFilename)
 			{
 				ConfigurationLocalisedFilenameList.add_entry(name);
 			}
-	
 		}
 	
-	}while (::FindNextFile(hFindFile,&wfd));
+	} while (::FindNextFile(hFindFile,&wfd));
 	
 	
 	if (ERROR_NO_MORE_FILES != GetLastError())
@@ -126,95 +133,95 @@ BOOL BuildLoadMPConfigMenu()
 	}
 	
 	::FindClose(hFindFile);
-	
 
 	//delete the old menu
-	if(AvPMenu_Multiplayer_LoadConfig) delete[] AvPMenu_Multiplayer_LoadConfig;
+	if (AvPMenu_Multiplayer_LoadConfig)
+		delete[] AvPMenu_Multiplayer_LoadConfig;
 
-	AvPMenu_Multiplayer_LoadConfig=0;
+	AvPMenu_Multiplayer_LoadConfig = 0;
 
-	if(!ConfigurationFilenameList.size()) return FALSE;
+	if (!ConfigurationFilenameList.size()) 
+		return FALSE;
 
 	//create a new menu from the list of filenames
 	AvPMenu_Multiplayer_LoadConfig = new AVPMENU_ELEMENT[ConfigurationFilenameList.size()+1];
 
 	int i;
-	for(i=0;i<ConfigurationFilenameList.size();i++)
+	for (i = 0;i < ConfigurationFilenameList.size(); i++)
 	{
-		AvPMenu_Multiplayer_LoadConfig[i].ElementID=AVPMENU_ELEMENT_LOADMPCONFIG;	
-		AvPMenu_Multiplayer_LoadConfig[i].TextDescription=TEXTSTRING_BLANK;	
-		AvPMenu_Multiplayer_LoadConfig[i].MenuToGoTo=AVPMENU_MULTIPLAYER_CONFIG;	
-		AvPMenu_Multiplayer_LoadConfig[i].TextPtr=ConfigurationLocalisedFilenameList[i];	
-		AvPMenu_Multiplayer_LoadConfig[i].HelpString=TEXTSTRING_LOADMULTIPLAYERCONFIG_HELP; 
+		AvPMenu_Multiplayer_LoadConfig[i].ElementID = AVPMENU_ELEMENT_LOADMPCONFIG;	
+		AvPMenu_Multiplayer_LoadConfig[i].TextDescription = TEXTSTRING_BLANK;	
+		AvPMenu_Multiplayer_LoadConfig[i].MenuToGoTo = AVPMENU_MULTIPLAYER_CONFIG;	
+		AvPMenu_Multiplayer_LoadConfig[i].TextPtr = ConfigurationLocalisedFilenameList[i];	
+		AvPMenu_Multiplayer_LoadConfig[i].HelpString = TEXTSTRING_LOADMULTIPLAYERCONFIG_HELP; 
 	}
 
-	AvPMenu_Multiplayer_LoadConfig[i].ElementID=AVPMENU_ELEMENT_ENDOFMENU;	
+	AvPMenu_Multiplayer_LoadConfig[i].ElementID = AVPMENU_ELEMENT_ENDOFMENU;	
 
 	return TRUE;
 }
 
-
-
 const char* GetMultiplayerConfigDescription(int index)
 {
-	if(index<0 || index>= ConfigurationFilenameList.size()) return 0;
+	if (index < 0 || index >= ConfigurationFilenameList.size())
+		return 0;
+
 	const char* name = ConfigurationFilenameList[index];
 	//see if we have already got the description for this file
-	if(LastDescriptionFile)
+	if (LastDescriptionFile)
 	{
-		if(!strcmp(LastDescriptionFile,name))
+		if (!strcmp(LastDescriptionFile, name))
 		{
 			return LastDescriptionText;
 		}
 		else
 		{
-			delete [] LastDescriptionFile;
-			delete [] LastDescriptionText;
+			delete[] LastDescriptionFile;
+			delete[] LastDescriptionText;
 			LastDescriptionFile=0;
 			LastDescriptionText=0;
 		}
 	}
 
-	LastDescriptionFile=new char[strlen(name)+1];
-	strcpy(LastDescriptionFile,name);
+	LastDescriptionFile = new char[strlen(name)+1];
+	strcpy(LastDescriptionFile, name);
 	
-	//seeif this is one of the default language localised configurations
-	if(!strncmp(name,"Config",6))
+	// see if this is one of the default language localised configurations
+	if (!strncmp(name, "Config", 6))
 	{
-		if(name[6]>='1' && name[6]<='7' && name[7]=='\0')
+		if (name[6] >= '1' && name[6] <= '7' && name[7] == '\0')
 		{
-			TEXTSTRING_ID string_index=(TEXTSTRING_ID)(TEXTSTRING_MPCONFIG1_DESCRIPTION+(name[6]-'1'));
-			LastDescriptionText=new char[strlen(GetTextString(string_index))+1];
+			TEXTSTRING_ID string_index = (TEXTSTRING_ID)(TEXTSTRING_MPCONFIG1_DESCRIPTION+(name[6]-'1'));
+			LastDescriptionText = new char[strlen(GetTextString(string_index))+1];
 			strcpy(LastDescriptionText,GetTextString(string_index));
 			
 			return LastDescriptionText;
 		}
 	}
 	
-	
 	FILE* file;
 	char filename[MAX_PATH];
-	if(netGameData.skirmishMode)
-		sprintf(filename,"%s\\%s.skirmish_cfg",MP_CONFIG_DIR,name);
+	if (netGameData.skirmishMode)
+		sprintf(filename, "%s%s\\%s.skirmish_cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
 	else
-		sprintf(filename,"%s\\%s.cfg",MP_CONFIG_DIR,name);
+		sprintf(filename, "%s%s\\%s.cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
 
-	file = avp_fopen(filename,"rb");
-	if(!file)
+	file = avp_fopen(filename, "rb");
+	if (!file)
 	{
 		return 0;
 	}
 
 	//skip to the part of the file containing the description
-	fseek(file,169,SEEK_SET);
+	fseek(file, 169, SEEK_SET);
 
-	int description_length=0;
+	int description_length = 0;
 	fread(&description_length,sizeof(int),1,file);
 	
-	if(description_length)
+	if (description_length)
 	{
-		LastDescriptionText=new char[description_length];
-		fread(LastDescriptionText,1,description_length,file);
+		LastDescriptionText = new char[description_length];
+		fread(LastDescriptionText, 1, description_length, file);
 	}
 	fclose(file);
 	
@@ -223,7 +230,8 @@ const char* GetMultiplayerConfigDescription(int index)
 
 void LoadMultiplayerConfigurationByIndex(int index)
 {
-	if(index<0 || index>= ConfigurationFilenameList.size()) return;
+	if (index < 0 || index >= ConfigurationFilenameList.size()) 
+		return;
 
 	LoadMultiplayerConfiguration(ConfigurationFilenameList[index]);	
 }
@@ -232,14 +240,14 @@ void LoadMultiplayerConfiguration(const char* name)
 {
 	FILE* file;
 	char filename[MAX_PATH];
-	if(netGameData.skirmishMode)
-		sprintf(filename,"%s\\%s.skirmish_cfg",MP_CONFIG_DIR,name);
+	if (netGameData.skirmishMode)
+		sprintf(filename, "%s%s\\%s.skirmish_cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
 	else
-		sprintf(filename,"%s\\%s.cfg",MP_CONFIG_DIR,name);
+		sprintf(filename, "%s%s\\%s.cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
 
-	file = avp_fopen(filename,"rb");
-	if(!file) return;
-
+	file = avp_fopen(filename, "rb");
+	if (!file) 
+		return;
 
 	//set defaults first , in case there are entries not set by this file
 	SetDefaultMultiplayerConfig();
@@ -278,7 +286,6 @@ void LoadMultiplayerConfiguration(const char* name)
 	fread(&netGameData.allowSpeargun,sizeof(BOOL),1,file);
 	fread(&netGameData.allowMedicomp,sizeof(BOOL),1,file);
 	fread(&MP_SessionName[0],sizeof(char),13,file);
-	
 
 	fread(&netGameData.maxLives,sizeof(int),1,file);
 	fread(&netGameData.useSharedLives,sizeof(BOOL),1,file);
@@ -292,7 +299,7 @@ void LoadMultiplayerConfiguration(const char* name)
 
 	fread(&netGameData.gameSpeed,sizeof(int),1,file);
 
-	int description_length=0;
+	int description_length = 0;
 	fread(&description_length,sizeof(int),1,file);
 	fread(MP_Config_Description,1,description_length,file);
 
@@ -309,11 +316,11 @@ void LoadMultiplayerConfiguration(const char* name)
 	#endif
 
 	//read the custom level name
-	int length=0;
+	int length = 0;
 	fread(&length,sizeof(int),1,file);
-	if(length)
+	if (length)
 	{
-		fread(netGameData.customLevelName,1,length,file);
+		fread(netGameData.customLevelName, 1, length, file);
 	}
 	else
 	{
@@ -323,32 +330,32 @@ void LoadMultiplayerConfiguration(const char* name)
 	fclose(file);
 
 	//if the custom level name has been set , we need to find the index
-	if(netGameData.customLevelName[0])
+	if (netGameData.customLevelName[0])
 	{
 		netGameData.levelNumber = GetCustomMultiplayerLevelIndex(netGameData.customLevelName,netGameData.gameType);
 
-		if(netGameData.levelNumber <0)
+		if (netGameData.levelNumber < 0)
 		{
 			//we don't have the level
 			netGameData.levelNumber = 0;
 			netGameData.customLevelName[0] = 0;
 		}
 	}
-
 }
 
 void SaveMultiplayerConfiguration(const char* name)
 {
 	FILE* file;
 	char filename[MAX_PATH];
-	if(netGameData.skirmishMode)
-		sprintf(filename,"%s\\%s.skirmish_cfg",MP_CONFIG_DIR,name);
+	if (netGameData.skirmishMode)
+		sprintf(filename, "%s\\%s.skirmish_cfg", MP_CONFIG_DIR, name);
 	else
-		sprintf(filename,"%s\\%s.cfg",MP_CONFIG_DIR,name);
+		sprintf(filename, "%s\\%s.cfg", MP_CONFIG_DIR, name);
 	
-	CreateDirectory(MP_CONFIG_DIR,0);
-	file = avp_fopen(filename,"wb");
-	if(!file) return;
+	CreateDirectory(MP_CONFIG_DIR, 0);
+	file = avp_fopen(filename, "wb");
+	if (!file) 
+		return;
 
 	fwrite(&netGameData.gameType,sizeof(int),1,file);
 	fwrite(&netGameData.levelNumber,sizeof(int),1,file);
@@ -399,8 +406,9 @@ void SaveMultiplayerConfiguration(const char* name)
 
 	//write the description of the config
 	//first the length
-	int length=strlen(MP_Config_Description)+1;
+	int length = strlen(MP_Config_Description)+1;
 	fwrite(&length,sizeof(int),1,file);
+
 	//and now the string
 	fwrite(MP_Config_Description,1,length,file);
 
@@ -418,32 +426,31 @@ void SaveMultiplayerConfiguration(const char* name)
 
 	//write the custom level name (if relevant)
 	//first the length
-	length=strlen(netGameData.customLevelName)+1;
+	length = strlen(netGameData.customLevelName)+1;
 	fwrite(&length,sizeof(int),1,file);
 	//and now the string
 	fwrite(netGameData.customLevelName,1,length,file);
-	
 
 	fclose(file);
 
 	//clear the last description stuff
-	delete [] LastDescriptionFile;
-	delete [] LastDescriptionText;
-	LastDescriptionFile=0;
-	LastDescriptionText=0;
-
+	delete[] LastDescriptionFile;
+	delete[] LastDescriptionText;
+	LastDescriptionFile = 0;
+	LastDescriptionText = 0;
 }
 
 
 void DeleteMultiplayerConfigurationByIndex(int index)
 {
-	if(index<0 || index>= ConfigurationFilenameList.size()) return;
+	if (index < 0 || index >= ConfigurationFilenameList.size()) 
+		return;
 
 	char filename[MAX_PATH];
-	if(netGameData.skirmishMode)
-		sprintf(filename,"%s\\%s.skirmish_cfg",MP_CONFIG_DIR,ConfigurationFilenameList[index]);
+	if (netGameData.skirmishMode)
+		sprintf(filename, "%s%s\\%s.skirmish_cfg", GetSaveFolderPath(), MP_CONFIG_DIR, ConfigurationFilenameList[index]);
 	else
-		sprintf(filename,"%s\\%s.cfg",MP_CONFIG_DIR,ConfigurationFilenameList[index]);
+		sprintf(filename, "%s%s\\%s.cfg", GetSaveFolderPath(), MP_CONFIG_DIR, ConfigurationFilenameList[index]);
 
 	DeleteFile(filename);
 }
@@ -454,25 +461,24 @@ void DeleteMultiplayerConfigurationByIndex(int index)
 
 static List<char*> IPAddFilenameList;
 
-AVPMENU_ELEMENT* AvPMenu_Multiplayer_LoadIPAddress=0;
+AVPMENU_ELEMENT* AvPMenu_Multiplayer_LoadIPAddress = 0;
 
 BOOL BuildLoadIPAddressMenu()
 {
 	//delete the old list of filenames
-	while(IPAddFilenameList.size())
+	while (IPAddFilenameList.size())
 	{
-		delete [] IPAddFilenameList.first_entry();
+		delete[] IPAddFilenameList.first_entry();
 		IPAddFilenameList.delete_first_entry();
 	}
 
 	//do a search for all the addresses in the address directory
-	
-	const char* load_name=IP_ADDRESS_WILDCARD;
+	const char* load_name = IP_ADDRESS_WILDCARD;
 	// allow a wildcard search
 	WIN32_FIND_DATA wfd;
 
 	HANDLE hFindFile = avp_FindFirstFile(load_name, &wfd);
-	
+
 	if (INVALID_HANDLE_VALUE == hFindFile)
 	{
 		return FALSE;
@@ -506,85 +512,79 @@ BOOL BuildLoadIPAddressMenu()
 				// not a directory, hidden or system file
 		)
 		{
-			char* name=new char[strlen(wfd.cFileName)+1];
+			char* name = new char[strlen(wfd.cFileName)+1];
 			strcpy(name,wfd.cFileName);
-			char* dotpos=strchr(name,'.');
-			if(dotpos) *dotpos=0;
+			char* dotpos = strchr(name,'.');
+			if (dotpos) 
+				*dotpos = 0;
 			IPAddFilenameList.add_entry(name);
-	
 		}
 	
 	}while (::FindNextFile(hFindFile,&wfd));
 	
-	
 	::FindClose(hFindFile);
-	
 
 	//delete the old menu
-	if(AvPMenu_Multiplayer_LoadIPAddress) delete [] AvPMenu_Multiplayer_LoadIPAddress;
+	if (AvPMenu_Multiplayer_LoadIPAddress) 
+		delete[] AvPMenu_Multiplayer_LoadIPAddress;
 
-	
 	//create a new menu from the list of filenames
-	AvPMenu_Multiplayer_LoadIPAddress=new AVPMENU_ELEMENT[IPAddFilenameList.size()+1];
+	AvPMenu_Multiplayer_LoadIPAddress = new AVPMENU_ELEMENT[IPAddFilenameList.size()+1];
 
 	int i;
-	for(i=0;i<IPAddFilenameList.size();i++)
+	for (i = 0; i < IPAddFilenameList.size(); i++)
 	{
-		AvPMenu_Multiplayer_LoadIPAddress[i].ElementID=AVPMENU_ELEMENT_LOADIPADDRESS;	
-		AvPMenu_Multiplayer_LoadIPAddress[i].TextDescription=TEXTSTRING_BLANK;	
-		AvPMenu_Multiplayer_LoadIPAddress[i].MenuToGoTo=AVPMENU_MULTIPLAYERSELECTSESSION;	
-		AvPMenu_Multiplayer_LoadIPAddress[i].TextPtr=IPAddFilenameList[i];	
-		AvPMenu_Multiplayer_LoadIPAddress[i].HelpString=TEXTSTRING_MULTIPLAYER_LOADADDRESS_HELP;	
+		AvPMenu_Multiplayer_LoadIPAddress[i].ElementID = AVPMENU_ELEMENT_LOADIPADDRESS;	
+		AvPMenu_Multiplayer_LoadIPAddress[i].TextDescription = TEXTSTRING_BLANK;	
+		AvPMenu_Multiplayer_LoadIPAddress[i].MenuToGoTo = AVPMENU_MULTIPLAYERSELECTSESSION;	
+		AvPMenu_Multiplayer_LoadIPAddress[i].TextPtr = IPAddFilenameList[i];	
+		AvPMenu_Multiplayer_LoadIPAddress[i].HelpString = TEXTSTRING_MULTIPLAYER_LOADADDRESS_HELP;	
 	}
 
-	AvPMenu_Multiplayer_LoadIPAddress[i].ElementID=AVPMENU_ELEMENT_ENDOFMENU;	
+	AvPMenu_Multiplayer_LoadIPAddress[i].ElementID = AVPMENU_ELEMENT_ENDOFMENU;	
 
-	return (IPAddFilenameList.size()>0); 
+	return (IPAddFilenameList.size() > 0); 
 }
 
 
 void SaveIPAddress(const char* name,const char* address)
 {
-	if(!name) return;
-	if(!address) return;
-	if(!strlen(name)) return;
-	if(!strlen(address)) return;
+	if (!name) return;
+	if (!address) return;
+	if (!strlen(name)) return;
+	if (!strlen(address)) return;
 
 	FILE* file;
 	char filename[MAX_PATH];
 	sprintf(filename,"%s\\%s.IP Address",IP_ADDRESS_DIR,name);
 	
-	CreateDirectory(IP_ADDRESS_DIR,0);
+	CreateDirectory(IP_ADDRESS_DIR, 0);
 	file = avp_fopen(filename,"wb");
-	if(!file) return;
+	if (!file) return;
 
 	fwrite(address,1,strlen(address)+1,file);
 	
 	fclose(file);
-	
 }
 
 void LoadIPAddress(const char* name)
 {
 	extern char IPAddressString[]; 
-	
-	
-	if(!name) return;
+
+	if (!name) return;
 
 	FILE* file;
 	char filename[MAX_PATH];
 	sprintf(filename,"%s\\%s.IP Address",IP_ADDRESS_DIR,name);
 
 	file = avp_fopen(filename,"rb");
-	if(!file) return;
+	if (!file) return;
 	
 	fread(IPAddressString,1,16,file);
-	IPAddressString[15]=0;
+	IPAddressString[15] = 0;
 	
 	fclose(file);
 }
-
-
 
 extern AVPMENU_ELEMENT AvPMenu_Multiplayer_Config[];
 extern AVPMENU_ELEMENT AvPMenu_Skirmish_Config[];
@@ -604,7 +604,8 @@ void BuildMultiplayerLevelNameArray()
 {
 	char buffer[256];
 	//only want to do this once
-	if(MultiplayerLevelNames) return;
+	if (MultiplayerLevelNames)
+		return;
 
 	//first do a search for custom level rifs
 	// allow a wildcard search
@@ -629,22 +630,21 @@ void BuildMultiplayerLevelNameArray()
 			)
 			{
 				strcpy(buffer,wfd.cFileName);
-				char* dotpos=strchr(buffer,'.');
-				if(dotpos) *dotpos=0;
+				char* dotpos = strchr(buffer,'.');
+				if (dotpos) 
+					*dotpos = 0;
 				strcat(buffer," (");
 				strcat(buffer,custom_string);
 				strcat(buffer,")");
 
-				char* name=new char[strlen(buffer)+1];
+				char* name = new char[strlen(buffer)+1];
 				strcpy(name,buffer);
 
 				CustomLevelNameList.add_entry(name);
-	
 			}
 	
-		}while (::FindNextFile(hFindFile,&wfd));
-	
-	
+		} while (::FindNextFile(hFindFile,&wfd));
+
 		::FindClose(hFindFile);
 	}
 
@@ -658,10 +658,10 @@ void BuildMultiplayerLevelNameArray()
 
 	int i;
 	//first the standard multiplayer levels
-	for(i=0;i<MAX_NO_OF_MULTIPLAYER_EPISODES;i++)
+	for (i = 0;i < MAX_NO_OF_MULTIPLAYER_EPISODES; i++)
 	{
 		char* level_name = GetTextString((TEXTSTRING_ID)(i+TEXTSTRING_MULTIPLAYERLEVELS_1));
-		if(i>=5)
+		if (i >= 5)
 		{
 			//a new level
 			char* new_string = GetTextString(TEXTSTRING_NEW_LEVEL);
@@ -676,22 +676,21 @@ void BuildMultiplayerLevelNameArray()
 			MultiplayerLevelNames[i] = level_name;
 		}
 	}
-	
 
 	CoopLevelNames = (char**) AllocateMem(sizeof(char*)* NumCoopLevels);
 
 	//and the standard coop levels
-	for(i=0;i<MAX_NO_OF_COOPERATIVE_EPISODES;i++)
+	for (i = 0; i < MAX_NO_OF_COOPERATIVE_EPISODES; i++)
 	{
 		char* level_name = GetTextString((TEXTSTRING_ID)(i+TEXTSTRING_COOPLEVEL_1));
-		if(i>=5)
+		if (i >= 5)
 		{
 			//a new level
 			char* new_string = GetTextString(TEXTSTRING_NEW_LEVEL);
 			sprintf(buffer,"%s (%s)",level_name,new_string);
 
 			//allocate memory and copy the string.
-			CoopLevelNames[i] =(char*) AllocateMem(strlen(buffer)+1);
+			CoopLevelNames[i] = (char*) AllocateMem(strlen(buffer)+1);
 			strcpy(CoopLevelNames[i],buffer);
 		}
 		else
@@ -701,21 +700,20 @@ void BuildMultiplayerLevelNameArray()
 	}
 
 	//now add the custom level names
-	for(i=0;i<NumCustomLevels;i++)
+	for (i = 0; i < NumCustomLevels; i++)
 	{
 		CoopLevelNames[i+MAX_NO_OF_COOPERATIVE_EPISODES] = CustomLevelNameList[i];
 		MultiplayerLevelNames[i+MAX_NO_OF_MULTIPLAYER_EPISODES] = CustomLevelNameList[i];
 	}
-	
 	
 	//now initialise the environment name entries for the various configuration menus
 	AVPMENU_ELEMENT *elementPtr;
 
 	elementPtr = AvPMenu_Multiplayer_Config;
 	//search for the level name element
-	while(elementPtr->TextDescription!=TEXTSTRING_MULTIPLAYER_ENVIRONMENT)
+	while (elementPtr->TextDescription != TEXTSTRING_MULTIPLAYER_ENVIRONMENT)
 	{
-		GLOBALASSERT(elementPtr->ElementID!=AVPMENU_ELEMENT_ENDOFMENU);
+		GLOBALASSERT(elementPtr->ElementID != AVPMENU_ELEMENT_ENDOFMENU);
 		elementPtr++;
 
 	}
@@ -724,26 +722,23 @@ void BuildMultiplayerLevelNameArray()
 	
 	elementPtr = AvPMenu_Multiplayer_Config_Join;
 	//search for the level name element
-	while(elementPtr->TextDescription!=TEXTSTRING_MULTIPLAYER_ENVIRONMENT)
+	while (elementPtr->TextDescription != TEXTSTRING_MULTIPLAYER_ENVIRONMENT)
 	{
-		GLOBALASSERT(elementPtr->ElementID!=AVPMENU_ELEMENT_ENDOFMENU);
+		GLOBALASSERT(elementPtr->ElementID != AVPMENU_ELEMENT_ENDOFMENU);
 		elementPtr++;
-
 	}
 	elementPtr->MaxSliderValue = NumMultiplayerLevels-1;
 	elementPtr->TextSliderStringPointer = MultiplayerLevelNames;
 
 	elementPtr = AvPMenu_Skirmish_Config;
 	//search for the level name element
-	while(elementPtr->TextDescription!=TEXTSTRING_MULTIPLAYER_ENVIRONMENT)
+	while (elementPtr->TextDescription != TEXTSTRING_MULTIPLAYER_ENVIRONMENT)
 	{
-		GLOBALASSERT(elementPtr->ElementID!=AVPMENU_ELEMENT_ENDOFMENU);
+		GLOBALASSERT(elementPtr->ElementID != AVPMENU_ELEMENT_ENDOFMENU);
 		elementPtr++;
-
 	}
 	elementPtr->MaxSliderValue = NumMultiplayerLevels-1;
 	elementPtr->TextSliderStringPointer = MultiplayerLevelNames;
-
 }
 
 //returns local index of a custom level (if it is a custom level)
@@ -755,11 +750,11 @@ int GetCustomMultiplayerLevelIndex(char* name,int gameType)
 	sprintf(buffer,"%s (%s)",name,custom_string);
 
 	//find the index of a custom level from its name
-	if(gameType==NGT_Coop)
+	if (gameType == NGT_Coop)
 	{
-		for(int i=MAX_NO_OF_COOPERATIVE_EPISODES;i<NumCoopLevels;i++)
+		for (int i = MAX_NO_OF_COOPERATIVE_EPISODES; i < NumCoopLevels; i++)
 		{
-			if(!_stricmp(buffer,CoopLevelNames[i]))
+			if (!_stricmp(buffer, CoopLevelNames[i]))
 			{
 				return i;
 			}
@@ -767,9 +762,9 @@ int GetCustomMultiplayerLevelIndex(char* name,int gameType)
 	}
 	else
 	{
-		for(int i=MAX_NO_OF_MULTIPLAYER_EPISODES;i<NumMultiplayerLevels;i++)
+		for (int i = MAX_NO_OF_MULTIPLAYER_EPISODES; i < NumMultiplayerLevels; i++)
 		{
-			if(!_stricmp(buffer,MultiplayerLevelNames[i]))
+			if (!_stricmp(buffer, MultiplayerLevelNames[i]))
 			{
 				return i;
 			}
@@ -780,55 +775,54 @@ int GetCustomMultiplayerLevelIndex(char* name,int gameType)
 }
 
 //returns name of custom level (without stuff tacked on the end)
-char* GetCustomMultiplayerLevelName(int index,int gameType)
+char* GetCustomMultiplayerLevelName(int index, int gameType)
 {
 	static char return_string[100];
 	return_string[0] = 0;
 	
 	//find the index of a custom level from its name
-	if(gameType==NGT_Coop)
+	if (gameType == NGT_Coop)
 	{
-		if(index>=MAX_NO_OF_COOPERATIVE_EPISODES)
+		if (index >= MAX_NO_OF_COOPERATIVE_EPISODES)
 		{
-			strcpy(return_string,CoopLevelNames[index]);
+			strcpy(return_string, CoopLevelNames[index]);
 		}
 	}
 	else
 	{
-		if(index>=MAX_NO_OF_MULTIPLAYER_EPISODES)
+		if (index >= MAX_NO_OF_MULTIPLAYER_EPISODES)
 		{
-			strcpy(return_string,MultiplayerLevelNames[index]);
+			strcpy(return_string, MultiplayerLevelNames[index]);
 		}
 	}
 
 	//need to remove ' (custom)' from the end of the level name
 	char* bracket_pos = strrchr(return_string,'(');
-	if(bracket_pos)
+	if (bracket_pos)
 	{
 		bracket_pos --; //to get back to the space
 		*bracket_pos = 0;
-		
 	}
 
 	return return_string;
 }
 
 
-int GetLocalMultiplayerLevelIndex(int index,char* customLevelName,int gameType)
+int GetLocalMultiplayerLevelIndex(int index, char* customLevelName, int gameType)
 {
-	if(customLevelName[0] == 0)
+	if (customLevelName[0] == 0)
 	{
 		//not a custom level , just need to check to see if the level index is in range
-		if(gameType==NGT_Coop)
+		if (gameType == NGT_Coop)
 		{
-			if(index<MAX_NO_OF_COOPERATIVE_EPISODES)
+			if (index < MAX_NO_OF_COOPERATIVE_EPISODES)
 			{
 				return index;
 			}
 		}
 		else
 		{
-			if(index<MAX_NO_OF_MULTIPLAYER_EPISODES)
+			if (index < MAX_NO_OF_MULTIPLAYER_EPISODES)
 			{
 				return index;
 			}
@@ -837,11 +831,10 @@ int GetLocalMultiplayerLevelIndex(int index,char* customLevelName,int gameType)
 	else
 	{
 		//see if we have the named level
-		return GetCustomMultiplayerLevelIndex(customLevelName,gameType);
+		return GetCustomMultiplayerLevelIndex(customLevelName, gameType);
 	}
 
 	return -1;
-	
 }
 
-};
+}

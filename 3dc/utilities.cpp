@@ -115,6 +115,25 @@ char *GetSaveFolderPath()
 		}
 	}
 
+	// lets create MPConfig folder too
+	tempPath[0] = '\0';
+	strcpy(tempPath, saveFolder);
+	strcat(tempPath, "MPConfig\\");
+
+	if (CreateDirectory(tempPath, NULL) == 0)
+	{
+		// something went wrong..
+		DWORD error = GetLastError();
+		if (error == ERROR_ALREADY_EXISTS)
+		{
+			// this is fine
+		}
+		else if (error == ERROR_PATH_NOT_FOUND)
+		{
+			return NULL;
+		}
+	}
+
 	// we're ok if we're here?
 	return saveFolder;
 #endif
@@ -138,7 +157,19 @@ FILE *avp_fopen(const char *fileName, const char *mode)
 	return theFile;
 #endif
 #ifdef WIN32
-	return fopen(fileName, mode);
+
+	// if write mode, direct to home path
+	if (strcmp(mode, "wb") == 0)
+	{
+		finalPath += GetSaveFolderPath();
+		finalPath += fileName;
+	}
+	else
+	{
+		finalPath += fileName;
+	}
+
+	return fopen(finalPath.c_str(), mode);
 #endif
 }
 

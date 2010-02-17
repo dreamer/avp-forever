@@ -108,22 +108,22 @@ extern AVP_USER_PROFILE *GetNextUserProfile(void)
 
 extern int SaveUserProfile(AVP_USER_PROFILE *profilePtr)
 {
-	char *filename = new char [strlen(GetSaveFolderPath()) + strlen(USER_PROFILES_PATH)+strlen(profilePtr->Name)+strlen(USER_PROFILES_SUFFIX)+1];
-	strcpy(filename, GetSaveFolderPath());
-	strcat(filename, USER_PROFILES_PATH);
+	char *filename = new char [/*strlen(GetSaveFolderPath()) +*/ strlen(USER_PROFILES_PATH)+strlen(profilePtr->Name)+strlen(USER_PROFILES_SUFFIX)+1];
+//	strcpy(filename, GetSaveFolderPath());
+	strcpy(filename, USER_PROFILES_PATH);
 	strcat(filename, profilePtr->Name);
 	strcat(filename, USER_PROFILES_SUFFIX);
 
 	FILE* file = avp_fopen(filename,"wb");
 
-	delete [] filename;
+	delete[] filename;
 
 	if (!file)
 		return 0;
 	
 	SaveSettingsToUserProfile(profilePtr);
 	
-	fwrite(profilePtr,sizeof(AVP_USER_PROFILE),1,file);
+	fwrite(profilePtr, sizeof(AVP_USER_PROFILE), 1, file);
 	fclose(file);
 
 	return 1;
