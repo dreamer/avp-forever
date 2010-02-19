@@ -9,9 +9,7 @@
 	#include "hash_tem.hpp" // for the backup surfaces memory leak checking
 #endif
 
-#ifdef _MSC_VER
-	#include "iff.hpp"
-#endif
+#include "iff.hpp"
 
 #include "list_tem.hpp"
 
@@ -20,9 +18,7 @@
 #include <limits.h>
 
 #include "awTexLd.h"
-#pragma warning(disable: 4701)
 #include "awTexLd.hpp"
-#pragma warning(default: 4701)
 
 #ifdef _CPPRTTI
 	#include <typeinfo.h>

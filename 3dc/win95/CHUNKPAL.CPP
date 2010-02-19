@@ -142,8 +142,8 @@ Preset_Palette::Preset_Palette (Preset_Palette const & c)
 , reserved1(c.reserved1)
 , reserved2(c.reserved2)
 , startpos(c.startpos)
-, pixel_data(grab_pixel_data(c.size, c.pixel_data))
 , name(0)
+, pixel_data(grab_pixel_data(c.size, c.pixel_data))
 {
 	if (c.name)
 	{
@@ -211,8 +211,8 @@ RIF_IMPLEMENT_DYNCREATE("PRSETPAL",Preset_Palette_Chunk)
 
 Preset_Palette_Chunk::Preset_Palette_Chunk(Chunk_With_Children * const parent, char const * sdata, size_t const /*ssize*/)
 : Chunk(parent,"PRSETPAL")
-, version_num(*(int *)sdata)
 , flags(*(int *)(sdata+4))
+, version_num(*(int *)sdata)
 , reserved1(*(int *)(sdata+8))
 , reserved2(*(int *)(sdata+12))
 , reserved3(*(int *)(sdata+16))
@@ -279,7 +279,7 @@ RIF_IMPLEMENT_DYNCREATE("ENVTXLIT",Environment_TLT_Chunk)
 
 Environment_TLT_Chunk::Environment_TLT_Chunk (Chunk_With_Children * parent, const char * sdata, size_t ssize)
 : Chunk (parent, "ENVTXLIT"), width (*((int*)(sdata))),
-	num_levels (*((int*)(sdata+4))), flags(*(int *)(sdata+28)), table (0), filename(0)
+	num_levels (*((int*)(sdata+4))), flags(*(int *)(sdata+28)), filename(0), table (0)
 {
 	for (int i=0; i<ChunkTLT_NumReserved; ++i) reserved[i] = *(int *)(sdata+8+(i<<2));
 
@@ -402,8 +402,8 @@ TLT_Config_Chunk::TLT_Config_Chunk (Chunk_With_Children * parent, const char * s
 : Chunk (parent, "TLTCONFG")
 , num_shades_white(*(unsigned int const *)sdata)
 , table_size(*(unsigned int const *)(sdata+4))
-, flags(*(unsigned int const *)(sdata+8))
 , palette_size(*(unsigned int const *)(sdata+12))
+, flags(*(unsigned int const *)(sdata+8))
 {
 	if (!table_size) table_size = 256;
 
@@ -817,8 +817,8 @@ RIF_IMPLEMENT_DYNCREATE("SETPALST",Preset_Palette_Store_Chunk)
 
 Preset_Palette_Store_Chunk::Preset_Palette_Store_Chunk(Chunk_With_Children * const parent, char const * sdata, size_t const /*ssize*/)
 : Chunk(parent,"SETPALST")
-, version_num(*(int *)sdata)
 , flags(*(int *)(sdata+4))
+, version_num(*(int *)sdata)
 , reserved1(*(int *)(sdata+8))
 , reserved2(*(int *)(sdata+12))
 , reserved3(*(int *)(sdata+16))
@@ -997,5 +997,3 @@ void Coloured_Polygons_Lookup_Chunk::fill_data_block (char * data_start)
 		}
 	}
 }
-
-

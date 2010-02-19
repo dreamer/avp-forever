@@ -68,10 +68,6 @@ class AVP_Strategy_Chunk :public Chunk
 	AvpStrat* Strategy; 
 };
 
-#if InterfaceEngine
-class StrategyObject;
-#endif
-
 class AVP_External_Strategy_Chunk :public Chunk
 {
 	public:
@@ -138,17 +134,6 @@ class AvpStrat
 	int Type,ExtraData;
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-
-#if InterfaceEngine
-	StrategyObject* SObject;
-	AvpStrat(int type,StrategyObject* dptr);
-	virtual int CopyStrategy(AVP_Strategy_Chunk*,StrategyObject*);//copy strategy to the chunk
-	virtual BOOL CanCopyStrategy(){return 0;};
-	virtual int EditStrategy(int Edit);//if Edit=0 only view it 
-	virtual int VerifyStrategy(){return 1;};
-	virtual void _EditSwitchRequest(int& request);
-	virtual void RemoveInvalidTargets(){};
-#endif
 };
 
 class MiscStrategy :public AvpStrat
@@ -162,10 +147,6 @@ class MiscStrategy :public AvpStrat
 	
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-
-#if InterfaceEngine
-	virtual int EditStrategy(int Edit);
-#endif 
 };
 
 
@@ -216,26 +197,6 @@ public:
 	void set_r6_integrity(unsigned int);
 	unsigned int get_r6_destruction_type();
 	void set_r6_destruction_type(unsigned int);
-
-#if InterfaceEngine
-	SimpleStrategy (int _Type, int _ExtraData, int _mass, int _integrity)
-	: AvpStrat (StratNewSimpleObject,0), Type(_Type), ExtraData(_ExtraData),
-		mass (_mass), integrity (_integrity)
-	{
-		flags=SimStratFlag_NotifyTargetOnDestruction;
-		target_request=0;
-		targetID.id1=targetID.id2=0;
-		integrity|=SimpleStrategy_SparesDontContainJunk;
-	}
-	SimpleStrategy(StrategyObject*);
-	virtual int EditStrategy(int Edit);
-	virtual BOOL CanCopyStrategy(){return 1;};
-	virtual int CopyStrategy(AVP_Strategy_Chunk*,StrategyObject*);
-	void EditTarget();
-	virtual void _EditSwitchRequest(int& request);
-	virtual void RemoveInvalidTargets();
-#endif
-
 };
 
 class R6SimpleStrategy : public SimpleStrategy
@@ -254,11 +215,6 @@ public :
 
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	
-	#if InterfaceEngine
-	R6SimpleStrategy (int _Type, int _ExtraData, int _mass, int _integrity);
-	R6SimpleStrategy (SimpleStrategy* ss);
-	#endif 
 };
 
 
@@ -295,26 +251,6 @@ class LiftStrategy :public AvpStrat
 
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	
-	#if InterfaceEngine
-	const char* GetStartName();
-	void GetStartPos(int& FileNum,ObjectID& StartID);
-	
-	LiftStrategy(StrategyObject* dptr);
-	LiftStrategy(LiftStrategy* ls);
-	virtual int EditStrategy(int Edit);
-	virtual int VerifyStrategy();
-
-	void EditAssocLifts(int Edit);
-	void EditAssocDoor(int Edit);
-	void EditAssocCallSwitch(int Edit);
-	void EditAssocFloorSwitch(int Edit);
-	void CalculateFloor(int FileNum,ObjectID liftid);
-	int EditExternalLifts(int FileNum,int Edit,int sel);
-	void AlterOtherPos();
-	void GetFloorSwitch(File_Chunk* fc,ObjectID LiftID);
-	#endif
-
 };
 
 #define PlatformLiftFlags_Disabled	0x00000001
@@ -329,15 +265,6 @@ class PlatLiftStrategy :public AvpStrat
 
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	
-	#if InterfaceEngine
-	
-	PlatLiftStrategy(StrategyObject* dptr);
-	virtual int EditStrategy(int Edit);
-	virtual int VerifyStrategy();
-
-	#endif
-
 };
 
 #define DoorFlag_Locked			0x00000001	 
@@ -358,14 +285,6 @@ class DoorStrategy :public AvpStrat
 
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-
-	#if InterfaceEngine
-	DoorStrategy(StrategyObject*);
-	virtual int CopyStrategy(AVP_Strategy_Chunk*,StrategyObject*);
-	BOOL CanCopyStrategy(){return 1;};
-	virtual int VerifyStrategy();
-	virtual int EditStrategy(int Edit);
-	#endif
 };
 
 #define R6SwitchDoorFlag_SwitchOperated 0x00000001
@@ -377,29 +296,21 @@ class SwitchDoorStrategy : public AvpStrat
 	SwitchDoorStrategy(const char* data_start,size_t);
 	
 	ObjectID AssocDoor;
-	union
-	{
+//	union
+//	{
 		int spare1;
-		struct
-		{
-			unsigned int r6_flags:20;
-			unsigned int r6_open_time:6; //in tenths of a second
-			unsigned int r6_close_time:6; //in tenths of a second
-		};
-	};
+//		struct
+//		{
+//			unsigned int r6_flags:20;
+//			unsigned int r6_open_time:6; //in tenths of a second
+//			unsigned int r6_close_time:6; //in tenths of a second
+//		};
+//	};
 	
 	int spare2;
 
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-
-	#if InterfaceEngine
-	SwitchDoorStrategy(StrategyObject*);
-	virtual int VerifyStrategy();
-	virtual int EditStrategy(int Edit);
-	void EditAssocDoor(int Edit);
-	#endif
-	
 };		
 
 struct SwitchTarget
@@ -426,17 +337,6 @@ class BinSwitchStrategy :public AvpStrat
 
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-
-	#if InterfaceEngine
-	BinSwitchStrategy(StrategyObject*);
-	BinSwitchStrategy(StrategyObject*,BinSwitchStrategy*);
-	virtual int CopyStrategy(AVP_Strategy_Chunk*,StrategyObject*);
-	BOOL CanCopyStrategy(){return 1;};
-	virtual int EditStrategy(int Edit);
-	virtual int VerifyStrategy();
-	int EditTarget(int Edit);
-	virtual void RemoveInvalidTargets();
-	#endif 
 };
 
 class LinkSwitchStrategy :public BinSwitchStrategy
@@ -450,13 +350,6 @@ class LinkSwitchStrategy :public BinSwitchStrategy
 
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	
-	#if InterfaceEngine
-	LinkSwitchStrategy(StrategyObject*);
-	virtual int EditStrategy(int Edit);
-	virtual int VerifyStrategy();
-	#endif 
-
 };
 #define MultiSwitchFlag_SwitchUpdated 0x80000000
 #define MultiSwitchFlag_OffMessageSame 0x00000002
@@ -485,22 +378,6 @@ class MultiSwitchStrategy :public AvpStrat
 	
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-
-	#if InterfaceEngine
-	MultiSwitchStrategy(StrategyObject*);
-	MultiSwitchStrategy(StrategyObject*,MultiSwitchStrategy*);
-	virtual int CopyStrategy(AVP_Strategy_Chunk*,StrategyObject*);
-	BOOL CanCopyStrategy(){return 1;};
-	virtual int EditStrategy(int Edit);
-	virtual int VerifyStrategy();
-	void EditTargets(int Edit,int envnum);
-	void add_target(ObjectID targetid,int envnum);
-	void duplicate_target(int index);
-	void remove_target(int index);
-	virtual void _EditSwitchRequest(int& request);
-	virtual void RemoveInvalidTargets();
-	#endif 
-
 };
 
 class AreaSwitchStrategy :public MultiSwitchStrategy
@@ -513,15 +390,6 @@ class AreaSwitchStrategy :public MultiSwitchStrategy
 	
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-
-	#if InterfaceEngine
-	AreaSwitchStrategy(StrategyObject*);
-	AreaSwitchStrategy(StrategyObject*,AreaSwitchStrategy*);
-	virtual int CopyStrategy(AVP_Strategy_Chunk*,StrategyObject*);
-	BOOL CanCopyStrategy(){return 1;};
-	void EditTriggerVolume();
-	#endif 
-	
 };
 
 
@@ -536,12 +404,6 @@ class ConsoleStrategy :public AvpStrat
 	
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	
-	#if InterfaceEngine
-	ConsoleStrategy(StrategyObject*);
-	virtual int EditStrategy(int Edit);
-//	virtual int VerifyStrategy();
-	#endif 
 };
 
 class LightingStrategy : public AvpStrat
@@ -555,15 +417,6 @@ class LightingStrategy : public AvpStrat
 	
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-
-	#if InterfaceEngine
-	LightingStrategy(StrategyObject*);
-	LightingStrategy(LightingStrategy*,StrategyObject*);
-	virtual int CopyStrategy(AVP_Strategy_Chunk*,StrategyObject*);
-	BOOL CanCopyStrategy(){return 1;};
-	virtual int EditStrategy(int Edit);
-	#endif
-
 };
 
 #define Teleport_All 0
@@ -582,14 +435,6 @@ class TeleportStrategy : public AvpStrat
 
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-
-	#if InterfaceEngine
-	TeleportStrategy(StrategyObject*);
-	virtual int VerifyStrategy();
-	virtual int EditStrategy(int Edit);
-	void EditTeleportTo(int Edit);
-	#endif
-	
 };		
 
 
@@ -608,16 +453,6 @@ class EnemyStrategy : public AvpStrat
 
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-
-	#if InterfaceEngine
-	EnemyStrategy(StrategyObject*);
-	EnemyStrategy(StrategyObject*,EnemyStrategy*);
-	virtual int EditStrategy(int Edit);
-	virtual int CopyStrategy(AVP_Strategy_Chunk*,StrategyObject*);
-	int EditTarget(int Edit);
-	virtual void RemoveInvalidTargets();
-	#endif
-	
 };
 
 class GeneratorStrategy : public AvpStrat
@@ -633,12 +468,6 @@ class GeneratorStrategy : public AvpStrat
 
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-
-	#if InterfaceEngine
-	GeneratorStrategy(StrategyObject*);
-	virtual int EditStrategy(int Edit);
-	#endif
-	
 };
 
 
@@ -692,14 +521,6 @@ class MissionObjectiveStrategy : public AvpStrat
 	
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	#if InterfaceEngine
-	MissionObjectiveStrategy(StrategyObject*);
-	virtual int EditStrategy(int Edit);
-	void EditMissionTargets();
-	virtual void _EditSwitchRequest(int& request);
-	virtual void RemoveInvalidTargets();
-	#endif
-
 };
 
 class MissionHintStrategy : public AvpStrat
@@ -715,10 +536,6 @@ class MissionHintStrategy : public AvpStrat
 
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	#if InterfaceEngine
-	MissionHintStrategy(StrategyObject*);
-	virtual int EditStrategy(int Edit);
-	#endif
 };		
 
 #define TextMessageFlag_NotActiveAtStart 0x00000001
@@ -734,11 +551,6 @@ class TextMessageStrategy : public AvpStrat
 
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	#if InterfaceEngine
-	TextMessageStrategy(StrategyObject*);
-	virtual int EditStrategy(int Edit);
-	virtual void _EditSwitchRequest(int& request);
-	#endif
 };
 
 
@@ -782,14 +594,6 @@ class TrackStrategy : public AvpStrat
 	
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	#if InterfaceEngine
-	TrackStrategy(StrategyObject*);
-	int EditStrategy(int Edit);
-	void EditTargets(TrackPointEffect*);
-	void _EditSwitchRequest(int& request);
-	virtual void RemoveInvalidTargets();
-	#endif
-
 };
 
 class TrackDestructStrategy : public TrackStrategy
@@ -803,12 +607,6 @@ class TrackDestructStrategy : public TrackStrategy
 	
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	#if InterfaceEngine
-	TrackDestructStrategy(StrategyObject*);
-	virtual void RemoveInvalidTargets();
-	void EditTarget();
-	#endif
-	
 };
 
 class HierarchyStrategy : public AvpStrat
@@ -825,12 +623,6 @@ class HierarchyStrategy : public AvpStrat
 	
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	#if InterfaceEngine
-	HierarchyStrategy(StrategyObject*);
-	int EditStrategy(int Edit);
-	void EditTargets(TrackPointEffect*);
-	virtual void RemoveInvalidTargets();
-	#endif
 };
 
 class FanStrategy : public AvpStrat
@@ -845,10 +637,6 @@ class FanStrategy : public AvpStrat
 	
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	#if InterfaceEngine
-	FanStrategy(StrategyObject*);
-	int EditStrategy(int Edit);
-	#endif
 };
 
 #define DeathVolumeFlag_StartsOn 0x00000001
@@ -866,10 +654,6 @@ class DeathVolumeStrategy : public AvpStrat
 	
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	#if InterfaceEngine
-	DeathVolumeStrategy(StrategyObject*);
-	int EditStrategy(int Edit);
-	#endif
 };
 
 class SelfDestructStrategy : public AvpStrat
@@ -882,10 +666,6 @@ class SelfDestructStrategy : public AvpStrat
 		
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	#if InterfaceEngine
-	SelfDestructStrategy(StrategyObject*);
-	int EditStrategy(int Edit);
-	#endif
 };
 
 
@@ -914,12 +694,6 @@ class SwingDoorStrategy : public AvpStrat
 		
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	#if InterfaceEngine
-	SwingDoorStrategy(StrategyObject*);
-	int EditStrategy(int Edit);
-	void EditPairedDoor();
-	void EditDoorwayModule();
-	#endif
 };
 
 
@@ -953,10 +727,6 @@ class PlacedBombStrategy : public AvpStrat
 		
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	#if InterfaceEngine
-	PlacedBombStrategy(StrategyObject*);
-	int EditStrategy(int Edit);
-	#endif
 };
 
 class R6SwitchStrategy : public AvpStrat
@@ -971,13 +741,6 @@ class R6SwitchStrategy : public AvpStrat
 		
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	
-	#if InterfaceEngine
-	R6SwitchStrategy(StrategyObject*);
-	int EditStrategy(int Edit);
-	void EditTarget();
-	virtual void RemoveInvalidTargets();
-	#endif
 };
 
 /////////////////////Mummy strategy alert/////////////////////////
@@ -998,15 +761,6 @@ public :
 		
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	
-	#if InterfaceEngine
-	MummyInanimateStrategy(StrategyObject*);
-	int EditStrategy(int Edit);
-	virtual void RemoveInvalidTargets();
-	void EditTarget();
-	void EditLinkedSound();
-	#endif
-	
 };
 
 
@@ -1022,13 +776,6 @@ public :
 		
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	
-	#if InterfaceEngine
-//	MummyPickupStrategy(StrategyObject*);
-	int EditStrategy(int Edit){return 0;};
-//	virtual void RemoveInvalidTargets();
-	#endif
-
 };
 
 class MummyTriggerVolumeStrategy : public AvpStrat
@@ -1043,15 +790,6 @@ public :
 		
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	
-	#if InterfaceEngine
-	MummyTriggerVolumeStrategy(StrategyObject*);
-	int EditStrategy(int Edit);
-	void EditTriggerVolume();
-	void EditTarget();
-	virtual void RemoveInvalidTargets();
-	#endif
-
 };
 
 #define MummyPivotObject_Pillar 0
@@ -1072,15 +810,6 @@ public :
 		
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	
-	#if InterfaceEngine
-	MummyPivotObjectStrategy(StrategyObject*);
-	int EditStrategy(int Edit);
-	void EditTarget();
-	virtual void RemoveInvalidTargets();
-	void EditTriggerVolume();
-	#endif
-
 };
 
 class MummyChestStrategy : public AvpStrat
@@ -1095,14 +824,6 @@ public :
 		
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	
-	#if InterfaceEngine
-	MummyChestStrategy(StrategyObject*);
-	int EditStrategy(int Edit);
-	void EditObjective(int index);
-	void EditCameraLocation();
-	#endif
-
 };
 
 
@@ -1127,16 +848,6 @@ public :
 		
 	virtual size_t GetStrategySize();
 	virtual void fill_data_block(char* data);
-	
-	#if InterfaceEngine
-	MummyAlterCameraRangeStrategy(StrategyObject*);
-	int EditStrategy(int Edit);
-	void EditTriggerVolume();
-	#endif
-	
 };
 
 #endif
-
-
-

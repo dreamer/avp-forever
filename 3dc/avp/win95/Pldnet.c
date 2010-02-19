@@ -9391,7 +9391,7 @@ void CreatePlayersImageInMirror(void)
 		case(I_BehaviourAlienPlayer):
 		{
 //			extern void CreateAlienHModel(NETGHOSTDATABLOCK *ghostDataPtr,int alienType); // remove undefined warning
-			CreateAlienHModel(ghostData);
+			CreateAlienHModel(ghostData, AT_Standard);
 			break;
 		}
 			case(I_BehaviourPredatorPlayer):
@@ -10456,6 +10456,9 @@ int DetermineAvailableCharacterTypes(BOOL ConsiderUsedCharacters)
 						case NGCT_Alien :
 							CharacterTypesAvailable[NGCT_Alien]--;
 							break;
+
+						default:
+							break;
 					}
 				}
 			}
@@ -10987,6 +10990,9 @@ void DoMultiplayerEndGameScreen(void)
 					case NGCT_Predator :
 						symbol[0]=FONT_PREDATORSYMBOL;
 						RenderStringCentred(symbol,100,y,0xffffffff);
+						break;
+
+					default:
 						break;
 				}
 			}

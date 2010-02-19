@@ -544,7 +544,7 @@ int PlatStartSoundSys(void)
 			);
 	   	if(hres != DS_OK)
 		{
-			/* FALSE property set. */
+			/* No property set. */
 			db_log1("Error: Failed to get the property set.");
 		}
 
@@ -586,7 +586,7 @@ int PlatStartSoundSys(void)
 			}
 			else
 			{
-				db_logf1(("FALSE voice management. Support %x", support));
+				db_logf1(("No voice management. Support %x", support));
 			}
 
 			/* EAX support. */
@@ -609,7 +609,7 @@ int PlatStartSoundSys(void)
 			}
 			else
 			{
-				db_logf1(("FALSE EAX support. Support %x", support));
+				db_logf1(("No EAX support. Support %x", support));
 			}
 		}
 
@@ -660,7 +660,7 @@ int PlatStartSoundSys(void)
 				);
 		   	if(hres != DS_OK)
 			{
-				/* FALSE property set. */
+				/* No property set. */
 				db_log1("Error: Failed to get the property set again.");
 			}
 
@@ -771,7 +771,7 @@ void PlatEndSoundSys(void)
 	db_log3("PlatEndSoundSys finished.");
 }
 
-int PlatChangeGlobalVolume(volume)
+int PlatChangeGlobalVolume(int volume)
 {
 	int attenuation;
 	HRESULT hres;
@@ -799,7 +799,7 @@ int PlatChangeGlobalVolume(volume)
 	return SOUND_PLATFORMERROR;
 }
  
-int PlatPlaySound(activeIndex)
+int PlatPlaySound(int activeIndex)
 {
 	HRESULT hres;
 	SOUNDINDEX gameIndex;
@@ -1217,7 +1217,7 @@ int PlatDo3dSound(int activeIndex)
 					DS3D_DEFERRED
 				);
 #if 0
-// FALSE doppler for now.
+// No doppler for now.
 			IDirectSound3DBuffer_SetVelocity
 				(
 					ActiveSounds[activeIndex].ds3DBufferP,
@@ -1495,7 +1495,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		}
 		else
 		{
-			/* FALSE Voice Manager. */
+			/* No Voice Manager. */
 			DSCAPS caps;
 			ZeroMemory(&caps, sizeof(DSCAPS));
 			caps.dwSize = sizeof(DSCAPS);
@@ -1721,7 +1721,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		}
 		else
 		{
-			/* FALSE Voice Manager. */
+			/* No Voice Manager. */
 			DSCAPS caps;
 			ZeroMemory(&caps, sizeof(DSCAPS));
 			caps.dwSize = sizeof(DSCAPS);
@@ -2191,7 +2191,7 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 		}
 		else
 		{
-			/* FALSE Voice Manager. */
+			/* No Voice Manager. */
 			DSCAPS caps;
 			ZeroMemory(&caps, sizeof(DSCAPS));
 			caps.dwSize = sizeof(DSCAPS);

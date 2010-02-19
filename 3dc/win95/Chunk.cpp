@@ -6,17 +6,9 @@
 #include "ourasert.h"
 #define assert(x) GLOBALASSERT(x)
 
-#if cencon
-#include "environs.hpp"
-#else
 #define twprintf printf
 
-#ifdef cencon
-#define new my_new
-#endif
-
 char * users_name = "Player";
-#endif
 
 #include "hash_tem.hpp"
 Chunk * Parent_File;
@@ -586,14 +578,3 @@ Chunk* Chunk_With_Children::DynCreate(const char* data)
 	}
 	return new Miscellaneous_Chunk(this,data,(data + 12), (*(int *) (data + 8))-12);
 }
-
-
-
-
-
-
-
-
-
-
-

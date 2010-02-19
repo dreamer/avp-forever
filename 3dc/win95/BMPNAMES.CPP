@@ -950,7 +950,3 @@ size_t Bitmap_MD5_Chunk::size_chunk()
 		+(shapename ? strlen(shapename) : 0)
 		+3 +3&~3;
 }
-
-
-
-

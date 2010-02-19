@@ -23,7 +23,7 @@ extern "C" {
 
 #include "datatype.h"        /* Include the data type definitions */
 
-#define COMPRESS_RGB        0L      /* FALSE compression               */
+#define COMPRESS_RGB        0L      /* No compression               */
 #define COMPRESS_RLE8       1L      /* 8 bits per pixel compression */
 #define COMPRESS_RLE4       2L      /* 4 bits per pixel compression */
 #define BMP_ID              0x4d42  /* BMP "magic" number           */

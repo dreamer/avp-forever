@@ -4,11 +4,8 @@
 #include "chunk.hpp"
 #include "chnktype.hpp"
 
-#if InterfaceEngine
-#include "strachnk.hpp"
-#endif
 
-#define LOFlag_On					0x00000001
+#define LOFlag_On			0x00000001
 #define LOFlag_ShadowData	0x00000002
 #define LOFlag_Changed		0x00000004
 #define LOFlag_Calc_Data	0x00000008
@@ -143,11 +140,6 @@ public:
 	
 	void fill_data_block ( char * data_start);
 
-#if InterfaceEngine
-	AVP_Strategy_Chunk* GetStrategyChunk();
-	AVP_Strategy_Chunk* CreateStrategyChunk();
-#endif
-	
 private:
 
 	friend class Light_Set_Chunk;
@@ -161,7 +153,7 @@ class Placed_Object_Light_Chunk : public Chunk
 {
 public :	
 	Placed_Object_Light_Chunk (Chunk_With_Children * parent, Placed_Object_Light_Data & new_light)
-	: Chunk (parent, "PLOBJLIT"), light (new_light),num_extra_data(0),extra_data(0) {}
+	: Chunk (parent, "PLOBJLIT"), light(new_light), extra_data(0), num_extra_data(0) {}
 
 	Placed_Object_Light_Chunk (Chunk_With_Children * parent, const char *, size_t const);
 	

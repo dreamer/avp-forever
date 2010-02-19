@@ -4,8 +4,6 @@
 #include "inline.h"
 #include "module.h"
 
-//#include <string.hpp>
-
 #include "list_tem.hpp"
 #include "chnkload.hpp"
 #include "projload.hpp"
@@ -25,7 +23,6 @@
 #include "objsetup.hpp"
 #include "npcsetup.h"
 #include "sprchunk.hpp"
-//#include "pcmenus.h"
 #include <math.h>
 #include "wpchunk.hpp"
 #include "hierchnk.hpp"
@@ -53,18 +50,11 @@
 #include "db.h"
 #include "pldnet.h"
 
-#include <crtdbg.h>
-
 extern "C" {
-//#include "3dc.h"
 #include "inventry.h"
 
 extern int VideoMode;
 extern int ZBufferMode;
-//extern unsigned char *PaletteRemapTable;
-//extern unsigned char **PaletteShadingTableArray;
-extern int cosine[];
-#define remap_table_size (1 << (remap_table_rgb_bits * 3))
 extern VECTORCH PlayerStartLocation;
 extern MATRIXCH PlayerStartMat;
 
@@ -87,14 +77,7 @@ const char * SubShps_Directory = "SubShps\\All\\";
 // const char * GenTex_Directory = 0;
 const char * FixTex_Directory = "\\\\Kate\\Kate Share\\avp\\Fix-Tex\\";
 const char * GameTex_Directory = "\\\\Kate\\Kate Share\\avp\\game-tex\\";
-// these link with pcmenus.cpp
-const char * GenTex4bit_Directory = "\\\\Kate\\Kate Share\\avp\\G4bitTex\\";
-const char * GenTex8bit_Directory = "\\\\Kate\\Kate Share\\avp\\GenG-Tex\\";
-const char * GenTex75pc_Directory = "\\\\Kate\\Kate Share\\avp\\Gen34Tex\\";
-const char * GenTex50pc_Directory = "\\\\Kate\\Kate Share\\avp\\Gen12Tex\\";
-
 // new directories for new-style graphics - to be determined properly
-
 char const * FirstTex_Directory = "Graphics"; // currently relative to cwd
 char const * SecondTex_Directory = 0; // will be the src safe shadow for development builds
 								//used for cd graphics directory in final version
@@ -358,9 +341,9 @@ struct LoadedPlacedHierarchy
 #define NumPlacedHierarchy 3
 LoadedPlacedHierarchy PlacedHierarchyArray[NumPlacedHierarchy]=
 {
-	"dropship","dropship",INVALID_RIFFHANDLE,
-	"pred ship fury","pred ship fury",INVALID_RIFFHANDLE,
-	"pred ship ob","pred ship ob",INVALID_RIFFHANDLE,
+	{ "dropship","dropship",INVALID_RIFFHANDLE },
+	{ "pred ship fury","pred ship fury",INVALID_RIFFHANDLE },
+	{ "pred ship ob","pred ship ob",INVALID_RIFFHANDLE },
 };
 
 
@@ -1444,7 +1427,7 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 				int ir = svic->intensity_array[vn]>>16;
 			 	int ig = svic->intensity_array[vn]>>8 &0xff;
 			 	int ib = svic->intensity_array[vn] &0xff;
-			 	int mag = (int)sqrt((double)(ir*ir+ig*ig+ib*ib)/3.0);
+			 	int mag = (int)sqrt((ir*ir+ig*ig+ib*ib)/3.0);
 				
 			 	mainshapelist[osnp->sh_num]->sh_extraitemdata[vn].EID_VertexI = svic->intensity_array[vn] + (mag<<24);
 			}
@@ -1973,7 +1956,6 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 					int start_shape_no = rt_temp.start_list_pos;
 					int list_pos = rt_temp.main_list_pos;
 					db_logf3(("Shape copied to %d",list_pos));
-					MORPHCTRL * mc = rt_temp.mc;
 					#else
 					int list_pos = copy_to_mainshapelist(h,shplif(),flags,&ob->object_data);
 					int start_shape_no = list_pos;
@@ -2048,7 +2030,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 								int ir=svic->intensity_array[vn]>>16;
 							 	int ig=svic->intensity_array[vn]>>8 &0xff;
 							 	int ib=svic->intensity_array[vn] &0xff;
-							 	int mag =sqrt((ir*ir+ig*ig+ib*ib)/3.0);
+							 	int mag =(int)sqrt((ir*ir+ig*ig+ib*ib)/3.0);
 								
 							 	mainshapelist[list_pos]->sh_extraitemdata[vn].EID_VertexI = svic->intensity_array[vn] + (mag<<24);
 								
@@ -2573,13 +2555,6 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 			if(num_ep)
 			{
 				FALLP_EntryPoints[i].entryPointsList=(FARENTRYPOINT*)AllocateMem(sizeof(FARENTRYPOINT)*num_ep);
-				FALLP_EntryPoints[i].entryPointsList->donorIndex = 0;
-				FALLP_EntryPoints[i].entryPointsList->position.vx = 0;
-				FALLP_EntryPoints[i].entryPointsList->position.vy = 0;
-				FALLP_EntryPoints[i].entryPointsList->position.vz = 0;
-
-				FALLP_EntryPoints[i].entryPointsList->alien_only = 0;
-
 				FALLP_EntryPoints[i].numEntryPoints=num_ep;
 
 				int adj_pos=0;
@@ -2953,10 +2928,8 @@ void DeallocateLoadedShapeheader(SHAPEHEADER * shp)
 
 void DeallocateModules()
 {
-	
-	MODULE ** m_arrayPtr = MainScene.sm_marray;
-	
 	#if !USE_LEVEL_MEMORY_POOL
+	MODULE ** m_arrayPtr = MainScene.sm_marray;
 	while (*m_arrayPtr)
 	{
 		List<Light_Chunk *> lights_for_this_module;
@@ -3024,10 +2997,7 @@ void DeallocateModules()
 
 	//and get rid of the strategy lists
 	deallocate_behaviour_list();
-
-
 }
-
 
 void avp_undo_rif_load(RIFFHANDLE h)
 {

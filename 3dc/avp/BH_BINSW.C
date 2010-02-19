@@ -28,6 +28,7 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	BINARY_SWITCH_BEHAV_BLOCK *bs_bhv;
 	BIN_SWITCH_TOOLS_TEMPLATE *bs_tt;
 	int i;
+	int test;
 
  	GLOBALASSERT(sbptr);
 	bs_bhv = (BINARY_SWITCH_BEHAV_BLOCK*)AllocateMem(sizeof(BINARY_SWITCH_BEHAV_BLOCK));
@@ -69,7 +70,8 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 			memoryInitialisationFailure = 1;
 			return ((void *)NULL);
 		}
-		bs_bhv->request_messages = (int *)AllocateMem(sizeof(int) * bs_tt->num_targets);
+
+		bs_bhv->request_messages = (int *)AllocateMem(sizeof(intptr_t) * bs_tt->num_targets);
 		if (!bs_bhv->request_messages) 
 		{
 			memoryInitialisationFailure = 1;
@@ -134,7 +136,8 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 					pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);
 					pnew_txactrlblk->tac_txah_s = GetTxAnimHeaderFromShape(pnew_txactrlblk, shape_num);
 
-					while(pnew_txactrlblk->tac_txarray[num_seq+1])num_seq++;
+					while (pnew_txactrlblk->tac_txarray[num_seq+1])
+						num_seq++;
 
 					// Assert does not work at this point so
 					GLOBALASSERT(num_seq==2);

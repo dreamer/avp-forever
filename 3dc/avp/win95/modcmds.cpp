@@ -131,8 +131,7 @@ void ModuleCommands :: ListModules(void)
 							(
 								Msg,
 								"MODULE:%3i NULL NAME",
-								Index,
-								pModule -> name
+								Index
 							);							
 						}
 						

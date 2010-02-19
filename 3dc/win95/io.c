@@ -27,13 +27,9 @@
 	externs for commonly used global variables and arrays
 */
 
-extern SCENE Global_Scene;
 extern SHAPEHEADER **mainshapelist;
 extern SHAPEHEADER *testpaletteshapelist[];
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern int sine[];
-extern int cosine[];
-extern int AdaptiveHazingFlag;
 extern int *Global_ShapeNormals;
 extern int *Global_ShapePoints;
 extern int *ItemPointers[];
@@ -53,7 +49,6 @@ extern int SoftwareScanDrawRequestMode;
 
 extern int TotalVideoMemory;
 extern int NumAvailableVideoModes;
-//extern VIDEOMODEINFO AvailableVideoModes[];
 
 extern int memoryInitialisationFailure;
 
@@ -66,17 +61,11 @@ extern IMAGEHEADER ImageHeaderArray[]; /* Array of Image Headers */
 
 */
 
-	int DrawMode = DrawPerVDB;
+//	int DrawMode = DrawPerVDB;
 	/* Win95 default ought to be per frame */
 	
 	/* Timer */
 	long lastTickCount;
-
-//	unsigned char *ScreenBuffer    = 0;		/* Ensure initialised to Null */
-//	unsigned char *ScreenBuffer2   = 0;
-
-
-//	unsigned char LPTestPalette[1024]; /* to cast to lp*/
 	
 	int InputMode;
 
@@ -84,11 +73,8 @@ extern IMAGEHEADER ImageHeaderArray[]; /* Array of Image Headers */
 	int VideoModeType;
 	int VideoModeTypeScreen;
 	int WindowMode;
-//	int ScanDrawMode;
 	int ZBufferMode;
-//	int DXMemoryMode;
 	unsigned char AttemptVideoModeRestart;
-//	VIDEORESTARTMODES VideoRestartMode;
 
     PROCESSORTYPES ProcessorType;
 	BOOL MMXAvailable;
@@ -97,10 +83,8 @@ extern IMAGEHEADER ImageHeaderArray[]; /* Array of Image Headers */
 
 	unsigned char *PaletteRemapTable = 0;
 
-	int **ShadingTableArray = 0;
 	int NumShadingTables    = 0;
 
-	unsigned char **PaletteShadingTableArray = 0;
 	int NumPaletteShadingTables              = 0;
 
 	int FrameRate;
@@ -414,15 +398,6 @@ int CompareFilenameCH(char *string1, char *string2)
  "GetRemappedPaletteColour()" is an access function for this table
 
 */
-
-
-#define remap_table_size (1 << (remap_table_rgb_bits * 3))
-
-
-#define cprt_info FALSE
-#define cprt_cnt FALSE
-
-
 
 int NearestColour(int rs, int gs, int bs, unsigned char *palette)
 
@@ -1011,7 +986,7 @@ static int DHM_MoveBufferToQueue(int* pPosX,int* pPosY,int fZeroLeftMargin)
 							/* It is a standard character or a space */
 							DHM_AddToQueue(*pPosX,(*pPosY)+textprint_Y_offset, *pCh);
 
-							(*pPosX)+=AAFontWidths[*pCh];//CharWidthInPixels(*pCh);
+							(*pPosX)+=AAFontWidths[(unsigned char)*pCh];//CharWidthInPixels(*pCh);
 
 							if ((*pPosX)>LastDisplayableXForChars())
 							{

@@ -30,7 +30,7 @@
 ****************************************************************************************KJL*/
 enum VISION_MODE_ID CurrentVisionMode;
 
-static visionModeDebounced=0;
+static int visionModeDebounced=0;
 
 extern ACTIVESOUNDSAMPLE ActiveSounds[];
 int predOVision_SoundHandle;
@@ -46,7 +46,6 @@ extern int NormalFrameTime;
 extern int GlobalAmbience;
 /* JH 29/5/97 - to control how D3D does the lighting */
 struct D3DLightColourControl d3d_light_ctrl;
-struct D3DOverlayColourControl d3d_overlay_ctrl;
 /*KJL****************************************************************************************
 *                                     F U N C T I O N S	                                    *
 ****************************************************************************************KJL*/
@@ -219,6 +218,8 @@ extern void ChangePredatorVisionMode(void)
 			CurrentVisionMode=VISION_MODE_NORMAL;
 			break;
 		}
+		default:
+			break;
 	}
 	Sound_Play(SID_VISION_ON,"h");
 	PredatorVisionChangeCounter=ONE_FIXED;

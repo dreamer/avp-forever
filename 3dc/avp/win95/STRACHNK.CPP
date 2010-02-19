@@ -336,29 +336,6 @@ Virtual_Object_Properties_Chunk::Virtual_Object_Properties_Chunk(Chunk_With_Chil
 	CalculateID();
 }
 
-#if UseOldChunkLoader
-Virtual_Object_Properties_Chunk::Virtual_Object_Properties_Chunk(Chunk_With_Children* parent,const char* data,size_t)
-:Chunk(parent,"VOBJPROP")
-{
-	location=*(ChunkVector*)data;
-	data+=sizeof(ChunkVector);
-	size=*(double*)data;
-	data+=sizeof(double);
-	
-	int length=strlen(data);
-	name=new char[length+1];
-	strcpy(name,data);
-	data+=(length+4)&~3;
-	
-	ID=*(ObjectID*)data;
-	data+=sizeof(ObjectID);
-
-	pad1=*(int*)data;
-	data+=sizeof(int);				
-	pad2=*(int*)data;
-	data+=sizeof(int);				
-}
-#else
 Virtual_Object_Properties_Chunk::Virtual_Object_Properties_Chunk(Chunk_With_Children* parent,const char* data,size_t)
 :Chunk(parent,"VOBJPROP")
 {
@@ -380,7 +357,6 @@ Virtual_Object_Properties_Chunk::Virtual_Object_Properties_Chunk(Chunk_With_Chil
 	pad2=*(int*)data;
 	data+=sizeof(int);				
 }
-#endif
 
 Virtual_Object_Properties_Chunk::~Virtual_Object_Properties_Chunk()
 {
@@ -585,46 +561,6 @@ void SimpleStrategy::set_r6_destruction_type(unsigned int dest_type)
 }
 
 //////////////////////////////////////////////
-#if InterfaceEngine
-R6SimpleStrategy::R6SimpleStrategy(int _Type, int _ExtraData, int _mass, int _integrity)
-:SimpleStrategy(_Type,_ExtraData,_mass,_integrity)
-{
-	StrategyType = StratR6SimpleObject;
-	
-	r6SoundID.id1 =	0;
-	r6SoundID.id2 = 0;
-	r6_spare1 = 0;
-	r6_spare2 = 0;
-	r6_spare3 = 0;
-	r6_spare4 = 0;
-	r6_spare5 = 0;
-	r6_spare6 = 0;
-}
-
-R6SimpleStrategy::R6SimpleStrategy(SimpleStrategy* ss)
-:SimpleStrategy(0,0,0,0)
-{
-	StrategyType = StratR6SimpleObject;
-
-	Type = ss->Type;
-	ExtraData = ss->ExtraData;
-	mass = ss->mass;
-	integrity = ss->integrity;
-	flags = ss->flags;
-	target_request = ss->target_request;
-	targetID = ss->targetID;
-
-	r6SoundID.id1 =	0;
-	r6SoundID.id2 = 0;
-	r6_spare1 = 0;
-	r6_spare2 = 0;
-	r6_spare3 = 0;
-	r6_spare4 = 0;
-	r6_spare5 = 0;
-	r6_spare6 = 0;
-
-}
-#endif
 
 R6SimpleStrategy::R6SimpleStrategy(const char * data,size_t size)
 :SimpleStrategy(data,size)
@@ -1157,24 +1093,6 @@ void MultiSwitchStrategy::fill_data_block(char* data)
 	*(int*)data=flags;	
 }
 ////////////////////////////////////////////////////////////////////////
-#if UseOldChunkLoader
-AreaSwitchStrategy::AreaSwitchStrategy(const char* data_start,size_t size)
-:MultiSwitchStrategy(data_start,size)
-{
-	data_start+=MultiSwitchStrategy::GetStrategySize();
-	
-	trigger_min=*(ChunkVector*)data_start;
-	data_start+=sizeof(ChunkVector);	
-	trigger_max=*(ChunkVector*)data_start;
-	data_start+=sizeof(ChunkVector);	
-	
-	area_pad1=*(int*)data_start;
-	data_start+=4;
-	area_pad2=*(int*)data_start;
-	data_start+=4;
-
-}
-#else
 AreaSwitchStrategy::AreaSwitchStrategy(const char* data_start,size_t size)
 :MultiSwitchStrategy(data_start,size)
 {
@@ -1191,9 +1109,6 @@ AreaSwitchStrategy::AreaSwitchStrategy(const char* data_start,size_t size)
 	data_start+=4;
 
 }
-#endif
-
-
 
 size_t AreaSwitchStrategy::GetStrategySize()
 {

@@ -3,6 +3,8 @@
 
 #include "decal.h"
 #include "dynblock.h"
+#include "d3_func.h"
+
 enum PARTICLE_ID
 {
 	PARTICLE_PREDATOR_BLOOD,

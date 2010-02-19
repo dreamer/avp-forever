@@ -11,7 +11,6 @@
 
 extern "C"
 {
-//	extern LPDIRECTSOUND DSObject; 
 	extern int SoundSwitchedOn;
 	// Pat sets this up
 };
@@ -69,7 +68,7 @@ void LoseAllNonCommonSounds()
 
 		DeallocateMem (ls->wavname);
 		DeallocateMem (ls);
-	};
+	}
 }
 
 static int find_empty_game_sound()
@@ -118,7 +117,7 @@ LOADED_SOUND const * GetSound (char const * fname)
 	}
 	else
 	{
-		wavname = (char *)fname;
+		wavname = fname;
 	}
 	
 	// check if wavname already loaded

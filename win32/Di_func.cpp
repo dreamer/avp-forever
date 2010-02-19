@@ -1694,8 +1694,8 @@ void DirectReadMouse(void)
 
 	GotMouse = TRUE;
 
-	MouseX += xPosRelative * 4;
-	MouseY += yPosRelative * 4;
+	MouseX += xPosRelative;// * 4;
+	MouseY += yPosRelative;// * 4;
 
 //	char buf[100];
 //	sprintf(buf, "x: %d, y: %d\n", xPosRelative, yPosRelative);

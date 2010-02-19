@@ -381,6 +381,7 @@ void UpdateModules(void);
 void ModuleFunctions(MODULE *mptr, MFUNCTION mf);
 void AllocateModuleObject(MODULE *mptr);
 void DeallocateModuleObject(MODULE *mptr);
+void AllNewModuleHandler(void);
 
 
 /*
@@ -439,6 +440,7 @@ int SaveModuleArray(MODULE *mptr, char *filename);
 MODULE* LoadModuleArray(MODULE *mptr, int size, char *filename);
 
 int IsModuleVisibleFromModule(MODULE *source, MODULE *target);
+int ThisObjectIsInAModuleVisibleFromCurrentlyVisibleModules(struct strategyblock *sbPtr);
 
 #endif	/* IncludeModuleFunctionPrototypes */
 

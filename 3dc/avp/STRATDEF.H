@@ -265,7 +265,9 @@ extern void InitPreservedSBs();
 extern void PreserveStBlocksInModule();
 extern BOOL SBNeededForNextEnv();
 extern void	AddPreservedSBsToActiveList();
-extern void TeleportPreservedSBsToNewEnvModule(MODULE* old_pos_module, MODULE* new_pos, int orient_diff);
+extern void TeleportPreservedSBsToNewEnvModule(MODULE* old_pos_module, 
+											   MODULE* new_pos, 
+											   int orient_diff);
 
 
 

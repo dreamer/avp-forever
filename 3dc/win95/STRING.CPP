@@ -136,7 +136,6 @@ String & String::operator += (char const * str)
 	return *this;
 }
 
-/*
 #define STRING_COMPARES(op) \
 int operator op (String const & str1, String const & str2) \
 { \
@@ -174,8 +173,7 @@ void String::put_at(size_t pos, char c)
 	else
 		operator += (c);
 }
-*/
-/*
+
 int String::match(String const & str) const
 {
 	for (size_t pos = 0; pos<len || pos<str.len; ++pos)
@@ -184,8 +182,7 @@ int String::match(String const & str) const
 	}
 	return -1;
 }
-*/
-/*
+
 int String::match(char const * str) const
 {
 	for (size_t pos = 0; pos<len || *str; ++pos, ++str)
@@ -194,8 +191,7 @@ int String::match(char const * str) const
 	}
 	return -1;
 }
-*/
-/*
+
 int String::index(String const & str, size_t pos) const
 {
 	if (!str.len) return (int)pos;
@@ -211,8 +207,7 @@ int String::index(String const & str, size_t pos) const
 	}
 	return -1;
 }
-*/
-/*
+
 int String::index(char const * str, size_t pos) const
 {
 	if (!*str) return (int)pos;
@@ -229,8 +224,7 @@ int String::index(char const * str, size_t pos) const
 	}
 	return -1;
 }
-*/
-/*
+
 String String::upper() const
 {
 	String rstr(*this);
@@ -240,8 +234,7 @@ String String::upper() const
 	}
 	return rstr;
 }
-*/
-/*
+
 String String::lower() const
 {
 	String rstr(*this);
@@ -251,8 +244,7 @@ String String::lower() const
 	}
 	return rstr;
 }
-*/
-/*
+
 String::String(String const & str1, String const & str2)
 : rep(0)
 , len(str1.len + str2.len)
@@ -263,8 +255,7 @@ String::String(String const & str1, String const & str2)
 	if (str1.len) memcpy(rep,str1.rep,str1.len*sizeof(char));
 	if (str2.len) memcpy(&rep[str1.len],str2.rep,str2.len*sizeof(char));
 }
-*/
-/*
+
 String::String(char const * str1, String const & str2)
 : rep(0)
 , cstring(0)
@@ -276,8 +267,7 @@ String::String(char const * str1, String const & str2)
 	if (clen) memcpy(rep,str1,clen*sizeof(char));
 	if (str2.len) memcpy(&rep[clen],str2.rep,str2.len*sizeof(char));
 }
-*/
-/*
+
 String::String(String const & str1, char const * str2)
 : rep(0)
 , cstring(0)
@@ -289,8 +279,7 @@ String::String(String const & str1, char const * str2)
 	if (str1.len) memcpy(rep,str1.rep,str1.len*sizeof(char));
 	if (clen) memcpy(&rep[str1.len],str2,clen*sizeof(char));
 }
-*/
-/*
+
 String::String(char c, String const & str2)
 : rep(0)
 , len(1 + str2.len)
@@ -300,8 +289,7 @@ String::String(char c, String const & str2)
 	rep[0]=c;
 	if (str2.len) memcpy(&rep[1],str2.rep,str2.len*sizeof(char));
 }
-*/
-/*
+
 String::String(String const & str1, char c)
 : rep(0)
 , len(str1.len + 1)
@@ -311,7 +299,6 @@ String::String(String const & str1, char c)
 	if (str1.len) memcpy(rep,str1.rep,str1.len*sizeof(char));
 	rep[str1.len]=c;
 }
-*/
 
 
 

@@ -25,11 +25,11 @@ typedef struct netghostdatablock
 
 	/* KJL 17:33:41 22/01/99 - I've made this a union because I needed a storage space,
 	and the currentAnimSequence is only used by specific objects */
-	union
-	{
+//	union
+//	{
 		int currentAnimSequence;
-		int EventCounter; // used by grenades
-	};
+//		int EventCounter; // used by grenades
+//	};
 	
 	DISPLAYBLOCK *myGunFlash;
 	SECTION_DATA *GunflashSectionPtr;
@@ -103,6 +103,9 @@ extern void KillAlienAIGhost(STRATEGYBLOCK *sbPtr,int death_code,int death_time,
 extern void Convert_DiscGhost_To_PickupGhost(STRATEGYBLOCK *sbPtr);
 extern void PlayHitDeltaOnGhost(STRATEGYBLOCK *sbPtr,char delta_seq,char delta_sub_seq);
 extern void PlayOtherSound(enum soundindex SoundIndex, VECTORCH *position, int explosion);
+void CreateMarineHModel(NETGHOSTDATABLOCK *ghostDataPtr, int weapon);
+void CreateAlienHModel(NETGHOSTDATABLOCK *ghostDataPtr,int alienType);
+void CreatePredatorHModel(NETGHOSTDATABLOCK *ghostDataPtr, int weapon);
 
 /*---------------------------Patrick 29/3/97----------------------------
   Defines

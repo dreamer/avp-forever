@@ -18,12 +18,6 @@ int testc = 0;
  externs for commonly used global variables and arrays
 
 */
-
-	#if platform_pc
-	extern int sine[];
-	extern int cosine[];
-	#endif
-
 	extern short ArcCosTable[];
 	extern short ArcSineTable[];
 	extern short ArcTanTable[];

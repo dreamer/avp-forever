@@ -1,16 +1,6 @@
 #ifndef _INCLUDED_IFF_HPP_
 #define _INCLUDED_IFF_HPP_
 
-#if 0
-#if defined(_WIN32) || defined(WIN32) || defined(WINDOWS) || defined(_WINDOWS)
-	#define _IFF_WIN_TARGET
-	#include <windows.h>
-#else // ! WIN32 && ! _WIN32 && ! WINDOWS && ! _WINDOWS
-	#include <stdio.h>
-	#include <conio.h>
-#endif // ! WIN32 && ! _WIN32 && ! WINDOWS && ! _WINDOWS
-#endif
-
 #ifdef WIN32
 	#define _IFF_WIN_TARGET
 	#include <windows.h>
@@ -253,7 +243,7 @@ namespace IFF
 		{
 			public:
 				virtual ~SerialData();
-				SerialData() : m_pPrev(NULL), m_pData(new DataBlock) {};
+				SerialData() : m_pData(new DataBlock), m_pPrev(NULL) {};
 				
 				void Clear();
 				

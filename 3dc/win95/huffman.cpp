@@ -28,17 +28,17 @@ typedef struct HuffNode // 16-byte node structure
     
     struct HuffNode     *parent; // the THIRD four bytes, parent node
     
-    union
-    {   	                        // the FOURTH four bytes
+ //   union
+ //   {   	                        // the FOURTH four bytes
         unsigned int       bits;    // the bit pattern of this end node
-        struct
-        {
-            unsigned char  flag;
-            unsigned char  curdepth;
-            unsigned char  maxdepth;
-            unsigned char  unused;  
-        };
-    };
+//        struct
+//       {
+//            unsigned char  flag;
+//            unsigned char  curdepth;
+//            unsigned char  maxdepth;
+//            unsigned char  unused;  
+//        };
+//    };
 
 } HuffNode;
 
@@ -59,11 +59,7 @@ static HuffEncode EncodingTable[257];
 
 /* KJL 17:16:03 17/09/98 - Compression */
 static void PerformSymbolCensus(unsigned char *sourcePtr, int length);
-#ifdef __WATCOMC__
-static int HuffItemsSortSub(const void *cmp1, const void *cmp2);
-#else
 static int __cdecl HuffItemsSortSub(const void *cmp1, const void *cmp2);
-#endif
 static void SortCensusData(void);
 static void BuildHuffmanTree(void);
 static void MakeHuffTreeFromHuffItems(HuffNode *base, HuffItem *source, int count);
@@ -123,11 +119,7 @@ static void PerformSymbolCensus(unsigned char *sourcePtr, int length)
 	while (--length);
 }			
 
-#ifdef __WATCOMC__
-static int HuffItemsSortSub(const void *cmp1, const void *cmp2)
-#else
 static int __cdecl HuffItemsSortSub(const void *cmp1, const void *cmp2)
-#endif
 {
     if (((HuffItem *)cmp1)->Count > ((HuffItem *)cmp2)->Count)
         return  1;
@@ -160,7 +152,7 @@ static void MakeHuffTreeFromHuffItems(HuffNode *base, HuffItem *source, int coun
     {
     	temp[n].bits = source[n].Count;
 	}
-    while (upperlim = --count)
+    while ((upperlim = --count))
     {
         if (temp[0].zero)
             temp[0].zero->parent = temp[0].one->parent = movdest;
@@ -234,7 +226,7 @@ static int HuffDepthsAdjust(int *depth, int maxdepth)
     unsigned int promotions, excess, hi;
 
     goal = 1 << maxdepth;
-    for (n = 0, sum = 0, items = 0; n <= maxdepth; n++)
+    for (n = 0, sum = 0, items = 0; n <= (unsigned int)maxdepth; n++)
     {
         items += depth[n];
         sum   += (goal >> n) * depth[n];
@@ -247,7 +239,7 @@ static int HuffDepthsAdjust(int *depth, int maxdepth)
         {
             gain             = (1 << (maxdepth - n)) - 1;
             busts            = (sum - goal + gain - 1) / gain;
-            busts            = depth[n] < busts ? depth[n] : busts;
+            busts            = (unsigned int)depth[n] < busts ? depth[n] : busts;
             depth[n]        -= busts;
             depth[maxdepth] += busts;
             sum             -= busts * gain;
@@ -257,7 +249,7 @@ static int HuffDepthsAdjust(int *depth, int maxdepth)
     for (n = 0; excess; n++)
     {
         hi = 1 << (maxdepth - n);
-        for (m = n + 1; m <= maxdepth; m++)
+        for (m = n + 1; m <= (unsigned int)maxdepth; m++)
         {
             gain = hi - (1 << (maxdepth - m));
             if (excess < gain)
@@ -265,7 +257,7 @@ static int HuffDepthsAdjust(int *depth, int maxdepth)
             if (depth[m])
             {
                 promotions  = excess / gain;
-                promotions  = depth[m] > promotions ? promotions : depth[m];
+                promotions  = (unsigned int)depth[m] > promotions ? promotions : depth[m];
                 depth[n]   += promotions;
                 depth[m]   -= promotions;
                 excess     -= promotions * gain;
@@ -319,6 +311,7 @@ static int HuffEncodeBytes(int *dest, unsigned char *source, int count, HuffEnco
 
     if (!count) return 0;
 
+	accum = 0;
     start = dest;
     sourcelim = sourceend = source + count;
     available = 32;
@@ -385,7 +378,7 @@ lpstart:        val  = *source++;
 		}
     }    
     *dest++ = accum >> available;
-    return (dest - start) * 4;
+    return (int)((dest - start) * 4);
 }
 
 
@@ -396,11 +389,11 @@ lpstart:        val  = *source++;
 /* KJL 17:16:24 17/09/98 - Decompression */
 static int DecodeTable[1<<MAX_DEPTH];
 
-static void MakeHuffmanDecodeTable(int *depth, int depthmax, unsigned char *list);
-static int HuffmanDecode(unsigned char *dest, int *source, int *table, int length);
+static void MakeHuffmanDecodeTable(const int *depth, int depthmax, const unsigned char *list);
+static int HuffmanDecode(unsigned char *dest, const int *source, const int *table, int length);
 
 
-extern char *HuffmanDecompress(HuffmanPackage *inpackage)
+extern char *HuffmanDecompress(const HuffmanPackage *inpackage)
 {
 	unsigned char *uncompressedData = NULL;
 	// Step 1: Make the decoding table
@@ -416,12 +409,12 @@ extern char *HuffmanDecompress(HuffmanPackage *inpackage)
 	return (char*)uncompressedData;	
 }
 
-static void MakeHuffmanDecodeTable(int *depth, int depthmax, unsigned char *list)
+static void MakeHuffmanDecodeTable(const int *depth, int depthmax, const unsigned char *list)
 {
     int thisdepth, depthbit, repcount, repspace, lenbits, temp, count;
 	int *outp;
     int o = 0;
-    unsigned char *p;
+    const unsigned char *p;
 	int *outtbl = DecodeTable;
 
     lenbits   = 0;
@@ -429,7 +422,7 @@ static void MakeHuffmanDecodeTable(int *depth, int depthmax, unsigned char *list
     repspace  = 1;
     thisdepth = 0;
     depthbit  = 4;
-    p         = (unsigned char *)list + 255;
+    p         = list + 255;
     while (1)
     {
         do
@@ -474,17 +467,18 @@ static void MakeHuffmanDecodeTable(int *depth, int depthmax, unsigned char *list
 
 #define EDXMASK ((((1 << (MAX_DEPTH + 1)) - 1) ^ 1) ^ -1)
 
-static int HuffmanDecode(unsigned char *dest, int *source, int *table, int length)
+static int HuffmanDecode(unsigned char *dest, const int *source, const int *table, int length)
 {
     unsigned char          *start;
     int                    available, reserve, fill, wid;
     unsigned int           bits=0, resbits;
-    unsigned char          *p;
+    const unsigned char    *p;
 
     start     = dest;
     available = 0;
     reserve   = 0;
-    wid       = 0;    
+    wid       = 0;
+	resbits   = 0;
     do 
     {
         available     += wid;
@@ -510,11 +504,11 @@ static int HuffmanDecode(unsigned char *dest, int *source, int *table, int lengt
         {
             bits      >>= wid;
             *dest++   = p[1];
-lpent:      p         = (unsigned char *)(((short *)table)+(bits & ~EDXMASK));
+lpent:      p         = (const unsigned char *)(((const short *)table)+(bits & ~EDXMASK));
         }
         while ((available  -= (wid = *p)) >= 0 && (dest-start)!=length);
 
     }
     while (available > -32 && (dest-start)!=length);
-    return dest - start;
+    return (int)(dest - start);
 }

@@ -370,32 +370,32 @@ ShapeInMSL const * ShapeInMSL::GetByName(char const * nam)
 }
 
 ShapeInMSL::ShapeInMSL()
-: shptr(0)
-, listpos(GLS_NOTINLIST)
+: listpos(GLS_NOTINLIST)
+, shptr(0)
 , in_hash_table(FALSE)
 {
 }
 
 ShapeInMSL::ShapeInMSL(int _p)
-: shptr(0)
-, listpos(_p)
+: listpos(_p)
+, shptr(0)
 , in_hash_table(FALSE)
 {
 }
 
 ShapeInMSL::ShapeInMSL(SHAPEHEADER * _s, char const * _n, int _p)
-: shptr(_s)
+: listpos(_p)
+, shptr(_s)
 , name(_n)
-, listpos(_p)
 , in_hash_table(FALSE)
 {
 	AddToHashTables();
 }
 
 ShapeInMSL::ShapeInMSL(ShapeInMSL const & sim)
-: shptr(sim.shptr)
+: listpos(sim.listpos)
+, shptr(sim.shptr)
 , name(sim.name)
-, listpos(sim.listpos)
 , in_hash_table(FALSE)
 {
 	if (sim.in_hash_table) AddToHashTables();
@@ -711,13 +711,12 @@ void CopyShapeAnimationHeader(SHAPEHEADER* shpfrom,SHAPEHEADER* shpto)
 	
 	shapeanimationsequence* sas=0;
 
-	unsigned int i = 0;
+	int i;
 	for(i=0;i<shpto->animation_header->num_sequences;i++)
 	{
 		sas=&shpto->animation_header->anim_sequences[i];
 		if(sas->num_frames)
 			break;
-		
 	}
 	GLOBALASSERT(i<shpto->animation_header->num_sequences);
 	
@@ -1151,7 +1150,7 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk * tmpshp, int fla
 }
 
 // load textures for environment
-BOOL load_rif_bitmaps (RIFFHANDLE h, int flags)
+BOOL load_rif_bitmaps (RIFFHANDLE h, int /*flags*/)
 {
 	Global_BMP_Name_Chunk * gbnc = 0;
 
@@ -1863,11 +1862,12 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 	if(ta1->ID!=ta2->ID)return;
 	int VertConv[3];//conversion between vert nos in triangles and vert nos in quad
 	int VertFrom,VertTo;//for remaining vert in second poly
+	int i;
 	VertTo=6;
 
-	int i, j;
 	for(i=0;i<3;i++)
 	{
+		int j;
 		for(j=0;j<4;j++)
 		{
 			if(sc->shape_data.poly_list[ta1->poly].vert_ind[i]==(shp->items[poly][j+4]))break;
@@ -1876,7 +1876,7 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 		VertConv[i]=j;
 		VertTo-=j;
 	}
-	
+
 	for(i=0;i<3;i++)
 	{
 		if(sc->shape_data.poly_list[ta2->poly].vert_ind[i]==(shp->items[poly][4+VertTo]))break;
@@ -1909,7 +1909,7 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 		th->txa_anim_id=ta1->Identifier;
 
 		txanimframe* tf;
-		for(j=0;j<th->txa_numframes;j++)
+		for(int j=0;j<th->txa_numframes;j++)
 		{
 			tf=&th->txa_framedata[j];
 			tf->txf_flags=0;
@@ -2137,7 +2137,7 @@ void SetupAnimatingShape(Shape_Chunk* sc,SHAPEHEADER* shp, Shape_Merge_Data_Chun
 //		square_root = sqrt(square_root);
 //		sas->radius = (int)square_root;
 
-		sas->radius = (int)sqrt((double)x*x+y*y+z*z);
+		sas->radius = (int)sqrt((double)(x*x+y*y+z*z));
 		
 		sas->vertex_normals=(int*)PoolAllocateMem(sizeof(VECTORCH)*cas->num_verts);
 		for(int i=0;i<cas->num_verts;i++)

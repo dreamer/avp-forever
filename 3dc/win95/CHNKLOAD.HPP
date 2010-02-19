@@ -11,6 +11,7 @@
 #include "bmpnames.hpp"
 #include "projload.hpp"
 
+class Sprite_Header_Chunk;
 #if 0
 extern BOOL copy_to_mainshpl (Shape_Chunk *shape, int list_pos);
 extern BOOL copy_to_mainshpl (Shape_Sub_Shape_Chunk *shape, int list_pos);
@@ -95,9 +96,9 @@ struct _RifHandle : Project_RifHandle
 	_RifHandle()
 		: fc(0)
 		, envd(0)
+		, palparent(0)
 		, max_index(0)
 		, tex_index_nos(0)
-		, palparent(0)
 		{}
 };
 

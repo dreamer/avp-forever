@@ -299,7 +299,7 @@
 				EnableEnhancedInstructionSet="1"
 				FloatingPointModel="0"
 				DefaultCharIsUnsigned="true"
-				RuntimeTypeInfo="true"
+				RuntimeTypeInfo="false"
 				PrecompiledHeaderFile=""
 				AssemblerListingLocation="$(IntDir)\"
 				ObjectFile="$(IntDir)\"

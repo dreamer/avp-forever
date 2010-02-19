@@ -216,7 +216,6 @@ void SortModules(unsigned int noOfItems)
 /* KJL 12:21:51 02/11/97 - This routine is too big and ugly. Split & clean up required! */
 void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 {
-	extern int NumActiveBlocks;
 	extern int NumOnScreenBlocks;
 	extern DISPLAYBLOCK *OnScreenBlockList[];
 	int numOfObjects = NumOnScreenBlocks;
@@ -596,6 +595,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 	}
 }
 
+#if 0
 static int ObjectIsInModule(DISPLAYBLOCK *objectPtr,MODULE *modulePtr)
 {
 	int objectSize = objectPtr->ObRadius;
@@ -616,6 +616,7 @@ static int ObjectIsInModule(DISPLAYBLOCK *objectPtr,MODULE *modulePtr)
 	return 0;
 
 }
+#endif
 static int PointIsInModule(VECTORCH *pointPtr,MODULE *modulePtr)
 {
 	VECTORCH position = *pointPtr;

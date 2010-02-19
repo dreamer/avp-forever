@@ -226,11 +226,6 @@ void AwPbmLoader::LoadNextRow(AwTl::PtrUnion pRow)
 	}
 }
 
-#ifdef _MSC_VER
-	// VC5.0 tries to compile out code that is in a library
-	// and it thinks isn't being used
-	#line 228
-#endif
 AWTEXLD_IMPLEMENT_DYNCREATE("P6",AwPpmLoader)
 AWTEXLD_IMPLEMENT_DYNCREATE("P5",AwPgmLoader)
 AWTEXLD_IMPLEMENT_DYNCREATE("P4",AwPbmLoader)

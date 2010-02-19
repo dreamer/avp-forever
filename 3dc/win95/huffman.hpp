@@ -20,7 +20,7 @@ typedef struct
 extern HuffmanPackage *HuffmanCompression(unsigned char *sourcePtr, int length);
 
 /* KJL 16:53:53 19/09/98 - Decompression */
-extern char *HuffmanDecompress(HuffmanPackage *inpackage);
+extern char *HuffmanDecompress(const HuffmanPackage *inpackage);
 
 
 #define COMPRESSED_RIF_IDENTIFIER "REBCRIF1"

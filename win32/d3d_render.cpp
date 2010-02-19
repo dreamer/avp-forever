@@ -2221,8 +2221,8 @@ void D3D_FMVParticle_Output(RENDERVERTEX *renderVerticesPtr)
 
 
 extern int CloakingPhase;
-extern int sine[];
-extern int cosine[];
+//extern int sine[];
+//extern int cosine[];
 extern int NumActiveBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
 extern int GlobalAmbience;

@@ -27,7 +27,6 @@ void *AllocMem(size_t __size)
 	#endif
 
 	return malloc(__size);
-	//return nedmalloc(__size);
 };
 
 /* Note: Never use DeallocMem directly !  */
@@ -42,11 +41,7 @@ void DeallocMem(void *__ptr)
 	#endif
 
 	if(__ptr)
-	{	
 		free(__ptr);
-		//nedfree(__ptr);
-		__ptr = 0;
-	}
 
 	#if debug
 	else {

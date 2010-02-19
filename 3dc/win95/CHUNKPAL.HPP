@@ -3,10 +3,8 @@
 
 #include "chunk.hpp"
 #include "bmpnames.hpp"
-#if cencon
-#include "palette.h"
-#endif
 
+class Environment_Data_Chunk;
 static const unsigned char * grab_pixel_data(int ssize, unsigned char const * sdata)
 {
 	if (!ssize) return 0;
@@ -28,10 +26,6 @@ class Environment_Palette_Chunk : public Chunk
 
 public:
 
-#if cencon
-	// constructor from data - defined in genpal
-	Environment_Palette_Chunk (Chunk_With_Children * const parent, PPM_Header const * const palette);
-#endif
 	// constructor from buffer
 	Environment_Palette_Chunk (Chunk_With_Children * const parent, const char * sdata, size_t const /*ssize*/)
 		: Chunk (parent, "ENVPALET")
@@ -73,40 +67,14 @@ class Preset_Palette
 {
 public:
 
-#if cencon
-	// constructor from data - defined in genpal
-	Preset_Palette (PPM_Header const * const palette);
-
-	// update by generating from bmps chunk
-	void update(Global_BMP_Name_Chunk * gbnc, Preset_Palette_Chunk * ppc, class Environment * e, Environment_Data_Chunk * envd, BOOL bDoSoftwareTex);
-
-#if 0
-	Preset_Palette (const char * iname)
-		: size(0)
-		, flags(0)
-		, reserved1(0)
-		, reserved2(0)
-		, startpos(0)
-		, pixel_data(0)
-		, name(0)
-		{
-			if (iname)
-			{
-				name = new char[strlen(iname)+1];
-				strcpy(name,iname);
-			}
-		}
-#endif
-#endif
-
 	Preset_Palette ()
 		: size(0)
 		, flags(0)
 		, reserved1(0)
 		, reserved2(0)
 		, startpos(0)
-		, pixel_data(0)
 		, name(0)
+		, pixel_data(0)
 		{}
 	
 	// copy constructor
@@ -164,18 +132,6 @@ class Preset_Palette_Chunk : public Chunk
 {
 public:
 
-#if cencon
-	// empty constructor
-	Preset_Palette_Chunk (Chunk_With_Children * const parent)
-		: Chunk (parent,"PRSETPAL")
-		, flags(0)
-		, version_num(0)
-		, reserved1(0)
-		, reserved2(0)
-		, reserved3(0)
-		{}
-
-#endif
 	// constructor from buffer
 	Preset_Palette_Chunk (Chunk_With_Children * const parent, char const * sdata, size_t const ssize);
 	~Preset_Palette_Chunk () {};
@@ -209,10 +165,6 @@ class Environment_TLT_Chunk : public Chunk
 
 public:
 
-#if cencon
-	// constructor using palette - defined in genpal
-	Environment_TLT_Chunk (Chunk_With_Children * parent, PPM_Header * palette, PPM_Header * tlt_palette, Lighting_Style const * ls);
-#endif
 	// constructor from buffer
 	Environment_TLT_Chunk (Chunk_With_Children * parent, const char * sdata, size_t ssize);
 
@@ -332,20 +284,6 @@ class TLT_Config_Chunk : public Chunk
 
 public:
 
-#if cencon
-	// constructor for default
-	TLT_Config_Chunk (Chunk_With_Children * parent, char const * rifname = 0)
-		: Chunk (parent, "TLTCONFG")
-		, num_shades_white(16)
-		, srcrifname(rifname ? new char [strlen(rifname)+1] : 0)
-		, blocks(TLTConfigBlock(0,0,1,1))
-		, table_size(256)
-		, palette_size(0)
-		{
-			for (int i=0; i<3; ++i) reserved[i]=0;
-			if (rifname) strcpy(srcrifname,rifname);
-		}
-#endif
 	// constructor from buffer
 	TLT_Config_Chunk (Chunk_With_Children * parent, const char * sdata, size_t ssize);
 
@@ -386,11 +324,6 @@ private:
 
 	
 };
-
-#if cencon
-extern TLT_Config_Chunk Default_TLT_Config_Chunk;
-#endif
-
 
 
 
@@ -556,17 +489,6 @@ class Environment_Game_Mode_Chunk : public Chunk_With_Children
 
 public:
 
-#if cencon
-	// constructor from data
-	Environment_Game_Mode_Chunk (Environment_Data_Chunk * const parent, const char * _mode_id);
-
-	// defined in gmodlink
-	void remove(class CWnd * const pWnd); // update this copy by finding its original
-	void update(class CWnd * const pWnd, BOOL bDoSoftwareTex); // update this copy by finding its original
-	void been_updated(class CWnd * const pWnd, BOOL bDoSoftwareTex); // find and update copies from this original
-	void definite_update(Environment_Game_Mode_Chunk const * const src, class CWnd * const pWnd, Environment_Data_Chunk * envd, BOOL bDoSoftwareTex);
-
-#endif
 	// constructor from buffer
 	Environment_Game_Mode_Chunk (Chunk_With_Children * const parent, const char * sdata, size_t const ssize);
 
@@ -678,48 +600,6 @@ private:
 	int reserved[ChunkGMod_NumReserved];
 
 	int version_num;
-	
-	
-	#if cencon
-	// constructor from parent
-	Environment_Game_Mode_Header_Chunk (Environment_Game_Mode_Chunk * const parent, const char * const _mode_id)
-	: Chunk (parent, "GMODHEAD"), version_num(0),
-	flags (0), rif_files()
-	{
-		for (int i=0; i<ChunkGMod_NumReserved; i++)
-		{
-			reserved[i] = 0;
-		}
-		mode_identifier = new char[strlen(_mode_id)+1];
-		strcpy(mode_identifier,_mode_id);
-
-		parent->header = this;
-	}
-
-	inline Environment_Game_Mode_Header_Chunk const & operator = (Environment_Game_Mode_Header_Chunk & s)
-	{
-		flags = s.flags;
-		while (rif_files.size())
-		{
-			delete[] rif_files.first_entry();
-			rif_files.delete_first_entry();
-		}
-		if (mode_identifier) delete[] mode_identifier;
-
-		mode_identifier = new char[strlen(s.mode_identifier)+1];
-		strcpy(mode_identifier,s.mode_identifier);
-
-		for (LIF<char *> src(&s.rif_files); !src.done(); src.next())
-		{
-			add_rif_entry(src());
-		}
-
-		version_num = s.version_num;
-
-		return *this;
-
-	}
-	#endif
 
 	// deconstructor
 	~Environment_Game_Mode_Header_Chunk();
@@ -754,8 +634,8 @@ class RIF_Child_Chunk;
 class BMP_Flags
 {
 public:
-	BMP_Flags(void) : filename(0), enum_id(0), version_num(0), flags((BMPN_Flags)0){}
-	BMP_Flags(const char * const fname) : enum_id(0), version_num(0), flags((BMPN_Flags)0), filename(0)
+	BMP_Flags(void) : filename(0), flags((BMPN_Flags)0), version_num(0), enum_id(0) {}
+	BMP_Flags(const char * const fname) : filename(0), flags((BMPN_Flags)0), version_num(0), enum_id(0)
 	{
 		if (fname)
 		{
@@ -763,7 +643,7 @@ public:
 			strcpy(filename,fname);
 		}
 	}
-	BMP_Flags(BMP_Name const & bn) : enum_id(bn.enum_id), version_num(bn.version_num), flags((BMPN_Flags)(bn.flags & COPY_BMPN_FLAGS)), filename(0)
+	BMP_Flags(BMP_Name const & bn) : filename(0), flags((BMPN_Flags)(bn.flags & COPY_BMPN_FLAGS)), version_num(bn.version_num), enum_id(bn.enum_id)
 	{
 		if (bn.filename)
 		{
@@ -771,7 +651,7 @@ public:
 			strcpy(filename,bn.filename);
 		}
 	}
-	BMP_Flags(BMP_Flags const & c) : filename(0), enum_id(c.enum_id), version_num(c.version_num), flags(c.flags)
+	BMP_Flags(BMP_Flags const & c) : filename(0), flags(c.flags), version_num(c.version_num), enum_id(c.enum_id)
 	{
 		if (c.filename)
 		{
@@ -824,10 +704,6 @@ public:
 	{
 		return _stricmp(filename,c.filename);
 	}
-
-	#if cencon
-	void DeleteAssociatedFiles(RIF_Child_Chunk const *, Environment_Data_Chunk *) const;
-	#endif
 };
 
 enum RCC_Flags {
@@ -843,13 +719,6 @@ class RIF_Child_Chunk : public Chunk
 {
 public:
 
-#if cencon
-	RIF_Child_Chunk(Environment_Game_Mode_Chunk	* const parent, const char * fname, class CWnd * const pWnd, BOOL bDoSoftwareTex);
-
-	void update(class CWnd * const, BOOL bDoSoftwareTex);
-	void update(class Environment * e, BOOL bDoSoftwareTex); // for where the environment is already loaded
-	void DeleteAssociatedFiles(Environment_Data_Chunk *) const;
-#endif
 // constructor from buffer
 	RIF_Child_Chunk (Chunk_With_Children * const parent, const char * sdata, size_t const ssize);
 	~RIF_Child_Chunk();
@@ -901,35 +770,6 @@ class Preset_Palette_Store_Chunk : public Chunk
 {
 public:
 
-#if cencon
-	// constructor from Preset_Palette_Chunk
-	Preset_Palette_Store_Chunk (Chunk_With_Children * const parent, Preset_Palette_Chunk const * const schunk, const char * const srname)
-		: Chunk (parent,"SETPALST")
-		, flags(schunk->flags)
-		, version_num(schunk->version_num)
-		, reserved1(schunk->reserved1)
-		, reserved2(schunk->reserved2)
-		, reserved3(schunk->reserved3)
-		, rifname(new char[strlen(srname)+1])
-		, pplist(schunk->pplist)
-		{
-			strcpy(rifname,srname);
-		}
-
-	// empty constructor
-	Preset_Palette_Store_Chunk (Chunk_With_Children * const parent, const char * const srname)
-		: Chunk (parent,"SETPALST")
-		, flags(0)
-		, version_num(0)
-		, reserved1(0)
-		, reserved2(0)
-		, reserved3(0)
-		, rifname(new char[strlen(srname)+1])
-		{
-			strcpy(rifname,srname);
-		}
-
-#endif
 	// constructor from buffer
 	Preset_Palette_Store_Chunk (Chunk_With_Children * const parent, char const * sdata, size_t const ssize);
 	~Preset_Palette_Store_Chunk ()
@@ -981,10 +821,6 @@ class Coloured_Polygons_Lookup_Chunk : public Chunk
 {
 public:
 
-#if cencon
-	// constructor from data - defined in cencon
-	Coloured_Polygons_Lookup_Chunk (Chunk_With_Children * parent, PPM_Header * const palette);
-#endif
 	// constructor from buffer
 	Coloured_Polygons_Lookup_Chunk (Chunk_With_Children * parent, const char * sdata, size_t ssize);
 

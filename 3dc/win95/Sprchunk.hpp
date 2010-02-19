@@ -2,16 +2,13 @@
 #define _sprchunk_hpp
 #include "chunk.hpp"
 #include "Chnktype.hpp"
-//#include "stdafx.h"
+
 struct Frame
 {
 	int Texture;
 	int CentreX;
 	int CentreY;
 	int UVCoords[4][2];
-#if cencon
-	int OldTexNum;
-#endif
 };
 
 class Sprite_Header_Chunk : public Chunk_With_Children
@@ -26,10 +23,6 @@ public:
 										 
 	int write_file(const char* fname);
 	virtual BOOL output_chunk(HANDLE &hand);
-	#if cencon
-	virtual void post_input_processing();
-	#endif
-		
 };
 
 class PC_Sprite_Chunk : public Chunk_With_Children

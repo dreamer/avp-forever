@@ -59,8 +59,6 @@ void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr);
 extern void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2);
 /* HUD globals */
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern int sine[], cosine[];
-
 signed int HUDTranslucencyLevel = 64;
 static int MotionTrackerHalfWidth;
 static int MotionTrackerTextureSize;

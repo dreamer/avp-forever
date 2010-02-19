@@ -2,11 +2,6 @@
 
 #include "ltchunk.hpp"
 
-
-#ifdef cencon
-#define new my_new
-#endif
-
 //macro for helping to force inclusion of chunks when using libraries
 FORCE_CHUNK_INCLUDE_IMPLEMENT(ltchunk)
 
@@ -118,60 +113,7 @@ void Light_Chunk::fill_data_block ( char * data_start)
 	*((int *) data_start) = light.pad2;
 	
 }
-#if UseOldChunkLoader
-Light_Chunk::Light_Chunk(Light_Set_Chunk * parent, const char * data, size_t const /*size*/)
-: Chunk (parent, "STDLIGHT")
-{
-	light.light_number = *((int *) data);
-	data += 4;
 
-	light.location = *((ChunkVector *) data);
-	data += sizeof(ChunkVector);
-	
-	light.orientation.mat11 = (int) *((double *) data);
-	data += 8;
-	light.orientation.mat12 = (int) *((double *) data);
-	data += 8;
-	light.orientation.mat13 = (int) *((double *) data);
-	data += 8;
-	light.orientation.mat21 = (int) *((double *) data);
-	data += 8;
-	light.orientation.mat22 = (int) *((double *) data);
-	data += 8;
-	light.orientation.mat23 = (int) *((double *) data);
-	data += 8;
-	light.orientation.mat31 = (int) *((double *) data);
-	data += 8;
-	light.orientation.mat32 = (int) *((double *) data);
-	data += 8;
-	light.orientation.mat33 = (int) *((double *) data);
-	data += 8;
-
-	light.brightness = *((int *) data);
-	data += 4;
-	light.spread = *((int *) data);
-	data += 4;
-	light.range = *((int *) data);
-	data += 4;
-
-	light.colour = *((int *) data);
-	data += 4;
-
-	light.engine_light_flags = *((int *) data);
-	data += 4;
-	light.local_light_flags = *((int *) data);
-	data += 4;
-
-	light.pad1 = *((int *) data);
-	data += 4;
-	light.pad2 = *((int *) data);
-	
-	#if engine || cencon
-	light_added_to_module = FALSE;
-	#endif
-		
-}
-#else
 Light_Chunk::Light_Chunk(Chunk_With_Children * parent, const char * data, size_t const /*size*/)
 : Chunk (parent, "STDLIGHT")
 {
@@ -202,37 +144,8 @@ Light_Chunk::Light_Chunk(Chunk_With_Children * parent, const char * data, size_t
 	light.pad1 = *((int *) data);
 	data += 4;
 	light.pad2 = *((int *) data);
-	
-	#if cencon
 	light_added_to_module = FALSE;
-	#endif
-		
 }
-#endif
-
-#if InterfaceEngine
-AVP_Strategy_Chunk* Light_Chunk::GetStrategyChunk()
-{
-	List<Chunk*> chlist;
-	parent->lookup_child("AVPSTRAT",chlist);
-	for(LIF<Chunk*> chlif(&chlist);!chlif.done();chlif.next())
-	{
-		AVP_Strategy_Chunk* asc=(AVP_Strategy_Chunk*)chlif();
-		if(asc->index==light.light_number) return asc; 
-	}
-	return 0;	
-}
-
-AVP_Strategy_Chunk* Light_Chunk::CreateStrategyChunk()
-{
-	AVP_Strategy_Chunk* asc=GetStrategyChunk();
-	if(asc) return asc;
-	
-	asc=new AVP_Strategy_Chunk(parent);
-	asc->index=light.light_number;
-	return asc;
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -241,7 +154,7 @@ RIF_IMPLEMENT_DYNCREATE("SHPVTINT",Shape_Vertex_Intensities_Chunk)
 
 Shape_Vertex_Intensities_Chunk::Shape_Vertex_Intensities_Chunk
 (Chunk_With_Children *parent, char *lsn, int num_v, int * i_array)
-: Chunk (parent, "SHPVTINT"), num_vertices(num_v), pad (0)
+: Chunk (parent, "SHPVTINT"), pad (0), num_vertices(num_v)
 {
 	strncpy (light_set_name, lsn, 8);
 	

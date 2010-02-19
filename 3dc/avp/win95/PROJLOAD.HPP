@@ -10,6 +10,7 @@
 
 #include "hierchnk.hpp"
 
+class File_Chunk;
 // project specifc structure contained in rif handle
 struct Project_RifHandle {};
 
@@ -133,7 +134,7 @@ extern BOOL copy_rif_data (RIFFHANDLE, int flags,int progress_start,int progress
 #define CopyRIFData(h,f) copy_rif_data(h,f)
 
 // this should return the next free main shape list position for loaded shapes; it may be called more than once
-extern int load_precompiled_shapes(void);
+extern int load_precompiled_shapes();
 #define LoadPrecompiledShapes() load_precompiled_shapes()
 
 void avp_undo_rif_load(RIFFHANDLE h);

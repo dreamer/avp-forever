@@ -1295,10 +1295,6 @@ void FindImageExtents(IMAGEHEADER *ihdr, int numuvs, int *uvdata, IMAGEEXTENTS *
 
 				if(e->u_high == smallint) e->u_high = e_curr->u_high;
 				if(e->v_high == smallint) e->v_high = e_curr->v_high;
-
-
-				/* TEST */
-				/*trip_up;*/
 			}
 
 			break;

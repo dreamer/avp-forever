@@ -62,7 +62,6 @@
 
 extern "C" {
 #include "3dc.h"
-extern int cosine[];
 extern MAPSETVDB chnk_playcam_vdb;
 extern int GlobalAmbience;
 extern VIEWDESCRIPTORBLOCK *ActiveVDBList[];
@@ -476,6 +475,9 @@ static void select_alternate_location(BehaviourBlockData* bbd)
 			part_temp->orientation=m;
 			break;
 		}
+
+		default:
+			break;
 	}
 }
 
@@ -497,6 +499,8 @@ void create_strategies_from_list ()
 			case I_Hard :
 			case I_Impossible :
 				if(!bbd->diff_hard) continue;
+				break;
+			default:
 				break;
 		}
 
@@ -614,7 +618,7 @@ void deallocate_behaviour_list()
 					MISSION_COMPLETE_TOOLS_TEMPLATE* mctt=(MISSION_COMPLETE_TOOLS_TEMPLATE*)bbd->bhdata;
 					if(mctt->mission_objective_ptr)
 					{
-						delete mctt->mission_objective_ptr;
+						delete (MissionObjective *)(mctt->mission_objective_ptr);
 					}
 					
 				}
@@ -783,6 +787,9 @@ void deallocate_behaviour_list()
 
 				}
 				#endif //!NEW_DEALLOCATION_ORDER
+				
+			default:
+				break;
 		}
 
 		#if !USE_LEVEL_MEMORY_POOL
@@ -1006,7 +1013,7 @@ void add_placed_hierarchy(Placed_Hierarchy_Chunk* phc,const char* fname,const ch
 
 		ph_seq->sequence_no=phsc->sequence;
 		ph_seq->sub_sequence_no=phsc->sub_sequence;
-		ph_seq->time = (int)(((float)phsc->time*(float)ONE_FIXED)/1000.0);
+		ph_seq->time=(int)(((float)phsc->time*(float)ONE_FIXED)/1000.0);
 		ph_seq->loop=((phsc->flags & HierarchySequenceFlag_Loop)!=0);
 
 		if(phsc->flags & HierarchySequenceFlag_InitialSequence)
@@ -3702,10 +3709,13 @@ void setup_sounds (Environment_Data_Chunk * envd)
 			stt->position.vy = (int)(snd->position.y * local_scale);
 			stt->position.vz = (int)(snd->position.z * local_scale);
 			
-			stt->inner_range = (int)(snd->inner_range * local_scale);
-			stt->outer_range = (int)(snd->outer_range * local_scale);
+			stt->inner_range = (unsigned)(snd->inner_range * local_scale);
+			stt->outer_range = (unsigned)(snd->outer_range * local_scale);
 			stt->max_volume = snd->max_volume;
 			stt->pitch = snd->pitch;
+
+			stt->playing = 0;
+			stt->loop = 0;
 
 			if(snd->flags & SoundObjectFlag_NotPlayingAtStart)
 				stt->playing=0;

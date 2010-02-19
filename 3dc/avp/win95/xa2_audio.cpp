@@ -1660,7 +1660,7 @@ void PlatSetEnviroment(unsigned int env_index, float reverb_mix)
 
 /* KJL 17:06:46 01/09/98 - ExtractWavFile does basically the same job as LoadWavFile,
 except that it takes data from a memory buffer, rather than through file access. */
-extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
+extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 {
 	if (!soundEnabled)
 		return NULL;
@@ -1668,7 +1668,7 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 	PWAVCHUNKHEADER myChunkHeader = {0};
 	PWAVRIFFHEADER myRiffHeader = {0};
 	WAVEFORMATEX myWaveFormat = {0};
-	unsigned char *endOfBufferPtr = NULL;   
+	uint8_t *endOfBufferPtr = NULL;   
 	int lengthInSeconds = 0;
 
 	{
@@ -1680,13 +1680,13 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 
 	/* Read the WAV RIFF header */
 	RebSndRead(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,bufferPtr);
-	endOfBufferPtr = bufferPtr+myChunkHeader.chunkLength;
+	endOfBufferPtr = bufferPtr + myChunkHeader.chunkLength;
 
 	RebSndRead(&myRiffHeader,sizeof(PWAVRIFFHEADER),1,bufferPtr);
 
 	/* Read the WAV format chunk */
 	RebSndRead(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,bufferPtr);
-	if(myChunkHeader.chunkLength==16)
+	if (myChunkHeader.chunkLength == 16)
 	{
 		/* a standard PCM wave format chunk */
 		PCMWAVEFORMAT tmpWaveFormat;
@@ -1703,7 +1703,7 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 		sprintf(buf, "name: %s channels: %d samsPerSec: %d\n", GameSounds[soundIndex].wavName, myWaveFormat.nChannels, myWaveFormat.nSamplesPerSec);
 		OutputDebugString(buf);
 	}
-	else if(myChunkHeader.chunkLength==18)
+	else if (myChunkHeader.chunkLength == 18)
 	{
 		/* an extended PCM wave format chunk */
 		RebSndRead(&myWaveFormat,sizeof(WAVEFORMATEX),1,bufferPtr);	
@@ -1722,43 +1722,43 @@ extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr)
 	{
 		/* Read	the data chunk header */
 		RebSndRead(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,bufferPtr);
-		if((myChunkHeader.chunkName[0]=='d')&&(myChunkHeader.chunkName[1]=='a')&&
+		if ((myChunkHeader.chunkName[0]=='d')&&(myChunkHeader.chunkName[1]=='a')&&
 	   		(myChunkHeader.chunkName[2]=='t')&&(myChunkHeader.chunkName[3]=='a'))
 		{
 			break;
 		}
 		//skip to next chunk
-		bufferPtr+=myChunkHeader.chunkLength;
-	}while(TRUE);
+		bufferPtr += myChunkHeader.chunkLength;
+	} while (TRUE);
 
 	/* Now do a few checks */
-	if((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
-	   (myChunkHeader.chunkName[2]!='t')||(myChunkHeader.chunkName[3]!='a'))
+	if ((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
+	    (myChunkHeader.chunkName[2]!='t')||(myChunkHeader.chunkName[3]!='a'))
 	{
 		/* chunk alignment disaster */
 		LOCALASSERT(1==0);
 		return 0;	
 	}
 	
-	//calculate length of sample
-	lengthInSeconds=DIV_FIXED(myChunkHeader.chunkLength,myWaveFormat.nAvgBytesPerSec);
+	// calculate length of sample
+	lengthInSeconds = DIV_FIXED(myChunkHeader.chunkLength,myWaveFormat.nAvgBytesPerSec);
 	
-	if((myChunkHeader.chunkLength<0)||(myChunkHeader.chunkLength > SOUND_MAXSIZE))
+	if ((myChunkHeader.chunkLength < 0) || (myChunkHeader.chunkLength > SOUND_MAXSIZE))
 	{
 		LOCALASSERT(1==0);
 		return 0;	
 	}	
-	if(myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
+	if (myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
 	{
 		LOCALASSERT(1==0);
 		return 0;	
 	}	
-	if((myWaveFormat.nChannels != 1)&&(myWaveFormat.nChannels != 2))
+	if ((myWaveFormat.nChannels != 1) && (myWaveFormat.nChannels != 2))
 	{
 		LOCALASSERT(1==0);
 		return 0;	
 	}	
-	if((myWaveFormat.wBitsPerSample != 8)&&(myWaveFormat.wBitsPerSample != 16))
+	if ((myWaveFormat.wBitsPerSample != 8) && (myWaveFormat.wBitsPerSample != 16))
 	{
 		LOCALASSERT(1==0);
 		return 0;	

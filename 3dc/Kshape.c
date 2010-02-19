@@ -137,8 +137,8 @@ void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerti
 void DrawWaterFallPoly(VECTORCH *v);
 void RenderAllParticlesFurtherAwayThan(int zThreshold);
 
-extern int sine[];
-extern int cosine[];
+//extern int sine[];
+//extern int cosine[];
 
 /*KJL************************************************************************************
 * N.B. All the following global variables have their first elements initialised so that *
@@ -2581,9 +2581,7 @@ static void VertexIntensity_Underwater(RENDERVERTEX *renderVertexPtr)
 */
 
 int* GetTxAnimArrayZ(int shape, int item)
-
 {
-
 	SHAPEHEADER *sptr;
 	int **item_array_ptr;
 	int **shape_textures;
@@ -2591,11 +2589,10 @@ int* GetTxAnimArrayZ(int shape, int item)
 	POLYHEADER *pheader;
 	int texture_defn_index;
 
-
 	sptr = GetShapeData(shape);
 
-	if(sptr && sptr->sh_textures && sptr->items) {
-
+	if (sptr && sptr->sh_textures && sptr->items) 
+	{
 		item_array_ptr = sptr->items;
 		shape_textures = sptr->sh_textures;
 
@@ -2604,10 +2601,9 @@ int* GetTxAnimArrayZ(int shape, int item)
 
 		texture_defn_index = (pheader->PolyColour >> TxDefn);
 
-		if(pheader->PolyFlags & iflag_txanim) {
-
+		if (pheader->PolyFlags & iflag_txanim) 
+		{
 			return (int*) shape_textures[texture_defn_index];
-
 		}
 
 		else return 0;

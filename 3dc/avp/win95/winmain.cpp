@@ -445,7 +445,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		/* turn off any special effects */
 		d3d_light_ctrl.ctrl = LCCM_NORMAL;
-		d3d_overlay_ctrl.ctrl = OCCM_NORMAL;
+//	d3d_overlay_ctrl.ctrl = OCCM_NORMAL;
 
 /* // bjd - we should be able to run menus at any resolution user selects now
 		if (!ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth))

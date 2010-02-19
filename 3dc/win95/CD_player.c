@@ -229,7 +229,7 @@ int PlatStartCDDA(void)
 
 	/* try to open mci cd-audio device */
 	mciOpenParms.lpstrDeviceType = (LPCSTR) MCI_DEVTYPE_CD_AUDIO;
-	dwReturn = mciSendCommand(devId, MCI_OPEN, MCI_OPEN_TYPE|MCI_OPEN_TYPE_ID, /*(DWORD)(LPVOID)*/(DWORD_PTR)&mciOpenParms);
+	dwReturn = mciSendCommand(devId, MCI_OPEN, MCI_OPEN_TYPE|MCI_OPEN_TYPE_ID, (DWORD_PTR)&mciOpenParms);
 	if (dwReturn) 
 	{
 		/* error */
@@ -330,7 +330,7 @@ static void PlatGetCDDAVolumeControl(void)
 
 
 void PlatEndCDDA(void)
-{	
+{
 	DWORD dwReturn;
 
     /* check the cdDeviceId */

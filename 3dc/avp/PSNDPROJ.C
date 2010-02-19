@@ -901,7 +901,8 @@ int FindAndLoadWavFile(int soundNum, char* wavFileName)
 /* Patrick 5/6/97 -------------------------------------------------------------
   Sound data loaders 
   ----------------------------------------------------------------------------*/
-extern unsigned char *ExtractWavFile(int soundIndex, unsigned char *bufferPtr);
+extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr);
+
 void *LoadRebSndFile(char *filename)
 {
 	void *bufferPtr;

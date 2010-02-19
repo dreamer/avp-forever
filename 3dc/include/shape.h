@@ -38,38 +38,6 @@
 
 /*
 
- Maximum number shading tables.
-
- This equate might have to be moved to "system.h"
-
-*/
-
-#define MaxShadingTables 4096
-
-
-
-/*
-
- Palette Creation Function Structure
-
-*/
-
-typedef struct palcreationdata {
-
-	unsigned char** PCD_ArrayPtr;
-	int PCD_NumHues;
-	int PCD_ShadesPerHue;
-	int PCD_NumColsUsed;
-
-} PALCREATIONDATA;
-
-
-
-
-
-
-/*
-
  Shape Item Function Array Indices
 
 */
@@ -427,7 +395,7 @@ typedef struct shapeheader {
 
 
 #else		/* StandardShapeLanguage */
-sssssssss
+
 
 	/*
 
@@ -511,25 +479,6 @@ typedef struct polyheader {
 
 } POLYHEADER;
 
-#if InterfaceEngine
-
-/*
-
-	Little structure for use creating
-	merge lists
-
-*/
-
-typedef struct merged_poly
-{
-	int other_poly;
-	int num_verts;
-	int vert_ind[4];
-} MERGED_POLY;
-
-#endif
-
-
 
 /*
 
@@ -554,21 +503,7 @@ typedef struct merged_poly
 #define iflag_no_bfc				0x00000020	/* No Back Face Cull */
 #define iflag_hazing				0x00000040	/* Haze / Depth Cue colour */
 
-#if InterfaceEngine
-
-	#define iflag_selected		0x00000080	/* It's a tools thing */
-
-#else
-
-	#if Saturn
-	#define iflag_sattexture	0x00000080	/* Outcode if outside frame buffer or behind z plane, else just draw */
-	#endif
-
-	#if platform_pc
-	#define iflag_zbuffer_w		0x00000080	/* Z-Buffer, Write-Only */
-	#endif
-
-#endif	/* InterfaceEngine */
+#define iflag_zbuffer_w		0x00000080	/* Z-Buffer, Write-Only */
 
 #define iflag_shadingtable		0x00000100	/* Hue is a table index */
 #define iflag_tab_gour_8		0x00000200	/* Gour. for 8-bit modes uses tab. */
@@ -587,9 +522,7 @@ typedef struct merged_poly
 
 #define iflag_no_mip				0x00008000	/* Use Index #0 */
 
-#if platform_pc
 #define iflag_zbuffer_r			0x00010000	/* Z-Buffer, Read-Only */
-#endif
 
 #define iflag_linear				0x00020000	/* Linear Interpolation */
 
@@ -610,12 +543,6 @@ typedef struct merged_poly
 #define iflag_drawtx3das2d		0x02000000	/* 3d until SC, draw as 2d */
 
 #define iflag_sortfarz			0x04000000	/* Use maxz for depth value */
-
-#define iflag_bufferxy			0x08000000  /* Internal - Saturn Only
-															- for xy clamped item */
-
-#define iflag_clampz				0x10000000  /* Internal - Saturn Only
-															- for z clamped item */
 
 #define iflag_light_corona		0x20000000 /* For use by the placed light strategy */
 
@@ -814,11 +741,7 @@ typedef struct texelgtx3d {
 
 typedef unsigned char TEXTURE;
 
-#if Saturn
-#define ImageNameSize 16
-#else
 #define ImageNameSize 128+1
-#endif
 
 
 typedef struct imageheader {

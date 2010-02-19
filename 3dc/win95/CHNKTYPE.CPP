@@ -6,10 +6,6 @@
 #include "ourasert.h"
 #define assert(x) GLOBALASSERT(x)
 
-#ifdef cencon
-#define new my_new
-#endif
-
 // misc data structures functions
 BOOL operator==(const obinfile &o1, const obinfile &o2)
 {

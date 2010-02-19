@@ -4,10 +4,6 @@
 #include "Chunk.hpp"
 #include "obchunk.hpp"
 
-#if objedit
-#include "Template.hpp"
-#endif
-
 struct	ChunkMapBlock
 {
 	char TemplateName[20];

@@ -152,24 +152,6 @@ public:
 	
 	void Validate(void);
 	
-	#if cencon
-	int const * md5val; // space to put a pointer
-
-	void DeleteAssociatedFiles() const;
-	void DeleteAssociatedMipFiles() const;
-	// changes the filename member, returns FALSE on failure
-	BOOL Rename(char const * newname);
-	
-	// use these to prevent DeleteAssociatedMipFiles & DeleteAssociatedFiles
-		// from deleting specific files
-	static void PreventDeleteFile(char const * pszFileName);
-	static void ReallowDeleteFile(char const * pszFileName);
-	private:
-	static List<char *> ms_listFilesCantDelete;
-	static void DeleteFileProt(char const * pszFileName);
-	public:
-	#endif
-	
 	unsigned GetTranspRedVal() const;
 	unsigned GetTranspGreenVal() const;
 	unsigned GetTranspBlueVal() const;
@@ -333,8 +315,8 @@ public:
 	virtual void SetMD5Val(BMP_Name const & rcbmp, int const * md5id);
 	virtual void RemoveMD5Val(char const * bname);
 
-	friend class BMP_Group; // for cencon
-	friend class BMP_Info; // for cencon
+//	friend class BMP_Group; // for cencon
+//	friend class BMP_Info; // for cencon
 	
 protected:
 	virtual Bitmap_MD5_Chunk * GetMD5Chunk(char const * bname) = 0;

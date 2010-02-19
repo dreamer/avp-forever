@@ -78,7 +78,7 @@ WINSCALEXY ExtentXYSubWindow;
 
 // static 
 
-int ReadModuleMapList(MODULEMAPBLOCK *mmbptr);
+static int ReadModuleMapList(MODULEMAPBLOCK *mmbptr);
 RIFFHANDLE env_rif = INVALID_RIFFHANDLE;
 RIFFHANDLE player_rif = INVALID_RIFFHANDLE;
 RIFFHANDLE alien_weapon_rif = INVALID_RIFFHANDLE;
@@ -134,10 +134,10 @@ void InitialVideoMode(void)
     WindowRequestMode = WindowModeSubWindow;
 	#endif
 
-    TopLeftSubWindow.x = 0.3f;
-	TopLeftSubWindow.y = 0.3f;
-	ExtentXYSubWindow.x = 0.6f;
-	ExtentXYSubWindow.y = 0.6f;
+    TopLeftSubWindow.x = 0.3;
+	TopLeftSubWindow.y = 0.3;
+	ExtentXYSubWindow.x = 0.6;
+	ExtentXYSubWindow.y = 0.6;
 
 /*
 	Experimental settings for other 
@@ -146,31 +146,6 @@ void InitialVideoMode(void)
 
 	/*VideoRequestMode = VideoMode_DX_640x480x8;  for menus - is this guaranteed? */
 	VideoRequestMode = AvP.MenuVideoRequestMode;
-	
-	/* JH 20/5/97
-		begin in minmal h/w configuration - for menus
-		- don't need any h/w 3d, but do need to know
-		about h/w direct draw and what video modes
-		will be available */
-
-//	ZBufferRequestMode = RequestZBufferNever;
-
-//	RasterisationRequestMode = RequestDefaultRasterisation;
-
-//    SoftwareScanDrawRequestMode = RequestScanDrawDirectDraw; 
-
-//	DXMemoryRequestMode = RequestSystemMemoryAlways;
-
-    /*
-		IMPORTANT!!!! In the Windows 95 version,
-		SetVideoMode MUST NOT be called from this
-		routine, since InitialVideoMode is called
-		first in WinMain to prepare for windows
-		initialisation and the actual DirectX 
-		initialisation (done through SetVideoMode)
-		must be done after windows initialisation
-	*/
-
 }
 
 
@@ -181,7 +156,7 @@ void InitialVideoMode(void)
 	the user, to obtain your heart's fondest desires
 	by one simple call.  Money? Love? A better job?
 	It's all here, you have only to ask...
-	FALSE, I was lying actually.
+	No, I was lying actually.
 	In fact, this should allow you to change
 	display modes cleanly.  Pass your request modes
 	(as normally set up in system.c).  For all entries
@@ -540,70 +515,8 @@ void RestartLevel()
 	}
 }
 
-ELO Gen1 = {"GEN1"};
-ELO Gen2 = {"GEN2"};
-ELO Gen3 = {"GEN3"};
-ELO Gen4 = {"GEN4"};
-ELO Medlab = { "MEDLAB"};
-ELO Cmc1 = {"CMC1"};
-ELO Cmc2 = {"CMC2"};
-ELO Cmc3 = {"CMC3"};
-ELO Cmc4 = {"CMC4"};
-ELO Cmc5 = {"CMC5"};
-
-ELO Cmc6 = {"CMC6"};
-ELO Sp1 =	{"SP1"};
-ELO Sp2 =	{"SP2"};
-ELO Sp3 =	{"SP3"};
-ELO Rnd1 = {"RND1"};
-ELO Rnd2 = {"RND2"};
-ELO Rnd3 = {"RND3"};
-ELO Rnd4 = {"RND4"};
-ELO Mps1 = {"MPS01"};
-ELO Mps2 = {"MPS02"};
-
-ELO Mps3 = {"MPS3"};
-ELO Mps4 = {"MPS4"};
-ELO Surface = {"SURFACE"};
-ELO Entrance = {"ENTRANCE"};
-ELO Dm1 = {"VERTIGO"};	
-ELO	Dm2 = {"TOWERS"};
-ELO	Dm3 = {"INVASION"};
-ELO	Dm4 = {"SHAFTED"};
-ELO	Dm5 = {"RANCOUR"};
-ELO	Dm6 = {"DM6"};
-ELO	Dm7 = {"DM7"};
-ELO	Dm8 = {"DM8"};
-ELO	Dm9 = {"DM9"};
-ELO	Dm10 = {"DM10"};
-
-
-
-
- // Modified by Edmond for Mplayer Demo
- ELO* Env_List[I_Num_Environments] = 
- {
- #ifndef MPLAYER_DEMO
- 	&Gen1,		&Gen2,
- 	&Gen3,		&Gen4,
- 	&Medlab, 	&Cmc1,
- 	&Cmc2,		&Cmc3,
- 	&Cmc4,		&Cmc5,  // 10
- 	&Cmc6, 		&Sp1,
- 	&Sp2,		&Sp3,
- 	&Rnd1, 		&Rnd2,
- 	&Rnd3,		&Rnd4,
- 	&Mps1,		&Mps2,	// 20
- 	&Mps3, 		&Mps4,
- 	&Surface, 	&Entrance,
- 	&Dm1, 		&Dm2,
- 	&Dm3, 		&Dm4,
- 	&Dm5,		&Dm6,	// 30
- 	&Dm7, 		&Dm8,
- 	&Dm9,
- #endif
- 				&Dm10
-  };
+static ELO JunkEnv; /* This is not needed */
+ELO* Env_List[I_Num_Environments] = { &JunkEnv };
 
 /**** Construct filename and go for it ***************/
 
@@ -663,7 +576,7 @@ void ProcessSystemObjects()
 	#endif
 }
 
-int ReadModuleMapList(MODULEMAPBLOCK *mmbptr)
+static int ReadModuleMapList(MODULEMAPBLOCK *mmbptr)
 {
 	MODULE m_temp;
 
@@ -792,16 +705,11 @@ void LoadRifFile()
 		exit(0x3421);
 	};
 
-//	#ifdef __WATCOMC__
-//	#pragma message("Note: use copy_chunks_from_envronment(CCF_ENVIRONMENT) iff a character rif is loaded")
-//	#endif
-
 	#if MaxImageGroups>1
 	SetCurrentImageGroup(2); // FOR ENV
 	#endif
 	copy_rif_data(env_rif,CCF_ENVIRONMENT,PBAR_LEVEL_START+PBAR_LEVEL_INTERVAL*.4,PBAR_LEVEL_INTERVAL*.6);
 	//setup_shading_tables();
-	//LoadBackdropImage();
 }
 
 int Destroy_CurrentEnvironment(void)
@@ -921,7 +829,7 @@ void InitEnvironmentFromLoad(void)
 	// Set the timer, or we have just taken
 	// 10 secs for the frame
 
-	/***** FALSE need to do frame counter stuff in a computer! *****/
+	/***** No need to do frame counter stuff in a computer! *****/
 
 	/* Patrick: 26/6/97
 	Load our sounds for the new env */	

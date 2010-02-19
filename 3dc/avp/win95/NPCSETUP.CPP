@@ -115,8 +115,8 @@ List<LoadedNPC> loaded_npcs;
 LoadedNPC::LoadedNPC(RIF_Child_Chunk const * rcc)
 : rifname(0)
 , filename(0)
-, npc_rif(INVALID_RIFFHANDLE)
 , img_group(-1)
+, npc_rif(INVALID_RIFFHANDLE)
 {
 	if (rcc->filename && *rcc->filename)
 	{
@@ -145,8 +145,8 @@ LoadedNPC::LoadedNPC(RIF_Child_Chunk const * rcc)
 LoadedNPC::LoadedNPC(char const * name)
 : rifname(0)
 , filename(0)
-, npc_rif(INVALID_RIFFHANDLE)
 , img_group(-1)
+, npc_rif(INVALID_RIFFHANDLE)
 {
 	if (name && *name)
 	{
@@ -168,16 +168,16 @@ LoadedNPC::LoadedNPC(char const * name)
 LoadedNPC::LoadedNPC()
 : rifname(0)
 , filename(0)
-, npc_rif(INVALID_RIFFHANDLE)
 , img_group(-1)
+, npc_rif(INVALID_RIFFHANDLE)
 {
 }
 
 LoadedNPC::LoadedNPC(LoadedNPC const & npc2)
 : rifname(npc2.rifname ? new char[strlen(npc2.rifname)+1] : 0)
 , filename(npc2.filename ? new char[strlen(npc2.filename)+1] : 0)
-, npc_rif(npc2.npc_rif)
 , img_group(npc2.img_group)
+, npc_rif(npc2.npc_rif)
 {
 	if (rifname) strcpy(rifname,npc2.rifname);
 	if (filename) strcpy(filename,npc2.filename);
@@ -320,10 +320,9 @@ void InitNPCs(RIFFHANDLE h)
 				DefaultGeneratorEnemy=HNPC_Marine;
 				break;					
 			default :
+				DefaultGeneratorEnemy=HNPC_Marine;
 				GLOBALASSERT("Invalid enemy type"==0);
-				
 		}
-
 	}
 	else
 	{
@@ -348,8 +347,6 @@ void InitNPCs(RIFFHANDLE h)
 				break;
 		}
 	}
-
-	
 
 	if(AvP.Network != I_No_Network)
 	{
@@ -438,7 +435,6 @@ void InitNPCs(RIFFHANDLE h)
 										}
 										break;
 	
-	
 									case 30://shotgun 1
 									case 31://shotgun 2
 									case 32://shotgun 3
@@ -470,8 +466,6 @@ void InitNPCs(RIFFHANDLE h)
 						default:
 							break;
 					}
-					
-				
 				}
 			}
 			else
@@ -557,7 +551,9 @@ void InitNPCs(RIFFHANDLE h)
 			}
 		}
 	}
-	#if 1
+
+/* predator disk not included in demos */
+#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
 	if(AvP.PlayerType==I_Predator || Load_HNPC[HNPC_Predator])
 	{
 		//need to load the disk hierarchy
@@ -568,6 +564,7 @@ void InitNPCs(RIFFHANDLE h)
 		}
 
 	}
+#endif
 
 	if(AvP.PlayerType==I_Marine || Load_HNPC[HNPC_Marine])
 	{
@@ -588,8 +585,6 @@ void InitNPCs(RIFFHANDLE h)
 			}
 		}
 	}
-	#endif
-	
 	
 	// see what we already have, unloading what we don't need, and ensuring we don't load a npc twice
 	for (LIF<LoadedNPC> i_loaded_npc(&loaded_npcs); !i_loaded_npc.done(); )
@@ -606,8 +601,9 @@ void InitNPCs(RIFFHANDLE h)
 			i_loaded_npc.delete_current();
 		}
 	}
-	
+#if debug
 	if(!KeepMainRifFile)
+#endif
 	{
 		//at this point we no longer need the main level rif file
 		unload_rif(h);
@@ -643,11 +639,13 @@ void InitNPCs(RIFFHANDLE h)
 	}
 	Set_Progress_Bar_Position(PBAR_NPC_START+PBAR_NPC_INTERVAL);
 
+#if debug
 	if(KeepMainRifFile)
 	{
 		Env_Chunk = old_env_chunk; // pop Env_Chunk
 	}
 	else
+#endif
 	{
 		Env_Chunk=0;
 	}
