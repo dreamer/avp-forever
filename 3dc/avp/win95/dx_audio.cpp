@@ -24,6 +24,7 @@ extern "C" {
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "db.h"
+#include "guiddef.h"
 #include "eax.h"
 #include "vmanpset.h"
 #include <windows.h>
@@ -2559,8 +2560,6 @@ int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct)
 
 int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 {
-
-
 	assert (streamStruct);
 
 	if (streamStruct->dsBuffer != NULL) 
@@ -2573,7 +2572,7 @@ int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 	// clear the new-ed memory
 	if (streamStruct->buffers)
 	{
-		delete []streamStruct->buffers;
+		delete[]streamStruct->buffers;
 		streamStruct->buffers = NULL;
 	}
 /*
@@ -2582,9 +2581,9 @@ int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 	streamStruct->bufferSize = 0;
 */
 
-	memset(streamStruct, 0, sizeof(StreamingAudioBuffer));
+	delete streamStruct;
 
-	return 1;
+	return AUDIOSTREAM_OK;
 }
 
 StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int bufferSize, int numBuffers)

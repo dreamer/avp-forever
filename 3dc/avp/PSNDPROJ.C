@@ -23,7 +23,7 @@
 
 #define PRED_PISTOL_PITCH_CHANGE 300
 
-#define CDDA_TEST 			FALSE
+#define CDDA_TEST 		FALSE
 #define CD_VOLUME_TEST 	FALSE
 #define SOUND_TEST_3D 	FALSE
 
@@ -149,7 +149,7 @@ void DoPlayerSounds(void)
 	/* do weapon sound */
 	    
  	/* access the extra data hanging off the strategy block */
-	playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+	playerStatusPtr = (PLAYER_STATUS *)(Player->ObStrategyBlock->SBdataptr);
  	GLOBALASSERT(playerStatusPtr);
     	
  	/* init a pointer to the weapon's data */
@@ -161,7 +161,7 @@ void DoPlayerSounds(void)
  		if (sadarReloadTimer <= 0)
 		{
 			sadarReloadTimer = 0;
-			playerNoise=1;
+			playerNoise = 1;
 		}
  	}
                            
@@ -845,12 +845,12 @@ void PlayCudgelSound(void) {
 }
 
 char * SecondSoundDir = 0;
-static const char * FirstSoundDir = "SOUND\\";
-static char *CommonSoundDirectory = ".\\SOUND\\COMMON\\";
+static const char *FirstSoundDir = "SOUND\\";
+static const char *CommonSoundDirectory = ".\\SOUND\\COMMON\\";
 
 int FindAndLoadWavFile(int soundNum, char* wavFileName)
 {
-	static char sound_name[200];
+	static char sound_name[MAX_PATH];
 	sprintf (sound_name, "%s%s", FirstSoundDir, wavFileName);
 
 #if LOAD_SOUND_FROM_FAST_FILE
@@ -903,7 +903,7 @@ int FindAndLoadWavFile(int soundNum, char* wavFileName)
   ----------------------------------------------------------------------------*/
 extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr);
 
-void *LoadRebSndFile(char *filename)
+void *LoadRebSndFile(const char *filename)
 {
 	void *bufferPtr;
 	long int save_pos, size_of_file;
@@ -912,10 +912,10 @@ void *LoadRebSndFile(char *filename)
 	
 	if (!fp) goto error;
 
-	save_pos=ftell(fp);
-	fseek(fp,0L,SEEK_END);
-	size_of_file=ftell(fp);
-	fseek(fp,save_pos,SEEK_SET);
+	save_pos = ftell(fp);
+	fseek(fp ,0L, SEEK_END);
+	size_of_file = ftell(fp);
+	fseek(fp, save_pos,SEEK_SET);
 	
 	bufferPtr = AllocateMem(size_of_file);
 	LOCALASSERT(bufferPtr);	
@@ -957,7 +957,7 @@ void LoadSounds(char *soundDirectory)
 
 	/* load RebSnd file into a (big) buffer	*/
 	{
-		char filename[64];
+		char filename[MAX_PATH];
 		#if ALIEN_DEMO
 		strcpy(filename, ".\\alienfastfile");//CommonSoundDirectory);
 		#else

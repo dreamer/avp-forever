@@ -176,8 +176,6 @@ void* LinkSwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 		int shape_num = ls_tt->shape_num;
 		SHAPEHEADER *shptr = GetShapeData(shape_num);
  
-		SetupPolygonFlagAccessForShape(shptr);
-
 		pptxactrlblk = &ls_bhv->ls_tac;
 
 		for(item_num = 0; item_num < shptr->numitems; item_num ++)

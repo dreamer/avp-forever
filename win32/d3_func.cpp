@@ -867,7 +867,7 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 	ThisFramesRenderingHasBegun();
 
 	// set up projection matrix
-	D3DXMatrixPerspectiveFovLH( &matProjection, width / height, D3DX_PI / 2, 1.0f, 100.0f);
+	D3DXMatrixPerspectiveFovLH( &matProjection, FLOAT(width / height), D3DX_PI / 2, 1.0f, 100.0f);
 
 	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
 	d3d.lpD3DDevice->SetTransform( D3DTS_WORLD, &matIdentity );
@@ -1056,6 +1056,8 @@ BOOL InitialiseDirect3D()
 						gotValidFormats = true;
 						gotOne = true;
 						//break;
+
+						// fix this..
 						goto blah;
 					}
 				}
@@ -1416,7 +1418,7 @@ void SetTransforms()
 	D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 
 	// set up projection matrix
-	D3DXMatrixPerspectiveFovLH( &matProjection, ScreenDescriptorBlock.SDB_Width / ScreenDescriptorBlock.SDB_Width, D3DX_PI / 2, 1.0f, 100.0f);
+	D3DXMatrixPerspectiveFovLH( &matProjection, FLOAT(ScreenDescriptorBlock.SDB_Width / ScreenDescriptorBlock.SDB_Width), D3DX_PI / 2, 1.0f, 100.0f);
 
 	// print projection matrix?
 	PrintD3DMatrix("Projection", matProjection);

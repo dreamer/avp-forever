@@ -28,7 +28,6 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	BINARY_SWITCH_BEHAV_BLOCK *bs_bhv;
 	BIN_SWITCH_TOOLS_TEMPLATE *bs_tt;
 	int i;
-	int test;
 
  	GLOBALASSERT(sbptr);
 	bs_bhv = (BINARY_SWITCH_BEHAV_BLOCK*)AllocateMem(sizeof(BINARY_SWITCH_BEHAV_BLOCK));
@@ -71,7 +70,7 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 			return ((void *)NULL);
 		}
 
-		bs_bhv->request_messages = (int *)AllocateMem(sizeof(intptr_t) * bs_tt->num_targets);
+		bs_bhv->request_messages = (int *)AllocateMem(sizeof(int) * bs_tt->num_targets);
 		if (!bs_bhv->request_messages) 
 		{
 			memoryInitialisationFailure = 1;
@@ -111,14 +110,12 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 		TXACTRLBLK **pptxactrlblk;		
 		int shape_num = bs_tt->shape_num;
 		SHAPEHEADER *shptr = GetShapeData(shape_num);
- 
-		SetupPolygonFlagAccessForShape(shptr);
 
 		pptxactrlblk = &bs_bhv->bs_tac;
 
 		for(item_num = 0; item_num < shptr->numitems; item_num ++)
 		{
-			POLYHEADER *poly =  (POLYHEADER*)(shptr->items[item_num]);
+			POLYHEADER *poly = (POLYHEADER*)(shptr->items[item_num]);
 			LOCALASSERT(poly);
 				
 			if((Request_PolyFlags((void *)poly)) & iflag_txanim)

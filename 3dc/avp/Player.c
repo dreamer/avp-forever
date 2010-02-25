@@ -1023,11 +1023,11 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 
 		if (sbPtr->SBDamageBlock.Health <= 0)
 		{
-			sbPtr->SBDamageBlock.Health = 0;
+//			sbPtr->SBDamageBlock.Health = 0;
 			if (playerStatusPtr->IsImmortal) sbPtr->SBDamageBlock.Health=0;
 			else
 			{
-			//bjd- REVERT	PlayerIsDead(damage,multiplier,incoming);
+				PlayerIsDead(damage,multiplier,incoming);
 			}
 		}
 

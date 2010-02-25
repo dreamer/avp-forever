@@ -979,8 +979,6 @@ static void* SimpleAnimationBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	GLOBALASSERT(shptr);
 	GLOBALASSERT(shptr->numitems > 0);
 
-	SetupPolygonFlagAccessForShape(shptr);
-
 	sabhv = (SIMPLE_ANIM_BEHAV_BLOCK*)AllocateMem(sizeof(SIMPLE_ANIM_BEHAV_BLOCK));
 	if(!sabhv) 
 	{

@@ -566,14 +566,14 @@ void InitNPCs(RIFFHANDLE h)
 	}
 #endif
 
-	if(AvP.PlayerType==I_Marine || Load_HNPC[HNPC_Marine])
+	if (AvP.PlayerType == I_Marine || Load_HNPC[HNPC_Marine])
 	{
 		// as per linux port, check if mdisk.rif exists. if it does,
 		// we're using the gold version, else the regular
 		//FILE * mdisk = avp_fopen("\\avp_huds\\mdisk.rif","r");
 		FILE * mdisk = avp_fopen("avp_huds\\mdisk.rif","r");
 
-		if(mdisk != NULL)
+		if (mdisk != NULL)
 		{
 			fclose(mdisk);
 			//need to load the mdisk hierarchy

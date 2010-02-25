@@ -1839,7 +1839,7 @@ void SetupAnimOnTriangle(SHAPEHEADER* shp,TEXANIM* ta,int poly, int * local_tex_
 			}
 			else
 			{
-				tf->txf_image=local_tex_index_nos[fl->Textures[j]];
+				tf->txf_image = local_tex_index_nos[fl->Textures[j]];
 				for(int k=0;k<6;k++)
 				{
 					tf->txf_uvdata[k]=fl->UVCoords[j*6+k]<<16;
@@ -2369,7 +2369,7 @@ BOOL copy_to_shapeheader (
 				uv_imnums[item_list[i*9+3]>>16]=local_tex_index_nos[texno];
 				item_list[i*9 + 3] += local_tex_index_nos[texno];
 
-				shphd->sh_textures[UVIndex] = (int *) PoolAllocateMem (sizeof(int) * cshp_ptr->uv_list[UVIndex].num_verts * 2);
+				shphd->sh_textures[UVIndex] = (int *) PoolAllocateMem (sizeof(int *) * cshp_ptr->uv_list[UVIndex].num_verts * 2);
 				for (j=0; j<cshp_ptr->uv_list[UVIndex].num_verts; j++) {
 					(shphd->sh_textures[UVIndex])[(j*2)] = ProcessUVCoord(h,UVC_POLY_U,(int)cshp_ptr->uv_list[UVIndex].vert[j].u,uv_imnums[UVIndex]);
 					(shphd->sh_textures[UVIndex])[(j*2)+1] = ProcessUVCoord(h,UVC_POLY_V,(int)cshp_ptr->uv_list[UVIndex].vert[j].v,uv_imnums[UVIndex]);

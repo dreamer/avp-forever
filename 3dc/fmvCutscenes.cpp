@@ -276,8 +276,7 @@ extern void PlayFMV(const char *filenamePtr)
 		return;
 
 	TheoraFMV fmv;
-	if (fmv.Open(/*filenamePtr*/"D:\\FMVs\\logos.ogv") != FMV_OK)
-//	if (fmv.Open(filenamePtr) != FMV_OK)
+	if (fmv.Open(filenamePtr) != FMV_OK)
 		return;
 
 	bool playing = true;

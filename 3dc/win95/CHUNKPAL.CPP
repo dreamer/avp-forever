@@ -563,7 +563,7 @@ Environment_Game_Mode_Header_Chunk::Environment_Game_Mode_Header_Chunk(Chunk_Wit
 
 	while (*pdata)
 	{
-		unsigned int len = strlen(pdata)+1;
+		size_t len = strlen(pdata)+1;
 
 		char * riffn = new char[len];
 		strcpy(riffn,pdata);
@@ -773,7 +773,7 @@ RIF_Child_Chunk::RIF_Child_Chunk (Chunk_With_Children * const parent, const char
 	flags = *(RCC_Flags *)sdata;
 	sdata += 4;
 
-	unsigned int len = strlen(sdata)+1;
+	size_t len = strlen(sdata)+1;
 	rifname = new char[len];
 	strcpy(rifname,sdata);
 	sdata += len+3 &~3;
@@ -825,7 +825,7 @@ Preset_Palette_Store_Chunk::Preset_Palette_Store_Chunk(Chunk_With_Children * con
 {
 	sdata += 20;
 
-	unsigned int const len = strlen(sdata)+1;
+	size_t const len = strlen(sdata)+1;
 	rifname = new char[len];
 	strcpy(rifname,sdata);
 	sdata += len + 3 &~3;

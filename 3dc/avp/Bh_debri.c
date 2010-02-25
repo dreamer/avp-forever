@@ -424,8 +424,6 @@ void SetupSimpleAnimation(int counter, STRATEGYBLOCK *sbPtr)
 	shape_num = dispPtr->ObShape;
 	shptr = GetShapeData(shape_num);
 	pptxactrlblk = &osab->tac_os;
-	
-	SetupPolygonFlagAccessForShape(shptr);
 
 	/*
 	the bhdata is a ptr to the SHAPEHEADER each 

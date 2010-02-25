@@ -520,9 +520,9 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 	/* if "-w" passed to command line */
 	if (WindowMode == WindowModeSubWindow)
 	{
-		//force window to be 640x480 to avoid stretch blits.
-		WinWidth = 640;
-		WinHeight = 480;
+		//force window to be 800x600 to avoid stretch blits.
+		WinWidth = 800;
+		WinHeight = 600;
 
 		clientRect.left = 0;
 		clientRect.top = 0;

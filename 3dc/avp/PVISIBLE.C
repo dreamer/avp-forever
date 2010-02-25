@@ -202,13 +202,16 @@ DoObjectVisibility().
 void DoObjectVisibilities(void)
 {
         extern int NumActiveStBlocks;
-        extern STRATEGYBLOCK *ActiveStBlockList[];      
+        extern STRATEGYBLOCK *ActiveStBlockList[];
+
+		int i;
 
         int sbIndex = 0;
         STRATEGYBLOCK *sbPtr;
 
         /* loop thro' the strategy block list, looking for objects that need to have
         their visibilities managed ... */
+
         while(sbIndex < NumActiveStBlocks)
         {       
                 sbPtr = ActiveStBlockList[sbIndex++];
@@ -681,7 +684,6 @@ NB returns 0 if relocation failed.
 static int EmergRelocCalls = 0;
 static int EmergencyRelocateObject(STRATEGYBLOCK *sbPtr)
 {
-		OutputDebugString("EmergencyRelocateObject\n");
         EmergRelocCalls++;
 
         if(sbPtr->I_SBtype == I_BehaviourNetGhost) return 1;
@@ -1350,8 +1352,6 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
                 {
                         POLYHEADER *poly =  (POLYHEADER*)(shptr->items[item_num]);
                         LOCALASSERT(poly);
-
-                        SetupPolygonFlagAccessForShape(shptr);
                                 
                         if((Request_PolyFlags((void *)poly)) & iflag_txanim)
                                 {
@@ -2259,7 +2259,6 @@ STRATEGYBLOCK* CreateMultiplayerWeaponPickup(VECTORCH* location,int type,char* n
 		case WEAPON_MINIGUN:
 			toolsdata.shapeIndex=GetLoadedShapeMSL("minigun");
 			break;
-		
 	}
 
 	if(toolsdata.shapeIndex==-1)
@@ -2345,7 +2344,6 @@ void MakePlayersWeaponPickupVisible()
 			}
 		}
 	}
-	
 }
 
 

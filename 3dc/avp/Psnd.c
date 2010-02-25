@@ -574,8 +574,7 @@ void Sound_Stop(int activeSoundNumber)
 	soundNo = ActiveSounds[activeSoundNumber].soundIndex;
 	GameSounds[soundNo].activeInstances--;
 	db_assert1((GameSounds[soundNo].activeInstances>=0) && (GameSounds[soundNo].activeInstances<SOUND_MAXINSTANCES));
-	
-	// FIXME - TYRARGO CRASH. causes crash on end of level before queen for marine. commented out for now.
+
 	if (ActiveSounds[activeSoundNumber].externalRef)
 		*(ActiveSounds[activeSoundNumber].externalRef) = SOUND_NOACTIVEINDEX;      
 			
@@ -777,18 +776,14 @@ void Load_SoundState(int* soundHandle)
 		{
 			Sound_Play(soundIndex,playOptions,soundHandle,block->volume,block->pitch,block->position);
 		}
-
 	}
-
-
 }
 
 
 void Save_SoundState(int* soundHandle)
 {
-	
-	if(!soundHandle) return;
-	
+	if(!soundHandle) 
+		return;
 	
 	if(*soundHandle == SOUND_NOACTIVEINDEX)
 	{
@@ -812,8 +807,6 @@ void Save_SoundState(int* soundHandle)
 		//fill in the header
 		block->header.size = sizeof(*block) + name_length;
 		block->header.type = SaveBlock_SoundState;
-		
-		
 
 		COPYELEMENT_SAVE(soundIndex)
 		COPYELEMENT_SAVE(priority)	
@@ -943,7 +936,6 @@ static SOUNDINDEX GetSoundIndexFromNameAndIndex(const char* name,SOUNDINDEX inde
 		{
 			if(!strcmp(GameSounds[index].wavName,name)) return index;
 		}
-	
 	}
 
 	for(i=0;i<SID_MAXIMUM;i++)

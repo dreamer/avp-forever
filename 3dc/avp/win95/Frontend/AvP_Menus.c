@@ -1346,7 +1346,7 @@ static void RenderBriefingScreenInfo(void)
 	RenderMenuText(GetTextString(textID),MENU_LEFTXEDGE,180,ONE_FIXED/2,AVPMENUFORMAT_LEFTJUSTIFIED);
 #endif	
 
-	RenderBriefingText(/*ScreenDescriptorBlock.SDB_Height*/480 / 2, ONE_FIXED);
+	RenderBriefingText(ScreenDescriptorBlock.SDB_Height / 2, ONE_FIXED);
 }
 /* KJL 12:11:18 24/09/98 - specialised code to handle episode selection screen, which
 has features which make it too awkward to add to the general system */

@@ -147,6 +147,8 @@ void Con_AddCommand(char *command, funcPointer function)
 
 void Con_Init()
 {
+	return; // bjd - disabling for now
+
 	console.isActive = false;
 	console.xPos = 0;
 	console.yPos = 0;
@@ -304,6 +306,8 @@ void Con_RemoveTypedChar()
 
 void Con_Draw()
 {
+	return; // bjd - disabling for now
+
 	int charWidth = 0;
 /*
 	if (IOFOCUS_Get() == IOFOCUS_GAME)

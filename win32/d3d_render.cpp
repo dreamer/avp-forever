@@ -159,8 +159,8 @@ void DeleteRenderMemory()
 	delete[] renderList;
 }
 
-int		NumVertices = 0;
-int		NumIndicies = 0;
+size_t	NumVertices = 0;
+size_t	NumIndicies = 0;
 int		vb = 0;
 int		particleIndex = 0;
 size_t	renderCount = 0;

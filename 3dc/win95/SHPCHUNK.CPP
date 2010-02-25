@@ -1327,7 +1327,7 @@ Shape_Header_Chunk::~Shape_Header_Chunk()
 
 size_t Shape_Header_Chunk::size_chunk()
 {
-	int length = 80;
+	size_t length = 80;
 
 	for (LIF<char *> aon(&object_names_store);
 			!aon.done(); aon.next() )

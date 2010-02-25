@@ -19,10 +19,6 @@ extern "C"
 #include "pldnet.h"
 #include <time.h>
 
-#ifdef WIN32
-#include "shlwapi.h"
-#endif
-
 #include "utilities.h"
 
 static int LoadUserProfiles(void);
@@ -247,8 +243,7 @@ static int LoadUserProfiles(void)
 			
 			//make sure the file is a rif file
 			HANDLE rif_file;
-			rif_file = avp_CreateFile (pszFullPath, GENERIC_READ, 0, 0, OPEN_EXISTING, 
-					FILE_FLAG_RANDOM_ACCESS, 0);
+			rif_file = avp_CreateFile (pszFullPath, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, 0);
 			if(rif_file==INVALID_HANDLE_VALUE)
 			{
 //				printf("couldn't open %s\n",pszFullPath);

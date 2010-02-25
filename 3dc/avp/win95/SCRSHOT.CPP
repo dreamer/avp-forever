@@ -7,13 +7,13 @@
 #include "stratdef.h"
 #include "gamedef.h"
 #include "ourasert.h"
+#include "d3_func.h"
 
 #include "frontend\avp_menus.h"
 extern "C"{
-// extern DDPIXELFORMAT DisplayPixelFormat;
  extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
  extern int VideoModeTypeScreen;
- extern unsigned char TestPalette[];
+ //extern unsigned char TestPalette[];
  extern unsigned char KeyboardInput[];
  extern unsigned char DebouncedKeyboardInput[];
  extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;

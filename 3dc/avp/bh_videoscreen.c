@@ -14,7 +14,7 @@
 
 #include "pvisible.h"
 
-
+int Request_PolyFlags(void *polygon);
 
 void* InitVideoScreen(void* bhdata,STRATEGYBLOCK *sbPtr)
 {
@@ -108,8 +108,6 @@ void* InitVideoScreen(void* bhdata,STRATEGYBLOCK *sbPtr)
 		{
 			POLYHEADER *poly =  (POLYHEADER*)(shptr->items[item_num]);
 			LOCALASSERT(poly);
-
-			SetupPolygonFlagAccessForShape(shptr);
 				
 			if((Request_PolyFlags((void *)poly)) & iflag_txanim)
 				{

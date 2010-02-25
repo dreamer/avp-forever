@@ -1962,7 +1962,7 @@ static int RequestChangeOfWeaponWhilstSwapping(PLAYER_STATUS *playerStatusPtr,PL
         LOCALASSERT(requestedSlot < MAX_NO_OF_WEAPON_SLOTS);
         LOCALASSERT(requestedSlot >= 0);
         
-        if( (requestedSlot != currentSlot)
+        if ((requestedSlot != currentSlot)
           &&(playerStatusPtr->WeaponSlot[requestedSlot].Possessed == 1) )
         { 
             // Disallow Gold version weapons with regular version
@@ -4210,8 +4210,6 @@ void InitThisWeapon(PLAYER_WEAPON_DATA *pwPtr) {
 		TXACTRLBLK **pptxactrlblk;		
 
 		pptxactrlblk = &pwPtr->TxAnimCtrl;
-
-		SetupPolygonFlagAccessForShape(shptr);
 
 		for(item_num = 0; item_num < shptr->numitems; item_num ++)
 		{

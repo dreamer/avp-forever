@@ -12,7 +12,7 @@
 #define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
 #endif
 
-#define VANILLA
+//#define VANILLA
 
 unsigned int __stdcall decodeThread(void *args);
 unsigned int __stdcall audioThread(void *args);
@@ -117,8 +117,6 @@ TheoraFMV::~TheoraFMV()
 {
 	if (mFmvPlaying)
 		mFmvPlaying = false;
-
-	OutputDebugString("CALLED DECONSTRUCTOR FOR FMV!\n");
 		
 	// wait for decode thread to finish
 	if (mDecodeThreadHandle)
@@ -285,8 +283,6 @@ int TheoraFMV::Open(const std::string &fileName)
 		mAudioThreadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, audioThread, static_cast<void*>(this), 0, NULL));
 	}
 
-	Con_PrintMessage("fmv should be playing now");
-
 	return FMV_OK;
 }
 
@@ -384,8 +380,6 @@ bool TheoraFMV::NextFrame(int width, int height, uint8_t *bufferPtr, int pitch)
 //	sprintf(buf, "total time: %d\n", timeGetTime() - startTime);
 //	OutputDebugString(buf);
 
-	OutputDebugString("decoded a frame\n");
-
 	mFrameReady = false;
 
 	return true;
@@ -434,8 +428,6 @@ bool TheoraFMV::NextFrame()
 		OutputDebugString("can't unlock FMV texture\n");
 		return false;
 	}
-
-	OutputDebugString("decoded a frame\n");
 
 	mFrameReady = false;
 
@@ -539,49 +531,10 @@ void TheoraFMV::ReadHeaders()
 
 		ogg_packet packet;
 
-		while (!/*gotAllHeaders*/headersDone && (ret = ogg_stream_packetpeek(&stream->mStreamState, &packet)) != 0)
+		while (!headersDone && (ret = ogg_stream_packetpeek(&stream->mStreamState, &packet)) != 0)
 		{
 			assert(ret == 1);
-#if 0
-			// check for a theora header first
-			if (!gotTheora)
-			{
-				ret = th_decode_headerin(&stream->mTheora.mInfo, &stream->mTheora.mComment, &stream->mTheora.mSetupInfo, &packet);
-				if (ret > 0)
-				{
-					// we found the header packet
-					stream->mType = TYPE_THEORA;
-				}
-				else if (stream->mType == TYPE_THEORA && ret == 0)
-				{
-					gotTheora = true;
-				}
-			}
 
-			// check for a vorbis header
-			if (!gotVorbis)
-			{
-				ret = vorbis_synthesis_headerin(&stream->mVorbis.mInfo, &stream->mVorbis.mComment, &packet);
-				if (ret == 0)
-				{
-					stream->mType = TYPE_VORBIS;
-				}
-				else if (stream->mType == TYPE_VORBIS && ret == OV_ENOTVORBIS)
-				{
-					gotVorbis = true;
-				}
-			}
-
-			if (gotVorbis && gotTheora)
-				gotAllHeaders = true;
-
-			if (!gotAllHeaders)
-			{
-				// we need to move forward and grab the next packet
-				ret = ogg_stream_packetout(&stream->mStreamState, &packet);
-				assert(ret == 1);
-			}
-#endif
 			// A packet is available. If it is not a header packet we exit.
 			// If it is a header packet, process it as normal.
 			headersDone = headersDone || HandleTheoraHeader(stream, &packet);

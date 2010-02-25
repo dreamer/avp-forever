@@ -366,8 +366,6 @@ void Setup_Texture_Animation_For_Section(SECTION_DATA *this_section_data)
 			{
 				POLYHEADER *poly =  (POLYHEADER*)(shptr->items[item_num]);
 				LOCALASSERT(poly);
-
-				SetupPolygonFlagAccessForShape(shptr);
 					
 				if((Request_PolyFlags((void *)poly)) & iflag_txanim)
 					{

@@ -355,14 +355,7 @@ int *GetPolygonVertexIndices(void)
   I have added some more shape data access functions......
   taken from PSX versions 
   ----------------------------------------------------------------*/
-
-
-void SetupPolygonFlagAccessForShape(SHAPEHEADER *shape) 
-{
-}
-		
-		
-int Request_PolyFlags(void *polygon) 
+int Request_PolyFlags(void *polygon)
 {
 	POLYHEADER *poly = (POLYHEADER*)polygon;
 	return poly->PolyFlags;

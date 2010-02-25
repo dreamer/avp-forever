@@ -162,7 +162,7 @@ FILE *avp_fopen(const char *fileName, const char *mode)
 #ifdef WIN32
 
 	// if write mode, direct to home path
-	if (strcmp(mode, "wb") == 0)
+	if ((strcmp(mode, "wb") == 0) || (strcmp(mode, "w") == 0))
 	{
 		finalPath += GetSaveFolderPath();
 		finalPath += fileName;

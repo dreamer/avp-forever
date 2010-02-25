@@ -154,6 +154,8 @@ template <class T> void Osk_AddKey(T buttonLabel, int numWidthBlocks)
 void Osk_Init()
 {
 
+	return; // bjd - disabling for now
+
 	currentRow = 0;
 	currentColumn = 0;
 /*
@@ -221,6 +223,8 @@ void Osk_Init()
 
 void Osk_Draw()
 {
+	return; // bjd - disabling for now
+
 	if (!Osk_IsActive()) 
 		return;
 

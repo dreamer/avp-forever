@@ -27,6 +27,7 @@ enum streamType
 {
 	TYPE_VORBIS,
 	TYPE_THEORA,
+	TYPE_SKELETON,
 	TYPE_UNKNOWN
 };
 

@@ -5,7 +5,6 @@
 
 struct ColPolyTag;
 
-extern void SetupPolygonFlagAccessForShape(SHAPEHEADER *shape);
 extern int Request_PolyFlags(void *polygon);
 
 extern int SetupPolygonAccess(DISPLAYBLOCK *objectPtr);

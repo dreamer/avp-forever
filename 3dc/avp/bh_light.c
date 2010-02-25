@@ -20,6 +20,7 @@
 extern int NormalFrameTime;
 void UpdatePlacedLightState(PLACED_LIGHT_BEHAV_BLOCK* pl_bhv,STRATEGYBLOCK* sbPtr);
 void UpdatePlacedLightColour(PLACED_LIGHT_BEHAV_BLOCK* pl_bhv);
+void MakeSprayOfSparks(MATRIXCH *orientationPtr, VECTORCH *positionPtr);
 
 void SetTextureAnimationSequence(int shapeindex,TXACTRLBLK* tac,int sequence)
 {
@@ -76,8 +77,6 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 	}
 	pl_bhv->destruct_target_sbptr=0;
 
-	
-
 	pl_bhv->sequence=toolsData->sequence;
 	pl_bhv->colour_red=toolsData->colour_red;
 	pl_bhv->colour_green=toolsData->colour_green;
@@ -99,10 +98,9 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 
 	pl_bhv->on_off_timer=0;
 
-	
-	sbPtr->SBDamageBlock.Health*=toolsData->integrity;
+	sbPtr->SBDamageBlock.Health *= toolsData->integrity;
 
-	if(toolsData->static_light)
+	if (toolsData->static_light)
 	{
 		sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_STATIC);
 	}
@@ -116,7 +114,6 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 		RemoveBehaviourStrategy(sbPtr);
 		return 0;
 	}
-
 
 	sbPtr->DynPtr->Mass = toolsData->mass;
 	if (toolsData->integrity > 20)
@@ -146,19 +143,16 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 		pptxactrlblk = &pl_bhv->inan_tac;
 		for(item_num = 0; item_num < shptr->numitems; item_num ++)
 		{
-			POLYHEADER *poly =  (POLYHEADER*)(shptr->items[item_num]);
+			POLYHEADER *poly = (POLYHEADER*)(shptr->items[item_num]);
 			LOCALASSERT(poly);
-
-			SetupPolygonFlagAccessForShape(shptr);
 				
 			if((Request_PolyFlags((void *)poly)) & iflag_txanim)
 				{
 					TXACTRLBLK *pnew_txactrlblk;
 
 					pnew_txactrlblk = AllocateMem(sizeof(TXACTRLBLK));
-					if(pnew_txactrlblk)
+					if (pnew_txactrlblk)
 					{
-						
 						pnew_txactrlblk->tac_flags = 0;										
 						pnew_txactrlblk->tac_item = item_num;										
 						pnew_txactrlblk->tac_sequence = 0;										
