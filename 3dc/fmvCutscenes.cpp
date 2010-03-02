@@ -340,7 +340,7 @@ extern void StartTriggerPlotFMV(int number)
 	if (CheatMode_Active != CHEATMODE_NONACTIVE)
 		return;
 
-	sprintf(buffer, "FMVs//message%d.ogv", number);
+	sprintf(buffer, "FMVs\\message%d.ogv", number);
 	{
 		FILE *file = avp_fopen(buffer, "rb");
 		if (!file)

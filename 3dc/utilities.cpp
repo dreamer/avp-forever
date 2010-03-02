@@ -146,6 +146,9 @@ FILE *avp_fopen(const char *fileName, const char *mode)
 
 #ifdef _XBOX
 
+	finalPath.append("d:\\");
+	finalPath.append(fileName);
+/*
 	// if write mode, direct to home path
 	if (strcmp(mode, "wb") == 0)
 	{
@@ -156,7 +159,7 @@ FILE *avp_fopen(const char *fileName, const char *mode)
 	{
 		finalPath += fileName;
 	}
-
+*/
 	return fopen(finalPath.c_str(), mode);
 #endif
 #ifdef WIN32

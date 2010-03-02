@@ -334,9 +334,7 @@ D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool)
 	}
 	else { newHeight = *height; }
 
-//	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)width, (UINT*)height, NULL, 0, NULL, (D3DPOOL)pool);
-
-	LastError = d3d.lpD3DDevice->CreateTexture(newWidth, newHeight, 1, usage, D3DFMT_LIN_X8R8G8B8, 0, &destTexture);
+	LastError = d3d.lpD3DDevice->CreateTexture(newWidth, newHeight, 1, 0, D3DFMT_LIN_A8R8G8B8, 0, &destTexture);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -353,7 +351,7 @@ D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool)
 // we remove the grid as it can sometimes bleed onto text when we use texture filtering.
 void DeRedTexture(D3DTEXTURE texture)
 {
-	D3DLOCKED_RECT	lock;
+	D3DLOCKED_RECT lock;
 
 	LastError = texture->LockRect(0, &lock, NULL, NULL );
 	if (FAILED(LastError))
@@ -485,7 +483,7 @@ D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *realHeig
 	return destTexture;
 }
 
-D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, unsigned char *buf, int usage, D3DPOOL poolType)
+D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL poolType)
 {
 	D3DTEXTURE destTexture = NULL;
 
@@ -532,6 +530,22 @@ D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, unsigned char *buf, int usage, D3DP
 	image.MipLevels = 1;
 	image.Depth = D3DFMT_A8R8G8B8;
 
+	D3DFORMAT textureFormat;
+
+	// if it's a dynamic texture we need to update it. make it linear to make things easier
+/*
+	if (usage == D3DUSAGE_DYNAMIC)
+	{
+		textureFormat = D3DFMT_LIN_A8R8G8B8;
+	}
+	else
+	{
+		textureFormat = D3DFMT_A8R8G8B8;
+	}
+*/
+
+	textureFormat = D3DFMT_A8R8G8B8;
+
 	LastError = D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
 		buffer,
 		sizeof(TGA_HEADER) + imageSize,
@@ -539,7 +553,7 @@ D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, unsigned char *buf, int usage, D3DP
 		tex->height,
 		1,
 		0,
-		D3DFMT_A8R8G8B8,
+		textureFormat,
 //		D3DFMT_DXT3,
 		D3DPOOL_DEFAULT, // not used for xbox
 		D3DX_FILTER_NONE,

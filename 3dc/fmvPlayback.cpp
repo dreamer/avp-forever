@@ -194,7 +194,13 @@ void VorbisDecode::Init()
 
 int TheoraFMV::Open(const std::string &fileName)
 {
+
+#ifdef _XBOX
+	mFileName = "d:\\";
+	mFileName += fileName;
+#else
 	mFileName = fileName;
+#endif
 
 	// open the file
 	mFileStream.open(mFileName.c_str(), std::ios::in | std::ios::binary);
@@ -316,6 +322,42 @@ bool TheoraFMV::HandleTheoraHeader(OggStream* stream, ogg_packet* packet)
 	return true;
 }
 
+bool TheoraFMV::HandleSkeletonHeader(OggStream* stream, ogg_packet* packet) 
+{
+	// Is it a "fishead" skeleton identifier packet?
+	if (packet->bytes > 8 && memcmp(packet->packet, "fishead", 8) == 0) 
+	{
+		stream->mType = TYPE_SKELETON;
+		return false;
+	}
+  
+	if (stream->mType != TYPE_SKELETON) 
+	{
+		// The first packet must be the skeleton identifier.
+		return false;
+	}
+  
+	// "fisbone" stream info packet?
+	if (packet->bytes >= 8 && memcmp(packet->packet, "fisbone", 8) == 0) 
+	{
+		return false;
+	}
+  
+	// "index" keyframe index packet?
+	if (packet->bytes > 6 && memcmp(packet->packet, "index", 6) == 0) 
+	{
+		return false;
+	}
+  
+	if (packet->e_o_s) 
+	{
+		return false;
+	}
+  
+	// Shouldn't actually get here.
+	return true;
+}
+
 bool TheoraFMV::HandleVorbisHeader(OggStream* stream, ogg_packet* packet)
 {
 	int ret = vorbis_synthesis_headerin(&stream->mVorbis.mInfo,
@@ -434,14 +476,25 @@ bool TheoraFMV::NextFrame()
 	return true;
 }
 
-bool TheoraFMV::ReadPage(ogg_page *page)
+ogg_int64_t TheoraFMV::ReadPage(ogg_page *page)
 {
-	int amountRead = 0;
+	ogg_int64_t offset = 0;
 	int ret = 0;
 
 	// if end of file, keep processing any remaining buffered pages
 	if (!mFileStream.good())
-		return ogg_sync_pageout(&mState, page) == 1;
+	{
+		if (ogg_sync_pageout(&mState, page) == 1) 
+		{
+			offset = mPageOffset;
+			mPageOffset += page->header_len + page->body_len;
+			return offset;
+		}
+		else
+		{
+			return -1;
+		}
+	}
 
 	while (ogg_sync_pageout(&mState, page) != 1)
 	{
@@ -449,7 +502,7 @@ bool TheoraFMV::ReadPage(ogg_page *page)
 		assert(buffer);
 
 		mFileStream.read(buffer, 4096);
-		amountRead = mFileStream.gcount();
+		int amountRead = mFileStream.gcount();
 
 		if (amountRead == 0)
 		{
@@ -461,7 +514,9 @@ bool TheoraFMV::ReadPage(ogg_page *page)
 		assert(ret == 0);
 	}
 
-	return true;
+	offset = mPageOffset;
+	mPageOffset += page->header_len + page->body_len;
+	return offset;
 }
 
 bool TheoraFMV::ReadPacket(OggStream *stream, ogg_packet *packet)
@@ -472,7 +527,7 @@ bool TheoraFMV::ReadPacket(OggStream *stream, ogg_packet *packet)
 	{
 		ogg_page page;
 
-		if (!ReadPage(&page))
+		if (ReadPage(&page) == -1)
 			return false;
 
 		int serialNumber = ogg_page_serialno(&page);
@@ -492,14 +547,12 @@ bool TheoraFMV::ReadPacket(OggStream *stream, ogg_packet *packet)
 void TheoraFMV::ReadHeaders()
 {
 	ogg_page page;
+	ogg_int64_t offset = 0;
 	int ret = 0;
 
-	bool gotAllHeaders = false;
 	bool headersDone = false;
-	bool gotTheora = false;
-	bool gotVorbis = false;
 
-	while (!gotAllHeaders && ReadPage(&page))
+	while (!headersDone && (offset = ReadPage(&page)) != -1)
 	{
 		OggStream *stream = 0;
 
@@ -539,14 +592,22 @@ void TheoraFMV::ReadHeaders()
 			// If it is a header packet, process it as normal.
 			headersDone = headersDone || HandleTheoraHeader(stream, &packet);
 			headersDone = headersDone || HandleVorbisHeader(stream, &packet);
+			headersDone = headersDone || HandleSkeletonHeader(stream, &packet);
 			if (!headersDone) 
 			{
 				// Consume the packet
 				ret = ogg_stream_packetout(&stream->mStreamState, &packet);
 				assert(ret == 1);
+			} 
+			else 
+			{
+				// First non-header page. Remember its location, so we can seek
+				// to time 0.
+				mDataOffset = offset;
 			}
 		}
 	}
+	assert(mDataOffset != 0);
 }
 
 void TheoraFMV::HandleTheoraData(OggStream *stream, ogg_packet *packet)
@@ -689,6 +750,10 @@ unsigned int __stdcall decodeThread(void *args)
 					double audio_time = static_cast<double>(AudioStream_GetNumSamplesPlayed(fmv->mAudioStream)) / static_cast<double>(fmv->mAudio->mVorbis.mInfo.rate);
 					double video_time = static_cast<double>(th_granule_time(fmv->mVideo->mTheora.mDecodeContext, fmv->mGranulePos));
 
+//					char buf[200];
+//					sprintf(buf, "audio_time: %f, video_time: %f\n", audio_time, video_time);
+//					OutputDebugString(buf);
+
 					// if mAudio is ahead of frame time, display a new frame
 					if ((audio_time > video_time))
 					{
@@ -769,6 +834,8 @@ unsigned int __stdcall audioThread(void *args)
 	_endthreadex(0);
 	return 0;
 }
+
+#define VANILLA
 
 /* Vanilla implementation if YUV->RGB conversion */
 void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb)

@@ -80,7 +80,7 @@ struct RENDER_STATES
 };
 
 RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
-//std::vector<RENDER_STATES> renderTest;
+std::vector<RENDER_STATES> renderTest(1000);
 
 struct ORTHO_OBJECTS
 {
@@ -431,7 +431,7 @@ BOOL SetExecuteBufferDefaults()
 	renderList[0].filteringType = FILTERING_BILINEAR_OFF;
 	renderList[0].translucencyType = TRANSLUCENCY_OFF;
 
-//	renderTest.push_back(renderList[0]);
+	renderTest.push_back(renderList[0]);
 
 	// Enable fog blending.
 //    d3d.lpD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE);
@@ -487,9 +487,6 @@ void CheckVertexBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYP
 		LockExecuteBuffer();
 	}
 
-	// in case we get a bad value..
-//	if (tex > MaxImages) return;
-
 	renderList[renderCount].textureID = textureID;
 	renderList[renderCount].vertStart = 0;
 	renderList[renderCount].vertEnd = 0;
@@ -501,14 +498,13 @@ void CheckVertexBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYP
 
 	// check if current vertexes use the same texture and render states as the previous
 	// if they do, we can 'merge' the two together
-
 	if ((textureID == renderList[renderCount-1].textureID && 
 		translucencyMode == renderList[renderCount-1].translucencyType) && 
 //		renderList[renderCount].filtering_type == renderList[renderCount-1].filtering_type) &&
 		renderCount != 0) 
 	{
 		// ok, drop back to the previous data
-//		renderTest.pop_back();
+		renderTest.pop_back();
 		renderCount--;
 	}
 	else
@@ -520,7 +516,7 @@ void CheckVertexBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYP
 	renderList[renderCount].vertEnd = NumVertices + numVerts;
 	renderList[renderCount].indexEnd = NumIndicies + realNumVerts;
 
-//	renderTest.push_back(renderList[renderCount]);
+	renderTest.push_back(renderList[renderCount]);
 	renderCount++;
 
 	NumVertices += numVerts;
@@ -552,8 +548,8 @@ BOOL LockExecuteBuffer()
 	
 	orthoOffset = 0;
 	orthoListCount = 0;
-	
-//	renderTest.resize(0);
+
+	renderTest.resize(0);
 
     return TRUE;
 }
@@ -732,8 +728,8 @@ BOOL ExecuteBuffer()
 //	if (NumVertices < 3)
 //		return FALSE;
 
-//	std::sort(renderTest.begin(), renderTest.end());
-//	std::sort(renderList.begin(), renderList.end());
+	// sort the list of render objects
+	std::sort(renderTest.begin(), renderTest.end());
 
 #ifdef WIN32
 	Font_DrawText("blah", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
@@ -762,18 +758,17 @@ BOOL ExecuteBuffer()
 	// we can assume to keep this turned on
 	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
-#if 1
 	for (size_t i = 0; i < renderCount; i++)
 	{
-		if (renderList[i].translucencyType != TRANSLUCENCY_OFF) 
+		if (renderTest[i].translucencyType != TRANSLUCENCY_OFF) 
 			continue;
 
 		// texture stuff here
-		ChangeTexture(renderList[i].textureID);
+		ChangeTexture(renderTest[i].textureID);
 
-		ChangeTranslucencyMode(renderList[i].translucencyType);
+		ChangeTranslucencyMode(renderTest[i].translucencyType);
 
-		UINT numPrimitives = (renderList[i].indexEnd - renderList[i].indexStart) / 3;
+		UINT numPrimitives = (renderTest[i].indexEnd - renderTest[i].indexStart) / 3;
 
 		if (numPrimitives > 0) 
 		{
@@ -781,7 +776,7 @@ BOOL ExecuteBuffer()
 				0, 
 				0, 
 				NumVertices,
-				renderList[i].indexStart,
+				renderTest[i].indexStart,
 				numPrimitives);
 
 			if (FAILED(LastError))
@@ -795,36 +790,36 @@ BOOL ExecuteBuffer()
 	// do transparents here..
 	for (size_t i = 0; i < renderCount; i++)
 	{
-		if (renderList[i].translucencyType == TRANSLUCENCY_OFF) 
+		if (renderTest[i].translucencyType == TRANSLUCENCY_OFF) 
 			continue;
 
 		// texture stuff here
-		ChangeTexture(renderList[i].textureID);
+		ChangeTexture(renderTest[i].textureID);
 
-		ChangeTranslucencyMode(renderList[i].translucencyType);
+		ChangeTranslucencyMode(renderTest[i].translucencyType);
 
 		extern int HUDImageNumber;
 		extern int HUDFontsImageNumber;
 		extern int AAFontImageNumber;
 
 		/* lazy way to get the filtering working correctly :) */
-		if (renderList[i].textureID == AAFontImageNumber 
-			|| renderList[i].textureID == HUDFontsImageNumber 
-			|| renderList[i].textureID == HUDImageNumber)
+		if (renderTest[i].textureID == AAFontImageNumber 
+			|| renderTest[i].textureID == HUDFontsImageNumber 
+			|| renderTest[i].textureID == HUDImageNumber)
 		{
 			ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 		}
 		else ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
-		UINT numPrimitives = (renderList[i].indexEnd - renderList[i].indexStart) / 3;
+		UINT numPrimitives = (renderTest[i].indexEnd - renderTest[i].indexStart) / 3;
 
 		if (numPrimitives > 0) 
 		{
 			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 
 			   0, 
-			   0, 
+			   0,
 			   NumVertices,
-			   renderList[i].indexStart,
+			   renderTest[i].indexStart,
 			   numPrimitives);
 
 			if (FAILED(LastError))
@@ -838,13 +833,13 @@ BOOL ExecuteBuffer()
 	// render any orthographic quads
 	if (orthoListCount)
 	{
-		LastError = d3d.lpD3DDevice->SetStreamSource (0, d3d.lpD3DOrthoVertexBuffer, 0, sizeof(ORTHOVERTEX));
+		LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DOrthoVertexBuffer, 0, sizeof(ORTHOVERTEX));
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
 
-		LastError = d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
+		LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_ORTHOVERTEX);
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
@@ -866,86 +861,6 @@ BOOL ExecuteBuffer()
 		}
 	}
 
-#else
-	for (unsigned int i = 0; i < /*renderTest.size()*/renderCount; i++)
-	{
-		tempTexture = renderList[i].texture_id;
-
-		if (renderList[i].translucency_type != TRANSLUCENCY_OFF) continue;
-
-		// texture stuff here
-		ChangeTexture(tempTexture);
-
-		ChangeTranslucencyMode(renderList[i].translucency_type);
-
-		unsigned int num_prims = (renderList[i].index_end - renderList[i].index_start) / 3;
-//		unsigned int num_prims = (renderList[i].vert_end - renderList[i].vert_start) / 3;
-
-		if (num_prims > 0) 
-		{
-			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 
-			   0, 
-			   0, 
-			   NumVertices,
-			   renderList[i].index_start,
-			   num_prims);
-
-//			LastError = d3d.lpD3DDevice->DrawPrimitive( D3DPT_TRIANGLELIST, renderTest[i].vert_start, num_prims);
-			draw_calls_per_frame++;
-			if (FAILED(LastError)){
-//				OutputDebugString(" Couldn't Draw Primitive!");
-				LogError(LastError);
-			}
-		}
-	}
-
-/* do transparents here.. */
-
-//	for (int i = 0; i <= pos; i++) 
-	for (unsigned int i = 0; i < /*renderTest.size()*/renderCount; i++)
-	{
-		tempTexture = renderList[i].texture_id;
-
-		if (renderList[i].translucency_type == TRANSLUCENCY_OFF) continue;
-
-		// texture stuff here
-		ChangeTexture(tempTexture);
-
-		ChangeTranslucencyMode(renderList[i].translucency_type);
-
-		extern int HUDImageNumber;
-		extern int HUDFontsImageNumber;
-		extern int AAFontImageNumber;
-
-		/* lazy way to get the filtering working correctly :) */
-		if ( tempTexture == AAFontImageNumber || tempTexture == HUDFontsImageNumber || tempTexture == HUDImageNumber)
-		{
-			ChangeFilteringMode(FILTERING_BILINEAR_OFF);
-		}
-		else ChangeFilteringMode(FILTERING_BILINEAR_ON);
-
-		unsigned int num_prims = (renderList[i].index_end - renderList[i].index_start) / 3;
-
-//		unsigned int num_prims = (renderList[i].vert_end - renderList[i].vert_start) / 3;
-
-		if (num_prims > 0) 
-		{
-			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 
-			   0, 
-			   0, 
-			   NumVertices,
-			   renderList[i].index_start,
-			   num_prims);
-
-//			LastError = d3d.lpD3DDevice->DrawPrimitive( D3DPT_TRIANGLELIST, renderTest[i].vert_start, num_prims);
-			draw_calls_per_frame++;
-			if (FAILED(LastError)){
-//				OutputDebugString(" Couldn't Draw Primitive!");
-				LogError(LastError);
-			}
-		}
-	}
-#endif
 	return TRUE;
 }
 
@@ -1293,7 +1208,7 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 		mainVertex[vb].sz = 1.0f;
 		mainVertex[vb].rhw = oneOverZ;
 		mainVertex[vb].color = RGBLIGHT_MAKE(vertices->R,vertices->G,vertices->B);
-		mainVertex[vb].specular=RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 		mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
 		mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
 
@@ -4706,8 +4621,8 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 	// set the texture
 	LastError = d3d.lpD3DDevice->SetTexture(0, fmvTexture);
 
-	d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
-	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(ORTHOVERTEX));
+	d3d.lpD3DDevice->SetFVF(D3DFVF_ORTHOVERTEX);
+	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(ORTHOVERTEX));
 	if (FAILED(LastError))
 	{
 		OutputDebugString("DrawPrimitiveUP failed\n");

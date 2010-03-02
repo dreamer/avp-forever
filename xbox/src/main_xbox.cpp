@@ -130,7 +130,7 @@ void exit_break_point_fucntion ()
 #if debug
 	if (WindowMode == WindowModeSubWindow)
 	{
-		__asm int 3;
+		__debugbreak();
 	}
 #endif
 }
@@ -146,7 +146,7 @@ void _cdecl main()
 	char * instr;
 	I_AVP_ENVIRONMENTS level_to_load = I_Num_Environments;
 
-	_controlfp(_PC_24,_MCW_PC); // bjd - CHECK
+//	_controlfp(_PC_24,_MCW_PC); // bjd - CHECK
 
 	InitFmvCutscenes();
 
@@ -165,120 +165,87 @@ void _cdecl main()
 		game. If you want to put something in it it must
 		be something that only needs to be called once
 	****/
-#if 1
-	#if debug && 1//!PREDATOR_DEMO
+	//see if any extra npc rif files should be loaded
+	char* strpos = strstr(command_line, "-l");
+	if (strpos)
 	{
-/*
-		#if OverrideOldMenus
+		while (strpos)
 		{
-			HWAccel = 1;
- 		}
-		#else
-		if(strstr(command_line, "-h"))
-		{
-			HWAccel = 1;
-		}
-		#endif
-*/
-		//see if any extra npc rif files should be loaded
-		{
-			char* strpos=strstr(command_line, "-l");
-			if(strpos)
+			strpos += 2;
+			if (*strpos >= 'a' && *strpos <= 'z')
 			{
-				while(strpos)
+				while (*strpos >= 'a' && *strpos <= 'z')
 				{
-					strpos+=2;
-					if(*strpos>='a' && *strpos<='z')
+					switch (*strpos)
 					{
-						while(*strpos>='a' && *strpos<='z')
-						{
-							switch (*strpos)
-							{
-								case 'a':
-									ForceLoad_Alien = TRUE;
-									break;
-								case 'm':
-									ForceLoad_Marine = TRUE;
-									break;
-								case 'p':
-									ForceLoad_Predator = TRUE;
-									break;
-								case 'h':
-									ForceLoad_Hugger = TRUE;
-									break;
-								case 'q':
-									ForceLoad_Queen = TRUE;
-									break;
-								case 'c':
-									ForceLoad_Civvie = TRUE;
-									break;
-								case 'x':
-									ForceLoad_Xenoborg = TRUE;
-									break;
-								case 't':
-									ForceLoad_Pretorian = TRUE;
-									break;
-								case 'r':
-									ForceLoad_PredAlien = TRUE;
-									break;
-								case 's':
-									ForceLoad_SentryGun = TRUE;
-									break;
-							}
-							strpos++;
-						}
+						case 'a':
+							ForceLoad_Alien = TRUE;
+							break;
+						case 'm':
+							ForceLoad_Marine = TRUE;
+							break;
+						case 'p':
+							ForceLoad_Predator = TRUE;
+							break;
+						case 'h':
+							ForceLoad_Hugger = TRUE;
+							break;
+						case 'q':
+							ForceLoad_Queen = TRUE;
+							break;
+						case 'c':
+							ForceLoad_Civvie = TRUE;
+							break;
+						case 'x':
+							ForceLoad_Xenoborg = TRUE;
+							break;
+						case 't':
+							ForceLoad_Pretorian = TRUE;
+							break;
+						case 'r':
+							ForceLoad_PredAlien = TRUE;
+							break;
+						case 's':
+							ForceLoad_SentryGun = TRUE;
+							break;
 					}
-					else
-					{
-						ForceLoad_Alien = TRUE;
-					}
-					strpos=strstr(strpos,"-l");
+					strpos++;
 				}
 			}
+			else
+			{
+				ForceLoad_Alien = TRUE;
+			}
+			strpos = strstr(strpos, "-l");
 		}
-
-		#ifdef AVP_DEBUG_VERSION
-		if (strstr(command_line, "-intro"))	WeWantAnIntro();
-		if (strstr(command_line, "-qm"))
-		{
-			QuickStartMultiplayer = 1;
-		}
-		else if (strstr(command_line, "-qa"))
-		{
-			QuickStartMultiplayer = 2;
-		}
-		else if (strstr(command_line, "-qp"))
-		{
-			QuickStartMultiplayer = 3;
-		}
-		else
-		{
-			QuickStartMultiplayer = 0;
-		}
-
-		if(strstr(command_line,"-keeprif"))
-		{
-			KeepMainRifFile=TRUE;
-		}
-/*
-		if (strstr(command_line, "-m"))
-		{
-			UseMouseCentreing = 1;
-		}
-*/
-		#endif //AVP_DEBUG_VERSION
 	}
-	#else
+
+	#ifdef AVP_DEBUG_VERSION
+	if (strstr(command_line, "-intro"))	WeWantAnIntro();
+	if (strstr(command_line, "-qm"))
 	{
-		#if OverrideOldMenus
-		{
-			HWAccel = 1;
-		}
-		#endif
+		QuickStartMultiplayer = 1;
 	}
-	#endif
+	else if (strstr(command_line, "-qa"))
+	{
+		QuickStartMultiplayer = 2;
+	}
+	else if (strstr(command_line, "-qp"))
+	{
+		QuickStartMultiplayer = 3;
+	}
+	else
+	{
+		QuickStartMultiplayer = 0;
+	}
 
-	if(strstr(command_line,"-server"))
+	if (strstr(command_line, "-keeprif"))
+	{
+		KeepMainRifFile = TRUE;
+	}
+	#endif //AVP_DEBUG_VERSION
+
+	if (strstr(command_line,"-server"))
 	{
 /*
 		extern int DirectPlay_InitLobbiedGame();
@@ -291,7 +258,7 @@ void _cdecl main()
 		}
 */
 	}
-	else if(strstr(command_line,"-client"))
+	else if (strstr(command_line, "-client"))
 	{
 /*
 		extern int DirectPlay_InitLobbiedGame();
@@ -309,7 +276,7 @@ void _cdecl main()
 		DebuggingCommandsActive = 1;
 	}
 
-	if(instr = strstr(command_line, "-ip"))
+	if (instr = strstr(command_line, "-ip"))
 	{
 		char buffer[100];
 		extern char CommandLineIPAddressString[];
@@ -319,7 +286,6 @@ void _cdecl main()
 		CommandLineIPAddressString[15] = 0;
 	}
 
-#endif
  	// Modified by Edmond for mplayer demo
  	#if MPLAYER_DEMO
  	if (!LobbiedGame)
@@ -352,10 +318,10 @@ void _cdecl main()
 	/****** REMOVE FOR GAME!!!!! ******/
 
 	#if debug && 1//!PREDATOR_DEMO
-/*
-	if(instr = strstr(command_line, "-s"))
+
+	if (instr = strstr(command_line, "-s"))
 		sscanf(instr, "-s%d", &level_to_load);
-*/
+
 	#endif
 
 	Env_List[0]->main = LevelName;
@@ -399,10 +365,10 @@ void _cdecl main()
 	LoadSounds("PLAYER");
 
 	#if PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO
-	if(AvP_MainMenus())
+	if (AvP_MainMenus())
 	#else
 
-	while(AvP_MainMenus())
+	while (AvP_MainMenus())
 	#endif
 	{
 		int menusActive=0;
@@ -428,7 +394,6 @@ void _cdecl main()
 
 		/* turn off any special effects */
 		d3d_light_ctrl.ctrl = LCCM_NORMAL;
-		d3d_overlay_ctrl.ctrl = OCCM_NORMAL;
 
 		/* JH 20/5/97
 			The video mode is no longer set when exiting the menus

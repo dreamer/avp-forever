@@ -2329,13 +2329,9 @@ void D3D_FMVParticle_Output(RENDERVERTEX *renderVerticesPtr)
 
 
 extern int CloakingPhase;
-extern int sine[];
-extern int cosine[];
 extern int NumActiveBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
 extern int GlobalAmbience;
-extern unsigned char *ScreenBuffer;
-extern long BackBufferPitch;
 
 unsigned short FlameFunction(int x, int y);
 void InitRandomArrays(void);
@@ -6639,7 +6635,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 
 	// lock the d3d texture
 	D3DLOCKED_RECT textureRect;
-	LastError = ftPtr->ImagePtr->Direct3DTexture->LockRect(0, &textureRect, NULL, /*D3DLOCK_DISCARD*/0);
+	LastError = ftPtr->ImagePtr->Direct3DTexture->LockRect(0, &textureRect, NULL, D3DLOCK_DISCARD);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -6661,10 +6657,10 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 			destPtr[2] = srcPtr[2];
 			destPtr[3] = srcPtr[3];
 */
-			memcpy(destPtr, srcPtr, 4);
+			memcpy(destPtr, srcPtr, sizeof(uint32_t));
 
-			destPtr += 4;
-			srcPtr += 4;
+			destPtr += sizeof(uint32_t);
+			srcPtr += sizeof(uint32_t);
 		}
 	}
 
@@ -7474,66 +7470,13 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 	// set the texture
 	LastError = d3d.lpD3DDevice->SetTexture(0, fmvTexture);
 
-	d3d.lpD3DDevice->SetVertexShader (D3DFVF_ORTHOVERTEX);
-	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(ORTHOVERTEX));
+	d3d.lpD3DDevice->SetVertexShader(D3DFVF_ORTHOVERTEX);
+	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(ORTHOVERTEX));
 	if (FAILED(LastError))
 	{
 		OutputDebugString("DrawPrimitiveUP failed\n");
 	}
 
-	OutputDebugString("drew fmv frame\n");
-/*
-	int topX = (ScreenDescriptorBlock.SDB_Width - frameWidth) / 2;
-	int topY = (ScreenDescriptorBlock.SDB_Height - frameHeight) / 2;
-
-	// bottom left
-	quadVert[0].sx = (float)topX - 0.5f;
-	quadVert[0].sy = (float)topY + frameHeight - 0.5f;
-	quadVert[0].sz = 0.0f;
-	quadVert[0].rhw = 1.0f;
-	quadVert[0].color = D3DCOLOR_ARGB(255,255,255,255);
-	quadVert[0].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[0].tu = 0.0f;
-	quadVert[0].tv = (1.0f / textureHeight) * frameHeight;
-
-	// top left
-	quadVert[1].sx = (float)topX - 0.5f;
-	quadVert[1].sy = (float)topY - 0.5f;
-	quadVert[1].sz = 0.0f;
-	quadVert[1].rhw = 1.0f;
-	quadVert[1].color = D3DCOLOR_ARGB(255,255,255,255);
-	quadVert[1].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[1].tu = 0.0f;
-	quadVert[1].tv = 0.0f;
-
-	// bottom right
-	quadVert[2].sx = (float)topX + frameWidth - 0.5f;
-	quadVert[2].sy = (float)topY + frameHeight - 0.5f;
-	quadVert[2].sz = 0.0f;
-	quadVert[2].rhw = 1.0f;
-	quadVert[2].color = D3DCOLOR_ARGB(255,255,255,255);
-	quadVert[2].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[2].tu = (1.0f / textureWidth) * frameWidth;
-	quadVert[2].tv = (1.0f / textureHeight) * frameHeight;
-
-	// top right
-	quadVert[3].sx = (float)topX + frameWidth - 0.5f;
-	quadVert[3].sy = (float)topY - 0.5f;
-	quadVert[3].sz = 0.0f;
-	quadVert[3].rhw = 1.0f;
-	quadVert[3].color = D3DCOLOR_ARGB(255,255,255,255);
-	quadVert[3].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[3].tu = (1.0f / textureWidth) * frameWidth;
-	quadVert[3].tv = 0.0f;
-
-	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
-
-	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
-*/
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_WRAP);
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_WRAP);
 }

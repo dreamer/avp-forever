@@ -350,7 +350,7 @@ void InteriorType_Body()
 		/* eye offset */
 		VECTORCH ioff;
 		COLLISION_EXTENTS *extentsPtr = 0;
-		PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (sbPtr->SBdataptr);
+		PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *)(sbPtr->SBdataptr);
 
 		switch(AvP.PlayerType)
 		{
@@ -498,11 +498,10 @@ void UpdateCamera(void)
 
 	// update the two globals
 	Global_VDB_Ptr->VDB_World = dptr_s->ObWorld; // world space location
-	Global_VDB_Ptr->VDB_Mat = dptr_s->ObMat; // local -> world orientation matrix
+	Global_VDB_Ptr->VDB_Mat = dptr_s->ObMat;	 // local -> world orientation matrix
 
 	// world position
-	sprintf(buf, "player world location - x: %d y: %d z: %d\n", Global_VDB_Ptr->VDB_World.vx,
-		Global_VDB_Ptr->VDB_World.vy, Global_VDB_Ptr->VDB_World.vz);
+	sprintf(buf, "player world location - x: %d y: %d z: %d\n", Global_VDB_Ptr->VDB_World.vx, Global_VDB_Ptr->VDB_World.vy, Global_VDB_Ptr->VDB_World.vz);
 //	OutputDebugString(buf);
 
 	sprintf(buf, 

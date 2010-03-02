@@ -260,9 +260,9 @@ char *LoadTextFile(char *filename)
 	
 	if (!fp) goto error;
 
-	save_pos=ftell(fp);
-	fseek(fp,0L,SEEK_END);
-	size_of_file=ftell(fp);
+	save_pos = ftell(fp);
+	fseek(fp, 0L, SEEK_END);
+	size_of_file = ftell(fp);
 	
 	bufferPtr = AllocateMem(size_of_file);
 	if (!bufferPtr)

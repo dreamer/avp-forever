@@ -1024,7 +1024,7 @@ extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 	size_t fastFileLength;
 	void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
 
-	if(pFastFileData)
+	if (pFastFileData)
 	{
 		//D3DTexture *ImagePtr; 
 
@@ -1052,7 +1052,7 @@ extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 		*/
 
 		//load from fast file
-		gfxPtr->ImagePtr = AwCreateTexture//Surface
+		gfxPtr->ImagePtr = AwCreateTexture
 							(
 								"pxfXYB",
 								pFastFileData,
@@ -1066,7 +1066,7 @@ extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 	else
 	{
 		//load graphic from rim file
-		gfxPtr->ImagePtr = AwCreateTexture//Surface
+		gfxPtr->ImagePtr = AwCreateTexture
 							(
 								"sfXYB",
 								buffer,

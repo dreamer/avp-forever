@@ -44,15 +44,12 @@ void InitTextStrings(void)
 	
 	#if MARINE_DEMO
 	filenamePtr = "menglish.txt";
-//	TextBufferPtr = LoadTextFile("menglish.txt");
 	#elif ALIEN_DEMO
 	filenamePtr = "aenglish.txt";
-//	TextBufferPtr = LoadTextFile("aenglish.txt");
 	#elif USE_LANGUAGE_TXT
 	filenamePtr = "language.txt";
 	#else
 	filenamePtr = LanguageFilename[AvP.Language];
-//	TextBufferPtr = LoadTextFile(LanguageFilename[AvP.Language]);
 	#endif
 
 	TextBufferPtr = LoadTextFile(filenamePtr);
@@ -61,12 +58,12 @@ void InitTextStrings(void)
 	{
 		/* have to quit if this file isn't available */
 		char message[100];
-		sprintf(message,"Unable to load language file: %s\n",filenamePtr);
+		sprintf(message, "Unable to load language file: %s\n", filenamePtr);
 		avp_MessageBox(message, MB_OK);
 		avp_exit(1);
 	}
 
-	if (!strncmp (TextBufferPtr, "REBCRIF1", 8))
+	if (!strncmp(TextBufferPtr, "REBCRIF1", 8))
 	{
 		textPtr = (char*)HuffmanDecompress((HuffmanPackage*)(TextBufferPtr)); 		
 		DeallocateMem(TextBufferPtr);
@@ -78,7 +75,7 @@ void InitTextStrings(void)
 	}
 
 	/* check if language file is not from Gold version */
-	if (strncmp (textPtr, "REBINFF2", 8))
+	if (strncmp(textPtr, "REBINFF2", 8))
 	{
 		char message[100];
 		sprintf(message,"File %s is not compatible with Gold Edition\n",filenamePtr);
@@ -86,7 +83,7 @@ void InitTextStrings(void)
 		avp_exit(1);
 	}
 
-	AddToTable( EmptyString );
+	AddToTable(EmptyString);
 
 	for (i=1; i<MAX_NO_OF_TEXTSTRINGS; i++)
 	{	

@@ -482,7 +482,7 @@ int PlatStartSoundSys()
 	XA2Listener.OrientFront.z = 1.0f;
 
 	XA2Listener.OrientTop.x = 0.0f;
-	XA2Listener.OrientTop.y = -1.0f;
+	XA2Listener.OrientTop.y = 1.0f;
 	XA2Listener.OrientTop.z = 0.0f;
 
 	XA2Listener.Velocity.x = 0.0f;
@@ -825,7 +825,7 @@ int PlatSoundHasStopped(int activeIndex)
 int PlatDo3dSound(int activeIndex)
 {
 	int distance = 0;
-	VECTORCH relativePosn = {0};
+	VECTORCH relativePosn;
 	int newVolume = 0;
 	int newPan = 0;
 
@@ -835,11 +835,11 @@ int PlatDo3dSound(int activeIndex)
 	relativePosn.vz = ActiveSounds[activeIndex].threedeedata.position.vz - Global_VDB_Ptr->VDB_World.vz;
 	distance = Magnitude(&relativePosn);
 
-	ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vx);
-	ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vy);
-	ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vz);
+	ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>((ActiveSounds[activeIndex].threedeedata.position.vx) / 65536.0F);
+	ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>((ActiveSounds[activeIndex].threedeedata.position.vy) / 65536.0F);
+	ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>((ActiveSounds[activeIndex].threedeedata.position.vz) / 65536.0F);
 
-//	sprintf(buf, "Sound Posn (%i, %i, %i)\n", ActiveSounds[activeIndex].threedeedata.position.vx, ActiveSounds[activeIndex].threedeedata.position.vy, ActiveSounds[activeIndex].threedeedata.position.vz);
+//	sprintf(buf, "Sound Posn (%f, %f, %f)\n", ActiveSounds[activeIndex].xa2Emitter.Position.x, ActiveSounds[activeIndex].xa2Emitter.Position.y, ActiveSounds[activeIndex].xa2Emitter.Position.z);
 //	OutputDebugString(buf);
 
 	db_logf5(("Sound Index %i", ActiveSounds[activeIndex].soundIndex));
@@ -934,9 +934,9 @@ int PlatDo3dSound(int activeIndex)
 	{
 		if (ActiveSounds[activeIndex].is3D)
 		{
-			ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(relativePosn.vx);
-			ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(relativePosn.vy);
-			ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(relativePosn.vz);
+//			ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(relativePosn.vx);
+//			ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(relativePosn.vy);
+//			ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(relativePosn.vz);
 
 
 			/* Use the Hardware. */
@@ -1515,15 +1515,15 @@ void PlatUpdatePlayer()
 		XA2Listener.Position.y = static_cast<float>(Global_VDB_Ptr->VDB_World.vy);
 		XA2Listener.Position.z = static_cast<float>(Global_VDB_Ptr->VDB_World.vz);
 
-		if (AvP.PlayerType != I_Alien)
-		{
-			XA2Listener.OrientFront.x = (float) ((Global_VDB_Ptr->VDB_Mat.mat13) / 65536.0F);
-			XA2Listener.OrientFront.y = 0.0f;
-			XA2Listener.OrientFront.z = (float) ((Global_VDB_Ptr->VDB_Mat.mat33) / 65536.0F);
+		// look-at
+		XA2Listener.OrientFront.x = (float)((Global_VDB_Ptr->VDB_Mat.mat13) / 65536.0F);
+		XA2Listener.OrientFront.y = (float)((Global_VDB_Ptr->VDB_Mat.mat23) / 65536.0F);
+		XA2Listener.OrientFront.z = (float)((Global_VDB_Ptr->VDB_Mat.mat33) / 65536.0F);
 
-			XA2Listener.OrientTop.x = 0.0f;
-			XA2Listener.OrientTop.y = 1.0f;
-			XA2Listener.OrientTop.z = 0.0f;
+		// up
+		XA2Listener.OrientTop.x = (float)((Global_VDB_Ptr->VDB_Mat.mat12) / 65536.0F);
+		XA2Listener.OrientTop.y = (float)((Global_VDB_Ptr->VDB_Mat.mat22) / 65536.0F);
+		XA2Listener.OrientTop.z = (float)((Global_VDB_Ptr->VDB_Mat.mat32) / 65536.0F);
 /*
 			char buf2[250];
 			sprintf(buf2, "of:x %f of:y %f of:z :%f - ot:x %f ot:y %f ot:z :%f\n", 
@@ -1535,27 +1535,6 @@ void PlatUpdatePlayer()
 				XA2Listener.OrientTop.z);
 			OutputDebugString(buf2);
 */
-		}
-		else
-		{
-			XA2Listener.OrientFront.x = (float) ((Global_VDB_Ptr->VDB_Mat.mat13) / 65536.0F);
-			XA2Listener.OrientFront.y = (float) ((Global_VDB_Ptr->VDB_Mat.mat23) / 65536.0F);
-			XA2Listener.OrientFront.z = (float) ((Global_VDB_Ptr->VDB_Mat.mat33) / 65536.0F);
-			XA2Listener.OrientTop.x = (float) ((Global_VDB_Ptr->VDB_Mat.mat12) / 65536.0F);
-			XA2Listener.OrientTop.y = (float) ((Global_VDB_Ptr->VDB_Mat.mat22) / 65536.0F);
-			XA2Listener.OrientTop.z = (float) ((Global_VDB_Ptr->VDB_Mat.mat32) / 65536.0F);
-/*
-			char buf2[250];
-			sprintf(buf2, "of:x %f of:y %f of:z :%f - ot:x %f ot:y %f ot:z :%f\n", 
-				XA2Listener.OrientFront.x,
-				XA2Listener.OrientFront.y,
-				XA2Listener.OrientFront.z,
-				XA2Listener.OrientTop.x,
-				XA2Listener.OrientTop.y,
-				XA2Listener.OrientTop.z);
-			OutputDebugString(buf2);
-*/
-		}
 
 		if (AvP.PlayerType == I_Alien && DopplerShiftIsOn && NormalFrameTime)
 		{
@@ -1591,12 +1570,11 @@ void PlatUpdatePlayer()
 
 			X3DAudioCalculate(x3DInstance, &XA2Listener, &ActiveSounds[i].xa2Emitter, calcFlags, &XA2DSPSettings);
 
-			sprintf(buf, "1: %f 2: %f\n", XA2DSPSettings.pMatrixCoefficients[0], XA2DSPSettings.pMatrixCoefficients[1]);
-			OutputDebugString(buf);
+//			sprintf(buf, "1: %f 2: %f\n", XA2DSPSettings.pMatrixCoefficients[0], XA2DSPSettings.pMatrixCoefficients[1]);
+//			OutputDebugString(buf);
 
 			ActiveSounds[i].pSourceVoice->SetOutputMatrix(pMasteringVoice, 1, 2, XA2DSPSettings.pMatrixCoefficients);
-
-			ActiveSounds[i].pSourceVoice->SetFrequencyRatio(XA2DSPSettings.DopplerFactor);
+//			ActiveSounds[i].pSourceVoice->SetFrequencyRatio(XA2DSPSettings.DopplerFactor);
 		}
 	}
 #endif

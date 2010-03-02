@@ -28,7 +28,6 @@ typedef enum activesoundpriority
 }ACTIVESOUNDPRIORITY;
 
 /* this is a structure for new 3d sound support */
-
 typedef struct sound3ddata
 {
 	VECTORCH position;

@@ -78,6 +78,12 @@ class TheoraFMV
 		bool mFrameReady;
 		bool mAudioStarted;
 
+		// Offset of the page which was last read.
+		ogg_int64_t mPageOffset;
+
+		// Offset of first non-header page in file.
+		ogg_int64_t mDataOffset;
+
 		TheoraFMV() :
 			mGranulePos(0),
 			mAudioStream(0),
@@ -97,6 +103,8 @@ class TheoraFMV
 			mFmvPlaying(false),
 			mFrameReady(false),
 			mAudioStarted(false),
+			mPageOffset(0),
+			mDataOffset(0),
 			mFrameCriticalSectionInited(false)
 		{
 
@@ -105,7 +113,7 @@ class TheoraFMV
 
 		int	Open(const std::string &fileName);
 		void Close();
-		bool ReadPage(ogg_page *page);
+		ogg_int64_t TheoraFMV::ReadPage(ogg_page *page);
 		bool ReadPacket(OggStream *stream, ogg_packet *packet);
 		void ReadHeaders();
 		void HandleTheoraData(OggStream *stream, ogg_packet *packet);
@@ -114,6 +122,7 @@ class TheoraFMV
 		bool NextFrame(int width, int height, uint8_t *bufferPtr, int pitch);
 		bool HandleTheoraHeader(OggStream* stream, ogg_packet* packet);
 		bool HandleVorbisHeader(OggStream* stream, ogg_packet* packet);
+		bool HandleSkeletonHeader(OggStream* stream, ogg_packet* packet);
 };
 
 #endif
