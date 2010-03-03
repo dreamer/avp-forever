@@ -815,7 +815,7 @@ void DirectReadKeyboard(void)
 
 	// mouse wheel - read using windows messages
 	{
-		extern signed int MouseWheelStatus;
+		extern int16_t MouseWheelStatus;
 		if (MouseWheelStatus > 0)
 		{
 			KeyboardInput[KEY_MOUSEWHEELUP] = TRUE;

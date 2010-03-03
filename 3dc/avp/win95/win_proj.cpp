@@ -26,7 +26,6 @@ extern unsigned char GotAnyKey;
 	
 #include "alt_tab.h"
 
-	
 #include "dxlog.h"
 #include <zmouse.h>
 
@@ -34,7 +33,7 @@ void MakeToAsciiTable(void);
 
 // mousewheel msg id
 UINT const RWM_MOUSEWHEEL = RegisterWindowMessage(MSH_MOUSEWHEEL);
-signed int MouseWheelStatus;
+int16_t MouseWheelStatus;
 
 unsigned char ksarray[256];
 unsigned char ToAsciiTable[256][256];
@@ -104,15 +103,13 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
  	if (message == RWM_MOUSEWHEEL)
 	{
 		message = WM_MOUSEWHEEL;
-		wParam <<= 16;
 	}
 
 	switch (message)
     {
 		case WM_MOUSEWHEEL:
 		{
-			MouseWheelStatus = wParam;
-			MouseWheelStatus>>=16;
+			MouseWheelStatus = (int16_t)HIWORD(wParam);
 			return 0;
 		}
 
@@ -186,7 +183,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 				}
 			}
 
-			IngameKeyboardInput_KeyDown(wParam);
+			IngameKeyboardInput_KeyDown((char)wParam);
 #if 0
 			int scancode = (lParam>>16)&255;
 			unsigned char vkcode = (wParam&255);
@@ -280,7 +277,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 				}
 			}
 
-			IngameKeyboardInput_KeyUp(wParam);
+			IngameKeyboardInput_KeyUp((char)wParam);
 #if 0
 			int scancode = (lParam>>16)&255;
 			unsigned char vkcode = (wParam&255);
@@ -436,7 +433,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 		/* Patrick 11/6/97: this to detects the end of a cdda track */
 		case MM_MCINOTIFY:
-			PlatCDDAManagementCallBack(wParam, lParam);
+			PlatCDDAManagementCallBack(wParam, (LONG)lParam);
 			break;
 
 		case WM_DESTROY:

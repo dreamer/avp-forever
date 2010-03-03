@@ -75,8 +75,8 @@ BOOL g_bMustRedrawScreen = FALSE;
 
 void CheckForWindowsMessages(void)
 {
-	MSG         msg;
-	extern signed int MouseWheelStatus;
+	MSG	msg;
+	extern int16_t MouseWheelStatus;
 	
 	MouseWheelStatus = 0;
 

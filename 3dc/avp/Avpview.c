@@ -89,8 +89,6 @@ extern int AlienBiteAttackInProgress=0;
 /* phase for cloaked objects */
 int CloakingPhase;
 extern int NormalFrameTime;
-//extern int cosine[];
-//extern int sine[];
 
 int LeanScale;
 EULER deathTargetOrientation = {0,0,0};
@@ -98,6 +96,10 @@ EULER deathTargetOrientation = {0,0,0};
 extern void ColourFillBackBuffer(int FillColour);
 void CheckIfMirroringIsRequired(void);
 static void ModifyHeadOrientation(void);
+void FlushD3DZBuffer();
+void UpdateAllFMVTextures();
+void D3D_DrawBackdrop(void);
+int AVPViewVolumePlaneTest(CLIPPLANEBLOCK *cpb, DISPLAYBLOCK *dblockptr, int or);
 
 #if defined(_MSC_VER)
 #define stricmp		_stricmp
