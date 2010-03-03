@@ -51,14 +51,14 @@ typedef struct
 } HUDCharDesc;
 
 
- 
 extern void D3D_DrawHUDFontCharacter(HUDCharDesc *charDescPtr);
 extern void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr);
-
-
+void D3D_BLTMotionTrackerBlipToHUD(int x, int y, int brightness);
+void D3D_BLTGunSightToHUD(int screenX, int screenY, enum GUNSIGHT_SHAPE gunsightShape);
+void D3D_DrawHUDPredatorDigit(HUDCharDesc *charDescPtr, int scale);
+void D3D_BLTMotionTrackerToHUD(int scanLineSize);
+void Draw_HUDImage(HUDImageDesc *imageDescPtr);
 extern void D3D_BlitWhiteChar(int x, int y, unsigned char c);
-
-
 
 /* KJL 17:55:48 18/04/98 - called by HUD.c */
 extern void Render_HealthAndArmour(unsigned int health, unsigned int armour);

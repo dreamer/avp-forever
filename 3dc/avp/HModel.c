@@ -54,6 +54,9 @@ void Slerp(KEYFRAME_DATA *input,int lerp,QUAT *output);
 void Analyse_Tweening_Data(HMODELCONTROLLER *controller,SECTION_DATA *this_section_data,int base_timer,VECTORCH *output_offset,MATRIXCH *output_matrix);
 static void FindHeatSource_Recursion(HMODELCONTROLLER *controllerPtr, SECTION_DATA *sectionDataPtr);
 void Budge_HModel(HMODELCONTROLLER *controller,VECTORCH *offset);
+void D3D_DecalSystem_Setup(void);
+void D3D_DecalSystem_End(void);
+int SeededFastRandom(void);
 
 /* external globals */
 extern int NormalFrameTime;
@@ -4286,8 +4289,8 @@ void PlayHierarchySound(HIERARCHY_SOUND* sound,VECTORCH* location)
    	Sound_Play (sound->sound_index, "nvpm", &sound->s3d,sound->volume,sound->pitch);
 }
 
-void Init_Tweening_ToTheMiddle_Recursion(SECTION_DATA *this_section_data, int target_sequence_type,int target_subsequence, int seconds_for_tweening, int target_sequence_timer, int backwards) {
-
+void Init_Tweening_ToTheMiddle_Recursion(SECTION_DATA *this_section_data, int target_sequence_type,int target_subsequence, int seconds_for_tweening, int target_sequence_timer, int backwards) 
+{
 	SEQUENCE *sequence_ptr;
 
 	/* Firstly, store current state. */
@@ -4944,8 +4947,8 @@ void LoadHierarchy(SAVE_BLOCK_HEADER* header,HMODELCONTROLLER* controller)
 void SaveHierarchy(HMODELCONTROLLER* controller)
 {
 	HIERARCHY_SAVE_BLOCK* block;
-	if(!controller) return;
-	if(!controller->Root_Section) return;
+	if (!controller) return;
+	if (!controller->Root_Section) return;
 
 	GET_SAVE_BLOCK_POINTER(block);
 	
@@ -4987,7 +4990,7 @@ void SaveHierarchy(HMODELCONTROLLER* controller)
 		char* Rif_Name = controller->Root_Section->Rif_Name;
 
 		//increase the block size by enough to hold these names
-		block->header.size+= strlen(Hierarchy_Name)+strlen(Rif_Name)+2;
+		block->header.size += strlen(Hierarchy_Name)+strlen(Rif_Name)+2;
 
 		//alllocate memoey , and copy names;
 		buffer = GetPointerForSaveBlock(strlen(Hierarchy_Name)+1);
@@ -4995,7 +4998,6 @@ void SaveHierarchy(HMODELCONTROLLER* controller)
 
 		buffer = GetPointerForSaveBlock(strlen(Rif_Name)+1);
 		strcpy(buffer,Rif_Name);
-		
 	}
 
 	//save the delta sequences
@@ -5067,8 +5069,8 @@ static void SaveHierarchyDelta(DELTA_CONTROLLER* delta)
 	int size;
 
 	//work out memory needed
-	size=sizeof(*block) + strlen(delta->id) +1;
-	block = (HIERARCHY_DELTA_SAVE_BLOCK*) GetPointerForSaveBlock(size);
+	size = sizeof(*block) + strlen(delta->id) +1;
+	block = (HIERARCHY_DELTA_SAVE_BLOCK*)GetPointerForSaveBlock(size);
 
 	//fill in the header
 	block->header.size = size;
@@ -5089,8 +5091,6 @@ static void SaveHierarchyDelta(DELTA_CONTROLLER* delta)
 		char* name = (char*)(block+1);
 		strcpy(name,delta->id);
 	}
-	
-	
 }
 
 
@@ -5381,7 +5381,6 @@ static void SaveHierarchySectionRecursion(SECTION_DATA* section)
 	block->header.type = SaveBlock_HierarchySection;	
 	block->header.size = sizeof(*block);
 
-
 	block->IDnumber = section->sempai->IDnumber;
 	
 	//copy stuff
@@ -5406,37 +5405,37 @@ static void SaveHierarchySectionRecursion(SECTION_DATA* section)
 
 	{
 		KEYFRAME_DATA* frame = section->current_sequence->first_frame; 
-		int time=0;
+		int time = 0;
 
-		while(frame != section->current_keyframe)
+		while (frame != section->current_keyframe)
 		{
 			time += frame->Sequence_Length;
 
-			if(frame->last_frame) break;
+			if (frame->last_frame) 
+				break;
 
 			frame = frame->Next_Frame;
 		}
 
 		block->keyframe_time = time;
-
 	}
 
 
 	//save decals (if needed)
-	if(section->NumberOfDecals)
+	if (section->NumberOfDecals)
 	{
 		SaveHierarchySectionDecals(section);
 	}
 
 	//save tweening	(if needed)
-	if(section->Tweening)
+	if (section->Tweening)
 	{
 		SaveHierarchySectionTween(section);
 	}
 
 	//recurse down hierarchy
-	if (section->First_Child!=NULL) {
-		
+	if (section->First_Child!=NULL) 
+	{	
 		SECTION_DATA * child_section;
 		/*
 		Must make sure the children are in the right order before saving.
@@ -5451,11 +5450,7 @@ static void SaveHierarchySectionRecursion(SECTION_DATA* section)
 			child_section = child_section->Next_Sibling;
 		}
 	}
-
-	
 }
-
-
 
 //section decal data
 typedef struct hierarchy_decal_save_block
@@ -5468,9 +5463,6 @@ typedef struct hierarchy_decal_save_block
 }HIERARCHY_DECAL_SAVE_BLOCK;
 
 
-
-
-
 static void LoadHierarchySectionDecals(SAVE_BLOCK_HEADER* header,SECTION_DATA* section)
 {
 	int i;
@@ -5480,11 +5472,10 @@ static void LoadHierarchySectionDecals(SAVE_BLOCK_HEADER* header,SECTION_DATA* s
 	COPYELEMENT_LOAD(NumberOfDecals);
 	COPYELEMENT_LOAD(NextDecalToUse);
 
-	for(i=0;i<block->NumberOfDecals;i++)
+	for (i = 0; i < block->NumberOfDecals; i++)
 	{
 		COPYELEMENT_LOAD(Decals[i]);
 	}
-
 }
 
 
@@ -5504,16 +5495,13 @@ static void SaveHierarchySectionDecals(SECTION_DATA* section)
 	block->header.size = size;
 
 	//copy the decals
-
 	COPYELEMENT_SAVE(NumberOfDecals);
 	COPYELEMENT_SAVE(NextDecalToUse);
 
-	for(i=0;i<block->NumberOfDecals;i++)
+	for (i = 0; i < block->NumberOfDecals; i++)
 	{
 		COPYELEMENT_SAVE(Decals[i]);
 	}
-
-
 }
 
 
@@ -5533,14 +5521,14 @@ typedef struct hierarchy_tween_save_block
 	int oneovertweeninglength;	
 	unsigned int Tweening:1;
 
-	
 }HIERARCHY_TWEEN_SAVE_BLOCK;
 
 static void LoadHierarchySectionTween(SAVE_BLOCK_HEADER* header,SECTION_DATA* section)
 {
 	//see if this section has tweening data saved
 	HIERARCHY_TWEEN_SAVE_BLOCK* block = (HIERARCHY_TWEEN_SAVE_BLOCK*) header;
-	if(!block) return;
+	if (!block) 
+		return;
 
 	COPYELEMENT_LOAD(stored_offset);
    	COPYELEMENT_LOAD(target_offset);
@@ -5574,5 +5562,4 @@ static void SaveHierarchySectionTween(SECTION_DATA* section)
    	COPYELEMENT_SAVE(oneoversinomega);
    	COPYELEMENT_SAVE(oneovertweeninglength);	
 	COPYELEMENT_SAVE(Tweening);
-
 }

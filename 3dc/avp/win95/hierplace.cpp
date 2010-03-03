@@ -31,49 +31,49 @@ Placed_Hierarchy_Chunk::Placed_Hierarchy_Chunk(Chunk_With_Children* parent,const
 ///////////////////////////////////////////////////////////////////////
 RIF_IMPLEMENT_DYNCREATE("PLACHIDT",Placed_Hierarchy_Data_Chunk)
 
-Placed_Hierarchy_Data_Chunk::Placed_Hierarchy_Data_Chunk(Chunk_With_Children* parent,const char* data, const size_t)
+Placed_Hierarchy_Data_Chunk::Placed_Hierarchy_Data_Chunk(Chunk_With_Children* parent, const char* data, const size_t)
 :Chunk(parent,"PLACHIDT")
 {
-	int length=strlen(data);
+	size_t length = strlen(data);
 
-	if(length)
+	if (length)
 	{
-		name=new char[length+1];
-		strcpy(name,data);
+		name = new char[length+1];
+		strcpy(name, data);
 	}
 	else
 	{
-		name=0;
+		name = 0;
 	}
-	data+=(length+4)&~3;
+	data += (length+4)&~3;
 
-	hierarchy_index=*(int*)data;
-	data+=4;
+	hierarchy_index = *(int*)data;
+	data += 4;
 
-	location=*(ChunkVectorInt*)data;
-	data+=sizeof(ChunkVectorInt);
+	location = *(ChunkVectorInt*)data;
+	data += sizeof(ChunkVectorInt);
 
-	orientation=*(ChunkQuat*)data;
-	data+=sizeof(ChunkQuat);
+	orientation = *(ChunkQuat*)data;
+	data += sizeof(ChunkQuat);
 
-	id=*(ObjectID*)data;
-	data+=sizeof(ObjectID);
+	id = *(ObjectID*)data;
+	data += sizeof(ObjectID);
 
-	num_extra_data=*(int*) data;
-	data+=4;
+	num_extra_data = *(int*) data;
+	data += 4;
 
-	if(num_extra_data)
+	if (num_extra_data)
 	{
-		extra_data=new int[num_extra_data];
-		for(int i=0;i<num_extra_data;i++)
+		extra_data = new int[num_extra_data];
+		for (int i = 0; i < num_extra_data; i++)
 		{
-			extra_data[i]=*(int*)data;
-			data+=4;
+			extra_data[i] = *(int*)data;
+			data += 4;
 		}
 	}
 	else
 	{
-		extra_data=0;
+		extra_data = 0;
 	}
 }
 

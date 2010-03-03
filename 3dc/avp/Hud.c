@@ -12,8 +12,6 @@
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
-
-
 #include "stratdef.h"
 #include "gamedef.h"
 #include "bh_types.h"
@@ -22,18 +20,15 @@
 #include "dynblock.h"
 #include "weapons.h"
 #include "hud_map.h"
-
 #include "psnd.h"
 #include "psndplat.h"
 #include "dynamics.h"
-
 #include "particle.h"
 #include "gadget.h"
 #include "lighting.h"
 #include "d3d_hud.h"
 #include "frustrum.h"
 #include "pldghost.h"
-
 #include "d3d_render.h"
 #include "bh_ais.h"
 #include "bh_alien.h"
@@ -133,28 +128,27 @@ extern void SmartTarget(int speed,int projectile_speed);
 extern void DrawScanlinesOverlay(float level);
 extern void RenderThisDisplayblock(DISPLAYBLOCK *dbPtr);
 void DisplayPredatorHealthAndEnergy(void);
-
 void InitHUD();
 static void InitMarineHUD();
 static void InitAlienHUD();
-//static void CalcCoordsAndBLTWeapon(WEAPON_DATA* wptr);
-
 static void DisplayHealthAndArmour(void);
 static void DisplayMarinesAmmo(void);
-
-
 static void DoMotionTracker(void);
 static int DoMotionTrackerBlips(void);
-
 static void HandleMarineWeapon(void);
 static void AimGunSight(int aimingSpeed, TEMPLATE_WEAPON_DATA *twPtr);
 static void DrawMarineSights(void);
 static void DrawPredatorSights(void);
 void DrawWristDisplay(void);
 static void DrawAlienTeeth(void);
-
 void CentreGunSight(void);
-
+void RenderInsideAlienTongue(int offset);
+void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed);
+void RenderBriefingText(int centreY, int brightness);
+int GetLoadedShapeMSL(char const * shapename);
+extern void D3D_PlayerDamagedOverlay(int intensity);
+void FlushD3DZBuffer();
+void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRIXCH *orientationPtr);
 
 static void InitPredatorHUD();
 #if DO_PREDATOR_OVERLAY
@@ -1701,6 +1695,7 @@ static void DrawPredatorSights(void)
 		Draw_HUDImage(&imageDesc);
 	}
 }
+
 void DrawWristDisplay(void)
 {
 	extern HMODELCONTROLLER PlayersWeaponHModelController;
@@ -1817,8 +1812,10 @@ static void HandleAlienWeapon(void)
 		
 		/* draw 3d weapon */
 		/* if there is no shape name then return */
-		if (twPtr->WeaponShapeName == NULL) return;
-			RenderThisDisplayblock(&PlayersWeapon);
+		if (twPtr->WeaponShapeName == NULL) 
+			return;
+
+		RenderThisDisplayblock(&PlayersWeapon);
 		
 	}
 	//if ((twPtr->PrimaryIsMeleeWeapon)&&
@@ -1836,7 +1833,6 @@ static void HandleAlienWeapon(void)
 	        AimGunSight(aimingSpeed,twPtr);
 		}
 	}
-
 }
 
 #if DO_ALIEN_OVERLAY
@@ -1922,8 +1918,6 @@ static void DrawAlienTeeth(void)
 	   
 	   	offsetY = MUL_FIXED(GetSin(AlienTeethOffset/64),80);
 
-
-
 	   	displayblock.ObShape=GetLoadedShapeMSL("uppertuth@tongue");
 	   	displayblock.ObWorld.vx = 0;
 	   	displayblock.ObWorld.vy = -200+offsetY;
@@ -1956,11 +1950,7 @@ static void DrawAlienTeeth(void)
 
 		RenderThisDisplayblock(&displayblock);  
 	}
-
-
 }
-
-
 
 /*KJL**************
 * Some useful fns *

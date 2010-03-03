@@ -190,7 +190,7 @@ extern void MakeImpactSparks(VECTORCH *incidentPtr, VECTORCH *normalPtr, VECTORC
 extern void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosionID);
 extern void MakePlasmaExplosion(VECTORCH *positionPtr, VECTORCH *fromPositionPtr, enum EXPLOSION_ID explosionID);
 extern void MakeDewlineTrailParticles(DYNAMICSBLOCK *dynPtr, int number);
-
+void MakeSprayOfSparks(MATRIXCH *orientationPtr, VECTORCH *positionPtr);
 
 extern void MakeBloodExplosion(VECTORCH *originPtr, int creationRadius, VECTORCH *blastPositionPtr, int noOfParticles, enum PARTICLE_ID particleID);
 extern void MakeFocusedExplosion(VECTORCH *originPtr, VECTORCH *blastPositionPtr, int noOfParticles, enum PARTICLE_ID particleID);
