@@ -68,11 +68,9 @@
 #define DB_H_INCLUDED
 
 /* I N C L U D E D S ************************************************** */
-#include "advwin32.h"
 #ifndef DB_NOWINDOWS
 	#ifdef WIN32
 		#include <windows.h>
-		#include "advwin32.h"
 	#endif
 	#ifdef _XBOX
 		#include "xbox_defines.h"

@@ -12,7 +12,6 @@ not project specific.
 extern "C" {
 
 #include "3dc.h"
-//#include "inline.h"
 
 // For modifications necessary to make Alt-Tabbing
 // behaviour (WM_ACTIVATEAPP) work full screen.
@@ -20,10 +19,6 @@ extern "C" {
 // ActiveMovie play.
 
 #define SupportAltTab TRUE
-
-// Globals
-
-//static HANDLE RasterThread;
 
 // Externs
 
@@ -124,12 +119,6 @@ void CheckForWindowsMessages(void)
 		}
 	}
 	while (!bActive);
-}
-
-
-PROCESSORTYPES ReadProcessorType(void)
-{
-	return PType_PentiumMMX;
 }
 
 // End of extern C declaration 

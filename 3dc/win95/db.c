@@ -27,15 +27,10 @@
 /* I N C L U D E S **************************************************** */
 
 /* Windows includes. Actually internal, but here to allow pre-compilation. */
-#include "advwin32.h"
 #ifndef DB_NOWINDOWS
 #ifdef WIN32
 	#include <windows.h>
 #endif
-	#include "advwin32.h"
-#endif	
-#ifndef DB_NODIRECTDRAW
-//	#include <ddraw.h>
 #endif
 #include "db.h"	 /* Contains most off the interface. */
 

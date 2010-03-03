@@ -3,36 +3,14 @@
 #ifndef _chunk_hpp
 #define _chunk_hpp
 
-
 	#include "3dc.h"
 	#include "mem3dc.h" // for debug new and delete
-	
-	
 	#include "inline.h"
 
 #if SupportModules
-
 	#include "module.h"
-
 #endif
-
 	#include "list_tem.hpp"
-
-#if cencon
-
-#include "AFXWIN.H"
-
-#ifdef _DEBUG
-#undef new
-#define new DEBUG_NEW
-#define my_new DEBUG_NEW
-#else
-#define my_new new
-#endif
-
-#include "list_tem.hpp"
-
-#endif
 
 #if objedit || sprite_edit || ANIMEXP
 #include "StdAfx.h"
@@ -43,13 +21,6 @@
 #include "stdafx.h"
 #include "list_tem.hpp"
 #endif
-
-#if standard
-#include "advwin32.h"
-#include "os_header.h"
-#include "list_tem.hpp"
-#endif
-
 
 #define CHUNK_FAILED_ON_LOAD -1
 #define CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED -2
@@ -68,10 +39,6 @@
 
 // we start at the header of the chunk we are in
 // so that we can stop at the end of the chunk
-
-#if cencon
-extern char users_name[];
-#endif
 
 #ifndef RIFF_OPTIMIZE // define this to get compiler errors where you are calling the old slow functions
 extern List<int> list_chunks_in_file (HANDLE &, const char * chunk_id);

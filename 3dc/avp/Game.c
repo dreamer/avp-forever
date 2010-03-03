@@ -46,18 +46,6 @@ different way on the consoles, so I won't worry the PSX guys for now.
 #include "pldnet.h"								 
 #include "kshape.h"
 
-/* KJL 16:00:13 11/22/96 - One of my evil experiments....   */
-#define PENTIUM_PROFILING_ON 0
-
-#define PROFILING_ON 0
-
-#if PENTIUM_PROFILING_ON
-#include "pentime.h"
-#else
-#define gProfileStart();
-#define ProfileStop(x);
-#endif
-
 #define	VERSION_DisableStartupMenus 	TRUE
 #define VERSION_DisableStartupCredits	TRUE
 #include "avp_menus.h"
@@ -322,59 +310,28 @@ void UpdateGame(void)
 	/* Read Keyboard, Keypad, Joystick etc. */
 	ReadUserInput();
 
-	/* DHM 18/11/97: hook for my code */
-	#if PENTIUM_PROFILING_ON
-	ProfileStart();
-	#endif	
+	/* DHM 18/11/97: hook for my code */	
 	DAVEHOOK_Maintain();
-	#if PENTIUM_PROFILING_ON
-	ProfileStop("DAEMON");
-	#endif
 
 	/*-------------- Patrick 14/11/96 ----------------
 	 call the pheronome system maintainence functions
 	-------------------------------------------------*/
-	#if PENTIUM_PROFILING_ON
-	ProfileStart();
-	#endif	
 	PlayerPheromoneSystem();
 	AiPheromoneSystem();
-	#if PENTIUM_PROFILING_ON
-	ProfileStop("PHEROMONE");
-	#endif	
 
 	/*-------------- Patrick 11/1/97 ----------------
 	Call the alien hive management function
 	-------------------------------------------------*/
 	DoHive();
 	DoSquad();
-	
 
-   	#if PROFILING_ON
-	ProfileStart();
-	#endif
  	ObjectBehaviours();
-	#if PROFILING_ON 
-	ProfileStop("BEHAVS");
-	#endif	
 	 
 	/* KJL 10:32:55 09/24/96 - update player */
-	#if PENTIUM_PROFILING_ON 
-	ProfileStart();
-	#endif
 	MaintainPlayer();
-	#if PENTIUM_PROFILING_ON 
-	ProfileStop("MNT PLYR");
-	#endif
 
 	/* KJL 12:54:08 21/04/98 - make sure the player's matrix is always normalised */
-	#if PENTIUM_PROFILING_ON
-	ProfileStart();
-	#endif	
 	MNormalise(&(Player->ObStrategyBlock->DynPtr->OrientMat));
-	#if PENTIUM_PROFILING_ON
-	ProfileStop("MNorm");
-	#endif
 
 	/* netgame support: it seems necessary to collect all our messages here, as some
 	things depend on the player's behaviour running before anything else... 
@@ -382,7 +339,6 @@ void UpdateGame(void)
 	if(AvP.Network != I_No_Network)	NetCollectMessages();
 
 	RemoveDestroyedStrategyBlocks();
-
 	{
 
 		if(SaveGameRequest != SAVELOAD_REQUEST_NONE)
@@ -394,30 +350,15 @@ void UpdateGame(void)
 			LoadSavedGame();
 		}
 	}
-	
-	#if PENTIUM_PROFILING_ON 
-  	ProfileStart();
-	#endif
+
 	ObjectDynamics();
-	#if PENTIUM_PROFILING_ON 
-	ProfileStop("DYNAMICS");
-	#endif
 
 	// now for the env teleports
 	
 	if(RequestEnvChangeViaLift)
 	{
 		CleanUpLiftControl();								
- 	}	
-
-	#if 0
-	Player->ObStrategyBlock->DynPtr->Position.vx = -71893;
-	Player->ObStrategyBlock->DynPtr->Position.vy = 36000;
-	Player->ObStrategyBlock->DynPtr->Position.vz = -52249;
-	Player->ObWorld.vx = -71893;
-	Player->ObWorld.vy = 36000;
-	Player->ObWorld.vz = -42249;
-	#endif
+ 	}
 	/* netgame support */
 	if(AvP.Network != I_No_Network)	NetSendMessages();
 
@@ -427,9 +368,6 @@ void UpdateGame(void)
 	/*------------Patrick 1/6/97---------------
 	New sound system 
 	-------------------------------------------*/
-	#if PENTIUM_PROFILING_ON 
-  	ProfileStart();
-	#endif
 	
 	if(playerPherModule)
 	{
@@ -437,9 +375,6 @@ void UpdateGame(void)
 	}
 	SoundSys_Management();
 	DoPlayerSounds();
-	#if PENTIUM_PROFILING_ON 
-  	ProfileStop("SOUND SYS");
-	#endif
 
 //	NormaliseTest();
 	MessageHistory_Maintain();

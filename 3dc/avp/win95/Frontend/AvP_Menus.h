@@ -286,7 +286,7 @@ typedef struct
 
 	enum AVPMENU_FONT_ID FontToUse;
 
-	int					PositionInTextField;
+	size_t				PositionInTextField;
 
 	int 				WidthLeftForText; //thing for checking whether user input will fit on screen
 

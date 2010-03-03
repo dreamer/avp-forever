@@ -453,19 +453,6 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 	BOOL 		rc;
 
     /*
-		Pick up processor type
-	*/
-
-    ProcessorType = ReadProcessorType();
-
-    if ((ProcessorType == PType_PentiumMMX) ||
-	   (ProcessorType == PType_Klamath) ||
-	   (ProcessorType == PType_OffTopOfScale))
-	  MMXAvailable = TRUE;
-	else
-	  MMXAvailable = FALSE;
-
-    /*
 		Copy initial requests to current variables,
 		subject to later modification.
 	*/

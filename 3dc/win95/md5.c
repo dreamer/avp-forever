@@ -19,8 +19,6 @@
 /* Written by Ulrich Drepper <drepper@gnu.ai.mit.edu>.  */
 #define STDC_HEADERS 1
 
-#include "advwin32.h"
-
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif

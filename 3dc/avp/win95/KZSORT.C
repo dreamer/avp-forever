@@ -13,15 +13,6 @@
 #include "ourasert.h"
 #include "avp_userprofile.h"
 
-#define PENTIUM_PROFILING_ON 0
-#if PENTIUM_PROFILING_ON
-#include "pentime.h"
-#else
-#define ProfileStart();
-#define ProfileStop(x);
-#endif
-#define MultipleExecuteBuffers TRUE
-
 extern int *ItemPointers[maxpolyptrs];
 extern int ItemCount;
 
@@ -221,7 +212,6 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 	int numOfObjects = NumOnScreenBlocks;
 	int numVisMods=0;
 	int numVisObjs=0;
-	ProfileStart();
 
 	while(numOfObjects)
 	{
@@ -327,12 +317,8 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 			numVisObjs++;
 		}
    	}
-	ProfileStop("SORTSETUP");
 	textprint("numvismods %d\n",numVisMods);
 	textprint("numvisobjs %d\n",numVisObjs);
-
-	ProfileStart();
-
 	{
 		int numMods = numVisMods;
 		
@@ -360,10 +346,6 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 			SortedModules = VisibleModules2;
 		}
 	}
-
-	ProfileStop("MODULESORT");
-
-	ProfileStart();
 	{
 		int fogDistance = 0x7f000000;
 
@@ -410,7 +392,6 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 		if (fogDistance<0) fogDistance=0;
 		SetFogDistance(fogDistance);
 	}
-	ProfileStop("OBJS IN MOD TESTS");
 	DrawingAReflection=0;
 	{
 		int numMods = numVisMods;
