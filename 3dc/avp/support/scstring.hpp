@@ -78,7 +78,7 @@
 		SCString
 		(
 			ProjChar* pProjCh_Init,
-			unsigned int Length
+			size_t Length
 		);
 			// Forms a string of length at most Length (with 1 extra for NULL-terminator)
 
@@ -152,7 +152,7 @@
 			// called by the font code whenever fonts are loaded/unloaded
 		#endif
 
-		unsigned int GetNumChars(void);
+		size_t GetNumChars(void);
 
 		void ProcessAnyCheatCodes(void);
 
@@ -180,7 +180,7 @@
 			// this is always "owned" by the String execpt when
 			// fAllocFailure is set
 
-		int NumberOfCharacters;
+		size_t NumberOfCharacters;
 			// doesn't include NULL terminator
 
 		#if SupportHHStuff
@@ -224,7 +224,7 @@
 		}
 	#endif // !SupportHHStuff		
 
-		inline unsigned int SCString::GetNumChars(void)
+		inline size_t SCString::GetNumChars(void)
 		{
 			return NumberOfCharacters;
 		}

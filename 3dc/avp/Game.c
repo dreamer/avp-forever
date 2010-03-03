@@ -517,8 +517,6 @@ extern void CheckCDStatus(void)
 	#endif	
 }
 
-
-
 void TimeStampedMessage(char *stringPtr)
 {
 	static int time=0;

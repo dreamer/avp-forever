@@ -154,6 +154,9 @@ extern void MakeBloodExplosion(VECTORCH *originPtr, int creationRadius, VECTORCH
 extern HIERARCHY_SHAPE_REPLACEMENT* GetHierarchyAlternateShapeSetFromLibrary(const char* rif_name,const char* shape_set_name);
 extern void Crunch_Position_For_Players_Weapon(VECTORCH *position);
 extern DISPLAYBLOCK *MakePistolCasing(VECTORCH *position,MATRIXCH *orient);
+void VideoScreenIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple);
+void TrackObjectIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple);
+
 
 int FriendlyFireDamageFilter(DAMAGE_PROFILE *damage);
 static void MarineZeroAmmoFunctionality(PLAYER_STATUS *playerStatusPtr,PLAYER_WEAPON_DATA *weaponPtr);
@@ -2062,15 +2065,15 @@ int FireAutomaticWeapon(PLAYER_WEAPON_DATA *weaponPtr)
 	   	
    	{
    	   	/* theoretical number of bullets fired each frame, as a 16.16 number */
-   	   	int bulletsToFire=MUL_FIXED(twPtr->FiringRate,NormalFrameTime);
+   	   	int bulletsToFire = MUL_FIXED(twPtr->FiringRate,NormalFrameTime);
 
-    	if (bulletsToFire<weaponPtr->PrimaryRoundsRemaining)
+    	if (bulletsToFire < weaponPtr->PrimaryRoundsRemaining)
     	{
     		weaponPtr->PrimaryRoundsRemaining -= bulletsToFire;	
        	}
         else /* end of magazine */
         {
-           	weaponPtr->PrimaryRoundsRemaining=0;	
+           	weaponPtr->PrimaryRoundsRemaining = 0;	
         }
     }
 

@@ -104,6 +104,8 @@ extern void HierarchicalFragmentBehaviour(STRATEGYBLOCK *sptr);
 extern void Xeno_Enter_PowerUp_State(STRATEGYBLOCK *sbPtr);
 extern void Xeno_Enter_PowerDown_State(STRATEGYBLOCK *sbPtr);
 
+void GrapplingHookBehaviour(STRATEGYBLOCK *sbPtr);
+
 /************************ FUNCTIONS TO FILL OUT SBS ***************/
 /* essentially these are the old entity type functions ******/
 

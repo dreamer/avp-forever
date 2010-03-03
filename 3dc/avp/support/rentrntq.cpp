@@ -127,10 +127,7 @@
 
 /* Exported function definitions ***********************************/
 /* Functions callable within the Windows procedure */
-void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR
-(
-	char Ch
-)
+void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR( char Ch )
 {
 	if ( NumQMessages < MAX_Q_MESSAGES )
 	{
@@ -143,10 +140,7 @@ void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR
 	// can safely be called at this stage
 }
 
-void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN
-(
-	WPARAM wParam
-)
+void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN( WPARAM wParam )
 {
 	if ( NumQMessages < MAX_Q_MESSAGES )
 	{
@@ -168,30 +162,23 @@ void RE_ENTRANT_QUEUE_WinMain_FlushMessages(void)
 	{
 		#if UseGadgets
 		// AVP/Win95-specific code
-		if ( HUDGadget :: GetHUD() )
+		if (HUDGadget::GetHUD())
 		{
-			int i;
+			unsigned int i;
 
-			for (i=0;i<NumQMessages;i++)
+			for (i = 0; i < NumQMessages; i++)
 			{
-				switch ( OurQ[ i ] . QEntryCat )
+				switch (OurQ[ i ].QEntryCat)
 				{
 					case QEntryCat_WM_CHAR:
 					{
-						char Ch = OurQ[ i ] . CatData . Ch;
+						char Ch = OurQ[ i ].CatData.Ch;
 
-						if
-						(
-							Ch != '`'
-								// hack to ignore the grave key
-						)
+						if (Ch != '`') // hack to ignore the grave key
 						{
-							if ( IOFOCUS_AcceptTyping() )
+							if (IOFOCUS_AcceptTyping())
 							{
-								HUDGadget :: GetHUD() -> CharTyped
-								(
-									Ch
-								);
+								HUDGadget::GetHUD()->CharTyped(Ch);
 							}
 						}
 						#if 0
@@ -206,43 +193,43 @@ void RE_ENTRANT_QUEUE_WinMain_FlushMessages(void)
 
 					case QEntryCat_WM_KEYDOWN:
 					{
-						if ( IOFOCUS_AcceptTyping() )
+						if (IOFOCUS_AcceptTyping())
 						{
-							switch ( OurQ[i] . CatData . wParam )
+							switch (OurQ[i].CatData.wParam)
 							{
 								default:
 									// ignore most keys;
 									break;
 
 								case VK_BACK:
-									HUDGadget :: GetHUD() -> Key_Backspace();
+									HUDGadget::GetHUD()->Key_Backspace();
 									break;
 								case VK_END:
-									HUDGadget :: GetHUD() -> Key_End();
+									HUDGadget::GetHUD()->Key_End();
 									break;
 								case VK_HOME:
-									HUDGadget :: GetHUD() -> Key_Home();
+									HUDGadget::GetHUD()->Key_Home();
 									break;
 								case VK_LEFT:
-									HUDGadget :: GetHUD() -> Key_Left();
+									HUDGadget::GetHUD()->Key_Left();
 									break;
 								case VK_UP:
-									HUDGadget :: GetHUD() -> Key_Up();
+									HUDGadget::GetHUD()->Key_Up();
 									break;
 								case VK_RIGHT:
-									HUDGadget :: GetHUD() -> Key_Right();
+									HUDGadget::GetHUD()->Key_Right();
 									break;
 								case VK_DOWN:
-									HUDGadget :: GetHUD() -> Key_Down();
+									HUDGadget::GetHUD()->Key_Down();
 									break;
 								case VK_INSERT:
-									TextInputState :: ToggleTypingMode();
+									TextInputState::ToggleTypingMode();
 									break;
 								case VK_DELETE:
-									HUDGadget :: GetHUD() -> Key_Delete();
+									HUDGadget::GetHUD()->Key_Delete();
 									break;
 								case VK_TAB:
-									HUDGadget :: GetHUD() -> Key_Tab();
+									HUDGadget::GetHUD()->Key_Tab();
 									break;							
 							}
 						}

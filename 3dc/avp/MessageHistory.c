@@ -8,7 +8,7 @@
 
 #define MAX_NO_OF_MESSAGES_IN_HISTORY 64
 
-extern void NewOnScreenMessage(unsigned char *messagePtr);
+extern void NewOnScreenMessage(char *messagePtr);
 
 struct MessageHistory
 {

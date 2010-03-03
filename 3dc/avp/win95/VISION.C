@@ -52,6 +52,9 @@ struct D3DLightColourControl d3d_light_ctrl;
 void SetupVision(void);
 
 extern void DrawNoiseOverlay(int t);
+extern void D3D_PredatorScreenInversionOverlay();
+extern void D3D_FadeDownScreen(int brightness, int colour);
+extern void D3D_ScreenInversionOverlay();
 
 void SetupVision(void)
 {
@@ -191,7 +194,6 @@ void HandlePredOVision(void)
 			PredatorVisionChangeCounter=0;
 		}
 	}
-
 }
 
 extern void ChangePredatorVisionMode(void)

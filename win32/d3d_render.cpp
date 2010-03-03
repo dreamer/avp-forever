@@ -3641,7 +3641,6 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 	}
 }
 
-
 extern void D3D_FadeDownScreen(int brightness, int colour)
 {
 	int t = 255 - (brightness>>8);

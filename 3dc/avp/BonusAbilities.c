@@ -180,7 +180,6 @@ static DISPLAYBLOCK* CreateGrapplingHook(void)
 
 		return dPtr;
 	}
-
 }
 
 void GrapplingHookBehaviour(STRATEGYBLOCK *sbPtr)

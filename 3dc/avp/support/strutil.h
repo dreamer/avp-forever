@@ -67,7 +67,7 @@
 		#endif
 
 	/* Emulation of <string.h> *******************************************/
-		extern unsigned int STRUTIL_SC_Strlen
+		extern size_t STRUTIL_SC_Strlen
 		(
 			const ProjChar* pProjCh_In
 		);
@@ -108,7 +108,7 @@
 		extern OurBool STRUTIL_SC_SafeCopy
 		(
 			ProjChar* pProjCh_Dst,
-			unsigned int MaxSize,
+			size_t MaxSize,
 
 			const ProjChar* pProjCh_Src
 		);
@@ -116,7 +116,7 @@
 		extern void STRUTIL_SC_SafeCat
 		(
 			ProjChar* pProjCh_Dst,
-			unsigned int MaxSize,
+			size_t MaxSize,
 
 			const ProjChar* pProjCh_Add
 		);

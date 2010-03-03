@@ -100,7 +100,7 @@
 		r2size R2Size_OverallImage;
 
 		int ASCIICodeForOffset0;
-		unsigned int NumChars;
+		size_t NumChars;
 		RECT WindowsRectForOffset[ MAX_CHARS_IN_TALLFONT ];
 			// coordinates of characters in the image
 		int WidthForOffset[ MAX_CHARS_IN_TALLFONT ];
@@ -233,7 +233,7 @@
 		r2size R2Size_OverallImage;
 
 		int ASCIICodeForOffset0;
-		unsigned int NumChars;
+		size_t NumChars;
 		RECT WindowsRectForOffset[ MAX_CHARS_IN_TALLFONT ];
 			// coordinates of characters in the image
 		int XIncForOffset[ MAX_CHARS_IN_TALLFONT ][ MAX_CHARS_IN_TALLFONT ];

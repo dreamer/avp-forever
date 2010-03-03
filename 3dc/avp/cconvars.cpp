@@ -108,7 +108,7 @@ extern int mx,my,mz;
 extern int RATweak;
 
 extern TEMPLATE_WEAPON_DATA	TemplateWeapon[MAX_NO_OF_WEAPON_TEMPLATES];
-extern void NewOnScreenMessage(unsigned char *messagePtr);
+extern void NewOnScreenMessage(char *messagePtr);
 
 extern int GlobalAmbience;
 int Old_GlobalAmbience=ONE_FIXED;
@@ -250,7 +250,7 @@ void ShowRecoilMaxXTilt(void) {
 	
 	sprintf(ccv_tempstring,"RECOILMAXXTILT = %d\n",twPtr->RecoilMaxXTilt);
 
-	NewOnScreenMessage((unsigned char *)&ccv_tempstring[0]);
+	NewOnScreenMessage(&ccv_tempstring[0]);
 }
 
 void ShowRecoilMaxYTilt(void) {
@@ -264,7 +264,7 @@ void ShowRecoilMaxYTilt(void) {
 
 	sprintf(ccv_tempstring,"RECOILMAXYTILT = %d\n",twPtr->RecoilMaxYTilt);
 
-	NewOnScreenMessage((unsigned char *)&ccv_tempstring[0]);
+	NewOnScreenMessage(&ccv_tempstring[0]);
 }
 
 void ShowRecoilMaxZ(void) {
@@ -278,7 +278,7 @@ void ShowRecoilMaxZ(void) {
 
 	sprintf(ccv_tempstring,"RECOILMAXZ = %d\n",twPtr->RecoilMaxZ);
 
-	NewOnScreenMessage((unsigned char *)&ccv_tempstring[0]);
+	NewOnScreenMessage(&ccv_tempstring[0]);
 }
 
 void ShowRecoilMaxRandomZ(void) {
@@ -292,7 +292,7 @@ void ShowRecoilMaxRandomZ(void) {
 
 	sprintf(ccv_tempstring,"RECOILMAXRANDOMZ = %d\n",twPtr->RecoilMaxRandomZ);
 
-	NewOnScreenMessage((unsigned char *)&ccv_tempstring[0]);
+	NewOnScreenMessage(&ccv_tempstring[0]);
 }
 
 void SetRecoilMaxXTilt(int value) {
@@ -308,7 +308,7 @@ void SetRecoilMaxXTilt(int value) {
 
 	sprintf(ccv_tempstring,"RECOILMAXXTILT = %d\n",twPtr->RecoilMaxXTilt);
 
-	NewOnScreenMessage((unsigned char *)&ccv_tempstring[0]);
+	NewOnScreenMessage(&ccv_tempstring[0]);
 }
 
 void SetRecoilMaxYTilt(int value) {
@@ -324,7 +324,7 @@ void SetRecoilMaxYTilt(int value) {
 
 	sprintf(ccv_tempstring,"RECOILMAXYTILT = %d\n",twPtr->RecoilMaxYTilt);
 
-	NewOnScreenMessage((unsigned char *)&ccv_tempstring[0]);
+	NewOnScreenMessage(&ccv_tempstring[0]);
 }
 
 void SetRecoilMaxZ(int value) {
@@ -340,7 +340,7 @@ void SetRecoilMaxZ(int value) {
 
 	sprintf(ccv_tempstring,"RECOILMAXZ = %d\n",twPtr->RecoilMaxZ);
 
-	NewOnScreenMessage((unsigned char *)&ccv_tempstring[0]);
+	NewOnScreenMessage(&ccv_tempstring[0]);
 }
 
 void SetRecoilMaxRandomZ(int value) {
@@ -356,7 +356,7 @@ void SetRecoilMaxRandomZ(int value) {
 
 	sprintf(ccv_tempstring,"RECOILMAXRANDOMZ = %d\n",twPtr->RecoilMaxRandomZ);
 
-	NewOnScreenMessage((unsigned char *)&ccv_tempstring[0]);
+	NewOnScreenMessage(&ccv_tempstring[0]);
 }
 
 void SetPredPistolRecoilTime(int value) {
@@ -373,7 +373,7 @@ void SetPredPistolRecoilTime(int value) {
 		time=DIV_FIXED(ONE_FIXED,twPtr->TimeOutRateForState[WEAPONSTATE_RECOIL_PRIMARY]);
 		sprintf(ccv_tempstring,"PREDPISTOL_RECOILTIME = %d\n",time);
 
-		NewOnScreenMessage((unsigned char *)&ccv_tempstring[0]);
+		NewOnScreenMessage(&ccv_tempstring[0]);
 		return;
 	}
 
@@ -388,7 +388,7 @@ void SetPredPistolMaxDamage(int value) {
 	if (value<0) {
 		sprintf(ccv_tempstring,"PREDPISTOL_BLASTDAMAGE = %d\n",TemplateAmmo[AMMO_PRED_PISTOL].MaxDamage[AvP.Difficulty].Electrical);
 
-		NewOnScreenMessage((unsigned char *)&ccv_tempstring[0]);
+		NewOnScreenMessage(&ccv_tempstring[0]);
 		return;
 	}
 
@@ -403,7 +403,7 @@ void SetPredPistolBlastRange(int value) {
 	if (value<0) {
 		sprintf(ccv_tempstring,"PREDPISTOL_BLASTRANGE = %d\n",TemplateAmmo[AMMO_PRED_PISTOL].MaxRange);
 
-		NewOnScreenMessage((unsigned char *)&ccv_tempstring[0]);
+		NewOnScreenMessage(&ccv_tempstring[0]);
 		return;
 	}
 
@@ -418,7 +418,7 @@ void SetPredPistolStrikeDamage(int value) {
 	if (value<0) {
 		sprintf(ccv_tempstring,"PREDPISTOL_STRIKEDAMAGE = %d\n",TemplateAmmo[AMMO_PREDPISTOL_STRIKE].MaxDamage[AvP.Difficulty].Electrical);
 
-		NewOnScreenMessage((unsigned char *)&ccv_tempstring[0]);
+		NewOnScreenMessage(&ccv_tempstring[0]);
 		return;
 	}
 
@@ -497,7 +497,7 @@ void SetPlayerStartingHealth(int value) {
 	if (value<=0) {
 		sprintf(ccv_tempstring,"PLAYER STARTING HEALTH = %d\n",NpcData->StartingStats.Health);
 
-		NewOnScreenMessage((unsigned char *)&ccv_tempstring[0]);
+		NewOnScreenMessage(&ccv_tempstring[0]);
 		return;
 	}
 
@@ -559,7 +559,7 @@ void SetPlayerStartingArmour(int value) {
 	if (value<=0) {
 		sprintf(ccv_tempstring,"PLAYER STARTING ARMOUR = %d\n",NpcData->StartingStats.Armour);
 
-		NewOnScreenMessage((unsigned char *)&ccv_tempstring[0]);
+		NewOnScreenMessage(&ccv_tempstring[0]);
 		return;
 	}
 

@@ -443,7 +443,7 @@ TextInputState :: TextInputState
 void TextInputState :: TryToInsertAt
 (
 	SCString* pSCString_ToInsert,
-	int Pos
+	size_t Pos
 )
 {
 	/* PRECONDITION */
@@ -488,7 +488,7 @@ void TextInputState :: TryToInsertAt
 int TextInputState :: bOvertypeAt
 (
 	ProjChar ProjCh_In,
-	int Pos_Where
+	size_t Pos_Where
 )
 {
 	// return value: was overtype succesful?
@@ -565,19 +565,15 @@ int TextInputState :: bOvertypeAt
 }
 
 
-int TextInputState :: bInsertAt
-(
-	ProjChar ProjCh_In,
-	int Pos_Where
-)
+int TextInputState :: bInsertAt(ProjChar ProjCh_In, size_t Pos_Where)
 {
 	// return value: was insertion succesful?
 
 	/* PRECONDITION */
 	{
-		// Function parameter validity:
+			// Function parameter validity:
 			GLOBALASSERT( ProjCh_In );
-				// mustn't be a null terminator  
+			// mustn't be a null terminator  
 
 			GLOBALASSERT( Pos_Where >= 0 );
 			
@@ -585,7 +581,7 @@ int TextInputState :: bInsertAt
 			GLOBALASSERT( Pos_Where <= MAX_LENGTH_INPUT );
 			#endif
 
-		// The data-representation invariant:
+			// The data-representation invariant:
 			#if LimitedLineLength
 			GLOBALASSERT( CursorPos >= 0 );
 			GLOBALASSERT( CursorPos <= NumChars );
@@ -638,12 +634,7 @@ int TextInputState :: bInsertAt
 					// Advance all to the right of the cursor, starting with the final
 					// character in the string:
 					
-					for
-					(
-						int i=NumChars;
-						i>=Pos_Where;
-						i--
-					)
+					for (size_t i = NumChars; i >= Pos_Where; i--)
 					{
 						ProjCh[ i + 1 ] = ProjCh[ i ];
 					}
@@ -678,7 +669,7 @@ int TextInputState :: bInsertAt
 	}
 }
 
-void TextInputState ::  DeleteAt( int Pos )
+void TextInputState :: DeleteAt( size_t Pos )
 {
 	#if LimitedLineLength
 	{
@@ -688,12 +679,7 @@ void TextInputState ::  DeleteAt( int Pos )
 		// Move all characters to the right of the deletion point one space to the left
 		// (this will overwrite the character at the deletion point )
 
-		for
-		(
-			int i=Pos;
-			i<NumChars;
-			i++
-		)
+		for (size_t i = Pos; i < NumChars; i++)
 		{
 			ProjCh[ i ] = ProjCh[ i + 1 ];
 		}
@@ -709,7 +695,6 @@ void TextInputState ::  DeleteAt( int Pos )
 		#if SupportAutomation
 		FullyManual();
 		#endif
-
 	}
 	#else
 	{
@@ -924,11 +909,10 @@ OurBool TextInputState :: bManualMatch
 
 	GLOBALASSERT( pProjCh );
 
-	int Count = ManualPos;
+	size_t Count = ManualPos;
 
 	const ProjChar* String1 = pProjCh;
 	const ProjChar* String2 = &ProjCh[0];
-
 
 	while 
 	(
@@ -981,7 +965,7 @@ OurBool TextInputState :: bManualMatchInsensitive
 
 	GLOBALASSERT( pProjCh );
 
-	int Count = ManualPos;
+	size_t Count = ManualPos;
 
 	const ProjChar* String1 = pProjCh;
 	const ProjChar* String2 = &ProjCh[0];

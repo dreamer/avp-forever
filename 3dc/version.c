@@ -1,7 +1,6 @@
 /* KJL 16:41:33 29/03/98 - not the most complicated code I've ever written... */
 #include "version.h"
-extern void NewOnScreenMessage(unsigned char *messagePtr);
-
+extern void NewOnScreenMessage(char *messagePtr);
 
 void GiveVersionDetails(void)
 {
@@ -11,5 +10,4 @@ void GiveVersionDetails(void)
 //	NewOnScreenMessage("Aliens vs Predator - \n   Build 103 \n   Rebellion Developments 1999/7/13 \n   (European Release)");
 //	NewOnScreenMessage("Aliens vs Predator - \n   Build 103 \n   Rebellion Developments 1999/7/13 \n   (American Release)");
 	NewOnScreenMessage("Aliens vs Predator - Gold\n   Build 116 \n   Rebellion Developments 2000/16/3 \n"); //11:25
-
 }

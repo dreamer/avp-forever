@@ -114,7 +114,7 @@ static void NetPlayerDeadProcessing(STRATEGYBLOCK* sbPtr);
 static void CorpseMovement(STRATEGYBLOCK *sbPtr);
 
 extern SECTION * GetNamedHierarchyFromLibrary(const char * rif_name, const char * hier_name);
-extern void NewOnScreenMessage(unsigned char *messagePtr);
+extern void NewOnScreenMessage(char *messagePtr);
 extern void RemoveAllThisPlayersDiscs(void);
 int timeInContactWithFloor;
 

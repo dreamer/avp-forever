@@ -231,17 +231,10 @@ SCString :: SCString
 	}
 }
 
-SCString :: SCString
-(
-	unsigned int Number
-)
+SCString :: SCString( size_t Number )
 {
 	// forms a new string object that describes the number passed
 	// standard decimal representation
-
-	/* PRECONDITION */
-	{
-	}
 
 	/* CODE */
 	{
@@ -253,10 +246,6 @@ SCString :: SCString
 			"%u",
 			Number
 		);
-
-		#if 0
-		LOCALISEME();
-		#endif
 
 		AllocatedSize = (size_t) STRUTIL_SC_NumBytes
 		(
@@ -316,7 +305,6 @@ SCString :: SCString
 
 			pFirst = this;
 		}
-
 	}
 }
 

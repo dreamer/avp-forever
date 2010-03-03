@@ -22,6 +22,10 @@ static int NumFreeSfxBlocks;
 static SFXBLOCK *FreeSfxBlockList[MAX_NO_OF_SFX_BLOCKS];
 static SFXBLOCK **FreeSfxBlockListPtr;
 
+void DrawFrisbeePlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr);
+void DrawPredatorPlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr);
+void DrawSmallPredatorPlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr);
+
 
 /*KJL***************************************************************************
 * FUNCTIONS TO ALLOCATE AND DEALLOCATE SFX BLOCKS - KJL 12:02:14 11/13/96 *

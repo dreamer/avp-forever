@@ -660,9 +660,9 @@ LiftStrategy::~LiftStrategy()
 
 size_t LiftStrategy::GetStrategySize()
 {
-	int size=AvpStrat::GetStrategySize();
-	size+=44+8*NumAssocLifts;
-	size+=NumExternalLifts*sizeof(ExtLift);
+	size_t size = AvpStrat::GetStrategySize();
+	size += 44+8*NumAssocLifts;
+	size += NumExternalLifts*sizeof(ExtLift);
 	return size;
 }
 
@@ -670,7 +670,6 @@ void LiftStrategy::fill_data_block(char* data)
 {
 	AvpStrat::fill_data_block(data);
 	data+=AvpStrat::GetStrategySize();
-	
 
 	(*(int*)data)=NumAssocLifts;
 	data+=4;
@@ -718,8 +717,8 @@ PlatLiftStrategy::PlatLiftStrategy(const char* data_start,size_t /*size*/)
 
 size_t PlatLiftStrategy::GetStrategySize()
 {
-	int size=AvpStrat::GetStrategySize();
-	size+=24;
+	size_t size = AvpStrat::GetStrategySize();
+	size += 24;
 	return size;
 }
 

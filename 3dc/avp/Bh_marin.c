@@ -85,6 +85,8 @@ extern int AlienPCIsCurrentlyVisible(int checktime,STRATEGYBLOCK *sbPtr);
 extern int ObjectShouldAppearOnMotionTracker(STRATEGYBLOCK *sbPtr);
 extern int SBIsEnvironment(STRATEGYBLOCK *sbPtr);
 void Marine_SwitchExpression(STRATEGYBLOCK *sbPtr,int state);
+int PrintDebuggingText(const char* t, ...);
+void GetTargetingPointOfObject_Far(STRATEGYBLOCK *sbPtr, VECTORCH *targetPtr);
 
 extern void PrintSpottedNumber(void);
 
@@ -951,8 +953,8 @@ void ForceCaps(char *input) {
 
 /* Squad functions, CDF 27/5/98 */
 
-void InitSquad(void) {
-
+void InitSquad(void) 
+{
 	/* Maybe level specific later? */
 	
 	NpcSquad.alertStatus=0;

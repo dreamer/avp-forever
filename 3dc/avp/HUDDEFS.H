@@ -238,7 +238,7 @@ extern void BLTPredatorOverlayToHUD(void);
 /* KJL 11:00:22 05/20/97 - On-screen messaging system */
 #define ON_SCREEN_MESSAGE_LIFETIME (ONE_FIXED*2)
 
-extern void NewOnScreenMessage(unsigned char *messagePtr);
+extern void NewOnScreenMessage(char *messagePtr);
 /*KJL********************************************************************
 * The text pointed to by the messagePtr will be displayed on screen for *
 * the time defined in ON_SCREEN_MESSAGE_LIFETIME. Any previous message  *

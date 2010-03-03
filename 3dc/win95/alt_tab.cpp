@@ -108,7 +108,7 @@ struct AltTabEntry
 	inline bool operator != (AltTabEntry const & rEntry) const
 		{ return ! operator == (rEntry); }
 		
-	friend inline unsigned HashFunction(AltTabEntry const & rEntry)
+	friend inline uintptr_t HashFunction(AltTabEntry const & rEntry)
 		{ return HashFunction(rEntry.m_pDxGraphic); }
 };
 

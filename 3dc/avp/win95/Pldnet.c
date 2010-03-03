@@ -263,7 +263,7 @@ extern unsigned char DebouncedGotAnyKey;
 extern int LastHand;  // For alien claws and two pistols
 
 extern void CreateSpearPossiblyWithFragment(DISPLAYBLOCK *dispPtr, VECTORCH *spearPositionPtr, VECTORCH *spearDirectionPtr);
-extern void NewOnScreenMessage(unsigned char *messagePtr);
+extern void NewOnScreenMessage(char *messagePtr);
 /*----------------------------------------------------------------------
   Some protoypes for this file
   ----------------------------------------------------------------------*/

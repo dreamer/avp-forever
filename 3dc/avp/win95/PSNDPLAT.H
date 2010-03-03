@@ -14,6 +14,7 @@ extern "C" {
 #endif
 #ifdef USE_XAUDIO2
 #include <xaudio2.h>
+#include <xaudio2fx.h>
 #include <x3daudio.h>
 #endif
 #include "psnd.h"
@@ -44,6 +45,7 @@ typedef struct soundsampledata
 	XAUDIO2_BUFFER xa2Buffer;
 	X3DAUDIO_EMITTER xa2Emitter;
 	IXAudio2SourceVoice *pSourceVoice;
+	WAVEFORMATEX audioWaveFormat;
 //	FLOAT32 emitterAzimuths;//[1];
 #endif
 	unsigned int flags;

@@ -875,7 +875,7 @@ IndexedFont_Kerned_Column :: UpdateWidths(void)
 void
 IndexedFont_Kerned_Column :: UpdateXIncs(void)
 {
-	int RowsToProcess = NumChars*GetHeight();
+	size_t RowsToProcess = NumChars*GetHeight();
 	int* minOpaqueX = new int[RowsToProcess];
 	int* maxOpaqueX = new int[RowsToProcess];
 

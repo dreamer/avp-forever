@@ -61,6 +61,15 @@ extern int Resolution;
 extern void SetupVision(void);
 extern void ReInitHUD(void);
 extern void CheckCDStatus(void);
+void InitSquad(void);
+void InitialiseParticleSystem(void);
+void InitialiseSfxBlocks(void);
+void InitialiseLightElementSystem(void);
+extern void InitialiseTriggeredFMVs();
+void MessageHistory_Initialise(void);
+void TeleportNetPlayerToAStartingPosition(STRATEGYBLOCK *playerSbPtr, int startOfGame);
+void CDDA_Stop();
+void TimeStampedMessage(char *stringPtr);
 
 extern void DeallocateSoundsAndPoolAllocatedMemory();
 
@@ -134,10 +143,10 @@ void InitialVideoMode(void)
     WindowRequestMode = WindowModeSubWindow;
 	#endif
 
-    TopLeftSubWindow.x = 0.3;
-	TopLeftSubWindow.y = 0.3;
-	ExtentXYSubWindow.x = 0.6;
-	ExtentXYSubWindow.y = 0.6;
+    TopLeftSubWindow.x = 0.3f;
+	TopLeftSubWindow.y = 0.3f;
+	ExtentXYSubWindow.x = 0.6f;
+	ExtentXYSubWindow.y = 0.6f;
 
 /*
 	Experimental settings for other 

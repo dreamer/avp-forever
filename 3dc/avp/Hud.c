@@ -1984,7 +1984,7 @@ int Fast2dMagnitude(int dx, int dy)
 * On screen messaging system *
 *************************KJL*/
 
-extern void NewOnScreenMessage(unsigned char *messagePtr)
+extern void NewOnScreenMessage(char *messagePtr)
 {
 	GADGET_NewOnScreenMessage( messagePtr );
 }

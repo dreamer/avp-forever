@@ -68,9 +68,11 @@ ACTIVESOUNDSAMPLE BlankActiveSound = {SID_NOSOUND,ASP_Minimum,0,0,NULL,0,0,0,0,0
 IXAudio2				*pXAudio2 = NULL;
 IXAudio2MasteringVoice	*pMasteringVoice = NULL;
 IXAudio2SourceVoice		*pSourceVoice = NULL;
+IXAudio2SubmixVoice		*pSubmixVoice = NULL;
 X3DAUDIO_HANDLE			x3DInstance = {0};
 X3DAUDIO_LISTENER		XA2Listener = {0};
 X3DAUDIO_DSP_SETTINGS	XA2DSPSettings = {0};
+IUnknown				*pReverbEffect = NULL;
 static unsigned int		numOutputChannels = 0;
 static DWORD			channelMask = 0;
 static unsigned int 	SoundMinBufferFree = 0;
@@ -79,6 +81,42 @@ static bool				soundEnabled = false;
 static HRESULT LastError;
 static char buf[100];
 
+// Must match order of g_PRESET_NAMES
+#define NUM_PRESETS		30
+
+XAUDIO2FX_REVERB_I3DL2_PARAMETERS g_PRESET_PARAMS[ NUM_PRESETS ] =
+{
+    XAUDIO2FX_I3DL2_PRESET_FOREST,
+    XAUDIO2FX_I3DL2_PRESET_DEFAULT,
+    XAUDIO2FX_I3DL2_PRESET_GENERIC,
+    XAUDIO2FX_I3DL2_PRESET_PADDEDCELL,
+    XAUDIO2FX_I3DL2_PRESET_ROOM,
+    XAUDIO2FX_I3DL2_PRESET_BATHROOM,
+    XAUDIO2FX_I3DL2_PRESET_LIVINGROOM,
+    XAUDIO2FX_I3DL2_PRESET_STONEROOM,
+    XAUDIO2FX_I3DL2_PRESET_AUDITORIUM,
+    XAUDIO2FX_I3DL2_PRESET_CONCERTHALL,
+    XAUDIO2FX_I3DL2_PRESET_CAVE,
+    XAUDIO2FX_I3DL2_PRESET_ARENA,
+    XAUDIO2FX_I3DL2_PRESET_HANGAR,
+    XAUDIO2FX_I3DL2_PRESET_CARPETEDHALLWAY,
+    XAUDIO2FX_I3DL2_PRESET_HALLWAY,
+    XAUDIO2FX_I3DL2_PRESET_STONECORRIDOR,
+    XAUDIO2FX_I3DL2_PRESET_ALLEY,
+    XAUDIO2FX_I3DL2_PRESET_CITY,
+    XAUDIO2FX_I3DL2_PRESET_MOUNTAINS,
+    XAUDIO2FX_I3DL2_PRESET_QUARRY,
+    XAUDIO2FX_I3DL2_PRESET_PLAIN,
+    XAUDIO2FX_I3DL2_PRESET_PARKINGLOT,
+    XAUDIO2FX_I3DL2_PRESET_SEWERPIPE,
+    XAUDIO2FX_I3DL2_PRESET_UNDERWATER,
+    XAUDIO2FX_I3DL2_PRESET_SMALLROOM,
+    XAUDIO2FX_I3DL2_PRESET_MEDIUMROOM,
+    XAUDIO2FX_I3DL2_PRESET_LARGEROOM,
+    XAUDIO2FX_I3DL2_PRESET_MEDIUMHALL,
+    XAUDIO2FX_I3DL2_PRESET_LARGEHALL,
+    XAUDIO2FX_I3DL2_PRESET_PLATE,
+};
 /* Patrick 5/6/97 -------------------------------------------------------------
   Internal global variables
   ----------------------------------------------------------------------------*/
@@ -468,6 +506,35 @@ int PlatStartSoundSys()
 
 	numOutputChannels = deviceDetails.OutputFormat.Format.nChannels;
 
+	// create reverb
+	flags = 0;
+
+#ifdef _DEBUG
+    flags |= XAUDIO2FX_DEBUG;
+#endif
+
+	LastError = XAudio2CreateReverb(&pReverbEffect, flags);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("XAudio2CreateReverb call failed");
+	}
+
+	// create a submix voice
+	XAUDIO2_EFFECT_DESCRIPTOR effects[] = {{pReverbEffect, TRUE, 1}};
+	XAUDIO2_EFFECT_CHAIN effectChain = {1, effects};
+
+	LastError = pXAudio2->CreateSubmixVoice(&pSubmixVoice, 1, deviceDetails.OutputFormat.Format.nSamplesPerSec, 0, 0,
+                                                               NULL, &effectChain);
+
+	if (FAILED(LastError))
+	{
+		Con_PrintError("CreateSubmixVoice call failed");
+	}
+
+    // Set default FX params
+    XAUDIO2FX_REVERB_PARAMETERS native;
+    ReverbConvertI3DL2ToNative(&g_PRESET_PARAMS[0], &native);
+    pSubmixVoice->SetEffectParameters(0, &native, sizeof(native));
 	// Initialise X3DAudio
 	const float SPEEDOFSOUND = X3DAUDIO_SPEED_OF_SOUND;
 	X3DAudioInitialize(deviceDetails.OutputFormat.dwChannelMask, SPEEDOFSOUND, x3DInstance);
@@ -522,6 +589,12 @@ void PlatEndSoundSys()
 		pSourceVoice->DestroyVoice();
 		pSourceVoice = NULL;
 	}
+
+	if (pSubmixVoice)
+	{
+		pSubmixVoice->DestroyVoice();
+		pSubmixVoice = NULL;
+	}
 	if (pMasteringVoice)
 	{
 		pMasteringVoice->DestroyVoice();
@@ -540,6 +613,7 @@ void PlatEndSoundSys()
 		SAFE_RELEASE (pXAudio2);
 	}
 
+	SAFE_RELEASE(pReverbEffect);
 	CoUninitialize();
 
 	Con_PrintMessage("Uninitialised XAudio2 successfully");
@@ -745,6 +819,7 @@ void PlatStopSound(int activeIndex)
 	ActiveSounds[activeIndex].is3D = FALSE;
 	ActiveSounds[activeIndex].audioBuffer = NULL; // GameSounds has the original reference to this memory
 	ActiveSounds[activeIndex].pSourceVoice = NULL;
+	ActiveSounds[activeIndex].xa2Buffer.LoopCount = 0;
 }
 
 /* Patrick 15/6/97 -------------------------------------------------------------
@@ -1018,7 +1093,8 @@ void PlatEndGameSound(SOUNDINDEX index)
 	}
 
 	GameSounds[index].dsFrequency = 0;	
-	GameSounds[index].loaded = 0;	
+	GameSounds[index].loaded = 0;
+	GameSounds[index].xa2Buffer.LoopCount = 0;
 	if (GameSounds[index].wavName)
 	{
 		DeallocateMem (GameSounds[index].wavName);

@@ -190,8 +190,8 @@ void TextExpansion :: Display(void)
 		#if LimitedLineLength
 		{
 			// Find the word that's just been typed:
-			int StartOfWordPos = pTextInputState_In -> CursorPos;
-			int EndOfWordPos = pTextInputState_In -> CursorPos;
+			size_t StartOfWordPos = pTextInputState_In -> CursorPos;
+			size_t EndOfWordPos = pTextInputState_In -> CursorPos;
 
 			do 
 			{
@@ -227,7 +227,7 @@ void TextExpansion :: Display(void)
 
 			SCString* pSCString_Compare = new SCString
 			(
-				&( pTextInputState_In -> ProjCh[ StartOfWordPos ]),
+				&( pTextInputState_In->ProjCh[ StartOfWordPos ]),
 				( EndOfWordPos - StartOfWordPos )
 			);
 
@@ -289,7 +289,7 @@ void TextExpansion :: Display(void)
 
 				// Delete the shorthand version:
 				{
-					int NumToDelete = EndOfWordPos - StartOfWordPos;
+					size_t NumToDelete = EndOfWordPos - StartOfWordPos;
 
 					GLOBALASSERT( NumToDelete > 0 );
 

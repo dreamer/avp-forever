@@ -25,6 +25,7 @@
 #endif
 
 #include "chnktexi.h"
+#include "d3_func.h"
 
 #if !defined(NDEBUG) && defined(_CPPRTTI)
 	#include <typeinfo.h>
