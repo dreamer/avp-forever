@@ -768,19 +768,6 @@ void UpdateObjectLights(DISPLAYBLOCK *dptr)
 	}
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /****************************************************************************/
 
 /*
@@ -869,47 +856,7 @@ void CheckIfMirroringIsRequired(void)
 	extern MODULE * playerPherModule;
 
 	MirroringActive = 0;
-	#if 0
-	if ( (!stricmp(LevelName,"e3demo")) || (!stricmp(LevelName,"e3demosp")) )
-	{
-		int numOfObjects = NumActiveBlocks;
 
-		while(numOfObjects)
-		{
-			DISPLAYBLOCK *objectPtr = ActiveBlockList[--numOfObjects];
-			MODULE *modulePtr = objectPtr->ObMyModule;
-
-			/* if it's a module, which isn't inside another module */
-			if (modulePtr && modulePtr->name)
-			{
-				if(!stricmp(modulePtr->name,"marine01b"))
-				{
-					if(ModuleCurrVisArray[modulePtr->m_index] == 2)
-					{
-						MirroringActive = 1;
-						MirroringAxis = -149*2;
-						break;
-					}
-				}
-			}
-		}
-	
-		if (playerPherModule && playerPherModule->name)
-		{
-			textprint("<%s>\n",playerPherModule->name);
-			if((!stricmp(playerPherModule->name,"predator"))
-			 ||(!stricmp(playerPherModule->name,"predator01"))
-			 ||(!stricmp(playerPherModule->name,"predator03"))
-			 ||(!stricmp(playerPherModule->name,"predator02")) )
-			{
-				MirroringActive = 1;
-				MirroringAxis = -7164*2;
-			}
-		}
-	}
-	else
-	#endif 
-	#if 1
 	if (!stricmp(LevelName,"derelict"))
 	{
 		if (playerPherModule && playerPherModule->name)
@@ -922,7 +869,6 @@ void CheckIfMirroringIsRequired(void)
 			}
 		}
 	}
-	#endif
 }
 #endif
 

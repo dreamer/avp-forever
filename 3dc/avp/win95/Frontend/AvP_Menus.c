@@ -24,8 +24,6 @@
 #include "psnd.h"
 #include "savegame.h"
 #include "networking.h"
-
-
 #include "utilities.h"
 
 #if defined(_MSC_VER)
@@ -51,7 +49,6 @@ extern void MakeAlienKeyConfigMenu(void);
 extern void MakeUserProfileSelectMenu(void);
 
 extern void SaveKeyConfiguration(void);
-
 
 extern void D3D_DrawSliderBar(int x, int y, int alpha);
 extern void D3D_DrawSlider(int x, int y, int alpha);
@@ -128,6 +125,10 @@ static int HeightOfMenuElement(AVPMENU_ELEMENT *elementPtr);
 extern void RenderKeyConfigRectangle(int alpha);
 extern void Hardware_RenderKeyConfigRectangle(int alpha);
 extern void Hardware_RenderHighlightRectangle(int x1,int y1,int x2,int y2,int r, int g, int b);
+char *GetVideoModeDescription2();
+char *GetVideoModeDescription3();
+void NextVideoMode2();
+void PreviousVideoMode2();
 
 extern char *GetGamePadButtonTextString(enum TEXTSTRING_ID stringID);
 
@@ -3753,7 +3754,6 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 				DrawAvPMenuGfx(AVPMENUGFX_SLIDERBAR,MENU_CENTREX+MENU_ELEMENT_SPACING,y+1,elementPtr->Brightness,AVPMENUFORMAT_LEFTJUSTIFIED);
 				DrawAvPMenuGfx(AVPMENUGFX_SLIDER,x,y+4,elementPtr->Brightness,AVPMENUFORMAT_LEFTJUSTIFIED);
 			}
-
 
 			break;
 		}

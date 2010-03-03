@@ -569,6 +569,7 @@ void FrameCounterHandler(void)
 {
 	int newTickCount = timeGetTime();
 	int fcnt;
+	char buf[100];
 
 	fcnt = newTickCount - lastTickCount;
 	lastTickCount = newTickCount;

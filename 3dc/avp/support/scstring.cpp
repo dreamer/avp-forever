@@ -231,7 +231,7 @@ SCString :: SCString
 	}
 }
 
-SCString :: SCString( size_t Number )
+SCString :: SCString( unsigned int Number )
 {
 	// forms a new string object that describes the number passed
 	// standard decimal representation
@@ -273,23 +273,15 @@ SCString :: SCString( size_t Number )
 
 			IndexedFont* pFont = IndexedFont :: GetFont( i );
 			
-			if ( pFont )
+			if (pFont)
 			{
-				R2Size[ i ] = pFont -> CalcSize
-				(
-					pProjCh_Val
-				);
-
-				bCanRender[ i ] = pFont -> bCanRenderFully
-				(
-					pProjCh_Val
-				);
+				R2Size[i] = pFont->CalcSize(pProjCh_Val);
+				bCanRender[i] = pFont->bCanRenderFully(pProjCh_Val);
 			}
 			else
 			{
-				R2Size[ i ] = r2size(0,0);
-
-				bCanRender[ i ] = FALSE;					
+				R2Size[i] = r2size(0,0);
+				bCanRender[i] = FALSE;					
 			}
 		}
 
@@ -328,24 +320,13 @@ SCString :: SCString
 			Number
 		);
 
-		#if 0
-		LOCALISEME();
-		#endif
-
-		AllocatedSize = (size_t) STRUTIL_SC_NumBytes
-		(
-			pProjCh_Init
-		);
+		AllocatedSize = (size_t) STRUTIL_SC_NumBytes(pProjCh_Init);
 
 		pProjCh_Val = new ProjChar[	AllocatedSize ];
 		GLOBALASSERT( pProjCh_Val );
 			// this is always "owned" by the String
 
-		STRUTIL_SC_StrCpy
-		(
-			pProjCh_Val,
-			pProjCh_Init
-		);
+		STRUTIL_SC_StrCpy(pProjCh_Val, pProjCh_Init);
 
 		NumberOfCharacters = ( AllocatedSize / sizeof(ProjChar ) ) - 1;
 			// doesn't include NULL terminator
@@ -360,21 +341,14 @@ SCString :: SCString
 			
 			if ( pFont )
 			{
-				R2Size[ i ] = pFont -> CalcSize
-				(
-					pProjCh_Val
-				);
+				R2Size[i] = pFont->CalcSize(pProjCh_Val);
 
-				bCanRender[ i ] = pFont -> bCanRenderFully
-				(
-					pProjCh_Val
-				);
+				bCanRender[i] = pFont->bCanRenderFully(pProjCh_Val);
 			}
 			else
 			{
-				R2Size[ i ] = r2size(0,0);
-
-				bCanRender[ i ] = FALSE;					
+				R2Size[i] = r2size(0,0);
+				bCanRender[i] = FALSE;					
 			}
 		}
 
@@ -382,7 +356,7 @@ SCString :: SCString
 		{
 			if ( pFirst )
 			{
-				pFirst -> pPrv = this;
+				pFirst->pPrv = this;
 			}
 			
 			pNxt = pFirst;
@@ -390,17 +364,11 @@ SCString :: SCString
 
 			pFirst = this;
 		}
-
 	}
 }
 
 
-
-SCString :: SCString
-(
-	ProjChar* pProjCh_Init,
-	unsigned int Length
-)
+SCString::SCString(ProjChar* pProjCh_Init, size_t Length)
 {
 	// Forms a string of length at most Length (with 1 extra for NULL-terminator)
 
@@ -414,15 +382,12 @@ SCString :: SCString
 		NumberOfCharacters = STRUTIL_SC_Strlen( pProjCh_Init );
 			// doesn't include NULL terminator
 
-		if ( (unsigned)NumberOfCharacters > Length )
+		if (NumberOfCharacters > Length)
 		{
 			NumberOfCharacters = Length;
 		}		
 
-		AllocatedSize = (size_t) STRUTIL_SC_NumBytes
-		(
-			pProjCh_Init
-		);
+		AllocatedSize = (size_t)STRUTIL_SC_NumBytes(pProjCh_Init);
 
 		{
 			size_t TruncSize = sizeof(ProjChar) * (Length + 1);
@@ -437,13 +402,7 @@ SCString :: SCString
 		GLOBALASSERT( pProjCh_Val );
 			// this is always "owned" by the String
 
-		STRUTIL_SC_SafeCopy
-		(
-			pProjCh_Val,
-			(NumberOfCharacters+1),
-
-			pProjCh_Init
-		);
+		STRUTIL_SC_SafeCopy(pProjCh_Val, (NumberOfCharacters+1), pProjCh_Init);
 
 		FontIndex i = IndexedFonts_MAX_NUMBER_OF_FONTS; 
 		
@@ -455,21 +414,13 @@ SCString :: SCString
 			
 			if ( pFont )
 			{
-				R2Size[ i ] = pFont -> CalcSize
-				(
-					pProjCh_Val
-				);
-
-				bCanRender[ i ] = pFont -> bCanRenderFully
-				(
-					pProjCh_Val
-				);
+				R2Size[i] = pFont->CalcSize(pProjCh_Val);
+				bCanRender[i] = pFont->bCanRenderFully(pProjCh_Val);
 			}
 			else
 			{
-				R2Size[ i ] = r2size(0,0);
-
-				bCanRender[ i ] = FALSE;					
+				R2Size[i] = r2size(0,0);
+				bCanRender[i] = FALSE;					
 			}
 		}
 

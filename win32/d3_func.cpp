@@ -250,8 +250,8 @@ void CreateScreenShotImage()
 	SYSTEMTIME systemTime;
 	LPDIRECT3DSURFACE9 frontBuffer = NULL;
 
-	std::ostringstream fileName;
-	
+	std::ostringstream fileName(GetSaveFolderPath());
+
 	// get current system time
 	GetSystemTime(&systemTime);
 
@@ -1132,7 +1132,7 @@ BOOL InitialiseDirect3D()
 	d3dpp.hDeviceWindow = hWndMain;
     d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
 
-	d3dpp.EnableAutoDepthStencil = true;
+	d3dpp.EnableAutoDepthStencil = TRUE;
 	d3dpp.AutoDepthStencilFormat = SelectedDepthFormat;
 	d3dpp.BackBufferFormat = SelectedBackbufferFormat;
 

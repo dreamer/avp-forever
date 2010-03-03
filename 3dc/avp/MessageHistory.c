@@ -5,6 +5,7 @@
 #include "stratdef.h"
 #include "gamedef.h"
 #include "language.h"
+#include "savegame.h"
 
 #define MAX_NO_OF_MESSAGES_IN_HISTORY 64
 
@@ -89,7 +90,6 @@ void MessageHistory_Maintain(void)
 /*---------------------------**
 ** Load/Save message history **
 **---------------------------*/
-#include "savegame.h"
 
 typedef struct message_history_save_block
 {
@@ -125,8 +125,6 @@ void Load_MessageHistory(SAVE_BLOCK_HEADER* header)
 	{
 		MessageHistoryStore[i] = *saved_message++;
 	}
-
-	
 }
 
 void Save_MessageHistory()
@@ -150,7 +148,6 @@ void Save_MessageHistory()
 		struct MessageHistory* message = GET_SAVE_BLOCK_POINTER(message);
 		*message = MessageHistoryStore[i];
 	}
-
 }
 
 

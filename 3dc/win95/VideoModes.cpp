@@ -35,8 +35,7 @@ void PreviousVideoMode2()
 char *GetVideoModeDescription2()
 {
 #ifdef _XBOX
-	static char description[15] = "Microsoft Xbox";
-	return description;
+	return "Microsoft Xbox";
 #else
 	return d3d.Driver[d3d.CurrentDriver].AdapterInfo.Description;
 #endif
