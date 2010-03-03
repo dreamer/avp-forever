@@ -28,7 +28,7 @@ extern unsigned char GotAnyKey;
 
 	
 #include "dxlog.h"
-#include "zmouse.h"
+#include <zmouse.h>
 
 void MakeToAsciiTable(void);
 
