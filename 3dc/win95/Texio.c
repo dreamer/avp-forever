@@ -17,32 +17,21 @@
 #include "alt_tab.h"
 
 /*
-	#define for experimental purposes 
-	ONLY!!!
-*/
-
-#define DefinedTextureType TextureTypePPM
-
-/*
 
  externs for commonly used global variables and arrays
 
 */
 
-	extern SHAPEHEADER **mainshapelist;
-	extern (*ShapeLanguageFunctions[])(SHAPEINSTR *shapeinstrptr);
-	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-	extern char projectsubdirectory[];
-	extern int VideoModeType;
-	void ReleaseD3DTexture(D3DTEXTURE *d3dTexture);
+extern SHAPEHEADER **mainshapelist;
+extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+extern char projectsubdirectory[];
+void ReleaseD3DTexture(D3DTEXTURE *d3dTexture);
 
 /*
 
  Global Variables for PC Functions
 
 */
-
-//	TEXTURE *ImageBuffer;							/* Memory Resident Image Data */
 
 	#ifdef MaxImageGroups
 	#if MaxImageGroups < 2 /* optimize if this multiple groups are not required */
@@ -325,22 +314,19 @@ int InitialiseTextures(void)
 	*/
 	if ( NULL == mainshapelist )
 	{
-		return TRUE;
-			// early exit
+		return TRUE; // early exit
 	}
 
 	/* Build the Texture List */
-
 	shlistptr = &mainshapelist[0];
 
-	while(*shlistptr) {
-
+	while (*shlistptr) 
+	{
 		shptr = *shlistptr++;
 
 		/* If the shape has textures */
-
-		if(shptr->sh_localtextures) {
-
+		if  (shptr->sh_localtextures) 
+		{
 			#if InitTexPrnt
 			textprint("This shape has textures\n");
 			#endif
@@ -349,10 +335,9 @@ int InitialiseTextures(void)
 
 			LTxIndex = 0;
 
-			while(*txfiles) {
-
+			while (*txfiles) 
+			{
 				/* The RIFF Image loaders have changed to support not loading the same image twice - JH 17-2-96 */
-
 				char *src;
 				char *dst;
 				char fname[ImageNameSize];
@@ -389,7 +374,6 @@ int InitialiseTextures(void)
 					*dst++ = *src++;
 
 				*dst = 0;
-
 
 				#if InitTexPrnt
 				textprint(" A Texture\n");
@@ -500,9 +484,9 @@ int InitialiseTextures(void)
 
 			/* Is this shape a sprite that requires resizing? */
 
-			if((shptr->shapeflags & ShapeFlag_Sprite) &&
-				(shptr->shapeflags & ShapeFlag_SpriteResizing)) {
-
+			if ((shptr->shapeflags & ShapeFlag_Sprite) &&
+				(shptr->shapeflags & ShapeFlag_SpriteResizing)) 
+			{
 				SpriteResizing(shptr);
 			}
 		}
@@ -582,22 +566,21 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 
 
 	/* Are the items in a pointer array? */
-
-	if(shptr->items) {
-
+	if (shptr->items) 
+	{
 		#if InitTexPrnt
 		textprint("Item Array\n");
 		#endif
 
 		ShapeItemArrayPtr = shptr->items;
 
-		for(i = shptr->numitems; i!=0; i--) {
-
+		for (i = shptr->numitems; i!=0; i--) 
+		{
 			ShapeItemPtr = (POLYHEADER *) *ShapeItemArrayPtr++;
 			
 			#if SupportZBuffering
 
-			if(ShapeItemPtr->PolyItemType == I_2dTexturedPolygon
+			if (ShapeItemPtr->PolyItemType == I_2dTexturedPolygon
 				|| ShapeItemPtr->PolyItemType == I_ZB_2dTexturedPolygon
 				|| ShapeItemPtr->PolyItemType == I_Gouraud2dTexturedPolygon
 				|| ShapeItemPtr->PolyItemType == I_ZB_Gouraud2dTexturedPolygon
@@ -614,23 +597,20 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 				|| ShapeItemPtr->PolyItemType == I_3dTexturedPolygon){
 			#endif /* SupportZBuffering */
 
-				if(ShapeItemPtr->PolyFlags & iflag_txanim) {
-
-					MakeTxAnimFrameTexturesGlobal(shptr, ShapeItemPtr,
-															LTxIndex, TxIndex);
-
+				if (ShapeItemPtr->PolyFlags & iflag_txanim) 
+				{
+					MakeTxAnimFrameTexturesGlobal(shptr, ShapeItemPtr, LTxIndex, TxIndex);
 				}
 
-				if(ShapeItemPtr->PolyColour & TxLocal) {
-
+				if (ShapeItemPtr->PolyColour & TxLocal) 
+				{
 					txi = ShapeItemPtr->PolyColour;
 					txi &= ~TxLocal;							/* Clear Flag */
 					txi &= ClrTxDefn;							/* Clear UV array index */
 
 					/* Is this the local index? */
-
-					if(txi == LTxIndex) {
-
+					if (txi == LTxIndex) 
+					{
 						/* Clear low word, OR in global index */
 
 						ShapeItemPtr->PolyColour &= ClrTxIndex;
@@ -1082,12 +1062,11 @@ void SpriteResizing(SHAPEHEADER *sptr)
 
 
 					/* Copy the polygon points (XY only) to the UV array space */
-
 					iptr  = polypts;
 					iptr2 = uvptr;
 
-					for(i = 4; i!=0; i--) {
-
+					for (i = 4; i!=0; i--) 
+					{
 						iptr2[0] = iptr[ix];
 						iptr2[1] = iptr[iy];
 
@@ -1098,10 +1077,10 @@ void SpriteResizing(SHAPEHEADER *sptr)
 
 
 					/* Scale the polygon points */
-
 					iptr = uvptr;
 
-					for(i = 4; i!=0; i--) {
+					for (i = 4; i!=0; i--) 
+					{
 
 						iptr[0] = WideMulNarrowDiv(iptr[0], size_uv.vx, size_uv_curr.vx);
 						iptr[1] = WideMulNarrowDiv(iptr[1], size_uv.vy, size_uv_curr.vy);
@@ -1112,23 +1091,20 @@ void SpriteResizing(SHAPEHEADER *sptr)
 
 
 					/* The translation vector in UV space */
-
 					tv.vx = cen_uv.vx - cen_uv_curr.vx;
 					tv.vy = cen_uv.vy - cen_uv_curr.vy;
 
 
 					/* And now in world space */
-
 					tv.vx = WideMulNarrowDiv(tv.vx, size_poly.vx, size_uv_curr.vx);
 					tv.vy = WideMulNarrowDiv(tv.vy, size_poly.vy, size_uv_curr.vy);
 
 
 					/* Translate the polygon points */
-
 					iptr = uvptr;
 
-					for(i = 4; i!=0; i--) {
-
+					for (i = 4; i!=0; i--) 
+					{
 						iptr[0] += tv.vx;
 						iptr[1] += tv.vy;
 
@@ -1175,13 +1151,9 @@ void FindImageExtents(IMAGEHEADER *ihdr, int numuvs, int *uvdata, IMAGEEXTENTS *
 {
 	int i;
 	int *uvptr;
-//	int u, v;
-//	int startu, endu;
-//	int startv, endv;
 
 
 	/* Find the current UV extents */
-
 	e_curr->u_low = bigint;
 	e_curr->v_low = bigint;
 
@@ -1190,93 +1162,16 @@ void FindImageExtents(IMAGEHEADER *ihdr, int numuvs, int *uvdata, IMAGEEXTENTS *
 
 	uvptr = uvdata;
 
-	for(i = numuvs; i!=0; i--) 
+	for (i = numuvs; i!=0; i--) 
 	{
+		if (uvptr[0] < e_curr->u_low) e_curr->u_low = uvptr[0];
+		if (uvptr[1] < e_curr->v_low) e_curr->v_low = uvptr[1];
 
-		if(uvptr[0] < e_curr->u_low) e_curr->u_low = uvptr[0];
-		if(uvptr[1] < e_curr->v_low) e_curr->v_low = uvptr[1];
-
-		if(uvptr[0] > e_curr->u_high) e_curr->u_high = uvptr[0];
-		if(uvptr[1] > e_curr->v_high) e_curr->v_high = uvptr[1];
+		if (uvptr[0] > e_curr->u_high) e_curr->u_high = uvptr[0];
+		if (uvptr[1] > e_curr->v_high) e_curr->v_high = uvptr[1];
 
 		uvptr += 2;
 	}
-
-
-	/* Look for the actual UV extents, assuming that colour 0 is transparent */
-#if 0
-	switch(VideoModeType) {
-
-		case VideoModeType_8:
-			{
-				TEXTURE *tptr = ihdr->ImagePtr;
-				TEXTURE texel;
-
-
-				/* Search for u_low and v_low */
-
-				e->u_low = bigint;
-				e->v_low = bigint;
-
-				startv = e_curr->v_low  >> 16;
-				endv   = e_curr->v_high >> 16;
-				startu = e_curr->u_low  >> 16;
-				endu   = e_curr->u_high >> 16;
-
-				for(v = startv; v <= endv; v++) {
-
-					for(u = startu; u <= endu; u++) {
-
-						texel = tptr[(v * ihdr->ImageWidth) + u];
-
-						if(texel) {
-
-							if(u < e->u_low) e->u_low = u;
-							if(v < e->v_low) e->v_low = v;
-						}
-					}
-				}
-
-				if(e->u_low == bigint) e->u_low = e_curr->u_low;
-				if(e->v_low == bigint) e->v_low = e_curr->v_low;
-
-
-				/* Search for u_high and v_high */
-
-				e->u_high = smallint;
-				e->v_high = smallint;
-
-				for(v = endv; v >= startv; v--) {
-
-					for(u = endu; u >= startu;  u--) {
-
-						texel = tptr[(v * ihdr->ImageWidth) + u];
-
-						if(texel) {
-
-							if(u > e->u_high) e->u_high = u;
-							if(v > e->v_high) e->v_high = v;
-
-						}
-					}
-				}
-
-				if(e->u_high == smallint) e->u_high = e_curr->u_high;
-				if(e->v_high == smallint) e->v_high = e_curr->v_high;
-			}
-
-			break;
-
-		case VideoModeType_15:
-			break;
-
-		case VideoModeType_24:
-			break;
-
-		case VideoModeType_8T:
-			break;
-	}
-#endif
 }
 
 
@@ -1318,58 +1213,7 @@ IMAGEHEADER* GetImageHeader(void)
 	NumImages++;
 	
 	return iheader;
-
 }
-
-
-/*
-
- Return the address of a texture image in memory, else null
-
-*/
-
-#if 0
-void* GetTexture(int texindex)
-
-{
-
-    /* Ahem... */
-
-	return FALSE;
-
-}
-#endif
-
-/*
-
- Allocate memory for a Texture Image
-
-*/
-
-#if 0
-TEXTURE* GetTextureMemory(int txsize)
-
-{
-
-    /* Err... */
-	return FALSE;
-
-}
-#endif
-
-/*
-
- Deallocate memory for a Texture Image
-
-*/
-
-#if 0
-void ReturnTextureMemory(TEXTURE *txptr)
-
-{
-
-}
-#endif
 
 static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 {
