@@ -1,5 +1,3 @@
-#if 0
-
 /*
  * KJL 15:13:43 7/17/97 - frustrum.c
  *
@@ -1273,5 +1271,3 @@ int //TriangleWithinFrustrum(void)
 	/* yes, we need to draw poly */
 	return 1;
 }
-
-  #endif
