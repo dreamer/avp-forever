@@ -173,7 +173,7 @@ SHAPEHEADER* GetShapeData(int shapenum)
 		SHAPEHEADER *sptr = mainshapelist[shapenum];
 		return sptr;
 	}
-	
+
 	return NULL;
 }
 

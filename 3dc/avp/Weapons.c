@@ -156,7 +156,7 @@ extern void Crunch_Position_For_Players_Weapon(VECTORCH *position);
 extern DISPLAYBLOCK *MakePistolCasing(VECTORCH *position,MATRIXCH *orient);
 void VideoScreenIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple);
 void TrackObjectIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple);
-
+int PrintDebuggingText(const char* t, ...);
 
 int FriendlyFireDamageFilter(DAMAGE_PROFILE *damage);
 static void MarineZeroAmmoFunctionality(PLAYER_STATUS *playerStatusPtr,PLAYER_WEAPON_DATA *weaponPtr);

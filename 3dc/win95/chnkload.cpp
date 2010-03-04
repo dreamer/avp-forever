@@ -1789,7 +1789,7 @@ void copy_to_module (Object_Chunk * ob, int mod_pos, int shplst_pos)
 
 #endif
 
-void SetupAnimOnTriangle(SHAPEHEADER* shp,TEXANIM* ta,int poly, int * local_tex_index_nos)
+void SetupAnimOnTriangle(SHAPEHEADER* shp, TEXANIM* ta, int poly, int *local_tex_index_nos)
 {
 	if(!is_textured(shp->items[poly][0]))return;
 	txanimheader** thlist=(txanimheader**)PoolAllocateMem((ta->NumSeq+2)*sizeof(txanimheader*));

@@ -2883,8 +2883,6 @@ void post_process_shape (SHAPEHEADER * shp)
 				}
 		}
 		shp->items[i][2] |= iflag_gsort_ptest | iflag_linear_s;
-		//shp->items[i][2] &= ~iflag_transparent; // this causes _translucency_ on direct 3d
-		//shp->items[i][2] &= ~iflag_drawtx3das2d;
 
 		{
 			switch (shp->items[i][0])
@@ -3010,16 +3008,16 @@ RIFFHANDLE avp_load_rif (const char * fname)
 	//see if there is a local copy of the rif file
 	FILE *rifFile = avp_fopen(fname, "rb");
 
-	if(!rifFile && AvpCDPath)
+	if (!rifFile && AvpCDPath)
 	{
 		//try and load rif file from cd instead
-		char RifName[200];
-		sprintf(RifName,"%s%s",AvpCDPath,fname);
+		char RifName[MAX_PATH];
+		sprintf(RifName, "%s%s", AvpCDPath, fname);
 		return load_rif(RifName);
 
 	}
 	// extra check
-	if(rifFile)
+	if (rifFile)
 	{
 		fclose(rifFile);
 	}

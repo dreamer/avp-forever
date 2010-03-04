@@ -757,12 +757,8 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 
 */
 
-void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr,
-														POLYHEADER *pheader,
-														int LTxIndex, int TxIndex)
-
+void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr, POLYHEADER *pheader, int LTxIndex, int TxIndex)
 {
-
 	TXANIMHEADER **txah_ptr;
 	TXANIMHEADER *txah;
 	TXANIMFRAME *txaf;
@@ -771,7 +767,6 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr,
 	int texture_defn_index;
 	int i, txi, image;
 
-
 	#if 0
 	textprint("LTxIndex = %d, TxIndex = %d\n", LTxIndex, TxIndex);
 	WaitForReturn();
@@ -779,64 +774,56 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr,
 
 
 	/* Get the animation sequence header */
-
 	shape_textures = sptr->sh_textures;
 	texture_defn_index = (pheader->PolyColour >> TxDefn);
 	txah_ptr = (TXANIMHEADER **) shape_textures[texture_defn_index];
 
 
 	/* The first array element is the sequence shadow, which we skip here */
-
 	txah_ptr++;
 
-
 	/* Process the animation sequences */
-
-	while(*txah_ptr) {
-
+	while (*txah_ptr) 
+	{
 		/* Get the animation header */
-
 		txah = *txah_ptr++;
 
 		/* Process the animation frames */
-
-		if(txah && txah->txa_numframes) {
-
+		if (txah && txah->txa_numframes) 
+		{
 			txaf = txah->txa_framedata;
 
-			for(i = txah->txa_numframes; i!=0; i--) {
-
+			for (i = txah->txa_numframes; i!=0; i--) 
+			{
 				/* Multi-View Sprite? */
+				if (sptr->shapeflags & ShapeFlag_MultiViewSprite) 
+				{
+					txf_imageptr = (int *)txaf->txf_image;
 
-				if(sptr->shapeflags & ShapeFlag_MultiViewSprite) {
-
-					txf_imageptr = (int *) txaf->txf_image;
-
-					for(image = txah->txa_num_mvs_images; image!=0; image--) {
-
-						if(*txf_imageptr & TxLocal) {
-
+					for (image = txah->txa_num_mvs_images; image!=0; image--) 
+					{
+						if (*txf_imageptr & TxLocal)
+						{
 							txi = *txf_imageptr;
 							txi &= ~TxLocal;					/* Clear Flag */
 
-							if(txi == LTxIndex) {
-
+							if (txi == LTxIndex) 
+							{
 								*txf_imageptr = TxIndex;
 							}
 						}
 						txf_imageptr++;
 					}
 				}
-
-				else {
-
-					if(txaf->txf_image & TxLocal) {
-
+				else 
+				{
+					if (txaf->txf_image & TxLocal)
+					{
 						txi = txaf->txf_image;
 						txi &= ~TxLocal;					/* Clear Flag */
 
-						if(txi == LTxIndex) {
-
+						if (txi == LTxIndex) 
+						{
 							txaf->txf_image = TxIndex;
 						}
 					}
@@ -868,9 +855,7 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr,
 #define sr_print FALSE
 
 void SpriteResizing(SHAPEHEADER *sptr)
-
 {
-
 	TXANIMHEADER **txah_ptr;
 	TXANIMHEADER *txah;
 	TXANIMFRAME *txaf;
@@ -910,16 +895,13 @@ void SpriteResizing(SHAPEHEADER *sptr)
 
 
 	/* Get the animation sequence header */
-
 	shape_textures = sptr->sh_textures;
 
 	item_array_ptr = sptr->items;		/* Assume item array */
 	item_ptr = item_array_ptr[0];		/* Assume only one polygon */
 	pheader = (POLYHEADER *) item_ptr;
 
-
 	/* Get the polygon points, and at the same time the extents, assuming an XY plane polygon */
-
 	e_poly.x_low = bigint;
 	e_poly.y_low = bigint;
 
@@ -929,7 +911,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 	iptr = polypts;
 	mypolystart = &pheader->Poly1stPt;
 
-	for(i = 4; i!=0; i--) 
+	for (i = 4; i!=0; i--) 
 	{
 		iptr[ix] = ((VECTORCH*)ShapePoints)[*mypolystart].vx;
 		iptr[iy] = ((VECTORCH*)ShapePoints)[*mypolystart].vy;
@@ -954,64 +936,50 @@ void SpriteResizing(SHAPEHEADER *sptr)
 
 
 	/* The first array element is the sequence shadow, which we skip here */
-
 	txah_ptr++;
 
-
 	/* Process the animation sequences */
-
-	while(*txah_ptr) {
-
+	while (*txah_ptr) 
+	{
 		/* Get the animation header */
-
 		txah = *txah_ptr++;
 
 		/* Process the animation frames */
-
-		if(txah && txah->txa_numframes) {
-
+		if (txah && txah->txa_numframes) 
+		{
 			txaf = txah->txa_framedata;
 
-			for(f = txah->txa_numframes; f!=0; f--) {
-
-
+			for (f = txah->txa_numframes; f!=0; f--) 
+			{
 				/* Multi-View Sprite? */
-
-				if(sptr->shapeflags & ShapeFlag_MultiViewSprite) {
-
+				if (sptr->shapeflags & ShapeFlag_MultiViewSprite) 
+				{
 					txf_imageptr = (int *) txaf->txf_image;
 					num_images = txah->txa_num_mvs_images;
 
 					txf_uvarrayptr = (int **) txaf->txf_uvdata;
-
 				}
 
 				/* A standard "Single View" Sprite has just one image */
-
-				else {
-
+				else 
+				{
 					txf_imageptr = &txaf->txf_image;
 					num_images = 1;
 
 					txf_uvarrayptr = &txaf->txf_uvdata;
-
 				}
 
-
-				for(image = 0; image < num_images; image++) {
-
-
+				for (image = 0; image < num_images; image++) 
+				{
 					#if sr_print
 					textprint("image %d of %d   \n", (image + 1), num_images);
 					#endif
 
 
 					/* Get the image */
-
 					ihdr = ImageHeaderPtrs[txf_imageptr[image]];
 
 					/* Get the uv array ptr */
-
 					txf_uvarray = txf_uvarrayptr[image];
 
 					/* Find the extents of the image, assuming transparency */

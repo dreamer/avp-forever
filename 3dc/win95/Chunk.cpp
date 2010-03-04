@@ -433,11 +433,11 @@ Chunk* Chunk_With_Children::lookup_single_child (const char * class_ident) const
 	{
 		while (child_ptr != NULL) 
 		{
-			if (strncmp (class_ident, child_ptr->identifier, 8) == NULL)
+			if (strncmp(class_ident, child_ptr->identifier, 8) == NULL)
 			{
 				assert (!child_ptr->r_u_miscellaneous());
 				assert(!chunk_found); 
-				chunk_found=child_ptr;
+				chunk_found = child_ptr;
 			}
 			child_ptr = child_ptr->next;
 		}

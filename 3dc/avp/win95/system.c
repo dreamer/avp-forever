@@ -685,8 +685,7 @@ const char FileNameExtension[5] =  {".rif"};
 
 void LoadRifFile()
 {
-
-	char file_and_path[100];
+	char file_and_path[MAX_PATH];
 	int i = 0;
 	
 	Set_Progress_Bar_Position(PBAR_LEVEL_START);
@@ -699,8 +698,8 @@ void LoadRifFile()
 		EnvFileName[i] = (char)0;
 		LevelDir[i] = (char)0;
 	}
+
 	// Set up the dirname for the Rif load
-				
 	catpathandextension(&file_and_path[0], (char *)&GameDataDirName[0]);
 	catpathandextension(&file_and_path[0], Env_List[AvP.CurrentEnv]->main); /* root of the file name,smae as dir*/
 	catpathandextension(&file_and_path[0], (char *)&FileNameExtension[0]);	/* extension*/
@@ -708,7 +707,7 @@ void LoadRifFile()
 	env_rif = avp_load_rif((const char*)&file_and_path[0]);
 	Set_Progress_Bar_Position(PBAR_LEVEL_START+PBAR_LEVEL_INTERVAL*.4);
 	
-	if(INVALID_RIFFHANDLE == env_rif)
+	if (INVALID_RIFFHANDLE == env_rif)
 	{
 //		finiObjects();
 		exit(0x3421);

@@ -75,20 +75,21 @@ STRATEGYBLOCK* AllocateStrategyBlock(void)
 	int *sptr;
 	int i;
 
-	if(NumFreeStBlocks) 
+	if (NumFreeStBlocks) 
+	{
+		FreeBlkPtr = *FreeStBlockListPtr--;
+
+		NumFreeStBlocks--;	/* One less free block */
+
+		/* Clear the block */
+		sptr = (int *)FreeBlkPtr;
+
+		// bjd - CHECK
+		for (i = sizeof(STRATEGYBLOCK)/4; i != 0; i--)
 		{
-			FreeBlkPtr = *FreeStBlockListPtr--;
-
-			NumFreeStBlocks--;					/* One less free block */
-
-			/* Clear the block */
-
-			sptr = (int *)FreeBlkPtr;
-			for(i = sizeof(STRATEGYBLOCK)/4; i!=0; i--)
-				{
-					*sptr++ = 0;
-				}
+			*sptr++ = 0;
 		}
+	}
 
 	return(FreeBlkPtr);
 }

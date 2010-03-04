@@ -115,6 +115,7 @@ static void VertexIntensity_DiscoInferno(RENDERVERTEX *renderVertexPtr);
 static void VertexIntensity_Underwater(RENDERVERTEX *renderVertexPtr);
 
 
+void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr);
 extern void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr);
 
 void PredatorThermalVision_ShapePipeline(SHAPEHEADER *shapePtr);
@@ -2861,19 +2862,18 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 
 	/* Because the current frame can be set from outside, clamp it first */
 
-	if(txah->txa_currentframe < 0) {
-
+	if (txah->txa_currentframe < 0)
+	{
 		txah->txa_currentframe = 0;
 	}
 
-	if(txah->txa_currentframe >= txah->txa_maxframe) {
-
+	if (txah->txa_currentframe >= txah->txa_maxframe) 
+	{
 		txah->txa_currentframe = txah->txa_maxframe - 1;
 	}
 
 
 	/* Frame # */
-
 	CurrentFrame  = txah->txa_currentframe >> 16;
 	Alpha         = txah->txa_currentframe - (CurrentFrame << 16);
 	OneMinusAlpha = ONE_FIXED - Alpha;
@@ -2882,7 +2882,8 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 	/* Start and End Frame */
 
 	NextFrame = CurrentFrame + 1;
-	if(NextFrame >= txah->txa_numframes) NextFrame = 0;
+	if (NextFrame >= txah->txa_numframes) 
+		NextFrame = 0;
 
 	txaf0 = &txaf[CurrentFrame];
 	txaf1 = &txaf[NextFrame];
@@ -2901,7 +2902,8 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 
 	/* Multi-View Sprites need to select an image from the array */
 
-	if(Global_ShapeHeaderPtr->shapeflags & ShapeFlag_MultiViewSprite) {
+	if(Global_ShapeHeaderPtr->shapeflags & ShapeFlag_MultiViewSprite) 
+	{
 
 		int **txf_uvarrayptr0 = (int **) txaf0->txf_uvdata;
 		int **txf_uvarrayptr1 = (int **) txaf1->txf_uvdata;
