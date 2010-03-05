@@ -58,6 +58,9 @@ extern DAMAGE_PROFILE FlechetteDamage;
 extern DAMAGE_PROFILE FallingDamage;
 extern DAMAGE_PROFILE PredPistol_FlechetteDamage;
 
+int PrintDebuggingText(const char* t, ...);
+void PlayerPheromoneTrail(DYNAMICSBLOCK *dynPtr);
+
 #define AccessNextPolygon()\
 {\
 	int *itemPtr = *(ItemArrayPtr++);\

@@ -27,7 +27,7 @@
 #include "psnd.h"
 #include "psndplat.h"
 #include "huddefs.h"
-
+#include "equipmnt.h"
 #include "particle.h"
 #include "sfx.h"
 #include "ShowCmds.h"
@@ -79,6 +79,15 @@ void Frisbee_Hit_Environment(STRATEGYBLOCK *sbPtr,COLLISIONREPORT *reportPtr);
 void Crunch_Position_For_Players_Weapon(VECTORCH *position);
 static int SBForcesBounce(STRATEGYBLOCK *sbPtr);
 static int Reflect(VECTORCH *Incident, VECTORCH *Normal, EULER *Output);
+int NPCCanSeeTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, int viewRange);
+void GetTargetingPointOfObject_Far(STRATEGYBLOCK *sbPtr, VECTORCH *targetPtr);
+int SlotForThisWeapon(enum WEAPON_ID weaponID);
+extern void CurrentGameStats_WeaponHit(enum WEAPON_SLOT slot,unsigned int rounds);
+void MakeGrenadeTrailParticles(VECTORCH *prevPositionPtr, VECTORCH *positionPtr);
+int ValidTargetForProxMine(STRATEGYBLOCK *obstaclePtr);
+void RubberDuckBehaviour(STRATEGYBLOCK *sbPtr);
+void MakePlasmaTrailParticles(DYNAMICSBLOCK *dynPtr, int number);
+void NewTrailPoint(DYNAMICSBLOCK *dynPtr);
 
 /*KJL****************************************************************************************
 *  										G L O B A L S 	            					    *

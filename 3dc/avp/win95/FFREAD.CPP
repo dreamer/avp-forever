@@ -301,7 +301,7 @@ FFError FFHeaderI::Read(char const *_filename)
 	READ_FILE(filename,(void)0,CloseHandle(h),h,&total_headsize,4,bytes_read,0)
 	READ_FILE(filename,(void)0,CloseHandle(h),h,&data_length,4,bytes_read,0)
 
-	length = data_length;
+	length = static_cast<uint32_t>(data_length);
 	
 	if (strncmp(magic,"RFFL",4))
 	{
@@ -337,7 +337,7 @@ FFError FFHeaderI::Read(char const *_filename)
 		void * dataP = (void *)((intptr_t)data + *(uint32_t *)headerP);
 		
 		files[HashFunction(fnameP)].add_entry(FFDataI(fnameP,dataP,leng));
-		
+
 		// increment pointer
 		headerP = (void *)(((intptr_t)headerP + 8 + strlen(fnameP) +4)&~3);
 	}

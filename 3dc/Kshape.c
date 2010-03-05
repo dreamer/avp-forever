@@ -2845,11 +2845,7 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 
 	/* The sequence # will have been copied across by the control block */
 
-//	sequence = *txa_data++;
-//	sequence = *txa_data += sizeof(int*);
-
-	sequence = *txa_data;
-	txa_data = (int *)((intptr_t) txa_data + sizeof(int *));
+	sequence = *txa_data++;
 
 	#if 0
 	textprint("sequence = %d\n", sequence);
@@ -2902,29 +2898,23 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 
 	/* Multi-View Sprites need to select an image from the array */
 
-	if(Global_ShapeHeaderPtr->shapeflags & ShapeFlag_MultiViewSprite) 
+	if (Global_ShapeHeaderPtr->shapeflags & ShapeFlag_MultiViewSprite) 
 	{
-
 		int **txf_uvarrayptr0 = (int **) txaf0->txf_uvdata;
 		int **txf_uvarrayptr1 = (int **) txaf1->txf_uvdata;
 		int index;
 
-
 		index = GetMVSIndex(txah, &LToVMat_Euler);
 
 		/*textprint("index = %d\n", index);*/
-
-
 		txf_imageptr = (int *) txaf0->txf_image;
 		pheader->PolyColour |= txf_imageptr[index];
 
 
 		/* Get the uv data */
-
 		txaf0_uv = txf_uvarrayptr0[index];
 		txaf1_uv = txf_uvarrayptr1[index];
 	}
-
 
 	/* Single-View Sprites have just one image per frame */
 
@@ -4052,7 +4042,6 @@ float Dest[3];
 
 extern void TranslationSetup(void)
 {
-	char buf[200];
 	VECTORCH v = Global_VDB_Ptr->VDB_World;
 	extern int PredatorVisionChangeCounter;
 	float p = PredatorVisionChangeCounter / 65536.0f;

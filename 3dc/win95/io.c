@@ -54,6 +54,8 @@ extern int memoryInitialisationFailure;
 
 extern IMAGEHEADER ImageHeaderArray[]; /* Array of Image Headers */
 
+void InitialiseRawInput();
+
 /*
 
  Global Variables for PC Watcom Functions
@@ -569,7 +571,6 @@ void FrameCounterHandler(void)
 {
 	int newTickCount = timeGetTime();
 	int fcnt;
-	char buf[100];
 
 	fcnt = newTickCount - lastTickCount;
 	lastTickCount = newTickCount;
@@ -1038,6 +1039,7 @@ int textprint(const char* t, ...)
 		return 0;
 	#endif
 }
+
 int PrintDebuggingText(const char* t, ...)
 {
 	/*

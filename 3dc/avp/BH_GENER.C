@@ -67,6 +67,7 @@ static void GeneratorBalance_Init();
 static void GeneratorBalance_PerFrameMaintenance();
 static int GeneratorBalance_GlobalLimit();
 static int GeneratorBalance_LocalLimit(int normal_limit);
+int PrintDebuggingText(const char* t, ...);
 
 BOOL UseGeneratorBalance = FALSE;
 struct

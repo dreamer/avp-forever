@@ -94,7 +94,7 @@ bool Config_Load()
 		else
 		{
 			// special case for strings such as command line
-			int stringCheck = tempLine.find('"'); // check for a quote..
+			size_t stringCheck = tempLine.find('"'); // check for a quote..
 
 			if (stringCheck != std::string::npos)
 			{
@@ -121,7 +121,7 @@ bool Config_Load()
 			}
 
 			// assume we got a variable and value
-			int lenOfVar = tempLine.find("=");
+			size_t lenOfVar = tempLine.find("=");
 
 			// if there's no equals sign in the string, don't add it
 			if (lenOfVar == std::string::npos)

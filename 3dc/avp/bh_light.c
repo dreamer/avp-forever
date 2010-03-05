@@ -164,12 +164,15 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 						pptxactrlblk = &pnew_txactrlblk->tac_next;
 						{
 							//see how many sequences there are
-							int num_seq=0;
-							while(pnew_txactrlblk->tac_txarray[num_seq+1])num_seq++;
-							if(num_seq<3) pl_bhv->has_broken_sequence=0;
-							GLOBALASSERT(num_seq>=2);
+							int num_seq = 0;
+							while (pnew_txactrlblk->tac_txarray[num_seq+1])
+								num_seq++;
+
+							if (num_seq < 3) 
+								pl_bhv->has_broken_sequence = 0;
+
+							GLOBALASSERT(num_seq >= 2);
 						}
-					
 					}
 					else *pptxactrlblk = NULL; 
 				}

@@ -151,6 +151,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	AVP_HInstance = hInst = hInstance;
 	AVP_NCmd = nCmdShow;
 	skOff = startupStickyKeys;
+
+	int test = sizeof(unsigned long);
+	int test2 = sizeof(uint32_t);
 	
 	if ((skOff.dwFlags & SKF_STICKYKEYSON) == 0)
 	{
@@ -395,31 +398,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		}
 		#endif
 
-//		#if debug
-//		if(UseMouseCentreing)
-		{
-			//Start thread that recentres mouse , making it easier to play
-			//in subwindow mode
-//			InitCentreMouseThread();
-		}
-//		#endif
-//		Env_List[0] = &(ELOLevelToLoad);
-//		level_to_load = 0;
-//		AvP.PlayerType = I_Marine;
-
-
 		/* turn off any special effects */
 		d3d_light_ctrl.ctrl = LCCM_NORMAL;
-//	d3d_overlay_ctrl.ctrl = OCCM_NORMAL;
-
-/* // bjd - we should be able to run menus at any resolution user selects now
-		if (!ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth))
-		{
-			MessageBox(hWndMain, "Couldn't set new resolution for device!", "Couldn't set new resolution", MB_OK | MB_ICONSTOP);
-			ReleaseDirect3D();
-			exit(-1);
-		}
-*/
 
 		/* Check Gamma Settings are correct after video mode change */
 //bjd		InitialiseGammaSettings(RequestedGammaSetting);
@@ -429,26 +409,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		/***********  Load up the character stuff *******/
 		InitCharacter();
-
-/*
-		//  Read in the env Map
-		#if debug
-  		if (level_to_load != I_Num_Environments)
-  		{
-  			if ((level_to_load < 0) || (level_to_load > I_Num_Environments))
- 				#ifdef MPLAYER_DEMO
- 					level_to_load = I_Dml1;
- 				#else
- 					level_to_load = I_Sp1;
- 				#endif
-
-  			AvP.CurrentEnv = AvP.StartingEnv = level_to_load;
-  		}
-		//#endif
-		#else
-			AvP.CurrentEnv = AvP.StartingEnv = I_Gen1;
-		#endif
-*/
 
 		LoadRifFile(); /* sets up a map*/
 		#if debug

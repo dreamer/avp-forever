@@ -204,8 +204,6 @@ void DoObjectVisibilities(void)
         extern int NumActiveStBlocks;
         extern STRATEGYBLOCK *ActiveStBlockList[];
 
-		int i;
-
         int sbIndex = 0;
         STRATEGYBLOCK *sbPtr;
 
@@ -213,7 +211,7 @@ void DoObjectVisibilities(void)
         their visibilities managed ... */
 
         while(sbIndex < NumActiveStBlocks)
-        {       
+        {
                 sbPtr = ActiveStBlockList[sbIndex++];
                 if(sbPtr->maintainVisibility)
                         DoObjectVisibility(sbPtr);                              

@@ -1518,8 +1518,8 @@ extern void RemovePickedUpObject(STRATEGYBLOCK *objectPtr)
 	}
 }
 
-int SlotForThisWeapon(enum WEAPON_ID weaponID) {
-
+int SlotForThisWeapon(enum WEAPON_ID weaponID)
+{
 	PLAYER_STATUS *psptr;
 	int a;
 

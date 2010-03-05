@@ -53,6 +53,8 @@ extern SCENEMODULE **Global_ModulePtr;
 static MODULE **Global_ModuleArrayPtr;
 
 extern void Execute_Alien_Dying(STRATEGYBLOCK *sbPtr);
+int PrintDebuggingText(const char* t, ...);
+void AddNetMsg_FarAlienPosition(STRATEGYBLOCK* sbPtr,int targetModuleIndex,int index,BOOL indexIsModuleIndex);
 
 /*--------------------Patrick 9/12/96-----------------------
   Far Alien behaviour execution shell.

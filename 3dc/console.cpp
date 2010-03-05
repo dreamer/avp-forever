@@ -377,7 +377,7 @@ void Con_Draw()
 	int xOffset = 0;
 
 	// draw all the lines of text
-	for (int32_t i = rows; i >= 0; i--, y -= CHAR_HEIGHT)
+	for (int32_t i = (int32_t)rows; i >= 0; i--, y -= CHAR_HEIGHT)
 	{
 		xOffset = 0;
 		charWidth = 0;

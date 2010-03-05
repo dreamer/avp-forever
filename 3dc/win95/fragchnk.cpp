@@ -38,19 +38,19 @@ Fragment_Type_Data_Chunk::Fragment_Type_Data_Chunk(Chunk_With_Children* parent,c
 	pad1=pad2=pad3=0;
 }
 
-Fragment_Type_Data_Chunk::Fragment_Type_Data_Chunk(Chunk_With_Children* const parent,const char* data,size_t const )
+Fragment_Type_Data_Chunk::Fragment_Type_Data_Chunk(Chunk_With_Children* const parent, const char* data, size_t const )
 :Chunk(parent,"FRGTYPDC")
 {
-	int length=strlen(data)+1;
-	frag_type_name=new char[length];
+	size_t length = strlen(data)+1;
+	frag_type_name = new char[length];
 	strcpy(frag_type_name,data);
-	data+=(length+3)&~3;
+	data += (length+3)&~3;
 
-	pad1=*(int*)data;
+	pad1 = *(int*)data;
 	data+=4;
-	pad2=*(int*)data;
+	pad2 = *(int*)data;
 	data+=4;
-	pad3=*(int*)data;
+	pad3 = *(int*)data;
 	data+=4;
 }
 
@@ -126,23 +126,22 @@ Fragment_Type_Shape_Chunk::Fragment_Type_Shape_Chunk(Chunk_With_Children* const 
 Fragment_Type_Shape_Chunk::Fragment_Type_Shape_Chunk(Chunk_With_Children* const parent,const char* data,size_t const )
 :Chunk(parent,"FRGTYPSC")
 {
-	int length=strlen(data)+1;
-	name=new char[length];
+	size_t length = strlen(data)+1;
+	name = new char[length];
 	strcpy(name,data);
-	data+=(length+3)&~3;
+	data += (length+3)&~3;
 
-	num_fragments=*(int*)data;
-	data+=4;
+	num_fragments = *(int*)data;
+	data += 4;
 
-	location=*(ChunkVectorInt*)data;
-	data+=sizeof(ChunkVectorInt);
+	location = *(ChunkVectorInt*)data;
+	data += sizeof(ChunkVectorInt);
 
-	
-	pad1=*(int*)data;
+	pad1 = *(int*)data;
 	data+=4;
-	pad2=*(int*)data;
+	pad2 = *(int*)data;
 	data+=4;
-	pad3=*(int*)data;
+	pad3 = *(int*)data;
 	data+=4;
 }
 #endif

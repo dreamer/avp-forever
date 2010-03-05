@@ -502,7 +502,7 @@ ogg_int64_t TheoraFMV::ReadPage(ogg_page *page)
 		assert(buffer);
 
 		mFileStream.read(buffer, 4096);
-		int amountRead = mFileStream.gcount();
+		std::streamsize amountRead = mFileStream.gcount();
 
 		if (amountRead == 0)
 		{

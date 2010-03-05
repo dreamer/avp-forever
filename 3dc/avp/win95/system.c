@@ -302,24 +302,24 @@ void InitCharacter()
 	// load charcater specific rif and sounds
 
 
-	if(player_rif != INVALID_RIFFHANDLE)
+	if (player_rif != INVALID_RIFFHANDLE)
 	{
-			// we already have a player loaded - delete the bastard
-			avp_undo_rif_load(player_rif);
+		// we already have a player loaded - delete the bastard
+		avp_undo_rif_load(player_rif);
 	}
-	if(alien_weapon_rif != INVALID_RIFFHANDLE)
+	if (alien_weapon_rif != INVALID_RIFFHANDLE)
 	{
-			// we already have a player loaded - delete the bastard
+		// we already have a player loaded - delete the bastard
 		avp_undo_rif_load(alien_weapon_rif);
 	}
-	if(marine_weapon_rif != INVALID_RIFFHANDLE)
+	if (marine_weapon_rif != INVALID_RIFFHANDLE)
 	{
-			// we already have a player loaded - delete the bastard
+		// we already have a player loaded - delete the bastard
 		avp_undo_rif_load(marine_weapon_rif);
 	}
-	if(predator_weapon_rif != INVALID_RIFFHANDLE)
+	if (predator_weapon_rif != INVALID_RIFFHANDLE)
 	{
-			// we already have a player loaded - delete the bastard
+		// we already have a player loaded - delete the bastard
 		avp_undo_rif_load(predator_weapon_rif);
 	}
 	

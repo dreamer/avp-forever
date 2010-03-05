@@ -13,10 +13,6 @@ extern "C" {
 #include "ourasert.h"
 #include <assert.h>
 
-
-
-#define _HARDWARE_TL
-
 extern D3DINFO d3d;
 
 extern "C++"{
@@ -84,7 +80,7 @@ struct RENDER_STATES
 };
 
 RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
-//std::vector<RENDER_STATES> renderTest;
+std::vector<RENDER_STATES> renderTest(1000);
 
 struct ORTHO_OBJECTS
 {
@@ -435,7 +431,7 @@ BOOL SetExecuteBufferDefaults()
 	renderList[0].filteringType = FILTERING_BILINEAR_OFF;
 	renderList[0].translucencyType = TRANSLUCENCY_OFF;
 
-//	renderTest.push_back(renderList[0]);
+	renderTest.push_back(renderList[0]);
 
 	// Enable fog blending.
 //    d3d.lpD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE);
@@ -491,9 +487,6 @@ void CheckVertexBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYP
 		LockExecuteBuffer();
 	}
 
-	// in case we get a bad value..
-//	if (tex > MaxImages) return;
-
 	renderList[renderCount].textureID = textureID;
 	renderList[renderCount].vertStart = 0;
 	renderList[renderCount].vertEnd = 0;
@@ -505,14 +498,13 @@ void CheckVertexBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYP
 
 	// check if current vertexes use the same texture and render states as the previous
 	// if they do, we can 'merge' the two together
-
 	if ((textureID == renderList[renderCount-1].textureID && 
 		translucencyMode == renderList[renderCount-1].translucencyType) && 
 //		renderList[renderCount].filtering_type == renderList[renderCount-1].filtering_type) &&
 		renderCount != 0) 
 	{
 		// ok, drop back to the previous data
-//		renderTest.pop_back();
+		renderTest.pop_back();
 		renderCount--;
 	}
 	else
@@ -524,7 +516,7 @@ void CheckVertexBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYP
 	renderList[renderCount].vertEnd = NumVertices + numVerts;
 	renderList[renderCount].indexEnd = NumIndicies + realNumVerts;
 
-//	renderTest.push_back(renderList[renderCount]);
+	renderTest.push_back(renderList[renderCount]);
 	renderCount++;
 
 	NumVertices += numVerts;
@@ -556,8 +548,8 @@ BOOL LockExecuteBuffer()
 	
 	orthoOffset = 0;
 	orthoListCount = 0;
-	
-//	renderTest.resize(0);
+
+	renderTest.resize(0);
 
     return TRUE;
 }
@@ -736,8 +728,8 @@ BOOL ExecuteBuffer()
 //	if (NumVertices < 3)
 //		return FALSE;
 
-//	std::sort(renderTest.begin(), renderTest.end());
-//	std::sort(renderList.begin(), renderList.end());
+	// sort the list of render objects
+	std::sort(renderTest.begin(), renderTest.end());
 
 #ifdef WIN32
 	Font_DrawText("blah", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
@@ -748,11 +740,8 @@ BOOL ExecuteBuffer()
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
-	
-	#ifndef _HARDWARE_TL
-	LastError = d3d.lpD3DDevice->SetFVF (D3DFVF_TLVERTEX);
-	#endif
 
+	LastError = d3d.lpD3DDevice->SetFVF (D3DFVF_TLVERTEX);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -769,18 +758,17 @@ BOOL ExecuteBuffer()
 	// we can assume to keep this turned on
 	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
-#if 1
 	for (size_t i = 0; i < renderCount; i++)
 	{
-		if (renderList[i].translucencyType != TRANSLUCENCY_OFF) 
+		if (renderTest[i].translucencyType != TRANSLUCENCY_OFF) 
 			continue;
 
 		// texture stuff here
-		ChangeTexture(renderList[i].textureID);
+		ChangeTexture(renderTest[i].textureID);
 
-		ChangeTranslucencyMode(renderList[i].translucencyType);
+		ChangeTranslucencyMode(renderTest[i].translucencyType);
 
-		UINT numPrimitives = (renderList[i].indexEnd - renderList[i].indexStart) / 3;
+		UINT numPrimitives = (renderTest[i].indexEnd - renderTest[i].indexStart) / 3;
 
 		if (numPrimitives > 0) 
 		{
@@ -788,7 +776,7 @@ BOOL ExecuteBuffer()
 				0, 
 				0, 
 				NumVertices,
-				renderList[i].indexStart,
+				renderTest[i].indexStart,
 				numPrimitives);
 
 			if (FAILED(LastError))
@@ -802,36 +790,36 @@ BOOL ExecuteBuffer()
 	// do transparents here..
 	for (size_t i = 0; i < renderCount; i++)
 	{
-		if (renderList[i].translucencyType == TRANSLUCENCY_OFF) 
+		if (renderTest[i].translucencyType == TRANSLUCENCY_OFF) 
 			continue;
 
 		// texture stuff here
-		ChangeTexture(renderList[i].textureID);
+		ChangeTexture(renderTest[i].textureID);
 
-		ChangeTranslucencyMode(renderList[i].translucencyType);
+		ChangeTranslucencyMode(renderTest[i].translucencyType);
 
 		extern int HUDImageNumber;
 		extern int HUDFontsImageNumber;
 		extern int AAFontImageNumber;
 
 		/* lazy way to get the filtering working correctly :) */
-		if (renderList[i].textureID == AAFontImageNumber 
-			|| renderList[i].textureID == HUDFontsImageNumber 
-			|| renderList[i].textureID == HUDImageNumber)
+		if (renderTest[i].textureID == AAFontImageNumber 
+			|| renderTest[i].textureID == HUDFontsImageNumber 
+			|| renderTest[i].textureID == HUDImageNumber)
 		{
 			ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 		}
 		else ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
-		UINT numPrimitives = (renderList[i].indexEnd - renderList[i].indexStart) / 3;
+		UINT numPrimitives = (renderTest[i].indexEnd - renderTest[i].indexStart) / 3;
 
 		if (numPrimitives > 0) 
 		{
 			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 
 			   0, 
-			   0, 
+			   0,
 			   NumVertices,
-			   renderList[i].indexStart,
+			   renderTest[i].indexStart,
 			   numPrimitives);
 
 			if (FAILED(LastError))
@@ -842,26 +830,16 @@ BOOL ExecuteBuffer()
 		NumberOfRenderedTriangles += numPrimitives / 3;
 	}
 
-	
-	#ifdef _HARDWARE_TL
-	int le,ri,to,bo;
-	D3DXMATRIX matOrtho;
-	le = ScreenDescriptorBlock.SDB_CentreX - ScreenDescriptorBlock.SDB_Width;
-	ri = ScreenDescriptorBlock.SDB_CentreX + ScreenDescriptorBlock.SDB_Width;
-	to = ScreenDescriptorBlock.SDB_CentreY - ScreenDescriptorBlock.SDB_Height;
-	bo = ScreenDescriptorBlock.SDB_CentreY + ScreenDescriptorBlock.SDB_Height;
-	D3DXMatrixOrthoOffCenterLH(&matOrtho,le,ri,bo,to,1,2);
-	#endif
 	// render any orthographic quads
 	if (orthoListCount)
 	{
-		LastError = d3d.lpD3DDevice->SetStreamSource (0, d3d.lpD3DOrthoVertexBuffer, 0, sizeof(ORTHOVERTEX));
+		LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DOrthoVertexBuffer, 0, sizeof(ORTHOVERTEX));
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
 
-		LastError = d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
+		LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_ORTHOVERTEX);
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
@@ -883,86 +861,6 @@ BOOL ExecuteBuffer()
 		}
 	}
 
-#else
-	for (unsigned int i = 0; i < /*renderTest.size()*/renderCount; i++)
-	{
-		tempTexture = renderList[i].texture_id;
-
-		if (renderList[i].translucency_type != TRANSLUCENCY_OFF) continue;
-
-		// texture stuff here
-		ChangeTexture(tempTexture);
-
-		ChangeTranslucencyMode(renderList[i].translucency_type);
-
-		unsigned int num_prims = (renderList[i].index_end - renderList[i].index_start) / 3;
-//		unsigned int num_prims = (renderList[i].vert_end - renderList[i].vert_start) / 3;
-
-		if (num_prims > 0) 
-		{
-			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 
-			   0, 
-			   0, 
-			   NumVertices,
-			   renderList[i].index_start,
-			   num_prims);
-
-//			LastError = d3d.lpD3DDevice->DrawPrimitive( D3DPT_TRIANGLELIST, renderTest[i].vert_start, num_prims);
-			draw_calls_per_frame++;
-			if (FAILED(LastError)){
-//				OutputDebugString(" Couldn't Draw Primitive!");
-				LogError(LastError);
-			}
-		}
-	}
-
-/* do transparents here.. */
-
-//	for (int i = 0; i <= pos; i++) 
-	for (unsigned int i = 0; i < /*renderTest.size()*/renderCount; i++)
-	{
-		tempTexture = renderList[i].texture_id;
-
-		if (renderList[i].translucency_type == TRANSLUCENCY_OFF) continue;
-
-		// texture stuff here
-		ChangeTexture(tempTexture);
-
-		ChangeTranslucencyMode(renderList[i].translucency_type);
-
-		extern int HUDImageNumber;
-		extern int HUDFontsImageNumber;
-		extern int AAFontImageNumber;
-
-		/* lazy way to get the filtering working correctly :) */
-		if ( tempTexture == AAFontImageNumber || tempTexture == HUDFontsImageNumber || tempTexture == HUDImageNumber)
-		{
-			ChangeFilteringMode(FILTERING_BILINEAR_OFF);
-		}
-		else ChangeFilteringMode(FILTERING_BILINEAR_ON);
-
-		unsigned int num_prims = (renderList[i].index_end - renderList[i].index_start) / 3;
-
-//		unsigned int num_prims = (renderList[i].vert_end - renderList[i].vert_start) / 3;
-
-		if (num_prims > 0) 
-		{
-			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 
-			   0, 
-			   0, 
-			   NumVertices,
-			   renderList[i].index_start,
-			   num_prims);
-
-//			LastError = d3d.lpD3DDevice->DrawPrimitive( D3DPT_TRIANGLELIST, renderTest[i].vert_start, num_prims);
-			draw_calls_per_frame++;
-			if (FAILED(LastError)){
-//				OutputDebugString(" Couldn't Draw Primitive!");
-				LogError(LastError);
-			}
-		}
-	}
-#endif
 	return TRUE;
 }
 
@@ -1256,25 +1154,6 @@ static void D3D_OutputTriangles(void);
 
 void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
 {
-	#ifdef _HARDWARE_TL
-	D3DXMATRIX projectionMatrix;
-	// The big bug we are fighting is some ZBuffer issue, somewhy everything 
-	// is very close to screen, a znear of 0.0000001 will exclude everything
-	// stuff's getting squashed and I don't know why
-	D3DXMatrixPerspectiveFovLH(&projectionMatrix,D3DXToDegree(90.0f),1.0f,64.0f,100000.0f);
-	// Load a default 90degrees fov...
-	D3DXMATRIX identity;
-	D3DXMatrixIdentity(&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION,&projectionMatrix);
-	// Our vertex FVF
-	d3d.lpD3DDevice->SetFVF(D3DFVF_HARDWARETLVERTEX);
-	
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-	
-	#endif
-
 	int flags;
 	int texoffset;
 
@@ -1329,17 +1208,10 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 		mainVertex[vb].sz = 1.0f;
 		mainVertex[vb].rhw = oneOverZ;
 		mainVertex[vb].color = RGBLIGHT_MAKE(vertices->R,vertices->G,vertices->B);
-		mainVertex[vb].specular=RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 		mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
 		mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
 
-		#ifdef _HARDWARE_TL
-		mainVertex[vb].sx = -vertices->X;
-		mainVertex[vb].sy = vertices->Y;
-		mainVertex[vb].sz = vertices->Z;
-		mainVertex[vb].rhw = 1.0f;
-		#endif
-			
 		vb++;
 	}
 
@@ -1348,24 +1220,6 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
 {
-	#ifdef _HARDWARE_TL
-	D3DXMATRIX projectionMatrix;
-	// The big bug we are fighting is some ZBuffer issue, somewhy everything 
-	// is very close to screen, a znear of 0.0000001 will exclude everything
-	// stuff's getting squashed and I don't know why
-	D3DXMatrixPerspectiveFovLH(&projectionMatrix,D3DXToDegree(90.0f),1.25f,64.0f,100000.0f);
-	// Load a default 90degrees fov...
-	D3DXMATRIX identity;
-	D3DXMatrixIdentity(&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION,&projectionMatrix);
-	// Our vertex FVF
-	d3d.lpD3DDevice->SetFVF(D3DFVF_HARDWARETLVERTEX);
-	
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-	
-	#endif
 	// bjd - This is the function responsible for drawing level geometry and the players weapon
 	int texoffset;
 
@@ -1423,13 +1277,6 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 		mainVertex[vb].tu = ((float)vertices->U) * RecipW + (1.0f/256.0f);
 		mainVertex[vb].tv = ((float)vertices->V) * RecipH + (1.0f/256.0f);
 
-		#ifdef _HARDWARE_TL
-		mainVertex[vb].sx = -vertices->X;
-		mainVertex[vb].sy = vertices->Y;
-		mainVertex[vb].sz = vertices->Z;
-		mainVertex[vb].rhw = 1.0f;
-		#endif
-
 		vb++;
 	}
 
@@ -1442,24 +1289,6 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 
 void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
 {
-	#ifdef _HARDWARE_TL
-	D3DXMATRIX projectionMatrix;
-	// The big bug we are fighting is some ZBuffer issue, somewhy everything 
-	// is very close to screen, a znear of 0.0000001 will exclude everything
-	// stuff's getting squashed and I don't know why
-	D3DXMatrixPerspectiveFovLH(&projectionMatrix,D3DXToDegree(90.0f),1.0f,64.0f,100000.0f);
-	// Load a default 90degrees fov...
-	D3DXMATRIX identity;
-	D3DXMatrixIdentity(&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION,&projectionMatrix);
-	// Our vertex FVF
-	d3d.lpD3DDevice->SetFVF(D3DFVF_HARDWARETLVERTEX);
-	
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-
-	#endif
 	// responsible for drawing predators lock on triangle, for one
 	int flags;
 
@@ -1504,12 +1333,7 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 		mainVertex[vb].specular = (D3DCOLOR)1.0f;
 		mainVertex[vb].tu = 0.0f;
 		mainVertex[vb].tv = 0.0f;
-		#ifdef _HARDWARE_TL
-		mainVertex[vb].sx = -vertices->X;
-		mainVertex[vb].sy = vertices->Y;
-		mainVertex[vb].sz = vertices->Z;
-		mainVertex[vb].rhw = 1.0f;
-		#endif		
+
 		vb++;
 	}
 
@@ -1518,24 +1342,6 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 
 void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
-	#ifdef _HARDWARE_TL
-	D3DXMATRIX projectionMatrix;
-	// The big bug we are fighting is some ZBuffer issue, somewhy everything 
-	// is very close to screen, a znear of 0.0000001 will exclude everything
-	// stuff's getting squashed and I don't know why
-	D3DXMatrixPerspectiveFovLH(&projectionMatrix,D3DXToDegree(90.0f),1.0f,64.0f,100000.0f);
-	// Load a default 90degrees fov...
-	D3DXMATRIX identity;
-	D3DXMatrixIdentity(&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION,&projectionMatrix);
-	// Our vertex FVF
-	d3d.lpD3DDevice->SetFVF(D3DFVF_HARDWARETLVERTEX);
-	
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-
-	#endif
 	float ZNear;
 
     // Get ZNear
@@ -1567,12 +1373,7 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
 		mainVertex[vb].specular = (D3DCOLOR)1.0f;
 		mainVertex[vb].tu = 0.0f;
 		mainVertex[vb].tv = 0.0f;
-		#ifdef _HARDWARE_TL
-		mainVertex[vb].sx = -vertices->X;
-		mainVertex[vb].sy = vertices->Y;
-		mainVertex[vb].sz = vertices->Z;
-		mainVertex[vb].rhw = 1.0f;
-		#endif
+
 		vb++;
 	}
 
@@ -1581,29 +1382,6 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
 
 void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
 {
-	// Melanikus 26/02/10 - T&L Fix
-	/**
-	* Here is our sandbox, we'll try to do a perspective transform here using Dx API instead
-	* of software. I'll just lay a D3DX matrix with a basic transform and comment the 
-	*/
-	#ifdef _HARDWARE_TL
-	D3DXMATRIX projectionMatrix;
-	// The big bug we are fighting is some ZBuffer issue, somewhy everything 
-	// is very close to screen, a znear of 0.0000001 will exclude everything
-	// stuff's getting squashed and I don't know why
-	D3DXMatrixPerspectiveFovLH(&projectionMatrix,D3DXToDegree(90.0f),1.0f,64.0f,100000.0f);
-	// Load a default 90degrees fov...
-	D3DXMATRIX identity;
-	D3DXMatrixIdentity(&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION,&projectionMatrix);
-	// Our vertex FVF
-	d3d.lpD3DDevice->SetFVF(D3DFVF_HARDWARETLVERTEX);
-		
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);	
-	#endif
-	
 	extern int CloakingMode;
 	extern char CloakedPredatorIsMoving;
 	int uOffset = FastRandom()&255;
@@ -1679,14 +1457,7 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 
 		mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
 		mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
-		
-		// Mel - All we really need is to set the vertices untransformed
-			#ifdef _HARDWARE_TL
-			mainVertex[vb].sx = -vertices->X;
-			mainVertex[vb].sy = vertices->Y;
-			mainVertex[vb].sz = vertices->Z; // AvP coordinate system is weird...
-			mainVertex[vb].rhw = 1.0f;
-			#endif
+
 		vb++;
 	}
 
@@ -1696,7 +1467,7 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a) 
 {
 	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
-	
+
 	if (mainMenu)
 	{
 		/* game used to render menus at 640x480. this allows us to use any resolution we want */
@@ -1711,25 +1482,11 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 		y0 = quadY;
 		y1 = quadY + quadHeight;
 	}
-	
-	#ifdef _HARDWARE_TL
-	int le,ri,to,bo;
-	D3DXMATRIX matOrtho;
-	le = ScreenDescriptorBlock.SDB_CentreX - ScreenDescriptorBlock.SDB_Width;
-	ri = ScreenDescriptorBlock.SDB_CentreX + ScreenDescriptorBlock.SDB_Width;
-	to = ScreenDescriptorBlock.SDB_CentreY - ScreenDescriptorBlock.SDB_Height;
-	bo = ScreenDescriptorBlock.SDB_CentreY + ScreenDescriptorBlock.SDB_Height;
-	D3DXMatrixOrthoOffCenterLH(&matOrtho,le,ri,bo,to,1,2);
-	#endif
 
 	// top left - 0
 	mainVertex[vb].sx = (float)x0;
 	mainVertex[vb].sy = (float)y0;
-	#ifdef _HARDWARE_TL
-	mainVertex[vb].sz = 1.5f;
-	#else
 	mainVertex[vb].sz = 0.0f;
-	#endif 
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(r,g,b,a);//colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
@@ -1741,11 +1498,7 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	// top right - 1
 	mainVertex[vb].sx = (float)(x1 - 1);
 	mainVertex[vb].sy = (float)y0;
-	#ifdef _HARDWARE_TL
-	mainVertex[vb].sz = 1.5f;
-	#else
 	mainVertex[vb].sz = 0.0f;
-	#endif 
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(r,g,b,a);//colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
@@ -1757,11 +1510,7 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	// bottom right - 2
 	mainVertex[vb].sx = (float)(x1 - 1);
 	mainVertex[vb].sy = (float)(y1 - 1);
-	#ifdef _HARDWARE_TL
-	mainVertex[vb].sz = 1.5f;
-	#else
 	mainVertex[vb].sz = 0.0f;
-	#endif 
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(r,g,b,a);//colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
@@ -1773,11 +1522,7 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	// bottom left - 3
 	mainVertex[vb].sx = (float)x0;
 	mainVertex[vb].sy = (float)(y1 - 1);
-	#ifdef _HARDWARE_TL
-	mainVertex[vb].sz = 1.5f;
-	#else
 	mainVertex[vb].sz = 0.0f;
-	#endif 
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(r,g,b,a);//colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
@@ -1801,15 +1546,6 @@ void D3D_HUD_Setup(void)
 
 void D3D_HUDQuad_Output(int imageNumber, struct VertexTag *quadVerticesPtr, unsigned int colour)
 {
-	#ifdef _HARDWARE_TL
-	int to,bo,le,ri;
-	le = ScreenDescriptorBlock.SDB_CentreX - ScreenDescriptorBlock.SDB_Width;
-	ri = ScreenDescriptorBlock.SDB_CentreX + ScreenDescriptorBlock.SDB_Width;
-	to = ScreenDescriptorBlock.SDB_CentreY - ScreenDescriptorBlock.SDB_Height;
-	bo = ScreenDescriptorBlock.SDB_CentreY + ScreenDescriptorBlock.SDB_Height;
-	D3DXMATRIX matOrtho;
-	D3DXMatrixOrthoOffCenterLH( &matOrtho,le,ri,bo,to,0.5,1.0);
-	#endif
 	float RecipW, RecipH;
 
 	float texWidth = (float) ImageHeaderArray[imageNumber].ImageWidth;
@@ -1825,11 +1561,7 @@ void D3D_HUDQuad_Output(int imageNumber, struct VertexTag *quadVerticesPtr, unsi
 //		textprint("x %d, y %d, u %d, v %d\n",quadVerticesPtr->X,quadVerticesPtr->Y,quadVerticesPtr->U,quadVerticesPtr->V);
 		mainVertex[vb].sx = (float)quadVerticesPtr->X;
 		mainVertex[vb].sy = (float)quadVerticesPtr->Y;
-		#ifdef _HARDWARE_TL
-			mainVertex[vb].sz = 0.6f; // So it can be between zmin and zmax
-		#else
-			mainVertex[vb].sz = 0.0f;
-		#endif
+		mainVertex[vb].sz = 0.0f;
 		mainVertex[vb].rhw = 1.0f;
  		mainVertex[vb].color = colour;
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
@@ -1845,29 +1577,6 @@ void D3D_HUDQuad_Output(int imageNumber, struct VertexTag *quadVerticesPtr, unsi
 
 void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 {
-	// Melanikus 26/02/10 - T&L Fix
-	/**
-	* Here is our sandbox, we'll try to do a perspective transform here using Dx API instead
-	* of software. I'll just lay a D3DX matrix with a basic transform and comment the 
-	*/
-	#ifdef _HARDWARE_TL
-	D3DXMATRIX projectionMatrix;
-	// The big bug we are fighting is some ZBuffer issue, somewhy everything 
-	// is very close to screen, a znear of 0.0000001 will exclude everything
-	// stuff's getting squashed and I don't know why
-	D3DXMatrixPerspectiveFovLH(&projectionMatrix,D3DXToDegree(90.0f),1.0f,64.0f,100000.0f);
-	// Load a default 90degrees fov...
-	D3DXMATRIX identity;
-	D3DXMatrixIdentity(&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION,&projectionMatrix);
-	// Our vertex FVF
-	d3d.lpD3DDevice->SetFVF(D3DFVF_HARDWARETLVERTEX);
-	
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-
-	#endif
 	VECTORCH vertices[3];
 	vertices[0] = *prevPositionPtr;
 
@@ -1922,12 +1631,7 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 				mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 				mainVertex[vb].tu = 0.0f;
 				mainVertex[vb].tv = 0.0f;
-				#ifdef _HARDWARE_TL
-				mainVertex[vb].sx = -vertices->vx;
-				mainVertex[vb].sy = vertices->vy;
-				mainVertex[vb].sz = vertices->vz;
-				mainVertex[vb].rhw = 1.0f;
-				#endif
+
 				vb++;
 				verticesPtr++;
 			}
@@ -1939,29 +1643,6 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 
 void D3D_DrawParticle_Smoke(PARTICLE *particlePtr)
 {
-	// Melanikus 26/02/10 - T&L Fix
-	/**
-	* Here is our sandbox, we'll try to do a perspective transform here using Dx API instead
-	* of software. I'll just lay a D3DX matrix with a basic transform and comment the 
-	*/
-	#ifdef _HARDWARE_TL
-	D3DXMATRIX projectionMatrix;
-	// The big bug we are fighting is some ZBuffer issue, somewhy everything 
-	// is very close to screen, a znear of 0.0000001 will exclude everything
-	// stuff's getting squashed and I don't know why
-	D3DXMatrixPerspectiveFovLH(&projectionMatrix,D3DXToDegree(90.0f),1.0f,64.0f,100000.0f);
-	// Load a default 90degrees fov...
-	D3DXMATRIX identity;
-	D3DXMatrixIdentity(&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION,&projectionMatrix);
-	// Our vertex FVF
-	d3d.lpD3DDevice->SetFVF(D3DFVF_HARDWARETLVERTEX);
-	
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-
-	#endif
 	VECTORCH vertices[3];
 	vertices[0] = particlePtr->Position;
 
@@ -2036,12 +1717,7 @@ void D3D_DrawParticle_Smoke(PARTICLE *particlePtr)
 				mainVertex[vb].specular = (D3DCOLOR)1.0f;
 				mainVertex[vb].tu = 0.0f;
 				mainVertex[vb].tv = 0.0f;
-				#ifdef _HARDWARE_TL
-				mainVertex[vb].sx = -vertices->vx;
-				mainVertex[vb].sy = vertices->vy;
-				mainVertex[vb].sz = vertices->vz;
-				mainVertex[vb].rhw = 1.0f;
-				#endif
+
 				vb++;
 				verticesPtr++;
 			}
@@ -2063,9 +1739,7 @@ void D3D_DecalSystem_Setup(void)
 	}
 
 	if (D3DZWriteEnable != FALSE) {
-		//#ifndef _HARDWARE_TL
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-		//#endif
 		D3DZWriteEnable = FALSE;
 	}
 }
@@ -2091,24 +1765,6 @@ void D3D_DecalSystem_End(void)
 
 void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 {
-	#ifdef _HARDWARE_TL
-	D3DXMATRIX projectionMatrix;
-	// The big bug we are fighting is some ZBuffer issue, somewhy everything 
-	// is very close to screen, a znear of 0.0000001 will exclude everything
-	// stuff's getting squashed and I don't know why
-	D3DXMatrixPerspectiveFovLH(&projectionMatrix,D3DXToDegree(90.0f),1.0f,64.0f,100000.0f);
-	// Load a default 90degrees fov...
-	D3DXMATRIX identity;
-	D3DXMatrixIdentity(&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION,&projectionMatrix);
-	// Our vertex FVF
-	d3d.lpD3DDevice->SetFVF(D3DFVF_HARDWARETLVERTEX);
-	
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-
-	#endif
 	// function responsible for bullet marks on walls, etc
 	DECAL_DESC *decalDescPtr = &DecalDescription[decalPtr->DecalID];
 
@@ -2236,14 +1892,6 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 
 			mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
 			mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
-			
-			#ifdef _HARDWARE_TL
-			mainVertex[vb].sx = -vertices->X;
-			mainVertex[vb].sy = vertices->Y;
-			mainVertex[vb].sz = vertices->Z;
-			mainVertex[vb].rhw = 1.0f;
-			#endif
-			
 			vb++;
 		}
 	}
@@ -2270,29 +1918,6 @@ void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 {
-	// Melanikus 26/02/10 - T&L Fix
-	/**
-	* Here is our sandbox, we'll try to do a perspective transform here using Dx API instead
-	* of software. I'll just lay a D3DX matrix with a basic transform and comment the 
-	*/
-	#ifdef _HARDWARE_TL
-	D3DXMATRIX projectionMatrix;
-	// The big bug we are fighting is some ZBuffer issue, somewhy everything 
-	// is very close to screen, a znear of 0.0000001 will exclude everything
-	// stuff's getting squashed and I don't know why
-	D3DXMatrixPerspectiveFovLH(&projectionMatrix,D3DXToDegree(90.0f),1.0f,64.0f,100000.0f);
-	// Load a default 90degrees fov...
-	D3DXMATRIX identity;
-	D3DXMatrixIdentity(&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,&identity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION,&projectionMatrix);
-	// Our vertex FVF
-	d3d.lpD3DDevice->SetFVF(D3DFVF_HARDWARETLVERTEX);
-	
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-
-	#endif
 	// steam jets, wall lights, fire (inc aliens on fire) etc
 	PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
 	int texoffset = SpecialFXImageNumber;
@@ -2404,12 +2029,6 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 				mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
 				mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
-				#ifdef _HARDWARE_TL
-				mainVertex[vb].sx = -vertices->X;
-				mainVertex[vb].sy = vertices->Y;
-				mainVertex[vb].sz = vertices->Z;
-				mainVertex[vb].rhw = 1.0f;
-				#endif
 				vb++;
 			}
 
@@ -3725,7 +3344,6 @@ extern void D3D_DrawSlider(int x, int y, int alpha)
 
 extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha)
 {
-	
 	struct VertexTag quadVertices[4];
 	int sliderHeight = 11;
 	unsigned int colour = alpha>>8;
@@ -4023,6 +3641,7 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 	}
 }
 
+
 extern void D3D_FadeDownScreen(int brightness, int colour)
 {
 	int t = 255 - (brightness>>8);
@@ -4142,15 +3761,6 @@ extern void D3D_PlayerOnFireOverlay(void)
 
 extern void D3D_ScreenInversionOverlay()
 {
-	#ifdef _HARDWARE_TL
-	int le,ri,to,bo;
-	D3DXMATRIX matOrtho;
-	le = ScreenDescriptorBlock.SDB_CentreX - ScreenDescriptorBlock.SDB_Width;
-	ri = ScreenDescriptorBlock.SDB_CentreX + ScreenDescriptorBlock.SDB_Width;
-	to = ScreenDescriptorBlock.SDB_CentreY - ScreenDescriptorBlock.SDB_Height;
-	bo = ScreenDescriptorBlock.SDB_CentreY + ScreenDescriptorBlock.SDB_Height;
-	D3DXMatrixOrthoOffCenterLH(&matOrtho,le,ri,bo,to,1,2);
-	#endif
 	// alien overlay
 	int theta[2];
 	int colour = 0xffffffff;
@@ -4169,11 +3779,7 @@ extern void D3D_ScreenInversionOverlay()
 		{
 	 	  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
 		  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
-		  	#ifndef _HARDWARE_TL
 			mainVertex[vb].sz = 0.0f;
-			#else
-			mainVertex[vb].sz = 1.5f;
-			#endif
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
@@ -4185,11 +3791,6 @@ extern void D3D_ScreenInversionOverlay()
 		  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
 		  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
 			mainVertex[vb].sz = 0.0f;
-			#ifndef _HARDWARE_TL
-			mainVertex[vb].sz = 0.0f;
-			#else
-			mainVertex[vb].sz = 1.5f;
-			#endif
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
@@ -4201,11 +3802,6 @@ extern void D3D_ScreenInversionOverlay()
 		  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
 		  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
 			mainVertex[vb].sz = 0.0f;
-			#ifndef _HARDWARE_TL
-			mainVertex[vb].sz = 0.0f;
-			#else
-			mainVertex[vb].sz = 1.5f;
-			#endif
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
@@ -4217,11 +3813,6 @@ extern void D3D_ScreenInversionOverlay()
 		  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
 		  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
 			mainVertex[vb].sz = 0.0f;
-			#ifndef _HARDWARE_TL
-			mainVertex[vb].sz = 0.0f;
-			#else
-			mainVertex[vb].sz = 1.5f;
-			#endif
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
@@ -5030,8 +4621,8 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 	// set the texture
 	LastError = d3d.lpD3DDevice->SetTexture(0, fmvTexture);
 
-	d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
-	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(ORTHOVERTEX));
+	d3d.lpD3DDevice->SetFVF(D3DFVF_ORTHOVERTEX);
+	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(ORTHOVERTEX));
 	if (FAILED(LastError))
 	{
 		OutputDebugString("DrawPrimitiveUP failed\n");

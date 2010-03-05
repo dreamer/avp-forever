@@ -181,7 +181,7 @@ KeyBinding :: ParseUnbindCommand
 	// We will use the longest match:
 	{
 		OurBool bGotMatch = FALSE;
-		unsigned int LongestMatch = 0;
+		size_t LongestMatch = 0;
 		BindableKey theKey_ToUnbind;
 
 		for (int i=0;i<MAX_VALUE_BINDABLE_KEY; i++)
@@ -190,7 +190,7 @@ KeyBinding :: ParseUnbindCommand
 
 			SCString* pSCString_TestKey = MakeStringForKey(theKey);
 
-			unsigned int LengthOfTestString = pSCString_TestKey -> GetNumChars();
+			size_t LengthOfTestString = pSCString_TestKey -> GetNumChars();
 
 			if (LengthOfTestString > 0)
 			{
@@ -213,7 +213,6 @@ KeyBinding :: ParseUnbindCommand
 
 						theKey_ToUnbind = theKey;
 						bGotMatch = TRUE;
-
 					}
 				}
 			}
@@ -858,7 +857,7 @@ OurBool KeyBinding :: ParseBindCommand
 	// We will use the longest match:
 	{
 		OurBool bGotMatch = FALSE;
-		unsigned int LongestMatch = 0;
+		size_t LongestMatch = 0;
 
 		for (int i=0;i<MAX_VALUE_BINDABLE_KEY; i++)
 		{
@@ -866,7 +865,7 @@ OurBool KeyBinding :: ParseBindCommand
 
 			SCString* pSCString_TestKey = MakeStringForKey(theKey);
 
-			unsigned int LengthOfTestString = pSCString_TestKey -> GetNumChars();
+			size_t LengthOfTestString = pSCString_TestKey -> GetNumChars();
 
 			if (LengthOfTestString > 0)
 			{

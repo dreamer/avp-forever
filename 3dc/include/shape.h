@@ -880,8 +880,8 @@ typedef struct txanimframe {
 	int txf_orienty;
 	int txf_numuvs;
 	int *txf_uvdata;
-//	int txf_image; // x64
-	intptr_t txf_image; // bjd - game stores a pointer adress in here later on..
+	int txf_image; // x64
+//	intptr_t txf_image; // bjd - game stores a pointer adress in here later on..
 
 } TXANIMFRAME;
 

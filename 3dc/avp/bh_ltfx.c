@@ -14,6 +14,8 @@
 
 extern int NormalFrameTime;
 
+int Request_PolyFlags(void *polygon);
+
 void * LightFXBehaveInit (void * bhdata, STRATEGYBLOCK* sbptr)
 {
 	LIGHT_FX_BEHAV_BLOCK * lfxbb;

@@ -239,7 +239,7 @@
 	}
 
 	// a hash function for pointers
-	inline uintptr_t HashFunction(void const * const _vP)
+	inline unsigned HashFunction(void const * const _vP)
 	{
 		// treat as integer
 		return HashFunction(reinterpret_cast<uintptr_t>(_vP));

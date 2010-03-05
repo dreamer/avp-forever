@@ -64,8 +64,8 @@ void InitialiseThirdAvoidance(STRATEGYBLOCK *sbPtr,NPC_AVOIDANCEMANAGER *manager
 void ClearThirdAvoidance(STRATEGYBLOCK *sbPtr,NPC_AVOIDANCEMANAGER *manager);
 int ExecuteThirdAvoidance(STRATEGYBLOCK *sbPtr,NPC_AVOIDANCEMANAGER *manager);
 int SimpleEdgeDetectionTest(STRATEGYBLOCK *sbPtr, COLLISIONREPORT *vcr);
-
 void AlignVelocityToGravity(STRATEGYBLOCK *sbPtr,VECTORCH *velocity);
+int PrintDebuggingText(const char* t, ...);
 
 int PathArraySize;
 PATHHEADER* PathArray;
@@ -3219,7 +3219,7 @@ int New_NPC_IsObstructed(STRATEGYBLOCK *sbPtr, NPC_AVOIDANCEMANAGER *manager)
 								/* Consider explosive objects as obstructions to most things. */
 								if ((objectstatusptr->explosionType==0)||(manager->ClearanceDamage!=AMMO_NPC_OBSTACLE_CLEAR)) {
 		                            /* aha: an object which the npc can destroy... damage it, and return zero. */
-		                            CauseDamageToObject(nextReport->ObstacleSBPtr, &TemplateAmmo[manager->ClearanceDamage].MaxDamage, ONE_FIXED,NULL);
+		                            CauseDamageToObject(nextReport->ObstacleSBPtr, TemplateAmmo[manager->ClearanceDamage].MaxDamage, ONE_FIXED, NULL);
 		                            return(0);
 		                            /* After a few frames of that, there'll just be real obstructions. */
 								}

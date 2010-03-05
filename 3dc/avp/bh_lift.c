@@ -46,10 +46,8 @@ int RequestEnvChangeViaAirlock	= 0;
 LIFT_CONTROL_BLOCK	EC_Lift_Ctrl;
 MODULE Old_Pos_Module;
 
-
-
 static void TeleportFloorSwitches(MODULE* dest, MODULE* src, LIFT_CONTROL_BLOCK* liftCtrl);
-
+BOOL BadGuyInModuleOrNoPlayer();
 
 
 /*********************** CLOSED TELEPORT LIFTS INIT ***************/

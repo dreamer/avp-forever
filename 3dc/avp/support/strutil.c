@@ -371,7 +371,7 @@ void STRUTIL_MC_MakeMCTS
 void STRUTIL_SC_SafeCat
 (
 	ProjChar* pProjCh_Dst,
-	unsigned int MaxSize,
+	size_t MaxSize,
 
 	const ProjChar* pProjCh_Add
 )
@@ -385,7 +385,7 @@ void STRUTIL_SC_SafeCat
 
 	/* CODE */
 	{
-		unsigned int MaxNonTerminatingCharsToUse = (MaxSize - 1);
+		size_t MaxNonTerminatingCharsToUse = (MaxSize - 1);
 
 		while
 		(

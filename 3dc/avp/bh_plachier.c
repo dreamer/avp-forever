@@ -430,7 +430,7 @@ void SaveStrategy_PlacedHierarchy(STRATEGYBLOCK* sbPtr)
 
 	{
 //		int sequence_index = ph_bhv->current_seq-ph_bhv->sequences;
-		intptr_t sequence_index = ph_bhv->current_seq-ph_bhv->sequences; // x64
+		ptrdiff_t sequence_index = ph_bhv->current_seq - ph_bhv->sequences; // x64
 		*(int*)buffer = sequence_index;
 		buffer+=sizeof(int);
 	}

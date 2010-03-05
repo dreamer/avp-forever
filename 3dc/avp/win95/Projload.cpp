@@ -1765,24 +1765,6 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 		//therefore only clear the fast files if the flag is not set.
 		ffclose_almost_all();
 	}
-
-	#if 0 //disable the multiple image group stuff
-	if (!(flags & CCF_IMAGEGROUPSET))
-	{
-		GLOBALASSERT(flags & CCF_ENVIRONMENT); //image group should be set for everything else
-		#ifdef MaxImageGroups
-		#if MaxImageGroups > 2
-		SetCurrentImageGroup(flags & CCF_ENVIRONMENT ? 2 : 0);
-		#else
-		if (flags & CCF_ENVIRONMENT)
-			GLOBALASSERT(0=="Requires MaxImageGroups to be > 2 (system.h)");
-		#endif
-		#else
-		if (flags & CCF_ENVIRONMENT)
-			GLOBALASSERT(0=="Requires MaxImageGroups to be defined > 2 (system.h)");
-		#endif
-	}
-	#endif
 	
 	if (INVALID_RIFFHANDLE == h || !h->fc) return(FALSE);
 	
@@ -1809,15 +1791,6 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 /*---------------**
 ** Load Textures **
 **---------------*/
-
-	//SelectGenTexDirectory(ITI_TEXTURE);
-
-	#if 0 //disable the multiple image group stuff
-	if(!(flags & CCF_DONT_INITIALISE_TEXTURES))
-	{
-		InitialiseTextures();
-	}
-	#endif
 	
 	if (flags & CCF_ENVIRONMENT)
 	{
@@ -2047,12 +2020,10 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 				
 						if (ob->get_header()->flags & OBJECT_FLAG_PLACED_OBJECT)
 						{
-							
 							deal_with_placed_object(ob, start_shape_no, AnimationShape);
 						}
 						else 
 						{
-							
 							copy_to_module (ob, mod_pos, start_shape_no);
 							
 							int shape2 = -1;
@@ -3300,17 +3271,17 @@ static void MakeBackupFile(File_Chunk* fc)
 	WarnedAboutDiskSpace=FALSE;
 
 	CreateDirectory("avp_rifs\\Backup",0);
-	int length=strlen(fc->filename);
-	int pos=length;
+	size_t length = strlen(fc->filename);
+	int32_t pos = (int32_t)length;
 	while(pos>=0 && fc->filename[pos]!='\\')pos--;
 	char* filename=&fc->filename[pos+1];
-	length=strlen(filename)-4;
+	length = strlen(filename)-4;
 
-	char* Name1=new char[length+30];
-	char* Name2=new char[length+30];
+	char* Name1 = new char[length+30];
+	char* Name2 = new char[length+30];
 	strncpy(Name1,"avp_rifs\\Backup\\",16);
 	strncpy(&Name1[16],filename,length);
-	length+=16;
+	length += 16;
 	strncpy(Name2,Name1,length);
 	strncpy(&Name1[length],"B0.rif",7);
 	strncpy(&Name2[length],"B1.rif",7);

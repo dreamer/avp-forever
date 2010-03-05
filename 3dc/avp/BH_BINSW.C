@@ -29,8 +29,6 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	BIN_SWITCH_TOOLS_TEMPLATE *bs_tt;
 	int i;
 	int count;
-	int *test1;
-	int *test2;
 
  	GLOBALASSERT(sbptr);
 	bs_bhv = (BINARY_SWITCH_BEHAV_BLOCK*)AllocateMem(sizeof(BINARY_SWITCH_BEHAV_BLOCK));

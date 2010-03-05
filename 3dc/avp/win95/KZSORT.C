@@ -29,6 +29,12 @@ static struct KObject VisibleModules2[MAX_NUMBER_OF_VISIBLE_MODULES]={0,};
 static struct KObject *SortedModules;
 static struct KObject VisibleObjects[maxobjects]={0,};
 
+void SetFogDistance(int fogDistance);
+void ReflectObject(DISPLAYBLOCK *dPtr);
+void ClearTranslucentPolyList(void);
+void RenderPlayersImageInMirror(void);
+void AddHierarchicalShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr);
+
 
 /*KJL*****************************
 * externs for new shape function *

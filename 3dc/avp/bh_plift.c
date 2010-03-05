@@ -22,6 +22,8 @@
 #include "pldnet.h"
 #include "pldghost.h"
 
+#include "weapons.h"
+
 /* prototypes for this file */
 static int SquashingSomething(DYNAMICSBLOCK *dynPtr);
 static void PushPassengersUpwards(DYNAMICSBLOCK *dynPtr);

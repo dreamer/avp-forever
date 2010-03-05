@@ -4302,6 +4302,7 @@ void MakeRocketTrailParticles(VECTORCH *prevPositionPtr, VECTORCH *positionPtr)
 		while(i--);
 	}
 }
+
 void MakeGrenadeTrailParticles(VECTORCH *prevPositionPtr, VECTORCH *positionPtr)
 {
 	VECTORCH disp;
@@ -4885,9 +4886,6 @@ void MakeFocusedExplosion(VECTORCH *originPtr, VECTORCH *blastPositionPtr, int n
 		MakeParticle(&position, &velocity, particleID);
 	}
 }
-
-
-
 
 void MakePlasmaTrailParticles(DYNAMICSBLOCK *dynPtr, int number)
 {

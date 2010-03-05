@@ -77,6 +77,7 @@ void CalculateWhereGunIsPointing(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA
 void CalculatePlayersTarget(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA *weaponPtr);
 DISPLAYBLOCK *SmartTarget_GetNewTarget(void);
 int SmartTarget_TargetFilter(STRATEGYBLOCK *candidate);
+int PrintDebuggingText(const char* t, ...);
 
 void CalculateWhereGunIsPointing(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA *weaponPtr)
 {

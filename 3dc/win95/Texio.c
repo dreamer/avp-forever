@@ -909,8 +909,6 @@ void SpriteResizing(SHAPEHEADER *sptr)
 
 	/* TEST */
 	/*trip_up;*/
-
-
 	texture_defn_index = (pheader->PolyColour >> TxDefn);
 	txah_ptr = (TXANIMHEADER **) shape_textures[texture_defn_index];
 

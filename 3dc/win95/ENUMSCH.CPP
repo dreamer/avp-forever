@@ -94,7 +94,7 @@ BMP_Enums_Chunk::BMP_Enums_Chunk(Chunk_With_Children * const parent, char const 
 : Chunk(parent,"BMPENUMS"), ctype(0), reserved1(*(int *)sdata), reserved2(*(int *)(sdata+4))
 {
 	sdata+=8;
-	unsigned int const len = strlen(sdata)+1;
+	const size_t len = strlen(sdata)+1;
 
 	if (len>1)
 	{

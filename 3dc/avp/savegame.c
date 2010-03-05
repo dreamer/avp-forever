@@ -36,6 +36,13 @@
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 
+extern void NewOnScreenMessage(char *messagePtr);
+extern void GetFilenameForSaveSlot(int i, unsigned char *filenamePtr);
+void ScanSaveSlots(void);
+void RestartLevel();
+extern void StartFMVAtFrame(int number, int frame);
+extern void GetFMVInformation(int *messageNumberPtr, int *frameNumberPtr);
+
 extern int unlimitedSaves;
 
 static struct

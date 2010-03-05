@@ -18,7 +18,7 @@
 
 #include "particle.h"
 
-#define UseLocalAssert TRUE
+#define UseLocalAssert Yes
 #include "ourasert.h"
 
 /*KJL****************************************************************************************
@@ -57,7 +57,7 @@ void (*GouraudTexturedPolygon_ClipWithNegativeY)(void);
 void (*GouraudTexturedPolygon_ClipWithPositiveX)(void);
 
 /* FRUSTRUM TESTS */
-int (*1;ObjectWithinFrustrum)(DISPLAYBLOCK *dbPtr);
+int (*ObjectWithinFrustrum)(DISPLAYBLOCK *dbPtr);
 int (*ObjectCompletelyWithinFrustrum)(DISPLAYBLOCK *dbPtr);
 int (*VertexWithinFrustrum)(RENDERVERTEX *vertexPtr);
 void (*TestVerticesWithFrustrum)(void);
@@ -114,7 +114,7 @@ void SetFrustrumType(enum FrustrumType frustrumType)
 			GouraudPolygon_ClipWithPositiveY = GouraudPolygon_Norm_ClipWithPositiveY;
 			GouraudPolygon_ClipWithNegativeY = GouraudPolygon_Norm_ClipWithNegativeY;
 			GouraudPolygon_ClipWithPositiveX = GouraudPolygon_Norm_ClipWithPositiveX;
-			
+
 			/* TEXTURED POLYGON CLIPPING */
 			TexturedPolygon_ClipWithNegativeX = TexturedPolygon_Norm_ClipWithNegativeX;
 			TexturedPolygon_ClipWithPositiveY = TexturedPolygon_Norm_ClipWithPositiveY;
@@ -122,14 +122,14 @@ void SetFrustrumType(enum FrustrumType frustrumType)
 			TexturedPolygon_ClipWithPositiveX = TexturedPolygon_Norm_ClipWithPositiveX;
 
 			/* GOURAUD TEXTURED POLYGON CLIPPING */
-			//GouraudTexturedPolygon_ClipWithNegativeX = GouraudTexturedPolygon_Norm_ClipWithNegativeX;
-			//GouraudTexturedPolygon_ClipWithPositiveY = GouraudTexturedPolygon_Norm_ClipWithPositiveY;
-			//GouraudTexturedPolygon_ClipWithNegativeY = GouraudTexturedPolygon_Norm_ClipWithNegativeY;
-			////GouraudTexturedPolygon_ClipWithPositiveX = GouraudTexturedPolygon_Norm_ClipWithPositiveX;
+			GouraudTexturedPolygon_ClipWithNegativeX = GouraudTexturedPolygon_Norm_ClipWithNegativeX;
+			GouraudTexturedPolygon_ClipWithPositiveY = GouraudTexturedPolygon_Norm_ClipWithPositiveY;
+			GouraudTexturedPolygon_ClipWithNegativeY = GouraudTexturedPolygon_Norm_ClipWithNegativeY;
+			GouraudTexturedPolygon_ClipWithPositiveX = GouraudTexturedPolygon_Norm_ClipWithPositiveX;
 
 			/* FRUSTRUM TESTS */
-			//TestVerticesWithFrustrum = TestVerticesWith_Norm_Frustrum;
-			1; //ObjectWithinFrustrum = ObjectWithin_Norm_Frustrum;
+			TestVerticesWithFrustrum = TestVerticesWith_Norm_Frustrum;
+			ObjectWithinFrustrum = ObjectWithin_Norm_Frustrum;
 			ObjectCompletelyWithinFrustrum = ObjectCompletelyWithin_Norm_Frustrum;
 			VertexWithinFrustrum = VertexWithin_Norm_Frustrum;
 
@@ -151,14 +151,14 @@ void SetFrustrumType(enum FrustrumType frustrumType)
 			TexturedPolygon_ClipWithPositiveX = TexturedPolygon_Wide_ClipWithPositiveX;
 
 			/* GOURAUD TEXTURED POLYGON CLIPPING */
-			//GouraudTexturedPolygon_ClipWithNegativeX = GouraudTexturedPolygon_Wide_ClipWithNegativeX;
-			//GouraudTexturedPolygon_ClipWithPositiveY = GouraudTexturedPolygon_Wide_ClipWithPositiveY;
-			//GouraudTexturedPolygon_ClipWithNegativeY = GouraudTexturedPolygon_Wide_ClipWithNegativeY;
-			////GouraudTexturedPolygon_ClipWithPositiveX = GouraudTexturedPolygon_Wide_ClipWithPositiveX;
+			GouraudTexturedPolygon_ClipWithNegativeX = GouraudTexturedPolygon_Wide_ClipWithNegativeX;
+			GouraudTexturedPolygon_ClipWithPositiveY = GouraudTexturedPolygon_Wide_ClipWithPositiveY;
+			GouraudTexturedPolygon_ClipWithNegativeY = GouraudTexturedPolygon_Wide_ClipWithNegativeY;
+			GouraudTexturedPolygon_ClipWithPositiveX = GouraudTexturedPolygon_Wide_ClipWithPositiveX;
 
 			/* FRUSTRUM TESTS */
-			//TestVerticesWithFrustrum = TestVerticesWith_Wide_Frustrum;
-			1; //ObjectWithinFrustrum = ObjectWithin_Wide_Frustrum;
+			TestVerticesWithFrustrum = TestVerticesWith_Wide_Frustrum;
+			ObjectWithinFrustrum = ObjectWithin_Wide_Frustrum;
 			ObjectCompletelyWithinFrustrum = ObjectCompletelyWithin_Wide_Frustrum;
 			VertexWithinFrustrum = VertexWithin_Wide_Frustrum;
 			
@@ -855,8 +855,8 @@ static void GouraudTexturedPolygon_Wide_ClipWithPositiveX(void)
 
 
 
-// XISGOSMIF
-int 1; //PolygonWithinFrustrum(POLYHEADER *polyPtr)
+
+int PolygonWithinFrustrum(POLYHEADER *polyPtr)
 {			
     char inFrustrumFlag=0;
    	char noClippingFlag=INSIDE_FRUSTRUM;
@@ -1167,7 +1167,7 @@ void TestVerticesWith_Wide_Frustrum(void)
 
 
 
-int //DecalWithinFrustrum(DECAL *decalPtr)
+int DecalWithinFrustrum(DECAL *decalPtr)
 {
 	char inFrustrumFlag;
 	char noClippingFlag;
@@ -1205,7 +1205,7 @@ int //DecalWithinFrustrum(DECAL *decalPtr)
 	return 1;
 }
 
-int //QuadWithinFrustrum(void)
+int QuadWithinFrustrum(void)
 {
 	char inFrustrumFlag;
 	char noClippingFlag;
@@ -1241,7 +1241,7 @@ int //QuadWithinFrustrum(void)
 	return 1;
 }
 
-int //TriangleWithinFrustrum(void)
+int TriangleWithinFrustrum(void)
 {
 	char inFrustrumFlag;
 	char noClippingFlag;

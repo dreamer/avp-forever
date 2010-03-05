@@ -97,6 +97,11 @@ void FindObjectOfFocus();
 void MaintainPlayer(void);
 
 extern void CheckCDStatus(void);
+void CreatePlayersImageInMirror(void);
+extern void InitialiseTriggeredFMVs();
+void CreateStarArray(void);
+MessageHistory_Initialise();
+TimeScaleThingy();
 
 /*********************************************
 
