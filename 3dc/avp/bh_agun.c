@@ -460,7 +460,6 @@ void AutoGunBehaveInit(void *bhdata,STRATEGYBLOCK *sbPtr) {
 		RemoveBehaviourStrategy(sbPtr);
 		return;
 	}
-
 }
 
 void MakeSentrygunFar(STRATEGYBLOCK *sbPtr)

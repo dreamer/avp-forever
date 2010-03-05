@@ -65,6 +65,8 @@ extern void NPC_GetBimbleTarget(STRATEGYBLOCK *sbPtr,VECTORCH *output);
 extern STRATEGYBLOCK* InitialiseEnergyBoltBehaviourKernel(VECTORCH *position,MATRIXCH *orient, int player, DAMAGE_PROFILE *damage, int factor);
 extern STRATEGYBLOCK* CreatePPPlasmaBoltKernel(VECTORCH *position,MATRIXCH *orient, int player);
 extern DISPLAYBLOCK *HtoHDamageToHModel(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, STRATEGYBLOCK *source, VECTORCH *attack_dir);
+int PrintDebuggingText(const char* t, ...);
+extern void CurrentGameStats_CreatureKilled(STRATEGYBLOCK *sbPtr,SECTION_DATA *sectionDataPtr);
 
 /* prototypes for this file */
 static void ProcessFarPredatorTargetAIModule(STRATEGYBLOCK *sbPtr, AIMODULE* targetModule);

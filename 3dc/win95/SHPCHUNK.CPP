@@ -3313,20 +3313,21 @@ void Shape_Preprocessed_Data_Chunk::fill_data_block(char* data_start)
 
 void* Shape_Preprocessed_Data_Chunk::GetMemoryBlock()
 {
-	void* retval=memory_block;
+	void* retval = memory_block;
 
-	unsigned int* current=(unsigned int*)&first_pointer;
+	unsigned int* current = (unsigned int*)&first_pointer;
 	unsigned int* next;
-	while((*current>>16)!=0xffff)
-	{
-		next=&memory_block[(*current)>>16];
-		*current=(unsigned int)&memory_block[(*current)&0xffff];
-		current=next;
-	}
-	*current=(unsigned int)&memory_block[(*current)&0xffff];
 
-	memory_block=0;
-	block_size=0;
+	while((*current>>16) != 0xffff)
+	{
+		next = &memory_block[(*current)>>16];
+		*current = (unsigned int)&memory_block[(*current)&0xffff];
+		current = next;
+	}
+	*current = (unsigned int)&memory_block[(*current)&0xffff];
+
+	memory_block=  0;
+	block_size = 0;
 	return retval;
 }
 

@@ -101,7 +101,6 @@ extern void PaintBallMode_DrawCurrentDecalAtTarget(void)
 		PrintDebuggingText("PAINTBALL MODE ACTIVE\n");
 		PrintDebuggingText("TOTAL PRE-DECALS: %d OUT OF 1024\n",NumFixedDecals);
 	}
-	
 }
 
 extern void PaintBallMode_ChangeSelectedDecalID(int delta)

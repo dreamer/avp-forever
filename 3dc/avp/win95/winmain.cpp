@@ -147,7 +147,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	I_AVP_ENVIRONMENTS level_to_load = I_Num_Environments;
 	char * command_line = lpCmdLine;
-						
+
 	AVP_HInstance = hInst = hInstance;
 	AVP_NCmd = nCmdShow;
 	skOff = startupStickyKeys;

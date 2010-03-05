@@ -1021,8 +1021,6 @@ CHEATMODEDESC CheatModeDesc[] =
 
 extern void CheatMode_GetNextAllowedSpecies(int *speciesPtr, int searchForward)
 {
-	char buf[100];
-
 	while(!(CheatModeDesc[CheatMode_Active].PlayableForSpecies[*speciesPtr]
 			&&ThereIsAnAllowedEnvironment()) )
 	{
@@ -1044,9 +1042,6 @@ extern void CheatMode_GetNextAllowedSpecies(int *speciesPtr, int searchForward)
 			(*speciesPtr)--;
 		}
 	}
-
-	sprintf(buf, "allowed species: %d\n", (*speciesPtr));
-	OutputDebugString(buf);
 }
 
 static int ThereIsAnAllowedEnvironment(void)

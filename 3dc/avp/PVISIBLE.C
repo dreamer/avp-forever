@@ -32,6 +32,7 @@
 #include "bh_dummy.h"
 #include "bh_videoscreen.h"
 #include "bh_plift.h"
+#include "weapons.h"
 
 /* for win95 net game support */
 #include "pldghost.h"
@@ -51,6 +52,13 @@ static void FragmentInanimateObject(STRATEGYBLOCK *sbptr);
 static void ExplodeInanimateObject(STRATEGYBLOCK *sbptr);
 static void RespawnInanimateObject(STRATEGYBLOCK *sbPtr);
 void KillFragmentalObjectForRespawn(STRATEGYBLOCK *sbPtr);
+void MakePlacedLightNear(STRATEGYBLOCK *sbPtr);
+void MakeSentrygunNear(STRATEGYBLOCK *sbPtr);
+void MakeCorpseNear(STRATEGYBLOCK *sbPtr);
+void MakeSentrygunFar(STRATEGYBLOCK *sbPtr);
+void MakeCorpseFar(STRATEGYBLOCK *sbPtr);
+void RespawnLight(STRATEGYBLOCK *sbPtr);
+int GetLoadedShapeMSL(char const * shapename);
 
 void IdentifyObject(STRATEGYBLOCK *sbPtr);
 

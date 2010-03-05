@@ -312,8 +312,6 @@ void PlacedLightBehaviour(STRATEGYBLOCK *sbPtr)
 	{
 		UpdatePlacedLightColour(pl_bhv);
 	}
-
-
 }
 
 void MakePlacedLightNear(STRATEGYBLOCK *sbPtr)

@@ -72,6 +72,15 @@ static void HandleVolumetricExplosion(VOLUMETRIC_EXPLOSION *expPtr);
 void DrawXenoborgMainLaserbeam(LASER_BEAM_DESC *laserPtr);
 void HandlePheromoneTrails(void);
 void RenderTrailSegment(PHEROMONE_TRAIL *trailPtr);
+void OutputTranslucentPolyList(void);
+void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour);
+int GetLoadedShapeMSL(char const * shapename);
+void RenderThisDisplayblock(DISPLAYBLOCK *dbPtr);
+void MakeMatrixFromDirection(VECTORCH *directionPtr, MATRIXCH *matrixPtr);
+void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr);
+void RenderDecal(DECAL *decalPtr);
+extern void RenderFlechetteParticle(PARTICLE *particlePtr);
+int PrintDebuggingText(const char* t, ...);
 		
 PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 {

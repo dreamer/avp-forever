@@ -129,6 +129,18 @@ char *GetVideoModeDescription2();
 char *GetVideoModeDescription3();
 void NextVideoMode2();
 void PreviousVideoMode2();
+void ThisFramesRenderingHasBegun(void);
+extern void RenderHighlightRectangle(int x1, int y1, int x2, int y2, int r, int g, int b);
+void Osk_Activate();
+void Osk_Deactivate();
+extern void CheatMode_GetNextAllowedSpecies(int *speciesPtr, int searchForward);
+extern void CheatMode_GetNextAllowedMode(int *cheatModePtr, int searchForward);
+extern void CheatMode_GetNextAllowedEnvironment(int *environmentPtr, int searchForward);
+void InitAVPNetGameForJoin(void);
+void SaveDeviceAndVideoModePreferences();
+extern void IngameKeyboardInput_ClearBuffer(void);
+extern int LengthOfMenuText(const char *textPtr);
+extern int PlayMenuBackgroundFmv();
 
 extern char *GetGamePadButtonTextString(enum TEXTSTRING_ID stringID);
 
@@ -676,9 +688,9 @@ extern void AvP_UpdateMenus(void)
 				char buffer2[100];
 				int nLen = 80;
 
-				time_t time_of_day;
+//				time_t time_of_day;
 
-			    time_of_day = time( NULL );
+//			    time_of_day = time( NULL );
 
 #ifdef WIN32
 				nLen = GetDateFormat(GetThreadLocale(), DATE_LONGDATE, &profilePtr->TimeLastUpdated,NULL,buffer,nLen);
@@ -1827,9 +1839,9 @@ static void RenderUserProfileSelectMenu(void)
 					profilePtr->TimeLastUpdated.wMonth,
 					profilePtr->TimeLastUpdated.wDay);
 				*/
-				time_t time_of_day;
+//				time_t time_of_day;
 
-			    time_of_day = time( NULL );
+//			    time_of_day = time( NULL );
 //			  strftime( buffer, 80, "%c",
 //				     localtime( &time_of_day ) );
 

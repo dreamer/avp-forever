@@ -740,9 +740,8 @@ extern void CurrentGameStats_TrophyCollected(STRATEGYBLOCK *sbPtr) {
 	}
 }
 
-extern void CurrentGameStats_CreatureKilled(STRATEGYBLOCK *sbPtr,SECTION_DATA *sectionDataPtr)
+extern void CurrentGameStats_CreatureKilled(STRATEGYBLOCK *sbPtr, SECTION_DATA *sectionDataPtr)
 {
-
 	if (PlayerStatusPtr->IsAlive==0) {
 		return;
 	}

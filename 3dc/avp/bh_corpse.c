@@ -93,8 +93,6 @@ void MakeCorpseNear(STRATEGYBLOCK *sbPtr)
 		dPtr->HModelControlBlock=&corpseData->HModelController;
 		ProveHModel(dPtr->HModelControlBlock,dPtr);
     }
-                            
-
 }
 
 void MakeCorpseFar(STRATEGYBLOCK *sbPtr)

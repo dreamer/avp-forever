@@ -102,6 +102,7 @@ extern void InitialiseTriggeredFMVs();
 void CreateStarArray(void);
 MessageHistory_Initialise();
 TimeScaleThingy();
+void MessageHistory_Maintain(void);
 
 /*********************************************
 

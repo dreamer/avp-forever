@@ -55,7 +55,7 @@ static int GoToJump(STRATEGYBLOCK *sbPtr);
 int TargetIsFiringFlamethrowerAtAlien(STRATEGYBLOCK *sbPtr);
 static int StartAlienTaunt(STRATEGYBLOCK *sbPtr);
 void StartAlienMovementSequence(STRATEGYBLOCK *sbPtr);
-
+int PrintDebuggingText(const char* t, ...);
 extern void Execute_Alien_Dying(STRATEGYBLOCK *sbPtr);
 
 int AlienIsAbleToClimb(STRATEGYBLOCK *sbPtr);
@@ -282,7 +282,8 @@ void NearAlienBehaviour(STRATEGYBLOCK *sbPtr)
   		}
   	}
 
-	if (ShowHiveState) {
+	if (ShowHiveState) 
+	{
 		/* Alien position print. */
 
 		MODULE *thisModule = sbPtr->containingModule;
@@ -290,7 +291,6 @@ void NearAlienBehaviour(STRATEGYBLOCK *sbPtr)
 		LOCALASSERT(thisModule);
 
 		PrintDebuggingText("Near %s alien is in module %d, %s\n",descriptor,thisModule->m_index,thisModule->name);
-
 	}
 
 	#if 0

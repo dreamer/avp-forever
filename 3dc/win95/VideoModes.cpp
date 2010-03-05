@@ -181,7 +181,7 @@ static void SetDeviceAndVideoModePreferences(void)
 }
 
 // called when you select "use selected settings" when selecting a video mode
-void SaveDeviceAndVideoModePreferences() 
+void SaveDeviceAndVideoModePreferences()
 {
 	SetDeviceAndVideoModePreferences();
 }

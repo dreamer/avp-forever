@@ -189,7 +189,7 @@ extern int start_of_loaded_shapes;
 
 extern unsigned char *TextureLightingTable;
 
-extern SHAPEHEADER ** mainshapelist;
+extern SHAPEHEADER **mainshapelist;
 
 extern MAPHEADER Map[];
 
@@ -199,8 +199,6 @@ extern MAPBLOCK6 Empty_Object_Type6;
 extern MAPBLOCK6 Term_Type6;
 
 extern unsigned char TestPalette[];
-
-extern unsigned char LPTestPalette[]; /* to cast to lp*/
 
 #if 0
 extern int NumImages;								/* # current images */

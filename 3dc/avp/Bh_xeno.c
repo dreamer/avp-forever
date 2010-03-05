@@ -63,6 +63,8 @@ VECTORCH null_vec={0,0,0};
 extern HIERARCHY_SHAPE_REPLACEMENT* GetHierarchyAlternateShapeSetFromLibrary(const char* rif_name,const char* shape_set_name);
 extern SECTION * GetNamedHierarchyFromLibrary(const char * rif_name, const char * hier_name);
 extern void HandleWeaponImpact(VECTORCH *positionPtr, STRATEGYBLOCK *sbPtr, enum AMMO_ID AmmoID, VECTORCH *directionPtr, int multiple, SECTION_DATA *section_pointer); 
+int PrintDebuggingText(const char* t, ...);
+extern void CurrentGameStats_CreatureKilled(STRATEGYBLOCK *sbPtr, SECTION_DATA *sectionDataPtr);
 
 int ShowXenoStats=0;
 
