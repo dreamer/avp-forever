@@ -489,6 +489,25 @@ D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool)
 		return NULL;
 	}
 
+	// lets clear it to black
+	D3DLOCKED_RECT lock;
+
+	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+	else
+	{
+		memset(lock.pBits, 0, lock.Pitch * newHeight);
+
+		LastError = destTexture->UnlockRect(0);
+		if (FAILED(LastError)) 
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+	}
+
 	*width = newWidth;
 	*height = newHeight;
 

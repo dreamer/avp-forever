@@ -4577,8 +4577,8 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 	float x1 = (float(topX / 640.0f) * 2) - 1;
 	float y1 = (float(topY / 480.0f) * 2) - 1;
 
-	float x2 = ((float(topX + textureWidth) / 640.0f) * 2) - 1;
-	float y2 = ((float(topY + textureHeight) / 480.0f) * 2) - 1;
+	float x2 = ((float(topX + frameWidth) / 640.0f) * 2) - 1;
+	float y2 = ((float(topY + frameHeight) / 480.0f) * 2) - 1;
 
 	D3DCOLOR colour = D3DCOLOR_ARGB(255, 255, 255, 255);
 
@@ -4590,7 +4590,7 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 	fmvVerts[0].z = 1.0f;
 	fmvVerts[0].colour = colour;
 	fmvVerts[0].u = 0.0f;
-	fmvVerts[0].v = 1.0f;
+	fmvVerts[0].v = (1.0f / textureHeight) * frameHeight;
 
 	// top left
 	fmvVerts[1].x = x1;
@@ -4605,17 +4605,18 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 	fmvVerts[2].y = y2;
 	fmvVerts[2].z = 1.0f;
 	fmvVerts[2].colour = colour;
-	fmvVerts[2].u = 1.0f;
-	fmvVerts[2].v = 1.0f;
+	fmvVerts[2].u = (1.0f / textureWidth) * frameWidth;
+	fmvVerts[2].v = (1.0f / textureHeight) * frameHeight;
 
 	// top right
 	fmvVerts[3].x = x2;
 	fmvVerts[3].y = y1;
 	fmvVerts[3].z = 1.0f;
 	fmvVerts[3].colour = colour;
-	fmvVerts[3].u = 1.0f;
+	fmvVerts[3].u = (1.0f / textureWidth) * frameWidth;
 	fmvVerts[3].v = 0.0f;
 
+	ChangeTextureAddressMode(TEXTURE_CLAMP);
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 		
 	// set the texture
