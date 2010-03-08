@@ -40,13 +40,10 @@ std::vector<Command> cmdList;
 std::vector<Command>::iterator cmdIt;
 std::vector<std::string>cmdArgs;
 
-//const int CON_TEXTSIZE = 32768;
-//char consoleTextArray[CON_TEXTSIZE];
-
 struct Console 
 {
-	bool isActive;
-	bool isOpen;
+//	bool isActive;
+//	bool isOpen;
 
 	int xPos;
 	int yPos;
@@ -58,7 +55,8 @@ struct Console
 	int width;
 	int height;
 
-	int destinationY;
+	float currentY;
+	float destinationY;
 
 	std::vector<std::string> text;
 	std::string	inputLine;
@@ -147,9 +145,7 @@ void Con_AddCommand(char *command, funcPointer function)
 
 void Con_Init()
 {
-	return; // bjd - disabling for now
-
-	console.isActive = false;
+//	console.isActive = false;
 	console.xPos = 0;
 	console.yPos = 0;
 	console.width = 640;
@@ -160,20 +156,13 @@ void Con_Init()
 	console.height = console.lines * CHAR_HEIGHT;
 	console.indent = CHAR_WIDTH / 2;
 
+	console.currentY = 0;
 	console.destinationY = 0;
 
 	sprintf(buf, "console height: %d num lines: %d\n", console.lines * CHAR_HEIGHT, console.lines);
 	OutputDebugString(buf);
 
 	Con_AddCommand("toggleconsole", Con_Toggle);
-//	LoadConsoleFont();
-/*
-	for (int i = 0; i < CON_TEXTSIZE; i++)
-	{
-		consoleTextArray[i] = ' ';
-	}
-*/
-	OutputDebugString("console initialised\n");
 }
 
 void Con_ProcessCommand()
@@ -241,17 +230,11 @@ void Con_ProcessInput()
 
 void Con_Toggle()
 {
-	console.isActive = !console.isActive;
-
-	if (console.height > 0) 
-		console.destinationY = 0;
-	else 
-		console.destinationY = console.lines * CHAR_HEIGHT;
-
 	// toggle on/off
 	IOFOCUS_Set(IOFOCUS_Get() ^ IOFOCUS_NEWCONSOLE);
 }
 
+/*
 bool Con_IsActive()
 {
 	return console.isActive;
@@ -261,6 +244,7 @@ bool Con_IsOpen()
 {
 	return console.isOpen;
 }
+*/
 
 void Con_CheckResize()
 {
@@ -274,8 +258,8 @@ void Con_CheckResize()
 
 void Con_AddTypedChar(char c)
 {
-	if (!console.isActive) 
-		return;
+//	if (!console.isActive) 
+//		return;
 
 	if (c == 0x08) // backspace
 	{
@@ -306,56 +290,40 @@ void Con_RemoveTypedChar()
 
 void Con_Draw()
 {
-	return; // bjd - disabling for now
-
 	int charWidth = 0;
-/*
-	if (IOFOCUS_Get() == IOFOCUS_GAME)
+
+	if (IOFOCUS_Get() & IOFOCUS_NEWCONSOLE)
 	{
-		OutputDebugString("IOFOCUS_GAME\n");
+		console.destinationY = 0.5f;
 	}
-	else if (IOFOCUS_Get() == IOFOCUS_NEWCONSOLE)
+	else 
 	{
-		OutputDebugString("IOFOCUS_NEWCONSOLE\n");
+		console.destinationY = 0.0f;
 	}
-	else if (IOFOCUS_Get() == IOFOCUS_OLDCONSOLE)
-	{
-		OutputDebugString("IOFOCUS_OLDCONSOLE\n");
-	}
-	else if (IOFOCUS_Get() == IOFOCUS_OSK)
-	{
-		OutputDebugString("IOFOCUS_OSK\n");
-	}
-	else OutputDebugString("no focus?\n");
-*/
+
 	// is console moving to a new position?
-	if (console.destinationY > console.height)
+	if (console.destinationY > console.currentY)
 	{
-		console.height += static_cast<int>(RealFrameTime * 0.01f);
-		if (console.height > console.destinationY)
-			console.height = console.destinationY;
-
-		console.isOpen = false;
+		console.currentY += RealFrameTime * 0.00002f;
+		if (console.currentY > console.destinationY)
+			console.currentY = console.destinationY;
 	}
-	else if (console.destinationY < console.height)
+	else if (console.destinationY < console.currentY)
 	{
-		console.height -= static_cast<int>(RealFrameTime * 0.01f);
-		if (console.height < console.destinationY)
-			console.height = console.destinationY;
-
-		console.isOpen = false;
+		console.currentY -= RealFrameTime * 0.00002f;
+		if (console.currentY < console.destinationY)
+			console.currentY = console.destinationY;
 	}
 
-	if (console.destinationY == console.height)
-		console.isOpen = true;
+	console.height = 480 * console.currentY;
 
 	// draw the background quad
-	DrawQuad(console.xPos, console.yPos, console.width, console.height, -1, D3DCOLOR_ARGB(255, 38, 80, 145), TRANSLUCENCY_GLOWING);
+	DrawQuad(console.xPos, console.yPos, console.width, console.height, -1, D3DCOLOR_ARGB(255, 38, 80, 145), TRANSLUCENCY_OFF);
 
 	if (console.height > 0)
 	{
 		// draw the outline bar that runs along the bottom of the console
-		DrawQuad(console.xPos, console.yPos + console.height, console.width, 2, -1, D3DCOLOR_ARGB(255, 255, 255, 255), TRANSLUCENCY_GLOWING);
+		DrawQuad(console.xPos, console.yPos + console.height, console.width, 2, -1, D3DCOLOR_ARGB(255, 255, 255, 255), TRANSLUCENCY_OFF);
 	}
 
 	int charCount = 0;

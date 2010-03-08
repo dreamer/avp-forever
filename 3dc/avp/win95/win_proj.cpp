@@ -8,6 +8,7 @@ Project specific (or potentially project specific) windows functionality
 // To link code to main C functions
 
 #include "console.h"
+#include "iofocus.h"
 
 extern "C" {
 
@@ -134,7 +135,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		// 21/11/97 DHM: Added processing of WM_CHAR messages:
 		case WM_CHAR:
 		{
-			if (Con_IsActive())
+			if (IOFOCUS_Get() & IOFOCUS_NEWCONSOLE)
 			{
 				Con_AddTypedChar((char)wParam);
 				break;
