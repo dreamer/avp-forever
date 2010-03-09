@@ -11,6 +11,9 @@ PAINTBALLMODE PaintBallMode;
 
 extern int NormalFrameTime;
 
+void RenderDecal(DECAL *decalPtr);
+int PrintDebuggingText(const char* t, ...);
+
 extern void TogglePaintBallMode(void)
 {
 	PaintBallMode.IsOn = ~PaintBallMode.IsOn;

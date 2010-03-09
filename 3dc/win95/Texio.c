@@ -2,7 +2,6 @@
 #include "3dc.h"
 
 #include <conio.h>
-#include <sys\stat.h>
 
 #include "inline.h"
 
@@ -906,9 +905,6 @@ void SpriteResizing(SHAPEHEADER *sptr)
 		mypolystart++;
 	}
 
-
-	/* TEST */
-	/*trip_up;*/
 	texture_defn_index = (pheader->PolyColour >> TxDefn);
 	txah_ptr = (TXANIMHEADER **) shape_textures[texture_defn_index];
 
@@ -953,7 +949,6 @@ void SpriteResizing(SHAPEHEADER *sptr)
 					textprint("image %d of %d   \n", (image + 1), num_images);
 					#endif
 
-
 					/* Get the image */
 					ihdr = ImageHeaderPtrs[txf_imageptr[image]];
 
@@ -961,12 +956,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 					txf_uvarray = txf_uvarrayptr[image];
 
 					/* Find the extents of the image, assuming transparency */
-
-					#if 0
-					FindImageExtents(ihdr, txaf->txf_numuvs, txaf->txf_uvdata, &e, &e_curr);
-					#else
 					FindImageExtents(ihdr, txaf->txf_numuvs, txf_uvarray, &e, &e_curr);
-					#endif
 
 					/* Convert the image extents to fixed point */
 
@@ -1000,34 +990,25 @@ void SpriteResizing(SHAPEHEADER *sptr)
 
 
 					/* Centre of the current cookie */
-
 					cen_uv_curr.vx = (e_curr.u_low + e_curr.u_high) / 2;
 					cen_uv_curr.vy = (e_curr.v_low + e_curr.v_high) / 2;
 
 					/* Size of the current cookie */
-
 					size_uv_curr.vx = e_curr.u_high - e_curr.u_low;
 					size_uv_curr.vy = e_curr.v_high - e_curr.v_low;
 
 
 					/* Centre of the new cookie */
-
 					cen_uv.vx = (e.u_low + e.u_high) / 2;
 					cen_uv.vy = (e.v_low + e.v_high) / 2;
 
 					/* Size of the new cookie */
-
 					size_uv.vx = e.u_high - e.u_low;
 					size_uv.vy = e.v_high - e.v_low;
 
 
 					/* Write out the new UV data */
-
-					#if 0
-					uvptr = txaf->txf_uvdata;
-					#else
 					uvptr = txf_uvarray;
-					#endif
 
 
 					/*
@@ -1050,12 +1031,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 					uvptr[7] = e.v_low;
 
 
-					/*
-
-					Create the new polygon XY array
-
-					*/
-
+					/* Create the new polygon XY array */
 					uvptr += (txaf->txf_numuvs * 2);	/* Advance the pointer past the UV array */
 
 
@@ -1070,9 +1046,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 
 						iptr  += vsize;
 						iptr2 += 2;
-
 					}
-
 
 					/* Scale the polygon points */
 					iptr = uvptr;
@@ -1086,7 +1060,6 @@ void SpriteResizing(SHAPEHEADER *sptr)
 						iptr += 2;
 
 					}
-
 
 					/* The translation vector in UV space */
 					tv.vx = cen_uv.vx - cen_uv_curr.vx;
@@ -1118,7 +1091,6 @@ void SpriteResizing(SHAPEHEADER *sptr)
 				textprint("\n");
 				#endif
 
-
 				/* Next Texture Animation Frame */
 
 				txaf++;
@@ -1149,7 +1121,6 @@ void FindImageExtents(IMAGEHEADER *ihdr, int numuvs, int *uvdata, IMAGEEXTENTS *
 {
 	int i;
 	int *uvptr;
-
 
 	/* Find the current UV extents */
 	e_curr->u_low = bigint;
@@ -1215,36 +1186,9 @@ IMAGEHEADER* GetImageHeader(void)
 
 static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 {
-#if 0
-	if (ihptr->hBackup)
-	{
-		if (ihptr->DDSurface)
-		{
-			GLOBALASSERT(!ihptr->DDSurface);
-			ATRemoveSurface(ihptr->DDSurface);
-		}
-		else if (ihptr->AvPTexture)
-		{
-			GLOBALASSERT(!ihptr->AvPTexture);
-			ATRemoveTexture(ihptr->AvPTexture);
-		}
-		
-//		AwDestroyBackupTexture(ihptr->hBackup);
-//		ihptr->hBackup = 0;
-	}
-#endif
-#if 0	
-	if (ihptr->ImagePtr) 
-	{
-		DeallocateMem(ihptr->ImagePtr);
-		ihptr->ImagePtr = 0;
-	}
-#endif
-
 	if (ihptr->AvPTexture)
 	{
 		ReleaseAvPTexture(ihptr->AvPTexture);
-		//ATRemoveTexture(ihptr->AvPTexture);
 		ihptr->AvPTexture = (void*) 0;
 	}
 
@@ -1485,25 +1429,6 @@ int MinimizeAllImages(void)
 
 	return TRUE; /* ok for the moment */
 }
-
-#if 0 // bjd
-int RestoreAllImages(void)
-{
-	int i;
-	IMAGEHEADER *ihptr;
-
-	if (NumImages)
-	{
-		ihptr = ImageHeaderArray;
-		for (i = NumImages; i!=0; i--)
-		{
-			RestoreImageHeader(ihptr++);
-		}		
-	}
-
-	return TRUE; /* ok for the moment */
-}
-#endif
 
 #endif
 

@@ -52,7 +52,6 @@ void Object_Animation_Sequence_Frame_Chunk::fill_data_block (char *data_start)
 		*((int *) data_start) = extra_data[i];
 		data_start += 4;
 	}
-	
 }
 
 #if UseOldChunkLoader

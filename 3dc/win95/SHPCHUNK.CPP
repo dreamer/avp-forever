@@ -1025,7 +1025,7 @@ uv_data (NULL), num_uvs (*((int *) uvdata))
 	
 	uvdata += 4;
 
-	for (i=0;i<num_uvs;i++)
+	for (i = 0; i < num_uvs; i++)
 	{
 		parent->shape_data_store->uv_list[i].num_verts = *((int *) uvdata);
 		uvdata += 4;
@@ -1036,7 +1036,6 @@ uv_data (NULL), num_uvs (*((int *) uvdata))
 			uvdata += sizeof(ChunkUV);
 		}
 	}
-	
 }
 
 Shape_UV_Coord_Chunk::Shape_UV_Coord_Chunk (Shape_Sub_Shape_Chunk * parent, const char * uvdata, size_t /*uvsize*/)
@@ -1063,7 +1062,6 @@ uv_data (NULL), num_uvs (*((int *) uvdata))
 			uvdata += sizeof(ChunkUV);
 		}
 	}
-	
 }
 
 Shape_UV_Coord_Chunk::Shape_UV_Coord_Chunk (Console_Shape_Chunk * parent, const char * uvdata, size_t /*uvsize*/)
@@ -1088,7 +1086,6 @@ uv_data (NULL), num_uvs (*((int *) uvdata))
 			uvdata += sizeof(ChunkUV);
 		}
 	}
-	
 }
 
 BOOL Shape_UV_Coord_Chunk::output_chunk (HANDLE &hand)
@@ -1106,7 +1103,6 @@ BOOL Shape_UV_Coord_Chunk::output_chunk (HANDLE &hand)
 	if (!ok) return FALSE;
 
 	return TRUE;
-		
 }
 
 
@@ -1134,7 +1130,6 @@ void Shape_UV_Coord_Chunk::fill_data_block(char * data_start)
 			data_start += sizeof(ChunkUV);
 		}
 	}
-
 }
 
 size_t Shape_UV_Coord_Chunk::size_chunk ()
@@ -1175,7 +1170,6 @@ tex_fns (), num_tex_fns (*((int *) tfndata))
 		strcpy (parent->shape_data_store->texture_fns[i], tfndata);
 		tfndata += (strlen(tfndata)+1);
 	}
-		
 }
 
 Shape_Texture_Filenames_Chunk::Shape_Texture_Filenames_Chunk (Shape_Sub_Shape_Chunk * parent, const char * tfndata, size_t /*tfnsize*/)
@@ -1196,7 +1190,6 @@ tex_fns (), num_tex_fns (*((int *) tfndata))
 		strcpy (parent->shape_data_store->texture_fns[i], tfndata);
 		tfndata += (strlen(tfndata)+1);
 	}
-		
 }
 
 BOOL Shape_Texture_Filenames_Chunk::output_chunk (HANDLE &hand)
@@ -1235,7 +1228,6 @@ void Shape_Texture_Filenames_Chunk::fill_data_block(char * data_start)
 		sprintf(data_start, "%s", tex_fns[i]);
 		data_start += (strlen (tex_fns[i]) + 1);
 	}
-
 }
 
 size_t Shape_Texture_Filenames_Chunk::size_chunk()
@@ -1248,7 +1240,6 @@ size_t Shape_Texture_Filenames_Chunk::size_chunk()
 	chunk_size += (4-chunk_size%4)%4;
 
 	return chunk_size;
-
 }
 
 
@@ -1315,7 +1306,6 @@ Shape_Header_Chunk::Shape_Header_Chunk (Shape_Chunk * parent, const char * hdata
 		object_names_store.add_entry(obj_store);
 		hdata += (strlen (hdata)+1);
 	}
-
 }
 
 Shape_Header_Chunk::~Shape_Header_Chunk()
@@ -1408,7 +1398,6 @@ void Shape_Header_Chunk::fill_data_block(char * data_start)
 		strcpy (data_start, ons());
 		data_start += (strlen(ons())+1);
 	}
-
 }
 
 
@@ -1462,7 +1451,6 @@ Shape_Merge_Data_Chunk::Shape_Merge_Data_Chunk(Shape_Chunk * parent, int * m_dt,
 	{
 		merge_data[i] = m_dt[i];
 	}
-	
 }	
 
 Shape_Merge_Data_Chunk::Shape_Merge_Data_Chunk(Shape_Sub_Shape_Chunk * parent, int * m_dt, int n_ps)
@@ -1473,7 +1461,6 @@ Shape_Merge_Data_Chunk::Shape_Merge_Data_Chunk(Shape_Sub_Shape_Chunk * parent, i
 	{
 		merge_data[i] = m_dt[i];
 	}
-	
 }	
 
 
@@ -1519,7 +1506,6 @@ void Shape_Merge_Data_Chunk::fill_data_block(char * data_start)
 	{
 		*((int *) (data_start+i*4) ) = merge_data[i];
 	}
-	
 }
 
 
@@ -1569,7 +1555,6 @@ const char* Shape_External_File_Chunk::get_shape_name()
 	}
 
 	return 0;
-
 }
 
 /////////////////////////////////////////
@@ -1583,7 +1568,6 @@ Shape_External_Filename_Chunk::Shape_External_Filename_Chunk(Chunk_With_Children
 	
 	rescale = 1;
 	version_no = -1;
-	
 }
 
 Shape_External_Filename_Chunk::Shape_External_Filename_Chunk (Chunk_With_Children * parent, const char *fdata, size_t /*fsize*/)
@@ -1621,8 +1605,7 @@ void Shape_External_Filename_Chunk::fill_data_block (char *data_start)
 	
 	data_start += 4;
 
-	strcpy (data_start, file_name);
-		
+	strcpy (data_start, file_name);	
 }
 
 ///////////////////////////////////////
@@ -1697,7 +1680,6 @@ void Shape_External_Object_Name_Chunk::fill_data_block (char *data_start)
 	data_start+=4;
 
 	strcpy (data_start, object_name);
-		
 }
 
 ///////////////////////////////////////
@@ -1729,8 +1711,8 @@ Shape_Morphing_Data_Chunk::Shape_Morphing_Data_Chunk (Shape_Chunk * parent, cons
 		data += *(int *)(data + 8);
 
 	}
-	
-}	
+}
+
 Shape_Morphing_Data_Chunk::Shape_Morphing_Data_Chunk (Shape_Sub_Shape_Chunk * parent, const char *data, size_t size)
 : Chunk_With_Children (parent, "SHPMORPH"), parent_shape (0), parent_sub_shape (parent)
 {
@@ -1744,12 +1726,8 @@ Shape_Morphing_Data_Chunk::Shape_Morphing_Data_Chunk (Shape_Sub_Shape_Chunk * pa
 		}
 		DynCreate(data);
 		data += *(int *)(data + 8);
-
-
 	}
-	
 }	
-
 
 void Shape_Morphing_Data_Chunk::prepare_for_output()
 {
@@ -1772,7 +1750,6 @@ void Shape_Morphing_Data_Chunk::prepare_for_output()
 		}
 	}
 	Chunk_With_Children::prepare_for_output();
-	
 }
 
 ///////////////////////////////////////
@@ -1955,7 +1932,6 @@ void Shape_Morphing_Frame_Data_Chunk::post_input_processing()
 			fr->spare = frame_store[i+2];
 			anim_frames.add_entry(fr);
 		}
-			
 	}
 }
 
@@ -2001,16 +1977,16 @@ Shape_Sub_Shape_Chunk::Shape_Sub_Shape_Chunk(Chunk_With_Children * parent, const
 
 	shape_data_store = (ChunkShape *) &shape_data;
 	
-	while ((data-buffer_ptr)< (signed)size) {
-
-		if ((*(int *)(data + 8)) + (data-buffer_ptr) > (signed)size) {
+	while ((data-buffer_ptr)< (signed)size) 
+	{
+		if ((*(int *)(data + 8)) + (data-buffer_ptr) > (signed)size) 
+		{
 			Parent_File->error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
 			break;
 		}
 
 		DynCreate(data);
 		data += *(int *)(data + 8);
-
 	}
 }
 
@@ -2064,9 +2040,7 @@ Shape_Sub_Shape_Chunk* Shape_Sub_Shape_Chunk::make_copy_of_chunk()
 
 Shape_Sub_Shape_Header_Chunk * Shape_Sub_Shape_Chunk::get_header()
 {
-	
 	return (Shape_Sub_Shape_Header_Chunk *) this->lookup_single_child ("SUBSHPHD");
-
 }
 
 BOOL Shape_Sub_Shape_Chunk::update_my_chunkshape (ChunkShape & cshp)
@@ -2100,7 +2074,6 @@ BOOL Shape_Sub_Shape_Chunk::update_my_chunkshape (ChunkShape & cshp)
 		chlst.delete_first_entry();
 	}
 
-
 	lookup_child ("SHPPOLYS",chlst);
 
 	while (chlst.size())
@@ -2109,7 +2082,6 @@ BOOL Shape_Sub_Shape_Chunk::update_my_chunkshape (ChunkShape & cshp)
 		chlst.delete_first_entry();
 	}
 
-
 	lookup_child ("SHPUVCRD",chlst);
 
 	while (chlst.size())
@@ -2117,7 +2089,6 @@ BOOL Shape_Sub_Shape_Chunk::update_my_chunkshape (ChunkShape & cshp)
 		delete chlst.first_entry();
 		chlst.delete_first_entry();
 	}
-
 
 	lookup_child ("SHPTEXFN",chlst);
 

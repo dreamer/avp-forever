@@ -1919,12 +1919,13 @@ StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int buff
 	waveFormat.cbSize			= sizeof(waveFormat);									//how big this structure is
 
 	// create streaming buffer description
-	DSSTREAMDESC streamDesc;
+	DSSTREAMDESC streamDesc = {0};
 	ZeroMemory(&streamDesc, sizeof(streamDesc));
 	streamDesc.dwMaxAttachedPackets		= numBuffers;
 	streamDesc.lpwfxFormat				= &waveFormat;
-	streamDesc.lpfnCallback = AudioStream_Callback;
-	streamDesc.lpvContext = newStreamingAudioBuffer;
+	streamDesc.lpfnCallback				= AudioStream_Callback;
+	streamDesc.lpvContext				= newStreamingAudioBuffer;
+	streamDesc.dwFlags					= DSSTREAMCAPS_ACCURATENOTIFY;
 
 	LastError = DirectSoundCreateStream(&streamDesc, &newStreamingAudioBuffer->dsStreamBuffer);
 	if (FAILED(LastError))
@@ -2000,7 +2001,20 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, uint8_t *audioData
 	// size in bytes divided by bits per sample (divided by 8 to get the bytes per sample) also dividded by the number of channels
 	streamStruct->totalSamplesWritten += ((size / streamStruct->bytesPerSample) / streamStruct->numChannels);
 
-//	OutputDebugString("wrote to audio buffer..\n");
+	DWORD status;
+	streamStruct->dsStreamBuffer->GetStatus(&status);
+
+	switch (status)
+	{
+		case DSSTREAMSTATUS_STARVED:
+		{
+			OutputDebugString("stream starved! restarting...\n");
+			streamStruct->dsStreamBuffer->Pause(DSSTREAMPAUSE_RESUME);
+			break;
+		}
+	}
+
+	OutputDebugString("wrote to audio buffer..\n");
 
 	return amountWritten;
 }

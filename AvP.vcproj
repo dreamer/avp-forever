@@ -10295,18 +10295,6 @@
 					>
 				</File>
 				<File
-					RelativePath="3dc\win95\Rad.h"
-					>
-				</File>
-				<File
-					RelativePath="3dc\avp\support\rebitems.hpp"
-					>
-				</File>
-				<File
-					RelativePath="3dc\avp\support\rebmenus.hpp"
-					>
-				</File>
-				<File
 					RelativePath="3dc\avp\support\reflist.hpp"
 					>
 				</File>

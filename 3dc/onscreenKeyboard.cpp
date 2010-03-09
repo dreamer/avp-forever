@@ -41,18 +41,6 @@
 	- xbox specific graphics to indicate press B to go back, A to select..
 */
 
-/*
-struct TextureResource
-{
-	std::string fileName;
-	int width;
-	int height;
-	D3DTEXTURE texture;
-};
-
-std::vector<TextureResource> oskTextures;
-*/
-
 extern "C"
 {
 	extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha);
@@ -87,12 +75,12 @@ static const int indent_space = 5;
 
 struct ButtonStruct
 {
-	int numWidthBlocks;
-	int height;
-	int width;
-	int positionOffset;
-	int stringId;
-	bool isBlank;
+	int		numWidthBlocks;
+	int		height;
+	int		width;
+	int		positionOffset;
+	int		stringId;
+	bool	isBlank;
 };
 std::vector<ButtonStruct> keyVector;
 
@@ -153,9 +141,6 @@ template <class T> void Osk_AddKey(T buttonLabel, int numWidthBlocks)
 
 void Osk_Init()
 {
-
-	return; // bjd - disabling for now
-
 	currentRow = 0;
 	currentColumn = 0;
 /*
@@ -223,8 +208,6 @@ void Osk_Init()
 
 void Osk_Draw()
 {
-	return; // bjd - disabling for now
-
 	if (!Osk_IsActive()) 
 		return;
 

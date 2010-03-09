@@ -110,8 +110,6 @@ Module_Waypoint_Chunk::Module_Waypoint_Chunk(Chunk_With_Children* parent,const c
 		{
 			AlienWaypoints=&Waypoints[0];
 		}
-
-		
 	}
 
 
@@ -133,7 +131,6 @@ Module_Waypoint_Chunk::Module_Waypoint_Chunk(Chunk_With_Children* parent)
 	
 	NumGroundWaypoints=0;
 	GroundWaypoints=0;
-
 
 	spare1=0;
 	spare2=0;	

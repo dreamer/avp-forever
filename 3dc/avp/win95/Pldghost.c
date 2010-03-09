@@ -25,6 +25,7 @@ d  ----------------------------------------------------------------------*/
 #include "bh_corpse.h"
 #include "bh_weap.h"
 #include "ShowCmds.h"
+#include "weapons.h"
 
 #define UseLocalAssert TRUE
 #include "ourasert.h"
@@ -39,7 +40,6 @@ d  ----------------------------------------------------------------------*/
   ----------------------------------------------------------------------*/
 extern int NormalFrameTime;
 extern int GlobalFrameCounter;
-//extern int cosine[], sine[];
 extern ACTIVESOUNDSAMPLE ActiveSounds[];
 extern DEATH_DATA Alien_Deaths[];
 extern HITLOCATIONTABLE *GetThisHitLocationTable(char *id);
@@ -67,6 +67,9 @@ void CreateAlienHModel(NETGHOSTDATABLOCK *ghostDataPtr,int alienType);
 void CreatePredatorHModel(NETGHOSTDATABLOCK *ghostDataPtr, int weapon);
 static void CalculatePosnForGhostAutoGunMuzzleFlash(STRATEGYBLOCK *sbPtr,VECTORCH *position, EULER *orientation);
 void UpdateAlienAIGhostAnimSequence(STRATEGYBLOCK *sbPtr,HMODEL_SEQUENCE_TYPES type, int subtype, int length, int tweeningtime);
+void MakePlasmaTrailParticles(DYNAMICSBLOCK *dynPtr, int number);
+void MakeGrenadeTrailParticles(VECTORCH *prevPositionPtr, VECTORCH *positionPtr);
+int ValidTargetForProxMine(STRATEGYBLOCK *obstaclePtr);
 
 /*-----------------------------------------------------------------------
   Functions...

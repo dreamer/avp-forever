@@ -224,9 +224,9 @@ typedef struct zspheader {
 typedef struct zspzone {
 
 	int zsp_numitems;
-	int **zsp_item_array_ptr;
-
 	int zsp_numpoints;
+
+	int **zsp_item_array_ptr;
 	int *zsp_vertex_array_ptr;
 
 } ZSPZONE;
@@ -598,10 +598,11 @@ typedef struct itemextension {
 typedef struct polyheader_ie {
 
 	int PolyItemType;
-	ITEMEXTENSION *PolyItemExtension;
+//	ITEMEXTENSION *PolyItemExtension;
 	int PolyFlags;
 	int PolyColour;
 	int Poly1stPt;
+	ITEMEXTENSION *PolyItemExtension;
 
 } POLYHEADER_IE;
 
@@ -841,7 +842,6 @@ typedef struct txanimheader {
 	int txa_flags;
 	int txa_state;
 	int txa_numframes;
-	struct txanimframe *txa_framedata;
 	int txa_currentframe;
 	int txa_maxframe;
 	int txa_speed;
@@ -850,6 +850,8 @@ typedef struct txanimheader {
 	int txa_num_mvs_images;	/* Multi-View Sprites - TOTAL number of images */
 	int txa_eulerxshift;		/* Multi-View Sprites, scale Euler X for index */
 	int txa_euleryshift;		/* As above, for Euler Y */
+
+	struct txanimframe *txa_framedata;
 
 } TXANIMHEADER;
 
