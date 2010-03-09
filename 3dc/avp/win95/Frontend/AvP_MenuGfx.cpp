@@ -740,37 +740,6 @@ extern void RenderHighlightRectangle(int x1, int y1, int x2, int y2, int r, int 
 {
 	// green rectangle highlight on load screen etc
 	D3D_Rectangle(x1, y1, x2, y2, r, g, b, 255);
-#if 0 
-	int x,y;
-	unsigned short c;
-
-	c =	((r>>3)<<11) |
-		((g>>2)<<5 ) |
-		((b>>3));
-
-	D3DInfo temp;
-
-	temp = GetD3DInfo();
-
-	D3DSURFACE_DESC surface_desc;
-	temp.lpD3DBackSurface->GetDesc(&surface_desc);
-
-	D3DLOCKED_RECT lock = {0,NULL};
-
-	temp.lpD3DBackSurface->LockRect(&lock, NULL, 0); if (lock.pBits == NULL) return;
-
-	for (y=y1; y<=y2; y++)
-	{
-		unsigned short *destPtr = (unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch) + x1;
-
-		for (x=x1; x<=x2; x++)
-		{
-			*destPtr |= c;
-			destPtr++;
-		}
-	}
-	temp.lpD3DBackSurface->UnlockRect();
-#endif
 }
 
 extern int RenderSmallChar(char c, int x, int y, int alpha, int red, int green, int blue)

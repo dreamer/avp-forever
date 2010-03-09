@@ -1466,6 +1466,58 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a) 
 {
+#if 1
+	float new_x1 = (float(x0 / 640.0f) * 2) - 1;
+	float new_y1 = (float(y0 / 480.0f) * 2) - 1;
+
+	float new_x2 = ((float(x1) / 640.0f) * 2) - 1;
+	float new_y2 = ((float(y1) / 480.0f) * 2) - 1;
+
+	// create a new list item for it
+	orthoList[orthoListCount].textureID = NO_TEXTURE;
+	orthoList[orthoListCount].vertStart = orthoOffset;
+	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
+	orthoList[orthoListCount].translucencyType = TRANSLUCENCY_GLOWING;
+	orthoListCount++;
+
+	// bottom left
+	orthoVerts[orthoOffset].x = new_x1;
+	orthoVerts[orthoOffset].y = new_y2;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
+	orthoVerts[orthoOffset].u = 0.0f;
+	orthoVerts[orthoOffset].v = 0.0f;
+
+	orthoOffset++;
+
+	// top left
+	orthoVerts[orthoOffset].x = new_x1;
+	orthoVerts[orthoOffset].y = new_y1;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
+	orthoVerts[orthoOffset].u = 0.0f;
+	orthoVerts[orthoOffset].v = 0.0f;
+	orthoOffset++;
+
+	// bottom right
+	orthoVerts[orthoOffset].x = new_x2;
+	orthoVerts[orthoOffset].y = new_y2;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
+	orthoVerts[orthoOffset].u = 0.0f;
+	orthoVerts[orthoOffset].v = 0.0f;
+	orthoOffset++;
+
+	// top right
+	orthoVerts[orthoOffset].x = new_x2;
+	orthoVerts[orthoOffset].y = new_y1;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
+	orthoVerts[orthoOffset].u = 0.0f;
+	orthoVerts[orthoOffset].v = 0.0f;
+
+	orthoOffset++;
+#else
 	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
 
 	if (mainMenu)
@@ -1533,6 +1585,7 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 
 	OUTPUT_TRIANGLE(0,1,2, 4);
 	OUTPUT_TRIANGLE(0,3,2, 4);
+#endif
 }
 
 void D3D_HUD_Setup(void)
@@ -1542,6 +1595,71 @@ void D3D_HUD_Setup(void)
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_LESSEQUAL);
 		D3DZFunc = D3DCMP_LESSEQUAL;
 	}
+}
+
+void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int uvArray[8], uint32_t colour)
+{
+	float x1 = (float(x / 640.0f) * 2) - 1;
+	float y1 = (float(y / 480.0f) * 2) - 1;
+
+	float x2 = ((float(x + width) / 640.0f) * 2) - 1;
+	float y2 = ((float(y + height) / 480.0f) * 2) - 1;
+
+	float RecipW, RecipH;
+
+	float texWidth = (float) ImageHeaderArray[textureID].ImageWidth;
+	RecipW = 1.0f / texWidth;
+
+	float texHeight = (float) ImageHeaderArray[textureID].ImageHeight;
+	RecipH = 1.0f / texHeight;
+
+	// create a new list item for it
+	orthoList[orthoListCount].textureID = textureID;
+	orthoList[orthoListCount].vertStart = orthoOffset;
+	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
+	orthoList[orthoListCount].translucencyType = TRANSLUCENCY_GLOWING;
+	orthoListCount++;
+
+	// bottom left
+	orthoVerts[orthoOffset].x = x1;
+	orthoVerts[orthoOffset].y = y2;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = uvArray[0] * RecipW;
+	orthoVerts[orthoOffset].v = uvArray[1] * RecipH;
+
+	orthoOffset++;
+
+	// top left
+	orthoVerts[orthoOffset].x = x1;
+	orthoVerts[orthoOffset].y = y1;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = uvArray[2] * RecipW;
+	orthoVerts[orthoOffset].v = uvArray[3] * RecipH;
+
+	orthoOffset++;
+
+	// bottom right
+	orthoVerts[orthoOffset].x = x2;
+	orthoVerts[orthoOffset].y = y2;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = uvArray[4] * RecipW;
+	orthoVerts[orthoOffset].v = uvArray[5] * RecipH;
+
+	orthoOffset++;
+
+	// top right
+	orthoVerts[orthoOffset].x = x2;
+	orthoVerts[orthoOffset].y = y1;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = uvArray[6] * RecipW;
+	orthoVerts[orthoOffset].v = uvArray[7] * RecipH;
+
+	orthoOffset++;
+
 }
 
 void D3D_HUDQuad_Output(int imageNumber, struct VertexTag *quadVerticesPtr, unsigned int colour)

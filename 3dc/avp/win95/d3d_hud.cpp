@@ -55,6 +55,7 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 
 void D3D_DrawHUDFontCharacter(HUDCharDesc *charDescPtr);
 void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr);
+extern void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int uvArray[8], uint32_t colour);
 
 extern void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2);
 /* HUD globals */
@@ -200,7 +201,7 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 	quadVertices[2].Y = imageDescPtr->TopLeftY + scaledHeight;
 	quadVertices[3].X = imageDescPtr->TopLeftX;
 	quadVertices[3].Y = imageDescPtr->TopLeftY + scaledHeight;
-		
+/*	
 	D3D_HUDQuad_Output
 	(
 		imageDescPtr->ImageNumber,
@@ -213,6 +214,7 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 			imageDescPtr->Translucency
 		)
 	);
+*/
 }
 
 
