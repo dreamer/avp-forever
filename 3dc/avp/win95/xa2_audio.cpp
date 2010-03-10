@@ -6,7 +6,6 @@
 #include "console.h"
 #include "logString.h"
 #include "configFile.h"
-
 #include "audioStreaming.h"
 #include <d3dx9math.h>
 
@@ -1984,21 +1983,22 @@ StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int buff
 		return NULL;
 
 	StreamingAudioBuffer *newStreamingAudioBuffer = new StreamingAudioBuffer;
-
 	memset(newStreamingAudioBuffer, 0, sizeof(StreamingAudioBuffer));
 
 	WAVEFORMATEX waveFormat;
 	ZeroMemory (&waveFormat, sizeof(waveFormat));
 	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
 	waveFormat.nChannels		= channels;
-	waveFormat.wBitsPerSample	= 16;					//we'll be using 16
+	waveFormat.wBitsPerSample	= 16;
 	waveFormat.nSamplesPerSec	= rate;
 	waveFormat.nBlockAlign		= waveFormat.nChannels * (waveFormat.wBitsPerSample / 8);	//what block boundaries exist
-	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
-	waveFormat.cbSize			= sizeof(waveFormat);	//how big this structure is
+	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;		//average bytes per second
+	waveFormat.cbSize			= sizeof(waveFormat);										//how big this structure is
+
+	newStreamingAudioBuffer->voiceContext = new StreamingVoiceContext;
 
 	// create the source voice for playing the sound
-	LastError = pXAudio2->CreateSourceVoice(&newStreamingAudioBuffer->pSourceVoice, &waveFormat);
+	LastError = pXAudio2->CreateSourceVoice(&newStreamingAudioBuffer->pSourceVoice, &waveFormat, 0, XAUDIO2_DEFAULT_FREQ_RATIO, newStreamingAudioBuffer->voiceContext);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -2175,6 +2175,11 @@ int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 	{
 		delete []streamStruct->buffers;
 		streamStruct->buffers = NULL;
+	}
+
+	if (streamStruct->voiceContext)
+	{
+		delete streamStruct->voiceContext;
 	}
 
 	streamStruct->bufferCount = 0;

@@ -12,7 +12,7 @@
 #define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
 #endif
 
-//#define VANILLA
+#define VANILLA
 
 unsigned int __stdcall decodeThread(void *args);
 unsigned int __stdcall audioThread(void *args);
@@ -390,8 +390,6 @@ bool TheoraFMV::NextFrame(int width, int height, uint8_t *bufferPtr, int pitch)
 	if (mFmvPlaying == false)
 		return false;
 
-	int startTime = timeGetTime();
-
 	// critical section
 	EnterCriticalSection(&mFrameCriticalSection);
 
@@ -440,7 +438,7 @@ bool TheoraFMV::NextFrame()
 	}
 
 	// critical section
-	EnterCriticalSection(&mFrameCriticalSection);
+//	EnterCriticalSection(&mFrameCriticalSection);
 
 	OggPlayYUVChannels oggYuv;
 	oggYuv.ptry = mYuvBuffer[0].data;
@@ -463,7 +461,7 @@ bool TheoraFMV::NextFrame()
 
 	oggplay_yuv2rgb(&oggYuv, &oggRgb);
 
-	LeaveCriticalSection(&mFrameCriticalSection);
+//	LeaveCriticalSection(&mFrameCriticalSection);
 
 	if (FAILED(mDisplayTexture->UnlockRect(0)))
 	{
@@ -725,14 +723,14 @@ unsigned int __stdcall decodeThread(void *args)
 					// if we can't fit all our data..
 					if (audioSize > freeSpace)
 					{
-						//while (audioSize > RingBuffer_GetWritableSpace())
 						while (audioSize > fmv->mRingBuffer->GetWritableSize())
 						{
 							// little bit of insurance in case we get stuck in here
 							if (!fmv->mFmvPlaying)
 								break;
 
-							Sleep(16);
+							// wait for the audio buffer to tell us it's just freed up another audio buffer for us to fill
+							WaitForSingleObject(fmv->mAudioStream->voiceContext->hBufferEndEvent, INFINITE );
 						}
 					}
 
@@ -834,8 +832,6 @@ unsigned int __stdcall audioThread(void *args)
 	_endthreadex(0);
 	return 0;
 }
-
-#define VANILLA
 
 /* Vanilla implementation if YUV->RGB conversion */
 void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb)
