@@ -678,7 +678,7 @@ BOOL EndD3DScene()
 	return TRUE;
 }
 
-void ChangeTexture(const int32_t textureID)
+static void ChangeTexture(const int32_t textureID)
 {
 	if (textureID == currentTextureID) 
 		return;
@@ -741,7 +741,7 @@ BOOL ExecuteBuffer()
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
-	LastError = d3d.lpD3DDevice->SetFVF (D3DFVF_TLVERTEX);
+	LastError = d3d.lpD3DDevice->SetFVF (/*D3DFVF_TLVERTEX*/D3DFVF_HARDWARETLVERTEX);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -752,6 +752,10 @@ BOOL ExecuteBuffer()
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
+
+	D3DXMATRIX matProjection;
+	D3DXMatrixPerspectiveFovLH( &matProjection, D3DX_PI / 2, FLOAT(ScreenDescriptorBlock.SDB_Width / ScreenDescriptorBlock.SDB_Height), 1.0f, 1000000.0f);
+	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matProjection );
 
 	ChangeTextureAddressMode(TEXTURE_WRAP);
 
@@ -846,6 +850,10 @@ BOOL ExecuteBuffer()
 		}
 
 		ChangeTextureAddressMode(TEXTURE_CLAMP);
+
+		D3DXMATRIX matOrtho;
+		D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
+		d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
 
 		// loop through list drawing the quads
 		for (size_t i = 0; i < orthoListCount; i++)
@@ -1170,24 +1178,11 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 	// properly cleared this time...
 	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-	if (ImageHeaderArray[texoffset].ImageWidth==128)
-	{
-		RecipW = 1.0f / 128;
-	}
-	else
-	{
-		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-		RecipW = 1.0f / width;
-	}
-	if (ImageHeaderArray[texoffset].ImageHeight==128)
-	{
-		RecipH = 1.0f / 128;
-	}
-	else
-	{
-		float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-		RecipH = 1.0f / height;
-	}
+	float width = (float) ImageHeaderArray[texoffset].ImageWidth;
+	RecipW = 1.0f / width;
+
+	float height = (float) ImageHeaderArray[texoffset].ImageHeight;
+	RecipH = 1.0f / height;
 
 	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, TRANSLUCENCY_OFF);
@@ -1236,8 +1231,11 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 	if (!texoffset) 
 		texoffset = currentTextureID;
 
-	RecipW = (1.0f/65536.0f)/(float) ImageHeaderArray[texoffset].ImageWidth;
-	RecipH = (1.0f/65536.0f)/(float) ImageHeaderArray[texoffset].ImageHeight;
+	float width = (float) ImageHeaderArray[texoffset].ImageWidth;
+	RecipW = (1.0f / width);// / 65536.0f;
+
+	float height = (float) ImageHeaderArray[texoffset].ImageHeight;
+	RecipH = (1.0f / height);// / 65536.0f;
 
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, RenderPolygon.TranslucencyMode);
 
@@ -1259,11 +1257,16 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 		// project into screen space
 		int x = (vertices->X * (Global_VDB_Ptr->VDB_ProjX + 1)) / vertices->Z + Global_VDB_Ptr->VDB_CentreX;
 		int y = (vertices->Y * (Global_VDB_Ptr->VDB_ProjY + 1)) / vertices->Z + Global_VDB_Ptr->VDB_CentreY;
-
+/*
 		mainVertex[vb].sx = (float)x;
 		mainVertex[vb].sy = (float)y;
 		mainVertex[vb].sz = zvalue;
 		mainVertex[vb].rhw = oneOverZ;
+*/
+		mainVertex[vb].sx = (float)vertices->X;
+		mainVertex[vb].sy = (float)-vertices->Y;
+		mainVertex[vb].sz = (float)vertices->Z;
+		mainVertex[vb].rhw = 1.0f;
 
 		extern unsigned char GammaValues[256];
 
@@ -1274,8 +1277,11 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 		mainVertex[vb].color = RGBALIGHT_MAKE(GammaValues[vertices->R],GammaValues[vertices->G],GammaValues[vertices->B],vertices->A);
 		mainVertex[vb].specular = RGBALIGHT_MAKE(GammaValues[vertices->SpecularR],GammaValues[vertices->SpecularG],GammaValues[vertices->SpecularB],255);
 
-		mainVertex[vb].tu = ((float)vertices->U) * RecipW + (1.0f/256.0f);
-		mainVertex[vb].tv = ((float)vertices->V) * RecipH + (1.0f/256.0f);
+//		mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
+//		mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
+
+		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
+		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
 
 		vb++;
 	}
@@ -1310,16 +1316,20 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 		float rhw = 1.0f/(float)vertices->Z;
 
 		int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-		mainVertex[vb].sx = (float)x;
-
 		int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-		mainVertex[vb].sy = (float)y;
 
 		zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
 		zvalue = 1.0f - Zoffset * ZNear/zvalue;
-
+/*
+		mainVertex[vb].sx = (float)x;
+		mainVertex[vb].sy = (float)y;
 		mainVertex[vb].sz = zvalue;
 		mainVertex[vb].rhw = rhw;
+*/
+		mainVertex[vb].sx = (float)vertices->X;
+		mainVertex[vb].sy = (float)-vertices->Y;
+		mainVertex[vb].sz = (float)vertices->Z;
+		mainVertex[vb].rhw = 1.0f;
 
 		if (flags & iflag_transparent)
 		{
@@ -1403,24 +1413,11 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 	// properly cleared this time...
 	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-	if (ImageHeaderArray[texoffset].ImageWidth == 128)
-	{
-		RecipW = (1.0 / 128.0);
-	}
-	else
-	{
-		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-		RecipW = (1.0f / width);
-	}
-	if (ImageHeaderArray[texoffset].ImageHeight == 128)
-	{
-		RecipH = (1.0f / 128.0);
-	}
-	else
-	{
-		float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-		RecipH = (1.0f / height);
-	}
+	float width = (float) ImageHeaderArray[texoffset].ImageWidth;
+	RecipW = (1.0f / width);
+
+	float height = (float) ImageHeaderArray[texoffset].ImageHeight;
+	RecipH = (1.0f / height);
 
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, TRANSLUCENCY_NORMAL);
 
@@ -1433,16 +1430,21 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 		float zvalue;
 
 		int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-		mainVertex[vb].sx = (float)x;
-
 		int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-		mainVertex[vb].sy = (float)y;
-
+	
 		zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
 		zvalue= 1.0f - Zoffset * ZNear/zvalue;
-
+/*
+		mainVertex[vb].sx = (float)x;
+		mainVertex[vb].sy = (float)y;
 		mainVertex[vb].sz = zvalue;
 		mainVertex[vb].rhw = oneOverZ;
+*/
+
+		mainVertex[vb].sx = (float)vertices->X;
+		mainVertex[vb].sy = (float)-vertices->Y;
+		mainVertex[vb].sz = (float)vertices->Z;
+		mainVertex[vb].rhw = 1.0f;
 
 		if (CloakedPredatorIsMoving)
 		{
@@ -1452,7 +1454,7 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 		{
 	   		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
 		}
-//		   	mainVertex[vb].specular=RGBALIGHT_MAKE(vertices->SpecularR,vertices->SpecularG,vertices->SpecularB,255);
+
 		mainVertex[vb].specular=RGBALIGHT_MAKE(0,0,0,255);
 
 		mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
@@ -1592,18 +1594,21 @@ void D3D_HUD_Setup(void)
 {
 	if (D3DZFunc != D3DCMP_LESSEQUAL) 
 	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_LESSEQUAL);
+		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 		D3DZFunc = D3DCMP_LESSEQUAL;
 	}
 }
 
-void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int uvArray[8], uint32_t colour)
+void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int *uvArray, uint32_t colour)
 {
-	float x1 = (float(x / 640.0f) * 2) - 1;
-	float y1 = (float(y / 480.0f) * 2) - 1;
+	int newWidth = ScreenDescriptorBlock.SDB_Width;
+	int newHeight = ScreenDescriptorBlock.SDB_Height;
 
-	float x2 = ((float(x + width) / 640.0f) * 2) - 1;
-	float y2 = ((float(y + height) / 480.0f) * 2) - 1;
+	float x1 = (float(x / (float)newWidth) * 2) - 1;
+	float y1 = (float(y / (float)newHeight) * 2) - 1;
+
+	float x2 = ((float(x + width) / (float)newWidth) * 2) - 1;
+	float y2 = ((float(y + height) / (float)newHeight) * 2) - 1;
 
 	float RecipW, RecipH;
 
@@ -1677,6 +1682,7 @@ void D3D_HUDQuad_Output(int imageNumber, struct VertexTag *quadVerticesPtr, unsi
 	for (int i = 0; i < 4; i++ ) 
 	{
 //		textprint("x %d, y %d, u %d, v %d\n",quadVerticesPtr->X,quadVerticesPtr->Y,quadVerticesPtr->U,quadVerticesPtr->V);
+
 		mainVertex[vb].sx = (float)quadVerticesPtr->X;
 		mainVertex[vb].sy = (float)quadVerticesPtr->Y;
 		mainVertex[vb].sz = 0.0f;
@@ -1685,6 +1691,7 @@ void D3D_HUDQuad_Output(int imageNumber, struct VertexTag *quadVerticesPtr, unsi
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 		mainVertex[vb].tu = ((float)(quadVerticesPtr->U)) * RecipW;
 		mainVertex[vb].tv = ((float)(quadVerticesPtr->V)) * RecipH;
+
 		quadVerticesPtr++;
 		vb++;
 	}
@@ -1927,24 +1934,11 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 	{
 		texoffset = SpecialFXImageNumber;
 
-		if (ImageHeaderArray[texoffset].ImageWidth == 256)
-		{
-			RecipW = 1.0f / 256.0;
-		}
-		else
-		{
-			float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-			RecipW = 1.0f / width;
-		}
-		if (ImageHeaderArray[texoffset].ImageHeight == 256)
-		{
-			RecipH = 1.0f / 256.0;
-		}
-		else
-		{
-			float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-			RecipH = 1.0f / height;
-		}
+		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
+		RecipW = 1.0f / width;
+
+		float height = (float) ImageHeaderArray[texoffset].ImageHeight;
+		RecipH = 1.0f / height;
 
 		textureID = texoffset;
 	}
@@ -1995,16 +1989,21 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 			float zvalue;
 
 			int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-			mainVertex[vb].sx = (float)x;
-			
 			int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-			mainVertex[vb].sy = (float)y;
 
 			zvalue = (float)((vertices->Z)+HeadUpDisplayZOffset-50);
 			zvalue = 1.0f - Zoffset * ZNear/zvalue;
-
+/*
+			mainVertex[vb].sx = (float)x;
+			mainVertex[vb].sy = (float)y;
 			mainVertex[vb].sz = zvalue;
 			mainVertex[vb].rhw = oneOverZ;
+*/
+			mainVertex[vb].sx = (float)vertices->X;
+			mainVertex[vb].sy = (float)-vertices->Y;
+			mainVertex[vb].sz = (float)vertices->Z;
+			mainVertex[vb].rhw = 1.0f;
+
 			mainVertex[vb].color = colour;
 			mainVertex[vb].specular = specular;//RGBALIGHT_MAKE(vertices->SpecularR,vertices->SpecularG,vertices->SpecularB,fog);
 
@@ -2042,24 +2041,11 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 	float RecipW, RecipH;
 
-	if (ImageHeaderArray[texoffset].ImageWidth == 256)
-	{
-		RecipW = (1.0f / 256.0);
-	}
-	else
-	{
-		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-		RecipW = (1.0f / width);
-	}
-	if (ImageHeaderArray[texoffset].ImageHeight == 256)
-	{
-		RecipH = 1.0f / 256.0;
-	}
-	else
-	{
-		float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-		RecipH = (1.0f / height);
-	}
+	float width = (float) ImageHeaderArray[texoffset].ImageWidth;
+	RecipW = (1.0f / width);
+
+	float height = (float) ImageHeaderArray[texoffset].ImageHeight;
+	RecipH = (1.0f / height);
 
 	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, particleDescPtr->TranslucencyType);
@@ -2120,11 +2106,8 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 				float zvalue;
 
 				int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-				mainVertex[vb].sx = (float)x;
-
 				int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-				mainVertex[vb].sy = (float)y;
-
+				
 				if (particleDescPtr->IsDrawnInFront)
 				{
 					zvalue = 0.0f;
@@ -2138,9 +2121,16 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 					//zvalue = 1.0f - ZNear*oneOverZ;
 					zvalue = 1.0f - Zoffset * ZNear/vertices->Z;
 				}
-
+/*
+				mainVertex[vb].sx = (float)x;
+				mainVertex[vb].sy = (float)y;
 				mainVertex[vb].sz = zvalue;
 				mainVertex[vb].rhw = oneOverZ;
+*/
+				mainVertex[vb].sx = (float)vertices->X;
+				mainVertex[vb].sy = (float)-vertices->Y;
+				mainVertex[vb].sz = (float)vertices->Z;
+				mainVertex[vb].rhw = 1.0f;
 
 				mainVertex[vb].color = colour;
 	 			mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);//RGBALIGHT_MAKE(vertices->SpecularR,vertices->SpecularG,vertices->SpecularB,fog);
@@ -3147,7 +3137,6 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
     // Get ZNear
 	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
 
-
 	// Take header information
 	flags = inputPolyPtr->PolyFlags;
 
@@ -3155,24 +3144,11 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 	// properly cleared this time...
 	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-	if (ImageHeaderArray[texoffset].ImageWidth == 128)
-	{
-		RecipW = (1.0f /128.0f) / 65536.0f;
-	}
-	else
-	{
-		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-		RecipW = (1.0f / width) / 65536.0f;
-	}
-	if (ImageHeaderArray[texoffset].ImageHeight == 128)
-	{
-		RecipH = (1.0f / 128.0f) / 65536.0f;
-	}
-	else
-	{
-		float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-		RecipH = (1.0f / height) / 65536.0f;
-	}
+	float width = (float) ImageHeaderArray[texoffset].ImageWidth;
+	RecipW = (1.0f / width);// / 65536.0f;
+
+	float height = (float) ImageHeaderArray[texoffset].ImageHeight;
+	RecipH = (1.0f / height);// / 65536.0f;
 
 	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, RenderPolygon.TranslucencyMode);
@@ -3189,18 +3165,27 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 	   	zvalue = 1.0f - ZNear/zvalue;
 
 		int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-		mainVertex[vb].sx = (float)x;
-
 		int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
+/*
+		mainVertex[vb].sx = (float)x;
 		mainVertex[vb].sy = (float)y;
-
 		mainVertex[vb].sz = 1.0f;
 		mainVertex[vb].rhw = oneOverZ;
-  		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
-		mainVertex[vb].specular=RGBALIGHT_MAKE(0,0,0,255);
+*/
 
-		mainVertex[vb].tu = ((float)vertices->U) * RecipW + (1.0f / 256.0f);
-		mainVertex[vb].tv = ((float)vertices->V) * RecipH + (1.0f / 256.0f);
+		mainVertex[vb].sx = (float)vertices->X;
+		mainVertex[vb].sy = (float)-vertices->Y;
+		mainVertex[vb].sz = 1.0f;
+		mainVertex[vb].rhw = 1.0f;
+
+  		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+
+//		mainVertex[vb].tu = ((float)vertices->U) * RecipW + (1.0f / 256.0f);
+//		mainVertex[vb].tv = ((float)vertices->V) * RecipH + (1.0f / 256.0f);
+
+		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
+		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
 
 		vb++;
 	}
@@ -4385,12 +4370,42 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 			quadVertices[1].X = x + w;
 			quadVertices[2].X = x + w;
 
+			int uvArray[8];
+
+			// bottom left
+			uvArray[0] = topLeftU;
+			uvArray[1] = topLeftV + HUD_DIGITAL_NUMBERS_HEIGHT;
+
+			// top left
+			uvArray[2] = topLeftU;
+			uvArray[3] = topLeftV;
+
+			// bottom right
+			uvArray[4] = topLeftU + HUD_DIGITAL_NUMBERS_WIDTH;
+			uvArray[5] = topLeftV + HUD_DIGITAL_NUMBERS_HEIGHT;
+
+			// top right
+			uvArray[6] = topLeftU + HUD_DIGITAL_NUMBERS_WIDTH;
+			uvArray[7] = topLeftV;
+
+			New_D3D_HUDQuad_Output
+			(
+				HUDFontsImageNumber,
+				x,
+				y,
+				w,
+				h,
+				uvArray,
+				colour
+			);
+/*
 			D3D_HUDQuad_Output
 			(
 				HUDFontsImageNumber,
 				quadVertices,
 				colour
 			);
+*/
 		}
 	}
 	while(--noOfDigits);
@@ -4432,13 +4447,44 @@ extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour)
 			quadVertices[3].X = x - 1;
 			quadVertices[1].X = x + HUD_FONT_WIDTH + 1;
 			quadVertices[2].X = x + HUD_FONT_WIDTH + 1;
-				
+
+			int uvArray[8];
+
+			// bottom left
+			uvArray[0] = topLeftU;
+			uvArray[1] = topLeftV + HUD_FONT_HEIGHT;
+
+			// top left
+			uvArray[2] = topLeftU;
+			uvArray[3] = topLeftV;
+
+			// bottom right
+			uvArray[4] = topLeftU + HUD_FONT_WIDTH;
+			uvArray[5] = topLeftV + HUD_FONT_HEIGHT;
+
+			// top right
+			uvArray[6] = topLeftU + HUD_FONT_WIDTH;
+			uvArray[7] = topLeftV;
+
+			New_D3D_HUDQuad_Output
+			(
+				AAFontImageNumber,
+				x,
+				y,
+				HUD_FONT_WIDTH,
+				HUD_FONT_HEIGHT,
+				uvArray,
+				colour
+			);
+
+/*			
 			D3D_HUDQuad_Output
 			(
 				AAFontImageNumber,
 				quadVertices,
 				colour
 			);
+*/
 		}
 		x += AAFontWidths[(unsigned char)c];
 	}
@@ -4819,6 +4865,79 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_textu
 	}
 }
 
+void DrawHUDQuad(int x, int y, int width, int height, float *UVList, int textureID, int colour, enum TRANSLUCENCY_TYPE translucencyType)
+{
+	if (!UVList)
+		return;
+
+	float x1 = (float(x / 640.0f) * 2) - 1;
+	float y1 = (float(y / 480.0f) * 2) - 1;
+
+	float x2 = ((float(x + width) / 640.0f) * 2) - 1;
+	float y2 = ((float(y + height) / 480.0f) * 2) - 1;
+
+	int texturePOW2Width, texturePOW2Height;
+	
+	// if in menus (outside game)
+	if (mainMenu)
+	{
+		texturePOW2Width = AvPMenuGfxStorage[textureID].newWidth;
+		texturePOW2Height = AvPMenuGfxStorage[textureID].newHeight;
+	}
+	else
+	{
+		texturePOW2Width = ImageHeaderArray[textureID].ImageWidth;
+		texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
+	}
+
+	// create a new list item for it
+	orthoList[orthoListCount].textureID = textureID;
+	orthoList[orthoListCount].vertStart = orthoOffset;
+	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
+	orthoList[orthoListCount].translucencyType = translucencyType;
+	orthoListCount++;
+
+	// bottom left
+	orthoVerts[orthoOffset].x = x1;
+	orthoVerts[orthoOffset].y = y2;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = 0.0f;
+	orthoVerts[orthoOffset].v = (1.0f / texturePOW2Height) * height;
+
+	orthoOffset++;
+
+	// top left
+	orthoVerts[orthoOffset].x = x1;
+	orthoVerts[orthoOffset].y = y1;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = 0.0f;
+	orthoVerts[orthoOffset].v = 0.0f;
+
+	orthoOffset++;
+
+	// bottom right
+	orthoVerts[orthoOffset].x = x2;
+	orthoVerts[orthoOffset].y = y2;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVerts[orthoOffset].v = (1.0f / texturePOW2Height) * height;
+
+	orthoOffset++;
+
+	// top right
+	orthoVerts[orthoOffset].x = x2;
+	orthoVerts[orthoOffset].y = y1;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVerts[orthoOffset].v = 0.0f;
+
+	orthoOffset++;
+}
+
 void DrawQuad(int x, int y, int width, int height, int textureID, int colour, enum TRANSLUCENCY_TYPE translucencyType)
 {
 	float x1 = (float(x / 640.0f) * 2) - 1;
@@ -4909,7 +5028,7 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 	DrawQuad(topX, topY, textureWidth, textureHeight, image_num, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
 
 	return;
-
+/*
 	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 
 	// game used to render menus at 640x480. this allows us to use any resolution we want
@@ -4969,6 +5088,7 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 
 	OUTPUT_TRIANGLE(0,1,2, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
+*/
 }
 
 void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)

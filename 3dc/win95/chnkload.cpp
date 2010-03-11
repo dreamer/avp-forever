@@ -785,10 +785,9 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk * tmpshp, int fla
 	if (pChunk) 
 	{
 		seflc = (Shape_External_File_Chunk *)pChunk;
-		char buf[100];
+
 		rif_name = seflc->get_shape_name();
-		sprintf(buf, "\t rif_name: %s\n", rif_name.c_str());
-		OutputDebugString(buf);
+
 		msl_shapes.add_entry(new ShapeInMSL(mainshapelist[list_pos],rif_name,list_pos));
 	}
 	else
@@ -1275,7 +1274,7 @@ BOOL copy_rif_tlt (RIFFHANDLE h, int /*flags*/)
 				tltch->table
 			){
 				TextureLightingTable = (unsigned char*)AllocateMem(tltch->width * tltch->num_levels);
-				memcpy(TextureLightingTable,tltch->table,tltch->width*tltch->num_levels);
+				memcpy(TextureLightingTable, tltch->table, tltch->width*tltch->num_levels);
 				if (ScreenDescriptorBlock.SDB_Flags & SDB_Flag_TLTPalette)
 				{
 					ScreenDescriptorBlock.SDB_Flags &= ~(SDB_Flag_TLTSize|SDB_Flag_TLTShift);
@@ -1834,7 +1833,7 @@ void SetupAnimOnTriangle(SHAPEHEADER* shp, TEXANIM* ta, int poly, int *local_tex
 				tf->txf_image=local_tex_index_nos[fl->Textures[0]];
 				for(int k=0;k<6;k++)
 				{
-					tf->txf_uvdata[k]=fl->UVCoords[k]<<16;
+					tf->txf_uvdata[k]=fl->UVCoords[k];
 				}	
 			}
 			else
@@ -1842,7 +1841,7 @@ void SetupAnimOnTriangle(SHAPEHEADER* shp, TEXANIM* ta, int poly, int *local_tex
 				tf->txf_image = local_tex_index_nos[fl->Textures[j]];
 				for(int k=0;k<6;k++)
 				{
-					tf->txf_uvdata[k]=fl->UVCoords[j*6+k]<<16;
+					tf->txf_uvdata[k]=fl->UVCoords[j*6+k];
 				}	
 			}
 		}
@@ -1926,23 +1925,22 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 				tf->txf_image=local_tex_index_nos[fl1->Textures[0]];
 				for(int k=0;k<3;k++)
 				{
-					tf->txf_uvdata[VertConv[k]*2]=fl1->UVCoords[k*2]<<16;
-					tf->txf_uvdata[VertConv[k]*2+1]=fl1->UVCoords[k*2+1]<<16;
+					tf->txf_uvdata[VertConv[k]*2]=fl1->UVCoords[k*2];
+					tf->txf_uvdata[VertConv[k]*2+1]=fl1->UVCoords[k*2+1];
 				}
-				tf->txf_uvdata[VertTo*2]=fl2->UVCoords[VertFrom*2]<<16;
-				tf->txf_uvdata[VertTo*2+1]=fl2->UVCoords[VertFrom*2+1]<<16;
-					
+				tf->txf_uvdata[VertTo*2]=fl2->UVCoords[VertFrom*2];
+				tf->txf_uvdata[VertTo*2+1]=fl2->UVCoords[VertFrom*2+1];
 			}
 			else
 			{
 				tf->txf_image=local_tex_index_nos[fl1->Textures[j]];
 				for(int k=0;k<3;k++)
 				{
-					tf->txf_uvdata[VertConv[k]*2]=fl1->UVCoords[j*6+k*2]<<16;
-					tf->txf_uvdata[VertConv[k]*2+1]=fl1->UVCoords[j*6+k*2+1]<<16;
+					tf->txf_uvdata[VertConv[k]*2]=fl1->UVCoords[j*6+k*2];
+					tf->txf_uvdata[VertConv[k]*2+1]=fl1->UVCoords[j*6+k*2+1];
 				}	
-				tf->txf_uvdata[VertTo*2]=fl2->UVCoords[j*6+VertFrom*2]<<16;
-				tf->txf_uvdata[VertTo*2+1]=fl2->UVCoords[j*6+VertFrom*2+1]<<16;
+				tf->txf_uvdata[VertTo*2]=fl2->UVCoords[j*6+VertFrom*2];
+				tf->txf_uvdata[VertTo*2+1]=fl2->UVCoords[j*6+VertFrom*2+1];
 			}
 		}
 	}
@@ -2767,7 +2765,7 @@ BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Heade
 		}
 
 		th->txa_framedata=(txanimframe*)PoolAllocateMem(th->txa_numframes*sizeof(txanimframe_mvs));
-		
+
 		txanimframe_mvs* tf;
 		for(j=0;j<th->txa_numframes;j++)
 		{
@@ -2816,12 +2814,11 @@ BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Heade
 					{
 						for(int l=0;l<4;l++)
 						{
-							tf->txf_uvdata[pos][l*2]=ProcessUVCoord(h,UVC_SPRITE_U,f->UVCoords[3-l][0]<<16,BmpConv[f->Texture]);
-							tf->txf_uvdata[pos][l*2+1]=ProcessUVCoord(h,UVC_SPRITE_V,f->UVCoords[3-l][1]<<16,BmpConv[f->Texture]);
-							tf->txf_uvdata[pos2][l*2]=ProcessUVCoord(h,UVC_SPRITE_U,f->UVCoords[3-l][0]<<16,BmpConv[f->Texture]);
-							tf->txf_uvdata[pos2][l*2+1]=ProcessUVCoord(h,UVC_SPRITE_V,f->UVCoords[3-l][1]<<16,BmpConv[f->Texture]);
-							
-							
+							tf->txf_uvdata[pos][l*2]=ProcessUVCoord(h,UVC_SPRITE_U,f->UVCoords[3-l][0],BmpConv[f->Texture]);
+							tf->txf_uvdata[pos][l*2+1]=ProcessUVCoord(h,UVC_SPRITE_V,f->UVCoords[3-l][1],BmpConv[f->Texture]);
+							tf->txf_uvdata[pos2][l*2]=ProcessUVCoord(h,UVC_SPRITE_U,f->UVCoords[3-l][0],BmpConv[f->Texture]);
+							tf->txf_uvdata[pos2][l*2+1]=ProcessUVCoord(h,UVC_SPRITE_V,f->UVCoords[3-l][1],BmpConv[f->Texture]);
+
 							tf->txf_uvdata[pos][l*2+8]=(int)(-(f->UVCoords[3-l][0]-f->CentreX)*bmpscale*GlobalScale);
 						   	tf->txf_uvdata[pos][l*2+9]=(int)((f->UVCoords[3-l][1]-f->CentreY)*bmpscale*GlobalScale);
 							tf->txf_uvdata[pos2][l*2+8]=(int)(-(f->UVCoords[3-l][0]-f->CentreX)*bmpscale*GlobalScale);
@@ -2832,10 +2829,10 @@ BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Heade
 					{
 						for(int l=0;l<4;l++)
 						{
-							tf->txf_uvdata[pos][l*2]=ProcessUVCoord(h,UVC_SPRITE_U,f->UVCoords[l][0]<<16,BmpConv[f->Texture]);
-							tf->txf_uvdata[pos][l*2+1]=ProcessUVCoord(h,UVC_SPRITE_V,f->UVCoords[l][1]<<16,BmpConv[f->Texture]);
-							tf->txf_uvdata[pos2][l*2]=ProcessUVCoord(h,UVC_SPRITE_U,f->UVCoords[l][0]<<16,BmpConv[f->Texture]);
-							tf->txf_uvdata[pos2][l*2+1]=ProcessUVCoord(h,UVC_SPRITE_V,f->UVCoords[l][1]<<16,BmpConv[f->Texture]);
+							tf->txf_uvdata[pos][l*2]=ProcessUVCoord(h,UVC_SPRITE_U,f->UVCoords[l][0],BmpConv[f->Texture]);
+							tf->txf_uvdata[pos][l*2+1]=ProcessUVCoord(h,UVC_SPRITE_V,f->UVCoords[l][1],BmpConv[f->Texture]);
+							tf->txf_uvdata[pos2][l*2]=ProcessUVCoord(h,UVC_SPRITE_U,f->UVCoords[l][0],BmpConv[f->Texture]);
+							tf->txf_uvdata[pos2][l*2+1]=ProcessUVCoord(h,UVC_SPRITE_V,f->UVCoords[l][1],BmpConv[f->Texture]);
 							
 							
 							tf->txf_uvdata[pos][l*2+8]=(int)((f->UVCoords[l][0]-f->CentreX)*bmpscale*GlobalScale);

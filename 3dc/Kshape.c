@@ -138,9 +138,6 @@ void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerti
 void DrawWaterFallPoly(VECTORCH *v);
 void RenderAllParticlesFurtherAwayThan(int zThreshold);
 
-//extern int sine[];
-//extern int cosine[];
-
 /*KJL************************************************************************************
 * N.B. All the following global variables have their first elements initialised so that *
 * they will end up in high memory on the Saturn.                                        *
@@ -170,10 +167,10 @@ static COLOURINTENSITIES ColourIntensityArray[maxrotpts];
 
 
 RENDERPOLYGON RenderPolygon;//={1,};
-RENDERVERTEX VerticesBuffer[9]={1,};
-static RENDERVERTEX TriangleVerticesBuffer[3]={1,};
+RENDERVERTEX VerticesBuffer[9];//={1,};
+static RENDERVERTEX TriangleVerticesBuffer[3];//={1,};
 
-static int *VertexNumberPtr=(int*)1;
+static int *VertexNumberPtr = (int*)1;
 
 extern struct KItem KItemList[maxpolyptrs];
 extern int *MorphedObjectPointsPtr;
@@ -333,12 +330,12 @@ void ChooseLightingModel(DISPLAYBLOCK *dispPtr)
 **********************************************************************************KJL*/
 void ShapePipeline(SHAPEHEADER *shapePtr)
 {
-	int numitems= shapePtr->numitems;
+	int numitems = shapePtr->numitems;
 	int **itemArrayPtr = shapePtr->items;
 
 	LOCALASSERT(numitems);
 	
-	switch(CurrentVisionMode)
+	switch (CurrentVisionMode)
 	{
 		case VISION_MODE_PRED_THERMAL:
 		{
@@ -353,7 +350,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 		case VISION_MODE_PRED_SEEALIENS:
 		{
 			STRATEGYBLOCK *sbPtr = Global_ODB_Ptr->ObStrategyBlock;
-		 	if(sbPtr)
+		 	if (sbPtr)
 		 	{
 				int useVision=0;
 		 		switch (sbPtr->I_SBtype)
@@ -365,7 +362,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 					case I_BehaviourPredatorAlien:
 					case I_BehaviourXenoborg:
 					{
-						useVision=1;
+						useVision = 1;
 						break;
 					}
 					case I_BehaviourMarine:
@@ -375,7 +372,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						
 						if (marineStatusPointer->Android)
 						{
-							useVision=1;
+							useVision = 1;
 						}
 						break;
 					}
@@ -387,7 +384,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						if (ghostDataPtr->type==I_BehaviourAlienPlayer || ghostDataPtr->type==I_BehaviourAlien
 						 	|| (ghostDataPtr->type==I_BehaviourNetCorpse&&ghostDataPtr->subtype==I_BehaviourAlienPlayer) )
 						{	
-							useVision=1;
+							useVision = 1;
 						}
 						break;
 					}
@@ -397,7 +394,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						NETCORPSEDATABLOCK *corpseDataPtr = (NETCORPSEDATABLOCK *)sbPtr->SBdataptr;
 						if (corpseDataPtr->Android || corpseDataPtr->Type==I_BehaviourAlienPlayer || corpseDataPtr->Type==I_BehaviourAlien)
 						{
-							useVision=1;
+							useVision = 1;
 						}
 						break;
 					}
@@ -410,7 +407,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						  ||debrisDataPtr->Type==I_BehaviourAutoGun
 						  ||debrisDataPtr->Android)
 						{
-							useVision=1;
+							useVision = 1;
 						}
 						break;
 					}
@@ -422,7 +419,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						  ||spearDataPtr->Type==I_BehaviourPredatorAlien
 						  ||spearDataPtr->Type==I_BehaviourAutoGun)
 						{
-							useVision=1;
+							useVision = 1;
 						}	
 						break;
 					}
@@ -441,9 +438,9 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 		case VISION_MODE_PRED_SEEPREDTECH:
 		{
 			STRATEGYBLOCK *sbPtr = Global_ODB_Ptr->ObStrategyBlock;
-		 	if(sbPtr)
+		 	if (sbPtr)
 		 	{
-				int useVision=0;
+				int useVision = 0;
 		 		switch (sbPtr->I_SBtype)
 				{
 			 		case I_BehaviourPredator:
@@ -551,21 +548,21 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 	TestVerticesWithFrustrum();
 
 	/* interesting hack for predator cloaking */
-  	if(Global_ODB_Ptr->ObStrategyBlock)
+  	if (Global_ODB_Ptr->ObStrategyBlock)
 	{
 		PRED_CLOAKSTATE cloakingStatus =  PCLOAK_Off;
 
-	 	if(Global_ODB_Ptr->ObStrategyBlock->I_SBtype == I_BehaviourNetGhost)
+	 	if (Global_ODB_Ptr->ObStrategyBlock->I_SBtype == I_BehaviourNetGhost)
 		{
    			NETGHOSTDATABLOCK *ghostData = (NETGHOSTDATABLOCK *)Global_ODB_Ptr->ObStrategyBlock->SBdataptr;
 		
-			if(ghostData->CloakingEffectiveness)
+			if (ghostData->CloakingEffectiveness)
 			{
 				cloakingStatus = PCLOAK_On;
 				CloakingMode = ONE_FIXED*5/4-ghostData->CloakingEffectiveness;
 			}
 		}
-	 	if(Global_ODB_Ptr->ObStrategyBlock->I_SBtype == I_BehaviourPredator)
+	 	if (Global_ODB_Ptr->ObStrategyBlock->I_SBtype == I_BehaviourPredator)
 		{
    			PREDATOR_STATUS_BLOCK *predData = (PREDATOR_STATUS_BLOCK *)Global_ODB_Ptr->ObStrategyBlock->SBdataptr;
 		
@@ -582,21 +579,12 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 			{
 				POLYHEADER *polyPtr = (POLYHEADER*) (*itemArrayPtr++);
 				int pif;
-				#if 0
-				if (objectCompletelyInView)
-				{
-					pif = PolygonShouldBeDrawn(polyPtr);
-				}
-				else
-				{
-					pif = PolygonWithinFrustrum(polyPtr);
-				}
-				#else
+
 				pif = PolygonWithinFrustrum(polyPtr);
-				#endif
-				if(pif)
+
+				if (pif)
 				{		 
-					switch(polyPtr->PolyItemType)
+					switch (polyPtr->PolyItemType)
 					{
 						case I_ZB_Gouraud3dTexturedPolygon:
 						case I_ZB_Gouraud2dTexturedPolygon:
@@ -1418,8 +1406,8 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 				renderVerticesPtr->Z = vertexPtr->vz;
 			}
 			#endif															
-			renderVerticesPtr->U = texture_defn_ptr[0] << 16;
-			renderVerticesPtr->V = texture_defn_ptr[1] << 16;
+			renderVerticesPtr->U = texture_defn_ptr[0];// << 16;
+			renderVerticesPtr->V = texture_defn_ptr[1];// << 16;
 
 			if( (Global_ODB_Ptr->SpecialFXFlags & SFXFLAG_MELTINGINTOGROUND)
 			  &&(Global_ODB_Ptr->ObFlags2 < ONE_FIXED) )	
@@ -2931,10 +2919,10 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 
 	iptr = uv_array;
 
-	if(txah->txa_flags & txa_flag_interpolate_uvs) {
-
-		for(i = txaf0->txf_numuvs; i!=0; i--) {
-
+	if (txah->txa_flags & txa_flag_interpolate_uvs) 
+	{
+		for (i = txaf0->txf_numuvs; i!=0; i--)
+		{
 			iptr[0] = MUL_FIXED(txaf0_uv[0], OneMinusAlpha)
 							+ MUL_FIXED(txaf1_uv[0], Alpha);
 
@@ -2948,11 +2936,10 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 			iptr += 2;
 		}
 	}
-
-	else {
-
-		for(i = txaf0->txf_numuvs; i!=0; i--) {
-
+	else 
+	{
+		for (i = txaf0->txf_numuvs; i!=0; i--)
+		{
 			iptr[0] = txaf0_uv[0];
 			iptr[1] = txaf0_uv[1];
 
@@ -2963,24 +2950,23 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 		}
 	}
 
-
 	/* Interpolate Orient and Scale */
 
 	o1 = txaf0->txf_orient;
 	o2 = txaf1->txf_orient;
 
-	if(o1 == o2) {
-
+	if (o1 == o2) 
+	{
 		Orient = o1;
 	}
-
-	else {
-
+	else 
+	{
 		od = o1 - o2;
-		if(od < 0) od = -od;
+		if (od < 0) 
+			od = -od;
 
-		if(od >= deg180) {
-
+		if (od >= deg180) 
+		{
 			o1 <<= (32 - 12);
 			o1 >>= (32 - 12);
 			o2 <<= (32 - 12);
@@ -2991,68 +2977,59 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 		Orient &= wrap360;
 	}
 
-	if(txaf0->txf_scale == txaf1->txf_scale) {
-
+	if (txaf0->txf_scale == txaf1->txf_scale) 
+	{
 		Scale = txaf0->txf_scale;
 	}
-
-	else {
-
+	else 
+	{
 		Scale = WideMul2NarrowDiv(txaf0->txf_scale, OneMinusAlpha,
 										txaf1->txf_scale, Alpha, ONE_FIXED);
 	}
 
 
 	/* Interpolate Orient and Scale Origins */
-
-	if(txaf0->txf_orientx == txaf1->txf_orientx) {
-
+	if (txaf0->txf_orientx == txaf1->txf_orientx) 
+	{
 		OrientX = txaf0->txf_orientx;
 	}
-
-	else {
-
+	else 
+	{
 		OrientX = MUL_FIXED(txaf0->txf_orientx, OneMinusAlpha)
 					+ MUL_FIXED(txaf1->txf_orientx, Alpha);
 	}
 
-
-	if(txaf0->txf_orienty == txaf1->txf_orienty) {
-
+	if (txaf0->txf_orienty == txaf1->txf_orienty)
+	{
 		OrientY = txaf0->txf_orienty;
 	}
-
-	else {
-
+	else 
+	{
 		OrientY = MUL_FIXED(txaf0->txf_orienty, OneMinusAlpha)
 					+ MUL_FIXED(txaf1->txf_orienty, Alpha);
 	}
 
 
-	if(txaf0->txf_scalex == txaf1->txf_scalex) {
-
+	if (txaf0->txf_scalex == txaf1->txf_scalex)
+	{
 		ScaleX = txaf0->txf_scalex;
 	}
-
-	else {
-
+	else 
+	{
 		ScaleX = MUL_FIXED(txaf0->txf_scalex, OneMinusAlpha)
 					+ MUL_FIXED(txaf1->txf_scalex, Alpha);
 	}
 
-
-	if(txaf0->txf_scaley == txaf1->txf_scaley) {
+	if (txaf0->txf_scaley == txaf1->txf_scaley) 
+	{
 
 		ScaleY = txaf0->txf_scaley;
 	}
-
-	else {
-
+	else 
+	{
 		ScaleY = MUL_FIXED(txaf0->txf_scaley, OneMinusAlpha)
 					+ MUL_FIXED(txaf1->txf_scaley, Alpha);
 	}
-
-
 
 	#if 0
 	textprint("Alpha         = %d\n", Alpha);
@@ -3064,16 +3041,15 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 	#endif
 
 	/* Rotate UV Array */
-
-	if(Orient) {
-
+	if (Orient)
+	{
 		sin = GetSin(Orient);
 		cos = GetCos(Orient);
 
 		iptr = uv_array;
 
-		for(i = txaf0->txf_numuvs; i!=0; i--) {
-
+		for (i = txaf0->txf_numuvs; i != 0; i--) 
+		{
 			x = iptr[0] - OrientX;
 			y = iptr[1] - OrientY;
 
@@ -3089,13 +3065,12 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 
 
 	/* Scale UV Array */
-
-	if(Scale != ONE_FIXED) {
-
+	if (Scale != ONE_FIXED) 
+	{
 		iptr = uv_array;
 
-		for(i = txaf0->txf_numuvs; i!=0; i--) {
-
+		for (i = txaf0->txf_numuvs; i!=0; i--) 
+		{
 			x = iptr[0] - ScaleX;
 			y = iptr[1] - ScaleY;
 
@@ -3109,14 +3084,12 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 		}
 	}
 
-
 	#if 0
 	textprint("Current Frame = %d\n", txah->txa_currentframe);
 	textprint("Current Frame = %d\n", CurrentFrame);
 	textprint("Next Frame    = %d\n", NextFrame);
 	textprint("Alpha         = %d\n", Alpha);
 	#endif
-
 }
 
 
@@ -3128,14 +3101,13 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 
 void ShapeSpritePointsInstr(SHAPEINSTR *shapeinstrptr)
 {
-
 	int **shapeitemarrayptr = shapeinstrptr->sh_instr_data;
 	int *shapeitemptr       = *shapeitemarrayptr;
 	VECTORCH *rotptsptr       = RotatedPts;
 	int numitems;
 
-
-	for(numitems = shapeinstrptr->sh_numitems; numitems!=0; numitems--) {
+	for (numitems = shapeinstrptr->sh_numitems; numitems!=0; numitems--) 
+	{
 
 		rotptsptr->vx =  shapeitemptr[ix];
 		rotptsptr->vx += Global_ODB_Ptr->ObView.vx;
@@ -3171,9 +3143,7 @@ void ShapeSpritePointsInstr(SHAPEINSTR *shapeinstrptr)
 #define ssrpi_kill_py TRUE
 
 void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
-
 {
-
 	int **shapeitemarrayptr = shapeinstrptr->sh_instr_data;
 	int *shapeitemptr       = *shapeitemarrayptr;
 	VECTORCH *rotptsptr       = RotatedPts;
@@ -3201,8 +3171,9 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 
 	*/
 
-	if(Global_ShapeHeaderPtr->shapeflags & ShapeFlag_Sprite &&
-		Global_ShapeHeaderPtr->shapeflags & ShapeFlag_SpriteResizing) {
+	if (Global_ShapeHeaderPtr->shapeflags & ShapeFlag_Sprite &&
+		Global_ShapeHeaderPtr->shapeflags & ShapeFlag_SpriteResizing) 
+	{
 
 		int *ShapePoints;
 		int **item_array_ptr;
@@ -3402,9 +3373,9 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 
 	*/
 
-	if(Global_ShapeHeaderPtr->shapeflags & ShapeFlag_Sprite &&
-		Global_ShapeHeaderPtr->shapeflags & ShapeFlag_SpriteResizing) {
-
+	if (Global_ShapeHeaderPtr->shapeflags & ShapeFlag_Sprite &&
+		Global_ShapeHeaderPtr->shapeflags & ShapeFlag_SpriteResizing)
+	{
 		int *ShapePoints;
 		int **item_array_ptr;
 		int *item_ptr;
@@ -3422,13 +3393,11 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 		ShapePoints = *(Global_ShapeHeaderPtr->points);
 
 		/* Item */
-
 		item_array_ptr = Global_ShapeHeaderPtr->items;	/* Assume item array */
 		item_ptr = item_array_ptr[0];					/* Assume only one polygon */
 		pheader = (POLYHEADER *) item_ptr;
 
 		/* Texture Animation */
-
 		texture_defn_index = (pheader->PolyColour >> TxDefn);
 		texture_defn_ptr = Global_ShapeTextures[texture_defn_index];
 
@@ -3439,10 +3408,9 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 		txaf = txah->txa_framedata;
 
 		/* Because the current frame can be set from outside, clamp it first */
-
-		if(txah->txa_currentframe < 0)
+		if (txah->txa_currentframe < 0)
 			txah->txa_currentframe = 0;
-		if(txah->txa_currentframe >= txah->txa_maxframe)
+		if (txah->txa_currentframe >= txah->txa_maxframe)
 			txah->txa_currentframe = txah->txa_maxframe - 1;
 
 		CurrentFrame  = txah->txa_currentframe >> 16;
@@ -3451,15 +3419,13 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 
 
 		/* UV array */
-
-		if(Global_ShapeHeaderPtr->shapeflags & ShapeFlag_Sprite) {
-
-			int **uvarrayptr = (int **) txaf0->txf_uvdata;
+		if (Global_ShapeHeaderPtr->shapeflags & ShapeFlag_Sprite) 
+		{
+			int **uvarrayptr = (int **)txaf0->txf_uvdata;
 			iptr = uvarrayptr[GetMVSIndex(txah, &LToVMat_Euler)];
 		}
-
-		else {
-
+		else 
+		{
 			iptr = txaf0->txf_uvdata;
 		}
 
@@ -3467,11 +3433,10 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 
 
 		/* Redefine the Shape Points */
-
 		mypolystart = &pheader->Poly1stPt;
 
-		while(*mypolystart != Term) {
-
+		while (*mypolystart != Term) 
+		{
 			/*textprint("copying point %d\n", *mypolystart / vsize);*/
 
 			((VECTORCH *)ShapePoints)[*mypolystart].vx = iptr[0];
@@ -3487,23 +3452,28 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
    	//project the object's y vector onto the screen.
 	//then rotate the sprite's points according to the vector's orintation
 	//relative to the screen's y vector.
-   	vecty=*(VECTORCH*)&Global_ODB_Ptr->ObMat.mat21;
+   	vecty = *(VECTORCH*)&Global_ODB_Ptr->ObMat.mat21;
 		
 	RotateVector(&vecty,&Global_VDB_Ptr->VDB_Mat);
-   	if(Global_VDB_Ptr->VDB_ProjX!=Global_VDB_Ptr->VDB_ProjY)
+
+   	if (Global_VDB_Ptr->VDB_ProjX != Global_VDB_Ptr->VDB_ProjY)
    	{
-   		vecty.vx=MUL_FIXED(vecty.vx,Global_VDB_Ptr->VDB_ProjX);
-		vecty.vy=MUL_FIXED(vecty.vy,Global_VDB_Ptr->VDB_ProjY);
+   		vecty.vx = MUL_FIXED(vecty.vx, Global_VDB_Ptr->VDB_ProjX);
+		vecty.vy = MUL_FIXED(vecty.vy, Global_VDB_Ptr->VDB_ProjY);
 	}
-	vecty.vz=0;
-	if(!vecty.vx && !vecty.vy)vecty.vy=ONE_FIXED;
+
+	vecty.vz = 0;
+
+	if (!vecty.vx && !vecty.vy)
+		vecty.vy=ONE_FIXED;
+
 	Normalise(&vecty);
-	vectx.vx=-vecty.vy;
-	vectx.vy=vecty.vx;
-	vectx.vz=0;
+	vectx.vx = -vecty.vy;
+	vectx.vy = vecty.vx;
+	vectx.vz = 0;
 
-	for(numitems = shapeinstrptr->sh_numitems; numitems!=0; numitems--) {
-
+	for (numitems = shapeinstrptr->sh_numitems; numitems!=0; numitems--)
+	{
 		x = -shapeitemptr[ix];
 		y = shapeitemptr[iy];
 
@@ -3537,20 +3507,24 @@ int GetMVSIndex(TXANIMHEADER *txah, EULER *e )
 	phi=-ArcSin(v.vy);
 	phi+=deg90;
 	phi&=wrap360;
-	if(phi==deg180)phi--;
-	if(!v.vx && !v.vz)
+
+	if (phi == deg180)
+		phi--;
+
+	if (!v.vx && !v.vz)
 	{
-		theta=0;
+		theta = 0;
 	}
 	else
 	{
 		v.vy=0;
 		Normalise(&v);
-		if(v.vz > Cosine45 || -v.vz>Cosine45) {
-
+		if (v.vz > Cosine45 || -v.vz>Cosine45) 
+		{
 			theta = ArcSin(-v.vx);
 
-			if(v.vz < 0) {
+			if (v.vz < 0) 
+			{
 				theta &= wrap360;
 			}
 			else
@@ -3560,12 +3534,12 @@ int GetMVSIndex(TXANIMHEADER *txah, EULER *e )
 				theta &= wrap360;
 			}
 		}
-
-		else {
-
+		else 
+		{
 			theta = ArcCos(v.vz);
 
-			if(v.vx < 0) {
+			if (v.vx < 0) 
+			{
 				theta =  -theta;
 			}
 			theta+=deg180;
@@ -3575,7 +3549,6 @@ int GetMVSIndex(TXANIMHEADER *txah, EULER *e )
 
 	EulerYIndex = theta;
 	EulerYIndex >>= txah->txa_euleryshift;
-
 
 	EulerYIndex <<= (11 - txah->txa_eulerxshift);
 
@@ -3600,7 +3573,7 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	/* KJL 12:42:38 18/05/98 - check to see if object is on fire */
 	if (dptr->ObStrategyBlock)
 	{
-		if(dptr->ObStrategyBlock->SBDamageBlock.IsOnFire)
+		if (dptr->ObStrategyBlock->SBDamageBlock.IsOnFire)
 		{
 			dptr->SpecialFXFlags |= SFXFLAG_ONFIRE;
 		}
@@ -3611,7 +3584,7 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	}
 	
 	/* is object a morphing one? */	
- 	if(dptr->ObMorphCtrl)
+ 	if (dptr->ObMorphCtrl)
 	{
 		LOCALASSERT(dptr->ObMorphCtrl->ObMorphHeader);
 		//if(dptr->ObMorphCtrl->ObMorphHeader)
@@ -3646,7 +3619,8 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	ChooseLightingModel(dptr);
 
 	/* Texture Animation Control */
-	if(dptr->ObTxAnimCtrlBlks) ControlTextureAnimation(dptr);
+	if (dptr->ObTxAnimCtrlBlks) 
+		ControlTextureAnimation(dptr);
 
 	/* Global Variables */
 	Global_VDB_Ptr        = VDB_Ptr;
@@ -5194,7 +5168,7 @@ void RenderMirrorSurface(void)
 			
 	};
  	int mirrorUV[]=
-	{ 0,0, 127<<16,0, 127<<16,127<<16, 0,127<<16};
+	{ 0,0, 127,0, 127,127, 0,127};
  	POLYHEADER fakeHeader;
 
 
@@ -5254,7 +5228,7 @@ void RenderMirrorSurface2(void)
 			
 	};
  	int mirrorUV[]=
-	{ 0,0, 127<<16,0, 127<<16,127<<16, 0,127<<16};
+	{ 0,0, 127,0, 127,127, 0,127};
  	POLYHEADER fakeHeader;
 
 
@@ -5307,10 +5281,10 @@ void RenderSmokeTest(void)
 {
  	int mirrorUV[]=
 	{
-		64<<16, 0,
-		64<<16, 31<<16,
-		95<<16, 31<<16,
-		95<<16, 0
+		64, 0,
+		64, 31,
+		95, 31,
+		95, 0
 	};
  	POLYHEADER fakeHeader;
 	int a = GetSin(CloakingPhase&4095);
@@ -5347,7 +5321,7 @@ void RenderSmokeTest(void)
 				VerticesBuffer[i].Y	= translatedPts[i].vy;
 				VerticesBuffer[i].Z	= translatedPts[i].vz;
 				VerticesBuffer[i].U = mirrorUV[i*2];
-				VerticesBuffer[i].V = mirrorUV[i*2+1]+image*(32<<16);
+				VerticesBuffer[i].V = mirrorUV[i*2+1]+image*(32);
 
 
 				VerticesBuffer[i].R = 255;
@@ -5391,17 +5365,18 @@ void RenderSky(void)
 {
    	POLYHEADER fakeHeader;
 	int x,z,o;
-	if(!setup)
+
+	if (!setup)
 	{
 		int i;
 		setup=1;
-		for(i=0;i<OCTAVES;i++)
+		for (i = 0; i < OCTAVES; i++)
 		{
 			u[i] = (FastRandom()&65535)*128;
 			v[i] = (FastRandom()&65535)*128;
 			du[i] = ( ((FastRandom()&65535)-32768)*(i+1) )*8;
 			dv[i] = ( ((FastRandom()&65535)-32768)*(i+1) )*8;
-		}											   
+		}
 	}
 	{
 		extern int CloudyImageNumber;
@@ -5963,17 +5938,17 @@ void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour)
 			RenderPolygon.NumberOfVertices=4;
 			
 //			textprint("On Screen!\n");
-			VerticesBuffer[0].U = 192<<16;
+			VerticesBuffer[0].U = 192;
 			VerticesBuffer[0].V = 0;
 
-			VerticesBuffer[1].U = 255<<16;
+			VerticesBuffer[1].U = 255;
 			VerticesBuffer[1].V = 0;
 
-			VerticesBuffer[2].U = 255<<16;
-			VerticesBuffer[2].V = 63<<16;
+			VerticesBuffer[2].U = 255;
+			VerticesBuffer[2].V = 63;
 
-			VerticesBuffer[3].U = 192<<16;
-			VerticesBuffer[3].V = 63<<16;
+			VerticesBuffer[3].U = 192;
+			VerticesBuffer[3].V = 63;
 
 			if (outcode!=2)
 			{
@@ -6286,8 +6261,8 @@ void RenderInsideAlienTongue(int offset)
 				VerticesBuffer[i].X	= translatedPts[v].vx;
 				VerticesBuffer[i].Y	= translatedPts[v].vy;
 				VerticesBuffer[i].Z	= translatedPts[v].vz;
-				VerticesBuffer[i].U = CuboidPolyVertexU[3][i]<<16;
-				VerticesBuffer[i].V = CuboidPolyVertexV[3][i]<<16;
+				VerticesBuffer[i].U = CuboidPolyVertexU[3][i];
+				VerticesBuffer[i].V = CuboidPolyVertexV[3][i];
 
 
 				VerticesBuffer[i].R = offset/2048;
@@ -6401,17 +6376,17 @@ void RenderStarfield(void)
 				RenderPolygon.NumberOfVertices=4;
 				
 	//			textprint("On Screen!\n");
-				VerticesBuffer[0].U = 192<<16;
+				VerticesBuffer[0].U = 192;
 				VerticesBuffer[0].V = 0;
 
-				VerticesBuffer[1].U = 255<<16;
+				VerticesBuffer[1].U = 255;
 				VerticesBuffer[1].V = 0;
 
-				VerticesBuffer[2].U = 255<<16;
-				VerticesBuffer[2].V = 63<<16;
+				VerticesBuffer[2].U = 255;
+				VerticesBuffer[2].V = 63;
 
-				VerticesBuffer[3].U = 192<<16;
-				VerticesBuffer[3].V = 63<<16;
+				VerticesBuffer[3].U = 192;
+				VerticesBuffer[3].V = 63;
 
 				if (outcode!=2)
 				{

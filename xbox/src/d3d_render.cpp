@@ -99,8 +99,8 @@ struct ORTHO_OBJECTS
 	uint32_t	vertStart;
 	uint32_t	vertEnd;
 
-	enum TRANSLUCENCY_TYPE translucency_type;
-	enum FILTERING_MODE_ID filtering_type;
+	enum TRANSLUCENCY_TYPE translucencyType;
+	enum FILTERING_MODE_ID filteringType;
 };
 
 // array of 2d objects
@@ -144,7 +144,7 @@ void DrawParticles()
 
 const signed int NO_TEXTURE = -1;
 // set them to 'null' texture initially
-signed int currentTextureId = NO_TEXTURE;
+signed int currentTextureID = NO_TEXTURE;
 signed int currentWaterTexture = NO_TEXTURE;
 
 // use 999 as a reference for the tallfont texture
@@ -255,16 +255,16 @@ static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n)
 	NumVertices+=3;
 }
 
-static void SetNewTexture(const int tex_id)
+static void SetNewTexture(const int32_t textureID)
 {
-	if (tex_id != currentTextureId)
+	if (textureID != currentTextureID)
 	{
-		LastError = d3d.lpD3DDevice->SetTexture(0, ImageHeaderArray[tex_id].Direct3DTexture);
+		LastError = d3d.lpD3DDevice->SetTexture(0, ImageHeaderArray[textureID].Direct3DTexture);
 		if (FAILED(LastError))
 		{
 			OutputDebugString("Couldn't set menu quad texture\n");
 		}
-		currentTextureId = tex_id;
+		currentTextureID = textureID;
 	}
 }
 
@@ -714,41 +714,49 @@ bool dither_on = false;
 
 extern int mainMenu;
 
-void ChangeTexture(const int texture_id)
+void ChangeTexture(const int32_t textureID)
 {
-	if(texture_id == currentTextureId) return;
+	if (textureID == currentTextureID)
+		return;
 
-	/* menu large font */
-	if (texture_id == TALLFONT_TEX)
+	// menu large font
+	else if (textureID == TALLFONT_TEX)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, IntroFont_Light.info.menuTexture);
-		if(!FAILED(LastError)) currentTextureId = TALLFONT_TEX;
+		if (!FAILED(LastError)) currentTextureID = TALLFONT_TEX;
+			return;
+	}
+
+	else if (textureID == CONSOLE_TEX)
+	{
+/*
+		LastError = d3d.lpD3DDevice->SetTexture(0, consoleText);
+		if (!FAILED(LastError)) currentTextureID = CONSOLE_TEX;
+*/
 		return;
 	}
 
-	/* if texture was specified as 'null' */
-	if (texture_id == NO_TEXTURE)
+	// if texture was specified as 'null'
+	else if (textureID == NO_TEXTURE)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, NULL);
-		if(!FAILED(LastError)) currentTextureId = NO_TEXTURE;
+		if (!FAILED(LastError)) currentTextureID = NO_TEXTURE;
 		return;
 	}
 
-	/* if in menus (outside game) */
-	if(mainMenu)
+	// if in menus (outside game)
+	if (mainMenu)
 	{
-		LastError = d3d.lpD3DDevice->SetTexture(0, AvPMenuGfxStorage[texture_id].menuTexture);
-		if(!FAILED(LastError)) currentTextureId = texture_id;
+		LastError = d3d.lpD3DDevice->SetTexture(0, AvPMenuGfxStorage[textureID].menuTexture);
+		if (!FAILED(LastError)) currentTextureID = textureID;
 		return;
 	}
 	else
 	{
-		LastError = d3d.lpD3DDevice->SetTexture(0, ImageHeaderArray[texture_id].Direct3DTexture);
-		if(!FAILED(LastError)) currentTextureId = texture_id;
+		LastError = d3d.lpD3DDevice->SetTexture(0, ImageHeaderArray[textureID].Direct3DTexture);
+		if (!FAILED(LastError)) currentTextureID = textureID;
 		return;
 	}
-
-	return;
 }
 
 BOOL ExecuteBuffer()
@@ -774,7 +782,7 @@ BOOL ExecuteBuffer()
 		for (int i = 0; i < orthoListCount; i++)
 		{
 			ChangeTexture(orthoList[i].textureID);
-			ChangeTranslucencyMode(orthoList[i].translucency_type);
+			ChangeTranslucencyMode(orthoList[i].translucencyType);
 
 			LastError = d3d.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, orthoList[i].vertStart, 2);
 			if (FAILED(LastError))
@@ -1355,10 +1363,13 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
 
 	if (!texoffset)
-		texoffset = currentTextureId;
+		texoffset = currentTextureID;
 
-	RecipW = (1.0f/65536.0f)/(float) ImageHeaderArray[texoffset].ImageWidth;
-	RecipH = (1.0f/65536.0f)/(float) ImageHeaderArray[texoffset].ImageHeight;
+	float width = (float) ImageHeaderArray[texoffset].ImageWidth;
+	RecipW = (1.0f / width);// / 65536.0f;
+
+	float height = (float) ImageHeaderArray[texoffset].ImageHeight;
+	RecipH = (1.0f / height);// / 65536.0f;
 
 	SetNewTexture(texoffset);
 	ChangeTranslucencyMode(RenderPolygon.TranslucencyMode);
@@ -1394,8 +1405,8 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 		tempVertex[i].color = RGBALIGHT_MAKE(GammaValues[vertices->R],GammaValues[vertices->G],GammaValues[vertices->B],vertices->A);
 		tempVertex[i].specular = RGBALIGHT_MAKE(GammaValues[vertices->SpecularR],GammaValues[vertices->SpecularG],GammaValues[vertices->SpecularB],255);
 
-		tempVertex[i].tu = ((float)vertices->U) * RecipW + (1.0f/256.0f);
-		tempVertex[i].tv = ((float)vertices->V) * RecipH + (1.0f/256.0f);
+		tempVertex[i].tu = (float)(vertices->U) * RecipW;
+		tempVertex[i].tv = (float)(vertices->V) * RecipH;
 	}
 
 	D3D_OutputTriangles();
@@ -1637,6 +1648,74 @@ void D3D_HUD_Setup(void)
 	}
 }
 
+void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int *uvArray, uint32_t colour)
+{
+	int newWidth = ScreenDescriptorBlock.SDB_Width;
+	int newHeight = ScreenDescriptorBlock.SDB_Height;
+
+	float x1 = (float(x / (float)newWidth) * 2) - 1;
+	float y1 = (float(y / (float)newHeight) * 2) - 1;
+
+	float x2 = ((float(x + width) / (float)newWidth) * 2) - 1;
+	float y2 = ((float(y + height) / (float)newHeight) * 2) - 1;
+
+	float RecipW, RecipH;
+
+	float texWidth = (float) ImageHeaderArray[textureID].ImageWidth;
+	RecipW = 1.0f / texWidth;
+
+	float texHeight = (float) ImageHeaderArray[textureID].ImageHeight;
+	RecipH = 1.0f / texHeight;
+
+	// create a new list item for it
+	orthoList[orthoListCount].textureID = textureID;
+	orthoList[orthoListCount].vertStart = orthoOffset;
+	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
+	orthoList[orthoListCount].translucencyType = TRANSLUCENCY_GLOWING;
+	orthoListCount++;
+
+	// bottom left
+	orthoVerts[orthoOffset].x = x1;
+	orthoVerts[orthoOffset].y = y2;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = uvArray[0] * RecipW;
+	orthoVerts[orthoOffset].v = uvArray[1] * RecipH;
+
+	orthoOffset++;
+
+	// top left
+	orthoVerts[orthoOffset].x = x1;
+	orthoVerts[orthoOffset].y = y1;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = uvArray[2] * RecipW;
+	orthoVerts[orthoOffset].v = uvArray[3] * RecipH;
+
+	orthoOffset++;
+
+	// bottom right
+	orthoVerts[orthoOffset].x = x2;
+	orthoVerts[orthoOffset].y = y2;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = uvArray[4] * RecipW;
+	orthoVerts[orthoOffset].v = uvArray[5] * RecipH;
+
+	orthoOffset++;
+
+	// top right
+	orthoVerts[orthoOffset].x = x2;
+	orthoVerts[orthoOffset].y = y1;
+	orthoVerts[orthoOffset].z = 1.0f;
+	orthoVerts[orthoOffset].colour = colour;
+	orthoVerts[orthoOffset].u = uvArray[6] * RecipW;
+	orthoVerts[orthoOffset].v = uvArray[7] * RecipH;
+
+	orthoOffset++;
+
+}
+
 
 void D3D_HUDQuad_Output(int imageNumber,struct VertexTag *quadVerticesPtr, unsigned int colour)
 {
@@ -1651,7 +1730,7 @@ void D3D_HUDQuad_Output(int imageNumber,struct VertexTag *quadVerticesPtr, unsig
 	ChangeTranslucencyMode(TRANSLUCENCY_GLOWING);
 
 	// if in menus (outside game)
-	if (imageNumber != currentTextureId)
+	if (imageNumber != currentTextureID)
 	{
 		if (mainMenu)
 		{
@@ -1661,7 +1740,7 @@ void D3D_HUDQuad_Output(int imageNumber,struct VertexTag *quadVerticesPtr, unsig
 		{
 			LastError = d3d.lpD3DDevice->SetTexture(0, ImageHeaderArray[imageNumber].Direct3DTexture);
 		}
-		currentTextureId = imageNumber;
+		currentTextureID = imageNumber;
 	}
 
 	for (int i = 0; i < 4; i++ )
@@ -7237,13 +7316,13 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 void DrawFadeQuad(int topX, int topY, int alpha)
 {
 	// turn off texturing
-	if(currentTextureId != NO_TEXTURE)
+	if(currentTextureID != NO_TEXTURE)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0,NULL);
 		if(FAILED(LastError)) {
 			OutputDebugString("Couldn't turn off texture for DrawFadeQuad");
 		}
-		currentTextureId = NO_TEXTURE;
+		currentTextureID = NO_TEXTURE;
 	}
 
 //	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
@@ -7414,22 +7493,16 @@ void DrawTexturedFadedQuad(int topX, int topY, int image_num, int alpha)
 /* more quad drawing functions than you can shake a stick at! */
 void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture)
 {
-	// set the texture
-	LastError = d3d.lpD3DDevice->SetTexture(0, fmvTexture);
-
-	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
-	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
-
 	int topX = (640 - frameWidth) / 2;
 	int topY = (480 - frameHeight) / 2;
 
 	float x1 = (float(topX / 640.0f) * 2) - 1;
 	float y1 = (float(topY / 480.0f) * 2) - 1;
 
-	float x2 = ((float(topX + textureWidth) / 640.0f) * 2) - 1;
-	float y2 = ((float(topY + textureHeight) / 480.0f) * 2) - 1;
+	float x2 = ((float(topX + frameWidth) / 640.0f) * 2) - 1;
+	float y2 = ((float(topY + frameHeight) / 480.0f) * 2) - 1;
 
-	D3DCOLOR colour = D3DCOLOR_ARGB(255, 128, 0, 128);
+	D3DCOLOR colour = D3DCOLOR_ARGB(255, 255, 255, 255);
 
 	ORTHOVERTEX fmvVerts[4];
 
@@ -7439,7 +7512,7 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 	fmvVerts[0].z = 1.0f;
 	fmvVerts[0].colour = colour;
 	fmvVerts[0].u = 0.0f;
-	fmvVerts[0].v = 1.0f;
+	fmvVerts[0].v = (1.0f / textureHeight) * frameHeight;
 
 	// top left
 	fmvVerts[1].x = x1;
@@ -7454,17 +7527,18 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 	fmvVerts[2].y = y2;
 	fmvVerts[2].z = 1.0f;
 	fmvVerts[2].colour = colour;
-	fmvVerts[2].u = 1.0f;
-	fmvVerts[2].v = 1.0f;
+	fmvVerts[2].u = (1.0f / textureWidth) * frameWidth;
+	fmvVerts[2].v = (1.0f / textureHeight) * frameHeight;
 
 	// top right
 	fmvVerts[3].x = x2;
 	fmvVerts[3].y = y1;
 	fmvVerts[3].z = 1.0f;
 	fmvVerts[3].colour = colour;
-	fmvVerts[3].u = 1.0f;
+	fmvVerts[3].u = (1.0f / textureWidth) * frameWidth;
 	fmvVerts[3].v = 0.0f;
 
+	ChangeTextureAddressMode(TEXTURE_CLAMP);
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 		
 	// set the texture
@@ -7476,15 +7550,12 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 	{
 		OutputDebugString("DrawPrimitiveUP failed\n");
 	}
-
-	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_WRAP);
-	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_WRAP);
 }
 
 void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE8 bar_texture, int original_width, int original_height, int new_width, int new_height)
 {
 	LastError = d3d.lpD3DDevice->SetTexture(0, bar_texture);
-	currentTextureId = 998; // ho hum
+	currentTextureID = 998; // ho hum
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -7586,7 +7657,7 @@ void DrawQuad(int x, int y, int width, int height, int textureID, int colour, en
 	orthoList[orthoListCount].textureID = textureID;
 	orthoList[orthoListCount].vertStart = orthoOffset;
 	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
-	orthoList[orthoListCount].translucency_type = translucencyType;
+	orthoList[orthoListCount].translucencyType = translucencyType;
 	orthoListCount++;
 
 	// bottom left
@@ -7720,14 +7791,14 @@ void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, B
 
 void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 {
-	if (currentTextureId != image_num)
+	if (currentTextureID != image_num)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, AvPMenuGfxStorage[image_num].menuTexture);
 		if (FAILED(LastError))
 		{
 			OutputDebugString("Couldn't set menu quad texture");
 		}
-		currentTextureId = image_num;
+		currentTextureID = image_num;
 	}
 
 //	CheckVertexBuffer(4, image_num, TRANSLUCENCY_GLOWING);
@@ -7809,14 +7880,14 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 
 void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha)
 {
-	if (AVPMENUGFX_SMALL_FONT != currentTextureId)
+	if (AVPMENUGFX_SMALL_FONT != currentTextureID)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, AvPMenuGfxStorage[AVPMENUGFX_SMALL_FONT].menuTexture);
 		if (FAILED(LastError))
 		{
 			OutputDebugString("Couldn't set DrawSmallMenuCharacter texture\n");
 		}
-		currentTextureId = AVPMENUGFX_SMALL_FONT;
+		currentTextureID = AVPMENUGFX_SMALL_FONT;
 	}
 
 	ChangeTranslucencyMode(TRANSLUCENCY_GLOWING);
@@ -7898,14 +7969,14 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 
 void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha)
 {
-	if (TALLFONT_TEX != currentTextureId)
+	if (TALLFONT_TEX != currentTextureID)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, IntroFont_Light.info.menuTexture);
 		if (FAILED(LastError))
 		{
 			OutputDebugString("Couldn't set menu quad texture\n");
 		}
-		currentTextureId = TALLFONT_TEX;
+		currentTextureID = TALLFONT_TEX;
 	}
 
 	alpha = (alpha / 256);

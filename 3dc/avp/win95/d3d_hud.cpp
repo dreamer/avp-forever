@@ -55,7 +55,7 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 
 void D3D_DrawHUDFontCharacter(HUDCharDesc *charDescPtr);
 void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr);
-extern void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int uvArray[8], uint32_t colour);
+extern void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int *uvArray, uint32_t colour);
 
 extern void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2);
 /* HUD globals */
@@ -201,6 +201,43 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 	quadVertices[2].Y = imageDescPtr->TopLeftY + scaledHeight;
 	quadVertices[3].X = imageDescPtr->TopLeftX;
 	quadVertices[3].Y = imageDescPtr->TopLeftY + scaledHeight;
+
+	int uvArray[8];
+
+	// bottom left
+	uvArray[0] = imageDescPtr->TopLeftU;
+	uvArray[1] = imageDescPtr->TopLeftV + imageDescPtr->Height;
+
+	// top left
+	uvArray[2] = imageDescPtr->TopLeftU;
+	uvArray[3] = imageDescPtr->TopLeftV;
+
+	// bottom right
+	uvArray[4] = imageDescPtr->TopLeftU + imageDescPtr->Width;
+	uvArray[5] = imageDescPtr->TopLeftV + imageDescPtr->Height;
+
+	// top right
+	uvArray[6] = imageDescPtr->TopLeftU + imageDescPtr->Width;
+	uvArray[7] = imageDescPtr->TopLeftV;
+
+	New_D3D_HUDQuad_Output
+	(
+		imageDescPtr->ImageNumber, 
+		imageDescPtr->TopLeftX,
+		imageDescPtr->TopLeftY,
+		scaledWidth,
+		scaledHeight,
+		uvArray,
+		RGBALIGHT_MAKE
+		(
+			imageDescPtr->Red,
+			imageDescPtr->Green,
+			imageDescPtr->Blue,
+			imageDescPtr->Translucency
+		)
+	);
+
+
 /*	
 	D3D_HUDQuad_Output
 	(
@@ -667,7 +704,6 @@ void D3D_DrawHUDPredatorDigit(HUDCharDesc *charDescPtr, int scale)
 	imageDesc.Blue = charDescPtr->Blue;
 
 	Draw_HUDImage(&imageDesc);
-	
 }
 
 void D3D_BLTDigitToHUD(char digit, int x, int y, int font)
@@ -706,21 +742,6 @@ void D3D_BLTDigitToHUD(char digit, int x, int y, int font)
 			break;
 	}
 
-/*	bjd
-	if (HUDResolution == HUD_RES_LO)
-	{
-		FontDescPtr = &HUDFontDesc[font];
-	}
-	else if (HUDResolution == HUD_RES_MED)
-	{
-		FontDescPtr = &HUDFontDesc[font];
-	}
-	else
-	{
-		FontDescPtr = &HUDFontDesc[font];
-	}
-*/
-
 	FontDescPtr = &HUDFontDesc[font];
 
 	imageDesc.ImageNumber = HUDImageNumber;
@@ -737,7 +758,6 @@ void D3D_BLTDigitToHUD(char digit, int x, int y, int font)
 	imageDesc.Blue = 255;
 
 	Draw_HUDImage(&imageDesc);
-
 }
 
 void D3D_BLTGunSightToHUD(int screenX, int screenY, enum GUNSIGHT_SHAPE gunsightShape)

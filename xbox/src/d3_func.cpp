@@ -315,6 +315,59 @@ D3DTEXTURE CreateD3DTallFontTexture (AVPTEXTURE *tex)
 	return swizTexture;
 }
 
+void WriteTextureToFile(D3DTEXTURE srcTexture, const char* fileName)
+{
+/*
+	int width = 0;
+	int height = 0;
+
+	// fill tga header
+	TgaHeader.idlength = 0;
+	TgaHeader.x_origin = width;
+	TgaHeader.y_origin = height;
+	TgaHeader.colourmapdepth  = 0;
+	TgaHeader.colourmaplength = 0;
+	TgaHeader.colourmaporigin = 0;
+	TgaHeader.colourmaptype   = 0;
+	TgaHeader.datatypecode    = 2;			// RGB
+	TgaHeader.bitsperpixel    = 32;
+	TgaHeader.imagedescriptor = 0x20;		// set origin to top left
+	TgaHeader.height = height;
+	TgaHeader.width  = width;
+
+	// size of raw image data
+	int imageSize = height * width * sizeof(uint32_t);
+
+	// create new buffer for header and image data
+	uint8_t *buffer = new uint8_t[sizeof(TGA_HEADER) + imageSize];
+
+	// copy header and image data to buffer
+	memcpy(buffer, &TgaHeader, sizeof(TGA_HEADER));
+
+	uint8_t *imageData = buffer + sizeof(TGA_HEADER);
+
+	// lock texture
+	D3DLOCKED_RECT lock;
+
+	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+
+	// loop, converting RGB to BGR for D3DX function
+	for (int i = 0; i < imageSize; i+=4)
+	{
+
+		// BGRA			 // RGBA
+		imageData[i+2] = tex->buffer[i];
+		imageData[i+1] = tex->buffer[i+1];
+		imageData[i]   = tex->buffer[i+2];
+		imageData[i+3] = tex->buffer[i+3];
+	}
+*/
+}
+
 D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool)
 {
 	D3DTEXTURE destTexture = NULL;
@@ -334,11 +387,35 @@ D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool)
 	}
 	else { newHeight = *height; }
 
-	LastError = d3d.lpD3DDevice->CreateTexture(newWidth, newHeight, 1, 0, D3DFMT_LIN_A8R8G8B8, 0, &destTexture);
+	LastError = d3d.lpD3DDevice->CreateTexture(newWidth, newHeight, 1, 0, D3DFMT_LIN_X8R8G8B8, 0, &destTexture);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
+	}
+
+	if (XGIsSwizzledFormat(D3DFMT_LIN_A8R8G8B8))
+	{
+		OutputDebugString("swizzledeeded!\n");
+	}
+
+	// lets clear it to black
+	D3DLOCKED_RECT lock;
+
+	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+	else
+	{
+		memset(lock.pBits, 0, lock.Pitch * newHeight);
+
+		LastError = destTexture->UnlockRect(0);
+		if (FAILED(LastError)) 
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
 	}
 
 	*width = newWidth;
@@ -394,7 +471,6 @@ D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *realHeig
 	int new_height = original_height;
 
 	D3DCOLOR pad_colour = D3DCOLOR_XRGB(0,0,0);
-
 
 	// check if passed value is already a power of 2
 	if (!IsPowerOf2(tex->width)) {

@@ -754,7 +754,7 @@ BOOL CreateVolatileResources()
 	RecreateAllFMVTexturesAfterDeviceReset();
 
 	// create dynamic vertex buffer
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DTLVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_TLVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DTLVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, /*D3DFVF_TLVERTEX*/D3DFVF_HARDWARETLVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -784,7 +784,7 @@ BOOL CreateVolatileResources()
 		return FALSE;
 	}
 
-	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_TLVERTEX);
+	LastError = d3d.lpD3DDevice->SetFVF(/*D3DFVF_TLVERTEX*/D3DFVF_HARDWARETLVERTEX);
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);

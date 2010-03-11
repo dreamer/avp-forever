@@ -2408,9 +2408,7 @@ void SetFastRandom(void)
 
 
 int FastRandom(void)
-
 {
-
 	long i;
 
 	/*
@@ -2428,25 +2426,22 @@ int FastRandom(void)
 
 	++front_ptr;
 
-	if(front_ptr < TABLE_END) {
-
+	if (front_ptr < TABLE_END) 
+	{
       ++rear_ptr;
 
-      if (rear_ptr < TABLE_END) return i;
+      if (rear_ptr < TABLE_END) 
+		  return i;
 
       rear_ptr = table;
-
 	}
-
-	else {				/* front_ptr >= TABLE_END */
-
+	else 
+	{				/* front_ptr >= TABLE_END */
 		front_ptr = table;
 		++rear_ptr;
-
 	}
 
 	return (int) i;
-
 }
 
 /*a second copy of the random number generator for getting random numbers from a single seed*/
