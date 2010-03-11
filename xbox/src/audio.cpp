@@ -1895,12 +1895,13 @@ int CheckSoundBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
 
 } // extern C
 
-void CALLBACK AudioStream_Callback( VOID* pStreamContext, VOID* pPacketContext, DWORD dwStatus )
+void CALLBACK AudioStream_Callback(VOID* pStreamContext, VOID* pPacketContext, DWORD dwStatus)
 {
 	StreamingAudioBuffer *streamStruct = static_cast<StreamingAudioBuffer*>(pStreamContext);
 
 	streamStruct->totalBytesPlayed += streamStruct->bufferSize;
-//	OutputDebugString("finished playing a packet\n");
+
+	streamStruct->voiceContext->TriggerEvent();
 }
 
 StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int bufferSize, int numBuffers)
@@ -1955,6 +1956,8 @@ StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int buff
 		newStreamingAudioBuffer = NULL;
 		return NULL;
 	}
+
+	newStreamingAudioBuffer->voiceContext = new StreamingVoiceContext;
 
 	newStreamingAudioBuffer->bufferSize = bufferSize;
 	newStreamingAudioBuffer->bufferCount = numBuffers;
@@ -2013,8 +2016,6 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, uint8_t *audioData
 			break;
 		}
 	}
-
-	OutputDebugString("wrote to audio buffer..\n");
 
 	return amountWritten;
 }
@@ -2151,11 +2152,14 @@ int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 		streamStruct->buffers = NULL;
 	}
 
+	if (streamStruct->voiceContext)
+	{
+		delete streamStruct->voiceContext;
+	}
+
 	streamStruct->bufferCount = 0;
 	streamStruct->currentBuffer = 0;
 	streamStruct->bufferSize = 0;
-
-//	streamStruct->PacketStatus.clear();
 
 	delete streamStruct;
 

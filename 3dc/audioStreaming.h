@@ -97,6 +97,24 @@ struct StreamingAudioBuffer
 #include <xtl.h>
 #include <vector>
 
+struct StreamingVoiceContext
+{
+	HANDLE hBufferEndEvent;
+
+	void TriggerEvent()
+	{
+		SetEvent( hBufferEndEvent );
+	}
+
+	StreamingVoiceContext() : hBufferEndEvent( CreateEvent( NULL, FALSE, FALSE, NULL ) )
+	{
+	}
+    virtual ~StreamingVoiceContext()
+    {
+        CloseHandle( hBufferEndEvent );
+    }
+};
+
 struct StreamingAudioBuffer
 {
 	int bufferSize;
@@ -111,6 +129,7 @@ struct StreamingAudioBuffer
 	bool isPaused;
 	std::vector<DWORD> PacketStatus;
 	LPDIRECTSOUNDSTREAM	dsStreamBuffer;
+	StreamingVoiceContext *voiceContext;
 };
 
 #endif

@@ -1995,6 +1995,7 @@ StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int buff
 	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;		//average bytes per second
 	waveFormat.cbSize			= sizeof(waveFormat);										//how big this structure is
 
+	// create a new voice context for "on buffer end" callback
 	newStreamingAudioBuffer->voiceContext = new StreamingVoiceContext;
 
 	// create the source voice for playing the sound
