@@ -48,11 +48,6 @@ extern "C"  {
 
 #include "aw.h"
 
-#define platform_pc		TRUE
-#define Saturn			FALSE
-
-#define Hardware2dTextureClipping FALSE
-
 /*
 
  Types
@@ -80,43 +75,6 @@ typedef struct LONGLONGCH {
 
 #define GetSin(a) sine[a]
 #define GetCos(a) cosine[a]
-
-/*
-	Available processor types
-*/
-
-typedef enum {
-
-	PType_OffBottomOfScale,
-	PType_486,
-	PType_Pentium,
-	PType_P6,
-	PType_PentiumMMX,
-	PType_Klamath,
-	PType_OffTopOfScale
-
-} PROCESSORTYPES;
-
-/*
-	Video mode decsription (to be filled
-	in by DirectDraw callback).
-*/
-
-typedef struct videomodeinfo {
-
-	int Width; /* in pixels */
-	int Height; /* in pixels */
-	int ColourDepth; /* in bits per pixel */
-
-} VIDEOMODEINFO;
-
-/*
-	Maximum number of display modes
-	that could be detected on unknown
-	hardware.
-*/
-
-#define MaxAvailableVideoModes 100
 
 /*
 	#defines, structures etc for
@@ -356,8 +314,6 @@ typedef enum {
 #define		ExtraMouse1		4
 #define		ExtraMouse2		5
 
-#define MaxScreenWidth 1600		/* Don't get this wrong! */
-
 typedef struct WinScaleXY {
 
 	float x;
@@ -389,10 +345,6 @@ typedef enum {
   Pack the header to 1 byte alignment so that the 
   loader works (John's code, still under test).
 */
-
-#ifdef __WATCOMC__
-#pragma pack (1)
-#endif
 
 typedef struct bmpheader {
 
@@ -436,12 +388,8 @@ BOOL ExitWindowsSystem(void);
 BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode);
 void KeyboardHandlerKeyDown(WPARAM wParam);
 void KeyboardHandlerKeyUp(WPARAM wParam);
-void MouseVelocityHandler(UINT message, LPARAM lParam);
-void MousePositionHandler(UINT message, LPARAM lParam);
 int  ReadJoystick(void); 
 int  CheckForJoystick(void);
-BOOL SpawnRasterThread();
-BOOL WaitForRasterThread();
 
 
 /* Direct 3D */
@@ -456,9 +404,6 @@ BOOL ExecuteBuffer(void);
 void ReleaseDirect3D(void);
 void ReleaseAvPTexture(AVPTEXTURE *texture);
 BOOL SetExecuteBufferDefaults(void);
-#if SUPPORT_MMX
-void SelectMMXOptions(void);
-#endif
 
 /* KJL 11:28:31 9/9/97 - Direct Input prototypes */
 BOOL InitialiseDirectInput(void);
@@ -480,9 +425,6 @@ int textprint(const char* t, ...);
 #endif
 
 int textprintXY(int x, int y, const char* t, ...);
-void LoadSystemFonts(char* fname);
-void DisplayWin95String(int x, int y, unsigned char *buffer);
-void WriteStringToTextBuffer(int x, int y, unsigned char *buffer);
 void FlushTextprintBuffer(void);
 void InitPrintQueue(void);
 void InitJoysticks(void);
@@ -490,7 +432,6 @@ void ReadJoysticks(void);
 int DeallocateAllImages(void);
 int MinimizeAllImages(void);
 int RestoreAllImages(void);
-PROCESSORTYPES ReadProcessorType(void);
 
 /*
 

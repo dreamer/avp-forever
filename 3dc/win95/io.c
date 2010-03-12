@@ -62,9 +62,6 @@ void InitialiseRawInput();
  and Windows 95!
 
 */
-
-//	int DrawMode = DrawPerVDB;
-	/* Win95 default ought to be per frame */
 	
 	/* Timer */
 	long lastTickCount;
@@ -76,18 +73,14 @@ void InitialiseRawInput();
 	int VideoModeTypeScreen;
 	int WindowMode;
 	int ZBufferMode;
-	unsigned char AttemptVideoModeRestart;
-
-    PROCESSORTYPES ProcessorType;
-	BOOL MMXAvailable;
 
 	unsigned char *TextureLightingTable = 0;
 
 	unsigned char *PaletteRemapTable = 0;
 
-	int NumShadingTables    = 0;
+	int NumShadingTables = 0;
 
-	int NumPaletteShadingTables              = 0;
+	int NumPaletteShadingTables = 0;
 
 	int FrameRate;
 	int NormalFrameTime;
@@ -99,12 +92,9 @@ void InitialiseRawInput();
 	unsigned char KeyCode;
 	unsigned char KeyASCII;
 
-
-	#if SuppressWarnings
 	unsigned char *palette_tmp;
 	static VIEWDESCRIPTORBLOCK* vdb_tmp;
 	static SCREENDESCRIPTORBLOCK* sdb_tmp;
-	#endif
 
     /* Keyboard */
 	unsigned char KeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
@@ -188,27 +178,21 @@ SHAPEHEADER* GetShapeData(int shapenum)
 
 void PlatformSpecificVDBInit(VIEWDESCRIPTORBLOCK *vdb)
 {
-	#if SuppressWarnings
 	vdb_tmp = vdb;
-	#endif
 }
 
 
 void PlatformSpecificShowViewEntry(VIEWDESCRIPTORBLOCK *vdb, SCREENDESCRIPTORBLOCK *sdb)
 {
-	#if SuppressWarnings
 	vdb_tmp = vdb;
 	sdb_tmp = sdb;
-	#endif
 }
 
 
 void PlatformSpecificShowViewExit(VIEWDESCRIPTORBLOCK *vdb, SCREENDESCRIPTORBLOCK *sdb)
 {
-	#if SuppressWarnings
 	vdb_tmp = vdb;
 	sdb_tmp = sdb;
-	#endif
 }
 
 
@@ -247,9 +231,7 @@ void GetDOSFilename(char *fnameptr)
 */
 
 int CompareStringCH(char *string1, char *string2)
-
 {
-
 	char *srtmp;
 	char *srtmp2;
 	int slen1 = 0;
@@ -387,62 +369,6 @@ int CompareFilenameCH(char *string1, char *string2)
 
 }
 
-
-
-
-
-
-
-/*
-
- Create an RGB table for "palette"
-
- "GetRemappedPaletteColour()" is an access function for this table
-
-*/
-
-int NearestColour(int rs, int gs, int bs, unsigned char *palette)
-
-{
-
-	int i;
-	VECTORCH p0;
-	VECTORCH p1;
-	int nearest_index;
-	int nearest_delta;
-	int d;
-
-
-	p0.vx = rs;
-	p0.vy = gs;
-	p0.vz = bs;
-
-	nearest_index = 0;
-	nearest_delta = bigint;
-
-	for(i = 0; i < 256; i++) {
-
-		p1.vx = palette[0];
-		p1.vy = palette[1];
-		p1.vz = palette[2];
-
-		d = FandVD_Distance_3d(&p0, &p1);
-
-		if(d < nearest_delta) {
-
-			nearest_delta = d;
-			nearest_index = i;
-
-		}
-
-		palette += 3;
-
-	}
-
-	return nearest_index;
-
-}
-
 /*
 
  Initialise System and System Variables
@@ -450,9 +376,8 @@ int NearestColour(int rs, int gs, int bs, unsigned char *palette)
 */
 
 void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
-
 {
-	BOOL 		rc;
+	BOOL	rc;
 
     /*
 		Copy initial requests to current variables,
@@ -461,14 +386,6 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 
     VideoMode = VideoRequestMode;
 	WindowMode = WindowRequestMode;
-
-    /*
-		Initialise dubious restart
-		system for ModeX emulation
-		and other problems
-	*/
-
-    AttemptVideoModeRestart = FALSE;
 
     /* Initialise main window, windows procedure etc */
 	rc = InitialiseWindowsSystem(hInstance, nCmdShow, WinInitFull);
@@ -495,14 +412,9 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 	InitPrintQueue();
 	#endif
 
-	#if SUPPORT_MMX
-	SelectMMXOptions();
-	#endif
-
 	{
 		/* CDF 4/2/97 */
 		extern void ConstructOneOverSinTable(void);
-
 		ConstructOneOverSinTable();
 	}
 }

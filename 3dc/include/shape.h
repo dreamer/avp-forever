@@ -694,33 +694,12 @@ typedef struct texel {
 
 } TEXEL;
 
-
-#if support3dtextures
-
-#if int3dtextures
-
-typedef struct texelf {
-
-	int uuuf;
-	int veef;
-
-} TEXELF;
-
-#else
-
 typedef struct texelf {
 
 	float uuuf;
 	float veef;
 
 } TEXELF;
-
-#endif
-
-#endif
-
-
-#if SupportGouraud3dTextures
 
 typedef struct texelgtx3d {
 
@@ -728,8 +707,6 @@ typedef struct texelgtx3d {
 	float veef;
 
 } TEXELGTX3D;
-
-#endif
 
 
 /*

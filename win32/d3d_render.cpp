@@ -1190,18 +1190,23 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 	for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
-
+/*
 	  	float oneOverZ;
 	  	oneOverZ = (1.0f)/vertices->Z;
 
 		int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-		mainVertex[vb].sx = (float)x;
-			
 		int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-		mainVertex[vb].sy = (float)y;
 
+		mainVertex[vb].sx = (float)x;
+		mainVertex[vb].sy = (float)y;
 		mainVertex[vb].sz = 1.0f;
 		mainVertex[vb].rhw = oneOverZ;
+*/
+		mainVertex[vb].sx = (float)vertices->X;
+		mainVertex[vb].sy = (float)-vertices->Y;
+		mainVertex[vb].sz = 1.0f;
+		mainVertex[vb].rhw = 1.0f;
+
 		mainVertex[vb].color = RGBLIGHT_MAKE(vertices->R,vertices->G,vertices->B);
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 		mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
@@ -1242,7 +1247,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 	for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
-
+/*
 	  	float oneOverZ = 1.0f / (float)vertices->Z;
 
 		float zvalue;
@@ -1257,7 +1262,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 		// project into screen space
 		int x = (vertices->X * (Global_VDB_Ptr->VDB_ProjX + 1)) / vertices->Z + Global_VDB_Ptr->VDB_CentreX;
 		int y = (vertices->Y * (Global_VDB_Ptr->VDB_ProjY + 1)) / vertices->Z + Global_VDB_Ptr->VDB_CentreY;
-/*
+
 		mainVertex[vb].sx = (float)x;
 		mainVertex[vb].sy = (float)y;
 		mainVertex[vb].sz = zvalue;
@@ -1311,7 +1316,7 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 	for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
-
+/*
 		float zvalue;
 		float rhw = 1.0f/(float)vertices->Z;
 
@@ -1320,7 +1325,7 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 
 		zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
 		zvalue = 1.0f - Zoffset * ZNear/zvalue;
-/*
+
 		mainVertex[vb].sx = (float)x;
 		mainVertex[vb].sy = (float)y;
 		mainVertex[vb].sz = zvalue;
@@ -1363,22 +1368,27 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
 	for(unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
-
+/*
 	  	float oneOverZ;
 	  	oneOverZ = (1.0f)/vertices->Z;
 		float zvalue;
 
 		int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-		mainVertex[vb].sx = (float)x;
-
 		int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-		mainVertex[vb].sy = (float)y;
 			
 		zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
 		zvalue = 1.0f - Zoffset * ZNear/zvalue;
 
+		mainVertex[vb].sx = (float)x;
+		mainVertex[vb].sy = (float)y;
 		mainVertex[vb].sz = zvalue;
 		mainVertex[vb].rhw = zvalue;
+*/
+		mainVertex[vb].sx = (float)vertices->X;
+		mainVertex[vb].sy = (float)-vertices->Y;
+		mainVertex[vb].sz = (float)vertices->Z;
+		mainVertex[vb].rhw = 1.0f;
+
 		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);//RGBALIGHT_MAKE(255,255,255,255);
 		mainVertex[vb].specular = (D3DCOLOR)1.0f;
 		mainVertex[vb].tu = 0.0f;
@@ -1424,7 +1434,7 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 	for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
-
+/*
 	  	float oneOverZ;
 	  	oneOverZ = (1.0f)/vertices->Z;
 		float zvalue;
@@ -1434,7 +1444,7 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 	
 		zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
 		zvalue= 1.0f - Zoffset * ZNear/zvalue;
-/*
+
 		mainVertex[vb].sx = (float)x;
 		mainVertex[vb].sy = (float)y;
 		mainVertex[vb].sz = zvalue;
@@ -1737,17 +1747,20 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 
 			for (int i = 0; i < 3; i++)
 			{
+/*
 				int x = (verticesPtr->vx*(Global_VDB_Ptr->VDB_ProjX))/verticesPtr->vz+Global_VDB_Ptr->VDB_CentreX;
 				int y = (verticesPtr->vy*(Global_VDB_Ptr->VDB_ProjY))/verticesPtr->vz+Global_VDB_Ptr->VDB_CentreY;
 
-				mainVertex[vb].sx = (float)x;
-				mainVertex[vb].sy = (float)y;
-
 			  	float oneOverZ = ((float)verticesPtr->vz-ZNear)/(float)verticesPtr->vz;
 
+				mainVertex[vb].sx = (float)x;
+				mainVertex[vb].sy = (float)y;
 				mainVertex[vb].sz = oneOverZ;
-
-				/* check this.. */
+				mainVertex[vb].rhw = 1.0f;
+*/
+				mainVertex[vb].sx = (float)verticesPtr->vx;
+				mainVertex[vb].sy = (float)-verticesPtr->vy;
+				mainVertex[vb].sz = (float)verticesPtr->vz; // bjd - CHECK
 				mainVertex[vb].rhw = 1.0f;
 
 				if (i==3) mainVertex[vb].color = RGBALIGHT_MAKE(0,255,255,32);
@@ -1824,17 +1837,21 @@ void D3D_DrawParticle_Smoke(PARTICLE *particlePtr)
 
 			do
 			{
+/*
 				int x = (verticesPtr->vx*(Global_VDB_Ptr->VDB_ProjX))/verticesPtr->vz+Global_VDB_Ptr->VDB_CentreX;
 				int y = (verticesPtr->vy*(Global_VDB_Ptr->VDB_ProjY))/verticesPtr->vz+Global_VDB_Ptr->VDB_CentreY;
-				
-				mainVertex[vb].sx = (float)x;
-				mainVertex[vb].sy = (float)y;
 
 				float zvalue = (float)((vertices->vz)+HeadUpDisplayZOffset);
 				zvalue = ((zvalue-ZNear)/zvalue);
 
+				mainVertex[vb].sx = (float)x;
+				mainVertex[vb].sy = (float)y;
 				mainVertex[vb].sz = zvalue;
-				/* check */
+				mainVertex[vb].rhw = 1.0f;
+*/
+				mainVertex[vb].sx = (float)verticesPtr->vx;
+				mainVertex[vb].sy = (float)-verticesPtr->vy;
+				mainVertex[vb].sz = (float)vertices->vz;
 				mainVertex[vb].rhw = 1.0f;
 
 				mainVertex[vb].color = RGBALIGHT_MAKE((particlePtr->LifeTime>>8),(particlePtr->LifeTime>>8),0,(particlePtr->LifeTime>>7)+64);
@@ -1846,7 +1863,7 @@ void D3D_DrawParticle_Smoke(PARTICLE *particlePtr)
 				vb++;
 				verticesPtr++;
 			}
-		  	while(--i);
+		  	while (--i);
 		}
 		OUTPUT_TRIANGLE(0,2,1, 3);
 	}
@@ -1858,12 +1875,14 @@ void D3D_DecalSystem_Setup(void)
 	ExecuteBuffer();
 	LockExecuteBuffer();
 
-	if (D3DDitherEnable != FALSE) {
+	if (D3DDitherEnable != FALSE) 
+	{
 		d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE, FALSE);
 		D3DDitherEnable = FALSE;
 	}
 
-	if (D3DZWriteEnable != FALSE) {
+	if (D3DZWriteEnable != FALSE) 
+	{
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 		D3DZWriteEnable = FALSE;
 	}
@@ -1877,12 +1896,14 @@ void D3D_DecalSystem_End(void)
 	ExecuteBuffer();
 	LockExecuteBuffer();
 
-	if (D3DDitherEnable != TRUE) {
+	if (D3DDitherEnable != TRUE) 
+	{
 		d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE, TRUE);
 		D3DDitherEnable = TRUE;
 	}
 
-	if (D3DZWriteEnable != TRUE) {
+	if (D3DZWriteEnable != TRUE) 
+	{
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 		D3DZWriteEnable = TRUE;
 	}
@@ -1983,7 +2004,7 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 		for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
 		{
 			RENDERVERTEX *vertices = &renderVerticesPtr[i];
-
+/*
 		  	float oneOverZ;
 		  	oneOverZ = (1.0f)/vertices->Z;
 			float zvalue;
@@ -1993,7 +2014,7 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 
 			zvalue = (float)((vertices->Z)+HeadUpDisplayZOffset-50);
 			zvalue = 1.0f - Zoffset * ZNear/zvalue;
-/*
+
 			mainVertex[vb].sx = (float)x;
 			mainVertex[vb].sy = (float)y;
 			mainVertex[vb].sz = zvalue;
@@ -2101,7 +2122,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 			for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++ )
 			{
 				RENDERVERTEX *vertices = &renderVerticesPtr[i];
-
+/*
 			  	float oneOverZ = (1.0f)/vertices->Z;
 				float zvalue;
 
@@ -2121,7 +2142,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 					//zvalue = 1.0f - ZNear*oneOverZ;
 					zvalue = 1.0f - Zoffset * ZNear/vertices->Z;
 				}
-/*
+
 				mainVertex[vb].sx = (float)x;
 				mainVertex[vb].sy = (float)y;
 				mainVertex[vb].sz = zvalue;
@@ -2244,8 +2265,6 @@ void D3D_FMVParticle_Output(RENDERVERTEX *renderVerticesPtr)
 
 
 extern int CloakingPhase;
-//extern int sine[];
-//extern int cosine[];
 extern int NumActiveBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
 extern int GlobalAmbience;
@@ -2382,11 +2401,11 @@ void PostLandscapeRendering()
 				}
 				else
 				{
-					if(!strcmp(modulePtr->name,"shaftbot"))
+					if (!strcmp(modulePtr->name,"shaftbot"))
 					{
 						drawEndWater = 1;
 					}
-					if((!_stricmp(modulePtr->name,"shaft01"))
+					if ((!_stricmp(modulePtr->name,"shaft01"))
 					 ||(!_stricmp(modulePtr->name,"shaft02"))
 					 ||(!_stricmp(modulePtr->name,"shaft03"))
 					 ||(!_stricmp(modulePtr->name,"shaft04"))
@@ -2475,7 +2494,7 @@ void PostLandscapeRendering()
 			/* if it's a module, which isn't inside another module */
 			if (modulePtr && modulePtr->name)
 			{
-			  	if( (!_stricmp(modulePtr->name,"start-en01"))
+			  	if ((!_stricmp(modulePtr->name,"start-en01"))
 			  	  ||(!_stricmp(modulePtr->name,"start")))
 				{
 					drawMirrorSurfaces = 1;
@@ -2530,7 +2549,7 @@ void PostLandscapeRendering()
 	{
 		char drawWater = 0;
 
-		while(numOfObjects)
+		while (numOfObjects)
 		{
 			DISPLAYBLOCK *objectPtr = OnScreenBlockList[--numOfObjects];
 			MODULE *modulePtr = objectPtr->ObMyModule;
@@ -2538,7 +2557,7 @@ void PostLandscapeRendering()
 			/* if it's a module, which isn't inside another module */
 			if (modulePtr && modulePtr->name)
 			{
-				if( (!_stricmp(modulePtr->name,"largespace"))
+				if ((!_stricmp(modulePtr->name,"largespace"))
 				  ||(!_stricmp(modulePtr->name,"proc13"))
 				  ||(!_stricmp(modulePtr->name,"trench01"))
 				  ||(!_stricmp(modulePtr->name,"trench02"))
@@ -2742,6 +2761,7 @@ int LightSourceWaterPoint(VECTORCH *pointPtr, int offset)
 			}
 		}
 	}
+
 	if (redI>ONE_FIXED) redI=ONE_FIXED;
 	else if (redI<GlobalAmbience) redI=GlobalAmbience;
 	if (greenI>ONE_FIXED) greenI=ONE_FIXED;
@@ -2761,13 +2781,13 @@ int LightIntensityAtPoint(VECTORCH *pointPtr)
 	int intensity=0;
 
 	DISPLAYBLOCK **activeBlockListPtr = ActiveBlockList;
-	for(int i = NumActiveBlocks; i!=0; i--)
+	for (int i = NumActiveBlocks; i!=0; i--)
 	{
 		DISPLAYBLOCK *dispPtr = *activeBlockListPtr++;
 
-		if(dispPtr->ObNumLights)
+		if (dispPtr->ObNumLights)
 		{
-			for(int j = 0; j < dispPtr->ObNumLights; j++)
+			for (int j = 0; j < dispPtr->ObNumLights; j++)
 			{
 				LIGHTBLOCK *lptr = dispPtr->ObLights[j];
 
@@ -2802,6 +2822,7 @@ unsigned char ForceFieldPointColour2[15*3+1][16];
 
 int Phase=0;
 int ForceFieldPhase=0;
+
 void InitForceField(void)
 {
 	for (int x=0; x<15*3+1; x++)
@@ -3156,7 +3177,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 	for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
-
+/*
 	  	float oneOverZ;
 	  	oneOverZ = (1.0f)/(vertices->Z);
 		float zvalue;
@@ -3166,7 +3187,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 
 		int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
 		int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-/*
+
 		mainVertex[vb].sx = (float)x;
 		mainVertex[vb].sy = (float)y;
 		mainVertex[vb].sz = 1.0f;
@@ -3212,12 +3233,10 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 	for (int i=0; i<256; i++)
 	{
 		if (point->vz<=1) point->vz = 1;
+/*
 		int x = (point->vx*(Global_VDB_Ptr->VDB_ProjX+1))/point->vz+Global_VDB_Ptr->VDB_CentreX;
 		int y = (point->vy*(Global_VDB_Ptr->VDB_ProjY+1))/point->vz+Global_VDB_Ptr->VDB_CentreY;
 //			textprint("%d, %d\n",x,y);
-
-		mainVertex[vb].sx = (float)x;
-		mainVertex[vb].sy = (float)y;
 
 		int z = point->vz + HeadUpDisplayZOffset;
 		float rhw = 1.0f / (float)point->vz;
@@ -3225,8 +3244,16 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 
 	  	float oneOverZ = ((float)(point->vz)-ZNear)/(float)(point->vz);
 
+		mainVertex[vb].sx = (float)x;
+		mainVertex[vb].sy = (float)y;
 		mainVertex[vb].sz = zf;
 		mainVertex[vb].rhw = rhw;
+*/
+		mainVertex[vb].sx = (float)point->vx;
+		mainVertex[vb].sy = (float)-point->vy;
+		mainVertex[vb].sz = (float)point->vz;
+		mainVertex[vb].rhw = 1.0f;
+
 	   	mainVertex[vb].color = MeshVertexColour[i];
 		mainVertex[vb].specular = 0;
 
@@ -3248,7 +3275,7 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 
 		for (x=0; x<15; x++)
 		{
-			for(y=0; y<15; y++)
+			for (y=0; y<15; y++)
 			{
 				OUTPUT_TRIANGLE(0+x+(16*y),1+x+(16*y),16+x+(16*y), 256);
 				OUTPUT_TRIANGLE(1+x+(16*y),17+x+(16*y),16+x+(16*y), 256);

@@ -1,7 +1,7 @@
 #ifndef _included_system_h_
 #define _included_system_h_
 
-/*   AVP - WIN95
+/*   AVP
 
  Project Specific System Equates etc.
 
@@ -29,10 +29,6 @@ extern "C" {
 #else /* default switch */
 	#define debug TRUE
 #endif
-
-#define SuppressWarnings 	TRUE
-#define platform_pc 		TRUE
-#define InterfaceEngine		FALSE
 
 #define Term -1
 
@@ -119,14 +115,9 @@ typedef struct oc_entry {
 
 } OC_ENTRY;
 
-/* now defunct - see next four defines*/
-#define Hardware2dTextureClipping FALSE
-
 #define Texture3dClamping  FALSE
 #define Texture2dClamping  FALSE
 #define Texture3dSubdivide FALSE
-
-#define SaturnHazing FALSE
 
 /***************** Angles  and VALUES ******************/
 
@@ -180,13 +171,8 @@ extern int maxshapes;
 #define numfreebspblocks 1
 #define maxbspnodeitems 1
 
-#if 0
-#define MaxImages 80 /* Was 400, but now we only have one NPC in each image group */
-#define MaxImageGroups 15 /* Right: One for the ENV one for the CHARACTER, one for each NPC (max 4, though only MPS4 ever has as many as 3 at present) */
-#else
 #define MaxImages 400
 #define MaxImageGroups 1
-#endif
 
 #define oversample_8bitg_threshold 256
 
@@ -205,18 +191,11 @@ extern int maxshapes;
 
 #define flic_player							TRUE
 
-#define SaturnCDQueueSystem					FALSE
-
 #define DynamicAdaptationToFrameRate		FALSE
 
 
 /***************** DRAW SORT *******************/
-
-
-
-
 #define SupportTrackOptimisation			FALSE
-
 
 #define SupportBSP						 	FALSE
 
@@ -292,56 +271,8 @@ extern int maxshapes;
 /* the mip maps' sizes to be rounded up eg. 161x82 -> 81x41 -> 21x11 -> 11x6 -> 6x3 -> 3x2 -> 2x1 */
 #define MIP_ROUNDUP        TRUE
 
-#if 0
-#define num_shadetable_entries	256
-#define shadetable_shift		8				/* 65,535 -> 255 */
-#endif
-
-#if 1
 #define num_shadetable_entries	1024
 #define shadetable_shift		6
-#endif
-
-/*
- 3d textures
- This defines the amount by which we can scale up U/Z, V/Z & 1/Z
- It is defined in terms of the maximum UV size and the size of an int
- A value of 10 gives a scale of 31 - 10 = 21
- 1/Z, the critical value, reaches 0 at 2^21 = 2km
- Since we know that z STARTS at no less than 2^8, we can increase this value
- by 8, giving 2^29
- 1/Z now reaches 0 at 2^29 = 537km
-*/
-
-#define support3dtextures					TRUE
-#define int3dtextures						FALSE /* there is no D3D Zbuffer support for int 3d textures */
-#define SupportGouraud3dTextures  			TRUE
-
-
-
-
-
-/*************************** WINDOWS 95 *********************/
-
-#ifdef _MSC_VER
-#define SUPPORT_MMX 0
-#else
-#define SUPPORT_MMX 1
-#endif
-
-#define MaxD3DInstructions 1000 // includes state change instructions!!!
-#define MaxD3DVertices     256
-
-#define optimiseflip FALSE /* unstable at present */
-#define optimiseblit TRUE /* unstable at present */
-
-
-
-/******************** PLAYSTATION ********************/
-
-
-
-
 
 #ifdef __cplusplus
 	

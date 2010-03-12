@@ -9,12 +9,6 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-
-#if SUPPORT_MMX
-#include "mmx_math.h"
-#endif
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -625,21 +619,10 @@ void MakeV(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3);
 void AddV(VECTORCH *v1, VECTORCH *v2);
 void RotVect(VECTORCH *v, MATRIXCH *m);
 
-#if SUPPORT_MMX
-
-#define RotateVector(v,m) (use_mmx_math ? MMX_VectorTransform((v),(m)) : _RotateVector((v),(m)))
-#define RotateAndCopyVector(v_in,v_out,m) (use_mmx_math ? MMX_VectorTransformed((v_out),(v_in),(m)) : _RotateAndCopyVector((v_in),(v_out),(m)))
-#define Dot(v1,v2) (use_mmx_math ? MMXInline_VectorDot((v1),(v2)) : _Dot((v1),(v2)))
-#define DotProduct(v1,v2) (use_mmx_math ? MMX_VectorDot((v1),(v2)) : _DotProduct((v1),(v2)))
-
-#else /* ! SUPPORT_MMX */
-
 #define RotateVector(v,m) (_RotateVector((v),(m)))
 #define RotateAndCopyVector(v_in,v_out,m) (_RotateAndCopyVector((v_in),(v_out),(m)))
 #define Dot(v1,v2) (_Dot((v1),(v2)))
 #define DotProduct(v1,v2) (_DotProduct((v1),(v2)))
-
-#endif /* ? SUPPORT_MMX */
 
 #ifdef __cplusplus
 }

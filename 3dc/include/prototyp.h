@@ -599,7 +599,6 @@ typedef struct viewdescriptorblock {
 
 	#if pc_backdrops
 	BACKDROPTYPE VDB_BackdropType;
-	unsigned short VDB_ProjectorXOffsets[MaxScreenWidth];
 	#endif
 
 	#if ProjectSpecificVDBs
@@ -614,7 +613,7 @@ typedef struct viewdescriptorblock {
 #define ViewDB_Flag_SingleBuffer	0x00000001
 #define ViewDB_Flag_DoubleBuffer	0x00000002
 #define ViewDB_Flag_FullSize		0x00000004	/* Use fast screen clear */
-#define ViewDB_Flag_NoBackdrop	0x00000008
+#define ViewDB_Flag_NoBackdrop		0x00000008
 
 #define ViewDB_Flag_LTrunc			0x00000010	/* Informs the VDB creator		*/
 #define ViewDB_Flag_RTrunc			0x00000020	/* that a physical screen		*/
@@ -623,25 +622,25 @@ typedef struct viewdescriptorblock {
 
 #define ViewDB_Flag_Hazing			0x00000100
 #define ViewDB_Flag_DontDraw		0x00000200
-#define ViewDB_Flag_AdjustScale	0x00000400	/* Scale 320x200 definition up to equivalent size for the mode */
-#define ViewDB_Flag_AddSubject	0x00000800	/* For MapSetVDB, telling it to add dptr_last to the dptr */
+#define ViewDB_Flag_AdjustScale		0x00000400	/* Scale 320x200 definition up to equivalent size for the mode */
+#define ViewDB_Flag_AddSubject		0x00000800	/* For MapSetVDB, telling it to add dptr_last to the dptr */
 
 #define ViewDB_Flag_NeedToFlushZ	0x00001000	/* Cleared by flush function */
 
 
-#define ViewDB_Flag_ImageBackdrop 0x00004000	/* This requires a backdrop
+#define ViewDB_Flag_ImageBackdrop	0x00004000	/* This requires a backdrop
 																image array, accessed through
 																"Global_SceneBackdropPtr" */
 
-#define ViewDB_Flag_Horizon		0x00008000	/* Draw a "traditional"
+#define ViewDB_Flag_Horizon			0x00008000	/* Draw a "traditional"
 																Sky/Ground horizon - before
 																the backdrop is drawn */
 
 #define ViewDB_Flag_UseBackdropImageColoursForHorizon	0x00010000
 
-#define ViewDB_Flag_NoScreenClear							0x00020000
+#define ViewDB_Flag_NoScreenClear						0x00020000
 
-#define ViewDB_Flag_NoModules									0x00040000
+#define ViewDB_Flag_NoModules							0x00040000
 
 
 /*
@@ -899,7 +898,7 @@ typedef struct displayblock
 															across the polygon */
 
 
-#define ObFlag_TypeZ				0x00000080	/* Shape uses Z Sort */
+#define ObFlag_TypeZ			0x00000080	/* Shape uses Z Sort */
 
 
 
@@ -919,7 +918,7 @@ typedef struct displayblock
 
 #define ObFlag_ZBuffer			0x08000000	/* Request item z-buffering */
 
-#define ObFlag_BFCRO				0x10000000	/* Back Face Cull Rot. Optimise */
+#define ObFlag_BFCRO			0x10000000	/* Back Face Cull Rot. Optimise */
 #define ObFlag_RSP				0x20000000	/* Radius Space Partitioning -
 															requires RFC data in shape */
 
@@ -937,7 +936,7 @@ typedef struct displayblock
 #define ObFlag2_ObjLevelHaze	0x00000002	/* Hazing at object level */
 
 
-#define ObFlag2_AugZ				0x00000008	/* Augmented Z-Sort */
+#define ObFlag2_AugZ			0x00000008	/* Augmented Z-Sort */
 
 
 
@@ -1033,919 +1032,6 @@ typedef struct displayblock
 
 #endif
 
-
-
-/*
-
- Standard Points
-
-*/
-
-typedef struct p2d {
-
-	VECTOR2D point2d;
-
-} P2D;
-
-typedef struct p3d {
-
-	VECTORCH point3d;
-
-} P3D;
-
-/*
-
- Gouraud Points
-
-*/
-
-typedef struct p2d_gouraud {
-
-	VECTOR2D point2d;
-	int i2d;
-
-} P2D_GOURAUD;
-
-typedef struct p3d_gouraud {
-
-	VECTORCH point3d;
-	int i3d;
-
-} P3D_GOURAUD;
-
-/*
-
- Phong Points
-
-*/
-
-typedef struct p2d_phong {
-
-	VECTOR2D point2d;
-	VECTORCH phong_normal2d;
-
-} P2D_PHONG;
-
-
-typedef struct p3d_phong {
-
-	VECTORCH point3d;
-	VECTORCH phong_normal3d;
-
-} P3D_PHONG;
-
-
-/*
-
- Texture 2d Points
-
-*/
-
-typedef struct p2d_texture2d {
-
-	VECTOR2D point2d;
-	int u2d_2d;
-	int v2d_2d;
-
-} P2D_TEXTURE2D;
-
-
-typedef struct p3d_texture2d {
-
-	VECTORCH point3d;
-	int u3d_2d;
-	int v3d_2d;
-
-} P3D_TEXTURE2D;
-
-
-/*
-
- Texture 2d Points - Z-Buffered
-
-*/
-
-#if SupportZBuffering
-
-typedef struct p2d_texture2d_zb {
-
-	VECTOR2D point2d;
-	int u2d_2d;
-	int v2d_2d;
-	float z2d_2d;
-
-} P2D_TEXTURE2D_ZB;
-
-
-typedef struct p3d_texture2d_zb {
-
-	VECTORCH point3d;
-	int u3d_2d;
-	int v3d_2d;
-	float z3d_2d;
-
-} P3D_TEXTURE2D_ZB;
-
-#endif
-
-
-/*
-
- Texture 3d Points
-
-*/
-
-#if support3dtextures
-
-#if int3dtextures
-
-typedef struct p2d_texture3d {
-
-	VECTOR2D point2d;
-	int u2d_tx3d;
-	int v2d_tx3d;
-	int z2d_tx3d;
-
-} P2D_TEXTURE3D;
-
-
-typedef struct p3d_texture3d {
-
-	VECTORCH point3d;
-	int u3d_tx3d;
-	int v3d_tx3d;
-
-} P3D_TEXTURE3D;
-
-#else
-
-typedef struct p2d_texture3d {
-
-	VECTOR2D point2d;
-	float u2d_tx3d;
-	float v2d_tx3d;
-	float z2d_tx3d;
-
-} P2D_TEXTURE3D;
-
-
-typedef struct p3d_texture3d {
-
-	VECTORCH point3d;
-	int u3d_tx3d;
-	int v3d_tx3d;
-
-} P3D_TEXTURE3D;
-
-#endif
-
-#endif
-
-/*
-
- Gouraud Texture 2d Points
-
-*/
-
-typedef struct p2d_gouraudtexture2d {
-
-	VECTOR2D point2d;
-	int u2d_2d;
-	int v2d_2d;
-	int i2d_2d;
-
-} P2D_GOURAUDTEXTURE2D;
-
-
-typedef struct p3d_gouraudtexture2d {
-
-	VECTORCH point3d;
-	int u3d_2d;
-	int v3d_2d;
-	int i3d_2d;
-
-} P3D_GOURAUDTEXTURE2D;
-
-
-/*
-
- Gouraud Texture 2d Points - Z-Buffered
-
-*/
-
-#if SupportZBuffering
-
-typedef struct p2d_gouraudtexture2d_zb {
-
-	VECTOR2D point2d;
-	int u2d_gtx2d;
-	int v2d_gtx2d;
-	int i2d_gtx2d;
-	float z2d_gtx2d;
-
-} P2D_GOURAUDTEXTURE2D_ZB;
-
-
-typedef struct p3d_gouraudtexture2d_zb {
-
-	VECTORCH point3d;
-	int u3d_gtx2d;
-	int v3d_gtx2d;
-	int i3d_gtx2d;
-	float z3d_gtx2d;
-
-} P3D_GOURAUDTEXTURE2D_ZB;
-
-#endif
-
-
-#if SupportGouraud3dTextures
-
-/*
-
- Gouraud Texture 3d Points
-
-*/
-
-typedef struct p2d_gouraudtexture3d {
-
-	VECTOR2D point2d;
-	float u2d_gtx3d;
-	float v2d_gtx3d;
-	float z2d_gtx3d;
-	int i2d_gtx3d;
-
-} P2D_GOURAUDTEXTURE3D;
-
-
-typedef struct p3d_gouraudtexture3d {
-
-	VECTORCH point3d;
-	int u3d_gtx3d;
-	int v3d_gtx3d;
-	int i3d_gtx3d;
-
-} P3D_GOURAUDTEXTURE3D;
-
-#endif	/* SupportGouraud3dTextures */
-
-
-
-/*
-
- Polygon Points.
-
- These are the points as they appear to a Scan Convertor. Item pointers are
- cast as these structs by the SC to make their life easier.
-
-*/
-
-
-/*
-
- I_Polygon
-
-*/
-
-typedef struct i_polygon_pt {
-
-	int i_x;
-	int i_y;
-
-} I_POLYGON_PT;
-
-
-/*
-
- I_Polygon_ZBuffer
-
-*/
-
-#if ZBufferTest
-
-typedef struct i_polygon_zbuffer_pt {
-
-	int i_x;
-	int i_y;
-	int i_z;
-
-} I_POLYGON_ZBUFFER_PT;
-
-#endif
-
-#if SupportZBuffering
-
-typedef struct i_polygon_zbuffer_pt {
-
-	int i_x;
-	int i_y;
-	float i_z;
-
-} I_POLYGON_ZBUFFER_PT;
-
-#endif
-
-
-/*
-
- I_GouraudPolygon
-
-*/
-
-typedef struct i_gouraudpolygon_pt {
-
-	int i_x;
-	int i_y;
-	int i_int;
-
-} I_GOURAUDPOLYGON_PT;
-
-
-/*
-
- I_GouraudPolygon_ZBuffer
-
-*/
-
-#if ZBufferTest
-
-typedef struct i_gouraudpolygon_zbuffer_pt {
-
-	int i_x;
-	int i_y;
-	int i_int;
-	int i_gz;
-
-} I_GOURAUDPOLYGON_ZBUFFER_PT;
-
-#endif
-
-#if SupportZBuffering
-
-typedef struct i_gouraudpolygon_zbuffer_pt {
-
-	int i_x;
-	int i_y;
-	int i_int;
-	float i_gz;
-
-} I_GOURAUDPOLYGON_ZBUFFER_PT;
-
-#endif
-
-
-/*
-
- I_PhongPolygon
-
-*/
-
-typedef struct i_phongpolygon_pt {
-
-	int i_x;
-	int i_y;
-
-	VECTORCH i_n;
-
-} I_PHONGPOLYGON_PT;
-
-#if SupportZBuffering
-
-typedef struct i_phongpolygon_zbuffer_pt {
-
-	int i_x;
-	int i_y;
-
-	VECTORCH i_n;
-
-	float i_pz;
-
-} I_PHONGPOLYGON_ZBUFFER_PT;
-
-#endif
-
-
-/*
-
- I_2dTexturePolygon
-
-*/
-
-typedef struct i_2dtexturepolygon_pt {
-
-	int i_x;
-	int i_y;
-
-	int i_u;
-	int i_v;
-
-} I_2DTEXTUREPOLYGON_PT;
-
-#if SupportZBuffering
-
-typedef struct i_2dtexturepolygon_zbuffer_pt {
-
-	int i_x;
-	int i_y;
-
-	int i_u;
-	int i_v;
-
-	float i_tx2dz;
-
-} I_2DTEXTUREPOLYGON_ZBUFFER_PT;
-
-#endif
-
-
-/*
-
- I_3dTexturePolygon
-
-*/
-
-#if support3dtextures
-
-#if int3dtextures
-
-typedef struct i_3dtexturepolygon_pt {
-
-	int i_x;
-	int i_y;
-
-	int i_tx3d_u;
-	int i_tx3d_v;
-	int i_tx3d_z;
-
-} I_3DTEXTUREPOLYGON_PT;
-
-#else
-
-typedef struct i_3dtexturepolygon_pt {
-
-	int i_x;
-	int i_y;
-
-	float i_tx3d_u;
-	float i_tx3d_v;
-	float i_tx3d_z;
-
-} I_3DTEXTUREPOLYGON_PT;
-
-#endif
-
-#if SupportZBuffering
-
-typedef struct i_3dtexturepolygon_zbuffer_pt {
-
-	int i_x;
-	int i_y;
-
-	float i_tx3d_u;
-	float i_tx3d_v;
-	float i_tx3d_z;
-
-} I_3DTEXTUREPOLYGON_ZBUFFER_PT;
-
-#endif
-
-#endif
-
-
-/*
-
- I_Gouraud2dTexturePolygon
-
-*/
-
-typedef struct i_gouraud2dtexturepolygon_pt {
-
-	int i_x;
-	int i_y;
-
-	int i_u;
-	int i_v;
-
-	int i_i;
-
-} I_GOURAUD2DTEXTUREPOLYGON_PT;
-
-
-#if SupportZBuffering
-
-typedef struct i_gouraud2dtexturepolygon_zbuffer_pt {
-
-	int i_x;
-	int i_y;
-
-	int i_u;
-	int i_v;
-
-	int i_i;
-
-	float i_gtx2dz;
-
-} I_GOURAUD2DTEXTUREPOLYGON_ZBUFFER_PT;
-
-#endif
-
-
-#if SupportGouraud3dTextures
-
-/*
-
- I_Gouraud3dTexturePolygon
-
-*/
-
-typedef struct i_gouraud3dtexturepolygon_pt {
-
-	int i_x;
-	int i_y;
-
-	float i_gtx3d_u;
-	float i_gtx3d_v;
-	float i_gtx3d_z;
-
-	int i_gtx3d_i;
-
-} I_GOURAUD3DTEXTUREPOLYGON_PT;
-
-#endif	/* SupportGouraud3dTextures */
-
-
-/*
-
- Clip Point Structure.
-
- Points P, S, F and I use this structure.
-
-*/
-
-typedef struct clip_point {
-
-	VECTORCH ClipPoint;
-	VECTORCH ClipNormal;
-	TEXEL ClipTexel;
-	int ClipInt;
-	int ClipZBuffer;
-
-} CLIP_POINT;
-
-
-#if support3dtextures
-
-#if int3dtextures
-
-typedef struct clip_point_f {
-
-	VECTORCH ClipPointF;
-	VECTORCH ClipNormalF;
-	TEXELF ClipTexelF;
-	int ClipIntF;
-	int ClipZBufferF;
-
-} CLIP_POINT_F;
-
-#else
-
-typedef struct clip_point_f {
-
-	VECTORCH ClipPointF;
-	VECTORCH ClipNormalF;
-	TEXELF ClipTexelF;
-	int ClipIntF;
-	float ClipZBufferF;
-
-} CLIP_POINT_F;
-
-#endif
-
-#endif
-
-
-#if SupportGouraud3dTextures
-
-typedef struct clip_point_gtx3d {
-
-	VECTORCH ClipPointF;
-	VECTORCH ClipNormalF;
-	TEXELGTX3D ClipTexelF;
-	int ClipIntF;
-	float ClipZBufferF;
-
-} CLIP_POINT_GTX3D;
-
-#endif
-
-
-
-
-/*
-
- Scan Data Blocks.
-
- These are the structures in ScanData[] that the SC outputs. Memory is
- allocated from ScanData[] as int* but is cast to the following structures
- by the SC for ease of use.
-
-*/
-
-typedef struct i_polygon_scan {
-
-	int ips_colour;
-	int ips_x1;
-	int ips_x2;
-	int ips_y;
-
-} I_POLYGON_SCAN;
-
-#if ZBufferTest
-
-typedef struct i_polygon_zbuffer_scan {
-
-	int ips_colour;
-	int ips_x1;
-	int ips_x2;
-	int ips_y;
-	int ips_z1;
-	int ips_z2;
-
-} I_POLYGON_ZBUFFER_SCAN;
-
-#endif
-
-#if SupportZBuffering
-
-typedef struct i_polygon_zbuffer_scan {
-
-	int ips_colour;
-	int ips_x1;
-	int ips_x2;
-	int ips_y;
-	float ips_z1;
-	float ips_z2;
-
-} I_POLYGON_ZBUFFER_SCAN;
-
-#endif
-
-
-typedef struct i_gouraudpolygon_scan {
-
-	int igs_c1;
-	int igs_c2;
-
-	int igs_x1;
-	int igs_x2;
-
-	int igs_y;
-
-} I_GOURAUDPOLYGON_SCAN;
-
-#if ZBufferTest
-
-typedef struct i_gouraudpolygon_zbuffer_scan {
-
-	int igs_c1;
-	int igs_c2;
-
-	int igs_x1;
-	int igs_x2;
-
-	int igs_y;
-
-	int igs_z1;
-	int igs_z2;
-
-} I_GOURAUDPOLYGON_ZBUFFER_SCAN;
-
-#endif
-
-#if SupportZBuffering
-
-typedef struct i_gouraudpolygon_zbuffer_scan {
-
-	int igs_c1;
-	int igs_c2;
-
-	int igs_x1;
-	int igs_x2;
-
-	int igs_y;
-
-	float igs_z1;
-	float igs_z2;
-
-} I_GOURAUDPOLYGON_ZBUFFER_SCAN;
-
-#endif
-
-
-typedef struct i_phongpolygon_scan {
-
-	VECTORCH ips_n1;
-	VECTORCH ips_n2;
-
-	int ips_x1;
-	int ips_x2;
-
-	int ips_y;
-
-} I_PHONGPOLYGON_SCAN;
-
-#if SupportZBuffering
-
-typedef struct i_phongpolygon_zbuffer_scan {
-
-	VECTORCH ips_n1;
-	VECTORCH ips_n2;
-
-	int ips_x1;
-	int ips_x2;
-
-	int ips_y;
-
-	float ips_z1;
-	float ips_z2;
-
-} I_PHONGPOLYGON_ZBUFFER_SCAN;
-
-#endif
-
-
-typedef struct i_2dtexturepolygon_scan {
-
-	int i2s_u1;
-	int i2s_v1;
-
-	int i2s_u2;
-	int i2s_v2;
-
-	int i2s_x1;
-	int i2s_x2;
-
-	int i2s_y;
-
-} I_2DTEXTUREPOLYGON_SCAN;
-
-#if SupportZBuffering
-
-typedef struct i_2dtexturepolygon_zbuffer_scan {
-
-	int i2s_u1;
-	int i2s_v1;
-
-	int i2s_u2;
-	int i2s_v2;
-
-	int i2s_x1;
-	int i2s_x2;
-
-	int i2s_y;
-
-	float i2s_z1;
-	float i2s_z2;
-
-} I_2DTEXTUREPOLYGON_ZBUFFER_SCAN;
-
-#endif
-
-
-#if support3dtextures
-
-#if int3dtextures
-
-typedef struct i_3dtexturepolygon_scan {
-
-	int i3s_u1;
-	int i3s_v1;
-	int i3s_z1;
-
-	int i3s_u2;
-	int i3s_v2;
-	int i3s_z2;
-
-	int i3s_x1;
-	int i3s_x2;
-
-	int i3s_y;
-
-} I_3DTEXTUREPOLYGON_SCAN;
-
-#else
-
-typedef struct i_3dtexturepolygon_scan {
-
-	float i3s_u1;
-	float i3s_v1;
-	float i3s_z1;
-
-	float i3s_u2;
-	float i3s_v2;
-	float i3s_z2;
-
-	int i3s_x1;
-	int i3s_x2;
-
-	int i3s_y;
-
-} I_3DTEXTUREPOLYGON_SCAN;
-
-#endif
-
-#if SupportZBuffering
-
-typedef struct i_3dtexturepolygon_zbuffer_scan {
-
-	float i3s_u1;
-	float i3s_v1;
-	float i3s_z1;
-
-	float i3s_u2;
-	float i3s_v2;
-	float i3s_z2;
-
-	int i3s_x1;
-	int i3s_x2;
-
-	int i3s_y;
-
-} I_3DTEXTUREPOLYGON_ZBUFFER_SCAN;
-
-#endif
-
-#endif
-
-
-typedef struct i_gouraud2dtexturepolygon_scan {
-
-	int ig2s_u1;
-	int ig2s_v1;
-	int ig2s_c1;
-
-	int ig2s_u2;
-	int ig2s_v2;
-	int ig2s_c2;
-
-	int ig2s_x1;
-	int ig2s_x2;
-
-	int ig2s_y;
-
-} I_GOURAUD2DTEXTUREPOLYGON_SCAN;
-
-#if SupportZBuffering
-
-typedef struct i_gouraud2dtexturepolygon_zbuffer_scan {
-
-	int ig2s_u1;
-	int ig2s_v1;
-	int ig2s_c1;
-
-	int ig2s_u2;
-	int ig2s_v2;
-	int ig2s_c2;
-
-	int ig2s_x1;
-	int ig2s_x2;
-
-	int ig2s_y;
-
-	float ig2s_z1;
-	float ig2s_z2;
-
-} I_GOURAUD2DTEXTUREPOLYGON_ZBUFFER_SCAN;
-
-#endif
-
-
-#if SupportGouraud3dTextures
-
-typedef struct i_gouraud3dtexturepolygon_scan {
-
-	float ig3s_u1;
-	float ig3s_v1;
-	float ig3s_z1;
-	int ig3s_c1;
-
-	float ig3s_u2;
-	float ig3s_v2;
-	float ig3s_z2;
-	int ig3s_c2;
-
-	int ig3s_x1;
-	int ig3s_x2;
-
-	int ig3s_y;
-
-} I_GOURAUD3DTEXTUREPOLYGON_SCAN;
-
-#endif	/* SupportGouraud3dTextures */
-
-
-
-
 /*
 
  Functions
@@ -1990,9 +1076,6 @@ void ProjectSpecificVDBInit(VIEWDESCRIPTORBLOCK *vdb);
 void UpdateGame(void);
 
 
-
-
-
 SHAPEHEADER* GetShapeData(int shapenum);
 
 
@@ -2012,9 +1095,6 @@ void DeallocateStrategyBlock(struct strategyblock *sptr);
 struct strategyblock* CreateActiveStrategyBlock(void);
 int DestroyActiveStrategyBlock(struct strategyblock*dblockptr);
 
-
-
-
 void InitialiseTxAnimBlocks(void);
 TXACTRLBLK* AllocateTxAnimBlock(void);
 void DeallocateTxAnimBlock(TXACTRLBLK *TxAnimblockptr);
@@ -2024,12 +1104,7 @@ void UpdateTxAnim(TXANIMHEADER *txah);
 void ChangeSequence(TXANIMHEADER *txah_old, TXANIMHEADER *txah_new);
 void ControlTextureAnimation(DISPLAYBLOCK *dptr);
 
-
-
-
-
 int DisplayAndLightBlockDeallocation(void);
-
 
 void InitialiseLightBlocks(void);
 
@@ -2038,8 +1113,6 @@ void DeallocateLightBlock(LIGHTBLOCK *lptr);
 
 LIGHTBLOCK* AddLightBlock(DISPLAYBLOCK *dptr, LIGHTBLOCK *lptr_to_add);
 void DeleteLightBlock(LIGHTBLOCK *lptr, DISPLAYBLOCK *dptr);
-
-
 
 void VDBClipPlanes(VIEWDESCRIPTORBLOCK *vdb);
 
@@ -2094,12 +1167,7 @@ int _DotProduct(VECTORCH *v1, VECTORCH *v2);
 int DotProduct2d(VECTOR2D *v1, VECTOR2D *v2);
 
 
-void MakeNormal(
-
-VECTORCH *v1,
-VECTORCH *v2,
-VECTORCH *v3,
-VECTORCH *v4);
+void MakeNormal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, VECTORCH *v4);
 
 void GetNormalVector(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3);
 
@@ -2114,13 +1182,10 @@ void Renormalise(VECTORCH *nvector);
 
 int Magnitude(VECTORCH *v);
 
-
-
 int VectorDistance(VECTORCH *v1, VECTORCH *v2);
 int OutcodeVectorDistance(VECTORCH *v1, VECTORCH *v2, int d);
 
 void MatrixFromZVector(VECTORCH *v, MATRIXCH *m);
-
 
 int PointInPolygon(int *point, int *polygon, int c, int ppsize);
 
@@ -2134,9 +1199,6 @@ void MaxLONGLONGCH(LONGLONGCH *llarrayptr, int llarraysize, LONGLONGCH *llmax);
 int MaxInt(int *iarray, int iarraysize);
 int MinInt(int *iarray, int iarraysize);
 
-
-
-
 /*
 
  Some Maths Functions
@@ -2146,19 +1208,12 @@ int MinInt(int *iarray, int iarraysize);
 void CreateEulerMatrix(EULER *e, MATRIXCH *m1);
 void CreateEulerVector(EULER *e, VECTORCH *v);
 
-
-
-void MatrixMultiply(
-
-MATRIXCH *m1,
-MATRIXCH *m2,
-MATRIXCH *m3);
+void MatrixMultiply(MATRIXCH *m1, MATRIXCH *m2, MATRIXCH *m3);
 
 void TransposeMatrixCH(MATRIXCH *m1);
 
 void CopyVector(VECTORCH *v1, VECTORCH *v2);
 void CopyLocation(VECTORCH *v1, VECTORCH *v2);
-
 
 void CopyEuler(EULER *e1, EULER *e2);
 void CopyMatrix(MATRIXCH *m1, MATRIXCH *m2);
@@ -2169,24 +1224,9 @@ void SubVector(VECTORCH *v1, VECTORCH *v2);
 void QuatToMat(QUAT *q,MATRIXCH *m);
 
 
-void _RotateVector(
-
-	VECTORCH *v,
-	MATRIXCH *m);
-
-
-void _RotateAndCopyVector(
-
-	VECTORCH *v1,
-	VECTORCH *v2,
-	MATRIXCH *m);
-
-
+void _RotateVector(VECTORCH *v, MATRIXCH *m);
+void _RotateAndCopyVector(VECTORCH *v1, VECTORCH *v2, MATRIXCH *m);
 void MakeVectorLocal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, MATRIXCH *m);
-
-
-
-
 
 void MatrixToEuler(MATRIXCH *m, EULER *e);
 void MatrixToEuler2(MATRIXCH *m, EULER *e);
@@ -2211,18 +1251,9 @@ int Distance_3d(VECTORCH *v0, VECTORCH *v1);
 */
 
 void SetupShapeLanguage(SHAPEHEADER *shapeheaderptr);
-
 void ShapePointsInstr(SHAPEINSTR *shapeinstrptr);
-
-
 void ShapeSpritePointsInstr(SHAPEINSTR *shapeinstrptr);
 void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr);
-
-
-void BackFaceCullPointOutcodeFlagging(void);
-
-
-
 
 
 
@@ -2243,7 +1274,6 @@ void InitialVideoMode(void);
 void ResetFrameCounter(void);
 void FrameCounterHandler(void);
 
-void* LoadFontIntoDirectDrawSurface(char *fname, IMAGEHEADER *iheader);
 #ifdef __cplusplus
 #endif // for __cplusplus
 
@@ -2253,15 +1283,6 @@ void ExitGame(void);
 
 void InitialiseParallelStrategy(void);
 void UpdateParallelStrategy(void);
-
-unsigned char* AllocateScreenBuffer(int sbuffersize);
-
-void SetPalette(unsigned char *palette);
-
-void CreatePaletteRemapTable(unsigned char *palette);
-unsigned char GetRemappedPaletteColour(int r, int g, int b, int bitsize);
-
-int NearestColour(int rs, int gs, int bs, unsigned char *palette);
 
 #if LoadingMapsShapesAndTexturesEtc
 
@@ -2275,25 +1296,12 @@ int InitialiseTextures(void);
 #endif
 
 void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex);
-void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr,
-												POLYHEADER *pheader,
-												int LTxIndex, int TxIndex);
-
+void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr, POLYHEADER *pheader, int LTxIndex, int TxIndex);
 void SpriteResizing(SHAPEHEADER *sptr);
-
 void FindImageExtents(IMAGEHEADER *ihdr, int numuvs, int *uvdata, IMAGEEXTENTS *e, IMAGEEXTENTS *e_curr);
-
-
 int GetMVSIndex(TXANIMHEADER *txah, EULER *e);
 
-
 IMAGEHEADER* GetImageHeader(void);
-
-void* GetTexture(int texindex);
-
-TEXTURE* GetTextureMemory(int txsize);
-void ReturnTextureMemory(TEXTURE *txptr);
-
 
 /* Backdrops */
 
@@ -2310,48 +1318,18 @@ void GetProjectFilename(char *fname, char *image);
 void GetDOSFilename(char *fnameptr);
 int CompareFilenameCH(char *string1, char *string2);
 
-TEXTURE* LoadBMP(char *fname, IMAGEHEADER *iheader);
-TEXTURE* LoadPGM(char *fname, IMAGEHEADER *iheader);
-int LoadPGMPalette(char *fname, unsigned char *palette);
-int LoadPGMPaletteLightingTable(char *filename, unsigned char *palette);
-
-void Create_MIP_Map(IMAGEHEADER *iheader);
-
 int NextLowPower2(int i);
 
 
 /* User Input */
 
 void ReadUserInput(void);
-
-void InitMouse(void);
-void ReadMouse(void);
-
-
-
-typedef struct mousedata {
-
-	short MouseDataX;
-	short MouseDataY;
-	unsigned short MouseDataButton;
-	short MouseDataVelX;
-	short MouseDataVelY;
-
-} MOUSEDATA;
-
-
 void ReadKeyboard(void);
-
-
 void WaitForReturn(void);
-
 void CursorHome(void);
-
 void InitialiseItemLists(void);
-
 void InitialiseItemPointers(void);
 void InitialiseItemData(void);
-
 void* AllocateItemData(int itemsize);
 
 
@@ -2394,9 +1372,6 @@ void SetFastRandom(void);
 int FastRandom(void);
 
 
-void DrawPalette(int x0, int y0, int x1, int y1);
-
-
 /*
 
  Equates and Enums
@@ -2430,13 +1405,6 @@ void FreeMorphArrays(void);
 
 #endif
 
-
-
-
-
-
-
-
 /* KJL 15:07:39 01/08/97 - Returns the magnitude of the 
    cross product of two vectors a and b. */
 int MagnitudeOfCrossProduct(VECTORCH *a, VECTORCH *b);
@@ -2448,12 +1416,6 @@ void CrossProduct(VECTORCH *a, VECTORCH *b, VECTORCH *c);
 /* KJL 12:01:08 7/16/97 - returns the magnitude of a vector - max error about 13%, though average error
    less than half this. Very fast compared to other approaches. */
 int Approximate3dMagnitude(VECTORCH *v);
-
-
-
-
-
-
 
 
 #ifdef __cplusplus

@@ -778,7 +778,6 @@ int GT_LL(LONGLONGCH *a, LONGLONGCH *b)
 */
 
 int LT_LL(LONGLONGCH *a, LONGLONGCH *b)
-
 {
 
 	int s = CMP_LL(a, b);		/* a-b */
@@ -787,35 +786,6 @@ int LT_LL(LONGLONGCH *a, LONGLONGCH *b)
 	if(s < 0) return (TRUE);
 
 	else return (FALSE);
-
-}
-
-
-
-
-/*
-
- Copy Clip Point Function
-
-*/
-
-void CopyClipPoint(CLIP_POINT *cp1, CLIP_POINT *cp2)
-
-{
-
-	cp2->ClipPoint.vx = cp1->ClipPoint.vx;
-	cp2->ClipPoint.vy = cp1->ClipPoint.vy;
-	cp2->ClipPoint.vz = cp1->ClipPoint.vz;
-
-	cp2->ClipNormal.vx = cp1->ClipNormal.vx;
-	cp2->ClipNormal.vy = cp1->ClipNormal.vy;
-	cp2->ClipNormal.vz = cp1->ClipNormal.vz;
-
-	cp2->ClipTexel.uuu = cp1->ClipTexel.uuu;
-	cp2->ClipTexel.vee = cp1->ClipTexel.vee;
-
-	cp2->ClipInt     = cp1->ClipInt;
-	cp2->ClipZBuffer = cp1->ClipZBuffer;
 
 }
 
