@@ -1152,8 +1152,8 @@ void InitialiseBaseFrequency(SOUNDINDEX soundNum)
 
 	float tempF;
 	GameSounds[soundNum].pSourceVoice->GetFrequencyRatio(&tempF);
-	sprintf(buf, "frequency ratio: %f\n", tempF);
-	OutputDebugString(buf);
+//	sprintf(buf, "frequency ratio: %f\n", tempF);
+//	OutputDebugString(buf);
 
 	/* otherwise, we have to set a new frequency, for our non-default pitch,
 	taking the current frequency as corresponding to the default pitch */

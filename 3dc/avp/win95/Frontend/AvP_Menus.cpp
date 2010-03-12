@@ -83,7 +83,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y);
 void DisplayVideoModeUnavailableScreen(void);
 void CheckForCredits(void);
 void DoCredits(void);
-BOOL RollCreditsText(int position, unsigned char *textPtr);
+BOOL RollCreditsText(int position, const char *textPtr);
 extern void SelectMenuDisplayMode(void);
 static void InitMainMenusBackdrop(void);
 extern void DrawMainMenusBackdrop(void);
@@ -97,7 +97,7 @@ void ShowMenuFrameRate(void);
 static void KeyboardEntryQueue_Clear(void);
 static void KeyboardEntryQueue_StartProcessing(void);
 void ScanSaveSlots(void);
-extern void GetFilenameForSaveSlot(int i, unsigned char *filenamePtr);
+extern void GetFilenameForSaveSlot(int i, char *filenamePtr);
 static void GetHeaderInfoForSaveSlot(SAVE_SLOT_HEADER* save_slot,const char* filename);
 
 static void PasteFromClipboard(char* Text,int MaxTextLength);
@@ -1895,7 +1895,7 @@ static void RenderLoadGameMenu(void)
 	AVPMENU_ELEMENT *elementPtr = AvPMenus.MenuElements;
 	int e;
 	int y;
-	int (*RenderText)(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
+	int (*RenderText)(const char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
 	
 	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
 	{
@@ -3353,12 +3353,10 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 	}
 }
 
-
-
 static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 {
-	int (*RenderText)(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
-	int (*RenderText_Coloured)(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int r, int g, int b);
+	int (*RenderText)(const char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
+	int (*RenderText_Coloured)(const char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int r, int g, int b);
 
 	if (AvPMenus.FontToUse==AVPMENU_FONT_BIG)
 	{
@@ -4658,7 +4656,7 @@ void DoCredits(void)
 	UnloadTextFile("credits.txt",creditsPtr);
 }
 
-BOOL RollCreditsText(int position, unsigned char *textPtr)
+BOOL RollCreditsText(int position, char *textPtr)
 {
 	int y=0;
 
@@ -4898,8 +4896,8 @@ static void TestValidityOfCheatMenu(void)
 	CheatMode_GetNextAllowedEnvironment(AvPMenus.MenuElements[2].SliderValuePtr,TRUE);
 }
 
-static unsigned char *BriefingTextString[5];
-static unsigned char BlankLine[]="";
+static char *BriefingTextString[5];
+static char BlankLine[]="";
 
 void SetBriefingTextForEpisode(int episode, I_PLAYER_TYPE playerID)
 {	
@@ -5281,7 +5279,7 @@ static char KeyboardEntryQueue_ProcessCharacter(void)
 
 void ScanSaveSlots(void)
 {
-	unsigned char filename[MAX_PATH];
+	char filename[MAX_PATH];
 	int i;
 	SAVE_SLOT_HEADER *slotPtr = SaveGameSlot;
 
@@ -5293,7 +5291,7 @@ void ScanSaveSlots(void)
 	}
 }
 
-extern void GetFilenameForSaveSlot(int i, unsigned char *filenamePtr)
+extern void GetFilenameForSaveSlot(int i, char *filenamePtr)
 {
 	TCHAR strPath[MAX_PATH];
 
@@ -5470,19 +5468,17 @@ static void PasteFromClipboard(char* Text,int MaxTextLength)
 {
 #ifdef WIN32
 	HANDLE hGlobal;
-	if(!Text)
-	{
+	if (!Text)
 		return;
-	}
 
-	if(IsClipboardFormatAvailable(CF_TEXT))
+	if (IsClipboardFormatAvailable(CF_TEXT))
 	{
 		OpenClipboard(0);
 		hGlobal = GetClipboardData(CF_TEXT);
-		if(hGlobal)
+		if (hGlobal)
 		{
-			char* pGlobal = GlobalLock(hGlobal);
-			if(pGlobal)
+			char* pGlobal = (char*)GlobalLock(hGlobal);
+			if (pGlobal)
 			{
 				strncpy(Text,pGlobal,MaxTextLength-1);
 				Text[MaxTextLength-1] = 0;

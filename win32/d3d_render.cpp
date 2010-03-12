@@ -1,10 +1,12 @@
+
+#include "d3_func.h"
+
 extern "C" {
 
 #include "3dc.h"
 #include "inline.h"
 #include "gamedef.h"
 #include "dxlog.h"
-#include "d3_func.h"
 #include "d3d_hud.h"
 #include "particle.h"
 #include "avp_menus.h"
@@ -12,8 +14,6 @@ extern "C" {
 #define UseLocalAssert FALSE
 #include "ourasert.h"
 #include <assert.h>
-
-extern D3DINFO d3d;
 
 extern "C++"{
 
@@ -754,7 +754,7 @@ BOOL ExecuteBuffer()
 	}
 
 	D3DXMATRIX matProjection;
-	D3DXMatrixPerspectiveFovLH( &matProjection, D3DX_PI / 2, FLOAT(ScreenDescriptorBlock.SDB_Width / ScreenDescriptorBlock.SDB_Height), 1.0f, 1000000.0f);
+	D3DXMatrixPerspectiveFovLH( &matProjection, D3DX_PI / 2, FLOAT(ScreenDescriptorBlock.SDB_Width / ScreenDescriptorBlock.SDB_Height), 64.0f, 1000000.0f);
 	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matProjection );
 
 	ChangeTextureAddressMode(TEXTURE_WRAP);
@@ -4341,9 +4341,9 @@ void r2rect :: AlphaFill
 }
 
 extern void D3D_RenderHUDNumber_Centred(unsigned int number, int x, int y, int colour);
-extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour);
-extern void D3D_RenderHUDString_Clipped(char *stringPtr, int x, int y, int colour);
-extern void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour);
+extern void D3D_RenderHUDString(const char *stringPtr, int x, int y, int colour);
+extern void D3D_RenderHUDString_Clipped(const char *stringPtr, int x, int y, int colour);
+extern void D3D_RenderHUDString_Centred(const char *stringPtr, int centreX, int y, int colour);
 
 extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colour)
 {
@@ -4438,7 +4438,7 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 	while(--noOfDigits);
 }
 
-extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour)
+extern void D3D_RenderHUDString(const char *stringPtr, int x, int y, int colour)
 {
 	// mission briefing text?
 	if (stringPtr == NULL)

@@ -29,8 +29,8 @@ extern "C"
 /* Macros **********************************************************/
 
 /* Imported function prototypes ************************************/
-extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour);
-extern void D3D_RenderHUDString_Clipped(char *stringPtr,int x,int y,int colour);
+extern void D3D_RenderHUDString(const char *stringPtr, int x, int y, int colour);
+extern void D3D_RenderHUDString_Clipped(const char *stringPtr, int x, int y, int colour);
 
 /* Imported data ***************************************************/
 #ifdef __cplusplus

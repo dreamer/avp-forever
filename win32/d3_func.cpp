@@ -41,52 +41,27 @@ int NearestSuperiorPow2(int i)
 	return x ? NearestSuperiorPow2(x) : i << 1;
 }
 
-extern "C" {
-
-#define INITGUID
-
-#include "3dc.h"
-#include "awTexLd.h"
-#include "module.h"
 #include "d3_func.h"
-#include "avp_menus.h"
-#include "kshape.h"
-#include "eax.h"
-#include "vmanpset.h"
-#include "networking.h"
-
-#include "avp_menugfx.hpp"
-extern AVPMENUGFX AvPMenuGfxStorage[];
-extern void ReleaseAllFMVTextures(void);
-
-extern void ThisFramesRenderingHasBegun(void);
-extern void ThisFramesRenderingHasFinished(void);
-
-extern "C++"
-{
-	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
-	#include "logString.h"
-	#include "configFile.h"
-	#include <d3dx9.h>
-	#include "console.h"
-	extern void Font_Init();
-	extern void Font_Release();
-	D3DXMATRIX matOrtho;
-	D3DXMATRIX matProjection;
-	D3DXMATRIX matViewProjection;
-	D3DXMATRIX matView; 
-	D3DXMATRIX matIdentity;
-}
-
-extern HWND hWndMain;
-extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern void DeleteRenderMemory();
-extern void ChangeWindowsSize(int width, int height);
-extern int WindowMode;
-int	VideoModeColourDepth;
-int	NumAvailableVideoModes;
-static HRESULT LastError;
 D3DINFO d3d;
+
+#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
+#include "logString.h"
+#include "configFile.h"
+#include <d3dx9.h>
+#include "console.h"
+#include "networking.h"
+#include "avp_menugfx.hpp"
+
+extern AVPMENUGFX AvPMenuGfxStorage[];
+extern void Font_Init();
+extern void Font_Release();
+D3DXMATRIX matOrtho;
+D3DXMATRIX matProjection;
+D3DXMATRIX matViewProjection;
+D3DXMATRIX matView; 
+D3DXMATRIX matIdentity;
+
+static HRESULT LastError;
 
 // byte order macros for A8R8G8B8 d3d texture
 enum 
@@ -97,17 +72,6 @@ enum
 	BO_ALPHA
 };
 
-void WriteMenuTextures()
-{
-	char *filename = new char[strlen(GetSaveFolderPath()) + MAX_PATH];
-
-	for (int i = 0; i < 54; i++)
-	{
-		sprintf(filename, "%s%d.png", GetSaveFolderPath(), i);
-
-		D3DXSaveTextureToFileA(filename, D3DXIFF_PNG, AvPMenuGfxStorage[i].menuTexture, NULL);
-	}
-}
 
 // TGA header structure
 #pragma pack(1)
@@ -130,10 +94,6 @@ struct TGA_HEADER
 
 static TGA_HEADER TgaHeader = {0};
 
-void ColourFillBackBuffer(int FillColour) 
-{
-	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET, FillColour, 1.0f, 0 );
-}
 
 char* GetDeviceName() 
 {
@@ -183,124 +143,21 @@ const D3DFORMAT DepthFormats[] =
 
 bool usingStencil = false;
 
-#if 0
-LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int *height)
+void WriteMenuTextures()
 {
-	LPDIRECT3DTEXTURE9	tempTexture = NULL;
-	D3DXIMAGE_INFO		imageInfo;
+	char *filename = new char[strlen(GetSaveFolderPath()) + MAX_PATH];
 
-	std::string fullFileName(fileName);
-	fullFileName += ".png";
-
-	// try find a png file at given path
-	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice, 
-		fullFileName.c_str(), 
-		D3DX_DEFAULT,			// width
-		D3DX_DEFAULT,			// height
-		1,						// mip levels
-		0,						// usage	
-		D3DFMT_UNKNOWN,			// format
-		D3DPOOL_MANAGED,
-		D3DX_FILTER_NONE,
-		D3DX_FILTER_NONE,
-		0,
-		&imageInfo,
-		NULL,
-		&tempTexture
-		);	
-
-	if (FAILED(LastError))
+	for (int i = 0; i < 54; i++)
 	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		*width = 0;
-		*height = 0;
-		return NULL;
+		sprintf(filename, "%s%d.png", GetSaveFolderPath(), i);
+
+		D3DXSaveTextureToFileA(filename, D3DXIFF_PNG, AvPMenuGfxStorage[i].menuTexture, NULL);
 	}
-
-	OutputDebugString("created user texture: ");
-	OutputDebugString(fullFileName.c_str());
-	OutputDebugString("\n");
-	
-	*width = imageInfo.Width;
-	*height = imageInfo.Height;
-	return tempTexture;
-}
-#endif
-
-void PrintD3DMatrix(const char* name, D3DXMATRIX &mat)
-{
-	char buf[300];
-	sprintf(buf, "Printing D3D Matrix: - %s\n"
-//	"\t 1 \t 2 \t 3 \t 4\n"
-	"\t %f \t %f \t %f \t %f\n"
-	"\t %f \t %f \t %f \t %f\n"
-	"\t %f \t %f \t %f \t %f\n"
-	"\t %f \t %f \t %f \t %f\n", name,
-	mat._11, mat._12, mat._13, mat._14,
-	mat._21, mat._22, mat._23, mat._24,
-	mat._31, mat._32, mat._33, mat._34,
-	mat._41, mat._42, mat._43, mat._44);
-
-	OutputDebugString(buf);
 }
 
-// called from Scrshot.cpp
-void CreateScreenShotImage()
+void ColourFillBackBuffer(int FillColour) 
 {
-	SYSTEMTIME systemTime;
-	LPDIRECT3DSURFACE9 frontBuffer = NULL;
-
-	std::ostringstream fileName(GetSaveFolderPath());
-
-	// get current system time
-	GetSystemTime(&systemTime);
-
-	//	creates filename from date and time, adding a prefix '0' to seconds value
-	//	otherwise 9 seconds appears as '9' instead of '09'
-	{
-		bool prefixSeconds = false;
-		if (systemTime.wYear < 10) prefixSeconds = true;
-
-		fileName << "AvP_" << systemTime.wDay << "-" << systemTime.wMonth << "-" << systemTime.wYear << "_" << systemTime.wHour << "-" << systemTime.wMinute << "-"; 
-
-		if (systemTime.wSecond < 10)
-		{
-			fileName << "0" << systemTime.wSecond;
-		}
-		else
-		{
-			fileName << systemTime.wSecond;
-		}
-
-		fileName << ".jpg";
-	}
-
-	// create surface to copy screen to
-	if (FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(ScreenDescriptorBlock.SDB_Width, ScreenDescriptorBlock.SDB_Height, D3DFMT_A8R8G8B8, D3DPOOL_SCRATCH, &frontBuffer, NULL)))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		OutputDebugString("Couldn't create screenshot surface\n");
-		return;
-	}
-
-	// copy front buffer screen to surface
-	if (FAILED(d3d.lpD3DDevice->GetFrontBufferData(0, frontBuffer))) 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		OutputDebugString("Couldn't get a copy of the front buffer\n");
-		SAFE_RELEASE(frontBuffer);
-		return;
-	}
-
-	// save surface to image file
-	if (FAILED(D3DXSaveSurfaceToFile(fileName.str().c_str(), D3DXIFF_JPG, frontBuffer, NULL, NULL))) 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		OutputDebugString("Save Surface to file failed!!!\n");
-	}
-
-	// release surface
-	SAFE_RELEASE(frontBuffer);
+	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET, FillColour, 1.0f, 0 );
 }
 
 D3DTEXTURE CreateD3DTallFontTexture(AVPTEXTURE *tex) 
@@ -732,6 +589,152 @@ D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL po
 
 	delete[] buffer;
 	return destTexture;
+}
+
+extern "C" {
+
+#define INITGUID
+
+#include "3dc.h"
+#include "awTexLd.h"
+#include "module.h"
+#include "avp_menus.h"
+#include "kshape.h"
+#include "eax.h"
+#include "vmanpset.h"
+
+extern void ReleaseAllFMVTextures(void);
+
+extern void ThisFramesRenderingHasBegun(void);
+extern void ThisFramesRenderingHasFinished(void);
+
+extern HWND hWndMain;
+extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+extern void DeleteRenderMemory();
+extern void ChangeWindowsSize(int width, int height);
+extern int WindowMode;
+int	VideoModeColourDepth;
+int	NumAvailableVideoModes;
+
+
+#if 0
+LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int *height)
+{
+	LPDIRECT3DTEXTURE9	tempTexture = NULL;
+	D3DXIMAGE_INFO		imageInfo;
+
+	std::string fullFileName(fileName);
+	fullFileName += ".png";
+
+	// try find a png file at given path
+	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice, 
+		fullFileName.c_str(), 
+		D3DX_DEFAULT,			// width
+		D3DX_DEFAULT,			// height
+		1,						// mip levels
+		0,						// usage	
+		D3DFMT_UNKNOWN,			// format
+		D3DPOOL_MANAGED,
+		D3DX_FILTER_NONE,
+		D3DX_FILTER_NONE,
+		0,
+		&imageInfo,
+		NULL,
+		&tempTexture
+		);	
+
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		*width = 0;
+		*height = 0;
+		return NULL;
+	}
+
+	OutputDebugString("created user texture: ");
+	OutputDebugString(fullFileName.c_str());
+	OutputDebugString("\n");
+	
+	*width = imageInfo.Width;
+	*height = imageInfo.Height;
+	return tempTexture;
+}
+#endif
+
+void PrintD3DMatrix(const char* name, D3DXMATRIX &mat)
+{
+	char buf[300];
+	sprintf(buf, "Printing D3D Matrix: - %s\n"
+//	"\t 1 \t 2 \t 3 \t 4\n"
+	"\t %f \t %f \t %f \t %f\n"
+	"\t %f \t %f \t %f \t %f\n"
+	"\t %f \t %f \t %f \t %f\n"
+	"\t %f \t %f \t %f \t %f\n", name,
+	mat._11, mat._12, mat._13, mat._14,
+	mat._21, mat._22, mat._23, mat._24,
+	mat._31, mat._32, mat._33, mat._34,
+	mat._41, mat._42, mat._43, mat._44);
+
+	OutputDebugString(buf);
+}
+
+// called from Scrshot.cpp
+void CreateScreenShotImage()
+{
+	SYSTEMTIME systemTime;
+	LPDIRECT3DSURFACE9 frontBuffer = NULL;
+
+	std::ostringstream fileName(GetSaveFolderPath());
+
+	// get current system time
+	GetSystemTime(&systemTime);
+
+	//	creates filename from date and time, adding a prefix '0' to seconds value
+	//	otherwise 9 seconds appears as '9' instead of '09'
+	{
+		bool prefixSeconds = false;
+		if (systemTime.wYear < 10) prefixSeconds = true;
+
+		fileName << "AvP_" << systemTime.wDay << "-" << systemTime.wMonth << "-" << systemTime.wYear << "_" << systemTime.wHour << "-" << systemTime.wMinute << "-"; 
+
+		if (systemTime.wSecond < 10)
+		{
+			fileName << "0" << systemTime.wSecond;
+		}
+		else
+		{
+			fileName << systemTime.wSecond;
+		}
+
+		fileName << ".jpg";
+	}
+
+	// create surface to copy screen to
+	if (FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(ScreenDescriptorBlock.SDB_Width, ScreenDescriptorBlock.SDB_Height, D3DFMT_A8R8G8B8, D3DPOOL_SCRATCH, &frontBuffer, NULL)))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		OutputDebugString("Couldn't create screenshot surface\n");
+		return;
+	}
+
+	// copy front buffer screen to surface
+	if (FAILED(d3d.lpD3DDevice->GetFrontBufferData(0, frontBuffer))) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		OutputDebugString("Couldn't get a copy of the front buffer\n");
+		SAFE_RELEASE(frontBuffer);
+		return;
+	}
+
+	// save surface to image file
+	if (FAILED(D3DXSaveSurfaceToFile(fileName.str().c_str(), D3DXIFF_JPG, frontBuffer, NULL, NULL))) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		OutputDebugString("Save Surface to file failed!!!\n");
+	}
+
+	// release surface
+	SAFE_RELEASE(frontBuffer);
 }
 
 // size of vertex and index buffers
@@ -1437,7 +1440,7 @@ void SetTransforms()
 	D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 
 	// set up projection matrix
-	D3DXMatrixPerspectiveFovLH( &matProjection, FLOAT(ScreenDescriptorBlock.SDB_Width / ScreenDescriptorBlock.SDB_Width), D3DX_PI / 2, 1.0f, 100.0f);
+	D3DXMatrixPerspectiveFovLH( &matProjection, D3DX_PI / 2, FLOAT(ScreenDescriptorBlock.SDB_Width / ScreenDescriptorBlock.SDB_Height), 64.0f, 1000000.0f);
 
 	// print projection matrix?
 	PrintD3DMatrix("Projection", matProjection);

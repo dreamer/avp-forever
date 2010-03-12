@@ -113,14 +113,14 @@ extern void ReleaseAllAvPMenuGfx(void);
 
 extern int RenderMenuText(const char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
 
-extern int RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
-extern int RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int red, int green, int blue); 
+extern int RenderSmallMenuText(const char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
+extern int RenderSmallMenuText_Coloured(const char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int red, int green, int blue); 
 
-extern int Hardware_RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
-extern int Hardware_RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int red, int green, int blue);
+extern int Hardware_RenderSmallMenuText(const char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
+extern int Hardware_RenderSmallMenuText_Coloured(const char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int red, int green, int blue);
 
 extern int RenderSmallChar(char c, int x, int y, int alpha, int red, int green, int blue);
-extern int RenderMenuText_Clipped(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int topY, int bottomY);
+extern int RenderMenuText_Clipped(const char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int topY, int bottomY);
 extern void RenderSmallFontString_Wrapped(const char *textPtr,RECT* area,int alpha,int* output_x,int* output_y);
 
 

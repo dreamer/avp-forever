@@ -43,7 +43,6 @@ extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 extern DISPLAYBLOCK *Global_ODB_Ptr;
 extern EXTRAITEMDATA *Global_EID_Ptr;
 extern int *Global_EID_IPtr;
-extern int ZBufferMode;
 extern int NormalFrameTime;
 
 extern SHAPEHEADER *Global_ShapeHeaderPtr;

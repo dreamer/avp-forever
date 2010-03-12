@@ -36,10 +36,6 @@ int NumOnScreenBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
 extern int NumActiveBlocks;
 
-/* JH 13/5/97 */
-extern int DrawMode;
-extern int ZBufferMode;
-
 extern DPID MultiplayerObservedPlayer;
 
 #if SupportMorphing

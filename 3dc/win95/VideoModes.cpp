@@ -5,13 +5,14 @@
 #include "configFile.h"
 #include <assert.h>
 
+#include "d3_func.h"
+
+extern D3DInfo d3d;
+
 extern "C"
 {
 #include "VideoModes.h"
 #include <stdio.h>
-#include "d3_func.h"
-
-extern D3DInfo d3d;
 
 int CurrentVideoMode = 0;
 DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
