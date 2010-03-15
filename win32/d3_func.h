@@ -3,11 +3,14 @@
 
 #ifdef WIN32
 
+#ifdef __cplusplus
+	extern "C" {
+#endif
+
 #include <d3d9.h>
 #include <Dxerr.h>
 #include "aw.h"
 #include <stdint.h>
-
 /*
   Direct3D globals
 */
@@ -57,10 +60,6 @@ typedef struct D3DInfo {
 
 extern D3DINFO d3d;
 
-D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL poolType);
-D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *realHeight);
-D3DTEXTURE CreateD3DTallFontTexture(AVPTEXTURE *tex);
-
 /* KJL 14:24:45 12/4/97 - render state information */
 enum TRANSLUCENCY_TYPE
 {
@@ -98,10 +97,9 @@ typedef struct
 
 } RENDERSTATES;
 
-
-#ifdef __cplusplus
-	extern "C" {
-#endif
+D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL poolType);
+D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *realHeight);
+D3DTEXTURE CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
 BOOL ReleaseVolatileResources();
 BOOL CreateVolatileResources();
@@ -124,6 +122,9 @@ D3DTEXTURE CheckAndLoadUserTexture(const char *fileName, int *width, int *height
 D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool);
 void SetTransforms();
 
+void LoadConsoleFont();
+
+D3DINFO GetD3DInfo();
 char* GetDeviceName();
 #define RGB_MAKE	D3DCOLOR_XRGB
 

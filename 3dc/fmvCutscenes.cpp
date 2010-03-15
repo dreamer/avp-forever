@@ -276,7 +276,7 @@ extern void PlayFMV(const char *filenamePtr)
 		return;
 
 	TheoraFMV fmv;
-	if (fmv.Open(filenamePtr) != FMV_OK)
+	if (fmv.Open(/*filenamePtr*/"FMvs\\big_buck_bunny_720p_stereo.ogv") != FMV_OK)
 		return;
 
 	bool playing = true;

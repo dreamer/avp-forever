@@ -10,10 +10,21 @@
 #include "ourasert.h"
 #include "ffstdio.h"
 #include "d3_func.h"
-#include "AvP_MenuGfx.hpp"
 
-extern void D3D_RenderHUDString(const char *stringPtr, int x, int y, int colour);
+extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour);
 extern void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, BOOL alpha);
+
+extern "C"
+{
+#include "AvP_Menus.h"
+extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+
+char AAFontWidths[256];
+
+extern int CloudTable[128][128];
+extern int CloakingPhase;
+
+extern D3DInfo d3d;
 
 AVPMENUGFX AvPMenuGfxStorage[MAX_NO_OF_AVPMENUGFXS] =
 {
@@ -102,21 +113,9 @@ AVPMENUGFX AvPMenuGfxStorage[MAX_NO_OF_AVPMENUGFXS] =
 	#endif
 };
 
-//extern "C"
-//{
-#include "AvP_Menus.h"
-extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-
-char AAFontWidths[256];
-
-extern int CloudTable[128][128];
-extern int CloakingPhase;
-
-extern D3DInfo d3d;
-
 static void LoadMenuFont(void);
 static void UnloadMenuFont(void);
-/*static*/ extern int RenderSmallFontString(const char *textPtr, int sx, int sy, int alpha, int red, int green, int blue);
+/*static*/ extern int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red, int green, int blue);
 static void CalculateWidthsOfAAFont(void);
 extern void DrawAvPMenuGlowyBar(int topleftX, int topleftY, int alpha, int length);
 extern void DrawAvPMenuGlowyBar_Clipped(int topleftX, int topleftY, int alpha, int length, int topY, int bottomY);
@@ -497,9 +496,10 @@ return pX;
 }
 
 
-extern int RenderSmallMenuText(const char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format) 
+extern int RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format) 
 {
 	int length;
+	char *ptr;
 
 	switch(format)
 	{
@@ -513,7 +513,7 @@ extern int RenderSmallMenuText(const char *textPtr, int x, int y, int alpha, enu
 		case AVPMENUFORMAT_RIGHTJUSTIFIED:
 		{
 			length = 0;
-			const char *ptr = textPtr;
+			ptr = textPtr;
 
 			while(*ptr)
 			{
@@ -527,7 +527,7 @@ extern int RenderSmallMenuText(const char *textPtr, int x, int y, int alpha, enu
 		case AVPMENUFORMAT_CENTREJUSTIFIED:
 		{
 			length = 0;
-			const char *ptr = textPtr;
+			ptr = textPtr;
 
 			while(*ptr)
 			{
@@ -591,7 +591,7 @@ extern int RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha, 
 	return x;
 }
 
-extern int Hardware_RenderSmallMenuText(const char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format) 
+extern int Hardware_RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format) 
 {
 	switch(format)
 	{
@@ -605,7 +605,7 @@ extern int Hardware_RenderSmallMenuText(const char *textPtr, int x, int y, int a
 		case AVPMENUFORMAT_RIGHTJUSTIFIED:
 		{
 			int length = 0;
-			const char *ptr = textPtr;
+			char *ptr = textPtr;
 
 			while(*ptr)
 			{
@@ -618,7 +618,7 @@ extern int Hardware_RenderSmallMenuText(const char *textPtr, int x, int y, int a
 		case AVPMENUFORMAT_CENTREJUSTIFIED:
 		{
 			int length = 0;
-			const char *ptr = textPtr;
+			char *ptr = textPtr;
 
 			while(*ptr)
 			{
@@ -767,7 +767,7 @@ extern int RenderTallChar(char c, int x, int y, int alpha, int red, int green, i
 	return 0;
 }
 
-/*static*/extern int RenderSmallFontString(const char *textPtr, int sx, int sy, int alpha, int red, int green, int blue)
+/*static*/extern int RenderSmallFontString(char *textPtr, int sx, int sy, int alpha, int red, int green, int blue)
 {
 	int alphaR = MUL_FIXED(alpha, red);
 	int alphaG = MUL_FIXED(alpha, green);
@@ -1653,7 +1653,7 @@ extern int HeightOfMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 	return AvPMenuGfxStorage[menuGfxID].Height; 
 }
 
-void ClearScreenToBlack(void)
+extern void ClearScreenToBlack(void)
 { 
 	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0 );
 }
@@ -1748,4 +1748,4 @@ static void CalculateWidthsOfAAFont(void)
 	}
 }
 
-//};
+};

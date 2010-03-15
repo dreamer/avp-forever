@@ -1,15 +1,15 @@
 #ifndef _included_AvP_Menus_h_
 #define _included_AvP_Menus_h_
 
-//#ifdef __cplusplus
-//extern "C" {
-//#endif // __cplusplus
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
 
 	extern int mainMenu;
 
-//#ifdef __cplusplus
-//}
-//#endif // __cplusplus
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 
 #define MARINE_DEMO 0
@@ -48,8 +48,6 @@
 
 #include "AvP_MenuGfx.hpp"
 #include "language.h"
-
-extern void DrawMainMenusBackdrop(void);
 
 enum MENUSSTATE_ID
 {

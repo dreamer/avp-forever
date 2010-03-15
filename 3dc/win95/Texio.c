@@ -1058,6 +1058,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 						iptr[1] = WideMulNarrowDiv(iptr[1], size_uv.vy, size_uv_curr.vy);
 
 						iptr += 2;
+
 					}
 
 					/* The translation vector in UV space */

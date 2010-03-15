@@ -3,25 +3,20 @@
 
 extern "C"
 {
+	#include "3dc.h"
+	#include "inline.h"
+	#include "AvP_Menus.h"
+	#include "avp_intro.h"
+	extern int NormalFrameTime;
+	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 	extern unsigned char GotAnyKey;
 	extern unsigned char DebouncedGotAnyKey;
 
-	extern void ThisFramesRenderingHasBegun(void);
-	extern void ThisFramesRenderingHasFinished(void);
-	extern int NormalFrameTime;
-
-}
-
-#include "3dc.h"
-#include "inline.h"
-#include "AvP_Menus.h"
-#include "avp_intro.h"
-	
-extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-	
-
-extern AVPMENUGFX AvPMenuGfxStorage[];
+	extern AVPMENUGFX AvPMenuGfxStorage[];
 extern void DirectReadKeyboard(void);
+
+extern void ThisFramesRenderingHasBegun(void);
+extern void ThisFramesRenderingHasFinished(void);
 
 static int IntroHasAlreadyBeenPlayed = 1;
 
@@ -32,6 +27,7 @@ void Show_ARebellionGame(void);
 void Show_AvPLogo(void);
 extern void ShowSplashScreens(void);
 extern void Show_WinnerScreen(void);
+//extern void PlayFMV(const char *filenamePtr);
 extern void DrawMainMenusBackdrop(void);
 extern void FadedScreen(int alpha);
 
@@ -352,5 +348,5 @@ void Show_AvPLogo(void)
 	#endif
 }
 
-//};
+};
 

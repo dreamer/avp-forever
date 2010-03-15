@@ -72,6 +72,7 @@ void InitialiseRawInput();
 	int VideoModeType;
 	int VideoModeTypeScreen;
 	int WindowMode;
+	int ZBufferMode;
 
 	unsigned char *TextureLightingTable = 0;
 
