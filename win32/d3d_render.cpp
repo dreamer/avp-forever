@@ -105,7 +105,7 @@ struct renderParticle
 	inline bool operator<(const renderParticle& rhs) const {return translucency < rhs.translucency;}
 };
 
-std::vector<renderParticle> particleArray;
+std::vector<renderParticle> particleArray(2000);
 
 size_t maxParts = 0;
 
@@ -189,6 +189,9 @@ extern int PredatorNumbersImageNumber;
 extern int StaticImageNumber;
 extern int AAFontImageNumber;
 extern int WaterShaftImageNumber;
+extern int HUDImageNumber;
+extern int HUDFontsImageNumber;
+extern int AAFontImageNumber;
 
 AVPTEXTURE FMVTextureHandle[4];
 AVPTEXTURE NoiseTextureHandle;
@@ -802,10 +805,6 @@ BOOL ExecuteBuffer()
 
 		ChangeTranslucencyMode(renderTest[i].translucencyType);
 
-		extern int HUDImageNumber;
-		extern int HUDFontsImageNumber;
-		extern int AAFontImageNumber;
-
 		/* lazy way to get the filtering working correctly :) */
 		if (renderTest[i].textureID == AAFontImageNumber 
 			|| renderTest[i].textureID == HUDFontsImageNumber 
@@ -860,6 +859,15 @@ BOOL ExecuteBuffer()
 		{
 			ChangeTexture(orthoList[i].textureID);
 			ChangeTranslucencyMode(orthoList[i].translucencyType);
+
+			/* lazy way to get the filtering working correctly :) */
+			if (orthoList[i].textureID == AAFontImageNumber 
+				|| orthoList[i].textureID == HUDFontsImageNumber 
+				|| orthoList[i].textureID == HUDImageNumber)
+			{
+				ChangeFilteringMode(FILTERING_BILINEAR_OFF);
+			}
+			else ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
 			LastError = d3d.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, orthoList[i].vertStart, 2);
 			if (FAILED(LastError))
@@ -2080,7 +2088,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	if (particleDescPtr->IsLit && !(particlePtr->ParticleID==PARTICLE_ALIEN_BLOOD && CurrentVisionMode==VISION_MODE_PRED_SEEALIENS) )
 	{
 		int intensity = LightIntensityAtPoint(&particlePtr->Position);
-		if (particlePtr->ParticleID==PARTICLE_SMOKECLOUD || particlePtr->ParticleID==PARTICLE_ANDROID_BLOOD)
+		if (particlePtr->ParticleID == PARTICLE_SMOKECLOUD || particlePtr->ParticleID==PARTICLE_ANDROID_BLOOD)
 		{
 			colour = RGBALIGHT_MAKE
 				  	(
@@ -2156,8 +2164,12 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 				mainVertex[vb].color = colour;
 	 			mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);//RGBALIGHT_MAKE(vertices->SpecularR,vertices->SpecularG,vertices->SpecularB,fog);
 
-				mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
-				mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
+//				mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
+//				mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
+
+				mainVertex[vb].tu = (float)(vertices->U) * RecipW;
+				mainVertex[vb].tv = (float)(vertices->V) * RecipH;
+
 				vb++;
 			}
 

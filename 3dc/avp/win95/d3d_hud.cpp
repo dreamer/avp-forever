@@ -420,32 +420,32 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 	{
 		int angle = 4095 - Player->ObEuler.EulerY;
 	
-		widthCos = MUL_FIXED
-				   (
-				   		motionTrackerScaledHalfWidth,
-				   		GetCos(angle)
-				   );
-		widthSin = MUL_FIXED
-				   (
-				   		motionTrackerScaledHalfWidth,
-						GetSin(angle)
-				   );
-	}			
+		widthCos = MUL_FIXED(motionTrackerScaledHalfWidth, GetCos(angle));
+		widthSin = MUL_FIXED(motionTrackerScaledHalfWidth, GetSin(angle));
+	}
 	
 	/* I've put these -1s in here to help clipping 45 degree cases,
 	where two vertices can end up around the clipping line of Y=0 */
+
+	// top left
 	quadVertices[0].X = (-widthCos - (-widthSin));
 	quadVertices[0].Y = (-widthSin + (-widthCos)) -1;
 	quadVertices[0].U = 1;
 	quadVertices[0].V = 1;
+	
+	// top right
 	quadVertices[1].X = (widthCos - (-widthSin));
 	quadVertices[1].Y = (widthSin + (-widthCos)) -1;
 	quadVertices[1].U = 1+MotionTrackerTextureSize;
 	quadVertices[1].V = 1;
+
+	// bottom right
 	quadVertices[2].X = (widthCos - widthSin);
 	quadVertices[2].Y = (widthSin + widthCos) -1;
 	quadVertices[2].U = 1+MotionTrackerTextureSize;
 	quadVertices[2].V = 1+MotionTrackerTextureSize;
+
+	// bottom left
 	quadVertices[3].X = ((-widthCos) - widthSin);
 	quadVertices[3].Y = ((-widthSin) + widthCos) -1;
 	quadVertices[3].U = 1;							   
@@ -486,11 +486,41 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 
 	D3D_HUD_Setup();
 
+	int uvArray[8];
+
+	// bottom left
+	uvArray[0] = quadVertices[3].U;
+	uvArray[1] = quadVertices[3].V;
+
+	// top left
+	uvArray[2] = quadVertices[0].U;
+	uvArray[3] = quadVertices[0].V;
+
+	// bottom right
+	uvArray[4] = quadVertices[2].U;
+	uvArray[5] = quadVertices[2].V;
+
+	// top right
+	uvArray[6] = quadVertices[1].U;
+	uvArray[7] = quadVertices[1].V;
+/*
+	New_D3D_HUDQuad_Output
+	(
+		HUDImageNumber, 
+		imageDescPtr->TopLeftX,
+		imageDescPtr->TopLeftY,
+		scaledWidth,
+		scaledHeight,
+		uvArray,
+		RGBALIGHT_MAKE(255,255,255,HUDTranslucencyLevel)
+	);
+*/
+/*
 	D3D_HUDQuad_Output(HUDImageNumber,
 		quadVertices,
 		RGBALIGHT_MAKE(255,255,255,HUDTranslucencyLevel)
 		);
-	
+*/	
 	{
 		HUDImageDesc imageDesc;
 

@@ -87,13 +87,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_PREDATOR_BLOOD */
 	{
 		//int StartU;
-		0<<16,
+		0,
 		//int StartV;
-		64<<16,
+		64,
 		//int EndU;
-		63<<16,
+		63,
 		//int EndV;
-		127<<16,
+		127,
 		//unsigned int Size;
 		200,
 
@@ -119,25 +119,15 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	},
 	/* PARTICLE_ALIEN_BLOOD */
 	{
-#if 0
 		//int StartU;
-		1<<16,
+		0,
 		//int StartV;
-		248<<16,
+		64,
 		//int EndU;
-		8<<16,
+		63,
 		//int EndV;
-		256<<16,
-#else
-		//int StartU;
-		0<<16,
-		//int StartV;
-		64<<16,
-		//int EndU;
-		63<<16,
-		//int EndV;
-		127<<16,
-#endif
+		127,
+
 		//unsigned int Size;
 		50,
 
@@ -164,13 +154,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_HUMAN_BLOOD */
 	{
 		//int StartU;
-		0<<16,
+		0,
 		//int StartV;
-		63<<16,
+		63,
 		//int EndU;
-		63<<16,
+		63,
 		//int EndV;
-		127<<16,
+		127,
 		//unsigned int Size;
 		50,
 		   
@@ -196,13 +186,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_ANDROID_BLOOD */
 	{
 		//int StartU;
-		0<<16,
+		0,
 		//int StartV;
-		63<<16,
+		63,
 		//int EndU;
-		63<<16,
+		63,
 		//int EndV;
-		127<<16,
+		127,
 		//unsigned int Size;
 		50,
 		   
@@ -228,13 +218,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_MUZZLEFLASH */
 	{
 		//int StartU;
-		64<<16,
+		64,
 		//int StartV;
-		64<<16,
+		64,
 		//int EndU;
-		127<<16,
+		127,
 		//int EndV;
-		127<<16,
+		127,
 		//unsigned int Size;
 		200,
 
@@ -260,13 +250,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_SMARTGUNMUZZLEFLASH */
 	{
 		//int StartU;
-		64<<16,
+		64,
 		//int StartV;
-	   	0<<16,
+	   	0,
 		//int EndU;
-		127<<16,
+		127,
 		//int EndV;
-		63<<16,
+		63,
 		//unsigned int Size;
 		800,
 
@@ -292,13 +282,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_WATERSPRAY */
 	{
 		//int StartU;
-		0<<16,
+		0,
 		//int StartV;
-	   	64<<16,
+	   	64,
 		//int EndU;
-		63<<16,
+		63,
 		//int EndV;
-		127<<16,
+		127,
 		//unsigned int Size;
 		80,
 
@@ -324,13 +314,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_WATERFALLSPRAY */
 	{
 		//int StartU;
-		0<<16,
+		0,
 		//int StartV;
-	   	64<<16,
+	   	64,
 		//int EndU;
-		63<<16,
+		63,
 		//int EndV;
-		127<<16,
+		127,
 		//unsigned int Size;
 		1600,//200,
 
@@ -356,13 +346,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_BLACKSMOKE */
 	{
 		//int StartU;
-		0<<16,
+		0,
 		//int StartV;
-	   	130<<16,
+	   	130,
 		//int EndU;
-		28<<16,
+		28,
 		//int EndV;
-		157<<16,
+		157,
 		//unsigned int Size;
 		200,
 
@@ -387,25 +377,14 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	},
 	/* PARTICLE_FLARESMOKE */
 	{
-		#if 0
 		//int StartU;
-		0<<16,
+		128,
 		//int StartV;
-	   	130<<16,
+	   	0,
 		//int EndU;
-		28<<16,
+		195,
 		//int EndV;
-		157<<16,
-		#else
-		//int StartU;
-		128<<16,
-		//int StartV;
-	   	0<<16,
-		//int EndU;
-		195<<16,
-		//int EndV;
-		63<<16,
-		#endif
+		63,
 		//unsigned int Size;
 		200,
 
@@ -431,13 +410,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_STEAM */
 	{
 		//int StartU;
-		0<<16,
+		0,
 		//int StartV;
-	   	130<<16,
+	   	130,
 		//int EndU;
-		28<<16,
+		28,
 		//int EndV;
-		157<<16,
+		157,
 		//unsigned int Size;
 		100,
 
@@ -463,13 +442,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_IMPACTSMOKE */
 	{
 		//int StartU;
-		0<<16,
+		0,
 		//int StartV;
-	   	130<<16,
+	   	130,
 		//int EndU;
-		28<<16,
+		28,
 		//int EndV;
-		157<<16,
+		157,
 		//unsigned int Size;
 		100,
 
@@ -495,13 +474,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_GUNMUZZLE_SMOKE */
 	{
 		//int StartU;
-		128<<16,
+		128,
 		//int StartV;
-	   	0<<16,
+	   	0,
 		//int EndU;
-		195<<16,
+		195,
 		//int EndV;
-		63<<16,
+		63,
 		//unsigned int Size;
 		32,
 
@@ -526,25 +505,14 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	},
 	/* PARTICLE_FLAME */
 	{
-		#if 0
 		//int StartU;
-		0<<16,
+		64,
 		//int StartV;
-	   	0<<16,
+	   	0,
 		//int EndU;
-		63<<16,
+		(64+127),
 		//int EndV;
-		63<<16,
-		#else
-		//int StartU;
-		64<<16,
-		//int StartV;
-	   	0<<16,
-		//int EndU;
-		(64+127)<<16,
-		//int EndV;
-		63<<16,
-		#endif
+		63,
 		//unsigned int Size;
 		0,
 
@@ -569,25 +537,14 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	},
 	/* PARTICLE_NONCOLLIDINGFLAME */
 	{
-		#if 0
 		//int StartU;
-		0<<16,
+		64,
 		//int StartV;
-	   	0<<16,
+	   	0,
 		//int EndU;
-		63<<16,
+		(64+127),
 		//int EndV;
-		63<<16,
-		#else
-		//int StartU;
-		64<<16,
-		//int StartV;
-	   	0<<16,
-		//int EndU;
-		(64+127)<<16,
-		//int EndV;
-		63<<16,
-		#endif
+		63,
 		//unsigned int Size;
 		0,
 
@@ -612,25 +569,14 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	},
 	/* PARTICLE_NONDAMAGINGFLAME */
 	{
-		#if 0
 		//int StartU;
-		0<<16,
+		64,
 		//int StartV;
-	   	0<<16,
+	   	0,
 		//int EndU;
-		63<<16,
+		(64+127),
 		//int EndV;
-		63<<16,
-		#else
-		//int StartU;
-		64<<16,
-		//int StartV;
-	   	0<<16,
-		//int EndU;
-		(64+127)<<16,
-		//int EndV;
-		63<<16,
-		#endif
+		63,
 		//unsigned int Size;
 		0,
 
@@ -655,26 +601,14 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	},
 	/* PARTICLE_FIRE */
 	{
-	   	#if 1
 	   	//int StartU;
-		0<<16,
+		0,
 		//int StartV;
-	   	0<<16,
+	   	0,
 		//int EndU;
-		63<<16,
+		63,
 		//int EndV;
-		63<<16,
-		#else
-		//int StartU;
-		64<<16,
-		//int StartV;
-	   	0<<16,
-		//int EndU;
-		(64+127)<<16,
-		//int EndV;
-		63<<16,
-		#endif
-
+		63,
 		//unsigned int Size;
 		0,
 
@@ -699,25 +633,14 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	},
 	/* PARTICLE_EXPLOSIONFIRE */
 	{
-		#if 0
 		//int StartU;
-		128<<16,
+		0,
 		//int StartV;
-	   	0<<16,
+	   	0,
 		//int EndU;
-		192<<16,
+		48,
 		//int EndV;
-		63<<16,
-		#else
-		//int StartU;
-		0<<16,
-		//int StartV;
-	   	0<<16,
-		//int EndU;
-		48<<16,
-		//int EndV;
-		63<<16,
-		#endif
+		63,
 		//unsigned int Size;
 		800,
 
@@ -743,13 +666,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_MOLOTOVFLAME */
 	{
 		//int StartU;
-		64<<16,
+		64,
 		//int StartV;
-	   	0<<16,
+	   	0,
 		//int EndU;
-		(64+127)<<16,
+		(64+127),
 		//int EndV;
-		63<<16,
+		63,
 		//unsigned int Size;
 		800,
 
@@ -775,13 +698,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_MOLOTOVFLAME_NONDAMAGING */
 	{
 		//int StartU;
-		64<<16,
+		64,
 		//int StartV;
-	   	0<<16,
+	   	0,
 		//int EndU;
-		(64+127)<<16,
+		(64+127),
 		//int EndV;
-		63<<16,
+		63,
 		//unsigned int Size;
 		800,
 
@@ -807,13 +730,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_SPARK */
 	{
 		//int StartU;
-		1<<16,
+		1,
 		//int StartV;
-	   	1<<16,
+	   	1,
 		//int EndU;
-		64<<16,
+		64,
 		//int EndV;
-		64<<16,
+		64,
 		//unsigned int Size;
 		200/8,
 
@@ -839,13 +762,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_RICOCHET_SPARK */
 	{
 		//int StartU;
-		1<<16,
+		1,
 		//int StartV;
-	   	1<<16,
+	   	1,
 		//int EndU;
-		64<<16,
+		64,
 		//int EndV;
-		64<<16,
+		64,
 		//unsigned int Size;
 		200/8,
 
@@ -871,13 +794,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_ORANGE_SPARK */
 	{
 		//int StartU;
-		224<<16,
+		224,
 		//int StartV;
-	   	192<<16,
+	   	192,
 		//int EndU;
-		255<<16,
+		255,
 		//int EndV;
-		223<<16,
+		223,
 		//unsigned int Size;
 		50,
 
@@ -903,13 +826,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_ORANGE_PLASMA */
 	{
 		//int StartU;
-		224<<16,
+		224,
 		//int StartV;
-	   	192<<16,
+	   	192,
 		//int EndU;
-		255<<16,
+		255,
 		//int EndV;
-		223<<16,
+		223,
 		//unsigned int Size;
 		50,
 
@@ -936,13 +859,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_PLASMATRAIL */
 	{
 		//int StartU;
-		64<<16,
+		64,
 		//int StartV;
-		64<<16,
+		64,
 		//int EndU;
-		127<<16,
+		127,
 		//int EndV;
-		127<<16,
+		127,
 		//unsigned int Size;
 		200/4,
 
@@ -968,13 +891,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_LASERBEAM */
 	{
 		//int StartU;
-		32<<16,
+		32,
 		//int StartV;
-	   	0<<16,
+	   	0,
 		//int EndU;
-		32<<16,
+		32,
 		//int EndV;
-		63<<16,
+		63,
 		//unsigned int Size;
 		50,
 
@@ -1000,13 +923,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_PLASMABEAM */
 	{
 		//int StartU;
-		192<<16,
+		192,
 		//int StartV;
-	   	224<<16,
+	   	224,
 		//int EndU;
-		223<<16,
+		223,
 		//int EndV;
-		255<<16,
+		255,
 		//unsigned int Size;
 		50,
 
@@ -1032,13 +955,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_TRACER */
 	{
 		//int StartU;
-		32<<16,
+		32,
 		//int StartV;
-	   	0<<16,
+	   	0,
 		//int EndU;
-		32<<16,
+		32,
 		//int EndV;
-		63<<16,
+		63,
 		//unsigned int Size;
 		16,
 
@@ -1067,13 +990,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_LIGHTFLARE */
 	{
 		//int StartU;
-		64<<16,
+		64,
 		//int StartV;
-		64<<16,
+		64,
 		//int EndU;
-		127<<16,
+		127,
 		//int EndV;
-		127<<16,
+		127,
 		//unsigned int Size;
 		200,
 
@@ -1099,13 +1022,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_STAR */
 	{
 		//int StartU;
-		64<<16,
+		64,
 		//int StartV;
-		64<<16,
+		64,
 		//int EndU;
-		127<<16,
+		127,
 		//int EndV;
-		127<<16,
+		127,
 		//unsigned int Size;
 		200,
 
@@ -1131,13 +1054,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_FLECHETTE */
 	{
 		//int StartU;
-		64<<16,
+		64,
 		//int StartV;
-		64<<16,
+		64,
 		//int EndU;
-		127<<16,
+		127,
 		//int EndV;
-		127<<16,
+		127,
 		//unsigned int Size;
 		100,
 
@@ -1163,13 +1086,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_SMOKECLOUD */
 	{
 		//int StartU;
-		128<<16,
+		128,
 		//int StartV;
-	   	64<<16,
+	   	64,
 		//int EndU;
-		191<<16,
+		191,
 		//int EndV;
-		127<<16,
+		127,
 		//unsigned int Size;
 		1000,
 
@@ -1195,13 +1118,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_BLUEPLASMASPHERE */
 	{
 		//int StartU;
-		224<<16,
+		224,
 		//int StartV;
-	   	160<<16,
+	   	160,
 		//int EndU;
-		255<<16,
+		255,
 		//int EndV;
-		191<<16,
+		191,
 		//unsigned int Size;
 		500,
 
@@ -1227,13 +1150,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_ELECTRICALPLASMASPHERE */
 	{
 		//int StartU;
-		64<<16,
+		64,
 		//int StartV;
-	   	128<<16,
+	   	128,
 		//int EndU;
-		127<<16,
+		127,
 		//int EndV;
-		191<<16,
+		191,
 		//unsigned int Size;
 		2000,
 
@@ -1259,13 +1182,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_PREDPISTOL_FLECHETTE */
 	{
 		//int StartU;
-		1<<16,
+		1,
 		//int StartV;
-	   	1<<16,
+	   	1,
 		//int EndU;
-		64<<16,
+		64,
 		//int EndV;
-		64<<16,
+		64,
 		//unsigned int Size;
 		200/8,
 
@@ -1291,13 +1214,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_PREDPISTOL_FLECHETTE_NONDAMAGING */
 	{
 		//int StartU;
-		1<<16,
+		1,
 		//int StartV;
-	   	1<<16,
+	   	1,
 		//int EndU;
-		64<<16,
+		64,
 		//int EndV;
-		64<<16,
+		64,
 		//unsigned int Size;
 		200/8,
 
@@ -1323,13 +1246,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_FLECHETTE_NONDAMAGING */
 	{
 		//int StartU;
-		64<<16,
+		64,
 		//int StartV;
-		64<<16,
+		64,
 		//int EndU;
-		127<<16,
+		127,
 		//int EndV;
-		127<<16,
+		127,
 		//unsigned int Size;
 		100,
 
@@ -1355,13 +1278,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_DEWLINE */
 	{
 		//int StartU;
-		64<<16,
+		64,
 		//int StartV;
-		64<<16,
+		64,
 		//int EndU;
-		127<<16,
+		127,
 		//int EndV;
-		127<<16,
+		127,
 		//unsigned int Size;
 		200/4,
 
@@ -1387,13 +1310,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	/* PARTICLE_PARGEN_FLAME */
 	{
 		//int StartU;
-		64<<16,
+		64,
 		//int StartV;
-	   	0<<16,
+	   	0,
 		//int EndU;
-		(64+127)<<16,
+		(64+127),
 		//int EndV;
-		63<<16,
+		63,
 		//unsigned int Size;
 		0,
 
@@ -1719,12 +1642,6 @@ void MakeParticle(VECTORCH *positionPtr, VECTORCH *velocityPtr, enum PARTICLE_ID
 	}
 }
 
-int sortParticle( const PARTICLE_DESC *elem1, const PARTICLE_DESC *elem2 )
-{
-	//return elem1.value > elem2.value;
-	return elem1->TranslucencyType > elem2->TranslucencyType;
-}
-
 void HandleParticleSystem(void)
 {
 	int i;
@@ -1734,7 +1651,6 @@ void HandleParticleSystem(void)
 	
 	HandleDecalSystem();
 	D3D_DecalSystem_End();
-
 
 	
 //	textprint("Particles Active: %d\n",i);
@@ -2317,7 +2233,6 @@ void HandleParticleSystem(void)
 			  					particlePtr->Colour = RGBALIGHT_MAKE(l,l,0,l);
 							  	break;
 							}
-
 						}
 					}
 				}
@@ -2822,7 +2737,7 @@ void HandleParticleSystem(void)
 	while(i--)
 	{
 		particlePtr->LifeTime -= NormalFrameTime;
-		
+
 		if (particlePtr->LifeTime<=0)
 		{
 			enum PARTICLE_ID particleID = particlePtr->ParticleID;
@@ -3171,7 +3086,6 @@ void HandleParticleSystem(void)
 	//RenderBoom();
    	//RenderFog();
 	D3D_DecalSystem_End();
-	
 }
 
 void RenderAllParticlesFurtherAwayThan(int zThreshold)
@@ -3197,12 +3111,11 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 						{
 							VECTORCH obstacleNormal;
 							int moduleIndex;
-							#if 1
+
 							if(ParticleDynamics(particlePtr,&obstacleNormal,&moduleIndex))
 							{
 								if(moduleIndex!=-1)
 								{	
-									#if 1
 									int i = 1;
 									MATRIXCH orientation;
 									MakeMatrixFromDirection(&obstacleNormal,&orientation);
@@ -3215,12 +3128,10 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 										RotateVector(&velocity,&orientation);
 										MakeParticle(&(particlePtr->Position),&(velocity),PARTICLE_IMPACTSMOKE);
 									}
-									#endif
 						 			MakeDecal(DECAL_SCORCHED,&obstacleNormal,&(particlePtr->Position),moduleIndex);
 								}
 								particlePtr->LifeTime = 0;
 							}
-							#endif
 						}
 
 						particlePtr->Velocity.vy += MUL_FIXED(10000,NormalFrameTime);
@@ -3248,7 +3159,6 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 						particlePtr->Velocity.vy += MUL_FIXED(10000,NormalFrameTime);
 						AddEffectsOfForceGenerators(&particlePtr->Position,&particlePtr->Velocity,32*16);
 						break;
-
 					}
 					case PARTICLE_HUMAN_BLOOD:
 					{
@@ -3434,6 +3344,7 @@ void DoFlareCorona(DISPLAYBLOCK *objectPtr)
 		RenderLightFlare(&position,colour);
 	}
 }
+
 #define MAX_RAINDROPS 1000
 static PARTICLE RainDropStorage[MAX_RAINDROPS];
 #define MAX_NO_OF_RIPPLES 100

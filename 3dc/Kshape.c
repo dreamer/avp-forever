@@ -166,9 +166,9 @@ static COLOURINTENSITIES ColourIntensityArray[maxrotpts];
 														
 
 
-RENDERPOLYGON RenderPolygon;//={1,};
-RENDERVERTEX VerticesBuffer[9];//={1,};
-static RENDERVERTEX TriangleVerticesBuffer[3];//={1,};
+RENDERPOLYGON RenderPolygon;
+RENDERVERTEX VerticesBuffer[9];
+static RENDERVERTEX TriangleVerticesBuffer[3];
 
 static int *VertexNumberPtr = (int*)1;
 
@@ -2604,7 +2604,6 @@ int* GetTxAnimArrayZ(int shape, int item)
 
 TXANIMHEADER* GetTxAnimDataZ(int shape, int item, int sequence)
 {
-
 	SHAPEHEADER *sptr;
 	TXANIMHEADER **txah_ptr;
 	TXANIMHEADER *txah;
@@ -2614,11 +2613,10 @@ TXANIMHEADER* GetTxAnimDataZ(int shape, int item, int sequence)
 	POLYHEADER *pheader;
 	int texture_defn_index;
 
-
 	sptr = GetShapeData(shape);
 
-	if(sptr && sptr->sh_textures && sptr->items) {
-
+	if (sptr && sptr->sh_textures && sptr->items) 
+	{
 		item_array_ptr = sptr->items;
 		shape_textures = sptr->sh_textures;
 
@@ -2627,7 +2625,8 @@ TXANIMHEADER* GetTxAnimDataZ(int shape, int item, int sequence)
 
 		texture_defn_index = (pheader->PolyColour >> TxDefn);
 
-		if(pheader->PolyFlags & iflag_txanim) {
+		if (pheader->PolyFlags & iflag_txanim) 
+		{
 
 			txah_ptr = (TXANIMHEADER **) shape_textures[texture_defn_index];
 			txah_ptr++;		/* Skip sequence shadow */
@@ -5934,7 +5933,7 @@ void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour)
 		int outcode = QuadWithinFrustrum();
 										  
 		if (outcode)
-		{		 
+		{
 			RenderPolygon.NumberOfVertices=4;
 			
 //			textprint("On Screen!\n");
@@ -5962,10 +5961,12 @@ void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour)
 				if(RenderPolygon.NumberOfVertices<3) return;
 				TexturedPolygon_ClipWithPositiveX();
 				if(RenderPolygon.NumberOfVertices<3) return;
-				D3D_Particle_Output(&particle,RenderPolygon.Vertices);
+//				D3D_Particle_Output(&particle,RenderPolygon.Vertices);
+				AddParticle(&particle, &RenderPolygon.Vertices[0]);
   			
   			}
-			else D3D_Particle_Output(&particle,VerticesBuffer);
+//			else D3D_Particle_Output(&particle,VerticesBuffer);
+			else AddParticle(&particle, &VerticesBuffer[0]);
 		}
 	}	
 }
@@ -6400,9 +6401,11 @@ void RenderStarfield(void)
 					if(RenderPolygon.NumberOfVertices<3) return;
 					TexturedPolygon_ClipWithPositiveX();
 					if(RenderPolygon.NumberOfVertices<3) return;
-					D3D_Particle_Output(&particle,RenderPolygon.Vertices);
+//					D3D_Particle_Output(&particle,RenderPolygon.Vertices);
+					AddParticle(&particle, &RenderPolygon.Vertices[0]);
 	  			}
-				else D3D_Particle_Output(&particle,VerticesBuffer);
+//				else D3D_Particle_Output(&particle,VerticesBuffer);
+				else AddParticle(&particle, &VerticesBuffer[0]);
 			}
 		}
 	}		

@@ -1375,7 +1375,6 @@ void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_dat
 			Process_Section(controller,child_ptr,&(this_section_data->World_Offset),&(this_section_data->SecMat),frame_timer,sequence_type,subsequence,render);
 			child_ptr=child_ptr->Next_Sibling;
 		}
-
 	}
 
 	/* Finally, if this section has a shape, and we are rendering, render it. */

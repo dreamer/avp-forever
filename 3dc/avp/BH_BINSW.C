@@ -133,6 +133,8 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 					pnew_txactrlblk->tac_node = 0;
 					pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);
 
+					OutputDebugString("buf\n");
+
 					pnew_txactrlblk->tac_txah_s = GetTxAnimHeaderFromShape(pnew_txactrlblk, shape_num);
 
 					count = 0;

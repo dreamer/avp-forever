@@ -11,12 +11,11 @@ static char* MemoryBlocks[MAX_NUM_MEMORY_BLOCK];
 static int CurrentMemoryBlock =-1;
 
 static char* MemoryPoolPtr = 0;
-static /*unsigned int*/size_t MemoryLeft = 0;
+static size_t MemoryLeft = 0;
 
-void* PoolAllocateMem(/*unsigned int*/size_t amount)
+void* PoolAllocateMem(size_t amount)
 {
-	char* retval;
-//	char buf[100];
+	char *retval;
 
 	GLOBALASSERT(amount <= MEMORY_BLOCK_SIZE)
 

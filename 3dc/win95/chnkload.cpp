@@ -1790,20 +1790,27 @@ void copy_to_module (Object_Chunk * ob, int mod_pos, int shplst_pos)
 
 void SetupAnimOnTriangle(SHAPEHEADER* shp, TEXANIM* ta, int poly, int *local_tex_index_nos)
 {
-	if(!is_textured(shp->items[poly][0]))return;
-	txanimheader** thlist=(txanimheader**)PoolAllocateMem((ta->NumSeq+2)*sizeof(txanimheader*));
-	thlist[0]=0;
-	thlist[ta->NumSeq+1]=0;
-	for(int i=0;i<ta->NumSeq;i++)
+	if (!is_textured(shp->items[poly][0]))
+		return;
+
+	txanimheader** thlist = (txanimheader**)PoolAllocateMem((ta->NumSeq+2) * sizeof(txanimheader*));
+	thlist[0] = 0;
+	thlist[ta->NumSeq+1] = 0;
+
+	for (int i = 0; i < ta->NumSeq; i++)
 	{
-		thlist[i+1]=(txanimheader*)PoolAllocateMem(sizeof(txanimheader));
-		txanimheader* th=thlist[i+1];
+		thlist[i+1] = (txanimheader*)PoolAllocateMem(sizeof(txanimheader));
+		txanimheader* th = thlist[i+1];
 		
-		FrameList* fl=ta->Seq[i];
-		th->txa_flags=fl->Flags;
-		if(!(ta->AnimFlags & AnimFlag_NotPlaying))th->txa_flags|=txa_flag_play;
-		th->txa_numframes=fl->NumFrames+1;
-		if(fl->Flags & txa_flag_nointerptofirst)
+		FrameList* fl = ta->Seq[i];
+		th->txa_flags = fl->Flags;
+
+		if (!(ta->AnimFlags & AnimFlag_NotPlaying))
+			th->txa_flags|=txa_flag_play;
+
+		th->txa_numframes = fl->NumFrames+1;
+
+		if (fl->Flags & txa_flag_nointerptofirst)
 		{
 			th->txa_flags&=~txa_flag_nointerptofirst;
 			th->txa_numframes--;				
@@ -1812,7 +1819,7 @@ void SetupAnimOnTriangle(SHAPEHEADER* shp, TEXANIM* ta, int poly, int *local_tex
 		th->txa_state=0;
 		th->txa_maxframe=(th->txa_numframes-1)<<16;
 		th->txa_speed=fl->Speed;
-		th->txa_framedata=(txanimframe*)PoolAllocateMem(th->txa_numframes*sizeof(txanimframe));
+		th->txa_framedata = (txanimframe*)PoolAllocateMem(th->txa_numframes*sizeof(txanimframe));
 		th->txa_anim_id=ta->Identifier;
 
 		txanimframe* tf;
@@ -1830,10 +1837,10 @@ void SetupAnimOnTriangle(SHAPEHEADER* shp, TEXANIM* ta, int poly, int *local_tex
 			tf->txf_uvdata=(int*)PoolAllocateMem(6*sizeof(int));
 			if(j==fl->NumFrames)
 			{
-				tf->txf_image=local_tex_index_nos[fl->Textures[0]];
+				tf->txf_image = local_tex_index_nos[fl->Textures[0]];
 				for(int k=0;k<6;k++)
 				{
-					tf->txf_uvdata[k]=fl->UVCoords[k];
+					tf->txf_uvdata[k] = fl->UVCoords[k];
 				}	
 			}
 			else
@@ -1846,19 +1853,23 @@ void SetupAnimOnTriangle(SHAPEHEADER* shp, TEXANIM* ta, int poly, int *local_tex
 			}
 		}
 	}
-	int UVIndex=shp->items[poly][3]>>16;
+	int UVIndex = shp->items[poly][3]>>16;
 	#if !USE_LEVEL_MEMORY_POOL
 	if(shp->sh_textures[UVIndex])DeallocateMem(shp->sh_textures[UVIndex]);
 	#endif
-	shp->sh_textures[UVIndex]=(int*)thlist;
-	shp->items[poly][2]|=iflag_txanim;
-	shp->items[poly][3]=UVIndex<<16;
+	shp->sh_textures[UVIndex] = (int*)thlist;
+	shp->items[poly][2] |= iflag_txanim;
+	shp->items[poly][3] = UVIndex<<16;
 
 }
 void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,int poly, int * local_tex_index_nos)
 {
-	if(!is_textured(shp->items[poly][0]))return;
-	if(ta1->ID!=ta2->ID)return;
+	if (!is_textured(shp->items[poly][0]))
+		return;
+
+	if (ta1->ID!=ta2->ID)
+		return;
+
 	int VertConv[3];//conversion between vert nos in triangles and vert nos in quad
 	int VertFrom,VertTo;//for remaining vert in second poly
 	int i;
@@ -1869,7 +1880,8 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 		int j;
 		for(j=0;j<4;j++)
 		{
-			if(sc->shape_data.poly_list[ta1->poly].vert_ind[i]==(shp->items[poly][j+4]))break;
+			if(sc->shape_data.poly_list[ta1->poly].vert_ind[i]==(shp->items[poly][j+4]))
+				break;
 		}
 		if(j==4)return;
 		VertConv[i]=j;
@@ -1878,7 +1890,8 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 
 	for(i=0;i<3;i++)
 	{
-		if(sc->shape_data.poly_list[ta2->poly].vert_ind[i]==(shp->items[poly][4+VertTo]))break;
+		if(sc->shape_data.poly_list[ta2->poly].vert_ind[i]==(shp->items[poly][4+VertTo]))
+			break;
 	}
 	if(i==3)return;
 	VertFrom=i;
@@ -1922,7 +1935,7 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 			tf->txf_uvdata=(int*)PoolAllocateMem(8*sizeof(int));
 			if(j==fl1->NumFrames)
 			{
-				tf->txf_image=local_tex_index_nos[fl1->Textures[0]];
+				tf->txf_image = local_tex_index_nos[fl1->Textures[0]];
 				for(int k=0;k<3;k++)
 				{
 					tf->txf_uvdata[VertConv[k]*2]=fl1->UVCoords[k*2];
@@ -2338,7 +2351,7 @@ BOOL copy_to_shapeheader (
 	if (cshp_ptr->num_uvs)
 	{
 		uv_imnums = new int[cshp_ptr->num_uvs];
-		for (i=0; i<cshp_ptr->num_uvs; ++i)
+		for (i=0; i < cshp_ptr->num_uvs; ++i)
 		{
 			uv_imnums[i]=-1;
 			shphd->sh_textures[i]=0;
@@ -2367,10 +2380,10 @@ BOOL copy_to_shapeheader (
 				uv_imnums[item_list[i*9+3]>>16]=local_tex_index_nos[texno];
 				item_list[i*9 + 3] += local_tex_index_nos[texno];
 
-				shphd->sh_textures[UVIndex] = (int *) PoolAllocateMem (sizeof(int *) * cshp_ptr->uv_list[UVIndex].num_verts * 2);
+				shphd->sh_textures[UVIndex] = (int *) PoolAllocateMem (sizeof(int) * cshp_ptr->uv_list[UVIndex].num_verts * 2);
 				for (j=0; j<cshp_ptr->uv_list[UVIndex].num_verts; j++) {
-					(shphd->sh_textures[UVIndex])[(j*2)] = ProcessUVCoord(h,UVC_POLY_U,(int)cshp_ptr->uv_list[UVIndex].vert[j].u,uv_imnums[UVIndex]);
-					(shphd->sh_textures[UVIndex])[(j*2)+1] = ProcessUVCoord(h,UVC_POLY_V,(int)cshp_ptr->uv_list[UVIndex].vert[j].v,uv_imnums[UVIndex]);
+					(shphd->sh_textures[UVIndex])[(j*2)] = ProcessUVCoord(h, UVC_POLY_U, (int)cshp_ptr->uv_list[UVIndex].vert[j].u, uv_imnums[UVIndex]);
+					(shphd->sh_textures[UVIndex])[(j*2)+1] = ProcessUVCoord(h, UVC_POLY_V, (int)cshp_ptr->uv_list[UVIndex].vert[j].v, uv_imnums[UVIndex]);
 				}
 			}
 			else
@@ -2380,7 +2393,6 @@ BOOL copy_to_shapeheader (
 				item_list[i*9 + 3] = 0xffffffff;
 			}
 		}
-			
 		
 		for (j=0;j<cshp_ptr->poly_list[i].num_verts;j++)
 		//	item_list[i*9 + 4 +j] = (cshp_ptr->poly_list[i].vert_ind[j] *3);
@@ -2847,7 +2859,7 @@ BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Heade
 
 		chlist.delete_first_entry();
 	}
-	shphd->sh_textures[0]=(int*)thlist;
+	shphd->sh_textures[0] = (int*)thlist;
 	delete [] BmpConv;
 	return TRUE;
 }
