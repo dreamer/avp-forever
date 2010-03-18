@@ -613,7 +613,7 @@ extern void AvP_UpdateMenus(void)
 		{
 			extern char MP_PlayerName[];
 			retval = Net_ConnectingToLobbiedGame(MP_PlayerName);
-			if (!retval)
+			if (retval == NET_FAIL)
 			{
 				//player has aborted, go back a menu
 				SetupNewMenu(AVPMENU_MULTIPLAYER_LOBBIEDCLIENT);

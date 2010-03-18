@@ -204,7 +204,7 @@ int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 		fontQuad[0].sx = x - 0.5f;
 		fontQuad[0].sy = y + sixtyThree - 0.5f;
 		fontQuad[0].sz = 0.0f;
-		fontQuad[0].rhw = 1.0f;
+//		fontQuad[0].rhw = 1.0f;
 		fontQuad[0].color = colour;
 		fontQuad[0].specular = D3DCOLOR_ARGB(255, 0, 0, 0);
 		fontQuad[0].tu = (float)((tex_x) * RecipW);
@@ -214,7 +214,7 @@ int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 		fontQuad[1].sx = x - 0.5f;
 		fontQuad[1].sy = y - 0.5f;
 		fontQuad[1].sz = 0.0f;
-		fontQuad[1].rhw = 1.0f;
+//		fontQuad[1].rhw = 1.0f;
 		fontQuad[1].color = colour;
 		fontQuad[1].specular = D3DCOLOR_ARGB(255, 0, 0, 0);
 		fontQuad[1].tu = (float)((tex_x) * RecipW);
@@ -224,7 +224,7 @@ int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 		fontQuad[2].sx = x + sixtyThree - 0.5f;
 		fontQuad[2].sy = y + sixtyThree - 0.5f;
 		fontQuad[2].sz = 0.0f;
-		fontQuad[2].rhw = 1.0f;
+//		fontQuad[2].rhw = 1.0f;
 		fontQuad[2].color = colour;
 		fontQuad[2].specular = D3DCOLOR_ARGB(255, 0, 0, 0);
 		fontQuad[2].tu = (float)((tex_x + Fonts[FONT_SMALL].blockWidth) * RecipW);
@@ -234,7 +234,7 @@ int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 		fontQuad[3].sx = x + sixtyThree - 0.5f;
 		fontQuad[3].sy = y - 0.5f;
 		fontQuad[3].sz = 0.0f;
-		fontQuad[3].rhw = 1.0f;
+//		fontQuad[3].rhw = 1.0f;
 		fontQuad[3].color = colour;
 		fontQuad[3].specular = D3DCOLOR_ARGB(255, 0, 0, 0);
 		fontQuad[3].tu = (float)((tex_x + Fonts[FONT_SMALL].blockWidth) * RecipW);

@@ -1247,7 +1247,7 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 		mainVertex[vb].sx = (float)vertices->X;
 		mainVertex[vb].sy = (float)-vertices->Y;
 		mainVertex[vb].sz = 1.0f;
-		mainVertex[vb].rhw = 1.0f;
+//		mainVertex[vb].rhw = 1.0f;
 
 		mainVertex[vb].color = RGBLIGHT_MAKE(vertices->R,vertices->G,vertices->B);
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
@@ -1317,7 +1317,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 		mainVertex[vb].sx = (float)vertices->X;
 		mainVertex[vb].sy = (float)-vertices->Y;
 		mainVertex[vb].sz = (float)vertices->Z;
-		mainVertex[vb].rhw = 1.0f;
+//		mainVertex[vb].rhw = 1.0f;
 
 		/* need this so we can enable alpha test and not lose pred arms in green vision mode, and also not lose 
 		/* aliens in pred red alien vision mode */
@@ -1379,7 +1379,7 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 		mainVertex[vb].sx = (float)vertices->X;
 		mainVertex[vb].sy = (float)-vertices->Y;
 		mainVertex[vb].sz = (float)vertices->Z;
-		mainVertex[vb].rhw = 1.0f;
+//		mainVertex[vb].rhw = 1.0f;
 
 		if (flags & iflag_transparent)
 		{
@@ -1432,7 +1432,7 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
 		mainVertex[vb].sx = (float)vertices->X;
 		mainVertex[vb].sy = (float)-vertices->Y;
 		mainVertex[vb].sz = (float)vertices->Z;
-		mainVertex[vb].rhw = 1.0f;
+//		mainVertex[vb].rhw = 1.0f;
 
 		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);//RGBALIGHT_MAKE(255,255,255,255);
 		mainVertex[vb].specular = (D3DCOLOR)1.0f;
@@ -1497,7 +1497,7 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 		mainVertex[vb].sx = (float)vertices->X;
 		mainVertex[vb].sy = (float)-vertices->Y;
 		mainVertex[vb].sz = (float)vertices->Z;
-		mainVertex[vb].rhw = 1.0f;
+//		mainVertex[vb].rhw = 1.0f;
 
 		if (CloakedPredatorIsMoving)
 		{
@@ -1760,7 +1760,7 @@ void D3D_HUDQuad_Output(int imageNumber, struct VertexTag *quadVerticesPtr, unsi
 		mainVertex[vb].sx = (float)quadVerticesPtr->X;
 		mainVertex[vb].sy = (float)quadVerticesPtr->Y;
 		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
+//		mainVertex[vb].rhw = 1.0f;
  		mainVertex[vb].color = colour;
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 		mainVertex[vb].tu = ((float)(quadVerticesPtr->U)) * RecipW;
@@ -1825,7 +1825,7 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 				mainVertex[vb].sx = (float)verticesPtr->vx;
 				mainVertex[vb].sy = (float)-verticesPtr->vy;
 				mainVertex[vb].sz = (float)verticesPtr->vz; // bjd - CHECK
-				mainVertex[vb].rhw = 1.0f;
+//				mainVertex[vb].rhw = 1.0f;
 
 				if (i==3) mainVertex[vb].color = RGBALIGHT_MAKE(0,255,255,32);
 				else mainVertex[vb].color = RGBALIGHT_MAKE(255,255,255,32);
@@ -1916,7 +1916,7 @@ void D3D_DrawParticle_Smoke(PARTICLE *particlePtr)
 				mainVertex[vb].sx = (float)verticesPtr->vx;
 				mainVertex[vb].sy = (float)-verticesPtr->vy;
 				mainVertex[vb].sz = (float)vertices->vz;
-				mainVertex[vb].rhw = 1.0f;
+//				mainVertex[vb].rhw = 1.0f;
 
 				mainVertex[vb].color = RGBALIGHT_MAKE((particlePtr->LifeTime>>8),(particlePtr->LifeTime>>8),0,(particlePtr->LifeTime>>7)+64);
 
@@ -2087,7 +2087,7 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 			mainVertex[vb].sx = (float)vertices->X;
 			mainVertex[vb].sy = (float)-vertices->Y;
 			mainVertex[vb].sz = (float)vertices->Z;
-			mainVertex[vb].rhw = 1.0f;
+//			mainVertex[vb].rhw = 1.0f;
 
 			mainVertex[vb].color = colour;
 			mainVertex[vb].specular = specular;//RGBALIGHT_MAKE(vertices->SpecularR,vertices->SpecularG,vertices->SpecularB,fog);
@@ -2219,7 +2219,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 				mainVertex[vb].sx = (float)vertices->X;
 				mainVertex[vb].sy = (float)-vertices->Y;
 				mainVertex[vb].sz = (float)vertices->Z;
-				mainVertex[vb].rhw = 1.0f;
+//				mainVertex[vb].rhw = 1.0f;
 
 				mainVertex[vb].color = colour;
 	 			mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);//RGBALIGHT_MAKE(vertices->SpecularR,vertices->SpecularG,vertices->SpecularB,fog);
@@ -3034,7 +3034,7 @@ void DrawNoiseOverlay(int t)
 	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
   	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 1.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = u/256.0f;
@@ -3046,7 +3046,7 @@ void DrawNoiseOverlay(int t)
   	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
   	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 1.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = (u+size)/256.0f;
@@ -3058,7 +3058,7 @@ void DrawNoiseOverlay(int t)
   	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
   	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 1.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = (u+size)/256.0f;
@@ -3070,7 +3070,7 @@ void DrawNoiseOverlay(int t)
   	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
   	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 1.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = u/256.0f;
@@ -3115,7 +3115,7 @@ void DrawScanlinesOverlay(float level)
   	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
   	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 1.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = (v-size)/256.0f;
@@ -3127,7 +3127,7 @@ void DrawScanlinesOverlay(float level)
   	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
   	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 1.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = (v-size)/256.0f;
@@ -3139,7 +3139,7 @@ void DrawScanlinesOverlay(float level)
   	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
   	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 1.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = (v+size)/256.0f;
@@ -3151,7 +3151,7 @@ void DrawScanlinesOverlay(float level)
   	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
   	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 1.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = (v+size)/256.0f;
@@ -3216,7 +3216,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 		mainVertex[vb].sx = (float)vertices->X;
 		mainVertex[vb].sy = (float)-vertices->Y;
 		mainVertex[vb].sz = 1.0f;
-		mainVertex[vb].rhw = 1.0f;
+//		mainVertex[vb].rhw = 1.0f;
 
   		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
@@ -3271,7 +3271,7 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 		mainVertex[vb].sx = (float)point->vx;
 		mainVertex[vb].sy = (float)-point->vy;
 		mainVertex[vb].sz = (float)point->vz;
-		mainVertex[vb].rhw = 1.0f;
+//		mainVertex[vb].rhw = 1.0f;
 
 	   	mainVertex[vb].color = MeshVertexColour[i];
 		mainVertex[vb].specular = 0;
@@ -3738,7 +3738,7 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 	  	mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
 	  	mainVertex[vb].sy = (float)yTop;
 		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
+//		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 		mainVertex[vb].tu = 0.0f;
@@ -3749,7 +3749,7 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 	  	mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
 	  	mainVertex[vb].sy = (float)yBottom;
 		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
+//		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 		mainVertex[vb].tu = 0.0f;
@@ -3764,7 +3764,7 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 		mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
 	  	mainVertex[vb].sy = (float)yBottom;
 		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
+//		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 		mainVertex[vb].tu = 0.0f;
@@ -3775,7 +3775,7 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 	  	mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
 	  	mainVertex[vb].sy = (float)yTop;
 		mainVertex[vb].sz = 0.0f;
-		mainVertex[vb].rhw = 1.0f;
+//		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 		mainVertex[vb].tu = 0.0f;
@@ -3800,7 +3800,7 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
   	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
   	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 64.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = (t<<24)+colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = 0.0f;
@@ -3812,7 +3812,7 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
   	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
   	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 64.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = (t<<24)+colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = 0.0f;
@@ -3824,7 +3824,7 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
   	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
   	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 64.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = (t<<24)+colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = 0.0f;
@@ -3836,7 +3836,7 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
   	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
   	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 64.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = (t<<24)+colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = 0.0f;
@@ -3867,7 +3867,7 @@ extern void D3D_PlayerOnFireOverlay(void)
   	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
   	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = u;
@@ -3879,7 +3879,7 @@ extern void D3D_PlayerOnFireOverlay(void)
   	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
   	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = u+1.0f;
@@ -3890,7 +3890,7 @@ extern void D3D_PlayerOnFireOverlay(void)
   	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
   	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = u+1.0f;
@@ -3902,7 +3902,7 @@ extern void D3D_PlayerOnFireOverlay(void)
   	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
   	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = u;
@@ -3936,7 +3936,7 @@ extern void D3D_ScreenInversionOverlay()
 	 	  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
 		  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 			mainVertex[vb].sz = 0.0f;
-			mainVertex[vb].rhw = 1.0f;
+//			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = 0.375f + (cos*(-1) - sin*(-1));
@@ -3948,7 +3948,7 @@ extern void D3D_ScreenInversionOverlay()
 		  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
 		  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 			mainVertex[vb].sz = 0.0f;
-			mainVertex[vb].rhw = 1.0f;
+//			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = .375f + (cos*(+1) - sin*(-1));
@@ -3960,7 +3960,7 @@ extern void D3D_ScreenInversionOverlay()
 		  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
 		  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 			mainVertex[vb].sz = 0.0f;
-			mainVertex[vb].rhw = 1.0f;
+//			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = .375f + (cos*(+1) - sin*(+1));
@@ -3972,7 +3972,7 @@ extern void D3D_ScreenInversionOverlay()
 		  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
 		  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 			mainVertex[vb].sz = 0.0f;
-			mainVertex[vb].rhw = 1.0f;
+//			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = .375f + (cos*(-1) - sin*(+1));
@@ -4006,7 +4006,7 @@ extern void D3D_PredatorScreenInversionOverlay()
   	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
   	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 1.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = 0.0f;
@@ -4018,7 +4018,7 @@ extern void D3D_PredatorScreenInversionOverlay()
   	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
   	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 1.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = 0.0f;
@@ -4030,7 +4030,7 @@ extern void D3D_PredatorScreenInversionOverlay()
   	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
   	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 1.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = 0.0f;
@@ -4042,7 +4042,7 @@ extern void D3D_PredatorScreenInversionOverlay()
   	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
   	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 1.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = 0.0f;
@@ -4112,7 +4112,7 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 	 	  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
 		  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 			mainVertex[vb].sz = 0.0f;
-			mainVertex[vb].rhw = 1.0f;
+//			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = (float)(0.875 + (cos*(-1) - sin*(-1)));
@@ -4124,7 +4124,7 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 		  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
 		  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 			mainVertex[vb].sz = 0.0f;
-			mainVertex[vb].rhw = 1.0f;
+//			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = (float)(.875 + (cos*(+1) - sin*(-1)));
@@ -4136,7 +4136,7 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 		  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
 		  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 			mainVertex[vb].sz = 0.0f;
-			mainVertex[vb].rhw = 1.0f;
+//			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = (float)(.875 + (cos*(+1) - sin*(+1)));
@@ -4148,7 +4148,7 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 		  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
 		  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 			mainVertex[vb].sz = 0.0f;
-			mainVertex[vb].rhw = 1.0f;
+//			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = (float)(.875 + (cos*(-1) - sin*(+1)));
@@ -4743,7 +4743,7 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 	mainVertex[vb].sx = (float)topX - 0.5f;
 	mainVertex[vb].sy = (float)topY + height - 0.5f;
 	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 	mainVertex[vb].tu = 0.0f;
@@ -4755,7 +4755,7 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 	mainVertex[vb].sx = (float)topX - 0.5f;
 	mainVertex[vb].sy = (float)topY - 0.5f;
 	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 	mainVertex[vb].tu = 0.0f;
@@ -4767,7 +4767,7 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 	mainVertex[vb].sx = (float)topX + width - 0.5f;
 	mainVertex[vb].sy = (float)topY + height - 0.5f;
 	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 	mainVertex[vb].tu = 0.0f;
@@ -4779,7 +4779,7 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 	mainVertex[vb].sx = (float)topX + width - 0.5f;
 	mainVertex[vb].sy = (float)topY - 0.5f;
 	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 	mainVertex[vb].tu = 0.0f;
@@ -4877,7 +4877,7 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_textu
 	quadVert[0].sx = (float)dest_rect.left - 0.5f;
 	quadVert[0].sy = (float)dest_rect.bottom - 0.5f;
 	quadVert[0].sz = 0.0f;
-	quadVert[0].rhw = 1.0f;
+//	quadVert[0].rhw = 1.0f;
 	quadVert[0].color = D3DCOLOR_XRGB(255,255,255);
 	quadVert[0].specular = RGBALIGHT_MAKE(0,0,0,255);
 	quadVert[0].tu = (float)((width - src_rect.left) * RecipW);
@@ -4887,7 +4887,7 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_textu
 	quadVert[1].sx = (float)dest_rect.left - 0.5f;
 	quadVert[1].sy = (float)dest_rect.top - 0.5f;
 	quadVert[1].sz = 0.0f;
-	quadVert[1].rhw = 1.0f;
+//	quadVert[1].rhw = 1.0f;
 	quadVert[1].color = D3DCOLOR_XRGB(255,255,255);
 	quadVert[1].specular = RGBALIGHT_MAKE(0,0,0,255);
 	quadVert[1].tu = (float)((width - src_rect.left) * RecipW);
@@ -4897,7 +4897,7 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_textu
 	quadVert[2].sx = (float)dest_rect.right - 0.5f;
 	quadVert[2].sy = (float)dest_rect.bottom - 0.5f;
 	quadVert[2].sz = 0.0f;
-	quadVert[2].rhw = 1.0f;
+//	quadVert[2].rhw = 1.0f;
 	quadVert[2].color = D3DCOLOR_XRGB(255,255,255);
 	quadVert[2].specular = RGBALIGHT_MAKE(0,0,0,255);
 	quadVert[2].tu = (float)((width - src_rect.right) * RecipW);
@@ -4907,7 +4907,7 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_textu
 	quadVert[3].sx = (float)dest_rect.right - 0.5f;
 	quadVert[3].sy = (float)dest_rect.top - 0.5f;
 	quadVert[3].sz = 0.0f;
-	quadVert[3].rhw = 1.0f;
+//	quadVert[3].rhw = 1.0f;
 	quadVert[3].color = D3DCOLOR_XRGB(255,255,255);
 	quadVert[3].specular = RGBALIGHT_MAKE(0,0,0,255);
 	quadVert[3].tu = (float)((width - src_rect.right) * RecipW);
@@ -5545,7 +5545,7 @@ void DrawBigChar(char c, int x, int y, int colour)
 	mainVertex[vb].sx = (float)x - 0.5f;
 	mainVertex[vb].sy = (float)y + height_of_char - 0.5f;
 	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = RGBALIGHT_MAKE(0, 0 ,0, 255);
 	mainVertex[vb].tu = (float)((texU) * RecipW);
@@ -5557,7 +5557,7 @@ void DrawBigChar(char c, int x, int y, int colour)
 	mainVertex[vb].sx = (float)x - 0.5f;
 	mainVertex[vb].sy = (float)y - 0.5f;
 	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 	mainVertex[vb].tu = (float)((texU) * RecipW);
@@ -5569,7 +5569,7 @@ void DrawBigChar(char c, int x, int y, int colour)
 	mainVertex[vb].sx = (float)x + width_of_char - 0.5f;
 	mainVertex[vb].sy = (float)y + height_of_char - 0.5f;
 	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 	mainVertex[vb].tu = (float)((texU + width_of_char) * RecipW);
@@ -5581,7 +5581,7 @@ void DrawBigChar(char c, int x, int y, int colour)
 	mainVertex[vb].sx = (float)x + width_of_char - 0.5f;
 	mainVertex[vb].sy = (float)y - 0.5f;
 	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
+//	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
 	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 	mainVertex[vb].tu = (float)((texU + width_of_char) * RecipW);

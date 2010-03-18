@@ -40,10 +40,12 @@ typedef struct _D3DTLVERTEX {
         float sz;
         float dvSZ;
     };
+/*
     union {
         float rhw;
         float dvRHW;
     };
+*/
     union {
         D3DCOLOR color;
         D3DCOLOR dcColor;
@@ -65,7 +67,7 @@ typedef struct _D3DTLVERTEX {
 
 #define D3DFVF_TLVERTEX	(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_SPECULAR | D3DFVF_TEX1)
 
-#define D3DFVF_HARDWARETLVERTEX	(D3DFVF_XYZW|D3DFVF_DIFFUSE|D3DFVF_SPECULAR|D3DFVF_TEX1)
+#define D3DFVF_HARDWARETLVERTEX	(D3DFVF_XYZ/*W*/ | D3DFVF_DIFFUSE | D3DFVF_SPECULAR | D3DFVF_TEX1)
 
 // orthographic quad vertex format
 #define D3DFVF_ORTHOVERTEX (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1)
