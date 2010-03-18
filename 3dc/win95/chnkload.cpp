@@ -1860,9 +1860,9 @@ void SetupAnimOnTriangle(SHAPEHEADER* shp, TEXANIM* ta, int poly, int *local_tex
 	shp->sh_textures[UVIndex] = (int*)thlist;
 	shp->items[poly][2] |= iflag_txanim;
 	shp->items[poly][3] = UVIndex<<16;
-
 }
-void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,int poly, int * local_tex_index_nos)
+
+void SetupAnimOnQuad(Shape_Chunk* sc, SHAPEHEADER* shp, TEXANIM* ta1, TEXANIM* ta2, int poly, int * local_tex_index_nos)
 {
 	if (!is_textured(shp->items[poly][0]))
 		return;
@@ -1957,22 +1957,22 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 			}
 		}
 	}
-	int UVIndex=shp->items[poly][3]>>16;
+	int UVIndex = shp->items[poly][3]>>16;
 	#if !USE_LEVEL_MEMORY_POOL
 	if(shp->sh_textures[UVIndex])DeallocateMem(shp->sh_textures[UVIndex]);
 	#endif
-	shp->sh_textures[UVIndex]=(int*)thlist;
-	shp->items[poly][2]|=iflag_txanim;
-	shp->items[poly][3]=UVIndex<<16;
+	shp->sh_textures[UVIndex] = (int*)thlist;
+	shp->items[poly][2] |= iflag_txanim;
+	shp->items[poly][3] = UVIndex<<16;
 }
 
-void SetupAnimatedTextures(Shape_Chunk* sc,SHAPEHEADER* shp,Animation_Chunk* ac,Shape_Merge_Data_Chunk* smdc, int * local_tex_index_nos)
+void SetupAnimatedTextures(Shape_Chunk* sc, SHAPEHEADER* shp, Animation_Chunk* ac, Shape_Merge_Data_Chunk* smdc, int * local_tex_index_nos)
 {
 	//create conversion between unmerged poly nos and merged poly nos
 	int* PolyConv=0;
 	int* mgd=0;
 	
-	if(smdc) 
+	if (smdc) 
 	{
 		mgd=smdc->merge_data;
 		PolyConv=new int[smdc->num_polys];
@@ -2342,7 +2342,6 @@ BOOL copy_to_shapeheader (
 		tptr[i*3 + 1] =(int) (cshp_ptr->p_normal_list[i].y*ONE_FIXED);
 		tptr[i*3 + 2] =(int) (cshp_ptr->p_normal_list[i].z*ONE_FIXED);
 	}
-
 	
 	for (i=0; i<shphd->numitems; i++)
 		shphd->items[i] = &item_list[i*9];
@@ -2360,7 +2359,6 @@ BOOL copy_to_shapeheader (
 	
 	for (i=0; i<shphd->numitems; i++) 
 	{
-
 		item_list[i*9] = (cshp_ptr->poly_list[i].engine_type);
 		item_list[i*9 + 1] = (cshp_ptr->poly_list[i].normal_index * 3);
 		item_list[i*9 + 2] = (cshp_ptr->poly_list[i].flags&~ChunkInternalItemFlags);
@@ -2369,7 +2367,7 @@ BOOL copy_to_shapeheader (
 		if ( is_textured(item_list[i*9]) && !( item_list[i*9 + 3] & 0x8000 ) ) 
 		{
 			int texno = item_list[i*9 + 3] & 0x7fff;
-			int UVIndex= item_list[i*9 + 3]>>16;
+			int UVIndex = item_list[i*9 + 3]>>16;
 
 			if (texno <= local_max_index &&
 				local_tex_index_nos[texno] != -1 &&

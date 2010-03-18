@@ -862,9 +862,6 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 		}
 	}
 
-
-	
-
     /*------------------------------------------------------ 
 	WEAPON FIRING
 	Kevin: The player input functions now interface directly

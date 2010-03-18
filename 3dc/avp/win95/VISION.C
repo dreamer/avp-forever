@@ -149,7 +149,8 @@ void HandlePredOVision(void)
 {
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 
-	if (playerStatusPtr->IsAlive) {
+	if (playerStatusPtr->IsAlive) 
+	{
 		CurrentGameStats_VisionMode(CurrentVisionMode);
 	}
 
@@ -157,6 +158,7 @@ void HandlePredOVision(void)
 	{
 		DrawNoiseOverlay(16);
 	}
+
 	if (CurrentVisionMode==VISION_MODE_PRED_SEEPREDTECH)
 	{
 		D3D_PredatorScreenInversionOverlay();
@@ -244,7 +246,8 @@ void HandleMarineOVision(void)
 {
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 	
-	if (playerStatusPtr->IsAlive) {
+	if (playerStatusPtr->IsAlive)
+	{
 		CurrentGameStats_VisionMode(CurrentVisionMode);
 	}
 
@@ -292,7 +295,8 @@ void HandleAlienOVision(void)
 {
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
  
-	if (playerStatusPtr->IsAlive) {
+	if (playerStatusPtr->IsAlive) 
+	{
 		CurrentGameStats_VisionMode(CurrentVisionMode);
 	}
 
@@ -302,7 +306,8 @@ void HandleAlienOVision(void)
 	}
 
 	/* We might have just morphed. */
-	if (predOVision_SoundHandle!=SOUND_NOACTIVEINDEX) {
+	if (predOVision_SoundHandle!=SOUND_NOACTIVEINDEX)
+	{
 		Sound_Stop(predOVision_SoundHandle);
 	}
 	

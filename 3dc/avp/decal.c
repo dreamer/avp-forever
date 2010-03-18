@@ -51,13 +51,13 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 	/* DECAL_FMV */
 	{
 		//int StartU;
-		0<<16,
+		0,
 		//int StartV;
-		0<<16,	 
+		0,	 
 		//int EndU;
-		(127)<<16,
+		(127),
 		//int EndV;
-	    (95)<<16,
+	    (95),
 
 		//int MinSize;
 		3000,
@@ -91,13 +91,13 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 	/* DECAL_SCORCHED */
 	{
 		//int StartU;
-		0<<16,
+		0,
 		//int StartV;
-		64<<16,
+		64,
 		//int EndU;
-		63<<16,
+		63,
 		//int EndV;
-		127<<16,
+		127,
 
 		//int MinSize;
 		20,
@@ -132,13 +132,13 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 	/* DECAL_BULLETHOLE */
 	{
 		//int StartU;
-		224<<16,
+		224,
 		//int StartV;
-		224<<16,
+		224,
 		//int EndU;
-		255<<16,
+		255,
 		//int EndV;
-		255<<16,
+		255,
 
 		//int MinSize;
 		32,
@@ -172,13 +172,13 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 	/* DECAL_PREDATOR_BLOOD */
 	{
 		//int StartU;
-		(0)<<16,
+		(0),
 		//int StartV;
-		224<<16,
+		224,
 		//int EndU;
-		(31)<<16,
+		(31),
 		//int EndV;
-		255<<16,
+		255,
 
 		//int MinSize;
 		20,
@@ -190,7 +190,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		//int MaxSubclassNumber;
 		3,
 		//int UOffsetForSubclass;
-		32<<16,
+		32,//<<16,
 		
 		//enum TRANSLUCENCY_TYPE TranslucencyType;
 		TRANSLUCENCY_GLOWING,
@@ -212,13 +212,13 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 	/* DECAL_ALIEN_BLOOD */
 	{
 		//int StartU;
-		0<<16,
+		0,
 		//int StartV;
-		64<<16,
+		64,
 		//int EndU;
-		63<<16,
+		63,
 		//int EndV;
-		127<<16,
+		127,
 
 		//int MinSize;
 		20,
@@ -253,13 +253,13 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 	/* DECAL_HUMAN_BLOOD */
 	{
 		//int StartU;
-		(0)<<16,
+		(0),
 		//int StartV;
-		224<<16,
+		224,
 		//int EndU;
-		(31)<<16,
+		(31),
 		//int EndV;
-		255<<16,
+		255,
 
 		//int MinSize;
 		20,
@@ -271,7 +271,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		//int MaxSubclassNumber;
 		4,
 		//int UOffsetForSubclass;
-		32<<16,
+		32,//<<16,
 
 		//enum TRANSLUCENCY_TYPE TranslucencyType;
 		TRANSLUCENCY_INVCOLOUR,//GLOWING,
@@ -294,13 +294,13 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 	/* DECAL_ANDROID_BLOOD */
 	{
 		//int StartU;
-		(0)<<16,
+		(0),
 		//int StartV;
-		224<<16,
+		224,
 		//int EndU;
-		(31)<<16,
+		(31),
 		//int EndV;
-		255<<16,
+		255,
 
 		//int MinSize;
 		20,
@@ -312,7 +312,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		//int MaxSubclassNumber;
 		3,
 		//int UOffsetForSubclass;
-		32<<16,
+		32,//<<16,
 		
 		//enum TRANSLUCENCY_TYPE TranslucencyType;
 		TRANSLUCENCY_GLOWING,
@@ -335,13 +335,13 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 	/* DECAL_LASERTARGET */
 	{
 		//int StartU;
-		0<<16,
+		0,
 		//int StartV;
-		0<<16,
+		0,
 		//int EndU;
-		63<<16,
+		63,
 		//int EndV;
-		63<<16,
+		63,
 
 		//int MinSize;
 		20,
@@ -712,10 +712,10 @@ void AddDecal(enum DECAL_ID decalID, VECTORCH *normalPtr, VECTORCH *positionPtr,
 		case DECAL_PREDATOR_BLOOD:
 		case DECAL_ANDROID_BLOOD:
 		{	
-			decalPtr->UOffset = (FastRandom()&1)*(32<<16);
+			decalPtr->UOffset = (FastRandom()&1)*(32/*<<16*/);
 			if (normalPtr->vy<-32768)
 			{
-				decalPtr->UOffset+=64<<16;
+				decalPtr->UOffset+=64;//<<16;
 			}
 			else
 			{

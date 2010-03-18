@@ -1030,7 +1030,7 @@ void DrawPredatorEnergyBar(void)
 	if (weaponPtr->WeaponIDNumber == WEAPON_PRED_SHOULDERCANNON)
 	{
 		h = MUL_FIXED(playerStatusPtr->PlasmaCasterCharge,maxHeight);
-			
+
 		r2rect rectangle
 		(
 			ScreenDescriptorBlock.SDB_Width+HUDLayout_RightmostTextCentre*3,
@@ -1040,7 +1040,7 @@ void DrawPredatorEnergyBar(void)
 			
 		);
 
-		rectangle . AlphaFill
+		rectangle.AlphaFill
 		(
 			0x00, // unsigned char R,
 			0xff,// unsigned char G,

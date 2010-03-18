@@ -2312,8 +2312,8 @@ DEATH_DATA *GetThisDeath_FromCode(HMODELCONTROLLER *controller,DEATH_DATA *First
         return(retval);
 }
 
-DEATH_DATA *GetThisDeath_FromUniqueCode(int code) {
-
+DEATH_DATA *GetThisDeath_FromUniqueCode(int code) 
+{
 	extern DEATH_DATA Alien_Deaths[];
 	extern DEATH_DATA Marine_Deaths[];
 	extern DEATH_DATA Predator_Special_SelfDestruct_Death;
@@ -2342,21 +2342,23 @@ DEATH_DATA *GetThisDeath_FromUniqueCode(int code) {
 		default:
 			return 0;
 	}
-        
 
-       while (this_death->Sequence_Type>=0) {
-               if (this_death->Unique_Code==code) {
-                       return this_death;
-               }
-               this_death++;
-       }
+	while (this_death->Sequence_Type>=0) 
+	{
+		if (this_death->Unique_Code==code) 
+		{
+			return this_death;
+		}
+		this_death++;
+	}
 
-       return 0;
+   return 0;
 }
 
 
 DEATH_DATA *GetDeathSequence(HMODELCONTROLLER *controller,SECTION *TemplateRoot,DEATH_DATA *FirstDeath,int wound_flags,int priority_wounds,
-        int hurtiness,HIT_FACING *facing,int burning,int crouching,int electrical) {
+        int hurtiness,HIT_FACING *facing,int burning,int crouching,int electrical) 
+{
 
         int number_of_candidates;
         int index;

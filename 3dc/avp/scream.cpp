@@ -49,13 +49,6 @@ static CharacterSoundEffects AlienSounds={0,0,0,SID_NOSOUND};
 static CharacterSoundEffects PredatorSounds={0,0,0,SID_NOSOUND};
 static CharacterSoundEffects QueenSounds={0,0,0,SID_NOSOUND};
 
-
-//static int num_voice_types=0;
-//static int num_voice_cats=0;
-//static ScreamVoiceType* voice_types=0;
-//static SOUNDINDEX global_last_sound;
-
-
 #if ALIEN_DEMO
 #define ScreamFilePath "alienfastfile\\"
 #elif LOAD_SCREAMS_FROM_FASTFILES
@@ -64,14 +57,15 @@ static CharacterSoundEffects QueenSounds={0,0,0,SID_NOSOUND};
 #define ScreamFilePath "sound\\"
 #endif
 
-void CharacterSoundEffects::LoadSounds(const char* filename,const char* directory)
+void CharacterSoundEffects::LoadSounds(const char* filename, const char* directory)
 {
-	if(voice_types) return;
+	if (voice_types) 
+		return;
 
-	char path[100]=ScreamFilePath;
+	char path[100] = ScreamFilePath;
 	strcat(path,filename);
 
-	HANDLE file = avp_CreateFile(path,GENERIC_READ, 0, 0, OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
+	HANDLE file = avp_CreateFile(path, GENERIC_READ, 0, 0, OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
 	if (file == INVALID_HANDLE_VALUE)
 	{
 		LOGDXFMT(("Failed to open %s",path));
@@ -82,24 +76,24 @@ void CharacterSoundEffects::LoadSounds(const char* filename,const char* director
 	int file_size;
 	unsigned long bytes_read;
 
-	file_size= GetFileSize(file,0);
-	buffer=new char[file_size+1];
-	ReadFile(file,buffer,file_size,&bytes_read,0);
+	file_size = GetFileSize(file,0);
+	buffer = new char[file_size+1];
+	ReadFile(file,buffer, file_size, &bytes_read, 0);
 	CloseHandle(file);
 
-	if(strncmp("MARSOUND",buffer,8))
+	if (strncmp("MARSOUND", buffer, 8))
 	{
 		return;
 	}
 
-	char* bufpos=buffer+8;
+	char* bufpos = buffer+8;
 
-	num_voice_types=*(int*)bufpos;
+	num_voice_types = *(int*)bufpos;
 	bufpos+=4;
-	num_voice_cats=*(int*)bufpos;
+	num_voice_cats = *(int*)bufpos;
 	bufpos+=4;
 	
-	voice_types=(ScreamVoiceType*) PoolAllocateMem(num_voice_types * sizeof(ScreamVoiceType));
+	voice_types = (ScreamVoiceType*) PoolAllocateMem(num_voice_types * sizeof(ScreamVoiceType));
 	
 	char wavpath[200];
 	strcpy(wavpath,directory);
@@ -107,21 +101,21 @@ void CharacterSoundEffects::LoadSounds(const char* filename,const char* director
 	
 	for(int i=0;i<num_voice_types;i++)	
 	{
-		voice_types[i].category=(ScreamSoundCategory*) PoolAllocateMem( num_voice_cats * sizeof(ScreamSoundCategory));
+		voice_types[i].category = (ScreamSoundCategory*) PoolAllocateMem( num_voice_cats * sizeof(ScreamSoundCategory));
 		for(int j=0;j<num_voice_cats;j++)
 		{
 			ScreamSoundCategory* cat=&voice_types[i].category[j];
-			cat->last_sound=SID_NOSOUND;
-			cat->num_sounds=*(int*)bufpos;
+			cat->last_sound = SID_NOSOUND;
+			cat->num_sounds = *(int*)bufpos;
 			bufpos+=4;
 
-			if(cat->num_sounds)
+			if (cat->num_sounds)
 			{
-				cat->sounds=(ScreamSound*) PoolAllocateMem(cat->num_sounds * sizeof(ScreamSound));
+				cat->sounds = (ScreamSound*) PoolAllocateMem(cat->num_sounds * sizeof(ScreamSound));
 			}
 			else
 			{
-				cat->sounds=0;
+				cat->sounds = 0;
 			}
 
 			for(int k=0;k<cat->num_sounds;)
@@ -150,7 +144,6 @@ void CharacterSoundEffects::LoadSounds(const char* filename,const char* director
 	}
 
 	delete [] buffer;
-		
 }
 
 void CharacterSoundEffects::UnloadSounds()

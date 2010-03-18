@@ -32,13 +32,12 @@ int testc = 0;
 
 */
 
-	MATRIXCH IdentityMatrix = {
-
-		ONE_FIXED, 0, 0,
-		0, ONE_FIXED, 0,
-		0, 0, ONE_FIXED
-
-	};
+MATRIXCH IdentityMatrix = 
+{
+	ONE_FIXED, 0, 0,
+	0, ONE_FIXED, 0,
+	0, 0, ONE_FIXED
+};
 
 
 
@@ -53,18 +52,22 @@ int testc = 0;
 
 extern int oneoversin[4096];
 
-void ConstructOneOverSinTable(void) {
-
+void ConstructOneOverSinTable(void) 
+{
 	int a,sin;
 
-	for (a=0; a<4096; a++) {
-		sin=GetSin(a);
+	for (a=0; a<4096; a++) 
+	{
+		sin = GetSin(a);
 
-		if (sin!=0) {
-			oneoversin[a]=DIV_FIXED(ONE_FIXED,sin);
-		} else {
-			sin=100;
-			oneoversin[a]=DIV_FIXED(ONE_FIXED,sin);
+		if (sin != 0) 
+		{
+			oneoversin[a] = DIV_FIXED(ONE_FIXED,sin);
+		} 
+		else 
+		{
+			sin = 100;
+			oneoversin[a] = DIV_FIXED(ONE_FIXED,sin);
 		}
 	}
 }
@@ -137,7 +140,6 @@ int VectorDistance(VECTORCH *v1, VECTORCH *v2)
 int OutcodeVectorDistance(VECTORCH *v1, VECTORCH *v2, int d)
 {
 	int i;
-
 
 	i = v1->vx - v2->vx;
 	if(i < 0) i = -i;

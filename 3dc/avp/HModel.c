@@ -112,7 +112,8 @@ void QNormalise(QUAT *q)
 }
 
 
-int GetSequenceID(int sequence_type,int sub_sequence) {
+int GetSequenceID(int sequence_type,int sub_sequence) 
+{
 	return( (sub_sequence<<16)+sequence_type);
 }
 

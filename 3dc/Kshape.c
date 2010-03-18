@@ -43,7 +43,6 @@ extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 extern DISPLAYBLOCK *Global_ODB_Ptr;
 extern EXTRAITEMDATA *Global_EID_Ptr;
 extern int *Global_EID_IPtr;
-extern int ZBufferMode;
 extern int NormalFrameTime;
 
 extern SHAPEHEADER *Global_ShapeHeaderPtr;
@@ -143,13 +142,13 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold);
 * they will end up in high memory on the Saturn.                                        *
 ************************************************************************************KJL*/
 
-VECTORCH Global_LightVector={1,}; 
+VECTORCH Global_LightVector;//={1,}; 
 
 /*
  Global variables and arrays
 */
 
-VECTORCH RotatedPts[maxrotpts]={1,};
+VECTORCH RotatedPts[maxrotpts];//={1,};
 int ItemColour=1;
 
 
@@ -620,8 +619,8 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 		PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 		if (playerStatusPtr->cloakOn||playerStatusPtr->CloakingEffectiveness!=0)
 		{
-			int a = GetSin(CloakingPhase&4095);
-			a = MUL_FIXED(a,a);
+//			int a = GetSin(CloakingPhase&4095);
+//			a = MUL_FIXED(a,a);
 			CloakingMode = ONE_FIXED*5/4-playerStatusPtr->CloakingEffectiveness;//32768;
 			do
 			{
@@ -958,8 +957,8 @@ static void CloakedPolygon_Construct(POLYHEADER *polyPtr)
 			renderVerticesPtr->X = vertexPtr->vx;
 			renderVerticesPtr->Y = vertexPtr->vy;
 			renderVerticesPtr->Z = vertexPtr->vz;
-			renderVerticesPtr->U = texture_defn_ptr[0] << 16;
-			renderVerticesPtr->V = texture_defn_ptr[1] << 16;
+			renderVerticesPtr->U = texture_defn_ptr[0];// << 16;
+			renderVerticesPtr->V = texture_defn_ptr[1];// << 16;
 
 			VertexIntensity(renderVerticesPtr);
 			{
@@ -1138,8 +1137,8 @@ static void PredatorSeeAliensVisionPolygon_Construct(POLYHEADER *polyPtr)
 			}
 			else
 			{
-				renderVerticesPtr->U = texture_defn_ptr[0] << 16;
-				renderVerticesPtr->V = texture_defn_ptr[1] << 16;
+				renderVerticesPtr->U = texture_defn_ptr[0];// << 16;
+				renderVerticesPtr->V = texture_defn_ptr[1];// << 16;
 			}
 			
 		
@@ -1405,7 +1404,7 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 				renderVerticesPtr->Y = vertexPtr->vy;
 				renderVerticesPtr->Z = vertexPtr->vz;
 			}
-			#endif															
+			#endif	
 			renderVerticesPtr->U = texture_defn_ptr[0];// << 16;
 			renderVerticesPtr->V = texture_defn_ptr[1];// << 16;
 
@@ -4162,7 +4161,6 @@ void MorphPoints(SHAPEINSTR *shapeinstrptr)
 			
 			srcPtr = (VECTORCH *)*shape2Ptr->points;
 			Global_ShapePoints    = *(shape2Ptr->points);
-				
 		}
 		else
 		{
@@ -5383,6 +5381,7 @@ void RenderSky(void)
 		fakeHeader.PolyColour = CloudyImageNumber;
 		RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
 	}
+
 	for (o=0; o<OCTAVES; o++)
 	{
 		u[o]+=MUL_FIXED(du[o],NormalFrameTime);

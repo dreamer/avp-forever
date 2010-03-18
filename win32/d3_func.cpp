@@ -1437,7 +1437,7 @@ void SetTransforms()
 	D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 
 	// set up projection matrix
-	D3DXMatrixPerspectiveFovLH( &matProjection, FLOAT(ScreenDescriptorBlock.SDB_Width / ScreenDescriptorBlock.SDB_Width), D3DX_PI / 2, 1.0f, 100.0f);
+	D3DXMatrixPerspectiveFovLH( &matProjection, D3DX_PI / 2, FLOAT(ScreenDescriptorBlock.SDB_Width / ScreenDescriptorBlock.SDB_Height), 1.0f, 100.0f);
 
 	// print projection matrix?
 	PrintD3DMatrix("Projection", matProjection);

@@ -72,7 +72,6 @@ void InitialiseRawInput();
 	int VideoModeType;
 	int VideoModeTypeScreen;
 	int WindowMode;
-	int ZBufferMode;
 
 	unsigned char *TextureLightingTable = 0;
 
@@ -87,12 +86,6 @@ void InitialiseRawInput();
 	int PrevNormalFrameTime;
 	extern int CloakingPhase;
 
-	/* These two are dummy values to get the DOS platform to compile */
-
-	unsigned char KeyCode;
-	unsigned char KeyASCII;
-
-	unsigned char *palette_tmp;
 	static VIEWDESCRIPTORBLOCK* vdb_tmp;
 	static SCREENDESCRIPTORBLOCK* sdb_tmp;
 
@@ -118,16 +111,9 @@ void InitialiseRawInput();
 	/* Added 28/1/98 by DHM: as above, but applies specifically to textprintXY */
 	int bEnableTextprintXY = TRUE;
 
-	/* Palette */
-
-//	unsigned char PaletteBuffer[768 + 1];
-
 /* Test Palette */
 
 unsigned char TestPalette[768];
-//unsigned char TestPalette2[768];
-
-
 
 
 /* KJL 11:48:45 28/01/98 - used to scale NormalFrameTime, so the game can be slowed down */

@@ -5245,14 +5245,18 @@ void KillMarine(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, int 
 		tkd=TotalKineticDamage(damage);
 		deathtype=0;
 
-		if (damage->ExplosivePower==1) {
-			if (MUL_FIXED(tkd,(multiple&((ONE_FIXED<<1)-1)))>20) {
+		if (damage->ExplosivePower==1) 
+		{
+			if (MUL_FIXED(tkd,(multiple&((ONE_FIXED<<1)-1)))>20)
+			{
 				/* Okay, you can gibb now. */
 				marineStatusPointer->GibbFactor=ONE_FIXED>>1;
 				marineStatusPointer->mtracker_timer=-1;
 				deathtype=2;
 			}
-		} else if ((tkd>60)&&((multiple>>16)>1)) {
+		}
+		else if ((tkd>60)&&((multiple>>16)>1)) 
+		{
 			int newmult;
 
 			newmult=DIV_FIXED(multiple,NormalFrameTime);
@@ -5264,7 +5268,8 @@ void KillMarine(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, int 
 			}
 		}
 
-		if ((damage->ExplosivePower==2)||(damage->ExplosivePower==6)) {
+		if ((damage->ExplosivePower==2)||(damage->ExplosivePower==6)) 
+		{
 			/* Basically SADARS only. */
 			marineStatusPointer->GibbFactor=ONE_FIXED;
 			marineStatusPointer->mtracker_timer=-1;
@@ -5273,7 +5278,8 @@ void KillMarine(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, int 
 	}
 	gibbFactor=marineStatusPointer->GibbFactor;
 
-	if (damage->ForceBoom) {
+	if (damage->ForceBoom) 
+	{
 		deathtype+=damage->ForceBoom;
 	}
 
@@ -5282,11 +5288,13 @@ void KillMarine(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, int 
 		
 		chest=GetThisSectionData(marineStatusPointer->HModelController.section_data,"chest");
 		
-		if (chest==NULL) {
+		if (chest==NULL) 
+		{
 			/* I'm impressed. */
 			deathtype+=2;
-		} else if ((chest->flags&section_data_notreal)
-			&&(chest->flags&section_data_terminate_here)) {
+		} 
+		else if ((chest->flags&section_data_notreal) && (chest->flags&section_data_terminate_here)) 
+		{
 			/* That's gotta hurt. */
 			deathtype++;
 		}
@@ -5296,21 +5304,29 @@ void KillMarine(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, int 
 	head=GetThisSectionData(marineStatusPointer->HModelController.section_data,"head");
 
 	/* Is it still attached? */
-	if (head) {
-		if (head->flags&section_data_notreal) {
+	if (head)
+	{
+		if (head->flags&section_data_notreal) 
+		{
 			head=NULL;
 		}
 	}
 	
-	if (marineStatusPointer->GibbFactor) {
+	if (marineStatusPointer->GibbFactor) 
+	{
 		/* Probably want to make some sort of splatting noise... */
-	} else if (head) {
-		if (marineStatusPointer->Expression!=3) {
+	} 
+	else if (head) 
+	{
+		if (marineStatusPointer->Expression!=3) 
+		{
 			/* Expression 3 just looks too peaceful. */
-			if (marineStatusPointer->Mission==MM_RunAroundOnFire) {
+			if (marineStatusPointer->Mission==MM_RunAroundOnFire) 
+			{
 				/* More burning screams. */
 				Marine_BurningDeathScream(sbPtr);
-			} else if ((damage->Impact==0) 		
+			} 
+			else if ((damage->Impact==0) 		
 				&&(damage->Cutting==0)  	
 				&&(damage->Penetrative==0)
 				&&(damage->Fire==0)

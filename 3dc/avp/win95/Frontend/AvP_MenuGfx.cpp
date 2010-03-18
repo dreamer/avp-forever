@@ -11,6 +11,9 @@
 #include "ffstdio.h"
 #include "d3_func.h"
 
+
+extern int Font_DrawText(const char* text, int x, int y, int colour, int fontType);
+
 extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour);
 extern void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, BOOL alpha);
 
@@ -248,7 +251,8 @@ extern int LengthOfMenuText(const char *textPtr)
 {
 	int width = 0;
 	
-	while (textPtr && *textPtr) {
+	while (textPtr && *textPtr) 
+	{
 		width += IntroFont_Light.FontWidth[(unsigned int) *textPtr];
 		
 		textPtr++;
@@ -545,6 +549,7 @@ extern int RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPM
 	x = RenderSmallFontString(textPtr, x, y, alpha, ONE_FIXED, ONE_FIXED, ONE_FIXED);
 	return x;
 }
+
 extern int RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int red, int green, int blue) 
 {
 	switch(format)
@@ -638,6 +643,7 @@ extern int Hardware_RenderSmallMenuText(char *textPtr, int x, int y, int alpha, 
 		colour = (colour<<24)+0xffffff;
 
 		D3D_RenderHUDString(textPtr,x,y,colour);
+//		Font_DrawText(textPtr, x, y, colour, 1);
 	}
 	return x;
 }

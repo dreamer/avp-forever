@@ -303,7 +303,6 @@ void DealWithElapsedTime()
 		AvP.ElapsedHours ++;
 	}		
 }
-	
 
 
 /**********************************************
@@ -445,10 +444,8 @@ void ModuleObjectAboutToBeDeallocated(MODULE *mptr)
 
 void NewAndOldModules(int num_new, MODULE **m_new, int num_old, MODULE **m_old, char *m_currvis)
 {
-	
 	/* this is the important bit */
 	DoObjectVisibilities();
-
 }
 
 extern void CheckCDStatus(void)

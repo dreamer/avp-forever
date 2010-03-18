@@ -54,7 +54,6 @@ extern "C" {
 #include "inventry.h"
 
 extern int VideoMode;
-extern int ZBufferMode;
 extern VECTORCH PlayerStartLocation;
 extern MATRIXCH PlayerStartMat;
 

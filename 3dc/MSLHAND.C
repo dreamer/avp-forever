@@ -115,7 +115,7 @@ void FlushMSLSection(MSL_SECTION sect)
 				{
 					if (shp->items[i][0] == 5 || shp->items[i][0] == 6)
 					{
-						int UVIndex =  (shp->items[i][3] &0xffff0000) >> 16;
+						int UVIndex = (shp->items[i][3] &0xffff0000) >> 16;
 						max_num_texs = max (max_num_texs, shp->items[i][3] &0x7fff);
 						if(shp->items[i][2]& iflag_txanim)
 						{

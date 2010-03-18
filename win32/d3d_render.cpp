@@ -56,7 +56,6 @@ D3DTLVERTEX *mainVertex = NULL;
 WORD *mainIndex = NULL;
 
 ORTHOVERTEX *orthoVerts = NULL;
-static int numOrthoVerts = 0;
 static int orthoOffset = 0;
 static int orthoListCount = 0;
 
@@ -105,7 +104,7 @@ struct renderParticle
 	inline bool operator<(const renderParticle& rhs) const {return translucency < rhs.translucency;}
 };
 
-std::vector<renderParticle> particleArray(2000);
+std::vector<renderParticle> particleArray;
 
 size_t maxParts = 0;
 
@@ -124,7 +123,7 @@ void DrawParticles()
 */
 	}
 
-	unsigned int backup = RenderPolygon.NumberOfVertices;
+	uint32_t numVertsBackup = RenderPolygon.NumberOfVertices;
 
 	// sort particle array
 	std::sort(particleArray.begin(), particleArray.end());
@@ -136,10 +135,10 @@ void DrawParticles()
 		D3D_Particle_Output(&particleArray[i].particle, &particleArray[i].vertices[0]);
 	}
 
-	particleArray.resize(0);
+	particleArray.clear();
 
 	// restore RenderPolygon.NumberOfVertices value...
-	RenderPolygon.NumberOfVertices = backup;
+	RenderPolygon.NumberOfVertices = numVertsBackup;
 }
 
 const signed int NO_TEXTURE = -1;
@@ -196,10 +195,22 @@ extern int AAFontImageNumber;
 AVPTEXTURE FMVTextureHandle[4];
 AVPTEXTURE NoiseTextureHandle;
 
+int WaterXOrigin;
+int WaterZOrigin;
+float WaterUScale;
+float WaterVScale;
+
+int MeshZScale;
+int MeshXScale;
+int WaterFallBase;
+
 int LightIntensityAtPoint(VECTORCH *pointPtr);
 
-// Externs
+VECTORCH MeshWorldVertex[256];
+unsigned int MeshVertexColour[256];
+char MeshVertexOutcode[256];
 
+// Externs
 extern int VideoMode;
 extern int WindowMode;
 extern int ZBufferRequestMode;
@@ -213,13 +224,39 @@ extern int NormalFrameTime;
 int WireFrameMode;
 
 extern int HUDScaleFactor;
+extern MODULE *playerPherModule;
+extern int NumOnScreenBlocks;
+extern DISPLAYBLOCK *OnScreenBlockList[];
+extern char LevelName[];
+
+extern int CloakingPhase;
+extern int NumActiveBlocks;
+extern DISPLAYBLOCK *ActiveBlockList[];
+
+extern unsigned char GammaValues[256];
+extern int GlobalAmbience;
+extern char CloakedPredatorIsMoving;
+
+int FMVParticleColour;
+VECTORCH MeshVertex[256];
+
+extern BOOL LevelHasStars;
+
+extern void HandleRainShaft(MODULE *modulePtr, int bottomY, int topY, int numberOfRaindrops);
+void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin);
+extern void RenderMirrorSurface(void);
+extern void RenderMirrorSurface2(void);
+extern void RenderParticlesInMirror(void);
+extern void CheckForObjectsInWater(int minX, int maxX, int minZ, int maxZ, int averageY);
+extern void HandleRain(int numberOfRaindrops);
+void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin);
+extern void RenderSky(void);
+extern void RenderStarfield(void);
+void D3D_DrawMoltenMetalMesh_Unclipped(void);
 
 //Globals
 
 // keep track of set render states
-static unsigned char D3DShadingMode;
-static unsigned char D3DTBlendMode;
-
 static bool	D3DAlphaBlendEnable;
 D3DBLEND D3DSrcBlend;
 D3DBLEND D3DDestBlend;
@@ -287,7 +324,7 @@ static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n)
 
 static inline void D3D_OutputTriangles()
 {
-	switch(RenderPolygon.NumberOfVertices)
+	switch (RenderPolygon.NumberOfVertices)
 	{
 		default:
 			OutputDebugString("unexpected number of verts to render\n");
@@ -354,20 +391,6 @@ static inline void D3D_OutputTriangles()
 	}
 }
 
-/* KJL 15:12:02 10/05/98 - FMV stuff */
-static void UpdateFMVTextures(int maxTextureNumberToUpdate);
-extern int NextFMVFrame(void*bufferPtr, int x, int y, int w, int h, int fmvNumber);
-
-void D3D_DrawFMV(int xOrigin, int yOrigin, int zOrigin);
-
-int FMVParticleColour;
-void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr);
-
-int WaterXOrigin;
-int WaterZOrigin;
-float WaterUScale;
-float WaterVScale;
-
 BOOL SetExecuteBufferDefaults()
 {
     NumVertices = 0;
@@ -400,8 +423,6 @@ BOOL SetExecuteBufferDefaults()
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF, (DWORD)0.5);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE); 
-
-	D3DShadingMode = D3DSHADE_GOURAUD;
 
 //	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 //	d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_MAGFILTER, D3DTEXF_POINT);
@@ -441,9 +462,6 @@ BOOL SetExecuteBufferDefaults()
  
     // Set the fog color.
 //    d3d.lpD3DDevice->SetRenderState(D3DRS_FOGCOLOR, FOG_COLOUR);
-
-//	static unsigned char D3DDitherEnable;
-//	static unsigned char D3DZWriteEnable;
 
     return TRUE;
 }
@@ -534,7 +552,6 @@ BOOL LockExecuteBuffer()
 		return FALSE;
 	}
 
-
 	LastError = d3d.lpD3DIndexBuffer->Lock(0, 0, (void**)&mainIndex, D3DLOCK_DISCARD);
 	if (FAILED(LastError)) 
 	{
@@ -552,13 +569,14 @@ BOOL LockExecuteBuffer()
 	orthoOffset = 0;
 	orthoListCount = 0;
 
-	renderTest.resize(0);
+	renderTest.clear();
 
     return TRUE;
 }
 
 BOOL UnlockExecuteBufferAndPrepareForUse()
 {
+	// unlock main vertex buffer
 	LastError = d3d.lpD3DVertexBuffer->Unlock();
 	if (FAILED(LastError)) 
 	{
@@ -566,6 +584,7 @@ BOOL UnlockExecuteBufferAndPrepareForUse()
 		return FALSE;
 	}
 
+	// unlock index buffer for main vertex buffer
 	LastError = d3d.lpD3DIndexBuffer->Unlock();
 	if (FAILED(LastError)) 
 	{
@@ -573,6 +592,7 @@ BOOL UnlockExecuteBufferAndPrepareForUse()
 		return FALSE;
 	}
 
+	// unlock orthographic quad vertex buffer
 	LastError = d3d.lpD3DOrthoVertexBuffer->Unlock();
 	if (FAILED(LastError)) 
 	{
@@ -589,6 +609,7 @@ BOOL BeginD3DScene()
 	LastError = d3d.lpD3DDevice->TestCooperativeLevel();
 	if (FAILED(LastError)) 
 	{
+		// release vertex + index buffers, and dynamic textures
 		ReleaseVolatileResources();
 		
 		// disable XInput
@@ -659,8 +680,6 @@ void D3D_SetupSceneDefaults()
 
 BOOL EndD3DScene()
 {
-	extern int NormalFrameTime;
-
     LastError = d3d.lpD3DDevice->EndScene();
 
 	if (ShowDebuggingText.PolyCount)
@@ -732,10 +751,10 @@ BOOL ExecuteBuffer()
 //		return FALSE;
 
 	// sort the list of render objects
-	std::sort(renderTest.begin(), renderTest.end());
+//	std::sort(renderTest.begin(), renderTest.end());
 
 #ifdef WIN32
-	Font_DrawText("blah", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
+//	Font_DrawText("blah", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
 #endif
 
 	LastError = d3d.lpD3DDevice->SetStreamSource (0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DTLVERTEX));
@@ -757,13 +776,18 @@ BOOL ExecuteBuffer()
 	}
 
 	D3DXMATRIX matProjection;
-	D3DXMatrixPerspectiveFovLH( &matProjection, D3DX_PI / 2, FLOAT(ScreenDescriptorBlock.SDB_Width / ScreenDescriptorBlock.SDB_Height), 1.0f, 1000000.0f);
+	D3DXMatrixPerspectiveFovLH( &matProjection, D3DX_PI / 2, FLOAT(ScreenDescriptorBlock.SDB_Width / ScreenDescriptorBlock.SDB_Height), 64.0f, 1000000.0f);
 	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matProjection );
 
 	ChangeTextureAddressMode(TEXTURE_WRAP);
 
 	// we can assume to keep this turned on
 	ChangeFilteringMode(FILTERING_BILINEAR_ON);
+
+	#define WIDEN2(x) L ## x
+	#define WIDEN(x) WIDEN2(x)
+
+	D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Before DrawIndexedPrimitive for non transparents\n"));
 
 	for (size_t i = 0; i < renderCount; i++)
 	{
@@ -793,6 +817,10 @@ BOOL ExecuteBuffer()
 		}
 		NumberOfRenderedTriangles += numPrimitives / 3;
 	}
+
+	D3DPERF_EndEvent();
+
+	D3DPERF_BeginEvent(D3DCOLOR_XRGB(140,36,70), WIDEN("Before DrawIndexedPrimitive for transparents\n"));
 
 	// do transparents here..
 	for (size_t i = 0; i < renderCount; i++)
@@ -833,9 +861,13 @@ BOOL ExecuteBuffer()
 		NumberOfRenderedTriangles += numPrimitives / 3;
 	}
 
+	D3DPERF_EndEvent();
+
 	// render any orthographic quads
 	if (orthoListCount)
 	{
+		D3DPERF_BeginEvent(D3DCOLOR_XRGB(200,29,89), WIDEN("Before DrawIndexedPrimitive for ortho quads\n"));
+
 		LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DOrthoVertexBuffer, 0, sizeof(ORTHOVERTEX));
 		if (FAILED(LastError))
 		{
@@ -860,7 +892,7 @@ BOOL ExecuteBuffer()
 			ChangeTexture(orthoList[i].textureID);
 			ChangeTranslucencyMode(orthoList[i].translucencyType);
 
-			/* lazy way to get the filtering working correctly :) */
+			// lazy way to get the filtering working correctly :)
 			if (orthoList[i].textureID == AAFontImageNumber 
 				|| orthoList[i].textureID == HUDFontsImageNumber 
 				|| orthoList[i].textureID == HUDImageNumber)
@@ -875,6 +907,8 @@ BOOL ExecuteBuffer()
 				LogDxError(LastError, __LINE__, __FILE__);
 			}
 		}
+		
+		D3DPERF_EndEvent();
 	}
 
 	return TRUE;
@@ -1217,8 +1251,12 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 
 		mainVertex[vb].color = RGBLIGHT_MAKE(vertices->R,vertices->G,vertices->B);
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
-		mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
+
+//		mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
+//		mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
+
+		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
+		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
 
 		vb++;
 	}
@@ -1281,11 +1319,10 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 		mainVertex[vb].sz = (float)vertices->Z;
 		mainVertex[vb].rhw = 1.0f;
 
-		extern unsigned char GammaValues[256];
-
 		/* need this so we can enable alpha test and not lose pred arms in green vision mode, and also not lose 
 		/* aliens in pred red alien vision mode */
-		if(vertices->A == 0) vertices->A = 1;
+		if (vertices->A == 0) 
+			vertices->A = 1;
 
 		mainVertex[vb].color = RGBALIGHT_MAKE(GammaValues[vertices->R],GammaValues[vertices->G],GammaValues[vertices->B],vertices->A);
 		mainVertex[vb].specular = RGBALIGHT_MAKE(GammaValues[vertices->SpecularR],GammaValues[vertices->SpecularG],GammaValues[vertices->SpecularB],255);
@@ -1410,8 +1447,6 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
 
 void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
 {
-	extern int CloakingMode;
-	extern char CloakedPredatorIsMoving;
 	int uOffset = FastRandom()&255;
 	int vOffset = FastRandom()&255;
 
@@ -1475,8 +1510,11 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 
 		mainVertex[vb].specular=RGBALIGHT_MAKE(0,0,0,255);
 
-		mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
-		mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
+//		mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
+//		mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
+
+		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
+		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
 
 		vb++;
 	}
@@ -1487,12 +1525,32 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a) 
 {
 #if 1
+
+	float new_x1, new_y1, new_x2, new_y2;
+
+	if (mainMenu)
+	{
+		new_x1 = (float(x0 / 640.0f) * 2) - 1;
+		new_y1 = (float(y0 / 480.0f) * 2) - 1;
+
+		new_x2 = ((float(x1) / 640.0f) * 2) - 1;
+		new_y2 = ((float(y1) / 480.0f) * 2) - 1;
+	}
+	else
+	{
+		new_x1 = (float(x0 / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
+		new_y1 = (float(y0 / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
+
+		new_x2 = ((float(x1) / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
+		new_y2 = ((float(y1) / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
+	}
+/*
 	float new_x1 = (float(x0 / 640.0f) * 2) - 1;
 	float new_y1 = (float(y0 / 480.0f) * 2) - 1;
 
 	float new_x2 = ((float(x1) / 640.0f) * 2) - 1;
 	float new_y2 = ((float(y1) / 480.0f) * 2) - 1;
-
+*/
 	// create a new list item for it
 	orthoList[orthoListCount].textureID = NO_TEXTURE;
 	orthoList[orthoListCount].vertStart = orthoOffset;
@@ -1507,7 +1565,6 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	orthoVerts[orthoOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
 	orthoVerts[orthoOffset].u = 0.0f;
 	orthoVerts[orthoOffset].v = 0.0f;
-
 	orthoOffset++;
 
 	// top left
@@ -1535,7 +1592,6 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	orthoVerts[orthoOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
 	orthoVerts[orthoOffset].u = 0.0f;
 	orthoVerts[orthoOffset].v = 0.0f;
-
 	orthoOffset++;
 #else
 	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
@@ -2036,8 +2092,12 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 			mainVertex[vb].color = colour;
 			mainVertex[vb].specular = specular;//RGBALIGHT_MAKE(vertices->SpecularR,vertices->SpecularG,vertices->SpecularB,fog);
 
-			mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
-			mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
+//			mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
+//			mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
+
+			mainVertex[vb].tu = (float)(vertices->U) * RecipW;
+			mainVertex[vb].tv = (float)(vertices->V) * RecipH;
+
 			vb++;
 		}
 	}
@@ -2275,40 +2335,9 @@ void D3D_FMVParticle_Output(RENDERVERTEX *renderVerticesPtr)
 #endif
 }
 
-
-extern int CloakingPhase;
-extern int NumActiveBlocks;
-extern DISPLAYBLOCK *ActiveBlockList[];
-extern int GlobalAmbience;
-
-unsigned short FlameFunction(int x, int y);
-void InitRandomArrays(void);
-int Turbulence(int x, int y, int t);
-
-void UpdateForceField(void);
-
-void UpdateWaterFall(void);
-void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin);
-void D3D_DrawPowerFence(int xOrigin, int yOrigin, int zOrigin, int xScale, int yScale, int zScale);
-void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin);
-
-int LightSourceWaterPoint(VECTORCH *pointPtr,int offset);
-
-void D3D_DrawMoltenMetal(int xOrigin, int yOrigin, int zOrigin);
-void D3D_DrawMoltenMetalMesh_Unclipped(void);
-
-int MeshXScale;
-int MeshZScale;
-int WaterFallBase;
-
-
 void PostLandscapeRendering()
 {
-	extern int NumOnScreenBlocks;
-	extern DISPLAYBLOCK *OnScreenBlockList[];
 	int numOfObjects = NumOnScreenBlocks;
-
-	extern char LevelName[];
 
   	CurrentRenderStates.FogIsOn = 1;
 
@@ -2365,7 +2394,6 @@ void PostLandscapeRendering()
 			MeshXScale = (87869-68581);
 			MeshZScale = (105385-93696);
 			{
-				extern void CheckForObjectsInWater(int minX, int maxX, int minZ, int maxZ, int averageY);
 				CheckForObjectsInWater(x, x+MeshXScale, z, z+MeshZScale, y);
 			}
 
@@ -2424,7 +2452,6 @@ void PostLandscapeRendering()
 					 ||(!_stricmp(modulePtr->name,"shaft05"))
 					 ||(!_stricmp(modulePtr->name,"shaft06")))
 					{
-						extern void HandleRainShaft(MODULE *modulePtr, int bottomY, int topY, int numberOfRaindrops);
 						HandleRainShaft(modulePtr, -11726,-107080,10);
 						drawEndWater = 1;
 						break;
@@ -2441,7 +2468,6 @@ void PostLandscapeRendering()
 			MeshXScale = (36353-20767);
 			MeshZScale = (41927-30238);
 			{
-				extern void CheckForObjectsInWater(int minX, int maxX, int minZ, int maxZ, int averageY);
 				CheckForObjectsInWater(x, x+MeshXScale, z, z+MeshZScale, y);
 			}
 
@@ -2471,7 +2497,6 @@ void PostLandscapeRendering()
 			MeshXScale = (15471-1800);
 			MeshZScale = (55875-36392);
 			{
-				extern void CheckForObjectsInWater(int minX, int maxX, int minZ, int maxZ, int averageY);
 				CheckForObjectsInWater(x, x+MeshXScale, z, z+MeshZScale, y);
 			}
 			WaterXOrigin=x;
@@ -2513,7 +2538,6 @@ void PostLandscapeRendering()
 				}
 				else if (!_stricmp(modulePtr->name,"water-01"))
 				{
-					extern void HandleRainShaft(MODULE *modulePtr, int bottomY, int topY, int numberOfRaindrops);
 					drawWater = 1;
 					HandleRainShaft(modulePtr, 32000, 0, 16);
 				}
@@ -2522,9 +2546,6 @@ void PostLandscapeRendering()
 
 		if (drawMirrorSurfaces)
 		{
-			extern void RenderMirrorSurface(void);
-			extern void RenderMirrorSurface2(void);
-			extern void RenderParticlesInMirror(void);
 			RenderParticlesInMirror();
 			RenderMirrorSurface();
 			RenderMirrorSurface2();
@@ -2537,7 +2558,6 @@ void PostLandscapeRendering()
 			MeshXScale = (102799-87216);
 			MeshZScale = (200964-180986);
 			{
-				extern void CheckForObjectsInWater(int minX, int maxX, int minZ, int maxZ, int averageY);
 				CheckForObjectsInWater(x, x+MeshXScale, z, z+MeshZScale, y);
 			}
 
@@ -2581,7 +2601,6 @@ void PostLandscapeRendering()
 				  ||(!_stricmp(modulePtr->name,"trench08"))
 				  ||(!_stricmp(modulePtr->name,"trench09")))
 				{
-					extern void HandleRain(int numberOfRaindrops);
 					HandleRain(999);
 					break;
 				}
@@ -2609,7 +2628,6 @@ void D3D_DrawWaterTest(MODULE *testModulePtr)
 				MeshXScale = (7791 - -7794);
 				MeshZScale = (23378 - 7793);
 				{
-					extern void CheckForObjectsInWater(int minX, int maxX, int minZ, int maxZ, int averageY);
 					CheckForObjectsInWater(x, x+MeshXScale, z, z+MeshZScale, y);
 				}
 
@@ -2627,19 +2645,11 @@ void D3D_DrawWaterTest(MODULE *testModulePtr)
 				D3D_DrawWaterPatch(x, y, z+MeshZScale);
 				D3D_DrawWaterPatch(x+MeshXScale, y, z+MeshZScale);
 
-				extern void HandleRainShaft(MODULE *modulePtr, int bottomY, int topY, int numberOfRaindrops);
 				HandleRainShaft(modulePtr, y,-21000,1);
 			}
 		}
 	}
 }
-
-VECTORCH MeshVertex[256];
-#define TEXTURE_WATER 0
-
-VECTORCH MeshWorldVertex[256];
-unsigned int MeshVertexColour[256];
-char MeshVertexOutcode[256];
 
 void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 {
@@ -2896,27 +2906,24 @@ void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin)
 
 void DrawFrameRateBar(void)
 {
-	extern int NormalFrameTime;
-	{
-		int width = DIV_FIXED(ScreenDescriptorBlock.SDB_Width/120,NormalFrameTime);
-		if (width>ScreenDescriptorBlock.SDB_Width) width=ScreenDescriptorBlock.SDB_Width;
+	int width = DIV_FIXED(ScreenDescriptorBlock.SDB_Width/120,NormalFrameTime);
+	if (width>ScreenDescriptorBlock.SDB_Width) width=ScreenDescriptorBlock.SDB_Width;
 
-		r2rect rectangle
-		(
-			0,0,
-			width,
-			24
-		);
+	r2rect rectangle
+	(
+		0,0,
+		width,
+		24
+	);
 //		textprint("width %d\n",width);
 
-		rectangle . AlphaFill
-		(
-			0xff, // unsigned char R,
-			0x00,// unsigned char G,
-			0x00,// unsigned char B,
-		   	128 // unsigned char translucency
-		);
-	}
+	rectangle . AlphaFill
+	(
+		0xff, // unsigned char R,
+		0x00,// unsigned char G,
+		0x00,// unsigned char B,
+	   	128 // unsigned char translucency
+	);
 }
 
 void D3D_DrawAlienRedBlipIndicatingJawAttack(void)
@@ -2939,11 +2946,10 @@ void D3D_DrawAlienRedBlipIndicatingJawAttack(void)
 
 void D3D_DrawBackdrop(void)
 {
-	extern char LevelName[];
+	if (TRIPTASTIC_CHEATMODE||MOTIONBLUR_CHEATMODE) 
+		return;
 
-	if (TRIPTASTIC_CHEATMODE||MOTIONBLUR_CHEATMODE) return;
-
-	if(WireFrameMode)
+	if (WireFrameMode)
 	{
    		ColourFillBackBuffer(0);
 		return;
@@ -2974,14 +2980,10 @@ void D3D_DrawBackdrop(void)
 		}
 		if(needToDrawBackdrop)
 		{
-			extern BOOL LevelHasStars;
-			extern void RenderSky(void);
-
 			ColourFillBackBuffer(0);
 
 			if (LevelHasStars)
 			{
-				extern void RenderStarfield(void);
 				RenderStarfield();
 			}
 			else
@@ -2994,7 +2996,6 @@ void D3D_DrawBackdrop(void)
 
 	/* if the player is outside the environment, clear the screen! */
 	{
-		extern MODULE *playerPherModule;
  		if (!playerPherModule)
  		{
  			ColourFillBackBuffer(0);
@@ -3018,7 +3019,6 @@ void D3D_DrawBackdrop(void)
 void DrawNoiseOverlay(int t)
 {
 	// t == 64 for image intensifier
-	extern float CameraZoomScale;
 	float u = (float)(FastRandom()&255);
 	float v = (float)(FastRandom()&255);
 	int c = 255;
@@ -3030,8 +3030,9 @@ void DrawNoiseOverlay(int t)
 
 	CheckVertexBuffer(4, StaticImageNumber, TRANSLUCENCY_GLOWING);
 
-	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
+	// top left?
+	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
+  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
@@ -3041,8 +3042,9 @@ void DrawNoiseOverlay(int t)
 
 	vb++;
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
+	// top right?
+  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
+  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
@@ -3052,8 +3054,9 @@ void DrawNoiseOverlay(int t)
 
 	vb++;
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
+	// bottom right?
+  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
+  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
@@ -3063,8 +3066,9 @@ void DrawNoiseOverlay(int t)
 
 	vb++;
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
+	// bottom left
+  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
+  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
@@ -3099,7 +3103,6 @@ void DrawScanlinesOverlay(float level)
 	float u = 0.0f;//FastRandom()&255;
 	float v = 128.0f;//FastRandom()&255;
 	int c = 255;
-	extern float CameraZoomScale;
 	int t;
    	f2i(t,64.0f+level*64.0f);
 
@@ -3108,8 +3111,9 @@ void DrawScanlinesOverlay(float level)
 	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(4, PredatorNumbersImageNumber, TRANSLUCENCY_NORMAL);
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
+	// top right
+  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
+  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
@@ -3119,8 +3123,9 @@ void DrawScanlinesOverlay(float level)
 
 	vb++;
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
+	// top left
+  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
+  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
@@ -3130,8 +3135,9 @@ void DrawScanlinesOverlay(float level)
 	
 	vb++;
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
+	// bottom left
+  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
+  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
@@ -3141,8 +3147,9 @@ void DrawScanlinesOverlay(float level)
 
 	vb++;
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
+	// bottom right
+  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
+  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
@@ -3713,8 +3720,6 @@ extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha)
 
 extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale)
 {
-	extern unsigned char GammaValues[256];
-
 //	CheckVertexBuffer(255, NO_TEXTURE, TRANSLUCENCY_OFF);
 
 	for (int i = 0; i < 255; )
@@ -3791,9 +3796,10 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
 
 	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_NORMAL);
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
-	mainVertex[vb].sz = 0.0f;
+	// top left
+  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
+  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
+	mainVertex[vb].sz = 64.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = (t<<24)+colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
@@ -3802,9 +3808,10 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
 
 	vb++;
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
-	mainVertex[vb].sz = 0.0f;
+	// top right
+  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
+  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
+	mainVertex[vb].sz = 64.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = (t<<24)+colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
@@ -3813,9 +3820,10 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
 
 	vb++;
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
-	mainVertex[vb].sz = 0.0f;
+	// bottom right
+  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
+  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
+	mainVertex[vb].sz = 64.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = (t<<24)+colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
@@ -3824,9 +3832,10 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
 
 	vb++;
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
-	mainVertex[vb].sz = 0.0f;
+	// bottom left
+  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
+  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
+	mainVertex[vb].sz = 64.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = (t<<24)+colour;
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
@@ -3854,8 +3863,9 @@ extern void D3D_PlayerOnFireOverlay(void)
 	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(4, BurningImageNumber, TRANSLUCENCY_GLOWING);
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
+	// top left
+  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
+  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -3865,8 +3875,9 @@ extern void D3D_PlayerOnFireOverlay(void)
 	
 	vb++;
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
+	// top right
+  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
+  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -3875,8 +3886,9 @@ extern void D3D_PlayerOnFireOverlay(void)
 	mainVertex[vb].tv = v;
 	vb++;
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
+	// bottom right
+  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
+  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -3886,8 +3898,9 @@ extern void D3D_PlayerOnFireOverlay(void)
 
 	vb++;
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
+	// bottom left
+  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
+  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 0.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -3919,8 +3932,9 @@ extern void D3D_ScreenInversionOverlay()
 		float sin = (GetSin(theta[i]))/65536.0f/16.0f;
 		float cos = (GetCos(theta[i]))/65536.0f/16.0f;
 		{
-	 	  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
-		  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
+			// top left
+	 	  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
+		  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 			mainVertex[vb].sz = 0.0f;
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
@@ -3930,8 +3944,9 @@ extern void D3D_ScreenInversionOverlay()
 
 			vb++;
 
-		  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
-		  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
+			// top right
+		  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
+		  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 			mainVertex[vb].sz = 0.0f;
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
@@ -3941,8 +3956,9 @@ extern void D3D_ScreenInversionOverlay()
 			
 			vb++;
 
-		  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
-		  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
+			// bottom right
+		  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
+		  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 			mainVertex[vb].sz = 0.0f;
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
@@ -3952,8 +3968,9 @@ extern void D3D_ScreenInversionOverlay()
 			
 			vb++;
 
-		  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
-		  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
+			// bottom left
+		  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
+		  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 			mainVertex[vb].sz = 0.0f;
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
@@ -3985,8 +4002,9 @@ extern void D3D_PredatorScreenInversionOverlay()
 
 	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_DARKENINGCOLOUR);
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
+	// top left
+  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
+  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -3996,8 +4014,9 @@ extern void D3D_PredatorScreenInversionOverlay()
 
 	vb++;
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
+	// top right
+  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
+  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -4007,8 +4026,9 @@ extern void D3D_PredatorScreenInversionOverlay()
 
 	vb++;
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
+	// bottom right
+  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
+  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -4018,8 +4038,9 @@ extern void D3D_PredatorScreenInversionOverlay()
 
 	vb++;
 
-  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
+	// bottom left
+  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
+  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 	mainVertex[vb].sz = 1.0f;
 	mainVertex[vb].rhw = 1.0f;
 	mainVertex[vb].color = colour;
@@ -4087,8 +4108,9 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 		float sin = (GetSin(theta[i]))/65536.0f/16.0f;
 		float cos = (GetCos(theta[i]))/65536.0f/16.0f;
 		{
-	 	  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
-		  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
+			// top left
+	 	  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
+		  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 			mainVertex[vb].sz = 0.0f;
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
@@ -4098,8 +4120,9 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 
 			vb++;
 
-		  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
-		  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipUp;
+			// top right
+		  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
+		  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
 			mainVertex[vb].sz = 0.0f;
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
@@ -4109,8 +4132,9 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 
 			vb++;
 
-		  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
-		  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
+			// bottom right
+		  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
+		  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 			mainVertex[vb].sz = 0.0f;
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
@@ -4120,8 +4144,9 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 
 			vb++;
 
-		  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
-		  	mainVertex[vb].sy =	(float)Global_VDB_Ptr->VDB_ClipDown;
+			// bottom left
+		  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
+		  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
 			mainVertex[vb].sz = 0.0f;
 			mainVertex[vb].rhw = 1.0f;
 			mainVertex[vb].color = colour;
@@ -4351,11 +4376,6 @@ void r2rect :: AlphaFill
 
 	D3D_Rectangle(x0, y0, x1, y1, R, G, B, translucency);
 }
-
-extern void D3D_RenderHUDNumber_Centred(unsigned int number, int x, int y, int colour);
-extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour);
-extern void D3D_RenderHUDString_Clipped(char *stringPtr, int x, int y, int colour);
-extern void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour);
 
 extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colour)
 {
@@ -5013,7 +5033,6 @@ void DrawQuad(int x, int y, int width, int height, int textureID, int colour, en
 	orthoVerts[orthoOffset].colour = colour;
 	orthoVerts[orthoOffset].u = 0.0f;
 	orthoVerts[orthoOffset].v = (1.0f / texturePOW2Height) * height;
-
 	orthoOffset++;
 
 	// top left
@@ -5023,7 +5042,6 @@ void DrawQuad(int x, int y, int width, int height, int textureID, int colour, en
 	orthoVerts[orthoOffset].colour = colour;
 	orthoVerts[orthoOffset].u = 0.0f;
 	orthoVerts[orthoOffset].v = 0.0f;
-
 	orthoOffset++;
 
 	// bottom right
@@ -5033,7 +5051,6 @@ void DrawQuad(int x, int y, int width, int height, int textureID, int colour, en
 	orthoVerts[orthoOffset].colour = colour;
 	orthoVerts[orthoOffset].u = (1.0f / texturePOW2Width) * width;
 	orthoVerts[orthoOffset].v = (1.0f / texturePOW2Height) * height;
-
 	orthoOffset++;
 
 	// top right
@@ -5043,7 +5060,6 @@ void DrawQuad(int x, int y, int width, int height, int textureID, int colour, en
 	orthoVerts[orthoOffset].colour = colour;
 	orthoVerts[orthoOffset].u = (1.0f / texturePOW2Width) * width;
 	orthoVerts[orthoOffset].v = 0.0f;
-
 	orthoOffset++;
 }
 
@@ -5405,7 +5421,6 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	orthoVerts[orthoOffset].colour = colour;
 	orthoVerts[orthoOffset].u = (float)((texU) * RecipW);
 	orthoVerts[orthoOffset].v = (float)((texV + font_height) * RecipH);
-
 	orthoOffset++;
 
 	// top left
@@ -5415,7 +5430,6 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	orthoVerts[orthoOffset].colour = colour;
 	orthoVerts[orthoOffset].u = (float)((texU) * RecipW);
 	orthoVerts[orthoOffset].v = (float)((texV) * RecipH);
-
 	orthoOffset++;
 
 	// bottom right
@@ -5425,7 +5439,6 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	orthoVerts[orthoOffset].colour = colour;
 	orthoVerts[orthoOffset].u = (float)((texU + font_height) * RecipW);
 	orthoVerts[orthoOffset].v = (float)((texV + font_height) * RecipH);
-
 	orthoOffset++;
 
 	// top right
@@ -5435,7 +5448,6 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	orthoVerts[orthoOffset].colour = colour;
 	orthoVerts[orthoOffset].u = (float)((texU + font_width) * RecipW);
 	orthoVerts[orthoOffset].v = (float)((texV) * RecipH);
-
 	orthoOffset++;
 
 

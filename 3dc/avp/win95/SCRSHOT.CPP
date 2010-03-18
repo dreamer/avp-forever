@@ -10,14 +10,14 @@
 #include "d3_func.h"
 
 #include "frontend\avp_menus.h"
-extern "C"{
- extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
- extern int VideoModeTypeScreen;
- //extern unsigned char TestPalette[];
- extern unsigned char KeyboardInput[];
- extern unsigned char DebouncedKeyboardInput[];
- extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
- extern MODULE* playerPherModule;	
+extern "C"
+{
+	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+	extern int VideoModeTypeScreen;
+	extern unsigned char KeyboardInput[];
+	extern unsigned char DebouncedKeyboardInput[];
+	extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
+	extern MODULE* playerPherModule;	
 };
 
 typedef VOID (*PutWord_F)(WORD, FILE *);

@@ -16,7 +16,6 @@
 extern int *ItemPointers[maxpolyptrs];
 extern int ItemCount;
 
-extern int ZBufferMode;
 extern int NumVertices;
 extern int WireFrameMode;
 extern int DrawingAReflection;
@@ -487,10 +486,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 					}
 				}
 
-
-				{
-		 			D3D_DrawWaterTest(modulePtr);
-				}
+		 		D3D_DrawWaterTest(modulePtr);
 			}
 		}
 		else

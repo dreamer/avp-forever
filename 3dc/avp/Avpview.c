@@ -36,10 +36,6 @@ int NumOnScreenBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
 extern int NumActiveBlocks;
 
-/* JH 13/5/97 */
-extern int DrawMode;
-extern int ZBufferMode;
-
 extern DPID MultiplayerObservedPlayer;
 
 #if SupportMorphing
@@ -503,8 +499,9 @@ void UpdateCamera(void)
 	Global_VDB_Ptr->VDB_Mat = dptr_s->ObMat;	 // local -> world orientation matrix
 
 	// world position
+/*
 	sprintf(buf, "player world location - x: %d y: %d z: %d\n", Global_VDB_Ptr->VDB_World.vx, Global_VDB_Ptr->VDB_World.vy, Global_VDB_Ptr->VDB_World.vz);
-//	OutputDebugString(buf);
+	OutputDebugString(buf);
 
 	sprintf(buf, 
 	"\t %d \t %d \t %d\n"
@@ -514,7 +511,7 @@ void UpdateCamera(void)
 	Global_VDB_Ptr->VDB_Mat.mat21, Global_VDB_Ptr->VDB_Mat.mat22, Global_VDB_Ptr->VDB_Mat.mat23,
 	Global_VDB_Ptr->VDB_Mat.mat31, Global_VDB_Ptr->VDB_Mat.mat32, Global_VDB_Ptr->VDB_Mat.mat33);
 //	OutputDebugString(buf);
-
+*/
 	mat.mat11 = ONE_FIXED;
 	mat.mat12 = 0;
 	mat.mat13 = 0;
@@ -665,10 +662,6 @@ void AvpShowViews(void)
 	 	/* KJL 12:13:26 02/05/97 - divert rendering for AvP */
 		KRenderItems(Global_VDB_Ptr);
 	}
-
-	#if 0 
-	RenderDungeon();
-	#endif
 
 	PlatformSpecificShowViewExit(Global_VDB_Ptr, &ScreenDescriptorBlock);
 

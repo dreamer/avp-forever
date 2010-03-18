@@ -65,8 +65,8 @@ unsigned int ChunkPoly::GetUVIndex()
 	if(colour & CHUNK_NEWUVINDEX_BITS)
 	{
 		unsigned int uv_index;
-		uv_index=(colour & CHUNK_NEWUVINDEX_BITS) << 4;
-		uv_index|= (colour >> 16);
+		uv_index = (colour & CHUNK_NEWUVINDEX_BITS) << 4;
+		uv_index |= (colour >> 16);
 
 		return uv_index;
 	}
@@ -74,8 +74,7 @@ unsigned int ChunkPoly::GetUVIndex()
 	{
 		//uvindex is just in the top 16 bits
 		return (colour >> 16);
-	}	
-	
+	}
 }
 
 unsigned int ChunkPoly::GetTextureIndex()
