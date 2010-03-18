@@ -2379,9 +2379,10 @@ BOOL copy_to_shapeheader (
 				item_list[i*9 + 3] += local_tex_index_nos[texno];
 
 				shphd->sh_textures[UVIndex] = (int *) PoolAllocateMem (sizeof(int) * cshp_ptr->uv_list[UVIndex].num_verts * 2);
-				for (j=0; j<cshp_ptr->uv_list[UVIndex].num_verts; j++) {
-					(shphd->sh_textures[UVIndex])[(j*2)] = ProcessUVCoord(h, UVC_POLY_U, (int)cshp_ptr->uv_list[UVIndex].vert[j].u, uv_imnums[UVIndex]);
-					(shphd->sh_textures[UVIndex])[(j*2)+1] = ProcessUVCoord(h, UVC_POLY_V, (int)cshp_ptr->uv_list[UVIndex].vert[j].v, uv_imnums[UVIndex]);
+				for (j=0; j<cshp_ptr->uv_list[UVIndex].num_verts; j++) 
+				{
+					(shphd->sh_textures[UVIndex])[(j*2)] = (int)cshp_ptr->uv_list[UVIndex].vert[j].u;//ProcessUVCoord(h, UVC_POLY_U, (int)cshp_ptr->uv_list[UVIndex].vert[j].u, uv_imnums[UVIndex]);
+					(shphd->sh_textures[UVIndex])[(j*2)+1] = (int)cshp_ptr->uv_list[UVIndex].vert[j].v;//ProcessUVCoord(h, UVC_POLY_V, (int)cshp_ptr->uv_list[UVIndex].vert[j].v, uv_imnums[UVIndex]);
 				}
 			}
 			else
