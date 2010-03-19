@@ -152,9 +152,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	AVP_NCmd = nCmdShow;
 	skOff = startupStickyKeys;
 
-	int test = sizeof(unsigned long);
-	int test2 = sizeof(uint32_t);
-	
 	if ((skOff.dwFlags & SKF_STICKYKEYSON) == 0)
 	{
 		// Disable the hotkey and the confirmation

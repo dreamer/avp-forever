@@ -1136,6 +1136,7 @@ void TestVerticesWith_Norm_Frustrum(void)
 		FrustrumFlagForVertex[v] = vertexFlag;
 	}
 }
+
 void TestVerticesWith_Wide_Frustrum(void)
 {
 	int v = Global_ShapeHeaderPtr->numpoints;

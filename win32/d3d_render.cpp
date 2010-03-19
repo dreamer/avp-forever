@@ -285,6 +285,7 @@ static HRESULT LastError;
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
 void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
+void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode);
 
 /* OUTPUT_TRIANGLE - how this bugger works
 
@@ -464,6 +465,34 @@ BOOL SetExecuteBufferDefaults()
 //    d3d.lpD3DDevice->SetRenderState(D3DRS_FOGCOLOR, FOG_COLOUR);
 
     return TRUE;
+}
+
+void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode)
+{
+	// check if we've got enough room. if not, flush
+		// TODO
+
+	// create a new list item for it
+	orthoList[orthoListCount].textureID = textureID;
+	orthoList[orthoListCount].vertStart = 0;
+	orthoList[orthoListCount].vertEnd = 0;
+	orthoList[orthoListCount].translucencyType = translucencyMode;
+
+	// check if current vertexes use the same texture and render states as the previous. if they do, we can 'merge' the two together
+	if ((textureID == orthoList[orthoListCount-1].textureID && translucencyMode == orthoList[orthoListCount-1].translucencyType) && orthoListCount != 0) 
+	{
+		// ok, drop back to the previous data
+		orthoListCount--;
+	}
+	else
+	{
+		// new unique entry
+		orthoList[orthoListCount].vertStart = orthoOffset;
+	}
+
+	orthoList[orthoListCount].vertEnd = orthoOffset + numVerts;
+
+	orthoListCount++;
 }
 
 void CheckVertexBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode) 
@@ -776,7 +805,7 @@ BOOL ExecuteBuffer()
 	}
 
 	D3DXMATRIX matProjection;
-	D3DXMatrixPerspectiveFovLH( &matProjection, D3DX_PI / 2, FLOAT(ScreenDescriptorBlock.SDB_Width / ScreenDescriptorBlock.SDB_Height), 64.0f, 1000000.0f);
+	D3DXMatrixPerspectiveFovLH( &matProjection, D3DX_PI / 2, (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
 	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matProjection );
 
 	ChangeTextureAddressMode(TEXTURE_WRAP);
@@ -901,7 +930,9 @@ BOOL ExecuteBuffer()
 			}
 			else ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
-			LastError = d3d.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, orthoList[i].vertStart, 2);
+			uint32_t primitiveCount = (orthoList[i].vertEnd - orthoList[i].vertStart / 4) * 2;
+
+			LastError = d3d.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, orthoList[i].vertStart, primitiveCount);
 			if (FAILED(LastError))
 			{
 				LogDxError(LastError, __LINE__, __FILE__);
@@ -1551,12 +1582,7 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	float new_x2 = ((float(x1) / 640.0f) * 2) - 1;
 	float new_y2 = ((float(y1) / 480.0f) * 2) - 1;
 */
-	// create a new list item for it
-	orthoList[orthoListCount].textureID = NO_TEXTURE;
-	orthoList[orthoListCount].vertStart = orthoOffset;
-	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
-	orthoList[orthoListCount].translucencyType = TRANSLUCENCY_GLOWING;
-	orthoListCount++;
+	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
 
 	// bottom left
 	orthoVerts[orthoOffset].x = new_x1;
@@ -1692,12 +1718,7 @@ void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, 
 	float texHeight = (float) ImageHeaderArray[textureID].ImageHeight;
 	RecipH = 1.0f / texHeight;
 
-	// create a new list item for it
-	orthoList[orthoListCount].textureID = textureID;
-	orthoList[orthoListCount].vertStart = orthoOffset;
-	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
-	orthoList[orthoListCount].translucencyType = TRANSLUCENCY_GLOWING;
-	orthoListCount++;
+	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING);
 
 	// bottom left
 	orthoVerts[orthoOffset].x = x1;
@@ -3941,7 +3962,6 @@ extern void D3D_ScreenInversionOverlay()
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = 0.375f + (cos*(-1) - sin*(-1));
 			mainVertex[vb].tv = 0.375f + (sin*(-1) + cos*(-1));
-
 			vb++;
 
 			// top right
@@ -3953,7 +3973,6 @@ extern void D3D_ScreenInversionOverlay()
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = .375f + (cos*(+1) - sin*(-1));
 			mainVertex[vb].tv = .375f + (sin*(+1) + cos*(-1));
-			
 			vb++;
 
 			// bottom right
@@ -3965,7 +3984,6 @@ extern void D3D_ScreenInversionOverlay()
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = .375f + (cos*(+1) - sin*(+1));
 			mainVertex[vb].tv = .375f + (sin*(+1) + cos*(+1));
-			
 			vb++;
 
 			// bottom left
@@ -3977,7 +3995,6 @@ extern void D3D_ScreenInversionOverlay()
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = .375f + (cos*(-1) - sin*(+1));
 			mainVertex[vb].tv = .375f + (sin*(-1) + cos*(+1));
-
 			vb++;
 
 			OUTPUT_TRIANGLE(0,1,3, 4);
@@ -4949,12 +4966,7 @@ void DrawHUDQuad(int x, int y, int width, int height, float *UVList, int texture
 		texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
 	}
 
-	// create a new list item for it
-	orthoList[orthoListCount].textureID = textureID;
-	orthoList[orthoListCount].vertStart = orthoOffset;
-	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
-	orthoList[orthoListCount].translucencyType = translucencyType;
-	orthoListCount++;
+	CheckOrthoBuffer(4, textureID, translucencyType);
 
 	// bottom left
 	orthoVerts[orthoOffset].x = x1;
@@ -5019,12 +5031,7 @@ void DrawQuad(int x, int y, int width, int height, int textureID, int colour, en
 		texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
 	}
 
-	// create a new list item for it
-	orthoList[orthoListCount].textureID = textureID;
-	orthoList[orthoListCount].vertStart = orthoOffset;
-	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
-	orthoList[orthoListCount].translucencyType = translucencyType;
-	orthoListCount++;
+	CheckOrthoBuffer(4, textureID, translucencyType);
 
 	// bottom left
 	orthoVerts[orthoOffset].x = x1;
@@ -5407,12 +5414,7 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	float x2 = ((float(topX + font_width) / 640.0f) * 2) - 1;
 	float y2 = ((float(topY + font_height) / 480.0f) * 2) - 1;
 
-	// create a new list item for it
-	orthoList[orthoListCount].textureID = AVPMENUGFX_SMALL_FONT;
-	orthoList[orthoListCount].vertStart = orthoOffset;
-	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
-	orthoList[orthoListCount].translucencyType = TRANSLUCENCY_GLOWING;
-	orthoListCount++;
+	CheckOrthoBuffer(4, AVPMENUGFX_SMALL_FONT, TRANSLUCENCY_GLOWING);
 
 	// bottom left
 	orthoVerts[orthoOffset].x = x1;
@@ -5617,12 +5619,7 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 	float x2 = ((float(topX + char_width) / 640.0f) * 2) - 1;
 	float y2 = ((float(topY + height_of_char) / 480.0f) * 2) - 1;
 
-	// create a new list item for it
-	orthoList[orthoListCount].textureID = TALLFONT_TEX;
-	orthoList[orthoListCount].vertStart = orthoOffset;
-	orthoList[orthoListCount].vertEnd = orthoOffset + 4;
-	orthoList[orthoListCount].translucencyType = TRANSLUCENCY_GLOWING;
-	orthoListCount++;
+	CheckOrthoBuffer(4, TALLFONT_TEX, TRANSLUCENCY_GLOWING);
 
 	// bottom left
 	orthoVerts[orthoOffset].x = x1;
