@@ -31,14 +31,16 @@
   Description of a D3D driver.
 */
 
-typedef struct D3DDriverInfo {
+typedef struct D3DDriverInfo 
+{
 	D3DFORMAT				Formats[20];
 	D3DADAPTER_IDENTIFIER9	AdapterInfo;
 	D3DDISPLAYMODE			DisplayMode[100];
 	int						NumModes;
 } D3DDRIVERINFO;
 
-typedef struct D3DInfo {
+typedef struct D3DInfo 
+{
     LPDIRECT3D9				lpD3D;
     LPDIRECT3DDEVICE9		lpD3DDevice; 
     D3DVIEWPORT9			D3DViewport; 
@@ -48,6 +50,7 @@ typedef struct D3DInfo {
 	LPDIRECT3DINDEXBUFFER9	lpD3DIndexBuffer;
 
 	LPDIRECT3DVERTEXBUFFER9 lpD3DOrthoVertexBuffer;
+	LPDIRECT3DINDEXBUFFER9	lpD3DOrthoIndexBuffer;
 
     int						NumDrivers;
     int						CurrentDriver;
