@@ -95,6 +95,7 @@ struct ORTHO_OBJECTS
 
 	enum TRANSLUCENCY_TYPE translucencyType;
 	enum FILTERING_MODE_ID filteringType;
+	enum TEXTURE_ADDRESS_MODE textureAddressMode;
 };
 
 // array of 2d objects
@@ -291,7 +292,7 @@ static HRESULT LastError;
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
 void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
-void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode);
+void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode);
 
 /* OUTPUT_TRIANGLE - how this bugger works
 
@@ -481,7 +482,7 @@ BOOL SetExecuteBufferDefaults()
     return TRUE;
 }
 
-void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode)
+void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode)
 {
 	assert (numVerts == 4);
 
@@ -493,9 +494,13 @@ void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE
 	orthoList[orthoListCount].vertStart = 0;
 	orthoList[orthoListCount].vertEnd = 0;
 	orthoList[orthoListCount].translucencyType = translucencyMode;
+	orthoList[orthoListCount].textureAddressMode = textureAddressMode;
 
 	// check if current vertexes use the same texture and render states as the previous. if they do, we can 'merge' the two together
-	if ((textureID == orthoList[orthoListCount-1].textureID && translucencyMode == orthoList[orthoListCount-1].translucencyType) && orthoListCount != 0) 
+	if (textureID == orthoList[orthoListCount-1].textureID && 
+		translucencyMode == orthoList[orthoListCount-1].translucencyType &&
+		textureAddressMode == orthoList[orthoListCount-1].textureAddressMode &&
+		orthoListCount != 0) 
 	{
 		// ok, drop back to the previous data
 		orthoListCount--;
@@ -749,6 +754,7 @@ void D3D_SetupSceneDefaults()
 	/* force translucency state to be reset */
 	CurrentRenderStates.TranslucencyMode = TRANSLUCENCY_NOT_SET;
 	CurrentRenderStates.FilteringMode = FILTERING_NOT_SET;
+	CurrentRenderStates.TextureAddressMode = TEXTURE_CLAMP;
 //	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_ON);
 	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckWireFrameMode(0);
@@ -859,7 +865,7 @@ BOOL ExecuteBuffer()
 	}
 
 	D3DXMATRIX matProjection;
-	D3DXMatrixPerspectiveFovLH( &matProjection, D3DX_PI / 2, (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+	D3DXMatrixPerspectiveFovLH( &matProjection, /*D3DX_PI / 2*/D3DXToRadian(90), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
 	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matProjection );
 
 	ChangeTextureAddressMode(TEXTURE_WRAP);
@@ -969,7 +975,7 @@ BOOL ExecuteBuffer()
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
 
-		ChangeTextureAddressMode(TEXTURE_CLAMP);
+//		ChangeTextureAddressMode(TEXTURE_CLAMP);
 
 		D3DXMATRIX matOrtho;
 		D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
@@ -980,6 +986,7 @@ BOOL ExecuteBuffer()
 		{
 			ChangeTexture(orthoList[i].textureID);
 			ChangeTranslucencyMode(orthoList[i].translucencyType);
+			ChangeTextureAddressMode(orthoList[i].textureAddressMode);
 
 			// lazy way to get the filtering working correctly :)
 			if (orthoList[i].textureID == AAFontImageNumber 
@@ -991,8 +998,6 @@ BOOL ExecuteBuffer()
 			else ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
 			uint32_t primitiveCount = (orthoList[i].indexEnd - orthoList[i].indexStart) / 3;
-
-//			LastError = d3d.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, orthoList[i].vertStart, primitiveCount);
 
 			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 
 			   0, 
@@ -1059,7 +1064,6 @@ void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode)
 		{
 			OutputDebugString("D3DSAMP_ADDRESSW Wrap fail");
 		}
-
 	}
 	else if (textureAddressMode == TEXTURE_CLAMP)
 	{
@@ -1650,7 +1654,7 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	float new_x2 = ((float(x1) / 640.0f) * 2) - 1;
 	float new_y2 = ((float(y1) / 480.0f) * 2) - 1;
 */
-	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
+	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
 
 	// bottom left
 	orthoVerts[orthoVBOffset].x = new_x1;
@@ -1786,7 +1790,7 @@ void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, 
 	float texHeight = (float) ImageHeaderArray[textureID].ImageHeight;
 	RecipH = 1.0f / texHeight;
 
-	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING);
+	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
 
 	// bottom left
 	orthoVerts[orthoVBOffset].x = x1;
@@ -3109,6 +3113,46 @@ void DrawNoiseOverlay(int t)
 	int c = 255;
 	int size = 256;//*CameraZoomScale;
 
+	CheckOrthoBuffer(4, StaticImageNumber, TRANSLUCENCY_GLOWING, TEXTURE_WRAP);
+
+	// bottom left
+	orthoVerts[orthoVBOffset].x = -1.0f;
+	orthoVerts[orthoVBOffset].y = 1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVerts[orthoVBOffset].u = u/256.0f;
+	orthoVerts[orthoVBOffset].v = (v+size)/256.0f;
+	orthoVBOffset++;
+
+	// top left
+	orthoVerts[orthoVBOffset].x = -1.0f;
+	orthoVerts[orthoVBOffset].y = -1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVerts[orthoVBOffset].u = u/256.0f;
+	orthoVerts[orthoVBOffset].v = v/256.0f;
+	orthoVBOffset++;
+
+	// bottom right
+	orthoVerts[orthoVBOffset].x = 1.0f;
+	orthoVerts[orthoVBOffset].y = 1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVerts[orthoVBOffset].u = (u+size)/256.0f;
+	orthoVerts[orthoVBOffset].v = (v+size)/256.0f;
+	orthoVBOffset++;
+
+	// top right
+	orthoVerts[orthoVBOffset].x = 1.0f;
+	orthoVerts[orthoVBOffset].y = -1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVerts[orthoVBOffset].u = (u+size)/256.0f;
+	orthoVerts[orthoVBOffset].v = v/256.0f;
+	orthoVBOffset++;
+
+
+#if 0
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
 	LockExecuteBuffer();
@@ -3181,6 +3225,7 @@ void DrawNoiseOverlay(int t)
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_LESSEQUAL);
 		D3DZFunc = D3DCMP_LESSEQUAL;
 	}
+#endif
 }
 
 void DrawScanlinesOverlay(float level)
@@ -3194,6 +3239,46 @@ void DrawScanlinesOverlay(float level)
 	float size = 128.0f*(1.0f-level*0.8f);//*CameraZoomScale;
 
 	SetFilteringMode(FILTERING_BILINEAR_ON);
+
+	CheckOrthoBuffer(4, PredatorNumbersImageNumber, TRANSLUCENCY_NORMAL, TEXTURE_WRAP);
+
+	// bottom left
+	orthoVerts[orthoVBOffset].x = -1.0f;
+	orthoVerts[orthoVBOffset].y = 1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVerts[orthoVBOffset].u = (v+size)/256.0f;
+	orthoVerts[orthoVBOffset].v = 1.0f;
+	orthoVBOffset++;
+
+	// top left
+	orthoVerts[orthoVBOffset].x = -1.0f;
+	orthoVerts[orthoVBOffset].y = -1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVerts[orthoVBOffset].u = (v-size)/256.0f;
+	orthoVerts[orthoVBOffset].v = 1.0f;
+	orthoVBOffset++;
+
+	// bottom right
+	orthoVerts[orthoVBOffset].x = 1.0f;
+	orthoVerts[orthoVBOffset].y = 1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVerts[orthoVBOffset].u = (v+size)/256.0f;
+	orthoVerts[orthoVBOffset].v = 1.0f;
+	orthoVBOffset++;
+
+	// top right
+	orthoVerts[orthoVBOffset].x = 1.0f;;
+	orthoVerts[orthoVBOffset].y = -1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVerts[orthoVBOffset].u = (v-size)/256.0f;
+	orthoVerts[orthoVBOffset].v = 1.0f;
+	orthoVBOffset++;
+
+#if 0
 	CheckVertexBuffer(4, PredatorNumbersImageNumber, TRANSLUCENCY_NORMAL);
 
 	// top right
@@ -3246,6 +3331,7 @@ void DrawScanlinesOverlay(float level)
 
 	OUTPUT_TRIANGLE(0,1,3, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
+#endif
 
 	if (level == 1.0f)
 		DrawNoiseOverlay(128);
@@ -3879,6 +3965,45 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
 	int t = 255 - (brightness>>8);
 	if (t < 0) t = 0;
 
+	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_NORMAL, TEXTURE_WRAP);
+
+	// bottom left
+	orthoVerts[orthoVBOffset].x = -1.0f;
+	orthoVerts[orthoVBOffset].y = 1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = (t<<24)+colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+	// top left
+	orthoVerts[orthoVBOffset].x = -1.0f;
+	orthoVerts[orthoVBOffset].y = -1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = (t<<24)+colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+	// bottom right
+	orthoVerts[orthoVBOffset].x = 1.0f;
+	orthoVerts[orthoVBOffset].y = 1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = (t<<24)+colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+	// top right
+	orthoVerts[orthoVBOffset].x = 1.0f;;
+	orthoVerts[orthoVBOffset].y = -1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = (t<<24)+colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+#if 0
 	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_NORMAL);
 
 	// top left
@@ -3935,6 +4060,7 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
 
 	OUTPUT_TRIANGLE(0,1,3, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
+#endif
 }
 
 extern void D3D_PlayerOnFireOverlay(void)
@@ -3945,6 +4071,45 @@ extern void D3D_PlayerOnFireOverlay(void)
 	float u = (FastRandom()&255)/256.0f;
 	float v = (FastRandom()&255)/256.0f;
 
+	CheckOrthoBuffer(4, BurningImageNumber, TRANSLUCENCY_GLOWING, TEXTURE_WRAP);
+
+	// bottom left
+	orthoVerts[orthoVBOffset].x = -1.0f;
+	orthoVerts[orthoVBOffset].y = 1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = u;
+	orthoVerts[orthoVBOffset].v = v+1.0f;
+	orthoVBOffset++;
+
+	// top left
+	orthoVerts[orthoVBOffset].x = -1.0f;
+	orthoVerts[orthoVBOffset].y = -1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = u;
+	orthoVerts[orthoVBOffset].v = v;
+	orthoVBOffset++;
+
+	// bottom right
+	orthoVerts[orthoVBOffset].x = 1.0f;
+	orthoVerts[orthoVBOffset].y = 1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = u+1.0f;
+	orthoVerts[orthoVBOffset].v = v+1.0f;
+	orthoVBOffset++;
+
+	// top right
+	orthoVerts[orthoVBOffset].x = 1.0f;;
+	orthoVerts[orthoVBOffset].y = -1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = u+1.0f;
+	orthoVerts[orthoVBOffset].v = v;
+	orthoVBOffset++;
+
+#if 0
 	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(4, BurningImageNumber, TRANSLUCENCY_GLOWING);
 
@@ -3997,6 +4162,7 @@ extern void D3D_PlayerOnFireOverlay(void)
 
 	OUTPUT_TRIANGLE(0,1,3, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
+#endif
 }
 
 extern void D3D_ScreenInversionOverlay()
@@ -4010,13 +4176,51 @@ extern void D3D_ScreenInversionOverlay()
 	theta[1] = (800-CloakingPhase/8)&4095;
 
 //	SetFilteringMode(FILTERING_BILINEAR_ON);
-	CheckVertexBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_DARKENINGCOLOUR);
+//	CheckVertexBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_DARKENINGCOLOUR);
+	CheckOrthoBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_DARKENINGCOLOUR, TEXTURE_WRAP);
 
 	for (i = 0; i < 2; i++)
 	{
 		float sin = (GetSin(theta[i]))/65536.0f/16.0f;
 		float cos = (GetCos(theta[i]))/65536.0f/16.0f;
 		{
+			// bottom left
+			orthoVerts[orthoVBOffset].x = -1.0f;
+			orthoVerts[orthoVBOffset].y = 1.0f;
+			orthoVerts[orthoVBOffset].z = 1.0f;
+			orthoVerts[orthoVBOffset].colour = colour;
+			orthoVerts[orthoVBOffset].u = 0.375f + (cos*(-1) - sin*(+1));
+			orthoVerts[orthoVBOffset].v = 0.375f + (sin*(-1) + cos*(+1));
+			orthoVBOffset++;
+
+			// top left
+			orthoVerts[orthoVBOffset].x = -1.0f;
+			orthoVerts[orthoVBOffset].y = -1.0f;
+			orthoVerts[orthoVBOffset].z = 1.0f;
+			orthoVerts[orthoVBOffset].colour = colour;
+			orthoVerts[orthoVBOffset].u = 0.375f + (cos*(-1) - sin*(-1));
+			orthoVerts[orthoVBOffset].v = 0.375f + (sin*(-1) + cos*(-1));
+			orthoVBOffset++;
+
+			// bottom right
+			orthoVerts[orthoVBOffset].x = 1.0f;
+			orthoVerts[orthoVBOffset].y = 1.0f;
+			orthoVerts[orthoVBOffset].z = 1.0f;
+			orthoVerts[orthoVBOffset].colour = colour;
+			orthoVerts[orthoVBOffset].u = 0.375f + (cos*(+1) - sin*(+1));
+			orthoVerts[orthoVBOffset].v = 0.375f + (sin*(+1) + cos*(+1));
+			orthoVBOffset++;
+
+			// top right
+			orthoVerts[orthoVBOffset].x = 1.0f;;
+			orthoVerts[orthoVBOffset].y = -1.0f;
+			orthoVerts[orthoVBOffset].z = 1.0f;
+			orthoVerts[orthoVBOffset].colour = colour;
+			orthoVerts[orthoVBOffset].u = 0.375f + (cos*(+1) - sin*(-1));
+			orthoVerts[orthoVBOffset].v = 0.375f + (sin*(+1) + cos*(-1));
+			orthoVBOffset++;
+
+#if 0
 			// top left
 	 	  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
 		  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
@@ -4063,12 +4267,14 @@ extern void D3D_ScreenInversionOverlay()
 
 			OUTPUT_TRIANGLE(0,1,3, 4);
 			OUTPUT_TRIANGLE(1,2,3, 4);
+#endif
 		}
 
 		/* only do this when finishing first loop, otherwise we reserve space for 4 verts we never add */
 		if (i == 0)
 		{
-			CheckVertexBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_COLOUR);
+//			CheckVertexBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_COLOUR);
+			CheckOrthoBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_COLOUR, TEXTURE_WRAP);
 		}
 	}
 }
@@ -4182,13 +4388,51 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 	colour = 0xffffff - baseColour + (intensity<<24);
 
 //	SetFilteringMode(FILTERING_BILINEAR_ON);
-	CheckVertexBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_INVCOLOUR);
+//	CheckVertexBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_INVCOLOUR);
 
-	for(i = 0; i < 2; i++)
+	CheckOrthoBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_INVCOLOUR, TEXTURE_WRAP);
+
+	for (i = 0; i < 2; i++)
 	{
 		float sin = (GetSin(theta[i]))/65536.0f/16.0f;
 		float cos = (GetCos(theta[i]))/65536.0f/16.0f;
 		{
+			// bottom left
+			orthoVerts[orthoVBOffset].x = -1.0f;
+			orthoVerts[orthoVBOffset].y = 1.0f;
+			orthoVerts[orthoVBOffset].z = 1.0f;
+			orthoVerts[orthoVBOffset].colour = colour;
+			orthoVerts[orthoVBOffset].u = (float)(.875 + (cos*(-1) - sin*(+1)));
+			orthoVerts[orthoVBOffset].v = (float)(.375 + (sin*(-1) + cos*(+1)));
+			orthoVBOffset++;
+
+			// top left
+			orthoVerts[orthoVBOffset].x = -1.0f;
+			orthoVerts[orthoVBOffset].y = -1.0f;
+			orthoVerts[orthoVBOffset].z = 1.0f;
+			orthoVerts[orthoVBOffset].colour = colour;
+			orthoVerts[orthoVBOffset].u = (float)(0.875 + (cos*(-1) - sin*(-1)));
+			orthoVerts[orthoVBOffset].v = (float)(0.375 + (sin*(-1) + cos*(-1)));
+			orthoVBOffset++;
+
+			// bottom right
+			orthoVerts[orthoVBOffset].x = 1.0f;
+			orthoVerts[orthoVBOffset].y = 1.0f;
+			orthoVerts[orthoVBOffset].z = 1.0f;
+			orthoVerts[orthoVBOffset].colour = colour;
+			orthoVerts[orthoVBOffset].u = (float)(.875 + (cos*(+1) - sin*(+1)));
+			orthoVerts[orthoVBOffset].v = (float)(.375 + (sin*(+1) + cos*(+1)));
+			orthoVBOffset++;
+
+			// top right
+			orthoVerts[orthoVBOffset].x = 1.0f;
+			orthoVerts[orthoVBOffset].y = -1.0f;
+			orthoVerts[orthoVBOffset].z = 1.0f;
+			orthoVerts[orthoVBOffset].colour = colour;
+			orthoVerts[orthoVBOffset].u = (float)(.875 + (cos*(+1) - sin*(-1)));
+			orthoVerts[orthoVBOffset].v = (float)(.375 + (sin*(+1) + cos*(-1)));
+			orthoVBOffset++;
+#if 0
 			// top left
 	 	  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
 		  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
@@ -4239,6 +4483,7 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 
 			OUTPUT_TRIANGLE(0,1,3, 4);
 			OUTPUT_TRIANGLE(1,2,3, 4);
+#endif
 		}
 
 		colour = baseColour +(intensity<<24);
@@ -4247,7 +4492,8 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 		/* only do this when finishing first loop, otherwise we reserve space for 4 verts we never add */
 		if (i == 0)
 		{
-			CheckVertexBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_GLOWING);
+//			CheckVertexBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_GLOWING);
+			CheckOrthoBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_GLOWING, TEXTURE_WRAP);
 		}
 	}
 }
@@ -4811,15 +5057,54 @@ extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, in
 
 void DrawFadeQuad(int topX, int topY, int alpha) 
 {
-	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
+//	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
 
-	int height = ScreenDescriptorBlock.SDB_Height;
-	int width = ScreenDescriptorBlock.SDB_Width;
+//	int height = ScreenDescriptorBlock.SDB_Height;
+//	int width = ScreenDescriptorBlock.SDB_Width;
 
 	alpha = alpha / 256;
 	if (alpha > 255) alpha = 255;
 	D3DCOLOR colour = D3DCOLOR_ARGB(alpha,0,0,0);
 
+	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING, TEXTURE_WRAP);
+
+	// bottom left
+	orthoVerts[orthoVBOffset].x = -1.0f;
+	orthoVerts[orthoVBOffset].y = 1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+	// top left
+	orthoVerts[orthoVBOffset].x = -1.0f;
+	orthoVerts[orthoVBOffset].y = -1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+	// bottom right
+	orthoVerts[orthoVBOffset].x = 1.0f;
+	orthoVerts[orthoVBOffset].y = 1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+	// top right
+	orthoVerts[orthoVBOffset].x = 1.0f;;
+	orthoVerts[orthoVBOffset].y = -1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+#if 0
 	// bottom left
 	mainVertex[vb].sx = (float)topX - 0.5f;
 	mainVertex[vb].sy = (float)topY + height - 0.5f;
@@ -4870,6 +5155,7 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 
 	OUTPUT_TRIANGLE(0,1,2, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
+#endif
 }
 
 /* more quad drawing functions than you can shake a stick at! */
@@ -5030,7 +5316,7 @@ void DrawHUDQuad(int x, int y, int width, int height, float *UVList, int texture
 		texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
 	}
 
-	CheckOrthoBuffer(4, textureID, translucencyType);
+	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP);
 
 	// bottom left
 	orthoVerts[orthoVBOffset].x = x1;
@@ -5095,7 +5381,7 @@ void DrawQuad(int x, int y, int width, int height, int textureID, int colour, en
 		texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
 	}
 
-	CheckOrthoBuffer(4, textureID, translucencyType);
+	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP);
 
 	// bottom left
 	orthoVerts[orthoVBOffset].x = x1;
@@ -5478,7 +5764,7 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	float x2 = ((float(topX + font_width) / 640.0f) * 2) - 1;
 	float y2 = ((float(topY + font_height) / 480.0f) * 2) - 1;
 
-	CheckOrthoBuffer(4, AVPMENUGFX_SMALL_FONT, TRANSLUCENCY_GLOWING);
+	CheckOrthoBuffer(4, AVPMENUGFX_SMALL_FONT, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
 
 	// bottom left
 	orthoVerts[orthoVBOffset].x = x1;
@@ -5683,7 +5969,7 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 	float x2 = ((float(topX + char_width) / 640.0f) * 2) - 1;
 	float y2 = ((float(topY + height_of_char) / 480.0f) * 2) - 1;
 
-	CheckOrthoBuffer(4, TALLFONT_TEX, TRANSLUCENCY_GLOWING);
+	CheckOrthoBuffer(4, TALLFONT_TEX, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
 
 	// bottom left
 	orthoVerts[orthoVBOffset].x = x1;

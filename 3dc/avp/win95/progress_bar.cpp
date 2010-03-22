@@ -61,23 +61,23 @@ void Start_Progress_Bar()
 {
 	AAFontImageNumber = CL_LoadImageOnce("Common\\aa_font.RIM", LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
 	
-	/* load other graphics */
+	// load other graphics
 	{
 		char buffer[100];
 		CL_GetImageFileName(buffer, 100, Loading_Bar_Empty_Image_Name, LIO_RELATIVEPATH);
 		
-		//see if graphic can be found in fast file
+		// see if graphic can be found in fast file
 		size_t fastFileLength;
 		void const * pFastFileData = ffreadbuf(buffer, &fastFileLength);
 
 		if (pFastFileData)
 		{
-			//load from fast file
+			// load from fast file
 			LoadingBarEmpty = AwCreateTexture("pxf", pFastFileData, fastFileLength, 0);
 		}
 		else
 		{
-			//load graphic from rim file
+			// load graphic from rim file
 			LoadingBarEmpty = AwCreateTexture("sf", buffer, 0);
 		}
 		// create d3d texture here
@@ -87,44 +87,44 @@ void Start_Progress_Bar()
 		char buffer[100];
 		CL_GetImageFileName(buffer, 100,Loading_Bar_Full_Image_Name, LIO_RELATIVEPATH);
 		
-		//see if graphic can be found in fast file
+		// see if graphic can be found in fast file
 		size_t fastFileLength;
 		void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
 		
 		if (pFastFileData)
 		{
-			//load from fast file
+			// load from fast file
 			LoadingBarFull = AwCreateTexture("pxf", pFastFileData, fastFileLength, 0);
 		}
 		else
 		{
-			//load graphic from rim file
+			// load graphic from rim file
 			LoadingBarFull = AwCreateTexture("sf", buffer, 0);
 		}
 		
 		LoadingBarFullTexture = CreateD3DTexturePadded(LoadingBarFull, &fullbarWidth, &fullbarHeight);
 	}
 	
-	//load background image for bar
+	// load background image for bar
 	char buffer[100];
 	CL_GetImageFileName(buffer, 100,Loading_Image_Name, LIO_RELATIVEPATH);
 	
-	//see if graphic can be found in fast file
+	// see if graphic can be found in fast file
 	size_t fastFileLength;
 	void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
 	
 	if (pFastFileData)
 	{
-		//load from fast file
+		// load from fast file
 		image = AwCreateTexture("pxf", pFastFileData, fastFileLength, 0);
 	}
 	else
 	{
-		//load graphic from rim file
+		// load graphic from rim file
 		image = AwCreateTexture("sf", buffer, 0);
 	}
 
-	//draw initial progress bar
+	// draw initial progress bar
 	LoadingBarEmpty_SrcRect.left = 0;
 	LoadingBarEmpty_SrcRect.right = 639;
 	LoadingBarEmpty_SrcRect.top = 0;
@@ -146,7 +146,7 @@ void Start_Progress_Bar()
 		FlipBuffers();	
 	}
 
-	CurrentPosition=0;
+	CurrentPosition = 0;
 }
 
 void Set_Progress_Bar_Position(int pos)
