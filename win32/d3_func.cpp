@@ -1051,7 +1051,7 @@ BOOL InitialiseDirect3D()
 
 	for (int i = 0; i < (sizeof(DisplayFormats) / sizeof(DisplayFormats[0])); i++)
 	{
-		for (int j = 0; i < d3d.Driver[defaultDevice].NumModes; j++)
+		for (int j = 0; j < d3d.Driver[defaultDevice].NumModes; j++)
 		{
 			// found a usable mode
 			if ((d3d.Driver[defaultDevice].DisplayMode[j].Width == width) && (d3d.Driver[defaultDevice].DisplayMode[j].Height == height))
