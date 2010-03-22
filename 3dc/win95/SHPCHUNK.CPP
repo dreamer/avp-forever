@@ -142,9 +142,7 @@ Shape_Chunk* Shape_Chunk::make_copy_of_chunk()
 
 Shape_Header_Chunk * Shape_Chunk::get_header()
 {
-	
 	return (Shape_Header_Chunk *) this->lookup_single_child ("SHPHEAD1");
-
 }
 
 List<Object_Chunk *> const & Shape_Chunk::list_assoc_objs()
@@ -210,9 +208,7 @@ void Shape_Chunk::post_input_processing()
 	shape_data_store->radius = radius;
 #endif	
 
-
 	Chunk_With_Children::post_input_processing();
-
 }
 
 void Shape_Chunk::destroy_auxiliary_chunks()
@@ -227,8 +223,7 @@ void Shape_Chunk::destroy_auxiliary_chunks()
 		delete chlst.first_entry();
 		chlst.delete_first_entry();
 	}
-	
-	
+
 	lookup_child("SHPMRGDT",chlst);
 	while (chlst.size())
 	{
@@ -236,17 +231,13 @@ void Shape_Chunk::destroy_auxiliary_chunks()
 		chlst.delete_first_entry();
 	}
 
-	
-	
 	lookup_child("SHPMORPH",chlst);
 	while (chlst.size())
 	{
 		delete chlst.first_entry();
 		chlst.delete_first_entry();
 	}
-	
-	
-	
+
 	lookup_child("TEXTANIM",chlst);
 	while (chlst.size())
 	{
@@ -254,15 +245,12 @@ void Shape_Chunk::destroy_auxiliary_chunks()
 		chlst.delete_first_entry();
 	}
 
-	
-	
 	lookup_child("SHPPCINF",chlst);
 	while (chlst.size())
 	{
 		delete chlst.first_entry();
 		chlst.delete_first_entry();
 	}
-
 	
 	lookup_child("SHPFRAGS",chlst);
 	while (chlst.size())
@@ -270,7 +258,6 @@ void Shape_Chunk::destroy_auxiliary_chunks()
 		delete chlst.first_entry();
 		chlst.delete_first_entry();
 	}
-
 	
 	lookup_child("ANIMSEQU",chlst);
 	while (chlst.size())
@@ -279,14 +266,12 @@ void Shape_Chunk::destroy_auxiliary_chunks()
 		chlst.delete_first_entry();
 	}
 	
-	
 	lookup_child("PNOTINBB",chlst);
 	while (chlst.size())
 	{
 		delete chlst.first_entry();
 		chlst.delete_first_entry();
 	}
-	
 	
 	lookup_child("ANSHCEN2",chlst);
 	while (chlst.size())
@@ -295,14 +280,12 @@ void Shape_Chunk::destroy_auxiliary_chunks()
 		chlst.delete_first_entry();
 	}
 	
-	
 	lookup_child("CONSHAPE",chlst);
 	while (chlst.size())
 	{
 		delete chlst.first_entry();
 		chlst.delete_first_entry();
 	}
-	
 	
 	lookup_child("ASALTTEX",chlst);
 	while (chlst.size())
@@ -317,7 +300,6 @@ void Shape_Chunk::destroy_auxiliary_chunks()
 		delete chlst.first_entry();
 		chlst.delete_first_entry();
 	}
-	
 }	
 
 

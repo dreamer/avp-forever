@@ -456,12 +456,20 @@ BOOL SetExecuteBufferDefaults()
 	D3DZFunc = D3DCMP_LESSEQUAL;
 
 	// fill out first render list struct
+	memset(&renderList[0], 0, sizeof(RENDER_STATES));
 	renderList[0].textureID = NO_TEXTURE;
+/*
 	renderList[0].vertStart = 0;
 	renderList[0].vertEnd = 0;
 	renderList[0].filteringType = FILTERING_BILINEAR_OFF;
 	renderList[0].translucencyType = TRANSLUCENCY_OFF;
-
+*/
+	memset(&orthoList[0], 0, sizeof(ORTHO_OBJECTS));
+	orthoList[0].textureID = NO_TEXTURE;
+/*
+	orthoList[0].translucencyType = TRANSLUCENCY_OFF;
+	orthoList[0].filteringType = FILTERING_BILINEAR_OFF;
+*/
 	renderTest.push_back(renderList[0]);
 
 	// Enable fog blending.
@@ -476,6 +484,7 @@ BOOL SetExecuteBufferDefaults()
 void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode)
 {
 	assert (numVerts == 4);
+
 	// check if we've got enough room. if not, flush
 		// TODO
 
@@ -484,47 +493,35 @@ void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE
 	orthoList[orthoListCount].vertStart = 0;
 	orthoList[orthoListCount].vertEnd = 0;
 	orthoList[orthoListCount].translucencyType = translucencyMode;
-/*
-	for (uint32_t i = 0; i < numVerts; i+=4)
-	{
-		orthoIndex[orthoIBOffset]   = orthoVBOffset;
-		orthoIndex[orthoIBOffset+1] = orthoVBOffset+1;
-		orthoIndex[orthoIBOffset+2] = orthoVBOffset+2;
-		orthoIBOffset++;
 
-		orthoIndex[orthoIBOffset]   = orthoVBOffset+2;
-		orthoIndex[orthoIBOffset+1] = orthoVBOffset+1;
-		orthoIndex[orthoIBOffset+2] = orthoVBOffset+3;
-		orthoIBOffset++;
-	}
-*/
 	// check if current vertexes use the same texture and render states as the previous. if they do, we can 'merge' the two together
-//	if ((textureID == orthoList[orthoListCount-1].textureID && translucencyMode == orthoList[orthoListCount-1].translucencyType) && orthoListCount != 0) 
+	if ((textureID == orthoList[orthoListCount-1].textureID && translucencyMode == orthoList[orthoListCount-1].translucencyType) && orthoListCount != 0) 
 	{
 		// ok, drop back to the previous data
-//		orthoListCount--;
+		orthoListCount--;
 	}
-//	else
+	else
 	{
 		// new unique entry
 		orthoList[orthoListCount].indexStart = orthoIBOffset;
-		
-		orthoIndex[orthoIBOffset+0] = orthoVBOffset+0;
-		orthoIndex[orthoIBOffset+1] = orthoVBOffset+1;
-		orthoIndex[orthoIBOffset+2] = orthoVBOffset+2;
+	}
+
+	// create the indicies for each triangle
+	for (uint32_t i = 0; i < numVerts; i+=4)
+	{
+		orthoIndex[orthoIBOffset]   = orthoVBOffset+i+0;
+		orthoIndex[orthoIBOffset+1] = orthoVBOffset+i+1;
+		orthoIndex[orthoIBOffset+2] = orthoVBOffset+i+2;
 		orthoIBOffset+=3;
 
-		orthoIndex[orthoIBOffset+0] = orthoVBOffset+2;
-		orthoIndex[orthoIBOffset+1] = orthoVBOffset+1;
-		orthoIndex[orthoIBOffset+2] = orthoVBOffset+3;
+		orthoIndex[orthoIBOffset]   = orthoVBOffset+i+2;
+		orthoIndex[orthoIBOffset+1] = orthoVBOffset+i+1;
+		orthoIndex[orthoIBOffset+2] = orthoVBOffset+i+3;
 		orthoIBOffset+=3;
-
-		orthoList[orthoListCount].vertStart = orthoVBOffset;
-//		orthoList[orthoListCount].indexStart = orthoIBOffset;
 	}
 
 	orthoList[orthoListCount].vertEnd = orthoVBOffset + numVerts;
-	orthoList[orthoListCount].indexEnd = orthoIBOffset;// + (numVerts + (numVerts / 2));
+	orthoList[orthoListCount].indexEnd = orthoIBOffset;
 
 	orthoListCount++;
 }
