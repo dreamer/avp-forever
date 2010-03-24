@@ -535,7 +535,7 @@ void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE
 	orthoListCount++;
 }
 
-void CheckVertexBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode) 
+void CheckVertexBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON) 
 {
 	size_t realNumVerts = 0;
 
@@ -585,12 +585,13 @@ void CheckVertexBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYP
 	renderList[renderCount].indexEnd = 0;
 
 	renderList[renderCount].translucencyType = translucencyMode;
+	renderList[renderCount].filteringType = filteringMode;
 
 	// check if current vertexes use the same texture and render states as the previous
 	// if they do, we can 'merge' the two together
-	if ((textureID == renderList[renderCount-1].textureID && 
-		translucencyMode == renderList[renderCount-1].translucencyType) && 
-//		renderList[renderCount].filtering_type == renderList[renderCount-1].filtering_type) &&
+	if (textureID == renderList[renderCount-1].textureID && 
+		translucencyMode == renderList[renderCount-1].translucencyType && 
+		filteringMode	 == renderList[renderCount-1].filteringType &&
 		renderCount != 0) 
 	{
 		// ok, drop back to the previous data
@@ -844,7 +845,7 @@ BOOL ExecuteBuffer()
 //		return FALSE;
 
 	// sort the list of render objects
-//	std::sort(renderTest.begin(), renderTest.end());
+	std::sort(renderTest.begin(), renderTest.end());
 
 #ifdef WIN32
 //	Font_DrawText("blah", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
@@ -869,7 +870,7 @@ BOOL ExecuteBuffer()
 	}
 
 	D3DXMATRIX matProjection;
-	D3DXMatrixPerspectiveFovLH( &matProjection, D3DXToRadian(90), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+	D3DXMatrixPerspectiveFovLH( &matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
 	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matProjection );
 /*
 	D3DXMATRIX matView; 
@@ -1008,6 +1009,7 @@ BOOL ExecuteBuffer()
 				|| orthoList[i].textureID == HUDImageNumber)
 			{
 				ChangeFilteringMode(FILTERING_BILINEAR_OFF);
+				ChangeTextureAddressMode(TEXTURE_CLAMP);
 			}
 			else ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
@@ -4941,7 +4943,8 @@ extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour)
 		x += AAFontWidths[(unsigned char)c];
 	}
 }
-extern void D3D_RenderHUDString_Clipped(char *stringPtr,int x,int y,int colour)
+
+extern void D3D_RenderHUDString_Clipped(char *stringPtr, int x, int y, int colour)
 {
 	if (stringPtr == NULL)
 		return;
@@ -4967,12 +4970,19 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr,int x,int y,int colour)
 			int topLeftU = 1+((c-32)&15)*16;
 			int topLeftV = 1+((c-32)>>4)*16;
 
+			// top left
 			quadVertices[0].U = topLeftU - 1;
 			quadVertices[0].V = topLeftV - y;
+
+			// top right
 			quadVertices[1].U = topLeftU + HUD_FONT_WIDTH + 1;
 			quadVertices[1].V = topLeftV - y;
+
+			// bottom right
 			quadVertices[2].U = topLeftU + HUD_FONT_WIDTH + 1;
 			quadVertices[2].V = topLeftV + HUD_FONT_HEIGHT + 1;
+
+			// bottom left
 			quadVertices[3].U = topLeftU - 1;
 			quadVertices[3].V = topLeftV + HUD_FONT_HEIGHT + 1;
 
@@ -4981,12 +4991,42 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr,int x,int y,int colour)
 			quadVertices[1].X = x + HUD_FONT_WIDTH + 1;
 			quadVertices[2].X = x + HUD_FONT_WIDTH + 1;
 
+			int uvArray[8];
+
+			// bottom left
+			uvArray[0] = topLeftU - 1;
+			uvArray[1] = topLeftV + HUD_FONT_HEIGHT + 1;
+
+			// top left
+			uvArray[2] = topLeftU - 1;
+			uvArray[3] = topLeftV - y;
+
+			// bottom right
+			uvArray[4] = topLeftU + HUD_FONT_WIDTH + 1;
+			uvArray[5] = topLeftV + HUD_FONT_HEIGHT + 1;
+
+			// top right
+			uvArray[6] = topLeftU + HUD_FONT_WIDTH + 1;
+			uvArray[7] = topLeftV - y;
+
+			New_D3D_HUDQuad_Output
+			(
+				AAFontImageNumber, 
+				quadVertices[0].X,
+				quadVertices[0].Y,
+				quadVertices[1].X = x - quadVertices[0].X,
+				quadVertices[2].Y = y - quadVertices[0].Y,
+				uvArray,
+				colour
+			);
+/*
 			D3D_HUDQuad_Output
 			(
 				AAFontImageNumber,
 				quadVertices,
 				colour
 			);
+*/
 		}
 		x += AAFontWidths[(unsigned char)c];
 	}
@@ -5029,12 +5069,19 @@ void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour
 			int topLeftU = 1+((c-32)&15)*16;
 			int topLeftV = 1+((c-32)>>4)*16;
 
+			// top left
 			quadVertices[0].U = topLeftU - 1;
 			quadVertices[0].V = topLeftV - 1;
+
+			// top right
 			quadVertices[1].U = topLeftU + HUD_FONT_WIDTH + 1;
 			quadVertices[1].V = topLeftV - 1;
+
+			// bottom right
 			quadVertices[2].U = topLeftU + HUD_FONT_WIDTH + 1;
 			quadVertices[2].V = topLeftV + HUD_FONT_HEIGHT + 1;
+
+			// bottom left
 			quadVertices[3].U = topLeftU - 1;
 			quadVertices[3].V = topLeftV + HUD_FONT_HEIGHT + 1;
 
@@ -5043,12 +5090,42 @@ void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour
 			quadVertices[1].X = x + MUL_FIXED(HUDScaleFactor,HUD_FONT_WIDTH + 1);
 			quadVertices[2].X = x + MUL_FIXED(HUDScaleFactor,HUD_FONT_WIDTH + 1);
 
+			int uvArray[8];
+
+			// bottom left
+			uvArray[0] = topLeftU - 1;
+			uvArray[1] = topLeftV + HUD_FONT_HEIGHT + 1;
+
+			// top left
+			uvArray[2] = topLeftU - 1;
+			uvArray[3] = topLeftV - 1;
+
+			// bottom right
+			uvArray[4] = topLeftU + HUD_FONT_WIDTH + 1;
+			uvArray[5] = topLeftV + HUD_FONT_HEIGHT + 1;
+
+			// top right
+			uvArray[6] = topLeftU + HUD_FONT_WIDTH + 1;
+			uvArray[7] = topLeftV - 1;
+
+			New_D3D_HUDQuad_Output
+			(
+				AAFontImageNumber, 
+				quadVertices[0].X,
+				quadVertices[0].Y,
+				quadVertices[1].X - quadVertices[0].X,
+				quadVertices[2].Y - quadVertices[0].Y,
+				uvArray,
+				colour
+			);
+/*
 			D3D_HUDQuad_Output
 			(
 				AAFontImageNumber,
 				quadVertices,
 				colour
 			);
+*/
 		}
 		x += MUL_FIXED(HUDScaleFactor,AAFontWidths[(unsigned char)c]);
 	}

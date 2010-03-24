@@ -729,9 +729,7 @@ void AddDecal(enum DECAL_ID decalID, VECTORCH *normalPtr, VECTORCH *positionPtr,
 			decalPtr->UOffset = 0;
 			break;
 		}
-
 	}
-
 }
 
 void RenderLaserTarget(THREE_LASER_DOT_DESC *laserTargetPtr)
@@ -828,7 +826,6 @@ void HandleDecalSystem(void)
 					decalPtr->Vertices[i].vy += decalPtr->Centre.vy;
 					decalPtr->Vertices[i].vz += decalPtr->Centre.vz;
 				}
-
 			}
 			RenderDecal(decalPtr);
 			decalPtr++;
@@ -858,7 +855,6 @@ void HandleDecalSystem(void)
 	{
 		RenderLaserTarget(&PredatorLaserTarget);
 	}
-
  	
 	{
 		extern int NumActiveBlocks;
@@ -929,12 +925,10 @@ void HandleDecalSystem(void)
 							}
 						}
 						break;
-						
 					}
 					default:
 						break;
 				}
-				
 			}
 		}
 	}
@@ -981,8 +975,6 @@ void AddDecalToHModel(VECTORCH *normalPtr, VECTORCH *positionPtr, SECTION_DATA *
 		v.vz -= sectionDataPtr->World_Offset.vz;
 		RotateVector(&v,&mat);
 	}
-	
-	
 	{
 		SECTION	*sectionPtr = sectionDataPtr->sempai;
 	
@@ -1002,7 +994,6 @@ void AddDecalToHModel(VECTORCH *normalPtr, VECTORCH *positionPtr, SECTION_DATA *
 		{
 			decalID = DECAL_BULLETHOLE;
 		}
-
 	}
 
 	decalPtr = &sectionDataPtr->Decals[sectionDataPtr->NextDecalToUse];
@@ -1105,10 +1096,7 @@ void ScanHModelForDecals(DISPLAYBLOCK *objectPtr, SECTION_DATA *sectionDataPtr)
 			childrenListPtr=childrenListPtr->Next_Sibling;
 		}
 	}
-
 }
-
-
 
 /*------------------**
 ** Load/Save Decals **
@@ -1144,7 +1132,6 @@ void Load_Decals(SAVE_BLOCK_HEADER* header)
 			*decal = *saved_decal++;	
 		}
 	}
-
 }
 
 void Save_Decals()
@@ -1170,5 +1157,4 @@ void Save_Decals()
 		DECAL* decal = GET_SAVE_BLOCK_POINTER(decal);
 		*decal = DecalStorage[i];
 	}
-	
 }

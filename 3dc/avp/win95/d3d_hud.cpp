@@ -590,6 +590,7 @@ void D3D_BLTMotionTrackerBlipToHUD(int x, int y, int brightness)
 	}
 	Draw_HUDImage(&imageDesc);
 }
+
 extern void D3D_BlitWhiteChar(int x, int y, unsigned char c)
 {
 	HUDImageDesc imageDesc;
@@ -599,16 +600,6 @@ extern void D3D_BlitWhiteChar(int x, int y, unsigned char c)
 //	if (c<' ' || c>'_') return;
 	if (c==' ') return;
 
-	#if 0
-	imageDesc.ImageNumber = HUDFontsImageNumber;
-
-	imageDesc.TopLeftX = x;
-	imageDesc.TopLeftY = y;
-	imageDesc.TopLeftU = 1+((c-32)&15)*7;
-	imageDesc.TopLeftV = 2+((c-32)>>4)*11;
-	imageDesc.Height = 8;
-	imageDesc.Width = 5;
-	#else
 	imageDesc.ImageNumber = AAFontImageNumber;
 
 	imageDesc.TopLeftX = x;
@@ -617,7 +608,7 @@ extern void D3D_BlitWhiteChar(int x, int y, unsigned char c)
 	imageDesc.TopLeftV = 1+((c-32)>>4)*16;
 	imageDesc.Height = 15;
 	imageDesc.Width = 15;
-	#endif
+
 	imageDesc.Scale = ONE_FIXED;
 	imageDesc.Translucency = 255;
 	imageDesc.Red = 255;
@@ -652,6 +643,7 @@ void D3D_DrawHUDFontCharacter(HUDCharDesc *charDescPtr)
 	Draw_HUDImage(&imageDesc);
 	
 }
+
 void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr)
 {
 	HUDImageDesc imageDesc;
@@ -682,8 +674,8 @@ void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr)
 	imageDesc.Blue = charDescPtr->Blue;
 
 	Draw_HUDImage(&imageDesc);
-	
 }
+
 void D3D_DrawHUDPredatorDigit(HUDCharDesc *charDescPtr, int scale)
 {
 	HUDImageDesc imageDesc;
@@ -825,6 +817,7 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 		int xCentre = MUL_FIXED(HUDLayout_RightmostTextCentre,HUDScaleFactor)+ScreenDescriptorBlock.SDB_Width - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
 		healthColour = HUDLayout_Colour_MarineGreen;
 		armourColour = HUDLayout_Colour_MarineGreen;
+
 		D3D_RenderHUDString_Centred
 		(
 			GetTextString(TEXTSTRING_INGAME_HEALTH),
