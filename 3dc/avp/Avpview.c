@@ -544,19 +544,20 @@ void AVPGetInViewVolumeList(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	{
 		DISPLAYBLOCK *dptr = *activeblocksptr++;
 	
-		if (dptr==Player) continue;
+		if (dptr==Player) 
+			continue;
+
 		MVis = TRUE;
-		if(dptr->ObMyModule)
+		if (dptr->ObMyModule)
 		{
 			MODULE *mptr = dptr->ObMyModule;
-			if(ModuleCurrVisArray[mptr->m_index] != 2) MVis = FALSE;
+			if (ModuleCurrVisArray[mptr->m_index] != 2) MVis = FALSE;
 			else
 			{
 				extern int NumberOfLandscapePolygons;
 				SHAPEHEADER *shapePtr = GetShapeData(dptr->ObShape);
 				NumberOfLandscapePolygons+=shapePtr->numitems;
 			}
-
 		}
 		if (!(dptr->ObFlags&ObFlag_NotVis) && MVis) 
 		{

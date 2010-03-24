@@ -62,6 +62,8 @@ extern void ReleaseAllFMVTextures(void);
 extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
 
+extern void ToggleWireframe();
+
 extern "C++"
 {
 	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
@@ -116,13 +118,13 @@ struct TGA_HEADER
 	char		idlength;
 	char		colourmaptype;
 	char		datatypecode;
-	short int	colourmaporigin;
-	short int	colourmaplength;
+	int16_t		colourmaporigin;
+	int16_t 	colourmaplength;
 	char		colourmapdepth;
-	short int	x_origin;
-	short int	y_origin;
-	short		width;
-	short		height;
+	int16_t		x_origin;
+	int16_t		y_origin;
+	int16_t		width;
+	int16_t		height;
 	char		bitsperpixel;
 	char		imagedescriptor;
 };
@@ -132,7 +134,7 @@ static TGA_HEADER TgaHeader = {0};
 
 void ColourFillBackBuffer(int FillColour) 
 {
-	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET, FillColour, 1.0f, 0 );
+	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET, /*FillColour*/D3DCOLOR_XRGB(255,255,0), 1.0f, 0 );
 }
 
 char* GetDeviceName() 
@@ -1181,8 +1183,8 @@ BOOL InitialiseDirect3D()
 		d3dpp.BackBufferHeight = height;
 		// setting this to interval one will cap the framerate to monitor refresh
 		// the timer goes a bit mad if this isnt capped!
-		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 //		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 		ChangeWindowsSize(d3dpp.BackBufferWidth, d3dpp.BackBufferHeight);
 	}
@@ -1422,6 +1424,7 @@ BOOL InitialiseDirect3D()
 	Font_Init();
 
 	Con_AddCommand("dumptex", WriteMenuTextures);
+	Con_AddCommand("r_toggleWireframe", ToggleWireframe);
 
 	Con_PrintMessage("Initialised Direct3D9 succesfully");
 	return TRUE;
@@ -1446,7 +1449,7 @@ void SetTransforms()
 	D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 
 	// set up projection matrix
-	D3DXMatrixPerspectiveFovLH( &matProjection, D3DX_PI / 2, (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+	D3DXMatrixPerspectiveFovLH( &matProjection, D3DXToRadian(90), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
 
 	// print projection matrix?
 	PrintD3DMatrix("Projection", matProjection);
@@ -1456,9 +1459,9 @@ void SetTransforms()
 	PrintD3DMatrix("View and Projection", matViewProjection);
 
 	D3DXMatrixIdentity( &matIdentity );
-	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
 	d3d.lpD3DDevice->SetTransform( D3DTS_WORLD, &matIdentity );
 	d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matIdentity );
+	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
 }
 
 void FlipBuffers()

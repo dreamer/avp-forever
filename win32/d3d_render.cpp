@@ -27,6 +27,10 @@ extern "C++"{
 extern int Font_DrawText(const char* text, int x, int y, int colour, int fontType);
 #endif
 
+// macros for Pix functions
+#define WIDEN2(x) L ## x
+#define WIDEN(x) WIDEN2(x)
+
 // STL stuff
 #include <vector>
 #include <algorithm>
@@ -60,7 +64,7 @@ WORD *orthoIndex = NULL;
 
 static int orthoVBOffset = 0;
 static int orthoIBOffset = 0;
-static int orthoListCount = 0;
+static size_t orthoListCount = 0;
 
 // for quad rendering
 D3DTLVERTEX quadVert[4];
@@ -865,16 +869,22 @@ BOOL ExecuteBuffer()
 	}
 
 	D3DXMATRIX matProjection;
-	D3DXMatrixPerspectiveFovLH( &matProjection, /*D3DX_PI / 2*/D3DXToRadian(90), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+	D3DXMatrixPerspectiveFovLH( &matProjection, D3DXToRadian(90), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
 	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matProjection );
-
+/*
+	D3DXMATRIX matView; 
+	D3DXMatrixIdentity( &matView );
+	D3DXVECTOR3 position = D3DXVECTOR3(-64.0f, 280.0f, -1088.0f);
+	D3DXVECTOR3 lookAt = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	D3DXVECTOR3 up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+	D3DXMatrixLookAtLH( &matView, &position, &lookAt, &up );
+	
+	d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matView );
+*/
 	ChangeTextureAddressMode(TEXTURE_WRAP);
 
 	// we can assume to keep this turned on
 	ChangeFilteringMode(FILTERING_BILINEAR_ON);
-
-	#define WIDEN2(x) L ## x
-	#define WIDEN(x) WIDEN2(x)
 
 	D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Before DrawIndexedPrimitive for non transparents\n"));
 
@@ -974,6 +984,10 @@ BOOL ExecuteBuffer()
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
+
+//		D3DXMATRIX matView; 
+//		D3DXMatrixIdentity( &matView );
+//		d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matView );
 
 //		ChangeTextureAddressMode(TEXTURE_CLAMP);
 
@@ -1284,14 +1298,22 @@ void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired)
 	}
 }
 
+void ToggleWireframe()
+{
+	if (CurrentRenderStates.WireFrameModeIsOn)
+		CheckWireFrameMode(0);
+	else
+		CheckWireFrameMode(1);
+}
+
 extern void CheckWireFrameMode(int shouldBeOn)
 {
 	if (shouldBeOn) 
 		shouldBeOn = 1;
 
-	if (CurrentRenderStates.WireFrameModeIsOn!=shouldBeOn)
+	if (CurrentRenderStates.WireFrameModeIsOn != shouldBeOn)
 	{
-		CurrentRenderStates.WireFrameModeIsOn=shouldBeOn;
+		CurrentRenderStates.WireFrameModeIsOn = shouldBeOn;
 		if (shouldBeOn)
 		{
 			d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
@@ -1513,7 +1535,7 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
 //	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, NO_TEXTURE, TRANSLUCENCY_OFF);
 
-	for(unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
+	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 /*
@@ -2039,6 +2061,8 @@ void D3D_DecalSystem_Setup(void)
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 		D3DZWriteEnable = FALSE;
 	}
+
+	D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Starting to draw Decals...\n"));
 }
 
 void D3D_DecalSystem_End(void)
@@ -2060,6 +2084,8 @@ void D3D_DecalSystem_End(void)
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 		D3DZWriteEnable = TRUE;
 	}
+
+	D3DPERF_EndEvent();
 }
 
 void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
@@ -3364,7 +3390,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, RenderPolygon.TranslucencyMode);
 
-	for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
+	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 /*
@@ -3386,7 +3412,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 
 		mainVertex[vb].sx = (float)vertices->X;
 		mainVertex[vb].sy = (float)-vertices->Y;
-		mainVertex[vb].sz = 1.0f;
+		mainVertex[vb].sz = 64.0f;
 //		mainVertex[vb].rhw = 1.0f;
 
   		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
@@ -4283,6 +4309,45 @@ extern void D3D_PredatorScreenInversionOverlay()
 {
 	int colour = 0xffffffff;
 
+	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_DARKENINGCOLOUR, TEXTURE_WRAP);
+
+	// bottom left
+	orthoVerts[orthoVBOffset].x = -1.0f;
+	orthoVerts[orthoVBOffset].y = 1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+	// top left
+	orthoVerts[orthoVBOffset].x = -1.0f;
+	orthoVerts[orthoVBOffset].y = -1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+	// bottom right
+	orthoVerts[orthoVBOffset].x = 1.0f;
+	orthoVerts[orthoVBOffset].y = 1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+	// top right
+	orthoVerts[orthoVBOffset].x = 1.0f;
+	orthoVerts[orthoVBOffset].y = -1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+#if 0
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
 	LockExecuteBuffer();
@@ -4356,6 +4421,7 @@ extern void D3D_PredatorScreenInversionOverlay()
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 		D3DZFunc = D3DCMP_LESSEQUAL;
 	}
+#endif
 }
 
 extern void D3D_PlayerDamagedOverlay(int intensity)
@@ -4402,8 +4468,8 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 			orthoVerts[orthoVBOffset].y = 1.0f;
 			orthoVerts[orthoVBOffset].z = 1.0f;
 			orthoVerts[orthoVBOffset].colour = colour;
-			orthoVerts[orthoVBOffset].u = (float)(.875 + (cos*(-1) - sin*(+1)));
-			orthoVerts[orthoVBOffset].v = (float)(.375 + (sin*(-1) + cos*(+1)));
+			orthoVerts[orthoVBOffset].u = (float)(0.875 + (cos*(-1) - sin*(+1)));
+			orthoVerts[orthoVBOffset].v = (float)(0.375 + (sin*(-1) + cos*(+1)));
 			orthoVBOffset++;
 
 			// top left
@@ -4420,8 +4486,8 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 			orthoVerts[orthoVBOffset].y = 1.0f;
 			orthoVerts[orthoVBOffset].z = 1.0f;
 			orthoVerts[orthoVBOffset].colour = colour;
-			orthoVerts[orthoVBOffset].u = (float)(.875 + (cos*(+1) - sin*(+1)));
-			orthoVerts[orthoVBOffset].v = (float)(.375 + (sin*(+1) + cos*(+1)));
+			orthoVerts[orthoVBOffset].u = (float)(0.875 + (cos*(+1) - sin*(+1)));
+			orthoVerts[orthoVBOffset].v = (float)(0.375 + (sin*(+1) + cos*(+1)));
 			orthoVBOffset++;
 
 			// top right
@@ -4429,8 +4495,8 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 			orthoVerts[orthoVBOffset].y = -1.0f;
 			orthoVerts[orthoVBOffset].z = 1.0f;
 			orthoVerts[orthoVBOffset].colour = colour;
-			orthoVerts[orthoVBOffset].u = (float)(.875 + (cos*(+1) - sin*(-1)));
-			orthoVerts[orthoVBOffset].v = (float)(.375 + (sin*(+1) + cos*(-1)));
+			orthoVerts[orthoVBOffset].u = (float)(0.875 + (cos*(+1) - sin*(-1)));
+			orthoVerts[orthoVBOffset].v = (float)(0.375 + (sin*(+1) + cos*(-1)));
 			orthoVBOffset++;
 #if 0
 			// top left

@@ -630,7 +630,7 @@ void RenderThisDisplayblock(DISPLAYBLOCK *dbPtr)
 	extern VIEWDESCRIPTORBLOCK *ActiveVDBList[];
 	VIEWDESCRIPTORBLOCK *VDBPtr = ActiveVDBList[0];
 
-  	AddShape(dbPtr,VDBPtr);
+  	AddShape(dbPtr, VDBPtr);
 }
 
 void RenderThisHierarchicalDisplayblock(DISPLAYBLOCK *dbPtr)

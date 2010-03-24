@@ -2711,54 +2711,48 @@ void UpdateTxAnim(TXANIMHEADER *txah)
 {
 	int UpdateRate;
 
-	if(txah->txa_flags & txa_flag_play) {
-
+	if (txah->txa_flags & txa_flag_play) 
+	{
 		/* How fast do we go? */
-
-		if(txah->txa_flags & txa_flag_quantiseframetime) {
-
+		if (txah->txa_flags & txa_flag_quantiseframetime) 
+		{
 			/* This option is still being designed and tested */
-
 			UpdateRate = txah->txa_speed & (~4096);		/* 1/16th */
 			if(UpdateRate < 4096) UpdateRate = 4096;
 			UpdateRate = MUL_FIXED(NormalFrameTime, txah->txa_speed);
-
 		}
 
 		else UpdateRate = MUL_FIXED(NormalFrameTime, txah->txa_speed);
 
-
 		/* Update the current frame */
-
-		if(txah->txa_flags & txa_flag_reverse) {
-
+		if (txah->txa_flags & txa_flag_reverse) 
+		{
 			txah->txa_currentframe -= UpdateRate;
 
-			if(txah->txa_currentframe < 0) {
-
-				if(txah->txa_flags & txa_flag_noloop) {
-
+			if (txah->txa_currentframe < 0) 
+			{
+				if (txah->txa_flags & txa_flag_noloop)
+				{
 					txah->txa_currentframe = 0;
 				}
-				else {
-
+				else 
+				{
 					txah->txa_currentframe += txah->txa_maxframe;
 				}
 			}
-
 		}
-
-		else {
-
+		else 
+		{
 			txah->txa_currentframe += UpdateRate;
 
-			if(txah->txa_currentframe >= txah->txa_maxframe) {
-
-				if(txah->txa_flags & txa_flag_noloop) {
-
+			if (txah->txa_currentframe >= txah->txa_maxframe)
+			{
+				if (txah->txa_flags & txa_flag_noloop) 
+				{
 					txah->txa_currentframe = txah->txa_maxframe - 1;
 				}
-				else {
+				else 
+				{
 					txah->txa_currentframe -= txah->txa_maxframe;
 				}
 			}
@@ -2775,11 +2769,9 @@ void UpdateTxAnim(TXANIMHEADER *txah)
 
 void ControlTextureAnimation(DISPLAYBLOCK *dptr)
 {
-
 	TXACTRLBLK *taptr;
 	TXANIMHEADER *txah;
 	int *iptr;
-
 
 	taptr = dptr->ObTxAnimCtrlBlks;
 
@@ -2790,7 +2782,6 @@ void ControlTextureAnimation(DISPLAYBLOCK *dptr)
 		UpdateTxAnim(&taptr->tac_txah);
 
 		/* Get the TXANIMHEADER from the shape data */
-
 		txah = taptr->tac_txah_s;
 
 		/* Copy across the current frame */
@@ -2862,7 +2853,6 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 
 
 	/* Start and End Frame */
-
 	NextFrame = CurrentFrame + 1;
 	if (NextFrame >= txah->txa_numframes) 
 		NextFrame = 0;
@@ -2883,7 +2873,6 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 
 
 	/* Multi-View Sprites need to select an image from the array */
-
 	if (Global_ShapeHeaderPtr->shapeflags & ShapeFlag_MultiViewSprite) 
 	{
 		int **txf_uvarrayptr0 = (int **) txaf0->txf_uvdata;
@@ -2903,9 +2892,8 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 	}
 
 	/* Single-View Sprites have just one image per frame */
-
-	else {
-
+	else 
+	{
 		pheader->PolyColour |= txaf0->txf_image;
 
 		txaf0_uv = txaf0->txf_uvdata;
@@ -2914,7 +2902,6 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 
 
 	/* Calculate UVs */
-
 	iptr = uv_array;
 
 	if (txah->txa_flags & txa_flag_interpolate_uvs) 
@@ -2928,7 +2915,6 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 							+ MUL_FIXED(txaf1_uv[1], Alpha);
 
 			/*textprint("%d, %d\n", iptr[0] >> 16, iptr[1] >> 16);*/
-
 			txaf0_uv += 2;
 			txaf1_uv += 2;
 			iptr += 2;
@@ -4234,7 +4220,7 @@ void TranslateShapeVertices(SHAPEINSTR *shapeinstrptr)
 
 	if (Global_ODB_Ptr->ObFlags & ObFlag_ArbRot)
 	{
-		for(i = shapeinstrptr->sh_numitems; i!=0; i--)
+		for (i = shapeinstrptr->sh_numitems; i!=0; i--)
 		{
 			destPtr->vx = (srcPtr->vx+Global_ODB_Ptr->ObView.vx);
 			destPtr->vy = ((srcPtr->vy+Global_ODB_Ptr->ObView.vy)*4)/3;
@@ -5077,6 +5063,7 @@ void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerti
 		*vertexPtr++ = *renderVerticesPtr++;
 	}
 	while(--i);
+
 	TranslucentPolygons[CurrentNumberOfTranslucentPolygons].MaxZ = maxZ;
 	TranslucentPolygonHeaders[CurrentNumberOfTranslucentPolygons] = *inputPolyPtr;
 
@@ -5088,10 +5075,12 @@ void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerti
 void OutputTranslucentPolyList(void)
 {
 	int i = CurrentNumberOfTranslucentPolygons;
+
 	while(i--)
 	{
 		int k = CurrentNumberOfTranslucentPolygons;
 		int maxFound = 0;
+
 		while(k--)
 		{
 			if (TranslucentPolygons[k].MaxZ>TranslucentPolygons[maxFound].MaxZ)
@@ -5109,9 +5098,9 @@ void OutputTranslucentPolyList(void)
 	}
 	
 	RenderAllParticlesFurtherAwayThan(-0x7fffffff);
-	
 }
 
+/*
 int CuboidPolyVertexList[][4] =
 {
 	{0,3,7,4},	 //+ve y
@@ -5129,6 +5118,7 @@ int CuboidPolyVertexList[][4] =
 	{0,1,2,3},	 //+ve x
 #endif
 };
+*/
 
 EULER CubeOrient = {0,0,0};
 int CuboidPolyVertexU[][4] =
@@ -5415,7 +5405,9 @@ void RenderSky(void)
 				translatedPts[i].vx += Global_VDB_Ptr->VDB_World.vx;
 				translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy;
 				translatedPts[i].vz += Global_VDB_Ptr->VDB_World.vz;
+
 				TranslatePointIntoViewspace(&translatedPts[i]);
+
 				VerticesBuffer[i].X	= translatedPts[i].vx;
 				VerticesBuffer[i].Y	= translatedPts[i].vy;
 				VerticesBuffer[i].Z	= translatedPts[i].vz;
@@ -5591,7 +5583,6 @@ void RenderWaterFall(int xOrigin, int yOrigin, int zOrigin)
 			
 			DrawWaterFallPoly(v);
 		}
-
 	}
 }
 

@@ -1095,67 +1095,55 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		}
 	}
 
-	if ( IOFOCUS_AcceptControls() && !InGameMenusAreRunning())
+	if (IOFOCUS_AcceptControls() && !InGameMenusAreRunning())
 	{
 		/* now do forward,backward,left,right,up and down 
 		   IMPORTANT:  The request flag and the movement 
 		   increment must BOTH be set!
 		*/
-		if(KeyboardInput[primaryInput->Forward]
-		 ||KeyboardInput[secondaryInput->Forward])
+		if (KeyboardInput[primaryInput->Forward] || KeyboardInput[secondaryInput->Forward])
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Forward = 1;
 			playerStatusPtr->Mvt_MotionIncrement = ONE_FIXED;
 		}	
-		if(KeyboardInput[primaryInput->Backward]
-		 ||KeyboardInput[secondaryInput->Backward])
+		if (KeyboardInput[primaryInput->Backward] || KeyboardInput[secondaryInput->Backward])
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Backward = 1;
 			playerStatusPtr->Mvt_MotionIncrement = -ONE_FIXED;
 		}
-		if(KeyboardInput[primaryInput->Left]
-		 ||KeyboardInput[secondaryInput->Left])
+		if (KeyboardInput[primaryInput->Left] || KeyboardInput[secondaryInput->Left])
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_TurnLeft = 1;
 			playerStatusPtr->Mvt_TurnIncrement = -ONE_FIXED;
 		}
-		if(KeyboardInput[primaryInput->Right]
-		 ||KeyboardInput[secondaryInput->Right])
+		if (KeyboardInput[primaryInput->Right] || KeyboardInput[secondaryInput->Right])
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_TurnRight = 1;
 			playerStatusPtr->Mvt_TurnIncrement = ONE_FIXED;
 		}
-
-		if(KeyboardInput[primaryInput->StrafeLeft]
-		 ||KeyboardInput[secondaryInput->StrafeLeft])
+		if (KeyboardInput[primaryInput->StrafeLeft] || KeyboardInput[secondaryInput->StrafeLeft])
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_SideStepLeft = 1;
 			playerStatusPtr->Mvt_SideStepIncrement = -ONE_FIXED;
 		}
-		if(KeyboardInput[primaryInput->StrafeRight]
-		 ||KeyboardInput[secondaryInput->StrafeRight])
+		if (KeyboardInput[primaryInput->StrafeRight] || KeyboardInput[secondaryInput->StrafeRight])
 		{	
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_SideStepRight = 1;
 			playerStatusPtr->Mvt_SideStepIncrement = ONE_FIXED;
 		}
-		if(KeyboardInput[primaryInput->Walk]
-		 ||KeyboardInput[secondaryInput->Walk])
+		if (KeyboardInput[primaryInput->Walk] || KeyboardInput[secondaryInput->Walk])
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Faster = 0;
 		
-		if(KeyboardInput[primaryInput->Strafe]
-		 ||KeyboardInput[secondaryInput->Strafe])
+		if (KeyboardInput[primaryInput->Strafe] || KeyboardInput[secondaryInput->Strafe])
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Strafe = 1;
 
-		if(KeyboardInput[primaryInput->Crouch]
-		 ||KeyboardInput[secondaryInput->Crouch])
+		if (KeyboardInput[primaryInput->Crouch] || KeyboardInput[secondaryInput->Crouch])
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Crouch = 1;
 		
-		if(KeyboardInput[primaryInput->Jump]
-		 ||KeyboardInput[secondaryInput->Jump])
+		if (KeyboardInput[primaryInput->Jump] || KeyboardInput[secondaryInput->Jump])
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Jump = 1;
 
-		if(KeyboardInput[primaryInput->Operate]
-		 ||KeyboardInput[secondaryInput->Operate])
+		if (KeyboardInput[primaryInput->Operate] || KeyboardInput[secondaryInput->Operate])
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Operate = 1;
 
 		/* check for character specific abilities */
@@ -1197,8 +1185,6 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 				if(KeyboardInput[primaryInput->Marine_ShowScores]
 				 ||KeyboardInput[secondaryInput->Marine_ShowScores])
 					ShowMultiplayerScores();
-					
-
 				break;
 			}
 			case I_Predator:
@@ -1547,13 +1533,13 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			{
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookUp = 1;
 				playerStatusPtr->Mvt_AnaloguePitching = 1;
-				playerStatusPtr->Mvt_PitchIncrement = ((int)newMouseVelY)*ControlMethods.MouseYSensitivity;
+				playerStatusPtr->Mvt_PitchIncrement = newMouseVelY * ControlMethods.MouseYSensitivity;
 			}
 			else if(newMouseVelY>0)
 			{
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookDown = 1;
 				playerStatusPtr->Mvt_AnaloguePitching = 1;
-				playerStatusPtr->Mvt_PitchIncrement = ((int)newMouseVelY)*ControlMethods.MouseYSensitivity;
+				playerStatusPtr->Mvt_PitchIncrement = newMouseVelY * ControlMethods.MouseYSensitivity;
 			}
 		}
 	}
@@ -1576,13 +1562,13 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookUp = 1;
 			playerStatusPtr->Mvt_AnaloguePitching = 1;
-			playerStatusPtr->Mvt_PitchIncrement = ((int)xPadLookY) * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
+			playerStatusPtr->Mvt_PitchIncrement = xPadLookY * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
 		}
 		else if (xPadLookY > 0)
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookDown = 1;
 			playerStatusPtr->Mvt_AnaloguePitching = 1;
-			playerStatusPtr->Mvt_PitchIncrement = ((int)xPadLookY) * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
+			playerStatusPtr->Mvt_PitchIncrement = xPadLookY * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
 		}
 
 		/* looking left and right */
@@ -1590,16 +1576,17 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_TurnLeft = 1;
 			playerStatusPtr->Mvt_AnaloguePitching = 1;
-			playerStatusPtr->Mvt_TurnIncrement = ((int)xPadLookX) * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
+			playerStatusPtr->Mvt_TurnIncrement = xPadLookX * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
 		}
 		else if (xPadLookX > 0)
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_TurnRight = 1;
 			playerStatusPtr->Mvt_AnaloguePitching = 1;
-			playerStatusPtr->Mvt_TurnIncrement = ((int)xPadLookX) * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
+			playerStatusPtr->Mvt_TurnIncrement = xPadLookX * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
 		}
 
-		if (JoystickControlMethods.JoystickFlipVerticalAxis) yAxis=-yAxis;
+		if (JoystickControlMethods.JoystickFlipVerticalAxis) 
+			yAxis =- yAxis;
 
 		/* forward and backward movement */
 		if (yAxis > JOYSTICK_DEAD_ZONE)
@@ -1831,27 +1818,27 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			{
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_TurnLeft = 1;
 				playerStatusPtr->Mvt_AnalogueTurning = 1;
-				playerStatusPtr->Mvt_TurnIncrement = trackerballH*JoystickControlMethods.JoystickTrackerBallHorizontalSensitivity;
+				playerStatusPtr->Mvt_TurnIncrement = trackerballH * JoystickControlMethods.JoystickTrackerBallHorizontalSensitivity;
 			   
 			}
 			else if(trackerballH>0)
 			{
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_TurnRight = 1;
 				playerStatusPtr->Mvt_AnalogueTurning = 1;
-				playerStatusPtr->Mvt_TurnIncrement = trackerballH*JoystickControlMethods.JoystickTrackerBallHorizontalSensitivity;
+				playerStatusPtr->Mvt_TurnIncrement = trackerballH * JoystickControlMethods.JoystickTrackerBallHorizontalSensitivity;
 
 			}
 			if(trackerballV<0)
 			{
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookUp = 1;
 				playerStatusPtr->Mvt_AnaloguePitching = 1;
-				playerStatusPtr->Mvt_PitchIncrement = trackerballV*JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
+				playerStatusPtr->Mvt_PitchIncrement = trackerballV * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;
 			}
 			else if(trackerballV>0)
 			{
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookDown = 1;
 				playerStatusPtr->Mvt_AnaloguePitching = 1;
-				playerStatusPtr->Mvt_PitchIncrement = trackerballV*JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;;
+				playerStatusPtr->Mvt_PitchIncrement = trackerballV * JoystickControlMethods.JoystickTrackerBallVerticalSensitivity;;
 			}
 		}
 					   

@@ -42,9 +42,6 @@ std::vector<std::string>cmdArgs;
 
 struct Console 
 {
-//	bool isActive;
-//	bool isOpen;
-
 	int xPos;
 	int yPos;
 	int lines;

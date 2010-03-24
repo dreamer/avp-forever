@@ -82,6 +82,12 @@ extern void PointAlert(int level, VECTORCH *point);
 extern void RemoveAllThisPlayersDiscs(void);
 void ShowAdjacencies(void);
 
+// external prototypes
+void ChangeToMarine();
+void ChangeToAlien();
+void ChangeToPredator();
+STRATEGYBLOCK* CreateGrenadeKernel(AVP_BEHAVIOUR_TYPE behaviourID, VECTORCH *position, MATRIXCH *orient, int fromplayer);
+
 extern int ShowAdj;
 
 /*KJL****************************************************************************************

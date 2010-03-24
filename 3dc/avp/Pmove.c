@@ -840,7 +840,6 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 
 		MatrixMultiply(&dynPtr->OrientMat,&mat,&dynPtr->OrientMat);
 	 	MatrixToEuler(&dynPtr->OrientMat, &dynPtr->OrientEuler);
-
 	}
 	/*------------------------------------------------------ 
 	CROUCHING, LYING DOWN, ETC.
@@ -874,8 +873,6 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 	
 	/* If AbsolutePitch is set, view angle comes direct from Mvt_PitchIncrement,
 	   which takes values -65536 to +65536. */
-	
-	
 	if (playerStatusPtr->Absolute_Pitching)
 	{
 		playerStatusPtr->ViewPanX = MUL_FIXED(playerStatusPtr->Mvt_PitchIncrement,1024-128);
@@ -1007,9 +1004,7 @@ static void MaintainPlayerShape(STRATEGYBLOCK* sbPtr)
 				{
 					CrouchKeyDebounced = 1;
 				}
-			
 			}
-
 
 			sbPtr->DynPtr->RequestsToStandUp=0;
 					   
@@ -1037,7 +1032,6 @@ static void MaintainPlayerShape(STRATEGYBLOCK* sbPtr)
 					{
 						CrouchKeyDebounced = 1;
 					}
-			
 				}
 			}
 			else
@@ -1080,9 +1074,7 @@ static void MaintainPlayerShape(STRATEGYBLOCK* sbPtr)
 			/* should never get here */
 			GLOBALASSERT(1==0);
 		}
-	
 	}
-
 }
 
 static void MakePlayerCrouch(STRATEGYBLOCK* sbPtr)
@@ -1226,7 +1218,6 @@ static void NetPlayerDeadProcessing(STRATEGYBLOCK *sbPtr)
 
 			//The player's dropped weapon (if there was one) can now be drawn
 			MakePlayersWeaponPickupVisible();
-			
 		}
 	}
 }
@@ -1238,7 +1229,6 @@ void NetPlayerRespawn(STRATEGYBLOCK *sbPtr)
 	extern int LeanScale;
 
 	PLAYER_STATUS *psPtr= (PLAYER_STATUS *) (sbPtr->SBdataptr);
-
 
 	/* Turn on corpse. */
 	if (psPtr->MyCorpse) {

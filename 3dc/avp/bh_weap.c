@@ -981,7 +981,8 @@ extern void RocketBehaviour(STRATEGYBLOCK *sbPtr)
 	}
 }
 
-STRATEGYBLOCK* CreateGrenadeKernel(AVP_BEHAVIOUR_TYPE behaviourID, VECTORCH *position, MATRIXCH *orient,int fromplayer) {
+STRATEGYBLOCK* CreateGrenadeKernel(AVP_BEHAVIOUR_TYPE behaviourID, VECTORCH *position, MATRIXCH *orient, int fromplayer) 
+{
 
 	DISPLAYBLOCK *dispPtr;
 	DYNAMICSBLOCK *dynPtr;

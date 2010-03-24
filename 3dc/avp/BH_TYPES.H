@@ -222,9 +222,9 @@ typedef struct player_status
 	and should be set by the (platform dependant) input 
 	device reading function */
 	unsigned char Mvt_DeviceType;		  
-	signed int Mvt_MotionIncrement;	/* 65536 (Forward) to -65536 (Backward) */					
+	signed int Mvt_MotionIncrement;		/* 65536 (Forward) to -65536 (Backward) */					
 	signed int Mvt_TurnIncrement;		/* 65536 (Right) to -65536 (Left)*/
-	signed int Mvt_PitchIncrement;	/* 65536 to -65536 */
+	signed int Mvt_PitchIncrement;		/* 65536 to -65536 */
 	signed int Mvt_SideStepIncrement;	/* 65536 to -65536 */
 
 	/* KJL 10:48:33 03/26/97 - inertia data */

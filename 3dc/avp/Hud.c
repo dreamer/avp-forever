@@ -368,6 +368,7 @@ void MaintainHUD(void)
 						AlienTongueOffset = 0;
 				}				
 				SetFrustrumType(FRUSTRUM_TYPE_NORMAL);
+
 				Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/2;
 				Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)/2;
 	
@@ -1787,7 +1788,7 @@ static void HandleAlienWeapon(void)
 	extern int Alien_Visible_Weapon;
     
     /* access the extra data hanging off the strategy block */
-	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
     GLOBALASSERT(playerStatusPtr);
     	
 	{
