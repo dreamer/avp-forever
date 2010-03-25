@@ -56,7 +56,7 @@ extern int Font_DrawText(const char* text, int x, int y, int colour, int fontTyp
 const int MAX_VERTEXES = 4096;
 const int MAX_INDICES = 9216;
 
-D3DTLVERTEX *mainVertex = NULL;
+D3DLVERTEX *mainVertex = NULL;
 WORD *mainIndex = NULL;
 
 ORTHOVERTEX *orthoVerts = NULL;
@@ -64,10 +64,10 @@ WORD *orthoIndex = NULL;
 
 static int orthoVBOffset = 0;
 static int orthoIBOffset = 0;
-static size_t orthoListCount = 0;
+static uint32_t orthoListCount = 0;
 
 // for quad rendering
-D3DTLVERTEX quadVert[4];
+D3DLVERTEX quadVert[4];
 
 struct RENDER_STATES
 {
@@ -173,7 +173,7 @@ size_t	NumVertices = 0;
 size_t	NumIndicies = 0;
 int		vb = 0;
 int		particleIndex = 0;
-size_t	renderCount = 0;
+static uint32_t	renderCount = 0;
 
 extern AVPIndexedFont IntroFont_Light;
 
@@ -853,13 +853,13 @@ BOOL ExecuteBuffer()
 //	Font_DrawText("blah", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
 #endif
 
-	LastError = d3d.lpD3DDevice->SetStreamSource (0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DTLVERTEX));
+	LastError = d3d.lpD3DDevice->SetStreamSource (0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
-	LastError = d3d.lpD3DDevice->SetFVF (/*D3DFVF_TLVERTEX*/D3DFVF_HARDWARETLVERTEX);
+	LastError = d3d.lpD3DDevice->SetFVF (D3DFVF_LVERTEX);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -886,19 +886,15 @@ BOOL ExecuteBuffer()
 */
 	ChangeTextureAddressMode(TEXTURE_WRAP);
 
-	// we can assume to keep this turned on
-//	ChangeFilteringMode(FILTERING_BILINEAR_ON);
-
 	D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Before DrawIndexedPrimitive for non transparents\n"));
 
-	for (size_t i = 0; i < renderCount; i++)
+	for (uint32_t i = 0; i < renderCount; i++)
 	{
 		if (renderTest[i].translucencyType != TRANSLUCENCY_OFF) 
 			continue;
 
-		// texture stuff here
+		// change render states if required
 		ChangeTexture(renderTest[i].textureID);
-
 		ChangeTranslucencyMode(renderTest[i].translucencyType);
 		ChangeFilteringMode(renderTest[i].filteringType);
 
@@ -926,27 +922,15 @@ BOOL ExecuteBuffer()
 	D3DPERF_BeginEvent(D3DCOLOR_XRGB(140,36,70), WIDEN("Before DrawIndexedPrimitive for transparents\n"));
 
 	// do transparents here..
-	for (size_t i = 0; i < renderCount; i++)
+	for (uint32_t i = 0; i < renderCount; i++)
 	{
 		if (renderTest[i].translucencyType == TRANSLUCENCY_OFF) 
 			continue;
 
-		// texture stuff here
+		// change render states if required
 		ChangeTexture(renderTest[i].textureID);
-
 		ChangeTranslucencyMode(renderTest[i].translucencyType);
 		ChangeFilteringMode(renderTest[i].filteringType);
-
-#if 0
-		/* lazy way to get the filtering working correctly :) */
-		if (renderTest[i].textureID == AAFontImageNumber 
-			|| renderTest[i].textureID == HUDFontsImageNumber 
-			|| renderTest[i].textureID == HUDImageNumber)
-		{
-			ChangeFilteringMode(FILTERING_BILINEAR_OFF);
-		}
-		else ChangeFilteringMode(FILTERING_BILINEAR_ON);
-#endif
 
 		UINT numPrimitives = (renderTest[i].indexEnd - renderTest[i].indexStart) / 3;
 
@@ -996,31 +980,19 @@ BOOL ExecuteBuffer()
 //		D3DXMatrixIdentity( &matView );
 //		d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matView );
 
-//		ChangeTextureAddressMode(TEXTURE_CLAMP);
-
 		D3DXMATRIX matOrtho;
 		D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 		d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
 
 		// loop through list drawing the quads
-		for (size_t i = 0; i < orthoListCount; i++)
+		for (uint32_t i = 0; i < orthoListCount; i++)
 		{
+			// change render states if required
 			ChangeTexture(orthoList[i].textureID);
 			ChangeTranslucencyMode(orthoList[i].translucencyType);
 			ChangeTextureAddressMode(orthoList[i].textureAddressMode);
 			ChangeFilteringMode(orthoList[i].filteringType);
 
-/*
-			// lazy way to get the filtering working correctly :)
-			if (orthoList[i].textureID == AAFontImageNumber 
-				|| orthoList[i].textureID == HUDFontsImageNumber 
-				|| orthoList[i].textureID == HUDImageNumber)
-			{
-				ChangeFilteringMode(FILTERING_BILINEAR_OFF);
-				ChangeTextureAddressMode(TEXTURE_CLAMP);
-			}
-			else ChangeFilteringMode(FILTERING_BILINEAR_ON);
-*/
 			uint32_t primitiveCount = (orthoList[i].indexEnd - orthoList[i].indexStart) / 3;
 
 			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 
@@ -3059,7 +3031,7 @@ void D3D_DrawAlienRedBlipIndicatingJawAttack(void)
 		32
 	);
 
-	rectangle . AlphaFill
+	rectangle.AlphaFill
 	(
 		0xff, // unsigned char R,
 		0x00,// unsigned char G,
@@ -5063,8 +5035,8 @@ void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour
 {
 	struct VertexTag quadVertices[4];
 
-	quadVertices[0].Y = y-MUL_FIXED(HUDScaleFactor,1);
-	quadVertices[1].Y = y-MUL_FIXED(HUDScaleFactor,1);
+	quadVertices[0].Y = y - MUL_FIXED(HUDScaleFactor,1);
+	quadVertices[1].Y = y - MUL_FIXED(HUDScaleFactor,1);
 	quadVertices[2].Y = y + MUL_FIXED(HUDScaleFactor,HUD_FONT_HEIGHT + 1);
 	quadVertices[3].Y = y + MUL_FIXED(HUDScaleFactor,HUD_FONT_HEIGHT + 1);
 
@@ -5437,8 +5409,8 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_textu
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
-	d3d.lpD3DDevice->SetFVF (D3DFVF_TLVERTEX);
-	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
+	d3d.lpD3DDevice->SetFVF (D3DFVF_LVERTEX);
+	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DLVERTEX));
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);

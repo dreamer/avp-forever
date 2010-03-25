@@ -236,7 +236,6 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 			imageDescPtr->Translucency
 		),
 		FILTERING_BILINEAR_OFF
-
 	);
 
 
@@ -871,7 +870,6 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 		}
 
 		{
-		
    			struct VertexTag quadVertices[4];
 			int scaledWidth;
 			int scaledHeight;
@@ -892,10 +890,13 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 
 			quadVertices[0].U = 8;
 			quadVertices[0].V = 5;
+
 			quadVertices[1].U = 57;//255;
 			quadVertices[1].V = 5;
+
 			quadVertices[2].U = 57;//255;
 			quadVertices[2].V = 55;//255;
+
 			quadVertices[3].U = 8;
 			quadVertices[3].V = 55;//255;
 			
@@ -907,14 +908,44 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 			quadVertices[2].Y = y + scaledHeight;
 			quadVertices[3].X = x;
 			quadVertices[3].Y = y + scaledHeight;
-				
+
+			int uvArray[8];
+
+			// bottom left
+			uvArray[0] = 8;
+			uvArray[1] = 55;
+
+			// top left
+			uvArray[2] = 8;
+			uvArray[3] = 5;
+
+			// bottom right
+			uvArray[4] = 57;
+			uvArray[5] = 55;
+
+			// top right
+			uvArray[6] = 57;
+			uvArray[7] = 5;
+
+			New_D3D_HUDQuad_Output
+			(
+				SpecialFXImageNumber, 
+				quadVertices[0].X,
+				quadVertices[0].Y,
+				quadVertices[1].X - quadVertices[0].X,
+				quadVertices[2].Y - quadVertices[0].Y,
+				uvArray,
+				0xff003fff,
+				FILTERING_BILINEAR_ON
+			);
+/*	
 			D3D_HUDQuad_Output
 			(
 				SpecialFXImageNumber,// AlienEnergyBarImageNumber,
 				quadVertices,
 				0xff003fff
 			);
-		
+*/		
 			health = (health / 2);
 			if (health < 0) 
 				health = 0;
@@ -941,13 +972,26 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 			quadVertices[2].Y = y + scaledHeight;
 			quadVertices[3].X = x;
 			quadVertices[3].Y = y + scaledHeight;
-	
+
+			New_D3D_HUDQuad_Output
+			(
+				SpecialFXImageNumber, 
+				quadVertices[0].X,
+				quadVertices[0].Y,
+				quadVertices[1].X - quadVertices[0].X,
+				quadVertices[2].Y - quadVertices[0].Y,
+				uvArray,
+				0xffffffff,
+				FILTERING_BILINEAR_ON
+			);
+/*	
 			D3D_HUDQuad_Output
 			(
 				SpecialFXImageNumber,// AlienEnergyBarImageNumber,
 				quadVertices,
 				0xffffffff
 			);
+*/
 		}
 	}
 } 
@@ -1014,7 +1058,7 @@ void DrawPredatorEnergyBar(void)
 			
 		);
 
-		rectangle . AlphaFill
+		rectangle.AlphaFill
 		(
 			0xff, // unsigned char R,
 			0x00,// unsigned char G,

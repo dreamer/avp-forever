@@ -1095,6 +1095,7 @@ static int ObjectCompletelyWithin_Norm_Frustrum(DISPLAYBLOCK *dbPtr)
 	}
 	return 0;
 }
+
 static int ObjectCompletelyWithin_Wide_Frustrum(DISPLAYBLOCK *dbPtr)
 {
 	return 0;

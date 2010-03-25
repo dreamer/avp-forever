@@ -178,7 +178,7 @@ int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 //	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 //	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 
-	D3DTLVERTEX fontQuad[4];
+	D3DLVERTEX fontQuad[4];
 
 	float RecipW = (1.0f / Fonts[FONT_SMALL].imageInfo.Width);
 	float RecipH = (1.0f / Fonts[FONT_SMALL].imageInfo.Height);
@@ -241,12 +241,12 @@ int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 		fontQuad[3].tv = (float)((tex_y) * RecipH);
 
 #ifdef _XBOX
-		d3d.lpD3DDevice->SetVertexShader(D3DFVF_TLVERTEX);
+		d3d.lpD3DDevice->SetVertexShader(D3DFVF_LVERTEX);
 #else
-		d3d.lpD3DDevice->SetFVF (D3DFVF_TLVERTEX);
+		d3d.lpD3DDevice->SetFVF (D3DFVF_LVERTEX);
 #endif
 
-		LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, fontQuad, sizeof(D3DTLVERTEX));
+		LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, fontQuad, sizeof(D3DLVERTEX));
 		if (FAILED(LastError)) 
 		{
 			OutputDebugString("Font_DrawText() failed on DrawPrimitiveUP\n");

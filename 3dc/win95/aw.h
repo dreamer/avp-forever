@@ -1,12 +1,14 @@
 #ifndef _INCLUDED_AW_H_
 #define _INCLUDED_AW_H_
 
+#include "stdint.h"
+
 struct AwBackupTexture;
 typedef struct AwBackupTexture * AW_BACKUPTEXTUREHANDLE;
 
 typedef struct AVPTEXTURE
 {
-	unsigned char *buffer;
+	uint8_t *buffer;
 
 	int width;
 	int height;
@@ -27,57 +29,39 @@ typedef int D3DTEXTUREHANDLE;
 	taken from http://www.mvps.org/directx/articles/definitions_for_dx7_vertex_types.htm
 */
 
-typedef struct _D3DTLVERTEX {
-    union {
-        float sx;
-        float dvSX;
-    };
-    union {
-        float sy;
-        float dvSY;
-    };
-    union {
-        float sz;
-        float dvSZ;
-    };
-/*
-    union {
-        float rhw;
-        float dvRHW;
-    };
-*/
-    union {
-        D3DCOLOR color;
-        D3DCOLOR dcColor;
-    };
-    union {
-        D3DCOLOR specular;
-        D3DCOLOR dcSpecular;
-    };
-    union {
-        float tu;
-        float dvTU;
-    };
-    union {
-        float tv;
-        float dvTV;
-    };
+typedef struct _D3DTVERTEX 
+{
+	float sx;
+	float sy;
+	float sz;
 
-} D3DTLVERTEX, *LPD3DTLVERTEX;
+	D3DCOLOR color;
+	D3DCOLOR specular;
 
-#define D3DFVF_TLVERTEX	(D3DFVF_XYZ/*RHW*/ | D3DFVF_DIFFUSE | D3DFVF_SPECULAR | D3DFVF_TEX1)
+	float tu;
+	float tv;
 
-#define D3DFVF_HARDWARETLVERTEX	(D3DFVF_XYZ/*W*/ | D3DFVF_DIFFUSE | D3DFVF_SPECULAR | D3DFVF_TEX1)
+} D3DLVERTEX;
 
-// orthographic quad vertex format
-#define D3DFVF_ORTHOVERTEX (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1)
+//#define D3DFVF_TLVERTEX	(D3DFVF_XYZ/*RHW*/ | D3DFVF_DIFFUSE | D3DFVF_SPECULAR | D3DFVF_TEX1)
+//#define D3DFVF_HARDWARETLVERTEX	(D3DFVF_XYZ/*W*/ | D3DFVF_DIFFUSE | D3DFVF_SPECULAR | D3DFVF_TEX1)
+#define D3DFVF_LVERTEX	(D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_SPECULAR | D3DFVF_TEX1)
 
 typedef struct ORTHOVERTEX 
 {
-	float x, y, z;	 // Position in 3d space 
-	DWORD colour;    // Colour  
-	float u, v;      // Texture coordinates 
+	float x;
+	float y;
+	float z;		// Position in 3d space 
+
+	DWORD colour;	// Colour  
+
+	float u;
+	float v;		// Texture coordinates 
+
 } ORTHOVERTEX;
+
+// orthographic quad vertex format
+#define D3DFVF_ORTHOVERTEX (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 
 // 32bit RGBA to 32bit D3DFMT_A8R8G8B8 format
 #define RGB16(r, g, b) ( ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3))
