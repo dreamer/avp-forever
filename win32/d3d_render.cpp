@@ -296,7 +296,7 @@ static HRESULT LastError;
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
 void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
-void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode);
+void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode, enum FILTERING_MODE_ID filteringMode);
 
 /* OUTPUT_TRIANGLE - how this bugger works
 
@@ -486,7 +486,7 @@ BOOL SetExecuteBufferDefaults()
     return TRUE;
 }
 
-void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode)
+void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
 {
 	assert (numVerts == 4);
 
@@ -499,11 +499,13 @@ void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE
 	orthoList[orthoListCount].vertEnd = 0;
 	orthoList[orthoListCount].translucencyType = translucencyMode;
 	orthoList[orthoListCount].textureAddressMode = textureAddressMode;
+	orthoList[orthoListCount].filteringType = filteringMode;
 
 	// check if current vertexes use the same texture and render states as the previous. if they do, we can 'merge' the two together
 	if (textureID == orthoList[orthoListCount-1].textureID && 
 		translucencyMode == orthoList[orthoListCount-1].translucencyType &&
 		textureAddressMode == orthoList[orthoListCount-1].textureAddressMode &&
+		filteringMode == orthoList[orthoListCount-1].filteringType &&
 		orthoListCount != 0) 
 	{
 		// ok, drop back to the previous data
@@ -885,7 +887,7 @@ BOOL ExecuteBuffer()
 	ChangeTextureAddressMode(TEXTURE_WRAP);
 
 	// we can assume to keep this turned on
-	ChangeFilteringMode(FILTERING_BILINEAR_ON);
+//	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
 	D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Before DrawIndexedPrimitive for non transparents\n"));
 
@@ -898,6 +900,7 @@ BOOL ExecuteBuffer()
 		ChangeTexture(renderTest[i].textureID);
 
 		ChangeTranslucencyMode(renderTest[i].translucencyType);
+		ChangeFilteringMode(renderTest[i].filteringType);
 
 		UINT numPrimitives = (renderTest[i].indexEnd - renderTest[i].indexStart) / 3;
 
@@ -932,7 +935,9 @@ BOOL ExecuteBuffer()
 		ChangeTexture(renderTest[i].textureID);
 
 		ChangeTranslucencyMode(renderTest[i].translucencyType);
+		ChangeFilteringMode(renderTest[i].filteringType);
 
+#if 0
 		/* lazy way to get the filtering working correctly :) */
 		if (renderTest[i].textureID == AAFontImageNumber 
 			|| renderTest[i].textureID == HUDFontsImageNumber 
@@ -941,6 +946,7 @@ BOOL ExecuteBuffer()
 			ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 		}
 		else ChangeFilteringMode(FILTERING_BILINEAR_ON);
+#endif
 
 		UINT numPrimitives = (renderTest[i].indexEnd - renderTest[i].indexStart) / 3;
 
@@ -1002,7 +1008,9 @@ BOOL ExecuteBuffer()
 			ChangeTexture(orthoList[i].textureID);
 			ChangeTranslucencyMode(orthoList[i].translucencyType);
 			ChangeTextureAddressMode(orthoList[i].textureAddressMode);
+			ChangeFilteringMode(orthoList[i].filteringType);
 
+/*
 			// lazy way to get the filtering working correctly :)
 			if (orthoList[i].textureID == AAFontImageNumber 
 				|| orthoList[i].textureID == HUDFontsImageNumber 
@@ -1012,7 +1020,7 @@ BOOL ExecuteBuffer()
 				ChangeTextureAddressMode(TEXTURE_CLAMP);
 			}
 			else ChangeFilteringMode(FILTERING_BILINEAR_ON);
-
+*/
 			uint32_t primitiveCount = (orthoList[i].indexEnd - orthoList[i].indexStart) / 3;
 
 			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 
@@ -1795,7 +1803,7 @@ void D3D_HUD_Setup(void)
 	}
 }
 
-void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int *uvArray, uint32_t colour)
+void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int *uvArray, uint32_t colour, enum FILTERING_MODE_ID filteringType)
 {
 	int newWidth = ScreenDescriptorBlock.SDB_Width;
 	int newHeight = ScreenDescriptorBlock.SDB_Height;
@@ -1814,7 +1822,7 @@ void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, 
 	float texHeight = (float) ImageHeaderArray[textureID].ImageHeight;
 	RecipH = 1.0f / texHeight;
 
-	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
+	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP, filteringType);
 
 	// bottom left
 	orthoVerts[orthoVBOffset].x = x1;
@@ -1851,7 +1859,6 @@ void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, 
 	orthoVerts[orthoVBOffset].u = uvArray[6] * RecipW;
 	orthoVerts[orthoVBOffset].v = uvArray[7] * RecipH;
 	orthoVBOffset++;
-
 }
 
 void D3D_HUDQuad_Output(int imageNumber, struct VertexTag *quadVerticesPtr, unsigned int colour)
@@ -4788,7 +4795,7 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 	x += (3*w)/2;
 
 //	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
-	SetFilteringMode(FILTERING_BILINEAR_OFF);
+//	SetFilteringMode(FILTERING_BILINEAR_OFF);
 
 	do
 	{
@@ -4850,7 +4857,8 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 				w,
 				h,
 				uvArray,
-				colour
+				colour,
+				FILTERING_BILINEAR_OFF
 			);
 /*
 			D3D_HUDQuad_Output
@@ -4879,7 +4887,7 @@ extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour)
 	quadVertices[3].Y = y + HUD_FONT_HEIGHT + 1;
 	
 //	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
-	SetFilteringMode(FILTERING_BILINEAR_OFF);
+//	SetFilteringMode(FILTERING_BILINEAR_OFF);
 
 	while( *stringPtr )
 	{
@@ -4928,7 +4936,8 @@ extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour)
 				HUD_FONT_WIDTH,
 				HUD_FONT_HEIGHT,
 				uvArray,
-				colour
+				colour,
+				FILTERING_BILINEAR_OFF
 			);
 
 /*			
@@ -4954,7 +4963,7 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr, int x, int y, int colou
  	LOCALASSERT(y<=0);
 
 //	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
-	SetFilteringMode(FILTERING_BILINEAR_OFF);
+//	SetFilteringMode(FILTERING_BILINEAR_OFF);
 
 	quadVertices[2].Y = y + HUD_FONT_HEIGHT + 1;
 	quadVertices[3].Y = y + HUD_FONT_HEIGHT + 1;
@@ -5017,7 +5026,8 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr, int x, int y, int colou
 				quadVertices[1].X = x - quadVertices[0].X,
 				quadVertices[2].Y = y - quadVertices[0].Y,
 				uvArray,
-				colour
+				colour,
+				FILTERING_BILINEAR_OFF
 			);
 /*
 			D3D_HUDQuad_Output
@@ -5059,7 +5069,7 @@ void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour
 	quadVertices[3].Y = y + MUL_FIXED(HUDScaleFactor,HUD_FONT_HEIGHT + 1);
 
 //	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
-	SetFilteringMode(FILTERING_BILINEAR_OFF);
+//	SetFilteringMode(FILTERING_BILINEAR_OFF);
 
 	while( *stringPtr )
 	{
@@ -5116,7 +5126,8 @@ void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour
 				quadVertices[1].X - quadVertices[0].X,
 				quadVertices[2].Y - quadVertices[0].Y,
 				uvArray,
-				colour
+				colour,
+				FILTERING_BILINEAR_OFF
 			);
 /*
 			D3D_HUDQuad_Output

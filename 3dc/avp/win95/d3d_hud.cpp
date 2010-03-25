@@ -55,7 +55,7 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 
 void D3D_DrawHUDFontCharacter(HUDCharDesc *charDescPtr);
 void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr);
-extern void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int *uvArray, uint32_t colour);
+extern void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int *uvArray, uint32_t colour, enum FILTERING_MODE_ID filteringType);
 
 extern void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2);
 /* HUD globals */
@@ -234,7 +234,9 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 			imageDescPtr->Green,
 			imageDescPtr->Blue,
 			imageDescPtr->Translucency
-		)
+		),
+		FILTERING_BILINEAR_OFF
+
 	);
 
 
