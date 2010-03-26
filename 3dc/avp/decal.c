@@ -86,7 +86,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		//unsigned char IsLit:1;
 		0,
 		//unsigned char CanCombine:1;
-		0, 
+		0
 	},
 	/* DECAL_SCORCHED */
 	{
@@ -126,8 +126,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		//unsigned char IsLit:1;
 		0,
 		//unsigned char CanCombine:1;
-		0, 
-
+		0
 	},
 	/* DECAL_BULLETHOLE */
 	{
@@ -167,7 +166,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		//unsigned char IsLit:1;
 		0,
 		//unsigned char CanCombine:1;
-		0, 
+		0
 	},
 	/* DECAL_PREDATOR_BLOOD */
 	{
@@ -207,7 +206,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		//unsigned char IsLit:1;
 		0,
 		//unsigned char CanCombine:1;
-		1, 
+		1
 	},
 	/* DECAL_ALIEN_BLOOD */
 	{
@@ -247,8 +246,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		//unsigned char IsLit:1;
 		1,
 		//unsigned char CanCombine:1;
-		1, 
-
+		1
 	},
 	/* DECAL_HUMAN_BLOOD */
 	{
@@ -288,8 +286,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		//unsigned char IsLit:1;
 		0,
 		//unsigned char CanCombine:1;
-		1, 
-
+		1
 	},
 	/* DECAL_ANDROID_BLOOD */
 	{
@@ -329,7 +326,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		//unsigned char IsLit:1;
 		1,
 		//unsigned char CanCombine:1;
-		1, 
+		1
 	},
 
 	/* DECAL_LASERTARGET */
@@ -370,8 +367,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		//unsigned char IsLit:1;
 		0,
 		//unsigned char CanCombine:1;
-		0, 
-
+		0
 	},
 	/* DECAL_SHAFTOFLIGHT */
 	{
@@ -411,8 +407,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		//unsigned char IsLit:1;
 		0,
 		//unsigned char CanCombine:1;
-		0, 
-
+		0
 	},
 	/* DECAL_SHAFTOFLIGHT_OUTER */
 	{
@@ -452,10 +447,8 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		//unsigned char IsLit:1;
 		0,
 		//unsigned char CanCombine:1;
-		0, 
-
-	},
-
+		0
+	}
 };
 
 
@@ -556,6 +549,7 @@ void MakeDecal(enum DECAL_ID decalID, VECTORCH *normalPtr, VECTORCH *positionPtr
 
 #define MAX_NO_OF_SIMILAR_DECALS_IN_ONE_PLACE 4
 #define INCREMENT_IN_DECAL_SIZE (25*4)
+
 static int TooManyDecalsOfThisType(enum DECAL_ID decalID, VECTORCH *positionPtr)
 {
 	int i = NumActiveDecals;
@@ -585,7 +579,6 @@ static int TooManyDecalsOfThisType(enum DECAL_ID decalID, VECTORCH *positionPtr)
 				similarDecalsPtr[decalsOfThisType] = decalPtr;
 				decalsOfThisType++;
 			}
-			
 		}
 		if (decalsOfThisType>=MAX_NO_OF_SIMILAR_DECALS_IN_ONE_PLACE)
 		{

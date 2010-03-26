@@ -4323,7 +4323,6 @@ void RenderDecal(DECAL *decalPtr)
 						TexturedPolygon_ClipWithPositiveX();
 						if(RenderPolygon.NumberOfVertices<3) return;
 						D3D_Decal_Output(decalPtr,RenderPolygon.Vertices);
-		  			
 		  			}
 					else D3D_Decal_Output(decalPtr,VerticesBuffer);
 					break;
@@ -4335,6 +4334,7 @@ void RenderDecal(DECAL *decalPtr)
 	if (MirroringActive) RenderMirroredDecal(decalPtr);
 	#endif
 }
+
 void RenderParticle(PARTICLE *particlePtr)
 {
 //	PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
@@ -4765,9 +4765,8 @@ void RenderMirroredDecal(DECAL *decalPtr)
 				}
 			}
 		}
-	}	
+	}
 }
-
 
 static void DecalPolygon_Construct(DECAL *decalPtr)
 {
@@ -4785,7 +4784,6 @@ static void DecalPolygon_Construct(DECAL *decalPtr)
 
 	VerticesBuffer[3].U = decalDescPtr->StartU+decalPtr->UOffset;
 	VerticesBuffer[3].V = decalDescPtr->EndV;
-
 }
 
 int polys[][4] =
@@ -4823,6 +4821,7 @@ VECTORCH shaftVertices[]=
 		{0, 	14500,	0},
 };
 
+#if 0 // bjd 
 void RenderShaftOfLight(MODULE *modulePtr)
 {
 	/* translate shaft into view space */
@@ -4840,16 +4839,15 @@ void RenderShaftOfLight(MODULE *modulePtr)
 		if (offset<0) offset=-offset;
 		offset = MUL_FIXED(offset,offset);
 		offset = MUL_FIXED(offset,offset);
-		offset=MUL_FIXED(offset,4000);
+		offset = MUL_FIXED(offset,4000);
 		lightDirection1.vz += offset;
 		lightDirection2.vz += offset;
 	}
 	Normalise(&lightDirection1);
 	Normalise(&lightDirection2);
 //	textprint("light shaft active");
-	fakeDecal.ModuleIndex=modulePtr->m_index;
+	fakeDecal.ModuleIndex = modulePtr->m_index;
 	fakeHeader.PolyFlags = iflag_transparent;
-	
 
 	FindIntersectionWithYPlane(&shaftVertices[2],&lightDirection1,&shaftVertices[4]);
 	FindIntersectionWithYPlane(&shaftVertices[3],&lightDirection2,&shaftVertices[5]);
@@ -4866,12 +4864,9 @@ void RenderShaftOfLight(MODULE *modulePtr)
 		do
 		{
 			translatedPts[i] = shaftVertices[i];
-			translatedPts[i].vx+=11762; 
-			translatedPts[i].vy+=-6919; 
-			translatedPts[i].vz+=-26312; 
-//			translatedPts[i].vx+=10712; 
-//			translatedPts[i].vy+=-6480; 
-//			translatedPts[i].vz+=-25898; 
+			translatedPts[i].vx+=11762;
+			translatedPts[i].vy+=-6919;
+			translatedPts[i].vz+=-26312;
 			TranslatePointIntoViewspace(&translatedPts[i]);
 		}
 	   	while(i--);
@@ -5022,6 +5017,7 @@ void RenderShaftOfLight2(MODULE *modulePtr)
 		}
 	}	
 }
+#endif
 
 void FindIntersectionWithYPlane(VECTORCH *startPtr, VECTORCH *directionPtr, VECTORCH *intersectionPtr)
 {
@@ -5058,7 +5054,7 @@ void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerti
 	
 	do
 	{
-		if (maxZ<renderVerticesPtr->Z)
+		if (maxZ < renderVerticesPtr->Z)
 			maxZ = renderVerticesPtr->Z;
 		*vertexPtr++ = *renderVerticesPtr++;
 	}
@@ -5887,7 +5883,8 @@ void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour)
 	VECTORCH point = *positionPtr;
 
 	TranslatePointIntoViewspace(&point);
-	if(point.vz<64) return;	
+	if (point.vz < 64) 
+		return;	
 	
 	particle.ParticleID = PARTICLE_LIGHTFLARE;
 
@@ -5896,7 +5893,7 @@ void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour)
 //	textprint("render fn %d %d %d\n",positionPtr->vx,positionPtr->vy,positionPtr->vz);
 //	PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
 //	int particleSize = particlePtr->Size;
-	z=ONE_FIXED;
+	z = ONE_FIXED;
 	{
 		extern int SmartTargetSightX, SmartTargetSightY;
 		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
@@ -5953,7 +5950,6 @@ void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour)
 				if(RenderPolygon.NumberOfVertices<3) return;
 //				D3D_Particle_Output(&particle,RenderPolygon.Vertices);
 				AddParticle(&particle, &RenderPolygon.Vertices[0]);
-  			
   			}
 //			else D3D_Particle_Output(&particle,VerticesBuffer);
 			else AddParticle(&particle, &VerticesBuffer[0]);

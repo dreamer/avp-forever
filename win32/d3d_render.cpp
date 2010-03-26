@@ -763,7 +763,6 @@ void D3D_SetupSceneDefaults()
 	CurrentRenderStates.FilteringMode = FILTERING_NOT_SET;
 	CurrentRenderStates.TextureAddressMode = TEXTURE_CLAMP;
 //	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_ON);
-	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckWireFrameMode(0);
 
 	// this defaults to FALSE
@@ -1021,16 +1020,6 @@ void SetFogDistance(int fogDistance)
 	fogDistance=2000;
 	CurrentRenderStates.FogDistance = fogDistance;
 //	textprint("fog distance %d\n",fogDistance);
-}
-
-void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired) 
-{
-	renderList[renderCount].filteringType = filteringRequired;
-}
-
-void SetTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
-{
-	renderList[renderCount].translucencyType = translucencyRequired;
 }
 
 void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode)
@@ -1333,10 +1322,9 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 	float height = (float) ImageHeaderArray[texoffset].ImageHeight;
 	RecipH = 1.0f / height;
 
-	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, TRANSLUCENCY_OFF);
 
-	for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
+	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 /*
@@ -1514,7 +1502,6 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
     // Get ZNear
 	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
 
-//	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, NO_TEXTURE, TRANSLUCENCY_OFF);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
@@ -1894,14 +1881,13 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 
 		float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
 
-		SetFilteringMode(FILTERING_BILINEAR_ON);
 		CheckVertexBuffer(3, NO_TEXTURE, TRANSLUCENCY_NORMAL);
 
 		{
 //			int i = 3;
 			VECTORCH *verticesPtr = vertices;
 
-			for (int i = 0; i < 3; i++)
+			for (uint32_t i = 0; i < 3; i++)
 			{
 /*
 				int x = (verticesPtr->vx*(Global_VDB_Ptr->VDB_ProjX))/verticesPtr->vz+Global_VDB_Ptr->VDB_CentreX;
@@ -1917,7 +1903,6 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 				mainVertex[vb].sx = (float)verticesPtr->vx;
 				mainVertex[vb].sy = (float)-verticesPtr->vy;
 				mainVertex[vb].sz = (float)verticesPtr->vz; // bjd - CHECK
-//				mainVertex[vb].rhw = 1.0f;
 
 				if (i==3) mainVertex[vb].color = RGBALIGHT_MAKE(0,255,255,32);
 				else mainVertex[vb].color = RGBALIGHT_MAKE(255,255,255,32);
@@ -1984,7 +1969,6 @@ void D3D_DrawParticle_Smoke(PARTICLE *particlePtr)
 
 		float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
 
-		SetFilteringMode(FILTERING_BILINEAR_ON);
 		CheckVertexBuffer(3, NO_TEXTURE, TRANSLUCENCY_NORMAL);
 
 		{
@@ -2003,12 +1987,10 @@ void D3D_DrawParticle_Smoke(PARTICLE *particlePtr)
 				mainVertex[vb].sx = (float)x;
 				mainVertex[vb].sy = (float)y;
 				mainVertex[vb].sz = zvalue;
-				mainVertex[vb].rhw = 1.0f;
 */
 				mainVertex[vb].sx = (float)verticesPtr->vx;
 				mainVertex[vb].sy = (float)-verticesPtr->vy;
 				mainVertex[vb].sz = (float)vertices->vz;
-//				mainVertex[vb].rhw = 1.0f;
 
 				mainVertex[vb].color = RGBALIGHT_MAKE((particlePtr->LifeTime>>8),(particlePtr->LifeTime>>8),0,(particlePtr->LifeTime>>7)+64);
 
@@ -2074,7 +2056,7 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 	// function responsible for bullet marks on walls, etc
 	DECAL_DESC *decalDescPtr = &DecalDescription[decalPtr->DecalID];
 
-	int texoffset;
+	int32_t texoffset;
 	int32_t textureID;
 
 	AVPTEXTURE *textureHandle = NULL;
@@ -2082,7 +2064,7 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 	float ZNear;
 	float RecipW, RecipH;
 	int colour;
-	int specular = RGBALIGHT_MAKE(0, 0, 0, 0);//255);
+	int specular = RGBALIGHT_MAKE(0, 0, 0, 0);
 
     // Get ZNear
 	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
@@ -2095,8 +2077,8 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 
 //		textureHandle = FMVTextureHandle[decalPtr->Centre.vx];
 
-		RecipW = 1.0 / 128.0;
-		RecipH = 1.0 / 128.0;
+		RecipW = 1.0f / 128.0f;
+		RecipH = 1.0f / 128.0f;
 /*
 	    if (TextureHandle != CurrTextureHandle)
 		{
@@ -2157,11 +2139,10 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 							  );
 	}
 
-	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, decalDescPtr->TranslucencyType);
 
 	{
-		for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
+		for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 		{
 			RENDERVERTEX *vertices = &renderVerticesPtr[i];
 /*
@@ -2182,7 +2163,7 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 */
 			mainVertex[vb].sx = (float)vertices->X;
 			mainVertex[vb].sy = (float)-vertices->Y;
-			mainVertex[vb].sz = (float)vertices->Z;
+			mainVertex[vb].sz = (float)vertices->Z+HeadUpDisplayZOffset-50;
 //			mainVertex[vb].rhw = 1.0f;
 
 			mainVertex[vb].color = colour;
@@ -2197,10 +2178,6 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 			vb++;
 		}
 	}
-
-	/* Check translucency mode */
-//	CheckTranslucencyModeIsCorrect(decalDescPtr->TranslucencyType);
-//	SetTranslucencyMode(decalDescPtr->TranslucencyType);
 
 	D3D_OutputTriangles();
 }
@@ -2232,7 +2209,6 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	float height = (float) ImageHeaderArray[texoffset].ImageHeight;
 	RecipH = (1.0f / height);
 
-	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, particleDescPtr->TranslucencyType);
 /*
 	char buf[100];
@@ -3245,8 +3221,6 @@ void DrawScanlinesOverlay(float level)
 
 	float size = 128.0f*(1.0f-level*0.8f);//*CameraZoomScale;
 
-	SetFilteringMode(FILTERING_BILINEAR_ON);
-
 	CheckOrthoBuffer(4, PredatorNumbersImageNumber, TRANSLUCENCY_NORMAL, TEXTURE_WRAP);
 
 	// bottom left
@@ -3368,7 +3342,6 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 	float height = (float) ImageHeaderArray[texoffset].ImageHeight;
 	RecipH = (1.0f / height);// / 65536.0f;
 
-	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, RenderPolygon.TranslucencyMode);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
@@ -3424,7 +3397,6 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 
 	// outputs 450 triangles with each run of the loop
 	// 450 triangles has 3 * 450 vertices which = 1350
-	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(256, currentWaterTexture, TRANSLUCENCY_NORMAL);
 
 	for (int i=0; i<256; i++)
@@ -4117,7 +4089,6 @@ extern void D3D_PlayerOnFireOverlay(void)
 	orthoVBOffset++;
 
 #if 0
-	SetFilteringMode(FILTERING_BILINEAR_ON);
 	CheckVertexBuffer(4, BurningImageNumber, TRANSLUCENCY_GLOWING);
 
 	// top left
@@ -4182,8 +4153,6 @@ extern void D3D_ScreenInversionOverlay()
 	theta[0] = (CloakingPhase/8)&4095;
 	theta[1] = (800-CloakingPhase/8)&4095;
 
-//	SetFilteringMode(FILTERING_BILINEAR_ON);
-//	CheckVertexBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_DARKENINGCOLOUR);
 	CheckOrthoBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_DARKENINGCOLOUR, TEXTURE_WRAP);
 
 	for (i = 0; i < 2; i++)
@@ -4434,9 +4403,6 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 
 	colour = 0xffffff - baseColour + (intensity<<24);
 
-//	SetFilteringMode(FILTERING_BILINEAR_ON);
-//	CheckVertexBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_INVCOLOUR);
-
 	CheckOrthoBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_INVCOLOUR, TEXTURE_WRAP);
 
 	for (i = 0; i < 2; i++)
@@ -4534,7 +4500,6 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 		}
 
 		colour = baseColour +(intensity<<24);
-//		SetFilteringMode(FILTERING_BILINEAR_ON);
 
 		/* only do this when finishing first loop, otherwise we reserve space for 4 verts we never add */
 		if (i == 0)
@@ -4766,9 +4731,6 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 
 	x += (3*w)/2;
 
-//	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
-//	SetFilteringMode(FILTERING_BILINEAR_OFF);
-
 	do
 	{
 		int digit = number%10;
@@ -4857,9 +4819,6 @@ extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour)
 	quadVertices[1].Y = y-1;
 	quadVertices[2].Y = y + HUD_FONT_HEIGHT + 1;
 	quadVertices[3].Y = y + HUD_FONT_HEIGHT + 1;
-	
-//	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
-//	SetFilteringMode(FILTERING_BILINEAR_OFF);
 
 	while( *stringPtr )
 	{
@@ -4933,9 +4892,6 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr, int x, int y, int colou
 	struct VertexTag quadVertices[4];
 
  	LOCALASSERT(y<=0);
-
-//	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
-//	SetFilteringMode(FILTERING_BILINEAR_OFF);
 
 	quadVertices[2].Y = y + HUD_FONT_HEIGHT + 1;
 	quadVertices[3].Y = y + HUD_FONT_HEIGHT + 1;
@@ -5040,13 +4996,9 @@ void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour
 	quadVertices[2].Y = y + MUL_FIXED(HUDScaleFactor,HUD_FONT_HEIGHT + 1);
 	quadVertices[3].Y = y + MUL_FIXED(HUDScaleFactor,HUD_FONT_HEIGHT + 1);
 
-//	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
-//	SetFilteringMode(FILTERING_BILINEAR_OFF);
-
-	while( *stringPtr )
+	while (*stringPtr)
 	{
 		char c = *stringPtr++;
-
 		{
 			int topLeftU = 1+((c-32)&15)*16;
 			int topLeftV = 1+((c-32)>>4)*16;
@@ -5145,10 +5097,7 @@ extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, in
 	quadVertices[2].X = quadVertices[0].X+2+HUD_FONT_HEIGHT*1;
 	quadVertices[3].X = quadVertices[2].X;
 
-//	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
-	SetFilteringMode(FILTERING_BILINEAR_OFF);
-
-	while( *stringPtr )
+	while (*stringPtr)
 	{
 		char c = *stringPtr++;
 
@@ -5855,10 +5804,6 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 
 void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha) 
 {
-//	CheckVertexBuffer(4, AVPMENUGFX_SMALL_FONT, TRANSLUCENCY_GLOWING);
-
-//	SetFilteringMode(FILTERING_BILINEAR_OFF);
-
 	alpha = (alpha / 256);
 
 	red = (red / 256);

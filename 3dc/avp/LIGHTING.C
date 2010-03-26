@@ -260,6 +260,7 @@ static LIGHTELEMENT* AllocateLightElement(void)
 
 	return lightElementPtr;
 }
+
 static void DeallocateLightElement(LIGHTELEMENT *lightElementPtr)
 {
 	/* is pointer within array? */
@@ -462,8 +463,6 @@ void HandleLightElementSystem(void)
 						lightPtr->LightBright = ONE_FIXED*8;
 					}
 				}
-
-				
 				{
 					PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 
