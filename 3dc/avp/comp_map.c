@@ -30,7 +30,6 @@ MAPHEADER Map[]={
 	}
 };
 
-
 MAPSETVDB chnk_playcam_vdb = {
 
 	ViewDB_Flag_AdjustScale

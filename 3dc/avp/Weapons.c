@@ -10017,8 +10017,8 @@ int IsPointInsideObject(VECTORCH *point, STRATEGYBLOCK *sbPtr, SECTION_DATA **hi
 	return(0);
 }
 
-int Staff_Manager(DAMAGE_PROFILE *damage,SECTION_DATA *section1,SECTION_DATA *section2,SECTION_DATA *section3,
-	STRATEGYBLOCK *wielder)	{
+int Staff_Manager(DAMAGE_PROFILE *damage, SECTION_DATA *section1, SECTION_DATA *section2, SECTION_DATA *section3, STRATEGYBLOCK *wielder)	
+{
 	
 	SECTION_DATA *hit_section;
 	int numberOfObjects = NumActiveBlocks;
@@ -10035,7 +10035,8 @@ int Staff_Manager(DAMAGE_PROFILE *damage,SECTION_DATA *section1,SECTION_DATA *se
 		
 		numhits=0;
 
-		if (objectPtr==Player) {
+		if (objectPtr==Player) 
+		{
 			GLOBALASSERT(objectPtr);
 			/* So I can breakpoint it. */
 		}
@@ -10043,32 +10044,38 @@ int Staff_Manager(DAMAGE_PROFILE *damage,SECTION_DATA *section1,SECTION_DATA *se
 		/* does object have a strategy block? */
 		if ((sbPtr)&&(sbPtr!=wielder))
 		{		
-
 			DYNAMICSBLOCK *dynPtr = sbPtr->DynPtr;
 			
-			if (dynPtr) {
-
+			if (dynPtr) 
+			{
 				if (IsThisObjectVisibleFromThisPosition_WithIgnore(objectPtr,wielder->SBdptr,&wielder->DynPtr->Position,10000)) {
 
 					/* Deduce if each section has hit. */
 			
-					if (IsPointInsideObject(&section1->World_Offset,sbPtr,&hit_section)) {
-						numhits++;
-					} else if (IsPointInsideObject(&section2->World_Offset,sbPtr,&hit_section)) {
-						numhits++;
-					} else if (IsPointInsideObject(&section3->World_Offset,sbPtr,&hit_section)) {
+					if (IsPointInsideObject(&section1->World_Offset,sbPtr,&hit_section)) 
+					{
 						numhits++;
 					}
-
+					else if (IsPointInsideObject(&section2->World_Offset,sbPtr,&hit_section))
+					{
+						numhits++;
+					}
+					else if (IsPointInsideObject(&section3->World_Offset,sbPtr,&hit_section)) 
+					{
+						numhits++;
+					}
 				}
 			}
 		}
 
-		if (numhits) {
+		if (numhits) 
+		{
 			hitatall++;
-			if (sbPtr->SBdptr->HModelControlBlock) {
+			if (sbPtr->SBdptr->HModelControlBlock)
+			{
 				#if 0
-				if (hit_section==NULL) {
+				if (hit_section==NULL) 
+				{
 					HtoHDamageToHModel(sbPtr, damage, NormalFrameTime, NULL, NULL);
 				} else {
 					CauseDamageToHModel(sbPtr->SBdptr->HModelControlBlock, sbPtr, damage, NormalFrameTime, hit_section,NULL,NULL,0);
@@ -10076,11 +10083,12 @@ int Staff_Manager(DAMAGE_PROFILE *damage,SECTION_DATA *section1,SECTION_DATA *se
 				#else
 				HtoHDamageToHModel(sbPtr, damage, NormalFrameTime, NULL, NULL);
 				#endif
-			} else {
+			} 
+			else 
+			{
 				CauseDamageToObject(sbPtr, damage, NormalFrameTime,NULL);
 			}
 		}
-
 	}
 	return(hitatall);
 }
@@ -10092,18 +10100,22 @@ int Staff_Manager(DAMAGE_PROFILE *damage,SECTION_DATA *section1,SECTION_DATA *se
 #define TROPHY_RANGE 	(3000)
 #define TROPHY_RADIUS	(200)
 
-SECTION_DATA *CheckBiteIntegrity(void) {
+SECTION_DATA *CheckBiteIntegrity(void) 
+{
 
 	VECTORCH targetpos;
 	DISPLAYBLOCK *objectPtr;
 
-	if (Biting==NULL) {
+	if (Biting==NULL) 
+	{
 		return(NULL);
 	}
-	if (!(Validate_Strategy(Biting,Biting_SBname))) {
+	if (!(Validate_Strategy(Biting,Biting_SBname))) 
+	{
 		return(NULL);
 	}
-	if (!(Biting->SBdptr)) {
+	if (!(Biting->SBdptr)) 
+	{
 		/* Gone far? */
 		return(NULL);
 	}
@@ -10116,25 +10128,28 @@ SECTION_DATA *CheckBiteIntegrity(void) {
 	RotateVector(&targetpos,&Global_VDB_Ptr->VDB_Mat);
 	
 	/* is it in the range band? */
-	if ((targetpos.vz >0) 
-		&& (targetpos.vz <  (BITE_RANGE<<1))) {
+	if ((targetpos.vz >0) && (targetpos.vz <  (BITE_RANGE<<1))) 
+	{
 	
 		DYNAMICSBLOCK *dynPtr = Biting->DynPtr;
 		GLOBALASSERT(dynPtr);
 		
-		if (IsThisObjectVisibleFromThisPosition_WithIgnore(objectPtr,Player,&Global_VDB_Ptr->VDB_World,(BITE_RANGE<<1))) {
-	
+		if (IsThisObjectVisibleFromThisPosition_WithIgnore(objectPtr,Player,&Global_VDB_Ptr->VDB_World,(BITE_RANGE<<1))) 
+		{
 			SECTION_DATA *head;
 			/* The minute his *head* is in view... */
 			head=GetThisSectionData(objectPtr->HModelControlBlock->section_data,"head");
-			if (head!=NULL) {
-				if (head->flags&section_data_notreal) {
+			if (head!=NULL) 
+			{
+				if (head->flags&section_data_notreal) 
+				{
 					/* Is it still attached? */
 					head=NULL;
 				}
 			}
 			/* We'll have the head now if at all. */
-			if (head) {
+			if (head) 
+			{
 				VECTORCH temp_view;
 				int dist;
 				/* I assume if we're alive, we have a head. */
@@ -10142,7 +10157,8 @@ SECTION_DATA *CheckBiteIntegrity(void) {
 				temp_view.vz=0;
 				dist=Approximate3dMagnitude(&temp_view);
 				/* Scale radius with FOV here? */
-				if (dist<(BITE_RADIUS<<1)) {
+				if (dist<(BITE_RADIUS<<1)) 
+				{
 					/* Aw, okay. */
 					return(head);
 				}
@@ -10153,7 +10169,8 @@ SECTION_DATA *CheckBiteIntegrity(void) {
 	return(NULL);
 }
 
-int AlienBite_TargetFilter(STRATEGYBLOCK *sbPtr) {
+int AlienBite_TargetFilter(STRATEGYBLOCK *sbPtr) 
+{
 
 	/* Is it tasty, mm?  Is it... crunchable? */
 

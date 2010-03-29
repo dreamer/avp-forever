@@ -3716,7 +3716,8 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	
 			   	int i;
 			  	D3D_DecalSystem_Setup();
-				for(i=0; i<63; i++)
+
+				for(i = 0; i < 63; i++)
 				{
 					PARTICLE particle = {0};
 

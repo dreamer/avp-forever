@@ -218,7 +218,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 	int numVisMods=0;
 	int numVisObjs=0;
 
-	while(numOfObjects)
+	while (numOfObjects)
 	{
 		extern DISPLAYBLOCK *Player;
 

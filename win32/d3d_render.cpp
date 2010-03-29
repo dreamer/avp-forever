@@ -144,13 +144,13 @@ void UpdateViewMatrix(float *viewMat)
 	viewMatrix._34 = 0.0f;
 	viewMatrix._44 = 1.0f;
 
-	D3DXVECTOR3 right(viewMatrix._11, viewMatrix._21, viewMatrix._31);
-	D3DXVECTOR3 up(viewMatrix._12, viewMatrix._22, viewMatrix._32);
-	D3DXVECTOR3 front(viewMatrix._13, viewMatrix._23, viewMatrix._33);
+	D3DXVECTOR3 right	(viewMatrix._11, viewMatrix._21, viewMatrix._31);
+	D3DXVECTOR3 up		(viewMatrix._12, viewMatrix._22, viewMatrix._32);
+	D3DXVECTOR3 front	(viewMatrix._13, viewMatrix._23, viewMatrix._33);
 	D3DXVECTOR3 position(viewMat[3], -viewMat[7], viewMat[11]);
 
 	viewMatrix._41 = -D3DXVec3Dot(&right, &position);
-	viewMatrix._42 = -D3DXVec3Dot(&up, &position);
+	viewMatrix._42 = -D3DXVec3Dot(&up,	  &position);
 	viewMatrix._43 = -D3DXVec3Dot(&front, &position);
 }
 
@@ -529,11 +529,11 @@ void CheckOrthoBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_TY
 	orthoList[orthoListCount].filteringType = filteringMode;
 
 	// check if current vertexes use the same texture and render states as the previous. if they do, we can 'merge' the two together
-	if (textureID == orthoList[orthoListCount-1].textureID && 
+	if (orthoListCount != 0 &&
+		textureID == orthoList[orthoListCount-1].textureID && 
 		translucencyMode == orthoList[orthoListCount-1].translucencyType &&
 		textureAddressMode == orthoList[orthoListCount-1].textureAddressMode &&
-		filteringMode == orthoList[orthoListCount-1].filteringType &&
-		orthoListCount != 0) 
+		filteringMode == orthoList[orthoListCount-1].filteringType)
 	{
 		// ok, drop back to the previous data
 		orthoListCount--;
@@ -618,10 +618,10 @@ void CheckVertexBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_T
 
 	// check if current vertexes use the same texture and render states as the previous
 	// if they do, we can 'merge' the two together
-	if (textureID == renderList[renderCount-1].textureID && 
+	if (renderCount != 0 &&
+		textureID == renderList[renderCount-1].textureID && 
 		translucencyMode == renderList[renderCount-1].translucencyType && 
-		filteringMode	 == renderList[renderCount-1].filteringType &&
-		renderCount != 0) 
+		filteringMode	 == renderList[renderCount-1].filteringType)
 	{
 		// ok, drop back to the previous data
 		renderTest.pop_back();
@@ -876,7 +876,7 @@ BOOL ExecuteBuffer()
 	std::sort(renderTest.begin(), renderTest.end());
 
 #ifdef WIN32
-//	Font_DrawText("blah", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
+	Font_DrawText("blah", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
 #endif
 
 	LastError = d3d.lpD3DDevice->SetStreamSource (0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));

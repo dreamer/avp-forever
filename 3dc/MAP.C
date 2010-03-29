@@ -36,19 +36,17 @@ DISPLAYBLOCK* ReadMap(MAPHEADER *mapheader)
 	MAPBLOCK8 *mapblock8ptr;
 	DISPLAYBLOCK *dblockptr = 0;
 
-
 	/* Set up pointers to the map arrays */
 	mapblock8ptr = mapheader->MapType8Objects;
 
-
  	/* Map Type #8 Structure */
-	if(mapblock8ptr) {
-
-		while(mapblock8ptr->MapType != MapType_Term) {
-
+	if (mapblock8ptr) 
+	{
+		while (mapblock8ptr->MapType != MapType_Term) 
+		{
 			dblockptr = CreateActiveObject();
 
-			if(dblockptr)
+			if (dblockptr)
 			{
 				dblockptr->ObShape = mapblock8ptr->MapShape;
 
@@ -69,16 +67,10 @@ DISPLAYBLOCK* ReadMap(MAPHEADER *mapheader)
 					dblockptr->ObFlags |= ObFlag_MultLSrc;
 				}
 
-/* KJL 16:55:57 06/05/97 - removing camera stuff */
-				if(mapblock8ptr->MapVDBData)
+				if (mapblock8ptr->MapVDBData)
 					MapSetVDB(dblockptr, mapblock8ptr->MapVDBData);
 
 				dblockptr->ObLightType = mapblock8ptr->MapLightType;
-
-/* KJL 15:23:52 06/07/97 - removed */
-//				CopyVector(&mapblock8ptr->MapOrigin, &dblockptr->ObOrigin);
-//				dblockptr->ObSimShapes = mapblock8ptr->MapSimShapes;
-//				dblockptr->ObViewType = mapblock8ptr->MapViewType;
 
 				MapBlockInit(dblockptr);
 
@@ -91,9 +83,7 @@ DISPLAYBLOCK* ReadMap(MAPHEADER *mapheader)
 			dptr_last = dblockptr;
 
 			mapblock8ptr++;
-
 		}
-
 	}
  	return dblockptr;
 }
@@ -131,20 +121,14 @@ void MapSetVDB(DISPLAYBLOCK *dptr, MAPSETVDB *mapvdbdata)
 
 	VIEWDESCRIPTORBLOCK *vdb;
 
-	/* TEST */
-	/*LIGHTBLOCK *lptr;*/
-
-
-
 	/* Allocate a VDB */
-
 	vdb = CreateActiveVDB();
 
-	if(vdb) {
-
+	if (vdb) 
+	{
 		dptr->ObVDBPtr = vdb;			/* Object Block ptr to VDB */
 
-		vdb->VDB_ViewObject = dptr;	/* VDB ptr to Object Block */
+		vdb->VDB_ViewObject = dptr;		/* VDB ptr to Object Block */
 
 
 		/* VDB Setup */
@@ -199,31 +183,26 @@ void MapBlockInit(DISPLAYBLOCK *dptr)
 	SHAPEHEADER *sptr;
 
 	/* Get the shape header ptr */
-
 	sptr = GetShapeData(dptr->ObShape);
 
 
 	/* Augmented Z */
-
-	if(sptr->shapeflags & ShapeFlag_AugZ) dptr->ObFlags2 |= ObFlag2_AugZ;
+	if (sptr->shapeflags & ShapeFlag_AugZ) 
+		dptr->ObFlags2 |= ObFlag2_AugZ;
 
 
 	/* Pass address of the shape data header back to the block for others */
-
 	dptr->ObShapeData = sptr;
 
 
 	/* Does this shape use a BSP tree or a Z Sort ? */
-
 	dptr->ObFlags |= ObFlag_TypeZ;
 
 
 	/* Copy shape radius to ODB */
-
 	dptr->ObRadius = sptr->shaperadius;
 
 	/* Copy shape xyz extents to ODB */
-
 	dptr->ObMaxX = sptr->shapemaxx;
 	dptr->ObMinX = sptr->shapeminx;
 

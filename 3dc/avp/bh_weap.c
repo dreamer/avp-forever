@@ -4062,13 +4062,16 @@ int PredDisc_TargetFilter(STRATEGYBLOCK *candidate) {
 	}
 }
 
-void PredDisc_GetFirstTarget(PC_PRED_DISC_BEHAV_BLOCK *bptr, DISPLAYBLOCK *target, VECTORCH *position) {
-
+void PredDisc_GetFirstTarget(PC_PRED_DISC_BEHAV_BLOCK *bptr, DISPLAYBLOCK *target, VECTORCH *position)
+{
 	int a;
 
-	if (target!=NULL) {
-		if (target->ObStrategyBlock!=NULL) {
-			if (PredDisc_TargetFilter(target->ObStrategyBlock)) {
+	if (target!=NULL) 
+	{
+		if (target->ObStrategyBlock!=NULL) 
+		{
+			if (PredDisc_TargetFilter(target->ObStrategyBlock)) 
+			{
 				/* Valid. */
 				bptr->Target=target->ObStrategyBlock;
 				COPY_NAME(bptr->Target_SBname,target->ObStrategyBlock->SBname);
@@ -4080,7 +4083,8 @@ void PredDisc_GetFirstTarget(PC_PRED_DISC_BEHAV_BLOCK *bptr, DISPLAYBLOCK *targe
 	/* Second try. */
 
 	bptr->Target=PredDisc_GetNewTarget(bptr,position,NULL,2);
-	if (bptr->Target!=NULL) {
+	if (bptr->Target!=NULL) 
+	{
 		COPY_NAME(bptr->Target_SBname,bptr->Target->SBname);
 		return;
 	}
@@ -4089,25 +4093,28 @@ void PredDisc_GetFirstTarget(PC_PRED_DISC_BEHAV_BLOCK *bptr, DISPLAYBLOCK *targe
 
 	bptr->Target=NULL;
 	{
-		for (a=0; a<SB_NAME_LENGTH; a++) {
+		for (a=0; a<SB_NAME_LENGTH; a++) 
+		{
 			bptr->Target_SBname[a]='\0';
 		}
 	}
-
 }
 
-int ObjectIsOnScreen(DISPLAYBLOCK *object) {
-
+int ObjectIsOnScreen(DISPLAYBLOCK *object) 
+{
 	int a;
 	extern DISPLAYBLOCK *OnScreenBlockList[];
 	extern int NumOnScreenBlocks;
 	
-	for (a=0; a<NumOnScreenBlocks; a++) {
-		if (OnScreenBlockList[a]==object) break;
+	for (a=0; a<NumOnScreenBlocks; a++) 
+	{
+		if (OnScreenBlockList[a] == object) 
+			break;
 	}
 	
-	if (a==NumOnScreenBlocks) return(0); else return(1);
-	
+	if (a==NumOnScreenBlocks) 
+		return(0);
+	else return(1);
 }
 
 #define DISC_PROX_RANGE 90000

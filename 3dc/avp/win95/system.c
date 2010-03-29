@@ -458,12 +458,11 @@ void RestartLevel()
 	//reset the displayblock for modules to 0
 	{
 		int i=2;
-		while(MainScene.sm_module[i].m_type!=mtype_term)
+		while (MainScene.sm_module[i].m_type!=mtype_term)
 		{
 			MainScene.sm_module[i].m_dptr=0;
 			i++;
 		}
-
 	}
  	
 	// set the Onscreenbloock lsit to zero
@@ -541,7 +540,7 @@ void ProcessSystemObjects()
 {
 	int i;
 
-	MODULEMAPBLOCK* mmbptr= &AvpCompiledMaps[0];
+	MODULEMAPBLOCK* mmbptr = &AvpCompiledMaps[0];
 	STRATEGYBLOCK* sbptr;
 
 	/* PC Loading.
@@ -643,7 +642,7 @@ void ChangeEnvironmentToEnv(I_AVP_ENVIRONMENTS env_to_load)
 void IntegrateNewEnvironment()
 {
 	int i;
-	MODULEMAPBLOCK* mmbptr= &AvpCompiledMaps[0];
+	MODULEMAPBLOCK* mmbptr = &AvpCompiledMaps[0];
 
 	// elements we need form processsystemobjects
 

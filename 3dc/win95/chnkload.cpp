@@ -1761,15 +1761,6 @@ void copy_to_module (Object_Chunk * ob, int mod_pos, int shplst_pos)
 		Map->MapCStrategyL = mapblok->map_data.MapCStrategyL;
 		#endif
 		Map->MapInteriorType = mapblok->map_data.MapInteriorType;
-//		Map->MapLightType = mapblok->map_data.MapLightType;
-//		Map->MapMass = mapblok->map_data.MapMass;
-//		Map->MapNewtonV.vx = mapblok->map_data.MapNewtonV.vx;
-//		Map->MapNewtonV.vy = mapblok->map_data.MapNewtonV.vy;
-//		Map->MapNewtonV.vz = mapblok->map_data.MapNewtonV.vz;
-//		Map->MapOrigin.vx = mapblok->map_data.MapOrigin.vx;
-//		Map->MapOrigin.vy = mapblok->map_data.MapOrigin.vy;
-//		Map->MapOrigin.vz = mapblok->map_data.MapOrigin.vz;
-//		Map->MapViewType = mapblok->map_data.MapViewType;
 	}
 
 	#if (StandardStrategyAndCollisions || IntermediateSSACM)

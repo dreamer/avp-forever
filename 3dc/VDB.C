@@ -601,7 +601,8 @@ VIEWDESCRIPTORBLOCK* CreateActiveVDB(void)
 			{
 				vdb_tmp = *v_src++;
 
-				if(vdb_tmp->VDB_Priority > p) p = vdb_tmp->VDB_Priority;
+				if(vdb_tmp->VDB_Priority > p) 
+					p = vdb_tmp->VDB_Priority;
 			}
 		}
 

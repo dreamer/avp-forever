@@ -71,12 +71,11 @@ void InitialiseObjectBlocks(void)
 	FreeBlockListPtr   = &FreeBlockList[maxobjects-1];
 	ActiveBlockListPtr = &ActiveBlockList[0];
 
-	for(NumFreeBlocks = 0; NumFreeBlocks<maxobjects; NumFreeBlocks++) {
-
+	for (NumFreeBlocks = 0; NumFreeBlocks < maxobjects; NumFreeBlocks++) 
+	{
 		FreeBlockList[NumFreeBlocks] = FreeBlkPtr;
 
 		FreeBlkPtr++;
-
 	}
 }
 
@@ -94,18 +93,19 @@ DISPLAYBLOCK* AllocateObjectBlock(void)
 	int *sptr;
 	int i;
 
-
-	if(NumFreeBlocks) {
-
+	if (NumFreeBlocks) 
+	{
 		FreeBlkPtr = *FreeBlockListPtr--;
 
 		NumFreeBlocks--;					/* One less free block */
 
 		/* Clear the block */
-
 		sptr = (int *)FreeBlkPtr;
+
 		for(i = sizeof(DISPLAYBLOCK)/4; i!=0; i--)
+		{
 			*sptr++ = 0;
+		}
 	}
 
 	return(FreeBlkPtr);
@@ -143,16 +143,13 @@ DISPLAYBLOCK* CreateActiveObject(void)
 
 	DISPLAYBLOCK *dblockptr;
 
-
 	dblockptr = AllocateObjectBlock();
 
-	if(dblockptr) {
-
+	if (dblockptr) 
+	{
 		*ActiveBlockListPtr++ = dblockptr;
 
 		NumActiveBlocks++;
-
-
 	}
 
 	return dblockptr;
@@ -177,43 +174,40 @@ int DestroyActiveObject(DISPLAYBLOCK *dblockptr)
 	TXACTRLBLK *taptr;
 
 	/* If the block ptr is OK, search the Active Blocks List */
-	if(dblockptr) {
-
-		for(i = 0; i < NumActiveBlocks; i++) {
-
-			if(ActiveBlockList[i] == dblockptr) {
-
+	if (dblockptr) 
+	{
+		for (i = 0; i < NumActiveBlocks; i++) 
+		{
+			if (ActiveBlockList[i] == dblockptr) 
+			{
 				ActiveBlockList[i] = ActiveBlockList[NumActiveBlocks-1];
 				NumActiveBlocks--;
 				ActiveBlockListPtr--;
 
 				DestroyActiveVDB(dblockptr->ObVDBPtr);	/* Checks for null */
 
-				if(dblockptr->ObNumLights) {
+				if (dblockptr->ObNumLights) 
+				{
 					for(light = dblockptr->ObNumLights - 1; light != -1; light--)
 						DeleteLightBlock(dblockptr->ObLights[light], dblockptr);
 				}
 
 				/* If no SB, deallocate any Texture Animation Blocks */
 
-				if(dblockptr->ObStrategyBlock == 0) {
-
-					if(dblockptr->ObTxAnimCtrlBlks) {
-
+				if (dblockptr->ObStrategyBlock == 0) 
+				{
+					if (dblockptr->ObTxAnimCtrlBlks) 
+					{
 						taptr = dblockptr->ObTxAnimCtrlBlks;
 
-						while(taptr) {
-
+						while(taptr) 
+						{
 							DeallocateTxAnimBlock(taptr);
 
 							taptr = taptr->tac_next;
-
 						}
-
 					}
-
 				}
-
 
 				/* Deallocate the Lazy Morphed Points Array Pointer */
 
@@ -225,7 +219,7 @@ int DestroyActiveObject(DISPLAYBLOCK *dblockptr)
 				#endif
 
 				/* KJL 16:52:43 06/01/98 - dealloc sfx block if one exists */
-				if(dblockptr->SfxPtr)
+				if (dblockptr->SfxPtr)
 				{
 					DeallocateSfxBlock(dblockptr->SfxPtr);
 				}
@@ -568,47 +562,39 @@ int DisplayAndLightBlockDeallocation(void)
 	int i, j;
 	LIGHTBLOCK *lptr;
 
-	if(NumActiveBlocks) {
-
+	if (NumActiveBlocks) 
+	{
 		activeblocksptr = &ActiveBlockList[NumActiveBlocks - 1];
 
-		for(i = NumActiveBlocks; i!=0; i--) {
-
+		for (i = NumActiveBlocks; i!=0; i--) 
+		{
 			dptr = *activeblocksptr--;
 
 			/* Deallocate Object? */
 
-			if(dptr->ObFlags2 & ObFlag2_Deallocate) {
-
+			if (dptr->ObFlags2 & ObFlag2_Deallocate) 
+			{
 				DestroyActiveObject(dptr);
-
 			}
 
-
 			/* Deallocate any Lights? */
-
-			else {
-
-				if(dptr->ObNumLights) {
-
-					for(j = dptr->ObNumLights - 1; j > -1; j--) {
-
+			else 
+			{
+				if (dptr->ObNumLights) 
+				{
+					for (j = dptr->ObNumLights - 1; j > -1; j--)
+					{
 						lptr = dptr->ObLights[j];
 
-						if(lptr->LightFlags & LFlag_Deallocate) {
-
+						if (lptr->LightFlags & LFlag_Deallocate) 
+						{
 							DeleteLightBlock(dptr->ObLights[j], dptr);
 
 						}
-
 					}
-
 				}
-
 			}
-
 		}
-
 	}
 	return 0;
 }

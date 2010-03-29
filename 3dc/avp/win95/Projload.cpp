@@ -1892,10 +1892,9 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 	** Load in shapes to the mainshapelist **
 	**-------------------------------------*/
 		o_chunk_array = new Object_Chunk * [num_modules];
-		aimodule_indeces=new int[num_modules];
+		aimodule_indeces = new int[num_modules];
 
 		int mod_pos = 0;
-
 
 		List<Shape_Chunk*> shape_list;
 		List<Object_Chunk*> object_list;

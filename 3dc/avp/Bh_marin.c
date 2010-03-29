@@ -983,18 +983,22 @@ void InitSquad(void)
 	NpcSquad.Nextframe_Squad_Delta_Morale=0;
 }
 
-void DoSquad(void) {
+void DoSquad(void) 
+{
 
 	/* Maintain squad level stuff. */
 
-	if (NpcSquad.alertZone!=NULL) {
+	if (NpcSquad.alertZone!=NULL) 
+	{
 		MaintainMarineTargetZone(NpcSquad.alertZone);
 	}
 	
 	/* Maintain squad suspicion. */
-	if (NpcSquad.Squad_Suspicion>0) {
+	if (NpcSquad.Squad_Suspicion>0)
+	{
 		NpcSquad.Squad_Suspicion-=NormalFrameTime;
-		if (NpcSquad.Squad_Suspicion<0) {
+		if (NpcSquad.Squad_Suspicion<0) 
+		{
 			NpcSquad.Squad_Suspicion=0;
 		}
 	}
@@ -1025,7 +1029,8 @@ void DoSquad(void) {
 	}
 	
 	/* Status display. */
-	if (ShowSquadState) {
+	if (ShowSquadState) 
+	{
 		PrintDebuggingText("Marine Alert Status = %d\n",NpcSquad.alertStatus);
 		PrintDebuggingText("Marine Alert Priority = %d\n",NpcSquad.alertPriority);
 		PrintDebuggingText("Responding Marines = %d\n",NpcSquad.RespondingMarines);
@@ -1033,15 +1038,20 @@ void DoSquad(void) {
 		PrintDebuggingText("NearUnpanicked Marines = %d\n",NpcSquad.NearUnpanickedMarines);
 		PrintDebuggingText("NearBurning Marines = %d\n",NpcSquad.NearBurningMarines);
 		PrintDebuggingText("Marine Outstanding Response Level = %d\n",NpcSquad.responseLevel);
-		if (NpcSquad.alertZone==NULL) {
+		if (NpcSquad.alertZone==NULL) 
+		{
 			PrintDebuggingText("Marine Alert Zone = NULL\n");
-		} else {
+		} 
+		else 
+		{
 			MODULE *sampleModule;
 
 			sampleModule=*(NpcSquad.alertZone->m_module_ptrs);
-			if (sampleModule==NULL) {
+			if (sampleModule==NULL) 
+			{
 				PrintDebuggingText("Marine Alert Zone = Totally Farped! %d\n",NpcSquad.alertZone->m_index);
-			} else {
+			} else 
+			{
 				PrintDebuggingText("Marine Alert Zone = %d, '%s'\n",sampleModule->m_index,sampleModule->name);
 			}
 		}
@@ -1052,28 +1062,31 @@ void DoSquad(void) {
 
 	/* And now just for me... :-) */
 	PrintSpottedNumber();
-
 }
 
-void ZoneAlert(int level,AIMODULE *targetModule) {
+void ZoneAlert(int level, AIMODULE *targetModule) 
+{
 
 	int idealResponse;	
 	/* Bad stuff is going down. */
 
 	/* Switch to this one if it has a higher level than the current priority. */
 
-	if (level<NpcSquad.alertPriority) {
+	if (level<NpcSquad.alertPriority) 
+	{
 		/* Don't bother me with trifles! */
 		return;
 	}
 
-	if (level>=NpcSquad.alertStatus) {
+	if (level>=NpcSquad.alertStatus) 
+	{
 		NpcSquad.alertStatus=level;
 	}
 
 	NpcSquad.alertPriority=level;
 	NpcSquad.alertZone=targetModule;
-	switch (NpcSquad.alertStatus) {
+	switch (NpcSquad.alertStatus) 
+	{
 		case 0:
 			/* Can this ever happen? */
 			idealResponse=1;
@@ -1092,41 +1105,45 @@ void ZoneAlert(int level,AIMODULE *targetModule) {
 			break;
 	}
 
-	if (NpcSquad.RespondingMarines<idealResponse) {
+	if (NpcSquad.RespondingMarines<idealResponse) 
+	{
 		NpcSquad.responseLevel=(idealResponse-NpcSquad.RespondingMarines);
 	}
-
 }
 
-void PointAlert(int level, VECTORCH *point) {
-	
+void PointAlert(int level, VECTORCH *point)
+{
+
 	MODULE *alertModule;
 
 	alertModule=ModuleFromPosition(point,playerPherModule);
 
-	if (NpcSquad.Squad_Suspicion!=SQUAD_PARANOIA_TIME) {
+	if (NpcSquad.Squad_Suspicion!=SQUAD_PARANOIA_TIME)
+	{
 		NpcSquad.Squad_Suspicion=SQUAD_PARANOIA_TIME;
 		NpcSquad.squad_suspect_point=*point;
 	}
 
-	if (alertModule==NULL) {
+	if (alertModule==NULL) 
+	{
 		return;
 	}
 
 	ZoneAlert(level,alertModule->m_aimodule);
-
 }
 
-void DeprioritiseAlert(AIMODULE *aimodule) {
-	
+void DeprioritiseAlert(AIMODULE *aimodule) 
+{
 	/* Parameterised, to make sure we're doing it right. */
 
-	if (aimodule==NpcSquad.alertZone) {
+	if (aimodule==NpcSquad.alertZone) 
+	{
 		NpcSquad.alertPriority=0;
 	}
 }
 
-void Console_ZoneAlert(int input) {
+void Console_ZoneAlert(int input) 
+{
 
 	MODULE *target;
 	SCENEMODULE *smptr;
@@ -1134,9 +1151,12 @@ void Console_ZoneAlert(int input) {
 	smptr = Global_ModulePtr[Global_Scene];
 	Global_ModuleArrayPtr = smptr->sm_marray;
 	
-	if ((input==0)||(input>=ModuleArraySize)) {
+	if ((input==0)||(input>=ModuleArraySize)) 
+	{
 		target=playerPherModule;
-	} else {
+	} 
+	else 
+	{
 		target=Global_ModuleArrayPtr[input];	
 	}
 
@@ -1149,39 +1169,48 @@ void Console_ZoneAlert(int input) {
 
 /* Interface function - 15/12/97 */
 
-MARINE_WEAPON_DATA *GetThisNPCMarineWeapon(MARINE_NPC_WEAPONS this_id) {
-
+MARINE_WEAPON_DATA *GetThisNPCMarineWeapon(MARINE_NPC_WEAPONS this_id) 
+{
 	int a;
 
 	a=0;
-	while (NPC_Marine_Weapons[a].id!=MNPCW_End) {
-		if (NPC_Marine_Weapons[a].id==this_id) {
+	while (NPC_Marine_Weapons[a].id!=MNPCW_End) 
+	{
+		if (NPC_Marine_Weapons[a].id==this_id) 
+		{
 			return(&NPC_Marine_Weapons[a]);
 		}
 		a++;
 	}
 
 	return(NULL);
-
 }
 
-MARINE_NPC_WEAPONS GetThisManAWeapon(void) {
+MARINE_NPC_WEAPONS GetThisManAWeapon(void) 
+{
 
 	int a;
 	MARINE_NPC_WEAPONS thisweap;
 
 	a=FastRandom()&65535;
 
-	if (a<(ONE_FIXED>>3)) {
+	if (a<(ONE_FIXED>>3)) 
+	{
 		/* 1/8: Smartgun. */
 		thisweap=(MNPCW_Smartgun);
-	} else if (a<(ONE_FIXED/3)) {
+	} 
+	else if (a<(ONE_FIXED/3))
+	{
 		/* 5/24: Flamethrower. */
 		thisweap=(MNPCW_Flamethrower);
-	} else if (a<((2*ONE_FIXED)/3)) {
+	} 
+	else if (a<((2*ONE_FIXED)/3)) 
+	{
 		thisweap=(MNPCW_PulseRifle);
 		//thisweap=(MNPCW_SADAR);
-	} else {
+	} 
+	else 
+	{
 		thisweap=(MNPCW_MShotgun);
 	}
 

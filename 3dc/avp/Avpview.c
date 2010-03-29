@@ -143,16 +143,14 @@ void LightSourcesInRangeOfObject(DISPLAYBLOCK *dptr)
 
 	*/
 
-	for(i = NumActiveBlocks;
-		i!=0 && NumLightSourcesForObject < MaxLightsPerObject; i--) {
-
+	for(i = NumActiveBlocks; i!=0 && NumLightSourcesForObject < MaxLightsPerObject; i--) 
+	{
 		dptr2 = *aptr++;
 
-		if(dptr2->ObNumLights) {
-
-			for(j = 0; j < dptr2->ObNumLights
-				&& NumLightSourcesForObject < MaxLightsPerObject; j++) {
-
+		if (dptr2->ObNumLights) 
+		{
+			for(j = 0; j < dptr2->ObNumLights && NumLightSourcesForObject < MaxLightsPerObject; j++) 
+			{
 				lptr = dptr2->ObLights[j];
 
 				if (!lptr->LightBright || !(lptr->RedScale||lptr->GreenScale||lptr->BlueScale))
@@ -189,7 +187,7 @@ void LightSourcesInRangeOfObject(DISPLAYBLOCK *dptr)
 							distanceToLight /= 2;
 						#endif
 
-						if(distanceToLight < (lptr->LightRange + dptr->ObRadius) )
+						if(distanceToLight < (lptr->LightRange + dptr->ObRadius))
 						{
 
 							LightSourcesForObject[NumLightSourcesForObject] = lptr;
@@ -487,7 +485,7 @@ void InteriorType_Body()
 
 void UpdateCamera(void)
 {
-	char buf[300];
+//	char buf[300];
 	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 	int cos = GetCos(playerStatusPtr->ViewPanX); // the looking up/down value that used to be in displayblock
 	int sin = GetSin(playerStatusPtr->ViewPanX);
@@ -540,10 +538,10 @@ void AVPGetInViewVolumeList(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	/* Scan the Active Blocks List */
 	activeblocksptr = &ActiveBlockList[0];
 
-	for(t = NumActiveBlocks; t!=0; t--)
+	for (t = NumActiveBlocks; t!=0; t--)
 	{
 		DISPLAYBLOCK *dptr = *activeblocksptr++;
-	
+
 		if (dptr==Player) 
 			continue;
 
@@ -551,12 +549,15 @@ void AVPGetInViewVolumeList(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 		if (dptr->ObMyModule)
 		{
 			MODULE *mptr = dptr->ObMyModule;
-			if (ModuleCurrVisArray[mptr->m_index] != 2) MVis = FALSE;
+			if (ModuleCurrVisArray[mptr->m_index] != 2)
+			{
+				MVis = FALSE;
+			}
 			else
 			{
 				extern int NumberOfLandscapePolygons;
 				SHAPEHEADER *shapePtr = GetShapeData(dptr->ObShape);
-				NumberOfLandscapePolygons+=shapePtr->numitems;
+				NumberOfLandscapePolygons += shapePtr->numitems;
 			}
 		}
 		if (!(dptr->ObFlags&ObFlag_NotVis) && MVis) 
@@ -633,13 +634,13 @@ void AvpShowViews(void)
 
 	/* Do lights */
 	UpdateRunTimeLights();
+
 	if (AvP.PlayerType==I_Alien)
 	{
 		MakeLightElement(&Player->ObWorld,LIGHTELEMENT_ALIEN_TEETH);
 		MakeLightElement(&Player->ObWorld,LIGHTELEMENT_ALIEN_TEETH2);
 	}
 
-//	GlobalAmbience=ONE_FIXED/4;
 	/* Find out which objects are in the View Volume */
 	AVPGetInViewVolumeList(Global_VDB_Ptr);
 
@@ -658,7 +659,7 @@ void AvpShowViews(void)
 	/* lights associated with the player may have changed */
 	UpdateObjectLights(Player);
 
-	if(NumOnScreenBlocks)
+	if (NumOnScreenBlocks)
 	{
 	 	/* KJL 12:13:26 02/05/97 - divert rendering for AvP */
 		KRenderItems(Global_VDB_Ptr);
