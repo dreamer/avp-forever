@@ -137,6 +137,8 @@ void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerti
 void DrawWaterFallPoly(VECTORCH *v);
 void RenderAllParticlesFurtherAwayThan(int zThreshold);
 
+extern void UpdateViewMatrix(float *viewMat);
+
 /*KJL************************************************************************************
 * N.B. All the following global variables have their first elements initialised so that *
 * they will end up in high memory on the Saturn.                                        *
@@ -4040,6 +4042,8 @@ extern void TranslationSetup(void)
 	ViewMatrix[7] = ((float)-v.vy)*1.0f/1.0f*p;
 	ViewMatrix[11] = ((float)-v.vz)*CameraZoomScale;
 
+	UpdateViewMatrix(&ViewMatrix[0]);
+
 /*
 	sprintf(buf, 
 	"\t %f \t %f \t %f\n"
@@ -4075,6 +4079,8 @@ static void TranslatePoint(const float *source, float *dest, const float *matrix
 
 void TranslatePointIntoViewspace(VECTORCH *pointPtr)
 {
+
+#if 0 // original code
 	Source[0] = (float)pointPtr->vx;
 	Source[1] = (float)pointPtr->vy;
 	Source[2] = (float)pointPtr->vz;
@@ -4084,6 +4090,11 @@ void TranslatePointIntoViewspace(VECTORCH *pointPtr)
 	f2i(pointPtr->vx,Dest[0]);
 	f2i(pointPtr->vy,Dest[1]);
 	f2i(pointPtr->vz,Dest[2]);
+
+#else // bjd - view matrix test
+
+
+#endif
 }
 
 void SquishPoints(SHAPEINSTR *shapeinstrptr)
@@ -4114,11 +4125,19 @@ void SquishPoints(SHAPEINSTR *shapeinstrptr)
 			Source[1] = (float)point.vy;
 			Source[2] = (float)point.vz;
 
+#if 0
 			TranslatePoint(Source, Dest, ViewMatrix);
 
 			f2i(RotatedPts[i].vx,Dest[0]);
 			f2i(RotatedPts[i].vy,Dest[1]);
 			f2i(RotatedPts[i].vz,Dest[2]);
+
+#else	// bjd - view matrix test
+
+			f2i(RotatedPts[i].vx,Source[0]);
+			f2i(RotatedPts[i].vy,Source[1]);
+			f2i(RotatedPts[i].vz,Source[2]);
+#endif
 		}	
 	}
 }
@@ -4197,11 +4216,19 @@ void MorphPoints(SHAPEINSTR *shapeinstrptr)
 			Source[1] = (float)(srcPtr->vy+Global_ODB_Ptr->ObWorld.vy);
 			Source[2] = (float)(srcPtr->vz+Global_ODB_Ptr->ObWorld.vz);
 
+#if 0
 			TranslatePoint(Source, Dest, ViewMatrix);
 
 			f2i(destPtr->vx,Dest[0]);
 			f2i(destPtr->vy,Dest[1]);
 			f2i(destPtr->vz,Dest[2]);
+
+#else  // bjd - view matrix test
+
+			f2i(destPtr->vx, Source[0]);
+			f2i(destPtr->vy, Source[1]);
+			f2i(destPtr->vz, Source[2]);
+#endif
 			srcPtr++;
 			destPtr++;
 		}
@@ -4256,11 +4283,22 @@ void TranslateShapeVertices(SHAPEINSTR *shapeinstrptr)
 	
 			// static void TranslatePoint(const float *source, float *dest, const float *matrix)
 			TranslatePoint(Source, Dest, ObjectViewMatrix); // local to world?
+
+#if 0
 			TranslatePoint(Dest, Source, ViewMatrix); // world to view?
 
 			f2i(destPtr->vx,Source[0]);
 			f2i(destPtr->vy,Source[1]);
 			f2i(destPtr->vz,Source[2]);
+
+#else // bjd - view matrix test
+
+			f2i(destPtr->vx, Dest[0]);
+			f2i(destPtr->vy, Dest[1]);
+			f2i(destPtr->vz, Dest[2]);
+
+#endif
+
 			srcPtr++;
 			destPtr++;
 		}
@@ -5883,6 +5921,7 @@ void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour)
 	VECTORCH point = *positionPtr;
 
 	TranslatePointIntoViewspace(&point);
+
 	if (point.vz < 64) 
 		return;	
 	
@@ -5899,8 +5938,8 @@ void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour)
 		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 		centreX = DIV_FIXED(point.vx,point.vz);
 		centreY = DIV_FIXED(point.vy,point.vz);
-		sizeX = (ScreenDescriptorBlock.SDB_Width<<13)/Global_VDB_Ptr->VDB_ProjX;
-		sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13,87381)/Global_VDB_Ptr->VDB_ProjY;
+		sizeX = (ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
+		sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
 	}
 
 	VerticesBuffer[0].X = centreX - sizeX;
@@ -5948,11 +5987,11 @@ void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour)
 				if(RenderPolygon.NumberOfVertices<3) return;
 				TexturedPolygon_ClipWithPositiveX();
 				if(RenderPolygon.NumberOfVertices<3) return;
-//				D3D_Particle_Output(&particle,RenderPolygon.Vertices);
-				AddParticle(&particle, &RenderPolygon.Vertices[0]);
+				D3D_Particle_Output(&particle,RenderPolygon.Vertices);
+//				AddParticle(&particle, &RenderPolygon.Vertices[0]);
   			}
-//			else D3D_Particle_Output(&particle,VerticesBuffer);
-			else AddParticle(&particle, &VerticesBuffer[0]);
+			else D3D_Particle_Output(&particle,VerticesBuffer);
+//			else AddParticle(&particle, &VerticesBuffer[0]);
 		}
 	}	
 }
@@ -6387,11 +6426,11 @@ void RenderStarfield(void)
 					if(RenderPolygon.NumberOfVertices<3) return;
 					TexturedPolygon_ClipWithPositiveX();
 					if(RenderPolygon.NumberOfVertices<3) return;
-//					D3D_Particle_Output(&particle,RenderPolygon.Vertices);
-					AddParticle(&particle, &RenderPolygon.Vertices[0]);
+					D3D_Particle_Output(&particle,RenderPolygon.Vertices);
+//					AddParticle(&particle, &RenderPolygon.Vertices[0]);
 	  			}
-//				else D3D_Particle_Output(&particle,VerticesBuffer);
-				else AddParticle(&particle, &VerticesBuffer[0]);
+				else D3D_Particle_Output(&particle,VerticesBuffer);
+//				else AddParticle(&particle, &VerticesBuffer[0]);
 			}
 		}
 	}		

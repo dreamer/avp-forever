@@ -797,7 +797,7 @@ BOOL CreateVolatileResources()
 		return FALSE;
 	}
 
-	LastError = d3d.lpD3DDevice->SetVertexShader(D3DFVF_TLVERTEX);
+	LastError = d3d.lpD3DDevice->SetVertexShader(D3DFVF_LVERTEX);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);

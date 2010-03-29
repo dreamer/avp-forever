@@ -117,7 +117,36 @@ struct renderParticle
 
 std::vector<renderParticle> particleArray;
 
+D3DXMATRIX viewMatrix;
+
 size_t maxParts = 0;
+
+void UpdateViewMatrix(float *viewMat)
+{
+	// right
+	viewMatrix._11 = viewMat[0];
+	viewMatrix._21 = viewMat[1];
+	viewMatrix._31 = viewMat[2];
+
+	// up
+	viewMatrix._12 = viewMat[4];
+	viewMatrix._22 = viewMat[5];
+	viewMatrix._32 = viewMat[6];
+
+	// front
+	viewMatrix._13 = viewMat[8];
+	viewMatrix._23 = viewMat[9];
+	viewMatrix._33 = viewMat[10];
+
+	viewMatrix._41 = viewMat[3];
+	viewMatrix._42 = -viewMat[7];
+	viewMatrix._43 = viewMat[11];
+
+	viewMatrix._14 = 0.0f;
+	viewMatrix._24 = 0.0f;
+	viewMatrix._34 = 0.0f;
+	viewMatrix._44 = 1.0f;
+}
 
 void DrawParticles()
 {
@@ -142,7 +171,7 @@ void DrawParticles()
 	// loop particles and add them to vertex buffer
 	for (size_t i = 0; i < particleArray.size(); i++)
 	{
-		RenderPolygon.NumberOfVertices = particleArray[i].numVerts;
+		RenderPolygon.NumberOfVertices = (uint32_t)particleArray[i].numVerts;
 		D3D_Particle_Output(&particleArray[i].particle, &particleArray[i].vertices[0]);
 	}
 
@@ -152,16 +181,15 @@ void DrawParticles()
 	RenderPolygon.NumberOfVertices = numVertsBackup;
 }
 
-const signed int NO_TEXTURE = -1;
+const int32_t  NO_TEXTURE   = -1;
+const uint32_t TALLFONT_TEX = 999;
+const uint32_t PROGRESS_TEX = 998;
+const uint32_t CONSOLE_TEX  = 997;
+const uint32_t FMV_TEX	    = 996;
+
 // set them to 'null' texture initially
 int32_t	currentTextureID	= NO_TEXTURE;
 int32_t	currentWaterTexture = NO_TEXTURE;
-
-// use 999 as a reference for the tallfont texture
-const int TALLFONT_TEX = 999;
-const int PROGRESS_TEX = 998;
-const int CONSOLE_TEX  = 997;
-const int FMV_TEX	   = 996;
 
 void DeleteRenderMemory()
 {
@@ -169,8 +197,8 @@ void DeleteRenderMemory()
 	delete[] renderList;
 }
 
-size_t	NumVertices = 0;
-size_t	NumIndicies = 0;
+uint32_t	NumVertices = 0;
+uint32_t	NumIndicies = 0;
 int		vb = 0;
 int		particleIndex = 0;
 static uint32_t	renderCount = 0;
@@ -218,7 +246,7 @@ int WaterFallBase;
 int LightIntensityAtPoint(VECTORCH *pointPtr);
 
 VECTORCH MeshWorldVertex[256];
-unsigned int MeshVertexColour[256];
+uint32_t MeshVertexColour[256];
 char MeshVertexOutcode[256];
 
 // Externs
@@ -296,7 +324,7 @@ static HRESULT LastError;
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
 void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
-void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode, enum FILTERING_MODE_ID filteringMode);
+void CheckOrthoBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode, enum FILTERING_MODE_ID filteringMode);
 
 /* OUTPUT_TRIANGLE - how this bugger works
 
@@ -463,18 +491,11 @@ BOOL SetExecuteBufferDefaults()
 	// fill out first render list struct
 	memset(&renderList[0], 0, sizeof(RENDER_STATES));
 	renderList[0].textureID = NO_TEXTURE;
-/*
-	renderList[0].vertStart = 0;
-	renderList[0].vertEnd = 0;
-	renderList[0].filteringType = FILTERING_BILINEAR_OFF;
-	renderList[0].translucencyType = TRANSLUCENCY_OFF;
-*/
+
+	// fill out first ortho render list struct
 	memset(&orthoList[0], 0, sizeof(ORTHO_OBJECTS));
 	orthoList[0].textureID = NO_TEXTURE;
-/*
-	orthoList[0].translucencyType = TRANSLUCENCY_OFF;
-	orthoList[0].filteringType = FILTERING_BILINEAR_OFF;
-*/
+
 	renderTest.push_back(renderList[0]);
 
 	// Enable fog blending.
@@ -486,7 +507,7 @@ BOOL SetExecuteBufferDefaults()
     return TRUE;
 }
 
-void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
+void CheckOrthoBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
 {
 	assert (numVerts == 4);
 
@@ -537,9 +558,9 @@ void CheckOrthoBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE
 	orthoListCount++;
 }
 
-void CheckVertexBuffer(size_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON) 
+void CheckVertexBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON) 
 {
-	size_t realNumVerts = 0;
+	uint32_t realNumVerts = 0;
 
 	switch (numVerts) 
 	{
@@ -871,7 +892,7 @@ BOOL ExecuteBuffer()
 	}
 
 	D3DXMATRIX matProjection;
-	D3DXMatrixPerspectiveFovLH( &matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+	D3DXMatrixPerspectiveFovLH( &matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, /*1000000*/65536.0f);
 	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matProjection );
 /*
 	D3DXMATRIX matView; 
@@ -880,9 +901,9 @@ BOOL ExecuteBuffer()
 	D3DXVECTOR3 lookAt = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXVECTOR3 up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 	D3DXMatrixLookAtLH( &matView, &position, &lookAt, &up );
-	
-	d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matView );
-*/
+*/	
+	d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &viewMatrix );
+
 	ChangeTextureAddressMode(TEXTURE_WRAP);
 
 	D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Before DrawIndexedPrimitive for non transparents\n"));
@@ -897,7 +918,7 @@ BOOL ExecuteBuffer()
 		ChangeTranslucencyMode(renderTest[i].translucencyType);
 		ChangeFilteringMode(renderTest[i].filteringType);
 
-		UINT numPrimitives = (renderTest[i].indexEnd - renderTest[i].indexStart) / 3;
+		uint32_t numPrimitives = (renderTest[i].indexEnd - renderTest[i].indexStart) / 3;
 
 		if (numPrimitives > 0) 
 		{
@@ -931,7 +952,7 @@ BOOL ExecuteBuffer()
 		ChangeTranslucencyMode(renderTest[i].translucencyType);
 		ChangeFilteringMode(renderTest[i].filteringType);
 
-		UINT numPrimitives = (renderTest[i].indexEnd - renderTest[i].indexStart) / 3;
+		uint32_t numPrimitives = (renderTest[i].indexEnd - renderTest[i].indexStart) / 3;
 
 		if (numPrimitives > 0) 
 		{
@@ -975,9 +996,9 @@ BOOL ExecuteBuffer()
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
 
-//		D3DXMATRIX matView; 
-//		D3DXMatrixIdentity( &matView );
-//		d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matView );
+		D3DXMATRIX matView; 
+		D3DXMatrixIdentity( &matView );
+		d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matView );
 
 		D3DXMATRIX matOrtho;
 		D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
@@ -2131,12 +2152,12 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 	if (RAINBOWBLOOD_CHEATMODE)
 	{
 		colour = RGBALIGHT_MAKE
-							  (
-							  	FastRandom()&255,
-							  	FastRandom()&255,
-							  	FastRandom()&255,
-							  	decalDescPtr->Alpha
-							  );
+				(
+					FastRandom()&255,
+					FastRandom()&255,
+					FastRandom()&255,
+					decalDescPtr->Alpha
+				);
 	}
 
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, decalDescPtr->TranslucencyType);
@@ -2167,7 +2188,7 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 //			mainVertex[vb].rhw = 1.0f;
 
 			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = specular;//RGBALIGHT_MAKE(vertices->SpecularR,vertices->SpecularG,vertices->SpecularB,fog);
+			mainVertex[vb].specular = specular;
 
 //			mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
 //			mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
@@ -2249,17 +2270,17 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	if (RAINBOWBLOOD_CHEATMODE)
 	{
 		colour = RGBALIGHT_MAKE
-							  (
-							  	FastRandom()&255,
-							  	FastRandom()&255,
-							  	FastRandom()&255,
-							  	particleDescPtr->Alpha
-							  );
+					(
+						FastRandom()&255,
+						FastRandom()&255,
+						FastRandom()&255,
+						particleDescPtr->Alpha
+					);
 	}
 		float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
 
 		{
-			for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++ )
+			for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++ )
 			{
 				RENDERVERTEX *vertices = &renderVerticesPtr[i];
 /*
@@ -2291,10 +2312,9 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 				mainVertex[vb].sx = (float)vertices->X;
 				mainVertex[vb].sy = (float)-vertices->Y;
 				mainVertex[vb].sz = (float)vertices->Z;
-//				mainVertex[vb].rhw = 1.0f;
 
 				mainVertex[vb].color = colour;
-	 			mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);//RGBALIGHT_MAKE(vertices->SpecularR,vertices->SpecularG,vertices->SpecularB,fog);
+	 			mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 
 //				mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
 //				mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
@@ -2914,8 +2934,8 @@ signed int ForceFieldPointVelocity[15*3+1][16];
 unsigned char ForceFieldPointColour1[15*3+1][16];
 unsigned char ForceFieldPointColour2[15*3+1][16];
 
-int Phase=0;
-int ForceFieldPhase=0;
+int Phase = 0;
+int ForceFieldPhase = 0;
 
 void InitForceField(void)
 {
@@ -2960,8 +2980,9 @@ void UpdateWaterFall(void)
 
 void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin)
 {
-	int noRequired = MUL_FIXED(250,NormalFrameTime);
-	for (int i=0; i<noRequired; i++)
+	uint32_t noRequired = MUL_FIXED(250, NormalFrameTime);
+
+	for (uint32_t i = 0; i < noRequired; i++)
 	{
 		VECTORCH velocity;
 		VECTORCH position;
@@ -2979,7 +3000,7 @@ void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin)
 void DrawFrameRateBar(void)
 {
 	int width = DIV_FIXED(ScreenDescriptorBlock.SDB_Width/120,NormalFrameTime);
-	if (width>ScreenDescriptorBlock.SDB_Width) width=ScreenDescriptorBlock.SDB_Width;
+	if (width>ScreenDescriptorBlock.SDB_Width) width = ScreenDescriptorBlock.SDB_Width;
 
 	r2rect rectangle
 	(
@@ -2989,7 +3010,7 @@ void DrawFrameRateBar(void)
 	);
 //		textprint("width %d\n",width);
 
-	rectangle . AlphaFill
+	rectangle.AlphaFill
 	(
 		0xff, // unsigned char R,
 		0x00,// unsigned char G,
@@ -3366,8 +3387,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 
 		mainVertex[vb].sx = (float)vertices->X;
 		mainVertex[vb].sy = (float)-vertices->Y;
-		mainVertex[vb].sz = 64.0f;
-//		mainVertex[vb].rhw = 1.0f;
+		mainVertex[vb].sz = 1.0f;
 
   		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
@@ -3399,9 +3419,10 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 	// 450 triangles has 3 * 450 vertices which = 1350
 	CheckVertexBuffer(256, currentWaterTexture, TRANSLUCENCY_NORMAL);
 
-	for (int i=0; i<256; i++)
+	for (uint32_t i=0; i < 256; i++)
 	{
-		if (point->vz<=1) point->vz = 1;
+		if (point->vz <= 1) 
+			point->vz = 1;
 /*
 		int x = (point->vx*(Global_VDB_Ptr->VDB_ProjX+1))/point->vz+Global_VDB_Ptr->VDB_CentreX;
 		int y = (point->vy*(Global_VDB_Ptr->VDB_ProjY+1))/point->vz+Global_VDB_Ptr->VDB_CentreY;
@@ -3421,7 +3442,6 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 		mainVertex[vb].sx = (float)point->vx;
 		mainVertex[vb].sy = (float)-point->vy;
 		mainVertex[vb].sz = (float)point->vz;
-//		mainVertex[vb].rhw = 1.0f;
 
 	   	mainVertex[vb].color = MeshVertexColour[i];
 		mainVertex[vb].specular = 0;
@@ -3942,7 +3962,8 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 extern void D3D_FadeDownScreen(int brightness, int colour)
 {
 	int t = 255 - (brightness>>8);
-	if (t < 0) t = 0;
+	if (t < 0) 
+		t = 0;
 
 	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_NORMAL, TEXTURE_WRAP);
 

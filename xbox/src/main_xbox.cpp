@@ -732,8 +732,3 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 {
 	return 1;
 }
-
-PROCESSORTYPES ReadProcessorType(void)
-{
-	return PType_PentiumMMX;
-}

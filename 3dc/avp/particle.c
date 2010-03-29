@@ -3301,9 +3301,10 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 		particlePtr++;
 	}
 }
+
 void DoFlareCorona(DISPLAYBLOCK *objectPtr)
 {
-	VECTORCH position=objectPtr->ObWorld;
+	VECTORCH position = objectPtr->ObWorld;
 	
 	if (CameraCanSeeThisPosition_WithIgnore(objectPtr,&position))
 	{

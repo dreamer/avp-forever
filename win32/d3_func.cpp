@@ -737,8 +737,8 @@ D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL po
 }
 
 // size of vertex and index buffers
-const int MAX_VERTEXES = 4096;
-const int MAX_INDICES = 9216;
+const uint32_t MAX_VERTEXES = 4096;
+const uint32_t MAX_INDICES = 9216;
 
 BOOL ReleaseVolatileResources() 
 {
@@ -1183,8 +1183,8 @@ BOOL InitialiseDirect3D()
 		d3dpp.BackBufferHeight = height;
 		// setting this to interval one will cap the framerate to monitor refresh
 		// the timer goes a bit mad if this isnt capped!
-		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 //		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 		ChangeWindowsSize(d3dpp.BackBufferWidth, d3dpp.BackBufferHeight);
 	}
