@@ -1051,9 +1051,10 @@ IndexedFont_Kerned_Column :: OverlapOnRow
 		// Find right-most pixel in row of first character
 		int rightmostX;
 		int firstoffsetY = Row+(currentOffset*GetHeight());
+
+#if 0 // bjd
 		for (rightmostX=GetMaxWidth()-1;rightmostX>0;rightmostX--)
 		{
-#if 0 // bjd
 			if
 			(
 				bOpaque
@@ -1067,15 +1068,16 @@ IndexedFont_Kerned_Column :: OverlapOnRow
 			{
 				break;
 			}
-#endif
 		}
+#endif
 		
 		// Find left-most pixel in row of second character
 		int leftmostX;
 		int nextoffsetY = Row+(nextOffset*GetHeight());
+
+#if 0 // bjd
 		for (leftmostX=0;leftmostX<GetMaxWidth();leftmostX++)
 		{
-#if 0 // bjd
 			if
 			(
 				bOpaque
@@ -1088,8 +1090,8 @@ IndexedFont_Kerned_Column :: OverlapOnRow
 			{
 				break;
 			}
-#endif
 		}
+#endif
 
 		// Is there an overlap when displaced by the proposed XInc?
 		{

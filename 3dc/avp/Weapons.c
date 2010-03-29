@@ -9886,15 +9886,13 @@ void Staff_Idle(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 				}
 			} else if ((FastRandom()&255)==0) {
 				/* Start animation. */
-				#if 1
+
 				if (HModelSequence_Exists(&PlayersWeaponHModelController,HMSQT_PredatorHUD,(int)PHSS_Fidget)) {
 					InitHModelTweening(&PlayersWeaponHModelController,(ONE_FIXED>>2),HMSQT_PredatorHUD,(int)PHSS_Fidget,-1,0);
 					weaponPtr->StateTimeOutCounter=0;
 					WeaponFidgetPlaying=1;
 				}
-				#endif
 			}
-		
 		}
 	}
 }
@@ -11064,17 +11062,17 @@ void ChangeHUDToAlternateShapeSet(char *riffname,char *setname) {
 
 	a=0;
 
-	while (replacement_array[a].replaced_section_name!=NULL) {
+	while (replacement_array[a].replaced_section_name!=NULL) 
+	{
 		SECTION_DATA *target_section;
 
 		target_section=GetThisSectionData(PlayersWeaponHModelController.section_data,
 			replacement_array[a].replaced_section_name);
-		if (target_section) {
+		if (target_section) 
+		{
 			target_section->Shape=replacement_array[a].replacement_shape;
-			#if 1
 			target_section->ShapeNum=replacement_array[a].replacement_shape_index;
-			#endif
-			
+
 			Setup_Texture_Animation_For_Section(target_section);
 		}
 		a++;

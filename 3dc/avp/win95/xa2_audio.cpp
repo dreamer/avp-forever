@@ -1882,7 +1882,6 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 
 int PlatUse3DSoundHW()
 {
-#if 1
 	unsigned int count = SoundMaxHW;
 
 	if (SoundConfig.flags & SOUND_USE_3DHW)
@@ -1920,13 +1919,12 @@ int PlatUse3DSoundHW()
 */
 	   	}
 	}
-#endif
+
 	return 1;
 }
 
 int PlatDontUse3DSoundHW()
 {
-#if 1
 	unsigned int count = SoundMaxHW;
 
 	if (~SoundConfig.flags & SOUND_USE_3DHW)
@@ -1947,7 +1945,7 @@ int PlatDontUse3DSoundHW()
 //			ActiveSounds[count].ds3DBufferP = NULL;
 	   	}
 	}
-#endif
+
 	return 1;
 }
 

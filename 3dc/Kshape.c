@@ -4035,14 +4035,12 @@ extern void TranslationSetup(void)
 	ViewMatrix[9] = (float)(Global_VDB_Ptr->VDB_Mat.mat23)/65536.0f*CameraZoomScale;
 	ViewMatrix[10] = (float)(Global_VDB_Ptr->VDB_Mat.mat33)/65536.0f*CameraZoomScale;
 
-	RotateVector(&v, &Global_VDB_Ptr->VDB_Mat);
+//	RotateVector(&v, &Global_VDB_Ptr->VDB_Mat);
 
 	// position
-	ViewMatrix[3] = ((float)-v.vx)*o;
-	ViewMatrix[7] = ((float)-v.vy)*1.0f/1.0f*p;
-	ViewMatrix[11] = ((float)-v.vz)*CameraZoomScale;
-
-	UpdateViewMatrix(&ViewMatrix[0]);
+	ViewMatrix[3] = ((float)v.vx)*o;
+	ViewMatrix[7] = ((float)v.vy)*1.0f/1.0f*p;
+	ViewMatrix[11] = ((float)v.vz)*CameraZoomScale;
 
 /*
 	sprintf(buf, 
@@ -4068,6 +4066,8 @@ extern void TranslationSetup(void)
 		ViewMatrix[2] =	-ViewMatrix[2];
 		ViewMatrix[3] =	-ViewMatrix[3];
 	}
+
+	UpdateViewMatrix(&ViewMatrix[0]);
 }
 
 static void TranslatePoint(const float *source, float *dest, const float *matrix)

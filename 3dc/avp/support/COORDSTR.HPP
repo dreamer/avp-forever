@@ -137,7 +137,6 @@
 
 	};
 
-#if 1
 	class HomingCoordinate : public CoordinateWithVelocity
 	{
 		protected:
@@ -251,8 +250,6 @@
 		
 	};
 		inline int AcyclicFixedSpeedHoming::GetTarget_Int(void) const {return Int_TargetCoord_Val;}
-
-#endif
 
 /* Exported globals *****************************************************/
 

@@ -504,6 +504,7 @@ extern FIXED_DECAL* AllocateFixedDecal(void)
 	LOCALASSERT(decalPtr);
 	return decalPtr;
 }
+
 extern void RemoveFixedDecal(void)
 {
 	if (CurrentFixedDecalIndex)
@@ -522,6 +523,7 @@ extern void RemoveAllFixedDecals(void)
 		NumFixedDecals = 0;
 	}
 }
+
 void MakeDecal(enum DECAL_ID decalID, VECTORCH *normalPtr, VECTORCH *positionPtr, int moduleIndex)
 {
 	if (TooManyDecalsOfThisType(decalID,positionPtr)) return;
@@ -694,7 +696,6 @@ void AddDecal(enum DECAL_ID decalID, VECTORCH *normalPtr, VECTORCH *positionPtr,
 		decalPtr->Vertices[3].vx += positionPtr->vx;
 		decalPtr->Vertices[3].vy += positionPtr->vy;
 		decalPtr->Vertices[3].vz += positionPtr->vz;
-
 	}
 
 	decalPtr->ModuleIndex = moduleIndex;

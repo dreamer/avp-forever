@@ -981,7 +981,7 @@ extern void MakePredatorKeyConfigMenu(void)
 	AvPMenu_KeyConfig[i].TextDescription = TEXTSTRING_CONTROLS_RESETTODEFAULT;
 	AvPMenu_KeyConfig[i].HelpString = TEXTSTRING_CONTROLS_RESETTODEFAULT_HELP;
 	i++;
-	#if 1
+
 	for(j=0; j<NUMBER_OF_PREDATOR_INPUTS; j++)
 	{
 		AvPMenu_KeyConfig[i+j].ElementID = AVPMENU_ELEMENT_KEYCONFIG;
@@ -990,12 +990,7 @@ extern void MakePredatorKeyConfigMenu(void)
 		AvPMenu_KeyConfig[i+j].HelpString = TEXTSTRING_KEYCONTROLS_HELP;
 
 	}
-	#else
-	AvPMenu_KeyConfig[i].ElementID = AVPMENU_ELEMENT_BUTTONSETTING;
-	AvPMenu_KeyConfig[i].TextDescription = TEXTSTRING_PREDATOR_KEY_FORWARD;
-	AvPMenu_KeyConfig[i].MaxSliderValue = NUMBER_OF_PREDATOR_INPUTS-1;
-	i++;
-	#endif
+
 	AvPMenu_KeyConfig[i+j].ElementID = AVPMENU_ELEMENT_ENDOFMENU;
 }
 
@@ -1015,7 +1010,7 @@ extern void MakeMarineKeyConfigMenu(void)
 	AvPMenu_KeyConfig[i].TextDescription = TEXTSTRING_CONTROLS_RESETTODEFAULT;
 	AvPMenu_KeyConfig[i].HelpString = TEXTSTRING_CONTROLS_RESETTODEFAULT_HELP;
 	i++;
-	#if 1
+
 	for(j=0; j<NUMBER_OF_MARINE_INPUTS; j++)
 	{
 		AvPMenu_KeyConfig[i+j].ElementID = AVPMENU_ELEMENT_KEYCONFIG;
@@ -1023,12 +1018,6 @@ extern void MakeMarineKeyConfigMenu(void)
 		AvPMenu_KeyConfig[i+j].MenuToGoTo = AVPMENU_MAIN;
 		AvPMenu_KeyConfig[i+j].HelpString = TEXTSTRING_KEYCONTROLS_HELP;
 	}
-	#else
-	AvPMenu_KeyConfig[i].ElementID = AVPMENU_ELEMENT_BUTTONSETTING;
-	AvPMenu_KeyConfig[i].TextDescription = TEXTSTRING_MARINE_KEY_FORWARD;
-	AvPMenu_KeyConfig[i].MaxSliderValue = NUMBER_OF_MARINE_INPUTS-1;
-	i++;
-	#endif
 
 	//store the value of AutoWeaponChange in a seperate variable , so we can restore the value
 	//if the user decides to cancel
@@ -1057,7 +1046,7 @@ extern void MakeAlienKeyConfigMenu(void)
 	AvPMenu_KeyConfig[i].TextDescription = TEXTSTRING_CONTROLS_RESETTODEFAULT;
 	AvPMenu_KeyConfig[i].HelpString = TEXTSTRING_CONTROLS_RESETTODEFAULT_HELP;
 	i++;
-	#if 1
+
 	for(j=0; j<NUMBER_OF_ALIEN_INPUTS; j++)
 	{
 		AvPMenu_KeyConfig[i+j].ElementID = AVPMENU_ELEMENT_KEYCONFIG;
@@ -1065,12 +1054,7 @@ extern void MakeAlienKeyConfigMenu(void)
 		AvPMenu_KeyConfig[i+j].MenuToGoTo = AVPMENU_MAIN;
 		AvPMenu_KeyConfig[i+j].HelpString = TEXTSTRING_KEYCONTROLS_HELP;
 	}
-	#else
-	AvPMenu_KeyConfig[i].ElementID = AVPMENU_ELEMENT_BUTTONSETTING;
-	AvPMenu_KeyConfig[i].TextDescription = TEXTSTRING_ALIEN_KEY_FORWARD;
-	AvPMenu_KeyConfig[i].MaxSliderValue = NUMBER_OF_ALIEN_INPUTS-1;
-	i++;
-	#endif
+
 	AvPMenu_KeyConfig[i+j].ElementID = AVPMENU_ELEMENT_ENDOFMENU;
 }
 

@@ -76,7 +76,6 @@ List<SCString*>* WordWrap :: DeprecatedMake
 	// The list to return is initially empty:
 	List<SCString*>* pList_pSCString_Return = new List<SCString*>;
 
-	#if 1
 	{
 		// Iterate through the string:
 		ProjChar* pProjCh_I = SCString_In . pProjCh();
@@ -222,117 +221,6 @@ List<SCString*>* WordWrap :: DeprecatedMake
 
 
 	}
-	#else
-	{
-		// Iterate through the string:
-		ProjChar* pProjCh_I = SCString_In . pProjCh();
-		ProjChar* pProjCh_StartOfLine = pProjCh_I;
-		
-		int CharsInLine = 0;
-
-		int W_Available = W_FirstLine_In;
-
-		while
-		(
-			!STRUTIL_SC_fIsTerminator
-			(
-				pProjCh_I
-			)
-		)
-		{
-			// Determine if adding this character to the line being
-			// formed will make the line too long to fit:
-			if
-			(
-				IndexedFnt_In . CalcSize
-				(
-					pProjCh_StartOfLine,
-					( CharsInLine + 1 )
-				) . w
-				>
-				W_Available
-			)
-			{
-				// It won't fit:
-				if ( CharsInLine > 0 )
-				{
-					// If so, flush the current line by creating a new SCString
-					// for it and start a new line with this as the first character
-					pList_pSCString_Return -> add_entry_end
-					(
-						new SCString
-						(
-							pProjCh_StartOfLine,
-							CharsInLine
-						)
-					);
-
-					pProjCh_StartOfLine = pProjCh_I;
-					CharsInLine = 0;
-						// Note that we don't advance pProjCh_I, but the variant does
-						// decrease since pProjCh_StartOfLine will advance, reducing the number
-						// of characters left to add.
-
-					W_Available = W_Subsequently_In;
-				}
-				else
-				{
-					// Emergency:  the character we have won't fit even by itself in the given
-					// width.  Make a line containing just this character (to avoid infinite loops):
-					pList_pSCString_Return -> add_entry_end
-					(
-						new SCString
-						(
-							pProjCh_StartOfLine,
-							1
-						)
-					);
-
-					pProjCh_I++;
-
-					pProjCh_StartOfLine = pProjCh_I;
-					CharsInLine = 0;
-
-					W_Available = W_Subsequently_In;
-				}
-			}
-			else
-			{
-				// Otherwise, add this character to the line being formed:
-				if
-				(
-					(CharsInLine == 0)
-					&&
-					bWhitespace( *pProjCh_I )
-				)
-				{
-					// Ignore leading whitespace in a line:
-					pProjCh_StartOfLine++;
-				}
-				else
-				{
-					// Add this character to the line being generated:
-					CharsInLine ++;
-				}
-
-				pProjCh_I++;
-
-			}
-		}
-
-		// Flush the final line that was formed:
-		pList_pSCString_Return -> add_entry_end
-		(
-			new SCString
-			(
-				pProjCh_StartOfLine,
-				CharsInLine
-			)
-		);
-
-
-	}
-	#endif
 
 	return pList_pSCString_Return;
 }

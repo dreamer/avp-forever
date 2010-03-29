@@ -485,23 +485,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 						UpdateGame();
 
-						#if 1
-						#if PROFILING_ON 
-					  	ProfileStart();
-						#endif
 						AvpShowViews();
-						#if PROFILING_ON 
-					  	ProfileStop("SHOW VIEW");
-						#endif
 
 						//Do screen shot here so that text and  hud graphics aren't shown
-						#if PROFILING_ON 
-					  	ProfileStart();
-						#endif
 						MaintainHUD();
-						#if PROFILING_ON 
-					  	ProfileStop("RENDER HUD");
-						#endif
 
 						//#if debug
 						FlushTextprintBuffer();
@@ -541,16 +528,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 						ThisFramesRenderingHasFinished();
 					}
 
-					/* JH 5/6/97 - this function may draw translucent polygons to the whole screen */
-					//HandleD3DScreenFading();
-					#else
-					{
-
-					ColourFillBackBuffer(0);
-					}
-					#endif
-
-					
 					FlipBuffers();
 
 					FrameCounterHandler();

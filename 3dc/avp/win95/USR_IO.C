@@ -1842,7 +1842,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			}
 		}
 					   
-		#if 1
+		#if 0
 		textprint("%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",
 			JoystickData.dwXpos,
 			JoystickData.dwYpos,
@@ -1899,7 +1899,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 	}
 	#endif
 	/* KJL 10:55:32 10/9/97 - screen size */
-	#if 1
+	#if 0
 	if(KeyboardInput[KEY_F3])
 		MakeViewingWindowLarger();
 	else if(KeyboardInput[KEY_F4])

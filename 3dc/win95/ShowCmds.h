@@ -46,11 +46,7 @@ extern int PrintDebuggingText(const char* t, ...);
 #endif
 #endif
 
-#if 1
 extern int ReleasePrintDebuggingText(const char* t, ...);
-#else
-#define PrintDebuggingText(ignore)
-#endif
 
 #ifdef __cplusplus
 }

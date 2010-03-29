@@ -261,7 +261,6 @@
 				GetHeight()
 			);
 		}
-		#if 1
 		inline r2size IndexedFont_HUD::CalcSize
 		(
 			ProjChar* pProjCh,
@@ -279,7 +278,7 @@
 				GetHeight()
 			);
 		}
-		#endif
+
 	class IndexedFont_Proportional : public IndexedFont
 	{
 	public:

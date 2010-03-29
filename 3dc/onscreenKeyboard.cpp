@@ -43,7 +43,7 @@
 
 extern "C"
 {
-	extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha);
+//	extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha);
 	extern unsigned char KeyboardInput[];
 	extern char AAFontWidths[256];
 

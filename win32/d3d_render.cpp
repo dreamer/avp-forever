@@ -138,14 +138,20 @@ void UpdateViewMatrix(float *viewMat)
 	viewMatrix._23 = viewMat[9];
 	viewMatrix._33 = viewMat[10];
 
-	viewMatrix._41 = viewMat[3];
-	viewMatrix._42 = -viewMat[7];
-	viewMatrix._43 = viewMat[11];
-
+	// 4th
 	viewMatrix._14 = 0.0f;
 	viewMatrix._24 = 0.0f;
 	viewMatrix._34 = 0.0f;
 	viewMatrix._44 = 1.0f;
+
+	D3DXVECTOR3 right(viewMatrix._11, viewMatrix._21, viewMatrix._31);
+	D3DXVECTOR3 up(viewMatrix._12, viewMatrix._22, viewMatrix._32);
+	D3DXVECTOR3 front(viewMatrix._13, viewMatrix._23, viewMatrix._33);
+	D3DXVECTOR3 position(viewMat[3], -viewMat[7], viewMat[11]);
+
+	viewMatrix._41 = -D3DXVec3Dot(&right, &position);
+	viewMatrix._42 = -D3DXVec3Dot(&up, &position);
+	viewMatrix._43 = -D3DXVec3Dot(&front, &position);
 }
 
 void DrawParticles()
@@ -3661,6 +3667,7 @@ extern void D3D_DrawSlider(int x, int y, int alpha)
 	}
 }
 
+#if 0 // bjd - unused now
 extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha)
 {
 	struct VertexTag quadVertices[4];
@@ -3887,6 +3894,7 @@ extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha)
 		);
 	}
 }
+#endif
 
 extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale)
 {

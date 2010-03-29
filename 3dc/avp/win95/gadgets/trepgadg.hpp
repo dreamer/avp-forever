@@ -120,7 +120,6 @@
 		int MinYDisplacement(void);
 		int MaxYDisplacement(void);
 
-		#if 1
 		// Queue of messages waiting to appear:
 		RefList<SCString> RefList_SCString_ToAppear;
 
@@ -132,11 +131,6 @@
 
 		CheesyDaemon_Flash* p666_CheeseFlash;
 		CheesyDaemon_Lifetime* p666_CheeseLifetime;
-
-		#else
-		// primitive implementation:
-		SCString* pSCString_Current;
-		#endif
 
 		TextReportDaemon_Scroll* p666_Scroll;
 			// scrolling the text box, making it appear and disappear

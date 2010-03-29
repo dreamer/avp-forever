@@ -4431,7 +4431,6 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 //				MakeLightElement(positionPtr, LIGHTELEMENT_ELECTRICAL_EXPLOSION);
 			}
 
-			#if 1
 			for (i=0; i<LocalDetailLevels.NumberOfSmokeParticlesFromSmallExplosion; i++)
 			{
 				VECTORCH position = *positionPtr;
@@ -4440,7 +4439,6 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 				position.vz += (FastRandom()&1023)-512;
 				MakeParticle(&position, positionPtr, PARTICLE_SMOKECLOUD);
 			}
-			#endif
 			break;
 		}
 		case EXPLOSION_PREDATORPISTOL:
@@ -4503,7 +4501,7 @@ void MakeFlechetteExplosionAt(VECTORCH *positionPtr,int seed)
 
 		velocity.vy = -(SeededFastRandom()&65535);
 		{
-			float y = ((float)velocity.vy)/65536.0;
+			float y = ((float)velocity.vy)/65536.0f;
 			y = sqrt(1-y*y);
 
 			f2i(velocity.vx,(float)GetCos(phi)*y);
@@ -4554,7 +4552,7 @@ void MakeMolotovExplosionAt(VECTORCH *positionPtr,int seed)
 
 		velocity.vy = -(SeededFastRandom()&65535);
 		{
-			float y = ((float)velocity.vy)/65536.0;
+			float y = ((float)velocity.vy)/65536.0f;
 			y = sqrt(1-y*y);
 
 			f2i(velocity.vx,(float)GetCos(phi)*y);
@@ -4658,7 +4656,7 @@ void MakeOldVolumetricExplosionAt(VECTORCH *positionPtr)
 
 		velocity.vz = (FastRandom()&131071) - ONE_FIXED;
 		{
-			float z = ((float)velocity.vz)/65536.0;
+			float z = ((float)velocity.vz)/65536.0f;
 			z = sqrt(1-z*z);
 
 			f2i(velocity.vx,(float)GetCos(phi)*z);
@@ -4733,7 +4731,7 @@ void MakeBloodExplosion(VECTORCH *originPtr, int creationRadius, VECTORCH *blast
 
 		velocity.vz = (FastRandom()&131071) - ONE_FIXED;
 		{
-			float z = ((float)velocity.vz)/65536.0;
+			float z = ((float)velocity.vz)/65536.0f;
 			z = sqrt(1-z*z);
 
 			f2i(velocity.vx,(float)GetCos(phi)*z);
@@ -4781,7 +4779,7 @@ void MakeFocusedExplosion(VECTORCH *originPtr, VECTORCH *blastPositionPtr, int n
 
 		velocity.vz = (FastRandom()&131071) - ONE_FIXED;
 		{
-			float z = ((float)velocity.vz)/65536.0;
+			float z = ((float)velocity.vz)/65536.0f;
 			z = sqrt(1-z*z);
 
 			f2i(velocity.vx,(float)GetCos(phi)*z);
@@ -4831,7 +4829,7 @@ void MakePlasmaTrailParticles(DYNAMICSBLOCK *dynPtr, int number)
 
 			velocity.vz = (FastRandom()&131071) - ONE_FIXED;
 			{
-				float z = ((float)velocity.vz)/65536.0;
+				float z = ((float)velocity.vz)/65536.0f;
 				z = sqrt(1-z*z);
 
 				f2i(velocity.vx,(float)GetCos(phi)*z);
@@ -4879,7 +4877,7 @@ void MakeDewlineTrailParticles(DYNAMICSBLOCK *dynPtr, int number)
 
 			velocity.vz = (FastRandom()&131071) - ONE_FIXED;
 			{
-				float z = ((float)velocity.vz)/65536.0;
+				float z = ((float)velocity.vz)/65536.0f;
 				z = sqrt(1-z*z);
 
 				f2i(velocity.vx,(float)GetCos(phi)*z);
