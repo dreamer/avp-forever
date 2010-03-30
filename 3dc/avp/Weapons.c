@@ -2797,7 +2797,7 @@ int MuzzleFlashLength;
 
 void PositionPlayersWeapon(void)
 {
-	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 	PLAYER_WEAPON_DATA *weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
 	TEMPLATE_WEAPON_DATA *twPtr = &TemplateWeapon[weaponPtr->WeaponIDNumber];
 
@@ -3014,7 +3014,6 @@ void PositionPlayersWeaponMuzzleFlash(void)
  	  	mat.mat33 = 65536;	  	
 		 	MatrixMultiply(&PlayersWeaponMuzzleFlash.ObMat,&mat,&PlayersWeaponMuzzleFlash.ObMat);
 	}
-
 }	
 
 
@@ -3095,8 +3094,6 @@ static void StateDependentMovement(PLAYER_STATUS *playerStatusPtr, PLAYER_WEAPON
  			weaponPtr->DirectionOffset.EulerX =-MUL_FIXED(offset,twPtr->RecoilMaxXTilt);
             break;
         }
-        
-        
 		default:
         {
 			/* recentre offsets */		
@@ -3213,8 +3210,8 @@ extern void UpdateWeaponShape(void)
 
 }
 
-void GetHierarchicalWeapon(char *riffname, char *hierarchyname, int sequence_type, int sub_sequence) {
-
+void GetHierarchicalWeapon(char *riffname, char *hierarchyname, int sequence_type, int sub_sequence) 
+{
 	extern SECTION * GetNamedHierarchyFromLibrary(const char * rif_name, const char * hier_name);
 	SECTION *root_section;
 	SECTION_DATA *camera_section;
@@ -3246,20 +3243,19 @@ void GetHierarchicalWeapon(char *riffname, char *hierarchyname, int sequence_typ
 	
 	camera_section=GetThisSectionData(PlayersWeaponHModelController.section_data,"Camera Root");
 
-	if (camera_section) {
+	if (camera_section) 
+	{
 		//PlayersWeaponCameraOffset=camera_section->sempai->sequence_array->first_frame->Offset;
 		GetKeyFrameOffset(camera_section->sempai->sequence_array->first_frame,&PlayersWeaponCameraOffset);
-		PlayersWeaponCameraOffset.vx=-PlayersWeaponCameraOffset.vx;
-		PlayersWeaponCameraOffset.vy=-PlayersWeaponCameraOffset.vy;
-		PlayersWeaponCameraOffset.vz=-PlayersWeaponCameraOffset.vz;
+		PlayersWeaponCameraOffset.vx =- PlayersWeaponCameraOffset.vx;
+		PlayersWeaponCameraOffset.vy =- PlayersWeaponCameraOffset.vy;
+		PlayersWeaponCameraOffset.vz =- PlayersWeaponCameraOffset.vz;
 	} else {
 		GLOBALASSERT(0);
 		/* If you really want, you could do something like... *
 		PlayersWeaponCameraOffset=twPtr->RestPosition;
 		 * But that would cause a compiler error.             */
 	}
-
-
 }
 
 void GrabWeaponShape(PLAYER_WEAPON_DATA *weaponPtr)
@@ -3286,21 +3282,21 @@ void GrabWeaponShape(PLAYER_WEAPON_DATA *weaponPtr)
 	//WeaponSetStartFrame(NULL,NULL);
 	FindEndOfShape(&CentreOfMuzzleOffset,PlayersWeapon.ObShape);
 
-	if (twPtr->HierarchyName) {
-
+	if (twPtr->HierarchyName) 
+	{
 		/* Bit of a cheap test, I know. */
 		GetHierarchicalWeapon(twPtr->RiffName,twPtr->HierarchyName,twPtr->InitialSequenceType,twPtr->InitialSubSequence);
-
-	} else {
+	} 
+	else 
+	{
 		Dispel_HModel(&PlayersWeaponHModelController);
 		PWMFSDP=NULL;
-		PlayersWeaponCameraOffset=twPtr->RestPosition;
+		PlayersWeaponCameraOffset = twPtr->RestPosition;
 	}
 
 	if (twPtr->WeaponInitFunction!=NULL) {
 		(*twPtr->WeaponInitFunction)(weaponPtr);
 	}
-
 }
 
 void GrabMuzzleFlashShape(TEMPLATE_WEAPON_DATA *twPtr)
@@ -4774,10 +4770,10 @@ int PredDiscChangeMode(PLAYER_WEAPON_DATA *weaponPtr) {
 }
 
 
-int MeleeWeapon_180Degree_Front_Core(DAMAGE_PROFILE *damage,int multiple,int range)
+int MeleeWeapon_180Degree_Front_Core(DAMAGE_PROFILE *damage, int multiple, int range)
 {
 	int numberOfObjects = NumOnScreenBlocks;
-	int numhits=0;
+	int numhits = 0;
 	STRATEGYBLOCK *objectToHit=0;
 
 	int hurt_people;
@@ -4803,12 +4799,12 @@ int MeleeWeapon_180Degree_Front_Core(DAMAGE_PROFILE *damage,int multiple,int ran
 			RotateVector(&targetpos,&Global_VDB_Ptr->VDB_Mat);
 
 			/* is it in range? */
-			if (targetpos.vz > 0) {
+			if (targetpos.vz > 0) 
+			{
+				int dist = Approximate3dMagnitude(&targetpos);
 
-				int dist=Approximate3dMagnitude(&targetpos);
-
-				if (dist<range)	{
-
+				if (dist<range)	
+				{
 					DYNAMICSBLOCK *dynPtr = sbPtr->DynPtr;
 			  	  	if (dynPtr)
 					{
@@ -4820,7 +4816,7 @@ int MeleeWeapon_180Degree_Front_Core(DAMAGE_PROFILE *damage,int multiple,int ran
 						since people evidently can't make up their minds. */
 
 						//if (IsThisObjectVisibleFromThisPosition_WithIgnore(Player,objectPtr,&targetposW,range))
-						if (CameraCanSeeThisPosition_WithIgnore(objectPtr,&targetposW))
+						if (CameraCanSeeThisPosition_WithIgnore(objectPtr, &targetposW))
 						{
 
 							int magnitudeOfForce = (5000*damage->Cutting) / dynPtr->Mass;
@@ -4848,16 +4844,20 @@ int MeleeWeapon_180Degree_Front_Core(DAMAGE_PROFILE *damage,int multiple,int ran
 					  			/* Consider player's target. */
 
 								/* Here's the mod. */
-								switch (sbPtr->I_SBtype) {
+								switch (sbPtr->I_SBtype) 
+								{
 									case I_BehaviourMarine:
 									case I_BehaviourMarinePlayer:
 									case I_BehaviourPredator:
 									case I_BehaviourAutoGun:
 									case I_BehaviourAlien:
-										if (hurt_people) {
+										if (hurt_people)
+										{
 											do_attack=1;
 											hurt_people=0;
-										} else {
+										} 
+										else 
+										{
 											do_attack=0;
 										}
 										break;
@@ -4866,33 +4866,43 @@ int MeleeWeapon_180Degree_Front_Core(DAMAGE_PROFILE *damage,int multiple,int ran
 										break;
 								}
 
-								if (do_attack) {
-									if (sbPtr->SBdptr->HModelControlBlock) {
+								if (do_attack) 
+								{
+									if (sbPtr->SBdptr->HModelControlBlock) 
+									{
 										DISPLAYBLOCK *frag;
 
 										frag=HtoHDamageToHModel(sbPtr, damage, real_multiple, NULL, &attack_dir);
 										/* If you're an alien, consider limb rip damage. */
-										if (AvP.PlayerType==I_Alien) {
-											if (sbPtr->I_SBtype==I_BehaviourMarine) {
+										if (AvP.PlayerType==I_Alien) 
+										{
+											if (sbPtr->I_SBtype==I_BehaviourMarine) 
+											{
 												MARINE_STATUS_BLOCK *marineStatusPointer;
 											
 												marineStatusPointer = (MARINE_STATUS_BLOCK *)(sbPtr->SBdataptr);    
 											    LOCALASSERT(marineStatusPointer);	          		
 							
-												if (marineStatusPointer->Android==0) {					
-													if (frag) {
+												if (marineStatusPointer->Android==0) 
+												{					
+													if (frag) 
+													{
 														/* Took off a limb! */
 														LimbRip_AwardHealth();
 													}
 												}
-											} else if (sbPtr->I_SBtype==I_BehaviourNetCorpse) {
+											} 
+											else if (sbPtr->I_SBtype==I_BehaviourNetCorpse) 
+											{
 												NETCORPSEDATABLOCK *corpseDataPtr;
 											
 												corpseDataPtr = (NETCORPSEDATABLOCK *)(sbPtr->SBdataptr);
 												LOCALASSERT(corpseDataPtr);
 							
-												if (corpseDataPtr->Android==0) {					
-													if (frag) {
+												if (corpseDataPtr->Android==0) 
+												{					
+													if (frag) 
+													{
 														/* Took off a limb! */
 														LimbRip_AwardHealth();
 													}
@@ -11344,8 +11354,6 @@ void Save_WeaponsCGlobals()
 
 	block->PlayersWeaponCameraOffset = PlayersWeaponCameraOffset;
 	block->PlayerGunBarrelOffset = PlayerGunBarrelOffset;
-
-	
 
 	Save_SoundState(&weaponHandle);
 }

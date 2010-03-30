@@ -543,17 +543,16 @@ static void DoMotionTracker(void)
 	/* draw static motion tracker background, and the moving scanline */
 	D3D_BLTMotionTrackerToHUD(MTScanLineSize);
 
-  	
-	if(distanceNotLocked) /* if MT hasn't found any contacts this scan */
+	if (distanceNotLocked) /* if MT hasn't found any contacts this scan */
 	{
-		int nearestDistance=DoMotionTrackerBlips();
+		int nearestDistance = DoMotionTrackerBlips();
 		
-   		if (nearestDistance<MOTIONTRACKER_RANGE) /* if picked up some blips */
+   		if (nearestDistance < MOTIONTRACKER_RANGE) /* if picked up some blips */
 		{
-			distance=nearestDistance;
-			distanceNotLocked=0;
+			distance = nearestDistance;
+			distanceNotLocked = 0;
 
-			if (MTSoundHandle==SOUND_NOACTIVEINDEX)
+			if (MTSoundHandle == SOUND_NOACTIVEINDEX)
 			{
 				int panicFactor = MUL_FIXED(nearestDistance,MOTIONTRACKER_SCALE);
 				if (panicFactor < 21845)
@@ -1005,7 +1004,6 @@ static void HandleMarineWeapon(void)
 	
 	/* draw 3d weapon */
 	PositionPlayersWeapon();
-	
 
 	/* if there is no shape name then return */
 	if (twPtr->WeaponShapeName == NULL) return;
@@ -1019,8 +1017,6 @@ static void HandleMarineWeapon(void)
 		PositionPlayersWeaponMuzzleFlash();
 
 	{
-		
-
 		if ((twPtr->MuzzleFlashShapeName != NULL)
 		  	   &&(!twPtr->PrimaryIsMeleeWeapon)
 		  	   &&((weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY) 

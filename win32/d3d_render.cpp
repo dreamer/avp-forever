@@ -477,7 +477,7 @@ BOOL SetExecuteBufferDefaults()
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 
 	d3d.lpD3DDevice->SetRenderState(D3DRS_CULLMODE,	D3DCULL_NONE);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_CLIPPING, FALSE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_CLIPPING, TRUE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_SPECULARENABLE, TRUE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE, TRUE);
@@ -487,7 +487,7 @@ BOOL SetExecuteBufferDefaults()
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
 
 	// enable z writes (already on by default)
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 	D3DZWriteEnable = TRUE;
 
 	// set less + equal z buffer test

@@ -4027,9 +4027,9 @@ extern void TranslationSetup(void)
 	ViewMatrix[2] = (float)(Global_VDB_Ptr->VDB_Mat.mat31)/65536.0f*o;
 
 	// up vector
-	ViewMatrix[4] = (float)(Global_VDB_Ptr->VDB_Mat.mat12)*1.0f/(65536.0f*1.0f)*p;
-	ViewMatrix[5] = (float)(Global_VDB_Ptr->VDB_Mat.mat22)*1.0f/(65536.0f*1.0f)*p;
-	ViewMatrix[6] = (float)(Global_VDB_Ptr->VDB_Mat.mat32)*1.0f/(65536.0f*1.0f)*p;
+	ViewMatrix[4] = (float)(Global_VDB_Ptr->VDB_Mat.mat12)/65536.0f*p;
+	ViewMatrix[5] = (float)(Global_VDB_Ptr->VDB_Mat.mat22)/65536.0f*p;
+	ViewMatrix[6] = (float)(Global_VDB_Ptr->VDB_Mat.mat32)/65536.0f*p;
 
 	// front vector
 	ViewMatrix[8] = (float)(Global_VDB_Ptr->VDB_Mat.mat13)/65536.0f*CameraZoomScale;
@@ -4040,7 +4040,7 @@ extern void TranslationSetup(void)
 
 	// position
 	ViewMatrix[3] = ((float)v.vx)*o;
-	ViewMatrix[7] = ((float)v.vy)*1.0f/1.0f*p;
+	ViewMatrix[7] = ((float)v.vy)*p;
 	ViewMatrix[11] = ((float)v.vz)*CameraZoomScale;
 
 /*
@@ -4251,7 +4251,8 @@ void TranslateShapeVertices(SHAPEINSTR *shapeinstrptr)
 		for (i = shapeinstrptr->sh_numitems; i!=0; i--)
 		{
 			destPtr->vx = (srcPtr->vx+Global_ODB_Ptr->ObView.vx);
-			destPtr->vy = ((srcPtr->vy+Global_ODB_Ptr->ObView.vy)*4)/3;
+//bjd			destPtr->vy = ((srcPtr->vy+Global_ODB_Ptr->ObView.vy)*4)/3;
+			destPtr->vy = (srcPtr->vy+Global_ODB_Ptr->ObView.vy);
 			destPtr->vz = (srcPtr->vz+Global_ODB_Ptr->ObView.vz);
 
 			srcPtr++;

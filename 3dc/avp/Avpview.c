@@ -344,7 +344,7 @@ void InteriorType_Body()
 	ModifyHeadOrientation();
 	{
 		/* eye offset */
-		VECTORCH ioff;
+		VECTORCH eyeOffset;
 		COLLISION_EXTENTS *extentsPtr = 0;
 		PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *)(sbPtr->SBdataptr);
 
@@ -366,35 +366,35 @@ void InteriorType_Body()
 		/* set player state */
 		if (playerStatusPtr->ShapeState == PMph_Standing)
 		{
-			ioff.vy = extentsPtr->StandingTop;
+			eyeOffset.vy = extentsPtr->StandingTop;
 		}
 		else
 		{
-			ioff.vy = extentsPtr->CrouchingTop;
+			eyeOffset.vy = extentsPtr->CrouchingTop;
 		}
 
 		if (LANDOFTHEGIANTS_CHEATMODE)
 		{
-			ioff.vy/=4; //sets player eye level to the floor level
+			eyeOffset.vy/=4; //sets player eye level to the floor level
 		}
 		if (!playerStatusPtr->IsAlive && !MultiplayerObservedPlayer)
 		{
 			extern int deathFadeLevel;
 			
-			ioff.vy = MUL_FIXED(deathFadeLevel*4-3*ONE_FIXED,ioff.vy);
+			eyeOffset.vy = MUL_FIXED(deathFadeLevel*4-3*ONE_FIXED, eyeOffset.vy);
 
-			if (ioff.vy>-100)
+			if (eyeOffset.vy>-100)
 			{
-				ioff.vy = -100;
+				eyeOffset.vy = -100;
 			}
 		}
 				
-		ioff.vx = 0;
-		ioff.vz = 0;//-extentsPtr->CollisionRadius*2;
-		ioff.vy += verticalSpeed/16+200;
+		eyeOffset.vx = 0;
+		eyeOffset.vz = 0;//-extentsPtr->CollisionRadius*2;
+		eyeOffset.vy += verticalSpeed/16+200;
 
-		RotateVector(&ioff, &subjectPtr->ObMat);
-		AddVector(&ioff, &Global_VDB_Ptr->VDB_World);
+		RotateVector(&eyeOffset, &subjectPtr->ObMat);
+		AddVector(&eyeOffset, &Global_VDB_Ptr->VDB_World);
 	}
 	{
 		EULER orientation;
