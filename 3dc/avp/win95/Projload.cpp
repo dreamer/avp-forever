@@ -1512,7 +1512,6 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 			{
 				low_osnp_lif.next();
 			}
-		
 		}
 
 		if(num_detail_level)//we have some lower detail shapes
@@ -1544,11 +1543,8 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 					}
 					deg_ptr++;
 				}
-			}
-
-				
+			}	
 		}
-		
 	}
 	//at this point low_osnp_list ought to be empty , but delete the rest anyway
 	while(low_osnp_list.size())
@@ -1579,8 +1575,7 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 	}
 
 	ghs->setup_alternate_shape_sets(osnp_list,h->fc);
-	
-	
+
 	while (osnp_list.size())
 	{
 		delete osnp_list.first_entry();
@@ -1595,8 +1590,6 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 	Rif_Sound_Directory=0;
 	
 	return(1);
-	
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////

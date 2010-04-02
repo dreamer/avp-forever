@@ -914,13 +914,13 @@ BOOL InitialiseDirect3D()
 	Con_PrintMessage("Starting to initialise Direct3D9");
 
 	// grab the users selected resolution from the config file
-	int width = Config_GetInt("[VideoMode]", "Width", 800);
-	int height = Config_GetInt("[VideoMode]", "Height", 600);
-	int colourDepth = Config_GetInt("[VideoMode]", "ColourDepth", 32);
+	uint32_t width       = Config_GetInt("[VideoMode]", "Width", 800);
+	uint32_t height      = Config_GetInt("[VideoMode]", "Height", 600);
+	uint32_t colourDepth = Config_GetInt("[VideoMode]", "ColourDepth", 32);
 	bool useTripleBuffering = Config_GetBool("[VideoMode]", "UseTripleBuffering", false);
 
 	// set some defaults
-	int defaultDevice = D3DADAPTER_DEFAULT;
+	uint32_t defaultDevice = D3DADAPTER_DEFAULT;
 	bool windowed = false;
 	D3DFORMAT SelectedDepthFormat = D3DFMT_D24S8;
 	D3DFORMAT SelectedAdapterFormat = D3DFMT_X8R8G8B8;
@@ -1088,64 +1088,15 @@ BOOL InitialiseDirect3D()
 						//break;
 
 						// fix this..
-						goto blah;
+						goto wereDone;
 					}
 				}
 			}
 		}
 	}
 
-	blah:
+	wereDone:
 
-#if 0
-
-		// check for a match on height and width
-		if ((d3d.Driver[defaultDevice].DisplayMode[i].Width == width) && (d3d.Driver[defaultDevice].DisplayMode[i].Height == height))
-		{
-			// we found something that matches the users settings
-			if (colourDepth == 32)
-			{
-				SelectedDisplayFormat = DisplayFormats32[0]; // use the first in the list
-
-				// try find a matching depth buffer format
-				for (int j = 0; j < (sizeof(DepthFormats) / sizeof(DepthFormats[0])); j++)
-				{
-					LastError = d3d.lpD3D->CheckDeviceFormat( d3d.CurrentDriver, 
-												D3DDEVTYPE_HAL, 
-												SelectedAdapterFormat, 
-												D3DUSAGE_DEPTHSTENCIL, 
-												D3DRTYPE_SURFACE,
-												DepthFormats[j]);
-
-					// if the format wont work with this depth buffer, try another format
-					if (FAILED(LastError)) 
-						continue;
-
-					LastError = d3d.lpD3D->CheckDepthStencilMatch( d3d.CurrentDriver,
-											D3DDEVTYPE_HAL,
-											SelectedAdapterFormat,
-											SelectedDisplayFormat,
-											DepthFormats[j]);
-
-					// we got valid formats
-					if (!FAILED(LastError))
-					{
-						SelectedDepthFormat = DepthFormats[j];
-						//SelectedDisplayFormat = DisplayFormats[i];
-						gotValidFormats = true;
-						break;
-					}
-				}
-			}
-			else if (colourDepth == 16)
-			{
-				SelectedDisplayFormat = DisplayFormats16[0]; // use the first in the list
-			}
-			gotOne = true;
-			break;
-		}
-	}
-#endif
 	if (!gotOne)
 	{
 		Con_PrintError("Couldn't find match for user requested resolution!");
@@ -1183,8 +1134,8 @@ BOOL InitialiseDirect3D()
 		d3dpp.BackBufferHeight = height;
 		// setting this to interval one will cap the framerate to monitor refresh
 		// the timer goes a bit mad if this isnt capped!
-//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 //		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 		ChangeWindowsSize(d3dpp.BackBufferWidth, d3dpp.BackBufferHeight);
 	}
@@ -1202,49 +1153,6 @@ BOOL InitialiseDirect3D()
 
 	// store the index of the driver we want to use
 	d3d.CurrentDriver = defaultDevice;
-
-#if 0
-	// try to get a depth format that'll work with the selected display format
-	for (int i = 0; i < (sizeof(DisplayFormats) / sizeof(DisplayFormats[0])); i++)
-	{
-		// if we're found a usable backbuffer and depth buffer format, break out of the two loops
-		if (gotValidFormats) 
-			break;
-
-		for (int j = 0; j < (sizeof(DepthFormats) / sizeof(DepthFormats[0])); j++)
-		{
-			LastError = d3d.lpD3D->CheckDeviceFormat( d3d.CurrentDriver, 
-										D3DDEVTYPE_HAL, 
-										SelectedDepthFormat, 
-										D3DUSAGE_DEPTHSTENCIL, 
-										D3DRTYPE_SURFACE,
-										DepthFormats[j]);
-
-			// if the format wont work with this depth buffer, try another format
-			if (FAILED(LastError)) 
-				continue;
-
-			LastError = d3d.lpD3D->CheckDepthStencilMatch( d3d.CurrentDriver,
-									D3DDEVTYPE_HAL,
-									SelectedDepthFormat,
-									DisplayFormats[i],
-									DepthFormats[j]);
-
-			// we got valid formats
-			if (!FAILED(LastError))
-			{
-				SelectedDepthFormat = DepthFormats[j];
-				SelectedDisplayFormat = DisplayFormats[i];
-				gotValidFormats = true;
-				break;
-			}
-		}
-	}
-
-	d3dpp.EnableAutoDepthStencil = true;
-	d3dpp.AutoDepthStencilFormat = SelectedDepthFormat;
-	d3dpp.BackBufferFormat = SelectedDisplayFormat;
-#endif
 
 #if 0 // NVidia PerfHUD
 	UINT adapter_to_use;
@@ -1437,31 +1345,34 @@ void SetTransforms()
 	int wideScreenWidth = 852;
 
 	// setup view matrix
-	D3DXMatrixIdentity( &matView );
+	D3DXMatrixIdentity(&matView );
+/*
 	D3DXVECTOR3 position = D3DXVECTOR3(-64.0f, 280.0f, -1088.0f);
-	D3DXVECTOR3 lookAt = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	D3DXVECTOR3 up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-	D3DXMatrixLookAtLH( &matView, &position, &lookAt, &up );
+	D3DXVECTOR3 lookAt   = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	D3DXVECTOR3 up       = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+
+	D3DXMatrixLookAtLH(&matView, &position, &lookAt, &up );
+*/
 	PrintD3DMatrix("View", matView);
 
 	// set up orthographic projection matrix
 //	D3DXMatrixOrthoOffCenterLH( &matOrtho, 0.0f, wideScreenWidth, 0.0f, 480, 1.0f, 10.0f);
-	D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
+	D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 
 	// set up projection matrix
-	D3DXMatrixPerspectiveFovLH( &matProjection, D3DXToRadian(90), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(90), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
 
 	// print projection matrix?
 	PrintD3DMatrix("Projection", matProjection);
 
 	// multiply view and projection
-	D3DXMatrixMultiply( &matViewProjection, &matView, &matProjection);
+	D3DXMatrixMultiply(&matViewProjection, &matView, &matProjection);
 	PrintD3DMatrix("View and Projection", matViewProjection);
 
 	D3DXMatrixIdentity( &matIdentity );
-	d3d.lpD3DDevice->SetTransform( D3DTS_WORLD, &matIdentity );
-	d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matIdentity );
-	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
+	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,		&matIdentity);
+	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,		&matIdentity);
+	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matOrtho);
 }
 
 void FlipBuffers()

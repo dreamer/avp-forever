@@ -2526,7 +2526,7 @@ void AddNetMsg_PlayerState_Minimal(STRATEGYBLOCK *sbPtr,BOOL sendOrient)
 	
 	/* KJL 17:04:22 26/01/98 - elevation (for weapon, etc.) */
 	{
-		PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+		PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 		messagePtr->Elevation = playerStatusPtr->ViewPanX;
 	}
 

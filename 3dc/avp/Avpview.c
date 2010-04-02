@@ -383,7 +383,7 @@ void InteriorType_Body()
 			
 			eyeOffset.vy = MUL_FIXED(deathFadeLevel*4-3*ONE_FIXED, eyeOffset.vy);
 
-			if (eyeOffset.vy>-100)
+			if (eyeOffset.vy > -100)
 			{
 				eyeOffset.vy = -100;
 			}
@@ -444,7 +444,8 @@ void InteriorType_Body()
 	
 			/* KJL 14:08:50 09/20/96 - the targeting is FRI, but care has to be taken
 			   at very low frame rates to ensure that you can't overshoot */
-			if (targetingSpeed > 65536)	targetingSpeed=65536;
+			if (targetingSpeed > 65536)	
+				targetingSpeed = 65536;
 					
 			zAxisTilt += MUL_FIXED
 				(
@@ -470,12 +471,16 @@ void InteriorType_Body()
 				}
 				else difference = 0;
 
-				if (verticalSpeed < difference) verticalSpeed = difference;
+				if (verticalSpeed < difference) 
+					verticalSpeed = difference;
 				
-			 	if(verticalSpeed > 150*16) verticalSpeed = 150*16;
+			 	if (verticalSpeed > 150*16) 
+					verticalSpeed = 150*16;
 				
 				verticalSpeed -= NormalFrameTime>>2;
-				if (verticalSpeed < 0) verticalSpeed = 0;				
+
+				if (verticalSpeed < 0) 
+					verticalSpeed = 0;				
 				
 				previousVerticalSpeed = relativeVelocity.vy;
 			}
@@ -609,10 +614,6 @@ void AvpShowViews(void)
 
 	/* Update attached object positions and orientations etc. */
 	UpdateCamera();
-
-	/* Initialise the global VMA */
-//	GlobalAmbience=655;
-//	textprint("Global Ambience: %d\n",GlobalAmbience);
 	
 	/* Prepare the View Descriptor Block for use in ShowView() */
 	PrepareVDBForShowView(Global_VDB_Ptr);

@@ -123,20 +123,26 @@ size_t maxParts = 0;
 
 void UpdateViewMatrix(float *viewMat)
 {
+	
+	D3DXVECTOR3 vecRight	(viewMat[0], viewMat[1], viewMat[2]);
+	D3DXVECTOR3 vecUp		(viewMat[4], viewMat[5], viewMat[6]);
+	D3DXVECTOR3 vecFront	(viewMat[8], viewMat[9], viewMat[10]);
+	D3DXVECTOR3 vecPosition (viewMat[3], -viewMat[7], viewMat[11]);
+
 	// right
-	viewMatrix._11 = viewMat[0];
-	viewMatrix._21 = viewMat[1];
-	viewMatrix._31 = viewMat[2];
+	viewMatrix._11 = vecRight.x;
+	viewMatrix._21 = vecRight.y;
+	viewMatrix._31 = vecRight.z;
 
 	// up
-	viewMatrix._12 = viewMat[4];
-	viewMatrix._22 = viewMat[5];
-	viewMatrix._32 = viewMat[6];
+	viewMatrix._12 = vecUp.x;
+	viewMatrix._22 = vecUp.y;
+	viewMatrix._32 = vecUp.z;
 
 	// front
-	viewMatrix._13 = viewMat[8];
-	viewMatrix._23 = viewMat[9];
-	viewMatrix._33 = viewMat[10];
+	viewMatrix._13 = vecFront.x;
+	viewMatrix._23 = vecFront.y;
+	viewMatrix._33 = vecFront.z;
 
 	// 4th
 	viewMatrix._14 = 0.0f;
@@ -144,14 +150,9 @@ void UpdateViewMatrix(float *viewMat)
 	viewMatrix._34 = 0.0f;
 	viewMatrix._44 = 1.0f;
 
-	D3DXVECTOR3 right	(viewMatrix._11, viewMatrix._21, viewMatrix._31);
-	D3DXVECTOR3 up		(viewMatrix._12, viewMatrix._22, viewMatrix._32);
-	D3DXVECTOR3 front	(viewMatrix._13, viewMatrix._23, viewMatrix._33);
-	D3DXVECTOR3 position(viewMat[3], -viewMat[7], viewMat[11]);
-
-	viewMatrix._41 = -D3DXVec3Dot(&right, &position);
-	viewMatrix._42 = -D3DXVec3Dot(&up,	  &position);
-	viewMatrix._43 = -D3DXVec3Dot(&front, &position);
+	viewMatrix._41 = -D3DXVec3Dot(&vecPosition, &vecRight);
+	viewMatrix._42 = -D3DXVec3Dot(&vecPosition, &vecUp);
+	viewMatrix._43 = -D3DXVec3Dot(&vecPosition, &vecFront);
 }
 
 void DrawParticles()
@@ -739,6 +740,8 @@ BOOL BeginD3DScene()
 
 		while (1) 
 		{
+			CheckForWindowsMessages();
+
 			if (D3DERR_DEVICENOTRESET == LastError) 
 			{
 				OutputDebugString("Releasing resources for a device reset..\n");
@@ -898,17 +901,10 @@ BOOL ExecuteBuffer()
 	}
 
 	D3DXMATRIX matProjection;
-	D3DXMatrixPerspectiveFovLH( &matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, /*1000000*/65536.0f);
-	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matProjection );
-/*
-	D3DXMATRIX matView; 
-	D3DXMatrixIdentity( &matView );
-	D3DXVECTOR3 position = D3DXVECTOR3(-64.0f, 280.0f, -1088.0f);
-	D3DXVECTOR3 lookAt = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	D3DXVECTOR3 up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-	D3DXMatrixLookAtLH( &matView, &position, &lookAt, &up );
-*/	
-	d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &viewMatrix );
+	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, /*1000000*/65536.0f);
+
+	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,		&viewMatrix);
+	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matProjection);
 
 	ChangeTextureAddressMode(TEXTURE_WRAP);
 
@@ -5126,34 +5122,76 @@ extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, in
 	quadVertices[2].X = quadVertices[0].X+2+HUD_FONT_HEIGHT*1;
 	quadVertices[3].X = quadVertices[2].X;
 
+	int width = (centreX - (HUD_FONT_HEIGHT/2) - 1) + 2+HUD_FONT_HEIGHT*1;
+
 	while (*stringPtr)
 	{
 		char c = *stringPtr++;
-
 		{
 			int topLeftU = 1+((c-32)&15)*16;
 			int topLeftV = 1+((c-32)>>4)*16;
 
+			// top left
 			quadVertices[0].U = topLeftU - 1;
 			quadVertices[0].V = topLeftV - 1;
+
+			// top right
 			quadVertices[1].U = topLeftU + HUD_FONT_WIDTH;
 			quadVertices[1].V = topLeftV - 1;
+
+			// bottom right
 			quadVertices[2].U = topLeftU + HUD_FONT_WIDTH;
 			quadVertices[2].V = topLeftV + HUD_FONT_HEIGHT + 1;
+
+			// bottom left
 			quadVertices[3].U = topLeftU - 1;
 			quadVertices[3].V = topLeftV + HUD_FONT_HEIGHT + 1;
 
-			quadVertices[0].Y = y ;
+			quadVertices[0].Y = y;
 			quadVertices[1].Y = y - HUD_FONT_WIDTH*1 -1;
 			quadVertices[2].Y = y - HUD_FONT_WIDTH*1 -1;
-			quadVertices[3].Y = y ;
+			quadVertices[3].Y = y;
 
+			int height = y - (y - HUD_FONT_WIDTH*1 -1);
+
+			int uvArray[8];
+
+			// bottom left
+			uvArray[0] = topLeftU - 1;
+			uvArray[1] = topLeftV + HUD_FONT_HEIGHT + 1;
+
+			// top left
+			uvArray[2] = topLeftU - 1;
+			uvArray[3] = topLeftV - 1;
+
+			// bottom right
+			uvArray[4] = topLeftU + HUD_FONT_WIDTH;
+			uvArray[5] = topLeftV + HUD_FONT_HEIGHT + 1;
+
+			// top right
+			uvArray[6] = topLeftU + HUD_FONT_WIDTH;
+			uvArray[7] = topLeftV - 1;
+
+			New_D3D_HUDQuad_Output
+			(
+				AAFontImageNumber, 
+				centreX - (HUD_FONT_HEIGHT/2) - 1,
+				y,
+				width,
+				height,
+				uvArray,
+				colour,
+				FILTERING_BILINEAR_OFF
+			);
+
+/*
 			D3D_HUDQuad_Output
 			(
 				AAFontImageNumber,
 				quadVertices,
 				colour
 			);
+*/
 		}
 	   	y -= AAFontWidths[(unsigned char)c];
 	}

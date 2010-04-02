@@ -11,6 +11,8 @@
 
 extern "C" {
 
+extern D3DXMATRIX viewMatrix;
+
 #ifdef DAVEW
 	#define DB_LEVEL 4
 #else
@@ -1586,6 +1588,39 @@ void PlatUpdatePlayer()
 		extern int NormalFrameTime;
 		extern int DopplerShiftIsOn;
 
+		//viewMatrix
+		D3DXVECTOR3 vPos;
+		D3DXVECTOR3 vLookAt;
+		D3DXVECTOR3 vUp;
+
+		vPos.x = -viewMatrix._41;
+		vPos.y = -viewMatrix._42;
+		vPos.z = -viewMatrix._43;
+
+		vLookAt.x = viewMatrix._13;
+		vLookAt.y = viewMatrix._23;
+		vLookAt.z = viewMatrix._33;
+
+		vUp.x = viewMatrix._12;
+		vUp.y = viewMatrix._22;
+		vUp.z = viewMatrix._32;
+
+		D3DXMatrixTranspose(&viewMatrix, &viewMatrix);
+		D3DXVec3TransformNormal(&vPos, &vPos, &viewMatrix);
+
+		XA2Listener.Position.x = vPos.x;
+		XA2Listener.Position.y = vPos.y;
+		XA2Listener.Position.z = vPos.z;
+
+		XA2Listener.OrientFront.x = vLookAt.x;
+		XA2Listener.OrientFront.y = vLookAt.y;
+		XA2Listener.OrientFront.z = vLookAt.z;
+
+		XA2Listener.OrientTop.x = vUp.x;
+		XA2Listener.OrientTop.y = vUp.y;
+		XA2Listener.OrientTop.z = vUp.z;
+
+/*
 		XA2Listener.Position.x = static_cast<float>(Global_VDB_Ptr->VDB_World.vx);
 		XA2Listener.Position.y = static_cast<float>(Global_VDB_Ptr->VDB_World.vy);
 		XA2Listener.Position.z = static_cast<float>(Global_VDB_Ptr->VDB_World.vz);
@@ -1599,6 +1634,7 @@ void PlatUpdatePlayer()
 		XA2Listener.OrientTop.x = (float)((Global_VDB_Ptr->VDB_Mat.mat12) / 65536.0F);
 		XA2Listener.OrientTop.y = (float)((Global_VDB_Ptr->VDB_Mat.mat22) / 65536.0F);
 		XA2Listener.OrientTop.z = (float)((Global_VDB_Ptr->VDB_Mat.mat32) / 65536.0F);
+*/
 /*
 			char buf2[250];
 			sprintf(buf2, "of:x %f of:y %f of:z :%f - ot:x %f ot:y %f ot:z :%f\n", 
@@ -1645,8 +1681,8 @@ void PlatUpdatePlayer()
 
 			X3DAudioCalculate(x3DInstance, &XA2Listener, &ActiveSounds[i].xa2Emitter, calcFlags, &XA2DSPSettings);
 
-//			sprintf(buf, "1: %f 2: %f\n", XA2DSPSettings.pMatrixCoefficients[0], XA2DSPSettings.pMatrixCoefficients[1]);
-//			OutputDebugString(buf);
+			sprintf(buf, "1: %f 2: %f\n", XA2DSPSettings.pMatrixCoefficients[0], XA2DSPSettings.pMatrixCoefficients[1]);
+			OutputDebugString(buf);
 
 			ActiveSounds[i].pSourceVoice->SetOutputMatrix(pMasteringVoice, 1, 2, XA2DSPSettings.pMatrixCoefficients);
 //			ActiveSounds[i].pSourceVoice->SetFrequencyRatio(XA2DSPSettings.DopplerFactor);

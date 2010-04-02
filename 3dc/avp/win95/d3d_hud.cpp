@@ -238,7 +238,6 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 		FILTERING_BILINEAR_OFF
 	);
 
-
 /*	
 	D3D_HUDQuad_Output
 	(

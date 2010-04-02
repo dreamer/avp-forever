@@ -3199,15 +3199,18 @@ extern void UpdateWeaponShape(void)
 
 	GrabWeaponShape(weaponPtr);
 
-	if (!(twPtr->PrimaryIsMeleeWeapon)) GrabMuzzleFlashShape(twPtr);
+	if (!(twPtr->PrimaryIsMeleeWeapon)) 
+		GrabMuzzleFlashShape(twPtr);
 
 	PlayersWeapon.ObTxAnimCtrlBlks=weaponPtr->TxAnimCtrl;
-	if (twPtr->HasShapeAnimation) {
+	if (twPtr->HasShapeAnimation) 
+	{
 		PlayersWeapon.ShapeAnimControlBlock=&weaponPtr->ShpAnimCtrl;
-	} else {
+	} 
+	else 
+	{
 		PlayersWeapon.ShapeAnimControlBlock=NULL;
 	}
-
 }
 
 void GetHierarchicalWeapon(char *riffname, char *hierarchyname, int sequence_type, int sub_sequence) 
@@ -3232,25 +3235,29 @@ void GetHierarchicalWeapon(char *riffname, char *hierarchyname, int sequence_typ
 	PlayersWeapon.HModelControlBlock->Looped=1;
 
 	PWMFSDP=GetThisSectionData(PlayersWeaponHModelController.section_data,"dum flash");
-	if (PWMFSDP==NULL) {
+	if (PWMFSDP==NULL) 
+	{
 		PWMFSDP=GetThisSectionData(PlayersWeaponHModelController.section_data,"Dum flash");
 		/* ?&$(*"*&^ pred pistol!!! */
-		if (PWMFSDP==NULL) {
+		if (PWMFSDP==NULL) 
+		{
 			PWMFSDP=GetThisSectionData(PlayersWeaponHModelController.section_data,"Dum Flash");
 		}
 	}
 	/* Could be NULL though, I don't care at this stage. */
 	
-	camera_section=GetThisSectionData(PlayersWeaponHModelController.section_data,"Camera Root");
+	camera_section = GetThisSectionData(PlayersWeaponHModelController.section_data,"Camera Root");
 
 	if (camera_section) 
 	{
 		//PlayersWeaponCameraOffset=camera_section->sempai->sequence_array->first_frame->Offset;
-		GetKeyFrameOffset(camera_section->sempai->sequence_array->first_frame,&PlayersWeaponCameraOffset);
+		GetKeyFrameOffset(camera_section->sempai->sequence_array->first_frame, &PlayersWeaponCameraOffset);
 		PlayersWeaponCameraOffset.vx =- PlayersWeaponCameraOffset.vx;
 		PlayersWeaponCameraOffset.vy =- PlayersWeaponCameraOffset.vy;
 		PlayersWeaponCameraOffset.vz =- PlayersWeaponCameraOffset.vz;
-	} else {
+	} 
+	else 
+	{
 		GLOBALASSERT(0);
 		/* If you really want, you could do something like... *
 		PlayersWeaponCameraOffset=twPtr->RestPosition;
@@ -3290,11 +3297,12 @@ void GrabWeaponShape(PLAYER_WEAPON_DATA *weaponPtr)
 	else 
 	{
 		Dispel_HModel(&PlayersWeaponHModelController);
-		PWMFSDP=NULL;
+		PWMFSDP = NULL;
 		PlayersWeaponCameraOffset = twPtr->RestPosition;
 	}
 
-	if (twPtr->WeaponInitFunction!=NULL) {
+	if (twPtr->WeaponInitFunction!=NULL) 
+	{
 		(*twPtr->WeaponInitFunction)(weaponPtr);
 	}
 }
@@ -3379,48 +3387,6 @@ void FindEndOfShape(VECTORCH* endPositionPtr, int shapeIndex)
     return;
 }
 
-
-#if 0
-static void FireLineOfSightAmmo(enum AMMO_ID AmmoID, VECTORCH* sourcePtr, VECTORCH* directionPtr, int multiple)
-{
-	#if 0
-	LOS_Lambda = 10000000;
-	LOS_ObjectHitPtr = 0;
-	LOS_HModel_Section=NULL;
-	{
-	   	extern int NumActiveBlocks;
-		extern DISPLAYBLOCK* ActiveBlockList[];
-	   	int numberOfObjects = NumActiveBlocks;
-		
-	   	while (numberOfObjects--)
-		{
-			DISPLAYBLOCK* objectPtr = ActiveBlockList[numberOfObjects];
-			VECTORCH alpha = *sourcePtr;
-			VECTORCH beta = *directionPtr;
-			GLOBALASSERT(objectPtr);
-
-			CheckForVectorIntersectionWith3dObject(objectPtr, &alpha, &beta,1);
-		}
-	}
-  	#else
-	FindPolygonInLineOfSight(directionPtr,sourcePtr,0,NULL);
-	#endif
-
-	if (LOS_ObjectHitPtr)
-	{
-		/* this fn needs updating to take amount of damage into account etc. */
-		if (LOS_ObjectHitPtr->ObStrategyBlock) {
-			if ((LOS_ObjectHitPtr->ObStrategyBlock->SBdptr)&&(LOS_HModel_Section)) {
-				GLOBALASSERT(LOS_ObjectHitPtr->ObStrategyBlock->SBdptr->HModelControlBlock==LOS_HModel_Section->my_controller);
-			}
-		}
-
-		HandleWeaponImpact(&LOS_Point,LOS_ObjectHitPtr->ObStrategyBlock,AmmoID,directionPtr, multiple*ONE_FIXED, LOS_HModel_Section);
-	}
-}
-#endif
-
-
 static void CalculateTorque(EULER *rotationPtr, VECTORCH *directionPtr, STRATEGYBLOCK *sbPtr)
 {
 	VECTORCH point,absPoint;
@@ -3428,7 +3394,7 @@ static void CalculateTorque(EULER *rotationPtr, VECTORCH *directionPtr, STRATEGY
 	DYNAMICSBLOCK *dynPtr = sbPtr->DynPtr;
 
 	{
-		MATRIXCH mat=dynPtr->OrientMat;
+		MATRIXCH mat = dynPtr->OrientMat;
 		TransposeMatrixCH(&mat);
 		
 		point.vx = directionPtr->vx - dynPtr->Position.vx;
@@ -3438,7 +3404,7 @@ static void CalculateTorque(EULER *rotationPtr, VECTORCH *directionPtr, STRATEGY
 		RotateVector(&point,&mat);
 	}
 
-	absPoint=point;
+	absPoint = point;
 	if (absPoint.vx<0) absPoint.vx = -absPoint.vx;
 	if (absPoint.vy<0) absPoint.vy = -absPoint.vy;
 	if (absPoint.vz<0) absPoint.vz = -absPoint.vz;
@@ -3501,7 +3467,6 @@ static void CalculateTorque(EULER *rotationPtr, VECTORCH *directionPtr, STRATEGY
 		default:
 			break;
 	}
-
 }
 
 
@@ -3585,8 +3550,6 @@ static void CalculateTorqueAtPoint(EULER *rotationPtr, VECTORCH *pointPtr, STRAT
 			}
 		}
 	}
-	
-
 
 	switch (intersectionPlane)
 	{
@@ -3735,6 +3698,7 @@ void AlienClawTrajectory(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr)
 	PlayersWeapon.ObMat.mat12 = -PlayersWeapon.ObMat.mat12;
 	PlayersWeapon.ObMat.mat13 = -PlayersWeapon.ObMat.mat13;
 }
+
 void AlienClawEndTrajectory(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr)
 {
 //    TEMPLATE_WEAPON_DATA *twPtr = &TemplateWeapon[weaponPtr->WeaponIDNumber];
@@ -3800,9 +3764,6 @@ void PredWristbladeTrajectory(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr)
 }
 
 
-
-
-
 /* in mm */
 //#define ACTIVATION_Z_RANGE 3000
 //#define ACTIVATION_X_RANGE 500
@@ -3819,7 +3780,7 @@ int DamageObjectInLineOfSight(PLAYER_WEAPON_DATA *weaponPtr)
 	
 	while (numberOfObjects)
 	{
-		DISPLAYBLOCK* objectPtr = OnScreenBlockList[--numberOfObjects];
+		DISPLAYBLOCK *objectPtr = OnScreenBlockList[--numberOfObjects];
 		STRATEGYBLOCK *sbPtr = objectPtr->ObStrategyBlock;
 		GLOBALASSERT(objectPtr);
 		
@@ -3889,8 +3850,8 @@ void PredDiscThrowTrajectory(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr)
 	}
 }
 
-static void DamageDamageBlock(DAMAGEBLOCK *DBPtr, DAMAGE_PROFILE *damage, int multiple) {
-
+static void DamageDamageBlock(DAMAGEBLOCK *DBPtr, DAMAGE_PROFILE *damage, int multiple) 
+{
 	/* Separate function to ease writing clarity. */
 
 	int ArmourDamage;
@@ -4146,18 +4107,18 @@ static void DamageDamageBlock(DAMAGEBLOCK *DBPtr, DAMAGE_PROFILE *damage, int mu
 		}
 	
 		Integer--;
-	
 	}
-	
 }
 
-void InitThisWeapon(PLAYER_WEAPON_DATA *pwPtr) {
+void InitThisWeapon(PLAYER_WEAPON_DATA *pwPtr) 
+{
 
 	TEMPLATE_WEAPON_DATA *twPtr;
 	int shapenum;
 	SHAPEHEADER *shptr;
 
-	if (pwPtr->WeaponIDNumber==NULL_WEAPON) {
+	if (pwPtr->WeaponIDNumber==NULL_WEAPON) 
+	{
 		/* D'oh! */
 		pwPtr->TxAnimCtrl=NULL;
 		pwPtr->ShpAnimCtrl.current.seconds_per_frame=0;
@@ -4204,7 +4165,8 @@ void InitThisWeapon(PLAYER_WEAPON_DATA *pwPtr) {
 	shapenum = GetLoadedShapeMSL(twPtr->WeaponShapeName);
 	shptr=GetShapeData(shapenum);
 
-	if (twPtr->HasTextureAnimation) {
+	if (twPtr->HasTextureAnimation) 
+	{
 		int item_num;
 		TXACTRLBLK **pptxactrlblk;		
 
@@ -4212,7 +4174,7 @@ void InitThisWeapon(PLAYER_WEAPON_DATA *pwPtr) {
 
 		for(item_num = 0; item_num < shptr->numitems; item_num ++)
 		{
-			POLYHEADER *poly =  (POLYHEADER*)(shptr->items[item_num]);
+			POLYHEADER *poly = (POLYHEADER*)(shptr->items[item_num]);
 			LOCALASSERT(poly);
 				
 			if((Request_PolyFlags((void *)poly)) & iflag_txanim)
@@ -4242,7 +4204,6 @@ void InitThisWeapon(PLAYER_WEAPON_DATA *pwPtr) {
 					*pptxactrlblk = pnew_txactrlblk;
 					pptxactrlblk = &pnew_txactrlblk->tac_next;
 				}
-		
 			}
 		}
 		*pptxactrlblk=0;
@@ -4253,9 +4214,12 @@ void InitThisWeapon(PLAYER_WEAPON_DATA *pwPtr) {
 
 	/* Now the shape animation... */
 
-	if (twPtr->HasShapeAnimation) {
+	if (twPtr->HasShapeAnimation) 
+	{
 		InitShapeAnimationController(&pwPtr->ShpAnimCtrl,shptr);
-	} else {
+	} 
+	else 
+	{
 		pwPtr->ShpAnimCtrl.current.seconds_per_frame=0;
 		pwPtr->ShpAnimCtrl.current.sequence_no=0;
 		pwPtr->ShpAnimCtrl.current.start_frame=0;
@@ -4307,10 +4271,9 @@ void ParticleBeamSwapping(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 	}
 }
 
-void ParticleBeamReadying(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
-
+void ParticleBeamReadying(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr)
+{
 	DoShapeAnimation(&PlayersWeapon);
-
 }
 
 void ParticleBeamUnreadying(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {

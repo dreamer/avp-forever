@@ -4134,10 +4134,14 @@ void SquishPoints(SHAPEINSTR *shapeinstrptr)
 			f2i(RotatedPts[i].vz,Dest[2]);
 
 #else	// bjd - view matrix test
-
+/*
 			f2i(RotatedPts[i].vx,Source[0]);
 			f2i(RotatedPts[i].vy,Source[1]);
 			f2i(RotatedPts[i].vz,Source[2]);
+*/
+			RotatedPts[i].vx = point.vx;
+			RotatedPts[i].vy = point.vy;
+			RotatedPts[i].vz = point.vz;
 #endif
 		}	
 	}
@@ -4226,9 +4230,14 @@ void MorphPoints(SHAPEINSTR *shapeinstrptr)
 
 #else  // bjd - view matrix test
 
+			destPtr->vx = srcPtr->vx+Global_ODB_Ptr->ObWorld.vx;
+			destPtr->vy = srcPtr->vy+Global_ODB_Ptr->ObWorld.vy;
+			destPtr->vz = srcPtr->vz+Global_ODB_Ptr->ObWorld.vz;
+/*
 			f2i(destPtr->vx, Source[0]);
 			f2i(destPtr->vy, Source[1]);
 			f2i(destPtr->vz, Source[2]);
+*/
 #endif
 			srcPtr++;
 			destPtr++;

@@ -442,9 +442,10 @@ File_Chunk::File_Chunk(const char * file_name)
 	// Process the RIF
 	// The start of the first chunk
 
-	while ((buffer_ptr-buffer)< ((signed) file_size-12) && !error_code) {
-
-		if ((*(int *)(buffer_ptr + 8)) + (buffer_ptr-buffer) > ((signed)file_size-12)) {
+	while ((buffer_ptr-buffer)< ((signed) file_size-12) && !error_code)
+	{
+		if ((*(int *)(buffer_ptr + 8)) + (buffer_ptr-buffer) > ((signed)file_size-12))
+		{
 			error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
 			break;
 		}
