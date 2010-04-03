@@ -966,10 +966,10 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 		case AVPMENU_INGAME:
 		case AVPMENU_INNETGAME:
 		{
-			if(AvP.Network != I_No_Network)
+			if (AvP.Network != I_No_Network)
 			{
 				//in a multiplayer game set up a menu without the restart mission option
-				menuID=AVPMENU_INNETGAME;
+				menuID = AVPMENU_INNETGAME;
 				AvPMenus.CurrentMenu = menuID;
 				AvPMenus.MenuElements = AvPMenusData[menuID].MenuElements; // could use default
 				AvPMenus.FontToUse = AvPMenusData[menuID].FontToUse;
@@ -1359,8 +1359,9 @@ static void RenderBriefingScreenInfo(void)
 	RenderMenuText(GetTextString(textID),MENU_LEFTXEDGE,180,ONE_FIXED/2,AVPMENUFORMAT_LEFTJUSTIFIED);
 #endif	
 
-	RenderBriefingText(ScreenDescriptorBlock.SDB_Height / 2, ONE_FIXED);
+	RenderBriefingText(/*ScreenDescriptorBlock.SDB_Height*/480 / 2, ONE_FIXED);
 }
+
 /* KJL 12:11:18 24/09/98 - specialised code to handle episode selection screen, which
 has features which make it too awkward to add to the general system */
 static void RenderEpisodeSelectMenu(void)
@@ -4612,6 +4613,7 @@ void CheckForCredits(void)
 		fclose(fp);
 	}
 }
+
 void DoCredits(void)
 {
 	int position = 300*2048;
@@ -5122,18 +5124,19 @@ void SetBriefingTextToBlank(void)
 
 void RenderBriefingText(int centreY, int brightness)
 {
-	int lengthOfLongestLine=-1;
-	int x,y,i;
 
-	for(i=0; i<5; i++)
+	int lengthOfLongestLine = -1;
+	int x, y, i;
+
+	for (i = 0; i < 5; i++)
 	{
 		int length = 0;
 		{
 			char *ptr = BriefingTextString[i];
 
-			while(*ptr)
+			while (*ptr)
 			{
-				length+=AAFontWidths[(unsigned char)*ptr++];
+				length += AAFontWidths[(unsigned char)*ptr++];
 			}
 		}
 		
@@ -5144,6 +5147,7 @@ void RenderBriefingText(int centreY, int brightness)
 	}
 
 	/* bjd */
+
 	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
 	{
 		x = (640 - lengthOfLongestLine)/2;
@@ -5153,9 +5157,11 @@ void RenderBriefingText(int centreY, int brightness)
 		x = (ScreenDescriptorBlock.SDB_Width-lengthOfLongestLine)/2;
 	}
 
+//	x = (ScreenDescriptorBlock.SDB_Width - lengthOfLongestLine) / 2;
+
 	y = centreY - 3*HUD_FONT_HEIGHT;
 
-	for(i=0; i<5; i++)
+	for (i=0; i<5; i++)
 	{
 		if (AvPMenus.MenusState != MENUSSTATE_MAINMENUS)
 		{
