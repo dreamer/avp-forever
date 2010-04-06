@@ -518,6 +518,8 @@ void CheckOrthoBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_TY
 	// check if we've got enough room. if not, flush
 		// TODO
 
+	assert (orthoListCount < MAX_VERTEXES);
+
 	// create a new list item for it
 	orthoList[orthoListCount].textureID = textureID;
 	orthoList[orthoListCount].vertStart = 0;

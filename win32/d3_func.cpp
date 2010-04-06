@@ -345,6 +345,11 @@ D3DTEXTURE CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	int padWidth = 512;
 	int padHeight = 512;
 
+	int charWidth = 30;
+	int charHeight = 33;
+	
+	int numTotalChars = tex->height / charHeight;
+
 	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, NULL, colourFormat, D3DPOOL_MANAGED, &destTexture, NULL);
 	if (FAILED(LastError)) 
 	{
@@ -382,10 +387,7 @@ D3DTEXTURE CreateD3DTallFontTexture(AVPTEXTURE *tex)
 			}
 		}
 
-		int charWidth = 30;
-		int charHeight = 33;
-
-		for (int i = 0; i < 224; i++) 
+		for (int i = 0; i < numTotalChars; i++) 
 		{
 			int row = i / 15; // get row
 			int column = i % 15; // get column from remainder value
@@ -430,10 +432,7 @@ D3DTEXTURE CreateD3DTallFontTexture(AVPTEXTURE *tex)
 			}
 		}
 
-		int charWidth = 30;
-		int charHeight = 33;
-
-		for (int i = 0; i < 224; i++) 
+		for (int i = 0; i < numTotalChars; i++) 
 		{
 			int row = i / 15; // get row
 			int column = i % 15; // get column from remainder value
@@ -577,6 +576,13 @@ void DeRedTexture(D3DTEXTURE texture)
 // use this to make textures from non power of two images
 D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *realHeight) 
 {
+	if (tex == NULL)
+	{
+		*realWidth = 0;
+		*realHeight = 0;
+		return NULL;
+	}
+
 	int original_width = tex->width;
 	int original_height = tex->height;
 	int new_width = original_width;

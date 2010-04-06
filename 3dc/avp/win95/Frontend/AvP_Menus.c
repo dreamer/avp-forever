@@ -4598,6 +4598,8 @@ void DisplayVideoModeUnavailableScreen(void)
 
 void CheckForCredits(void)
 {
+#ifndef ALIEN_DEMO
+
 	FILE *fp = avp_fopen("credits.txt", "rb");
 	
 	if (!fp)
@@ -4612,6 +4614,8 @@ void CheckForCredits(void)
 	{
 		fclose(fp);
 	}
+
+#endif
 }
 
 void DoCredits(void)
@@ -4623,7 +4627,8 @@ void DoCredits(void)
 
 	char *creditsPtr;
 	
-	if (!creditsBufferPtr) return;
+	if (!creditsBufferPtr) 
+		return;
 
 	if (!strncmp (creditsBufferPtr, "REBCRIF1", 8))
 	{
@@ -4635,7 +4640,6 @@ void DoCredits(void)
 	{
 		creditsPtr = creditsBufferPtr;
 	}
-
 
 	do
 	{

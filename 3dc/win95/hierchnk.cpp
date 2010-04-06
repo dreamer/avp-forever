@@ -158,13 +158,12 @@ Object_Hierarchy_Data_Chunk::Object_Hierarchy_Data_Chunk (Chunk_With_Children * 
 	num_extra_data=*(int*)data_start;
 	data_start+=4;
 
-	if(num_extra_data)
-		extra_data=new int[num_extra_data];
+	if (num_extra_data)
+		extra_data = new int[num_extra_data];
 	else
-		extra_data=0;
-	
-	
-	for (int i=0; i<num_extra_data; i++)
+		extra_data = 0;
+
+	for (int i = 0; i < num_extra_data; i++)
 	{
 		extra_data[i] =	*((int *) data_start);
 		data_start += 4;

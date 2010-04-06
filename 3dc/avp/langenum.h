@@ -6,7 +6,7 @@
  * the enums are updated by a utility which rewrites the entire file.
  */ 
 
-#if !(MARINE_DEMO)
+#if 1//!(MARINE_DEMO)
 
 enum TEXTSTRING_ID
 {

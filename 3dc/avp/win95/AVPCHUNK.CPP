@@ -811,7 +811,6 @@ size_t AVP_Particle_Generator_Data_Chunk::size_chunk()
 	chunk_size+=sizeof(ChunkVectorInt)+sizeof(ChunkQuat);
 	chunk_size+=(strlen(name)+4)&~3;
 	return chunk_size;
-
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -452,7 +452,6 @@ File_Chunk::File_Chunk(const char * file_name)
 
 		DynCreate(buffer_ptr);
 		buffer_ptr += *(int *)(buffer_ptr + 8);
-
 	}
 
 	/* KJL 17:59:42 19/09/98 - release the memory holding the rif */
@@ -1592,18 +1591,17 @@ GodFather_Chunk::GodFather_Chunk(char * buffer, size_t size)
 
 	// The start of the first chunk
 
-	while ((buffer_ptr-buffer)< ((signed)size-12) && !error_code) {
-
-		if ((*(int *)(buffer_ptr + 8)) + (buffer_ptr-buffer) > ((signed)size-12)) {
+	while ((buffer_ptr-buffer)< ((signed)size-12) && !error_code) 
+	{
+		if ((*(int *)(buffer_ptr + 8)) + (buffer_ptr-buffer) > ((signed)size-12)) 
+		{
 			error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
 			break;
 		}
 
 		DynCreate(buffer_ptr);
 		buffer_ptr += *(int *)(buffer_ptr + 8);
-
 	}
-
 }
 
 /////////////////////////////////////////

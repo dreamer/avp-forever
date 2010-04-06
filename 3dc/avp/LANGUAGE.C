@@ -18,14 +18,6 @@
 
 extern HWND hWndMain;
 
-#ifdef AVP_DEBUG_VERSION
-	// bjd - this'll look for ENGLISH.TXT which doesn't exist in the retail data files
-	// so i'll set it to '1' to use language.txt
-	#define USE_LANGUAGE_TXT 1
-#else
-	#define USE_LANGUAGE_TXT 1
-#endif
-
 static char EmptyString[]="";
 
 static char *TextStringPtr[MAX_NO_OF_TEXTSTRINGS]={EmptyString};
@@ -46,10 +38,11 @@ void InitTextStrings(void)
 	filenamePtr = "menglish.txt";
 	#elif ALIEN_DEMO
 	filenamePtr = "aenglish.txt";
-	#elif USE_LANGUAGE_TXT
-	filenamePtr = "language.txt";
+	#elif PREDATOR_DEMO
+	filenamePtr = "english.txt";
+//	#elif USE_LANGUAGE_TXT
 	#else
-	filenamePtr = LanguageFilename[AvP.Language];
+	filenamePtr = "language.txt";
 	#endif
 
 	TextBufferPtr = LoadTextFile(filenamePtr);

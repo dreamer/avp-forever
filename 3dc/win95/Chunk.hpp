@@ -534,9 +534,8 @@ static Chunk * RifCreateClassObject ## tokenClassName ##_## nLine (Chunk_With_Ch
 /*
 Load from buffer function for standard Chunk_With_Children
 */
-
 #define CHUNK_WITH_CHILDREN_LOADER(id,chunk_class) \
-chunk_class::chunk_class(Chunk_With_Children * const parent,char const * __data, size_t const __size)\
+chunk_class::chunk_class(Chunk_With_Children * const parent, char const * __data, size_t const __size)\
 :Chunk_With_Children(parent,id)\
 {\
 	const char * __buffer_ptr = __data;\

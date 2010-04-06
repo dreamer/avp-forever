@@ -1061,6 +1061,13 @@ extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 			OutputDebugString("Texture in AvPMenuGfxStorage was NULL!");
 		}
 	}
+	else
+	{
+		// bjd - bail out?
+		gfxPtr->Height = 0;
+		gfxPtr->Width = 0;
+		return;
+	}
 
 	// remove the red outline grid from the font texture
 	if (menuGfxID == AVPMENUGFX_SMALL_FONT)
@@ -1106,39 +1113,41 @@ extern void LoadAllAvPMenuGfx(void)
 {
 	int i = 0;
 
-	while(i < AVPMENUGFX_WINNER_SCREEN)
+	while (i < AVPMENUGFX_WINNER_SCREEN)
 	{
 		LoadAvPMenuGfx((enum AVPMENUGFX_ID)i++);
 	}
 
 	LoadMenuFont();	
 	
-	{	
-		unsigned char *srcPtr;
+	unsigned char *srcPtr;
 
-		AVPMENUGFX *gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_CLOUDY];
-		
-		AVPTEXTURE *image;
+	AVPMENUGFX *gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_CLOUDY];
+	
+	AVPTEXTURE *image;
 
-		image = gfxPtr->ImagePtr;
+	image = gfxPtr->ImagePtr;
+
+	if (image != NULL)
+	{
 		srcPtr = image->buffer;
 	  		
 		int x,y;
 		extern int CloudTable[128][128];
 
-			for (y = 0; y < gfxPtr->Height; y++)
+		for (y = 0; y < gfxPtr->Height; y++)
+		{
+			for (x = 0; x < gfxPtr->Width; x++)
 			{
-				for (x = 0; x < gfxPtr->Width; x++)
-				{
-					int r = srcPtr[0];
+				int r = srcPtr[0];
 
-					r = DIV_FIXED(r, 0xFF);
-					CloudTable[x][y] = r;
-			
-					srcPtr += 4;
-				}
+				r = DIV_FIXED(r, 0xFF);
+				CloudTable[x][y] = r;
+		
+				srcPtr += 4;
 			}
 		}
+	}
 
 	CalculateWidthsOfAAFont();
 }
@@ -1715,6 +1724,9 @@ static void CalculateWidthsOfAAFont(void)
 
 	gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_SMALL_FONT];
 	image = gfxPtr->ImagePtr;
+
+	if (image == NULL)
+		return;
 
 	srcPtr = image->buffer;
 

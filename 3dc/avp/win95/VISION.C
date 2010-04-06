@@ -35,7 +35,7 @@ static int visionModeDebounced=0;
 extern ACTIVESOUNDSAMPLE ActiveSounds[];
 int predOVision_SoundHandle;
 
-extern int FMVParticleColour;
+extern uint32_t FMVParticleColour;
 extern int LogosAlphaLevel;
 int PredatorVisionChangeCounter;
 

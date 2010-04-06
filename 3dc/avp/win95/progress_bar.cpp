@@ -137,7 +137,7 @@ void Start_Progress_Bar()
 	{
 		ThisFramesRenderingHasBegun();
 
-		DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height, emptybarWidth, emptybarHeight);
+//		DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height, emptybarWidth, emptybarHeight);
 
 		RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
 
@@ -169,13 +169,13 @@ void Set_Progress_Bar_Position(int pos)
 
 		// need to render the empty bar here again. As we're not blitting anymore, 
 		// the empty bar will only be rendered for one frame.
-		DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height, emptybarWidth, emptybarHeight);
+//		DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height, emptybarWidth, emptybarHeight);
 
 		// also need this here again, or else the text disappears!
 		RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
 
 		// now render the green percent loaded overlay
-		DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height, fullbarWidth, fullbarHeight);
+//		DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height, fullbarWidth, fullbarHeight);
 		
 		ThisFramesRenderingHasFinished();
 		
@@ -240,7 +240,7 @@ void Game_Has_Loaded(void)
 			// also need this here again, or else the text disappears!
 			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
 
-			DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height, fullbarWidth, fullbarHeight);
+//			DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height, fullbarWidth, fullbarHeight);
 			f-=NormalFrameTime;
 			if (f<0) f=0;
 		}
