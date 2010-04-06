@@ -4701,7 +4701,7 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 	{
 		int outcode = TriangleWithinFrustrum();
 		POLYHEADER fakeHeader;
-		fakeHeader.PolyFlags  = iflag_transparent;
+		fakeHeader.PolyFlags = iflag_transparent;
 
 		do
 		{
@@ -4833,7 +4833,7 @@ static void DecalPolygon_Construct(DECAL *decalPtr)
 	VerticesBuffer[3].U = decalDescPtr->StartU+decalPtr->UOffset;
 	VerticesBuffer[3].V = decalDescPtr->EndV;
 }
-
+/*
 int polys[][4] =
 {
 	{0,1,3,2},
@@ -4868,6 +4868,7 @@ VECTORCH shaftVertices[]=
 		{0, 	14500,	0},
 		{0, 	14500,	0},
 };
+*/
 
 #if 0 // bjd 
 void RenderShaftOfLight(MODULE *modulePtr)
@@ -5354,7 +5355,6 @@ void RenderSmokeTest(void)
 				VerticesBuffer[i].U = mirrorUV[i*2];
 				VerticesBuffer[i].V = mirrorUV[i*2+1]+image*(32);
 
-
 				VerticesBuffer[i].R = 255;
 				VerticesBuffer[i].G	= 255;
 				VerticesBuffer[i].B = 255;
@@ -5492,8 +5492,7 @@ void RenderSky(void)
 			VerticesBuffer[2].U = (u[o]+size*(x+1));
 			VerticesBuffer[2].V = (v[o]+size*(z+1));
 			VerticesBuffer[3].U = (u[o]+size*(x+1));
-			VerticesBuffer[3].V = (v[o]+size*z);
-																
+			VerticesBuffer[3].V = (v[o]+size*z);										
 
 			RenderPolygon.NumberOfVertices=4;
 		}

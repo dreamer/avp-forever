@@ -913,18 +913,10 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 	ScreenDescriptorBlock.SDB_ClipDown  = height;
 
 	CreateVolatileResources();
-//	SetExecuteBufferDefaults();
 
 	SetTransforms();
 
 	ThisFramesRenderingHasBegun();
-
-	// set up projection matrix
-	D3DXMatrixPerspectiveFovLH( &matProjection, FLOAT(width / height), D3DX_PI / 2, 1.0f, 100.0f);
-
-	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
-	d3d.lpD3DDevice->SetTransform( D3DTS_WORLD, &matIdentity );
-	d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matIdentity );
 
 	return TRUE;
 }
