@@ -14,6 +14,7 @@ extern "C" {
 #include <assert.h>
 
 extern D3DINFO d3d;
+extern uint32_t fov;
 
 extern "C++"{
 
@@ -53,8 +54,8 @@ extern int Font_DrawText(const char* text, int x, int y, int colour, int fontTyp
 #include "avp_userprofile.h"
 #include "bh_types.h"
 
-const int MAX_VERTEXES = 4096;
-const int MAX_INDICES = 9216;
+const uint32_t MAX_VERTEXES = 4096;
+const uint32_t MAX_INDICES = 9216;
 
 D3DLVERTEX *mainVertex = NULL;
 WORD *mainIndex = NULL;
@@ -62,8 +63,8 @@ WORD *mainIndex = NULL;
 ORTHOVERTEX *orthoVerts = NULL;
 WORD *orthoIndex = NULL;
 
-static int orthoVBOffset = 0;
-static int orthoIBOffset = 0;
+static uint32_t orthoVBOffset = 0;
+static uint32_t orthoIBOffset = 0;
 static uint32_t orthoListCount = 0;
 
 // for quad rendering
@@ -109,7 +110,7 @@ struct renderParticle
 {
 	PARTICLE		particle;
 	RENDERVERTEX	vertices[9];
-	size_t			numVerts;
+	uint32_t		numVerts;
 	int				translucency;
 
 	inline bool operator<(const renderParticle& rhs) const {return translucency < rhs.translucency;}
@@ -153,22 +154,17 @@ void UpdateViewMatrix(float *viewMat)
 	viewMatrix._41 = -D3DXVec3Dot(&vecPosition, &vecRight);
 	viewMatrix._42 = -D3DXVec3Dot(&vecPosition, &vecUp);
 	viewMatrix._43 = -D3DXVec3Dot(&vecPosition, &vecFront);
+/*
+	viewMatrix._41 = vecPosition.x;
+	viewMatrix._42 = vecPosition.y;
+	viewMatrix._43 = vecPosition.z;
+*/
 }
 
 void DrawParticles()
 {
 	if (particleArray.size() == 0) 
 		return;
-
-	if (particleArray.size() > maxParts) 
-	{
-		maxParts = particleArray.size();
-/*
-		char buf[100];
-		sprintf(buf, "particle size: %d\n", maxParts);
-		OutputDebugString(buf);
-*/
-	}
 
 	uint32_t numVertsBackup = RenderPolygon.NumberOfVertices;
 
@@ -206,8 +202,8 @@ void DeleteRenderMemory()
 
 uint32_t	NumVertices = 0;
 uint32_t	NumIndicies = 0;
-int		vb = 0;
-int		particleIndex = 0;
+uint32_t	vb = 0;
+uint32_t	particleIndex = 0;
 static uint32_t	renderCount = 0;
 
 extern AVPIndexedFont IntroFont_Light;
@@ -283,7 +279,7 @@ extern unsigned char GammaValues[256];
 extern int GlobalAmbience;
 extern char CloakedPredatorIsMoving;
 
-int FMVParticleColour;
+uint32_t FMVParticleColour;
 VECTORCH MeshVertex[256];
 
 extern BOOL LevelHasStars;
@@ -299,6 +295,7 @@ void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin);
 extern void RenderSky(void);
 extern void RenderStarfield(void);
 void D3D_DrawMoltenMetalMesh_Unclipped(void);
+static void D3D_OutputTriangles(void);
 
 //Globals
 
@@ -467,9 +464,9 @@ BOOL SetExecuteBufferDefaults()
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
 
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF, (DWORD)0.5);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE); 
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF,			(DWORD)0.5);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAFUNC,		D3DCMP_GREATER);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,	TRUE); 
 
 //	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 //	d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_MAGFILTER, D3DTEXF_POINT);
@@ -477,11 +474,11 @@ BOOL SetExecuteBufferDefaults()
 
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 
-	d3d.lpD3DDevice->SetRenderState(D3DRS_CULLMODE,	D3DCULL_NONE);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_CLIPPING, TRUE);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_SPECULARENABLE, TRUE);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE, TRUE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_CULLMODE,			D3DCULL_NONE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_CLIPPING,			TRUE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_LIGHTING,			FALSE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_SPECULARENABLE,	TRUE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE,		TRUE);
 	D3DDitherEnable = TRUE;
 
 	// enable z-buffer
@@ -736,7 +733,7 @@ BOOL BeginD3DScene()
 		ReleaseVolatileResources();
 		
 		// disable XInput
-		XInputEnable( false );
+		XInputEnable(false);
 
 		while (1) 
 		{
@@ -758,7 +755,7 @@ BOOL BeginD3DScene()
 					SetTransforms();
 
 					// re-enable XInput
-					XInputEnable( true );
+					XInputEnable(true);
 					break;
 				}
 			}
@@ -895,13 +892,13 @@ BOOL ExecuteBuffer()
 	}
 
 	LastError = d3d.lpD3DDevice->SetIndices (d3d.lpD3DIndexBuffer);
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
 	D3DXMATRIX matProjection;
-	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, /*1000000*/65536.0f);
+	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(fov), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, /*1000000*/65536.0f);
 
 	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,		&viewMatrix);
 	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matProjection);
@@ -999,12 +996,12 @@ BOOL ExecuteBuffer()
 		}
 
 		D3DXMATRIX matView; 
-		D3DXMatrixIdentity( &matView );
-		d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matView );
+		D3DXMatrixIdentity(&matView);
+		d3d.lpD3DDevice->SetTransform(D3DTS_VIEW, &matView);
 
 		D3DXMATRIX matOrtho;
-		D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
-		d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
+		D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
+		d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matOrtho);
 
 		// loop through list drawing the quads
 		for (uint32_t i = 0; i < orthoListCount; i++)
@@ -1038,9 +1035,11 @@ BOOL ExecuteBuffer()
 
 void SetFogDistance(int fogDistance)
 {
-	if (fogDistance>10000) fogDistance = 10000;
-	fogDistance+=5000;
-	fogDistance=2000;
+	if (fogDistance > 10000) 
+		fogDistance = 10000;
+
+	fogDistance += 5000;
+	fogDistance = 2000;
 	CurrentRenderStates.FogDistance = fogDistance;
 //	textprint("fog distance %d\n",fogDistance);
 }
@@ -1269,7 +1268,7 @@ void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired)
 
 	CurrentRenderStates.FilteringMode = filteringRequired;
 
-	switch(CurrentRenderStates.FilteringMode)
+	switch (CurrentRenderStates.FilteringMode)
 	{
 		case FILTERING_BILINEAR_OFF:
 		{
@@ -1318,8 +1317,6 @@ extern void CheckWireFrameMode(int shouldBeOn)
 		}
 	}
 }
-
-static void D3D_OutputTriangles(void);
 
 void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
 {

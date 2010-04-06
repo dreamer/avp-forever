@@ -485,7 +485,7 @@ void MaintainHUD(void)
 		if (PlayerDamagedOverlayIntensity<0) PlayerDamagedOverlayIntensity=0;
 	}
 	{
-		if(FadingGameInAfterLoading)
+		if (FadingGameInAfterLoading)
 		{
 			extern void D3D_FadeDownScreen(int brightness, int colour);
 			extern int RealFrameTime;

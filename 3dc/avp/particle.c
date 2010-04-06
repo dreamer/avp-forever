@@ -3915,7 +3915,7 @@ void DrawMuzzleFlash(VECTORCH *positionPtr,VECTORCH *directionPtr, enum MUZZLE_F
 {
 	PARTICLE particle;
 	particle.Position = *positionPtr;
-	
+
 	D3D_DecalSystem_Setup();
 	
 	switch (muzzleFlashID)
@@ -3991,7 +3991,7 @@ void DrawMuzzleFlash(VECTORCH *positionPtr,VECTORCH *directionPtr, enum MUZZLE_F
 					particle.Position.vy += -MUL_FIXED(200,directionPtr->vy) + MUL_FIXED(50,muzzleMatrix.mat22);
 					particle.Position.vz += -MUL_FIXED(200,directionPtr->vz) + MUL_FIXED(50,muzzleMatrix.mat23);
 
-					particle.ParticleID=PARTICLE_MUZZLEFLASH;
+					particle.ParticleID = PARTICLE_MUZZLEFLASH;
 
 					particle.Colour = RGBALIGHT_MAKE(particleDescPtr->RedScale[CurrentVisionMode],particleDescPtr->GreenScale[CurrentVisionMode],particleDescPtr->BlueScale[CurrentVisionMode],particleDescPtr->Alpha);
 					particle.Size = 50;
@@ -4009,7 +4009,6 @@ void DrawMuzzleFlash(VECTORCH *positionPtr,VECTORCH *directionPtr, enum MUZZLE_F
 
 					MatrixMultiply(&muzzleMatrix,&rotmat,&muzzleMatrix);
 				}
-
 			}
 			#endif
 			break;

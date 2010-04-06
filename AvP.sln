@@ -35,4 +35,7 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		AMDCaProjectFile = D:\Development\AvP-Branch\trunk\CodeAnalyst\AvP.caw
+	EndGlobalSection
 EndGlobal

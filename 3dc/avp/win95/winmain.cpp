@@ -663,7 +663,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	EmptyUserProfilesList();
 
 	#else
-	QuickSplashScreens();
+//	QuickSplashScreens();
 	#endif
 	#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
 

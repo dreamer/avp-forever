@@ -4122,9 +4122,9 @@ void SquishPoints(SHAPEINSTR *shapeinstrptr)
 			point.vy += Global_ODB_Ptr->ObWorld.vy;
 			point.vy = HierarchicalObjectsLowestYValue + MUL_FIXED(point.vy-HierarchicalObjectsLowestYValue, scale);
 
-			Source[0] = (float)point.vx;
-			Source[1] = (float)point.vy;
-			Source[2] = (float)point.vz;
+//			Source[0] = (float)point.vx;
+//			Source[1] = (float)point.vy;
+//			Source[2] = (float)point.vz;
 
 #if 0
 			TranslatePoint(Source, Dest, ViewMatrix);
@@ -4217,9 +4217,9 @@ void MorphPoints(SHAPEINSTR *shapeinstrptr)
 		int i;
 		for(i = shapeinstrptr->sh_numitems; i!=0; i--)
 		{
-			Source[0] = (float)(srcPtr->vx+Global_ODB_Ptr->ObWorld.vx);
-			Source[1] = (float)(srcPtr->vy+Global_ODB_Ptr->ObWorld.vy);
-			Source[2] = (float)(srcPtr->vz+Global_ODB_Ptr->ObWorld.vz);
+//			Source[0] = (float)(srcPtr->vx+Global_ODB_Ptr->ObWorld.vx);
+//			Source[1] = (float)(srcPtr->vy+Global_ODB_Ptr->ObWorld.vy);
+//			Source[2] = (float)(srcPtr->vz+Global_ODB_Ptr->ObWorld.vz);
 
 #if 0
 			TranslatePoint(Source, Dest, ViewMatrix);
@@ -4286,7 +4286,7 @@ void TranslateShapeVertices(SHAPEINSTR *shapeinstrptr)
 		ObjectViewMatrix[7] = (float)Global_ODB_Ptr->ObWorld.vy;
 		ObjectViewMatrix[11] = (float)Global_ODB_Ptr->ObWorld.vz;
 
-		for(i = shapeinstrptr->sh_numitems; i!=0; i--)
+		for (i = shapeinstrptr->sh_numitems; i != 0; i--)
 		{
 			Source[0] = (float)srcPtr->vx;
 			Source[1] = (float)srcPtr->vy;
@@ -4386,7 +4386,7 @@ void RenderDecal(DECAL *decalPtr)
 
 void RenderParticle(PARTICLE *particlePtr)
 {
-//	PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
+
 	int particleSize = particlePtr->Size;
 	{
 		VECTORCH translatedPosition = particlePtr->Position;
@@ -5924,35 +5924,37 @@ void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRI
 
 int LightFlareAlpha = 65535;
 
-void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour)
+void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 {
-	int centreX,centreY,sizeX,sizeY,z;
+	int centreX, centreY, sizeX, sizeY, z;
+	char buf[100];
 	PARTICLE particle;
-//	VECTORCH point = {-20947,-8216,2244};
 	VECTORCH point = *positionPtr;
 
-	TranslatePointIntoViewspace(&point);
+//	TranslatePointIntoViewspace(&point);
 
-	if (point.vz < 64) 
-		return;	
+//	if (point.vz < 64) 
+//		return;	
 	
 	particle.ParticleID = PARTICLE_LIGHTFLARE;
 
 	particle.Colour = colour;
 
+//	sprintf(buf, "render fn %d %d %d\n",positionPtr->vx,positionPtr->vy,positionPtr->vz);
+//	OutputDebugString(buf);
+
 //	textprint("render fn %d %d %d\n",positionPtr->vx,positionPtr->vy,positionPtr->vz);
-//	PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
-//	int particleSize = particlePtr->Size;
+
 	z = ONE_FIXED;
 	{
 		extern int SmartTargetSightX, SmartTargetSightY;
 		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-		centreX = DIV_FIXED(point.vx,point.vz);
-		centreY = DIV_FIXED(point.vy,point.vz);
-		sizeX = (ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
-		sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
+		centreX = DIV_FIXED(point.vx, point.vz);
+		centreY = DIV_FIXED(point.vy, point.vz);
+		sizeX = 200;//(ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
+		sizeY = 200;//MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
 	}
-
+/*
 	VerticesBuffer[0].X = centreX - sizeX;
 	VerticesBuffer[0].Y = centreY - sizeY;
 	VerticesBuffer[0].Z = z;
@@ -5965,13 +5967,29 @@ void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour)
 	VerticesBuffer[3].X = centreX - sizeX;
 	VerticesBuffer[3].Y = centreY + sizeY;
 	VerticesBuffer[3].Z = z;
-	
+*/
+
+	point.vz = 65534;
+
+	VerticesBuffer[0].X = point.vx - sizeX;
+	VerticesBuffer[0].Y = point.vy - sizeY;
+	VerticesBuffer[0].Z = point.vz;
+	VerticesBuffer[1].X = point.vx + sizeX;
+	VerticesBuffer[1].Y = point.vy - sizeY;
+	VerticesBuffer[1].Z = point.vz;
+	VerticesBuffer[2].X = point.vx + sizeX;
+	VerticesBuffer[2].Y = point.vy + sizeY;
+	VerticesBuffer[2].Z = point.vz;
+	VerticesBuffer[3].X = point.vx - sizeX;
+	VerticesBuffer[3].Y = point.vy + sizeY;
+	VerticesBuffer[3].Z = point.vz;
+
 	{
 		int outcode = QuadWithinFrustrum();
 										  
 		if (outcode)
 		{
-			RenderPolygon.NumberOfVertices=4;
+			RenderPolygon.NumberOfVertices = 4;
 			
 //			textprint("On Screen!\n");
 			VerticesBuffer[0].U = 192;
@@ -5989,20 +6007,25 @@ void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour)
 			if (outcode!=2)
 			{
 				TexturedPolygon_ClipWithZ();
-				if(RenderPolygon.NumberOfVertices<3) return;
+				if (RenderPolygon.NumberOfVertices<3) 
+					return;
 				TexturedPolygon_ClipWithNegativeX();
-				if(RenderPolygon.NumberOfVertices<3) return;
+				if (RenderPolygon.NumberOfVertices<3) 
+					return;
 				TexturedPolygon_ClipWithPositiveY();
-				if(RenderPolygon.NumberOfVertices<3) return;
+				if (RenderPolygon.NumberOfVertices<3) 
+					return;
 				TexturedPolygon_ClipWithNegativeY();
-				if(RenderPolygon.NumberOfVertices<3) return;
+				if (RenderPolygon.NumberOfVertices<3) 
+					return;
 				TexturedPolygon_ClipWithPositiveX();
-				if(RenderPolygon.NumberOfVertices<3) return;
-				D3D_Particle_Output(&particle,RenderPolygon.Vertices);
-//				AddParticle(&particle, &RenderPolygon.Vertices[0]);
+				if (RenderPolygon.NumberOfVertices<3) 
+					return;
+//				D3D_Particle_Output(&particle,RenderPolygon.Vertices);
+				AddParticle(&particle, &RenderPolygon.Vertices[0]);
   			}
-			else D3D_Particle_Output(&particle,VerticesBuffer);
-//			else AddParticle(&particle, &VerticesBuffer[0]);
+//			else D3D_Particle_Output(&particle,VerticesBuffer);
+			else AddParticle(&particle, &VerticesBuffer[0]);
 		}
 	}	
 }

@@ -90,6 +90,8 @@ int	NumAvailableVideoModes;
 static HRESULT LastError;
 D3DINFO d3d;
 
+uint32_t fov = 75;
+
 // byte order macros for A8R8G8B8 d3d texture
 enum 
 {
@@ -99,6 +101,21 @@ enum
 	BO_ALPHA
 };
 
+// console command : set a new field of view value
+void SetFov()
+{
+	if (Con_GetNumArguments() == 0)
+	{
+		Con_PrintMessage("usage: r_setfov 75");
+		return;
+	}
+
+	int newFov = atoi(Con_GetArgument(0).c_str());
+	
+	fov = newFov;
+}
+
+// console command : output all menu textures as .png files
 void WriteMenuTextures()
 {
 	char *filename = new char[strlen(GetSaveFolderPath()) + MAX_PATH];
@@ -1333,6 +1350,7 @@ BOOL InitialiseDirect3D()
 
 	Con_AddCommand("dumptex", WriteMenuTextures);
 	Con_AddCommand("r_toggleWireframe", ToggleWireframe);
+	Con_AddCommand("r_setfov", SetFov);
 
 	Con_PrintMessage("Initialised Direct3D9 succesfully");
 	return TRUE;
@@ -1346,30 +1364,22 @@ void SetTransforms()
 
 	// setup view matrix
 	D3DXMatrixIdentity(&matView );
-/*
-	D3DXVECTOR3 position = D3DXVECTOR3(-64.0f, 280.0f, -1088.0f);
-	D3DXVECTOR3 lookAt   = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	D3DXVECTOR3 up       = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-
-	D3DXMatrixLookAtLH(&matView, &position, &lookAt, &up );
-*/
-	PrintD3DMatrix("View", matView);
+//	PrintD3DMatrix("View", matView);
 
 	// set up orthographic projection matrix
-//	D3DXMatrixOrthoOffCenterLH( &matOrtho, 0.0f, wideScreenWidth, 0.0f, 480, 1.0f, 10.0f);
 	D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 
 	// set up projection matrix
-	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(90), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, /*1000000*/65536.0f);
 
 	// print projection matrix?
-	PrintD3DMatrix("Projection", matProjection);
+//	PrintD3DMatrix("Projection", matProjection);
 
 	// multiply view and projection
-	D3DXMatrixMultiply(&matViewProjection, &matView, &matProjection);
-	PrintD3DMatrix("View and Projection", matViewProjection);
+//	D3DXMatrixMultiply(&matViewProjection, &matView, &matProjection);
+//	PrintD3DMatrix("View and Projection", matViewProjection);
 
-	D3DXMatrixIdentity( &matIdentity );
+	D3DXMatrixIdentity(&matIdentity);
 	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,		&matIdentity);
 	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,		&matIdentity);
 	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matOrtho);
