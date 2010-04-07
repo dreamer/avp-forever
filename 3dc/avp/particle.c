@@ -3093,17 +3093,17 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 	/* now render particles */
 	int i = NumActiveParticles;
 	PARTICLE *particlePtr = ParticleStorage;
-	while(i--)
+	while (i--)
 	{
 		if (particlePtr->NotYetRendered)
 		{
 			VECTORCH position = particlePtr->Position;
 			TranslatePointIntoViewspace(&position);
 
-			if (position.vz>zThreshold)
+			if (position.vz > zThreshold)
 			{
 				particlePtr->NotYetRendered = 0;
-				switch(particlePtr->ParticleID)
+				switch (particlePtr->ParticleID)
 				{
 					case PARTICLE_ALIEN_BLOOD:
 					{
@@ -3112,14 +3112,14 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 							VECTORCH obstacleNormal;
 							int moduleIndex;
 
-							if(ParticleDynamics(particlePtr,&obstacleNormal,&moduleIndex))
+							if (ParticleDynamics(particlePtr,&obstacleNormal,&moduleIndex))
 							{
-								if(moduleIndex!=-1)
+								if (moduleIndex!=-1)
 								{	
 									int i = 1;
 									MATRIXCH orientation;
 									MakeMatrixFromDirection(&obstacleNormal,&orientation);
-									while(i--)
+									while (i--)
 									{
 										VECTORCH velocity;
 										velocity.vx = ((FastRandom()&1023) - 512);
@@ -3146,9 +3146,9 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 							VECTORCH obstacleNormal;
 							int moduleIndex;
 
-							if(ParticleDynamics(particlePtr,&obstacleNormal,&moduleIndex))//&& !(FastRandom()&15))
+							if (ParticleDynamics(particlePtr,&obstacleNormal,&moduleIndex))//&& !(FastRandom()&15))
 							{
-								if(moduleIndex!=-1)
+								if (moduleIndex!=-1)
 								{
 									MakeDecal(DECAL_PREDATOR_BLOOD,&obstacleNormal,&(particlePtr->Position),moduleIndex);
 								}
@@ -3167,9 +3167,9 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 							VECTORCH obstacleNormal;
 							int moduleIndex;
 
-							if(ParticleDynamics(particlePtr,&obstacleNormal,&moduleIndex))//&& !(FastRandom()&15))
+							if (ParticleDynamics(particlePtr,&obstacleNormal,&moduleIndex))//&& !(FastRandom()&15))
 							{
-								if(moduleIndex!=-1)
+								if (moduleIndex!=-1)
 								{
 									MakeDecal(DECAL_HUMAN_BLOOD,&obstacleNormal,&(particlePtr->Position),moduleIndex);
 								}
@@ -3188,9 +3188,9 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 							VECTORCH obstacleNormal;
 							int moduleIndex;
 
-							if(ParticleDynamics(particlePtr,&obstacleNormal,&moduleIndex))//&& !(FastRandom()&15))
+							if (ParticleDynamics(particlePtr,&obstacleNormal,&moduleIndex))//&& !(FastRandom()&15))
 							{
-								if(moduleIndex!=-1)
+								if (moduleIndex!=-1)
 								{
 									MakeDecal(DECAL_ANDROID_BLOOD,&obstacleNormal,&(particlePtr->Position),moduleIndex);
 								}
@@ -3225,10 +3225,10 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 							VECTORCH obstacleNormal;
 							int moduleIndex;
 
-							if(ParticleDynamics(particlePtr,&obstacleNormal,&moduleIndex) && !(FastRandom()&15))
+							if (ParticleDynamics(particlePtr,&obstacleNormal,&moduleIndex) && !(FastRandom()&15))
 							{
 								if (particlePtr->ParticleID!=PARTICLE_NONDAMAGINGFLAME) {
-									if(moduleIndex!=-1)
+									if (moduleIndex!=-1)
 									{
 										MakeDecal(DECAL_SCORCHED,&obstacleNormal,&(particlePtr->Position),moduleIndex);
 									}
@@ -3306,13 +3306,14 @@ void DoFlareCorona(DISPLAYBLOCK *objectPtr)
 {
 	VECTORCH position = objectPtr->ObWorld;
 	
-	if (CameraCanSeeThisPosition_WithIgnore(objectPtr,&position))
+	if (CameraCanSeeThisPosition_WithIgnore(objectPtr, &position))
 	{
 		LIGHTBLOCK *lPtr = objectPtr->ObLights[0];
 		int a = lPtr->LightBright>>8;
 		int colour;
 
-		if (a>255) a=255;
+		if (a > 255) 
+			a = 255;
 		
 		switch (CurrentVisionMode)
 		{
@@ -3336,7 +3337,9 @@ void DoFlareCorona(DISPLAYBLOCK *objectPtr)
 							lPtr->RedScale+lPtr->GreenScale+lPtr->BlueScale,
 							lPtr->LightBright
 						)>>10;
-				if (b>255) b=255;
+
+				if (b > 255) 
+					b = 255;
 
 				colour = 0xff000000+(b<<16)+((b>>1)<<8);
 			  	break;

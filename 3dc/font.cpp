@@ -173,6 +173,8 @@ extern char AAFontWidths[256];
 
 int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 {
+	return 0;
+
 	d3d.lpD3DDevice->SetTexture(0, Fonts[FONT_SMALL].texture);
 
 	D3DLVERTEX fontQuad[4];

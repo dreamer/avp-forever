@@ -871,8 +871,6 @@ static void ChangeTexture(const int32_t textureID)
 
 BOOL ExecuteBuffer()
 {
-//	if (NumVertices < 3)
-//		return FALSE;
 
 	// sort the list of render objects
 	std::sort(renderTest.begin(), renderTest.end());
@@ -881,19 +879,19 @@ BOOL ExecuteBuffer()
 	Font_DrawText("blah", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
 #endif
 
-	LastError = d3d.lpD3DDevice->SetStreamSource (0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));
+	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
-	LastError = d3d.lpD3DDevice->SetFVF (D3DFVF_LVERTEX);
+	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_LVERTEX);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
-	LastError = d3d.lpD3DDevice->SetIndices (d3d.lpD3DIndexBuffer);
+	LastError = d3d.lpD3DDevice->SetIndices(d3d.lpD3DIndexBuffer);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -902,17 +900,29 @@ BOOL ExecuteBuffer()
 	D3DXMATRIX matProjection;
 	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(fov), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, /*1000000*/65536.0f);
 
-	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,		&viewMatrix);
+	#ifndef USE_D3DVIEWTRANSFORM
+		D3DXMatrixIdentity(&viewMatrix); // we want to use the identity matrix in this case
+	#endif
+
+	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW, &viewMatrix);
 	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matProjection);
 
 	ChangeTextureAddressMode(TEXTURE_WRAP);
 
-	D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Before DrawIndexedPrimitive for non transparents\n"));
+	bool weHaveOpaques = false;
+	bool weHaveTransparents = false;
 
 	for (uint32_t i = 0; i < renderCount; i++)
 	{
 		if (renderTest[i].translucencyType != TRANSLUCENCY_OFF) 
 			continue;
+
+		// just call this function once
+		if (!weHaveOpaques)
+		{
+			D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Before DrawIndexedPrimitive for non transparents\n"));
+			weHaveOpaques = true;
+		}
 
 		// change render states if required
 		ChangeTexture(renderTest[i].textureID);
@@ -940,13 +950,18 @@ BOOL ExecuteBuffer()
 
 	D3DPERF_EndEvent();
 
-	D3DPERF_BeginEvent(D3DCOLOR_XRGB(140,36,70), WIDEN("Before DrawIndexedPrimitive for transparents\n"));
-
 	// do transparents here..
 	for (uint32_t i = 0; i < renderCount; i++)
 	{
 		if (renderTest[i].translucencyType == TRANSLUCENCY_OFF) 
 			continue;
+
+		// just call this function once
+		if (!weHaveTransparents)
+		{
+			D3DPERF_BeginEvent(D3DCOLOR_XRGB(140,36,70), WIDEN("Before DrawIndexedPrimitive for transparents\n"));
+			weHaveTransparents = true;
+		}
 
 		// change render states if required
 		ChangeTexture(renderTest[i].textureID);
@@ -1031,6 +1046,9 @@ BOOL ExecuteBuffer()
 		
 		D3DPERF_EndEvent();
 	}
+
+	weHaveTransparents = false;
+	weHaveOpaques = false;
 
 	return TRUE;
 }
@@ -1884,10 +1902,10 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 	TranslatePointIntoViewspace(&vertices[0]);
 
 	/* is particle within normal view frustrum ? */
-	if((-vertices[0].vx <= vertices[0].vz)
-	&&(vertices[0].vx <= vertices[0].vz)
-	&&(-vertices[0].vy <= vertices[0].vz)
-	&&(vertices[0].vy <= vertices[0].vz))
+	if ((-vertices[0].vx <= vertices[0].vz)
+	&& (vertices[0].vx <= vertices[0].vz)
+	&& (-vertices[0].vy <= vertices[0].vz)
+	&& (vertices[0].vy <= vertices[0].vz))
 	{
 
 		vertices[1] = particlePtr->Position;
@@ -1901,7 +1919,7 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 		TranslatePointIntoViewspace(&vertices[1]);
 		TranslatePointIntoViewspace(&vertices[2]);
 
-		float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
+//		float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
 
 		CheckVertexBuffer(3, NO_TEXTURE, TRANSLUCENCY_NORMAL);
 
@@ -1926,8 +1944,10 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 				mainVertex[vb].sy = (float)-verticesPtr->vy;
 				mainVertex[vb].sz = (float)verticesPtr->vz; // bjd - CHECK
 
-				if (i==3) mainVertex[vb].color = RGBALIGHT_MAKE(0,255,255,32);
-				else mainVertex[vb].color = RGBALIGHT_MAKE(255,255,255,32);
+				if (i==3) 
+					mainVertex[vb].color = RGBALIGHT_MAKE(0, 255, 255, 32);
+				else 
+					mainVertex[vb].color = RGBALIGHT_MAKE(255, 255, 255, 32);
 
 				mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 				mainVertex[vb].tu = 0.0f;
@@ -1953,9 +1973,9 @@ void D3D_DrawParticle_Smoke(PARTICLE *particlePtr)
 	/* is particle within normal view frustrum ? */
 	int inView = 0;
 
-	if(AvP.PlayerType == I_Alien)
+	if (AvP.PlayerType == I_Alien)
 	{
-		if((-vertices[0].vx <= vertices[0].vz*2)
+		if ((-vertices[0].vx <= vertices[0].vz*2)
 		&&(vertices[0].vx <= vertices[0].vz*2)
 		&&(-vertices[0].vy <= vertices[0].vz*2)
 		&&(vertices[0].vy <= vertices[0].vz*2))
@@ -1965,7 +1985,7 @@ void D3D_DrawParticle_Smoke(PARTICLE *particlePtr)
 	}
 	else
 	{
-		if((-vertices[0].vx <= vertices[0].vz)
+		if ((-vertices[0].vx <= vertices[0].vz)
 		&&(vertices[0].vx <= vertices[0].vz)
 		&&(-vertices[0].vy <= vertices[0].vz)
 		&&(vertices[0].vy <= vertices[0].vz))
@@ -1994,10 +2014,9 @@ void D3D_DrawParticle_Smoke(PARTICLE *particlePtr)
 		CheckVertexBuffer(3, NO_TEXTURE, TRANSLUCENCY_NORMAL);
 
 		{
-			int i = 3;
 			VECTORCH *verticesPtr = vertices;
 
-			do
+			for (uint32_t i = 0; i < 3; i++)
 			{
 /*
 				int x = (verticesPtr->vx*(Global_VDB_Ptr->VDB_ProjX))/verticesPtr->vz+Global_VDB_Ptr->VDB_CentreX;
@@ -2023,7 +2042,6 @@ void D3D_DrawParticle_Smoke(PARTICLE *particlePtr)
 				vb++;
 				verticesPtr++;
 			}
-		  	while (--i);
 		}
 		OUTPUT_TRIANGLE(0,2,1, 3);
 	}
@@ -2078,7 +2096,6 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 	// function responsible for bullet marks on walls, etc
 	DECAL_DESC *decalDescPtr = &DecalDescription[decalPtr->DecalID];
 
-	int32_t texoffset;
 	int32_t textureID;
 
 	AVPTEXTURE *textureHandle = NULL;
@@ -2117,15 +2134,13 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 	}
 	else
 	{
-		texoffset = SpecialFXImageNumber;
-
-		float width = (float) ImageHeaderArray[texoffset].ImageWidth;
+		float width = (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
 		RecipW = 1.0f / width;
 
-		float height = (float) ImageHeaderArray[texoffset].ImageHeight;
+		float height = (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
 		RecipH = 1.0f / height;
 
-		textureID = texoffset;
+		textureID = SpecialFXImageNumber;
 	}
 
 	if (decalDescPtr->IsLit)
@@ -2185,7 +2200,7 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 */
 			mainVertex[vb].sx = (float)vertices->X;
 			mainVertex[vb].sy = (float)-vertices->Y;
-			mainVertex[vb].sz = (float)vertices->Z+HeadUpDisplayZOffset-50;
+			mainVertex[vb].sz = (float)vertices->Z + HeadUpDisplayZOffset;// - 50;
 //			mainVertex[vb].rhw = 1.0f;
 
 			mainVertex[vb].color = colour;
@@ -2239,10 +2254,10 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 */
 	int colour;
 
-	if (particleDescPtr->IsLit && !(particlePtr->ParticleID==PARTICLE_ALIEN_BLOOD && CurrentVisionMode==VISION_MODE_PRED_SEEALIENS) )
+	if (particleDescPtr->IsLit && !(particlePtr->ParticleID == PARTICLE_ALIEN_BLOOD && CurrentVisionMode == VISION_MODE_PRED_SEEALIENS))
 	{
 		int intensity = LightIntensityAtPoint(&particlePtr->Position);
-		if (particlePtr->ParticleID == PARTICLE_SMOKECLOUD || particlePtr->ParticleID==PARTICLE_ANDROID_BLOOD)
+		if (particlePtr->ParticleID == PARTICLE_SMOKECLOUD || particlePtr->ParticleID == PARTICLE_ANDROID_BLOOD)
 		{
 			colour = RGBALIGHT_MAKE
 				  	(
@@ -2281,7 +2296,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
 
 		{
-			for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++ )
+			for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 			{
 				RENDERVERTEX *vertices = &renderVerticesPtr[i];
 /*
@@ -2290,7 +2305,9 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 				int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
 				int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-				
+*/			
+				float zvalue;
+
 				if (particleDescPtr->IsDrawnInFront)
 				{
 					zvalue = 0.0f;
@@ -2302,9 +2319,9 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 				else
 				{
 					//zvalue = 1.0f - ZNear*oneOverZ;
-					zvalue = 1.0f - Zoffset * ZNear/vertices->Z;
+					zvalue = (float)vertices->Z;//1.0f - Zoffset * ZNear/vertices->Z;
 				}
-
+/*
 				mainVertex[vb].sx = (float)x;
 				mainVertex[vb].sy = (float)y;
 				mainVertex[vb].sz = zvalue;
@@ -2312,7 +2329,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 */
 				mainVertex[vb].sx = (float)vertices->X;
 				mainVertex[vb].sy = (float)-vertices->Y;
-				mainVertex[vb].sz = (float)vertices->Z;
+				mainVertex[vb].sz = zvalue;//(float)vertices->Z;
 
 				mainVertex[vb].color = colour;
 	 			mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);

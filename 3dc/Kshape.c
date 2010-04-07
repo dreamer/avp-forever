@@ -4037,12 +4037,20 @@ extern void TranslationSetup(void)
 	ViewMatrix[9] = (float)(Global_VDB_Ptr->VDB_Mat.mat23)/65536.0f*CameraZoomScale;
 	ViewMatrix[10] = (float)(Global_VDB_Ptr->VDB_Mat.mat33)/65536.0f*CameraZoomScale;
 
-//	RotateVector(&v, &Global_VDB_Ptr->VDB_Mat);
+	#ifndef USE_D3DVIEWTRANSFORM
+	RotateVector(&v, &Global_VDB_Ptr->VDB_Mat);
+	#endif
 
 	// position
+	#ifndef USE_D3DVIEWTRANSFORM // negate values
+	ViewMatrix[3] = ((float)-v.vx)*o;
+	ViewMatrix[7] = ((float)-v.vy)*p;
+	ViewMatrix[11] = ((float)-v.vz)*CameraZoomScale;
+	#else
 	ViewMatrix[3] = ((float)v.vx)*o;
 	ViewMatrix[7] = ((float)v.vy)*p;
 	ViewMatrix[11] = ((float)v.vz)*CameraZoomScale;
+	#endif
 /*
 	sprintf(buf, 
 	"\t %f \t %f \t %f\n"
@@ -4079,20 +4087,17 @@ static void TranslatePoint(const float *source, float *dest, const float *matrix
 
 void TranslatePointIntoViewspace(VECTORCH *pointPtr)
 {
+#ifndef USE_D3DVIEWTRANSFORM
 
-#if 0 // original code
 	Source[0] = (float)pointPtr->vx;
 	Source[1] = (float)pointPtr->vy;
 	Source[2] = (float)pointPtr->vz;
 
 	TranslatePoint(Source, Dest, ViewMatrix);
 
-	f2i(pointPtr->vx,Dest[0]);
-	f2i(pointPtr->vy,Dest[1]);
-	f2i(pointPtr->vz,Dest[2]);
-
-#else // bjd - view matrix test
-
+	f2i(pointPtr->vx, Dest[0]);
+	f2i(pointPtr->vy, Dest[1]);
+	f2i(pointPtr->vz, Dest[2]);
 
 #endif
 }
@@ -4101,12 +4106,12 @@ void SquishPoints(SHAPEINSTR *shapeinstrptr)
 {
 	int **shapeitemarrayptr = shapeinstrptr->sh_instr_data;
 
-	VECTORCH *shapePts      = (VECTORCH*)*shapeitemarrayptr;
+	VECTORCH *shapePts = (VECTORCH*)*shapeitemarrayptr;
 	{
 		int i;
 		int scale = Global_ODB_Ptr->ObFlags2;
 		
-		for (i=0; i<Global_ShapeHeaderPtr->numpoints; i++)
+		for (i = 0; i < Global_ShapeHeaderPtr->numpoints; i++)
 		{
 			VECTORCH point = shapePts[i];
 
@@ -4121,23 +4126,20 @@ void SquishPoints(SHAPEINSTR *shapeinstrptr)
 			point.vy += Global_ODB_Ptr->ObWorld.vy;
 			point.vy = HierarchicalObjectsLowestYValue + MUL_FIXED(point.vy-HierarchicalObjectsLowestYValue, scale);
 
-//			Source[0] = (float)point.vx;
-//			Source[1] = (float)point.vy;
-//			Source[2] = (float)point.vz;
+#ifndef USE_D3DVIEWTRANSFORM
 
-#if 0
+			Source[0] = (float)point.vx;
+			Source[1] = (float)point.vy;
+			Source[2] = (float)point.vz;
+
 			TranslatePoint(Source, Dest, ViewMatrix);
 
-			f2i(RotatedPts[i].vx,Dest[0]);
-			f2i(RotatedPts[i].vy,Dest[1]);
-			f2i(RotatedPts[i].vz,Dest[2]);
+			f2i(RotatedPts[i].vx, Dest[0]);
+			f2i(RotatedPts[i].vy, Dest[1]);
+			f2i(RotatedPts[i].vz, Dest[2]);
 
 #else	// bjd - view matrix test
-/*
-			f2i(RotatedPts[i].vx,Source[0]);
-			f2i(RotatedPts[i].vy,Source[1]);
-			f2i(RotatedPts[i].vz,Source[2]);
-*/
+
 			RotatedPts[i].vx = point.vx;
 			RotatedPts[i].vy = point.vy;
 			RotatedPts[i].vz = point.vz;
@@ -4159,11 +4161,11 @@ void MorphPoints(SHAPEINSTR *shapeinstrptr)
 
 		shape1Ptr = MorphDisplay.md_sptr1;
 
-		if(MorphDisplay.md_lerp == 0x0000)
+		if (MorphDisplay.md_lerp == 0x0000)
 		{	
 			srcPtr = (VECTORCH *)*shape1Ptr->points;
 		}
-		else if(MorphDisplay.md_lerp == 0xffff)
+		else if (MorphDisplay.md_lerp == 0xffff)
 		{
 			SHAPEHEADER *shape2Ptr;
 			shape2Ptr = MorphDisplay.md_sptr2;
@@ -4183,12 +4185,12 @@ void MorphPoints(SHAPEINSTR *shapeinstrptr)
 		    	int numberOfPoints = shape1Ptr->numpoints;
 				VECTORCH *morphedPointsPtr = (VECTORCH *) MorphedPts;
 		    
-				while(numberOfPoints--)
+				while (numberOfPoints--)
 				{
 				   	VECTORCH vertex1 = *shape1PointsPtr;
 				   	VECTORCH vertex2 = *shape2PointsPtr;
 				
-					if( (vertex1.vx == vertex2.vx && vertex1.vy == vertex2.vy && vertex1.vz == vertex2.vz) )
+					if ((vertex1.vx == vertex2.vx && vertex1.vy == vertex2.vy && vertex1.vz == vertex2.vz))
 					{
 						*morphedPointsPtr = vertex1;
 					}
@@ -4214,29 +4216,26 @@ void MorphPoints(SHAPEINSTR *shapeinstrptr)
 	{
 		VECTORCH *destPtr = RotatedPts;
 		int i;
-		for(i = shapeinstrptr->sh_numitems; i!=0; i--)
+		for (i = shapeinstrptr->sh_numitems; i!=0; i--)
 		{
-//			Source[0] = (float)(srcPtr->vx+Global_ODB_Ptr->ObWorld.vx);
-//			Source[1] = (float)(srcPtr->vy+Global_ODB_Ptr->ObWorld.vy);
-//			Source[2] = (float)(srcPtr->vz+Global_ODB_Ptr->ObWorld.vz);
 
-#if 0
+#ifndef USE_D3DVIEWTRANSFORM
+
+			Source[0] = (float)(srcPtr->vx + Global_ODB_Ptr->ObWorld.vx);
+			Source[1] = (float)(srcPtr->vy + Global_ODB_Ptr->ObWorld.vy);
+			Source[2] = (float)(srcPtr->vz + Global_ODB_Ptr->ObWorld.vz);
+
 			TranslatePoint(Source, Dest, ViewMatrix);
 
-			f2i(destPtr->vx,Dest[0]);
-			f2i(destPtr->vy,Dest[1]);
-			f2i(destPtr->vz,Dest[2]);
+			f2i(destPtr->vx, Dest[0]);
+			f2i(destPtr->vy, Dest[1]);
+			f2i(destPtr->vz, Dest[2]);
 
 #else  // bjd - view matrix test
 
-			destPtr->vx = srcPtr->vx+Global_ODB_Ptr->ObWorld.vx;
-			destPtr->vy = srcPtr->vy+Global_ODB_Ptr->ObWorld.vy;
-			destPtr->vz = srcPtr->vz+Global_ODB_Ptr->ObWorld.vz;
-/*
-			f2i(destPtr->vx, Source[0]);
-			f2i(destPtr->vy, Source[1]);
-			f2i(destPtr->vz, Source[2]);
-*/
+			destPtr->vx = srcPtr->vx + Global_ODB_Ptr->ObWorld.vx;
+			destPtr->vy = srcPtr->vy + Global_ODB_Ptr->ObWorld.vy;
+			destPtr->vz = srcPtr->vz + Global_ODB_Ptr->ObWorld.vz;
 #endif
 			srcPtr++;
 			destPtr++;
@@ -4258,10 +4257,10 @@ void TranslateShapeVertices(SHAPEINSTR *shapeinstrptr)
 	{
 		for (i = shapeinstrptr->sh_numitems; i!=0; i--)
 		{
-			destPtr->vx = (srcPtr->vx+Global_ODB_Ptr->ObView.vx);
-//bjd			destPtr->vy = ((srcPtr->vy+Global_ODB_Ptr->ObView.vy)*4)/3;
-			destPtr->vy = (srcPtr->vy+Global_ODB_Ptr->ObView.vy);
-			destPtr->vz = (srcPtr->vz+Global_ODB_Ptr->ObView.vz);
+			destPtr->vx = (srcPtr->vx + Global_ODB_Ptr->ObView.vx);
+//			destPtr->vy = ((srcPtr->vy + Global_ODB_Ptr->ObView.vy)*4)/3;
+			destPtr->vy = (srcPtr->vy + Global_ODB_Ptr->ObView.vy);
+			destPtr->vz = (srcPtr->vz + Global_ODB_Ptr->ObView.vz);
 
 			srcPtr++;
 			destPtr++;
@@ -4294,21 +4293,20 @@ void TranslateShapeVertices(SHAPEINSTR *shapeinstrptr)
 			// static void TranslatePoint(const float *source, float *dest, const float *matrix)
 			TranslatePoint(Source, Dest, ObjectViewMatrix); // local to world?
 
-#if 0
+#ifndef USE_D3DVIEWTRANSFORM
+
 			TranslatePoint(Dest, Source, ViewMatrix); // world to view?
 
-			f2i(destPtr->vx,Source[0]);
-			f2i(destPtr->vy,Source[1]);
-			f2i(destPtr->vz,Source[2]);
+			f2i(destPtr->vx, Source[0]);
+			f2i(destPtr->vy, Source[1]);
+			f2i(destPtr->vz, Source[2]);
 
 #else // bjd - view matrix test
 
 			f2i(destPtr->vx, Dest[0]);
 			f2i(destPtr->vy, Dest[1]);
 			f2i(destPtr->vz, Dest[2]);
-
 #endif
-
 			srcPtr++;
 			destPtr++;
 		}
@@ -4350,7 +4348,7 @@ void RenderDecal(DECAL *decalPtr)
 		int outcode = DecalWithinFrustrum(decalPtr);
 										  
 		if (outcode)
-		{		 
+		{
 			switch(decalPtr->DecalID)
 			{
 				default:
@@ -4385,7 +4383,6 @@ void RenderDecal(DECAL *decalPtr)
 
 void RenderParticle(PARTICLE *particlePtr)
 {
-
 	int particleSize = particlePtr->Size;
 	{
 		VECTORCH translatedPosition = particlePtr->Position;
@@ -4538,10 +4535,10 @@ void RenderParticle(PARTICLE *particlePtr)
 		{
 			extern void RotateVertex(VECTOR2D *vertexPtr, int theta);
 			int theta = FastRandom()&4095;
-			RotateVertex(&offset[0],theta);
-			RotateVertex(&offset[1],theta);
-			RotateVertex(&offset[2],theta);
-			RotateVertex(&offset[3],theta);
+			RotateVertex(&offset[0], theta);
+			RotateVertex(&offset[1], theta);
+			RotateVertex(&offset[2], theta);
+			RotateVertex(&offset[3], theta);
 		}
 		else if ((particlePtr->ParticleID == PARTICLE_SMOKECLOUD)
 			||(particlePtr->ParticleID == PARTICLE_GUNMUZZLE_SMOKE)
@@ -4786,7 +4783,7 @@ void RenderMirroredDecal(DECAL *decalPtr)
 										  
 		if (outcode)
 		{		 
-			switch(decalPtr->DecalID)
+			switch (decalPtr->DecalID)
 			{
 				default:
 				case DECAL_SCORCHED:
@@ -5121,14 +5118,14 @@ void OutputTranslucentPolyList(void)
 {
 	int i = CurrentNumberOfTranslucentPolygons;
 
-	while(i--)
+	while (i--)
 	{
 		int k = CurrentNumberOfTranslucentPolygons;
 		int maxFound = 0;
 
-		while(k--)
+		while (k--)
 		{
-			if (TranslucentPolygons[k].MaxZ>TranslucentPolygons[maxFound].MaxZ)
+			if (TranslucentPolygons[k].MaxZ > TranslucentPolygons[maxFound].MaxZ)
 			{
 				maxFound = k;
 			}
@@ -5138,8 +5135,8 @@ void OutputTranslucentPolyList(void)
 
 		RenderPolygon.NumberOfVertices = TranslucentPolygons[maxFound].NumberOfVertices;
 		RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
-		D3D_ZBufferedGouraudTexturedPolygon_Output(&TranslucentPolygonHeaders[maxFound],TranslucentPolygons[maxFound].Vertices);
-		TranslucentPolygons[maxFound].MaxZ=0;
+		D3D_ZBufferedGouraudTexturedPolygon_Output(&TranslucentPolygonHeaders[maxFound], TranslucentPolygons[maxFound].Vertices);
+		TranslucentPolygons[maxFound].MaxZ = 0;
 	}
 	
 	RenderAllParticlesFurtherAwayThan(-0x7fffffff);
@@ -5929,7 +5926,7 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 	PARTICLE particle;
 	VECTORCH point = *positionPtr;
 
-//	TranslatePointIntoViewspace(&point);
+	TranslatePointIntoViewspace(&point);
 
 //	if (point.vz < 64) 
 //		return;	
@@ -5967,7 +5964,7 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 	VerticesBuffer[3].Z = z;
 */
 
-	point.vz = 65534;
+	point.vz = 65535;
 
 	VerticesBuffer[0].X = point.vx - sizeX;
 	VerticesBuffer[0].Y = point.vy - sizeY;
