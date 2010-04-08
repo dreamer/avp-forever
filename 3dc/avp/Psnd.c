@@ -246,11 +246,13 @@ void SoundSys_StopAll(void)
 	int i;
 
 	/* if we're not switched on, should be nothing playing */
-	if(!SoundSwitchedOn) return;
+	if (!SoundSwitchedOn) 
+		return;
 
-	for(i=0;i<SOUND_MAXACTIVE;i++)
+	for (i = 0;i < SOUND_MAXACTIVE; i++)
 	{
-		if(ActiveSounds[i].soundIndex!=SID_NOSOUND) Sound_Stop(i);		
+		if (ActiveSounds[i].soundIndex != SID_NOSOUND)  
+			Sound_Stop(i);		
 	}
 }
 
@@ -260,17 +262,18 @@ void SoundSys_RemoveAll(void)
 	
 	/* if we are not initialised, there should be no sounds loaded or playing.
 	if we are switched off, we should still unload them all */
-	if(!SoundInitialised) return;
+	if (!SoundInitialised) 
+		return;
 
 	/* make sure there are no sounds playing */
 	SoundSys_StopAll();
 
 	/* deallocate all sounds */
-	for(i=0;i<SID_MAXIMUM;i++)
+	for (i = 0;i < SID_MAXIMUM; i++)
 	{
-		if(GameSounds[i].loaded) 
+		if (GameSounds[i].loaded) 
 		{
-			LOCALASSERT(GameSounds[i].activeInstances==0);
+			LOCALASSERT(GameSounds[i].activeInstances == 0);
 			PlatEndGameSound(i);
 			GameSounds[i] = BlankGameSound;
 		}		

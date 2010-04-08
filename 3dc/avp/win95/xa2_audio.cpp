@@ -585,6 +585,9 @@ void ResetEaxEnvironment(void)
 
 void PlatEndSoundSys()
 {
+	// lets check all sounds are stopped and released here (important to handle alt+f4 close)
+	SoundSys_RemoveAll();
+
 	if (pSourceVoice)
 	{
 		pSourceVoice->DestroyVoice();
@@ -596,6 +599,7 @@ void PlatEndSoundSys()
 		pSubmixVoice->DestroyVoice();
 		pSubmixVoice = NULL;
 	}
+
 	if (pMasteringVoice)
 	{
 		pMasteringVoice->DestroyVoice();

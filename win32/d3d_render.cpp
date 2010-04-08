@@ -22,7 +22,6 @@ extern "C++"{
 #include "onscreenKeyboard.h"
 
 #include "r2base.h"
-#include <math.h> // for sqrt
 
 #ifdef WIN32
 extern int Font_DrawText(const char* text, int x, int y, int colour, int fontType);
@@ -727,6 +726,9 @@ BOOL UnlockExecuteBufferAndPrepareForUse()
 
 BOOL BeginD3DScene()
 {
+	if (d3d.lpD3DDevice == NULL)
+		return FALSE;
+
 	// check for lost device
 	LastError = d3d.lpD3DDevice->TestCooperativeLevel();
 	if (FAILED(LastError)) 
@@ -3494,8 +3496,9 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 
 void ThisFramesRenderingHasBegun(void)
 {
-	BeginD3DScene(); // calls a function to perform d3d_device->Begin();
+	if (BeginD3DScene()) { // calls a function to perform d3d_device->Begin();
 	LockExecuteBuffer(); // lock vertex buffer
+	}
 }
 
 void ThisFramesRenderingHasFinished(void)
