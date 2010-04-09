@@ -117,6 +117,8 @@ extern void InitFmvCutscenes();
 extern DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
 extern struct DEBUGGINGTEXTOPTIONS ShowDebuggingText;
 
+extern BOOL bRunning;
+
 int unlimitedSaves = 0;
 
 void exit_break_point_fucntion ()
@@ -161,7 +163,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		SystemParametersInfo(SPI_SETSTICKYKEYS, sizeof(STICKYKEYS), &skOff, 0);
 	}
 
-	InitCentreMouseThread();
 	InitFmvCutscenes();
 
 	// load AliensVsPredator.cfg
@@ -258,8 +259,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	if (strstr(command_line, "-m"))
 	{
-		UseMouseCentreing = 1;
+		UseMouseCentreing = TRUE;
 	}
+
+	// windowed mode?
+	if (strstr(command_line, "-w"))
+	{
+		WindowRequestMode = WindowModeSubWindow;
+
+		// will stop mouse cursor moving outside game window
+		UseMouseCentreing = TRUE;
+	}
+
+	if (strstr(command_line, "-dontgrabmouse"))
+	{
+		// if this was previously set due to -m or -w, disable it
+		UseMouseCentreing = FALSE;
+	}
+
+	if (UseMouseCentreing)
+	{
+		InitCentreMouseThread();
+	}
+
 	#endif //AVP_DEBUG_VERSION
 
 	if (strstr(command_line, "-server"))
@@ -316,14 +338,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	#if debug && 1//!PREDATOR_DEMO
 
-	// windowed mode?
-	if (strstr(command_line, "-w"))
-	{
-		WindowRequestMode = WindowModeSubWindow;
-
-		// will stop mouse cursor moving outside game window
-		//UseMouseCentreing = TRUE;
-	}
 	if (instr = strstr(command_line, "-s"))
 		sscanf(instr, "-s%d", &level_to_load);
 	
@@ -380,7 +394,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	}
 	else unlimitedSaves = 1;
 
-	while (AvP_MainMenus())
+	while (AvP_MainMenus() && bRunning)
 	#endif
 	{
 		int menusActive = 0;
@@ -389,7 +403,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		mainMenu = 0;
 
 		#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
-		if(instr = strstr(command_line, "-n"))
+		if (instr = strstr(command_line, "-n"))
 		{								  
 			sscanf(instr, "-n %s", &LevelName);
 		}
@@ -441,7 +455,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		
 		IngameKeyboardInput_ClearBuffer();
 
-		while(AvP.MainLoopRunning) 
+		while (AvP.MainLoopRunning && bRunning) 
 		{
 		 	CheckForWindowsMessages();
 			CursorHome();
@@ -455,7 +469,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			}
 			#endif
 
-			switch(AvP.GameMode)
+			switch (AvP.GameMode)
 			{
 				case I_GM_Playing:
 				{
@@ -656,6 +670,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	/*-------------------Patrick 2/6/97-----------------------
 	End the sound system
 	----------------------------------------------------------*/
+
 	SoundSys_StopAll();
   	SoundSys_RemoveAll(); 
 
@@ -675,7 +690,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	//TimeStampedMessage("after ReleaseDirect3D");
 	
 	/* Kill windows procedures */
-	ExitWindowsSystem();
+//	ExitWindowsSystem();
 	//TimeStampedMessage("after ExitWindowsSystem");
 
 	#endif
@@ -696,7 +711,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	// 'shutdown' timer
 	timeEndPeriod(1);
 
-	FinishCentreMouseThread();
+	if (UseMouseCentreing)
+	{
+		FinishCentreMouseThread();
+	}
 
 	return 0;
 }

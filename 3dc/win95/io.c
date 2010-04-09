@@ -432,7 +432,7 @@ void ExitSystem(void)
     */
 
 	/* should be taken care of with WM_DESTROY ?*/
-//	ReleaseDirect3D();
+	ReleaseDirect3D();
 
 	/* Kill windows procedures */
 	ExitWindowsSystem();

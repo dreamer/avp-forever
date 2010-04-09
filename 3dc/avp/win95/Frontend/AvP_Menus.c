@@ -245,6 +245,8 @@ static const char* MultiplayerConfigurationName=0; //ditto
 
 extern int DebuggingCommandsActive;
 
+extern BOOL bRunning;
+
 int mainMenu = 1;
 
 int GetAvPMenuState()
@@ -254,11 +256,7 @@ int GetAvPMenuState()
 
 int AvP_MainMenus(void)
 {
-	#if 0
-	SaveDefaultPrimaryConfigs();
-	#else
 	LoadDefaultPrimaryConfigs();
-	#endif
 	
 	SoundSys_ResetFadeLevel();
 	SoundSys_Management();	
@@ -332,7 +330,7 @@ int AvP_MainMenus(void)
 
 	TimeStampedMessage("starting general menus");
 
-	while(AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
+	while (AvPMenus.MenusState == MENUSSTATE_MAINMENUS && bRunning)
 	{
 		mainMenu = 1;
 		ThisFramesRenderingHasBegun();

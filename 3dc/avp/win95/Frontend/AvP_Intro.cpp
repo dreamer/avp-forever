@@ -33,6 +33,8 @@ extern void FadedScreen(int alpha);
 
 extern void DrawFadeQuad(int topX, int topY, int alpha);
 
+extern BOOL bRunning;
+
 void WeWantAnIntro(void)
 {
 	IntroHasAlreadyBeenPlayed = 0;
@@ -112,15 +114,13 @@ extern void ShowSplashScreens(void)
 		  	DirectReadKeyboard();
 			FrameCounterHandler();
 		}
-		while(timeRemaining>=0 && !DebouncedGotAnyKey);
+		while(timeRemaining>=0 && !DebouncedGotAnyKey && bRunning);
 	}
+
 	ThisFramesRenderingHasBegun();
 	ClearScreenToBlack();
 	ThisFramesRenderingHasFinished();
 	FlipBuffers();
-
-//	ClearScreenToBlack();
-//	FlipBuffers();
 }
 
 extern void Show_WinnerScreen(void)
@@ -151,14 +151,12 @@ extern void Show_WinnerScreen(void)
 		FrameCounterHandler();
 		timeRemaining-=NormalFrameTime;
 	}
-	while(timeRemaining>=0 && !DebouncedGotAnyKey);
+	while (timeRemaining>=0 && !DebouncedGotAnyKey && bRunning);
 
 	ThisFramesRenderingHasBegun();
 	ClearScreenToBlack();
 	ThisFramesRenderingHasFinished();
 	FlipBuffers();
-//	ClearScreenToBlack();
-//	FlipBuffers();
 }
 
 void Show_CopyrightInfo(void)
@@ -176,9 +174,10 @@ void Show_CopyrightInfo(void)
 		FrameCounterHandler();
 		timeRemaining-=NormalFrameTime;
 	}
-	while(timeRemaining>0);
+	while (timeRemaining > 0 && bRunning);
 
 	timeRemaining = ONE_FIXED*2;
+
 	do
 	{
 		CheckForWindowsMessages();
@@ -191,7 +190,7 @@ void Show_CopyrightInfo(void)
 		FrameCounterHandler();
 		timeRemaining-=NormalFrameTime;
 	}
-	while(timeRemaining>0);
+	while (timeRemaining > 0 && bRunning);
 
 	timeRemaining = ONE_FIXED/2;
 	do
@@ -206,7 +205,7 @@ void Show_CopyrightInfo(void)
 		FrameCounterHandler();
 		timeRemaining-=NormalFrameTime;
 	}
-	while(timeRemaining>0);
+	while (timeRemaining > 0 && bRunning);
 }
 
 void Show_Presents(void)
@@ -252,7 +251,7 @@ void Show_Presents(void)
 	}
 	#if ALLOW_SKIP_INTRO
 
-	while((timeRemaining>0) && !GotAnyKey);
+	while ((timeRemaining>0) && !GotAnyKey && bRunning);
 
 	#else
 	while(timeRemaining>0);// && !GotAnyKey);
@@ -301,7 +300,7 @@ void Show_ARebellionGame(void)
 		timeRemaining-=NormalFrameTime;
 	}
 	#if ALLOW_SKIP_INTRO
-	while((timeRemaining>0) && !GotAnyKey);
+	while((timeRemaining>0) && !GotAnyKey && bRunning);
 	#else
 	while(timeRemaining>0);// && !GotAnyKey);
 	#endif
@@ -342,7 +341,7 @@ void Show_AvPLogo(void)
 		timeRemaining-=NormalFrameTime;
 	}
 	#if ALLOW_SKIP_INTRO
-	while((timeRemaining>0) && !GotAnyKey);
+	while((timeRemaining>0) && !GotAnyKey && bRunning);
 	#else
 	while(timeRemaining>0);// && !GotAnyKey);
 	#endif

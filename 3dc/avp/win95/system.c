@@ -884,23 +884,23 @@ void SaveGameToFile(void)
 // project spec game exit
 void ExitGame(void)
 {
-	if(player_rif != INVALID_RIFFHANDLE)
+	if (player_rif != INVALID_RIFFHANDLE)
 	{
 		avp_undo_rif_load(player_rif);
 	  	player_rif=INVALID_RIFFHANDLE;
 	}
 	
-	if(alien_weapon_rif != INVALID_RIFFHANDLE)
+	if (alien_weapon_rif != INVALID_RIFFHANDLE)
 	{
 		avp_undo_rif_load(alien_weapon_rif);
 		alien_weapon_rif=INVALID_RIFFHANDLE;
 	}
-	if(marine_weapon_rif != INVALID_RIFFHANDLE)
+	if (marine_weapon_rif != INVALID_RIFFHANDLE)
 	{
 		avp_undo_rif_load(marine_weapon_rif);
 		marine_weapon_rif=INVALID_RIFFHANDLE;
 	}
-	if(predator_weapon_rif != INVALID_RIFFHANDLE)
+	if (predator_weapon_rif != INVALID_RIFFHANDLE)
 	{
 		avp_undo_rif_load(predator_weapon_rif);
 		predator_weapon_rif=INVALID_RIFFHANDLE;

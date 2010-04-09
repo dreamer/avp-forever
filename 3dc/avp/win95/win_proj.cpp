@@ -57,6 +57,7 @@ unsigned char ToAsciiTable[256][256];
 
 HWND 		hWndMain;
 BOOL        bActive = TRUE;        // is application active?
+BOOL		bRunning = TRUE;
 
 // Parameters for main (assumed full screen) window
 int WinLeftX, WinRightX, WinTopY, WinBotY;
@@ -437,22 +438,26 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			PlatCDDAManagementCallBack(wParam, (LONG)lParam);
 			break;
 
+		case WM_CLOSE:
+		{
+			bRunning = FALSE;
+			OutputDebugString("WM_CLOSE\n");
+			//break;
+			return 0;
+		}
+
 		case WM_DESTROY:
 		{
-			// Calls ReleaseDirect3D DIRECTLY,
-			// so as to avoid calling ExitSystem and exiting the
-			// Windows system inside the windows procedure
-			// IMPORTANT!!! For this to work, release functions 
-			// must be re-entrant.  Since this may be causing
-			// problems under obscure cirumstances, I am removing 
-			// this now (25/7/96).
-			// And putting it back... (20/9/96)
+			OutputDebugString("WM_DESTROY\n");
+/*
 			ReleaseDirect3D();
 
-	 		/* patrick 9/6/97: hmmmmm.... */  	
 	   		PlatEndSoundSys();
 
+//			DestroyWindow(hWnd);
+*/
 	   		PostQuitMessage(0);
+
 			break;
 		}
     }
