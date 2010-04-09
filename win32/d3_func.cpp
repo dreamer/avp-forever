@@ -738,7 +738,7 @@ D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL po
 		sizeof(TGA_HEADER) + imageSize,
 		tex->width,
 		tex->height,
-		1,
+		1, // mips
 		usage,
 		D3DFMT_A8R8G8B8,
 		poolType,

@@ -449,15 +449,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		case WM_DESTROY:
 		{
 			OutputDebugString("WM_DESTROY\n");
-/*
-			ReleaseDirect3D();
 
-	   		PlatEndSoundSys();
-
-//			DestroyWindow(hWnd);
-*/
 	   		PostQuitMessage(0);
-
 			break;
 		}
     }
@@ -573,8 +566,6 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 		OutputDebugString("!hWndMain\n");
 		return FALSE;
 	}
-
-// Experiment only!!!!
 
 	// Set the window up to be displayed 
 	ShowWindow(hWndMain, nCmdShow);

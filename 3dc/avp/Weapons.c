@@ -2156,7 +2156,8 @@ static void PlayerFireLineOfSightAmmo(enum AMMO_ID AmmoID, int multiple)
 
 	if (PlayersTarget.DispPtr)
 	{
-		if (PlayersTarget.HModelSection!=NULL) {
+		if (PlayersTarget.HModelSection!=NULL) 
+		{
 			textprint("Hitting a hierarchical section.\n");
 			GLOBALASSERT(PlayersTarget.DispPtr->HModelControlBlock==PlayersTarget.HModelSection->my_controller);
 		}
@@ -2164,11 +2165,11 @@ static void PlayerFireLineOfSightAmmo(enum AMMO_ID AmmoID, int multiple)
 		HandleWeaponImpact(&(PlayersTarget.Position),PlayersTarget.DispPtr->ObStrategyBlock,AmmoID,&GunMuzzleDirectionInWS, multiple*ONE_FIXED, PlayersTarget.HModelSection);
 
 		/* Put in a target filter here? */
-		if (AccuracyStats_TargetFilter(PlayersTarget.DispPtr->ObStrategyBlock)) {
+		if (AccuracyStats_TargetFilter(PlayersTarget.DispPtr->ObStrategyBlock)) 
+		{
 			CurrentGameStats_WeaponHit(PlayerStatusPtr->SelectedWeaponSlot,multiple);
 		}
 	}
-	 	 
 }
 
 void HandleWeaponImpact(VECTORCH *positionPtr, STRATEGYBLOCK *sbPtr, enum AMMO_ID AmmoID, VECTORCH *directionPtr, int multiple, SECTION_DATA *this_section_data) 
@@ -3167,10 +3168,7 @@ static void StateDependentMovement(PLAYER_STATUS *playerStatusPtr, PLAYER_WEAPON
         	
         	break;
         }
-     
-        
 	}
-
 }
 
 

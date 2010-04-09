@@ -100,69 +100,78 @@ void CalculateWhereGunIsPointing(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA
 		(((GunMuzzleSightY-(ScreenDescriptorBlock.SDB_Height<<15))/(VDBPtr->VDB_ProjY))*3)/4;
     
 	/* Now fudge for gun judder! */
- 	if ((twPtr->UseStateMovement==0)||(weaponPtr->WeaponIDNumber == WEAPON_MINIGUN)) {
+ 	if ((twPtr->UseStateMovement==0)||(weaponPtr->WeaponIDNumber == WEAPON_MINIGUN)) 
+	{
 		if ((weaponPtr->CurrentState==WEAPONSTATE_FIRING_PRIMARY) 
-			||( (weaponPtr->CurrentState==WEAPONSTATE_FIRING_SECONDARY)&&(weaponPtr->WeaponIDNumber == WEAPON_TWO_PISTOLS) )){
-			if ((twPtr->PrimaryIsRapidFire)||(weaponPtr->WeaponIDNumber == WEAPON_TWO_PISTOLS)) {
-
+			||( (weaponPtr->CurrentState==WEAPONSTATE_FIRING_SECONDARY)&&(weaponPtr->WeaponIDNumber == WEAPON_TWO_PISTOLS) ))
+		{
+			if ((twPtr->PrimaryIsRapidFire)||(weaponPtr->WeaponIDNumber == WEAPON_TWO_PISTOLS)) 
+			{
 				EULER judder;
 				MATRIXCH juddermat;
 
-				if (twPtr->RecoilMaxRandomZ>0) {
+				if (twPtr->RecoilMaxRandomZ>  0) 
+				{
 					weaponPtr->PositionOffset.vz = (FastRandom()%twPtr->RecoilMaxRandomZ) - twPtr->RecoilMaxZ;
 				}
 								
-				if ((Weapon_ThisBurst>0)||(weaponPtr->WeaponIDNumber == WEAPON_TWO_PISTOLS)) {
-
+				if ((Weapon_ThisBurst>0)||(weaponPtr->WeaponIDNumber == WEAPON_TWO_PISTOLS)) 
+				{
 					/* jiggle the weapon around when you shoot */
 					int speed=Approximate3dMagnitude(&Player->ObStrategyBlock->DynPtr->LinVelocity);
 					/* speed should be between ~0 and ~27000 (jumping alien). ~15000 is a moving marine. */
 					
-					if (twPtr->RecoilMaxXTilt>0) {
+					if (twPtr->RecoilMaxXTilt > 0) 
+					{
 						judder.EulerX=(FastRandom()%twPtr->RecoilMaxXTilt)-twPtr->RecoilMaxXTilt/2;
-					} else {
+					} 
+					else 
+					{
 						judder.EulerX=0;
 					}
-					if (twPtr->RecoilMaxYTilt>0) {
+					if (twPtr->RecoilMaxYTilt > 0) 
+					{
 						judder.EulerY=(FastRandom()%twPtr->RecoilMaxYTilt)-twPtr->RecoilMaxYTilt/2;
-					} else {
-						judder.EulerY=0;
+					} 
+					else 
+					{
+						judder.EulerY = 0;
 					}
-					judder.EulerZ=0;
+					judder.EulerZ = 0;
 	
-					judder.EulerX=MUL_FIXED(judder.EulerX,(ONE_FIXED+(speed<<2)));
-					judder.EulerY=MUL_FIXED(judder.EulerY,(ONE_FIXED+(speed<<2)));
+					judder.EulerX = MUL_FIXED(judder.EulerX,(ONE_FIXED+(speed<<2)));
+					judder.EulerY = MUL_FIXED(judder.EulerY,(ONE_FIXED+(speed<<2)));
 
 					judder.EulerX&=wrap360;
 					judder.EulerY&=wrap360;
 	
-					CreateEulerMatrix(&judder,&juddermat);
-					RotateVector(&GunMuzzleDirectionInVS,&juddermat);
+					CreateEulerMatrix(&judder, &juddermat);
+					RotateVector(&GunMuzzleDirectionInVS, &juddermat);
 				}
 			}
-		} else {
+		} 
+		else 
+		{
 			/* Recentre Z offset. */
 			int linearCenteringSpeed = MUL_FIXED(300,NormalFrameTime);
 
-			if (weaponPtr->PositionOffset.vz > 0 )
+			if (weaponPtr->PositionOffset.vz > 0)
 			{
 				weaponPtr->PositionOffset.vz -= linearCenteringSpeed;
 				if (weaponPtr->PositionOffset.vz < 0) weaponPtr->PositionOffset.vz = 0;	
 			}
-			else if (weaponPtr->PositionOffset.vz < 0 )
+			else if (weaponPtr->PositionOffset.vz < 0)
 			{
 				weaponPtr->PositionOffset.vz += linearCenteringSpeed;
 				if (weaponPtr->PositionOffset.vz > 0) weaponPtr->PositionOffset.vz = 0;	
 			}
-
 		}
 	}
 
     GunMuzzleDirectionInWS = GunMuzzleDirectionInVS;
     /* rotate vector into world space and then normalise */
-    RotateVector(&GunMuzzleDirectionInWS,&matrix);
+    RotateVector(&GunMuzzleDirectionInWS, &matrix);
 	Normalise(&GunMuzzleDirectionInWS);
-
 }
 
 void CalculatePlayersTarget(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA *weaponPtr)
@@ -185,9 +194,12 @@ void CalculatePlayersTarget(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA *wea
 
 	//textprint("Exiting CPT - PT.DP is %x, PT.HMS is %x\n",PlayersTarget.DispPtr,PlayersTarget.HModelSection);
 
-	if (PlayersTarget.DispPtr) {
-		if (PlayersTarget.HModelSection) {
-			if (PlayersTarget.HModelSection->my_controller!=PlayersTarget.DispPtr->HModelControlBlock) {
+	if (PlayersTarget.DispPtr) 
+	{
+		if (PlayersTarget.HModelSection) 
+		{
+			if (PlayersTarget.HModelSection->my_controller!=PlayersTarget.DispPtr->HModelControlBlock)
+			{
 				PlayersTarget.HModelSection=NULL;
 			}
 		}
@@ -206,21 +218,22 @@ void CalculatePlayersTarget(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA *wea
 		PlayersTarget.Position.vz = Global_VDB_Ptr->VDB_World.vz + (Global_VDB_Ptr->VDB_Mat.mat33<<7);
 		PlayersTarget.HModelSection = NULL;
 	}
+
 	if (ShowDebuggingText.Target)
 	{
 		PrintDebuggingText("Target Position: %d %d %d\n",PlayersTarget.Position.vx,PlayersTarget.Position.vy,PlayersTarget.Position.vz);
 	}
 
-	if (PlayersTarget.HModelSection) {
+	if (PlayersTarget.HModelSection) 
+	{
 		GLOBALASSERT(PlayersTarget.DispPtr->HModelControlBlock==PlayersTarget.HModelSection->my_controller);
 	}
   	
-	if(AvP.Network!=I_No_Network) 
+	if (AvP.Network!=I_No_Network) 
 	{
 		AddNetMsg_PredatorLaserSights(&PlayersTarget.Position,&LOS_ObjectNormal,PlayersTarget.DispPtr);
 	}
 
-	
 	/* find position/orientation of predator's targeting sights */
 	if ( (AvP.PlayerType == I_Predator)
 	   &&((weaponPtr->WeaponIDNumber == WEAPON_PRED_RIFLE)
@@ -242,7 +255,7 @@ void CalculatePlayersTarget(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA *wea
 		{
 			VECTORCH position = offset[i];
 
-		  	RotateVector(&position,&matrix);
+		  	RotateVector(&position, &matrix);
 			position.vx += Global_VDB_Ptr->VDB_World.vx;
 			position.vy += Global_VDB_Ptr->VDB_World.vy;
 			position.vz += Global_VDB_Ptr->VDB_World.vz;
@@ -269,8 +282,6 @@ void CalculatePlayersTarget(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA *wea
 	{
 		PredatorLaserTarget.ShouldBeDrawn=0;
 	}
-
-
 }
 
 BOOL CalculateFiringSolution(VECTORCH* firing_pos,VECTORCH* target_pos,VECTORCH* target_vel,int projectile_speed,VECTORCH* solution)

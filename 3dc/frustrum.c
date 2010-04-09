@@ -394,7 +394,11 @@ void GouraudPolygon_ClipWithZ(void)
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
 	
-	int curVertexInside = 1;//Clip_Z_Test(curVertexPtr);
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_Z_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart(VerticesBuffer)
 	Clip_Z_Test(nextVertexPtr);
@@ -411,8 +415,12 @@ static void GouraudPolygon_Norm_ClipWithNegativeX(void)
 	RENDERVERTEX *outputVerticesPtr = VerticesBuffer;
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_NX_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_NX_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart((RenderPolygon.Vertices))
 	Clip_NX_Test(nextVertexPtr);
@@ -420,6 +428,7 @@ static void GouraudPolygon_Norm_ClipWithNegativeX(void)
 	Clip_OutputI
 	Clip_LoopEnd(VerticesBuffer)
 }
+
 static void GouraudPolygon_Wide_ClipWithNegativeX(void)
 {
 	RENDERVERTEX *curVertexPtr = (RenderPolygon.Vertices);
@@ -427,7 +436,11 @@ static void GouraudPolygon_Wide_ClipWithNegativeX(void)
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
 	
-	int curVertexInside = 1;//Clip_Wide_NX_Test(curVertexPtr);
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_Wide_NX_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart((RenderPolygon.Vertices))
 	Clip_Wide_NX_Test(nextVertexPtr);
@@ -444,7 +457,11 @@ static void GouraudPolygon_Norm_ClipWithPositiveY(void)
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
 	
-	int curVertexInside = 1;//Clip_PY_Test(curVertexPtr);
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_PY_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart(VerticesBuffer)
 	Clip_PY_Test(nextVertexPtr);
@@ -460,7 +477,11 @@ static void GouraudPolygon_Wide_ClipWithPositiveY(void)
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
 	
-	int curVertexInside = 1;//Clip_Wide_PY_Test(curVertexPtr);
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_Wide_PY_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart(VerticesBuffer)
 	Clip_Wide_PY_Test(nextVertexPtr);
@@ -476,8 +497,12 @@ static void GouraudPolygon_Norm_ClipWithNegativeY(void)
 	RENDERVERTEX *outputVerticesPtr = VerticesBuffer;
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_NY_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_NY_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart((RenderPolygon.Vertices))
 	Clip_NY_Test(nextVertexPtr);
@@ -492,8 +517,12 @@ static void GouraudPolygon_Wide_ClipWithNegativeY(void)
 	RENDERVERTEX *outputVerticesPtr = VerticesBuffer;
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_Wide_NY_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_Wide_NY_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart((RenderPolygon.Vertices))
 	Clip_Wide_NY_Test(nextVertexPtr);
@@ -509,8 +538,12 @@ static void GouraudPolygon_Norm_ClipWithPositiveX(void)
 	RENDERVERTEX *outputVerticesPtr = (RenderPolygon.Vertices);
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_PX_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_PX_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart(VerticesBuffer)
 	Clip_PX_Test(nextVertexPtr);
@@ -525,8 +558,12 @@ static void GouraudPolygon_Wide_ClipWithPositiveX(void)
 	RENDERVERTEX *outputVerticesPtr = (RenderPolygon.Vertices);
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_Wide_PX_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_Wide_PX_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart(VerticesBuffer)
 	Clip_Wide_PX_Test(nextVertexPtr);
@@ -546,8 +583,12 @@ void TexturedPolygon_ClipWithZ(void)
 	RENDERVERTEX *outputVerticesPtr = (RenderPolygon.Vertices);
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_Z_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_Z_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart(VerticesBuffer)
 	Clip_Z_Test(nextVertexPtr);
@@ -564,8 +605,12 @@ static void TexturedPolygon_Norm_ClipWithNegativeX(void)
 	RENDERVERTEX *outputVerticesPtr = VerticesBuffer;
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_NX_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_NX_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart((RenderPolygon.Vertices))
 	Clip_NX_Test(nextVertexPtr);
@@ -581,8 +626,12 @@ static void TexturedPolygon_Wide_ClipWithNegativeX(void)
 	RENDERVERTEX *outputVerticesPtr = VerticesBuffer;
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_Wide_NX_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_Wide_NX_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart((RenderPolygon.Vertices))
 	Clip_Wide_NX_Test(nextVertexPtr);
@@ -599,8 +648,12 @@ static void TexturedPolygon_Norm_ClipWithPositiveY(void)
 	RENDERVERTEX *outputVerticesPtr = (RenderPolygon.Vertices);
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_PY_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_PY_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart(VerticesBuffer)
 	Clip_PY_Test(nextVertexPtr);
@@ -616,8 +669,12 @@ static void TexturedPolygon_Wide_ClipWithPositiveY(void)
 	RENDERVERTEX *outputVerticesPtr = (RenderPolygon.Vertices);
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_Wide_PY_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_Wide_PY_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart(VerticesBuffer)
 	Clip_Wide_PY_Test(nextVertexPtr);
@@ -634,8 +691,12 @@ static void TexturedPolygon_Norm_ClipWithNegativeY(void)
 	RENDERVERTEX *outputVerticesPtr = VerticesBuffer;
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_NY_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_NY_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart((RenderPolygon.Vertices))
 	Clip_NY_Test(nextVertexPtr);
@@ -651,8 +712,12 @@ static void TexturedPolygon_Wide_ClipWithNegativeY(void)
 	RENDERVERTEX *outputVerticesPtr = VerticesBuffer;
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_Wide_NY_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_Wide_NY_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart((RenderPolygon.Vertices))
 	Clip_Wide_NY_Test(nextVertexPtr);
@@ -669,8 +734,12 @@ static void TexturedPolygon_Norm_ClipWithPositiveX(void)
 	RENDERVERTEX *outputVerticesPtr = (RenderPolygon.Vertices);
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_PX_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_PX_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart(VerticesBuffer)
 	Clip_PX_Test(nextVertexPtr);
@@ -686,8 +755,12 @@ static void TexturedPolygon_Wide_ClipWithPositiveX(void)
 	RENDERVERTEX *outputVerticesPtr = (RenderPolygon.Vertices);
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_Wide_PX_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_Wide_PX_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart(VerticesBuffer)
 	Clip_Wide_PX_Test(nextVertexPtr);
@@ -709,8 +782,12 @@ void GouraudTexturedPolygon_ClipWithZ(void)
 	RENDERVERTEX *outputVerticesPtr = (RenderPolygon.Vertices);
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_Z_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_Z_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart(VerticesBuffer)
 	Clip_Z_Test(nextVertexPtr);
@@ -727,8 +804,12 @@ static void GouraudTexturedPolygon_Norm_ClipWithNegativeX(void)
 	RENDERVERTEX *outputVerticesPtr = VerticesBuffer;
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_NX_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_NX_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart((RenderPolygon.Vertices))
 	Clip_NX_Test(nextVertexPtr);
@@ -745,7 +826,11 @@ static void GouraudTexturedPolygon_Wide_ClipWithNegativeX(void)
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
 	
-	int curVertexInside = 1;//Clip_Wide_NX_Test(curVertexPtr);
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_Wide_NX_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart((RenderPolygon.Vertices))
 	Clip_Wide_NX_Test(nextVertexPtr);
@@ -762,8 +847,12 @@ static void GouraudTexturedPolygon_Norm_ClipWithPositiveY(void)
 	RENDERVERTEX *outputVerticesPtr = (RenderPolygon.Vertices);
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_PY_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_PY_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart(VerticesBuffer)
 	Clip_PY_Test(nextVertexPtr);
@@ -779,8 +868,12 @@ static void GouraudTexturedPolygon_Wide_ClipWithPositiveY(void)
 	RENDERVERTEX *outputVerticesPtr = (RenderPolygon.Vertices);
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_Wide_PY_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_Wide_PY_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart(VerticesBuffer)
 	Clip_Wide_PY_Test(nextVertexPtr);
@@ -797,8 +890,12 @@ static void GouraudTexturedPolygon_Norm_ClipWithNegativeY(void)
 	RENDERVERTEX *outputVerticesPtr = VerticesBuffer;
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_NY_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_NY_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart((RenderPolygon.Vertices))
 	Clip_NY_Test(nextVertexPtr);
@@ -815,7 +912,11 @@ static void GouraudTexturedPolygon_Wide_ClipWithNegativeY(void)
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
 	
-	int curVertexInside = 1;//Clip_Wide_NY_Test(curVertexPtr);
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_Wide_NY_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart((RenderPolygon.Vertices))
 	Clip_Wide_NY_Test(nextVertexPtr);
@@ -832,8 +933,12 @@ static void GouraudTexturedPolygon_Norm_ClipWithPositiveX(void)
 	RENDERVERTEX *outputVerticesPtr = (RenderPolygon.Vertices);
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_PX_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_PX_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart(VerticesBuffer)
 	Clip_PX_Test(nextVertexPtr);
@@ -849,8 +954,12 @@ static void GouraudTexturedPolygon_Wide_ClipWithPositiveX(void)
 	RENDERVERTEX *outputVerticesPtr = (RenderPolygon.Vertices);
 	int verticesLeft = RenderPolygon.NumberOfVertices;
 	int numberOfPointsOutputted=0;
-	
-	int curVertexInside = 1;//Clip_Wide_PX_Test(curVertexPtr);
+
+#ifdef USE_FRUSTUM_CULL
+	int curVertexInside = Clip_Wide_PX_Test(curVertexPtr);
+#else
+	int curVertexInside = 1;
+#endif
 
 	Clip_LoopStart(VerticesBuffer)
 	Clip_Wide_PX_Test(nextVertexPtr);
@@ -862,8 +971,8 @@ static void GouraudTexturedPolygon_Wide_ClipWithPositiveX(void)
 
 int PolygonWithinFrustrum(POLYHEADER *polyPtr)
 {			
-    char inFrustrumFlag=0;
-   	char noClippingFlag=INSIDE_FRUSTRUM;
+    char inFrustrumFlag = 0;
+   	char noClippingFlag = INSIDE_FRUSTRUM;
 	int *vertexNumberPtr = &polyPtr->Poly1stPt;
 	
 	if (polyPtr->PolyFlags & iflag_notvis) 
@@ -871,7 +980,7 @@ int PolygonWithinFrustrum(POLYHEADER *polyPtr)
 	
 	RenderPolygon.NumberOfVertices = 0;
 
-	while(*vertexNumberPtr != Term)
+	while (*vertexNumberPtr != Term)
 	{
 		int vertexNumber = *vertexNumberPtr++;
 
@@ -882,8 +991,10 @@ int PolygonWithinFrustrum(POLYHEADER *polyPtr)
 	   	RenderPolygon.NumberOfVertices++; 
 	}
 	
-//	if (inFrustrumFlag != INSIDE_FRUSTRUM) 
-//		return 0;
+#ifdef USE_FRUSTUM_CULL
+	if (inFrustrumFlag != INSIDE_FRUSTRUM) 
+		return 0;
+#endif
 
 	/* at this point we know that the poly is inside the view frustrum */
 
@@ -893,7 +1004,7 @@ int PolygonWithinFrustrum(POLYHEADER *polyPtr)
 		VECTORCH pop;
 		VECTORCH *normalPtr = (VECTORCH*)(Global_ShapeNormals + polyPtr->PolyNormalIndex);
 
-		if(Global_ODB_Ptr->ObMorphCtrl)
+		if (Global_ODB_Ptr->ObMorphCtrl)
 		{
 			extern MORPHDISPLAY MorphDisplay;
 		   	SHAPEHEADER *shape1Ptr;
@@ -905,13 +1016,13 @@ int PolygonWithinFrustrum(POLYHEADER *polyPtr)
 
 			shape1Ptr = MorphDisplay.md_sptr1;
 
-			if(MorphDisplay.md_lerp == 0x0000)
+			if (MorphDisplay.md_lerp == 0x0000)
 			{
 				shape1PointsPtr = (VECTORCH *)*shape1Ptr->points;
 				pop = shape1PointsPtr[polyPtr->Poly1stPt];	
 					
 			}
-			else if(MorphDisplay.md_lerp == 0xffff)
+			else if (MorphDisplay.md_lerp == 0xffff)
 			{
 				SHAPEHEADER *shape2Ptr = MorphDisplay.md_sptr2;
 				
@@ -929,7 +1040,7 @@ int PolygonWithinFrustrum(POLYHEADER *polyPtr)
 				   	VECTORCH vertex1 = shape1PointsPtr[polyPtr->Poly1stPt];
 				   	VECTORCH vertex2 = shape2PointsPtr[polyPtr->Poly1stPt];
 				
-					if( (vertex1.vx == vertex2.vx && vertex1.vy == vertex2.vy && vertex1.vz == vertex2.vz) )
+					if ((vertex1.vx == vertex2.vx && vertex1.vy == vertex2.vy && vertex1.vz == vertex2.vz))
 					{
 						pop = vertex1;
 					}
@@ -953,7 +1064,7 @@ int PolygonWithinFrustrum(POLYHEADER *polyPtr)
 		pop.vy -= LocalView.vy;
 		pop.vz -= LocalView.vz;
 	
-		if (Dot(&pop, normalPtr)>0) 
+		if (Dot(&pop, normalPtr) > 0) 
 			return 0;
 	}
 
@@ -1014,6 +1125,25 @@ static int VertexWithin_Norm_Frustrum(RENDERVERTEX *vertexPtr)
 {
 	int vertexFlag = 0;
 
+#ifdef USE_FRUSTUM_CULL
+
+	if (Clip_Z_Test(vertexPtr))
+		vertexFlag |= INSIDE_FRUSTRUM_Z_PLANE;
+
+	if (Clip_PX_Test(vertexPtr))
+		vertexFlag |= INSIDE_FRUSTRUM_PX_PLANE;
+
+	if (Clip_NX_Test(vertexPtr))
+		vertexFlag |= INSIDE_FRUSTRUM_NX_PLANE;
+
+	if (Clip_PY_Test(vertexPtr))
+		vertexFlag |= INSIDE_FRUSTRUM_PY_PLANE;
+
+	if (Clip_NY_Test(vertexPtr))
+		vertexFlag |= INSIDE_FRUSTRUM_NY_PLANE;
+
+#else
+		
 //	if (Clip_Z_Test(vertexPtr))
 		vertexFlag |= INSIDE_FRUSTRUM_Z_PLANE;
 
@@ -1028,6 +1158,9 @@ static int VertexWithin_Norm_Frustrum(RENDERVERTEX *vertexPtr)
 
 //	if (Clip_NY_Test(vertexPtr))
 		vertexFlag |= INSIDE_FRUSTRUM_NY_PLANE;
+#endif
+
+
 	
 	return vertexFlag;
 }
@@ -1035,6 +1168,25 @@ static int VertexWithin_Norm_Frustrum(RENDERVERTEX *vertexPtr)
 static int VertexWithin_Wide_Frustrum(RENDERVERTEX *vertexPtr)
 {
 	int vertexFlag = 0;
+
+#ifdef USE_FRUSTUM_CULL
+
+	if (Clip_Z_Test(vertexPtr))			
+		vertexFlag |= INSIDE_FRUSTRUM_Z_PLANE;
+
+	if (Clip_Wide_PX_Test(vertexPtr))	
+		vertexFlag |= INSIDE_FRUSTRUM_PX_PLANE;
+
+	if (Clip_Wide_NX_Test(vertexPtr))	
+		vertexFlag |= INSIDE_FRUSTRUM_NX_PLANE;
+
+	if (Clip_Wide_PY_Test(vertexPtr))
+		vertexFlag |= INSIDE_FRUSTRUM_PY_PLANE;
+
+	if (Clip_Wide_NY_Test(vertexPtr))
+		vertexFlag |= INSIDE_FRUSTRUM_NY_PLANE;
+
+#else
 
 //	if (Clip_Z_Test(vertexPtr))			
 		vertexFlag |= INSIDE_FRUSTRUM_Z_PLANE;
@@ -1050,7 +1202,8 @@ static int VertexWithin_Wide_Frustrum(RENDERVERTEX *vertexPtr)
 
 //	if (Clip_Wide_NY_Test(vertexPtr))
 		vertexFlag |= INSIDE_FRUSTRUM_NY_PLANE;
-	
+#endif
+
 	return vertexFlag;
 }
 
@@ -1058,7 +1211,11 @@ static int VertexWithin_Wide_Frustrum(RENDERVERTEX *vertexPtr)
 /* KJL 15:32:52 7/17/97 - Test to see if an object is in the view frustrum */
 static int ObjectWithin_Norm_Frustrum(DISPLAYBLOCK *dbPtr)
 {
+
+#ifndef USE_FRUSTUM_CULL
 	return 1; // bjd
+#endif
+
  //	LOCALASSERT(dbPtr->ObShapeData->shaperadius);
 
 #if FAR_Z_CLIP
@@ -1080,7 +1237,11 @@ static int ObjectWithin_Norm_Frustrum(DISPLAYBLOCK *dbPtr)
 
 static int ObjectCompletelyWithin_Norm_Frustrum(DISPLAYBLOCK *dbPtr)
 {
+
+#ifndef USE_FRUSTUM_CULL
 	return 1; // bjd
+#endif
+
  //	LOCALASSERT(dbPtr->ObShapeData->shaperadius);
 	if (dbPtr->ObView.vz-dbPtr->ObShapeData->shaperadius>=ZCLIPPINGVALUE)
 	{
@@ -1103,7 +1264,10 @@ static int ObjectCompletelyWithin_Wide_Frustrum(DISPLAYBLOCK *dbPtr)
 
 static int ObjectWithin_Wide_Frustrum(DISPLAYBLOCK *dbPtr)
 {
+
+#ifndef USE_FRUSTUM_CULL
 	return 1; // bjd
+#endif
 
 	if (dbPtr->ObView.vz+dbPtr->ObShapeData->shaperadius>=ZCLIPPINGVALUE)
 	{
@@ -1128,16 +1292,38 @@ void TestVerticesWith_Norm_Frustrum(void)
 
 	GLOBALASSERT(v>0);
 
-	while(v--)
+	while (v--)
 	{
 		char vertexFlag = 0;
 		
 #if FAR_Z_CLIP
 		if(ZCLIPPINGVALUE <= RotatedPts[v].vz && RotatedPts[v].vz<=FAR_Z_CLIP_RANGE)
 #else
-//		if(ZCLIPPINGVALUE <= RotatedPts[v].vz)
+
+	#ifdef USE_FRUSTUM_CULL
+		if(ZCLIPPINGVALUE <= RotatedPts[v].vz)
+	#endif
+
 #endif
-			vertexFlag |= INSIDE_FRUSTRUM_Z_PLANE;
+
+#ifdef USE_FRUSTUM_CULL
+
+		vertexFlag |= INSIDE_FRUSTRUM_Z_PLANE;
+		
+		if(-RotatedPts[v].vx <= RotatedPts[v].vz)
+			vertexFlag |= INSIDE_FRUSTRUM_PX_PLANE;	
+		
+		if(RotatedPts[v].vx <= RotatedPts[v].vz)
+			vertexFlag |= INSIDE_FRUSTRUM_NX_PLANE;	
+		
+		if(-RotatedPts[v].vy <= RotatedPts[v].vz)
+			vertexFlag |= INSIDE_FRUSTRUM_PY_PLANE;	
+		
+		if(RotatedPts[v].vy <= RotatedPts[v].vz)
+			vertexFlag |= INSIDE_FRUSTRUM_NY_PLANE;	
+
+#else
+		vertexFlag |= INSIDE_FRUSTRUM_Z_PLANE;
 		
 //		if(-RotatedPts[v].vx <= RotatedPts[v].vz)
 			vertexFlag |= INSIDE_FRUSTRUM_PX_PLANE;	
@@ -1150,6 +1336,9 @@ void TestVerticesWith_Norm_Frustrum(void)
 		
 //		if(RotatedPts[v].vy <= RotatedPts[v].vz)
 			vertexFlag |= INSIDE_FRUSTRUM_NY_PLANE;	
+
+#endif
+
 		
 		FrustrumFlagForVertex[v] = vertexFlag;
 	}
@@ -1161,10 +1350,29 @@ void TestVerticesWith_Wide_Frustrum(void)
 
 	GLOBALASSERT(v>0);
 
-	while(v--)
+	while (v--)
 	{
 		char vertexFlag = 0;
+
+#ifdef USE_FRUSTUM_CULL
+
+		if (ZCLIPPINGVALUE <= RotatedPts[v].vz)
+			vertexFlag |= INSIDE_FRUSTRUM_Z_PLANE;
 		
+		if (-RotatedPts[v].vx <= RotatedPts[v].vz*2)
+			vertexFlag |= INSIDE_FRUSTRUM_PX_PLANE;	
+		
+		if (RotatedPts[v].vx <= RotatedPts[v].vz*2)
+			vertexFlag |= INSIDE_FRUSTRUM_NX_PLANE;	
+		
+		if (-RotatedPts[v].vy <= RotatedPts[v].vz*2)
+			vertexFlag |= INSIDE_FRUSTRUM_PY_PLANE;	
+		
+		if (RotatedPts[v].vy <= RotatedPts[v].vz*2)
+			vertexFlag |= INSIDE_FRUSTRUM_NY_PLANE;
+
+#else
+
 //		if(ZCLIPPINGVALUE <= RotatedPts[v].vz)
 			vertexFlag |= INSIDE_FRUSTRUM_Z_PLANE;
 		
@@ -1178,7 +1386,9 @@ void TestVerticesWith_Wide_Frustrum(void)
 			vertexFlag |= INSIDE_FRUSTRUM_PY_PLANE;	
 		
 //		if(RotatedPts[v].vy <= RotatedPts[v].vz*2)
-			vertexFlag |= INSIDE_FRUSTRUM_NY_PLANE;	
+			vertexFlag |= INSIDE_FRUSTRUM_NY_PLANE;
+
+#endif
 		
 		FrustrumFlagForVertex[v] = vertexFlag;
 	}
@@ -1191,9 +1401,12 @@ int DecalWithinFrustrum(DECAL *decalPtr)
 	char inFrustrumFlag;
 	char noClippingFlag;
 
+#ifndef USE_FRUSTUM_CULL
 	return 1; // bjd
+#endif
 
-	if(ModuleCurrVisArray[decalPtr->ModuleIndex] != 2) return 0;
+	if (ModuleCurrVisArray[decalPtr->ModuleIndex] != 2) 
+		return 0;
 
     inFrustrumFlag=0;
    	noClippingFlag=INSIDE_FRUSTRUM;
@@ -1231,7 +1444,9 @@ int QuadWithinFrustrum(void)
 	char inFrustrumFlag;
 	char noClippingFlag;
 
+#ifndef USE_FRUSTUM_CULL
 	return 1; // bjd
+#endif
 
     inFrustrumFlag=0;
    	noClippingFlag=INSIDE_FRUSTRUM;
@@ -1269,7 +1484,9 @@ int TriangleWithinFrustrum(void)
 	char inFrustrumFlag;
 	char noClippingFlag;
 
+#ifndef USE_FRUSTUM_CULL
 	return 1; // bjd
+#endif
 
     inFrustrumFlag=0;
    	noClippingFlag=INSIDE_FRUSTRUM;

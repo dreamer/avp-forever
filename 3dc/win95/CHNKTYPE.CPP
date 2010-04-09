@@ -219,7 +219,7 @@ double dot(const ChunkVector& a, const ChunkVector& b)
   return(a.x*b.x + a.y*b.y + a.z*b.z);
 }
 
-double  mod(const ChunkVector& a)
+double mod(const ChunkVector& a)
 {
   return(sqrt(dot(a,a)));
 }
