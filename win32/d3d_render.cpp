@@ -1674,7 +1674,6 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a) 
 {
-#if 1
 
 	float new_x1, new_y1, new_x2, new_y2;
 
@@ -1694,13 +1693,7 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 		new_x2 = ((float(x1) / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
 		new_y2 = ((float(y1) / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
 	}
-/*
-	float new_x1 = (float(x0 / 640.0f) * 2) - 1;
-	float new_y1 = (float(y0 / 480.0f) * 2) - 1;
 
-	float new_x2 = ((float(x1) / 640.0f) * 2) - 1;
-	float new_y2 = ((float(y1) / 480.0f) * 2) - 1;
-*/
 	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
 
 	// bottom left
@@ -1738,75 +1731,6 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	orthoVerts[orthoVBOffset].u = 0.0f;
 	orthoVerts[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
-#else
-	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
-
-	if (mainMenu)
-	{
-		/* game used to render menus at 640x480. this allows us to use any resolution we want */
-		int quadWidth = static_cast<int>(ScreenDescriptorBlock.SDB_Width / ((1.0f / (x1 - x0)) * 640));
-		int quadHeight = static_cast<int>(ScreenDescriptorBlock.SDB_Height / ((1.0f / (y1 - y0)) * 480));
-
-		int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0) * x0);
-		int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0) * y0);
-
-		x0 = quadX;
-		x1 = quadX + quadWidth;
-		y0 = quadY;
-		y1 = quadY + quadHeight;
-	}
-
-	// top left - 0
-	mainVertex[vb].sx = (float)x0;
-	mainVertex[vb].sy = (float)y0;
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = RGBALIGHT_MAKE(r,g,b,a);//colour;
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	// top right - 1
-	mainVertex[vb].sx = (float)(x1 - 1);
-	mainVertex[vb].sy = (float)y0;
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = RGBALIGHT_MAKE(r,g,b,a);//colour;
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	// bottom right - 2
-	mainVertex[vb].sx = (float)(x1 - 1);
-	mainVertex[vb].sy = (float)(y1 - 1);
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = RGBALIGHT_MAKE(r,g,b,a);//colour;
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	// bottom left - 3
-	mainVertex[vb].sx = (float)x0;
-	mainVertex[vb].sy = (float)(y1 - 1);
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = RGBALIGHT_MAKE(r,g,b,a);//colour;
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	OUTPUT_TRIANGLE(0,1,2, 4);
-	OUTPUT_TRIANGLE(0,3,2, 4);
-#endif
 }
 
 void D3D_HUD_Setup(void)
@@ -1831,11 +1755,20 @@ void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, 
 
 	float RecipW, RecipH;
 
-	float texWidth = (float) ImageHeaderArray[textureID].ImageWidth;
-	RecipW = 1.0f / texWidth;
+	// ugh..
+	if (textureID >= texIDoffset)
+	{
+		Tex_Info texInfo;
+		Tex_GetInfo(textureID, &texInfo);
 
-	float texHeight = (float) ImageHeaderArray[textureID].ImageHeight;
-	RecipH = 1.0f / texHeight;
+		RecipW = 1.0f / texInfo.width;
+		RecipH = 1.0f / texInfo.height;
+	}
+	else
+	{
+		RecipW = 1.0f / ImageHeaderArray[textureID].ImageWidth;
+		RecipH = 1.0f / ImageHeaderArray[textureID].ImageHeight;
+	}
 
 	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP, filteringType);
 
@@ -5399,25 +5332,30 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 	}
 }
 
-void DrawProgressBar(RECT src_rect, RECT dest_rect, uint32_t textureID, int original_width, int original_height, int new_width, int new_height)
+void DrawProgressBar(RECT srcRect, RECT destRect, uint32_t textureID, AVPTEXTURE *tex, int newWidth, int newHeight)
 {
 	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_OFF, TEXTURE_CLAMP, FILTERING_BILINEAR_ON);
 
-	float x1 = (float(dest_rect.left / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
-	float y1 = (float(dest_rect.top / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
+	float x1 = (float(destRect.left / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
+	float y1 = (float(destRect.top / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
 
-	float x2 = ((float(dest_rect.right) / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
-	float y2 = ((float(dest_rect.bottom ) / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
+	float x2 = ((float(destRect.right) / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
+	float y2 = ((float(destRect.bottom ) / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
 
-	int width = original_width;
-	int height = original_height;
+	if (!tex)
+	{
+		return;
+	}
+
+	int width = tex->width;
+	int height = tex->height;
 
 	// new, power of 2 values
-	int real_width = new_width;
-	int real_height = new_height;
+	int realWidth = newWidth;
+	int realHeight = newHeight;
 
-	float RecipW = (1.0f / real_width);
-	float RecipH = (1.0f / real_height);
+	float RecipW = (1.0f / realWidth);
+	float RecipH = (1.0f / realHeight);
 
 	D3DCOLOR colour = D3DCOLOR_XRGB(255, 255, 255);
 
@@ -5426,8 +5364,8 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, uint32_t textureID, int orig
 	orthoVerts[orthoVBOffset].y = y2;
 	orthoVerts[orthoVBOffset].z = 1.0f;
 	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((width - src_rect.left) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((height - src_rect.bottom) * RecipH);
+	orthoVerts[orthoVBOffset].u = (float)((width - srcRect.left) * RecipW);
+	orthoVerts[orthoVBOffset].v = (float)((height - srcRect.bottom) * RecipH);
 	orthoVBOffset++;
 
 	// top left
@@ -5435,8 +5373,8 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, uint32_t textureID, int orig
 	orthoVerts[orthoVBOffset].y = y1;
 	orthoVerts[orthoVBOffset].z = 1.0f;
 	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((width - src_rect.left) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((height - src_rect.top) * RecipH);
+	orthoVerts[orthoVBOffset].u = (float)((width - srcRect.left) * RecipW);
+	orthoVerts[orthoVBOffset].v = (float)((height - srcRect.top) * RecipH);
 	orthoVBOffset++;
 
 	// bottom right
@@ -5444,8 +5382,8 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, uint32_t textureID, int orig
 	orthoVerts[orthoVBOffset].y = y2;
 	orthoVerts[orthoVBOffset].z = 1.0f;
 	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((width - src_rect.right) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((height - src_rect.bottom) * RecipH);
+	orthoVerts[orthoVBOffset].u = (float)((width - srcRect.right) * RecipW);
+	orthoVerts[orthoVBOffset].v = (float)((height - srcRect.bottom) * RecipH);
 	orthoVBOffset++;
 
 	// top right
@@ -5453,8 +5391,8 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, uint32_t textureID, int orig
 	orthoVerts[orthoVBOffset].y = y1;
 	orthoVerts[orthoVBOffset].z = 1.0f;
 	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((width - src_rect.right) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((height - src_rect.top) * RecipH);
+	orthoVerts[orthoVBOffset].u = (float)((width - srcRect.right) * RecipW);
+	orthoVerts[orthoVBOffset].v = (float)((height - srcRect.top) * RecipH);
 	orthoVBOffset++;
 }
 

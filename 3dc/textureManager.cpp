@@ -56,5 +56,11 @@ uint32_t Tex_AddTexture(LPDIRECT3DTEXTURE9 texture, uint32_t width, uint32_t hei
 
 LPDIRECT3DTEXTURE9 Tex_GetTexture(uint32_t textureID)
 {
-	return(textureList[textureID - texIDoffset].texture);
+	return (textureList[textureID - texIDoffset].texture);
+}
+
+void Tex_GetInfo(uint32_t textureID, Tex_Info *info)
+{
+	info->width  = textureList[textureID - texIDoffset].width;
+	info->height = textureList[textureID - texIDoffset].height;
 }

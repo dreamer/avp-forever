@@ -7,7 +7,6 @@ extern void D3D_DrawBackdrop(void);
 extern void PostLandscapeRendering(void);
 extern void D3D_DrawWaterTest(MODULE *testModulePtr);
 
-
 extern void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr);
 extern void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr);
 extern void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr);

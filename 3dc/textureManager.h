@@ -27,5 +27,12 @@
 
 const int32_t texIDoffset = 2000;
 
+struct Tex_Info
+{
+	uint32_t	width;
+	uint32_t	height;
+};
+
 uint32_t Tex_AddTexture(LPDIRECT3DTEXTURE9 texture, uint32_t width, uint32_t height);
+void Tex_GetInfo(uint32_t textureID, Tex_Info *info);
 LPDIRECT3DTEXTURE9 Tex_GetTexture(uint32_t textureID);

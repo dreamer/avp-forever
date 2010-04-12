@@ -85,8 +85,11 @@ void Start_Progress_Bar()
 			LoadingBarEmpty = AwCreateTexture("sf", buffer, 0);
 		}
 		// create d3d texture here
-		LoadingBarEmptyTexture = CreateD3DTexturePadded(LoadingBarEmpty, &emptybarWidth, &emptybarHeight);
-		emptyTextureID = Tex_AddTexture(LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height);
+		if (LoadingBarEmpty)
+		{
+			LoadingBarEmptyTexture = CreateD3DTexturePadded(LoadingBarEmpty, &emptybarWidth, &emptybarHeight);
+			emptyTextureID = Tex_AddTexture(LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height);
+		}
 	}
 	{
 		char buffer[100];
@@ -106,9 +109,12 @@ void Start_Progress_Bar()
 			// load graphic from rim file
 			LoadingBarFull = AwCreateTexture("sf", buffer, 0);
 		}
-		
-		LoadingBarFullTexture = CreateD3DTexturePadded(LoadingBarFull, &fullbarWidth, &fullbarHeight);
-		fullTextureID = Tex_AddTexture(LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height);
+
+		if (LoadingBarFull)
+		{
+			LoadingBarFullTexture = CreateD3DTexturePadded(LoadingBarFull, &fullbarWidth, &fullbarHeight);
+			fullTextureID = Tex_AddTexture(LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height);
+		}
 	}
 	
 	// load background image for bar
@@ -143,9 +149,22 @@ void Start_Progress_Bar()
 	{
 		ThisFramesRenderingHasBegun();
 
-		DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID/*LoadingBarEmptyTexture*/, LoadingBarEmpty->width, LoadingBarEmpty->height, emptybarWidth, emptybarHeight);
+		if (LoadingBarEmpty)
+		{
+			DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID, LoadingBarEmpty, emptybarWidth, emptybarHeight);
 
-		RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
+			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
+		}
+		else
+		{
+			// user is using demo files, therefor no progress bar graphics? draw demo style..
+
+			// white outline
+			DrawQuad(105, 413, 429, 46, -1, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
+
+			// blue background
+			DrawQuad(106, 414, 427, 44, -1, D3DCOLOR_XRGB(0, 0, 248), TRANSLUCENCY_OFF);
+		}
 
 		ThisFramesRenderingHasFinished();
 
@@ -157,32 +176,46 @@ void Start_Progress_Bar()
 
 void Set_Progress_Bar_Position(int pos)
 {
-	int NewPosition = DIV_FIXED(pos,PBAR_LENGTH);
-	if(NewPosition>CurrentPosition)
-	{
+	int NewPosition = DIV_FIXED(pos, PBAR_LENGTH);
 
+	if (NewPosition > CurrentPosition)
+	{
 		CurrentPosition = NewPosition;
 		LoadingBarFull_SrcRect.left = 0;
-		LoadingBarFull_SrcRect.right = MUL_FIXED(639,NewPosition);
+		LoadingBarFull_SrcRect.right = MUL_FIXED(639, NewPosition);
 		LoadingBarFull_SrcRect.top = 0;
 		LoadingBarFull_SrcRect.bottom = 39;
 		LoadingBarFull_DestRect.left = 0;
-		LoadingBarFull_DestRect.right = MUL_FIXED(ScreenDescriptorBlock.SDB_Width-1,NewPosition);
+		LoadingBarFull_DestRect.right = MUL_FIXED(ScreenDescriptorBlock.SDB_Width-1, NewPosition);
 		LoadingBarFull_DestRect.top = ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*11)/12;
 		LoadingBarFull_DestRect.bottom = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)-1;
 		
 		ThisFramesRenderingHasBegun();
 
-		// need to render the empty bar here again. As we're not blitting anymore, 
-		// the empty bar will only be rendered for one frame.
-		DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, /*LoadingBarEmptyTexture*/emptyTextureID, LoadingBarEmpty->width, LoadingBarEmpty->height, emptybarWidth, emptybarHeight);
+		if (!LoadingBarEmpty) // if we're using demo assets, draw the demo style progress bar
+		{
+			// white outline
+			DrawQuad(105, 413, 429, 46, -1, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
-		// also need this here again, or else the text disappears!
-		RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
+			// blue background
+			DrawQuad(106, 414, 427, 44, -1, D3DCOLOR_XRGB(0, 0, 248), TRANSLUCENCY_OFF);
 
-		// now render the green percent loaded overlay
-		DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, /*LoadingBarFullTexture*/fullTextureID, LoadingBarFull->width, LoadingBarFull->height, fullbarWidth, fullbarHeight);
-		
+			// red progress bar
+			DrawQuad(106, 414, MUL_FIXED(427, NewPosition), 44, -1, D3DCOLOR_XRGB(248, 0, 0), TRANSLUCENCY_OFF);
+		}
+		else		
+		{
+			// need to render the empty bar here again. As we're not blitting anymore, 
+			// the empty bar will only be rendered for one frame.
+			DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID, LoadingBarEmpty, emptybarWidth, emptybarHeight);
+
+			// also need this here again, or else the text disappears!
+			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED); // no briefing text on demo this this call is in this block
+
+			// now render the green percent loaded overlay
+			DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, fullTextureID, LoadingBarFull, fullbarWidth, fullbarHeight);
+		}
+
 		ThisFramesRenderingHasFinished();
 		
 		FlipBuffers();	
@@ -232,27 +265,40 @@ void Game_Has_Loaded(void)
 
 		if (f)
 		{
-			LoadingBarFull_SrcRect.left=0;
-			LoadingBarFull_SrcRect.right=639;
-			LoadingBarFull_SrcRect.top=0;
-			LoadingBarFull_SrcRect.bottom=39;
-			LoadingBarFull_DestRect.left=MUL_FIXED(ScreenDescriptorBlock.SDB_Width-1,(ONE_FIXED-f)/2);
-			LoadingBarFull_DestRect.right=MUL_FIXED(ScreenDescriptorBlock.SDB_Width-1,f)+LoadingBarFull_DestRect.left;
+			LoadingBarFull_SrcRect.left = 0;
+			LoadingBarFull_SrcRect.right = 639;
+			LoadingBarFull_SrcRect.top = 0;
+			LoadingBarFull_SrcRect.bottom = 39;
+			LoadingBarFull_DestRect.left = MUL_FIXED(ScreenDescriptorBlock.SDB_Width-1,(ONE_FIXED-f)/2);
+			LoadingBarFull_DestRect.right = MUL_FIXED(ScreenDescriptorBlock.SDB_Width-1,f)+LoadingBarFull_DestRect.left;
 
 			int h = MUL_FIXED((ScreenDescriptorBlock.SDB_Height)/24,ONE_FIXED-f);
-			LoadingBarFull_DestRect.top=((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset) *11)/12+h;
-			LoadingBarFull_DestRect.bottom=(ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)-1-h;
+			LoadingBarFull_DestRect.top = ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset) *11)/12+h;
+			LoadingBarFull_DestRect.bottom = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)-1-h;
 			
 			// also need this here again, or else the text disappears!
 			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
+	
+			if (LoadingBarFull)
+			{
+				DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, fullTextureID, LoadingBarFull, fullbarWidth, fullbarHeight);
+			}
+			else
+			{
+				// white outline
+				DrawQuad(105, 413, 429, 46, -1, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
-			DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, /*LoadingBarFullTexture*/fullTextureID, LoadingBarFull->width, LoadingBarFull->height, fullbarWidth, fullbarHeight);
+				// red background (no more blue as bar is now full with red)
+				DrawQuad(106, 414, 427, 44, -1, D3DCOLOR_XRGB(248, 0, 0), TRANSLUCENCY_OFF);
+			}
+
 			f -= NormalFrameTime;
 			if (f < 0) 
 				f = 0;
 		}
 
-		RenderStringCentred(GetTextString(TEXTSTRING_INGAME_PRESSANYKEYTOCONTINUE), ScreenDescriptorBlock.SDB_Width/2, ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*23)/24-9, 0xffffffff);
+		if (LoadingBarFull) // demo doesn't show this
+			RenderStringCentred(GetTextString(TEXTSTRING_INGAME_PRESSANYKEYTOCONTINUE), ScreenDescriptorBlock.SDB_Width/2, ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*23)/24-9, 0xffffffff);
 
 		ThisFramesRenderingHasFinished();
 		FlipBuffers();	
@@ -268,9 +314,9 @@ void Game_Has_Loaded(void)
 		}
 	}
 
-	while (!DebouncedGotAnyKey && AvP.Network != I_Host);
+	while (!DebouncedGotAnyKey && AvP.Network != I_Host && LoadingBarFull != NULL);
 
-	FadingGameInAfterLoading=ONE_FIXED;
+	FadingGameInAfterLoading = ONE_FIXED;
 
 	if (image)
 	{

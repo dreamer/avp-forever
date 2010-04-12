@@ -33,12 +33,15 @@
 
 static HRESULT LastError;
 
+extern "C" {
+extern void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int *uvArray, uint32_t colour, enum FILTERING_MODE_ID filteringType);
+}
+
 struct Font
 {
 	enum type;
 	int textureWidth;
 	int textureHeight;
-//	D3DTEXTURE texture;
 	uint32_t	textureID;
 	D3DXIMAGE_INFO imageInfo;
 	int fontWidths[256];
@@ -182,10 +185,6 @@ extern char AAFontWidths[256];
 int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 {
 	return 0;
-#if 0
-//	d3d.lpD3DDevice->SetTexture(0, Fonts[FONT_SMALL].texture);
-
-//	D3DLVERTEX fontQuad[4];
 
 	float RecipW = (1.0f / Fonts[FONT_SMALL].imageInfo.Width);
 	float RecipH = (1.0f / Fonts[FONT_SMALL].imageInfo.Height);
@@ -207,99 +206,19 @@ int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 		int tex_x = column * Fonts[FONT_SMALL].blockWidth;
 		int tex_y = row * Fonts[FONT_SMALL].blockHeight;
 
-		CheckOrthoBuffer(4, Fonts[FONT_SMALL].textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP, FILTERING_BILINEAR_OFF);
+		int uvArray[8];
 
-		float x1 = (float(x / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
-		float y1 = (float(y / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
+		uvArray[0] = tex_x;
+		uvArray[1] = tex_y + Fonts[FONT_SMALL].blockWidth;
+		uvArray[2] = tex_x;
+		uvArray[3] = tex_y;
+		uvArray[4] = tex_x + Fonts[FONT_SMALL].blockWidth;
+		uvArray[5] = tex_y + Fonts[FONT_SMALL].blockHeight;
+		uvArray[6] = tex_x + Fonts[FONT_SMALL].blockWidth;
+		uvArray[7] = tex_y;
 
-		float x2 = ((float(x + sixtyThree) / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
-		float y2 = ((float(y + sixtyThree) / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
+		New_D3D_HUDQuad_Output(Fonts[FONT_SMALL].textureID, x, y, sixtyThree, sixtyThree, &uvArray[0], colour, FILTERING_BILINEAR_OFF);
 
-		// bottom left
-		orthoVerts[orthoVBOffset].x = x1;
-		orthoVerts[orthoVBOffset].y = y2;
-		orthoVerts[orthoVBOffset].z = 1.0f;
-		orthoVerts[orthoVBOffset].colour = colour;
-		orthoVerts[orthoVBOffset].u = (float)((tex_x) * RecipW);
-		orthoVerts[orthoVBOffset].v = (float)((tex_y + Fonts[FONT_SMALL].blockWidth) * RecipH);
-		orthoVBOffset++;
-
-		// top left
-		orthoVerts[orthoVBOffset].x = x1;
-		orthoVerts[orthoVBOffset].y = y1;
-		orthoVerts[orthoVBOffset].z = 1.0f;
-		orthoVerts[orthoVBOffset].colour = colour;
-		orthoVerts[orthoVBOffset].u = (float)((tex_x) * RecipW);
-		orthoVerts[orthoVBOffset].v = (float)((tex_y) * RecipH);
-		orthoVBOffset++;
-
-		// bottom right
-		orthoVerts[orthoVBOffset].x = x2;
-		orthoVerts[orthoVBOffset].y = y2;
-		orthoVerts[orthoVBOffset].z = 1.0f;
-		orthoVerts[orthoVBOffset].colour = colour;
-		orthoVerts[orthoVBOffset].u = (float)((tex_x + Fonts[FONT_SMALL].blockWidth) * RecipW);
-		orthoVerts[orthoVBOffset].v = (float)((tex_y + Fonts[FONT_SMALL].blockHeight) * RecipH);
-		orthoVBOffset++;
-
-		// top right
-		orthoVerts[orthoVBOffset].x = x2;
-		orthoVerts[orthoVBOffset].y = y1;
-		orthoVerts[orthoVBOffset].z = 1.0f;
-		orthoVerts[orthoVBOffset].colour = colour;
-		orthoVerts[orthoVBOffset].u = (float)((tex_x + Fonts[FONT_SMALL].blockWidth) * RecipW);
-		orthoVerts[orthoVBOffset].v = (float)((tex_y) * RecipH);
-		orthoVBOffset++;
-
-/*
-		// bottom left
-		fontQuad[0].sx = x - 0.5f;
-		fontQuad[0].sy = y + sixtyThree - 0.5f;
-		fontQuad[0].sz = 0.0f;
-		fontQuad[0].color = colour;
-		fontQuad[0].specular = D3DCOLOR_ARGB(255, 0, 0, 0);
-		fontQuad[0].tu = (float)((tex_x) * RecipW);
-		fontQuad[0].tv = (float)((tex_y + Fonts[FONT_SMALL].blockWidth) * RecipH);
-
-		// top left
-		fontQuad[1].sx = x - 0.5f;
-		fontQuad[1].sy = y - 0.5f;
-		fontQuad[1].sz = 0.0f;
-		fontQuad[1].color = colour;
-		fontQuad[1].specular = D3DCOLOR_ARGB(255, 0, 0, 0);
-		fontQuad[1].tu = (float)((tex_x) * RecipW);
-		fontQuad[1].tv = (float)((tex_y) * RecipH);
-
-		// bottom right
-		fontQuad[2].sx = x + sixtyThree - 0.5f;
-		fontQuad[2].sy = y + sixtyThree - 0.5f;
-		fontQuad[2].sz = 0.0f;
-		fontQuad[2].color = colour;
-		fontQuad[2].specular = D3DCOLOR_ARGB(255, 0, 0, 0);
-		fontQuad[2].tu = (float)((tex_x + Fonts[FONT_SMALL].blockWidth) * RecipW);
-		fontQuad[2].tv = (float)((tex_y + Fonts[FONT_SMALL].blockHeight) * RecipH);
-
-		// top right
-		fontQuad[3].sx = x + sixtyThree - 0.5f;
-		fontQuad[3].sy = y - 0.5f;
-		fontQuad[3].sz = 0.0f;
-		fontQuad[3].color = colour;
-		fontQuad[3].specular = D3DCOLOR_ARGB(255, 0, 0, 0);
-		fontQuad[3].tu = (float)((tex_x + Fonts[FONT_SMALL].blockWidth) * RecipW);
-		fontQuad[3].tv = (float)((tex_y) * RecipH);
-
-#ifdef _XBOX
-		d3d.lpD3DDevice->SetVertexShader(D3DFVF_LVERTEX);
-#else
-		d3d.lpD3DDevice->SetFVF (D3DFVF_LVERTEX);
-#endif
-
-		LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, fontQuad, sizeof(D3DLVERTEX));
-		if (FAILED(LastError)) 
-		{
-			OutputDebugString("Font_DrawText() failed on DrawPrimitiveUP\n");
-		}
-*/
 		if (/*widthSpaced*/1)
 		{
 			x += charWidth;
@@ -311,7 +230,6 @@ int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 	}
 
 	return 0;
-#endif
 }
 
 int Font_GetTextLength(const char* text)

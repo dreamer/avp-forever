@@ -114,7 +114,7 @@ void DrawBigChar(char c, int x, int y, int colour);
 void DrawCloudTable(int topX, int topY, int word_length, int alpha);
 void DrawFadeQuad(int topX, int topY, int alpha);
 void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha);
-void DrawProgressBar(RECT src_rect, RECT dest_rect, uint32_t textureID, int original_width, int original_height, int new_width, int new_height);
+void DrawProgressBar(RECT srcRect, RECT destRect, uint32_t textureID, AVPTEXTURE *tex, int newWidth, int newHeight);
 void DrawQuad(int x, int y, int width, int height, int textureID, int colour, enum TRANSLUCENCY_TYPE translucencyType);
 void ReleaseD3DTexture(D3DTEXTURE *d3dTexture);
 void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture);
