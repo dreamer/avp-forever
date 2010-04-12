@@ -29,6 +29,7 @@
 #include "logString.h"
 #include "stdint.h"
 #include "font2.h"
+#include "textureManager.h"
 
 static HRESULT LastError;
 
@@ -37,7 +38,8 @@ struct Font
 	enum type;
 	int textureWidth;
 	int textureHeight;
-	D3DTEXTURE texture;
+//	D3DTEXTURE texture;
+	uint32_t	textureID;
 	D3DXIMAGE_INFO imageInfo;
 	int fontWidths[256];
 	int blockWidth;
@@ -48,6 +50,7 @@ static Font Fonts[NUM_FONT_TYPES];
 
 void Font_Release()
 {
+/*
 	for (int i = 0; i < NUM_FONT_TYPES; i++)
 	{
 		if (Fonts[i].texture)
@@ -56,17 +59,20 @@ void Font_Release()
 			Fonts[i].texture = NULL;
 		}
 	}
+*/
 }
 
 void Font_Init()
 {
+	D3DTEXTURE texture;
+/*
 	// load the small font texture
 	if (Fonts[FONT_SMALL].texture)
 	{
 		Fonts[FONT_SMALL].texture->Release();
 		Fonts[FONT_SMALL].texture = NULL;
 	}
-
+*/
 	LastError = D3DXCreateTextureFromFileEx
 	(
 		d3d.lpD3DDevice, 
@@ -82,7 +88,7 @@ void Font_Init()
 		0,
 		&Fonts[FONT_SMALL].imageInfo,
 		NULL,
-		&Fonts[FONT_SMALL].texture
+		&texture
 	);
 	
 	if (FAILED(LastError))
@@ -98,10 +104,10 @@ void Font_Init()
 	Fonts[FONT_SMALL].blockWidth = Fonts[FONT_SMALL].imageInfo.Width / 16;
 	Fonts[FONT_SMALL].blockHeight = Fonts[FONT_SMALL].imageInfo.Height / 16;
 	
-	LastError = Fonts[FONT_SMALL].texture->LockRect(0, &lock, NULL, NULL );
+	LastError = texture->LockRect(0, &lock, NULL, NULL );
 	if (FAILED(LastError)) 
 	{
-		Fonts[FONT_SMALL].texture->Release();
+		texture->Release();
 		LogDxError(LastError, __LINE__, __FILE__);
 		return;
 	}
@@ -151,12 +157,14 @@ void Font_Init()
 		}
 	}
 
-	LastError = Fonts[FONT_SMALL].texture->UnlockRect(0);
+	LastError = texture->UnlockRect(0);
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return;
 	}
+
+	Fonts[FONT_SMALL].textureID = Tex_AddTexture(texture, Fonts[FONT_SMALL].imageInfo.Width, Fonts[FONT_SMALL].imageInfo.Height);
 /*
 	char buf[100];
 	for (int i = 0; i < 256; i++)
@@ -174,10 +182,10 @@ extern char AAFontWidths[256];
 int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 {
 	return 0;
+#if 0
+//	d3d.lpD3DDevice->SetTexture(0, Fonts[FONT_SMALL].texture);
 
-	d3d.lpD3DDevice->SetTexture(0, Fonts[FONT_SMALL].texture);
-
-	D3DLVERTEX fontQuad[4];
+//	D3DLVERTEX fontQuad[4];
 
 	float RecipW = (1.0f / Fonts[FONT_SMALL].imageInfo.Width);
 	float RecipH = (1.0f / Fonts[FONT_SMALL].imageInfo.Height);
@@ -199,6 +207,51 @@ int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 		int tex_x = column * Fonts[FONT_SMALL].blockWidth;
 		int tex_y = row * Fonts[FONT_SMALL].blockHeight;
 
+		CheckOrthoBuffer(4, Fonts[FONT_SMALL].textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP, FILTERING_BILINEAR_OFF);
+
+		float x1 = (float(x / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
+		float y1 = (float(y / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
+
+		float x2 = ((float(x + sixtyThree) / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
+		float y2 = ((float(y + sixtyThree) / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
+
+		// bottom left
+		orthoVerts[orthoVBOffset].x = x1;
+		orthoVerts[orthoVBOffset].y = y2;
+		orthoVerts[orthoVBOffset].z = 1.0f;
+		orthoVerts[orthoVBOffset].colour = colour;
+		orthoVerts[orthoVBOffset].u = (float)((tex_x) * RecipW);
+		orthoVerts[orthoVBOffset].v = (float)((tex_y + Fonts[FONT_SMALL].blockWidth) * RecipH);
+		orthoVBOffset++;
+
+		// top left
+		orthoVerts[orthoVBOffset].x = x1;
+		orthoVerts[orthoVBOffset].y = y1;
+		orthoVerts[orthoVBOffset].z = 1.0f;
+		orthoVerts[orthoVBOffset].colour = colour;
+		orthoVerts[orthoVBOffset].u = (float)((tex_x) * RecipW);
+		orthoVerts[orthoVBOffset].v = (float)((tex_y) * RecipH);
+		orthoVBOffset++;
+
+		// bottom right
+		orthoVerts[orthoVBOffset].x = x2;
+		orthoVerts[orthoVBOffset].y = y2;
+		orthoVerts[orthoVBOffset].z = 1.0f;
+		orthoVerts[orthoVBOffset].colour = colour;
+		orthoVerts[orthoVBOffset].u = (float)((tex_x + Fonts[FONT_SMALL].blockWidth) * RecipW);
+		orthoVerts[orthoVBOffset].v = (float)((tex_y + Fonts[FONT_SMALL].blockHeight) * RecipH);
+		orthoVBOffset++;
+
+		// top right
+		orthoVerts[orthoVBOffset].x = x2;
+		orthoVerts[orthoVBOffset].y = y1;
+		orthoVerts[orthoVBOffset].z = 1.0f;
+		orthoVerts[orthoVBOffset].colour = colour;
+		orthoVerts[orthoVBOffset].u = (float)((tex_x + Fonts[FONT_SMALL].blockWidth) * RecipW);
+		orthoVerts[orthoVBOffset].v = (float)((tex_y) * RecipH);
+		orthoVBOffset++;
+
+/*
 		// bottom left
 		fontQuad[0].sx = x - 0.5f;
 		fontQuad[0].sy = y + sixtyThree - 0.5f;
@@ -246,7 +299,7 @@ int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 		{
 			OutputDebugString("Font_DrawText() failed on DrawPrimitiveUP\n");
 		}
-
+*/
 		if (/*widthSpaced*/1)
 		{
 			x += charWidth;
@@ -258,6 +311,7 @@ int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 	}
 
 	return 0;
+#endif
 }
 
 int Font_GetTextLength(const char* text)

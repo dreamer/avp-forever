@@ -1,3 +1,15 @@
+/*
+	Modules - AvP is an entirely module-based engine. Modules are defined as regular orthogonal boxes within the 
+	gameworld. Modules contain the polygons which make up the rooms & corridors - module size is defined by the 
+	extents of this shape. Modules must not overlap. Nothing can exist in AvP unless it is within a module. 
+	Everything in an AvP environment must be split up into modules. A module is a cubical volume of space 
+	defined by the polygons within it. This volume is always aligned to the x,y,z axes and must not overlap any 
+	other module. A module equates to an object in 3dMax. Modules are at the core of how the AvP engine works. 
+	Primarily (as far as an artist is concerned) they are important in defining how much of the environment can 
+	be 'seen' at any one time. In the following plan view, from where the stick man is, the shaded yellow modules 
+	are the ones that are visible.  
+*/
+
 #include "3dc.h"
 
 #include "inline.h"
@@ -36,7 +48,7 @@ void AllNewModuleHandler(void)
 		smptr = Global_ModulePtr[Global_Scene];
 		Global_ModuleArrayPtr = smptr->sm_marray;
 	
-		for(i = 0; i < ModuleArraySize; i++)
+		for (i = 0; i < ModuleArraySize; i++)
 		{
 			ModuleCurrVisArray[i] = 0;
 		}
@@ -50,7 +62,7 @@ void AllNewModuleHandler(void)
 		{
 			DISPLAYBLOCK* objectPtr = ActiveBlockList[numberOfObjects];
 			
-			if(objectPtr->ObFlags3 & ObFlag3_DynamicModuleObject)
+			if (objectPtr->ObFlags3 & ObFlag3_DynamicModuleObject)
 			{
 				STRATEGYBLOCK *sbPtr = objectPtr->ObStrategyBlock;
 
@@ -59,7 +71,8 @@ void AllNewModuleHandler(void)
 				if (ModuleIsPhysical(sbPtr->containingModule))
 				{
 					ModuleCurrVisArray[sbPtr->containingModule->m_index] = 1;
-					if(sbPtr->containingModule->m_vmptr) FindVisibleModules(sbPtr->containingModule->m_vmptr,1);
+					if (sbPtr->containingModule->m_vmptr) 
+						FindVisibleModules(sbPtr->containingModule->m_vmptr, 1);
 				}
 			}
 		}
@@ -67,15 +80,18 @@ void AllNewModuleHandler(void)
 	
 	/*If this is an network game , and this machine is the ai server , then need to check if
 	  there are any aliens near to other players*/
-	if(AvP.Network!=I_No_Network && AvP.NetworkAIServer)
+	if (AvP.Network != I_No_Network && AvP.NetworkAIServer)
 	{
 		/* go through the strategy blocks looking for players*/
 		int sbIndex;
-		for(sbIndex=0;sbIndex<NumActiveStBlocks;sbIndex++)
+		for (sbIndex = 0; sbIndex<NumActiveStBlocks; sbIndex++)
 		{
 			STRATEGYBLOCK *playerSbPtr = ActiveStBlockList[sbIndex];
 			NETGHOSTDATABLOCK *ghostData;
-			if(playerSbPtr->I_SBtype!=I_BehaviourNetGhost) continue;
+
+			if (playerSbPtr->I_SBtype != I_BehaviourNetGhost) 
+				continue;
+
 			ghostData = (NETGHOSTDATABLOCK *)playerSbPtr->SBdataptr;
 
 			if(ghostData->type==I_BehaviourAlienPlayer ||
@@ -84,7 +100,8 @@ void AllNewModuleHandler(void)
 			{
 				int sbIndex2;
 				//found one of the players
-				if(!playerSbPtr->containingModule) continue;
+				if (!playerSbPtr->containingModule) 
+					continue;
 
 				/*now search through the strategy blocks , to see if any aliens are
 				visible from the player's location*/
@@ -119,7 +136,7 @@ void AllNewModuleHandler(void)
 		extern MODULE * playerPherModule;
 		playerPherModule = (ModuleFromPosition(&(Global_VDB_Ptr->VDB_World), playerPherModule));
 	
-		if(!playerPherModule)
+		if (!playerPherModule)
 		{
 			playerPherModule = (ModuleFromPosition(&(Player->ObWorld), playerPherModule));
 		}
@@ -127,7 +144,8 @@ void AllNewModuleHandler(void)
 		if (playerPherModule)
 		{
 			ModuleCurrVisArray[playerPherModule->m_index] = 2;
-			if(playerPherModule->m_vmptr) FindVisibleModules(playerPherModule->m_vmptr,2);
+			if (playerPherModule->m_vmptr) 
+				FindVisibleModules(playerPherModule->m_vmptr, 2);
 		}
 	}
 
@@ -135,7 +153,7 @@ void AllNewModuleHandler(void)
 	/* handle AIMODULE visibility stuff */
 	{
 		int i;
-		for(i = 0; i < ModuleArraySize; i++)
+		for (i = 0; i < ModuleArraySize; i++)
 		{
 			if (ModuleCurrVisArray[i] == 2)
 			{
@@ -143,7 +161,7 @@ void AllNewModuleHandler(void)
 				if (aiModulePtr)
 				{
 					MODULE **modulelistPtr = aiModulePtr->m_module_ptrs;
-					while(*modulelistPtr)
+					while (*modulelistPtr)
 					{
 						int index = (*modulelistPtr)->m_index;
 						if (!ModuleCurrVisArray[index]) ModuleCurrVisArray[index]=1;

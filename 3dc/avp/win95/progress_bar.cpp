@@ -9,6 +9,7 @@
 #include "inline.h"
 #include "gamedef.h"
 #include "psnd.h"
+#include "textureManager.h"
 
 extern "C"
 {
@@ -38,9 +39,9 @@ static int BarRight;
 static int BarTop;
 static int BarBottom;
 
-static const char* Loading_Image_Name="Menus\\Loading.rim";
-static const char* Loading_Bar_Empty_Image_Name="Menus\\Loadingbar_empty.rim";
-static const char* Loading_Bar_Full_Image_Name="Menus\\Loadingbar_full.rim";
+static const char* Loading_Image_Name = "Menus\\Loading.rim";
+static const char* Loading_Bar_Empty_Image_Name = "Menus\\Loadingbar_empty.rim";
+static const char* Loading_Bar_Full_Image_Name = "Menus\\Loadingbar_full.rim";
 
 RECT LoadingBarEmpty_DestRect;
 RECT LoadingBarEmpty_SrcRect;
@@ -49,6 +50,9 @@ RECT LoadingBarFull_SrcRect;
 
 D3DTEXTURE LoadingBarFullTexture;
 D3DTEXTURE LoadingBarEmptyTexture;
+
+uint32_t	fullTextureID = 0;
+uint32_t	emptyTextureID = 0;
 
 AVPTEXTURE *image = NULL;
 AVPTEXTURE *LoadingBarEmpty = NULL;
@@ -82,14 +86,15 @@ void Start_Progress_Bar()
 		}
 		// create d3d texture here
 		LoadingBarEmptyTexture = CreateD3DTexturePadded(LoadingBarEmpty, &emptybarWidth, &emptybarHeight);
+		emptyTextureID = Tex_AddTexture(LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height);
 	}
 	{
 		char buffer[100];
-		CL_GetImageFileName(buffer, 100,Loading_Bar_Full_Image_Name, LIO_RELATIVEPATH);
+		CL_GetImageFileName(buffer, 100, Loading_Bar_Full_Image_Name, LIO_RELATIVEPATH);
 		
 		// see if graphic can be found in fast file
 		size_t fastFileLength;
-		void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
+		void const * pFastFileData = ffreadbuf(buffer, &fastFileLength);
 		
 		if (pFastFileData)
 		{
@@ -103,16 +108,17 @@ void Start_Progress_Bar()
 		}
 		
 		LoadingBarFullTexture = CreateD3DTexturePadded(LoadingBarFull, &fullbarWidth, &fullbarHeight);
+		fullTextureID = Tex_AddTexture(LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height);
 	}
 	
 	// load background image for bar
 	char buffer[100];
-	CL_GetImageFileName(buffer, 100,Loading_Image_Name, LIO_RELATIVEPATH);
+	CL_GetImageFileName(buffer, 100, Loading_Image_Name, LIO_RELATIVEPATH);
 	
 	// see if graphic can be found in fast file
 	size_t fastFileLength;
 	void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
-	
+
 	if (pFastFileData)
 	{
 		// load from fast file
@@ -137,7 +143,7 @@ void Start_Progress_Bar()
 	{
 		ThisFramesRenderingHasBegun();
 
-//		DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height, emptybarWidth, emptybarHeight);
+		DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID/*LoadingBarEmptyTexture*/, LoadingBarEmpty->width, LoadingBarEmpty->height, emptybarWidth, emptybarHeight);
 
 		RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
 
@@ -169,13 +175,13 @@ void Set_Progress_Bar_Position(int pos)
 
 		// need to render the empty bar here again. As we're not blitting anymore, 
 		// the empty bar will only be rendered for one frame.
-//		DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height, emptybarWidth, emptybarHeight);
+		DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, /*LoadingBarEmptyTexture*/emptyTextureID, LoadingBarEmpty->width, LoadingBarEmpty->height, emptybarWidth, emptybarHeight);
 
 		// also need this here again, or else the text disappears!
 		RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
 
 		// now render the green percent loaded overlay
-//		DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height, fullbarWidth, fullbarHeight);
+		DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, /*LoadingBarFullTexture*/fullTextureID, LoadingBarFull->width, LoadingBarFull->height, fullbarWidth, fullbarHeight);
 		
 		ThisFramesRenderingHasFinished();
 		
@@ -240,9 +246,10 @@ void Game_Has_Loaded(void)
 			// also need this here again, or else the text disappears!
 			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
 
-//			DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height, fullbarWidth, fullbarHeight);
-			f-=NormalFrameTime;
-			if (f<0) f=0;
+			DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, /*LoadingBarFullTexture*/fullTextureID, LoadingBarFull->width, LoadingBarFull->height, fullbarWidth, fullbarHeight);
+			f -= NormalFrameTime;
+			if (f < 0) 
+				f = 0;
 		}
 
 		RenderStringCentred(GetTextString(TEXTSTRING_INGAME_PRESSANYKEYTOCONTINUE), ScreenDescriptorBlock.SDB_Width/2, ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*23)/24-9, 0xffffffff);

@@ -233,7 +233,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		}
 	}
 
-	#ifdef AVP_DEBUG_VERSION
+//	#ifdef AVP_DEBUG_VERSION
 	if (strstr(command_line, "-intro"))	WeWantAnIntro();
 	if (strstr(command_line, "-qm"))
 	{
@@ -262,13 +262,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		UseMouseCentreing = TRUE;
 	}
 
+	UseMouseCentreing = TRUE;
+
 	// windowed mode?
 	if (strstr(command_line, "-w"))
 	{
 		WindowRequestMode = WindowModeSubWindow;
 
 		// will stop mouse cursor moving outside game window
-		UseMouseCentreing = TRUE;
+		//UseMouseCentreing = TRUE;
 	}
 
 	if (strstr(command_line, "-dontgrabmouse"))
@@ -282,7 +284,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		InitCentreMouseThread();
 	}
 
-	#endif //AVP_DEBUG_VERSION
+//	#endif //AVP_DEBUG_VERSION
 
 	if (strstr(command_line, "-server"))
 	{
@@ -634,19 +636,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			EndAVPNetGame();
 			//EndOfNetworkGameScreen();
 		}
-
-		//need to get rid of the player rifs before we can clear the memory pool
 				
 		ClearMemoryPool();
-	
-//		#if debug
-//		if(UseMouseCentreing)
-		{
-			//Stop thread that recentres mouse , making it easier to play
-			//in subwindow mode
-//			FinishCentreMouseThread();
-		}
-//		#endif
 
 #if 0 //bjd - FIXME
 		if(LobbiedGame)
@@ -663,9 +654,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	TimeStampedMessage("After Menus");
 
 	/* Added 28/1/98 by DHM: hook for my code on program shutdown */
-	{
-		DAVEHOOK_UnInit();
-	}
+	DAVEHOOK_UnInit();
 	
 	/*-------------------Patrick 2/6/97-----------------------
 	End the sound system

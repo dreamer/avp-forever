@@ -131,7 +131,7 @@ void SortModules(unsigned int noOfItems)
 	
 	unsigned int offSet;
 
-	for (partitionSize=1;partitionSize<noOfItems;partitionSize*=2)
+	for (partitionSize = 1; partitionSize < noOfItems; partitionSize *= 2)
 	{
 		/* for each partition size...
 		   loop through partition pairs and merge */

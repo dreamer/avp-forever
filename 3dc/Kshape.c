@@ -629,9 +629,9 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 				POLYHEADER *polyPtr = (POLYHEADER*) (*itemArrayPtr++);
 				int pif;
 				pif = PolygonWithinFrustrum(polyPtr);
-				if(pif)
+				if (pif)
 				{		 
-					switch(polyPtr->PolyItemType)
+					switch (polyPtr->PolyItemType)
 					{
 						case I_ZB_Gouraud3dTexturedPolygon:
 						case I_ZB_Gouraud2dTexturedPolygon:
@@ -658,7 +658,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 					}
 				}
 			}
-			while(--numitems);
+			while (--numitems);
 			return;
 		}
 	}
@@ -671,7 +671,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 				 
 		if (pif)
 		{		 
-			switch(polyPtr->PolyItemType)
+			switch (polyPtr->PolyItemType)
 			{
 				#if debug
 				case I_Polyline:
@@ -721,12 +721,12 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 				case I_ZB_Gouraud2dTexturedPolygon:
 				{
 					GouraudTexturedPolygon_Construct(polyPtr);
-				   	if (pif!=2)
+				   	if (pif != 2)
 					{
 						/* if this polygon is a quad, split it into two */
-						if(RenderPolygon.NumberOfVertices==4)
+						if (RenderPolygon.NumberOfVertices == 4)
 						{
-							RenderPolygon.NumberOfVertices=3;
+							RenderPolygon.NumberOfVertices = 3;
 							TriangleVerticesBuffer[0] = VerticesBuffer[0];
 							TriangleVerticesBuffer[1] = VerticesBuffer[2];
 							TriangleVerticesBuffer[2] = VerticesBuffer[3];
@@ -752,7 +752,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 							}
 							
 							SecondTriangle:
-							RenderPolygon.NumberOfVertices=3;
+							RenderPolygon.NumberOfVertices = 3;
 							VerticesBuffer[0] = TriangleVerticesBuffer[0];
 							VerticesBuffer[1] = TriangleVerticesBuffer[1];
 							VerticesBuffer[2] = TriangleVerticesBuffer[2];
@@ -768,7 +768,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						GouraudTexturedPolygon_ClipWithPositiveX();
 						if(RenderPolygon.NumberOfVertices<3) continue;
 
-//						polyPtr->PolyFlags |= iflag_transparent;
 						if (polyPtr->PolyFlags & iflag_transparent)
 						{
 							AddToTranslucentPolyList(polyPtr,RenderPolygon.Vertices);
@@ -780,7 +779,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 		  			}
 					else
 					{
-//						polyPtr->PolyFlags |= iflag_transparent;
 						if (polyPtr->PolyFlags & iflag_transparent)
 						{
 							AddToTranslucentPolyList(polyPtr,VerticesBuffer);

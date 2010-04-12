@@ -209,377 +209,375 @@ DoObjectVisibility().
 
 void DoObjectVisibilities(void)
 {
-        extern int NumActiveStBlocks;
-        extern STRATEGYBLOCK *ActiveStBlockList[];
+	extern int NumActiveStBlocks;
+	extern STRATEGYBLOCK *ActiveStBlockList[];
 
-        int sbIndex = 0;
-        STRATEGYBLOCK *sbPtr;
+	int sbIndex = 0;
+	STRATEGYBLOCK *sbPtr;
 
-        /* loop thro' the strategy block list, looking for objects that need to have
-        their visibilities managed ... */
+	/* loop thro' the strategy block list, looking for objects that need to have
+	their visibilities managed ... */
 
-        while(sbIndex < NumActiveStBlocks)
-        {
-                sbPtr = ActiveStBlockList[sbIndex++];
-                if(sbPtr->maintainVisibility)
-                        DoObjectVisibility(sbPtr);                              
-        }
+	while (sbIndex < NumActiveStBlocks)
+	{
+		sbPtr = ActiveStBlockList[sbIndex++];
+		if (sbPtr->maintainVisibility)
+			DoObjectVisibility(sbPtr);                              
+	}
 }
 
 
 void DoObjectVisibility(STRATEGYBLOCK *sbPtr)
-{       
-        if(!(sbPtr->SBdptr))
-        {                                                
-                /* Note that we don't call modulefromposition() for far objects, as they mostly don't 
-                move, and those that do (eg AIs) move to precalculated positions in modules. Thus
-                invisible objects are responsible for looking after their own containingModule field.
-                This should always be ok: we should always have a correct and valid containing
-                module. However, we will do a paranoia check for a null containingModule... */ 
-                if(!sbPtr->containingModule)    
-                {
-                        textprint("Calling Far EmergencyRelocateObject, On object %x, type %d!\n",(int)sbPtr, sbPtr->I_SBtype);
-                        IdentifyObject(sbPtr);
-                        if(!(EmergencyRelocateObject(sbPtr))) {
-                                textprint("Relocate failed!\n");
-                                return;
-                        }
-                }
-                if (!sbPtr->containingModule)
-                {
-                        textprint("Relocate failed and reported success\n");
-                        return;
-                }
+{
+    if (!(sbPtr->SBdptr))
+    {
+        /* Note that we don't call modulefromposition() for far objects, as they mostly don't 
+        move, and those that do (eg AIs) move to precalculated positions in modules. Thus
+        invisible objects are responsible for looking after their own containingModule field.
+        This should always be ok: we should always have a correct and valid containing
+        module. However, we will do a paranoia check for a null containingModule... */ 
+        if (!sbPtr->containingModule)    
+        {
+//            textprint("Calling Far EmergencyRelocateObject, On object %x, type %d!\n", (int)sbPtr, sbPtr->I_SBtype);
+            IdentifyObject(sbPtr);
+            if (!(EmergencyRelocateObject(sbPtr))) 
+			{
+                textprint("Relocate failed!\n");
+                return;
+            }
+        }
+        if (!sbPtr->containingModule)
+        {
+            textprint("Relocate failed and reported success\n");
+            return;
+        }
 
-                /* Now do the visibility check: the object has no display block, so check if 
-                it's module is visible. If so, make the object visibile too. */
+        /* Now do the visibility check: the object has no display block, so check if 
+        it's module is visible. If so, make the object visibile too. */
 
-
-                if ( (sbPtr->I_SBtype == I_BehaviourPlacedLight)
-                &&ThisObjectIsInAModuleVisibleFromCurrentlyVisibleModules(sbPtr))
+        if ((sbPtr->I_SBtype == I_BehaviourPlacedLight)
+        &&ThisObjectIsInAModuleVisibleFromCurrentlyVisibleModules(sbPtr))
+        {
+            MakePlacedLightNear(sbPtr);
+            return;
+        }
+        else if (sbPtr->I_SBtype == I_BehaviourNetGhost)
+        {
+            NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)sbPtr->SBdataptr;
+            if (ghostDataPtr && ghostDataPtr->type == I_BehaviourFlareGrenade)
+            {
+                if (ThisObjectIsInAModuleVisibleFromCurrentlyVisibleModules(sbPtr))
                 {
-                        MakePlacedLightNear(sbPtr);
-                        return;
+                    MakeGhostNear(sbPtr);
+                    return;
                 }
-                else if (sbPtr->I_SBtype == I_BehaviourNetGhost)
+            }
+        }
+		else if (sbPtr->I_SBtype == I_BehaviourPlatform)
+		{
+			PLATFORMLIFT_BEHAVIOUR_BLOCK *platformliftdata = (PLATFORMLIFT_BEHAVIOUR_BLOCK *)sbPtr->SBdataptr;
+        	//platform lift needs to be made near if its module near or 
+			//if it is moving
+        	if (ModuleCurrVisArray[(sbPtr->containingModule->m_index)] ||
+			   platformliftdata->state==PLBS_GoingUp ||
+			   platformliftdata->state==PLBS_GoingDown)
+			{
+				MakeObjectNear(sbPtr);
+				return;
+			}
+		}
+        
+        if (ModuleCurrVisArray[(sbPtr->containingModule->m_index)])
+        {
+            /* module is visible, so make object visible too */
+            switch (sbPtr->I_SBtype)
+            {
+                case (I_BehaviourAlien):
                 {
-                        NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)sbPtr->SBdataptr;
-                        if (ghostDataPtr && ghostDataPtr->type == I_BehaviourFlareGrenade)
-                        {
-                                if(ThisObjectIsInAModuleVisibleFromCurrentlyVisibleModules(sbPtr))
-                                {
-                                        MakeGhostNear(sbPtr);
-                                        return;
-                                }
-                        }
+                    MakeAlienNear(sbPtr);
+                    break;
                 }
-				else if (sbPtr->I_SBtype == I_BehaviourPlatform)
+                case (I_BehaviourVideoScreen):
+                {
+                    MakeObjectNear(sbPtr);
+                    if (sbPtr->SBdptr) 
+						AddLightingEffectToObject(sbPtr->SBdptr,LFX_FLARE);
+                    break;
+                }
+                case (I_BehaviourRubberDuck):
+                case (I_BehaviourInanimateObject):
+                {
+                    MakeObjectNear(sbPtr);
+                    break;
+                }
+                case (I_BehaviourAutoGun):
+                {
+                    MakeSentrygunNear(sbPtr);
+                    break;
+                }
+                case (I_BehaviourPlatform):
+                {
+                    MakeObjectNear(sbPtr);
+                    break;
+                }
+                case (I_BehaviourBinarySwitch):
+                {
+                    MakeObjectNear(sbPtr);
+                    break;
+                }
+                case (I_BehaviourDatabase):
+                {
+                    MakeObjectNear(sbPtr);
+                    break;
+                }
+                case (I_BehaviourLinkSwitch):
+                {
+                    MakeObjectNear(sbPtr);
+                    break;
+                }
+                case (I_BehaviourPredator):
+                {
+                    MakePredatorNear(sbPtr);
+                    break;
+                }
+				case (I_BehaviourXenoborg):
 				{
-					PLATFORMLIFT_BEHAVIOUR_BLOCK *platformliftdata = (PLATFORMLIFT_BEHAVIOUR_BLOCK *)sbPtr->SBdataptr;
-                	//platform lift needs to be made near if its module near or 
-					//if it is moving
-                	if(ModuleCurrVisArray[(sbPtr->containingModule->m_index)] ||
-					   platformliftdata->state==PLBS_GoingUp ||
-					   platformliftdata->state==PLBS_GoingDown)
-					{
-						MakeObjectNear(sbPtr);
-						return;
-					}
-				}
-                
-                if(ModuleCurrVisArray[(sbPtr->containingModule->m_index)])
-                { 
-                        /* module is visible, so make object visible too */
-                        switch(sbPtr->I_SBtype)
-                        {
-                                case(I_BehaviourAlien):
-                                {
-                                        MakeAlienNear(sbPtr);
-                                        break;          
-                                }
-                                case(I_BehaviourVideoScreen):
-                                {
-                                        MakeObjectNear(sbPtr);
-                                        if(sbPtr->SBdptr) AddLightingEffectToObject(sbPtr->SBdptr,LFX_FLARE);
-                                        break;
-                                }
-                                case(I_BehaviourRubberDuck):
-                                case(I_BehaviourInanimateObject):
-                                {
-                                        MakeObjectNear(sbPtr);
-                                        break;          
-                                }                               
-                                case(I_BehaviourAutoGun):
-                                {
-                                        MakeSentrygunNear(sbPtr);
-                                        break;          
-                                }
-                                case(I_BehaviourPlatform):
-                                {
-                                        MakeObjectNear(sbPtr);                                  
-                                        break;          
-                                }
-                                case(I_BehaviourBinarySwitch):
-                                {
-                                        MakeObjectNear(sbPtr);                                  
-                                        break;          
-                                }
-                                case(I_BehaviourDatabase):
-                                {
-                                        MakeObjectNear(sbPtr);                                  
-                                        break;          
-                                }
-                                case(I_BehaviourLinkSwitch):
-                                {
-                                        MakeObjectNear(sbPtr);                                  
-                                        break;          
-                                }
-                                case(I_BehaviourPredator):
-                                {
-                                        MakePredatorNear(sbPtr);                                        
-                                        break;          
-                                }
-                                case(I_BehaviourXenoborg):
-                                {
-                                        MakeXenoborgNear(sbPtr);                                        
-                                        break;          
-                                }
-                                case(I_BehaviourQueenAlien):
-                                {
-                                        MakeQueenNear(sbPtr);                                   
-                                        break;          
-                                }
-                                case(I_BehaviourPredatorAlien):
-                                {
-                                        GLOBALASSERT(0);
-                                        //MakePAQNear(sbPtr);                                   
-                                        break;          
-                                }
-                                case(I_BehaviourFaceHugger):
-                                {
-                                        MakeFacehuggerNear(sbPtr);                                      
-                                        break;          
-                                }
-                                case(I_BehaviourMarine):
-                                {
-                                        MakeMarineNear(sbPtr);
-                                        break;          
-                                }
-                                case(I_BehaviourSeal):
-                                {
-                                        MakeMarineNear(sbPtr); 
-                                        break;          
-                                }
-                                case(I_BehaviourNetGhost):
-                                {
-                                        NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)sbPtr->SBdataptr;
-
-                                        /* KJL 16:42:40 23/01/99 - near behaviour is triggered differently for
-                                           lightsources such as flares */
-                                        if (ghostDataPtr && ghostDataPtr->type != I_BehaviourFlareGrenade)
-                                        {
-                                                MakeGhostNear(sbPtr); 
-                                        }
-
-                                        break;          
-                                }
-                                case(I_BehaviourTrackObject):
-                                {
-                                        MakeObjectNear(sbPtr);                                  
-                                        break;          
-                                }
-                                case(I_BehaviourFan):
-                                {
-                                        MakeObjectNear(sbPtr);                                  
-                                        break;          
-                                }
-                                case(I_BehaviourNetCorpse):
-                                {
-                                        MakeCorpseNear(sbPtr);
-                                        break;
-                                }
-                                case (I_BehaviourPlacedHierarchy):
-                                {
-                                        MakePlacedHierarchyNear(sbPtr);
-                                        break;
-                                }
-                                case (I_BehaviourPlacedLight):
-                                {
-                                        /* KJL 16:42:40 23/01/99 - do nothing; near behaviour is triggered 
-                                        differently for lightsources */
-                                        break;
-                                }
-                                case (I_BehaviourDummy):
-                                {
-                                        MakeDummyNear(sbPtr);
-                                        break;
-                                }
-                                default:
-                                {
-                                        /* only the above object types should get here */
-                                        LOCALASSERT(1==0);                                                                              
-                                }
-                        }
+                    MakeXenoborgNear(sbPtr);
+                    break;
                 }
+                case (I_BehaviourQueenAlien):
+                {
+                    MakeQueenNear(sbPtr);
+                    break;
+                }
+                case (I_BehaviourPredatorAlien):
+                {
+                    GLOBALASSERT(0);
+                    //MakePAQNear(sbPtr);
+                    break;
+                }
+                case (I_BehaviourFaceHugger):
+                {
+                    MakeFacehuggerNear(sbPtr);
+                    break;
+                }
+                case (I_BehaviourMarine):
+                {
+                    MakeMarineNear(sbPtr);
+                    break;
+                }
+                case (I_BehaviourSeal):
+                {
+                    MakeMarineNear(sbPtr); 
+                    break;
+                }
+                case (I_BehaviourNetGhost):
+                {
+                    NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)sbPtr->SBdataptr;
+
+                    /* KJL 16:42:40 23/01/99 - near behaviour is triggered differently for
+                       lightsources such as flares */
+                    if (ghostDataPtr && ghostDataPtr->type != I_BehaviourFlareGrenade)
+                    {
+						MakeGhostNear(sbPtr); 
+                    }
+                    break;
+                }
+                case (I_BehaviourTrackObject):
+                {
+                    MakeObjectNear(sbPtr);
+                    break;
+                }
+                case (I_BehaviourFan):
+                {
+                    MakeObjectNear(sbPtr);
+                    break;
+                }
+                case (I_BehaviourNetCorpse):
+                {
+                    MakeCorpseNear(sbPtr);
+                    break;
+                }
+                case (I_BehaviourPlacedHierarchy):
+                {
+                    MakePlacedHierarchyNear(sbPtr);
+                    break;
+                }
+                case (I_BehaviourPlacedLight):
+                {
+                    /* KJL 16:42:40 23/01/99 - do nothing; near behaviour is triggered 
+                    differently for lightsources */
+                    break;
+                }
+                case (I_BehaviourDummy):
+                {
+                    MakeDummyNear(sbPtr);
+                    break;
+                }
+                default:
+                {
+                    /* only the above object types should get here */
+                    LOCALASSERT(1==0);
+                }
+            }
+        }
+    }
+    else
+	{
+        /* object is currently visible. 
+        first need to get it's module, as it may have moved under dynamics */
+        MODULE* newModule;
+        DYNAMICSBLOCK *dynPtr = sbPtr->DynPtr;
+        LOCALASSERT(dynPtr);
+
+        newModule = ModuleFromPosition(&(dynPtr->Position), (sbPtr->containingModule));
+        if (!(newModule))
+        {
+			/* attempt to relocate object */
+//			textprint("Calling Near EmergencyRelocateObject, On object %x, type %d!\n",(int)sbPtr, sbPtr->I_SBtype);
+			IdentifyObject(sbPtr);
+			if (!(EmergencyRelocateObject(sbPtr))) 
+			{
+				textprint("Relocate failed!\n");
+				return;
+			}
         }
         else
+			/* update object's module field */
+			sbPtr->containingModule = newModule;
+                
+        /* now check the object's module */
+        if (sbPtr->I_SBtype == I_BehaviourPlacedLight)
         {
-                /* object is currently visible. 
-                first need to get it's module, as it may have moved under dynamics */
-                MODULE* newModule;
-                DYNAMICSBLOCK *dynPtr = sbPtr->DynPtr;
-                LOCALASSERT(dynPtr);                                    
-
-                newModule = ModuleFromPosition(&(dynPtr->Position), (sbPtr->containingModule));
-                if(!(newModule))
-                {
-                        /* attempt to relocate object */
-                        textprint("Calling Near EmergencyRelocateObject, On object %x, type %d!\n",(int)sbPtr, sbPtr->I_SBtype);
-                        IdentifyObject(sbPtr);
-                        if(!(EmergencyRelocateObject(sbPtr))) {
-                                textprint("Relocate failed!\n");
-                                return;
-                        }
-                }
-                else
-                        /* update object's module field */
-                        sbPtr->containingModule = newModule;
-                        
-                /* now check the object's module */
-                if (sbPtr->I_SBtype == I_BehaviourPlacedLight)
-                {
-                        if(!ThisObjectIsInAModuleVisibleFromCurrentlyVisibleModules(sbPtr))
-                        {
-                                MakeObjectFar(sbPtr);
-                        }
-                }
-                else if(ModuleCurrVisArray[(sbPtr->containingModule->m_index)] == 0)
-                { 
-                        /* module is invisible, so make object invisible too */
-                        switch(sbPtr->I_SBtype)
-                        {
-                                case(I_BehaviourAlien):
-                                {
-                                        MakeAlienFar(sbPtr);
-                                        break;          
-                                }
-                                case(I_BehaviourRubberDuck):
-                                case(I_BehaviourVideoScreen):
-                                case(I_BehaviourInanimateObject):
-                                {
-                                        MakeObjectFar(sbPtr);
-                                        break;          
-                                }
-                                case(I_BehaviourAutoGun):
-                                {
-                                        MakeSentrygunFar(sbPtr);
-                                        break;          
-                                }
-                                case(I_BehaviourPlatform):
-                                {
-										PLATFORMLIFT_BEHAVIOUR_BLOCK *platformliftdata = (PLATFORMLIFT_BEHAVIOUR_BLOCK *)sbPtr->SBdataptr;
-										//don't make platform lift far if it is currently moving
-										//(otherwise the lift won't be able to move)
-										if(platformliftdata->state!=PLBS_GoingUp &&
-										   platformliftdata->state!=PLBS_GoingDown)
-										{	
-											MakeObjectFar(sbPtr);
-										}
-                                        break;          
-                                }                               
-                                case(I_BehaviourBinarySwitch):
-                                {
-                                        MakeObjectFar(sbPtr);                                   
-                                        break;          
-                                }
-                                case(I_BehaviourDatabase):
-                                {
-                                        MakeObjectFar(sbPtr);                                   
-                                        break;          
-                                }
-                                case(I_BehaviourLinkSwitch):
-                                {
-                                        MakeObjectFar(sbPtr);                                   
-                                        break;          
-                                }
-                                case(I_BehaviourPredator):
-                                {
-                                        MakePredatorFar(sbPtr);
-                                        break;          
-                                }
-                                case(I_BehaviourXenoborg):
-                                {
-                                        MakeXenoborgFar(sbPtr);
-                                        break;          
-                                }
-                                case(I_BehaviourQueenAlien):
-                                {
-                                        MakeQueenFar(sbPtr);                                    
-                                        break;          
-                                }
-                                case(I_BehaviourPredatorAlien):
-                                {
-                                        //MakePAQFar(sbPtr); 
-                                        GLOBALASSERT(0);
-                                        /* Should be BehaviourAlien! */
-                                        break;          
-                                }
-                                case(I_BehaviourFaceHugger):
-                                {
-                                        MakeFacehuggerFar(sbPtr);               
-                                        break;          
-                                }
-                                case(I_BehaviourMarine):
-                                {
-                                        MakeMarineFar(sbPtr);                                   
-                                        break;          
-                                }
-                                case(I_BehaviourSeal):
-                                {
-                                        MakeMarineFar(sbPtr); /* not yet supported */                                   
-                                        break;          
-                                }
-                                case(I_BehaviourNetGhost):
-                                {
-										MakeGhostFar(sbPtr); 
-                                        break;          
-                                }
-                                case(I_BehaviourTrackObject):
-                                {
-                                        MakeObjectFar(sbPtr);                                   
-                                        break;          
-                                }
-                                case(I_BehaviourFan):
-                                {
-                                        MakeObjectFar(sbPtr);                                   
-                                        break;          
-                                }
-                                case(I_BehaviourNetCorpse):
-                                {
-                                        MakeCorpseFar(sbPtr);
-                                        break;
-                                }
-                                case (I_BehaviourPlacedHierarchy):
-                                {
-                                        MakeObjectFar(sbPtr);
-                                        break;
-                                }
-                                case (I_BehaviourDummy):
-                                {
-                                        MakeDummyFar(sbPtr);
-                                        break;
-                                }
-                                default:
-                                {
-                                        /* only the above object types should get here */
-                                        LOCALASSERT(1==0);                                                                              
-                                }
-                        }
-
-                }
-
+			if (!ThisObjectIsInAModuleVisibleFromCurrentlyVisibleModules(sbPtr))
+			{
+				MakeObjectFar(sbPtr);
+			}
         }
-                        
+        else if (ModuleCurrVisArray[(sbPtr->containingModule->m_index)] == 0)
+        { 
+            /* module is invisible, so make object invisible too */
+            switch (sbPtr->I_SBtype)
+            {
+                case (I_BehaviourAlien):
+                {
+                    MakeAlienFar(sbPtr);
+                    break;
+                }
+                case (I_BehaviourRubberDuck):
+                case (I_BehaviourVideoScreen):
+                case (I_BehaviourInanimateObject):
+                {
+                    MakeObjectFar(sbPtr);
+                    break;
+                }
+                case (I_BehaviourAutoGun):
+                {
+                    MakeSentrygunFar(sbPtr);
+                    break;
+                }
+                case (I_BehaviourPlatform):
+                {
+					PLATFORMLIFT_BEHAVIOUR_BLOCK *platformliftdata = (PLATFORMLIFT_BEHAVIOUR_BLOCK *)sbPtr->SBdataptr;
+					//don't make platform lift far if it is currently moving
+					//(otherwise the lift won't be able to move)
+					if (platformliftdata->state!=PLBS_GoingUp &&
+					   platformliftdata->state!=PLBS_GoingDown)
+					{
+						MakeObjectFar(sbPtr);
+					}
+                    break;
+                }
+                case (I_BehaviourBinarySwitch):
+                {
+                    MakeObjectFar(sbPtr);
+                    break;
+                }
+                case (I_BehaviourDatabase):
+                {
+                    MakeObjectFar(sbPtr);
+                    break;
+                }
+                case (I_BehaviourLinkSwitch):
+                {
+                    MakeObjectFar(sbPtr);
+                    break;
+                }
+                case (I_BehaviourPredator):
+                {
+                    MakePredatorFar(sbPtr);
+                    break;
+                }
+                case (I_BehaviourXenoborg):
+                {
+                    MakeXenoborgFar(sbPtr);
+                    break;
+                }
+                case (I_BehaviourQueenAlien):
+                {
+                    MakeQueenFar(sbPtr);
+                    break;
+                }
+                case (I_BehaviourPredatorAlien):
+                {
+                    //MakePAQFar(sbPtr); 
+                    GLOBALASSERT(0);
+                    /* Should be BehaviourAlien! */
+                    break;
+                }
+                case (I_BehaviourFaceHugger):
+                {
+                    MakeFacehuggerFar(sbPtr);
+                    break;
+                }
+                case (I_BehaviourMarine):
+                {
+                    MakeMarineFar(sbPtr);
+                    break;
+                }
+                case (I_BehaviourSeal):
+                {
+                    MakeMarineFar(sbPtr); /* not yet supported */
+                    break;
+                }
+                case (I_BehaviourNetGhost):
+                {
+					MakeGhostFar(sbPtr); 
+                    break;
+                }
+                case (I_BehaviourTrackObject):
+                {
+                    MakeObjectFar(sbPtr);
+                    break;
+                }
+                case (I_BehaviourFan):
+                {
+                    MakeObjectFar(sbPtr);
+                    break;
+                }
+                case (I_BehaviourNetCorpse):
+                {
+                    MakeCorpseFar(sbPtr);
+                    break;
+                }
+                case (I_BehaviourPlacedHierarchy):
+                {
+                    MakeObjectFar(sbPtr);
+                    break;
+                }
+                case (I_BehaviourDummy):
+                {
+					MakeDummyFar(sbPtr);
+					break;
+                }
+                default:
+                {
+					/* only the above object types should get here */
+					LOCALASSERT(1==0);
+                }
+            }
+        }
+    }
 }
 
 /*-----------------------Patrick 15/1/97---------------------------
@@ -610,13 +608,14 @@ void MakeObjectNear(STRATEGYBLOCK *sbPtr)
         tempModule.name = NULL; /* this is important */
 
         AllocateModuleObject(&tempModule); 
-        dPtr = tempModule.m_dptr;               
-        if(dPtr==NULL) return; /* cannot create displayblock, so leave object "far" */
+        dPtr = tempModule.m_dptr;
+        if (dPtr==NULL) 
+			return; /* cannot create displayblock, so leave object "far" */
         
         sbPtr->SBdptr = dPtr;
         dPtr->ObStrategyBlock = sbPtr;
-        dPtr->ObMyModule = NULL;                                        
-                            
+        dPtr->ObMyModule = NULL;
+
         /* also need to initialise positional information in the new display
         block from the existing dynamics block: this necessary because this 
         function is (usually) called between the dynamics and rendering systems
@@ -690,160 +689,148 @@ NB returns 0 if relocation failed.
 static int EmergRelocCalls = 0;
 static int EmergencyRelocateObject(STRATEGYBLOCK *sbPtr)
 {
-        EmergRelocCalls++;
+    EmergRelocCalls++;
 
-        if(sbPtr->I_SBtype == I_BehaviourNetGhost) return 1;
+    if (sbPtr->I_SBtype == I_BehaviourNetGhost)
+		return 1;
 
-        /* KJL 14:48:36 09/02/98 - ignore platform lifts */
-        if (sbPtr->I_SBtype == I_BehaviourPlatform) return 1;
+    /* KJL 14:48:36 09/02/98 - ignore platform lifts */
+    if (sbPtr->I_SBtype == I_BehaviourPlatform) 
+		return 1;
 
-        /* first, try to reset the object's position: if it has a valid 'containingModule',
-        this means that it's last position was in that module, so we can use that as a reset
-        position. 
-        NB this means that NPC's will be unable to 'run away' into an invisible module. 
-        */
+    /* first, try to reset the object's position: if it has a valid 'containingModule',
+    this means that it's last position was in that module, so we can use that as a reset
+    position. 
+    NB this means that NPC's will be unable to 'run away' into an invisible module. 
+    */
+    
+    if(sbPtr->containingModule) 
+    {
+        /* Nooo, this doesn't work! CDF 3/12/97 Hack. */
+        if ((sbPtr->I_SBtype!=I_BehaviourAlien) && (sbPtr->I_SBtype!=I_BehaviourMarine))
+		{
+            textprint("Valid containingModule.\n");
+            sbPtr->DynPtr->Position = sbPtr->DynPtr->PrevPosition;
+            return 1;
+        }
+    }
+
+    /* so, we don't have a previous module... then search the environment for the 
+    nearest invisible module that has entry point locations, and relocate to one of 
+    these locations. */
+    {
+        //extern SCENE Global_Scene;
+        //extern SCENEMODULE **Global_ModulePtr;
         
-        if(sbPtr->containingModule) 
+        AIMODULE *targetModule = 0;
+        int targetModuleDistance = 0;
+        //SCENEMODULE *ScenePtr;
+        AIMODULE *moduleListPointer;
+        int moduleCounter;
+
+        LOCALASSERT(ModuleArraySize);
+        LOCALASSERT(Global_ModulePtr);
+
+        LOCALASSERT(FALLP_EntryPoints); /* NB should never get here in a net game, so the codition should be true */
+
+        //ScenePtr = Global_ModulePtr[Global_Scene];
+        //moduleListPointer = ScenePtr->sm_marray;
         {
-        
+            extern AIMODULE *AIModuleArray;
+            moduleListPointer = AIModuleArray;
+        }
+
+        for (moduleCounter = 0; moduleCounter < AIModuleArraySize; moduleCounter++)
+        {
+            AIMODULE *thisModule = &(moduleListPointer[moduleCounter]);
+            //MODULE* thisModule = moduleListPointer[moduleCounter]; 
+
+            if ((!(ModuleCurrVisArray[thisModule->m_index])) && (FALLP_EntryPoints[thisModule->m_index].numEntryPoints != 0))
+            {
+                /* a candidate */
+                int thisModuleDistance = VectorDistance(&(thisModule->m_world), &(sbPtr->DynPtr->Position));
+
+                if ((!targetModule) || (thisModuleDistance < targetModuleDistance))
+                {
+                    targetModule = thisModule;
+                    targetModuleDistance = thisModuleDistance;
+                }
+            }
+        }
+
+        if (!targetModule)
+        {
+            /* this condition shouldn't happen, but since I'm paranoid... */
+            //This can happen on the skirmish levels (where the whole level is visible at once)
+            //Therefore if the object has a previous containing module , use it.
+            //Otherwise get rid of it.
+
+            //LOCALASSERT(1==0);
+            if (sbPtr->containingModule) 
+            {
                 /* Nooo, this doesn't work! CDF 3/12/97 Hack. */
-
-                if ((sbPtr->I_SBtype!=I_BehaviourAlien) 
-                        &&(sbPtr->I_SBtype!=I_BehaviourMarine)
-                ) {
-                        textprint("Valid containingModule.\n");
-                        sbPtr->DynPtr->Position = sbPtr->DynPtr->PrevPosition;
-                        return 1;
-                }
+                textprint("Valid containingModule.\n");
+                sbPtr->DynPtr->Position = sbPtr->DynPtr->PrevPosition;
+                return 1;
+            }
+            DestroyAnyStrategyBlock(sbPtr);
+            return 0;
         }
-                        
-        /* so, we don't have a previous module... then search the environment for the 
-        nearest invisible module that has entry point locations, and relocate to one of 
-        these locations. */
-        {       
-                //extern SCENE Global_Scene;
-                //extern SCENEMODULE **Global_ModulePtr;
-                
-                AIMODULE *targetModule = 0;
-                int targetModuleDistance = 0;
-                //SCENEMODULE *ScenePtr;
-                AIMODULE *moduleListPointer;    
-                int moduleCounter;
-
-                LOCALASSERT(ModuleArraySize);
-                LOCALASSERT(Global_ModulePtr);
-
-                LOCALASSERT(FALLP_EntryPoints); /* NB should never get here in a net game, so the codition should be true */
-
-                //ScenePtr = Global_ModulePtr[Global_Scene];
-                //moduleListPointer = ScenePtr->sm_marray;
-                {
-                        extern AIMODULE *AIModuleArray;
-                        moduleListPointer = AIModuleArray;
-                }
-
-                for(moduleCounter = 0; moduleCounter < AIModuleArraySize; moduleCounter++)
-                {
-                        AIMODULE *thisModule = &(moduleListPointer[moduleCounter]); 
-                        //MODULE* thisModule = moduleListPointer[moduleCounter]; 
         
-                        if(     (!(ModuleCurrVisArray[thisModule->m_index]))&&
-                                (FALLP_EntryPoints[thisModule->m_index].numEntryPoints != 0)
-                          )
-                        {
-                                /* a candidate */
-                                int thisModuleDistance = 
-                                        VectorDistance(&(thisModule->m_world), &(sbPtr->DynPtr->Position));                                             
-                                                
-                                if((!targetModule) || (thisModuleDistance < targetModuleDistance))
-                                { 
-                                        targetModule = thisModule;
-                                        targetModuleDistance = thisModuleDistance;      
-                                }
-                        }               
-                }       
-
-                if(!targetModule)
-                {
-                        /* this condition shouldn't happen, but since I'm paranoid... */
-                        //This can happen on the skirmish levels (where the whole level is visible at once)
-                        //Therefore if the object has a previous containing module , use it.
-                        //Otherwise get rid of it.
-
-                        //LOCALASSERT(1==0);
-                        if(sbPtr->containingModule) 
-                        {
+        EmergencyPlaceObjectInModule(sbPtr, targetModule);
         
-                                /* Nooo, this doesn't work! CDF 3/12/97 Hack. */
-
-                                textprint("Valid containingModule.\n");
-                                sbPtr->DynPtr->Position = sbPtr->DynPtr->PrevPosition;
-                                return 1;
-                                
-                        }
-                        DestroyAnyStrategyBlock(sbPtr);
-                        return 0;
-                }
-                
-                EmergencyPlaceObjectInModule(sbPtr, targetModule);
-                
-                #if debug
-                if (!sbPtr->containingModule)
-                {
-                        textprint("WARNING!! EmgcyPlcObInMod failed\n");
-                }
-                #endif
-                
-                
-                return sbPtr->containingModule ? 1 : 0;
+        #if debug
+        if (!sbPtr->containingModule)
+        {
+			textprint("WARNING!! EmgcyPlcObInMod failed\n");
         }
+        #endif
+
+        return sbPtr->containingModule ? 1 : 0;
+    }
 }
 
 static void EmergencyPlaceObjectInModule(STRATEGYBLOCK *sbPtr, AIMODULE* targetModule)
 {
-        int noOfEntryPoints;
-        FARENTRYPOINT *entryPointsList;
-        VECTORCH newPosition;
-        MODULE *renderModule;
+	int noOfEntryPoints;
+	FARENTRYPOINT *entryPointsList;
+	VECTORCH newPosition;
+	MODULE *renderModule;
 
-        textprint("Calling EmergencyPlaceObjectInModule!\n");
+	textprint("Calling EmergencyPlaceObjectInModule!\n");
 
-        /* first off, assert a few pre-conditions */
-        GLOBALASSERT(AIModuleIsPhysical(targetModule));
-        GLOBALASSERT(sbPtr->maintainVisibility);
-        GLOBALASSERT(FALLP_EntryPoints);
+	/* first off, assert a few pre-conditions */
+	GLOBALASSERT(AIModuleIsPhysical(targetModule));
+	GLOBALASSERT(sbPtr->maintainVisibility);
+	GLOBALASSERT(FALLP_EntryPoints);
 
-        noOfEntryPoints = FALLP_EntryPoints[(targetModule->m_index)].numEntryPoints;
-        entryPointsList = FALLP_EntryPoints[(targetModule->m_index)].entryPointsList;  
-        
-        GLOBALASSERT(noOfEntryPoints);
+	noOfEntryPoints = FALLP_EntryPoints[(targetModule->m_index)].numEntryPoints;
+	entryPointsList = FALLP_EntryPoints[(targetModule->m_index)].entryPointsList;  
 
-        /* just use the first entry point */
-        newPosition = entryPointsList[0].position;
-        
-        /* now set the object's new position and current module. 
-           NB this is world position + a little extra in y to make sure */
-        {
-                DYNAMICSBLOCK *dynPtr;
-                
-                dynPtr = sbPtr->DynPtr;
-                dynPtr->Position = newPosition;
+	GLOBALASSERT(noOfEntryPoints);
 
-                dynPtr->Position.vx += targetModule->m_world.vx;
-                dynPtr->Position.vy += targetModule->m_world.vy;
-                dynPtr->Position.vz += targetModule->m_world.vz;
+	/* just use the first entry point */
+	newPosition = entryPointsList[0].position;
 
-                dynPtr->PrevPosition = dynPtr->Position;
-           
-        }
-        /* finally, update the sb's module */
-        renderModule=ModuleFromPosition(&sbPtr->DynPtr->Position,NULL);
+	/* now set the object's new position and current module. 
+	   NB this is world position + a little extra in y to make sure */
+	{
+		DYNAMICSBLOCK *dynPtr;
+		dynPtr = sbPtr->DynPtr;
+		dynPtr->Position = newPosition;
 
-        sbPtr->containingModule = renderModule;
+		dynPtr->Position.vx += targetModule->m_world.vx;
+		dynPtr->Position.vy += targetModule->m_world.vy;
+		dynPtr->Position.vz += targetModule->m_world.vz;
 
+		dynPtr->PrevPosition = dynPtr->Position;
+	   
+	}
+	/* finally, update the sb's module */
+	renderModule=ModuleFromPosition(&sbPtr->DynPtr->Position,NULL);
+
+	sbPtr->containingModule = renderModule;
 }
-
-
 
 
 /*------------------------Patrick 14/1/97-----------------------------
@@ -874,63 +861,63 @@ static MODULE* ModuleFromPosition_WithTolerance(VECTORCH *position, MODULE* star
 
 MODULE* ModuleFromPosition(VECTORCH *position, MODULE* startingModule)
 {
-        if((startingModule) && (ModuleIsPhysical(startingModule)))
+    if ((startingModule) && (ModuleIsPhysical(startingModule)))
+    {
+		/* first test for the most trivial, and most likely case */
+		if (WorldPointIsInModule(startingModule, position)) 
+			return startingModule;
+	    
+		/* now test visible-linked modules (If there are any) */
+		{
+			VMODULE *vlPtr = startingModule->m_vmptr;
+			if (vlPtr)
+			{
+				while (vlPtr->vmod_type != vmtype_term) 
+				{
+					MODULE *mPtr = vlPtr->vmod_mref.mref_ptr;
+					if (mPtr) 
+					{
+						if (ModuleIsPhysical(mPtr))
+							if (WorldPointIsInModule(mPtr, position)) 
+								return mPtr;
+					}                       
+					vlPtr++;
+				}
+			}
+		}
+    }
+
+    /* either there is no starting module; the starting module is not physical;
+    we are not in the starting module and it has no visibility-linked modules;
+    or we haven't found a module yet: so search the entire module list */
+    {
+        extern SCENE Global_Scene;
+        extern SCENEMODULE **Global_ModulePtr;
+        extern int ModuleArraySize;
+        MODULE **moduleListPointer;     
+        int moduleCounter;
+
+        LOCALASSERT(ModuleArraySize);
+        LOCALASSERT(Global_ModulePtr);
+
+        moduleListPointer = (Global_ModulePtr[Global_Scene])->sm_marray;
+        moduleCounter = ModuleArraySize;
+        while (moduleCounter>0)
         {
-                /* first test for the most trivial, and most likely case */
-                if(WorldPointIsInModule(startingModule, position)) 
-                        return startingModule;
-                
-                /* now test visible-linked modules (If there are any) */
-                {
-                        VMODULE *vlPtr = startingModule->m_vmptr;
-                        if(vlPtr)
-                        {
-                                while(vlPtr->vmod_type != vmtype_term) 
-                                {
-                                        MODULE *mPtr = vlPtr->vmod_mref.mref_ptr;
-                                        if(mPtr) 
-                                        {
-                                                if(ModuleIsPhysical(mPtr))
-                                                        if(WorldPointIsInModule(mPtr, position)) 
-                                                                return mPtr;
-                                        }                       
-                                        vlPtr++;
-                                }
-                        }
-                }
+            MODULE *thisModule;
+            
+            thisModule = *moduleListPointer++;
+            if (ModuleIsPhysical(thisModule))
+				if (WorldPointIsInModule(thisModule, position)) 
+					return (thisModule);
+
+            moduleCounter--;
         }
+    }
 
-        /* either there is no starting module; the starting module is not physical;
-        we are not in the starting module and it has no visibility-linked modules;
-        or we haven't found a module yet: so search the entire module list */
-        {
-                extern SCENE Global_Scene;
-                extern SCENEMODULE **Global_ModulePtr;
-                extern int ModuleArraySize;
-                MODULE **moduleListPointer;     
-                int moduleCounter;
-
-                LOCALASSERT(ModuleArraySize);
-                LOCALASSERT(Global_ModulePtr);
-
-                moduleListPointer = (Global_ModulePtr[Global_Scene])->sm_marray;
-                moduleCounter = ModuleArraySize;
-                while(moduleCounter>0)
-                {
-                        MODULE *thisModule;
-                        
-                        thisModule = *moduleListPointer++;
-                        if(ModuleIsPhysical(thisModule))
-                                if(WorldPointIsInModule(thisModule, position)) 
-                                        return (thisModule);
-
-                        moduleCounter--;
-                }
-        }
-
-        /* couldn't find a module */
-		/*Try with slightly larger module bounding boxes*/
-        return ModuleFromPosition_WithTolerance(position,startingModule);
+    /* couldn't find a module */
+	/*Try with slightly larger module bounding boxes*/
+    return ModuleFromPosition_WithTolerance(position,startingModule);
 }
 
 
@@ -942,20 +929,20 @@ NB the bizzare structure of this function produces optimum pentium
 instructions... apparently.
 -------------------------------------------------------------------*/
 static int WorldPointIsInModule(MODULE* thisModule, VECTORCH* thisPoint)
-{               
-        VECTORCH localpoint = *thisPoint;
-        localpoint.vx -= thisModule->m_world.vx;
-        localpoint.vy -= thisModule->m_world.vy;
-        localpoint.vz -= thisModule->m_world.vz;
+{
+    VECTORCH localpoint = *thisPoint;
+    localpoint.vx -= thisModule->m_world.vx;
+    localpoint.vy -= thisModule->m_world.vy;
+    localpoint.vz -= thisModule->m_world.vz;
 
-        if(localpoint.vx <= thisModule->m_maxx)
-                if(localpoint.vx >= thisModule->m_minx)
-                        if(localpoint.vy <= thisModule->m_maxy)
-                                if(localpoint.vy >= thisModule->m_miny)
-                                        if(localpoint.vz <= thisModule->m_maxz)
-                                                if(localpoint.vz >= thisModule->m_minz)
-                                                        return 1;       
-        return 0;
+    if (localpoint.vx <= thisModule->m_maxx)
+        if (localpoint.vx >= thisModule->m_minx)
+            if (localpoint.vy <= thisModule->m_maxy)
+                if (localpoint.vy >= thisModule->m_miny)
+                    if (localpoint.vz <= thisModule->m_maxz)
+                        if (localpoint.vz >= thisModule->m_minz)
+                                return 1;
+    return 0;
 }
 
 
@@ -964,62 +951,62 @@ static int WorldPointIsInModule(MODULE* thisModule, VECTORCH* thisPoint)
 #define ModuleFromPositionTolerance 50
 static MODULE* ModuleFromPosition_WithTolerance(VECTORCH *position, MODULE* startingModule)
 {
-        if((startingModule) && (ModuleIsPhysical(startingModule)))
+    if((startingModule) && (ModuleIsPhysical(startingModule)))
+    {
+        /* first test for the most trivial, and most likely case */
+        if(WorldPointIsInModule_WithTolerance(startingModule, position)) 
+			return startingModule;
+
+        /* now test visible-linked modules (If there are any) */
         {
-                /* first test for the most trivial, and most likely case */
-                if(WorldPointIsInModule_WithTolerance(startingModule, position)) 
-                        return startingModule;
-                
-                /* now test visible-linked modules (If there are any) */
+            VMODULE *vlPtr = startingModule->m_vmptr;
+            if(vlPtr)
+            {
+                while(vlPtr->vmod_type != vmtype_term) 
                 {
-                        VMODULE *vlPtr = startingModule->m_vmptr;
-                        if(vlPtr)
-                        {
-                                while(vlPtr->vmod_type != vmtype_term) 
-                                {
-                                        MODULE *mPtr = vlPtr->vmod_mref.mref_ptr;
-                                        if(mPtr) 
-                                        {
-                                                if(ModuleIsPhysical(mPtr))
-                                                        if(WorldPointIsInModule_WithTolerance(mPtr, position)) 
-                                                                return mPtr;
-                                        }                       
-                                        vlPtr++;
-                                }
-                        }
+                    MODULE *mPtr = vlPtr->vmod_mref.mref_ptr;
+                    if(mPtr) 
+                    {
+                        if(ModuleIsPhysical(mPtr))
+                            if(WorldPointIsInModule_WithTolerance(mPtr, position)) 
+								return mPtr;
+                    }
+                    vlPtr++;
                 }
+            }
         }
+    }
 
-        /* either there is no starting module; the starting module is not physical;
-        we are not in the starting module and it has no visibility-linked modules;
-        or we haven't found a module yet: so search the entire module list */
+    /* either there is no starting module; the starting module is not physical;
+    we are not in the starting module and it has no visibility-linked modules;
+    or we haven't found a module yet: so search the entire module list */
+    {
+        extern SCENE Global_Scene;
+        extern SCENEMODULE **Global_ModulePtr;
+        extern int ModuleArraySize;
+        MODULE **moduleListPointer;
+        int moduleCounter;
+
+        LOCALASSERT(ModuleArraySize);
+        LOCALASSERT(Global_ModulePtr);
+
+        moduleListPointer = (Global_ModulePtr[Global_Scene])->sm_marray;
+        moduleCounter = ModuleArraySize;
+        while (moduleCounter>0)
         {
-                extern SCENE Global_Scene;
-                extern SCENEMODULE **Global_ModulePtr;
-                extern int ModuleArraySize;
-                MODULE **moduleListPointer;     
-                int moduleCounter;
+            MODULE *thisModule;
+            
+            thisModule = *moduleListPointer++;
+            if(ModuleIsPhysical(thisModule))
+				if (WorldPointIsInModule_WithTolerance(thisModule, position))
+					return (thisModule);
 
-                LOCALASSERT(ModuleArraySize);
-                LOCALASSERT(Global_ModulePtr);
-
-                moduleListPointer = (Global_ModulePtr[Global_Scene])->sm_marray;
-                moduleCounter = ModuleArraySize;
-                while(moduleCounter>0)
-                {
-                        MODULE *thisModule;
-                        
-                        thisModule = *moduleListPointer++;
-                        if(ModuleIsPhysical(thisModule))
-                                if(WorldPointIsInModule_WithTolerance(thisModule, position)) 
-                                        return (thisModule);
-
-                        moduleCounter--;
-                }
+            moduleCounter--;
         }
+    }
 
-        /* couldn't find a module */
-        return (MODULE *)0;
+    /* couldn't find a module */
+    return (MODULE *)0;
 }
 
 
@@ -1080,7 +1067,7 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
                         
         /* these should be loaded */
         objectstatusptr->typeId = toolsData->typeId;
-        objectstatusptr->subType = toolsData->subType;                                  
+        objectstatusptr->subType = toolsData->subType;
         
         /* set default indestructibility */
         objectstatusptr->Indestructable = FALSE;
@@ -1155,8 +1142,8 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
                                 sbPtr->integrity = (DEFAULT_OBJECT_INTEGRITY)*(toolsData->integrity);
                         }
                         break;
-                }                               
-                case IOT_Furniture:     
+                }
+                case IOT_Furniture:
                 {
                         sbPtr->DynPtr = AllocateDynamicsBlock(inanimateDynamicsInitialiser);
                         if(!sbPtr->DynPtr)
@@ -1179,7 +1166,7 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
                                 sbPtr->integrity = (DEFAULT_OBJECT_INTEGRITY)*(toolsData->integrity);
                         }
                         break;
-                }                               
+                }
                 case IOT_Weapon:
                 {
                         sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_PICKUPOBJECT);
@@ -1192,10 +1179,10 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
 						if(objectstatusptr->subType==WEAPON_FLAMETHROWER)
 						{
 							//flamethrowers explode using a molotov explosion
-							objectstatusptr->explosionType=3;							
+							objectstatusptr->explosionType=3;
 						}
                         break;
-                }                               
+                }
                 case IOT_Ammo:
                 {
                         sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_PICKUPOBJECT);
@@ -1209,10 +1196,10 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
 						if(objectstatusptr->subType==AMMO_FLAMETHROWER)
 						{
 							//flamethrowers explode using a molotov explosion
-							objectstatusptr->explosionType=3;							
+							objectstatusptr->explosionType=3;
 						}
                         break;
-                }                               
+                }
                 case IOT_Health:
                 {
                         sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_PICKUPOBJECT);
@@ -1225,7 +1212,7 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
 
                         sbPtr->integrity = DEFAULT_OBJECT_INTEGRITY;
                         break;
-                }                               
+                }
                 case IOT_Armour:
                 {
                         sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_PICKUPOBJECT);
@@ -1249,7 +1236,7 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
 
                         sbPtr->integrity = DEFAULT_OBJECT_INTEGRITY;
                         break;
-                }                               
+                }
                 case IOT_BoxedSentryGun:
                 {
                         sbPtr->DynPtr = AllocateDynamicsBlock(inanimateDynamicsInitialiser);
@@ -1261,7 +1248,7 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
                         
                         sbPtr->integrity = DEFAULT_OBJECT_INTEGRITY;
                         break;
-                }                               
+                }
                 case IOT_IRGoggles:
                 {
                         sbPtr->DynPtr = AllocateDynamicsBlock(inanimateDynamicsInitialiser);
@@ -1272,7 +1259,7 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
                         }
                         sbPtr->integrity = DEFAULT_OBJECT_INTEGRITY;
                         break;
-                }                               
+                }
                 case IOT_DataTape:
                 {
                         sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_STATIC);
@@ -1294,7 +1281,7 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
                         }
                         sbPtr->integrity = DEFAULT_OBJECT_INTEGRITY;
                         break;
-                }                               
+                }
                 case IOT_PheromonePod:
                 {
                         sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_PICKUPOBJECT);
@@ -1340,16 +1327,16 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
 
                         sbPtr->integrity = DEFAULT_OBJECT_INTEGRITY;
                         break;
-                }                               
+                }
                 default:
                 {
-                        LOCALASSERT(1==0);                              
+                        LOCALASSERT(1==0);
                         break;
                 }
         }
         /*check to see if object is animated.*/
         {
-                TXACTRLBLK **pptxactrlblk;              
+                TXACTRLBLK **pptxactrlblk;
                 int item_num;
                 int shape_num = toolsData->shapeIndex;
                 SHAPEHEADER *shptr = GetShapeData(shape_num);
@@ -1358,7 +1345,7 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
                 {
                         POLYHEADER *poly =  (POLYHEADER*)(shptr->items[item_num]);
                         LOCALASSERT(poly);
-                                
+
                         if((Request_PolyFlags((void *)poly)) & iflag_txanim)
                                 {
                                         TXACTRLBLK *pnew_txactrlblk;
@@ -1366,11 +1353,11 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
                                         pnew_txactrlblk = AllocateMem(sizeof(TXACTRLBLK));
                                         if(pnew_txactrlblk)
                                         {
-                                                pnew_txactrlblk->tac_flags = 0;                                                                         
-                                                pnew_txactrlblk->tac_item = item_num;                                                                           
-                                                pnew_txactrlblk->tac_sequence = 0;                                                                              
-                                                pnew_txactrlblk->tac_node = 0;                                                                          
-                                                pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);                                                                            
+                                                pnew_txactrlblk->tac_flags = 0;
+                                                pnew_txactrlblk->tac_item = item_num;
+                                                pnew_txactrlblk->tac_sequence = 0;
+                                                pnew_txactrlblk->tac_node = 0;
+                                                pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);
                                                 pnew_txactrlblk->tac_txah_s = GetTxAnimHeaderFromShape(pnew_txactrlblk, shape_num);
 
                                                 *pptxactrlblk = pnew_txactrlblk;
@@ -1774,7 +1761,7 @@ void InanimateObjectIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int 
                         {
                                 ExplodeInanimateObject(sbPtr);
                                 if(AvP.Network==I_No_Network) DestroyAnyStrategyBlock(sbPtr);
-                                else KillInanimateObjectForRespawn(sbPtr);                      
+                                else KillInanimateObjectForRespawn(sbPtr);
                         }
                         break;
                 }                               
@@ -1784,7 +1771,7 @@ void InanimateObjectIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int 
                         {
                                 ExplodeInanimateObject(sbPtr);
                                 if(AvP.Network==I_No_Network) DestroyAnyStrategyBlock(sbPtr);
-                                else KillInanimateObjectForRespawn(sbPtr);                      
+                                else KillInanimateObjectForRespawn(sbPtr);
                         }
                         break;
                 }                               
@@ -1799,17 +1786,17 @@ void InanimateObjectIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int 
                         {
                                 ExplodeInanimateObject(sbPtr);
                                 if(AvP.Network==I_No_Network) DestroyAnyStrategyBlock(sbPtr);
-                                else KillInanimateObjectForRespawn(sbPtr);                      
+                                else KillInanimateObjectForRespawn(sbPtr);
                         }
                         break;
-                }                               
+                }
                 case IOT_PheromonePod:
                 {
                         if(sbPtr->SBDamageBlock.Health <= 0) 
                         {
                                 ExplodeInanimateObject(sbPtr);
                                 if(AvP.Network==I_No_Network) DestroyAnyStrategyBlock(sbPtr);
-                                else KillInanimateObjectForRespawn(sbPtr);                      
+                                else KillInanimateObjectForRespawn(sbPtr);
                         }
                         break;
                 }                               
@@ -1821,7 +1808,7 @@ void InanimateObjectIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int 
                         	{
                         	        FragmentInanimateObject(sbPtr);
                         	        if(AvP.Network==I_No_Network) DestroyAnyStrategyBlock(sbPtr);
-                        	        else KillInanimateObjectForRespawn(sbPtr);                      
+                        	        else KillInanimateObjectForRespawn(sbPtr);
                         	}
                         }
                         break;
@@ -1854,13 +1841,13 @@ void InanimateObjectIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int 
                         {
                                 FragmentInanimateObject(sbPtr);
                                 if(AvP.Network==I_No_Network) DestroyAnyStrategyBlock(sbPtr);
-                                else KillInanimateObjectForRespawn(sbPtr);                      
+                                else KillInanimateObjectForRespawn(sbPtr);
                         }
                         break;
-                }                               
+                }
                 default:
                 {
-                        LOCALASSERT(1==0);                              
+                        LOCALASSERT(1==0);
                         break;
                 }
         }
@@ -1879,7 +1866,7 @@ void SendRequestToInanimateObject(STRATEGYBLOCK* sbptr,BOOL state,int extended_d
                 if(extended_data & ObjectRequest_AdjustIntegrity)
                 {
                         int new_integrity=(extended_data>>7)&0xff;
-                        sbptr->SBDamageBlock.Health=(10<<ONE_FIXED_SHIFT)*new_integrity;        
+                        sbptr->SBDamageBlock.Health=(10<<ONE_FIXED_SHIFT)*new_integrity;
                         sbptr->integrity = DEFAULT_OBJECT_INTEGRITY*new_integrity;
 
                         if(new_integrity>20)
@@ -1991,7 +1978,7 @@ void RespawnAllObjects(void)
                         if(objectStatusPtr->respawnTimer!=0)
                         {
                                 RespawnInanimateObject(sbPtr);
-                                objectStatusPtr->respawnTimer=0;        
+                                objectStatusPtr->respawnTimer=0;
                         }
                 }
                 else if(sbPtr->I_SBtype == I_BehaviourPlacedLight)
@@ -2025,11 +2012,11 @@ void RespawnAllPickups(void)
 				if(objectStatusPtr->respawnTimer!=0)
 				{
 					RespawnInanimateObject(sbPtr);
-					objectStatusPtr->respawnTimer=0;        
+					objectStatusPtr->respawnTimer=0;
 				}
 			}
 		}
-	}               
+	}
 }
 
 void IdentifyObject(STRATEGYBLOCK *sbPtr) {

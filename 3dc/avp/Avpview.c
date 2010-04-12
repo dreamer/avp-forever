@@ -606,7 +606,6 @@ void ReflectObject(DISPLAYBLOCK *dPtr)
 
 void AvpShowViews(void)
 {
-
 	FlushD3DZBuffer();
 
 	UpdateAllFMVTextures();	
@@ -622,10 +621,8 @@ void AvpShowViews(void)
 	D3D_DrawBackdrop();
 
 	/* Now we know where the camera is, update the modules */
-
 	#if SupportModules
 	AllNewModuleHandler();
-//	ModuleHandler(Global_VDB_Ptr);
 	#endif
 
 	#if MIRRORING_ON

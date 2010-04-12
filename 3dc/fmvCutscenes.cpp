@@ -326,7 +326,7 @@ void UpdateAllFMVTextures()
 	extern void UpdateFMVTexture(FMVTEXTURE *ftPtr);
 	int i = NumberOfFMVTextures;
 
-	while(i--)
+	while (i--)
 	{
 		UpdateFMVTexture(&FMVTexture[i]);
 	}

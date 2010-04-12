@@ -20,6 +20,7 @@ extern "C++"{
 
 #include "console.h"
 #include "onscreenKeyboard.h"
+#include "textureManager.h"
 
 #include "r2base.h"
 
@@ -56,8 +57,11 @@ extern int Font_DrawText(const char* text, int x, int y, int colour, int fontTyp
 const uint32_t MAX_VERTEXES = 4096;
 const uint32_t MAX_INDICES = 9216;
 
-D3DLVERTEX *mainVertex = NULL;
-WORD *mainIndex = NULL;
+D3DLVERTEX *mainVertex = new D3DLVERTEX[MAX_VERTEXES];//NULL;
+WORD *mainIndex = new WORD [MAX_INDICES * 3];//NULL;
+
+D3DLVERTEX *testVertex = NULL;
+WORD *testIndex = NULL;
 
 ORTHOVERTEX *orthoVerts = NULL;
 WORD *orthoIndex = NULL;
@@ -474,7 +478,7 @@ BOOL SetExecuteBufferDefaults()
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 
 	d3d.lpD3DDevice->SetRenderState(D3DRS_CULLMODE,			D3DCULL_NONE);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_CLIPPING,			TRUE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_CLIPPING,			FALSE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_LIGHTING,			FALSE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_SPECULARENABLE,	TRUE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE,		TRUE);
@@ -643,14 +647,14 @@ void CheckVertexBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_T
 
 BOOL LockExecuteBuffer()
 {
-	LastError = d3d.lpD3DVertexBuffer->Lock(0, 0, (void**)&mainVertex, D3DLOCK_DISCARD);
+	LastError = d3d.lpD3DVertexBuffer->Lock(0, 0, (void**)&testVertex, D3DLOCK_DISCARD);
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
 
-	LastError = d3d.lpD3DIndexBuffer->Lock(0, 0, (void**)&mainIndex, D3DLOCK_DISCARD);
+	LastError = d3d.lpD3DIndexBuffer->Lock(0, 0, (void**)&testIndex, D3DLOCK_DISCARD);
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -831,6 +835,13 @@ static void ChangeTexture(const int32_t textureID)
 	if (textureID == currentTextureID) 
 		return;
 
+	if (textureID >= texIDoffset)
+	{
+		LastError = d3d.lpD3DDevice->SetTexture(0, Tex_GetTexture(textureID));
+		if (!FAILED(LastError)) currentTextureID = textureID;
+			return;
+	}
+
 	// menu large font
 	else if (textureID == TALLFONT_TEX)
 	{
@@ -876,6 +887,9 @@ BOOL ExecuteBuffer()
 
 	// sort the list of render objects
 	std::sort(renderTest.begin(), renderTest.end());
+
+	memcpy(testVertex, mainVertex, NumVertices * sizeof(D3DLVERTEX));
+	memcpy(testIndex, mainIndex, NumIndicies * sizeof(WORD));
 
 #ifdef WIN32
 	Font_DrawText("blah", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
@@ -3913,12 +3927,16 @@ extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha)
 
 extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale)
 {
+	return;
+
 //	CheckVertexBuffer(255, NO_TEXTURE, TRANSLUCENCY_OFF);
+
+	CheckOrthoBuffer(255, NO_TEXTURE, TRANSLUCENCY_OFF, TEXTURE_CLAMP, FILTERING_BILINEAR_ON);
 
 	for (int i = 0; i < 255; )
 	{
 		/* this'll do.. */
-		CheckVertexBuffer(/*1530*/4, NO_TEXTURE, TRANSLUCENCY_OFF);
+//		CheckVertexBuffer(/*1530*/4, NO_TEXTURE, TRANSLUCENCY_OFF);
 
 		unsigned int colour = 0;
 		unsigned int c = 0;
@@ -5381,15 +5399,15 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 	}
 }
 
-void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_texture, int original_width, int original_height, int new_width, int new_height) 
+void DrawProgressBar(RECT src_rect, RECT dest_rect, uint32_t textureID, int original_width, int original_height, int new_width, int new_height)
 {
-	LastError = d3d.lpD3DDevice->SetTexture(0, bar_texture);
-	if (FAILED(LastError)) 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return;
-	}
-	currentTextureID = PROGRESS_TEX;
+	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_OFF, TEXTURE_CLAMP, FILTERING_BILINEAR_ON);
+
+	float x1 = (float(dest_rect.left / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
+	float y1 = (float(dest_rect.top / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
+
+	float x2 = ((float(dest_rect.right) / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
+	float y2 = ((float(dest_rect.bottom ) / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
 
 	int width = original_width;
 	int height = original_height;
@@ -5401,55 +5419,43 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE9 bar_textu
 	float RecipW = (1.0f / real_width);
 	float RecipH = (1.0f / real_height);
 
+	D3DCOLOR colour = D3DCOLOR_XRGB(255, 255, 255);
+
 	// bottom left
-	quadVert[0].sx = (float)dest_rect.left - 0.5f;
-	quadVert[0].sy = (float)dest_rect.bottom - 0.5f;
-	quadVert[0].sz = 0.0f;
-//	quadVert[0].rhw = 1.0f;
-	quadVert[0].color = D3DCOLOR_XRGB(255,255,255);
-	quadVert[0].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[0].tu = (float)((width - src_rect.left) * RecipW);
-	quadVert[0].tv = (float)((height - src_rect.bottom) * RecipH);
+	orthoVerts[orthoVBOffset].x = x1;
+	orthoVerts[orthoVBOffset].y = y2;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = (float)((width - src_rect.left) * RecipW);
+	orthoVerts[orthoVBOffset].v = (float)((height - src_rect.bottom) * RecipH);
+	orthoVBOffset++;
 
 	// top left
-	quadVert[1].sx = (float)dest_rect.left - 0.5f;
-	quadVert[1].sy = (float)dest_rect.top - 0.5f;
-	quadVert[1].sz = 0.0f;
-//	quadVert[1].rhw = 1.0f;
-	quadVert[1].color = D3DCOLOR_XRGB(255,255,255);
-	quadVert[1].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[1].tu = (float)((width - src_rect.left) * RecipW);
-	quadVert[1].tv = (float)((height - src_rect.top) * RecipH);
+	orthoVerts[orthoVBOffset].x = x1;
+	orthoVerts[orthoVBOffset].y = y1;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = (float)((width - src_rect.left) * RecipW);
+	orthoVerts[orthoVBOffset].v = (float)((height - src_rect.top) * RecipH);
+	orthoVBOffset++;
 
 	// bottom right
-	quadVert[2].sx = (float)dest_rect.right - 0.5f;
-	quadVert[2].sy = (float)dest_rect.bottom - 0.5f;
-	quadVert[2].sz = 0.0f;
-//	quadVert[2].rhw = 1.0f;
-	quadVert[2].color = D3DCOLOR_XRGB(255,255,255);
-	quadVert[2].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[2].tu = (float)((width - src_rect.right) * RecipW);
-	quadVert[2].tv = (float)((height - src_rect.bottom) * RecipH);
+	orthoVerts[orthoVBOffset].x = x2;
+	orthoVerts[orthoVBOffset].y = y2;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = (float)((width - src_rect.right) * RecipW);
+	orthoVerts[orthoVBOffset].v = (float)((height - src_rect.bottom) * RecipH);
+	orthoVBOffset++;
 
 	// top right
-	quadVert[3].sx = (float)dest_rect.right - 0.5f;
-	quadVert[3].sy = (float)dest_rect.top - 0.5f;
-	quadVert[3].sz = 0.0f;
-//	quadVert[3].rhw = 1.0f;
-	quadVert[3].color = D3DCOLOR_XRGB(255,255,255);
-	quadVert[3].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[3].tu = (float)((width - src_rect.right) * RecipW);
-	quadVert[3].tv = (float)((height - src_rect.top) * RecipH);
-
-	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
-	ChangeFilteringMode(FILTERING_BILINEAR_ON);
-
-	d3d.lpD3DDevice->SetFVF (D3DFVF_LVERTEX);
-	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DLVERTEX));
-	if (FAILED(LastError)) 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
+	orthoVerts[orthoVBOffset].x = x2;
+	orthoVerts[orthoVBOffset].y = y1;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = (float)((width - src_rect.right) * RecipW);
+	orthoVerts[orthoVBOffset].v = (float)((height - src_rect.top) * RecipH);
+	orthoVBOffset++;
 }
 
 void DrawHUDQuad(int x, int y, int width, int height, float *UVList, int textureID, int colour, enum TRANSLUCENCY_TYPE translucencyType)

@@ -310,6 +310,8 @@ void PlatEndCDDA(void)
 {
 	DWORD dwReturn;
 
+	return;
+
     /* check the cdDeviceId */
     if (cdDeviceID == NO_DEVICE)
 		return;	
