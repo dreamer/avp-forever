@@ -923,8 +923,9 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 						if (pTexture->buffer) 
 						{
 							if ((strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0) ||
-								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\alien.RIM") == 0) || // for alien demo
-								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\predator.RIM") == 0)) // for marine(?) demo
+								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\alien.RIM") == 0) ||		// for alien demo
+								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\predator.RIM") == 0) ||  // for marine(?) demo
+								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\final.RIM") == 0))		// for predator demo
 							{
 								OutputDebugString("found fmv texture.. \n");
 								/* is fmv texture, create in default pool so we can dynamically update it */
@@ -1020,8 +1021,9 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 						if (pTexture->buffer) 
 						{
 							if ((strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0) ||
-								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\alien.RIM") == 0) || // for alien demo
-								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\predator.RIM") == 0)) // for marine(?) demomo
+								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\alien.RIM") == 0) ||		// for alien demo
+								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\predator.RIM") == 0) ||  // for marine(?) demo
+								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\final.RIM") == 0))		// for predator demo
 							{
 								/* is fmv texture, create in default pool so we can dynamically update it */
 								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
