@@ -1402,7 +1402,7 @@ int DecalWithinFrustrum(DECAL *decalPtr)
 	char noClippingFlag;
 
 #ifndef USE_FRUSTUM_CULL
-	return 1; // bjd
+	return 2; // bjd
 #endif
 
 	if (ModuleCurrVisArray[decalPtr->ModuleIndex] != 2) 
@@ -1445,7 +1445,7 @@ int QuadWithinFrustrum(void)
 	char noClippingFlag;
 
 #ifndef USE_FRUSTUM_CULL
-	return 1; // bjd
+	return 2; // bjd
 #endif
 
     inFrustrumFlag=0;
@@ -1485,7 +1485,7 @@ int TriangleWithinFrustrum(void)
 	char noClippingFlag;
 
 #ifndef USE_FRUSTUM_CULL
-	return 1; // bjd
+	return 2; // bjd
 #endif
 
     inFrustrumFlag=0;

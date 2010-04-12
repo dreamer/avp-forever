@@ -64,3 +64,22 @@ void Tex_GetInfo(uint32_t textureID, Tex_Info *info)
 	info->width  = textureList[textureID - texIDoffset].width;
 	info->height = textureList[textureID - texIDoffset].height;
 }
+
+void Tex_Release(uint32_t textureID)
+{
+	// this is bad, temporary..
+	textureList[textureID - texIDoffset].texture->Release();
+	textureList[textureID - texIDoffset].texture = NULL;
+}
+
+void Tex_DeInit()
+{
+	for (std::vector<Texture>::iterator it = textureList.begin(); it != textureList.end(); ++it)
+	{
+		if ((*it).texture)
+		{
+			(*it).texture->Release();
+			(*it).texture = NULL;
+		}
+	}
+}

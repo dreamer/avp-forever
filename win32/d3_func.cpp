@@ -71,6 +71,7 @@ extern "C++"
 	#include "configFile.h"
 	#include <d3dx9.h>
 	#include "console.h"
+	#include "textureManager.h"
 	extern void Font_Init();
 	extern void Font_Release();
 	D3DXMATRIX matOrtho;
@@ -110,9 +111,7 @@ void SetFov()
 		return;
 	}
 
-	int newFov = atoi(Con_GetArgument(0).c_str());
-	
-	fov = newFov;
+	fov = atoi(Con_GetArgument(0).c_str());
 }
 
 // console command : output all menu textures as .png files
@@ -771,6 +770,7 @@ BOOL ReleaseVolatileResources()
 	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
 	SAFE_RELEASE(d3d.lpD3DOrthoVertexBuffer);
 	SAFE_RELEASE(d3d.lpD3DOrthoIndexBuffer);
+	SAFE_RELEASE(d3d.lpD3DPointSpriteVertexBuffer);
 
 	return TRUE;
 }
@@ -805,6 +805,41 @@ BOOL CreateVolatileResources()
 
 	// create our 2D index buffer
 	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoIndexBuffer, NULL);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return FALSE;
+	}
+
+	// point sprite vb
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(4 * sizeof(POINTSPRITEVERTEX), D3DUSAGE_POINTS, D3DFVF_POINTSPRITEVERTEX, D3DPOOL_MANAGED, &d3d.lpD3DPointSpriteVertexBuffer, NULL);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return FALSE;
+	}
+
+	POINTSPRITEVERTEX *testPS;
+
+	LastError = d3d.lpD3DPointSpriteVertexBuffer->Lock(0, 0, (void**)&testPS, 0);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return FALSE;
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		testPS->x = i * 1000;
+		testPS->y = i * 1000;
+		testPS->z = i * 1000;
+		testPS->size = 64.0f;
+		testPS->colour = D3DCOLOR_XRGB(128, 0, 128);
+		testPS->u = 0.0f;
+		testPS->v = 0.0f;
+	}
+
+	LastError = d3d.lpD3DPointSpriteVertexBuffer->Unlock();
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -1368,7 +1403,7 @@ void SetTransforms()
 	D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 
 	// set up projection matrix
-	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, /*1000000*/65536.0f);
+	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
 
 	// print projection matrix?
 //	PrintD3DMatrix("Projection", matProjection);
@@ -1397,6 +1432,8 @@ void ReleaseDirect3D()
     DeallocateAllImages();
 
 	Font_Release();
+
+	Tex_DeInit();
 
 	// release back-buffer copy surface, vertex buffer and index buffer
 	ReleaseVolatileResources();

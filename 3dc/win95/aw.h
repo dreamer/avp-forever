@@ -60,8 +60,25 @@ typedef struct ORTHOVERTEX
 
 } ORTHOVERTEX;
 
+typedef struct POINTSPRITEVERTEX
+{
+	float x;
+	float y;
+	float z;
+
+	float size;
+
+	DWORD colour;
+
+	float u;
+	float v;
+
+} POINTSPRITEVERTEX;
+
 // orthographic quad vertex format
 #define D3DFVF_ORTHOVERTEX (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1)
+
+#define D3DFVF_POINTSPRITEVERTEX (D3DFVF_XYZ | D3DFVF_PSIZE | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 
 // 32bit RGBA to 32bit D3DFMT_A8R8G8B8 format
 #define RGB16(r, g, b) ( ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3))

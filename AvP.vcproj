@@ -61,6 +61,7 @@
 				RuntimeLibrary="3"
 				StructMemberAlignment="0"
 				EnableEnhancedInstructionSet="0"
+				FloatingPointModel="0"
 				FloatingPointExceptions="true"
 				DefaultCharIsUnsigned="true"
 				RuntimeTypeInfo="true"

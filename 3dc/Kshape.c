@@ -4347,35 +4347,46 @@ void RenderDecal(DECAL *decalPtr)
 										  
 		if (outcode)
 		{
-			switch(decalPtr->DecalID)
+			switch (decalPtr->DecalID)
 			{
 				default:
 				case DECAL_SCORCHED:
 				{
 					DecalPolygon_Construct(decalPtr);
 
-					if (outcode!=2)
+					if (outcode != 2)
 					{
 						TexturedPolygon_ClipWithZ();
-						if(RenderPolygon.NumberOfVertices<3) return;
+						if (RenderPolygon.NumberOfVertices < 3)
+							return;
+
 						TexturedPolygon_ClipWithNegativeX();
-						if(RenderPolygon.NumberOfVertices<3) return;
+						if (RenderPolygon.NumberOfVertices < 3) 
+							return;
+
 						TexturedPolygon_ClipWithPositiveY();
-						if(RenderPolygon.NumberOfVertices<3) return;
+						if (RenderPolygon.NumberOfVertices < 3) 
+							return;
+
 						TexturedPolygon_ClipWithNegativeY();
-						if(RenderPolygon.NumberOfVertices<3) return;
+						if (RenderPolygon.NumberOfVertices < 3)
+							return;
+
 						TexturedPolygon_ClipWithPositiveX();
-						if(RenderPolygon.NumberOfVertices<3) return;
-						D3D_Decal_Output(decalPtr,RenderPolygon.Vertices);
+						if (RenderPolygon.NumberOfVertices < 3) 
+							return;
+
+						D3D_Decal_Output(decalPtr, RenderPolygon.Vertices);
 		  			}
-					else D3D_Decal_Output(decalPtr,VerticesBuffer);
+					else D3D_Decal_Output(decalPtr, VerticesBuffer);
 					break;
 				}
 			}
 		}
 	}	
 	#if MIRRORING_ON
-	if (MirroringActive) RenderMirroredDecal(decalPtr);
+	if (MirroringActive) 
+		RenderMirroredDecal(decalPtr);
 	#endif
 }
 
@@ -4814,18 +4825,18 @@ void RenderMirroredDecal(DECAL *decalPtr)
 static void DecalPolygon_Construct(DECAL *decalPtr)
 {
 	DECAL_DESC *decalDescPtr = &DecalDescription[decalPtr->DecalID];
-	RenderPolygon.NumberOfVertices=4;
+	RenderPolygon.NumberOfVertices = 4;
 	
-	VerticesBuffer[0].U = decalDescPtr->StartU+decalPtr->UOffset;
+	VerticesBuffer[0].U = decalDescPtr->StartU + decalPtr->UOffset;
 	VerticesBuffer[0].V = decalDescPtr->StartV;
 
-	VerticesBuffer[1].U = decalDescPtr->EndU+decalPtr->UOffset;
+	VerticesBuffer[1].U = decalDescPtr->EndU + decalPtr->UOffset;
 	VerticesBuffer[1].V = decalDescPtr->StartV;
 
-	VerticesBuffer[2].U = decalDescPtr->EndU+decalPtr->UOffset;
+	VerticesBuffer[2].U = decalDescPtr->EndU + decalPtr->UOffset;
 	VerticesBuffer[2].V = decalDescPtr->EndV;
 
-	VerticesBuffer[3].U = decalDescPtr->StartU+decalPtr->UOffset;
+	VerticesBuffer[3].U = decalDescPtr->StartU + decalPtr->UOffset;
 	VerticesBuffer[3].V = decalDescPtr->EndV;
 }
 /*

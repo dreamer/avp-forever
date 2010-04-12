@@ -52,6 +52,8 @@ typedef struct D3DInfo
 	LPDIRECT3DVERTEXBUFFER9 lpD3DOrthoVertexBuffer;
 	LPDIRECT3DINDEXBUFFER9	lpD3DOrthoIndexBuffer;
 
+	LPDIRECT3DVERTEXBUFFER9 lpD3DPointSpriteVertexBuffer;
+
     int						NumDrivers;
     int						CurrentDriver;
     D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS];

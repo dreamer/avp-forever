@@ -473,9 +473,9 @@ static DECAL* AllocateDecal(void)
 	decalPtr = &DecalStorage[CurrentDecalIndex];
 
 	CurrentDecalIndex++;
-	if (CurrentDecalIndex>=LocalDetailLevels.MaximumAllowedNumberOfDecals)
+	if (CurrentDecalIndex >= LocalDetailLevels.MaximumAllowedNumberOfDecals)
 	{
-		CurrentDecalIndex=0;
+		CurrentDecalIndex = 0;
 	}
 
 	if (NumActiveDecals < LocalDetailLevels.MaximumAllowedNumberOfDecals) 
@@ -490,7 +490,6 @@ static DECAL* AllocateDecal(void)
 extern FIXED_DECAL* AllocateFixedDecal(void)
 {
 	FIXED_DECAL *decalPtr;
-
 
 	if (CurrentFixedDecalIndex>=MAX_NO_OF_FIXED_DECALS)
 	{
@@ -731,9 +730,10 @@ void RenderLaserTarget(THREE_LASER_DOT_DESC *laserTargetPtr)
 	extern MODULE * playerPherModule;
 	int i;
 
-	if(!playerPherModule) return;
+	if (!playerPherModule)
+		return;
 
-	i=2;
+	i = 2;
 	do
 	{
 		DECAL decal;
@@ -798,7 +798,7 @@ void HandleDecalSystem(void)
 		int i = NumActiveDecals;
 		DECAL *decalPtr = DecalStorage;
 	//	textprint("Decals Active: %d\n",i);
-		while(i--)
+		while (i--)
 		{
 			DECAL_DESC *decalDescPtr = &DecalDescription[decalPtr->DecalID];
 
@@ -811,11 +811,11 @@ void HandleDecalSystem(void)
 				{
 					decalPtr->CurrentSize = decalPtr->TargetSize;
 				}
-				for (i=0; i<4; i++)
+				for (i=0; i < 4; i++)
 				{
-					decalPtr->Vertices[i].vx = MUL_FIXED(decalPtr->Direction[i].vx,decalPtr->CurrentSize);
-					decalPtr->Vertices[i].vy = MUL_FIXED(decalPtr->Direction[i].vy,decalPtr->CurrentSize);
-					decalPtr->Vertices[i].vz = MUL_FIXED(decalPtr->Direction[i].vz,decalPtr->CurrentSize);
+					decalPtr->Vertices[i].vx = MUL_FIXED(decalPtr->Direction[i].vx, decalPtr->CurrentSize);
+					decalPtr->Vertices[i].vy = MUL_FIXED(decalPtr->Direction[i].vy, decalPtr->CurrentSize);
+					decalPtr->Vertices[i].vz = MUL_FIXED(decalPtr->Direction[i].vz, decalPtr->CurrentSize);
 					decalPtr->Vertices[i].vx += decalPtr->Centre.vx;
 					decalPtr->Vertices[i].vy += decalPtr->Centre.vy;
 					decalPtr->Vertices[i].vz += decalPtr->Centre.vz;
@@ -830,7 +830,7 @@ void HandleDecalSystem(void)
 		DECAL dummyDecal;
 		FIXED_DECAL *decalPtr = FixedDecalStorage;
 	//	textprint("Decals Active: %d\n",i);
-		while(i--)
+		while (i--)
 		{
 			dummyDecal.DecalID = decalPtr->DecalID;
 			dummyDecal.Vertices[0] = decalPtr->Vertices[0];
@@ -844,7 +844,7 @@ void HandleDecalSystem(void)
 			decalPtr++;;
 		}
 	}
-//	CubeOMatic();
+
 	if (AvP.PlayerType == I_Predator && PredatorLaserTarget.ShouldBeDrawn)
 	{
 		RenderLaserTarget(&PredatorLaserTarget);
@@ -854,7 +854,7 @@ void HandleDecalSystem(void)
 		extern int NumActiveBlocks;
 		extern DISPLAYBLOCK *ActiveBlockList[];
 		int numOfObjects = NumActiveBlocks;
-		while(numOfObjects)
+		while (numOfObjects)
 		{
 			DISPLAYBLOCK *objectPtr = ActiveBlockList[--numOfObjects];
 			STRATEGYBLOCK *sbPtr = objectPtr->ObStrategyBlock;
@@ -866,12 +866,12 @@ void HandleDecalSystem(void)
 					case (I_BehaviourNetGhost):
 				   	{
 					 	NETGHOSTDATABLOCK *ghostData = (NETGHOSTDATABLOCK *)sbPtr->SBdataptr;
-						GLOBALASSERT(AvP.Network!=I_No_Network);
+						GLOBALASSERT(AvP.Network != I_No_Network);
 						if (ghostData->type == I_BehaviourPredatorPlayer)
 						{
 							extern DPID AvPNetID;
 							int playerIndex = PlayerIdInPlayerList(ghostData->playerId);
-							if(playerIndex==NET_IDNOTINPLAYERLIST)
+							if (playerIndex == NET_IDNOTINPLAYERLIST)
 							{
 								continue;
 							}
@@ -884,11 +884,11 @@ void HandleDecalSystem(void)
 							if (AvPNetID==PredatorLaserSights[playerIndex].TargetID)
 							{
 								SECTION_DATA *plasma_muzzle;
-								plasma_muzzle=GetThisSectionData(ghostData->HModelController.section_data,"dum flash");
-								if (plasma_muzzle!=NULL)
+								plasma_muzzle = GetThisSectionData(ghostData->HModelController.section_data, "dum flash");
+								if (plasma_muzzle != NULL)
 								{
 									extern void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour);
-									RenderLightFlare(&plasma_muzzle->World_Offset,0xffff0000);
+									RenderLightFlare(&plasma_muzzle->World_Offset, 0xffff0000);
 								}
 							}
 							else
@@ -905,7 +905,7 @@ void HandleDecalSystem(void)
 						LOCALASSERT(statusPtr);
 //						RenderLightFlare(&(sbPtr->DynPtr->Position),0x7fffffff);
 //						textprint("predator?\n");
-						if(statusPtr->Pred_Laser_On)
+						if (statusPtr->Pred_Laser_On)
 						{
 							if (statusPtr->Pred_Laser_Sight.DotIsOnPlayer)
 							{

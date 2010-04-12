@@ -70,9 +70,6 @@ static uint32_t orthoVBOffset = 0;
 static uint32_t orthoIBOffset = 0;
 static uint32_t orthoListCount = 0;
 
-// for quad rendering
-D3DLVERTEX quadVert[4];
-
 struct RENDER_STATES
 {
 	int32_t		textureID;
@@ -467,9 +464,18 @@ BOOL SetExecuteBufferDefaults()
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
 
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF,			(DWORD)0.5);
+	float alphaRef = 0.5f;
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF,			*((DWORD*)&alphaRef));//(DWORD)0.5);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAFUNC,		D3DCMP_GREATER);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,	TRUE); 
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,	TRUE);
+
+	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSPRITEENABLE, TRUE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSCALEENABLE,  TRUE);
+
+	float pointSize = 1.0f;
+	float pointScale = 1.0f;
+	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSIZE,	*((DWORD*)&pointSize));
+	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSCALE_B, *((DWORD*)&pointScale));
 
 //	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 //	d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_MAGFILTER, D3DTEXF_POINT);
@@ -892,7 +898,7 @@ BOOL ExecuteBuffer()
 	memcpy(testIndex, mainIndex, NumIndicies * sizeof(WORD));
 
 #ifdef WIN32
-	Font_DrawText("blah", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
+//	Font_DrawText("blah", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
 #endif
 
 	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));
@@ -914,13 +920,13 @@ BOOL ExecuteBuffer()
 	}
 
 	D3DXMATRIX matProjection;
-	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(fov), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, /*1000000*/65536.0f);
+	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(fov), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
 
 	#ifndef USE_D3DVIEWTRANSFORM
 		D3DXMatrixIdentity(&viewMatrix); // we want to use the identity matrix in this case
 	#endif
 
-	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW, &viewMatrix);
+	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,		&viewMatrix);
 	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matProjection);
 
 	ChangeTextureAddressMode(TEXTURE_WRAP);
@@ -1005,6 +1011,26 @@ BOOL ExecuteBuffer()
 
 	D3DPERF_EndEvent();
 
+/*
+	// PS test
+	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DPointSpriteVertexBuffer, 0, sizeof(POINTSPRITEVERTEX));
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+
+	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_POINTSPRITEVERTEX);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+
+	LastError = d3d.lpD3DDevice->DrawPrimitive(D3DPT_POINTLIST, 0, 4);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+*/
 	// render any orthographic quads
 	if (orthoListCount)
 	{
@@ -1433,15 +1459,12 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 	if (!texoffset) 
 		texoffset = currentTextureID;
 
-	float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-	RecipW = (1.0f / width);// / 65536.0f;
-
-	float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-	RecipH = (1.0f / height);// / 65536.0f;
+	RecipW = 1.0f / (float) ImageHeaderArray[texoffset].ImageWidth;
+	RecipH = 1.0f / (float) ImageHeaderArray[texoffset].ImageHeight;
 
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, RenderPolygon.TranslucencyMode);
 
-	for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
+	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 /*
@@ -2083,11 +2106,8 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 	}
 	else
 	{
-		float width = (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
-		RecipW = 1.0f / width;
-
-		float height = (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
-		RecipH = 1.0f / height;
+		RecipW = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
+		RecipH = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
 
 		textureID = SpecialFXImageNumber;
 	}
@@ -3443,8 +3463,9 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 
 void ThisFramesRenderingHasBegun(void)
 {
-	if (BeginD3DScene()) { // calls a function to perform d3d_device->Begin();
-	LockExecuteBuffer(); // lock vertex buffer
+	if (BeginD3DScene()) // calls a function to perform d3d_device->Begin();
+	{		
+		LockExecuteBuffer(); // lock vertex buffer
 	}
 }
 
@@ -3629,235 +3650,6 @@ extern void D3D_DrawSlider(int x, int y, int alpha)
 	}
 }
 
-#if 0 // bjd - unused now
-extern void D3D_DrawRectangle(int x, int y, int w, int h, int alpha)
-{
-	struct VertexTag quadVertices[4];
-	int sliderHeight = 11;
-	unsigned int colour = alpha>>8;
-
-	if (colour>255) colour = 255;
-	colour = (colour<<24)+0xffffff;
-
-	quadVertices[0].Y = y;
-	quadVertices[1].Y = y;
-	quadVertices[2].Y = y + 6;
-	quadVertices[3].Y = y + 6;
-
-	/* top left corner */
-	{
-		int topLeftU = 1;
-		int topLeftV = 238;
-
-		quadVertices[0].U = topLeftU;
-		quadVertices[0].V = topLeftV;
-		quadVertices[1].U = topLeftU + 6;
-		quadVertices[1].V = topLeftV;
-		quadVertices[2].U = topLeftU + 6;
-		quadVertices[2].V = topLeftV + 6;
-		quadVertices[3].U = topLeftU;
-		quadVertices[3].V = topLeftV + 6;
-
-		quadVertices[0].X = x;
-		quadVertices[3].X = x;
-		quadVertices[1].X = x + 6;
-		quadVertices[2].X = x + 6;
-
-		D3D_HUDQuad_Output
-		(
-			AAFontImageNumber,
-			quadVertices,
-			colour
-		);
-	}
-	/* top */
-	{
-		int topLeftU = 9;
-		int topLeftV = 238;
-
-		quadVertices[0].U = topLeftU;
-		quadVertices[0].V = topLeftV;
-		quadVertices[1].U = topLeftU;
-		quadVertices[1].V = topLeftV;
-		quadVertices[2].U = topLeftU;
-		quadVertices[2].V = topLeftV + 6;
-		quadVertices[3].U = topLeftU;
-		quadVertices[3].V = topLeftV + 6;
-
-		quadVertices[0].X = x+6;
-		quadVertices[3].X = x+6;
-		quadVertices[1].X = x+6 + w-12;
-		quadVertices[2].X = x+6 + w-12;
-
-		D3D_HUDQuad_Output
-		(
-			AAFontImageNumber,
-			quadVertices,
-			colour
-		);
-	}
-	/* top right corner */
-	{
-		int topLeftU = 11;
-		int topLeftV = 238;
-
-		quadVertices[0].U = topLeftU;
-		quadVertices[0].V = topLeftV;
-		quadVertices[1].U = topLeftU + 6;
-		quadVertices[1].V = topLeftV;
-		quadVertices[2].U = topLeftU + 6;
-		quadVertices[2].V = topLeftV + 6;
-		quadVertices[3].U = topLeftU;
-		quadVertices[3].V = topLeftV + 6;
-
-		quadVertices[0].X = x + w - 6;
-		quadVertices[3].X = x + w - 6;
-		quadVertices[1].X = x + w;
-		quadVertices[2].X = x + w;
-
-		D3D_HUDQuad_Output
-		(
-			AAFontImageNumber,
-			quadVertices,
-			colour
-		);
-	}
-	quadVertices[0].Y = y + 6;
-	quadVertices[1].Y = y + 6;
-	quadVertices[2].Y = y + h - 6;
-	quadVertices[3].Y = y + h - 6;
-	/* right */
-	{
-		int topLeftU = 1;
-		int topLeftV = 246;
-
-		quadVertices[0].U = topLeftU;
-		quadVertices[0].V = topLeftV;
-		quadVertices[1].U = topLeftU + 6;
-		quadVertices[1].V = topLeftV;
-		quadVertices[2].U = topLeftU + 6;
-		quadVertices[2].V = topLeftV;
-		quadVertices[3].U = topLeftU;
-		quadVertices[3].V = topLeftV;
-
-		D3D_HUDQuad_Output
-		(
-			AAFontImageNumber,
-			quadVertices,
-			colour
-		);
-	}
-	/* left */
-	{
-		int topLeftU = 1;
-		int topLeftV = 246;
-
-		quadVertices[0].U = topLeftU;
-		quadVertices[0].V = topLeftV;
-		quadVertices[1].U = topLeftU + 6;
-		quadVertices[1].V = topLeftV;
-		quadVertices[2].U = topLeftU + 6;
-		quadVertices[2].V = topLeftV;
-		quadVertices[3].U = topLeftU;
-		quadVertices[3].V = topLeftV;
-
-		quadVertices[0].X = x;
-		quadVertices[3].X = x;
-		quadVertices[1].X = x + 6;
-		quadVertices[2].X = x + 6;
-
-		D3D_HUDQuad_Output
-		(
-			AAFontImageNumber,
-			quadVertices,
-			colour
-		);
-	}
-	quadVertices[0].Y = y + h - 6;
-	quadVertices[1].Y = y + h - 6;
-	quadVertices[2].Y = y + h;
-	quadVertices[3].Y = y + h;
-	/* bottom left corner */
-	{
-		int topLeftU = 1;
-		int topLeftV = 248;
-
-		quadVertices[0].U = topLeftU;
-		quadVertices[0].V = topLeftV;
-		quadVertices[1].U = topLeftU + 6;
-		quadVertices[1].V = topLeftV;
-		quadVertices[2].U = topLeftU + 6;
-		quadVertices[2].V = topLeftV + 6;
-		quadVertices[3].U = topLeftU;
-		quadVertices[3].V = topLeftV + 6;
-
-		quadVertices[0].X = x;
-		quadVertices[3].X = x;
-		quadVertices[1].X = x + 6;
-		quadVertices[2].X = x + 6;
-
-		D3D_HUDQuad_Output
-		(
-			AAFontImageNumber,
-			quadVertices,
-			colour
-		);
-	}
-	/* bottom */
-	{
-		int topLeftU = 9;
-		int topLeftV = 238;
-
-		quadVertices[0].U = topLeftU;
-		quadVertices[0].V = topLeftV;
-		quadVertices[1].U = topLeftU;
-		quadVertices[1].V = topLeftV;
-		quadVertices[2].U = topLeftU;
-		quadVertices[2].V = topLeftV + 6;
-		quadVertices[3].U = topLeftU;
-		quadVertices[3].V = topLeftV + 6;
-
-		quadVertices[0].X = x+6;
-		quadVertices[3].X = x+6;
-		quadVertices[1].X = x+6 + w-12;
-		quadVertices[2].X = x+6 + w-12;
-
-		D3D_HUDQuad_Output
-		(
-			AAFontImageNumber,
-			quadVertices,
-			colour
-		);
-	}
-	/* bottom right corner */
-	{
-		int topLeftU = 11;
-		int topLeftV = 248;
-
-		quadVertices[0].U = topLeftU;
-		quadVertices[0].V = topLeftV;
-		quadVertices[1].U = topLeftU + 6;
-		quadVertices[1].V = topLeftV;
-		quadVertices[2].U = topLeftU + 6;
-		quadVertices[2].V = topLeftV + 6;
-		quadVertices[3].U = topLeftU;
-		quadVertices[3].V = topLeftV + 6;
-
-		quadVertices[0].X = x + w - 6;
-		quadVertices[3].X = x + w - 6;
-		quadVertices[1].X = x + w;
-		quadVertices[2].X = x + w;
-
-		D3D_HUDQuad_Output
-		(
-			AAFontImageNumber,
-			quadVertices,
-			colour
-		);
-	}
-}
-#endif
-
 extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale)
 {
 	return;
@@ -3976,65 +3768,6 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
 	orthoVerts[orthoVBOffset].u = 0.0f;
 	orthoVerts[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
-
-#if 0
-	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_NORMAL);
-
-	// top left
-  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
-	mainVertex[vb].sz = 64.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = (t<<24)+colour;
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	// top right
-  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
-	mainVertex[vb].sz = 64.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = (t<<24)+colour;
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	// bottom right
-  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
-	mainVertex[vb].sz = 64.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = (t<<24)+colour;
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	// bottom left
-  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
-	mainVertex[vb].sz = 64.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = (t<<24)+colour;
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-//	test = (t<<24)+colour;
-//	sprintf(buf, "\n colour: %d", test);
-//	OutputDebugString(buf);
-
-	vb++;
-
-	OUTPUT_TRIANGLE(0,1,3, 4);
-	OUTPUT_TRIANGLE(1,2,3, 4);
-#endif
 }
 
 extern void D3D_PlayerOnFireOverlay(void)

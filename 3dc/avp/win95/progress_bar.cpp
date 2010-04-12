@@ -335,8 +335,11 @@ void Game_Has_Loaded(void)
 		LoadingBarFull = NULL;
 	}
 
-	SAFE_RELEASE(LoadingBarEmptyTexture);
-	SAFE_RELEASE(LoadingBarFullTexture);
+//	SAFE_RELEASE(LoadingBarEmptyTexture);
+//	SAFE_RELEASE(LoadingBarFullTexture);
+
+	Tex_Release(emptyTextureID);
+	Tex_Release(fullTextureID);
 }
 
 } // extern C
