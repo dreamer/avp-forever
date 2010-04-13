@@ -5208,15 +5208,26 @@ void DrawQuad(int x, int y, int width, int height, int textureID, int colour, en
 	int texturePOW2Width, texturePOW2Height;
 	
 	// if in menus (outside game)
-	if (mainMenu)
+	if (textureID >= texIDoffset)
 	{
-		texturePOW2Width = AvPMenuGfxStorage[textureID].newWidth;
-		texturePOW2Height = AvPMenuGfxStorage[textureID].newHeight;
+		Tex_Info texInfo;
+		Tex_GetInfo(textureID, &texInfo);
+
+		texturePOW2Width = texInfo.width;
+		texturePOW2Height = texInfo.height;
 	}
-	else
+	else 
 	{
-		texturePOW2Width = ImageHeaderArray[textureID].ImageWidth;
-		texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
+		if (mainMenu)
+		{
+			texturePOW2Width = AvPMenuGfxStorage[textureID].newWidth;
+			texturePOW2Height = AvPMenuGfxStorage[textureID].newHeight;
+		}
+		else
+		{
+			texturePOW2Width = ImageHeaderArray[textureID].ImageWidth;
+			texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
+		}
 	}
 
 	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP);

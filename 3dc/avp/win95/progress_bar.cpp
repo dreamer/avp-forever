@@ -50,16 +50,20 @@ RECT LoadingBarFull_SrcRect;
 
 D3DTEXTURE LoadingBarFullTexture;
 D3DTEXTURE LoadingBarEmptyTexture;
+D3DTEXTURE DemoBackgroundImage;
 
 uint32_t	fullTextureID = 0;
 uint32_t	emptyTextureID = 0;
+uint32_t	dbTextureID = 0;
+
+uint32_t	dbWidth, dbHeight;
 
 AVPTEXTURE *image = NULL;
 AVPTEXTURE *LoadingBarEmpty = NULL;
 AVPTEXTURE *LoadingBarFull = NULL;
 AVPTEXTURE *aa_font = NULL;
 
-int fullbarHeight, fullbarWidth, emptybarHeight, emptybarWidth;
+uint32_t fullbarHeight, fullbarWidth, emptybarHeight, emptybarWidth;
 
 void Start_Progress_Bar()
 {
@@ -136,6 +140,12 @@ void Start_Progress_Bar()
 		image = AwCreateTexture("sf", buffer, 0);
 	}
 
+	if (image) // background image on demo loading screen
+	{
+		DemoBackgroundImage = CreateD3DTexturePadded(image, &dbWidth, &dbHeight);
+		dbTextureID = Tex_AddTexture(DemoBackgroundImage, dbWidth, dbHeight);
+	}
+
 	// draw initial progress bar
 	LoadingBarEmpty_SrcRect.left = 0;
 	LoadingBarEmpty_SrcRect.right = 639;
@@ -158,6 +168,9 @@ void Start_Progress_Bar()
 		else
 		{
 			// user is using demo files, therefor no progress bar graphics? draw demo style..
+
+			// background image
+			DrawQuad(0, 0, dbWidth, dbHeight, dbTextureID, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
 			// white outline
 			DrawQuad(105, 413, 429, 46, -1, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
@@ -194,6 +207,9 @@ void Set_Progress_Bar_Position(int pos)
 
 		if (!LoadingBarEmpty) // if we're using demo assets, draw the demo style progress bar
 		{
+			// background image
+			DrawQuad(0, 0, dbWidth, dbHeight, dbTextureID, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
+
 			// white outline
 			DrawQuad(105, 413, 429, 46, -1, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
@@ -285,6 +301,9 @@ void Game_Has_Loaded(void)
 			}
 			else
 			{
+				// background image
+				DrawQuad(0, 0, dbWidth, dbHeight, dbTextureID, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
+
 				// white outline
 				DrawQuad(105, 413, 429, 46, -1, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
@@ -340,6 +359,7 @@ void Game_Has_Loaded(void)
 
 	Tex_Release(emptyTextureID);
 	Tex_Release(fullTextureID);
+	Tex_Release(dbTextureID);
 }
 
 } // extern C

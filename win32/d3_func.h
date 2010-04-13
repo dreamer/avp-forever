@@ -103,7 +103,7 @@ typedef struct
 } RENDERSTATES;
 
 D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL poolType);
-D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *realHeight);
+D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight);
 D3DTEXTURE CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
 BOOL ReleaseVolatileResources();
