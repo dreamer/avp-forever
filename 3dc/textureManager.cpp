@@ -67,9 +67,15 @@ void Tex_GetInfo(uint32_t textureID, Tex_Info *info)
 
 void Tex_Release(uint32_t textureID)
 {
-	// this is bad, temporary..
-	textureList[textureID - texIDoffset].texture->Release();
-	textureList[textureID - texIDoffset].texture = NULL;
+	if (textureID < texIDoffset) // bad value
+		return;
+
+	if (textureList.at(textureID - texIDoffset).texture)
+	{
+		// this is bad, temporary..
+		textureList[textureID - texIDoffset].texture->Release();
+		textureList[textureID - texIDoffset].texture = NULL;
+	}
 }
 
 void Tex_DeInit()
