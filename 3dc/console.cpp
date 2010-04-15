@@ -287,7 +287,7 @@ void Con_RemoveTypedChar()
 
 void Con_Draw()
 {
-	int charWidth = 0;
+	int charWidth = 12;
 
 	if (IOFOCUS_Get() & IOFOCUS_NEWCONSOLE)
 	{
@@ -331,8 +331,10 @@ void Con_Draw()
 		alpha = ONE_FIXED;
 
 	// draw input cusor
-	charWidth = RenderSmallChar('>', console.indent, console.height - CHAR_HEIGHT, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
-	RenderSmallChar('_', console.indent + charWidth, console.height - CHAR_HEIGHT, alpha, ONE_FIXED, ONE_FIXED, ONE_FIXED);
+	Font_DrawText(">", console.indent, console.height - CHAR_HEIGHT, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
+	Font_DrawText("_", console.indent + charWidth, console.height - CHAR_HEIGHT, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
+//	charWidth = RenderSmallChar('>', console.indent, console.height - CHAR_HEIGHT, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
+//	RenderSmallChar('_', console.indent + charWidth, console.height - CHAR_HEIGHT, alpha, ONE_FIXED, ONE_FIXED, ONE_FIXED);
 
 	size_t rows = console.text.size() - 1;
 
@@ -349,21 +351,28 @@ void Con_Draw()
 
 //		Font_DrawText(console.text[i].c_str(), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 
+		Font_DrawText(console.text.at(i), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
+/*
 		for (size_t j = 0; j < console.text[i].length(); j++)
 		{
-			charWidth = RenderSmallChar(console.text.at(i).at(j), console.indent + xOffset, y, ONE_FIXED, ONE_FIXED / 2, ONE_FIXED, ONE_FIXED);
+			//charWidth = RenderSmallChar(console.text.at(i).at(j), console.indent + xOffset, y, ONE_FIXED, ONE_FIXED / 2, ONE_FIXED, ONE_FIXED);
+			Font_DrawText(console.text.at(i).at(j), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 			//Font_DrawText(console.text.at(i).at(j), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 			xOffset += charWidth;
 		}
+*/
 	}
-
 	xOffset = CHAR_WIDTH;
 	charWidth = 0;
 
+	Font_DrawText(console.inputLine, console.indent + xOffset, console.height - CHAR_HEIGHT, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
+
 	// draw the line of text we're currently typing
+/*
 	for (size_t j = 0; j < console.inputLine.length(); j++)
 	{
 		charWidth = RenderSmallChar(console.inputLine.at(j), console.indent + xOffset, console.height - CHAR_HEIGHT, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
 		xOffset += charWidth;
 	}
+*/
 }

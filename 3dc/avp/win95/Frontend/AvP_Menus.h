@@ -124,7 +124,6 @@ enum AVPMENU_ID
 
 	AVPMENU_LOADGAME,
 	AVPMENU_SAVEGAME,
-
 };
 
 enum AVPMENU_FONT_ID
@@ -132,6 +131,7 @@ enum AVPMENU_FONT_ID
 	AVPMENU_FONT_SMALL,
 	AVPMENU_FONT_BIG,
 };
+
 /* menu elements */
 enum AVPMENU_ELEMENT_ID
 {
@@ -158,7 +158,7 @@ enum AVPMENU_ELEMENT_ID
 	AVPMENU_ELEMENT_DUMMYTEXTSLIDER,
 	AVPMENU_ELEMENT_SPECIES_TEXTSLIDER,
 	
-	AVPMENU_ELEMENT_TEXTSLIDER_POINTER, // text slider with a char** rather than a string index
+	AVPMENU_ELEMENT_TEXTSLIDER_POINTER,		 // text slider with a char** rather than a string index
 	AVPMENU_ELEMENT_DUMMYTEXTSLIDER_POINTER, // text slider with a char** rather than a string index
 				
 	AVPMENU_ELEMENT_CHEATMODE_TEXTSLIDER,
@@ -269,14 +269,12 @@ typedef struct
 	enum AVPMENU_ID		ParentMenu;
 	int					DefaultElement;
 
-
 } AVPMENU;
 
 
 typedef struct
 {
 	enum MENUSSTATE_ID	MenusState;
-
 	
 	enum AVPMENU_ID		CurrentMenu;
 	AVPMENU_ELEMENT		*MenuElements;
@@ -316,22 +314,16 @@ typedef struct
 #define MENU_WIDTH (MENU_RIGHTXEDGE-MENU_LEFTXEDGE)
 
 
-/*
-Defines for numbers of levels transferred to AvP_EnvInfo.h
--Richard.
-*/
-
-							 
-
 /* KJL 18:05:51 05/07/98 - multiplayer stuff */
 typedef struct
 {
 	char Name[40];
-	char levelIndex;//local level index
+	char levelIndex; //local level index
 	char hostAddress[16];
 	GUID Guid;
 	BOOL AllowedToJoin;
 } SESSION_DESC;
+
 #define MAX_NO_OF_SESSIONS 10
 extern SESSION_DESC SessionData[];
 extern int NumberOfSessionsFound;

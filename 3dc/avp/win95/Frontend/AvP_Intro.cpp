@@ -251,10 +251,10 @@ void Show_Presents(void)
 	}
 	#if ALLOW_SKIP_INTRO
 
-	while ((timeRemaining>0) && !GotAnyKey && bRunning);
+	while ((timeRemaining > 0) && !GotAnyKey && bRunning);
 
 	#else
-	while(timeRemaining>0);// && !GotAnyKey);
+	while (timeRemaining > 0 && bRunning);// && !GotAnyKey);
 	#endif
 }
 
@@ -276,20 +276,17 @@ void Show_ARebellionGame(void)
 			if (timeRemaining > 13*ONE_FIXED/2)
 			{
 //				DrawAvPMenuGfx(AVPMENUGFX_AREBELLIONGAME, MENU_CENTREX, y, 14*ONE_FIXED-timeRemaining*2,AVPMENUFORMAT_CENTREJUSTIFIED);
-				RenderMenuText(textPtr,MENU_CENTREX,y,14*ONE_FIXED-timeRemaining*2,AVPMENUFORMAT_CENTREJUSTIFIED);
-//				DrawGraphicWithAlphaChannel(&RebellionLogo,timeRemaining*2-13*ONE_FIXED);
+				RenderMenuText(textPtr, MENU_CENTREX, y, 14*ONE_FIXED-timeRemaining*2, AVPMENUFORMAT_CENTREJUSTIFIED);
  			}
 			else if (timeRemaining > 5*ONE_FIXED)
 			{
 //				DrawAvPMenuGfx(AVPMENUGFX_AREBELLIONGAME, MENU_CENTREX, y, ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
-				RenderMenuText(textPtr,MENU_CENTREX,y,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
-//				DrawGraphicWithAlphaChannel(&RebellionLogo,0);
+				RenderMenuText(textPtr, MENU_CENTREX, y, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
 			}
 			else if (timeRemaining > 3*ONE_FIXED)
 			{
 //				DrawAvPMenuGfx(AVPMENUGFX_AREBELLIONGAME, MENU_CENTREX, y, (timeRemaining-3*ONE_FIXED)/2,AVPMENUFORMAT_CENTREJUSTIFIED);
-				RenderMenuText(textPtr,MENU_CENTREX,y,(timeRemaining-3*ONE_FIXED)/2,AVPMENUFORMAT_CENTREJUSTIFIED);
-//				DrawGraphicWithAlphaChannel(&RebellionLogo, ONE_FIXED - (timeRemaining-3*ONE_FIXED)/2);
+				RenderMenuText(textPtr, MENU_CENTREX, y, (timeRemaining-3*ONE_FIXED)/2, AVPMENUFORMAT_CENTREJUSTIFIED);
 			}
 
 			ThisFramesRenderingHasFinished();

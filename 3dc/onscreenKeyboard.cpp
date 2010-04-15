@@ -24,6 +24,7 @@
 
 #include "onscreenKeyboard.h"
 #include "logString.h"
+#include "font2.h"
 #include "d3_func.h"
 #include "stdio.h"
 #include <string>
@@ -142,17 +143,7 @@ void Osk_Init()
 {
 	currentRow = 0;
 	currentColumn = 0;
-/*
-	// load the button textures
-	TextureResource newTexture;
-	newTexture.fileName = "images//a.png";
-	newTexture.texture = CheckAndLoadUserTexture(newTexture.fileName.c_str(), &newTexture.width, &newTexture.height);
-	oskTextures.push_back(newTexture);
 
-	newTexture.fileName = "images//b.png";
-	newTexture.texture = CheckAndLoadUserTexture(newTexture.fileName.c_str(), &newTexture.width, &newTexture.height);
-	oskTextures.push_back(newTexture);
-*/
 	// do top row of numbers
 	for (int i = 9; i >= 0; i--)
 	{
@@ -241,10 +232,11 @@ void Osk_Draw()
 				DrawQuad(pos_x, pos_y, keyVector.at(index).width, keyVector.at(index).height, -1, D3DCOLOR_ARGB(200, 255, 255, 255), TRANSLUCENCY_GLOWING);
 
 				if (Osk_GetCurrentLocation() == index) // draw the selected item differently (highlight it)
-					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, -1, D3DCOLOR_ARGB(220, 0, 128, 0), TRANSLUCENCY_GLOWING);
+					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, -1, D3DCOLOR_ARGB(220, 0, 128, 0), TRANSLUCENCY_OFF);
 				else
-					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, -1, D3DCOLOR_ARGB(220, 38, 80, 145), TRANSLUCENCY_GLOWING);
+					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, -1, D3DCOLOR_ARGB(220, 38, 80, 145), TRANSLUCENCY_OFF);
 
+/*
 				// now draw text, but figure out how wide the string is first.. do this once on init?
 				std::string tempString = Osk_GetKeyLabel(index);
 				const char *tempPtr = tempString.c_str();
@@ -255,11 +247,12 @@ void Osk_Draw()
 				{
 					labelWidth += AAFontWidths[(unsigned char)*tempPtr++];
 				}
+*/
+				int positionX = pos_x + ((keyVector.at(index).width - 16) / 2);
 
-				positionX = pos_x + ((keyVector.at(index).width - labelWidth) / 2);
-
-				RenderSmallMenuText((char*)Osk_GetKeyLabel(index).c_str(), pos_x + (keyVector.at(index).width / 2)/*(keyVector.at(index).width - outline_border_size * 2 / 2)*/, pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
-				RenderSmallMenuText((char*)tempString.c_str(), positionX, pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
+				Font_DrawText(Osk_GetKeyLabel(index), pos_x + (keyVector.at(index).width / 2), pos_y + space_between_keys, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
+				//RenderSmallMenuText((char*)Osk_GetKeyLabel(index).c_str(), pos_x + (keyVector.at(index).width / 2)/*(keyVector.at(index).width - outline_border_size * 2 / 2)*/, pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
+				//RenderSmallMenuText((char*)tempString.c_str(), positionX, pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
 				//RenderMenuText((char*)Osk_GetKeyLabel(index).c_str(), pos_x + (keyVector.at(index).width / 2), pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
 			}
 

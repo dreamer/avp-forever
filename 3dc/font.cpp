@@ -39,9 +39,9 @@ extern void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int h
 
 struct Font
 {
-	enum type;
-	int textureWidth;
-	int textureHeight;
+	enum		type;
+	uint32_t	textureWidth;
+	uint32_t	textureHeight;
 	uint32_t	textureID;
 	D3DXIMAGE_INFO imageInfo;
 	int fontWidths[256];
@@ -79,7 +79,7 @@ void Font_Init()
 	LastError = D3DXCreateTextureFromFileEx
 	(
 		d3d.lpD3DDevice, 
-		"aa_font_grid_test.png", 
+		"avp_font.tga", 
 		D3DX_DEFAULT,			// width
 		D3DX_DEFAULT,			// height
 		1,						// mip levels
@@ -99,7 +99,11 @@ void Font_Init()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return;
 	}
-	
+
+	Fonts[FONT_SMALL].blockWidth = Fonts[FONT_SMALL].imageInfo.Width / 16;
+	Fonts[FONT_SMALL].blockHeight = Fonts[FONT_SMALL].imageInfo.Height / 16;
+
+#if 0
 	// get the font widths
 	D3DLOCKED_RECT lock;
 	uint8_t *srcPtr = NULL;
@@ -166,7 +170,7 @@ void Font_Init()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return;
 	}
-
+#endif
 	Fonts[FONT_SMALL].textureID = Tex_AddTexture(texture, Fonts[FONT_SMALL].imageInfo.Width, Fonts[FONT_SMALL].imageInfo.Height);
 /*
 	char buf[100];
@@ -182,21 +186,24 @@ extern "C" {
 extern char AAFontWidths[256];
 }
 
-int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
+int Font_DrawText(const std::string &text, int x, int y, int colour, int fontType)
 {
-	return 0;
 
 	float RecipW = (1.0f / Fonts[FONT_SMALL].imageInfo.Width);
 	float RecipH = (1.0f / Fonts[FONT_SMALL].imageInfo.Height);
 
-	int sixtyThree = 32;
+	int sixtyThree = 16;
 
-	while (*text)
+	int i = 0;
+
+//	while (*text)
+	while (i < text.size())
 	{
-		char c = *text++;
+		char c = text[i];
 
 //		int charWidth = Fonts[FONT_SMALL].fontWidths[c];
-		int charWidth = AAFontWidths[c] * 2;
+//		int charWidth = AAFontWidths[c] * 2;
+		int charWidth = 16;
 
 		c = c - 32;
 
@@ -227,6 +234,8 @@ int Font_DrawText(const char* text, int x, int y, int colour, int fontType)
 		{
 			x += Fonts[FONT_SMALL].blockWidth;
 		}
+
+		i++;
 	}
 
 	return 0;

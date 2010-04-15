@@ -23,10 +23,7 @@ extern "C++"{
 #include "textureManager.h"
 
 #include "r2base.h"
-
-#ifdef WIN32
-extern int Font_DrawText(const char* text, int x, int y, int colour, int fontType);
-#endif
+#include "font2.h"
 
 // macros for Pix functions
 #define WIDEN2(x) L ## x
@@ -87,7 +84,7 @@ struct RENDER_STATES
 };
 
 RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
-std::vector<RENDER_STATES> renderTest(1000);
+std::vector<RENDER_STATES> renderTest;
 
 struct ORTHO_OBJECTS
 {
@@ -890,7 +887,6 @@ static void ChangeTexture(const int32_t textureID)
 
 BOOL ExecuteBuffer()
 {
-
 	// sort the list of render objects
 	std::sort(renderTest.begin(), renderTest.end());
 
@@ -898,7 +894,7 @@ BOOL ExecuteBuffer()
 	memcpy(testIndex, mainIndex, NumIndicies * sizeof(WORD));
 
 #ifdef WIN32
-//	Font_DrawText("blah", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
+//	Font_DrawText("blah this is my text test", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
 #endif
 
 	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));

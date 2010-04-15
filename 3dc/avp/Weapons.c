@@ -4679,8 +4679,8 @@ int GrenadeLauncherChangeAmmo(PLAYER_WEAPON_DATA *weaponPtr) {
 	
 }
 
-int SmartgunSecondaryFire(PLAYER_WEAPON_DATA *weaponPtr) {
-
+int SmartgunSecondaryFire(PLAYER_WEAPON_DATA *weaponPtr) 
+{
 	switch (SmartgunMode) {
 		case I_Track:
 			/* Language Localise */
@@ -4701,11 +4701,10 @@ int SmartgunSecondaryFire(PLAYER_WEAPON_DATA *weaponPtr) {
     weaponPtr->CurrentState = WEAPONSTATE_WAITING;
 
 	return(0);	
-
 }
 
-int PredDiscChangeMode(PLAYER_WEAPON_DATA *weaponPtr) {
-
+int PredDiscChangeMode(PLAYER_WEAPON_DATA *weaponPtr) 
+{
 	#if 0
 	switch (ThisDiscMode) {
 		case I_Seek_Track:

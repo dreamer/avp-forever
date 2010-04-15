@@ -25,6 +25,8 @@
 #ifndef _included_font2_h_
 #define _included_font2_h_
 
+#include <string>
+
 enum
 {
 	FONT_SMALL,
@@ -33,7 +35,7 @@ enum
 };
 
 void Font_Init();
-int Font_DrawText(const char* text, int x, int y, int colour, int fontType);
+int Font_DrawText(const std::string &text, int x, int y, int colour, int fontType);
 void Font_Release();
 
 #endif
