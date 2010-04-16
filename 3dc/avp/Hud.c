@@ -990,7 +990,7 @@ static void HandleMarineWeapon(void)
 	TEMPLATE_WEAPON_DATA *twPtr;
     
 	/* access the extra data hanging off the strategy block */
-	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
     GLOBALASSERT(playerStatusPtr);
     	
 	{
@@ -1012,19 +1012,18 @@ static void HandleMarineWeapon(void)
 	if ((twPtr->MuzzleFlashShapeName != NULL)
 	  &&(!twPtr->PrimaryIsMeleeWeapon)
 	  &&( (weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY) 
-	   	||( (weaponPtr->WeaponIDNumber==WEAPON_MARINE_PISTOL)&&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY) )
-	   	||( (weaponPtr->WeaponIDNumber==WEAPON_TWO_PISTOLS)&&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY) ) ) )
+	   	||( (weaponPtr->WeaponIDNumber == WEAPON_MARINE_PISTOL)&&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY) )
+	   	||( (weaponPtr->WeaponIDNumber == WEAPON_TWO_PISTOLS)&&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY) ) ) )
 		PositionPlayersWeaponMuzzleFlash();
-
 	{
 		if ((twPtr->MuzzleFlashShapeName != NULL)
 		  	   &&(!twPtr->PrimaryIsMeleeWeapon)
 		  	   &&((weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY) 
-		  	   	||((weaponPtr->WeaponIDNumber==WEAPON_MARINE_PISTOL)&&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY))
-		  	   	||((weaponPtr->WeaponIDNumber==WEAPON_TWO_PISTOLS)&&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY) )))
+		  	   	||((weaponPtr->WeaponIDNumber == WEAPON_MARINE_PISTOL)&&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY))
+		  	   	||((weaponPtr->WeaponIDNumber == WEAPON_TWO_PISTOLS)&&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY) )))
 		{
 			static int onThisFrame=1;
-			if(onThisFrame || !twPtr->PrimaryIsRapidFire)
+			if (onThisFrame || !twPtr->PrimaryIsRapidFire)
 			{
 				VECTORCH direction;
 
@@ -1032,41 +1031,22 @@ static void HandleMarineWeapon(void)
 				direction.vy = PlayersWeaponMuzzleFlash.ObMat.mat32;
 				direction.vz = PlayersWeaponMuzzleFlash.ObMat.mat33;
 				
-				if (weaponPtr->WeaponIDNumber==WEAPON_SMARTGUN)
+				if (weaponPtr->WeaponIDNumber == WEAPON_SMARTGUN)
 				{
-					DrawMuzzleFlash(&PlayersWeaponMuzzleFlash.ObWorld,&direction,MUZZLE_FLASH_SMARTGUN);
+					DrawMuzzleFlash(&PlayersWeaponMuzzleFlash.ObWorld, &direction, MUZZLE_FLASH_SMARTGUN);
 				}
-				else if (weaponPtr->WeaponIDNumber==WEAPON_FRISBEE_LAUNCHER)
+				else if (weaponPtr->WeaponIDNumber == WEAPON_FRISBEE_LAUNCHER)
 				{
-					DrawMuzzleFlash(&PlayersWeaponMuzzleFlash.ObWorld,&direction,MUZZLE_FLASH_SKEETER);
+					DrawMuzzleFlash(&PlayersWeaponMuzzleFlash.ObWorld, &direction, MUZZLE_FLASH_SKEETER);
 				}
 				else
 				{
-					DrawMuzzleFlash(&PlayersWeaponMuzzleFlash.ObWorld,&direction,MUZZLE_FLASH_AMORPHOUS);
-					#if 0
-					{
-						int i = 5;
-						VECTORCH velocity = direction;
-						velocity.vx >>= 9;
-						velocity.vy >>= 9;
-						velocity.vz >>= 9;
-						do
-						{
-							VECTORCH position = PlayersWeaponMuzzleFlash.ObWorld;
-							position.vx += (FastRandom()&15)-8;
-							position.vy += (FastRandom()&15)-8;
-							position.vz += (FastRandom()&15)-8;
-							MakeParticle(&position,&velocity,PARTICLE_GUNMUZZLE_SMOKE);
-						}
-						while(--i);
-					}
-					#endif
+					DrawMuzzleFlash(&PlayersWeaponMuzzleFlash.ObWorld, &direction, MUZZLE_FLASH_AMORPHOUS);
 				}
 			}
 			onThisFrame=!onThisFrame;
 		//	RenderThisDisplayblock(&PlayersWeaponMuzzleFlash);
 		}
-		
 	}
 
 	/* handle smart targeting */

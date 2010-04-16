@@ -2203,15 +2203,10 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
 	int texoffset = SpecialFXImageNumber;
 
-	float RecipW, RecipH;
+	float RecipW = 1.0f / (float) ImageHeaderArray[texoffset].ImageWidth;
+	float RecipH = 1.0f / (float) ImageHeaderArray[texoffset].ImageHeight;
 
-	float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-	RecipW = (1.0f / width);
-
-	float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-	RecipH = (1.0f / height);
-
-	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, particleDescPtr->TranslucencyType);
+	CheckVertexBuffer(RenderPolygon.NumberOfVertices, /*texoffset*/NO_TEXTURE, particleDescPtr->TranslucencyType);
 /*
 	char buf[100];
 	sprintf(buf, "trans type: %d\n", particleDescPtr->TranslucencyType);
@@ -2294,7 +2289,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 */
 				mainVertex[vb].sx = (float)vertices->X;
 				mainVertex[vb].sy = (float)-vertices->Y;
-				mainVertex[vb].sz = zvalue;//(float)vertices->Z;
+				mainVertex[vb].sz = (float)vertices->Z;
 
 				mainVertex[vb].color = colour;
 	 			mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);

@@ -2124,11 +2124,11 @@ static void ActUponUsersInput(void)
 			// KJL 10:09:35 09/02/00 - when the user has entered their name,
 			// move down to the next option. If the user enters a null
 			// string, replace it with a placeholder name		
-			if((AvPMenus.CurrentMenu == AVPMENU_USERPROFILEENTERNAME)
+			if ((AvPMenus.CurrentMenu == AVPMENU_USERPROFILEENTERNAME)
  			 ||(AvPMenus.CurrentMenu == AVPMENU_MULTIPLAYER_SKIRMISH)
  			 ||(AvPMenus.CurrentMenu == AVPMENU_MULTIPLAYER))
 			{
-				if(AvPMenus.PositionInTextField==0)
+				if (AvPMenus.PositionInTextField == 0)
 				{
 					strcpy(elementPtr->TextPtr,"DeadMeat");
 				}
@@ -2142,13 +2142,13 @@ static void ActUponUsersInput(void)
 				elementPtr->TextPtr[--AvPMenus.PositionInTextField] = 0;
 			}
 		}
-		else if(BackspaceTimer>ONE_FIXED/2)
+		else if (BackspaceTimer>ONE_FIXED/2)
 		{
 			//check for backspace being held down for a long time
-			while(BackspaceTimer>ONE_FIXED/2)
+			while (BackspaceTimer > ONE_FIXED/2)
 			{
-				BackspaceTimer-=ONE_FIXED/20;
-				if (AvPMenus.PositionInTextField>0)
+				BackspaceTimer -= ONE_FIXED/20;
+				if (AvPMenus.PositionInTextField > 0)
 				{
 					elementPtr->TextPtr[--AvPMenus.PositionInTextField] = 0;
 				}
@@ -2157,22 +2157,22 @@ static void ActUponUsersInput(void)
 		else
 		{
 			//allow Ctrl+V to paste from the clipboard (really just for pasting in ip addresses)
-			if((KeyboardInput[KEY_LEFTCTRL] || KeyboardInput[KEY_RIGHTCTRL]) && KeyboardInput[KEY_V])
+			if ((KeyboardInput[KEY_LEFTCTRL] || KeyboardInput[KEY_RIGHTCTRL]) && KeyboardInput[KEY_V])
 			{
-				PasteFromClipboard(elementPtr->TextPtr,elementPtr->MaxTextLength);
+				PasteFromClipboard(elementPtr->TextPtr, elementPtr->MaxTextLength);
 				AvPMenus.PositionInTextField = strlen(elementPtr->TextPtr);
 			}
-			else if (AvPMenus.PositionInTextField<elementPtr->MaxTextLength)
+			else if (AvPMenus.PositionInTextField < elementPtr->MaxTextLength)
 			{
-				char c=0;
+				char c = 0;
 				KeyboardEntryQueue_StartProcessing();
 				
-				while(c=KeyboardEntryQueue_ProcessCharacter())
+				while (c = KeyboardEntryQueue_ProcessCharacter())
 				{
-					if (AvPMenus.PositionInTextField<elementPtr->MaxTextLength)
+					if (AvPMenus.PositionInTextField < elementPtr->MaxTextLength)
 					{
 						//see if there is room for this character
-						if(AvPMenus.FontToUse==AVPMENU_FONT_BIG && elementPtr->ElementID !=AVPMENU_ELEMENT_TEXTFIELD_SMALLWRAPPED)
+						if (AvPMenus.FontToUse == AVPMENU_FONT_BIG && elementPtr->ElementID != AVPMENU_ELEMENT_TEXTFIELD_SMALLWRAPPED)
 						{
 							//using large font
 							//allocate 32 pixels for each new character for the moment
@@ -2197,9 +2197,8 @@ static void ActUponUsersInput(void)
 					}
 				}
 			}
-		
+
 			KeyboardEntryQueue_Clear();
-			
 		}
 	}
 	else if (AvPMenus.UserEnteringNumber)

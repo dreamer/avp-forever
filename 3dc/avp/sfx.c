@@ -111,7 +111,6 @@ void DrawSfxObject(DISPLAYBLOCK *dispPtr)
 	
 	sfxPtr = dispPtr->SfxPtr;
 	GLOBALASSERT(sfxPtr);
-	
 
 	switch(sfxPtr->SfxID)
 	{
@@ -124,7 +123,7 @@ void DrawSfxObject(DISPLAYBLOCK *dispPtr)
 				direction.vx = dispPtr->ObMat.mat31;
 				direction.vy = dispPtr->ObMat.mat32;
 				direction.vz = dispPtr->ObMat.mat33;
-				DrawMuzzleFlash(&dispPtr->ObWorld,&direction,MUZZLE_FLASH_AMORPHOUS);
+				DrawMuzzleFlash(&dispPtr->ObWorld, &direction, MUZZLE_FLASH_AMORPHOUS);
 			}
 			sfxPtr->EffectDrawnLastFrame=!sfxPtr->EffectDrawnLastFrame;
 

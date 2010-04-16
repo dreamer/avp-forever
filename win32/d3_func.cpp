@@ -685,6 +685,39 @@ D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t
 	return destTexture;
 }
 
+D3DTEXTURE CreateD3DTextureFromFile(const char* fileName, Tex_Info &texInfo)
+{
+	D3DTEXTURE destTexture = NULL;
+	D3DXIMAGE_INFO imageInfo;
+
+	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice, 
+		fileName, 
+		D3DX_DEFAULT,			// width
+		D3DX_DEFAULT,			// height
+		1,						// mip levels
+		0,						// usage	
+		D3DFMT_UNKNOWN,			// format
+		D3DPOOL_MANAGED,
+		D3DX_FILTER_NONE,
+		D3DX_FILTER_NONE,
+		0,
+		&imageInfo,
+		NULL,
+		&destTexture
+		);	
+
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return NULL;
+	}
+
+	texInfo.width = imageInfo.Width;
+	texInfo.height = imageInfo.Height;
+
+	return destTexture;
+}
+
 D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL poolType) 
 {
 	D3DTEXTURE destTexture = NULL;

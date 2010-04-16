@@ -3914,7 +3914,7 @@ void CheckForObjectsInWater(int minX, int maxX, int minZ, int maxZ, int averageY
 	}
 }
 
-void DrawMuzzleFlash(VECTORCH *positionPtr,VECTORCH *directionPtr, enum MUZZLE_FLASH_ID muzzleFlashID)
+void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_FLASH_ID muzzleFlashID)
 {
 	PARTICLE particle;
 	particle.Position = *positionPtr;
@@ -3925,19 +3925,6 @@ void DrawMuzzleFlash(VECTORCH *positionPtr,VECTORCH *directionPtr, enum MUZZLE_F
 	{
 		case MUZZLE_FLASH_SMARTGUN:
 		{
-			#if 0
-			PARTICLE_DESC *particleDescPtr;
-			particle.ParticleID=PARTICLE_SMARTGUNMUZZLEFLASH;
-			particleDescPtr = &ParticleDescription[particle.ParticleID];
-
-			particle.Colour = RGBALIGHT_MAKE(particleDescPtr->RedScale[CurrentVisionMode],particleDescPtr->GreenScale[CurrentVisionMode],particleDescPtr->BlueScale[CurrentVisionMode],particleDescPtr->Alpha);
-			particle.Size = particleDescPtr->Size;
-
-			particle.Position.vx += MUL_FIXED(100,directionPtr->vx);
-			particle.Position.vy += MUL_FIXED(100,directionPtr->vy);
-			particle.Position.vz += MUL_FIXED(100,directionPtr->vz);
-			RenderParticle(&particle);
-			#else
 			PARTICLE_DESC *particleDescPtr=&ParticleDescription[PARTICLE_MUZZLEFLASH];
 			MATRIXCH muzzleMatrix;
 			MATRIXCH rotmat;
@@ -3956,7 +3943,6 @@ void DrawMuzzleFlash(VECTORCH *positionPtr,VECTORCH *directionPtr, enum MUZZLE_F
 		 	  	rotmat.mat32 = 0;	  	
 		 	  	rotmat.mat33 = 65536;	  	
 			}
-			#if 1
 			{
 				int i = 16;
 				PARTICLE particle;
@@ -3966,7 +3952,7 @@ void DrawMuzzleFlash(VECTORCH *positionPtr,VECTORCH *directionPtr, enum MUZZLE_F
 				particle.Position.vy += MUL_FIXED(100 - (FastRandom()&15),directionPtr->vy);
 				particle.Position.vz += MUL_FIXED(100 - (FastRandom()&15),directionPtr->vz);
 
-				particle.ParticleID=PARTICLE_MUZZLEFLASH;
+				particle.ParticleID = PARTICLE_MUZZLEFLASH;
 
 				particle.Colour = RGBALIGHT_MAKE(particleDescPtr->RedScale[CurrentVisionMode],particleDescPtr->GreenScale[CurrentVisionMode],particleDescPtr->BlueScale[CurrentVisionMode],particleDescPtr->Alpha);
 				particle.Size = 200;
@@ -3981,7 +3967,6 @@ void DrawMuzzleFlash(VECTORCH *positionPtr,VECTORCH *directionPtr, enum MUZZLE_F
 				}
 
 			}
-			#endif
 			{
 				int a;
 				for (a=0; a<12;a++)
@@ -4013,39 +3998,37 @@ void DrawMuzzleFlash(VECTORCH *positionPtr,VECTORCH *directionPtr, enum MUZZLE_F
 					MatrixMultiply(&muzzleMatrix,&rotmat,&muzzleMatrix);
 				}
 			}
-			#endif
 			break;
 		}
-		case MUZZLE_FLASH_AMORPHOUS:
+		case MUZZLE_FLASH_AMORPHOUS: // include pulse rifle muzzle flash
 		{
 			PARTICLE_DESC *particleDescPtr;
-			particle.ParticleID=PARTICLE_MUZZLEFLASH;
+			particle.ParticleID = PARTICLE_MUZZLEFLASH;
 			particleDescPtr = &ParticleDescription[particle.ParticleID];
 
 			particle.Colour = RGBALIGHT_MAKE(particleDescPtr->RedScale[CurrentVisionMode],particleDescPtr->GreenScale[CurrentVisionMode],particleDescPtr->BlueScale[CurrentVisionMode],particleDescPtr->Alpha);
 			particle.Size = particleDescPtr->Size;
 		
 			RenderParticle(&particle);
-			particle.Position.vx += MUL_FIXED(100,directionPtr->vx);
-			particle.Position.vy += MUL_FIXED(100,directionPtr->vy);
-			particle.Position.vz += MUL_FIXED(100,directionPtr->vz);
+			particle.Position.vx += MUL_FIXED(100, directionPtr->vx);
+			particle.Position.vy += MUL_FIXED(100, directionPtr->vy);
+			particle.Position.vz += MUL_FIXED(100, directionPtr->vz);
 			RenderParticle(&particle);
-			particle.Position.vx += MUL_FIXED(100,directionPtr->vx);
-			particle.Position.vy += MUL_FIXED(100,directionPtr->vy);
-			particle.Position.vz += MUL_FIXED(100,directionPtr->vz);
+			particle.Position.vx += MUL_FIXED(100, directionPtr->vx);
+			particle.Position.vy += MUL_FIXED(100, directionPtr->vy);
+			particle.Position.vz += MUL_FIXED(100, directionPtr->vz);
 			RenderParticle(&particle);
 			{
 				int i = 16;
 				particle.Size = 20;
 
-				while(i--)
+				while (i--)
 				{
 					RenderParticle(&particle);
-					particle.Position.vx = positionPtr->vx + MUL_FIXED(100,directionPtr->vx) + (FastRandom()&127)-64;
-					particle.Position.vy = positionPtr->vy + MUL_FIXED(100,directionPtr->vy) + (FastRandom()&127)-64;
-					particle.Position.vz = positionPtr->vz + MUL_FIXED(100,directionPtr->vz) + (FastRandom()&127)-64;
+					particle.Position.vx = positionPtr->vx + MUL_FIXED(100, directionPtr->vx) + (FastRandom()&127)-64;
+					particle.Position.vy = positionPtr->vy + MUL_FIXED(100, directionPtr->vy) + (FastRandom()&127)-64;
+					particle.Position.vz = positionPtr->vz + MUL_FIXED(100, directionPtr->vz) + (FastRandom()&127)-64;
 				}																								 
-
 			}
 			break;
 		}
@@ -4099,12 +4082,12 @@ void DrawFrisbeePlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr)
 
 	particle.Position = *positionPtr;
 
-	particle.ParticleID=PARTICLE_MUZZLEFLASH;
+	particle.ParticleID = PARTICLE_MUZZLEFLASH;
 
 	particle.Colour = RGBALIGHT_MAKE(255,255,255,255);
 	particle.Size = 200;
 
-	while(i--)
+	while (i--)
 	{
 		RenderParticle(&particle);
 		particle.Position.vx -= MUL_FIXED(50,directionPtr->vx);
@@ -4112,7 +4095,6 @@ void DrawFrisbeePlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr)
 		particle.Position.vz -= MUL_FIXED(50,directionPtr->vz);
 		particle.Size -= 10;
 	}
-
 }
 
 void DrawPredatorPlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr)
@@ -4122,44 +4104,23 @@ void DrawPredatorPlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr)
 
 	particle.Position = *positionPtr;
 
-	particle.ParticleID=PARTICLE_MUZZLEFLASH;
+	particle.ParticleID = PARTICLE_MUZZLEFLASH;
 
-	particle.Colour = RGBALIGHT_MAKE(50,255,255,255);
+	particle.Colour = RGBALIGHT_MAKE(50, 255, 255, 255);
 	particle.Size = 200;
 
-	while(i--)
+	while (i--)
 	{
 		RenderParticle(&particle);
-		particle.Position.vx -= MUL_FIXED(50,directionPtr->vx);
-		particle.Position.vy -= MUL_FIXED(50,directionPtr->vy);
-		particle.Position.vz -= MUL_FIXED(50,directionPtr->vz);
+		particle.Position.vx -= MUL_FIXED(50, directionPtr->vx);
+		particle.Position.vy -= MUL_FIXED(50, directionPtr->vy);
+		particle.Position.vz -= MUL_FIXED(50, directionPtr->vz);
 		particle.Size -= 10;
 	}
-
 }
 
 void DrawSmallPredatorPlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr)
 {
-	#if 0
-	int i = 16;
-	PARTICLE particle;
-
-	particle.Position = *positionPtr;
-
-	particle.ParticleID=PARTICLE_MUZZLEFLASH;
-
-	particle.Colour = RGBALIGHT_MAKE(50,255,255,255);
-	particle.Size = 100;
-
-	while(i--)
-	{
-		RenderParticle(&particle);
-		particle.Position.vx -= MUL_FIXED(25,directionPtr->vx);
-		particle.Position.vy -= MUL_FIXED(25,directionPtr->vy);
-		particle.Position.vz -= MUL_FIXED(25,directionPtr->vz);
-		particle.Size -= 5;
-	}
-	#else
 	PARTICLE particle;
 
 	particle.Position = *positionPtr;
@@ -4175,9 +4136,6 @@ void DrawSmallPredatorPlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr)
 	particle.Size = 1000;
 	RenderParticle(&particle);
 	RenderParticle(&particle);
-
-	#endif
-
 }
 
 

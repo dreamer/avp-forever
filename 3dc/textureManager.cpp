@@ -24,7 +24,10 @@
 
 #include "textureManager.h"
 #include <vector>
-#include <string>
+
+extern "C" {
+extern LPDIRECT3DTEXTURE9 CreateD3DTextureFromFile(const char* fileName, Tex_Info &texInfo);
+}
 
 struct Texture
 {
@@ -38,10 +41,24 @@ struct Texture
 
 std::vector<Texture> textureList;
 
+static uint32_t Tex_GetFreeID()
+{
+	for (uint32_t i = 0; i < textureList.size(); i++)
+	{
+		if (textureList[i].texture == NULL)
+		{
+			return texIDoffset + i; // this slot has no texture, return the ID so we can reuse it
+		}
+	}
+
+	// no free slots in the vector, we'll be adding to the end
+	return texIDoffset + textureList.size();
+}
+
 uint32_t Tex_AddTexture(LPDIRECT3DTEXTURE9 texture, uint32_t width, uint32_t height)
 {
 	// get the next available ID
-	uint32_t textureID = (uint32_t)textureList.size();
+	uint32_t textureID = Tex_GetFreeID();
 
 	Texture newTexture;
 	newTexture.texture = texture;
@@ -49,9 +66,46 @@ uint32_t Tex_AddTexture(LPDIRECT3DTEXTURE9 texture, uint32_t width, uint32_t hei
 	newTexture.height = height;
 
 	// store it
-	textureList.push_back(newTexture);
-	
-	return textureID + texIDoffset;
+	if ((textureID - texIDoffset) < textureList.size()) // we're reusing a slot in this case
+	{
+		textureList[textureID - texIDoffset] = newTexture; // replace in the old unused slot
+	}
+	else // adding on to the end
+	{
+		textureList.push_back(newTexture);
+	}
+
+	char buf[100];
+	sprintf(buf, "added tex at ID: %d\n", textureID);
+	OutputDebugString(buf);
+
+	return textureID;
+}
+
+uint32_t Tex_LoadFromFile(const std::string &fileName)
+{
+	// get the next available ID
+	uint32_t textureID = Tex_GetFreeID();
+
+	Texture		newTexture;
+	Tex_Info	texInfo;
+
+	newTexture.texture = CreateD3DTextureFromFile(fileName.c_str(), texInfo);
+
+	newTexture.width = texInfo.width;
+	newTexture.height = texInfo.height;
+
+	// store it
+	if ((textureID - texIDoffset) < textureList.size()) // we're reusing a slot in this case
+	{
+		textureList[textureID - texIDoffset] = newTexture; // replace in the old unused slot
+	}
+	else // adding on to the end
+	{
+		textureList.push_back(newTexture);
+	}
+
+	return textureID;
 }
 
 LPDIRECT3DTEXTURE9 Tex_GetTexture(uint32_t textureID)
@@ -76,6 +130,10 @@ void Tex_Release(uint32_t textureID)
 		textureList[textureID - texIDoffset].texture->Release();
 		textureList[textureID - texIDoffset].texture = NULL;
 	}
+
+	char buf[100];
+	sprintf(buf, "released tex at ID: %d\n", textureID);
+	OutputDebugString(buf);
 }
 
 void Tex_DeInit()

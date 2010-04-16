@@ -2930,7 +2930,6 @@ void PositionPlayersWeapon(void)
 	}
 	/* It ignores all the things that are pipeline specific, like the return *
 	 * condition of the fire function, and won't work for melee weapons. */
-
 }
 
 void PositionPlayersWeaponMuzzleFlash(void)
@@ -2938,21 +2937,21 @@ void PositionPlayersWeaponMuzzleFlash(void)
 	int size = 65536*3/4 - (FastRandom()&16383);
 	int length = size;
 
-	if (PWMFSDP) {
+	if (PWMFSDP) 
+	{
 //		textprint("Hierarchical Muzzle Flash.\n");
-	
-		PlayersWeaponMuzzleFlash.ObWorld=PWMFSDP->World_Offset;
-		PlayersWeaponMuzzleFlash.ObMat=PWMFSDP->SecMat;
-		return;
 
+		PlayersWeaponMuzzleFlash.ObWorld = PWMFSDP->World_Offset;
+		PlayersWeaponMuzzleFlash.ObMat = PWMFSDP->SecMat;
+		return;
 	}
 
 	{
 
 		PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 		PLAYER_WEAPON_DATA *weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
-		if (weaponPtr->WeaponIDNumber==WEAPON_SMARTGUN) length*=2;
-	
+		if (weaponPtr->WeaponIDNumber == WEAPON_SMARTGUN) 
+			length*=2;
 	}
 
 	{
@@ -3232,10 +3231,10 @@ void GetHierarchicalWeapon(char *riffname, char *hierarchyname, int sequence_typ
 	PlayersWeapon.HModelControlBlock->Playing=1;
 	PlayersWeapon.HModelControlBlock->Looped=1;
 
-	PWMFSDP=GetThisSectionData(PlayersWeaponHModelController.section_data,"dum flash");
-	if (PWMFSDP==NULL) 
+	PWMFSDP = GetThisSectionData(PlayersWeaponHModelController.section_data,"dum flash");
+	if (PWMFSDP == NULL) 
 	{
-		PWMFSDP=GetThisSectionData(PlayersWeaponHModelController.section_data,"Dum flash");
+		PWMFSDP = GetThisSectionData(PlayersWeaponHModelController.section_data,"Dum flash");
 		/* ?&$(*"*&^ pred pistol!!! */
 		if (PWMFSDP==NULL) 
 		{

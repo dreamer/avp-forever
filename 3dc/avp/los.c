@@ -486,13 +486,11 @@ void CheckForRayIntersectionWithObject(DISPLAYBLOCK *dPtr)
 	viewVectorAlpha.vy -= position.vy;
 	viewVectorAlpha.vz -= position.vz;
 	
-	#if 1
 	if (dPtr!=Player)
 	{
 		if (MagnitudeOfCrossProduct(&viewVectorAlpha,&viewVectorBeta)>dPtr->ObShapeData->shaperadius)
 			return;
 	}
-	#endif
 
 	/* if we're not dealing with a module, it's probably rotated */
 	if(!dPtr->ObMyModule&&dPtr!=Player)
@@ -531,8 +529,8 @@ void CheckForRayIntersectionWithObject(DISPLAYBLOCK *dPtr)
 		/* scanning through polys */
 		AccessNextPolygon();
 		
-		if( (PolyheaderPtr->PolyFlags & iflag_notvis) && !(PolyheaderPtr->PolyFlags & iflag_mirror)) continue;
-
+		if ((PolyheaderPtr->PolyFlags & iflag_notvis) && !(PolyheaderPtr->PolyFlags & iflag_mirror)) 
+			continue;
 
 		{
 			int normDotBeta;
@@ -547,7 +545,7 @@ void CheckForRayIntersectionWithObject(DISPLAYBLOCK *dPtr)
 				//if((PolyheaderPtr->PolyFlags) & iflag_no_bfc)
 				/* KJL 16:06:11 10/07/98 - treat all polys as no bfc */
 				{
-					if (normDotBeta>0)
+					if (normDotBeta > 0)
 					{
 						normDotBeta=-normDotBeta;
 						polyNormal.vx = -polyNormal.vx;

@@ -2176,7 +2176,7 @@ static void InitialisePPPlasmaBoltBehaviour(void)
 	
 	/* calculate the position */
 		
-	position=PWMFSDP->World_Offset;
+	position = PWMFSDP->World_Offset;
 
 	#if NEAR_WEAPON_FUDGE
 	{
@@ -2311,7 +2311,7 @@ static void InitialiseSpeargunBoltBehaviour(void)
 
 	GLOBALASSERT(PWMFSDP);
 
-	position=PWMFSDP->World_Offset;
+	position = PWMFSDP->World_Offset;
 
 	/* make displayblock with correct shape, etc */
 	dispPtr = MakeObject(I_BehaviourSpeargunBolt,&position);
@@ -2338,7 +2338,7 @@ static void InitialiseSpeargunBoltBehaviour(void)
 	dispPtr->ObStrategyBlock->DynPtr = dynPtr;
 
 	/* give missile a maximum lifetime */
-	dispPtr->ObStrategyBlock->SBdataptr=AllocateMem(sizeof(SPEAR_BEHAV_BLOCK));
+	dispPtr->ObStrategyBlock->SBdataptr = AllocateMem(sizeof(SPEAR_BEHAV_BLOCK));
 	
 	if (dispPtr->ObStrategyBlock->SBdataptr == 0) 
 	{

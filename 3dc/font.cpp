@@ -67,7 +67,7 @@ void Font_Release()
 
 void Font_Init()
 {
-	D3DTEXTURE texture;
+//	D3DTEXTURE texture;
 /*
 	// load the small font texture
 	if (Fonts[FONT_SMALL].texture)
@@ -76,6 +76,8 @@ void Font_Init()
 		Fonts[FONT_SMALL].texture = NULL;
 	}
 */
+
+/*
 	LastError = D3DXCreateTextureFromFileEx
 	(
 		d3d.lpD3DDevice, 
@@ -99,6 +101,8 @@ void Font_Init()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return;
 	}
+*/
+	Fonts[FONT_SMALL].textureID = Tex_LoadFromFile("avp_font.tga");
 
 	Fonts[FONT_SMALL].blockWidth = Fonts[FONT_SMALL].imageInfo.Width / 16;
 	Fonts[FONT_SMALL].blockHeight = Fonts[FONT_SMALL].imageInfo.Height / 16;
@@ -171,7 +175,7 @@ void Font_Init()
 		return;
 	}
 #endif
-	Fonts[FONT_SMALL].textureID = Tex_AddTexture(texture, Fonts[FONT_SMALL].imageInfo.Width, Fonts[FONT_SMALL].imageInfo.Height);
+//	Fonts[FONT_SMALL].textureID = Tex_AddTexture(texture, Fonts[FONT_SMALL].imageInfo.Width, Fonts[FONT_SMALL].imageInfo.Height);
 /*
 	char buf[100];
 	for (int i = 0; i < 256; i++)

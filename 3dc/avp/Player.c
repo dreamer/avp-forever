@@ -2158,7 +2158,6 @@ void LoadStrategy_Player(SAVE_BLOCK_STRATEGY_HEADER* header)
 		}
 	}
 
-
 	PlayersWeapon.HModelControlBlock = &PlayersWeaponHModelController;
 
 	//get the section data pointers
