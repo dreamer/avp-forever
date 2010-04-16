@@ -26,18 +26,8 @@
 #include <vector>
 
 extern "C" {
-extern LPDIRECT3DTEXTURE9 CreateD3DTextureFromFile(const char* fileName, Tex_Info &texInfo);
+extern uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture);
 }
-
-struct Texture
-{
-	std::string		name;
-	uint32_t		width;
-	uint32_t		height;
-	D3DPOOL			poolType;
-	D3DFORMAT		format;
-	LPDIRECT3DTEXTURE9	texture;
-};
 
 std::vector<Texture> textureList;
 
@@ -88,12 +78,12 @@ uint32_t Tex_LoadFromFile(const std::string &fileName)
 	uint32_t textureID = Tex_GetFreeID();
 
 	Texture		newTexture;
-	Tex_Info	texInfo;
+//	Tex_Info	texInfo;
 
-	newTexture.texture = CreateD3DTextureFromFile(fileName.c_str(), texInfo);
+	uint32_t ret = CreateD3DTextureFromFile(fileName.c_str(), newTexture);
 
-	newTexture.width = texInfo.width;
-	newTexture.height = texInfo.height;
+//	newTexture.width = texInfo.width;
+//	newTexture.height = texInfo.height;
 
 	// store it
 	if ((textureID - texIDoffset) < textureList.size()) // we're reusing a slot in this case
@@ -113,10 +103,10 @@ LPDIRECT3DTEXTURE9 Tex_GetTexture(uint32_t textureID)
 	return (textureList[textureID - texIDoffset].texture);
 }
 
-void Tex_GetInfo(uint32_t textureID, Tex_Info *info)
+void Tex_GetDimensions(uint32_t textureID, uint32_t &width, uint32_t &height)
 {
-	info->width  = textureList[textureID - texIDoffset].width;
-	info->height = textureList[textureID - texIDoffset].height;
+	width  = textureList[textureID - texIDoffset].width;
+	height = textureList[textureID - texIDoffset].height;
 }
 
 void Tex_Release(uint32_t textureID)

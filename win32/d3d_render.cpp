@@ -1777,11 +1777,12 @@ void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, 
 	// ugh..
 	if (textureID >= texIDoffset)
 	{
-		Tex_Info texInfo;
-		Tex_GetInfo(textureID, &texInfo);
+		uint32_t texWidth, texHeight;
 
-		RecipW = 1.0f / texInfo.width;
-		RecipH = 1.0f / texInfo.height;
+		Tex_GetDimensions(textureID, texWidth, texHeight);
+
+		RecipW = 1.0f / texWidth;
+		RecipH = 1.0f / texHeight;
 	}
 	else
 	{
@@ -5196,16 +5197,12 @@ void DrawQuad(int x, int y, int width, int height, int textureID, int colour, en
 	float x2 = ((float(x + width) / 640.0f) * 2) - 1;
 	float y2 = ((float(y + height) / 480.0f) * 2) - 1;
 
-	int texturePOW2Width, texturePOW2Height;
+	uint32_t texturePOW2Width, texturePOW2Height;
 	
 	// if in menus (outside game)
 	if (textureID >= texIDoffset)
 	{
-		Tex_Info texInfo;
-		Tex_GetInfo(textureID, &texInfo);
-
-		texturePOW2Width = texInfo.width;
-		texturePOW2Height = texInfo.height;
+		Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
 	}
 	else 
 	{

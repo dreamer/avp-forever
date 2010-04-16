@@ -43,7 +43,6 @@ struct Font
 	uint32_t	textureWidth;
 	uint32_t	textureHeight;
 	uint32_t	textureID;
-	D3DXIMAGE_INFO imageInfo;
 	int fontWidths[256];
 	int blockWidth;
 	int blockHeight;
@@ -67,45 +66,12 @@ void Font_Release()
 
 void Font_Init()
 {
-//	D3DTEXTURE texture;
-/*
-	// load the small font texture
-	if (Fonts[FONT_SMALL].texture)
-	{
-		Fonts[FONT_SMALL].texture->Release();
-		Fonts[FONT_SMALL].texture = NULL;
-	}
-*/
+	Fonts[FONT_SMALL].textureID = Tex_LoadFromFile("avp_font2.tga");
 
-/*
-	LastError = D3DXCreateTextureFromFileEx
-	(
-		d3d.lpD3DDevice, 
-		"avp_font.tga", 
-		D3DX_DEFAULT,			// width
-		D3DX_DEFAULT,			// height
-		1,						// mip levels
-		0,						// usage	
-		D3DFMT_UNKNOWN,			// format
-		D3DPOOL_MANAGED,
-		D3DX_FILTER_NONE,
-		D3DX_FILTER_NONE,
-		0,
-		&Fonts[FONT_SMALL].imageInfo,
-		NULL,
-		&texture
-	);
-	
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return;
-	}
-*/
-	Fonts[FONT_SMALL].textureID = Tex_LoadFromFile("avp_font.tga");
+	Tex_GetDimensions(Fonts[FONT_SMALL].textureID, Fonts[FONT_SMALL].textureWidth, Fonts[FONT_SMALL].textureHeight);
 
-	Fonts[FONT_SMALL].blockWidth = Fonts[FONT_SMALL].imageInfo.Width / 16;
-	Fonts[FONT_SMALL].blockHeight = Fonts[FONT_SMALL].imageInfo.Height / 16;
+	Fonts[FONT_SMALL].blockWidth = Fonts[FONT_SMALL].textureWidth / 16;
+	Fonts[FONT_SMALL].blockHeight = Fonts[FONT_SMALL].textureHeight / 16;
 
 #if 0
 	// get the font widths
@@ -193,20 +159,17 @@ extern char AAFontWidths[256];
 int Font_DrawText(const std::string &text, int x, int y, int colour, int fontType)
 {
 
-	float RecipW = (1.0f / Fonts[FONT_SMALL].imageInfo.Width);
-	float RecipH = (1.0f / Fonts[FONT_SMALL].imageInfo.Height);
+	float RecipW = (1.0f / Fonts[FONT_SMALL].textureWidth);
+	float RecipH = (1.0f / Fonts[FONT_SMALL].textureHeight);
 
 	int sixtyThree = 16;
 
 	int i = 0;
 
-//	while (*text)
 	while (i < text.size())
 	{
 		char c = text[i];
 
-//		int charWidth = Fonts[FONT_SMALL].fontWidths[c];
-//		int charWidth = AAFontWidths[c] * 2;
 		int charWidth = 16;
 
 		c = c - 32;

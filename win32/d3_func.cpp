@@ -685,9 +685,9 @@ D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t
 	return destTexture;
 }
 
-D3DTEXTURE CreateD3DTextureFromFile(const char* fileName, Tex_Info &texInfo)
+uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture)
 {
-	D3DTEXTURE destTexture = NULL;
+//	D3DTEXTURE destTexture = NULL;
 	D3DXIMAGE_INFO imageInfo;
 
 	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice, 
@@ -703,7 +703,7 @@ D3DTEXTURE CreateD3DTextureFromFile(const char* fileName, Tex_Info &texInfo)
 		0,
 		&imageInfo,
 		NULL,
-		&destTexture
+		&texture.texture
 		);	
 
 	if (FAILED(LastError))
@@ -712,10 +712,10 @@ D3DTEXTURE CreateD3DTextureFromFile(const char* fileName, Tex_Info &texInfo)
 		return NULL;
 	}
 
-	texInfo.width = imageInfo.Width;
-	texInfo.height = imageInfo.Height;
+	texture.width = imageInfo.Width;
+	texture.height = imageInfo.Height;
 
-	return destTexture;
+	return 0;
 }
 
 D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL poolType) 

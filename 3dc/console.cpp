@@ -19,7 +19,6 @@ extern "C"
 	#include "platform.h"
 	extern unsigned char DebouncedKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
 	extern int RealFrameTime;
-	extern D3DINFO d3d;
 }
 
 #define CHAR_WIDTH	16
@@ -40,7 +39,7 @@ std::vector<Command> cmdList;
 std::vector<Command>::iterator cmdIt;
 std::vector<std::string>cmdArgs;
 
-struct Console 
+struct Console
 {
 	int xPos;
 	int yPos;
@@ -77,28 +76,6 @@ void Con_PrintError(const std::string &errorString)
 
 	// write to log file for now
 	LogErrorString(errorString);
-}
-
-void Con_PrintHRESULTError(HRESULT hr, const std::string &errorString, int lineNumber = 0, const char *fileName = 0)
-{
-#if 0
-	if (lineNumber && fileName)
-	{
-		std::stringstream sstream = "\t Error:" << errorString << DXGetErrorString(hr) << " - " << DXGetErrorDescription(hr) << "Line: " << lineNumber << "File: " << fileName;
-	}
-/*
-	if (lineNumber && fileName)
-	{
-		console.text.push_back("\t Error:" + errorString + DXGetErrorString(hr) + " - " + DXGetErrorDescription(hr) + "Line: " + lineNumber + "File: " + fileName);
-		LogString("\t Error:" + errorString + DXGetErrorString(hr) + " - " + DXGetErrorDescription(hr) + "Line: " + lineNumber + "File: " + fileName);
-	}
-	else
-	{
-		console.text.push_back("\t Error:" + errorString + DXGetErrorString(hr) + " - " + DXGetErrorDescription(hr));
-		LogString("\t Error:" + errorString + DXGetErrorString(hr) + " - " + DXGetErrorDescription(hr));
-	}
-*/
-#endif
 }
 
 void Con_PrintMessage(const std::string &messageString)
@@ -255,7 +232,7 @@ void Con_CheckResize()
 
 void Con_AddTypedChar(char c)
 {
-//	if (!console.isActive) 
+//	if (!console.isActive)
 //		return;
 
 	if (c == 0x08) // backspace
@@ -324,17 +301,25 @@ void Con_Draw()
 	}
 
 	int charCount = 0;
+	int alpha = 255;
+/*
 	static int alpha = ONE_FIXED;
 
 	alpha -= static_cast<int>(RealFrameTime * 1.2f);
+	if (alpha <= 0) alpha = ONE_FIXED;
+	alpha /= 256;
 	if (alpha < 0) 
-		alpha = ONE_FIXED;
+		alpha = 0;
+	else if (alpha > 255)
+		alpha = 255;
 
+	char buf[100];
+	sprintf(buf, "alpha: %d\n", alpha);
+	OutputDebugString(buf);
+*/
 	// draw input cusor
 	Font_DrawText(">", console.indent, console.height - CHAR_HEIGHT, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
-	Font_DrawText("_", console.indent + charWidth, console.height - CHAR_HEIGHT, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
-//	charWidth = RenderSmallChar('>', console.indent, console.height - CHAR_HEIGHT, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
-//	RenderSmallChar('_', console.indent + charWidth, console.height - CHAR_HEIGHT, alpha, ONE_FIXED, ONE_FIXED, ONE_FIXED);
+	Font_DrawText("_", console.indent + charWidth, console.height - CHAR_HEIGHT, D3DCOLOR_ARGB(alpha, 255, 255, 255), FONT_SMALL);
 
 	size_t rows = console.text.size() - 1;
 
@@ -349,30 +334,12 @@ void Con_Draw()
 		xOffset = 0;
 		charWidth = 0;
 
-//		Font_DrawText(console.text[i].c_str(), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
-
 		Font_DrawText(console.text.at(i), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
-/*
-		for (size_t j = 0; j < console.text[i].length(); j++)
-		{
-			//charWidth = RenderSmallChar(console.text.at(i).at(j), console.indent + xOffset, y, ONE_FIXED, ONE_FIXED / 2, ONE_FIXED, ONE_FIXED);
-			Font_DrawText(console.text.at(i).at(j), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
-			//Font_DrawText(console.text.at(i).at(j), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
-			xOffset += charWidth;
-		}
-*/
 	}
+
 	xOffset = CHAR_WIDTH;
 	charWidth = 0;
 
-	Font_DrawText(console.inputLine, console.indent + xOffset, console.height - CHAR_HEIGHT, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
-
 	// draw the line of text we're currently typing
-/*
-	for (size_t j = 0; j < console.inputLine.length(); j++)
-	{
-		charWidth = RenderSmallChar(console.inputLine.at(j), console.indent + xOffset, console.height - CHAR_HEIGHT, ONE_FIXED, ONE_FIXED, ONE_FIXED, ONE_FIXED);
-		xOffset += charWidth;
-	}
-*/
+	Font_DrawText(console.inputLine, console.indent + xOffset, console.height - CHAR_HEIGHT, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 }

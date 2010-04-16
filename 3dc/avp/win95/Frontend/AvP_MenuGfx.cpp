@@ -813,25 +813,29 @@ extern void RenderSmallFontString_Wrapped(const char *textPtr, RECT* area, int a
 
 /*
 Determine area used by text , so we can draw it centrally
-*/                        	
-{
+*/
 	const char *textPtr2=textPtr;
-	while (*textPtr2) {
+	while (*textPtr2) 
+	{
 		int widthFromSpaces=0;
 		int widthFromChars=0;
 		
-		while(*textPtr2 && *textPtr2==' ') {
+		while (*textPtr2 && *textPtr2==' ') 
+		{
 			widthFromSpaces+=AAFontWidths[(unsigned int) *textPtr2++];
 		}
 		
-		while(*textPtr2 && *textPtr2!=' ') {
+		while (*textPtr2 && *textPtr2!=' ') 
+		{
 			widthFromChars+=AAFontWidths[(unsigned int) *textPtr2++];
 		}
 		
 		wordWidth=widthFromSpaces+widthFromChars;
 		
-		if(wordWidth> area->right-sx) {
-			if(wordWidth >area->right-area->left) {
+		if (wordWidth> area->right-sx) 
+		{
+			if (wordWidth >area->right-area->left) 
+			{
 				int extraLinesNeeded=0;
 				
 				wordWidth-=(area->right-sx);
@@ -844,35 +848,47 @@ Determine area used by text , so we can draw it centrally
 				sy+=HUD_FONT_HEIGHT*extraLinesNeeded;
 				wordWidth %= (area->right-area->left);
 				
-				if(sy+HUD_FONT_HEIGHT> area->bottom) break;
-			} else {
-				sy+=HUD_FONT_HEIGHT;
-				sx=area->left;
+				if (sy + HUD_FONT_HEIGHT > area->bottom) 
+					break;
+			}
+			else 
+			{
+				sy += HUD_FONT_HEIGHT;
+				sx = area->left;
 				
-				if(sy+HUD_FONT_HEIGHT> area->bottom) break;
+				if (sy + HUD_FONT_HEIGHT > area->bottom) 
+					break;
 				
-				if(wordWidth> area->right-sx) break;
+				if (wordWidth > area->right - sx) 
+					break;
 				
-				wordWidth-=widthFromSpaces;
+				wordWidth -= widthFromSpaces;
 			}
 		}
-		sx+=wordWidth;
+		sx += wordWidth;
 	}
 	
-	if(sy==area->top) {
-		sx=area->left+ (area->right-sx)/2;
-	} else {
-		sx=area->left;
+	if (sy == area->top) 
+	{
+		sx = area->left + (area->right-sx)/2;
+	} 
+	else 
+	{
+		sx = area->left;
 	}
 	
 	sy+=HUD_FONT_HEIGHT;
-	if(sy<area->bottom) {
+	if(sy<area->bottom) 
+	{
 		sy=area->top + (area->bottom-sy)/2;
-	} else {
+	} 
+	else 
+	{
 		sy=area->top;
 	}
-}	
-	while ( *textPtr ) {
+
+	while ( *textPtr ) 
+	{
 		const char* textPtr2=textPtr;
 		wordWidth=0;
 		
@@ -884,48 +900,53 @@ Determine area used by text , so we can draw it centrally
 			wordWidth+=AAFontWidths[(unsigned int) *textPtr2++];
 		}
 		
-		if(wordWidth> area->right-sx) {
-			if(wordWidth>area->right - area->left) {
+		if (wordWidth> area->right-sx) 
+		{
+			if (wordWidth>area->right - area->left) 
+			{
 				/* 
 				  word is too long too fit on one line 
 				  so we'll just have to allow it to be split
 				 */
-			} else {
+			} 
+			else 
+			{
 				sy+=HUD_FONT_HEIGHT;
 				sx=area->left;
 				
-				if(sy+HUD_FONT_HEIGHT> area->bottom) break;
+				if (sy+HUD_FONT_HEIGHT> area->bottom) break;
 				
-				if(wordWidth> area->right-sx) break;
+				if (wordWidth> area->right-sx) break;
 				
-				while(*textPtr && *textPtr==' ') {
+				while (*textPtr && *textPtr==' ') {
 					textPtr++;
 				}
 			}
 		}
-		
-		while(*textPtr && *textPtr==' ') 
+
+		while (*textPtr && *textPtr==' ') 
 		{
 			sx+=AAFontWidths[(unsigned int) *textPtr++];
 		}
 		
-		if(sx>area->right) 
+		if (sx>area->right) 
 		{
-			while(sx>area->right) 
+			while (sx>area->right) 
 			{
 				sx-=(area->right-area->left);
 				sy+=HUD_FONT_HEIGHT;
 			}
 			
-			if(sy+HUD_FONT_HEIGHT> area->bottom) break;
+			if (sy+HUD_FONT_HEIGHT> area->bottom) 
+				break;
 		}
 		
-		while(*textPtr && *textPtr!=' ') 
+		while (*textPtr && *textPtr!=' ') 
 		{
 			char c = *textPtr++;
 			int letterWidth = AAFontWidths[(unsigned int) c];
 			
-			if(sx+letterWidth>area->right) 
+			if (sx+letterWidth>area->right) 
 			{
 				sx=area->left;
 				sy+=HUD_FONT_HEIGHT;
@@ -980,8 +1001,8 @@ Determine area used by text , so we can draw it centrally
 		}
 	}
 	
-	if(output_x) *output_x=sx;
-	if(output_y) *output_y=sy;
+	if (output_x) *output_x=sx;
+	if (output_y) *output_y=sy;
 }
 
 extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
