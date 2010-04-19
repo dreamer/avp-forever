@@ -27,6 +27,21 @@ extern int NumberOfFMVTextures;
 #define MAX_NO_FMVTEXTURES 10
 extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 
+#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
+#include "logString.h"
+#include "configFile.h"
+#include <d3dx9.h>
+#include "console.h"
+#include "textureManager.h"
+#include "networking.h"
+extern void Font_Init();
+extern void Font_Release();
+D3DXMATRIX matOrtho;
+D3DXMATRIX matProjection;
+D3DXMATRIX matViewProjection;
+D3DXMATRIX matView; 
+D3DXMATRIX matIdentity;
+
 bool IsPowerOf2(int i) 
 {
 	if ((i & -i) == i) {
@@ -52,8 +67,7 @@ extern "C" {
 #include "avp_menus.h"
 #include "kshape.h"
 #include "eax.h"
-#include "vmanpset.h"
-#include "networking.h"
+//#include "vmanpset.h"
 
 #include "avp_menugfx.hpp"
 extern AVPMENUGFX AvPMenuGfxStorage[];
@@ -63,23 +77,6 @@ extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
 
 extern void ToggleWireframe();
-
-extern "C++"
-{
-	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
-	#include "logString.h"
-	#include "configFile.h"
-	#include <d3dx9.h>
-	#include "console.h"
-	#include "textureManager.h"
-	extern void Font_Init();
-	extern void Font_Release();
-	D3DXMATRIX matOrtho;
-	D3DXMATRIX matProjection;
-	D3DXMATRIX matViewProjection;
-	D3DXMATRIX matView; 
-	D3DXMATRIX matIdentity;
-}
 
 extern HWND hWndMain;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
@@ -506,6 +503,7 @@ D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool)
 		return NULL;
 	}
 
+#if 0 // dont need this
 	// lets clear it to black
 	D3DLOCKED_RECT lock;
 
@@ -524,6 +522,7 @@ D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool)
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
 	}
+#endif
 
 	*width = newWidth;
 	*height = newHeight;
@@ -709,7 +708,7 @@ uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture)
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		return NULL;
+		return -1;
 	}
 
 	texture.width = imageInfo.Width;
@@ -718,7 +717,7 @@ uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture)
 	return 0;
 }
 
-D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL poolType) 
+D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usage, D3DPOOL poolType)
 {
 	D3DTEXTURE destTexture = NULL;
 
@@ -737,7 +736,7 @@ D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL po
 	TgaHeader.width = tex->width;
 
 	// size of raw image data
-	int imageSize = tex->height * tex->width * sizeof(uint32_t);
+	uint32_t imageSize = tex->height * tex->width * sizeof(uint32_t);
 
 	// create new buffer for header and image data
 	uint8_t *buffer = new uint8_t[sizeof(TGA_HEADER) + imageSize];
@@ -748,7 +747,7 @@ D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL po
 	uint8_t *imageData = buffer + sizeof(TGA_HEADER);
 
 	// loop, converting RGB to BGR for D3DX function
-	for (int i = 0; i < imageSize; i+=4)
+	for (uint32_t i = 0; i < imageSize; i+=4)
 	{
 		// ARGB
 		// BGR
@@ -1270,12 +1269,10 @@ BOOL InitialiseDirect3D()
 #else
 
 	// create D3DCREATE_PUREDEVICE
-/*
 	LastError = d3d.lpD3D->CreateDevice(defaultDevice, D3DDEVTYPE_HAL, hWndMain,
 		D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, &d3dpp, &d3d.lpD3DDevice);
 
 	if (FAILED(LastError))
-*/
 	{
 		LastError = d3d.lpD3D->CreateDevice(defaultDevice, D3DDEVTYPE_HAL, hWndMain,
 			D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);

@@ -77,13 +77,9 @@ uint32_t Tex_LoadFromFile(const std::string &fileName)
 	// get the next available ID
 	uint32_t textureID = Tex_GetFreeID();
 
-	Texture		newTexture;
-//	Tex_Info	texInfo;
+	Texture	newTexture;
 
 	uint32_t ret = CreateD3DTextureFromFile(fileName.c_str(), newTexture);
-
-//	newTexture.width = texInfo.width;
-//	newTexture.height = texInfo.height;
 
 	// store it
 	if ((textureID - texIDoffset) < textureList.size()) // we're reusing a slot in this case

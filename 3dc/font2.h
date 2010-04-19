@@ -26,8 +26,9 @@
 #define _included_font2_h_
 
 #include <string>
+#include "stdint.h"
 
-enum
+enum FONT_TYPE
 {
 	FONT_SMALL,
 	FONT_BIG,
@@ -35,7 +36,7 @@ enum
 };
 
 void Font_Init();
-int Font_DrawText(const std::string &text, int x, int y, int colour, int fontType);
+uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t colour, enum FONT_TYPE fontType);
 void Font_Release();
 
 #endif

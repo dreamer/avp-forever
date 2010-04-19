@@ -264,7 +264,7 @@ void Con_RemoveTypedChar()
 
 void Con_Draw()
 {
-	int charWidth = 12;
+	uint32_t charWidth = 12;
 
 	if (IOFOCUS_Get() & IOFOCUS_NEWCONSOLE)
 	{
@@ -301,18 +301,16 @@ void Con_Draw()
 	}
 
 	int charCount = 0;
-	int alpha = 255;
+	static int alpha = 255;
 /*
-	static int alpha = ONE_FIXED;
+	alpha -= 65536 / (static_cast<int>(RealFrameTime * 0.01f));
 
-	alpha -= static_cast<int>(RealFrameTime * 1.2f);
-	if (alpha <= 0) alpha = ONE_FIXED;
-	alpha /= 256;
-	if (alpha < 0) 
-		alpha = 0;
-	else if (alpha > 255)
+	if (alpha < 0)
 		alpha = 255;
-
+	else if (alpha > 255)
+		alpha = 0;
+*/
+/*
 	char buf[100];
 	sprintf(buf, "alpha: %d\n", alpha);
 	OutputDebugString(buf);

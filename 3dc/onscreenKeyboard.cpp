@@ -61,23 +61,23 @@ static int currentColumn = 0;
 
 static int currentValue = 0;
 
-static int osk_x = 320;
-static int osk_y = 280;
-static int oskWidth = 400;
-static int oskHeight = 200;
+static uint32_t osk_x = 320;
+static uint32_t osk_y = 280;
+static uint32_t oskWidth = 400;
+static uint32_t oskHeight = 200;
 
-static const int keyWidth = 30;
-static const int keyHeight = 30;
+static const uint32_t keyWidth = 30;
+static const uint32_t keyHeight = 30;
 
-static const int space_between_keys = 3;
-static const int outline_border_size = 1;
-static const int indent_space = 5;
+static const uint32_t space_between_keys = 3;
+static const uint32_t outline_border_size = 1;
+static const uint32_t indent_space = 5;
 
 struct ButtonStruct
 {
 	int		numWidthBlocks;
-	int		height;
-	int		width;
+	uint32_t	height;
+	uint32_t	width;
 	int		positionOffset;
 	int		stringId;
 	bool	isBlank;
@@ -87,9 +87,9 @@ std::vector<ButtonStruct> keyVector;
 // we store our strings seperately and index using the stringId (to avoid duplicates)
 std::vector<std::string> stringVector;
 
-const int numVerticalKeys = 5;
-const int numHorizontalKeys = 12;
-const int numKeys = numVerticalKeys * numHorizontalKeys;
+static const uint32_t numVerticalKeys = 5;
+static const uint32_t numHorizontalKeys = 12;
+static const uint32_t numKeys = numVerticalKeys * numHorizontalKeys;
 
 static bool is_active = false;
 static bool is_inited = false;
@@ -101,7 +101,7 @@ static int buttonId = 0;
 
 static char buf[100];
 
-template <class T> void Osk_AddKey(T buttonLabel, int numWidthBlocks)
+template <class T> void Osk_AddKey(T buttonLabel, uint32_t numWidthBlocks)
 {
 	ButtonStruct newButton = {0};
 
@@ -122,9 +122,9 @@ template <class T> void Osk_AddKey(T buttonLabel, int numWidthBlocks)
 		newButton.isBlank = true;
 	}
 
-	int positionOffset = 0;
+	uint32_t positionOffset = 0;
 
-	int blockCount = numWidthBlocks;
+	uint32_t blockCount = numWidthBlocks;
 
 	// for each block in a button, add it to the key vector
 	while (blockCount)
@@ -236,24 +236,9 @@ void Osk_Draw()
 				else
 					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, -1, D3DCOLOR_ARGB(220, 38, 80, 145), TRANSLUCENCY_OFF);
 
-/*
-				// now draw text, but figure out how wide the string is first.. do this once on init?
-				std::string tempString = Osk_GetKeyLabel(index);
-				const char *tempPtr = tempString.c_str();
-				int labelWidth = 0;
-				int positionX = 0;
-
-				while (*tempPtr)
-				{
-					labelWidth += AAFontWidths[(unsigned char)*tempPtr++];
-				}
-*/
 				int positionX = pos_x + ((keyVector.at(index).width - 16) / 2);
 
-				Font_DrawText(Osk_GetKeyLabel(index), pos_x + (keyVector.at(index).width / 2), pos_y + space_between_keys, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
-				//RenderSmallMenuText((char*)Osk_GetKeyLabel(index).c_str(), pos_x + (keyVector.at(index).width / 2)/*(keyVector.at(index).width - outline_border_size * 2 / 2)*/, pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
-				//RenderSmallMenuText((char*)tempString.c_str(), positionX, pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
-				//RenderMenuText((char*)Osk_GetKeyLabel(index).c_str(), pos_x + (keyVector.at(index).width / 2), pos_y + space_between_keys, ONE_FIXED, AVPMENUFORMAT_LEFTJUSTIFIED);
+				Font_DrawText(Osk_GetKeyLabel(index), pos_x + (keyVector.at(index).width / 2), pos_y + space_between_keys, D3DCOLOR_ARGB(255, 255, 255, 0), FONT_SMALL);
 			}
 
 			pos_x += (keyVector.at(index).width + space_between_keys);

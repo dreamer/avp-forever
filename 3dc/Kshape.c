@@ -231,7 +231,7 @@ void SetupShapePipeline(void)
 	Global_ShapePoints    = *(Global_ShapeHeaderPtr->points);
 	Global_ShapeTextures  = Global_ShapeHeaderPtr->sh_textures;
 
-	if(Global_ODB_Ptr->ObEIDPtr)
+	if (Global_ODB_Ptr->ObEIDPtr)
 	{
 		Global_EID_Ptr  = Global_ODB_Ptr->ObEIDPtr;
 		Global_EID_IPtr = (int *) Global_ODB_Ptr->ObEIDPtr;
@@ -242,7 +242,7 @@ void SetupShapePipeline(void)
 		Global_EID_IPtr = (int *) Global_ShapeHeaderPtr->sh_extraitemdata;
 	}
 
-	if(Global_ShapeHeaderPtr->sh_normals)
+	if (Global_ShapeHeaderPtr->sh_normals)
 	{
 		Global_ShapeNormals = *(Global_ShapeHeaderPtr->sh_normals);
 	}
@@ -251,7 +251,7 @@ void SetupShapePipeline(void)
 		Global_ShapeNormals = 0;
 	}
 	
-	if(Global_ShapeHeaderPtr->sh_vnormals)
+	if (Global_ShapeHeaderPtr->sh_vnormals)
 	{
 		Global_ShapeVNormals = *(Global_ShapeHeaderPtr->sh_vnormals);
 	}
@@ -3706,16 +3706,16 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	HandleSfxForObject(dptr);
 	if (dptr->ObStrategyBlock)
 	{
-		if (dptr->ObStrategyBlock->I_SBtype==I_BehaviourInanimateObject)
+		if (dptr->ObStrategyBlock->I_SBtype == I_BehaviourInanimateObject)
 		{
 			INANIMATEOBJECT_STATUSBLOCK* objStatPtr = dptr->ObStrategyBlock->SBdataptr;
-			if(objStatPtr->typeId==IOT_FieldCharge)
+			if (objStatPtr->typeId == IOT_FieldCharge)
 			{
-	
 			   	int i;
+
 			  	D3D_DecalSystem_Setup();
 
-				for(i = 0; i < 63; i++)
+				for (i = 0; i < 63; i++)
 				{
 					PARTICLE particle = {0};
 
@@ -3724,12 +3724,12 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 
 					particle.Position.vx = GetCos((CloakingPhase +i*64+particle.Position.vy)&4095)/512;
 					particle.Position.vz = GetSin((CloakingPhase +i*64+particle.Position.vy)&4095)/512;
-					RotateVector(&particle.Position,&dptr->ObMat);
+					RotateVector(&particle.Position, &dptr->ObMat);
 					particle.Position.vx += dptr->ObWorld.vx;
 					particle.Position.vy += dptr->ObWorld.vy;
 					particle.Position.vz += dptr->ObWorld.vz;
 
-					particle.ParticleID=PARTICLE_MUZZLEFLASH;
+					particle.ParticleID = PARTICLE_MUZZLEFLASH;
 					particle.Colour = 0xff00007f+(FastRandom()&0x7f7f7f);
 					particle.Size = 40;
 					RenderParticle(&particle);
@@ -3746,8 +3746,6 @@ void DoAlienEnergyView(DISPLAYBLOCK *dispPtr)
 	unsigned int colour = MARINES_LIFEFORCE_GLOW_COLOUR;
 	
 	LOCALASSERT(controllerPtr);
-	
-
 
 	/* KJL 16:36:25 10/02/98 - process model */
 	{
@@ -3882,12 +3880,12 @@ static void FindAlienEnergySource_Recursion(HMODELCONTROLLER *controllerPtr, SEC
 			childSectionPtr=childSectionPtr->Next_Sibling;
 		}
 	}
-	if(sectionDataPtr->Shape && sectionDataPtr->Shape->shaperadius>LocalDetailLevels.AlienEnergyViewThreshold)
+	if (sectionDataPtr->Shape && sectionDataPtr->Shape->shaperadius>LocalDetailLevels.AlienEnergyViewThreshold)
 	{
 		PARTICLE particle;
 
 		particle.Position = sectionDataPtr->World_Offset;
-		particle.ParticleID=PARTICLE_MUZZLEFLASH;
+		particle.ParticleID = PARTICLE_MUZZLEFLASH;
 		particle.Colour = colour;//0x208080ff;
 //		particle.Colour = 0x20ff8080;
 //		particle.Size = sectionDataPtr->Shape->shaperadius*3;
@@ -4393,16 +4391,16 @@ void RenderDecal(DECAL *decalPtr)
 void RenderParticle(PARTICLE *particlePtr)
 {
 	int particleSize = particlePtr->Size;
-	{
-		VECTORCH translatedPosition = particlePtr->Position;
-		TranslatePointIntoViewspace(&translatedPosition);
-		VerticesBuffer[0].X = translatedPosition.vx;
-		VerticesBuffer[3].X = translatedPosition.vx;
-		VerticesBuffer[0].Y = translatedPosition.vy;
-		VerticesBuffer[3].Y = translatedPosition.vy;
-		VerticesBuffer[0].Z = translatedPosition.vz;
-		VerticesBuffer[3].Z = translatedPosition.vz;
-	}
+
+	VECTORCH translatedPosition = particlePtr->Position;
+	TranslatePointIntoViewspace(&translatedPosition);
+
+	VerticesBuffer[0].X = translatedPosition.vx;
+	VerticesBuffer[3].X = translatedPosition.vx;
+	VerticesBuffer[0].Y = translatedPosition.vy;
+	VerticesBuffer[3].Y = translatedPosition.vy;
+	VerticesBuffer[0].Z = translatedPosition.vz;
+	VerticesBuffer[3].Z = translatedPosition.vz;
 
 	if ((particlePtr->ParticleID == PARTICLE_EXPLOSIONFIRE)
 	  ||(particlePtr->ParticleID == PARTICLE_RICOCHET_SPARK)
@@ -4428,7 +4426,7 @@ void RenderParticle(PARTICLE *particlePtr)
 		VerticesBuffer[2].Y = translatedPosition.vy;
 		VerticesBuffer[1].Z = translatedPosition.vz;
 		VerticesBuffer[2].Z = translatedPosition.vz;
-	
+
 		{
 			int deltaX = VerticesBuffer[1].X - VerticesBuffer[0].X;
 			int deltaY = VerticesBuffer[1].Y - VerticesBuffer[0].Y;
@@ -4518,9 +4516,10 @@ void RenderParticle(PARTICLE *particlePtr)
 			}
 		}
 	}
-	else
+	else // pulse rifle muzzle flash handled here - bjd
 	{
 		VECTOR2D offset[4];
+
 		VerticesBuffer[1].X = VerticesBuffer[0].X;
 		VerticesBuffer[2].X = VerticesBuffer[0].X;
 		VerticesBuffer[1].Y = VerticesBuffer[0].Y;
@@ -4540,7 +4539,7 @@ void RenderParticle(PARTICLE *particlePtr)
 		offset[3].vx = -particleSize;
 		offset[3].vy = +particleSize;
 
-		if ((particlePtr->ParticleID == PARTICLE_MUZZLEFLASH) )
+		if ((particlePtr->ParticleID == PARTICLE_MUZZLEFLASH))
 		{
 			extern void RotateVertex(VECTOR2D *vertexPtr, int theta);
 			int theta = FastRandom()&4095;
@@ -4555,23 +4554,29 @@ void RenderParticle(PARTICLE *particlePtr)
 			||(particlePtr->ParticleID == PARTICLE_FLAME)) 
 		{
 			extern void RotateVertex(VECTOR2D *vertexPtr, int theta);
-			int theta = (particlePtr->Offset.vx+MUL_FIXED(CloakingPhase,particlePtr->Offset.vy))&4095;
-			RotateVertex(&offset[0],theta);
-			RotateVertex(&offset[1],theta);
-			RotateVertex(&offset[2],theta);
-			RotateVertex(&offset[3],theta);
+			int theta = (particlePtr->Offset.vx + MUL_FIXED(CloakingPhase, particlePtr->Offset.vy))&4095;
+			RotateVertex(&offset[0], theta);
+			RotateVertex(&offset[1], theta);
+			RotateVertex(&offset[2], theta);
+			RotateVertex(&offset[3], theta);
 		}
+
+		// bjd - commented below lines out and replaced with straight += offset y. didnt make any noticable change?
 		VerticesBuffer[0].X += offset[0].vx;
-		VerticesBuffer[0].Y += MUL_FIXED(offset[0].vy,87381);
+		VerticesBuffer[0].Y += offset[0].vy;
+//		VerticesBuffer[0].Y += MUL_FIXED(offset[0].vy, 87381);
 		
 		VerticesBuffer[1].X += offset[1].vx;
-		VerticesBuffer[1].Y += MUL_FIXED(offset[1].vy,87381);
+		VerticesBuffer[1].Y += offset[1].vy;
+//		VerticesBuffer[1].Y += MUL_FIXED(offset[1].vy, 87381);
 
 		VerticesBuffer[2].X += offset[2].vx;
-		VerticesBuffer[2].Y += MUL_FIXED(offset[2].vy,87381);
+		VerticesBuffer[2].Y += offset[2].vy;
+//		VerticesBuffer[2].Y += MUL_FIXED(offset[2].vy, 87381);
 		
 		VerticesBuffer[3].X += offset[3].vx;
-		VerticesBuffer[3].Y += MUL_FIXED(offset[3].vy,87381);
+		VerticesBuffer[3].Y += offset[3].vy;
+//		VerticesBuffer[3].Y += MUL_FIXED(offset[3].vy, 87381);
 	}
 	
 	{
@@ -4581,18 +4586,18 @@ void RenderParticle(PARTICLE *particlePtr)
 		{		 
 			ParticlePolygon_Construct(particlePtr);
 
-			if (outcode!=2)
+			if (outcode != 2)
 			{
 				TexturedPolygon_ClipWithZ();
-				if(RenderPolygon.NumberOfVertices<3) return;
+				if (RenderPolygon.NumberOfVertices<3) return;
 				TexturedPolygon_ClipWithNegativeX();
-				if(RenderPolygon.NumberOfVertices<3) return;
+				if (RenderPolygon.NumberOfVertices<3) return;
 				TexturedPolygon_ClipWithPositiveY();
-				if(RenderPolygon.NumberOfVertices<3) return;
+				if (RenderPolygon.NumberOfVertices<3) return;
 				TexturedPolygon_ClipWithNegativeY();
-				if(RenderPolygon.NumberOfVertices<3) return;
+				if (RenderPolygon.NumberOfVertices<3) return;
 				TexturedPolygon_ClipWithPositiveX();
-				if(RenderPolygon.NumberOfVertices<3) return;
+				if (RenderPolygon.NumberOfVertices<3) return;
 //				D3D_Particle_Output(particlePtr,RenderPolygon.Vertices);
 				AddParticle(particlePtr, &RenderPolygon.Vertices[0]);
   			}
@@ -4737,7 +4742,7 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 static void ParticlePolygon_Construct(PARTICLE *particlePtr)
 {
 	PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
-	RenderPolygon.NumberOfVertices=4;
+	RenderPolygon.NumberOfVertices = 4;
 	
 	VerticesBuffer[0].U = particleDescPtr->StartU;
 	VerticesBuffer[0].V = particleDescPtr->StartV;

@@ -27,7 +27,6 @@
 #include <d3dx9.h>
 #endif
 #include "logString.h"
-#include "stdint.h"
 #include "font2.h"
 #include "textureManager.h"
 
@@ -43,9 +42,9 @@ struct Font
 	uint32_t	textureWidth;
 	uint32_t	textureHeight;
 	uint32_t	textureID;
-	int fontWidths[256];
-	int blockWidth;
-	int blockHeight;
+	uint32_t	fontWidths[256];
+	uint32_t	blockWidth;
+	uint32_t	blockHeight;
 };
 
 static Font Fonts[NUM_FONT_TYPES];
@@ -66,14 +65,17 @@ void Font_Release()
 
 void Font_Init()
 {
-	Fonts[FONT_SMALL].textureID = Tex_LoadFromFile("avp_font2.tga");
+	Fonts[FONT_SMALL].textureID = Tex_LoadFromFile("ExportedFont.tga");
 
+	// get the font texture width and height
 	Tex_GetDimensions(Fonts[FONT_SMALL].textureID, Fonts[FONT_SMALL].textureWidth, Fonts[FONT_SMALL].textureHeight);
 
+	// work out how big each character cell/block is
 	Fonts[FONT_SMALL].blockWidth = Fonts[FONT_SMALL].textureWidth / 16;
 	Fonts[FONT_SMALL].blockHeight = Fonts[FONT_SMALL].textureHeight / 16;
 
-#if 0
+#if 0 // we're using a fixed width font
+
 	// get the font widths
 	D3DLOCKED_RECT lock;
 	uint8_t *srcPtr = NULL;
@@ -141,7 +143,6 @@ void Font_Init()
 		return;
 	}
 #endif
-//	Fonts[FONT_SMALL].textureID = Tex_AddTexture(texture, Fonts[FONT_SMALL].imageInfo.Width, Fonts[FONT_SMALL].imageInfo.Height);
 /*
 	char buf[100];
 	for (int i = 0; i < 256; i++)
@@ -156,23 +157,22 @@ extern "C" {
 extern char AAFontWidths[256];
 }
 
-int Font_DrawText(const std::string &text, int x, int y, int colour, int fontType)
+uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t colour, enum FONT_TYPE fontType)
 {
 
 	float RecipW = (1.0f / Fonts[FONT_SMALL].textureWidth);
 	float RecipH = (1.0f / Fonts[FONT_SMALL].textureHeight);
 
-	int sixtyThree = 16;
+//	int sixtyThree = 16;
 
-	int i = 0;
+	uint32_t i = 0;
+
+	uint32_t charWidth = 11;
+	int uvArray[8];
 
 	while (i < text.size())
 	{
-		char c = text[i];
-
-		int charWidth = 16;
-
-		c = c - 32;
+		char c = text[i] - 32;
 
 		int row = (int)(c / 16); // get row 
 		int column = c % 16;	 // get column from remainder value
@@ -180,18 +180,16 @@ int Font_DrawText(const std::string &text, int x, int y, int colour, int fontTyp
 		int tex_x = column * Fonts[FONT_SMALL].blockWidth;
 		int tex_y = row * Fonts[FONT_SMALL].blockHeight;
 
-		int uvArray[8];
-
 		uvArray[0] = tex_x;
-		uvArray[1] = tex_y + Fonts[FONT_SMALL].blockWidth;
+		uvArray[1] = tex_y + Fonts[FONT_SMALL].blockHeight;
 		uvArray[2] = tex_x;
 		uvArray[3] = tex_y;
-		uvArray[4] = tex_x + Fonts[FONT_SMALL].blockWidth;
+		uvArray[4] = tex_x + charWidth;//Fonts[FONT_SMALL].blockWidth;
 		uvArray[5] = tex_y + Fonts[FONT_SMALL].blockHeight;
-		uvArray[6] = tex_x + Fonts[FONT_SMALL].blockWidth;
+		uvArray[6] = tex_x + charWidth;//Fonts[FONT_SMALL].blockWidth;
 		uvArray[7] = tex_y;
 
-		New_D3D_HUDQuad_Output(Fonts[FONT_SMALL].textureID, x, y, sixtyThree, sixtyThree, &uvArray[0], colour, FILTERING_BILINEAR_OFF);
+		New_D3D_HUDQuad_Output(Fonts[FONT_SMALL].textureID, x, y, charWidth, 16, &uvArray[0], colour, FILTERING_BILINEAR_OFF);
 
 		if (/*widthSpaced*/1)
 		{
@@ -208,6 +206,7 @@ int Font_DrawText(const std::string &text, int x, int y, int colour, int fontTyp
 	return 0;
 }
 
+/*
 int Font_GetTextLength(const char* text)
 {
 	int width = 0;
@@ -220,3 +219,4 @@ int Font_GetTextLength(const char* text)
 
 	return width;
 }
+*/
