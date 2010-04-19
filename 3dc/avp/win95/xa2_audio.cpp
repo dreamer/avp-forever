@@ -2015,7 +2015,7 @@ void UpdateSoundFrequencies(void)
 
 } // extern "C"
 
-StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int bufferSize, int numBuffers)
+StreamingAudioBuffer * AudioStream_CreateBuffer(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers)
 {
 	if (!soundEnabled)
 		return NULL;
@@ -2077,12 +2077,12 @@ StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int buff
 	return newStreamingAudioBuffer;
 }
 
-int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, uint8_t *audioData, int size)
+int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, uint8_t *audioData, uint32_t size)
 {
 	assert (streamStruct);
 	assert (audioData);
 
-	int amountWritten = 0;
+	uint32_t amountWritten = 0;
 	XAUDIO2_BUFFER buf = {0};
 
 	assert (size == streamStruct->bufferSize);
@@ -2143,7 +2143,7 @@ int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)
 	return ((streamStruct->bufferSize * streamStruct->bufferCount) - (state.BuffersQueued * streamStruct->bufferSize));
 }
 
-int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
+int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, uint32_t volume)
 {
 	assert (streamStruct);
 
@@ -2159,7 +2159,7 @@ int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
 	return AUDIOSTREAM_OK;
 }
 
-int AudioStream_SetPan(StreamingAudioBuffer *streamStruct, int pan)
+int AudioStream_SetPan(StreamingAudioBuffer *streamStruct, uint32_t pan)
 {
 	return AUDIOSTREAM_OK;
 }

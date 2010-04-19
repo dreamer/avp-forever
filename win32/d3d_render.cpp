@@ -853,15 +853,6 @@ static void ChangeTexture(const int32_t textureID)
 			return;
 	}
 
-	else if (textureID == CONSOLE_TEX)
-	{
-/*
-		LastError = d3d.lpD3DDevice->SetTexture(0, consoleText);
-		if (!FAILED(LastError)) currentTextureID = CONSOLE_TEX;
-*/
-		return;
-	}
-
 	// if texture was specified as 'null'
 	else if (textureID == NO_TEXTURE)
 	{
@@ -2268,7 +2259,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 				int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
 */			
 				float zvalue;
-
+/*
 				if (particleDescPtr->IsDrawnInFront)
 				{
 					zvalue = 0.0f;
@@ -2282,12 +2273,14 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 					//zvalue = 1.0f - ZNear*oneOverZ;
 					zvalue = (float)vertices->Z;//1.0f - Zoffset * ZNear/vertices->Z;
 				}
+*/
 /*
 				mainVertex[vb].sx = (float)x;
 				mainVertex[vb].sy = (float)y;
 				mainVertex[vb].sz = zvalue;
 				mainVertex[vb].rhw = oneOverZ;
 */
+
 				mainVertex[vb].sx = (float)vertices->X;
 				mainVertex[vb].sy = (float)-vertices->Y;
 				mainVertex[vb].sz = (float)vertices->Z;

@@ -153,10 +153,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		}
 		// it's intentional for this case to fall through to WM_SYSKEYDOWN
 		case WM_SYSKEYDOWN:
-		{	
+		{
 			// handle left/right alt keys
 			if (wParam == VK_MENU)
-			{			
+			{
 				if (lParam&(1<<24))
 					wParam = VK_RMENU;
 				else
@@ -165,7 +165,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 			// handle left/right control keys
 			if (wParam == VK_CONTROL)
-			{			
+			{
 				if (lParam&(1<<24))
 					wParam = VK_RCONTROL;
 				else
@@ -220,35 +220,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		}
 
 		case WM_SYSKEYUP:
-		case WM_KEYUP:						
+		case WM_KEYUP:
 		{
-/*
-			// Handle on screen keyboard input
-			if (Osk_IsActive())
-			{
-				switch (wParam)
-				{
-					case VK_LEFT:
-						Osk_MoveLeft();
-						break;
-					case VK_RIGHT:
-						Osk_MoveRight();
-						break;
-					case VK_UP:
-						Osk_MoveUp();
-						break;
-					case VK_DOWN:
-						Osk_MoveDown();
-						break;
-					case VK_RETURN: // handle this as if it's a WM_CHAR
-						//char key = Osk_GetSelectedKeyChar();
-						//RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(key);
-						//KeyboardEntryQueue_Add(key);
-						break;
-				}
-			}
-*/
-			/* handle left/right alt keys */
+			// handle left/right alt keys
 			if (wParam == VK_MENU)
 			{	
 				if (lParam&(1<<24))
@@ -257,7 +231,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 					wParam = VK_LMENU;
 			}
 
-			/* handle left/right control keys */
+			// handle left/right control keys
 			if (wParam == VK_CONTROL)
 			{			
 				if (lParam&(1<<24))
@@ -266,7 +240,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 					wParam = VK_LCONTROL;
 			}
 
-			/* handle left/right shift keys */	
+			// handle left/right shift keys
 			if (wParam == VK_SHIFT)
 			{
 				if ((!(GetKeyState(VK_RSHIFT) & 0x8000)) && (KeyboardInput[KEY_RIGHTSHIFT] == TRUE))

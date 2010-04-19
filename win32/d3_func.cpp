@@ -708,6 +708,7 @@ uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture)
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
+		texture.texture = NULL;
 		return -1;
 	}
 

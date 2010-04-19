@@ -5942,8 +5942,8 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 
 	TranslatePointIntoViewspace(&point);
 
-//	if (point.vz < 64) 
-//		return;	
+	if (point.vz < 64) 
+		return;	
 	
 	particle.ParticleID = PARTICLE_LIGHTFLARE;
 
@@ -5960,10 +5960,10 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 		centreX = DIV_FIXED(point.vx, point.vz);
 		centreY = DIV_FIXED(point.vy, point.vz);
-		sizeX = 200;//(ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
-		sizeY = 200;//MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
+		sizeX = (ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
+		sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
 	}
-/*
+
 	VerticesBuffer[0].X = centreX - sizeX;
 	VerticesBuffer[0].Y = centreY - sizeY;
 	VerticesBuffer[0].Z = z;
@@ -5976,8 +5976,7 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 	VerticesBuffer[3].X = centreX - sizeX;
 	VerticesBuffer[3].Y = centreY + sizeY;
 	VerticesBuffer[3].Z = z;
-*/
-
+/*
 	point.vz = 65535;
 
 	VerticesBuffer[0].X = point.vx - sizeX;
@@ -5992,7 +5991,7 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 	VerticesBuffer[3].X = point.vx - sizeX;
 	VerticesBuffer[3].Y = point.vy + sizeY;
 	VerticesBuffer[3].Z = point.vz;
-
+*/
 	{
 		int outcode = QuadWithinFrustrum();
 										  

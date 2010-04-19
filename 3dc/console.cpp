@@ -21,7 +21,7 @@ extern "C"
 	extern int RealFrameTime;
 }
 
-#define CHAR_WIDTH	16
+#define CHAR_WIDTH	12//16
 #define CHAR_HEIGHT	16
 
 #define ONE_FIXED	65536
@@ -315,24 +315,27 @@ void Con_Draw()
 	sprintf(buf, "alpha: %d\n", alpha);
 	OutputDebugString(buf);
 */
+
+	uint32_t y = console.height;
+
 	// draw input cusor
-	Font_DrawText(">", console.indent, console.height - CHAR_HEIGHT, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
-	Font_DrawText("_", console.indent + charWidth, console.height - CHAR_HEIGHT, D3DCOLOR_ARGB(alpha, 255, 255, 255), FONT_SMALL);
+	Font_DrawText(">", console.indent, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
+	Font_DrawText("_", console.indent + charWidth, y, D3DCOLOR_ARGB(alpha, 255, 255, 255), FONT_SMALL);
 
-	size_t rows = console.text.size() - 1;
+	y-= CHAR_HEIGHT;
 
-	int y = console.height - CHAR_HEIGHT * 2;
+	int32_t rows = console.text.size() - 1;
 
 	int lines = console.lines;
 	int xOffset = 0;
 
 	// draw all the lines of text
-	for (int32_t i = (int32_t)rows; i >= 0; i--, y -= CHAR_HEIGHT)
+	for (; rows >= 0; rows--, y -= CHAR_HEIGHT)
 	{
 		xOffset = 0;
 		charWidth = 0;
 
-		Font_DrawText(console.text.at(i), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
+		Font_DrawText(console.text.at(rows), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 	}
 
 	xOffset = CHAR_WIDTH;

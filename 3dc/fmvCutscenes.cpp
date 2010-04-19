@@ -477,7 +477,7 @@ void StartMenuMusic()
 	menuMusic = new VorbisPlayback;
 	if (!menuMusic->Open("IntroSound.ogg"))
 	{
-		Con_PrintError("Can't located IntroSound.ogg");
+		Con_PrintError("Can't open file IntroSound.ogg");
 		delete menuMusic;
 		menuMusic = NULL;
 	}

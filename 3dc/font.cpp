@@ -65,7 +65,7 @@ void Font_Release()
 
 void Font_Init()
 {
-	Fonts[FONT_SMALL].textureID = Tex_LoadFromFile("ExportedFont.tga");
+	Fonts[FONT_SMALL].textureID = Tex_LoadFromFile("avp_font.tga");
 
 	// get the font texture width and height
 	Tex_GetDimensions(Fonts[FONT_SMALL].textureID, Fonts[FONT_SMALL].textureWidth, Fonts[FONT_SMALL].textureHeight);
