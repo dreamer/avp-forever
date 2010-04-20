@@ -56,6 +56,7 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 void D3D_DrawHUDFontCharacter(HUDCharDesc *charDescPtr);
 void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr);
 extern void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int *uvArray, uint32_t colour, enum FILTERING_MODE_ID filteringType);
+extern void New_D3D_HUDQuad_Output2(int textureID, struct VertexTag *quadVerticesPtr, uint32_t colour, enum FILTERING_MODE_ID filteringType);
 
 extern void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2);
 /* HUD globals */
@@ -503,18 +504,15 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 	// top right
 	uvArray[6] = quadVertices[1].U;
 	uvArray[7] = quadVertices[1].V;
-/*
-	New_D3D_HUDQuad_Output
+
+	New_D3D_HUDQuad_Output2
 	(
 		HUDImageNumber, 
-		imageDescPtr->TopLeftX,
-		imageDescPtr->TopLeftY,
-		scaledWidth,
-		scaledHeight,
-		uvArray,
-		RGBALIGHT_MAKE(255,255,255,HUDTranslucencyLevel)
+		quadVertices,
+		RGBALIGHT_MAKE(255,255,255,HUDTranslucencyLevel),
+		FILTERING_BILINEAR_ON
 	);
-*/
+
 /*
 	D3D_HUDQuad_Output(HUDImageNumber,
 		quadVertices,
@@ -641,7 +639,6 @@ void D3D_DrawHUDFontCharacter(HUDCharDesc *charDescPtr)
 	imageDesc.Blue = charDescPtr->Blue;
 
 	Draw_HUDImage(&imageDesc);
-	
 }
 
 void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr)

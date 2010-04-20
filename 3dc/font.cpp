@@ -47,6 +47,16 @@ struct Font
 	uint32_t	blockHeight;
 };
 
+struct BFD
+{
+	uint32_t	mapWidth;
+	uint32_t	mapHeight;
+	uint32_t	cellWidth;
+	uint32_t	cellHeight;
+	char		startChar;
+	char		charWidths[256];
+};
+
 static Font Fonts[NUM_FONT_TYPES];
 
 void Font_Release()
@@ -189,6 +199,7 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 		uvArray[6] = tex_x + charWidth;//Fonts[FONT_SMALL].blockWidth;
 		uvArray[7] = tex_y;
 
+//		DrawQuad(x, y, charWidth, 16, Fonts[FONT_SMALL].textureID, colour, TRANSLUCENCY_GLOWING);
 		New_D3D_HUDQuad_Output(Fonts[FONT_SMALL].textureID, x, y, charWidth, 16, &uvArray[0], colour, FILTERING_BILINEAR_OFF);
 
 		if (/*widthSpaced*/1)

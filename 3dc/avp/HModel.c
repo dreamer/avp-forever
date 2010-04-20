@@ -1478,7 +1478,7 @@ void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_dat
 			D3D_DecalSystem_Setup();
 			RenderParticle(&particle);
 		
-			particle.ParticleID=PARTICLE_ANDROID_BLOOD;
+			particle.ParticleID = PARTICLE_ANDROID_BLOOD;
 
 			particle.Size = shape_to_use->shaperadius/8;
 			RenderParticle(&particle);

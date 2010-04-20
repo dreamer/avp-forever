@@ -1638,7 +1638,6 @@ void MakeParticle(VECTORCH *positionPtr, VECTORCH *velocityPtr, enum PARTICLE_ID
 				break;
 			}
 		}
-
 	}
 }
 
@@ -4061,7 +4060,6 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 					particle.Position.vy = positionPtr->vy + MUL_FIXED(100,directionPtr->vy) + (FastRandom()&127)-64;
 					particle.Position.vz = positionPtr->vz + MUL_FIXED(100,directionPtr->vz) + (FastRandom()&127)-64;
 				}																								 
-
 			}
 			break;
 		}
@@ -4072,7 +4070,6 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 		}
 	}
 	D3D_DecalSystem_End();
-
 }
 
 void DrawFrisbeePlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr)
@@ -5181,9 +5178,7 @@ extern void RenderParticlesInMirror(void)
 		}
 	}
 	D3D_DecalSystem_End();
-
 }
-
 
 
 #if 0

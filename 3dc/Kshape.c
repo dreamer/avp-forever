@@ -6029,11 +6029,11 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 				TexturedPolygon_ClipWithPositiveX();
 				if (RenderPolygon.NumberOfVertices<3) 
 					return;
-//				D3D_Particle_Output(&particle,RenderPolygon.Vertices);
-				AddParticle(&particle, &RenderPolygon.Vertices[0]);
+				D3D_Particle_Output(&particle,RenderPolygon.Vertices);
+//				AddParticle(&particle, &RenderPolygon.Vertices[0]);
   			}
-//			else D3D_Particle_Output(&particle,VerticesBuffer);
-			else AddParticle(&particle, &VerticesBuffer[0]);
+			else D3D_Particle_Output(&particle,VerticesBuffer);
+//			else AddParticle(&particle, &VerticesBuffer[0]);
 		}
 	}	
 }
@@ -6468,11 +6468,11 @@ void RenderStarfield(void)
 					if(RenderPolygon.NumberOfVertices<3) return;
 					TexturedPolygon_ClipWithPositiveX();
 					if(RenderPolygon.NumberOfVertices<3) return;
-					D3D_Particle_Output(&particle,RenderPolygon.Vertices);
-//					AddParticle(&particle, &RenderPolygon.Vertices[0]);
+//					D3D_Particle_Output(&particle,RenderPolygon.Vertices);
+					AddParticle(&particle, &RenderPolygon.Vertices[0]);
 	  			}
-				else D3D_Particle_Output(&particle,VerticesBuffer);
-//				else AddParticle(&particle, &VerticesBuffer[0]);
+//				else D3D_Particle_Output(&particle,VerticesBuffer);
+				else AddParticle(&particle, &VerticesBuffer[0]);
 			}
 		}
 	}		

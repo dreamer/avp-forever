@@ -301,26 +301,12 @@ void Con_Draw()
 	}
 
 	int charCount = 0;
-	static int alpha = 255;
-/*
-	alpha -= 65536 / (static_cast<int>(RealFrameTime * 0.01f));
-
-	if (alpha < 0)
-		alpha = 255;
-	else if (alpha > 255)
-		alpha = 0;
-*/
-/*
-	char buf[100];
-	sprintf(buf, "alpha: %d\n", alpha);
-	OutputDebugString(buf);
-*/
 
 	uint32_t y = console.height;
 
 	// draw input cusor
 	Font_DrawText(">", console.indent, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
-	Font_DrawText("_", console.indent + charWidth, y, D3DCOLOR_ARGB(alpha, 255, 255, 255), FONT_SMALL);
+	Font_DrawText("_", console.indent + charWidth, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 
 	y-= CHAR_HEIGHT;
 

@@ -463,7 +463,7 @@ void DeRedTexture(D3DTEXTURE texture)
 }
 
 // use this to make textures from non power of two images
-D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, int *realWidth, int *realHeight)
+D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight)
 {
 	int original_width = tex->width;
 	int original_height = tex->height;

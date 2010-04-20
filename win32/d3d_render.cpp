@@ -1,23 +1,3 @@
-extern "C" {
-
-#include "3dc.h"
-#include "inline.h"
-#include "gamedef.h"
-#include "dxlog.h"
-#include "d3_func.h"
-#include "d3d_hud.h"
-#include "particle.h"
-#include "avp_menus.h"
-
-#define UseLocalAssert FALSE
-#include "ourasert.h"
-#include <assert.h>
-
-extern D3DINFO d3d;
-extern uint32_t fov;
-
-extern "C++"{
-
 #include "console.h"
 #include "onscreenKeyboard.h"
 #include "textureManager.h"
@@ -40,7 +20,23 @@ extern "C++"{
 #include <d3dx9math.h>
 #include "fmvCutscenes.h"
 
-} //extern "C++"
+extern "C" {
+
+#include "3dc.h"
+#include "inline.h"
+#include "gamedef.h"
+#include "dxlog.h"
+#include "d3_func.h"
+#include "d3d_hud.h"
+#include "particle.h"
+#include "avp_menus.h"
+
+#define UseLocalAssert FALSE
+#include "ourasert.h"
+#include <assert.h>
+
+extern D3DINFO d3d;
+extern uint32_t fov;
 
 #include "HUD_layout.h"
 #define HAVE_VISION_H 1
@@ -54,11 +50,8 @@ extern "C++"{
 const uint32_t MAX_VERTEXES = 4096;
 const uint32_t MAX_INDICES = 9216;
 
-D3DLVERTEX *mainVertex = new D3DLVERTEX[MAX_VERTEXES];//NULL;
-WORD *mainIndex = new WORD [MAX_INDICES * 3];//NULL;
-
-D3DLVERTEX *testVertex = NULL;
-WORD *testIndex = NULL;
+D3DLVERTEX *mainVertex = NULL;
+WORD *mainIndex = NULL;
 
 ORTHOVERTEX *orthoVerts = NULL;
 WORD *orthoIndex = NULL;
@@ -70,7 +63,6 @@ static uint32_t orthoListCount = 0;
 struct RENDER_STATES
 {
 	int32_t		textureID;
-
 	uint32_t	vertStart;
 	uint32_t	vertEnd;
 	uint32_t	indexStart;
@@ -116,8 +108,6 @@ struct renderParticle
 std::vector<renderParticle> particleArray;
 
 D3DXMATRIX viewMatrix;
-
-size_t maxParts = 0;
 
 void UpdateViewMatrix(float *viewMat)
 {
@@ -171,7 +161,7 @@ void DrawParticles()
 	// loop particles and add them to vertex buffer
 	for (size_t i = 0; i < particleArray.size(); i++)
 	{
-		RenderPolygon.NumberOfVertices = (uint32_t)particleArray[i].numVerts;
+		RenderPolygon.NumberOfVertices = particleArray[i].numVerts;
 		D3D_Particle_Output(&particleArray[i].particle, &particleArray[i].vertices[0]);
 	}
 
@@ -605,7 +595,7 @@ void CheckVertexBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_T
 	}
 
 	// check if we've got enough room. if not, flush
-	if (NumVertices + numVerts> (MAX_VERTEXES-12))
+	if (NumVertices + numVerts > (MAX_VERTEXES-12))
 	{
 		UnlockExecuteBufferAndPrepareForUse();
 		ExecuteBuffer();
@@ -650,14 +640,14 @@ void CheckVertexBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_T
 
 BOOL LockExecuteBuffer()
 {
-	LastError = d3d.lpD3DVertexBuffer->Lock(0, 0, (void**)&testVertex, D3DLOCK_DISCARD);
+	LastError = d3d.lpD3DVertexBuffer->Lock(0, 0, (void**)&mainVertex, D3DLOCK_DISCARD);
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
 
-	LastError = d3d.lpD3DIndexBuffer->Lock(0, 0, (void**)&testIndex, D3DLOCK_DISCARD);
+	LastError = d3d.lpD3DIndexBuffer->Lock(0, 0, (void**)&mainIndex, D3DLOCK_DISCARD);
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -806,7 +796,7 @@ void D3D_SetupSceneDefaults()
 	// this defaults to FALSE
 	if (D3DDitherEnable != TRUE)
 	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE,TRUE);
+		d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE, TRUE);
 		D3DDitherEnable = TRUE;
 	}
 }
@@ -881,9 +871,6 @@ BOOL ExecuteBuffer()
 	// sort the list of render objects
 	std::sort(renderTest.begin(), renderTest.end());
 
-	memcpy(testVertex, mainVertex, NumVertices * sizeof(D3DLVERTEX));
-	memcpy(testIndex, mainIndex, NumIndicies * sizeof(WORD));
-
 #ifdef WIN32
 //	Font_DrawText("blah this is my text test", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
 #endif
@@ -894,13 +881,13 @@ BOOL ExecuteBuffer()
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
-	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_LVERTEX);
+	LastError = d3d.lpD3DDevice->SetIndices(d3d.lpD3DIndexBuffer);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
-	LastError = d3d.lpD3DDevice->SetIndices(d3d.lpD3DIndexBuffer);
+	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_LVERTEX);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -943,8 +930,8 @@ BOOL ExecuteBuffer()
 		if (numPrimitives > 0) 
 		{
 			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 
-				0, 
-				0, 
+				0,
+				0,
 				NumVertices,
 				renderTest[i].indexStart,
 				numPrimitives);
@@ -1752,13 +1739,86 @@ void D3D_HUD_Setup(void)
 	}
 }
 
+inline float WPos2DC(int pos)
+{
+	return (float(pos / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
+}
+
+inline float HPos2DC(int pos)
+{
+	return (float(pos / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
+}
+
+void New_D3D_HUDQuad_Output2(int textureID, struct VertexTag *quadVerticesPtr, uint32_t colour, enum FILTERING_MODE_ID filteringType)
+{
+	float RecipW, RecipH;
+
+	// ugh..
+	if (textureID >= texIDoffset)
+	{
+		uint32_t texWidth, texHeight;
+
+		Tex_GetDimensions(textureID, texWidth, texHeight);
+
+		RecipW = 1.0f / texWidth;
+		RecipH = 1.0f / texHeight;
+	}
+	else
+	{
+		RecipW = 1.0f / ImageHeaderArray[textureID].ImageWidth;
+		RecipH = 1.0f / ImageHeaderArray[textureID].ImageHeight;
+	}
+
+	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP, filteringType);
+
+	// bottom left
+	orthoVerts[orthoVBOffset].x = WPos2DC(quadVerticesPtr[3].X);
+	orthoVerts[orthoVBOffset].y = HPos2DC(quadVerticesPtr[3].Y);
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = quadVerticesPtr[3].U * RecipW;
+	orthoVerts[orthoVBOffset].v = quadVerticesPtr[3].V * RecipH;
+	orthoVBOffset++;
+
+	// top left
+	orthoVerts[orthoVBOffset].x = WPos2DC(quadVerticesPtr[0].X);
+	orthoVerts[orthoVBOffset].y = HPos2DC(quadVerticesPtr[0].Y);
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = quadVerticesPtr[0].U * RecipW;
+	orthoVerts[orthoVBOffset].v = quadVerticesPtr[0].V * RecipH;
+	orthoVBOffset++;
+
+	// bottom right
+	orthoVerts[orthoVBOffset].x = WPos2DC(quadVerticesPtr[2].X);
+	orthoVerts[orthoVBOffset].y = HPos2DC(quadVerticesPtr[2].Y);
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = quadVerticesPtr[2].U * RecipW;
+	orthoVerts[orthoVBOffset].v = quadVerticesPtr[2].V * RecipH;
+	orthoVBOffset++;
+
+	// top right
+	orthoVerts[orthoVBOffset].x = WPos2DC(quadVerticesPtr[1].X);
+	orthoVerts[orthoVBOffset].y = HPos2DC(quadVerticesPtr[1].Y);
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = quadVerticesPtr[1].U * RecipW;
+	orthoVerts[orthoVBOffset].v = quadVerticesPtr[1].V * RecipH;
+	orthoVBOffset++;
+}
+
 void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int *uvArray, uint32_t colour, enum FILTERING_MODE_ID filteringType)
 {
 	int newWidth = ScreenDescriptorBlock.SDB_Width;
 	int newHeight = ScreenDescriptorBlock.SDB_Height;
 
-	float x1 = (float(x / (float)newWidth) * 2) - 1;
-	float y1 = (float(y / (float)newHeight) * 2) - 1;
+//	float x1 = (float(x / (float)newWidth) * 2) - 1;
+	float x1 = WPos2DC(x);
+
+	float y1 = HPos2DC(y);
+//	float y1 = (float(y / (float)newHeight) * 2) - 1;
+
 
 	float x2 = ((float(x + width) / (float)newWidth) * 2) - 1;
 	float y2 = ((float(y + height) / (float)newHeight) * 2) - 1;
@@ -2198,7 +2258,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	float RecipW = 1.0f / (float) ImageHeaderArray[texoffset].ImageWidth;
 	float RecipH = 1.0f / (float) ImageHeaderArray[texoffset].ImageHeight;
 
-	CheckVertexBuffer(RenderPolygon.NumberOfVertices, /*texoffset*/NO_TEXTURE, particleDescPtr->TranslucencyType);
+	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, particleDescPtr->TranslucencyType);
 /*
 	char buf[100];
 	sprintf(buf, "trans type: %d\n", particleDescPtr->TranslucencyType);
