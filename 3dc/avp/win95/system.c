@@ -489,7 +489,7 @@ void RestartLevel()
 	InitObjectVisibilities();
 	InitPheromoneSystem();
 	InitHive();
-	InitSquad();
+//	InitSquad();
 	
 	/* KJL 14:22:41 17/11/98 - reset HUD data, such as where the crosshair is,
 	whether the Alien jaw is on-screen, and so on */

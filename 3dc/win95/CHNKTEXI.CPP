@@ -17,24 +17,9 @@
 	#include "ffstdio.h"
 #endif
 
-#ifndef CL_SUPPORT_ALTTAB
-	#error "Please #define CL_SUPPORT_ALTTAB to 0 or 1 in projload.hpp"
-#endif
-#if CL_SUPPORT_ALTTAB
-	#include "alt_tab.h"
-#endif
-
 #include "chnktexi.h"
 
-#if !defined(NDEBUG) && defined(_CPPRTTI)
-	#include <typeinfo.h>
-#else
-	#define dynamic_cast static_cast
-#endif
-	
 char const * cl_pszGameMode = NULL;
-
-#include <string>
 
 // used to determine if the display is palettized
 // currently assuming that if this is <= 8 then all
@@ -463,7 +448,6 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 					else
 						db_logf3(("CL_LoadImageOnce(): WARNING! shape/sprite %s does not appear to list %s\n",pszSubName,pszName));
 				}
-
 			}
 
 			List<Chunk *> listMatchImageChunk;
@@ -670,7 +654,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 */	
 	// get the filename
 	char szBuf[MAX_PATH];
-	if (!CL_GetImageFileName(szBuf,sizeof szBuf/sizeof szBuf[0],pszFileName,fFlagsEtc))
+	if (!CL_GetImageFileName(szBuf, sizeof szBuf/sizeof szBuf[0], pszFileName, fFlagsEtc))
 	{
 		db_log1("CL_LoadImageOnce(): ERROR: unable to determine path of file");
 		return GEI_NOTLOADED;
@@ -714,154 +698,12 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 				return GEI_NOTLOADED;
 			}
 		}
-		case LIO_DDSURFACE:
-		{
-#if 0 // bjd - this is never used as far as I can see
-			#if CL_SUPPORT_FASTFILE
-			unsigned nFastFileLen;
-			void const * pFastFileData = ffreadbuf(szBuf,&nFastFileLen);
-			if (pFastFileData)
-			{
-				db_log4("\tfile is in a fast file");
-				unsigned nWidth, nHeight;
-				AW_BACKUPTEXTUREHANDLE hBackup = NULL;
-				DDSurface * pSurface =
-					AwCreateSurface
-					(
-						fFlagsEtc & LIO_RESTORABLE ? "pxfXYB" : "pxfXY",
-						pFastFileData,
-						nFastFileLen,
-						fAwLoad,
-						&nWidth,
-						&nHeight,
-						&hBackup
-					);
-				if (pSurface)
-				{
-					IMAGEHEADER * pImageHdr = GetImageHeader();
-					db_assert1(pImageHdr);
-					memset(pImageHdr,0,sizeof(IMAGEHEADER));
-					pImageHdr->ImageWidth = pSurface->width; //nWidth;
-					pImageHdr->ImageHeight = pSurface->height; //nHeight;
-					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
-					strcpy(pImageHdr->ImageName,szBuf);
-//					pImageHdr->DDSurface = pSurface;
-//					pImageHdr->hBackup = hBackup;
-					pImageHdr->Direct3DTexture = NULL;
-					
-					db_logf4(("\tloaded to image number %d",NumImages-1));
-/*					
-					if (pSurface->buf) {
-						pImageHdr->Direct3DSurface8 = CreateD3DSurface(pSurface, pSurface->w, pSurface->h);
-						//char szDbInf[512];
-						//sprintf(szDbInf,"Surface \"%s\" didn't load",pImageHdr->ImageName);
-							
-						if (pImageHdr->Direct3DSurface8 == NULL) {
-							OutputDebugString("Direct3DSurface8 was Null!");
-						}
-					}
-					else {
-						OutputDebugString("pSurface->buf was Null!");
-					}
-*/
-					#if CL_SUPPORT_ALTTAB
-						if (fFlagsEtc & LIO_RESTORABLE)
-						#ifdef NDEBUG
-							ATIncludeSurface(pSurface,hBackup);
-						#else
-						{
-							char szDbInf[512];
-							sprintf(szDbInf,"Name \"%s\" Number %d",szBuf,NumImages-1);
-							ATIncludeSurfaceDb(pSurface,hBackup,szDbInf);
-						}
-						#endif
-					#endif // CL_SUPPORT_ALTTAB
-					return NumImages-1;
-				}
-				else
-				{
-					db_log1("CL_LoadImageOnce(): ERROR copying data to surface");
-					return GEI_NOTLOADED;
-				}
-			}
-			else
-			#endif // CL_SUPPORT_FASTFILE
-			{
-				#if !defined(CL_SUPPORTONLY_FASTFILE) || !CL_SUPPORTONLY_FASTFILE
-				db_log4("\tloading the actual file");
-				unsigned nWidth, nHeight;
-				AW_BACKUPTEXTUREHANDLE hBackup = NULL;
-				DDSurface * pSurface =
-					AwCreateSurface
-					(
-						fFlagsEtc & LIO_RESTORABLE ? "sfXYB" : "sfXY",
-						&szBuf[0],
-						fAwLoad,
-						&nWidth,
-						&nHeight,
-						&hBackup
-					);
-				if (pSurface)
-				{
-					IMAGEHEADER * pImageHdr = GetImageHeader();
-					db_assert1(pImageHdr);
-					memset(pImageHdr,0,sizeof(IMAGEHEADER));
-					pImageHdr->ImageWidth = pSurface->width; //nWidth;
-					pImageHdr->ImageHeight = pSurface->height; //nHeight;
-					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
-					strcpy(pImageHdr->ImageName,szBuf);
-//					pImageHdr->DDSurface = pSurface;
-//					pImageHdr->hBackup = hBackup;
-					pImageHdr->Direct3DTexture = NULL;
-
-					db_logf4(("\tloaded to image number %d",NumImages-1));
-					db_logf4(("\t\tsurface:%p",pSurface));
-/*					
-					if (pSurface->buf) {
-						pImageHdr->Direct3DSurface8 = CreateD3DSurface(pSurface, pSurface->w, pSurface->h);
-						//char szDbInf[512];
-						//sprintf(szDbInf,"Surface \"%s\" didn't load",pImageHdr->ImageName);
-							
-						if (pImageHdr->Direct3DSurface8 == NULL) {
-							OutputDebugString("Direct3DSurface8 was Null!");
-						}
-					}
-					else {
-						OutputDebugString("pSurface->buf was Null!");
-					}
-*/
-					#if CL_SUPPORT_ALTTAB
-						if (fFlagsEtc & LIO_RESTORABLE)
-						#ifdef NDEBUG
-							ATIncludeSurface(pSurface,hBackup);
-						#else
-						{
-							char szDbInf[512];
-							sprintf(szDbInf,"Name \"%s\" Number %d",szBuf,NumImages-1);
-							ATIncludeSurfaceDb(pSurface,hBackup,szDbInf);
-						}
-						#endif
-					#endif // CL_SUPPORT_ALTTAB
-					return NumImages-1;
-				}
-				else
-				{
-					db_log1("CL_LoadImageOnce(): ERROR copying data to surface");
-					return GEI_NOTLOADED;
-				}
-				#elif !CL_SUPPORT_FASTFILE
-					#error "CL_SUPPORTONLY_FASTFILE set but CL_SUPPORT_FASTFILE not set"
-				#endif // !CL_SUPPORTONLY_FASTFILE
-			}
-			//db_msg1("THIS CODE SHOULD BE UNREACHABLE");
-#endif // bjd
-		}
 		case LIO_D3DTEXTURE:
 		{
 			fAwLoad |= AW_TLF_COMPRESS; // required on some cards!!
 			#if CL_SUPPORT_FASTFILE
 			size_t nFastFileLen;
-			void const * pFastFileData = ffreadbuf(szBuf,&nFastFileLen);
+			void const * pFastFileData = ffreadbuf(szBuf, &nFastFileLen);
 #if 0
 			/* check for user texture first? */
 			int height, width;
@@ -905,8 +747,8 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					IMAGEHEADER * pImageHdr = GetImageHeader();
 					db_assert1(pImageHdr);
 					memset(pImageHdr,0,sizeof(IMAGEHEADER));
-					pImageHdr->ImageWidth = pTexture->width;//nWidth;
-					pImageHdr->ImageHeight = pTexture->height;//nHeight;
+					pImageHdr->ImageWidth = pTexture->width;
+					pImageHdr->ImageHeight = pTexture->height;
 					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
 					strcpy(pImageHdr->ImageName,szBuf);
 					pImageHdr->AvPTexture = pTexture;
@@ -942,23 +784,10 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 
 							//char szDbInf[512];
 								//sprintf(szDbInf,"Texture \"%s\" didn't load",pImageHdr->ImageName);
-							
-							if (pImageHdr->Direct3DTexture == NULL) 
-							{
-								OutputDebugString("Direct3DTexture was Null!");
-							}
 
 							/* free this, as d3d now holds the texture */
-							//free(pImageHdr->AvPTexture);
-
 							free(pTexture->buffer);
-							//pImageHdr->AvPTexture = NULL;
 							pTexture->buffer = NULL;
-
-							int gotTextureHandle = 1;
-							//free(pTexture->buffer);
-							//int gotTextureHandle = GetTextureHandle(pImageHdr);
-							//db_assert1(gotTextureHandle==TRUE);
 						}
 						else OutputDebugString("pTexture->buf was Null!");
 					}
