@@ -42,6 +42,10 @@ D3DXMATRIX matViewProjection;
 D3DXMATRIX matView; 
 D3DXMATRIX matIdentity;
 
+extern D3DVERTEXELEMENT9 decl[];
+extern LPD3DXBUFFER	code; //Temporary buffer (NEW)
+extern LPD3DXCONSTANTTABLE	constantTable;
+
 bool IsPowerOf2(int i) 
 {
 	if ((i & -i) == i) {
@@ -1416,6 +1420,53 @@ BOOL InitialiseDirect3D()
 	Con_AddCommand("r_toggleWireframe", ToggleWireframe);
 	Con_AddCommand("r_setfov", SetFov);
 
+	d3d.lpD3DDevice->CreateVertexDeclaration(decl, &d3d.vertexDecl);
+
+	LPD3DXBUFFER pErrors = NULL;
+
+	// set up vertex shader
+	LastError = D3DXCompileShaderFromFile("vertex.vsh",    //filepath
+							   NULL,            //macro's
+							   NULL,            //includes
+							   "vs_main",       //main function
+							   "vs_2_0",        //shader profile
+							   0,               //flags
+							   &code,           //compiled operations
+							   &pErrors,        //errors
+							   &constantTable); //constants
+	if (FAILED(LastError))
+	{
+		OutputDebugString((const char*)pErrors->GetBufferPointer());
+		int i = 0;
+	}
+
+	d3d.lpD3DDevice->CreateVertexShader((DWORD*)code->GetBufferPointer(), &d3d.vertexShader);
+	code->Release();
+
+	//set up Pixel Shader (NEW)
+	LastError = D3DXCompileShaderFromFile("pixel.psh",   //filepath
+							   NULL,          //macro's            
+							   NULL,          //includes           
+							   "ps_main",     //main function      
+							   "ps_2_0",      //shader profile     
+							   0,             //flags              
+							   &code,         //compiled operations
+							   &pErrors,      //errors
+							   NULL);         //constants
+	if (FAILED(LastError))
+	{
+		if (pErrors)
+		{
+			char buf[200];
+			memcpy(buf, pErrors->GetBufferPointer(), pErrors->GetBufferSize());
+			OutputDebugString(buf);
+			int i = 0;
+		}
+	}
+
+	d3d.lpD3DDevice->CreatePixelShader((DWORD*)code->GetBufferPointer(), &d3d.pixelShader);
+	code->Release();
+
 	Con_PrintMessage("Initialised Direct3D9 succesfully");
 	return TRUE;
 }
@@ -1471,6 +1522,11 @@ void ReleaseDirect3D()
 
 	// delete up any new()-ed memory in d3d_render.cpp
 	DeleteRenderMemory();
+
+	SAFE_RELEASE(constantTable);
+	SAFE_RELEASE(d3d.pixelShader);
+	SAFE_RELEASE(d3d.vertexShader);
+	SAFE_RELEASE(d3d.vertexDecl);
 
 	SAFE_RELEASE(d3d.lpD3DDevice);
 	LogString("Releasing Direct3D9 device...");

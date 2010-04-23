@@ -54,6 +54,14 @@ typedef struct D3DInfo
 
 	LPDIRECT3DVERTEXBUFFER9 lpD3DPointSpriteVertexBuffer;
 
+	LPDIRECT3DVERTEXDECLARATION9 vertexDecl; //VertexDeclaration (NEW)
+	LPDIRECT3DVERTEXSHADER9      vertexShader; //VS (NEW)
+//	LPD3DXCONSTANTTABLE          constantTable; //ConstantTable (NEW)
+
+	LPDIRECT3DPIXELSHADER9       pixelShader; //PS (NEW)
+
+//	LPD3DXBUFFER                 code; //Temporary buffer (NEW)
+
     int						NumDrivers;
     int						CurrentDriver;
     D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS];

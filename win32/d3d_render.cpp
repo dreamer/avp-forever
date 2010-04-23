@@ -20,6 +20,15 @@
 #include <d3dx9math.h>
 #include "fmvCutscenes.h"
 
+D3DVERTEXELEMENT9 decl[] = {{0, 0,  D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
+							{0, 12, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0},
+							{0, 16, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 1},
+                            {0, 20, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
+                            D3DDECL_END()};
+
+LPD3DXCONSTANTTABLE			constantTable = NULL; //ConstantTable (NEW)
+LPD3DXBUFFER				code = NULL; //Temporary buffer (NEW)
+
 extern "C" {
 
 #include "3dc.h"
@@ -886,13 +895,13 @@ BOOL ExecuteBuffer()
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
-
+/*
 	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_LVERTEX);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
-
+*/
 	D3DXMATRIX matProjection;
 	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(fov), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
 
@@ -902,6 +911,16 @@ BOOL ExecuteBuffer()
 
 	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,		&viewMatrix);
 	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matProjection);
+
+	D3DXMATRIX matWorld; 
+	D3DXMatrixIdentity(&matWorld);
+
+	D3DXMATRIXA16 matWorldViewProj = matWorld * viewMatrix * matProjection;
+	constantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
+
+	d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
+	d3d.lpD3DDevice->SetVertexShader(d3d.vertexShader);
+	d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
 
 	ChangeTextureAddressMode(TEXTURE_WRAP);
 
