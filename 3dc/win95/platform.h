@@ -396,8 +396,6 @@ int  CheckForJoystick(void);
 void ColourFillBackBuffer(int FillColour);
 void FlipBuffers(void);
 BOOL InitialiseDirect3D(void);
-BOOL LockExecuteBuffer(void);
-BOOL UnlockExecuteBufferAndPrepareForUse(void);
 BOOL BeginD3DScene(void);
 BOOL EndD3DScene(void);
 BOOL ExecuteBuffer(void);

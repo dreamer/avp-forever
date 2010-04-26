@@ -20,6 +20,8 @@
 #include <d3dx9math.h>
 #include "fmvCutscenes.h"
 
+uint32_t psIndex = 0;
+
 D3DVERTEXELEMENT9 decl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
 							{0, 12, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		0},
 							{0, 16, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		1},
@@ -77,6 +79,8 @@ WORD *mainIndex = NULL;
 
 ORTHOVERTEX *orthoVerts = NULL;
 WORD *orthoIndex = NULL;
+
+POINTSPRITEVERTEX *testPS = NULL;
 
 static uint32_t orthoVBOffset = 0;
 static uint32_t orthoIBOffset = 0;
@@ -139,6 +143,14 @@ void UpdateViewMatrix(float *viewMat)
 	D3DXVECTOR3 vecFront	(viewMat[8], viewMat[9], viewMat[10]);
 	D3DXVECTOR3 vecPosition (viewMat[3], -viewMat[7], viewMat[11]);
 
+	D3DXVec3Normalize(&vecFront, &vecFront);
+
+	D3DXVec3Cross(&vecUp, &vecFront, &vecRight);
+	D3DXVec3Normalize(&vecUp, &vecUp);
+
+	D3DXVec3Cross(&vecRight, &vecUp, &vecFront);
+	D3DXVec3Normalize(&vecRight, &vecRight);
+
 	// right
 	viewMatrix._11 = vecRight.x;
 	viewMatrix._21 = vecRight.y;
@@ -163,6 +175,7 @@ void UpdateViewMatrix(float *viewMat)
 	viewMatrix._41 = -D3DXVec3Dot(&vecPosition, &vecRight);
 	viewMatrix._42 = -D3DXVec3Dot(&vecPosition, &vecUp);
 	viewMatrix._43 = -D3DXVec3Dot(&vecPosition, &vecFront);
+
 /*
 	viewMatrix._41 = vecPosition.x;
 	viewMatrix._42 = vecPosition.y;
@@ -305,6 +318,8 @@ extern void RenderSky(void);
 extern void RenderStarfield(void);
 void D3D_DrawMoltenMetalMesh_Unclipped(void);
 static void D3D_OutputTriangles(void);
+BOOL LockExecuteBuffer();
+BOOL UnlockExecuteBufferAndPrepareForUse();
 
 //Globals
 
@@ -692,6 +707,14 @@ BOOL LockExecuteBuffer()
 		return FALSE;
 	}
 
+	// lock point sprite vb
+	LastError = d3d.lpD3DPointSpriteVertexBuffer->Lock(0, 0, (void**)&testPS, 0);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return FALSE;
+	}
+
 	NumVertices = 0;
 	NumIndicies = 0;
 	renderCount = 0;
@@ -718,6 +741,14 @@ BOOL UnlockExecuteBufferAndPrepareForUse()
 
 	// unlock index buffer for main vertex buffer
 	LastError = d3d.lpD3DIndexBuffer->Unlock();
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return FALSE;
+	}
+
+	// unlock point sprite vb
+	LastError = d3d.lpD3DPointSpriteVertexBuffer->Unlock();
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -1017,26 +1048,30 @@ BOOL ExecuteBuffer()
 
 	D3DPERF_EndEvent();
 
-/*
-	// PS test
-	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DPointSpriteVertexBuffer, 0, sizeof(POINTSPRITEVERTEX));
-	if (FAILED(LastError))
+	if (psIndex)
 	{
-		LogDxError(LastError, __LINE__, __FILE__);
+		// PS test
+		LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DPointSpriteVertexBuffer, 0, sizeof(POINTSPRITEVERTEX));
+		if (FAILED(LastError))
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+
+		LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_POINTSPRITEVERTEX);
+		if (FAILED(LastError))
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+
+		LastError = d3d.lpD3DDevice->DrawPrimitive(D3DPT_POINTLIST, 0, psIndex);
+		if (FAILED(LastError))
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
 	}
 
-	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_POINTSPRITEVERTEX);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
+	psIndex = 0;
 
-	LastError = d3d.lpD3DDevice->DrawPrimitive(D3DPT_POINTLIST, 0, 4);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
-*/
 	// render any orthographic quads
 	if (orthoListCount)
 	{
@@ -1086,7 +1121,7 @@ BOOL ExecuteBuffer()
 			uint32_t primitiveCount = (orthoList[i].indexEnd - orthoList[i].indexStart) / 3;
 
 			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 
-			   0, 
+			   0,
 			   0,
 			   orthoVBOffset,
 			   orthoList[i].indexStart,
@@ -2287,16 +2322,30 @@ void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	particleArray.push_back(tempParticle);
 }
 
+void D3D_PointSpriteTest(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
+{
+	testPS[psIndex].x = particlePtr->Position.vx;
+	testPS[psIndex].y = particlePtr->Position.vy;
+	testPS[psIndex].z = particlePtr->Position.vz;
+
+	testPS[psIndex].size = 64.0f;
+
+	testPS[psIndex].colour = D3DCOLOR_XRGB(128, 0, 128);
+	testPS[psIndex].u = 0.0f;
+	testPS[psIndex].v = 0.0f;
+
+	psIndex++;
+}
+
 void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 {
 	// steam jets, wall lights, fire (inc aliens on fire) etc
 	PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
-	int texoffset = SpecialFXImageNumber;
 
-	float RecipW = 1.0f / (float) ImageHeaderArray[texoffset].ImageWidth;
-	float RecipH = 1.0f / (float) ImageHeaderArray[texoffset].ImageHeight;
+	float RecipW = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
+	float RecipH = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
 
-	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, particleDescPtr->TranslucencyType);
+	CheckVertexBuffer(RenderPolygon.NumberOfVertices, SpecialFXImageNumber, particleDescPtr->TranslucencyType);
 /*
 	char buf[100];
 	sprintf(buf, "trans type: %d\n", particleDescPtr->TranslucencyType);

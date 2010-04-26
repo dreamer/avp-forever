@@ -202,7 +202,7 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 	quadVertices[2].Y = imageDescPtr->TopLeftY + scaledHeight;
 	quadVertices[3].X = imageDescPtr->TopLeftX;
 	quadVertices[3].Y = imageDescPtr->TopLeftY + scaledHeight;
-
+/*
 	int uvArray[8];
 
 	// bottom left
@@ -220,7 +220,16 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 	// top right
 	uvArray[6] = imageDescPtr->TopLeftU + imageDescPtr->Width;
 	uvArray[7] = imageDescPtr->TopLeftV;
-
+*/
+	New_D3D_HUDQuad_Output2(imageDescPtr->ImageNumber, quadVertices, RGBALIGHT_MAKE
+		(
+			imageDescPtr->Red,
+			imageDescPtr->Green,
+			imageDescPtr->Blue,
+			imageDescPtr->Translucency
+		),
+		FILTERING_BILINEAR_OFF);
+/*
 	New_D3D_HUDQuad_Output
 	(
 		imageDescPtr->ImageNumber, 
@@ -238,7 +247,7 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 		),
 		FILTERING_BILINEAR_OFF
 	);
-
+*/
 /*	
 	D3D_HUDQuad_Output
 	(

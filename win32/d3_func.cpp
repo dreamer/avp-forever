@@ -895,13 +895,14 @@ BOOL CreateVolatileResources()
 	}
 
 	// point sprite vb
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(4 * sizeof(POINTSPRITEVERTEX), D3DUSAGE_POINTS, D3DFVF_POINTSPRITEVERTEX, D3DPOOL_MANAGED, &d3d.lpD3DPointSpriteVertexBuffer, NULL);
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(24 * sizeof(POINTSPRITEVERTEX), D3DUSAGE_POINTS, D3DFVF_POINTSPRITEVERTEX, D3DPOOL_MANAGED, &d3d.lpD3DPointSpriteVertexBuffer, NULL);
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
 
+#if 0
 	POINTSPRITEVERTEX *testPS;
 
 	LastError = d3d.lpD3DPointSpriteVertexBuffer->Lock(0, 0, (void**)&testPS, 0);
@@ -928,6 +929,7 @@ BOOL CreateVolatileResources()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
+#endif
 
 	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));
 	if (FAILED(LastError))
