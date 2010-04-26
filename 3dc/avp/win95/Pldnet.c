@@ -5986,7 +5986,7 @@ static void ProcessNetMsg_PlayerState_Minimal(NETMESSAGE_PLAYERSTATE_MINIMAL *me
 	STRATEGYBLOCK *sbPtr;
 	
 	/* if we're not playing, ignore it */
-	if(netGameData.myGameState!=NGS_Playing) return;	
+	if(netGameData.myGameState!=NGS_Playing) return;
 
 	playerIndex = PlayerIdInPlayerList(senderId);
 
@@ -5994,7 +5994,6 @@ static void ProcessNetMsg_PlayerState_Minimal(NETMESSAGE_PLAYERSTATE_MINIMAL *me
 	if (playerIndex==NET_IDNOTINPLAYERLIST) return;
 
 	sbPtr = FindGhost(senderId, GHOST_PLAYEROBJECTID);
-		
 	
 	//record whether the player is in the land of the living
 	netGameData.playerData[playerIndex].playerAlive=messagePtr->IAmAlive;	
@@ -6005,7 +6004,6 @@ static void ProcessNetMsg_PlayerState_Minimal(NETMESSAGE_PLAYERSTATE_MINIMAL *me
 		//if we don't have a ghost for this player , wait for a full player state message
 		return;
 	}
-	
 
 	if(!MultiplayerObservedPlayer)
 	{
@@ -6015,22 +6013,20 @@ static void ProcessNetMsg_PlayerState_Minimal(NETMESSAGE_PLAYERSTATE_MINIMAL *me
 			sbPtr->SBdptr->ObFlags&=~ObFlag_NotVis;
 		}
 	}
-	
+
 	{
 		int firingPrimary;
 		int firingSecondary;
 		
 		firingPrimary = (int)messagePtr->IAmFiringPrimary;
 		firingSecondary = (int)messagePtr->IAmFiringSecondary;
-		
-		
 
 		if(!(((!(messagePtr->IAmAlive)))&&(netGameData.playerData[playerIndex].characterType==NGCT_Alien)))
 		{
 			NETGHOSTDATABLOCK *ghostData;
 			ghostData = (NETGHOSTDATABLOCK *)sbPtr->SBdataptr;
 			GLOBALASSERT(ghostData);
-			
+
 			if(orientation)
 			{
 				NETMESSAGE_PLAYERSTATE_MEDIUM* mediumMessage=(NETMESSAGE_PLAYERSTATE_MEDIUM*) messagePtr;
@@ -6041,7 +6037,7 @@ static void ProcessNetMsg_PlayerState_Minimal(NETMESSAGE_PLAYERSTATE_MINIMAL *me
 
 				UpdateGhost(sbPtr,&sbPtr->DynPtr->Position,&orientation,-1,messagePtr->Special);
 			}
-			
+
 			/* We are not a dead alien */
 			HandleWeaponElevation(sbPtr,(int)messagePtr->Elevation,ghostData->CurrentWeapon);
 			//don't draw muzzle flash if observing from this player
@@ -6071,8 +6067,7 @@ static void ProcessNetMsg_PlayerState_Minimal(NETMESSAGE_PLAYERSTATE_MINIMAL *me
 			RemoveGhost(sbPtr);
 			return;
 		}
-		
-		
+
 		if(sbPtr && messagePtr->IAmAlive)
 		{
 			NETGHOSTDATABLOCK *ghostData;
@@ -6085,7 +6080,7 @@ static void ProcessNetMsg_PlayerState_Minimal(NETMESSAGE_PLAYERSTATE_MINIMAL *me
 				{
 					PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 					playerStatusPtr->ViewPanX=messagePtr->Elevation;
-				
+
 					//don't draw the player we're observing
 					if(sbPtr && sbPtr->SBdptr)
 					{
@@ -9494,7 +9489,6 @@ void RenderPlayersImageInMirror(void)
 			HandleWeaponElevation(sbPtr,playerStatusPtr->ViewPanX,weapon);
 		
 			UpdateGhost(sbPtr,&(Player->ObStrategyBlock->DynPtr->Position),&(Player->ObStrategyBlock->DynPtr->OrientEuler),sequence,AreTwoPistolsInTertiaryFire());
-
 
 			MaintainGhostCloakingStatus(sbPtr,(int)playerStatusPtr->cloakOn);
 		}

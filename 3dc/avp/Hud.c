@@ -1006,7 +1006,9 @@ static void HandleMarineWeapon(void)
 	PositionPlayersWeapon();
 
 	/* if there is no shape name then return */
-	if (twPtr->WeaponShapeName == NULL) return;
+	if (twPtr->WeaponShapeName == NULL) 
+		return;
+
 	RenderThisDisplayblock(&PlayersWeapon);
 
 	if ((twPtr->MuzzleFlashShapeName != NULL)
@@ -1054,8 +1056,8 @@ static void HandleMarineWeapon(void)
 
 	/* aim gun sight */ 
     {
-    	int aimingSpeed=twPtr->GunCrosshairSpeed * NormalFrameTime;
-        AimGunSight(aimingSpeed,twPtr);
+    	int aimingSpeed = twPtr->GunCrosshairSpeed * NormalFrameTime;
+        AimGunSight(aimingSpeed, twPtr);
 	}
 }
 
@@ -1985,7 +1987,7 @@ static void AimGunSight(int aimingSpeed, TEMPLATE_WEAPON_DATA *twPtr)
     dx = targetX-GunMuzzleSightX;
   	dy = targetY-GunMuzzleSightY;
     mag = Fast2dMagnitude(dx,dy);
-	
+
     /* return if no need to move sight */
 	if (mag==0) return;
     

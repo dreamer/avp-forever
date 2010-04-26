@@ -43,7 +43,8 @@ D3DXMATRIX matView;
 D3DXMATRIX matIdentity;
 
 extern D3DVERTEXELEMENT9 decl[];
-extern LPD3DXBUFFER	code; //Temporary buffer (NEW)
+extern D3DVERTEXELEMENT9 orthoDecl[];
+extern D3DVERTEXELEMENT9 fmvDecl[];
 extern LPD3DXCONSTANTTABLE	constantTable;
 
 bool IsPowerOf2(int i) 
@@ -201,50 +202,6 @@ const D3DFORMAT DepthFormats[] =
 };
 
 bool usingStencil = false;
-
-#if 0
-LPDIRECT3DTEXTURE9 CheckAndLoadUserTexture(const char *fileName, int *width, int *height)
-{
-	LPDIRECT3DTEXTURE9	tempTexture = NULL;
-	D3DXIMAGE_INFO		imageInfo;
-
-	std::string fullFileName(fileName);
-	fullFileName += ".png";
-
-	// try find a png file at given path
-	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice, 
-		fullFileName.c_str(), 
-		D3DX_DEFAULT,			// width
-		D3DX_DEFAULT,			// height
-		1,						// mip levels
-		0,						// usage	
-		D3DFMT_UNKNOWN,			// format
-		D3DPOOL_MANAGED,
-		D3DX_FILTER_NONE,
-		D3DX_FILTER_NONE,
-		0,
-		&imageInfo,
-		NULL,
-		&tempTexture
-		);	
-
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		*width = 0;
-		*height = 0;
-		return NULL;
-	}
-
-	OutputDebugString("created user texture: ");
-	OutputDebugString(fullFileName.c_str());
-	OutputDebugString("\n");
-	
-	*width = imageInfo.Width;
-	*height = imageInfo.Height;
-	return tempTexture;
-}
-#endif
 
 void PrintD3DMatrix(const char* name, D3DXMATRIX &mat)
 {
@@ -478,7 +435,7 @@ D3DTEXTURE CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	return destTexture;
 }
 
-D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool)
+D3DTEXTURE CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool)
 {
 	D3DTEXTURE destTexture = NULL;
 
@@ -507,32 +464,121 @@ D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool)
 		return NULL;
 	}
 
-#if 0 // dont need this
-	// lets clear it to black
-	D3DLOCKED_RECT lock;
-
-	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
-	if (FAILED(LastError)) 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
-	else
-	{
-		memset(lock.pBits, 0, lock.Pitch * newHeight);
-
-		LastError = destTexture->UnlockRect(0);
-		if (FAILED(LastError)) 
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-		}
-	}
-#endif
-
 	*width = newWidth;
 	*height = newHeight;
 
 	return destTexture;
 }
+
+D3DTEXTURE CreateFmvTexture2(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool)
+{
+	D3DTEXTURE destTexture = NULL;
+#if 0
+	int newWidth, newHeight;
+
+	// check if passed value is already a power of 2
+	if (!IsPowerOf2(*width)) 
+	{
+		newWidth = NearestSuperiorPow2(*width);
+	}
+	else { newWidth = *width; }
+
+	if (!IsPowerOf2(*height)) 
+	{
+		newHeight = NearestSuperiorPow2(*height);
+	}
+	else { newHeight = *height; }
+#endif
+	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, usage, D3DFMT_L8, (D3DPOOL)pool, &destTexture, NULL);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return NULL;
+	}
+
+//	*width = newWidth;
+//	*height = newHeight;
+
+	return destTexture;
+}
+
+uint32_t CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 *vertexShader)
+{
+	LPD3DXBUFFER pErrors = NULL;
+	LPD3DXBUFFER pCode = NULL;
+
+	// set up vertex shader
+	LastError = D3DXCompileShaderFromFile(fileName.c_str(), //filepath
+						NULL,            //macro's
+						NULL,            //includes
+						"vs_main",       //main function
+						"vs_2_0",        //shader profile
+						0,               //flags
+						&pCode,          //compiled operations
+						&pErrors,        //errors
+						&constantTable); //constants
+
+	if (FAILED(LastError))
+	{
+		if (pErrors)
+		{
+			// shader didn't compile for some reason
+			OutputDebugString((const char*)pErrors->GetBufferPointer());
+			return -1;
+		}
+		else
+		{
+			// other error. can't load file?
+			OutputDebugString(DXGetErrorDescription(LastError));
+			return -1;
+		}
+	}
+
+	d3d.lpD3DDevice->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), vertexShader);
+	pCode->Release();
+
+	return 0;
+}
+
+uint32_t CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *pixelShader)
+{
+	LPD3DXBUFFER pErrors = NULL;
+	LPD3DXBUFFER pCode = NULL;
+
+	// set up pixel shader
+	LastError = D3DXCompileShaderFromFile(fileName.c_str(), //filepath
+						NULL,            //macro's
+						NULL,            //includes
+						"ps_main",       //main function
+						"ps_2_0",        //shader profile
+						0,               //flags
+						&pCode,          //compiled operations
+						&pErrors,        //errors
+						NULL); //constants
+
+	if (FAILED(LastError))
+	{
+		if (pErrors)
+		{
+			// shader didn't compile for some reason
+			OutputDebugString((const char*)pErrors->GetBufferPointer());
+			return -1;
+		}
+		else
+		{
+			// other error. can't load file?
+			OutputDebugString(DXGetErrorDescription(LastError));
+			return -1;
+		}
+	}
+
+	d3d.lpD3DDevice->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), pixelShader);
+	pCode->Release();
+
+	return 0;
+}
+
+
 
 int imageNum = 0;
 
@@ -1421,51 +1467,15 @@ BOOL InitialiseDirect3D()
 	Con_AddCommand("r_setfov", SetFov);
 
 	d3d.lpD3DDevice->CreateVertexDeclaration(decl, &d3d.vertexDecl);
+	d3d.lpD3DDevice->CreateVertexDeclaration(orthoDecl, &d3d.orthoVertexDecl);
+	d3d.lpD3DDevice->CreateVertexDeclaration(fmvDecl, &d3d.fmvVertexDecl);
 
-	LPD3DXBUFFER pErrors = NULL;
+	CreateVertexShader("vertex.vsh", &d3d.vertexShader);
+	CreateVertexShader("orthoVertex.vsh", &d3d.orthoVertexShader);
+	CreateVertexShader("fmvVertex.vsh", &d3d.fmvVertexShader);
 
-	// set up vertex shader
-	LastError = D3DXCompileShaderFromFile("vertex.vsh",    //filepath
-							   NULL,            //macro's
-							   NULL,            //includes
-							   "vs_main",       //main function
-							   "vs_2_0",        //shader profile
-							   0,               //flags
-							   &code,           //compiled operations
-							   &pErrors,        //errors
-							   &constantTable); //constants
-	if (FAILED(LastError))
-	{
-		OutputDebugString((const char*)pErrors->GetBufferPointer());
-		int i = 0;
-	}
-
-	d3d.lpD3DDevice->CreateVertexShader((DWORD*)code->GetBufferPointer(), &d3d.vertexShader);
-	code->Release();
-
-	//set up Pixel Shader (NEW)
-	LastError = D3DXCompileShaderFromFile("pixel.psh",   //filepath
-							   NULL,          //macro's            
-							   NULL,          //includes           
-							   "ps_main",     //main function      
-							   "ps_2_0",      //shader profile     
-							   0,             //flags              
-							   &code,         //compiled operations
-							   &pErrors,      //errors
-							   NULL);         //constants
-	if (FAILED(LastError))
-	{
-		if (pErrors)
-		{
-			char buf[200];
-			memcpy(buf, pErrors->GetBufferPointer(), pErrors->GetBufferSize());
-			OutputDebugString(buf);
-			int i = 0;
-		}
-	}
-
-	d3d.lpD3DDevice->CreatePixelShader((DWORD*)code->GetBufferPointer(), &d3d.pixelShader);
-	code->Release();
+	CreatePixelShader("pixel.psh", &d3d.pixelShader);
+	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
 
 	Con_PrintMessage("Initialised Direct3D9 succesfully");
 	return TRUE;
@@ -1525,8 +1535,13 @@ void ReleaseDirect3D()
 
 	SAFE_RELEASE(constantTable);
 	SAFE_RELEASE(d3d.pixelShader);
+	SAFE_RELEASE(d3d.fmvPixelShader);
 	SAFE_RELEASE(d3d.vertexShader);
+	SAFE_RELEASE(d3d.fmvVertexShader);
+	SAFE_RELEASE(d3d.orthoVertexShader);
 	SAFE_RELEASE(d3d.vertexDecl);
+	SAFE_RELEASE(d3d.orthoVertexDecl);
+	SAFE_RELEASE(d3d.fmvVertexDecl);
 
 	SAFE_RELEASE(d3d.lpD3DDevice);
 	LogString("Releasing Direct3D9 device...");

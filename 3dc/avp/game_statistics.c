@@ -210,7 +210,6 @@ extern void CurrentGameStats_UsingWeapon(enum WEAPON_SLOT slot) {
 	if ((slot>=0)&&(slot<=MAX_NO_OF_WEAPON_SLOTS)) {
 		CurrentGameStatistics.WeaponTimes[slot]+=NormalFrameTime;
 	}
-
 }
 
 extern void CurrentGameStats_Spotted(void) {

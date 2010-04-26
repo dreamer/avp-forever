@@ -1,0 +1,80 @@
+/* based on shader created by Michael Dominic K. obtained from http://www.mdk.org.pl/2007/11/17/gl-colorspace-conversions
+ * original license below:
+ */
+
+/* YUV -> RGB shader for 4:2:2 I420 format (+ rounded rectangles)
+ *                                                                            
+ * MIT X11 license, Copyright (c) 2007 by:                               
+ *                                                                            
+ * Authors:                                                                   
+ *      Michael Dominic K. <mdk@mdk.am>
+ *                                                                            
+ * Permission is hereby granted, free of charge, to any person obtaining a   
+ *  copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation  
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,   
+ * and/or sell copies of the Software, and to permit persons to whom the      
+ * Software is furnished to do so, subject to the following conditions:       
+ *                                                                            
+ * The above copyright notice and this permission notice shall be included    
+ * in all copies or substantial portions of the Software.                     
+ *                                                                            
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS    
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                 
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN  
+ * NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,   
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR      
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE  
+ * USE OR OTHER DEALINGS IN THE SOFTWARE.                                     
+ *                                                                            
+ */
+ 
+// Pixel shader input structure
+struct PS_INPUT
+{
+    float4 Position   : POSITION;
+    float4 Diffuse    : COLOR0;
+    float2 Texture1   : TEXCOORD0;
+    float2 Texture2   : TEXCOORD1;
+    float2 Texture3   : TEXCOORD2;
+};
+
+
+// Pixel shader output structure
+struct PS_OUTPUT
+{
+    float4 Color   : COLOR0;
+};
+
+
+// Global variables
+sampler2D Tex0;
+sampler2D Tex1;
+sampler2D Tex2;
+
+
+// Name: Simple Pixel Shader
+// Type: Pixel shader
+// Desc: Fetch texture and blend with constant color
+//
+PS_OUTPUT ps_main( in PS_INPUT In )
+{
+	PS_OUTPUT Out;                             //create an output pixel
+	
+	float3 pre;
+	
+	pre.r = tex2D(Tex0, In.Texture1).x - (16.0 / 256.0);
+	pre.g = tex2D(Tex1, In.Texture2).x - (128.0 / 256.0);
+	pre.b = tex2D(Tex2, In.Texture3).x - (128.0 / 256.0);
+	
+	const float3 red = float3 (0.00456621, 0.0, 0.00625893) * 255.0;
+	const float3 green = float3 (0.00456621, -0.00153632, -0.00318811) * 255.0;
+	const float3 blue = float3 (0.00456621, 0.00791071, 0.0) * 255.0;
+	
+	Out.Color.r = dot(red, pre);
+	Out.Color.g = dot(green, pre);
+	Out.Color.b = dot(blue, pre);
+	Out.Color.a = 1.0;
+
+	return Out;                                //return output pixel
+}

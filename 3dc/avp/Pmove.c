@@ -659,8 +659,7 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 	  			dynPtr->LinVelocity.vz = forwardSpeed/8;
 				/* rotate LinVelocity into world space */
 				RotateVector(&dynPtr->LinVelocity,&dynPtr->OrientMat);
-				
-			}	
+			}
 		}
 		/* this bit sets the velocity: don't do it in demo mode, though
 		as we set our own velocity... */
@@ -792,7 +791,6 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 						}
 						default:
 							break;
-
 					}
 				}
 			}
@@ -838,7 +836,7 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
  	  	mat.mat32 = 0;	  	
  	  	mat.mat33 = cos;	  	
 
-		MatrixMultiply(&dynPtr->OrientMat,&mat,&dynPtr->OrientMat);
+		MatrixMultiply(&dynPtr->OrientMat, &mat, &dynPtr->OrientMat);
 	 	MatrixToEuler(&dynPtr->OrientMat, &dynPtr->OrientEuler);
 	}
 	/*------------------------------------------------------ 
@@ -875,16 +873,16 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 	   which takes values -65536 to +65536. */
 	if (playerStatusPtr->Absolute_Pitching)
 	{
-		playerStatusPtr->ViewPanX = MUL_FIXED(playerStatusPtr->Mvt_PitchIncrement,1024-128);
+		playerStatusPtr->ViewPanX = MUL_FIXED(playerStatusPtr->Mvt_PitchIncrement, 1024-128);
 		playerStatusPtr->ViewPanX &= wrap360;
 	}
 	else
 	{
-		static int timeBeenContinuouslyMoving=0;
+		static int timeBeenContinuouslyMoving = 0;
 		int AllowedLookDownAngle;
 		int AllowedLookUpAngle;
 
-		if (AvP.PlayerType==I_Alien)
+		if (AvP.PlayerType == I_Alien)
 		{
 			AllowedLookUpAngle = 0;
 			AllowedLookDownAngle = 2048;
@@ -918,11 +916,11 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 			}
 		}
 		
-		if(playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookUp)
+		if (playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookUp)
 		{
         	playerStatusPtr->ViewPanX += 1024;
 			playerStatusPtr->ViewPanX &= wrap360;
-                               
+
 			playerStatusPtr->ViewPanX += MUL_FIXED
 									(
 										playerStatusPtr->Mvt_PitchIncrement,
@@ -938,7 +936,7 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 		{
         	playerStatusPtr->ViewPanX += 1024;
 			playerStatusPtr->ViewPanX &= wrap360;
-                               
+
 			playerStatusPtr->ViewPanX += MUL_FIXED
 									(
 										playerStatusPtr->Mvt_PitchIncrement,

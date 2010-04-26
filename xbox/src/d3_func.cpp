@@ -368,7 +368,7 @@ void WriteTextureToFile(D3DTEXTURE srcTexture, const char* fileName)
 */
 }
 
-D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool)
+D3DTEXTURE CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool)
 {
 	D3DTEXTURE destTexture = NULL;
 

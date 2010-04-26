@@ -63,10 +63,16 @@ class TheoraFMV
 
 		// video
 		D3DTEXTURE mDisplayTexture;
-		int mTextureWidth;
-		int mTextureHeight;
-		int mFrameWidth;
-		int mFrameHeight;
+
+		// test
+		D3DTEXTURE tex[3];
+		uint32_t   texWidth[3];
+		uint32_t   texHeight[3];
+
+		uint32_t mTextureWidth;
+		uint32_t mTextureHeight;
+		uint32_t mFrameWidth;
+		uint32_t mFrameHeight;
 		CRITICAL_SECTION mFrameCriticalSection;
 		bool mFrameCriticalSectionInited;
 

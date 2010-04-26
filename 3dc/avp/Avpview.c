@@ -250,30 +250,30 @@ static void ModifyHeadOrientation(void)
 	extern int NormalFrameTime;
 	#define TILT_THRESHOLD 128
 	PLAYER_STATUS *playerStatusPtr;
-    
+
 	/* get the player status block ... */
 	playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
     GLOBALASSERT(playerStatusPtr);
-  
+
     if (!playerStatusPtr->IsAlive && !MultiplayerObservedPlayer)
 	{
 		int decay = NormalFrameTime>>6;
 
 		HeadOrientation.EulerX &= 4095;
 	   	HeadOrientation.EulerX -= decay;
-		if(HeadOrientation.EulerX < 3072)
+		if (HeadOrientation.EulerX < 3072)
 			HeadOrientation.EulerX = 3072;
 	}
 	else
 	{
 		int decay = NormalFrameTime>>8;
-		if(HeadOrientation.EulerX > 2048)
+		if (HeadOrientation.EulerX > 2048)
 		{
 			if (HeadOrientation.EulerX < 4096 - TILT_THRESHOLD)
 				HeadOrientation.EulerX = 4096 - TILT_THRESHOLD;
 
 		   	HeadOrientation.EulerX += decay;
-			if(HeadOrientation.EulerX > 4095)
+			if (HeadOrientation.EulerX > 4095)
 				HeadOrientation.EulerX =0;
 		}
 		else
@@ -282,17 +282,17 @@ static void ModifyHeadOrientation(void)
 				HeadOrientation.EulerX = TILT_THRESHOLD;
 
 		   	HeadOrientation.EulerX -= decay;
-			if(HeadOrientation.EulerX < 0)
+			if (HeadOrientation.EulerX < 0)
 				HeadOrientation.EulerX =0;
 		}
 
-		if(HeadOrientation.EulerY > 2048)
+		if (HeadOrientation.EulerY > 2048)
 		{
 			if (HeadOrientation.EulerY < 4096 - TILT_THRESHOLD)
 				HeadOrientation.EulerY = 4096 - TILT_THRESHOLD;
 
 		   	HeadOrientation.EulerY += decay;
-			if(HeadOrientation.EulerY > 4095)
+			if (HeadOrientation.EulerY > 4095)
 				HeadOrientation.EulerY =0;
 		}
 		else
@@ -301,17 +301,17 @@ static void ModifyHeadOrientation(void)
 				HeadOrientation.EulerY = TILT_THRESHOLD;
 
 		   	HeadOrientation.EulerY -= decay;
-			if(HeadOrientation.EulerY < 0)
+			if (HeadOrientation.EulerY < 0)
 				HeadOrientation.EulerY =0;
 		}
 		
-		if(HeadOrientation.EulerZ > 2048)
+		if (HeadOrientation.EulerZ > 2048)
 		{
 			if (HeadOrientation.EulerZ < 4096 - TILT_THRESHOLD)
 				HeadOrientation.EulerZ = 4096 - TILT_THRESHOLD;
 
 		   	HeadOrientation.EulerZ += decay;
-			if(HeadOrientation.EulerZ > 4095)
+			if (HeadOrientation.EulerZ > 4095)
 				HeadOrientation.EulerZ =0;
 		}
 		else
@@ -320,7 +320,7 @@ static void ModifyHeadOrientation(void)
 				HeadOrientation.EulerZ = TILT_THRESHOLD;
 
 		   	HeadOrientation.EulerZ -= decay;
-			if(HeadOrientation.EulerZ < 0)
+			if (HeadOrientation.EulerZ < 0)
 				HeadOrientation.EulerZ =0;
 		}
 	}
@@ -332,7 +332,7 @@ void InteriorType_Body()
 	extern int NormalFrameTime;
 
 	static int verticalSpeed = 0;
-	static int zAxisTilt=0;
+	static int zAxisTilt = 0;
 	STRATEGYBLOCK *sbPtr;
 	DYNAMICSBLOCK *dynPtr;
 	
@@ -348,7 +348,7 @@ void InteriorType_Body()
 		COLLISION_EXTENTS *extentsPtr = 0;
 		PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *)(sbPtr->SBdataptr);
 
-		switch(AvP.PlayerType)
+		switch (AvP.PlayerType)
 		{
 			case I_Marine:
 				extentsPtr = &CollisionExtents[CE_MARINE];
@@ -437,7 +437,7 @@ void InteriorType_Body()
 			relativeVelocity.vz = dynPtr->Position.vz - dynPtr->PrevPosition.vz;
 			/* rotate into object space */
 
-			RotateVector(&relativeVelocity,&worldToLocalMatrix);
+			RotateVector(&relativeVelocity, &worldToLocalMatrix);
 		}
 		{
 			int targetingSpeed = 10*NormalFrameTime;

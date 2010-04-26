@@ -718,15 +718,12 @@ typedef struct texelgtx3d {
 
 #if StandardShapeLanguage
 
-
-typedef unsigned char TEXTURE;
-
 #define ImageNameSize 128+1
 
-
-typedef struct imageheader {
-
-	int ImageWidth;
+typedef struct imageheader 
+{
+	uint32_t ImageWidth;
+	uint32_t ImageHeight;					/* Height, Pixels */
 
 	int ImageWidthShift;				/* Image Width as a power of 2 */
 
@@ -735,13 +732,8 @@ typedef struct imageheader {
 	// graphics api texture
 	D3DTEXTURE Direct3DTexture;
 
-	int UserTexture;
-	int RequiresRestore;
-
 	int ImageNum;						/* # MIP images */
 	char ImageName[ImageNameSize];		/* Filename */
-
-	int ImageHeight;					/* Height, Pixels */
 
 	int ImageSize;						/* Size of Image Data in bytes */
 	int ImageFlags;						/* Load / Display Options */

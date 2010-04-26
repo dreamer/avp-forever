@@ -20,14 +20,27 @@
 #include <d3dx9math.h>
 #include "fmvCutscenes.h"
 
-D3DVERTEXELEMENT9 decl[] = {{0, 0,  D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
-							{0, 12, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0},
-							{0, 16, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 1},
-                            {0, 20, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
+D3DVERTEXELEMENT9 decl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
+							{0, 12, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		0},
+							{0, 16, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		1},
+                            {0, 20, D3DDECLTYPE_FLOAT2,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
                             D3DDECL_END()};
 
-LPD3DXCONSTANTTABLE			constantTable = NULL; //ConstantTable (NEW)
-LPD3DXBUFFER				code = NULL; //Temporary buffer (NEW)
+D3DVERTEXELEMENT9 orthoDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
+								 {0, 12, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		0},
+								 {0, 16, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
+                            D3DDECL_END()};
+
+D3DVERTEXELEMENT9 fmvDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
+							   {0, 12, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,	0},
+							   {0, 16, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
+							   {0, 24, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	1},
+							   {0, 32, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	2},
+                            D3DDECL_END()};
+
+
+
+LPD3DXCONSTANTTABLE		constantTable = NULL;
 
 extern "C" {
 
@@ -1041,12 +1054,15 @@ BOOL ExecuteBuffer()
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
 
+		d3d.lpD3DDevice->SetVertexDeclaration(d3d.orthoVertexDecl);
+		d3d.lpD3DDevice->SetVertexShader(d3d.orthoVertexShader);
+/*
 		LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_ORTHOVERTEX);
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
-
+*/
 		D3DXMATRIX matView; 
 		D3DXMatrixIdentity(&matView);
 		d3d.lpD3DDevice->SetTransform(D3DTS_VIEW, &matView);
@@ -1054,6 +1070,9 @@ BOOL ExecuteBuffer()
 		D3DXMATRIX matOrtho;
 		D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 		d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matOrtho);
+
+		D3DXMATRIXA16 matWorldViewProj = matWorld * matView * matOrtho;
+		constantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
 
 		// loop through list drawing the quads
 		for (uint32_t i = 0; i < orthoListCount; i++)
@@ -3110,19 +3129,18 @@ void D3D_DrawBackdrop(void)
 		extern DISPLAYBLOCK *ActiveBlockList[];
 
 		int numOfObjects = NumActiveBlocks;
-		while(numOfObjects--)
+		while (numOfObjects--)
 		{
 			DISPLAYBLOCK *objectPtr = ActiveBlockList[numOfObjects];
 			MODULE *modulePtr = objectPtr->ObMyModule;
 
-
-			if (modulePtr && (ModuleCurrVisArray[modulePtr->m_index] == 2) &&modulePtr->m_flags&MODULEFLAG_SKY)
+			if (modulePtr && (ModuleCurrVisArray[modulePtr->m_index] == 2) && modulePtr->m_flags&MODULEFLAG_SKY)
 			{
 				needToDrawBackdrop=1;
 				break;
 			}
 		}
-		if(needToDrawBackdrop)
+		if (needToDrawBackdrop)
 		{
 			ColourFillBackBuffer(0);
 
@@ -3396,7 +3414,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 	int texoffset;
 
 	float ZNear;
-	float RecipW, RecipH;
+//	float RecipW, RecipH;
 
     // Get ZNear
 	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
@@ -3408,11 +3426,14 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 	// properly cleared this time...
 	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-	float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-	RecipW = (1.0f / width);// / 65536.0f;
+	float RecipW = 1.0f / (float) ImageHeaderArray[texoffset].ImageWidth;
+	float RecipH = 1.0f / (float) ImageHeaderArray[texoffset].ImageHeight;
 
-	float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-	RecipH = (1.0f / height);// / 65536.0f;
+//	float width = (float) ImageHeaderArray[texoffset].ImageWidth;
+//	RecipW = (1.0f / width);// / 65536.0f;
+
+//	float height = (float) ImageHeaderArray[texoffset].ImageHeight;
+//	RecipH = (1.0f / height);// / 65536.0f;
 
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, RenderPolygon.TranslucencyMode);
 
@@ -5068,7 +5089,7 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 }
 
 /* more quad drawing functions than you can shake a stick at! */
-void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int textureHeight, D3DTEXTURE fmvTexture)
+void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, D3DTEXTURE fmvTexture)
 {
 	int topX = (640 - frameWidth) / 2;
 	int topY = (480 - frameHeight) / 2;
@@ -5129,7 +5150,118 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 	}
 }
 
-void DrawProgressBar(RECT srcRect, RECT destRect, uint32_t textureID, AVPTEXTURE *tex, int newWidth, int newHeight)
+typedef struct FMVVERTEX 
+{
+	float x;
+	float y;
+	float z;		// Position in 3d space 
+
+	DWORD colour;	// Colour  
+
+	float u1;
+	float v1;		// Texture coordinates 
+
+	float u2;
+	float v2;		// Texture coordinates 
+
+	float u3;
+	float v3;		// Texture coordinates 
+
+} FMVVERTEX;
+
+/* more quad drawing functions than you can shake a stick at! */
+void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, D3DTEXTURE tex[3])
+{
+	int topX = (640 - frameWidth) / 2;
+	int topY = (480 - frameHeight) / 2;
+
+	float x1 = (float(topX / 640.0f) * 2) - 1;
+	float y1 = (float(topY / 480.0f) * 2) - 1;
+
+	float x2 = ((float(topX + frameWidth) / 640.0f) * 2) - 1;
+	float y2 = ((float(topY + frameHeight) / 480.0f) * 2) - 1;
+
+	D3DCOLOR colour = D3DCOLOR_ARGB(255, 255, 255, 255);
+
+	FMVVERTEX fmvVerts[4];
+
+	// bottom left
+	fmvVerts[0].x = x1;
+	fmvVerts[0].y = y2;
+	fmvVerts[0].z = 1.0f;
+	fmvVerts[0].colour = colour;
+	fmvVerts[0].u1 = 0.0f;
+	fmvVerts[0].v1 = (1.0f / textureHeight) * frameHeight;
+
+	fmvVerts[0].u2 = 0.0f;
+	fmvVerts[0].v2 = 1.0f;
+
+	fmvVerts[0].u3 = 0.0f;
+	fmvVerts[0].v3 = 1.0f;
+
+	// top left
+	fmvVerts[1].x = x1;
+	fmvVerts[1].y = y1;
+	fmvVerts[1].z = 1.0f;
+	fmvVerts[1].colour = colour;
+	fmvVerts[1].u1 = 0.0f;
+	fmvVerts[1].v1 = 0.0f;
+
+	fmvVerts[1].u2 = 0.0f;
+	fmvVerts[1].v2 = 0.0f;
+
+	fmvVerts[1].u3 = 0.0f;
+	fmvVerts[1].v3 = 0.0f;
+
+	// bottom right
+	fmvVerts[2].x = x2;
+	fmvVerts[2].y = y2;
+	fmvVerts[2].z = 1.0f;
+	fmvVerts[2].colour = colour;
+	fmvVerts[2].u1 = (1.0f / textureWidth) * frameWidth;
+	fmvVerts[2].v1 = (1.0f / textureHeight) * frameHeight;
+
+	fmvVerts[2].u2 = 1.0f;
+	fmvVerts[2].v2 = 1.0f;
+
+	fmvVerts[2].u3 = 1.0f;
+	fmvVerts[2].v3 = 1.0f;
+
+	// top right
+	fmvVerts[3].x = x2;
+	fmvVerts[3].y = y1;
+	fmvVerts[3].z = 1.0f;
+	fmvVerts[3].colour = colour;
+	fmvVerts[3].u1 = (1.0f / textureWidth) * frameWidth;
+	fmvVerts[3].v1 = 0.0f;
+
+	fmvVerts[3].u2 = 1.0f;
+	fmvVerts[3].v2 = 0.0f;
+
+	fmvVerts[3].u3 = 1.0f;
+	fmvVerts[3].v3 = 0.0f;
+
+	ChangeTextureAddressMode(TEXTURE_CLAMP);
+	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
+
+	// set the texture
+	LastError = d3d.lpD3DDevice->SetTexture(0, tex[0]);
+	LastError = d3d.lpD3DDevice->SetTexture(1, tex[1]);
+	LastError = d3d.lpD3DDevice->SetTexture(2, tex[2]);
+
+	d3d.lpD3DDevice->SetVertexDeclaration(d3d.fmvVertexDecl);
+	d3d.lpD3DDevice->SetVertexShader(d3d.fmvVertexShader);
+	d3d.lpD3DDevice->SetPixelShader(d3d.fmvPixelShader);
+
+//	d3d.lpD3DDevice->SetFVF(D3DFVF_ORTHOVERTEX);
+	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(FMVVERTEX));
+	if (FAILED(LastError))
+	{
+		OutputDebugString("DrawPrimitiveUP failed\n");
+	}
+}
+
+void DrawProgressBar(RECT srcRect, RECT destRect, uint32_t textureID, AVPTEXTURE *tex, uint32_t newWidth, uint32_t newHeight)
 {
 	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_OFF, TEXTURE_CLAMP, FILTERING_BILINEAR_ON);
 
@@ -5261,7 +5393,7 @@ void DrawHUDQuad(int x, int y, int width, int height, float *UVList, int texture
 	orthoVBOffset++;
 }
 
-void DrawQuad(int x, int y, int width, int height, int textureID, int colour, enum TRANSLUCENCY_TYPE translucencyType)
+void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
 {
 	float x1 = (float(x / 640.0f) * 2) - 1;
 	float y1 = (float(y / 480.0f) * 2) - 1;

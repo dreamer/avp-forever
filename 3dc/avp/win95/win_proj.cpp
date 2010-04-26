@@ -614,6 +614,7 @@ BOOL ExitWindowsSystem(void)
    return rc;
 }
 
+/*
 void MakeToAsciiTable(void)
 {
 	WORD output;
@@ -637,6 +638,8 @@ void MakeToAsciiTable(void)
 		}
 	}
 }
+*/
+
 // End of extern C declaration 
 
 };

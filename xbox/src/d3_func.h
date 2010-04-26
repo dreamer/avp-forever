@@ -116,7 +116,7 @@ void DrawFmvFrame(int frameWidth, int frameHeight, int textureWidth, int texture
 void CreateScreenShotImage();
 void DeRedTexture(D3DTEXTURE texture);
 D3DTEXTURE CheckAndLoadUserTexture(const char *fileName, int *width, int *height);
-D3DTEXTURE CreateFmvTexture(int *width, int *height, int usage, int pool);
+D3DTEXTURE CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool);
 void SetTransforms();
 
 D3DINFO GetD3DInfo();

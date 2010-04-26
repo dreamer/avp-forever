@@ -161,6 +161,12 @@ TheoraFMV::~TheoraFMV()
 		mDisplayTexture->Release();
 	}
 
+	for (int i = 0; i < 3; i++)
+	{
+		if (tex[i])
+			tex[i]->Release();
+	}
+
 	if (mFrameCriticalSectionInited)
 	{
 		DeleteCriticalSection(&mFrameCriticalSection);
@@ -267,6 +273,23 @@ int TheoraFMV::Open(const std::string &fileName)
 
 		// create a new texture, passing width and height which will be set to the actual size of the created texture
 		mDisplayTexture = CreateFmvTexture(&mTextureWidth, &mTextureHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+		if (!mDisplayTexture)
+		{
+			Con_PrintError("can't create FMV texture");
+			return FMV_ERROR;
+		}
+	}
+
+	texWidth[0] = mFrameWidth;
+	texHeight[0] = mFrameHeight;
+
+	texWidth[1] = texWidth[2] = mFrameWidth / 2;
+	texHeight[1] = texHeight[2] = mFrameHeight / 2;
+
+	for (int i = 0; i < 3; i++)
+	{
+		// create a new texture, passing width and height which will be set to the actual size of the created texture
+		tex[i] = CreateFmvTexture2(&texWidth[i], &texHeight[i], D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 		if (!mDisplayTexture)
 		{
 			Con_PrintError("can't create FMV texture");
@@ -437,6 +460,41 @@ bool TheoraFMV::NextFrame()
 		return false;
 	}
 
+	D3DLOCKED_RECT texLock[3];
+
+	if (FAILED(tex[0]->LockRect(0, &texLock[0], NULL, D3DLOCK_DISCARD)))
+	{
+		OutputDebugString("can't lock FMV texture1\n");
+		return false;
+	}
+	if (FAILED(tex[1]->LockRect(0, &texLock[1], NULL, D3DLOCK_DISCARD)))
+	{
+		OutputDebugString("can't lock FMV texture2\n");
+		return false;
+	}
+	if (FAILED(tex[2]->LockRect(0, &texLock[2], NULL, D3DLOCK_DISCARD)))
+	{
+		OutputDebugString("can't lock FMV texture3\n");
+		return false;
+	}
+
+	for (uint32_t i = 0; i < 3; i++)
+	{
+		for (uint32_t y = 0; y < texHeight[i]; y++)
+		{
+			uint8_t *destPtr = static_cast<uint8_t*>(texLock[i].pBits) + y * texLock[i].Pitch;
+			uint8_t *srcPtr = mYuvBuffer[i].data + (y * mYuvBuffer[i].stride);
+
+			for (uint32_t x = 0; x < texWidth[i]; x++)
+			{
+				memcpy(destPtr, srcPtr, 1);
+
+				destPtr += 1;
+				srcPtr += 1;
+			}
+		}
+	}
+
 	// critical section
 //	EnterCriticalSection(&mFrameCriticalSection);
 
@@ -459,7 +517,7 @@ bool TheoraFMV::NextFrame()
 	oggRgb.rgb_width = mFrameWidth;
 	oggRgb.rgb_pitch = textureLock.Pitch;
 
-	oggplay_yuv2rgb(&oggYuv, &oggRgb);
+//	oggplay_yuv2rgb(&oggYuv, &oggRgb);
 
 //	LeaveCriticalSection(&mFrameCriticalSection);
 
@@ -468,6 +526,10 @@ bool TheoraFMV::NextFrame()
 		OutputDebugString("can't unlock FMV texture\n");
 		return false;
 	}
+
+	tex[0]->UnlockRect(0);
+	tex[1]->UnlockRect(0);
+	tex[2]->UnlockRect(0);
 
 	mFrameReady = false;
 
@@ -795,11 +857,11 @@ unsigned int __stdcall audioThread(void *args)
 	{
 		startTime = timeGetTime();
 
-		int numBuffersFree = AudioStream_GetNumFreeBuffers(fmv->mAudioStream);
+		uint32_t numBuffersFree = AudioStream_GetNumFreeBuffers(fmv->mAudioStream);
 
 		while (numBuffersFree)
 		{
-			int readableAudio = fmv->mRingBuffer->GetReadableSize();
+			uint32_t readableAudio = fmv->mRingBuffer->GetReadableSize();
 
 			// we can fill a buffer
 			if (readableAudio >= fmv->mAudioStream->bufferSize)

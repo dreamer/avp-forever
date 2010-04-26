@@ -2728,7 +2728,7 @@ void HandleParticleSystem(void)
 	
 	//
 	PostLandscapeRendering();
-	D3D_DecalSystem_Setup();
+//	D3D_DecalSystem_Setup();
 	OutputTranslucentPolyList();
 
 	i = NumActiveParticles;
@@ -3084,7 +3084,7 @@ void HandleParticleSystem(void)
 	}
 	//RenderBoom();
    	//RenderFog();
-	D3D_DecalSystem_End();
+//	D3D_DecalSystem_End();
 }
 
 void RenderAllParticlesFurtherAwayThan(int zThreshold)
@@ -3918,16 +3918,17 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 	PARTICLE particle;
 	particle.Position = *positionPtr;
 
-	D3D_DecalSystem_Setup();
+//	D3D_DecalSystem_Setup();
 	
 	switch (muzzleFlashID)
 	{
+#if 0 // bjd - revert
 		case MUZZLE_FLASH_SMARTGUN:
 		{
-			PARTICLE_DESC *particleDescPtr=&ParticleDescription[PARTICLE_MUZZLEFLASH];
+			PARTICLE_DESC *particleDescPtr = &ParticleDescription[PARTICLE_MUZZLEFLASH];
 			MATRIXCH muzzleMatrix;
 			MATRIXCH rotmat;
-			MakeMatrixFromDirection(directionPtr,&muzzleMatrix);
+			MakeMatrixFromDirection(directionPtr, &muzzleMatrix);
 			{
 		   		int angle = 4096/12;
 		 	  	int cos = GetCos(angle);
@@ -3999,6 +4000,7 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 			}
 			break;
 		}
+#endif
 		case MUZZLE_FLASH_AMORPHOUS: // include pulse rifle muzzle flash
 		{
 			PARTICLE_DESC *particleDescPtr;
@@ -4020,14 +4022,15 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 			{
 				int i = 16;
 				particle.Size = 20;
-
+#if 0 // bjd - revert
 				while (i--)
 				{
 					RenderParticle(&particle);
 					particle.Position.vx = positionPtr->vx + MUL_FIXED(100, directionPtr->vx) + (FastRandom()&127)-64;
 					particle.Position.vy = positionPtr->vy + MUL_FIXED(100, directionPtr->vy) + (FastRandom()&127)-64;
 					particle.Position.vz = positionPtr->vz + MUL_FIXED(100, directionPtr->vz) + (FastRandom()&127)-64;
-				}																								 
+				}
+#endif // bjd
 			}
 			break;
 		}
@@ -4069,7 +4072,7 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 			return;
 		}
 	}
-	D3D_DecalSystem_End();
+//	D3D_DecalSystem_End();
 }
 
 void DrawFrisbeePlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr)
@@ -4122,13 +4125,13 @@ void DrawSmallPredatorPlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr)
 
 	particle.Position = *positionPtr;
 
-	particle.ParticleID=PARTICLE_ELECTRICALPLASMASPHERE;
+	particle.ParticleID = PARTICLE_ELECTRICALPLASMASPHERE;
 
 	particle.Colour = RGBALIGHT_MAKE(255,255,255,128);
 	particle.Size = 200;
 
 	RenderParticle(&particle);
-	particle.ParticleID=PARTICLE_MUZZLEFLASH;
+	particle.ParticleID = PARTICLE_MUZZLEFLASH;
 	particle.Colour = RGBALIGHT_MAKE(255,255,255,64);
 	particle.Size = 1000;
 	RenderParticle(&particle);
@@ -5139,7 +5142,7 @@ extern void RenderParticlesInMirror(void)
 
 //  	RenderPlayersImageInMirror();
 
-	D3D_DecalSystem_Setup();
+//	D3D_DecalSystem_Setup();
 	while(i--)
 	{
 		switch(particlePtr->ParticleID)
@@ -5177,7 +5180,7 @@ extern void RenderParticlesInMirror(void)
 			}
 		}
 	}
-	D3D_DecalSystem_End();
+//	D3D_DecalSystem_End();
 }
 
 

@@ -656,7 +656,7 @@ void UpdateWeaponStateMachine(void)
     int justfiredp,justfireds,ps;
 
     /* access the extra data hanging off the strategy block */
-	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
     GLOBALASSERT(playerStatusPtr);
     	
 	/* player's current weapon */
@@ -703,7 +703,7 @@ void UpdateWeaponStateMachine(void)
 
     twPtr = &TemplateWeapon[weaponPtr->WeaponIDNumber];
     
- 	CalculatePlayersTarget(twPtr,weaponPtr);
+ 	CalculatePlayersTarget(twPtr, weaponPtr);
 
 	playerStatusPtr->Encumberance=twPtr->Encum_Idle; //Default state
 
@@ -724,7 +724,7 @@ void UpdateWeaponStateMachine(void)
     	/* Time out current weapon state */
     	{
         	int timeOutRate = twPtr->TimeOutRateForState[weaponPtr->CurrentState];
-            
+
 			if (WEAPONSTATE_INSTANTTIMEOUT==timeOutRate)
             {
             	weaponPtr->StateTimeOutCounter=0;
@@ -733,7 +733,6 @@ void UpdateWeaponStateMachine(void)
            	{
             	weaponPtr->StateTimeOutCounter-=MUL_FIXED(timeOutRate,NormalFrameTime);
             }
-        
         }
         if(weaponPtr->StateTimeOutCounter<=0)
         {
@@ -938,7 +937,6 @@ void UpdateWeaponStateMachine(void)
 					break;
 				}
 
-
 				case WEAPONSTATE_WAITING:
 				{
 					/* wait for player to take his finger of fire */
@@ -1124,7 +1122,6 @@ void UpdateWeaponStateMachine(void)
 	}
 	StateDependentMovement(playerStatusPtr,weaponPtr);
 	PositionPlayersWeapon();
-    
 }
 
 static void WeaponStateIdle(PLAYER_STATUS *playerStatusPtr,PLAYER_WEAPON_DATA *weaponPtr,TEMPLATE_WEAPON_DATA *twPtr, int justfiredp, int justfireds, int ps)
@@ -2845,23 +2842,13 @@ void PositionPlayersWeapon(void)
 		    VECTORCH ZVector;
 
 			ZVector = gunDirection;
-			#if 0
-			/* KJL 13:13:34 04/05/97 - allow weapon to rotate about z axis */
-			XVector.vx = ZVector.vz;
-			XVector.vy = 0;
-			XVector.vz = -ZVector.vx;
 
-			Normalise(&XVector);
-
-			CrossProduct(&ZVector,&XVector, &YVector);
-			#else
 			/* keep weapon stable about z axis - definitely needed for alien */
 			YVector.vx = Global_VDB_Ptr->VDB_Mat.mat12;
 			YVector.vy = Global_VDB_Ptr->VDB_Mat.mat22;
 			YVector.vz = Global_VDB_Ptr->VDB_Mat.mat32;
 			CrossProduct(&YVector,&ZVector, &XVector);
 			Normalise(&XVector);
-			#endif
 
 			PlayersWeapon.ObMat.mat11 = XVector.vx;
 			PlayersWeapon.ObMat.mat12 = XVector.vy;
@@ -2883,12 +2870,14 @@ void PositionPlayersWeapon(void)
 
 				CreateEulerMatrix(&dir, &mat);
 				TransposeMatrixCH(&mat);
-				MatrixMultiply(&PlayersWeapon.ObMat,&mat,&PlayersWeapon.ObMat);
+				MatrixMultiply(&PlayersWeapon.ObMat, &mat, &PlayersWeapon.ObMat);
 		 	}
 		}
-	} else {
+	} 
+	else 
+	{
 		/* Pred Weapons. */
-		PlayersWeapon.ObMat=Global_VDB_Ptr->VDB_Mat;
+		PlayersWeapon.ObMat = Global_VDB_Ptr->VDB_Mat;
 		TransposeMatrixCH(&PlayersWeapon.ObMat);
 	}
 
@@ -2911,19 +2900,29 @@ void PositionPlayersWeapon(void)
 	}
 
 	/* Late firing.  Note that this is a horrible hack. */
-	if (FirePrimaryLate) {
-		if ((*twPtr->FirePrimaryFunction)(weaponPtr)) {
-			if (twPtr->PrimaryMuzzleFlash) {
-				if (twPtr->PrimaryAmmoID==AMMO_PARTICLE_BEAM) {
+	if (FirePrimaryLate) 
+	{
+		if ((*twPtr->FirePrimaryFunction)(weaponPtr)) 
+		{
+			if (twPtr->PrimaryMuzzleFlash) 
+			{
+				if (twPtr->PrimaryAmmoID==AMMO_PARTICLE_BEAM) 
+				{
 					AddLightingEffectToObject(Player,LFX_PARTICLECANNON);
-				} else {
+				} 
+				else 
+				{
 					AddLightingEffectToObject(Player,LFX_MUZZLEFLASH);
 				}
 			}
 		}
-	} else if (FireSecondaryLate) {
-		if (twPtr->SecondaryMuzzleFlash) {
-			if ((*twPtr->FireSecondaryFunction)(weaponPtr)) {
+	} 
+	else if (FireSecondaryLate) 
+	{
+		if (twPtr->SecondaryMuzzleFlash) 
+		{
+			if ((*twPtr->FireSecondaryFunction)(weaponPtr)) 
+			{
 				AddLightingEffectToObject(Player,LFX_MUZZLEFLASH);
 			}
 		}
@@ -2947,8 +2946,7 @@ void PositionPlayersWeaponMuzzleFlash(void)
 	}
 
 	{
-
-		PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+		PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *)(Player->ObStrategyBlock->SBdataptr);
 		PLAYER_WEAPON_DATA *weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
 		if (weaponPtr->WeaponIDNumber == WEAPON_SMARTGUN) 
 			length*=2;
@@ -2958,11 +2956,12 @@ void PositionPlayersWeaponMuzzleFlash(void)
 		VECTORCH v = CentreOfMuzzleOffset;
  //		int disp = MUL_FIXED(MuzzleFlashLength,length);
 		
-		RotateVector(&v,&PlayersWeapon.ObMat);
+		RotateVector(&v, &PlayersWeapon.ObMat);
 	
-		v.vx+=PlayersWeapon.ObWorld.vx;
-		v.vy+=PlayersWeapon.ObWorld.vy;
-		v.vz+=PlayersWeapon.ObWorld.vz;
+		v.vx += PlayersWeapon.ObWorld.vx;
+		v.vy += PlayersWeapon.ObWorld.vy;
+		v.vz += PlayersWeapon.ObWorld.vz;
+
 		/* position the muzzle flash in world space */
 		PlayersWeaponMuzzleFlash.ObWorld.vx = v.vx+MUL_FIXED(200,PlayersWeapon.ObMat.mat31);
 		PlayersWeaponMuzzleFlash.ObWorld.vy = v.vy+MUL_FIXED(200,PlayersWeapon.ObMat.mat32);
@@ -3216,13 +3215,13 @@ void GetHierarchicalWeapon(char *riffname, char *hierarchyname, int sequence_typ
 	SECTION *root_section;
 	SECTION_DATA *camera_section;
 
-	root_section=GetNamedHierarchyFromLibrary(riffname,hierarchyname);
+	root_section = GetNamedHierarchyFromLibrary(riffname,hierarchyname);
 
 	GLOBALASSERT(root_section);
 
 	Dispel_HModel(&PlayersWeaponHModelController);
-	Create_HModel(&PlayersWeaponHModelController,root_section);
-	InitHModelSequence(&PlayersWeaponHModelController,sequence_type,sub_sequence,ONE_FIXED); // Was >>3
+	Create_HModel(&PlayersWeaponHModelController, root_section);
+	InitHModelSequence(&PlayersWeaponHModelController, sequence_type, sub_sequence, ONE_FIXED); // Was >>3
 	
 	/* Causes that 'one frame' flicker? */
 	//ProveHModel(&PlayersWeaponHModelController,&PlayersWeapon);
@@ -3236,9 +3235,9 @@ void GetHierarchicalWeapon(char *riffname, char *hierarchyname, int sequence_typ
 	{
 		PWMFSDP = GetThisSectionData(PlayersWeaponHModelController.section_data,"Dum flash");
 		/* ?&$(*"*&^ pred pistol!!! */
-		if (PWMFSDP==NULL) 
+		if (PWMFSDP == NULL) 
 		{
-			PWMFSDP=GetThisSectionData(PlayersWeaponHModelController.section_data,"Dum Flash");
+			PWMFSDP = GetThisSectionData(PlayersWeaponHModelController.section_data,"Dum Flash");
 		}
 	}
 	/* Could be NULL though, I don't care at this stage. */
@@ -3252,7 +3251,7 @@ void GetHierarchicalWeapon(char *riffname, char *hierarchyname, int sequence_typ
 		PlayersWeaponCameraOffset.vx =- PlayersWeaponCameraOffset.vx;
 		PlayersWeaponCameraOffset.vy =- PlayersWeaponCameraOffset.vy;
 		PlayersWeaponCameraOffset.vz =- PlayersWeaponCameraOffset.vz;
-	} 
+	}
 	else 
 	{
 		GLOBALASSERT(0);
@@ -3264,7 +3263,6 @@ void GetHierarchicalWeapon(char *riffname, char *hierarchyname, int sequence_typ
 
 void GrabWeaponShape(PLAYER_WEAPON_DATA *weaponPtr)
 {
-	
 	TEMPLATE_WEAPON_DATA *twPtr;
     
     twPtr = &TemplateWeapon[weaponPtr->WeaponIDNumber];
@@ -6329,7 +6327,6 @@ int PlayerFireFlameThrower(PLAYER_WEAPON_DATA *weaponPtr)
 		/* ammo is in 16.16. we want the integer part, rounded up */
 		if ( (weaponPtr->PrimaryRoundsRemaining&0xffff)!=0 ) oldAmmoCount+=1;
 	}
-		
 	   	
    	{
    	   	/* theoretical number of bullets fired each frame, as a 16.16 number */
@@ -6352,7 +6349,6 @@ int PlayerFireFlameThrower(PLAYER_WEAPON_DATA *weaponPtr)
 			if ( (weaponPtr->PrimaryRoundsRemaining&0xffff)!=0 ) newAmmoCount+=1;
         
         bulletsFired = oldAmmoCount-newAmmoCount;
-
 	}
 
 	CurrentGameStats_WeaponFired(PlayerStatusPtr->SelectedWeaponSlot,NormalFrameTime);
@@ -6413,9 +6409,7 @@ int PlayerFireFlameThrower(PLAYER_WEAPON_DATA *weaponPtr)
 		#endif
 	}
 
-
-	return(1);
-
+	return 1;
 }
 
 #define ALWAYS_EXIT_WOUNDS 1
@@ -10974,44 +10968,48 @@ void BiteAttack_AwardHealth(STRATEGYBLOCK *sbPtr,AVP_BEHAVIOUR_TYPE pre_bite_typ
 
 }
 
-int PlayerFirePredPistolFlechettes(PLAYER_WEAPON_DATA *weaponPtr) {
-
+int PlayerFirePredPistolFlechettes(PLAYER_WEAPON_DATA *weaponPtr) 
+{
 	extern VECTORCH CentreOfMuzzleOffset;
 	VECTORCH *firingpos;
-	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *)(Player->ObStrategyBlock->SBdataptr);
 	LOCALASSERT(playerStatusPtr);
 	
 	/* Another cheap copy of the flamethrower function. */
-    
+
 	ProveHModel(&PlayersWeaponHModelController,&PlayersWeapon);
 
-	if (playerStatusPtr->FieldCharge>0) {
+	if (playerStatusPtr->FieldCharge>0) 
+	{
 		playerStatusPtr->FieldCharge-=(NormalFrameTime);
 		CurrentGameStats_ChargeUsed(NormalFrameTime);
-		if (playerStatusPtr->FieldCharge<0) {
+		if (playerStatusPtr->FieldCharge<0) 
+		{
 			playerStatusPtr->FieldCharge=0;
 		}
-	} else {
-		return(0);
+	} 
+	else
+	{
+		return 0;
 	}
 
-	if (PWMFSDP) {
+	if (PWMFSDP) 
+	{
 		VECTORCH null_vec={0,0,0};
 	
 		textprint("Hierarchical Flechettes Fire!\n");
 	
-		firingpos=&PWMFSDP->World_Offset;
+		firingpos = &PWMFSDP->World_Offset;
 		
 		FirePredPistolFlechettes(firingpos,&null_vec,&PlayersWeapon.ObMat,0,&Flamethrower_Timer,TRUE);
-	
-	} else {
+	}
+	else
+	{
 		firingpos=&CentreOfMuzzleOffset;
 		FirePredPistolFlechettes(&PlayersWeapon.ObWorld,firingpos,&PlayersWeapon.ObMat,1,&Flamethrower_Timer,TRUE);
 	}
 
-
-	return(1);
-
+	return 1;
 }
 
 int PredPistolSecondaryFire(PLAYER_WEAPON_DATA *weaponPtr) {

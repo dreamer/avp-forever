@@ -316,7 +316,8 @@ clipping fns for different polygon types with the minimum of fuss */
 #define Clip_Wide_NX_Test(v) (-(v)->X <= (v)->Z*2)
 #define Clip_Wide_PX_Test(v) ((v)->X <= (v)->Z*2)
 #define Clip_Wide_NY_Test(v) (-(v)->Y <= (v)->Z*2)
-#define Clip_Wide_PY_Test(v) ((v)->Y <= (v)->Z*2)	  
+#define Clip_Wide_PY_Test(v) ((v)->Y <= (v)->Z*2)
+
 #define Clip_Wide_NX_OutputXYZ \
 		/* if one is in, and the other is out, output a clipped vertex */ \
 		if (nextVertexInside != curVertexInside) \

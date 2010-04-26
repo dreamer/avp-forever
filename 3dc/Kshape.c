@@ -3554,6 +3554,7 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 //		DrawSfxObject(dptr);
 		return;
 	}
+
 	/* KJL 12:42:38 18/05/98 - check to see if object is on fire */
 	if (dptr->ObStrategyBlock)
 	{
@@ -3713,8 +3714,9 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 			{
 			   	int i;
 
-			  	D3D_DecalSystem_Setup();
+//		  		D3D_DecalSystem_Setup();
 
+#if 0 // bjd - revert
 				for (i = 0; i < 63; i++)
 				{
 					PARTICLE particle = {0};
@@ -3734,7 +3736,8 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 					particle.Size = 40;
 					RenderParticle(&particle);
 				}
-			 	D3D_DecalSystem_End();
+#endif // bjd
+//			 	D3D_DecalSystem_End();
 			}
 		}
 	}
@@ -3858,11 +3861,11 @@ void DoAlienEnergyView(DISPLAYBLOCK *dispPtr)
 	/* KJL 16:36:12 10/02/98 - check positions are up to date */
 	ProveHModel(controllerPtr,dispPtr);
 
-	D3D_DecalSystem_Setup();
+//	D3D_DecalSystem_Setup();
 
 	FindAlienEnergySource_Recursion(controllerPtr,controllerPtr->section_data,colour);
 
-	D3D_DecalSystem_End();
+//	D3D_DecalSystem_End();
 }
 																	  
 static void FindAlienEnergySource_Recursion(HMODELCONTROLLER *controllerPtr, SECTION_DATA *sectionDataPtr, unsigned int colour)
@@ -4418,6 +4421,8 @@ void RenderParticle(PARTICLE *particlePtr)
 	  ||(particlePtr->ParticleID == PARTICLE_PREDPISTOL_FLECHETTE_NONDAMAGING)
 	  )
 	{
+
+#if 0 // bjd - revert
 		VECTORCH translatedPosition = particlePtr->Offset;
 		TranslatePointIntoViewspace(&translatedPosition);
 		VerticesBuffer[1].X = translatedPosition.vx;
@@ -4515,6 +4520,7 @@ void RenderParticle(PARTICLE *particlePtr)
 				}
 			}
 		}
+#endif // bjd
 	}
 	else // pulse rifle muzzle flash handled here - bjd
 	{
@@ -4538,7 +4544,7 @@ void RenderParticle(PARTICLE *particlePtr)
 
 		offset[3].vx = -particleSize;
 		offset[3].vy = +particleSize;
-
+#if 0 // bjd - revert
 		if ((particlePtr->ParticleID == PARTICLE_MUZZLEFLASH))
 		{
 			extern void RotateVertex(VECTOR2D *vertexPtr, int theta);
@@ -4548,6 +4554,8 @@ void RenderParticle(PARTICLE *particlePtr)
 			RotateVertex(&offset[2], theta);
 			RotateVertex(&offset[3], theta);
 		}
+#endif // bjd
+#if 0 // bjd - revert
 		else if ((particlePtr->ParticleID == PARTICLE_SMOKECLOUD)
 			||(particlePtr->ParticleID == PARTICLE_GUNMUZZLE_SMOKE)
 			||(particlePtr->ParticleID == PARTICLE_PARGEN_FLAME) 
@@ -4560,6 +4568,7 @@ void RenderParticle(PARTICLE *particlePtr)
 			RotateVertex(&offset[2], theta);
 			RotateVertex(&offset[3], theta);
 		}
+#endif // bjd
 
 		// bjd - commented below lines out and replaced with straight += offset y. didnt make any noticable change?
 		VerticesBuffer[0].X += offset[0].vx;
@@ -4578,7 +4587,7 @@ void RenderParticle(PARTICLE *particlePtr)
 		VerticesBuffer[3].Y += offset[3].vy;
 //		VerticesBuffer[3].Y += MUL_FIXED(offset[3].vy, 87381);
 	}
-	
+
 	{
 		int outcode = QuadWithinFrustrum();
 										  
@@ -5408,6 +5417,8 @@ void RenderSky(void)
    	POLYHEADER fakeHeader;
 	int x,z,o;
 
+//		return;
+
 	if (!setup)
 	{
 		int i;
@@ -5427,10 +5438,10 @@ void RenderSky(void)
 		RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
 	}
 
-	for (o=0; o<OCTAVES; o++)
+	for (o=0; o < OCTAVES; o++)
 	{
-		u[o]+=MUL_FIXED(du[o],NormalFrameTime);
-		v[o]+=MUL_FIXED(dv[o],NormalFrameTime);
+		u[o] += MUL_FIXED(du[o], NormalFrameTime);
+		v[o] += MUL_FIXED(dv[o], NormalFrameTime);
 	}
 	for(x=-10; x<=10; x++)
 	{
@@ -5949,19 +5960,19 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 
 	particle.Colour = colour;
 
-//	sprintf(buf, "render fn %d %d %d\n",positionPtr->vx,positionPtr->vy,positionPtr->vz);
+//	sprintf(buf, "render fn %d %d %d\n",positionPtr->vx, positionPtr->vy, positionPtr->vz);
 //	OutputDebugString(buf);
 
 //	textprint("render fn %d %d %d\n",positionPtr->vx,positionPtr->vy,positionPtr->vz);
 
-	z = ONE_FIXED;
+	z = point.vz;//ONE_FIXED;
 	{
 		extern int SmartTargetSightX, SmartTargetSightY;
 		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 		centreX = DIV_FIXED(point.vx, point.vz);
 		centreY = DIV_FIXED(point.vy, point.vz);
-		sizeX = (ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
-		sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
+		sizeX = 200;//(ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
+		sizeY = 200;//MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
 	}
 
 	VerticesBuffer[0].X = centreX - sizeX;

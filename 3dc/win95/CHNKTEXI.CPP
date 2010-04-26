@@ -639,10 +639,6 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 
 extern "C" extern void CheckForWindowsMessages(void);
 
-/* folder to check for user textures */
-//std::string newTextureFolder = "Textures\\";
-//std::string newTextureFileName;
-
 int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 {
 	// safe to handle windows messages at this point (I think - JCWH)
@@ -651,7 +647,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 	newTextureFileName = newTextureFolder + pszFileName;
 	// lop .RIM off the end of the filename
 	newTextureFileName = newTextureFileName.substr(0, newTextureFileName.length() - 4);
-*/	
+*/
 	// get the filename
 	char szBuf[MAX_PATH];
 	if (!CL_GetImageFileName(szBuf, sizeof szBuf/sizeof szBuf[0], pszFileName, fFlagsEtc))
@@ -704,27 +700,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 			#if CL_SUPPORT_FASTFILE
 			size_t nFastFileLen;
 			void const * pFastFileData = ffreadbuf(szBuf, &nFastFileLen);
-#if 0
-			/* check for user texture first? */
-			int height, width;
-			D3DTEXTURE test;
-			test = CheckAndLoadUserTexture(newTextureFileName.c_str(), &height, &width);
-			if(test)
-			{
-				IMAGEHEADER * pImageHdr = GetImageHeader();
-				db_assert1(pImageHdr);
-				memset(pImageHdr,0,sizeof(IMAGEHEADER));
-				pImageHdr->ImageWidth = width;//pTexture->width;//nWidth;
-				pImageHdr->ImageHeight = height;//pTexture->height;//nHeight;
-//				db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
-				strcpy(pImageHdr->ImageName,szBuf);
-//				pImageHdr->D3DTexture = pTexture;
-//				pImageHdr->hBackup = hBackup;
-				pImageHdr->Direct3DTexture = test;
-				pImageHdr->UserTexture = 1;
-				return NumImages-1;
-			}
-#endif
+
 			// eg, Graphics\HUDs\Marine\pulsetx.RIM
 			if (pFastFileData)
 			{
@@ -773,13 +749,10 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 								/* is fmv texture, create in default pool so we can dynamically update it */
 								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 								/* will need to be restored on alt/tab or device loss */
-								pImageHdr->RequiresRestore = 1;
 							}
 							else
 							{
 								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, 0, D3DPOOL_MANAGED);
-								/* don't need to restore on alt/tab or device loss */
-								pImageHdr->RequiresRestore = 0;
 							}
 
 							//char szDbInf[512];
@@ -834,8 +807,8 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					IMAGEHEADER * pImageHdr = GetImageHeader();
 					db_assert1(pImageHdr);
 					memset(pImageHdr,0,sizeof(IMAGEHEADER));
-					pImageHdr->ImageWidth = pTexture->width;//nWidth;
-					pImageHdr->ImageHeight = pTexture->height;//nHeight;
+					pImageHdr->ImageWidth = pTexture->width;
+					pImageHdr->ImageHeight = pTexture->height;
 					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
 					strcpy(pImageHdr->ImageName,szBuf);
 					pImageHdr->AvPTexture = pTexture;
@@ -856,14 +829,10 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 							{
 								/* is fmv texture, create in default pool so we can dynamically update it */
 								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
-								/* will need to be restored on alt/tab or device loss */
-								pImageHdr->RequiresRestore = 1;
 							}
 							else
 							{
 								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, 0, D3DPOOL_MANAGED);
-								/* don't need to restore on alt/tab or device loss */
-								pImageHdr->RequiresRestore = 0;
 							}
 							//char szDbInf[512];
 							//	sprintf(szDbInf,"Texture \"%s\" didn't load",pImageHdr->ImageName);
@@ -874,10 +843,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 							}
 
 							/* free this, as d3d now holds the texture */
-							//free(pImageHdr->AvPTexture);
-
 							free(pTexture->buffer);
-							//pImageHdr->AvPTexture = NULL;
 							pTexture->buffer = NULL;
 
 							/* 

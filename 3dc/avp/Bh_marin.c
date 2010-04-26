@@ -959,7 +959,7 @@ void InitSquad(void)
 	
 	NpcSquad.alertStatus=0;
 	NpcSquad.responseLevel=0;
-	NpcSquad.alertZone=NULL;
+	NpcSquad.alertZone = NULL;
 	NpcSquad.alertPriority=0;
 
 	NpcSquad.Squad_Suspicion=0;
@@ -987,8 +987,7 @@ void DoSquad(void)
 {
 
 	/* Maintain squad level stuff. */
-
-	if (NpcSquad.alertZone!=NULL) 
+	if (NpcSquad.alertZone != NULL) 
 	{
 		MaintainMarineTargetZone(NpcSquad.alertZone);
 	}

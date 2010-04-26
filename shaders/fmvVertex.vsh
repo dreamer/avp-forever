@@ -3,8 +3,9 @@ struct VS_INPUT
 {
     float4 Position   : POSITION;
     float4 Diffuse    : COLOR0;
-    float4 Specular   : COLOR1;
-    float2 Texture    : TEXCOORD0;
+    float2 Texture1   : TEXCOORD0;
+    float2 Texture2   : TEXCOORD1;
+    float2 Texture3   : TEXCOORD2;
 };
 
 
@@ -13,8 +14,9 @@ struct VS_OUTPUT
 {
     float4 Position   : POSITION;
     float4 Diffuse    : COLOR0;
-    float4 Specular   : COLOR1;
-    float2 Texture    : TEXCOORD0;
+    float2 Texture1   : TEXCOORD0;
+    float2 Texture2   : TEXCOORD1;
+    float2 Texture3   : TEXCOORD2;
 };
 
 
@@ -32,10 +34,12 @@ VS_OUTPUT vs_main( in VS_INPUT In )
 
     Out.Position = mul(In.Position,
                        WorldViewProj);  //apply vertex transformation
-    Out.Texture  = In.Texture;          //copy original texcoords
+
+    Out.Texture1  = In.Texture1;          //copy original texcoords
+    Out.Texture2  = In.Texture2;          //copy original texcoords
+    Out.Texture3  = In.Texture3;          //copy original texcoords
     
     Out.Diffuse = In.Diffuse;
-    Out.Specular = In.Specular;
 
     return Out;                         //return output vertex
 }

@@ -3,7 +3,7 @@
 ***********************************************************************KJL*/
 #include "3dc.h"
 #include "inline.h"
-#include "module.h"					  
+#include "module.h"
 
 #include "stratdef.h"
 #include "gamedef.h"
@@ -126,15 +126,13 @@ void OperateObjectInLineOfSight(void)
 
 BOOL AnythingInMyModule(MODULE* my_mod)
 {
-	
-		// simple overlap test
-
+	// simple overlap test
 
 	//	this used within level - find objects in module
 	// all will have sbs
 
 	int i;
-	int max_x, min_x, max_y, min_y, max_z, min_z;	
+	int max_x, min_x, max_y, min_y, max_z, min_z;
 
 	max_x = my_mod->m_maxx + my_mod->m_world.vx;
 	min_x = my_mod->m_minx + my_mod->m_world.vx;
@@ -143,30 +141,29 @@ BOOL AnythingInMyModule(MODULE* my_mod)
 	max_z = my_mod->m_maxz + my_mod->m_world.vz;
 	min_z = my_mod->m_minz + my_mod->m_world.vz;
 
+	for (i = 0; i < NumActiveStBlocks; i++)
+	{
+		VECTORCH obj_world;
+		STRATEGYBLOCK	*sbptr;
+		DYNAMICSBLOCK	*dynptr;
 
-	for(i = 0; i < NumActiveStBlocks; i++)
-		{
-			VECTORCH obj_world;
-			STRATEGYBLOCK	*sbptr;
-			DYNAMICSBLOCK	*dynptr;			
+		sbptr = ActiveStBlockList[i];
 
-			sbptr = ActiveStBlockList[i];
+		if (!(dynptr = sbptr->DynPtr))
+			continue;
+		
+		obj_world = dynptr->Position;
 
-			if(!(dynptr = sbptr->DynPtr))
-				continue;
-			
-			obj_world = dynptr->Position;
+		if (obj_world.vx < max_x)
+			if (obj_world.vx > min_x)
+				if (obj_world.vz < max_z)
+					if (obj_world.vz > min_z)
+						if (obj_world.vy < max_y)
+							if (obj_world.vy > min_y)
+							{
+								return(1);
+							}
+	}
 
-			if(obj_world.vx < max_x)
-				if(obj_world.vx > min_x)
-					if(obj_world.vz < max_z)
-						if(obj_world.vz > min_z)
-							if(obj_world.vy < max_y)
-								if(obj_world.vy > min_y)
-									{
-										return(1);
-									}
-		}
-
-	return(0);
-}	
+	return 0;
+}
