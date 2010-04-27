@@ -350,7 +350,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         		RESTORE_SURFACE(lpDDBackdrop)
         		// now do all the graphics surfaces and textures, etc.
 				*/
-        		ATOnAppReactivate();
+//        		ATOnAppReactivate();
 			}
 			IngameKeyboardInput_ClearBuffer();
 			return 0;

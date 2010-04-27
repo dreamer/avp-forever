@@ -55,8 +55,6 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 
 void D3D_DrawHUDFontCharacter(HUDCharDesc *charDescPtr);
 void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr);
-extern void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int *uvArray, uint32_t colour, enum FILTERING_MODE_ID filteringType);
-extern void New_D3D_HUDQuad_Output2(int textureID, struct VertexTag *quadVerticesPtr, uint32_t colour, enum FILTERING_MODE_ID filteringType);
 
 extern void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2);
 /* HUD globals */
@@ -202,66 +200,15 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 	quadVertices[2].Y = imageDescPtr->TopLeftY + scaledHeight;
 	quadVertices[3].X = imageDescPtr->TopLeftX;
 	quadVertices[3].Y = imageDescPtr->TopLeftY + scaledHeight;
-/*
-	int uvArray[8];
 
-	// bottom left
-	uvArray[0] = imageDescPtr->TopLeftU;
-	uvArray[1] = imageDescPtr->TopLeftV + imageDescPtr->Height;
-
-	// top left
-	uvArray[2] = imageDescPtr->TopLeftU;
-	uvArray[3] = imageDescPtr->TopLeftV;
-
-	// bottom right
-	uvArray[4] = imageDescPtr->TopLeftU + imageDescPtr->Width;
-	uvArray[5] = imageDescPtr->TopLeftV + imageDescPtr->Height;
-
-	// top right
-	uvArray[6] = imageDescPtr->TopLeftU + imageDescPtr->Width;
-	uvArray[7] = imageDescPtr->TopLeftV;
-*/
-	New_D3D_HUDQuad_Output2(imageDescPtr->ImageNumber, quadVertices, RGBALIGHT_MAKE
-		(
-			imageDescPtr->Red,
-			imageDescPtr->Green,
-			imageDescPtr->Blue,
-			imageDescPtr->Translucency
-		),
-		FILTERING_BILINEAR_OFF);
-/*
-	New_D3D_HUDQuad_Output
-	(
-		imageDescPtr->ImageNumber, 
-		imageDescPtr->TopLeftX,
-		imageDescPtr->TopLeftY,
-		scaledWidth,
-		scaledHeight,
-		uvArray,
-		RGBALIGHT_MAKE
-		(
-			imageDescPtr->Red,
-			imageDescPtr->Green,
-			imageDescPtr->Blue,
-			imageDescPtr->Translucency
-		),
-		FILTERING_BILINEAR_OFF
-	);
-*/
-/*	
-	D3D_HUDQuad_Output
-	(
-		imageDescPtr->ImageNumber,
-		quadVertices,
-		RGBALIGHT_MAKE
-		(
-			imageDescPtr->Red,
-			imageDescPtr->Green,
-			imageDescPtr->Blue,
-			imageDescPtr->Translucency
-		)
-	);
-*/
+	D3D_HUDQuad_Output(imageDescPtr->ImageNumber, quadVertices, RGBALIGHT_MAKE
+			(
+				imageDescPtr->Red,
+				imageDescPtr->Green,
+				imageDescPtr->Blue,
+				imageDescPtr->Translucency
+			),
+			FILTERING_BILINEAR_OFF);
 }
 
 
@@ -496,25 +443,7 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 
 	D3D_HUD_Setup();
 
-	int uvArray[8];
-
-	// bottom left
-	uvArray[0] = quadVertices[3].U;
-	uvArray[1] = quadVertices[3].V;
-
-	// top left
-	uvArray[2] = quadVertices[0].U;
-	uvArray[3] = quadVertices[0].V;
-
-	// bottom right
-	uvArray[4] = quadVertices[2].U;
-	uvArray[5] = quadVertices[2].V;
-
-	// top right
-	uvArray[6] = quadVertices[1].U;
-	uvArray[7] = quadVertices[1].V;
-
-	New_D3D_HUDQuad_Output2
+	D3D_HUDQuad_Output
 	(
 		HUDImageNumber, 
 		quadVertices,
@@ -522,12 +451,6 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 		FILTERING_BILINEAR_ON
 	);
 
-/*
-	D3D_HUDQuad_Output(HUDImageNumber,
-		quadVertices,
-		RGBALIGHT_MAKE(255,255,255,HUDTranslucencyLevel)
-		);
-*/	
 	{
 		HUDImageDesc imageDesc;
 
@@ -914,43 +837,8 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 			quadVertices[3].X = x;
 			quadVertices[3].Y = y + scaledHeight;
 
-			int uvArray[8];
+			D3D_HUDQuad_Output(SpecialFXImageNumber, quadVertices, 0xff003fff, FILTERING_BILINEAR_ON);
 
-			// bottom left
-			uvArray[0] = 8;
-			uvArray[1] = 55;
-
-			// top left
-			uvArray[2] = 8;
-			uvArray[3] = 5;
-
-			// bottom right
-			uvArray[4] = 57;
-			uvArray[5] = 55;
-
-			// top right
-			uvArray[6] = 57;
-			uvArray[7] = 5;
-
-			New_D3D_HUDQuad_Output
-			(
-				SpecialFXImageNumber, 
-				quadVertices[0].X,
-				quadVertices[0].Y,
-				quadVertices[1].X - quadVertices[0].X,
-				quadVertices[2].Y - quadVertices[0].Y,
-				uvArray,
-				0xff003fff,
-				FILTERING_BILINEAR_ON
-			);
-/*	
-			D3D_HUDQuad_Output
-			(
-				SpecialFXImageNumber,// AlienEnergyBarImageNumber,
-				quadVertices,
-				0xff003fff
-			);
-*/		
 			health = (health / 2);
 			if (health < 0) 
 				health = 0;
@@ -978,25 +866,7 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 			quadVertices[3].X = x;
 			quadVertices[3].Y = y + scaledHeight;
 
-			New_D3D_HUDQuad_Output
-			(
-				SpecialFXImageNumber, 
-				quadVertices[0].X,
-				quadVertices[0].Y,
-				quadVertices[1].X - quadVertices[0].X,
-				quadVertices[2].Y - quadVertices[0].Y,
-				uvArray,
-				0xffffffff,
-				FILTERING_BILINEAR_ON
-			);
-/*	
-			D3D_HUDQuad_Output
-			(
-				SpecialFXImageNumber,// AlienEnergyBarImageNumber,
-				quadVertices,
-				0xffffffff
-			);
-*/
+			D3D_HUDQuad_Output(SpecialFXImageNumber, quadVertices, 0xffffffff, FILTERING_BILINEAR_ON);
 		}
 	}
 } 

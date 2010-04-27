@@ -1822,7 +1822,7 @@ inline float HPos2DC(int pos)
 	return (float(pos / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
 }
 
-void New_D3D_HUDQuad_Output2(int textureID, struct VertexTag *quadVerticesPtr, uint32_t colour, enum FILTERING_MODE_ID filteringType)
+void D3D_HUDQuad_Output(int32_t textureID, struct VertexTag *quadVerticesPtr, uint32_t colour, enum FILTERING_MODE_ID filteringType)
 {
 	float RecipW, RecipH;
 
@@ -1881,78 +1881,7 @@ void New_D3D_HUDQuad_Output2(int textureID, struct VertexTag *quadVerticesPtr, u
 	orthoVBOffset++;
 }
 
-void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int *uvArray, uint32_t colour, enum FILTERING_MODE_ID filteringType)
-{
-	int newWidth = ScreenDescriptorBlock.SDB_Width;
-	int newHeight = ScreenDescriptorBlock.SDB_Height;
-
-//	float x1 = (float(x / (float)newWidth) * 2) - 1;
-	float x1 = WPos2DC(x);
-
-	float y1 = HPos2DC(y);
-//	float y1 = (float(y / (float)newHeight) * 2) - 1;
-
-
-	float x2 = ((float(x + width) / (float)newWidth) * 2) - 1;
-	float y2 = ((float(y + height) / (float)newHeight) * 2) - 1;
-
-	float RecipW, RecipH;
-
-	// ugh..
-	if (textureID >= texIDoffset)
-	{
-		uint32_t texWidth, texHeight;
-
-		Tex_GetDimensions(textureID, texWidth, texHeight);
-
-		RecipW = 1.0f / texWidth;
-		RecipH = 1.0f / texHeight;
-	}
-	else
-	{
-		RecipW = 1.0f / ImageHeaderArray[textureID].ImageWidth;
-		RecipH = 1.0f / ImageHeaderArray[textureID].ImageHeight;
-	}
-
-	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP, filteringType);
-
-	// bottom left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = uvArray[0] * RecipW;
-	orthoVerts[orthoVBOffset].v = uvArray[1] * RecipH;
-	orthoVBOffset++;
-
-	// top left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = uvArray[2] * RecipW;
-	orthoVerts[orthoVBOffset].v = uvArray[3] * RecipH;
-	orthoVBOffset++;
-
-	// bottom right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = uvArray[4] * RecipW;
-	orthoVerts[orthoVBOffset].v = uvArray[5] * RecipH;
-	orthoVBOffset++;
-
-	// top right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = uvArray[6] * RecipW;
-	orthoVerts[orthoVBOffset].v = uvArray[7] * RecipH;
-	orthoVBOffset++;
-}
-
+/*
 void D3D_HUDQuad_Output(int imageNumber, struct VertexTag *quadVerticesPtr, unsigned int colour)
 {
 	float RecipW, RecipH;
@@ -1985,6 +1914,7 @@ void D3D_HUDQuad_Output(int imageNumber, struct VertexTag *quadVerticesPtr, unsi
 	OUTPUT_TRIANGLE(0,1,3, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
 }
+*/
 
 void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 {
@@ -3653,7 +3583,8 @@ extern void D3D_DrawSliderBar(int x, int y, int alpha)
 		(
 			HUDFontsImageNumber,
 			quadVertices,
-			colour
+			colour,
+			FILTERING_BILINEAR_ON
 		);
 
 	}
@@ -3679,7 +3610,8 @@ extern void D3D_DrawSliderBar(int x, int y, int alpha)
 		(
 			HUDFontsImageNumber,
 			quadVertices,
-			colour
+			colour,
+			FILTERING_BILINEAR_ON
 		);
 	}
 	quadVertices[2].Y = y + 2;
@@ -3707,7 +3639,8 @@ extern void D3D_DrawSliderBar(int x, int y, int alpha)
 		(
 			HUDFontsImageNumber,
 			quadVertices,
-			colour
+			colour,
+			FILTERING_BILINEAR_ON
 		);
 	}
 	quadVertices[0].Y = y + 9;
@@ -3737,7 +3670,8 @@ extern void D3D_DrawSliderBar(int x, int y, int alpha)
 		(
 			HUDFontsImageNumber,
 			quadVertices,
-			colour
+			colour,
+			FILTERING_BILINEAR_ON
 		);
 	}
 }
@@ -3779,7 +3713,8 @@ extern void D3D_DrawSlider(int x, int y, int alpha)
 		(
 			HUDFontsImageNumber,
 			quadVertices,
-			colour
+			colour,
+			FILTERING_BILINEAR_ON
 		);
 	}
 }
@@ -4627,46 +4562,10 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 			quadVertices[1].X = x + w;
 			quadVertices[2].X = x + w;
 
-			int uvArray[8];
-
-			// bottom left
-			uvArray[0] = topLeftU;
-			uvArray[1] = topLeftV + HUD_DIGITAL_NUMBERS_HEIGHT;
-
-			// top left
-			uvArray[2] = topLeftU;
-			uvArray[3] = topLeftV;
-
-			// bottom right
-			uvArray[4] = topLeftU + HUD_DIGITAL_NUMBERS_WIDTH;
-			uvArray[5] = topLeftV + HUD_DIGITAL_NUMBERS_HEIGHT;
-
-			// top right
-			uvArray[6] = topLeftU + HUD_DIGITAL_NUMBERS_WIDTH;
-			uvArray[7] = topLeftV;
-
-			New_D3D_HUDQuad_Output
-			(
-				HUDFontsImageNumber,
-				x,
-				y,
-				w,
-				h,
-				uvArray,
-				colour,
-				FILTERING_BILINEAR_OFF
-			);
-/*
-			D3D_HUDQuad_Output
-			(
-				HUDFontsImageNumber,
-				quadVertices,
-				colour
-			);
-*/
+			D3D_HUDQuad_Output(HUDFontsImageNumber, quadVertices, colour, FILTERING_BILINEAR_OFF);
 		}
 	}
-	while(--noOfDigits);
+	while (--noOfDigits);
 }
 
 extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour)
@@ -4703,44 +4602,7 @@ extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour)
 			quadVertices[1].X = x + HUD_FONT_WIDTH + 1;
 			quadVertices[2].X = x + HUD_FONT_WIDTH + 1;
 
-			int uvArray[8];
-
-			// bottom left
-			uvArray[0] = topLeftU;
-			uvArray[1] = topLeftV + HUD_FONT_HEIGHT;
-
-			// top left
-			uvArray[2] = topLeftU;
-			uvArray[3] = topLeftV;
-
-			// bottom right
-			uvArray[4] = topLeftU + HUD_FONT_WIDTH;
-			uvArray[5] = topLeftV + HUD_FONT_HEIGHT;
-
-			// top right
-			uvArray[6] = topLeftU + HUD_FONT_WIDTH;
-			uvArray[7] = topLeftV;
-
-			New_D3D_HUDQuad_Output
-			(
-				AAFontImageNumber,
-				x,
-				y,
-				HUD_FONT_WIDTH,
-				HUD_FONT_HEIGHT,
-				uvArray,
-				colour,
-				FILTERING_BILINEAR_OFF
-			);
-
-/*			
-			D3D_HUDQuad_Output
-			(
-				AAFontImageNumber,
-				quadVertices,
-				colour
-			);
-*/
+			D3D_HUDQuad_Output(AAFontImageNumber, quadVertices, colour, FILTERING_BILINEAR_OFF);
 		}
 		x += AAFontWidths[(unsigned char)c];
 	}
@@ -4790,43 +4652,7 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr, int x, int y, int colou
 			quadVertices[1].X = x + HUD_FONT_WIDTH + 1;
 			quadVertices[2].X = x + HUD_FONT_WIDTH + 1;
 
-			int uvArray[8];
-
-			// bottom left
-			uvArray[0] = topLeftU - 1;
-			uvArray[1] = topLeftV + HUD_FONT_HEIGHT + 1;
-
-			// top left
-			uvArray[2] = topLeftU - 1;
-			uvArray[3] = topLeftV - y;
-
-			// bottom right
-			uvArray[4] = topLeftU + HUD_FONT_WIDTH + 1;
-			uvArray[5] = topLeftV + HUD_FONT_HEIGHT + 1;
-
-			// top right
-			uvArray[6] = topLeftU + HUD_FONT_WIDTH + 1;
-			uvArray[7] = topLeftV - y;
-
-			New_D3D_HUDQuad_Output
-			(
-				AAFontImageNumber, 
-				quadVertices[0].X,
-				quadVertices[0].Y,
-				quadVertices[1].X = x - quadVertices[0].X,
-				quadVertices[2].Y = y - quadVertices[0].Y,
-				uvArray,
-				colour,
-				FILTERING_BILINEAR_OFF
-			);
-/*
-			D3D_HUDQuad_Output
-			(
-				AAFontImageNumber,
-				quadVertices,
-				colour
-			);
-*/
+			D3D_HUDQuad_Output(AAFontImageNumber, quadVertices, colour, FILTERING_BILINEAR_OFF);
 		}
 		x += AAFontWidths[(unsigned char)c];
 	}
@@ -4850,7 +4676,7 @@ void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour
 // 	D3D_RenderHUDString(stringPtr,centreX-length/2,y,colour);
 
 	int x = centreX-length/2;
-{
+
 	struct VertexTag quadVertices[4];
 
 	quadVertices[0].Y = y - MUL_FIXED(HUDScaleFactor,1);
@@ -4886,47 +4712,11 @@ void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour
 			quadVertices[1].X = x + MUL_FIXED(HUDScaleFactor,HUD_FONT_WIDTH + 1);
 			quadVertices[2].X = x + MUL_FIXED(HUDScaleFactor,HUD_FONT_WIDTH + 1);
 
-			int uvArray[8];
+			D3D_HUDQuad_Output(AAFontImageNumber, quadVertices, colour, FILTERING_BILINEAR_OFF);
 
-			// bottom left
-			uvArray[0] = topLeftU - 1;
-			uvArray[1] = topLeftV + HUD_FONT_HEIGHT + 1;
-
-			// top left
-			uvArray[2] = topLeftU - 1;
-			uvArray[3] = topLeftV - 1;
-
-			// bottom right
-			uvArray[4] = topLeftU + HUD_FONT_WIDTH + 1;
-			uvArray[5] = topLeftV + HUD_FONT_HEIGHT + 1;
-
-			// top right
-			uvArray[6] = topLeftU + HUD_FONT_WIDTH + 1;
-			uvArray[7] = topLeftV - 1;
-
-			New_D3D_HUDQuad_Output
-			(
-				AAFontImageNumber, 
-				quadVertices[0].X,
-				quadVertices[0].Y,
-				quadVertices[1].X - quadVertices[0].X,
-				quadVertices[2].Y - quadVertices[0].Y,
-				uvArray,
-				colour,
-				FILTERING_BILINEAR_OFF
-			);
-/*
-			D3D_HUDQuad_Output
-			(
-				AAFontImageNumber,
-				quadVertices,
-				colour
-			);
-*/
 		}
 		x += MUL_FIXED(HUDScaleFactor,AAFontWidths[(unsigned char)c]);
 	}
-}
 }
 
 extern "C"
@@ -4991,44 +4781,8 @@ extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, in
 
 			int height = y - (y - HUD_FONT_WIDTH*1 -1);
 
-			int uvArray[8];
+			D3D_HUDQuad_Output(AAFontImageNumber, quadVertices, colour, FILTERING_BILINEAR_OFF);
 
-			// bottom left
-			uvArray[0] = topLeftU - 1;
-			uvArray[1] = topLeftV + HUD_FONT_HEIGHT + 1;
-
-			// top left
-			uvArray[2] = topLeftU - 1;
-			uvArray[3] = topLeftV - 1;
-
-			// bottom right
-			uvArray[4] = topLeftU + HUD_FONT_WIDTH;
-			uvArray[5] = topLeftV + HUD_FONT_HEIGHT + 1;
-
-			// top right
-			uvArray[6] = topLeftU + HUD_FONT_WIDTH;
-			uvArray[7] = topLeftV - 1;
-
-			New_D3D_HUDQuad_Output
-			(
-				AAFontImageNumber, 
-				centreX - (HUD_FONT_HEIGHT/2) - 1,
-				y,
-				width,
-				height,
-				uvArray,
-				colour,
-				FILTERING_BILINEAR_OFF
-			);
-
-/*
-			D3D_HUDQuad_Output
-			(
-				AAFontImageNumber,
-				quadVertices,
-				colour
-			);
-*/
 		}
 	   	y -= AAFontWidths[(unsigned char)c];
 	}

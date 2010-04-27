@@ -196,9 +196,9 @@ static char * GetPath(char * pszFileNameBuf, unsigned nBufSize, ImageDescriptor 
 
 	if (pszFileNameBuf)
 		db_logf4(("\tfile expected to be '%s'",pszFileNameBuf));
-		
+
 	delete[] pszName;
-		
+
 	return pszFileNameBuf;
 }
 
@@ -243,7 +243,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 								db_log1("CL_LoadImageOnce(): ERROR: buffer not large enough to hold filename"); \
 								return NULL; /* fail because the buffer isnt big enough */ \
 				}	}	}	}
-				
+
 			#if CL_SUPPORT_FASTFILE
 			_GET_RELATIVE_PATH(FirstTex_Directory,IsFileInFastFile)
 			_GET_RELATIVE_PATH(SecondTex_Directory,IsFileInFastFile)
@@ -257,7 +257,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 		case LIO_RIFFPATH:
 		{
 			int enum_id = -1; // may be supported at a later date, valid when pszFileName is NULL
-			
+
 			bool bGloballyPalettized = VideoModeColourDepth <= 8 && (fFlagsEtc & _LIO_SURFTYPEMASK) != LIO_D3DTEXTURE;
 			
 			db_log4("\t(whose path is determined by the current .RIF file)");
@@ -274,7 +274,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 			}
 			Chunk_With_Children * pEnvDataChunk = dynamic_cast<Chunk_With_Children *>(pChunk);
 			db_assert1(pEnvDataChunk);
-			
+
 			Environment_Game_Mode_Chunk * pGameModeChunk = NULL;
 			if (cl_pszGameMode)
 			{
@@ -282,7 +282,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 				{
 					List<Chunk *> listGmChunks;
 					pEnvDataChunk->lookup_child("GAMEMODE",listGmChunks);
-					
+
 					for (LIF<Chunk *> itGmChunks(&listGmChunks); !itGmChunks.done(); itGmChunks.next())
 					{
 						Environment_Game_Mode_Chunk * pGmChunk = dynamic_cast<Environment_Game_Mode_Chunk *>(itGmChunks());
@@ -300,7 +300,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 			}
 
 			char * pszName = StripFileExtension(StripPath(pszFileName));
-			
+
 			char * pszSubName = 0;
 			if (pszFileName)
 			{
@@ -324,16 +324,16 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 				// Get the matching image 'Processor' chunk
 				Chunk * pMiChunk = pGameModeChunk->lookup_single_child("MATCHIMG");
 				Matching_Images_Chunk * pMatchImageChunk = NULL;
-				
+
 				if (pMiChunk)
 				{
 					pMatchImageChunk = dynamic_cast<Matching_Images_Chunk *>(pMiChunk);
 					db_assert1(pMatchImageChunk);
 				}
-				
+
 				List<Chunk *> listRifChildChunks;
 				pGameModeChunk->lookup_child("RIFCHILD",listRifChildChunks);
-				
+
 				for (LIF<Chunk *> itRifChildChunks(&listRifChildChunks); !itRifChildChunks.done(); itRifChildChunks.next())
 				{
 					RIF_Child_Chunk * pRifChildChunk = dynamic_cast<RIF_Child_Chunk *>(itRifChildChunks());
@@ -385,7 +385,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 						}
 					}
 				}
-				
+
 				List<Chunk *> listExtShapes;
 				pGameModeChunk->lookup_child("SHBMPNAM",listExtShapes);
 
@@ -440,7 +440,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 						}
 					}
 				}
-				
+
 				if (pszSubName)
 				{
 					if (!bShapeInGm)
@@ -452,10 +452,10 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 
 			List<Chunk *> listMatchImageChunk;
 			pEnvDataChunk->lookup_child("MATCHIMG",listMatchImageChunk);
-			
+
 			Matching_Images_Chunk * pMicFix = NULL;
 			Matching_Images_Chunk * pMicNorm = NULL;
-			
+
 			for (LIF<Chunk *> itMatchImageChunk(&listMatchImageChunk); !itMatchImageChunk.done(); itMatchImageChunk.next())
 			{
 				Matching_Images_Chunk * pMatchImageChunk = dynamic_cast<Matching_Images_Chunk *>(itMatchImageChunk());
@@ -465,9 +465,9 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 				else
 					pMicNorm = pMatchImageChunk;
 			}
-				
+
 			List<Chunk_With_Children *> listShapesSprites;
-			
+
 			List<Chunk *> listShapes;
 			Env_Chunk->lookup_child("REBSHAPE",listShapes);
 			for (LIF<Chunk *> itShapes(&listShapes); !itShapes.done(); itShapes.next())
@@ -487,10 +487,10 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 			{
 				Chunk_With_Children * pSpritesChunk = dynamic_cast<Chunk_With_Children *>(pSprChunk);
 				db_assert1(pSpritesChunk);
-				
+
 				List<Chunk *> listSprHeadChunks;
 				pSpritesChunk->lookup_child("SPRIHEAD",listSprHeadChunks);
-				
+
 				for (LIF<Chunk *> itSprites(&listSprHeadChunks); !itSprites.done(); itSprites.next())
 				{	
 					Chunk_With_Children * pSpriteHead = dynamic_cast<Chunk_With_Children *>(itSprites());
@@ -500,7 +500,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 			}
 
 			int bShapeFound = pszSubName ? false : true;
-			
+
 			for (LIF<Chunk_With_Children *> itShapesSprites(&listShapesSprites); !itShapesSprites.done(); itShapesSprites.next())
 			{	
 				char * pszSubRifName = RiffBasename(itShapesSprites());
@@ -514,7 +514,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 					}
 					bShapeFound = true;
 				}
-				
+
 				Chunk * pBmpLstStChunk = itShapesSprites()->lookup_single_child("BMPLSTST");
 				if (pBmpLstStChunk)
 				{
@@ -528,7 +528,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 
 						if (pszFileName ? !_stricmp(pszName,StripPath(bmpnTemp.filename)) : enum_id == bmpnTemp.enum_id)
 						{
-						
+
 							// select image descriptor
 							char * pszRifName = RiffBasename(pEnvDataChunk);
 							ImageDescriptor const idsc
@@ -585,9 +585,9 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 					db_logf3(("CL_LoadImageOnce(): WARNING! shape/sprite %s does not appear to list %s\n",pszSubName,pszName));
 				delete[] pszSubName;
 			}
-			
+
 			// not found in game textures, so look in default
-			
+
 			else // but only if there is no virtual shape directory
 			{
 				Chunk * pBmpNames = pEnvDataChunk->lookup_single_child("BMPNAMES");
@@ -655,9 +655,9 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 		db_log1("CL_LoadImageOnce(): ERROR: unable to determine path of file");
 		return GEI_NOTLOADED;
 	}
-	
+
 	db_logf4(("\tLoading '%s'",szBuf));
-	
+
 	// already loaded ?
 	int iExistingImage = GetExistingImageNum(szBuf);
 	if (GEI_NOTLOADED != iExistingImage)
@@ -665,7 +665,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 		db_logf4(("\tImage already loaded to image number %d",iExistingImage));
 		return iExistingImage;
 	}
-	
+
 	// what flags do we want?
 	unsigned fAwLoad = AW_TLF_DEFAULT;
 	if (fFlagsEtc & LIO_VIDMEM)

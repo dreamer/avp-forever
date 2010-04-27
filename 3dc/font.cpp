@@ -33,7 +33,7 @@
 static HRESULT LastError;
 
 extern "C" {
-extern void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int *uvArray, uint32_t colour, enum FILTERING_MODE_ID filteringType);
+//extern void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int *uvArray, uint32_t colour, enum FILTERING_MODE_ID filteringType);
 }
 
 struct Font
@@ -200,7 +200,7 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 		uvArray[7] = tex_y;
 
 //		DrawQuad(x, y, charWidth, 16, Fonts[FONT_SMALL].textureID, colour, TRANSLUCENCY_GLOWING);
-		New_D3D_HUDQuad_Output(Fonts[FONT_SMALL].textureID, x, y, charWidth, 16, &uvArray[0], colour, FILTERING_BILINEAR_OFF);
+//		New_D3D_HUDQuad_Output(Fonts[FONT_SMALL].textureID, x, y, charWidth, 16, &uvArray[0], colour, FILTERING_BILINEAR_OFF);
 
 		if (/*widthSpaced*/1)
 		{
