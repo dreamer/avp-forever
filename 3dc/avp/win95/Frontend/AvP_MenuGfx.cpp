@@ -3,7 +3,6 @@
 #include "tallfont.hpp"
 #include "strtab.hpp"
 #include "awTexLd.h"
-#include "alt_tab.h"
 #include "chnktexi.h"
 #include "hud_layout.h"
 #define UseLocalAssert TRUE

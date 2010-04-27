@@ -24,8 +24,6 @@ extern unsigned char GotAnyKey;
 #include "rentrntq.h"
 	// Added 21/11/97 by DHM: support for a queue of Windows
 	// messages to avoid problems with re-entrancy due to WinProc()
-	
-#include "alt_tab.h"
 
 #include "dxlog.h"
 #include <zmouse.h>

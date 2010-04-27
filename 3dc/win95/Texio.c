@@ -13,7 +13,6 @@
 #include "ourasert.h"
 
 #include "awTexLd.h"
-#include "alt_tab.h"
 
 /*
 

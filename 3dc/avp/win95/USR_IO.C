@@ -17,7 +17,6 @@
 #include "comp_shp.h"
 #include "pmove.h"
 #include "usr_io.h"
-#include "hud_map.h"
 #include "iofocus.h"
 #include "paintball.h"
 #include "avp_menus.h"

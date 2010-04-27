@@ -17,7 +17,6 @@
 	#include "tallfont.hpp"
 
 	#include "awTexLd.h"
-	#include "alt_tab.h"
 
 	#include "ffstdio.h"
 	

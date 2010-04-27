@@ -19,7 +19,6 @@
 #include "huddefs.h"
 #include "dynblock.h"
 #include "weapons.h"
-#include "hud_map.h"
 #include "psnd.h"
 #include "psndplat.h"
 #include "dynamics.h"
