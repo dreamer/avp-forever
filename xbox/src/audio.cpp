@@ -1904,7 +1904,7 @@ void CALLBACK AudioStream_Callback(VOID* pStreamContext, VOID* pPacketContext, D
 	streamStruct->voiceContext->TriggerEvent();
 }
 
-StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int bufferSize, int numBuffers)
+StreamingAudioBuffer * AudioStream_CreateBuffer(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers)
 {
 	StreamingAudioBuffer *newStreamingAudioBuffer = new StreamingAudioBuffer;
 	memset(newStreamingAudioBuffer, 0, sizeof(StreamingAudioBuffer));
@@ -1971,7 +1971,7 @@ StreamingAudioBuffer * AudioStream_CreateBuffer(int channels, int rate, int buff
 	return newStreamingAudioBuffer;
 }
 
-int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, uint8_t *audioData, int size)
+int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, uint8_t *audioData, uint32_t size)
 {
 	assert (streamStruct);
 	assert (audioData);
@@ -2055,7 +2055,7 @@ int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)
 	return 1;
 }
 
-int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, int volume)
+int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, uint32_t volume)
 {
 	assert (streamStruct);
 

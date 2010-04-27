@@ -1609,8 +1609,8 @@ void PlatUpdatePlayer()
 		vUp.y = viewMatrix._22;
 		vUp.z = viewMatrix._32;
 
-		D3DXMatrixTranspose(&viewMatrix, &viewMatrix);
-		D3DXVec3TransformNormal(&vPos, &vPos, &viewMatrix);
+//		D3DXMatrixTranspose(&viewMatrix, &viewMatrix);
+//		D3DXVec3TransformNormal(&vPos, &vPos, &viewMatrix);
 
 		XA2Listener.Position.x = vPos.x;
 		XA2Listener.Position.y = vPos.y;
@@ -1685,8 +1685,8 @@ void PlatUpdatePlayer()
 
 			X3DAudioCalculate(x3DInstance, &XA2Listener, &ActiveSounds[i].xa2Emitter, calcFlags, &XA2DSPSettings);
 
-			sprintf(buf, "1: %f 2: %f\n", XA2DSPSettings.pMatrixCoefficients[0], XA2DSPSettings.pMatrixCoefficients[1]);
-			OutputDebugString(buf);
+//			sprintf(buf, "1: %f 2: %f\n", XA2DSPSettings.pMatrixCoefficients[0], XA2DSPSettings.pMatrixCoefficients[1]);
+//			OutputDebugString(buf);
 
 			ActiveSounds[i].pSourceVoice->SetOutputMatrix(pMasteringVoice, 1, 2, XA2DSPSettings.pMatrixCoefficients);
 //			ActiveSounds[i].pSourceVoice->SetFrequencyRatio(XA2DSPSettings.DopplerFactor);

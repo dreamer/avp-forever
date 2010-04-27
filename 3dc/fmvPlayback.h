@@ -62,10 +62,10 @@ class TheoraFMV
 		int	mAudioDataBufferSize;
 
 		// video
-		D3DTEXTURE mDisplayTexture;
+		RENDERTEXTURE mDisplayTexture;
 
 		// test
-		D3DTEXTURE tex[3];
+		RENDERTEXTURE tex[3];
 		uint32_t   texWidth[3];
 		uint32_t   texHeight[3];
 

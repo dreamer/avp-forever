@@ -23,9 +23,6 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "d3_func.h"
-#ifdef WIN32
-#include <d3dx9.h>
-#endif
 #include "logString.h"
 #include "font2.h"
 #include "textureManager.h"

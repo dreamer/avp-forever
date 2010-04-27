@@ -23,7 +23,7 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "logString.h"
-#include "d3_func.h"
+#include "renderer.h"
 #include "utilities.h"
 
 #ifdef _XBOX

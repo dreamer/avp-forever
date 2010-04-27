@@ -6,13 +6,7 @@
 
 */
 
-#ifdef WIN32
-	#include <d3d9.h>
-#endif
-
-#ifdef _XBOX
-	#include <xtl.h>
-#endif
+#include "renderer.h"
 
 #include "aw.h"
 #include "shpanim.h"
@@ -730,14 +724,13 @@ typedef struct imageheader
 	AVPTEXTURE *AvPTexture;
 
 	// graphics api texture
-	D3DTEXTURE Direct3DTexture;
+	RENDERTEXTURE Direct3DTexture;
 
 	int ImageNum;						/* # MIP images */
 	char ImageName[ImageNameSize];		/* Filename */
 
 	int ImageSize;						/* Size of Image Data in bytes */
 	int ImageFlags;						/* Load / Display Options */
-
 
 } IMAGEHEADER;
 

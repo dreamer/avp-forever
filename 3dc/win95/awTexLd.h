@@ -3,7 +3,7 @@
 
 #ifdef WIN32
 	#include <windows.h>
-	#include <d3d9.h>
+//	#include <d3d9.h>
 #endif
 #ifdef _XBOX
 	#include <xtl.h>

@@ -23,7 +23,7 @@
 extern SHAPEHEADER **mainshapelist;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern char projectsubdirectory[];
-void ReleaseD3DTexture(D3DTEXTURE *d3dTexture);
+void ReleaseD3DTexture(RENDERTEXTURE *d3dTexture);
 
 /*
 

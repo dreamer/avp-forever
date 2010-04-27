@@ -48,9 +48,9 @@ RECT LoadingBarEmpty_SrcRect;
 RECT LoadingBarFull_DestRect;
 RECT LoadingBarFull_SrcRect;
 
-D3DTEXTURE LoadingBarFullTexture;
-D3DTEXTURE LoadingBarEmptyTexture;
-D3DTEXTURE DemoBackgroundImage;
+RENDERTEXTURE LoadingBarFullTexture;
+RENDERTEXTURE LoadingBarEmptyTexture;
+RENDERTEXTURE DemoBackgroundImage;
 
 uint32_t	fullTextureID = 0;
 uint32_t	emptyTextureID = 0;

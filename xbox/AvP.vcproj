@@ -302,29 +302,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\win95\alt_tab.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Xbox">
-					<Tool
-						Name="VCCLCompilerTool"
-						WarningLevel="4"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\3dc\win95\Animchnk.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -3821,6 +3798,9 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\3dc\textureManager.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\track.c">

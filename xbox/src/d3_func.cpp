@@ -27,6 +27,21 @@ extern int NumberOfFMVTextures;
 #define MAX_NO_FMVTEXTURES 10
 extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 
+#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
+#include "logString.h"
+#include "configFile.h"
+#include "console.h"
+#include "textureManager.h"
+#include "networking.h"
+#include <xgraphics.h>
+#include "font2.h"
+
+D3DXMATRIX matOrtho;
+D3DXMATRIX matProjection;
+D3DXMATRIX matViewProjection;
+D3DXMATRIX matView; 
+D3DXMATRIX matIdentity;
+
 bool IsPowerOf2(int i)
 {
 	if ((i & -i) == i) {
@@ -50,7 +65,6 @@ extern "C" {
 #include "module.h"
 #include "d3_func.h"
 #include "kshape.h"
-#include "networking.h"
 
 #include "avp_menugfx.hpp"
 extern AVPMENUGFX AvPMenuGfxStorage[];
@@ -58,22 +72,6 @@ extern void ReleaseAllFMVTextures(void);
 
 extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
-
-extern "C++" {
-	#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
-	#include "logString.h"
-	#include "configFile.h"
-	#include <xtl.h>
-	#include <xgraphics.h>
-	#include "console.h"
-	extern void Font_Init();
-	extern void Font_Release();
-	D3DXMATRIX matOrtho;
-	D3DXMATRIX matProjection;
-	D3DXMATRIX matViewProjection;
-	D3DXMATRIX matView;
-	D3DXMATRIX matIdentity;
-}
 
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern int WindowMode;
@@ -424,6 +422,39 @@ D3DTEXTURE CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t usage, u
 	return destTexture;
 }
 
+LPDIRECT3DTEXTURE8 CreateFmvTexture2(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool)
+{
+	LPDIRECT3DTEXTURE8 destTexture = NULL;
+#if 0
+	int newWidth, newHeight;
+
+	// check if passed value is already a power of 2
+	if (!IsPowerOf2(*width)) 
+	{
+		newWidth = NearestSuperiorPow2(*width);
+	}
+	else { newWidth = *width; }
+
+	if (!IsPowerOf2(*height)) 
+	{
+		newHeight = NearestSuperiorPow2(*height);
+	}
+	else { newHeight = *height; }
+#endif
+
+	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, usage, D3DFMT_L8, (D3DPOOL)pool, &destTexture);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return NULL;
+	}
+
+//	*width = newWidth;
+//	*height = newHeight;
+
+	return destTexture;
+}
+
 // removes pure red colour from a texture. used to remove red outline grid on small font texture.
 // we remove the grid as it can sometimes bleed onto text when we use texture filtering.
 void DeRedTexture(D3DTEXTURE texture)
@@ -559,7 +590,41 @@ D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t
 	return destTexture;
 }
 
-D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL poolType)
+uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture)
+{
+//	D3DTEXTURE destTexture = NULL;
+	D3DXIMAGE_INFO imageInfo;
+
+	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice, 
+		fileName, 
+		D3DX_DEFAULT,			// width
+		D3DX_DEFAULT,			// height
+		1,						// mip levels
+		0,						// usage	
+		D3DFMT_UNKNOWN,			// format
+		D3DPOOL_MANAGED,
+		D3DX_FILTER_NONE,
+		D3DX_FILTER_NONE,
+		0,
+		&imageInfo,
+		NULL,
+		&texture.texture
+		);	
+
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		texture.texture = NULL;
+		return -1;
+	}
+
+	texture.width = imageInfo.Width;
+	texture.height = imageInfo.Height;
+
+	return 0;
+}
+
+D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usage, D3DPOOL poolType)
 {
 	D3DTEXTURE destTexture = NULL;
 
@@ -578,7 +643,7 @@ D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL po
 	TgaHeader.width  = tex->width;
 
 	// size of raw image data
-	int imageSize = tex->height * tex->width * sizeof(uint32_t);
+	uint32_t imageSize = tex->height * tex->width * sizeof(uint32_t);
 
 	// create new buffer for header and image data
 	uint8_t *buffer = new uint8_t[sizeof(TGA_HEADER) + imageSize];
@@ -589,7 +654,7 @@ D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL po
 	uint8_t *imageData = buffer + sizeof(TGA_HEADER);
 
 	// loop, converting RGB to BGR for D3DX function
-	for (int i = 0; i < imageSize; i+=4)
+	for (uint32_t i = 0; i < imageSize; i+=4)
 	{
 		// RGB
 		// BGR
@@ -607,18 +672,6 @@ D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL po
 	image.Depth = D3DFMT_A8R8G8B8;
 
 	D3DFORMAT textureFormat;
-
-	// if it's a dynamic texture we need to update it. make it linear to make things easier
-/*
-	if (usage == D3DUSAGE_DYNAMIC)
-	{
-		textureFormat = D3DFMT_LIN_A8R8G8B8;
-	}
-	else
-	{
-		textureFormat = D3DFMT_A8R8G8B8;
-	}
-*/
 
 	textureFormat = D3DFMT_A8R8G8B8;
 
@@ -638,6 +691,7 @@ D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, int usage, D3DPOOL po
 		&image,
 		0,
 		&destTexture);
+
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);

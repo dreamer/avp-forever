@@ -34,8 +34,8 @@ extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 #include "console.h"
 #include "textureManager.h"
 #include "networking.h"
-extern void Font_Init();
-extern void Font_Release();
+#include "font2.h"
+
 D3DXMATRIX matOrtho;
 D3DXMATRIX matProjection;
 D3DXMATRIX matViewProjection;
@@ -279,9 +279,9 @@ void CreateScreenShotImage()
 	SAFE_RELEASE(frontBuffer);
 }
 
-D3DTEXTURE CreateD3DTallFontTexture(AVPTEXTURE *tex) 
+LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex) 
 {
-	D3DTEXTURE destTexture = NULL;
+	LPDIRECT3DTEXTURE9 destTexture = NULL;
 	D3DLOCKED_RECT lock;
 
 	// default colour format
@@ -435,9 +435,9 @@ D3DTEXTURE CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	return destTexture;
 }
 
-D3DTEXTURE CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool)
+LPDIRECT3DTEXTURE9 CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool)
 {
-	D3DTEXTURE destTexture = NULL;
+	LPDIRECT3DTEXTURE9 destTexture = NULL;
 
 	int newWidth, newHeight;
 
@@ -470,9 +470,9 @@ D3DTEXTURE CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t usage, u
 	return destTexture;
 }
 
-D3DTEXTURE CreateFmvTexture2(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool)
+LPDIRECT3DTEXTURE9 CreateFmvTexture2(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool)
 {
-	D3DTEXTURE destTexture = NULL;
+	LPDIRECT3DTEXTURE9 destTexture = NULL;
 #if 0
 	int newWidth, newHeight;
 
@@ -585,7 +585,7 @@ int imageNum = 0;
 
 // removes pure red colour from a texture. used to remove red outline grid on small font texture.
 // we remove the grid as it can sometimes bleed onto text when we use texture filtering.
-void DeRedTexture(D3DTEXTURE texture)
+void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
 {
 	D3DLOCKED_RECT	lock;
 
@@ -622,7 +622,7 @@ void DeRedTexture(D3DTEXTURE texture)
 }
 
 // use this to make textures from non power of two images
-D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight) 
+LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight) 
 {
 	if (tex == NULL)
 	{
@@ -660,7 +660,7 @@ D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t
 	(*realHeight) = new_height;
 	(*realWidth) = new_width;
 
-	D3DTEXTURE destTexture = NULL;
+	LPDIRECT3DTEXTURE9 destTexture = NULL;
 
 	D3DXIMAGE_INFO image;
 	image.Depth = 32;
@@ -768,9 +768,9 @@ uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture)
 	return 0;
 }
 
-D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usage, D3DPOOL poolType)
+LPDIRECT3DTEXTURE9 CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usage, D3DPOOL poolType)
 {
-	D3DTEXTURE destTexture = NULL;
+	LPDIRECT3DTEXTURE9 destTexture = NULL;
 
 	// fill tga header
 	TgaHeader.idlength = 0;
@@ -832,7 +832,6 @@ D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usage, D3DPO
 		&destTexture)))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		OutputDebugString("COULD NOT CREATE TEXTURE?\n");
 		delete[] buffer;
 		return NULL;
 	}
@@ -1573,7 +1572,7 @@ void ReleaseAvPTexture(AVPTEXTURE *texture)
 	}
 }
 
-void ReleaseD3DTexture(D3DTEXTURE *d3dTexture)
+void ReleaseD3DTexture(LPDIRECT3DTEXTURE9 *d3dTexture)
 {
 	// release d3d texture
 	SAFE_RELEASE(*d3dTexture);

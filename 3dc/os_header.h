@@ -1,7 +1,18 @@
 #ifdef WIN32
-#include <windows.h>
+
+	/*
+		Minimise header files to
+		speed compiles...
+	*/
+	#define WIN32_LEAN_AND_MEAN
+
+	#include <windows.h>
+	#include <mmsystem.h>
+
 #endif
 
 #ifdef _XBOX
-#include <xtl.h>
+
+	#include <xtl.h>
+
 #endif

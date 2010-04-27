@@ -15,36 +15,9 @@ extern "C"  {
 #include <stdarg.h>
 #include <stdio.h>
 
-/*
-	Standard windows functionality
-*/
-#ifdef WIN32
-	/*
-		Minimise header files to
-		speed compiles...
-	*/
-	#define WIN32_LEAN_AND_MEAN
+#include "os_header.h"
 
-	#include <windows.h>
-	#include <windowsx.h>
-	#include <winuser.h>
-	#include <mmsystem.h>
-#endif
-
-/*
-	DirectX functionality
-*/
-#ifdef WIN32
-	#include <d3d9.h>
-	typedef int DPID;
-
-	#define DIRECTINPUT_VERSION 0x0800
-	#include "dinput.h"
-#endif
-#ifdef _XBOX
-	#include <xtl.h>
-	#include "xbox_defines.h"
-#endif
+typedef unsigned int DPID;
 
 #include "aw.h"
 
@@ -382,7 +355,6 @@ typedef struct bmpheader {
 	library.
 */
 
-long GetWindowsTickCount(void);
 void CheckForWindowsMessages(void);
 BOOL ExitWindowsSystem(void);
 BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode);

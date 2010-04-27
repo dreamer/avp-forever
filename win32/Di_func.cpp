@@ -3,7 +3,10 @@
 
 // Must link to C code in main engine system
 
+#define DIRECTINPUT_VERSION 0x0800
+
 #include "logString.h"
+#include <dinput.h>
 #include <XInput.h> // XInput API
 
 extern "C" {

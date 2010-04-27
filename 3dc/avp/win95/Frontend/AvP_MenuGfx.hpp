@@ -78,7 +78,7 @@ typedef struct
 {
 	char *FilenamePtr;
 	AVPTEXTURE *ImagePtr;
-	D3DTEXTURE menuTexture;
+	RENDERTEXTURE menuTexture;
 	AW_BACKUPTEXTUREHANDLE hBackup;
 	int Width;
 	int Height;

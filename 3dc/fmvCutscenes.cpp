@@ -18,13 +18,6 @@ struct fmvCutscene
 
 fmvCutscene fmvList[MAX_FMVS];
 
-#ifdef _XBOX
-#include <d3dx8.h>
-#include <xtl.h>
-#define D3DLOCK_DISCARD 0
-#else
-#include <d3dx9.h>
-#endif
 
 #include "logString.h"
 #include "vorbisPlayer.h"

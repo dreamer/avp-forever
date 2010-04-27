@@ -31,4 +31,5 @@ void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
 extern void CheckWireFrameMode(int shouldBeOn);
 
 extern void InitForceField(void);
+
 #endif

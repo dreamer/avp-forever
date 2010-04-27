@@ -22,25 +22,29 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "renderer.h"
-#include "stdint.h"
-#include <string>
 
-const int32_t texIDoffset = 2000;
+// temp
 
-struct Texture
-{
-	std::string		name;
-	uint32_t		width;
-	uint32_t		height;
-	D3DPOOL			poolType;
-	D3DFORMAT		format;
-	RENDERTEXTURE	texture;
-};
+#ifdef WIN32
+	#define USE_D3D9
+#endif
 
-uint32_t Tex_AddTexture(RENDERTEXTURE texture, uint32_t width, uint32_t height);
-uint32_t Tex_LoadFromFile(const std::string &fileName);
-void Tex_GetDimensions(uint32_t textureID, uint32_t &width, uint32_t &height);
-RENDERTEXTURE Tex_GetTexture(uint32_t textureID);
-void Tex_DeInit();
-void Tex_Release(uint32_t textureID);
+#ifdef USE_D3D9
+
+	#include "d3_func.h"
+
+#endif
+
+#ifdef _XBOX
+
+	#include "d3_func.h"
+
+#endif
+
+#ifdef USE_OPENGL
+
+#endif
+
+#ifdef USE_GLIDE
+	#include <glide.h>
+#endif

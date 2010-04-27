@@ -5944,6 +5944,8 @@ void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRI
 
 int LightFlareAlpha = 65535;
 
+extern void D3D_PointSpriteTest(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr);
+
 void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 {
 	int centreX, centreY, sizeX, sizeY, z;
@@ -6040,10 +6042,12 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 				TexturedPolygon_ClipWithPositiveX();
 				if (RenderPolygon.NumberOfVertices<3) 
 					return;
-				D3D_Particle_Output(&particle,RenderPolygon.Vertices);
+//				D3D_Particle_Output(&particle, RenderPolygon.Vertices);
+				D3D_PointSpriteTest(&particle, RenderPolygon.Vertices);
 //				AddParticle(&particle, &RenderPolygon.Vertices[0]);
   			}
-			else D3D_Particle_Output(&particle,VerticesBuffer);
+//			else D3D_Particle_Output(&particle, VerticesBuffer);
+			else D3D_PointSpriteTest(&particle, VerticesBuffer);
 //			else AddParticle(&particle, &VerticesBuffer[0]);
 		}
 	}	
@@ -6117,7 +6121,6 @@ int Alpha[SPHERE_VERTICES];
 
 void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 {
-	extern D3DTEXTUREHANDLE FMVTextureHandle[];
 	int red,green,blue;
 
 	switch (CurrentVisionMode)

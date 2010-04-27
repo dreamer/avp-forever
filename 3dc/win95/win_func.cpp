@@ -37,23 +37,6 @@ extern BOOL bActive;
 // dd_proj.cpp etc.
 
 
-// GetTickCount is the standard windows return
-// millisecond time function, which isn't actually
-// accurate to a millisecond.  In order to get FRI
-// to work properly with GetTickCount at high frame 
-// rates, you will have to switch KalmanTimer to TRUE
-// at the start of io.c to turn on a filtering algorithm
-// in the frame counter handler.  
-// Alternately, we can use the mm function 
-// timeGetTime to get the time accurate to a millisecond.
-// There is still enough variation in this to make
-// the kalman filter probably worthwhile, however.
-
-long GetWindowsTickCount(void)
-{
-	return timeGetTime();
-}
-
 // This function is set up using a PeekMessage check,
 // with a return on a failure of GetMessage, on the
 // grounds that it might be more stable than just

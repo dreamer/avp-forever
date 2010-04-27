@@ -45,7 +45,7 @@ static uint32_t Tex_GetFreeID()
 	return texIDoffset + textureList.size();
 }
 
-uint32_t Tex_AddTexture(LPDIRECT3DTEXTURE9 texture, uint32_t width, uint32_t height)
+uint32_t Tex_AddTexture(RENDERTEXTURE texture, uint32_t width, uint32_t height)
 {
 	// get the next available ID
 	uint32_t textureID = Tex_GetFreeID();
@@ -94,7 +94,7 @@ uint32_t Tex_LoadFromFile(const std::string &fileName)
 	return textureID;
 }
 
-LPDIRECT3DTEXTURE9 Tex_GetTexture(uint32_t textureID)
+RENDERTEXTURE Tex_GetTexture(uint32_t textureID)
 {
 	return (textureList[textureID - texIDoffset].texture);
 }

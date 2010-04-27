@@ -87,6 +87,8 @@ extern BOOL ForceLoad_SentryGun;
 BOOL UseMouseCentreing = FALSE;
 BOOL KeepMainRifFile = FALSE;
 
+BOOL bRunning = TRUE;
+
 char LevelName[] = {"predbit6\0QuiteALongNameActually"};
 
 int VideoModeNotAvailable = 0;

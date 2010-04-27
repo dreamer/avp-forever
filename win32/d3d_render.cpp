@@ -4892,7 +4892,7 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 }
 
 /* more quad drawing functions than you can shake a stick at! */
-void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, D3DTEXTURE fmvTexture)
+void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE9 fmvTexture)
 {
 	int topX = (640 - frameWidth) / 2;
 	int topY = (480 - frameHeight) / 2;
@@ -4973,7 +4973,7 @@ typedef struct FMVVERTEX
 } FMVVERTEX;
 
 /* more quad drawing functions than you can shake a stick at! */
-void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, D3DTEXTURE tex[3])
+void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE9 tex[3])
 {
 	int topX = (640 - frameWidth) / 2;
 	int topY = (480 - frameHeight) / 2;
