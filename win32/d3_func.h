@@ -114,13 +114,16 @@ typedef struct D3DInfo
 	LPDIRECT3DVERTEXDECLARATION9 vertexDecl;
 	LPDIRECT3DVERTEXDECLARATION9 orthoVertexDecl;
 	LPDIRECT3DVERTEXDECLARATION9 fmvVertexDecl;
+	LPDIRECT3DVERTEXDECLARATION9 pointVertexDecl;
 
 	LPDIRECT3DVERTEXSHADER9      vertexShader;
 	LPDIRECT3DVERTEXSHADER9      orthoVertexShader;
 	LPDIRECT3DVERTEXSHADER9      fmvVertexShader;
+	LPDIRECT3DVERTEXSHADER9      pointSpriteShader;
 
 	LPDIRECT3DPIXELSHADER9       pixelShader;
 	LPDIRECT3DPIXELSHADER9       fmvPixelShader;
+	LPDIRECT3DPIXELSHADER9       pointSpritePixelShader;
 
     int						NumDrivers;
     int						CurrentDriver;

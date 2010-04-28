@@ -40,6 +40,11 @@ D3DVERTEXELEMENT9 fmvDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT
 							   {0, 32, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	2},
                             D3DDECL_END()};
 
+D3DVERTEXELEMENT9 pointDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
+								 {0, 12, D3DDECLTYPE_FLOAT1,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_PSIZE,		0},
+								 {0, 16, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		0},
+								 {0, 20, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
+                            D3DDECL_END()};
 
 
 LPD3DXCONSTANTTABLE		constantTable = NULL;
@@ -1056,12 +1061,17 @@ BOOL ExecuteBuffer()
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
-
+/*
 		LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_POINTSPRITEVERTEX);
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
+*/
+
+		d3d.lpD3DDevice->SetVertexDeclaration(d3d.pointVertexDecl);
+		d3d.lpD3DDevice->SetVertexShader(d3d.pointSpriteShader);
+		d3d.lpD3DDevice->SetPixelShader(d3d.pointSpritePixelShader);
 
 		LastError = d3d.lpD3DDevice->DrawPrimitive(D3DPT_POINTLIST, 0, psIndex);
 		if (FAILED(LastError))
@@ -1091,6 +1101,7 @@ BOOL ExecuteBuffer()
 
 		d3d.lpD3DDevice->SetVertexDeclaration(d3d.orthoVertexDecl);
 		d3d.lpD3DDevice->SetVertexShader(d3d.orthoVertexShader);
+		d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
 /*
 		LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_ORTHOVERTEX);
 		if (FAILED(LastError))

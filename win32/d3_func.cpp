@@ -1470,13 +1470,16 @@ BOOL InitialiseDirect3D()
 	d3d.lpD3DDevice->CreateVertexDeclaration(decl, &d3d.vertexDecl);
 	d3d.lpD3DDevice->CreateVertexDeclaration(orthoDecl, &d3d.orthoVertexDecl);
 	d3d.lpD3DDevice->CreateVertexDeclaration(fmvDecl, &d3d.fmvVertexDecl);
+	d3d.lpD3DDevice->CreateVertexDeclaration(fmvDecl, &d3d.pointVertexDecl);
 
 	CreateVertexShader("vertex.vsh", &d3d.vertexShader);
 	CreateVertexShader("orthoVertex.vsh", &d3d.orthoVertexShader);
 	CreateVertexShader("fmvVertex.vsh", &d3d.fmvVertexShader);
+	CreateVertexShader("pointSpriteVertex.vsh", &d3d.pointSpriteShader);
 
 	CreatePixelShader("pixel.psh", &d3d.pixelShader);
 	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
+	CreatePixelShader("pointSpritePixel.psh", &d3d.pointSpritePixelShader);
 
 	Con_PrintMessage("Initialised Direct3D9 succesfully");
 	return TRUE;

@@ -5,6 +5,7 @@
 #include "list_tem.hpp"
 #include "dxlog.h"
 #include "system.h"
+#include <stdlib.h>
 #include "utilities.h" // avp_fopen
 
 class FFileDesc
