@@ -524,6 +524,7 @@ uint32_t CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9
 		{
 			// shader didn't compile for some reason
 			OutputDebugString((const char*)pErrors->GetBufferPointer());
+			pErrors->Release();
 			return -1;
 		}
 		else
@@ -556,20 +557,19 @@ uint32_t CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *
 						&pErrors,        //errors
 						NULL); //constants
 
+	if (pErrors)
+	{
+		// shader didn't compile for some reason
+		OutputDebugString((const char*)pErrors->GetBufferPointer());
+		pErrors->Release();
+//		return -1;
+	}
+
 	if (FAILED(LastError))
 	{
-		if (pErrors)
-		{
-			// shader didn't compile for some reason
-			OutputDebugString((const char*)pErrors->GetBufferPointer());
-			return -1;
-		}
-		else
-		{
-			// other error. can't load file?
-			OutputDebugString(DXGetErrorDescription(LastError));
-			return -1;
-		}
+		// other error. can't load file?
+		OutputDebugString(DXGetErrorDescription(LastError));
+		return -1;
 	}
 
 	d3d.lpD3DDevice->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), pixelShader);

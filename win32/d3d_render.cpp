@@ -34,10 +34,10 @@ D3DVERTEXELEMENT9 orthoDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAU
                             D3DDECL_END()};
 
 D3DVERTEXELEMENT9 fmvDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
-							   {0, 12, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,	0},
-							   {0, 16, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
-							   {0, 24, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	1},
-							   {0, 32, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	2},
+							   //{0, 12, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,	0},
+							   {0, 12, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
+							   {0, 20, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	1},
+							   {0, 28, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	2},
                             D3DDECL_END()};
 
 D3DVERTEXELEMENT9 pointDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
@@ -213,9 +213,6 @@ void DrawParticles()
 
 const int32_t  NO_TEXTURE   = -1;
 const uint32_t TALLFONT_TEX = 999;
-const uint32_t PROGRESS_TEX = 998;
-const uint32_t CONSOLE_TEX  = 997;
-const uint32_t FMV_TEX	    = 996;
 
 // set them to 'null' texture initially
 int32_t	currentTextureID	= NO_TEXTURE;
@@ -1053,6 +1050,7 @@ BOOL ExecuteBuffer()
 
 	D3DPERF_EndEvent();
 
+#if 0
 	if (psIndex)
 	{
 		// PS test
@@ -1079,6 +1077,7 @@ BOOL ExecuteBuffer()
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
 	}
+#endif
 
 	psIndex = 0;
 
@@ -4964,25 +4963,6 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWid
 	}
 }
 
-typedef struct FMVVERTEX 
-{
-	float x;
-	float y;
-	float z;		// Position in 3d space 
-
-	DWORD colour;	// Colour  
-
-	float u1;
-	float v1;		// Texture coordinates 
-
-	float u2;
-	float v2;		// Texture coordinates 
-
-	float u3;
-	float v3;		// Texture coordinates 
-
-} FMVVERTEX;
-
 /* more quad drawing functions than you can shake a stick at! */
 void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE9 tex[3])
 {
@@ -5003,7 +4983,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	fmvVerts[0].x = x1;
 	fmvVerts[0].y = y2;
 	fmvVerts[0].z = 1.0f;
-	fmvVerts[0].colour = colour;
+//	fmvVerts[0].colour = colour;
 	fmvVerts[0].u1 = 0.0f;
 	fmvVerts[0].v1 = (1.0f / textureHeight) * frameHeight;
 
@@ -5017,7 +4997,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	fmvVerts[1].x = x1;
 	fmvVerts[1].y = y1;
 	fmvVerts[1].z = 1.0f;
-	fmvVerts[1].colour = colour;
+//	fmvVerts[1].colour = colour;
 	fmvVerts[1].u1 = 0.0f;
 	fmvVerts[1].v1 = 0.0f;
 
@@ -5031,7 +5011,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	fmvVerts[2].x = x2;
 	fmvVerts[2].y = y2;
 	fmvVerts[2].z = 1.0f;
-	fmvVerts[2].colour = colour;
+//	fmvVerts[2].colour = colour;
 	fmvVerts[2].u1 = (1.0f / textureWidth) * frameWidth;
 	fmvVerts[2].v1 = (1.0f / textureHeight) * frameHeight;
 
@@ -5045,7 +5025,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	fmvVerts[3].x = x2;
 	fmvVerts[3].y = y1;
 	fmvVerts[3].z = 1.0f;
-	fmvVerts[3].colour = colour;
+//	fmvVerts[3].colour = colour;
 	fmvVerts[3].u1 = (1.0f / textureWidth) * frameWidth;
 	fmvVerts[3].v1 = 0.0f;
 
@@ -5713,87 +5693,6 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	OUTPUT_TRIANGLE(0,1,2, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
 #endif
-}
-
-void DrawBigChar(char c, int x, int y, int colour)
-{
-	return;
-	#define BIG_CHAR 30
-#if 0
-	/* realign it to our text image */
-	c = c - 32;
-
-	int row = (int)(c / 16); // get row 
-	int column = c % 16; // get column from remainder value
-
-	int texU = column * BIG_CHAR;
-	int texV = row * BIG_CHAR;
-#endif
-	
-	int texU = 1+((c-32)&29)*16;
-	int texV = 1+((c-32)>>8)*16;
-
-	CheckVertexBuffer(4, CONSOLE_TEX, TRANSLUCENCY_GLOWING);
-
-	int TexRealHeight = 512;
-	int TexRealWidth = 512;
-
-	int width_of_char = BIG_CHAR;
-	int height_of_char = BIG_CHAR;
-
-	float RecipW = (1.0f / TexRealWidth);
-	float RecipH = (1.0f / TexRealHeight);
-
-	// bottom left
-	mainVertex[vb].sx = (float)x - 0.5f;
-	mainVertex[vb].sy = (float)y + height_of_char - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0, 0 ,0, 255);
-	mainVertex[vb].tu = (float)((texU) * RecipW);
-	mainVertex[vb].tv = (float)((texV + height_of_char) * RecipH);
-
-	vb++;
-
-	// top left
-	mainVertex[vb].sx = (float)x - 0.5f;
-	mainVertex[vb].sy = (float)y - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = (float)((texU) * RecipW);
-	mainVertex[vb].tv = (float)((texV) * RecipH);
-
-	vb++;
-
-	// bottom right
-	mainVertex[vb].sx = (float)x + width_of_char - 0.5f;
-	mainVertex[vb].sy = (float)y + height_of_char - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = (float)((texU + width_of_char) * RecipW);
-	mainVertex[vb].tv = (float)((texV + height_of_char) * RecipH);
-
-	vb++;
-
-	// top right
-	mainVertex[vb].sx = (float)x + width_of_char - 0.5f;
-	mainVertex[vb].sy = (float)y - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = (float)((texU + width_of_char) * RecipW);
-	mainVertex[vb].tv = (float)((texV) * RecipH);
-
-	vb++;
-
-	OUTPUT_TRIANGLE(0,1,2, 4);
-	OUTPUT_TRIANGLE(1,2,3, 4);
 }
 
 void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha) 

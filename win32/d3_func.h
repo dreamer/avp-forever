@@ -72,6 +72,23 @@ typedef struct ORTHOVERTEX
 // orthographic quad vertex format
 #define D3DFVF_ORTHOVERTEX (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 
+typedef struct FMVVERTEX 
+{
+	float x;
+	float y;
+	float z;		// Position in 3d space 
+
+	float u1;
+	float v1;		// Texture coordinates 1
+
+	float u2;
+	float v2;		// Texture coordinates 2
+
+	float u3;
+	float v3;		// Texture coordinates 3
+
+} FMVVERTEX;
+
 /* 
   Maximum number of Direct3D drivers ever
   expected to be resident on the system.
@@ -183,7 +200,6 @@ BOOL ChangeGameResolution(int width, int height, int colour_depth);
 
 void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha);
 void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha);
-void DrawBigChar(char c, int x, int y, int colour);
 void DrawCloudTable(int topX, int topY, int word_length, int alpha);
 void DrawFadeQuad(int topX, int topY, int alpha);
 void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha);

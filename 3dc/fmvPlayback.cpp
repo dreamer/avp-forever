@@ -161,7 +161,7 @@ TheoraFMV::~TheoraFMV()
 		mDisplayTexture->Release();
 	}
 
-	for (int i = 0; i < 3; i++)
+	for (uint32_t i = 0; i < 3; i++)
 	{
 		if (tex[i])
 			tex[i]->Release();
