@@ -145,7 +145,7 @@ void UpdateViewMatrix(float *viewMat)
 	
 	D3DXVECTOR3 vecRight	(viewMat[0], viewMat[1], viewMat[2]);
 	D3DXVECTOR3 vecUp		(viewMat[4], viewMat[5], viewMat[6]);
-	D3DXVECTOR3 vecFront	(viewMat[8], viewMat[9], viewMat[10]);
+	D3DXVECTOR3 vecFront	(viewMat[8], -viewMat[9], viewMat[10]);
 	D3DXVECTOR3 vecPosition (viewMat[3], -viewMat[7], viewMat[11]);
 
 	D3DXVec3Normalize(&vecFront, &vecFront);
@@ -926,10 +926,6 @@ BOOL ExecuteBuffer()
 	// sort the list of render objects
 	std::sort(renderTest.begin(), renderTest.end());
 
-#ifdef WIN32
-//	Font_DrawText("blah this is my text test", 100, 100, D3DCOLOR_ARGB(255, 255, 255, 0), 1);
-#endif
-
 	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));
 	if (FAILED(LastError))
 	{
@@ -955,8 +951,8 @@ BOOL ExecuteBuffer()
 		D3DXMatrixIdentity(&viewMatrix); // we want to use the identity matrix in this case
 	#endif
 
-	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,		&viewMatrix);
-	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matProjection);
+//	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,		&viewMatrix);
+//	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matProjection);
 
 	D3DXMATRIX matWorld; 
 	D3DXMatrixIdentity(&matWorld);
@@ -1098,9 +1094,24 @@ BOOL ExecuteBuffer()
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
 
-		d3d.lpD3DDevice->SetVertexDeclaration(d3d.orthoVertexDecl);
-		d3d.lpD3DDevice->SetVertexShader(d3d.orthoVertexShader);
-		d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
+		LastError = d3d.lpD3DDevice->SetVertexDeclaration(d3d.orthoVertexDecl);
+		if (FAILED(LastError)) 
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+
+		LastError = d3d.lpD3DDevice->SetVertexShader(d3d.orthoVertexShader)
+		if (FAILED(LastError)) 
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+
+		LastError = d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
+		if (FAILED(LastError)) 
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+
 /*
 		LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_ORTHOVERTEX);
 		if (FAILED(LastError))
@@ -1110,11 +1121,11 @@ BOOL ExecuteBuffer()
 */
 		D3DXMATRIX matView; 
 		D3DXMatrixIdentity(&matView);
-		d3d.lpD3DDevice->SetTransform(D3DTS_VIEW, &matView);
+//		d3d.lpD3DDevice->SetTransform(D3DTS_VIEW, &matView);
 
 		D3DXMATRIX matOrtho;
 		D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
-		d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matOrtho);
+//		d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matOrtho);
 
 		D3DXMATRIXA16 matWorldViewProj = matWorld * matView * matOrtho;
 		constantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
@@ -1589,7 +1600,7 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, NO_TEXTURE, RenderPolygon.TranslucencyMode);
 
-	for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
+	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 /*
@@ -1704,7 +1715,7 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, TRANSLUCENCY_NORMAL);
 
-	for (unsigned int i = 0; i < RenderPolygon.NumberOfVertices; i++)
+	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 /*
@@ -1738,7 +1749,7 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 	   		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
 		}
 
-		mainVertex[vb].specular=RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 
 //		mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
 //		mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
@@ -4431,11 +4442,11 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	uint8_t *destPtr = NULL;
 	uint8_t *srcPtr = &ftPtr->RGBBuffer[0];
 
-	for (int y = 0; y < ftPtr->ImagePtr->ImageHeight; y++)
+	for (uint32_t y = 0; y < ftPtr->ImagePtr->ImageHeight; y++)
 	{
 		destPtr = static_cast<uint8_t*>(textureRect.pBits) + y * textureRect.Pitch;
 
-		for (int x = 0; x < ftPtr->ImagePtr->ImageWidth; x++)
+		for (uint32_t x = 0; x < ftPtr->ImagePtr->ImageWidth; x++)
 		{
 /*
 			destPtr[0] = srcPtr[0];

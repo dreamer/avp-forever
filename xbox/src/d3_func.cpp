@@ -42,6 +42,12 @@ D3DXMATRIX matViewProjection;
 D3DXMATRIX matView; 
 D3DXMATRIX matIdentity;
 
+extern DWORD mainDecl[];
+
+// size of vertex and index buffers
+const uint32_t MAX_VERTEXES = 4096;
+const uint32_t MAX_INDICES = 9216;
+
 bool IsPowerOf2(int i)
 {
 	if ((i & -i) == i) {
@@ -80,6 +86,8 @@ static HRESULT LastError;
 
 D3DINFO d3d;
 
+uint32_t fov = 75;
+
 // byte order macros for A8R8G8B8 d3d texture
 enum
 {
@@ -88,6 +96,18 @@ enum
 	BO_RED,
 	BO_ALPHA
 };
+
+// console command : set a new field of view value
+void SetFov()
+{
+	if (Con_GetNumArguments() == 0)
+	{
+		Con_PrintMessage("usage: r_setfov 75");
+		return;
+	}
+
+	fov = atoi(Con_GetArgument(0).c_str());
+}
 
 // TGA header structure
 #pragma pack(1)
@@ -141,7 +161,7 @@ char* GetDeviceName()
 	else return "Default Adapter";
 }
 
-D3DTEXTURE CreateD3DTallFontTexture (AVPTEXTURE *tex)
+LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AVPTEXTURE *tex)
 {
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
 	LPDIRECT3DTEXTURE8 swizTexture = NULL;
@@ -313,7 +333,7 @@ D3DTEXTURE CreateD3DTallFontTexture (AVPTEXTURE *tex)
 	return swizTexture;
 }
 
-void WriteTextureToFile(D3DTEXTURE srcTexture, const char* fileName)
+void WriteTextureToFile(LPDIRECT3DTEXTURE8 srcTexture, const char* fileName)
 {
 /*
 	int width = 0;
@@ -366,9 +386,9 @@ void WriteTextureToFile(D3DTEXTURE srcTexture, const char* fileName)
 */
 }
 
-D3DTEXTURE CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool)
+LPDIRECT3DTEXTURE8 CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool)
 {
-	D3DTEXTURE destTexture = NULL;
+	LPDIRECT3DTEXTURE8 destTexture = NULL;
 
 	int newWidth, newHeight;
 
@@ -455,9 +475,107 @@ LPDIRECT3DTEXTURE8 CreateFmvTexture2(uint32_t *width, uint32_t *height, uint32_t
 	return destTexture;
 }
 
+uint32_t CreateVertexShader(const std::string &fileName, DWORD *vertexShader)
+{
+	XGBuffer* pShaderData = NULL;
+
+	std::string properPath = "d:\\" + fileName;
+
+	// have to open the file ourselves and pass as string. XGAssembleShader won't do this for us
+	std::ifstream shaderFile(properPath.c_str(), std::ifstream::in);
+
+	if (!shaderFile.is_open())
+	{
+		LogErrorString("Error cannot open vertex shader file");
+		return -1;
+	}
+
+	std::stringstream buffer;
+	buffer << shaderFile.rdbuf();
+
+	// compile shader from file
+	LastError = XGAssembleShader(fileName.c_str(), // filename (for errors only)
+			buffer.str().c_str(),
+			buffer.str().size(),
+			0,
+			NULL,
+			&pShaderData,
+			NULL,
+			NULL,
+			NULL,
+			NULL,
+			NULL);
+
+	if (FAILED(LastError))
+	{
+		LogErrorString("Error cannot compile vertex shader file");
+		return -1;
+	}
+
+	LastError = d3d.lpD3DDevice->CreateVertexShader(&mainDecl[0], (const DWORD*)pShaderData->pData, vertexShader, D3DUSAGE_PERSISTENTDIFFUSE); // ??
+	if (FAILED(LastError))
+	{
+		LogErrorString("Error create vertex shader");
+		return -1;
+	}
+
+	pShaderData->Release();
+
+	return 0;
+}
+
+uint32_t CreatePixelShader(const std::string &fileName, DWORD *pixelShader)
+{
+	XGBuffer* pShaderData = NULL;
+
+	std::string properPath = "d:\\" + fileName;
+
+	// have to open the file ourselves and pass as string. XGAssembleShader won't do this for us
+	std::ifstream shaderFile(properPath.c_str(), std::ifstream::in);
+
+	if (!shaderFile.is_open())
+	{
+		LogErrorString("Error cannot open pixel shader file");
+		return -1;
+	}
+
+	std::stringstream buffer;
+	buffer << shaderFile.rdbuf();
+
+	// compile shader from file
+	LastError = XGAssembleShader(fileName.c_str(), // filename (for errors only)
+			buffer.str().c_str(),
+			buffer.str().size(),
+			0,
+			NULL,
+			&pShaderData,
+			NULL,
+			NULL,
+			NULL,
+			NULL,
+			NULL);
+
+	if (FAILED(LastError))
+	{
+		LogErrorString("Error cannot compile pixel shader file");
+		return -1;
+	}
+
+	LastError = d3d.lpD3DDevice->CreatePixelShader((D3DPIXELSHADERDEF*)pShaderData->GetBufferPointer(), pixelShader); // ??
+	if (FAILED(LastError))
+	{
+		LogErrorString("Error create pixel vertex shader");
+		return -1;
+	}
+
+	pShaderData->Release();
+	
+	return 0;
+}
+
 // removes pure red colour from a texture. used to remove red outline grid on small font texture.
 // we remove the grid as it can sometimes bleed onto text when we use texture filtering.
-void DeRedTexture(D3DTEXTURE texture)
+void DeRedTexture(LPDIRECT3DTEXTURE8 texture)
 {
 	D3DLOCKED_RECT lock;
 
@@ -494,8 +612,15 @@ void DeRedTexture(D3DTEXTURE texture)
 }
 
 // use this to make textures from non power of two images
-D3DTEXTURE CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight)
+LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight)
 {
+	if (tex == NULL)
+	{
+		*realWidth = 0;
+		*realHeight = 0;
+		return NULL;
+	}
+
 	int original_width = tex->width;
 	int original_height = tex->height;
 	int new_width = original_width;
@@ -624,9 +749,9 @@ uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture)
 	return 0;
 }
 
-D3DTEXTURE CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usage, D3DPOOL poolType)
+LPDIRECT3DTEXTURE8 CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usage, D3DPOOL poolType)
 {
-	D3DTEXTURE destTexture = NULL;
+	LPDIRECT3DTEXTURE8 destTexture = NULL;
 
 	// fill tga header
 	TgaHeader.idlength = 0;
@@ -815,9 +940,6 @@ BOOL ReleaseVolatileResources()
 	return true;
 }
 
-const int MAX_VERTEXES = 4096 * 2;
-//const int MAX_INDICES = 9216 * 2;
-
 BOOL CreateVolatileResources()
 {
 /*
@@ -851,12 +973,20 @@ BOOL CreateVolatileResources()
 		return FALSE;
 	}
 
+	// create our 2D index buffer
+	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoIndexBuffer);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return FALSE;
+	}
+/*
 	LastError = d3d.lpD3DDevice->SetVertexShader(D3DFVF_LVERTEX);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
-
+*/
 /*
 	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_TLVERTEX);
 	if(FAILED(LastError))
@@ -1199,40 +1329,16 @@ BOOL InitialiseDirect3D()
 	// create vertex and index buffers
 	CreateVolatileResources();
 
-	// Setup orthographic projection matrix
-	int standardWidth = 640;
-	int wideScreenWidth = 852;
-
-	// setup view matrix
-	D3DXMatrixIdentity( &matView );
-	D3DXVECTOR3 position = D3DXVECTOR3(-64.0f, 280.0f, -1088.0f);
-	D3DXVECTOR3 lookAt = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	D3DXVECTOR3 up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-	D3DXMatrixLookAtLH( &matView, &position, &lookAt, &up );
-	PrintD3DMatrix("View", matView);
-
-	// set up orthographic projection matrix
-//	D3DXMatrixOrthoOffCenterLH( &matOrtho, 0.0f, wideScreenWidth, 0.0f, 480, 1.0f, 10.0f);
-	D3DXMatrixOrthoLH( &matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
-
-	// set up projection matrix
-	D3DXMatrixPerspectiveFovLH( &matProjection, width / height, D3DX_PI / 2, 1.0f, 100.0f);
-
-	// print projection matrix?
-	PrintD3DMatrix("Projection", matProjection);
-
-	// multiply view and projection
-	D3DXMatrixMultiply( &matViewProjection, &matView, &matProjection);
-	PrintD3DMatrix("View and Projection", matViewProjection);
-
-	D3DXMatrixIdentity( &matIdentity );
-	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
-	d3d.lpD3DDevice->SetTransform( D3DTS_WORLD, &matIdentity );
-	d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matIdentity );
+//	SetTransforms();
 
 	Con_Init();
 	Net_Initialise();
 	Font_Init();
+
+	CreateVertexShader("vertex_1_1.vsh", &d3d.vertexShader);
+	CreateVertexShader("orthoVertex_1_1.vsh", &d3d.orthoVertexShader);
+
+	CreatePixelShader("pixel_1_1.psh", &d3d.pixelShader);
 
 	Con_PrintMessage("Initialised Direct3D succesfully");
 	return TRUE;
@@ -1283,7 +1389,7 @@ void ReleaseAvPTexture(AVPTEXTURE *texture)
 	}
 }
 
-void ReleaseD3DTexture(D3DTEXTURE *d3dTexture)
+void ReleaseD3DTexture(LPDIRECT3DTEXTURE8 *d3dTexture)
 {
 	// release d3d texture
 	SAFE_RELEASE(*d3dTexture);

@@ -364,13 +364,13 @@ void InitPlayer(STRATEGYBLOCK* sbPtr, int sb_type)
 
 void ChangeToMarine()
 {
-	if(AvP.Network!=I_No_Network)
+	if (AvP.Network != I_No_Network)
 	{
-		AvP.PlayerType=I_Marine;
+		AvP.PlayerType = I_Marine;
 		NetPlayerRespawn(Player->ObStrategyBlock);
 		InitPlayerMovementData(Player->ObStrategyBlock);
-		Player->ObStrategyBlock->DynPtr->ToppleForce=TOPPLE_FORCE_NONE;
-		netGameData.myCharacterType=netGameData.myNextCharacterType=NGCT_Marine;
+		Player->ObStrategyBlock->DynPtr->ToppleForce = TOPPLE_FORCE_NONE;
+		netGameData.myCharacterType=netGameData.myNextCharacterType = NGCT_Marine;
 
 		//reorient the player
 		{
@@ -379,7 +379,7 @@ void ChangeToMarine()
 			e.EulerX=0;
 			e.EulerZ=0;
 
-			CreateEulerMatrix(&e,&Player->ObStrategyBlock->DynPtr->OrientMat);
+			CreateEulerMatrix(&e, &Player->ObStrategyBlock->DynPtr->OrientMat);
 			TransposeMatrixCH(&Player->ObStrategyBlock->DynPtr->OrientMat);
 
 			Player->ObStrategyBlock->DynPtr->UseStandardGravity=1;
@@ -387,9 +387,9 @@ void ChangeToMarine()
 
 		/* CDF 15/3/99, delete all discs... */
 		RemoveAllThisPlayersDiscs();
-
 	}
 }
+
 void ChangeToAlien()
 {
 	if(AvP.Network!=I_No_Network)
@@ -405,6 +405,7 @@ void ChangeToAlien()
 		RemoveAllThisPlayersDiscs();
 	}
 }
+
 void ChangeToPredator()
 {
 	if(AvP.Network!=I_No_Network)
@@ -477,15 +478,13 @@ void MaintainPlayer(void)
 	textprint("PlayerLight %d\n",CurrentLightAtPlayer);
 	#endif
 
-	if(AvP.Network==I_No_Network)
+	if (AvP.Network==I_No_Network)
 	{
-		#if 1
-		if(playerStatusPtr->Mvt_InputRequests.Flags.Rqst_PauseGame)
+		if (playerStatusPtr->Mvt_InputRequests.Flags.Rqst_PauseGame)
 		{
 			// go to start menu
 			AvP.MainLoopRunning = 0;
 		}
-		#endif
 	}
 	else
 	if(playerStatusPtr->Mvt_InputRequests.Flags.Rqst_PauseGame)
@@ -539,7 +538,6 @@ void MaintainPlayer(void)
 		}
 	}
 
-
 	if (AvP.DestructTimer>0) {
 		extern int NormalFrameTime;
 
@@ -580,7 +578,6 @@ void MaintainPlayer(void)
 
 		/* Put the fire out... */
 
-		#if 1
 		{
 			int speed;
 			/* Go out? */
@@ -609,25 +606,6 @@ void MaintainPlayer(void)
 				playerStatusPtr->fireTimer=0;
 			}
 		}
-		#else
-		if (playerStatusPtr->incidentFlag) {
-			int speed;
-			/* Go out? */
-			speed=Approximate3dMagnitude(&Player->ObStrategyBlock->DynPtr->LinVelocity);
-
-			if (speed>15000) {
-				/* Running alien. */
-				if ((FastRandom()&65535)<13107) {
-					Player->ObStrategyBlock->SBDamageBlock.IsOnFire=0;
-				}
-			} else {
-				/* Normal bloke. */
-				if ((FastRandom()&65535)<3000) {
-					Player->ObStrategyBlock->SBDamageBlock.IsOnFire=0;
-				}
-			}
-		}
-		#endif
 	} else {
 		if (playerStatusPtr->soundHandle3!=SOUND_NOACTIVEINDEX) {
 			Sound_Stop(playerStatusPtr->soundHandle3);
@@ -725,28 +703,36 @@ void MaintainPlayer(void)
 			HeadOrientation.EulerX=ex;
 			HeadOrientation.EulerY=ey;
 			HeadOrientation.EulerZ=ez;
-		} else if (AvP.PlayerType==I_Marine) {
-			if (TauntSoundPlayed==0) {
+		} else if (AvP.PlayerType==I_Marine)
+		{
+			if (TauntSoundPlayed == 0) 
+			{
 				/* That should make sure we don't get more than one. */
-				if (playerStatusPtr->soundHandle==SOUND_NOACTIVEINDEX) {
+				if (playerStatusPtr->soundHandle==SOUND_NOACTIVEINDEX) 
+				{
 					PlayMarineScream(0,SC_Taunt,0,&playerStatusPtr->soundHandle,NULL);
-					if(AvP.Network!=I_No_Network) netGameData.myLastScream=SC_Taunt;
+					if (AvP.Network!=I_No_Network) 
+						netGameData.myLastScream=  SC_Taunt;
 					TauntSoundPlayed=1;
 				}
 			}
-		} else if (AvP.PlayerType==I_Predator) {
-			if (TauntSoundPlayed==0) {
+		} 
+		else if (AvP.PlayerType==I_Predator) 
+		{
+			if (TauntSoundPlayed==0) 
+			{
 				/* That should make sure we don't get more than one. */
-				if (playerStatusPtr->soundHandle==SOUND_NOACTIVEINDEX) {
+				if (playerStatusPtr->soundHandle==SOUND_NOACTIVEINDEX) 
+				{
 					PlayPredatorSound(0,PSC_Taunt,0,&playerStatusPtr->soundHandle,NULL);
-					if(AvP.Network!=I_No_Network) netGameData.myLastScream=PSC_Taunt;
+					if (AvP.Network!=I_No_Network) 
+						netGameData.myLastScream = PSC_Taunt;
 					TauntSoundPlayed=1;
 				}
 			}
 		} else {
 			GLOBALASSERT(0);
 		}
-
 	}
 
 	/* Decay alien superhealth. */
@@ -790,7 +776,7 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 
 	/* access the extra data hanging off the strategy block */
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (sbPtr->SBdataptr);
-  GLOBALASSERT(playerStatusPtr);
+	GLOBALASSERT(playerStatusPtr);
 
 	deltaHealth=playerStatusPtr->Health-sbPtr->SBDamageBlock.Health;
 	deltaArmour=playerStatusPtr->Armour-sbPtr->SBDamageBlock.Armour;
@@ -805,40 +791,17 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 
 	if (playerStatusPtr->IsAlive)
 	{
-		#if 0
-		damage <<= 16;
-		if (playerStatusPtr->Armour > 0)
+		int maxTilt = deltaHealth>>12;
+		int halfTilt = maxTilt/2;
+		if (maxTilt)
 		{
-			if (playerStatusPtr->Armour >= damage/2)
-			{
-				playerStatusPtr->Armour -= damage/2;
-				playerStatusPtr->Health -= damage/4;
-			}
-			else
-			{
-				damage -= playerStatusPtr->Armour*2;
-				playerStatusPtr->Health -= playerStatusPtr->Armour/2 + damage;
-				playerStatusPtr->Armour = 0;
-			}
-		}
-		else
-		{
-			playerStatusPtr->Health -= damage;
-		}
-		#endif
-		{
-			int maxTilt = deltaHealth>>12;
-			int halfTilt = maxTilt/2;
-			if (maxTilt)
-			{
-				HeadOrientation.EulerX = (FastRandom()%maxTilt)-halfTilt;
-				HeadOrientation.EulerY = (FastRandom()%maxTilt)-halfTilt;
-				HeadOrientation.EulerZ = (FastRandom()%maxTilt)-halfTilt;
+			HeadOrientation.EulerX = (FastRandom()%maxTilt)-halfTilt;
+			HeadOrientation.EulerY = (FastRandom()%maxTilt)-halfTilt;
+			HeadOrientation.EulerZ = (FastRandom()%maxTilt)-halfTilt;
 
-				if (HeadOrientation.EulerX < 0) HeadOrientation.EulerX += 4096;
-				if (HeadOrientation.EulerY < 0) HeadOrientation.EulerY += 4096;
-				if (HeadOrientation.EulerZ < 0) HeadOrientation.EulerZ += 4096;
-			}
+			if (HeadOrientation.EulerX < 0) HeadOrientation.EulerX += 4096;
+			if (HeadOrientation.EulerY < 0) HeadOrientation.EulerY += 4096;
+			if (HeadOrientation.EulerZ < 0) HeadOrientation.EulerZ += 4096;
 		}
 
 		if ((playerStatusPtr->soundHandle==SOUND_NOACTIVEINDEX)&&(deltaHealth||deltaArmour)) {

@@ -47,6 +47,10 @@ extern D3DVERTEXELEMENT9 orthoDecl[];
 extern D3DVERTEXELEMENT9 fmvDecl[];
 extern LPD3DXCONSTANTTABLE	constantTable;
 
+// size of vertex and index buffers
+const uint32_t MAX_VERTEXES = 4096;
+const uint32_t MAX_INDICES = 9216;
+
 bool IsPowerOf2(int i) 
 {
 	if ((i & -i) == i) {
@@ -72,7 +76,6 @@ extern "C" {
 #include "avp_menus.h"
 #include "kshape.h"
 #include "eax.h"
-//#include "vmanpset.h"
 
 #include "avp_menugfx.hpp"
 extern AVPMENUGFX AvPMenuGfxStorage[];
@@ -840,10 +843,6 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usag
 	return destTexture;
 }
 
-// size of vertex and index buffers
-const uint32_t MAX_VERTEXES = 4096;
-const uint32_t MAX_INDICES = 9216;
-
 BOOL ReleaseVolatileResources() 
 {
 	ReleaseAllFMVTexturesForDeviceReset();
@@ -1537,15 +1536,23 @@ void ReleaseDirect3D()
 	// delete up any new()-ed memory in d3d_render.cpp
 	DeleteRenderMemory();
 
+	// release constant tables
 	SAFE_RELEASE(constantTable);
+
+	// release vertex declarations
+	SAFE_RELEASE(d3d.vertexDecl);
+	SAFE_RELEASE(d3d.orthoVertexDecl);
+	SAFE_RELEASE(d3d.fmvVertexDecl);
+	SAFE_RELEASE(d3d.pointVertexDecl);
+
+	// release shaders
 	SAFE_RELEASE(d3d.pixelShader);
 	SAFE_RELEASE(d3d.fmvPixelShader);
 	SAFE_RELEASE(d3d.vertexShader);
 	SAFE_RELEASE(d3d.fmvVertexShader);
 	SAFE_RELEASE(d3d.orthoVertexShader);
-	SAFE_RELEASE(d3d.vertexDecl);
-	SAFE_RELEASE(d3d.orthoVertexDecl);
-	SAFE_RELEASE(d3d.fmvVertexDecl);
+	SAFE_RELEASE(d3d.pointSpriteShader);
+	SAFE_RELEASE(d3d.pointSpritePixelShader);
 
 	SAFE_RELEASE(d3d.lpD3DDevice);
 	LogString("Releasing Direct3D9 device...");

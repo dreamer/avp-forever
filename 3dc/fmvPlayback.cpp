@@ -208,6 +208,10 @@ int TheoraFMV::Open(const std::string &fileName)
 	mFileName = fileName;
 #endif
 
+	tex[0] = 0;
+	tex[1] = 0;
+	tex[2] = 0;
+
 	// open the file
 	mFileStream.open(mFileName.c_str(), std::ios::in | std::ios::binary);
 

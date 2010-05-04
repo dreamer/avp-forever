@@ -349,7 +349,15 @@ extern void StartTriggerPlotFMV(int number)
 	{
 		if (FMVTexture[i].IsTriggeredPlotFMV)
 		{
-			int fmvHandle = OpenFMV(buffer);
+			// close it if it's open
+			if (FMVTexture[i].fmvHandle)
+			{
+				if (fmvList[FMVTexture[i].fmvHandle].isPlaying)
+					fmvList[FMVTexture[i].fmvHandle].fmvClass->Close();
+					FMVTexture[i].fmvHandle = -1;
+			}
+
+			int32_t fmvHandle = OpenFMV(buffer);
 
 			// couldn't open it
 			if (fmvHandle == -1)
