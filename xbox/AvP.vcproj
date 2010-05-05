@@ -2853,23 +2853,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\mp_launch.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\3dc\Mslhand.c">
 				<FileConfiguration
 					Name="Debug|Win32">

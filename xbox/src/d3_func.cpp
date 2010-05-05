@@ -64,6 +64,9 @@ int NearestSuperiorPow2(int i)
 
 extern "C" {
 
+extern D3DLVERTEX *mainVertex;
+extern WORD *mainIndex;
+
 #define INITGUID
 
 #include "3dc.h"
@@ -111,18 +114,18 @@ void SetFov()
 
 // TGA header structure
 #pragma pack(1)
-struct TGA_HEADER
+struct TGA_HEADER 
 {
 	char		idlength;
 	char		colourmaptype;
 	char		datatypecode;
-	short int	colourmaporigin;
-	short int	colourmaplength;
+	int16_t		colourmaporigin;
+	int16_t 	colourmaplength;
 	char		colourmapdepth;
-	short int	x_origin;
-	short int	y_origin;
-	short		width;
-	short		height;
+	int16_t		x_origin;
+	int16_t		y_origin;
+	int16_t		width;
+	int16_t		height;
 	char		bitsperpixel;
 	char		imagedescriptor;
 };
@@ -914,7 +917,7 @@ LPDIRECT3DTEXTURE8 CheckAndLoadUserTexture(const char *fileName, int *width, int
 		&tempTexture
 		);
 
-	if(FAILED(LastError))
+	if (FAILED(LastError))
 	{
 //		OutputDebugString("\n couldn't create texture");
 		*width = 0;
@@ -1082,14 +1085,9 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 
 	CreateVolatileResources();
 
+	SetTransforms();
+
 	ThisFramesRenderingHasBegun();
-
-	// set up projection matrix
-	D3DXMatrixPerspectiveFovLH( &matProjection, width / height, D3DX_PI / 2, 1.0f, 100.0f);
-
-	d3d.lpD3DDevice->SetTransform( D3DTS_PROJECTION, &matOrtho );
-	d3d.lpD3DDevice->SetTransform( D3DTS_WORLD, &matIdentity );
-	d3d.lpD3DDevice->SetTransform( D3DTS_VIEW, &matIdentity );
 
 	return TRUE;
 }
@@ -1100,11 +1098,11 @@ BOOL InitialiseDirect3D()
 	ClearLog();
 	Con_PrintMessage("Starting to initialise Direct3D");
 
-	int width = 640;
-	int height = 480;
-	int depth = 32;
-	int defaultDevice = D3DADAPTER_DEFAULT;
-	int thisDevice = D3DADAPTER_DEFAULT;
+	uint32_t width = 640;
+	uint32_t height = 480;
+	uint32_t colourDepth = 32;
+	uint32_t defaultDevice = D3DADAPTER_DEFAULT;
+	uint32_t thisDevice = D3DADAPTER_DEFAULT;
 
 	//	Zero d3d structure
     memset(&d3d, 0, sizeof(D3DINFO));
@@ -1225,11 +1223,11 @@ BOOL InitialiseDirect3D()
 //	D3DDISPLAYMODE d3ddm;
 //	LastError = d3d.lpD3D->GetAdapterDisplayMode(defaultDevice, &d3ddm);
 
-	unsigned int modeCount = d3d.lpD3D->GetAdapterModeCount(defaultDevice);
+	uint32_t modeCount = d3d.lpD3D->GetAdapterModeCount(defaultDevice);
 	D3DDISPLAYMODE tempMode;
 
 	// create our list of supported resolutions for D3DFMT_LIN_X8R8G8B8 format
-	for (int i = 0; i < modeCount; i++)
+	for (uint32_t i = 0; i < modeCount; i++)
 	{
 		LastError = d3d.lpD3D->EnumAdapterModes( defaultDevice, i, &tempMode );
 		if (FAILED(LastError))
@@ -1306,12 +1304,14 @@ BOOL InitialiseDirect3D()
 
 	ScreenDescriptorBlock.SDB_Width     = width;
 	ScreenDescriptorBlock.SDB_Height    = height;
-	ScreenDescriptorBlock.SDB_Depth		= depth;
+	ScreenDescriptorBlock.SDB_Depth		= colourDepth;
 	ScreenDescriptorBlock.SDB_Size      = width*height;
 	ScreenDescriptorBlock.SDB_CentreX   = width/2;
 	ScreenDescriptorBlock.SDB_CentreY   = height/2;
+
 	ScreenDescriptorBlock.SDB_ProjX     = width/2;
 	ScreenDescriptorBlock.SDB_ProjY     = height/2;
+
 	ScreenDescriptorBlock.SDB_ClipLeft  = 0;
 	ScreenDescriptorBlock.SDB_ClipRight = width;
 	ScreenDescriptorBlock.SDB_ClipUp    = 0;
@@ -1329,7 +1329,10 @@ BOOL InitialiseDirect3D()
 	// create vertex and index buffers
 	CreateVolatileResources();
 
-//	SetTransforms();
+	mainVertex = new D3DLVERTEX[4096];
+	mainIndex = new WORD[9216 * 3];
+
+	SetTransforms();
 
 	Con_Init();
 	Net_Initialise();
@@ -1342,6 +1345,35 @@ BOOL InitialiseDirect3D()
 
 	Con_PrintMessage("Initialised Direct3D succesfully");
 	return TRUE;
+}
+
+void SetTransforms()
+{
+	// Setup orthographic projection matrix
+	int standardWidth = 640;
+	int wideScreenWidth = 852;
+
+	// setup view matrix
+	D3DXMatrixIdentity(&matView );
+//	PrintD3DMatrix("View", matView);
+
+	// set up orthographic projection matrix
+	D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
+
+	// set up projection matrix
+	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+
+	// print projection matrix?
+//	PrintD3DMatrix("Projection", matProjection);
+
+	// multiply view and projection
+//	D3DXMatrixMultiply(&matViewProjection, &matView, &matProjection);
+//	PrintD3DMatrix("View and Projection", matViewProjection);
+
+	D3DXMatrixIdentity(&matIdentity);
+	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,		&matIdentity);
+	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,		&matIdentity);
+	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matOrtho);
 }
 
 void FlipBuffers()

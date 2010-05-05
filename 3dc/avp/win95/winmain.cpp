@@ -447,7 +447,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		Game_Has_Loaded();
 		ResetFrameCounter();
 
-		if (AvP.Network!=I_No_Network)
+		if (AvP.Network != I_No_Network)
 		{
 			/*Need to choose a starting position for the player , but first we must look
 			through the network messages to find out which generator spots are currently clear*/
@@ -516,7 +516,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		
 						// check to see if we're pausing the game;
 						// if so kill off any sound effects
-						if(InGameMenusAreRunning() && ( (AvP.Network!=I_No_Network && netGameData.skirmishMode) || (AvP.Network==I_No_Network))	)
+						if (InGameMenusAreRunning() && ( (AvP.Network!=I_No_Network && netGameData.skirmishMode) || (AvP.Network==I_No_Network))	)
 							SoundSys_StopAll();
 					}
 					else
@@ -581,8 +581,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 				FixCheatModesInUserProfile(UserProfilePtr);
 				RestartLevel();
 			}
-
-
 		}// end of main game loop
 
 		AvP.LevelCompleted = thisLevelHasBeenCompleted;

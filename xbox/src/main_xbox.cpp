@@ -222,7 +222,7 @@ void _cdecl main()
 		}
 	}
 
-	#ifdef AVP_DEBUG_VERSION
+//	#ifdef AVP_DEBUG_VERSION
 	if (strstr(command_line, "-intro"))	WeWantAnIntro();
 	if (strstr(command_line, "-qm"))
 	{
@@ -245,7 +245,7 @@ void _cdecl main()
 	{
 		KeepMainRifFile = TRUE;
 	}
-	#endif //AVP_DEBUG_VERSION
+//	#endif //AVP_DEBUG_VERSION
 
 	if (strstr(command_line,"-server"))
 	{
@@ -288,16 +288,6 @@ void _cdecl main()
 		CommandLineIPAddressString[15] = 0;
 	}
 
- 	// Modified by Edmond for mplayer demo
- 	#if MPLAYER_DEMO
- 	if (!LobbiedGame)
- 	{
- 		MessageBox(NULL, "This demo can only be launched from Mplayer.", "Oh no!", MB_OK);
-// 		exit(33445);
-		OutputDebugString("\n line 347 main_xbox.c");
- 	}
- 	#endif
-
  	#if PLAY_INTRO//(MARINE_DEMO||ALIEN_DEMO||PREDATOR_DEMO)
   	if (!LobbiedGame)  // Edmond
 	 	WeWantAnIntro();
@@ -333,7 +323,7 @@ void _cdecl main()
 
 	/*******	System initialisation **********/
 
-	InitialiseSystem(0,0/*hInstance, nCmdShow*/);
+	InitialiseSystem(0,0);
 	GotMouse = 1;
 
 	InitialiseRenderer();
@@ -358,7 +348,7 @@ void _cdecl main()
 	SoundSys_Start();
 	CDDA_Start();
 
-	/* load language file and setup text string access */
+	// load language file and setup text string access
 	InitTextStrings();
 
 	BuildMultiplayerLevelNameArray();//sort out multiplayer level names
@@ -369,6 +359,13 @@ void _cdecl main()
 	#if PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO
 	if (AvP_MainMenus())
 	#else
+
+	// support removing limit on number of game saves
+	if (!Config_GetBool("[Misc]", "UnlimitedSaves", false))
+	{
+		unlimitedSaves = 0;
+	}
+	else unlimitedSaves = 1;
 
 	while (AvP_MainMenus())
 	#endif
@@ -386,13 +383,6 @@ void _cdecl main()
 		}
 */
 		#endif
-
-		// support removing limit on number of game saves
-		if (!Config_GetBool("[Misc]", "UnlimitedSaves", false))
-		{
-			unlimitedSaves = 0;
-		}
-		else unlimitedSaves = 1;
 
 		/* turn off any special effects */
 		d3d_light_ctrl.ctrl = LCCM_NORMAL;
@@ -420,14 +410,6 @@ void _cdecl main()
 		AssignAllSBNames();
 		StartGame();
 
-//		UnloadRifFile();//deletes environment File_Chunk since it is no longer needed
-
-
-		/* Patrick 26/6/97
-		Load the game sounds here: should be done after loading everthing
-		else, incase sounds take up system memory */
-//		LoadSounds("PLAYER");
-
 		/* JH 28/5/97 */
 		/* remove resident loaded 'fast' files */
 		ffcloseall();
@@ -453,7 +435,7 @@ void _cdecl main()
 
 		IngameKeyboardInput_ClearBuffer();
 
-		while(AvP.MainLoopRunning)
+		while (AvP.MainLoopRunning)
 		{
 		 	CheckForWindowsMessages();
 			CursorHome();
@@ -491,32 +473,15 @@ void _cdecl main()
 						}
 						#endif  /* MainTextPrint */
 
-						// bjd
 						ThisFramesRenderingHasBegun();
-
-//						FlushD3DZBuffer();
 
 						DoAllShapeAnimations();
 
 						UpdateGame();
 
-						#if 1
-						#if PROFILING_ON
-					  	ProfileStart();
-						#endif
 						AvpShowViews();
-						#if PROFILING_ON
-					  	ProfileStop("SHOW VIEW");
-						#endif
 
-						//Do screen shot here so that text and  hud graphics aren't shown
-						#if PROFILING_ON
-					  	ProfileStart();
-						#endif
 						MaintainHUD();
-						#if PROFILING_ON
-					  	ProfileStop("RENDER HUD");
-						#endif
 
 						#if debug
 						FlushTextprintBuffer();
@@ -527,7 +492,7 @@ void _cdecl main()
 
 						// check to see if we're pausing the game;
 						// if so kill off any sound effects
-						if(InGameMenusAreRunning() && ( (AvP.Network!=I_No_Network && netGameData.skirmishMode) || (AvP.Network==I_No_Network))	)
+						if (InGameMenusAreRunning() && ( (AvP.Network!=I_No_Network && netGameData.skirmishMode) || (AvP.Network==I_No_Network))	)
 							SoundSys_StopAll();
 					}
 					else
@@ -556,15 +521,6 @@ void _cdecl main()
 						//extern void ThisFramesRenderingHasFinished(void);
 						ThisFramesRenderingHasFinished();
 					}
-
-					/* JH 5/6/97 - this function may draw translucent polygons to the whole screen */
-					//HandleD3DScreenFading();
-					#else
-					{
-
-					ColourFillBackBuffer(0);
-					}
-					#endif
 
 					FlipBuffers();
 
@@ -605,15 +561,13 @@ void _cdecl main()
 				}
 			}
 
-			if(AvP.RestartLevel)
+			if (AvP.RestartLevel)
 			{
 				AvP.RestartLevel=0;
 				AvP.LevelCompleted = 0;
 				FixCheatModesInUserProfile(UserProfilePtr);
 				RestartLevel();
 			}
-
-
 		}// end of main game loop
 
 		AvP.LevelCompleted = thisLevelHasBeenCompleted;
@@ -657,7 +611,7 @@ void _cdecl main()
 		Vorbis_CloseSystem(); // stop ogg vorbis player
 
 		// netgame support
-		if(AvP.Network != I_No_Network)
+		if (AvP.Network != I_No_Network)
 		{
 			/* we cleanup and reset our game mode here, at the end of the game loop, as other
 			clean-up functions need to know if we've just exited a netgame */
@@ -669,7 +623,7 @@ void _cdecl main()
 
 		ClearMemoryPool();
 
-		if(LobbiedGame)
+		if (LobbiedGame)
 		{
 			/*
 			We have been playing a lobbied game , and have now diconnected.
@@ -709,25 +663,22 @@ void _cdecl main()
 	SoundSys_End();
 	ReleaseDirect3D();
 
-	/* Kill windows procedures */
-	ExitWindowsSystem();
-
 	#endif
  	CDDA_End();
 	ClearMemoryPool();
 
-	/* bye bye! */
+	// return to dashboard
+	XLaunchNewImage(NULL, NULL);
+}
+
+BOOL ExitWindowsSystem(void)
+{
+	return TRUE;
 }
 
 void CheckForWindowsMessages()
 {
 	DirectSoundDoWork();
-}
-
-BOOL ExitWindowsSystem(void)
-{
- // do nothing here
-	return 0;
 }
 
 BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)

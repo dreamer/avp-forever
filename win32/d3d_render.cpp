@@ -350,7 +350,6 @@ RENDERSTATES CurrentRenderStates;
 
 static HRESULT LastError;
 
-
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
 void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
@@ -1100,7 +1099,7 @@ BOOL ExecuteBuffer()
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
 
-		LastError = d3d.lpD3DDevice->SetVertexShader(d3d.orthoVertexShader)
+		LastError = d3d.lpD3DDevice->SetVertexShader(d3d.orthoVertexShader);
 		if (FAILED(LastError)) 
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
@@ -1454,7 +1453,6 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 	int texoffset;
 
 	float ZNear;
-	float RecipW, RecipH;
 
     // Get ZNear
 	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
@@ -1466,11 +1464,8 @@ void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVer
 	// properly cleared this time...
 	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-	float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-	RecipW = 1.0f / width;
-
-	float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-	RecipH = 1.0f / height;
+	float RecipW = 1.0f / (float)ImageHeaderArray[texoffset].ImageWidth;
+	float RecipH = 1.0f / (float)ImageHeaderArray[texoffset].ImageHeight;
 
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, TRANSLUCENCY_OFF);
 
@@ -1695,7 +1690,6 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 	int texoffset;
 
 	float ZNear;
-	float RecipW, RecipH;
 
     // Get ZNear
 	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
@@ -1707,11 +1701,8 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 	// properly cleared this time...
 	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-	float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-	RecipW = (1.0f / width);
-
-	float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-	RecipH = (1.0f / height);
+	float RecipW = 1.0f / (float) ImageHeaderArray[texoffset].ImageWidth;
+	float RecipH = 1.0f / (float) ImageHeaderArray[texoffset].ImageHeight;
 
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, TRANSLUCENCY_NORMAL);
 
@@ -1902,41 +1893,6 @@ void D3D_HUDQuad_Output(int32_t textureID, struct VertexTag *quadVerticesPtr, ui
 	orthoVBOffset++;
 }
 
-/*
-void D3D_HUDQuad_Output(int imageNumber, struct VertexTag *quadVerticesPtr, unsigned int colour)
-{
-	float RecipW, RecipH;
-
-	float texWidth = (float) ImageHeaderArray[imageNumber].ImageWidth;
-	RecipW = 1.0f / texWidth;
-
-	float texHeight = (float) ImageHeaderArray[imageNumber].ImageHeight;
-	RecipH = 1.0f / texHeight;
-
-	CheckVertexBuffer(4, imageNumber, TRANSLUCENCY_GLOWING);
-
-	for (int i = 0; i < 4; i++ ) 
-	{
-//		textprint("x %d, y %d, u %d, v %d\n",quadVerticesPtr->X,quadVerticesPtr->Y,quadVerticesPtr->U,quadVerticesPtr->V);
-
-		mainVertex[vb].sx = (float)quadVerticesPtr->X;
-		mainVertex[vb].sy = (float)quadVerticesPtr->Y;
-		mainVertex[vb].sz = 0.0f;
-//		mainVertex[vb].rhw = 1.0f;
- 		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = ((float)(quadVerticesPtr->U)) * RecipW;
-		mainVertex[vb].tv = ((float)(quadVerticesPtr->V)) * RecipH;
-
-		quadVerticesPtr++;
-		vb++;
-	}
-
-	OUTPUT_TRIANGLE(0,1,3, 4);
-	OUTPUT_TRIANGLE(1,2,3, 4);
-}
-*/
-
 void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 {
 	VECTORCH vertices[3];
@@ -1967,39 +1923,36 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 
 		CheckVertexBuffer(3, NO_TEXTURE, TRANSLUCENCY_NORMAL);
 
+		VECTORCH *verticesPtr = vertices;
+
+		for (uint32_t i = 0; i < 3; i++)
 		{
-//			int i = 3;
-			VECTORCH *verticesPtr = vertices;
-
-			for (uint32_t i = 0; i < 3; i++)
-			{
 /*
-				int x = (verticesPtr->vx*(Global_VDB_Ptr->VDB_ProjX))/verticesPtr->vz+Global_VDB_Ptr->VDB_CentreX;
-				int y = (verticesPtr->vy*(Global_VDB_Ptr->VDB_ProjY))/verticesPtr->vz+Global_VDB_Ptr->VDB_CentreY;
+			int x = (verticesPtr->vx*(Global_VDB_Ptr->VDB_ProjX))/verticesPtr->vz+Global_VDB_Ptr->VDB_CentreX;
+			int y = (verticesPtr->vy*(Global_VDB_Ptr->VDB_ProjY))/verticesPtr->vz+Global_VDB_Ptr->VDB_CentreY;
 
-			  	float oneOverZ = ((float)verticesPtr->vz-ZNear)/(float)verticesPtr->vz;
+		  	float oneOverZ = ((float)verticesPtr->vz-ZNear)/(float)verticesPtr->vz;
 
-				mainVertex[vb].sx = (float)x;
-				mainVertex[vb].sy = (float)y;
-				mainVertex[vb].sz = oneOverZ;
-				mainVertex[vb].rhw = 1.0f;
+			mainVertex[vb].sx = (float)x;
+			mainVertex[vb].sy = (float)y;
+			mainVertex[vb].sz = oneOverZ;
+			mainVertex[vb].rhw = 1.0f;
 */
-				mainVertex[vb].sx = (float)verticesPtr->vx;
-				mainVertex[vb].sy = (float)-verticesPtr->vy;
-				mainVertex[vb].sz = (float)verticesPtr->vz; // bjd - CHECK
+			mainVertex[vb].sx = (float)verticesPtr->vx;
+			mainVertex[vb].sy = (float)-verticesPtr->vy;
+			mainVertex[vb].sz = (float)verticesPtr->vz; // bjd - CHECK
 
-				if (i==3) 
-					mainVertex[vb].color = RGBALIGHT_MAKE(0, 255, 255, 32);
-				else 
-					mainVertex[vb].color = RGBALIGHT_MAKE(255, 255, 255, 32);
+			if (i==3) 
+				mainVertex[vb].color = RGBALIGHT_MAKE(0, 255, 255, 32);
+			else 
+				mainVertex[vb].color = RGBALIGHT_MAKE(255, 255, 255, 32);
 
-				mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-				mainVertex[vb].tu = 0.0f;
-				mainVertex[vb].tv = 0.0f;
+			mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+			mainVertex[vb].tu = 0.0f;
+			mainVertex[vb].tv = 0.0f;
 
-				vb++;
-				verticesPtr++;
-			}
+			vb++;
+			verticesPtr++;
 		}
 
 		OUTPUT_TRIANGLE(0,2,1, 3);
@@ -2115,11 +2068,11 @@ void D3D_DecalSystem_Setup(void)
 void D3D_DecalSystem_End(void)
 {
 	DrawParticles();
-
+/*
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
 	LockExecuteBuffer();
-
+*/
 	if (D3DDitherEnable != TRUE) 
 	{
 		d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE, TRUE);
@@ -2275,6 +2228,7 @@ void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 void D3D_PointSpriteTest(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 {
+/*
 	testPS[psIndex].x = particlePtr->Position.vx;
 	testPS[psIndex].y = particlePtr->Position.vy;
 	testPS[psIndex].z = particlePtr->Position.vz;
@@ -2286,6 +2240,7 @@ void D3D_PointSpriteTest(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	testPS[psIndex].v = 0.0f;
 
 	psIndex++;
+*/
 }
 
 void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
@@ -2398,7 +2353,6 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		D3D_OutputTriangles();
 	}
 }
-
 
 void D3D_FMVParticle_Output(RENDERVERTEX *renderVerticesPtr)
 {
@@ -2906,7 +2860,7 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 		}
 	}
 
-	D3D_DrawMoltenMetalMesh_Unclipped();	
+	D3D_DrawMoltenMetalMesh_Unclipped();
 }
 
 int LightSourceWaterPoint(VECTORCH *pointPtr, int offset)
