@@ -34,7 +34,6 @@ D3DVERTEXELEMENT9 orthoDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAU
                             D3DDECL_END()};
 
 D3DVERTEXELEMENT9 fmvDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
-							   //{0, 12, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,	0},
 							   {0, 12, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
 							   {0, 20, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	1},
 							   {0, 28, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	2},
@@ -4940,17 +4939,14 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	float x2 = ((float(topX + frameWidth) / 640.0f) * 2) - 1;
 	float y2 = ((float(topY + frameHeight) / 480.0f) * 2) - 1;
 
-	D3DCOLOR colour = D3DCOLOR_ARGB(255, 255, 255, 255);
-
 	FMVVERTEX fmvVerts[4];
 
 	// bottom left
 	fmvVerts[0].x = x1;
 	fmvVerts[0].y = y2;
 	fmvVerts[0].z = 1.0f;
-//	fmvVerts[0].colour = colour;
 	fmvVerts[0].u1 = 0.0f;
-	fmvVerts[0].v1 = (1.0f / textureHeight) * frameHeight;
+	fmvVerts[0].v1 = 1.0f;//(1.0f / textureHeight) * frameHeight;
 
 	fmvVerts[0].u2 = 0.0f;
 	fmvVerts[0].v2 = 1.0f;
@@ -4962,7 +4958,6 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	fmvVerts[1].x = x1;
 	fmvVerts[1].y = y1;
 	fmvVerts[1].z = 1.0f;
-//	fmvVerts[1].colour = colour;
 	fmvVerts[1].u1 = 0.0f;
 	fmvVerts[1].v1 = 0.0f;
 
@@ -4976,9 +4971,8 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	fmvVerts[2].x = x2;
 	fmvVerts[2].y = y2;
 	fmvVerts[2].z = 1.0f;
-//	fmvVerts[2].colour = colour;
-	fmvVerts[2].u1 = (1.0f / textureWidth) * frameWidth;
-	fmvVerts[2].v1 = (1.0f / textureHeight) * frameHeight;
+	fmvVerts[2].u1 = 1.0f;//(1.0f / textureWidth) * frameWidth;
+	fmvVerts[2].v1 = 1.0f;//(1.0f / textureHeight) * frameHeight;
 
 	fmvVerts[2].u2 = 1.0f;
 	fmvVerts[2].v2 = 1.0f;
@@ -4990,8 +4984,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	fmvVerts[3].x = x2;
 	fmvVerts[3].y = y1;
 	fmvVerts[3].z = 1.0f;
-//	fmvVerts[3].colour = colour;
-	fmvVerts[3].u1 = (1.0f / textureWidth) * frameWidth;
+	fmvVerts[3].u1 = 1.0f;;//(1.0f / textureWidth) * frameWidth;
 	fmvVerts[3].v1 = 0.0f;
 
 	fmvVerts[3].u2 = 1.0f;
@@ -5012,7 +5005,6 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	d3d.lpD3DDevice->SetVertexShader(d3d.fmvVertexShader);
 	d3d.lpD3DDevice->SetPixelShader(d3d.fmvPixelShader);
 
-//	d3d.lpD3DDevice->SetFVF(D3DFVF_ORTHOVERTEX);
 	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(FMVVERTEX));
 	if (FAILED(LastError))
 	{

@@ -56,10 +56,10 @@ class TheoraFMV
 
 		// audio
 		StreamingAudioBuffer *mAudioStream;
-		RingBuffer *mRingBuffer;
-		uint8_t	*mAudioData;
-		uint16_t *mAudioDataBuffer;
-		int	mAudioDataBufferSize;
+		RingBuffer  *mRingBuffer;
+		uint8_t		*mAudioData;
+		uint16_t	*mAudioDataBuffer;
+		uint32_t	mAudioDataBufferSize;
 
 		// video
 		RENDERTEXTURE mDisplayTexture;
@@ -125,7 +125,7 @@ class TheoraFMV
 		void HandleTheoraData(OggStream *stream, ogg_packet *packet);
 		bool IsPlaying();
 		bool NextFrame();
-		bool NextFrame(int width, int height, uint8_t *bufferPtr, int pitch);
+		bool TheoraFMV::NextFrame(uint32_t width, uint32_t height, uint8_t *bufferPtr, uint32_t pitch);
 		bool HandleTheoraHeader(OggStream* stream, ogg_packet* packet);
 		bool HandleVorbisHeader(OggStream* stream, ogg_packet* packet);
 		bool HandleSkeletonHeader(OggStream* stream, ogg_packet* packet);

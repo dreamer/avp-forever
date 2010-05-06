@@ -213,7 +213,7 @@ int TheoraFMV::Open(const std::string &fileName)
 	tex[2] = 0;
 
 	// open the file
-	mFileStream.open(mFileName.c_str(), std::ios::in | std::ios::binary);
+	mFileStream.open(/*mFileName.c_str()*/"FMVs\\big_buck_bunny_720p_stereo.ogv", std::ios::in | std::ios::binary);
 
 	if (!mFileStream.is_open())
 	{
@@ -266,7 +266,7 @@ int TheoraFMV::Open(const std::string &fileName)
 
 		mAudioDataBuffer = NULL;
 	}
-
+/*
 	if (!mDisplayTexture)
 	{
 		mFrameWidth = mVideo->mTheora.mInfo.frame_width;
@@ -283,6 +283,9 @@ int TheoraFMV::Open(const std::string &fileName)
 			return FMV_ERROR;
 		}
 	}
+*/
+	mFrameWidth = mVideo->mTheora.mInfo.frame_width;
+	mFrameHeight = mVideo->mTheora.mInfo.frame_height;
 
 	texWidth[0] = mFrameWidth;
 	texHeight[0] = mFrameHeight;
@@ -290,11 +293,11 @@ int TheoraFMV::Open(const std::string &fileName)
 	texWidth[1] = texWidth[2] = mFrameWidth / 2;
 	texHeight[1] = texHeight[2] = mFrameHeight / 2;
 
-	for (int i = 0; i < 3; i++)
+	for (uint32_t i = 0; i < 3; i++)
 	{
 		// create a new texture, passing width and height which will be set to the actual size of the created texture
 		tex[i] = CreateFmvTexture2(&texWidth[i], &texHeight[i], D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
-		if (!mDisplayTexture)
+		if (!tex[i])
 		{
 			Con_PrintError("can't create FMV texture");
 			return FMV_ERROR;
@@ -412,7 +415,7 @@ bool TheoraFMV::IsPlaying()
 	return mFmvPlaying;
 }
 
-bool TheoraFMV::NextFrame(int width, int height, uint8_t *bufferPtr, int pitch)
+bool TheoraFMV::NextFrame(uint32_t width, uint32_t height, uint8_t *bufferPtr, uint32_t pitch)
 {
 	if (mFmvPlaying == false)
 		return false;
@@ -456,30 +459,23 @@ bool TheoraFMV::NextFrame()
 {
 	if (mFmvPlaying == false)
 		return false;
-
+/*
 	D3DLOCKED_RECT textureLock;
 	if (FAILED(mDisplayTexture->LockRect(0, &textureLock, NULL, D3DLOCK_DISCARD)))
 	{
 		OutputDebugString("can't lock FMV texture\n");
 		return false;
 	}
-
+*/
 	D3DLOCKED_RECT texLock[3];
 
-	if (FAILED(tex[0]->LockRect(0, &texLock[0], NULL, D3DLOCK_DISCARD)))
+	for (uint32_t i = 0; i < 3; i++)
 	{
-		OutputDebugString("can't lock FMV texture1\n");
-		return false;
-	}
-	if (FAILED(tex[1]->LockRect(0, &texLock[1], NULL, D3DLOCK_DISCARD)))
-	{
-		OutputDebugString("can't lock FMV texture2\n");
-		return false;
-	}
-	if (FAILED(tex[2]->LockRect(0, &texLock[2], NULL, D3DLOCK_DISCARD)))
-	{
-		OutputDebugString("can't lock FMV texture3\n");
-		return false;
+		if (FAILED(tex[i]->LockRect(0, &texLock[i], NULL, D3DLOCK_DISCARD)))
+		{
+			OutputDebugString("can't lock FMV texture\n");
+			return false;
+		}
 	}
 
 	for (uint32_t i = 0; i < 3; i++)
@@ -502,6 +498,7 @@ bool TheoraFMV::NextFrame()
 	// critical section
 //	EnterCriticalSection(&mFrameCriticalSection);
 
+/*
 	OggPlayYUVChannels oggYuv;
 	oggYuv.ptry = mYuvBuffer[0].data;
 	oggYuv.ptru = mYuvBuffer[2].data;
@@ -521,7 +518,7 @@ bool TheoraFMV::NextFrame()
 	oggRgb.rgb_width = mFrameWidth;
 	oggRgb.rgb_pitch = textureLock.Pitch;
 
-//	oggplay_yuv2rgb(&oggYuv, &oggRgb);
+	oggplay_yuv2rgb(&oggYuv, &oggRgb);
 
 //	LeaveCriticalSection(&mFrameCriticalSection);
 
@@ -530,7 +527,7 @@ bool TheoraFMV::NextFrame()
 		OutputDebugString("can't unlock FMV texture\n");
 		return false;
 	}
-
+*/
 	tex[0]->UnlockRect(0);
 	tex[1]->UnlockRect(0);
 	tex[2]->UnlockRect(0);
@@ -738,7 +735,7 @@ unsigned int __stdcall decodeThread(void *args)
 			{
 				if (samples > 0)
 				{
-					int dataSize = samples * fmv->mAudio->mVorbis.mInfo.channels;
+					uint32_t dataSize = samples * fmv->mAudio->mVorbis.mInfo.channels;
 
 					if (fmv->mAudioDataBuffer == NULL)
 					{
@@ -768,9 +765,9 @@ unsigned int __stdcall decodeThread(void *args)
 
 					uint16_t* p = fmv->mAudioDataBuffer;
 
-					for (int i = 0; i < samples; ++i)
+					for (uint32_t i = 0; i < samples; ++i)
 					{
-						for (int j = 0; j < fmv->mAudio->mVorbis.mInfo.channels; ++j)
+						for (uint32_t j = 0; j < fmv->mAudio->mVorbis.mInfo.channels; ++j)
 						{
 							int v = static_cast<int>(floorf(0.5f + pcm[j][i]*32767.0f));
 							if (v > 32767) v = 32767;
@@ -779,7 +776,7 @@ unsigned int __stdcall decodeThread(void *args)
 						}
 					}
 
-					int audioSize = samples * fmv->mAudio->mVorbis.mInfo.channels * sizeof(uint16_t);
+					uint32_t audioSize = samples * fmv->mAudio->mVorbis.mInfo.channels * sizeof(uint16_t);
 
 					// move the critical section stuff into the ring buffer code itself?
 //					EnterCriticalSection(&fmv->mAudioCriticalSection);
