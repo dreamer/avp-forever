@@ -213,7 +213,7 @@ int TheoraFMV::Open(const std::string &fileName)
 	tex[2] = 0;
 
 	// open the file
-	mFileStream.open(/*mFileName.c_str()*/"FMVs\\big_buck_bunny_720p_stereo.ogv", std::ios::in | std::ios::binary);
+	mFileStream.open(mFileName.c_str(), std::ios::in | std::ios::binary);
 
 	if (!mFileStream.is_open())
 	{

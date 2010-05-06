@@ -50,6 +50,38 @@ struct StreamingVoiceContext : public IXAudio2VoiceCallback
     }
 };
 
+class AudioStream
+{
+
+private:
+	uint32_t	bufferSize;
+	uint32_t	bufferCount;
+	uint32_t	currentBuffer;
+	uint32_t	numChannels;
+	uint32_t	rate;
+	uint32_t	bytesPerSample;
+	uint64_t	totalBytesPlayed;
+	uint64_t	totalSamplesWritten;
+	bool		isPaused;
+	uint8_t		*buffers;
+	IXAudio2SourceVoice *pSourceVoice;
+	StreamingVoiceContext *voiceContext;
+	
+public:
+	AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers);
+	int32_t  Stop();
+	int32_t  Play();
+	int32_t  SetVolume(uint32_t volume);
+	int32_t  SetPan(uint32_t pan);
+	uint32_t WriteData(uint8_t *audioData, uint32_t size);
+	uint32_t GetNumFreeBuffers();
+	uint64_t GetNumSamplesPlayed();
+	uint64_t GetNumSamplesWritten();
+	uint32_t GetWritableBufferSize();
+
+	~AudioStream();
+};
+
 struct StreamingAudioBuffer
 {
 	uint32_t	bufferSize;
@@ -58,8 +90,8 @@ struct StreamingAudioBuffer
 	uint32_t	numChannels;
 	uint32_t	rate;
 	uint32_t	bytesPerSample;
-	UINT64		totalBytesPlayed;
-	UINT64		totalSamplesWritten;
+	uint64_t	totalBytesPlayed;
+	uint64_t	totalSamplesWritten;
 	bool		isPaused;
 	uint8_t		*buffers;
 	IXAudio2SourceVoice *pSourceVoice;

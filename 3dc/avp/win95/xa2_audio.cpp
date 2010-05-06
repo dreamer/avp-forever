@@ -2015,6 +2015,51 @@ void UpdateSoundFrequencies(void)
 
 } // extern "C"
 
+AudioStream::AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers)
+{
+	WAVEFORMATEX waveFormat;
+	ZeroMemory (&waveFormat, sizeof(waveFormat));
+	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
+	waveFormat.nChannels		= channels;
+	waveFormat.wBitsPerSample	= 16;
+	waveFormat.nSamplesPerSec	= rate;
+	waveFormat.nBlockAlign		= waveFormat.nChannels * (waveFormat.wBitsPerSample / 8);	//what block boundaries exist
+	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;		//average bytes per second
+	waveFormat.cbSize			= sizeof(waveFormat);
+
+	// create a new voice context for "on buffer end" callback
+	this->voiceContext = new StreamingVoiceContext;
+
+	// create the source voice for playing the sound
+	LastError = pXAudio2->CreateSourceVoice(&this->pSourceVoice, &waveFormat, 0, XAUDIO2_DEFAULT_FREQ_RATIO, this->voiceContext);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+//		AudioStream_ReleaseBuffer(newStreamingAudioBuffer);
+//		newStreamingAudioBuffer = NULL;
+//		return NULL;
+	}
+
+	this->buffers = new uint8_t[bufferSize * numBuffers];
+	if (this->buffers == NULL)
+	{
+		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
+//		AudioStream_ReleaseBuffer(newStreamingAudioBuffer);
+//		newStreamingAudioBuffer = NULL;
+//		return NULL;
+	}
+
+	this->bytesPerSample = waveFormat.wBitsPerSample / 8;
+	this->numChannels = waveFormat.nChannels;
+	this->rate = waveFormat.nSamplesPerSec;
+	this->isPaused = true;
+
+	this->currentBuffer = 0;
+	this->bufferSize = bufferSize;
+	this->bufferCount = numBuffers;
+	this->totalSamplesWritten = 0;
+}
+
 StreamingAudioBuffer * AudioStream_CreateBuffer(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers)
 {
 	if (!soundEnabled)
@@ -2077,6 +2122,32 @@ StreamingAudioBuffer * AudioStream_CreateBuffer(uint32_t channels, uint32_t rate
 	return newStreamingAudioBuffer;
 }
 
+uint32_t AudioStream::WriteData(uint8_t *audioData, uint32_t size)
+{
+	assert (audioData);
+	assert (size == this->bufferSize);
+
+	uint32_t amountWritten = 0;
+	XAUDIO2_BUFFER xA2Buf;
+
+	memcpy(&this->buffers[this->currentBuffer * this->bufferSize], audioData, size);
+	xA2Buf.AudioBytes = size;
+	xA2Buf.pAudioData = static_cast<BYTE*>(&this->buffers[this->currentBuffer * this->bufferSize]);
+
+	this->pSourceVoice->SubmitSourceBuffer(&xA2Buf);
+
+	// this is so redundant..
+	amountWritten += size;
+
+	this->currentBuffer++;
+	this->currentBuffer %= this->bufferCount;
+
+	// size in bytes divided by bits per sample (divided by 8 to get the bytes per sample) also dividded by the number of channels
+	this->totalSamplesWritten += ((size / this->bytesPerSample) / this->numChannels);
+
+	return amountWritten;
+}
+
 int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, uint8_t *audioData, uint32_t size)
 {
 	assert (streamStruct);
@@ -2105,6 +2176,14 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, uint8_t *audioData
 	return amountWritten;
 }
 
+uint32_t AudioStream::GetNumFreeBuffers()
+{
+	XAUDIO2_VOICE_STATE xA2VoiceState;
+	this->pSourceVoice->GetState(&xA2VoiceState);
+
+	return this->bufferCount - xA2VoiceState.BuffersQueued;
+}
+
 int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);
@@ -2113,6 +2192,14 @@ int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
 	streamStruct->pSourceVoice->GetState(&state);
 
 	return streamStruct->bufferCount - state.BuffersQueued;
+}
+
+uint64_t AudioStream::GetNumSamplesPlayed()
+{
+	XAUDIO2_VOICE_STATE xA2VoiceState;
+	this->pSourceVoice->GetState(&xA2VoiceState);
+
+	return xA2VoiceState.SamplesPlayed;
 }
 
 UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
@@ -2125,11 +2212,24 @@ UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
 	return state.SamplesPlayed;
 }
 
+uint64_t AudioStream::GetNumSamplesWritten()
+{
+	return this->totalSamplesWritten;
+}
+
 UINT64 AudioStream_GetNumSamplesWritten(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);
 
 	return streamStruct->totalSamplesWritten;
+}
+
+uint32_t AudioStream::GetWritableBufferSize()
+{
+	XAUDIO2_VOICE_STATE xA2VoiceState;
+	this->pSourceVoice->GetState(&xA2VoiceState);
+
+	return ((this->bufferSize * this->bufferCount) - (xA2VoiceState.BuffersQueued * this->bufferSize));
 }
 
 int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)
@@ -2141,6 +2241,17 @@ int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)
 	streamStruct->pSourceVoice->GetState(&state);
 
 	return ((streamStruct->bufferSize * streamStruct->bufferCount) - (state.BuffersQueued * streamStruct->bufferSize));
+}
+
+int32_t AudioStream::SetVolume(uint32_t volume)
+{
+	LastError = this->pSourceVoice->SetVolume(vol_to_gain_table[volume]);
+	if (FAILED(LastError))
+	{
+		return AUDIOSTREAM_ERROR;
+	}
+	
+	return AUDIOSTREAM_OK;
 }
 
 int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, uint32_t volume)
@@ -2159,8 +2270,25 @@ int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, uint32_t vol
 	return AUDIOSTREAM_OK;
 }
 
+int32_t AudioStream::SetPan(uint32_t pan)
+{
+	// todo: implement this function
+	return AUDIOSTREAM_OK;
+}
+
 int AudioStream_SetPan(StreamingAudioBuffer *streamStruct, uint32_t pan)
 {
+	return AUDIOSTREAM_OK;
+}
+
+int32_t AudioStream::Stop()
+{
+	LastError = this->pSourceVoice->Stop();
+	if (FAILED(LastError))
+	{
+		return AUDIOSTREAM_ERROR;
+	}
+	
 	return AUDIOSTREAM_OK;
 }
 
@@ -2175,6 +2303,22 @@ int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct)
 		{
 			return AUDIOSTREAM_ERROR;
 		}
+	}
+
+	return AUDIOSTREAM_OK;
+}
+
+int32_t AudioStream::Play()
+{
+	if (this->isPaused)
+	{
+		LastError = this->pSourceVoice->Start();
+
+		if (FAILED(LastError))
+		{
+			return AUDIOSTREAM_ERROR;
+		}
+		this->isPaused = false;
 	}
 
 	return AUDIOSTREAM_OK;
@@ -2196,6 +2340,27 @@ int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct)
 	}
 
 	return AUDIOSTREAM_OK;
+}
+
+AudioStream::~AudioStream()
+{
+	if (this->pSourceVoice)
+	{
+		this->pSourceVoice->Stop();
+		this->pSourceVoice->DestroyVoice();
+        this->pSourceVoice = 0;
+	}
+
+	// clear the new-ed memory
+	if (this->buffers)
+	{
+		delete []this->buffers;
+	}
+
+	if (this->voiceContext)
+	{
+		delete this->voiceContext;
+	}
 }
 
 int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
