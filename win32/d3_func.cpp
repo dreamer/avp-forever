@@ -473,7 +473,7 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t 
 	return destTexture;
 }
 
-LPDIRECT3DTEXTURE9 CreateFmvTexture2(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool)
+LPDIRECT3DTEXTURE9 CreateFmvTexture2(uint32_t *width, uint32_t *height)
 {
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
 #if 0
@@ -492,7 +492,7 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture2(uint32_t *width, uint32_t *height, uint32_t
 	}
 	else { newHeight = *height; }
 #endif
-	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, usage, D3DFMT_L8, (D3DPOOL)pool, &destTexture, NULL);
+	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, D3DUSAGE_DYNAMIC, D3DFMT_L8, D3DPOOL_DEFAULT, &destTexture, NULL);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -1545,18 +1545,22 @@ void ReleaseDirect3D()
 	SAFE_RELEASE(d3d.fmvVertexDecl);
 	SAFE_RELEASE(d3d.pointVertexDecl);
 
-	// release shaders
+	// release pixel shaders
 	SAFE_RELEASE(d3d.pixelShader);
 	SAFE_RELEASE(d3d.fmvPixelShader);
+	SAFE_RELEASE(d3d.pointSpritePixelShader);
+
+	// release vertex shaders
 	SAFE_RELEASE(d3d.vertexShader);
 	SAFE_RELEASE(d3d.fmvVertexShader);
 	SAFE_RELEASE(d3d.orthoVertexShader);
 	SAFE_RELEASE(d3d.pointSpriteShader);
-	SAFE_RELEASE(d3d.pointSpritePixelShader);
 
+	// release device
 	SAFE_RELEASE(d3d.lpD3DDevice);
 	LogString("Releasing Direct3D9 device...");
 
+	// release object
 	SAFE_RELEASE(d3d.lpD3D);
 	LogString("Releasing Direct3D9 object...");
 

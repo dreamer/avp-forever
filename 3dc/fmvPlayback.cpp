@@ -296,7 +296,7 @@ int TheoraFMV::Open(const std::string &fileName)
 	for (uint32_t i = 0; i < 3; i++)
 	{
 		// create a new texture, passing width and height which will be set to the actual size of the created texture
-		tex[i] = CreateFmvTexture2(&texWidth[i], &texHeight[i], D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+		tex[i] = CreateFmvTexture2(&texWidth[i], &texHeight[i]);
 		if (!tex[i])
 		{
 			Con_PrintError("can't create FMV texture");
@@ -467,6 +467,9 @@ bool TheoraFMV::NextFrame()
 		return false;
 	}
 */
+	// critical section
+	EnterCriticalSection(&mFrameCriticalSection);
+
 	D3DLOCKED_RECT texLock[3];
 
 	for (uint32_t i = 0; i < 3; i++)
@@ -495,9 +498,6 @@ bool TheoraFMV::NextFrame()
 		}
 	}
 
-	// critical section
-//	EnterCriticalSection(&mFrameCriticalSection);
-
 /*
 	OggPlayYUVChannels oggYuv;
 	oggYuv.ptry = mYuvBuffer[0].data;
@@ -520,8 +520,6 @@ bool TheoraFMV::NextFrame()
 
 	oggplay_yuv2rgb(&oggYuv, &oggRgb);
 
-//	LeaveCriticalSection(&mFrameCriticalSection);
-
 	if (FAILED(mDisplayTexture->UnlockRect(0)))
 	{
 		OutputDebugString("can't unlock FMV texture\n");
@@ -533,6 +531,8 @@ bool TheoraFMV::NextFrame()
 	tex[2]->UnlockRect(0);
 
 	mFrameReady = false;
+
+	LeaveCriticalSection(&mFrameCriticalSection);
 
 	return true;
 }

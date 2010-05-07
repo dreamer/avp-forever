@@ -5008,6 +5008,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(FMVVERTEX));
 	if (FAILED(LastError))
 	{
+		LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("DrawPrimitiveUP failed\n");
 	}
 }
