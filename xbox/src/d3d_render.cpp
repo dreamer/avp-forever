@@ -427,7 +427,7 @@ static inline void PushVerts()
 
 static inline void D3D_OutputTriangles()
 {
-	switch(RenderPolygon.NumberOfVertices)
+	switch (RenderPolygon.NumberOfVertices)
 	{
 		default:
 			OutputDebugString("unexpected number of verts to render\n");
@@ -451,6 +451,7 @@ static inline void D3D_OutputTriangles()
 			OUTPUT_TRIANGLE(0,1,4, 5);
 		    OUTPUT_TRIANGLE(1,3,4, 5);
 		    OUTPUT_TRIANGLE(1,2,3, 5);
+
 			break;
 		}
 		case 6:
@@ -459,6 +460,7 @@ static inline void D3D_OutputTriangles()
 		    OUTPUT_TRIANGLE(0,3,4, 6);
 		    OUTPUT_TRIANGLE(0,2,3, 6);
 		    OUTPUT_TRIANGLE(0,1,2, 6);
+
 			break;
 		}
 		case 7:
@@ -468,6 +470,7 @@ static inline void D3D_OutputTriangles()
 		    OUTPUT_TRIANGLE(0,3,4, 7);
 		    OUTPUT_TRIANGLE(0,2,3, 7);
 		    OUTPUT_TRIANGLE(0,1,2, 7);
+
 			break;
 		}
 		case 8:
@@ -478,6 +481,7 @@ static inline void D3D_OutputTriangles()
 		    OUTPUT_TRIANGLE(0,3,4, 8);
 		    OUTPUT_TRIANGLE(0,2,3, 8);
 		    OUTPUT_TRIANGLE(0,1,2, 8);
+
 			break;
 		}
 	}
@@ -531,10 +535,10 @@ BOOL SetExecuteBufferDefaults()
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 
 	d3d.lpD3DDevice->SetRenderState(D3DRS_CULLMODE,			D3DCULL_NONE);
-//	d3d.lpD3DDevice->SetRenderState(D3DRS_CLIPPING,			FALSE);
+//	d3d.lpD3DDevice->SetRenderState(D3DRS_CLIPPING,			TRUE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_LIGHTING,			FALSE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_SPECULARENABLE,	TRUE);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE,		TRUE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE,		FALSE);
 	D3DDitherEnable = TRUE;
 
 	// enable z-buffer
@@ -716,7 +720,7 @@ BOOL LockExecuteBuffer()
 		return FALSE;
 	}
 	
-	d3d.lpD3DDevice->SetVertexShader(D3DFVF_LVERTEX);
+//	d3d.lpD3DDevice->SetVertexShader(D3DFVF_LVERTEX);
 
 	NumVertices = 0;
 	NumIndicies = 0;
@@ -827,10 +831,6 @@ BOOL EndD3DScene()
 
 static void ChangeTexture(const int32_t textureID)
 {
-
-	d3d.lpD3DDevice->SetTexture(0, NULL);
-	return;
-
 	if (textureID == currentTextureID) 
 		return;
 
@@ -884,14 +884,28 @@ BOOL ExecuteBuffer()
 		D3DXMatrixIdentity(&viewMatrix); // we want to use the identity matrix in this case
 	#endif
 
-	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,		&viewMatrix);
-	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matProjection);
+//	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,		&viewMatrix);
+//	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matProjection);
 
-	LastError = d3d.lpD3DDevice->SetVertexShader(D3DFVF_LVERTEX);
+	LastError = d3d.lpD3DDevice->SetVertexShader(d3d.vertexShader);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
+
+	LastError = d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+
+	D3DXMATRIX matWorld; 
+	D3DXMatrixIdentity(&matWorld);
+
+	D3DXMATRIX matWorldViewProj = matWorld * viewMatrix * matProjection;
+	
+	D3DXMatrixTranspose(&matWorldViewProj, &matWorldViewProj);
+	d3d.lpD3DDevice->SetVertexShaderConstant(0, &matWorldViewProj, 4);
 
 	ChangeTextureAddressMode(TEXTURE_WRAP);
 
@@ -957,7 +971,7 @@ BOOL ExecuteBuffer()
 		}
 		NumberOfRenderedTriangles += numPrimitives / 3;
 	}
-#if 0
+#if 1
 	// render any orthographic quads
 	if (orthoListCount)
 	{
@@ -973,18 +987,18 @@ BOOL ExecuteBuffer()
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
 
-		LastError = d3d.lpD3DDevice->SetVertexShader(/*d3d.orthoVertexShader*/D3DFVF_ORTHOVERTEX);
+		LastError = d3d.lpD3DDevice->SetVertexShader(d3d.orthoVertexShader);
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
-/*
+
 		LastError = d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
-*/
+
 		D3DXMATRIX matView; 
 		D3DXMatrixIdentity(&matView);
 
@@ -998,11 +1012,11 @@ BOOL ExecuteBuffer()
 
 		D3DXMatrixTranspose(&matWorldViewProj, &matWorldViewProj);
 		d3d.lpD3DDevice->SetVertexShaderConstant(0, &matWorldViewProj, 4);
-
+/*
 		d3d.lpD3DDevice->SetTransform(D3DTS_WORLD, &matWorld);
 		d3d.lpD3DDevice->SetTransform(D3DTS_VIEW, &matView);
 		d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matOrtho);
-
+*/
 		// loop through list drawing the quads
 		for (uint32_t i = 0; i < orthoListCount; i++)
 		{

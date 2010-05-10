@@ -63,7 +63,7 @@ VECTORCH LocalLightCH;
 int NumLightSourcesForObject;
 LIGHTBLOCK *LightSourcesForObject[MaxLightsPerObject];
 int GlobalAmbience;
-int LightScale=ONE_FIXED;
+int LightScale = ONE_FIXED;
 int DrawingAReflection;
 
 int *Global_ShapePoints;

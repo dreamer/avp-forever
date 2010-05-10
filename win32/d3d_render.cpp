@@ -107,6 +107,8 @@ struct RENDER_STATES
 };
 
 RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
+RENDER_STATES *transRenderList = new RENDER_STATES[MAX_VERTEXES];
+
 std::vector<RENDER_STATES> renderTest;
 
 struct ORTHO_OBJECTS
@@ -229,6 +231,7 @@ uint32_t	NumIndicies = 0;
 uint32_t	vb = 0;
 uint32_t	particleIndex = 0;
 static uint32_t	renderCount = 0;
+static uint32_t	transRenderCount = 0;
 
 extern AVPIndexedFont IntroFont_Light;
 
@@ -321,6 +324,7 @@ extern void RenderStarfield(void);
 void D3D_DrawMoltenMetalMesh_Unclipped(void);
 static void D3D_OutputTriangles(void);
 BOOL LockExecuteBuffer();
+BOOL ExecuteBuffer();
 BOOL UnlockExecuteBufferAndPrepareForUse();
 
 //Globals
@@ -473,7 +477,7 @@ BOOL SetExecuteBufferDefaults()
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-
+/*
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP,	D3DTOP_MODULATE);
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1,	D3DTA_TEXTURE);
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG2,	D3DTA_DIFFUSE);
@@ -488,7 +492,7 @@ BOOL SetExecuteBufferDefaults()
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
-
+*/
 	float alphaRef = 0.5f;
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF,			*((DWORD*)&alphaRef));//(DWORD)0.5);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAFUNC,		D3DCMP_GREATER);
@@ -509,10 +513,10 @@ BOOL SetExecuteBufferDefaults()
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 
 	d3d.lpD3DDevice->SetRenderState(D3DRS_CULLMODE,			D3DCULL_NONE);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_CLIPPING,			FALSE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_CLIPPING,			TRUE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_LIGHTING,			FALSE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_SPECULARENABLE,	TRUE);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE,		TRUE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE,		FALSE);
 	D3DDitherEnable = TRUE;
 
 	// enable z-buffer
@@ -640,38 +644,77 @@ void CheckVertexBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_T
 		LockExecuteBuffer();
 	}
 
-	renderList[renderCount].textureID = textureID;
-	renderList[renderCount].vertStart = 0;
-	renderList[renderCount].vertEnd = 0;
-
-	renderList[renderCount].indexStart = 0;
-	renderList[renderCount].indexEnd = 0;
-
-	renderList[renderCount].translucencyType = translucencyMode;
-	renderList[renderCount].filteringType = filteringMode;
-
-	// check if current vertexes use the same texture and render states as the previous
-	// if they do, we can 'merge' the two together
-	if (renderCount != 0 &&
-		textureID == renderList[renderCount-1].textureID && 
-		translucencyMode == renderList[renderCount-1].translucencyType && 
-		filteringMode	 == renderList[renderCount-1].filteringType)
+	if (translucencyMode == TRANSLUCENCY_OFF)
 	{
-		// ok, drop back to the previous data
-		renderTest.pop_back();
-		renderCount--;
+		renderList[renderCount].textureID = textureID;
+		renderList[renderCount].vertStart = 0;
+		renderList[renderCount].vertEnd = 0;
+
+		renderList[renderCount].indexStart = 0;
+		renderList[renderCount].indexEnd = 0;
+
+		renderList[renderCount].translucencyType = translucencyMode;
+		renderList[renderCount].filteringType = filteringMode;
+
+		// check if current vertexes use the same texture and render states as the previous
+		// if they do, we can 'merge' the two together
+		if (renderCount != 0 &&
+			textureID == renderList[renderCount-1].textureID && 
+			translucencyMode == renderList[renderCount-1].translucencyType && 
+			filteringMode	 == renderList[renderCount-1].filteringType)
+		{
+			// ok, drop back to the previous data
+			renderTest.pop_back();
+			renderCount--;
+		}
+		else
+		{
+			renderList[renderCount].vertStart = NumVertices;
+			renderList[renderCount].indexStart = NumIndicies;
+		}
+
+		renderList[renderCount].vertEnd = NumVertices + numVerts;
+		renderList[renderCount].indexEnd = NumIndicies + realNumVerts;
+
+		renderTest.push_back(renderList[renderCount]);
+		renderCount++;
 	}
 	else
 	{
-		renderList[renderCount].vertStart = NumVertices;
-		renderList[renderCount].indexStart = NumIndicies;
+		transRenderList[transRenderCount].textureID = textureID;
+		transRenderList[transRenderCount].vertStart = 0;
+		transRenderList[transRenderCount].vertEnd = 0;
+
+		transRenderList[transRenderCount].indexStart = 0;
+		transRenderList[transRenderCount].indexEnd = 0;
+
+		transRenderList[transRenderCount].translucencyType = translucencyMode;
+		transRenderList[transRenderCount].filteringType = filteringMode;
+
+		// check if current vertexes use the same texture and render states as the previous
+		// if they do, we can 'merge' the two together
+		if (transRenderCount != 0 &&
+			textureID == transRenderList[transRenderCount-1].textureID && 
+			translucencyMode == transRenderList[transRenderCount-1].translucencyType && 
+			filteringMode	 == transRenderList[transRenderCount-1].filteringType)
+		{
+			// ok, drop back to the previous data
+//			renderTest.pop_back();
+			transRenderCount--;
+		}
+		else
+		{
+			transRenderList[transRenderCount].vertStart = NumVertices;
+			transRenderList[transRenderCount].indexStart = NumIndicies;
+		}
+
+		transRenderList[transRenderCount].vertEnd = NumVertices + numVerts;
+		transRenderList[transRenderCount].indexEnd = NumIndicies + realNumVerts;
+
+//		renderTest.push_back(renderList[renderCount]);
+		transRenderCount++;
+
 	}
-
-	renderList[renderCount].vertEnd = NumVertices + numVerts;
-	renderList[renderCount].indexEnd = NumIndicies + realNumVerts;
-
-	renderTest.push_back(renderList[renderCount]);
-	renderCount++;
 
 	NumVertices += numVerts;
 }
@@ -719,6 +762,7 @@ BOOL LockExecuteBuffer()
 	NumVertices = 0;
 	NumIndicies = 0;
 	renderCount = 0;
+	transRenderCount = 0;
 	vb = 0;
 	
 	orthoVBOffset = 0;
@@ -970,8 +1014,8 @@ BOOL ExecuteBuffer()
 
 	for (uint32_t i = 0; i < renderCount; i++)
 	{
-		if (renderTest[i].translucencyType != TRANSLUCENCY_OFF) 
-			continue;
+//		if (renderTest[i].translucencyType != TRANSLUCENCY_OFF) 
+//			continue;
 
 		// just call this function once
 		if (!weHaveOpaques)
@@ -1007,10 +1051,10 @@ BOOL ExecuteBuffer()
 	D3DPERF_EndEvent();
 
 	// do transparents here..
-	for (uint32_t i = 0; i < renderCount; i++)
+	for (uint32_t i = 0; i < transRenderCount; i++)
 	{
-		if (renderTest[i].translucencyType == TRANSLUCENCY_OFF) 
-			continue;
+//		if (renderTest[i].translucencyType == TRANSLUCENCY_OFF) 
+//			continue;
 
 		// just call this function once
 		if (!weHaveTransparents)
@@ -1020,11 +1064,11 @@ BOOL ExecuteBuffer()
 		}
 
 		// change render states if required
-		ChangeTexture(renderTest[i].textureID);
-		ChangeTranslucencyMode(renderTest[i].translucencyType);
-		ChangeFilteringMode(renderTest[i].filteringType);
+		ChangeTexture(transRenderList[i].textureID);
+		ChangeTranslucencyMode(transRenderList[i].translucencyType);
+		ChangeFilteringMode(transRenderList[i].filteringType);
 
-		uint32_t numPrimitives = (renderTest[i].indexEnd - renderTest[i].indexStart) / 3;
+		uint32_t numPrimitives = (transRenderList[i].indexEnd - transRenderList[i].indexStart) / 3;
 
 		if (numPrimitives > 0) 
 		{
@@ -1032,7 +1076,7 @@ BOOL ExecuteBuffer()
 			   0, 
 			   0,
 			   NumVertices,
-			   renderTest[i].indexStart,
+			   transRenderList[i].indexStart,
 			   numPrimitives);
 
 			if (FAILED(LastError))
@@ -3364,17 +3408,10 @@ void DrawScanlinesOverlay(float level)
 
 void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
 {
-	int flags;
-	int texoffset;
-
-	float ZNear;
-//	float RecipW, RecipH;
+	int32_t texoffset;
 
     // Get ZNear
-	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
-
-	// Take header information
-	flags = inputPolyPtr->PolyFlags;
+	float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
 
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
@@ -3382,12 +3419,6 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 
 	float RecipW = 1.0f / (float) ImageHeaderArray[texoffset].ImageWidth;
 	float RecipH = 1.0f / (float) ImageHeaderArray[texoffset].ImageHeight;
-
-//	float width = (float) ImageHeaderArray[texoffset].ImageWidth;
-//	RecipW = (1.0f / width);// / 65536.0f;
-
-//	float height = (float) ImageHeaderArray[texoffset].ImageHeight;
-//	RecipH = (1.0f / height);// / 65536.0f;
 
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, RenderPolygon.TranslucencyMode);
 
@@ -3413,7 +3444,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVertices
 
 		mainVertex[vb].sx = (float)vertices->X;
 		mainVertex[vb].sy = (float)-vertices->Y;
-		mainVertex[vb].sz = 1.0f;
+		mainVertex[vb].sz = (float)vertices->Z;
 
   		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
@@ -3445,7 +3476,7 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 	// 450 triangles has 3 * 450 vertices which = 1350
 	CheckVertexBuffer(256, currentWaterTexture, TRANSLUCENCY_NORMAL);
 
-	for (uint32_t i=0; i < 256; i++)
+	for (uint32_t i = 0; i < 256; i++)
 	{
 		if (point->vz <= 1) 
 			point->vz = 1;

@@ -3285,7 +3285,9 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 					case PARTICLE_PREDPISTOL_FLECHETTE_NONDAMAGING:
 					case PARTICLE_TRACER:
 					{
+/* bjd - revert
 						RenderParticle(particlePtr);
+*/
 						break;
 					}
 					default:
@@ -4036,6 +4038,7 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 		}
 		case MUZZLE_FLASH_SKEETER:
 		{
+/* bjd - revert
 			PARTICLE_DESC *particleDescPtr;
 			particle.ParticleID=PARTICLE_MUZZLEFLASH;
 			particleDescPtr = &ParticleDescription[particle.ParticleID];
@@ -4064,6 +4067,7 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 					particle.Position.vz = positionPtr->vz + MUL_FIXED(100,directionPtr->vz) + (FastRandom()&127)-64;
 				}																								 
 			}
+*/
 			break;
 		}
 		default:
@@ -4924,9 +4928,9 @@ void DrawXenoborgMainLaserbeam(LASER_BEAM_DESC *laserPtr)
 	 //	particle.Colour = RGBALIGHT_MAKE(255,255,255,255);
 	 //	particle.Size = 20;
 	 //	RenderParticle(&particle);
-
 	}
 }
+
 /* KJL 16:37:03 20/06/98 - stupid but quick implementation */
 #define NO_OF_VERTICES_IN_TRAIL 300
 PHEROMONE_TRAIL Trail[NO_OF_VERTICES_IN_TRAIL];

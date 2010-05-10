@@ -36,6 +36,38 @@ extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 #include <xgraphics.h>
 #include "font2.h"
 
+const char *orthoShader = 
+    "vs.1.1\n"
+    "def c4, 0, 0, 0, 0\n"
+    "dp4 oPos.x, v0, c0\n"
+    "dp4 oPos.y, v0, c1\n"
+    "dp4 oPos.z, v0, c2\n"
+    "dp4 oPos.w, v0, c3\n"
+    "mov oD0, v1\n"
+    "mov oD1, c4\n"
+    "mov oT0, v2\0";
+
+const char *vertShader =
+    "vs.1.1\n"
+//    "dcl_position v0\n"
+//    "dcl_color v1\n"
+//    "dcl_color1 v2\n"
+//    "dcl_texcoord v3\n"
+    "dp4 oPos.x, v0, c0\n"
+    "dp4 oPos.y, v0, c1\n"
+    "dp4 oPos.z, v0, c2\n"
+    "dp4 oPos.w, v0, c3\n"
+    "mov oD0, v1\n"
+    "mov oD1, v2\n"
+    "mov oT0.xy, v3\0";
+
+const char *pixelShader = 
+	"ps.1.1\n"
+    "def c4, 0, 0, 0, 0\n"
+    "tex t0\n"
+    "add r0, v0, v1\n"
+    "mul r0, t0, r0\0";
+
 D3DXMATRIX matOrtho;
 D3DXMATRIX matProjection;
 D3DXMATRIX matViewProjection;
@@ -445,7 +477,7 @@ LPDIRECT3DTEXTURE8 CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t 
 	return destTexture;
 }
 
-LPDIRECT3DTEXTURE8 CreateFmvTexture2(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool)
+LPDIRECT3DTEXTURE8 CreateFmvTexture2(uint32_t *width, uint32_t *height)
 {
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
 #if 0
@@ -465,7 +497,7 @@ LPDIRECT3DTEXTURE8 CreateFmvTexture2(uint32_t *width, uint32_t *height, uint32_t
 	else { newHeight = *height; }
 #endif
 
-	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, usage, D3DFMT_L8, (D3DPOOL)pool, &destTexture);
+	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, D3DUSAGE_DYNAMIC, D3DFMT_L8, D3DPOOL_DEFAULT, &destTexture);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -478,9 +510,10 @@ LPDIRECT3DTEXTURE8 CreateFmvTexture2(uint32_t *width, uint32_t *height, uint32_t
 	return destTexture;
 }
 
-uint32_t CreateVertexShader(const std::string &fileName, DWORD *vertexShader)
+uint32_t CreateVertexShader(const std::string &fileName, DWORD &vertexShader)
 {
 	XGBuffer* pShaderData = NULL;
+	XGBuffer* pErrors = NULL;
 
 	std::string properPath = "d:\\" + fileName;
 
@@ -503,7 +536,7 @@ uint32_t CreateVertexShader(const std::string &fileName, DWORD *vertexShader)
 			0,
 			NULL,
 			&pShaderData,
-			NULL,
+			&pErrors,
 			NULL,
 			NULL,
 			NULL,
@@ -515,7 +548,14 @@ uint32_t CreateVertexShader(const std::string &fileName, DWORD *vertexShader)
 		return -1;
 	}
 
-	LastError = d3d.lpD3DDevice->CreateVertexShader(&mainDecl[0], (const DWORD*)pShaderData->pData, vertexShader, D3DUSAGE_PERSISTENTDIFFUSE); // ??
+	if (pErrors)
+	{
+//		LogErrorString("Errors!");
+		OutputDebugString((const char*)pErrors->GetBufferPointer());
+		pErrors->Release();
+	}
+
+	LastError = d3d.lpD3DDevice->CreateVertexShader(mainDecl, (const DWORD*)pShaderData->pData, &vertexShader, 0); // ??
 	if (FAILED(LastError))
 	{
 		LogErrorString("Error create vertex shader");
@@ -527,9 +567,10 @@ uint32_t CreateVertexShader(const std::string &fileName, DWORD *vertexShader)
 	return 0;
 }
 
-uint32_t CreatePixelShader(const std::string &fileName, DWORD *pixelShader)
+uint32_t CreatePixelShader(const std::string &fileName, DWORD &pixelShader)
 {
 	XGBuffer* pShaderData = NULL;
+	XGBuffer* pErrors = NULL;
 
 	std::string properPath = "d:\\" + fileName;
 
@@ -552,7 +593,7 @@ uint32_t CreatePixelShader(const std::string &fileName, DWORD *pixelShader)
 			0,
 			NULL,
 			&pShaderData,
-			NULL,
+			&pErrors,
 			NULL,
 			NULL,
 			NULL,
@@ -564,7 +605,14 @@ uint32_t CreatePixelShader(const std::string &fileName, DWORD *pixelShader)
 		return -1;
 	}
 
-	LastError = d3d.lpD3DDevice->CreatePixelShader((D3DPIXELSHADERDEF*)pShaderData->GetBufferPointer(), pixelShader); // ??
+	if (pErrors)
+	{
+//		LogErrorString("Errors!");
+		OutputDebugString((const char*)pErrors->GetBufferPointer());
+		pErrors->Release();
+	}
+
+	LastError = d3d.lpD3DDevice->CreatePixelShader((D3DPIXELSHADERDEF*)pShaderData->GetBufferPointer(), &pixelShader); // ??
 	if (FAILED(LastError))
 	{
 		LogErrorString("Error create pixel vertex shader");
@@ -1115,7 +1163,6 @@ BOOL InitialiseDirect3D()
 		return FALSE;
 	}
 
-
 /*
 	unsigned int modeCount = d3d.lpD3D->GetAdapterModeCount(defaultDevice);
 
@@ -1285,6 +1332,24 @@ BOOL InitialiseDirect3D()
 		return FALSE;
 	}
 
+	D3DCAPS8 devCaps;
+	d3d.lpD3DDevice->GetDeviceCaps(&devCaps);
+
+	if (devCaps.TextureCaps & D3DPTEXTURECAPS_POW2)
+	{
+		OutputDebugString("D3DPTEXTURECAPS_POW2\n");
+	}
+
+	if (devCaps.TextureCaps & D3DPTEXTURECAPS_SQUAREONLY)
+	{
+		OutputDebugString("D3DPTEXTURECAPS_SQUAREONLY\n");
+	}
+
+	if (devCaps.TextureCaps & D3DPTEXTURECAPS_NONPOW2CONDITIONAL)
+	{
+		OutputDebugString("D3DPTEXTURECAPS_NONPOW2CONDITIONAL\n");
+	}
+
 	// Log resolution set
 	Con_PrintMessage("\t Resolution set: " + LogInteger(d3dpp.BackBufferWidth) + " x " + LogInteger(d3dpp.BackBufferHeight));
 
@@ -1338,11 +1403,45 @@ BOOL InitialiseDirect3D()
 	Net_Initialise();
 	Font_Init();
 
-	CreateVertexShader("vertex_1_1.vsh", &d3d.vertexShader);
-	CreateVertexShader("orthoVertex_1_1.vsh", &d3d.orthoVertexShader);
+	CreateVertexShader("vertex_1_1.vsh", d3d.vertexShader);
+	CreateVertexShader("orthoVertex_1_1.vsh", d3d.orthoVertexShader);
 
-	CreatePixelShader("pixel_1_1.psh", &d3d.pixelShader);
+	CreatePixelShader("pixel_1_1.psh", d3d.pixelShader);
 
+
+/*
+	XGBuffer* pShaderData = NULL;
+	XGBuffer* pErrors = NULL;
+
+	// compile shader from file
+	LastError = XGAssembleShader(fileName.c_str(), // filename (for errors only)
+			orthoShader,
+			strlen(orthoShader),
+			0,
+			NULL,
+			&pShaderData,
+			NULL,
+			NULL,
+			NULL,
+			NULL,
+			NULL);
+
+	if (FAILED(LastError))
+	{
+		LogErrorString("Error cannot compile vertex shader file");
+		return -1;
+	}
+
+	LastError = d3d.lpD3DDevice->CreateVertexShader(mainDecl, (const DWORD*)pShaderData->pData, &vertexShader, 0); // ??
+	if (FAILED(LastError))
+	{
+		LogErrorString("Error create vertex shader");
+		return -1;
+	}
+
+	pShaderData->Release();
+
+*/
 	Con_PrintMessage("Initialised Direct3D succesfully");
 	return TRUE;
 }

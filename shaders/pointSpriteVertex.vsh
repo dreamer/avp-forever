@@ -2,8 +2,8 @@
 struct VS_INPUT
 {
     float4 Position   : POSITION;
-    float  Size	      : PSIZE0;
-    float4 Color      : COLOR0;
+    float  Size	      : PSIZE;
+    float4 Colour     : COLOR0;
     float2 Texture    : TEXCOORD0;
 };
 
@@ -12,9 +12,7 @@ struct VS_INPUT
 struct VS_OUTPUT
 {
     float4 Position   : POSITION;
-    float  Size	      : PSIZE0;
-    float4 Color      : COLOR0;
-    float2 Texture    : TEXCOORD0;
+    float4 Colour     : COLOR0;
 };
 
 
@@ -32,12 +30,9 @@ VS_OUTPUT vs_main( in VS_INPUT In )
 
     Out.Position = mul(In.Position,
                        WorldViewProj);  //apply vertex transformation
-
-    Out.Texture  = In.Texture;          //copy original texcoords
+//    Out.Texture  = In.Texture;          //copy original texcoords
     
-    Out.Color = In.Color;
-    
-    Out.Size = In.Size;
+    Out.Colour = In.Colour;
 
     return Out;                         //return output vertex
 }

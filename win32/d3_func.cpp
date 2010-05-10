@@ -54,6 +54,8 @@ extern LPD3DXCONSTANTTABLE	fmvConstantTable;
 const uint32_t MAX_VERTEXES = 4096;
 const uint32_t MAX_INDICES = 9216;
 
+std::string shaderPath;
+
 bool IsPowerOf2(int i) 
 {
 	if ((i & -i) == i) {
@@ -92,6 +94,7 @@ extern void ToggleWireframe();
 extern HWND hWndMain;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern void DeleteRenderMemory();
+extern BOOL SetExecuteBufferDefaults();
 extern void ChangeWindowsSize(int width, int height);
 extern int WindowMode;
 int	VideoModeColourDepth;
@@ -512,9 +515,10 @@ uint32_t CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9
 {
 	LPD3DXBUFFER pErrors = NULL;
 	LPD3DXBUFFER pCode = NULL;
+	std::string actualPath = shaderPath + fileName;
 
 	// set up vertex shader
-	LastError = D3DXCompileShaderFromFile(fileName.c_str(), //filepath
+	LastError = D3DXCompileShaderFromFile(actualPath.c_str(), //filepath
 						NULL,            //macro's
 						NULL,            //includes
 						"vs_main",       //main function
@@ -551,9 +555,10 @@ uint32_t CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *
 {
 	LPD3DXBUFFER pErrors = NULL;
 	LPD3DXBUFFER pCode = NULL;
+	std::string actualPath = shaderPath + fileName;
 
 	// set up pixel shader
-	LastError = D3DXCompileShaderFromFile(fileName.c_str(), //filepath
+	LastError = D3DXCompileShaderFromFile(actualPath.c_str(), //filepath
 						NULL,            //macro's
 						NULL,            //includes
 						"ps_main",       //main function
@@ -1054,6 +1059,7 @@ BOOL InitialiseDirect3D()
 	uint32_t height      = Config_GetInt("[VideoMode]", "Height", 600);
 	uint32_t colourDepth = Config_GetInt("[VideoMode]", "ColourDepth", 32);
 	bool useTripleBuffering = Config_GetBool("[VideoMode]", "UseTripleBuffering", false);
+	shaderPath = Config_GetString("[VideoMode]", "ShaderPath", "shaders\\");
 
 	// set some defaults
 	uint32_t defaultDevice = D3DADAPTER_DEFAULT;
@@ -1474,14 +1480,17 @@ BOOL InitialiseDirect3D()
 	d3d.lpD3DDevice->CreateVertexDeclaration(fmvDecl, &d3d.fmvVertexDecl);
 	d3d.lpD3DDevice->CreateVertexDeclaration(fmvDecl, &d3d.pointVertexDecl);
 
-	CreateVertexShader("vertex.vsh", &d3d.vertexShader, &vertexConstantTable);
+	if (CreateVertexShader("vertex.vsh", &d3d.vertexShader, &vertexConstantTable) != 0)
+	{
+		return FALSE;
+	}
 	CreateVertexShader("orthoVertex.vsh", &d3d.orthoVertexShader, &orthoConstantTable);
 	CreateVertexShader("fmvVertex.vsh", &d3d.fmvVertexShader, &fmvConstantTable);
-	CreateVertexShader("pointSpriteVertex.vsh", &d3d.pointSpriteShader, NULL);
+//	CreateVertexShader("pointSpriteVertex.vsh", &d3d.pointSpriteShader, NULL);
 
 	CreatePixelShader("pixel.psh", &d3d.pixelShader);
 	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
-	CreatePixelShader("pointSpritePixel.psh", &d3d.pointSpritePixelShader);
+//	CreatePixelShader("pointSpritePixel.psh", &d3d.pointSpritePixelShader);
 
 	Con_PrintMessage("Initialised Direct3D9 succesfully");
 	return TRUE;

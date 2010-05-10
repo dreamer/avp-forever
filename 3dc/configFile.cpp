@@ -134,8 +134,7 @@ bool Config_Load()
 			MapValue &tempValue = AvPConfig[currentHeading];
 
 			// +1 to skip over the equals sign
-			tempValue.insert(std::make_pair(tempLine.substr(0, lenOfVar),
-												tempLine.substr(lenOfVar + 1)));
+			tempValue.insert(std::make_pair(tempLine.substr(0, lenOfVar), tempLine.substr(lenOfVar + 1)));
 		}
 	}
 
@@ -162,7 +161,7 @@ bool Config_Save()
 	while (headingIt != AvPConfig.end())
 	{
 		file << (*headingIt).first << "\n";
-		
+
 		MapValue::iterator variableIt = (*headingIt).second.begin();
 
 		while (variableIt != (*headingIt).second.end())
@@ -170,7 +169,7 @@ bool Config_Save()
 			file << (*variableIt).first << " = " << (*variableIt).second << "\n";
 			variableIt++;
 		}
-		
+
 		headingIt++;
 		file << "\n";
 	}

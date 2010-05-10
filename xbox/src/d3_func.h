@@ -200,7 +200,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 void CreateScreenShotImage();
 void DeRedTexture(LPDIRECT3DTEXTURE8 texture);
 LPDIRECT3DTEXTURE8 CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool);
-LPDIRECT3DTEXTURE8 CreateFmvTexture2(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool);
+LPDIRECT3DTEXTURE8 CreateFmvTexture2(uint32_t *width, uint32_t *height);
 void SetTransforms();
 
 D3DINFO GetD3DInfo();

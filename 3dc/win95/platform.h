@@ -370,10 +370,8 @@ void FlipBuffers(void);
 BOOL InitialiseDirect3D(void);
 BOOL BeginD3DScene(void);
 BOOL EndD3DScene(void);
-BOOL ExecuteBuffer(void);
 void ReleaseDirect3D(void);
 void ReleaseAvPTexture(AVPTEXTURE *texture);
-BOOL SetExecuteBufferDefaults(void);
 
 /* KJL 11:28:31 9/9/97 - Direct Input prototypes */
 BOOL InitialiseDirectInput(void);

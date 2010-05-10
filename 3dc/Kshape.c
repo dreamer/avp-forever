@@ -68,6 +68,7 @@ extern MORPHDISPLAY MorphDisplay;
 extern int VideoModeType;
 extern int GlobalAmbience;
 extern int NumActiveBlocks;
+extern int CloudyImageNumber;
 
 extern DISPLAYBLOCK *ActiveBlockList[];
 extern SHAPEHEADER **mainshapelist;
@@ -138,6 +139,7 @@ void DrawWaterFallPoly(VECTORCH *v);
 void RenderAllParticlesFurtherAwayThan(int zThreshold);
 
 extern void UpdateViewMatrix(float *viewMat);
+void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr);
 
 /*KJL************************************************************************************
 * N.B. All the following global variables have their first elements initialised so that *
@@ -3885,6 +3887,7 @@ static void FindAlienEnergySource_Recursion(HMODELCONTROLLER *controllerPtr, SEC
 	}
 	if (sectionDataPtr->Shape && sectionDataPtr->Shape->shaperadius>LocalDetailLevels.AlienEnergyViewThreshold)
 	{
+/* bjd - revert
 		PARTICLE particle;
 
 		particle.Position = sectionDataPtr->World_Offset;
@@ -3895,6 +3898,7 @@ static void FindAlienEnergySource_Recursion(HMODELCONTROLLER *controllerPtr, SEC
 //		particle.Colour = 0x20ffffff;
 		particle.Size = sectionDataPtr->Shape->shaperadius*2;
 		RenderParticle(&particle);
+*/
 	}
 }
 
@@ -4099,6 +4103,19 @@ void TranslatePointIntoViewspace(VECTORCH *pointPtr)
 	f2i(pointPtr->vz, Dest[2]);
 
 #endif
+}
+
+void TranslatePointIntoViewspace2(VECTORCH *pointPtr)
+{
+	Source[0] = (float)pointPtr->vx;
+	Source[1] = (float)pointPtr->vy;
+	Source[2] = (float)pointPtr->vz;
+
+	TranslatePoint(Source, Dest, ViewMatrix);
+
+	f2i(pointPtr->vx, Dest[0]);
+	f2i(pointPtr->vy, Dest[1]);
+	f2i(pointPtr->vz, Dest[2]);
 }
 
 void SquishPoints(SHAPEINSTR *shapeinstrptr)
@@ -4396,7 +4413,7 @@ void RenderParticle(PARTICLE *particlePtr)
 	int particleSize = particlePtr->Size;
 
 	VECTORCH translatedPosition = particlePtr->Position;
-	TranslatePointIntoViewspace(&translatedPosition);
+	TranslatePointIntoViewspace2(&translatedPosition);
 
 	VerticesBuffer[0].X = translatedPosition.vx;
 	VerticesBuffer[3].X = translatedPosition.vx;
@@ -4528,8 +4545,10 @@ void RenderParticle(PARTICLE *particlePtr)
 
 		VerticesBuffer[1].X = VerticesBuffer[0].X;
 		VerticesBuffer[2].X = VerticesBuffer[0].X;
+
 		VerticesBuffer[1].Y = VerticesBuffer[0].Y;
 		VerticesBuffer[2].Y = VerticesBuffer[0].Y;
+
 		VerticesBuffer[1].Z = VerticesBuffer[0].Z;
 		VerticesBuffer[2].Z = VerticesBuffer[0].Z;
 
@@ -5406,7 +5425,7 @@ int u[OCTAVES];
 int v[OCTAVES];
 int du[OCTAVES];
 int dv[OCTAVES];
-int setup=0;
+int skySetup = 0;
 
 int SkyColour_R=200;
 int SkyColour_G=200;
@@ -5415,14 +5434,11 @@ int SkyColour_B=200;
 void RenderSky(void)
 {
    	POLYHEADER fakeHeader;
-	int x,z,o;
+	int x,z,o,i;
 
-//		return;
-
-	if (!setup)
+	// if this is our first time in the function, initialise some values just the once
+	if (!skySetup)
 	{
-		int i;
-		setup=1;
 		for (i = 0; i < OCTAVES; i++)
 		{
 			u[i] = (FastRandom()&65535)*128;
@@ -5430,121 +5446,119 @@ void RenderSky(void)
 			du[i] = ( ((FastRandom()&65535)-32768)*(i+1) )*8;
 			dv[i] = ( ((FastRandom()&65535)-32768)*(i+1) )*8;
 		}
-	}
-	{
-		extern int CloudyImageNumber;
-		fakeHeader.PolyFlags = iflag_transparent;
-		fakeHeader.PolyColour = CloudyImageNumber;
-		RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
+		skySetup = 1;
 	}
 
-	for (o=0; o < OCTAVES; o++)
+	// set render states and texture
+	fakeHeader.PolyFlags = iflag_transparent;
+	fakeHeader.PolyColour = CloudyImageNumber;
+	RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
+
+	for (o = 0; o < OCTAVES; o++)
 	{
 		u[o] += MUL_FIXED(du[o], NormalFrameTime);
 		v[o] += MUL_FIXED(dv[o], NormalFrameTime);
 	}
-	for(x=-10; x<=10; x++)
+
+	for (x = -10; x <= 10; x++)
 	{
-	for(z=-10; z<=10; z++)
-	{
-		int t = 255;
-		int size = 65536*128;
-	for (o=0; o<OCTAVES; o++)
-	{
-	 	{
-		   VECTORCH translatedPts[4] =
+		for (z = -10; z <= 10; z++)
+		{
+			int t = 255;
+			int size = 65536*128;
+
+			for (o = 0; o < OCTAVES; o++)
 			{
-				{-1024,-1000,-1024},
-				{-1024,-1000, 1024},
-				{ 1024,-1000, 1024},
-				{ 1024,-1000,-1024},
-					
-			};			
-			int i;
-			for (i=0; i<4; i++) 
-			{
-				VerticesBuffer[i].A = t;
-				translatedPts[i].vx += 2048*x;//+(Global_VDB_Ptr->VDB_World.vx*7)/8;
-				translatedPts[i].vz += 2048*z;//+(Global_VDB_Ptr->VDB_World.vz*7)/8;
-//				RotateVector(&translatedPts[i],&(Global_VDB_Ptr->VDB_Mat));
-//				translatedPts[i].vy = MUL_FIXED(translatedPts[i].vy,87381);
-				translatedPts[i].vx += Global_VDB_Ptr->VDB_World.vx;
-				translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy;
-				translatedPts[i].vz += Global_VDB_Ptr->VDB_World.vz;
-
-				TranslatePointIntoViewspace(&translatedPts[i]);
-
-				VerticesBuffer[i].X	= translatedPts[i].vx;
-				VerticesBuffer[i].Y	= translatedPts[i].vy;
-				VerticesBuffer[i].Z	= translatedPts[i].vz;
-
-				switch (CurrentVisionMode)
+ 			   VECTORCH translatedPts[4] =
 				{
-					default:
-					case VISION_MODE_NORMAL:
+					{-1024,-1000,-1024},
+					{-1024,-1000, 1024},
+					{ 1024,-1000, 1024},
+					{ 1024,-1000,-1024},
+				};
+
+				for (i = 0; i < 4; i++)
+				{
+					VerticesBuffer[i].A = t;
+					translatedPts[i].vx += 2048*x;//+(Global_VDB_Ptr->VDB_World.vx*7)/8;
+					translatedPts[i].vz += 2048*z;//+(Global_VDB_Ptr->VDB_World.vz*7)/8;
+		//				RotateVector(&translatedPts[i],&(Global_VDB_Ptr->VDB_Mat));
+		//				translatedPts[i].vy = MUL_FIXED(translatedPts[i].vy,87381);
+					translatedPts[i].vx += Global_VDB_Ptr->VDB_World.vx;
+					translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy;
+					translatedPts[i].vz += Global_VDB_Ptr->VDB_World.vz;
+
+					TranslatePointIntoViewspace(&translatedPts[i]);
+
+					VerticesBuffer[i].X	= translatedPts[i].vx;
+					VerticesBuffer[i].Y	= translatedPts[i].vy;
+					VerticesBuffer[i].Z	= translatedPts[i].vz;
+
+					switch (CurrentVisionMode)
 					{
-						VerticesBuffer[i].R = SkyColour_R;
-						VerticesBuffer[i].G	= SkyColour_G;
-						VerticesBuffer[i].B = SkyColour_B;
-						break;
+						default:
+						case VISION_MODE_NORMAL:
+						{
+							VerticesBuffer[i].R = SkyColour_R;
+							VerticesBuffer[i].G	= SkyColour_G;
+							VerticesBuffer[i].B = SkyColour_B;
+							break;
+						}
+						case VISION_MODE_IMAGEINTENSIFIER:
+						{
+							VerticesBuffer[i].R = 0;
+							VerticesBuffer[i].G	= 255;
+							VerticesBuffer[i].B = 0;
+							break;
+						}
+						case VISION_MODE_PRED_THERMAL:
+						case VISION_MODE_PRED_SEEALIENS:
+						case VISION_MODE_PRED_SEEPREDTECH:
+						{
+							VerticesBuffer[i].R = 0;
+							VerticesBuffer[i].G	= 0;
+							VerticesBuffer[i].B = 255;
+			  				break;
+						}
 					}
-					case VISION_MODE_IMAGEINTENSIFIER:
-					{
-						VerticesBuffer[i].R = 0;
-						VerticesBuffer[i].G	= 255;
-						VerticesBuffer[i].B = 0;
-						break;
-					}
-					case VISION_MODE_PRED_THERMAL:
-					case VISION_MODE_PRED_SEEALIENS:
-					case VISION_MODE_PRED_SEEPREDTECH:
-					{
-						VerticesBuffer[i].R = 0;
-						VerticesBuffer[i].G	= 0;
-						VerticesBuffer[i].B = 255;
-					  	break;
-					}
+
+					VerticesBuffer[0].U = (u[o]+size*x);
+					VerticesBuffer[0].V = (v[o]+size*z);
+					VerticesBuffer[1].U = (u[o]+size*x);
+					VerticesBuffer[1].V = (v[o]+size*(z+1));
+					VerticesBuffer[2].U = (u[o]+size*(x+1));
+					VerticesBuffer[2].V = (v[o]+size*(z+1));
+					VerticesBuffer[3].U = (u[o]+size*(x+1));
+					VerticesBuffer[3].V = (v[o]+size*z);
+
+					RenderPolygon.NumberOfVertices = 4;
 				}
 
-			}	
-			VerticesBuffer[0].U = (u[o]+size*x);
-			VerticesBuffer[0].V = (v[o]+size*z);
-			VerticesBuffer[1].U = (u[o]+size*x);
-			VerticesBuffer[1].V = (v[o]+size*(z+1));
-			VerticesBuffer[2].U = (u[o]+size*(x+1));
-			VerticesBuffer[2].V = (v[o]+size*(z+1));
-			VerticesBuffer[3].U = (u[o]+size*(x+1));
-			VerticesBuffer[3].V = (v[o]+size*z);										
-
-			RenderPolygon.NumberOfVertices=4;
-		}
-				
-		GouraudTexturedPolygon_ClipWithZ();
-		if(RenderPolygon.NumberOfVertices>=3)
-		{
-			GouraudTexturedPolygon_ClipWithNegativeX();
-			if(RenderPolygon.NumberOfVertices>=3)
-			{
-				GouraudTexturedPolygon_ClipWithPositiveY();
-				if(RenderPolygon.NumberOfVertices>=3)
+				GouraudTexturedPolygon_ClipWithZ();
+				if (RenderPolygon.NumberOfVertices>=3)
 				{
-					GouraudTexturedPolygon_ClipWithNegativeY();
-					if(RenderPolygon.NumberOfVertices>=3)
+					GouraudTexturedPolygon_ClipWithNegativeX();
+					if (RenderPolygon.NumberOfVertices>=3)
 					{
-						GouraudTexturedPolygon_ClipWithPositiveX();
-						if(RenderPolygon.NumberOfVertices>=3)
+						GouraudTexturedPolygon_ClipWithPositiveY();
+						if (RenderPolygon.NumberOfVertices>=3)
 						{
-							void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr);
-							D3D_SkyPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
+							GouraudTexturedPolygon_ClipWithNegativeY();
+							if (RenderPolygon.NumberOfVertices>=3)
+							{
+								GouraudTexturedPolygon_ClipWithPositiveX();
+								if (RenderPolygon.NumberOfVertices>=3)
+								{
+									D3D_SkyPolygon_Output(&fakeHeader, RenderPolygon.Vertices);
+								}
+							}
 						}
 					}
 				}
+				t/=2;
+				size*=2;
 			}
 		}
-		t/=2;
-		size*=2;
-	}
-	}
 	}
 }
 
@@ -5953,10 +5967,10 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 	PARTICLE particle;
 	VECTORCH point = *positionPtr;
 
-	TranslatePointIntoViewspace(&point);
+	TranslatePointIntoViewspace2(&point);
 
 	if (point.vz < 64) 
-		return;	
+		return;
 	
 	particle.ParticleID = PARTICLE_LIGHTFLARE;
 
@@ -6043,12 +6057,10 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 				if (RenderPolygon.NumberOfVertices<3) 
 					return;
 //				D3D_Particle_Output(&particle, RenderPolygon.Vertices);
-				D3D_PointSpriteTest(&particle, RenderPolygon.Vertices);
-//				AddParticle(&particle, &RenderPolygon.Vertices[0]);
+				AddParticle(&particle, &RenderPolygon.Vertices[0]);
   			}
 //			else D3D_Particle_Output(&particle, VerticesBuffer);
-			else D3D_PointSpriteTest(&particle, VerticesBuffer);
-//			else AddParticle(&particle, &VerticesBuffer[0]);
+			else AddParticle(&particle, &VerticesBuffer[0]);
 		}
 	}	
 }
