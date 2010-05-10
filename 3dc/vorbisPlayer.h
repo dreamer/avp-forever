@@ -41,7 +41,9 @@ class VorbisPlayback
 		FILE *mVorbisFile;
 		vorbis_info *mVorbisInfo;
 		OggVorbis_File mOggFile;
-		StreamingAudioBuffer *mAudioStream;
+
+		AudioStream *audioStream;
+
 		bool mIsPlaying;
 
 		unsigned int mBufferSize;
@@ -54,7 +56,7 @@ class VorbisPlayback
 		VorbisPlayback() :
 			mVorbisFile(0),
 			mVorbisInfo(0),
-			mAudioStream(0),
+			audioStream(0),
 			mIsPlaying(false),
 			mBufferSize(0),
 			mHalfBufferSize(0),

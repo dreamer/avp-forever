@@ -90,7 +90,7 @@ extern void ShowSplashScreens(void)
 
 			if (i!=4)
 			{
-			  	DrawAvPMenuGfx_CrossFade(graphic[i],graphic[i+1], a);
+//			  	DrawAvPMenuGfx_CrossFade(graphic[i],graphic[i+1], a);
 				timeRemaining-=NormalFrameTime;
 			}
 			else

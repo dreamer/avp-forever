@@ -380,7 +380,7 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
     memset((void*)KeyboardInput, FALSE, MAX_NUMBER_OF_INPUT_KEYS);
 	GotAnyKey = FALSE;
 
-#ifdef WIN32
+#ifdef _WIN32
 	/* init raw input for mouse */
 	InitialiseRawInput();
 #endif

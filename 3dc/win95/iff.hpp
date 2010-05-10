@@ -1,7 +1,7 @@
 #ifndef _INCLUDED_IFF_HPP_
 #define _INCLUDED_IFF_HPP_
 
-#ifdef WIN32
+#ifdef _WIN32
 	#define _IFF_WIN_TARGET
 	#include <windows.h>
 #endif
@@ -49,7 +49,7 @@ namespace IFF
 		inline void DisplayMessage(char const * pszTitle,char const * pszText)
 		{
 			::printf("%s\n%s\n",pszTitle,pszText);
-#ifdef WIN32
+#ifdef _WIN32
 			while (::kbhit())
 				::getch();
 			while (!::kbhit() || '\r' != ::getch())

@@ -55,11 +55,11 @@ class TheoraFMV
 		streamMap		mStreams;
 
 		// audio
-		StreamingAudioBuffer *mAudioStream;
-		RingBuffer  *mRingBuffer;
-		uint8_t		*mAudioData;
-		uint16_t	*mAudioDataBuffer;
-		uint32_t	mAudioDataBufferSize;
+		AudioStream		*audioStream;
+		RingBuffer		*mRingBuffer;
+		uint8_t			*mAudioData;
+		uint16_t		*mAudioDataBuffer;
+		uint32_t		mAudioDataBufferSize;
 
 		// video
 		RENDERTEXTURE mDisplayTexture;
@@ -92,7 +92,7 @@ class TheoraFMV
 
 		TheoraFMV() :
 			mGranulePos(0),
-			mAudioStream(0),
+			audioStream(0),
 			mRingBuffer(0),
 			mAudioData(0),
 			mAudioDataBuffer(0),

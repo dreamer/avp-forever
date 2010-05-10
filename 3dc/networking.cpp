@@ -1429,7 +1429,7 @@ int Net_CreateSession(const char* sessionName, int maxPlayers, int version, int 
 	// should this be done here?
 	netSession.currentPlayers = 1;
 
-#ifdef WIN32
+#ifdef _WIN32
 	CoCreateGuid(&netSession.guidInstance);
 #endif
 

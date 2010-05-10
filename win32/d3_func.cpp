@@ -45,7 +45,10 @@ D3DXMATRIX matIdentity;
 extern D3DVERTEXELEMENT9 decl[];
 extern D3DVERTEXELEMENT9 orthoDecl[];
 extern D3DVERTEXELEMENT9 fmvDecl[];
-extern LPD3DXCONSTANTTABLE	constantTable;
+
+extern LPD3DXCONSTANTTABLE	vertexConstantTable;
+extern LPD3DXCONSTANTTABLE	orthoConstantTable;
+extern LPD3DXCONSTANTTABLE	fmvConstantTable;
 
 // size of vertex and index buffers
 const uint32_t MAX_VERTEXES = 4096;
@@ -505,7 +508,7 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture2(uint32_t *width, uint32_t *height)
 	return destTexture;
 }
 
-uint32_t CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 *vertexShader)
+uint32_t CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 *vertexShader, LPD3DXCONSTANTTABLE *constantTable)
 {
 	LPD3DXBUFFER pErrors = NULL;
 	LPD3DXBUFFER pCode = NULL;
@@ -519,7 +522,7 @@ uint32_t CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9
 						0,               //flags
 						&pCode,          //compiled operations
 						&pErrors,        //errors
-						&constantTable); //constants
+						constantTable); //constants
 
 	if (FAILED(LastError))
 	{
@@ -1471,10 +1474,10 @@ BOOL InitialiseDirect3D()
 	d3d.lpD3DDevice->CreateVertexDeclaration(fmvDecl, &d3d.fmvVertexDecl);
 	d3d.lpD3DDevice->CreateVertexDeclaration(fmvDecl, &d3d.pointVertexDecl);
 
-	CreateVertexShader("vertex.vsh", &d3d.vertexShader);
-	CreateVertexShader("orthoVertex.vsh", &d3d.orthoVertexShader);
-	CreateVertexShader("fmvVertex.vsh", &d3d.fmvVertexShader);
-	CreateVertexShader("pointSpriteVertex.vsh", &d3d.pointSpriteShader);
+	CreateVertexShader("vertex.vsh", &d3d.vertexShader, &vertexConstantTable);
+	CreateVertexShader("orthoVertex.vsh", &d3d.orthoVertexShader, &orthoConstantTable);
+	CreateVertexShader("fmvVertex.vsh", &d3d.fmvVertexShader, &fmvConstantTable);
+	CreateVertexShader("pointSpriteVertex.vsh", &d3d.pointSpriteShader, NULL);
 
 	CreatePixelShader("pixel.psh", &d3d.pixelShader);
 	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
@@ -1537,7 +1540,9 @@ void ReleaseDirect3D()
 	DeleteRenderMemory();
 
 	// release constant tables
-	SAFE_RELEASE(constantTable);
+	SAFE_RELEASE(vertexConstantTable);
+	SAFE_RELEASE(orthoConstantTable);
+	SAFE_RELEASE(fmvConstantTable);
 
 	// release vertex declarations
 	SAFE_RELEASE(d3d.vertexDecl);

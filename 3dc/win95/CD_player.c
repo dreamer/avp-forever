@@ -1,4 +1,4 @@
-#ifdef WIN32
+#ifdef _WIN32
 
 #include "3dc.h"
 #include "inline.h"
@@ -551,4 +551,4 @@ void PlatCDDAManagementCallBack(WPARAM flags, LONG deviceId)
 		//NewOnScreenMessage("CD COMMAND RETURNED WITH UNKNOWN MESSAGE");
 	}
 }
-#endif // ifdef WIN32
+#endif // ifdef _WIN32

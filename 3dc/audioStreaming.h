@@ -65,7 +65,6 @@ private:
 	bool		isPaused;
 	uint8_t		*buffers;
 	IXAudio2SourceVoice *pSourceVoice;
-	StreamingVoiceContext *voiceContext;
 	
 public:
 	AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers);
@@ -78,24 +77,10 @@ public:
 	uint64_t GetNumSamplesPlayed();
 	uint64_t GetNumSamplesWritten();
 	uint32_t GetWritableBufferSize();
+	uint32_t GetBufferSize();
+	StreamingVoiceContext *voiceContext;
 
 	~AudioStream();
-};
-
-struct StreamingAudioBuffer
-{
-	uint32_t	bufferSize;
-	uint32_t	bufferCount;
-	uint32_t	currentBuffer;
-	uint32_t	numChannels;
-	uint32_t	rate;
-	uint32_t	bytesPerSample;
-	uint64_t	totalBytesPlayed;
-	uint64_t	totalSamplesWritten;
-	bool		isPaused;
-	uint8_t		*buffers;
-	IXAudio2SourceVoice *pSourceVoice;
-	StreamingVoiceContext *voiceContext;
 };
 
 #endif
@@ -166,6 +151,7 @@ struct StreamingAudioBuffer
 
 #endif
 
+/*
 StreamingAudioBuffer * AudioStream_CreateBuffer(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers);
 int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct);
 int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct);
@@ -177,5 +163,6 @@ int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct);
 int AudioStream_SetPan(StreamingAudioBuffer *streamStruct, uint32_t pan);
 UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct);
 UINT64 AudioStream_GetNumSamplesWritten(StreamingAudioBuffer *streamStruct);
+*/
 
 #endif

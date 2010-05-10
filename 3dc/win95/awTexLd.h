@@ -1,9 +1,8 @@
 #ifndef _INCLUDED_AWTEXLD_H_
 #define _INCLUDED_AWTEXLD_H_
 
-#ifdef WIN32
+#ifdef _WIN32
 	#include <windows.h>
-//	#include <d3d9.h>
 #endif
 #ifdef _XBOX
 	#include <xtl.h>

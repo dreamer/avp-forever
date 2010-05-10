@@ -12,6 +12,9 @@
 #define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
 #endif
 
+static const int BUFFER_SIZE  = 4096;
+static const int BUFFER_COUNT = 3;
+
 #define VANILLA
 
 unsigned int __stdcall decodeThread(void *args);
@@ -138,10 +141,8 @@ TheoraFMV::~TheoraFMV()
 	//FIXME	int ret = ogg_sync_clear(&mState);
 	//	assert(ret == 0);
 
-		if (mAudioStream)
-		{
-			AudioStream_ReleaseBuffer(mAudioStream);
-		}
+		if (audioStream)
+			delete audioStream;
 
 		if (mAudioData)
 		{
@@ -253,16 +254,16 @@ int TheoraFMV::Open(const std::string &fileName)
 	if (mAudio)
 	{
 		// create mAudio streaming buffer
-		mAudioStream = AudioStream_CreateBuffer(mAudio->mVorbis.mInfo.channels, mAudio->mVorbis.mInfo.rate, 4096, 3);
-		if (mAudioStream == NULL)
+		this->audioStream = new AudioStream(mAudio->mVorbis.mInfo.channels, mAudio->mVorbis.mInfo.rate, BUFFER_SIZE, BUFFER_COUNT);
+		if (this->audioStream == NULL)
 		{
 			Con_PrintError("Failed to create mAudio stream buffer for fmv playback");
 			return FMV_ERROR;
 		}
 
 		// we need some temporary mAudio data storage space and a ring buffer instance
-		mAudioData = new uint8_t[mAudioStream->bufferSize];
-		mRingBuffer = new RingBuffer(mAudioStream->bufferSize * mAudioStream->bufferCount);
+		mAudioData = new uint8_t[BUFFER_SIZE];
+		mRingBuffer = new RingBuffer(BUFFER_SIZE * BUFFER_COUNT);
 
 		mAudioDataBuffer = NULL;
 	}
@@ -793,7 +794,7 @@ unsigned int __stdcall decodeThread(void *args)
 								break;
 
 							// wait for the audio buffer to tell us it's just freed up another audio buffer for us to fill
-							WaitForSingleObject(fmv->mAudioStream->voiceContext->hBufferEndEvent, INFINITE );
+							WaitForSingleObject(fmv->audioStream->voiceContext->hBufferEndEvent, INFINITE );
 						}
 					}
 
@@ -808,7 +809,7 @@ unsigned int __stdcall decodeThread(void *args)
 
 				if (fmv->mVideo)
 				{
-					double audio_time = static_cast<double>(AudioStream_GetNumSamplesPlayed(fmv->mAudioStream)) / static_cast<double>(fmv->mAudio->mVorbis.mInfo.rate);
+					double audio_time = static_cast<double>(fmv->audioStream->GetNumSamplesPlayed()) / static_cast<double>(fmv->mAudio->mVorbis.mInfo.rate);
 					double video_time = static_cast<double>(th_granule_time(fmv->mVideo->mTheora.mDecodeContext, fmv->mGranulePos));
 
 //					char buf[200];
@@ -858,17 +859,17 @@ unsigned int __stdcall audioThread(void *args)
 	{
 		startTime = timeGetTime();
 
-		uint32_t numBuffersFree = AudioStream_GetNumFreeBuffers(fmv->mAudioStream);
+		uint32_t numBuffersFree = fmv->audioStream->GetNumFreeBuffers();
 
 		while (numBuffersFree)
 		{
 			uint32_t readableAudio = fmv->mRingBuffer->GetReadableSize();
 
 			// we can fill a buffer
-			if (readableAudio >= fmv->mAudioStream->bufferSize)
+			if (readableAudio >= fmv->audioStream->GetBufferSize())
 			{
-				fmv->mRingBuffer->ReadData(fmv->mAudioData, fmv->mAudioStream->bufferSize);
-				AudioStream_WriteData(fmv->mAudioStream, fmv->mAudioData, fmv->mAudioStream->bufferSize);
+				fmv->mRingBuffer->ReadData(fmv->mAudioData, fmv->audioStream->GetBufferSize());
+				fmv->audioStream->WriteData(fmv->mAudioData, fmv->audioStream->GetBufferSize());
 
 				numBuffersFree--;
 			}
@@ -881,7 +882,7 @@ unsigned int __stdcall audioThread(void *args)
 
 		if (fmv->mAudioStarted == false)
 		{
-			AudioStream_PlayBuffer(fmv->mAudioStream);
+			fmv->audioStream->Play();
 			fmv->mAudioStarted = true;
 		}
 

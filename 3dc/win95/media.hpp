@@ -1,17 +1,16 @@
 #ifndef _INCLUDED_MEDIA_HPP_
 #define _INCLUDED_MEDIA_HPP_
 
-#ifdef WIN32//#if defined(_WIN32) || defined(WIN32) || defined(WINDOWS) || defined(_WINDOWS)
+#ifdef _WIN32
 	#define _MEDIA_WIN_TARGET
 	#include <windows.h>
-#endif // WIN32 || _WIN32 || WINDOWS || _WINDOWS
+#endif
 
 #ifdef _XBOX
 	#define _MEDIA_WIN_TARGET
 	#include <xtl.h>
 #endif
 
-//#include <stdio.h>
 #include "utilities.h"
 #include <conio.h>
 #include <limits.h>

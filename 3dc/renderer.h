@@ -25,7 +25,7 @@
 
 // temp
 
-#ifdef WIN32
+#ifdef _WIN32
 	#define USE_D3D9
 #endif
 

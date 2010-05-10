@@ -28,7 +28,7 @@
 
 /* Windows includes. Actually internal, but here to allow pre-compilation. */
 #ifndef DB_NOWINDOWS
-#ifdef WIN32
+#ifdef _WIN32
 	#include <windows.h>
 #endif
 #endif
@@ -80,7 +80,7 @@ int db_option = 0; /* Default is off. */
  * logfile will go in the directory that is current when db_log_init() 
  * is called.
  */
-#ifdef WIN32
+#ifdef _WIN32
 	#define ABSOLUTE_PATH	0
 #endif
 #ifdef _XBOX
@@ -268,29 +268,7 @@ void db_assert_fail(const char *exprP, const char *fileP, int line)
 			printf( db_assert_textA[ 2 ], fileP, line );
 			printf("\n");
 			db_do_std_prompt( 0 );
-			break;
-#ifndef DB_NODIRECTDRAW			
-		case DB_DIRECTDRAW:
-			{
-//				char msg[256];
-				unsigned short xLimit = (unsigned short) dd_mode.width;
-				
-				/* Wait for any hardware to finish flipping. */
-				DbWaitForHw();
-#if 0 // bjd				
-				out_text((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP,
-					0, 0, db_assert_textA[ 0 ], xLimit, FontP);
-				wsprintf(msg, db_assert_textA[ 1 ], exprP);
-				out_text((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP,
-					0, 16, msg, xLimit, FontP);
-				wsprintf(msg, db_assert_textA[ 2 ], fileP, line);
-				out_text((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP,
-					0, 32, msg, xLimit, FontP);
-				db_do_std_prompt( 48 );
-#endif
-			}	
-			break;
-#endif	
+			break;	
 #ifndef DB_NOWINDOWS		
 		case DB_WINDOWS:
 			{
@@ -332,21 +310,6 @@ void db_msg_fired(const char *strP)
 			db_do_win_prompt( "Debugging Message", strP );
 			break;
 #endif
-#ifndef DB_NODIRECTDRAW			
-		case DB_DIRECTDRAW:
-			{
-				unsigned short xLimit = (unsigned short) dd_mode.width;
-				
-				/* Wait for any flip hardware to be ready. */
-				DbWaitForHw();
-#if 0 // bjd				
-				out_text((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP,
-					0, 0, strP, xLimit, FontP);
-				db_do_std_prompt( 16 );
-#endif
-			}	
-			break;	
-#endif
 		default:
 			break;				
 	}
@@ -363,17 +326,6 @@ void db_print_fired(int x, int y, const char *strP)
 #ifndef DB_NOWINDOWS			
 		case DB_WINDOWS:
 			break;
-#endif
-#ifndef DB_NODIRECTDRAW		
-		case DB_DIRECTDRAW:
-		{
-#if 0 // bjd
-			unsigned short xLimit = (unsigned short) (dd_mode.width - x);
-			out_text((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP, x, y, 
-				strP, xLimit, FontP);
-#endif
-			break;
-		}	
 #endif
 		default:
 			break;			
@@ -425,52 +377,6 @@ extern void db_set_log_file_ex(const char *strP)
 
 void db_set_mode_ex(int mode, void *modeInfoP, void *newFontP)
 {
-	db_display_type = mode;	
-#ifndef DB_NODIRECTDRAW	
-	if(dd_mode.visibleSurfaceP)
-	{
-#if 0 // bjd
-		IDirectDrawSurface_Release((LPDIRECTDRAWSURFACE) dd_mode.visibleSurfaceP);
-		dd_mode.visibleSurfaceP = NULL;
-#endif
-	}
-	
-	if(dd_mode.drawSurfaceP)
-	{
-#if 0 // bjd
-		IDirectDrawSurface_Release((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP);
-		dd_mode.drawSurfaceP = NULL;
-#endif
-	}
-
-	if(mode == DB_DIRECTDRAW) 
-	{
-		dd_mode = *((struct db_dd_mode_tag *) modeInfoP);
-
-		if(dd_mode.visibleSurfaceP)
-		{
-// bjd			IDirectDrawSurface_AddRef((LPDIRECTDRAWSURFACE) dd_mode.visibleSurfaceP);
-		}
-
-		if(dd_mode.drawSurfaceP)
-		{
-// bjd			IDirectDrawSurface_AddRef((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP);
-		}
-
-		if(!FontP)
-		{
-			if(!newFontP)
-				FontP = guiload_font("DIALOG.FNT");	
-			else
-				FontP = (fontPtr) newFontP;
-		}
-		if(!FontP) 
-		{
-			db_log_fired("DB ERROR: Font load failed. Exiting...");
-			exit(0);
-		}	
-	}	
-#endif	
 }
 
 /* Called to set whether exceptions or brakepoints are called. */
@@ -485,16 +391,6 @@ int db_get_mode(void** modeInfoPP, void **FontPP)
 	*FontPP = NULL;
 	*modeInfoPP = NULL;
 
-#ifndef DB_NODIRECTDRAW
-	if(db_display_type == DB_DIRECTDRAW)
-	{
-		// copy font data
-		*FontPP = (void *) FontP;
-
-		// copy surface data
-		*modeInfoPP = (void *) &dd_mode;
-	}
-#endif
 	return db_display_type;
 }
 
@@ -542,7 +438,7 @@ static void db_do_std_prompt(unsigned yOffset)
 	switch(db_display_type)
 	{
 		case DB_DOS:
-#ifdef WIN32
+#ifdef _WIN32
 			printf( db_prompt_std );
 			printf("\n");
 			do
@@ -554,62 +450,6 @@ static void db_do_std_prompt(unsigned yOffset)
 			ch = 'N';
 #endif
 			break;
-#ifndef DB_NODIRECTDRAW
-		case DB_DIRECTDRAW:
-		{
-			SHORT response;
-			BOOL done = FALSE;
-			unsigned short xLimit = (unsigned short) dd_mode.width;
-
-			/* bjd
-			out_text((LPDIRECTDRAWSURFACE) dd_mode.drawSurfaceP,
-				0, yOffset, db_prompt_std, xLimit, FontP);
-			*/
-
-			/* Show the message. */
-			if(dd_mode.bltOrFlip == DB_FLIP) 
-			{
-				DbFlip();
-			}
-			else 
-			{
-				DbBlt();
-			}
-			
-			/* Wait for a valid key press. */
-			do
-			{
-				response = GetAsyncKeyState('Y');
-				if(response & 0x8000) 
-				{
-					ch = 'Y';
-					done = TRUE;
-				}	
-				response = GetAsyncKeyState('N');
-				if(response & 0x8000) 
-				{
-					ch = 'N';
-					done = TRUE;
-				}	
-				response = GetAsyncKeyState('X');
-				if(response & 0x8000)
-				{
-					ch = 'X';
-					done = TRUE;
-				}
-			}
-			while(!done);
-			
-			Debounce();		
-			
-			/* Return the flip surfaces to their pre-message state. */
-			if(dd_mode.bltOrFlip == DB_FLIP) 
-			{
-				DbFlip();
-			}			
-			break;
-		}
-#endif /* ifndef DB_NODIRECTDRAW */
 	}/* switch(db_display_type) */
 
 	if(ch == 'Y')

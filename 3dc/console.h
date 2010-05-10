@@ -2,7 +2,7 @@
 #define _console_h_
 
 #include <string>
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #endif
 #ifdef _XBOX

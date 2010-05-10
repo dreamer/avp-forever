@@ -69,7 +69,7 @@
 
 /* I N C L U D E D S ************************************************** */
 #ifndef DB_NOWINDOWS
-	#ifdef WIN32
+	#ifdef _WIN32
 		#include <windows.h>
 	#endif
 	#ifdef _XBOX
@@ -97,7 +97,6 @@ extern "C" {
 /* Possible values for the global variable, db_display_type. */
 #define DB_DOS			0
 #define DB_WINDOWS		1
-#define DB_DIRECTDRAW	2
 
 /* Possible values for the bltOrFlip field of db_dd_mode_tag structure. */
 #define DB_FLIP	0

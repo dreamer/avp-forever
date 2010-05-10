@@ -3237,7 +3237,7 @@ int get_object_index_from_module_index(List<Object_Chunk*>& ob_list,int index)
 static BOOL WarnedAboutDiskSpace=FALSE;
 static void MakeBackupFile(File_Chunk* fc)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	unsigned long spc,bps,numclust,total;
 
 	if(GetDiskFreeSpace(0,&spc,&bps,&numclust,&total))

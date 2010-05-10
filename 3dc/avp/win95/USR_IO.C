@@ -1613,7 +1613,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 /* XInput -------------------------------------------------------------------------------------------------- */
 	}
 
-#ifdef WIN32
+#ifdef _WIN32
 	/* KJL 18:27:34 04/29/97 - joystick control */
 	if (GotJoystick)
 	{
@@ -1854,7 +1854,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		#endif
 	}
 
-#endif // ifdef WIN32
+#endif // ifdef _WIN32
 
 	/* KJL 16:03:06 05/11/97 - Handle map options */
 	#if 0
@@ -1994,7 +1994,7 @@ void SaveDefaultPrimaryConfigs(void)
 }
 void LoadDefaultPrimaryConfigs(void)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	FILE* file = avp_fopen("default.cfg","rb");
 	if(!file) return;
 

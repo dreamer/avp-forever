@@ -2035,18 +2035,12 @@ AudioStream::AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, 
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-//		AudioStream_ReleaseBuffer(newStreamingAudioBuffer);
-//		newStreamingAudioBuffer = NULL;
-//		return NULL;
 	}
 
 	this->buffers = new uint8_t[bufferSize * numBuffers];
 	if (this->buffers == NULL)
 	{
 		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
-//		AudioStream_ReleaseBuffer(newStreamingAudioBuffer);
-//		newStreamingAudioBuffer = NULL;
-//		return NULL;
 	}
 
 	this->bytesPerSample = waveFormat.wBitsPerSample / 8;
@@ -2060,75 +2054,13 @@ AudioStream::AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, 
 	this->totalSamplesWritten = 0;
 }
 
-StreamingAudioBuffer * AudioStream_CreateBuffer(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers)
-{
-	if (!soundEnabled)
-		return NULL;
-
-	StreamingAudioBuffer *newStreamingAudioBuffer = new StreamingAudioBuffer;
-	memset(newStreamingAudioBuffer, 0, sizeof(StreamingAudioBuffer));
-
-	WAVEFORMATEX waveFormat;
-	ZeroMemory (&waveFormat, sizeof(waveFormat));
-	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
-	waveFormat.nChannels		= channels;
-	waveFormat.wBitsPerSample	= 16;
-	waveFormat.nSamplesPerSec	= rate;
-	waveFormat.nBlockAlign		= waveFormat.nChannels * (waveFormat.wBitsPerSample / 8);	//what block boundaries exist
-	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;		//average bytes per second
-	waveFormat.cbSize			= sizeof(waveFormat);										//how big this structure is
-
-	// create a new voice context for "on buffer end" callback
-	newStreamingAudioBuffer->voiceContext = new StreamingVoiceContext;
-
-	// create the source voice for playing the sound
-	LastError = pXAudio2->CreateSourceVoice(&newStreamingAudioBuffer->pSourceVoice, &waveFormat, 0, XAUDIO2_DEFAULT_FREQ_RATIO, newStreamingAudioBuffer->voiceContext);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		AudioStream_ReleaseBuffer(newStreamingAudioBuffer);
-		newStreamingAudioBuffer = NULL;
-		return NULL;
-	}
-/*
-	LastError = streamStruct->pSourceVoice->Start(0, XAUDIO2_COMMIT_NOW);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		AudioStream_ReleaseBuffer(newStreamingAudioBuffer);
-		newStreamingAudioBuffer = NULL;
-		return -1;
-	}
-*/
-	newStreamingAudioBuffer->buffers = new uint8_t[bufferSize * numBuffers];
-	if (newStreamingAudioBuffer->buffers == NULL)
-	{
-		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
-		AudioStream_ReleaseBuffer(newStreamingAudioBuffer);
-		newStreamingAudioBuffer = NULL;
-		return NULL;
-	}
-
-	newStreamingAudioBuffer->bytesPerSample = waveFormat.wBitsPerSample / 8;
-	newStreamingAudioBuffer->numChannels = waveFormat.nChannels;
-	newStreamingAudioBuffer->rate = waveFormat.nSamplesPerSec;
-	newStreamingAudioBuffer->isPaused = true;
-
-	newStreamingAudioBuffer->currentBuffer = 0;
-	newStreamingAudioBuffer->bufferSize = bufferSize;
-	newStreamingAudioBuffer->bufferCount = numBuffers;
-	newStreamingAudioBuffer->totalSamplesWritten = 0;
-
-	return newStreamingAudioBuffer;
-}
-
 uint32_t AudioStream::WriteData(uint8_t *audioData, uint32_t size)
 {
 	assert (audioData);
 	assert (size == this->bufferSize);
 
 	uint32_t amountWritten = 0;
-	XAUDIO2_BUFFER xA2Buf;
+	XAUDIO2_BUFFER xA2Buf = {0};
 
 	memcpy(&this->buffers[this->currentBuffer * this->bufferSize], audioData, size);
 	xA2Buf.AudioBytes = size;
@@ -2148,32 +2080,9 @@ uint32_t AudioStream::WriteData(uint8_t *audioData, uint32_t size)
 	return amountWritten;
 }
 
-int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, uint8_t *audioData, uint32_t size)
+uint32_t AudioStream::GetBufferSize()
 {
-	assert (streamStruct);
-	assert (audioData);
-
-	uint32_t amountWritten = 0;
-	XAUDIO2_BUFFER buf = {0};
-
-	assert (size == streamStruct->bufferSize);
-
-	memcpy(&streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize], audioData, size);
-	buf.AudioBytes = size;
-	buf.pAudioData = static_cast<BYTE*>(&streamStruct->buffers[streamStruct->currentBuffer * streamStruct->bufferSize]);
-
-	streamStruct->pSourceVoice->SubmitSourceBuffer(&buf);
-
-	// this is so redundant..
-	amountWritten += size;
-
-	streamStruct->currentBuffer++;
-	streamStruct->currentBuffer %= streamStruct->bufferCount;
-
-	// size in bytes divided by bits per sample (divided by 8 to get the bytes per sample) also dividded by the number of channels
-	streamStruct->totalSamplesWritten += ((size / streamStruct->bytesPerSample) / streamStruct->numChannels);
-
-	return amountWritten;
+	return bufferSize;
 }
 
 uint32_t AudioStream::GetNumFreeBuffers()
@@ -2184,16 +2093,6 @@ uint32_t AudioStream::GetNumFreeBuffers()
 	return this->bufferCount - xA2VoiceState.BuffersQueued;
 }
 
-int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
-{
-	assert (streamStruct);
-
-	XAUDIO2_VOICE_STATE state;
-	streamStruct->pSourceVoice->GetState(&state);
-
-	return streamStruct->bufferCount - state.BuffersQueued;
-}
-
 uint64_t AudioStream::GetNumSamplesPlayed()
 {
 	XAUDIO2_VOICE_STATE xA2VoiceState;
@@ -2202,26 +2101,9 @@ uint64_t AudioStream::GetNumSamplesPlayed()
 	return xA2VoiceState.SamplesPlayed;
 }
 
-UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
-{
-	assert (streamStruct);
-
-	XAUDIO2_VOICE_STATE state;
-	streamStruct->pSourceVoice->GetState(&state);
-
-	return state.SamplesPlayed;
-}
-
 uint64_t AudioStream::GetNumSamplesWritten()
 {
 	return this->totalSamplesWritten;
-}
-
-UINT64 AudioStream_GetNumSamplesWritten(StreamingAudioBuffer *streamStruct)
-{
-	assert (streamStruct);
-
-	return streamStruct->totalSamplesWritten;
 }
 
 uint32_t AudioStream::GetWritableBufferSize()
@@ -2232,36 +2114,9 @@ uint32_t AudioStream::GetWritableBufferSize()
 	return ((this->bufferSize * this->bufferCount) - (xA2VoiceState.BuffersQueued * this->bufferSize));
 }
 
-int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)
-{
-	assert (streamStruct);
-
-	XAUDIO2_VOICE_STATE state;
-
-	streamStruct->pSourceVoice->GetState(&state);
-
-	return ((streamStruct->bufferSize * streamStruct->bufferCount) - (state.BuffersQueued * streamStruct->bufferSize));
-}
-
 int32_t AudioStream::SetVolume(uint32_t volume)
 {
 	LastError = this->pSourceVoice->SetVolume(vol_to_gain_table[volume]);
-	if (FAILED(LastError))
-	{
-		return AUDIOSTREAM_ERROR;
-	}
-	
-	return AUDIOSTREAM_OK;
-}
-
-int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, uint32_t volume)
-{
-	assert (streamStruct);
-
-	if (streamStruct->bufferSize == 0)
-		return 0;
-
-	LastError = streamStruct->pSourceVoice->SetVolume(vol_to_gain_table[volume]);
 	if (FAILED(LastError))
 	{
 		return AUDIOSTREAM_ERROR;
@@ -2276,11 +2131,6 @@ int32_t AudioStream::SetPan(uint32_t pan)
 	return AUDIOSTREAM_OK;
 }
 
-int AudioStream_SetPan(StreamingAudioBuffer *streamStruct, uint32_t pan)
-{
-	return AUDIOSTREAM_OK;
-}
-
 int32_t AudioStream::Stop()
 {
 	LastError = this->pSourceVoice->Stop();
@@ -2289,22 +2139,6 @@ int32_t AudioStream::Stop()
 		return AUDIOSTREAM_ERROR;
 	}
 	
-	return AUDIOSTREAM_OK;
-}
-
-int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct)
-{
-	assert (streamStruct);
-
-	if (streamStruct->pSourceVoice)
-	{
-		LastError = streamStruct->pSourceVoice->Stop();
-		if (FAILED(LastError))
-		{
-			return AUDIOSTREAM_ERROR;
-		}
-	}
-
 	return AUDIOSTREAM_OK;
 }
 
@@ -2319,24 +2153,6 @@ int32_t AudioStream::Play()
 			return AUDIOSTREAM_ERROR;
 		}
 		this->isPaused = false;
-	}
-
-	return AUDIOSTREAM_OK;
-}
-
-int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct)
-{
-	assert (streamStruct);
-
-	if (streamStruct->isPaused)
-	{
-		LastError = streamStruct->pSourceVoice->Start();
-
-		if (FAILED(LastError))
-		{
-			return AUDIOSTREAM_ERROR;
-		}
-		streamStruct->isPaused = false;
 	}
 
 	return AUDIOSTREAM_OK;
@@ -2361,38 +2177,6 @@ AudioStream::~AudioStream()
 	{
 		delete this->voiceContext;
 	}
-}
-
-int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
-{
-	assert (streamStruct);
-
-	if (streamStruct->pSourceVoice)
-	{
-		streamStruct->pSourceVoice->Stop();
-		streamStruct->pSourceVoice->DestroyVoice();
-        streamStruct->pSourceVoice = 0;
-	}
-
-	// clear the new-ed memory
-	if (streamStruct->buffers)
-	{
-		delete []streamStruct->buffers;
-		streamStruct->buffers = NULL;
-	}
-
-	if (streamStruct->voiceContext)
-	{
-		delete streamStruct->voiceContext;
-	}
-
-	streamStruct->bufferCount = 0;
-	streamStruct->currentBuffer = 0;
-	streamStruct->bufferSize = 0;
-
-	delete streamStruct;
-
-	return AUDIOSTREAM_OK;
 }
 
 #endif

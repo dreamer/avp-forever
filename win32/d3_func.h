@@ -1,7 +1,7 @@
 #ifndef _included_d3_func_h_
 #define _included_d3_func_h_
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #ifdef __cplusplus
 	extern "C" {
@@ -129,17 +129,18 @@ typedef struct D3DInfo
 	LPDIRECT3DVERTEXBUFFER9 lpD3DPointSpriteVertexBuffer;
 
 	LPDIRECT3DVERTEXDECLARATION9 vertexDecl;
-	LPDIRECT3DVERTEXDECLARATION9 orthoVertexDecl;
-	LPDIRECT3DVERTEXDECLARATION9 fmvVertexDecl;
-	LPDIRECT3DVERTEXDECLARATION9 pointVertexDecl;
-
 	LPDIRECT3DVERTEXSHADER9      vertexShader;
-	LPDIRECT3DVERTEXSHADER9      orthoVertexShader;
-	LPDIRECT3DVERTEXSHADER9      fmvVertexShader;
-	LPDIRECT3DVERTEXSHADER9      pointSpriteShader;
-
 	LPDIRECT3DPIXELSHADER9       pixelShader;
+
+	LPDIRECT3DVERTEXDECLARATION9 orthoVertexDecl;
+	LPDIRECT3DVERTEXSHADER9      orthoVertexShader;
+
+	LPDIRECT3DVERTEXDECLARATION9 fmvVertexDecl;
+	LPDIRECT3DVERTEXSHADER9      fmvVertexShader;
 	LPDIRECT3DPIXELSHADER9       fmvPixelShader;
+	
+	LPDIRECT3DVERTEXDECLARATION9 pointVertexDecl;
+	LPDIRECT3DVERTEXSHADER9      pointSpriteShader;
 	LPDIRECT3DPIXELSHADER9       pointSpritePixelShader;
 
     int						NumDrivers;
@@ -224,6 +225,6 @@ char* GetDeviceName();
 
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 
-#endif /* ifdef WIN32 */
+#endif /* ifdef _WIN32 */
 
 #endif /* ! _included_d3_func_h_ */

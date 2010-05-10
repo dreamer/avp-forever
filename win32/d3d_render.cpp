@@ -45,8 +45,9 @@ D3DVERTEXELEMENT9 pointDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAU
 								 {0, 20, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
                             D3DDECL_END()};
 
-
-LPD3DXCONSTANTTABLE		constantTable = NULL;
+LPD3DXCONSTANTTABLE	vertexConstantTable = NULL;
+LPD3DXCONSTANTTABLE	orthoConstantTable = NULL;
+LPD3DXCONSTANTTABLE	fmvConstantTable = NULL;
 
 extern "C" {
 
@@ -956,7 +957,7 @@ BOOL ExecuteBuffer()
 	D3DXMatrixIdentity(&matWorld);
 
 	D3DXMATRIXA16 matWorldViewProj = matWorld * viewMatrix * matProjection;
-	constantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
+	vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
 
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
 	d3d.lpD3DDevice->SetVertexShader(d3d.vertexShader);
@@ -1126,7 +1127,7 @@ BOOL ExecuteBuffer()
 //		d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matOrtho);
 
 		D3DXMATRIXA16 matWorldViewProj = matWorld * matView * matOrtho;
-		constantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
+		orthoConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
 
 		// loop through list drawing the quads
 		for (uint32_t i = 0; i < orthoListCount; i++)
