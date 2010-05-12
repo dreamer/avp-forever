@@ -1,7 +1,7 @@
 #ifndef _INCLUDED_MEDIA_HPP_
 #define _INCLUDED_MEDIA_HPP_
 
-#ifdef _WIN32
+#ifdef WIN32
 	#define _MEDIA_WIN_TARGET
 	#include <windows.h>
 #endif

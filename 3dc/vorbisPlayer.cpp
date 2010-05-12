@@ -50,7 +50,7 @@ extern "C"
 
 std::vector<std::string> TrackList;
 
-#ifdef _WIN32
+#ifdef WIN32
 	const std::string tracklistFilename = "Music/ogg_tracks.txt";
 	const std::string musicFolderName = "Music/";
 #endif

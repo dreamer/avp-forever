@@ -1,7 +1,7 @@
 #ifndef _INCLUDED_AWTEXLD_H_
 #define _INCLUDED_AWTEXLD_H_
 
-#ifdef _WIN32
+#ifdef WIN32
 	#include <windows.h>
 #endif
 #ifdef _XBOX

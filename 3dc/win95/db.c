@@ -28,7 +28,7 @@
 
 /* Windows includes. Actually internal, but here to allow pre-compilation. */
 #ifndef DB_NOWINDOWS
-#ifdef _WIN32
+#ifdef WIN32
 	#include <windows.h>
 #endif
 #endif
@@ -80,7 +80,7 @@ int db_option = 0; /* Default is off. */
  * logfile will go in the directory that is current when db_log_init() 
  * is called.
  */
-#ifdef _WIN32
+#ifdef WIN32
 	#define ABSOLUTE_PATH	0
 #endif
 #ifdef _XBOX
@@ -438,7 +438,7 @@ static void db_do_std_prompt(unsigned yOffset)
 	switch(db_display_type)
 	{
 		case DB_DOS:
-#ifdef _WIN32
+#ifdef WIN32
 			printf( db_prompt_std );
 			printf("\n");
 			do

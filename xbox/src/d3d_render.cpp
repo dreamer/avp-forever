@@ -316,6 +316,7 @@ extern void RenderStarfield(void);
 void D3D_DrawMoltenMetalMesh_Unclipped(void);
 static void D3D_OutputTriangles(void);
 BOOL LockExecuteBuffer();
+BOOL ExecuteBuffer();
 BOOL UnlockExecuteBufferAndPrepareForUse();
 
 //Globals
@@ -330,7 +331,7 @@ bool D3DAlphaTestEnable = FALSE;
 static bool D3DStencilEnable;
 D3DCMPFUNC D3DStencilFunc;
 static unsigned int D3DStencilRef;
-static unsigned char D3DZFunc;
+static D3DCMPFUNC D3DZFunc;
 static unsigned char D3DDitherEnable;
 static bool D3DZWriteEnable;
 

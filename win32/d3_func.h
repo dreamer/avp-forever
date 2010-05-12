@@ -1,7 +1,7 @@
 #ifndef _included_d3_func_h_
 #define _included_d3_func_h_
 
-#ifdef _WIN32
+#ifdef WIN32
 
 #ifdef __cplusplus
 	extern "C" {
@@ -225,6 +225,6 @@ char* GetDeviceName();
 
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 
-#endif /* ifdef _WIN32 */
+#endif /* ifdef WIN32 */
 
 #endif /* ! _included_d3_func_h_ */

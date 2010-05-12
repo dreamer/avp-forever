@@ -5,7 +5,7 @@
 
 LogFile::LogFile(char const * const _fname) : fname(0) , ever_written(0)
 {
-#ifdef _WIN32
+#ifdef WIN32
 	FILE * fp = avp_fopen(_fname,"w");
 	if (fp)
 	{

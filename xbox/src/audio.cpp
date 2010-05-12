@@ -1897,13 +1897,260 @@ int CheckSoundBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
 
 void CALLBACK AudioStream_Callback(VOID* pStreamContext, VOID* pPacketContext, DWORD dwStatus)
 {
-	StreamingAudioBuffer *streamStruct = static_cast<StreamingAudioBuffer*>(pStreamContext);
+	AudioStream *streamStruct = static_cast<AudioStream*>(pStreamContext);
 
-	streamStruct->totalBytesPlayed += streamStruct->bufferSize;
+	streamStruct->totalBytesPlayed += streamStruct->GetBufferSize();
 
 	streamStruct->voiceContext->TriggerEvent();
 }
 
+AudioStream::AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers)
+{
+	WAVEFORMATEX waveFormat;
+	memset(&waveFormat, 0, sizeof(waveFormat));
+	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
+	waveFormat.nChannels		= channels;
+	waveFormat.wBitsPerSample	= 16;
+	waveFormat.nSamplesPerSec	= rate;	
+	waveFormat.nBlockAlign		= waveFormat.nChannels * waveFormat.wBitsPerSample / 8;	//what block boundaries exist
+	waveFormat.nAvgBytesPerSec	= waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;	//average bytes per second
+	waveFormat.cbSize			= sizeof(waveFormat);									//how big this structure is
+
+	// create streaming buffer description
+	DSSTREAMDESC streamDesc = {0};
+	ZeroMemory(&streamDesc, sizeof(streamDesc));
+	streamDesc.dwMaxAttachedPackets		= numBuffers;
+	streamDesc.lpwfxFormat				= &waveFormat;
+	streamDesc.lpfnCallback				= AudioStream_Callback;
+	streamDesc.lpvContext				= this;
+	streamDesc.dwFlags					= DSSTREAMCAPS_ACCURATENOTIFY;
+
+	LastError = DirectSoundCreateStream(&streamDesc, &this->dsStreamBuffer);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+
+	this->dsStreamBuffer->Pause(DSSTREAMPAUSE_PAUSE);
+	this->isPaused = true;
+
+	// Set the stream headroom to 0
+	this->dsStreamBuffer->SetHeadroom(0);
+
+	this->PacketStatus.resize(numBuffers);
+
+	for (uint32_t i = 0; i < this->PacketStatus.size(); i++)
+		this->PacketStatus[i] = XMEDIAPACKET_STATUS_SUCCESS;
+
+	this->buffers = new uint8_t[bufferSize * numBuffers];
+	if (this->buffers == NULL)
+	{
+		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
+	}
+
+	this->voiceContext = new StreamingVoiceContext;
+
+	this->bufferSize = bufferSize;
+	this->bufferCount = numBuffers;
+	this->currentBuffer = 0;
+	this->numChannels = waveFormat.nChannels;
+	this->rate = waveFormat.nSamplesPerSec;
+	this->bytesPerSample = waveFormat.wBitsPerSample / 8;
+	this->totalBytesPlayed = 0;
+	this->totalSamplesWritten = 0;
+}
+
+uint32_t AudioStream::WriteData(uint8_t *audioData, uint32_t size)
+{
+	assert (audioData);
+	assert (size == this->bufferSize);
+
+	uint32_t amountWritten = 0;
+
+	// then send some of that audio to directsound
+	XMEDIAPACKET packet;
+	ZeroMemory(&packet, sizeof(packet));
+
+	// offset into source data buffer
+	memcpy(&this->buffers[this->currentBuffer * this->bufferSize], audioData, size);
+
+	packet.pvBuffer  = &this->buffers[this->currentBuffer * this->bufferSize];
+	packet.dwMaxSize = size;
+	packet.pdwStatus = &this->PacketStatus[this->currentBuffer];
+
+	LastError = this->dsStreamBuffer->Process(&packet, NULL);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+
+	// this is so redundant..
+	amountWritten += size;
+
+	this->currentBuffer++;
+	this->currentBuffer %= this->bufferCount;
+
+	// size in bytes divided by bits per sample (divided by 8 to get the bytes per sample) also dividded by the number of channels
+	this->totalSamplesWritten += ((size / this->bytesPerSample) / this->numChannels);
+
+	DWORD status;
+	this->dsStreamBuffer->GetStatus(&status);
+
+	switch (status)
+	{
+		case DSSTREAMSTATUS_STARVED:
+		{
+			OutputDebugString("stream starved! restarting...\n");
+			this->dsStreamBuffer->Pause(DSSTREAMPAUSE_RESUME);
+			break;
+		}
+	}
+
+	return amountWritten;
+}
+
+uint32_t AudioStream::GetBufferSize()
+{
+	return bufferSize;
+}
+
+uint32_t AudioStream::GetNumFreeBuffers()
+{
+	uint32_t numFreeBuffers = 0;
+
+	for (uint32_t i = 0; i < this->PacketStatus.size(); i++)
+    {
+        if (XMEDIAPACKET_STATUS_PENDING != this->PacketStatus[i])
+        {
+			numFreeBuffers++;
+        }
+    }
+
+	return numFreeBuffers;
+}
+
+uint64_t AudioStream::GetNumSamplesPlayed()
+{
+	return ((this->totalBytesPlayed / this->bytesPerSample) / this->numChannels);
+}
+
+uint64_t AudioStream::GetNumSamplesWritten()
+{
+	return this->totalSamplesWritten;
+}
+
+uint32_t AudioStream::GetWritableBufferSize()
+{
+	assert (1 == 0); // blow up here as not implemented yet
+	return 1;
+}
+
+int32_t AudioStream::SetVolume(uint32_t volume)
+{
+	if (this->dsStreamBuffer == NULL) 
+		return 0;
+
+	int32_t attenuation;
+
+	if (volume < VOLUME_MIN) volume = VOLUME_MIN;
+	if (volume > VOLUME_MAX) volume = VOLUME_MAX;
+
+	// convert from intensity to attenuation
+	attenuation = vol_to_atten_table[volume];
+
+	if (attenuation > VOLUME_MAXPLAT) attenuation = VOLUME_MAXPLAT;
+	if (attenuation < VOLUME_MINPLAT) attenuation = VOLUME_MINPLAT;
+
+	// and apply it
+	LastError = this->dsStreamBuffer->SetVolume(attenuation);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return AUDIOSTREAM_ERROR;
+	}
+
+	return AUDIOSTREAM_OK;
+}
+
+int32_t AudioStream::SetPan(uint32_t pan)
+{
+	// todo: implement this function
+	return AUDIOSTREAM_OK;
+}
+
+int32_t AudioStream::Stop()
+{
+	if (this->dsStreamBuffer)
+	{
+		this->dsStreamBuffer->Flush();
+		this->dsStreamBuffer->Pause(DSSTREAMPAUSE_PAUSE);
+		this->isPaused = true;
+	}
+
+	for (uint32_t i = 0; i < this->PacketStatus.size(); i++)
+	{
+		this->PacketStatus[i] = XMEDIAPACKET_STATUS_SUCCESS;
+	}
+
+	return AUDIOSTREAM_OK;
+}
+
+int32_t AudioStream::Play()
+{
+	if (this->isPaused)
+	{
+		OutputDebugString("starting streaming audio..\n"); 
+		this->dsStreamBuffer->Pause(DSSTREAMPAUSE_RESUME);
+		this->isPaused = false;
+	}
+
+	return AUDIOSTREAM_OK;
+}
+
+AudioStream::~AudioStream()
+{
+	DWORD dwStatus;
+
+	if (this->dsStreamBuffer)
+	{
+		LastError = this->dsStreamBuffer->Flush();
+		if (FAILED(LastError))
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+
+		do
+		{
+			// Perform other tasks while waiting for FlushEx to complete
+			
+			this->dsStreamBuffer->GetStatus( &dwStatus );
+		} while( dwStatus & DSSTREAMSTATUS_PLAYING );
+
+
+		LastError = this->dsStreamBuffer->Pause(DSSTREAMPAUSE_PAUSE);
+
+		LastError = this->dsStreamBuffer->Release();
+		if (FAILED(LastError))
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+		this->dsStreamBuffer = NULL;
+	}
+
+	// clear the new-ed memory
+	if (this->buffers)
+	{
+		delete []this->buffers;
+		this->buffers = NULL;
+	}
+
+	if (this->voiceContext)
+	{
+		delete this->voiceContext;
+	}
+}
+
+/*
 StreamingAudioBuffer * AudioStream_CreateBuffer(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers)
 {
 	StreamingAudioBuffer *newStreamingAudioBuffer = new StreamingAudioBuffer;
@@ -1970,7 +2217,9 @@ StreamingAudioBuffer * AudioStream_CreateBuffer(uint32_t channels, uint32_t rate
 
 	return newStreamingAudioBuffer;
 }
+*/
 
+/*
 int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, uint8_t *audioData, uint32_t size)
 {
 	assert (streamStruct);
@@ -2019,7 +2268,9 @@ int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, uint8_t *audioData
 
 	return amountWritten;
 }
+*/
 
+/*
 int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);
@@ -2036,25 +2287,31 @@ int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct)
 
 	return numFreeBuffers;
 }
+*/
 
+/*
 UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct)
 {
 	return ((streamStruct->totalBytesPlayed / streamStruct->bytesPerSample) / streamStruct->numChannels);
 }
-
+*/
+/*
 UINT64 AudioStream_GetNumSamplesWritten(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);
 
 	return streamStruct->totalSamplesWritten;
 }
+*/
 
+/*
 int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct)
 {
 	assert (1 == 0); // blow up here as not implemented yet
 	return 1;
 }
-
+*/
+/*
 int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, uint32_t volume)
 {
 	assert (streamStruct);
@@ -2082,7 +2339,9 @@ int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, uint32_t vol
 	}
 	return AUDIOSTREAM_OK;
 }
+*/
 
+/*
 int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct)
 {
 	assert (streamStruct);
@@ -2165,3 +2424,4 @@ int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct)
 
 	return AUDIOSTREAM_OK;
 }
+*/

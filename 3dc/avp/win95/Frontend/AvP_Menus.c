@@ -690,7 +690,7 @@ extern void AvP_UpdateMenus(void)
 
 //			    time_of_day = time( NULL );
 
-#ifdef _WIN32
+#ifdef WIN32
 				nLen = GetDateFormat(GetThreadLocale(), DATE_LONGDATE, &profilePtr->TimeLastUpdated,NULL,buffer,nLen);
 				nLen = GetTimeFormat(GetThreadLocale(), 0, &profilePtr->TimeLastUpdated,NULL,buffer2,100);
 
@@ -1844,7 +1844,7 @@ static void RenderUserProfileSelectMenu(void)
 //			  strftime( buffer, 80, "%c",
 //				     localtime( &time_of_day ) );
 
-#ifdef _WIN32
+#ifdef WIN32
 				nLen = GetDateFormat(GetThreadLocale(), DATE_LONGDATE, &profilePtr->TimeLastUpdated,
 				NULL,buffer,
 				nLen);
@@ -2001,7 +2001,7 @@ static void RenderLoadGameMenu(void)
 
 				//GetLocalTime(&slotPtr->TimeStamp);
 
-#ifdef _WIN32
+#ifdef WIN32
 				nLen = GetDateFormat(GetThreadLocale(), DATE_SHORTDATE, &slotPtr->TimeStamp ,NULL, buffer, nLen);
 				nLen = GetTimeFormat(GetThreadLocale(), 0, &slotPtr->TimeStamp, NULL, buffer2, 100);
 	
@@ -5475,7 +5475,7 @@ static void CheckForLoadGame()
 
 static void PasteFromClipboard(char* Text,int MaxTextLength)
 {
-#ifdef _WIN32
+#ifdef WIN32
 	HANDLE hGlobal;
 	if(!Text)
 	{

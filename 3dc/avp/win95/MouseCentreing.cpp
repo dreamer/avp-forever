@@ -1,6 +1,6 @@
 
 // only for windows
-#ifdef _WIN32
+#ifdef WIN32
 #include <windows.h>
 #include <process.h>
 

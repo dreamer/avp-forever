@@ -585,13 +585,15 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 
 				pif = PolygonWithinFrustrum(polyPtr);
 
-				if (pif)
+				if (/*pif*/1) // bjd
 				{		 
 					switch (polyPtr->PolyItemType)
 					{
 						case I_ZB_Gouraud3dTexturedPolygon:
 						case I_ZB_Gouraud2dTexturedPolygon:
 						CloakedPolygon_Construct(polyPtr);
+
+/* bjd - bypass clipping
 						if (pif!=2)
 						{
 							GouraudTexturedPolygon_ClipWithZ();
@@ -607,6 +609,9 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 							D3D_ZBufferedCloakedPolygon_Output(polyPtr,RenderPolygon.Vertices);
 						}
 						else D3D_ZBufferedCloakedPolygon_Output(polyPtr,VerticesBuffer);
+*/
+						D3D_ZBufferedCloakedPolygon_Output(polyPtr, VerticesBuffer);
+
 						break;
 						default:
 							textprint("found polygon of type %d\n",polyPtr->PolyItemType);
@@ -631,13 +636,15 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 				POLYHEADER *polyPtr = (POLYHEADER*) (*itemArrayPtr++);
 				int pif;
 				pif = PolygonWithinFrustrum(polyPtr);
-				if (pif)
+				if (/*pif*/1) // bjd
 				{		 
 					switch (polyPtr->PolyItemType)
 					{
 						case I_ZB_Gouraud3dTexturedPolygon:
 						case I_ZB_Gouraud2dTexturedPolygon:
 						CloakedPolygon_Construct(polyPtr);
+
+/* bjd - bypass clipping
 						if (pif!=2)
 						{
 							GouraudTexturedPolygon_ClipWithZ();
@@ -653,6 +660,9 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 							D3D_ZBufferedCloakedPolygon_Output(polyPtr,RenderPolygon.Vertices);
 						}
 						else D3D_ZBufferedCloakedPolygon_Output(polyPtr,VerticesBuffer);
+*/
+						D3D_ZBufferedCloakedPolygon_Output(polyPtr, VerticesBuffer);
+
 						break;
 						default:
 							textprint("found polygon of type %d\n",polyPtr->PolyItemType);
@@ -3718,7 +3728,7 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 
 //		  		D3D_DecalSystem_Setup();
 
-#if 0 // bjd - revert
+#if 1 // bjd - revert
 				for (i = 0; i < 63; i++)
 				{
 					PARTICLE particle = {0};
@@ -3887,7 +3897,7 @@ static void FindAlienEnergySource_Recursion(HMODELCONTROLLER *controllerPtr, SEC
 	}
 	if (sectionDataPtr->Shape && sectionDataPtr->Shape->shaperadius>LocalDetailLevels.AlienEnergyViewThreshold)
 	{
-/* bjd - revert
+#if 1 // bjd - revert
 		PARTICLE particle;
 
 		particle.Position = sectionDataPtr->World_Offset;
@@ -3898,7 +3908,7 @@ static void FindAlienEnergySource_Recursion(HMODELCONTROLLER *controllerPtr, SEC
 //		particle.Colour = 0x20ffffff;
 		particle.Size = sectionDataPtr->Shape->shaperadius*2;
 		RenderParticle(&particle);
-*/
+#endif
 	}
 }
 
@@ -4103,19 +4113,6 @@ void TranslatePointIntoViewspace(VECTORCH *pointPtr)
 	f2i(pointPtr->vz, Dest[2]);
 
 #endif
-}
-
-void TranslatePointIntoViewspace2(VECTORCH *pointPtr)
-{
-	Source[0] = (float)pointPtr->vx;
-	Source[1] = (float)pointPtr->vy;
-	Source[2] = (float)pointPtr->vz;
-
-	TranslatePoint(Source, Dest, ViewMatrix);
-
-	f2i(pointPtr->vx, Dest[0]);
-	f2i(pointPtr->vy, Dest[1]);
-	f2i(pointPtr->vz, Dest[2]);
 }
 
 void SquishPoints(SHAPEINSTR *shapeinstrptr)
@@ -4413,7 +4410,7 @@ void RenderParticle(PARTICLE *particlePtr)
 	int particleSize = particlePtr->Size;
 
 	VECTORCH translatedPosition = particlePtr->Position;
-	TranslatePointIntoViewspace2(&translatedPosition);
+//	TranslatePointIntoViewspace2(&translatedPosition);
 
 	VerticesBuffer[0].X = translatedPosition.vx;
 	VerticesBuffer[3].X = translatedPosition.vx;
@@ -4439,7 +4436,7 @@ void RenderParticle(PARTICLE *particlePtr)
 	  )
 	{
 
-#if 0 // bjd - revert
+#if 1 // bjd - revert
 		VECTORCH translatedPosition = particlePtr->Offset;
 		TranslatePointIntoViewspace(&translatedPosition);
 		VerticesBuffer[1].X = translatedPosition.vx;
@@ -4563,7 +4560,7 @@ void RenderParticle(PARTICLE *particlePtr)
 
 		offset[3].vx = -particleSize;
 		offset[3].vy = +particleSize;
-#if 0 // bjd - revert
+#if 1 // bjd - revert
 		if ((particlePtr->ParticleID == PARTICLE_MUZZLEFLASH))
 		{
 			extern void RotateVertex(VECTOR2D *vertexPtr, int theta);
@@ -4574,7 +4571,7 @@ void RenderParticle(PARTICLE *particlePtr)
 			RotateVertex(&offset[3], theta);
 		}
 #endif // bjd
-#if 0 // bjd - revert
+#if 1 // bjd - revert
 		else if ((particlePtr->ParticleID == PARTICLE_SMOKECLOUD)
 			||(particlePtr->ParticleID == PARTICLE_GUNMUZZLE_SMOKE)
 			||(particlePtr->ParticleID == PARTICLE_PARGEN_FLAME) 
@@ -4589,25 +4586,22 @@ void RenderParticle(PARTICLE *particlePtr)
 		}
 #endif // bjd
 
-		// bjd - commented below lines out and replaced with straight += offset y. didnt make any noticable change?
 		VerticesBuffer[0].X += offset[0].vx;
-		VerticesBuffer[0].Y += offset[0].vy;
-//		VerticesBuffer[0].Y += MUL_FIXED(offset[0].vy, 87381);
+		VerticesBuffer[0].Y += MUL_FIXED(offset[0].vy, 87381);
 		
 		VerticesBuffer[1].X += offset[1].vx;
-		VerticesBuffer[1].Y += offset[1].vy;
-//		VerticesBuffer[1].Y += MUL_FIXED(offset[1].vy, 87381);
+		VerticesBuffer[1].Y += MUL_FIXED(offset[1].vy, 87381);
 
 		VerticesBuffer[2].X += offset[2].vx;
-		VerticesBuffer[2].Y += offset[2].vy;
-//		VerticesBuffer[2].Y += MUL_FIXED(offset[2].vy, 87381);
+		VerticesBuffer[2].Y += MUL_FIXED(offset[2].vy, 87381);
 		
 		VerticesBuffer[3].X += offset[3].vx;
-		VerticesBuffer[3].Y += offset[3].vy;
-//		VerticesBuffer[3].Y += MUL_FIXED(offset[3].vy, 87381);
+		VerticesBuffer[3].Y += MUL_FIXED(offset[3].vy, 87381);
 	}
 
 	{
+
+/* bjd - bypass this clipping stuff
 		int outcode = QuadWithinFrustrum();
 										  
 		if (outcode)
@@ -4631,7 +4625,9 @@ void RenderParticle(PARTICLE *particlePtr)
   			}
 			else AddParticle(particlePtr, &VerticesBuffer[0]);//D3D_Particle_Output(particlePtr,VerticesBuffer);
 		}
-	}	
+*/
+		AddParticle(particlePtr, VerticesBuffer);
+	}
 }
 
 extern void RenderFlechetteParticle(PARTICLE *particlePtr)
@@ -5271,10 +5267,11 @@ void RenderMirrorSurface(void)
 			VerticesBuffer[i].SpecularB = 0;
 			
 		}
-		RenderPolygon.NumberOfVertices=4;
+		RenderPolygon.NumberOfVertices = 4;
 		RenderPolygon.TranslucencyMode = TRANSLUCENCY_COLOUR;
 	}
-			
+
+/* bjd - bypass clipping
 	GouraudTexturedPolygon_ClipWithZ();
 	if(RenderPolygon.NumberOfVertices<3) return;
 	GouraudTexturedPolygon_ClipWithNegativeX();
@@ -5286,6 +5283,8 @@ void RenderMirrorSurface(void)
 	GouraudTexturedPolygon_ClipWithPositiveX();
 	if(RenderPolygon.NumberOfVertices<3) return;
 	D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
+*/
+	D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader, RenderPolygon.Vertices);
 }
 
 void RenderMirrorSurface2(void)
@@ -5334,7 +5333,8 @@ void RenderMirrorSurface2(void)
 		RenderPolygon.NumberOfVertices=4;
 		RenderPolygon.TranslucencyMode = TRANSLUCENCY_COLOUR;
 	}
-			
+
+/* bjd - bypass clipping
 	GouraudTexturedPolygon_ClipWithZ();
 	if(RenderPolygon.NumberOfVertices<3) return;
 	GouraudTexturedPolygon_ClipWithNegativeX();
@@ -5346,8 +5346,11 @@ void RenderMirrorSurface2(void)
 	GouraudTexturedPolygon_ClipWithPositiveX();
 	if(RenderPolygon.NumberOfVertices<3) return;
 	D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
+*/
+	D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader, RenderPolygon.Vertices);
 }
 
+/* bjd - not called
 void RenderSmokeTest(void)
 {
  	int mirrorUV[]=
@@ -5419,6 +5422,7 @@ void RenderSmokeTest(void)
 		D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
 	}
 }
+*/
 
 #define OCTAVES 3
 int u[OCTAVES];
@@ -5441,10 +5445,10 @@ void RenderSky(void)
 	{
 		for (i = 0; i < OCTAVES; i++)
 		{
-			u[i] = (FastRandom()&65535)*128;
-			v[i] = (FastRandom()&65535)*128;
-			du[i] = ( ((FastRandom()&65535)-32768)*(i+1) )*8;
-			dv[i] = ( ((FastRandom()&65535)-32768)*(i+1) )*8;
+			u[i] = (FastRandom()&65535);//*128;
+			v[i] = (FastRandom()&65535);//*128;
+			du[i] = ( ((FastRandom()&65535)-32768)*(i+1) );//*8;
+			dv[i] = ( ((FastRandom()&65535)-32768)*(i+1) );//*8;
 		}
 		skySetup = 1;
 	}
@@ -5465,12 +5469,13 @@ void RenderSky(void)
 		for (z = -10; z <= 10; z++)
 		{
 			int t = 255;
-			int size = 65536*128;
+			int size = /*65536*/128;
 
 			for (o = 0; o < OCTAVES; o++)
 			{
  			   VECTORCH translatedPts[4] =
 				{
+					// x   // y  // z
 					{-1024,-1000,-1024},
 					{-1024,-1000, 1024},
 					{ 1024,-1000, 1024},
@@ -5479,11 +5484,9 @@ void RenderSky(void)
 
 				for (i = 0; i < 4; i++)
 				{
-					VerticesBuffer[i].A = t;
-					translatedPts[i].vx += 2048*x;//+(Global_VDB_Ptr->VDB_World.vx*7)/8;
-					translatedPts[i].vz += 2048*z;//+(Global_VDB_Ptr->VDB_World.vz*7)/8;
-		//				RotateVector(&translatedPts[i],&(Global_VDB_Ptr->VDB_Mat));
-		//				translatedPts[i].vy = MUL_FIXED(translatedPts[i].vy,87381);
+					translatedPts[i].vx += 2048*x;
+					translatedPts[i].vz += 2048*z;
+
 					translatedPts[i].vx += Global_VDB_Ptr->VDB_World.vx;
 					translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy;
 					translatedPts[i].vz += Global_VDB_Ptr->VDB_World.vz;
@@ -5522,6 +5525,8 @@ void RenderSky(void)
 						}
 					}
 
+					VerticesBuffer[i].A = t;
+
 					VerticesBuffer[0].U = (u[o]+size*x);
 					VerticesBuffer[0].V = (v[o]+size*z);
 					VerticesBuffer[1].U = (u[o]+size*x);
@@ -5534,6 +5539,8 @@ void RenderSky(void)
 					RenderPolygon.NumberOfVertices = 4;
 				}
 
+				D3D_SkyPolygon_Output(&fakeHeader, VerticesBuffer);
+/*
 				GouraudTexturedPolygon_ClipWithZ();
 				if (RenderPolygon.NumberOfVertices>=3)
 				{
@@ -5555,6 +5562,7 @@ void RenderSky(void)
 						}
 					}
 				}
+*/
 				t/=2;
 				size*=2;
 			}
@@ -5967,8 +5975,6 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 	PARTICLE particle;
 	VECTORCH point = *positionPtr;
 
-	TranslatePointIntoViewspace2(&point);
-
 	if (point.vz < 64) 
 		return;
 	
@@ -5981,14 +5987,14 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 
 //	textprint("render fn %d %d %d\n",positionPtr->vx,positionPtr->vy,positionPtr->vz);
 
-	z = point.vz;//ONE_FIXED;
+	z = ONE_FIXED;
 	{
 		extern int SmartTargetSightX, SmartTargetSightY;
 		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 		centreX = DIV_FIXED(point.vx, point.vz);
 		centreY = DIV_FIXED(point.vy, point.vz);
-		sizeX = 200;//(ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
-		sizeY = 200;//MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
+		sizeX = (ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
+		sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
 	}
 
 	VerticesBuffer[0].X = centreX - sizeX;
@@ -6022,7 +6028,7 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 	{
 		int outcode = QuadWithinFrustrum();
 										  
-		if (outcode)
+		if (/*outcode*/1) // bjd
 		{
 			RenderPolygon.NumberOfVertices = 4;
 			
@@ -6039,6 +6045,7 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 			VerticesBuffer[3].U = 192;
 			VerticesBuffer[3].V = 63;
 
+/* bjd - bypass clipping code
 			if (outcode!=2)
 			{
 				TexturedPolygon_ClipWithZ();
@@ -6061,7 +6068,9 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
   			}
 //			else D3D_Particle_Output(&particle, VerticesBuffer);
 			else AddParticle(&particle, &VerticesBuffer[0]);
+*/
 		}
+			AddParticle(&particle, VerticesBuffer);
 	}	
 }
 

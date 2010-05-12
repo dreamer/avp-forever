@@ -27,7 +27,7 @@
 #include "configFile.h"
 #include <assert.h>
 
-#ifdef _WIN32
+#ifdef WIN32
 	#include <shlobj.h>
 	#include <shlwapi.h>
 #endif
@@ -38,7 +38,7 @@ extern "C" {
 
 extern void ReleaseDirect3D();
 
-#ifdef _WIN32
+#ifdef WIN32
 	extern HWND	hWndMain;
 #endif
 
@@ -53,7 +53,7 @@ char *GetSaveFolderPath()
 	saveFolder[0] = '\0';
 	return saveFolder;
 #endif
-#ifdef _WIN32
+#ifdef WIN32
 
 	if (FAILED(SHGetFolderPath(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, saveFolder)))
 	{
@@ -162,7 +162,7 @@ FILE *avp_fopen(const char *fileName, const char *mode)
 */
 	return fopen(finalPath.c_str(), mode);
 #endif
-#ifdef _WIN32
+#ifdef WIN32
 
 	// if write mode, direct to home path
 	if ((strcmp(mode, "wb") == 0) || (strcmp(mode, "w") == 0))
@@ -190,7 +190,7 @@ DWORD avp_GetFileAttributes(LPCTSTR lpFileName)
 
 	return GetFileAttributes(finalPath.c_str());
 #endif
-#ifdef _WIN32
+#ifdef WIN32
 	return GetFileAttributes(lpFileName);
 #endif
 }
@@ -207,7 +207,7 @@ HANDLE avp_CreateFile(LPCTSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMo
 	return CreateFile(finalPath.c_str(), dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 
 #endif
-#ifdef _WIN32
+#ifdef WIN32
 	return CreateFile(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 #endif
 }
@@ -222,7 +222,7 @@ HANDLE avp_FindFirstFile(LPCTSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData)
 	finalPath.append(lpFileName);
 	return FindFirstFile(finalPath.c_str(), lpFindFileData);
 #endif
-#ifdef _WIN32
+#ifdef WIN32
 	return FindFirstFile(lpFileName, lpFindFileData);
 #endif	
 }
@@ -236,7 +236,7 @@ void avp_GetCommandLineArgs(char *args, int size)
 
 void avp_MessageBox(const char* message, int type)
 {
-#ifdef _WIN32
+#ifdef WIN32
 	ReleaseDirect3D();
 	MessageBox(hWndMain, message, "AvP Error", type);
 #endif
@@ -244,7 +244,7 @@ void avp_MessageBox(const char* message, int type)
 
 void avp_exit(int code)
 {
-#ifdef _WIN32
+#ifdef WIN32
 	exit(code);
 #endif
 }

@@ -113,6 +113,7 @@ extern void ReleaseAllFMVTextures(void);
 
 extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
+extern BOOL SetExecuteBufferDefaults();
 
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern int WindowMode;

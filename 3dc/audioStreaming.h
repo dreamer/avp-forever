@@ -77,6 +77,7 @@ public:
 	uint64_t GetNumSamplesPlayed();
 	uint64_t GetNumSamplesWritten();
 	uint32_t GetWritableBufferSize();
+	uint32_t GetBytesWritten();
 	uint32_t GetBufferSize();
 	StreamingVoiceContext *voiceContext;
 
@@ -132,6 +133,41 @@ struct StreamingVoiceContext
     }
 };
 
+class AudioStream
+{
+
+private:
+	uint32_t	bufferSize;
+	uint32_t	bufferCount;
+	uint32_t	currentBuffer;
+	uint32_t	numChannels;
+	uint32_t	rate;
+	uint32_t	bytesPerSample;
+	uint64_t	totalSamplesWritten;
+	bool		isPaused;
+	uint8_t		*buffers;
+	std::vector<DWORD> PacketStatus;
+	LPDIRECTSOUNDSTREAM	dsStreamBuffer;
+	
+public:
+	AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers);
+	int32_t  Stop();
+	int32_t  Play();
+	int32_t  SetVolume(uint32_t volume);
+	int32_t  SetPan(uint32_t pan);
+	uint32_t WriteData(uint8_t *audioData, uint32_t size);
+	uint32_t GetNumFreeBuffers();
+	uint64_t GetNumSamplesPlayed();
+	uint64_t GetNumSamplesWritten();
+	uint32_t GetWritableBufferSize();
+	uint32_t GetBufferSize();
+	StreamingVoiceContext *voiceContext;
+	uint64_t	totalBytesPlayed;
+
+	~AudioStream();
+};
+
+/*
 struct StreamingAudioBuffer
 {
 	int bufferSize;
@@ -148,21 +184,8 @@ struct StreamingAudioBuffer
 	LPDIRECTSOUNDSTREAM	dsStreamBuffer;
 	StreamingVoiceContext *voiceContext;
 };
+*/
 
 #endif
-
-/*
-StreamingAudioBuffer * AudioStream_CreateBuffer(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers);
-int AudioStream_PlayBuffer(StreamingAudioBuffer *streamStruct);
-int AudioStream_StopBuffer(StreamingAudioBuffer *streamStruct);
-int AudioStream_ReleaseBuffer(StreamingAudioBuffer *streamStruct);
-int AudioStream_SetBufferVolume(StreamingAudioBuffer *streamStruct, uint32_t);
-int AudioStream_WriteData(StreamingAudioBuffer *streamStruct, uint8_t *audioData, uint32_t size);
-int AudioStream_GetWritableBufferSize(StreamingAudioBuffer *streamStruct);
-int AudioStream_GetNumFreeBuffers(StreamingAudioBuffer *streamStruct);
-int AudioStream_SetPan(StreamingAudioBuffer *streamStruct, uint32_t pan);
-UINT64 AudioStream_GetNumSamplesPlayed(StreamingAudioBuffer *streamStruct);
-UINT64 AudioStream_GetNumSamplesWritten(StreamingAudioBuffer *streamStruct);
-*/
 
 #endif

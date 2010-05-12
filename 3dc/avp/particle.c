@@ -3382,7 +3382,8 @@ void InitialiseRainDrops(void)
 	}
 }
 
-void HandleRainDrops(MODULE *modulePtr,int numberOfRaindrops)
+/* bjd - not called
+void HandleRainDrops(MODULE *modulePtr, int numberOfRaindrops)
 {
 	int i = numberOfRaindrops;
 
@@ -3436,6 +3437,8 @@ void HandleRainDrops(MODULE *modulePtr,int numberOfRaindrops)
 	while(--i);
 	
 }
+*/
+
 #if 0
 void HandleRain(MODULE *modulePtr,int numberOfRaindrops)
 {
@@ -3500,6 +3503,7 @@ void HandleRain(MODULE *modulePtr,int numberOfRaindrops)
 	
 }
 #endif
+
 void HandleRain(int numberOfRaindrops)
 {
 	int i = numberOfRaindrops;

@@ -1,4 +1,4 @@
-#ifdef _WIN32
+#ifdef WIN32
 
 	/*
 		Minimise header files to

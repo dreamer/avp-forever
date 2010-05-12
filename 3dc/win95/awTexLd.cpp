@@ -1199,7 +1199,7 @@ char const * AwWinErrorToString(DWORD error)
 {
 	if (NO_ERROR==error) return "FALSE error";
 	static TCHAR buffer[1024];
-#ifdef _WIN32
+#ifdef WIN32
 	if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,NULL,error,MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),buffer,sizeof buffer/sizeof(TCHAR)-1,NULL))
 #endif
 		wsprintf(buffer,TEXT("FormatMessage() failed; previous Windows error code: 0x%08X"),error);

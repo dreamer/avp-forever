@@ -3406,7 +3406,7 @@ void DrawScanlinesOverlay(float level)
 		DrawNoiseOverlay(128);
 }
 
-void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
+void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
 	int32_t texoffset;
 
