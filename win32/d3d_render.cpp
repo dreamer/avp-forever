@@ -988,7 +988,7 @@ BOOL ExecuteBuffer()
 	}
 */
 	D3DXMATRIX matProjection;
-	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(fov), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(fov), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 100000.0f);
 
 	#ifndef USE_D3DVIEWTRANSFORM
 		D3DXMatrixIdentity(&viewMatrix); // we want to use the identity matrix in this case
@@ -4960,7 +4960,7 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWid
 }
 
 /* more quad drawing functions than you can shake a stick at! */
-void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE9 tex[3])
+void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE9 tex1, LPDIRECT3DTEXTURE9 tex2, LPDIRECT3DTEXTURE9 tex3)
 {
 	int topX = (640 - frameWidth) / 2;
 	int topY = (480 - frameHeight) / 2;
@@ -5029,9 +5029,9 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 
 	// set the texture
-	LastError = d3d.lpD3DDevice->SetTexture(0, tex[0]);
-	LastError = d3d.lpD3DDevice->SetTexture(1, tex[1]);
-	LastError = d3d.lpD3DDevice->SetTexture(2, tex[2]);
+	LastError = d3d.lpD3DDevice->SetTexture(0, tex1);
+	LastError = d3d.lpD3DDevice->SetTexture(1, tex2);
+	LastError = d3d.lpD3DDevice->SetTexture(2, tex3);
 
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.fmvVertexDecl);
 	d3d.lpD3DDevice->SetVertexShader(d3d.fmvVertexShader);

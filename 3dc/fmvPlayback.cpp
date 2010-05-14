@@ -157,15 +157,10 @@ TheoraFMV::~TheoraFMV()
 		delete mRingBuffer;
 	}
 
-	if (mDisplayTexture)
-	{
-		mDisplayTexture->Release();
-	}
-
 	for (uint32_t i = 0; i < 3; i++)
 	{
-		if (tex[i])
-			tex[i]->Release();
+		if (frameTextures[i].texture)
+			frameTextures[i].texture->Release();
 	}
 
 	if (mFrameCriticalSectionInited)
@@ -209,9 +204,9 @@ int TheoraFMV::Open(const std::string &fileName)
 	mFileName = fileName;
 #endif
 
-	tex[0] = 0;
-	tex[1] = 0;
-	tex[2] = 0;
+	frameTextures[0].texture = 0;
+	frameTextures[1].texture = 0;
+	frameTextures[2].texture = 0;
 
 	// open the file
 	mFileStream.open(mFileName.c_str(), std::ios::in | std::ios::binary);
@@ -288,17 +283,17 @@ int TheoraFMV::Open(const std::string &fileName)
 	mFrameWidth = mVideo->mTheora.mInfo.frame_width;
 	mFrameHeight = mVideo->mTheora.mInfo.frame_height;
 
-	texWidth[0] = mFrameWidth;
-	texHeight[0] = mFrameHeight;
+	frameTextures[0].width = mFrameWidth;
+	frameTextures[0].height = mFrameHeight;
 
-	texWidth[1] = texWidth[2] = mFrameWidth / 2;
-	texHeight[1] = texHeight[2] = mFrameHeight / 2;
+	frameTextures[1].width = frameTextures[2].width = mFrameWidth / 2;
+	frameTextures[1].height = frameTextures[2].height = mFrameHeight / 2;
 
 	for (uint32_t i = 0; i < 3; i++)
 	{
 		// create a new texture, passing width and height which will be set to the actual size of the created texture
-		tex[i] = CreateFmvTexture2(&texWidth[i], &texHeight[i]);
-		if (!tex[i])
+		frameTextures[i].texture = CreateFmvTexture2(&frameTextures[i].width, &frameTextures[i].height);
+		if (!frameTextures[i].texture)
 		{
 			Con_PrintError("can't create FMV texture");
 			return FMV_ERROR;
@@ -475,7 +470,7 @@ bool TheoraFMV::NextFrame()
 
 	for (uint32_t i = 0; i < 3; i++)
 	{
-		if (FAILED(tex[i]->LockRect(0, &texLock[i], NULL, D3DLOCK_DISCARD)))
+		if (FAILED(frameTextures[i].texture->LockRect(0, &texLock[i], NULL, D3DLOCK_DISCARD)))
 		{
 			OutputDebugString("can't lock FMV texture\n");
 			return false;
@@ -484,12 +479,12 @@ bool TheoraFMV::NextFrame()
 
 	for (uint32_t i = 0; i < 3; i++)
 	{
-		for (uint32_t y = 0; y < texHeight[i]; y++)
+		for (uint32_t y = 0; y < frameTextures[i].height; y++)
 		{
 			uint8_t *destPtr = static_cast<uint8_t*>(texLock[i].pBits) + y * texLock[i].Pitch;
 			uint8_t *srcPtr = mYuvBuffer[i].data + (y * mYuvBuffer[i].stride);
 
-			for (uint32_t x = 0; x < texWidth[i]; x++)
+			for (uint32_t x = 0; x < frameTextures[i].width; x++)
 			{
 				memcpy(destPtr, srcPtr, 1);
 
@@ -527,10 +522,14 @@ bool TheoraFMV::NextFrame()
 		return false;
 	}
 */
+	frameTextures[0].texture->UnlockRect(0);
+	frameTextures[1].texture->UnlockRect(0);
+	frameTextures[2].texture->UnlockRect(0);
+/*
 	tex[0]->UnlockRect(0);
 	tex[1]->UnlockRect(0);
 	tex[2]->UnlockRect(0);
-
+*/
 	mFrameReady = false;
 
 	LeaveCriticalSection(&mFrameCriticalSection);

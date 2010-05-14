@@ -161,7 +161,7 @@ static TGA_HEADER TgaHeader = {0};
 
 void ColourFillBackBuffer(int FillColour) 
 {
-	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET, /*FillColour*/D3DCOLOR_XRGB(255,255,0), 1.0f, 0 );
+	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_TARGET, FillColour, 1.0f, 0);
 }
 
 char* GetDeviceName() 

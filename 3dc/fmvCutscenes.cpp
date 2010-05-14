@@ -49,22 +49,32 @@ bool MenuBackground = false;
 
 void ReleaseAllFMVTexturesForDeviceReset()
 {
-	for (int i = 0; i < NumberOfFMVTextures; i++)
+	for (uint32_t i = 0; i < NumberOfFMVTextures; i++)
 	{
 		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
 	}
 
 	// check for fullscreen intro/outro fmvs
-	for (int i = 0; i < MAX_FMVS; i++)
+	for (uint32_t i = 0; i < MAX_FMVS; i++)
 	{
 		if (fmvList[i].isPlaying && fmvList[i].fmvClass)
 		{
+			for (uint32_t j = 0; j < 3; j++)
+			{
+				if (fmvList[i].fmvClass->frameTextures[j].texture)
+				{
+					fmvList[i].fmvClass->frameTextures[j].texture->Release();
+					fmvList[i].fmvClass->frameTextures[j].texture = NULL;
+				}
+			}
+/*
 			// lets double check..
 			if (fmvList[i].fmvClass->mDisplayTexture)
 			{
 				fmvList[i].fmvClass->mDisplayTexture->Release();
 				fmvList[i].fmvClass->mDisplayTexture = NULL;
 			}
+*/
 		}
 	}
 }
@@ -75,7 +85,7 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 	{
 		FMVTexture[i].ImagePtr->Direct3DTexture = CreateFmvTexture(&FMVTexture[i].ImagePtr->ImageWidth, &FMVTexture[i].ImagePtr->ImageHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 	}
-
+/*
 	// check for fullscreen intro/outro fmvs
 	for (int i = 0; i < MAX_FMVS; i++)
 	{
@@ -88,6 +98,7 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 			}
 		}
 	}
+*/
 }
 
 void FindLightingValuesFromTriggeredFMV(uint8_t *bufferPtr, FMVTEXTURE *ftPtr)
@@ -290,7 +301,7 @@ extern void PlayFMV(const char *filenamePtr)
 //		if (fmv.mDisplayTexture)
 		{
 //			DrawFmvFrame(fmv.mFrameWidth, fmv.mFrameHeight, fmv.mTextureWidth, fmv.mTextureHeight, fmv.mDisplayTexture);
-			DrawFmvFrame2(fmv.mFrameWidth, fmv.mFrameHeight, fmv.texWidth[0], fmv.texHeight[0], fmv.tex);
+			DrawFmvFrame2(fmv.mFrameWidth, fmv.mFrameHeight, fmv.frameTextures[0].width, fmv.frameTextures[0].height, fmv.frameTextures[0].texture, fmv.frameTextures[1].texture, fmv.frameTextures[2].texture);
 		}
 
 		ThisFramesRenderingHasFinished();

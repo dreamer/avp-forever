@@ -15,6 +15,7 @@
 #include <vorbis/vorbisfile.h>
 #include "ringbuffer.h"
 #include "audioStreaming.h"
+#include "textureManager.h"
 
 enum fmvErrors
 {
@@ -61,13 +62,13 @@ class TheoraFMV
 		uint16_t		*mAudioDataBuffer;
 		uint32_t		mAudioDataBufferSize;
 
-		// video
-		RENDERTEXTURE mDisplayTexture;
-
-		// test
-		RENDERTEXTURE tex[3];
+		// textures for video frames
+/*
+		RENDERTEXTURE texArray[3];
 		uint32_t   texWidth[3];
 		uint32_t   texHeight[3];
+*/
+		Texture frameTextures[3];
 
 		uint32_t mTextureWidth;
 		uint32_t mTextureHeight;
@@ -97,7 +98,6 @@ class TheoraFMV
 			mAudioData(0),
 			mAudioDataBuffer(0),
 			mAudioDataBufferSize(0),
-			mDisplayTexture(0),
 			mTextureWidth(0),
 			mTextureHeight(0),
 			mFrameWidth(0),
