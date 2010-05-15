@@ -75,6 +75,7 @@ D3DXMATRIX matView;
 D3DXMATRIX matIdentity;
 
 extern DWORD mainDecl[];
+extern DWORD orthoDecl[];
 
 // size of vertex and index buffers
 const uint32_t MAX_VERTEXES = 4096;
@@ -498,7 +499,7 @@ LPDIRECT3DTEXTURE8 CreateFmvTexture2(uint32_t *width, uint32_t *height)
 	else { newHeight = *height; }
 #endif
 
-	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, D3DUSAGE_DYNAMIC, D3DFMT_L8, D3DPOOL_DEFAULT, &destTexture);
+	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, D3DUSAGE_DYNAMIC, D3DFMT_LIN_L8, D3DPOOL_DEFAULT, &destTexture);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -511,7 +512,43 @@ LPDIRECT3DTEXTURE8 CreateFmvTexture2(uint32_t *width, uint32_t *height)
 	return destTexture;
 }
 
-uint32_t CreateVertexShader(const std::string &fileName, DWORD &vertexShader)
+int32_t CreateVertexShaderFromMemory(const char *shader, DWORD &vertexShader)
+{
+	XGBuffer* pShaderData = NULL;
+	XGBuffer* pErrors = NULL;
+
+	// compile shader from file
+	LastError = XGAssembleShader(NULL, // filename (for errors only)
+			shader,
+			strlen(shader),
+			0,
+			NULL,
+			&pShaderData,
+			&pErrors,
+			NULL,
+			NULL,
+			NULL,
+			NULL);
+
+	if (FAILED(LastError))
+	{
+		LogErrorString("Error cannot compile vertex shader file");
+		return -1;
+	}
+
+	LastError = d3d.lpD3DDevice->CreateVertexShader(mainDecl, (const DWORD*)pShaderData->pData, &vertexShader, 0); // ??
+	if (FAILED(LastError))
+	{
+		LogErrorString("Error create vertex shader");
+		return -1;
+	}
+
+	pShaderData->Release();
+
+	return 0;
+}
+
+int32_t CreateVertexShader(const std::string &fileName, DWORD *vertexShader, DWORD *vertexDeclaration)
 {
 	XGBuffer* pShaderData = NULL;
 	XGBuffer* pErrors = NULL;
@@ -556,7 +593,7 @@ uint32_t CreateVertexShader(const std::string &fileName, DWORD &vertexShader)
 		pErrors->Release();
 	}
 
-	LastError = d3d.lpD3DDevice->CreateVertexShader(mainDecl, (const DWORD*)pShaderData->pData, &vertexShader, 0); // ??
+	LastError = d3d.lpD3DDevice->CreateVertexShader(vertexDeclaration, (const DWORD*)pShaderData->pData, vertexShader, 0); // ??
 	if (FAILED(LastError))
 	{
 		LogErrorString("Error create vertex shader");
@@ -568,7 +605,7 @@ uint32_t CreateVertexShader(const std::string &fileName, DWORD &vertexShader)
 	return 0;
 }
 
-uint32_t CreatePixelShader(const std::string &fileName, DWORD &pixelShader)
+int32_t CreatePixelShader(const std::string &fileName, DWORD *pixelShader)
 {
 	XGBuffer* pShaderData = NULL;
 	XGBuffer* pErrors = NULL;
@@ -613,7 +650,7 @@ uint32_t CreatePixelShader(const std::string &fileName, DWORD &pixelShader)
 		pErrors->Release();
 	}
 
-	LastError = d3d.lpD3DDevice->CreatePixelShader((D3DPIXELSHADERDEF*)pShaderData->GetBufferPointer(), &pixelShader); // ??
+	LastError = d3d.lpD3DDevice->CreatePixelShader((D3DPIXELSHADERDEF*)pShaderData->GetBufferPointer(), pixelShader); // ??
 	if (FAILED(LastError))
 	{
 		LogErrorString("Error create pixel vertex shader");
@@ -1404,45 +1441,11 @@ BOOL InitialiseDirect3D()
 	Net_Initialise();
 	Font_Init();
 
-	CreateVertexShader("vertex_1_1.vsh", d3d.vertexShader);
-	CreateVertexShader("orthoVertex_1_1.vsh", d3d.orthoVertexShader);
+	CreateVertexShader("vertex_1_1.vsh", &d3d.vertexShader, mainDecl);
+	CreateVertexShader("orthoVertex_1_1.vsh", &d3d.orthoVertexShader, orthoDecl);
 
-	CreatePixelShader("pixel_1_1.psh", d3d.pixelShader);
+	CreatePixelShader("pixel_1_1.psh", &d3d.pixelShader);
 
-
-/*
-	XGBuffer* pShaderData = NULL;
-	XGBuffer* pErrors = NULL;
-
-	// compile shader from file
-	LastError = XGAssembleShader(fileName.c_str(), // filename (for errors only)
-			orthoShader,
-			strlen(orthoShader),
-			0,
-			NULL,
-			&pShaderData,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL);
-
-	if (FAILED(LastError))
-	{
-		LogErrorString("Error cannot compile vertex shader file");
-		return -1;
-	}
-
-	LastError = d3d.lpD3DDevice->CreateVertexShader(mainDecl, (const DWORD*)pShaderData->pData, &vertexShader, 0); // ??
-	if (FAILED(LastError))
-	{
-		LogErrorString("Error create vertex shader");
-		return -1;
-	}
-
-	pShaderData->Release();
-
-*/
 	Con_PrintMessage("Initialised Direct3D succesfully");
 	return TRUE;
 }

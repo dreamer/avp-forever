@@ -4,7 +4,7 @@
 #include "3dc.h"
 #include "module.h"
 #include "stratdef.h"
-#include "d3_func.h"
+#include "renderer.h"
 
 #ifdef __cplusplus
 extern "C"

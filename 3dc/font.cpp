@@ -22,7 +22,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "d3_func.h"
+#include "renderer.h"
 #include "logString.h"
 #include "font2.h"
 #include "textureManager.h"

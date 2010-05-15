@@ -7,7 +7,7 @@
 #include "stratdef.h"
 #include "gamedef.h"
 #include "ourasert.h"
-#include "d3_func.h"
+#include "renderer.h"
 
 #include "frontend\avp_menus.h"
 extern "C"

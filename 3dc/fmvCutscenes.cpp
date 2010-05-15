@@ -5,7 +5,6 @@
 
 #include "fmvPlayback.h"
 #include "fmvCutscenes.h"
-#include "d3_func.h"
 #include "console.h"
 
 #define MAX_FMVS 4

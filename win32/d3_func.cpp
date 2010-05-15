@@ -642,10 +642,10 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, 
 		return NULL;
 	}
 
-	int original_width = tex->width;
-	int original_height = tex->height;
-	int new_width = original_width;
-	int new_height = original_height;
+	uint32_t original_width = tex->width;
+	uint32_t original_height = tex->height;
+	uint32_t new_width = original_width;
+	uint32_t new_height = original_height;
 
 	D3DCOLOR pad_colour = D3DCOLOR_ARGB(255, 255, 0, 255);
 
@@ -697,7 +697,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, 
 	TgaHeader.width  = tex->width;
 
 	// size of raw image data
-	int imageSize = tex->height * tex->width * sizeof(uint32_t);
+	uint32_t imageSize = tex->height * tex->width * sizeof(uint32_t);
 
 	// create new buffer for header and image data
 	uint8_t *buffer = new uint8_t[sizeof(TGA_HEADER) + imageSize];
@@ -708,7 +708,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, 
 	uint8_t *imageData = buffer + sizeof(TGA_HEADER);
 
 	// loop, converting RGB to BGR for D3DX function
-	for (int i = 0; i < imageSize; i+=4)
+	for (uint32_t i = 0; i < imageSize; i+=4)
 	{
 
 		// BGRA			 // RGBA
@@ -956,7 +956,7 @@ BOOL CreateVolatileResources()
 	return TRUE;
 }
 
-BOOL ChangeGameResolution(int width, int height, int colourDepth)
+BOOL ChangeGameResolution(uint32_t width, uint32_t height, uint32_t colourDepth)
 {
 	// don't bother resetting device if we're already using the requested settings
 	if ((width == d3d.d3dpp.BackBufferWidth) && (height == d3d.d3dpp.BackBufferHeight))

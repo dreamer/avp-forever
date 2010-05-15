@@ -197,7 +197,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
 BOOL ReleaseVolatileResources();
 BOOL CreateVolatileResources();
-BOOL ChangeGameResolution(int width, int height, int colour_depth);
+BOOL ChangeGameResolution(uint32_t width, uint32_t height, uint32_t colour_depth);
 
 void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha);
 void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha);

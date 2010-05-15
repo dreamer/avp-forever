@@ -9,7 +9,7 @@ extern "C"
 {
 #include "VideoModes.h"
 #include <stdio.h>
-#include "d3_func.h"
+#include "renderer.h"
 
 extern D3DInfo d3d;
 

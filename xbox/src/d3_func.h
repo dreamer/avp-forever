@@ -196,7 +196,7 @@ void DrawProgressBar(RECT srcRect, RECT destRect, uint32_t textureID, AVPTEXTURE
 void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
 void ReleaseD3DTexture(LPDIRECT3DTEXTURE8 *d3dTexture);
 void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE8 fmvTexture);
-void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE8 tex[3]);
+void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE8 tex1, LPDIRECT3DTEXTURE8 tex2, LPDIRECT3DTEXTURE8 tex3);
 void CreateScreenShotImage();
 void DeRedTexture(LPDIRECT3DTEXTURE8 texture);
 LPDIRECT3DTEXTURE8 CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool);

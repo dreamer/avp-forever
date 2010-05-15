@@ -2295,7 +2295,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	float RecipW = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
 	float RecipH = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
 
-	CheckVertexBuffer(RenderPolygon.NumberOfVertices, SpecialFXImageNumber, particleDescPtr->TranslucencyType);
+	CheckVertexBuffer(RenderPolygon.NumberOfVertices, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType);
 /*
 	char buf[100];
 	sprintf(buf, "trans type: %d\n", particleDescPtr->TranslucencyType);
@@ -3890,60 +3890,6 @@ extern void D3D_PlayerOnFireOverlay(void)
 	orthoVerts[orthoVBOffset].u = u+1.0f;
 	orthoVerts[orthoVBOffset].v = v;
 	orthoVBOffset++;
-
-#if 0
-	CheckVertexBuffer(4, BurningImageNumber, TRANSLUCENCY_GLOWING);
-
-	// top left
-  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
-	mainVertex[vb].sz = 0.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = u;
-	mainVertex[vb].tv = v;
-	
-	vb++;
-
-	// top right
-  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
-	mainVertex[vb].sz = 0.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = u+1.0f;
-	mainVertex[vb].tv = v;
-	vb++;
-
-	// bottom right
-  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
-	mainVertex[vb].sz = 0.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = u+1.0f;
-	mainVertex[vb].tv = v+1.0f;
-
-	vb++;
-
-	// bottom left
-  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
-	mainVertex[vb].sz = 0.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = u;
-	mainVertex[vb].tv = v+1.0f;
-
-	vb++;
-
-	OUTPUT_TRIANGLE(0,1,3, 4);
-	OUTPUT_TRIANGLE(1,2,3, 4);
-#endif
 }
 
 extern void D3D_ScreenInversionOverlay()
@@ -3998,55 +3944,6 @@ extern void D3D_ScreenInversionOverlay()
 			orthoVerts[orthoVBOffset].u = 0.375f + (cos*(+1) - sin*(-1));
 			orthoVerts[orthoVBOffset].v = 0.375f + (sin*(+1) + cos*(-1));
 			orthoVBOffset++;
-
-#if 0
-			// top left
-	 	  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
-		  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
-			mainVertex[vb].sz = 0.0f;
-//			mainVertex[vb].rhw = 1.0f;
-			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = (D3DCOLOR)1.0f;
-			mainVertex[vb].tu = 0.375f + (cos*(-1) - sin*(-1));
-			mainVertex[vb].tv = 0.375f + (sin*(-1) + cos*(-1));
-			vb++;
-
-			// top right
-		  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
-		  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
-			mainVertex[vb].sz = 0.0f;
-//			mainVertex[vb].rhw = 1.0f;
-			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = (D3DCOLOR)1.0f;
-			mainVertex[vb].tu = .375f + (cos*(+1) - sin*(-1));
-			mainVertex[vb].tv = .375f + (sin*(+1) + cos*(-1));
-			vb++;
-
-			// bottom right
-		  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
-		  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
-			mainVertex[vb].sz = 0.0f;
-//			mainVertex[vb].rhw = 1.0f;
-			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = (D3DCOLOR)1.0f;
-			mainVertex[vb].tu = .375f + (cos*(+1) - sin*(+1));
-			mainVertex[vb].tv = .375f + (sin*(+1) + cos*(+1));
-			vb++;
-
-			// bottom left
-		  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
-		  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
-			mainVertex[vb].sz = 0.0f;
-//			mainVertex[vb].rhw = 1.0f;
-			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = (D3DCOLOR)1.0f;
-			mainVertex[vb].tu = .375f + (cos*(-1) - sin*(+1));
-			mainVertex[vb].tv = .375f + (sin*(-1) + cos*(+1));
-			vb++;
-
-			OUTPUT_TRIANGLE(0,1,3, 4);
-			OUTPUT_TRIANGLE(1,2,3, 4);
-#endif
 		}
 
 		/* only do this when finishing first loop, otherwise we reserve space for 4 verts we never add */
@@ -4099,82 +3996,6 @@ extern void D3D_PredatorScreenInversionOverlay()
 	orthoVerts[orthoVBOffset].u = 0.0f;
 	orthoVerts[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
-
-#if 0
-	UnlockExecuteBufferAndPrepareForUse();
-	ExecuteBuffer();
-	LockExecuteBuffer();
-
-	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_DARKENINGCOLOUR);
-
-	// top left
-  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
-	mainVertex[vb].sz = 1.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	// top right
-  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
-	mainVertex[vb].sz = 1.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	// bottom right
-  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
-	mainVertex[vb].sz = 1.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	// bottom left
-  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
-	mainVertex[vb].sz = 1.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	if (D3DZFunc != D3DCMP_ALWAYS) 
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_ALWAYS);
-		D3DZFunc = D3DCMP_ALWAYS;
-	}
-
-
-	OUTPUT_TRIANGLE(0,1,3, 4);
-	OUTPUT_TRIANGLE(1,2,3, 4);
-
-	UnlockExecuteBufferAndPrepareForUse();
-	ExecuteBuffer();
-	LockExecuteBuffer();
-
-	if (D3DZFunc != D3DCMP_LESSEQUAL) 
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
-		D3DZFunc = D3DCMP_LESSEQUAL;
-	}
-#endif
 }
 
 extern void D3D_PlayerDamagedOverlay(int intensity)
@@ -4248,58 +4069,6 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 			orthoVerts[orthoVBOffset].u = (float)(0.875 + (cos*(+1) - sin*(-1)));
 			orthoVerts[orthoVBOffset].v = (float)(0.375 + (sin*(+1) + cos*(-1)));
 			orthoVBOffset++;
-#if 0
-			// top left
-	 	  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
-		  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
-			mainVertex[vb].sz = 0.0f;
-//			mainVertex[vb].rhw = 1.0f;
-			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = (D3DCOLOR)1.0f;
-			mainVertex[vb].tu = (float)(0.875 + (cos*(-1) - sin*(-1)));
-			mainVertex[vb].tv = (float)(0.375 + (sin*(-1) + cos*(-1)));
-
-			vb++;
-
-			// top right
-		  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
-		  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
-			mainVertex[vb].sz = 0.0f;
-//			mainVertex[vb].rhw = 1.0f;
-			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = (D3DCOLOR)1.0f;
-			mainVertex[vb].tu = (float)(.875 + (cos*(+1) - sin*(-1)));
-			mainVertex[vb].tv = (float)(.375 + (sin*(+1) + cos*(-1)));
-
-			vb++;
-
-			// bottom right
-		  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
-		  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
-			mainVertex[vb].sz = 0.0f;
-//			mainVertex[vb].rhw = 1.0f;
-			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = (D3DCOLOR)1.0f;
-			mainVertex[vb].tu = (float)(.875 + (cos*(+1) - sin*(+1)));
-			mainVertex[vb].tv = (float)(.375 + (sin*(+1) + cos*(+1)));
-
-			vb++;
-
-			// bottom left
-		  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
-		  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
-			mainVertex[vb].sz = 0.0f;
-//			mainVertex[vb].rhw = 1.0f;
-			mainVertex[vb].color = colour;
-			mainVertex[vb].specular = (D3DCOLOR)1.0f;
-			mainVertex[vb].tu = (float)(.875 + (cos*(-1) - sin*(+1)));
-			mainVertex[vb].tv = (float)(.375 + (sin*(-1) + cos*(+1)));
-			
-			vb++;
-
-			OUTPUT_TRIANGLE(0,1,3, 4);
-			OUTPUT_TRIANGLE(1,2,3, 4);
-#endif
 		}
 
 		colour = baseColour +(intensity<<24);
@@ -4796,11 +4565,6 @@ extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, in
 
 void DrawFadeQuad(int topX, int topY, int alpha) 
 {
-//	CheckVertexBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING);
-
-//	int height = ScreenDescriptorBlock.SDB_Height;
-//	int width = ScreenDescriptorBlock.SDB_Width;
-
 	alpha = alpha / 256;
 	if (alpha > 255) alpha = 255;
 	D3DCOLOR colour = D3DCOLOR_ARGB(alpha,0,0,0);
@@ -4842,59 +4606,6 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 	orthoVerts[orthoVBOffset].u = 0.0f;
 	orthoVerts[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
-
-#if 0
-	// bottom left
-	mainVertex[vb].sx = (float)topX - 0.5f;
-	mainVertex[vb].sy = (float)topY + height - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	// top left
-	mainVertex[vb].sx = (float)topX - 0.5f;
-	mainVertex[vb].sy = (float)topY - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	// bottom right
-	mainVertex[vb].sx = (float)topX + width - 0.5f;
-	mainVertex[vb].sy = (float)topY + height - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	// top right
-	mainVertex[vb].sx = (float)topX + width - 0.5f;
-	mainVertex[vb].sy = (float)topY - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	OUTPUT_TRIANGLE(0,1,2, 4);
-	OUTPUT_TRIANGLE(1,2,3, 4);
-#endif
 }
 
 /* more quad drawing functions than you can shake a stick at! */
@@ -5247,9 +4958,6 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t t
 
 void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha) 
 {
-/*
-	CheckVertexBuffer(4, image_num, TRANSLUCENCY_GLOWING);
-*/
 	// textures actual height/width (whether it's non power of two or not)
 	int textureWidth = AvPMenuGfxStorage[image_num].Width;
 	int textureHeight = AvPMenuGfxStorage[image_num].Height;
@@ -5265,67 +4973,6 @@ void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha)
 	DrawQuad(topX, topY, textureWidth, textureHeight, image_num, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
 
 	return;
-/*
-	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
-
-	// game used to render menus at 640x480. this allows us to use any resolution we want
-	int quadWidth = (ScreenDescriptorBlock.SDB_Width / 640.0f) * textureWidth;
-	int quadHeight = (ScreenDescriptorBlock.SDB_Height / 480.0f) * textureHeight;
-
-	int quadX = ((ScreenDescriptorBlock.SDB_Width / 640.0f) * topX);
-	int quadY = ((ScreenDescriptorBlock.SDB_Height / 480.0f) * topY);
-
-	// bottom left
-	mainVertex[vb].sx = (float)(quadX) - 0.5f;
-	mainVertex[vb].sy = (float)(quadY + quadHeight) - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
-
-	vb++;
-
-	// top left
-	mainVertex[vb].sx = (float)(quadX) - 0.5f;
-	mainVertex[vb].sy = (float)(quadY) - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = 0.0f;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	// bottom right
-	mainVertex[vb].sx = (float)(quadX + quadWidth) - 0.5f;
-	mainVertex[vb].sy = (float)(quadY + quadHeight) - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
-	mainVertex[vb].tv = (1.0f / texturePOW2Height) * textureHeight;
-
-	vb++;
-
-	// top right
-	mainVertex[vb].sx = (float)(quadX + quadWidth) - 0.5f;
-	mainVertex[vb].sy = (float)(quadY) - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = (1.0f / texturePOW2Width) * textureWidth;
-	mainVertex[vb].tv = 0.0f;
-
-	vb++;
-
-	OUTPUT_TRIANGLE(0,1,2, 4);
-	OUTPUT_TRIANGLE(1,2,3, 4);
-*/
 }
 
 void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
@@ -5370,186 +5017,6 @@ void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
 	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Height;
 
 	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_RIGHT, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
-
-#if 0
-
-	float x1 = (float(topLeftX / 640.0f) * 2) - 1;
-	float y1 = (float(topLeftY / 480.0f) * 2) - 1;
-
-	float x2 = ((float(topLeftX + textureWidth) / 640.0f) * 2) - 1;
-	float y2 = ((float(topLeftY + textureHeight) / 480.0f) * 2) - 1;
-
-	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
-
-	// bottom left
-	orthoVerts[0].x = x1;
-	orthoVerts[0].y = y2;
-	orthoVerts[0].z = 1.0f;
-	orthoVerts[0].colour = colour;
-	orthoVerts[0].u = 0.0f;
-	orthoVerts[0].v = (1.0f / texturePOW2Height) * textureHeight;
-
-	// top left
-	orthoVerts[1].x = x1;
-	orthoVerts[1].y = y1;
-	orthoVerts[1].z = 1.0f;
-	orthoVerts[1].colour = colour;
-	orthoVerts[1].u = 0.0f;
-	orthoVerts[1].v = 0.0f;
-
-	// bottom right
-	orthoVerts[2].x = x2;
-	orthoVerts[2].y = y2;
-	orthoVerts[2].z = 1.0f;
-	orthoVerts[2].colour = colour;
-	orthoVerts[2].u = (1.0f / texturePOW2Width) * textureWidth;
-	orthoVerts[2].v = (1.0f / texturePOW2Height) * textureHeight;
-
-	// top right
-	orthoVerts[3].x = x2;
-	orthoVerts[3].y = y1;
-	orthoVerts[3].z = 1.0f;
-	orthoVerts[3].colour = colour;
-	orthoVerts[3].u = (1.0f / texturePOW2Width) * textureWidth;
-	orthoVerts[3].v = 0.0f;
-
-	d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
-	d3d.lpD3DDevice->SetTexture (0, AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].menuTexture);
-
-	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &orthoVerts[0], sizeof(ORTHOVERTEX));
-	if (FAILED(LastError))
-	{
-		OutputDebugString("DrawPrimitiveUP failed\n");
-	}
-
-	return;
-
-	// now do the middle section
-	topLeftX += textureWidth;
-
-	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Width;
-	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Height;
-
-	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].newWidth;
-	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].newHeight;
-
-	x1 = (float(topLeftX / 640.0f) * 2) - 1;
-	y1 = (float(topLeftY / 480.0f) * 2) - 1;
-
-	float xoffset = x1 - x2;
-	float yoffset = y1 - y2;
-
-	x2 = ((float(topLeftX + textureWidth * size) / 640.0f) * 2) - 1;
-	y2 = ((float(topLeftY + textureHeight) / 480.0f) * 2) - 1;
-
-	x1 -= xoffset;
-	x2 -= xoffset;
-
-	colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
-
-	// bottom left
-	orthoVerts[0].x = x1;
-	orthoVerts[0].y = y2;
-	orthoVerts[0].z = 1.0f;
-	orthoVerts[0].colour = colour;
-	orthoVerts[0].u = 0.0f;
-	orthoVerts[0].v = (1.0f / texturePOW2Height) * textureHeight;
-
-	// top left
-	orthoVerts[1].x = x1;
-	orthoVerts[1].y = y1;
-	orthoVerts[1].z = 1.0f;
-	orthoVerts[1].colour = colour;
-	orthoVerts[1].u = 0.0f;
-	orthoVerts[1].v = 0.0f;
-
-	// bottom right
-	orthoVerts[2].x = x2;
-	orthoVerts[2].y = y2;
-	orthoVerts[2].z = 1.0f;
-	orthoVerts[2].colour = colour;
-	orthoVerts[2].u = (1.0f / texturePOW2Width) * textureWidth;
-	orthoVerts[2].v = (1.0f / texturePOW2Height) * textureHeight;
-
-	// top right
-	orthoVerts[3].x = x2;
-	orthoVerts[3].y = y1;
-	orthoVerts[3].z = 1.0f;
-	orthoVerts[3].colour = colour;
-	orthoVerts[3].u = (1.0f / texturePOW2Width) * textureWidth;
-	orthoVerts[3].v = 0.0f;
-
-	d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
-	d3d.lpD3DDevice->SetTexture (0, AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].menuTexture);
-
-	LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &orthoVerts[0], sizeof(ORTHOVERTEX));
-	if (FAILED(LastError))
-	{
-		OutputDebugString("DrawPrimitiveUP failed\n");
-	}
-
-	// now do the right section
-	topLeftX += textureWidth * size;
-
-	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Width;
-	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Height;
-
-	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].newWidth;
-	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].newHeight;
-
-	x1 = (float(topLeftX / 640.0f) * 2) - 1;
-	y1 = (float(topLeftY / 480.0f) * 2) - 1;
-
-	xoffset = x1 - x2;
-	yoffset = y1 - y2;
-
-	x2 = ((float(topLeftX + textureWidth) / 640.0f) * 2) - 1;
-	y2 = ((float(topLeftY + textureHeight) / 480.0f) * 2) - 1;
-
-	x1 -= xoffset;
-	x2 -= xoffset;
-
-	// bottom left
-	orthoVerts[0].x = x1;
-	orthoVerts[0].y = y2;
-	orthoVerts[0].z = 1.0f;
-	orthoVerts[0].colour = colour;
-	orthoVerts[0].u = 0.0f;
-	orthoVerts[0].v = (1.0f / texturePOW2Height) * textureHeight;
-
-	// top left
-	orthoVerts[1].x = x1;
-	orthoVerts[1].y = y1;
-	orthoVerts[1].z = 1.0f;
-	orthoVerts[1].colour = colour;
-	orthoVerts[1].u = 0.0f;
-	orthoVerts[1].v = 0.0f;
-
-	// bottom right
-	orthoVerts[2].x = x2;
-	orthoVerts[2].y = y2;
-	orthoVerts[2].z = 1.0f;
-	orthoVerts[2].colour = colour;
-	orthoVerts[2].u = (1.0f / texturePOW2Width) * textureWidth;
-	orthoVerts[2].v = (1.0f / texturePOW2Height) * textureHeight;
-
-	// top right
-	orthoVerts[3].x = x2;
-	orthoVerts[3].y = y1;
-	orthoVerts[3].z = 1.0f;
-	orthoVerts[3].colour = colour;
-	orthoVerts[3].u = (1.0f / texturePOW2Width) * textureWidth;
-	orthoVerts[3].v = 0.0f;
-
-	d3d.lpD3DDevice->SetFVF (D3DFVF_ORTHOVERTEX);
-	d3d.lpD3DDevice->SetTexture (0, AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].menuTexture);
-
-	LastError = d3d.lpD3DDevice->DrawPrimitiveUP (D3DPT_TRIANGLESTRIP, 2, &orthoVerts[0], sizeof(ORTHOVERTEX));
-	if (FAILED(LastError))
-	{
-		OutputDebugString("DrawPrimitiveUP failed\n");
-	}
-#endif
 }
 
 void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha) 
@@ -5622,67 +5089,6 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	orthoVerts[orthoVBOffset].u = (float)((texU + font_width) * RecipW);
 	orthoVerts[orthoVBOffset].v = (float)((texV) * RecipH);
 	orthoVBOffset++;
-
-
-#if 0
-	// game used to render menus at 640x480. this allows us to use any resolution we want
-	int quadWidth = (ScreenDescriptorBlock.SDB_Width / 640.0f) * font_width;
-	int quadHeight = (ScreenDescriptorBlock.SDB_Height / 480.0f) * font_height;
-
-	int quadX = static_cast<int>((ScreenDescriptorBlock.SDB_Width / 640.0) * topX);
-	int quadY = static_cast<int>((ScreenDescriptorBlock.SDB_Height / 480.0) * topY);
-
-	// bottom left
-	mainVertex[vb].sx = (float)(quadX) - 0.5f;
-	mainVertex[vb].sy = (float)(quadY + quadHeight) - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = (float)((texU) * RecipW);
-	mainVertex[vb].tv = (float)((texV + font_height) * RecipH);
-
-	vb++;
-
-	// top left
-	mainVertex[vb].sx = (float)(quadX) - 0.5f;
-	mainVertex[vb].sy = (float)(quadY) - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = (float)((texU) * RecipW);
-	mainVertex[vb].tv = (float)((texV) * RecipH);
-
-	vb++;
-
-	// bottom right
-	mainVertex[vb].sx = (float)(quadX + quadWidth) - 0.5f;
-	mainVertex[vb].sy = (float)(quadY + quadHeight) - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = (float)((texU + font_height) * RecipW);
-	mainVertex[vb].tv = (float)((texV + font_height) * RecipH);
-
-	vb++;
-
-	// top right
-	mainVertex[vb].sx = (float)(quadX + quadWidth) - 0.5f;
-	mainVertex[vb].sy = (float)(quadY) - 0.5f;
-	mainVertex[vb].sz = 0.0f;
-	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = colour;
-	mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-	mainVertex[vb].tu = (float)((texU + font_width) * RecipW);
-	mainVertex[vb].tv = (float)((texV) * RecipH);
-	
-	vb++;
-
-	OUTPUT_TRIANGLE(0,1,2, 4);
-	OUTPUT_TRIANGLE(1,2,3, 4);
-#endif
 }
 
 void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha) 

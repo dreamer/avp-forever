@@ -7,7 +7,7 @@
 #include <sstream>
 
 #include "console.h"
-#include "d3_func.h"
+#include "renderer.h"
 #include "iofocus.h"
 #include "logString.h"
 #include "font2.h"

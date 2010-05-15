@@ -8,7 +8,7 @@
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "ffstdio.h"
-#include "d3_func.h"
+#include "renderer.h"
 
 
 extern int Font_DrawText(const char* text, int x, int y, int colour, int fontType);

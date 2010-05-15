@@ -8,7 +8,7 @@
 #include "awTexLd.h"
 #include "chnkload.hpp"
 #include "chunkpal.hpp"
-#include "d3_func.h"
+#include "renderer.h"
 
 #ifndef CL_SUPPORT_FASTFILE
 	#error "Please #define CL_SUPPORT_FASTFILE to 0 or 1 in projload.hpp"

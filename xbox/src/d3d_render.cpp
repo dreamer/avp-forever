@@ -4231,7 +4231,7 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWid
 }
 
 /* more quad drawing functions than you can shake a stick at! */
-void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE8 tex[3])
+void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE8 tex1, LPDIRECT3DTEXTURE8 tex2, LPDIRECT3DTEXTURE8 tex3)
 {
 /*
 	int topX = (640 - frameWidth) / 2;

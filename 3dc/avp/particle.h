@@ -3,7 +3,7 @@
 
 #include "decal.h"
 #include "dynblock.h"
-#include "d3_func.h"
+//#include "renderer.h"
 
 enum PARTICLE_ID
 {
@@ -119,7 +119,8 @@ typedef struct
 	int EndV;
 	unsigned int Size;
 
-	enum TRANSLUCENCY_TYPE TranslucencyType;
+//	enum TRANSLUCENCY_TYPE TranslucencyType;
+	int TranslucencyType;
 
 	unsigned char Alpha;
 	unsigned char RedScale[NUMBER_OF_VISION_MODES];
