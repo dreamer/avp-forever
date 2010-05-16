@@ -25,7 +25,7 @@
 #include "onscreenKeyboard.h"
 #include "logString.h"
 #include "font2.h"
-#include "d3_func.h"
+#include "renderer.h"
 #include "stdio.h"
 #include <string>
 #include <sstream>
@@ -229,7 +229,7 @@ void Osk_Draw()
 			// only draw keys not marked as blank keys
 			if (!keyVector.at(index).isBlank)
 			{
-				DrawQuad(pos_x, pos_y, keyVector.at(index).width, keyVector.at(index).height, -1, D3DCOLOR_ARGB(200, 255, 255, 255), TRANSLUCENCY_GLOWING);
+				DrawQuad(pos_x, pos_y, keyVector.at(index).width, keyVector.at(index).height, -1, D3DCOLOR_ARGB(200, 255, 255, 255), TRANSLUCENCY_NORMAL);
 
 				if (Osk_GetCurrentLocation() == index) // draw the selected item differently (highlight it)
 					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, -1, D3DCOLOR_ARGB(220, 0, 128, 0), TRANSLUCENCY_OFF);

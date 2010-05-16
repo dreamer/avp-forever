@@ -288,6 +288,36 @@ void CreateScreenShotImage()
 	SAFE_RELEASE(frontBuffer);
 }
 
+int32_t LockTexture(LPDIRECT3DTEXTURE9 texture, void **data, uint32_t *pitch)
+{
+	D3DLOCKED_RECT lock;
+
+	LastError = texture->LockRect(0, &lock, NULL, NULL);
+
+	if (FAILED(LastError))
+	{
+		*data = NULL;
+		*pitch = NULL;
+		return -1;
+	}
+	else
+	{
+		*data = lock.pBits;
+		*pitch = lock.Pitch;
+		return 0;
+	}
+}
+
+int32_t UnlockTexture(LPDIRECT3DTEXTURE9 texture)
+{
+	LastError = texture->UnlockRect(0);
+
+	if (FAILED(LastError))
+		return -1;
+	else
+		return 0;
+}
+
 LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex) 
 {
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
@@ -869,7 +899,7 @@ BOOL CreateVolatileResources()
 	RecreateAllFMVTexturesAfterDeviceReset();
 
 	// create dynamic vertex buffer
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DLVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_LVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DLVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, /*D3DFVF_LVERTEX*/0, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -885,7 +915,7 @@ BOOL CreateVolatileResources()
 	}
 
 	// create our 2D vertex buffer
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(4 * 2000 * sizeof(ORTHOVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_ORTHOVERTEX, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoVertexBuffer, NULL);
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(4 * 2000 * sizeof(ORTHOVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, /*D3DFVF_ORTHOVERTEX*/0, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoVertexBuffer, NULL);
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -901,7 +931,7 @@ BOOL CreateVolatileResources()
 	}
 
 	// point sprite vb
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(24 * sizeof(POINTSPRITEVERTEX), D3DUSAGE_POINTS, D3DFVF_POINTSPRITEVERTEX, D3DPOOL_MANAGED, &d3d.lpD3DPointSpriteVertexBuffer, NULL);
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(24 * sizeof(POINTSPRITEVERTEX), D3DUSAGE_POINTS, /*D3DFVF_POINTSPRITEVERTEX*/0, D3DPOOL_MANAGED, &d3d.lpD3DPointSpriteVertexBuffer, NULL);
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);

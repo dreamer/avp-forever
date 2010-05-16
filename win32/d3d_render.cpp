@@ -91,6 +91,24 @@ static uint32_t orthoVBOffset = 0;
 static uint32_t orthoIBOffset = 0;
 static uint32_t orthoListCount = 0;
 
+// keep track of set render states
+static bool	D3DAlphaBlendEnable;
+D3DBLEND D3DSrcBlend;
+D3DBLEND D3DDestBlend;
+
+// for tallfont
+bool D3DAlphaTestEnable = FALSE;
+static bool D3DStencilEnable;
+D3DCMPFUNC D3DStencilFunc;
+static unsigned int D3DStencilRef;
+static unsigned char D3DZFunc;
+static unsigned char D3DDitherEnable;
+static bool D3DZWriteEnable;
+
+BOOL UnlockExecuteBufferAndPrepareForUse();
+BOOL ExecuteBuffer();
+BOOL LockExecuteBuffer();
+
 struct RENDER_STATES
 {
 	int32_t		textureID;
@@ -328,20 +346,6 @@ BOOL ExecuteBuffer();
 BOOL UnlockExecuteBufferAndPrepareForUse();
 
 //Globals
-
-// keep track of set render states
-static bool	D3DAlphaBlendEnable;
-D3DBLEND D3DSrcBlend;
-D3DBLEND D3DDestBlend;
-
-// for tallfont
-bool D3DAlphaTestEnable = FALSE;
-static bool D3DStencilEnable;
-D3DCMPFUNC D3DStencilFunc;
-static unsigned int D3DStencilRef;
-static unsigned char D3DZFunc;
-static unsigned char D3DDitherEnable;
-static bool D3DZWriteEnable;
 
 static unsigned char DefaultD3DTextureFilterMin;
 static unsigned char DefaultD3DTextureFilterMax;
@@ -1202,7 +1206,21 @@ BOOL ExecuteBuffer()
 
 	weHaveTransparents = false;
 	weHaveOpaques = false;
+/*
+	if (D3DZWriteEnable != FALSE) 
+	{
+		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+		D3DZWriteEnable = FALSE;
+	}
 
+	DrawParticles();
+
+	if (D3DZWriteEnable != TRUE) 
+	{
+		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+		D3DZWriteEnable = TRUE;
+	}
+*/
 	return TRUE;
 }
 
@@ -2111,7 +2129,7 @@ void D3D_DecalSystem_Setup(void)
 
 void D3D_DecalSystem_End(void)
 {
-	DrawParticles();
+//	DrawParticles();
 /*
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();

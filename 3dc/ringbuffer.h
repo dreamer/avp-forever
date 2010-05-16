@@ -29,18 +29,18 @@
 class RingBuffer
 {
 	private:
-		int		readPos;
-		int		writePos;
-		int		amountFilled;
-		bool	initialFill;
-		uint8_t	*buffer;
-		int		bufferCapacity;
+		uint32_t	readPos;
+		uint32_t	writePos;
+		uint32_t	amountFilled;
+		bool		initialFill;
+		uint8_t		*buffer;
+		uint32_t	bufferCapacity;
 		CRITICAL_SECTION mCriticalSection;
 	public:
-		RingBuffer(int size);
+		RingBuffer(uint32_t size);
 		~RingBuffer();
-		int RingBuffer::GetWritableSize();
-		int RingBuffer::GetReadableSize();
-		int RingBuffer::ReadData(uint8_t *destData, int amountToRead);
-		int RingBuffer::WriteData(uint8_t *srcData, int srcDataSize);
+		uint32_t RingBuffer::GetWritableSize();
+		uint32_t RingBuffer::GetReadableSize();
+		uint32_t RingBuffer::ReadData(uint8_t *destData, uint32_t amountToRead);
+		uint32_t RingBuffer::WriteData(uint8_t *srcData, uint32_t srcDataSize);
 };

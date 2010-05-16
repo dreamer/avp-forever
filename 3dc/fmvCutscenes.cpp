@@ -11,7 +11,7 @@
 
 struct fmvCutscene
 {
-	int isPlaying;
+	BOOL isPlaying;
 	TheoraFMV *fmvClass;
 };
 
@@ -134,7 +134,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 			ftPtr->MessageNumber = 0;
 			delete fmvList[ftPtr->fmvHandle].fmvClass;
 			fmvList[ftPtr->fmvHandle].fmvClass = NULL;
-			fmvList[ftPtr->fmvHandle].isPlaying = 0;
+			fmvList[ftPtr->fmvHandle].isPlaying = FALSE;
 			ftPtr->fmvHandle = -1;
 		}
 		else
@@ -262,7 +262,7 @@ int OpenFMV(const char *filenamePtr)
 			fmvList[fmvHandle].fmvClass = NULL;
 			return -1;
 		}
-		fmvList[fmvHandle].isPlaying = 1;
+		fmvList[fmvHandle].isPlaying = TRUE;
 	}
 	else
 	{

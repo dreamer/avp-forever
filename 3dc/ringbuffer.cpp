@@ -26,7 +26,7 @@
 #include "os_header.h"
 #include "ringbuffer.h"
 
-RingBuffer::RingBuffer(int size)
+RingBuffer::RingBuffer(uint32_t size)
 {
 	buffer = new uint8_t[size];
 	bufferCapacity = size;
@@ -48,12 +48,12 @@ RingBuffer::~RingBuffer()
 	DeleteCriticalSection(&mCriticalSection);
 }
 
-int RingBuffer::GetWritableSize()
+uint32_t RingBuffer::GetWritableSize()
 {
 	// load ring buffer
-	int freeSpace = 0;
-	int firstSize = 0;
-	int secondSize = 0;
+	int32_t freeSpace = 0;
+	uint32_t firstSize = 0;
+	uint32_t secondSize = 0;
 
 	EnterCriticalSection(&mCriticalSection);
 
@@ -85,12 +85,12 @@ int RingBuffer::GetWritableSize()
 	return freeSpace;
 }
 
-int RingBuffer::GetReadableSize()
+uint32_t RingBuffer::GetReadableSize()
 {
 	// find out how we need to read data. do we split into 2 memcpys or not?
-	int firstSize = 0;
-	int secondSize = 0;
-	int readableSpace = 0;
+	uint32_t firstSize = 0;
+	uint32_t secondSize = 0;
+	int32_t readableSpace = 0;
 
 	EnterCriticalSection(&mCriticalSection);
 
@@ -122,17 +122,17 @@ int RingBuffer::GetReadableSize()
 	return readableSpace;
 }
 
-int RingBuffer::ReadData(uint8_t *destData, int amountToRead)
+uint32_t RingBuffer::ReadData(uint8_t *destData, uint32_t amountToRead)
 {
 	assert (buffer);
 	assert (destData != NULL);
 
-	int firstSize = 0;
-	int secondSize = 0;
-	int totalRead = 0;
+	uint32_t firstSize = 0;
+	uint32_t secondSize = 0;
+	uint32_t totalRead = 0;
 
 	// grab how much readable data there is
-	int readableSpace = GetReadableSize();
+	uint32_t readableSpace = GetReadableSize();
 
 	EnterCriticalSection(&mCriticalSection);
 
@@ -169,17 +169,17 @@ int RingBuffer::ReadData(uint8_t *destData, int amountToRead)
 	return totalRead;
 }
 
-int RingBuffer::WriteData(uint8_t *srcData, int srcDataSize)
+uint32_t RingBuffer::WriteData(uint8_t *srcData, uint32_t srcDataSize)
 {
 	assert (buffer);
 	assert (srcData != NULL);
 
-	int firstSize = 0;
-	int secondSize = 0;
-	int totalWritten = 0;
+	uint32_t firstSize = 0;
+	uint32_t secondSize = 0;
+	uint32_t totalWritten = 0;
 
 	// grab how much writable space there is
-	int availableSpace = GetWritableSize();
+	uint32_t availableSpace = GetWritableSize();
 
 	EnterCriticalSection(&mCriticalSection);
 
