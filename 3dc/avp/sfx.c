@@ -238,7 +238,6 @@ void HandleObjectOnFire(DISPLAYBLOCK *dispPtr)
 
 	if (dispPtr->ObShapeData->shaperadius<=LocalDetailLevels.AlienEnergyViewThreshold) return;
 
-	#if 1
 	{
 		DYNAMICSBLOCK *dynPtr;
 		STRATEGYBLOCK *sbPtr;
@@ -254,11 +253,6 @@ void HandleObjectOnFire(DISPLAYBLOCK *dispPtr)
 
 		if (dispPtr==sbPtr->SBdptr)	noRequired = 5;
 	}
-	#else
-	velocity.vx = 0;
-	velocity.vy = 0;
-	velocity.vz = 0;
-	#endif
 	
 	objectIsDisappearing = ( (dispPtr->SpecialFXFlags & SFXFLAG_MELTINGINTOGROUND) &&(dispPtr->ObFlags2 <= ONE_FIXED) )	;
 

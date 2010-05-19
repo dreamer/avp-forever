@@ -86,10 +86,12 @@ void UpdateGammaSettings(void)
 
 		a = m/256+MUL_FIXED(RequestedGammaSetting,l);
 
-		if (a<0) a=0;
-		if (a>255) a=255;
+		if (a < 0) 
+			a = 0;
+		if (a > 255) 
+			a = 255;
 
-		GammaValues[i]=a;
+		GammaValues[i] = a;
 	}
 
 	ActualGammaSetting=RequestedGammaSetting;

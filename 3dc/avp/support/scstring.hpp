@@ -7,8 +7,6 @@
 #ifndef _scstring
 #define _scstring 1
 
-	#define SupportHHStuff	FALSE
-
 	#ifndef _refobj
 	#include "refobj.hpp"
 	#endif
@@ -17,34 +15,21 @@
 	#include "ourbool.h"
 	#endif
 
-	#if SupportHHStuff
-		#ifndef HHSTRING
-		#include "hhstring.h"
+	#ifndef _projtext
+	#include "projtext.h"
 		#endif
 
-		#ifndef FDIPUB_INCLUDED
-		#include "fdipub.h"
-		#endif
-	#else
-		#ifndef _projtext
-		#include "projtext.h"
-		#endif
-
-		#ifndef _projfont
+	#ifndef _projfont
 		#include "projfont.h"
-		#endif
+	#endif
 
-		#ifndef _r2base
+	#ifndef _r2base
 		#include "r2base.h"
-		#endif
-
 	#endif
 
 	#ifndef list_template_hpp
 	#include "list_tem.hpp"
 	#endif
-
-	#define EnableSizeData	TRUE
 
 	class SCString : public RefCountObject
 	{
@@ -124,19 +109,6 @@
 			List<ProjChar> List_ProjChar
 		);
 
-		#if SupportHHStuff
-		void GetSizeOfSingleLineGivenStandardFont
-		(
-			FDIBMAP* pFDIBMap_Out
-		);
-		FDIBMAP GetSizeOfSingleLineGivenStandardFont(void);
-		int GetWidthOfSingleLineGivenStandardFont(void);
-
-		FDIQUAD MinFDIQuadForSCStringAtPos
-		(
-			FDIPOS FDIPos
-		);
-		#else
 		r2size CalcSize
 		(
 			FontIndex I_Font
@@ -150,7 +122,6 @@
 
 		static void UpdateAfterFontChange( FontIndex I_Font_Changed );
 			// called by the font code whenever fonts are loaded/unloaded
-		#endif
 
 		size_t GetNumChars(void);
 
@@ -183,16 +154,9 @@
 		size_t NumberOfCharacters;
 			// doesn't include NULL terminator
 
-		#if SupportHHStuff
-		int WidthGivenStandardFont;
-			// width in pixels, to save constant recalc
-		#else
-			#if EnableSizeData
-			r2size R2Size[ IndexedFonts_MAX_NUMBER_OF_FONTS ];
-			#endif
+		r2size R2Size[ IndexedFonts_MAX_NUMBER_OF_FONTS ];
 
 		OurBool bCanRender[ IndexedFonts_MAX_NUMBER_OF_FONTS ];			
-		#endif
 
 		size_t AllocatedSize;
 			// this includes the NULL terminator
@@ -207,40 +171,20 @@
 	}; // Naming: "StringObj"
 
 	// Inline methods:
-	#if !SupportHHStuff
-		#if EnableSizeData
-		inline r2size SCString::CalcSize
-		(
-			FontIndex I_Font
-		)
-		{
-			return R2Size[ I_Font ];
-		}
-		#endif
+	inline r2size SCString::CalcSize(FontIndex I_Font)
+	{
+		return R2Size[ I_Font ];
+	}
 
-		inline OurBool SCString::bCanRenderFully( FontIndex I_Font )
-		{
-			return bCanRender[ I_Font ];
-		}
-	#endif // !SupportHHStuff		
+	inline OurBool SCString::bCanRenderFully( FontIndex I_Font )
+	{
+		return bCanRender[ I_Font ];
+	}
 
-		inline size_t SCString::GetNumChars(void)
-		{
-			return NumberOfCharacters;
-		}
-
-	#if SupportHHStuff
-	extern SCString* HHSTRING_GetSCString
-	(
-		HHStringTable* pHHST,
-		unsigned int StrNum
-	);
-		// The result is guaranteed to be non-NULL if you pick a valid
-		// StrNum.
-
-		// Remember to call R_AddRef() if you use the result
-		// NO LONGER THE CASE!!!!
-	#endif
+	inline unsigned int SCString::GetNumChars(void)
+	{
+		return NumberOfCharacters;
+	}
 
 
 #ifdef __cplusplus

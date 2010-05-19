@@ -161,10 +161,6 @@ struct ChunkShape
 	int num_verts;
 	ChunkVectorInt * v_list;
 
-	#if UseOldChunkLoader
-	ChunkVector * float_v_list;
-	#endif
-
 	//int num_vert_normals; //I don't think num_vert_normals is ever used
 	ChunkVectorFloat * v_normal_list;
 
@@ -204,10 +200,6 @@ struct ChunkObject
 
 	ChunkVectorInt location;
 
-	#if UseOldChunkLoader
-	ChunkVector float_location;
-	#endif
-
 	ChunkQuat orientation;
 
 	BOOL is_base_object;
@@ -233,10 +225,6 @@ struct VMod_Arr_Item
 	int flags;
 	int spare;
 	int object_index;
-	
-	#if UseOldChunkLoader
-	char * o_name; //replaced by object_index
-	#endif
 
 	friend BOOL operator==(const VMod_Arr_Item &, const VMod_Arr_Item &);
 	friend BOOL operator!=(const VMod_Arr_Item &, const VMod_Arr_Item &);
@@ -254,10 +242,6 @@ struct Adjacent_Module
 	int flags;
 	ChunkVectorInt entry_point;
 	int object_index;
-
-	#if UseOldChunkLoader
-	char * o_name;
-	#endif 
 
 	friend BOOL operator==(const Adjacent_Module & am1, const Adjacent_Module & am2);
 	friend BOOL operator!=(const Adjacent_Module & am1, const Adjacent_Module & am2);

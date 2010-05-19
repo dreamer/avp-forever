@@ -5045,6 +5045,7 @@ void HandlePheromoneTrails(void)
 	}					 
 }
 #include "frustrum.h"
+
 void RenderTrailSegment(PHEROMONE_TRAIL *trailPtr)
 {
  	POLYHEADER fakeHeader;

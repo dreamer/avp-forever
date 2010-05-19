@@ -382,6 +382,12 @@ int InitialiseTextures(void)
 
 				/* This function calls GetExistingImageHeader to figure out if the image is already loaded */
 				TxIndex = CL_LoadImageOnce(fname, LIO_D3DTEXTURE|LIO_TRANSPARENT|LIO_RELATIVEPATH|LIO_RESTORABLE);
+
+				{
+					char buf[100];
+					sprintf(buf, "TxIndex: %d\n", TxIndex);
+					OutputDebugString(buf);
+				}
 				GLOBALASSERT(GEI_NOTLOADED != TxIndex);
 				
 				#else
@@ -554,12 +560,6 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 	int **ShapeItemArrayPtr;
 	POLYHEADER *ShapeItemPtr;
 
-	#if SupportBSP
-	SHAPEDATA_BSP_BLOCK *ShapeBSPPtr;
-	int num_bsp_blocks;
-	int j, k;
-	#endif
-
 	int i, txi;
 
 
@@ -575,8 +575,6 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 		for (i = shptr->numitems; i!=0; i--) 
 		{
 			ShapeItemPtr = (POLYHEADER *) *ShapeItemArrayPtr++;
-			
-			#if SupportZBuffering
 
 			if (ShapeItemPtr->PolyItemType == I_2dTexturedPolygon
 				|| ShapeItemPtr->PolyItemType == I_ZB_2dTexturedPolygon
@@ -587,13 +585,6 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 				|| ShapeItemPtr->PolyItemType == I_ScaledSprite
 				|| ShapeItemPtr->PolyItemType == I_3dTexturedPolygon
 				|| ShapeItemPtr->PolyItemType == I_ZB_3dTexturedPolygon) {
-			#else
-			if(ShapeItemPtr->PolyItemType == I_2dTexturedPolygon
-				|| ShapeItemPtr->PolyItemType == I_Gouraud2dTexturedPolygon
-				|| ShapeItemPtr->PolyItemType == I_Gouraud3dTexturedPolygon
-				|| ShapeItemPtr->PolyItemType == I_ScaledSprite
-				|| ShapeItemPtr->PolyItemType == I_3dTexturedPolygon){
-			#endif /* SupportZBuffering */
 
 				if (ShapeItemPtr->PolyFlags & iflag_txanim) 
 				{
@@ -610,7 +601,6 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 					if (txi == LTxIndex) 
 					{
 						/* Clear low word, OR in global index */
-
 						ShapeItemPtr->PolyColour &= ClrTxIndex;
 						ShapeItemPtr->PolyColour |= TxIndex;
 					}
@@ -618,110 +608,6 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 			}
 		}
 	}
-
-	#if SupportBSP
-
-	/* Or are they in a BSP block array? */
-
-	else if(shptr->sh_bsp_blocks) {
-
-		#if InitTexPrnt
-		textprint("BSP Block Array\n");
-		#endif
-
-		#if 0
-		/* Find the BSP Instruction */
-		ShInstrPtr = shptr->sh_instruction;
-		num_bsp_blocks = 0;
-		while(ShInstrPtr->sh_instr != I_ShapeEnd) {
-			if(ShInstrPtr->sh_instr == I_ShapeBSPTree) {
-				num_bsp_blocks = ShInstrPtr->sh_numitems;
-			}
-			ShInstrPtr++;
-		}
-		#endif
-
-		num_bsp_blocks = FindNumBSPNodes(shptr);
-
-
-		#if InitTexPrnt
-		textprint("Number of BSP blocks = %d\n", num_bsp_blocks);
-		#endif
-
-		if(num_bsp_blocks) {
-
-			ShapeBSPPtr = shptr->sh_bsp_blocks;
-
-			for(k=num_bsp_blocks; k!=0; k--) {
-
-				ShapeItemArrayPtr = ShapeBSPPtr->bsp_block_data;
-
-				for(j=ShapeBSPPtr->bsp_numitems; j!=0; j--) {
-
-					ShapeItemPtr = (POLYHEADER *) *ShapeItemArrayPtr++;
-
-					#if InitTexPrnt
-					textprint("shape item\n");
-					#endif
-
-					if(ShapeItemPtr->PolyItemType == I_2dTexturedPolygon
-						|| ShapeItemPtr->PolyItemType == I_ZB_2dTexturedPolygon
-						|| ShapeItemPtr->PolyItemType == I_Gouraud2dTexturedPolygon
-						|| ShapeItemPtr->PolyItemType == I_ZB_Gouraud2dTexturedPolygon
-						|| ShapeItemPtr->PolyItemType == I_Gouraud3dTexturedPolygon
-						|| ShapeItemPtr->PolyItemType == I_ZB_Gouraud3dTexturedPolygon
-						|| ShapeItemPtr->PolyItemType == I_ScaledSprite
-						|| ShapeItemPtr->PolyItemType == I_3dTexturedPolygon
-						|| ShapeItemPtr->PolyItemType == I_ZB_3dTexturedPolygon) {
-
-						if(ShapeItemPtr->PolyFlags & iflag_txanim) {
-
-							MakeTxAnimFrameTexturesGlobal(shptr, ShapeItemPtr,
-																	LTxIndex, TxIndex);
-
-						}
-
-						#if InitTexPrnt
-						textprint(" - textured\n");
-						#endif
-
-						if(ShapeItemPtr->PolyColour & TxLocal) {
-
-							#if InitTexPrnt
-							textprint("  - local index\n");
-							#endif
-
-							txi = ShapeItemPtr->PolyColour;
-							txi &= ~(TxLocal);					/* Clear Flag */
-							txi &= ClrTxDefn;						/* Clear Defn */
-
-							#if InitTexPrnt
-							textprint("  - is %d\n", txi);
-							textprint("  - LTxIndex is %d\n", LTxIndex);
-							#endif
-
-							/* Is this the local index? */
-
-							if(txi == LTxIndex) {
-
-								/* Clear low word, OR in global index */
-
-								ShapeItemPtr->PolyColour &= ClrTxIndex;
-								ShapeItemPtr->PolyColour |= TxIndex;
-
-								#if InitTexPrnt
-								textprint("Local %d, Global %d\n", LTxIndex, TxIndex);
-								#endif
-							}
-						}
-					}
-				}
-				ShapeBSPPtr++;
-			}
-		}
-	}
-
-	#endif	/* SupportBSP */
 
 	/* Otherwise the shape has no item data */
 }
@@ -743,7 +629,8 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr, POLYHEADER *pheader, int L
 	int **shape_textures;
 	int *txf_imageptr;
 	int texture_defn_index;
-	int i, txi, image;
+	int i, /*txi,*/ image;
+	intptr_t txi;
 
 	#if 0
 	textprint("LTxIndex = %d, TxIndex = %d\n", LTxIndex, TxIndex);
@@ -797,7 +684,7 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr, POLYHEADER *pheader, int L
 				{
 					if (txaf->txf_image & TxLocal)
 					{
-						txi = txaf->txf_image;
+ 						txi = txaf->txf_image;
 						txi &= ~TxLocal;					/* Clear Flag */
 
 						if (txi == LTxIndex) 
@@ -860,7 +747,8 @@ void SpriteResizing(SHAPEHEADER *sptr)
 	VECTOR2D cen_uv;
 	VECTOR2D size_uv;
 	VECTOR2D tv;
-	int *txf_imageptr;
+//	int *txf_imageptr;
+	intptr_t *txf_imageptr;
 	int **txf_uvarrayptr;
 	int *txf_uvarray;
 	int image;
@@ -927,7 +815,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 				/* Multi-View Sprite? */
 				if (sptr->shapeflags & ShapeFlag_MultiViewSprite) 
 				{
-					txf_imageptr = (int *) txaf->txf_image;
+					txf_imageptr = /*(int *)*/ (intptr_t*)txaf->txf_image; // bjd - x64
 					num_images = txah->txa_num_mvs_images;
 
 					txf_uvarrayptr = (int **) txaf->txf_uvdata;

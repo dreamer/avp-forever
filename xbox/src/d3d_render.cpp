@@ -1328,72 +1328,22 @@ extern void CheckWireFrameMode(int shouldBeOn)
 	}
 }
 
-void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
-{
-	int flags;
-	int texoffset;
-
-	float ZNear;
-
-    // Get ZNear
-	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
-
-	// Take header information
-	flags = inputPolyPtr->PolyFlags;
-
-	// We assume bit 15 (TxLocal) HAS been
-	// properly cleared this time...
-	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
-
-	float RecipW = 1.0f / (float)ImageHeaderArray[texoffset].ImageWidth;
-	float RecipH = 1.0f / (float)ImageHeaderArray[texoffset].ImageHeight;
-
-	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, TRANSLUCENCY_OFF);
-
-	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
-	{
-		RENDERVERTEX *vertices = &renderVerticesPtr[i];
-
-		mainVertex[vb].sx = (float)vertices->X;
-		mainVertex[vb].sy = (float)-vertices->Y;
-		mainVertex[vb].sz = 1.0f;
-
-		mainVertex[vb].color = RGBLIGHT_MAKE(vertices->R,vertices->G,vertices->B);
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-
-		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
-		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
-
-		vb++;
-	}
-
-	D3D_OutputTriangles();
-}
-
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
 {
 	// bjd - This seems to be the function responsible for drawing level geometry
 	// and the players weapon
 
-	int texoffset;
-
-	float ZNear;
-	float RecipW, RecipH;
-
-    // Get ZNear
-	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
-
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
-	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
+	int32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-	if (!texoffset)
-		texoffset = currentTextureID;
+	if (!textureID)
+		textureID = currentTextureID;
 
-	RecipW = 1.0f / (float) ImageHeaderArray[texoffset].ImageWidth;
-	RecipH = 1.0f / (float) ImageHeaderArray[texoffset].ImageHeight;
+	float RecipW = 1.0f / (float) ImageHeaderArray[textureID].ImageWidth;
+	float RecipH = 1.0f / (float) ImageHeaderArray[textureID].ImageHeight;
 
-	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, RenderPolygon.TranslucencyMode);
+	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
@@ -1402,13 +1352,6 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 		mainVertex[vb].sx = (float)vertices->X;
 		mainVertex[vb].sy = (float)-vertices->Y;
 		mainVertex[vb].sz = (float)vertices->Z;
-
-		extern unsigned char GammaValues[256];
-
-		/* need this so we can enable alpha test and not lose pred arms in green vision mode, and also not lose
-		/* aliens in pred red alien vision mode */
-		if (vertices->A == 0)
-			vertices->A = 1;
 
 		mainVertex[vb].color = RGBALIGHT_MAKE(GammaValues[vertices->R],GammaValues[vertices->G],GammaValues[vertices->B],vertices->A);
 		mainVertex[vb].specular = RGBALIGHT_MAKE(GammaValues[vertices->SpecularR],GammaValues[vertices->SpecularG],GammaValues[vertices->SpecularB],255);
@@ -3287,8 +3230,6 @@ extern void D3D_DrawSlider(int x, int y, int alpha)
 extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale)
 {
 #if 0 // TODO
-
-	extern unsigned char GammaValues[256];
 
 	SetNewTexture(NO_TEXTURE);
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);

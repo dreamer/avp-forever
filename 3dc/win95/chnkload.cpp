@@ -637,9 +637,8 @@ static void setup_tex_conv_array (
 	
 	Shape_External_File_Chunk * seflc = 0;
 	Bitmap_List_Store_Chunk * blsc = 0;
-	
-	
-	if (pChunk) 
+
+	if (pChunk)
 	{
 		seflc = (Shape_External_File_Chunk *)pChunk;
 		pChunk = seflc->lookup_single_child("BMPLSTST");
@@ -652,9 +651,9 @@ static void setup_tex_conv_array (
 		{
 			rif_name = ((RIF_Name_Chunk *)pChunk)->rif_name;
 		}
-	}	
+	}
 
-	if (blsc)	
+	if (blsc)
 	{
 	
 		// load in the textures from the shape
@@ -696,9 +695,7 @@ static void setup_tex_conv_array (
 					conv_array[bns().index] = imgnum;
 			}
 		}
-		
 	}
-	
 }
 
 void CopyShapeAnimationHeader(SHAPEHEADER* shpfrom,SHAPEHEADER* shpto)
@@ -730,11 +727,10 @@ void CopyShapeAnimationHeader(SHAPEHEADER* shpfrom,SHAPEHEADER* shpto)
 	shpto->points[0]=sas->anim_frames[0].vertices;
 	shpto->sh_normals[0]=sas->anim_frames[0].item_normals;
 	shpto->sh_vnormals[0]=sas->vertex_normals;
-
 }
 
 // copies shape to main shape list
-CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk * tmpshp, int flags,const ChunkObject* object)
+CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk *tmpshp, int flags, const ChunkObject *object)
 {
 	int local_max_index;
 	int * local_tex_index_nos;
@@ -746,8 +742,7 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk * tmpshp, int fla
 	
 	setup_tex_conv_array (local_max_index, local_tex_index_nos, h, tmpshp);
 
-	
-	Shape_Preprocessed_Data_Chunk* spdc = (Shape_Preprocessed_Data_Chunk*)tmpshp->lookup_single_child("SHPPRPRO");
+	Shape_Preprocessed_Data_Chunk *spdc = (Shape_Preprocessed_Data_Chunk*)tmpshp->lookup_single_child("SHPPRPRO");
 
 	if(spdc)
 	{
@@ -800,9 +795,9 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk * tmpshp, int fla
 			{
 				msl_shapes.add_entry(new ShapeInMSL(mainshapelist[list_pos],oc->object_data.o_name,list_pos));
 			}
-		}	
-	}	
-	
+		}
+	}
+
 	post_process_shape(mainshapelist[list_pos]);
 
 	h->shape_nums.add_entry(list_pos);
@@ -876,7 +871,6 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk * tmpshp, int fla
 					Shape_Sub_Shape_Chunk * sssc = ((Shape_Sub_Shape_Chunk *)cli());
 				
 					list_pos = GetMSLPos();
-
 
 					copy_to_shapeheader (
 						h, 
@@ -2204,14 +2198,14 @@ void SetupAnimatingShape(Shape_Chunk* sc,SHAPEHEADER* shp, Shape_Merge_Data_Chun
 
 BOOL copy_to_shapeheader (
 	RIFFHANDLE h, 
-	ChunkShape const & cshp, 
+	ChunkShape const &cshp, 
 	SHAPEHEADER *& shphd, 
-	Chunk_With_Children * shape, 
+	Chunk_With_Children *shape, 
 	int flags, 
 	int local_max_index,
-	int * local_tex_index_nos,
+	int *local_tex_index_nos,
 	int /*listpos*/,
-	const ChunkObject* object
+	const ChunkObject *object
 	)
 {
 	ChunkShape merged_cshp;
@@ -2587,7 +2581,6 @@ BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Heade
 			if (GEI_NOTLOADED != imgnum)
 				BmpConv[bns().index] = imgnum;
 		}
-		
 	}
 	// header data (note shapeheader is calloced)
 	

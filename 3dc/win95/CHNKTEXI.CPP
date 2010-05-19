@@ -10,6 +10,8 @@
 #include "chunkpal.hpp"
 #include "renderer.h"
 
+#include "textureManager.h"
+
 #ifndef CL_SUPPORT_FASTFILE
 	#error "Please #define CL_SUPPORT_FASTFILE to 0 or 1 in projload.hpp"
 #endif
@@ -637,17 +639,13 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 	}
 }
 
-extern "C" extern void CheckForWindowsMessages(void);
-
 int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 {
 	// safe to handle windows messages at this point (I think - JCWH)
 	CheckForWindowsMessages();
-/*
-	newTextureFileName = newTextureFolder + pszFileName;
-	// lop .RIM off the end of the filename
-	newTextureFileName = newTextureFileName.substr(0, newTextureFileName.length() - 4);
-*/
+
+	int32_t texID = 0;
+
 	// get the filename
 	char szBuf[MAX_PATH];
 	if (!CL_GetImageFileName(szBuf, sizeof szBuf/sizeof szBuf[0], pszFileName, fFlagsEtc))
@@ -680,20 +678,6 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 	// what are we loading into ?
 	switch (fFlagsEtc & _LIO_SURFTYPEMASK)
 	{
-		case LIO_CHIMAGE:
-		{
-			db_log1("CL_LoadImageOnce(): WARNING: having to call LoadImageCH()");
-			IMAGEHEADER * pImageHdr = GetImageHeader();
-			db_assert1(pImageHdr);
-			memset(pImageHdr,0,sizeof(IMAGEHEADER));
-//			if (LoadImageCH(szBuf,pImageHdr))
-//				return NumImages-1;
-//			else
-			{
-				db_log1("CL_LoadImageOnce(): ERROR: LoadImageCH() failed");
-				return GEI_NOTLOADED;
-			}
-		}
 		case LIO_D3DTEXTURE:
 		{
 			fAwLoad |= AW_TLF_COMPRESS; // required on some cards!!
@@ -705,8 +689,8 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 			if (pFastFileData)
 			{
 				db_log4("\tfile is in a fast file");
-				unsigned nWidth, nHeight;
-				AW_BACKUPTEXTUREHANDLE hBackup = NULL;
+				uint32_t nWidth, nHeight;
+
 				AVPTEXTURE * pTexture =
 					AwCreateTexture
 					(
@@ -715,8 +699,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 						nFastFileLen,
 						fAwLoad,
 						&nWidth,
-						&nHeight,
-						&hBackup
+						&nHeight
 					);
 				if (pTexture)
 				{
@@ -726,17 +709,13 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					pImageHdr->ImageWidth = pTexture->width;
 					pImageHdr->ImageHeight = pTexture->height;
 					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
-					strcpy(pImageHdr->ImageName,szBuf);
+					strcpy(pImageHdr->ImageName, szBuf);
 					pImageHdr->AvPTexture = pTexture;
-//					pImageHdr->hBackup = hBackup;
 
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 
 					/* KJL 16:05:50 26/02/98 - attempt to get a texture handle */
 					{
-//						OutputDebugString("\n");
-//						OutputDebugString(pImageHdr->ImageName);
-
 						// load Direct3D Texture here?	
 						if (pTexture->buffer) 
 						{
@@ -746,38 +725,26 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\final.RIM") == 0))		// for predator demo
 							{
 								OutputDebugString("found fmv texture.. \n");
-								/* is fmv texture, create in default pool so we can dynamically update it */
+								// is fmv texture, create in default pool so we can dynamically update it
 								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
-								/* will need to be restored on alt/tab or device loss */
+								// will need to be restored on alt/tab or device loss
 							}
 							else
 							{
 								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, 0, D3DPOOL_MANAGED);
 							}
 
-							//char szDbInf[512];
-								//sprintf(szDbInf,"Texture \"%s\" didn't load",pImageHdr->ImageName);
+//							texID = Tex_AddTexture(pImageHdr->Direct3DTexture, pImageHdr->ImageWidth, pImageHdr->ImageHeight);
 
-							/* free this, as d3d now holds the texture */
+							// free this, as d3d now holds the texture
 							free(pTexture->buffer);
 							pTexture->buffer = NULL;
 						}
 						else OutputDebugString("pTexture->buf was Null!");
 					}
-					
-					#if CL_SUPPORT_ALTTAB
-						if (fFlagsEtc & LIO_RESTORABLE)
-						#ifdef NDEBUG
-							ATIncludeTexture(pTexture,hBackup);
-						#else
-						{
-							char szDbInf[512];
-							sprintf(szDbInf,"Name \"%s\" Number %d",szBuf,NumImages-1);
-							ATIncludeTextureDb(pTexture,hBackup,szDbInf);
-						}
-						#endif
-					#endif // CL_SUPPORT_ALTTAB
+
 					return NumImages-1;
+					//return texID;
 				}
 				else
 				{
@@ -790,8 +757,8 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 			{
 				#if !defined(CL_SUPPORTONLY_FASTFILE) || !CL_SUPPORTONLY_FASTFILE
 				db_log4("\tloading the actual file");
-				unsigned nWidth, nHeight;
-				AW_BACKUPTEXTUREHANDLE hBackup = NULL;
+				uint32_t nWidth, nHeight;
+
 				AVPTEXTURE * pTexture =
 					AwCreateTexture
 					(
@@ -799,8 +766,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 						&szBuf[0],
 						fAwLoad,
 						&nWidth,
-						&nHeight,
-						&hBackup
+						&nHeight
 					);
 				if (pTexture)
 				{
@@ -812,14 +778,11 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
 					strcpy(pImageHdr->ImageName,szBuf);
 					pImageHdr->AvPTexture = pTexture;
-//					pImageHdr->hBackup = hBackup;
+
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 
 					/* KJL 16:05:50 26/02/98 - attempt to get a texture handle */
 					{
-//						OutputDebugString("\n");
-//						OutputDebugString(pImageHdr->ImageName);
-
 						if (pTexture->buffer) 
 						{
 							if ((strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0) ||
@@ -834,46 +797,25 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 							{
 								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, 0, D3DPOOL_MANAGED);
 							}
-							//char szDbInf[512];
-							//	sprintf(szDbInf,"Texture \"%s\" didn't load",pImageHdr->ImageName);
+
+//							texID = Tex_AddTexture(pImageHdr->Direct3DTexture, pImageHdr->ImageWidth, pImageHdr->ImageHeight);
 							
 							if (pImageHdr->Direct3DTexture == NULL) 
 							{
 								OutputDebugString("Direct3DTexture was null!");
 							}
 
-							/* free this, as d3d now holds the texture */
+							// free this, as d3d now holds the texture
 							free(pTexture->buffer);
 							pTexture->buffer = NULL;
-
-							/* 
-								the below allows us to basically check if a texture is in the D3D managed pool or not
-								we don't need to restore a managed texture on device reset (alt tab etc) but we will
-								for the fmv textures
-							*/
-							
-							int gotTextureHandle = 1;
-							//int gotTextureHandle = GetTextureHandle(pImageHdr);
-							//db_assert1(gotTextureHandle==TRUE);
 						}
 						else {
 							OutputDebugString("pTexture->buf was null!");
 						}
 					}
 
-					#if CL_SUPPORT_ALTTAB
-						if (fFlagsEtc & LIO_RESTORABLE)
-						#ifdef NDEBUG
-							ATIncludeTexture(pTexture,hBackup);
-						#else
-						{
-							char szDbInf[512];
-							sprintf(szDbInf,"Name \"%s\" Number %d",szBuf,NumImages-1);
-							ATIncludeTextureDb(pTexture,hBackup,szDbInf);
-						}
-						#endif
-					#endif // CL_SUPPORT_ALTTAB
 					return NumImages-1;
+//					return texID;
 				}
 				else
 				{

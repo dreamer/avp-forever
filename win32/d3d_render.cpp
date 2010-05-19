@@ -555,6 +555,11 @@ BOOL SetExecuteBufferDefaults()
 
 void CheckOrthoBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
 {
+	if (textureID == 2)
+	{
+		int blah = 1;
+	}
+
 	assert (numVerts == 4);
 
 	// check if we've got enough room. if not, flush
@@ -963,6 +968,7 @@ static void ChangeTexture(const int32_t textureID)
 	else
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, ImageHeaderArray[textureID].Direct3DTexture);
+//		LastError = d3d.lpD3DDevice->SetTexture(0, Tex_GetTexture(textureID /*+ texIDoffset*/));
 		if (!FAILED(LastError)) currentTextureID = textureID;
 		return;
 	}
@@ -1509,125 +1515,37 @@ extern void CheckWireFrameMode(int shouldBeOn)
 	}
 }
 
-void D3D_BackdropPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
-{
-	int flags;
-	int texoffset;
-
-	float ZNear;
-
-    // Get ZNear
-	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
-
-	// Take header information
-	flags = inputPolyPtr->PolyFlags;
-
-	// We assume bit 15 (TxLocal) HAS been
-	// properly cleared this time...
-	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
-
-	float RecipW = 1.0f / (float)ImageHeaderArray[texoffset].ImageWidth;
-	float RecipH = 1.0f / (float)ImageHeaderArray[texoffset].ImageHeight;
-
-	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, TRANSLUCENCY_OFF);
-
-	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
-	{
-		RENDERVERTEX *vertices = &renderVerticesPtr[i];
-/*
-	  	float oneOverZ;
-	  	oneOverZ = (1.0f)/vertices->Z;
-
-		int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-		int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-
-		mainVertex[vb].sx = (float)x;
-		mainVertex[vb].sy = (float)y;
-		mainVertex[vb].sz = 1.0f;
-		mainVertex[vb].rhw = oneOverZ;
-*/
-		mainVertex[vb].sx = (float)vertices->X;
-		mainVertex[vb].sy = (float)-vertices->Y;
-		mainVertex[vb].sz = 1.0f;
-//		mainVertex[vb].rhw = 1.0f;
-
-		mainVertex[vb].color = RGBLIGHT_MAKE(vertices->R,vertices->G,vertices->B);
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-
-//		mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
-//		mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
-
-		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
-		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
-
-		vb++;
-	}
-
-	D3D_OutputTriangles();
-}
-
-void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr)
+void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
 	// bjd - This is the function responsible for drawing level geometry and the players weapon
-	int texoffset;
-
-	float ZNear;
-	float RecipW, RecipH;
-
-    // Get ZNear
-	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
 
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
-	texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
+	int32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-	if (!texoffset) 
-		texoffset = currentTextureID;
+	if (!textureID) 
+		textureID = currentTextureID;
 
-	RecipW = 1.0f / (float) ImageHeaderArray[texoffset].ImageWidth;
-	RecipH = 1.0f / (float) ImageHeaderArray[texoffset].ImageHeight;
+	float RecipW = 1.0f / (float) ImageHeaderArray[textureID].ImageWidth;
+	float RecipH = 1.0f / (float) ImageHeaderArray[textureID].ImageHeight;
 
-	CheckVertexBuffer(RenderPolygon.NumberOfVertices, texoffset, RenderPolygon.TranslucencyMode);
+	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
-/*
-	  	float oneOverZ = 1.0f / (float)vertices->Z;
 
-		float zvalue;
-
-		zvalue = (float)vertices->Z+HeadUpDisplayZOffset;
-
-		zvalue = 1.0f - Zoffset * ZNear/zvalue;
-
-		if (zvalue < 0.0f) 
-			zvalue = 0.0f;
-
-		// project into screen space
-		int x = (vertices->X * (Global_VDB_Ptr->VDB_ProjX + 1)) / vertices->Z + Global_VDB_Ptr->VDB_CentreX;
-		int y = (vertices->Y * (Global_VDB_Ptr->VDB_ProjY + 1)) / vertices->Z + Global_VDB_Ptr->VDB_CentreY;
-
-		mainVertex[vb].sx = (float)x;
-		mainVertex[vb].sy = (float)y;
-		mainVertex[vb].sz = zvalue;
-		mainVertex[vb].rhw = oneOverZ;
-*/
 		mainVertex[vb].sx = (float)vertices->X;
 		mainVertex[vb].sy = (float)-vertices->Y;
 		mainVertex[vb].sz = (float)vertices->Z;
-//		mainVertex[vb].rhw = 1.0f;
 
 		/* need this so we can enable alpha test and not lose pred arms in green vision mode, and also not lose 
 		/* aliens in pred red alien vision mode */
-		if (vertices->A == 0) 
-			vertices->A = 1;
+//		if (vertices->A == 0) 
+//			vertices->A = 1;
 
 		mainVertex[vb].color = RGBALIGHT_MAKE(GammaValues[vertices->R],GammaValues[vertices->G],GammaValues[vertices->B],vertices->A);
 		mainVertex[vb].specular = RGBALIGHT_MAKE(GammaValues[vertices->SpecularR],GammaValues[vertices->SpecularG],GammaValues[vertices->SpecularB],255);
-
-//		mainVertex[vb].tu = ((float)(vertices->U>>16)+0.5f) * RecipW;
-//		mainVertex[vb].tv = ((float)(vertices->V>>16)+0.5f) * RecipH;
 
 		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
 		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
@@ -1818,7 +1736,6 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *r
 
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a) 
 {
-
 	float new_x1, new_y1, new_x2, new_y2;
 
 	if (mainMenu)
@@ -3239,82 +3156,6 @@ void DrawNoiseOverlay(int t)
 	orthoVerts[orthoVBOffset].u = (u+size)/256.0f;
 	orthoVerts[orthoVBOffset].v = v/256.0f;
 	orthoVBOffset++;
-
-
-#if 0
-	UnlockExecuteBufferAndPrepareForUse();
-	ExecuteBuffer();
-	LockExecuteBuffer();
-
-	CheckVertexBuffer(4, StaticImageNumber, TRANSLUCENCY_GLOWING);
-
-	// top left?
-	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
-	mainVertex[vb].sz = 1.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = u/256.0f;
-	mainVertex[vb].tv = v/256.0f;
-
-	vb++;
-
-	// top right?
-  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
-	mainVertex[vb].sz = 1.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = (u+size)/256.0f;
-	mainVertex[vb].tv = v/256.0f;
-
-	vb++;
-
-	// bottom right?
-  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
-	mainVertex[vb].sz = 1.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = (u+size)/256.0f;
-	mainVertex[vb].tv = (v+size)/256.0f;
-
-	vb++;
-
-	// bottom left
-  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
-	mainVertex[vb].sz = 1.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = u/256.0f;
-	mainVertex[vb].tv = (v+size)/256.0f;
-
-	vb++;
-
-	if (D3DZFunc != D3DCMP_ALWAYS) 
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_ALWAYS);
-		D3DZFunc = D3DCMP_ALWAYS;
-	}
-
-	OUTPUT_TRIANGLE(0,1,3, 4);
-	OUTPUT_TRIANGLE(1,2,3, 4);
-
-	UnlockExecuteBufferAndPrepareForUse();
-	ExecuteBuffer();
-	LockExecuteBuffer();
-
-	if (D3DZFunc != D3DCMP_LESSEQUAL) 
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_LESSEQUAL);
-		D3DZFunc = D3DCMP_LESSEQUAL;
-	}
-#endif
 }
 
 void DrawScanlinesOverlay(float level)
@@ -4843,6 +4684,8 @@ void DrawHUDQuad(int x, int y, int width, int height, float *UVList, int texture
 	if (!UVList)
 		return;
 
+	assert (textureID != -1);
+
 	float x1 = (float(x / 640.0f) * 2) - 1;
 	float y1 = (float(y / 480.0f) * 2) - 1;
 
@@ -4921,8 +4764,15 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t t
 	{
 		Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
 	}
-	else 
+	else
 	{
+		if (textureID == -1)
+		{
+			texturePOW2Width = width;
+			texturePOW2Height = height;
+		}
+
+		else {
 		if (mainMenu)
 		{
 			texturePOW2Width = AvPMenuGfxStorage[textureID].newWidth;
@@ -4932,6 +4782,7 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t t
 		{
 			texturePOW2Width = ImageHeaderArray[textureID].ImageWidth;
 			texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
+		}
 		}
 	}
 

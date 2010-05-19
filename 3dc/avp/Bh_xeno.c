@@ -4125,6 +4125,10 @@ void Execute_Xeno_Follow_Far(STRATEGYBLOCK *sbPtr)
 {
 	XENO_STATUS_BLOCK *xenoStatusPointer;
 
+#if FAR_XENO_ACTIVITY
+        int anglex,angley;
+#endif
+
 	LOCALASSERT(sbPtr);
 	xenoStatusPointer = (XENO_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
 	LOCALASSERT(xenoStatusPointer);

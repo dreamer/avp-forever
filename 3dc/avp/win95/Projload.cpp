@@ -2714,7 +2714,7 @@ int load_rif_bitmap (char const * fname, BMPN_Flags flags)
 	return CL_LoadImageOnce
 		(
 			fname,
-			(/*ScanDrawDirectDraw == ScanDrawMode ? LIO_CHIMAGE : */LIO_D3DTEXTURE)
+			(LIO_D3DTEXTURE)
 			|(flags & ChunkBMPFlag_IFF ? LIO_RELATIVEPATH : LIO_RIFFPATH)
 			|(flags & ChunkBMPFlag_UsesTransparency ? LIO_TRANSPARENT : LIO_NONTRANSP)
 			|(flags & (cl_pszGameMode ?

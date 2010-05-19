@@ -377,7 +377,6 @@ void CreateAlienBot(VECTORCH *Position,int type)
 		NewOnScreenMessage("FAILED TO CREATE BOT: MALLOC FAILURE");
 		return;
 	}
-
 }
 
 

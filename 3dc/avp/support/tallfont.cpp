@@ -771,7 +771,7 @@ IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
 		if (pFastFileData)
 		{
 			//load from fast file
-			image_ptr = AwCreateTexture//Surface
+			image_ptr = AwCreateTexture
 			(
 				"pxfXYB",
 				pFastFileData,
@@ -787,7 +787,7 @@ IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
 		else
 		{
 			//load graphic from rim file
-			image_ptr = AwCreateTexture//Surface
+			image_ptr = AwCreateTexture
 			(
 				"sfXYB",
 				Filename,
@@ -800,8 +800,8 @@ IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
 			);
 		}
 		
-		R2Size_OverallImage . w = nWidth;
-		R2Size_OverallImage . h = nHeight;
+		R2Size_OverallImage.w = nWidth;
+		R2Size_OverallImage.h = nHeight;
 	}
 
 	GLOBALASSERT(image_ptr);

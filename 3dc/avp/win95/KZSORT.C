@@ -20,13 +20,16 @@ extern int NumVertices;
 extern int WireFrameMode;
 extern int DrawingAReflection;
 
-struct KItem KItemList[maxpolyptrs]={0,};
-static struct KItem KItemList2[maxpolyptrs]={0,};
+struct KItem KItemList[maxpolyptrs];
 
-static struct KObject VisibleModules[MAX_NUMBER_OF_VISIBLE_MODULES]={0,};
-static struct KObject VisibleModules2[MAX_NUMBER_OF_VISIBLE_MODULES]={0,};
+#if 0
+static struct KItem KItemList2[maxpolyptrs];
+#endif
+
+static struct KObject VisibleModules[MAX_NUMBER_OF_VISIBLE_MODULES];
+static struct KObject VisibleModules2[MAX_NUMBER_OF_VISIBLE_MODULES];
 static struct KObject *SortedModules;
-static struct KObject VisibleObjects[maxobjects]={0,};
+static struct KObject VisibleObjects[maxobjects];
 
 void SetFogDistance(int fogDistance);
 void ReflectObject(DISPLAYBLOCK *dPtr);

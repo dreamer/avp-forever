@@ -138,7 +138,7 @@ void * LiftBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 		// fill in the number of floors
 		
 		lcont->num_stations	= lift_tt->num_stations;
-  	lcont->lift_stations = (LIFT_STATION**)AllocateMem(sizeof(LIFT_STATION*)*lcont->num_stations);											
+  		lcont->lift_stations = (LIFT_STATION**)AllocateMem(sizeof(LIFT_STATION*)*lcont->num_stations);											
 
 		if(!lcont->lift_stations) 
 		{
@@ -167,14 +167,12 @@ void * LiftBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 		lcont->prev_station = -1;
 		lcont->SoundHandle = SOUND_NOACTIVEINDEX;
 
-		
 		if(lift_tt->lift_flags & LiftFlag_NoTel)
 			lcont->floor_switches_fixed=1;
 		else
 			lcont->floor_switches_fixed=0;
 
 	}
-
 
 	return((void*)lift_bhv);
 }

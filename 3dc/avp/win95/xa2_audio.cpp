@@ -74,9 +74,9 @@ X3DAUDIO_HANDLE			x3DInstance = {0};
 X3DAUDIO_LISTENER		XA2Listener = {0};
 X3DAUDIO_DSP_SETTINGS	XA2DSPSettings = {0};
 IUnknown				*pReverbEffect = NULL;
-static unsigned int		numOutputChannels = 0;
+static uint32_t			numOutputChannels = 0;
 static DWORD			channelMask = 0;
-static unsigned int 	SoundMinBufferFree = 0;
+static uint32_t		 	SoundMinBufferFree = 0;
 static bool				soundEnabled = false;
 
 static HRESULT LastError;
@@ -431,7 +431,7 @@ int PlatStartSoundSys()
 
 //	LOG_RC();
 
-	int sampleRate = Config_GetInt("[Audio]", "SampleRate", 44100);
+	uint32_t sampleRate = Config_GetInt("[Audio]", "SampleRate", 44100);
 
 	/* Set the globals. */
 	SoundConfig.flags			= SOUND_DEFAULT;
@@ -915,13 +915,13 @@ int PlatDo3dSound(int activeIndex)
 	relativePosn.vz = ActiveSounds[activeIndex].threedeedata.position.vz - Global_VDB_Ptr->VDB_World.vz;
 	distance = Magnitude(&relativePosn);
 
-	ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>((ActiveSounds[activeIndex].threedeedata.position.vx) / 65536.0F);
-	ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>((ActiveSounds[activeIndex].threedeedata.position.vy) / 65536.0F);
-	ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>((ActiveSounds[activeIndex].threedeedata.position.vz) / 65536.0F);
-
-//	sprintf(buf, "Sound Posn (%f, %f, %f)\n", ActiveSounds[activeIndex].xa2Emitter.Position.x, ActiveSounds[activeIndex].xa2Emitter.Position.y, ActiveSounds[activeIndex].xa2Emitter.Position.z);
-//	OutputDebugString(buf);
-
+	ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vx);// / 65536.0f);
+	ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vy);// / 65536.0f);
+	ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vz);// / 65536.0f);
+/*
+	sprintf(buf, "Sound Id: %d Posn (%f, %f, %f)\n", activeIndex, ActiveSounds[activeIndex].xa2Emitter.Position.x, ActiveSounds[activeIndex].xa2Emitter.Position.y, ActiveSounds[activeIndex].xa2Emitter.Position.z);
+	OutputDebugString(buf);
+*/
 	db_logf5(("Sound Index %i", ActiveSounds[activeIndex].soundIndex));
 	db_logf5(("Global Player Posn (%i, %i, %i)",  Global_VDB_Ptr->VDB_World.vx, Global_VDB_Ptr->VDB_World.vy, Global_VDB_Ptr->VDB_World.vz));
 	db_logf5(("Sound Posn (%i, %i, %i)",  ActiveSounds[activeIndex].threedeedata.position.vx, ActiveSounds[activeIndex].threedeedata.position.vy, ActiveSounds[activeIndex].threedeedata.position.vz));
@@ -1242,18 +1242,18 @@ int LoadWavFile(int soundNum, char * wavFileName)
 	do
 	{
 		/* Read	the data chunk header */
-		res = fread(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,myFile);
-		if((myChunkHeader.chunkName[0]=='d')&&(myChunkHeader.chunkName[1]=='a')&&
+		res = fread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
+		if ((myChunkHeader.chunkName[0]=='d')&&(myChunkHeader.chunkName[1]=='a')&&
 	   		(myChunkHeader.chunkName[2]=='t')&&(myChunkHeader.chunkName[3]=='a'))
 		{
 			break;
 		}
 	
 		fseek(myFile,myChunkHeader.chunkLength,SEEK_CUR);
-	}while(res);
+	} while(res);
 
 	/* Now do a few checks */
-	if((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
+	if ((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
 	   (myChunkHeader.chunkName[2]!='t')||(myChunkHeader.chunkName[3]!='a'))
 	{
 		/* chunk alignment disaster */
@@ -1265,25 +1265,25 @@ int LoadWavFile(int soundNum, char * wavFileName)
 	// Calculate length of sample
 	lengthInSeconds = DIV_FIXED(myChunkHeader.chunkLength, myWaveFormat.nAvgBytesPerSec);
 
-	if((myChunkHeader.chunkLength<0)||(myChunkHeader.chunkLength > SOUND_MAXSIZE))
+	if ((myChunkHeader.chunkLength < 0) || (myChunkHeader.chunkLength > SOUND_MAXSIZE))
 	{
 		LOCALASSERT(1==0);
 		fclose(myFile);
 		return 0;	
 	}	
-	if(myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
+	if (myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
 	{
 		LOCALASSERT(1==0);
 		fclose(myFile);
 		return 0;	
 	}	
-	if((myWaveFormat.nChannels != 1)&&(myWaveFormat.nChannels != 2))
+	if ((myWaveFormat.nChannels != 1)&&(myWaveFormat.nChannels != 2))
 	{
 		LOCALASSERT(1==0);
 		fclose(myFile);
 		return 0;	
 	}	
-	if((myWaveFormat.wBitsPerSample != 8)&&(myWaveFormat.wBitsPerSample != 16))
+	if ((myWaveFormat.wBitsPerSample != 8)&&(myWaveFormat.wBitsPerSample != 16))
 	{
 		LOCALASSERT(1==0);
 		fclose(myFile);
@@ -1367,7 +1367,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	int lengthInSeconds;
 
 	myFile = ffopen(wavFileName,"rb");
-	if(!myFile)
+	if (!myFile)
 	{
 		GLOBALASSERT (0);
 		return(0);
@@ -1379,7 +1379,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 
 	/* Read the WAV format chunk */
 	res = ffread(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,myFile);
-	if(myChunkHeader.chunkLength==16)
+	if (myChunkHeader.chunkLength == 16)
 	{
 		/* a standard PCM wave format chunk */
 		PCMWAVEFORMAT tmpWaveFormat;
@@ -1397,7 +1397,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		OutputDebugString(buf);
 */
 	}
-	else if(myChunkHeader.chunkLength==18)
+	else if (myChunkHeader.chunkLength==18)
 	{
 		/* an extended PCM wave format chunk */
 		res = ffread(&myWaveFormat,sizeof(WAVEFORMATEX),1,myFile);	
@@ -1416,18 +1416,18 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	do
 	{
 		/* Read	the data chunk header */
-		res = ffread(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,myFile);
-		if((myChunkHeader.chunkName[0]=='d')&&(myChunkHeader.chunkName[1]=='a')&&
+		res = ffread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
+		if ((myChunkHeader.chunkName[0]=='d')&&(myChunkHeader.chunkName[1]=='a')&&
 	   		(myChunkHeader.chunkName[2]=='t')&&(myChunkHeader.chunkName[3]=='a'))
 		{
 			break;
 		}
 	
 		ffseek(myFile,myChunkHeader.chunkLength,SEEK_CUR);
-	}while(res);
+	} while(res);
 
 	/* Now do a few checks */
-	if((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
+	if ((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
 	   (myChunkHeader.chunkName[2]!='t')||(myChunkHeader.chunkName[3]!='a'))
 	{
 		/* chunk alignment disaster */
@@ -1439,25 +1439,25 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	//calculate length of sample
 	lengthInSeconds=DIV_FIXED(myChunkHeader.chunkLength,myWaveFormat.nAvgBytesPerSec);
 
-	if((myChunkHeader.chunkLength<0)||(myChunkHeader.chunkLength > SOUND_MAXSIZE))
+	if ((myChunkHeader.chunkLength<0)||(myChunkHeader.chunkLength > SOUND_MAXSIZE))
 	{
 		LOCALASSERT(1==0);
 		ffclose(myFile);
 		return 0;	
 	}	
-	if(myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
+	if (myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
 	{
 		LOCALASSERT(1==0);
 		ffclose(myFile);
 		return 0;	
 	}	
-	if((myWaveFormat.nChannels != 1)&&(myWaveFormat.nChannels != 2))
+	if ((myWaveFormat.nChannels != 1)&&(myWaveFormat.nChannels != 2))
 	{
 		LOCALASSERT(1==0);
 		ffclose(myFile);
 		return 0;	
 	}	
-	if((myWaveFormat.wBitsPerSample != 8)&&(myWaveFormat.wBitsPerSample != 16))
+	if ((myWaveFormat.wBitsPerSample != 8)&&(myWaveFormat.wBitsPerSample != 16))
 	{
 		LOCALASSERT(1==0);
 		ffclose(myFile);
@@ -1592,25 +1592,25 @@ void PlatUpdatePlayer()
 		extern int NormalFrameTime;
 		extern int DopplerShiftIsOn;
 
+		D3DXMATRIX test;
+
 		//viewMatrix
 		D3DXVECTOR3 vPos;
 		D3DXVECTOR3 vLookAt;
 		D3DXVECTOR3 vUp;
 
-		vPos.x = -viewMatrix._41;
-		vPos.y = -viewMatrix._42;
-		vPos.z = -viewMatrix._43;
+		D3DXMatrixInverse( &test, NULL, &viewMatrix );
+		D3DXVec3TransformCoord( &vPos, &D3DXVECTOR3(0.0f,0.0f,0.0f), &test );
 
-		vLookAt.x = viewMatrix._13;
-		vLookAt.y = viewMatrix._23;
-		vLookAt.z = viewMatrix._33;
-
+		// up
 		vUp.x = viewMatrix._12;
 		vUp.y = viewMatrix._22;
 		vUp.z = viewMatrix._32;
 
-//		D3DXMatrixTranspose(&viewMatrix, &viewMatrix);
-//		D3DXVec3TransformNormal(&vPos, &vPos, &viewMatrix);
+		// front
+		vLookAt.x = viewMatrix._13;
+		vLookAt.y = viewMatrix._23;
+		vLookAt.z = viewMatrix._33;
 
 		XA2Listener.Position.x = vPos.x;
 		XA2Listener.Position.y = vPos.y;
@@ -1662,7 +1662,6 @@ void PlatUpdatePlayer()
 			XA2Listener.Velocity.z = (float)(dynPtr->Position.vz - dynPtr->PrevPosition.vz) * invFrameTime;
 		}
 		else
-
 		{
 			XA2Listener.Velocity.x = 0.0f;
 			XA2Listener.Velocity.y = 0.0f;

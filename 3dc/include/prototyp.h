@@ -1359,11 +1359,6 @@ void Draw_Item_ZB_Gouraud3dTexturePolygon(int *itemptr);
 int* GetTxAnimArrayZ(int shape, int item);
 TXANIMHEADER* GetTxAnimDataZ(int shape, int item, int sequence);
 
-#if SupportBSP
-TXANIMHEADER* GetTxAnimDataBSP(int shape, int node, int item, int sequence);
-#endif
-
-
 int GT_LL(LONGLONGCH *a, LONGLONGCH *b);
 int LT_LL(LONGLONGCH *a, LONGLONGCH *b);
 

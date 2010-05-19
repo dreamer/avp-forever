@@ -342,7 +342,7 @@ extern AW_TL_ERC AwSetAdditionalTextureFormat2(void* _ddpfP, unsigned _maxAlphaB
 		As for AwSetTextureFormat but tells AwCreateSurface()
 		what format surfaces for blitting should be in
 */
-//extern AW_TL_ERC AwSetSurfaceFormat2(LPDDPIXELFORMAT _ddpfP); // BJD
+
 #define AwSetSurfaceFormat(_descP) (AwSetSurfaceFormat2((_descP) ? &(_descP)->ddpfPixelFormat : NULL))
 
 /* AwGetTextureSize(unsigned * _widthP, unsigned * _heightP, unsigned _width, unsigned _height)
@@ -539,28 +539,6 @@ extern AVPTEXTURE * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...);
 		t	The next argument is of type 'DDSurface *'
 		
 */
-
-#if 0
-extern DDSurface * _AWTL_VARARG AwCreateSurface(char const * _argFormatS, ...);
-
-/* AwDestroyBackupTexture(AW_BACKUPTEXTUREHANDLE _bH)
-
-	Description:
-		Deallocates the memory associated with a backup
-		texture handle, created by a call to
-		'AwCreateTexture()' with a 'B' specifier. The handle
-		cannot be used after this.
-		
-	Parameters:
-		_bH
-			The handle whose associated memory should be
-			deallocated.
-
-	Returns:
-		AW_TLE_OK if the function succeeds.
-		AW_TLE_BADPARMS if the handle was not valid.
-*/
-#endif
 
 extern AW_TL_ERC AwDestroyBackupTexture(AW_BACKUPTEXTUREHANDLE _bH);
 

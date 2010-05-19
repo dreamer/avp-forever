@@ -278,9 +278,8 @@ AVP_Generator_Extended_Settings_Chunk::AVP_Generator_Extended_Settings_Chunk(Chu
 	CHUNK_EXTRACT(pad3,unsigned char)
 	CHUNK_EXTRACT(spare1,int)
 	CHUNK_EXTRACT(spare2,int)
-    	
-	
-	size_t size=max(*(int*) data,sizeof(AVP_Generator_Weighting));
+
+	size_t size=max(*(int*) data,(int)sizeof(AVP_Generator_Weighting));
 
 	weights=(AVP_Generator_Weighting*)new unsigned char[size];
 	memset(weights,0,sizeof(AVP_Generator_Weighting));
