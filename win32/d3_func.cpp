@@ -50,6 +50,8 @@ extern LPD3DXCONSTANTTABLE	vertexConstantTable;
 extern LPD3DXCONSTANTTABLE	orthoConstantTable;
 extern LPD3DXCONSTANTTABLE	fmvConstantTable;
 
+LPDIRECT3DTEXTURE9 blankTexture;
+
 // size of vertex and index buffers
 const uint32_t MAX_VERTEXES = 4096;
 const uint32_t MAX_INDICES = 9216;
@@ -1108,7 +1110,7 @@ BOOL InitialiseDirect3D()
 	d3d.lpD3D = Direct3DCreate9(D3D_SDK_VERSION);
 	if (!d3d.lpD3D)
 	{
-		Con_PrintError("Could not create Direct3D9 object!");
+		Con_PrintError("Could not create Direct3D9 object");
 		return FALSE;
 	}
 
@@ -1380,6 +1382,7 @@ BOOL InitialiseDirect3D()
 #endif
 	if (FAILED(LastError)) 
 	{
+		Con_PrintError("Could not create Direct3D device");
 		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
 	}
@@ -1522,6 +1525,16 @@ BOOL InitialiseDirect3D()
 	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
 //	CreatePixelShader("pointSpritePixel.psh", &d3d.pointSpritePixelShader);
 
+	d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &blankTexture, NULL);
+
+	D3DLOCKED_RECT lock;
+
+	blankTexture->LockRect(0, &lock, NULL, 0);
+
+	memset(lock.pBits, 255, lock.Pitch);
+
+	blankTexture->UnlockRect(0);
+
 	Con_PrintMessage("Initialised Direct3D9 succesfully");
 	return TRUE;
 }
@@ -1577,6 +1590,8 @@ void ReleaseDirect3D()
 
 	// delete up any new()-ed memory in d3d_render.cpp
 	DeleteRenderMemory();
+
+	SAFE_RELEASE(blankTexture);
 
 	// release constant tables
 	SAFE_RELEASE(vertexConstantTable);

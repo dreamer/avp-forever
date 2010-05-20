@@ -175,7 +175,6 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 	uint32_t i = 0;
 
 	uint32_t charWidth = 11;
-	int uvArray[8];
 
 	while (i < text.size())
 	{
@@ -187,17 +186,7 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 		int tex_x = column * Fonts[FONT_SMALL].blockWidth;
 		int tex_y = row * Fonts[FONT_SMALL].blockHeight;
 
-		uvArray[0] = tex_x;
-		uvArray[1] = tex_y + Fonts[FONT_SMALL].blockHeight;
-		uvArray[2] = tex_x;
-		uvArray[3] = tex_y;
-		uvArray[4] = tex_x + charWidth;//Fonts[FONT_SMALL].blockWidth;
-		uvArray[5] = tex_y + Fonts[FONT_SMALL].blockHeight;
-		uvArray[6] = tex_x + charWidth;//Fonts[FONT_SMALL].blockWidth;
-		uvArray[7] = tex_y;
-
 		DrawQuad(x, y, charWidth, 16, Fonts[FONT_SMALL].textureID, colour, TRANSLUCENCY_NORMAL);
-//		New_D3D_HUDQuad_Output(Fonts[FONT_SMALL].textureID, x, y, charWidth, 16, &uvArray[0], colour, FILTERING_BILINEAR_OFF);
 
 		if (/*widthSpaced*/1)
 		{

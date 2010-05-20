@@ -49,6 +49,8 @@ LPD3DXCONSTANTTABLE	vertexConstantTable = NULL;
 LPD3DXCONSTANTTABLE	orthoConstantTable = NULL;
 LPD3DXCONSTANTTABLE	fmvConstantTable = NULL;
 
+extern LPDIRECT3DTEXTURE9 blankTexture;
+
 extern "C" {
 
 #include "3dc.h"
@@ -953,7 +955,8 @@ static void ChangeTexture(const int32_t textureID)
 	// if texture was specified as 'null'
 	else if (textureID == NO_TEXTURE)
 	{
-		LastError = d3d.lpD3DDevice->SetTexture(0, NULL);
+		//LastError = d3d.lpD3DDevice->SetTexture(0, NULL);
+		LastError = d3d.lpD3DDevice->SetTexture(0, blankTexture);
 		if (!FAILED(LastError)) currentTextureID = NO_TEXTURE;
 		return;
 	}

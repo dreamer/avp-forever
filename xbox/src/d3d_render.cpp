@@ -43,6 +43,7 @@ DWORD fmvDecl[] =
 	D3DVSD_END()	
 };
 
+extern LPDIRECT3DTEXTURE8 blankTexture;
 
 extern "C" {
 
@@ -853,7 +854,8 @@ static void ChangeTexture(const int32_t textureID)
 	// if texture was specified as 'null'
 	else if (textureID == NO_TEXTURE)
 	{
-		LastError = d3d.lpD3DDevice->SetTexture(0, NULL);
+		//LastError = d3d.lpD3DDevice->SetTexture(0, NULL);
+		LastError = d3d.lpD3DDevice->SetTexture(0, blankTexture);
 		if (!FAILED(LastError)) currentTextureID = NO_TEXTURE;
 		return;
 	}
@@ -4344,8 +4346,15 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t t
 	{
 		Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
 	}
-	else 
+	else
 	{
+		if (textureID == -1)
+		{
+			texturePOW2Width = width;
+			texturePOW2Height = height;
+		}
+
+		else {
 		if (mainMenu)
 		{
 			texturePOW2Width = AvPMenuGfxStorage[textureID].newWidth;
@@ -4355,6 +4364,7 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t t
 		{
 			texturePOW2Width = ImageHeaderArray[textureID].ImageWidth;
 			texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
+		}
 		}
 	}
 

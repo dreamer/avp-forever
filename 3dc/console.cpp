@@ -291,6 +291,9 @@ void Con_Draw()
 
 	console.height = 480 * console.currentY;
 
+	if (console.height == 0)
+		return;
+
 	// draw the background quad
 	DrawQuad(console.xPos, console.yPos, console.width, console.height, -1, D3DCOLOR_ARGB(255, 38, 80, 145), TRANSLUCENCY_OFF);
 

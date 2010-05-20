@@ -49,10 +49,6 @@ const char *orthoShader =
 
 const char *vertShader =
     "vs.1.1\n"
-//    "dcl_position v0\n"
-//    "dcl_color v1\n"
-//    "dcl_color1 v2\n"
-//    "dcl_texcoord v3\n"
     "dp4 oPos.x, v0, c0\n"
     "dp4 oPos.y, v0, c1\n"
     "dp4 oPos.z, v0, c2\n"
@@ -71,8 +67,10 @@ const char *pixelShader =
 D3DXMATRIX matOrtho;
 D3DXMATRIX matProjection;
 D3DXMATRIX matViewProjection;
-D3DXMATRIX matView; 
+D3DXMATRIX matView;
 D3DXMATRIX matIdentity;
+
+LPDIRECT3DTEXTURE8 blankTexture;
 
 extern DWORD mainDecl[];
 extern DWORD orthoDecl[];
@@ -80,6 +78,8 @@ extern DWORD orthoDecl[];
 // size of vertex and index buffers
 const uint32_t MAX_VERTEXES = 4096;
 const uint32_t MAX_INDICES = 9216;
+
+std::string shaderPath;
 
 bool IsPowerOf2(int i)
 {
@@ -1189,6 +1189,8 @@ BOOL InitialiseDirect3D()
 	uint32_t colourDepth = 32;
 	uint32_t defaultDevice = D3DADAPTER_DEFAULT;
 	uint32_t thisDevice = D3DADAPTER_DEFAULT;
+	bool useTripleBuffering = Config_GetBool("[VideoMode]", "UseTripleBuffering", false);
+	shaderPath = Config_GetString("[VideoMode]", "ShaderPath", "shaders\\");
 
 	//	Zero d3d structure
     memset(&d3d, 0, sizeof(D3DINFO));
@@ -1197,7 +1199,7 @@ BOOL InitialiseDirect3D()
 	d3d.lpD3D = Direct3DCreate8(D3D_SDK_VERSION);
 	if (!d3d.lpD3D)
 	{
-		LogErrorString("Could not create Direct3D object \n");
+		Con_PrintError("Could not create Direct3D8 object");
 		return FALSE;
 	}
 
@@ -1314,7 +1316,7 @@ BOOL InitialiseDirect3D()
 	// create our list of supported resolutions for D3DFMT_LIN_X8R8G8B8 format
 	for (uint32_t i = 0; i < modeCount; i++)
 	{
-		LastError = d3d.lpD3D->EnumAdapterModes( defaultDevice, i, &tempMode );
+		LastError = d3d.lpD3D->EnumAdapterModes(defaultDevice, i, &tempMode);
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
@@ -1351,7 +1353,7 @@ BOOL InitialiseDirect3D()
 
 	d3dpp.BackBufferWidth = width;
 	d3dpp.BackBufferHeight = height;
-	d3dpp.BackBufferFormat = D3DFMT_LIN_X8R8G8B8;
+	d3dpp.BackBufferFormat = D3DFMT_X8R8G8B8;
 	d3dpp.BackBufferCount = 1;
 	d3dpp.EnableAutoDepthStencil = TRUE;
 	d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8;
@@ -1359,6 +1361,13 @@ BOOL InitialiseDirect3D()
 //	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 //	d3dpp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE_OR_IMMEDIATE;
+
+	if (useTripleBuffering)
+	{
+		d3dpp.BackBufferCount = 2;
+		d3dpp.SwapEffect = D3DSWAPEFFECT_FLIP;
+		Con_PrintMessage("Using triple buffering");
+	}
 
 	LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, NULL,
 			D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
@@ -1446,7 +1455,17 @@ BOOL InitialiseDirect3D()
 
 	CreatePixelShader("pixel_1_1.psh", &d3d.pixelShader);
 
-	Con_PrintMessage("Initialised Direct3D succesfully");
+	d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &blankTexture);
+
+	D3DLOCKED_RECT lock;
+
+	blankTexture->LockRect(0, &lock, NULL, 0);
+
+	memset(lock.pBits, 255, lock.Pitch);
+
+	blankTexture->UnlockRect(0);
+
+	Con_PrintMessage("Initialised Direct3D8 succesfully");
 	return TRUE;
 }
 
