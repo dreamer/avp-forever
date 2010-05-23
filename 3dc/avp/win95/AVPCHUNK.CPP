@@ -534,8 +534,8 @@ void AVP_Power_Cable_Chunk::fill_data_block(char* data)
 	{
 		*data=0;
 	}
-
 }
+
 size_t AVP_Power_Cable_Chunk::size_chunk()
 {
 	chunk_size=(strlen(name)+4)&~3;
@@ -576,6 +576,7 @@ AVP_Environment_Settings_Chunk::AVP_Environment_Settings_Chunk(Chunk_With_Childr
 
 	settings->data_size=size;
 }
+
 AVP_Environment_Settings_Chunk::AVP_Environment_Settings_Chunk(Chunk_With_Children* parent)
 :Chunk(parent,"AVPENVIR")
 {
@@ -594,7 +595,6 @@ AVP_Environment_Settings_Chunk::AVP_Environment_Settings_Chunk(Chunk_With_Childr
 	settings->marine_jetpack=0;
 	settings->stars_in_sky=0;
 	settings->spare_bits=0;
-			
 }
 
 
@@ -617,7 +617,6 @@ size_t AVP_Environment_Settings_Chunk::size_chunk ()
 {
 	chunk_size = 12+settings->data_size;
 	return(chunk_size);
-	
 }
 
 AVP_Environment_Settings_Chunk* GetAVPEnvironmentSettings(Environment_Data_Chunk* env_chunk)

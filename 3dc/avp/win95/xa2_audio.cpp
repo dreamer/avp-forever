@@ -9,9 +9,9 @@
 #include "audioStreaming.h"
 #include <d3dx9math.h>
 
-extern "C" {
-
 extern D3DXMATRIX viewMatrix;
+
+extern "C" {
 
 #ifdef DAVEW
 	#define DB_LEVEL 4

@@ -50,13 +50,52 @@ extern LPD3DXCONSTANTTABLE	vertexConstantTable;
 extern LPD3DXCONSTANTTABLE	orthoConstantTable;
 extern LPD3DXCONSTANTTABLE	fmvConstantTable;
 
+extern void DeleteRenderMemory();
+
 LPDIRECT3DTEXTURE9 blankTexture;
 
 // size of vertex and index buffers
 const uint32_t MAX_VERTEXES = 4096;
 const uint32_t MAX_INDICES = 9216;
+uint32_t fov = 75;
+
+static HRESULT LastError;
 
 std::string shaderPath;
+
+bool CreateVolatileResources();
+bool ReleaseVolatileResources();
+bool SetRenderStateDefaults();
+
+// byte order macros for A8R8G8B8 d3d texture
+enum 
+{
+	BO_BLUE,
+	BO_GREEN,
+	BO_RED,
+	BO_ALPHA
+};
+
+// TGA header structure
+#pragma pack(1)
+struct TGA_HEADER 
+{
+	char		idlength;
+	char		colourmaptype;
+	char		datatypecode;
+	int16_t		colourmaporigin;
+	int16_t 	colourmaplength;
+	char		colourmapdepth;
+	int16_t		x_origin;
+	int16_t		y_origin;
+	int16_t		width;
+	int16_t		height;
+	char		bitsperpixel;
+	char		imagedescriptor;
+};
+#pragma pack()
+
+static TGA_HEADER TgaHeader = {0};
 
 bool IsPowerOf2(int i) 
 {
@@ -70,6 +109,111 @@ int NearestSuperiorPow2(int i)
 {
 	int x = ((i - 1) & i);
 	return x ? NearestSuperiorPow2(x) : i << 1;
+}
+
+bool ReleaseVolatileResources() 
+{
+	ReleaseAllFMVTexturesForDeviceReset();
+
+	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
+	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
+	SAFE_RELEASE(d3d.lpD3DOrthoVertexBuffer);
+	SAFE_RELEASE(d3d.lpD3DOrthoIndexBuffer);
+	SAFE_RELEASE(d3d.lpD3DPointSpriteVertexBuffer);
+
+	return true;
+}
+
+bool CreateVolatileResources() 
+{
+	RecreateAllFMVTexturesAfterDeviceReset();
+
+	// create dynamic vertex buffer
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DLVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, /*D3DFVF_LVERTEX*/0, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	// create index buffer
+	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DIndexBuffer, NULL);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	// create our 2D vertex buffer
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(4 * 2000 * sizeof(ORTHOVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, /*D3DFVF_ORTHOVERTEX*/0, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoVertexBuffer, NULL);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	// create our 2D index buffer
+	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoIndexBuffer, NULL);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	// point sprite vb
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(24 * sizeof(POINTSPRITEVERTEX), D3DUSAGE_POINTS, /*D3DFVF_POINTSPRITEVERTEX*/0, D3DPOOL_MANAGED, &d3d.lpD3DPointSpriteVertexBuffer, NULL);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+#if 0
+	POINTSPRITEVERTEX *testPS;
+
+	LastError = d3d.lpD3DPointSpriteVertexBuffer->Lock(0, 0, (void**)&testPS, 0);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return FALSE;
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		testPS->x = i * 1000;
+		testPS->y = i * 1000;
+		testPS->z = i * 1000;
+		testPS->size = 64.0f;
+		testPS->colour = D3DCOLOR_XRGB(128, 0, 128);
+		testPS->u = 0.0f;
+		testPS->v = 0.0f;
+	}
+
+	LastError = d3d.lpD3DPointSpriteVertexBuffer->Unlock();
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return FALSE;
+	}
+#endif
+
+	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_LVERTEX);
+	if (FAILED(LastError)) 
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	SetRenderStateDefaults();
+
+	return true;
 }
 
 extern "C" {
@@ -95,25 +239,11 @@ extern void ToggleWireframe();
 
 extern HWND hWndMain;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern void DeleteRenderMemory();
-extern BOOL SetExecuteBufferDefaults();
 extern void ChangeWindowsSize(int width, int height);
 extern int WindowMode;
 int	VideoModeColourDepth;
 int	NumAvailableVideoModes;
-static HRESULT LastError;
 D3DINFO d3d;
-
-uint32_t fov = 75;
-
-// byte order macros for A8R8G8B8 d3d texture
-enum 
-{
-	BO_BLUE,
-	BO_GREEN,
-	BO_RED,
-	BO_ALPHA
-};
 
 // console command : set a new field of view value
 void SetFov()
@@ -139,27 +269,6 @@ void WriteMenuTextures()
 		D3DXSaveTextureToFileA(filename, D3DXIFF_PNG, AvPMenuGfxStorage[i].menuTexture, NULL);
 	}
 }
-
-// TGA header structure
-#pragma pack(1)
-struct TGA_HEADER 
-{
-	char		idlength;
-	char		colourmaptype;
-	char		datatypecode;
-	int16_t		colourmaporigin;
-	int16_t 	colourmaplength;
-	char		colourmapdepth;
-	int16_t		x_origin;
-	int16_t		y_origin;
-	int16_t		width;
-	int16_t		height;
-	char		bitsperpixel;
-	char		imagedescriptor;
-};
-#pragma pack()
-
-static TGA_HEADER TgaHeader = {0};
 
 void ColourFillBackBuffer(int FillColour) 
 {
@@ -337,16 +446,16 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 		colourFormat = D3DFMT_A8R8G8B8;
 	}
 
-	int width = 450;
-	int height = 495;
+	uint32_t width = 450;
+	uint32_t height = 495;
 
-	int padWidth = 512;
-	int padHeight = 512;
+	uint32_t padWidth = 512;
+	uint32_t padHeight = 512;
 
-	int charWidth = 30;
-	int charHeight = 33;
+	uint32_t charWidth = 30;
+	uint32_t charHeight = 33;
 	
-	int numTotalChars = tex->height / charHeight;
+	uint32_t numTotalChars = tex->height / charHeight;
 
 	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, NULL, colourFormat, D3DPOOL_MANAGED, &destTexture, NULL);
 	if (FAILED(LastError)) 
@@ -373,11 +482,11 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 		D3DCOLOR padColour = D3DCOLOR_ARGB(255, 255, 0, 255);
 
 		// lets pad the whole thing black first
-		for (int y = 0; y < padHeight; y++)
+		for (uint32_t y = 0; y < padHeight; y++)
 		{
 			destPtr = ((uint16_t*)(((uint8_t*)lock.pBits) + y*lock.Pitch));
 
-			for (int x = 0; x < padWidth; x++)
+			for (uint32_t x = 0; x < padWidth; x++)
 			{
 				// >> 3 for red and blue in a 16 bit texture, 2 for green
 				*destPtr = static_cast<uint16_t> (RGB16(padColour, padColour, padColour));
@@ -385,16 +494,16 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 			}
 		}
 
-		for (int i = 0; i < numTotalChars; i++) 
+		for (uint32_t i = 0; i < numTotalChars; i++) 
 		{
-			int row = i / 15; // get row
-			int column = i % 15; // get column from remainder value
+			uint32_t row = i / 15; // get row
+			uint32_t column = i % 15; // get column from remainder value
 
-			int offset = ((column * charWidth) * sizeof(uint16_t)) + ((row * charHeight) * lock.Pitch);
+			uint32_t offset = ((column * charWidth) * sizeof(uint16_t)) + ((row * charHeight) * lock.Pitch);
 
 			destPtr = ((uint16_t*)(((uint8_t*)lock.pBits + offset)));
 
-			for (int y = 0; y < charHeight; y++) 
+			for (uint32_t y = 0; y < charHeight; y++) 
 			{
 				destPtr = ((uint16_t*)(((uint8_t*)lock.pBits + offset) + (y*lock.Pitch)));
 
@@ -417,11 +526,11 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 		D3DCOLOR padColour = D3DCOLOR_ARGB(255, 255, 0, 255);
 
 		// lets pad the whole thing black first
-		for (int y = 0; y < padHeight; y++)
+		for (uint32_t y = 0; y < padHeight; y++)
 		{
 			destPtr = (((uint8_t*)lock.pBits) + y*lock.Pitch);
 
-			for (int x = 0; x < padWidth; x++)
+			for (uint32_t x = 0; x < padWidth; x++)
 			{
 				// >> 3 for red and blue in a 16 bit texture, 2 for green
 				*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(padColour, padColour, padColour, padColour);
@@ -430,20 +539,20 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 			}
 		}
 
-		for (int i = 0; i < numTotalChars; i++) 
+		for (uint32_t i = 0; i < numTotalChars; i++) 
 		{
-			int row = i / 15; // get row
-			int column = i % 15; // get column from remainder value
+			uint32_t row = i / 15; // get row
+			uint32_t column = i % 15; // get column from remainder value
 
-			int offset = ((column * charWidth) * sizeof(uint32_t)) + ((row * charHeight) * lock.Pitch);
+			uint32_t offset = ((column * charWidth) * sizeof(uint32_t)) + ((row * charHeight) * lock.Pitch);
 
 			destPtr = (((uint8_t*)lock.pBits + offset));
 
-			for (int y = 0; y < charHeight; y++) 
+			for (uint32_t y = 0; y < charHeight; y++) 
 			{
 				destPtr = (((uint8_t*)lock.pBits + offset) + (y*lock.Pitch));
 
-				for (int x = 0; x < charWidth; x++) 
+				for (uint32_t x = 0; x < charWidth; x++) 
 				{
 					if (srcPtr[0] == 0x00 && srcPtr[1] == 0x00 && srcPtr[2] == 0x00) 
 					{
@@ -480,7 +589,7 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t 
 {
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
 
-	int newWidth, newHeight;
+	uint32_t newWidth, newHeight;
 
 	// check if passed value is already a power of 2
 	if (!IsPowerOf2(*width)) 
@@ -645,7 +754,7 @@ void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
 	{
 		destPtr = (((uint8_t*)lock.pBits) + y*lock.Pitch);
 
-		for (int x = 0; x < 256; x++)
+		for (uint32_t x = 0; x < 256; x++)
 		{
 			if ((destPtr[BO_RED] == 255) && (destPtr[BO_BLUE] == 0) && (destPtr[BO_GREEN] == 0))
 			{
@@ -881,111 +990,6 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usag
 
 	delete[] buffer;
 	return destTexture;
-}
-
-BOOL ReleaseVolatileResources() 
-{
-	ReleaseAllFMVTexturesForDeviceReset();
-
-	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
-	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
-	SAFE_RELEASE(d3d.lpD3DOrthoVertexBuffer);
-	SAFE_RELEASE(d3d.lpD3DOrthoIndexBuffer);
-	SAFE_RELEASE(d3d.lpD3DPointSpriteVertexBuffer);
-
-	return TRUE;
-}
-
-BOOL CreateVolatileResources() 
-{
-	RecreateAllFMVTexturesAfterDeviceReset();
-
-	// create dynamic vertex buffer
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DLVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, /*D3DFVF_LVERTEX*/0, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
-	if (FAILED(LastError)) 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return FALSE;
-	}
-
-	// create index buffer
-	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DIndexBuffer, NULL);
-	if (FAILED(LastError)) 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return FALSE;
-	}
-
-	// create our 2D vertex buffer
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(4 * 2000 * sizeof(ORTHOVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, /*D3DFVF_ORTHOVERTEX*/0, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoVertexBuffer, NULL);
-	if (FAILED(LastError)) 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return FALSE;
-	}
-
-	// create our 2D index buffer
-	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoIndexBuffer, NULL);
-	if (FAILED(LastError)) 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return FALSE;
-	}
-
-	// point sprite vb
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(24 * sizeof(POINTSPRITEVERTEX), D3DUSAGE_POINTS, /*D3DFVF_POINTSPRITEVERTEX*/0, D3DPOOL_MANAGED, &d3d.lpD3DPointSpriteVertexBuffer, NULL);
-	if (FAILED(LastError)) 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return FALSE;
-	}
-
-#if 0
-	POINTSPRITEVERTEX *testPS;
-
-	LastError = d3d.lpD3DPointSpriteVertexBuffer->Lock(0, 0, (void**)&testPS, 0);
-	if (FAILED(LastError)) 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return FALSE;
-	}
-
-	for (int i = 0; i < 4; i++)
-	{
-		testPS->x = i * 1000;
-		testPS->y = i * 1000;
-		testPS->z = i * 1000;
-		testPS->size = 64.0f;
-		testPS->colour = D3DCOLOR_XRGB(128, 0, 128);
-		testPS->u = 0.0f;
-		testPS->v = 0.0f;
-	}
-
-	LastError = d3d.lpD3DPointSpriteVertexBuffer->Unlock();
-	if (FAILED(LastError)) 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return FALSE;
-	}
-#endif
-
-	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return FALSE;
-	}
-
-	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_LVERTEX);
-	if (FAILED(LastError)) 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return FALSE;
-	}
-
-	SetExecuteBufferDefaults();
-
-	return TRUE;
 }
 
 BOOL ChangeGameResolution(uint32_t width, uint32_t height, uint32_t colourDepth)
@@ -1399,7 +1403,7 @@ BOOL InitialiseDirect3D()
 	else 
 	{
 		d3d.supportsDynamicTextures = FALSE;
-		Con_PrintError("Device can't use D3DUSAGE_DYNAMIC");
+		Con_PrintError("Device does not support D3DUSAGE_DYNAMIC");
 	}
 
 	// Log resolution set
@@ -1486,7 +1490,7 @@ BOOL InitialiseDirect3D()
 		ScreenDescriptorBlock.SDB_SafeZoneWidthOffset = (width / 100) * 15;
 		ScreenDescriptorBlock.SDB_SafeZoneHeightOffset = (height / 100) * 15;
 	}
-	else 
+	else
 	{
 		ScreenDescriptorBlock.SDB_SafeZoneWidthOffset = 0;
 		ScreenDescriptorBlock.SDB_SafeZoneHeightOffset = 0;
@@ -1525,12 +1529,13 @@ BOOL InitialiseDirect3D()
 	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
 //	CreatePixelShader("pointSpritePixel.psh", &d3d.pointSpritePixelShader);
 
+	// create a 1x1 resolution texture
 	d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &blankTexture, NULL);
 
 	D3DLOCKED_RECT lock;
-
 	blankTexture->LockRect(0, &lock, NULL, 0);
 
+	// set pixel to white
 	memset(lock.pBits, 255, lock.Pitch);
 
 	blankTexture->UnlockRect(0);

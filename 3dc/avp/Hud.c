@@ -424,9 +424,6 @@ void MaintainHUD(void)
 	CheckWireFrameMode(0);
 
 	{
-		extern int HeadUpDisplayZOffset;
-		HeadUpDisplayZOffset = 0;
-
 		#if 1||!PREDATOR_DEMO
 		GADGET_Render();
 		#endif
@@ -446,7 +443,6 @@ void MaintainHUD(void)
 			default:
 				break;
 		}
-
 	}
 	{
 		extern int AlienBiteAttackInProgress;

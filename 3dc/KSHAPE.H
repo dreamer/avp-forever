@@ -97,10 +97,6 @@ extern void TranslatePointIntoViewspace(VECTORCH *pointPtr);
 extern void RenderDecal(DECAL *decalPtr);
 extern void RenderParticle(PARTICLE *particlePtr);
 
-/* KJL 10:25:44 7/23/97 - this offset is used to push back the normal game gfx,
-so that the HUD can be drawn over the top without sinking into walls, etc. */
-extern int HeadUpDisplayZOffset;
-
 /* KJL 16:17:13 11/02/98 - heat source containment */
 typedef struct
 {

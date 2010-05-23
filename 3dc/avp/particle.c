@@ -3285,9 +3285,7 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 					case PARTICLE_PREDPISTOL_FLECHETTE_NONDAMAGING:
 					case PARTICLE_TRACER:
 					{
-/* bjd - revert
 						RenderParticle(particlePtr);
-*/
 						break;
 					}
 					default:
@@ -3928,7 +3926,7 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 	
 	switch (muzzleFlashID)
 	{
-#if 0 // bjd - revert
+#if 1 // bjd - revert
 		case MUZZLE_FLASH_SMARTGUN:
 		{
 			PARTICLE_DESC *particleDescPtr = &ParticleDescription[PARTICLE_MUZZLEFLASH];
@@ -4028,7 +4026,7 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 			{
 				int i = 16;
 				particle.Size = 20;
-#if 0 // bjd - revert
+#if 1 // bjd - revert
 				while (i--)
 				{
 					RenderParticle(&particle);
@@ -4042,7 +4040,6 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 		}
 		case MUZZLE_FLASH_SKEETER:
 		{
-/* bjd - revert
 			PARTICLE_DESC *particleDescPtr;
 			particle.ParticleID=PARTICLE_MUZZLEFLASH;
 			particleDescPtr = &ParticleDescription[particle.ParticleID];
@@ -4071,7 +4068,6 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 					particle.Position.vz = positionPtr->vz + MUL_FIXED(100,directionPtr->vz) + (FastRandom()&127)-64;
 				}																								 
 			}
-*/
 			break;
 		}
 		default:

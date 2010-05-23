@@ -26,8 +26,6 @@ extern void D3D_PlayerOnFireOverlay(void);
 
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a);
 
-void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
-
 extern void CheckWireFrameMode(int shouldBeOn);
 
 extern void InitForceField(void);

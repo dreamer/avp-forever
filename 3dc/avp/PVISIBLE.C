@@ -1940,52 +1940,51 @@ void KillInanimateObjectForRespawn(STRATEGYBLOCK *sbPtr)
 
 void KillFragmentalObjectForRespawn(STRATEGYBLOCK *sbPtr)
 {
-        INANIMATEOBJECT_STATUSBLOCK* objectstatusptr = sbPtr->SBdataptr;
-        LOCALASSERT(objectstatusptr);
-        LOCALASSERT(AvP.Network!=I_No_Network);
-        
-        /* make the object invisible, and remove it from visibility management */
-        sbPtr->maintainVisibility = 0;
-        if(sbPtr->SBdptr) MakeObjectFar(sbPtr);
+    INANIMATEOBJECT_STATUSBLOCK* objectstatusptr = sbPtr->SBdataptr;
+    LOCALASSERT(objectstatusptr);
+    LOCALASSERT(AvP.Network!=I_No_Network);
+    
+    /* make the object invisible, and remove it from visibility management */
+    sbPtr->maintainVisibility = 0;
+    if(sbPtr->SBdptr) MakeObjectFar(sbPtr);
 
-        /* KJL 12:44:23 24/05/98 -
-        
-                Set the respawn counter to be the max allowable, so that if all the
-        respawn counters are set to zero, it forces all the objects that have been
-        destroyed (eg. glass) to respawn simultaneously.
+    /* KJL 12:44:23 24/05/98 -
+    
+            Set the respawn counter to be the max allowable, so that if all the
+    respawn counters are set to zero, it forces all the objects that have been
+    destroyed (eg. glass) to respawn simultaneously.
 
-        Not a perfect solution: the object will respawn in 9.1 hours on its own. */
-        
-        objectstatusptr->respawnTimer = OBJECT_RESPAWN_NO_RESPAWN;
-
+    Not a perfect solution: the object will respawn in 9.1 hours on its own. */
+    
+    objectstatusptr->respawnTimer = OBJECT_RESPAWN_NO_RESPAWN;
 }
 
 void RespawnAllObjects(void)
 {
-        int i;
+    int i;
 
-        LOCALASSERT(AvP.Network!=I_No_Network);
+    LOCALASSERT(AvP.Network!=I_No_Network);
 
-        for (i=0; i<NumActiveStBlocks; i++)
+    for (i=0; i<NumActiveStBlocks; i++)
+    {
+        STRATEGYBLOCK *sbPtr = ActiveStBlockList[i];
+
+        if(sbPtr->I_SBtype == I_BehaviourInanimateObject)
         {
-                STRATEGYBLOCK *sbPtr = ActiveStBlockList[i];
-
-                if(sbPtr->I_SBtype == I_BehaviourInanimateObject)
+                INANIMATEOBJECT_STATUSBLOCK* objectStatusPtr = sbPtr->SBdataptr;
+                LOCALASSERT(objectStatusPtr);
+                
+                if(objectStatusPtr->respawnTimer!=0)
                 {
-                        INANIMATEOBJECT_STATUSBLOCK* objectStatusPtr = sbPtr->SBdataptr;
-                        LOCALASSERT(objectStatusPtr);
-                        
-                        if(objectStatusPtr->respawnTimer!=0)
-                        {
-                                RespawnInanimateObject(sbPtr);
-                                objectStatusPtr->respawnTimer=0;
-                        }
+                        RespawnInanimateObject(sbPtr);
+                        objectStatusPtr->respawnTimer=0;
                 }
-                else if(sbPtr->I_SBtype == I_BehaviourPlacedLight)
-                {
-                        RespawnLight(sbPtr);
-                }
-        }               
+        }
+        else if(sbPtr->I_SBtype == I_BehaviourPlacedLight)
+        {
+                RespawnLight(sbPtr);
+        }
+    }               
 }
 
 void RespawnAllPickups(void)
@@ -2019,176 +2018,174 @@ void RespawnAllPickups(void)
 	}
 }
 
-void IdentifyObject(STRATEGYBLOCK *sbPtr) {
-        
-        if (sbPtr==NULL) {
-                textprint("Object is NULL!\n");
-                return;
-        }
+void IdentifyObject(STRATEGYBLOCK *sbPtr) 
+{
+    if (sbPtr==NULL) {
+            textprint("Object is NULL!\n");
+            return;
+    }
 
-        if (sbPtr->I_SBtype == I_BehaviourInanimateObject) {
-                INANIMATEOBJECT_STATUSBLOCK* objStatPtr = sbPtr->SBdataptr;
-        
-                switch(objStatPtr->typeId)
+    if (sbPtr->I_SBtype == I_BehaviourInanimateObject) 
+	{
+        INANIMATEOBJECT_STATUSBLOCK* objStatPtr = sbPtr->SBdataptr;
+
+        switch(objStatPtr->typeId)
+        {
+				case(IOT_Weapon):
                 {
-                        case(IOT_Weapon):
+                        switch(objStatPtr->subType)
                         {
-                                switch(objStatPtr->subType)
+                                case WEAPON_PULSERIFLE:
                                 {
-                                        case WEAPON_PULSERIFLE:
-                                        {
-                                                textprint("Object is a Pulse Rifle.\n");
-                                                return;
-                                        }
-                                        case WEAPON_AUTOSHOTGUN:
-                                        {
-                                                textprint("Object is an Autoshotgun.\n");
-                                                return;
-                                        }
-                                        case WEAPON_SMARTGUN:
-                                        {
-                                                textprint("Object is a Smartgun.\n");
-                                                return;
-                                        }
-                                        case WEAPON_FLAMETHROWER:
-                                        {
-                                                textprint("Object is a Flamethrower.\n");
-                                                return;
-                                        }
-                                        case WEAPON_PLASMAGUN:
-                                        {
-                                                textprint("Object is a Plasmagun!\n");
-                                                return;
-                                        }
-                                        case WEAPON_SADAR:
-                                        {
-                                                textprint("Object is a Sadar.\n");
-                                                return;
-                                        }
-                                        case WEAPON_GRENADELAUNCHER:
-                                        {
-                                                textprint("Object is a Grenade Launcher.\n");
-                                                return;
-                                        }
-                                        case WEAPON_MINIGUN:
-                                        {
-                                                textprint("Object is a Minigun.\n");
-                                                return;
-                                        }
-        
-                                        default:
-                                                textprint("Object is unknown weapon (subtype %d).\n",(int)objStatPtr->subType);
-                                                break;
+                                        textprint("Object is a Pulse Rifle.\n");
+                                        return;
                                 }
-                                break;
-                        }
-                        case(IOT_Ammo):
-                        {
-                                switch(objStatPtr->subType)
+                                case WEAPON_AUTOSHOTGUN:
                                 {
-                                        case AMMO_10MM_CULW:
-                                        {
-                                                textprint("Object is Pulse Rifle ammo.\n");
-                                                break;
-                                        }
-                                        case AMMO_SHOTGUN:
-                                        {
-                                                textprint("Object is Shotgun ammo.\n");
-                                                break;
-                                        }
-                                        case AMMO_SMARTGUN:
-                                        {
-                                                textprint("Object is Smartgun ammo.\n");
-                                                break;
-                                        }
-                                        case AMMO_FLAMETHROWER:
-                                        {
-                                                textprint("Object is Flamethrower ammo.\n");
-                                                break;
-                                        }
-                                        case AMMO_PLASMA:
-                                        {
-                                                textprint("Object is Plasmagun ammo!\n");
-                                                break;
-                                        }
-                                        case AMMO_SADAR_TOW:
-                                        {
-                                                textprint("Object is Sadar ammo.\n");
-                                                break;
-                                        }
-                                        case AMMO_GRENADE: 
-                                        {
-                                                textprint("Object is Grenade Launcher ammo.\n");
-                                                break;
-                                        }
-                                        case AMMO_MINIGUN:
-                                        {
-                                                textprint("Object is Minigun ammo.\n");
-                                                break;
-                                        }
-                                        default:
-                                                textprint("Object is unlisted ammo (subtype %d).\n",(int)objStatPtr->subType);
-                                                break;
+                                        textprint("Object is an Autoshotgun.\n");
+                                        return;
                                 }
-                                
-                                break;
+                                case WEAPON_SMARTGUN:
+                                {
+                                        textprint("Object is a Smartgun.\n");
+                                        return;
+                                }
+                                case WEAPON_FLAMETHROWER:
+                                {
+                                        textprint("Object is a Flamethrower.\n");
+                                        return;
+                                }
+                                case WEAPON_PLASMAGUN:
+                                {
+                                        textprint("Object is a Plasmagun!\n");
+                                        return;
+                                }
+                                case WEAPON_SADAR:
+                                {
+                                        textprint("Object is a Sadar.\n");
+                                        return;
+                                }
+                                case WEAPON_GRENADELAUNCHER:
+                                {
+                                        textprint("Object is a Grenade Launcher.\n");
+                                        return;
+                                }
+                                case WEAPON_MINIGUN:
+                                {
+                                        textprint("Object is a Minigun.\n");
+                                        return;
+                                }
+
+                                default:
+                                        textprint("Object is unknown weapon (subtype %d).\n",(int)objStatPtr->subType);
+                                        break;
                         }
-                        case(IOT_Health):
-                        {
-                                textprint("Object is health.\n");
-                                break;
-                        }
-                        case(IOT_Armour):
-                        {
-                                textprint("Object is armour.\n");
-                                break;
-                        }
-                        case(IOT_FieldCharge):
-                        {
-                                textprint("Object is field charge powerup.\n");
-                                break;
-                        }
-                        default:
-                        {
-                                textprint("Object is unlisted subtype (%d).\n",(int)objStatPtr->subType);
-                                break;
-                        }
+                        break;
                 }
-        } else {
-                switch(sbPtr->I_SBtype) {
-                        case I_BehaviourMarine:
+                case(IOT_Ammo):
+                {
+                        switch(objStatPtr->subType)
                         {
-                                textprint("Object is a marine.\n");
-                                textprint("Marine is in %s\n",sbPtr->containingModule->name);
-                                break;
+                                case AMMO_10MM_CULW:
+                                {
+                                        textprint("Object is Pulse Rifle ammo.\n");
+                                        break;
+                                }
+                                case AMMO_SHOTGUN:
+                                {
+                                        textprint("Object is Shotgun ammo.\n");
+                                        break;
+                                }
+                                case AMMO_SMARTGUN:
+                                {
+                                        textprint("Object is Smartgun ammo.\n");
+                                        break;
+                                }
+                                case AMMO_FLAMETHROWER:
+                                {
+                                        textprint("Object is Flamethrower ammo.\n");
+                                        break;
+                                }
+                                case AMMO_PLASMA:
+                                {
+                                        textprint("Object is Plasmagun ammo!\n");
+                                        break;
+                                }
+                                case AMMO_SADAR_TOW:
+                                {
+                                        textprint("Object is Sadar ammo.\n");
+                                        break;
+                                }
+                                case AMMO_GRENADE: 
+                                {
+                                        textprint("Object is Grenade Launcher ammo.\n");
+                                        break;
+                                }
+                                case AMMO_MINIGUN:
+                                {
+                                        textprint("Object is Minigun ammo.\n");
+                                        break;
+                                }
+                                default:
+                                        textprint("Object is unlisted ammo (subtype %d).\n",(int)objStatPtr->subType);
+                                        break;
                         }
-                        case I_BehaviourAlien:
-                        {
-                                textprint("Object is an alien.\n");
-                                break;
-                        }
-                        case I_BehaviourPredator:
-                        {
-                                textprint("Object is a predator.\n");
-                                break;
-                        }
-                        default:
-                        {
-                                textprint("Object is not supported - change PVisible.c for expanded diagnostics!\n");
-                                break;
-                        }
+                        
+                        break;
+                }
+                case(IOT_Health):
+                {
+                        textprint("Object is health.\n");
+                        break;
+                }
+                case(IOT_Armour):
+                {
+                        textprint("Object is armour.\n");
+                        break;
+                }
+                case(IOT_FieldCharge):
+                {
+                        textprint("Object is field charge powerup.\n");
+                        break;
+                }
+                default:
+                {
+                        textprint("Object is unlisted subtype (%d).\n",(int)objStatPtr->subType);
+                        break;
                 }
         }
+    } else {
+            switch(sbPtr->I_SBtype) {
+                    case I_BehaviourMarine:
+                    {
+                            textprint("Object is a marine.\n");
+                            textprint("Marine is in %s\n",sbPtr->containingModule->name);
+                            break;
+                    }
+                    case I_BehaviourAlien:
+                    {
+                            textprint("Object is an alien.\n");
+                            break;
+                    }
+                    case I_BehaviourPredator:
+                    {
+                            textprint("Object is a predator.\n");
+                            break;
+                    }
+                    default:
+                    {
+                            textprint("Object is not supported - change PVisible.c for expanded diagnostics!\n");
+                            break;
+                    }
+            }
+    }
 
-        if (!sbPtr->DynPtr) {
-                textprint("Object has no dynamics block!\n");
-        } else {
-                textprint("Object world co-ords: %d %d %d\n",sbPtr->DynPtr->Position.vx,sbPtr->DynPtr->Position.vy,sbPtr->DynPtr->Position.vz);
-        }
-
+    if (!sbPtr->DynPtr) {
+            textprint("Object has no dynamics block!\n");
+    } else {
+            textprint("Object world co-ords: %d %d %d\n",sbPtr->DynPtr->Position.vx,sbPtr->DynPtr->Position.vy,sbPtr->DynPtr->Position.vz);
+    }
 }
-
-
 
 STRATEGYBLOCK* CreateMultiplayerWeaponPickup(VECTORCH* location,int type,char* name)
 {

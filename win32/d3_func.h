@@ -195,8 +195,6 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usag
 LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight);
 LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
-BOOL ReleaseVolatileResources();
-BOOL CreateVolatileResources();
 BOOL ChangeGameResolution(uint32_t width, uint32_t height, uint32_t colour_depth);
 
 void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha);

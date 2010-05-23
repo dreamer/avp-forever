@@ -5,6 +5,9 @@
  * to the view frustrum and clipping
  *
  */
+
+#if 1
+
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
@@ -1514,3 +1517,5 @@ int TriangleWithinFrustrum(void)
 	/* yes, we need to draw poly */
 	return 1;
 }
+
+#endif

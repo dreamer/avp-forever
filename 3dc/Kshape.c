@@ -183,10 +183,6 @@ RENDERPOLYGON TranslucentPolygons[MAX_NO_OF_TRANSLUCENT_POLYGONS];
 POLYHEADER TranslucentPolygonHeaders[MAX_NO_OF_TRANSLUCENT_POLYGONS];
 int CurrentNumberOfTranslucentPolygons;
 
-/* KJL 10:25:44 7/23/97 - this offset is used to push back the normal game gfx,
-so that the HUD can be drawn over the top without sinking into walls, etc. */
-int HeadUpDisplayZOffset=0;
-
 extern int CloakingPhase;
 static VECTORCH ObjectCentre;
 static int HierarchicalObjectsLowestYValue;
@@ -756,11 +752,11 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 
 							if (polyPtr->PolyFlags & iflag_transparent)
 							{
-								AddToTranslucentPolyList(polyPtr,RenderPolygon.Vertices);
+								AddToTranslucentPolyList(polyPtr, RenderPolygon.Vertices);
 							}
 							else 
 							{
-								D3D_ZBufferedGouraudTexturedPolygon_Output(polyPtr,RenderPolygon.Vertices);
+								D3D_ZBufferedGouraudTexturedPolygon_Output(polyPtr, RenderPolygon.Vertices);
 							}
 							
 							SecondTriangle:
@@ -1134,7 +1130,7 @@ static void PredatorSeeAliensVisionPolygon_Construct(POLYHEADER *polyPtr)
 		}
 		else
 		{
-			alpha = 0;
+			alpha = 255;
 			RenderPolygon.TranslucencyMode = TRANSLUCENCY_OFF;
 		}
 		
@@ -2830,6 +2826,7 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 	POLYHEADER *pheader = (POLYHEADER*) shapeitemptr;
 	int sequence;
 	int *txf_imageptr;
+	int test;
 
 
 	/* The sequence # will have been copied across by the control block */
@@ -2883,6 +2880,8 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 
 	pheader->PolyColour &= ClrTxIndex;
 
+	test = (pheader->PolyColour & ClrTxDefn);
+
 
 	/* Multi-View Sprites need to select an image from the array */
 	if (Global_ShapeHeaderPtr->shapeflags & ShapeFlag_MultiViewSprite) 
@@ -2890,6 +2889,7 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 		int **txf_uvarrayptr0 = (int **) txaf0->txf_uvdata;
 		int **txf_uvarrayptr1 = (int **) txaf1->txf_uvdata;
 		int index;
+		int test;
 
 		index = GetMVSIndex(txah, &LToVMat_Euler);
 
@@ -2897,6 +2897,7 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 		txf_imageptr = (int *) txaf0->txf_image;
 		pheader->PolyColour |= txf_imageptr[index];
 
+		test = (pheader->PolyColour & ClrTxDefn);
 
 		/* Get the uv data */
 		txaf0_uv = txf_uvarrayptr0[index];
@@ -2911,7 +2912,6 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 		txaf0_uv = txaf0->txf_uvdata;
 		txaf1_uv = txaf1->txf_uvdata;
 	}
-
 
 	/* Calculate UVs */
 	iptr = uv_array;
@@ -3919,12 +3919,15 @@ void AddHierarchicalShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	SHAPEINSTR *shapeinstrptr;
 
 	GLOBALASSERT(!dptr->HModelControlBlock);
-	if(!ObjectWithinFrustrum(dptr)) return;
+
+	if (!ObjectWithinFrustrum(dptr))
+		return;
 
 	shapeheaderptr = dptr->ObShapeData;
 
 	/* Texture Animation Control */
-	if(dptr->ObTxAnimCtrlBlks) ControlTextureAnimation(dptr);
+	if (dptr->ObTxAnimCtrlBlks) 
+		ControlTextureAnimation(dptr);
 
 	/* Global Variables */
 	Global_VDB_Ptr        = VDB_Ptr;
@@ -4016,7 +4019,6 @@ float Dest[3];
 
 extern void TranslationSetup(void)
 {
-	char buf[300];
 	VECTORCH v = Global_VDB_Ptr->VDB_World;
 	extern int PredatorVisionChangeCounter;
 	float p = PredatorVisionChangeCounter / 65536.0f;
@@ -4360,7 +4362,7 @@ void RenderDecal(DECAL *decalPtr)
 	{
 		int outcode = DecalWithinFrustrum(decalPtr);
 										  
-		if (outcode)
+		if (1)//(outcode) // bjd
 		{
 			switch (decalPtr->DecalID)
 			{
@@ -4369,7 +4371,7 @@ void RenderDecal(DECAL *decalPtr)
 				{
 					DecalPolygon_Construct(decalPtr);
 
-					if (outcode != 2)
+					if (0)//(outcode != 2) // bjd
 					{
 						TexturedPolygon_ClipWithZ();
 						if (RenderPolygon.NumberOfVertices < 3)
@@ -5447,8 +5449,8 @@ void RenderSky(void)
 		{
 			u[i] = (FastRandom()&65535);//*128;
 			v[i] = (FastRandom()&65535);//*128;
-			du[i] = ( ((FastRandom()&65535)-32768)*(i+1) );//*8;
-			dv[i] = ( ((FastRandom()&65535)-32768)*(i+1) );//*8;
+			du[i] = (((FastRandom()&65535)-32768)*(i+1));//*8;
+			dv[i] = (((FastRandom()&65535)-32768)*(i+1));//*8;
 		}
 		skySetup = 1;
 	}
@@ -5491,7 +5493,7 @@ void RenderSky(void)
 					translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy;
 					translatedPts[i].vz += Global_VDB_Ptr->VDB_World.vz;
 
-					TranslatePointIntoViewspace(&translatedPts[i]);
+//					TranslatePointIntoViewspace(&translatedPts[i]);
 
 					VerticesBuffer[i].X	= translatedPts[i].vx;
 					VerticesBuffer[i].Y	= translatedPts[i].vy;

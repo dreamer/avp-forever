@@ -13831,7 +13831,8 @@ void GetPointToFaceMarineTowards(STRATEGYBLOCK *sbPtr,VECTORCH *output) {
 	return;
 }
 
-int MarineSight_FrustrumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRATEGYBLOCK *target) {
+int MarineSight_FrustrumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRATEGYBLOCK *target) 
+{
 
 	MARINE_STATUS_BLOCK *marineStatusPointer;
 
@@ -13840,7 +13841,8 @@ int MarineSight_FrustrumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRATE
 	marineStatusPointer = (MARINE_STATUS_BLOCK *)(sbPtr->SBdataptr);    
     LOCALASSERT(marineStatusPointer);	          		
 
-	if (marineStatusPointer->Target==NULL) {
+	if (marineStatusPointer->Target==NULL) 
+	{
 		/* Chop off the top 45 degrees. */
 		if ( (localOffset->vz <0) && (
 			((localOffset->vy-100)>=0)||(((localOffset->vy-100)<0)&&((-(localOffset->vy-100)) < (-localOffset->vz)))
@@ -13850,8 +13852,9 @@ int MarineSight_FrustrumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRATE
 		} else {
 			return(0);
 		}
-	} else if (marineStatusPointer->Target!=target) {
-	
+	} 
+	else if (marineStatusPointer->Target!=target) 
+	{
 		if ( (localOffset->vz <0) 
 	//		&& (localOffset->vz <  (localOffset->vy+500)) 
 	// 		&& (localOffset->vz > -(localOffset->vy+500)) 
@@ -13877,8 +13880,8 @@ int MarineSight_FrustrumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRATE
 	}
 }
 
-int Marine_SoundInterest(SOUNDINDEX soundIndex) {
-
+int Marine_SoundInterest(SOUNDINDEX soundIndex) 
+{
 	/* Returns 0->ONE_FIXED scale.  0 is ignored.  Otherwise, larger value means
 	lower priority. */
 	
