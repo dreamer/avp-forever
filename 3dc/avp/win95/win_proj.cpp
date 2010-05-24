@@ -9,6 +9,7 @@ Project specific (or potentially project specific) windows functionality
 
 #include "console.h"
 #include "iofocus.h"
+#include "logString.h"
 
 extern "C" {
 
@@ -563,20 +564,32 @@ void ChangeWindowsSize(int width, int height)
 {
 	RECT testRect;
 	RECT newWindowSize;
+	HRESULT LastError;
 
 	newWindowSize.top = 0;
 	newWindowSize.left = 0;
 	newWindowSize.right = width;
 	newWindowSize.bottom = height;
 
-	AdjustWindowRect(&newWindowSize, GetWindowLongPtr( hWndMain, GWL_STYLE ), FALSE );
+	if (AdjustWindowRect(&newWindowSize, GetWindowLongPtr( hWndMain, GWL_STYLE ), FALSE ) == 0)
+	{
+		LastError = HRESULT_FROM_WIN32(GetLastError());
+		LogDxError(LastError, __LINE__, __FILE__);
+		return;
+	}
 
 	if (SetWindowPos(hWndMain, 0, 0, 0, newWindowSize.right - newWindowSize.left, newWindowSize.bottom - newWindowSize.top, SWP_SHOWWINDOW) == 0)
 	{	
-		OutputDebugString("SetWindowPos failed\n");
+		LastError = HRESULT_FROM_WIN32(GetLastError());
+		LogDxError(LastError, __LINE__, __FILE__);
+		return;
 	}
 
-	GetClientRect(hWndMain, &testRect);
+	if (GetClientRect(hWndMain, &testRect) == 0)
+	{
+		LastError = HRESULT_FROM_WIN32(GetLastError());
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
 }
 
 void InitialiseRawInput()

@@ -1515,7 +1515,6 @@ BOOL InitialiseDirect3D()
 	d3d.lpD3DDevice->CreateVertexDeclaration(decl, &d3d.vertexDecl);
 	d3d.lpD3DDevice->CreateVertexDeclaration(orthoDecl, &d3d.orthoVertexDecl);
 	d3d.lpD3DDevice->CreateVertexDeclaration(fmvDecl, &d3d.fmvVertexDecl);
-	d3d.lpD3DDevice->CreateVertexDeclaration(fmvDecl, &d3d.pointVertexDecl);
 
 	if (CreateVertexShader("vertex.vsh", &d3d.vertexShader, &vertexConstantTable) != 0)
 	{
@@ -1523,11 +1522,9 @@ BOOL InitialiseDirect3D()
 	}
 	CreateVertexShader("orthoVertex.vsh", &d3d.orthoVertexShader, &orthoConstantTable);
 	CreateVertexShader("fmvVertex.vsh", &d3d.fmvVertexShader, &fmvConstantTable);
-//	CreateVertexShader("pointSpriteVertex.vsh", &d3d.pointSpriteShader, NULL);
 
 	CreatePixelShader("pixel.psh", &d3d.pixelShader);
 	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
-//	CreatePixelShader("pointSpritePixel.psh", &d3d.pointSpritePixelShader);
 
 	// create a 1x1 resolution texture
 	d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &blankTexture, NULL);

@@ -27,12 +27,6 @@
 #include "font2.h"
 #include "textureManager.h"
 
-static HRESULT LastError;
-
-extern "C" {
-//extern void New_D3D_HUDQuad_Output(int textureID, int x, int y, int width, int height, int *uvArray, uint32_t colour, enum FILTERING_MODE_ID filteringType);
-}
-
 struct Font
 {
 	enum		type;
@@ -160,10 +154,6 @@ void Font_Init()
 */
 }
 
-extern "C" {
-extern char AAFontWidths[256];
-}
-
 uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t colour, enum FONT_TYPE fontType)
 {
 
@@ -172,21 +162,21 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 
 //	int sixtyThree = 16;
 
-	uint32_t i = 0;
+	uint32_t charIndex = 0;
 
 	uint32_t charWidth = 11;
 
-	while (i < text.size())
+	while (charIndex < text.size())
 	{
-		char c = text[i] - 32;
+		char c = text[charIndex] - 32;
 
-		int row = (int)(c / 16); // get row 
-		int column = c % 16;	 // get column from remainder value
+		uint32_t row = (uint32_t)(c / 16);  // get row 
+		uint32_t column = c % 16;			// get column from remainder value
 
-		int tex_x = column * Fonts[FONT_SMALL].blockWidth;
-		int tex_y = row * Fonts[FONT_SMALL].blockHeight;
+		uint32_t tex_x = column * Fonts[FONT_SMALL].blockWidth;
+		uint32_t tex_y = row * Fonts[FONT_SMALL].blockHeight;
 
-		DrawQuad(x, y, charWidth, 16, Fonts[FONT_SMALL].textureID, colour, TRANSLUCENCY_NORMAL);
+		DrawQuad(x, y, charWidth, 16, Fonts[FONT_SMALL].textureID, colour, TRANSLUCENCY_GLOWING);
 
 		if (/*widthSpaced*/1)
 		{
@@ -197,7 +187,7 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 			x += Fonts[FONT_SMALL].blockWidth;
 		}
 
-		i++;
+		charIndex++;
 	}
 
 	return 0;

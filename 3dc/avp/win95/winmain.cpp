@@ -101,7 +101,7 @@ extern void ReleaseAllFMVTextures();
 extern void MinimalNetCollectMessages(void);
 extern void InitCentreMouseThread();
 extern void IngameKeyboardInput_ClearBuffer(void);
-extern void Game_Has_Loaded(void);
+extern void Game_Has_Loaded();
 extern void FinishCentreMouseThread();
 extern void DoCompletedLevelStatisticsScreen(void);
 extern void DeInitialisePlayer();

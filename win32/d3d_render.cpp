@@ -228,8 +228,8 @@ bool SetRenderStateDefaults()
 	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSCALE_B, *((DWORD*)&pointScale));
 
 //	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
-//	d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-//	d3d.lpD3DDevice->SetSamplerState(0,D3DSAMP_MINFILTER, D3DTEXF_POINT);
+//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 
@@ -597,13 +597,7 @@ bool ExecuteBuffer()
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
-/*
-	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_LVERTEX);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
-*/
+
 	D3DXMATRIX matProjection;
 	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(fov), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 100000.0f);
 
@@ -611,13 +605,8 @@ bool ExecuteBuffer()
 		D3DXMatrixIdentity(&viewMatrix); // we want to use the identity matrix in this case
 	#endif
 
-//	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,		&viewMatrix);
-//	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matProjection);
-
-	D3DXMATRIX matWorld; 
-	D3DXMatrixIdentity(&matWorld);
-
-	D3DXMATRIXA16 matWorldViewProj = matWorld * viewMatrix * matProjection;
+	// we dont need world matrix here as avp has done all the world transforms itself
+	D3DXMATRIXA16 matWorldViewProj = viewMatrix * matProjection;
 	vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
 
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
@@ -772,22 +761,10 @@ bool ExecuteBuffer()
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
 
-/*
-		LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_ORTHOVERTEX);
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-		}
-*/
-		D3DXMATRIX matView; 
-		D3DXMatrixIdentity(&matView);
-//		d3d.lpD3DDevice->SetTransform(D3DTS_VIEW, &matView);
-
 		D3DXMATRIX matOrtho;
 		D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
-//		d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matOrtho);
 
-		D3DXMATRIXA16 matWorldViewProj = matWorld * matView * matOrtho;
+		D3DXMATRIXA16 matWorldViewProj = matOrtho;
 		orthoConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
 
 		// loop through list drawing the quads
@@ -906,11 +883,6 @@ void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired)
 
 void CheckOrthoBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
 {
-	if (textureID == 2)
-	{
-		int blah = 1;
-	}
-
 	assert (numVerts == 4);
 
 	// check if we've got enough room. if not, flush
@@ -1017,14 +989,13 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWid
 	LastError = d3d.lpD3DDevice->SetTexture(0, fmvTexture);
 
 	d3d.lpD3DDevice->SetFVF(D3DFVF_ORTHOVERTEX);
-	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(ORTHOVERTEX));
+	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(ORTHOVERTEX));
 	if (FAILED(LastError))
 	{
 		OutputDebugString("DrawPrimitiveUP failed\n");
 	}
 }
 
-/* more quad drawing functions than you can shake a stick at! */
 void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE9 tex1, LPDIRECT3DTEXTURE9 tex2, LPDIRECT3DTEXTURE9 tex3)
 {
 	int topX = (640 - frameWidth) / 2;
@@ -1037,6 +1008,12 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	float y2 = ((float(topY + frameHeight) / 480.0f) * 2) - 1;
 
 	FMVVERTEX fmvVerts[4];
+
+	D3DXMATRIX matOrtho;
+	D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
+
+	D3DXMATRIXA16 matWorldViewProj = matOrtho;
+	fmvConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
 
 	// bottom left
 	fmvVerts[0].x = x1;
@@ -1102,7 +1079,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	d3d.lpD3DDevice->SetVertexShader(d3d.fmvVertexShader);
 	d3d.lpD3DDevice->SetPixelShader(d3d.fmvPixelShader);
 
-	HRESULT LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(FMVVERTEX));
+	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(FMVVERTEX));
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -1110,7 +1087,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	}
 }
 
-void DrawProgressBar(RECT srcRect, RECT destRect, uint32_t textureID, AVPTEXTURE *tex, uint32_t newWidth, uint32_t newHeight)
+void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t textureID, AVPTEXTURE *tex, uint32_t newWidth, uint32_t newHeight)
 {
 	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_OFF, TEXTURE_CLAMP, FILTERING_BILINEAR_ON);
 
@@ -1782,7 +1759,7 @@ bool BeginD3DScene()
 				{
 					OutputDebugString("Couldn't reset device\n");
 				}
-				else 
+				else
 				{	
 					OutputDebugString("We have reset the device. recreating resources..\n");
 					CreateVolatileResources();
@@ -1797,6 +1774,11 @@ bool BeginD3DScene()
 			else if (D3DERR_DEVICELOST == LastError)
 			{
 				OutputDebugString("D3D device lost\n");
+			}
+			else if (D3DERR_DRIVERINTERNALERROR == LastError)
+			{
+				// handle this a lot better (exit the game etc)
+				Con_PrintError("need to close avp as a display adapter error occured");
 			}
 			Sleep(50);
 		}
@@ -1820,7 +1802,7 @@ bool BeginD3DScene()
 
 void D3D_SetupSceneDefaults()
 {
-	/* force translucency state to be reset */
+	// force translucency state to be reset
 	CurrentRenderStates.TranslucencyMode = TRANSLUCENCY_NOT_SET;
 	CurrentRenderStates.FilteringMode = FILTERING_NOT_SET;
 	CurrentRenderStates.TextureAddressMode = TEXTURE_CLAMP;

@@ -18,26 +18,25 @@ extern "C"
 
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern unsigned char DebouncedGotAnyKey;
+extern IMAGEHEADER ImageHeaderArray[];
+extern int AAFontImageNumber;
+extern int FadingGameInAfterLoading;
+extern int NormalFrameTime;
 
 extern void MinimalNetCollectMessages(void);
 extern void NetSendMessages(void);
 extern void RenderGrabbedScreen(void);
-
 extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
-
-extern IMAGEHEADER ImageHeaderArray[];
-
-extern int AAFontImageNumber;
-extern int FadingGameInAfterLoading;
 extern void RenderBriefingText(int centreY, int brightness);
+extern void RenderStringCentred(char *stringPtr, int centreX, int y, int colour);
 };
 
-static int CurrentPosition = 0;
-static int BarLeft;
-static int BarRight;
-static int BarTop;
-static int BarBottom;
+static uint32_t	CurrentPosition = 0;
+static uint32_t BarLeft;
+static uint32_t BarRight;
+static uint32_t BarTop;
+static uint32_t BarBottom;
 
 static const char* Loading_Image_Name = "Menus\\Loading.rim";
 static const char* Loading_Bar_Empty_Image_Name = "Menus\\Loadingbar_empty.rim";
@@ -51,6 +50,8 @@ RECT LoadingBarFull_SrcRect;
 RENDERTEXTURE LoadingBarFullTexture;
 RENDERTEXTURE LoadingBarEmptyTexture;
 RENDERTEXTURE DemoBackgroundImage;
+
+void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t textureID, AVPTEXTURE *tex, uint32_t newWidth, uint32_t newHeight);
 
 uint32_t	fullTextureID = 0;
 uint32_t	emptyTextureID = 0;
@@ -67,11 +68,12 @@ uint32_t fullbarHeight, fullbarWidth, emptybarHeight, emptybarWidth;
 
 void Start_Progress_Bar()
 {
-	AAFontImageNumber = CL_LoadImageOnce("Common\\aa_font.RIM", LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
+	char buffer[100];
+
+	AAFontImageNumber = CL_LoadImageOnce("Common\\aa_font.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 	
 	// load other graphics
 	{
-		char buffer[100];
 		CL_GetImageFileName(buffer, 100, Loading_Bar_Empty_Image_Name, LIO_RELATIVEPATH);
 		
 		// see if graphic can be found in fast file
@@ -96,7 +98,6 @@ void Start_Progress_Bar()
 		}
 	}
 	{
-		char buffer[100];
 		CL_GetImageFileName(buffer, 100, Loading_Bar_Full_Image_Name, LIO_RELATIVEPATH);
 		
 		// see if graphic can be found in fast file
@@ -122,12 +123,11 @@ void Start_Progress_Bar()
 	}
 	
 	// load background image for bar
-	char buffer[100];
 	CL_GetImageFileName(buffer, 100, Loading_Image_Name, LIO_RELATIVEPATH);
 	
 	// see if graphic can be found in fast file
 	size_t fastFileLength;
-	void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
+	void const * pFastFileData = ffreadbuf(buffer, &fastFileLength);
 
 	if (pFastFileData)
 	{
@@ -259,14 +259,8 @@ void Set_Progress_Bar_Position(int pos)
 	}
 }
 
-extern "C"
+void Game_Has_Loaded()
 {
-
-void Game_Has_Loaded(void)
-{
-	extern int NormalFrameTime;
-	extern void RenderStringCentred(char *stringPtr, int centreX, int y, int colour);
-
 	SoundSys_StopAll();
 	SoundSys_Management();
 
@@ -354,12 +348,7 @@ void Game_Has_Loaded(void)
 		LoadingBarFull = NULL;
 	}
 
-//	SAFE_RELEASE(LoadingBarEmptyTexture);
-//	SAFE_RELEASE(LoadingBarFullTexture);
-
 	Tex_Release(emptyTextureID);
 	Tex_Release(fullTextureID);
 	Tex_Release(dbTextureID);
 }
-
-} // extern C
