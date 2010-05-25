@@ -1,0 +1,677 @@
+# depslib dependency file v1.0
+1274783171 source:c:\dev\avp\trunk\3dc\configfile.cpp
+	<string>
+	<fstream>
+	<iostream>
+	<sstream>
+	<map>
+	<algorithm>
+	"logString.h"
+	"utilities.h"
+	"configFile.h"
+
+1274783161 c:\dev\avp\trunk\3dc\logstring.h
+	<string>
+	<sstream>
+	<fstream>
+	"os_header.h"
+
+1274783158 c:\dev\avp\trunk\3dc\os_header.h
+	<windows.h>
+	<mmsystem.h>
+	<xtl.h>
+
+1274783153 c:\dev\avp\trunk\3dc\utilities.h
+	<stdio.h>
+	<string.h>
+	"os_header.h"
+
+1274783225 c:\dev\avp\trunk\3dc\configfile.h
+	<string>
+
+1274786740 source:c:\dev\avp\trunk\3dc\kshape.c
+	"3dc.h"
+	<math.h>
+	"module.h"
+	"inline.h"
+	"stratdef.h"
+	"gamedef.h"
+	"kshape.h"
+	"kzsort.h"
+	"frustrum.h"
+	"ourasert.h"
+	"equipmnt.h"
+	"bh_pred.h"
+	"bh_marin.h"
+	"bh_corpse.h"
+	"bh_debri.h"
+	"bh_weap.h"
+	"bh_types.h"
+	"pldghost.h"
+	"particle.h"
+	"vision.h"
+	"sfx.h"
+	"d3d_render.h"
+	"avpview.h"
+	"sphere.h"
+	"detaillevels.h"
+	"avp_userprofile.h"
+	"chnktexi.h"
+
+1274786751 c:\dev\avp\trunk\3dc\include\3dc.h
+	"system.h"
+	"equates.h"
+	"platform.h"
+	"shape.h"
+	"prototyp.h"
+	"utilities.h"
+	<stdint.h>
+
+1274367363 c:\dev\avp\trunk\3dc\avp\win95\system.h
+
+1267702143 c:\dev\avp\trunk\3dc\avp\equates.h
+
+1274777443 c:\dev\avp\trunk\3dc\win95\platform.h
+	<stdlib.h>
+	<stdarg.h>
+	<stdio.h>
+	"os_header.h"
+	"aw.h"
+
+1274784923 c:\dev\avp\trunk\3dc\win95\aw.h
+	<stdint.h>
+
+1272443502 c:\dev\avp\trunk\3dc\include\shape.h
+	"renderer.h"
+	"aw.h"
+	"shpanim.h"
+	<stdint.h>
+	"sheader.h"
+	"pheader.h"
+	"iheader.h"
+	"theader.h"
+
+1274783321 c:\dev\avp\trunk\3dc\renderer.h
+	"d3_func.h"
+	"d3_func.h"
+	<glide.h>
+
+1274788385 c:\dev\avp\trunk\win32\d3_func.h
+	<d3d9.h>
+	<Dxerr9.h>
+	"aw.h"
+	<stdint.h>
+
+1274784410 c:\dev\avp\trunk\3dc\win95\shpanim.h
+
+1274367360 c:\dev\avp\trunk\3dc\include\prototyp.h
+	"shpanim.h"
+	"mem3dc.h"
+
+1267702135 c:\dev\avp\trunk\3dc\include\mem3dc.h
+	"system.h"
+	<stddef.h>
+
+1267702135 c:\dev\avp\trunk\3dc\include\module.h
+	"bh_waypt.h"
+
+1267702143 c:\dev\avp\trunk\3dc\avp\bh_waypt.h
+
+1268389991 c:\dev\avp\trunk\3dc\win95\inline.h
+
+1274784366 c:\dev\avp\trunk\3dc\avp\stratdef.h
+	"hmodel.h"
+
+1274784366 c:\dev\avp\trunk\3dc\avp\hmodel.h
+	"decal.h"
+	"psnd.h"
+
+1274784296 c:\dev\avp\trunk\3dc\avp\decal.h
+	"vision.h"
+
+1267702140 c:\dev\avp\trunk\3dc\avp\win95\vision.h
+
+1267702143 c:\dev\avp\trunk\3dc\avp\psnd.h
+	"psndproj.h"
+
+1274786979 c:\dev\avp\trunk\3dc\avp\psndproj.h
+	"equipmnt.h"
+
+1267702143 c:\dev\avp\trunk\3dc\avp\gamedef.h
+	"module.h"
+
+1274784366 c:\dev\avp\trunk\3dc\kshape.h
+	"particle.h"
+
+1274784367 c:\dev\avp\trunk\3dc\avp\particle.h
+	"decal.h"
+	"dynblock.h"
+
+1267702144 c:\dev\avp\trunk\3dc\avp\dynblock.h
+
+1274784367 c:\dev\avp\trunk\3dc\avp\win95\kzsort.h
+
+1267702146 c:\dev\avp\trunk\3dc\frustrum.h
+	"kshape.h"
+
+1267702137 c:\dev\avp\trunk\3dc\win95\ourasert.h
+
+1274784366 c:\dev\avp\trunk\3dc\avp\equipmnt.h
+	"language.h"
+	"gamedef.h"
+
+1274784367 c:\dev\avp\trunk\3dc\avp\language.h
+	"langenum.h"
+
+1271327632 c:\dev\avp\trunk\3dc\avp\langenum.h
+
+1274784367 c:\dev\avp\trunk\3dc\avp\bh_pred.h
+	"bh_ais.h"
+	"decal.h"
+
+1267702143 c:\dev\avp\trunk\3dc\avp\bh_ais.h
+
+1274784367 c:\dev\avp\trunk\3dc\avp\bh_marin.h
+	"bh_pred.h"
+	"psndproj.h"
+	"sfx.h"
+
+1274784367 c:\dev\avp\trunk\3dc\avp\sfx.h
+
+1267702143 c:\dev\avp\trunk\3dc\avp\bh_corpse.h
+
+1274784367 c:\dev\avp\trunk\3dc\avp\bh_debri.h
+
+1274784367 c:\dev\avp\trunk\3dc\avp\bh_weap.h
+	"particle.h"
+
+1269426747 c:\dev\avp\trunk\3dc\avp\bh_types.h
+	"equipmnt.h"
+	"gameflow.h"
+	"pmove.h"
+
+1274784367 c:\dev\avp\trunk\3dc\avp\gameflow.h
+	"gamedef.h"
+	"system.h"
+
+1274784367 c:\dev\avp\trunk\3dc\avp\pmove.h
+
+1267702141 c:\dev\avp\trunk\3dc\avp\win95\pldghost.h
+	"pvisible.h"
+	"pldnet.h"
+
+1267702143 c:\dev\avp\trunk\3dc\avp\pvisible.h
+
+1267702140 c:\dev\avp\trunk\3dc\avp\win95\pldnet.h
+	"psnd.h"
+	"particle.h"
+	"decal.h"
+
+1274784367 c:\dev\avp\trunk\win32\d3d_render.h
+	"particle.h"
+
+1274784367 c:\dev\avp\trunk\3dc\avp\avpview.h
+
+1274784367 c:\dev\avp\trunk\3dc\sphere.h
+
+1274784367 c:\dev\avp\trunk\3dc\avp\detaillevels.h
+
+1274784403 c:\dev\avp\trunk\3dc\avp\win95\frontend\avp_userprofile.h
+	"usr_io.h"
+	"AvP_EnvInfo.h"
+	"game_statistics.h"
+	"detaillevels.h"
+
+1274784363 c:\dev\avp\trunk\3dc\avp\win95\usr_io.h
+	"avp_menus.h"
+	"stratdef.h"
+
+1274784367 c:\dev\avp\trunk\3dc\avp\win95\frontend\avp_menus.h
+	"AvP_MenuGfx.hpp"
+	"language.h"
+
+1274784367 c:\dev\avp\trunk\3dc\avp\win95\frontend\avp_menugfx.hpp
+
+1267702140 c:\dev\avp\trunk\3dc\avp\win95\frontend\avp_envinfo.h
+
+1274784403 c:\dev\avp\trunk\3dc\avp\game_statistics.h
+	"equipmnt.h"
+
+1267702137 c:\dev\avp\trunk\3dc\win95\chnktexi.h
+
+1269938319 source:c:\dev\avp\trunk\3dc\map.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"ourasert.h"
+
+1267702146 source:c:\dev\avp\trunk\3dc\mem3dcpp.cpp
+	"mem3dc.h"
+
+1274786967 source:c:\dev\avp\trunk\3dc\module.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"bh_types.h"
+	"pvisible.h"
+	"pfarlocs.h"
+	"avpview.h"
+	"ourasert.h"
+	"pldghost.h"
+
+1274787789 c:\dev\avp\trunk\3dc\avp\pfarlocs.h
+
+1274788411 source:c:\dev\avp\trunk\3dc\morph.c
+	"3dc.h"
+	"inline.h"
+
+1268911036 source:c:\dev\avp\trunk\3dc\mslhand.c
+	"3dc.h"
+	"mslhand.h"
+	"ourasert.h"
+
+1267702146 c:\dev\avp\trunk\3dc\mslhand.h
+
+1274787080 source:c:\dev\avp\trunk\3dc\maths.c
+	"3dc.h"
+	"inline.h"
+
+1269938319 source:c:\dev\avp\trunk\3dc\object.c
+	"3dc.h"
+	"module.h"
+	"stratdef.h"
+	"sfx.h"
+	"ourasert.h"
+
+1274787089 source:c:\dev\avp\trunk\3dc\tables.c
+	"system.h"
+
+1274787642 source:c:\dev\avp\trunk\3dc\vdb.c
+	"3dc.h"
+	"inline.h"
+
+1267702144 source:c:\dev\avp\trunk\3dc\avp\ai_sight.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"gamedef.h"
+	"dynblock.h"
+	"dynamics.h"
+	"los.h"
+	"ShowCmds.h"
+	"equipmnt.h"
+	"bh_marin.h"
+	"bh_xeno.h"
+	"targeting.h"
+	"bh_weap.h"
+	"AI_Sight.h"
+	"ourasert.h"
+
+1267702144 c:\dev\avp\trunk\3dc\avp\dynamics.h
+	"particle.h"
+
+1267702143 c:\dev\avp\trunk\3dc\avp\los.h
+
+1274788411 c:\dev\avp\trunk\3dc\win95\showcmds.h
+
+1274788411 c:\dev\avp\trunk\3dc\avp\bh_xeno.h
+	"particle.h"
+	"bh_ais.h"
+
+1267702143 c:\dev\avp\trunk\3dc\avp\targeting.h
+
+1267702144 c:\dev\avp\trunk\3dc\avp\ai_sight.h
+
+1274777444 source:c:\dev\avp\trunk\3dc\avp\avpview.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"gamedef.h"
+	"stratdef.h"
+	"dynblock.h"
+	"bh_types.h"
+	"avpview.h"
+	"kshape.h"
+	"kzsort.h"
+	"frustrum.h"
+	"vision.h"
+	"lighting.h"
+	"weapons.h"
+	"sfx.h"
+	"extents.h"
+	"avp_userprofile.h"
+	"ourasert.h"
+	<assert.h>
+
+1267702143 c:\dev\avp\trunk\3dc\avp\lighting.h
+
+1267702144 c:\dev\avp\trunk\3dc\avp\weapons.h
+
+1267702144 c:\dev\avp\trunk\3dc\avp\extents.h
+
+1274799925 source:c:\dev\avp\trunk\3dc\avp\bh_alien.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"gamedef.h"
+	"dynblock.h"
+	"dynamics.h"
+	"comp_shp.h"
+	"load_shp.h"
+	"bh_types.h"
+	"bh_debri.h"
+	"bh_far.h"
+	"bh_near.h"
+	"bh_gener.h"
+	"bh_pred.h"
+	"bh_alien.h"
+	"bh_marin.h"
+	"weapons.h"
+	"pheromon.h"
+	"pfarlocs.h"
+	"pvisible.h"
+	"psnd.h"
+	"psndplat.h"
+	"extents.h"
+	"huddefs.h"
+	"pldghost.h"
+	"bh_corpse.h"
+	"bh_dummy.h"
+	"game_statistics.h"
+	"scream.h"
+	"ourasert.h"
+	"pldnet.h"
+	"AvP_UserProfile.h"
+	"savegame.h"
+
+1267702143 c:\dev\avp\trunk\3dc\avp\comp_shp.h
+
+1267702144 c:\dev\avp\trunk\3dc\avp\load_shp.h
+
+1274787789 c:\dev\avp\trunk\3dc\avp\bh_far.h
+
+1267702144 c:\dev\avp\trunk\3dc\avp\bh_near.h
+
+1274787789 c:\dev\avp\trunk\3dc\avp\bh_gener.h
+
+1274787797 c:\dev\avp\trunk\3dc\avp\bh_alien.h
+	"bh_pred.h"
+	"sequnces.h"
+
+1267702144 c:\dev\avp\trunk\3dc\avp\sequnces.h
+
+1274787781 c:\dev\avp\trunk\3dc\avp\pheromon.h
+
+1267702141 c:\dev\avp\trunk\3dc\avp\win95\psndplat.h
+	<dsound.h>
+	<xaudio2.h>
+	<xaudio2fx.h>
+	<x3daudio.h>
+	"psnd.h"
+
+1274787789 c:\dev\avp\trunk\3dc\avp\huddefs.h
+
+1267702144 c:\dev\avp\trunk\3dc\avp\bh_dummy.h
+	"bh_ais.h"
+
+1274787788 c:\dev\avp\trunk\3dc\avp\scream.h
+
+1274787815 c:\dev\avp\trunk\3dc\avp\savegame.h
+
+1274800993 source:c:\dev\avp\trunk\3dc\avp\win95\gammacontrol.cpp
+	"3dc.h"
+	"module.h"
+	"inline.h"
+	"GammaControl.h"
+
+1274800986 c:\dev\avp\trunk\3dc\avp\win95\gammacontrol.h
+
+1274367363 source:c:\dev\avp\trunk\3dc\avp\win95\d3d_hud.cpp
+	"3dc.h"
+	"module.h"
+	"stratdef.h"
+	"gamedef.h"
+	"bh_types.h"
+	"hudgfx.h"
+	"huddefs.h"
+	"kshape.h"
+	"chnktexi.h"
+	"HUD_layout.h"
+	"language.h"
+	"r2base.h"
+	"chnkload.hpp"
+	"d3d_hud.h"
+	"ourasert.h"
+	"vision.h"
+	"kshape.h"
+
+1274800959 c:\dev\avp\trunk\3dc\avp\win95\hudgfx.h
+
+1267702141 c:\dev\avp\trunk\3dc\avp\win95\hud_layout.h
+
+1267702142 c:\dev\avp\trunk\3dc\avp\support\r2base.h
+
+1267702137 c:\dev\avp\trunk\3dc\win95\chnkload.hpp
+	"chnkload.h"
+	"chunk.hpp"
+	"shpchunk.hpp"
+	"obchunk.hpp"
+	"bmpnames.hpp"
+	"projload.hpp"
+
+1267723685 c:\dev\avp\trunk\3dc\win95\chnkload.h
+	"system.h"
+	"equates.h"
+	"platform.h"
+	"shape.h"
+	"prototyp.h"
+	"module.h"
+
+1274800808 c:\dev\avp\trunk\3dc\win95\chunk.hpp
+	"3dc.h"
+	"mem3dc.h"
+	"inline.h"
+	"module.h"
+	"list_tem.hpp"
+	"StdAfx.h"
+	"list_tem.hpp"
+	"stdafx.h"
+	"list_tem.hpp"
+
+1267702137 c:\dev\avp\trunk\3dc\win95\list_tem.hpp
+	<stdio.h>
+	<typeinfo.h>
+	"mem3dc.h"
+	"fail.h"
+
+1267702137 c:\dev\avp\trunk\3dc\win95\fail.h
+
+1274800808 c:\dev\avp\trunk\3dc\win95\shpchunk.hpp
+	"chunk.hpp"
+	"chnktype.hpp"
+	"mishchnk.hpp"
+
+1274800808 c:\dev\avp\trunk\3dc\win95\chnktype.hpp
+	"3dc.h"
+	"list_tem.hpp"
+
+1274800808 c:\dev\avp\trunk\3dc\win95\mishchnk.hpp
+	<time.h>
+	"chunk.hpp"
+	"chnktype.hpp"
+	"ourasert.h"
+
+1274800808 c:\dev\avp\trunk\3dc\win95\obchunk.hpp
+	"chunk.hpp"
+	"chnktype.hpp"
+	"mishchnk.hpp"
+
+1274800808 c:\dev\avp\trunk\3dc\win95\bmpnames.hpp
+	"chunk.hpp"
+	"ourasert.h"
+
+1274800808 c:\dev\avp\trunk\3dc\avp\win95\projload.hpp
+	"chnkload.h"
+	"hmodel.h"
+	"hierchnk.hpp"
+
+1274800809 c:\dev\avp\trunk\3dc\win95\hierchnk.hpp
+	"chunk.hpp"
+	"list_tem.hpp"
+	"chnktype.hpp"
+
+1272380168 c:\dev\avp\trunk\3dc\avp\win95\d3d_hud.h
+	"langenum.h"
+
+1274784906 source:c:\dev\avp\trunk\3dc\console.cpp
+	<string>
+	<vector>
+	<sstream>
+	"console.h"
+	"renderer.h"
+	"iofocus.h"
+	"logString.h"
+	"font2.h"
+	<stdint.h>
+	"avp_menugfx.hpp"
+	"platform.h"
+
+1274783613 c:\dev\avp\trunk\3dc\console.h
+	<string>
+	<windows.h>
+	<xtl.h>
+
+1267702141 c:\dev\avp\trunk\3dc\avp\win95\iofocus.h
+	"ourbool.h"
+	"gadget.h"
+
+1267702142 c:\dev\avp\trunk\3dc\avp\support\ourbool.h
+
+1267702139 c:\dev\avp\trunk\3dc\avp\win95\gadgets\gadget.h
+	"projtext.h"
+	"r2base.h"
+
+1267702143 c:\dev\avp\trunk\3dc\avp\projtext.h
+
+1274784923 c:\dev\avp\trunk\3dc\font2.h
+	<string>
+	<stdint.h>
+
+1274801467 source:c:\dev\avp\trunk\3dc\font.cpp
+	"renderer.h"
+	"logString.h"
+	"font2.h"
+	"textureManager.h"
+
+1274783493 c:\dev\avp\trunk\3dc\texturemanager.h
+	"renderer.h"
+	"stdint.h"
+	<string>
+
+1274777444 source:c:\dev\avp\trunk\3dc\frustrum.c
+	"3dc.h"
+	"module.h"
+	"inline.h"
+	"stratdef.h"
+	"gamedef.h"
+	"kshape.h"
+	"kzsort.h"
+	"frustrum.h"
+	"particle.h"
+	"ourasert.h"
+
+1274800902 source:c:\dev\avp\trunk\3dc\win95\cd_player.c
+	"3dc.h"
+	"inline.h"
+	"psndplat.h"
+	"cd_player.h"
+	"ourasert.h"
+
+1274800904 c:\dev\avp\trunk\3dc\win95\cd_player.h
+
+1274800818 source:c:\dev\avp\trunk\3dc\win95\chnktexi.cpp
+	"os_header.h"
+	<string.h>
+	<string.hpp>
+	"db.h"
+	"awTexLd.h"
+	"chnkload.hpp"
+	"chunkpal.hpp"
+	"renderer.h"
+	"textureManager.h"
+	"ffstdio.h"
+	"chnktexi.h"
+
+1274800809 c:\dev\avp\trunk\3dc\win95\string.hpp
+	<stddef.h>
+
+1273739582 c:\dev\avp\trunk\3dc\win95\db.h
+	<windows.h>
+	"xbox_defines.h"
+	<xtl.h>
+
+1267702135 c:\dev\avp\trunk\3dc\include\xbox_defines.h
+
+1274784923 c:\dev\avp\trunk\3dc\win95\awtexld.h
+	<windows.h>
+	<xtl.h>
+	"aw.h"
+	<stdint.h>
+
+1267702137 c:\dev\avp\trunk\3dc\win95\chunkpal.hpp
+	"chunk.hpp"
+	"bmpnames.hpp"
+
+1267702141 c:\dev\avp\trunk\3dc\avp\win95\ffstdio.h
+	<stdio.h>
+
+1274800837 source:c:\dev\avp\trunk\3dc\win95\our_mem.c
+	"3dc.h"
+	<malloc.h>
+	"ourasert.h"
+
+1274367362 source:c:\dev\avp\trunk\3dc\win95\texio.c
+	"3dc.h"
+	<conio.h>
+	"inline.h"
+	"chnktexi.h"
+	"ourasert.h"
+	"awTexLd.h"
+	"txioctrl.h"
+
+1274106645 source:c:\dev\avp\trunk\3dc\win95\videomodes.cpp
+	<fstream>
+	<string>
+	<sstream>
+	"logString.h"
+	"configFile.h"
+	<assert.h>
+	"VideoModes.h"
+	<stdio.h>
+	"renderer.h"
+
+1274783838 c:\dev\avp\trunk\3dc\win95\videomodes.h
+
+1267702137 source:c:\dev\avp\trunk\3dc\win95\zsp.cpp
+	<math.h>
+	"list_tem.hpp"
+	"zsp.hpp"
+
+1267702137 c:\dev\avp\trunk\3dc\win95\zsp.hpp
+	"shpchunk.hpp"
+
+1267702137 source:c:\dev\avp\trunk\3dc\win95\list_tem.cpp
+
+1267712832 source:c:\dev\avp\trunk\3dc\win95\md5.c
+	<string.h>
+	"md5.h"
+
+1267712800 c:\dev\avp\trunk\3dc\win95\md5.h
+
+1273739582 source:c:\dev\avp\trunk\3dc\win95\win_func.cpp
+	"3dc.h"
+

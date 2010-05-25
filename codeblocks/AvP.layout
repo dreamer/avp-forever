@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="..\3dc\KSHAPE.H" open="1" top="0" tabpos="3">
+		<Cursor position="2028" topLine="88" />
+	</File>
+	<File name="..\3dc\Kshape.c" open="1" top="0" tabpos="1">
+		<Cursor position="161033" topLine="6016" />
+	</File>
+	<File name="..\3dc\MODULE.C" open="1" top="0" tabpos="59">
+		<Cursor position="13759" topLine="640" />
+	</File>
+	<File name="..\3dc\MORPH.C" open="1" top="0" tabpos="76">
+		<Cursor position="5398" topLine="210" />
+	</File>
+	<File name="..\3dc\Maths.c" open="1" top="0" tabpos="63">
+		<Cursor position="46458" topLine="2730" />
+	</File>
+	<File name="..\3dc\TABLES.C" open="1" top="0" tabpos="62">
+		<Cursor position="240" topLine="0" />
+	</File>
+	<File name="..\3dc\VDB.C" open="1" top="0" tabpos="64">
+		<Cursor position="7411" topLine="333" />
+	</File>
+	<File name="..\3dc\avp\AVPVIEW.H" open="1" top="0" tabpos="45">
+		<Cursor position="507" topLine="0" />
+	</File>
+	<File name="..\3dc\avp\Avpview.c" open="1" top="0" tabpos="61">
+		<Cursor position="1073" topLine="33" />
+	</File>
+	<File name="..\3dc\avp\BH_ALIEN.C" open="1" top="1" tabpos="67">
+		<Cursor position="69440" topLine="2410" />
+	</File>
+	<File name="..\3dc\avp\BH_ALIEN.H" open="1" top="0" tabpos="74">
+		<Cursor position="7412" topLine="227" />
+	</File>
+	<File name="..\3dc\avp\BH_BINSW.C" open="1" top="0" tabpos="80">
+		<Cursor position="613" topLine="0" />
+	</File>
+	<File name="..\3dc\avp\BH_BINSW.H" open="1" top="0" tabpos="82">
+		<Cursor position="840" topLine="21" />
+	</File>
+	<File name="..\3dc\avp\BH_FAR.H" open="1" top="0" tabpos="68">
+		<Cursor position="1736" topLine="26" />
+	</File>
+	<File name="..\3dc\avp\BH_GENER.H" open="1" top="0" tabpos="69">
+		<Cursor position="3275" topLine="102" />
+	</File>
+	<File name="..\3dc\avp\BH_MARIN.H" open="1" top="0" tabpos="39">
+		<Cursor position="11281" topLine="384" />
+	</File>
+	<File name="..\3dc\avp\BH_PRED.H" open="1" top="0" tabpos="37">
+		<Cursor position="7156" topLine="232" />
+	</File>
+	<File name="..\3dc\avp\BH_XENO.H" open="1" top="0" tabpos="78">
+		<Cursor position="6372" topLine="205" />
+	</File>
+	<File name="..\3dc\avp\EQUATES.H" open="1" top="0" tabpos="65">
+		<Cursor position="514" topLine="26" />
+	</File>
+	<File name="..\3dc\avp\EQUIPMNT.H" open="1" top="0" tabpos="31">
+		<Cursor position="9536" topLine="371" />
+	</File>
+	<File name="..\3dc\avp\HUDDEFS.H" open="1" top="0" tabpos="72">
+		<Cursor position="10429" topLine="229" />
+	</File>
+	<File name="..\3dc\avp\LANGUAGE.H" open="1" top="0" tabpos="36">
+		<Cursor position="1744" topLine="13" />
+	</File>
+	<File name="..\3dc\avp\PFARLOCS.H" open="1" top="0" tabpos="71">
+		<Cursor position="2463" topLine="68" />
+	</File>
+	<File name="..\3dc\avp\PHEROMON.H" open="1" top="0" tabpos="70">
+		<Cursor position="970" topLine="2" />
+	</File>
+	<File name="..\3dc\avp\PMOVE.H" open="1" top="0" tabpos="43">
+		<Cursor position="2049" topLine="59" />
+	</File>
+	<File name="..\3dc\avp\PSNDPROJ.H" open="1" top="0" tabpos="55">
+		<Cursor position="298" topLine="0" />
+	</File>
+	<File name="..\3dc\avp\STRATDEF.H" open="1" top="0" tabpos="33">
+		<Cursor position="7247" topLine="264" />
+	</File>
+	<File name="..\3dc\avp\bh_debri.h" open="1" top="0" tabpos="40">
+		<Cursor position="1447" topLine="20" />
+	</File>
+	<File name="..\3dc\avp\bh_weap.h" open="1" top="0" tabpos="41">
+		<Cursor position="4908" topLine="162" />
+	</File>
+	<File name="..\3dc\avp\decal.c" open="1" top="0" tabpos="101">
+		<Cursor position="27450" topLine="1125" />
+	</File>
+	<File name="..\3dc\avp\decal.h" open="1" top="0" tabpos="30">
+		<Cursor position="2372" topLine="86" />
+	</File>
+	<File name="..\3dc\avp\game_statistics.h" open="1" top="0" tabpos="53">
+		<Cursor position="3182" topLine="78" />
+	</File>
+	<File name="..\3dc\avp\gameflow.h" open="1" top="0" tabpos="42">
+		<Cursor position="2556" topLine="97" />
+	</File>
+	<File name="..\3dc\avp\hmodel.h" open="1" top="0" tabpos="32">
+		<Cursor position="13916" topLine="374" />
+	</File>
+	<File name="..\3dc\avp\particle.h" open="1" top="0" tabpos="34">
+		<Cursor position="4501" topLine="175" />
+	</File>
+	<File name="..\3dc\avp\savegame.c" open="1" top="0" tabpos="79">
+		<Cursor position="10068" topLine="280" />
+	</File>
+	<File name="..\3dc\avp\savegame.h" open="1" top="0" tabpos="75">
+		<Cursor position="2141" topLine="70" />
+	</File>
+	<File name="..\3dc\avp\scream.h" open="1" top="0" tabpos="73">
+		<Cursor position="1614" topLine="48" />
+	</File>
+	<File name="..\3dc\avp\sfx.h" open="1" top="0" tabpos="38">
+		<Cursor position="1159" topLine="24" />
+	</File>
+	<File name="..\3dc\avp\track.h" open="1" top="0" tabpos="81">
+		<Cursor position="2854" topLine="88" />
+	</File>
+	<File name="..\3dc\avp\win95\Frontend\AvP_MenuGfx.hpp" open="1" top="0" tabpos="48">
+		<Cursor position="1884" topLine="68" />
+	</File>
+	<File name="..\3dc\avp\win95\GAMEPLAT.H" open="1" top="0" tabpos="99">
+		<Cursor position="875" topLine="16" />
+	</File>
+	<File name="..\3dc\avp\win95\GammaControl.cpp" open="1" top="0" tabpos="105">
+		<Cursor position="1947" topLine="0" />
+	</File>
+	<File name="..\3dc\avp\win95\GammaControl.h" open="1" top="0" tabpos="106">
+		<Cursor position="210" topLine="0" />
+	</File>
+	<File name="..\3dc\avp\win95\HUDGFX.H" open="1" top="0" tabpos="102">
+		<Cursor position="3181" topLine="86" />
+	</File>
+	<File name="..\3dc\avp\win95\KZSORT.C" open="1" top="0" tabpos="104">
+		<Cursor position="16417" topLine="632" />
+	</File>
+	<File name="..\3dc\avp\win95\KZSORT.H" open="1" top="0" tabpos="35">
+		<Cursor position="652" topLine="1" />
+	</File>
+	<File name="..\3dc\avp\win95\PROJLOAD.HPP" open="1" top="0" tabpos="95">
+		<Cursor position="4068" topLine="134" />
+	</File>
+	<File name="..\3dc\avp\win95\Pldnet.h" open="1" top="0" tabpos="51">
+		<Cursor position="26960" topLine="984" />
+	</File>
+	<File name="..\3dc\avp\win95\USR_IO.H" open="1" top="0" tabpos="50">
+		<Cursor position="8389" topLine="293" />
+	</File>
+	<File name="..\3dc\avp\win95\d3d_hud.h" open="1" top="0" tabpos="108">
+		<Cursor position="1023" topLine="36" />
+	</File>
+	<File name="..\3dc\avp\win95\dx_audio.cpp" open="1" top="0" tabpos="103">
+		<Cursor position="94062" topLine="2655" />
+	</File>
+	<File name="..\3dc\configFile.cpp" open="1" top="0" tabpos="5">
+		<Cursor position="1718" topLine="24" />
+	</File>
+	<File name="..\3dc\configFile.h" open="1" top="0" tabpos="7">
+		<Cursor position="721" topLine="0" />
+	</File>
+	<File name="..\3dc\console.cpp" open="1" top="0" tabpos="22">
+		<Cursor position="5473" topLine="277" />
+	</File>
+	<File name="..\3dc\console.h" open="1" top="0" tabpos="21">
+		<Cursor position="949" topLine="11" />
+	</File>
+	<File name="..\3dc\fmvCutscenes.h" open="1" top="0" tabpos="111">
+		<Cursor position="838" topLine="12" />
+	</File>
+	<File name="..\3dc\fmvPlayback.h" open="1" top="0" tabpos="20">
+		<Cursor position="1049" topLine="44" />
+	</File>
+	<File name="..\3dc\font.cpp" open="1" top="0" tabpos="25">
+		<Cursor position="1580" topLine="17" />
+	</File>
+	<File name="..\3dc\font2.h" open="1" top="0" tabpos="10">
+		<Cursor position="1533" topLine="13" />
+	</File>
+	<File name="..\3dc\frustrum.h" open="1" top="0" tabpos="4">
+		<Cursor position="1723" topLine="35" />
+	</File>
+	<File name="..\3dc\include\3dc.h" open="1" top="0" tabpos="2">
+		<Cursor position="133" topLine="0" />
+	</File>
+	<File name="..\3dc\include\mem3dc.h" open="1" top="0" tabpos="60">
+		<Cursor position="2480" topLine="62" />
+	</File>
+	<File name="..\3dc\include\prototyp.h" open="1" top="0" tabpos="66">
+		<Cursor position="21477" topLine="1118" />
+	</File>
+	<File name="..\3dc\networking.cpp" open="1" top="0" tabpos="113">
+		<Cursor position="2" topLine="0" />
+	</File>
+	<File name="..\3dc\networking.h" open="1" top="0" tabpos="110">
+		<Cursor position="5002" topLine="196" />
+	</File>
+	<File name="..\3dc\onscreenKeyboard.cpp" open="1" top="0" tabpos="12">
+		<Cursor position="3143" topLine="87" />
+	</File>
+	<File name="..\3dc\onscreenKeyboard.h" open="1" top="0" tabpos="14">
+		<Cursor position="1835" topLine="23" />
+	</File>
+	<File name="..\3dc\os_header.h" open="1" top="0" tabpos="6">
+		<Cursor position="209" topLine="0" />
+	</File>
+	<File name="..\3dc\renderer.h" open="1" top="0" tabpos="11">
+		<Cursor position="1495" topLine="19" />
+	</File>
+	<File name="..\3dc\ringbuffer.cpp" open="1" top="0" tabpos="18">
+		<Cursor position="6048" topLine="189" />
+	</File>
+	<File name="..\3dc\ringbuffer.h" open="1" top="0" tabpos="17">
+		<Cursor position="1967" topLine="17" />
+	</File>
+	<File name="..\3dc\sphere.h" open="1" top="0" tabpos="46">
+		<Cursor position="912" topLine="11" />
+	</File>
+	<File name="..\3dc\stdint.h" open="0" top="0" tabpos="0">
+		<Cursor position="7692" topLine="218" />
+	</File>
+	<File name="..\3dc\textureManager.cpp" open="1" top="0" tabpos="16">
+		<Cursor position="2783" topLine="67" />
+	</File>
+	<File name="..\3dc\textureManager.h" open="1" top="0" tabpos="15">
+		<Cursor position="2003" topLine="17" />
+	</File>
+	<File name="..\3dc\utilities.cpp" open="1" top="0" tabpos="114">
+		<Cursor position="1968" topLine="43" />
+	</File>
+	<File name="..\3dc\utilities.h" open="1" top="0" tabpos="8">
+		<Cursor position="2276" topLine="25" />
+	</File>
+	<File name="..\3dc\vorbisPlayer.cpp" open="1" top="0" tabpos="24">
+		<Cursor position="7347" topLine="269" />
+	</File>
+	<File name="..\3dc\vorbisPlayer.h" open="1" top="0" tabpos="23">
+		<Cursor position="1805" topLine="30" />
+	</File>
+	<File name="..\3dc\win95\BMPNAMES.HPP" open="1" top="0" tabpos="93">
+		<Cursor position="23426" topLine="665" />
+	</File>
+	<File name="..\3dc\win95\CD_player.c" open="1" top="0" tabpos="98">
+		<Cursor position="14413" topLine="525" />
+	</File>
+	<File name="..\3dc\win95\CHNKTEXI.CPP" open="1" top="0" tabpos="86">
+		<Cursor position="20579" topLine="635" />
+	</File>
+	<File name="..\3dc\win95\CHNKTYPE.HPP" open="1" top="0" tabpos="89">
+		<Cursor position="7818" topLine="335" />
+	</File>
+	<File name="..\3dc\win95\Chunk.hpp" open="1" top="0" tabpos="88">
+		<Cursor position="18418" topLine="586" />
+	</File>
+	<File name="..\3dc\win95\Hash_tem.hpp" open="1" top="0" tabpos="83">
+		<Cursor position="14054" topLine="230" />
+	</File>
+	<File name="..\3dc\win95\MISHCHNK.HPP" open="1" top="0" tabpos="90">
+		<Cursor position="5134" topLine="202" />
+	</File>
+	<File name="..\3dc\win95\OBCHUNK.HPP" open="1" top="0" tabpos="92">
+		<Cursor position="10873" topLine="474" />
+	</File>
+	<File name="..\3dc\win95\OUR_MEM.C" open="1" top="0" tabpos="96">
+		<Cursor position="533" topLine="0" />
+	</File>
+	<File name="..\3dc\win95\SHPCHUNK.HPP" open="1" top="0" tabpos="91">
+		<Cursor position="28271" topLine="1054" />
+	</File>
+	<File name="..\3dc\win95\STRING.HPP" open="1" top="0" tabpos="87">
+		<Cursor position="4929" topLine="148" />
+	</File>
+	<File name="..\3dc\win95\ShowCmds.h" open="1" top="0" tabpos="77">
+		<Cursor position="1104" topLine="26" />
+	</File>
+	<File name="..\3dc\win95\VideoModes.cpp" open="1" top="0" tabpos="26">
+		<Cursor position="2337" topLine="98" />
+	</File>
+	<File name="..\3dc\win95\VideoModes.h" open="1" top="0" tabpos="27">
+		<Cursor position="886" topLine="26" />
+	</File>
+	<File name="..\3dc\win95\aw.h" open="1" top="0" tabpos="28">
+		<Cursor position="671" topLine="0" />
+	</File>
+	<File name="..\3dc\win95\awTexLd.cpp" open="1" top="0" tabpos="85">
+		<Cursor position="23847" topLine="919" />
+	</File>
+	<File name="..\3dc\win95\awTexLd.hpp" open="1" top="0" tabpos="84">
+		<Cursor position="13213" topLine="443" />
+	</File>
+	<File name="..\3dc\win95\hierchnk.hpp" open="1" top="0" tabpos="94">
+		<Cursor position="4867" topLine="174" />
+	</File>
+	<File name="..\3dc\win95\shpanim.h" open="1" top="0" tabpos="54">
+		<Cursor position="4382" topLine="172" />
+	</File>
+	<File name="..\win32\Di_func.cpp" open="1" top="0" tabpos="112">
+		<Cursor position="2000" topLine="74" />
+	</File>
+	<File name="..\win32\d3_func.cpp" open="1" top="0" tabpos="109">
+		<Cursor position="1732" topLine="18" />
+	</File>
+	<File name="..\win32\d3d_render.cpp" open="1" top="0" tabpos="107">
+		<Cursor position="40416" topLine="1339" />
+	</File>
+</CodeBlocks_layout_file>

@@ -1,0 +1,797 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="AvP" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin\Debug\AvP" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\Debug\" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="..\3dc" />
+					<Add directory="..\3dc\avp" />
+					<Add directory="..\3dc\avp\support" />
+					<Add directory="..\3dc\avp\win95" />
+					<Add directory="..\3dc\avp\win95\Frontend" />
+					<Add directory="..\3dc\avp\win95\gadgets" />
+					<Add directory="..\3dc\include" />
+					<Add directory="..\3dc\win95" />
+					<Add directory="..\win32" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin\Release\AvP" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\Release\" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="..\3dc\KSHAPE.H" />
+		<Unit filename="..\3dc\Kshape.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\MAP.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\MEM3DCPP.CPP" />
+		<Unit filename="..\3dc\MODULE.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\MORPH.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\MSLHAND.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\MSLHAND.H" />
+		<Unit filename="..\3dc\Maths.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\OBJECT.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\TABLES.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\VDB.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\AI_Sight.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\AI_Sight.h" />
+		<Unit filename="..\3dc\avp\AVPVIEW.H" />
+		<Unit filename="..\3dc\avp\Avpview.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\BH_ALIEN.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\BH_ALIEN.H" />
+		<Unit filename="..\3dc\avp\BH_BINSW.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\BH_BINSW.H" />
+		<Unit filename="..\3dc\avp\BH_FAR.H" />
+		<Unit filename="..\3dc\avp\BH_FHUG.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\BH_FHUG.H" />
+		<Unit filename="..\3dc\avp\BH_GENER.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\BH_GENER.H" />
+		<Unit filename="..\3dc\avp\BH_LNKSW.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\BH_LNKSW.H" />
+		<Unit filename="..\3dc\avp\BH_MARIN.H" />
+		<Unit filename="..\3dc\avp\BH_NEAR.H" />
+		<Unit filename="..\3dc\avp\BH_PAQ.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\BH_PAQ.H" />
+		<Unit filename="..\3dc\avp\BH_PRED.H" />
+		<Unit filename="..\3dc\avp\BH_SWDOR.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\BH_SWDOR.H" />
+		<Unit filename="..\3dc\avp\BH_TYPES.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\BH_TYPES.H" />
+		<Unit filename="..\3dc\avp\BH_XENO.H" />
+		<Unit filename="..\3dc\avp\Bh_debri.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\Bh_marin.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\Bh_near.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\Bh_pred.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\Bh_xeno.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\BonusAbilities.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\BonusAbilities.h" />
+		<Unit filename="..\3dc\avp\CDTrackSelection.cpp" />
+		<Unit filename="..\3dc\avp\CDTrackSelection.h" />
+		<Unit filename="..\3dc\avp\COMP_SHP.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\COMP_SHP.H" />
+		<Unit filename="..\3dc\avp\CheatModes.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\ConsoleLog.cpp" />
+		<Unit filename="..\3dc\avp\ConsoleLog.hpp" />
+		<Unit filename="..\3dc\avp\DYNAMICS.H" />
+		<Unit filename="..\3dc\avp\DYNBLOCK.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\DYNBLOCK.H" />
+		<Unit filename="..\3dc\avp\DetailLevels.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\DetailLevels.h" />
+		<Unit filename="..\3dc\avp\Dynamics.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\EQUATES.H" />
+		<Unit filename="..\3dc\avp\EQUIPMNT.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\EQUIPMNT.H" />
+		<Unit filename="..\3dc\avp\GAMEDEF.H" />
+		<Unit filename="..\3dc\avp\Game.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\Game.c.bak" />
+		<Unit filename="..\3dc\avp\HModel.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\HUDDEFS.H" />
+		<Unit filename="..\3dc\avp\Hud.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\INVENTRY.H" />
+		<Unit filename="..\3dc\avp\Inventry.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\LANGUAGE.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\LANGUAGE.H" />
+		<Unit filename="..\3dc\avp\LIGHTING.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\LIGHTING.H" />
+		<Unit filename="..\3dc\avp\MessageHistory.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\PFARLOCS.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\PFARLOCS.H" />
+		<Unit filename="..\3dc\avp\PHEROMON.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\PHEROMON.H" />
+		<Unit filename="..\3dc\avp\PMOVE.H" />
+		<Unit filename="..\3dc\avp\PSND.H" />
+		<Unit filename="..\3dc\avp\PSNDPROJ.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\PSNDPROJ.H" />
+		<Unit filename="..\3dc\avp\PVISIBLE.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\PVISIBLE.H" />
+		<Unit filename="..\3dc\avp\Paintball.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\Paintball.h" />
+		<Unit filename="..\3dc\avp\Player.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\Pmove.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\Psnd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\SMOVDATA.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\STRATDEF.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\STRATDEF.H" />
+		<Unit filename="..\3dc\avp\SecStats.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\TRIGGERS.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\TRIGGERS.H" />
+		<Unit filename="..\3dc\avp\WEAPONS.H" />
+		<Unit filename="..\3dc\avp\Weapons.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_RubberDuck.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_RubberDuck.h" />
+		<Unit filename="..\3dc\avp\bh_agun.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_agun.h" />
+		<Unit filename="..\3dc\avp\bh_ais.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_ais.h" />
+		<Unit filename="..\3dc\avp\bh_cable.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_cable.h" />
+		<Unit filename="..\3dc\avp\bh_corpse.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_corpse.h" />
+		<Unit filename="..\3dc\avp\bh_deathvol.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_deathvol.h" />
+		<Unit filename="..\3dc\avp\bh_debri.h" />
+		<Unit filename="..\3dc\avp\bh_dummy.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_dummy.h" />
+		<Unit filename="..\3dc\avp\bh_fan.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_fan.h" />
+		<Unit filename="..\3dc\avp\bh_far.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_ldoor.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_ldoor.h" />
+		<Unit filename="..\3dc\avp\bh_lift.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_lift.h" />
+		<Unit filename="..\3dc\avp\bh_light.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_light.h" />
+		<Unit filename="..\3dc\avp\bh_ltfx.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_ltfx.h" />
+		<Unit filename="..\3dc\avp\bh_mission.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_mission.h" />
+		<Unit filename="..\3dc\avp\bh_pargen.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_pargen.h" />
+		<Unit filename="..\3dc\avp\bh_plachier.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_plachier.h" />
+		<Unit filename="..\3dc\avp\bh_plift.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_plift.h" />
+		<Unit filename="..\3dc\avp\bh_queen.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_queen.h" />
+		<Unit filename="..\3dc\avp\bh_selfdest.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_selfdest.h" />
+		<Unit filename="..\3dc\avp\bh_snds.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_snds.h" />
+		<Unit filename="..\3dc\avp\bh_spcl.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_spcl.h" />
+		<Unit filename="..\3dc\avp\bh_track.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_track.h" />
+		<Unit filename="..\3dc\avp\bh_videoscreen.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_videoscreen.h" />
+		<Unit filename="..\3dc\avp\bh_waypt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_waypt.h" />
+		<Unit filename="..\3dc\avp\bh_weap.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\bh_weap.h" />
+		<Unit filename="..\3dc\avp\cconvars.cpp" />
+		<Unit filename="..\3dc\avp\comp_map.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\davehook.cpp" />
+		<Unit filename="..\3dc\avp\davehook.h" />
+		<Unit filename="..\3dc\avp\deaths.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\decal.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\decal.h" />
+		<Unit filename="..\3dc\avp\equiputl.cpp" />
+		<Unit filename="..\3dc\avp\equiputl.hpp" />
+		<Unit filename="..\3dc\avp\extents.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\extents.h" />
+		<Unit filename="..\3dc\avp\game_statistics.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\game_statistics.h" />
+		<Unit filename="..\3dc\avp\gamecmds.cpp" />
+		<Unit filename="..\3dc\avp\gameflow.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\gameflow.h" />
+		<Unit filename="..\3dc\avp\gamevars.cpp" />
+		<Unit filename="..\3dc\avp\hmodel.h" />
+		<Unit filename="..\3dc\avp\langenum.h" />
+		<Unit filename="..\3dc\avp\load_shp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\load_shp.h" />
+		<Unit filename="..\3dc\avp\los.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\los.h" />
+		<Unit filename="..\3dc\avp\ltfx_exp.h" />
+		<Unit filename="..\3dc\avp\mempool.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\mempool.h" />
+		<Unit filename="..\3dc\avp\missions.cpp" />
+		<Unit filename="..\3dc\avp\missions.hpp" />
+		<Unit filename="..\3dc\avp\movement.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\particle.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\particle.h" />
+		<Unit filename="..\3dc\avp\projfont.h" />
+		<Unit filename="..\3dc\avp\projtext.h" />
+		<Unit filename="..\3dc\avp\savegame.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\savegame.h" />
+		<Unit filename="..\3dc\avp\scream.cpp" />
+		<Unit filename="..\3dc\avp\scream.h" />
+		<Unit filename="..\3dc\avp\sequnces.h" />
+		<Unit filename="..\3dc\avp\sfx.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\sfx.h" />
+		<Unit filename="..\3dc\avp\shapes\CUBE.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\statpane.h" />
+		<Unit filename="..\3dc\avp\support\COORDSTR.CPP" />
+		<Unit filename="..\3dc\avp\support\COORDSTR.HPP" />
+		<Unit filename="..\3dc\avp\support\DAEMON.CPP" />
+		<Unit filename="..\3dc\avp\support\command.hpp" />
+		<Unit filename="..\3dc\avp\support\consbind.cpp" />
+		<Unit filename="..\3dc\avp\support\consbind.hpp" />
+		<Unit filename="..\3dc\avp\support\consbtch.cpp" />
+		<Unit filename="..\3dc\avp\support\consbtch.hpp" />
+		<Unit filename="..\3dc\avp\support\daemon.h" />
+		<Unit filename="..\3dc\avp\support\dcontext.hpp" />
+		<Unit filename="..\3dc\avp\support\expvar.hpp" />
+		<Unit filename="..\3dc\avp\support\indexfnt.cpp" />
+		<Unit filename="..\3dc\avp\support\indexfnt.hpp" />
+		<Unit filename="..\3dc\avp\support\ourbool.h" />
+		<Unit filename="..\3dc\avp\support\r2base.cpp" />
+		<Unit filename="..\3dc\avp\support\r2base.h" />
+		<Unit filename="..\3dc\avp\support\r2pos666.cpp" />
+		<Unit filename="..\3dc\avp\support\r2pos666.hpp" />
+		<Unit filename="..\3dc\avp\support\reflist.cpp" />
+		<Unit filename="..\3dc\avp\support\reflist.hpp" />
+		<Unit filename="..\3dc\avp\support\refobj.cpp" />
+		<Unit filename="..\3dc\avp\support\refobj.hpp" />
+		<Unit filename="..\3dc\avp\support\rentrntq.cpp" />
+		<Unit filename="..\3dc\avp\support\rentrntq.h" />
+		<Unit filename="..\3dc\avp\support\scstring.cpp" />
+		<Unit filename="..\3dc\avp\support\scstring.hpp" />
+		<Unit filename="..\3dc\avp\support\strtab.cpp" />
+		<Unit filename="..\3dc\avp\support\strtab.hpp" />
+		<Unit filename="..\3dc\avp\support\strutil.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\support\strutil.h" />
+		<Unit filename="..\3dc\avp\support\tallfont.cpp" />
+		<Unit filename="..\3dc\avp\support\tallfont.hpp" />
+		<Unit filename="..\3dc\avp\support\trig666.cpp" />
+		<Unit filename="..\3dc\avp\support\trig666.hpp" />
+		<Unit filename="..\3dc\avp\support\wrapstr.cpp" />
+		<Unit filename="..\3dc\avp\support\wrapstr.hpp" />
+		<Unit filename="..\3dc\avp\targeting.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\targeting.h" />
+		<Unit filename="..\3dc\avp\track.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\track.h" />
+		<Unit filename="..\3dc\avp\win95\AVPCHUNK.CPP" />
+		<Unit filename="..\3dc\avp\win95\AVPCHUNK.HPP" />
+		<Unit filename="..\3dc\avp\win95\AvpReg.cpp" />
+		<Unit filename="..\3dc\avp\win95\AvpReg.hpp" />
+		<Unit filename="..\3dc\avp\win95\BMP2.H" />
+		<Unit filename="..\3dc\avp\win95\CHEAT.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\CHEAT.H" />
+		<Unit filename="..\3dc\avp\win95\DirectPlay.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\Dp_func.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\Dp_func.h" />
+		<Unit filename="..\3dc\avp\win95\EAX.h" />
+		<Unit filename="..\3dc\avp\win95\FFREAD.CPP" />
+		<Unit filename="..\3dc\avp\win95\FFREAD.HPP" />
+		<Unit filename="..\3dc\avp\win95\FFSTDIO.CPP" />
+		<Unit filename="..\3dc\avp\win95\FFSTDIO.H" />
+		<Unit filename="..\3dc\avp\win95\Frontend\AvP_EnvInfo.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\Frontend\AvP_EnvInfo.h" />
+		<Unit filename="..\3dc\avp\win95\Frontend\AvP_Intro.cpp" />
+		<Unit filename="..\3dc\avp\win95\Frontend\AvP_MP_Config.cpp" />
+		<Unit filename="..\3dc\avp\win95\Frontend\AvP_MP_Config.h" />
+		<Unit filename="..\3dc\avp\win95\Frontend\AvP_MenuData.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\Frontend\AvP_MenuGfx.cpp" />
+		<Unit filename="..\3dc\avp\win95\Frontend\AvP_MenuGfx.hpp" />
+		<Unit filename="..\3dc\avp\win95\Frontend\AvP_Menus.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\Frontend\AvP_Menus.h" />
+		<Unit filename="..\3dc\avp\win95\Frontend\AvP_UserProfile.cpp" />
+		<Unit filename="..\3dc\avp\win95\Frontend\AvP_UserProfile.h" />
+		<Unit filename="..\3dc\avp\win95\Frontend\avp_intro.h" />
+		<Unit filename="..\3dc\avp\win95\GAMEPLAT.H" />
+		<Unit filename="..\3dc\avp\win95\GammaControl.cpp" />
+		<Unit filename="..\3dc\avp\win95\GammaControl.h" />
+		<Unit filename="..\3dc\avp\win95\HEAP_TEM.HPP" />
+		<Unit filename="..\3dc\avp\win95\HUDGFX.H" />
+		<Unit filename="..\3dc\avp\win95\HUD_layout.h" />
+		<Unit filename="..\3dc\avp\win95\Ia3d.h" />
+		<Unit filename="..\3dc\avp\win95\KZSORT.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\KZSORT.H" />
+		<Unit filename="..\3dc\avp\win95\LANGPLAT.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\MULTMENU.H" />
+		<Unit filename="..\3dc\avp\win95\MouseCentreing.cpp" />
+		<Unit filename="..\3dc\avp\win95\NPCSETUP.CPP" />
+		<Unit filename="..\3dc\avp\win95\NPCSETUP.H" />
+		<Unit filename="..\3dc\avp\win95\OBJSETUP.HPP" />
+		<Unit filename="..\3dc\avp\win95\Objsetup.cpp" />
+		<Unit filename="..\3dc\avp\win95\PCPAUSE.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\PLATSUP.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\PLDGHOST.H" />
+		<Unit filename="..\3dc\avp\win95\PROJLOAD.HPP" />
+		<Unit filename="..\3dc\avp\win95\PSNDPLAT.H" />
+		<Unit filename="..\3dc\avp\win95\PathChnk.cpp" />
+		<Unit filename="..\3dc\avp\win95\PathChnk.hpp" />
+		<Unit filename="..\3dc\avp\win95\Pldghost.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\Pldnet.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\Pldnet.h" />
+		<Unit filename="..\3dc\avp\win95\Projload.cpp" />
+		<Unit filename="..\3dc\avp\win95\Psndplat.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\SCRSHOT.CPP" />
+		<Unit filename="..\3dc\avp\win95\SCRSHOT.HPP" />
+		<Unit filename="..\3dc\avp\win95\STRACHNK.CPP" />
+		<Unit filename="..\3dc\avp\win95\Strachnk.hpp" />
+		<Unit filename="..\3dc\avp\win95\System.h" />
+		<Unit filename="..\3dc\avp\win95\USR_IO.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\USR_IO.H" />
+		<Unit filename="..\3dc\avp\win95\VISION.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\VISION.H" />
+		<Unit filename="..\3dc\avp\win95\VMANPSET.H" />
+		<Unit filename="..\3dc\avp\win95\chtcodes.cpp" />
+		<Unit filename="..\3dc\avp\win95\d3d_hud.cpp" />
+		<Unit filename="..\3dc\avp\win95\d3d_hud.h" />
+		<Unit filename="..\3dc\avp\win95\datatype.h" />
+		<Unit filename="..\3dc\avp\win95\dbdefs.h" />
+		<Unit filename="..\3dc\avp\win95\dplayext.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\dplayext.h" />
+		<Unit filename="..\3dc\avp\win95\dx_audio.cpp" />
+		<Unit filename="..\3dc\avp\win95\endianio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\endianio.h" />
+		<Unit filename="..\3dc\avp\win95\font.h" />
+		<Unit filename="..\3dc\avp\win95\gadgets\ahudgadg.cpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\ahudgadg.hpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\conscmnd.cpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\conscmnd.hpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\conssym.cpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\conssym.hpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\consvar.cpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\consvar.hpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\gadget.cpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\gadget.h" />
+		<Unit filename="..\3dc\avp\win95\gadgets\hudgadg.cpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\hudgadg.hpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\rootgadg.cpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\rootgadg.hpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\t_ingadg.cpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\t_ingadg.hpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\teletype.cpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\teletype.hpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\textexp.cpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\textexp.hpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\textin.cpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\textin.hpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\trepgadg.cpp" />
+		<Unit filename="..\3dc\avp\win95\gadgets\trepgadg.hpp" />
+		<Unit filename="..\3dc\avp\win95\hierplace.cpp" />
+		<Unit filename="..\3dc\avp\win95\hierplace.hpp" />
+		<Unit filename="..\3dc\avp\win95\iofocus.cpp" />
+		<Unit filename="..\3dc\avp\win95\iofocus.h" />
+		<Unit filename="..\3dc\avp\win95\jsndsup.cpp" />
+		<Unit filename="..\3dc\avp\win95\jsndsup.h" />
+		<Unit filename="..\3dc\avp\win95\modcmds.cpp" />
+		<Unit filename="..\3dc\avp\win95\modcmds.hpp" />
+		<Unit filename="..\3dc\avp\win95\progress_bar.cpp" />
+		<Unit filename="..\3dc\avp\win95\progress_bar.h" />
+		<Unit filename="..\3dc\avp\win95\system.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\avp\win95\win_proj.cpp" />
+		<Unit filename="..\3dc\avp\win95\winmain.cpp" />
+		<Unit filename="..\3dc\avp\win95\xa2_audio.cpp" />
+		<Unit filename="..\3dc\configFile.cpp" />
+		<Unit filename="..\3dc\configFile.h" />
+		<Unit filename="..\3dc\console.cpp" />
+		<Unit filename="..\3dc\console.h" />
+		<Unit filename="..\3dc\fmvCutscenes.cpp" />
+		<Unit filename="..\3dc\fmvCutscenes.h" />
+		<Unit filename="..\3dc\fmvPlayback.cpp" />
+		<Unit filename="..\3dc\fmvPlayback.h" />
+		<Unit filename="..\3dc\font.cpp" />
+		<Unit filename="..\3dc\font2.h" />
+		<Unit filename="..\3dc\frustrum.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\frustrum.h" />
+		<Unit filename="..\3dc\include\3dc.h" />
+		<Unit filename="..\3dc\include\mem3dc.h" />
+		<Unit filename="..\3dc\include\module.h" />
+		<Unit filename="..\3dc\include\prototyp.h" />
+		<Unit filename="..\3dc\include\shape.h" />
+		<Unit filename="..\3dc\include\xbox_defines.h" />
+		<Unit filename="..\3dc\logString.cpp" />
+		<Unit filename="..\3dc\logstring.h" />
+		<Unit filename="..\3dc\mathline.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\mem3dc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\networking.cpp" />
+		<Unit filename="..\3dc\networking.h" />
+		<Unit filename="..\3dc\onscreenKeyboard.cpp" />
+		<Unit filename="..\3dc\onscreenKeyboard.h" />
+		<Unit filename="..\3dc\os_header.h" />
+		<Unit filename="..\3dc\readme.txt" />
+		<Unit filename="..\3dc\renderer.h" />
+		<Unit filename="..\3dc\ringbuffer.cpp" />
+		<Unit filename="..\3dc\ringbuffer.h" />
+		<Unit filename="..\3dc\shpanim.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\sphere.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\sphere.h" />
+		<Unit filename="..\3dc\stdint.h">
+			<Option weight="100" />
+		</Unit>
+		<Unit filename="..\3dc\textureManager.cpp" />
+		<Unit filename="..\3dc\textureManager.h" />
+		<Unit filename="..\3dc\utilities.cpp" />
+		<Unit filename="..\3dc\utilities.h" />
+		<Unit filename="..\3dc\version.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\version.h" />
+		<Unit filename="..\3dc\vorbisPlayer.cpp" />
+		<Unit filename="..\3dc\vorbisPlayer.h" />
+		<Unit filename="..\3dc\win95\ANIMCHNK.CPP" />
+		<Unit filename="..\3dc\win95\ANIMCHNK.HPP" />
+		<Unit filename="..\3dc\win95\BMPNAMES.CPP" />
+		<Unit filename="..\3dc\win95\BMPNAMES.HPP" />
+		<Unit filename="..\3dc\win95\CD_player.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\win95\CD_player.h" />
+		<Unit filename="..\3dc\win95\CHNKLOAD.H" />
+		<Unit filename="..\3dc\win95\CHNKLOAD.HPP" />
+		<Unit filename="..\3dc\win95\CHNKTEXI.CPP" />
+		<Unit filename="..\3dc\win95\CHNKTEXI.H" />
+		<Unit filename="..\3dc\win95\CHNKTYPE.CPP" />
+		<Unit filename="..\3dc\win95\CHNKTYPE.HPP" />
+		<Unit filename="..\3dc\win95\CHUNKPAL.CPP" />
+		<Unit filename="..\3dc\win95\CHUNKPAL.HPP" />
+		<Unit filename="..\3dc\win95\Chunk.cpp" />
+		<Unit filename="..\3dc\win95\Chunk.hpp" />
+		<Unit filename="..\3dc\win95\DB.H" />
+		<Unit filename="..\3dc\win95\DEBUGLOG.CPP" />
+		<Unit filename="..\3dc\win95\DEBUGLOG.H" />
+		<Unit filename="..\3dc\win95\DEBUGLOG.HPP" />
+		<Unit filename="..\3dc\win95\DXLOG.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\win95\DXLOG.H" />
+		<Unit filename="..\3dc\win95\DummyObjectChunk.cpp" />
+		<Unit filename="..\3dc\win95\DummyObjectChunk.hpp" />
+		<Unit filename="..\3dc\win95\ENUMCHNK.CPP" />
+		<Unit filename="..\3dc\win95\ENUMCHNK.HPP" />
+		<Unit filename="..\3dc\win95\ENUMSCH.CPP" />
+		<Unit filename="..\3dc\win95\ENUMSCH.HPP" />
+		<Unit filename="..\3dc\win95\ENVCHUNK.CPP" />
+		<Unit filename="..\3dc\win95\ENVCHUNK.HPP" />
+		<Unit filename="..\3dc\win95\GSPRCHNK.CPP" />
+		<Unit filename="..\3dc\win95\GSPRCHNK.HPP" />
+		<Unit filename="..\3dc\win95\Hash_tem.hpp" />
+		<Unit filename="..\3dc\win95\ILBM_ext.cpp" />
+		<Unit filename="..\3dc\win95\ILBM_ext.hpp" />
+		<Unit filename="..\3dc\win95\INLINE.H" />
+		<Unit filename="..\3dc\win95\LTCHUNK.CPP" />
+		<Unit filename="..\3dc\win95\LTCHUNK.HPP" />
+		<Unit filename="..\3dc\win95\MISHCHNK.CPP" />
+		<Unit filename="..\3dc\win95\MISHCHNK.HPP" />
+		<Unit filename="..\3dc\win95\OBCHUNK.CPP" />
+		<Unit filename="..\3dc\win95\OBCHUNK.HPP" />
+		<Unit filename="..\3dc\win95\OEChunk.cpp" />
+		<Unit filename="..\3dc\win95\OEChunk.h" />
+		<Unit filename="..\3dc\win95\OURASERT.H" />
+		<Unit filename="..\3dc\win95\OUR_MEM.C">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\win95\SHPCHUNK.CPP" />
+		<Unit filename="..\3dc\win95\SHPCHUNK.HPP" />
+		<Unit filename="..\3dc\win95\SNDCHUNK.CPP" />
+		<Unit filename="..\3dc\win95\SNDCHUNK.HPP" />
+		<Unit filename="..\3dc\win95\STRING.CPP" />
+		<Unit filename="..\3dc\win95\STRING.HPP" />
+		<Unit filename="..\3dc\win95\ShowCmds.h" />
+		<Unit filename="..\3dc\win95\Sprchunk.cpp" />
+		<Unit filename="..\3dc\win95\Sprchunk.hpp" />
+		<Unit filename="..\3dc\win95\Texio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\win95\VideoModes.cpp" />
+		<Unit filename="..\3dc\win95\VideoModes.h" />
+		<Unit filename="..\3dc\win95\Zsp.cpp" />
+		<Unit filename="..\3dc\win95\Zsp.hpp" />
+		<Unit filename="..\3dc\win95\animobs.cpp" />
+		<Unit filename="..\3dc\win95\animobs.hpp" />
+		<Unit filename="..\3dc\win95\aw.h" />
+		<Unit filename="..\3dc\win95\awBmpLd.cpp" />
+		<Unit filename="..\3dc\win95\awIffLd.cpp" />
+		<Unit filename="..\3dc\win95\awPnmLd.cpp" />
+		<Unit filename="..\3dc\win95\awTexLd.cpp" />
+		<Unit filename="..\3dc\win95\awTexLd.h" />
+		<Unit filename="..\3dc\win95\awTexLd.hpp" />
+		<Unit filename="..\3dc\win95\chnkload.cpp" />
+		<Unit filename="..\3dc\win95\db.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\win95\fail.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\win95\fail.h" />
+		<Unit filename="..\3dc\win95\fragchnk.cpp" />
+		<Unit filename="..\3dc\win95\fragchnk.hpp" />
+		<Unit filename="..\3dc\win95\hierchnk.cpp" />
+		<Unit filename="..\3dc\win95\hierchnk.hpp" />
+		<Unit filename="..\3dc\win95\huffman.cpp" />
+		<Unit filename="..\3dc\win95\huffman.hpp" />
+		<Unit filename="..\3dc\win95\iff.cpp" />
+		<Unit filename="..\3dc\win95\iff.hpp" />
+		<Unit filename="..\3dc\win95\iff_ILBM.cpp" />
+		<Unit filename="..\3dc\win95\iff_ILBM.hpp" />
+		<Unit filename="..\3dc\win95\io.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\win95\item.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\win95\list_tem.cpp" />
+		<Unit filename="..\3dc\win95\list_tem.hpp" />
+		<Unit filename="..\3dc\win95\md5.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\win95\md5.h" />
+		<Unit filename="..\3dc\win95\media.cpp" />
+		<Unit filename="..\3dc\win95\media.hpp" />
+		<Unit filename="..\3dc\win95\objedit.h" />
+		<Unit filename="..\3dc\win95\plat_shp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\win95\plat_shp.h" />
+		<Unit filename="..\3dc\win95\platform.h" />
+		<Unit filename="..\3dc\win95\plspecfn.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\3dc\win95\shpanim.h" />
+		<Unit filename="..\3dc\win95\win_func.cpp" />
+		<Unit filename="..\3dc\win95\wpchunk.cpp" />
+		<Unit filename="..\3dc\win95\wpchunk.hpp" />
+		<Unit filename="..\win32\Di_func.cpp" />
+		<Unit filename="..\win32\d3_func.cpp" />
+		<Unit filename="..\win32\d3_func.h" />
+		<Unit filename="..\win32\d3d_render.cpp" />
+		<Unit filename="..\win32\d3d_render.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
