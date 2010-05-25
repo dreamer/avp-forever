@@ -50,7 +50,7 @@ extern int ModuleArraySize;
 extern char *ModuleCurrVisArray;
 extern int NormalFrameTime;
 extern SECTION_DATA* LOS_HModel_Section;        /* Section of HModel hit */
-extern void HandleWeaponImpact(VECTORCH *positionPtr, STRATEGYBLOCK *sbPtr, enum AMMO_ID AmmoID, VECTORCH *directionPtr, int multiple, SECTION_DATA *section_pointer); 
+extern void HandleWeaponImpact(VECTORCH *positionPtr, STRATEGYBLOCK *sbPtr, enum AMMO_ID AmmoID, VECTORCH *directionPtr, int multiple, SECTION_DATA *section_pointer);
 extern void HandleSpearImpact(VECTORCH *positionPtr, STRATEGYBLOCK *sbPtr, enum AMMO_ID AmmoID, VECTORCH *directionPtr, int multiple, SECTION_DATA *this_section_data);
 extern SECTION * GetNamedHierarchyFromLibrary(const char * rif_name, const char * hier_name);
 extern int GlobalFrameCounter;
@@ -149,7 +149,7 @@ format: health,speed,defenceHealth,useShoulderCannon,
 timebetweenRangedAttacks,maxShotsPerRangedAttack,
 timeBetweenEachShot,closeAttackDamage,chanceOfCloaking(1-8)
 ---------------------------------------------------------------------*/
-static PREDATOR_PERSONALPARAMETERS predatorCV[] = 
+static PREDATOR_PERSONALPARAMETERS predatorCV[] =
 {
         {800,8000,200,1,(2*ONE_FIXED),3,(ONE_FIXED),25,200,2},
         {1000,7000,500,0,(ONE_FIXED),1,(ONE_FIXED>>1),20,400,4},
@@ -316,10 +316,10 @@ PREDATOR_WEAPON_DATA *GetThisNPCPredatorWeapon(PREDATOR_NPC_WEAPONS this_id) {
 
 static enum AMMO_ID GetPredatorAttackDamageType(STRATEGYBLOCK *sbPtr,int flagnum) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
         LOCALASSERT(predatorStatusPointer);
 
         if (predatorStatusPointer->current_attack==NULL) {
@@ -333,13 +333,13 @@ static enum AMMO_ID GetPredatorAttackDamageType(STRATEGYBLOCK *sbPtr,int flagnum
 
 static void PredatorNearDamageShell(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         DYNAMICSBLOCK *dynPtr;
         int workingflags,flagnum,a;
         int dist,dodamage;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
         dynPtr = sbPtr->DynPtr;
         LOCALASSERT(predatorStatusPointer);
         LOCALASSERT(dynPtr);
@@ -356,35 +356,35 @@ static void PredatorNearDamageShell(STRATEGYBLOCK *sbPtr)
         } else {
                 dodamage=0;
         }
-        
+
         for (a=0; a<NUM_ATTACKFLAGS; a++) {
-        
+
                 if (workingflags&1) {
-                
+
                 /* Do the alien attack sound */
-        
+
                     #if 0
         	        	unsigned int rand=FastRandom();
                         switch (rand % 4)
                         {
                                 case 0:
                                 {
-                                Sound_Play(SID_SWIPE,"dp",&dynPtr->Position,(rand&255)-128);                                    
+                                Sound_Play(SID_SWIPE,"dp",&dynPtr->Position,(rand&255)-128);
                                 break;
                         }
                         case 1:
                         {
-                                Sound_Play(SID_SWIPE2,"dp",&dynPtr->Position,(rand&255)-128);                                   
+                                Sound_Play(SID_SWIPE2,"dp",&dynPtr->Position,(rand&255)-128);
                                 break;
                         }
                         case 2:
                         {
-                                Sound_Play(SID_SWIPE3,"dp",&dynPtr->Position,(rand&255)-128);                                   
+                                Sound_Play(SID_SWIPE3,"dp",&dynPtr->Position,(rand&255)-128);
                                 break;
                         }
                                 case 3:
                         {
-                                Sound_Play(SID_SWIPE4,"dp",&dynPtr->Position,(rand&255)-128);                                   
+                                Sound_Play(SID_SWIPE4,"dp",&dynPtr->Position,(rand&255)-128);
                                 break;
                         }
                                 default:
@@ -397,30 +397,30 @@ static void PredatorNearDamageShell(STRATEGYBLOCK *sbPtr)
 					#endif
                         /* Oops, check range first. */
                         if (dodamage) {
-        
+
                                 if (predatorStatusPointer->Target->SBdptr) {
                                         VECTORCH rel_pos,attack_dir;
-        
+
                                         rel_pos.vx=predatorStatusPointer->Target->DynPtr->Position.vx-sbPtr->DynPtr->Position.vx;
                                         rel_pos.vy=predatorStatusPointer->Target->DynPtr->Position.vy-sbPtr->DynPtr->Position.vy;
                                         rel_pos.vz=predatorStatusPointer->Target->DynPtr->Position.vz-sbPtr->DynPtr->Position.vz;
-        
+
                                         GetDirectionOfAttack(predatorStatusPointer->Target,&rel_pos,&attack_dir);
 
                                         if (predatorStatusPointer->Target->SBdptr->HModelControlBlock) {
                                                 HtoHDamageToHModel(predatorStatusPointer->Target,&TemplateAmmo[GetPredatorAttackDamageType(sbPtr,flagnum)].MaxDamage[AvP.Difficulty], ONE_FIXED, sbPtr, &attack_dir);
                                         } else {
                                                 CauseDamageToObject(predatorStatusPointer->Target,&TemplateAmmo[GetPredatorAttackDamageType(sbPtr,flagnum)].MaxDamage[AvP.Difficulty], ONE_FIXED,&attack_dir);
-                                        }               
+                                        }
                                 } else {
                                         VECTORCH rel_pos,attack_dir;
-        
+
                                         rel_pos.vx=predatorStatusPointer->Target->DynPtr->Position.vx-sbPtr->DynPtr->Position.vx;
                                         rel_pos.vy=predatorStatusPointer->Target->DynPtr->Position.vy-sbPtr->DynPtr->Position.vy;
                                         rel_pos.vz=predatorStatusPointer->Target->DynPtr->Position.vz-sbPtr->DynPtr->Position.vz;
-        
+
                                         GetDirectionOfAttack(predatorStatusPointer->Target,&rel_pos,&attack_dir);
-        
+
                                         CauseDamageToObject(predatorStatusPointer->Target,&TemplateAmmo[GetPredatorAttackDamageType(sbPtr,flagnum)].MaxDamage[AvP.Difficulty], ONE_FIXED,&attack_dir);
                                 }
                         }
@@ -434,16 +434,16 @@ static void PredatorNearDamageShell(STRATEGYBLOCK *sbPtr)
 
 static void StartWristbladeAttackSequence(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         ATTACK_DATA *thisAttack;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
         LOCALASSERT(predatorStatusPointer);
 
         thisAttack=GetWristbladeAttackSequence(&predatorStatusPointer->HModelController,0,
                 predatorStatusPointer->IAmCrouched);
-        
+
         GLOBALASSERT(thisAttack);
 
         SetPredatorAnimationSequence(sbPtr,thisAttack->Sequence_Type,thisAttack->Sub_Sequence,
@@ -455,16 +455,16 @@ static void StartWristbladeAttackSequence(STRATEGYBLOCK *sbPtr) {
 
 static void StartPredStaffAttackSequence(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         ATTACK_DATA *thisAttack;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
         LOCALASSERT(predatorStatusPointer);
 
         thisAttack=GetPredStaffAttackSequence(&predatorStatusPointer->HModelController,0,
                 predatorStatusPointer->IAmCrouched);
-        
+
         GLOBALASSERT(thisAttack);
 
         SetPredatorAnimationSequence(sbPtr,thisAttack->Sequence_Type,thisAttack->Sub_Sequence,
@@ -488,9 +488,9 @@ void CastPredoBot(int weapon) {
         }
 
         position=Player->ObStrategyBlock->DynPtr->Position;
-        position.vx+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat31,BOTRANGE);              
-        position.vy+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat32,BOTRANGE);              
-        position.vz+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat33,BOTRANGE);              
+        position.vx+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat31,BOTRANGE);
+        position.vy+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat32,BOTRANGE);
+        position.vz+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat33,BOTRANGE);
 
         CreatePredoBot(&position, weapon);
 
@@ -522,8 +522,8 @@ void CreatePredoBot(VECTORCH *position, int weapon)
         dynPtr->PrevPosition = dynPtr->Position = *position;
                 dynPtr->OrientEuler = zeroEuler;
                 CreateEulerMatrix(&dynPtr->OrientEuler, &dynPtr->OrientMat);
-                TransposeMatrixCH(&dynPtr->OrientMat);      
-                
+                TransposeMatrixCH(&dynPtr->OrientMat);
+
                 /* zero linear velocity in dynamics block */
                 dynPtr->LinVelocity.vx = 0;
                 dynPtr->LinVelocity.vy = 0;
@@ -582,9 +582,9 @@ void CreatePredoBot(VECTORCH *position, int weapon)
                 predatorStatus->behaviourState = PBS_Wandering;
                 predatorStatus->stateTimer = PRED_FAR_MOVE_TIME;
                 predatorStatus->internalState=0;
-                predatorStatus->weaponTarget.vx = predatorStatus->weaponTarget.vy = predatorStatus->weaponTarget.vz = 0;                
+                predatorStatus->weaponTarget.vx = predatorStatus->weaponTarget.vy = predatorStatus->weaponTarget.vz = 0;
                 predatorStatus->volleySize = 0;
-                predatorStatus->IAmCrouched = 0;                
+                predatorStatus->IAmCrouched = 0;
                 predatorStatus->nearSpeed = predatorCV[predatorStatus->personalNumber].speed;
                 predatorStatus->GibbFactor=0;
                 predatorStatus->current_attack=NULL;
@@ -635,7 +635,7 @@ void CreatePredoBot(VECTORCH *position, int weapon)
                 //a generated predator won't have a death target
                 {
                         int i;
-                        for(i=0;i<SB_NAME_LENGTH;i++) predatorStatus->death_target_ID[i] =0; 
+                        for(i=0;i<SB_NAME_LENGTH;i++) predatorStatus->death_target_ID[i] =0;
                         predatorStatus->death_target_request=0;
                         predatorStatus->death_target_sbptr=0;
                 }
@@ -671,7 +671,7 @@ void CreatePredoBot(VECTORCH *position, int weapon)
 
                 ProveHModel_Far(&predatorStatus->HModelController,sbPtr);
 
-                InitPredatorCloak(predatorStatus);      
+                InitPredatorCloak(predatorStatus);
 
                 if(!(sbPtr->containingModule))
                 {
@@ -693,7 +693,7 @@ void CreatePredoBot(VECTORCH *position, int weapon)
                 RemoveBehaviourStrategy(sbPtr);
                 NewOnScreenMessage("FAILED TO CREATE BOT: MALLOC FAILURE");
                 return;
-        }                                          
+        }
 }
 
 /* Patrick 4/7/97 --------------------------------------------------
@@ -702,22 +702,22 @@ Initialiser, visibility management,behaviour shell, and damage functions
 ---------------------------------------------------------------------*/
 void InitPredatorBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
 {
-        TOOLS_DATA_PREDATOR *toolsData; 
+        TOOLS_DATA_PREDATOR *toolsData;
         int i;
 
         LOCALASSERT(sbPtr);
         LOCALASSERT(bhdata);
-        toolsData = (TOOLS_DATA_PREDATOR *)bhdata; 
+        toolsData = (TOOLS_DATA_PREDATOR *)bhdata;
 
         /* check we're not in a net game */
-        if(AvP.Network != I_No_Network) 
+        if(AvP.Network != I_No_Network)
         {
                 RemoveBehaviourStrategy(sbPtr);
                 return;
         }
 
-        /* make the assumption that the loader has initialised the strategy 
-        block sensibly... 
+        /* make the assumption that the loader has initialised the strategy
+        block sensibly...
         so just set the shapeIndex from the tools data & copy the name id*/
         sbPtr->shapeIndex = toolsData->shapeIndex;
         for(i=0;i<SB_NAME_LENGTH;i++) sbPtr->SBname[i] = toolsData->nameID[i];
@@ -731,8 +731,8 @@ void InitPredatorBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
         dynPtr->PrevPosition = dynPtr->Position = toolsData->position;
                 dynPtr->OrientEuler = zeroEuler;
                 CreateEulerMatrix(&dynPtr->OrientEuler, &dynPtr->OrientMat);
-                TransposeMatrixCH(&dynPtr->OrientMat);      
-                
+                TransposeMatrixCH(&dynPtr->OrientMat);
+
                 /* zero linear velocity in dynamics block */
                 dynPtr->LinVelocity.vx = 0;
                 dynPtr->LinVelocity.vy = 0;
@@ -783,9 +783,9 @@ void InitPredatorBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
                 predatorStatus->behaviourState = PBS_Wandering;
                 predatorStatus->stateTimer = PRED_FAR_MOVE_TIME;
                 predatorStatus->internalState=0;
-                predatorStatus->weaponTarget.vx = predatorStatus->weaponTarget.vy = predatorStatus->weaponTarget.vz = 0;                
+                predatorStatus->weaponTarget.vx = predatorStatus->weaponTarget.vy = predatorStatus->weaponTarget.vz = 0;
                 predatorStatus->volleySize = 0;
-                predatorStatus->IAmCrouched = 0;                
+                predatorStatus->IAmCrouched = 0;
                 predatorStatus->nearSpeed = predatorCV[predatorStatus->personalNumber].speed;
                 predatorStatus->GibbFactor=0;
                 predatorStatus->current_attack=NULL;
@@ -833,8 +833,8 @@ void InitPredatorBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
                 for(i=0;i<SB_NAME_LENGTH;i++) predatorStatus->death_target_ID[i] = toolsData->death_target_ID[i];
                 predatorStatus->death_target_request=toolsData->death_target_request;
                 predatorStatus->death_target_sbptr=0;
-                
-                
+
+
                 root_section=GetNamedHierarchyFromLibrary(predatorStatus->Selected_Weapon->Riffname,predatorStatus->Selected_Weapon->HierarchyName);
                 GLOBALASSERT(root_section);
                 Create_HModel(&predatorStatus->HModelController,root_section);
@@ -861,14 +861,14 @@ void InitPredatorBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
 
                 ProveHModel_Far(&predatorStatus->HModelController,sbPtr);
 
-                InitPredatorCloak(predatorStatus);      
+                InitPredatorCloak(predatorStatus);
         }
         else
         {
                 /* allocation failure */
                 RemoveBehaviourStrategy(sbPtr);
                 return;
-        }                                          
+        }
 }
 
 void InitDormantPredatorBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
@@ -893,8 +893,8 @@ void ActivateDormantPredator(STRATEGYBLOCK* sbPtr)
         GLOBALASSERT(sbPtr->SBdataptr);
         pred_bhv = (DORMANT_PREDATOR_STATUS_BLOCK*)sbPtr->SBdataptr;
         toolsData=pred_bhv->toolsData;
-                
-        //convert this strategyblock to a predator      
+
+        //convert this strategyblock to a predator
         DeallocateMem(pred_bhv);
         InitialiseSBValues(sbPtr);
         sbPtr->I_SBtype = I_BehaviourPredator;
@@ -905,11 +905,11 @@ void ActivateDormantPredator(STRATEGYBLOCK* sbPtr)
                 PREDATOR_STATUS_BLOCK *predatorStatus = (PREDATOR_STATUS_BLOCK *)sbPtr->SBdataptr;
                 predatorStatus->death_target_sbptr = FindSBWithName(predatorStatus->death_target_ID);
         }
-        
+
         sbPtr->maintainVisibility = 1;
         sbPtr->containingModule = ModuleFromPosition(&(sbPtr->DynPtr->Position), (MODULE*)0);
 
-        
+
 }
 
 
@@ -920,7 +920,7 @@ void SetPredatorElevation(STRATEGYBLOCK *sbPtr) {
         DELTA_CONTROLLER *elevation_controller;
         VECTORCH gunpos;
 
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
 
         if (predatorStatusPointer->Selected_Weapon->UseElevation==0) {
                 /* Non elevating weapon. */
@@ -936,7 +936,7 @@ void SetPredatorElevation(STRATEGYBLOCK *sbPtr) {
         }
 
         /* Aim at weaponTarget. */
-        
+
         offsetx=(predatorStatusPointer->weaponTarget.vx)-(gunpos.vx);
         offsety=(predatorStatusPointer->weaponTarget.vz)-(gunpos.vz);
         offseta=-((predatorStatusPointer->weaponTarget.vy)-(gunpos.vy));
@@ -947,7 +947,7 @@ void SetPredatorElevation(STRATEGYBLOCK *sbPtr) {
                 ||(offsetx<-(ONE_FIXED>>2))
                 ||(offsety<-(ONE_FIXED>>2))
                 ||(offseta<-(ONE_FIXED>>2))) {
-        
+
                 offsetx>>=1;
                 offsety>>=1;
                 offseta>>=1;
@@ -987,7 +987,7 @@ void CentrePredatorElevation(STRATEGYBLOCK *sbPtr) {
         PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         DELTA_CONTROLLER *elevation_controller;
 
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
 
         if (predatorStatusPointer->Selected_Weapon->UseElevation==0) {
                 /* Non elevating weapon. */
@@ -1004,47 +1004,47 @@ void CentrePredatorElevation(STRATEGYBLOCK *sbPtr) {
 
 void PredatorBehaviour(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         int predatorIsNear;
         char *descriptor;
         PRED_RETURN_CONDITION state_result;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-    LOCALASSERT(predatorStatusPointer);                         
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+    LOCALASSERT(predatorStatusPointer);
 
         /* test if we've got a containing module: if we haven't, do nothing.
-        This is important as the object could have been marked for deletion by the visibility 
+        This is important as the object could have been marked for deletion by the visibility
         management system...*/
         if(!sbPtr->containingModule)
         {
                 DestroyAnyStrategyBlock(sbPtr); /* just to make sure */
                 return;
-        } 
+        }
 
-        if(sbPtr->SBdptr) 
+        if(sbPtr->SBdptr)
         {
-                LOCALASSERT(ModuleCurrVisArray[(sbPtr->containingModule->m_index)]);                                            
+                LOCALASSERT(ModuleCurrVisArray[(sbPtr->containingModule->m_index)]);
                 predatorIsNear=1;
         } else {
                 predatorIsNear=0;
-        }               
+        }
 
         if (ShowSlack) {
                 int synthSpeed,setSpeed,slack;
                 VECTORCH offset;
                 extern int SlackTotal;
                 extern int SlackSize;
-                                
+
                 offset.vx=(sbPtr->DynPtr->Position.vx-sbPtr->DynPtr->PrevPosition.vx);
                 offset.vy=(sbPtr->DynPtr->Position.vy-sbPtr->DynPtr->PrevPosition.vy);
                 offset.vz=(sbPtr->DynPtr->Position.vz-sbPtr->DynPtr->PrevPosition.vz);
-                
+
                 synthSpeed=Magnitude(&offset);
                 synthSpeed=DIV_FIXED(synthSpeed,NormalFrameTime);
                 setSpeed=Magnitude(&sbPtr->DynPtr->LinVelocity);
-                
-                if (setSpeed) {         
+
+                if (setSpeed) {
                         slack=(ONE_FIXED-(DIV_FIXED(synthSpeed,setSpeed)));
                         SlackTotal+=slack;
                         SlackSize++;
@@ -1080,7 +1080,7 @@ void PredatorBehaviour(STRATEGYBLOCK *sbPtr)
                         textprint("Predator gets new target.\n");
                         #endif
                         COPY_NAME(predatorStatusPointer->Target_SBname,predatorStatusPointer->Target->SBname);
-        
+
                 } else {
                         #if 0
                                 PrintDebuggingText("Predator found no target!\n");
@@ -1096,7 +1096,7 @@ void PredatorBehaviour(STRATEGYBLOCK *sbPtr)
         predatorStatusPointer->incidentFlag=0;
 
         predatorStatusPointer->incidentTimer-=NormalFrameTime;
-        
+
         if (predatorStatusPointer->incidentTimer<0) {
                 predatorStatusPointer->incidentFlag=1;
                 predatorStatusPointer->incidentTimer=32767+(FastRandom()&65535);
@@ -1121,13 +1121,13 @@ void PredatorBehaviour(STRATEGYBLOCK *sbPtr)
                                 sbPtr->SBDamageBlock.IsOnFire=0;
                         }
                 }
-                
+
         }
 
         if (predatorStatusPointer->behaviourState!=PBS_Dying) {
                 HModel_Regen(&predatorStatusPointer->HModelController,PRED_REGEN_TIME);
         }
-        
+
         /* now execute behaviour state */
         switch(predatorStatusPointer->behaviourState)
         {
@@ -1169,7 +1169,7 @@ void PredatorBehaviour(STRATEGYBLOCK *sbPtr)
                                 case AvSS_ThirdAvoidance:
                                         descriptor="Avoidance Level 3";
                                         break;
-                        }       
+                        }
                         if (predatorIsNear) {
                                 state_result=Execute_PNS_Avoidance(sbPtr);
                                 CentrePredatorElevation(sbPtr);
@@ -1317,37 +1317,37 @@ void PredatorBehaviour(STRATEGYBLOCK *sbPtr)
                 PrintDebuggingText("%s Predator in %s: %d,%d\n",descriptor,sbPtr->containingModule->name,
                         (sbPtr->SBDamageBlock.Health>>ONE_FIXED_SHIFT),(sbPtr->SBDamageBlock.Armour>>ONE_FIXED_SHIFT));
         }
-        
+
         Predator_SwitchState(sbPtr,state_result);
 
         if (!predatorIsNear) {
-                
+
                 /* check here to see if predator is in a proximity door - if so, trigger it to open. */
                 {
                         MODULEDOORTYPE doorType = ModuleIsADoor(sbPtr->containingModule);
 
-                        if(doorType == MDT_ProxDoor)    
+                        if(doorType == MDT_ProxDoor)
                                 ((PROXDOOR_BEHAV_BLOCK *)sbPtr->containingModule->m_sbptr->SBdataptr)->alienTrigger = 1;
                 }
 
                 /* lastly, do a containment test: to make sure that we are inside a module. */
-                #if UseLocalAssert   
+                #if UseLocalAssert
                 {
                         VECTORCH localCoords;
                         MODULE *thisModule = sbPtr->containingModule;
-                        
+
                         LOCALASSERT(thisModule);
 
                         localCoords = sbPtr->DynPtr->Position;
                         localCoords.vx -= thisModule->m_world.vx;
                         localCoords.vy -= thisModule->m_world.vy;
                         localCoords.vz -= thisModule->m_world.vz;
-                        
+
                         if(PointIsInModule(thisModule, &localCoords)==0)
                         {
                                 textprint("FAR PREDATOR MODULE CONTAINMENT FAILURE \n");
                                 LOCALASSERT(1==0);
-                        }  
+                        }
                 }
                 #endif
         }
@@ -1357,7 +1357,7 @@ void PredatorBehaviour(STRATEGYBLOCK *sbPtr)
            (predatorStatusPointer->stateTimer <= 0)) {
                 DestroyAnyStrategyBlock(sbPtr);
         }
-        
+
         #if 0
         /* Now, right at the end, fix animation speed. */
         if ((predatorStatusPointer->HModelController.Sub_Sequence==PRSS_Standard)
@@ -1384,9 +1384,9 @@ void PredatorBehaviour(STRATEGYBLOCK *sbPtr)
         /* Update delta playing flag. */
         {
                 DELTA_CONTROLLER *hitdelta;
-                                
+
                 hitdelta=Get_Delta_Sequence(&predatorStatusPointer->HModelController,"HitDelta");
-        
+
                 if (hitdelta) {
                         if (DeltaAnimation_IsFinished(hitdelta)) {
                                 hitdelta->Playing=0;
@@ -1401,21 +1401,21 @@ void PredatorBehaviour(STRATEGYBLOCK *sbPtr)
 
 void PredatorHandleMovingAnimation(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         VECTORCH offset;
         int speed,animfactor,walking;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
     LOCALASSERT(predatorStatusPointer);
 
         offset.vx=sbPtr->DynPtr->Position.vx-sbPtr->DynPtr->PrevPosition.vx;
         offset.vy=sbPtr->DynPtr->Position.vy-sbPtr->DynPtr->PrevPosition.vy;
         offset.vz=sbPtr->DynPtr->Position.vz-sbPtr->DynPtr->PrevPosition.vz;
-        
+
         /* ...compute speed factor... */
         speed=Magnitude(&offset);
-        if ((speed<(MUL_FIXED(NormalFrameTime,50))) 
+        if ((speed<(MUL_FIXED(NormalFrameTime,50)))
                 &&(predatorStatusPointer->HModelController.Tweening==0)) {
                 /* Not moving much, are we?  Be stationary! */
                if (ShowPredoStats)
@@ -1444,7 +1444,7 @@ void PredatorHandleMovingAnimation(STRATEGYBLOCK *sbPtr)
                 return;
         }
         speed=DIV_FIXED(speed,NormalFrameTime);
-        
+
         if (speed==0) {
                 animfactor=ONE_FIXED;
         } else {
@@ -1474,16 +1474,16 @@ void PredatorHandleMovingAnimation(STRATEGYBLOCK *sbPtr)
                         }
                 }
         }
-        
+
         /* Start animation? */
         if (predatorStatusPointer->HModelController.Tweening==0) {
 
                 /* If still tweening, probably best to leave it alone... */
 
                 if (PredatorShouldBeCrawling(sbPtr)) {
-                
+
                         predatorStatusPointer->IAmCrouched=1;
-                        
+
                         /* Only one possible sequence here. */
                         if ((predatorStatusPointer->HModelController.Sequence_Type!=HMSQT_PredatorCrawl)
                                 ||(predatorStatusPointer->HModelController.Sub_Sequence!=PCSS_Standard)) {
@@ -1491,13 +1491,13 @@ void PredatorHandleMovingAnimation(STRATEGYBLOCK *sbPtr)
                         }
 
                 } else if (walking==0) {
-                
+
                         predatorStatusPointer->IAmCrouched=0;
 
                         /* Are we doing the right anim? */
                         if ((predatorStatusPointer->HModelController.Sequence_Type!=HMSQT_PredatorRun)
                                 ||(predatorStatusPointer->HModelController.Sub_Sequence!=PRSS_Standard)) {
-                                
+
                                 /* If we're currently walking, tween over. */
                                 if ((predatorStatusPointer->HModelController.Sequence_Type==HMSQT_PredatorRun)
                                         &&(predatorStatusPointer->HModelController.Sub_Sequence==PRSS_Walk)) {
@@ -1509,7 +1509,7 @@ void PredatorHandleMovingAnimation(STRATEGYBLOCK *sbPtr)
                         }
 
                 } else {
-                
+
                         predatorStatusPointer->IAmCrouched=0;
 
                         /* Are we doing the right anim? */
@@ -1524,9 +1524,9 @@ void PredatorHandleMovingAnimation(STRATEGYBLOCK *sbPtr)
                                         SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorRun,PRSS_Walk,ONE_FIXED,(ONE_FIXED>>3));
                                 }
                         }
-                
+
                 }
-        
+
         }
 
         if (predatorStatusPointer->HModelController.Tweening==0) {
@@ -1541,11 +1541,11 @@ void MakePredatorNear(STRATEGYBLOCK *sbPtr)
         MODULE tempModule;
         DISPLAYBLOCK *dPtr;
         DYNAMICSBLOCK *dynPtr;
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
         dynPtr = sbPtr->DynPtr;
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
     LOCALASSERT(predatorStatusPointer);
     LOCALASSERT(dynPtr);
         LOCALASSERT(sbPtr->SBdptr == NULL);
@@ -1557,28 +1557,28 @@ void MakePredatorNear(STRATEGYBLOCK *sbPtr)
         tempModule.m_lightarray = (struct lightblock *)0;
         tempModule.m_extraitemdata = (struct extraitemdata *)0;
         tempModule.m_dptr = NULL;
-        AllocateModuleObject(&tempModule); 
+        AllocateModuleObject(&tempModule);
         dPtr = tempModule.m_dptr;
         if(dPtr==NULL) return; /* cannot allocate displayblock, so leave far */
-                
+
         sbPtr->SBdptr = dPtr;
         dPtr->ObStrategyBlock = sbPtr;
-        dPtr->ObMyModule = NULL;                                        
-                            
-        /* need to initialise positional information in the new display block */ 
+        dPtr->ObMyModule = NULL;
+
+        /* need to initialise positional information in the new display block */
         dPtr->ObWorld = dynPtr->Position;
         dPtr->ObEuler = dynPtr->OrientEuler;
         dPtr->ObMat = dynPtr->OrientMat;
-          
+
         /* status block init */
-        predatorStatusPointer->weaponTarget.vx = predatorStatusPointer->weaponTarget.vy = predatorStatusPointer->weaponTarget.vz = 0;                   
+        predatorStatusPointer->weaponTarget.vx = predatorStatusPointer->weaponTarget.vy = predatorStatusPointer->weaponTarget.vz = 0;
         predatorStatusPointer->volleySize = 0;
-        InitPredatorCloak(predatorStatusPointer);       
+        InitPredatorCloak(predatorStatusPointer);
 
         /* regenerate health (before deciding whether to attack or defend) */
         if(predatorStatusPointer->health < predatorCV[predatorStatusPointer->personalNumber].startingHealth)
         {
-                predatorStatusPointer->health += predatorCV[predatorStatusPointer->personalNumber].regenerationUnit;    
+                predatorStatusPointer->health += predatorCV[predatorStatusPointer->personalNumber].regenerationUnit;
 
                 if(predatorStatusPointer->health > predatorCV[predatorStatusPointer->personalNumber].startingHealth)
                         predatorStatusPointer->health = predatorCV[predatorStatusPointer->personalNumber].startingHealth;
@@ -1590,11 +1590,11 @@ void MakePredatorNear(STRATEGYBLOCK *sbPtr)
         sbPtr->DynPtr->LinVelocity.vz = 0;
 
         /* initialise state and sequence... */
-        
+
         dPtr->HModelControlBlock=&predatorStatusPointer->HModelController;
 
         CentrePredatorElevation(sbPtr);
-        
+
         ProveHModel(dPtr->HModelControlBlock,dPtr);
 
         /* LOCALASSERT(predatorStatusPointer->nearBehaviourState != PNS_Dying); */
@@ -1631,12 +1631,12 @@ void MakePredatorNear(STRATEGYBLOCK *sbPtr)
 void MakePredatorFar(STRATEGYBLOCK *sbPtr)
 {
         /* get the predator's status block */
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         int i;
-        
-        LOCALASSERT(sbPtr);     
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);   
+
+        LOCALASSERT(sbPtr);
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
         LOCALASSERT(sbPtr->SBdptr != NULL);
 
         /* get rid of the displayblock */
@@ -1647,22 +1647,22 @@ void MakePredatorFar(STRATEGYBLOCK *sbPtr)
         /* zero linear velocity in dynamics block */
         sbPtr->DynPtr->LinVelocity.vx = 0;
         sbPtr->DynPtr->LinVelocity.vy = 0;
-        sbPtr->DynPtr->LinVelocity.vz = 0;      
+        sbPtr->DynPtr->LinVelocity.vz = 0;
 
         /* status block init */
         if ((predatorStatusPointer->behaviourState!=PBS_SwapWeapon)
         	&&(predatorStatusPointer->behaviourState!=PBS_SelfDestruct)) {
                 predatorStatusPointer->stateTimer = PRED_FAR_MOVE_TIME;
         }
-        InitPredatorCloak(predatorStatusPointer);       
-        
+        InitPredatorCloak(predatorStatusPointer);
+
         /* initialise state and sequence... */
         if(predatorStatusPointer->behaviourState == PBS_Dying)
         {
                 DestroyAnyStrategyBlock(sbPtr);
                 return;
         }
-        
+
         #if 0
         if(PredatorShouldAttackPlayer(sbPtr))
         {
@@ -1670,28 +1670,28 @@ void MakePredatorFar(STRATEGYBLOCK *sbPtr)
         }
         else
         {
-                predatorStatusPointer->behaviourState = PBS_Withdrawing;        
+                predatorStatusPointer->behaviourState = PBS_Withdrawing;
         }
         #endif
 }
 
 void PredatorIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple,SECTION_DATA *Section, VECTORCH *incoming)
 {
-         
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
         LOCALASSERT(sbPtr->DynPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
-                                        
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
+
         /* if we're dying, do nothing */
         if(predatorStatusPointer->behaviourState==PBS_Dying)
         {
                 /* PFS should be dying, too */
                 return;
-        }                               
-        
+        }
+
         if(!(sbPtr->SBdptr))
         {
                 DestroyAnyStrategyBlock(sbPtr);
@@ -1702,12 +1702,12 @@ void PredatorIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multipl
 
         predatorStatusPointer->Target=NULL;
 
-        if (predatorStatusPointer->behaviourState!=PBS_SelfDestruct) {  
+        if (predatorStatusPointer->behaviourState!=PBS_SelfDestruct) {
                 NPC_DATA *NpcData;
                 /* we are far enough away, so return to approach? */
 
                 NpcData=GetThisNpcData(I_NPC_Predator);
-                
+
                 if ((sbPtr->SBDamageBlock.Health<(NpcData->StartingStats.Health<<(ONE_FIXED_SHIFT-3)))
                         &&(sbPtr->SBDamageBlock.Health>0)) {
                         /* 12.5% health? */
@@ -1715,7 +1715,7 @@ void PredatorIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multipl
                         return;
                 }
         }
-		
+
 		#if 0
 		{
 			int tkd;
@@ -1751,7 +1751,7 @@ void PredatorIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multipl
 	                NPC_DATA *NpcData;
 
 	                NpcData=GetThisNpcData(I_NPC_Predator);
-                
+
 	                sbPtr->SBDamageBlock.Health=(NpcData->StartingStats.Health<<(ONE_FIXED_SHIFT-3));
 					/* 12.5% health. */
 					Predator_Enter_SelfDestruct_State(sbPtr);
@@ -1764,17 +1764,17 @@ void PredatorIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multipl
         {
                 /* KILL PREDATOR! */
                 int deathtype=0;
-	
+
 				if (AvP.PlayerType!=I_Predator) {
-					CurrentGameStats_CreatureKilled(sbPtr,Section);		
+					CurrentGameStats_CreatureKilled(sbPtr,Section);
 				}
 
                 /*notify death target ,if predator has one*/
                 if(predatorStatusPointer->death_target_sbptr)
                 {
                         RequestState(predatorStatusPointer->death_target_sbptr,predatorStatusPointer->death_target_request, 0);
-                } 
-        
+                }
+
                 #if 0
                 /* switch to dying-suicide state? */
                 predatorStatusPointer->behaviourState = PBS_Dying;
@@ -1783,10 +1783,10 @@ void PredatorIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multipl
                 #endif
 
                 /* Set deathtype */
-                
+
                 {
                         int tkd;
-                        
+
                         tkd=TotalKineticDamage(damage);
                         deathtype=0;
 
@@ -1819,9 +1819,9 @@ void PredatorIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multipl
 
                 {
                         SECTION_DATA *chest;
-                        
+
                         chest=GetThisSectionData(predatorStatusPointer->HModelController.section_data,"chest");
-                        
+
                         if (chest==NULL) {
                                 /* I'm impressed. */
                                 deathtype+=2;
@@ -1860,12 +1860,12 @@ void PredatorIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multipl
                         int wounds;
 
                         root=GetNamedHierarchyFromLibrary("hnpcpredator","Template");
-                        
+
                         facing.Front=0;
                         facing.Back=0;
                         facing.Left=0;
                         facing.Right=0;
-                        
+
                         if (incoming) {
                                 if (incoming->vz>0) {
                                         facing.Back=1;
@@ -1878,9 +1878,9 @@ void PredatorIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multipl
                                         facing.Left=1;
                                 }
                         }
-                        
-                        if ((damage->Impact==0)                 
-                                &&(damage->Cutting==0)          
+
+                        if ((damage->Impact==0)
+                                &&(damage->Cutting==0)
                                 &&(damage->Penetrative==0)
                                 &&(damage->Fire>0)
                                 &&(damage->Electrical==0)
@@ -1890,22 +1890,22 @@ void PredatorIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multipl
                         } else {
                                 burning=0;
                         }
-        
+
                         if (Section) {
                                 wounds=(Section->flags&section_flags_wounding);
                         } else {
                                 wounds=0;
                         }
-                        
+
                         //if (predatorStatusPointer->behaviourState==PBS_SelfDestruct) {
                         //      this_death=&Predator_Special_SelfDestruct_Death;
                         //} else {
                                 this_death=GetPredatorDeathSequence(&predatorStatusPointer->HModelController,root,wounds,
                                         wounds,deathtype,&facing,burning,predatorStatusPointer->IAmCrouched,0);
                         //}
-                        
+
                         GLOBALASSERT(this_death);
-                        
+
                         Remove_Delta_Sequence(&predatorStatusPointer->HModelController,"Elevation");
                         Remove_Delta_Sequence(&predatorStatusPointer->HModelController,"HitDelta");
 
@@ -1918,8 +1918,8 @@ void PredatorIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multipl
                 DELTA_CONTROLLER *hitdelta;
                 int frontback;
 
-				if ((damage->Impact==0) 		
-					&&(damage->Cutting==0)  	
+				if ((damage->Impact==0)
+					&&(damage->Cutting==0)
 					&&(damage->Penetrative==0)
 					&&(damage->Fire==0)
 					&&(damage->Electrical==0)
@@ -1931,7 +1931,7 @@ void PredatorIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multipl
 				}
 
                 hitdelta=Get_Delta_Sequence(&predatorStatusPointer->HModelController,"HitDelta");
-        
+
                 if (incoming) {
                         if (incoming->vz>=0) {
                                 frontback=0;
@@ -1946,7 +1946,7 @@ void PredatorIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multipl
                 if (hitdelta) {
                         /* A hierarchy with hit deltas! */
                         if (hitdelta->Playing==0) {
-                                
+
                                 int CrouchSubSequence;
                                 int StandSubSequence;
 
@@ -2012,7 +2012,7 @@ void PredatorIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multipl
                                                 StandSubSequence=PSSS_HitChestFront;
                                         }
                                 }
-                                
+
 
                                 if(predatorStatusPointer->IAmCrouched) {
                                         if (HModelSequence_Exists(&predatorStatusPointer->HModelController,(int)HMSQT_PredatorCrouch,CrouchSubSequence)) {
@@ -2027,7 +2027,7 @@ void PredatorIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multipl
                                 /* Not looped. */
                         }
                 }
-        
+
                 /* Break out of recover. */
                 if (predatorStatusPointer->behaviourState==PBS_Recovering) {
                         Predator_Enter_Swapping_State(sbPtr);
@@ -2038,26 +2038,26 @@ void PredatorIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multipl
 
 /* Patrick 4/7/97 --------------------------------------------------
   The various far state behaviour execution functions for predator...
-  
+
   1. Wandering is the initial far state, to which the predator never
   returns: after becoming visible for the first time, it will use only
   hunt and retreat
   2. Hunting is used if the predator feels confident enough to engage
   the player.
-  3. Retreating is used if the predator is not confident    
+  3. Retreating is used if the predator is not confident
 ---------------------------------------------------------------------*/
 static PRED_RETURN_CONDITION Execute_PFS_Wander(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         AIMODULE *targetModule = 0;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         /* Decrement the Far state timer */
-        predatorStatusPointer->stateTimer -= NormalFrameTime;   
-        /* check if far state timer has timed-out. If so, it is time 
+        predatorStatusPointer->stateTimer -= NormalFrameTime;
+        /* check if far state timer has timed-out. If so, it is time
         to do something. Otherwise just return. */
         if(predatorStatusPointer->stateTimer > 0) {
                 return(PRC_No_Change);
@@ -2071,20 +2071,20 @@ static PRED_RETURN_CONDITION Execute_PFS_Wander(STRATEGYBLOCK *sbPtr)
         }
 
         /* Preds NEVER camp.  I mean, get tired of wandering. */
-                        
+
         /* timer has timed-out in roving mode */
-        targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr,NULL,0);
+        targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr, NULL);
 
         /* if there is no target module, it means that the pred is trapped in an
-        unlinked module. In this case, reset the timer and return. */                   
+        unlinked module. In this case, reset the timer and return. */
         if(!targetModule)
         {
                 predatorStatusPointer->stateTimer = PRED_FAR_MOVE_TIME;
                 return(PRC_No_Change);
         }
         /* Examine target, and decide what to do */
-        GLOBALASSERT(AIModuleIsPhysical(targetModule));         
-        ProcessFarPredatorTargetAIModule(sbPtr, targetModule);  
+        GLOBALASSERT(AIModuleIsPhysical(targetModule));
+        ProcessFarPredatorTargetAIModule(sbPtr, targetModule);
         /* reset timer */
         predatorStatusPointer->stateTimer = PRED_FAR_MOVE_TIME;
         return(PRC_No_Change);
@@ -2092,33 +2092,33 @@ static PRED_RETURN_CONDITION Execute_PFS_Wander(STRATEGYBLOCK *sbPtr)
 
 static PRED_RETURN_CONDITION Execute_PFS_Hunt(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         AIMODULE *targetModule = 0;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         /* Decrement the Far state timer */
-        predatorStatusPointer->stateTimer -= NormalFrameTime;   
-        /* check if far state timer has timed-out. If so, it is time 
+        predatorStatusPointer->stateTimer -= NormalFrameTime;
+        /* check if far state timer has timed-out. If so, it is time
         to do something. Otherwise just return. */
         if(predatorStatusPointer->stateTimer > 0) {
                 return(PRC_No_Change);
         }
-        
+
         if ((!PredatorIsAwareOfTarget(sbPtr))
                 ||(predatorStatusPointer->Target!=Player->ObStrategyBlock))
         {
                 /* I have a bad feeling about this. */
                 return(PRC_Request_Wander);
         }
-                        
+
         /* timer has timed-out in hunting mode: */
-        targetModule = FarNPC_GetTargetAIModuleForHunt(sbPtr,0);
+        targetModule = FarNPC_GetTargetAIModuleForHunt(sbPtr/*,0*/);
 
         /* if there is no target module, it means that the pred is trapped in an
-        unlinked module. In this case, reset the timer and return. */                   
+        unlinked module. In this case, reset the timer and return. */
         if(!targetModule)
         {
                 predatorStatusPointer->stateTimer = PRED_FAR_MOVE_TIME;
@@ -2128,16 +2128,16 @@ static PRED_RETURN_CONDITION Execute_PFS_Hunt(STRATEGYBLOCK *sbPtr)
         /* NB don't need to check for state changes... will regen health on makenear */
 
         /* Examine target, and decide what to do */
-        GLOBALASSERT(AIModuleIsPhysical(targetModule));         
-        ProcessFarPredatorTargetAIModule(sbPtr, targetModule);  
+        GLOBALASSERT(AIModuleIsPhysical(targetModule));
+        ProcessFarPredatorTargetAIModule(sbPtr, targetModule);
         /* reset timer */
-        predatorStatusPointer->stateTimer = PRED_FAR_MOVE_TIME;                                 
+        predatorStatusPointer->stateTimer = PRED_FAR_MOVE_TIME;
         return(PRC_No_Change);
 }
 
 static PRED_RETURN_CONDITION Execute_PFS_Engage(STRATEGYBLOCK *sbPtr)
 {
-        /* If we're far, we should be hunting, surely? */       
+        /* If we're far, we should be hunting, surely? */
 
         return(PRC_Request_Hunt);
 
@@ -2145,18 +2145,18 @@ static PRED_RETURN_CONDITION Execute_PFS_Engage(STRATEGYBLOCK *sbPtr)
 
 static PRED_RETURN_CONDITION Execute_PFS_Retreat(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         AIMODULE *targetModule = 0;
         AIMODULE *old_fearmodule;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         old_fearmodule=predatorStatusPointer->fearmodule;
 
         /* Decrement the state timer */
-        predatorStatusPointer->stateTimer -= NormalFrameTime;   
+        predatorStatusPointer->stateTimer -= NormalFrameTime;
 
         if(!(PredatorIsAwareOfTarget(sbPtr))) {
                 /* What am I running from? */
@@ -2182,7 +2182,7 @@ static PRED_RETURN_CONDITION Execute_PFS_Retreat(STRATEGYBLOCK *sbPtr)
                 predatorStatusPointer->fearmodule=predatorStatusPointer->Target->containingModule->m_aimodule;
         } else if (predatorStatusPointer->fearmodule==NULL) {
                 predatorStatusPointer->fearmodule=sbPtr->containingModule->m_aimodule;
-        }       
+        }
 
         if ((predatorStatusPointer->missionmodule==NULL)||(predatorStatusPointer->fearmodule!=old_fearmodule)) {
 
@@ -2192,7 +2192,7 @@ static PRED_RETURN_CONDITION Execute_PFS_Retreat(STRATEGYBLOCK *sbPtr)
                 } else {
                         predatorStatusPointer->missionmodule = General_GetAIModuleForRetreat(sbPtr,Player->ObStrategyBlock->containingModule->m_aimodule,5);
                 }
-                
+
         }
 
         if (predatorStatusPointer->missionmodule==NULL) {
@@ -2209,19 +2209,19 @@ static PRED_RETURN_CONDITION Execute_PFS_Retreat(STRATEGYBLOCK *sbPtr)
         }
 
         /* Examine target, and decide what to do */
-        GLOBALASSERT(AIModuleIsPhysical(targetModule));         
-        ProcessFarPredatorTargetAIModule(sbPtr, targetModule);  
+        GLOBALASSERT(AIModuleIsPhysical(targetModule));
+        ProcessFarPredatorTargetAIModule(sbPtr, targetModule);
         /* reset timer */
-        predatorStatusPointer->stateTimer = PRED_FAR_MOVE_TIME;                                 
+        predatorStatusPointer->stateTimer = PRED_FAR_MOVE_TIME;
         return(PRC_No_Change);
 }
 
 static PRED_RETURN_CONDITION Execute_PFS_Avoidance(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
     LOCALASSERT(predatorStatusPointer);
 
         /* High on the list of Things Not To Be Doing. */
@@ -2253,20 +2253,20 @@ static PRED_RETURN_CONDITION Execute_PFS_Avoidance(STRATEGYBLOCK *sbPtr) {
 static void ProcessFarPredatorTargetAIModule(STRATEGYBLOCK *sbPtr, AIMODULE* targetModule)
 {
         NPC_TARGETMODULESTATUS targetStatus;
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
-        
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
+
         LOCALASSERT(sbPtr);
         LOCALASSERT(targetModule);
         LOCALASSERT(sbPtr->I_SBtype == I_BehaviourPredator);
         predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
         LOCALASSERT(predatorStatusPointer);
-            
-        targetStatus = GetTargetAIModuleStatus(sbPtr, targetModule,0);
+
+        targetStatus = GetTargetAIModuleStatus(sbPtr, targetModule, 0);
         switch(targetStatus)
         {
                 case(NPCTM_NoEntryPoint):
                 {
-                        /* do nothing: can't get in. reset lastVisitedModule to avoid getting 
+                        /* do nothing: can't get in. reset lastVisitedModule to avoid getting
                         stuck in a conceptual dead end (?)*/
                         FarNpc_FlipAround(sbPtr);
                         break;
@@ -2293,7 +2293,7 @@ static void ProcessFarPredatorTargetAIModule(STRATEGYBLOCK *sbPtr, AIMODULE* tar
                         /* locate to target: don't need to move thro'quick, as door is constantly retriggered   */
                         LocateFarNPCInAIModule(sbPtr, targetModule);
                         break;
-                }               
+                }
                 case(NPCTM_ProxDoorNotOpen):
                 {
                         /* trigger the door, and set timer to quick so we can catch the door when it's open */
@@ -2335,18 +2335,18 @@ static void ProcessFarPredatorTargetAIModule(STRATEGYBLOCK *sbPtr, AIMODULE* tar
                         LOCALASSERT(1==0);
                         break;
                 }
-        }               
+        }
 }
 
 static PRED_RETURN_CONDITION Execute_PNS_DischargePistol(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         VECTORCH orientationDirn,relPos,relPos2;
         int correctlyOrientated,range;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         /* zero linear velocity in dynamics block */
         LOCALASSERT(sbPtr->DynPtr);
@@ -2374,7 +2374,7 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargePistol(STRATEGYBLOCK *sbPtr)
         }
 		/* Aim up a little? */
 		range=VectorDistance((&predatorStatusPointer->weaponTarget),(&sbPtr->DynPtr->Position));
-		
+
 		if (range>3000) {
 			predatorStatusPointer->weaponTarget.vy-=(range/6);
 		} else {
@@ -2411,9 +2411,9 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargePistol(STRATEGYBLOCK *sbPtr)
         if (predatorStatusPointer->HModelController.Tweening!=Controller_NoTweening) {
                 return(PRC_No_Change);
         }
-        
+
         if (predatorStatusPointer->stateTimer==predatorStatusPointer->Selected_Weapon->FiringRate) {
-                
+
                 predatorStatusPointer->HModelController.Playing=0;
 
                 /* Only terminate if you haven't fired yet... */
@@ -2422,10 +2422,10 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargePistol(STRATEGYBLOCK *sbPtr)
                         #if 1
                         /* ... and remove the gunflash */
                         #endif
-        
+
                         return(PRC_Request_Engage);
                 }
-        
+
                 /* we are not correctly orientated to the target: this could happen because we have
                 just entered this state, or the target has moved during firing*/
                 if((!correctlyOrientated)||(predatorStatusPointer->CloakStatus!=PCLOAK_Off))
@@ -2435,7 +2435,7 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargePistol(STRATEGYBLOCK *sbPtr)
                         #endif
                         return(PRC_No_Change);
                 }
-                
+
                 /* If you are correctly oriented, you can now fire! */
 
                 predatorStatusPointer->HModelController.Playing=1;
@@ -2444,27 +2444,27 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargePistol(STRATEGYBLOCK *sbPtr)
                 relPos.vx=(predatorStatusPointer->Target->DynPtr->Position.vx)-(sbPtr->DynPtr->Position.vx);
                 relPos.vy=(predatorStatusPointer->Target->DynPtr->Position.vy)-(sbPtr->DynPtr->Position.vy);
                 relPos.vz=(predatorStatusPointer->Target->DynPtr->Position.vz)-(sbPtr->DynPtr->Position.vz);
-                          
+
                 relPos2.vx=(predatorStatusPointer->Target->DynPtr->Position.vx)-(predatorStatusPointer->Target->DynPtr->PrevPosition.vx);
                 relPos2.vy=(predatorStatusPointer->Target->DynPtr->Position.vy)-(predatorStatusPointer->Target->DynPtr->PrevPosition.vy);
                 relPos2.vz=(predatorStatusPointer->Target->DynPtr->Position.vz)-(predatorStatusPointer->Target->DynPtr->PrevPosition.vz);
-                
+
                 range=VectorDistance((&predatorStatusPointer->Target->DynPtr->Position),(&sbPtr->DynPtr->Position));
-        
+
                 #if 1
                 /* look after the gun flash */
                 #endif
-                
+
                 /* look after the sound */
                 Sound_Play(SID_PRED_PISTOL,"d",&(sbPtr->DynPtr->Position));
-        
+
                 /* Now fire a bolt. */
 
                 {
                         SECTION_DATA *muzzle;
 
                         muzzle=GetThisSectionData(predatorStatusPointer->HModelController.section_data,"dum flash");
-                        
+
                         CreatePPPlasmaBoltKernel(&muzzle->World_Offset, &muzzle->SecMat,0);
                         predatorStatusPointer->volleySize++;
                 }
@@ -2472,7 +2472,7 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargePistol(STRATEGYBLOCK *sbPtr)
                 if (predatorStatusPointer->volleySize>3) {
                         predatorStatusPointer->enableSwap=1;
                 }
-        }       
+        }
 
         predatorStatusPointer->stateTimer -= NormalFrameTime;
 
@@ -2481,11 +2481,11 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargePistol(STRATEGYBLOCK *sbPtr)
         if(predatorStatusPointer->stateTimer > 0)       {
                 return(PRC_No_Change);
         }
-        
+
         if(range < predatorStatusPointer->Selected_Weapon->MinRange)
         {
-                /* renew firing, as we are still too close to approach */ 
-                predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;                                 
+                /* renew firing, as we are still too close to approach */
+                predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;
                 predatorStatusPointer->volleySize = 0;
                 return(PRC_No_Change);
         }
@@ -2495,14 +2495,14 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargePistol(STRATEGYBLOCK *sbPtr)
                 /* we are far enough away, so return to approach? */
 
                 NpcData=GetThisNpcData(I_NPC_Predator);
-                
+
                 if ((sbPtr->SBDamageBlock.Health<(NpcData->StartingStats.Health<<(ONE_FIXED_SHIFT-1)))
                         &&(sbPtr->SBDamageBlock.Health>0)) {
                         /* 50% health? */
                         if (General_GetAIModuleForRetreat(sbPtr,predatorStatusPointer->Target->containingModule->m_aimodule,5)) {
                                 return(PRC_Request_Withdraw);
                         } else {
-                                predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;                                 
+                                predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;
                                 return(PRC_No_Change);
                         }
                 }
@@ -2516,7 +2516,7 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargePistol(STRATEGYBLOCK *sbPtr)
                         }
                 } else {
                         /* And another! */
-                        predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;                                 
+                        predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;
                         return(PRC_No_Change);
                 }
         }
@@ -2525,13 +2525,13 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargePistol(STRATEGYBLOCK *sbPtr)
 
 static PRED_RETURN_CONDITION Execute_PNS_AttackWithPlasmaCaster(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         VECTORCH orientationDirn,relPos,relPos2;
         int correctlyOrientated,range,onTarget;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         /* zero linear velocity in dynamics block */
         LOCALASSERT(sbPtr->DynPtr);
@@ -2553,7 +2553,7 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithPlasmaCaster(STRATEGYBLOCK *s
         /* Always turn to face... */
         GLOBALASSERT(predatorStatusPointer->Target);
         NPCGetTargetPosition(&(predatorStatusPointer->weaponTarget),predatorStatusPointer->Target);
-        
+
         /* orientate to firing point first */
         if (predatorStatusPointer->My_Elevation_Section) {
                 /* Assume range large w.r.t. half shoulder width... */
@@ -2588,7 +2588,7 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithPlasmaCaster(STRATEGYBLOCK *s
                 #if 1
                 /* ... and remove the gunflash */
                 #endif
-        
+
                 return(PRC_Request_Engage);
         }
 
@@ -2599,7 +2599,7 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithPlasmaCaster(STRATEGYBLOCK *s
         }
 
         /* State timed out - try to fire! */
-        
+
         /* we are not correctly orientated to the target: this could happen because we have
         just entered this state, or the target has moved during firing*/
         if((!correctlyOrientated)||(predatorStatusPointer->CloakStatus!=PCLOAK_Off))
@@ -2621,10 +2621,10 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithPlasmaCaster(STRATEGYBLOCK *s
         range=VectorDistance((&predatorStatusPointer->Target->DynPtr->Position),(&sbPtr->DynPtr->Position));
 
         if ((predatorStatusPointer->internalState==1)&&(predatorStatusPointer->stateTimer<=0)) {
-                if (onTarget) {         
-                        
+                if (onTarget) {
+
                         /* If you are correctly oriented, you can now fire!  Or taunt instead? */
-                        
+
                         if (((FastRandom()&65535)<32767)&&(predatorStatusPointer->enableTaunt)
                         	&&(predatorStatusPointer->Target->I_SBtype!=I_BehaviourAutoGun)) {
                                 /* Suprise! */
@@ -2632,34 +2632,34 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithPlasmaCaster(STRATEGYBLOCK *s
                         }
                         /* Fire at least once! */
                         predatorStatusPointer->enableTaunt=1;
-                
+
                         predatorStatusPointer->HModelController.Playing=1;
                         predatorStatusPointer->HModelController.Looped=0;
                         predatorStatusPointer->HModelController.sequence_timer=0;
                         predatorStatusPointer->internalState=2;
-                
+
                         relPos.vx=(predatorStatusPointer->Target->DynPtr->Position.vx)-(sbPtr->DynPtr->Position.vx);
                         relPos.vy=(predatorStatusPointer->Target->DynPtr->Position.vy)-(sbPtr->DynPtr->Position.vy);
                         relPos.vz=(predatorStatusPointer->Target->DynPtr->Position.vz)-(sbPtr->DynPtr->Position.vz);
-                                  
+
                         relPos2.vx=(predatorStatusPointer->Target->DynPtr->Position.vx)-(predatorStatusPointer->Target->DynPtr->PrevPosition.vx);
                         relPos2.vy=(predatorStatusPointer->Target->DynPtr->Position.vy)-(predatorStatusPointer->Target->DynPtr->PrevPosition.vy);
                         relPos2.vz=(predatorStatusPointer->Target->DynPtr->Position.vz)-(predatorStatusPointer->Target->DynPtr->PrevPosition.vz);
-                        
+
                         #if 1
                         /* look after the gun flash */
                         #endif
-                        
+
                         /* look after the sound */
                         Sound_Play(SID_PRED_LAUNCHER,"d",&(sbPtr->DynPtr->Position));
-                
+
                         /* Now fire a bolt. */
-                
+
                         {
                                 SECTION_DATA *muzzle;
-                
+
                                 muzzle=GetThisSectionData(predatorStatusPointer->HModelController.section_data,"dum flash");
-                                
+
                                 InitialiseEnergyBoltBehaviourKernel(&muzzle->World_Offset, &muzzle->SecMat,0,&TemplateAmmo[AMMO_PRED_ENERGY_BOLT].MaxDamage[AvP.Difficulty],65536);
                                 predatorStatusPointer->volleySize++;
                         }
@@ -2689,8 +2689,8 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithPlasmaCaster(STRATEGYBLOCK *s
 
                 if(range < predatorStatusPointer->Selected_Weapon->MinRange)
                 {
-                        /* renew firing, as we are still too close to approach */ 
-                        predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;                                 
+                        /* renew firing, as we are still too close to approach */
+                        predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;
                         predatorStatusPointer->volleySize = 0;
                         predatorStatusPointer->internalState=0;
                         return(PRC_No_Change);
@@ -2699,21 +2699,21 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithPlasmaCaster(STRATEGYBLOCK *s
                 {
                         NPC_DATA *NpcData;
                         /* we are far enough away, so return to approach? */
-        
+
                         NpcData=GetThisNpcData(I_NPC_Predator);
-                        
+
                         if ((sbPtr->SBDamageBlock.Health<(NpcData->StartingStats.Health<<(ONE_FIXED_SHIFT-1)))
                                 &&(sbPtr->SBDamageBlock.Health>0)) {
                                 /* 50% health? */
                                 if (General_GetAIModuleForRetreat(sbPtr,predatorStatusPointer->Target->containingModule->m_aimodule,5)) {
                                         return(PRC_Request_Withdraw);
                                 } else {
-                                        predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;                                 
+                                        predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;
                                         predatorStatusPointer->internalState=0;
                                         return(PRC_No_Change);
                                 }
                         }
-                
+
                         if (predatorStatusPointer->volleySize>=predatorStatusPointer->Selected_Weapon->VolleySize) {
                                 if ((range<PRED_CLOSE_ATTACK_RANGE)||((FastRandom()&65535)>52000)) {
                                         /* Change weapon! */
@@ -2723,14 +2723,14 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithPlasmaCaster(STRATEGYBLOCK *s
                                 }
                         } else {
                                 /* And another! */
-                                predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;                                 
+                                predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;
                                 predatorStatusPointer->internalState=0;
                                 return(PRC_No_Change);
                         }
                 }
 
-        }       
-        
+        }
+
         return(PRC_No_Change);
 }
 
@@ -2738,24 +2738,24 @@ static PRED_RETURN_CONDITION Execute_PNS_Avoidance(STRATEGYBLOCK *sbPtr)
 {
         int terminateState = 0;
         PREDATOR_STATUS_BLOCK *predatorStatusPointer;
-        
+
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);            
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         /* first check for a close attack... */
         if(VectorDistance((&Player->ObStrategyBlock->DynPtr->Position),(&sbPtr->DynPtr->Position)) < PRED_CLOSE_ATTACK_RANGE)
-        {       
+        {
                 return(PRC_Request_Attack);
         }
 
         /* New avoidance kernel. */
 
         NPCSetVelocity(sbPtr, &(predatorStatusPointer->avoidanceManager.avoidanceDirection), (predatorStatusPointer->nearSpeed));
-        /* Velocity CANNOT be zero, unless deliberately so! */  
+        /* Velocity CANNOT be zero, unless deliberately so! */
         {
                 AVOIDANCE_RETURN_CONDITION rc;
-                
+
                 rc=AllNewAvoidanceKernel(sbPtr,&predatorStatusPointer->avoidanceManager);
 
                 if (rc!=AvRC_Avoidance) {
@@ -2781,7 +2781,7 @@ static PRED_RETURN_CONDITION Execute_PNS_Avoidance(STRATEGYBLOCK *sbPtr)
                                 else
                                 {
                                         /* go to retreat */
-                                        NPC_InitMovementData(&(predatorStatusPointer->moveData));               
+                                        NPC_InitMovementData(&(predatorStatusPointer->moveData));
                                         return(PRC_Request_Withdraw);
                                 }
                                 break;
@@ -2812,14 +2812,14 @@ static PRED_RETURN_CONDITION Execute_PNS_Avoidance(STRATEGYBLOCK *sbPtr)
 #if 0
 static PRED_RETURN_CONDITION Execute_PNS_Approach(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         VECTORCH velocityDirection = {0,0,0};
         VECTORCH targetPosition;
         int targetIsAirduct = 0;
-        
+
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         LOCALASSERT(sbPtr->DynPtr);
 
@@ -2864,12 +2864,12 @@ static PRED_RETURN_CONDITION Execute_PNS_Approach(STRATEGYBLOCK *sbPtr)
         }
 
         PredatorHandleMovingAnimation(sbPtr);
-                                
+
         /* check for state changes...*/
-        
+
         /* now check if we want to close-attack */
         if(VectorDistance((&Player->ObStrategyBlock->DynPtr->Position),(&sbPtr->DynPtr->Position)) < PRED_CLOSE_ATTACK_RANGE)
-        {       
+        {
                 return(PRC_Request_Attack);
         }
 
@@ -2890,7 +2890,7 @@ static PRED_RETURN_CONDITION Execute_PNS_Approach(STRATEGYBLOCK *sbPtr)
                 {
                         return(PRC_Request_Attack);
                 }
-                else 
+                else
                 {
                         /* reset the timer if we couldn't fire */
                         predatorStatusPointer->stateTimer = predatorCV[predatorStatusPointer->personalNumber].timeBetweenRangedAttacks;
@@ -2901,7 +2901,7 @@ static PRED_RETURN_CONDITION Execute_PNS_Approach(STRATEGYBLOCK *sbPtr)
         /* get and set approach velocity */
         NPCGetMovementTarget(sbPtr, Player->ObStrategyBlock, &targetPosition, &targetIsAirduct,0);
         NPCGetMovementDirection(sbPtr, &velocityDirection, &targetPosition,&predatorStatusPointer->waypointManager);
-        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);    
+        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);
 
         /* test here for impeding collisions, and not being able to reach target... */
         {
@@ -2916,16 +2916,16 @@ static PRED_RETURN_CONDITION Execute_PNS_Approach(STRATEGYBLOCK *sbPtr)
 
 static PRED_RETURN_CONDITION Execute_PNS_EngageWithPistol(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         VECTORCH velocityDirection = {0,0,0};
         VECTORCH targetPosition;
         int targetIsAirduct = 0;
         int range;
-        
+
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
-        
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
+
         PredatorHandleMovingAnimation(sbPtr);
 
         /* now check for state changes... firstly, if we can no longer attack the target, go
@@ -2935,7 +2935,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPistol(STRATEGYBLOCK *sbPtr)
                 return(PRC_Request_Hunt);
                 /* Drop out null targets. */
         } else {
-        
+
                 /* We have a target that we are aware of. */
 
                 range=VectorDistance((&predatorStatusPointer->Target->DynPtr->Position),(&sbPtr->DynPtr->Position));
@@ -2944,15 +2944,15 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPistol(STRATEGYBLOCK *sbPtr)
                 if (predatorStatusPointer->CloakStatus==PCLOAK_Off) {
                         PredatorCloakOn(predatorStatusPointer);
                 }
-                
+
                 /* if we are close... go directly to firing */
                 if(range < PRED_CLOSE_ATTACK_RANGE)
-                {       
+                {
                         /* switch directly to firing, at this distance */
-                
+
                         return(PRC_Request_Attack);
                 }
-                
+
                 /* if our state timer has run out in approach state, see if we can fire*/
                 if(predatorStatusPointer->stateTimer > 0) predatorStatusPointer->stateTimer -= NormalFrameTime;
                 if(predatorStatusPointer->stateTimer <= 0)
@@ -2960,8 +2960,8 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPistol(STRATEGYBLOCK *sbPtr)
                         /* it is time to fire, if we can see the target  */
                         if(PredatorCanSeeTarget(sbPtr))
                         {
-                                /* we are going to fire then */         
-                
+                                /* we are going to fire then */
+
                                 return(PRC_Request_Attack);
                         }
                         else
@@ -2975,7 +2975,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPistol(STRATEGYBLOCK *sbPtr)
 
         /* See which way we want to go. */
         {
-        
+
                 AIMODULE *targetModule;
                 MODULE *tcm;
                 FARENTRYPOINT *thisEp = (FARENTRYPOINT *)0;
@@ -2988,7 +2988,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPistol(STRATEGYBLOCK *sbPtr)
                         tcm=ModuleFromPosition(&predatorStatusPointer->Target->DynPtr->Position,sbPtr->containingModule);
                 }
 
-                if (tcm) {              
+                if (tcm) {
                         targetModule=GetNextModuleForLink(sbPtr->containingModule->m_aimodule,tcm->m_aimodule,7,0);
                 } else {
                         targetModule=NULL;
@@ -2996,7 +2996,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPistol(STRATEGYBLOCK *sbPtr)
 
                 if (targetModule==sbPtr->containingModule->m_aimodule) {
                         /* Try going for it, we still can't see them. */
-                        NPCGetMovementTarget(sbPtr, predatorStatusPointer->Target, &targetPosition, &targetIsAirduct,0);
+                        NPCGetMovementTarget(sbPtr, predatorStatusPointer->Target, &targetPosition, &targetIsAirduct);
                         NPCGetMovementDirection(sbPtr, &velocityDirection, &targetPosition,&predatorStatusPointer->waypointManager);
                 } else if (!targetModule) {
                         /* Must be inaccessible. */
@@ -3018,7 +3018,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPistol(STRATEGYBLOCK *sbPtr)
                                 GLOBALASSERT(thisEp);
                         }
                         /* If that fired, there's a farped adjacency. */
-                
+
                         predatorStatusPointer->wanderData.worldPosition=thisEp->position;
                         predatorStatusPointer->wanderData.worldPosition.vx+=targetModule->m_world.vx;
                         predatorStatusPointer->wanderData.worldPosition.vy+=targetModule->m_world.vy;
@@ -3026,12 +3026,12 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPistol(STRATEGYBLOCK *sbPtr)
 
                         NPCGetMovementDirection(sbPtr, &velocityDirection, &(predatorStatusPointer->wanderData.worldPosition),&predatorStatusPointer->waypointManager);
                 }
-                                
+
         }
 
         /* Should have a velocity set now. */
 
-        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);    
+        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);
 
         /* test here for impeding collisions, and not being able to reach target... */
         #if ALL_NEW_AVOIDANCE_PRED
@@ -3065,7 +3065,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPistol(STRATEGYBLOCK *sbPtr)
                 predatorStatusPointer->obstruction.destructableObject=0;
                 predatorStatusPointer->obstruction.otherCharacter=0;
                 predatorStatusPointer->obstruction.anySingleObstruction=0;
-        
+
                 return(PRC_Request_Avoidance);
         }
         #endif
@@ -3074,17 +3074,17 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPistol(STRATEGYBLOCK *sbPtr)
 
 static PRED_RETURN_CONDITION Execute_PNS_EngageWithPlasmaCaster(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         VECTORCH velocityDirection = {0,0,0};
         VECTORCH targetPosition;
         int targetIsAirduct = 0;
         int range;
 
         /* For the moment, the same as the pistol. */
-        
+
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         PredatorHandleMovingAnimation(sbPtr);
 
@@ -3093,7 +3093,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPlasmaCaster(STRATEGYBLOCK *s
         if (predatorStatusPointer->patience<=0) {
                 return(PRC_Request_Swap);
         }
-                        
+
         /* now check for state changes... firstly, if we can no longer attack the target, go
         to wander */
         if(!(PredatorIsAwareOfTarget(sbPtr)))
@@ -3101,16 +3101,16 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPlasmaCaster(STRATEGYBLOCK *s
                 return(PRC_Request_Hunt);
                 /* Drop out null targets. */
         } else {
-        
+
                 /* We have a target that we are aware of. */
 
                 range=VectorDistance((&predatorStatusPointer->Target->DynPtr->Position),(&sbPtr->DynPtr->Position));
 
                 /* if we are close... go directly to firing */
                 if(range < PRED_CLOSE_ATTACK_RANGE)
-                {       
+                {
                         /* switch directly to firing, at this distance */
-                
+
                         return(PRC_Request_Attack);
                 } else {
 
@@ -3118,9 +3118,9 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPlasmaCaster(STRATEGYBLOCK *s
                         if (predatorStatusPointer->CloakStatus==PCLOAK_Off) {
                                 PredatorCloakOn(predatorStatusPointer);
                         }
-                
+
                 }
-                
+
                 /* if our state timer has run out in approach state, see if we can fire*/
                 if(predatorStatusPointer->stateTimer > 0) predatorStatusPointer->stateTimer -= NormalFrameTime;
                 if(predatorStatusPointer->stateTimer <= 0)
@@ -3128,8 +3128,8 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPlasmaCaster(STRATEGYBLOCK *s
                         /* it is time to fire, if we can see the target  */
                         if(PredatorCanSeeTarget(sbPtr))
                         {
-                                /* we are going to fire then */         
-                
+                                /* we are going to fire then */
+
                                 return(PRC_Request_Attack);
                         }
                         else
@@ -3143,7 +3143,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPlasmaCaster(STRATEGYBLOCK *s
 
         /* See which way we want to go. */
         {
-        
+
                 AIMODULE *targetModule;
                 MODULE *tcm;
                 FARENTRYPOINT *thisEp = (FARENTRYPOINT *)0;
@@ -3156,7 +3156,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPlasmaCaster(STRATEGYBLOCK *s
                         tcm=ModuleFromPosition(&predatorStatusPointer->Target->DynPtr->Position,sbPtr->containingModule);
                 }
 
-                if (tcm) {              
+                if (tcm) {
                         targetModule=GetNextModuleForLink(sbPtr->containingModule->m_aimodule,tcm->m_aimodule,7,0);
                 } else {
                         targetModule=NULL;
@@ -3164,7 +3164,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPlasmaCaster(STRATEGYBLOCK *s
 
                 if (targetModule==sbPtr->containingModule->m_aimodule) {
                         /* Try going for it, we still can't see them. */
-                        NPCGetMovementTarget(sbPtr, predatorStatusPointer->Target, &targetPosition, &targetIsAirduct,0);
+                        NPCGetMovementTarget(sbPtr, predatorStatusPointer->Target, &targetPosition, &targetIsAirduct);
                         NPCGetMovementDirection(sbPtr, &velocityDirection, &targetPosition,&predatorStatusPointer->waypointManager);
                 } else if (!targetModule) {
                         /* Must be inaccessible. */
@@ -3186,7 +3186,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPlasmaCaster(STRATEGYBLOCK *s
                                 GLOBALASSERT(thisEp);
                         }
                         /* If that fired, there's a farped adjacency. */
-                
+
                         predatorStatusPointer->wanderData.worldPosition=thisEp->position;
                         predatorStatusPointer->wanderData.worldPosition.vx+=targetModule->m_world.vx;
                         predatorStatusPointer->wanderData.worldPosition.vy+=targetModule->m_world.vy;
@@ -3194,12 +3194,12 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPlasmaCaster(STRATEGYBLOCK *s
 
                         NPCGetMovementDirection(sbPtr, &velocityDirection, &(predatorStatusPointer->wanderData.worldPosition),&predatorStatusPointer->waypointManager);
                 }
-                                
+
         }
 
         /* Should have a velocity set now. */
 
-        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);    
+        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);
 
         /* test here for impeding collisions, and not being able to reach target... */
         #if ALL_NEW_AVOIDANCE_PRED
@@ -3233,7 +3233,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPlasmaCaster(STRATEGYBLOCK *s
                 predatorStatusPointer->obstruction.destructableObject=0;
                 predatorStatusPointer->obstruction.otherCharacter=0;
                 predatorStatusPointer->obstruction.anySingleObstruction=0;
-        
+
                 return(PRC_Request_Avoidance);
         }
         #endif
@@ -3242,15 +3242,15 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPlasmaCaster(STRATEGYBLOCK *s
 
 static PRED_RETURN_CONDITION Execute_PNS_EngageWithWristblade(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         VECTORCH velocityDirection = {0,0,0};
         VECTORCH targetPosition;
         int targetIsAirduct = 0;
         int range;
-        
+
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         PredatorHandleMovingAnimation(sbPtr);
 
@@ -3259,7 +3259,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithWristblade(STRATEGYBLOCK *sbP
         if (predatorStatusPointer->patience<=0) {
                 return(PRC_Request_Swap);
         }
-                        
+
         /* now check for state changes... firstly, if we can no longer attack the target, go
         to wander */
         if(!(PredatorIsAwareOfTarget(sbPtr)))
@@ -3267,7 +3267,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithWristblade(STRATEGYBLOCK *sbP
                 return(PRC_Request_Hunt);
                 /* Drop out null targets. */
         } else {
-        
+
                 /* We have a target that we are aware of. */
 
                 range=VectorDistance((&predatorStatusPointer->Target->DynPtr->Position),(&sbPtr->DynPtr->Position));
@@ -3279,15 +3279,15 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithWristblade(STRATEGYBLOCK *sbP
                 } else if (predatorStatusPointer->CloakStatus==PCLOAK_Off) {
                         PredatorCloakOn(predatorStatusPointer);
                 }
-                
+
                 /* if we are close... go directly to firing */
                 if(range < PRED_CLOSE_ATTACK_RANGE)
-                {       
+                {
                         /* switch directly to firing, at this distance */
-                
+
                         return(PRC_Request_Attack);
                 }
-                
+
                 /* if our state timer has run out in approach state, see if we can fire*/
                 if(predatorStatusPointer->stateTimer > 0) {
                         predatorStatusPointer->stateTimer -= NormalFrameTime;
@@ -3299,8 +3299,8 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithWristblade(STRATEGYBLOCK *sbP
                         /* Might want to withdraw. */
                         if(!PredatorCanSeeTarget(sbPtr))
                         {
-                                /* Lost sight of him! */                
-                
+                                /* Lost sight of him! */
+
                                 return(PRC_Request_Hunt);
                         }
                         else
@@ -3314,7 +3314,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithWristblade(STRATEGYBLOCK *sbP
 
         /* See which way we want to go. */
         {
-        
+
                 AIMODULE *targetModule;
                 MODULE *tcm;
                 FARENTRYPOINT *thisEp = (FARENTRYPOINT *)0;
@@ -3327,7 +3327,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithWristblade(STRATEGYBLOCK *sbP
                         tcm=ModuleFromPosition(&predatorStatusPointer->Target->DynPtr->Position,sbPtr->containingModule);
                 }
 
-                if (tcm) {              
+                if (tcm) {
                         targetModule=GetNextModuleForLink(sbPtr->containingModule->m_aimodule,tcm->m_aimodule,7,0);
                 } else {
                         targetModule=NULL;
@@ -3335,7 +3335,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithWristblade(STRATEGYBLOCK *sbP
 
                 if (targetModule==sbPtr->containingModule->m_aimodule) {
                         /* Try going for it, we still can't see them. */
-                        NPCGetMovementTarget(sbPtr, predatorStatusPointer->Target, &targetPosition, &targetIsAirduct,0);
+                        NPCGetMovementTarget(sbPtr, predatorStatusPointer->Target, &targetPosition, &targetIsAirduct);
                         NPCGetMovementDirection(sbPtr, &velocityDirection, &targetPosition,&predatorStatusPointer->waypointManager);
                 } else if (!targetModule) {
                         /* Must be inaccessible. */
@@ -3357,7 +3357,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithWristblade(STRATEGYBLOCK *sbP
                                 GLOBALASSERT(thisEp);
                         }
                         /* If that fired, there's a farped adjacency. */
-                
+
                         predatorStatusPointer->wanderData.worldPosition=thisEp->position;
                         predatorStatusPointer->wanderData.worldPosition.vx+=targetModule->m_world.vx;
                         predatorStatusPointer->wanderData.worldPosition.vy+=targetModule->m_world.vy;
@@ -3365,12 +3365,12 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithWristblade(STRATEGYBLOCK *sbP
 
                         NPCGetMovementDirection(sbPtr, &velocityDirection, &(predatorStatusPointer->wanderData.worldPosition),&predatorStatusPointer->waypointManager);
                 }
-                                
+
         }
 
         /* Should have a velocity set now. */
 
-        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);    
+        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);
 
         /* test here for impeding collisions, and not being able to reach target... */
         #if ALL_NEW_AVOIDANCE_PRED
@@ -3406,7 +3406,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithWristblade(STRATEGYBLOCK *sbP
                 predatorStatusPointer->obstruction.anySingleObstruction=0;
 
                 predatorStatusPointer->patience-=ONE_FIXED;
-        
+
                 return(PRC_Request_Avoidance);
         }
         #endif
@@ -3417,12 +3417,12 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithWristblade(STRATEGYBLOCK *sbP
 {
         VECTORCH orientationDirn;
         int i;
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         DYNAMICSBLOCK *dynPtr;
-        
+
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
         LOCALASSERT (sbPtr->DynPtr);
 
         /* zero linear velocity in dynamics block */
@@ -3446,7 +3446,7 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithWristblade(STRATEGYBLOCK *sbP
 
         GLOBALASSERT(predatorStatusPointer->Target);
         NPCGetTargetPosition(&(predatorStatusPointer->weaponTarget),predatorStatusPointer->Target);
-        
+
         /* check for state changes: */
         if(VectorDistance((&predatorStatusPointer->Target->DynPtr->Position),(&sbPtr->DynPtr->Position)) > PRED_CLOSE_ATTACK_RANGE)
         {
@@ -3454,7 +3454,7 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithWristblade(STRATEGYBLOCK *sbP
                         /* Change weapon! */
                         return(PRC_Request_Swap);
                 } else {
-                        /* switch back to engage. */            
+                        /* switch back to engage. */
                         GLOBALASSERT(predatorStatusPointer->Target);
                         NPCGetTargetPosition(&(predatorStatusPointer->weaponTarget),predatorStatusPointer->Target);
                         return(PRC_Request_Engage);
@@ -3466,7 +3466,7 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithWristblade(STRATEGYBLOCK *sbP
         orientationDirn.vy = 0;
         orientationDirn.vz = predatorStatusPointer->Target->DynPtr->Position.vz - sbPtr->DynPtr->Position.vz;
         i = NPCOrientateToVector(sbPtr, &orientationDirn,NPC_TURNRATE,NULL);
-        
+
         /* Decrement the near state timer */
         predatorStatusPointer->stateTimer -= NormalFrameTime;
 
@@ -3486,11 +3486,11 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithWristblade(STRATEGYBLOCK *sbP
 #if 0
 static PRED_RETURN_CONDITION Execute_PNS_StandGround(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
-        
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
+
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         /* basically just stand there and fire... */
 
@@ -3499,10 +3499,10 @@ static PRED_RETURN_CONDITION Execute_PNS_StandGround(STRATEGYBLOCK *sbPtr)
         sbPtr->DynPtr->LinVelocity.vx = 0;
         sbPtr->DynPtr->LinVelocity.vy = 0;
         sbPtr->DynPtr->LinVelocity.vz = 0;
-        
+
         /* check if we want to close-attack */
         if(VectorDistance((&Player->ObStrategyBlock->DynPtr->Position),(&sbPtr->DynPtr->Position)) < PRED_CLOSE_ATTACK_RANGE)
-        {       
+        {
                 return(PRC_Request_Attack);
         }
 
@@ -3516,7 +3516,7 @@ static PRED_RETURN_CONDITION Execute_PNS_StandGround(STRATEGYBLOCK *sbPtr)
                 {
                         return(PRC_Request_Attack);
                 }
-                else 
+                else
                 {
                         /* reset the timer if we couldn't fire */
                         predatorStatusPointer->stateTimer = predatorCV[predatorStatusPointer->personalNumber].timeBetweenRangedAttacks;
@@ -3527,12 +3527,12 @@ static PRED_RETURN_CONDITION Execute_PNS_StandGround(STRATEGYBLOCK *sbPtr)
 #endif
 
 static PRED_RETURN_CONDITION Execute_PNS_SwapWeapon(STRATEGYBLOCK *sbPtr) {
-        
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
-        
+
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
+
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         /* zero linear velocity in dynamics block */
         LOCALASSERT(sbPtr->DynPtr);
@@ -3632,7 +3632,7 @@ static PRED_RETURN_CONDITION Execute_PNS_SwapWeapon(STRATEGYBLOCK *sbPtr) {
                 predatorStatusPointer->Selected_Weapon=targetWeapon;
                 root_section=GetNamedHierarchyFromLibrary(predatorStatusPointer->Selected_Weapon->Riffname,predatorStatusPointer->Selected_Weapon->HierarchyName);
                 GLOBALASSERT(root_section);
-                
+
                 /* Strip out HitDelta for now, if any... */
                 {
                         DELTA_CONTROLLER *delta;
@@ -3659,7 +3659,7 @@ static PRED_RETURN_CONDITION Execute_PNS_SwapWeapon(STRATEGYBLOCK *sbPtr) {
 				predatorStatusPointer->HModelController.Sub_Sequence=(int)PSSS_Get_Weapon;
 
                 Transmogrify_HModels(sbPtr,&predatorStatusPointer->HModelController,root_section,0,1,0);
-                
+
                 #if PREDATOR_HIT_DELTAS
                 if (HModelSequence_Exists(&predatorStatusPointer->HModelController,(int)HMSQT_PredatorStand,(int)PSSS_HitChestFront)) {
                         /* This ritual in case _one_ of the hierarchies doesn't have hitdeltas. */
@@ -3688,7 +3688,7 @@ static PRED_RETURN_CONDITION Execute_PNS_SwapWeapon(STRATEGYBLOCK *sbPtr) {
 
 				DeInitialise_HModel(&predatorStatusPointer->HModelController);
                 ProveHModel_Far(&predatorStatusPointer->HModelController,sbPtr);
-        
+
 				Verify_Positions_In_HModel(sbPtr,&predatorStatusPointer->HModelController,
 					"Predator Swap Weapon Three");
 
@@ -3760,10 +3760,10 @@ static PRED_RETURN_CONDITION Execute_PNS_SwapWeapon(STRATEGYBLOCK *sbPtr) {
 					"Predator Swap Weapon Six");
 
                 return(PRC_No_Change);
-                
+
         } else if (predatorStatusPointer->stateTimer==3) {
                 /* You are in the process of swapping in. */
-                
+
                 if (ShowPredoStats) {
                         PrintDebuggingText("Part four ");
                 }
@@ -3778,7 +3778,7 @@ static PRED_RETURN_CONDITION Execute_PNS_SwapWeapon(STRATEGYBLOCK *sbPtr) {
                 }
         } else if (predatorStatusPointer->stateTimer==4) {
                 /* All (valid) conclusions arrive here. */
-                
+
                 if (ShowPredoStats) {
                         PrintDebuggingText("Part five ");
                 }
@@ -3804,13 +3804,13 @@ static PRED_RETURN_CONDITION Execute_PNS_Wander(STRATEGYBLOCK *sbPtr)
         PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         DYNAMICSBLOCK *dynPtr;
         VECTORCH velocityDirection = {0,0,0};
-        
+
         LOCALASSERT(sbPtr);
-        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
         dynPtr = sbPtr->DynPtr;
         LOCALASSERT(predatorStatusPointer);
         LOCALASSERT(dynPtr);
-                
+
         PredatorHandleMovingAnimation(sbPtr);
 
         /* should we change to approach state? */
@@ -3823,7 +3823,7 @@ static PRED_RETURN_CONDITION Execute_PNS_Wander(STRATEGYBLOCK *sbPtr)
         /* Are we using bimble rules? */
 
         if (predatorStatusPointer->wanderData.currentModule==NPC_BIMBLINGINMODULE) {
-        
+
                 int range;
 
                 /* Range to target... */
@@ -3836,7 +3836,7 @@ static PRED_RETURN_CONDITION Execute_PNS_Wander(STRATEGYBLOCK *sbPtr)
                         predatorStatusPointer->wanderData.currentModule=NPC_NOWANDERMODULE;
 
                 }
-                
+
         }
         else
         {
@@ -3851,19 +3851,19 @@ static PRED_RETURN_CONDITION Execute_PNS_Wander(STRATEGYBLOCK *sbPtr)
                 {
                         NPC_FindAIWanderTarget(sbPtr,&(predatorStatusPointer->wanderData),&(predatorStatusPointer->moveData),0);
                 }
-                
+
                 /* if we still haven't got one, bimble about in this one for a bit. */
                 if(predatorStatusPointer->wanderData.currentModule==NPC_NOWANDERMODULE)
                 {
                         NPC_GetBimbleTarget(sbPtr,&predatorStatusPointer->wanderData.worldPosition);
                         predatorStatusPointer->wanderData.currentModule=NPC_BIMBLINGINMODULE;
                 }
-                
+
         }
-                
+
         /* ok: should have a current target at this stage... */
         NPCGetMovementDirection(sbPtr, &velocityDirection, &(predatorStatusPointer->wanderData.worldPosition),&predatorStatusPointer->waypointManager);
-        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);    
+        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);
 
         /* test here for impeding collisions, and not being able to reach target... */
         if (New_NPC_IsObstructed(sbPtr,&predatorStatusPointer->avoidanceManager))
@@ -3877,18 +3877,18 @@ static PRED_RETURN_CONDITION Execute_PNS_Wander(STRATEGYBLOCK *sbPtr)
 
 static PRED_RETURN_CONDITION Execute_PNS_Hunt(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         DYNAMICSBLOCK *dynPtr;
         VECTORCH velocityDirection = {0,0,0};
 
         /* Your mission: to advance into the players module, even if near. */
-        
+
         LOCALASSERT(sbPtr);
-        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
         dynPtr = sbPtr->DynPtr;
         LOCALASSERT(predatorStatusPointer);
         LOCALASSERT(dynPtr);
-                
+
         PredatorHandleMovingAnimation(sbPtr);
 
         /* should we change to approach state? */
@@ -3905,7 +3905,7 @@ static PRED_RETURN_CONDITION Execute_PNS_Hunt(STRATEGYBLOCK *sbPtr)
                 AIMODULE *targetModule;
                 FARENTRYPOINT *thisEp = (FARENTRYPOINT *)0;
 
-                targetModule = FarNPC_GetTargetAIModuleForHunt(sbPtr,0);
+                targetModule = FarNPC_GetTargetAIModuleForHunt(sbPtr/*,0*/);
 
                 if (targetModule) {
                         if (ShowPredoStats) {
@@ -3932,11 +3932,11 @@ static PRED_RETURN_CONDITION Execute_PNS_Hunt(STRATEGYBLOCK *sbPtr)
                         return(PRC_Request_Recover);
                         #else
                         extern MODULE *playerPherModule;
-                        
+
                         LOGDXFMT(("Jules's bug: predator is in %s, player is in %s",sbPtr->containingModule->name,playerPherModule->name));
                         GLOBALASSERT(targetModule);
                         #endif
-                }                               
+                }
 
                 thisEp=GetAIModuleEP(targetModule,sbPtr->containingModule->m_aimodule);
                 if (!thisEp) {
@@ -3944,17 +3944,17 @@ static PRED_RETURN_CONDITION Execute_PNS_Hunt(STRATEGYBLOCK *sbPtr)
                         GLOBALASSERT(thisEp);
                 }
                 /* If that fired, there's a farped adjacency. */
-        
+
                 predatorStatusPointer->wanderData.worldPosition=thisEp->position;
                 predatorStatusPointer->wanderData.worldPosition.vx+=targetModule->m_world.vx;
                 predatorStatusPointer->wanderData.worldPosition.vy+=targetModule->m_world.vy;
                 predatorStatusPointer->wanderData.worldPosition.vz+=targetModule->m_world.vz;
-                
+
         }
 
         /* ok: should have a current target at this stage... */
         NPCGetMovementDirection(sbPtr, &velocityDirection, &(predatorStatusPointer->wanderData.worldPosition),&predatorStatusPointer->waypointManager);
-        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);    
+        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);
 
         /* test here for impeding collisions, and not being able to reach target... */
         #if ALL_NEW_AVOIDANCE_PRED
@@ -3984,7 +3984,7 @@ static PRED_RETURN_CONDITION Execute_PNS_Hunt(STRATEGYBLOCK *sbPtr)
         {
                 /* go to avoidance */
                 /* no sequence change required */
-                
+
                 predatorStatusPointer->obstruction.environment=1;
                 predatorStatusPointer->obstruction.destructableObject=0;
                 predatorStatusPointer->obstruction.otherCharacter=0;
@@ -3998,19 +3998,19 @@ static PRED_RETURN_CONDITION Execute_PNS_Hunt(STRATEGYBLOCK *sbPtr)
 
 static PRED_RETURN_CONDITION Execute_PNS_Retreat(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         DYNAMICSBLOCK *dynPtr;
         VECTORCH velocityDirection = {0,0,0};
         AIMODULE *old_fearmodule;
 
         /* Your mission: to advance out of trouble, even if near. */
-        
+
         LOCALASSERT(sbPtr);
-        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
         dynPtr = sbPtr->DynPtr;
         LOCALASSERT(predatorStatusPointer);
         LOCALASSERT(dynPtr);
-                
+
         PredatorHandleMovingAnimation(sbPtr);
 
         old_fearmodule=predatorStatusPointer->fearmodule;
@@ -4034,7 +4034,7 @@ static PRED_RETURN_CONDITION Execute_PNS_Retreat(STRATEGYBLOCK *sbPtr)
                 predatorStatusPointer->fearmodule=predatorStatusPointer->Target->containingModule->m_aimodule;
         } else if (predatorStatusPointer->fearmodule==NULL) {
                 predatorStatusPointer->fearmodule=sbPtr->containingModule->m_aimodule;
-        }       
+        }
 
         if ((predatorStatusPointer->missionmodule==NULL)||(predatorStatusPointer->fearmodule!=old_fearmodule)) {
 
@@ -4044,13 +4044,13 @@ static PRED_RETURN_CONDITION Execute_PNS_Retreat(STRATEGYBLOCK *sbPtr)
                 } else {
                         predatorStatusPointer->missionmodule = General_GetAIModuleForRetreat(sbPtr,Player->ObStrategyBlock->containingModule->m_aimodule,5);
                 }
-                
+
         }
 
         {
                 AIMODULE *targetModule;
                 FARENTRYPOINT *thisEp = (FARENTRYPOINT *)0;
-  
+
                 if (predatorStatusPointer->missionmodule==NULL) {
                         /* Hey, it'll drop through. */
                         return(PRC_Request_Recover);
@@ -4061,7 +4061,7 @@ static PRED_RETURN_CONDITION Execute_PNS_Retreat(STRATEGYBLOCK *sbPtr)
                 }
 
                 targetModule = GetNextModuleForLink(sbPtr->containingModule->m_aimodule,predatorStatusPointer->missionmodule,6,0);
-                
+
                 if (targetModule) {
                         if (ShowPredoStats) {
                                 PrintDebuggingText("Next Module is %s.\n",(*(targetModule->m_module_ptrs))->name);
@@ -4077,26 +4077,26 @@ static PRED_RETURN_CONDITION Execute_PNS_Retreat(STRATEGYBLOCK *sbPtr)
                         /* Hey, it'll drop through. */
                         return(PRC_Request_Recover);
                 }
-                
+
                 GLOBALASSERT(targetModule);
-                
+
                 thisEp=GetAIModuleEP(targetModule,sbPtr->containingModule->m_aimodule);
                 if (!thisEp) {
                         LOGDXFMT(("This assert is a busted adjacency!"));
                         GLOBALASSERT(thisEp);
                 }
                 /* If that fired, there's a farped adjacency. */
-        
+
                 predatorStatusPointer->wanderData.worldPosition=thisEp->position;
                 predatorStatusPointer->wanderData.worldPosition.vx+=targetModule->m_world.vx;
                 predatorStatusPointer->wanderData.worldPosition.vy+=targetModule->m_world.vy;
                 predatorStatusPointer->wanderData.worldPosition.vz+=targetModule->m_world.vz;
-                
+
         }
 
         /* ok: should have a current target at this stage... */
         NPCGetMovementDirection(sbPtr, &velocityDirection, &(predatorStatusPointer->wanderData.worldPosition),&predatorStatusPointer->waypointManager);
-        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);    
+        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);
 
         /* test here for impeding collisions, and not being able to reach target... */
         #if ALL_NEW_AVOIDANCE_PRED
@@ -4127,7 +4127,7 @@ static PRED_RETURN_CONDITION Execute_PNS_Retreat(STRATEGYBLOCK *sbPtr)
         {
                 /* go to avoidance */
                 /* no sequence change required */
-                
+
                 predatorStatusPointer->obstruction.environment=1;
                 predatorStatusPointer->obstruction.destructableObject=0;
                 predatorStatusPointer->obstruction.otherCharacter=0;
@@ -4142,30 +4142,30 @@ static PRED_RETURN_CONDITION Execute_PNS_Retreat(STRATEGYBLOCK *sbPtr)
 
 static void Execute_Dying(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predStatusPointer;       
+        PREDATOR_STATUS_BLOCK *predStatusPointer;
 
         LOCALASSERT(sbPtr);
         LOCALASSERT(sbPtr->DynPtr);
-        predStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);        
+        predStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
         LOCALASSERT(predStatusPointer);
-        
+
         /* make sure we're not cloaked... if activating, ignore until fully on */
         if(predStatusPointer->CloakStatus==PCLOAK_On)
         {
                 PredatorCloakOff(predStatusPointer);
                 Sound_Play(SID_VISION_ON,"d",&sbPtr->DynPtr->Position);
         }
-        
+
         sbPtr->DynPtr->LinImpulse.vx = 0;
         sbPtr->DynPtr->LinImpulse.vy = 0;
         sbPtr->DynPtr->LinImpulse.vz = 0;
-        
+
         predStatusPointer->stateTimer -= NormalFrameTime;
 }
 
 #if 0
 /* Patrick 4/7/97 --------------------------------------------------
-Behaviour support functions 
+Behaviour support functions
 ---------------------------------------------------------------------*/
 #define PRED_PLASMASPEED 30000
 #define PRED_DISCSPEED 30000
@@ -4173,14 +4173,14 @@ static void CreateNPCPredatorPlasBolt(VECTORCH *startingPosition, VECTORCH *targ
 {
         DISPLAYBLOCK *dPtr;
         DYNAMICSBLOCK *dynPtr;
-        
+
         /* make displayblock with correct shape, etc */
         dPtr = MakeObject(I_BehaviourPredatorEnergyBolt,startingPosition);
-        if(!dPtr) return;       
+        if(!dPtr) return;
         LOCALASSERT(dPtr->ObStrategyBlock);
 
         /* add lighting effect */
-        AddLightingEffectToObject(dPtr,LFX_ROCKETJET);  
+        AddLightingEffectToObject(dPtr,LFX_ROCKETJET);
 
         /* setup dynamics block */
         dynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_ROCKET);
@@ -4200,16 +4200,16 @@ static void CreateNPCPredatorPlasBolt(VECTORCH *startingPosition, VECTORCH *targ
                 return;
         }
 
-        ((CASTER_BOLT_BEHAV_BLOCK *)dPtr->ObStrategyBlock->SBdataptr)->counter = 5*ONE_FIXED;                   
+        ((CASTER_BOLT_BEHAV_BLOCK *)dPtr->ObStrategyBlock->SBdataptr)->counter = 5*ONE_FIXED;
         ((CASTER_BOLT_BEHAV_BLOCK *)dPtr->ObStrategyBlock->SBdataptr)->damage = TemplateAmmo[AMMO_PRED_ENERGY_BOLT].MaxDamage[AvP.Difficulty];
         ((CASTER_BOLT_BEHAV_BLOCK *)dPtr->ObStrategyBlock->SBdataptr)->blast_radius = 2000;
         /* align projectile to launcher */
         dynPtr->Position = *startingPosition;
         dynPtr->PrevPosition=dynPtr->Position;
         MakeMatrixFromDirection(targetDirection, &(dynPtr->OrientMat));
-        dynPtr->PrevOrientMat = dynPtr->OrientMat; /* stops mis-alignment if dynamics problem */            
+        dynPtr->PrevOrientMat = dynPtr->OrientMat; /* stops mis-alignment if dynamics problem */
 
-        /* set velocity */      
+        /* set velocity */
     dynPtr->LinVelocity.vx = MUL_FIXED(targetDirection->vx,PRED_PLASMASPEED);
     dynPtr->LinVelocity.vy = MUL_FIXED(targetDirection->vy,PRED_PLASMASPEED);
     dynPtr->LinVelocity.vz = MUL_FIXED(targetDirection->vz,PRED_PLASMASPEED);
@@ -4219,10 +4219,10 @@ static void CreateNPCPredatorDisc(VECTORCH *startingPosition, VECTORCH *targetDi
 {
         DISPLAYBLOCK *dPtr;
         DYNAMICSBLOCK *dynPtr;
-        
+
         /* make displayblock with correct shape, etc */
         dPtr = MakeObject(I_BehaviourNPCPredatorDisc,startingPosition);
-        if(!dPtr) return;       
+        if(!dPtr) return;
         LOCALASSERT(dPtr->ObStrategyBlock);
 
         /* add lighting effect */
@@ -4246,13 +4246,13 @@ static void CreateNPCPredatorDisc(VECTORCH *startingPosition, VECTORCH *targetDi
                 return;
         }
 
-        ((ONE_SHOT_BEHAV_BLOCK *)dPtr->ObStrategyBlock->SBdataptr)->counter = 5*ONE_FIXED;                      
+        ((ONE_SHOT_BEHAV_BLOCK *)dPtr->ObStrategyBlock->SBdataptr)->counter = 5*ONE_FIXED;
         /* align projectile to launcher */
         dynPtr->Position = *startingPosition;
         MakeMatrixFromDirection(targetDirection, &(dynPtr->OrientMat));
-        dynPtr->PrevOrientMat = dynPtr->OrientMat; /* stops mis-alignment if dynamics problem */            
+        dynPtr->PrevOrientMat = dynPtr->OrientMat; /* stops mis-alignment if dynamics problem */
 
-        /* set velocity */      
+        /* set velocity */
     dynPtr->LinVelocity.vx = MUL_FIXED(targetDirection->vx,PRED_DISCSPEED);
     dynPtr->LinVelocity.vy = MUL_FIXED(targetDirection->vy,PRED_DISCSPEED);
     dynPtr->LinVelocity.vz = MUL_FIXED(targetDirection->vz,PRED_DISCSPEED);
@@ -4262,28 +4262,28 @@ static void CreateNPCPredatorDisc(VECTORCH *startingPosition, VECTORCH *targetDi
 static void SetPredatorAnimationSequence(STRATEGYBLOCK *sbPtr,HMODEL_SEQUENCE_TYPES type, int subtype, int length, int tweening)
 {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         GLOBALASSERT(length!=0);
 
         if (tweening<=0) {
                 InitHModelSequence(&predatorStatusPointer->HModelController,(int)type,subtype,length);
-        } else {        
+        } else {
                 InitHModelTweening(&predatorStatusPointer->HModelController, tweening, (int)type,subtype,length, 1);
         }
 }
 
 static int PredatorShouldAttackPlayer(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predStatusPointer;       
+        PREDATOR_STATUS_BLOCK *predStatusPointer;
 
         LOCALASSERT(sbPtr);
         LOCALASSERT(sbPtr->DynPtr);
-        predStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);        
+        predStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
         LOCALASSERT(predStatusPointer);
 
         if(predStatusPointer->health > predatorCV[predStatusPointer->personalNumber].defenceHealth)
@@ -4304,14 +4304,14 @@ Predator cloak interface functions...
 static void InitPredatorCloak(PREDATOR_STATUS_BLOCK *predStatus)
 {
         predStatus->CloakStatus = PCLOAK_Off;
-        predStatus->CloakingEffectiveness = 0;            
+        predStatus->CloakingEffectiveness = 0;
         predStatus->CloakTimer = 0;
 }
 
 static void PredatorCloakOn(PREDATOR_STATUS_BLOCK *predStatus)
 {
         LOCALASSERT(predStatus);
-        
+
         #if 0
         /* Temp! */
         return;
@@ -4327,7 +4327,7 @@ static void PredatorCloakOn(PREDATOR_STATUS_BLOCK *predStatus)
                 return;
         } else {
                 /* Cloak ust be Off. */
-                predStatus->CloakStatus = PCLOAK_Activating;            
+                predStatus->CloakStatus = PCLOAK_Activating;
                 predStatus->CloakTimer = ONE_FIXED-1;
         }
         #endif
@@ -4348,7 +4348,7 @@ static void PredatorCloakOff(PREDATOR_STATUS_BLOCK *predStatus)
                 return;
         } else {
                 /* Cloak must be On. */
-                predStatus->CloakStatus = PCLOAK_Deactivating;          
+                predStatus->CloakStatus = PCLOAK_Deactivating;
                 predStatus->CloakTimer = 0; /* Was predStatus->PredShimmer. */
         }
 }
@@ -4385,7 +4385,7 @@ static void DoPredatorCloak(PREDATOR_STATUS_BLOCK *predStatus,DYNAMICSBLOCK *dyn
                         {
                                 predStatus->CloakTimer=0;
                                 predStatus->CloakStatus=PCLOAK_Off;
-                        }                       
+                        }
                         break;
                 }
                 default:
@@ -4404,7 +4404,7 @@ static void DoPredatorCloak(PREDATOR_STATUS_BLOCK *predStatus,DYNAMICSBLOCK *dyn
 		velocity.vx = dynPtr->Position.vx - dynPtr->PrevPosition.vx;
 		velocity.vy = dynPtr->Position.vy - dynPtr->PrevPosition.vy;
 		velocity.vz = dynPtr->Position.vz - dynPtr->PrevPosition.vz;
-		
+
 		maxPossibleEffectiveness = ONE_FIXED - DIV_FIXED(Magnitude(&velocity)*4,NormalFrameTime);
 
 		if (maxPossibleEffectiveness<0) maxPossibleEffectiveness = 0;
@@ -4428,12 +4428,12 @@ static void DoPredatorCloak(PREDATOR_STATUS_BLOCK *predStatus,DYNAMICSBLOCK *dyn
 }
 
 int NPCPredatorIsCloaked(STRATEGYBLOCK *sbPtr) {
-        
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         /* For external calls. */
 
@@ -4463,12 +4463,12 @@ int NPCPredatorIsCloaked(STRATEGYBLOCK *sbPtr) {
 
 static int PredatorCanSeeTarget(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         int targetIsCloaked;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         if (predatorStatusPointer->Target==NULL) {
                 /* You can't see nothin. */
@@ -4481,7 +4481,7 @@ static int PredatorCanSeeTarget(STRATEGYBLOCK *sbPtr)
 
         if (predatorStatusPointer->Target==Player->ObStrategyBlock) {
                 /* test for player hiding? */
-        
+
         } else {
                 /* Test for NPC aliens hiding? */
         }
@@ -4499,12 +4499,12 @@ static int PredatorCanSeeTarget(STRATEGYBLOCK *sbPtr)
 
 static int PredatorCanSeeObject(STRATEGYBLOCK *sbPtr,STRATEGYBLOCK *target)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         int targetIsCloaked;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         if (target==NULL) {
                 /* You can't see nothin. */
@@ -4517,7 +4517,7 @@ static int PredatorCanSeeObject(STRATEGYBLOCK *sbPtr,STRATEGYBLOCK *target)
 
         if (target==Player->ObStrategyBlock) {
                 /* test for player hiding? */
-        
+
         } else {
                 /* Test for NPC aliens hiding? */
         }
@@ -4535,11 +4535,11 @@ static int PredatorCanSeeObject(STRATEGYBLOCK *sbPtr,STRATEGYBLOCK *target)
 
 static int PredatorIsAwareOfTarget(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         if (predatorStatusPointer->Target==NULL) {
                 /* You can't see nothin. */
@@ -4547,7 +4547,7 @@ static int PredatorIsAwareOfTarget(STRATEGYBLOCK *sbPtr)
         }
 
         /* Okay, let's cut to the chase. */
-		
+
 		/* Slightly more restrictive now... */
 		if ((IsModuleVisibleFromModule(sbPtr->containingModule,
 			predatorStatusPointer->Target->containingModule))) {
@@ -4561,11 +4561,11 @@ static int PredatorIsAwareOfTarget(STRATEGYBLOCK *sbPtr)
 
 void Predator_Enter_Wander_State(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         NPC_InitMovementData(&(predatorStatusPointer->moveData));
         NPC_InitWanderData(&(predatorStatusPointer->wanderData));
@@ -4573,12 +4573,12 @@ void Predator_Enter_Wander_State(STRATEGYBLOCK *sbPtr) {
         predatorStatusPointer->volleySize = 0;
         predatorStatusPointer->lastState=predatorStatusPointer->behaviourState;
         predatorStatusPointer->behaviourState = PBS_Wandering;
-        predatorStatusPointer->stateTimer = PRED_NEAR_CLOSEATTACK_TIME;                                                         
+        predatorStatusPointer->stateTimer = PRED_NEAR_CLOSEATTACK_TIME;
         predatorStatusPointer->Pred_Laser_On=0;
 
         #if 0
         if(predatorStatusPointer->IAmCrouched) {
-                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrawl,PCrSS_Standard,ONE_FIXED,(ONE_FIXED>>3));                
+                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrawl,PCrSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
         } else {
                 SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorRun,PRSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
         }
@@ -4588,11 +4588,11 @@ void Predator_Enter_Wander_State(STRATEGYBLOCK *sbPtr) {
 
 void Predator_Enter_Hunt_State(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         NPC_InitMovementData(&(predatorStatusPointer->moveData));
         NPC_InitWanderData(&(predatorStatusPointer->wanderData));
@@ -4600,12 +4600,12 @@ void Predator_Enter_Hunt_State(STRATEGYBLOCK *sbPtr) {
         predatorStatusPointer->volleySize = 0;
         predatorStatusPointer->lastState=predatorStatusPointer->behaviourState;
         predatorStatusPointer->behaviourState = PBS_Hunting;
-        predatorStatusPointer->stateTimer = PRED_NEAR_CLOSEATTACK_TIME;                                                         
+        predatorStatusPointer->stateTimer = PRED_NEAR_CLOSEATTACK_TIME;
         predatorStatusPointer->Pred_Laser_On=0;
 
         #if 0
         if(predatorStatusPointer->IAmCrouched) {
-                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrawl,PCrSS_Standard,ONE_FIXED,(ONE_FIXED>>3));                
+                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrawl,PCrSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
         } else {
                 SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorRun,PRSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
         }
@@ -4615,11 +4615,11 @@ void Predator_Enter_Hunt_State(STRATEGYBLOCK *sbPtr) {
 
 void Predator_Enter_Recover_State(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         if (predatorStatusPointer->Selected_Weapon->id!=PNPCW_Medicomp) {
                 /* Change to it. */
@@ -4644,11 +4644,11 @@ void Predator_Enter_Recover_State(STRATEGYBLOCK *sbPtr) {
         predatorStatusPointer->volleySize = 0;
         predatorStatusPointer->lastState=predatorStatusPointer->behaviourState;
         predatorStatusPointer->behaviourState = PBS_Recovering;
-        predatorStatusPointer->stateTimer = PRED_NEAR_CLOSEATTACK_TIME;                                                         
+        predatorStatusPointer->stateTimer = PRED_NEAR_CLOSEATTACK_TIME;
         predatorStatusPointer->Pred_Laser_On=0;
 
         if(predatorStatusPointer->IAmCrouched) {
-                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrouch,PCrSS_Attack_Primary,ONE_FIXED,(ONE_FIXED>>3));         
+                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrouch,PCrSS_Attack_Primary,ONE_FIXED,(ONE_FIXED>>3));
         } else {
                 SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorStand,PSSS_Attack_Primary,ONE_FIXED,(ONE_FIXED>>3));
         }
@@ -4657,11 +4657,11 @@ void Predator_Enter_Recover_State(STRATEGYBLOCK *sbPtr) {
 
 void Predator_Enter_Withdrawal_State(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         NPC_InitMovementData(&(predatorStatusPointer->moveData));
         NPC_InitWanderData(&(predatorStatusPointer->wanderData));
@@ -4671,14 +4671,14 @@ void Predator_Enter_Withdrawal_State(STRATEGYBLOCK *sbPtr) {
         predatorStatusPointer->behaviourState = PBS_Withdrawing;
         predatorStatusPointer->stateTimer = PRED_NEAR_CLOSEATTACK_TIME;
         predatorStatusPointer->Pred_Laser_On=0;
-        
+
         /* Force re-evaluation of priorities. */
         predatorStatusPointer->missionmodule=NULL;
         predatorStatusPointer->fearmodule=NULL;
 
         #if 0
         if(predatorStatusPointer->IAmCrouched) {
-                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrawl,PCrSS_Standard,ONE_FIXED,(ONE_FIXED>>3));                
+                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrawl,PCrSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
         } else {
                 SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorRun,PRSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
         }
@@ -4688,11 +4688,11 @@ void Predator_Enter_Withdrawal_State(STRATEGYBLOCK *sbPtr) {
 
 void Predator_Enter_Engaged_State(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         NPC_InitMovementData(&(predatorStatusPointer->moveData));
         NPC_InitWanderData(&(predatorStatusPointer->wanderData));
@@ -4700,12 +4700,12 @@ void Predator_Enter_Engaged_State(STRATEGYBLOCK *sbPtr) {
         predatorStatusPointer->volleySize = 0;
         predatorStatusPointer->lastState=predatorStatusPointer->behaviourState;
         predatorStatusPointer->behaviourState = PBS_Engaging;
-        predatorStatusPointer->stateTimer = PRED_NEAR_CLOSEATTACK_TIME;                                                         
+        predatorStatusPointer->stateTimer = PRED_NEAR_CLOSEATTACK_TIME;
         predatorStatusPointer->Pred_Laser_On=0;
 
         #if 0
         if(predatorStatusPointer->IAmCrouched) {
-                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrawl,PCrSS_Standard,ONE_FIXED,(ONE_FIXED>>3));                
+                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrawl,PCrSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
         } else {
                 SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorRun,PRSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
         }
@@ -4715,11 +4715,11 @@ void Predator_Enter_Engaged_State(STRATEGYBLOCK *sbPtr) {
 
 void Predator_Enter_Attacking_State(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         NPC_InitMovementData(&(predatorStatusPointer->moveData));
         NPC_InitWanderData(&(predatorStatusPointer->wanderData));
@@ -4727,7 +4727,7 @@ void Predator_Enter_Attacking_State(STRATEGYBLOCK *sbPtr) {
         predatorStatusPointer->volleySize = 0;
         predatorStatusPointer->lastState=predatorStatusPointer->behaviourState;
         predatorStatusPointer->behaviourState = PBS_Attacking;
-        predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;                                                         
+        predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;
         predatorStatusPointer->Pred_Laser_On=0;
         predatorStatusPointer->internalState=0;
         /* Become patient again. */
@@ -4739,7 +4739,7 @@ void Predator_Enter_Attacking_State(STRATEGYBLOCK *sbPtr) {
                 StartPredStaffAttackSequence(sbPtr);
         } else {
                 if(predatorStatusPointer->IAmCrouched) {
-                        SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrouch,PCrSS_Attack_Primary,-1,(ONE_FIXED>>3));        
+                        SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrouch,PCrSS_Attack_Primary,-1,(ONE_FIXED>>3));
                 } else {
                         SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorStand,PSSS_Attack_Primary,-1,(ONE_FIXED>>3));
                 }
@@ -4748,11 +4748,11 @@ void Predator_Enter_Attacking_State(STRATEGYBLOCK *sbPtr) {
 
 void Predator_Enter_Avoidance_State(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         NPC_InitMovementData(&(predatorStatusPointer->moveData));
         NPCGetAvoidanceDirection(sbPtr, &(predatorStatusPointer->moveData.avoidanceDirn),&predatorStatusPointer->obstruction);
@@ -4760,7 +4760,7 @@ void Predator_Enter_Avoidance_State(STRATEGYBLOCK *sbPtr) {
         predatorStatusPointer->volleySize = 0;
         predatorStatusPointer->lastState=predatorStatusPointer->behaviourState;
         predatorStatusPointer->behaviourState = PBS_Avoidance;
-        predatorStatusPointer->stateTimer = NPC_AVOIDTIME;                                                              
+        predatorStatusPointer->stateTimer = NPC_AVOIDTIME;
         predatorStatusPointer->Pred_Laser_On=0;
 
         /* zero linear velocity in dynamics block */
@@ -4770,7 +4770,7 @@ void Predator_Enter_Avoidance_State(STRATEGYBLOCK *sbPtr) {
 
         #if 0
         if(predatorStatusPointer->IAmCrouched) {
-                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrawl,PCrSS_Standard,ONE_FIXED,(ONE_FIXED>>3));                
+                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrawl,PCrSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
         } else {
                 SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorRun,PRSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
         }
@@ -4780,11 +4780,11 @@ void Predator_Enter_Avoidance_State(STRATEGYBLOCK *sbPtr) {
 
 void Predator_Enter_Swapping_State(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         /* What are we swapping to? */
         if (predatorStatusPointer->ChangeToWeapon==PNPCW_End) {
@@ -4816,11 +4816,11 @@ void Predator_Enter_Swapping_State(STRATEGYBLOCK *sbPtr) {
 
 void Predator_Enter_Return_State(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         GLOBALASSERT(predatorStatusPointer->path!=-1);
         GLOBALASSERT(predatorStatusPointer->stepnumber!=-1);
@@ -4831,12 +4831,12 @@ void Predator_Enter_Return_State(STRATEGYBLOCK *sbPtr) {
         predatorStatusPointer->volleySize = 0;
         predatorStatusPointer->lastState=predatorStatusPointer->behaviourState;
         predatorStatusPointer->behaviourState = PBS_Returning;
-        predatorStatusPointer->stateTimer = PRED_NEAR_CLOSEATTACK_TIME;                                                         
+        predatorStatusPointer->stateTimer = PRED_NEAR_CLOSEATTACK_TIME;
         predatorStatusPointer->Pred_Laser_On=0;
 
         #if 0
         if(predatorStatusPointer->IAmCrouched) {
-                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrawl,PCrSS_Standard,ONE_FIXED,(ONE_FIXED>>3));                
+                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrawl,PCrSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
         } else {
                 SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorRun,PRSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
         }
@@ -4846,12 +4846,12 @@ void Predator_Enter_Return_State(STRATEGYBLOCK *sbPtr) {
 
 void Predator_Enter_Pathfinder_State(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
-        
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
+
         GLOBALASSERT(predatorStatusPointer->path!=-1);
         GLOBALASSERT(predatorStatusPointer->stepnumber!=-1);
 
@@ -4861,12 +4861,12 @@ void Predator_Enter_Pathfinder_State(STRATEGYBLOCK *sbPtr) {
         predatorStatusPointer->volleySize = 0;
         predatorStatusPointer->lastState=predatorStatusPointer->behaviourState;
         predatorStatusPointer->behaviourState = PBS_Pathfinding;
-        predatorStatusPointer->stateTimer = PRED_NEAR_CLOSEATTACK_TIME;                                                         
+        predatorStatusPointer->stateTimer = PRED_NEAR_CLOSEATTACK_TIME;
         predatorStatusPointer->Pred_Laser_On=0;
 
         #if 0
         if(predatorStatusPointer->IAmCrouched) {
-                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrawl,PCrSS_Standard,ONE_FIXED,(ONE_FIXED>>3));                
+                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorCrawl,PCrSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
         } else {
                 SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorRun,PRSS_Standard,ONE_FIXED,(ONE_FIXED>>3));
         }
@@ -4876,11 +4876,11 @@ void Predator_Enter_Pathfinder_State(STRATEGYBLOCK *sbPtr) {
 
 void Predator_Enter_Taunt_State(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         if (HModelSequence_Exists(&predatorStatusPointer->HModelController,(int)HMSQT_PredatorStand,(int)PSSS_Taunt_One)) {
 
@@ -4890,15 +4890,15 @@ void Predator_Enter_Taunt_State(STRATEGYBLOCK *sbPtr) {
                 predatorStatusPointer->volleySize = 0;
                 predatorStatusPointer->lastState=predatorStatusPointer->behaviourState;
                 predatorStatusPointer->behaviourState = PBS_Taunting;
-                predatorStatusPointer->stateTimer = NPC_AVOIDTIME;                                                              
+                predatorStatusPointer->stateTimer = NPC_AVOIDTIME;
                 predatorStatusPointer->Pred_Laser_On=0;
                 /* Become patient again. */
                 predatorStatusPointer->patience=PRED_PATIENCE_TIME;
                 predatorStatusPointer->enableTaunt=0;
 
-                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorStand,PSSS_Taunt_One,-1,(ONE_FIXED>>3));               
+                SetPredatorAnimationSequence(sbPtr,HMSQT_PredatorStand,PSSS_Taunt_One,-1,(ONE_FIXED>>3));
                 predatorStatusPointer->HModelController.LoopAfterTweening=0;
-				
+
 				#if 0
                 Sound_Play(SID_PRED_NEWROAR,"d",&sbPtr->DynPtr->Position);
 				#else
@@ -4914,14 +4914,14 @@ void Predator_Enter_Taunt_State(STRATEGYBLOCK *sbPtr) {
 
 void Predator_Enter_SelfDestruct_State(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         SECTION *root;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
-        
-        /* Switch to template. */       
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
+
+        /* Switch to template. */
         root=GetNamedHierarchyFromLibrary("hnpcpredator","Template");
         GLOBALASSERT(root);
         RemoveAllDeltas(&predatorStatusPointer->HModelController);
@@ -4931,7 +4931,7 @@ void Predator_Enter_SelfDestruct_State(STRATEGYBLOCK *sbPtr) {
         Transmogrify_HModels(sbPtr,&predatorStatusPointer->HModelController,root, 1, 0,0);
         ProveHModel_Far(&predatorStatusPointer->HModelController,sbPtr);
 
-        InitHModelTweening(&predatorStatusPointer->HModelController, (ONE_FIXED>>3), 
+        InitHModelTweening(&predatorStatusPointer->HModelController, (ONE_FIXED>>3),
                 HMSQT_PredatorCrouch,PCrSS_Det_Prog,-1,0);
 
         /* Init stats. */
@@ -4950,12 +4950,12 @@ void Predator_Enter_SelfDestruct_State(STRATEGYBLOCK *sbPtr) {
 
 void Predator_SwitchState(STRATEGYBLOCK *sbPtr,PRED_RETURN_CONDITION state_result) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
-        
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
+
         switch (state_result) {
                 case (PRC_No_Change):
                 {
@@ -5070,9 +5070,9 @@ int Predator_TargetFilter(STRATEGYBLOCK *candidate) {
                         }
                 case I_BehaviourDummy:
                         {
-                                DUMMY_STATUS_BLOCK *dummyStatusPointer;    
-                                dummyStatusPointer = (DUMMY_STATUS_BLOCK *)(candidate->SBdataptr);    
-                            LOCALASSERT(dummyStatusPointer);                            
+                                DUMMY_STATUS_BLOCK *dummyStatusPointer;
+                                dummyStatusPointer = (DUMMY_STATUS_BLOCK *)(candidate->SBdataptr);
+                            LOCALASSERT(dummyStatusPointer);
                                 switch (dummyStatusPointer->PlayerType) {
                                         case I_Marine:
                                         case I_Alien:
@@ -5091,11 +5091,11 @@ int Predator_TargetFilter(STRATEGYBLOCK *candidate) {
                 case I_BehaviourAlien:
                         {
                                 ALIEN_STATUS_BLOCK *alienStatusPointer;
-                                LOCALASSERT(candidate); 
-                                LOCALASSERT(candidate->DynPtr); 
-                        
-                                alienStatusPointer=(ALIEN_STATUS_BLOCK *)(candidate->SBdataptr);    
-                                
+                                LOCALASSERT(candidate);
+                                LOCALASSERT(candidate->DynPtr);
+
+                                alienStatusPointer=(ALIEN_STATUS_BLOCK *)(candidate->SBdataptr);
+
                                 if (NPC_IsDead(candidate)) {
                                         return(0);
                                 } else {
@@ -5107,10 +5107,10 @@ int Predator_TargetFilter(STRATEGYBLOCK *candidate) {
                     if (NPC_IsDead(candidate)) {
                             return(0);
                     } else {
-                            AUTOGUN_STATUS_BLOCK *autogunStatusPointer;    
-                            autogunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(candidate->SBdataptr);    
+                            AUTOGUN_STATUS_BLOCK *autogunStatusPointer;
+                            autogunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(candidate->SBdataptr);
                             LOCALASSERT(autogunStatusPointer);
-							
+
 							if (autogunStatusPointer->behaviourState==I_inactive) {
 	                            return(0);
 							} else {
@@ -5171,22 +5171,22 @@ STRATEGYBLOCK *Predator_GetNewTarget(STRATEGYBLOCK *sbPtr) {
         int a;
         STRATEGYBLOCK *candidate;
         MODULE *dmod;
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         int dist;
         VECTORCH offset;
 
         LOCALASSERT(sbPtr);
         predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
-        LOCALASSERT(predatorStatusPointer);                             
-        
+        LOCALASSERT(predatorStatusPointer);
+
         dmod=ModuleFromPosition(&sbPtr->DynPtr->Position,playerPherModule);
-        
+
         LOCALASSERT(dmod);
-        
+
         nearest=NULL;
         neardist=ONE_FIXED;
         newblip=0;
-        
+
         for (a=0; a<NumActiveStBlocks; a++) {
                 candidate=ActiveStBlockList[a];
                 if (candidate!=sbPtr) {
@@ -5197,17 +5197,17 @@ STRATEGYBLOCK *Predator_GetNewTarget(STRATEGYBLOCK *sbPtr) {
                                 offset.vx=sbPtr->DynPtr->Position.vx-candidate->DynPtr->Position.vx;
                                 offset.vy=sbPtr->DynPtr->Position.vy-candidate->DynPtr->Position.vy;
                                 offset.vz=sbPtr->DynPtr->Position.vz-candidate->DynPtr->Position.vz;
-                        
+
                                 WtoL=sbPtr->DynPtr->OrientMat;
                                 TransposeMatrixCH(&WtoL);
                                 RotateVector(&offset,&WtoL);
 
                                 if (offset.vz<=0) {
-                                        
+
                                         if (Predator_TargetFilter(candidate)) {
-                                        
+
                                                 dist=Approximate3dMagnitude(&offset);
-                                        
+
                                                 if (dist<neardist) {
                                                         /* Check visibility? */
                                                         if (candidate->SBdptr) {
@@ -5216,14 +5216,14 @@ STRATEGYBLOCK *Predator_GetNewTarget(STRATEGYBLOCK *sbPtr) {
                                                                         if ((PredatorCanSeeObject(sbPtr,candidate))) {
                                                                                 nearest=candidate;
                                                                                 neardist=dist;
-                                                                        }       
+                                                                        }
                                                                 }
                                                         } else {
                                                                 if (!NPC_IsDead(candidate)) {
                                                                         if ((IsModuleVisibleFromModule(dmod,candidate->containingModule))) {
                                                                                 nearest=candidate;
                                                                                 neardist=dist;
-                                                                        }       
+                                                                        }
                                                                 }
                                                         }
                                                 }
@@ -5235,14 +5235,14 @@ STRATEGYBLOCK *Predator_GetNewTarget(STRATEGYBLOCK *sbPtr) {
 
         return(nearest);
         #endif
-        
+
 }
 
 int DoPredatorLaserTargeting(STRATEGYBLOCK *sbPtr) {
 
         int i,hits;
         MATRIXCH matrix;
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         SECTION_DATA *plasma_muzzle;
         VECTORCH offset[3] =
         {
@@ -5256,7 +5256,7 @@ int DoPredatorLaserTargeting(STRATEGYBLOCK *sbPtr) {
 
         LOCALASSERT(sbPtr);
         predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
-        LOCALASSERT(predatorStatusPointer);                             
+        LOCALASSERT(predatorStatusPointer);
 
         predatorStatusPointer->Pred_Laser_On=0;
         /* Reset it at the end! */
@@ -5265,7 +5265,7 @@ int DoPredatorLaserTargeting(STRATEGYBLOCK *sbPtr) {
         if (plasma_muzzle==NULL) {
                 return(0);
         }
-        
+
         matrix = plasma_muzzle->SecMat;
 
         z_vec.vx=matrix.mat31;
@@ -5279,10 +5279,10 @@ int DoPredatorLaserTargeting(STRATEGYBLOCK *sbPtr) {
 
         i=2;
         hits=0;
-                        
+
         do {
                 VECTORCH position = offset[i];
-        
+
                 RotateVector(&position,&matrix);
                 position.vx += plasma_muzzle->World_Offset.vx;
                 position.vy += plasma_muzzle->World_Offset.vy;
@@ -5301,7 +5301,7 @@ int DoPredatorLaserTargeting(STRATEGYBLOCK *sbPtr) {
                 } else {
                         laserhits[i]=NULL;
                 }
-                
+
                 if (laserhits[i]) {
                         hits++;
                 }
@@ -5309,7 +5309,7 @@ int DoPredatorLaserTargeting(STRATEGYBLOCK *sbPtr) {
 
         /* Now, what have we hit? */
 
-        consensus=NULL; 
+        consensus=NULL;
 
         switch (hits) {
                 case 0:
@@ -5350,7 +5350,7 @@ int DoPredatorLaserTargeting(STRATEGYBLOCK *sbPtr) {
         }
 
         predatorStatusPointer->Pred_Laser_On=1;
-        
+
         if (predatorStatusPointer->Target==NULL) {
                 return(0);
         }
@@ -5365,16 +5365,16 @@ int DoPredatorLaserTargeting(STRATEGYBLOCK *sbPtr) {
 
 static PRED_RETURN_CONDITION Execute_PNS_EngageWithStaff(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         VECTORCH velocityDirection = {0,0,0};
         VECTORCH targetPosition;
         int targetIsAirduct = 0;
         int range;
 
-        /* Same as wristblade version. */       
+        /* Same as wristblade version. */
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         PredatorHandleMovingAnimation(sbPtr);
 
@@ -5383,7 +5383,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithStaff(STRATEGYBLOCK *sbPtr)
         if (predatorStatusPointer->patience<=0) {
                 return(PRC_Request_Swap);
         }
-                        
+
         /* now check for state changes... firstly, if we can no longer attack the target, go
         to wander */
         if(!(PredatorIsAwareOfTarget(sbPtr)))
@@ -5391,7 +5391,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithStaff(STRATEGYBLOCK *sbPtr)
                 return(PRC_Request_Hunt);
                 /* Drop out null targets. */
         } else {
-        
+
                 /* We have a target that we are aware of. */
 
                 range=VectorDistance((&predatorStatusPointer->Target->DynPtr->Position),(&sbPtr->DynPtr->Position));
@@ -5403,15 +5403,15 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithStaff(STRATEGYBLOCK *sbPtr)
                 } else if (predatorStatusPointer->CloakStatus==PCLOAK_Off) {
                         PredatorCloakOn(predatorStatusPointer);
                 }
-                
+
                 /* if we are close... go directly to firing */
                 if(range < PRED_STAFF_ATTACK_RANGE)
-                {       
+                {
                         /* switch directly to firing, at this distance */
-                
+
                         return(PRC_Request_Attack);
                 }
-                
+
                 /* if our state timer has run out in approach state, see if we can fire*/
                 if(predatorStatusPointer->stateTimer > 0) {
                         predatorStatusPointer->stateTimer -= NormalFrameTime;
@@ -5423,8 +5423,8 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithStaff(STRATEGYBLOCK *sbPtr)
                         /* Might want to withdraw. */
                         if(!PredatorCanSeeTarget(sbPtr))
                         {
-                                /* Lost sight of him! */                
-                
+                                /* Lost sight of him! */
+
                                 return(PRC_Request_Hunt);
                         }
                         else
@@ -5438,7 +5438,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithStaff(STRATEGYBLOCK *sbPtr)
 
         /* See which way we want to go. */
         {
-        
+
                 AIMODULE *targetModule;
                 MODULE *tcm;
                 FARENTRYPOINT *thisEp = (FARENTRYPOINT *)0;
@@ -5451,7 +5451,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithStaff(STRATEGYBLOCK *sbPtr)
                         tcm=ModuleFromPosition(&predatorStatusPointer->Target->DynPtr->Position,sbPtr->containingModule);
                 }
 
-                if (tcm) {              
+                if (tcm) {
                         targetModule=GetNextModuleForLink(sbPtr->containingModule->m_aimodule,tcm->m_aimodule,7,0);
                 } else {
                         targetModule=NULL;
@@ -5459,7 +5459,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithStaff(STRATEGYBLOCK *sbPtr)
 
                 if (targetModule==sbPtr->containingModule->m_aimodule) {
                         /* Try going for it, we still can't see them. */
-                        NPCGetMovementTarget(sbPtr, predatorStatusPointer->Target, &targetPosition, &targetIsAirduct,0);
+                        NPCGetMovementTarget(sbPtr, predatorStatusPointer->Target, &targetPosition, &targetIsAirduct);
                         NPCGetMovementDirection(sbPtr, &velocityDirection, &targetPosition,&predatorStatusPointer->waypointManager);
                 } else if (!targetModule) {
                         /* Must be inaccessible. */
@@ -5489,11 +5489,11 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithStaff(STRATEGYBLOCK *sbPtr)
 
                         NPCGetMovementDirection(sbPtr, &velocityDirection, &(predatorStatusPointer->wanderData.worldPosition),&predatorStatusPointer->waypointManager);
                 }
-                                
+
         }
 
         /* Should have a velocity set now. */
-        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);    
+        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);
 
         /* test here for impeding collisions, and not being able to reach target... */
         if (New_NPC_IsObstructed(sbPtr,&predatorStatusPointer->avoidanceManager))
@@ -5509,12 +5509,12 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithStaff(STRATEGYBLOCK *sbPtr)
 {
         VECTORCH orientationDirn;
         int i;
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         DYNAMICSBLOCK *dynPtr;
-        
+
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
         LOCALASSERT (sbPtr->DynPtr);
 
         /* zero linear velocity in dynamics block */
@@ -5546,7 +5546,7 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithStaff(STRATEGYBLOCK *sbPtr)
                         /* Quite like the staff. */
                         return(PRC_Request_Swap);
                 } else {
-                        /* switch back to engage. */            
+                        /* switch back to engage. */
                         GLOBALASSERT(predatorStatusPointer->Target);
                         NPCGetTargetPosition(&(predatorStatusPointer->weaponTarget),predatorStatusPointer->Target);
                         return(PRC_Request_Engage);
@@ -5561,7 +5561,7 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithStaff(STRATEGYBLOCK *sbPtr)
         orientationDirn.vx+=(predatorStatusPointer->Target->DynPtr->OrientMat.mat11>>8);
         orientationDirn.vz+=(predatorStatusPointer->Target->DynPtr->OrientMat.mat13>>8);
         i = NPCOrientateToVector(sbPtr, &orientationDirn,NPC_TURNRATE,NULL);
-        
+
         /* Decrement the near state timer */
         predatorStatusPointer->stateTimer -= NormalFrameTime;
 
@@ -5575,7 +5575,7 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithStaff(STRATEGYBLOCK *sbPtr)
                 tip1=GetThisSectionData(predatorStatusPointer->HModelController.section_data,"staff a blade");
                 mid=GetThisSectionData(predatorStatusPointer->HModelController.section_data,"staff center");
                 tip2=GetThisSectionData(predatorStatusPointer->HModelController.section_data,"staff b blade");
-        
+
                 GLOBALASSERT(tip1);
                 GLOBALASSERT(mid);
                 GLOBALASSERT(tip2);
@@ -5599,22 +5599,22 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackWithStaff(STRATEGYBLOCK *sbPtr)
 
 static PRED_RETURN_CONDITION Execute_PFS_Pathfinder(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         AIMODULE *targetModule = 0;
         int nextModuleIndex;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-    LOCALASSERT(predatorStatusPointer);                         
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+    LOCALASSERT(predatorStatusPointer);
 
         /* Okay, so you're a LocalGuard or Pathfinder who's gotten lost. */
 
         /* Decrement the Far state timer */
-        predatorStatusPointer->stateTimer -= NormalFrameTime;   
-        /* check if far state timer has timed-out. If so, it is time 
+        predatorStatusPointer->stateTimer -= NormalFrameTime;
+        /* check if far state timer has timed-out. If so, it is time
         to do something. Otherwise just return. */
         if(predatorStatusPointer->stateTimer > 0) return(PRC_No_Change);
-                        
+
         /* check for state changes */
         if(PredatorIsAwareOfTarget(sbPtr))
         /* Hack! */
@@ -5640,7 +5640,7 @@ static PRED_RETURN_CONDITION Execute_PFS_Pathfinder(STRATEGYBLOCK *sbPtr)
                 /* Oh, to heck with this.  Try to wander. */
                 return(PRC_Request_Wander);
         }
-        
+
         /* Right, so there is a somewhere to get to. */
 
         if (targetModule!=sbPtr->containingModule->m_aimodule) {
@@ -5648,7 +5648,7 @@ static PRED_RETURN_CONDITION Execute_PFS_Pathfinder(STRATEGYBLOCK *sbPtr)
                 predatorStatusPointer->missionmodule=targetModule;
                 return(PRC_Request_Return);
         }
-        
+
         /* Okay, so now we need to know where to go now. */
 
         nextModuleIndex=GetNextModuleInPath(predatorStatusPointer->stepnumber,predatorStatusPointer->path);
@@ -5660,8 +5660,8 @@ static PRED_RETURN_CONDITION Execute_PFS_Pathfinder(STRATEGYBLOCK *sbPtr)
         predatorStatusPointer->stepnumber=nextModuleIndex;
 
         /* Examine target, and decide what to do */
-        GLOBALASSERT(AIModuleIsPhysical(targetModule));         
-        ProcessFarPredatorTargetAIModule(sbPtr, targetModule);  
+        GLOBALASSERT(AIModuleIsPhysical(targetModule));
+        ProcessFarPredatorTargetAIModule(sbPtr, targetModule);
         /* reset timer */
         predatorStatusPointer->stateTimer = PRED_FAR_MOVE_TIME;
         return(PRC_No_Change);
@@ -5669,17 +5669,17 @@ static PRED_RETURN_CONDITION Execute_PFS_Pathfinder(STRATEGYBLOCK *sbPtr)
 
 static PRED_RETURN_CONDITION Execute_PNS_Pathfinder(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         DYNAMICSBLOCK *dynPtr;
         AIMODULE *targetModule;
         VECTORCH velocityDirection = {0,0,0};
-        
+
         LOCALASSERT(sbPtr);
-        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
         dynPtr = sbPtr->DynPtr;
         LOCALASSERT(predatorStatusPointer);
         LOCALASSERT(dynPtr);
-        
+
         PredatorHandleMovingAnimation(sbPtr);
 
         /* should we change to approach state? */
@@ -5706,24 +5706,24 @@ static PRED_RETURN_CONDITION Execute_PNS_Pathfinder(STRATEGYBLOCK *sbPtr)
                         /* Get OUT! */
                         return(PRC_Request_Wander);
                 }
-        
+
                 targetModule = TranslatePathIndex(predatorStatusPointer->stepnumber,predatorStatusPointer->path);
-        
+
                 if (targetModule==NULL) {
                         /* Oh, to heck with this.  Try to wander. */
                         return(PRC_Request_Wander);
                 }
-                
+
                 /* Right, so there is a somewhere to get to. */
-        
+
                 if (targetModule!=sbPtr->containingModule->m_aimodule) {
                         /* But we're nowhere near it.  Geeze... */
                         predatorStatusPointer->missionmodule=targetModule;
                         return(PRC_Request_Return);
                 }
-                
+
                 /* Okay, so now we need to know where to go now. */
-        
+
                 nextModuleIndex=GetNextModuleInPath(predatorStatusPointer->stepnumber,predatorStatusPointer->path);
                 GLOBALASSERT(nextModuleIndex>=0);
                 /* If that fires, it's Richard's fault. */
@@ -5731,26 +5731,26 @@ static PRED_RETURN_CONDITION Execute_PNS_Pathfinder(STRATEGYBLOCK *sbPtr)
                 GLOBALASSERT(targetModule);
                 /* Ditto. */
                 predatorStatusPointer->stepnumber=nextModuleIndex;
-                
+
                 thisEp = GetAIModuleEP(targetModule, sbPtr->containingModule->m_aimodule);
                 if(thisEp) {
-                        /* aha. an ep!... */ 
+                        /* aha. an ep!... */
                         VECTORCH thisEpWorld = thisEp->position;
 
                         thisEpWorld.vx += targetModule->m_world.vx;
                         thisEpWorld.vy += targetModule->m_world.vy;
-                        thisEpWorld.vz += targetModule->m_world.vz;                     
-                        
+                        thisEpWorld.vz += targetModule->m_world.vz;
+
                         predatorStatusPointer->wanderData.currentModule = sbPtr->containingModule->m_aimodule->m_index;
                         predatorStatusPointer->wanderData.worldPosition = thisEpWorld;
-                
+
                 } else {
                         /* Failure case. */
                         predatorStatusPointer->wanderData.currentModule=NPC_NOWANDERMODULE;
                 }
 
         }
-        
+
         /* if we still haven't got one, wander for a bit. */
         if(predatorStatusPointer->wanderData.currentModule==NPC_NOWANDERMODULE)
         {
@@ -5762,10 +5762,10 @@ static PRED_RETURN_CONDITION Execute_PNS_Pathfinder(STRATEGYBLOCK *sbPtr)
                 /* STILL broken!  Okay, just... wander forever, then. */
                 return(PRC_Request_Wander);
         }
-                
+
         /* ok: should have a current target at this stage... */
         NPCGetMovementDirection(sbPtr, &velocityDirection, &(predatorStatusPointer->wanderData.worldPosition),&predatorStatusPointer->waypointManager);
-        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);    
+        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);
 
         /* test here for impeding collisions, and not being able to reach target... */
         #if ALL_NEW_AVOIDANCE_PRED
@@ -5795,7 +5795,7 @@ static PRED_RETURN_CONDITION Execute_PNS_Pathfinder(STRATEGYBLOCK *sbPtr)
         {
                 /* go to avoidance */
                 /* no sequence change required */
-                
+
                 predatorStatusPointer->obstruction.environment=1;
                 predatorStatusPointer->obstruction.destructableObject=0;
                 predatorStatusPointer->obstruction.otherCharacter=0;
@@ -5809,19 +5809,19 @@ static PRED_RETURN_CONDITION Execute_PNS_Pathfinder(STRATEGYBLOCK *sbPtr)
 
 static PRED_RETURN_CONDITION Execute_PFS_Return(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         AIMODULE *targetModule = 0;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-    LOCALASSERT(predatorStatusPointer);                         
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+    LOCALASSERT(predatorStatusPointer);
 
         /* Decrement the Far state timer */
-        predatorStatusPointer->stateTimer -= NormalFrameTime;   
-        /* check if far state timer has timed-out. If so, it is time 
+        predatorStatusPointer->stateTimer -= NormalFrameTime;
+        /* check if far state timer has timed-out. If so, it is time
         to do something. Otherwise just return. */
         if(predatorStatusPointer->stateTimer > 0) return(SRC_No_Change);
-                        
+
         /* check for state changes */
         if(PredatorIsAwareOfTarget(sbPtr))
         /* Hack! */
@@ -5835,35 +5835,35 @@ static PRED_RETURN_CONDITION Execute_PFS_Return(STRATEGYBLOCK *sbPtr)
         }
 
         /* get the target module... */
-        
+
         targetModule = GetNextModuleForLink(sbPtr->containingModule->m_aimodule,predatorStatusPointer->missionmodule,7,0);
 
         /* If there is no target module, we're way out there.  Better wander a bit more. */
         if(!targetModule)
         {
-                targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr,NULL,0);
+                targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr, NULL);
         }
         /* Examine target, and decide what to do */
-        GLOBALASSERT(AIModuleIsPhysical(targetModule));         
-        ProcessFarPredatorTargetAIModule(sbPtr, targetModule);  
+        GLOBALASSERT(AIModuleIsPhysical(targetModule));
+        ProcessFarPredatorTargetAIModule(sbPtr, targetModule);
         /* reset timer */
-        predatorStatusPointer->stateTimer = PRED_FAR_MOVE_TIME;                                 
+        predatorStatusPointer->stateTimer = PRED_FAR_MOVE_TIME;
         return(PRC_No_Change);
 }
 
 static PRED_RETURN_CONDITION Execute_PNS_Return(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         DYNAMICSBLOCK *dynPtr;
         AIMODULE *targetModule;
         VECTORCH velocityDirection = {0,0,0};
-        
+
         LOCALASSERT(sbPtr);
-        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+        predatorStatusPointer=(PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
         dynPtr = sbPtr->DynPtr;
         LOCALASSERT(predatorStatusPointer);
         LOCALASSERT(dynPtr);
-        
+
         PredatorHandleMovingAnimation(sbPtr);
 
         /* should we change to approach state? */
@@ -5879,7 +5879,7 @@ static PRED_RETURN_CONDITION Execute_PNS_Return(STRATEGYBLOCK *sbPtr)
         if (sbPtr->containingModule->m_aimodule==predatorStatusPointer->missionmodule) {
                 return(PRC_Request_Pathfind);
         }
-        
+
         /* Target module aquisition. */
 
         LOCALASSERT(sbPtr->containingModule);
@@ -5892,20 +5892,20 @@ static PRED_RETURN_CONDITION Execute_PNS_Return(STRATEGYBLOCK *sbPtr)
                 ||(predatorStatusPointer->wanderData.currentModule!=sbPtr->containingModule->m_aimodule->m_index)) {
 
                 targetModule = GetNextModuleForLink(sbPtr->containingModule->m_aimodule,predatorStatusPointer->missionmodule,7,0);
-        
+
                 if (targetModule) {
                         FARENTRYPOINT *thisEp = GetAIModuleEP(targetModule, sbPtr->containingModule->m_aimodule);
                         if(thisEp) {
-                                /* aha. an ep!... */ 
+                                /* aha. an ep!... */
                                 VECTORCH thisEpWorld = thisEp->position;
 
                                 thisEpWorld.vx += targetModule->m_world.vx;
                                 thisEpWorld.vy += targetModule->m_world.vy;
-                                thisEpWorld.vz += targetModule->m_world.vz;                     
-                                
+                                thisEpWorld.vz += targetModule->m_world.vz;
+
                                 predatorStatusPointer->wanderData.currentModule = sbPtr->containingModule->m_aimodule->m_index;
                                 predatorStatusPointer->wanderData.worldPosition = thisEpWorld;
-                        
+
                         } else {
                                 /* Failure case. */
                                 predatorStatusPointer->wanderData.currentModule=NPC_NOWANDERMODULE;
@@ -5916,7 +5916,7 @@ static PRED_RETURN_CONDITION Execute_PNS_Return(STRATEGYBLOCK *sbPtr)
                         predatorStatusPointer->wanderData.currentModule=NPC_NOWANDERMODULE;
                 }
         }
-        
+
         /* if we still haven't got one, bimble about in this one for a bit. */
         if(predatorStatusPointer->wanderData.currentModule==NPC_NOWANDERMODULE)
         {
@@ -5928,10 +5928,10 @@ static PRED_RETURN_CONDITION Execute_PNS_Return(STRATEGYBLOCK *sbPtr)
                 /* STILL broken!  Okay, just... wander, then. */
                 return(PRC_Request_Wander);
         }
-                
+
         /* ok: should have a current target at this stage... */
         NPCGetMovementDirection(sbPtr, &velocityDirection, &(predatorStatusPointer->wanderData.worldPosition),&predatorStatusPointer->waypointManager);
-        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);    
+        NPCSetVelocity(sbPtr, &velocityDirection, predatorStatusPointer->nearSpeed);
 
         /* test here for impeding collisions, and not being able to reach target... */
         #if ALL_NEW_AVOIDANCE_PRED
@@ -5961,7 +5961,7 @@ static PRED_RETURN_CONDITION Execute_PNS_Return(STRATEGYBLOCK *sbPtr)
         {
                 /* go to avoidance */
                 /* no sequence change required */
-                
+
                 predatorStatusPointer->obstruction.environment=1;
                 predatorStatusPointer->obstruction.destructableObject=0;
                 predatorStatusPointer->obstruction.otherCharacter=0;
@@ -5975,12 +5975,12 @@ static PRED_RETURN_CONDITION Execute_PNS_Return(STRATEGYBLOCK *sbPtr)
 
 static PRED_RETURN_CONDITION Execute_PNS_Recover(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         NPC_DATA *NpcData;
-        
+
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         /* zero linear velocity in dynamics block */
         LOCALASSERT(sbPtr->DynPtr);
@@ -6001,15 +6001,15 @@ static PRED_RETURN_CONDITION Execute_PNS_Recover(STRATEGYBLOCK *sbPtr) {
                 int health_increment;
 
                 health_increment=DIV_FIXED((NpcData->StartingStats.Health*NormalFrameTime),PRED_REGEN_TIME);
-                sbPtr->SBDamageBlock.Health+=health_increment;  
-                
+                sbPtr->SBDamageBlock.Health+=health_increment;
+
                 if (sbPtr->SBDamageBlock.Health>(NpcData->StartingStats.Health<<ONE_FIXED_SHIFT)) {
                         sbPtr->SBDamageBlock.Health=(NpcData->StartingStats.Health<<ONE_FIXED_SHIFT);
                 }
 
                 HModel_Regen(&predatorStatusPointer->HModelController,PRED_REGEN_TIME);
         }
-        
+
         /* Are we fully healed? */
         if (sbPtr->SBDamageBlock.Health==(NpcData->StartingStats.Health<<ONE_FIXED_SHIFT)) {
                 return(PRC_Request_Swap);
@@ -6020,7 +6020,7 @@ static PRED_RETURN_CONDITION Execute_PNS_Recover(STRATEGYBLOCK *sbPtr) {
         }
 
         /* Sequence should be set? */
-        
+
         return(PRC_No_Change);
 
 }
@@ -6028,10 +6028,10 @@ static PRED_RETURN_CONDITION Execute_PNS_Recover(STRATEGYBLOCK *sbPtr) {
 static PRED_RETURN_CONDITION Execute_PNS_Taunting(STRATEGYBLOCK *sbPtr)
 {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
     LOCALASSERT(predatorStatusPointer);
 
         /* zero linear velocity in dynamics block */
@@ -6065,13 +6065,13 @@ static PRED_RETURN_CONDITION Execute_PNS_Taunting(STRATEGYBLOCK *sbPtr)
 
 static PRED_RETURN_CONDITION Execute_PNS_DischargeSpeargun(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         VECTORCH orientationDirn,relPos,relPos2;
         int correctlyOrientated,range;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         /* zero linear velocity in dynamics block */
         LOCALASSERT(sbPtr->DynPtr);
@@ -6097,7 +6097,7 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargeSpeargun(STRATEGYBLOCK *sbPtr)
                 predatorStatusPointer->weaponTarget.vz-=MUL_FIXED(sbPtr->DynPtr->OrientMat.mat23,
                         300);
         }
-        
+
         /* orientate to firing point first */
         if (predatorStatusPointer->My_Elevation_Section) {
                 /* Assume range large w.r.t. half shoulder width... */
@@ -6121,9 +6121,9 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargeSpeargun(STRATEGYBLOCK *sbPtr)
         if (predatorStatusPointer->HModelController.Tweening!=Controller_NoTweening) {
                 return(PRC_No_Change);
         }
-        
+
         if (predatorStatusPointer->stateTimer==predatorStatusPointer->Selected_Weapon->FiringRate) {
-                
+
                 predatorStatusPointer->HModelController.Playing=0;
 
                 /* Only terminate if you haven't fired yet... */
@@ -6132,10 +6132,10 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargeSpeargun(STRATEGYBLOCK *sbPtr)
                         #if 1
                         /* ... and remove the gunflash */
                         #endif
-        
+
                         return(PRC_Request_Engage);
                 }
-        
+
                 /* we are not correctly orientated to the target: this could happen because we have
                 just entered this state, or the target has moved during firing*/
                 if((!correctlyOrientated)||(predatorStatusPointer->CloakStatus!=PCLOAK_Off))
@@ -6145,7 +6145,7 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargeSpeargun(STRATEGYBLOCK *sbPtr)
                         #endif
                         return(PRC_No_Change);
                 }
-                
+
                 /* If you are correctly oriented, you can now fire! */
 
                 predatorStatusPointer->HModelController.Playing=1;
@@ -6154,20 +6154,20 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargeSpeargun(STRATEGYBLOCK *sbPtr)
                 relPos.vx=(predatorStatusPointer->Target->DynPtr->Position.vx)-(sbPtr->DynPtr->Position.vx);
                 relPos.vy=(predatorStatusPointer->Target->DynPtr->Position.vy)-(sbPtr->DynPtr->Position.vy);
                 relPos.vz=(predatorStatusPointer->Target->DynPtr->Position.vz)-(sbPtr->DynPtr->Position.vz);
-                          
+
                 relPos2.vx=(predatorStatusPointer->Target->DynPtr->Position.vx)-(predatorStatusPointer->Target->DynPtr->PrevPosition.vx);
                 relPos2.vy=(predatorStatusPointer->Target->DynPtr->Position.vy)-(predatorStatusPointer->Target->DynPtr->PrevPosition.vy);
                 relPos2.vz=(predatorStatusPointer->Target->DynPtr->Position.vz)-(predatorStatusPointer->Target->DynPtr->PrevPosition.vz);
-                
+
                 range=VectorDistance((&predatorStatusPointer->Target->DynPtr->Position),(&sbPtr->DynPtr->Position));
-        
+
                 #if 1
                 /* look after the gun flash */
                 #endif
-                
+
                 /* look after the sound */
                 Sound_Play(SID_PRED_LASER,"d",&(sbPtr->DynPtr->Position));
-        
+
                 /* Now fire a spear... */
 
                 {
@@ -6179,7 +6179,7 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargeSpeargun(STRATEGYBLOCK *sbPtr)
                         shotVector.vx=muzzle->SecMat.mat31;
                         shotVector.vy=muzzle->SecMat.mat32;
                         shotVector.vz=muzzle->SecMat.mat33;
-                        
+
                         FindPolygonInLineOfSight(&shotVector,&muzzle->World_Offset,0,sbPtr->SBdptr);
 
                         /* Now deal with LOS_ObjectHitPtr. */
@@ -6200,7 +6200,7 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargeSpeargun(STRATEGYBLOCK *sbPtr)
                 if (predatorStatusPointer->volleySize>0) { /* Was 3 for pistol. */
                         predatorStatusPointer->enableSwap=1;
                 }
-        }       
+        }
 
         predatorStatusPointer->stateTimer -= NormalFrameTime;
 
@@ -6209,11 +6209,11 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargeSpeargun(STRATEGYBLOCK *sbPtr)
         if(predatorStatusPointer->stateTimer > 0)       {
                 return(PRC_No_Change);
         }
-        
+
         if(range < predatorStatusPointer->Selected_Weapon->MinRange)
         {
-                /* renew firing, as we are still too close to approach */ 
-                predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;                                 
+                /* renew firing, as we are still too close to approach */
+                predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;
                 predatorStatusPointer->volleySize = 0;
                 return(PRC_No_Change);
         }
@@ -6223,14 +6223,14 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargeSpeargun(STRATEGYBLOCK *sbPtr)
                 /* we are far enough away, so return to approach? */
 
                 NpcData=GetThisNpcData(I_NPC_Predator);
-                
+
                 if ((sbPtr->SBDamageBlock.Health<(NpcData->StartingStats.Health<<(ONE_FIXED_SHIFT-1)))
                         &&(sbPtr->SBDamageBlock.Health>0)) {
                         /* 50% health? */
                         if (General_GetAIModuleForRetreat(sbPtr,predatorStatusPointer->Target->containingModule->m_aimodule,5)) {
                                 return(PRC_Request_Withdraw);
                         } else {
-                                predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;                                 
+                                predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;
                                 return(PRC_No_Change);
                         }
                 }
@@ -6244,7 +6244,7 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargeSpeargun(STRATEGYBLOCK *sbPtr)
                         }
                 } else {
                         /* And another! */
-                        predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;                                 
+                        predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;
                         return(PRC_No_Change);
                 }
         }
@@ -6253,13 +6253,13 @@ static PRED_RETURN_CONDITION Execute_PNS_DischargeSpeargun(STRATEGYBLOCK *sbPtr)
 
 static PRED_RETURN_CONDITION Execute_PNS_AttackBrutallyWithPlasmaCaster(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         VECTORCH orientationDirn,relPos,relPos2;
         int correctlyOrientated,range,onTarget;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         /* zero linear velocity in dynamics block */
         LOCALASSERT(sbPtr->DynPtr);
@@ -6283,7 +6283,7 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackBrutallyWithPlasmaCaster(STRATEGY
         /* Always turn to face... */
         GLOBALASSERT(predatorStatusPointer->Target);
         NPCGetTargetPosition(&(predatorStatusPointer->weaponTarget),predatorStatusPointer->Target);
-        
+
         /* orientate to firing point first */
         if (predatorStatusPointer->My_Elevation_Section) {
                 /* Assume range large w.r.t. half shoulder width... */
@@ -6315,7 +6315,7 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackBrutallyWithPlasmaCaster(STRATEGY
                 #if 1
                 /* ... and remove the gunflash */
                 #endif
-        
+
                 return(PRC_Request_Engage);
         }
 
@@ -6326,7 +6326,7 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackBrutallyWithPlasmaCaster(STRATEGY
         }
 
         /* State timed out - try to fire! */
-        
+
         /* we are not correctly orientated to the target: this could happen because we have
         just entered this state, or the target has moved during firing*/
         if (!correctlyOrientated)
@@ -6350,40 +6350,40 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackBrutallyWithPlasmaCaster(STRATEGY
         range=VectorDistance((&predatorStatusPointer->Target->DynPtr->Position),(&sbPtr->DynPtr->Position));
 
         if ((predatorStatusPointer->internalState==1)&&(predatorStatusPointer->stateTimer<=0)) {
-                if (onTarget) {         
+                if (onTarget) {
 
                         /* If you are correctly oriented, you can now fire! */
-                        
+
                         predatorStatusPointer->enableTaunt=0;
                         /* No taunting here, we're busy. */
-                
+
                         predatorStatusPointer->HModelController.Playing=1;
                         predatorStatusPointer->HModelController.Looped=0;
                         predatorStatusPointer->HModelController.sequence_timer=0;
                         predatorStatusPointer->internalState=2;
-                
+
                         relPos.vx=(predatorStatusPointer->Target->DynPtr->Position.vx)-(sbPtr->DynPtr->Position.vx);
                         relPos.vy=(predatorStatusPointer->Target->DynPtr->Position.vy)-(sbPtr->DynPtr->Position.vy);
                         relPos.vz=(predatorStatusPointer->Target->DynPtr->Position.vz)-(sbPtr->DynPtr->Position.vz);
-                                  
+
                         relPos2.vx=(predatorStatusPointer->Target->DynPtr->Position.vx)-(predatorStatusPointer->Target->DynPtr->PrevPosition.vx);
                         relPos2.vy=(predatorStatusPointer->Target->DynPtr->Position.vy)-(predatorStatusPointer->Target->DynPtr->PrevPosition.vy);
                         relPos2.vz=(predatorStatusPointer->Target->DynPtr->Position.vz)-(predatorStatusPointer->Target->DynPtr->PrevPosition.vz);
-                        
+
                         #if 1
                         /* look after the gun flash */
                         #endif
-                        
+
                         /* look after the sound */
                         Sound_Play(SID_PRED_LAUNCHER,"d",&(sbPtr->DynPtr->Position));
-                
+
                         /* Now fire a bolt. */
-                
+
                         {
                                 SECTION_DATA *muzzle;
-                
+
                                 muzzle=GetThisSectionData(predatorStatusPointer->HModelController.section_data,"dum flash");
-                                
+
                                 Pred_Weapon_Damage=TemplateAmmo[AMMO_PRED_ENERGY_BOLT].MaxDamage[AvP.Difficulty];
 
                                 Pred_Weapon_Damage.Impact               =MUL_FIXED(TemplateAmmo[AMMO_PRED_ENERGY_BOLT].MaxDamage[AvP.Difficulty].Impact         ,10000);
@@ -6417,7 +6417,7 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackBrutallyWithPlasmaCaster(STRATEGY
         if (predatorStatusPointer->internalState==2) {
 
                 /* After shot. */
-                
+
                 #if 0
                 if (!(HModelAnimation_IsFinished(&predatorStatusPointer->HModelController))) {
                         /* Still playing. */
@@ -6427,8 +6427,8 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackBrutallyWithPlasmaCaster(STRATEGY
 
                 if(range < predatorStatusPointer->Selected_Weapon->MinRange)
                 {
-                        /* renew firing, as we are still too close to approach */ 
-                        predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;                                 
+                        /* renew firing, as we are still too close to approach */
+                        predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;
                         predatorStatusPointer->volleySize = 0;
                         predatorStatusPointer->internalState=0;
                         return(PRC_No_Change);
@@ -6437,21 +6437,21 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackBrutallyWithPlasmaCaster(STRATEGY
                 {
                         NPC_DATA *NpcData;
                         /* we are far enough away, so return to approach? */
-        
+
                         NpcData=GetThisNpcData(I_NPC_Predator);
-                        
+
                         if ((sbPtr->SBDamageBlock.Health<(NpcData->StartingStats.Health<<(ONE_FIXED_SHIFT-1)))
                                 &&(sbPtr->SBDamageBlock.Health>0)) {
                                 /* 50% health? */
                                 if (General_GetAIModuleForRetreat(sbPtr,predatorStatusPointer->Target->containingModule->m_aimodule,5)) {
                                         return(PRC_Request_Withdraw);
                                 } else {
-                                        predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;                                 
+                                        predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;
                                         predatorStatusPointer->internalState=0;
                                         return(PRC_No_Change);
                                 }
                         }
-                
+
                         if (predatorStatusPointer->volleySize>=predatorStatusPointer->Selected_Weapon->VolleySize) {
                                 if (range<PRED_CLOSE_ATTACK_RANGE) {
                                         /* Change weapon?  No random chance... */
@@ -6474,20 +6474,20 @@ static PRED_RETURN_CONDITION Execute_PNS_AttackBrutallyWithPlasmaCaster(STRATEGY
                         }
                 }
 
-        }       
-        
+        }
+
         return(PRC_No_Change);
 }
 
 #if 0
 static PRED_RETURN_CONDITION Predator_ThreatAnalysis(STRATEGYBLOCK *sbPtr) {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
-        
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
+
         /* A bit of an experimental function. */
         if (predatorStatusPointer->Target==NULL) {
                 /* There ain't no threat! */
@@ -6508,20 +6508,20 @@ static PRED_RETURN_CONDITION Predator_ThreatAnalysis(STRATEGYBLOCK *sbPtr) {
         /* Now, what manner of threat do we face? */
 
         /* Frankly, this needs discussing before I do anything major. */
-        
+
         return(PRC_Request_Swap);
 
 }
 
 static PRED_RETURN_CONDITION Execute_PNS_NewDischargePistol(STRATEGYBLOCK *sbPtr)
 {
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
         VECTORCH orientationDirn,relPos,relPos2;
         int correctlyOrientated,range;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-        LOCALASSERT(predatorStatusPointer);                             
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
+        LOCALASSERT(predatorStatusPointer);
 
         /* zero linear velocity in dynamics block */
         LOCALASSERT(sbPtr->DynPtr);
@@ -6547,7 +6547,7 @@ static PRED_RETURN_CONDITION Execute_PNS_NewDischargePistol(STRATEGYBLOCK *sbPtr
                 predatorStatusPointer->weaponTarget.vz-=MUL_FIXED(sbPtr->DynPtr->OrientMat.mat13,
                         200);
         }
-        
+
         /* orientate to firing point first */
         if (predatorStatusPointer->My_Elevation_Section) {
                 /* Assume range large w.r.t. half shoulder width... */
@@ -6571,10 +6571,10 @@ static PRED_RETURN_CONDITION Execute_PNS_NewDischargePistol(STRATEGYBLOCK *sbPtr
         if (predatorStatusPointer->HModelController.Tweening!=Controller_NoTweening) {
                 return(PRC_No_Change);
         }
-        
-        //if (predatorStatusPointer->stateTimer==predatorStatusPointer->Selected_Weapon->FiringRate) 
+
+        //if (predatorStatusPointer->stateTimer==predatorStatusPointer->Selected_Weapon->FiringRate)
         {
-                
+
                 //predatorStatusPointer->HModelController.Playing=0;
 
                 /* Only terminate if you haven't fired yet... */
@@ -6583,10 +6583,10 @@ static PRED_RETURN_CONDITION Execute_PNS_NewDischargePistol(STRATEGYBLOCK *sbPtr
                         #if 1
                         /* ... and remove the gunflash */
                         #endif
-        
+
                         return(PRC_Request_Engage);
                 }
-        
+
                 /* we are not correctly orientated to the target: this could happen because we have
                 just entered this state, or the target has moved during firing*/
                 if((!correctlyOrientated)||(predatorStatusPointer->CloakStatus!=PCLOAK_Off))
@@ -6596,7 +6596,7 @@ static PRED_RETURN_CONDITION Execute_PNS_NewDischargePistol(STRATEGYBLOCK *sbPtr
                         #endif
                         return(PRC_No_Change);
                 }
-                
+
                 /* If you are correctly oriented, you can now fire! */
 
                 //predatorStatusPointer->HModelController.Playing=1;
@@ -6605,20 +6605,20 @@ static PRED_RETURN_CONDITION Execute_PNS_NewDischargePistol(STRATEGYBLOCK *sbPtr
                 relPos.vx=(predatorStatusPointer->Target->DynPtr->Position.vx)-(sbPtr->DynPtr->Position.vx);
                 relPos.vy=(predatorStatusPointer->Target->DynPtr->Position.vy)-(sbPtr->DynPtr->Position.vy);
                 relPos.vz=(predatorStatusPointer->Target->DynPtr->Position.vz)-(sbPtr->DynPtr->Position.vz);
-                          
+
                 relPos2.vx=(predatorStatusPointer->Target->DynPtr->Position.vx)-(predatorStatusPointer->Target->DynPtr->PrevPosition.vx);
                 relPos2.vy=(predatorStatusPointer->Target->DynPtr->Position.vy)-(predatorStatusPointer->Target->DynPtr->PrevPosition.vy);
                 relPos2.vz=(predatorStatusPointer->Target->DynPtr->Position.vz)-(predatorStatusPointer->Target->DynPtr->PrevPosition.vz);
-                
+
                 range=VectorDistance((&predatorStatusPointer->Target->DynPtr->Position),(&sbPtr->DynPtr->Position));
-        
+
                 #if 1
                 /* look after the gun flash */
                 #endif
-                
+
                 /* look after the sound */
                 Sound_Play(SID_PRED_PISTOL,"d",&(sbPtr->DynPtr->Position));
-        
+
                 /* Now fire a volley... */
 
                 {
@@ -6626,7 +6626,7 @@ static PRED_RETURN_CONDITION Execute_PNS_NewDischargePistol(STRATEGYBLOCK *sbPtr
                         VECTORCH null_vec;
 
                         muzzle=GetThisSectionData(predatorStatusPointer->HModelController.section_data,"dum flash");
-                        
+
                         null_vec.vx=0;
                         null_vec.vy=0;
                         null_vec.vz=0;
@@ -6640,7 +6640,7 @@ static PRED_RETURN_CONDITION Execute_PNS_NewDischargePistol(STRATEGYBLOCK *sbPtr
                 //if (predatorStatusPointer->volleySize>3) {
                 //      predatorStatusPointer->enableSwap=1;
                 //}
-        }       
+        }
 
         predatorStatusPointer->stateTimer -= NormalFrameTime;
 
@@ -6657,14 +6657,14 @@ static PRED_RETURN_CONDITION Execute_PNS_NewDischargePistol(STRATEGYBLOCK *sbPtr
         if(predatorStatusPointer->stateTimer > 0)       {
                 return(PRC_No_Change);
         }
-        
+
         /* Enable swap after a full burst. */
 //        predatorStatusPointer->enableSwap=1;
 
         #if 0
         {
-                /* renew firing, as we are still too close to approach */ 
-                predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;                                 
+                /* renew firing, as we are still too close to approach */
+                predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;
                 predatorStatusPointer->volleySize = 0;
                 return(PRC_No_Change);
         }
@@ -6674,14 +6674,14 @@ static PRED_RETURN_CONDITION Execute_PNS_NewDischargePistol(STRATEGYBLOCK *sbPtr
                 /* we are far enough away, so return to approach? */
 
                 NpcData=GetThisNpcData(I_NPC_Predator);
-                
+
                 if ((sbPtr->SBDamageBlock.Health<(NpcData->StartingStats.Health<<(ONE_FIXED_SHIFT-1)))
                         &&(sbPtr->SBDamageBlock.Health>0)) {
                         /* 50% health? */
                         if (General_GetAIModuleForRetreat(sbPtr,predatorStatusPointer->Target->containingModule->m_aimodule,5)) {
                                 return(PRC_Request_Withdraw);
                         } else {
-                                predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;                                 
+                                predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;
                                 return(PRC_No_Change);
                         }
                 }
@@ -6695,7 +6695,7 @@ static PRED_RETURN_CONDITION Execute_PNS_NewDischargePistol(STRATEGYBLOCK *sbPtr
                         }
                 } else {
                         /* And another! */
-                        predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;                                 
+                        predatorStatusPointer->stateTimer = predatorStatusPointer->Selected_Weapon->FiringRate;
                         return(PRC_No_Change);
                 }
         }
@@ -6707,10 +6707,10 @@ static PRED_RETURN_CONDITION Execute_PNS_NewDischargePistol(STRATEGYBLOCK *sbPtr
 static PRED_RETURN_CONDITION Execute_PNS_SelfDestruct(STRATEGYBLOCK *sbPtr)
 {
 
-        PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+        PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
         LOCALASSERT(sbPtr);
-        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+        predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
     LOCALASSERT(predatorStatusPointer);
 
         /* zero linear velocity in dynamics block */
@@ -6756,7 +6756,7 @@ static PRED_RETURN_CONDITION Execute_PNS_SelfDestruct(STRATEGYBLOCK *sbPtr)
 						#endif
                 }
         }
-                
+
         /* There's no escape from this other than death! */
         return(PRC_No_Change);
 
@@ -6783,7 +6783,7 @@ void StartPredatorSelfDestructExplosion(STRATEGYBLOCK *sbPtr) {
 	Sound_Play(SID_NICE_EXPLOSION,"d",&(Player->ObWorld));
 	MakeVolumetricExplosionAt(&Player->ObWorld,EXPLOSION_HUGE);
 	Player->ObStrategyBlock->SBDamageBlock.IsOnFire=1;
-	
+
 	//blow up everone
 	for (i=0; i<NumActiveStBlocks; i++)
 	{
@@ -6798,14 +6798,14 @@ void StartPredatorSelfDestructExplosion(STRATEGYBLOCK *sbPtr) {
 		   SbPtr->I_SBtype==I_BehaviourPredatorAlien ||
 		   SbPtr->I_SBtype==I_BehaviourAlien ||
 		   SbPtr->I_SBtype==I_BehaviourMarinePlayer ||
-		   SbPtr->I_SBtype==I_BehaviourPredatorPlayer || 
-		   SbPtr->I_SBtype==I_BehaviourAlienPlayer) 
+		   SbPtr->I_SBtype==I_BehaviourPredatorPlayer ||
+		   SbPtr->I_SBtype==I_BehaviourAlienPlayer)
 		{
 	 		{
 	 			//kill the creature/player
 	 			VECTORCH direction={0,-ONE_FIXED,0};
 	 			CauseDamageToObject(SbPtr,&certainDeath,ONE_FIXED,&direction);
-	 		
+
 			}
 		}
 	}
@@ -6817,10 +6817,10 @@ void DoPredatorHitSound(STRATEGYBLOCK *sbPtr) {
 	DYNAMICSBLOCK *dynPtr;
 	int rand = FastRandom();
 	int pitch = (rand & 255) - 128;
-	PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
- 
+	PREDATOR_STATUS_BLOCK *predatorStatusPointer;
+
 	GLOBALASSERT(sbPtr);
-	predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(predatorStatusPointer);
 	dynPtr = sbPtr->DynPtr;
 	LOCALASSERT(dynPtr);
@@ -6843,10 +6843,10 @@ void DoPredatorAcidSound(STRATEGYBLOCK *sbPtr) {
 	DYNAMICSBLOCK *dynPtr;
 	int rand = FastRandom();
 	int pitch = (rand & 255) - 128;
-	PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
- 
+	PREDATOR_STATUS_BLOCK *predatorStatusPointer;
+
 	GLOBALASSERT(sbPtr);
-	predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(predatorStatusPointer);
 	dynPtr = sbPtr->DynPtr;
 	LOCALASSERT(dynPtr);
@@ -6869,10 +6869,10 @@ void DoPredatorDeathSound(STRATEGYBLOCK *sbPtr) {
 	DYNAMICSBLOCK *dynPtr;
 	int rand = FastRandom();
 	int pitch = (rand & 255) - 128;
-	PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
- 
+	PREDATOR_STATUS_BLOCK *predatorStatusPointer;
+
 	GLOBALASSERT(sbPtr);
-	predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(predatorStatusPointer);
 	dynPtr = sbPtr->DynPtr;
 	LOCALASSERT(dynPtr);
@@ -6895,10 +6895,10 @@ void DoPredatorRandomSound(STRATEGYBLOCK *sbPtr) {
 	DYNAMICSBLOCK *dynPtr;
 	int rand = FastRandom();
 	int pitch = (rand & 255) - 128;
-	PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
- 
+	PREDATOR_STATUS_BLOCK *predatorStatusPointer;
+
 	GLOBALASSERT(sbPtr);
-	predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(predatorStatusPointer);
 	dynPtr = sbPtr->DynPtr;
 	LOCALASSERT(dynPtr);
@@ -6921,10 +6921,10 @@ void DoPredatorTauntSound(STRATEGYBLOCK *sbPtr) {
 	DYNAMICSBLOCK *dynPtr;
 	int rand = FastRandom();
 	int pitch = (rand & 255) - 128;
-	PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
- 
+	PREDATOR_STATUS_BLOCK *predatorStatusPointer;
+
 	GLOBALASSERT(sbPtr);
-	predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(predatorStatusPointer);
 	dynPtr = sbPtr->DynPtr;
 	LOCALASSERT(dynPtr);
@@ -6948,7 +6948,7 @@ void DoPredatorAISwipeSound(STRATEGYBLOCK *sbPtr) {
 	PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 
 	GLOBALASSERT(sbPtr);
-	predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(predatorStatusPointer);
 	dynPtr = sbPtr->DynPtr;
 	LOCALASSERT(dynPtr);
@@ -7034,7 +7034,7 @@ void LoadStrategy_Predator(SAVE_BLOCK_STRATEGY_HEADER* header)
 {
 	STRATEGYBLOCK* sbPtr;
 	PREDATOR_STATUS_BLOCK* predatorStatusPointer;
-	PREDATOR_SAVE_BLOCK* block = (PREDATOR_SAVE_BLOCK*) header; 
+	PREDATOR_SAVE_BLOCK* block = (PREDATOR_SAVE_BLOCK*) header;
 
 	//check the size of the save block
 	if(header->size!=sizeof(*block)) return;
@@ -7052,7 +7052,7 @@ void LoadStrategy_Predator(SAVE_BLOCK_STRATEGY_HEADER* header)
 	if(sbPtr->I_SBtype == I_BehaviourDormantPredator)
 	{
 		//best make it un-dormant then
-		ActivateDormantPredator(sbPtr);	
+		ActivateDormantPredator(sbPtr);
 	}
 	else if(sbPtr->I_SBtype != I_BehaviourPredator)
 	{
@@ -7060,10 +7060,10 @@ void LoadStrategy_Predator(SAVE_BLOCK_STRATEGY_HEADER* header)
 	}
 
 	predatorStatusPointer = (PREDATOR_STATUS_BLOCK*) sbPtr->SBdataptr;
-	
+
 
 	//start copying stuff
-	
+
 	COPYELEMENT_LOAD(health)
 	COPYELEMENT_LOAD(behaviourState)
 	COPYELEMENT_LOAD(lastState)
@@ -7104,7 +7104,7 @@ void LoadStrategy_Predator(SAVE_BLOCK_STRATEGY_HEADER* header)
 
 	//get the predator's attack from the attack code
 	predatorStatusPointer->current_attack = GetThisAttack_FromUniqueCode(block->currentAttackCode);
-	
+
 	//get marine's weapon
 	predatorStatusPointer->Selected_Weapon = GetThisNPCPredatorWeapon(block->weapon_id);
 
@@ -7137,12 +7137,12 @@ void SaveStrategy_Predator(STRATEGYBLOCK* sbPtr)
 	PREDATOR_SAVE_BLOCK *block;
 	PREDATOR_STATUS_BLOCK* predatorStatusPointer;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(PREDATOR_SAVE_BLOCK,block,sbPtr);
 	predatorStatusPointer = (PREDATOR_STATUS_BLOCK*) sbPtr->SBdataptr;
 
 
 	//start copying stuff
-	
+
 	COPYELEMENT_SAVE(health)
 	COPYELEMENT_SAVE(behaviourState)
 	COPYELEMENT_SAVE(lastState)
@@ -7189,17 +7189,17 @@ void SaveStrategy_Predator(STRATEGYBLOCK* sbPtr)
 	{
 		block->currentAttackCode = -1;
 	}
-	
+
 	//save predator's weapon
-	if(predatorStatusPointer->Selected_Weapon) 
+	if(predatorStatusPointer->Selected_Weapon)
 		block->weapon_id = predatorStatusPointer->Selected_Weapon->id;
-	else 
+	else
 		block->weapon_id = -1;
-	
+
 	//copy strategy block stuff
 	block->dynamics = *sbPtr->DynPtr;
 	block->dynamics.CollisionReportPtr=0;
-	
+
 	block->integrity = sbPtr->integrity;
 	block->SBDamageBlock = sbPtr->SBDamageBlock;
 

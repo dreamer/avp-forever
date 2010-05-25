@@ -432,7 +432,7 @@ void SaveStrategy_Grapple(STRATEGYBLOCK* sbPtr)
 {
 	GRAPPLE_SAVE_BLOCK* block;
 	
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(GRAPPLE_SAVE_BLOCK, block, sbPtr);
 
 	//copy stuff to the save block
 	COPYELEMENT_SAVE(IsEmbedded)

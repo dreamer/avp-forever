@@ -5389,7 +5389,7 @@ void Save_Particles()
 	if(!NumActiveParticles) return;
 
 	//get memory for header
-	GET_SAVE_BLOCK_POINTER(block);
+	GET_SAVE_BLOCK_POINTER(PARTICLE_SAVE_BLOCK_HEADER, block);
 
 	//fill in header
 	block->header.type = SaveBlock_Particles;
@@ -5461,7 +5461,7 @@ void Save_VolumetricExplosions()
 	if(!NumActiveExplosions) return;
 
 	//get memory for header
-	GET_SAVE_BLOCK_POINTER(block);
+	GET_SAVE_BLOCK_POINTER(EXPLOSION_SAVE_BLOCK_HEADER, block);
 
 	//fill in header
 	block->header.type = SaveBlock_VolumetricExplosions;
@@ -5527,7 +5527,7 @@ void Save_PheromoneTrails()
 	if(!NumActiveTrails) return;
 
 	//get memory for header
-	GET_SAVE_BLOCK_POINTER(block);
+	GET_SAVE_BLOCK_POINTER(PHEROMONE_SAVE_BLOCK_HEADER, block);
 
 	//fill in header
 	block->header.type = SaveBlock_PheromoneTrail;
@@ -5539,7 +5539,7 @@ void Save_PheromoneTrails()
 	//now save the trails
 	for(i=0;i<NumActiveTrails;i++)
 	{
-		PHEROMONE_TRAIL* trail = GET_SAVE_BLOCK_POINTER(trail);
+		PHEROMONE_TRAIL* trail = GET_SAVE_BLOCK_POINTER(PHEROMONE_TRAIL, trail);
 		*trail = TrailStorage[i];
 	}
 	

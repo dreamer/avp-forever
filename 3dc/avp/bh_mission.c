@@ -176,7 +176,7 @@ void SaveStrategy_Message(STRATEGYBLOCK* sbPtr)
 	
 	m_bhv = (MESSAGE_BEHAV_BLOCK *)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(MESSAGE_SAVE_BLOCK,block,sbPtr);
 
 	//start copying stuff
 	block->active = m_bhv->active;
@@ -229,7 +229,7 @@ void SaveStrategy_MissionComplete(STRATEGYBLOCK* sbPtr)
 	
 	m_bhv = (MISSION_COMPLETE_BEHAV_BLOCK *)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(MISSION_COMPLETE_SAVE_BLOCK,block,sbPtr);
 
 	//start copying stuff
 	block->state = GetMissionStateForSave(m_bhv->mission_objective_ptr);

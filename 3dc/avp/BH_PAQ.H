@@ -10,7 +10,7 @@ extern "C" {
 #endif
 
 #include "bh_pred.h"
- 
+
 /* Patrick 18/2/97 ------------------------------------------------
   Some enumerations
 -----------------------------------------------------------------*/
@@ -50,9 +50,9 @@ typedef struct paqStatusBlock
 	signed int health;
 	signed int nearSpeed;
 	signed int damageInflicted;
-	PAQ_FAR_BHSTATE FarBehaviourState;	
-	PAQ_NEAR_BHSTATE NearBehaviourState;	
-	int stateTimer;  		
+	PAQ_FAR_BHSTATE FarBehaviourState;
+	PAQ_NEAR_BHSTATE NearBehaviourState;
+	int stateTimer;
 	SHAPEANIMATIONCONTROLLER ShpAnimCtrl;
 	HMODELCONTROLLER HModelController;
 	NPC_MOVEMENTDATA moveData;
@@ -69,17 +69,17 @@ typedef struct tools_data_paq
 /* Patrick 18/2/97 ------------------------------------------------
   Some defines
 -----------------------------------------------------------------*/
-#define PRAL_STARTING_HEALTH			700 	 
-#define QUEEN_STARTING_HEALTH			1400 	   	
+#define PRAL_STARTING_HEALTH			700
+#define QUEEN_STARTING_HEALTH			1400
 #define NO_OF_FRAGMENTS_FROM_DEAD_PAQ	10
 #define PRAL_NEAR_SPEED					10000 	/* mm/s */
 #define QUEEN_NEAR_SPEED				12000 	/* mm/s */
 #define PRAL_NEAR_DAMAGE				20 		/* mm/s */
 #define QUEEN_NEAR_DAMAGE				40 		/* mm/s */
 #define PAQ_CLOSE_ATTACK_RANGE			1500 	/* mm */
-#define PAQ_NEAR_VIEW_WIDTH				500		/* mm */  	
+#define PAQ_NEAR_VIEW_WIDTH				500		/* mm */
 /* 1-1.5 seconds in 16ths of a second */
-#define PAQ_FAR_MOVE_TIME			((16+(FastRandom()&0x07))*(ONE_FIXED>>4))  	
+#define PAQ_FAR_MOVE_TIME			((16+(FastRandom()&0x07))*(ONE_FIXED>>4))
 #define PAQ_NEAR_CLOSEATTACK_TIME	(ONE_FIXED>>1)	/* 1/2 second */
 /* random time between 1 and 2 seconds,in fixed point,with granularity 1/8th second */
 #define PAQ_NEARWAITTIME			(ONE_FIXED+((FastRandom()&0x7)*(ONE_FIXED>>3)))
@@ -94,7 +94,7 @@ void PAQBehaviour(STRATEGYBLOCK *sbPtr);
 void MakePAQNear(STRATEGYBLOCK *sbPtr);
 void MakePAQFar(STRATEGYBLOCK *sbPtr);
 void PAQIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple);
-		
+
 
 #ifdef __cplusplus
 }

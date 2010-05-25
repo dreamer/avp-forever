@@ -11284,7 +11284,7 @@ void Save_WeaponsCGlobals()
 {
 	WEAPONS_C_SAVE_BLOCK* block;
 
-	GET_SAVE_BLOCK_POINTER(block);
+	GET_SAVE_BLOCK_POINTER(WEAPONS_C_SAVE_BLOCK, block);
 
 	//fill in the header
 	block->header.size = sizeof(*block);

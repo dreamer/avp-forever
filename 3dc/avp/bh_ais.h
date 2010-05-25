@@ -38,7 +38,7 @@ typedef struct npc_avoidancemanager {
 	VECTORCH incidentPoint;
 
 	VECTORCH aggregateNormal;
-	
+
 	int recommendedDistance;
 	int timer;
 	STRATEGYBLOCK *primaryCollision;
@@ -74,7 +74,7 @@ typedef struct npc_wanderdata
  	int currentModule;
 	VECTORCH worldPosition;
 }NPC_WANDERDATA;
-	
+
 #define NPC_AVOIDTIME				(ONE_FIXED<<1)
 #define NPC_GMD_NOPOLY				(-1)
 #define NPC_MIN_MOVEFROMPOLYDIST	(650)
@@ -156,7 +156,7 @@ typedef struct movement_data {
 
 extern int CheckAdjacencyValidity(AIMODULE *target,AIMODULE *source,int alien);
 extern int AIModuleIsVisible(AIMODULE *aimodule);
-	
+
 extern int NPC_IsDead(STRATEGYBLOCK *sbPtr);
 extern void NPC_InitMovementData(NPC_MOVEMENTDATA *moveData);
 extern void NPC_IsObstructed(STRATEGYBLOCK *sbPtr, NPC_MOVEMENTDATA *moveData, NPC_OBSTRUCTIONREPORT *details, STRATEGYBLOCK **destructableObject);
@@ -165,7 +165,7 @@ extern void NPCGetAvoidanceDirection(STRATEGYBLOCK *sbPtr, VECTORCH *velocityDir
 extern void NPCGetTargetPosition(VECTORCH *targetPoint,STRATEGYBLOCK *target);
 extern int NPCSetVelocity(STRATEGYBLOCK *sbPtr, VECTORCH* targetDirn, int in_speed);
 extern int NPCOrientateToVector(STRATEGYBLOCK *sbPtr, VECTORCH *zAxisVector, int turnspeed, VECTORCH *offset);
-extern void NPCGetMovementTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, VECTORCH *targetPosition, int* targetIsAirduct,int alien);
+extern void NPCGetMovementTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, VECTORCH *targetPosition, int* targetIsAirduct/*,int alien*/);
 extern void NPCGetMovementDirection(STRATEGYBLOCK *sbPtr, VECTORCH *velocityDirection, VECTORCH* target, WAYPOINT_MANAGER *waypointManager);
 extern void NPC_InitWanderData(NPC_WANDERDATA *wanderData);
 extern void NPC_FindWanderTarget(STRATEGYBLOCK *sbPtr, NPC_WANDERDATA *wanderData, NPC_MOVEMENTDATA *moveData);
@@ -212,13 +212,13 @@ extern AVOIDANCE_RETURN_CONDITION AllNewAvoidanceKernel(STRATEGYBLOCK *sbPtr,NPC
 extern const MOVEMENT_DATA *GetThisMovementData(MOVEMENT_DATA_INDEX index);
 extern void AlignVelocityToGravity(STRATEGYBLOCK *sbPtr,VECTORCH *velocity);
 
-extern int NPC_targetIsPlayer; 
+extern int NPC_targetIsPlayer;
 extern VECTORCH NPC_movementTarget;
 extern int *NPC_myPoly;
 extern int *NPC_myLastPoly;
 extern int *NPC_lastFrameModule;
 
-extern int Observer;	
+extern int Observer;
 
 typedef struct pathheader
 {

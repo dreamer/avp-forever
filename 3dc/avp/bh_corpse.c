@@ -1011,7 +1011,7 @@ void SaveStrategy_Corpse(STRATEGYBLOCK* sbPtr)
 	
 	corpseDataPtr = (NETCORPSEDATABLOCK*)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(CORPSE_SAVE_BLOCK, block, sbPtr);
 
 	//start copying stuff
 	

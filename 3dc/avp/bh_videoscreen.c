@@ -275,7 +275,7 @@ void SaveStrategy_VideoScreen(STRATEGYBLOCK* sbPtr)
 	
 	videoScreen = (VIDEO_SCREEN_BEHAV_BLOCK*)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(VIDEO_SCREEN_SAVE_BLOCK,block,sbPtr);
 
 	//start copying stuff
 	block->Indestructable = videoScreen->Indestructable;

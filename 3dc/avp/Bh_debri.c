@@ -60,7 +60,7 @@ extern MATRIXCH Identity_RotMat; /* From HModel.c */
 
 int NextAlienFragmentToProduce;
 
-static char *ShapeNameOfAlienFragment[] = 
+static char *ShapeNameOfAlienFragment[] =
 {
 	"AlFrga",
 	"AlFrgb",
@@ -93,7 +93,7 @@ DISPLAYBLOCK *MakeDebris(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
   // information and extent data
 
   mmbptr = &TempModuleMap;
-               
+
   switch (bhvr)
   {
   		/* KJL 12:45:30 03/20/97 - fragments
@@ -102,7 +102,7 @@ DISPLAYBLOCK *MakeDebris(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 		{
 			if( (NextAlienFragmentToProduce<0) || (NextAlienFragmentToProduce>=NO_OF_DIFFERENT_ALIEN_FRAGS))
 				NextAlienFragmentToProduce=0;
-			
+
 			/* cycle through the available body parts */
 			CreateShapeInstance(mmbptr,ShapeNameOfAlienFragment[NextAlienFragmentToProduce++]);
 
@@ -130,7 +130,7 @@ DISPLAYBLOCK *MakeDebris(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 			{
 				CreateShapeInstance(mmbptr,"Bodprt2");
 			}
-			else 
+			else
 			{
 				CreateShapeInstance(mmbptr,"Bodprt3");
 			}
@@ -143,9 +143,9 @@ DISPLAYBLOCK *MakeDebris(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
       // Don't call this function for undefined types
       GLOBALASSERT (1 == 0);
 			break;
-    }            
+    }
 	}
- 
+
   // And allocate the modulemapblock object
 
 	m_temp.m_numlights = 0;
@@ -153,7 +153,7 @@ DISPLAYBLOCK *MakeDebris(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
   m_temp.m_mapptr = mmbptr;
   m_temp.m_sbptr = (STRATEGYBLOCK*)NULL;
   m_temp.m_dptr = NULL;
-  AllocateModuleObject(&m_temp);    
+  AllocateModuleObject(&m_temp);
   dispPtr = m_temp.m_dptr;
 	if(dispPtr==NULL) return (DISPLAYBLOCK *)0; /* patrick: cannot create displayblock, so just return 0 */
 
@@ -161,7 +161,7 @@ DISPLAYBLOCK *MakeDebris(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 	dispPtr->ObWorld = *positionPtr;
 
   sbPtr = AttachNewStratBlock((MODULE*)NULL, mmbptr, dispPtr);
-  
+
 	if (sbPtr == 0) return (DISPLAYBLOCK *)0; // Failed to allocate a strategy block
 
   // 2. NOW set up the strategyblock-specific fields for
@@ -175,30 +175,30 @@ DISPLAYBLOCK *MakeDebris(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 
   switch (bhvr)
   {
-		case I_BehaviourAlienFragment:		
+		case I_BehaviourAlienFragment:
 		{
 			DYNAMICSBLOCK *dynPtr;
 
 			sbPtr->SBdataptr = (SMOKEGEN_BEHAV_BLOCK *) AllocateMem(sizeof(SMOKEGEN_BEHAV_BLOCK));
-			if (sbPtr->SBdataptr == 0) 
-			{	
+			if (sbPtr->SBdataptr == 0)
+			{
 				// Failed to allocate a strategy block data pointer
 				RemoveBehaviourStrategy(sbPtr);
 				return (DISPLAYBLOCK*)NULL;
 			}
-			
+
 			((SMOKEGEN_BEHAV_BLOCK * ) sbPtr->SBdataptr)->counter = ALIEN_DYINGTIME;
 			((SMOKEGEN_BEHAV_BLOCK * ) sbPtr->SBdataptr)->smokes=0;
 
 			dynPtr = sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_ALIEN_DEBRIS);
-			
+
 			if (dynPtr == 0)
 			{
 				// Failed to allocate a dynamics block
 				RemoveBehaviourStrategy(sbPtr);
 				return (DISPLAYBLOCK*)NULL;
 			}
-		
+
 			dynPtr->Position = *positionPtr;
 
 			// Give explosion fragments an angular velocity
@@ -228,8 +228,8 @@ DISPLAYBLOCK *MakeDebris(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 			DYNAMICSBLOCK *dynPtr;
 
 			sbPtr->SBdataptr = (ONE_SHOT_BEHAV_BLOCK *) AllocateMem(sizeof(ONE_SHOT_BEHAV_BLOCK ));
-			if (sbPtr->SBdataptr == 0) 
-			{	
+			if (sbPtr->SBdataptr == 0)
+			{
 				// Failed to allocate a strategy block data pointer
 				RemoveBehaviourStrategy(sbPtr);
 				return(DISPLAYBLOCK*)NULL;
@@ -279,9 +279,9 @@ DISPLAYBLOCK *MakeDebris(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 		}
     }
 
-                    
+
     return dispPtr;
-	
+
 }
 
 
@@ -289,15 +289,15 @@ DISPLAYBLOCK *MakeDebris(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 void CreateShapeInstance(MODULEMAPBLOCK *mmbptr, char *shapeNamePtr)
 {
 	int shapenum;
-	shapenum = GetLoadedShapeMSL(shapeNamePtr);					
+	shapenum = GetLoadedShapeMSL(shapeNamePtr);
 	#if debug
 	if (shapenum<=0)
 	{
-		textprint("Unable to display shape:%s\n",shapeNamePtr);
+//		textprint("Unable to display shape:%s\n",shapeNamePtr);
 		LOCALASSERT(0);
 	}
 	#endif
-			
+
     mmbptr->MapShape = shapenum;
 	mmbptr->MapType = MapType_Default;
 }
@@ -313,19 +313,19 @@ void OneShotBehaveFun(STRATEGYBLOCK *sptr)
     // frame. It simply decrements the counter of the specified
     // temporary object, and destroys it if that counter hits
     // zero
-    
 
-    ONE_SHOT_BEHAV_BLOCK *osbhv;    
+
+    ONE_SHOT_BEHAV_BLOCK *osbhv;
     GLOBALASSERT(sptr);
-    osbhv = (ONE_SHOT_BEHAV_BLOCK * ) sptr->SBdataptr;    
+    osbhv = (ONE_SHOT_BEHAV_BLOCK * ) sptr->SBdataptr;
     GLOBALASSERT(sptr->SBdptr);
 
     if (osbhv->counter < 0)
-    {            
+    {
     	DestroyAnyStrategyBlock(sptr);
-		return;            
+		return;
 	}
-    
+
 	{
 		DISPLAYBLOCK *dispPtr = sptr->SBdptr;
 		/* do we have a displayblock? */
@@ -361,22 +361,22 @@ void OneShot_Anim_BehaveFun(STRATEGYBLOCK *sptr)
     // frame. It simply decrements the counter of the specified
     // temporary object, and destroys it if that counter hits
     // zero
-    
 
-    ONESHOT_ANIM_BEHAV_BLOCK *osbhv;    
+
+    ONESHOT_ANIM_BEHAV_BLOCK *osbhv;
     DISPLAYBLOCK* dptr;
 
     GLOBALASSERT(sptr);
     GLOBALASSERT(sptr->SBdptr);
 
-    osbhv = (ONESHOT_ANIM_BEHAV_BLOCK * ) sptr->SBdataptr;    
-		
+    osbhv = (ONESHOT_ANIM_BEHAV_BLOCK * ) sptr->SBdataptr;
+
     if (osbhv->counter < 0)
-    {            
+    {
     	DestroyAnyStrategyBlock(sptr);
-		return;            
+		return;
 	}
-    
+
     osbhv->counter -= NormalFrameTime;
 
 	{
@@ -396,7 +396,7 @@ void OneShot_Anim_BehaveFun(STRATEGYBLOCK *sptr)
 	if(dptr)
 	{
 		if(!dptr->ObTxAnimCtrlBlks)
-		{ 
+		{
 			dptr->ObTxAnimCtrlBlks = osbhv->tac_os;
 		}
 	}
@@ -406,7 +406,7 @@ void OneShot_Anim_BehaveFun(STRATEGYBLOCK *sptr)
 
 void SetupSimpleAnimation(int counter, STRATEGYBLOCK *sbPtr)
 {
-	TXACTRLBLK **pptxactrlblk;		
+	TXACTRLBLK **pptxactrlblk;
 	int item_num;
 	SHAPEHEADER* shptr;
 	ONESHOT_ANIM_BEHAV_BLOCK* osab;
@@ -414,7 +414,7 @@ void SetupSimpleAnimation(int counter, STRATEGYBLOCK *sbPtr)
 	int shape_num;
 
 	sbPtr->SBdataptr = (ONESHOT_ANIM_BEHAV_BLOCK *) AllocateMem(sizeof(ONESHOT_ANIM_BEHAV_BLOCK ));
-	
+
 	if (sbPtr->SBdataptr == 0) return;	// Failed to allocate an sb data ptr
 
 	osab =	((ONESHOT_ANIM_BEHAV_BLOCK * ) sbPtr->SBdataptr);
@@ -426,8 +426,8 @@ void SetupSimpleAnimation(int counter, STRATEGYBLOCK *sbPtr)
 	pptxactrlblk = &osab->tac_os;
 
 	/*
-	the bhdata is a ptr to the SHAPEHEADER each 
-	animating polygon has an array of sequences, in 
+	the bhdata is a ptr to the SHAPEHEADER each
+	animating polygon has an array of sequences, in
 	this case thers is only onr sequence per array
 	*/
 
@@ -435,27 +435,27 @@ void SetupSimpleAnimation(int counter, STRATEGYBLOCK *sbPtr)
 	{
 		POLYHEADER *poly =  (POLYHEADER*)(shptr->items[item_num]);
 		LOCALASSERT(poly);
-			
+
 		if((Request_PolyFlags((void *)poly)) & iflag_txanim)
 		{
 			TXACTRLBLK *pnew_txactrlblk;
 
 			pnew_txactrlblk = AllocateMem(sizeof(TXACTRLBLK));
-			
-			if (pnew_txactrlblk) 
+
+			if (pnew_txactrlblk)
 			{
 				// We have allocated the new tx anim control block so initialise it
 
-				pnew_txactrlblk->tac_flags = 0;										
-				pnew_txactrlblk->tac_item = item_num;										
-				pnew_txactrlblk->tac_sequence = 0;										
-				pnew_txactrlblk->tac_node = 0;										
-				pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);										
+				pnew_txactrlblk->tac_flags = 0;
+				pnew_txactrlblk->tac_item = item_num;
+				pnew_txactrlblk->tac_sequence = 0;
+				pnew_txactrlblk->tac_node = 0;
+				pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);
 				pnew_txactrlblk->tac_txah_s = GetTxAnimHeaderFromShape(pnew_txactrlblk, shape_num);
-			
+
 				pnew_txactrlblk->tac_txah.txa_currentframe = 0;
 				pnew_txactrlblk->tac_txah.txa_flags = txa_flag_play|txa_flag_noloop;
-		
+
 				/* change the value held in pptxactrlblk
 				 which point to the previous structures "next"
 			 	pointer*/
@@ -466,7 +466,7 @@ void SetupSimpleAnimation(int counter, STRATEGYBLOCK *sbPtr)
 	 	}
 	}
 	dispPtr->ObTxAnimCtrlBlks = osab->tac_os;
-														  
+
 	*pptxactrlblk=0;
 }
 
@@ -475,23 +475,23 @@ void AlienFragFun(STRATEGYBLOCK *sptr)
 	int a;
 	DYNAMICSBLOCK *dynptr;
 	COLLISIONREPORT *reportptr;
-    SMOKEGEN_BEHAV_BLOCK *sgbhv;    
+    SMOKEGEN_BEHAV_BLOCK *sgbhv;
     GLOBALASSERT(sptr);
-    sgbhv = (SMOKEGEN_BEHAV_BLOCK * ) sptr->SBdataptr;    
+    sgbhv = (SMOKEGEN_BEHAV_BLOCK * ) sptr->SBdataptr;
     GLOBALASSERT(sptr->SBdptr);
 
 	dynptr=sptr->DynPtr;
-	
+
 	GLOBALASSERT(dynptr);
 
 	reportptr=dynptr->CollisionReportPtr;
 
 	if (sgbhv->counter < 0)
-	{            
+	{
 		DestroyAnyStrategyBlock(sptr);
-		return;            
+		return;
 	}
-    
+
 	{
 		DISPLAYBLOCK *dispPtr = sptr->SBdptr;
 		/* do we have a displayblock? */
@@ -516,7 +516,7 @@ void AlienFragFun(STRATEGYBLOCK *sptr)
 				sptr->I_SBtype=I_BehaviourSmokeGenerator;
 			}
 			#endif
-		}	
+		}
 		else if (reportptr->ObstacleSBPtr->SBdptr==Player)
 		{
 
@@ -538,7 +538,7 @@ void AlienFragFun(STRATEGYBLOCK *sptr)
 			}
 		}
 	}
-	
+
 }
 
 void SmokeGeneratorBehaviour(STRATEGYBLOCK *sptr) {
@@ -548,12 +548,12 @@ void SmokeGeneratorBehaviour(STRATEGYBLOCK *sptr) {
     // frame. It simply decrements the counter of the specified
     // temporary object, and destroys it if that counter hits
     // zero
-    
+
 	DYNAMICSBLOCK *dynptr;
 	COLLISIONREPORT *reportptr;
-    SMOKEGEN_BEHAV_BLOCK *sgbhv;    
+    SMOKEGEN_BEHAV_BLOCK *sgbhv;
     GLOBALASSERT(sptr);
-    sgbhv = (SMOKEGEN_BEHAV_BLOCK * ) sptr->SBdataptr;    
+    sgbhv = (SMOKEGEN_BEHAV_BLOCK * ) sptr->SBdataptr;
     GLOBALASSERT(sptr->SBdptr);
 
 	dynptr=sptr->DynPtr;
@@ -562,14 +562,14 @@ void SmokeGeneratorBehaviour(STRATEGYBLOCK *sptr) {
 	if (sgbhv->counter < 0) sgbhv->counter=ONE_FIXED<<2;
 
 	if (sgbhv->counter > (ONE_FIXED<<1))
-	{            
+	{
 		DestroyAnyStrategyBlock(sptr);
-		return;            
+		return;
 	}
-    
+
 	sgbhv->counter += NormalFrameTime;
 
-	if ((sgbhv->counter>>15)>sgbhv->smokes) 
+	if ((sgbhv->counter>>15)>sgbhv->smokes)
 	{
 		{
 			VECTORCH velocity={0,0,0};
@@ -601,15 +601,15 @@ int generate_random_between (int first, int second)
 	int diff = second - first;
 	int absdiff;
 	int rand_no;
-	
+
 	if (diff == 0)
 	{
 		return(first);
 	}
-	
+
 	absdiff = abs (diff);
 	rand_no = FastRandom () % absdiff;
-	
+
 	if (diff < 0)
 	{
 		return (second + rand_no);
@@ -618,7 +618,7 @@ int generate_random_between (int first, int second)
 	{
 		return (first + rand_no);
 	}
-	
+
 }
 
 void MakeFragments (STRATEGYBLOCK * sbptr)
@@ -640,7 +640,7 @@ void MakeFragments (STRATEGYBLOCK * sbptr)
 	if( (NumActiveBlocks > maxobjects-5)
 			|| (NumActiveStBlocks > maxstblocks-5))
 		return;
-	
+
 	if (!sbptr)
 		return;
 
@@ -651,11 +651,11 @@ void MakeFragments (STRATEGYBLOCK * sbptr)
 		return;
 
 	memset(&m_temp,0,sizeof(MODULE));
-	
+
 	posPtr = &(sbptr->DynPtr->Position);
 
 	mmbptr = &TempModuleMap;
-	
+
 	mslpos = sbptr->shapeIndex;
 
 	if (mslpos < 0)
@@ -665,7 +665,7 @@ void MakeFragments (STRATEGYBLOCK * sbptr)
 
 	if(!fragdesc || !fragdesc->sh_fragsound)
 	{
-  		Sound_Play(SID_EXPLOSION,"d",posPtr);  
+  		Sound_Play(SID_EXPLOSION,"d",posPtr);
 	}
 	else
 	{
@@ -680,7 +680,7 @@ void MakeFragments (STRATEGYBLOCK * sbptr)
 			s3d.velocity.vy = 0;
 			s3d.velocity.vz = 0;
 			Sound_Play ((SOUNDINDEX)fragsound->sound_loaded->sound_num, "nvp", &s3d,fragsound->max_volume,fragsound->pitch);
-  			//Sound_Play((SOUNDINDEX)fragsound->sound_loaded->sound_num,"d",posPtr);  
+  			//Sound_Play((SOUNDINDEX)fragsound->sound_loaded->sound_num,"d",posPtr);
 		}
 	}
 
@@ -707,7 +707,7 @@ void MakeFragments (STRATEGYBLOCK * sbptr)
 			m_temp.m_mapptr = mmbptr;
 			m_temp.m_sbptr = (STRATEGYBLOCK*)NULL;
 			m_temp.m_dptr = NULL;
-			AllocateModuleObject(&m_temp); 
+			AllocateModuleObject(&m_temp);
 			if(m_temp.m_dptr==NULL) return; /* patrick: cannot create displayblock, so just return (?) */
 
 			dispPtr = m_temp.m_dptr;
@@ -717,7 +717,7 @@ void MakeFragments (STRATEGYBLOCK * sbptr)
 			offset.vx = frags->x_offset;
 			offset.vy = frags->y_offset;
 			offset.vz = frags->z_offset;
-			
+
 			if (offset.vx == 0 && offset.vy == 0 && offset.vz == 0)
 			{
 				// place the fragment randomly within the bounding box of the parent
@@ -726,29 +726,29 @@ void MakeFragments (STRATEGYBLOCK * sbptr)
 
 				offset.vy = generate_random_between (mainshapelist[mslpos]->shapemaxy,
 						mainshapelist[mslpos]->shapeminy);
-				
+
 				offset.vz = generate_random_between (mainshapelist[mslpos]->shapemaxz,
 						mainshapelist[mslpos]->shapeminz);
 			}
 
 			sbPtr = AttachNewStratBlock((MODULE*)NULL, mmbptr, dispPtr);
 	    if (sbPtr == 0) return; // Failed to allocate a strategy block
-	    
+
 	    sbPtr->I_SBtype = I_BehaviourFragment;
 
 			sbPtr->SBdataptr = (ONE_SHOT_BEHAV_BLOCK *) AllocateMem(sizeof(ONE_SHOT_BEHAV_BLOCK ));
 
-			if (sbPtr->SBdataptr == 0) 
-			{	
+			if (sbPtr->SBdataptr == 0)
+			{
 				// Failed to allocate a strategy block data pointer
 				RemoveBehaviourStrategy(sbPtr);
 				return;
 			}
-			
+
 			((ONE_SHOT_BEHAV_BLOCK * ) sbPtr->SBdataptr)->counter = ((FastRandom()&32768)<<2) + 65535;
 
 			dynPtr = sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_DEBRIS);
-	
+
 			if (dynPtr == 0)
 			{
 				// Failed to allocate a dynamics block
@@ -757,8 +757,8 @@ void MakeFragments (STRATEGYBLOCK * sbptr)
 			}
 
 			RotateVector (&offset, &(sbptr->DynPtr->OrientMat));
-			
-			
+
+
 			if (sbptr->containingModule)
 			{
 
@@ -785,37 +785,37 @@ void MakeFragments (STRATEGYBLOCK * sbptr)
 				diff.vz = 0;
 			}
 
-			
+
 			{
 				/*give fragment an impulse roughly in the direction of its offset*/
 				VECTORCH impulse=offset;
-				
+
 				if(impulse.vx || impulse.vy || impulse.vz)
 				{
 					Normalise(&impulse);
-									
+
 			 		impulse.vx/=generate_random_between(5,10);
 			  //	impulse.vy/=generate_random_between(5,10);
 			 		impulse.vz/=generate_random_between(5,10);
 				}
 			   	dynPtr->LinImpulse=impulse;
 			}
-			
+
 			diff.vx = (diff.vx>>4);
 			diff.vy = (diff.vy>>4);
 			diff.vz = (diff.vz>>4);
-			
-			
+
+
 			offset.vx += posPtr->vx;
 			offset.vy += posPtr->vy;
 			offset.vz += posPtr->vz;
-			
+
 			dispPtr->ObWorld = offset;
 			dispPtr->ObMat = sbptr->DynPtr->OrientMat;
 			dispPtr->ObEuler = sbptr->DynPtr->OrientEuler;
 
 			dynPtr->Position = offset;
-			
+
 			dynPtr->OrientMat = sbptr->DynPtr->OrientMat;
 			dynPtr->PrevOrientMat = sbptr->DynPtr->PrevOrientMat;
 
@@ -826,23 +826,23 @@ void MakeFragments (STRATEGYBLOCK * sbptr)
 				dynPtr->AngVelocity.EulerX = (((FastRandom()&2047)-1023))<<2;
 				dynPtr->AngVelocity.EulerY = (((FastRandom()&2047)-1023))<<2;
 				dynPtr->AngVelocity.EulerZ = (((FastRandom()&2047)-1023))<<2;
-		
+
 				dynPtr->LinImpulse.vy = - (FastRandom()&1023)<<2;
 
 				/* Look to see if object has only one polygon in it;
 				   if so it's probably a glass fragment, so don't bother
 				   giving it collisions */
 				if (dispPtr->ObShape)
-				{	
+				{
 					SHAPEHEADER *shapePtr = GetShapeData(dispPtr->ObShape);
-					
+
 					if (shapePtr)
 					{
 						if (shapePtr->numitems!=1)
 						{
 							dynPtr->DynamicsType = DYN_TYPE_NRBB_COLLISIONS;
 						}
-					}	
+					}
 				}
 			}
 		}
@@ -868,7 +868,7 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 		return NULL;
 	if(positionPtr->vz>1000000 || positionPtr->vz<-1000000)
 		return NULL;
-	
+
 	if( (NumActiveBlocks > maxobjects-5) || (NumActiveStBlocks > maxstblocks-5)) return NULL;
 
 	/* Right away, try to intercept all molotov cocktails! */
@@ -911,7 +911,7 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 	// information and extent data
 
 	mmbptr = &TempModuleMap;
-               
+
 	/* Doesn't really matter what shape gets generated... */
 	//CreateShapeInstance(mmbptr,root->sempai->ShapeName);
 	CreateShapeInstance(mmbptr,"Shell");
@@ -925,7 +925,7 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 	m_temp.m_mapptr = mmbptr;
 	m_temp.m_sbptr = (STRATEGYBLOCK*)NULL;
 	m_temp.m_dptr = NULL;
-	AllocateModuleObject(&m_temp);    
+	AllocateModuleObject(&m_temp);
 	dispPtr = m_temp.m_dptr;
 	if(dispPtr==NULL) return (DISPLAYBLOCK *)0; /* patrick: cannot create displayblock, so just return 0 */
 
@@ -933,7 +933,7 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 	dispPtr->ObWorld = *positionPtr;
 
 	sbPtr = AttachNewStratBlock((MODULE*)NULL, mmbptr, dispPtr);
-  
+
 	if (sbPtr == 0) return (DISPLAYBLOCK *)0; // Failed to allocate a strategy block
 
 	// 2. NOW set up the strategyblock-specific fields for
@@ -948,14 +948,14 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 	GLOBALASSERT(root);
 
 	{
-	
+
 		sbPtr->SBdataptr = (HDEBRIS_BEHAV_BLOCK *) AllocateMem(sizeof(HDEBRIS_BEHAV_BLOCK));
-		if (sbPtr->SBdataptr == 0) {	
+		if (sbPtr->SBdataptr == 0) {
 			// Failed to allocate a strategy block data pointer
 			RemoveBehaviourStrategy(sbPtr);
 			return (DISPLAYBLOCK*)NULL;
 		}
-			
+
 		((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->counter = HDEBRIS_LIFETIME;
 		((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->smokes=0;
 
@@ -971,9 +971,9 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 		} else {
 			((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->Android=0;
 		}
-				
+
 		woundflags=Splice_HModels(&(((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController),root);
-	
+
 
 		if (parent_sbPtr)
 		{
@@ -987,10 +987,10 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 			switch (parent_sbPtr->I_SBtype) {
 				case I_BehaviourAlien:
 					{
-						ALIEN_STATUS_BLOCK *alienStatusPointer;    
+						ALIEN_STATUS_BLOCK *alienStatusPointer;
 						/* See if we can strip to template. */
-						alienStatusPointer = (ALIEN_STATUS_BLOCK *)(parent_sbPtr->SBdataptr);    
-						LOCALASSERT(alienStatusPointer);	          		
+						alienStatusPointer = (ALIEN_STATUS_BLOCK *)(parent_sbPtr->SBdataptr);
+						LOCALASSERT(alienStatusPointer);
 						/* Just go to spasm. */
 						InitHModelTweening( &(((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController),(ONE_FIXED>>2),HMSQT_AlienStand,ASSS_Spasm,-1,1);
 						((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController.LockTopSection=1;
@@ -1008,10 +1008,10 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 					{
 						SECTION *template_root;
 						SECTION *template_sempai;
-						MARINE_STATUS_BLOCK *marineStatusPointer;    
+						MARINE_STATUS_BLOCK *marineStatusPointer;
 						/* See if we can strip to template. */
-						marineStatusPointer = (MARINE_STATUS_BLOCK *)(parent_sbPtr->SBdataptr);    
-						LOCALASSERT(marineStatusPointer);	          		
+						marineStatusPointer = (MARINE_STATUS_BLOCK *)(parent_sbPtr->SBdataptr);
+						LOCALASSERT(marineStatusPointer);
 						template_root=GetNamedHierarchyFromLibrary(marineStatusPointer->My_Weapon->Riffname,marineStatusPointer->My_Weapon->TemplateName);
 						/* Now, find the section that matches. */
 						template_sempai=Get_Corresponding_Section_Recursive(template_root,(((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController).Root_Section->Section_Name);
@@ -1029,13 +1029,13 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 							//((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController.ZeroRootRotation=1;
 							root->SecMat=*orientation;
 							MakeFleshRippingNoises(positionPtr);
-						} else {						
+						} else {
 							/* Forget it.  Must be a disembodied weapon, or something. */
 							InitHModelTweening( &(((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController),(ONE_FIXED<<1),0,1,ONE_FIXED,0);
 							((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController.LockTopSection=1;
 							((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController.ZeroRootDisplacement=1;
 							//((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController.ZeroRootRotation=1;
-							
+
 							//dispPtr->ObMat=*orientation;
 							/* Below is an alternative... */
 							root->SecMat=*orientation;
@@ -1048,13 +1048,13 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 							head=GetThisSectionData(((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController.section_data,"head");
 							if (head) {
 								if ((head->flags&section_data_notreal)==0) {
-							
+
 									tacb=head->tac_ptr;
-							
+
 									while (tacb) {
 										tacb->tac_sequence = 4;
 										tacb->tac_txah_s = GetTxAnimHeaderFromShape(tacb, head->ShapeNum);
-									
+
 										tacb=tacb->tac_next;
 									}
 								}
@@ -1068,10 +1068,10 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 					{
 						SECTION *template_root;
 						SECTION *template_sempai;
-						PREDATOR_STATUS_BLOCK *predatorStatusPointer;    
+						PREDATOR_STATUS_BLOCK *predatorStatusPointer;
 						/* See if we can strip to template. */
-						predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(parent_sbPtr->SBdataptr);    
-						LOCALASSERT(predatorStatusPointer);	          		
+						predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(parent_sbPtr->SBdataptr);
+						LOCALASSERT(predatorStatusPointer);
 						template_root=GetNamedHierarchyFromLibrary("hnpcpredator","Template");
 						/* Now, find the section that matches. */
 						template_sempai=Get_Corresponding_Section_Recursive(template_root,(((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController).Root_Section->Section_Name);
@@ -1087,7 +1087,7 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 							((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController.LockTopSection=1;
 							((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController.ZeroRootDisplacement=1;
 							root->SecMat=*orientation;
-						} else {						
+						} else {
 							/* Forget it.  Must be a disembodied weapon, or something. */
 							InitHModelTweening( &(((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController),(ONE_FIXED<<1),0,1,ONE_FIXED,0);
 							((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController.ZeroRootDisplacement=1;
@@ -1119,7 +1119,7 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 							template_root=corpseDataPtr->TemplateRoot;
 							/* Now, find the section that matches. */
 							template_sempai=Get_Corresponding_Section_Recursive(template_root,(((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController).Root_Section->Section_Name);
-							
+
 							if (template_sempai) {
 								MakeFleshRippingNoises(positionPtr);
 							}
@@ -1180,7 +1180,7 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 					((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController.ZeroRootDisplacement=1;
 					((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController.LockTopSection=1;
 					root->SecMat=*orientation;
-					
+
 					((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->Type = debrisDataPtr->Type;
 					((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->SubType = debrisDataPtr->SubType;
 					/* Inherit counter from parent debris. */
@@ -1275,7 +1275,7 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 		}
 
 		dispPtr->HModelControlBlock=&(((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->HModelController);
-		
+
 		dispPtr->ObWorld=*positionPtr;
 		//dispPtr->ObMat=*orientation;
 		dispPtr->ObMat=Identity_RotMat;
@@ -1285,13 +1285,13 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 		LOCALASSERT(dispPtr->ObWorld.vz<1000000 && dispPtr->ObWorld.vz>-1000000);
 
 		dynPtr = sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_ALIEN_DEBRIS);
-			
+
 		if (dynPtr == 0) {
 			// Failed to allocate a dynamics block
 			RemoveBehaviourStrategy(sbPtr);
 			return (DISPLAYBLOCK*)NULL;
 		}
-		
+
 		dynPtr->Position = *positionPtr;
 
 		dynPtr->OrientMat=*orientation;
@@ -1301,7 +1301,7 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 		dynPtr->LinVelocity.vx=0;
 		dynPtr->LinVelocity.vy=0;
 		dynPtr->LinVelocity.vz=0;
-		
+
 		dynPtr->Mass=50;
 
    		#if 1
@@ -1334,7 +1334,7 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 		dynPtr->LinImpulse.vy=0;
 		dynPtr->LinImpulse.vz=0;
 		#endif
-		
+
 		/* Set up default here for neatness. */
 		((HDEBRIS_BEHAV_BLOCK * ) sbPtr->SBdataptr)->Bounce_Sound=SID_NOSOUND;
 		/* Consider the bounce sound, by section name. */
@@ -1379,9 +1379,9 @@ DISPLAYBLOCK *MakeHierarchicalDebris(STRATEGYBLOCK *parent_sbPtr,SECTION_DATA *r
 	LOCALASSERT(dispPtr->ObWorld.vx<1000000 && dispPtr->ObWorld.vx>-1000000);
 	LOCALASSERT(dispPtr->ObWorld.vy<1000000 && dispPtr->ObWorld.vy>-1000000);
 	LOCALASSERT(dispPtr->ObWorld.vz<1000000 && dispPtr->ObWorld.vz>-1000000);
-                    
+
     return dispPtr;
-	
+
 }
 /* KJL 16:35:13 08/01/99 - make body ripping noises */
 void MakeFleshRippingNoises(VECTORCH *positionPtr)
@@ -1413,22 +1413,22 @@ void Pop_Section(STRATEGYBLOCK *sbPtr,SECTION_DATA *section_data, VECTORCH *blas
 		} else if (section_data->sempai->flags&section_sprays_sparks) {
 			blood_type=PARTICLE_SPARK;
 		} else {
-			blood_type=PARTICLE_NULL;	
+			blood_type=PARTICLE_NULL;
 		}
 	}
 	/* Right, should have a blood type set.  Now, trim off the extra bits... */
-	
+
 	if ((section_data->First_Child!=NULL)
 		&&( (section_data->flags&section_data_terminate_here)==0)) {
 
 		SECTION_DATA *child_ptr;
-	
+
 		child_ptr=section_data->First_Child;
-	
+
 		while (child_ptr!=NULL) {
 
 			LOCALASSERT(child_ptr->My_Parent==section_data);
-			/* Please work! */			
+			/* Please work! */
 			MakeHierarchicalDebris(sbPtr,child_ptr,&child_ptr->World_Offset,&child_ptr->SecMat,&temp_wounds,2);
 
 			(*wounds)|=temp_wounds;
@@ -1438,8 +1438,8 @@ void Pop_Section(STRATEGYBLOCK *sbPtr,SECTION_DATA *section_data, VECTORCH *blas
 
 	}
 	/* Okay.  Now, call the explosion of blood. */
-	
-	if ((section_data->sempai->Shape)&&(blood_type!=PARTICLE_NULL)) {	
+
+	if ((section_data->sempai->Shape)&&(blood_type!=PARTICLE_NULL)) {
 		if (SUPERGORE_MODE) {
 			MakeBloodExplosion(&section_data->World_Offset,section_data->sempai->Shape->shaperadius,
 				blastcentre,500,blood_type);
@@ -1450,7 +1450,7 @@ void Pop_Section(STRATEGYBLOCK *sbPtr,SECTION_DATA *section_data, VECTORCH *blas
 	}
 
 	/* Now trim off THIS bit, permanently. */
-	
+
 	(*wounds)|=section_data->sempai->flags&section_flags_wounding;
 
 	section_data->flags|=section_data_notreal;
@@ -1468,21 +1468,21 @@ void HierarchicalFragmentBehaviour(STRATEGYBLOCK *sptr)
 	int bounce=0;
 
     GLOBALASSERT(sptr);
-    hdbhv = (HDEBRIS_BEHAV_BLOCK * ) sptr->SBdataptr;    
+    hdbhv = (HDEBRIS_BEHAV_BLOCK * ) sptr->SBdataptr;
     GLOBALASSERT(sptr->SBdptr);
 
 	dynPtr=sptr->DynPtr;
-	
+
 	GLOBALASSERT(dynPtr);
 
 	reportptr=dynPtr->CollisionReportPtr;
 
 	if (hdbhv->counter < 0)
-	{            
+	{
 		DestroyAnyStrategyBlock(sptr);
-		return;            
+		return;
 	}
-    
+
 	{
 		DISPLAYBLOCK *dispPtr = sptr->SBdptr;
 		/* do we have a displayblock? */
@@ -1493,7 +1493,7 @@ void HierarchicalFragmentBehaviour(STRATEGYBLOCK *sptr)
 
 		}
 	}
-	
+
 	{
 		/* CDF 8/3/99 Added this on request... */
 		if (hdbhv->counter<(HDEBRIS_LIFETIME-HDEBRIS_BLEEDING_TIME)) {
@@ -1514,7 +1514,7 @@ void HierarchicalFragmentBehaviour(STRATEGYBLOCK *sptr)
 		if (SBIsEnvironment(reportptr->ObstacleSBPtr)) {
 			/* Hit environment. */
 			bounce=1;
-		}	
+		}
 		else if (reportptr->ObstacleSBPtr->SBdptr==Player)
 		{
 			/* Hurt the player on collision? */
@@ -1542,7 +1542,7 @@ void HierarchicalFragmentBehaviour(STRATEGYBLOCK *sptr)
 			dynPtr->AngVelocity.EulerZ=0;
 		}
 	}
-	
+
 }
 
 
@@ -1597,7 +1597,7 @@ void LoadStrategy_HierarchicalDebris(SAVE_BLOCK_STRATEGY_HEADER* header)
 		// information and extent data
 
 		mmbptr = &TempModuleMap;
-    	           
+
 		/* Doesn't really matter what shape gets generated... */
 		//CreateShapeInstance(mmbptr,root->sempai->ShapeName);
 		CreateShapeInstance(mmbptr,"Shell");
@@ -1610,7 +1610,7 @@ void LoadStrategy_HierarchicalDebris(SAVE_BLOCK_STRATEGY_HEADER* header)
 		m_temp.m_mapptr = mmbptr;
 		m_temp.m_sbptr = (STRATEGYBLOCK*)NULL;
 		m_temp.m_dptr = NULL;
-		AllocateModuleObject(&m_temp);    
+		AllocateModuleObject(&m_temp);
 		dispPtr = m_temp.m_dptr;
 		if(dispPtr==NULL) return ; /* patrick: cannot create displayblock, so just return 0 */
 
@@ -1628,9 +1628,9 @@ void LoadStrategy_HierarchicalDebris(SAVE_BLOCK_STRATEGY_HEADER* header)
 
 		memset(hdebrisStatusPointer,0,sizeof(*hdebrisStatusPointer));
 		dispPtr->HModelControlBlock=&hdebrisStatusPointer->HModelController;
-	
+
 	}
-	
+
 
 	//start copying stuff
 
@@ -1664,7 +1664,7 @@ void SaveStrategy_HierarchicalDebris(STRATEGYBLOCK* sbPtr)
 	HDEBRIS_BEHAV_BLOCK* hdebrisStatusPointer;
 	HIER_DEBRIS_SAVE_BLOCK* block;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(HIER_DEBRIS_SAVE_BLOCK,block,sbPtr);
 	hdebrisStatusPointer = (HDEBRIS_BEHAV_BLOCK*) sbPtr->SBdataptr;
 
 	//start copying stuff
@@ -1681,13 +1681,13 @@ void SaveStrategy_HierarchicalDebris(STRATEGYBLOCK* sbPtr)
 	//save strategy block stuff
 	block->dynamics = *sbPtr->DynPtr;
 	block->dynamics.CollisionReportPtr=0;
-	
+
 	block->integrity = sbPtr->integrity;
 	block->SBDamageBlock = sbPtr->SBDamageBlock;
 
 	//save the hierarchy
 	SaveHierarchy(&hdebrisStatusPointer->HModelController);
-		
+
 }
 
 
@@ -1700,7 +1700,7 @@ void SaveStrategy_HierarchicalDebris(STRATEGYBLOCK* sbPtr)
 typedef struct debris_save_block
 {
 	SAVE_BLOCK_STRATEGY_HEADER header;
-	
+
     int counter;
 
 	BOOL dynamicModuleObject;
@@ -1709,7 +1709,7 @@ typedef struct debris_save_block
 	int shapeNumPoints;
 	int shapeNumItems;
 	int shapeRadius;
-	
+
 
 //strategy block stuff
 	int integrity;
@@ -1725,54 +1725,54 @@ STRATEGYBLOCK*  MakeDebrisForLoad(int shapeIndex,int counter,BOOL dynamicModuleO
 	STRATEGYBLOCK *sbPtr;
 	MODULEMAPBLOCK *mmbptr;
 	MODULE m_temp;
-	
+
 	DYNAMICSBLOCK *dynPtr;
 
 	if( (NumActiveBlocks > maxobjects-5)
 			|| (NumActiveStBlocks > maxstblocks-5))
 		return NULL;
-	
+
 
 	memset(&m_temp,0,sizeof(MODULE));
-		  
+
 	mmbptr = &TempModuleMap;
-	
+
 
 	mmbptr->MapShape = shapeIndex;
 	mmbptr->MapType = MapType_Default;
 
-	
+
 	m_temp.m_numlights = 0;
 	m_temp.m_lightarray = NULL;
 	m_temp.m_mapptr = mmbptr;
 	m_temp.m_sbptr = (STRATEGYBLOCK*)NULL;
 	m_temp.m_dptr = NULL;
-	AllocateModuleObject(&m_temp); 
+	AllocateModuleObject(&m_temp);
 	if(m_temp.m_dptr==NULL) return NULL; /* patrick: cannot create displayblock, so just return (?) */
 
 	dispPtr = m_temp.m_dptr;
 
 	dispPtr->ObMyModule = NULL;     /* Module that created us */
-		
+
 
 	sbPtr = AttachNewStratBlock((MODULE*)NULL, mmbptr, dispPtr);
 	if (sbPtr == 0) return NULL; // Failed to allocate a strategy block
-	  
+
 	sbPtr->I_SBtype = I_BehaviourFragment;
 
 	sbPtr->SBdataptr = (ONE_SHOT_BEHAV_BLOCK *) AllocateMem(sizeof(ONE_SHOT_BEHAV_BLOCK ));
 
-	if (sbPtr->SBdataptr == 0) 
-	{	
+	if (sbPtr->SBdataptr == 0)
+	{
 		// Failed to allocate a strategy block data pointer
 		RemoveBehaviourStrategy(sbPtr);
 		return NULL;
 	}
-	
+
 	((ONE_SHOT_BEHAV_BLOCK * ) sbPtr->SBdataptr)->counter = counter;
 
 	dynPtr = sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_DEBRIS);
-	
+
 	if (dynPtr == 0)
 	{
 		// Failed to allocate a dynamics block
@@ -1814,7 +1814,7 @@ void LoadStrategy_Debris(SAVE_BLOCK_HEADER* header)
 	*sbPtr->DynPtr = block->dynamics;
 	sbPtr->integrity = block->integrity;
 	sbPtr->SBDamageBlock = block->SBDamageBlock;
-	
+
 
 }
 
@@ -1828,9 +1828,7 @@ void SaveStrategy_Debris(STRATEGYBLOCK* sbPtr)
 	if(!sbPtr->SBdptr->ObShapeData) return;
 	shp = sbPtr->SBdptr->ObShapeData;
 
-	
-
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(DEBRIS_SAVE_BLOCK, block, sbPtr);
 
 	block->counter = behav->counter;
 	block->shapeIndex = sbPtr->SBdptr->ObShape;
@@ -1844,7 +1842,7 @@ void SaveStrategy_Debris(STRATEGYBLOCK* sbPtr)
 //strategy block stuff
 	block->dynamics = *sbPtr->DynPtr;
 	block->dynamics.CollisionReportPtr=0;
-	
+
 	block->integrity = sbPtr->integrity;
 	block->SBDamageBlock = sbPtr->SBDamageBlock;
 

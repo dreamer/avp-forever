@@ -670,7 +670,7 @@ void Save_LightElements()
 	if(!NumActiveLightElements) return;
 
 	//get memory for header
-	GET_SAVE_BLOCK_POINTER(block);
+	GET_SAVE_BLOCK_POINTER(LIGHT_ELEMENT_SAVE_BLOCK_HEADER, block);
 
 	//fill in header
 	block->header.type = SaveBlock_LightElements;
@@ -682,7 +682,7 @@ void Save_LightElements()
 	//now save the light elements
 	for(i=0;i<NumActiveLightElements;i++)
 	{
-		LIGHTELEMENT* light = GET_SAVE_BLOCK_POINTER(light);
+		LIGHTELEMENT* light = GET_SAVE_BLOCK_POINTER(LIGHTELEMENT, light);
 		*light = LightElementStorage[i];	
 	}
 	

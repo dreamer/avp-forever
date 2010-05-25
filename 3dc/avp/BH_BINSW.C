@@ -32,7 +32,7 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 
  	GLOBALASSERT(sbptr);
 	bs_bhv = (BINARY_SWITCH_BEHAV_BLOCK*)AllocateMem(sizeof(BINARY_SWITCH_BEHAV_BLOCK));
-	if (!bs_bhv) 
+	if (!bs_bhv)
 	{
 		memoryInitialisationFailure = 1;
 		return ((void *)NULL);
@@ -52,27 +52,27 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	sbptr->shapeIndex = bs_tt->shape_num;
 	COPY_NAME(sbptr->SBname, bs_tt->nameID);
 
-	bs_bhv->bs_mode = bs_tt->mode;
+	bs_bhv->bs_mode = (BSWITCH_MODE)bs_tt->mode;
 	bs_bhv->time_for_reset = bs_tt->time_for_reset;
 	bs_bhv->security_clerance = bs_tt->security_clearance;
 
-	bs_bhv->trigger_volume_min=bs_tt->trigger_volume_min;	
-	bs_bhv->trigger_volume_max=bs_tt->trigger_volume_max;	
-	bs_bhv->switch_flags=bs_tt->switch_flags;	
+	bs_bhv->trigger_volume_min=bs_tt->trigger_volume_min;
+	bs_bhv->trigger_volume_max=bs_tt->trigger_volume_max;
+	bs_bhv->switch_flags=bs_tt->switch_flags;
 
 
 	bs_bhv->num_targets = bs_tt->num_targets;
 	if(bs_tt->num_targets)
 	{
 		bs_bhv->target_names = (SBNAMEBLOCK *)AllocateMem(sizeof(SBNAMEBLOCK) * bs_tt->num_targets);
-		if (!bs_bhv->target_names) 
+		if (!bs_bhv->target_names)
 		{
 			memoryInitialisationFailure = 1;
 			return ((void *)NULL);
 		}
 
 		bs_bhv->request_messages = (int *)AllocateMem(sizeof(int) * bs_tt->num_targets);
-		if (!bs_bhv->request_messages) 
+		if (!bs_bhv->request_messages)
 		{
 			memoryInitialisationFailure = 1;
 			return ((void *)NULL);
@@ -102,13 +102,13 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 		sbptr->DynPtr->Position = sbptr->DynPtr->PrevPosition = bs_tt->position;
 		sbptr->DynPtr->OrientEuler = bs_tt->orientation;
 		CreateEulerMatrix(&sbptr->DynPtr->OrientEuler, &sbptr->DynPtr->OrientMat);
-		TransposeMatrixCH(&sbptr->DynPtr->OrientMat);	
+		TransposeMatrixCH(&sbptr->DynPtr->OrientMat);
 	}
 	// set up the animation control
 	if(sbptr->shapeIndex!=-1)
 	{
 		int item_num;
-		TXACTRLBLK **pptxactrlblk;		
+		TXACTRLBLK **pptxactrlblk;
 		int shape_num = bs_tt->shape_num;
 		SHAPEHEADER *shptr = GetShapeData(shape_num);
 
@@ -118,13 +118,13 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 		{
 			POLYHEADER *poly = (POLYHEADER*)(shptr->items[item_num]);
 			LOCALASSERT(poly);
-				
+
 			if((Request_PolyFlags((void *)poly)) & iflag_txanim)
 			{
 				TXACTRLBLK *pnew_txactrlblk;
 				int num_seq = 0;
 
-				pnew_txactrlblk = AllocateMem(sizeof(TXACTRLBLK));
+				pnew_txactrlblk = (TXACTRLBLK*)AllocateMem(sizeof(TXACTRLBLK));
 				if (pnew_txactrlblk)
 				{
 					pnew_txactrlblk->tac_flags = 0;
@@ -184,11 +184,11 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	}
 
 	bs_bhv->bs_track=bs_tt->track;
-	
+
 	if (bs_bhv->bs_track)
 	{
 		bs_bhv->bs_track->sbptr=sbptr;
-		
+
 		if (bs_bhv->bs_dtype == binswitch_animate_me)
 		{
 			bs_bhv->bs_dtype = binswitch_animate_and_move_me;
@@ -203,12 +203,12 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 
 	// fill in the rest ourselves
 
-	bs_bhv->request = 0;
+	bs_bhv->request = I_no_request;//0;
 	bs_bhv->state = bs_tt->starts_on;
 	bs_bhv->timer = 0;
-	bs_bhv->switch_off_message_same=bs_tt->switch_off_message_same;	
-	bs_bhv->switch_off_message_none=bs_tt->switch_off_message_none;	
-		
+	bs_bhv->switch_off_message_same=bs_tt->switch_off_message_same;
+	bs_bhv->switch_off_message_none=bs_tt->switch_off_message_none;
+
 	bs_bhv->soundHandle = SOUND_NOACTIVEINDEX;
 	bs_bhv->triggered_last = FALSE;
 
@@ -221,7 +221,7 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 
 	if(bs_bhv->state)
 	{
-		bs_bhv->timer=bs_bhv->time_for_reset;	
+		bs_bhv->timer=bs_bhv->time_for_reset;
 		if(bs_bhv->bs_track)
 		{
 			//set the track to the end position
@@ -232,7 +232,7 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 
 		}
 	}
-	
+
 	bs_bhv->TimeUntilNetSynchAllowed=0;
 
 	return((void*)bs_bhv);
@@ -254,9 +254,9 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 	if(AvP.Network!=I_No_Network) return;
 	*/
 
-	/****** 
+	/******
 		What I need to do - check to see if we have
-		a request - requests have different effects depending on 
+		a request - requests have different effects depending on
 		the mode - so we have to switch on the mode
 	*****/
 
@@ -271,7 +271,7 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 	{
 		bs_bhv->request = I_no_request;
 		return;
-		
+
 	}
 
 	if(AvP.Network != I_No_Network)
@@ -320,9 +320,9 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 						needToTest = 1;
 				}
 			}
-			
+
 			if(needToTest&&
-				sbPtr->DynPtr->Position.vx > bs_bhv->trigger_volume_min.vx &&	
+				sbPtr->DynPtr->Position.vx > bs_bhv->trigger_volume_min.vx &&
 				sbPtr->DynPtr->Position.vx < bs_bhv->trigger_volume_max.vx &&
 				sbPtr->DynPtr->Position.vy > bs_bhv->trigger_volume_min.vy &&
 				sbPtr->DynPtr->Position.vy < bs_bhv->trigger_volume_max.vy &&
@@ -332,7 +332,7 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 	    		bs_bhv->request=I_request_on;
 				break;
 	    	}
-    	} 
+    	}
 	}
 
 	if (bs_bhv->request == I_request_on)
@@ -356,16 +356,16 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 		{
 			case I_bswitch_timer:
 				{
-					if(bs_bhv->request == I_request_on && !bs_bhv->state) 
+					if(bs_bhv->request == I_request_on && !bs_bhv->state)
 						{
-							
+
 							bs_bhv->timer = bs_bhv->time_for_reset;
 
 							if(sbptr->shapeIndex!=-1)//don't play a sound if there is no shape
 							{
 								if(!bs_bhv->bs_track || !bs_bhv->bs_track->sound)
 								{
-									if (bs_bhv->soundHandle == SOUND_NOACTIVEINDEX) 
+									if (bs_bhv->soundHandle == SOUND_NOACTIVEINDEX)
 					 				{
 										Sound_Play(SID_SWITCH1,"eh",&bs_bhv->soundHandle);
 									}
@@ -390,12 +390,12 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 									if (bs_bhv->bs_targets[i])
 									{
 										RequestState(bs_bhv->bs_targets[i],bs_bhv->request_messages[i], sbptr);
-										
+
 									}
 								}
 								bs_bhv->state = 1;
 							}
-							
+
 
 							// swap sequence
 							if(bs_bhv->bs_tac)
@@ -403,9 +403,9 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 									bs_bhv->bs_tac->tac_sequence = 1;
 									bs_bhv->bs_tac->tac_txah_s = GetTxAnimHeaderFromShape(bs_bhv->bs_tac, (sbptr->shapeIndex));
 								}
-							
-							
-						}															
+
+
+						}
 					 else	if(bs_bhv->timer > 0)
 						{
 					 		bs_bhv->timer -= NormalFrameTime;
@@ -415,10 +415,10 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 									{
 										bs_bhv->TimeUntilNetSynchAllowed=5*ONE_FIXED;
 									}
-									
+
 									if(sbptr->shapeIndex!=-1)//don't play a sound if there is no shape
 									{
-										if (bs_bhv->soundHandle == SOUND_NOACTIVEINDEX) 
+										if (bs_bhv->soundHandle == SOUND_NOACTIVEINDEX)
 							 			{
 											if(!bs_bhv->bs_track || !bs_bhv->bs_track->sound)
 											{
@@ -438,7 +438,7 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 										bs_bhv->mode_store = bs_bhv->bs_mode;
 										bs_bhv->bs_mode = I_bswitch_moving;
 									}
-									
+
 									if(!bs_bhv->switch_off_message_none)
 									{
 										//send the 'off' message
@@ -450,7 +450,7 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 												RequestState(bs_bhv->bs_targets[i],bs_bhv->request_messages[i]^(!bs_bhv->switch_off_message_same), sbptr);
 											}
 										}
-										
+
 									}
 
 									if(bs_bhv->bs_tac)
@@ -459,11 +459,11 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 											bs_bhv->bs_tac->tac_txah_s = GetTxAnimHeaderFromShape(bs_bhv->bs_tac, (sbptr->shapeIndex));
 										}
 
-								}						
+								}
 						}
-					break;				
+					break;
 				}
-			
+
 			case I_bswitch_toggle:
 				{
 					if(bs_bhv->request == I_no_request)
@@ -474,7 +474,7 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 
 						if(sbptr->shapeIndex!=-1)//don't play a sound if there is no shape
 						{
-							if (bs_bhv->soundHandle == SOUND_NOACTIVEINDEX) 
+							if (bs_bhv->soundHandle == SOUND_NOACTIVEINDEX)
 							{
 								if(!bs_bhv->bs_track || !bs_bhv->bs_track->sound)
 								{
@@ -537,24 +537,24 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 							}
 
 
-					break;				
+					break;
 				}
 			case I_bswitch_wait:
 				{
 					if(bs_bhv->request == I_no_request)
 						return;
 
-					
+
 					oldState = bs_bhv->state;
 
 					if(bs_bhv->request == I_request_on)
 						{
 							if(bs_bhv->state)
 								break;//switch cannot be activated again until it is reset
-					
+
 							if(bs_bhv->bs_dtype == binswitch_move_me || bs_bhv->bs_dtype == binswitch_animate_and_move_me)
 							{
-							
+
 								// moving switch
 								bs_bhv->new_state = 1;
 								bs_bhv->new_request = 1;
@@ -582,10 +582,10 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 							if(!bs_bhv->state) break; //can only be deactivated if currently on
 							if(bs_bhv->bs_dtype == binswitch_move_me || bs_bhv->bs_dtype == binswitch_animate_and_move_me)
 							{
-							
+
 								// moving switch
 								bs_bhv->new_state = 0;
-								
+
 								//check to see what the switch off request is
 								if(bs_bhv->switch_off_message_same)
 									bs_bhv->new_request=1;
@@ -593,7 +593,7 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 									bs_bhv->new_request=-1;
 								else
 									bs_bhv->new_request=0;
-								
+
 								bs_bhv->mode_store = bs_bhv->bs_mode;
 								bs_bhv->bs_mode = I_bswitch_moving;
 								bs_bhv->bs_track->reverse=1;
@@ -602,7 +602,7 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 							else
 							{
 								int i;
-								
+
 								bs_bhv->state = 0;
 								if(!bs_bhv->switch_off_message_none)
 								{
@@ -616,13 +616,13 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 									}
 								}
 							}
-						}											
-						
+						}
+
 					if(sbptr->shapeIndex!=-1)//don't play a sound if there is no shape
 					{
 						if (oldState == bs_bhv->state)
 						{
-							if (bs_bhv->soundHandle == SOUND_NOACTIVEINDEX) 
+							if (bs_bhv->soundHandle == SOUND_NOACTIVEINDEX)
 						 	{
 								if(!bs_bhv->bs_track || !bs_bhv->bs_track->sound)
 								{
@@ -632,7 +632,7 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 						}
 						else
 						{
-							if (bs_bhv->soundHandle == SOUND_NOACTIVEINDEX) 
+							if (bs_bhv->soundHandle == SOUND_NOACTIVEINDEX)
 							{
 							   	if(!bs_bhv->bs_track || !bs_bhv->bs_track->sound)
 							   	{
@@ -690,7 +690,7 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 						//time to send the request
 						int i;
 						bs_bhv->timer=0;
-						
+
 						//only send message if we got here through the time running out
 						if(bs_bhv->request != I_request_off)
 						{
@@ -703,29 +703,29 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 							}
 						}
 						bs_bhv->state = 0;
-					
+
 						 // swap sequence
 						if(bs_bhv->bs_tac)
 						{
 							bs_bhv->bs_tac->tac_sequence = 0;
 							bs_bhv->bs_tac->tac_txah_s = GetTxAnimHeaderFromShape(bs_bhv->bs_tac, (sbptr->shapeIndex));
 						}
-						
+
 						if(AvP.Network != I_No_Network)
 						{
 							bs_bhv->TimeUntilNetSynchAllowed=5*ONE_FIXED;
 						}
 
-					}	
+					}
 				}
 				else
 				{
-					if(bs_bhv->request == I_request_on && bs_bhv->state == 0) 
+					if(bs_bhv->request == I_request_on && bs_bhv->state == 0)
 					{
 						bs_bhv->timer = bs_bhv->time_for_reset;
 						if(sbptr->shapeIndex!=-1)//don't play a sound if there is no shape
 						{
-							if (bs_bhv->soundHandle == SOUND_NOACTIVEINDEX) 
+							if (bs_bhv->soundHandle == SOUND_NOACTIVEINDEX)
 					 		{
 								if(!bs_bhv->bs_track || !bs_bhv->bs_track->sound)
 								{
@@ -734,14 +734,14 @@ void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr)
 							}
 						}
 						bs_bhv->state = 1;
-					
+
 						 // swap sequence
 						 if(bs_bhv->bs_tac)
 						 	{
 						 		bs_bhv->bs_tac->tac_sequence = 1;
 						 		bs_bhv->bs_tac->tac_txah_s = GetTxAnimHeaderFromShape(bs_bhv->bs_tac, (sbptr->shapeIndex));
 						 	}
-					
+
 					}
 				}
 			}
@@ -773,7 +773,7 @@ int BinarySwitchGetSynchData(STRATEGYBLOCK* sbPtr)
 
 	if(bs_bhv->state)
 		return BINARYSWITCHSYNCH_ON;
-	else	
+	else
 		return BINARYSWITCHSYNCH_OFF;
 }
 
@@ -796,8 +796,8 @@ void BinarySwitchSetSynchData(STRATEGYBLOCK* sbPtr,int status)
 	{
 		return;
 	}
-	
-	
+
+
 	switch(status)
 	{
 		case BINARYSWITCHSYNCH_ON :
@@ -833,12 +833,12 @@ typedef struct binary_switch_save_block
 	BOOL state;
 	BSWITCH_MODE bs_mode;
 	int timer;
-	
+
 	BSWITCH_MODE mode_store;
-	
+
 	BOOL new_state;
 	int new_request;
-	
+
 	BOOL triggered_last;
 
 	int txanim_sequence;
@@ -854,8 +854,8 @@ void LoadStrategy_BinarySwitch(SAVE_BLOCK_STRATEGY_HEADER* header)
 {
 	STRATEGYBLOCK* sbPtr;
 	BINARY_SWITCH_BEHAV_BLOCK *bs_bhv;
-	BINARY_SWITCH_SAVE_BLOCK* block = (BINARY_SWITCH_SAVE_BLOCK*) header; 
-	
+	BINARY_SWITCH_SAVE_BLOCK* block = (BINARY_SWITCH_SAVE_BLOCK*) header;
+
 	//check the size of the save block
 	if(header->size!=sizeof(*block)) return;
 
@@ -869,7 +869,7 @@ void LoadStrategy_BinarySwitch(SAVE_BLOCK_STRATEGY_HEADER* header)
 	bs_bhv = (BINARY_SWITCH_BEHAV_BLOCK*)sbPtr->SBdataptr;
 
 	//start copying stuff
-	
+
 	COPYELEMENT_LOAD(request)
 	COPYELEMENT_LOAD(state)
 	COPYELEMENT_LOAD(bs_mode)
@@ -903,12 +903,11 @@ void SaveStrategy_BinarySwitch(STRATEGYBLOCK* sbPtr)
 	BINARY_SWITCH_SAVE_BLOCK *block;
 	BINARY_SWITCH_BEHAV_BLOCK *bs_bhv;
 	bs_bhv = (BINARY_SWITCH_BEHAV_BLOCK*)sbPtr->SBdataptr;
-	
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(BINARY_SWITCH_SAVE_BLOCK, block, sbPtr);
 
 	//start copying stuff
-	
+
 	COPYELEMENT_SAVE(request)
 	COPYELEMENT_SAVE(state)
 	COPYELEMENT_SAVE(bs_mode)
@@ -933,5 +932,5 @@ void SaveStrategy_BinarySwitch(STRATEGYBLOCK* sbPtr)
 	{
 		SaveTrackPosition(bs_bhv->bs_track);
 	}
-	
+
 }

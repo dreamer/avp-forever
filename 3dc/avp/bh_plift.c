@@ -675,7 +675,7 @@ void SaveStrategy_PlatformLift(STRATEGYBLOCK* sbPtr)
 	
 	platformliftdata = (PLATFORMLIFT_BEHAVIOUR_BLOCK*)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(PLATFORM_LIFT_SAVE_BLOCK,block,sbPtr);
 
 	
 	COPYELEMENT_SAVE(activationDelayTimer)

@@ -352,7 +352,7 @@ void SaveStrategy_ParticleGenerator(STRATEGYBLOCK* sbPtr)
 	
 	pargen = (PARTICLE_GENERATOR_BEHAV_BLOCK*)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(PARTICLE_GENERATOR_SAVE_BLOCK,block,sbPtr);
 
 	//start copying stuff
 	COPYELEMENT_SAVE(position)

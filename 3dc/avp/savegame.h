@@ -82,10 +82,10 @@ extern int GetIndexFromAIModulePointer(struct aimodule* module);
 
 extern SAVE_BLOCK_HEADER* GetNextBlockIfOfType(SAVE_BLOCK_TYPE type);
 
-#define GET_SAVE_BLOCK_POINTER(block) block = GetPointerForSaveBlock(sizeof(*block))
+#define GET_SAVE_BLOCK_POINTER(blockStructDefinition, block) block = (blockStructDefinition*)GetPointerForSaveBlock(sizeof(*block))
 
-#define GET_STRATEGY_SAVE_BLOCK(block,sbPtr)\
-	block = GetPointerForSaveBlock(sizeof(*block));\
+#define GET_STRATEGY_SAVE_BLOCK(blockStructDefinition, block, sbPtr)\
+	block = (blockStructDefinition*)GetPointerForSaveBlock(sizeof(*block));\
 	block->header.type = SaveBlock_Strategy;\
 	block->header.size = sizeof(*block);\
 	block->header.bhvr_type = sbPtr->I_SBtype;\

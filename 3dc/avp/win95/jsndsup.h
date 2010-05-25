@@ -14,12 +14,12 @@
 typedef struct loaded_sound
 {
 	int sound_num;
-	
+
 	char * wavname;
 	int num_attached;
-	
+
 	unsigned long permanent :1;
-	
+
 } LOADED_SOUND;
 
 
@@ -31,6 +31,5 @@ LOADED_SOUND const * GetSound (char const * fname);
 	}; // end of extern "c"
 
 #endif
-
 
 #endif

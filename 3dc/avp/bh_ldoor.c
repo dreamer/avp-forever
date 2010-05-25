@@ -307,7 +307,7 @@ void SaveStrategy_LiftDoor(STRATEGYBLOCK* sbPtr)
 	
 	doorbhv = (LIFT_DOOR_BEHAV_BLOCK*)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(LIFT_DOOR_SAVE_BLOCK,block,sbPtr);
 
 	block->request_state = doorbhv->request_state;
 	block->door_state = doorbhv->door_state;

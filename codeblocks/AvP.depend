@@ -675,3 +675,861 @@
 1273739582 source:c:\dev\avp\trunk\3dc\win95\win_func.cpp
 	"3dc.h"
 
+1274815689 source:d:\development\avp-branch\trunk\3dc\kshape.c
+	"3dc.h"
+	<math.h>
+	"module.h"
+	"inline.h"
+	"stratdef.h"
+	"gamedef.h"
+	"kshape.h"
+	"kzsort.h"
+	"frustrum.h"
+	"ourasert.h"
+	"equipmnt.h"
+	"bh_pred.h"
+	"bh_marin.h"
+	"bh_corpse.h"
+	"bh_debri.h"
+	"bh_weap.h"
+	"bh_types.h"
+	"pldghost.h"
+	"particle.h"
+	"vision.h"
+	"sfx.h"
+	"d3d_render.h"
+	"avpview.h"
+	"sphere.h"
+	"detaillevels.h"
+	"avp_userprofile.h"
+	"chnktexi.h"
+
+1274815603 d:\development\avp-branch\trunk\3dc\include\3dc.h
+	"system.h"
+	"equates.h"
+	"platform.h"
+	"shape.h"
+	"prototyp.h"
+	"utilities.h"
+	<stdint.h>
+
+1274305939 d:\development\avp-branch\trunk\3dc\avp\win95\system.h
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\equates.h
+
+1274634219 d:\development\avp-branch\trunk\3dc\win95\platform.h
+	<stdlib.h>
+	<stdarg.h>
+	<stdio.h>
+	"os_header.h"
+	"aw.h"
+
+1274815689 d:\development\avp-branch\trunk\3dc\os_header.h
+	<windows.h>
+	<mmsystem.h>
+	<xtl.h>
+
+1274815617 d:\development\avp-branch\trunk\3dc\win95\aw.h
+	<stdint.h>
+
+1274301633 d:\development\avp-branch\trunk\3dc\include\shape.h
+	"renderer.h"
+	"aw.h"
+	"shpanim.h"
+	<stdint.h>
+	"sheader.h"
+	"pheader.h"
+	"iheader.h"
+	"theader.h"
+
+1274815693 d:\development\avp-branch\trunk\3dc\renderer.h
+	"d3_func.h"
+	"d3_func.h"
+	<glide.h>
+
+1274822315 d:\development\avp-branch\trunk\win32\d3_func.h
+	<d3d9.h>
+	<Dxerr9.h>
+	"aw.h"
+	<stdint.h>
+
+1274815615 d:\development\avp-branch\trunk\3dc\win95\shpanim.h
+
+1274305901 d:\development\avp-branch\trunk\3dc\include\prototyp.h
+	"shpanim.h"
+	"mem3dc.h"
+
+1269032302 d:\development\avp-branch\trunk\3dc\include\mem3dc.h
+	"system.h"
+	<stddef.h>
+
+1274815693 d:\development\avp-branch\trunk\3dc\utilities.h
+	<stdio.h>
+	<string.h>
+	"os_header.h"
+
+1269032302 d:\development\avp-branch\trunk\3dc\include\module.h
+	"bh_waypt.h"
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\bh_waypt.h
+
+1269032305 d:\development\avp-branch\trunk\3dc\win95\inline.h
+
+1274828771 d:\development\avp-branch\trunk\3dc\avp\stratdef.h
+	"hmodel.h"
+
+1274815669 d:\development\avp-branch\trunk\3dc\avp\hmodel.h
+	"decal.h"
+	"psnd.h"
+
+1274815664 d:\development\avp-branch\trunk\3dc\avp\decal.h
+	"vision.h"
+
+1269032310 d:\development\avp-branch\trunk\3dc\avp\win95\vision.h
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\psnd.h
+	"psndproj.h"
+
+1274815662 d:\development\avp-branch\trunk\3dc\avp\psndproj.h
+	"equipmnt.h"
+
+1274815664 d:\development\avp-branch\trunk\3dc\avp\equipmnt.h
+	"language.h"
+	"gamedef.h"
+
+1274815670 d:\development\avp-branch\trunk\3dc\avp\language.h
+	"langenum.h"
+
+1274815670 d:\development\avp-branch\trunk\3dc\avp\langenum.h
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\gamedef.h
+	"module.h"
+
+1274815680 d:\development\avp-branch\trunk\3dc\kshape.h
+	"particle.h"
+
+1274815662 d:\development\avp-branch\trunk\3dc\avp\particle.h
+	"decal.h"
+	"dynblock.h"
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\dynblock.h
+
+1274815629 d:\development\avp-branch\trunk\3dc\avp\win95\kzsort.h
+
+1269032318 d:\development\avp-branch\trunk\3dc\frustrum.h
+	"kshape.h"
+
+1269032305 d:\development\avp-branch\trunk\3dc\win95\ourasert.h
+
+1274815666 d:\development\avp-branch\trunk\3dc\avp\bh_pred.h
+	"bh_ais.h"
+	"decal.h"
+
+1274827934 d:\development\avp-branch\trunk\3dc\avp\bh_ais.h
+
+1274815664 d:\development\avp-branch\trunk\3dc\avp\bh_marin.h
+	"bh_pred.h"
+	"psndproj.h"
+	"sfx.h"
+
+1274815665 d:\development\avp-branch\trunk\3dc\avp\sfx.h
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\bh_corpse.h
+
+1274815662 d:\development\avp-branch\trunk\3dc\avp\bh_debri.h
+
+1274815667 d:\development\avp-branch\trunk\3dc\avp\bh_weap.h
+	"particle.h"
+
+1269215862 d:\development\avp-branch\trunk\3dc\avp\bh_types.h
+	"equipmnt.h"
+	"gameflow.h"
+	"pmove.h"
+
+1274815668 d:\development\avp-branch\trunk\3dc\avp\gameflow.h
+	"gamedef.h"
+	"system.h"
+
+1274815670 d:\development\avp-branch\trunk\3dc\avp\pmove.h
+
+1269032311 d:\development\avp-branch\trunk\3dc\avp\win95\pldghost.h
+	"pvisible.h"
+	"pldnet.h"
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\pvisible.h
+
+1269032310 d:\development\avp-branch\trunk\3dc\avp\win95\pldnet.h
+	"psnd.h"
+	"particle.h"
+	"decal.h"
+
+1274815599 d:\development\avp-branch\trunk\win32\d3d_render.h
+	"particle.h"
+
+1274815666 d:\development\avp-branch\trunk\3dc\avp\avpview.h
+
+1274815694 d:\development\avp-branch\trunk\3dc\sphere.h
+
+1274815668 d:\development\avp-branch\trunk\3dc\avp\detaillevels.h
+
+1274815626 d:\development\avp-branch\trunk\3dc\avp\win95\frontend\avp_userprofile.h
+	"usr_io.h"
+	"AvP_EnvInfo.h"
+	"game_statistics.h"
+	"detaillevels.h"
+
+1274815629 d:\development\avp-branch\trunk\3dc\avp\win95\usr_io.h
+	"avp_menus.h"
+	"stratdef.h"
+
+1274815626 d:\development\avp-branch\trunk\3dc\avp\win95\frontend\avp_menus.h
+	"AvP_MenuGfx.hpp"
+	"language.h"
+
+1274815626 d:\development\avp-branch\trunk\3dc\avp\win95\frontend\avp_menugfx.hpp
+
+1269032309 d:\development\avp-branch\trunk\3dc\avp\win95\frontend\avp_envinfo.h
+
+1274815663 d:\development\avp-branch\trunk\3dc\avp\game_statistics.h
+	"equipmnt.h"
+
+1269032305 d:\development\avp-branch\trunk\3dc\win95\chnktexi.h
+
+1269901304 source:d:\development\avp-branch\trunk\3dc\map.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"ourasert.h"
+
+1269032318 source:d:\development\avp-branch\trunk\3dc\mem3dcpp.cpp
+	"mem3dc.h"
+
+1274815693 source:d:\development\avp-branch\trunk\3dc\module.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"bh_types.h"
+	"pvisible.h"
+	"pfarlocs.h"
+	"avpview.h"
+	"ourasert.h"
+	"pldghost.h"
+
+1274815669 d:\development\avp-branch\trunk\3dc\avp\pfarlocs.h
+
+1274815693 source:d:\development\avp-branch\trunk\3dc\morph.c
+	"3dc.h"
+	"inline.h"
+
+1269032318 source:d:\development\avp-branch\trunk\3dc\mslhand.c
+	"3dc.h"
+	"mslhand.h"
+	"ourasert.h"
+
+1269032318 d:\development\avp-branch\trunk\3dc\mslhand.h
+
+1274815690 source:d:\development\avp-branch\trunk\3dc\maths.c
+	"3dc.h"
+	"inline.h"
+
+1269898758 source:d:\development\avp-branch\trunk\3dc\object.c
+	"3dc.h"
+	"module.h"
+	"stratdef.h"
+	"sfx.h"
+	"ourasert.h"
+
+1274815680 source:d:\development\avp-branch\trunk\3dc\tables.c
+	"system.h"
+
+1274815691 source:d:\development\avp-branch\trunk\3dc\vdb.c
+	"3dc.h"
+	"inline.h"
+
+1269032317 source:d:\development\avp-branch\trunk\3dc\avp\ai_sight.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"gamedef.h"
+	"dynblock.h"
+	"dynamics.h"
+	"los.h"
+	"ShowCmds.h"
+	"equipmnt.h"
+	"bh_marin.h"
+	"bh_xeno.h"
+	"targeting.h"
+	"bh_weap.h"
+	"AI_Sight.h"
+	"ourasert.h"
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\dynamics.h
+	"particle.h"
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\los.h
+
+1274815617 d:\development\avp-branch\trunk\3dc\win95\showcmds.h
+
+1274815663 d:\development\avp-branch\trunk\3dc\avp\bh_xeno.h
+	"particle.h"
+	"bh_ais.h"
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\targeting.h
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\ai_sight.h
+
+1274645800 source:d:\development\avp-branch\trunk\3dc\avp\avpview.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"gamedef.h"
+	"stratdef.h"
+	"dynblock.h"
+	"bh_types.h"
+	"avpview.h"
+	"kshape.h"
+	"kzsort.h"
+	"frustrum.h"
+	"vision.h"
+	"lighting.h"
+	"weapons.h"
+	"sfx.h"
+	"extents.h"
+	"avp_userprofile.h"
+	"ourasert.h"
+	<assert.h>
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\lighting.h
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\weapons.h
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\extents.h
+
+1274827419 source:d:\development\avp-branch\trunk\3dc\avp\bh_alien.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"gamedef.h"
+	"dynblock.h"
+	"dynamics.h"
+	"comp_shp.h"
+	"load_shp.h"
+	"bh_types.h"
+	"bh_debri.h"
+	"bh_far.h"
+	"bh_near.h"
+	"bh_gener.h"
+	"bh_pred.h"
+	"bh_alien.h"
+	"bh_marin.h"
+	"weapons.h"
+	"pheromon.h"
+	"pfarlocs.h"
+	"pvisible.h"
+	"psnd.h"
+	"psndplat.h"
+	"extents.h"
+	"huddefs.h"
+	"pldghost.h"
+	"bh_corpse.h"
+	"bh_dummy.h"
+	"game_statistics.h"
+	"scream.h"
+	"ourasert.h"
+	"pldnet.h"
+	"AvP_UserProfile.h"
+	"savegame.h"
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\comp_shp.h
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\load_shp.h
+
+1274827508 d:\development\avp-branch\trunk\3dc\avp\bh_far.h
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\bh_near.h
+
+1274815668 d:\development\avp-branch\trunk\3dc\avp\bh_gener.h
+
+1274815663 d:\development\avp-branch\trunk\3dc\avp\bh_alien.h
+	"bh_pred.h"
+	"sequnces.h"
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\sequnces.h
+
+1274815666 d:\development\avp-branch\trunk\3dc\avp\pheromon.h
+
+1269032310 d:\development\avp-branch\trunk\3dc\avp\win95\psndplat.h
+	<dsound.h>
+	<xaudio2.h>
+	<xaudio2fx.h>
+	<x3daudio.h>
+	"psnd.h"
+
+1274815667 d:\development\avp-branch\trunk\3dc\avp\huddefs.h
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\bh_dummy.h
+	"bh_ais.h"
+
+1274815663 d:\development\avp-branch\trunk\3dc\avp\scream.h
+
+1274824562 d:\development\avp-branch\trunk\3dc\avp\savegame.h
+
+1274824508 source:d:\development\avp-branch\trunk\3dc\avp\bh_binsw.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"gamedef.h"
+	"bh_types.h"
+	"bh_binsw.h"
+	"dynblock.h"
+	"dynamics.h"
+	"pldghost.h"
+	"ourasert.h"
+	"pmove.h"
+	"pvisible.h"
+	"plat_shp.h"
+	"psnd.h"
+	"savegame.h"
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\bh_binsw.h
+	"3dc.h"
+	"track.h"
+
+1274815663 d:\development\avp-branch\trunk\3dc\avp\track.h
+
+1269032305 d:\development\avp-branch\trunk\3dc\win95\plat_shp.h
+
+1274824832 source:d:\development\avp-branch\trunk\3dc\avp\bh_fhug.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"gamedef.h"
+	"game_statistics.h"
+	"dynblock.h"
+	"dynamics.h"
+	"comp_shp.h"
+	"bh_types.h"
+	"bh_pred.h"
+	"bh_fhug.h"
+	"bh_debri.h"
+	"pfarlocs.h"
+	"pvisible.h"
+	"weapons.h"
+	"psnd.h"
+	"psndplat.h"
+	"targeting.h"
+	"ourasert.h"
+	"ShowCmds.h"
+	"sfx.h"
+	"savegame.h"
+
+1274824821 d:\development\avp-branch\trunk\3dc\avp\bh_fhug.h
+	"bh_pred.h"
+	"sequnces.h"
+
+1274824736 source:d:\development\avp-branch\trunk\3dc\avp\bh_gener.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"gamedef.h"
+	"bh_types.h"
+	"bh_alien.h"
+	"bh_marin.h"
+	"pfarlocs.h"
+	"bh_gener.h"
+	"pvisible.h"
+	"pheromon.h"
+	"bh_far.h"
+	"pldghost.h"
+	"load_shp.h"
+	"ourasert.h"
+	"huddefs.h"
+	"ShowCmds.h"
+	"savegame.h"
+
+1274826128 source:d:\development\avp-branch\trunk\3dc\avp\bh_lnksw.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"gamedef.h"
+	"bh_types.h"
+	"bh_lnksw.h"
+	"dynblock.h"
+	"dynamics.h"
+	"pldghost.h"
+	"ourasert.h"
+	"pmove.h"
+	"pvisible.h"
+	"bh_binsw.h"
+	"plat_shp.h"
+	"psnd.h"
+	"inventry.h"
+	"savegame.h"
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\bh_lnksw.h
+	"track.h"
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\inventry.h
+
+1274822062 source:d:\development\avp-branch\trunk\3dc\avp\bh_swdor.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"gamedef.h"
+	"bh_types.h"
+	"triggers.h"
+	"psnd.h"
+	"ourasert.h"
+	"pvisible.h"
+	"bh_swdor.h"
+	"savegame.h"
+
+1274828425 d:\development\avp-branch\trunk\3dc\avp\triggers.h
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\bh_swdor.h
+
+1274828729 source:d:\development\avp-branch\trunk\3dc\avp\bh_types.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"gamedef.h"
+	"bh_types.h"
+	"bonusabilities.h"
+	"weapons.h"
+	"comp_shp.h"
+	"inventry.h"
+	"triggers.h"
+	"dynblock.h"
+	"dynamics.h"
+	"ourasert.h"
+	"pmove.h"
+	"bh_alien.h"
+	"bh_gener.h"
+	"pvisible.h"
+	"bh_pred.h"
+	"bh_xeno.h"
+	"bh_paq.h"
+	"bh_queen.h"
+	"bh_marin.h"
+	"bh_fhug.h"
+	"bh_swdor.h"
+	"bh_ldoor.h"
+	"bh_plift.h"
+	"load_shp.h"
+	"bh_weap.h"
+	"bh_debri.h"
+	"lighting.h"
+	"bh_lnksw.h"
+	"bh_binsw.h"
+	"bh_spcl.h"
+	"bh_agun.h"
+	"bh_lift.h"
+	"bh_ltfx.h"
+	"bh_snds.h"
+	"bh_mission.h"
+	"bh_track.h"
+	"bh_fan.h"
+	"bh_rubberduck.h"
+	"bh_plachier.h"
+	"bh_light.h"
+	"bh_cable.h"
+	"bh_deathvol.h"
+	"bh_selfdest.h"
+	"bh_dummy.h"
+	"bh_pargen.h"
+	"bh_videoscreen.h"
+	"psnd.h"
+	"plat_shp.h"
+	"savegame.h"
+	"db.h"
+	"pldghost.h"
+	"bh_corpse.h"
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\bonusabilities.h
+
+1274826307 d:\development\avp-branch\trunk\3dc\avp\bh_paq.h
+	"bh_pred.h"
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\bh_queen.h
+	"bh_pred.h"
+	"scream.h"
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\bh_ldoor.h
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\bh_plift.h
+	"track.h"
+
+1274828425 d:\development\avp-branch\trunk\3dc\avp\bh_spcl.h
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"gamedef.h"
+	"bh_types.h"
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\bh_agun.h
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\bh_lift.h
+
+1274828425 d:\development\avp-branch\trunk\3dc\avp\bh_ltfx.h
+	"ltfx_exp.h"
+
+1274828425 d:\development\avp-branch\trunk\3dc\avp\ltfx_exp.h
+
+1274828425 d:\development\avp-branch\trunk\3dc\avp\bh_snds.h
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"jsndsup.h"
+
+1274828425 d:\development\avp-branch\trunk\3dc\avp\win95\jsndsup.h
+	"3dc.h"
+	"inline.h"
+	"module.h"
+
+1274828425 d:\development\avp-branch\trunk\3dc\avp\bh_mission.h
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\bh_track.h
+	"track.h"
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\bh_fan.h
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\bh_rubberduck.h
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\bh_plachier.h
+	"bh_track.h"
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\bh_light.h
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\bh_cable.h
+
+1269032317 d:\development\avp-branch\trunk\3dc\avp\bh_deathvol.h
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\bh_selfdest.h
+
+1269032316 d:\development\avp-branch\trunk\3dc\avp\bh_pargen.h
+	"track.h"
+
+1274828423 d:\development\avp-branch\trunk\3dc\avp\bh_videoscreen.h
+
+1273697383 d:\development\avp-branch\trunk\3dc\win95\db.h
+	<windows.h>
+	"xbox_defines.h"
+	<xtl.h>
+
+1269032302 d:\development\avp-branch\trunk\3dc\include\xbox_defines.h
+
+1274828865 source:d:\development\avp-branch\trunk\3dc\avp\bh_debri.c
+	"3dc.h"
+	"module.h"
+	"inline.h"
+	"stratdef.h"
+	"gamedef.h"
+	"dynblock.h"
+	"dynamics.h"
+	"comp_shp.h"
+	"load_shp.h"
+	"bh_types.h"
+	"bh_debri.h"
+	"bh_weap.h"
+	"inventry.h"
+	"psnd.h"
+	"plat_shp.h"
+	"particle.h"
+	"jsndsup.h"
+	"bh_alien.h"
+	"bh_marin.h"
+	"bh_corpse.h"
+	"ourasert.h"
+	"weapons.h"
+	"lighting.h"
+	"sfx.h"
+	"pldghost.h"
+	"AvP_UserProfile.h"
+	"savegame.h"
+	<math.h>
+	"savegame.h"
+
+1274829281 source:d:\development\avp-branch\trunk\3dc\avp\bh_marin.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"gamedef.h"
+	"bh_types.h"
+	"comp_shp.h"
+	"dynblock.h"
+	"dynamics.h"
+	"lighting.h"
+	"pfarlocs.h"
+	"pvisible.h"
+	"pheromon.h"
+	"bh_gener.h"
+	"bh_far.h"
+	"bh_pred.h"
+	"bh_marin.h"
+	"bh_weap.h"
+	"bh_debri.h"
+	"bh_alien.h"
+	"psnd.h"
+	"weapons.h"
+	"load_shp.h"
+	"particle.h"
+	"sfx.h"
+	"huddefs.h"
+	"pldghost.h"
+	"pldnet.h"
+	"psndplat.h"
+	"AI_Sight.h"
+	"los.h"
+	"bh_corpse.h"
+	"bh_dummy.h"
+	"scream.h"
+	"dxlog.h"
+	"ourasert.h"
+	"sequnces.h"
+	"ShowCmds.h"
+	"extents.h"
+	"AvP_UserProfile.h"
+	"savegame.h"
+
+1269032304 d:\development\avp-branch\trunk\3dc\win95\dxlog.h
+	"system.h"
+
+1274829420 source:d:\development\avp-branch\trunk\3dc\avp\bh_near.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"gamedef.h"
+	"bh_types.h"
+	"dynblock.h"
+	"pheromon.h"
+	"bh_pred.h"
+	"bh_alien.h"
+	"bh_near.h"
+	"bh_far.h"
+	"bh_marin.h"
+	"pfarlocs.h"
+	"targeting.h"
+	"weapons.h"
+	"ourasert.h"
+	"psnd.h"
+	"psndplat.h"
+	"dxlog.h"
+	"ShowCmds.h"
+	"AI_Sight.h"
+	"los.h"
+	"bh_gener.h"
+	"pldnet.h"
+	"particle.h"
+	"scream.h"
+
+1274829520 source:d:\development\avp-branch\trunk\3dc\avp\bh_pred.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"gamedef.h"
+	"comp_shp.h"
+	"dynblock.h"
+	"dynamics.h"
+	"pfarlocs.h"
+	"pheromon.h"
+	"bh_types.h"
+	"pvisible.h"
+	"bh_far.h"
+	"bh_debri.h"
+	"bh_pred.h"
+	"bh_paq.h"
+	"bh_queen.h"
+	"bh_marin.h"
+	"bh_alien.h"
+	"lighting.h"
+	"bh_weap.h"
+	"weapons.h"
+	"psnd.h"
+	"equipmnt.h"
+	"los.h"
+	"AI_Sight.h"
+	"targeting.h"
+	"dxlog.h"
+	"ShowCmds.h"
+	"huddefs.h"
+	"pldghost.h"
+	"bh_gener.h"
+	"bh_corpse.h"
+	"bh_dummy.h"
+	"bh_agun.h"
+	"scream.h"
+	"ourasert.h"
+	"extents.h"
+	"savegame.h"
+
+1274821659 source:d:\development\avp-branch\trunk\3dc\avp\bonusabilities.c
+	"3dc.h"
+	"module.h"
+	"inline.h"
+	"stratdef.h"
+	"gamedef.h"
+	"bh_types.h"
+	"weapons.h"
+	"dynblock.h"
+	"avpview.h"
+	"load_shp.h"
+	"kzsort.h"
+	"kshape.h"
+	"pfarlocs.h"
+	"pvisible.h"
+	"ourasert.h"
+	"savegame.h"
+
+1274829741 source:d:\development\avp-branch\trunk\3dc\avp\bh_xeno.c
+	"3dc.h"
+	"inline.h"
+	"module.h"
+	"stratdef.h"
+	"gamedef.h"
+	"bh_types.h"
+	"comp_shp.h"
+	"dynblock.h"
+	"dynamics.h"
+	"pfarlocs.h"
+	"pvisible.h"
+	"bh_pred.h"
+	"bh_xeno.h"
+	"lighting.h"
+	"bh_weap.h"
+	"weapons.h"
+	"bh_debri.h"
+	"plat_shp.h"
+	"particle.h"
+	"AI_Sight.h"
+	"sequnces.h"
+	"huddefs.h"
+	"ShowCmds.h"
+	"sfx.h"
+	"bh_marin.h"
+	"bh_far.h"
+	"pldghost.h"
+	"pheromon.h"
+	"targeting.h"
+	"dxlog.h"
+	"los.h"
+	"bh_alien.h"
+	"bh_corpse.h"
+	"bh_dummy.h"
+	"ourasert.h"
+	"psnd.h"
+	"savegame.h"
+

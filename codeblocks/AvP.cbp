@@ -12,6 +12,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-W" />
 					<Add option="-g" />
 					<Add directory="..\3dc" />
 					<Add directory="..\3dc\avp" />
@@ -31,6 +32,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-W" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -101,9 +103,6 @@
 		<Unit filename="..\3dc\avp\BH_LNKSW.H" />
 		<Unit filename="..\3dc\avp\BH_MARIN.H" />
 		<Unit filename="..\3dc\avp\BH_NEAR.H" />
-		<Unit filename="..\3dc\avp\BH_PAQ.C">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="..\3dc\avp\BH_PAQ.H" />
 		<Unit filename="..\3dc\avp\BH_PRED.H" />
 		<Unit filename="..\3dc\avp\BH_SWDOR.C">

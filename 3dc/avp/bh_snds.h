@@ -19,10 +19,10 @@ typedef struct sound_tools_template
 
 	unsigned long inner_range;
 	unsigned long outer_range;
-	
+
 	unsigned long max_volume;
 	unsigned long pitch;
-	
+
 	unsigned int playing :1;
 	unsigned int loop :1;
 
@@ -35,25 +35,25 @@ typedef struct sound_tools_template
 typedef struct sound_behav_block
 {
 	VECTORCH position;
-	
+
 	unsigned long inner_range;
 	unsigned long outer_range;
 	int max_volume;
 	int	pitch;
-	
+
 	int activ_no;
-	
+
 	char * wav_name;
-	
+
 // sound management stuff
-	
+
 	LOADED_SOUND const * sound_loaded;
-	
+
 	BOOL sound_not_started;
 
 	unsigned int playing :1;
 	unsigned int loop :1;
-	
+
 } SOUND_BEHAV_BLOCK;
 
 void * SoundBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr);

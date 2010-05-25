@@ -4503,7 +4503,7 @@ void SaveStrategy_Grenade(STRATEGYBLOCK* sbPtr)
 	GRENADE_SAVE_BLOCK* block;
 
 	behav = (GRENADE_BEHAV_BLOCK*) sbPtr->SBdataptr;
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(GRENADE_SAVE_BLOCK,block,sbPtr);
 
 	COPYELEMENT_SAVE(counter);
 	COPYELEMENT_SAVE(bouncelastframe);
@@ -4556,7 +4556,7 @@ void SaveStrategy_ClusterGrenade(STRATEGYBLOCK* sbPtr)
 	CLUSTER_GRENADE_SAVE_BLOCK* block;
 
 	behav = (GRENADE_BEHAV_BLOCK*) sbPtr->SBdataptr;
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(CLUSTER_GRENADE_SAVE_BLOCK,block,sbPtr);
 
 	COPYELEMENT_SAVE(counter);
 	COPYELEMENT_SAVE(bouncelastframe);
@@ -4610,7 +4610,7 @@ void SaveStrategy_FlareGrenade(STRATEGYBLOCK* sbPtr)
 	FLARE_GRENADE_SAVE_BLOCK* block;
 
 	behav = (FLARE_BEHAV_BLOCK*) sbPtr->SBdataptr;
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(FLARE_GRENADE_SAVE_BLOCK,block,sbPtr);
 
 	COPYELEMENT_SAVE(LifeTimeRemaining)
 	COPYELEMENT_SAVE(ParticleGenerationTimer)
@@ -4665,7 +4665,7 @@ void SaveStrategy_ProxGrenade(STRATEGYBLOCK* sbPtr)
 	PROX_GRENADE_SAVE_BLOCK* block;
 
 	behav = (PROX_GRENADE_BEHAV_BLOCK*) sbPtr->SBdataptr;
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(PROX_GRENADE_SAVE_BLOCK,block,sbPtr);
 
 	COPYELEMENT_SAVE(LifeTimeRemaining)
 	COPYELEMENT_SAVE(SoundGenerationTimer)
@@ -4718,7 +4718,7 @@ void SaveStrategy_Rocket(STRATEGYBLOCK* sbPtr)
 	ROCKET_SAVE_BLOCK* block;
 
 	behav = (PREDPISTOL_BEHAV_BLOCK*) sbPtr->SBdataptr;
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(ROCKET_SAVE_BLOCK,block,sbPtr);
 
 	COPYELEMENT_SAVE(counter)
 	COPYELEMENT_SAVE(player)
@@ -4770,7 +4770,7 @@ void SaveStrategy_PPPlasmaBolt(STRATEGYBLOCK* sbPtr)
 	PPPLASMA_SAVE_BLOCK* block;
 
 	behav = (PREDPISTOL_BEHAV_BLOCK*) sbPtr->SBdataptr;
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(PPPLASMA_SAVE_BLOCK,block,sbPtr);
 
 	COPYELEMENT_SAVE(counter)
 	COPYELEMENT_SAVE(player)
@@ -4828,7 +4828,7 @@ void SaveStrategy_PredatorEnergyBolt(STRATEGYBLOCK* sbPtr)
 	PREDATOR_ENERGY_BOLT_SAVE_BLOCK* block;
 
 	behav = (CASTER_BOLT_BEHAV_BLOCK*) sbPtr->SBdataptr;
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(PREDATOR_ENERGY_BOLT_SAVE_BLOCK,block,sbPtr);
 
 	COPYELEMENT_SAVE(counter)
 	COPYELEMENT_SAVE(player)
@@ -4884,7 +4884,7 @@ void SaveStrategy_PulseGrenade(STRATEGYBLOCK* sbPtr)
 	PULSE_GRENADE_SAVE_BLOCK* block;
 
 	behav = (PREDPISTOL_BEHAV_BLOCK*) sbPtr->SBdataptr;
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(PULSE_GRENADE_SAVE_BLOCK,block,sbPtr);
 
 	COPYELEMENT_SAVE(counter)
 	COPYELEMENT_SAVE(player)
@@ -4947,7 +4947,7 @@ void SaveStrategy_Molotov(STRATEGYBLOCK* sbPtr)
 	PULSE_GRENADE_SAVE_BLOCK* block;
 
 	behav = (MOLOTOV_BEHAV_BLOCK*) sbPtr->SBdataptr;
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(PULSE_GRENADE_SAVE_BLOCK,block,sbPtr);
 
 	COPYELEMENT_SAVE(counter)
 
@@ -5036,7 +5036,7 @@ void SaveStrategy_PredatorDisc(STRATEGYBLOCK* sbPtr)
 	
 	
 	behav = (PC_PRED_DISC_BEHAV_BLOCK*)sbPtr->SBdataptr;
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(PREDATOR_DISC_SAVE_BLOCK,block,sbPtr);
 
 //start copying stuff
 	COPYELEMENT_SAVE(counter)
@@ -5137,9 +5137,7 @@ void SaveStrategy_SpearBolt(STRATEGYBLOCK* sbPtr)
 	SPEAR_BEHAV_BLOCK *behav;
 	
 	behav = (SPEAR_BEHAV_BLOCK*)sbPtr->SBdataptr;
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
-
-
+	GET_STRATEGY_SAVE_BLOCK(SPEAR_BOLT_SAVE_BLOCK,block,sbPtr);
 
 	COPYELEMENT_SAVE(counter)
 	COPYELEMENT_SAVE(Orient)
@@ -5214,7 +5212,7 @@ void SaveStrategy_Frisbee(STRATEGYBLOCK* sbPtr)
 	
 	
 	behav = (FRISBEE_BEHAV_BLOCK*)sbPtr->SBdataptr;
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(FRISBEE_SAVE_BLOCK,block,sbPtr);
 
 //start copying stuff
 	COPYELEMENT_SAVE(counter)
@@ -5460,7 +5458,7 @@ void SaveStrategy_FrisbeeEnergyBolt(STRATEGYBLOCK* sbPtr)
 	PREDATOR_ENERGY_BOLT_SAVE_BLOCK* block;
 
 	behav = (CASTER_BOLT_BEHAV_BLOCK*) sbPtr->SBdataptr;
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(PREDATOR_ENERGY_BOLT_SAVE_BLOCK,block,sbPtr);
 
 	COPYELEMENT_SAVE(counter)
 	COPYELEMENT_SAVE(player)

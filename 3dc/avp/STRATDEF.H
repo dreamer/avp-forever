@@ -263,7 +263,7 @@ extern void GivePlayerCloakAway(void);
 
 extern void InitPreservedSBs();
 extern void PreserveStBlocksInModule();
-extern BOOL SBNeededForNextEnv();
+extern BOOL SBNeededForNextEnv(STRATEGYBLOCK* sbptr);
 extern void	AddPreservedSBsToActiveList();
 extern void TeleportPreservedSBsToNewEnvModule(MODULE* old_pos_module,
 											   MODULE* new_pos,

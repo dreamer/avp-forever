@@ -944,7 +944,7 @@ void SaveStrategy_Generator(STRATEGYBLOCK* sbPtr)
 	genBlock = (GENERATOR_BLOCK*)sbPtr->SBdataptr;
 	
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(GENERATOR_SAVE_BLOCK,block,sbPtr);
 
 	//start copying stuff
 
@@ -995,7 +995,7 @@ void LoadHiveSettings(SAVE_BLOCK_HEADER* header)
 void SaveHiveSettings()
 {
 	HIVE_SAVE_BLOCK* block;
-	GET_SAVE_BLOCK_POINTER(block);
+	GET_SAVE_BLOCK_POINTER(HIVE_SAVE_BLOCK, block);
 
 	//fill in the header
 	block->header.type = SaveBlock_GlobalHive;

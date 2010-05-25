@@ -19,14 +19,14 @@ typedef struct toolsdata_video_screen
 {
 	struct vectorch position;
 	struct euler orientation;
-	int shapeIndex;	
+	int shapeIndex;
 	char nameID[SB_NAME_LENGTH];
 	int integrity; // 0-20 (>20 = indestructable)
 
 	int destruct_target_request;
 	char destruct_target_ID[SB_NAME_LENGTH];
 
-	
+
 }TOOLS_DATA_VIDEO_SCREEN;
 
 void* InitVideoScreen(void* bhdata,STRATEGYBLOCK *sbPtr);

@@ -327,7 +327,7 @@ void SaveStrategy_SwitchDoor(STRATEGYBLOCK* sbPtr)
 	
 	doorbhv = (SWITCH_DOOR_BEHAV_BLOCK*)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(SWITCH_DOOR_SAVE_BLOCK,block,sbPtr);
 
 	COPYELEMENT_SAVE(doorState)
 	COPYELEMENT_SAVE(openTimer)

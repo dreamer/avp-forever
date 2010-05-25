@@ -1136,7 +1136,7 @@ void Save_Decals()
 	if(!NumActiveDecals) return;
 
 	//get memory for header
-	GET_SAVE_BLOCK_POINTER(block);
+	GET_SAVE_BLOCK_POINTER(DECAL_SAVE_BLOCK_HEADER, block);
 
 	//fill in header
 	block->header.type = SaveBlock_Decals;
@@ -1148,7 +1148,7 @@ void Save_Decals()
 	//now save the decals
 	for(i=0;i<NumActiveDecals;i++)
 	{
-		DECAL* decal = GET_SAVE_BLOCK_POINTER(decal);
+		DECAL* decal = GET_SAVE_BLOCK_POINTER(DECAL, decal);
 		*decal = DecalStorage[i];
 	}
 }

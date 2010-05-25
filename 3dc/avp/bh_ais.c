@@ -1075,43 +1075,43 @@ int NPCFindTargetEP(STRATEGYBLOCK *sbPtr, VECTORCH *targetPosn, AIMODULE **targe
   suitable target module, and return this.  If cannot find an ep,
   or if the player is in our module, return the player's position.
   --------------------------------------------------------------------*/
-void NPCGetMovementTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, VECTORCH *targetPosition,int *targetIsAirduct,int alien)
+void NPCGetMovementTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, VECTORCH *targetPosition, int *targetIsAirduct/*, int alien*/)
 {       
-        LOCALASSERT(sbPtr);
-        LOCALASSERT(targetPosition);
-        LOCALASSERT(targetIsAirduct);
-        LOCALASSERT(target);
-        GLOBALASSERT(playerPherModule);
+    LOCALASSERT(sbPtr);
+    LOCALASSERT(targetPosition);
+    LOCALASSERT(targetIsAirduct);
+    LOCALASSERT(target);
+    GLOBALASSERT(playerPherModule);
 
-        if (target==Player->ObStrategyBlock) {
-
-                if(sbPtr->containingModule->m_aimodule != playerPherModule->m_aimodule)
-                {
-                        int epFound;
-                        VECTORCH epPosn;
-                        AIMODULE *epModule;
-                        epFound = NPCFindTargetEP(sbPtr, &epPosn, &epModule,alien);
-                        if(epFound)
-                        {
-                                *targetPosition = epPosn;
-                                if((*epModule->m_module_ptrs)->m_flags & MODULEFLAG_AIRDUCT) *targetIsAirduct = 1;
-                                else *targetIsAirduct = 0;                      
-                                return;
-                        }
-                }
-                /* in same module as player, or can't find an entry point */
-                //*targetPosition = Player->ObWorld;
-                GetTargetingPointOfObject(Player, targetPosition);
-                *targetIsAirduct = 0;
-        
-        } else {
-
-                /* Improve this presently */
-                //*targetPosition = target->DynPtr->Position;
-                GetTargetingPointOfObject_Far(target, targetPosition);
-                *targetIsAirduct = 0;
-
+    if (target==Player->ObStrategyBlock) 
+	{
+        if (sbPtr->containingModule->m_aimodule != playerPherModule->m_aimodule)
+        {
+            int epFound;
+            VECTORCH epPosn;
+            AIMODULE *epModule;
+            epFound = NPCFindTargetEP(sbPtr, &epPosn, &epModule,alien);
+            if (epFound)
+            {
+                *targetPosition = epPosn;
+                if((*epModule->m_module_ptrs)->m_flags & MODULEFLAG_AIRDUCT) *targetIsAirduct = 1;
+                else *targetIsAirduct = 0;                      
+                return;
+            }
         }
+        /* in same module as player, or can't find an entry point */
+        //*targetPosition = Player->ObWorld;
+        GetTargetingPointOfObject(Player, targetPosition);
+        *targetIsAirduct = 0;
+    } 
+	else 
+	{
+
+        /* Improve this presently */
+        //*targetPosition = target->DynPtr->Position;
+        GetTargetingPointOfObject_Far(target, targetPosition);
+        *targetIsAirduct = 0;
+    }
 }
 
 /*------------------------------Patrick 24/3/97-----------------------------------

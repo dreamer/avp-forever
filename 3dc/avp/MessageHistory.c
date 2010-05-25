@@ -133,7 +133,7 @@ void Save_MessageHistory()
 	int i;
 
 	//get memory for header
-	GET_SAVE_BLOCK_POINTER(block);
+	GET_SAVE_BLOCK_POINTER(MESSAGE_HISTORY_SAVE_BLOCK, block);
 
 	//fill in header
 	block->header.type = SaveBlock_MessageHistory;
@@ -145,7 +145,7 @@ void Save_MessageHistory()
 
 	for(i=0;i<NumberOfEntriesInMessageHistory;i++)
 	{
-		struct MessageHistory* message = GET_SAVE_BLOCK_POINTER(message);
+		struct MessageHistory* message = GET_SAVE_BLOCK_POINTER(MessageHistory, message);
 		*message = MessageHistoryStore[i];
 	}
 }

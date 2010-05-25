@@ -68,8 +68,8 @@
 #include "pldghost.h"
 #include "bh_corpse.h"
 
-/* 
-	our functions for doing stuff to objects 
+/*
+	our functions for doing stuff to objects
   	can be called in two different ways, call the function
   	that processes the list (ObjectBehaviours) or call
   	ExecuteBehaviour with the strategyblock
@@ -96,7 +96,7 @@ static int AnythingNearProxDoor(MODULE *doorModulePtr,PROXDOOR_BEHAV_BLOCK *door
 /***** extern functions *****/
 
 extern void SmokeGeneratorBehaviour(STRATEGYBLOCK *sptr);
-extern void InitPlayer(STRATEGYBLOCK* sbPtr, int sb_type); 
+extern void InitPlayer(STRATEGYBLOCK* sbPtr, int sb_type);
 extern void AlienFragFun(STRATEGYBLOCK* sptr);
 extern void SetupSimpleAnimation(int counter, STRATEGYBLOCK *sbPtr);
 extern void HierarchicalFragmentBehaviour(STRATEGYBLOCK *sptr);
@@ -110,10 +110,10 @@ void GrapplingHookBehaviour(STRATEGYBLOCK *sbPtr);
 /* essentially these are the old entity type functions ******/
 
 /* IMPORTANT IMPORTANT!!!
-	
+
 	If you write an allocater for a behaviour that AllocatesMem BESIDES
 	that for the BehaviourBlock e.g. the simpleanimations generates a
-	linked list of texture animation control blocks, one for every item 
+	linked list of texture animation control blocks, one for every item
 	with an animation, THEN YOU MUST ALWAYS WRITE A SPECIFIC DEALLOCATER
 */
 
@@ -595,19 +595,19 @@ else return(&NpcDataList[a]);
 }
 
 /*----------------------------------------------------------------------
-  Use this function to initialise compiled in objects - redundant in final 
+  Use this function to initialise compiled in objects - redundant in final
   ----------------------------------------------------------------------*/
 
 
-void AssignRunTimeBehaviours(STRATEGYBLOCK* sbptr) 
+void AssignRunTimeBehaviours(STRATEGYBLOCK* sbptr)
 {
-	/* 
+	/*
 	function for assigning behaviours to objects at
 	runtime. This includes any objects that are going
-	to be created (grenades) AND compiled in ints such 
+	to be created (grenades) AND compiled in ints such
     as the player
 	*/
-			
+
 
 	DISPLAYBLOCK *dptr;
 
@@ -644,7 +644,7 @@ void EnableBehaviourType(STRATEGYBLOCK* sbptr, AVP_BEHAVIOUR_TYPE sb_type, void 
 		case I_BehaviourPredator:
 			InitPredatorBehaviour(bhdata, sbptr);
 			break;
-		
+
 		case I_BehaviourDormantPredator:
 			InitDormantPredatorBehaviour(bhdata, sbptr);
 			break;
@@ -710,7 +710,7 @@ void EnableBehaviourType(STRATEGYBLOCK* sbptr, AVP_BEHAVIOUR_TYPE sb_type, void 
 		case I_BehaviourSimpleAnimation:
 			sbptr->SBdataptr = SimpleAnimationBehaveInit(bhdata, sbptr);
 			break;
-		
+
 		case I_BehaviourGenerator:
 			InitGenerator(bhdata, sbptr);
 			break;
@@ -731,7 +731,7 @@ void EnableBehaviourType(STRATEGYBLOCK* sbptr, AVP_BEHAVIOUR_TYPE sb_type, void 
 		case I_BehaviourXenoborgMorphRoom:
 			sbptr->SBdataptr = InitXenoMorphRoom (bhdata, sbptr);
 			break;
-		
+
 		case I_BehaviourLightFX:
 		{
 			sbptr->SBdataptr = LightFXBehaveInit (bhdata, sbptr);
@@ -743,7 +743,7 @@ void EnableBehaviourType(STRATEGYBLOCK* sbptr, AVP_BEHAVIOUR_TYPE sb_type, void 
 			sbptr->SBdataptr = SoundBehaveInit (bhdata, sbptr);
 			break;
 		}
-					
+
 		case I_BehaviourMissionComplete:
 		{
 			sbptr->SBdataptr = MissionCompleteBehaveInit (bhdata, sbptr);
@@ -772,7 +772,7 @@ void EnableBehaviourType(STRATEGYBLOCK* sbptr, AVP_BEHAVIOUR_TYPE sb_type, void 
 			sbptr->SBdataptr = PlacedHierarchyBehaveInit(bhdata, sbptr);
 			break;
 		}
-		
+
 		case I_BehaviourPlacedLight:
 			InitPlacedLight(bhdata, sbptr);
 			break;
@@ -784,11 +784,11 @@ void EnableBehaviourType(STRATEGYBLOCK* sbptr, AVP_BEHAVIOUR_TYPE sb_type, void 
 		case I_BehaviourPowerCable :
 			sbptr->SBdataptr = PowerCableBehaveInit(bhdata, sbptr);
 			break;
-		
+
 		case I_BehaviourDeathVolume :
 			sbptr->SBdataptr = DeathVolumeBehaveInit(bhdata, sbptr);
 			break;
-		
+
 		case I_BehaviourSelfDestruct :
 			sbptr->SBdataptr = SelfDestructBehaveInit(bhdata, sbptr);
 			break;
@@ -816,7 +816,7 @@ static void* DoorProxBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 {
 	PROXDOOR_BEHAV_BLOCK *doorbhv;
 	PROX_DOOR_TOOLS_TEMPLATE *doortt;
-	MORPHCTRL* morphctrl;	
+	MORPHCTRL* morphctrl;
 	MORPHHEADER* morphheader;
 	MORPHFRAME* morphframe;
 	MODULE * my_mod;
@@ -824,7 +824,7 @@ static void* DoorProxBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
  	GLOBALASSERT(sbptr);
 	doorbhv = (PROXDOOR_BEHAV_BLOCK*)AllocateMem(sizeof(PROXDOOR_BEHAV_BLOCK));
 
-	if(!doorbhv) 
+	if(!doorbhv)
 	{
 		memoryInitialisationFailure = 1;
 		return ((void *)NULL);
@@ -840,19 +840,19 @@ static void* DoorProxBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 
 	// Set up a new Morph Control
 	morphctrl = (MORPHCTRL*)AllocateMem(sizeof(MORPHCTRL));
-	if(!morphctrl) 
+	if(!morphctrl)
 	{
 		memoryInitialisationFailure = 1;
 		return ((void *)NULL);
 	}
 	morphheader = (MORPHHEADER*)AllocateMem(sizeof(MORPHHEADER));
-	if(!morphheader) 
+	if(!morphheader)
 	{
 		memoryInitialisationFailure = 1;
 		return ((void *)NULL);
 	}
 	morphframe = (MORPHFRAME*)AllocateMem(sizeof(MORPHFRAME));
-	if(!morphframe) 
+	if(!morphframe)
 	{
 		memoryInitialisationFailure = 1;
 		return ((void *)NULL);
@@ -889,7 +889,7 @@ static void* DoorProxBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	sbptr->SBflags.no_displayblock = 1;
 
 
-	doorbhv->PDmctrl = morphctrl; 
+	doorbhv->PDmctrl = morphctrl;
 	doorbhv->lockable_door = doortt->has_lock_target;
 
 	doorbhv->door_opening_speed=doortt->door_opening_speed;
@@ -904,7 +904,7 @@ static void* DoorProxBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	sbptr->SBmorphctrl->ObMorphCurrFrame = 1; /* this should be closed*/
 
 	doorbhv->door_state = 	I_door_closed;
-	CloseDoor(sbptr->SBmorphctrl, DOOR_CLOSEFASTSPEED);	
+	CloseDoor(sbptr->SBmorphctrl, DOOR_CLOSEFASTSPEED);
 
 	if(sbptr->SBmoptr)
 		{
@@ -928,26 +928,26 @@ static void* DoorProxBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
    sound stuff...
   ----------------------------------------*/
   doorbhv->SoundHandle = SOUND_NOACTIVEINDEX;
-	
+
 	{
 		// Work out the door sound pitch
-	
+
 		int maxX,maxY,maxZ,doorSize;
 
 		maxX=mainshapelist[morphframe->mf_shape2]->shapemaxx;
 		maxY=mainshapelist[morphframe->mf_shape2]->shapemaxy;
 		maxZ=mainshapelist[morphframe->mf_shape2]->shapemaxz;
-			
+
 		doorSize = maxX + maxY + maxZ;
 		if (doorSize < 3000) doorSize = 3000;
 		else if (doorSize > 8000) doorSize = 8000;
-		
+
 		doorSize = (3000 - doorSize) >> 4;
 
-		doorbhv->doorType = doorSize; 
+		doorbhv->doorType = doorSize;
 
 	}
-		
+
 	return((void*)doorbhv);
 }
 
@@ -964,35 +964,35 @@ static void* SimpleAnimationBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	/**RWH 10/12/96 ***************************************
 
 	Simple Animation intialistation. This will set up an array
-	of texture control blocks. Each textures controlblock will animate only 
+	of texture control blocks. Each textures controlblock will animate only
 	one sequence per polygon.
 
 	***********************************************************/
 
 	SIMPLE_ANIM_BEHAV_BLOCK *sabhv;
 	int item_num;
-	TXACTRLBLK **pptxactrlblk;		
+	TXACTRLBLK **pptxactrlblk;
 	SIMPLE_ANIM_TOOLS_TEMPLATE * satt = (SIMPLE_ANIM_TOOLS_TEMPLATE *)bhdata;
 	int shape_num = satt->shape_num;
 	SHAPEHEADER *shptr = GetShapeData(shape_num);
 	MODULE * my_mod;
-   	
+
 
 	GLOBALASSERT(shptr);
 	GLOBALASSERT(shptr->numitems > 0);
 
 	sabhv = (SIMPLE_ANIM_BEHAV_BLOCK*)AllocateMem(sizeof(SIMPLE_ANIM_BEHAV_BLOCK));
-	if(!sabhv) 
+	if(!sabhv)
 	{
 		memoryInitialisationFailure = 1;
 		return ((void *)NULL);
 	}
-		
+
 	sabhv->bhvr_type = I_BehaviourSimpleAnimation;
-	
+
 	// Copy the name over
 	COPY_NAME (sbptr->SBname, satt->nameID);
-	
+
 	// Setup module ref
 
 	if (*((int *)satt->my_module.mref_name))
@@ -1011,7 +1011,7 @@ static void* SimpleAnimationBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	}
 
 
-	/* we need to reserve the address of where we 
+	/* we need to reserve the address of where we
 		 are going to place the new animation ctrl block.
 
 		 this is so that we can call the texture animation builder
@@ -1021,8 +1021,8 @@ static void* SimpleAnimationBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	pptxactrlblk = &sabhv->tacbSimple;
 
 	/*
-	the bhdata is a ptr to the SHAPEHEADER each 
-	animating polygon has an array of sequences, in 
+	the bhdata is a ptr to the SHAPEHEADER each
+	animating polygon has an array of sequences, in
 	this case thers is only onr sequence per array
 	*/
 
@@ -1030,19 +1030,19 @@ static void* SimpleAnimationBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 		{
 			POLYHEADER *poly =  (POLYHEADER*)(shptr->items[item_num]);
 			LOCALASSERT(poly);
-				
+
 			if((Request_PolyFlags((void *)poly)) & iflag_txanim)
 				{
 					TXACTRLBLK *pnew_txactrlblk;
 
-					pnew_txactrlblk = AllocateMem(sizeof(TXACTRLBLK));
+					pnew_txactrlblk = (TXACTRLBLK*)AllocateMem(sizeof(TXACTRLBLK));
 					if (pnew_txactrlblk)
 					{
- 						pnew_txactrlblk->tac_flags = 0;										
-						pnew_txactrlblk->tac_item = item_num;										
-						pnew_txactrlblk->tac_sequence = 0;										
-						pnew_txactrlblk->tac_node = 0;										
-						pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);										
+ 						pnew_txactrlblk->tac_flags = 0;
+						pnew_txactrlblk->tac_item = item_num;
+						pnew_txactrlblk->tac_sequence = 0;
+						pnew_txactrlblk->tac_node = 0;
+						pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);
 						pnew_txactrlblk->tac_txah_s = GetTxAnimHeaderFromShape(pnew_txactrlblk, shape_num);
 
 						/* set the flags in the animation header */
@@ -1050,7 +1050,7 @@ static void* SimpleAnimationBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 						/* KJL 17:00:38 04/04/97 - ChrisF complained about the next line, so
 						I've turned it off to see if anything happens. */
 						/*pnew_txactrlblk->tac_txah.txa_flags = txa_flag_play; */
-					
+
 						/* change the value held in pptxactrlblk
 						 which point to the previous structures "next"
 						 pointer*/
@@ -1069,8 +1069,6 @@ static void* SimpleAnimationBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	return((void*)sabhv);
 }
 
-
-
 static void* InitDatabase(void* bhdata, STRATEGYBLOCK* sbptr)
 {
 	DATABASE_BLOCK *db;
@@ -1081,7 +1079,7 @@ static void* InitDatabase(void* bhdata, STRATEGYBLOCK* sbptr)
 	dbtt = (DATABASE_TOOLS_TEMPLATE*)bhdata;
 
 	db = (DATABASE_BLOCK*)AllocateMem(sizeof(DATABASE_BLOCK));
-	if(!db) 
+	if(!db)
 	{
 		memoryInitialisationFailure = 1;
 		return ((void *)NULL);
@@ -1094,24 +1092,18 @@ static void* InitDatabase(void* bhdata, STRATEGYBLOCK* sbptr)
 	sbptr->DynPtr->Position = sbptr->DynPtr->PrevPosition = dbtt->position;
 	sbptr->DynPtr->OrientEuler = dbtt->orientation;
 	CreateEulerMatrix(&sbptr->DynPtr->OrientEuler, &sbptr->DynPtr->OrientMat);
-	TransposeMatrixCH(&sbptr->DynPtr->OrientMat);	
+	TransposeMatrixCH(&sbptr->DynPtr->OrientMat);
 
 	sbptr->shapeIndex = dbtt->shape_num;
 
 	return(void*)db;
 }
 
-
-
-
-
 /*********************************************************************
 ******************************** ASSIGN SB  Names ********************/
 
-
 void AssignAllSBNames()
 {
-
 	int stratblock = NumActiveStBlocks;
 	GLOBALASSERT(stratblock>=0);
 
@@ -1178,7 +1170,7 @@ void AssignAllSBNames()
 						}
 					case I_BehaviourLift:
 					{
-						LIFT_BEHAV_BLOCK *lift_bhv;	
+						LIFT_BEHAV_BLOCK *lift_bhv;
 						LIFT_STATION *curr_stn;
 						lift_bhv = (LIFT_BEHAV_BLOCK*)sbptr->SBdataptr;
 						GLOBALASSERT((lift_bhv->bhvr_type == I_BehaviourLift));
@@ -1188,26 +1180,25 @@ void AssignAllSBNames()
 						if((*(int*)&curr_stn->lift_floor_switch_name[0]) ||	(*(int*)&curr_stn->lift_floor_switch_name[4]))
 							curr_stn->lift_floor_switch = FindSBWithName(curr_stn->lift_floor_switch_name); //lifts with switches that don't teleport,don't know about their floor switches
 						curr_stn->lift_door = FindSBWithName(curr_stn->lift_door_name);
-						
+
 						// find my module pointer
 
 						{
 							STRATEGYBLOCK *my_sb;
 							my_sb = FindSBWithName(curr_stn->my_sb_name);
-							if(my_sb)							
+							if(my_sb)
 								curr_stn->lift_module = my_sb->SBmoptr;
-								
-						}							
-							
+						}
+
 						// find the controlling lift behave block
 						lift_bhv->control_sb = FindSBWithName(lift_bhv->control_sb_name);
-						
+
 						GLOBALASSERT(lift_bhv->control_sb);
 
 						{
 							LIFT_STATION **lift_array;
-							LIFT_BEHAV_BLOCK *cont_bhv = lift_bhv->control_sb->SBdataptr;
-	
+							LIFT_BEHAV_BLOCK *cont_bhv = (LIFT_BEHAV_BLOCK*)lift_bhv->control_sb->SBdataptr;
+
 							lift_bhv->lift_control = cont_bhv->lift_control;
 							lift_array = cont_bhv->lift_control->lift_stations;
 
@@ -1221,7 +1212,7 @@ void AssignAllSBNames()
 							// i can say
 
 							GLOBALASSERT(lift_bhv->lift_control->curr_station == -1);
-							
+
 							lift_bhv->lift_control->curr_station = curr_stn->num_floor;
 							if(curr_stn->env == AvP.CurrentEnv)
 							{
@@ -1233,15 +1224,11 @@ void AssignAllSBNames()
 										RequestState(curr_stn->lift_floor_switch, 1, 0);
 								}
 							}
-							
-							
 						}
-
-							
 
 						break;
 					}
-					
+
 					case I_BehaviourXenoborgMorphRoom:
 					{
 						XENO_MORPH_ROOM_DATA * xmrd = (XENO_MORPH_ROOM_DATA *)sbptr->SBdataptr;
@@ -1251,57 +1238,57 @@ void AssignAllSBNames()
 						xmrd->DoorToRoom = FindSBWithName(xmrd->doorID);
 						break;
 					}
-					
+
 					default:
 						break;
-					
+
 					case I_BehaviourAlien:
 						{
 							ALIEN_STATUS_BLOCK *alienStatus = (ALIEN_STATUS_BLOCK *)sbptr->SBdataptr;
 							alienStatus->death_target_sbptr = FindSBWithName(alienStatus->death_target_ID);
-						
+
 			 				break;
 						}
 					case I_BehaviourMarine:
 						{
 							MARINE_STATUS_BLOCK *marineStatus = (MARINE_STATUS_BLOCK *)sbptr->SBdataptr;
 							marineStatus->death_target_sbptr = FindSBWithName(marineStatus->death_target_ID);
-						
+
 			 				break;
 						}
 					case I_BehaviourPredator:
 						{
 							PREDATOR_STATUS_BLOCK *predatorStatus = (PREDATOR_STATUS_BLOCK *)sbptr->SBdataptr;
 							predatorStatus->death_target_sbptr = FindSBWithName(predatorStatus->death_target_ID);
-						
+
 			 				break;
 						}
 					case I_BehaviourXenoborg:
 						{
 							XENO_STATUS_BLOCK *xenoStatus = (XENO_STATUS_BLOCK *)sbptr->SBdataptr;
 							xenoStatus->death_target_sbptr = FindSBWithName(xenoStatus->death_target_ID);
-						
+
 			 				break;
 						}
 					case I_BehaviourAutoGun:
 						{
 							AUTOGUN_STATUS_BLOCK *agunStatus = (AUTOGUN_STATUS_BLOCK *)sbptr->SBdataptr;
 							agunStatus->death_target_sbptr = FindSBWithName(agunStatus->death_target_ID);
-						
+
 			 				break;
 						}
 					case I_BehaviourQueenAlien:
 						{
 							QUEEN_STATUS_BLOCK *queenStatus = (QUEEN_STATUS_BLOCK *)sbptr->SBdataptr;
 							queenStatus->death_target_sbptr = FindSBWithName(queenStatus->death_target_ID);
-						
+
 			 				break;
 						}
 					case I_BehaviourFaceHugger:
 						{
 							FACEHUGGER_STATUS_BLOCK *facehuggerStatus = (FACEHUGGER_STATUS_BLOCK *)sbptr->SBdataptr;
 							facehuggerStatus->death_target_sbptr = FindSBWithName(facehuggerStatus->death_target_ID);
-					
+
 			 				break;
 						}
 					case I_BehaviourTrackObject:
@@ -1317,9 +1304,9 @@ void AssignAllSBNames()
 									stp->targets[j].target_sbptr=FindSBWithName(stp->targets[j].target_name);
 								}
 							}
-							
+
 							to_bhv->destruct_target_sbptr=FindSBWithName(to_bhv->destruct_target_ID);
-								
+
 			 				break;
 						}
 					case I_BehaviourPlacedHierarchy:
@@ -1335,10 +1322,10 @@ void AssignAllSBNames()
 									stp->targets[j].target_sbptr=FindSBWithName(stp->targets[j].target_name);
 								}
 							}
-							
+
 			 				break;
 						}
-					
+
 					case I_BehaviourInanimateObject:
 						{
 							INANIMATEOBJECT_STATUSBLOCK* objectstatusptr=(INANIMATEOBJECT_STATUSBLOCK*)sbptr->SBdataptr;
@@ -1350,19 +1337,19 @@ void AssignAllSBNames()
 								}
 							}
 							break;
-						
+
 						}
-					
+
 					case I_BehaviourPlacedLight:
 						{
 							PLACED_LIGHT_BEHAV_BLOCK* pl_bhv=(PLACED_LIGHT_BEHAV_BLOCK*)sbptr->SBdataptr;
 							if(pl_bhv)
 							{
 								pl_bhv->destruct_target_sbptr=FindSBWithName(pl_bhv->destruct_target_ID);
-								
+
 							}
 							break;
-						
+
 						}
 					case I_BehaviourVideoScreen:
 						{
@@ -1370,10 +1357,10 @@ void AssignAllSBNames()
 							if(videoScreen)
 							{
 								videoScreen->destruct_target_sbptr=FindSBWithName(videoScreen->destruct_target_ID);
-								
+
 							}
 							break;
-						
+
 						}
 			  }
 		}
@@ -1382,11 +1369,11 @@ void AssignAllSBNames()
 
 /**************************************************************************************/
 /******************************* STUFF TO DO BEHAVIOURS *******************************/
-							 					
-							 																 
+
+
 void ObjectBehaviours(void)
 {
-	int i;	
+	int i;
 
 #ifdef AVP_DEBUG_VERSION
 	for (i=0; i<NumActiveStBlocks; i++)
@@ -1409,12 +1396,12 @@ void ObjectBehaviours(void)
 	RequestEnvChangeViaLift	= 0;
 
 	i = 0;
-	
+
 	while(i < NumActiveStBlocks)
 	{
 		ExecuteBehaviour(ActiveStBlockList[i++]);
   }
-}			
+}
 
 
 void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
@@ -1426,7 +1413,7 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 		case I_BehaviourInanimateObject:
 			InanimateObjectBehaviour(sbptr);
 			break;
-	
+
 		case I_BehaviourProximityDoor:
 			DoorProxBehaveFun(sbptr);
 			break;
@@ -1458,11 +1445,11 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 		case I_BehaviourSwitchDoor:
 			SwitchDoorBehaviour(sbptr);
 			break;
-	  
+
 		case I_BehaviourLinkSwitch:
 			LinkSwitchBehaveFun(sbptr);
 			break;
-			
+
 		case I_BehaviourPlatform:
 			PlatformLiftBehaviour(sbptr);
 			break;
@@ -1470,12 +1457,12 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 		case I_BehaviourSimpleAnimation:
 			SimpleAnimBehaveFun(sbptr);
 			break;
-		
+
 		case I_BehaviourAutoGun:
 			AutoGunBehaveFun(sbptr);
-			break;			
+			break;
 
-	
+
 		case I_BehaviourFragmentationGrenade:
 		case I_BehaviourGrenade:
 			GrenadeBehaviour(sbptr);
@@ -1483,7 +1470,7 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 		case I_BehaviourMolotov:
 			MolotovBehaviour(sbptr);
 			break;
-    	
+
     case I_BehaviourProximityGrenade:
 			ProximityGrenadeBehaviour(sbptr);
     	break;
@@ -1491,11 +1478,11 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
     case I_BehaviourFlareGrenade:
 			FlareGrenadeBehaviour(sbptr);
     	break;
-				
+
 		case I_BehaviourClusterGrenade:
 			ClusterGrenadeBehaviour(sbptr);
 			break;
-	 
+
 		case I_BehaviourFrisbee:
 			FrisbeeBehaviour(sbptr);
 			break;
@@ -1507,7 +1494,7 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 		case I_BehaviourPulseGrenade:
 			PulseGrenadeBehaviour(sbptr);
 			break;
-		
+
 		case I_BehaviourFaceHugger:
 			FacehuggerBehaviour(sbptr);
 			break;
@@ -1536,8 +1523,8 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 		case I_BehaviourSeal:
 			MarineBehaviour(sbptr);
 			break;
-					
-		
+
+
 		case I_BehaviourHierarchicalFragment:
 			{
 				#if 0
@@ -1564,10 +1551,10 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 
 		case I_BehaviourOneShotAnim:
 			OneShot_Anim_BehaveFun(sbptr);
-			break;			
-  		
+			break;
+
 		case I_BehaviourPPPlasmaBolt:
-			PPPlasmaBoltBehaviour(sbptr); 
+			PPPlasmaBoltBehaviour(sbptr);
 			break;
 
 		case I_BehaviourSpeargunBolt:
@@ -1575,29 +1562,29 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 			break;
 
 		case I_BehaviourPredatorEnergyBolt:
-			PredatorEnergyBoltBehaviour(sbptr); 
+			PredatorEnergyBoltBehaviour(sbptr);
 			break;
 
 		case I_BehaviourFrisbeeEnergyBolt:
-			FrisbeeEnergyBoltBehaviour(sbptr); 
+			FrisbeeEnergyBoltBehaviour(sbptr);
 			break;
 
 		case I_BehaviourXenoborgEnergyBolt:
-			XenoborgEnergyBoltBehaviour(sbptr); 
+			XenoborgEnergyBoltBehaviour(sbptr);
 			break;
-		
+
 		case I_BehaviourAlienSpit:
-			AlienSpitBehaviour(sbptr); 
+			AlienSpitBehaviour(sbptr);
 			break;
 
 		case I_BehaviourNPCPredatorDisc:
 			NPCDiscBehaviour(sbptr);
 			break;
-		
+
 		case I_BehaviourPredatorDisc_SeekTrack:
 			DiscBehaviour_SeekTrack(sbptr);
 			break;
-		
+
 		#if 0
 		/* KJL 17:07:53 02/24/97 - I've turned these off for now since they
 		always seem to cause crashes. */
@@ -1605,11 +1592,11 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 			FlameProjectileFunction(sbptr);
 			break;
 		#endif
-		
+
 		case I_BehaviourDatabase:
 			/* KJL 16:30:21 03/13/97 - no behaviour required */
 			break;
-		
+
  		case I_BehaviourNetGhost:
 			NetGhostBehaviour(sbptr);
 			break;
@@ -1621,7 +1608,7 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 		case I_BehaviourXenoborgMorphRoom:
 			XenoMorphRoomBehaviour (sbptr);
 			break;
-    
+
 		case I_BehaviourLightFX:
 			LightFXBehaveFun (sbptr);
 			break;
@@ -1647,7 +1634,7 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 			break;
 		}
 		case I_BehaviourRubberDuck:
-		{	
+		{
 			RubberDuckBehaviour(sbptr);
 			break;
 		}
@@ -1656,7 +1643,7 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 			PlacedHierarchyBehaveFun(sbptr);
 			break;
 		}
-				
+
 		case I_BehaviourPlacedLight:
 			PlacedLightBehaviour(sbptr);
 			break;
@@ -1664,7 +1651,7 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 		case I_BehaviourVideoScreen:
 			VideoScreenBehaviour(sbptr);
 			break;
-	
+
 		case I_BehaviourPowerCable:
 			PowerCableBehaveFun(sbptr);
 			break;
@@ -1751,23 +1738,23 @@ static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
 	mptr = sbptr->SBmoptr;
 	GLOBALASSERT(mptr);
 	dptr = sbptr->SBdptr;
-	
-	
+
+
 	/* update morphing.... */
 	UpdateMorphing(mctrl);
 
 	/*-----------------Patrick 29/4/97-------------------------
 	 Little patch for networking: doors should run the
 	 AnythingNearProxDoor() test even when they are not visible
-	 ----------------------------------------------------------*/ 
-	 
+	 ----------------------------------------------------------*/
+
 	if(AvP.Network==I_No_Network)
 	{
 		/* if door is visible check for proximity of player, aliens, and whatever... */
 		if(dptr) open_door = AnythingNearProxDoor(mptr,doorbhv);
 	}
 	else open_door = AnythingNearProxDoor(mptr,doorbhv);
-	
+
 
 
  	/* check for an alien trigger:
@@ -1791,9 +1778,9 @@ static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
  	switch(doorbhv->door_state)
 	{
 		case I_door_opening:
-		{	
+		{
 			mptr->m_flags |= m_flag_open;
-			if(mctrl->ObMorphFlags & mph_flag_finished)		
+			if(mctrl->ObMorphFlags & mph_flag_finished)
 			{
 		        if (doorbhv->SoundHandle!=SOUND_NOACTIVEINDEX)
 		        {
@@ -1813,9 +1800,9 @@ static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
 		case I_door_closing:
 		{
 			if(open_door)
-			{				
-      								
-				if(dptr) 
+			{
+
+				if(dptr)
 				{
 					OpenDoor(mctrl, doorbhv->door_opening_speed);
 					if (doorbhv->SoundHandle==SOUND_NOACTIVEINDEX)
@@ -1828,8 +1815,8 @@ static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
 					 		Sound_Play(SID_DOORMID,"delp",&mptr->m_world,&doorbhv->SoundHandle,doorbhv->doorType);
 						 }
 				 	}
-		    }	
-				else 
+		    }
+				else
 				{
 				  OpenDoor(mctrl, DOOR_OPENFASTSPEED);
 				}
@@ -1847,11 +1834,11 @@ static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
 					 }
 		       		Sound_Stop(doorbhv->SoundHandle);
 		        }
-        
+
 				doorbhv->door_state = I_door_closed;
 				mptr->m_flags &= ~m_flag_open;
 			}
-				
+
 			break;
 		}
 
@@ -1860,8 +1847,8 @@ static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
 			mptr->m_flags |= m_flag_open;
 			if(!open_door)
 			{
-          
- 				if(dptr) 
+
+ 				if(dptr)
 				{
   		         if (doorbhv->triggeredByMarine) {
 			 		Sound_Play(SID_DOORSTART,"dpm",&mptr->m_world,doorbhv->doorType);
@@ -1869,12 +1856,12 @@ static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
 				 } else {
 			 		Sound_Play(SID_DOORSTART,"dp",&mptr->m_world,doorbhv->doorType);
 			 		Sound_Play(SID_DOORMID,"delp",&mptr->m_world,&doorbhv->SoundHandle,doorbhv->doorType);
-				 }			 			  				 							
+				 }
 					doorbhv->alienTimer = 0;
 					CloseDoor(mctrl,doorbhv->door_closing_speed);
 					doorbhv->door_state = I_door_closing;
 				}
-				else 
+				else
 				{
 					doorbhv->alienTimer -= NormalFrameTime;
 					if(!(doorbhv->alienTimer>0))
@@ -1885,16 +1872,16 @@ static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
 					}
 				}
 			}
-				
+
 			break;
 		}
-			
+
 		case I_door_closed:
 		{
 			mptr->m_flags &= ~m_flag_open;
 			if(open_door)
 			{
-		 		if(dptr) 
+		 		if(dptr)
 				{
 	  		         if (doorbhv->triggeredByMarine) {
 						Sound_Play(SID_DOORSTART,"dpm",&mptr->m_world,doorbhv->doorType);
@@ -1911,10 +1898,10 @@ static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
 			} else {
 				doorbhv->triggeredByMarine = 0;
 			}
-			
+
 			break;
 		}
-		
+
 		default:
 				LOCALASSERT(1==0);
 	}
@@ -1935,7 +1922,7 @@ void OpenDoor(MORPHCTRL *mctrl, int speed)
 void CloseDoor(MORPHCTRL *mctrl, int speed)
 {
 	LOCALASSERT(mctrl);
-	
+
 	mctrl->ObMorphFlags = mph_flag_play;
 	mctrl->ObMorphFlags |= mph_flag_noloop;
 	mctrl->ObMorphFlags &= ~mph_flag_reverse;
@@ -1943,15 +1930,15 @@ void CloseDoor(MORPHCTRL *mctrl, int speed)
 }
 
 /*---------------Patrick 6/1/97-------------------
-  Sorry, but I can't think of anything better than 
+  Sorry, but I can't think of anything better than
   searching the	entire sb list for any object that
   might trigger a door....
   ------------------------------------------------*/
 static int AnythingNearProxDoor(MODULE *doorModulePtr,PROXDOOR_BEHAV_BLOCK *doorbhv)
-{	
-	/* KJL 18:06:59 19/02/98 - I've rewritten this check so that it can cope with very tall doors. */	
+{
+	/* KJL 18:06:59 19/02/98 - I've rewritten this check so that it can cope with very tall doors. */
 	extern int NumActiveStBlocks;
-	extern STRATEGYBLOCK *ActiveStBlockList[];	
+	extern STRATEGYBLOCK *ActiveStBlockList[];
 
 	int sbIndex = 0;
 	STRATEGYBLOCK *sbPtr;
@@ -1984,13 +1971,13 @@ static int AnythingNearProxDoor(MODULE *doorModulePtr,PROXDOOR_BEHAV_BLOCK *door
 		maxZ = doorModulePtr->m_world.vz + DOOR_OPENDISTANCE;
 		minZ = doorModulePtr->m_world.vz - DOOR_OPENDISTANCE;
 	}
-	/* loop thro' the strategy block list... 
+	/* loop thro' the strategy block list...
 	looking for triggerable objects (please feel free to add any
 	sensible object types) */
 	retval=FALSE;
 
 	while(sbIndex < NumActiveStBlocks)
-	{	
+	{
 		sbPtr = ActiveStBlockList[sbIndex++];
 		dynPtr = sbPtr->DynPtr;
 		dPtr = sbPtr->SBdptr;
@@ -2015,11 +2002,11 @@ static int AnythingNearProxDoor(MODULE *doorModulePtr,PROXDOOR_BEHAV_BLOCK *door
 			(sbPtr->I_SBtype == I_BehaviourNetGhost)||
 //			(sbPtr->I_SBtype == I_BehaviourFlareGrenade)||
 			(sbPtr->I_SBtype == I_BehaviourFragmentationGrenade)||
-			(sbPtr->I_SBtype == I_BehaviourPredatorDisc_SeekTrack)||		
+			(sbPtr->I_SBtype == I_BehaviourPredatorDisc_SeekTrack)||
 			(sbPtr->I_SBtype == I_BehaviourNetCorpse)||
 			(sbPtr->I_SBtype == I_BehaviourHierarchicalFragment)||
-			(sbPtr->I_SBtype == I_BehaviourNPCPredatorDisc))		
-		  )		
+			(sbPtr->I_SBtype == I_BehaviourNPCPredatorDisc))
+		  )
 		{
 			if (dynPtr->Position.vy > minY && dynPtr->Position.vy < maxY)
 			{
@@ -2031,15 +2018,15 @@ static int AnythingNearProxDoor(MODULE *doorModulePtr,PROXDOOR_BEHAV_BLOCK *door
 							||(sbPtr->I_SBtype==I_BehaviourSeal)) {
 							doorbhv->triggeredByMarine = 1;
 						}
-						retval=TRUE;	
+						retval=TRUE;
 					}
 				}
 			}
-		}		
+		}
 	}
-	
+
 	return(retval);
-	
+
 }
 
 
@@ -2061,7 +2048,7 @@ static void SimpleAnimBehaveFun(STRATEGYBLOCK* sbptr)
 	if(dptr)
 	{
 		if(!dptr->ObTxAnimCtrlBlks)
-			{ 
+			{
 				dptr->ObTxAnimCtrlBlks = sanimbhv->tacbSimple;
 			}
 	}
@@ -2070,14 +2057,14 @@ static void SimpleAnimBehaveFun(STRATEGYBLOCK* sbptr)
 
 /********************* SUPPORT  FUNCTION ***********************/
 /*
-	these set the reqest state in a strategy block 
+	these set the reqest state in a strategy block
 */
 
 void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester)
 {
 	//lowest bit of message corresponds to old on/off state
 	//the rest is extended information ,the interpretation of which depends on the receiving strategy
-	BOOL state=message & 1;	
+	BOOL state=message & 1;
 	if(!sbptr)
 	{
 		return;
@@ -2087,7 +2074,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 	if(sbptr->SBflags.destroyed_but_preserved)
 	{
 		//target doesn't exist anymore so ignore request.
-		return;	
+		return;
 	}
 
 	#if DB_LEVEL >=3
@@ -2121,7 +2108,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 						bs_bhv->request = I_request_on;
 					else
 						bs_bhv->request = I_request_off;
-										
+
 					break;
 				}
 
@@ -2131,11 +2118,11 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 
 					// 0 = rest state
 					// 1 = unusual state
-					
+
 					bs_bhv = (LINK_SWITCH_BEHAV_BLOCK*)sbptr->SBdataptr;
 					GLOBALASSERT((bs_bhv->bhvr_type == I_BehaviourLinkSwitch));
 
-					if (SBRequester) if (SBRequester->I_SBtype == I_BehaviourBinarySwitch || 
+					if (SBRequester) if (SBRequester->I_SBtype == I_BehaviourBinarySwitch ||
 															SBRequester->I_SBtype == I_BehaviourLinkSwitch)
 					{
 						//if the request has come from one of the linked switches , ignore it
@@ -2153,12 +2140,11 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 						}
 					}
 
-
 					if(state)
-						bs_bhv->request = I_request_on;
+						bs_bhv->request = linkswitch_request_on;//I_request_on;
 					else
-						bs_bhv->request = I_request_off;
-										
+						bs_bhv->request = linkswitch_request_off;//I_request_off;
+
 					break;
 				}
 
@@ -2166,7 +2152,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 				{
 					PROXDOOR_BEHAV_BLOCK *door_bhv;
 					MORPHCTRL *mctrl;
-				
+
 					door_bhv = (PROXDOOR_BEHAV_BLOCK*)sbptr->SBdataptr;
 					GLOBALASSERT((door_bhv->bhvr_type == I_BehaviourProximityDoor));
 					mctrl = door_bhv->PDmctrl;
@@ -2182,18 +2168,18 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 							door_bhv->door_locked = 1;
 						}
 					break;
-				}	
+				}
 
 			case I_BehaviourLiftDoor:
 				{
 					LIFT_DOOR_BEHAV_BLOCK *door_bhv;
 					door_bhv = (LIFT_DOOR_BEHAV_BLOCK*)sbptr->SBdataptr;
 					GLOBALASSERT((door_bhv->bhvr_type == I_BehaviourLiftDoor));
-		
+
 					if(state == 1)
 						door_bhv->request_state = I_door_open;
 					else
-						door_bhv->request_state = I_door_closed;					
+						door_bhv->request_state = I_door_closed;
 
 					break;
 				}
@@ -2203,7 +2189,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 				SWITCH_DOOR_BEHAV_BLOCK *door_bhv;
 				door_bhv = (SWITCH_DOOR_BEHAV_BLOCK*)sbptr->SBdataptr;
 				GLOBALASSERT((door_bhv->myBehaviourType == I_BehaviourSwitchDoor));
-		
+
 				if(state == 1) door_bhv->requestOpen = 1;
 				else door_bhv->requestClose = 1;
 				break;
@@ -2211,7 +2197,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 
 			case I_BehaviourLift:
 				{
-					LIFT_BEHAV_BLOCK *lift_bhv;	
+					LIFT_BEHAV_BLOCK *lift_bhv;
 					LIFT_STATION *lift_stn;
 			 		GLOBALASSERT(sbptr);
 					lift_bhv = (LIFT_BEHAV_BLOCK*)sbptr->SBdataptr;
@@ -2222,16 +2208,16 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 					if(state == 1)
 						lift_stn->called = 1;
 					else
-						lift_stn->called = 0;					
+						lift_stn->called = 0;
 
 					break;
 				}
 
 			case I_BehaviourPlatform:
 			{
-							
+
 				((PLATFORMLIFT_BEHAVIOUR_BLOCK*)sbptr->SBdataptr)->Enabled = state;
-				
+
 				break;
 			}
 
@@ -2239,7 +2225,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 			{
 				AUTOGUN_STATUS_BLOCK *agunStatusPointer;
 				agunStatusPointer = (AUTOGUN_STATUS_BLOCK*)sbptr->SBdataptr;
-				
+
 				if ((agunStatusPointer->behaviourState==I_inactive)&&(state==1)) {
 					agunStatusPointer->behaviourState=I_tracking;
 				} else if ((agunStatusPointer->behaviourState==I_tracking)&&(state==0)) {
@@ -2249,22 +2235,22 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 
 				break;
 			}
-			
+
 			case I_BehaviourGenerator:
 			{
 				((GENERATOR_BLOCK*)sbptr->SBdataptr)->Active = state;
 				break;
 			}
-			
+
 			case I_BehaviourLightFX:
 			{
 				LIGHT_FX_BEHAV_BLOCK * lfxbb = (LIGHT_FX_BEHAV_BLOCK *)sbptr->SBdataptr;
-				
+
 				if (lfxbb->type == LFX_Switch)
 				{
 					switch (lfxbb->current_state)
 					{
-						
+
 						case LFXS_LightOn:
 						{
 							if(state==0)
@@ -2274,7 +2260,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 							}
 							break;
 						}
-						
+
 						case LFXS_LightOff:
 						{
 							if(state==1)
@@ -2284,7 +2270,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 							}
 							break;
 						}
-						
+
 						case LFXS_LightFadingUp:
 						{
 							if(state==0)
@@ -2294,7 +2280,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 							}
 							break;
 						}
-						
+
 						case LFXS_LightFadingDown:
 						{
 							if(state==1)
@@ -2304,7 +2290,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 							}
 							break;
 						}
-						
+
 						default:
 						{
 							GLOBALASSERT (0 == "Light FX state not supported");
@@ -2316,7 +2302,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 				{
 					switch (lfxbb->current_state)
 					{
-						
+
 						case LFXS_LightOn:
 						{
 							if(state==0)
@@ -2326,7 +2312,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 							}
 							break;
 						}
-						
+
 						case LFXS_LightOff:
 						{
 							if(state==1)
@@ -2336,7 +2322,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 							}
 							break;
 						}
-						
+
 						case LFXS_LightFadingUp:
 						{
 							if(state==0)
@@ -2347,7 +2333,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 							}
 							break;
 						}
-						
+
 						case LFXS_LightFadingDown:
 						{
 							if(state==1)
@@ -2357,7 +2343,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 							}
 							break;
 						}
-						
+
 						default:
 						{
 							GLOBALASSERT (0 == "Light FX state not supported");
@@ -2377,7 +2363,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 								lfxbb->current_state = LFXS_LightOff;
 							}
 							break;
-							
+
 						case LFXS_LightOff :
 							if(state==1)
 							{
@@ -2388,23 +2374,23 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 						default: ;
 					}
 				}
-				
-				
+
+
 				break;
 			}
 			case I_BehaviourMissionComplete:
 				{
 					SendRequestToMissionStrategy(sbptr,state,message>>1);
-						
+
 					break;
 				}
 			case I_BehaviourMessage:
 				{
 					SendRequestToMessageStrategy(sbptr,state,message>>1);
-									
+
 					break;
 				}
-			
+
 			case I_BehaviourTrackObject:
 				{
 
@@ -2429,7 +2415,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 					}
 					else
 						to_bhv->request = track_request_stop;
-										
+
 					break;
 				}
 
@@ -2444,7 +2430,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 						f_bhv->state = fan_state_go;
 					else
 						f_bhv->state = fan_state_stop;
-										
+
 					break;
 				}
 
@@ -2472,7 +2458,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 			case I_BehaviourPlacedLight:
 				{
 					SendRequestToPlacedLight(sbptr,state,message>>1);
-						
+
 					break;
 				}
 			case I_BehaviourAlien:
@@ -2487,9 +2473,9 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 				}
 			case I_BehaviourFaceHugger:
 				{
-					FACEHUGGER_STATUS_BLOCK *facehuggerStatusPointer;    
+					FACEHUGGER_STATUS_BLOCK *facehuggerStatusPointer;
 
-					facehuggerStatusPointer = (FACEHUGGER_STATUS_BLOCK *)(sbptr->SBdataptr);    
+					facehuggerStatusPointer = (FACEHUGGER_STATUS_BLOCK *)(sbptr->SBdataptr);
 					LOCALASSERT(facehuggerStatusPointer);
 
 					if (facehuggerStatusPointer->nearBehaviourState==FHNS_Floating) {
@@ -2532,7 +2518,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 					SendRequestToMarine(sbptr,state,message>>1);
 				}
 				break;
-			
+
 			case I_BehaviourDeathVolume:
 				{
 
@@ -2541,7 +2527,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 					GLOBALASSERT((dv_bhv->bhvr_type == I_BehaviourDeathVolume));
 
 					dv_bhv->active=state;
-										
+
 					break;
 				}
 			case I_BehaviourSelfDestruct:
@@ -2552,13 +2538,13 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 					GLOBALASSERT((sd_bhv->bhvr_type == I_BehaviourSelfDestruct));
 
 					sd_bhv->active=state;
-										
+
 					break;
 				}
 			case I_BehaviourParticleGenerator:
 				{
 					SendRequestToParticleGenerator(sbptr,state,message>>1);
-						
+
 					break;
 				}
 			default:
@@ -2572,7 +2558,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 BOOL GetState(STRATEGYBLOCK* sbptr)
 {
 	GLOBALASSERT(sbptr);
-	
+
 	switch (sbptr->I_SBtype)
 	  {
 			case I_BehaviourBinarySwitch:
@@ -2585,7 +2571,7 @@ BOOL GetState(STRATEGYBLOCK* sbptr)
 					GLOBALASSERT((bs_bhv->bhvr_type == I_BehaviourBinarySwitch));
 
 					return((BOOL)bs_bhv->state);
-										
+
 					break;
 				}
 			case I_BehaviourLinkSwitch:
@@ -2598,7 +2584,7 @@ BOOL GetState(STRATEGYBLOCK* sbptr)
 					GLOBALASSERT((bs_bhv->bhvr_type == I_BehaviourLinkSwitch));
 
 					return((BOOL)bs_bhv->state);
-										
+
 					break;
 				}
 			case I_BehaviourProximityDoor:
@@ -2608,12 +2594,12 @@ BOOL GetState(STRATEGYBLOCK* sbptr)
 					GLOBALASSERT((door_bhv->bhvr_type == I_BehaviourProximityDoor));
 
 					// returns true only when fully open
-					
+
 					if(door_bhv->door_state == I_door_open)
 						return((BOOL)1);
 					else
 						return((BOOL)0);
-						
+
 					break;
 				}
 			case I_BehaviourSwitchDoor:
@@ -2622,9 +2608,9 @@ BOOL GetState(STRATEGYBLOCK* sbptr)
 					SWITCH_DOOR_BEHAV_BLOCK *door_bhv;
 					door_bhv = (SWITCH_DOOR_BEHAV_BLOCK*)sbptr->SBdataptr;
 					GLOBALASSERT(door_bhv->myBehaviourType == I_BehaviourSwitchDoor);
-										
+
 					if(door_bhv->doorState == I_door_open) return((BOOL)1);
-					else return((BOOL)0);	
+					else return((BOOL)0);
 					break;
 				}
 			case I_BehaviourLiftDoor:
@@ -2635,17 +2621,17 @@ BOOL GetState(STRATEGYBLOCK* sbptr)
 
 					// returns true only when fully open so that the lift
 					// dosn't start to move when we can still see out
-				
+
 					if(door_bhv->door_state == I_door_closed)
 						return((BOOL)0);
 					else
 						return((BOOL)1);
-						
+
 					break;
 				}
 			case I_BehaviourLift:
 				{
-					LIFT_BEHAV_BLOCK *lift_bhv;	
+					LIFT_BEHAV_BLOCK *lift_bhv;
 					LIFT_STATION *lift_stn;
 			 		GLOBALASSERT(sbptr);
 					lift_bhv = (LIFT_BEHAV_BLOCK*)sbptr->SBdataptr;
@@ -2667,7 +2653,7 @@ BOOL GetState(STRATEGYBLOCK* sbptr)
 
 
 
-DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr) 
+DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 {
   // This function creates the specified object, fully
   // initialized, WITHOUT a modulemapblock into which
@@ -2681,7 +2667,7 @@ DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
   MODULEMAPBLOCK *mmbptr;
   MODULE m_temp;
   //TXACTRLBLK *taPtr;
-	
+
   if (NumActiveBlocks >= maxobjects) return (DISPLAYBLOCK *)NULL;
   if (NumActiveStBlocks >= maxstblocks) return (DISPLAYBLOCK *)NULL;
 
@@ -2690,7 +2676,7 @@ DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
   // information and extent data
 
   mmbptr = &TempModuleMap;
-                
+
   switch (bhvr)
   {
     case I_BehaviourAutoGunMuzzleFlash:
@@ -2698,13 +2684,13 @@ DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 			CreateShapeInstance(mmbptr,"Sntrymuz");
 			break;
 		}
-	
+
 		case I_BehaviourRocket:
 		{
 			CreateShapeInstance(mmbptr,"missile");
 		    break;
-		}				
-						
+		}
+
 		case I_BehaviourFrisbee:
 		case I_BehaviourNPCPredatorDisc:
 		case I_BehaviourPredatorDisc_SeekTrack:
@@ -2712,7 +2698,7 @@ DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 			//CreateShapeInstance(mmbptr,"disk@hnpcpredator");
 			CreateShapeInstance(mmbptr,"Shell");
 		    break;
-		}				
+		}
 
 		case I_BehaviourPulseGrenade: /* need a new shape */
 		case I_BehaviourGrenade:
@@ -2734,9 +2720,9 @@ DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 		{
 			CreateShapeInstance(mmbptr,"Proxmine");
 			break;
-		}		
-		
-    			
+		}
+
+
 		case I_BehaviourFlareGrenade:
 		{
 			CreateShapeInstance(mmbptr,"Flare");
@@ -2747,8 +2733,8 @@ DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 		{
 			CreateShapeInstance(mmbptr,"spear");
 			break;
-		}				
-		case I_BehaviourPPPlasmaBolt:		
+		}
+		case I_BehaviourPPPlasmaBolt:
 		case I_BehaviourFrisbeeEnergyBolt:
 		case I_BehaviourPredatorEnergyBolt:
 		case I_BehaviourXenoborgEnergyBolt:
@@ -2760,12 +2746,12 @@ DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 			CreateShapeInstance(mmbptr,"Shell");
 
 			break;
-		}				
+		}
 		case I_BehaviourAlienSpit:
 		{
 			CreateShapeInstance(mmbptr,"Spit");
 			break;
-		}				
+		}
 
     case I_BehaviourTest:
     default:
@@ -2773,7 +2759,7 @@ DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
       // Don't call this function for undefined types
       GLOBALASSERT (1 == 0);
 			break;
-    }            
+    }
 	}
 
   // And allocate the modulemapblock object
@@ -2782,8 +2768,8 @@ DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 	m_temp.m_lightarray = NULL;
   m_temp.m_mapptr = mmbptr;
   m_temp.m_sbptr = (STRATEGYBLOCK*)NULL;
-  AllocateModuleObject(&m_temp); 
-   
+  AllocateModuleObject(&m_temp);
+
   dptr = m_temp.m_dptr;
 
 	if (dptr == 0) return(DISPLAYBLOCK*)NULL;
@@ -2792,9 +2778,9 @@ DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 	dptr->ObWorld = *positionPtr;
 
  	sptr = AttachNewStratBlock((MODULE*)NULL, mmbptr, dptr);
-   
+
   if (sptr == 0) return(DISPLAYBLOCK*)NULL;
-  
+
   // 2. NOW set up the strategyblock-specific fields for
   // the new displayblock. We won't go through the "AttachNew
   // StrategyBlock" and "AssignRunTimeBehaviours" pair, since
@@ -2803,7 +2789,7 @@ DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
   // between them.
 
   sptr->I_SBtype = bhvr;
-	    
+
   switch (bhvr)
   {
     case I_BehaviourAutoGunMuzzleFlash:
@@ -2811,13 +2797,13 @@ DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 		{
 			sptr->SBdataptr = (ONE_SHOT_BEHAV_BLOCK *) AllocateMem(sizeof(ONE_SHOT_BEHAV_BLOCK ));
 
-   		if (sptr->SBdataptr == 0) 
-			{	
+   		if (sptr->SBdataptr == 0)
+			{
 				// Failed to allocate a strategy block data pointer
 				RemoveBehaviourStrategy(sptr);
 				return (DISPLAYBLOCK*)NULL;
 			}
-	
+
 			((ONE_SHOT_BEHAV_BLOCK * ) sptr->SBdataptr)->counter = ONE_FIXED/10;
 
 			/* KJL 17:23:22 11/26/96 - here's a little something to give a random orientation */
@@ -2835,7 +2821,7 @@ DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 
 			break;
 		}
-      			
+
 
 		case I_BehaviourFrisbee:
 		case I_BehaviourRocket:
@@ -2846,7 +2832,7 @@ DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr)
 		case I_BehaviourClusterGrenade:
 		case I_BehaviourProximityGrenade:
 		case I_BehaviourSpeargunBolt:
-		case I_BehaviourPPPlasmaBolt:		
+		case I_BehaviourPPPlasmaBolt:
 		case I_BehaviourFrisbeeEnergyBolt:
 		case I_BehaviourPredatorEnergyBolt:
 		case I_BehaviourXenoborgEnergyBolt:
@@ -2878,17 +2864,17 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 {
 	GLOBALASSERT(sbptr);
 
-	/* Andy 16/8/97  - Updated to cope with partially allocated strategy blocks 
+	/* Andy 16/8/97  - Updated to cope with partially allocated strategy blocks
 										 We need to check that each allocation has been completed before
 										  trying to deallocate */
-	
+
 	/* CDF 12/11/96 - Destroys ANY strategyblock. *
 	* Please maintain...                         */
 
 	// this is to check for the sb destroy flag
 	// only destroy sbs if DoNotRemoveSB = 0
 	// and the destroy flag is set
-	
+
 	// first check to see if we need the SB in the next env
 	// if we do we need to preserve the contents
 
@@ -2899,12 +2885,12 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 
 		DestroyActiveStrategyBlock(sbptr);
 		return;
-	}			
+	}
 
 	// this notifies the game flow system that an object has been destroyed
-	
 
-	switch(sbptr->I_SBtype) 
+
+	switch(sbptr->I_SBtype)
 	{
 		case I_BehaviourProximityDoor:
 		{
@@ -2914,20 +2900,20 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 				if(doorbhv && doorbhv->SoundHandle!=SOUND_NOACTIVEINDEX) Sound_Stop(doorbhv->SoundHandle);
 			}
 			// 	Deallocater for the doors hack
-			if (sbptr->SBmorphctrl && 
-					sbptr->SBmorphctrl->ObMorphHeader && 
-					sbptr->SBmorphctrl->ObMorphHeader->mph_frames) 
+			if (sbptr->SBmorphctrl &&
+					sbptr->SBmorphctrl->ObMorphHeader &&
+					sbptr->SBmorphctrl->ObMorphHeader->mph_frames)
 				DeallocateMem( sbptr->SBmorphctrl->ObMorphHeader->mph_frames);
-	
-			if (sbptr->SBmorphctrl && 
-					sbptr->SBmorphctrl->ObMorphHeader) 
+
+			if (sbptr->SBmorphctrl &&
+					sbptr->SBmorphctrl->ObMorphHeader)
 				DeallocateMem( sbptr->SBmorphctrl->ObMorphHeader);
 
 			if (sbptr->SBmorphctrl)
 				DeallocateMem( sbptr->SBmorphctrl);
-			
+
 			break;
-		}	
+		}
 		case I_BehaviourLiftDoor:
 		{
 			// 	Deallocater for the doors hack
@@ -2935,22 +2921,22 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 				/* patrick 7/7/97: remove sound handle, if we have one*/
 				LIFT_DOOR_BEHAV_BLOCK *doorbhv = (LIFT_DOOR_BEHAV_BLOCK *)(sbptr->SBdataptr);
 				if(doorbhv && doorbhv->SoundHandle!=SOUND_NOACTIVEINDEX) Sound_Stop(doorbhv->SoundHandle);
-			}							 
+			}
 
-			if (sbptr->SBmorphctrl && 
-					sbptr->SBmorphctrl->ObMorphHeader && 
-					sbptr->SBmorphctrl->ObMorphHeader->mph_frames) 
+			if (sbptr->SBmorphctrl &&
+					sbptr->SBmorphctrl->ObMorphHeader &&
+					sbptr->SBmorphctrl->ObMorphHeader->mph_frames)
 				DeallocateMem( sbptr->SBmorphctrl->ObMorphHeader->mph_frames);
-	
-			if (sbptr->SBmorphctrl && 
-					sbptr->SBmorphctrl->ObMorphHeader) 
+
+			if (sbptr->SBmorphctrl &&
+					sbptr->SBmorphctrl->ObMorphHeader)
 				DeallocateMem( sbptr->SBmorphctrl->ObMorphHeader);
 
 			if (sbptr->SBmorphctrl)
 				DeallocateMem( sbptr->SBmorphctrl);
 
 			break;
-		}	
+		}
 		case I_BehaviourSwitchDoor:
 		{
 			{
@@ -2958,21 +2944,21 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 				SWITCH_DOOR_BEHAV_BLOCK *doorbhv = (SWITCH_DOOR_BEHAV_BLOCK *)(sbptr->SBdataptr);
 				if(doorbhv && doorbhv->SoundHandle!=SOUND_NOACTIVEINDEX) Sound_Stop(doorbhv->SoundHandle);
 			}
-	
-			if (sbptr->SBmorphctrl && 
-					sbptr->SBmorphctrl->ObMorphHeader && 
-					sbptr->SBmorphctrl->ObMorphHeader->mph_frames) 
+
+			if (sbptr->SBmorphctrl &&
+					sbptr->SBmorphctrl->ObMorphHeader &&
+					sbptr->SBmorphctrl->ObMorphHeader->mph_frames)
 				DeallocateMem( sbptr->SBmorphctrl->ObMorphHeader->mph_frames);
-	
-			if (sbptr->SBmorphctrl && 
-					sbptr->SBmorphctrl->ObMorphHeader) 
+
+			if (sbptr->SBmorphctrl &&
+					sbptr->SBmorphctrl->ObMorphHeader)
 				DeallocateMem( sbptr->SBmorphctrl->ObMorphHeader);
 
 			if (sbptr->SBmorphctrl)
 				DeallocateMem( sbptr->SBmorphctrl);
 
 			break;
-		}	
+		}
 		case I_BehaviourSimpleAnimation:
 		{
 
@@ -2994,7 +2980,7 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 				}
 			}
 			break;
-		}	
+		}
 		case I_BehaviourBinarySwitch:
 		{
 			BINARY_SWITCH_BEHAV_BLOCK *bs_bhv;
@@ -3005,7 +2991,7 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 			if (bs_bhv)
 			{
 				GLOBALASSERT(bs_bhv->bhvr_type == I_BehaviourBinarySwitch);
-				
+
 			 	/* Andy 20/8/97: remove sound handle, if we have one*/
 			 	if(bs_bhv->soundHandle!=SOUND_NOACTIVEINDEX) Sound_Stop(bs_bhv->soundHandle);
 
@@ -3013,10 +2999,10 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 				{
 					Reset_Track(bs_bhv->bs_track);
 				}
-						
+
 				txactrl_next = bs_bhv->bs_tac;
 				while(txactrl_next)
-				{	
+				{
 					txactrl = txactrl_next;
 					txactrl_next = txactrl->tac_next;
 					DeallocateMem((void*)txactrl);
@@ -3024,10 +3010,10 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 				if (bs_bhv->target_names) DeallocateMem ((void *)bs_bhv->target_names);
 				if (bs_bhv->bs_targets) DeallocateMem ((void *)bs_bhv->bs_targets);
 				if (bs_bhv->request_messages) DeallocateMem ((void *)bs_bhv->request_messages);
-				
+
 			}
 			break;
-	 	}	
+	 	}
 		case I_BehaviourLinkSwitch:
 		{
 			LINK_SWITCH_BEHAV_BLOCK *bs_bhv;
@@ -3056,17 +3042,17 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 					DeallocateMem((void*)txactrl);
 				}
 
-				
+
 				if (bs_bhv->ls_targets) DeallocateMem ((void *)bs_bhv->ls_targets);
 				if (bs_bhv->lswitch_list) DeallocateMem ((void *)bs_bhv->lswitch_list);
 			}
 			break;
-		}	
+		}
 		case I_BehaviourLift:
 		{
 			LIFT_BEHAV_BLOCK *lift_bhv;
    		lift_bhv = (LIFT_BEHAV_BLOCK*)(sbptr->SBdataptr);
-   		
+
 			if (lift_bhv)
 			{
 				GLOBALASSERT(lift_bhv->bhvr_type == I_BehaviourLift);
@@ -3077,17 +3063,17 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 					if(lift_bhv->lift_control->SoundHandle!=SOUND_NOACTIVEINDEX)
 					Sound_Stop(lift_bhv->lift_control->SoundHandle);
 				}
-			
+
 				if(lift_bhv->controller)
 				{
 					if (lift_bhv->lift_control && lift_bhv->lift_control->lift_stations)
 						DeallocateMem(lift_bhv->lift_control->lift_stations);
 					if (lift_bhv->lift_control)
 						DeallocateMem(lift_bhv->lift_control);
-				}	
+				}
 			}
 			break;
-		}	
+		}
 		case I_BehaviourAutoGun:
 		{
 			AUTOGUN_STATUS_BLOCK *ag_bhv;
@@ -3101,7 +3087,7 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 					Sound_Stop(ag_bhv->soundHandle);
 				}
 				Dispel_HModel(&ag_bhv->HModelController);
-			
+
 			}
 			break;
 		}
@@ -3115,17 +3101,17 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 		case I_BehaviourGenerator:
 		{
 			break;
-		}	
+		}
 
 		case I_BehaviourMarine:
 		case I_BehaviourSeal:
 		{
 			MARINE_STATUS_BLOCK *marineStatusPointer;
-			marineStatusPointer = (MARINE_STATUS_BLOCK *)(sbptr->SBdataptr);    
+			marineStatusPointer = (MARINE_STATUS_BLOCK *)(sbptr->SBdataptr);
 			if(marineStatusPointer)
 			{
 				Dispel_HModel(&marineStatusPointer->HModelController);
-	
+
 				if(marineStatusPointer->myGunFlash) DestroyActiveObject(marineStatusPointer->myGunFlash);
 				if(marineStatusPointer->soundHandle!=SOUND_NOACTIVEINDEX) Sound_Stop(marineStatusPointer->soundHandle);
 			}
@@ -3134,7 +3120,7 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 		case I_BehaviourDummy:
 		{
 			DUMMY_STATUS_BLOCK *dummyStatusPointer;
-			dummyStatusPointer = (DUMMY_STATUS_BLOCK *)(sbptr->SBdataptr);    
+			dummyStatusPointer = (DUMMY_STATUS_BLOCK *)(sbptr->SBdataptr);
 			if(dummyStatusPointer)
 			{
 				Dispel_HModel(&dummyStatusPointer->HModelController);
@@ -3144,15 +3130,15 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 		case I_BehaviourPredatorDisc_SeekTrack:
 		{
 		  	PC_PRED_DISC_BEHAV_BLOCK *bblk;
-			bblk = (PC_PRED_DISC_BEHAV_BLOCK *)(sbptr->SBdataptr);    
+			bblk = (PC_PRED_DISC_BEHAV_BLOCK *)(sbptr->SBdataptr);
 			if(bblk)
 			{
 				if (bblk->soundHandle!=SOUND_NOACTIVEINDEX) {
 					Sound_Stop(bblk->soundHandle);
 				}
-				
+
 				Dispel_HModel(&bblk->HModelController);
-	
+
 			}
 			break;
 		}
@@ -3160,7 +3146,7 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 		case I_BehaviourFrisbeeEnergyBolt:
 		{
 		  	CASTER_BOLT_BEHAV_BLOCK *bblk;
-			bblk = (CASTER_BOLT_BEHAV_BLOCK *)(sbptr->SBdataptr);    
+			bblk = (CASTER_BOLT_BEHAV_BLOCK *)(sbptr->SBdataptr);
 			if(bblk)
 			{
 				if (bblk->soundHandle!=SOUND_NOACTIVEINDEX) {
@@ -3172,15 +3158,15 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 		case I_BehaviourFrisbee:
 		{
 		  	FRISBEE_BEHAV_BLOCK *fblk;
-			fblk = (FRISBEE_BEHAV_BLOCK *)(sbptr->SBdataptr);    
+			fblk = (FRISBEE_BEHAV_BLOCK *)(sbptr->SBdataptr);
 			if(fblk)
 			{
 				if (fblk->soundHandle!=SOUND_NOACTIVEINDEX) {
 					Sound_Stop(fblk->soundHandle);
 				}
-				
+
 				Dispel_HModel(&fblk->HModelController);
-	
+
 			}
 			break;
 		}
@@ -3188,7 +3174,7 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 		case I_BehaviourFaceHugger:
 		{
 			FACEHUGGER_STATUS_BLOCK *fhugStatusPointer;
-			fhugStatusPointer = (FACEHUGGER_STATUS_BLOCK *)(sbptr->SBdataptr);    
+			fhugStatusPointer = (FACEHUGGER_STATUS_BLOCK *)(sbptr->SBdataptr);
 			if(fhugStatusPointer)
 			{
 				if(fhugStatusPointer->soundHandle!=SOUND_NOACTIVEINDEX) Sound_Stop(fhugStatusPointer->soundHandle);
@@ -3216,15 +3202,15 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 
 			}
 			break;
-		}			
+		}
 		case I_BehaviourPredator:
 		{
 			PREDATOR_STATUS_BLOCK *predatorStatusPointer;
-			predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbptr->SBdataptr);    
+			predatorStatusPointer = (PREDATOR_STATUS_BLOCK *)(sbptr->SBdataptr);
 			if(predatorStatusPointer)
 			{
 				Dispel_HModel(&predatorStatusPointer->HModelController);
-	
+
 				if(predatorStatusPointer->soundHandle!=SOUND_NOACTIVEINDEX) Sound_Stop(predatorStatusPointer->soundHandle);
 			}
 			break;
@@ -3232,21 +3218,21 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 		case I_BehaviourQueenAlien:
 		{
 			QUEEN_STATUS_BLOCK *queenStatusPointer;
-			queenStatusPointer = (QUEEN_STATUS_BLOCK *)(sbptr->SBdataptr);    
+			queenStatusPointer = (QUEEN_STATUS_BLOCK *)(sbptr->SBdataptr);
 			if(queenStatusPointer)
 			{
 				Dispel_HModel(&queenStatusPointer->HModelController);
 			}
 			//stop any sound the queen is making
 			if(queenStatusPointer->soundHandle!=SOUND_NOACTIVEINDEX) Sound_Stop(queenStatusPointer->soundHandle);
-			
+
 			break;
 		}
 		case I_BehaviourNetGhost:
 		{
 			{
 				NETGHOSTDATABLOCK *ghostData;
-				ghostData = (NETGHOSTDATABLOCK *)(sbptr->SBdataptr);    
+				ghostData = (NETGHOSTDATABLOCK *)(sbptr->SBdataptr);
 				if(ghostData)
 				{
 					if(ghostData->myGunFlash) DestroyActiveObject(ghostData->myGunFlash);
@@ -3257,19 +3243,19 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 				}
 			}
 			break;
-		}	
+		}
 
 		case I_BehaviourXenoborgMorphRoom:
 		{
 			XENO_MORPH_ROOM_DATA * xmrd = (XENO_MORPH_ROOM_DATA *)sbptr->SBdataptr;
-	
-			if (sbptr->SBmorphctrl && 
-					sbptr->SBmorphctrl->ObMorphHeader && 
-					sbptr->SBmorphctrl->ObMorphHeader->mph_frames) 
+
+			if (sbptr->SBmorphctrl &&
+					sbptr->SBmorphctrl->ObMorphHeader &&
+					sbptr->SBmorphctrl->ObMorphHeader->mph_frames)
 				DeallocateMem( sbptr->SBmorphctrl->ObMorphHeader->mph_frames);
-	
-			if (sbptr->SBmorphctrl && 
-					sbptr->SBmorphctrl->ObMorphHeader) 
+
+			if (sbptr->SBmorphctrl &&
+					sbptr->SBmorphctrl->ObMorphHeader)
 				DeallocateMem( sbptr->SBmorphctrl->ObMorphHeader);
 
 			if (sbptr->SBmorphctrl)
@@ -3300,14 +3286,14 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 			TXACTRLBLK *txactrl;
 			TXACTRLBLK *txactrl_next;
 
-		
+
 			if (objectstatusptr)
 			{
 				if(objectstatusptr->event_target)
 				{
 					DeallocateMem(objectstatusptr->event_target);
 				}
-				
+
 				if(!objectstatusptr->inan_tac) break;
 				txactrl_next = objectstatusptr->inan_tac;
 
@@ -3326,10 +3312,10 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 			TXACTRLBLK *txactrl;
 			TXACTRLBLK *txactrl_next;
 
-		
+
 			if (videoScreen)
 			{
-				
+
 				if(!videoScreen->inan_tac) break;
 				txactrl_next = videoScreen->inan_tac;
 
@@ -3348,7 +3334,7 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 			PLACED_LIGHT_BEHAV_BLOCK* pl_bhv=(PLACED_LIGHT_BEHAV_BLOCK*)sbptr->SBdataptr;
 			TXACTRLBLK *txactrl;
 			TXACTRLBLK *txactrl_next;
-					
+
 			if (pl_bhv)
 			{
 				if(sbptr->SBdptr)
@@ -3361,7 +3347,7 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 				pl_bhv->light->RedScale=pl_bhv->colour_red;
 				pl_bhv->light->GreenScale=pl_bhv->colour_green;
 				pl_bhv->light->BlueScale=pl_bhv->colour_blue;
-								
+
 				if(!pl_bhv->inan_tac) break;
 				txactrl_next = pl_bhv->inan_tac;
 
@@ -3381,13 +3367,13 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 				Dispel_HModel(&hdbblk->HModelController);
 			}
 			break;
-		
+
 		case I_BehaviourPlacedSound:
 		{
 			SoundBehaveDestroy (sbptr);
 			break;
 		}
-		
+
 		case I_BehaviourMissionComplete:
 		{
 			MISSION_COMPLETE_BEHAV_BLOCK *mc_bhv;
@@ -3395,12 +3381,12 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 			if(mc_bhv)
 			{
 				GLOBALASSERT((mc_bhv->bhvr_type == I_BehaviourMissionComplete));
-				ResetMission(mc_bhv->mission_objective_ptr); 
+				ResetMission(mc_bhv->mission_objective_ptr);
 
 			}
 			break;
 		}
-		
+
 		case I_BehaviourTrackObject:
 		{
 			TRACK_OBJECT_BEHAV_BLOCK *to_bhv;
@@ -3411,15 +3397,15 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 			if (to_bhv)
 			{
 				GLOBALASSERT(to_bhv->bhvr_type == I_BehaviourTrackObject);
-				
+
 				if(to_bhv->to_track)
 				{
 					Reset_Track(to_bhv->to_track);
 				}
-				
+
 				txactrl_next = to_bhv->to_tac;
 				while(txactrl_next)
-				{	
+				{
 					txactrl = txactrl_next;
 					txactrl_next = txactrl->tac_next;
 					DeallocateMem((void*)txactrl);
@@ -3442,7 +3428,7 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 		{
 			{
 				NETCORPSEDATABLOCK *corpseData;
-				corpseData = (NETCORPSEDATABLOCK *)(sbptr->SBdataptr);    
+				corpseData = (NETCORPSEDATABLOCK *)(sbptr->SBdataptr);
 				if(corpseData)
 				{
 					if(corpseData->SoundHandle!=SOUND_NOACTIVEINDEX) Sound_Stop(corpseData->SoundHandle);
@@ -3450,14 +3436,14 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 				}
 			}
 			break;
-		}	
+		}
 
 		case I_BehaviourLightFX :
 		{
 			LIGHT_FX_BEHAV_BLOCK * lfxbb;
 			TXACTRLBLK *txactrl;
 			TXACTRLBLK *txactrl_next;
-			
+
 			lfxbb = (LIGHT_FX_BEHAV_BLOCK *)sbptr->SBdataptr;
 			if(lfxbb)
 			{
@@ -3470,9 +3456,9 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 				}
 			}
 			break;
-			
+
 		}
-		
+
 		case I_BehaviourFan :
 		{
 			FAN_BEHAV_BLOCK* f_bhv=(FAN_BEHAV_BLOCK*)sbptr->SBdataptr;
@@ -3482,7 +3468,7 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 			}
 			break;
 
-			
+
 		}
 		case I_BehaviourSpeargunBolt:
 		{
@@ -3509,7 +3495,7 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 			{
 				Stop_Track_Sound(pl_bhv->end_sound);
 			}
-			break;	
+			break;
 		}
 		case I_BehaviourParticleGenerator :
 		{
@@ -3518,17 +3504,17 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 			{
 				Stop_Track_Sound(pargen->sound);
 			}
-			break;	
+			break;
 		}
-	 	
-	 	}	
+
+	 	}
 		default:
 		{
 			break;
 		}
 	}
 
-		
+
 	/* destroy the behaviour block BUT not if I am the player	*/
 
 	if((sbptr->I_SBtype != I_BehaviourMarinePlayer)&&(sbptr->I_SBtype != I_BehaviourAlienPlayer)&&(sbptr->I_SBtype != I_BehaviourPredatorPlayer))
@@ -3541,20 +3527,20 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 			//I dont do a full initialisation with debug because
 			//we dont want to hide switch on Behaviour type bugs
 			// I just do this to trap the bastard
-			sbptr->SBdataptr = NULL; 
+			sbptr->SBdataptr = NULL;
 			#endif
 		}
 	}
 
 	/* remove DYNBLOCK and DisplayBlock*/
-	if (sbptr->SBdptr) 
+	if (sbptr->SBdptr)
 	{
 		DestroyActiveObject(sbptr->SBdptr);
 	}
-	if (sbptr->DynPtr) 
+	if (sbptr->DynPtr)
 	{
 		DeallocateDynamicsBlock(sbptr->DynPtr);
-	}	
+	}
 
 	#if !debug
 	// ull SB init
@@ -3593,7 +3579,7 @@ void LoadStrategy_ProxDoor(SAVE_BLOCK_STRATEGY_HEADER* header)
 {
 	STRATEGYBLOCK* sbPtr;
 	PROXDOOR_BEHAV_BLOCK *doorbhv;
-	PROX_DOOR_SAVE_BLOCK* block = (PROX_DOOR_SAVE_BLOCK*) header; 
+	PROX_DOOR_SAVE_BLOCK* block = (PROX_DOOR_SAVE_BLOCK*) header;
 
 	if(header->size!=sizeof(*block)) return;
 
@@ -3624,7 +3610,7 @@ void SaveStrategy_ProxDoor(STRATEGYBLOCK* sbPtr)
 	PROXDOOR_BEHAV_BLOCK *doorbhv ;
 	doorbhv = (PROXDOOR_BEHAV_BLOCK*)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(PROX_DOOR_SAVE_BLOCK,block,sbPtr);
 
 
 	block->door_state = doorbhv->door_state;

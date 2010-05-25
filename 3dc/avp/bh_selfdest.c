@@ -142,7 +142,7 @@ void SaveStrategy_SelfDestruct(STRATEGYBLOCK* sbPtr)
 	
 	sd_bhv = (SELF_DESTRUCT_BEHAV_BLOCK*)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(SELF_DESTRUCT_SAVE_BLOCK,block,sbPtr);
 
 	//start copying stuff
 	COPYELEMENT_SAVE(timer);

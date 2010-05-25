@@ -17,14 +17,14 @@ void XenoMorphRoomBehaviour (STRATEGYBLOCK * sbptr);
 typedef struct xeno_morph_room_tools_template
 {
 	int MainShape;
-	
+
 	int ShutShape;
 	int WallsOutShape;
 	int ProbesInShape;
 
 	MREF my_module;
 	char nameID[SB_NAME_LENGTH];
-	
+
 	char doorID[SB_NAME_LENGTH];
 
 } XENO_MORPH_ROOM_TOOLS_TEMPLATE;
@@ -51,19 +51,19 @@ typedef struct xeno_morph_room_data
 	TXACTRLBLK *tacb;
 
 	MORPHCTRL *XMR_Mctrl;
-	
+
 	XENO_MORPH_ROOM_STATE XMR_State;
-	
+
 	int MainShape;
 	int ShutShape;
 	int WallsOutShape;
 	int ProbesInShape;
-	
+
 	int timer;
 
 	int ** pis_items_str;
 	int ** pis_sht_str;
-	
+
 	char doorID[SB_NAME_LENGTH];
 	STRATEGYBLOCK* DoorToRoom;
 

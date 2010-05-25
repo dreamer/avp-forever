@@ -1248,7 +1248,7 @@ static void SaveDeadStrategies()
 		if(sbPtr->SBflags.destroyed_but_preserved)
 		{
 			DEAD_STRATEGY_SAVE_BLOCK* block;	
-			GET_SAVE_BLOCK_POINTER(block);
+			GET_SAVE_BLOCK_POINTER(DEAD_STRATEGY_SAVE_BLOCK, block);
 
 			block->header.type = SaveBlock_DeadStrategy;
 			block->header.size = sizeof(*block);

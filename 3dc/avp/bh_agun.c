@@ -1667,8 +1667,8 @@ void SaveStrategy_Autogun(STRATEGYBLOCK* sbPtr)
 	AUTOGUN_STATUS_BLOCK* agunStatusPointer;
 	AGUN_SAVE_BLOCK* block;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
-	agunStatusPointer =(AUTOGUN_STATUS_BLOCK*) sbPtr->SBdataptr;
+	GET_STRATEGY_SAVE_BLOCK(AGUN_SAVE_BLOCK, block, sbPtr);
+	agunStatusPointer = (AUTOGUN_STATUS_BLOCK*) sbPtr->SBdataptr;
 
 	//start copying stuff
 	COPYELEMENT_SAVE(behaviourState)

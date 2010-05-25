@@ -2464,7 +2464,7 @@ void SaveStrategy_InanimateObject(STRATEGYBLOCK* sbPtr)
 	
 	objectstatusptr = (INANIMATEOBJECT_STATUSBLOCK*)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(INANIMATE_OBJECT_SAVE_BLOCK, block, sbPtr);
 
 	//start copying stuff
 	

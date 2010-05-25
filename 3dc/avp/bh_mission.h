@@ -23,7 +23,7 @@ typedef struct mission_complete_target
 {
 	AVP_BEHAVIOUR_TYPE bhvr_type;
 	void* mission_objective_ptr;
-	
+
 }MISSION_COMPLETE_BEHAV_BLOCK;
 
 
@@ -43,8 +43,7 @@ typedef struct message_behav_block
 	AVP_BEHAVIOUR_TYPE bhvr_type;
 	enum TEXTSTRING_ID string_no;
 	BOOL active;
-	
-}MESSAGE_BEHAV_BLOCK;
 
+}MESSAGE_BEHAV_BLOCK;
 
 #endif

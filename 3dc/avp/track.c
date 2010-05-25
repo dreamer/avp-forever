@@ -961,7 +961,7 @@ void SaveTrackPosition(TRACK_CONTROLLER* tc)
 	TRACK_SAVE_BLOCK* block;
 	if(!tc) return;
 
-	GET_SAVE_BLOCK_POINTER(block);
+	GET_SAVE_BLOCK_POINTER(TRACK_SAVE_BLOCK, block);
 
 	//fill in header
 	block->header.type = SaveBlock_Track;

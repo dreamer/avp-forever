@@ -985,7 +985,7 @@ void AlienBehaviour(STRATEGYBLOCK *sbPtr)
 							targetModule = FarNPC_GetTargetAIModuleForGlobalHunt(sbPtr);
 						} else {
 							/* This just makes them hunt a bit more... */
-							targetModule = FarNPC_GetTargetAIModuleForHunt(sbPtr,1);
+							targetModule = FarNPC_GetTargetAIModuleForHunt(sbPtr/*,1*/);
 						}
 
 						if ((!targetModule)||(PlayerIsDeadAndNoLivingNetghosts())) {
@@ -2422,7 +2422,7 @@ void SaveStrategy_Alien(STRATEGYBLOCK* sbPtr)
 
 	alienStatusPointer = (ALIEN_STATUS_BLOCK*)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block, sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(ALIEN_SAVE_BLOCK, block, sbPtr);
 
 	//start copying stuff
 	COPYELEMENT_SAVE(Type)

@@ -1120,7 +1120,7 @@ void SaveStrategy_PlacedLight(STRATEGYBLOCK* sbPtr)
 	
 	pl_bhv = sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(PLACED_LIGHT_SAVE_BLOCK,block,sbPtr);
 
 	//start copying stuff
 	COPYELEMENT_SAVE(Indestructable);

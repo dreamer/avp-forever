@@ -25,13 +25,13 @@ typedef enum FhugSequence
 typedef enum FhugHModelSequence {
 	FhSSQ_Stand	= 0,
 	FhSSQ_Run,
-	FhSSQ_Dies,   
-	FhSSQ_Jump,   
-	FhSSQ_Attack, 
+	FhSSQ_Dies,
+	FhSSQ_Jump,
+	FhSSQ_Attack,
 } FHUG_HMODEL_SEQUENCE;
 
 #include "sequnces.h"
- 
+
 typedef enum facehugger_near_bhstate
 {
 	FHNS_Approach,
@@ -50,18 +50,18 @@ typedef enum facehugger_near_bhstate
 typedef struct facehuggerStatusBlock
 {
 	signed int health;
-	FACEHUGGER_NEAR_BHSTATE nearBehaviourState;	
+	FACEHUGGER_NEAR_BHSTATE nearBehaviourState;
 	int stateTimer;
 	int DoomTimer;
 	int CurveRadius;
 	int CurveLength;
 	int CurveTimeOut;
-  	unsigned int jumping :1;	
+  	unsigned int jumping :1;
 	NPC_MOVEMENTDATA moveData;
 	HMODELCONTROLLER HModelController;
 	int soundHandle;
 	int soundHandle2;
-  
+
 	char death_target_ID[SB_NAME_LENGTH];
 	STRATEGYBLOCK* death_target_sbptr;
 	int death_target_request;
@@ -74,14 +74,14 @@ typedef struct tools_data_facehugger
 	char nameID[SB_NAME_LENGTH];
 	int startInactive;
 
-	char death_target_ID[SB_NAME_LENGTH]; 
+	char death_target_ID[SB_NAME_LENGTH];
 	int death_target_request;
 }TOOLS_DATA_FACEHUGGER;
 
 /* ------------------------------------------------------------
   Some structures
   -------------------------------------------------------------*/
-#define FACEHUGGER_STARTING_HEALTH			5 	 
+#define FACEHUGGER_STARTING_HEALTH			5
 #define NO_OF_FRAGMENTS_FROM_DEAD_FHUGA	 	10
 #define FACEHUGGER_NEAR_SPEED				4000/* 8000 */
 #define FACEHUGGER_JUMPSPEED				6000/* 10000 */
@@ -103,7 +103,7 @@ void MakeFacehuggerNear(STRATEGYBLOCK *sbPtr);
 void MakeFacehuggerFar(STRATEGYBLOCK *sbPtr);
 void FacehuggerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple);
 void Wake_Hugger(STRATEGYBLOCK *sbPtr);
-		
+
 
 #ifdef __cplusplus
 }

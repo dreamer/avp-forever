@@ -791,7 +791,7 @@ void Save_SoundState(int* soundHandle)
 	if(*soundHandle == SOUND_NOACTIVEINDEX)
 	{
 		SAVE_BLOCK_HEADER* header;
-		GET_SAVE_BLOCK_POINTER(header);
+		GET_SAVE_BLOCK_POINTER(SAVE_BLOCK_HEADER, header);
 	
 		//fill in the header
 		header->size = sizeof(*header);

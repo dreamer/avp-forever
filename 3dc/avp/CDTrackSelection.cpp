@@ -65,7 +65,7 @@ static void ExtractTracksForLevel(char* &buffer, List<int> &track_list)
 			index++;
 		}
 	}
-	
+
 	while(buffer[index])
 	{
 		//search for a track number or comment
@@ -131,7 +131,7 @@ static void ExtractTracksForLevel(char* &buffer, List<int> &track_list)
 			buffer++;
 		}
 	}
-	
+
 	while(*buffer)
 	{
 		//search for a track number or comment
@@ -202,7 +202,7 @@ void LoadCDTrackList()
 	CloseHandle(file);
 
 	strncpy(&buffer[file_size], "\0" , 1);
-	
+
 	char* bufferptr = buffer;
 
 	//first extract the multiplayer tracks
@@ -210,13 +210,13 @@ void LoadCDTrackList()
 	{
 		ExtractTracksForLevel(bufferptr,MultiplayerCDTracks[i]);
 	}
-	
+
 	//now the level tracks
 	for(int i=0 ;i<AVP_ENVIRONMENT_END_OF_LIST;i++)
 	{
 		ExtractTracksForLevel(bufferptr,LevelCDTracks[i]);
 	}
-	
+
 	delete [] buffer;
 	buffer = NULL;
 	bufferptr = NULL;
@@ -239,16 +239,16 @@ static BOOL PickCDTrack(List<int>& track_list)
 	CDDA_Play(track_list[index]);
 
 	LastTrackChosen = track_list[index];
-	return TRUE;	
+	return TRUE;
 }
 
 static bool PickOGGTrack(List<int>& track_list)
 {
 	//make sure we have some tracks in the list
-	if (!CheckNumberOfVorbisTracks()) 
+	if (!CheckNumberOfVorbisTracks())
 		return false;
 
-	if (!track_list.size()) 
+	if (!track_list.size())
 		return false;
 
 	//pick the next track in the list
@@ -272,25 +272,25 @@ static bool PickOGGTrack(List<int>& track_list)
 void CheckCDAndChooseTrackIfNeeded()
 {
 	static enum playertypes lastPlayerType;
-	
+
 	//are we bothering with cd tracks
-	if (!CDDA_IsOn()) 
+	if (!CDDA_IsOn())
 		return;
 
 	//is our current track still playing
 	if (CDDA_IsPlaying() || IsVorbisPlaying()) // check this is ok
 	{
 		//if in a multiplayer game see if we have changed character type
-		if (AvP.Network == I_No_Network || AvP.PlayerType==lastPlayerType) 
+		if (AvP.Network == I_No_Network || AvP.PlayerType==lastPlayerType)
 			return;
-		
+
 		//have changed character type , is the current track in the list for this character type
-		if (MultiplayerCDTracks[AvP.PlayerType].contains(LastTrackChosen)) 
+		if (MultiplayerCDTracks[AvP.PlayerType].contains(LastTrackChosen))
 			return;
 
 		//Lets choose a new track then
 	}
-		
+
 	if (AvP.Network == I_No_Network)
 	{
 		int level=NumberForCurrentLevel();
@@ -317,7 +317,7 @@ void CheckCDAndChooseTrackIfNeeded()
 
 	//multiplayer (or their weren't ant level specific tracks)
 	lastPlayerType=AvP.PlayerType;
-	PickCDTrack(MultiplayerCDTracks[AvP.PlayerType]); 	
+	PickCDTrack(MultiplayerCDTracks[AvP.PlayerType]);
 }
 
 void ResetCDPlayForLevel()
@@ -330,4 +330,4 @@ void ResetCDPlayForLevel()
 	CDDA_Stop();
 }
 
-};
+}

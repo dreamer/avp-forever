@@ -1911,12 +1911,11 @@ typedef struct player_save_block
 
 void SaveStrategy_Player(STRATEGYBLOCK* sbPtr)
 {
-	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (sbPtr->SBdataptr);
+	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (sbPtr->SBdataptr);
 	PLAYER_SAVE_BLOCK* block;
 	int i;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
-
+	GET_STRATEGY_SAVE_BLOCK(PLAYER_SAVE_BLOCK, block, sbPtr);
 
 	COPYELEMENT_SAVE(SelectedWeaponSlot)
 	COPYELEMENT_SAVE(SwapToWeaponSlot)

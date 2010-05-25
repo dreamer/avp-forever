@@ -238,7 +238,7 @@ void SaveStrategy_Fan(STRATEGYBLOCK* sbPtr)
 	
 	f_bhv = (FAN_BEHAV_BLOCK*)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(FAN_SAVE_BLOCK,block,sbPtr);
 
 	//start copying stuff
 	
@@ -251,5 +251,4 @@ void SaveStrategy_Fan(STRATEGYBLOCK* sbPtr)
 	{
 		SaveTrackPosition(f_bhv->track);
 	}
-
 }

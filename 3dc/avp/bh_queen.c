@@ -5098,7 +5098,7 @@ void SaveStrategy_Queen(STRATEGYBLOCK* sbPtr)
 	QUEEN_STATUS_BLOCK* queenStatusPointer;
 	QUEEN_SAVE_BLOCK* block;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(QUEEN_SAVE_BLOCK,block,sbPtr);
 	queenStatusPointer = (QUEEN_STATUS_BLOCK*) sbPtr->SBdataptr;
 
 	//start copying stuff

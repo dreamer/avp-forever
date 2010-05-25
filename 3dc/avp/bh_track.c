@@ -572,7 +572,7 @@ void SaveStrategy_TrackObject(STRATEGYBLOCK* sbPtr)
 	
 	to_bhv = (TRACK_OBJECT_BEHAV_BLOCK*)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(TRACK_OBJECT_SAVE_BLOCK,block,sbPtr);
 
 	//start copying stuff
 	

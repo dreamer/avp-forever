@@ -190,10 +190,9 @@ void SaveStrategy_DeathVolume(STRATEGYBLOCK* sbPtr)
 	
 	dv_bhv = (DEATH_VOLUME_BEHAV_BLOCK*)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(DEATH_VOLUME_SAVE_BLOCK,block,sbPtr);
 
 	//start copying stuff
  	block->active = dv_bhv->active;
-
 }
 

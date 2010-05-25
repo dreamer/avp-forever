@@ -614,7 +614,7 @@ void SaveStrategy_LightFx(STRATEGYBLOCK* sbPtr)
 	
 	lfxbb = (LIGHT_FX_BEHAV_BLOCK *)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(LIGHT_FX_SAVE_BLOCK,block,sbPtr);
 
 	//start copying stuff
 	

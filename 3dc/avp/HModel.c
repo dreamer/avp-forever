@@ -4950,7 +4950,7 @@ void SaveHierarchy(HMODELCONTROLLER* controller)
 	if (!controller) return;
 	if (!controller->Root_Section) return;
 
-	GET_SAVE_BLOCK_POINTER(block);
+	GET_SAVE_BLOCK_POINTER(HIERARCHY_SAVE_BLOCK, block);
 	
 	//fill in header
 	block->header.type = SaveBlock_Hierarchy;	
@@ -5375,7 +5375,7 @@ static void SaveHierarchySectionRecursion(SECTION_DATA* section)
 {
 	HIERARCHY_SECTION_SAVE_BLOCK* block;
 
-	GET_SAVE_BLOCK_POINTER(block);
+	GET_SAVE_BLOCK_POINTER(HIERARCHY_SECTION_SAVE_BLOCK, block);
 
 	//fill in header
 	block->header.type = SaveBlock_HierarchySection;	
@@ -5545,7 +5545,7 @@ static void SaveHierarchySectionTween(SECTION_DATA* section)
 {
 	HIERARCHY_TWEEN_SAVE_BLOCK* block;
 
-	GET_SAVE_BLOCK_POINTER(block);
+	GET_SAVE_BLOCK_POINTER(HIERARCHY_TWEEN_SAVE_BLOCK, block);
 
 	//fill in the header
 	block->header.type = SaveBlock_HierarchyTween;
