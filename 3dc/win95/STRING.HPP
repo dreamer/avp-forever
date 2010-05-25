@@ -17,13 +17,13 @@ public:
 	String(char const *, size_t = _BIGSIZET);
 	String(String const &, size_t = 0, size_t = _BIGSIZET);
 	String(char, size_t = 1);
-	
+
 	~String();
-	
+
 	inline operator char const * () const;
 	char const * c_str() const;
 	//operator char () const;
-	
+
     String & operator = (String const &);
     String & operator = (char const *);
 
@@ -102,7 +102,7 @@ private:
 	String(String const &, char const *);
 	String(char, String const &);
 	String(String const &, char);
-	
+
 	char * rep;
 	size_t len;
 	char * cstring;
@@ -122,17 +122,17 @@ inline char & String::operator () (size_t pos)
 {
 	return operator [] (pos);
 }
-	
+
 inline char const & String::operator () (size_t pos) const
 {
 	return operator [] (pos);
 }
-	
+
 inline char & String::operator [] (size_t pos)
 {
 	return rep[pos];
 }
-	
+
 inline char const & String::operator [] (size_t pos) const
 {
 	return rep[pos];
@@ -168,7 +168,7 @@ inline int String::valid() const
 {
 	return 1;
 }
-	
+
 inline int valid(String const & str)
 {
 	return str.valid();

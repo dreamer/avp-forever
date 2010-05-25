@@ -24,13 +24,13 @@ typedef struct shapeanimationframe
 
 	// Public variables
 
-	
-	
+
+
 	// Private variables
-	
+
 	int * vertices;
 	int * item_normals;
-	
+
 
 } SHAPEANIMATIONFRAME;
 
@@ -49,10 +49,10 @@ typedef struct shapeanimationsequence
 	int min_x;
 	int min_y;
 	int min_z;
-	
-	
+
+
 	// Private variables
-	
+
 	unsigned long num_frames;
 	SHAPEANIMATIONFRAME * anim_frames;
 
@@ -60,7 +60,7 @@ typedef struct shapeanimationsequence
 	// 0 for none
 
 	int * vertex_normals;
-	
+
 } SHAPEANIMATIONSEQUENCE;
 
 
@@ -71,11 +71,11 @@ typedef struct shapeanimationheader
 
 
 	// Private variables
-	
+
 	int num_sequences;
-	
+
 	SHAPEANIMATIONSEQUENCE * anim_sequences;
-	
+
 	int num_shapes_using_this;  //number of shapes sharing the same shapeanimationheader
 
 } SHAPEANIMATIONHEADER;
@@ -90,7 +90,7 @@ typedef struct shapeanimationcontroldata
 	// 16.16 fixed point
 	unsigned long seconds_per_frame;
 	// default is ONE_FIXED / 8
-	
+
 	unsigned long sequence_no;
 	// default is 0
 
@@ -102,21 +102,21 @@ typedef struct shapeanimationcontroldata
 
 	unsigned long default_start_and_end_frames : 1;
 	// default is on
-	
-	unsigned long reversed : 1;
-	// default is off	
-	
-	unsigned long stop_at_end : 1;
-	// default is off	
-	
 
-	
+	unsigned long reversed : 1;
+	// default is off
+
+	unsigned long stop_at_end : 1;
+	// default is off
+
+
+
 	// Private variables
 
 	unsigned long empty : 1;
 	unsigned long stop_now : 1;
 	unsigned long pause_at_end : 1;
-	
+
 	// if start_frame == end_frame
 	// then do not stop unless it has done at least one frame
 	unsigned long done_a_frame : 1;
@@ -133,25 +133,25 @@ typedef struct shapeanimationcontroller
 {
 
 	// Public variables
-	
+
 	SHAPEANIMATIONCONTROLDATA current;
-	
+
 	SHAPEANIMATIONCONTROLDATA next;
-	
+
 	unsigned long finished : 1;
-	
-	
+
+
 	// Private variables
-	
+
 	unsigned long playing : 1;
-	
+
 	SHAPEANIMATIONHEADER * anim_header;
-	
+
 } SHAPEANIMATIONCONTROLLER;
-	
-	
-	
-	
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////      Funtions      /////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
@@ -188,9 +188,9 @@ void InitShapeAnimationControlData (SHAPEANIMATIONCONTROLDATA *);
 // These are for the system
 
 void DoAllShapeAnimations ();
-	
+
 void CopyAnimationFrameToShape (SHAPEANIMATIONCONTROLDATA *sacd, struct displayblock * dptr);
-	
+
 #ifdef __cplusplus
 
 	};

@@ -54,7 +54,7 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 
 	bs_bhv->bs_mode = bs_tt->mode;
 	bs_bhv->time_for_reset = bs_tt->time_for_reset;
-	bs_bhv->security_clerance	= bs_tt->security_clearance;
+	bs_bhv->security_clerance = bs_tt->security_clearance;
 
 	bs_bhv->trigger_volume_min=bs_tt->trigger_volume_min;	
 	bs_bhv->trigger_volume_max=bs_tt->trigger_volume_max;	

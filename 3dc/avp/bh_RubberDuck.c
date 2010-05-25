@@ -30,7 +30,6 @@ void CreateRubberDuckBot(void)
 	CreateRubberDuck(&(Global_VDB_Ptr->VDB_World));
 }
 
-
 void CreateRubberDuck(VECTORCH *positionPtr)
 {
 	STRATEGYBLOCK* sbPtr;
@@ -82,7 +81,6 @@ void CreateRubberDuck(VECTORCH *positionPtr)
 		RemoveBehaviourStrategy(sbPtr);
 		return;
 	}
-
 }
 
 void RubberDuckBehaviour(STRATEGYBLOCK *sbPtr)
@@ -134,7 +132,6 @@ void RubberDuckBehaviour(STRATEGYBLOCK *sbPtr)
 		{
 			if (plusDeltaZ>0) dynPtr->LinImpulse.vz = plusDeltaZ*256;
 		}														 
-
 	}
 	dynPtr->LinImpulse.vy = 0;
 	{
@@ -197,7 +194,6 @@ void RubberDuckBehaviour(STRATEGYBLOCK *sbPtr)
 		}
 	}
 	#endif
-
 }
 
 extern void CreateFlamingDebris(VECTORCH *positionPtr, VECTORCH *dirPtr)
@@ -298,7 +294,6 @@ extern void CreateFlamingDebris(VECTORCH *positionPtr, VECTORCH *dirPtr)
 		dPtr->ObFlags3 |= ObFlag3_DynamicModuleObject;
 
 		sbPtr->SBDamageBlock.IsOnFire=1;
-
 	}
 }
 

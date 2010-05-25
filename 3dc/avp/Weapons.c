@@ -10521,8 +10521,8 @@ extern void AutoSwapToDisc(void) {
 
 }
 
-extern void AutoSwapToDisc_OutOfSequence(void) {
-
+extern void AutoSwapToDisc_OutOfSequence(void) 
+{
 	int slot;
 	PLAYER_WEAPON_DATA *weaponPtr;
  
@@ -10533,7 +10533,6 @@ extern void AutoSwapToDisc_OutOfSequence(void) {
 	if (slot!=-1) {
 		AutoSwap=slot;
 	}
-
 }
 
 #define SPEAR_NPC_IMPULSE	(20000)
@@ -11989,7 +11988,6 @@ void MarinePistol_SwapOut(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 				if (weaponPtr->PrimaryMagazinesRemaining&1) {
 	       			((PLAYER_STATUS *)playerStatus)->WeaponSlot[slot].PrimaryMagazinesRemaining++;
 				}
-
 			}
 		}
 	}

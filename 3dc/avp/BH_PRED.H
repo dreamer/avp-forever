@@ -14,8 +14,8 @@ extern "C" {
 
 /*-----------------------------
 Predator Specific Support
--------------------------------*/	
-/* predator animation sequences */	
+-------------------------------*/
+/* predator animation sequences */
 typedef enum predatorsequence
 {
 	PredSQ_Run=0,
@@ -24,8 +24,8 @@ typedef enum predatorsequence
 	PredSQ_Crouch,
 	PredSQ_StandDie,
 	PredSQ_StandDead,
-	PredSQ_CrouchDie,	
-	PredSQ_CrouchDead,	
+	PredSQ_CrouchDie,
+	PredSQ_CrouchDead,
 	PredSQ_StandingSwipe,
 	PredSQ_CrouchedSwipe,
 	PredSQ_RunningSwipe,
@@ -87,7 +87,7 @@ typedef struct predatorPersonalParameters
 	int speed;						/* running speed */
 	int defenceHealth;			 	/* health level below which defensive behaviour is used */
 	int useShoulderCannon;		 	/* 1 = shouldercannon, 0 = disc */
-	int timeBetweenRangedAttacks;	
+	int timeBetweenRangedAttacks;
 	int maxShotsPerRangedAttack;
 	int timeBetweenShots;
 	int closeAttackDamage;
@@ -144,7 +144,7 @@ typedef struct predatorStatusBlock
 	NPC_OBSTRUCTIONREPORT obstruction;
 	NPC_MOVEMENTDATA moveData;
 	NPC_WANDERDATA wanderData;
-	
+
 	NPC_AVOIDANCEMANAGER avoidanceManager;
 	WAYPOINT_MANAGER waypointManager;
 
@@ -165,7 +165,7 @@ typedef struct predatorStatusBlock
 	STRATEGYBLOCK *Target;
 	char Target_SBname[SB_NAME_LENGTH];
 	int soundHandle;
-	
+
 	HMODELCONTROLLER HModelController;
 	SECTION_DATA *My_Gun_Section; /* For template computation. */
 	SECTION_DATA *My_Elevation_Section; /* For elevation computation. */
@@ -195,7 +195,7 @@ typedef struct predatorStatusBlock
 typedef struct dormantPredatorStatusBlock
 {
 	AVP_BEHAVIOUR_TYPE bhvr_type;
-	void* toolsData; 
+	void* toolsData;
 }DORMANT_PREDATOR_STATUS_BLOCK;
 
 /* Tools data template */
@@ -210,7 +210,7 @@ typedef struct tools_data_predator
 	int path;
 	int stepnumber;
 
-	char death_target_ID[SB_NAME_LENGTH]; 
+	char death_target_ID[SB_NAME_LENGTH];
 	int death_target_request;
 
 }TOOLS_DATA_PREDATOR;
@@ -220,11 +220,11 @@ typedef struct tools_data_predator
 #define PRED_WALKING_SPEED_MIN				(3000)
 #define PRED_PATIENCE_TIME					(6*ONE_FIXED)
 #define PRED_REGEN_TIME						(10*ONE_FIXED)
-#define PRED_MAXIDENTITY					(4) 	 	
+#define PRED_MAXIDENTITY					(4)
 #define NO_OF_FRAGMENTS_FROM_DEAD_PREDATOR 	(10)
 #define PRED_CLOSE_ATTACK_RANGE				(1500) 	/* mm */
 #define PRED_STAFF_ATTACK_RANGE				(2000) 	/* mm */
-#define PRED_NEAR_VIEW_WIDTH				(500)	/* mm */  	
+#define PRED_NEAR_VIEW_WIDTH				(500)	/* mm */
 #define PRED_FPPLASMA_INFRONT				(600) 	/* mm */
 #define PRED_FPPLASMA_ACROSS				(-500) 	/* mm */
 #define PRED_FPPLASMA_UP					(900) 	/* mm */
@@ -240,7 +240,7 @@ typedef struct tools_data_predator
 #define PRED_PLASBOLTSPEED 					(22000)	/* mm/s */
 #define PRED_PLASBOLTDAMAGE					(50)
 /* 1.5-2 seconds in 1/16 second. NB DO NOT INCREASE THIS */
-#define PRED_FAR_MOVE_TIME			((24+(FastRandom()&0x07))*(ONE_FIXED>>4))  	
+#define PRED_FAR_MOVE_TIME			((24+(FastRandom()&0x07))*(ONE_FIXED>>4))
 #define PRED_NEAR_CLOSEATTACK_TIME	ONE_FIXED	   /* 1 second */
 
 extern void InitPredatorBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr);

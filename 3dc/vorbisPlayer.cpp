@@ -42,7 +42,7 @@ static const int BUFFER_COUNT = 3;
 
 unsigned int __stdcall VorbisUpdateThread(void *args);
 
-extern "C" 
+extern "C"
 {
 	extern int SetStreamingMusicVolume(int volume);
 	extern int CDPlayerVolume; // volume control from menus
@@ -102,7 +102,7 @@ bool VorbisPlayback::Open(const std::string &fileName)
 		this->audioStream->SetVolume(CDPlayerVolume);
 		mPlaybackThreadFinished = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, VorbisUpdateThread, static_cast<void*>(this), 0, NULL));
 	}
-	else 
+	else
 	{
 		LogErrorString("couldn't play ogg vorbis buffer\n");
 	}
@@ -133,7 +133,7 @@ int VorbisPlayback::GetVorbisData(int sizeToRead)
 	int bytesReadTotal = 0;
 	int bytesReadPerLoop = 0;
 
-	while (bytesReadTotal < sizeToRead) 
+	while (bytesReadTotal < sizeToRead)
 	{
 		bytesReadPerLoop = ov_read(
 			&mOggFile,									//what file to read from
@@ -145,7 +145,7 @@ int VorbisPlayback::GetVorbisData(int sizeToRead)
 			0
 		);
 
-		if (bytesReadPerLoop < 0) 
+		if (bytesReadPerLoop < 0)
 		{
 			LogErrorString("ov_read encountered an error", __LINE__, __FILE__);
 		}
@@ -154,11 +154,11 @@ int VorbisPlayback::GetVorbisData(int sizeToRead)
 		{
 			ov_raw_seek(&mOggFile, 0);
 		}
-		else if (bytesReadPerLoop == OV_HOLE) 
+		else if (bytesReadPerLoop == OV_HOLE)
 		{
 			LogErrorString("OV_HOLE", __LINE__, __FILE__);
 		}
-		else if (bytesReadPerLoop == OV_EBADLINK) 
+		else if (bytesReadPerLoop == OV_EBADLINK)
 		{
 			LogErrorString("OV_EBADLINK", __LINE__, __FILE__);
 		}
@@ -212,7 +212,7 @@ void VorbisPlayback::Stop()
 	}
 }
 
-void LoadVorbisTrack(size_t track) 
+void LoadVorbisTrack(size_t track)
 {
 	// if we're already playing a track, stop it
 	if (inGameMusic)
@@ -222,7 +222,7 @@ void LoadVorbisTrack(size_t track)
 	}
 
 	// TODO? rather than return, pick a random track or just play last?
-	if (track > TrackList.size()) 
+	if (track > TrackList.size())
 		return;
 
 	// if user enters 1, decrement to 0 to align to array (enters 2, decrement to 1 etc)
@@ -241,16 +241,16 @@ bool LoadVorbisTrackList()
 {
 	std::ifstream file(tracklistFilename.c_str());
 
-	if (!file.is_open()) 
+	if (!file.is_open())
 	{
 		LogErrorString("no music tracklist found - not using ogg vorbis music");
 		return false;
 	}
 
 	std::string trackName;
-	unsigned int pos = 0;
+//	unsigned int pos = 0;
 
-	while (std::getline(file, trackName)) 
+	while (std::getline(file, trackName))
 	{
 /*
 		pos = trackName.find(": ");
@@ -296,3 +296,4 @@ void Vorbis_CloseSystem()
 		inGameMusic = NULL;
 	}
 }
+

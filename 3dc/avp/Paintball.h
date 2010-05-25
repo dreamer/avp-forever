@@ -6,7 +6,7 @@
 
 typedef struct
 {
-	DISPLAYBLOCK	*TargetDispPtr; 
+	DISPLAYBLOCK	*TargetDispPtr;
 	VECTORCH		TargetPosition;
 	VECTORCH		TargetNormal;
 
@@ -17,7 +17,7 @@ typedef struct
 
 	unsigned int  	IsOn :1;
 	unsigned int	DecalIsInverted :1;
-	
+
 } PAINTBALLMODE;
 
 extern PAINTBALLMODE PaintBallMode;

@@ -24,21 +24,21 @@ typedef enum
 	MarineMission_GoToCMC2,
 	MarineMission_DestructBase,
 	MarineMission_Won,
-	
+
 	PredMission_DestroyComputers,
 	PredMission_GetShipGen3,
 	PredMission_GetShipCMC2,
 	PredMission_KillPredAlien,
 	PredMission_KillQueen,
 	PredMission_ReturnToShip,
-	
+
 	AlienMission_DestroyMarines,
 	AlienMission_DestroyMarinesWithSpit,
 	AlienMission_DestoryOtherBaddies,
 	AlienMission_DestroyQueen,
-	
+
 	PlayerMissions_Last,
-	
+
 } PLAYERMISSION;
 
 typedef enum
@@ -81,12 +81,12 @@ typedef enum
 	GOT_DATALOG_1,
 	GOT_DATALOG_2,
 	GOT_DATALOG_3,
-	GOT_ENDLEVEL_EVENT,	
+	GOT_ENDLEVEL_EVENT,
 
 	GOT_LASTGAMEOBJECT,
 } GAMESTATECHANGEOBJECTS;
 
-typedef struct 
+typedef struct
 {
 	GAMESTATECHANGEOBJECTS StateChangeObjectNum;
 	int id1;
@@ -106,7 +106,7 @@ typedef struct {
 	GAMETARGETOBJECTS TargetObjectNum;
 	char SBname[SB_NAME_LENGTH];
 } GAME_STRATBLOCK_LIST_ENTRY;
-	
+
 struct player_status;
 
 // Internal Platform independent fns.

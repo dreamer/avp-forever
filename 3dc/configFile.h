@@ -11,6 +11,5 @@ void Config_SetString(const std::string &heading, const std::string &variable, c
 std::string Config_GetString(const std::string &heading, const std::string &variable, const std::string &defaultString);
 bool Config_GetBool(const std::string &heading, const std::string &variable, bool defaultValue);
 void Config_SetBool(const std::string &heading, const std::string &variable, bool newValue);
-bool Config_CreateDefault();
 
 #endif

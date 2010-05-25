@@ -46,8 +46,8 @@ typedef struct farentrypointsheader
 /* enum of the different door types, as seen by NPC's */
 typedef enum moduledoortype
 {
-	MDT_NotADoor,			
-	MDT_ProxDoor,			
+	MDT_NotADoor,
+	MDT_ProxDoor,
 	MDT_LiftDoor,
 	MDT_SecurityDoor,
 
@@ -72,7 +72,7 @@ extern FARENTRYPOINTSHEADER *FALLP_EntryPoints;
 #define EP_MAXPOINTS	200
 #define EP_MAXEDGES		200
 
-/* defines for module door types insofar as they relate to alien behaviour 
+/* defines for module door types insofar as they relate to alien behaviour
 FADT stands for Far Alien Door Type*/
 
 

@@ -41,7 +41,7 @@ void UpdateGammaSettings(void)
 		int l = MUL_FIXED(2*u,ONE_FIXED-u);
 
 		int a;
-		
+
 		a = m/256+MUL_FIXED(RequestedGammaSetting,l);
 		if (a<0) a=0;
 		if (a>255) a=255;
@@ -78,7 +78,7 @@ void UpdateGammaSettings(void)
 		int l = MUL_FIXED(2*u,ONE_FIXED-u);
 
 		int a;
-		
+
 		a = m+MUL_FIXED(RequestedGammaSetting*256,l);
 
 		m = MUL_FIXED(a,a);
@@ -86,9 +86,9 @@ void UpdateGammaSettings(void)
 
 		a = m/256+MUL_FIXED(RequestedGammaSetting,l);
 
-		if (a < 0) 
+		if (a < 0)
 			a = 0;
-		if (a > 255) 
+		if (a > 255)
 			a = 255;
 
 		GammaValues[i] = a;
@@ -99,4 +99,4 @@ void UpdateGammaSettings(void)
 }
 #endif
 
-};
+}

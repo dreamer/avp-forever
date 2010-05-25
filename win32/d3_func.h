@@ -6,7 +6,7 @@
 #include <d3d9.h>
 #include <Dxerr.h>
 #include "aw.h"
-#include "stdint.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 	extern "C" {
@@ -18,12 +18,12 @@ typedef LPDIRECT3DTEXTURE9 RENDERTEXTURE;
   Direct3D globals
 */
 
-/* 
+/*
  *	Pre-DX8 vertex format
  *	taken from http://www.mvps.org/directx/articles/definitions_for_dx7_vertex_types.htm
  */
 
-typedef struct _D3DTVERTEX 
+typedef struct _D3DTVERTEX
 {
 	float sx;
 	float sy;
@@ -56,27 +56,27 @@ typedef struct POINTSPRITEVERTEX
 
 #define D3DFVF_POINTSPRITEVERTEX (D3DFVF_XYZ | D3DFVF_PSIZE | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 
-typedef struct ORTHOVERTEX 
+typedef struct ORTHOVERTEX
 {
 	float x;
 	float y;
-	float z;		// Position in 3d space 
+	float z;		// Position in 3d space
 
-	DWORD colour;	// Colour  
+	DWORD colour;	// Colour
 
 	float u;
-	float v;		// Texture coordinates 
+	float v;		// Texture coordinates
 
 } ORTHOVERTEX;
 
 // orthographic quad vertex format
 #define D3DFVF_ORTHOVERTEX (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 
-typedef struct FMVVERTEX 
+typedef struct FMVVERTEX
 {
 	float x;
 	float y;
-	float z;		// Position in 3d space 
+	float z;		// Position in 3d space
 
 	float u1;
 	float v1;		// Texture coordinates 1
@@ -89,7 +89,7 @@ typedef struct FMVVERTEX
 
 } FMVVERTEX;
 
-/* 
+/*
   Maximum number of Direct3D drivers ever
   expected to be resident on the system.
 */
@@ -105,7 +105,7 @@ typedef struct FMVVERTEX
   Description of a D3D driver.
 */
 
-typedef struct D3DDriverInfo 
+typedef struct D3DDriverInfo
 {
 	D3DFORMAT				Formats[20];
 	D3DADAPTER_IDENTIFIER9	AdapterInfo;
@@ -138,7 +138,7 @@ typedef struct D3DInfo
 	LPDIRECT3DVERTEXDECLARATION9 fmvVertexDecl;
 	LPDIRECT3DVERTEXSHADER9      fmvVertexShader;
 	LPDIRECT3DPIXELSHADER9       fmvPixelShader;
-	
+
 	LPDIRECT3DVERTEXDECLARATION9 pointVertexDecl;
 	LPDIRECT3DVERTEXSHADER9      pointSpriteShader;
 	LPDIRECT3DPIXELSHADER9       pointSpritePixelShader;

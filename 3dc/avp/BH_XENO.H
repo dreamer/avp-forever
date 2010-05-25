@@ -16,7 +16,7 @@
 
 /* KJL 16:57:28 16/07/98 - particle.h is needed for LASER_BEAM_DESC */
 #include "particle.h"
-#include "bh_ais.h" 
+#include "bh_ais.h"
 /* Patrick 4/7/97------------------------------
   Enumerations of sequences and states
   ---------------------------------------------*/
@@ -45,7 +45,7 @@
 		signed int health;
 		XENO_BHSTATE behaviourState;
 		XENO_BHSTATE lastState;
-		int stateTimer;  		
+		int stateTimer;
 		NPC_MOVEMENTDATA moveData;
 		NPC_WANDERDATA wanderData;
 		NPC_OBSTRUCTIONREPORT obstruction;
@@ -91,7 +91,7 @@
 		beam weapon thingies */
 		LASER_BEAM_DESC LeftMainBeam;
 		LASER_BEAM_DESC RightMainBeam;
-		
+
 		/* KJL 16:56:38 16/07/98 */
 		LASER_BEAM_DESC TargetingLaser[3];
 
@@ -102,14 +102,14 @@
 		unsigned int rightarmpandir		:1;
 		unsigned int rightarmtiltdir	:1;
 		unsigned int torsotwistdir		:1;
-	
+
 		unsigned int headLock			:1;
 		unsigned int leftArmLock		:1;
 		unsigned int rightArmLock		:1;
 		unsigned int targetSightTest	:1;
 		unsigned int IAmFar				:1;
 		unsigned int ShotThisFrame		:1;
-	
+
 		unsigned int FiringLeft			:1;
 		unsigned int FiringRight		:1;
 
@@ -131,7 +131,7 @@
 
 		int incidentFlag;
 		int incidentTimer;
-			
+
 		int head_whirr;
 		int left_arm_whirr;
 		int right_arm_whirr;
@@ -140,7 +140,7 @@
 		char death_target_ID[SB_NAME_LENGTH];
 		STRATEGYBLOCK* death_target_sbptr;
 		int death_target_request;
-		
+
 		WAYPOINT_MANAGER waypointManager;
 
  	}XENO_STATUS_BLOCK;
@@ -150,7 +150,7 @@
 		struct vectorch position;
 		int shapeIndex;
 		char nameID[SB_NAME_LENGTH];
-		char death_target_ID[SB_NAME_LENGTH]; 
+		char death_target_ID[SB_NAME_LENGTH];
 		int death_target_request;
 		struct euler starteuler;
 		int UpTime;			/* Default to '20' */
@@ -160,12 +160,12 @@
 /* Patrick 4/7/97------------------------------
   Some defines
   ---------------------------------------------*/
-	#define XENO_STARTING_HEALTH				600 	 
+	#define XENO_STARTING_HEALTH				600
 	#define XENO_NEAR_SPEED						1000 	/* mm/s */
-  	#define XENO_NEAR_ACCURACY					5		/* mm per m max deviation */		
+  	#define XENO_NEAR_ACCURACY					5		/* mm per m max deviation */
 	#define XENO_NEAR_VIEW_WIDTH				500		/* mm */
 	#define XENO_CLOSE_APPROACH_DISTANCE		3000	/* mm */
-	#define XENO_FIRINGPOINT_INFRONT			1000		/* mm */  	
+	#define XENO_FIRINGPOINT_INFRONT			1000		/* mm */
 	#define XENO_FIRINGPOINT_ACROSS				300 	/* mm */
 	#define XENO_FIRINGPOINT_UP					100 	/* mm */
     #define XENO_PROJECTILESPEED 				20000	/* mm/s */
@@ -180,7 +180,7 @@
 	#define XENO_DEACTIVATION_TIME		(ONE_FIXED)  /* 1 second */
 	#define XENO_REGEN_TIME				(ONE_FIXED*5)
 	#define XENO_POWERDOWN_TIME			(ONE_FIXED*5)
-		  
+
 	/* 2,3 or 4*/
 	#define XENO_VOLLEYSIZE				(2+(FastRandom()%3))
 
@@ -192,9 +192,9 @@
 	#define XENO_LEFTARM_ACW_GIMBALL	(910)
 	#define XENO_RIGHTARM_CW_GIMBALL	(910)
 	#define XENO_RIGHTARM_ACW_GIMBALL	(626)
-	
+
 	#define XENO_ARM_PITCH_GIMBALL		(1024)
-	
+
 	#if 0
 	/* Original values. */
 	#define XENO_HEAD_LOCK_RATE			(2)	/* Was 0 */
@@ -202,7 +202,7 @@
 	#define XENO_TORSO_TWIST_RATE		(3)
 	#define XENO_ARM_LOCK_RATE			(4)
 	#define XENO_FOOT_TURN_RATE			(3)
-	
+
 	#else
 	/* Let's slow everything down a wee bit. */
 	#define XENO_HEAD_LOCK_RATE			(2)	/* Was 0 */
@@ -222,7 +222,7 @@
 	void MakeXenoborgFar(STRATEGYBLOCK *sbPtr);
 	void XenoborgIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, int wounds,VECTORCH *incoming);
 	int XenoSight_FrustrumReject(STRATEGYBLOCK *sbtr,VECTORCH *localOffset);
-		
+
 
 	#ifdef __cplusplus
 

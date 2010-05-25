@@ -14,7 +14,7 @@
 	General System Globals
 */
 
-SCENE Global_Scene = 0;
+SCENE Global_Scene = AVP_Scene0;//0;
 
 
 
@@ -68,28 +68,28 @@ void VDBClipPlanes(VIEWDESCRIPTORBLOCK *vdb)
 	/* Check Clip Boundaries against the Physical Screen */
 
 	/* Check Left Boundary */
-	if (vdb->VDB_ClipLeft < ScreenDescriptorBlock.SDB_ClipLeft) 
+	if (vdb->VDB_ClipLeft < ScreenDescriptorBlock.SDB_ClipLeft)
 	{
 		vdb->VDB_ClipLeft = ScreenDescriptorBlock.SDB_ClipLeft;
 		vdb->VDB_Flags |= ViewDB_Flag_LTrunc;
 	}
 
 	/* Check Right Boundary */
-	if (vdb->VDB_ClipRight > ScreenDescriptorBlock.SDB_ClipRight) 
+	if (vdb->VDB_ClipRight > ScreenDescriptorBlock.SDB_ClipRight)
 	{
 		vdb->VDB_ClipRight = ScreenDescriptorBlock.SDB_ClipRight;
 		vdb->VDB_Flags |= ViewDB_Flag_RTrunc;
 	}
 
 	/* Check Up boundary */
-	if (vdb->VDB_ClipUp < ScreenDescriptorBlock.SDB_ClipUp) 
+	if (vdb->VDB_ClipUp < ScreenDescriptorBlock.SDB_ClipUp)
 	{
 		vdb->VDB_ClipUp = ScreenDescriptorBlock.SDB_ClipUp;
 		vdb->VDB_Flags |= ViewDB_Flag_UTrunc;
 	}
 
 	/* Check Down boundary */
-	if (vdb->VDB_ClipDown > ScreenDescriptorBlock.SDB_ClipDown) 
+	if (vdb->VDB_ClipDown > ScreenDescriptorBlock.SDB_ClipDown)
 	{
 		vdb->VDB_ClipDown = ScreenDescriptorBlock.SDB_ClipDown;
 		vdb->VDB_Flags |= ViewDB_Flag_DTrunc;
@@ -343,6 +343,31 @@ static void CreateProjectorArray(VIEWDESCRIPTORBLOCK *vdb)
 
 */
 
+void SetVDB(VIEWDESCRIPTORBLOCK *vdb, int fl,
+	int ty,
+
+	int d,
+
+	int cx,
+	int cy,
+
+	int prx,
+	int pry,
+	int mxp,
+
+	int cl,
+	int cr,
+	int cu,
+	int cd,
+
+	int h1,
+	int h2,
+	int hc,
+
+	int amb)
+{
+
+/*
 void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 
 	VIEWDESCRIPTORBLOCK *vdb;
@@ -371,7 +396,7 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 	int amb;
 
 {
-
+*/
 
 	/* Initial setup */
 	vdb->VDB_Flags			= fl;
@@ -385,7 +410,7 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 	GlobalAmbience = amb;
 
 	/* Width and Height are set by the Clip Boundaries */
-	if (vdb->VDB_Flags & ViewDB_Flag_FullSize) 
+	if (vdb->VDB_Flags & ViewDB_Flag_FullSize)
 	{
 
 		vdb->VDB_Depth			= ScreenDescriptorBlock.SDB_Depth;
@@ -404,7 +429,7 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 		vdb->VDB_ClipUp			= ScreenDescriptorBlock.SDB_ClipUp;
 		vdb->VDB_ClipDown		= ScreenDescriptorBlock.SDB_ClipDown;
 	}
-	else 
+	else
 	{
 //		 if (ScanDrawMode == ScanDrawDirectDraw)
 //		   vdb->VDB_Depth			= d;
@@ -425,7 +450,7 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 		vdb->VDB_ClipUp			= cu;
 		vdb->VDB_ClipDown		= cd;
 
-		if (vdb->VDB_Flags & ViewDB_Flag_AdjustScale) 
+		if (vdb->VDB_Flags & ViewDB_Flag_AdjustScale)
 		{
 			vdb->VDB_CentreX =
 				WideMulNarrowDiv(
@@ -511,7 +536,7 @@ void InitialiseVDBs(void)
 
 	NumActiveVDBs = 0;
 
-	for (NumFreeVDBs = 0; NumFreeVDBs < maxvdbs; NumFreeVDBs++) 
+	for (NumFreeVDBs = 0; NumFreeVDBs < maxvdbs; NumFreeVDBs++)
 	{
 		FreeVDBList[NumFreeVDBs] = FreeVDBPtr;
 
@@ -537,7 +562,7 @@ VIEWDESCRIPTORBLOCK* AllocateVDB(void)
 	int i;
 
 
-	if (NumFreeVDBs) 
+	if (NumFreeVDBs)
 	{
 		FreeVDBPtr = *FreeVDBListPtr--;
 
@@ -589,19 +614,19 @@ VIEWDESCRIPTORBLOCK* CreateActiveVDB(void)
 
 	vdb = AllocateVDB();
 
-	if (vdb) 
+	if (vdb)
 	{
 		/* Find the next "VDB_Priority" */
 
-		if (NumActiveVDBs) 
+		if (NumActiveVDBs)
 		{
 			v_src = &ActiveVDBList[0];
 
-			for(v = NumActiveVDBs; v!=0; v--) 
+			for(v = NumActiveVDBs; v!=0; v--)
 			{
 				vdb_tmp = *v_src++;
 
-				if(vdb_tmp->VDB_Priority > p) 
+				if(vdb_tmp->VDB_Priority > p)
 					p = vdb_tmp->VDB_Priority;
 			}
 		}
@@ -627,10 +652,7 @@ VIEWDESCRIPTORBLOCK* CreateActiveVDB(void)
 
 */
 
-int DestroyActiveVDB(dblockptr)
-
-	VIEWDESCRIPTORBLOCK *dblockptr;
-
+int DestroyActiveVDB(VIEWDESCRIPTORBLOCK *dblockptr)
 {
 
 	int j = -1;

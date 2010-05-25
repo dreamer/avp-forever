@@ -23,11 +23,11 @@ void *AllocMem(size_t __size)
 {
 	GLOBALASSERT(__size>0);
 	#if debug
-	alloc_cnt++;	
+	alloc_cnt++;
 	#endif
 
 	return malloc(__size);
-};
+}
 
 /* Note: Never use DeallocMem directly !  */
 /* Instead use DeallocateMem() which is a */
@@ -51,4 +51,4 @@ void DeallocMem(void *__ptr)
 
 	}
 	#endif
-};
+}

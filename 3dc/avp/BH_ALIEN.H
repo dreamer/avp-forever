@@ -13,7 +13,7 @@
 	#endif
 
 #include "bh_pred.h"
- 
+
  /*--------------------------------------------
    Enum of alien behaviour states
    --------------------------------------------*/
@@ -49,7 +49,7 @@
 	ASQ_CrouchedAttack_Claw,
 	ASQ_CrawlingAttack_Claw,
 	ASQ_RunningAttack_Claw,
-	ASQ_Pain,	 
+	ASQ_Pain,
 	ASQ_Jump,
 	/* Additions by ChrisF, 20/4/98 */
 	ASQ_StandingTailPoise,
@@ -104,14 +104,14 @@
 	int MaxSpeed;
 	int Wounds;
 	int last_anim_length;
-	ALIEN_BHSTATE BehaviourState;	
+	ALIEN_BHSTATE BehaviourState;
 	ATTACK_DATA *current_attack;
 	int PounceDetected;
 	int JumpDetected;
 	int EnablePounce;
 	int EnableWaypoints;
 	int PreferToCrouch;
-	
+
 	MODULE *my_containing_module;
 	AIMODULE *huntingModule;
 
@@ -130,7 +130,7 @@
 	int IAmCrouched;
 	NPC_MOVEMENTDATA moveData;
 	NPC_WANDERDATA wanderData;
-	
+
 	NPC_AVOIDANCEMANAGER avoidanceManager;
 	WAYPOINT_MANAGER waypointManager;
 
@@ -163,7 +163,7 @@
 	struct vectorch position;
 	int shapeIndex;
 	char nameID[SB_NAME_LENGTH];
-	char death_target_ID[SB_NAME_LENGTH]; 
+	char death_target_ID[SB_NAME_LENGTH];
 	ALIEN_TYPE type;
 	int start_inactive;
 	struct euler starteuler;
@@ -201,7 +201,7 @@
 	#define ALIEN_ATTACKTIME 					(ONE_FIXED>>1)
 	/* random time between 1 and 2 seconds,in fixed point,with granularity 1/8th second */
 	#define ALIEN_NEARWAITTIME					(ONE_FIXED+((FastRandom()&0x7)*(ONE_FIXED>>3)))
-	
+
 	#define PREDALIEN_SPEED_FACTOR				((ONE_FIXED*8)/10)
 	#define PRAETORIAN_SPEED_FACTOR				((ONE_FIXED*8)/10)
 	#define PRAETORIAN_WALKSPEED_FACTOR			((ONE_FIXED*6)/5)
@@ -227,7 +227,7 @@
 /*--------------------------------------------
   Prototypes
   --------------------------------------------*/
- 
+
 	void CreateAlienDynamic(STRATEGYBLOCK *Generator , ALIEN_TYPE type_of_alien);
 	void InitAlienBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr);
 	void AlienBehaviour(STRATEGYBLOCK *sbPtr);
@@ -252,6 +252,5 @@
 		}
 
 	#endif
-
 
 #endif

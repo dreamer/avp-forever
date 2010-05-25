@@ -40,7 +40,6 @@ void InitTextStrings(void)
 	filenamePtr = "aenglish.txt";
 	#elif PREDATOR_DEMO
 	filenamePtr = "english.txt";
-//	#elif USE_LANGUAGE_TXT
 	#else
 	filenamePtr = "language.txt";
 	#endif
@@ -67,7 +66,7 @@ void InitTextStrings(void)
 		textPtr = TextBufferPtr;
 	}
 
-	/* check if language file is not from Gold version */
+	// check if language file is not from Gold version
 	if (strncmp(textPtr, "REBINFF2", 8))
 	{
 		char message[100];
@@ -78,7 +77,7 @@ void InitTextStrings(void)
 
 	AddToTable(EmptyString);
 
-	for (i=1; i<MAX_NO_OF_TEXTSTRINGS; i++)
+	for (i = 1; i < MAX_NO_OF_TEXTSTRINGS; i++)
 	{	
 		/* scan for a quote mark */
 		while (*textPtr++ != '"');
@@ -108,7 +107,7 @@ void KillTextStrings(void)
 
 char *GetTextString(enum TEXTSTRING_ID stringID)
 {
-	LOCALASSERT(stringID<MAX_NO_OF_TEXTSTRINGS);
+	LOCALASSERT(stringID < MAX_NO_OF_TEXTSTRINGS);
 
 	return TextStringPtr[stringID];
 }

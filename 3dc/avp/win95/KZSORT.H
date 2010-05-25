@@ -26,5 +26,5 @@ extern void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr);
 /* generic item shape function */
 extern void KShapeItemsInstr(SHAPEINSTR *shapeinstrptr);
 extern void OutputKItem(int *shapeitemptr);
-							
+
 extern void RenderThisDisplayblock(DISPLAYBLOCK *dbPtr);

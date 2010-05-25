@@ -32,7 +32,7 @@ extern const short ArcTanTable[256];
 
 */
 
-MATRIXCH IdentityMatrix = 
+MATRIXCH IdentityMatrix =
 {
 	ONE_FIXED, 0, 0,
 	0, ONE_FIXED, 0,
@@ -52,19 +52,19 @@ MATRIXCH IdentityMatrix =
 
 extern int oneoversin[4096];
 
-void ConstructOneOverSinTable(void) 
+void ConstructOneOverSinTable(void)
 {
 	int a,sin;
 
-	for (a=0; a<4096; a++) 
+	for (a=0; a<4096; a++)
 	{
 		sin = GetSin(a);
 
-		if (sin != 0) 
+		if (sin != 0)
 		{
 			oneoversin[a] = DIV_FIXED(ONE_FIXED,sin);
-		} 
-		else 
+		}
+		else
 		{
 			sin = 100;
 			oneoversin[a] = DIV_FIXED(ONE_FIXED,sin);
@@ -72,12 +72,12 @@ void ConstructOneOverSinTable(void)
 	}
 }
 
-int GetOneOverSin(int a) 
+int GetOneOverSin(int a)
 {
 	int b;
 
 	b=a&wrap360;
-	
+
 	return(oneoversin[b]);
 }
 
@@ -228,7 +228,7 @@ int FindShift32(int value, int limit)
 
 	if(value < 0) value = -value;
 
-	while(value > limit) 
+	while(value > limit)
 	{
 		#if trip_debugger
 		if(shift > 32) {
@@ -281,7 +281,7 @@ int MinInt(int *iarray, int iarraysize)
 	int imin = bigint;
 	int i;
 
-	for(i = iarraysize; i!=0; i--) 
+	for(i = iarraysize; i!=0; i--)
 	{
 		if(imin > *iarray) imin = *iarray;
 
@@ -490,9 +490,9 @@ void MatrixMultiply(m1, m2, m3)
 	struct matrixch *m1, *m2, *m3;
 
 {
-  
+
 	#if 0
- 		
+
 	PushMatrix();
 
 	ch2psx(m1,(MATRIX *)scratchp);
@@ -503,11 +503,11 @@ void MatrixMultiply(m1, m2, m3)
 	psx2ch((MATRIX *)(scratchp+((sizeof(MATRIX)<<1))),m3);
 
  	PopMatrix();
-		
+
 	#else
-		 
+
 	MATRIXCH TmpMat;
-	 
+
 /* m11'' = c1.r1' */
 
 	TmpMat.mat11=MUL_FIXED(m1->mat11,m2->mat11);
@@ -575,9 +575,9 @@ void PSXAccurateMatrixMultiply(m1, m2, m3)
 	struct matrixch *m1, *m2, *m3;
 
 {
- 	 
+
 	MATRIXCH TmpMat;
-	 
+
 /* m11'' = c1.r1' */
 
 	TmpMat.mat11=MUL_FIXED(m1->mat11,m2->mat11);
@@ -937,7 +937,7 @@ void MatrixToEuler(MATRIXCH *m, EULER *e)
 		}
 
 		else CosMatrixPitch = 1;
-	
+
 		SineMatrixYaw = WideMulNarrowDiv(
 			#if j_and_r_change
 			m->mat31 >> m2e_scale, ONE_FIXED_S, CosMatrixPitch);
@@ -980,7 +980,7 @@ void MatrixToEuler(MATRIXCH *m, EULER *e)
 		textprint("CosMatrixRoll = %d\n", CosMatrixRoll);
 		/* WaitForReturn(); */
 		#endif
-	
+
 		/* Tables are for values +- 2^16 */
 
 		sinx = SineMatrixPitch << m2e_scale;
@@ -1028,7 +1028,7 @@ void MatrixToEuler(MATRIXCH *m, EULER *e)
 
 			if(sinx < 0) {
 				x =  -x;
-				x &= wrap360;			
+				x &= wrap360;
 			}
 		}
 
@@ -1060,7 +1060,7 @@ void MatrixToEuler(MATRIXCH *m, EULER *e)
 
 			if(siny < 0) {
 				x =  -x;
-				x &= wrap360;			
+				x &= wrap360;
 			}
 
 		}
@@ -1092,7 +1092,7 @@ void MatrixToEuler(MATRIXCH *m, EULER *e)
 
 			if(sinz < 0) {
 				x =  -x;
-				x &= wrap360;			
+				x &= wrap360;
 			}
 		}
 
@@ -1110,13 +1110,13 @@ void MatrixToEuler(MATRIXCH *m, EULER *e)
 			e->EulerX = 3072;
 		else
 			e->EulerX = 1024;
-		
+
 		e->EulerZ=0;
 
 
-		
+
 		/* Yaw */
-		
+
 		siny = -m->mat13 ;
 
 		cosy = 	m->mat11 ;
@@ -1143,7 +1143,7 @@ void MatrixToEuler(MATRIXCH *m, EULER *e)
 
 			if(siny < 0) {
 				x =  -x;
-				x &= wrap360;			
+				x &= wrap360;
 			}
 
 		}
@@ -1322,7 +1322,7 @@ void MatrixToEuler2(MATRIXCH *m, EULER *e)
 
 		if(sinx < 0) {
 			x =  -x;
-			x &= wrap360;			
+			x &= wrap360;
 		}
 	}
 
@@ -1354,7 +1354,7 @@ void MatrixToEuler2(MATRIXCH *m, EULER *e)
 
 		if(siny < 0) {
 			x =  -x;
-			x &= wrap360;			
+			x &= wrap360;
 		}
 
 	}
@@ -1386,7 +1386,7 @@ void MatrixToEuler2(MATRIXCH *m, EULER *e)
 
 		if(sinz < 0) {
 			x =  -x;
-			x &= wrap360;			
+			x &= wrap360;
 		}
 	}
 
@@ -1476,7 +1476,7 @@ void MNormalise(MATRIXCH *m)
 
 
 	/* Find the two vectors nearest 90ø */
-	if (dotxy > dotxz && dotxy > dotyz) 
+	if (dotxy > dotxz && dotxy > dotyz)
 	{
 
 		/* xy are the closest to 90ø */
@@ -1497,7 +1497,7 @@ void MNormalise(MATRIXCH *m)
 		CopyVector(&v, y);
 	}
 
-	else if(dotxz > dotxy && dotxz > dotyz) 
+	else if(dotxz > dotxy && dotxz > dotyz)
 	{
 		/* xz are the closest to 90ø */
 
@@ -1517,7 +1517,7 @@ void MNormalise(MATRIXCH *m)
 		CopyVector(&v, z);
 
 	}
-	else 
+	else
 	{
 		/* yz are the closest to 90ø */
 
@@ -2338,7 +2338,7 @@ int PointInPolygon(int *point, int *polygon, int c, int ppsize)
 
 /*
 
- #defines and statics required for Jamie's Most Excellent 
+ #defines and statics required for Jamie's Most Excellent
  random number generator
 
 */
@@ -2393,7 +2393,7 @@ void SetFastRandom(void)
 	int i;
 	long number = timeGetTime();//GetTickCount();
 
-	for (i = 0; i < DEG_3; ++i) 
+	for (i = 0; i < DEG_3; ++i)
 	{
 		number = 1103515145 * number + 12345;
 		table[i] = number;
@@ -2428,16 +2428,16 @@ int FastRandom(void)
 
 	++front_ptr;
 
-	if (front_ptr < TABLE_END) 
+	if (front_ptr < TABLE_END)
 	{
       ++rear_ptr;
 
-      if (rear_ptr < TABLE_END) 
+      if (rear_ptr < TABLE_END)
 		  return i;
 
       rear_ptr = table;
 	}
-	else 
+	else
 	{				/* front_ptr >= TABLE_END */
 		front_ptr = table;
 		++rear_ptr;
@@ -2506,7 +2506,7 @@ void SetSeededFastRandom(int seed)
 	long number = seed;
 
 
-	for(i = 0; i < SEEDED_DEG_3; ++i) 
+	for(i = 0; i < SEEDED_DEG_3; ++i)
 	{
       number   = 1103515145 * number + 12345;
       seeded_table[i] = number;
@@ -2550,7 +2550,7 @@ void PolyAveragePoint(POLYHEADER *pheader, int *spts, VECTORCH *apt)
 
 	numpolypts = 0;
 
-	while(*mypolystart != Term) 
+	while(*mypolystart != Term)
 	{
 		x = *(spts + *mypolystart + ix);
 		y = *(spts + *mypolystart + iy);
@@ -2580,16 +2580,16 @@ void PolyAveragePoint(POLYHEADER *pheader, int *spts, VECTORCH *apt)
 
 
 
-/* KJL 15:07:39 01/08/97 - Returns the magnitude of the 
+/* KJL 15:07:39 01/08/97 - Returns the magnitude of the
    cross product of two vectors a and b. */
 int MagnitudeOfCrossProduct(VECTORCH *a, VECTORCH *b)
 {
-	VECTORCH c;				 
-    
+	VECTORCH c;
+
 	c.vx = MUL_FIXED(a->vy,b->vz) - MUL_FIXED(a->vz,b->vy);
 	c.vy = MUL_FIXED(a->vz,b->vx) - MUL_FIXED(a->vx,b->vz);
 	c.vz = MUL_FIXED(a->vx,b->vy) - MUL_FIXED(a->vy,b->vx);
-    
+
 	return Magnitude(&c);
 }
 
@@ -2612,14 +2612,14 @@ int Approximate3dMagnitude(VECTORCH *v)
 
 	dx = v->vx;
 	if (dx<0) dx = -dx;
-	
+
 	dy = v->vy;
 	if (dy<0) dy = -dy;
-	
-	dz = v->vz;	 	 
+
+	dz = v->vz;
 	if (dz<0) dz = -dz;
-						 
-	
+
+
 	if (dx>dy)
 	{
 		if (dx>dz)

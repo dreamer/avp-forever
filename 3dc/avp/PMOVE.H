@@ -22,8 +22,8 @@
   Free movement indicates normal movement.
   Special Movement indicates that the player is
   executing a special move.
-  Aborting indicates that a special move is 
-  prematurely terminating.  
+  Aborting indicates that a special move is
+  prematurely terminating.
   ---------------------------------------------------*/
 
 typedef enum player_mov_state
@@ -35,7 +35,7 @@ typedef enum player_mov_state
 
 /*--------------Patrick 15/10/96 ---------------------
   Enumeration of special move types
-  Special moves are flagged as belonging to a 
+  Special moves are flagged as belonging to a
   character type
   ---------------------------------------------------*/
 
@@ -60,7 +60,7 @@ typedef enum player_morph_state
 
 
 /*--------------Patrick 1/11/96 ---------------------
-  this define determines how crouching and lying down 
+  this define determines how crouching and lying down
   are implemented for the player.  It can either be
   done by changing the shape, or by morphing....
   Morphing is better, but doesn't work with the current

@@ -131,7 +131,7 @@ void SortModules(unsigned int noOfItems)
 	struct KObject *mergeFrom = &VisibleModules[0];
 	struct KObject *mergeTo = &VisibleModules2[0];
 	struct KObject *mergeTemp;
-	
+
 	unsigned int offSet;
 
 	for (partitionSize = 1; partitionSize < noOfItems; partitionSize *= 2)
@@ -279,7 +279,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 					else /* between faces */
 					{
 						dist.vy = 0;
-					}		  
+					}
 				}
 			    {
 				    int minZ = modulePtr->m_minz + position.vz;
@@ -296,7 +296,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 					else /* between faces */
 					{
 						dist.vz = 0;
-					}		  
+					}
 				}
 
 				VisibleModules[numVisMods].DispPtr = objectPtr;
@@ -329,7 +329,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 	textprint("numvisobjs %d\n",numVisObjs);
 	{
 		int numMods = numVisMods;
-		
+
 		while(numMods)
 		{
 			int n = numMods;
@@ -346,7 +346,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 					furthestModule = n;
 				}
 			}
-		
+
 			numMods--;
 
 			VisibleModules2[numMods] = VisibleModules[furthestModule];
@@ -359,26 +359,26 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 
 		int o = numVisObjs;
 		while(o--)
-		{	
+		{
 			DISPLAYBLOCK *objectPtr = VisibleObjects[o].DispPtr;
-			int maxX = objectPtr->ObWorld.vx + objectPtr->ObRadius; 
-			int minX = objectPtr->ObWorld.vx - objectPtr->ObRadius; 
-			int maxZ = objectPtr->ObWorld.vz + objectPtr->ObRadius; 
-			int minZ = objectPtr->ObWorld.vz - objectPtr->ObRadius; 
-			int maxY = objectPtr->ObWorld.vy + objectPtr->ObRadius; 
-			int minY = objectPtr->ObWorld.vy - objectPtr->ObRadius; 
-			
+			int maxX = objectPtr->ObWorld.vx + objectPtr->ObRadius;
+			int minX = objectPtr->ObWorld.vx - objectPtr->ObRadius;
+			int maxZ = objectPtr->ObWorld.vz + objectPtr->ObRadius;
+			int minZ = objectPtr->ObWorld.vz - objectPtr->ObRadius;
+			int maxY = objectPtr->ObWorld.vy + objectPtr->ObRadius;
+			int minY = objectPtr->ObWorld.vy - objectPtr->ObRadius;
+
 			int numMods = 0;
 			while(numMods<numVisMods)
 			{
 				MODULE *modulePtr = SortedModules[numMods].DispPtr->ObMyModule;
 
-				if (maxX >= modulePtr->m_minx+modulePtr->m_world.vx) 
-				if (minX <= modulePtr->m_maxx+modulePtr->m_world.vx) 
-			    if (maxZ >= modulePtr->m_minz+modulePtr->m_world.vz) 
+				if (maxX >= modulePtr->m_minx+modulePtr->m_world.vx)
+				if (minX <= modulePtr->m_maxx+modulePtr->m_world.vx)
+			    if (maxZ >= modulePtr->m_minz+modulePtr->m_world.vz)
 			    if (minZ <= modulePtr->m_maxz+modulePtr->m_world.vz)
-			    if (maxY >= modulePtr->m_miny+modulePtr->m_world.vy) 
-			    if (minY <= modulePtr->m_maxy+modulePtr->m_world.vy) 
+			    if (maxY >= modulePtr->m_miny+modulePtr->m_world.vy)
+			    if (minY <= modulePtr->m_maxy+modulePtr->m_world.vy)
 				{
 					VisibleObjects[o].SortKey=numMods;
 					break;
@@ -414,7 +414,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 				if(VisibleObjects[o].DrawBeforeEnvironment)
 				{
 					DISPLAYBLOCK *dptr = VisibleObjects[o].DispPtr;
-					AddShape(VisibleObjects[o].DispPtr,VDBPtr);	
+					AddShape(VisibleObjects[o].DispPtr,VDBPtr);
 					#if MIRRORING_ON
 					if (MirroringActive && !dptr->HModelControlBlock)
 					{
@@ -440,7 +440,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 			for (numMods=0; numMods<numVisMods; numMods++)
 			{
 				MODULE *modulePtr = SortedModules[numMods].DispPtr->ObMyModule;
-				
+
 				CheckWireFrameMode(WireFrameMode&1);
 		  		AddShape(SortedModules[numMods].DispPtr,VDBPtr);
 				#if MIRRORING_ON
@@ -470,7 +470,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 						if(VisibleObjects[o].SortKey == numMods && !VisibleObjects[o].DrawBeforeEnvironment)
 						{
 							DISPLAYBLOCK *dptr = VisibleObjects[o].DispPtr;
-							AddShape(VisibleObjects[o].DispPtr,VDBPtr);	
+							AddShape(VisibleObjects[o].DispPtr,VDBPtr);
 							#if MIRRORING_ON
 							if (MirroringActive && !dptr->HModelControlBlock)
 							{
@@ -497,7 +497,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 			while(numMods--)
 			{
 				MODULE *modulePtr = SortedModules[numMods].DispPtr->ObMyModule;
-				
+
 				CheckWireFrameMode(WireFrameMode&1);
 		  		AddShape(SortedModules[numMods].DispPtr,VDBPtr);
 				#if MIRRORING_ON
@@ -527,7 +527,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 						if(VisibleObjects[o].SortKey == numMods && !VisibleObjects[o].DrawBeforeEnvironment)
 						{
 							DISPLAYBLOCK *dptr = VisibleObjects[o].DispPtr;
-							AddShape(VisibleObjects[o].DispPtr,VDBPtr);	
+							AddShape(VisibleObjects[o].DispPtr,VDBPtr);
 							#if MIRRORING_ON
 							if (MirroringActive && !dptr->HModelControlBlock)
 							{
@@ -569,7 +569,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 				}
 			}
 		}
-		
+
 	#if MIRRORING_ON
 		if (MirroringActive)
 		{
@@ -591,11 +591,11 @@ static int ObjectIsInModule(DISPLAYBLOCK *objectPtr,MODULE *modulePtr)
 	position.vy -= modulePtr->m_world.vy;
 	position.vz -= modulePtr->m_world.vz;
 
-	if (position.vx + objectSize >= modulePtr->m_minx) 
-    	if (position.vx - objectSize <= modulePtr->m_maxx) 
-		    if (position.vz + objectSize >= modulePtr->m_minz) 
-			    if (position.vz - objectSize <= modulePtr->m_maxz) 
-				    if (position.vy + objectSize >= modulePtr->m_miny) 
+	if (position.vx + objectSize >= modulePtr->m_minx)
+    	if (position.vx - objectSize <= modulePtr->m_maxx)
+		    if (position.vz + objectSize >= modulePtr->m_minz)
+			    if (position.vz - objectSize <= modulePtr->m_maxz)
+				    if (position.vy + objectSize >= modulePtr->m_miny)
 					    if (position.vy - objectSize <= modulePtr->m_maxy)
 							return 1;
 
@@ -610,11 +610,11 @@ static int PointIsInModule(VECTORCH *pointPtr,MODULE *modulePtr)
 	position.vy -= modulePtr->m_world.vy;
 	position.vz -= modulePtr->m_world.vz;
 
-	if (position.vx >= modulePtr->m_minx) 
-    	if (position.vx <= modulePtr->m_maxx) 
-		    if (position.vz >= modulePtr->m_minz) 
-			    if (position.vz <= modulePtr->m_maxz) 
-				    if (position.vy >= modulePtr->m_miny) 
+	if (position.vx >= modulePtr->m_minx)
+    	if (position.vx <= modulePtr->m_maxx)
+		    if (position.vz >= modulePtr->m_minz)
+			    if (position.vz <= modulePtr->m_maxz)
+				    if (position.vy >= modulePtr->m_miny)
 					    if (position.vy <= modulePtr->m_maxy)
 							return 1;
 	return 0;
@@ -625,8 +625,8 @@ static int PointIsInModule(VECTORCH *pointPtr,MODULE *modulePtr)
 
 void RenderThisDisplayblock(DISPLAYBLOCK *dbPtr)
 {
-/* 
-	bjd - returning from this function before calling 
+/*
+	bjd - returning from this function before calling
 	AddShape makes the marines weapons disappear. Nothing else changes
 	when playing marine level 1
 */
@@ -638,7 +638,7 @@ void RenderThisDisplayblock(DISPLAYBLOCK *dbPtr)
 
 void RenderThisHierarchicalDisplayblock(DISPLAYBLOCK *dbPtr)
 {
-/* 
+/*
 	bjd - returning from this function early makes the marines weapons
 	and NPCs disappear, nothing else!
 */

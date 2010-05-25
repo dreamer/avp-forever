@@ -27,7 +27,7 @@ typedef struct HierarchicalDebrisBehaviourType {
 	/* Silly stuff for bouncing sounds. */
 	int bouncelastframe;
 	enum soundindex Bounce_Sound;
-	
+
 } HDEBRIS_BEHAV_BLOCK;
 
 // extern functions

@@ -12,7 +12,7 @@
 
 	#endif
 
- 
+
 	#include "bh_pred.h"
 	#include "psndproj.h"
 	#include "sfx.h"
@@ -22,7 +22,7 @@
 	typedef enum marine_bhstate
 	{
 		MBS_Waiting,
-		/* Waiting - stand and do nothing, 
+		/* Waiting - stand and do nothing,
 		 until you get a call, see an enemy,
 		 or begin to fidget. */
 		MBS_Wandering,
@@ -85,8 +85,8 @@
 		MSQ_StandDeadFront,
 		MSQ_StandDeadBack,
 		MSQ_Crawl,
-		MSQ_CrouchDie,	
-		MSQ_CrouchDead,	
+		MSQ_CrouchDie,
+		MSQ_CrouchDead,
 		MSQ_RunningFire,
 		MSQ_Crouch,
 		MSQ_Stand,
@@ -95,7 +95,7 @@
 		MSQ_Walk_Backwards,
 		MSQ_Crawl_Backwards,
 		MSQ_RunningFire_Backwards,
-		
+
 		MSQ_StandingFireSecondary,
 		MSQ_RunningFireSecondary,
 		MSQ_RunningFireSecondary_Backwards,
@@ -123,7 +123,7 @@
 
 		int Squad_Suspicion;
 		VECTORCH squad_suspect_point;
-		
+
 		/* Now some stats. */
 		int RespondingMarines;
 		int Alt_RespondingMarines;
@@ -136,7 +136,7 @@
 
 		int NearBurningMarines;
 		int Alt_NearBurningMarines;
-		
+
 		int Squad_Delta_Morale;
 		int Nextframe_Squad_Delta_Morale;
 
@@ -145,7 +145,7 @@
 	/*--------------------------------------------
   	Data for civilian accoutement stuff
   	--------------------------------------------*/
-	
+
 	struct hierarchy_shape_replacement;
 	typedef struct hierarchy_variant_data
 	{
@@ -175,7 +175,7 @@
 		int death_target_request;
 
 		STRATEGYBLOCK* generator_sbptr;//0 unless created by a generator
-	
+
 		AIMODULE *lastmodule;
 		AIMODULE *destinationmodule;
 		AIMODULE *missionmodule;
@@ -217,7 +217,7 @@
 		SECTION_DATA *My_Elevation_Section; /* For elevation computation. */
 		int lastroundhit;
 		SECTION_DATA *lasthitsection;
-		
+
 		int GibbFactor;
 		int Wounds;
 
@@ -235,7 +235,7 @@
 		int Courage;
 		int Voice;
 		int VoicePitch;
-		
+
 		int FiringAnim;
 		int Expression;
 		int Target_Expression;
@@ -271,7 +271,7 @@
 		MNPCW_End,
 
 	} MARINE_NPC_WEAPONS;
- 	
+
  	/*--------------------------------------------
   	Tools data template
  	--------------------------------------------*/
@@ -282,7 +282,7 @@
 		int shapeIndex;
 		char nameID[SB_NAME_LENGTH];
 		MARINE_MISSION Mission;
-		char death_target_ID[SB_NAME_LENGTH]; 
+		char death_target_ID[SB_NAME_LENGTH];
 		int death_target_request;
 
 		enum marine_npc_weapons marine_type;
@@ -300,7 +300,7 @@
 
 
 	typedef struct marine_weapon_data {
-	
+
 		MARINE_NPC_WEAPONS id;
 		enum SFX_ID SfxID;
 		STATE_RETURN_CONDITION (*WeaponFireFunction)(STRATEGYBLOCK *);
@@ -347,10 +347,10 @@
 	#define MARINE_NEAR_VIEW_WIDTH				500		/* mm */
 	#define MARINE_WEAPON_DAMAGE				5
 	#define MARINE_CLOSE_APPROACH_DISTANCE		3000	/* mm */
-	#define MARINE_FIRINGPOINT_INFRONT			3000		/* 900 mm */  	
+	#define MARINE_FIRINGPOINT_INFRONT			3000		/* 900 mm */
 	#define MARINE_FIRINGPOINT_ACROSS			300 	/* 300 mm */
 	#define MARINE_FIRINGPOINT_UP				200 	/* 200 mm */
-	#define MARINE_FIRINGPOINT_INFRONT_CROUCHED	900		/* mm */  	
+	#define MARINE_FIRINGPOINT_INFRONT_CROUCHED	900		/* mm */
 	#define MARINE_FIRINGPOINT_ACROSS_CROUCHED	200 	/* mm */
 	#define MARINE_FIRINGPOINT_UP_CROUCHED		100 	/* mm */
 	#define MARINE_WEAPON_VOLLEYSIZE			(1+(FastRandom()&0x02))	/* 1,2 or 3 1/4 second bursts */
@@ -361,7 +361,7 @@
 	#define SQUAD_PARANOIA_TIME					(ONE_FIXED)
 
 	/* 1.5-2 seconds in 1/16 second. NB DO NOT INCREASE THIS */
-	#define MARINE_FAR_MOVE_TIME ((24+(FastRandom()&0x07))*(ONE_FIXED>>4)) 				
+	#define MARINE_FAR_MOVE_TIME ((24+(FastRandom()&0x07))*(ONE_FIXED>>4))
 	/* 1-2 seconds in 1/8ths of a second */
 	#define MARINE_NEAR_TIMEBETWEENFIRING	((8+(FastRandom()&0x07))*(ONE_FIXED>>3))
 //	#define MARINE_NEAR_FIRE_TIME			(ONE_FIXED>>2) 	/* 1/4 second */
@@ -389,7 +389,7 @@
 	void MakeMarineFar(STRATEGYBLOCK *sbPtr);
 	void MarineIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, int wounds,SECTION_DATA *Section, VECTORCH *incoming);
 	void WarnMarineOfAttack(STRATEGYBLOCK *marine,STRATEGYBLOCK *attacker);
-	
+
 	DISPLAYBLOCK* AddNPCGunFlashEffect(VECTORCH *position, MATRIXCH* orientation, enum SFX_ID sfxID);
 	void RemoveNPCGunFlashEffect(DISPLAYBLOCK* dPtr);
 	void MaintainNPCGunFlashEffect(DISPLAYBLOCK* dPtr, VECTORCH *position, MATRIXCH* orientation);

@@ -52,11 +52,11 @@ enum MARINE_HUD_DIGIT
     MARINE_HUD_MOTIONTRACKER_TENS,
     MARINE_HUD_MOTIONTRACKER_HUNDREDS,
     MARINE_HUD_MOTIONTRACKER_THOUSANDS,
-    
+
     MARINE_HUD_HEALTH_UNITS,
     MARINE_HUD_HEALTH_TENS,
     MARINE_HUD_HEALTH_HUNDREDS,
-    
+
     MARINE_HUD_ENERGY_UNITS,
     MARINE_HUD_ENERGY_TENS,
     MARINE_HUD_ENERGY_HUNDREDS,
@@ -64,14 +64,14 @@ enum MARINE_HUD_DIGIT
     MARINE_HUD_ARMOUR_UNITS,
     MARINE_HUD_ARMOUR_TENS,
     MARINE_HUD_ARMOUR_HUNDREDS,
-    
+
     MARINE_HUD_PRIMARY_AMMO_ROUNDS_UNITS,
     MARINE_HUD_PRIMARY_AMMO_ROUNDS_TENS,
     MARINE_HUD_PRIMARY_AMMO_ROUNDS_HUNDREDS,
 
 	MARINE_HUD_PRIMARY_AMMO_MAGAZINES_UNITS,
     MARINE_HUD_PRIMARY_AMMO_MAGAZINES_TENS,
-    
+
     MARINE_HUD_SECONDARY_AMMO_ROUNDS_UNITS,
     MARINE_HUD_SECONDARY_AMMO_ROUNDS_TENS,
     MARINE_HUD_SECONDARY_AMMO_ROUNDS_HUNDREDS,
@@ -91,13 +91,13 @@ enum PREDATOR_HUD_DIGIT
     PREDATOR_HUD_ARMOUR_3,
     PREDATOR_HUD_ARMOUR_4,
     PREDATOR_HUD_ARMOUR_5,
-    
+
     PREDATOR_HUD_HEALTH_1,
 	PREDATOR_HUD_HEALTH_2,
     PREDATOR_HUD_HEALTH_3,
     PREDATOR_HUD_HEALTH_4,
     PREDATOR_HUD_HEALTH_5,
-    
+
 	/*
 	PREDATOR_HUD_THREATDISPLAY_1,
 	PREDATOR_HUD_THREATDISPLAY_2,
@@ -128,7 +128,7 @@ enum GUNSIGHT_SHAPE
     GUNSIGHT_GREENBOX,
     GUNSIGHT_REDBOX,
     GUNSIGHT_REDDIAMOND,
-    
+
     MAX_NO_OF_GUNSIGHT_SHAPES
 };
 
@@ -172,7 +172,7 @@ extern void PlatformSpecificExitingHUD(void);
 /*KJL**************************************************
 * Made to complement PlatformSpecificExitingHUD() fn. *
 **************************************************KJL*/
-	
+
 extern void BLTMotionTrackerToHUD(int scanLineSize);
 /*KJL******************************************************************************************
 * draw motion tracker with its expanding scanline                                             *

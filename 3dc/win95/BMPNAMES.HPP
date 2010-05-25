@@ -38,9 +38,9 @@ enum BMPN_Flags
 	ChunkBMPFlag_HistogramV2Exists    = 0x00200000, // used by cencon in palette generation - help by outputting .HS2 files (non-lit histograms for lit bitmaps with conceptual tlt palette)
 	ChunkBMPFlag_CopiedGenMipMaps     = 0x00400000, // mip map HW generic textures have been copied to final dest
 	ChunkBMPFlag_CopiedGenBaseTex     = 0x00800000, // base (non-mip) HW generic textures have been copied to final dest
-	
+
 	ChunkBMPFlag_IFF                  = 0x01000000, // a very important flag indeed:
-		// when this flag is set, the file is an IFF file and the filename stores a 
+		// when this flag is set, the file is an IFF file and the filename stores a
 		// full relative path from the 'textures-root' directory for the project
 		// all other flags are complete bollocks when this flag is set
 		// (except for the NotIn.... flags)
@@ -117,9 +117,9 @@ public:
 
 	BMP_Name(const BMP_Name &);
 	const BMP_Name & operator=(const BMP_Name &);
-	
+
 	char * filename;
-	
+
 	BMPN_Flags flags;
 	int index;
 	int version_num;
@@ -143,33 +143,33 @@ public:
 	inline int get_psx_priority(void) const { return priority >> 8 & 0xff; }
 	inline void set_pc_priority(int const p) { priority &= ~0xff; priority |= p & 0xff; }
 	inline void set_psx_priority(int const p) { priority &= ~0xff00; priority |= (p & 0xff) << 8; }
-	
+
 	friend BOOL operator==(const BMP_Name &o1, const BMP_Name &o2);
 	friend BOOL operator!=(const BMP_Name &o1, const BMP_Name &o2);
-	
+
 	BMP_Name()
 	: filename(0), flags((BMPN_Flags)DEFAULT_BMPN_FLAGS), index(0), version_num (0), priority (DEFAULT_BMPN_PRIORITY), transparency_colour_union(0) {}
-	
+
 	void Validate(void);
-	
+
 	unsigned GetTranspRedVal() const;
 	unsigned GetTranspGreenVal() const;
 	unsigned GetTranspBlueVal() const;
 	unsigned GetWidth() const;
 	unsigned GetHeight() const;
-	
+
 	void SetTranspRedVal(unsigned);
 	void SetTranspGreenVal(unsigned);
 	void SetTranspBlueVal(unsigned);
 	void SetWidth(unsigned);
 	void SetHeight(unsigned);
-	
+
 	// copy all data
 	void CopyUnionDataFrom(BMP_Name const & rBmp);
 	bool DifferentTransparencyColour(BMP_Name const & rBmp) const;
-	
+
 	enum
-	{	
+	{
 		MAXVAL_RGB = 0xff,
 		MAXVAL_WH = 0xffff
 	};
@@ -177,17 +177,17 @@ public:
 private:
 
 	int priority; // contains pc palettized mode palette generating priority as well as 16/256 colour priority for attahced palettes
-	
+
 	enum
 	{
 		SHIFT_R = 22,
 		SHIFT_G = 12,
 		SHIFT_B = 2,
-		
+
 		SHIFT_W = 0,
 		SHIFT_H = 16
 	};
-	
+
 	unsigned transparency_colour_union; // == r<<22 + g<<12 + b << 2 ; r,g,b <- [0..255], but don't assume this'll always be the case
 		// or H<<16 + W
 
@@ -237,7 +237,7 @@ inline void BMP_Name::SetTranspRedVal(unsigned v)
 {
 	assert(!(flags & ChunkBMPFlag_IFF)); // not available for IFF files - it's in the file
 	assert(v<=MAXVAL_RGB); // sensible value
-	
+
 	transparency_colour_union &= ~(MAXVAL_RGB << SHIFT_R);
 	transparency_colour_union |= v << SHIFT_R;
 }
@@ -246,7 +246,7 @@ inline void BMP_Name::SetTranspGreenVal(unsigned v)
 {
 	assert(!(flags & ChunkBMPFlag_IFF)); // not available for IFF files - it's in the file
 	assert(v<=MAXVAL_RGB); // sensible value
-	
+
 	transparency_colour_union &= ~(MAXVAL_RGB << SHIFT_G);
 	transparency_colour_union |= v << SHIFT_G;
 }
@@ -255,7 +255,7 @@ inline void BMP_Name::SetTranspBlueVal(unsigned v)
 {
 	assert(!(flags & ChunkBMPFlag_IFF)); // not available for IFF files - it's in the file
 	assert(v<=MAXVAL_RGB); // sensible value
-	
+
 	transparency_colour_union &= ~(MAXVAL_RGB << SHIFT_B);
 	transparency_colour_union |= v << SHIFT_B;
 }
@@ -264,7 +264,7 @@ inline void BMP_Name::SetWidth(unsigned v)
 {
 	assert(flags & ChunkBMPFlag_IFF); // only available for IFF files - required since they can be modified externally
 	assert(v<=MAXVAL_WH); // sensible value
-	
+
 	transparency_colour_union &= ~(MAXVAL_WH << SHIFT_W);
 	transparency_colour_union |= v << SHIFT_W;
 }
@@ -273,7 +273,7 @@ inline void BMP_Name::SetHeight(unsigned v)
 {
 	assert(flags & ChunkBMPFlag_IFF); // only available for IFF files - required since they can be modified externally
 	assert(v<=MAXVAL_WH); // sensible value
-	
+
 	transparency_colour_union &= ~(MAXVAL_WH << SHIFT_H);
 	transparency_colour_union |= v << SHIFT_H;
 }
@@ -281,14 +281,14 @@ inline void BMP_Name::SetHeight(unsigned v)
 inline void BMP_Name::CopyUnionDataFrom(BMP_Name const & rBmp)
 {
 	assert((flags & ChunkBMPFlag_IFF)==(rBmp.flags & ChunkBMPFlag_IFF));
-	
+
 	transparency_colour_union = rBmp.transparency_colour_union;
 }
 
 inline bool BMP_Name::DifferentTransparencyColour(BMP_Name const & rBmp) const
 {
 	assert(!(flags & ChunkBMPFlag_IFF) && !(rBmp.flags & ChunkBMPFlag_IFF));
-	
+
 	return transparency_colour_union != rBmp.transparency_colour_union;
 }
 
@@ -303,7 +303,7 @@ class Chunk_With_BMPs : public Chunk
 public:
 
 	int max_index;
-	
+
 	List<BMP_Name> bmps;
 
 	virtual int get_version_num(void);
@@ -317,7 +317,7 @@ public:
 
 //	friend class BMP_Group; // for cencon
 //	friend class BMP_Info; // for cencon
-	
+
 protected:
 	virtual Bitmap_MD5_Chunk * GetMD5Chunk(char const * bname) = 0;
 	virtual void CreateMD5Chunk(BMP_Name const & rcbmp, int const * md5id) = 0;
@@ -346,9 +346,9 @@ private:
 	virtual void CreateMD5Chunk(BMP_Name const & rcbmp, int const * md5id);
 
 	friend class Environment_Data_Chunk;
-	
 
-	
+
+
 
 };
 
@@ -371,9 +371,9 @@ private:
 	virtual void CreateMD5Chunk(BMP_Name const & rcbmp, int const * md5id);
 
 	friend class Shape_External_File_Chunk;
-	
+
 };
-	
+
 
 
 class BMP_Names_Version_Chunk : public Chunk
@@ -402,7 +402,7 @@ private:
 	friend class Sprite_Header_Chunk;
 
 
-};	
+};
 
 enum GlobalBMPFlags
 {
@@ -412,7 +412,7 @@ enum GlobalBMPFlags
 	GBF_HISTOGRAMV2EXISTS = 0x00000008,
 
 	GBF_NONE = 0,
-	
+
 	// IMPORTANT
 	// since enums are not guaranteed to assume any particular
 	// storage class, code compiled on different compilers or
@@ -455,7 +455,7 @@ public:
 		sdata += 4;
 		for (int i=0; i<12; ++i, sdata+=4) reserved[i] = *(int *)sdata;
 	}
-	
+
 private:
 
 	virtual size_t size_chunk ();
@@ -467,7 +467,7 @@ private:
 	friend class Sprite_Header_Chunk;
 
 
-};	
+};
 
 
 class External_Shape_BMPs_Store_Chunk : public Chunk_With_BMPs, protected BMP_Names_ExtraData
@@ -484,13 +484,13 @@ public:
 	virtual void set_version_num(int v) { version_num = v; }
 	virtual void inc_version_num(void) { ++version_num; }
 	virtual BMP_Names_ExtraData * GetExtendedData(void) { return this; }
-	
+
 private:
 	virtual Bitmap_MD5_Chunk * GetMD5Chunk(char const * bname);
 	virtual void CreateMD5Chunk(BMP_Name const & rcbmp, int const * md5id);
 
 	int version_num;
-	
+
 	virtual size_t size_chunk()
 	{
 		return chunk_size = Chunk_With_BMPs::size_chunk() + ((rifname ? strlen(rifname) : 0) + (shapename ? strlen(shapename) : 0)+2 +3&~3) + 56;
@@ -499,7 +499,7 @@ private:
 	virtual void fill_data_block(char * data_start);
 
 
-	
+
 	friend class Environment_Game_Mode_Chunk;
 };
 
@@ -514,7 +514,7 @@ enum IDscFlags
 	IDSCF_SUBSHAPE     = 0x00000008, // image for shape included from another file
 
 	IDSCF_0 = 0,
-	
+
 	// IMPORTANT
 	// since enums are not guaranteed to assume any particular
 	// storage class, code compiled on different compilers or
@@ -543,7 +543,7 @@ public:
 	BOOL operator == (ImageDescriptor const &) const;
 	inline BOOL operator != (ImageDescriptor const & id2) const
 		{ return ! operator == (id2); }
-	
+
 	// members
 	IDscFlags flags;
 
@@ -558,7 +558,7 @@ private:
 	void WriteData(char * datablock) const;
 
 	friend class MatchingImages;
-	
+
 	int spares[3];
 };
 
@@ -585,11 +585,11 @@ private:
 	MatchingImages(char const * datablock);
 	size_t Size() const;
 	void WriteData(char * datablock) const;
-	
+
 	friend class Matching_Images_Chunk;
-	
+
 	int spares[3];
-	
+
 };
 
 enum MICFlags
@@ -597,7 +597,7 @@ enum MICFlags
 	MICF_0 = 0,
 
 	MICF_FIXEDPALETTE = 0x00000001,
-	
+
 	// IMPORTANT
 	// since enums are not guaranteed to assume any particular
 	// storage class, code compiled on different compilers or
@@ -644,7 +644,7 @@ enum BMPMD5_Flags
 	BMD5F_0 = 0,
 
 	BMD5F_SPRITE = 0x00000001,
-	
+
 	// IMPORTANT
 	// since enums are not guaranteed to assume any particular
 	// storage class, code compiled on different compilers or
@@ -674,7 +674,7 @@ private:
 	int version_num;
 
 	int spare;
-	
+
 	virtual size_t size_chunk();
 	virtual void fill_data_block(char * data_start);
 
@@ -690,7 +690,5 @@ private:
 	friend class External_Shape_BMPs_Store_Chunk;
 	friend class RIF_Child_Chunk;
 };
-
-
 
 #endif

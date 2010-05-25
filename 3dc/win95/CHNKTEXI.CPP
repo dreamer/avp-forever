@@ -26,7 +26,7 @@ char const * cl_pszGameMode = NULL;
 // used to determine if the display is palettized
 // currently assuming that if this is <= 8 then all
 // surfaces et. except d3d textures have a global palette
-extern "C" extern int VideoModeColourDepth;
+extern "C" { extern int VideoModeColourDepth; }
 
 // useful filename handling functions
 
@@ -63,11 +63,11 @@ static char * StripFileExtension(char const * n)
 static char * RiffBasename(Chunk_With_Children * pEnvDataChunk)
 {
 	Chunk * pChunk = pEnvDataChunk->lookup_single_child("RIFFNAME");
-	
+
 	if (pChunk)
 	{
 		RIF_Name_Chunk * pRifNameChunk = dynamic_cast<RIF_Name_Chunk *>(pChunk);
-		
+
 		const char * pszRifName = StripPath(pRifNameChunk->rif_name);
 
 		char * pszBaseName = new char[strlen(pszRifName)+1];
@@ -94,7 +94,7 @@ static inline bool IsFileInFastFile(char const * pszFileName)
 static bool DoesFileExist(char const * pszFileName)
 {
 	DWORD dwFileAttributes = avp_GetFileAttributes(pszFileName);
-	
+
 	if (0xffffffff == dwFileAttributes || dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 		return false;
 	else
@@ -108,10 +108,10 @@ static char * GetPath(char * pszFileNameBuf, unsigned nBufSize, ImageDescriptor 
 	char * pszName = new char[strlen(pszRawName)+1];
 	strcpy(pszName,pszRawName);
 	StripFileExtension(pszName);
-					
+
 	// load this image
 	char const * pg0ext = ".PG0";
-	
+
 	if (!bGloballyPalettized)
 	{
 		char const * dir2 = idsc.flags & IDSCF_SPRITE ? "Sprites\\" : idsc.flags & IDSCF_SUBSHAPE ? SubShps_Directory : "";
@@ -261,7 +261,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 			int enum_id = -1; // may be supported at a later date, valid when pszFileName is NULL
 
 			bool bGloballyPalettized = VideoModeColourDepth <= 8 && (fFlagsEtc & _LIO_SURFTYPEMASK) != LIO_D3DTEXTURE;
-			
+
 			db_log4("\t(whose path is determined by the current .RIF file)");
 			if (!Env_Chunk)
 			{
@@ -358,7 +358,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 							// select image descriptor
 							ImageDescriptor const idsc
 								(
-									*pRifChildChunk->filename ? 
+									*pRifChildChunk->filename ?
 										(IDscFlags)((bmpfTemp.flags & ChunkBMPFlag_FixedPalette ?
 											IDSCF_FIXEDPALETTE
 										:
@@ -473,7 +473,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 			List<Chunk *> listShapes;
 			Env_Chunk->lookup_child("REBSHAPE",listShapes);
 			for (LIF<Chunk *> itShapes(&listShapes); !itShapes.done(); itShapes.next())
-			{	
+			{
 				Shape_Chunk * pShapeChunk = dynamic_cast<Shape_Chunk *>(itShapes());
 				db_assert1(pShapeChunk);
 				Chunk * pSxfnChunk = pShapeChunk->lookup_single_child("SHPEXTFL");
@@ -494,7 +494,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 				pSpritesChunk->lookup_child("SPRIHEAD",listSprHeadChunks);
 
 				for (LIF<Chunk *> itSprites(&listSprHeadChunks); !itSprites.done(); itSprites.next())
-				{	
+				{
 					Chunk_With_Children * pSpriteHead = dynamic_cast<Chunk_With_Children *>(itSprites());
 					db_assert1(pSpriteHead);
 					listShapesSprites.add_entry(pSpriteHead);
@@ -504,7 +504,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 			int bShapeFound = pszSubName ? false : true;
 
 			for (LIF<Chunk_With_Children *> itShapesSprites(&listShapesSprites); !itShapesSprites.done(); itShapesSprites.next())
-			{	
+			{
 				char * pszSubRifName = RiffBasename(itShapesSprites());
 
 				if (pszSubName)
@@ -644,7 +644,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 	// safe to handle windows messages at this point (I think - JCWH)
 	CheckForWindowsMessages();
 
-	int32_t texID = 0;
+//	int32_t texID = 0;
 
 	// get the filename
 	char szBuf[MAX_PATH];
@@ -716,8 +716,8 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 
 					/* KJL 16:05:50 26/02/98 - attempt to get a texture handle */
 					{
-						// load Direct3D Texture here?	
-						if (pTexture->buffer) 
+						// load Direct3D Texture here?
+						if (pTexture->buffer)
 						{
 							if ((strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0) ||
 								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\alien.RIM") == 0) ||		// for alien demo
@@ -783,7 +783,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 
 					/* KJL 16:05:50 26/02/98 - attempt to get a texture handle */
 					{
-						if (pTexture->buffer) 
+						if (pTexture->buffer)
 						{
 							if ((strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0) ||
 								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\alien.RIM") == 0) ||		// for alien demo
@@ -799,8 +799,8 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 							}
 
 //							texID = Tex_AddTexture(pImageHdr->Direct3DTexture, pImageHdr->ImageWidth, pImageHdr->ImageHeight);
-							
-							if (pImageHdr->Direct3DTexture == NULL) 
+
+							if (pImageHdr->Direct3DTexture == NULL)
 							{
 								OutputDebugString("Direct3DTexture was null!");
 							}

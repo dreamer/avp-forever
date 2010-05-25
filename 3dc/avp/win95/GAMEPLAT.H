@@ -5,8 +5,8 @@
 extern "C" {
 #endif // __cplusplus
 
-/* 
-	This contains project platfrom specifc externs 
+/*
+	This contains project platfrom specifc externs
 	and prototypes. Only valid when we are calling one
 	p\p function from another.
 */
@@ -21,16 +21,16 @@ extern int AVP_NCmd;
 
 extern int AVP_ChangeDisplayMode
 					(
-						HINSTANCE hInst, 
-						int nCmd, 
-						int NewVideoMode, 
+						HINSTANCE hInst,
+						int nCmd,
+						int NewVideoMode,
 						int NewWindowMode,
-						int NewZBufferMode, 
-						int NewRasterisationMode, 
-						int NewSoftwareScanDrawMode, 
+						int NewZBufferMode,
+						int NewRasterisationMode,
+						int NewSoftwareScanDrawMode,
 						int NewDXMemoryMode
 					);
-				
+
 
 
 extern int WindowMode;

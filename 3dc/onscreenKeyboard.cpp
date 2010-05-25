@@ -34,7 +34,7 @@
 #include <assert.h>
 
 /* TODO:
-	
+
 	- align text properly
 	- add Shift
 	- add Caps lock
@@ -99,7 +99,7 @@ bool capsLock = false;
 
 static int buttonId = 0;
 
-static char buf[100];
+//static char buf[100];
 
 template <class T> void Osk_AddKey(T buttonLabel, uint32_t numWidthBlocks)
 {
@@ -198,7 +198,7 @@ void Osk_Init()
 
 void Osk_Draw()
 {
-	if (!Osk_IsActive()) 
+	if (!Osk_IsActive())
 		return;
 
 	osk_x = (640 - oskWidth) / 2;
@@ -213,12 +213,12 @@ void Osk_Draw()
 	int pos_x = osk_x + indent_space;
 	int pos_y = osk_y + indent_space;
 
-	int innerSquareWidth = keyWidth - outline_border_size * 2;
-	int innerSquareHeight = keyHeight - outline_border_size * 2;
+//	int innerSquareWidth = keyWidth - outline_border_size * 2;
+//	int innerSquareHeight = keyHeight - outline_border_size * 2;
 
 	int index = 0;
 
-	for (int y = 0; y < numVerticalKeys; y++)
+	for (uint32_t y = 0; y < numVerticalKeys; y++)
 	{
 		pos_x = osk_x + indent_space;
 
@@ -236,7 +236,7 @@ void Osk_Draw()
 				else
 					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, -1, D3DCOLOR_ARGB(220, 38, 80, 145), TRANSLUCENCY_OFF);
 
-				int positionX = pos_x + ((keyVector.at(index).width - 16) / 2);
+//				int positionX = pos_x + ((keyVector.at(index).width - 16) / 2);
 
 				Font_DrawText(Osk_GetKeyLabel(index), pos_x + (keyVector.at(index).width / 2), pos_y + space_between_keys, D3DCOLOR_ARGB(255, 255, 255, 0), FONT_SMALL);
 			}
@@ -304,7 +304,7 @@ KEYPRESS Osk_HandleKeypress()
 		shift = !shift;
 
 		// if capslock on, turn it off?
-		if (capsLock) 
+		if (capsLock)
 			capsLock = false;
 
 		return newKeypress;
@@ -315,7 +315,7 @@ KEYPRESS Osk_HandleKeypress()
 		capsLock = !capsLock;
 
 		// if shift is on, turn it off?
-		if (shift) 
+		if (shift)
 			shift = false;
 
 		return newKeypress;
@@ -354,7 +354,7 @@ KEYPRESS Osk_HandleKeypress()
 
 		if (shift) // turn it off, as it's a use-once thing
 			shift = false;
-		
+
 		return newKeypress;
 	}
 
@@ -373,7 +373,7 @@ void Osk_MoveLeft()
 
 	// store some information about current key
 	int buttonOffset = keyVector.at(currentPosition).positionOffset;
-	int width = keyVector.at(currentPosition).numWidthBlocks;
+//	int width = keyVector.at(currentPosition).numWidthBlocks;
 
 	// lets do the actual left move
 	currentColumn -= buttonOffset + 1;
@@ -474,7 +474,7 @@ void Osk_MoveUp()
 	currentValue -= keyVector.at(currentValue).positionOffset;
 }
 
-void Osk_MoveDown() 
+void Osk_MoveDown()
 {
 	currentRow++;
 
@@ -503,3 +503,4 @@ void Osk_MoveDown()
 	// left align button value
 	currentValue -= keyVector.at(currentValue).positionOffset;
 }
+

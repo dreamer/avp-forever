@@ -10,7 +10,7 @@
 
 */
 
-const int oneoversin[4096];
+int oneoversin[4096];
 
 const int sine[4096]={
 

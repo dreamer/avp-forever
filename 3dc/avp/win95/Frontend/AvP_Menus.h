@@ -44,7 +44,7 @@ extern "C" {
 #define PLAY_INTRO 1
 #define ALLOW_SKIP_INTRO 1
 
-#define SAVE_GAME_ON 1 
+#define SAVE_GAME_ON 1
 
 #include "AvP_MenuGfx.hpp"
 #include "language.h"
@@ -76,7 +76,7 @@ enum AVPMENU_ID
 	AVPMENU_MARINELEVELS,
 	AVPMENU_ALIENLEVELS,
 	AVPMENU_PREDATORLEVELS,
-	
+
 	AVPMENU_MULTIPLAYER,
 	AVPMENU_MULTIPLAYER_LOBBIEDSERVER,
 	AVPMENU_MULTIPLAYER_LOBBIEDCLIENT,
@@ -99,7 +99,7 @@ enum AVPMENU_ID
 	AVPMENU_MULTIPLAYER_DELETECONFIG,
 
 	AVPMENU_MULTIPLAYER_JOINING,
-	
+
 	AVPMENU_CONTROLS,
 	AVPMENU_JOYSTICKCONTROLS,
 
@@ -157,10 +157,10 @@ enum AVPMENU_ELEMENT_ID
 	AVPMENU_ELEMENT_TEXTSLIDER,
 	AVPMENU_ELEMENT_DUMMYTEXTSLIDER,
 	AVPMENU_ELEMENT_SPECIES_TEXTSLIDER,
-	
+
 	AVPMENU_ELEMENT_TEXTSLIDER_POINTER,		 // text slider with a char** rather than a string index
 	AVPMENU_ELEMENT_DUMMYTEXTSLIDER_POINTER, // text slider with a char** rather than a string index
-				
+
 	AVPMENU_ELEMENT_CHEATMODE_TEXTSLIDER,
 	AVPMENU_ELEMENT_CHEATMODE_SPECIES_TEXTSLIDER,
 	AVPMENU_ELEMENT_CHEATMODE_ENVIRONMENT_TEXTSLIDER,
@@ -200,7 +200,7 @@ enum AVPMENU_ELEMENT_ID
 	AVPMENU_ELEMENT_LOADIPADDRESS,
 
 	AVPMENU_ELEMENT_USERPROFILE_DELETE,
-		
+
 
 	AVPMENU_ELEMENT_SAVESETTINGS,
 
@@ -236,7 +236,7 @@ typedef struct
 
 	union
 	{
-		int *ToggleValuePtr;				  
+		int *ToggleValuePtr;
 		int *SliderValuePtr;
 		char *TextPtr;
 		int *NumberPtr;
@@ -246,12 +246,12 @@ typedef struct
 	union
 	{
 		enum TEXTSTRING_ID FirstTextSliderString;
-		enum TEXTSTRING_ID NumberFieldUnitsString; 
+		enum TEXTSTRING_ID NumberFieldUnitsString;
 		char** TextSliderStringPointer;
 	};
-	
+
 	enum TEXTSTRING_ID HelpString;
-	
+
 	union
 	{
 		enum TEXTSTRING_ID NumberFieldZeroString; //special string for 0
@@ -275,7 +275,7 @@ typedef struct
 typedef struct
 {
 	enum MENUSSTATE_ID	MenusState;
-	
+
 	enum AVPMENU_ID		CurrentMenu;
 	AVPMENU_ELEMENT		*MenuElements;
 	int					NumberOfElementsInMenu;

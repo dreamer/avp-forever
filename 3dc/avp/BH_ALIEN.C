@@ -78,14 +78,14 @@ MODULEMAPBLOCK AlienDefaultMap =
 	ObFlag_NoInfLSrc|ObFlag_MultLSrc,
 	0,
 	0,
-	0,							
-	0,							
-	0,	
+	0,
+	0,
+	0,
 	{0,0,0},
 	0,
 	0,
 	0,
-	0,						 
+	0,
 	{0,0,0},
 };
 
@@ -103,9 +103,9 @@ void CastAlienBot(void) {
 	}
 	#endif
 	position=Player->ObStrategyBlock->DynPtr->Position;
-	position.vx+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat31,BOTRANGE);		
-	position.vy+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat32,BOTRANGE);		
-	position.vz+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat33,BOTRANGE);		
+	position.vx+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat31,BOTRANGE);
+	position.vy+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat32,BOTRANGE);
+	position.vz+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat33,BOTRANGE);
 
 	CreateAlienBot(&position,0);
 
@@ -123,9 +123,9 @@ void CastPredAlienBot(void) {
 	}
 	#endif
 	position=Player->ObStrategyBlock->DynPtr->Position;
-	position.vx+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat31,BOTRANGE);		
-	position.vy+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat32,BOTRANGE);		
-	position.vz+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat33,BOTRANGE);		
+	position.vx+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat31,BOTRANGE);
+	position.vy+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat32,BOTRANGE);
+	position.vz+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat33,BOTRANGE);
 
 	CreateAlienBot(&position,1);
 
@@ -143,9 +143,9 @@ void CastPraetorianBot(void) {
 	}
 	#endif
 	position=Player->ObStrategyBlock->DynPtr->Position;
-	position.vx+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat31,BOTRANGE);		
-	position.vy+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat32,BOTRANGE);		
-	position.vz+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat33,BOTRANGE);		
+	position.vx+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat31,BOTRANGE);
+	position.vy+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat32,BOTRANGE);
+	position.vz+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat33,BOTRANGE);
 
 	CreateAlienBot(&position,2);
 
@@ -166,7 +166,7 @@ void CreateAlienBot(VECTORCH *Position,int type)
 	sbPtr->I_SBtype = I_BehaviourAlien;
 
 	AssignNewSBName(sbPtr);
-			
+
 	/* create, initialise and attach a dynamics block */
 	sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_ALIEN_NPC);
 	if(sbPtr->DynPtr)
@@ -176,7 +176,7 @@ void CreateAlienBot(VECTORCH *Position,int type)
       	dynPtr->PrevPosition = dynPtr->Position = *Position;
 		dynPtr->OrientEuler = zeroEuler;
 		CreateEulerMatrix(&dynPtr->OrientEuler, &dynPtr->OrientMat);
-		TransposeMatrixCH(&dynPtr->OrientMat);      
+		TransposeMatrixCH(&dynPtr->OrientMat);
 	}
 	else
 	{
@@ -200,7 +200,7 @@ void CreateAlienBot(VECTORCH *Position,int type)
 		int i;
 
 		NPC_InitMovementData(&(alienStatus->moveData));
-		NPC_InitWanderData(&(alienStatus->wanderData));     	
+		NPC_InitWanderData(&(alienStatus->wanderData));
 		switch (type) {
 			case 0:
 			default:
@@ -217,7 +217,7 @@ void CreateAlienBot(VECTORCH *Position,int type)
 		/* Initialise alien's stats */
 		{
 			NPC_DATA *NpcData;
-	
+
 			switch (alienStatus->Type) {
 				case AT_Standard:
 					NpcData=GetThisNpcData(I_NPC_Alien);
@@ -256,9 +256,9 @@ void CreateAlienBot(VECTORCH *Position,int type)
 		alienStatus->Wounds=0;
 		alienStatus->last_anim_length=ONE_FIXED;
    		sbPtr->integrity = alienStatus->Health;
-   		alienStatus->BehaviourState = ABS_Hunt;   		
+   		alienStatus->BehaviourState = ABS_Hunt;
 		alienStatus->current_attack=NULL;
-	
+
 		alienStatus->Target=NULL;
 		COPY_NAME(alienStatus->Target_SBname,Null_Name);
 		alienStatus->Mission=AM_Hunt; /* Was GlobalHunt... */
@@ -281,15 +281,15 @@ void CreateAlienBot(VECTORCH *Position,int type)
 
 		alienStatus->incidentFlag=0;
 		alienStatus->incidentTimer=0;
-		
+
 		//alien created by generator won't have a death target
-		for(i=0;i<SB_NAME_LENGTH;i++) alienStatus->death_target_ID[i] =0; 
+		for(i=0;i<SB_NAME_LENGTH;i++) alienStatus->death_target_ID[i] =0;
 		alienStatus->death_target_sbptr=0;
 
 		//this alien wasn't produced by a generator
 		alienStatus->generator_sbptr=0;
 
-		
+
 		alienStatus->HModelController.section_data=NULL;
 		alienStatus->HModelController.Deltas=NULL;
 
@@ -307,7 +307,7 @@ void CreateAlienBot(VECTORCH *Position,int type)
 				GLOBALASSERT(0);
 				break;
 		}
-				
+
 		if (!root_section) {
 			RemoveBehaviourStrategy(sbPtr);
 			NewOnScreenMessage("FAILED TO CREATE BOT: NO HMODEL");
@@ -347,7 +347,7 @@ void CreateAlienBot(VECTORCH *Position,int type)
 			return;
 		}
 		LOCALASSERT(sbPtr->containingModule);
-	
+
 		if (HModelSequence_Exists(&alienStatus->HModelController,HMSQT_AlienRun,ARSS_Jump)) {
 			alienStatus->JumpDetected=1;
 		} else {
@@ -362,7 +362,7 @@ void CreateAlienBot(VECTORCH *Position,int type)
 			alienStatus->PounceDetected=0;
 			alienStatus->EnablePounce=0;
 		}
-		
+
 		alienStatus->aliensIgniterId=0;
 
 		MakeAlienNear(sbPtr);
@@ -406,7 +406,7 @@ void CreateAlienDynamic(STRATEGYBLOCK *Generator, ALIEN_TYPE type_of_alien)
 	sbPtr->I_SBtype = I_BehaviourAlien;
 
 	AssignNewSBName(sbPtr);
-			
+
 	/* create, initialise and attach a dynamics block */
 	sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_ALIEN_NPC);
 	if(sbPtr->DynPtr)
@@ -416,7 +416,7 @@ void CreateAlienDynamic(STRATEGYBLOCK *Generator, ALIEN_TYPE type_of_alien)
       	dynPtr->PrevPosition = dynPtr->Position = ((GENERATOR_BLOCK* )Generator->SBdataptr)->Position;
 		dynPtr->OrientEuler = zeroEuler;
 		CreateEulerMatrix(&dynPtr->OrientEuler, &dynPtr->OrientMat);
-		TransposeMatrixCH(&dynPtr->OrientMat);      
+		TransposeMatrixCH(&dynPtr->OrientMat);
 	}
 	else
 	{
@@ -436,7 +436,7 @@ void CreateAlienDynamic(STRATEGYBLOCK *Generator, ALIEN_TYPE type_of_alien)
 		RemoveBehaviourStrategy(sbPtr);
 		return;
 	}
-  	
+
   	/* assert alien is starting as invisible */
   	LOCALASSERT(ModuleCurrVisArray[(sbPtr->containingModule->m_index)] == 0);
 
@@ -449,14 +449,14 @@ void CreateAlienDynamic(STRATEGYBLOCK *Generator, ALIEN_TYPE type_of_alien)
 		int i;
 
 		NPC_InitMovementData(&(alienStatus->moveData));
-		NPC_InitWanderData(&(alienStatus->wanderData));     	
+		NPC_InitWanderData(&(alienStatus->wanderData));
 
 		alienStatus->Type = type_of_alien;
 
 		/* Initialise alien's stats */
 		{
 			NPC_DATA *NpcData;
-	
+
 			switch (alienStatus->Type) {
 				case AT_Standard:
 					NpcData=GetThisNpcData(I_NPC_Alien);
@@ -495,7 +495,7 @@ void CreateAlienDynamic(STRATEGYBLOCK *Generator, ALIEN_TYPE type_of_alien)
 		alienStatus->Wounds=0;
 		alienStatus->last_anim_length=ONE_FIXED;
    		sbPtr->integrity = alienStatus->Health;
-   		alienStatus->BehaviourState = ABS_Hunt;   		
+   		alienStatus->BehaviourState = ABS_Hunt;
 		alienStatus->current_attack=NULL;
 		alienStatus->Wounds=0;
 
@@ -512,7 +512,7 @@ void CreateAlienDynamic(STRATEGYBLOCK *Generator, ALIEN_TYPE type_of_alien)
 		alienStatus->FarStateTimer = ALIEN_FAR_MOVE_TIME;
 		alienStatus->NearStateTimer = 0;
 		alienStatus->IAmCrouched = 0;
-		
+
 		Initialise_AvoidanceManager(sbPtr,&alienStatus->avoidanceManager);
 		InitWaypointManager(&alienStatus->waypointManager);
 
@@ -523,12 +523,12 @@ void CreateAlienDynamic(STRATEGYBLOCK *Generator, ALIEN_TYPE type_of_alien)
 		alienStatus->incidentTimer=0;
 
 		//alien created by generator won't have a death target
-		for(i=0;i<SB_NAME_LENGTH;i++) alienStatus->death_target_ID[i] =0; 
+		for(i=0;i<SB_NAME_LENGTH;i++) alienStatus->death_target_ID[i] =0;
 		alienStatus->death_target_sbptr=0;
 
 		//note the generator that produced this alien
 		alienStatus->generator_sbptr=Generator;
-		
+
 		switch (alienStatus->Type) {
 			case AT_Standard:
 				root_section=GetNamedHierarchyFromLibrary("hnpcalien","alien");
@@ -604,18 +604,18 @@ void InitAlienBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
 	int i;
 
 	/* check we're not in a net game */
-	if(AvP.Network != I_No_Network && !AvP.NetworkAIServer) 
+	if(AvP.Network != I_No_Network && !AvP.NetworkAIServer)
 	{
 		RemoveBehaviourStrategy(sbPtr);
 		return;
 	}
 
 	/* strategy block should be initialised to general default values:
-	I_behaviourAlien, shapeIndex, and everything else 0.... 
-	
+	I_behaviourAlien, shapeIndex, and everything else 0....
+
 	NB it is necessary that placed aliens are initialised without a
 	displayblock, otherwise far aliens will be re-initialised by
-	MakeAlienFar() to a hunting state instead of a wait state....*/			
+	MakeAlienFar() to a hunting state instead of a wait state....*/
 	LOCALASSERT(!(sbPtr->SBdptr));
 
 	/* strategy block initialisation */
@@ -639,7 +639,7 @@ void InitAlienBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
       	dynPtr->PrevPosition = dynPtr->Position = toolsData->position;
 		dynPtr->OrientEuler = toolsData->starteuler;
 		CreateEulerMatrix(&dynPtr->OrientEuler, &dynPtr->OrientMat);
-		TransposeMatrixCH(&dynPtr->OrientMat);      
+		TransposeMatrixCH(&dynPtr->OrientMat);
 	}
 	else
 	{
@@ -663,7 +663,7 @@ void InitAlienBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
 		/* Initialise alien's stats */
 		{
 			NPC_DATA *NpcData;
-	
+
 			switch (alienStatus->Type) {
 				case AT_Standard:
 					NpcData=GetThisNpcData(I_NPC_Alien);
@@ -701,13 +701,13 @@ void InitAlienBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
 		alienStatus->GibbFactor=0;
 		alienStatus->Wounds=0;
 		alienStatus->last_anim_length=ONE_FIXED;
-		
+
 		if (toolsData->start_inactive) {
 	   		alienStatus->BehaviourState = ABS_Dormant;
 		} else {
 	   		alienStatus->BehaviourState = ABS_Wait;
 		}
-		
+
 		alienStatus->current_attack=NULL;
 		alienStatus->Wounds=0;
 
@@ -740,7 +740,7 @@ void InitAlienBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
 		//this alien wasn't produced by a generator
 		alienStatus->generator_sbptr=0;
 
-		
+
 		switch (alienStatus->Type) {
 			case AT_Standard:
 				root_section=GetNamedHierarchyFromLibrary("hnpcalien","alien");
@@ -805,7 +805,7 @@ void InitAlienBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
 			alienStatus->PounceDetected=0;
 			alienStatus->EnablePounce=0;
 		}
-		
+
 		alienStatus->aliensIgniterId=0;
 
 	}
@@ -814,7 +814,7 @@ void InitAlienBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
 		/* no data block can be allocated */
 		RemoveBehaviourStrategy(sbPtr);
 		return;
-	}   	   	   	   
+	}
 }
 
 
@@ -831,7 +831,7 @@ static BOOL PlayerIsDeadAndNoLivingNetghosts()
 		int sbIndex;
 		//first check the host player
 		if(!NPC_IsDead(Player->ObStrategyBlock)) return FALSE;
-		
+
 		/* go through the strategy blocks looking for players*/
 		for(sbIndex=0;sbIndex<NumActiveStBlocks;sbIndex++)
 		{
@@ -872,21 +872,21 @@ void AlienBehaviour(STRATEGYBLOCK *sbPtr)
 	int alienIsNear;
 
     LOCALASSERT(sbPtr);
-	alienStatusPointer= (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-    LOCALASSERT(alienStatusPointer);	          		
+	alienStatusPointer= (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
+    LOCALASSERT(alienStatusPointer);
 
 	/* test if we've got a containing module: if we haven't, do nothing.
-	This is important as the alien could have been marked for deletion by the visibility 
+	This is important as the alien could have been marked for deletion by the visibility
 	management system...*/
 	if(!sbPtr->containingModule)
 	{
 		DestroyAnyStrategyBlock(sbPtr); /* just to make sure */
 		return;
-	} 
+	}
 
 	if(sbPtr->SBdptr) {
 		alienIsNear=1;
-		LOCALASSERT(ModuleCurrVisArray[(sbPtr->containingModule->m_index)]);						
+		LOCALASSERT(ModuleCurrVisArray[(sbPtr->containingModule->m_index)]);
 	} else {
 		alienIsNear=0;
 	}
@@ -895,7 +895,7 @@ void AlienBehaviour(STRATEGYBLOCK *sbPtr)
 	alienStatusPointer->incidentFlag=0;
 
 	alienStatusPointer->incidentTimer-=NormalFrameTime;
-	
+
 	if (alienStatusPointer->incidentTimer<0) {
 		alienStatusPointer->incidentFlag=1;
 		alienStatusPointer->incidentTimer=32767+(FastRandom()&65535);
@@ -943,7 +943,7 @@ void AlienBehaviour(STRATEGYBLOCK *sbPtr)
 	/* check if we've been killed */
 	if ( (sbPtr->SBDamageBlock.Health <= 0)&&(alienStatusPointer->BehaviourState!=ABS_Dying) )
 	{
-		textprint("Zombie Alien!!! State is %d.\n",alienStatusPointer->BehaviourState);
+//		textprint("Zombie Alien!!! State is %d.\n",alienStatusPointer->BehaviourState);
 		return;
 	}
 
@@ -953,28 +953,28 @@ void AlienBehaviour(STRATEGYBLOCK *sbPtr)
 
 		/* Target handling. */
 		if (Validate_Target(alienStatusPointer->Target,alienStatusPointer->Target_SBname)==0) {
-	 
+
 			/* Target must be dead... */
 			alienStatusPointer->Target=NULL;
 			/* Now try to get a new target. */
 		}
-	
+
 		if ((alienIsNear)||(alienStatusPointer->incidentFlag)) {
 			if (alienStatusPointer->Target==NULL) {
-				
+
 				alienStatusPointer->Target=Alien_GetNewTarget(&sbPtr->DynPtr->Position,sbPtr);
-		
+
 				if (alienStatusPointer->Target!=NULL) {
 					textprint("Alien gets new target.\n");
-		
+
 					COPY_NAME(alienStatusPointer->Target_SBname,alienStatusPointer->Target->SBname);
-		
+
 					if (alienStatusPointer->BehaviourState!=ABS_Wait) {
 						alienStatusPointer->BehaviourState=ABS_Hunt;
 					}
 					alienStatusPointer->FarStateTimer = ALIEN_FAR_MOVE_TIME;
 			 		alienStatusPointer->NearStateTimer = 0;
-		
+
 				} else {
 					textprint("Alien found no target!\n");
 					if (alienStatusPointer->BehaviourState!=ABS_Wait) {
@@ -1008,7 +1008,7 @@ void AlienBehaviour(STRATEGYBLOCK *sbPtr)
 		}
 	}
 
-	if(sbPtr->SBdptr) 
+	if(sbPtr->SBdptr)
 	{
 		LOCALASSERT(ModuleCurrVisArray[(sbPtr->containingModule->m_index)]);
 		#if 0
@@ -1024,7 +1024,7 @@ void AlienBehaviour(STRATEGYBLOCK *sbPtr)
 		#if 0
 		textprint("Far Alien in module %s \n",sbPtr->containingModule->name);
 		#endif
-		FarAlienBehaviour(sbPtr);	
+		FarAlienBehaviour(sbPtr);
 		Alt_FarAliens++;
 	}
 
@@ -1032,12 +1032,12 @@ void AlienBehaviour(STRATEGYBLOCK *sbPtr)
 	do this here */
 	if((alienStatusPointer->BehaviourState == ABS_Dying)&&(alienStatusPointer->NearStateTimer <= 0)) {
 
-		if(alienStatusPointer->soundHandle!=SOUND_NOACTIVEINDEX) Sound_Stop(alienStatusPointer->soundHandle);				
+		if(alienStatusPointer->soundHandle!=SOUND_NOACTIVEINDEX) Sound_Stop(alienStatusPointer->soundHandle);
 		if(alienStatusPointer->soundHandle2!=SOUND_NOACTIVEINDEX) Sound_Stop(alienStatusPointer->soundHandle2);
 		DestroyAnyStrategyBlock(sbPtr);
 	}
 
-	/* Update containing module? */	
+	/* Update containing module? */
 	if (sbPtr->containingModule!=alienStatusPointer->my_containing_module) {
 		/* This is to slow down new hunting target computation. */
 		alienStatusPointer->my_containing_module=sbPtr->containingModule;
@@ -1046,9 +1046,9 @@ void AlienBehaviour(STRATEGYBLOCK *sbPtr)
 	/* Update delta playing flag. */
 	{
 		DELTA_CONTROLLER *hitdelta;
-				
+
 		hitdelta=Get_Delta_Sequence(&alienStatusPointer->HModelController,"HitDelta");
-	
+
 		if (hitdelta) {
 			if (DeltaAnimation_IsFinished(hitdelta)) {
 				hitdelta->Playing=0;
@@ -1068,7 +1068,7 @@ void MakeAlienNear(STRATEGYBLOCK *sbPtr)
 	MODULE tempModule;
 	DISPLAYBLOCK *dPtr;
 	DYNAMICSBLOCK *dynPtr = sbPtr->DynPtr;
-	ALIEN_STATUS_BLOCK *alienStatusPointer= (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	ALIEN_STATUS_BLOCK *alienStatusPointer= (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 
     LOCALASSERT(alienStatusPointer);
     LOCALASSERT(dynPtr);
@@ -1086,18 +1086,18 @@ void MakeAlienNear(STRATEGYBLOCK *sbPtr)
 	tempModule.m_mapptr = &AlienDefaultMap;
 	tempModule.m_sbptr = (STRATEGYBLOCK*)NULL;
 	tempModule.m_numlights = 0;
-	tempModule.m_lightarray = (struct lightblock *)0;	
+	tempModule.m_lightarray = (struct lightblock *)0;
 	tempModule.m_extraitemdata = (struct extraitemdata *)0;
 	tempModule.m_dptr=NULL;
-	AllocateModuleObject(&tempModule); 
+	AllocateModuleObject(&tempModule);
 	dPtr = tempModule.m_dptr;
 	if(dPtr==NULL) return; /* cannot create displayblock: leave alien far */
-		
+
 	sbPtr->SBdptr = dPtr;
 	dPtr->ObStrategyBlock = sbPtr;
-	dPtr->ObMyModule = NULL;					
-                            
-	
+	dPtr->ObMyModule = NULL;
+
+
 	/*Copy extents from the collision extents in extents.c*/
 	dPtr->ObMinX=-CollisionExtents[CE_ALIEN].CollisionRadius;
 	dPtr->ObMaxX=CollisionExtents[CE_ALIEN].CollisionRadius;
@@ -1106,10 +1106,10 @@ void MakeAlienNear(STRATEGYBLOCK *sbPtr)
 	dPtr->ObMinY=CollisionExtents[CE_ALIEN].CrouchingTop;
 	dPtr->ObMaxY=CollisionExtents[CE_ALIEN].Bottom;
 	dPtr->ObRadius = 1000;
-	/* also need to initialise positional information in the new display block, 
+	/* also need to initialise positional information in the new display block,
 	from the existing dynamics block.
-	NB this necessary because this function is (usually) called between the 
-	dynamics and rendering systems so it is not initialised by the dynamics 
+	NB this necessary because this function is (usually) called between the
+	dynamics and rendering systems so it is not initialised by the dynamics
 	system the first frame it is drawn. */
 	dPtr->ObWorld = dynPtr->Position;
 	dPtr->ObEuler = dynPtr->OrientEuler;
@@ -1117,7 +1117,7 @@ void MakeAlienNear(STRATEGYBLOCK *sbPtr)
 
 	/* init state timers */
 	alienStatusPointer->NearStateTimer = 0;
-	alienStatusPointer->FarStateTimer = ALIEN_FAR_MOVE_TIME;	
+	alienStatusPointer->FarStateTimer = ALIEN_FAR_MOVE_TIME;
 	alienStatusPointer->CurveRadius = 0;
 	alienStatusPointer->CurveLength = 0;
 	alienStatusPointer->CurveTimeOut = 0;
@@ -1130,7 +1130,7 @@ void MakeAlienNear(STRATEGYBLOCK *sbPtr)
 	/* initialise our sequence data */
 	//dPtr->ShapeAnimControlBlock = &alienStatusPointer->ShpAnimCtrl;
 	dPtr->HModelControlBlock=&alienStatusPointer->HModelController;
-	
+
 	ProveHModel(dPtr->HModelControlBlock,dPtr);
 
 	if(AlienShouldBeCrawling(sbPtr)) alienStatusPointer->IAmCrouched = 1;
@@ -1154,25 +1154,25 @@ void MakeAlienNear(STRATEGYBLOCK *sbPtr)
 		NPC_InitMovementData(&(alienStatusPointer->moveData));
 		alienStatusPointer->BehaviourState = ABS_Approach;
 		if(alienStatusPointer->IAmCrouched) SetAlienShapeAnimSequence(sbPtr,HMSQT_AlienCrawl,(int)ACSS_Standard,ONE_FIXED>>1);
-		else SetAlienShapeAnimSequence(sbPtr,HMSQT_AlienRun,(int)ARSS_Standard,ONE_FIXED>>1);	
+		else SetAlienShapeAnimSequence(sbPtr,HMSQT_AlienRun,(int)ARSS_Standard,ONE_FIXED>>1);
 	} else {
 		NPC_InitMovementData(&(alienStatusPointer->moveData));
 		/* Was Wander, now Hunt.  Hunt should kick in wander if needed. */
 		alienStatusPointer->BehaviourState = ABS_Hunt;
 		if(alienStatusPointer->IAmCrouched) SetAlienShapeAnimSequence(sbPtr,HMSQT_AlienCrawl,(int)ACSS_Standard,ONE_FIXED>>1);
-		else SetAlienShapeAnimSequence(sbPtr,HMSQT_AlienRun,(int)ARSS_Standard,ONE_FIXED>>1);	
+		else SetAlienShapeAnimSequence(sbPtr,HMSQT_AlienRun,(int)ARSS_Standard,ONE_FIXED>>1);
 	}
-}  
+}
 
 void MakeAlienFar(STRATEGYBLOCK *sbPtr)
 {
 	/* get the alien's status block */
-	ALIEN_STATUS_BLOCK *alienStatusPointer;    
+	ALIEN_STATUS_BLOCK *alienStatusPointer;
 	int i;
-	
+
 	LOCALASSERT(sbPtr);
-	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-	LOCALASSERT(alienStatusPointer);   
+	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
+	LOCALASSERT(alienStatusPointer);
 	LOCALASSERT(sbPtr->SBdptr != NULL);
 
 	/* get rid of the displayblock */
@@ -1183,11 +1183,11 @@ void MakeAlienFar(STRATEGYBLOCK *sbPtr)
 		sbPtr->SBdptr = NULL;
 	}
 
-	if(alienStatusPointer->soundHandle!=SOUND_NOACTIVEINDEX) Sound_Stop(alienStatusPointer->soundHandle);				
+	if(alienStatusPointer->soundHandle!=SOUND_NOACTIVEINDEX) Sound_Stop(alienStatusPointer->soundHandle);
 	if(alienStatusPointer->soundHandle2!=SOUND_NOACTIVEINDEX) Sound_Stop(alienStatusPointer->soundHandle2);
 
     /* initialise our far state */
-	if ((alienStatusPointer->BehaviourState!=ABS_Dying) 
+	if ((alienStatusPointer->BehaviourState!=ABS_Dying)
 		&&(alienStatusPointer->BehaviourState!=ABS_Dormant)
 		&&(alienStatusPointer->BehaviourState!=ABS_Awakening)) {
 		/* No zombie aliens here! */
@@ -1204,7 +1204,7 @@ void MakeAlienFar(STRATEGYBLOCK *sbPtr)
 	NPC_InitWanderData(&(alienStatusPointer->wanderData));
 	/* init state timers */
 	alienStatusPointer->NearStateTimer = 0;
-	alienStatusPointer->FarStateTimer = ALIEN_FAR_MOVE_TIME;	
+	alienStatusPointer->FarStateTimer = ALIEN_FAR_MOVE_TIME;
 
 	/* zero linear velocity in dynamics block */
 	LOCALASSERT(sbPtr->DynPtr);
@@ -1222,7 +1222,7 @@ static void DoAlienAIHiss(STRATEGYBLOCK *sbPtr) {
 	ALIEN_STATUS_BLOCK *alienStatusPointer;
 
 	GLOBALASSERT(sbPtr);
-	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
 	dynPtr = sbPtr->DynPtr;
 	LOCALASSERT(dynPtr);
@@ -1240,9 +1240,9 @@ static void DoAlienAIHiss(STRATEGYBLOCK *sbPtr) {
 		{
 			AddNetMsg_SpotAlienSound(ASC_Scream_Hurt,(int)alienStatusPointer->Type,pitch,&dynPtr->Position);
 		}
-	
+
 	}
-	
+
 
 }
 
@@ -1253,7 +1253,7 @@ static void DoAlienDeathScream(STRATEGYBLOCK *sbPtr) {
 	ALIEN_STATUS_BLOCK *alienStatusPointer;
 
 	GLOBALASSERT(sbPtr);
-	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
 	dynPtr = sbPtr->DynPtr;
 	LOCALASSERT(dynPtr);
@@ -1268,13 +1268,13 @@ static void DoAlienDeathScream(STRATEGYBLOCK *sbPtr) {
 	if (alienStatusPointer->soundHandle2==SOUND_NOACTIVEINDEX) {
 		PlayAlienSound((int)alienStatusPointer->Type,ASC_Scream_Dying,0,
 			&alienStatusPointer->soundHandle2,&sbPtr->DynPtr->Position);
-		
+
 		if (AvP.Network != I_No_Network)
 		{
 			AddNetMsg_SpotAlienSound((int)ASC_Scream_Dying,(int)alienStatusPointer->Type,0,&dynPtr->Position);
 		}
 	}
-	
+
 
 }
 
@@ -1285,7 +1285,7 @@ static void DoAlienDeathSound(STRATEGYBLOCK *sbPtr) {
 	ALIEN_STATUS_BLOCK *alienStatusPointer;
 
 	GLOBALASSERT(sbPtr);
-	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
 	dynPtr = sbPtr->DynPtr;
 	LOCALASSERT(dynPtr);
@@ -1299,7 +1299,7 @@ static void DoAlienDeathSound(STRATEGYBLOCK *sbPtr) {
 	PlayAlienSound((int)alienStatusPointer->Type,ASC_Death,0,
 		NULL,&sbPtr->DynPtr->Position);
 
-	#if 0	
+	#if 0
 	if (AvP.Network != I_No_Network)
 	{
 		soundIndex=ActiveSounds[alienStatusPointer->soundHandle2].soundIndex;
@@ -1334,23 +1334,23 @@ Handle weapon impact on an alien
 
 void AlienIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, int wounds,SECTION_DATA *Section,VECTORCH *incoming, DISPLAYBLOCK *frag)
 {
-	
+
 	int tkd;
 	ALIEN_STATUS_BLOCK *alienStatusPointer;
 	GLOBALASSERT(sbPtr);
 
-	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
-		
+
 	LOCALASSERT(sbPtr);
 
 	alienStatusPointer->Wounds|=wounds;
 
 	if (incoming) {
-		textprint("Alien hit from %d %d %d\n",incoming->vx,incoming->vy,incoming->vz);
+//		textprint("Alien hit from %d %d %d\n",incoming->vx,incoming->vy,incoming->vz);
 		/* Knockback effects? */
 	}
-	
+
 	if (frag) {
 		DoAlienLimbLossSound(&sbPtr->DynPtr->Position);
 	}
@@ -1358,16 +1358,16 @@ void AlienIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, 
 #if 0
 	ALIEN_STATUS_BLOCK *alienStatusPointer;
 	GLOBALASSERT(sbPtr);
-					
+
 	/* reduce alien health */
-	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
-	if(alienStatusPointer->Health>0) (alienStatusPointer->Health) -= damage; 	
+	if(alienStatusPointer->Health>0) (alienStatusPointer->Health) -= damage;
 #endif
 	/* Perhaps I'd better explain... I now handle damage
 	for you.  These functions now are only for special effects,
 	and if you need to do anything when damage happens. */
-	
+
 	if (alienStatusPointer->BehaviourState==ABS_Dormant) {
 		Alien_Awaken(sbPtr);
 	}
@@ -1376,7 +1376,7 @@ void AlienIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, 
 	{
 
 		/* reduce alien health */
-		
+
 		if (sbPtr->SBDamageBlock.Health <= 0) {
 
 			/* Oh yes, kill them, too. */
@@ -1420,7 +1420,7 @@ void AlienIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, 
 					GLOBALASSERT(0);
 					break;
 			}
-	
+
 			if (changespeed) {
 				int newspeed;
 				/* ONE_FIXED implies we're playing an invariant length anim. */
@@ -1429,7 +1429,7 @@ void AlienIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, 
 				HModel_ChangeSpeed(&alienStatusPointer->HModelController,newspeed);
 			}
 			#endif
-			
+
 			/* If you got here, you should still be alive. */
 
 			if ((alienStatusPointer->BehaviourState!=ABS_Dying)&&(alienStatusPointer->soundHandle2==SOUND_NOACTIVEINDEX)) {
@@ -1442,9 +1442,9 @@ void AlienIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, 
 				/* If not dead, play a hit delta. */
 				DELTA_CONTROLLER *hitdelta;
 				int frontback;
-				
+
 				hitdelta=Get_Delta_Sequence(&alienStatusPointer->HModelController,"HitDelta");
-				
+
 				if (incoming) {
 					if (incoming->vz>=0) {
 						frontback=0;
@@ -1455,14 +1455,14 @@ void AlienIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, 
 					/* Default to front. */
 					frontback=1;
 				}
-				
+
 				/* Only do it from the front. */
 				if ((hitdelta)&&(frontback)) {
 					if (hitdelta->Playing==0) {
 						/* A hierarchy with hit deltas! */
 						int CrouchSubSequence;
 						int StandSubSequence;
-					
+
 						if (Section==NULL) {
 							if ((FastRandom()&65535)<32767) {
 								CrouchSubSequence=ACrSS_Hit_Left;
@@ -1492,8 +1492,8 @@ void AlienIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, 
 								StandSubSequence=ASSS_Hit_Right;
 							}
 						}
-						
-					
+
+
 						if(alienStatusPointer->IAmCrouched) {
 							if (HModelSequence_Exists(&alienStatusPointer->HModelController,(int)HMSQT_AlienCrouch,CrouchSubSequence)) {
 								Start_Delta_Sequence(hitdelta,(int)HMSQT_AlienCrouch,CrouchSubSequence,-1);
@@ -1514,25 +1514,25 @@ void AlienIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, 
 			}
 		}
 	}
-	
-}	
-	
+
+}
+
 /* patrick 29/7/97 -----------------------------------
 This function to be called only from behaviour
 -- ChrisF 1/4/98 What a stupid idea. This function ---
 -- to be called only from AlienIsDamaged. ------------
 ------------------------------------------------------*/
 void KillAlien(STRATEGYBLOCK *sbPtr,int wounds,DAMAGE_PROFILE *damage, int multiple,VECTORCH *incoming)
-{	
+{
 	ALIEN_STATUS_BLOCK *alienStatusPointer;
 	int tkd,deathtype;
 	SECTION_DATA *head;
 
-	LOCALASSERT(sbPtr);	
-	LOCALASSERT(sbPtr->DynPtr);	
+	LOCALASSERT(sbPtr);
+	LOCALASSERT(sbPtr->DynPtr);
 
-	
-	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+
+	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 
 	/* make a sound.  Just this once without a check. */
 
@@ -1542,8 +1542,8 @@ void KillAlien(STRATEGYBLOCK *sbPtr,int wounds,DAMAGE_PROFILE *damage, int multi
 	if(alienStatusPointer->death_target_sbptr)
 	{
 		RequestState(alienStatusPointer->death_target_sbptr,1, 0);
-	} 
-	
+	}
+
 	/* Set up gibb factor. */
 
 	tkd=TotalKineticDamage(damage);
@@ -1592,8 +1592,8 @@ void KillAlien(STRATEGYBLOCK *sbPtr,int wounds,DAMAGE_PROFILE *damage, int multi
 	}
 
 	if ( (damage->Impact==0)
-	   &&(damage->Cutting==0)	
-	   &&(damage->Penetrative==0)	
+	   &&(damage->Cutting==0)
+	   &&(damage->Penetrative==0)
 	   &&(damage->Fire!=0)
 	   &&(damage->Electrical==0)
 	   &&(damage->Acid==0))
@@ -1602,7 +1602,7 @@ void KillAlien(STRATEGYBLOCK *sbPtr,int wounds,DAMAGE_PROFILE *damage, int multi
 		alienStatusPointer->GibbFactor=ONE_FIXED>>2;
 		/* Gibb just a little for now. */
 	}
-	
+
 	if (damage->Id==AMMO_PREDPISTOL_STRIKE) {
 		/* Blow up if hit by the bolt. */
 		alienStatusPointer->GibbFactor=ONE_FIXED>>3;
@@ -1612,7 +1612,7 @@ void KillAlien(STRATEGYBLOCK *sbPtr,int wounds,DAMAGE_PROFILE *damage, int multi
 
 	{
 		SECTION_DATA *chest=GetThisSectionData(alienStatusPointer->HModelController.section_data,"chest");
-		
+
 		if (chest==NULL) {
 			/* I'm impressed. */
 			deathtype+=2;
@@ -1644,12 +1644,12 @@ void KillAlien(STRATEGYBLOCK *sbPtr,int wounds,DAMAGE_PROFILE *damage, int multi
 
 	/* More restrained death than before... */
 	{
-	
+
 
 		DEATH_DATA *this_death;
 		HIT_FACING facing;
 		int electrical;
-	
+
 		facing.Front=0;
 		facing.Back=0;
 		facing.Left=0;
@@ -1668,8 +1668,8 @@ void KillAlien(STRATEGYBLOCK *sbPtr,int wounds,DAMAGE_PROFILE *damage, int multi
 			}
 		}
 
-		if ((damage->Impact==0) 		
-			&&(damage->Cutting==0)  	
+		if ((damage->Impact==0)
+			&&(damage->Cutting==0)
 			&&(damage->Penetrative==0)
 			&&(damage->Fire==0)
 			&&(damage->Electrical>0)
@@ -1685,10 +1685,10 @@ void KillAlien(STRATEGYBLOCK *sbPtr,int wounds,DAMAGE_PROFILE *damage, int multi
 
 		#if 0
 		GLOBALASSERT(this_death);
-		
+
 		SetAlienShapeAnimSequence_Core(sbPtr,this_death->Sequence_Type,this_death->Sub_Sequence,
 			this_death->Sequence_Length,this_death->TweeningTime);
- 
+
 		alienStatusPointer->NearStateTimer=ALIEN_DYINGTIME;
 		alienStatusPointer->HModelController.Looped=0;
 		alienStatusPointer->HModelController.LoopAfterTweening=0;
@@ -1696,7 +1696,7 @@ void KillAlien(STRATEGYBLOCK *sbPtr,int wounds,DAMAGE_PROFILE *damage, int multi
 		alienStatusPointer->BehaviourState=ABS_Dying;
 
 		/* stop sound, if we have one */
-		if(alienStatusPointer->soundHandle!=SOUND_NOACTIVEINDEX) Sound_Stop(alienStatusPointer->soundHandle);				
+		if(alienStatusPointer->soundHandle!=SOUND_NOACTIVEINDEX) Sound_Stop(alienStatusPointer->soundHandle);
 
 		/* stop motion */
 		LOCALASSERT(sbPtr->DynPtr);
@@ -1718,12 +1718,12 @@ void KillAlien(STRATEGYBLOCK *sbPtr,int wounds,DAMAGE_PROFILE *damage, int multi
 
 void Execute_Alien_Dying(STRATEGYBLOCK *sbPtr)
 {
-	ALIEN_STATUS_BLOCK *alienStatusPointer;    	
+	ALIEN_STATUS_BLOCK *alienStatusPointer;
 
 	LOCALASSERT(sbPtr);
-	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
+	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
-	
+
 	//sbPtr->DynPtr->LinVelocity.vx = 0;
 	//sbPtr->DynPtr->LinVelocity.vy = 0;
 	//sbPtr->DynPtr->LinVelocity.vz = 0;
@@ -1731,7 +1731,7 @@ void Execute_Alien_Dying(STRATEGYBLOCK *sbPtr)
 	//sbPtr->DynPtr->LinImpulse.vx = 0;
 	//sbPtr->DynPtr->LinImpulse.vy = 0;
 	//sbPtr->DynPtr->LinImpulse.vz = 0;
-	
+
 	{
 		DISPLAYBLOCK *dispPtr = sbPtr->SBdptr;
 		/* do we have a displayblock? */
@@ -1747,16 +1747,16 @@ void Execute_Alien_Dying(STRATEGYBLOCK *sbPtr)
 
 void RecomputeAlienSpeed(STRATEGYBLOCK *sbPtr) {
 
-	ALIEN_STATUS_BLOCK *alienStatusPointer;    	
+	ALIEN_STATUS_BLOCK *alienStatusPointer;
 	int factor,basespeed;
 
 	LOCALASSERT(sbPtr);
-	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
+	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
 
 	/* Change max speed. */
 	factor=GetAlienSpeedFactor_ForSequence(sbPtr,HMSQT_AlienRun,(int)ARSS_Standard);
-	
+
 	switch (alienStatusPointer->Type) {
 		case AT_Standard:
 		default:
@@ -1783,14 +1783,14 @@ void RecomputeAlienSpeed(STRATEGYBLOCK *sbPtr) {
 
 int GetAlienSpeedFactor(STRATEGYBLOCK *sbPtr) {
 
-	ALIEN_STATUS_BLOCK *alienStatusPointer;    	
+	ALIEN_STATUS_BLOCK *alienStatusPointer;
 	HMODEL_SEQUENCE_TYPES sequence_type;
 	int subsequence;
 
 	LOCALASSERT(sbPtr);
-	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
+	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
-	
+
 	sequence_type=(HMODEL_SEQUENCE_TYPES)alienStatusPointer->HModelController.Sequence_Type;
 	subsequence=alienStatusPointer->HModelController.Sub_Sequence;
 	/* That is what the controller thinks the shape is playing. */
@@ -1801,11 +1801,11 @@ int GetAlienSpeedFactor(STRATEGYBLOCK *sbPtr) {
 
 int GetAlienSpeedFactor_ForSequence(STRATEGYBLOCK *sbPtr, HMODEL_SEQUENCE_TYPES sequence_type,int subsequence) {
 
-	ALIEN_STATUS_BLOCK *alienStatusPointer;    	
+	ALIEN_STATUS_BLOCK *alienStatusPointer;
 	int factor,factortype;
 
 	LOCALASSERT(sbPtr);
-	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
+	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
 
 	factortype=-1;
@@ -1960,7 +1960,7 @@ int GetAlienSpeedFactor_ForSequence(STRATEGYBLOCK *sbPtr, HMODEL_SEQUENCE_TYPES 
 				/* More complex.  Affected by alien type and health. */
 				NPC_DATA *NpcData;
 				int prefactor;
-				
+
 				switch (alienStatusPointer->Type) {
 					case AT_Standard:
 						NpcData=GetThisNpcData(I_NPC_Alien);
@@ -1970,7 +1970,7 @@ int GetAlienSpeedFactor_ForSequence(STRATEGYBLOCK *sbPtr, HMODEL_SEQUENCE_TYPES 
 						NpcData=GetThisNpcData(I_NPC_PredatorAlien);
 						prefactor=PREDALIEN_SPEED_FACTOR;
 						break;
-					case AT_Praetorian:	
+					case AT_Praetorian:
 						NpcData=GetThisNpcData(I_NPC_PraetorianGuard);
 						prefactor=PRAETORIAN_SPEED_FACTOR;
 						break;
@@ -1980,14 +1980,14 @@ int GetAlienSpeedFactor_ForSequence(STRATEGYBLOCK *sbPtr, HMODEL_SEQUENCE_TYPES 
 				}
 
 				LOCALASSERT(NpcData);
-				
+
 				factor=sbPtr->SBDamageBlock.Health/NpcData->StartingStats.Health;
 				/* ONE_FIXED shift already included. */
 				LOCALASSERT(factor<=ONE_FIXED);
 
 				factor+=ONE_FIXED;
 				factor>>=1;
-				
+
 				/* Wounding effects. */
 				if (alienStatusPointer->Wounds&(section_flag_left_leg|section_flag_right_leg)) {
 					/* Missing a leg. */
@@ -2009,7 +2009,7 @@ int GetAlienSpeedFactor_ForSequence(STRATEGYBLOCK *sbPtr, HMODEL_SEQUENCE_TYPES 
 				if (prefactor!=ONE_FIXED) {
 					factor=MUL_FIXED(prefactor,factor);
 				}
-	
+
 				return(factor);
 			}
 			break;
@@ -2032,11 +2032,11 @@ int Alien_TargetFilter(STRATEGYBLOCK *candidate) {
 				if (Observer) {
 					return(0);
 				}
-				
+
 				if(AvP.Network != I_No_Network)
 				{
 					//In multiplayer games we don't want the aliens to be going after
-					//the host once he's dead. 
+					//the host once he's dead.
 					PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (candidate->SBdataptr);
 					if(!playerStatusPtr->IsAlive)
 					{
@@ -2062,9 +2062,9 @@ int Alien_TargetFilter(STRATEGYBLOCK *candidate) {
 			}
 		case I_BehaviourDummy:
 			{
-				DUMMY_STATUS_BLOCK *dummyStatusPointer;    
-				dummyStatusPointer = (DUMMY_STATUS_BLOCK *)(candidate->SBdataptr);    
-			    LOCALASSERT(dummyStatusPointer);	          		
+				DUMMY_STATUS_BLOCK *dummyStatusPointer;
+				dummyStatusPointer = (DUMMY_STATUS_BLOCK *)(candidate->SBdataptr);
+			    LOCALASSERT(dummyStatusPointer);
 				switch (dummyStatusPointer->PlayerType) {
 					case I_Marine:
 					case I_Predator:
@@ -2098,8 +2098,9 @@ int Alien_TargetFilter(STRATEGYBLOCK *candidate) {
 		case I_BehaviourNetGhost:
 			{
 				NETGHOSTDATABLOCK *dataptr;
-				dataptr=candidate->SBdataptr;
-				switch (dataptr->type) {
+				dataptr = (NETGHOSTDATABLOCK*)candidate->SBdataptr;
+				switch (dataptr->type)
+				{
 					case I_BehaviourMarinePlayer:
 					case I_BehaviourPredatorPlayer:
 						return(1);
@@ -2126,14 +2127,14 @@ STRATEGYBLOCK *Alien_GetNewTarget(VECTORCH *alienpos, STRATEGYBLOCK *me) {
 	int a;
 	STRATEGYBLOCK *candidate;
 	MODULE *dmod;
-	
+
 	dmod=ModuleFromPosition(alienpos,playerPherModule);
-	
+
 	LOCALASSERT(dmod);
-	
+
 	nearest=NULL;
 	neardist=ONE_FIXED;
-	
+
 	for (a=0; a<NumActiveStBlocks; a++) {
 		candidate=ActiveStBlockList[a];
 		if (candidate!=me) {
@@ -2141,17 +2142,17 @@ STRATEGYBLOCK *Alien_GetNewTarget(VECTORCH *alienpos, STRATEGYBLOCK *me) {
 				if (Alien_TargetFilter(candidate)) {
 					VECTORCH offset;
 					int dist;
-		
+
 					offset.vx=alienpos->vx-candidate->DynPtr->Position.vx;
 					offset.vy=alienpos->vy-candidate->DynPtr->Position.vy;
 					offset.vz=alienpos->vz-candidate->DynPtr->Position.vz;
-			
+
 					dist=Approximate3dMagnitude(&offset);
 					/* Preferentially ignore predators? */
 					if (candidate->I_SBtype==I_BehaviourPredator) {
 						dist<<=2;
 					}
-		
+
 					if (dist<neardist) {
 						/* Check visibility? */
 						//if (candidate->SBdptr) {
@@ -2159,7 +2160,7 @@ STRATEGYBLOCK *Alien_GetNewTarget(VECTORCH *alienpos, STRATEGYBLOCK *me) {
 								if ((IsModuleVisibleFromModule(dmod,candidate->containingModule))) {
 									nearest=candidate;
 									neardist=dist;
-								}	
+								}
 							}
 						//}
 					}
@@ -2177,17 +2178,17 @@ STRATEGYBLOCK *Alien_GetNewTarget(VECTORCH *alienpos, STRATEGYBLOCK *me) {
 		}
 	}
 	#endif
-	
+
 	return(nearest);
 
 }
 
 void Alien_Awaken(STRATEGYBLOCK *sbPtr) {
 
-	ALIEN_STATUS_BLOCK *alienStatusPointer;    	
+	ALIEN_STATUS_BLOCK *alienStatusPointer;
 
 	LOCALASSERT(sbPtr);
-	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
+	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
 
 	alienStatusPointer->BehaviourState = ABS_Awakening;
@@ -2204,10 +2205,10 @@ void Alien_Awaken(STRATEGYBLOCK *sbPtr) {
 
 void Alien_GoToApproach(STRATEGYBLOCK *sbPtr) {
 
-	ALIEN_STATUS_BLOCK *alienStatusPointer;    	
+	ALIEN_STATUS_BLOCK *alienStatusPointer;
 
 	LOCALASSERT(sbPtr);
-	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
+	alienStatusPointer = (ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
 
 	NPC_InitMovementData(&(alienStatusPointer->moveData));
@@ -2216,16 +2217,16 @@ void Alien_GoToApproach(STRATEGYBLOCK *sbPtr) {
 	if(alienStatusPointer->IAmCrouched) {
 		SetAlienShapeAnimSequence(sbPtr,HMSQT_AlienCrawl,(int)ACSS_Standard,ONE_FIXED>>1);
 	} else {
-		SetAlienShapeAnimSequence(sbPtr,HMSQT_AlienRun,(int)ARSS_Standard,ONE_FIXED>>1);			
+		SetAlienShapeAnimSequence(sbPtr,HMSQT_AlienRun,(int)ARSS_Standard,ONE_FIXED>>1);
 	}
 	RecomputeAlienSpeed(sbPtr);
 	alienStatusPointer->CurveTimeOut = 0;
-	alienStatusPointer->NearStateTimer = 0;	
+	alienStatusPointer->NearStateTimer = 0;
 
 }
 
 int AlienIsCrawling(STRATEGYBLOCK *sbPtr) {
-	
+
 	/* For external calls. */
 
 	DYNAMICSBLOCK *dynPtr = sbPtr->DynPtr;
@@ -2257,11 +2258,11 @@ typedef struct alien_save_block
 	int GibbFactor;
 	int Wounds;
 	int last_anim_length;
-	ALIEN_BHSTATE BehaviourState;	
+	ALIEN_BHSTATE BehaviourState;
 	int PounceDetected;
 	int JumpDetected;
 	int EnablePounce;
-	
+
 
 	int incidentFlag;
 	int incidentTimer;
@@ -2306,7 +2307,7 @@ void LoadStrategy_Alien(SAVE_BLOCK_STRATEGY_HEADER* header)
 {
 	STRATEGYBLOCK* sbPtr;
 	ALIEN_STATUS_BLOCK* alienStatusPointer;
-	ALIEN_SAVE_BLOCK* block = (ALIEN_SAVE_BLOCK*) header; 
+	ALIEN_SAVE_BLOCK* block = (ALIEN_SAVE_BLOCK*) header;
 
 	//check the size of the save block
 	if(header->size!=sizeof(*block)) return;
@@ -2324,9 +2325,9 @@ void LoadStrategy_Alien(SAVE_BLOCK_STRATEGY_HEADER* header)
 		//we will have to generate an alien then
 		TOOLS_DATA_ALIEN tda;
 
-		//make sure the alien is in a module 
+		//make sure the alien is in a module
 		if(!ModuleFromPosition(&block->dynamics.Position,NULL)) return;
-		
+
 		sbPtr = CreateActiveStrategyBlock();
 		if(!sbPtr) return;
 
@@ -2346,7 +2347,7 @@ void LoadStrategy_Alien(SAVE_BLOCK_STRATEGY_HEADER* header)
 		tda.starteuler.EulerX = 0;
 		tda.starteuler.EulerY = 0;
 		tda.starteuler.EulerZ = 0;
- 
+
  		EnableBehaviourType(sbPtr,I_BehaviourAlien , &tda );
 
  	}
@@ -2355,7 +2356,7 @@ void LoadStrategy_Alien(SAVE_BLOCK_STRATEGY_HEADER* header)
 	alienStatusPointer = (ALIEN_STATUS_BLOCK*)sbPtr->SBdataptr;
 
 	//start copying stuff
-	
+
 	COPYELEMENT_LOAD(Type)
 	COPYELEMENT_LOAD(Health)
 	COPYELEMENT_LOAD(GibbFactor)
@@ -2392,7 +2393,7 @@ void LoadStrategy_Alien(SAVE_BLOCK_STRATEGY_HEADER* header)
 
 	//get the alien's attack from the attack code
 	alienStatusPointer->current_attack = GetThisAttack_FromUniqueCode(block->currentAttackCode);
-					 
+
 	*sbPtr->DynPtr = block->dynamics;
 	sbPtr->integrity = block->integrity;
 	sbPtr->SBDamageBlock = block->SBDamageBlock;
@@ -2418,14 +2419,12 @@ void SaveStrategy_Alien(STRATEGYBLOCK* sbPtr)
 {
 	ALIEN_SAVE_BLOCK *block;
 	ALIEN_STATUS_BLOCK* alienStatusPointer;
-	
-	
+
 	alienStatusPointer = (ALIEN_STATUS_BLOCK*)sbPtr->SBdataptr;
 
-	GET_STRATEGY_SAVE_BLOCK(block,sbPtr);
+	GET_STRATEGY_SAVE_BLOCK(block, sbPtr);
 
 	//start copying stuff
-	
 	COPYELEMENT_SAVE(Type)
 	COPYELEMENT_SAVE(Health)
 	COPYELEMENT_SAVE(GibbFactor)
@@ -2446,7 +2445,7 @@ void SaveStrategy_Alien(STRATEGYBLOCK* sbPtr)
 	COPYELEMENT_SAVE(IAmCrouched)
 	COPYELEMENT_SAVE(wanderData)
 
-	
+
 	//save target
 	COPY_NAME(block->Target_SBname,alienStatusPointer->Target_SBname);
 
@@ -2479,11 +2478,11 @@ void SaveStrategy_Alien(STRATEGYBLOCK* sbPtr)
 	{
 		COPY_NAME(block->Generator_SBname,Null_Name);
 	}
-	
+
 
 	block->dynamics = *sbPtr->DynPtr;
 	block->dynamics.CollisionReportPtr=0;
-	
+
 	block->integrity = sbPtr->integrity;
 	block->SBDamageBlock = sbPtr->SBDamageBlock;
 

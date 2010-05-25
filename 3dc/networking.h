@@ -96,7 +96,7 @@ enum
 
 #pragma pack(1)
 
-typedef struct 
+typedef struct
 {
     uint32_t	size;
     GUID		guidInstance;
@@ -126,7 +126,7 @@ typedef struct DPMSG_DESTROYPLAYERORGROUP
 {
 	uint32_t	type;
 	uint32_t	ID;
-	uint32_t	playerType;	
+	uint32_t	playerType;
 } DPMSG_DESTROYPLAYERORGROUP;
 
 /*
@@ -134,6 +134,7 @@ typedef struct DPMSG_DESTROYPLAYERORGROUP
  * System message generated when a player is being added
  * to a group.
  */
+
 /*
 typedef struct
 {
@@ -142,11 +143,13 @@ typedef struct
     DPID        dpIdPlayer;     // player ID being added
 } DPMSG_ADDPLAYERTOGROUP;
 */
+
 /*
  * DPMSG_SETPLAYERORGROUPDATA
  * System message generated when remote data for a player or
  * group has changed.
  */
+
 /*
 typedef struct
 {
@@ -157,11 +160,13 @@ typedef struct
     DWORD       dwDataSize;     // size of remote data
 } DPMSG_SETPLAYERORGROUPDATA;
 */
+
 /*
  * DPMSG_SETPLAYERORGROUPNAME
  * System message generated when the name of a player or
  * group has changed.
  */
+
 /*
 typedef struct
 {
@@ -171,23 +176,26 @@ typedef struct
     DPNAME      dpnName;        // structure with new name info
 } DPMSG_SETPLAYERORGROUPNAME;
 */
+
 /* The maximum length of a message that can be received by the system, in
  * bytes. DPEXT_MAX_MSG_SIZE bytes will be required to hold the message, so
  * you can't just set this to a huge number.
  */
 
-//#define DPEXT_MAX_MSG_SIZE	3072
+/*
+#define DPEXT_MAX_MSG_SIZE	3072
 
 // Buffer used to store incoming messages.
-//static uint8_t gbufDpExtRecv[ DPEXT_MAX_MSG_SIZE ];
+static uint8_t gbufDpExtRecv[ DPEXT_MAX_MSG_SIZE ];
 
-//#define DPEXT_NEXT_GRNTD_MSG_COUNT() \
-//	if( ++gnCurrGrntdMsgId < 1 ) gnCurrGrntdMsgId = 1
+#define DPEXT_NEXT_GRNTD_MSG_COUNT() \
+	if( ++gnCurrGrntdMsgId < 1 ) gnCurrGrntdMsgId = 1
 
-//static BOOL gbDpExtDoGrntdMsgs = FALSE;
-//static BOOL gbDpExtDoErrChcks = FALSE;
+static BOOL gbDpExtDoGrntdMsgs = FALSE;
+static BOOL gbDpExtDoErrChcks = FALSE;
 
-//static int gnCurrGrntdMsgId = 1;
+static int gnCurrGrntdMsgId = 1;
+*/
 
 /*
 typedef struct DPMSG_GENERIC
@@ -198,7 +206,7 @@ typedef struct DPMSG_GENERIC
 typedef struct DPMSG_CREATEPLAYERORGROUP
 {
 	int dwType;
-	
+
 	DPID dpId;
 	int dwPlayerType;
 

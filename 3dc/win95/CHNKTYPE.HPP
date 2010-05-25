@@ -12,14 +12,14 @@ struct ChunkVector
 	double x;
 	double y;
 	double z;
-  
+
   	ChunkVector friend operator+(const ChunkVector&, const ChunkVector&);
   	ChunkVector friend operator-(const ChunkVector&, const ChunkVector&);
   	ChunkVector& operator+=(const ChunkVector&);
   	ChunkVector& operator-=(const ChunkVector&);
 
 	ChunkVector friend operator*(const ChunkVector&, const double);
- 	ChunkVector friend operator/(const ChunkVector&, const double); 
+ 	ChunkVector friend operator/(const ChunkVector&, const double);
 
   	ChunkVector friend operator*(const ChunkVector&, const ChunkVector&); //cross prod
 
@@ -37,14 +37,14 @@ struct ChunkVectorInt
 	int x;
 	int y;
 	int z;
-  	
+
   	ChunkVectorInt friend operator+(const ChunkVectorInt&, const ChunkVectorInt&);
   	ChunkVectorInt friend operator-(const ChunkVectorInt&, const ChunkVectorInt&);
   	ChunkVectorInt& operator+=(const ChunkVectorInt&);
   	ChunkVectorInt& operator-=(const ChunkVectorInt&);
 
 	ChunkVectorInt friend operator*(const ChunkVectorInt&, const double);
- 	ChunkVectorInt friend operator/(const ChunkVectorInt&, const double); 
+ 	ChunkVectorInt friend operator/(const ChunkVectorInt&, const double);
 
   	//ChunkVectorInt friend operator*(const ChunkVectorInt&, const ChunkVectorInt&); //cross prod
 
@@ -60,15 +60,15 @@ struct ChunkVectorFloat
 	float x;
 	float y;
 	float z;
-  	
+
   	ChunkVectorFloat friend operator+(const ChunkVectorFloat&, const ChunkVectorFloat&);
   	ChunkVectorFloat friend operator-(const ChunkVectorFloat&, const ChunkVectorFloat&);
   	ChunkVectorFloat& operator+=(const ChunkVectorFloat&);
   	ChunkVectorFloat& operator-=(const ChunkVectorFloat&);
-	
+
 	ChunkVectorFloat friend operator*(const ChunkVectorFloat&, const double);
- 	ChunkVectorFloat friend operator/(const ChunkVectorFloat&, const double); 
-	
+ 	ChunkVectorFloat friend operator/(const ChunkVectorFloat&, const double);
+
 	//ChunkVectorInt friend operator*(const ChunkVectorInt&, const ChunkVectorInt&); //cross prod
 	operator VECTORCH () const;
 
@@ -113,7 +113,7 @@ struct ChunkUV_List
 	// for list iterator
 	friend BOOL operator== (const ChunkUV_List &, const ChunkUV_List &);
 	friend BOOL operator!= (const ChunkUV_List &, const ChunkUV_List &);
-	
+
 };
 
 class ChunkPoly
@@ -137,7 +137,7 @@ public:
 	void SetUVIndex(unsigned int uv_index);
 	void SetTextureIndex(unsigned int texture_index);
 
-		
+
 };
 
 
@@ -156,7 +156,7 @@ struct ChunkShape
 	ChunkVectorInt min;
 
 	ChunkVectorInt centre;	//average of min and max
-	float radius_about_centre;	
+	float radius_about_centre;
 
 	int num_verts;
 	ChunkVectorInt * v_list;
@@ -188,11 +188,11 @@ struct ObjectID
 {
 	int id1;
 	int id2;
-	
+
 	friend BOOL operator== (const ObjectID  &, const ObjectID &);
 	friend BOOL operator!= (const ObjectID  &, const ObjectID &);
 	friend ObjectID  Minimum(const ObjectID &,const  ObjectID &);
-	
+
 };
 
 struct ChunkObject
@@ -220,7 +220,7 @@ struct VMod_Arr_Item
 
 	VMod_Arr_Item(const VMod_Arr_Item & vma);
 	VMod_Arr_Item & operator=(const VMod_Arr_Item & vma);
-	
+
 	int branch_no;
 	int flags;
 	int spare;
@@ -228,7 +228,7 @@ struct VMod_Arr_Item
 
 	friend BOOL operator==(const VMod_Arr_Item &, const VMod_Arr_Item &);
 	friend BOOL operator!=(const VMod_Arr_Item &, const VMod_Arr_Item &);
-	
+
 };
 
 struct Adjacent_Module
@@ -238,14 +238,14 @@ struct Adjacent_Module
 
 	Adjacent_Module(const Adjacent_Module & vma);
 	Adjacent_Module & operator=(const Adjacent_Module & vma);
-	
+
 	int flags;
 	ChunkVectorInt entry_point;
 	int object_index;
 
 	friend BOOL operator==(const Adjacent_Module & am1, const Adjacent_Module & am2);
 	friend BOOL operator!=(const Adjacent_Module & am1, const Adjacent_Module & am2);
-	
+
 };
 
 class Shape_Chunk;
@@ -264,7 +264,7 @@ struct a_frame
 	int spare;
 };
 
-	
+
 // Data structures for bits and pieces
 
 struct obinfile
@@ -293,7 +293,7 @@ struct poly_change_info
 	int poly_num;
 	int vert_num_before;
 	int vert_num_after;
-	
+
 	friend BOOL operator==(poly_change_info const &f1, poly_change_info const &f2);
 	friend BOOL operator!=(poly_change_info const &f1, poly_change_info const &f2);
 };
@@ -312,17 +312,17 @@ struct ChunkAnimFrame
 	//constructor for interpolated frame
 	//ChunkAnimFrame(ChunkAnimFrame* startframe,ChunkAnimFrame* endframe,int startwt,int endwt,ChunkShape const *cs);
 	ChunkAnimFrame& operator=(const ChunkAnimFrame &);
-	
+
 
 	char* name;
-	
+
 	int num_polys;
 	int num_verts;
-	
+
 	ChunkVectorInt * v_list;
 	ChunkVectorFloat * p_normal_list;
-	
-	int flags;	
+
+	int flags;
 	int num_interp_frames;
 	int pad3,pad4;
 };
@@ -339,10 +339,10 @@ struct ChunkAnimSequence
 
 	ChunkAnimSequence (const ChunkAnimSequence &);
 	ChunkAnimSequence& operator=(const ChunkAnimSequence &);
-	
+
 	void DeleteInterpolatedFrames();
 	void GenerateInterpolatedFrames(ChunkShape const *cs);
-	
+
 	void UpdateNormalsAndExtents(ChunkShape const *cs,List<int>* poly_not_in_bb=0);
 
 	int SequenceNum;
@@ -350,15 +350,16 @@ struct ChunkAnimSequence
 
 	int NumFrames;
 	ChunkAnimFrame** Frames;
-	
+
 	int flags;
 	int pad2,pad3,pad4;
 
 	ChunkVectorInt min;
 	ChunkVectorInt max;
 	float radius;
-	
+
 	int num_verts;
 	ChunkVectorFloat* v_normal_list;
 };
 #endif
+

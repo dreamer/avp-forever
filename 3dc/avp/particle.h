@@ -17,7 +17,7 @@ enum PARTICLE_ID
 
 	PARTICLE_WATERSPRAY,
 	PARTICLE_WATERFALLSPRAY,
-	
+
 	PARTICLE_BLACKSMOKE,
 	PARTICLE_FLARESMOKE,
 	PARTICLE_STEAM,
@@ -32,12 +32,12 @@ enum PARTICLE_ID
 	PARTICLE_MOLOTOVFLAME,
 	PARTICLE_MOLOTOVFLAME_NONDAMAGING,
 
-	PARTICLE_SPARK,	
-	PARTICLE_RICOCHET_SPARK,	
+	PARTICLE_SPARK,
+	PARTICLE_RICOCHET_SPARK,
 	PARTICLE_ORANGE_SPARK,
 	PARTICLE_ORANGE_PLASMA,
 
-	PARTICLE_PLASMATRAIL,	
+	PARTICLE_PLASMATRAIL,
 	PARTICLE_LASERBEAM,
 	PARTICLE_PLASMABEAM,
 	PARTICLE_TRACER,
@@ -57,7 +57,7 @@ enum PARTICLE_ID
 	PARTICLE_FLECHETTE_NONDAMAGING,
 
 	PARTICLE_DEWLINE,
-	
+
 	PARTICLE_PARGEN_FLAME, //identical to PARTICLE_FLAME , except doesn't damage netghosts
 
 	MAX_NO_OF_PARTICLE_IDS,
@@ -94,9 +94,9 @@ typedef struct
 
 	enum PARTICLE_ID ParticleID;
 	signed int LifeTime;
-	
+
 	VECTORCH Position;
-	
+
 	VECTORCH Velocity;
 	VECTORCH Offset;
 
@@ -130,7 +130,7 @@ typedef struct
 	unsigned char IsLit:1;
 	unsigned char IsDrawnInFront:1;
 	unsigned char IsDrawnAtBack:1;
-	
+
 } PARTICLE_DESC;
 
 typedef struct
@@ -151,7 +151,7 @@ typedef struct
 } PHEROMONE_TRAIL;
 
 
-typedef struct 
+typedef struct
 {
 	VECTORCH	SourcePosition;
 	VECTORCH	TargetPosition;

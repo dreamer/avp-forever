@@ -1,4 +1,4 @@
-#ifndef scream_h 
+#ifndef scream_h
 #define scream_h 1
 
 #ifdef __cplusplus

@@ -21,27 +21,27 @@ void UpdateMorphing(MORPHCTRL *mcptr)
 	/*textprint("UpdateMorphing\n");*/
 
 
-	if (mcptr->ObMorphFlags & mph_flag_play) 
+	if (mcptr->ObMorphFlags & mph_flag_play)
 	{
 		/* How fast? */
-		if (mcptr->ObMorphSpeed == ONE_FIXED) 
+		if (mcptr->ObMorphSpeed == ONE_FIXED)
 		{
 			UpdateRate = NormalFrameTime;
 		}
-		else 
+		else
 		{
 			UpdateRate = MUL_FIXED(NormalFrameTime, mcptr->ObMorphSpeed);
 		}
 
 
 		/* Update the current frame */
-		if (mcptr->ObMorphFlags & mph_flag_reverse) 
+		if (mcptr->ObMorphFlags & mph_flag_reverse)
 		{
 			mcptr->ObMorphCurrFrame -= UpdateRate;
 
-			if (mcptr->ObMorphCurrFrame < 0) 
+			if (mcptr->ObMorphCurrFrame < 0)
 			{
-				if (mcptr->ObMorphFlags & mph_flag_noloop) 
+				if (mcptr->ObMorphFlags & mph_flag_noloop)
 				{
 					mcptr->ObMorphCurrFrame = 0;
 
@@ -49,7 +49,7 @@ void UpdateMorphing(MORPHCTRL *mcptr)
 					mcptr->ObMorphFlags |= (mph_flag_finished | mph_flag_start);
 				}
 
-				else 
+				else
 				{
 					mcptr->ObMorphCurrFrame += mhdr->mph_maxframes;
 
@@ -58,20 +58,20 @@ void UpdateMorphing(MORPHCTRL *mcptr)
 				}
 			}
 		}
-		else 
+		else
 		{
 			mcptr->ObMorphCurrFrame += UpdateRate;
 
 			if (mcptr->ObMorphCurrFrame >= mhdr->mph_maxframes)
 			{
-				if (mcptr->ObMorphFlags & mph_flag_noloop) 
+				if (mcptr->ObMorphFlags & mph_flag_noloop)
 				{
 					/* The sequence has finished and we are at the end */
 					mcptr->ObMorphFlags |= (mph_flag_finished | mph_flag_end);
 
 					mcptr->ObMorphCurrFrame = mhdr->mph_maxframes - 1;
 				}
-				else 
+				else
 				{
 					mcptr->ObMorphCurrFrame -= mhdr->mph_maxframes;
 
@@ -109,12 +109,12 @@ void UpdateMorphingDptr(DISPLAYBLOCK *dptr)
 
 	/* Radius */
 
-	if (sptr1->shaperadius == sptr2->shaperadius) 
+	if (sptr1->shaperadius == sptr2->shaperadius)
 	{
 		dptr->ObRadius = sptr1->shaperadius;
 	}
 
-	else 
+	else
 	{
 		dptr->ObRadius = WideMul2NarrowDiv(sptr1->shaperadius,
 													MorphDisplay.md_one_minus_lerp,
@@ -124,11 +124,11 @@ void UpdateMorphingDptr(DISPLAYBLOCK *dptr)
 
 
 	/* X Extent */
-	if (sptr1->shapemaxx == sptr2->shapemaxx) 
+	if (sptr1->shapemaxx == sptr2->shapemaxx)
 	{
 		dptr->ObMaxX = sptr1->shapemaxx;
 	}
-	else 
+	else
 	{
 		dptr->ObMaxX = WideMul2NarrowDiv(sptr1->shapemaxx,
 													MorphDisplay.md_one_minus_lerp,
@@ -136,11 +136,11 @@ void UpdateMorphingDptr(DISPLAYBLOCK *dptr)
 													MorphDisplay.md_lerp, ONE_FIXED);
 	}
 
-	if (sptr1->shapeminx == sptr2->shapeminx) 
+	if (sptr1->shapeminx == sptr2->shapeminx)
 	{
 		dptr->ObMinX = sptr1->shapeminx;
 	}
-	else 
+	else
 	{
 		dptr->ObMinX = WideMul2NarrowDiv(sptr1->shapeminx,
 													MorphDisplay.md_one_minus_lerp,
@@ -150,11 +150,11 @@ void UpdateMorphingDptr(DISPLAYBLOCK *dptr)
 
 
 	/* Y Extent */
-	if (sptr1->shapemaxy == sptr2->shapemaxy) 
+	if (sptr1->shapemaxy == sptr2->shapemaxy)
 	{
 		dptr->ObMaxY = sptr1->shapemaxy;
 	}
-	else 
+	else
 	{
 		dptr->ObMaxY = WideMul2NarrowDiv(sptr1->shapemaxy,
 													MorphDisplay.md_one_minus_lerp,
@@ -162,11 +162,11 @@ void UpdateMorphingDptr(DISPLAYBLOCK *dptr)
 													MorphDisplay.md_lerp, ONE_FIXED);
 	}
 
-	if (sptr1->shapeminy == sptr2->shapeminy) 
+	if (sptr1->shapeminy == sptr2->shapeminy)
 	{
 		dptr->ObMinY = sptr1->shapeminy;
 	}
-	else 
+	else
 	{
 		dptr->ObMinY = WideMul2NarrowDiv(sptr1->shapeminy,
 													MorphDisplay.md_one_minus_lerp,
@@ -175,11 +175,11 @@ void UpdateMorphingDptr(DISPLAYBLOCK *dptr)
 	}
 
 	/* Z Extent */
- 	if (sptr1->shapemaxz == sptr2->shapemaxz) 
+ 	if (sptr1->shapemaxz == sptr2->shapemaxz)
 	{
 		dptr->ObMaxZ = sptr1->shapemaxz;
 	}
-	else 
+	else
 	{
 		dptr->ObMaxZ = WideMul2NarrowDiv(sptr1->shapemaxz,
 													MorphDisplay.md_one_minus_lerp,
@@ -187,13 +187,13 @@ void UpdateMorphingDptr(DISPLAYBLOCK *dptr)
 													MorphDisplay.md_lerp, ONE_FIXED);
 	}
 
-	if (sptr1->shapeminz == sptr2->shapeminz) 
+	if (sptr1->shapeminz == sptr2->shapeminz)
 	{
 
 		dptr->ObMinZ = sptr1->shapeminz;
 	}
 
-	else 
+	else
 	{
 		dptr->ObMinZ = WideMul2NarrowDiv(sptr1->shapeminz,
 													MorphDisplay.md_one_minus_lerp,

@@ -12,25 +12,25 @@
 
 /* KJL 12:34:46 09/18/96 - new stuff under development */
 
-/* KJL 12:39:41 09/18/96 - 
+/* KJL 12:39:41 09/18/96 -
 	Okay, I think we should have two weapon structures:
-    
+
     TEMPLATE_WEAPON_DATA:	First the basic template for each weapon, which remains constant
     						during the game & contains the base description of a weapon	eg.
     						ammo type, weight, graphics, etc.
-							
+
     PLAYER_WEAPON_DATA:		Second is the structure which describes a player's weapon
     						eg. a pointer to a TEMPLATE_WEAPON_DATA, ammo remaining, jam
                             status, and so on.
-                            
+
                             eg.	PLAYER_WEAPON_DATA PlayerWeapons[];
-                            
+
 */
 /* KJL 16:09:51 09/20/96 - Weapon States */
-enum WEAPON_STATE 
+enum WEAPON_STATE
 {
 	WEAPONSTATE_IDLE=0,
-	
+
 	WEAPONSTATE_FIRING_PRIMARY,
     WEAPONSTATE_RECOIL_PRIMARY,
 	WEAPONSTATE_RELOAD_PRIMARY,
@@ -38,13 +38,13 @@ enum WEAPON_STATE
     WEAPONSTATE_FIRING_SECONDARY,
 	WEAPONSTATE_RECOIL_SECONDARY,
 	WEAPONSTATE_RELOAD_SECONDARY,
-	
+
 	WEAPONSTATE_SWAPPING_IN,
 	WEAPONSTATE_SWAPPING_OUT,
 	WEAPONSTATE_JAMMED,
 
 	WEAPONSTATE_WAITING,
-	
+
 	WEAPONSTATE_READYING,
 	WEAPONSTATE_UNREADYING,
 
@@ -67,7 +67,7 @@ enum WEAPON_ID
     WEAPON_PLASMAGUN,
     WEAPON_SADAR,
     WEAPON_GRENADELAUNCHER,
-    WEAPON_MINIGUN,	 
+    WEAPON_MINIGUN,
 	WEAPON_SONICCANNON,
 	WEAPON_BEAMCANNON,
 	WEAPON_MYSTERYGUN,
@@ -80,7 +80,7 @@ enum WEAPON_ID
 	WEAPON_PRED_DISC,
 	WEAPON_PRED_MEDICOMP,
 	WEAPON_PRED_STAFF,
-	    
+
     /* ALIEN WEAPONS */
     WEAPON_ALIEN_CLAW,
 	WEAPON_ALIEN_GRAB,
@@ -108,7 +108,7 @@ enum WEAPON_SLOT
 	WEAPON_SLOT_10,
 	WEAPON_SLOT_11,
 	MAX_NO_OF_WEAPON_SLOTS,
-	
+
     WEAPON_FINISHED_SWAPPING
 };
 
@@ -122,7 +122,7 @@ enum AMMO_ID
 	AMMO_FLAMETHROWER,
 	AMMO_PLASMA,
 	AMMO_SADAR_TOW,
-	AMMO_GRENADE, 
+	AMMO_GRENADE,
 	AMMO_MINIGUN,
 	AMMO_PULSE_GRENADE,
 	AMMO_FLARE_GRENADE,
@@ -130,13 +130,13 @@ enum AMMO_ID
 	AMMO_PROXIMITY_GRENADE,
 	AMMO_PARTICLE_BEAM,
 	AMMO_SONIC_PULSE,
-	
+
 	AMMO_PRED_WRISTBLADE,
 	AMMO_PRED_PISTOL,
 	AMMO_PRED_RIFLE,
 	AMMO_PRED_ENERGY_BOLT,
 	AMMO_PRED_DISC,
-	
+
 	AMMO_ALIEN_CLAW,
 	AMMO_ALIEN_TAIL,
 	AMMO_ALIEN_SPIT,
@@ -216,7 +216,7 @@ typedef struct {
 	unsigned int MakeExitWounds	:1;
 
 	enum AMMO_ID Id;
-	
+
 } DAMAGE_PROFILE;
 
 /* CDF - 15/9/97 New Damage System */
@@ -232,7 +232,7 @@ typedef struct {
 typedef struct
 {
 	int					AmmoPerMagazine;
-	
+
 	DAMAGE_PROFILE		MaxDamage[I_MaxDifficulties];
 	int					MaxRange;
 
@@ -248,22 +248,22 @@ typedef struct
 {
 	enum WEAPON_ID	 	WeaponIDNumber;
 	/* eg.==MARINE_WEAPON_PULSE. This can be used to access the TemplateWeapon[] data, graphics, etc. */
- 
+
     enum WEAPON_STATE 	CurrentState;
- 
-    int				 	StateTimeOutCounter; /* in 16.16 */   
-        
+
+    int				 	StateTimeOutCounter; /* in 16.16 */
+
     unsigned int		PrimaryRoundsRemaining; /* in 'current' magazine */
     unsigned int		SecondaryRoundsRemaining; /* in 'current' magazine */
     unsigned char		PrimaryMagazinesRemaining;
     unsigned char		SecondaryMagazinesRemaining;
 
-	VECTORCH			PositionOffset; 
+	VECTORCH			PositionOffset;
     EULER				DirectionOffset;
 
 	SHAPEANIMATIONCONTROLLER ShpAnimCtrl;
     TXACTRLBLK			*TxAnimCtrl;
-     
+
     /* general flags */
     signed int		Possessed :2; /* meaning you are carrying the weapon, not that an evil spirit etc etc. */
 
@@ -277,18 +277,18 @@ typedef struct
 	int 				(*FirePrimaryFunction)(PLAYER_WEAPON_DATA *);
 	int 				(*FireSecondaryFunction)(PLAYER_WEAPON_DATA *);
 	void 				(*WeaponInitFunction)(PLAYER_WEAPON_DATA *);
-	   
+
     int					TimeOutRateForState[MAX_NO_OF_WEAPON_STATES]; /* in 16.16 */
 	void 				(*WeaponStateFunction[MAX_NO_OF_WEAPON_STATES])(void *, PLAYER_WEAPON_DATA *);	// void * is for PLAYER_STATUS
 	int					ProbabilityOfJamming;
     int					FiringRate;
-    
+
     /* display stuff */
 	signed int 			SmartTargetSpeed;	/* how fast crosshair moves */
     unsigned int		GunCrosshairSpeed;	/* how fast the gun moves to catch up */
     unsigned int  		SmartTargetRadius;
     VECTORCH			RestPosition;
-	
+
 	int					RecoilMaxZ;
 	int					RecoilMaxRandomZ;
 	int					RecoilMaxXTilt;
@@ -308,19 +308,19 @@ typedef struct
 
 	/* Encumberance */
 
-	ENCUMBERANCE_STATE	Encum_Idle;	
-	ENCUMBERANCE_STATE	Encum_FirePrime;	
-	ENCUMBERANCE_STATE	Encum_FireSec;	
+	ENCUMBERANCE_STATE	Encum_Idle;
+	ENCUMBERANCE_STATE	Encum_FirePrime;
+	ENCUMBERANCE_STATE	Encum_FireSec;
 
     /* flags */
 	unsigned int 		UseStateMovement :1;
 	unsigned int		IsSmartTarget :1;
-	unsigned int		PrimaryIsRapidFire   :1;    
-	unsigned int		PrimaryIsAutomatic   :1;    
-	unsigned int		PrimaryIsMeleeWeapon :1;  
-	unsigned int		SecondaryIsRapidFire   :1;    
-	unsigned int		SecondaryIsAutomatic   :1;    
-	unsigned int		SecondaryIsMeleeWeapon :1;  
+	unsigned int		PrimaryIsRapidFire   :1;
+	unsigned int		PrimaryIsAutomatic   :1;
+	unsigned int		PrimaryIsMeleeWeapon :1;
+	unsigned int		SecondaryIsRapidFire   :1;
+	unsigned int		SecondaryIsAutomatic   :1;
+	unsigned int		SecondaryIsMeleeWeapon :1;
 	unsigned int 		HasShapeAnimation: 1;
 	unsigned int 		HasTextureAnimation: 1;
 	unsigned int 		FireWhenCloaked: 1;
@@ -338,7 +338,7 @@ typedef struct
 
 
 
-typedef struct 
+typedef struct
 {
 	enum AMMO_ID	SelectedAmmo;
 
@@ -380,7 +380,7 @@ extern enum WEAPON_ID AlienWeaponKey[MAX_NO_OF_WEAPON_SLOTS];
 
 extern DAMAGE_PROFILE certainDeath;
 extern DAMAGE_PROFILE console_nuke;
-extern DAMAGE_PROFILE firedamage;	
+extern DAMAGE_PROFILE firedamage;
 
 extern DAMAGE_PROFILE SmallExplosionDamage;
 extern DAMAGE_PROFILE BigExplosionDamage;

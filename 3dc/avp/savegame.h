@@ -56,7 +56,7 @@ typedef struct level_save_block
 	SAVE_BLOCK_HEADER header;
 
 	char AvP_Save_String[8];
-	
+
 	unsigned char	Species;
 	unsigned char	Episode;
 	unsigned char	ElapsedTime_Hours;

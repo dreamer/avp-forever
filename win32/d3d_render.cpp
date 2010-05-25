@@ -3651,11 +3651,11 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
   		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 
-//		mainVertex[vb].tu = ((float)vertices->U) * RecipW + (1.0f / 256.0f);
-//		mainVertex[vb].tv = ((float)vertices->V) * RecipH + (1.0f / 256.0f);
+		mainVertex[vb].tu = ((float)vertices->U) * RecipW + (1.0f / 256.0f);
+		mainVertex[vb].tv = ((float)vertices->V) * RecipH + (1.0f / 256.0f);
 
-		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
-		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
+//		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
+//		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
 
 		vb++;
 	}

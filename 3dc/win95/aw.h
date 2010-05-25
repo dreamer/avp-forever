@@ -1,7 +1,7 @@
 #ifndef _INCLUDED_AW_H_
 #define _INCLUDED_AW_H_
 
-#include "stdint.h"
+#include <stdint.h>
 
 struct AwBackupTexture;
 typedef struct AwBackupTexture * AW_BACKUPTEXTUREHANDLE;

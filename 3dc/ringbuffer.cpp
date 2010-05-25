@@ -52,8 +52,8 @@ uint32_t RingBuffer::GetWritableSize()
 {
 	// load ring buffer
 	int32_t freeSpace = 0;
-	uint32_t firstSize = 0;
-	uint32_t secondSize = 0;
+//	uint32_t firstSize = 0;
+//	uint32_t secondSize = 0;
 
 	EnterCriticalSection(&mCriticalSection);
 
@@ -72,11 +72,11 @@ uint32_t RingBuffer::GetWritableSize()
 			freeSpace = bufferCapacity;
 		}
 	}
-	else 
+	else
 	{
 		// standard logic - buffers have a gap, work out writable space between them
 		freeSpace = readPos - writePos;
-		if (freeSpace < 0) 
+		if (freeSpace < 0)
 			freeSpace += bufferCapacity;
 	}
 
@@ -88,8 +88,8 @@ uint32_t RingBuffer::GetWritableSize()
 uint32_t RingBuffer::GetReadableSize()
 {
 	// find out how we need to read data. do we split into 2 memcpys or not?
-	uint32_t firstSize = 0;
-	uint32_t secondSize = 0;
+//	uint32_t firstSize = 0;
+//	uint32_t secondSize = 0;
 	int32_t readableSpace = 0;
 
 	EnterCriticalSection(&mCriticalSection);
@@ -109,11 +109,11 @@ uint32_t RingBuffer::GetReadableSize()
 			readableSpace = 0;
 		}
 	}
-	else 
+	else
 	{
 		// standard logic - buffers have a gap, work out readable space between them
 		readableSpace = writePos - readPos;
-		if (readableSpace < 0) 
+		if (readableSpace < 0)
 			readableSpace += bufferCapacity;
 	}
 
@@ -192,7 +192,7 @@ uint32_t RingBuffer::WriteData(uint8_t *srcData, uint32_t srcDataSize)
 	firstSize = bufferCapacity - writePos;
 
 	// is first size big enough to hold all our data?
-	if (firstSize > srcDataSize) 
+	if (firstSize > srcDataSize)
 		firstSize = srcDataSize;
 
 	// first part. from write cursor to end of buffer

@@ -21,7 +21,7 @@ enum AVP_DIFFICULTY_LEVEL_ID
 	AVP_DIFFICULTY_LEVEL_NONE,
 	/* the 'none' difficulty level setting can be used to indicate that
 	a level has never been completed */
-		
+
 	AVP_DIFFICULTY_LEVEL_EASY,
 	AVP_DIFFICULTY_LEVEL_MEDIUM,
 	AVP_DIFFICULTY_LEVEL_HARD,
@@ -50,7 +50,7 @@ enum CHEATMODE_ID
 	CHEATMODE_NAUSEA,
 	CHEATMODE_FREEFALL,
 	CHEATMODE_BALLSOFFIRE,
-	
+
 	MAX_NUMBER_OF_CHEATMODES,
 
 
@@ -65,7 +65,7 @@ typedef struct {
 	enum CHEATMODE_ID CheatModeToActivate;
 } AvP_Level_Target_Desc;
 
-typedef struct 
+typedef struct
 {
 	char Name[MAX_SIZE_OF_USERS_NAME+1];
 
@@ -92,7 +92,7 @@ typedef struct
 	int IntroOutroMoviesAreActive;
 
 	MENU_DETAIL_LEVEL_OPTIONS DetailLevelSettings;
-		
+
 	PLAYER_INPUT_CONFIGURATION MarineInputPrimaryConfig;
 	PLAYER_INPUT_CONFIGURATION MarineInputSecondaryConfig;
 	PLAYER_INPUT_CONFIGURATION AlienInputPrimaryConfig;
@@ -124,8 +124,8 @@ typedef struct
 #define UNDERWATER_CHEATMODE 		(CheatMode_Active == CHEATMODE_UNDERWATER)
 #define JOHNWOO_CHEATMODE			(CheatMode_Active == CHEATMODE_JOHNWOO)
 #define WARPSPEED_CHEATMODE			(CheatMode_Active == CHEATMODE_WARPSPEED)
-#define LANDOFTHEGIANTS_CHEATMODE	(CheatMode_Active == CHEATMODE_LANDOFTHEGIANTS)	
-#define IMPOSSIBLEMISSION_CHEATMODE	(CheatMode_Active == CHEATMODE_IMPOSSIBLEMISSION)	
+#define LANDOFTHEGIANTS_CHEATMODE	(CheatMode_Active == CHEATMODE_LANDOFTHEGIANTS)
+#define IMPOSSIBLEMISSION_CHEATMODE	(CheatMode_Active == CHEATMODE_IMPOSSIBLEMISSION)
 #define RAINBOWBLOOD_CHEATMODE		(CheatMode_Active == CHEATMODE_RAINBOWBLOOD)
 #define TICKERTAPE_CHEATMODE		(CheatMode_Active == CHEATMODE_TICKERTAPE)
 #define NAUSEA_CHEATMODE			(CheatMode_Active == CHEATMODE_NAUSEA)
@@ -168,7 +168,7 @@ extern int CheatMode_Active;
 extern int CheatMode_Species;
 extern int CheatMode_Environment;
 
-#ifdef __cplusplus									 
+#ifdef __cplusplus
 }; // extern "C"
 #endif
 

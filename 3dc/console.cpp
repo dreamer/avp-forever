@@ -11,9 +11,9 @@
 #include "iofocus.h"
 #include "logString.h"
 #include "font2.h"
-#include "stdint.h"
+#include <stdint.h>
 
-extern "C" 
+extern "C"
 {
 	#include "avp_menugfx.hpp"
 	#include "platform.h"
@@ -28,7 +28,7 @@ extern "C"
 
 char buf[100];
 
-struct Command 
+struct Command
 {
 	char *cmdName;
 	char *cmdDescription;
@@ -107,9 +107,9 @@ void Con_AddCommand(char *command, funcPointer function)
 			return;
 		}
 	}
-	
+
 	Command newCommand;
-	
+
 	newCommand.cmdName = command;
 	newCommand.cmdDescription = "no description yet";
 	newCommand.cmdFuncPointer = function;
@@ -142,7 +142,7 @@ void Con_Init()
 void Con_ProcessCommand()
 {
 	// if nothing typed, don't bother doing anything
-	if (console.inputLine.length() == 0) 
+	if (console.inputLine.length() == 0)
 		return;
 
 	// clear the arg vector
@@ -166,7 +166,7 @@ void Con_ProcessCommand()
 			break;
 		}
 	}
-	
+
 	// in case we didnt find it
 	if (theCommand.cmdFuncPointer == NULL)
 	{
@@ -240,7 +240,7 @@ void Con_AddTypedChar(char c)
 		Con_RemoveTypedChar();
 	}
 	else if (c == 13) // enter/return key
-	{	
+	{
 		Con_ProcessCommand();
 	}
 	else
@@ -270,7 +270,7 @@ void Con_Draw()
 	{
 		console.destinationY = 0.5f;
 	}
-	else 
+	else
 	{
 		console.destinationY = 0.0f;
 	}
@@ -303,7 +303,7 @@ void Con_Draw()
 		DrawQuad(console.xPos, console.yPos + console.height, console.width, 2, -1, D3DCOLOR_ARGB(255, 255, 255, 255), TRANSLUCENCY_OFF);
 	}
 
-	int charCount = 0;
+//	int charCount = 0;
 
 	uint32_t y = console.height;
 
@@ -315,7 +315,7 @@ void Con_Draw()
 
 	int32_t rows = console.text.size() - 1;
 
-	int lines = console.lines;
+//	int lines = console.lines;
 	int xOffset = 0;
 
 	// draw all the lines of text

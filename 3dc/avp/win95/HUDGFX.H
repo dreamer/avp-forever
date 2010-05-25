@@ -69,7 +69,7 @@ struct DigitPropertiesTag
 	int	X;
     int	Y;
    	int	Font;
-};	
+};
 
 /* info about a particular frame */
 struct FrameInfoTag
@@ -77,7 +77,7 @@ struct FrameInfoTag
 	int	X;			   /* centre X coord of frame */
     int	Y;			   /* bottom Y of frame */
    	char *FilenamePtr; /* filename of graphic */
-};	
+};
 
 struct HUDFontDescTag
 {
@@ -100,7 +100,7 @@ struct LittleMDescTag
 *                                     P R O T O T Y P E S                                   *
 *****************************************************************************************JH*/
 
-/* JH 3/6/97 - these functions are to 
+/* JH 3/6/97 - these functions are to
    release hud graphics with any links to direct draw
    but still keep them in memory, so they can be restored */
 //extern void MinimizeAllDDGraphics(void);

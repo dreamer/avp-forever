@@ -1,5 +1,5 @@
 /* Patrick 5/6/97 -------------------------------------------------------------
-  AvP Project sound header 
+  AvP Project sound header
   ----------------------------------------------------------------------------*/
 #ifndef PSNDPROJ_H
 #define PSNDPROJ_H
@@ -7,6 +7,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "equipmnt.h"
 
 /* Andy 12/6/97 --------------------------------------------------------------
   Some background sound defines
@@ -20,7 +22,7 @@ extern "C" {
 /* Patrick 5/6/97 -------------------------------------------------------------
   Enumeration of all the sounds that may be loaded/used in the game. Each
   of these corresponds to a data slot in the GameSounds[] array, and to the Id
-  number specified for each sound in the sound data file 
+  number specified for each sound in the sound data file
   ----------------------------------------------------------------------------*/
 typedef enum soundindex
 {
@@ -45,12 +47,12 @@ typedef enum soundindex
 	SID_TAIL, //FALSE
 	SID_VISION_ON, //TRUE
 	SID_VISION_LOOP,   // not loaded (Continuous pred background)
-	
+
 	SID_SWIPE2,			// 20 //FALSE
 	SID_SWIPE3,		//FALSE
 	SID_SWIPE4,		//FALSE
-	SID_PRED_HISS,	//FALSE	
-	SID_HIT_FLESH,	//FALSE	
+	SID_PRED_HISS,	//FALSE
+	SID_HIT_FLESH,	//FALSE
 	SID_ALIEN_HIT,			//FALSE
 	SID_ALIEN_KILL, // Only used for queen death!
 	SID_ALIEN_HISS, //FALSE
@@ -144,7 +146,7 @@ typedef enum soundindex
 	SID_CONSOLE_ALIENMESSAGE,//TRUE
 	SID_CONSOLE_PREDATORMESSAGE,//TRUE
 	SID_MINIGUN_READY, //FALSE! WIL_MINIGUN_READY used instead.
-	
+
 	SID_MINIGUN_EMPTY, //110 //TRUE
 	SID_SMART_MODESWITCH,//TRUE
 	SID_GRENADE_BOUNCE,//TRUE
@@ -155,7 +157,7 @@ typedef enum soundindex
 	SID_MARINE_PICKUP_WEAPON,//TRUE
 	SID_MARINE_PICKUP_AMMO,	 //TRUE
 	SID_MARINE_PICKUP_ARMOUR,//TRUE
-	
+
 	SID_PREDATOR_PICKUP_FIELDCHARGE, //120 //TRUE
 	SID_PREDATOR_PICKUP_WEAPON, // In code, but never happens
 	SID_PREDATOR_CLOAKING_ACTIVE,//TRUE (vision modes)
@@ -191,7 +193,7 @@ typedef enum soundindex
 
 	SID_MARINE_JUMP_START_2, //150 //FALSE
 	SID_MARINE_JUMP_START_3,//FALSE
-	SID_MARINE_JUMP_START_4,//FALSE 
+	SID_MARINE_JUMP_START_4,//FALSE
 	SID_ED_GRENADE_EXPLOSION,//TRUE
 	SID_ED_GRENADE_PROXEXPLOSION,//TRUE
 	SID_ED_MOLOTOV_EXPLOSION,//TRUE
@@ -350,9 +352,9 @@ typedef enum soundindex
   SID_UNUSED_239,
 
 	SID_ENDOF_LOADSLOTS=800,
-    
-	SID_MAXIMUM, /* SPECIAL: used to trap out of bounds values */ 		
-	SID_NOSOUND	 /* SPECIAL: used to specify a null sound */ 		
+
+	SID_MAXIMUM, /* SPECIAL: used to trap out of bounds values */
+	SID_NOSOUND	 /* SPECIAL: used to specify a null sound */
 }SOUNDINDEX;
 
 /* Patrick 5/6/97 -------------------------------------------------------------
@@ -372,7 +374,7 @@ extern void MenuSelectSound(void);
 extern void MenuNotAvailableSound(int *handlePtr);
 extern void MenuSliderBarSound(int *handlePtr);
 void PlayWeaponClickingNoise(enum WEAPON_ID weaponIDNumber);
-              
+
 
 /* Patrick 5/6/97 -------------------------------------------------------------
   Sound data loader
@@ -384,7 +386,7 @@ extern void LoadSounds(char *soundDirectory);
 extern int FindAndLoadWavFile(int soundNum,char* wavFileName);
 
 /* Patrick 10/6/97 -------------------------------------------------------------
-  Enumeration of CDDA tracks 
+  Enumeration of CDDA tracks
   ----------------------------------------------------------------------------*/
 typedef enum cdtrackid
 {
@@ -414,7 +416,7 @@ typedef enum cdtrackid
   CDTrack24,
   CDTrack25,
   CDTrack26,
-//  CDTrackMax, /* SPECIAL: used to trap out of bounds values */ 		
+//  CDTrackMax, /* SPECIAL: used to trap out of bounds values */
 } CDTRACKID;
 
 extern int CDTrackMax; //bas maximum cd track on the actual number of tracks

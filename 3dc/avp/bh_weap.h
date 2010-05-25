@@ -4,21 +4,21 @@
 #include "particle.h"
 
 extern void FireProjectileAmmo(enum AMMO_ID AmmoID);
-extern void FrisbeeBehaviour(STRATEGYBLOCK *sbPtr); 
-extern void RocketBehaviour(STRATEGYBLOCK *sbPtr); 
-extern void GrenadeBehaviour(STRATEGYBLOCK *sbPtr); 
-extern void MolotovBehaviour(STRATEGYBLOCK *sbPtr); 
-extern void PulseGrenadeBehaviour(STRATEGYBLOCK *sbPtr); 
+extern void FrisbeeBehaviour(STRATEGYBLOCK *sbPtr);
+extern void RocketBehaviour(STRATEGYBLOCK *sbPtr);
+extern void GrenadeBehaviour(STRATEGYBLOCK *sbPtr);
+extern void MolotovBehaviour(STRATEGYBLOCK *sbPtr);
+extern void PulseGrenadeBehaviour(STRATEGYBLOCK *sbPtr);
 extern void ProximityGrenadeBehaviour(STRATEGYBLOCK *sbPtr);
 extern void FlareGrenadeBehaviour(STRATEGYBLOCK *sbPtr);
-extern void ClusterGrenadeBehaviour(STRATEGYBLOCK *sbPtr); 
+extern void ClusterGrenadeBehaviour(STRATEGYBLOCK *sbPtr);
 extern void XenoborgEnergyBoltBehaviour(STRATEGYBLOCK *sbPtr);
 extern void PredatorEnergyBoltBehaviour(STRATEGYBLOCK *sbPtr);
 extern void AlienSpitBehaviour(STRATEGYBLOCK *sbPtr);
 extern void NPCDiscBehaviour(STRATEGYBLOCK *sbPtr);
 extern void DiscBehaviour_SeekTrack(STRATEGYBLOCK *sbPtr);
-extern void PPPlasmaBoltBehaviour(STRATEGYBLOCK *sbPtr); 
-extern void SpeargunBoltBehaviour(STRATEGYBLOCK *sbPtr); 
+extern void PPPlasmaBoltBehaviour(STRATEGYBLOCK *sbPtr);
+extern void SpeargunBoltBehaviour(STRATEGYBLOCK *sbPtr);
 extern void FireFlameThrower(VECTORCH *position,VECTORCH *base_offset,MATRIXCH *orientmat, int player, int *timer);
 extern void FireNetGhostFlameThrower(VECTORCH *positionPtr, MATRIXCH *orientMatPtr);
 extern DISPLAYBLOCK *SpawnMolotovCocktail(SECTION_DATA *root, MATRIXCH *master_orient);
@@ -55,7 +55,7 @@ typedef struct
 	becomeStuck set when flare hits wall.
 	gets reset once a network message about it has been sent
 	*/
-	unsigned int becomeStuck:1; 
+	unsigned int becomeStuck:1;
 
 } FLARE_BEHAV_BLOCK;
 
@@ -86,7 +86,7 @@ typedef struct FrisbeeBehaviourType
 	int counter;
 	HMODELCONTROLLER HModelController;
 	int soundHandle;
-	int Bounced :1; 
+	int Bounced :1;
 	int bounces;
 
 	LASER_BEAM_DESC Laser;
@@ -104,9 +104,9 @@ typedef struct PCPredDiscBehaviourType
 	int soundHandle;
 	int Destruct:1;
 	int Stuck	:1;
-	int Bounced :1; 
+	int Bounced :1;
 	int bounces;
-				
+
 
 } PC_PRED_DISC_BEHAV_BLOCK;
 
@@ -142,7 +142,7 @@ typedef struct SpearBehaviourType
 
 
 /* KJL 17:46:30 02/24/97 - below is some old stuff I'll leave for reference */
-#if 0                       
+#if 0
 extern void FlameProjectileFunction(STRATEGYBLOCK *sptr);
 extern void GrenadeBehaviour(STRATEGYBLOCK *sptr);
 extern void TOWMissileBehaviour(STRATEGYBLOCK *sptr);

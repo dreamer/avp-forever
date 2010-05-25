@@ -29,19 +29,19 @@ public:
 	{}
 
 
-// derived classes from this class must have the 
+// derived classes from this class must have the
 // following functions (or it won't compile)!!
 
 	virtual BOOL file_equals(HANDLE &) = 0;
 	// the file equals function knows to look in
 	// the file from the start of the current chunk
 	// to see if the current chunk is the same one
-	
+
 	virtual const char * get_head_id() = 0;
 	virtual void set_lock_user(char *) = 0;
 
-// this function will lock the chunk if it can - 
-// will return true on success or if the chunk has 
+// this function will lock the chunk if it can -
+// will return true on success or if the chunk has
 // already been locked locally.
 
 	BOOL lock_chunk(File_Chunk &);
@@ -55,15 +55,15 @@ public:
 
 	BOOL update_chunk_in_file(HANDLE &rif_file);
 
-	// Selective output functions, 
+	// Selective output functions,
 	// These will output on condition of the flag, the flag will be set
 	// to FALSE
 
 	BOOL output_chunk_for_process;
-	
+
 	virtual size_t size_chunk_for_process();
-	
-	virtual void fill_data_block_for_process(char * data_start);	
+
+	virtual void fill_data_block_for_process(char * data_start);
 
 
 	BOOL updated;
@@ -72,7 +72,7 @@ public:
 	BOOL external_lock;
 
 	BOOL deleted;
-	
+
 };
 
 
@@ -113,7 +113,7 @@ public:
 
 
 	// some easy access functions
-	
+
 	void list_objects(List<Object_Chunk *> * pList);
 	void list_shapes(List<Shape_Chunk *> * pList);
 	void list_dummy_objects(List<Dummy_Object_Chunk *> * pList);
@@ -122,7 +122,7 @@ public:
 
 	Object_Chunk* get_object_by_index(int index);
 	void assign_index_to_object(Object_Chunk* object);
-	
+
 private:
 
 	friend class Shape_Chunk;
@@ -149,22 +149,22 @@ public:
 
 	int file_version_no;
 
-// output_chunk updates the above	
+// output_chunk updates the above
 
 	virtual void fill_data_block (char * data_start);
 
-	virtual size_t size_chunk () 
+	virtual size_t size_chunk ()
 	{
 		chunk_size = 16;
 		return 16;
 	}
 
-private:	
+private:
 
 	friend class File_Chunk;
 	friend class GodFather_Chunk;
 	friend class RIF_File_Chunk;
-	
+
 
 
 	RIF_Version_Num_Chunk	(Chunk_With_Children * parent)
@@ -176,26 +176,26 @@ private:
 
 class RIF_File_Chunk : public Chunk_With_Children
 {
-public:	
+public:
 
 	// This is a special chunk which does not output itself
 
 	RIF_File_Chunk (Chunk_With_Children * parent, const char * fname);
-	
+
 	size_t size_chunk()
 	{
 		return chunk_size = 0;
 	}
-	
+
 	virtual void post_input_processing();
-	
+
 	BOOL output_chunk (HANDLE & /*h*/){return TRUE;};
 	void fill_data_block (char * /*c*/){};
 
 	void list_objects(List<Object_Chunk *> * pList);
 	void list_shapes(List<Shape_Chunk *> * pList);
 	Environment_Data_Chunk * get_env_data();
-	
+
 };
 
 ///////////////////////////////////////////////
@@ -216,14 +216,14 @@ public:
 	}
 
 	virtual void fill_data_block (char * data_start);
-	
+
 private:
 
 	friend class Environment_Data_Chunk;
 	friend class Environment_Game_Mode_Chunk;
 	friend class Shape_External_File_Chunk;
 	friend class Sprite_Header_Chunk;
-	
+
 
 
 };

@@ -3,7 +3,7 @@
 
 /* KJL 14:42:10 29/03/98 - ShowCmds.h
 
-	defines the variables that describe the status of the debugging text 
+	defines the variables that describe the status of the debugging text
 
 
 	eg. if ShowDebuggingText.FPS == 1, then the frame-rate show be displayed.

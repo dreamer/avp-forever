@@ -17,7 +17,7 @@ enum SFX_ID
 typedef struct sfxblock
 {
 	enum SFX_ID SfxID;
-	
+
 	unsigned int EffectDrawnLastFrame:1; // useful for strobing effects
 
 
@@ -33,7 +33,7 @@ typedef struct forcefield
 	VECTORCH Corner;
 	VECTORCH Scale;
 	int ModuleIndex;
-	
+
 } FORCEFIELD;
 
 

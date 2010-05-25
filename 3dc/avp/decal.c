@@ -53,7 +53,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		//int StartU;
 		0,
 		//int StartV;
-		0,	 
+		0,
 		//int EndU;
 		(127),
 		//int EndV;
@@ -110,7 +110,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		0,
 		//int UOffsetForSubclass;
 		0,
-		
+
 		//enum TRANSLUCENCY_TYPE TranslucencyType;
 		TRANSLUCENCY_INVCOLOUR,
 
@@ -150,10 +150,10 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		0,
 		//int UOffsetForSubclass;
 		0,
-		
+
 		//enum TRANSLUCENCY_TYPE TranslucencyType;
 		TRANSLUCENCY_INVCOLOUR,
-					 
+
 		//unsigned char Alpha;
 		255,
 		//unsigned char RedScale;
@@ -190,7 +190,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		3,
 		//int UOffsetForSubclass;
 		32,//<<16,
-		
+
 		//enum TRANSLUCENCY_TYPE TranslucencyType;
 		TRANSLUCENCY_GLOWING,
 
@@ -230,7 +230,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		0,
 		//int UOffsetForSubclass;
 		0,
-		
+
 		//enum TRANSLUCENCY_TYPE TranslucencyType;
 		TRANSLUCENCY_GLOWING,
 
@@ -277,7 +277,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		//unsigned char Alpha;
 		255,
 		//unsigned char RedScale;
-		{64,		64,		255,		0,		  0}, 
+		{64,		64,		255,		0,		  0},
 		//unsigned char GreenScale;
 		{192,		192,	192,		112,	112},
 		//unsigned char BlueScale;
@@ -310,7 +310,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		3,
 		//int UOffsetForSubclass;
 		32,//<<16,
-		
+
 		//enum TRANSLUCENCY_TYPE TranslucencyType;
 		TRANSLUCENCY_GLOWING,
 
@@ -351,7 +351,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		0,
 		//int UOffsetForSubclass;
 		0,
-		
+
 		//enum TRANSLUCENCY_TYPE TranslucencyType;
 		TRANSLUCENCY_GLOWING,
 
@@ -391,7 +391,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		0,
 		//int UOffsetForSubclass;
 		0,
-		
+
 		//enum TRANSLUCENCY_TYPE TranslucencyType;
 		TRANSLUCENCY_GLOWING,
 
@@ -403,7 +403,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		{255,255,255,255},
 		//unsigned char BlueScale;
 		{192,192,192,192},
- 
+
 		//unsigned char IsLit:1;
 		0,
 		//unsigned char CanCombine:1;
@@ -431,7 +431,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		0,
 		//int UOffsetForSubclass;
 		0,
-	
+
 		//enum TRANSLUCENCY_TYPE TranslucencyType;
 		TRANSLUCENCY_GLOWING,
 
@@ -478,7 +478,7 @@ static DECAL* AllocateDecal(void)
 		CurrentDecalIndex = 0;
 	}
 
-	if (NumActiveDecals < LocalDetailLevels.MaximumAllowedNumberOfDecals) 
+	if (NumActiveDecals < LocalDetailLevels.MaximumAllowedNumberOfDecals)
 	{
 		NumActiveDecals++;
 	}
@@ -529,7 +529,7 @@ void MakeDecal(enum DECAL_ID decalID, VECTORCH *normalPtr, VECTORCH *positionPtr
 	AddDecal(decalID,normalPtr,positionPtr,moduleIndex);
 
 	/* no blood across network? */
- 	if(AvP.Network!=I_No_Network) 
+ 	if(AvP.Network!=I_No_Network)
 	{
 		if(netGameData.sendDecals)
 		{
@@ -583,7 +583,7 @@ static int TooManyDecalsOfThisType(enum DECAL_ID decalID, VECTORCH *positionPtr)
 		}
 		if (decalsOfThisType>=MAX_NO_OF_SIMILAR_DECALS_IN_ONE_PLACE)
 		{
-			if (DecalDescription[decalID].CanCombine) 
+			if (DecalDescription[decalID].CanCombine)
 			{
 				int j;//= FastRandom()%MAX_NO_OF_SIMILAR_DECALS_IN_ONE_PLACE;
 		  		for (j=0; j<MAX_NO_OF_SIMILAR_DECALS_IN_ONE_PLACE; j++)
@@ -603,29 +603,29 @@ static int TooManyDecalsOfThisType(enum DECAL_ID decalID, VECTORCH *positionPtr)
 		}
 		decalPtr++;
 	}
-	
+
 	return 0;
 }
-	
+
 void AddDecal(enum DECAL_ID decalID, VECTORCH *normalPtr, VECTORCH *positionPtr, int moduleIndex)
 {
 	DECAL *decalPtr;
 	MATRIXCH orientation;
-	int decalSize; 
+	int decalSize;
 	int theta = FastRandom()&4095;
 	int sin = GetSin(theta);
 	int cos = GetCos(theta);
 
 
 	MakeMatrixFromDirection(normalPtr,&orientation);
-	
+
 	if (decalID == DECAL_BULLETHOLE)
 	{
 		MakeImpactSmoke(&orientation,positionPtr);
 	}
 
 	decalPtr = AllocateDecal();
-	
+
 	decalPtr->DecalID = decalID;
 
 	decalPtr->Centre = *positionPtr;
@@ -704,7 +704,7 @@ void AddDecal(enum DECAL_ID decalID, VECTORCH *normalPtr, VECTORCH *positionPtr,
 		case DECAL_HUMAN_BLOOD:
 		case DECAL_PREDATOR_BLOOD:
 		case DECAL_ANDROID_BLOOD:
-		{	
+		{
 			decalPtr->UOffset = (FastRandom()&1)*(32/*<<16*/);
 			if (normalPtr->vy<-32768)
 			{
@@ -738,11 +738,11 @@ void RenderLaserTarget(THREE_LASER_DOT_DESC *laserTargetPtr)
 	{
 		DECAL decal;
 		MATRIXCH orientation;
-		int decalSize; 
+		int decalSize;
 		VECTORCH *positionPtr = &(laserTargetPtr->Position[i]);
 
 		MakeMatrixFromDirection(&(laserTargetPtr->Normal[i]),&orientation);
-		
+
 		decal.DecalID = DECAL_LASERTARGET;
 		decalSize = DecalDescription[DECAL_LASERTARGET].MaxSize;
 
@@ -788,7 +788,7 @@ void RenderLaserTarget(THREE_LASER_DOT_DESC *laserTargetPtr)
 void HandleDecalSystem(void)
 {
 	D3D_DecalSystem_Setup();
-	
+
 	if (NumActiveDecals > LocalDetailLevels.MaximumAllowedNumberOfDecals)
 	{
 		NumActiveDecals = LocalDetailLevels.MaximumAllowedNumberOfDecals;
@@ -849,7 +849,7 @@ void HandleDecalSystem(void)
 	{
 		RenderLaserTarget(&PredatorLaserTarget);
 	}
- 	
+
 	{
 		extern int NumActiveBlocks;
 		extern DISPLAYBLOCK *ActiveBlockList[];
@@ -943,7 +943,7 @@ void AddDecalToHModel(VECTORCH *normalPtr, VECTORCH *positionPtr, SECTION_DATA *
 	MATRIXCH orientation;
 	VECTORCH v;
 
-	int decalSize; 
+	int decalSize;
 	int theta,sin,cos;
 
 	if (!LocalDetailLevels.DrawHierarchicalDecals) return;
@@ -952,7 +952,7 @@ void AddDecalToHModel(VECTORCH *normalPtr, VECTORCH *positionPtr, SECTION_DATA *
 	sin = GetSin(theta);
 	cos = GetCos(theta);
 
-	
+
 	LOCALASSERT(sectionDataPtr->NumberOfDecals <= MAX_NO_OF_DECALS_PER_HIERARCHICAL_SECTION);
 	{
 		MATRIXCH mat = sectionDataPtr->SecMat;
@@ -971,7 +971,7 @@ void AddDecalToHModel(VECTORCH *normalPtr, VECTORCH *positionPtr, SECTION_DATA *
 	}
 	{
 		SECTION	*sectionPtr = sectionDataPtr->sempai;
-	
+
 		if(sectionPtr->flags&section_sprays_blood)
 		{
 			decalID = DECAL_HUMAN_BLOOD;
@@ -991,7 +991,7 @@ void AddDecalToHModel(VECTORCH *normalPtr, VECTORCH *positionPtr, SECTION_DATA *
 	}
 
 	decalPtr = &sectionDataPtr->Decals[sectionDataPtr->NextDecalToUse];
-	
+
 	if (sectionDataPtr->NextDecalToUse >= MAX_NO_OF_DECALS_PER_HIERARCHICAL_SECTION-1)
 	{
 		sectionDataPtr->NextDecalToUse = 0;
@@ -1006,7 +1006,7 @@ void AddDecalToHModel(VECTORCH *normalPtr, VECTORCH *positionPtr, SECTION_DATA *
 		sectionDataPtr->NumberOfDecals++;
 	}
 
-	
+
 	decalPtr->DecalID = decalID;
 	decalSize = 40;//DecalDescription[decalID].MaxSize;
 
@@ -1049,7 +1049,7 @@ void AddDecalToHModel(VECTORCH *normalPtr, VECTORCH *positionPtr, SECTION_DATA *
 void ScanHModelForDecals(DISPLAYBLOCK *objectPtr, SECTION_DATA *sectionDataPtr)
 {
 	SECTION *sectionPtr = sectionDataPtr->sempai;
-		
+
 	/* Unreal things aren't drawn... */
 	if (!(sectionDataPtr->flags&section_data_notreal) && (sectionPtr->Shape!=NULL))
 	{
@@ -1121,9 +1121,9 @@ void Load_Decals(SAVE_BLOCK_HEADER* header)
 	for(i=0;i<block->NumActiveDecals;i++)
 	{
 		DECAL* decal = AllocateDecal();
-		if(decal) 
+		if(decal)
 		{
-			*decal = *saved_decal++;	
+			*decal = *saved_decal++;
 		}
 	}
 }

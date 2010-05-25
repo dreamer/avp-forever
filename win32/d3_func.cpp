@@ -39,7 +39,7 @@ extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 D3DXMATRIX matOrtho;
 D3DXMATRIX matProjection;
 D3DXMATRIX matViewProjection;
-D3DXMATRIX matView; 
+D3DXMATRIX matView;
 D3DXMATRIX matIdentity;
 
 extern D3DVERTEXELEMENT9 decl[];
@@ -68,7 +68,7 @@ bool ReleaseVolatileResources();
 bool SetRenderStateDefaults();
 
 // byte order macros for A8R8G8B8 d3d texture
-enum 
+enum
 {
 	BO_BLUE,
 	BO_GREEN,
@@ -78,7 +78,7 @@ enum
 
 // TGA header structure
 #pragma pack(1)
-struct TGA_HEADER 
+struct TGA_HEADER
 {
 	char		idlength;
 	char		colourmaptype;
@@ -97,7 +97,7 @@ struct TGA_HEADER
 
 static TGA_HEADER TgaHeader = {0};
 
-bool IsPowerOf2(int i) 
+bool IsPowerOf2(int i)
 {
 	if ((i & -i) == i) {
 		return true;
@@ -111,7 +111,7 @@ int NearestSuperiorPow2(int i)
 	return x ? NearestSuperiorPow2(x) : i << 1;
 }
 
-bool ReleaseVolatileResources() 
+bool ReleaseVolatileResources()
 {
 	ReleaseAllFMVTexturesForDeviceReset();
 
@@ -124,13 +124,13 @@ bool ReleaseVolatileResources()
 	return true;
 }
 
-bool CreateVolatileResources() 
+bool CreateVolatileResources()
 {
 	RecreateAllFMVTexturesAfterDeviceReset();
 
 	// create dynamic vertex buffer
 	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DLVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, /*D3DFVF_LVERTEX*/0, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
@@ -138,7 +138,7 @@ bool CreateVolatileResources()
 
 	// create index buffer
 	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DIndexBuffer, NULL);
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
@@ -146,7 +146,7 @@ bool CreateVolatileResources()
 
 	// create our 2D vertex buffer
 	LastError = d3d.lpD3DDevice->CreateVertexBuffer(4 * 2000 * sizeof(ORTHOVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, /*D3DFVF_ORTHOVERTEX*/0, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoVertexBuffer, NULL);
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
@@ -154,7 +154,7 @@ bool CreateVolatileResources()
 
 	// create our 2D index buffer
 	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoIndexBuffer, NULL);
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
@@ -162,7 +162,7 @@ bool CreateVolatileResources()
 
 	// point sprite vb
 	LastError = d3d.lpD3DDevice->CreateVertexBuffer(24 * sizeof(POINTSPRITEVERTEX), D3DUSAGE_POINTS, /*D3DFVF_POINTSPRITEVERTEX*/0, D3DPOOL_MANAGED, &d3d.lpD3DPointSpriteVertexBuffer, NULL);
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
@@ -172,7 +172,7 @@ bool CreateVolatileResources()
 	POINTSPRITEVERTEX *testPS;
 
 	LastError = d3d.lpD3DPointSpriteVertexBuffer->Lock(0, 0, (void**)&testPS, 0);
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
@@ -190,7 +190,7 @@ bool CreateVolatileResources()
 	}
 
 	LastError = d3d.lpD3DPointSpriteVertexBuffer->Unlock();
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return FALSE;
@@ -205,7 +205,7 @@ bool CreateVolatileResources()
 	}
 
 	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_LVERTEX);
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
@@ -270,14 +270,14 @@ void WriteMenuTextures()
 	}
 }
 
-void ColourFillBackBuffer(int FillColour) 
+void ColourFillBackBuffer(int FillColour)
 {
 	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_TARGET, FillColour, 1.0f, 0);
 }
 
-char* GetDeviceName() 
+char* GetDeviceName()
 {
-	if (d3d.Driver[d3d.CurrentDriver].AdapterInfo.Description != NULL) 
+	if (d3d.Driver[d3d.CurrentDriver].AdapterInfo.Description != NULL)
 	{
 		return d3d.Driver[d3d.CurrentDriver].AdapterInfo.Description;
 	}
@@ -357,7 +357,7 @@ void CreateScreenShotImage()
 		bool prefixSeconds = false;
 		if (systemTime.wYear < 10) prefixSeconds = true;
 
-		fileName << "AvP_" << systemTime.wDay << "-" << systemTime.wMonth << "-" << systemTime.wYear << "_" << systemTime.wHour << "-" << systemTime.wMinute << "-"; 
+		fileName << "AvP_" << systemTime.wDay << "-" << systemTime.wMonth << "-" << systemTime.wYear << "_" << systemTime.wHour << "-" << systemTime.wMinute << "-";
 
 		if (systemTime.wSecond < 10)
 		{
@@ -380,7 +380,7 @@ void CreateScreenShotImage()
 	}
 
 	// copy front buffer screen to surface
-	if (FAILED(d3d.lpD3DDevice->GetFrontBufferData(0, frontBuffer))) 
+	if (FAILED(d3d.lpD3DDevice->GetFrontBufferData(0, frontBuffer)))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("Couldn't get a copy of the front buffer\n");
@@ -389,7 +389,7 @@ void CreateScreenShotImage()
 	}
 
 	// save surface to image file
-	if (FAILED(D3DXSaveSurfaceToFile(fileName.str().c_str(), D3DXIFF_JPG, frontBuffer, NULL, NULL))) 
+	if (FAILED(D3DXSaveSurfaceToFile(fileName.str().c_str(), D3DXIFF_JPG, frontBuffer, NULL, NULL)))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("Save Surface to file failed!!!\n");
@@ -407,8 +407,8 @@ int32_t LockTexture(LPDIRECT3DTEXTURE9 texture, void **data, uint32_t *pitch)
 
 	if (FAILED(LastError))
 	{
-		*data = NULL;
-		*pitch = NULL;
+		*data = 0;
+		*pitch = 0;
 		return -1;
 	}
 	else
@@ -429,7 +429,7 @@ int32_t UnlockTexture(LPDIRECT3DTEXTURE9 texture)
 		return 0;
 }
 
-LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex) 
+LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 {
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
 	D3DLOCKED_RECT lock;
@@ -437,7 +437,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	// default colour format
 	D3DFORMAT colourFormat = D3DFMT_R5G6B5;
 
-	if (ScreenDescriptorBlock.SDB_Depth == 16) 
+	if (ScreenDescriptorBlock.SDB_Depth == 16)
 	{
 		colourFormat = D3DFMT_R5G6B5;
 	}
@@ -454,25 +454,25 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 
 	uint32_t charWidth = 30;
 	uint32_t charHeight = 33;
-	
+
 	uint32_t numTotalChars = tex->height / charHeight;
 
 	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, NULL, colourFormat, D3DPOOL_MANAGED, &destTexture, NULL);
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
 
 	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		destTexture->Release();
 		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
 
-	if (ScreenDescriptorBlock.SDB_Depth == 16) 
+	if (ScreenDescriptorBlock.SDB_Depth == 16)
 	{
 		uint16_t *destPtr;
 		uint8_t  *srcPtr;
@@ -494,7 +494,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 			}
 		}
 
-		for (uint32_t i = 0; i < numTotalChars; i++) 
+		for (uint32_t i = 0; i < numTotalChars; i++)
 		{
 			uint32_t row = i / 15; // get row
 			uint32_t column = i % 15; // get column from remainder value
@@ -503,7 +503,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 
 			destPtr = ((uint16_t*)(((uint8_t*)lock.pBits + offset)));
 
-			for (uint32_t y = 0; y < charHeight; y++) 
+			for (uint32_t y = 0; y < charHeight; y++)
 			{
 				destPtr = ((uint16_t*)(((uint8_t*)lock.pBits + offset) + (y*lock.Pitch)));
 
@@ -517,7 +517,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 			}
 		}
 	}
-	if (ScreenDescriptorBlock.SDB_Depth == 32) 
+	if (ScreenDescriptorBlock.SDB_Depth == 32)
 	{
 		uint8_t *destPtr, *srcPtr;
 
@@ -539,7 +539,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 			}
 		}
 
-		for (uint32_t i = 0; i < numTotalChars; i++) 
+		for (uint32_t i = 0; i < numTotalChars; i++)
 		{
 			uint32_t row = i / 15; // get row
 			uint32_t column = i % 15; // get column from remainder value
@@ -548,17 +548,17 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 
 			destPtr = (((uint8_t*)lock.pBits + offset));
 
-			for (uint32_t y = 0; y < charHeight; y++) 
+			for (uint32_t y = 0; y < charHeight; y++)
 			{
 				destPtr = (((uint8_t*)lock.pBits + offset) + (y*lock.Pitch));
 
-				for (uint32_t x = 0; x < charWidth; x++) 
+				for (uint32_t x = 0; x < charWidth; x++)
 				{
-					if (srcPtr[0] == 0x00 && srcPtr[1] == 0x00 && srcPtr[2] == 0x00) 
+					if (srcPtr[0] == 0x00 && srcPtr[1] == 0x00 && srcPtr[2] == 0x00)
 					{
 						*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], 0x00);
 					}
-					else 
+					else
 					{
 						*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], 0xff);
 					}
@@ -571,7 +571,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	}
 
 	LastError = destTexture->UnlockRect(0);
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
@@ -592,13 +592,13 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t 
 	uint32_t newWidth, newHeight;
 
 	// check if passed value is already a power of 2
-	if (!IsPowerOf2(*width)) 
+	if (!IsPowerOf2(*width))
 	{
 		newWidth = NearestSuperiorPow2(*width);
 	}
 	else { newWidth = *width; }
 
-	if (!IsPowerOf2(*height)) 
+	if (!IsPowerOf2(*height))
 	{
 		newHeight = NearestSuperiorPow2(*height);
 	}
@@ -627,13 +627,13 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture2(uint32_t *width, uint32_t *height)
 	int newWidth, newHeight;
 
 	// check if passed value is already a power of 2
-	if (!IsPowerOf2(*width)) 
+	if (!IsPowerOf2(*width))
 	{
 		newWidth = NearestSuperiorPow2(*width);
 	}
 	else { newWidth = *width; }
 
-	if (!IsPowerOf2(*height)) 
+	if (!IsPowerOf2(*height))
 	{
 		newHeight = NearestSuperiorPow2(*height);
 	}
@@ -652,7 +652,7 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture2(uint32_t *width, uint32_t *height)
 	return destTexture;
 }
 
-uint32_t CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 *vertexShader, LPD3DXCONSTANTTABLE *constantTable)
+int32_t CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 *vertexShader, LPD3DXCONSTANTTABLE *constantTable)
 {
 	LPD3DXBUFFER pErrors = NULL;
 	LPD3DXBUFFER pCode = NULL;
@@ -692,7 +692,7 @@ uint32_t CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9
 	return 0;
 }
 
-uint32_t CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *pixelShader)
+int32_t CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *pixelShader)
 {
 	LPD3DXBUFFER pErrors = NULL;
 	LPD3DXBUFFER pCode = NULL;
@@ -742,7 +742,7 @@ void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
 	D3DLOCKED_RECT	lock;
 
 	LastError = texture->LockRect(0, &lock, NULL, NULL );
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return;
@@ -766,7 +766,7 @@ void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
 	}
 
 	LastError = texture->UnlockRect(0);
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return;
@@ -774,7 +774,7 @@ void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
 }
 
 // use this to make textures from non power of two images
-LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight) 
+LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight)
 {
 	if (tex == NULL)
 	{
@@ -791,13 +791,13 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, 
 	D3DCOLOR pad_colour = D3DCOLOR_ARGB(255, 255, 0, 255);
 
 	// check if passed value is already a power of 2
-	if (!IsPowerOf2(tex->width)) 
+	if (!IsPowerOf2(tex->width))
 	{
 		new_width = NearestSuperiorPow2(tex->width);
 	}
 	else { new_width = original_width; }
 
-	if (!IsPowerOf2(tex->height)) 
+	if (!IsPowerOf2(tex->height))
 	{
 		new_height = NearestSuperiorPow2(tex->height);
 	}
@@ -891,12 +891,12 @@ uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture)
 //	D3DTEXTURE destTexture = NULL;
 	D3DXIMAGE_INFO imageInfo;
 
-	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice, 
-		fileName, 
+	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice,
+		fileName,
 		D3DX_DEFAULT,			// width
 		D3DX_DEFAULT,			// height
 		1,						// mip levels
-		0,						// usage	
+		0,						// usage
 		D3DFMT_UNKNOWN,			// format
 		D3DPOOL_MANAGED,
 		D3DX_FILTER_NONE,
@@ -905,7 +905,7 @@ uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture)
 		&imageInfo,
 		NULL,
 		&texture.texture
-		);	
+		);
 
 	if (FAILED(LastError))
 	{
@@ -1104,7 +1104,7 @@ BOOL InitialiseDirect3D()
 	D3DFORMAT SelectedAdapterFormat = D3DFMT_X8R8G8B8;
 	D3DFORMAT SelectedBackbufferFormat = D3DFMT_X8R8G8B8; // back buffer format
 
-	if (WindowMode == WindowModeSubWindow) 
+	if (WindowMode == WindowModeSubWindow)
 		windowed = true;
 
 	//	Zero d3d structure
@@ -1127,7 +1127,7 @@ BOOL InitialiseDirect3D()
 	for (int i = 0; i < d3d.NumDrivers; i++)
 	{
 		LastError = d3d.lpD3D->GetAdapterIdentifier(i, /*D3DENUM_WHQL_LEVEL*/0, &d3d.Driver[i].AdapterInfo);
-		if (FAILED(LastError)) 
+		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 			return FALSE;
@@ -1147,7 +1147,7 @@ BOOL InitialiseDirect3D()
 			LogDxError(LastError, __LINE__, __FILE__);
 			return FALSE;
 		}
-		else 
+		else
 		{
 			SelectedAdapterFormat = d3ddm.Format;
 		}
@@ -1168,12 +1168,12 @@ BOOL InitialiseDirect3D()
 	{
 		d3d.Driver[thisDevice].NumModes = 0;
 
-		for (int displayFormatIndex = 0; displayFormatIndex < numDisplayFormats; displayFormatIndex++) 
+		for (int displayFormatIndex = 0; displayFormatIndex < numDisplayFormats; displayFormatIndex++)
 		{
 			// get the number of display moves available on this adapter for this particular format
 			int numAdapterModes = d3d.lpD3D->GetAdapterModeCount(thisDevice, DisplayFormats[displayFormatIndex]);
 
-			for (int modeIndex = 0; modeIndex < numAdapterModes; modeIndex++) 
+			for (int modeIndex = 0; modeIndex < numAdapterModes; modeIndex++)
 			{
 				D3DDISPLAYMODE DisplayMode;
 
@@ -1185,9 +1185,9 @@ BOOL InitialiseDirect3D()
 					continue;
 
 				int j = 0;
-				
+
 				// Check if the mode already exists (to filter out refresh rates)
-				for(; j < d3d.Driver[thisDevice].NumModes; j++ ) 
+				for(; j < d3d.Driver[thisDevice].NumModes; j++ )
 				{
 					if (( d3d.Driver[thisDevice].DisplayMode[j].Width  == DisplayMode.Width ) &&
 						( d3d.Driver[thisDevice].DisplayMode[j].Height == DisplayMode.Height) &&
@@ -1211,7 +1211,7 @@ BOOL InitialiseDirect3D()
 					int f = 0;
 
 					// Check if the mode's format already exists
-					for (int f = 0; f < numFomats; f++ ) 
+					for (int f = 0; f < numFomats; f++ )
 					{
 						if (DisplayMode.Format == d3d.Driver[thisDevice].Formats[f])
 							break;
@@ -1224,7 +1224,7 @@ BOOL InitialiseDirect3D()
 			}
 		}
 	}
-	
+
 	// check that the resolution and colour depth the user wants is supported
 	bool gotOne = false;
 	bool gotValidFormats = false;
@@ -1239,15 +1239,15 @@ BOOL InitialiseDirect3D()
 				// try find a matching depth buffer format
 				for (int d = 0; d < (sizeof(DepthFormats) / sizeof(DepthFormats[0])); d++)
 				{
-					LastError = d3d.lpD3D->CheckDeviceFormat( d3d.CurrentDriver, 
-												D3DDEVTYPE_HAL, 
-												SelectedAdapterFormat, 
-												D3DUSAGE_DEPTHSTENCIL, 
+					LastError = d3d.lpD3D->CheckDeviceFormat( d3d.CurrentDriver,
+												D3DDEVTYPE_HAL,
+												SelectedAdapterFormat,
+												D3DUSAGE_DEPTHSTENCIL,
 												D3DRTYPE_SURFACE,
 												DepthFormats[d]);
 
 					// if the format wont work with this depth buffer, try another format
-					if (FAILED(LastError)) 
+					if (FAILED(LastError))
 						continue;
 
 					LastError = d3d.lpD3D->CheckDepthStencilMatch( d3d.CurrentDriver,
@@ -1295,7 +1295,7 @@ BOOL InitialiseDirect3D()
 	d3dpp.AutoDepthStencilFormat = SelectedDepthFormat;
 	d3dpp.BackBufferFormat = SelectedBackbufferFormat;
 
-	if (windowed) 
+	if (windowed)
 	{
 		d3dpp.Windowed = TRUE;
 		d3dpp.BackBufferWidth = width;
@@ -1305,7 +1305,7 @@ BOOL InitialiseDirect3D()
 		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 		ChangeWindowsSize(d3dpp.BackBufferWidth, d3dpp.BackBufferHeight);
 	}
-	else 
+	else
 	{
 		d3dpp.Windowed = FALSE;
 		d3dpp.BackBufferWidth = width;
@@ -1341,15 +1341,15 @@ BOOL InitialiseDirect3D()
 		HRESULT Res;
 
 	Res = d3d.lpD3D->GetAdapterIdentifier(Adapter, 0, &Identifier);
- 
+
 	if (strstr(Identifier.Description, "PerfHUD") != 0)
 	{
 		adapter_to_use = Adapter;
 
 		d3d.lpD3D->CreateDevice(Adapter, D3DDEVTYPE_REF, hWndMain,
 		D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
-	} 
-	else 
+	}
+	else
 	{
 		LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWndMain,
 		D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
@@ -1373,18 +1373,18 @@ BOOL InitialiseDirect3D()
 		LastError = d3d.lpD3D->CreateDevice(defaultDevice, D3DDEVTYPE_HAL, hWndMain,
 			D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
 	}
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LastError = d3d.lpD3D->CreateDevice(defaultDevice, D3DDEVTYPE_HAL, hWndMain,
 			D3DCREATE_MIXED_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
 	}
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LastError = d3d.lpD3D->CreateDevice(defaultDevice, D3DDEVTYPE_HAL, hWndMain,
 			D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
 	}
 #endif
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		Con_PrintError("Could not create Direct3D device");
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -1400,7 +1400,7 @@ BOOL InitialiseDirect3D()
 	{
 		d3d.supportsDynamicTextures = TRUE;
 	}
-	else 
+	else
 	{
 		d3d.supportsDynamicTextures = FALSE;
 		Con_PrintError("Device does not support D3DUSAGE_DYNAMIC");
@@ -1573,7 +1573,7 @@ void SetTransforms()
 void FlipBuffers()
 {
 	LastError = d3d.lpD3DDevice->Present(NULL, NULL, NULL, NULL);
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}

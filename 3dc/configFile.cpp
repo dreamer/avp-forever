@@ -82,7 +82,7 @@ bool Config_Load()
 
 	// go through the cfg file line by line
 	while (getline(file, tempLine))
-	{	
+	{
 		if (tempLine.length() == 0) // skip empty lines
 			continue;
 
@@ -139,7 +139,7 @@ bool Config_Load()
 	}
 
 	LogString("Loaded config file");
-	
+
 	return true;
 }
 
@@ -235,7 +235,7 @@ std::string Config_GetString(const std::string &heading, const std::string &vari
 	{
 		// grab a copy of the string
 		std::string tempString = AvPConfig.find(heading)->second.find(variable)->second;
-	
+
 		// if it has quotes, remove them
 		tempString.erase(std::remove(tempString.begin(), tempString.end(),'"'), tempString.end());
 
@@ -258,7 +258,7 @@ bool Config_GetBool(const std::string &heading, const std::string &variable, boo
 	{
 		// grab a copy of the string
 		std::string tempString = AvPConfig.find(heading)->second.find(variable)->second;
-	
+
 		// if it has quotes, remove them
 		tempString.erase(std::remove(tempString.begin(), tempString.end(),'"'), tempString.end());
 

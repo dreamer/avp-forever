@@ -5,24 +5,24 @@
   etc.  This is basically all platform dependant,
   and console versions should have they're own
   versions of the functions prototyped here.
-  (win 95 source is in avp/win95/usr_io.c).  
-  -------------------------------------------------*/ 
+  (win 95 source is in avp/win95/usr_io.c).
+  -------------------------------------------------*/
 
 
 /*-------------- Patrick 21/10/96 -----------------
   Configuration structure for Win95 keyboard
   reading stuff.  Console versions can proabably
   use the same structure, but don't have to.
-    
-  NB Entries in the configuration structure 
+
+  NB Entries in the configuration structure
   correspond to request flags in the player status
-  block.  However, each request flag does not 
+  block.  However, each request flag does not
   necessarily need a config entry (eg lie down,
   which is only activated by special moves). If you
   don't want to implement a particular request flag
   functionality, leave it out of the config, and don't
   set it in ReadPlayerGameInput.
-  -------------------------------------------------*/ 
+  -------------------------------------------------*/
 #include "avp_menus.h"
 #include "stratdef.h"
 
@@ -33,19 +33,19 @@ typedef struct player_input_configuration
 	unsigned char Backward;
 	unsigned char Left;
 	unsigned char Right;
-	
+
 	unsigned char Strafe;
 	unsigned char StrafeLeft;
 	unsigned char StrafeRight;
-	
+
 	unsigned char LookUp;
 	unsigned char LookDown;
 	unsigned char CentreView;
-	
+
 	unsigned char Walk;
 	unsigned char Crouch;
 	unsigned char Jump;
-	
+
 	unsigned char Operate;
 
 	unsigned char NextWeapon;
@@ -54,7 +54,7 @@ typedef struct player_input_configuration
 	unsigned char FireSecondaryWeapon;
 
 	#ifdef __cplusplus
-	// C++ only stuff, added by DHM 17/3/98 to ease rewrite of the 
+	// C++ only stuff, added by DHM 17/3/98 to ease rewrite of the
 	// key configuration screens:
 	// (definitions are in REBITEMS.HPP)
 	unsigned char GetMethod( enum KeyConfigItems theEffect ) const;
@@ -133,7 +133,7 @@ typedef struct fixed_input_configuration
 	unsigned char Weapon9;
 	unsigned char Weapon10;
 	unsigned char PauseGame;
-		
+
 }FIXED_INPUT_CONFIGURATION;
 
 
@@ -143,7 +143,7 @@ typedef struct
 	unsigned char Backward;
 	unsigned char Left;
 	unsigned char Right;
-	
+
 	unsigned char Strafe;
 	unsigned char StrafeLeft;
 	unsigned char StrafeRight;
@@ -164,13 +164,13 @@ typedef struct
 		unsigned char NextWeapon; // Predator & Marine
 		unsigned char AlternateVision;	// Alien
 	};
-		
+
 	union
 	{
 		unsigned char PreviousWeapon; // Predator & Marine
 		unsigned char Taunt;	  	  // Alien
 	};
-	
+
 	union
 	{
 		unsigned char FlashbackWeapon; // Predator & Marine
@@ -197,13 +197,13 @@ typedef struct
 		unsigned char Alien_ShowScores;	// Alien
 	};
 	union
-	{									
+	{
 		unsigned char ZoomOut;			// Predator
 		unsigned char MarineTaunt;		// Marine
 	};
 	union
 	{
-		unsigned char GrapplingHook;    // Predator	
+		unsigned char GrapplingHook;    // Predator
 		unsigned char Marine_MessageHistory; // Marine
 	};
 	union
@@ -249,7 +249,7 @@ typedef struct
 {
 	/* joystick stuff */
 	unsigned int JoystickEnabled;
-	
+
 	unsigned int JoystickVAxisIsMovement; // else it's looking
 	unsigned int JoystickHAxisIsTurning;  // else it's sidestepping
 	unsigned int JoystickFlipVerticalAxis;
@@ -258,7 +258,7 @@ typedef struct
 	unsigned int JoystickPOVHAxisIsTurning;	 // else it's sidestepping
 	unsigned int JoystickPOVFlipVerticalAxis;
 
-	unsigned int JoystickRudderEnabled;		  
+	unsigned int JoystickRudderEnabled;
 	unsigned int JoystickRudderAxisIsTurning; // else it's sidestepping
 
 	unsigned int JoystickTrackerBallEnabled;

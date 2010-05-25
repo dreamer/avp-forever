@@ -78,7 +78,7 @@ char *GetSaveFolderPath()
 	}
 
 	strcat(saveFolder, "\\Aliens versus Predator");
-	
+
 	// then check Aliens versus Predator
 	if (CreateDirectory(saveFolder, NULL) == 0)
 	{
@@ -141,7 +141,7 @@ char *GetSaveFolderPath()
 
 FILE *avp_fopen(const char *fileName, const char *mode)
 {
-	FILE *theFile = 0;
+//	FILE *theFile = 0;
 	std::string finalPath;
 
 #ifdef _XBOX
@@ -224,7 +224,7 @@ HANDLE avp_FindFirstFile(LPCTSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData)
 #endif
 #ifdef WIN32
 	return FindFirstFile(lpFileName, lpFindFileData);
-#endif	
+#endif
 }
 
 void avp_GetCommandLineArgs(char *args, int size)
@@ -249,4 +249,4 @@ void avp_exit(int code)
 #endif
 }
 
-};
+}

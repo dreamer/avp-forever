@@ -57,7 +57,7 @@ typedef struct
 	int StartV;
 	int EndU;
 	int EndV;
-	
+
 	int MinSize;
 	int MaxSize;
 	int GrowthRate;
@@ -78,7 +78,7 @@ typedef struct
 } DECAL_DESC;
 
 
-typedef struct 
+typedef struct
 {
 	VECTORCH Position[3];
 	VECTORCH Normal[3];

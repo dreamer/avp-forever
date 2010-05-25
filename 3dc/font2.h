@@ -26,7 +26,7 @@
 #define _included_font2_h_
 
 #include <string>
-#include "stdint.h"
+#include <stdint.h>
 
 enum FONT_TYPE
 {

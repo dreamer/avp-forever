@@ -28,6 +28,8 @@ rounds fired etc etc etc*/
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 
+#include <assert.h>
+
 void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr);
 void MaintainPlayersInventory(void);
 void SetPlayerSecurityClearance(STRATEGYBLOCK *sbPtr, unsigned int securityLevel);
@@ -334,6 +336,7 @@ void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr)
 							}
 						}
 						a=SlotForThisWeapon(WEAPON_SMARTGUN);
+						assert(a != -1);
             			playerStatusPtr->WeaponSlot[a].PrimaryMagazinesRemaining=5;
             			playerStatusPtr->WeaponSlot[a].Possessed=1;
 						break;
@@ -357,6 +360,7 @@ void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr)
 							}
 						}
 						a=SlotForThisWeapon(WEAPON_FLAMETHROWER);
+						assert(a != -1);
             			playerStatusPtr->WeaponSlot[a].PrimaryMagazinesRemaining=5;
             			playerStatusPtr->WeaponSlot[a].Possessed=1;
 						break;
@@ -380,6 +384,7 @@ void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr)
 							}
 						}
 						a=SlotForThisWeapon(WEAPON_SADAR);
+						assert(a != -1);
             			playerStatusPtr->WeaponSlot[a].PrimaryMagazinesRemaining=10;
             			playerStatusPtr->WeaponSlot[a].Possessed=1;
 						break;
@@ -403,6 +408,7 @@ void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr)
 							}
 						}
 						a=SlotForThisWeapon(WEAPON_GRENADELAUNCHER);
+						assert(a != -1);
             			playerStatusPtr->WeaponSlot[a].PrimaryMagazinesRemaining=4;
 						GrenadeLauncherData.StandardMagazinesRemaining=4;
 						GrenadeLauncherData.FlareMagazinesRemaining=4;
@@ -430,6 +436,7 @@ void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr)
 							}
 						}
 						a=SlotForThisWeapon(WEAPON_MINIGUN);
+						assert(a != -1);
             			playerStatusPtr->WeaponSlot[a].PrimaryMagazinesRemaining=5;
             			playerStatusPtr->WeaponSlot[a].Possessed=1;
 						break;
@@ -449,6 +456,7 @@ void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr)
 	            			playerStatusPtr->WeaponSlot[a].Possessed=1;
 						}
 						a=SlotForThisWeapon(WEAPON_PULSERIFLE);
+						assert(a != -1);
             			//pulse rifle marines get more ammo
             			playerStatusPtr->WeaponSlot[a].PrimaryMagazinesRemaining=10;
             			playerStatusPtr->WeaponSlot[a].SecondaryRoundsRemaining=(ONE_FIXED*15);
@@ -475,6 +483,7 @@ void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr)
 							}
 						}
 						a=SlotForThisWeapon(WEAPON_FRISBEE_LAUNCHER);
+						assert(a != -1);
             			playerStatusPtr->WeaponSlot[a].PrimaryMagazinesRemaining=5;
             			playerStatusPtr->WeaponSlot[a].Possessed=1;
 						break;
@@ -499,6 +508,7 @@ void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr)
 	            			playerStatusPtr->WeaponSlot[a].Possessed=1;
 						}
 						a=SlotForThisWeapon(WEAPON_PULSERIFLE);
+						assert(a != -1);
             			playerStatusPtr->WeaponSlot[a].PrimaryMagazinesRemaining=5;
             			playerStatusPtr->WeaponSlot[a].SecondaryRoundsRemaining=(ONE_FIXED*5);
             			playerStatusPtr->WeaponSlot[a].SecondaryMagazinesRemaining=0;
@@ -517,6 +527,7 @@ void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr)
 			else
 			{
 				a=SlotForThisWeapon(WEAPON_PULSERIFLE);
+				assert(a != -1);
 				if (GRENADE_MODE) {
 	            	playerStatusPtr->WeaponSlot[a].PrimaryMagazinesRemaining=0;
 	            	playerStatusPtr->WeaponSlot[a].SecondaryRoundsRemaining=(ONE_FIXED*99);
@@ -545,7 +556,11 @@ void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr)
 			#endif
 
 			a=SlotForThisWeapon(WEAPON_BEAMCANNON);
-            playerStatusPtr->WeaponSlot[a].Possessed=0;
+			//assert(a != -1);
+			if (a != -1) 
+			{
+           		playerStatusPtr->WeaponSlot[a].Possessed = 0;
+			}
 
     		break;	
     	}
@@ -557,6 +572,7 @@ void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr)
 			if(StartingEquipment.predator_pistol)
 			{
 				a=SlotForThisWeapon(WEAPON_PRED_PISTOL);
+				assert(a != -1);
             	playerStatusPtr->WeaponSlot[a].PrimaryRoundsRemaining=ONE_FIXED;
             	playerStatusPtr->WeaponSlot[a].SecondaryRoundsRemaining=ONE_FIXED;
 				playerStatusPtr->WeaponSlot[a].Possessed=1;
@@ -564,6 +580,7 @@ void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr)
 			if(StartingEquipment.predator_num_spears)
 			{
 				a=SlotForThisWeapon(WEAPON_PRED_RIFLE);
+				assert(a != -1);
             	playerStatusPtr->WeaponSlot[a].PrimaryRoundsRemaining=(ONE_FIXED*StartingEquipment.predator_num_spears);
             	playerStatusPtr->WeaponSlot[a].PrimaryMagazinesRemaining=0;
 				playerStatusPtr->WeaponSlot[a].Possessed=1;
@@ -571,18 +588,21 @@ void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr)
 			if(StartingEquipment.predator_plasmacaster)
 			{
 				a=SlotForThisWeapon(WEAPON_PRED_SHOULDERCANNON);
+				assert(a != -1);
             	playerStatusPtr->WeaponSlot[a].PrimaryMagazinesRemaining=5;
 				playerStatusPtr->WeaponSlot[a].Possessed=1;
 			}
 			if(StartingEquipment.predator_disc)
 			{
 				a=SlotForThisWeapon(WEAPON_PRED_DISC);
+				assert(a != -1);
             	playerStatusPtr->WeaponSlot[a].PrimaryMagazinesRemaining=1;
 				playerStatusPtr->WeaponSlot[a].Possessed=1;
 			}
 			if(StartingEquipment.predator_medicomp)
 			{
 				a=SlotForThisWeapon(WEAPON_PRED_MEDICOMP);
+				assert(a != -1);
             	playerStatusPtr->WeaponSlot[a].PrimaryMagazinesRemaining=0;
             	playerStatusPtr->WeaponSlot[a].PrimaryRoundsRemaining=MEDICOMP_MAX_AMMO;
 				playerStatusPtr->WeaponSlot[a].Possessed=1;
@@ -799,6 +819,7 @@ static int AbleToPickupAmmo(enum AMMO_ID ammoID)
 				{
 					/* Quick fix... */
 					weaponSlot = SlotForThisWeapon(WEAPON_PULSERIFLE);
+					assert(weaponSlot != -1);
 					{
 						PLAYER_WEAPON_DATA *weaponPtr;
 						    
@@ -861,6 +882,7 @@ static int AbleToPickupAmmo(enum AMMO_ID ammoID)
 
 				    GLOBALASSERT(playerStatusPtr);
 					weaponSlot = SlotForThisWeapon(WEAPON_PRED_DISC);
+					assert(weaponSlot != -1);
 
 				    weaponPtr = &(playerStatusPtr->WeaponSlot[weaponSlot]);
 
@@ -895,6 +917,8 @@ static int AbleToPickupAmmo(enum AMMO_ID ammoID)
 	    /* access the extra data hanging off the strategy block */
 		PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 	    GLOBALASSERT(playerStatusPtr);
+
+		assert(weaponSlot != -1);
 	    	
 	    /* init a pointer to the weapon's data */
 	    weaponPtr = &(playerStatusPtr->WeaponSlot[weaponSlot]);
@@ -983,12 +1007,11 @@ static int AbleToPickupWeapon(enum WEAPON_ID weaponID)
 	BOOL WillSwitchToThisWeapon = FALSE;
 	int weaponSlot = -1;
     /* access the extra data hanging off the strategy block */
-	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
     GLOBALASSERT(playerStatusPtr);
 
 	LOCALASSERT(weaponID>=0);
 	LOCALASSERT(weaponID<MAX_NO_OF_WEAPON_TEMPLATES);
-
 	
 	switch(AvP.PlayerType)
 	{
@@ -1116,13 +1139,13 @@ static int AbleToPickupWeapon(enum WEAPON_ID weaponID)
 					} else {
 						weaponSlot = SlotForThisWeapon(WEAPON_MARINE_PISTOL);
 					}
+
 					break;
 				}
 				default:
 					weaponSlot = SlotForThisWeapon(weaponID);
 					break;
 			}
-			
 			break;
 		}
        	case I_Predator:
@@ -1141,8 +1164,6 @@ static int AbleToPickupWeapon(enum WEAPON_ID weaponID)
 			break;
 	}
 
-	
-	
 	/* if unable to find the correct weapon slot */
 	if (weaponSlot == -1) return 0;
 	

@@ -56,8 +56,8 @@ extern void list_chunks_in_file (List<int> * pList, HANDLE, const char * chunk_i
 //											Base_Chunk
 //											|				|
 //		Chunk_With_Children				Data Chunks
-// 			|							 				 
-// 	File_Chunk 
+// 			|
+// 	File_Chunk
 //
 
 // Most chunk classes are either derived from the Chunk
@@ -68,12 +68,12 @@ extern void list_chunks_in_file (List<int> * pList, HANDLE, const char * chunk_i
 //	class Sample_Data_Chunk : public Chunk
 //	{
 // 	public:
-//	
+//
 //	// Constructors are placed either here or may be private
 //	// The constructors for most shape data chunks are private
 //	// as only the Shape_Chunk can call them.  This is because
 //	// the shape chunk deals with the data.
-//	// 
+//	//
 //	// Any constuctor should initialise class chunk with the
 //	// correct identifier for the current chunk.
 //	//
@@ -84,7 +84,7 @@ extern void list_chunks_in_file (List<int> * pList, HANDLE, const char * chunk_i
 //	//
 //	// Any variables that are made available for the user should also
 //	// be placed here.
-//	// 
+//	//
 //	// The next three functions are vital for the io functions
 //	//
 //	virtual BOOL output_chunk (HANDLE &hand);
@@ -100,7 +100,7 @@ extern void list_chunks_in_file (List<int> * pList, HANDLE, const char * chunk_i
 //	// the same as the file data.  The data is assumed to be pre-allocated
 //	// with the size given by the size_chunk function.
 //	//
-//	} 
+//	}
 
 // A chunk with children is derived from the Chunk_With_Children class
 // as follows
@@ -116,13 +116,13 @@ extern void list_chunks_in_file (List<int> * pList, HANDLE, const char * chunk_i
 //	// Any constructor should initialise class Chunk_With_Children with
 //	// the correct identifier for the current chunk.
 //	//
-//	// The Destructor does not need to destroy child chunks as the 
+//	// The Destructor does not need to destroy child chunks as the
 //	// Chunk_With_Children destructor will automatically do this.
-//	// 
-//	// The three functions (size_chunk, output_chunk and fill_data_block) 
+//	//
+//	// The three functions (size_chunk, output_chunk and fill_data_block)
 //	// are not needed as Chunk_With_Children can deal with these - but may
 //	// be put in.
-//	// 
+//	//
 //	}
 
 //
@@ -181,7 +181,7 @@ public:
 	// this function is virtual, but will probably not be used elsewhere
 	virtual char * make_data_block_from_chunk ();
 
-	
+
 	// Selective output functions, these are similar to the normal ones
 	// and will normally call the equivalents.
 	// special chunks will have there own functions which will only respond
@@ -190,12 +190,12 @@ public:
 	virtual char * make_data_block_for_process();
 
 	virtual size_t size_chunk_for_process();
-	
-	virtual void fill_data_block_for_process(char * data_start);	
+
+	virtual void fill_data_block_for_process(char * data_start);
 
 	// these functions are virtual, but will only be used sparingly
 
-	virtual void prepare_for_output() 
+	virtual void prepare_for_output()
 	{}
 
 	virtual void post_input_processing()
@@ -204,21 +204,21 @@ public:
 	const char * identifier;
 
 	int error_code;
-	
+
 	// this allows chunks with children to trap miscellaneous chunks
 	// that shouldn't be miscellaneous !!!
 	virtual BOOL r_u_miscellaneous()
 	{ return FALSE; }
 
 	static void Register(const char* idChunk,const char* idParent ,Chunk * (* pfnCreate) (Chunk_With_Children* parent,const char* data) );
-	
+
 private:
 
 	// copy - private to stop chunks
 	// from being copied
 	Chunk (const Chunk &);
 	// ditto
-	void operator=(const Chunk &);	
+	void operator=(const Chunk &);
 
 	// pointers to siblings
 
@@ -234,7 +234,7 @@ private:
 	// identifier store
 
 	char identifier_store[9];
-	
+
 protected:
 
 	size_t chunk_size;
@@ -246,7 +246,7 @@ public :
 
 	class Chunk_With_Children * GetRootChunk(void);
 	class Chunk_With_Children const * GetRootChunk(void) const;
-	
+
 };
 
 
@@ -276,7 +276,7 @@ public:
 	// that shouldn't be miscellaneous !!!
 	virtual BOOL r_u_miscellaneous()
 	{ return TRUE; }
-	
+
 private:
 
 	char * data_store;
@@ -302,7 +302,7 @@ public:
 
 	virtual void fill_data_block (char * data_start);
 
-	virtual void prepare_for_output();	
+	virtual void prepare_for_output();
 
 	virtual void post_input_processing();
 
@@ -320,8 +320,8 @@ public:
 	// if they have a flag set
 
 	virtual size_t size_chunk_for_process();
-	
-	virtual void fill_data_block_for_process(char * data_start);	
+
+	virtual void fill_data_block_for_process(char * data_start);
 
 
 	Chunk* Chunk_With_Children::DynCreate(const char* data);
@@ -330,10 +330,10 @@ protected:
 
 	friend class Chunk;
 	friend class File_Chunk;
-	
+
 	// points to a doubly linked list
 	Chunk * children;
-	
+
 };
 
 /////////////////////////////////////////////
@@ -382,7 +382,7 @@ chunkclass::chunkclass(Chunk_With_Children * const CHUNK_WITH_CHILDREN_LOADER_PA
 		else { \
 			new Miscellaneous_Chunk (this, __data, (__data + 12), (*(int *) (__data + 8)) -12 ); \
 			__data += *(int *)(__data + 8);}}}
-		
+
 // example:
 //
 // CHUNK_WITH_CHILDREN_LOADER_INIT("GAMEMODE",Environment_Game_Mode_Chunk)
@@ -425,7 +425,7 @@ chunkclass::chunkclass(Chunk_With_Children * const CHUNK_WITH_CHILDREN_LOADER_PA
 		} \
 	} \
 	else pointer=0;}
-	
+
 
 //macros for use in fill_data_block
 
@@ -433,7 +433,7 @@ chunkclass::chunkclass(Chunk_With_Children * const CHUNK_WITH_CHILDREN_LOADER_PA
 	strncpy (data, identifier, 8); \
 	data += 8; \
 	*(int *) data = chunk_size; \
-	data += 4; 
+	data += 4;
 
 
 //write variable of type 'type'
@@ -445,7 +445,7 @@ chunkclass::chunkclass(Chunk_With_Children * const CHUNK_WITH_CHILDREN_LOADER_PA
 #define CHUNK_FILL_STRING(var) \
 	if(var) strcpy(data,var); \
 	else *data=0; \
-	data+=(strlen(data)+4)&~3; 
+	data+=(strlen(data)+4)&~3;
 
 #define CHUNK_FILL_ARRAY(length,pointer,type){\
 	CHUNK_FILL(length,int) \
@@ -458,7 +458,7 @@ chunkclass::chunkclass(Chunk_With_Children * const CHUNK_WITH_CHILDREN_LOADER_PA
 //macros for use in size_chunk
 
 #define CHUNK_SIZE_START \
-	chunk_size = 12 
+	chunk_size = 12
 
 
 //size of variable of type 'type'
@@ -479,12 +479,12 @@ chunkclass::chunkclass(Chunk_With_Children * const CHUNK_WITH_CHILDREN_LOADER_PA
 
 class GodFather_Chunk : public Chunk_With_Children
 {
-public:	
+public:
 
 	GodFather_Chunk ()
 	: Chunk_With_Children (NULL, "REBINFF2")
 	{}
-	
+
 	GodFather_Chunk (char * buffer, size_t size);
 };
 
@@ -568,7 +568,7 @@ chunk_class::chunk_class(Chunk_With_Children * const parent,char const * __data,
 		__data += *(int *)(__data + 8);\
 	}\
 }
-	
+
 
 //macros for forcing inclusion of chunk files from a library
 #define FORCE_CHUNK_INCLUDE_START //not needed anymore
@@ -613,3 +613,4 @@ FORCE_CHUNK_INCLUDE_END
 */
 
 #endif // !included
+

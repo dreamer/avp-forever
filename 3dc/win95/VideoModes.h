@@ -7,10 +7,10 @@ typedef struct
 	int  Height;
 	int  ColourDepth;
 	int	 SafeZoneOffset;
-	
+
 } DEVICEANDVIDEOMODE;
 
-#if 0 
+#if 0
 
 #define MAX_DEVICES 4
 #define MAX_VIDEOMODES 100
@@ -44,7 +44,7 @@ typedef struct
 	int  Width;
 	int  Height;
 	int  ColourDepth;
-	
+
 } DEVICEANDVIDEOMODE;
 
 extern DEVICEANDVIDEOMODESDESC DeviceDescriptions[MAX_DEVICES];

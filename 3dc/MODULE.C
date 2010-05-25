@@ -1,13 +1,13 @@
 /*
-	Modules - AvP is an entirely module-based engine. Modules are defined as regular orthogonal boxes within the 
-	gameworld. Modules contain the polygons which make up the rooms & corridors - module size is defined by the 
-	extents of this shape. Modules must not overlap. Nothing can exist in AvP unless it is within a module. 
-	Everything in an AvP environment must be split up into modules. A module is a cubical volume of space 
-	defined by the polygons within it. This volume is always aligned to the x,y,z axes and must not overlap any 
-	other module. A module equates to an object in 3dMax. Modules are at the core of how the AvP engine works. 
-	Primarily (as far as an artist is concerned) they are important in defining how much of the environment can 
-	be 'seen' at any one time. In the following plan view, from where the stick man is, the shaded yellow modules 
-	are the ones that are visible.  
+	Modules - AvP is an entirely module-based engine. Modules are defined as regular orthogonal boxes within the
+	gameworld. Modules contain the polygons which make up the rooms & corridors - module size is defined by the
+	extents of this shape. Modules must not overlap. Nothing can exist in AvP unless it is within a module.
+	Everything in an AvP environment must be split up into modules. A module is a cubical volume of space
+	defined by the polygons within it. This volume is always aligned to the x,y,z axes and must not overlap any
+	other module. A module equates to an object in 3dMax. Modules are at the core of how the AvP engine works.
+	Primarily (as far as an artist is concerned) they are important in defining how much of the environment can
+	be 'seen' at any one time. In the following plan view, from where the stick man is, the shaded yellow modules
+	are the ones that are visible.
 */
 
 #include "3dc.h"
@@ -47,21 +47,21 @@ void AllNewModuleHandler(void)
 		SCENEMODULE *smptr;
 		smptr = Global_ModulePtr[Global_Scene];
 		Global_ModuleArrayPtr = smptr->sm_marray;
-	
+
 		for (i = 0; i < ModuleArraySize; i++)
 		{
 			ModuleCurrVisArray[i] = 0;
 		}
 	}
-	
+
 	/* handle dynamic module objects */
 	{
 		int numberOfObjects = NumActiveBlocks;
-		
+
 	   	while (numberOfObjects--)
 		{
 			DISPLAYBLOCK* objectPtr = ActiveBlockList[numberOfObjects];
-			
+
 			if (objectPtr->ObFlags3 & ObFlag3_DynamicModuleObject)
 			{
 				STRATEGYBLOCK *sbPtr = objectPtr->ObStrategyBlock;
@@ -71,13 +71,13 @@ void AllNewModuleHandler(void)
 				if (ModuleIsPhysical(sbPtr->containingModule))
 				{
 					ModuleCurrVisArray[sbPtr->containingModule->m_index] = 1;
-					if (sbPtr->containingModule->m_vmptr) 
+					if (sbPtr->containingModule->m_vmptr)
 						FindVisibleModules(sbPtr->containingModule->m_vmptr, 1);
 				}
 			}
 		}
 	}
-	
+
 	/*If this is an network game , and this machine is the ai server , then need to check if
 	  there are any aliens near to other players*/
 	if (AvP.Network != I_No_Network && AvP.NetworkAIServer)
@@ -89,7 +89,7 @@ void AllNewModuleHandler(void)
 			STRATEGYBLOCK *playerSbPtr = ActiveStBlockList[sbIndex];
 			NETGHOSTDATABLOCK *ghostData;
 
-			if (playerSbPtr->I_SBtype != I_BehaviourNetGhost) 
+			if (playerSbPtr->I_SBtype != I_BehaviourNetGhost)
 				continue;
 
 			ghostData = (NETGHOSTDATABLOCK *)playerSbPtr->SBdataptr;
@@ -100,7 +100,7 @@ void AllNewModuleHandler(void)
 			{
 				int sbIndex2;
 				//found one of the players
-				if (!playerSbPtr->containingModule) 
+				if (!playerSbPtr->containingModule)
 					continue;
 
 				/*now search through the strategy blocks , to see if any aliens are
@@ -127,15 +127,15 @@ void AllNewModuleHandler(void)
 						break;
 					}
 				}
-			}	
+			}
 		}
 	}
-	
+
 	/* handle player visibilities */
 	{
 		extern MODULE * playerPherModule;
 		playerPherModule = (ModuleFromPosition(&(Global_VDB_Ptr->VDB_World), playerPherModule));
-	
+
 		if (!playerPherModule)
 		{
 			playerPherModule = (ModuleFromPosition(&(Player->ObWorld), playerPherModule));
@@ -144,7 +144,7 @@ void AllNewModuleHandler(void)
 		if (playerPherModule)
 		{
 			ModuleCurrVisArray[playerPherModule->m_index] = 2;
-			if (playerPherModule->m_vmptr) 
+			if (playerPherModule->m_vmptr)
 				FindVisibleModules(playerPherModule->m_vmptr, 2);
 		}
 	}
@@ -174,7 +174,7 @@ void AllNewModuleHandler(void)
 	/* update active block list */
 	{
 		int i;
-	
+
 		for(i = 0; i < ModuleArraySize; i++)
 		{
 			MODULE *mptr = Global_ModuleArrayPtr[i];
@@ -236,18 +236,18 @@ void FindVisibleModules(VMODULE *vptr,int flag)
 int ThisObjectIsInAModuleVisibleFromCurrentlyVisibleModules(STRATEGYBLOCK *sbPtr)
 {
 	VMODULE *vPtr;
-	
+
 	GLOBALASSERT(sbPtr);
 	GLOBALASSERT(sbPtr->containingModule);
 
 	vPtr = sbPtr->containingModule->m_vmptr;
 	GLOBALASSERT(vPtr);
-	
+
 	if(ModuleCurrVisArray[sbPtr->containingModule->m_index] == 2)
 	{
 		return 1;
 	}
-	
+
 	while(vPtr->vmod_type != vmtype_term)
 	{
 		MODULE *mptr = NULL;
@@ -298,7 +298,7 @@ int ThisObjectIsInAModuleVisibleFromCurrentlyVisibleModules(STRATEGYBLOCK *sbPtr
 
 void ModuleFunctions(MODULE *mptr, MFUNCTION mf)
 {
-	switch(mf) 
+	switch(mf)
 	{
 		case mfun_null:
 			break;
@@ -424,7 +424,7 @@ void AllocateModuleObject(MODULE *mptr)
 			extern MATRIXCH IdentityMatrix;
 			dptr->ObMat = IdentityMatrix;
 		}
-		
+
 
 		/*
 
@@ -508,7 +508,7 @@ void AllocateModuleObject(MODULE *mptr)
 				GLOBALASSERT(sanimbhv->bhvr_type == I_BehaviourSimpleAnimation);
 				GLOBALASSERT (dptr == sbptr->SBdptr);
 
-				if(!dptr->ObTxAnimCtrlBlks)	{ 
+				if(!dptr->ObTxAnimCtrlBlks)	{
 					dptr->ObTxAnimCtrlBlks = sanimbhv->tacbSimple;
 				}
 
@@ -642,21 +642,19 @@ int GetModuleVisArrays(void)
 	m_array_ptr = sm_ptr->sm_marray;
 	index       = smallint;
 
-	while(*m_array_ptr) {
-
+	while (*m_array_ptr)
+	{
 		m_ptr = *m_array_ptr++;
-		if(m_ptr->m_index > index) index = m_ptr->m_index;
-
+		if (m_ptr->m_index > index)
+            index = m_ptr->m_index;
 	}
 
 	ModuleArraySize = index + 1;
 
+	ModuleCurrVisArray = (char*)AllocateMem(ModuleArraySize);
 
-	ModuleCurrVisArray  = AllocateMem(ModuleArraySize);
-
-	if(ModuleCurrVisArray)
+	if (ModuleCurrVisArray)
 	{
-
 		for(i = 0; i < ModuleArraySize; i++)
 		{
 
@@ -668,14 +666,10 @@ int GetModuleVisArrays(void)
 		#endif
 
 		return TRUE;
-
 	}
 
 	else return FALSE;
-
 }
-
-
 
 
 #define ppma_print FALSE
@@ -690,25 +684,21 @@ void PreprocessModuleArray(MODULE **m_array_ptr)
 	MODULE *m_ptr;
 	int index;
 
-
 	#if ppma_print
 	textprint("PreprocessModuleArray %u\n", m_array_ptr);
 	#endif
 
-
 	index = 0;
 
-	while(*m_array) {
-
+	while(*m_array)
+	{
 		/* Get the module pointer */
 
 		m_ptr = *m_array;
 
-
 		/* Assign the module an index */
 
 		m_ptr->m_index = index++;
-
 
 		#if ppma_print
 		textprint("\nModule %u, ", m_ptr);
@@ -719,44 +709,39 @@ void PreprocessModuleArray(MODULE **m_array_ptr)
 		textprint(")\n");
 		#endif
 
-
 		/* Convert module references from names to pointers */
 
-		if(!(m_ptr->m_flags & m_flag_gotptrs)) {
-
+		if (!(m_ptr->m_flags & m_flag_gotptrs))
+		{
 			#if 0
 			/* Vertical Pointer */
 
 			ConvertModuleNameToPointer(&m_ptr->m_vptr, m_array_ptr);
 
-
 			/* Extent Pointer */
 
 			ConvertModuleNameToPointer(&m_ptr->m_ext, m_array_ptr);
 
-
 			/* Function Pointer */
 
 			ConvertModuleNameToPointer(&m_ptr->m_funref, m_array_ptr);
-
 
 			// Hack by John to make the m_link pointers work
 
 			if (m_ptr->m_link_ptrs)
 			{
 				MREF * m_link_ptr = m_ptr->m_link_ptrs;
-				
+
 				while (m_link_ptr->mref_ptr)
 				{
 					ConvertModuleNameToPointer(m_link_ptr++, m_array_ptr);
 				}
-
 			}
 			 #endif
 			/* VMODULE Array */
 
-			if(m_ptr->m_vmptr) {
-
+			if (m_ptr->m_vmptr)
+			{
 				/* Convert VMODIDATA names to pointers */
 
 				PreprocessVMODIDATA(m_ptr->m_vmptr);
@@ -770,33 +755,26 @@ void PreprocessModuleArray(MODULE **m_array_ptr)
 					ConvertModuleNameToPointer(&v_ptr->vmod_mref, m_array_ptr);
 
 					v_ptr++;
-
 				}
 				*/
 			}
 
-
 			/* Tell the module that its names are now pointers */
 
 			m_ptr->m_flags |= m_flag_gotptrs;
-
 		}
 
-
 		/* Calculate module extents */
-	
+
 		//I'll set the extents and world position in the loaders -Richard.
 		//GetModuleMapData(m_ptr);
-
 
 		/* Next module array entry */
 
 		m_array++;
-
 	}
 
 	/*WaitForReturn();*/
-
 }
 
 
@@ -1043,7 +1021,7 @@ void PrintName(char *name)
 
 int IsModuleVisibleFromModule(MODULE *source, MODULE *target) {
 
-	VMODULE *vptr;	
+	VMODULE *vptr;
 	MODULE *mptr;
 	int gotit;
 

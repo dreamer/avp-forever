@@ -13,7 +13,7 @@ typedef struct track_sound
 	unsigned long outer_range;
 	int max_volume;
 	int	pitch;
-	
+
 	struct loaded_sound const * sound_loaded;
 	int activ_no;
 	int time_left;
@@ -27,26 +27,26 @@ typedef struct track_section_data
 {
 	QUAT quat_start;	//orientations of object relative to pivot
 	QUAT quat_end;
-	
+
 	VECTORCH pivot_start;		//pivot start pos in world space
-	VECTORCH pivot_travel;		
+	VECTORCH pivot_travel;
 
 	VECTORCH object_offset; //from pivot
-	
+
 	int time_for_section; //time take for this section in fixed point seconds
-	
+
 	//preprocessed stuff
 	int omega;
 	int oneoversinomega;
-	int oneovertime;	
-	
+	int oneovertime;
+
 
 
 	/* KJL 12:25:51 24/03/98 - quaternions added to handle spining of quaternions over track */
 	QUAT quat_prev;
 	QUAT quat_start_control;
 	QUAT quat_end_control;
-	
+
 	/* KJL 12:25:37 24/03/98 - data points used to create a smooth curve from the 3d keyframes */
 	VECTORCH pivot_0;
 	VECTORCH pivot_1;
@@ -58,7 +58,7 @@ typedef struct track_section_data
 typedef struct track_controller
 {
 	STRATEGYBLOCK* sbptr;
-	
+
 	int num_sections;
 	TRACK_SECTION_DATA* sections;
 
@@ -100,7 +100,7 @@ void Deallocate_Track(TRACK_CONTROLLER* tc);
 
 /*the track_sound stuff doesn't actually refer to the track directly , so
 it can be used by other things*/
-void Start_Track_Sound(TRACK_SOUND* ts,VECTORCH * location); 
+void Start_Track_Sound(TRACK_SOUND* ts,VECTORCH * location);
 void Stop_Track_Sound(TRACK_SOUND* ts);
 void Update_Track_Sound(TRACK_SOUND* ts,VECTORCH * location);
 void Deallocate_Track_Sound(TRACK_SOUND* ts);

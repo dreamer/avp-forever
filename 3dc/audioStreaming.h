@@ -65,7 +65,7 @@ private:
 	bool		isPaused;
 	uint8_t		*buffers;
 	IXAudio2SourceVoice *pSourceVoice;
-	
+
 public:
 	AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers);
 	int32_t  Stop();
@@ -148,7 +148,7 @@ private:
 	uint8_t		*buffers;
 	std::vector<DWORD> PacketStatus;
 	LPDIRECTSOUNDSTREAM	dsStreamBuffer;
-	
+
 public:
 	AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers);
 	int32_t  Stop();

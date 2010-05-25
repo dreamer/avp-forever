@@ -72,11 +72,11 @@ public:
 	BOOL inc_v_no();
 
 	BOOL same_and_updated(Object_Chunk &);
-	
+
 	BOOL assoc_with_shape_no(File_Chunk *);
-	
+
 	void update_my_chunkobject (ChunkObject &);
-	
+
 	// functions for the locking functionality
 
 	BOOL file_equals (HANDLE &);
@@ -86,12 +86,12 @@ public:
 	virtual void post_input_processing();
 
 	VModule_Array_Chunk * get_vmod_chunk();
-	
+
 	// destroy object needs to go through all the other
 	// objects and delete itself from the VMAC
-	
+
 	void destroy(File_Chunk *);
-	
+
 	ObjectID CalculateID();
 
 	//program_object_index can be set by the program using the chunks , so you can find where
@@ -100,7 +100,7 @@ public:
 	int program_object_index;
 
 private:
-	
+
 	friend class File_Chunk;
 	friend class Object_Header_Chunk;
 
@@ -109,12 +109,12 @@ private:
 };
 
 ///////////////////////////////////////////////
-	
+
 class Object_Header_Chunk : public Chunk
 {
 public:
 	// constructor from buffer
-	Object_Header_Chunk (Chunk_With_Children * parent, const char * pdata, size_t psize);	
+	Object_Header_Chunk (Chunk_With_Children * parent, const char * pdata, size_t psize);
 	virtual size_t size_chunk ();
 
 	virtual BOOL output_chunk (HANDLE &);
@@ -140,7 +140,7 @@ private:
 	friend class File_Chunk;
 
 	friend class Environment;
-	
+
 	char lock_user[17];
 	int version_no;
 
@@ -203,7 +203,7 @@ public:
 
 	const size_t data_size;
 	const char * const data;
-	
+
 private:
 
 	char * data_store;
@@ -226,11 +226,11 @@ public:
 private:
 
 	friend class Object_Chunk;
-	friend class AI_Module_Master_Chunk; 
-	friend class AI_Module_Slave_Chunk; 
+	friend class AI_Module_Master_Chunk;
+	friend class AI_Module_Slave_Chunk;
 	// constructor from buffer
 	Object_Module_Data_Chunk (Object_Chunk * parent,const char *, size_t);
-	
+
 };
 
 ///////////////////////////////////////////////
@@ -238,15 +238,15 @@ private:
 class VModule_Array_Chunk : public Chunk
 {
 public:
-	
+
 	VModule_Array_Chunk (Object_Module_Data_Chunk * parent, VMod_Arr_Item * vma, int num_in_vma);
 	VModule_Array_Chunk (Chunk_With_Children* parent, const char * vmdata, size_t vmsize);
 	~VModule_Array_Chunk ();
-	
+
 	int num_array_items;
-	
+
 	VMod_Arr_Item * vmod_array;
-	
+
 	virtual void fill_data_block (char *);
 	virtual size_t size_chunk ();
 
@@ -274,13 +274,13 @@ public:
 	virtual void fill_data_block (char *);
 	virtual size_t size_chunk ();
 
-	
+
 private:
 
 	friend class Object_Module_Data_Chunk;
-	
+
 	Adjacent_Modules_Chunk(Object_Module_Data_Chunk * parent, const char * data, size_t size);
-	
+
 };
 #endif
 
@@ -303,13 +303,13 @@ public:
 	virtual void fill_data_block (char *);
 	virtual size_t size_chunk ();
 
-	
+
 private:
 
 	friend class Object_Module_Data_Chunk;
-	
 
-	
+
+
 };
 
 
@@ -320,7 +320,7 @@ class Module_Flag_Chunk : public Chunk
 public:
 	Module_Flag_Chunk(Object_Module_Data_Chunk * parent);
 	Module_Flag_Chunk(Chunk_With_Children* parent, const char * data, size_t );
-	
+
 	virtual void fill_data_block(char*);
 	virtual size_t size_chunk()
 	{return chunk_size=20;}
@@ -329,9 +329,9 @@ public:
 	int spare;
 private:
 	friend class Object_Module_Data_Chunk;
-	
 
-	
+
+
 };
 ///////////////////////////////////////////////
 
@@ -340,7 +340,7 @@ class Module_Zone_Chunk : public Chunk
 public:
 	Module_Zone_Chunk(Object_Module_Data_Chunk * parent);
 	Module_Zone_Chunk(Chunk_With_Children* parent, const char * data, size_t );
-	
+
 	virtual void fill_data_block(char*);
 	virtual size_t size_chunk()
 	{return chunk_size=20;}
@@ -358,17 +358,17 @@ class Module_Acoustics_Chunk : public Chunk
 public:
 	Module_Acoustics_Chunk(Object_Module_Data_Chunk * parent);
 	Module_Acoustics_Chunk(Chunk_With_Children* parent, const char * data, size_t );
-	
+
 	virtual void fill_data_block(char*);
 	virtual size_t size_chunk()
 	{return chunk_size=24;}
 
-	int env_index; 
+	int env_index;
 	float reverb;
 	int spare;
 private:
 	friend class Object_Module_Data_Chunk;
-	
+
 
 
 };
@@ -388,7 +388,7 @@ private:
 
 	friend class Object_Chunk;
 
-	
+
 
 };
 
@@ -403,10 +403,10 @@ struct ChunkTrackSection
 
 	ChunkQuat quat_start;
 	ChunkQuat quat_end;
-	
+
 	ChunkVectorInt pivot_start;
 	ChunkVectorInt pivot_end;
-	
+
 	ChunkVectorInt object_offset;
 
 	int time_for_section;
@@ -430,49 +430,49 @@ public:
 	Object_Track_Chunk2 (Chunk_With_Children * parent,const char *, size_t);
 
 	~Object_Track_Chunk2();
-	
+
 	int num_sections;
 	ChunkTrackSection * sections;
 
 	int flags;
 	int timer_start;
- 
+
 	virtual void fill_data_block (char *);
 	virtual size_t size_chunk ();
-	
+
 private:
 
 	friend class Object_Chunk;
-	
-	
+
+
 };
 
 #define TrackSoundFlag_Loop 0x00000001
 class Object_Track_Sound_Chunk : public Chunk
 {
 	public :
-	
+
 	Object_Track_Sound_Chunk(Chunk_With_Children* parent);
 	Object_Track_Sound_Chunk (Chunk_With_Children * const parent,const char *, size_t const);
 	~Object_Track_Sound_Chunk();
-	
+
 	size_t size_chunk ();
 	void fill_data_block (char * data_start);
-	
+
 	char* wav_name;
 	unsigned long inner_range;
 	unsigned long outer_range;
 	int max_volume;
 	int	pitch;
 	int flags;
-	int index;	
+	int index;
 
 };
 
 ///////////////////////////////////////////////
 
 
-struct AltObjectLocation 
+struct AltObjectLocation
 {
 	ChunkVectorInt position;
 	ChunkQuat orientation;
@@ -485,13 +485,13 @@ struct AltObjectLocation
 class Object_Alternate_Locations_Chunk : public Chunk
 {
 public :
-	Object_Alternate_Locations_Chunk(Chunk_With_Children* parent,const char* data, size_t);	
+	Object_Alternate_Locations_Chunk(Chunk_With_Children* parent,const char* data, size_t);
 	Object_Alternate_Locations_Chunk(Chunk_With_Children* parent);
 	~Object_Alternate_Locations_Chunk();
 
 	void fill_data_block(char* data);
 	size_t size_chunk();
-	
+
 	int num_locations;
 	AltObjectLocation* locations;
 

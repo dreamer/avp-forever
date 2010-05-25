@@ -36,7 +36,7 @@ enum Console_Type
 {
 	CT_PSX=0,
 	CT_Saturn=1,
-	
+
 	// IMPORTANT
 	// since enums are not guaranteed to assume any particular
 	// storage class, code compiled on different compilers or
@@ -71,11 +71,11 @@ public:
 	// I want the external file load to be as transparent as possible
 	// i.e. we have a shape which is loaded as usaul - it should then
 	// load the shape which is its main copy and copy itself over !!!
-	
-	// Problems will be encountered with the texturing data though - 
+
+	// Problems will be encountered with the texturing data though -
 	// but this stuff should onyl be worked with with a hardware
 	// accelerator - so that should solve many of the problems
-	
+
 	// destructor
 	virtual ~Shape_Chunk();
 
@@ -94,7 +94,7 @@ public:
 	// destroy all auxiliary chunks
 	// that is all except the header and the chunkshape
 	void destroy_auxiliary_chunks();
-	
+
 	// functions for the locking functionality
 
 	BOOL file_equals (HANDLE &);
@@ -104,19 +104,19 @@ public:
 	virtual void post_input_processing();
 
 	Console_Shape_Chunk* get_console_shape_data(Console_Type);
-	
+
 	BOOL inc_v_no();
 
 	BOOL same_and_updated(Shape_Chunk &);
-	
+
 	BOOL assoc_with_object_list(File_Chunk *);
-	
+
 	BOOL update_my_chunkshape (ChunkShape & cshp);
 
 	// THIS IS A HACK, DO NOT USE AFTER AVP AUGUST DEMO
-	
+
 	BOOL has_door;
-	
+
 private:
 
 	friend class Object_Chunk;
@@ -166,11 +166,11 @@ public:
 	const char * get_shape_name();
 
 	Console_Shape_Chunk* get_console_shape_data(Console_Type);
-	
+
 	// Number stored for list_pos when loading
-	
+
 	int list_pos_number;
-	
+
 private:
 
 	friend class Shape_Vertex_Chunk;
@@ -193,7 +193,7 @@ class Shape_Sub_Shape_Header_Chunk : public Chunk
 public:
 	// constructor from buffer
 	Shape_Sub_Shape_Header_Chunk (Shape_Sub_Shape_Chunk * parent, const char * pdata, size_t psize);
-	
+
 	~Shape_Sub_Shape_Header_Chunk();
 
 	virtual size_t size_chunk ();
@@ -248,11 +248,11 @@ class Anim_Shape_Sequence_Chunk :public Chunk_With_Children
 	Anim_Shape_Sequence_Chunk(Chunk_With_Children* const parent,const char*,size_t const);
 	Anim_Shape_Sequence_Chunk(Chunk_With_Children* const parent,int sequencenum,const char* name);
 	Anim_Shape_Sequence_Chunk(Chunk_With_Children* const parent,ChunkAnimSequence const* cas);
-	
+
 	virtual void post_input_processing();
 
 	const ChunkAnimSequence sequence_data;
-	
+
 	void update_my_sequencedata (ChunkAnimSequence &);
 
 	void set_sequence_flags(int flags);
@@ -282,7 +282,7 @@ class Anim_Shape_Sequence_Data_Chunk:public Chunk
 	char* name;
 
 	virtual size_t size_chunk();
-	
+
 	virtual void fill_data_block(char* data_start);
 };
 
@@ -300,17 +300,17 @@ class Anim_Shape_Frame_Data_Chunk : public Chunk
 	public:
 	Anim_Shape_Frame_Data_Chunk(Anim_Shape_Frame_Chunk* const parent,const char*,size_t const);
 	Anim_Shape_Frame_Data_Chunk(Anim_Shape_Frame_Chunk* const parent,ChunkAnimFrame* caf,int frameno);
-	
+
 	private:
 	friend class Anim_Shape_Frame_Chunk;
 	friend class Anim_Shape_Sequence_Chunk;
-	
+
 	int FrameNum;
 	int flags,num_interp_frames,pad3,pad4;
 	char* name;//name of asc file for frame
 
 	virtual size_t size_chunk();
-	
+
 	virtual void fill_data_block(char* data_start);
 };
 ///////////////////////////////////////////////
@@ -321,7 +321,7 @@ class Anim_Shape_Alternate_Texturing_Chunk : public Chunk_With_Children
 	Anim_Shape_Alternate_Texturing_Chunk(Chunk_With_Children* const parent)
 	:Chunk_With_Children(parent,"ASALTTEX")
 	{}
-	
+
 	Shape_Sub_Shape_Chunk* CreateNewSubShape(const char* name);
 };
 ///////////////////////////////////////////////
@@ -332,10 +332,10 @@ class Poly_Not_In_Bounding_Box_Chunk : public Chunk
 	Poly_Not_In_Bounding_Box_Chunk(Chunk_With_Children* const parent);
 
 	virtual size_t size_chunk();
-	
+
 	virtual void fill_data_block(char* data_start);
-	
-	
+
+
 	List<int> poly_no;
 	int pad1,pad2;
 };
@@ -349,13 +349,13 @@ class Console_Type_Chunk: public Chunk
 	{}
 	Console_Type_Chunk(Chunk_With_Children* const parent,Console_Type ct)
 	:Chunk(parent,"CONSTYPE"),console(ct)
-	{}	
-	
+	{}
+
 	Console_Type console;
-	
+
 	virtual size_t size_chunk()
 	{return chunk_size=16;}
-	
+
 	virtual void fill_data_block(char * data_start);
 };
 ///////////////////////////////////////////////
@@ -364,7 +364,7 @@ class Console_Shape_Chunk : public Chunk_With_Children
 	public :
 	Console_Shape_Chunk(Chunk_With_Children* const  parent,const char*,size_t);
 	Console_Shape_Chunk(Chunk_With_Children* const  parent,Console_Type ct);
-	
+
 	const ChunkShape shape_data;
 
 	void generate_console_chunkshape();//needs parent's chunkshape to be set up first
@@ -405,7 +405,7 @@ private:
 	friend class Shape_Sub_Shape_Chunk;
 	friend class Anim_Shape_Frame_Chunk;
 
-	
+
 	// constructor from data
 	Shape_Vertex_Chunk (Shape_Sub_Shape_Chunk * parent, int n_verts)
 	: Chunk (parent, "SHPRAWVT"),
@@ -416,7 +416,7 @@ private:
 	: Chunk (parent, "SHPRAWVT"),
 	vert_data (parent->shape_data_store->v_list), num_verts (n_verts)
 	{}
-	
+
 	Shape_Vertex_Chunk (Anim_Shape_Frame_Chunk * parent,ChunkVectorInt* v_list ,int n_verts)
 	: Chunk (parent, "SHPRAWVT"),
 	vert_data (v_list), num_verts (n_verts)
@@ -526,7 +526,7 @@ public:
 	Shape_Polygon_Chunk (Shape_Sub_Shape_Chunk * parent, const char * pdata, size_t psize);
 	Shape_Polygon_Chunk (Shape_Chunk * parent, const char * pdata, size_t psize);
 	Shape_Polygon_Chunk (Console_Shape_Chunk * parent, const char * pdata, size_t psize);
-	
+
 	virtual size_t size_chunk ()
 	{
 		return (chunk_size = (12 + (num_polys*36)));// 36 bytes per vertex
@@ -558,7 +558,7 @@ private:
 	: Chunk (parent, "SHPPOLYS"),
 	poly_data (parent->shape_data_store->poly_list), num_polys (n_polys)
 	{}
-	
+
 	Shape_Polygon_Chunk (Console_Shape_Chunk * parent, int n_polys)
 	: Chunk (parent, "SHPPOLYS"),
 	poly_data (parent->shape_data_store->poly_list), num_polys (n_polys)
@@ -573,7 +573,7 @@ class Shape_Header_Chunk : public Chunk
 public:
 	// constructor from buffer
 	Shape_Header_Chunk (Shape_Chunk * parent, const char * pdata, size_t psize);
-	
+
 	~Shape_Header_Chunk();
 
 	virtual size_t size_chunk ();
@@ -634,7 +634,7 @@ private:
 
 	friend class Shape_Chunk;
 	friend class Shape_Sub_Shape_Chunk;
-	
+
 
 	// constructor from data
 	Shape_Centre_Chunk (Chunk_With_Children * parent)
@@ -668,7 +668,7 @@ private:
 	friend class Shape_Chunk;
 	friend class Shape_Sub_Shape_Chunk;
 	friend class Console_Shape_Chunk;
-	
+
 
 	// constructor from data
 	Shape_UV_Coord_Chunk (Shape_Sub_Shape_Chunk * parent, int n_uvs)
@@ -737,17 +737,17 @@ public:
 
 	Shape_Merge_Data_Chunk (Shape_Sub_Shape_Chunk * parent, int *, int);
 	Shape_Merge_Data_Chunk (Shape_Chunk * parent, int *, int);
-	
+
 	~Shape_Merge_Data_Chunk ();
 
 	int * merge_data;
 	int num_polys;
-	
+
 	size_t size_chunk()
 	{
 		return chunk_size = 12 + num_polys*4;
 	}
-	
+
 	void fill_data_block (char *);
 
 	Shape_Merge_Data_Chunk (Shape_Sub_Shape_Chunk * parent, const char *, size_t);
@@ -764,7 +764,7 @@ public:
 
 	Shape_External_File_Chunk (Chunk_With_Children * parent, const char * fname);
 	Shape_External_File_Chunk (Chunk_With_Children * const parent, const char *, size_t const);
-	
+
 	void post_input_processing();
 
 	//gets name from shape_external_object_name_chunk if it has one
@@ -775,7 +775,7 @@ private:
 	friend class Shape_Chunk;
 	friend class Shape_Sub_Shape_Chunk;
 
-	//Used to avoid updating external shapes in files that have been loaded 
+	//Used to avoid updating external shapes in files that have been loaded
 	//by Shape_External_File_Chunk::post_input_processing
 	static BOOL UpdatingExternalShape;
 
@@ -794,23 +794,23 @@ public:
 	~Shape_External_Filename_Chunk ();
 
 	// Here is stored the shape name, rescale value and version number.
-	
+
 	char * file_name;
 
 	double rescale;
-	
+
 	int version_no;
 
 	size_t size_chunk()
 	{
 		return chunk_size = 12 + 8 + 4 + strlen(file_name) + (4-strlen(file_name)%4);
 	}
-	
+
 	void fill_data_block (char *);
 
-	
+
 private:
-	
+
 	friend class Shape_External_File_Chunk;
 	friend class Sprite_Header_Chunk;
 
@@ -836,13 +836,13 @@ public :
 	{
 		return chunk_size = 12 +4+ strlen(object_name) + (4-strlen(object_name)%4);
 	}
-	
+
 	void post_input_processing();
-	
+
 	void fill_data_block (char *);
 
 private:
-	
+
 	friend class Shape_External_File_Chunk;
 
 };
@@ -855,15 +855,15 @@ public:
 
 	Shape_Morphing_Data_Chunk (Shape_Chunk * parent)
 	: Chunk_With_Children (parent, "SHPMORPH"), parent_shape (parent) {}
-	
+
 	Shape_Chunk * parent_shape;
 	Shape_Sub_Shape_Chunk * parent_sub_shape;
-	
+
 	virtual void prepare_for_output();
 
 	Shape_Morphing_Data_Chunk (Shape_Chunk * parent, const char *, size_t);
 	Shape_Morphing_Data_Chunk (Shape_Sub_Shape_Chunk * parent, const char *, size_t);
-	
+
 };
 
 
@@ -885,7 +885,7 @@ public:
 	int a_flags;
 	int a_speed;
 
-	List<a_frame *> anim_frames;	
+	List<a_frame *> anim_frames;
 
 	virtual void fill_data_block (char *);
 	virtual size_t size_chunk ()
@@ -895,7 +895,7 @@ public:
 
 	virtual void prepare_for_output();
 	virtual void post_input_processing();
-	
+
 private:
 
 	int num_frames;
@@ -911,14 +911,14 @@ private:
 class Shape_Poly_Change_Info_Chunk : public Chunk
 {
 public:
-	
+
 	Shape_Poly_Change_Info_Chunk (Shape_Chunk * parent, List<poly_change_info> & pci, int orig_num_v)
 	: Chunk (parent, "SHPPCINF"), original_num_verts (orig_num_v), change_list (pci)
 	{}
 
 	int original_num_verts;
 	List<poly_change_info> change_list;
-	
+
 	virtual void fill_data_block (char *);
 	virtual size_t size_chunk ()
 	{
@@ -946,7 +946,7 @@ public:
 	}
 
 	virtual void fill_data_block (char * data_start);
-	
+
 private:
 
 	friend class Shape_Sub_Shape_Chunk;
@@ -981,8 +981,8 @@ public :
 	char* frag_type_name;
 	int pad1,pad2;
 
-	
-	
+
+
 };
 ///////////////////////////////////////////////
 
@@ -995,25 +995,25 @@ public:
 		pad1(0), pad2(0), pad3(0)
 	{}
 	Shape_Fragments_Data_Chunk (Chunk_With_Children * parent, const char * sdata, size_t ssize);
-	
+
 	int num_fragments;
-	
+
 	int pad1, pad2, pad3;
-	
+
 	virtual size_t size_chunk ()
 	{
 		return (chunk_size = 12 + 16);
 	}
-	
+
 	virtual void fill_data_block (char *);
-	
+
 private:
 
 	friend class Shape_Sub_Shape_Chunk;
-	
-	
+
+
 };
-	
+
 ///////////////////////////////////////////////
 
 class Shape_Fragment_Location_Chunk : public Chunk
@@ -1025,23 +1025,23 @@ public:
 		pad1(0), pad2(0), pad3(0), pad4(0)
 	{}
 	Shape_Fragment_Location_Chunk (Chunk_With_Children * parent, const char * sdata, size_t ssize);
-	
+
 	ChunkVectorInt frag_loc;
-	
+
 	int pad1, pad2, pad3, pad4;
-	
+
 	virtual size_t size_chunk ()
 	{
 		return (chunk_size = 12 + 28);
 	}
-	
+
 	virtual void fill_data_block (char *);
-	
+
 private:
 
 	friend class Shape_Sub_Shape_Chunk;
-	
-	
+
+
 };
 
 ///////////////////////////////////////////////
@@ -1056,14 +1056,14 @@ public:
 		if(extra_data) delete[] extra_data;
 		if(memory_block) delete[] memory_block;
 	}
-	
+
 	virtual size_t size_chunk ()
 	{
 		return (chunk_size = 12 + 12+block_size*4+num_extra_data*4);
 	}
-	
+
 	virtual void fill_data_block (char *);
-	
+
 
 	int num_extra_data;
 	int* extra_data;
@@ -1075,9 +1075,9 @@ private:
 	int block_size;
 	int first_pointer;
 	unsigned int* memory_block;
-	
+
 	friend class Shape_Chunk;
 	friend class Shape_Sub_Shape_Chunk;
-	
+
 };
 #endif

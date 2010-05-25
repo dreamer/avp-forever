@@ -34,7 +34,7 @@ struct Hierarchy_Alternate_Shape_Set
 	int num_replaced_shapes;
 	int flags;
 	//terminator has 0 for name and replacement_shape
-	HIERARCHY_SHAPE_REPLACEMENT* replaced_shapes;	
+	HIERARCHY_SHAPE_REPLACEMENT* replaced_shapes;
 };
 
 struct Hierarchy_Descriptor
@@ -42,12 +42,12 @@ struct Hierarchy_Descriptor
 	// this is null if the sequence is a template
 	// or contains the name of the SECTION that it
 	// attachs to
-	
+
 	SECTION * hierarchy_root;
-	
+
 	char * hierarchy_name;
 
-	
+
 };
 
 extern "C"
@@ -62,14 +62,14 @@ public:
 
 	// in a vain hope
 	Global_Hierarchy_Store (RIFFHANDLE h);
-	
+
 	~Global_Hierarchy_Store();
-	
+
 	void add_hierarchy (List <Object_ShapeNum_Pair *> & osnp_lst, Object_Hierarchy_Chunk * ohc);
 	void setup_alternate_shape_sets (List <Object_ShapeNum_Pair *> & osnp_lst, File_Chunk * fc);
-	
+
 	List <Hierarchy_Descriptor *> hierarchy_list;
-	
+
 	List<Hierarchy_Alternate_Shape_Set*> alternate_shape_set_list;
 
 	int num_shape_collections;
@@ -78,24 +78,24 @@ public:
 
 
 	RIFFHANDLE rif_hand;
-	
+
 	char * riffname;
 
 	private:
-	
+
 	int num_sounds;
 	HIERARCHY_SOUND* sound_array;
-		
+
 	static List<Hierarchy_ID_Time_Pair*> time_list;
 
 	int get_time_from_sequence_id(int id);
 	void build_time_list(Object_Hierarchy_Chunk* ohc);
-	
+
 	SECTION * build_hierarchy (Object_Hierarchy_Chunk * ohc,char* hierarchy_name);
-	
+
 	void delete_section(SECTION *);
-	
-	
+
+
 };
 
 extern "C" {

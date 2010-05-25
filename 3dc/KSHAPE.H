@@ -3,7 +3,7 @@
 
 #include "particle.h"
 
-typedef struct 
+typedef struct
 {
 	/* base coords */
 	int X;
@@ -29,7 +29,7 @@ typedef struct
 
 	/* fog component */
 	unsigned char Fog;
-	
+
 
 } RENDERVERTEX;
 
@@ -54,7 +54,7 @@ typedef struct
 } COLOURINTENSITIES;
 
 
-typedef struct 
+typedef struct
 {
 	RENDERVERTEX Vertices[maxpolypts];
 

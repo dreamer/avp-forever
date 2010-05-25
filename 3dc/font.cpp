@@ -29,7 +29,7 @@
 
 struct Font
 {
-	enum		type;
+	enum FONT_TYPE  type;
 	uint32_t	textureWidth;
 	uint32_t	textureHeight;
 	uint32_t	textureID;
@@ -83,9 +83,9 @@ void Font_Init()
 	int c;
 	Fonts[FONT_SMALL].blockWidth = Fonts[FONT_SMALL].imageInfo.Width / 16;
 	Fonts[FONT_SMALL].blockHeight = Fonts[FONT_SMALL].imageInfo.Height / 16;
-	
+
 	LastError = texture->LockRect(0, &lock, NULL, NULL );
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		texture->Release();
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -96,7 +96,7 @@ void Font_Init()
 
 	Fonts[FONT_SMALL].fontWidths[32] = 12; // size of space character
 
-	for (c = 33; c < 255; c++) 
+	for (c = 33; c < 255; c++)
 	{
 		int x, y;
 
@@ -138,7 +138,7 @@ void Font_Init()
 	}
 
 	LastError = texture->UnlockRect(0);
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return;
@@ -157,8 +157,8 @@ void Font_Init()
 uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t colour, enum FONT_TYPE fontType)
 {
 
-	float RecipW = (1.0f / Fonts[FONT_SMALL].textureWidth);
-	float RecipH = (1.0f / Fonts[FONT_SMALL].textureHeight);
+//	float RecipW = (1.0f / Fonts[FONT_SMALL].textureWidth);
+//	float RecipH = (1.0f / Fonts[FONT_SMALL].textureHeight);
 
 //	int sixtyThree = 16;
 
@@ -168,13 +168,13 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 
 	while (charIndex < text.size())
 	{
-		char c = text[charIndex] - 32;
+//		char c = text[charIndex] - 32;
 
-		uint32_t row = (uint32_t)(c / 16);  // get row 
-		uint32_t column = c % 16;			// get column from remainder value
+//		uint32_t row = (uint32_t)(c / 16);  // get row
+//		uint32_t column = c % 16;			// get column from remainder value
 
-		uint32_t tex_x = column * Fonts[FONT_SMALL].blockWidth;
-		uint32_t tex_y = row * Fonts[FONT_SMALL].blockHeight;
+//		uint32_t tex_x = column * Fonts[FONT_SMALL].blockWidth;
+//		uint32_t tex_y = row * Fonts[FONT_SMALL].blockHeight;
 
 		DrawQuad(x, y, charWidth, 16, Fonts[FONT_SMALL].textureID, colour, TRANSLUCENCY_GLOWING);
 
@@ -198,7 +198,7 @@ int Font_GetTextLength(const char* text)
 {
 	int width = 0;
 
-	while (text && *text) 
+	while (text && *text)
 	{
 		width += Fonts[FONT_SMALL].fontWidths[*text];
 		text++;

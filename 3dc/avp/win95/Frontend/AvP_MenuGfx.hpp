@@ -4,8 +4,8 @@
 /* KJL 12:27:18 26/06/98 - AvP_MenuGfx.hpp */
 
 enum AVPMENUGFX_ID
-{	
-	AVPMENUGFX_CLOUDY,		   
+{
+	AVPMENUGFX_CLOUDY,
 	AVPMENUGFX_SMALL_FONT,
 	AVPMENUGFX_COPYRIGHT_SCREEN,
 
@@ -18,8 +18,8 @@ enum AVPMENUGFX_ID
 
 	AVPMENUGFX_BACKDROP,
 	AVPMENUGFX_ALIENS_LOGO,
-	AVPMENUGFX_ALIEN_LOGO,		
-	AVPMENUGFX_MARINE_LOGO,		
+	AVPMENUGFX_ALIEN_LOGO,
+	AVPMENUGFX_MARINE_LOGO,
 	AVPMENUGFX_PREDATOR_LOGO,
 
 	AVPMENUGFX_GLOWY_LEFT,
@@ -94,7 +94,7 @@ typedef struct AVPIndexedFont
 	int swidth;		/* width for space */
 	int ascii;		/* ascii code for initial character */
 	int height;		/* height per character */
-	
+
 	int numchars;
 	int FontWidth[256];
 } AVPIndexedFont;
@@ -114,7 +114,7 @@ extern void ReleaseAllAvPMenuGfx(void);
 extern int RenderMenuText(const char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
 
 extern int RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
-extern int RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int red, int green, int blue); 
+extern int RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int red, int green, int blue);
 
 extern int Hardware_RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
 extern int Hardware_RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int red, int green, int blue);

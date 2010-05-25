@@ -32,7 +32,7 @@ typedef struct damageblock {
 	/* CDF 15/9/97 New Damage System */
 	int Health;
 	int Armour;
-	unsigned int IsOnFire:1; 
+	unsigned int IsOnFire:1;
 
 	SBHEALTHFLAGS SB_H_flags;
 	/* CDF 15/9/97 New Damage System */
@@ -47,16 +47,16 @@ typedef struct Hierarchy_Sound
 	struct loaded_sound const * sound_loaded;
 	SOUNDINDEX sound_index;
 	int pitch;
-	int volume;	
+	int volume;
 }HIERARCHY_SOUND;
 
 
 /*
-I'm going to try storing the quaternions as shorts within the keyframes , 
+I'm going to try storing the quaternions as shorts within the keyframes ,
 because there are loads of them.
 -Richard.
 */
-#pragma pack(push,1) 
+#pragma pack(push,1)
 typedef struct quat_short
 {
 	short quatx;
@@ -73,12 +73,12 @@ extern void CopyIntQuatToShort(QUAT* q_from,QUAT_SHORT* qs_to);
 #define KEYFRAME_VECTOR_SHIFT 4
 
 //make sure the keyframe structure packs as much as possible
-#pragma pack(push,1) 
+#pragma pack(push,1)
 typedef struct keyframe_data {
 	short Offset_x; /*Offset values may need to be scaled*/
 	short Offset_y;	/*In practice scaling should only be needed for 'placed' hierarchies*/
 	short Offset_z;
-	
+
 	/* Quats */
 	QUAT_SHORT QOrient;
 	/*
@@ -86,7 +86,7 @@ typedef struct keyframe_data {
 	Removed oneoversinomega , since I can save a far amount of memory by doing so ,
 	and the value is just calculated using a lookup table anyway. -Richard
 	*/
-	int oneoversequencelength;	
+	int oneoversequencelength;
 	unsigned short omega:12;
 	/* Quats */
 	unsigned short slerp_to_negative_quat:1; /*Should the slerping use the negative version of the next quaternion*/
@@ -107,7 +107,7 @@ extern void GetKeyFrameOffset(KEYFRAME_DATA* frame,VECTORCH* output_vector);
 extern void SetKeyFrameOffset(KEYFRAME_DATA* frame,VECTORCH* input_vector);
 
 /*
-If a keyframe has frame_has_extended_data set , then it can be cast to a 
+If a keyframe has frame_has_extended_data set , then it can be cast to a
 KEYFRAME_DATA_EXTENDED in order to access  the flags and sound.
 */
 typedef struct keyframe_data_extended {
@@ -199,14 +199,14 @@ typedef struct section_attachment {
 typedef struct section_data {
 	int ShapeNum; /* Just in case */
 	SHAPEHEADER *Shape;
-	
+
 	VECTORCH Offset;
 	VECTORCH World_Offset;
 	VECTORCH Last_World_Offset;
 	VECTORCH View_Offset;
 	MATRIXCH RelSecMat;
 	MATRIXCH SecMat;
-	
+
 	struct damageblock current_damage;
 	struct hmodelcontroller *my_controller;
 	SHAPEANIMATIONCONTROLLER *sac_ptr;
@@ -243,7 +243,7 @@ typedef struct section_data {
 	QUAT target_quat;
 	int omega;
 	int oneoversinomega;
-	int oneovertweeninglength;	
+	int oneovertweeninglength;
 	unsigned int Tweening:1;
 
 } SECTION_DATA;
@@ -272,7 +272,7 @@ typedef struct delta_controller {
 } DELTA_CONTROLLER;
 
 typedef struct hmodelcontroller {
-	
+
 	int Seconds_For_Sequence;
 	int timer_increment;
 	int Sequence_Type;

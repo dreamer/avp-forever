@@ -1,7 +1,7 @@
 #include "fmvPlayback.h"
 #include "3dc.h"
 #include "console.h"
-#include "stdint.h"
+#include <stdint.h>
 #include "assert.h"
 #include <process.h>
 #define restrict
