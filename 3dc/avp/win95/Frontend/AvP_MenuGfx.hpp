@@ -130,7 +130,4 @@ extern void DrawAvPMenuGfx_CrossFade(enum AVPMENUGFX_ID menuGfxID,enum AVPMENUGF
 extern void DrawAvPMenuGfx_Faded(enum AVPMENUGFX_ID menuGfxID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format);
 extern int HeightOfMenuGfx(enum AVPMENUGFX_ID menuGfxID);
 
-
-extern void ClearScreenToBlack(void);
-
 #endif

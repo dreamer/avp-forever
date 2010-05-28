@@ -2243,7 +2243,7 @@ void Execute_Xeno_Follow(STRATEGYBLOCK *sbPtr)
 		range=VectorDistance((&xenoStatusPointer->Target->DynPtr->Position),(&sbPtr->DynPtr->Position));
 
 		if (range>XENO_CLOSE_APPROACH_DISTANCE) {
-			NPCGetMovementTarget(sbPtr, xenoStatusPointer->Target, &targetPosition, &targetIsAirduct);
+			NPCGetMovementTarget(sbPtr, xenoStatusPointer->Target, &targetPosition, &targetIsAirduct, 0);
 			NPCGetMovementDirection(sbPtr, &velocityDirection, &targetPosition,&xenoStatusPointer->waypointManager);
 			NPCSetVelocity(sbPtr, &velocityDirection, XENO_NEAR_SPEED);
 			if (ShowXenoStats) {

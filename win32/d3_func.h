@@ -4,7 +4,7 @@
 #ifdef WIN32
 
 #include <d3d9.h>
-#include <Dxerr9.h>
+#include <Dxerr.h>
 #include "aw.h"
 #include <stdint.h>
 

@@ -116,11 +116,6 @@ extern void ShowSplashScreens(void)
 		}
 		while(timeRemaining>=0 && !DebouncedGotAnyKey && bRunning);
 	}
-
-	ThisFramesRenderingHasBegun();
-	ClearScreenToBlack();
-	ThisFramesRenderingHasFinished();
-	FlipBuffers();
 }
 
 extern void Show_WinnerScreen(void)
@@ -152,11 +147,6 @@ extern void Show_WinnerScreen(void)
 		timeRemaining-=NormalFrameTime;
 	}
 	while (timeRemaining>=0 && !DebouncedGotAnyKey && bRunning);
-
-	ThisFramesRenderingHasBegun();
-	ClearScreenToBlack();
-	ThisFramesRenderingHasFinished();
-	FlipBuffers();
 }
 
 void Show_CopyrightInfo(void)

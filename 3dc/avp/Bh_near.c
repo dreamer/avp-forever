@@ -848,7 +848,7 @@ static void AlienNearState_Approach(STRATEGYBLOCK *sbPtr)
 		else
 		{
 			curveToPlayer = 0;
-			NPCGetMovementTarget(sbPtr, alienStatusPointer->Target, &targetPos, &approachingAirDuct);
+			NPCGetMovementTarget(sbPtr, alienStatusPointer->Target, &targetPos, &approachingAirDuct, 1);
 			/* don't climb on walls, etc */
 			dynPtr->UseStandardGravity=1;
 		}

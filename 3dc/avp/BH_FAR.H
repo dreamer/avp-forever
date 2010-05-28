@@ -36,9 +36,9 @@ extern void LocateFarNPCInModule(STRATEGYBLOCK *sbPtr, MODULE *targetModule);
 extern void LocateFarNPCInAIModule(STRATEGYBLOCK *sbPtr, AIMODULE *targetModule);
 extern NPC_TARGETMODULESTATUS GetTargetAIModuleStatus(STRATEGYBLOCK *sbPtr, AIMODULE *targetModule, int alien);
 
-extern AIMODULE *FarNPC_GetTargetAIModuleForHunt(STRATEGYBLOCK *sbPtr/*, int alien*/);
+extern AIMODULE *FarNPC_GetTargetAIModuleForHunt(STRATEGYBLOCK *sbPtr, int alien);
 extern AIMODULE *FarNPC_GetTargetAIModuleForGlobalHunt(STRATEGYBLOCK *sbPtr);
-extern AIMODULE *FarNPC_GetTargetAIModuleForWander(STRATEGYBLOCK *sbPtr, AIMODULE *exception/*, int alien*/);
+extern AIMODULE *FarNPC_GetTargetAIModuleForWander(STRATEGYBLOCK *sbPtr, AIMODULE *exception, int alien);
 extern AIMODULE *FarNPC_GetTargetAIModuleForRetreat(STRATEGYBLOCK *sbPtr);
 extern AIMODULE *FarNPC_GetTargetAIModuleForMarineRespond(STRATEGYBLOCK *sbPtr);
 extern void FarNpc_FlipAround(STRATEGYBLOCK *sbPtr);

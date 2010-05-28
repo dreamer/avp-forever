@@ -5957,7 +5957,7 @@ static STATE_RETURN_CONDITION Execute_MFS_SentryMode(STRATEGYBLOCK *sbPtr)
 		/* If there is no target module, we're way out there.  Better wander a bit more. */
 		if(!targetModule)
 		{
-			targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr, marineStatusPointer->lastmodule);
+			targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr, marineStatusPointer->lastmodule, 0);
 		}
 		/* Examine target, and decide what to do */
 		GLOBALASSERT(AIModuleIsPhysical(targetModule));
@@ -6177,7 +6177,7 @@ static STATE_RETURN_CONDITION Execute_MFS_Wander(STRATEGYBLOCK *sbPtr)
 	}
 
 	/* get the target module... */
-	targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr, marineStatusPointer->lastmodule);
+	targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr, marineStatusPointer->lastmodule, 0);
 
 	/* if there is no target module, it means that the pred is trapped in an
 	unlinked module. In this case, reset the timer and return. */
@@ -6251,7 +6251,7 @@ static STATE_RETURN_CONDITION Execute_MFS_Return(STRATEGYBLOCK *sbPtr)
 	/* If there is no target module, we're way out there.  Better wander a bit more. */
 	if(!targetModule)
 	{
-		targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr, marineStatusPointer->lastmodule);
+		targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr, marineStatusPointer->lastmodule, 0);
 	}
 	/* Examine target, and decide what to do */
 	if (AIModuleIsPhysical(targetModule)==0) {
@@ -7618,7 +7618,7 @@ static STATE_RETURN_CONDITION Execute_MNS_Approach(STRATEGYBLOCK *sbPtr)
 		if (targetModule==sbPtr->containingModule->m_aimodule) {
 			/* Try going for it, we still can't see them. */
 			if (marineStatusPointer->Target) {
-				NPCGetMovementTarget(sbPtr, marineStatusPointer->Target, &targetPosition, &targetIsAirduct);
+				NPCGetMovementTarget(sbPtr, marineStatusPointer->Target, &targetPosition, &targetIsAirduct, 0);
 			} else {
 				int range2;
 				VECTORCH relTargetPosition;
@@ -7724,7 +7724,7 @@ static STATE_RETURN_CONDITION Execute_MNS_Approach(STRATEGYBLOCK *sbPtr)
 	} else {
 		/*  we are still in approach state: target the target, and move */
 		if (marineStatusPointer->Target) {
-			NPCGetMovementTarget(sbPtr, marineStatusPointer->Target, &targetPosition, &targetIsAirduct);
+			NPCGetMovementTarget(sbPtr, marineStatusPointer->Target, &targetPosition, &targetIsAirduct, 0);
 		} else {
 			/* How did we get here, anyway? */
 			targetPosition=marineStatusPointer->suspect_point;

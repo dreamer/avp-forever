@@ -1577,53 +1577,6 @@ extern int HeightOfMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 	return AvPMenuGfxStorage[menuGfxID].Height; 
 }
 
-extern void ClearScreenToBlack(void)
-{ 
-	d3d.lpD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0 );
-}
-
-extern void FadedScreen(int alpha)
-{	
-#if 0 // bjd - replaced
-	unsigned int x, y;
-	unsigned short *ptr;
-
-	D3DInfo temp;
-
-	temp = GetD3DInfo();
-
-	D3DSURFACE_DESC surface_desc;
-	temp.lpD3DBackSurface->GetDesc(&surface_desc);
-
-	D3DLOCKED_RECT lock = {0,NULL};
-
-	temp.lpD3DBackSurface->LockRect(&lock, NULL, 0); if (lock.pBits == NULL) return;
-
-
-	for (y = 60; y < surface_desc.Height-60; y++) {
-		ptr = (unsigned short *)(((unsigned char *)lock.pBits)+y*lock.Pitch);
-		for (x = 0; x < surface_desc.Width; x++) {
-			unsigned int srcR, srcG, srcB;
-			
-			srcR = (*ptr & 0xF800) >> 11;
-			srcG = (*ptr & 0x07E0) >> 5;
-			srcB = (*ptr & 0x001F);
-			
-			srcR = MUL_FIXED(srcR, alpha);
-			srcG = MUL_FIXED(srcG, alpha);
-			srcB = MUL_FIXED(srcB, alpha);
-			*ptr =	((srcR>>3)<<11) |
-				((srcG>>2)<<5 ) |
-				((srcB>>3));
-			ptr++;
-		}
-	}
-
-	temp.lpD3DBackSurface->UnlockRect();
-#endif
-}
-
-
 static void CalculateWidthsOfAAFont(void)
 {
 	unsigned char *srcPtr;

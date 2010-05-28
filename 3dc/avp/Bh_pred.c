@@ -2073,7 +2073,7 @@ static PRED_RETURN_CONDITION Execute_PFS_Wander(STRATEGYBLOCK *sbPtr)
         /* Preds NEVER camp.  I mean, get tired of wandering. */
 
         /* timer has timed-out in roving mode */
-        targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr, NULL);
+        targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr, NULL, 0);
 
         /* if there is no target module, it means that the pred is trapped in an
         unlinked module. In this case, reset the timer and return. */
@@ -2115,7 +2115,7 @@ static PRED_RETURN_CONDITION Execute_PFS_Hunt(STRATEGYBLOCK *sbPtr)
         }
 
         /* timer has timed-out in hunting mode: */
-        targetModule = FarNPC_GetTargetAIModuleForHunt(sbPtr/*,0*/);
+        targetModule = FarNPC_GetTargetAIModuleForHunt(sbPtr, 0);
 
         /* if there is no target module, it means that the pred is trapped in an
         unlinked module. In this case, reset the timer and return. */
@@ -2996,7 +2996,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPistol(STRATEGYBLOCK *sbPtr)
 
                 if (targetModule==sbPtr->containingModule->m_aimodule) {
                         /* Try going for it, we still can't see them. */
-                        NPCGetMovementTarget(sbPtr, predatorStatusPointer->Target, &targetPosition, &targetIsAirduct);
+                        NPCGetMovementTarget(sbPtr, predatorStatusPointer->Target, &targetPosition, &targetIsAirduct, 0);
                         NPCGetMovementDirection(sbPtr, &velocityDirection, &targetPosition,&predatorStatusPointer->waypointManager);
                 } else if (!targetModule) {
                         /* Must be inaccessible. */
@@ -3164,7 +3164,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithPlasmaCaster(STRATEGYBLOCK *s
 
                 if (targetModule==sbPtr->containingModule->m_aimodule) {
                         /* Try going for it, we still can't see them. */
-                        NPCGetMovementTarget(sbPtr, predatorStatusPointer->Target, &targetPosition, &targetIsAirduct);
+                        NPCGetMovementTarget(sbPtr, predatorStatusPointer->Target, &targetPosition, &targetIsAirduct, 0);
                         NPCGetMovementDirection(sbPtr, &velocityDirection, &targetPosition,&predatorStatusPointer->waypointManager);
                 } else if (!targetModule) {
                         /* Must be inaccessible. */
@@ -3335,7 +3335,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithWristblade(STRATEGYBLOCK *sbP
 
                 if (targetModule==sbPtr->containingModule->m_aimodule) {
                         /* Try going for it, we still can't see them. */
-                        NPCGetMovementTarget(sbPtr, predatorStatusPointer->Target, &targetPosition, &targetIsAirduct);
+                        NPCGetMovementTarget(sbPtr, predatorStatusPointer->Target, &targetPosition, &targetIsAirduct, 0);
                         NPCGetMovementDirection(sbPtr, &velocityDirection, &targetPosition,&predatorStatusPointer->waypointManager);
                 } else if (!targetModule) {
                         /* Must be inaccessible. */
@@ -3905,7 +3905,7 @@ static PRED_RETURN_CONDITION Execute_PNS_Hunt(STRATEGYBLOCK *sbPtr)
                 AIMODULE *targetModule;
                 FARENTRYPOINT *thisEp = (FARENTRYPOINT *)0;
 
-                targetModule = FarNPC_GetTargetAIModuleForHunt(sbPtr/*,0*/);
+                targetModule = FarNPC_GetTargetAIModuleForHunt(sbPtr, 0);
 
                 if (targetModule) {
                         if (ShowPredoStats) {
@@ -5459,7 +5459,7 @@ static PRED_RETURN_CONDITION Execute_PNS_EngageWithStaff(STRATEGYBLOCK *sbPtr)
 
                 if (targetModule==sbPtr->containingModule->m_aimodule) {
                         /* Try going for it, we still can't see them. */
-                        NPCGetMovementTarget(sbPtr, predatorStatusPointer->Target, &targetPosition, &targetIsAirduct);
+                        NPCGetMovementTarget(sbPtr, predatorStatusPointer->Target, &targetPosition, &targetIsAirduct, 0);
                         NPCGetMovementDirection(sbPtr, &velocityDirection, &targetPosition,&predatorStatusPointer->waypointManager);
                 } else if (!targetModule) {
                         /* Must be inaccessible. */
@@ -5841,7 +5841,7 @@ static PRED_RETURN_CONDITION Execute_PFS_Return(STRATEGYBLOCK *sbPtr)
         /* If there is no target module, we're way out there.  Better wander a bit more. */
         if(!targetModule)
         {
-                targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr, NULL);
+                targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr, NULL, 0);
         }
         /* Examine target, and decide what to do */
         GLOBALASSERT(AIModuleIsPhysical(targetModule));

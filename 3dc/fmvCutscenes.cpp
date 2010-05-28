@@ -295,7 +295,6 @@ extern void PlayFMV(const char *filenamePtr)
 			playing = fmv.NextFrame();
 
 		ThisFramesRenderingHasBegun();
-		ClearScreenToBlack();
 
 //		if (fmv.mDisplayTexture)
 		{

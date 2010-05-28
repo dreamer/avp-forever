@@ -937,8 +937,8 @@ void CheckOrthoBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_TY
 /* more quad drawing functions than you can shake a stick at! */
 void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE9 fmvTexture)
 {
-	int topX = (640 - frameWidth) / 2;
-	int topY = (480 - frameHeight) / 2;
+	uint32_t topX = (640 - frameWidth) / 2;
+	uint32_t topY = (480 - frameHeight) / 2;
 
 	float x1 = (float(topX / 640.0f) * 2) - 1;
 	float y1 = (float(topY / 480.0f) * 2) - 1;
@@ -998,8 +998,8 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWid
 
 void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE9 tex1, LPDIRECT3DTEXTURE9 tex2, LPDIRECT3DTEXTURE9 tex3)
 {
-	int topX = (640 - frameWidth) / 2;
-	int topY = (480 - frameHeight) / 2;
+	uint32_t topX = (640 - frameWidth) / 2;
+	uint32_t topY = (480 - frameHeight) / 2;
 
 	float x1 = (float(topX / 640.0f) * 2) - 1;
 	float y1 = (float(topY / 480.0f) * 2) - 1;

@@ -1075,7 +1075,7 @@ int NPCFindTargetEP(STRATEGYBLOCK *sbPtr, VECTORCH *targetPosn, AIMODULE **targe
   suitable target module, and return this.  If cannot find an ep,
   or if the player is in our module, return the player's position.
   --------------------------------------------------------------------*/
-void NPCGetMovementTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, VECTORCH *targetPosition, int *targetIsAirduct/*, int alien*/)
+void NPCGetMovementTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, VECTORCH *targetPosition, int *targetIsAirduct, int alien)
 {       
     LOCALASSERT(sbPtr);
     LOCALASSERT(targetPosition);
@@ -1090,7 +1090,7 @@ void NPCGetMovementTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, VECTORCH 
             int epFound;
             VECTORCH epPosn;
             AIMODULE *epModule;
-            epFound = NPCFindTargetEP(sbPtr, &epPosn, &epModule,alien);
+            epFound = NPCFindTargetEP(sbPtr, &epPosn, &epModule, alien);
             if (epFound)
             {
                 *targetPosition = epPosn;

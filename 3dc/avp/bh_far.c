@@ -263,7 +263,7 @@ static void Execute_AFS_Hunt(STRATEGYBLOCK *sbPtr)
 	}
 	
 	/* get the target */
-	targetModule = FarNPC_GetTargetAIModuleForHunt(sbPtr/*,1*/);
+	targetModule = FarNPC_GetTargetAIModuleForHunt(sbPtr, 1);
 
 	/* if there is no target module, it means that the alien is trapped in an
 	unlinked module. In this case, reset the timer and return. */			
@@ -501,7 +501,7 @@ static void Execute_AFS_Wander(STRATEGYBLOCK *sbPtr)
 	now, there might concievably be NO targets, -> wander. */	
 
 	/* get the target module... */
-	targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr, NULL);
+	targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr, NULL, 0);
 
 	/* if there is no target module, reset the timer and return. */			
 	if(!targetModule)
@@ -1020,7 +1020,7 @@ NPC_TARGETMODULESTATUS GetTargetAIModuleStatus(STRATEGYBLOCK *sbPtr, AIMODULE *t
   target module for hunting, wandering, and retreating
   ----------------------------------------------------------*/
 
-AIMODULE *FarNPC_GetTargetAIModuleForHunt(STRATEGYBLOCK *sbPtr/*, int alien*/)
+AIMODULE *FarNPC_GetTargetAIModuleForHunt(STRATEGYBLOCK *sbPtr, int alien)
 {
 	AIMODULE **AdjModuleRefPtr;
 	int AdjModuleIndex;
@@ -1063,7 +1063,7 @@ AIMODULE *FarNPC_GetTargetAIModuleForHunt(STRATEGYBLOCK *sbPtr/*, int alien*/)
 }
 
 /* Patrick 2/7/96: this function returns a module for wandering to */
-AIMODULE *FarNPC_GetTargetAIModuleForWander(STRATEGYBLOCK *sbPtr, AIMODULE *exception/*, int alien*/)
+AIMODULE *FarNPC_GetTargetAIModuleForWander(STRATEGYBLOCK *sbPtr, AIMODULE *exception, int alien)
 {
 	//extern int cosine[], sine[];
 
@@ -1098,7 +1098,8 @@ AIMODULE *FarNPC_GetTargetAIModuleForWander(STRATEGYBLOCK *sbPtr, AIMODULE *exce
 			VECTORCH moduleDirn;	
 			int thisDirn;
 
-			if (CheckAdjacencyValidity((*AdjModuleRefPtr), sbPtr->containingModule->m_aimodule,alien)) {
+			if (CheckAdjacencyValidity((*AdjModuleRefPtr), sbPtr->containingModule->m_aimodule, alien)) 
+			{
 				moduleDirn.vx = nextAdjModule->m_world.vx - sbPtr->containingModule->m_world.vx;
 				moduleDirn.vz = nextAdjModule->m_world.vz - sbPtr->containingModule->m_world.vz;
 				moduleDirn.vy = 0;

@@ -11,15 +11,15 @@
 
 extern void NewOnScreenMessage(char *messagePtr);
 
-struct MessageHistory
+typedef struct MessageHistory
 {
 	enum TEXTSTRING_ID StringID;
 	int Hours;
 	int Minutes;
 	int Seconds;
-};
+} MessageHistory;
 
-static struct MessageHistory MessageHistoryStore[MAX_NO_OF_MESSAGES_IN_HISTORY];
+static MessageHistory MessageHistoryStore[MAX_NO_OF_MESSAGES_IN_HISTORY];
 static int NumberOfEntriesInMessageHistory;
 static int EntryToNextShow;
 static int MessageHistoryAccessedTimer;
@@ -106,13 +106,13 @@ void Load_MessageHistory(SAVE_BLOCK_HEADER* header)
 {
 	int i;
 	MESSAGE_HISTORY_SAVE_BLOCK* block = (MESSAGE_HISTORY_SAVE_BLOCK*) header;
-	struct MessageHistory* saved_message = (struct MessageHistory*) (block+1);
+	MessageHistory* saved_message = (struct MessageHistory*) (block+1);
 
 	int expected_size;
 
 	//make sure the block is the correct size
 	expected_size = sizeof(*block);
-	expected_size += sizeof(struct MessageHistory) * block->NumberOfEntriesInMessageHistory;
+	expected_size += sizeof(MessageHistory) * block->NumberOfEntriesInMessageHistory;
 	if(header->size != expected_size) return;
 	
 	//load the stuff then
@@ -137,7 +137,7 @@ void Save_MessageHistory()
 
 	//fill in header
 	block->header.type = SaveBlock_MessageHistory;
-	block->header.size = sizeof(*block) + NumberOfEntriesInMessageHistory * sizeof(struct MessageHistory);
+	block->header.size = sizeof(*block) + NumberOfEntriesInMessageHistory * sizeof(MessageHistory);
 
 	block->NumberOfEntriesInMessageHistory = NumberOfEntriesInMessageHistory;
 	block->EntryToNextShow = EntryToNextShow;
@@ -145,9 +145,7 @@ void Save_MessageHistory()
 
 	for(i=0;i<NumberOfEntriesInMessageHistory;i++)
 	{
-		struct MessageHistory* message = GET_SAVE_BLOCK_POINTER(MessageHistory, message);
+		MessageHistory* message = GET_SAVE_BLOCK_POINTER(MessageHistory, message);
 		*message = MessageHistoryStore[i];
 	}
 }
-
-

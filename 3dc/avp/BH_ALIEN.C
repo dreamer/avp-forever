@@ -985,7 +985,7 @@ void AlienBehaviour(STRATEGYBLOCK *sbPtr)
 							targetModule = FarNPC_GetTargetAIModuleForGlobalHunt(sbPtr);
 						} else {
 							/* This just makes them hunt a bit more... */
-							targetModule = FarNPC_GetTargetAIModuleForHunt(sbPtr/*,1*/);
+							targetModule = FarNPC_GetTargetAIModuleForHunt(sbPtr, 1);
 						}
 
 						if ((!targetModule)||(PlayerIsDeadAndNoLivingNetghosts())) {
