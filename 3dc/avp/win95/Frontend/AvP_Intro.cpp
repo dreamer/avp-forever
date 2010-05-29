@@ -27,11 +27,10 @@ void Show_ARebellionGame(void);
 void Show_AvPLogo(void);
 extern void ShowSplashScreens(void);
 extern void Show_WinnerScreen(void);
-//extern void PlayFMV(const char *filenamePtr);
 extern void DrawMainMenusBackdrop(void);
 extern void FadedScreen(int alpha);
 
-extern void DrawFadeQuad(int topX, int topY, int alpha);
+extern void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha);
 
 extern BOOL bRunning;
 

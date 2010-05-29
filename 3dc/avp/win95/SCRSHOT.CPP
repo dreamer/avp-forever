@@ -17,7 +17,7 @@ extern "C"
 	extern unsigned char KeyboardInput[];
 	extern unsigned char DebouncedKeyboardInput[];
 	extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
-	extern MODULE* playerPherModule;	
+	extern MODULE* playerPherModule;
 };
 
 typedef VOID (*PutWord_F)(WORD, FILE *);
@@ -57,11 +57,12 @@ void LogCameraPosForModuleLinking()
 	}
 
 	fwrite(&output_buffer[0],4,length/4,file);
-	fclose(file);		
+	fclose(file);
 	textprint("Saving camera for module links");
 }
-int SaveCameraPosKeyPressed=0;
-static BOOL ModuleLinkAssist=FALSE;
+
+int SaveCameraPosKeyPressed = 0;
+static BOOL ModuleLinkAssist = FALSE;
 
 void HandleScreenShot()
 {
@@ -72,57 +73,33 @@ void HandleScreenShot()
 
 	if (KeyboardInput[KEY_F7])
 	{
-		if(!SaveCameraPosKeyPressed)
+		if (!SaveCameraPosKeyPressed)
 		{
-			if(KeyboardInput[KEY_LEFTSHIFT]||KeyboardInput[KEY_RIGHTSHIFT])
+			if (KeyboardInput[KEY_LEFTSHIFT] || KeyboardInput[KEY_RIGHTSHIFT])
 			{
-				ModuleLinkAssist=TRUE;
+				ModuleLinkAssist = TRUE;
 				DeleteFile("avp_rifs\\module.aaa");
 			}
 			else
 			{
 				LogCameraPosForModuleLinking();
-				SaveCameraPosKeyPressed=1;
+				SaveCameraPosKeyPressed = 1;
 			}
 		}
 	}
 	else
-		SaveCameraPosKeyPressed=0;
+		SaveCameraPosKeyPressed = 0;
 	
-	if(AvP.MainLoopRunning && ModuleLinkAssist)LoadModuleData();
+	if (AvP.MainLoopRunning && ModuleLinkAssist)
+		LoadModuleData();
 
 	#endif
 }
 
 extern void CreateScreenShotImage();
-					 
+
 void ScreenShot()
 {
-	/* in d3_func.cpp */
+	// in d3_func.cpp
 	CreateScreenShotImage();
-#if 0
-	// this is called via the console by typing SCREENSHOT
-	// it'll have the console in the screen shot as a result..
-	LPDIRECT3DSURFACE9 front_buffer;
-
-	d3d.lpD3DDevice->CreateImageSurface(ScreenDescriptorBlock.SDB_Width, ScreenDescriptorBlock.SDB_Height, D3DFMT_A8R8G8B8, &front_buffer);
-
-	if(FAILED(d3d.lpD3DDevice->GetFrontBuffer(front_buffer))) {
-		OutputDebugString("\n Couldn't get a copy of the front buffer");
-		front_buffer->Release();
-		return;
-	}
-
-	char buf[100];
-	sprintf(buf,"avp_screenshot_%d.bmp", screen_num);
-
-	if(FAILED(D3DXSaveSurfaceToFileA(buf, D3DXIFF_BMP, front_buffer, NULL, NULL))) {
-		OutputDebugString("\n Save Surface to file failed!!!");
-	}
-	OutputDebugString("\n WROTE A SCREENSHOT");
-
-	front_buffer->Release();
-#endif
 }
-
-

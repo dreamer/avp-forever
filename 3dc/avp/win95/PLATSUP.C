@@ -264,7 +264,7 @@ char *LoadTextFile(char *filename)
 	fseek(fp, 0L, SEEK_END);
 	size_of_file = ftell(fp);
 	
-	bufferPtr = AllocateMem(size_of_file);
+	bufferPtr = (char*)AllocateMem(size_of_file);
 	if (!bufferPtr)
 	{
 		memoryInitialisationFailure = 1;

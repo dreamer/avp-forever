@@ -4769,28 +4769,8 @@ extern int WindowRequestMode;
 
 static void InitMainMenusBackdrop(void)
 {
-	#if 0
-	int i;
-	for(i=0; i<NUMBER_OF_STARS; i++)
-	{
-		Star[i].X = (FastRandom()&65535)*640;
-		Star[i].Y = (FastRandom()&65535)*480;
-		Star[i].Chasing = (FastRandom()&127);
-		Star[i].Fleeing = (FastRandom()&127);
-	}
-	#endif
-	#if 0
-	{
-		int x,y;
-		for (x=0; x<128; x++)
-		for (y=0; y<128; y++)
-		CloudTable[x][y]=(FastRandom()&32767)+32768;
-	}
-	#endif
 // bjd - lets relocate this call -	StartMenuBackgroundFmv();
 }
-
-
 
 extern void DrawMainMenusBackdrop(void)
 {
@@ -4828,16 +4808,16 @@ static void UpdateMultiplayerConfigurationMenu()
 		GLOBALASSERT(elementPtr->ElementID!=AVPMENU_ELEMENT_ENDOFMENU);
 		elementPtr++;
 
-	}while(elementPtr->TextDescription!=TEXTSTRING_MULTIPLAYER_ENVIRONMENT);
+	} while (elementPtr->TextDescription!=TEXTSTRING_MULTIPLAYER_ENVIRONMENT);
 
 	
-	if(netGameData.skirmishMode)
+	if (netGameData.skirmishMode)
 	{
 		//force 'cooperative' game if using skirmish mode
-		netGameData.gameType=NGT_Coop;
+		netGameData.gameType = NGT_Coop;
 	}
 	
-	if(netGameData.gameType!=NGT_Coop)
+	if (netGameData.gameType != NGT_Coop)
 	{
 		elementPtr->MaxSliderValue = NumMultiplayerLevels-1;
 		elementPtr->TextSliderStringPointer = MultiplayerLevelNames;
@@ -4858,32 +4838,32 @@ static void UpdateMultiplayerConfigurationMenu()
 	//see if selected element is the gamestyle element
 	elementPtr = &AvPMenus.MenuElements[AvPMenus.CurrentlySelectedElement];
 
-	if(elementPtr->TextDescription==TEXTSTRING_MULTIPLAYER_GAMESTYLE)
+	if (elementPtr->TextDescription==TEXTSTRING_MULTIPLAYER_GAMESTYLE)
 	{
 		//change the helpstring according to the game style
-		switch(netGameData.gameType)
+		switch (netGameData.gameType)
 		{
-			case NGT_Individual :
+			case NGT_Individual:
 				elementPtr->HelpString=TEXTSTRING_MPHELP_GAMESTYLE_DEATHMATCH;
 				break;
 
-			case NGT_CoopDeathmatch :
+			case NGT_CoopDeathmatch:
 				elementPtr->HelpString=TEXTSTRING_MPHELP_GAMESTYLE_DEATHMATCHTEAM;
 				break;
 			
-			case NGT_LastManStanding :
+			case NGT_LastManStanding:
 				elementPtr->HelpString=TEXTSTRING_MPHELP_GAMESTYLE_LASTMANSTANDING;
 				break;
 			
-			case NGT_PredatorTag :
+			case NGT_PredatorTag:
 				elementPtr->HelpString=TEXTSTRING_MPHELP_GAMESTYLE_PREDATORTAG;
 				break;
 			
-			case NGT_Coop :
+			case NGT_Coop:
 				elementPtr->HelpString=TEXTSTRING_MPHELP_GAMESTYLE_COOPERATIVE;
 				break;
 
-			case NGT_AlienTag :
+			case NGT_AlienTag:
 				elementPtr->HelpString=TEXTSTRING_MPHELP_GAMESTYLE_ALIENTAG;
 				break;
 		}
@@ -4891,7 +4871,6 @@ static void UpdateMultiplayerConfigurationMenu()
 
 	//also need to fill in customLevelName
 	strcpy(netGameData.customLevelName,GetCustomMultiplayerLevelName(netGameData.levelNumber,netGameData.gameType));
-
 }
 
 static void TestValidityOfCheatMenu(void)
@@ -4928,7 +4907,7 @@ void SetBriefingTextForEpisode(int episode, I_PLAYER_TYPE playerID)
 		}
 	}
 	
-	for(i=0; i<5; i++)
+	for (i = 0; i < 5; i++)
 	{
 		BriefingTextString[i] = GetTextString(s+i+ episode*5);
 	}

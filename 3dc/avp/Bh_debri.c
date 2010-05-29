@@ -440,7 +440,7 @@ void SetupSimpleAnimation(int counter, STRATEGYBLOCK *sbPtr)
 		{
 			TXACTRLBLK *pnew_txactrlblk;
 
-			pnew_txactrlblk = AllocateMem(sizeof(TXACTRLBLK));
+			pnew_txactrlblk = (TXACTRLBLK*)AllocateMem(sizeof(TXACTRLBLK));
 
 			if (pnew_txactrlblk)
 			{

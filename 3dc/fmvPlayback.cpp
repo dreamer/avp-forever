@@ -778,10 +778,7 @@ unsigned int __stdcall decodeThread(void *args)
 
 					uint32_t audioSize = samples * fmv->mAudio->mVorbis.mInfo.channels * sizeof(uint16_t);
 
-					// move the critical section stuff into the ring buffer code itself?
-//					EnterCriticalSection(&fmv->mAudioCriticalSection);
-
-					int freeSpace = fmv->mRingBuffer->GetWritableSize();
+					uint32_t freeSpace = fmv->mRingBuffer->GetWritableSize();
 
 					// if we can't fit all our data..
 					if (audioSize > freeSpace)
@@ -798,8 +795,6 @@ unsigned int __stdcall decodeThread(void *args)
 					}
 
 					fmv->mRingBuffer->WriteData((uint8_t*)&fmv->mAudioDataBuffer[0], audioSize);
-
-//					LeaveCriticalSection(&fmv->mAudioCriticalSection);
 				}
 
 				// tell vorbis how many samples we consumed

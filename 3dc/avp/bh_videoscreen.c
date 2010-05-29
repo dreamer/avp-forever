@@ -35,12 +35,10 @@ void* InitVideoScreen(void* bhdata,STRATEGYBLOCK *sbPtr)
 	videoScreen->bhvr_type=I_BehaviourVideoScreen;
 
 	sbPtr->SBdataptr = videoScreen;
-			
 	
 	/* set default indestructibility */
 	videoScreen->Indestructable = FALSE;
 
-	
 	/* Initialise object's stats */
 	//set health and armour
 	{
@@ -63,7 +61,6 @@ void* InitVideoScreen(void* bhdata,STRATEGYBLOCK *sbPtr)
 		RemoveBehaviourStrategy(sbPtr);
 		return 0;
 	}
-
 	
 	//is this screen indestructable
 	if (toolsData->integrity > 20)
@@ -94,8 +91,8 @@ void* InitVideoScreen(void* bhdata,STRATEGYBLOCK *sbPtr)
 
 	/* strategy block initialisation */
 	sbPtr->shapeIndex = toolsData->shapeIndex;
-	for(i=0;i<SB_NAME_LENGTH;i++) sbPtr->SBname[i] = toolsData->nameID[i];
-
+	for (i=0;i<SB_NAME_LENGTH;i++) 
+		sbPtr->SBname[i] = toolsData->nameID[i];
 	
 	/*check to see if object is animated.*/
 	{
@@ -104,33 +101,33 @@ void* InitVideoScreen(void* bhdata,STRATEGYBLOCK *sbPtr)
 		int shape_num = toolsData->shapeIndex;
 		SHAPEHEADER *shptr = GetShapeData(shape_num);
 		pptxactrlblk = &videoScreen->inan_tac;
-		for(item_num = 0; item_num < shptr->numitems; item_num ++)
+
+		for (item_num = 0; item_num < shptr->numitems; item_num ++)
 		{
 			POLYHEADER *poly =  (POLYHEADER*)(shptr->items[item_num]);
 			LOCALASSERT(poly);
 				
-			if((Request_PolyFlags((void *)poly)) & iflag_txanim)
+			if ((Request_PolyFlags((void *)poly)) & iflag_txanim)
+			{
+				TXACTRLBLK *pnew_txactrlblk;
+
+				pnew_txactrlblk = (TXACTRLBLK*)AllocateMem(sizeof(TXACTRLBLK));
+				if (pnew_txactrlblk)
 				{
-					TXACTRLBLK *pnew_txactrlblk;
+					pnew_txactrlblk->tac_flags = 0;										
+					pnew_txactrlblk->tac_item = item_num;										
+					pnew_txactrlblk->tac_sequence = 0;										
+					pnew_txactrlblk->tac_node = 0;										
+					pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);										
+					pnew_txactrlblk->tac_txah_s = GetTxAnimHeaderFromShape(pnew_txactrlblk, shape_num);
 
-					pnew_txactrlblk = AllocateMem(sizeof(TXACTRLBLK));
-					if(pnew_txactrlblk)
-					{
-						pnew_txactrlblk->tac_flags = 0;										
-						pnew_txactrlblk->tac_item = item_num;										
-						pnew_txactrlblk->tac_sequence = 0;										
-						pnew_txactrlblk->tac_node = 0;										
-						pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);										
-						pnew_txactrlblk->tac_txah_s = GetTxAnimHeaderFromShape(pnew_txactrlblk, shape_num);
-
-						*pptxactrlblk = pnew_txactrlblk;
-						pptxactrlblk = &pnew_txactrlblk->tac_next;
-					}
-					else *pptxactrlblk = NULL; 
+					*pptxactrlblk = pnew_txactrlblk;
+					pptxactrlblk = &pnew_txactrlblk->tac_next;
 				}
+				else *pptxactrlblk = NULL; 
+			}
 		}
 		*pptxactrlblk=0;
-
 	}
 	
 	//copy destruction target stuff

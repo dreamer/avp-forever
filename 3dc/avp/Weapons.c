@@ -4176,7 +4176,7 @@ void InitThisWeapon(PLAYER_WEAPON_DATA *pwPtr)
 			{
 				TXACTRLBLK *pnew_txactrlblk;
 	
-				pnew_txactrlblk = AllocateMem(sizeof(TXACTRLBLK));
+				pnew_txactrlblk = (TXACTRLBLK*)AllocateMem(sizeof(TXACTRLBLK));
 				
 				if (pnew_txactrlblk) 
 				{

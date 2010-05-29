@@ -487,7 +487,7 @@ STRATEGYBLOCK *CreateNetGhost(DPID playerId, int objectId, VECTORCH *position, E
 
 	/* data block */
 	{
-		NETGHOSTDATABLOCK *ghostData = AllocateMem(sizeof(NETGHOSTDATABLOCK)); 
+		NETGHOSTDATABLOCK *ghostData = (NETGHOSTDATABLOCK*)AllocateMem(sizeof(NETGHOSTDATABLOCK)); 
 		if(!ghostData) 
 		{
 			/* allocation failed */
@@ -4835,7 +4835,7 @@ STRATEGYBLOCK *MakeNewCorpse()
 
 	/* data block */
 	{
-		corpseData = AllocateMem(sizeof(NETCORPSEDATABLOCK)); 
+		corpseData = (NETCORPSEDATABLOCK*)AllocateMem(sizeof(NETCORPSEDATABLOCK)); 
 		if(!corpseData) 
 		{
 			/* allocation failed */

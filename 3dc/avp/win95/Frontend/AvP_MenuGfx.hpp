@@ -80,11 +80,11 @@ typedef struct
 	AVPTEXTURE *ImagePtr;
 	RENDERTEXTURE menuTexture;
 	AW_BACKUPTEXTUREHANDLE hBackup;
-	int Width;
-	int Height;
+	uint32_t Width;
+	uint32_t Height;
 
-	int newWidth;
-	int newHeight;
+	uint32_t newWidth;
+	uint32_t newHeight;
 
 } AVPMENUGFX;
 

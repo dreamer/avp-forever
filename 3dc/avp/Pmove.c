@@ -116,6 +116,10 @@ static void CorpseMovement(STRATEGYBLOCK *sbPtr);
 extern SECTION * GetNamedHierarchyFromLibrary(const char * rif_name, const char * hier_name);
 extern void NewOnScreenMessage(char *messagePtr);
 extern void RemoveAllThisPlayersDiscs(void);
+void ChangeToMarine();
+void ChangeToAlien();
+void ChangeToPredator();
+STRATEGYBLOCK* CreateGrenadeKernel(AVP_BEHAVIOUR_TYPE behaviourID, VECTORCH *position, MATRIXCH *orient, int fromplayer);
 int timeInContactWithFloor;
 
 extern int weaponHandle;

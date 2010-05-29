@@ -15,6 +15,7 @@ extern int Font_DrawText(const char* text, int x, int y, int colour, int fontTyp
 
 extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour);
 extern void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, BOOL alpha);
+extern void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint32_t alpha);
 
 extern "C"
 {
@@ -307,8 +308,6 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 			DrawAvPMenuGlowyBar(pX+18, pY-8, alpha, size-18);
 			DrawAvPMenuGfx(AVPMENUGFX_GLOWY_RIGHT, pX+size, pY-8, alpha, AVPMENUFORMAT_LEFTJUSTIFIED);
 */
-			extern void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha);
-
 			DrawMenuTextGlow(pX+18, pY-8, size-18, alpha);
 		}
 	}
@@ -317,11 +316,11 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 	int positionX = pX;
 	int positionY = pY;
 
-	while( *textPtr ) 
+	while (*textPtr)
 	{
 		char c = *textPtr++;
 
-		if (c>=' ') 
+		if (c >= ' ') 
 		{
 //			int topLeftU = 1;
 //			int topLeftV = 1+(c-32)*33;
@@ -1138,26 +1137,21 @@ extern void LoadAllAvPMenuGfx(void)
 		LoadAvPMenuGfx((enum AVPMENUGFX_ID)i++);
 	}
 
-	LoadMenuFont();	
+	LoadMenuFont();
 	
-	unsigned char *srcPtr;
+	uint8_t *srcPtr = 0;
 
 	AVPMENUGFX *gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_CLOUDY];
 	
-	AVPTEXTURE *image;
-
-	image = gfxPtr->ImagePtr;
+	AVPTEXTURE *image = gfxPtr->ImagePtr;
 
 	if (image != NULL)
 	{
 		srcPtr = image->buffer;
-	  		
-		int x,y;
-		extern int CloudTable[128][128];
 
-		for (y = 0; y < gfxPtr->Height; y++)
+		for (uint32_t y = 0; y < gfxPtr->Height; y++)
 		{
-			for (x = 0; x < gfxPtr->Width; x++)
+			for (uint32_t x = 0; x < gfxPtr->Width; x++)
 			{
 				int r = srcPtr[0];
 

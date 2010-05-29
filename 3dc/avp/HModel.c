@@ -375,7 +375,7 @@ void Setup_Texture_Animation_For_Section(SECTION_DATA *this_section_data)
 					{
 						TXACTRLBLK *pnew_txactrlblk;
 
-						pnew_txactrlblk = AllocateMem(sizeof(TXACTRLBLK));
+						pnew_txactrlblk = (TXACTRLBLK*)AllocateMem(sizeof(TXACTRLBLK));
 						if(pnew_txactrlblk)
 						{
 							pnew_txactrlblk->tac_flags = 0;										
@@ -460,7 +460,7 @@ SECTION_DATA *Create_New_Section(SECTION *this_section) {
 
 			GLOBALASSERT(this_section->Shape->animation_header);
 			
-			this_section_data->sac_ptr=AllocateMem(sizeof(SHAPEANIMATIONCONTROLLER));
+			this_section_data->sac_ptr = (SHAPEANIMATIONCONTROLLER*)AllocateMem(sizeof(SHAPEANIMATIONCONTROLLER));
 
 			InitShapeAnimationController (this_section_data->sac_ptr, this_section->Shape);
 	
@@ -3492,7 +3492,7 @@ DELTA_CONTROLLER *Add_Delta_Sequence(HMODELCONTROLLER *controller,char *id,int s
 	delta_controller->next_controller=controller->Deltas;
 	controller->Deltas=delta_controller;
 
-	delta_controller->id = AllocateMem(strlen(id)+1);
+	delta_controller->id = (char*)AllocateMem(strlen(id)+1);
 	strcpy(delta_controller->id,id);
 
 	delta_controller->sequence_type=sequence_type;

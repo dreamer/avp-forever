@@ -303,7 +303,7 @@ static void InitFarLocDataAreas(MODULE **moduleList, int numModules)
 
 	/* allocate base data areas */
 	LOCALASSERT(FL_TotalNumAuxLocs>0);
-	FL_AuxData = AllocateMem(FL_TotalNumAuxLocs*sizeof(VECTORCH));;
+	FL_AuxData = (VECTORCH*)AllocateMem(FL_TotalNumAuxLocs*sizeof(VECTORCH));;
 	if(!FL_AuxData) 
 	{
 		memoryInitialisationFailure = 1;

@@ -4326,7 +4326,6 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 				MakeLightElement(positionPtr, LIGHTELEMENT_EXPLOSION);
 			}
 
-			#if 1
 			for (i=0; i<LocalDetailLevels.NumberOfSmokeParticlesFromLargeExplosion; i++)
 			{
 				VECTORCH position = *positionPtr;
@@ -4335,7 +4334,6 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 				position.vz += (FastRandom()&2047)-1024;
 				MakeParticle(&position, positionPtr, PARTICLE_SMOKECLOUD);
 			}
-			#endif
 			break;
 		}
 		case EXPLOSION_MOLOTOV:

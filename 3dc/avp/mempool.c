@@ -23,7 +23,7 @@ void* PoolAllocateMem(size_t amount)
 	{
 		CurrentMemoryBlock++;
 		GLOBALASSERT(CurrentMemoryBlock < MAX_NUM_MEMORY_BLOCK);
-		MemoryBlocks[CurrentMemoryBlock] = AllocateMem(MEMORY_BLOCK_SIZE);
+		MemoryBlocks[CurrentMemoryBlock] = (char*)AllocateMem(MEMORY_BLOCK_SIZE);
 		GLOBALASSERT(MemoryBlocks[CurrentMemoryBlock]);
 
 		MemoryLeft = MEMORY_BLOCK_SIZE;

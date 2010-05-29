@@ -1151,17 +1151,17 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t texture
 	orthoVBOffset++;
 }
 
-inline float WPos2DC(int pos)
+inline float WPos2DC(uint32_t pos)
 {
 	return (float(pos / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
 }
 
-inline float HPos2DC(int pos)
+inline float HPos2DC(uint32_t pos)
 {
 	return (float(pos / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
 }
 
-void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha) 
+void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t char_width, uint32_t alpha) 
 {
 //	CheckVertexBuffer(4, TALLFONT_TEX, TRANSLUCENCY_GLOWING);
 
@@ -1329,6 +1329,391 @@ void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_widt
 		D3DStencilEnable = FALSE;
 	}
 #endif
+}
+
+void SetupFMVTexture(FMVTEXTURE *ftPtr)
+{
+	ftPtr->RGBBuffer = new uint8_t[128 * 128 * 4];
+
+	ftPtr->SoundVolume = 0;
+}
+
+void UpdateFMVTexture(FMVTEXTURE *ftPtr)
+{
+	assert(ftPtr);
+	assert(ftPtr->ImagePtr);
+	assert(ftPtr->ImagePtr->Direct3DTexture);
+
+	if (!ftPtr) 
+		return;
+
+	if (!NextFMVTextureFrame(ftPtr))
+	{
+	 	return;
+	}
+
+	// lock the d3d texture
+	D3DLOCKED_RECT textureRect;
+	LastError = ftPtr->ImagePtr->Direct3DTexture->LockRect(0, &textureRect, NULL, D3DLOCK_DISCARD);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return;
+	}
+
+	uint8_t *destPtr = 0;
+	uint8_t *srcPtr = &ftPtr->RGBBuffer[0];
+
+	for (uint32_t y = 0; y < ftPtr->ImagePtr->ImageHeight; y++)
+	{
+		destPtr = static_cast<uint8_t*>(textureRect.pBits) + y * textureRect.Pitch;
+
+		for (uint32_t x = 0; x < ftPtr->ImagePtr->ImageWidth; x++)
+		{
+/*
+			destPtr[0] = srcPtr[0];
+			destPtr[1] = srcPtr[1];
+			destPtr[2] = srcPtr[2];
+			destPtr[3] = srcPtr[3];
+*/
+			memcpy(destPtr, srcPtr, 4);
+
+			destPtr += 4;
+			srcPtr += 4;
+		}
+	}
+	
+	// unlock d3d texture
+	LastError = ftPtr->ImagePtr->Direct3DTexture->UnlockRect(0);
+	if (FAILED(LastError)) 
+	{
+		LogErrorString("Could not unlock Direct3D texture ftPtr->DestTexture", __LINE__, __FILE__);
+		return;
+	}
+}
+
+void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha) 
+{
+	alpha = alpha / 256;
+	if (alpha > 255) 
+		alpha = 255;
+
+	D3DCOLOR colour = D3DCOLOR_ARGB(alpha,0,0,0);
+
+	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING, TEXTURE_WRAP);
+
+	// bottom left
+	orthoVerts[orthoVBOffset].x = -1.0f;
+	orthoVerts[orthoVBOffset].y = 1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+	// top left
+	orthoVerts[orthoVBOffset].x = -1.0f;
+	orthoVerts[orthoVBOffset].y = -1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+	// bottom right
+	orthoVerts[orthoVBOffset].x = 1.0f;
+	orthoVerts[orthoVBOffset].y = 1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+	// top right
+	orthoVerts[orthoVBOffset].x = 1.0f;;
+	orthoVerts[orthoVBOffset].y = -1.0f;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+}
+
+void DrawHUDQuad(int x, int y, int width, int height, float *UVList, int textureID, int colour, enum TRANSLUCENCY_TYPE translucencyType)
+{
+	if (!UVList)
+		return;
+
+	assert (textureID != -1);
+
+	float x1 = (float(x / 640.0f) * 2) - 1;
+	float y1 = (float(y / 480.0f) * 2) - 1;
+
+	float x2 = ((float(x + width) / 640.0f) * 2) - 1;
+	float y2 = ((float(y + height) / 480.0f) * 2) - 1;
+
+	int texturePOW2Width, texturePOW2Height;
+	
+	// if in menus (outside game)
+	if (mainMenu)
+	{
+		texturePOW2Width = AvPMenuGfxStorage[textureID].newWidth;
+		texturePOW2Height = AvPMenuGfxStorage[textureID].newHeight;
+	}
+	else
+	{
+		texturePOW2Width = ImageHeaderArray[textureID].ImageWidth;
+		texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
+	}
+
+	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP);
+
+	// bottom left
+	orthoVerts[orthoVBOffset].x = x1;
+	orthoVerts[orthoVBOffset].y = y2;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
+	orthoVBOffset++;
+
+	// top left
+	orthoVerts[orthoVBOffset].x = x1;
+	orthoVerts[orthoVBOffset].y = y1;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+	// bottom right
+	orthoVerts[orthoVBOffset].x = x2;
+	orthoVerts[orthoVBOffset].y = y2;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVerts[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
+	orthoVBOffset++;
+
+	// top right
+	orthoVerts[orthoVBOffset].x = x2;
+	orthoVerts[orthoVBOffset].y = y1;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+}
+
+void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
+{
+	float x1 = (float(x / 640.0f) * 2) - 1;
+	float y1 = (float(y / 480.0f) * 2) - 1;
+
+	float x2 = ((float(x + width) / 640.0f) * 2) - 1;
+	float y2 = ((float(y + height) / 480.0f) * 2) - 1;
+
+	uint32_t texturePOW2Width, texturePOW2Height;
+	
+	// if in menus (outside game)
+	if (textureID >= texIDoffset)
+	{
+		Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
+	}
+	else
+	{
+		if (textureID == -1)
+		{
+			texturePOW2Width = width;
+			texturePOW2Height = height;
+		}
+
+		else {
+		if (mainMenu)
+		{
+			texturePOW2Width = AvPMenuGfxStorage[textureID].newWidth;
+			texturePOW2Height = AvPMenuGfxStorage[textureID].newHeight;
+		}
+		else
+		{
+			texturePOW2Width = ImageHeaderArray[textureID].ImageWidth;
+			texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
+		}
+		}
+	}
+
+	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP);
+
+	// bottom left
+	orthoVerts[orthoVBOffset].x = x1;
+	orthoVerts[orthoVBOffset].y = y2;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
+	orthoVBOffset++;
+
+	// top left
+	orthoVerts[orthoVBOffset].x = x1;
+	orthoVerts[orthoVBOffset].y = y1;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+	// bottom right
+	orthoVerts[orthoVBOffset].x = x2;
+	orthoVerts[orthoVBOffset].y = y2;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVerts[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
+	orthoVBOffset++;
+
+	// top right
+	orthoVerts[orthoVBOffset].x = x2;
+	orthoVerts[orthoVBOffset].y = y1;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+}
+
+void DrawAlphaMenuQuad(uint32_t topX, uint32_t topY, int32_t image_num, uint32_t alpha)
+{
+	// textures actual height/width (whether it's non power of two or not)
+	uint32_t textureWidth = AvPMenuGfxStorage[image_num].Width;
+	uint32_t textureHeight = AvPMenuGfxStorage[image_num].Height;
+
+	// we pad non power of two textures to pow2
+	uint32_t texturePOW2Width = AvPMenuGfxStorage[image_num].newWidth;
+	uint32_t texturePOW2Height = AvPMenuGfxStorage[image_num].newHeight;
+
+	alpha = (alpha / 256);
+	if (alpha > 255) 
+		alpha = 255;
+
+	DrawQuad(topX, topY, textureWidth, textureHeight, image_num, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
+
+	return;
+}
+
+void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint32_t alpha)
+{
+	uint32_t textureWidth = 0;
+	uint32_t textureHeight = 0;
+	uint32_t texturePOW2Width = 0;
+	uint32_t texturePOW2Height = 0;
+
+	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
+		alpha = ONE_FIXED;
+
+	alpha = (alpha / 256);
+	if (alpha > 255) 
+		alpha = 255;
+
+	// textures original resolution (if it's a non power of 2, these will be the non power of 2 values)
+	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Width;
+	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Height;
+
+	// these values are the texture width and height as power of two values
+//	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newWidth;
+//	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newHeight;
+
+	// do the text alignment justification
+	topLeftX -= textureWidth;
+
+	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_LEFT, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
+
+	// now do the middle section
+	topLeftX += textureWidth;
+
+	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Width;
+	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Height;
+
+	DrawQuad(topLeftX, topLeftY, textureWidth * size, textureHeight, AVPMENUGFX_GLOWY_MIDDLE, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
+
+	// now do the right section
+	topLeftX += textureWidth * size;
+
+	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Width;
+	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Height;
+
+	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_RIGHT, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
+}
+
+void DrawSmallMenuCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t red, uint32_t green, uint32_t blue, uint32_t alpha) 
+{
+	alpha = (alpha / 256);
+
+	red = (red / 256);
+	green = (green / 256);
+	blue = (blue / 256);
+
+	// clamp if needed
+	if (alpha > 255) alpha = 255;
+	if (red > 255) red = 255;
+	if (green > 255) green = 255;
+	if (blue > 255) blue = 255;
+
+	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
+//	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, red, green, blue);
+
+	uint32_t font_height = 15;
+	uint32_t font_width = 15;
+
+	// aa_font.bmp is 256 x 256
+	uint32_t image_height = 256;
+	uint32_t image_width = 256;
+
+	float RecipW = 1.0f / image_width; // 0.00390625
+	float RecipH = 1.0f / image_height;
+
+	float x1 = (float(topX / 640.0f) * 2) - 1;
+	float y1 = (float(topY / 480.0f) * 2) - 1;
+
+	float x2 = ((float(topX + font_width) / 640.0f) * 2) - 1;
+	float y2 = ((float(topY + font_height) / 480.0f) * 2) - 1;
+
+	CheckOrthoBuffer(4, AVPMENUGFX_SMALL_FONT, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
+
+	// bottom left
+	orthoVerts[orthoVBOffset].x = x1;
+	orthoVerts[orthoVBOffset].y = y2;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = (float)((texU) * RecipW);
+	orthoVerts[orthoVBOffset].v = (float)((texV + font_height) * RecipH);
+	orthoVBOffset++;
+
+	// top left
+	orthoVerts[orthoVBOffset].x = x1;
+	orthoVerts[orthoVBOffset].y = y1;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = (float)((texU) * RecipW);
+	orthoVerts[orthoVBOffset].v = (float)((texV) * RecipH);
+	orthoVBOffset++;
+
+	// bottom right
+	orthoVerts[orthoVBOffset].x = x2;
+	orthoVerts[orthoVBOffset].y = y2;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = (float)((texU + font_height) * RecipW);
+	orthoVerts[orthoVBOffset].v = (float)((texV + font_height) * RecipH);
+	orthoVBOffset++;
+
+	// top right
+	orthoVerts[orthoVBOffset].x = x2;
+	orthoVerts[orthoVBOffset].y = y1;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = (float)((texU + font_width) * RecipW);
+	orthoVerts[orthoVBOffset].v = (float)((texV) * RecipH);
+	orthoVBOffset++;
 }
 
 extern "C" {
@@ -3929,13 +4314,13 @@ extern void D3D_DrawSlider(int x, int y, int alpha)
 
 extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale)
 {
-	return;
 
+#if 0 // fixme
 //	CheckVertexBuffer(255, NO_TEXTURE, TRANSLUCENCY_OFF);
 
 	CheckOrthoBuffer(255, NO_TEXTURE, TRANSLUCENCY_OFF, TEXTURE_CLAMP, FILTERING_BILINEAR_ON);
 
-	for (int i = 0; i < 255; )
+	for (uint32_t i = 0; i < 255; )
 	{
 		/* this'll do.. */
 //		CheckVertexBuffer(/*1530*/4, NO_TEXTURE, TRANSLUCENCY_OFF);
@@ -3947,7 +4332,8 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 
 		// set alpha to 255 otherwise d3d alpha test stops pixels being rendered
 		colour = RGBA_MAKE(MUL_FIXED(c,rScale),MUL_FIXED(c,gScale),MUL_FIXED(c,bScale),255);
-
+/*
+		// top right?
 	  	mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
 	  	mainVertex[vb].sy = (float)yTop;
 		mainVertex[vb].sz = 0.0f;
@@ -3959,6 +4345,7 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 
 		vb++;
 
+		// bottom right?
 	  	mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
 	  	mainVertex[vb].sy = (float)yBottom;
 		mainVertex[vb].sz = 0.0f;
@@ -3969,11 +4356,12 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 		mainVertex[vb].tv = 0.0f;
 
 		vb++;
-
+*/
 		i++;
 		c = GammaValues[i];
 		colour = RGBA_MAKE(MUL_FIXED(c,rScale),MUL_FIXED(c,gScale),MUL_FIXED(c,bScale),255);
-
+/*
+		// 
 		mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
 	  	mainVertex[vb].sy = (float)yBottom;
 		mainVertex[vb].sz = 0.0f;
@@ -3993,12 +4381,13 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 		mainVertex[vb].tu = 0.0f;
 		mainVertex[vb].tv = 0.0f;
-
+*/
 		vb++;
 
 		OUTPUT_TRIANGLE(0,1,3, 4);
 		OUTPUT_TRIANGLE(1,2,3, 4);
 	}
+#endif
 }
 
 
@@ -4367,71 +4756,6 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 	}
 }
 
-extern "C++" { // sort this out sometime..
-
-void SetupFMVTexture(FMVTEXTURE *ftPtr)
-{
-	ftPtr->RGBBuffer = new uint8_t[128 * 128 * 4];
-
-	ftPtr->SoundVolume = 0;
-}
-
-void UpdateFMVTexture(FMVTEXTURE *ftPtr)
-{
-	assert(ftPtr);
-	assert(ftPtr->ImagePtr);
-	assert(ftPtr->ImagePtr->Direct3DTexture);
-
-	if (!ftPtr) 
-		return;
-
-	if (!NextFMVTextureFrame(ftPtr))
-	{
-	 	return;
-	}
-
-	// lock the d3d texture
-	D3DLOCKED_RECT textureRect;
-	LastError = ftPtr->ImagePtr->Direct3DTexture->LockRect(0, &textureRect, NULL, D3DLOCK_DISCARD);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return;
-	}
-
-	uint8_t *destPtr = NULL;
-	uint8_t *srcPtr = &ftPtr->RGBBuffer[0];
-
-	for (uint32_t y = 0; y < ftPtr->ImagePtr->ImageHeight; y++)
-	{
-		destPtr = static_cast<uint8_t*>(textureRect.pBits) + y * textureRect.Pitch;
-
-		for (uint32_t x = 0; x < ftPtr->ImagePtr->ImageWidth; x++)
-		{
-/*
-			destPtr[0] = srcPtr[0];
-			destPtr[1] = srcPtr[1];
-			destPtr[2] = srcPtr[2];
-			destPtr[3] = srcPtr[3];
-*/
-			memcpy(destPtr, srcPtr, 4);
-
-			destPtr += 4;
-			srcPtr += 4;
-		}
-	}
-	
-	// unlock d3d texture
-	LastError = ftPtr->ImagePtr->Direct3DTexture->UnlockRect(0);
-	if (FAILED(LastError)) 
-	{
-		LogErrorString("Could not unlock Direct3D texture ftPtr->DestTexture", __LINE__, __FILE__);
-		return;
-	}
-}
-
-} // extern "C"
-
 #if 0
 static int GammaSetting;
 void UpdateGammaSettings(int g, int forceUpdate)
@@ -4769,329 +5093,8 @@ extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, in
 	}
 }
 
-void DrawFadeQuad(int topX, int topY, int alpha) 
+void DrawCloudTable(uint32_t topX, uint32_t topY, uint32_t word_length, uint32_t alpha) 
 {
-	alpha = alpha / 256;
-	if (alpha > 255) alpha = 255;
-	D3DCOLOR colour = D3DCOLOR_ARGB(alpha,0,0,0);
-
-	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING, TEXTURE_WRAP);
-
-	// bottom left
-	orthoVerts[orthoVBOffset].x = -1.0f;
-	orthoVerts[orthoVBOffset].y = 1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
-	orthoVBOffset++;
-
-	// top left
-	orthoVerts[orthoVBOffset].x = -1.0f;
-	orthoVerts[orthoVBOffset].y = -1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
-	orthoVBOffset++;
-
-	// bottom right
-	orthoVerts[orthoVBOffset].x = 1.0f;
-	orthoVerts[orthoVBOffset].y = 1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
-	orthoVBOffset++;
-
-	// top right
-	orthoVerts[orthoVBOffset].x = 1.0f;;
-	orthoVerts[orthoVBOffset].y = -1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
-	orthoVBOffset++;
-}
-
-void DrawHUDQuad(int x, int y, int width, int height, float *UVList, int textureID, int colour, enum TRANSLUCENCY_TYPE translucencyType)
-{
-	if (!UVList)
-		return;
-
-	assert (textureID != -1);
-
-	float x1 = (float(x / 640.0f) * 2) - 1;
-	float y1 = (float(y / 480.0f) * 2) - 1;
-
-	float x2 = ((float(x + width) / 640.0f) * 2) - 1;
-	float y2 = ((float(y + height) / 480.0f) * 2) - 1;
-
-	int texturePOW2Width, texturePOW2Height;
-	
-	// if in menus (outside game)
-	if (mainMenu)
-	{
-		texturePOW2Width = AvPMenuGfxStorage[textureID].newWidth;
-		texturePOW2Height = AvPMenuGfxStorage[textureID].newHeight;
-	}
-	else
-	{
-		texturePOW2Width = ImageHeaderArray[textureID].ImageWidth;
-		texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
-	}
-
-	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP);
-
-	// bottom left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
-	orthoVBOffset++;
-
-	// top left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
-	orthoVBOffset++;
-
-	// bottom right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
-	orthoVerts[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
-	orthoVBOffset++;
-
-	// top right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
-	orthoVerts[orthoVBOffset].v = 0.0f;
-	orthoVBOffset++;
-}
-
-void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
-{
-	float x1 = (float(x / 640.0f) * 2) - 1;
-	float y1 = (float(y / 480.0f) * 2) - 1;
-
-	float x2 = ((float(x + width) / 640.0f) * 2) - 1;
-	float y2 = ((float(y + height) / 480.0f) * 2) - 1;
-
-	uint32_t texturePOW2Width, texturePOW2Height;
-	
-	// if in menus (outside game)
-	if (textureID >= texIDoffset)
-	{
-		Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
-	}
-	else
-	{
-		if (textureID == -1)
-		{
-			texturePOW2Width = width;
-			texturePOW2Height = height;
-		}
-
-		else {
-		if (mainMenu)
-		{
-			texturePOW2Width = AvPMenuGfxStorage[textureID].newWidth;
-			texturePOW2Height = AvPMenuGfxStorage[textureID].newHeight;
-		}
-		else
-		{
-			texturePOW2Width = ImageHeaderArray[textureID].ImageWidth;
-			texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
-		}
-		}
-	}
-
-	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP);
-
-	// bottom left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
-	orthoVBOffset++;
-
-	// top left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
-	orthoVBOffset++;
-
-	// bottom right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
-	orthoVerts[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
-	orthoVBOffset++;
-
-	// top right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
-	orthoVerts[orthoVBOffset].v = 0.0f;
-	orthoVBOffset++;
-}
-
-void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha) 
-{
-	// textures actual height/width (whether it's non power of two or not)
-	int textureWidth = AvPMenuGfxStorage[image_num].Width;
-	int textureHeight = AvPMenuGfxStorage[image_num].Height;
-
-	// we pad non power of two textures to pow2
-	int texturePOW2Width = AvPMenuGfxStorage[image_num].newWidth;
-	int texturePOW2Height = AvPMenuGfxStorage[image_num].newHeight;
-
-	alpha = (alpha / 256);
-	if (alpha > 255) 
-		alpha = 255;
-
-	DrawQuad(topX, topY, textureWidth, textureHeight, image_num, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
-
-	return;
-}
-
-void DrawMenuTextGlow(int topLeftX, int topLeftY, int size, int alpha)
-{
-	int textureWidth = 0;
-	int textureHeight = 0;
-	int texturePOW2Width = 0;
-	int texturePOW2Height = 0;
-
-	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
-		alpha = ONE_FIXED;
-
-	alpha = (alpha / 256);
-	if (alpha > 255) 
-		alpha = 255;
-
-	// textures original resolution (if it's a non power of 2, these will be the non power of 2 values)
-	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Width;
-	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Height;
-
-	// these values are the texture width and height as power of two values
-//	texturePOW2Width = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newWidth;
-//	texturePOW2Height = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].newHeight;
-
-	// do the text alignment justification
-	topLeftX -= textureWidth;
-
-	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_LEFT, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
-
-	// now do the middle section
-	topLeftX += textureWidth;
-
-	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Width;
-	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Height;
-
-	DrawQuad(topLeftX, topLeftY, textureWidth * size, textureHeight, AVPMENUGFX_GLOWY_MIDDLE, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
-
-	// now do the right section
-	topLeftX += textureWidth * size;
-
-	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Width;
-	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Height;
-
-	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_RIGHT, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
-}
-
-void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha) 
-{
-	alpha = (alpha / 256);
-
-	red = (red / 256);
-	green = (green / 256);
-	blue = (blue / 256);
-
-	// clamp if needed
-	if (alpha > 255) alpha = 255;
-	if (red > 255) red = 255;
-	if (green > 255) green = 255;
-	if (blue > 255) blue = 255;
-
-	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
-//	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, red, green, blue);
-
-	int font_height = 15;
-	int font_width = 15;
-
-	// aa_font.bmp is 256 x 256
-	int image_height = 256;
-	int image_width = 256;
-
-	float RecipW = 1.0f / image_width; // 0.00390625
-	float RecipH = 1.0f / image_height;
-
-	float x1 = (float(topX / 640.0f) * 2) - 1;
-	float y1 = (float(topY / 480.0f) * 2) - 1;
-
-	float x2 = ((float(topX + font_width) / 640.0f) * 2) - 1;
-	float y2 = ((float(topY + font_height) / 480.0f) * 2) - 1;
-
-	CheckOrthoBuffer(4, AVPMENUGFX_SMALL_FONT, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
-
-	// bottom left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((texU) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((texV + font_height) * RecipH);
-	orthoVBOffset++;
-
-	// top left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((texU) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((texV) * RecipH);
-	orthoVBOffset++;
-
-	// bottom right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((texU + font_height) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((texV + font_height) * RecipH);
-	orthoVBOffset++;
-
-	// top right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((texU + font_width) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((texV) * RecipH);
-	orthoVBOffset++;
-}
-
-void DrawCloudTable(int topX, int topY, int word_length, int alpha) {
 #if 0
 	LastError = d3d.lpD3DDevice->SetTexture(0, AvPMenuGfxStorage[AVPMENUGFX_CLOUDY].menuTexture);
 	if(FAILED(LastError)) {

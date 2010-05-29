@@ -1341,30 +1341,30 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
                 int shape_num = toolsData->shapeIndex;
                 SHAPEHEADER *shptr = GetShapeData(shape_num);
                 pptxactrlblk = &objectstatusptr->inan_tac;
-                for(item_num = 0; item_num < shptr->numitems; item_num ++)
+                for (item_num = 0; item_num < shptr->numitems; item_num ++)
                 {
-                        POLYHEADER *poly =  (POLYHEADER*)(shptr->items[item_num]);
-                        LOCALASSERT(poly);
+                    POLYHEADER *poly = (POLYHEADER*)(shptr->items[item_num]);
+                    LOCALASSERT(poly);
 
-                        if((Request_PolyFlags((void *)poly)) & iflag_txanim)
-                                {
-                                        TXACTRLBLK *pnew_txactrlblk;
+                    if ((Request_PolyFlags((void *)poly)) & iflag_txanim)
+                    {
+                        TXACTRLBLK *pnew_txactrlblk;
 
-                                        pnew_txactrlblk = AllocateMem(sizeof(TXACTRLBLK));
-                                        if(pnew_txactrlblk)
-                                        {
-                                                pnew_txactrlblk->tac_flags = 0;
-                                                pnew_txactrlblk->tac_item = item_num;
-                                                pnew_txactrlblk->tac_sequence = 0;
-                                                pnew_txactrlblk->tac_node = 0;
-                                                pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);
-                                                pnew_txactrlblk->tac_txah_s = GetTxAnimHeaderFromShape(pnew_txactrlblk, shape_num);
+                        pnew_txactrlblk = (TXACTRLBLK*)AllocateMem(sizeof(TXACTRLBLK));
+                        if (pnew_txactrlblk)
+                        {
+                            pnew_txactrlblk->tac_flags = 0;
+                            pnew_txactrlblk->tac_item = item_num;
+                            pnew_txactrlblk->tac_sequence = 0;
+                            pnew_txactrlblk->tac_node = 0;
+                            pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);
+                            pnew_txactrlblk->tac_txah_s = GetTxAnimHeaderFromShape(pnew_txactrlblk, shape_num);
 
-                                                *pptxactrlblk = pnew_txactrlblk;
-                                                pptxactrlblk = &pnew_txactrlblk->tac_next;
-                                        }
-                                        else *pptxactrlblk = NULL; 
-                                }
+                            *pptxactrlblk = pnew_txactrlblk;
+                            pptxactrlblk = &pnew_txactrlblk->tac_next;
+                        }
+                        else *pptxactrlblk = NULL; 
+                    }
                 }
                 *pptxactrlblk=0;
 

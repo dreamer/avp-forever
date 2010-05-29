@@ -121,7 +121,7 @@ void * InitXenoMorphRoom (void * bhdata, STRATEGYBLOCK * sbptr)
 				TXACTRLBLK *pnew_txactrlblk;
 				int num_seq = 0;
 
-				pnew_txactrlblk = AllocateMem(sizeof(TXACTRLBLK));
+				pnew_txactrlblk = (TXACTRLBLK*)AllocateMem(sizeof(TXACTRLBLK));
 				if (pnew_txactrlblk)
 				{
 					pnew_txactrlblk->tac_flags = 0;

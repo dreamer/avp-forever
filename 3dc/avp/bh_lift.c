@@ -126,7 +126,7 @@ void * LiftBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 
 	if(lift_bhv->controller)
 	{
-		LIFT_CONTROL_BLOCK* lcont = AllocateMem(sizeof(LIFT_CONTROL_BLOCK));
+		LIFT_CONTROL_BLOCK* lcont = (LIFT_CONTROL_BLOCK*)AllocateMem(sizeof(LIFT_CONTROL_BLOCK));
 		if(!lcont) 
 		{
 			memoryInitialisationFailure = 1;

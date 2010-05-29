@@ -16,7 +16,7 @@ extern D3DInfo d3d;
 int CurrentVideoMode = 0;
 DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
 
-void NextVideoMode2() 
+void NextVideoMode2()
 {
 	if (++CurrentVideoMode >= d3d.Driver[d3d.CurrentDriver].NumModes)
 	{
@@ -24,7 +24,7 @@ void NextVideoMode2()
 	}
 }
 
-void PreviousVideoMode2() 
+void PreviousVideoMode2()
 {
 	if (--CurrentVideoMode < 0)
 	{
