@@ -5484,19 +5484,19 @@ void RenderSky(void)
  			   VECTORCH translatedPts[4] =
 				{
 					// x   // y  // z
-					{-8192,-1000,-8192},
-					{-8192,-1000, 8192},
-					{ 8192,-1000, 8192},
-					{ 8192,-1000,-8192},
+					{-16384,-11000,-16384},
+					{-16384,-11000, 16384},
+					{ 16384,-11000, 16384},
+					{ 16384,-11000,-16384},
 				};
 
 				for (i = 0; i < 4; i++)
 				{
-					translatedPts[i].vx += 16384*x;
-					translatedPts[i].vz += 16384*z;
+					translatedPts[i].vx += 32768*x;
+					translatedPts[i].vz += 32768*z;
 
 					translatedPts[i].vx += Global_VDB_Ptr->VDB_World.vx;
-					translatedPts[i].vy += -10000;
+					//translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy;//-10000;
 					translatedPts[i].vz += Global_VDB_Ptr->VDB_World.vz;
 
 //					TranslatePointIntoViewspace(&translatedPts[i]);

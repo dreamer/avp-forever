@@ -606,7 +606,7 @@ void ReflectObject(DISPLAYBLOCK *dPtr)
 
 void AvpShowViews(void)
 {
-	FlushD3DZBuffer();
+//	FlushD3DZBuffer();
 
 	UpdateAllFMVTextures();	
 

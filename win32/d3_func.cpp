@@ -399,7 +399,7 @@ void CreateScreenShotImage()
 	SAFE_RELEASE(frontBuffer);
 }
 
-int32_t LockTexture(LPDIRECT3DTEXTURE9 texture, void **data, uint32_t *pitch)
+int32_t LockTexture(LPDIRECT3DTEXTURE9 texture, uint8_t **data, uint32_t *pitch)
 {
 	D3DLOCKED_RECT lock;
 
@@ -413,7 +413,7 @@ int32_t LockTexture(LPDIRECT3DTEXTURE9 texture, void **data, uint32_t *pitch)
 	}
 	else
 	{
-		*data = lock.pBits;
+		*data = static_cast<uint8_t*>(lock.pBits);
 		*pitch = lock.Pitch;
 		return 0;
 	}
@@ -507,7 +507,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 			{
 				destPtr = ((uint16_t*)(((uint8_t*)lock.pBits + offset) + (y*lock.Pitch)));
 
-				for (int x = 0; x < charWidth; x++)
+				for (uint32_t x = 0; x < charWidth; x++)
 				{
 					*destPtr = RGB16(srcPtr[0], srcPtr[1], srcPtr[2]);
 
@@ -617,6 +617,26 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t 
 	*width = newWidth;
 	*height = newHeight;
 
+	// lock and clear texture to black
+	D3DLOCKED_RECT lock;
+
+	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
+	if (FAILED(LastError))
+	{
+		destTexture->Release();
+		LogDxError(LastError, __LINE__, __FILE__);
+		return NULL;
+	}
+
+	memset(lock.pBits, 0, newHeight * lock.Pitch);
+
+	LastError = destTexture->UnlockRect(0);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return NULL;
+	}
+
 	return destTexture;
 }
 
@@ -648,6 +668,26 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture2(uint32_t *width, uint32_t *height)
 
 //	*width = newWidth;
 //	*height = newHeight;
+
+	// lock and clear texture to black
+	D3DLOCKED_RECT lock;
+
+	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
+	if (FAILED(LastError))
+	{
+		destTexture->Release();
+		LogDxError(LastError, __LINE__, __FILE__);
+		return NULL;
+	}
+
+	memset(lock.pBits, 0, (*height) * lock.Pitch);
+
+	LastError = destTexture->UnlockRect(0);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return NULL;
+	}
 
 	return destTexture;
 }

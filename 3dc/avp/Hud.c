@@ -268,6 +268,7 @@ void MaintainHUD(void)
 
 	RenderGrapplingHook();
 	
+	// stops player weapon sinking into walls
 	FlushD3DZBuffer();
 
 	//DrawFontTest();
