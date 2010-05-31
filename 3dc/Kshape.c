@@ -5466,8 +5466,10 @@ void RenderSky(void)
 
 	for (o = 0; o < OCTAVES; o++)
 	{
-		u[o] += MUL_FIXED(du[o], NormalFrameTime);
-		v[o] += MUL_FIXED(dv[o], NormalFrameTime);
+	/*	u[o] += MUL_FIXED(du[o], NormalFrameTime & 0x000000FF);
+		v[o] += MUL_FIXED(dv[o], NormalFrameTime & 0x000000FF);*/
+		u[o] += MUL_FIXED(du[o], 0x0000001);
+		v[o] += MUL_FIXED(dv[o], 0x0000001);
 	}
 
 	for (x = -10; x <= 10; x++)
@@ -5482,19 +5484,19 @@ void RenderSky(void)
  			   VECTORCH translatedPts[4] =
 				{
 					// x   // y  // z
-					{-1024,-1000,-1024},
-					{-1024,-1000, 1024},
-					{ 1024,-1000, 1024},
-					{ 1024,-1000,-1024},
+					{-8192,-1000,-8192},
+					{-8192,-1000, 8192},
+					{ 8192,-1000, 8192},
+					{ 8192,-1000,-8192},
 				};
 
 				for (i = 0; i < 4; i++)
 				{
-					translatedPts[i].vx += 2048*x;
-					translatedPts[i].vz += 2048*z;
+					translatedPts[i].vx += 16384*x;
+					translatedPts[i].vz += 16384*z;
 
 					translatedPts[i].vx += Global_VDB_Ptr->VDB_World.vx;
-					translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy;
+					translatedPts[i].vy += -10000;
 					translatedPts[i].vz += Global_VDB_Ptr->VDB_World.vz;
 
 //					TranslatePointIntoViewspace(&translatedPts[i]);
