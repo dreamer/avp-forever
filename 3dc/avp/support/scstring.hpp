@@ -181,7 +181,7 @@
 		return bCanRender[ I_Font ];
 	}
 
-	inline unsigned int SCString::GetNumChars(void)
+	inline size_t SCString::GetNumChars(void)
 	{
 		return NumberOfCharacters;
 	}

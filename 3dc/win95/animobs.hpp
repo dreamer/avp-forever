@@ -100,7 +100,7 @@ public:
 	ChunkQuat orientation;
 	ChunkVectorInt transform;
 	
-	signed long at_frame_no;  //frame start time (0-65535)
+	int32_t at_frame_no;  //frame start time (0-65535)
 	
 	signed long frame_ref_no; //frame index number
 	 

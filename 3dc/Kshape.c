@@ -2831,7 +2831,11 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 
 	/* The sequence # will have been copied across by the control block */
 
-	sequence = *txa_data++;
+//	sequence = *txa_data++;
+
+	sequence = *txa_data;
+
+	txa_data = (int *)((intptr_t) txa_data + sizeof(int *));
 
 	#if 0
 	textprint("sequence = %d\n", sequence);

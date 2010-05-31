@@ -734,15 +734,15 @@ void TextInputState :: SetString
 		&ProjCh[0],
 		MAX_SIZE_INPUT,	// unsigned int MaxSize,
 
-		SCString_ToUse . pProjCh()
+		SCString_ToUse.pProjCh()
 	);
 
 	if
 	(
-		SCString_ToUse . GetNumChars() < MAX_SIZE_INPUT
+		SCString_ToUse.GetNumChars() < MAX_SIZE_INPUT
 	)
 	{
-		NumChars = SCString_ToUse . GetNumChars();
+		NumChars = SCString_ToUse.GetNumChars();
 	}	
 	else
 	{
@@ -865,7 +865,7 @@ void TextInputState :: AddToHistory
 	SCString& SCString_ToAdd
 )
 {
-	if ( SCString_ToAdd . GetNumChars() < 1)
+	if (SCString_ToAdd.GetNumChars() < 1)
 	{
 		// Reject adding empty strings to the history
 		return;

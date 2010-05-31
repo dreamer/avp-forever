@@ -190,7 +190,7 @@ KeyBinding :: ParseUnbindCommand
 
 			SCString* pSCString_TestKey = MakeStringForKey(theKey);
 
-			size_t LengthOfTestString = pSCString_TestKey -> GetNumChars();
+			size_t LengthOfTestString = pSCString_TestKey->GetNumChars();
 
 			if (LengthOfTestString > 0)
 			{
@@ -865,7 +865,7 @@ OurBool KeyBinding :: ParseBindCommand
 
 			SCString* pSCString_TestKey = MakeStringForKey(theKey);
 
-			size_t LengthOfTestString = pSCString_TestKey -> GetNumChars();
+			size_t LengthOfTestString = pSCString_TestKey->GetNumChars();
 
 			if (LengthOfTestString > 0)
 			{

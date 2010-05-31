@@ -2363,7 +2363,7 @@ BOOL copy_to_shapeheader (
 				uv_imnums[item_list[i*9+3]>>16]=local_tex_index_nos[texno];
 				item_list[i*9 + 3] += local_tex_index_nos[texno];
 
-				shphd->sh_textures[UVIndex] = (int *) PoolAllocateMem (sizeof(int) * cshp_ptr->uv_list[UVIndex].num_verts * 2);
+				shphd->sh_textures[UVIndex] = (int *) PoolAllocateMem (sizeof(int*) * cshp_ptr->uv_list[UVIndex].num_verts * 2);
 				for (j=0; j<cshp_ptr->uv_list[UVIndex].num_verts; j++) 
 				{
 					(shphd->sh_textures[UVIndex])[(j*2)] = (int)cshp_ptr->uv_list[UVIndex].vert[j].u;//ProcessUVCoord(h, UVC_POLY_U, (int)cshp_ptr->uv_list[UVIndex].vert[j].u, uv_imnums[UVIndex]);
@@ -2776,16 +2776,20 @@ BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Heade
 			tf->txf_orienty=0;
 			tf->txf_numuvs=4;
 			
-			tf->txf_uvdata=(int**)PoolAllocateMem((th->txa_num_mvs_images)*sizeof(int*));
-			int* uvdata=(int*)PoolAllocateMem(th->txa_num_mvs_images*16*sizeof(int));
-			for(int k=0;k<th->txa_num_mvs_images;k++)
+			tf->txf_uvdata = (int**)PoolAllocateMem((th->txa_num_mvs_images) * sizeof(int*));
+			int* uvdata = (int*)PoolAllocateMem(th->txa_num_mvs_images * 16 * sizeof(int));
+
+			for (int k = 0; k < th->txa_num_mvs_images; k++)
 			{
-				tf->txf_uvdata[k]=&uvdata[16*k];
+				tf->txf_uvdata[k] = &uvdata[16*k];
 			}
 			
-			tf->txf_images=(int*)PoolAllocateMem(th->txa_num_mvs_images*sizeof(int));
-			int ny=2*sac->NumYaw;
-			if(sac->NumYaw==1) ny=1;
+			tf->txf_images = (int*)PoolAllocateMem(th->txa_num_mvs_images * sizeof(int));
+			int ny = 2 * sac->NumYaw;
+
+			if (sac->NumYaw == 1)
+				ny = 1;
+
 			int y,y2;
 			int pos,pos2;
 			for(y=0;y<ny;y+=2)

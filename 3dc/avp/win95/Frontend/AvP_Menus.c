@@ -715,8 +715,8 @@ extern void AvP_UpdateMenus(void)
 			RenderMenu();
 			RenderHelpString();
 			break;
-
 		}
+
 		case AVPMENU_MULTIPLAYER_DELETECONFIG :
 		{
 			//show the name of the configuration we're trying to delete
@@ -3754,7 +3754,8 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 			int x = MENU_CENTREX+MENU_ELEMENT_SPACING+3;
 			x+=(201*(*elementPtr->SliderValuePtr))/elementPtr->MaxSliderValue;
 			RenderText(GetTextString(elementPtr->TextDescription),MENU_CENTREX-MENU_ELEMENT_SPACING,y,elementPtr->Brightness,AVPMENUFORMAT_RIGHTJUSTIFIED);
-			if(AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
+			
+			if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 			{
 				D3D_DrawSliderBar(MENU_CENTREX+MENU_ELEMENT_SPACING,y+1,elementPtr->Brightness);
 				D3D_DrawSlider(x,y+4,elementPtr->Brightness);

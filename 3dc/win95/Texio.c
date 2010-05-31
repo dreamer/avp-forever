@@ -747,8 +747,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 	VECTOR2D cen_uv;
 	VECTOR2D size_uv;
 	VECTOR2D tv;
-//	int *txf_imageptr;
-	intptr_t *txf_imageptr;
+	int *txf_imageptr;
 	int **txf_uvarrayptr;
 	int *txf_uvarray;
 	int image;
@@ -815,7 +814,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 				/* Multi-View Sprite? */
 				if (sptr->shapeflags & ShapeFlag_MultiViewSprite) 
 				{
-					txf_imageptr = /*(int *)*/ (intptr_t*)txaf->txf_image; // bjd - x64
+					txf_imageptr = (int *)txaf->txf_image;
 					num_images = txah->txa_num_mvs_images;
 
 					txf_uvarrayptr = (int **) txaf->txf_uvdata;

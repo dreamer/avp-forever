@@ -2346,7 +2346,7 @@ int PointInPolygon(int *point, int *polygon, int c, int ppsize)
 #define DEG_3	31
 #define SEP_3	3
 
-static long table [DEG_3] =
+static int32_t table [DEG_3] =
 {
   -851904987, -43806228, -2029755270, 1390239686, -1912102820,
   -485608943, 1969813258, -1590463333, -1944053249, 455935928,
@@ -2359,8 +2359,8 @@ static long table [DEG_3] =
 
 #define TABLE_END (table + sizeof (table) / sizeof (table [0]))
 
-static long * front_ptr = table + SEP_3;
-static long * rear_ptr = table;
+static int32_t * front_ptr = table + SEP_3;
+static int32_t * rear_ptr = table;
 
 
 /*
@@ -2391,7 +2391,7 @@ void SetSeededFastRandom(int seed);
 void SetFastRandom(void)
 {
 	int i;
-	long number = timeGetTime();//GetTickCount();
+	uint32_t number = timeGetTime();
 
 	for (i = 0; i < DEG_3; ++i)
 	{
@@ -2422,7 +2422,7 @@ int FastRandom(void)
 	*/
 
 	*front_ptr += *rear_ptr;
-	i = (long) ((unsigned long) *front_ptr >> 1);
+	i = (int32_t) ((uint32_t) *front_ptr >> 1);
 
 	/* `front_ptr' and `rear_ptr' can't wrap at the same time. */
 
@@ -2451,18 +2451,18 @@ int FastRandom(void)
 #define SEEDED_DEG_3	13
 #define SEEDED_SEP_3	3
 
-static long seeded_table [SEEDED_DEG_3];
+static int32_t seeded_table [SEEDED_DEG_3];
 
 #define SEEDED_TABLE_END (seeded_table + sizeof (seeded_table) / sizeof (seeded_table [0]))
 
-static long * seeded_front_ptr = seeded_table + SEEDED_SEP_3;
-static long * seeded_rear_ptr = seeded_table;
+static int32_t * seeded_front_ptr = seeded_table + SEEDED_SEP_3;
+static int32_t * seeded_rear_ptr = seeded_table;
 
 
 
 int SeededFastRandom(void)
 {
-	long i;
+	int32_t i;
 
 	/*
 
@@ -2473,51 +2473,46 @@ int SeededFastRandom(void)
 	*/
 
 	*seeded_front_ptr += *seeded_rear_ptr;
-	i = (long) ((unsigned long) *seeded_front_ptr >> 1);
+	i = (int32_t) ((uint32_t) *seeded_front_ptr >> 1);
 
 	/* `front_ptr' and `rear_ptr' can't wrap at the same time. */
 
 	++seeded_front_ptr;
 
-	if(seeded_front_ptr < SEEDED_TABLE_END) {
+	if (seeded_front_ptr < SEEDED_TABLE_END) 
+	{
+	  ++seeded_rear_ptr;
 
-      ++seeded_rear_ptr;
+	  if (seeded_rear_ptr < SEEDED_TABLE_END) 
+		  return i;
 
-      if (seeded_rear_ptr < SEEDED_TABLE_END) return i;
-
-      seeded_rear_ptr = seeded_table;
-
+	  seeded_rear_ptr = seeded_table;
 	}
 
 	else {				/* front_ptr >= TABLE_END */
-
 		seeded_front_ptr = seeded_table;
 		++seeded_rear_ptr;
-
 	}
 
-	return (int) i;
-
+	return i;
 }
 
 void SetSeededFastRandom(int seed)
 {
 	int i;
-	long number = seed;
+	int32_t number = seed;
 
-
-	for(i = 0; i < SEEDED_DEG_3; ++i)
+	for (i = 0; i < SEEDED_DEG_3; ++i)
 	{
-      number   = 1103515145 * number + 12345;
-      seeded_table[i] = number;
+		number   = 1103515145 * number + 12345;
+		seeded_table[i] = number;
 	}
 
 	seeded_front_ptr = seeded_table + SEEDED_SEP_3;
 	seeded_rear_ptr  = seeded_table;
 
-	for(i = 0; i < 2 * SEEDED_DEG_3; ++i)
+	for (i = 0; i < 2 * SEEDED_DEG_3; ++i)
 		(void) SeededFastRandom ();
-
 }
 
 #if StandardShapeLanguage
