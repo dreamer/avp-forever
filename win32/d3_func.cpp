@@ -1141,21 +1141,21 @@ BOOL InitialiseDirect3D()
 	}
 
 	// count number of display formats in our array
-	int numDisplayFormats = sizeof(DisplayFormats) / sizeof(DisplayFormats[0]);
+	uint32_t numDisplayFormats = sizeof(DisplayFormats) / sizeof(DisplayFormats[0]);
 
-	int numFomats = 0;
+	uint32_t numFomats = 0;
 
 	// loop through all the devices, getting the list of formats available for each
-	for (int thisDevice = 0; thisDevice < d3d.NumDrivers; thisDevice++)
+	for (uint32_t thisDevice = 0; thisDevice < d3d.NumDrivers; thisDevice++)
 	{
 		d3d.Driver[thisDevice].NumModes = 0;
 
-		for (int displayFormatIndex = 0; displayFormatIndex < numDisplayFormats; displayFormatIndex++)
+		for (uint32_t displayFormatIndex = 0; displayFormatIndex < numDisplayFormats; displayFormatIndex++)
 		{
 			// get the number of display moves available on this adapter for this particular format
-			int numAdapterModes = d3d.lpD3D->GetAdapterModeCount(thisDevice, DisplayFormats[displayFormatIndex]);
+			uint32_t numAdapterModes = d3d.lpD3D->GetAdapterModeCount(thisDevice, DisplayFormats[displayFormatIndex]);
 
-			for (int modeIndex = 0; modeIndex < numAdapterModes; modeIndex++)
+			for (uint32_t modeIndex = 0; modeIndex < numAdapterModes; modeIndex++)
 			{
 				D3DDISPLAYMODE DisplayMode;
 
@@ -1166,7 +1166,7 @@ BOOL InitialiseDirect3D()
 				if (DisplayMode.Width < 640 || DisplayMode.Height < 480)
 					continue;
 
-				int j = 0;
+				uint32_t j = 0;
 
 				// Check if the mode already exists (to filter out refresh rates)
 				for(; j < d3d.Driver[thisDevice].NumModes; j++ )
@@ -1190,10 +1190,10 @@ BOOL InitialiseDirect3D()
 
 					d3d.Driver[thisDevice].NumModes++;
 
-					int f = 0;
+					uint32_t f = 0;
 
 					// Check if the mode's format already exists
-					for (int f = 0; f < numFomats; f++ )
+					for (; f < numFomats; f++ )
 					{
 						if (DisplayMode.Format == d3d.Driver[thisDevice].Formats[f])
 							break;
@@ -1211,15 +1211,15 @@ BOOL InitialiseDirect3D()
 	bool gotOne = false;
 	bool gotValidFormats = false;
 
-	for (int i = 0; i < (sizeof(DisplayFormats) / sizeof(DisplayFormats[0])); i++)
+	for (uint32_t i = 0; i < (sizeof(DisplayFormats) / sizeof(DisplayFormats[0])); i++)
 	{
-		for (int j = 0; j < d3d.Driver[defaultDevice].NumModes; j++)
+		for (uint32_t j = 0; j < d3d.Driver[defaultDevice].NumModes; j++)
 		{
 			// found a usable mode
 			if ((d3d.Driver[defaultDevice].DisplayMode[j].Width == width) && (d3d.Driver[defaultDevice].DisplayMode[j].Height == height))
 			{
 				// try find a matching depth buffer format
-				for (int d = 0; d < (sizeof(DepthFormats) / sizeof(DepthFormats[0])); d++)
+				for (uint32_t d = 0; d < (sizeof(DepthFormats) / sizeof(DepthFormats[0])); d++)
 				{
 					LastError = d3d.lpD3D->CheckDeviceFormat( d3d.CurrentDriver,
 												D3DDEVTYPE_HAL,

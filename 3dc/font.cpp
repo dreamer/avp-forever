@@ -154,13 +154,12 @@ void Font_Init()
 */
 }
 
+extern void DrawFontQuad(uint32_t x, uint32_t y, int32_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
+
 uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t colour, enum FONT_TYPE fontType)
 {
-
-//	float RecipW = (1.0f / Fonts[FONT_SMALL].textureWidth);
-//	float RecipH = (1.0f / Fonts[FONT_SMALL].textureHeight);
-
-//	int sixtyThree = 16;
+	float RecipW = (1.0f / Fonts[FONT_SMALL].textureWidth);
+	float RecipH = (1.0f / Fonts[FONT_SMALL].textureHeight);
 
 	uint32_t charIndex = 0;
 
@@ -168,15 +167,35 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 
 	while (charIndex < text.size())
 	{
-//		char c = text[charIndex] - 32;
+		// get the current char we're at in the string
+		char c = text[charIndex] - 32;
 
-//		uint32_t row = (uint32_t)(c / 16);  // get row
-//		uint32_t column = c % 16;			// get column from remainder value
+		uint32_t row = (uint32_t)(c / 16);  // get row
+		uint32_t column = c % 16;			// get column from remainder value
 
-//		uint32_t tex_x = column * Fonts[FONT_SMALL].blockWidth;
-//		uint32_t tex_y = row * Fonts[FONT_SMALL].blockHeight;
+		uint32_t tex_x = column * Fonts[FONT_SMALL].blockWidth;
+		uint32_t tex_y = row * Fonts[FONT_SMALL].blockHeight;
 
-		DrawQuad(x, y, charWidth, 16, Fonts[FONT_SMALL].textureID, colour, TRANSLUCENCY_GLOWING);
+		// generate the texture UVs for this character
+		float uvArray[8];
+
+		// bottom left
+		uvArray[0] = RecipW * tex_x;
+		uvArray[1] = RecipH * (tex_y + 16);
+
+		// top left
+		uvArray[2] = RecipW * tex_x;
+		uvArray[3] = RecipH * tex_y;
+
+		// bottom right
+		uvArray[4] = RecipW * (tex_x + 16);
+		uvArray[5] = RecipH * (tex_y + 16);
+
+		// top right
+		uvArray[6] = RecipW * (tex_x + 16);
+		uvArray[7] = RecipH * tex_y;
+
+		DrawFontQuad(x, y, Fonts[FONT_SMALL].textureID, uvArray, colour, TRANSLUCENCY_GLOWING);
 
 		if (/*widthSpaced*/1)
 		{

@@ -1452,6 +1452,53 @@ void DrawHUDQuad(int x, int y, int width, int height, float *UVList, int texture
 	orthoVBOffset++;
 }
 
+void DrawFontQuad(uint32_t x, uint32_t y, int32_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
+{
+	float x1 = (float(x / 640.0f) * 2) - 1;
+	float y1 = (float(y / 480.0f) * 2) - 1;
+
+	float x2 = ((float(x + 16) / 640.0f) * 2) - 1;
+	float y2 = ((float(y + 16) / 480.0f) * 2) - 1;
+
+	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP, FILTERING_BILINEAR_OFF);
+
+	// bottom left
+	orthoVerts[orthoVBOffset].x = x1;
+	orthoVerts[orthoVBOffset].y = y2;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = uvArray[0];
+	orthoVerts[orthoVBOffset].v = uvArray[1];
+	orthoVBOffset++;
+
+	// top left
+	orthoVerts[orthoVBOffset].x = x1;
+	orthoVerts[orthoVBOffset].y = y1;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = uvArray[2];
+	orthoVerts[orthoVBOffset].v = uvArray[3];
+	orthoVBOffset++;
+
+	// bottom right
+	orthoVerts[orthoVBOffset].x = x2;
+	orthoVerts[orthoVBOffset].y = y2;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = uvArray[4];
+	orthoVerts[orthoVBOffset].v = uvArray[5];
+	orthoVBOffset++;
+
+	// top right
+	orthoVerts[orthoVBOffset].x = x2;
+	orthoVerts[orthoVBOffset].y = y1;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = uvArray[6];
+	orthoVerts[orthoVBOffset].v = uvArray[7];
+	orthoVBOffset++;
+}
+
 void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
 {
 	float x1 = (float(x / 640.0f) * 2) - 1;
