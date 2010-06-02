@@ -27,13 +27,7 @@ PS_OUTPUT ps_main( in PS_INPUT In )
 {
 	PS_OUTPUT Out;                             // create an output pixel
 
-//	Out.Color = tex2D(Tex0, In.Texture);       // do a texture lookup
-
-//	Out.Color *= In.Diffuse + In.Specular;
-
-	Out.Color = tex2D(Tex0, In.Texture) * In.Diffuse + vLightColor[0];
-	
+	Out.Color = tex2D(Tex0, In.Texture) * In.Diffuse;
 
 	return Out;                                // return output pixel
-
 }

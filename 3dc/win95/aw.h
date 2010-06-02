@@ -4,9 +4,11 @@
 struct AwBackupTexture;
 typedef struct AwBackupTexture * AW_BACKUPTEXTUREHANDLE;
 
+#include <stdint.h>
+
 typedef struct AVPTEXTURE
 {
-	unsigned char *buffer;
+	uint8_t *buffer;
 
 	int width;
 	int height;
