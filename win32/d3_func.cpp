@@ -273,6 +273,7 @@ void WriteMenuTextures()
 void ColourFillBackBuffer(int FillColour)
 {
 	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_TARGET, FillColour, 1.0f, 0);
+
 }
 
 char* GetDeviceName()

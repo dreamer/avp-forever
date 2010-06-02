@@ -1794,6 +1794,48 @@ void DrawParticles()
 	// loop particles and add them to vertex buffer
 	for (size_t i = 0; i < particleArray.size(); i++)
 	{
+		// Calculate the midpoint
+		D3DXVECTOR3 midPoint;
+		ZeroMemory(midPoint,sizeof(D3DXVECTOR3));
+		// Get the normal (front vector)
+		D3DXVECTOR3 normal(viewMatrix._13,viewMatrix._23,viewMatrix._33);
+		for (size_t j = 0; j < particleArray[i].numVerts; j++)
+		{
+			// Convert from fixed point and ad to midpoint
+			midPoint+= D3DXVECTOR3(particleArray[i].vertices[j].X/65535.0f,
+								   particleArray[i].vertices[j].Y/65535.0f,
+							       particleArray[i].vertices[j].Z/65535.0f);
+		}
+		// Calculate midpoint
+		midPoint /= particleArray[i].numVerts;
+		for (size_t j = 0; j < particleArray[i].numVerts; j++)
+		{
+			// Get a vertex
+			D3DXVECTOR3 vertex(particleArray[i].vertices[j].X/65535.0f,
+							   particleArray[i].vertices[j].Y/65535.0f,
+							   particleArray[i].vertices[j].Z/65535.0f);
+			// Make a vector from midpoint
+			vertex -= midPoint;
+			// Save it's magnitude to be restored later
+			float magnitude = D3DXVec3Length(&vertex);
+			// Normalize it
+			D3DXVec3Normalize(&vertex,&vertex);
+			// Normalize our normal 
+			D3DXVec3Normalize(&normal,&normal);
+			// Apply Graham-Schimdt orthogonalization
+			vertex = (vertex - normal * D3DXVec3Dot(&normal,&vertex));
+			// Re-normalize
+			D3DXVec3Normalize(&vertex,&vertex);
+			// Restore the magnitude
+			vertex *= magnitude;
+			vertex += midPoint;
+			// And (sadly) convert it back to fixed point
+			particleArray[i].vertices[j].X = vertex.x * 65535;
+			particleArray[i].vertices[j].Y = vertex.y * 65535;
+			particleArray[i].vertices[j].Z = vertex.z * 65535;
+		}
+
+		
 		RenderPolygon.NumberOfVertices = particleArray[i].numVerts;
 		D3D_Particle_Output(&particleArray[i].particle, &particleArray[i].vertices[0]);
 	}
@@ -2775,7 +2817,7 @@ void D3D_DecalSystem_Setup(void)
 
 void D3D_DecalSystem_End(void)
 {
-//	DrawParticles();
+	DrawParticles();
 /*
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();

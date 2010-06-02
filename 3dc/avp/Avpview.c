@@ -495,10 +495,35 @@ void UpdateCamera(void)
 	int sin = GetSin(playerStatusPtr->ViewPanX);
 	MATRIXCH mat;
 	DISPLAYBLOCK *dptr_s = Player;
+	D3DLIGHT9 spot;
+	D3DMATERIAL9 material;
 
 	// update the two globals
 	Global_VDB_Ptr->VDB_World = dptr_s->ObWorld; // world space location
 	Global_VDB_Ptr->VDB_Mat = dptr_s->ObMat;	 // local -> world orientation matrix
+
+	ZeroMemory(&material,sizeof(D3DMATERIAL9));
+	
+	material.Diffuse.b = 0xFF;
+	material.Diffuse.g = 0xFF;
+	material.Diffuse.r = 0xFF;
+
+	
+
+	ZeroMemory(&spot,sizeof(D3DLIGHT9));
+	spot.Diffuse.r = 0xFF;
+	spot.Diffuse.g = 0xFF;
+	spot.Diffuse.b = 0xFF;
+
+	spot.Position.x = Player->ObWorld.vx;
+	spot.Position.y = Player->ObWorld.vy;
+	spot.Position.z = Player->ObWorld.vz;
+
+	spot.Type = D3DLIGHT_POINT;
+	d3d.lpD3DDevice->lpVtbl->SetRenderState(d3d.lpD3DDevice,D3DRS_LIGHTING,TRUE);
+	d3d.lpD3DDevice->lpVtbl->SetLight(d3d.lpD3DDevice,0,&spot);
+	d3d.lpD3DDevice->lpVtbl->SetMaterial(d3d.lpD3DDevice,&material);
+	 
 
 	// world position
 /*

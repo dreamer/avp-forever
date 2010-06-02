@@ -5466,8 +5466,6 @@ void RenderSky(void)
 
 	for (o = 0; o < OCTAVES; o++)
 	{
-	/*	u[o] += MUL_FIXED(du[o], NormalFrameTime & 0x000000FF);
-		v[o] += MUL_FIXED(dv[o], NormalFrameTime & 0x000000FF);*/
 		u[o] += MUL_FIXED(du[o], 0x0000001);
 		v[o] += MUL_FIXED(dv[o], 0x0000001);
 	}

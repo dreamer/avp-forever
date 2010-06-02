@@ -1,14 +1,12 @@
 #ifndef _INCLUDED_AW_H_
 #define _INCLUDED_AW_H_
 
-#include <stdint.h>
-
 struct AwBackupTexture;
 typedef struct AwBackupTexture * AW_BACKUPTEXTUREHANDLE;
 
 typedef struct AVPTEXTURE
 {
-	uint8_t *buffer;
+	unsigned char *buffer;
 
 	int width;
 	int height;
