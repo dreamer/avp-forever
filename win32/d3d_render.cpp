@@ -26,7 +26,6 @@
 #include "avp_menus.h"
 #include "avp_userprofile.h"
 
-uint32_t psIndex = 0;
 uint32_t NumVertices = 0;
 const int32_t  NO_TEXTURE   = -1;
 const uint32_t TALLFONT_TEX = 999;
@@ -57,12 +56,6 @@ D3DVERTEXELEMENT9 fmvDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT
 							   {0, 12, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
 							   {0, 20, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	1},
 							   {0, 28, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	2},
-                            D3DDECL_END()};
-
-D3DVERTEXELEMENT9 pointDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
-								 {0, 12, D3DDECLTYPE_FLOAT1,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_PSIZE,		0},
-								 {0, 16, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		0},
-								 {0, 20, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
                             D3DDECL_END()};
 
 LPD3DXCONSTANTTABLE	vertexConstantTable = NULL;
@@ -454,14 +447,6 @@ bool UnlockExecuteBufferAndPrepareForUse()
 		return false;
 	}
 
-	// unlock point sprite vb
-	LastError = d3d.lpD3DPointSpriteVertexBuffer->Unlock();
-	if (FAILED(LastError)) 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
 	// unlock orthographic quad vertex buffer
 	LastError = d3d.lpD3DOrthoVertexBuffer->Unlock();
 	if (FAILED(LastError)) 
@@ -508,14 +493,6 @@ bool LockExecuteBuffer()
 	// lock 2D ortho index buffer
 	LastError = d3d.lpD3DOrthoIndexBuffer->Lock(0, 0, (void**)&orthoIndex, D3DLOCK_DISCARD);
 	if (FAILED(LastError)) 
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	// lock point sprite vb
-	LastError = d3d.lpD3DPointSpriteVertexBuffer->Lock(0, 0, (void**)&testPS, 0);
-	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
@@ -694,37 +671,6 @@ bool ExecuteBuffer()
 	}
 
 	D3DPERF_EndEvent();
-
-#if 0
-	if (psIndex)
-	{
-		// PS test
-		LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DPointSpriteVertexBuffer, 0, sizeof(POINTSPRITEVERTEX));
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-		}
-/*
-		LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_POINTSPRITEVERTEX);
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-		}
-*/
-
-		d3d.lpD3DDevice->SetVertexDeclaration(d3d.pointVertexDecl);
-		d3d.lpD3DDevice->SetVertexShader(d3d.pointSpriteShader);
-		d3d.lpD3DDevice->SetPixelShader(d3d.pointSpritePixelShader);
-
-		LastError = d3d.lpD3DDevice->DrawPrimitive(D3DPT_POINTLIST, 0, psIndex);
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-		}
-	}
-#endif
-
-	psIndex = 0;
 
 	// render any orthographic quads
 	if (orthoListCount)
@@ -1069,6 +1015,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 
 	ChangeTextureAddressMode(TEXTURE_CLAMP);
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
+	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 
 	// set the texture
 	LastError = d3d.lpD3DDevice->SetTexture(0, tex1);
@@ -1798,23 +1745,23 @@ void DrawParticles()
 		D3DXVECTOR3 midpoint;
 		// Our rotation matrix
 		D3DXMATRIX rotationMatrix;
-		if(particleArray[i].numVerts > 2)
+		if (particleArray[i].numVerts > 2)
 		{
 			// Get the normal (front vector)
-			D3DXVECTOR3 eyeVector(viewMatrix._13,viewMatrix._23,viewMatrix._33);
+			D3DXVECTOR3 eyeVector(viewMatrix._13, viewMatrix._23, viewMatrix._33);
 					
 			// Get three vertex to extract vectors
-			D3DXVECTOR3 vertex1(particleArray[i].vertices[0].X/65535.0f,
-								particleArray[i].vertices[0].Y/65535.0f,
-								particleArray[i].vertices[0].Z/65535.0f);
-			D3DXVECTOR3 vertex2(particleArray[i].vertices[1].X/65535.0f,
-								particleArray[i].vertices[1].Y/65535.0f,
-								particleArray[i].vertices[1].Z/65535.0f);
-			D3DXVECTOR3 vertex3(particleArray[i].vertices[2].X/65535.0f,
-								particleArray[i].vertices[2].Y/65535.0f,
-								particleArray[i].vertices[2].Z/65535.0f);
+			D3DXVECTOR3 vertex1(particleArray[i].vertices[0].X / 65535.0f,
+								particleArray[i].vertices[0].Y / 65535.0f,
+								particleArray[i].vertices[0].Z / 65535.0f);
+			D3DXVECTOR3 vertex2(particleArray[i].vertices[1].X / 65535.0f,
+								particleArray[i].vertices[1].Y / 65535.0f,
+								particleArray[i].vertices[1].Z / 65535.0f);
+			D3DXVECTOR3 vertex3(particleArray[i].vertices[2].X / 65535.0f,
+								particleArray[i].vertices[2].Y / 65535.0f,
+								particleArray[i].vertices[2].Z / 65535.0f);
 
-			midpoint = (vertex1+vertex2+vertex3)/3;
+			midpoint = (vertex1 + vertex2 + vertex3) / 3;
 			// Make two vectors from three vertices
 			vertex1 -= vertex2;
 			vertex2 -= vertex3;
@@ -1832,38 +1779,39 @@ void DrawParticles()
 			D3DXVECTOR3 rotationAxis;
 			// Create our rotation axis
 			// if both vectors are normalized, cross result will be normalized...
-			D3DXVec3Cross(&rotationAxis,&faceNormal,&eyeVector);
+			D3DXVec3Cross(&rotationAxis, &faceNormal, &eyeVector);
 			// now, get the angle to rotate (between face and eye vector)
-			float angleInRads = acosf(D3DXVec3Dot(&faceNormal,&eyeVector));
-			// Those two axis are inverted ,no idea why =p
+			float angleInRads = acosf(D3DXVec3Dot(&faceNormal, &eyeVector));
+			// Those two axis are inverted, no idea why =p
 			rotationAxis.x = -rotationAxis.x;
 			rotationAxis.z = -rotationAxis.z;
+
 			// Now we are set up to make a matrix out of all this
-			D3DXMatrixRotationAxis(&rotationMatrix,&rotationAxis,angleInRads);
+			D3DXMatrixRotationAxis(&rotationMatrix, &rotationAxis, angleInRads);
 		}
 
-		for(size_t j = 0; j < particleArray[i].numVerts; j++)
+		for (size_t j = 0; j < particleArray[i].numVerts; j++)
 		{
 			// Get a vertex to be rotated
 			D3DXVECTOR4 finalVert;
-			D3DXVECTOR3 vertex(particleArray[i].vertices[j].X/65535.0f,
-							   particleArray[i].vertices[j].Y/65535.0f,
-							   particleArray[i].vertices[j].Z/65535.0f);
-			vertex -=midpoint;
+			D3DXVECTOR3 vertex(particleArray[i].vertices[j].X / 65535.0f,
+							   particleArray[i].vertices[j].Y / 65535.0f,
+							   particleArray[i].vertices[j].Z / 65535.0f);
+
+			vertex -= midpoint;
+
 			// Rotate it
 			D3DXVec3Transform(&finalVert,&vertex,&rotationMatrix);
 			finalVert.x += midpoint.x;
 			finalVert.y += midpoint.y;
 			finalVert.z += midpoint.z;
+
 			// And (sadly) convert it back to fixed point
 			particleArray[i].vertices[j].X = finalVert.x * 65535.0f;
 			particleArray[i].vertices[j].Y = finalVert.y * 65535.0f;
 			particleArray[i].vertices[j].Z = finalVert.z * 65535.0f;
 		}
-	
-	
 
-		
 		RenderPolygon.NumberOfVertices = particleArray[i].numVerts;
 		D3D_Particle_Output(&particleArray[i].particle, &particleArray[i].vertices[0]);
 	}
@@ -2234,6 +2182,7 @@ bool BeginD3DScene()
 			{
 				// handle this a lot better (exit the game etc)
 				Con_PrintError("need to close avp as a display adapter error occured");
+				return false;
 			}
 			Sleep(50);
 		}
@@ -2250,6 +2199,7 @@ bool BeginD3DScene()
 	if (FAILED(LastError)) 
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
 	}
 
 	return true;
@@ -2851,7 +2801,7 @@ void D3D_DecalSystem_End(void)
 	ExecuteBuffer();
 	LockExecuteBuffer();
 */
-	if (D3DDitherEnable != TRUE) 
+	if (D3DDitherEnable != TRUE)
 	{
 		d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE, TRUE);
 		D3DDitherEnable = TRUE;
@@ -4230,9 +4180,9 @@ extern void D3D_DrawSliderBar(int x, int y, int alpha)
 
 		quadVertices[0].U = topLeftU;
 		quadVertices[0].V = topLeftV;
-		quadVertices[1].U = topLeftU;// + 2;
+		quadVertices[1].U = topLeftU + 2;
 		quadVertices[1].V = topLeftV;
-		quadVertices[2].U = topLeftU;// + 2;
+		quadVertices[2].U = topLeftU + 2;
 		quadVertices[2].V = topLeftV + sliderHeight;
 		quadVertices[3].U = topLeftU;
 		quadVertices[3].V = topLeftV + sliderHeight;

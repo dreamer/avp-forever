@@ -525,6 +525,10 @@ bool TheoraFMV::NextFrame()
 	frameTextures[0].texture->UnlockRect(0);
 	frameTextures[1].texture->UnlockRect(0);
 	frameTextures[2].texture->UnlockRect(0);
+
+	// set this value to true so we can now begin to draw the textured fmv frame
+	if (!mTexturesReady)
+		mTexturesReady = true;
 /*
 	tex[0]->UnlockRect(0);
 	tex[1]->UnlockRect(0);

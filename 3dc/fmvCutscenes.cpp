@@ -297,6 +297,7 @@ extern void PlayFMV(const char *filenamePtr)
 		ThisFramesRenderingHasBegun();
 
 //		if (fmv.mDisplayTexture)
+		if (fmv.mTexturesReady)
 		{
 //			DrawFmvFrame(fmv.mFrameWidth, fmv.mFrameHeight, fmv.mTextureWidth, fmv.mTextureHeight, fmv.mDisplayTexture);
 			DrawFmvFrame2(fmv.mFrameWidth, fmv.mFrameHeight, fmv.frameTextures[0].width, fmv.frameTextures[0].height, fmv.frameTextures[0].texture, fmv.frameTextures[1].texture, fmv.frameTextures[2].texture);

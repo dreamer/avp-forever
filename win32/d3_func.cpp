@@ -119,7 +119,6 @@ bool ReleaseVolatileResources()
 	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
 	SAFE_RELEASE(d3d.lpD3DOrthoVertexBuffer);
 	SAFE_RELEASE(d3d.lpD3DOrthoIndexBuffer);
-	SAFE_RELEASE(d3d.lpD3DPointSpriteVertexBuffer);
 
 	return true;
 }
@@ -159,43 +158,6 @@ bool CreateVolatileResources()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
-
-	// point sprite vb
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(24 * sizeof(POINTSPRITEVERTEX), D3DUSAGE_POINTS, /*D3DFVF_POINTSPRITEVERTEX*/0, D3DPOOL_MANAGED, &d3d.lpD3DPointSpriteVertexBuffer, NULL);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-#if 0
-	POINTSPRITEVERTEX *testPS;
-
-	LastError = d3d.lpD3DPointSpriteVertexBuffer->Lock(0, 0, (void**)&testPS, 0);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return FALSE;
-	}
-
-	for (int i = 0; i < 4; i++)
-	{
-		testPS->x = i * 1000;
-		testPS->y = i * 1000;
-		testPS->z = i * 1000;
-		testPS->size = 64.0f;
-		testPS->colour = D3DCOLOR_XRGB(128, 0, 128);
-		testPS->u = 0.0f;
-		testPS->v = 0.0f;
-	}
-
-	LastError = d3d.lpD3DPointSpriteVertexBuffer->Unlock();
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return FALSE;
-	}
-#endif
 
 	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));
 	if (FAILED(LastError))
@@ -643,6 +605,8 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t 
 
 LPDIRECT3DTEXTURE9 CreateFmvTexture2(uint32_t *width, uint32_t *height)
 {
+	/* TODO - Add support for rendering FMVs on GPUs that can't use non power of 2 textures */
+
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
 #if 0
 	int newWidth, newHeight;
@@ -661,29 +625,6 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture2(uint32_t *width, uint32_t *height)
 	else { newHeight = *height; }
 #endif
 	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, D3DUSAGE_DYNAMIC, D3DFMT_L8, D3DPOOL_DEFAULT, &destTexture, NULL);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return NULL;
-	}
-
-//	*width = newWidth;
-//	*height = newHeight;
-
-	// lock and clear texture to black
-	D3DLOCKED_RECT lock;
-
-	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
-	if (FAILED(LastError))
-	{
-		destTexture->Release();
-		LogDxError(LastError, __LINE__, __FILE__);
-		return NULL;
-	}
-
-	memset(lock.pBits, 0, (*height) * lock.Pitch);
-
-	LastError = destTexture->UnlockRect(0);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -1567,7 +1508,7 @@ BOOL InitialiseDirect3D()
 	CreatePixelShader("pixel.psh", &d3d.pixelShader);
 	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
 
-	// create a 1x1 resolution texture
+	// create a 1x1 resolution texture to set to shader for sampling when we don't want to texture an object (eg what was NULL texture in fixed function pipeline)
 	d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &blankTexture, NULL);
 
 	D3DLOCKED_RECT lock;
@@ -1645,18 +1586,15 @@ void ReleaseDirect3D()
 	SAFE_RELEASE(d3d.vertexDecl);
 	SAFE_RELEASE(d3d.orthoVertexDecl);
 	SAFE_RELEASE(d3d.fmvVertexDecl);
-	SAFE_RELEASE(d3d.pointVertexDecl);
 
 	// release pixel shaders
 	SAFE_RELEASE(d3d.pixelShader);
 	SAFE_RELEASE(d3d.fmvPixelShader);
-	SAFE_RELEASE(d3d.pointSpritePixelShader);
 
 	// release vertex shaders
 	SAFE_RELEASE(d3d.vertexShader);
 	SAFE_RELEASE(d3d.fmvVertexShader);
 	SAFE_RELEASE(d3d.orthoVertexShader);
-	SAFE_RELEASE(d3d.pointSpriteShader);
 
 	// release device
 	SAFE_RELEASE(d3d.lpD3DDevice);

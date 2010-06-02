@@ -126,8 +126,6 @@ typedef struct D3DInfo
 	LPDIRECT3DVERTEXBUFFER9 lpD3DOrthoVertexBuffer;
 	LPDIRECT3DINDEXBUFFER9	lpD3DOrthoIndexBuffer;
 
-	LPDIRECT3DVERTEXBUFFER9 lpD3DPointSpriteVertexBuffer;
-
 	LPDIRECT3DVERTEXDECLARATION9 vertexDecl;
 	LPDIRECT3DVERTEXSHADER9      vertexShader;
 	LPDIRECT3DPIXELSHADER9       pixelShader;
@@ -138,10 +136,6 @@ typedef struct D3DInfo
 	LPDIRECT3DVERTEXDECLARATION9 fmvVertexDecl;
 	LPDIRECT3DVERTEXSHADER9      fmvVertexShader;
 	LPDIRECT3DPIXELSHADER9       fmvPixelShader;
-
-	LPDIRECT3DVERTEXDECLARATION9 pointVertexDecl;
-	LPDIRECT3DVERTEXSHADER9      pointSpriteShader;
-	LPDIRECT3DPIXELSHADER9       pointSpritePixelShader;
 
     int						NumDrivers;
     int						CurrentDriver;
