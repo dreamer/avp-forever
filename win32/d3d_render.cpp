@@ -1793,47 +1793,75 @@ void DrawParticles()
 
 	// loop particles and add them to vertex buffer
 	for (size_t i = 0; i < particleArray.size(); i++)
-	{
-		// Calculate the midpoint
-		D3DXVECTOR3 midPoint;
-		ZeroMemory(midPoint,sizeof(D3DXVECTOR3));
-		// Get the normal (front vector)
-		D3DXVECTOR3 normal(viewMatrix._13,viewMatrix._23,viewMatrix._33);
-		for (size_t j = 0; j < particleArray[i].numVerts; j++)
+	{	
+		
+		D3DXVECTOR3 midpoint;
+		// Our rotation matrix
+		D3DXMATRIX rotationMatrix;
+		if(particleArray[i].numVerts > 2)
 		{
-			// Convert from fixed point and ad to midpoint
-			midPoint+= D3DXVECTOR3(particleArray[i].vertices[j].X/65535.0f,
-								   particleArray[i].vertices[j].Y/65535.0f,
-							       particleArray[i].vertices[j].Z/65535.0f);
+			// Get the normal (front vector)
+			D3DXVECTOR3 eyeVector(viewMatrix._13,viewMatrix._23,viewMatrix._33);
+					
+			// Get three vertex to extract vectors
+			D3DXVECTOR3 vertex1(particleArray[i].vertices[0].X/65535.0f,
+								particleArray[i].vertices[0].Y/65535.0f,
+								particleArray[i].vertices[0].Z/65535.0f);
+			D3DXVECTOR3 vertex2(particleArray[i].vertices[1].X/65535.0f,
+								particleArray[i].vertices[1].Y/65535.0f,
+								particleArray[i].vertices[1].Z/65535.0f);
+			D3DXVECTOR3 vertex3(particleArray[i].vertices[2].X/65535.0f,
+								particleArray[i].vertices[2].Y/65535.0f,
+								particleArray[i].vertices[2].Z/65535.0f);
+
+			midpoint = (vertex1+vertex2+vertex3)/3;
+			// Make two vectors from three vertices
+			vertex1 -= vertex2;
+			vertex2 -= vertex3;
+			// Make a normal for the face
+			D3DXVECTOR3 faceNormal;
+			// Calculate face normal
+			D3DXVec3Cross(&faceNormal,&vertex1,&vertex2);
+			// Normalize it
+			D3DXVec3Normalize(&faceNormal,&faceNormal);
+			// Normalize our eyeVector 
+			D3DXVec3Normalize(&eyeVector,&eyeVector);
+			// For this to work in any orientation (say, the guy is looking to a particle
+			// on a lower level then he is) and not only around up vector, we need to rotate
+			// by an arbitrary vector, which is the cross between eye and normal
+			D3DXVECTOR3 rotationAxis;
+			// Create our rotation axis
+			// if both vectors are normalized, cross result will be normalized...
+			D3DXVec3Cross(&rotationAxis,&faceNormal,&eyeVector);
+			// now, get the angle to rotate (between face and eye vector)
+			float angleInRads = acosf(D3DXVec3Dot(&faceNormal,&eyeVector));
+			// Those two axis are inverted ,no idea why =p
+			rotationAxis.x = -rotationAxis.x;
+			rotationAxis.z = -rotationAxis.z;
+			// Now we are set up to make a matrix out of all this
+			D3DXMatrixRotationAxis(&rotationMatrix,&rotationAxis,angleInRads);
 		}
-		// Calculate midpoint
-		midPoint /= particleArray[i].numVerts;
-		for (size_t j = 0; j < particleArray[i].numVerts; j++)
+
+		for(size_t j = 0; j < particleArray[i].numVerts; j++)
 		{
-			// Get a vertex
+			// Get a vertex to be rotated
+			D3DXVECTOR4 finalVert;
 			D3DXVECTOR3 vertex(particleArray[i].vertices[j].X/65535.0f,
 							   particleArray[i].vertices[j].Y/65535.0f,
 							   particleArray[i].vertices[j].Z/65535.0f);
-			// Make a vector from midpoint
-			vertex -= midPoint;
-			// Save it's magnitude to be restored later
-			float magnitude = D3DXVec3Length(&vertex);
-			// Normalize it
-			D3DXVec3Normalize(&vertex,&vertex);
-			// Normalize our normal 
-			D3DXVec3Normalize(&normal,&normal);
-			// Apply Graham-Schimdt orthogonalization
-			vertex = (vertex - normal * D3DXVec3Dot(&normal,&vertex));
-			// Re-normalize
-			D3DXVec3Normalize(&vertex,&vertex);
-			// Restore the magnitude
-			vertex *= magnitude;
-			vertex += midPoint;
+			vertex -=midpoint;
+			// Rotate it
+			D3DXVec3Transform(&finalVert,&vertex,&rotationMatrix);
+			finalVert.x += midpoint.x;
+			finalVert.y += midpoint.y;
+			finalVert.z += midpoint.z;
 			// And (sadly) convert it back to fixed point
-			particleArray[i].vertices[j].X = vertex.x * 65535;
-			particleArray[i].vertices[j].Y = vertex.y * 65535;
-			particleArray[i].vertices[j].Z = vertex.z * 65535;
+			particleArray[i].vertices[j].X = finalVert.x * 65535.0f;
+			particleArray[i].vertices[j].Y = finalVert.y * 65535.0f;
+			particleArray[i].vertices[j].Z = finalVert.z * 65535.0f;
 		}
+	
+	
 
 		
 		RenderPolygon.NumberOfVertices = particleArray[i].numVerts;
