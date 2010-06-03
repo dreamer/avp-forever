@@ -1653,7 +1653,7 @@ void HandleParticleSystem(void)
 
 	
 //	textprint("Particles Active: %d\n",i);
-//	D3D_DecalSystem_Setup();
+	D3D_DecalSystem_Setup();
 	i = NumActiveParticles;
 	particlePtr = ParticleStorage;
 	
@@ -2728,7 +2728,7 @@ void HandleParticleSystem(void)
 	
 	//
 	PostLandscapeRendering();
-//	D3D_DecalSystem_Setup();
+	D3D_DecalSystem_Setup();
 	OutputTranslucentPolyList();
 
 	i = NumActiveParticles;
@@ -3084,7 +3084,7 @@ void HandleParticleSystem(void)
 	}
 	//RenderBoom();
    	//RenderFog();
-//	D3D_DecalSystem_End();
+	D3D_DecalSystem_End();
 }
 
 void RenderAllParticlesFurtherAwayThan(int zThreshold)
@@ -3922,7 +3922,7 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 	PARTICLE particle;
 	particle.Position = *positionPtr;
 
-//	D3D_DecalSystem_Setup();
+	D3D_DecalSystem_Setup();
 	
 	switch (muzzleFlashID)
 	{
@@ -4076,7 +4076,7 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 			return;
 		}
 	}
-//	D3D_DecalSystem_End();
+	D3D_DecalSystem_End();
 }
 
 void DrawFrisbeePlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr)
@@ -5145,7 +5145,7 @@ extern void RenderParticlesInMirror(void)
 
 //  	RenderPlayersImageInMirror();
 
-//	D3D_DecalSystem_Setup();
+	D3D_DecalSystem_Setup();
 	while(i--)
 	{
 		switch(particlePtr->ParticleID)
@@ -5183,7 +5183,7 @@ extern void RenderParticlesInMirror(void)
 			}
 		}
 	}
-//	D3D_DecalSystem_End();
+	D3D_DecalSystem_End();
 }
 
 

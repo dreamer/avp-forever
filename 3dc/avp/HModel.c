@@ -1475,14 +1475,14 @@ void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_dat
 			particle.Position = this_section_data->World_Offset;
 			particle.Offset = *parent_position;;
 
-//			D3D_DecalSystem_Setup();
+			D3D_DecalSystem_Setup();
 			RenderParticle(&particle);
 		
 			particle.ParticleID = PARTICLE_ANDROID_BLOOD;
 
 			particle.Size = shape_to_use->shaperadius/8;
 			RenderParticle(&particle);
-//			D3D_DecalSystem_End();
+			D3D_DecalSystem_End();
 		}
 
 		RenderThisHierarchicalDisplayblock(&dummy_displayblock);						  

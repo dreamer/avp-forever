@@ -3731,9 +3731,8 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 			{
 			   	int i;
 
-//		  		D3D_DecalSystem_Setup();
+		  		D3D_DecalSystem_Setup();
 
-#if 1 // bjd - revert
 				for (i = 0; i < 63; i++)
 				{
 					PARTICLE particle = {0};
@@ -3753,8 +3752,8 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 					particle.Size = 40;
 					RenderParticle(&particle);
 				}
-#endif // bjd
-//			 	D3D_DecalSystem_End();
+
+			 	D3D_DecalSystem_End();
 			}
 		}
 	}
@@ -3878,11 +3877,11 @@ void DoAlienEnergyView(DISPLAYBLOCK *dispPtr)
 	/* KJL 16:36:12 10/02/98 - check positions are up to date */
 	ProveHModel(controllerPtr,dispPtr);
 
-//	D3D_DecalSystem_Setup();
+	D3D_DecalSystem_Setup();
 
 	FindAlienEnergySource_Recursion(controllerPtr,controllerPtr->section_data,colour);
 
-//	D3D_DecalSystem_End();
+	D3D_DecalSystem_End();
 }
 
 static void FindAlienEnergySource_Recursion(HMODELCONTROLLER *controllerPtr, SECTION_DATA *sectionDataPtr, unsigned int colour)
@@ -6300,7 +6299,6 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 							if(RenderPolygon.NumberOfVertices>=3)
 							{
 								D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
-//								D3D_FMVParticle_Output(RenderPolygon.Vertices);
 							}
 						}
 					}

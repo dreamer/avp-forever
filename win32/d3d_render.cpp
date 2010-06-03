@@ -2849,11 +2849,11 @@ void D3D_DecalSystem_Setup(void)
 void D3D_DecalSystem_End(void)
 {
 	DrawParticles();
-/*
+
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
 	LockExecuteBuffer();
-*/
+
 	if (D3DDitherEnable != TRUE)
 	{
 		d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE, TRUE);
@@ -2896,13 +2896,7 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 
 		RecipW = 1.0f / 128.0f;
 		RecipH = 1.0f / 128.0f;
-/*
-	    if (TextureHandle != CurrTextureHandle)
-		{
-			d3d.lpD3DDevice->SetTexture(0,TextureHandle);
-		   	CurrTextureHandle = TextureHandle;
-		}
-*/
+
 		textureID = NO_TEXTURE;
 	}
 
@@ -2974,7 +2968,7 @@ void D3D_Decal_Output(DECAL *decalPtr,RENDERVERTEX *renderVerticesPtr)
 */
 		mainVertex[vb].sx = (float)vertices->X;
 		mainVertex[vb].sy = (float)-vertices->Y;
-		mainVertex[vb].sz = (float)vertices->Z;
+		mainVertex[vb].sz = (float)vertices->Z - 50;
 //			mainVertex[vb].rhw = 1.0f;
 
 		mainVertex[vb].color = colour;
@@ -3077,7 +3071,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 						particleDescPtr->Alpha
 					);
 	}
-		float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
+//		float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
 
 		{
 			for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
@@ -3131,103 +3125,6 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 		D3D_OutputTriangles();
 	}
-}
-
-void D3D_FMVParticle_Output(RENDERVERTEX *renderVerticesPtr)
-{
-#if 0 // bjd
-	D3DTEXTUREHANDLE TextureHandle = FMVTextureHandle[0];
-	float RecipW, RecipH;
-
-	RecipW = 1.0 /128.0;
-	RecipH = 1.0 /128.0;
-
-	int colour = FMVParticleColour&0xffffff;
-
-//	D3DTLVERTEX *vertexPtr = new D3DTLVERTEX;// = &((LPD3DTLVERTEX)ExecuteBufferDataArea)[NumVertices];
-
-	{
-		float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
-		{
-			int i = RenderPolygon.NumberOfVertices;
-			RENDERVERTEX *vertices = renderVerticesPtr;
-
-			do
-			{
-				//D3DTLVERTEX *vertexPtr = &((LPD3DTLVERTEX)ExecuteBufferDataArea)[NumVertices];
-			  	float oneOverZ = (1.0)/vertices->Z;
-				float zvalue;
-
-				{
-					int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-
-					if (x<Global_VDB_Ptr->VDB_ClipLeft)
-					{
-						x=Global_VDB_Ptr->VDB_ClipLeft;
-					}
-					else if (x>Global_VDB_Ptr->VDB_ClipRight)
-					{
-						x=Global_VDB_Ptr->VDB_ClipRight;
-					}
-
-					mainVertex->sx=x;
-				}
-				{
-					int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-
-					if (y<Global_VDB_Ptr->VDB_ClipUp)
-					{
-						y=Global_VDB_Ptr->VDB_ClipUp;
-					}
-					else if (y>Global_VDB_Ptr->VDB_ClipDown)
-					{
-						y=Global_VDB_Ptr->VDB_ClipDown;
-					}
-					mainVertex->sy=y;
-
-				}
-				mainVertex->tu = ((float)(vertices->U>>16)) * RecipW;
-				mainVertex->tv = ((float)(vertices->V>>16)) * RecipH;
-				mainVertex->rhw = oneOverZ;
-				zvalue = 1.0 - ZNear*oneOverZ;
-
-//				vertexPtr->color = colour;
-				mainVertex->color = (colour)+(vertices->A<<24);
-				mainVertex->sz = zvalue;
-	 		   	mainVertex->specular=RGBALIGHT_MAKE(0,0,0,255);//RGBALIGHT_MAKE(vertices->SpecularR,vertices->SpecularG,vertices->SpecularB,fog);
-
-	 			NumVertices++;
-				vertices++;
-
-//				vertexPtr++; // increment
-				mainVertex++;
-			}
-		  	while(--i);
-		}
-
-		// set correct texture handle
-	    if (TextureHandle != CurrTextureHandle)
-		{
-			d3d.lpD3DDevice->SetTexture(0,TextureHandle);
-			CurrTextureHandle = TextureHandle;
-		}
-
-		CheckTranslucencyModeIsCorrect(TRANSLUCENCY_NORMAL);
-
-	    if (D3DTexturePerspective != TRUE)
-	    {
-			D3DTexturePerspective = TRUE;
-			//OP_STATE_RENDER(1, ExecBufInstPtr);
-			//STATE_DATA(D3DRENDERSTATE_TEXTUREPERSPECTIVE, TRUE, ExecBufInstPtr);
-		}
-
-//		d3d.lpD3DDevice->SetVertexShader(D3DFVF_TLVERTEX);
-//		d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST,NumVertices/3,vertexPtr,sizeof(D3DTLVERTEX));
-
-		D3D_OutputTriangles();
-
-	}
-#endif
 }
 
 void PostLandscapeRendering()
@@ -3605,8 +3502,9 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 			
 //bjd			TranslatePointIntoViewspace(point);
 
-			/* is particle within normal view frustrum ? */
-			if (AvP.PlayerType==I_Alien)	/* wide frustrum */
+/*
+			// is particle within normal view frustrum ?
+			if (AvP.PlayerType==I_Alien)	// wide frustrum
 			{
 				if(( (-point->vx <= point->vz*2)
 		   			&&(point->vx <= point->vz*2)
@@ -3634,7 +3532,7 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 					MeshVertexOutcode[i]=0;
 				}
 			}
-
+*/
 			// bjd - ignore tests, say its in
 			MeshVertexOutcode[i] = 1;
 
@@ -4009,70 +3907,12 @@ void DrawScanlinesOverlay(float level)
 	orthoVerts[orthoVBOffset].v = 1.0f;
 	orthoVBOffset++;
 
-#if 0
-	CheckVertexBuffer(4, PredatorNumbersImageNumber, TRANSLUCENCY_NORMAL);
-
-	// top right
-  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
-	mainVertex[vb].sz = 1.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = (v-size)/256.0f;
-	mainVertex[vb].tv = 1.0f;
-
-	vb++;
-
-	// top left
-  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipUp;
-	mainVertex[vb].sz = 1.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = (v-size)/256.0f;
-	mainVertex[vb].tv = 1.0f;
-	
-	vb++;
-
-	// bottom left
-  	mainVertex[vb].sx =	-1.0f;//(float)Global_VDB_Ptr->VDB_ClipLeft;
-  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
-	mainVertex[vb].sz = 1.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = (v+size)/256.0f;
-	mainVertex[vb].tv = 1.0f;
-
-	vb++;
-
-	// bottom right
-  	mainVertex[vb].sx =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipRight;
-  	mainVertex[vb].sy =	1.0f;//(float)Global_VDB_Ptr->VDB_ClipDown;
-	mainVertex[vb].sz = 1.0f;
-//	mainVertex[vb].rhw = 1.0f;
-	mainVertex[vb].color = RGBALIGHT_MAKE(c,c,c,t);
-	mainVertex[vb].specular = (D3DCOLOR)1.0f;
-	mainVertex[vb].tu = (v+size)/256.0f;
-	mainVertex[vb].tv = 1.0f;
-	
-	vb++;
-
-	OUTPUT_TRIANGLE(0,1,3, 4);
-	OUTPUT_TRIANGLE(1,2,3, 4);
-#endif
-
 	if (level == 1.0f)
 		DrawNoiseOverlay(128);
 }
 
 void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
-    // Get ZNear
-//	float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
-
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
 	int32_t texoffset = (inputPolyPtr->PolyColour & ClrTxDefn);
@@ -4085,35 +3925,16 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
-/*
-	  	float oneOverZ;
-	  	oneOverZ = (1.0f)/(vertices->Z);
-		float zvalue;
-
-		zvalue = (float)(vertices->Z+HeadUpDisplayZOffset);
-	   	zvalue = 1.0f - ZNear/zvalue;
-
-		int x = (vertices->X*(Global_VDB_Ptr->VDB_ProjX+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreX;
-		int y = (vertices->Y*(Global_VDB_Ptr->VDB_ProjY+1))/vertices->Z+Global_VDB_Ptr->VDB_CentreY;
-
-		mainVertex[vb].sx = (float)x;
-		mainVertex[vb].sy = (float)y;
-		mainVertex[vb].sz = 1.0f;
-		mainVertex[vb].rhw = oneOverZ;
-*/
 
 		mainVertex[vb].sx = (float)vertices->X;
 		mainVertex[vb].sy = (float)-vertices->Y;
 		mainVertex[vb].sz = (float)vertices->Z;
 
-  		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
+		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 
-		mainVertex[vb].tu = ((float)vertices->U) * RecipW + (1.0f / 256.0f);
-		mainVertex[vb].tv = ((float)vertices->V) * RecipH + (1.0f / 256.0f);
-
-//		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
-//		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
+		mainVertex[vb].tu = ((float)vertices->U) * RecipW;
+		mainVertex[vb].tv = ((float)vertices->V) * RecipH;
 
 		vb++;
 	}
@@ -4127,7 +3948,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 
 void D3D_DrawMoltenMetalMesh_Unclipped(void)
 {
-	float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
+//	float ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
 
 	VECTORCH *point = MeshVertex;
 	VECTORCH *pointWS = MeshWorldVertex;
@@ -4171,21 +3992,19 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 		pointWS++;
 	}
 
- //	textprint("numvertices %d\n",NumVertices);
-
 	/* CONSTRUCT POLYS */
 	int count = 0;
 	{
 		int x = 0;
 		int y = 0;
 
-		for (x=0; x<15; x++)
+		for (x = 0; x < 15; x++)
 		{
-			for (y=0; y<15; y++)
+			for (y = 0; y < 15; y++)
 			{
 				OUTPUT_TRIANGLE(0+x+(16*y),1+x+(16*y),16+x+(16*y), 256);
 				OUTPUT_TRIANGLE(1+x+(16*y),17+x+(16*y),16+x+(16*y), 256);
-				count+=6;
+				count += 6;
 			}
 		}
 	}
@@ -4216,11 +4035,13 @@ void ThisFramesRenderingHasFinished(void)
 extern void D3D_DrawSliderBar(int x, int y, int alpha)
 {
 	struct VertexTag quadVertices[4];
-	int sliderHeight = 11;
-	unsigned int colour = alpha>>8;
+	uint32_t sliderHeight = 11;
+	uint32_t colour = alpha >> 8;
 
-	if (colour>255) colour = 255;
-	colour = (colour<<24)+0xffffff;
+	if (colour > 255) 
+		colour = 255;
+
+	colour = (colour << 24) + 0xffffff;
 
 	quadVertices[0].Y = y;
 	quadVertices[1].Y = y;
@@ -4346,11 +4167,13 @@ extern void D3D_DrawSlider(int x, int y, int alpha)
 {
 	// the little thingy that slides through the rectangle
 	struct VertexTag quadVertices[4];
-	int sliderHeight = 5;
-	unsigned int colour = alpha>>8;
+	uint32_t sliderHeight = 5;
+	uint32_t colour = alpha >> 8;
 
-	if (colour>255) colour = 255;
-	colour = (colour<<24)+0xffffff;
+	if (colour > 255) 
+		colour = 255;
+
+	colour = (colour << 24) + 0xffffff;
 
 	quadVertices[0].Y = y;
 	quadVertices[1].Y = y;
@@ -4561,14 +4384,13 @@ extern void D3D_ScreenInversionOverlay()
 	// alien overlay
 	int theta[2];
 	int colour = 0xffffffff;
-	int i;
 
 	theta[0] = (CloakingPhase/8)&4095;
 	theta[1] = (800-CloakingPhase/8)&4095;
 
 	CheckOrthoBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_DARKENINGCOLOUR, TEXTURE_WRAP);
 
-	for (i = 0; i < 2; i++)
+	for (uint32_t i = 0; i < 2; i++)
 	{
 		float sin = (GetSin(theta[i]))/65536.0f/16.0f;
 		float cos = (GetCos(theta[i]))/65536.0f/16.0f;
@@ -4613,7 +4435,6 @@ extern void D3D_ScreenInversionOverlay()
 		/* only do this when finishing first loop, otherwise we reserve space for 4 verts we never add */
 		if (i == 0)
 		{
-//			CheckVertexBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_COLOUR);
 			CheckOrthoBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_COLOUR, TEXTURE_WRAP);
 		}
 	}
@@ -4666,7 +4487,6 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 {
 	int theta[2];
 	int colour, baseColour;
-	int i;
 
 	theta[0] = (CloakingPhase/8)&4095;
 	theta[1] = (800-CloakingPhase/8)&4095;
@@ -4693,7 +4513,7 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 
 	CheckOrthoBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_INVCOLOUR, TEXTURE_WRAP);
 
-	for (i = 0; i < 2; i++)
+	for (uint32_t i = 0; i < 2; i++)
 	{
 		float sin = (GetSin(theta[i]))/65536.0f/16.0f;
 		float cos = (GetCos(theta[i]))/65536.0f/16.0f;
@@ -4737,19 +4557,18 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 
 		colour = baseColour +(intensity<<24);
 
-		/* only do this when finishing first loop, otherwise we reserve space for 4 verts we never add */
+		// only do this when finishing first loop, otherwise we reserve space for 4 verts we never add
 		if (i == 0)
 		{
-//			CheckVertexBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_GLOWING);
 			CheckOrthoBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_GLOWING, TEXTURE_WRAP);
 		}
 	}
 }
 
-/* D3D_DrawCable - draws predator grappling hook */
+// D3D_DrawCable - draws predator grappling hook
 void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 {	
-	/* TODO - not disabling zwrites. probably need to do this but double check (be handy if we didn't have to) */
+	// TODO - not disabling zwrites. probably need to do this but double check (be handy if we didn't have to)
 
 	currentWaterTexture = NO_TEXTURE;
 
@@ -4788,8 +4607,9 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 
 //bjd				TranslatePointIntoViewspace(point);
 
-				/* is particle within normal view frustrum ? */
-				if(AvP.PlayerType==I_Alien)	/* wide frustrum */
+/*
+				// is particle within normal view frustrum ?
+				if(AvP.PlayerType==I_Alien)	// wide frustrum
 				{
 					if(( (-point->vx <= point->vz*2)
 		   				&&(point->vx <= point->vz*2)
@@ -4817,7 +4637,7 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 						MeshVertexOutcode[i]=0;
 					}
 				}
-
+*/
 				// bjd - override above
 				MeshVertexOutcode[i] = 1;
 
@@ -4959,7 +4779,7 @@ extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour)
 	quadVertices[2].Y = y + HUD_FONT_HEIGHT + 1;
 	quadVertices[3].Y = y + HUD_FONT_HEIGHT + 1;
 
-	while( *stringPtr )
+	while (*stringPtr)
 	{
 		char c = *stringPtr++;
 		{
@@ -5001,7 +4821,7 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr, int x, int y, int colou
 	quadVertices[0].Y = 0;
 	quadVertices[1].Y = 0;
 
-	while ( *stringPtr )
+	while (*stringPtr)
 	{
 		char c = *stringPtr++;
 
@@ -5045,13 +4865,12 @@ void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour
 	int length = 0;
 	char *ptr = stringPtr;
 
-	while(*ptr)
+	while (*ptr)
 	{
 		length+=AAFontWidths[(unsigned char)*ptr++];
 	}
 
 	length = MUL_FIXED(HUDScaleFactor,length);
-// 	D3D_RenderHUDString(stringPtr,centreX-length/2,y,colour);
 
 	int x = centreX-length/2;
 
@@ -5110,10 +4929,11 @@ extern void RenderStringCentred(char *stringPtr, int centreX, int y, int colour)
 	int length = 0;
 	char *ptr = stringPtr;
 
-	while(*ptr)
+	while (*ptr)
 	{
-		length+=AAFontWidths[(unsigned char)*ptr++];
+		length += AAFontWidths[(unsigned char)*ptr++];
 	}
+
 	D3D_RenderHUDString(stringPtr,centreX-length/2,y,colour);
 }
 
