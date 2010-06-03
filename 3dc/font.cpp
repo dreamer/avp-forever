@@ -22,10 +22,17 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+/*
+ * this code is written to use fonts created with Codehead's Bitmap Font Generator
+ * from http://www.codehead.co.uk/cbfg/
+ */
+
 #include "renderer.h"
 #include "logString.h"
 #include "font2.h"
 #include "textureManager.h"
+#include <iostream>
+#include <fstream>
 
 struct Font
 {
@@ -38,6 +45,8 @@ struct Font
 	uint32_t	blockHeight;
 };
 
+#pragma pack(1) // ensure no padding on struct
+
 struct BFD
 {
 	uint32_t	mapWidth;
@@ -47,6 +56,8 @@ struct BFD
 	char		startChar;
 	char		charWidths[256];
 };
+
+#pragma pack()
 
 static Font Fonts[NUM_FONT_TYPES];
 
@@ -68,93 +79,34 @@ void Font_Init()
 {
 	Fonts[FONT_SMALL].textureID = Tex_LoadFromFile("avp_font.tga");
 
+	// see if there's a font description file
+	std::ifstream infile;
+	infile.open("avp_font.dat", std::ifstream::in | std::ifstream::binary);
+
+	if (infile.good())
+	{
+		// find out the size of the file
+		infile.seekg(0, std::ios::end);
+		size_t fileLength = infile.tellg();
+		infile.seekg(0, std::ios.beg);
+
+		if (fileLength == sizeof(BFD))
+		{
+			// read in the data
+			BFD newFontDesc;
+			infile.read(reinterpret_cast<char*>(&newFontDesc), sizeof(BFD));
+		}
+	}
+
 	// get the font texture width and height
 	Tex_GetDimensions(Fonts[FONT_SMALL].textureID, Fonts[FONT_SMALL].textureWidth, Fonts[FONT_SMALL].textureHeight);
 
 	// work out how big each character cell/block is
 	Fonts[FONT_SMALL].blockWidth = Fonts[FONT_SMALL].textureWidth / 16;
 	Fonts[FONT_SMALL].blockHeight = Fonts[FONT_SMALL].textureHeight / 16;
-
-#if 0 // we're using a fixed width font
-
-	// get the font widths
-	D3DLOCKED_RECT lock;
-	uint8_t *srcPtr = NULL;
-	int c;
-	Fonts[FONT_SMALL].blockWidth = Fonts[FONT_SMALL].imageInfo.Width / 16;
-	Fonts[FONT_SMALL].blockHeight = Fonts[FONT_SMALL].imageInfo.Height / 16;
-
-	LastError = texture->LockRect(0, &lock, NULL, NULL );
-	if (FAILED(LastError))
-	{
-		texture->Release();
-		LogDxError(LastError, __LINE__, __FILE__);
-		return;
-	}
-
-	srcPtr = static_cast<uint8_t*> (lock.pBits);
-
-	Fonts[FONT_SMALL].fontWidths[32] = 12; // size of space character
-
-	for (c = 33; c < 255; c++)
-	{
-		int x, y;
-
-//		int x1 = 1+((c-32)&15) * Fonts[FONT_SMALL].blockWidth;
-//		int y1 = 1+((c-32)>>4) * Fonts[FONT_SMALL].blockHeight;
-
-		int row = (int)((c-32) / 16);
-		int column = (c-32) % 16;
-
-		int x2 = column * Fonts[FONT_SMALL].blockWidth;
-		int y2 = row * Fonts[FONT_SMALL].blockHeight;
-
-		Fonts[FONT_SMALL].fontWidths[c] = Fonts[FONT_SMALL].blockWidth + 1;
-
-		for (x = x2 + Fonts[FONT_SMALL].blockWidth; x > x2; x--)
-		{
-			int blank = 1;
-
-			for (y = y2; y < y2 + Fonts[FONT_SMALL].blockHeight; y++)
-			{
-				uint8_t *s = &srcPtr[((x * 4) + y * lock.Pitch)];
-
-				if ((s[2] >= 0x80))// && (s[1] >= 240) && (s[2] >= 240))
-				{
-					blank = 0;
-					break;
-				}
-			}
-
-			if (blank)
-			{
-				Fonts[FONT_SMALL].fontWidths[c]--;
-			}
-			else
-			{
-				break;
-			}
-		}
-	}
-
-	LastError = texture->UnlockRect(0);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return;
-	}
-#endif
-/*
-	char buf[100];
-	for (int i = 0; i < 256; i++)
-	{
-		sprintf(buf, "Fonts[FONT_SMALL].fontWidths[%d] == %d\n", i, Fonts[FONT_SMALL].fontWidths[i]);
-		OutputDebugString(buf);
-	}
-*/
 }
 
-extern void DrawFontQuad(uint32_t x, uint32_t y, int32_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
+void DrawFontQuad(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeight, int32_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
 
 uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t colour, enum FONT_TYPE fontType)
 {
@@ -163,7 +115,8 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 
 	uint32_t charIndex = 0;
 
-	uint32_t charWidth = 11;
+	uint32_t charWidth = 10;
+	uint32_t charHeight = 16;
 
 	while (charIndex < text.size())
 	{
@@ -181,21 +134,21 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 
 		// bottom left
 		uvArray[0] = RecipW * tex_x;
-		uvArray[1] = RecipH * (tex_y + 16);
+		uvArray[1] = RecipH * (tex_y + charHeight);
 
 		// top left
 		uvArray[2] = RecipW * tex_x;
 		uvArray[3] = RecipH * tex_y;
 
 		// bottom right
-		uvArray[4] = RecipW * (tex_x + 16);
-		uvArray[5] = RecipH * (tex_y + 16);
+		uvArray[4] = RecipW * (tex_x + charWidth);
+		uvArray[5] = RecipH * (tex_y + charHeight);
 
 		// top right
-		uvArray[6] = RecipW * (tex_x + 16);
+		uvArray[6] = RecipW * (tex_x + charWidth);
 		uvArray[7] = RecipH * tex_y;
 
-		DrawFontQuad(x, y, Fonts[FONT_SMALL].textureID, uvArray, colour, TRANSLUCENCY_GLOWING);
+		DrawFontQuad(x, y, charWidth, charHeight, Fonts[FONT_SMALL].textureID, uvArray, colour, TRANSLUCENCY_GLOWING);
 
 		if (/*widthSpaced*/1)
 		{
@@ -212,17 +165,3 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 	return 0;
 }
 
-/*
-int Font_GetTextLength(const char* text)
-{
-	int width = 0;
-
-	while (text && *text)
-	{
-		width += Fonts[FONT_SMALL].fontWidths[*text];
-		text++;
-	}
-
-	return width;
-}
-*/

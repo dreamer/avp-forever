@@ -1452,13 +1452,19 @@ void DrawHUDQuad(int x, int y, int width, int height, float *UVList, int texture
 	orthoVBOffset++;
 }
 
-void DrawFontQuad(uint32_t x, uint32_t y, int32_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
+void DrawFontQuad(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeight, int32_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
 {
-	float x1 = (float(x / 640.0f) * 2) - 1;
-	float y1 = (float(y / 480.0f) * 2) - 1;
+//	float x1 = (float(x / 640.0f) * 2) - 1;
+//	float y1 = (float(y / 480.0f) * 2) - 1;
 
-	float x2 = ((float(x + 16) / 640.0f) * 2) - 1;
-	float y2 = ((float(y + 16) / 480.0f) * 2) - 1;
+	float x1 = WPos2DC(x);
+	float y1 = HPos2DC(y);
+
+//	float x2 = ((float(x + charWidth) / 640.0f) * 2) - 1;
+//	float y2 = ((float(y + charHeight) / 480.0f) * 2) - 1;
+
+	float x2 = WPos2DC(x + charWidth);
+	float y2 = HPos2DC(y + charHeight);
 
 	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP, FILTERING_BILINEAR_OFF);
 

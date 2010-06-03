@@ -117,6 +117,7 @@ static void VertexIntensity_Underwater(RENDERVERTEX *renderVertexPtr);
 
 void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr);
 extern void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr);
+extern void RotateVertex(VECTOR2D *vertexPtr, int theta);
 
 void PredatorThermalVision_ShapePipeline(SHAPEHEADER *shapePtr);
 void PredatorSeeAliensVision_ShapePipeline(SHAPEHEADER *shapePtr);
@@ -4569,7 +4570,6 @@ void RenderParticle(PARTICLE *particlePtr)
 #if 1 // bjd - revert
 		if ((particlePtr->ParticleID == PARTICLE_MUZZLEFLASH))
 		{
-			extern void RotateVertex(VECTOR2D *vertexPtr, int theta);
 			int theta = FastRandom()&4095;
 			RotateVertex(&offset[0], theta);
 			RotateVertex(&offset[1], theta);
@@ -4583,7 +4583,6 @@ void RenderParticle(PARTICLE *particlePtr)
 			||(particlePtr->ParticleID == PARTICLE_PARGEN_FLAME)
 			||(particlePtr->ParticleID == PARTICLE_FLAME))
 		{
-			extern void RotateVertex(VECTOR2D *vertexPtr, int theta);
 			int theta = (particlePtr->Offset.vx + MUL_FIXED(CloakingPhase, particlePtr->Offset.vy))&4095;
 			RotateVertex(&offset[0], theta);
 			RotateVertex(&offset[1], theta);
@@ -5781,8 +5780,6 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 
 		if (theta)
 		{
-			extern void RotateVertex(VECTOR2D *vertexPtr, int theta);
-
 			RotateVertex(&offset[0],theta);
 			RotateVertex(&offset[1],theta);
 			RotateVertex(&offset[2],theta);
