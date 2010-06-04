@@ -128,10 +128,10 @@ VorbisPlayback::~VorbisPlayback()
 	}
 }
 
-int VorbisPlayback::GetVorbisData(int sizeToRead)
+uint32_t VorbisPlayback::GetVorbisData(uint32_t sizeToRead)
 {
-	int bytesReadTotal = 0;
-	int bytesReadPerLoop = 0;
+	uint32_t bytesReadTotal = 0;
+	uint32_t bytesReadPerLoop = 0;
 
 	while (bytesReadTotal < sizeToRead)
 	{

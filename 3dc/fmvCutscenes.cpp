@@ -24,7 +24,7 @@ fmvCutscene fmvList[MAX_FMVS];
 
 #define MAX_NO_FMVTEXTURES 10
 FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
-int NumberOfFMVTextures = 0;
+uint32_t NumberOfFMVTextures = 0;
 
 extern void UpdateFMVTexture(FMVTEXTURE *ftPtr);
 
@@ -80,7 +80,7 @@ void ReleaseAllFMVTexturesForDeviceReset()
 
 void RecreateAllFMVTexturesAfterDeviceReset()
 {
-	for (int i = 0; i < NumberOfFMVTextures; i++)
+	for (uint32_t i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].ImagePtr->Direct3DTexture = CreateFmvTexture(&FMVTexture[i].ImagePtr->ImageWidth, &FMVTexture[i].ImagePtr->ImageHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 	}
@@ -113,8 +113,8 @@ void FindLightingValuesFromTriggeredFMV(uint8_t *bufferPtr, FMVTEXTURE *ftPtr)
 
 int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 {
-	int w = ftPtr->ImagePtr->ImageWidth;
-	int h = ftPtr->ImagePtr->ImageHeight;
+	uint32_t w = ftPtr->ImagePtr->ImageWidth;
+	uint32_t h = ftPtr->ImagePtr->ImageHeight;
 
 	uint8_t *DestBufferPtr = ftPtr->RGBBuffer;
 
@@ -149,15 +149,15 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 	}
 	else if (!ftPtr->StaticImageDrawn || /*smackerFormat*/1)
 	{
-		int i = w * h;
-		unsigned int seed = FastRandom();
+		uint32_t i = w * h;
+		uint32_t seed = FastRandom();
 		int *ptr = (int*)DestBufferPtr;
 		do
 		{
 			seed = ((seed * 1664525) + 1013904223);
 			*ptr++ = seed;
 		}
-		while(--i);
+		while (--i);
 		ftPtr->StaticImageDrawn = 1;
 	}
 	FindLightingValuesFromTriggeredFMV((uint8_t*)ftPtr->RGBBuffer, ftPtr);
@@ -235,9 +235,9 @@ void InitFmvCutscenes()
 	memset(fmvList, 0, sizeof(fmvCutscene) * MAX_FMVS);
 }
 
-int FindFreeFmvHandle()
+int32_t FindFreeFmvHandle()
 {
-	for (int i = 0; i < MAX_FMVS; i++)
+	for (uint32_t i = 0; i < MAX_FMVS; i++)
 	{
 		if (!fmvList[i].isPlaying)
 		{
@@ -250,7 +250,7 @@ int FindFreeFmvHandle()
 int OpenFMV(const char *filenamePtr)
 {
 	// find a free handle in our fmv list to use
-	int fmvHandle = FindFreeFmvHandle();
+	int32_t fmvHandle = FindFreeFmvHandle();
 
 	if (fmvHandle != -1)
 	{
@@ -296,10 +296,8 @@ extern void PlayFMV(const char *filenamePtr)
 
 		ThisFramesRenderingHasBegun();
 
-//		if (fmv.mDisplayTexture)
 		if (fmv.mTexturesReady)
 		{
-//			DrawFmvFrame(fmv.mFrameWidth, fmv.mFrameHeight, fmv.mTextureWidth, fmv.mTextureHeight, fmv.mDisplayTexture);
 			DrawFmvFrame2(fmv.mFrameWidth, fmv.mFrameHeight, fmv.frameTextures[0].width, fmv.frameTextures[0].height, fmv.frameTextures[0].texture, fmv.frameTextures[1].texture, fmv.frameTextures[2].texture);
 		}
 
@@ -328,7 +326,7 @@ void FmvClose()
 void UpdateAllFMVTextures()
 {
 	extern void UpdateFMVTexture(FMVTEXTURE *ftPtr);
-	int i = NumberOfFMVTextures;
+	uint32_t i = NumberOfFMVTextures;
 
 	while (i--)
 	{
@@ -338,7 +336,7 @@ void UpdateAllFMVTextures()
 
 extern void StartTriggerPlotFMV(int number)
 {
-	int i = NumberOfFMVTextures;
+	uint32_t i = NumberOfFMVTextures;
 	char buffer[25];
 
 	if (CheatMode_Active != CHEATMODE_NONACTIVE)
@@ -407,7 +405,7 @@ void ScanImagesForFMVs()
 		if (NumImages)
 		{
 			ihPtr = &ImageHeaderArray[0];
-			for (i = 0; i<NumImages; i++, ihPtr++)
+			for (i = 0; i < NumImages; i++, ihPtr++)
 			{
 	#endif
 				char *strPtr;
@@ -420,7 +418,7 @@ void ScanImagesForFMVs()
 						{
 							*filenamePtr++ = *strPtr;
 						}
-						while(*strPtr++!='.');
+						while (*strPtr++!='.');
 
 						*filenamePtr++='o';
 						*filenamePtr++='g';
@@ -456,7 +454,7 @@ void ReleaseAllFMVTextures()
 {
 	OutputDebugString("exiting level..closing FMV system\n");
 
-	for (int i = 0; i < NumberOfFMVTextures; i++)
+	for (uint32_t i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].MessageNumber = 0;
 
@@ -511,7 +509,7 @@ void EndMenuMusic()
 
 extern void InitialiseTriggeredFMVs()
 {
-	int i = NumberOfFMVTextures;
+	uint32_t i = NumberOfFMVTextures;
 	while (i--)
 	{
 		if (FMVTexture[i].fmvHandle != -1)
@@ -526,7 +524,7 @@ extern void InitialiseTriggeredFMVs()
 
 extern void GetFMVInformation(int *messageNumberPtr, int *frameNumberPtr)
 {
-	int i = NumberOfFMVTextures;
+//	uint32_t i = NumberOfFMVTextures;
 /*
 	while (i--)
 	{

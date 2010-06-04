@@ -110,7 +110,7 @@ typedef struct D3DDriverInfo
 	D3DFORMAT				Formats[20];
 	D3DADAPTER_IDENTIFIER9	AdapterInfo;
 	D3DDISPLAYMODE			DisplayMode[100];
-	int						NumModes;
+	uint32_t				NumModes;
 } D3DDRIVERINFO;
 
 typedef struct D3DInfo
@@ -137,11 +137,11 @@ typedef struct D3DInfo
 	LPDIRECT3DVERTEXSHADER9      fmvVertexShader;
 	LPDIRECT3DPIXELSHADER9       fmvPixelShader;
 
-    int						NumDrivers;
-    int						CurrentDriver;
+    uint32_t				NumDrivers;
+    uint32_t				CurrentDriver;
     D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS];
-    int						CurrentTextureFormat;
-    int						NumTextureFormats;
+    uint32_t				CurrentTextureFormat;
+    uint32_t				NumTextureFormats;
 
 	BOOL					supportsDynamicTextures;
 } D3DINFO;
@@ -189,8 +189,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usag
 LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight);
 LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
-BOOL ChangeGameResolution(uint32_t width, uint32_t height, uint32_t colour_depth);
-
+BOOL ChangeGameResolution	(uint32_t width, uint32_t height, uint32_t colour_depth);
 void DrawAlphaMenuQuad		(uint32_t topX, uint32_t topY, int32_t image_num, uint32_t alpha);
 void DrawTallFontCharacter  (uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t char_width, uint32_t alpha);
 void DrawCloudTable			(uint32_t topX, uint32_t topY, uint32_t word_length, uint32_t alpha);

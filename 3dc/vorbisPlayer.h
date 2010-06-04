@@ -46,8 +46,8 @@ class VorbisPlayback
 
 		bool mIsPlaying;
 
-		unsigned int mBufferSize;
-		unsigned int mHalfBufferSize;
+		uint32_t mBufferSize;
+		uint32_t mHalfBufferSize;
 
 		HANDLE mPlaybackThreadFinished;
 
@@ -68,7 +68,7 @@ class VorbisPlayback
 
 		bool Open(const std::string &fileName);
 		void Stop();
-		int GetVorbisData(int sizeToRead);
+		uint32_t GetVorbisData(uint32_t sizeToRead);
 };
 
 #ifdef __cplusplus

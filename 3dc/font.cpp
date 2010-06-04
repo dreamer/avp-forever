@@ -34,17 +34,6 @@
 #include <iostream>
 #include <fstream>
 
-struct Font
-{
-	enum FONT_TYPE  type;
-	uint32_t	textureWidth;
-	uint32_t	textureHeight;
-	uint32_t	textureID;
-	uint32_t	fontWidths[256];
-	uint32_t	blockWidth;
-	uint32_t	blockHeight;
-};
-
 #pragma pack(1) // ensure no padding on struct
 
 struct BFD
@@ -59,25 +48,34 @@ struct BFD
 
 #pragma pack()
 
+struct Font
+{
+	enum FONT_TYPE  type;
+	uint32_t	textureWidth;
+	uint32_t	textureHeight;
+	uint32_t	textureID;
+	uint32_t	fontWidths[256];
+	uint32_t	blockWidth;
+	uint32_t	blockHeight;
+	BFD			desc;
+};
+
 static Font Fonts[NUM_FONT_TYPES];
 
 void Font_Release()
 {
-/*
 	for (int i = 0; i < NUM_FONT_TYPES; i++)
 	{
-		if (Fonts[i].texture)
-		{
-			Fonts[i].texture->Release();
-			Fonts[i].texture = NULL;
-		}
+		Tex_Release(Fonts[i].textureHeight);
 	}
-*/
 }
 
 void Font_Init()
 {
 	Fonts[FONT_SMALL].textureID = Tex_LoadFromFile("avp_font.tga");
+
+	// zero out all values in the description struct
+	memset(&Fonts[FONT_SMALL].desc, 0, sizeof(BFD));
 
 	// see if there's a font description file
 	std::ifstream infile;
@@ -93,8 +91,7 @@ void Font_Init()
 		if (fileLength == sizeof(BFD))
 		{
 			// read in the data
-			BFD newFontDesc;
-			infile.read(reinterpret_cast<char*>(&newFontDesc), sizeof(BFD));
+			infile.read(reinterpret_cast<char*>(&Fonts[FONT_SMALL].desc), sizeof(BFD));
 		}
 	}
 
@@ -114,14 +111,14 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 	float RecipH = (1.0f / Fonts[FONT_SMALL].textureHeight);
 
 	uint32_t charIndex = 0;
-
-	uint32_t charWidth = 10;
 	uint32_t charHeight = 16;
 
 	while (charIndex < text.size())
 	{
 		// get the current char we're at in the string
 		char c = text[charIndex] - 32;
+
+		uint32_t charWidth = Fonts[FONT_SMALL].desc.charWidths[c];
 
 		uint32_t row = (uint32_t)(c / 16);  // get row
 		uint32_t column = c % 16;			// get column from remainder value

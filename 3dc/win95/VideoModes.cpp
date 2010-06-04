@@ -45,7 +45,7 @@ char *GetVideoModeDescription3()
 {
 	static char buf[64];
 
-	int colourDepth = 0;
+	uint32_t colourDepth = 0;
 	
 	// determine colour depth from d3d format
 	switch (d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Format) 
@@ -81,9 +81,9 @@ char *GetVideoModeDescription3()
 
 void GetDeviceAndVideoModePrefences() 
 {
-	int colourDepth = 0;
+	uint32_t colourDepth = 0;
 
-	for (int i = 0; i < d3d.Driver[d3d.CurrentDriver].NumModes; i++)
+	for (uint32_t i = 0; i < d3d.Driver[d3d.CurrentDriver].NumModes; i++)
 	{
 		// determine colour depth from d3d format
 		switch (d3d.Driver[d3d.CurrentDriver].DisplayMode[i].Format) 
@@ -142,7 +142,7 @@ static void SetDeviceAndVideoModePreferences(void)
 	PreferredDeviceAndVideoMode.Width = d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Width;
 	PreferredDeviceAndVideoMode.Height = d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Height;
 
-	int colourDepth = 0;
+	uint32_t colourDepth = 0;
 
 	// determine colour depth from d3d format
 	switch (d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Format)

@@ -75,12 +75,12 @@ static const uint32_t indent_space = 5;
 
 struct ButtonStruct
 {
-	int		numWidthBlocks;
+	int			numWidthBlocks;
 	uint32_t	height;
 	uint32_t	width;
-	int		positionOffset;
-	int		stringId;
-	bool	isBlank;
+	int			positionOffset;
+	uint32_t	stringId;
+	bool		isBlank;
 };
 std::vector<ButtonStruct> keyVector;
 
