@@ -189,7 +189,7 @@ void Start_Progress_Bar()
 
 void Set_Progress_Bar_Position(int pos)
 {
-	int NewPosition = DIV_FIXED(pos, PBAR_LENGTH);
+	uint32_t NewPosition = DIV_FIXED(pos, PBAR_LENGTH);
 
 	if (NewPosition > CurrentPosition)
 	{
@@ -244,8 +244,8 @@ void Set_Progress_Bar_Position(int pos)
 		
 		if (AvP.Network != I_No_Network)
 		{
-			static int LastSendTime;
-			int time = timeGetTime();
+			static uint32_t LastSendTime;
+			uint32_t time = timeGetTime();
 			if (time - LastSendTime > 1000 || time < LastSendTime)
 			{
 				//time to check our messages 
@@ -264,7 +264,7 @@ void Game_Has_Loaded()
 	SoundSys_StopAll();
 	SoundSys_Management();
 
-	int f = 65536;
+	uint32_t f = 65536;
 	ResetFrameCounter();
 
 	do

@@ -2256,23 +2256,6 @@ bool BeginD3DScene()
 	return true;
 }
 
-void D3D_SetupSceneDefaults()
-{
-	// force translucency state to be reset
-	CurrentRenderStates.TranslucencyMode = TRANSLUCENCY_NOT_SET;
-	CurrentRenderStates.FilteringMode = FILTERING_NOT_SET;
-	CurrentRenderStates.TextureAddressMode = TEXTURE_CLAMP;
-//	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_ON);
-	CheckWireFrameMode(0);
-
-	// this defaults to FALSE
-	if (D3DDitherEnable != TRUE)
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE, TRUE);
-		D3DDitherEnable = TRUE;
-	}
-}
-
 bool EndD3DScene()
 {
     LastError = d3d.lpD3DDevice->EndScene();
@@ -2293,6 +2276,23 @@ bool EndD3DScene()
 	}
 
 	return true;
+}
+
+void D3D_SetupSceneDefaults()
+{
+	// force translucency state to be reset
+	CurrentRenderStates.TranslucencyMode = TRANSLUCENCY_NOT_SET;
+	CurrentRenderStates.FilteringMode = FILTERING_NOT_SET;
+	CurrentRenderStates.TextureAddressMode = TEXTURE_CLAMP;
+//	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_ON);
+	CheckWireFrameMode(0);
+
+	// this defaults to FALSE
+	if (D3DDitherEnable != TRUE)
+	{
+		d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE, TRUE);
+		D3DDitherEnable = TRUE;
+	}
 }
 
 void SetFogDistance(int fogDistance)

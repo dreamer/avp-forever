@@ -2,7 +2,6 @@
 #define _included_d3_func_h_
 
 #ifdef WIN32
-
 #include <d3d9.h>
 #include <Dxerr.h>
 #include "aw.h"
@@ -189,7 +188,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usag
 LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight);
 LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
-BOOL ChangeGameResolution	(uint32_t width, uint32_t height, uint32_t colour_depth);
+BOOL ChangeGameResolution	(uint32_t width, uint32_t height/*, uint32_t colour_depth*/);
 void DrawAlphaMenuQuad		(uint32_t topX, uint32_t topY, int32_t image_num, uint32_t alpha);
 void DrawTallFontCharacter  (uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t char_width, uint32_t alpha);
 void DrawCloudTable			(uint32_t topX, uint32_t topY, uint32_t word_length, uint32_t alpha);

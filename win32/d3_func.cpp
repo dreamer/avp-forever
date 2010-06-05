@@ -252,19 +252,19 @@ const D3DFORMAT DisplayFormats[] =
 {
 	D3DFMT_X8R8G8B8,
 	D3DFMT_A8R8G8B8,
-	D3DFMT_R8G8B8,
+	D3DFMT_R8G8B8/*,
 	D3DFMT_A1R5G5B5,
 	D3DFMT_X1R5G5B5,
-	D3DFMT_R5G6B5
+	D3DFMT_R5G6B5*/
 };
 
 // 16 bit formats
 const D3DFORMAT DisplayFormats16[] =
 {
-	D3DFMT_R8G8B8,
+	D3DFMT_R8G8B8/*,
 	D3DFMT_A1R5G5B5,
 	D3DFMT_X1R5G5B5,
-	D3DFMT_R5G6B5
+	D3DFMT_R5G6B5*/
 };
 
 // 32 bit formats
@@ -398,8 +398,8 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	D3DLOCKED_RECT lock;
 
 	// default colour format
-	D3DFORMAT colourFormat = D3DFMT_R5G6B5;
-
+	D3DFORMAT colourFormat = D3DFMT_A8R8G8B8;//D3DFMT_R5G6B5;
+/*
 	if (ScreenDescriptorBlock.SDB_Depth == 16)
 	{
 		colourFormat = D3DFMT_R5G6B5;
@@ -408,6 +408,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	{
 		colourFormat = D3DFMT_A8R8G8B8;
 	}
+*/
 
 	uint32_t width = 450;
 	uint32_t height = 495;
@@ -434,7 +435,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
-
+/*
 	if (ScreenDescriptorBlock.SDB_Depth == 16)
 	{
 		uint16_t *destPtr;
@@ -480,7 +481,8 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 			}
 		}
 	}
-	if (ScreenDescriptorBlock.SDB_Depth == 32)
+*/
+//	if (ScreenDescriptorBlock.SDB_Depth == 32)
 	{
 		uint8_t *destPtr, *srcPtr;
 
@@ -770,7 +772,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, 
 	uint32_t new_width = original_width;
 	uint32_t new_height = original_height;
 
-	D3DCOLOR pad_colour = D3DCOLOR_ARGB(255, 255, 0, 255);
+	D3DCOLOR padColour = D3DCOLOR_ARGB(255, 255, 0, 255);
 
 	// check if passed value is already a power of 2
 	if (!IsPowerOf2(tex->width))
@@ -974,7 +976,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usag
 	return destTexture;
 }
 
-BOOL ChangeGameResolution(uint32_t width, uint32_t height, uint32_t colourDepth)
+BOOL ChangeGameResolution(uint32_t width, uint32_t height/*, uint32_t colourDepth*/)
 {
 	// don't bother resetting device if we're already using the requested settings
 	if ((width == d3d.d3dpp.BackBufferWidth) && (height == d3d.d3dpp.BackBufferHeight))
@@ -1043,7 +1045,7 @@ BOOL ChangeGameResolution(uint32_t width, uint32_t height, uint32_t colourDepth)
 
 	ScreenDescriptorBlock.SDB_Width     = width;
 	ScreenDescriptorBlock.SDB_Height    = height;
-	ScreenDescriptorBlock.SDB_Depth		= colourDepth;
+//	ScreenDescriptorBlock.SDB_Depth		= colourDepth;
 	ScreenDescriptorBlock.SDB_Size      = width*height;
 	ScreenDescriptorBlock.SDB_CentreX   = width/2;
 	ScreenDescriptorBlock.SDB_CentreY   = height/2;
@@ -1075,7 +1077,7 @@ BOOL InitialiseDirect3D()
 	// grab the users selected resolution from the config file
 	uint32_t width       = Config_GetInt("[VideoMode]", "Width", 800);
 	uint32_t height      = Config_GetInt("[VideoMode]", "Height", 600);
-	uint32_t colourDepth = Config_GetInt("[VideoMode]", "ColourDepth", 32);
+//	uint32_t colourDepth = Config_GetInt("[VideoMode]", "ColourDepth", 32);
 	bool useTripleBuffering = Config_GetBool("[VideoMode]", "UseTripleBuffering", false);
 	shaderPath = Config_GetString("[VideoMode]", "ShaderPath", "shaders\\");
 
@@ -1294,8 +1296,8 @@ BOOL InitialiseDirect3D()
 		d3dpp.BackBufferHeight = height;
 		// setting this to interval one will cap the framerate to monitor refresh
 		// the timer goes a bit mad if this isnt capped!
-		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 //		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 		ChangeWindowsSize(d3dpp.BackBufferWidth, d3dpp.BackBufferHeight);
 	}
@@ -1453,7 +1455,7 @@ BOOL InitialiseDirect3D()
 
 	ScreenDescriptorBlock.SDB_Width     = width;
 	ScreenDescriptorBlock.SDB_Height    = height;
-	ScreenDescriptorBlock.SDB_Depth		= colourDepth;
+//	ScreenDescriptorBlock.SDB_Depth		= colourDepth;
 	ScreenDescriptorBlock.SDB_Size      = width*height;
 	ScreenDescriptorBlock.SDB_CentreX   = width/2;
 	ScreenDescriptorBlock.SDB_CentreY   = height/2;
@@ -1526,25 +1528,17 @@ BOOL InitialiseDirect3D()
 void SetTransforms()
 {
 	// Setup orthographic projection matrix
-	int standardWidth = 640;
-	int wideScreenWidth = 852;
+	uint32_t standardWidth = 640;
+	uint32_t wideScreenWidth = 852;
 
 	// setup view matrix
-	D3DXMatrixIdentity(&matView );
-//	PrintD3DMatrix("View", matView);
+	D3DXMatrixIdentity(&matView);
 
 	// set up orthographic projection matrix
 	D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 
 	// set up projection matrix
 	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
-
-	// print projection matrix?
-//	PrintD3DMatrix("Projection", matProjection);
-
-	// multiply view and projection
-//	D3DXMatrixMultiply(&matViewProjection, &matView, &matProjection);
-//	PrintD3DMatrix("View and Projection", matViewProjection);
 
 	D3DXMatrixIdentity(&matIdentity);
 	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,		&matIdentity);

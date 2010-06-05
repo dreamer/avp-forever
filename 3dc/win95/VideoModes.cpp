@@ -44,7 +44,7 @@ char *GetVideoModeDescription2()
 char *GetVideoModeDescription3() 
 {
 	static char buf[64];
-
+/*
 	uint32_t colourDepth = 0;
 	
 	// determine colour depth from d3d format
@@ -71,11 +71,11 @@ char *GetVideoModeDescription3()
 			colourDepth = 16;
 			break;
 	}
-
+*/
 	assert (d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Width != 0);
 	assert (d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Height != 0);
 
-	sprintf(buf, "%dx%dx%d", d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Width, d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Height, colourDepth);
+	sprintf(buf, /*"%dx%dx%d"*/"%dx%d", d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Width, d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Height/*, colourDepth*/);
 	return buf;
 }
 
@@ -111,8 +111,8 @@ void GetDeviceAndVideoModePrefences()
 		}
 
 		if ((PreferredDeviceAndVideoMode.Width == d3d.Driver[d3d.CurrentDriver].DisplayMode[i].Width)
-		  &&(PreferredDeviceAndVideoMode.Height == d3d.Driver[d3d.CurrentDriver].DisplayMode[i].Height)
-		  &&(PreferredDeviceAndVideoMode.ColourDepth == colourDepth))
+		  &&(PreferredDeviceAndVideoMode.Height == d3d.Driver[d3d.CurrentDriver].DisplayMode[i].Height))
+//		  &&(PreferredDeviceAndVideoMode.ColourDepth == colourDepth))
 		{
 			CurrentVideoMode = i;
 			break;
@@ -125,14 +125,14 @@ void SelectBasicDeviceAndVideoMode()
 	// default to 800x600x32
 	PreferredDeviceAndVideoMode.Width = 800;
 	PreferredDeviceAndVideoMode.Height = 600;
-	PreferredDeviceAndVideoMode.ColourDepth = 32;
+//	PreferredDeviceAndVideoMode.ColourDepth = 32;
 }
 
 void LoadDeviceAndVideoModePreferences()
 {
 	PreferredDeviceAndVideoMode.Width = Config_GetInt("[VideoMode]", "Width", 800);
 	PreferredDeviceAndVideoMode.Height= Config_GetInt("[VideoMode]", "Height", 600);
-	PreferredDeviceAndVideoMode.ColourDepth = Config_GetInt("[VideoMode]", "ColourDepth", 32);
+//	PreferredDeviceAndVideoMode.ColourDepth = Config_GetInt("[VideoMode]", "ColourDepth", 32);
 
 	GetDeviceAndVideoModePrefences();
 }
@@ -141,7 +141,7 @@ static void SetDeviceAndVideoModePreferences(void)
 {
 	PreferredDeviceAndVideoMode.Width = d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Width;
 	PreferredDeviceAndVideoMode.Height = d3d.Driver[d3d.CurrentDriver].DisplayMode[CurrentVideoMode].Height;
-
+/*
 	uint32_t colourDepth = 0;
 
 	// determine colour depth from d3d format
@@ -170,14 +170,14 @@ static void SetDeviceAndVideoModePreferences(void)
 	}
 
 	PreferredDeviceAndVideoMode.ColourDepth = colourDepth;
-
+*/
 	Config_SetInt("[VideoMode]", "Height", PreferredDeviceAndVideoMode.Height);
 	Config_SetInt("[VideoMode]", "Width" , PreferredDeviceAndVideoMode.Width);
-	Config_SetInt("[VideoMode]", "ColourDepth", PreferredDeviceAndVideoMode.ColourDepth);
+//	Config_SetInt("[VideoMode]", "ColourDepth", PreferredDeviceAndVideoMode.ColourDepth);
 
 	Config_Save();
 
-	ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth);
+	ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height/*, PreferredDeviceAndVideoMode.ColourDepth*/);
 }
 
 // called when you select "use selected settings" when selecting a video mode
