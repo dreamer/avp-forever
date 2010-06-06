@@ -38,7 +38,6 @@ extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 
 D3DXMATRIX matOrtho;
 D3DXMATRIX matProjection;
-D3DXMATRIX matViewProjection;
 D3DXMATRIX matView;
 D3DXMATRIX matIdentity;
 
@@ -217,6 +216,8 @@ void SetFov()
 	}
 
 	fov = atoi(Con_GetArgument(0).c_str());
+
+	SetTransforms();
 }
 
 // console command : output all menu textures as .png files
@@ -1531,7 +1532,9 @@ void SetTransforms()
 	uint32_t standardWidth = 640;
 	uint32_t wideScreenWidth = 852;
 
-	// setup view matrix
+	// create an identity matrix
+	D3DXMatrixIdentity(&matIdentity);
+
 	D3DXMatrixIdentity(&matView);
 
 	// set up orthographic projection matrix
@@ -1539,11 +1542,11 @@ void SetTransforms()
 
 	// set up projection matrix
 	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
-
-	D3DXMatrixIdentity(&matIdentity);
+/*
 	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,		&matIdentity);
 	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,		&matIdentity);
 	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matOrtho);
+*/
 }
 
 void FlipBuffers()

@@ -64,6 +64,10 @@ LPD3DXCONSTANTTABLE	fmvConstantTable = NULL;
 
 D3DXMATRIX viewMatrix;
 
+extern D3DXMATRIX matOrtho;
+extern D3DXMATRIX matProjection;
+extern D3DXMATRIX matIdentity;
+
 // externs
 extern LPDIRECT3DTEXTURE9 blankTexture;
 extern D3DINFO d3d;
@@ -573,9 +577,6 @@ bool ExecuteBuffer()
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
-	D3DXMATRIX matProjection;
-	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(fov), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 100000.0f);
-
 	#ifndef USE_D3DVIEWTRANSFORM
 		D3DXMatrixIdentity(&viewMatrix); // we want to use the identity matrix in this case
 	#endif
@@ -705,11 +706,8 @@ bool ExecuteBuffer()
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
 
-		D3DXMATRIX matOrtho;
-		D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
-
-		D3DXMATRIXA16 matWorldViewProj = matOrtho;
-		orthoConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
+		// pass the orthographicp projection matrix to the vertex shader
+		orthoConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
 
 		// loop through list drawing the quads
 		for (uint32_t i = 0; i < orthoListCount; i++)
@@ -1520,23 +1518,23 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t t
 	}
 	else
 	{
-		if (textureID == -1)
+		if (textureID == NO_TEXTURE)
 		{
 			texturePOW2Width = width;
 			texturePOW2Height = height;
 		}
-
-		else {
-		if (mainMenu)
+		else 
 		{
-			texturePOW2Width = AvPMenuGfxStorage[textureID].newWidth;
-			texturePOW2Height = AvPMenuGfxStorage[textureID].newHeight;
-		}
-		else
-		{
-			texturePOW2Width = ImageHeaderArray[textureID].ImageWidth;
-			texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
-		}
+			if (mainMenu)
+			{
+				texturePOW2Width = AvPMenuGfxStorage[textureID].newWidth;
+				texturePOW2Height = AvPMenuGfxStorage[textureID].newHeight;
+			}
+			else
+			{
+				texturePOW2Width = ImageHeaderArray[textureID].ImageWidth;
+				texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
+			}
 		}
 	}
 
@@ -1579,21 +1577,21 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t t
 	orthoVBOffset++;
 }
 
-void DrawAlphaMenuQuad(uint32_t topX, uint32_t topY, int32_t image_num, uint32_t alpha)
+void DrawAlphaMenuQuad(uint32_t topX, uint32_t topY, int32_t textureID, uint32_t alpha)
 {
 	// textures actual height/width (whether it's non power of two or not)
-	uint32_t textureWidth = AvPMenuGfxStorage[image_num].Width;
-	uint32_t textureHeight = AvPMenuGfxStorage[image_num].Height;
+	uint32_t textureWidth = AvPMenuGfxStorage[textureID].Width;
+	uint32_t textureHeight = AvPMenuGfxStorage[textureID].Height;
 
 	// we pad non power of two textures to pow2
-//	uint32_t texturePOW2Width = AvPMenuGfxStorage[image_num].newWidth;
-//	uint32_t texturePOW2Height = AvPMenuGfxStorage[image_num].newHeight;
+//	uint32_t texturePOW2Width = AvPMenuGfxStorage[textureID].newWidth;
+//	uint32_t texturePOW2Height = AvPMenuGfxStorage[textureID].newHeight;
 
 	alpha = (alpha / 256);
 	if (alpha > 255)
 		alpha = 255;
 
-	DrawQuad(topX, topY, textureWidth, textureHeight, image_num, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
+	DrawQuad(topX, topY, textureWidth, textureHeight, textureID, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
 
 	return;
 }
