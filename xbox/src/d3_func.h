@@ -1,17 +1,16 @@
 #ifndef _included_d3_func_h_
 #define _included_d3_func_h_
 
+#include <xtl.h>
+#include "aw.h"
+#include <stdint.h>
+
 #ifdef __cplusplus
 	extern "C" {
 #endif
 
-#include <xtl.h>
-
 typedef LPDIRECT3DTEXTURE8 RENDERTEXTURE;
 #define D3DLOCK_DISCARD	0
-
-#include "aw.h"
-#include "stdint.h"
 
 /*
   Direct3D globals
@@ -108,7 +107,7 @@ typedef struct D3DDriverInfo {
 	D3DFORMAT				Formats[20];
 	D3DADAPTER_IDENTIFIER8	AdapterInfo;
 	D3DDISPLAYMODE			DisplayMode[100];
-	int						NumModes;
+	uint32_t				NumModes;
 } D3DDRIVERINFO;
 
 
@@ -131,11 +130,11 @@ typedef struct D3DInfo {
 	DWORD					pixelShader;
 	DWORD					fmvPixelShader;				
 
-    int						NumDrivers;
-    int						CurrentDriver;
+    uint32_t				NumDrivers;
+    uint32_t				CurrentDriver;
 	D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS];
-    int						CurrentTextureFormat;
-    int						NumTextureFormats;
+    uint32_t				CurrentTextureFormat;
+    uint32_t				NumTextureFormats;
 
 } D3DINFO;
 
@@ -182,24 +181,19 @@ LPDIRECT3DTEXTURE8 CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usag
 LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight);
 LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
-BOOL ReleaseVolatileResources();
-BOOL CreateVolatileResources();
-BOOL ChangeGameResolution(int width, int height, int colour_depth);
-
-void DrawAlphaMenuQuad(int topX, int topY, int image_num, int alpha);
-void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha);
-void DrawBigChar(char c, int x, int y, int colour);
-void DrawCloudTable(int topX, int topY, int word_length, int alpha);
-void DrawFadeQuad(int topX, int topY, int alpha);
-void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha);
-void DrawProgressBar(RECT srcRect, RECT destRect, uint32_t textureID, AVPTEXTURE *tex, uint32_t newWidth, uint32_t newHeight);
-void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
-void ReleaseD3DTexture(LPDIRECT3DTEXTURE8 *d3dTexture);
-void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE8 fmvTexture);
-void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE8 tex1, LPDIRECT3DTEXTURE8 tex2, LPDIRECT3DTEXTURE8 tex3);
+BOOL ChangeGameResolution(uint32_t width, uint32_t height);
+void DrawAlphaMenuQuad		(uint32_t topX, uint32_t topY, int32_t image_num, uint32_t alpha);
+void DrawTallFontCharacter  (uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t char_width, uint32_t alpha);
+void DrawCloudTable			(uint32_t topX, uint32_t topY, uint32_t word_length, uint32_t alpha);
+void DrawFadeQuad			(uint32_t topX, uint32_t topY, uint32_t alpha);
+void DrawSmallMenuCharacter (uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t red, uint32_t green, uint32_t blue, uint32_t alpha);
+void DrawQuad				(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
+void DrawFmvFrame			(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE8 fmvTexture);
+void DrawFmvFrame2			(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE8 tex1, LPDIRECT3DTEXTURE8 tex2, LPDIRECT3DTEXTURE8 tex3);
 void CreateScreenShotImage();
 void DeRedTexture(LPDIRECT3DTEXTURE8 texture);
-LPDIRECT3DTEXTURE8 CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool);
+void ReleaseD3DTexture(LPDIRECT3DTEXTURE8 *d3dTexture);
+LPDIRECT3DTEXTURE8 CreateFmvTexture (uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool);
 LPDIRECT3DTEXTURE8 CreateFmvTexture2(uint32_t *width, uint32_t *height);
 void SetTransforms();
 
@@ -207,10 +201,10 @@ D3DINFO GetD3DInfo();
 char* GetDeviceName();
 #define RGB_MAKE	D3DCOLOR_XRGB
 
-#define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
-
 #ifdef __cplusplus
 }
 #endif
+
+#define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 
 #endif /* ! _included_d3_func_h_ */

@@ -2,7 +2,7 @@
 
 /* CDF 25/7/98 - A completely new file. */
 
-#include "3dc.h"		   
+#include "3dc.h"
 #include "inline.h"
 #include "module.h"
 
@@ -104,9 +104,9 @@ void CastSentrygun(void) {
 	}
 
 	position=Player->ObStrategyBlock->DynPtr->Position;
-	position.vx+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat31,BOTRANGE);		
-	position.vy+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat32,BOTRANGE);		
-	position.vz+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat33,BOTRANGE);		
+	position.vx+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat31,BOTRANGE);
+	position.vy+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat32,BOTRANGE);
+	position.vz+=MUL_FIXED(Player->ObStrategyBlock->DynPtr->OrientMat.mat33,BOTRANGE);
 
 	CreateSentrygun(&position, 0);
 
@@ -128,7 +128,7 @@ void CreateSentrygun(VECTORCH *Position,int type)
 	sbPtr->I_SBtype = I_BehaviourAutoGun;
 
 	AssignNewSBName(sbPtr);
-			
+
 	/* create, initialise and attach a dynamics block */
 	sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_SPRITE_NPC);
 	if(sbPtr->DynPtr)
@@ -167,16 +167,16 @@ void CreateSentrygun(VECTORCH *Position,int type)
 		/* Initialise xenoborg's stats */
 		{
 			NPC_DATA *NpcData;
-	
+
 			NpcData=GetThisNpcData(I_NPC_SentryGun);
 			LOCALASSERT(NpcData);
 			sbPtr->SBDamageBlock.Health=NpcData->StartingStats.Health<<ONE_FIXED_SHIFT;
 			sbPtr->SBDamageBlock.Armour=NpcData->StartingStats.Armour<<ONE_FIXED_SHIFT;
 			sbPtr->SBDamageBlock.SB_H_flags=NpcData->StartingStats.SB_H_flags;
 		}
-		
+
 		agunStatus->behaviourState=I_tracking;
-		agunStatus->Target=NULL; 
+		agunStatus->Target=NULL;
 		COPY_NAME(agunStatus->Target_SBname,Null_Name);
 		agunStatus->targetTrackPos.vx=0;
 		agunStatus->targetTrackPos.vy=0;
@@ -185,10 +185,10 @@ void CreateSentrygun(VECTORCH *Position,int type)
 		agunStatus->stateTimer=0;
 		agunStatus->Gun_Pan=0;
 		agunStatus->Gun_Tilt=0;
-		
+
 		agunStatus->gunpandir=0;
 		agunStatus->guntiltdir=0;
-		
+
 		agunStatus->IAmFar=1;
 		agunStatus->Firing=0;
 		agunStatus->Drama=0;
@@ -209,12 +209,12 @@ void CreateSentrygun(VECTORCH *Position,int type)
 		agunStatus->HModelController.section_data=NULL;
 		agunStatus->HModelController.Deltas=NULL;
 
-		for(i=0;i<SB_NAME_LENGTH;i++) agunStatus->death_target_ID[i] =0; 
+		for(i=0;i<SB_NAME_LENGTH;i++) agunStatus->death_target_ID[i] =0;
 		agunStatus->death_target_sbptr=0;
 		agunStatus->death_target_request=0;
 
 		root_section=GetNamedHierarchyFromLibrary("sentry","gun");
-				
+
 		if (!root_section) {
 			RemoveBehaviourStrategy(sbPtr);
 			NewOnScreenMessage("FAILED TO CREATE GUN: NO HMODEL");
@@ -247,7 +247,7 @@ void CreateSentrygun(VECTORCH *Position,int type)
 			return;
 		}
 		LOCALASSERT(sbPtr->containingModule);
-	
+
 		MakeSentrygunNear(sbPtr);
 
 		NewOnScreenMessage("SENTRYGUN CREATED");
@@ -259,7 +259,7 @@ void CreateSentrygun(VECTORCH *Position,int type)
 		NewOnScreenMessage("FAILED TO CREATE GUN: MALLOC FAILURE");
 		return;
 	}
-	if(AvP.Network != I_No_Network) 
+	if(AvP.Network != I_No_Network)
 	{
 		AddNetGameObjectID(sbPtr);
 	}
@@ -272,12 +272,12 @@ void MakeSentrygunNear(STRATEGYBLOCK *sbPtr)
 	MODULE tempModule;
 	DISPLAYBLOCK *dPtr;
 	DYNAMICSBLOCK *dynPtr;
-	AUTOGUN_STATUS_BLOCK *agunStatusPointer;    
+	AUTOGUN_STATUS_BLOCK *agunStatusPointer;
 
 	LOCALASSERT(sbPtr);
 	dynPtr = sbPtr->DynPtr;
-	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-    LOCALASSERT(agunStatusPointer);	          		
+	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);
+    LOCALASSERT(agunStatusPointer);
     LOCALASSERT(dynPtr);
 	LOCALASSERT(sbPtr->SBdptr == NULL);
 
@@ -288,15 +288,15 @@ void MakeSentrygunNear(STRATEGYBLOCK *sbPtr)
 	tempModule.m_lightarray = (struct lightblock *)0;
 	tempModule.m_extraitemdata = (struct extraitemdata *)0;
 	tempModule.m_dptr = NULL;
-	AllocateModuleObject(&tempModule); 
+	AllocateModuleObject(&tempModule);
 	dPtr = tempModule.m_dptr;
 	if(dPtr==NULL) return; /* if cannot create displayblock, leave far */
-			
+
 	sbPtr->SBdptr = dPtr;
 	dPtr->ObStrategyBlock = sbPtr;
-	dPtr->ObMyModule = NULL;					
+	dPtr->ObMyModule = NULL;
 
-	/* need to initialise positional information in the new display block */ 
+	/* need to initialise positional information in the new display block */
 	dPtr->ObWorld = dynPtr->Position;
 	dPtr->ObEuler = dynPtr->OrientEuler;
 	dPtr->ObMat = dynPtr->OrientMat;
@@ -323,22 +323,22 @@ void AutoGunBehaveInit(void *bhdata,STRATEGYBLOCK *sbPtr) {
 	int i;
 
 	LOCALASSERT(bhdata);
-	toolsData = (AUTOGUN_TOOLS_TEMPLATE *)bhdata; 
+	toolsData = (AUTOGUN_TOOLS_TEMPLATE *)bhdata;
 	LOCALASSERT(sbPtr);
 
 	/* check we're not in a net game */
-	if(AvP.Network != I_No_Network) 
+	if(AvP.Network != I_No_Network)
 	{
 		RemoveBehaviourStrategy(sbPtr);
 		return;
 	}
 
-	/* make the assumption that the loader has initialised the strategy block sensibly... 
+	/* make the assumption that the loader has initialised the strategy block sensibly...
 	so just set the shapeIndex from the tools data & copy the name id*/
 	sbPtr->shapeIndex = toolsData->shapenum;
 	for(i=0;i<SB_NAME_LENGTH;i++) sbPtr->SBname[i] = toolsData->nameID[i];
 
-	
+
 	/* create, initialise and attach a dynamics block */
 	sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_SPRITE_NPC);
 	if(sbPtr->DynPtr)
@@ -372,7 +372,7 @@ void AutoGunBehaveInit(void *bhdata,STRATEGYBLOCK *sbPtr) {
 		/* Initialise xenoborg's stats */
 		{
 			NPC_DATA *NpcData;
-	
+
 			NpcData=GetThisNpcData(I_NPC_SentryGun);
 			LOCALASSERT(NpcData);
 			sbPtr->SBDamageBlock.Health=NpcData->StartingStats.Health<<ONE_FIXED_SHIFT;
@@ -381,10 +381,10 @@ void AutoGunBehaveInit(void *bhdata,STRATEGYBLOCK *sbPtr) {
 		}
 		if (toolsData->startInactive) {
 			agunStatus->behaviourState=I_inactive;
-		} else {	
+		} else {
 			agunStatus->behaviourState=I_tracking;
 		}
-		agunStatus->Target=NULL; 
+		agunStatus->Target=NULL;
 		COPY_NAME(agunStatus->Target_SBname,Null_Name);
 		agunStatus->targetTrackPos.vx=0;
 		agunStatus->targetTrackPos.vy=0;
@@ -393,10 +393,10 @@ void AutoGunBehaveInit(void *bhdata,STRATEGYBLOCK *sbPtr) {
 		agunStatus->stateTimer=0;
 		agunStatus->Gun_Pan=0;
 		agunStatus->Gun_Tilt=0;
-		
+
 		agunStatus->gunpandir=0;
 		agunStatus->guntiltdir=0;
-		
+
 		agunStatus->IAmFar=1;
 		agunStatus->Firing=0;
 		agunStatus->Drama=0;
@@ -417,12 +417,12 @@ void AutoGunBehaveInit(void *bhdata,STRATEGYBLOCK *sbPtr) {
 		agunStatus->HModelController.section_data=NULL;
 		agunStatus->HModelController.Deltas=NULL;
 
-		for(i=0;i<SB_NAME_LENGTH;i++) agunStatus->death_target_ID[i] =toolsData->death_target_ID[i]; 
+		for(i=0;i<SB_NAME_LENGTH;i++) agunStatus->death_target_ID[i] =toolsData->death_target_ID[i];
 		agunStatus->death_target_sbptr=0;
 		agunStatus->death_target_request=toolsData->death_target_request;
 
 		root_section=GetNamedHierarchyFromLibrary("sentry","gun");
-				
+
 		if (!root_section) {
 			RemoveBehaviourStrategy(sbPtr);
 			return;
@@ -464,12 +464,12 @@ void AutoGunBehaveInit(void *bhdata,STRATEGYBLOCK *sbPtr) {
 
 void MakeSentrygunFar(STRATEGYBLOCK *sbPtr)
 {
-	AUTOGUN_STATUS_BLOCK *agunStatusPointer;    
+	AUTOGUN_STATUS_BLOCK *agunStatusPointer;
 	int i;
 
 	LOCALASSERT(sbPtr);
-	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
-	LOCALASSERT(agunStatusPointer);	          		
+	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);
+	LOCALASSERT(agunStatusPointer);
 	LOCALASSERT(sbPtr->SBdptr != NULL);
 
 	/* get rid of the displayblock */
@@ -492,7 +492,7 @@ void MakeSentrygunFar(STRATEGYBLOCK *sbPtr)
 	/* zero linear velocity in dynamics block */
 	sbPtr->DynPtr->LinVelocity.vx = 0;
 	sbPtr->DynPtr->LinVelocity.vy = 0;
-	sbPtr->DynPtr->LinVelocity.vz = 0;	
+	sbPtr->DynPtr->LinVelocity.vz = 0;
 
 	agunStatusPointer->IAmFar=1;
 
@@ -503,8 +503,8 @@ static void Autogun_VerifyDeltaControllers(STRATEGYBLOCK *sbPtr) {
 	AUTOGUN_STATUS_BLOCK *agunStatusPointer;
 
 	LOCALASSERT(sbPtr);
-	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-	LOCALASSERT(agunStatusPointer);	          		
+	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);
+	LOCALASSERT(agunStatusPointer);
 
 	/* Nothing has deltas like a xenoborg does. */
 	/* But sentryguns try their best. */
@@ -523,7 +523,7 @@ static void AGun_ComputeDeltaValues(STRATEGYBLOCK *sbPtr)
 	int angle;
 
 	LOCALASSERT(sbPtr);
-	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
+	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(agunStatusPointer);
 
 	/* Interpret all status block values, and apply to deltas. */
@@ -543,19 +543,19 @@ static void AGun_ComputeDeltaValues(STRATEGYBLOCK *sbPtr)
 	} else if (angle<-SGUN_PAN_GIMBALL) {
 		angle=-SGUN_PAN_GIMBALL;
 	}
-	
+
 	{
 		int fake_timer;
 
 		if (angle>0) {
-		
+
 			fake_timer=DIV_FIXED(angle,(SGUN_PAN_GIMBALL<<1));
 			fake_timer+=32767;
 			if (fake_timer>=65536) fake_timer=65535;
 			if (fake_timer<=0) fake_timer=0;
 
 		} else {
-		
+
 			fake_timer=DIV_FIXED(angle,(SGUN_PAN_GIMBALL<<1));
 			fake_timer+=32767;
 			if (fake_timer>=65536) fake_timer=65535;
@@ -590,7 +590,7 @@ static void AGun_ComputeDeltaValues(STRATEGYBLOCK *sbPtr)
 	} else if (angle<-SGUN_PITCH_GIMBALL) {
 		angle=-SGUN_PITCH_GIMBALL;
 	}
-	
+
 	GLOBALASSERT(angle>=-1024);
 	GLOBALASSERT(angle<=1024);
 
@@ -617,10 +617,10 @@ static void AGun_ComputeDeltaValues(STRATEGYBLOCK *sbPtr)
 
 void AGun_UpdateTargetTrackPos(STRATEGYBLOCK *sbPtr) {
 
-	AUTOGUN_STATUS_BLOCK *agunStatusPointer;    	
+	AUTOGUN_STATUS_BLOCK *agunStatusPointer;
 
 	LOCALASSERT(sbPtr);
-	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
+	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(agunStatusPointer);
 
 	if (agunStatusPointer->Target==NULL) {
@@ -673,9 +673,9 @@ int Autogun_TargetFilter(STRATEGYBLOCK *candidate) {
 			}
 		case I_BehaviourDummy:
 			{
-				DUMMY_STATUS_BLOCK *dummyStatusPointer;    
-				dummyStatusPointer = (DUMMY_STATUS_BLOCK *)(candidate->SBdataptr);    
-			    LOCALASSERT(dummyStatusPointer);	          		
+				DUMMY_STATUS_BLOCK *dummyStatusPointer;
+				dummyStatusPointer = (DUMMY_STATUS_BLOCK *)(candidate->SBdataptr);
+			    LOCALASSERT(dummyStatusPointer);
 				switch (dummyStatusPointer->PlayerType) {
 					case I_Alien:
 					case I_Predator:
@@ -746,14 +746,14 @@ STRATEGYBLOCK *Autogun_GetNewTarget(STRATEGYBLOCK *sbPtr) {
 	int a;
 	STRATEGYBLOCK *candidate;
 	MODULE *dmod;
-	
+
 	dmod=ModuleFromPosition((&sbPtr->DynPtr->Position),playerPherModule);
-	
+
 	LOCALASSERT(dmod);
-	
+
 	nearest=NULL;
 	neardist=ONE_FIXED;
-	
+
 	for (a=0; a<NumActiveStBlocks; a++) {
 		candidate=ActiveStBlockList[a];
 		if (candidate!=sbPtr) {
@@ -761,20 +761,20 @@ STRATEGYBLOCK *Autogun_GetNewTarget(STRATEGYBLOCK *sbPtr) {
 				if (Autogun_TargetFilter(candidate)) {
 					VECTORCH offset;
 					int dist;
-		
+
 					offset.vx=(&sbPtr->DynPtr->Position)->vx-candidate->DynPtr->Position.vx;
 					offset.vy=(&sbPtr->DynPtr->Position)->vy-candidate->DynPtr->Position.vy;
 					offset.vz=(&sbPtr->DynPtr->Position)->vz-candidate->DynPtr->Position.vz;
-			
+
 					dist=Approximate3dMagnitude(&offset);
-		
+
 					if (dist<neardist) {
 						/* Check visibility? */
 						if (NPCCanSeeTarget(sbPtr,candidate,AGUN_NEAR_VIEW_WIDTH)) {
 							if (!NPC_IsDead(candidate)) {
 								if ((IsModuleVisibleFromModule(dmod,candidate->containingModule))) {
 									nearest=candidate;
-								}	
+								}
 							}
 						}
 					}
@@ -782,12 +782,12 @@ STRATEGYBLOCK *Autogun_GetNewTarget(STRATEGYBLOCK *sbPtr) {
 			}
 		}
 	}
-	
+
 	return(nearest);
 
 }
 
-int AGunSight_FrustrumReject(VECTORCH *localOffset) {
+int AGunSight_FrustumReject(VECTORCH *localOffset) {
 
 	VECTORCH fixed_offset;
 
@@ -816,11 +816,11 @@ void AutoGunBehaveFun(STRATEGYBLOCK* sbPtr) {
 	int agunIsNear;
 
 	LOCALASSERT(sbPtr);
-	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-	LOCALASSERT(agunStatusPointer);	          		
+	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);
+	LOCALASSERT(agunStatusPointer);
 
 	/* test if we've got a containing module: if we haven't, do nothing.
-	This is important as the object could have been marked for deletion by the visibility 
+	This is important as the object could have been marked for deletion by the visibility
 	management system...*/
 	if(!sbPtr->containingModule)
 	{
@@ -830,7 +830,7 @@ void AutoGunBehaveFun(STRATEGYBLOCK* sbPtr) {
 
 	if(sbPtr->SBdptr) {
 		agunIsNear=1;
-		LOCALASSERT(ModuleCurrVisArray[(sbPtr->containingModule->m_index)]);						
+		LOCALASSERT(ModuleCurrVisArray[(sbPtr->containingModule->m_index)]);
 	} else {
 		agunIsNear=0;
 	}
@@ -842,7 +842,7 @@ void AutoGunBehaveFun(STRATEGYBLOCK* sbPtr) {
 	sbPtr->DynPtr->LinVelocity.vx = 0;
 	sbPtr->DynPtr->LinVelocity.vy = 0;
 	sbPtr->DynPtr->LinVelocity.vz = 0;
-	
+
 	sbPtr->DynPtr->LinImpulse.vx = 0;
 	sbPtr->DynPtr->LinImpulse.vy = 0;
 	sbPtr->DynPtr->LinImpulse.vz = 0;
@@ -876,17 +876,17 @@ void AutoGunBehaveFun(STRATEGYBLOCK* sbPtr) {
 			AGun_UpdateTargetTrackPos(sbPtr);
 		}
 	} else if (NPCCanSeeTarget(sbPtr,agunStatusPointer->Target,AGUN_NEAR_VIEW_WIDTH)) {
-		AGun_UpdateTargetTrackPos(sbPtr);	
+		AGun_UpdateTargetTrackPos(sbPtr);
 	} else {
 		/* We have a target that we can't see. */
 		agunStatusPointer->Target=NULL;
-		AGun_UpdateTargetTrackPos(sbPtr);	
+		AGun_UpdateTargetTrackPos(sbPtr);
 	}
-	
+
 	/* Unset incident flag. */
 	agunStatusPointer->incidentFlag=0;
 	agunStatusPointer->incidentTimer-=NormalFrameTime;
-	
+
 	if (agunStatusPointer->incidentTimer<0) {
 		agunStatusPointer->incidentFlag=1;
 		agunStatusPointer->incidentTimer=32767+(FastRandom()&65535);
@@ -896,7 +896,7 @@ void AutoGunBehaveFun(STRATEGYBLOCK* sbPtr) {
 
 		/* Why not? */
 		CauseDamageToObject(sbPtr,&firedamage,NormalFrameTime,NULL);
-	
+
 		if (agunStatusPointer->incidentFlag) {
 			if ((FastRandom()&65535)<32767) {
 				sbPtr->SBDamageBlock.IsOnFire=0;
@@ -970,7 +970,7 @@ void AutoGunBehaveFun(STRATEGYBLOCK* sbPtr) {
 	ProveHModel_Far(&agunStatusPointer->HModelController,sbPtr);
 
 	/* Now, are we firing? */
-	
+
 	if (agunStatusPointer->IAmFar) {
 		/* Just to be sure, for now. */
 		agunStatusPointer->Firing=0;
@@ -1003,10 +1003,10 @@ void AutoGunBehaveFun(STRATEGYBLOCK* sbPtr) {
 
 void AGunMovement_ScanLeftRight(STRATEGYBLOCK *sbPtr,int rate)
 {
-	AUTOGUN_STATUS_BLOCK *agunStatusPointer;    	
+	AUTOGUN_STATUS_BLOCK *agunStatusPointer;
 
 	LOCALASSERT(sbPtr);
-	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
+	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(agunStatusPointer);
 
 	/* Let's wave the gun around, half full tracking. */
@@ -1050,10 +1050,10 @@ void AGunMovement_ScanLeftRight(STRATEGYBLOCK *sbPtr,int rate)
 
 void AGunMovement_Centre(STRATEGYBLOCK *sbPtr,int rate)
 {
-	AUTOGUN_STATUS_BLOCK *agunStatusPointer;    	
+	AUTOGUN_STATUS_BLOCK *agunStatusPointer;
 
 	LOCALASSERT(sbPtr);
-	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
+	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(agunStatusPointer);
 
 	/* Let's centre pan... */
@@ -1098,13 +1098,13 @@ void AGunMovement_Centre(STRATEGYBLOCK *sbPtr,int rate)
 }
 
 void AGun_GetRelativeAngles(STRATEGYBLOCK *sbPtr, int *anglex, int *angley, VECTORCH *pivotPoint) {
-	
-	AUTOGUN_STATUS_BLOCK *agunStatusPointer;    	
+
+	AUTOGUN_STATUS_BLOCK *agunStatusPointer;
 	MATRIXCH WtoL;
 	VECTORCH targetPos;
 
 	LOCALASSERT(sbPtr);
-	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
+	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(agunStatusPointer);
 
 	/* First, extract relative angle. */
@@ -1116,7 +1116,7 @@ void AGun_GetRelativeAngles(STRATEGYBLOCK *sbPtr, int *anglex, int *angley, VECT
 	targetPos.vy-=pivotPoint->vy;
 	targetPos.vz-=pivotPoint->vz;
 	RotateVector(&targetPos,&WtoL);
-	
+
 	/* Now... */
 	{
 		int offsetx,offsety,offsetz,offseta;
@@ -1131,7 +1131,7 @@ void AGun_GetRelativeAngles(STRATEGYBLOCK *sbPtr, int *anglex, int *angley, VECT
 			||(offsetx<-(ONE_FIXED>>2))
 			||(offsety<-(ONE_FIXED>>2))
 			||(offseta<-(ONE_FIXED>>2))) {
-	
+
 			offsetx>>=1;
 			offsety>>=1;
 			offseta>>=1;
@@ -1139,7 +1139,7 @@ void AGun_GetRelativeAngles(STRATEGYBLOCK *sbPtr, int *anglex, int *angley, VECT
 		}
 
 		offsetz=SqRoot32((offsetx*offsetx)+(offsety*offsety));
-		
+
 		if (angley) {
 			(*angley)=ArcTan(offseta,offsetz);
 
@@ -1150,7 +1150,7 @@ void AGun_GetRelativeAngles(STRATEGYBLOCK *sbPtr, int *anglex, int *angley, VECT
 		}
 		if (anglex) {
 			(*anglex)=ArcTan(offsetx,offsety);
-		
+
 			if ((*anglex)>=3072) (*anglex)-=4096;
 			if ((*anglex)>=2048) (*anglex)=(*anglex)-4096;
 
@@ -1161,11 +1161,11 @@ void AGun_GetRelativeAngles(STRATEGYBLOCK *sbPtr, int *anglex, int *angley, VECT
 
 int AGunMovement_TrackToAngles(STRATEGYBLOCK *sbPtr,int rate,int in_anglex,int in_angley)
 {
-	AUTOGUN_STATUS_BLOCK *agunStatusPointer;    	
+	AUTOGUN_STATUS_BLOCK *agunStatusPointer;
 	int real_anglex,angley,online;
 
 	LOCALASSERT(sbPtr);
-	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
+	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(agunStatusPointer);
 
 	/* Turn the gun to face a certain way. */
@@ -1182,7 +1182,7 @@ int AGunMovement_TrackToAngles(STRATEGYBLOCK *sbPtr,int rate,int in_anglex,int i
 			real_anglex-=4096;
 		}
 	}
-	
+
 	if (real_anglex>=3072) real_anglex-=4096;
 	if (real_anglex>=2048) real_anglex=real_anglex-3072;
 	if (real_anglex> 1024) real_anglex=2048-real_anglex;
@@ -1258,11 +1258,11 @@ int AGunMovement_TrackToAngles(STRATEGYBLOCK *sbPtr,int rate,int in_anglex,int i
 
 void Execute_AGun_Target(STRATEGYBLOCK *sbPtr) {
 
-	AUTOGUN_STATUS_BLOCK *agunStatusPointer;    	
+	AUTOGUN_STATUS_BLOCK *agunStatusPointer;
 	int anglex,angley;
 
 	LOCALASSERT(sbPtr);
-	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
+	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(agunStatusPointer);
 
 	{
@@ -1270,7 +1270,7 @@ void Execute_AGun_Target(STRATEGYBLOCK *sbPtr) {
 
 		gun_section=GetThisSectionData(agunStatusPointer->HModelController.section_data,"gun");
 		GLOBALASSERT(gun_section);
-		
+
 		AGun_GetRelativeAngles(sbPtr,&anglex,&angley,&gun_section->World_Offset);
 
 	}
@@ -1314,9 +1314,9 @@ void AGun_MaintainGun(STRATEGYBLOCK *sbPtr)
 	int multiple,volley_section,totalrounds;
 
 	LOCALASSERT(sbPtr);
-	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
+	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(agunStatusPointer);
-	
+
 	dum=GetThisSectionData(agunStatusPointer->HModelController.section_data,"flash dummy");
 
 	if ((agunStatusPointer->Firing==0)||(dum==NULL)||(agunStatusPointer->IAmFar)) {
@@ -1327,16 +1327,16 @@ void AGun_MaintainGun(STRATEGYBLOCK *sbPtr)
 		}
 		return;
 	}
-	
+
 	/* Okay, must be firing.  Did we get anyone? */
-	
+
 	volley_section=AGUN_ROF*NormalFrameTime;
 
 	agunStatusPointer->volleyFired+=volley_section;
 	if (agunStatusPointer->volleyFired>(AGUN_VOLLEYSIZE<<ONE_FIXED_SHIFT)) {
 		agunStatusPointer->volleyFired=(AGUN_VOLLEYSIZE<<ONE_FIXED_SHIFT);
 	}
-	
+
 	totalrounds=agunStatusPointer->volleyFired>>ONE_FIXED_SHIFT;
 	GLOBALASSERT(totalrounds>=agunStatusPointer->roundsFired);
 	multiple=totalrounds-agunStatusPointer->roundsFired;
@@ -1366,7 +1366,7 @@ void AGun_MaintainGun(STRATEGYBLOCK *sbPtr)
 		agunStatusPointer->ammo-=multiple;
 	}
 	agunStatusPointer->roundsFired+=multiple;
-	
+
 	/* End of volley? */
 	if (agunStatusPointer->volleyFired==(AGUN_VOLLEYSIZE<<ONE_FIXED_SHIFT)) {
 		agunStatusPointer->volleyFired=0;
@@ -1378,9 +1378,9 @@ void AGun_MaintainGun(STRATEGYBLOCK *sbPtr)
 		/* Set up LOS. */
 		//get a random rotation , for error in firing direction
 		MATRIXCH rotate;
-		
+
 		multiple--;
-		
+
 		{
 			EULER e;
 			//convert angle from degrees to the engine units
@@ -1396,9 +1396,9 @@ void AGun_MaintainGun(STRATEGYBLOCK *sbPtr)
 		beta.vz=dum->SecMat.mat33;
 
 		RotateVector(&beta,&rotate);
-		
+
 		FindPolygonInLineOfSight(&beta,&alpha,0,sbPtr->SBdptr);
-		
+
 		/* Now deal with LOS_ObjectHitPtr. */
 		if (LOS_ObjectHitPtr) {
 			if (LOS_HModel_Section) {
@@ -1408,7 +1408,7 @@ void AGun_MaintainGun(STRATEGYBLOCK *sbPtr)
 					}
 				}
 			}
-			
+
 			/*Don't allow the sentrygun to destroy 'special' inanimate objects.
 			  Doing so ruins some puzzles*/
 			if(LOS_ObjectHitPtr->ObStrategyBlock)
@@ -1422,7 +1422,7 @@ void AGun_MaintainGun(STRATEGYBLOCK *sbPtr)
 						/*This object has best be left*/
 						continue;
 					}
-						
+
 				}
 			}
 
@@ -1456,12 +1456,12 @@ void AGun_MaintainGun(STRATEGYBLOCK *sbPtr)
 
 void Execute_AGun_Dying(STRATEGYBLOCK *sbPtr)
 {
-	AUTOGUN_STATUS_BLOCK *agunStatusPointer;    	
+	AUTOGUN_STATUS_BLOCK *agunStatusPointer;
 
 	LOCALASSERT(sbPtr);
-	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
+	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(agunStatusPointer);
-	
+
 	/* Droop the gun. */
 	if (agunStatusPointer->Gun_Tilt<8192) {
 		agunStatusPointer->Gun_Tilt+=(NormalFrameTime>>3);
@@ -1489,22 +1489,22 @@ void Execute_AGun_Dying(STRATEGYBLOCK *sbPtr)
 }
 
 static void KillAGun(STRATEGYBLOCK *sbPtr,int wounds,DAMAGE_PROFILE *damage, int multiple,VECTORCH *incoming)
-{	  
-	AUTOGUN_STATUS_BLOCK *agunStatusPointer;    	
+{
+	AUTOGUN_STATUS_BLOCK *agunStatusPointer;
 
 	LOCALASSERT(sbPtr);
-	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
+	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(agunStatusPointer);
-	
-	/* make an explosion sound */    
-    Sound_Play(SID_SENTRYGUNDEST,"d",&sbPtr->DynPtr->Position);  
+
+	/* make an explosion sound */
+    Sound_Play(SID_SENTRYGUNDEST,"d",&sbPtr->DynPtr->Position);
 
 	agunStatusPointer->stateTimer=AGUN_DYINGTIME;
 	agunStatusPointer->HModelController.Looped=0;
 	agunStatusPointer->HModelController.LoopAfterTweening=0;
 	/* switch state */
 	agunStatusPointer->behaviourState=I_disabled;
-	
+
 	/* Fiddle with sequences? */
 
 	/* Ensure sufficient sparking. */
@@ -1513,7 +1513,7 @@ static void KillAGun(STRATEGYBLOCK *sbPtr,int wounds,DAMAGE_PROFILE *damage, int
  	if(agunStatusPointer->death_target_sbptr)
 	{
 		RequestState(agunStatusPointer->death_target_sbptr,agunStatusPointer->death_target_request, 0);
-	} 
+	}
 
 	if (agunStatusPointer->soundHandle!=SOUND_NOACTIVEINDEX) {
 		/* Well, it shouldn't be! */
@@ -1524,12 +1524,12 @@ static void KillAGun(STRATEGYBLOCK *sbPtr,int wounds,DAMAGE_PROFILE *damage, int
 
 void AGunIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, int wounds,VECTORCH *incoming)
 {
-	
-	AUTOGUN_STATUS_BLOCK *agunStatusPointer;    
+
+	AUTOGUN_STATUS_BLOCK *agunStatusPointer;
 	LOCALASSERT(sbPtr);
-	LOCALASSERT(sbPtr->DynPtr);	   	                
-	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-	LOCALASSERT(agunStatusPointer);	          		
+	LOCALASSERT(sbPtr->DynPtr);
+	agunStatusPointer = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);
+	LOCALASSERT(agunStatusPointer);
 
 	if (sbPtr->SBDamageBlock.Health <= 0) {
 
@@ -1537,7 +1537,7 @@ void AGunIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, i
 		if (agunStatusPointer->behaviourState!=I_disabled) {
 			KillAGun(sbPtr,wounds,damage,multiple,incoming);
 		}
-	}	
+	}
 
 }
 
@@ -1599,7 +1599,7 @@ void LoadStrategy_Autogun(SAVE_BLOCK_STRATEGY_HEADER* header)
 {
 	STRATEGYBLOCK* sbPtr;
 	AUTOGUN_STATUS_BLOCK* agunStatusPointer;
-	AGUN_SAVE_BLOCK* block = (AGUN_SAVE_BLOCK*) header; 
+	AGUN_SAVE_BLOCK* block = (AGUN_SAVE_BLOCK*) header;
 
 	//check the size of the save block
 	if(header->size!=sizeof(*block)) return;
@@ -1613,7 +1613,7 @@ void LoadStrategy_Autogun(SAVE_BLOCK_STRATEGY_HEADER* header)
 
 	agunStatusPointer =(AUTOGUN_STATUS_BLOCK*) sbPtr->SBdataptr;
 
-	
+
 	//start copying stuff
 	COPYELEMENT_LOAD(behaviourState)
 	COPYELEMENT_LOAD(stateTimer)
@@ -1659,7 +1659,7 @@ void LoadStrategy_Autogun(SAVE_BLOCK_STRATEGY_HEADER* header)
 
 	Load_SoundState(&agunStatusPointer->soundHandle);
 	Load_SoundState(&agunStatusPointer->soundHandle2);
-	
+
 }
 
 void SaveStrategy_Autogun(STRATEGYBLOCK* sbPtr)
@@ -1693,11 +1693,11 @@ void SaveStrategy_Autogun(STRATEGYBLOCK* sbPtr)
 
 	//save target
 	COPY_NAME(block->Target_SBname,agunStatusPointer->Target_SBname);
-	
+
 	//save strategy block stuff
 	block->dynamics = *sbPtr->DynPtr;
 	block->dynamics.CollisionReportPtr=0;
-	
+
 	block->integrity = sbPtr->integrity;
 	block->SBDamageBlock = sbPtr->SBDamageBlock;
 
@@ -1706,5 +1706,5 @@ void SaveStrategy_Autogun(STRATEGYBLOCK* sbPtr)
 
 	Save_SoundState(&agunStatusPointer->soundHandle);
 	Save_SoundState(&agunStatusPointer->soundHandle2);
-	
+
 }

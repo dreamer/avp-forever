@@ -21,7 +21,7 @@
 *                                    P R O T O T Y P E S	                                *
 ****************************************************************************************KJL*/
 #include "vision.h"
-#include "frustrum.h"
+#include "frustum.h"
 #include "avpview.h"
 #include "game_statistics.h"
 
@@ -42,7 +42,7 @@ int PredatorVisionChangeCounter;
 static struct PredOVisionDescriptor PredOVision;
 static struct MarineOVisionDescriptor MarineOVision;
 extern VIEWDESCRIPTORBLOCK *ActiveVDBList[];
-extern int NormalFrameTime;	
+extern int NormalFrameTime;
 extern int GlobalAmbience;
 /* JH 29/5/97 - to control how D3D does the lighting */
 struct D3DLightColourControl d3d_light_ctrl;
@@ -66,7 +66,7 @@ void SetupVision(void)
 		extern VIEWDESCRIPTORBLOCK *ActiveVDBList[];
 		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 		VIEWDESCRIPTORBLOCK *VDBPtr = ActiveVDBList[0];
-	
+
 		LOCALASSERT(VDBPtr);
 
 		/* change clipping planes for new field of view */
@@ -74,8 +74,8 @@ void SetupVision(void)
 		VDBPtr->VDB_ProjX = ScreenDescriptorBlock.SDB_Width/4;
 		VDBPtr->VDB_ProjY = (ScreenDescriptorBlock.SDB_Height)/4;
 
-		/* KJL 17:37:51 7/17/97 - frustrum setup */
-		SetFrustrumType(FRUSTRUM_TYPE_WIDE);
+		/* KJL 17:37:51 7/17/97 - frustum setup */
+		SetFrustumType(FRUSTUM_TYPE_WIDE);
 	}
 	else if (AvP.PlayerType == I_Predator)
 	{
@@ -83,16 +83,16 @@ void SetupVision(void)
 		extern VIEWDESCRIPTORBLOCK *ActiveVDBList[];
 		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 		VIEWDESCRIPTORBLOCK *VDBPtr = ActiveVDBList[0];
-	
+
 		LOCALASSERT(VDBPtr);
 
 		/* change clipping planes for new field of view */
 		VDBPtr->VDB_ProjX = ScreenDescriptorBlock.SDB_Width/2;
 		VDBPtr->VDB_ProjY = (ScreenDescriptorBlock.SDB_Height)/2;
-		
+
 		SetupPredOVision();
-		/* KJL 17:37:51 7/17/97 - frustrum setup */
-		SetFrustrumType(FRUSTRUM_TYPE_NORMAL);
+		/* KJL 17:37:51 7/17/97 - frustum setup */
+		SetFrustumType(FRUSTUM_TYPE_NORMAL);
 	}
 	else
 	{
@@ -100,16 +100,16 @@ void SetupVision(void)
 		extern VIEWDESCRIPTORBLOCK *ActiveVDBList[];
 		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 		VIEWDESCRIPTORBLOCK *VDBPtr = ActiveVDBList[0];
-	
+
 		LOCALASSERT(VDBPtr);
 
 		/* change clipping planes for new field of view */
 		VDBPtr->VDB_ProjX = ScreenDescriptorBlock.SDB_Width/2;
 		VDBPtr->VDB_ProjY = (ScreenDescriptorBlock.SDB_Height)/2;
-		
+
 		SetupMarineOVision();
-		/* KJL 17:37:51 7/17/97 - frustrum setup */
-		SetFrustrumType(FRUSTRUM_TYPE_NORMAL);
+		/* KJL 17:37:51 7/17/97 - frustum setup */
+		SetFrustumType(FRUSTUM_TYPE_NORMAL);
 	}
 
 	InitCameraValues();
@@ -136,7 +136,7 @@ alien character will still have the same vision settings.
 /* Pred-O-Vision */
 void SetupPredOVision(void)
 {
-  
+
 	/* setup in-game data */
 	PredOVision.VisionMode = PREDOVISION_NORMAL;
 	PredOVision.VisionIsChanging=0;
@@ -149,7 +149,7 @@ void HandlePredOVision(void)
 {
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 
-	if (playerStatusPtr->IsAlive) 
+	if (playerStatusPtr->IsAlive)
 	{
 		CurrentGameStats_VisionMode(CurrentVisionMode);
 	}
@@ -163,7 +163,7 @@ void HandlePredOVision(void)
 	{
 		D3D_PredatorScreenInversionOverlay();
 	}
-	
+
 	if (CurrentVisionMode==VISION_MODE_NORMAL)
 	{
 		if (predOVision_SoundHandle!=SOUND_NOACTIVEINDEX)
@@ -185,7 +185,7 @@ void HandlePredOVision(void)
 			Sound_Play(SID_PREDATOR_CLOAKING_ACTIVE,"elh",&predOVision_SoundHandle);
 		}
 	}
-	
+
 	if (PredatorVisionChangeCounter)
 	{
 		D3D_FadeDownScreen(ONE_FIXED-PredatorVisionChangeCounter,0xffffffff);
@@ -245,7 +245,7 @@ void SetupMarineOVision(void)
 void HandleMarineOVision(void)
 {
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
-	
+
 	if (playerStatusPtr->IsAlive)
 	{
 		CurrentGameStats_VisionMode(CurrentVisionMode);
@@ -274,7 +274,7 @@ void HandleMarineOVision(void)
 				FMVParticleColour = RGBA_MAKE(255,255,255,128);
 				Sound_Play(SID_IMAGE_OFF,"h");
 			}
-			else																					 
+			else
 			{
 				/* then we'll be changing to intensified vision */
 				NewOnScreenMessage(GetTextString(TEXTSTRING_INGAME_INTENSIFIERON));
@@ -283,7 +283,7 @@ void HandleMarineOVision(void)
 				Sound_Play(SID_IMAGE,"h");
 			}
 		}
-	}	
+	}
 	else
 	{
 		visionModeDebounced = 1;
@@ -294,8 +294,8 @@ void HandleMarineOVision(void)
 void HandleAlienOVision(void)
 {
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
- 
-	if (playerStatusPtr->IsAlive) 
+
+	if (playerStatusPtr->IsAlive)
 	{
 		CurrentGameStats_VisionMode(CurrentVisionMode);
 	}
@@ -310,7 +310,7 @@ void HandleAlienOVision(void)
 	{
 		Sound_Stop(predOVision_SoundHandle);
 	}
-	
+
 	if (playerStatusPtr->Mvt_InputRequests.Flags.Rqst_ChangeVision)
 	{
 		if (visionModeDebounced)
@@ -322,14 +322,14 @@ void HandleAlienOVision(void)
 				CurrentVisionMode = VISION_MODE_NORMAL;
 				FMVParticleColour = RGBA_MAKE(255,255,255,128);
 			}
-			else																					 
+			else
 			{
 				/* then we'll be changing to alien sense */
 				CurrentVisionMode = VISION_MODE_ALIEN_SENSE;
 				FMVParticleColour = RGBA_MAKE(255,255,255,128);
 			}
 		}
-	}	
+	}
 	else
 	{
 		visionModeDebounced = 1;
@@ -350,10 +350,10 @@ int IsVisionChanging(void)
 			return (PredOVision.VisionIsChanging);
 			break;
 		case I_Alien:
-			return(0); 
+			return(0);
 			break;
 		default:
-			return(0); 
+			return(0);
 			break;
 	}
 }

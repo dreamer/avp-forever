@@ -1,22 +1,22 @@
-#ifndef _frustrum_h_ /* Is this your first time? */
-#define _frustrum_h_ 1
+#ifndef _frustum_h_ /* Is this your first time? */
+#define _frustum_h_ 1
 
 #include "kshape.h"
 /*
- * KJL 15:13:43 7/17/97 - frustrum.h
+ * KJL 15:13:43 7/17/97 - frustum.h
  *
  * function prototypes & pointers for things connected
- * to the view frustrum and clipping
+ * to the view frustum and clipping
  *
  */
 
-enum FrustrumType
+enum FrustumType
 {
-	FRUSTRUM_TYPE_NORMAL,
-	FRUSTRUM_TYPE_WIDE
+	FRUSTUM_TYPE_NORMAL,
+	FRUSTUM_TYPE_WIDE
 };
 
-extern void SetFrustrumType(enum FrustrumType frustrumType);
+extern void SetFrustumType(enum FrustumType frustumType);
 
 /* GOURAUD POLYGON CLIPPING */
 extern void GouraudPolygon_ClipWithZ(void);
@@ -39,28 +39,28 @@ extern void (*GouraudTexturedPolygon_ClipWithPositiveY)(void);
 extern void (*GouraudTexturedPolygon_ClipWithNegativeY)(void);
 extern void (*GouraudTexturedPolygon_ClipWithPositiveX)(void);
 
-/* FRUSTRUM TESTS */
-extern int PolygonWithinFrustrum(POLYHEADER *polyPtr);
+/* FRUSTUM TESTS */
+extern int PolygonWithinFrustum(POLYHEADER *polyPtr);
 extern int PolygonShouldBeDrawn(POLYHEADER *polyPtr);
-extern int (*ObjectWithinFrustrum)(DISPLAYBLOCK *dbPtr);
-extern int (*ObjectCompletelyWithinFrustrum)(DISPLAYBLOCK *dbPtr);
-extern int (*VertexWithinFrustrum)(RENDERVERTEX *vertexPtr);
-extern void (*TestVerticesWithFrustrum)(void);
+extern int (*ObjectWithinFrustum)(DISPLAYBLOCK *dbPtr);
+extern int (*ObjectCompletelyWithinFrustum)(DISPLAYBLOCK *dbPtr);
+extern int (*VertexWithinFrustum)(RENDERVERTEX *vertexPtr);
+extern void (*TestVerticesWithFrustum)(void);
 
-extern int DecalWithinFrustrum(DECAL *decalPtr);
-extern int QuadWithinFrustrum(void);
-extern int TriangleWithinFrustrum(void);
+extern int DecalWithinFrustum(DECAL *decalPtr);
+extern int QuadWithinFrustum(void);
+extern int TriangleWithinFrustum(void);
 
 
 /* pass a pointer to a vertex to be tested; results are returned in an int,
 using the following defines */
-#define INSIDE_FRUSTRUM_Z_PLANE		1
-#define INSIDE_FRUSTRUM_PX_PLANE	2	
-#define INSIDE_FRUSTRUM_NX_PLANE	4	
-#define INSIDE_FRUSTRUM_PY_PLANE	8	
-#define INSIDE_FRUSTRUM_NY_PLANE	16	
-#define INSIDE_FRUSTRUM				31
+#define INSIDE_FRUSTUM_Z_PLANE		1
+#define INSIDE_FRUSTUM_PX_PLANE	2
+#define INSIDE_FRUSTUM_NX_PLANE	4
+#define INSIDE_FRUSTUM_PY_PLANE	8
+#define INSIDE_FRUSTUM_NY_PLANE	16
+#define INSIDE_FRUSTUM				31
 
-extern char FrustrumFlagForVertex[maxrotpts];
+extern char FrustumFlagForVertex[maxrotpts];
 
 #endif

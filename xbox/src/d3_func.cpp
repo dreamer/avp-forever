@@ -205,22 +205,13 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AVPTEXTURE *tex)
 	D3DLOCKED_RECT	   lock;
 
 	// default colour format
-	D3DFORMAT colourFormat = D3DFMT_R5G6B5;
+	D3DFORMAT colourFormat = D3DFMT_LIN_A8R8G8B8;
 
-	if (ScreenDescriptorBlock.SDB_Depth == 16)
-	{
-		colourFormat = D3DFMT_LIN_R5G6B5;
-	}
-	if (ScreenDescriptorBlock.SDB_Depth == 32)
-	{
-		colourFormat = D3DFMT_LIN_A8R8G8B8;
-	}
+	uint32_t height = 495;
+	uint32_t width = 450;
 
-	int height = 495;
-	int width = 450;
-
-	int padWidth = 512;
-	int padHeight = 512;
+	uint32_t padWidth = 512;
+	uint32_t padHeight = 512;
 
 	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, NULL, colourFormat, D3DPOOL_MANAGED, &destTexture);
 	if (FAILED(LastError))
@@ -237,55 +228,6 @@ LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture (AVPTEXTURE *tex)
 		return NULL;
 	}
 
-	if (ScreenDescriptorBlock.SDB_Depth == 16)
-	{
-		uint16_t *destPtr;
-		uint8_t  *srcPtr;
-
-		srcPtr = (uint8_t*)tex->buffer;
-
-		D3DCOLOR padColour = D3DCOLOR_XRGB(0,0,0);
-
-		// lets pad the whole thing black first
-		for (int y = 0; y < padHeight; y++)
-		{
-			destPtr = ((uint16_t*)(((uint8_t*)lock.pBits) + y*lock.Pitch));
-
-			for (int x = 0; x < padWidth; x++)
-			{
-				// >> 3 for red and blue in a 16 bit texture, 2 for green
-				*destPtr = static_cast<uint16_t> (RGB16(padColour, padColour, padColour));
-				destPtr += sizeof(uint16_t);
-			}
-		}
-
-		int charWidth = 30;
-		int charHeight = 33;
-
-		for (int i = 0; i < 224; i++)
-		{
-			int row = i / 15; // get row
-			int column = i % 15; // get column from remainder value
-
-			int offset = ((column * charWidth) * sizeof(uint16_t)) + ((row * charHeight) * lock.Pitch);
-
-			destPtr = ((uint16_t*)(((uint8_t*)lock.pBits + offset)));
-
-			for (int y = 0; y < charHeight; y++)
-			{
-				destPtr = ((uint16_t*)(((uint8_t*)lock.pBits + offset) + (y*lock.Pitch)));
-
-				for (int x = 0; x < charWidth; x++)
-				{
-					*destPtr = RGB16(srcPtr[0], srcPtr[1], srcPtr[2]);
-
-					destPtr += sizeof(uint16_t);
-					srcPtr += sizeof(uint32_t); // our source is 32 bit, move over an entire 4 byte pixel
-				}
-			}
-		}
-	}
-	if (ScreenDescriptorBlock.SDB_Depth == 32)
 	{
 		uint8_t *destPtr, *srcPtr;
 
@@ -677,11 +619,11 @@ void DeRedTexture(LPDIRECT3DTEXTURE8 texture)
 
 	uint8_t *destPtr = NULL;
 
-	for (int y = 0; y < 256; y++)
+	for (uint32_t y = 0; y < 256; y++)
 	{
 		destPtr = (((uint8_t*)lock.pBits) + y*lock.Pitch);
 
-		for (int x = 0; x < 256; x++)
+		for (uint32_t x = 0; x < 256; x++)
 		{
 			if ((destPtr[BO_RED] == 255) && (destPtr[BO_BLUE] == 0) && (destPtr[BO_GREEN] == 0))
 			{
@@ -710,10 +652,10 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, 
 		return NULL;
 	}
 
-	int original_width = tex->width;
-	int original_height = tex->height;
-	int new_width = original_width;
-	int new_height = original_height;
+	uint32_t original_width = tex->width;
+	uint32_t original_height = tex->height;
+	uint32_t new_width = original_width;
+	uint32_t new_height = original_height;
 
 	D3DCOLOR pad_colour = D3DCOLOR_XRGB(0,0,0);
 
@@ -757,7 +699,7 @@ LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, 
 	TgaHeader.width  = tex->width;
 
 	// size of raw image data
-	int imageSize = tex->height * tex->width * sizeof(uint32_t);
+	uint32_t imageSize = tex->height * tex->width * sizeof(uint32_t);
 
 	// create new buffer for header and image data
 	uint8_t *buffer = new uint8_t[sizeof(TGA_HEADER) + imageSize];
@@ -917,7 +859,7 @@ LPDIRECT3DTEXTURE8 CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usag
 	return destTexture;
 }
 
-/* called from Scrshot.cpp */
+// called from Scrshot.cpp
 void CreateScreenShotImage()
 {
 #if 0 // can't be bothered implementing this for the xbox
@@ -976,47 +918,6 @@ void CreateScreenShotImage()
 	/* release surface */
 	SAFE_RELEASE(frontBuffer);
 #endif
-}
-
-LPDIRECT3DTEXTURE8 CheckAndLoadUserTexture(const char *fileName, int *width, int *height)
-{
-	LPDIRECT3DTEXTURE8	tempTexture = NULL;
-	D3DXIMAGE_INFO		imageInfo;
-
-	std::string fullFileName(fileName);
-	fullFileName += ".png";
-
-	/* try find a png file at given path */
-	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice,
-		fullFileName.c_str(),
-		D3DX_DEFAULT,	// width
-		D3DX_DEFAULT,	// height
-		1,	// mip levels
-		0,				// usage
-		D3DFMT_UNKNOWN,	// format
-		D3DPOOL_MANAGED,
-		D3DX_FILTER_NONE,
-		D3DX_FILTER_NONE,
-		0,
-		&imageInfo,
-		NULL,
-		&tempTexture
-		);
-
-	if (FAILED(LastError))
-	{
-//		OutputDebugString("\n couldn't create texture");
-		*width = 0;
-		*height = 0;
-		return NULL;
-	}
-
-	OutputDebugString("\n made texture: ");
-	OutputDebugString(fullFileName.c_str());
-
-	*width = imageInfo.Width;
-	*height = imageInfo.Height;
-	return tempTexture;
 }
 
 BOOL ReleaseVolatileResources()
@@ -1089,9 +990,8 @@ BOOL CreateVolatileResources()
 	return true;
 }
 
-BOOL ChangeGameResolution(int width, int height, int colourDepth)
+BOOL ChangeGameResolution(uint32_t width, uint32_t height)
 {
-
 	// don't bother resetting device if we're already using the requested settings
 	if ((width == d3d.d3dpp.BackBufferWidth) && (height == d3d.d3dpp.BackBufferHeight))
 	{
@@ -1156,7 +1056,7 @@ BOOL ChangeGameResolution(int width, int height, int colourDepth)
 
 	ScreenDescriptorBlock.SDB_Width     = width;
 	ScreenDescriptorBlock.SDB_Height    = height;
-	ScreenDescriptorBlock.SDB_Depth		= colourDepth;
+//	ScreenDescriptorBlock.SDB_Depth		= colourDepth;
 	ScreenDescriptorBlock.SDB_Size      = width*height;
 	ScreenDescriptorBlock.SDB_CentreX   = width/2;
 	ScreenDescriptorBlock.SDB_CentreY   = height/2;
@@ -1186,7 +1086,7 @@ BOOL InitialiseDirect3D()
 
 	uint32_t width = 640;
 	uint32_t height = 480;
-	uint32_t colourDepth = 32;
+//	uint32_t colourDepth = 32;
 	uint32_t defaultDevice = D3DADAPTER_DEFAULT;
 	uint32_t thisDevice = D3DADAPTER_DEFAULT;
 	bool useTripleBuffering = Config_GetBool("[VideoMode]", "UseTripleBuffering", false);
@@ -1416,7 +1316,7 @@ BOOL InitialiseDirect3D()
 
 	ScreenDescriptorBlock.SDB_Width     = width;
 	ScreenDescriptorBlock.SDB_Height    = height;
-	ScreenDescriptorBlock.SDB_Depth		= colourDepth;
+//	ScreenDescriptorBlock.SDB_Depth		= colourDepth;
 	ScreenDescriptorBlock.SDB_Size      = width*height;
 	ScreenDescriptorBlock.SDB_CentreX   = width/2;
 	ScreenDescriptorBlock.SDB_CentreY   = height/2;
@@ -1472,25 +1372,17 @@ BOOL InitialiseDirect3D()
 void SetTransforms()
 {
 	// Setup orthographic projection matrix
-	int standardWidth = 640;
-	int wideScreenWidth = 852;
+	uint32_t standardWidth = 640;
+	uint32_t wideScreenWidth = 852;
 
 	// setup view matrix
-	D3DXMatrixIdentity(&matView );
-//	PrintD3DMatrix("View", matView);
+	D3DXMatrixIdentity(&matView);
 
 	// set up orthographic projection matrix
 	D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 
 	// set up projection matrix
 	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
-
-	// print projection matrix?
-//	PrintD3DMatrix("Projection", matProjection);
-
-	// multiply view and projection
-//	D3DXMatrixMultiply(&matViewProjection, &matView, &matProjection);
-//	PrintD3DMatrix("View and Projection", matViewProjection);
 
 	D3DXMatrixIdentity(&matIdentity);
 	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,		&matIdentity);

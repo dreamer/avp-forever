@@ -4662,44 +4662,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="3dc\frustrum.c"
+				RelativePath=".\3dc\frustum.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="3dc\avp\win95\gadgets\gadget.cpp"
@@ -9844,7 +9808,7 @@
 					>
 				</File>
 				<File
-					RelativePath="3dc\frustrum.h"
+					RelativePath=".\3dc\frustum.h"
 					>
 				</File>
 				<File

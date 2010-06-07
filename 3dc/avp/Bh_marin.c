@@ -10392,7 +10392,7 @@ static int MarineIsAwareOfTarget(STRATEGYBLOCK *sbPtr)
 			TransposeMatrixCH(&WtoL);
 			RotateVector(&offset,&WtoL);
 			/* Do reject. */
-			if (MarineSight_FrustrumReject(sbPtr,&offset,NULL)) {
+			if (MarineSight_FrustumReject(sbPtr,&offset,NULL)) {
 				if (IsThisObjectVisibleFromThisPosition(sbPtr->SBdptr,&marineStatusPointer->suspect_point,NPC_MAX_VIEWRANGE)) {
 					/* I know what you're going to say.  That's backwards. */
 					#if 0
@@ -13831,7 +13831,7 @@ void GetPointToFaceMarineTowards(STRATEGYBLOCK *sbPtr,VECTORCH *output) {
 	return;
 }
 
-int MarineSight_FrustrumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRATEGYBLOCK *target)
+int MarineSight_FrustumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRATEGYBLOCK *target)
 {
 
 	MARINE_STATUS_BLOCK *marineStatusPointer;

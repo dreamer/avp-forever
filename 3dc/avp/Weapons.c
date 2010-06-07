@@ -5004,7 +5004,7 @@ int MeleeWeapon_90Degree_Front_Core(DAMAGE_PROFILE *damage,int multiple,int rang
 			targetpos.vz-=Global_VDB_Ptr->VDB_World.vz;
 			RotateVector(&targetpos,&Global_VDB_Ptr->VDB_Mat);
 		
-			/* is it in the frustrum? */
+			/* is it in the frustum? */
 			if ( (targetpos.vz >0) 
 				&& (targetpos.vz >  targetpos.vx) 
 				&& (targetpos.vz > -targetpos.vx) 
@@ -8126,7 +8126,7 @@ int PC_Alien_Eat_Attack(int hits)
 		/* does object have a strategy block? */
 		if (sbPtr)
 		{		
-			/* is it in the frustrum? */
+			/* is it in the frustum? */
 			if ( (objectPtr->ObView.vz >0) 
 				&& (objectPtr->ObView.vz >  objectPtr->ObView.vx) 
 				&& (objectPtr->ObView.vz > -objectPtr->ObView.vx) 
@@ -8775,7 +8775,7 @@ DISPLAYBLOCK *AlienTail_TargetSelect(void)
 		if (sbPtr)
 		{		
 			if (Tail_TargetFilter(sbPtr)) {
-				/* is it in the frustrum? */
+				/* is it in the frustum? */
 				if ( (objectPtr->ObView.vz >0) 
 					&& (objectPtr->ObView.vz >  (objectPtr->ObView.vx>>1)) 
 					&& (objectPtr->ObView.vz > -(objectPtr->ObView.vx>>1)) 
@@ -8814,7 +8814,7 @@ DISPLAYBLOCK *AlienTail_TargetSelect(void)
 		if (PlayersTarget.Distance<ALIEN_TAIL_RANGE) {
 			if (PlayersTarget.DispPtr->ObStrategyBlock) {
 				sbPtr=PlayersTarget.DispPtr->ObStrategyBlock;
-				/* It must be in the frustrum... */
+				/* It must be in the frustum... */
 				if (sbPtr) {
 					if (sbPtr->DynPtr) {
 						if (Tail_TargetFilter(sbPtr)) {

@@ -8,7 +8,7 @@ extern void AutoGunBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr);
 
 void MakeSentrygunNear(STRATEGYBLOCK *sbPtr);
 void MakeSentrygunFar(STRATEGYBLOCK *sbPtr);
-int AGunSight_FrustrumReject(VECTORCH *localOffset);
+int AGunSight_FrustumReject(VECTORCH *localOffset);
 void AGunIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, int wounds,VECTORCH *incoming);
 
 typedef enum {
@@ -67,14 +67,14 @@ typedef struct autogun_tools_template
 {
 	VECTORCH position;
 	EULER orientation;
-	
+
 	int ammo;
 	int shapenum;
 	int startInactive;
 
 	char nameID[SB_NAME_LENGTH];
 
-	char death_target_ID[SB_NAME_LENGTH]; 
+	char death_target_ID[SB_NAME_LENGTH];
 	int death_target_request;
 
 }AUTOGUN_TOOLS_TEMPLATE;

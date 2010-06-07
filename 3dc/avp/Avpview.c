@@ -10,7 +10,7 @@
 
 #include "kshape.h"
 #include "kzsort.h"
-#include "frustrum.h"
+#include "frustum.h"
 #include "vision.h"
 #include "lighting.h"
 #include "weapons.h"
@@ -24,9 +24,9 @@
 
 /* KJL 13:59:05 04/19/97 - avpview.c
  *
- *	This is intended to be an AvP-specific streamlined version of view.c. 
+ *	This is intended to be an AvP-specific streamlined version of view.c.
  */
-																		
+
 extern void AllNewModuleHandler(void);
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 
@@ -143,13 +143,13 @@ void LightSourcesInRangeOfObject(DISPLAYBLOCK *dptr)
 
 	*/
 
-	for(i = NumActiveBlocks; i!=0 && NumLightSourcesForObject < MaxLightsPerObject; i--) 
+	for(i = NumActiveBlocks; i!=0 && NumLightSourcesForObject < MaxLightsPerObject; i--)
 	{
 		dptr2 = *aptr++;
 
-		if (dptr2->ObNumLights) 
+		if (dptr2->ObNumLights)
 		{
-			for(j = 0; j < dptr2->ObNumLights && NumLightSourcesForObject < MaxLightsPerObject; j++) 
+			for(j = 0; j < dptr2->ObNumLights && NumLightSourcesForObject < MaxLightsPerObject; j++)
 			{
 				lptr = dptr2->ObLights[j];
 
@@ -304,7 +304,7 @@ static void ModifyHeadOrientation(void)
 			if (HeadOrientation.EulerY < 0)
 				HeadOrientation.EulerY =0;
 		}
-		
+
 		if (HeadOrientation.EulerZ > 2048)
 		{
 			if (HeadOrientation.EulerZ < 4096 - TILT_THRESHOLD)
@@ -335,12 +335,12 @@ void InteriorType_Body()
 	static int zAxisTilt = 0;
 	STRATEGYBLOCK *sbPtr;
 	DYNAMICSBLOCK *dynPtr;
-	
+
 	sbPtr = subjectPtr->ObStrategyBlock;
 	LOCALASSERT(sbPtr);
-	dynPtr = sbPtr->DynPtr;	
+	dynPtr = sbPtr->DynPtr;
 	LOCALASSERT(dynPtr);
-    
+
 	ModifyHeadOrientation();
 	{
 		/* eye offset */
@@ -353,16 +353,16 @@ void InteriorType_Body()
 			case I_Marine:
 				extentsPtr = &CollisionExtents[CE_MARINE];
 				break;
-				
+
 			case I_Alien:
 				extentsPtr = &CollisionExtents[CE_ALIEN];
 				break;
-			
+
 			case I_Predator:
 				extentsPtr = &CollisionExtents[CE_PREDATOR];
 				break;
 		}
-		
+
 		/* set player state */
 		if (playerStatusPtr->ShapeState == PMph_Standing)
 		{
@@ -380,7 +380,7 @@ void InteriorType_Body()
 		if (!playerStatusPtr->IsAlive && !MultiplayerObservedPlayer)
 		{
 			extern int deathFadeLevel;
-			
+
 			eyeOffset.vy = MUL_FIXED(deathFadeLevel*4-3*ONE_FIXED, eyeOffset.vy);
 
 			if (eyeOffset.vy > -100)
@@ -388,7 +388,7 @@ void InteriorType_Body()
 				eyeOffset.vy = -100;
 			}
 		}
-				
+
 		eyeOffset.vx = 0;
 		eyeOffset.vz = 0;//-extentsPtr->CollisionRadius*2;
 		eyeOffset.vy += verticalSpeed/16+200;
@@ -404,7 +404,7 @@ void InteriorType_Body()
 
 		orientation.EulerZ += (zAxisTilt>>8);
 		orientation.EulerZ &= 4095;
-		
+
 		if (NAUSEA_CHEATMODE)
 		{
 			orientation.EulerZ = (orientation.EulerZ+GetSin((CloakingPhase/2)&4095)/256)&4095;
@@ -413,7 +413,7 @@ void InteriorType_Body()
 		}
 		// The next test drops the matrix multiply if the orientation is close to zero
 		// There is an inaccuracy problem with the Z angle at this point
-		if (orientation.EulerX != 0 || orientation.EulerY != 0 || 
+		if (orientation.EulerX != 0 || orientation.EulerY != 0 ||
 					(orientation.EulerZ > 1 && orientation.EulerZ <	4095))
 		{
 			CreateEulerMatrix(&orientation, &matrix);
@@ -423,16 +423,16 @@ void InteriorType_Body()
 
 	{
 		VECTORCH relativeVelocity;
-		
+
 		/* get subject's total velocity */
 		{
 			MATRIXCH worldToLocalMatrix;
 
 			/* make world to local matrix */
 			worldToLocalMatrix = subjectPtr->ObMat;
-			TransposeMatrixCH(&worldToLocalMatrix);													   
+			TransposeMatrixCH(&worldToLocalMatrix);
 
-			relativeVelocity.vx = dynPtr->Position.vx - dynPtr->PrevPosition.vx;		
+			relativeVelocity.vx = dynPtr->Position.vx - dynPtr->PrevPosition.vx;
 			relativeVelocity.vy = dynPtr->Position.vy - dynPtr->PrevPosition.vy;
 			relativeVelocity.vz = dynPtr->Position.vz - dynPtr->PrevPosition.vz;
 			/* rotate into object space */
@@ -441,12 +441,12 @@ void InteriorType_Body()
 		}
 		{
 			int targetingSpeed = 10*NormalFrameTime;
-	
+
 			/* KJL 14:08:50 09/20/96 - the targeting is FRI, but care has to be taken
 			   at very low frame rates to ensure that you can't overshoot */
-			if (targetingSpeed > 65536)	
+			if (targetingSpeed > 65536)
 				targetingSpeed = 65536;
-					
+
 			zAxisTilt += MUL_FIXED
 				(
 					DIV_FIXED
@@ -462,7 +462,7 @@ void InteriorType_Body()
 				int difference;
 
 				if (relativeVelocity.vy >= 0)
-				{ 
+				{
 					difference = DIV_FIXED
 					(
 						previousVerticalSpeed - relativeVelocity.vy,
@@ -471,17 +471,17 @@ void InteriorType_Body()
 				}
 				else difference = 0;
 
-				if (verticalSpeed < difference) 
+				if (verticalSpeed < difference)
 					verticalSpeed = difference;
-				
-			 	if (verticalSpeed > 150*16) 
+
+			 	if (verticalSpeed > 150*16)
 					verticalSpeed = 150*16;
-				
+
 				verticalSpeed -= NormalFrameTime>>2;
 
-				if (verticalSpeed < 0) 
-					verticalSpeed = 0;				
-				
+				if (verticalSpeed < 0)
+					verticalSpeed = 0;
+
 				previousVerticalSpeed = relativeVelocity.vy;
 			}
 	 	}
@@ -505,7 +505,7 @@ void UpdateCamera(void)
 	sprintf(buf, "player world location - x: %d y: %d z: %d\n", Global_VDB_Ptr->VDB_World.vx, Global_VDB_Ptr->VDB_World.vy, Global_VDB_Ptr->VDB_World.vz);
 	OutputDebugString(buf);
 
-	sprintf(buf, 
+	sprintf(buf,
 	"\t %d \t %d \t %d\n"
 	"\t %d \t %d \t %d\n"
 	"\t %d \t %d \t %d\n",
@@ -546,7 +546,7 @@ void AVPGetInViewVolumeList(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	{
 		DISPLAYBLOCK *dptr = *activeblocksptr++;
 
-		if (dptr==Player) 
+		if (dptr==Player)
 			continue;
 
 		MVis = TRUE;
@@ -564,7 +564,7 @@ void AVPGetInViewVolumeList(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 				NumberOfLandscapePolygons += shapePtr->numitems;
 			}
 		}
-		if (!(dptr->ObFlags&ObFlag_NotVis) && MVis) 
+		if (!(dptr->ObFlags&ObFlag_NotVis) && MVis)
 		{
 			MakeVector(&dptr->ObWorld, &VDB_Ptr->VDB_World, &dptr->ObView);
 			RotateVector(&dptr->ObView, &VDB_Ptr->VDB_Mat);
@@ -575,12 +575,12 @@ void AVPGetInViewVolumeList(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 			{
 				OnScreenBlockList[NumOnScreenBlocks++] = dptr;
 			}
-			else if (ObjectWithinFrustrum(dptr))
+			else if (ObjectWithinFrustum(dptr))
 			{
 				OnScreenBlockList[NumOnScreenBlocks++] = dptr;
 			}
 			#else
-			if(dptr->SfxPtr || dptr->HModelControlBlock || ObjectWithinFrustrum(dptr))
+			if(dptr->SfxPtr || dptr->HModelControlBlock || ObjectWithinFrustum(dptr))
 			{
 				OnScreenBlockList[NumOnScreenBlocks++] = dptr;
 			}
@@ -608,11 +608,11 @@ void AvpShowViews(void)
 {
 //	FlushD3DZBuffer();
 
-	UpdateAllFMVTextures();	
+	UpdateAllFMVTextures();
 
 	/* Update attached object positions and orientations etc. */
 	UpdateCamera();
-	
+
 	/* Prepare the View Descriptor Block for use in ShowView() */
 	PrepareVDBForShowView(Global_VDB_Ptr);
 	PlatformSpecificShowViewEntry(Global_VDB_Ptr, &ScreenDescriptorBlock);
@@ -722,7 +722,7 @@ void PrepareVDBForShowView(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 */
 }
 
-   
+
 /*
 
  This function updates the position and orientation of the lights attached
@@ -866,7 +866,7 @@ void MakeViewingWindowSmaller(void)
 {
 	extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 	int MinChangeInYSize = (ScreenDescriptorBlock.SDB_Height * MinChangeInXSize) / ScreenDescriptorBlock.SDB_Width;
-	
+
 	if (Global_VDB_Ptr->VDB_ClipLeft<ScreenDescriptorBlock.SDB_Width/2-16)
 	{
 		Global_VDB_Ptr->VDB_ClipLeft +=MinChangeInXSize;
@@ -884,7 +884,7 @@ void MakeViewingWindowSmaller(void)
 		Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/2;
 		Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)/2;
 	}
-	//BlankScreen(); 
+	//BlankScreen();
 }
 
 void MakeViewingWindowLarger(void)

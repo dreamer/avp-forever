@@ -266,6 +266,8 @@ void Con_Draw()
 {
 	uint32_t charWidth = 12;
 
+	Font_DrawText("Test", 120, 120, D3DCOLOR_ARGB(255,255,255,255), FONT_SMALL);
+
 	if (IOFOCUS_Get() & IOFOCUS_NEWCONSOLE)
 	{
 		console.destinationY = 0.5f;

@@ -138,7 +138,7 @@ void Execute_Xeno_Follow_Far(STRATEGYBLOCK *sbPtr);
 void Execute_Xeno_Return_Far(STRATEGYBLOCK *sbPtr);
 void Execute_Xeno_Avoidance_Far(STRATEGYBLOCK *sbPtr);
 
-int XenoActivation_FrustrumReject(VECTORCH *localOffset);
+int XenoActivation_FrustumReject(VECTORCH *localOffset);
 
 /* Begin Code! */
 
@@ -3808,7 +3808,7 @@ void Xeno_RightArmMovement_Centre(STRATEGYBLOCK *sbPtr,int rate)
 
 }
 
-int XenoActivation_FrustrumReject(VECTORCH *localOffset) {
+int XenoActivation_FrustumReject(VECTORCH *localOffset) {
 
 	if ( (localOffset->vz <0)
 		&& (localOffset->vz <  localOffset->vx)
@@ -3824,7 +3824,7 @@ int XenoActivation_FrustrumReject(VECTORCH *localOffset) {
 
 }
 
-int XenoSight_FrustrumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset) {
+int XenoSight_FrustumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset) {
 
 	XENO_STATUS_BLOCK *xenoStatusPointer;
 
@@ -4629,7 +4629,7 @@ int Xeno_Activation_Test(STRATEGYBLOCK *sbPtr) {
 
 					RotateVector(&offset,&WtoL);
 
-					if (XenoActivation_FrustrumReject(&offset)) {
+					if (XenoActivation_FrustumReject(&offset)) {
 						/* Check visibility? */
 						if (NPCCanSeeTarget(sbPtr,candidate,XENO_NEAR_VIEW_WIDTH)) {
 							if (!NPC_IsDead(candidate)) {

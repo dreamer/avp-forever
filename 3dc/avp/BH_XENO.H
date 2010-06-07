@@ -221,7 +221,7 @@
 	void MakeXenoborgNear(STRATEGYBLOCK *sbPtr);
 	void MakeXenoborgFar(STRATEGYBLOCK *sbPtr);
 	void XenoborgIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, int wounds,VECTORCH *incoming);
-	int XenoSight_FrustrumReject(STRATEGYBLOCK *sbtr,VECTORCH *localOffset);
+	int XenoSight_FrustumReject(STRATEGYBLOCK *sbtr,VECTORCH *localOffset);
 
 
 	#ifdef __cplusplus

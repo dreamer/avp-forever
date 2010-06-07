@@ -11,7 +11,7 @@
 
 #include "kshape.h"
 #include "kzsort.h"
-#include "frustrum.h"
+#include "frustum.h"
 
 #define UseLocalAssert TRUE
 #include "ourasert.h"
@@ -545,7 +545,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 // 	if((Global_ODB_Ptr->ObStrategyBlock)&&(Global_ODB_Ptr->ObStrategyBlock->I_SBtype == I_BehaviourAlien))
 	//textprint("shape alien\n");
 
-	TestVerticesWithFrustrum();
+	TestVerticesWithFrustum();
 
 	/* interesting hack for predator cloaking */
   	if (Global_ODB_Ptr->ObStrategyBlock)
@@ -580,7 +580,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 				POLYHEADER *polyPtr = (POLYHEADER*) (*itemArrayPtr++);
 				int pif;
 
-				pif = PolygonWithinFrustrum(polyPtr);
+				pif = PolygonWithinFrustum(polyPtr);
 
 				if (/*pif*/1) // bjd
 				{
@@ -632,7 +632,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 			{
 				POLYHEADER *polyPtr = (POLYHEADER*) (*itemArrayPtr++);
 				int pif;
-				pif = PolygonWithinFrustrum(polyPtr);
+				pif = PolygonWithinFrustum(polyPtr);
 				if (/*pif*/1) // bjd
 				{
 					switch (polyPtr->PolyItemType)
@@ -676,7 +676,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 	{
 		POLYHEADER *polyPtr = (POLYHEADER*) (*itemArrayPtr++);
 
-		int pif = PolygonWithinFrustrum(polyPtr);
+		int pif = PolygonWithinFrustum(polyPtr);
 
 		if (pif)
 		{
@@ -814,12 +814,12 @@ void PredatorThermalVision_ShapePipeline(SHAPEHEADER *shapePtr)
 
 	LOCALASSERT(numitems);
 
-	TestVerticesWithFrustrum();
+	TestVerticesWithFrustum();
 	do
 	{
 		POLYHEADER *polyPtr = (POLYHEADER*) (*itemArrayPtr++);
 
-		int pif = PolygonWithinFrustrum(polyPtr);
+		int pif = PolygonWithinFrustum(polyPtr);
 
 		if (pif)
 		{
@@ -853,7 +853,7 @@ void PredatorSeeAliensVision_ShapePipeline(SHAPEHEADER *shapePtr)
 
 	LOCALASSERT(numitems);
 
-	TestVerticesWithFrustrum();
+	TestVerticesWithFrustum();
 	do
 	{
 		POLYHEADER *polyPtr = (POLYHEADER*) (*itemArrayPtr++);
@@ -863,7 +863,7 @@ void PredatorSeeAliensVision_ShapePipeline(SHAPEHEADER *shapePtr)
 	 		case I_ZB_Gouraud3dTexturedPolygon:
 			case I_ZB_Gouraud2dTexturedPolygon:
 			{
-				int pif = PolygonWithinFrustrum(polyPtr);
+				int pif = PolygonWithinFrustum(polyPtr);
 
 				if (pif)
 				{
@@ -3924,7 +3924,7 @@ void AddHierarchicalShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 
 	GLOBALASSERT(!dptr->HModelControlBlock);
 
-	if (!ObjectWithinFrustrum(dptr))
+	if (!ObjectWithinFrustum(dptr))
 		return;
 
 	shapeheaderptr = dptr->ObShapeData;
@@ -4364,7 +4364,7 @@ void RenderDecal(DECAL *decalPtr)
 		VerticesBuffer[3].Z = translatedPosition.vz;
 	}
 	{
-		int outcode = DecalWithinFrustrum(decalPtr);
+		int outcode = DecalWithinFrustum(decalPtr);
 
 		if (1)//(outcode) // bjd
 		{
@@ -4606,7 +4606,7 @@ void RenderParticle(PARTICLE *particlePtr)
 	{
 
 /* bjd - bypass this clipping stuff
-		int outcode = QuadWithinFrustrum();
+		int outcode = QuadWithinFrustum();
 
 		if (outcode)
 		{
@@ -4694,7 +4694,7 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 		RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
 	}
 	{
-		int outcode = TriangleWithinFrustrum();
+		int outcode = TriangleWithinFrustum();
 		POLYHEADER fakeHeader;
 		fakeHeader.PolyFlags  = iflag_transparent;
 
@@ -4738,7 +4738,7 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 		RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
 	}
 	{
-		int outcode = TriangleWithinFrustrum();
+		int outcode = TriangleWithinFrustum();
 		POLYHEADER fakeHeader;
 		fakeHeader.PolyFlags = iflag_transparent;
 
@@ -4821,7 +4821,7 @@ void RenderMirroredDecal(DECAL *decalPtr)
 		VerticesBuffer[3].Z = translatedPosition.vz;
 	}
 	{
-		int outcode = DecalWithinFrustrum(decalPtr);
+		int outcode = DecalWithinFrustum(decalPtr);
 
 		if (outcode)
 		{
@@ -4979,7 +4979,7 @@ void RenderShaftOfLight(MODULE *modulePtr)
 			RenderPolygon.NumberOfVertices=4;
 		}
 		{
-			int outcode = DecalWithinFrustrum(&fakeDecal);
+			int outcode = DecalWithinFrustum(&fakeDecal);
 
 			if (outcode)
 			{
@@ -5082,7 +5082,7 @@ void RenderShaftOfLight2(MODULE *modulePtr)
 			RenderPolygon.NumberOfVertices=4;
 		}
 		{
-			int outcode = DecalWithinFrustrum(&fakeDecal);
+			int outcode = DecalWithinFrustum(&fakeDecal);
 
 			if (outcode)
 			{
@@ -5943,7 +5943,7 @@ void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRI
 		RenderPolygon.NumberOfVertices=4;
 	}
 	{
-		int outcode = QuadWithinFrustrum();
+		int outcode = QuadWithinFrustum();
 
 		if (outcode)
 		{
@@ -6028,7 +6028,7 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 	VerticesBuffer[3].Z = point.vz;
 */
 	{
-		int outcode = QuadWithinFrustrum();
+		int outcode = QuadWithinFrustum();
 
 		if (/*outcode*/1) // bjd
 		{
@@ -6473,7 +6473,7 @@ void RenderStarfield(void)
 		VerticesBuffer[3].Z = position.vz;
 
 		{
-			int outcode = QuadWithinFrustrum();
+			int outcode = QuadWithinFrustum();
 
 			if (outcode)
 			{

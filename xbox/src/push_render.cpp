@@ -15,7 +15,7 @@ extern "C" {
 //#include "string.h"
 
 #include "kshape.h"
-#include "frustrum.h"
+#include "frustum.h"
 
 #include "d3d_hud.h"
 #include "gamedef.h"
@@ -42,7 +42,7 @@ extern "C++"{
 #include "vision.h"
 #include "lighting.h"
 #include "showcmds.h"
-#include "frustrum.h"
+#include "frustum.h"
 //#include "smacker.h"
 #include "fmv.h"
 #include "d3d_render.h"
@@ -527,7 +527,7 @@ BOOL SetExecuteBufferDefaults()
 
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF, (DWORD)0.5);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE); 
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
 
 	D3DShadingMode = D3DSHADE_GOURAUD;
 
@@ -563,7 +563,7 @@ BOOL SetExecuteBufferDefaults()
 
 	// Enable fog blending.
 //    d3d.lpD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE);
- 
+
     // Set the fog color.
 //    d3d.lpD3DDevice->SetRenderState(D3DRS_FOGCOLOR, FOG_COLOUR);
 
@@ -650,16 +650,16 @@ void CheckVertexBuffer(unsigned int num_verts, int tex, enum TRANSLUCENCY_TYPE t
 	// check if current vertexes use the same texture and render states as the previous
 	// if they do, we can 'merge' the two together
 
-	if ((tex == renderList[renderCount-1].texture_id && 
-		translucency_mode == renderList[renderCount-1].translucency_type) && 
+	if ((tex == renderList[renderCount-1].texture_id &&
+		translucency_mode == renderList[renderCount-1].translucency_type) &&
 //		renderList[renderCount].filtering_type == renderList[renderCount-1].filtering_type) &&
-		renderCount != 0) 
+		renderCount != 0)
 	{
 		// ok, drop back to the previous data
 //		renderTest.pop_back();
 		renderCount--;
 	}
-	else 
+	else
 	{
 		renderList[renderCount].vert_start = NumVertices;
 //		renderList[renderCount].index_start = NumIndicies;
@@ -678,7 +678,7 @@ BOOL LockExecuteBuffer()
 {
 /*
 	LastError = d3d.lpD3DVertexBuffer->Lock(0, 0, (byte**)&mainVertex, 0);
-	if(FAILED(LastError)) 
+	if(FAILED(LastError))
 	{
 		OutputDebugString("Couldn't lock vertex buffer");
 		LogDxError(LastError);
@@ -900,7 +900,7 @@ BOOL ExecuteBuffer()
 
 		if (num_prims > 0)
 		{
-			DWORD *pPush; 
+			DWORD *pPush;
 			DWORD dwordCount;
 
 			int totalDwordCount = (num_prims * 3) * 8;
@@ -928,7 +928,7 @@ BOOL ExecuteBuffer()
 				memcpy(pPush, (DWORD*) &mainVertex[vertIndex], (dwordCount / 8) * sizeof(D3DTLVERTEX));
 
 				pPush+= dwordCount;
-					 
+
 				pPush[0] = D3DPUSH_ENCODE( D3DPUSH_SET_BEGIN_END, 1 );
 				pPush[1] = 0;
 				pPush += 2;
@@ -946,7 +946,7 @@ BOOL ExecuteBuffer()
 #if 1
 /* do transparents here.. */
 
-//	for (int i = 0; i <= pos; i++) 
+//	for (int i = 0; i <= pos; i++)
 	for (unsigned int i = 0; i < renderCount; i++)
 	{
 		tempTexture = renderList[i].texture_id;
@@ -980,7 +980,7 @@ BOOL ExecuteBuffer()
 
 		if (num_prims > 0)
 		{
-			DWORD *pPush; 
+			DWORD *pPush;
 			DWORD dwordCount;
 
 			int totalDwordCount = (num_prims * 3) * 8;
@@ -1008,7 +1008,7 @@ BOOL ExecuteBuffer()
 				memcpy(pPush, (DWORD*) &mainVertex[vertIndex], (dwordCount / 8) * sizeof(D3DTLVERTEX));
 
 				pPush+= dwordCount;
-					 
+
 				pPush[0] = D3DPUSH_ENCODE( D3DPUSH_SET_BEGIN_END, 1 );
 				pPush[1] = 0;
 				pPush += 2;
@@ -1034,7 +1034,7 @@ void SetFogDistance(int fogDistance)
 
 }
 
-void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired) 
+void SetFilteringMode(enum FILTERING_MODE_ID filteringRequired)
 {
 //	renderList[renderCount].filtering_type = filteringRequired;
 }
@@ -1160,7 +1160,7 @@ void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 					d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
 					D3DSrcBlend = D3DBLEND_SRCALPHA;
 				}
-				if (D3DDestBlend != D3DBLEND_ONE) 
+				if (D3DDestBlend != D3DBLEND_ONE)
 				{
 					d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_ONE);
 					D3DDestBlend = D3DBLEND_ONE;
@@ -1174,13 +1174,13 @@ void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 					d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 					D3DAlphaBlendEnable = TRUE;
 				}
-				if (D3DSrcBlend != D3DBLEND_INVDESTCOLOR) 
+				if (D3DSrcBlend != D3DBLEND_INVDESTCOLOR)
 				{
 					d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_INVDESTCOLOR);
 					D3DSrcBlend = D3DBLEND_INVDESTCOLOR;
 				}
 
-				if (D3DDestBlend != D3DBLEND_ZERO) 
+				if (D3DDestBlend != D3DBLEND_ZERO)
 				{
 					d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_ZERO);
 					D3DDestBlend = D3DBLEND_ZERO;
@@ -1435,7 +1435,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 
 		extern unsigned char GammaValues[256];
 
-		/* need this so we can enable alpha test and not lose pred arms in green vision mode, and also not lose 
+		/* need this so we can enable alpha test and not lose pred arms in green vision mode, and also not lose
 		/* aliens in pred red alien vision mode */
 		if(vertices->A == 0) vertices->A = 1;
 
@@ -1454,7 +1454,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 
 	D3D_OutputTriangles();
 #if 0
-	DWORD *pPush; 
+	DWORD *pPush;
 	DWORD dwordCount = 8 * NumVertices;
 
 //	d3d.lpD3DDevice->SetVertexShader( D3DTLVERTEX );
@@ -1481,12 +1481,12 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr,RENDERV
 		pPush[5] = *((DWORD*) &testVertex[i].specular);
 		pPush[6] = *((DWORD*) &testVertex[i].tu);
 		pPush[7] = *((DWORD*) &testVertex[i].tv);
-  
+
 		pPush += 8;
 	}
 */
 	pPush+= dwordCount;
-		 
+
 	pPush[0] = D3DPUSH_ENCODE( D3DPUSH_SET_BEGIN_END, 1 );
 	pPush[1] = 0;
 	pPush += 2;
@@ -1835,7 +1835,7 @@ void ColourFillBackBufferQuad(int FillColour, int LeftX,
 #endif
 }
 
-void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a) 
+void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 {
 	return;
 #if 1
@@ -1900,7 +1900,7 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 
 void D3D_HUD_Setup(void)
 {
-	if (D3DZFunc != D3DCMP_LESSEQUAL) 
+	if (D3DZFunc != D3DCMP_LESSEQUAL)
 	{
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_LESSEQUAL);
 		D3DZFunc = D3DCMP_LESSEQUAL;
@@ -1964,7 +1964,7 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr,VECTORCH *prevPositionPtr)
 	/* translate second vertex into view space */
 	TranslatePointIntoViewspace(&vertices[0]);
 
-	/* is particle within normal view frustrum ? */
+	/* is particle within normal view frustum ? */
 	if((-vertices[0].vx <= vertices[0].vz)
 	&&(vertices[0].vx <= vertices[0].vz)
 	&&(-vertices[0].vy <= vertices[0].vz)
@@ -2057,7 +2057,7 @@ void D3D_DrawParticle_Smoke(PARTICLE *particlePtr)
 	/* translate second vertex into view space */
 	TranslatePointIntoViewspace(&vertices[0]);
 
-	/* is particle within normal view frustrum ? */
+	/* is particle within normal view frustum ? */
 	int inView = 0;
 
 	if(AvP.PlayerType == I_Alien)
@@ -3406,7 +3406,7 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 		for(z=0; z<16; z++)
 		{
 			VECTORCH *point = &MeshVertex[i];
-			
+
 			point->vx = xOrigin+(x*MeshXScale)/15;
 			point->vz = zOrigin+(z*MeshZScale)/15;
 
@@ -3452,7 +3452,7 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 							c = MUL_FIXED(s,c);
 						}
 						MeshVertexSpecular[i] = (c<<16)+(((c/4)<<8)&0xff00) + (c/4);
-						#else 
+						#else
 						if (!(FastRandom()&1023))
 						{
 							MeshVertexSpecular[i] = 0xc04040;
@@ -3483,10 +3483,10 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 			#endif
 
 			#if 1
-			MeshWorldVertex[i].vx = ((point->vx-WaterXOrigin)/4+MUL_FIXED(GetSin((point->vy*16)&4095),128));			
-			MeshWorldVertex[i].vy = ((point->vz-WaterZOrigin)/4+MUL_FIXED(GetSin((point->vy*16+200)&4095),128));			
+			MeshWorldVertex[i].vx = ((point->vx-WaterXOrigin)/4+MUL_FIXED(GetSin((point->vy*16)&4095),128));
+			MeshWorldVertex[i].vy = ((point->vz-WaterZOrigin)/4+MUL_FIXED(GetSin((point->vy*16+200)&4095),128));
 			#endif
-			
+
 			#if 1
 			TranslatePointIntoViewspace(point);
 			#else
@@ -3497,8 +3497,8 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 			point->vy = MUL_FIXED(point->vy,87381);
 
 			#endif
-			/* is particle within normal view frustrum ? */
-			if(AvP.PlayerType==I_Alien)	/* wide frustrum */
+			/* is particle within normal view frustum ? */
+			if(AvP.PlayerType==I_Alien)	/* wide frustum */
 			{
 				if(( (-point->vx <= point->vz*2)
 		   			&&(point->vx <= point->vz*2)
@@ -3535,7 +3535,7 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 	{
 		D3D_DrawMoltenMetalMesh_Unclipped();
 //		D3D_DrawWaterMesh_Unclipped();
-	}	
+	}
 	else
 //	else if (MeshVertexOutcode[0]||MeshVertexOutcode[15]||MeshVertexOutcode[240]||MeshVertexOutcode[255])
 	{
@@ -4133,8 +4133,8 @@ void D3D_DrawForceField(int xOrigin, int yOrigin, int zOrigin, int fieldType)
 
 			TranslatePointIntoViewspace(point);
 
-			/* is particle within normal view frustrum ? */
-			if(AvP.PlayerType==I_Alien)	/* wide frustrum */
+			/* is particle within normal view frustum ? */
+			if(AvP.PlayerType==I_Alien)	/* wide frustum */
 			{
 				if(( (-point->vx <= point->vz*2)
 		   			&&(point->vx <= point->vz*2)
@@ -4209,8 +4209,8 @@ void D3D_DrawPowerFence(int xOrigin, int yOrigin, int zOrigin, int xScale, int y
 			/* translate particle into view space */
 			TranslatePointIntoViewspace(point);
 
-			/* is particle within normal view frustrum ? */
-			if(AvP.PlayerType==I_Alien)	/* wide frustrum */
+			/* is particle within normal view frustum ? */
+			if(AvP.PlayerType==I_Alien)	/* wide frustum */
 			{
 				if(( (-point->vx <= point->vz*2)
 		   			&&(point->vx <= point->vz*2)
@@ -4364,8 +4364,8 @@ void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin)
 			/* translate particle into view space */
 			TranslatePointIntoViewspace(point);
 
-			/* is particle within normal view frustrum ? */
-			if(AvP.PlayerType==I_Alien)	/* wide frustrum */
+			/* is particle within normal view frustum ? */
+			if(AvP.PlayerType==I_Alien)	/* wide frustum */
 			{
 				if(( (-point->vx <= point->vz*2)
 		   			&&(point->vx <= point->vz*2)
@@ -4732,7 +4732,7 @@ void DrawScanlinesOverlay(float level)
 	ExecuteBuffer();
 	LockExecuteBuffer();
 
-	if(D3DZFunc != D3DCMP_ALWAYS) 
+	if(D3DZFunc != D3DCMP_ALWAYS)
 	{
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_ALWAYS);
 		D3DZFunc = D3DCMP_ALWAYS;
@@ -4760,7 +4760,7 @@ void DrawScanlinesOverlay(float level)
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = (v-size)/256.0f;
 	mainVertex[vb].tv = 1.0f;
-	
+
 	vb++;
 
   	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
@@ -4782,7 +4782,7 @@ void DrawScanlinesOverlay(float level)
 	mainVertex[vb].specular = (D3DCOLOR)1.0f;
 	mainVertex[vb].tu = (v+size)/256.0f;
 	mainVertex[vb].tv = 1.0f;
-	
+
 	vb++;
 
 	OUTPUT_TRIANGLE(0,1,3, 4);
@@ -4792,7 +4792,7 @@ void DrawScanlinesOverlay(float level)
 	ExecuteBuffer();
 	LockExecuteBuffer();
 
-	if (D3DZFunc != D3DCMP_LESSEQUAL) 
+	if (D3DZFunc != D3DCMP_LESSEQUAL)
 	{
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_LESSEQUAL);
 		D3DZFunc = D3DCMP_LESSEQUAL;
@@ -5196,8 +5196,8 @@ void D3D_DrawFMVOnWater(int xOrigin, int yOrigin, int zOrigin)
 			point->vy = MUL_FIXED(point->vy,87381);
 
 			#endif
-			/* is particle within normal view frustrum ? */
-			if(AvP.PlayerType==I_Alien)	/* wide frustrum */
+			/* is particle within normal view frustum ? */
+			if(AvP.PlayerType==I_Alien)	/* wide frustum */
 			{
 				if(( (-point->vx <= point->vz*2)
 		   			&&(point->vx <= point->vz*2)
@@ -5329,7 +5329,7 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 
 		mainVertex[vb].tu = pointWS->vx*WaterUScale+(1.0f/256.0f);
 		mainVertex[vb].tv =	pointWS->vy*WaterVScale+(1.0f/256.0f);
-	
+
 		vb++;
 		point++;
 		pointWS++;
@@ -5540,7 +5540,7 @@ void D3D_DrawMoltenMetalMesh_Clipped(void)
 						RenderPolygon.NumberOfVertices=4;
 					}
 					{
-						int outcode = QuadWithinFrustrum();
+						int outcode = QuadWithinfrustum();
 
 						if (outcode)
 						{
@@ -5738,8 +5738,8 @@ void D3D_DrawFMV(int xOrigin, int yOrigin, int zOrigin)
 
 			TranslatePointIntoViewspace(point);
 
-			/* is particle within normal view frustrum ? */
-			if(AvP.PlayerType==I_Alien)	/* wide frustrum */
+			/* is particle within normal view frustum ? */
+			if(AvP.PlayerType==I_Alien)	/* wide frustum */
 			{
 				if(( (-point->vx <= point->vz*2)
 		   			&&(point->vx <= point->vz*2)
@@ -5838,7 +5838,7 @@ void RenderFMVParticle(int t, int o, VECTORCH *offsetPtr)
 		VerticesBuffer[2].Z = translatedPosition.vz;
 	}
 	{
-		int outcode = TriangleWithinFrustrum();
+		int outcode = TriangleWithinfrustum();
 
 		if (outcode)
 		{
@@ -6211,8 +6211,8 @@ void D3D_DrawWaterOctagonPatch(int xOrigin, int yOrigin, int zOrigin, int xOffse
 			}
 			#endif
 			TranslatePointIntoViewspace(point);
-			/* is particle within normal view frustrum ? */
-			if(AvP.PlayerType==I_Alien)	/* wide frustrum */
+			/* is particle within normal view frustum ? */
+			if(AvP.PlayerType==I_Alien)	/* wide frustum */
 			{
 				if(( (-point->vx <= point->vz*2)
 		   			&&(point->vx <= point->vz*2)
@@ -6980,7 +6980,7 @@ extern void D3D_ScreenInversionOverlay()
 	LockExecuteBuffer();
 */
 /*
-	if (D3DZFunc != D3DCMP_ALWAYS) 
+	if (D3DZFunc != D3DCMP_ALWAYS)
 	{
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_ALWAYS);
 		D3DZFunc = D3DCMP_ALWAYS;
@@ -7013,7 +7013,7 @@ extern void D3D_ScreenInversionOverlay()
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = .375f + (cos*(+1) - sin*(-1));
 			mainVertex[vb].tv = .375f + (sin*(+1) + cos*(-1));
-			
+
 			vb++;
 
 		  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipRight;
@@ -7024,7 +7024,7 @@ extern void D3D_ScreenInversionOverlay()
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = .375f + (cos*(+1) - sin*(+1));
 			mainVertex[vb].tv = .375f + (sin*(+1) + cos*(+1));
-			
+
 			vb++;
 
 		  	mainVertex[vb].sx =	(float)Global_VDB_Ptr->VDB_ClipLeft;
@@ -7063,7 +7063,7 @@ extern void D3D_ScreenInversionOverlay()
 	LockExecuteBuffer();
 */
 /*
-	if (D3DZFunc != D3DCMP_LESSEQUAL) 
+	if (D3DZFunc != D3DCMP_LESSEQUAL)
 	{
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_LESSEQUAL);
 		D3DZFunc = D3DCMP_LESSEQUAL;
@@ -7256,7 +7256,7 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 			mainVertex[vb].specular = (D3DCOLOR)1.0f;
 			mainVertex[vb].tu = (float)(.875 + (cos*(-1) - sin*(+1)));
 			mainVertex[vb].tv = (float)(.375 + (sin*(-1) + cos*(+1)));
-			
+
 			vb++;
 
 			OUTPUT_TRIANGLE(0,1,3, 4);
@@ -7366,8 +7366,8 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 
 			TranslatePointIntoViewspace(point);
 
-			/* is particle within normal view frustrum ? */
-			if(AvP.PlayerType==I_Alien)	/* wide frustrum */
+			/* is particle within normal view frustum ? */
+			if(AvP.PlayerType==I_Alien)	/* wide frustum */
 			{
 				if(( (-point->vx <= point->vz*2)
 		   			&&(point->vx <= point->vz*2)
@@ -7469,7 +7469,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 
 	/* unlock d3d texture */
 	LastError = ftPtr->ImagePtr->Direct3DTexture->UnlockRect(0);
-	if(FAILED(LastError)) 
+	if(FAILED(LastError))
 	{
 		LogDxErrorString("Could not unlock Direct3D texture ftPtr->ImagePtr->Direct3DTexture\n");
 		return;
@@ -7478,7 +7478,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	/* update rendering texture with FMV image */
 	LastError = d3d.lpD3DDevice->UpdateTexture(ftPtr->DestTexture, ftPtr->ImagePtr->Direct3DTexture);
 	if(FAILED(LastError))
-	{	
+	{
 		OutputDebugString("\n couldn't update texture in UpdateFMVTexture");
 	}
 #endif
@@ -7589,7 +7589,7 @@ extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour)
 	quadVertices[1].Y = y-1;
 	quadVertices[2].Y = y + HUD_FONT_HEIGHT + 1;
 	quadVertices[3].Y = y + HUD_FONT_HEIGHT + 1;
-	
+
 //	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_OFF);
 	SetFilteringMode(FILTERING_BILINEAR_OFF);
 
@@ -7609,12 +7609,12 @@ extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour)
 			quadVertices[2].V = topLeftV + HUD_FONT_HEIGHT + 1;
 			quadVertices[3].U = topLeftU - 1;
 			quadVertices[3].V = topLeftV + HUD_FONT_HEIGHT + 1;
-			
+
 			quadVertices[0].X = x - 1;
 			quadVertices[3].X = x - 1;
 			quadVertices[1].X = x + HUD_FONT_WIDTH + 1;
 			quadVertices[2].X = x + HUD_FONT_WIDTH + 1;
-				
+
 			D3D_HUDQuad_Output
 			(
 				AAFontImageNumber,
@@ -7821,7 +7821,7 @@ extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, in
 #endif
 }
 
-void DrawFadeQuad(int topX, int topY, int alpha) 
+void DrawFadeQuad(int topX, int topY, int alpha)
 {
 	return;
 //	return;
@@ -7903,7 +7903,7 @@ void DrawFadeQuad(int topX, int topY, int alpha)
 */
 }
 
-void DrawTexturedFadedQuad(int topX, int topY, int image_num, int alpha) 
+void DrawTexturedFadedQuad(int topX, int topY, int image_num, int alpha)
 {
 	return;
 //	return;
@@ -7991,7 +7991,7 @@ void DrawTexturedFadedQuad(int topX, int topY, int image_num, int alpha)
 */
 }
 
-void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE8 bar_texture, int original_width, int original_height, int new_width, int new_height) 
+void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE8 bar_texture, int original_width, int original_height, int new_width, int new_height)
 {
 	LastError = d3d.lpD3DDevice->SetTexture(0, bar_texture);
 	currentTextureId = 998; // ho hum
@@ -8068,7 +8068,7 @@ void DrawProgressBar(RECT src_rect, RECT dest_rect, LPDIRECT3DTEXTURE8 bar_textu
 	}
 }
 
-void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, BOOL alpha) 
+void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, BOOL alpha)
 {
 LastError = d3d.lpD3DDevice->SetTexture(0,AvPMenuGfxStorage[image_num].menuTexture);
 	if(FAILED(LastError)) {
@@ -8153,7 +8153,7 @@ LastError = d3d.lpD3DDevice->SetTexture(0,AvPMenuGfxStorage[image_num].menuTextu
 	}
 }
 
-void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, int alpha) 
+void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, int alpha)
 {
 	return;
 /*
@@ -8227,7 +8227,7 @@ void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_n
 	tempVertex[3].tv = 0.0f;
 
 //	vb++;
-	
+
 	OUTPUT_TRIANGLE(0,1,2, 4);
 	OUTPUT_TRIANGLE(1,2,3, 4);
 
@@ -8241,7 +8241,7 @@ void DrawAlphaMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_n
 */
 }
 
-void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha) 
+void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int green, int blue, int alpha)
 {
 	return;
 /*
@@ -8322,7 +8322,7 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 	tempVertex[3].specular = RGBALIGHT_MAKE(0,0,0,255);
 	tempVertex[3].tu = (float)((texU + font_width) * RecipW);
 	tempVertex[3].tv = (float)((texV) * RecipH);
-	
+
 //	vb++;
 
 	OUTPUT_TRIANGLE(0,1,2, 4);
@@ -8338,7 +8338,7 @@ void DrawSmallMenuCharacter(int topX, int topY, int texU, int texV, int red, int
 */
 }
 
-void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha) 
+void DrawTallFontCharacter(int topX, int topY, int texU, int texV, int char_width, int alpha)
 {
 //	return;
 /*

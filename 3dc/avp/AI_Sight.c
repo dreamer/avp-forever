@@ -21,13 +21,13 @@
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 
-extern int MarineSight_FrustrumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRATEGYBLOCK *target);
-extern int FrisbeeSight_FrustrumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRATEGYBLOCK *target);
-int AGunSight_FrustrumReject(VECTORCH *localOffset);
+extern int MarineSight_FrustumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRATEGYBLOCK *target);
+extern int FrisbeeSight_FrustumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRATEGYBLOCK *target);
+int AGunSight_FrustumReject(VECTORCH *localOffset);
 
 int NPCCanSeeTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, int viewRange)
 {
-	int frustrum_test;
+	int frustum_test;
 	/* connect eyeposition to head */
 	VECTORCH eyePosition = {0,-1500,0};
 
@@ -41,7 +41,7 @@ int NPCCanSeeTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, int viewRange)
 	if (sbPtr->containingModule==NULL) {
 		return(0);
 	}
-	
+
 	if ((target->SBdptr==NULL)||(sbPtr->SBdptr==NULL)) {
 		if ((IsModuleVisibleFromModule(target->containingModule,sbPtr->containingModule))) {
 			return(1);
@@ -59,11 +59,11 @@ int NPCCanSeeTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, int viewRange)
 	    			SECTION_DATA *disc_sec;
 
 					LOCALASSERT(sbPtr);
-					LOCALASSERT(sbPtr->containingModule); 
-					frisbeeStatusPointer = (FRISBEE_BEHAV_BLOCK *)(sbPtr->SBdataptr);    
-				    LOCALASSERT(frisbeeStatusPointer);	          		
+					LOCALASSERT(sbPtr->containingModule);
+					frisbeeStatusPointer = (FRISBEE_BEHAV_BLOCK *)(sbPtr->SBdataptr);
+				    LOCALASSERT(frisbeeStatusPointer);
 					/* Arc reject. */
-			
+
 					disc_sec=GetThisSectionData(frisbeeStatusPointer->HModelController.section_data,"Mdisk");
 
 					if (disc_sec) {
@@ -75,15 +75,15 @@ int NPCCanSeeTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, int viewRange)
 					}
 
 					GetTargetingPointOfObject_Far(target,&targetpos);
- 					
+
 					offset.vx=sourcepos.vx-targetpos.vx;
 					offset.vy=sourcepos.vy-targetpos.vy;
 					offset.vz=sourcepos.vz-targetpos.vz;
-					
+
 					TransposeMatrixCH(&WtoL);
 					RotateVector(&offset,&WtoL);
 
-					frustrum_test=FrisbeeSight_FrustrumReject(sbPtr,&offset,target);
+					frustum_test=FrisbeeSight_FrustumReject(sbPtr,&offset,target);
 				}
 				break;
 			case I_BehaviourMarine:
@@ -95,11 +95,11 @@ int NPCCanSeeTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, int viewRange)
 	    			SECTION_DATA *head_sec;
 
 					LOCALASSERT(sbPtr);
-					LOCALASSERT(sbPtr->containingModule); 
-					marineStatusPointer = (MARINE_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-				    LOCALASSERT(marineStatusPointer);	          		
+					LOCALASSERT(sbPtr->containingModule);
+					marineStatusPointer = (MARINE_STATUS_BLOCK *)(sbPtr->SBdataptr);
+				    LOCALASSERT(marineStatusPointer);
 					/* Arc reject. */
-			
+
 					head_sec=GetThisSectionData(marineStatusPointer->HModelController.section_data,"head");
 
 					if (head_sec) {
@@ -111,15 +111,15 @@ int NPCCanSeeTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, int viewRange)
 					}
 
 					GetTargetingPointOfObject_Far(target,&targetpos);
- 					
+
 					offset.vx=sourcepos.vx-targetpos.vx;
 					offset.vy=sourcepos.vy-targetpos.vy;
 					offset.vz=sourcepos.vz-targetpos.vz;
-					
+
 					TransposeMatrixCH(&WtoL);
 					RotateVector(&offset,&WtoL);
 
-					frustrum_test=MarineSight_FrustrumReject(sbPtr,&offset,target);
+					frustum_test=MarineSight_FrustumReject(sbPtr,&offset,target);
 				}
 				break;
 			case I_BehaviourXenoborg:
@@ -130,11 +130,11 @@ int NPCCanSeeTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, int viewRange)
 	    			SECTION_DATA *head_sec;
 
 					LOCALASSERT(sbPtr);
-					LOCALASSERT(sbPtr->containingModule); 
-					xenoStatusPointer = (XENO_STATUS_BLOCK *)(sbPtr->SBdataptr);    
-				    LOCALASSERT(xenoStatusPointer);	          		
+					LOCALASSERT(sbPtr->containingModule);
+					xenoStatusPointer = (XENO_STATUS_BLOCK *)(sbPtr->SBdataptr);
+				    LOCALASSERT(xenoStatusPointer);
 					/* Arc reject. */
-			
+
 					head_sec=GetThisSectionData(xenoStatusPointer->HModelController.section_data,"head");
 
 					if (head_sec) {
@@ -146,15 +146,15 @@ int NPCCanSeeTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, int viewRange)
 					}
 
 					GetTargetingPointOfObject_Far(target,&targetpos);
- 					
+
 					offset.vx=sourcepos.vx-targetpos.vx;
 					offset.vy=sourcepos.vy-targetpos.vy;
 					offset.vz=sourcepos.vz-targetpos.vz;
-					
+
 					TransposeMatrixCH(&WtoL);
 					RotateVector(&offset,&WtoL);
 
-					frustrum_test=XenoSight_FrustrumReject(sbPtr,&offset);
+					frustum_test=XenoSight_FrustumReject(sbPtr,&offset);
 				}
 				break;
 			case I_BehaviourAutoGun:
@@ -163,27 +163,27 @@ int NPCCanSeeTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, int viewRange)
 					MATRIXCH WtoL;
 					VECTORCH offset, sourcepos, targetpos;
 					/* Arc reject. */
-			
+
 					WtoL=sbPtr->DynPtr->OrientMat;
 					GetTargetingPointOfObject_Far(sbPtr,&sourcepos);
 					GetTargetingPointOfObject_Far(target,&targetpos);
- 					
+
 					offset.vx=sourcepos.vx-targetpos.vx;
 					offset.vy=sourcepos.vy-targetpos.vy;
 					offset.vz=sourcepos.vz-targetpos.vz;
-					
+
 					TransposeMatrixCH(&WtoL);
 					RotateVector(&offset,&WtoL);
 
-					frustrum_test=AGunSight_FrustrumReject(&offset);
+					frustum_test=AGunSight_FrustumReject(&offset);
 				}
 				break;
 			default:
-				frustrum_test=1;
+				frustum_test=1;
 				break;
 		}
-		
-		if (frustrum_test) {
+
+		if (frustum_test) {
 
 			RotateVector(&eyePosition,&(sbPtr->DynPtr->OrientMat));
 

@@ -1622,7 +1622,7 @@ extern "C" {
 #define HAVE_VISION_H 1
 #include "lighting.h"
 #include "showcmds.h"
-#include "frustrum.h"
+#include "frustum.h"
 #include "d3d_render.h"
 #include "bh_types.h"
 
@@ -2477,7 +2477,7 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 	/* translate second vertex into view space */
 //	TranslatePointIntoViewspace(&vertices[0]);
 
-	/* is particle within normal view frustrum ? */
+	/* is particle within normal view frustum ? */
 
 /*
 	if ((-vertices[0].vx <= vertices[0].vz)
@@ -3191,8 +3191,8 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 //bjd			TranslatePointIntoViewspace(point);
 
 /*
-			// is particle within normal view frustrum ?
-			if (AvP.PlayerType==I_Alien)	// wide frustrum
+			// is particle within normal view frustum ?
+			if (AvP.PlayerType==I_Alien)	// wide frustum
 			{
 				if(( (-point->vx <= point->vz*2)
 		   			&&(point->vx <= point->vz*2)
@@ -4287,8 +4287,8 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 //bjd				TranslatePointIntoViewspace(point);
 
 /*
-				// is particle within normal view frustrum ?
-				if(AvP.PlayerType==I_Alien)	// wide frustrum
+				// is particle within normal view frustum ?
+				if(AvP.PlayerType==I_Alien)	// wide frustum
 				{
 					if(( (-point->vx <= point->vz*2)
 		   				&&(point->vx <= point->vz*2)
