@@ -580,7 +580,7 @@ bool ExecuteBuffer()
 		// just call this function once
 		if (!weHaveOpaques)
 		{
-			D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Before DrawIndexedPrimitive for non transparents\n"));
+//			D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Before DrawIndexedPrimitive for non transparents\n"));
 			weHaveOpaques = true;
 		}
 
@@ -606,9 +606,9 @@ bool ExecuteBuffer()
 			}
 		}
 		NumberOfRenderedTriangles += numPrimitives / 3;
-	}
 
-	D3DPERF_EndEvent();
+//		D3DPERF_EndEvent();
+	}
 
 	// do transparents here..
 	for (uint32_t i = 0; i < transRenderCount; i++)
@@ -619,7 +619,7 @@ bool ExecuteBuffer()
 		// just call this function once
 		if (!weHaveTransparents)
 		{
-			D3DPERF_BeginEvent(D3DCOLOR_XRGB(140,36,70), WIDEN("Before DrawIndexedPrimitive for transparents\n"));
+//			D3DPERF_BeginEvent(D3DCOLOR_XRGB(140,36,70), WIDEN("Before DrawIndexedPrimitive for transparents\n"));
 			weHaveTransparents = true;
 		}
 
@@ -645,14 +645,14 @@ bool ExecuteBuffer()
 			}
 		}
 		NumberOfRenderedTriangles += numPrimitives / 3;
-	}
 
-	D3DPERF_EndEvent();
+//		D3DPERF_EndEvent();
+	}
 
 	// render any orthographic quads
 	if (orthoListCount)
 	{
-		D3DPERF_BeginEvent(D3DCOLOR_XRGB(200,29,89), WIDEN("Before DrawIndexedPrimitive for ortho quads\n"));
+//		D3DPERF_BeginEvent(D3DCOLOR_XRGB(200,29,89), WIDEN("Before DrawIndexedPrimitive for ortho quads\n"));
 
 		LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DOrthoVertexBuffer, 0, sizeof(ORTHOVERTEX));
 		if (FAILED(LastError))
@@ -711,7 +711,7 @@ bool ExecuteBuffer()
 			}
 		}
 
-		D3DPERF_EndEvent();
+//		D3DPERF_EndEvent();
 	}
 
 	weHaveTransparents = false;
@@ -1071,12 +1071,12 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, int32_t textureI
 	orthoVBOffset++;
 }
 
-inline float WPos2DC(uint32_t pos)
+inline float WPos2DC(int32_t pos)
 {
 	return (float(pos / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
 }
 
-inline float HPos2DC(uint32_t pos)
+inline float HPos2DC(int32_t pos)
 {
 	return (float(pos / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
 }
@@ -1430,7 +1430,7 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t t
 			texturePOW2Width = width;
 			texturePOW2Height = height;
 		}
-		else 
+		else
 		{
 			if (mainMenu)
 			{
@@ -2608,7 +2608,7 @@ void D3D_DecalSystem_Setup(void)
 		D3DZWriteEnable = FALSE;
 	}
 
-	D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Starting to draw Decals...\n"));
+//	D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Starting to draw Decals...\n"));
 }
 
 void D3D_DecalSystem_End(void)
@@ -2625,7 +2625,7 @@ void D3D_DecalSystem_End(void)
 		D3DZWriteEnable = TRUE;
 	}
 
-	D3DPERF_EndEvent();
+//	D3DPERF_EndEvent();
 }
 
 void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
@@ -4390,7 +4390,7 @@ void r2rect :: AlphaFill
 	D3D_Rectangle(x0, y0, x1, y1, R, G, B, translucency);
 }
 
-extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colour)
+extern void D3D_RenderHUDNumber_Centred(uint32_t number, uint32_t x, uint32_t y, uint32_t colour)
 {
 	// green and red ammo numbers
 	struct VertexTag quadVertices[4];
@@ -4535,7 +4535,7 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr, int x, int y, int colou
 	}
 }
 
-void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour)
+void D3D_RenderHUDString_Centred(char *stringPtr, uint32_t centreX, uint32_t y, uint32_t colour)
 {
 	// white text only of marine HUD ammo, health numbers etc
 	if (stringPtr == NULL)

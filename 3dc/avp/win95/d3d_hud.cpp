@@ -28,8 +28,8 @@ extern "C++"
 {
 #include "r2base.h"
 #include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
-extern void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour);
-extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colour);
+extern void D3D_RenderHUDString_Centred(char *stringPtr, uint32_t centreX, uint32_t y, uint32_t colour);
+extern void D3D_RenderHUDNumber_Centred(uint32_t number, uint32_t x, uint32_t y, uint32_t colour);
 };
 
 #include "d3d_hud.h"
@@ -364,7 +364,7 @@ void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2)
 void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 {
 	struct VertexTag quadVertices[4];
-	int widthCos,widthSin;
+	int widthCos, widthSin;
 	extern int CloakingPhase;
 
 	BlueBar.TopLeftY = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset) - MUL_FIXED(MotionTrackerScale,40);
