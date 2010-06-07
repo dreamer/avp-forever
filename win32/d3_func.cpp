@@ -393,6 +393,13 @@ int32_t UnlockTexture(LPDIRECT3DTEXTURE9 texture)
 		return 0;
 }
 
+/*
+ * This function is responsible for creating the large sized font texture, as used in the game menu system. Originally this 
+ * texture was only handled by DirectDraw, and has a resolution of 30 x 7392, which cannot be loaded as a standard Direct3D texture.
+ * The original image (IntroFont.RIM) is a bitmap font, containing one letter per row (width of 30px). The below function takes this 
+ * bitmap font and rearranges it into a square texture, now containing more letters per row (as a standard bitmap font would be)
+ * which can be used by Direct3D without issue.
+ */
 LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 {
 	LPDIRECT3DTEXTURE9 destTexture = NULL;

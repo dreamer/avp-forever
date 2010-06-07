@@ -28,7 +28,6 @@
 
 uint32_t NumVertices = 0;
 const int32_t  NO_TEXTURE   = -1;
-const uint32_t TALLFONT_TEX = 999;
 
 // set them to 'null' texture initially
 int32_t	currentTextureID	= NO_TEXTURE;
@@ -524,14 +523,6 @@ static void ChangeTexture(const int32_t textureID)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, Tex_GetTexture(textureID));
 		if (!FAILED(LastError)) currentTextureID = textureID;
-			return;
-	}
-
-	// menu large font
-	else if (textureID == TALLFONT_TEX)
-	{
-		LastError = d3d.lpD3DDevice->SetTexture(0, IntroFont_Light.info.menuTexture);
-		if (!FAILED(LastError)) currentTextureID = TALLFONT_TEX;
 			return;
 	}
 
@@ -1104,10 +1095,8 @@ inline float HPos2DC(uint32_t pos)
 	return (float(pos / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
 }
 
-void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t char_width, uint32_t alpha)
+void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha)
 {
-//	CheckVertexBuffer(4, TALLFONT_TEX, TRANSLUCENCY_GLOWING);
-
 	alpha = (alpha / 256);
 	if (alpha > 255)
 		alpha = 255;
@@ -1120,15 +1109,15 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_t
 	float RecipW = 1.0f / real_width;
 	float RecipH = 1.0f / real_height;
 
-	int height_of_char = 33;
+	uint32_t charHeight = 33;
 
 	float x1 = (float(topX / 640.0f) * 2) - 1;
 	float y1 = (float(topY / 480.0f) * 2) - 1;
 
-	float x2 = ((float(topX + char_width) / 640.0f) * 2) - 1;
-	float y2 = ((float(topY + height_of_char) / 480.0f) * 2) - 1;
+	float x2 = ((float(topX + charWidth) / 640.0f) * 2) - 1;
+	float y2 = ((float(topY + charHeight) / 480.0f) * 2) - 1;
 
-	CheckOrthoBuffer(4, TALLFONT_TEX, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
+	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
 
 	// bottom left
 	orthoVerts[orthoVBOffset].x = x1;
@@ -1136,7 +1125,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_t
 	orthoVerts[orthoVBOffset].z = 1.0f;
 	orthoVerts[orthoVBOffset].colour = colour;
 	orthoVerts[orthoVBOffset].u = (float)((texU) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((texV + height_of_char) * RecipH);
+	orthoVerts[orthoVBOffset].v = (float)((texV + charHeight) * RecipH);
 	orthoVBOffset++;
 
 	// top left
@@ -1153,8 +1142,8 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_t
 	orthoVerts[orthoVBOffset].y = y2;
 	orthoVerts[orthoVBOffset].z = 1.0f;
 	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((texU + char_width) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((texV + height_of_char) * RecipH);
+	orthoVerts[orthoVBOffset].u = (float)((texU + charWidth) * RecipW);
+	orthoVerts[orthoVBOffset].v = (float)((texV + charHeight) * RecipH);
 	orthoVBOffset++;
 
 	// top right
@@ -1162,7 +1151,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_t
 	orthoVerts[orthoVBOffset].y = y1;
 	orthoVerts[orthoVBOffset].z = 1.0f;
 	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((texU + char_width) * RecipW);
+	orthoVerts[orthoVBOffset].u = (float)((texU + charWidth) * RecipW);
 	orthoVerts[orthoVBOffset].v = (float)((texV) * RecipH);
 	orthoVBOffset++;
 

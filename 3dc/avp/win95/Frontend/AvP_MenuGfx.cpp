@@ -10,6 +10,7 @@
 #include "ffstdio.h"
 #include "renderer.h"
 
+#include "textureManager.h"
 
 extern int Font_DrawText(const char* text, int x, int y, int colour, int fontType);
 
@@ -186,38 +187,33 @@ static void LoadMenuFont(void)
 	GLOBALASSERT(gfxPtr->Width>0);
 	GLOBALASSERT(gfxPtr->Height>0);
 	
-	gfxPtr->hBackup = 0;
-	
 	AVPTEXTURE *image = gfxPtr->ImagePtr;
 
-	unsigned char *srcPtr = image->buffer;
-
-	int c;
-	
+	uint8_t *srcPtr = image->buffer;
+/*
 	if ((image->width != 30) || ((image->height % 33) != 0)) {
 		// handle new texture
 	}
-	
+*/	
 	IntroFont_Light.numchars = image->height / 33;	
 	IntroFont_Light.FontWidth[32] = 5;
 	
-	for (c=33; c<(32+IntroFont_Light.numchars); c++) 
+	for (int c = 33; c < (32+IntroFont_Light.numchars); c++) 
 	{
-		int x,y;
 		int y1 = 1+(c-32)*33;
 		
-		IntroFont_Light.FontWidth[c]=31;
+		IntroFont_Light.FontWidth[c] = 31;
 		
-		for (x=29; x>0; x--) 
+		for (int x = 29; x > 0; x--) 
 		{
-			int blank = 1;
+			bool blank = true;
 			
-			for (y=y1; y<y1+31; y++) 
+			for (int y = y1; y < y1+31; y++) 
 			{
-				unsigned char *s = &srcPtr[(x + y*image->width) * 4];
+				uint8_t *s = &srcPtr[(x + y*image->width) * sizeof(uint32_t)];
 				if (s[2]) 
 				{
-					blank = 0;
+					blank = false;
 					break;
 				}
 			}
@@ -233,18 +229,18 @@ static void LoadMenuFont(void)
 		}
 	}
 
-	// we're going to try create a square texture..
+	// we're going to try create a square texture
 	gfxPtr->menuTexture = CreateD3DTallFontTexture(image);
+	gfxPtr->textureID = Tex_AddTexture(gfxPtr->menuTexture, image->width, image->height);
+	gfxPtr->menuTexture = NULL; // bjd - fixme
 }
 
 static void UnloadMenuFont(void)
 {
-//	IndexedFont :: UnloadFont( IntroFont_Light );
-
 	ReleaseAvPTexture(IntroFont_Light.info.ImagePtr);
 	IntroFont_Light.info.ImagePtr = NULL;
 
-	SAFE_RELEASE(IntroFont_Light.info.menuTexture);
+	Tex_Release(IntroFont_Light.info.textureID);
 }
 
 extern int LengthOfMenuText(const char *textPtr)
@@ -344,7 +340,7 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 				ie the moving hazy smoke/cloud effect behind the large font text on the menus
 			*/
 
-			DrawTallFontCharacter(positionX, positionY, topLeftU, topLeftV, char_width, alpha);
+			DrawTallFontCharacter(positionX, positionY, IntroFont_Light.info.textureID, topLeftU, topLeftV, char_width, alpha);
 
 //			DrawCloudTable(pX, pY, word_length, 255);
 
@@ -760,17 +756,6 @@ extern int RenderSmallChar(char c, int x, int y, int alpha, int red, int green, 
 	return AAFontWidths[(unsigned int) c];
 }
 
-extern int RenderTallChar(char c, int x, int y, int alpha, int red, int green, int blue)
-{
-	int char_width = IntroFont_Light.FontWidth[(unsigned int) c];
-
-	int topLeftU = 0;
-	int topLeftV = 0;
-
-	DrawTallFontCharacter(x, y, topLeftU, topLeftV, char_width, alpha);
-	return 0;
-}
-
 /*static*/extern int RenderSmallFontString(char *textPtr, int sx, int sy, int alpha, int red, int green, int blue)
 {
 	int alphaR = MUL_FIXED(alpha, red);
@@ -1053,8 +1038,7 @@ extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 								fastFileLength,
 								AW_TLF_TRANSP|AW_TLF_CHROMAKEY,
 								&(gfxPtr->Width),
-								&(gfxPtr->Height),
-								&(gfxPtr->hBackup)
+								&(gfxPtr->Height)
 							);
 	}
 	else
@@ -1066,8 +1050,7 @@ extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 								buffer,
 								AW_TLF_TRANSP|AW_TLF_CHROMAKEY,
 								&(gfxPtr->Width),
-								&(gfxPtr->Height),
-								&(gfxPtr->hBackup)
+								&(gfxPtr->Height)
 							);
 
 	}
@@ -1095,10 +1078,8 @@ extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 	}
 
 	GLOBALASSERT(gfxPtr->ImagePtr);
-//	GLOBALASSERT(gfxPtr->hBackup);
-	GLOBALASSERT(gfxPtr->Width>0);
-	GLOBALASSERT(gfxPtr->Height>0);
-	gfxPtr->hBackup=0;
+	GLOBALASSERT(gfxPtr->Width  > 0);
+	GLOBALASSERT(gfxPtr->Height > 0);
 }
 
 static void ReleaseAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
@@ -1112,17 +1093,8 @@ static void ReleaseAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 	GLOBALASSERT(gfxPtr);
 	GLOBALASSERT(gfxPtr->ImagePtr);
 
-  //	ATRemoveSurface(gfxPtr->ImagePtr);
 	ReleaseAvPTexture(gfxPtr->ImagePtr);
 	gfxPtr->ImagePtr = NULL;
-
-	#if 0
-	if (gfxPtr->hBackup)
-	{
-		AwDestroyBackupTexture(gfxPtr->hBackup);
-		gfxPtr->hBackup = NULL;
-	}
-	#endif
 
 	/* release d3d texture */
 	SAFE_RELEASE(gfxPtr->menuTexture);

@@ -213,13 +213,6 @@ IndexedFont_Proportional_Column :: ~IndexedFont_Proportional_Column()
 	GLOBALASSERT(image_ptr);
 	ReleaseAvPTexture(image_ptr);
 	image_ptr = NULL;
-	
-	if (hBackup)
-	{
-		AwDestroyBackupTexture(hBackup);
-	}
-	
-	hBackup = NULL;
 }
 
 IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
@@ -260,8 +253,7 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 					0
 				),
 				&nWidth,
-				&nHeight,
-				&hBackup
+				&nHeight
 			);
 		}
 		else
@@ -275,8 +267,7 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 					0
 				),
 				&nWidth,
-				&nHeight,
-				&hBackup
+				&nHeight
 			);
 		}
 		R2Size_OverallImage.w = nWidth;
@@ -284,7 +275,6 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 	}
 
 	GLOBALASSERT(image_ptr);
-	GLOBALASSERT(hBackup);
 
 	GLOBALASSERT(R2Size_OverallImage.w > 0);
 	GLOBALASSERT(R2Size_OverallImage.h > 0);
@@ -730,19 +720,11 @@ IndexedFont_Kerned_Column* IndexedFont_Kerned_Column :: Create
 IndexedFont_Kerned_Column :: ~IndexedFont_Kerned_Column()
 {
 	GLOBALASSERT(image_ptr);
-//	ATRemoveSurface(image_ptr);
 	ReleaseAvPTexture(image_ptr);
 	image_ptr = NULL;
-	
-	if (hBackup)
-	{
-		AwDestroyBackupTexture(hBackup);
-	}
-	
-	hBackup = NULL;
 }
 
-IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
+IndexedFont_Kerned_Column::IndexedFont_Kerned_Column
 (
 	FontIndex I_Font_New,
 	char* Filename,
@@ -780,8 +762,7 @@ IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
 					0
 				),
 				&nWidth,
-				&nHeight,
-				&hBackup
+				&nHeight
 			);
 		}
 		else
@@ -795,8 +776,7 @@ IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
 					0
 				),
 				&nWidth,
-				&nHeight,
-				&hBackup
+				&nHeight
 			);
 		}
 		
@@ -805,23 +785,22 @@ IndexedFont_Kerned_Column :: IndexedFont_Kerned_Column
 	}
 
 	GLOBALASSERT(image_ptr);
-	GLOBALASSERT(hBackup);
 
-	GLOBALASSERT(R2Size_OverallImage . w>0);
-	GLOBALASSERT(R2Size_OverallImage . h>0); 
+	GLOBALASSERT(R2Size_OverallImage.w > 0);
+	GLOBALASSERT(R2Size_OverallImage.h > 0); 
 	
-	NumChars = (R2Size_OverallImage . h)/HeightPerChar_Val;
+	NumChars = (R2Size_OverallImage.h) / HeightPerChar_Val;
 
 	GLOBALASSERT( NumChars < MAX_CHARS_IN_TALLFONT );
 
-	for (int i=0;i<NumChars;i++)
+	for (int i = 0; i < NumChars; i++)
 	{
-		WindowsRectForOffset[ i ] . top = (i*HeightPerChar_Val);
-		WindowsRectForOffset[ i ] . bottom = ((i+1)*HeightPerChar_Val);
-		WindowsRectForOffset[ i ] . left = 0;
-		WindowsRectForOffset[ i ] . right = R2Size_OverallImage . w;
+		WindowsRectForOffset[i].top = (i*HeightPerChar_Val);
+		WindowsRectForOffset[i].bottom = ((i+1)*HeightPerChar_Val);
+		WindowsRectForOffset[i].left = 0;
+		WindowsRectForOffset[i].right = R2Size_OverallImage.w;
 
-		FullWidthForOffset[ i ] = R2Size_OverallImage . w;
+		FullWidthForOffset[i] = R2Size_OverallImage.w;
 	}
 
 	UpdateWidths();
@@ -840,19 +819,19 @@ IndexedFont_Kerned_Column :: UpdateWidths(void)
 			for (int iOffset=0;iOffset<NumChars;iOffset++)
 			{
 				int y = iOffset * HeightPerChar_Val;
-				int x = ( R2Size_OverallImage . w - 1);
+				int x = ( R2Size_OverallImage.w - 1);
 
 				#if 0
 				db_logf1(("Character offset %i",iOffset));
 				#endif
 
-				while (x>0)
+				while (x > 0)
 				{
 					if
 					(
 						bAnyNonTransparentPixelsInColumn
 						(
-							r2pos(x,y), // r2pos R2Pos_TopOfColumn,
+							r2pos(x, y), // r2pos R2Pos_TopOfColumn,
 							HeightPerChar_Val // int HeightOfColumn
 							//&tempDDSurfaceDesc // LPDDSURFACEDESC lpDDSurfaceDesc
 						)
@@ -865,7 +844,7 @@ IndexedFont_Kerned_Column :: UpdateWidths(void)
 					x--;
 				}
 
-				SetWidth(iOffset,x+1);
+				SetWidth(iOffset, x+1);
 			}
 		}
 	}
@@ -908,13 +887,13 @@ IndexedFont_Kerned_Column :: UpdateXIncs(void)
 */
 				}
 				
-				maxOpaqueX[Row]=rightmostX;
+				maxOpaqueX[Row] = rightmostX;
 			}
 			
 			// Find left-most pixel in row of second character
 			{
-				int leftmostX=0;
-				while(leftmostX<GetMaxWidth())
+				int leftmostX = 0;
+				while (leftmostX < GetMaxWidth())
 				{
 #if 0 //bjd
 					if
@@ -936,15 +915,15 @@ IndexedFont_Kerned_Column :: UpdateXIncs(void)
 					}
 #endif
 				}
-				minOpaqueX[Row]=leftmostX;
+				minOpaqueX[Row] = leftmostX;
 			}
 		}		
 	}
 		// Use the table of opaque extents:
 
-		for (int i=0;i<NumChars;i++)
+		for (int i = 0; i < NumChars; i++)
 		{
-			for (int j=0;j<NumChars;j++)
+			for (int j = 0; j < NumChars; j++)
 			{
 				int XInc = CalcXInc
 				(

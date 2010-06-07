@@ -540,7 +540,7 @@ extern AVPTEXTURE * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...);
 		
 */
 
-extern AW_TL_ERC AwDestroyBackupTexture(AW_BACKUPTEXTUREHANDLE _bH);
+//extern AW_TL_ERC AwDestroyBackupTexture(AW_BACKUPTEXTUREHANDLE _bH);
 
 /* End Wrappers */
 #ifdef __cplusplus

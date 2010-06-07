@@ -95,7 +95,6 @@
 		int SpaceWidth_Val;
 
 		AVPTEXTURE *image_ptr;
-		AW_BACKUPTEXTUREHANDLE hBackup;
 
 		r2size R2Size_OverallImage;
 
@@ -227,8 +226,6 @@
 
 		int HeightPerChar_Val;
 		int SpaceWidth_Val;
-
-		AW_BACKUPTEXTUREHANDLE hBackup;
 
 		r2size R2Size_OverallImage;
 

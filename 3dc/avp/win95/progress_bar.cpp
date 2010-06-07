@@ -336,7 +336,6 @@ void Game_Has_Loaded()
 		ReleaseAvPTexture(image);
 		image = NULL;
 	}
-
 	if (LoadingBarEmpty) 
 	{
 		ReleaseAvPTexture(LoadingBarEmpty);

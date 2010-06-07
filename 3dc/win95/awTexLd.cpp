@@ -2,6 +2,7 @@
 #define DB_LEVEL 4
 #endif
 #include "db.h"
+#include <assert.h>
 
 #ifndef NDEBUG
 	#define HT_FAIL db_log1
@@ -141,7 +142,7 @@ namespace AwTl
 				: fileNameS(NULL)
 				, fileH(INVALID_HANDLE_VALUE)
 				, dataP(NULL)
-				, restoreH(NULL)
+//				, restoreH(NULL)
 				, maxReadBytes(UINT_MAX)
 				, bytesReadP(NULL)
 				, flags(AW_TLF_DEFAULT)
@@ -149,7 +150,7 @@ namespace AwTl
 				, originalHeightP(NULL)
 				, widthP(NULL)
 				, heightP(NULL)
-				, backupHP(NULL)
+//				, backupHP(NULL)
 				, prevTexP(static_cast<AVPTEXTURE *>(NULL))
 				, prevTexB(false)
 				, loadTextureB(false)
@@ -165,7 +166,6 @@ namespace AwTl
 			LPCTSTR fileNameS;
 			HANDLE fileH;
 			PtrUnionConst dataP;
-			AW_BACKUPTEXTUREHANDLE restoreH;
 
 			unsigned maxReadBytes;
 			unsigned * bytesReadP;
@@ -177,8 +177,6 @@ namespace AwTl
 
 			unsigned * originalWidthP;
 			unsigned * originalHeightP;
-
-			AW_BACKUPTEXTUREHANDLE * backupHP;
 
 			SurfUnion prevTexP;
 			bool prevTexB; // used when rectA is non-NULL, otherwise prevTexP is used
@@ -396,11 +394,14 @@ void AwBackupTexture::ChoosePixelFormat(AwTl::CreateTextureParms const & _parmsR
 	pixelFormat.validB = false; // set invalid first
 
 	// which flags to use?
+/*
 	unsigned fMyFlags =
 		_parmsR.flags & AW_TLF_PREVSRCALL ? db_assert1(_parmsR.restoreH), m_fFlags
 		: _parmsR.flags & AW_TLF_PREVSRC ? db_assert1(_parmsR.restoreH),
 			_parmsR.flags & ~AW_TLF_TRANSP | m_fFlags & AW_TLF_TRANSP
 		: _parmsR.flags;
+*/
+	uint32_t fMyFlags = _parmsR.flags & AW_TLF_PREVSRC ? _parmsR.flags & ~AW_TLF_TRANSP | m_fFlags & AW_TLF_TRANSP : _parmsR.flags;
 
 	// transparency?
 	m_bTranspMask = HasTransparentMask(fMyFlags & AW_TLF_TRANSP ? true : false);
@@ -888,8 +889,10 @@ namespace AwTl {
 		}
 		else
 		{
-			db_assert1(restoreH);
-			return restoreH->Restore(*this);
+			assert(1 == 0);
+			//db_assert1(restoreH);
+			//return restoreH->Restore(*this);
+			return NULL;
 		}
 	}
 
@@ -908,7 +911,7 @@ namespace AwTl {
 			switch (*_argFormatS++)
 			{
 				case 's':
-					if (pParams->fileNameS || INVALID_HANDLE_VALUE!=pParams->fileH || pParams->dataP || pParams->restoreH)
+					if (pParams->fileNameS || INVALID_HANDLE_VALUE!=pParams->fileH || pParams->dataP/* || pParams->restoreH*/)
 						bad_parmsB = true;
 					else
 					{
@@ -917,7 +920,7 @@ namespace AwTl {
 					}
 					break;
 				case 'h':
-					if (pParams->fileNameS || INVALID_HANDLE_VALUE!=pParams->fileH || pParams->dataP || pParams->restoreH)
+					if (pParams->fileNameS || INVALID_HANDLE_VALUE!=pParams->fileH || pParams->dataP/* || pParams->restoreH*/)
 						bad_parmsB = true;
 					else
 					{
@@ -926,7 +929,7 @@ namespace AwTl {
 					}
 					break;
 				case 'p':
-					if (pParams->fileNameS || INVALID_HANDLE_VALUE!=pParams->fileH || pParams->dataP || pParams->restoreH)
+					if (pParams->fileNameS || INVALID_HANDLE_VALUE!=pParams->fileH || pParams->dataP /*|| pParams->restoreH*/)
 						bad_parmsB = true;
 					else
 					{
@@ -935,6 +938,7 @@ namespace AwTl {
 					}
 					break;
 				case 'r':
+/*
 					if (pParams->fileNameS || INVALID_HANDLE_VALUE!=pParams->fileH || pParams->dataP || pParams->restoreH || UINT_MAX!=pParams->maxReadBytes || pParams->bytesReadP || pParams->backupHP)
 						bad_parmsB = true;
 					else
@@ -942,9 +946,10 @@ namespace AwTl {
 						pParams->restoreH = va_arg(ap,AW_BACKUPTEXTUREHANDLE);
 						db_logf4(("\tRestore Handle = 0x%08x",pParams->restoreH));
 					}
+*/
 					break;
 				case 'x':
-					if (UINT_MAX!=pParams->maxReadBytes || pParams->restoreH)
+					if (UINT_MAX!=pParams->maxReadBytes/* || pParams->restoreH*/)
 						bad_parmsB = true;
 					else
 					{
@@ -953,7 +958,7 @@ namespace AwTl {
 					}
 					break;
 				case 'N':
-					if (pParams->bytesReadP || pParams->restoreH)
+					if (pParams->bytesReadP/* || pParams->restoreH*/)
 						bad_parmsB = true;
 					else
 					{
@@ -1007,6 +1012,7 @@ namespace AwTl {
 					}
 					break;
 				case 'B':
+/*
 					if (pParams->backupHP || pParams->restoreH)
 						bad_parmsB = true;
 					else
@@ -1014,6 +1020,7 @@ namespace AwTl {
 						pParams->backupHP = va_arg(ap,AW_BACKUPTEXTUREHANDLE *);
 						db_logf4(("\tPtr to backup handle = %p",pParams->backupHP));
 					}
+*/
 					break;
 				case 't':
 					if (pParams->prevTexP.voidP)
@@ -1054,7 +1061,7 @@ namespace AwTl {
 			}
 		}
 
-		if (!pParams->fileNameS && INVALID_HANDLE_VALUE==pParams->fileH && !pParams->dataP && !pParams->restoreH)
+		if (!pParams->fileNameS && INVALID_HANDLE_VALUE==pParams->fileH && !pParams->dataP/* && !pParams->restoreH*/)
 		{
 			awTlLastErr = AW_TLE_BADPARMS;
 			db_log2("AwCreateGraphic(): ERROR: FALSE data medium is specified");
@@ -1167,6 +1174,7 @@ AVPTEXTURE * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...)
 	return bParmsOK ? LoadFromParams(&parms).textureP : NULL;
 }
 
+/*
 AW_TL_ERC AwDestroyBackupTexture(AW_BACKUPTEXTUREHANDLE _bH)
 {
 	db_logf4(("AwDestroyBackupTexture(0x%08x) called",_bH));
@@ -1181,6 +1189,7 @@ AW_TL_ERC AwDestroyBackupTexture(AW_BACKUPTEXTUREHANDLE _bH)
 		return AW_TLE_BADPARMS;
 	}
 }
+*/
 
 /*********************************/
 /* PUBLIC DEBUG: LastErr globals */

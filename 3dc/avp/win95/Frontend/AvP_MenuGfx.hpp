@@ -76,24 +76,25 @@ enum AVPMENUGFX_ID
 
 typedef struct
 {
-	char *FilenamePtr;
-	AVPTEXTURE *ImagePtr;
-	RENDERTEXTURE menuTexture;
-	AW_BACKUPTEXTUREHANDLE hBackup;
-	uint32_t Width;
-	uint32_t Height;
+	char			*FilenamePtr;
+	AVPTEXTURE		*ImagePtr;
+	RENDERTEXTURE	menuTexture;
 
-	uint32_t newWidth;
-	uint32_t newHeight;
+	uint32_t	textureID;	// texture ID for textureManager.cpp system
+	uint32_t	Width;
+	uint32_t	Height;
+
+	uint32_t	newWidth;
+	uint32_t	newHeight;
 
 } AVPMENUGFX;
 
 typedef struct AVPIndexedFont
 {
-	AVPMENUGFX info;	/* graphic info */
-	int swidth;		/* width for space */
-	int ascii;		/* ascii code for initial character */
-	int height;		/* height per character */
+	AVPMENUGFX info;	// graphic info
+	int swidth;			// width for space
+	int ascii;			// ascii code for initial character
+	int height;			// height per character
 
 	int numchars;
 	int FontWidth[256];
@@ -121,8 +122,7 @@ extern int Hardware_RenderSmallMenuText_Coloured(char *textPtr, int x, int y, in
 
 extern int RenderSmallChar(char c, int x, int y, int alpha, int red, int green, int blue);
 extern int RenderMenuText_Clipped(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int topY, int bottomY);
-extern void RenderSmallFontString_Wrapped(const char *textPtr,RECT* area,int alpha,int* output_x,int* output_y);
-
+extern void RenderSmallFontString_Wrapped(const char *textPtr, RECT* area, int alpha, int* output_x, int* output_y);
 
 extern void DrawAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format);
 extern void DrawAvPMenuGfx_Clipped(enum AVPMENUGFX_ID menuGfxID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format, int topY, int bottomY);

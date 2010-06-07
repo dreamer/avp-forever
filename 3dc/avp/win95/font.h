@@ -84,7 +84,6 @@ typedef struct pffont
 	int fttexHeight;
 	int fttexBitDepth;
 	unsigned hotSpotValue;
-	AW_BACKUPTEXTUREHANDLE hBackup;
 
 	#ifdef __cplusplus
 	// C++ methods: ////////////////////////////////
