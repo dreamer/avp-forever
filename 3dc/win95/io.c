@@ -43,7 +43,6 @@ extern int WinBotY;
 
 extern int WindowRequestMode;
 extern int VideoRequestMode;
-extern int ZBufferRequestMode;
 extern int RasterisationRequestMode;
 extern int SoftwareScanDrawRequestMode;
 

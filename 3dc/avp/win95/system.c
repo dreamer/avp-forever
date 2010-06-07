@@ -78,7 +78,6 @@ extern void DeallocateSoundsAndPoolAllocatedMemory();
 
 int WindowRequestMode;
 int VideoRequestMode;
-int ZBufferRequestMode;
 int RasterisationRequestMode;
 int SoftwareScanDrawRequestMode;
 WINSCALEXY TopLeftSubWindow;
@@ -246,7 +245,6 @@ int AVP_ChangeDisplayMode
 
     VideoRequestMode = NewVideoMode;
     WindowRequestMode = NewWindowMode;
-	ZBufferRequestMode = NewZBufferMode;
 	RasterisationRequestMode = NewRasterisationMode;
 	SoftwareScanDrawRequestMode = NewSoftwareScanDrawMode;
 

@@ -189,8 +189,8 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, 
 LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
 BOOL ChangeGameResolution	(uint32_t width, uint32_t height/*, uint32_t colour_depth*/);
-void DrawAlphaMenuQuad(uint32_t topX, uint32_t topY, int32_t textureID, uint32_t alpha);
-void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha);
+void DrawAlphaMenuQuad		(uint32_t topX, uint32_t topY, int32_t textureID, uint32_t alpha);
+void DrawTallFontCharacter	(uint32_t topX, uint32_t topY, int32_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha);
 void DrawCloudTable			(uint32_t topX, uint32_t topY, uint32_t wordLength, uint32_t alpha);
 void DrawFadeQuad			(uint32_t topX, uint32_t topY, uint32_t alpha);
 void DrawSmallMenuCharacter (uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t red, uint32_t green, uint32_t blue, uint32_t alpha);

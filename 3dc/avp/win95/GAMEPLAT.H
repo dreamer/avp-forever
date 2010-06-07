@@ -36,7 +36,6 @@ extern int AVP_ChangeDisplayMode
 extern int WindowMode;
 extern int WindowRequestMode;
 extern int VideoRequestMode;
-extern int ZBufferRequestMode;
 
 #ifdef __cplusplus
 }

@@ -51,7 +51,7 @@ RENDERTEXTURE LoadingBarFullTexture;
 RENDERTEXTURE LoadingBarEmptyTexture;
 RENDERTEXTURE DemoBackgroundImage;
 
-void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t textureID, AVPTEXTURE *tex, uint32_t newWidth, uint32_t newHeight);
+void DrawProgressBar(const RECT &srcRect, const RECT &destRect, int32_t textureID, AVPTEXTURE *tex, uint32_t newWidth, uint32_t newHeight);
 
 uint32_t	fullTextureID = 0;
 uint32_t	emptyTextureID = 0;
