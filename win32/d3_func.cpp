@@ -1398,6 +1398,26 @@ BOOL InitialiseDirect3D()
 		Con_PrintError("Device does not support D3DUSAGE_DYNAMIC");
 	}
 
+	// check texture support
+	if (d3dCaps.TextureCaps & D3DPTEXTURECAPS_SQUAREONLY)
+	{
+		Con_PrintError("Device requires square textures");
+	}
+
+	if (d3dCaps.TextureCaps & D3DPTEXTURECAPS_SQUAREONLY)
+	{
+		Con_PrintError("Device requires power of two textures");
+
+		// check conditonal support
+		if (d3dCaps.TextureCaps & D3DPTEXTURECAPS_NONPOW2CONDITIONAL)
+		{
+			Con_PrintError("Device has conditional power of two textures support");
+		}
+	}
+
+	// check max texture size
+	Con_PrintMessage("Max texture size: " + LogInteger(d3dCaps.MaxTextureWidth));
+
 	// Log resolution set
 	Con_PrintMessage("\t Resolution set: " + LogInteger(d3dpp.BackBufferWidth) + " x " + LogInteger(d3dpp.BackBufferHeight));
 

@@ -40,7 +40,7 @@ void ReleaseD3DTexture(RENDERTEXTURE *d3dTexture);
 	#ifdef MaxImageGroups
 
 	#include "txioctrl.h"
-	
+
 	/*
 	basically, I want there to be more than one image header array
 	so that I can load some images once only, then load shapes, call
@@ -61,17 +61,17 @@ void ReleaseD3DTexture(RENDERTEXTURE *d3dTexture);
 	int NumImages = 0;								/* # current images */
 	IMAGEHEADER *ImageHeaderPtrs[MaxImageGroups*MaxImages];	/* Ptrs to Image Header Blocks */
 	IMAGEHEADER ImageHeaderArray[MaxImageGroups*MaxImages];	/* Array of Image Headers */
-	
+
 	int NumImagesArray[MaxImageGroups]; /* must be static to ensure initialization to zero */
 	static int CurrentImageGroup = 0;
 	static IMAGEHEADER *NextFreeImageHeaderPtr[MaxImageGroups];
-	
+
 	#else /* ! MaxImageGroups */
-	
+
 	int NumImages = 0;								/* # current images */
 	IMAGEHEADER *ImageHeaderPtrs[MaxImages];	/* Ptrs to Image Header Blocks */
 	IMAGEHEADER ImageHeaderArray[MaxImages];	/* Array of Image Headers */
-	
+
 	static IMAGEHEADER *NextFreeImageHeaderPtr;
 
 	#endif /* ! MaxImageGroups */
@@ -136,7 +136,7 @@ int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
 			while(*txfiles) {
 
 				/* The RIFF Image loaders have changed to support not loading the same image twice - JH 17-2-96 */
-				
+
 				char *src;
 				char *dst;
 				char fname[ImageNameSize];
@@ -148,9 +148,9 @@ int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
 				IMAGEHEADER *new_ihptr;
 				void* im;
 				#endif
-				
+
 				txfilesptr = *txfiles++;
-				
+
 				/*
 
 				"txfilesptr" is in the form "textures\<fname>". We need to
@@ -179,9 +179,9 @@ int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
 				/* This function calls GetExistingImageHeader to figure out if the image is already loaded */
 				TxIndex = CL_LoadImageOnce(fname,(/*ScanDrawDirectDraw == ScanDrawMode ? LIO_CHIMAGE : */LIO_D3DTEXTURE)|LIO_TRANSPARENT|LIO_RELATIVEPATH|LIO_RESTORABLE);
 				GLOBALASSERT(GEI_NOTLOADED != TxIndex);
-				
+
 				#else
-				
+
 				/* If there are already images, try and find this one */
 
 				NewImage = TRUE;
@@ -189,7 +189,7 @@ int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
 				#ifdef MaxImageGroups
 
 				TxIndex = CurrentImageGroup * MaxImages;			/* Assume image 0 */
-				
+
 				if(NumImagesArray[CurrentImageGroup]) {
 
 					for(i=NumImagesArray[CurrentImageGroup]; i!=0 && NewImage!=FALSE; i--) {
@@ -197,7 +197,7 @@ int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
 				#else
 
 				TxIndex = 0;			/* Assume image 0 */
-				
+
 				if(NumImages) {
 
 					for(i=NumImages; i!=0 && NewImage!=FALSE; i--) {
@@ -318,12 +318,12 @@ int InitialiseTextures(void)
 	/* Build the Texture List */
 	shlistptr = &mainshapelist[0];
 
-	while (*shlistptr) 
+	while (*shlistptr)
 	{
 		shptr = *shlistptr++;
 
 		/* If the shape has textures */
-		if  (shptr->sh_localtextures) 
+		if  (shptr->sh_localtextures)
 		{
 			#if InitTexPrnt
 			textprint("This shape has textures\n");
@@ -333,7 +333,7 @@ int InitialiseTextures(void)
 
 			LTxIndex = 0;
 
-			while (*txfiles) 
+			while (*txfiles)
 			{
 				/* The RIFF Image loaders have changed to support not loading the same image twice - JH 17-2-96 */
 				char *src;
@@ -347,9 +347,9 @@ int InitialiseTextures(void)
 				IMAGEHEADER *new_ihptr;
 				void* im;
 				#endif
-				
+
 				txfilesptr = *txfiles++;
-				
+
 				/*
 
 				"txfilesptr" is in the form "textures\<fname>". We need to
@@ -377,7 +377,7 @@ int InitialiseTextures(void)
 				textprint(" A Texture\n");
 				#endif
 
-				
+
 				#ifdef RIFF_SYSTEM
 
 				/* This function calls GetExistingImageHeader to figure out if the image is already loaded */
@@ -389,9 +389,9 @@ int InitialiseTextures(void)
 					OutputDebugString(buf);
 				}
 				GLOBALASSERT(GEI_NOTLOADED != TxIndex);
-				
+
 				#else
-				
+
 				/* If there are already images, try and find this one */
 
 				NewImage = TRUE;
@@ -399,7 +399,7 @@ int InitialiseTextures(void)
 				#ifdef MaxImageGroups
 
 				TxIndex = CurrentImageGroup * MaxImages;			/* Assume image 0 */
-				
+
 				if(NumImagesArray[CurrentImageGroup]) {
 
 					for(i=NumImagesArray[CurrentImageGroup]; i!=0 && NewImage!=FALSE; i--) {
@@ -407,7 +407,7 @@ int InitialiseTextures(void)
 				#else
 
 				TxIndex = 0;			/* Assume image 0 */
-				
+
 				if(NumImages) {
 
 					for(i=NumImages; i!=0 && NewImage!=FALSE; i--) {
@@ -489,7 +489,7 @@ int InitialiseTextures(void)
 			/* Is this shape a sprite that requires resizing? */
 
 			if ((shptr->shapeflags & ShapeFlag_Sprite) &&
-				(shptr->shapeflags & ShapeFlag_SpriteResizing)) 
+				(shptr->shapeflags & ShapeFlag_SpriteResizing))
 			{
 				SpriteResizing(shptr);
 			}
@@ -564,7 +564,7 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 
 
 	/* Are the items in a pointer array? */
-	if (shptr->items) 
+	if (shptr->items)
 	{
 		#if InitTexPrnt
 		textprint("Item Array\n");
@@ -572,7 +572,7 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 
 		ShapeItemArrayPtr = shptr->items;
 
-		for (i = shptr->numitems; i!=0; i--) 
+		for (i = shptr->numitems; i!=0; i--)
 		{
 			ShapeItemPtr = (POLYHEADER *) *ShapeItemArrayPtr++;
 
@@ -586,19 +586,19 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 				|| ShapeItemPtr->PolyItemType == I_3dTexturedPolygon
 				|| ShapeItemPtr->PolyItemType == I_ZB_3dTexturedPolygon) {
 
-				if (ShapeItemPtr->PolyFlags & iflag_txanim) 
+				if (ShapeItemPtr->PolyFlags & iflag_txanim)
 				{
 					MakeTxAnimFrameTexturesGlobal(shptr, ShapeItemPtr, LTxIndex, TxIndex);
 				}
 
-				if (ShapeItemPtr->PolyColour & TxLocal) 
+				if (ShapeItemPtr->PolyColour & TxLocal)
 				{
 					txi = ShapeItemPtr->PolyColour;
 					txi &= ~TxLocal;							/* Clear Flag */
 					txi &= ClrTxDefn;							/* Clear UV array index */
 
 					/* Is this the local index? */
-					if (txi == LTxIndex) 
+					if (txi == LTxIndex)
 					{
 						/* Clear low word, OR in global index */
 						ShapeItemPtr->PolyColour &= ClrTxIndex;
@@ -648,31 +648,31 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr, POLYHEADER *pheader, int L
 	txah_ptr++;
 
 	/* Process the animation sequences */
-	while (*txah_ptr) 
+	while (*txah_ptr)
 	{
 		/* Get the animation header */
 		txah = *txah_ptr++;
 
 		/* Process the animation frames */
-		if (txah && txah->txa_numframes) 
+		if (txah && txah->txa_numframes)
 		{
 			txaf = txah->txa_framedata;
 
-			for (i = txah->txa_numframes; i!=0; i--) 
+			for (i = txah->txa_numframes; i!=0; i--)
 			{
 				/* Multi-View Sprite? */
-				if (sptr->shapeflags & ShapeFlag_MultiViewSprite) 
+				if (sptr->shapeflags & ShapeFlag_MultiViewSprite)
 				{
 					txf_imageptr = (int *)txaf->txf_image;
 
-					for (image = txah->txa_num_mvs_images; image!=0; image--) 
+					for (image = txah->txa_num_mvs_images; image!=0; image--)
 					{
 						if (*txf_imageptr & TxLocal)
 						{
 							txi = *txf_imageptr;
 							txi &= ~TxLocal;					/* Clear Flag */
 
-							if (txi == LTxIndex) 
+							if (txi == LTxIndex)
 							{
 								*txf_imageptr = TxIndex;
 							}
@@ -680,14 +680,14 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr, POLYHEADER *pheader, int L
 						txf_imageptr++;
 					}
 				}
-				else 
+				else
 				{
 					if (txaf->txf_image & TxLocal)
 					{
  						txi = txaf->txf_image;
 						txi &= ~TxLocal;					/* Clear Flag */
 
-						if (txi == LTxIndex) 
+						if (txi == LTxIndex)
 						{
 							txaf->txf_image = TxIndex;
 						}
@@ -776,7 +776,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 	iptr = polypts;
 	mypolystart = &pheader->Poly1stPt;
 
-	for (i = 4; i!=0; i--) 
+	for (i = 4; i!=0; i--)
 	{
 		iptr[ix] = ((VECTORCH*)ShapePoints)[*mypolystart].vx;
 		iptr[iy] = ((VECTORCH*)ShapePoints)[*mypolystart].vy;
@@ -799,20 +799,20 @@ void SpriteResizing(SHAPEHEADER *sptr)
 	txah_ptr++;
 
 	/* Process the animation sequences */
-	while (*txah_ptr) 
+	while (*txah_ptr)
 	{
 		/* Get the animation header */
 		txah = *txah_ptr++;
 
 		/* Process the animation frames */
-		if (txah && txah->txa_numframes) 
+		if (txah && txah->txa_numframes)
 		{
 			txaf = txah->txa_framedata;
 
-			for (f = txah->txa_numframes; f!=0; f--) 
+			for (f = txah->txa_numframes; f!=0; f--)
 			{
 				/* Multi-View Sprite? */
-				if (sptr->shapeflags & ShapeFlag_MultiViewSprite) 
+				if (sptr->shapeflags & ShapeFlag_MultiViewSprite)
 				{
 					txf_imageptr = (int *)txaf->txf_image;
 					num_images = txah->txa_num_mvs_images;
@@ -821,7 +821,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 				}
 
 				/* A standard "Single View" Sprite has just one image */
-				else 
+				else
 				{
 					txf_imageptr = &txaf->txf_image;
 					num_images = 1;
@@ -829,7 +829,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 					txf_uvarrayptr = &txaf->txf_uvdata;
 				}
 
-				for (image = 0; image < num_images; image++) 
+				for (image = 0; image < num_images; image++)
 				{
 					#if sr_print
 					textprint("image %d of %d   \n", (image + 1), num_images);
@@ -925,7 +925,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 					iptr  = polypts;
 					iptr2 = uvptr;
 
-					for (i = 4; i!=0; i--) 
+					for (i = 4; i!=0; i--)
 					{
 						iptr2[0] = iptr[ix];
 						iptr2[1] = iptr[iy];
@@ -937,7 +937,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 					/* Scale the polygon points */
 					iptr = uvptr;
 
-					for (i = 4; i!=0; i--) 
+					for (i = 4; i!=0; i--)
 					{
 
 						iptr[0] = WideMulNarrowDiv(iptr[0], size_uv.vx, size_uv_curr.vx);
@@ -960,7 +960,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 					/* Translate the polygon points */
 					iptr = uvptr;
 
-					for (i = 4; i!=0; i--) 
+					for (i = 4; i!=0; i--)
 					{
 						iptr[0] += tv.vx;
 						iptr[1] += tv.vy;
@@ -1017,7 +1017,7 @@ void FindImageExtents(IMAGEHEADER *ihdr, int numuvs, int *uvdata, IMAGEEXTENTS *
 
 	uvptr = uvdata;
 
-	for (i = numuvs; i!=0; i--) 
+	for (i = numuvs; i!=0; i--)
 	{
 		if (uvptr[0] < e_curr->u_low) e_curr->u_low = uvptr[0];
 		if (uvptr[1] < e_curr->v_low) e_curr->v_low = uvptr[1];
@@ -1051,7 +1051,7 @@ IMAGEHEADER* GetImageHeader(void)
 		iheader = NextFreeImageHeaderPtr[CurrentImageGroup]++;
 	}
 	while (IsImageInUse(CurrentImageGroup,NumImagesArray[CurrentImageGroup]++) ? ++NumImages : 0);
-	
+
 	GLOBALASSERT(NumImagesArray[CurrentImageGroup] < MaxImages);
 
 	#else
@@ -1060,13 +1060,13 @@ IMAGEHEADER* GetImageHeader(void)
 	GLOBALASSERT(NumImages < MaxImages);
 
 	#endif
-	
+
 	/* ensure flags are zero */
 	memset(iheader,0,sizeof(IMAGEHEADER));
 
 	ImageHeaderPtrs[NumImages] = iheader;
 	NumImages++;
-	
+
 	return iheader;
 }
 
@@ -1120,7 +1120,7 @@ int DeallocateCurrentImages(void)
 			if (CanDeleteImage(CurrentImageGroup,i))
 				DeallocateImageHeader(ihptr);
 			++ihptr;
-		}		
+		}
 		NumImagesArray[CurrentImageGroup] = 0;
 		NumImages = CurrentImageGroup * MaxImages;
 		NextFreeImageHeaderPtr[CurrentImageGroup] = &ImageHeaderArray[CurrentImageGroup*MaxImages];
@@ -1150,7 +1150,7 @@ int DeallocateAllImages(void)
 				if (CanDeleteImage(j,i))
 					DeallocateImageHeader(ihptr);
 				++ihptr;
-			}		
+			}
 			NumImagesArray[j] = 0;
 		}
 		ImageGroupFreed(j);
@@ -1181,7 +1181,7 @@ int MinimizeAllImages(void)
 			{
 				MinimizeImageHeader(ihptr);
 				++ihptr;
-			}		
+			}
 		}
 		EnumLeftoverImages(j,NumImagesArray[j],MinimizeImageCallback,&j);
 	}
@@ -1209,7 +1209,7 @@ int RestoreAllImages(void)
 			{
 				RestoreImageHeader(ihptr);
 				++ihptr;
-			}		
+			}
 		}
 		EnumLeftoverImages(j,NumImagesArray[j],RestoreImageCallback,&j);
 	}
@@ -1232,14 +1232,14 @@ static struct ImageGroupDebugInfo db_gp_info[MaxImageGroups];
 static void DbShareImgCallback(int imgnum, void * user)
 {
 	int g = *(int *)user;
-	
+
 	++db_gp_info[g].num_shared;
 }
 
 static void DbLeftoverImgCallback(int i, void * user)
 {
 	int g = *(int *)user;
-	
+
 	++db_gp_info[g].num_leftover;
 
 	db_gp_info[g].num_texels += ImageHeaderPtrs[g*MaxImages+i]->ImageWidth * ImageHeaderPtrs[g*MaxImages+i]->ImageHeight;
@@ -1251,7 +1251,7 @@ void ImageGroupsDebugPrintInit(void)
 	for (g=0; g<MaxImageGroups; g++)
 	{
 		int i;
-		
+
 		db_gp_info[g].num_texels = 0;
 		db_gp_info[g].num_images = NumImagesArray[g];
 		db_gp_info[g].num_shared = 0;
@@ -1278,7 +1278,7 @@ void ImageGroupsDebugPrint(void)
 }
 
 #endif
-	
+
 #else
 
 int DeallocateAllImages(void)
@@ -1292,7 +1292,7 @@ int DeallocateAllImages(void)
 		for (i = NumImages; i!=0; i--)
 		{
 			DeallocateImageHeader(ihptr++);
-		}		
+		}
 		NumImages = 0;
 		NextFreeImageHeaderPtr = ImageHeaderArray;
 	}
@@ -1310,7 +1310,7 @@ int MinimizeAllImages(void)
 		for (i = NumImages; i!=0; i--)
 		{
 			MinimizeImageHeader(ihptr++);
-		}		
+		}
 	}
 
 	return TRUE; /* ok for the moment */
@@ -1344,7 +1344,7 @@ int GetExistingImageNum(char const * fname)
 {
 	int i;
 	IMAGEHEADER * iharrayptr;
-	
+
 	#ifdef MaxImageGroups
 
 	int g;
@@ -1363,7 +1363,7 @@ int GetExistingImageNum(char const * fname)
 	}
 
 	#else
-	
+
 	for (i=0, iharrayptr = ImageHeaderArray; i<NumImages; ++i, ++iharrayptr)
 	{
 		if (!_stricmp(iharrayptr->ImageName,fname)) return i;

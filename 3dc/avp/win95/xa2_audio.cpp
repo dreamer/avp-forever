@@ -420,6 +420,8 @@ static int ToneToFrequency(int currentFrequency, int currentPitch, int newPitch)
 extern HWND hWndMain;
 extern DISPLAYBLOCK *Player;
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
+extern int NormalFrameTime;
+extern int DopplerShiftIsOn;
 
 /* Patrick 5/6/97 -------------------------------------------------------------
   Function definitions
@@ -456,6 +458,21 @@ int PlatStartSoundSys()
 	LastError = XAudio2Create(&pXAudio2, flags);
 	if (FAILED(LastError))
 	{
+		switch (LastError)
+		{
+			case XAUDIO2_E_INVALID_CALL:
+					Con_PrintError("XAUDIO2_E_INVALID_CALL");
+				break;
+			case XAUDIO2_E_XMA_DECODER_ERROR:
+					Con_PrintError("XAUDIO2_E_XMA_DECODER_ERROR");
+				break;
+			case XAUDIO2_E_XAPO_CREATION_FAILED:
+					Con_PrintError("XAUDIO2_E_XAPO_CREATION_FAILED");
+				break;
+			case XAUDIO2_E_DEVICE_INVALIDATED:
+					Con_PrintError("XAUDIO2_E_DEVICE_INVALIDATED");
+				break;
+		}
 		Con_PrintError("Couldn't initialise XAudio2");
 		LogDxError (LastError, __LINE__, __FILE__);
 		PlatEndSoundSys();
@@ -1189,7 +1206,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 	FILE *myFile = NULL;
 	WAVEFORMATEX myWaveFormat = {0};
 	size_t res = 0;
-	int lengthInSeconds = 0;
+	uint32_t lengthInSeconds = 0;
 
 	myFile = avp_fopen(wavFileName, "rb");
 	if (!myFile)
@@ -1364,7 +1381,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	FFILE *myFile;
 	WAVEFORMATEX myWaveFormat;
 	size_t res;
-	int lengthInSeconds;
+	uint32_t lengthInSeconds;
 
 	myFile = ffopen(wavFileName,"rb");
 	if (!myFile)
@@ -1589,9 +1606,6 @@ void PlatUpdatePlayer()
 				(Global_VDB_Ptr->VDB_World.vz == 0))
 			return;
 
-		extern int NormalFrameTime;
-		extern int DopplerShiftIsOn;
-
 		D3DXMATRIX test;
 
 		//viewMatrix
@@ -1751,7 +1765,7 @@ void PlatSetEnviroment(unsigned int env_index, float reverb_mix)
 	SoundConfig.reverb_changed = TRUE;
 #endif
 }
-
+/*
 #define RebSndRead(dest,size,n,src)\
 {\
 	unsigned char *d = (unsigned char*)(dest);\
@@ -1761,6 +1775,19 @@ void PlatSetEnviroment(unsigned int env_index, float reverb_mix)
 		*d++ = *(src)++;\
 	}\
 	while(--i);\
+}
+*/
+
+inline void RebSndRead(void *dest, size_t size, uint32_t n, uint8_t **src)
+{
+	uint8_t *d = static_cast<uint8_t*>(dest);
+	size_t i = n * size;
+
+	do
+	{
+		*d++ = *(*src)++;
+	}
+	while (--i);
 }
 
 /* KJL 17:06:46 01/09/98 - ExtractWavFile does basically the same job as LoadWavFile,
@@ -1774,28 +1801,28 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 	PWAVRIFFHEADER myRiffHeader = {0};
 	WAVEFORMATEX myWaveFormat = {0};
 	uint8_t *endOfBufferPtr = NULL;   
-	int lengthInSeconds = 0;
+	uint32_t lengthInSeconds = 0;
 
 	{
-		int length = (int)strlen ((const char *)bufferPtr) + 1;
+		size_t length = strlen ((const char *)bufferPtr) + 1;
 		GameSounds[soundIndex].wavName = (char *)AllocateMem (length);
 		strcpy (GameSounds[soundIndex].wavName, (const char *)bufferPtr);
 		bufferPtr += length;
 	}
 
 	/* Read the WAV RIFF header */
-	RebSndRead(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,bufferPtr);
+	RebSndRead(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1 ,&bufferPtr);
 	endOfBufferPtr = bufferPtr + myChunkHeader.chunkLength;
 
-	RebSndRead(&myRiffHeader,sizeof(PWAVRIFFHEADER),1,bufferPtr);
+	RebSndRead(&myRiffHeader, sizeof(PWAVRIFFHEADER), 1, &bufferPtr);
 
 	/* Read the WAV format chunk */
-	RebSndRead(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,bufferPtr);
+	RebSndRead(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, &bufferPtr);
 	if (myChunkHeader.chunkLength == 16)
 	{
 		/* a standard PCM wave format chunk */
 		PCMWAVEFORMAT tmpWaveFormat;
-		RebSndRead(&tmpWaveFormat,sizeof(PCMWAVEFORMAT),1,bufferPtr);	
+		RebSndRead(&tmpWaveFormat, sizeof(PCMWAVEFORMAT), 1, &bufferPtr);	
 		myWaveFormat.wFormatTag = tmpWaveFormat.wf.wFormatTag;        
 		myWaveFormat.nChannels = tmpWaveFormat.wf.nChannels;
 		myWaveFormat.nSamplesPerSec = tmpWaveFormat.wf.nSamplesPerSec;;
@@ -1812,7 +1839,7 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 	else if (myChunkHeader.chunkLength == 18)
 	{
 		/* an extended PCM wave format chunk */
-		RebSndRead(&myWaveFormat,sizeof(WAVEFORMATEX),1,bufferPtr);	
+		RebSndRead(&myWaveFormat, sizeof(WAVEFORMATEX), 1, &bufferPtr);	
 		myWaveFormat.cbSize = 0;
 	}
 	else
@@ -1827,7 +1854,7 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 	do
 	{
 		/* Read	the data chunk header */
-		RebSndRead(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,bufferPtr);
+		RebSndRead(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, &bufferPtr);
 		if ((myChunkHeader.chunkName[0]=='d')&&(myChunkHeader.chunkName[1]=='a')&&
 	   		(myChunkHeader.chunkName[2]=='t')&&(myChunkHeader.chunkName[3]=='a'))
 		{
@@ -1873,8 +1900,8 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 	{
 		GameSounds[soundIndex].audioBuffer = new uint8_t[myChunkHeader.chunkLength];
 
-		/* Read data from file to buffer */
-		RebSndRead(GameSounds[soundIndex].audioBuffer, 1, myChunkHeader.chunkLength, bufferPtr);
+		// Read data from file to buffer
+		RebSndRead(GameSounds[soundIndex].audioBuffer, 1, myChunkHeader.chunkLength, &bufferPtr);
 
 		memset(&GameSounds[soundIndex].xa2Buffer, 0, sizeof(XAUDIO2_BUFFER));
 		GameSounds[soundIndex].xa2Buffer.AudioBytes = myChunkHeader.chunkLength;
@@ -1921,7 +1948,11 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 
 int PlatUse3DSoundHW()
 {
-	unsigned int count = SoundMaxHW;
+	uint32_t count = SoundMaxHW;
+
+	char buf[100];
+	sprintf(buf, "SoundMaxHW: %d\n", count);
+	OutputDebugString(buf);
 
 	if (SoundConfig.flags & SOUND_USE_3DHW)
 	{
@@ -1964,7 +1995,11 @@ int PlatUse3DSoundHW()
 
 int PlatDontUse3DSoundHW()
 {
-	unsigned int count = SoundMaxHW;
+	uint32_t count = SoundMaxHW;
+
+	char buf[100];
+	sprintf(buf, "SoundMaxHW: %d\n", count);
+	OutputDebugString(buf);
 
 	if (~SoundConfig.flags & SOUND_USE_3DHW)
 	{
@@ -1992,14 +2027,13 @@ void UpdateSoundFrequencies(void)
 {
 	extern int SoundSwitchedOn;
 	extern int TimeScale;
-	int i;
 
 	if (!SoundSwitchedOn) 
 		return;
 
-	for(i = 0; i < SOUND_MAXACTIVE; i++)
+	for (uint32_t i = 0; i < SOUND_MAXACTIVE; i++)
 	{
-		int gameIndex = ActiveSounds[i].soundIndex;
+		int32_t gameIndex = ActiveSounds[i].soundIndex;
 
 		if (gameIndex == SID_NOSOUND) 
 			continue;
@@ -2163,7 +2197,6 @@ AudioStream::~AudioStream()
 	{
 		this->pSourceVoice->Stop();
 		this->pSourceVoice->DestroyVoice();
-        this->pSourceVoice = 0;
 	}
 
 	// clear the new-ed memory

@@ -1661,7 +1661,7 @@ void HandleParticleSystem(void)
 	{
 		PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
 
-		particlePtr->NotYetRendered = 1;
+		particlePtr->NotYetRendered = TRUE;
 		switch(particlePtr->ParticleID)
 		{
 			case PARTICLE_ALIEN_BLOOD:
@@ -3101,7 +3101,7 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 
 			if (position.vz > zThreshold)
 			{
-				particlePtr->NotYetRendered = 0;
+				particlePtr->NotYetRendered = FALSE;
 				switch (particlePtr->ParticleID)
 				{
 					case PARTICLE_ALIEN_BLOOD:

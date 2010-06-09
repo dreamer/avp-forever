@@ -90,7 +90,7 @@ struct ColourComponents
 
 typedef struct
 {
-	unsigned int NotYetRendered;
+	BOOL NotYetRendered;
 
 	enum PARTICLE_ID ParticleID;
 	signed int LifeTime;

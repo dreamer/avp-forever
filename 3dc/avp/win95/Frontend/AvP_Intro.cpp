@@ -18,7 +18,7 @@ extern void DirectReadKeyboard(void);
 extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
 
-static int IntroHasAlreadyBeenPlayed = 1;
+static BOOL IntroHasAlreadyBeenPlayed = TRUE;
 
 
 void Show_CopyrightInfo(void);
@@ -36,7 +36,7 @@ extern BOOL bRunning;
 
 void WeWantAnIntro(void)
 {
-	IntroHasAlreadyBeenPlayed = 0;
+	IntroHasAlreadyBeenPlayed = FALSE;
 }
 
 extern void PlayIntroSequence(void)
@@ -46,7 +46,7 @@ extern void PlayIntroSequence(void)
 		StartMenuMusic();
 		return;
 	}
-	IntroHasAlreadyBeenPlayed=1;
+	IntroHasAlreadyBeenPlayed = TRUE;
 
 	ResetFrameCounter();
 	Show_CopyrightInfo();
