@@ -44,10 +44,12 @@ D3DXMATRIX matIdentity;
 extern D3DVERTEXELEMENT9 decl[];
 extern D3DVERTEXELEMENT9 orthoDecl[];
 extern D3DVERTEXELEMENT9 fmvDecl[];
+extern D3DVERTEXELEMENT9 cloudDecl[];
 
 extern LPD3DXCONSTANTTABLE	vertexConstantTable;
 extern LPD3DXCONSTANTTABLE	orthoConstantTable;
 extern LPD3DXCONSTANTTABLE	fmvConstantTable;
+extern LPD3DXCONSTANTTABLE	cloudConstantTable;
 
 extern void DeleteRenderMemory();
 
@@ -1516,10 +1518,6 @@ BOOL InitialiseDirect3D()
 
 	SetTransforms();
 
-	Con_Init();
-	Net_Initialise();
-	Font_Init();
-
 	Con_AddCommand("dumptex", WriteMenuTextures);
 	Con_AddCommand("r_toggleWireframe", ToggleWireframe);
 	Con_AddCommand("r_setfov", SetFov);
@@ -1527,6 +1525,7 @@ BOOL InitialiseDirect3D()
 	d3d.lpD3DDevice->CreateVertexDeclaration(decl, &d3d.vertexDecl);
 	d3d.lpD3DDevice->CreateVertexDeclaration(orthoDecl, &d3d.orthoVertexDecl);
 	d3d.lpD3DDevice->CreateVertexDeclaration(fmvDecl, &d3d.fmvVertexDecl);
+	d3d.lpD3DDevice->CreateVertexDeclaration(cloudDecl, &d3d.cloudVertexDecl);
 
 	if (CreateVertexShader("vertex.vsh", &d3d.vertexShader, &vertexConstantTable) != 0)
 	{
@@ -1534,9 +1533,11 @@ BOOL InitialiseDirect3D()
 	}
 	CreateVertexShader("orthoVertex.vsh", &d3d.orthoVertexShader, &orthoConstantTable);
 	CreateVertexShader("fmvVertex.vsh", &d3d.fmvVertexShader, &fmvConstantTable);
+	CreateVertexShader("cloudTextVertex.vsh", &d3d.cloudVertexShader, &cloudConstantTable);
 
 	CreatePixelShader("pixel.psh", &d3d.pixelShader);
 	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
+	CreatePixelShader("cloudTextPixel.psh", &d3d.cloudPixelShader);
 
 	// create a 1x1 resolution texture to set to shader for sampling when we don't want to texture an object (eg what was NULL texture in fixed function pipeline)
 	d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &blankTexture, NULL);
@@ -1550,6 +1551,11 @@ BOOL InitialiseDirect3D()
 	blankTexture->UnlockRect(0);
 
 	Con_PrintMessage("Initialised Direct3D9 succesfully");
+
+	Con_Init();
+	Net_Initialise();
+	Font_Init();
+
 	return TRUE;
 }
 
@@ -1605,20 +1611,24 @@ void ReleaseDirect3D()
 	SAFE_RELEASE(vertexConstantTable);
 	SAFE_RELEASE(orthoConstantTable);
 	SAFE_RELEASE(fmvConstantTable);
+	SAFE_RELEASE(cloudConstantTable);
 
 	// release vertex declarations
 	SAFE_RELEASE(d3d.vertexDecl);
 	SAFE_RELEASE(d3d.orthoVertexDecl);
 	SAFE_RELEASE(d3d.fmvVertexDecl);
+	SAFE_RELEASE(d3d.cloudVertexDecl);
 
 	// release pixel shaders
 	SAFE_RELEASE(d3d.pixelShader);
 	SAFE_RELEASE(d3d.fmvPixelShader);
+	SAFE_RELEASE(d3d.cloudPixelShader);
 
 	// release vertex shaders
 	SAFE_RELEASE(d3d.vertexShader);
 	SAFE_RELEASE(d3d.fmvVertexShader);
 	SAFE_RELEASE(d3d.orthoVertexShader);
+	SAFE_RELEASE(d3d.cloudVertexShader);
 
 	// release device
 	SAFE_RELEASE(d3d.lpD3DDevice);

@@ -57,9 +57,16 @@ D3DVERTEXELEMENT9 fmvDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT
 							   {0, 28, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	2},
                             D3DDECL_END()};
 
+D3DVERTEXELEMENT9 cloudDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
+								{0, 12, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		0},	
+							    {0, 16, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
+							    {0, 24, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	1},
+                            D3DDECL_END()};
+
 LPD3DXCONSTANTTABLE	vertexConstantTable = NULL;
 LPD3DXCONSTANTTABLE	orthoConstantTable = NULL;
 LPD3DXCONSTANTTABLE	fmvConstantTable = NULL;
+LPD3DXCONSTANTTABLE	cloudConstantTable = NULL;
 
 D3DXMATRIX viewMatrix;
 
@@ -999,6 +1006,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	d3d.lpD3DDevice->SetVertexShader(d3d.fmvVertexShader);
 	d3d.lpD3DDevice->SetPixelShader(d3d.fmvPixelShader);
 
+
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(FMVVERTEX));
 	if (FAILED(LastError))
 	{
@@ -1103,6 +1111,61 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, int32_t textureID, uint
 	float x2 = ((float(topX + charWidth) / 640.0f) * 2) - 1;
 	float y2 = ((float(topY + charHeight) / 480.0f) * 2) - 1;
 
+#if 0
+	ChangeTexture(textureID);
+	d3d.lpD3DDevice->SetTexture(1, AvPMenuGfxStorage[AVPMENUGFX_CLOUDY].menuTexture);
+
+	ORTHOVERTEX testOrtho[4];
+	int16_t indices[6];
+
+	indices[0] = 1;
+	indices[1] = 2;
+	indices[2] = 3;
+
+	indices[3] = 2;
+	indices[4] = 4;
+	indices[5] = 3;
+
+	// bottom left
+	testOrtho[0].x = x1;
+	testOrtho[0].y = y2;
+	testOrtho[0].z = 1.0f;
+	testOrtho[0].colour = colour;
+	testOrtho[0].u = (float)((texU) * RecipW);
+	testOrtho[0].v = (float)((texV + charHeight) * RecipH);
+
+	// top left
+	testOrtho[1].x = x1;
+	testOrtho[1].y = y1;
+	testOrtho[1].z = 1.0f;
+	testOrtho[1].colour = colour;
+	testOrtho[1].u = (float)((texU) * RecipW);
+	testOrtho[1].v = (float)((texV) * RecipH);
+
+	// bottom right
+	testOrtho[2].x = x2;
+	testOrtho[2].y = y2;
+	testOrtho[2].z = 1.0f;
+	testOrtho[2].colour = colour;
+	testOrtho[2].u = (float)((texU + charWidth) * RecipW);
+	testOrtho[2].v = (float)((texV + charHeight) * RecipH);
+
+	// top right
+	testOrtho[3].x = x2;
+	testOrtho[3].y = y1;
+	testOrtho[3].z = 1.0f;
+	testOrtho[3].colour = colour;
+	testOrtho[3].u = (float)((texU + charWidth) * RecipW);
+	testOrtho[3].v = (float)((texV) * RecipH);
+
+//	LastError = d3d.lpD3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, 4, 2, &indices[0], D3DFMT_INDEX16, testOrtho, sizeof(ORTHOVERTEX));
+	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, testOrtho, sizeof(ORTHOVERTEX));
+	if (FAILED(LastError)) 
+	{
+		OutputDebugString(" draw menu quad failed ");
+	}
+
+#else // turned off for testing
 	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
 
 	// bottom left
@@ -1141,6 +1204,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, int32_t textureID, uint
 	orthoVerts[orthoVBOffset].v = (float)((texV) * RecipH);
 	orthoVBOffset++;
 
+#endif
 #if 0
 //	d3d.lpD3DDevice->SetRenderState(D3DRS_COLORWRITEENABLE, 0x00000000);
 /*

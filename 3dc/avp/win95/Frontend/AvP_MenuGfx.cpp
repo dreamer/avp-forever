@@ -321,7 +321,7 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 //			int topLeftU = 1;
 //			int topLeftV = 1+(c-32)*33;
 //			int x, y;
-			int char_width = IntroFont_Light.FontWidth[(unsigned int) c];
+			uint32_t charWidth = IntroFont_Light.FontWidth[(unsigned int) c];
 
 			c = c - 32;
 
@@ -340,7 +340,7 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 				ie the moving hazy smoke/cloud effect behind the large font text on the menus
 			*/
 
-			DrawTallFontCharacter(positionX, positionY, IntroFont_Light.info.textureID, topLeftU, topLeftV, char_width, alpha);
+			DrawTallFontCharacter(positionX, positionY, IntroFont_Light.info.textureID, topLeftU, topLeftV, charWidth, alpha);
 
 //			DrawCloudTable(pX, pY, word_length, 255);
 
@@ -379,8 +379,8 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 				srcPtr += (image->w - width) * 4;
 			}
 */
-			positionX += char_width;
-			word_length += char_width;
+			positionX += charWidth;
+			word_length += charWidth;
 		}
 	}
 //	DrawCloudTable(pX, pY, word_length, alpha);

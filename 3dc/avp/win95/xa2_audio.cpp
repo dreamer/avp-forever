@@ -122,7 +122,7 @@ XAUDIO2FX_REVERB_I3DL2_PARAMETERS g_PRESET_PARAMS[ NUM_PRESETS ] =
   Internal global variables
   ----------------------------------------------------------------------------*/
 struct SoundConfigTag SoundConfig;
-static const signed int vol_to_atten_table[] = 
+static const int32_t vol_to_atten_table[] = 
 {
 	-10000, -9922, -8502, -7672, -7083, -6626, -6252, -5936,
 	-5663, -5422, -5206, -5011, -4832, -4669, -4517, -4375,
@@ -405,7 +405,7 @@ enum
 	EAX_MAX
 };
 
-static unsigned int SoundMaxHW;
+static uint32_t SoundMaxHW;
 extern int GlobalFrameCounter;
 
 /* Patrick 5/6/97 -------------------------------------------------------------
@@ -435,9 +435,9 @@ int PlatStartSoundSys()
 
 	uint32_t sampleRate = Config_GetInt("[Audio]", "SampleRate", 44100);
 
-	/* Set the globals. */
+	// Set the globals.
 	SoundConfig.flags			= SOUND_DEFAULT;
-	SoundConfig.reverb_changed	= TRUE;
+	SoundConfig.reverb_changed	= true;
 	SoundConfig.reverb_mix		= 0.0f;
 	SoundConfig.env_index		= 1000;
 
@@ -671,7 +671,8 @@ int PlatChangeGlobalVolume(int volume)
 	{
 		return SOUND_PLATFORMERROR;
 	}
-	else return 1;
+	
+	return 1;
 }
  
 int PlatPlaySound(int activeIndex)
@@ -690,7 +691,6 @@ int PlatPlaySound(int activeIndex)
 	ActiveSounds[activeIndex].pSourceVoice = GameSounds[gameIndex].pSourceVoice;
 	ActiveSounds[activeIndex].xa2Emitter = GameSounds[gameIndex].xa2Emitter;
 
-	/* Do we need to get a DirectSound3D buffer. */
 	if ((ActiveSounds[activeIndex].threedee))
 	{
 		ActiveSounds[activeIndex].is3D = TRUE;
@@ -860,7 +860,8 @@ int PlatChangeSoundVolume(int activeIndex, int volume)
 	{
 		return SOUND_PLATFORMERROR;
 	}
-	else return 1;
+	
+	return 1;
 }
 
 int PlatChangeSoundPitch(int activeIndex, int pitch)

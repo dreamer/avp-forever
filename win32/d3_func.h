@@ -136,6 +136,10 @@ typedef struct D3DInfo
 	LPDIRECT3DVERTEXSHADER9      fmvVertexShader;
 	LPDIRECT3DPIXELSHADER9       fmvPixelShader;
 
+	LPDIRECT3DVERTEXDECLARATION9 cloudVertexDecl;
+	LPDIRECT3DVERTEXSHADER9      cloudVertexShader;
+	LPDIRECT3DPIXELSHADER9       cloudPixelShader;
+
     uint32_t				NumDrivers;
     uint32_t				CurrentDriver;
     D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS];
