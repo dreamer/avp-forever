@@ -40,6 +40,7 @@
 #define MAX_INTENSITY (65536*4-1)
 
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
+extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern DISPLAYBLOCK *Global_ODB_Ptr;
 extern EXTRAITEMDATA *Global_EID_Ptr;
 extern int *Global_EID_IPtr;
@@ -4823,7 +4824,7 @@ void RenderMirroredDecal(DECAL *decalPtr)
 	{
 		int outcode = DecalWithinFrustum(decalPtr);
 
-		if (outcode)
+		if (/*outcode*/1) // bjd
 		{
 			switch (decalPtr->DecalID)
 			{
@@ -4832,7 +4833,7 @@ void RenderMirroredDecal(DECAL *decalPtr)
 				{
 					DecalPolygon_Construct(decalPtr);
 
-					if (outcode!=2)
+					if (/*outcode!=2*/0) // bjd
 					{
 						TexturedPolygon_ClipWithZ();
 						if(RenderPolygon.NumberOfVertices<3) return;
@@ -5968,20 +5969,19 @@ void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRI
 
 int LightFlareAlpha = 65535;
 
-extern void D3D_PointSpriteTest(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr);
-
 void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 {
 	int centreX, centreY, sizeX, sizeY, z;
-	char buf[100];
+
 	PARTICLE particle;
 	VECTORCH point = *positionPtr;
 
-	if (point.vz < 64)
-		return;
+//	TranslatePointIntoViewspace(&point);
+
+//	if (point.vz < 64)
+//		return;
 
 	particle.ParticleID = PARTICLE_LIGHTFLARE;
-
 	particle.Colour = colour;
 
 //	sprintf(buf, "render fn %d %d %d\n",positionPtr->vx, positionPtr->vy, positionPtr->vz);
@@ -5989,44 +5989,33 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 
 //	textprint("render fn %d %d %d\n",positionPtr->vx,positionPtr->vy,positionPtr->vz);
 
-	z = ONE_FIXED;
-	{
-		extern int SmartTargetSightX, SmartTargetSightY;
-		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-		centreX = DIV_FIXED(point.vx, point.vz);
-		centreY = DIV_FIXED(point.vy, point.vz);
-		sizeX = (ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
-		sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
-	}
+	z = point.vz;//ONE_FIXED;
 
+	centreX = point.vx;//DIV_FIXED(point.vx, point.vz);
+	centreY = point.vy;//DIV_FIXED(point.vy, point.vz);
+	sizeX = 1200;//(ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
+	sizeY = 1200;//MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
+
+	// top left?
 	VerticesBuffer[0].X = centreX - sizeX;
 	VerticesBuffer[0].Y = centreY - sizeY;
 	VerticesBuffer[0].Z = z;
+
+	// top right?
 	VerticesBuffer[1].X = centreX + sizeX;
 	VerticesBuffer[1].Y = centreY - sizeY;
 	VerticesBuffer[1].Z = z;
+
+	// bottom right?
 	VerticesBuffer[2].X = centreX + sizeX;
 	VerticesBuffer[2].Y = centreY + sizeY;
 	VerticesBuffer[2].Z = z;
+
+	// bottom left?
 	VerticesBuffer[3].X = centreX - sizeX;
 	VerticesBuffer[3].Y = centreY + sizeY;
 	VerticesBuffer[3].Z = z;
-/*
-	point.vz = 65535;
 
-	VerticesBuffer[0].X = point.vx - sizeX;
-	VerticesBuffer[0].Y = point.vy - sizeY;
-	VerticesBuffer[0].Z = point.vz;
-	VerticesBuffer[1].X = point.vx + sizeX;
-	VerticesBuffer[1].Y = point.vy - sizeY;
-	VerticesBuffer[1].Z = point.vz;
-	VerticesBuffer[2].X = point.vx + sizeX;
-	VerticesBuffer[2].Y = point.vy + sizeY;
-	VerticesBuffer[2].Z = point.vz;
-	VerticesBuffer[3].X = point.vx - sizeX;
-	VerticesBuffer[3].Y = point.vy + sizeY;
-	VerticesBuffer[3].Z = point.vz;
-*/
 	{
 		int outcode = QuadWithinFrustum();
 
@@ -6071,8 +6060,8 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 //			else D3D_Particle_Output(&particle, VerticesBuffer);
 			else AddParticle(&particle, &VerticesBuffer[0]);
 */
-		}
 			AddParticle(&particle, VerticesBuffer);
+		}
 	}
 }
 
