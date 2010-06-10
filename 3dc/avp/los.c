@@ -143,15 +143,14 @@ int CameraCanSeeThisPosition_WithIgnore(DISPLAYBLOCK *ignoredObjectPtr,VECTORCH 
 
 	/* try to look at the centre of the camera */
 	viewVector = Global_VDB_Ptr->VDB_World;
-   	
+
    	viewVector.vx -= positionPtr->vx;
 	viewVector.vy -= positionPtr->vy;
 	viewVector.vz -= positionPtr->vz;
 	Normalise(&viewVector);
 
 	FindPolygonInLineOfSight(&viewVector, positionPtr, 0,ignoredObjectPtr);
-	
-		
+
 	if (LOS_ObjectHitPtr == Player) return 1;
 	else return 0;
 }

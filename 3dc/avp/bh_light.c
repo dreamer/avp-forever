@@ -179,34 +179,34 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 
 			if((Request_PolyFlags((void *)poly)) & iflag_light_corona)
 			{
-				int* vertexptr= &poly->Poly1stPt;
+				int* vertexptr = &poly->Poly1stPt;
 				int num_verts=0;
 
-				pl_bhv->has_corona=1;
-				pl_bhv->corona_location.vx=0;
-				pl_bhv->corona_location.vy=0;
-				pl_bhv->corona_location.vz=0;
+				pl_bhv->has_corona = 1;
+				pl_bhv->corona_location.vx = 0;
+				pl_bhv->corona_location.vy = 0;
+				pl_bhv->corona_location.vz = 0;
 
 				//take the average of all the points in the polygon
-				while(*vertexptr!=-1)
+				while (*vertexptr != -1)
 				{
 					num_verts++;
-					AddVector((VECTORCH*)&shptr->points[0][(*vertexptr)*3],&pl_bhv->corona_location);
+					AddVector((VECTORCH*)&shptr->points[0][(*vertexptr)*3], &pl_bhv->corona_location);
 					vertexptr++;
 				}
-				pl_bhv->corona_location.vx/=num_verts;
-				pl_bhv->corona_location.vy/=num_verts;
-				pl_bhv->corona_location.vz/=num_verts;
+				pl_bhv->corona_location.vx /= num_verts;
+				pl_bhv->corona_location.vy /= num_verts;
+				pl_bhv->corona_location.vz /= num_verts;
 			}
 		}
-		*pptxactrlblk=0;
+		*pptxactrlblk = 0;
 
-		pl_bhv->light=toolsData->light;
+		pl_bhv->light = toolsData->light;
 		GLOBALASSERT(pl_bhv->light);
 
-		pl_bhv->light->RedScale=pl_bhv->colour_red;
-		pl_bhv->light->GreenScale=pl_bhv->colour_green;
-		pl_bhv->light->BlueScale=pl_bhv->colour_blue;
+		pl_bhv->light->RedScale   = pl_bhv->colour_red;
+		pl_bhv->light->GreenScale = pl_bhv->colour_green;
+		pl_bhv->light->BlueScale  = pl_bhv->colour_blue;
 	}
 	if(!pl_bhv->inan_tac)
 	{

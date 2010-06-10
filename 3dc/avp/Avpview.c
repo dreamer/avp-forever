@@ -435,8 +435,8 @@ void InteriorType_Body()
 			relativeVelocity.vx = dynPtr->Position.vx - dynPtr->PrevPosition.vx;
 			relativeVelocity.vy = dynPtr->Position.vy - dynPtr->PrevPosition.vy;
 			relativeVelocity.vz = dynPtr->Position.vz - dynPtr->PrevPosition.vz;
-			/* rotate into object space */
 
+			/* rotate into object space */
 			RotateVector(&relativeVelocity, &worldToLocalMatrix);
 		}
 		{

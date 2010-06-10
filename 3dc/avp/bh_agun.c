@@ -300,6 +300,7 @@ void MakeSentrygunNear(STRATEGYBLOCK *sbPtr)
 	dPtr->ObWorld = dynPtr->Position;
 	dPtr->ObEuler = dynPtr->OrientEuler;
 	dPtr->ObMat = dynPtr->OrientMat;
+
 	/* zero linear velocity in dynamics block */
 	sbPtr->DynPtr->LinVelocity.vx = 0;
 	sbPtr->DynPtr->LinVelocity.vy = 0;

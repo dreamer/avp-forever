@@ -2786,11 +2786,11 @@ void HandleParticleSystem(void)
 			}
 			if (sbPtr)
 			{
-				switch(sbPtr->I_SBtype)
+				switch (sbPtr->I_SBtype)
 				{
 					case I_BehaviourPlacedLight:
-					{		  
-						PLACED_LIGHT_BEHAV_BLOCK* pl_bhv = sbPtr->SBdataptr;
+					{
+						PLACED_LIGHT_BEHAV_BLOCK *pl_bhv = sbPtr->SBdataptr;
 					   	GLOBALASSERT(pl_bhv);
 						GLOBALASSERT(sbPtr->containingModule);
 
@@ -2803,13 +2803,13 @@ void HandleParticleSystem(void)
 	  					     || pl_bhv->light->BlueScale)
 	  						)
 						{
-							VECTORCH position=pl_bhv->corona_location;
-							RotateVector(&position,&objectPtr->ObMat);
+							VECTORCH position = pl_bhv->corona_location;
+							RotateVector(&position, &objectPtr->ObMat);
 							position.vx += objectPtr->ObWorld.vx;
 							position.vy += objectPtr->ObWorld.vy;
 							position.vz += objectPtr->ObWorld.vz;
-							
-							if (CameraCanSeeThisPosition_WithIgnore(objectPtr,&position))
+
+							if (CameraCanSeeThisPosition_WithIgnore(objectPtr, &position))
 							{
 								LIGHTBLOCK *lPtr = pl_bhv->light;
 								int colour;
@@ -2818,12 +2818,12 @@ void HandleParticleSystem(void)
 									default:
 									case VISION_MODE_NORMAL:
 									{
-										int r = MUL_FIXED(lPtr->RedScale,lPtr->LightBright)>>8;
-										int g = MUL_FIXED(lPtr->GreenScale,lPtr->LightBright)>>8;
-										int b = MUL_FIXED(lPtr->BlueScale,lPtr->LightBright)>>8;
-										if (r>255) r=255;
-										if (g>255) g=255;
-										if (b>255) b=255;
+										int r = MUL_FIXED(lPtr->RedScale,   lPtr->LightBright)>>8;
+										int g = MUL_FIXED(lPtr->GreenScale, lPtr->LightBright)>>8;
+										int b = MUL_FIXED(lPtr->BlueScale,  lPtr->LightBright)>>8;
+										if (r > 255) r = 255;
+										if (g > 255) g = 255;
+										if (b > 255) b = 255;
 										colour = 0xff000000+(r<<16)+(g<<8)+(b);
 										break;
 									}
@@ -2838,7 +2838,7 @@ void HandleParticleSystem(void)
 									{
 										int b = MUL_FIXED
 												(
-													lPtr->RedScale+lPtr->GreenScale+lPtr->BlueScale,
+													lPtr->RedScale+lPtr->GreenScale + lPtr->BlueScale,
 													lPtr->LightBright
 												)>>10;
 										if (b>255) b=255;
@@ -2847,16 +2847,16 @@ void HandleParticleSystem(void)
 									  	break;
 									}
 								}
-								RenderLightFlare(&position,colour);
+								RenderLightFlare(&position, colour);
 							}
 						}
 
 						break;
 					}
 					case I_BehaviourFlareGrenade:
-					{		  
+					{
 						if (LocalDetailLevels.DrawLightCoronas)
-						{						
+						{
 							DoFlareCorona(objectPtr);
 						}
 						break;
@@ -2948,7 +2948,7 @@ void HandleParticleSystem(void)
 							if (laserPtr->BeamIsOn)
 							{
 								if (laserPtr->BeamHasHitPlayer)
-								{			  
+								{
 									int colour;
 									switch (CurrentVisionMode)
 									{
@@ -3017,7 +3017,7 @@ void HandleParticleSystem(void)
 							DrawXenoborgMainLaserbeam(&statusPtr->RightMainBeam);
 						}
 						break;
-					}		 
+					}
 					case I_BehaviourSpeargunBolt:
 					{
 					    SPEAR_BEHAV_BLOCK *bbPtr = (SPEAR_BEHAV_BLOCK * ) sbPtr->SBdataptr;
@@ -3249,7 +3249,7 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 						break;
 					}
 					case PARTICLE_NONCOLLIDINGFLAME:
-					{				
+					{
 					   	RenderParticle(particlePtr);
 						
 						particlePtr->Position.vx += MUL_FIXED(particlePtr->Velocity.vx,NormalFrameTime);
@@ -5146,6 +5146,7 @@ extern void RenderParticlesInMirror(void)
 //  	RenderPlayersImageInMirror();
 
 	D3D_DecalSystem_Setup();
+
 	while(i--)
 	{
 		switch(particlePtr->ParticleID)
@@ -5166,14 +5167,13 @@ extern void RenderParticlesInMirror(void)
 		}
 		particlePtr++;
 	}
-//			DrawingAReflection=1;
-//			DrawingAReflection=0;
 
 	{
 		extern int NumOnScreenBlocks;
 		extern DISPLAYBLOCK *OnScreenBlockList[];
 		int numOfObjects = NumOnScreenBlocks;
-		while(numOfObjects)
+
+		while (numOfObjects)
 		{
 			DISPLAYBLOCK *objectPtr = OnScreenBlockList[--numOfObjects];
 

@@ -1759,6 +1759,7 @@ void DrawParticles()
 	for (size_t i = 0; i < particleArray.size(); i++)
 	{
 
+#if 0
 		D3DXVECTOR3 midpoint;
 		// Our rotation matrix
 		D3DXMATRIX rotationMatrix;
@@ -1828,6 +1829,7 @@ void DrawParticles()
 			particleArray[i].vertices[j].Y = finalVert.y * 65535.0f;
 			particleArray[i].vertices[j].Z = finalVert.z * 65535.0f;
 		}
+#endif
 
 		RenderPolygon.NumberOfVertices = particleArray[i].numVerts;
 		D3D_Particle_Output(&particleArray[i].particle, &particleArray[i].vertices[0]);
@@ -2800,15 +2802,15 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 
 void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 {
-	renderParticle tempParticle;
+	renderParticle newParticle;
 
-	tempParticle.numVerts = RenderPolygon.NumberOfVertices;
-	tempParticle.particle = *particlePtr;
+	newParticle.numVerts = RenderPolygon.NumberOfVertices;
+	newParticle.particle = *particlePtr;
 
-	memcpy(&tempParticle.vertices[0], renderVerticesPtr, tempParticle.numVerts * sizeof(RENDERVERTEX));
-	tempParticle.translucency = ParticleDescription[particlePtr->ParticleID].TranslucencyType;
+	memcpy(&newParticle.vertices[0], renderVerticesPtr, newParticle.numVerts * sizeof(RENDERVERTEX));
+	newParticle.translucency = ParticleDescription[particlePtr->ParticleID].TranslucencyType;
 
-	particleArray.push_back(tempParticle);
+	particleArray.push_back(newParticle);
 }
 
 void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
@@ -2888,7 +2890,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 		mainVertex[vb].sx = (float)vertices->X;
 		mainVertex[vb].sy = (float)-vertices->Y;
-		mainVertex[vb].sz = zvalue;
+		mainVertex[vb].sz = (float)vertices->Z;//zvalue;
 
 		mainVertex[vb].color = colour;
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
@@ -2908,37 +2910,37 @@ void PostLandscapeRendering()
 
   	CurrentRenderStates.FogIsOn = 1;
 
-	if (!strcmp(LevelName,"fall")||!strcmp(LevelName,"fall_m"))
+	if (!strcmp(LevelName,"fall") || !strcmp(LevelName,"fall_m"))
 	{
-		char drawWaterFall = 0;
-		char drawStream = 0;
+		bool drawWaterFall = false;
+		bool drawStream = false;
 
 		while (numOfObjects)
 		{
 			DISPLAYBLOCK *objectPtr = OnScreenBlockList[--numOfObjects];
 			MODULE *modulePtr = objectPtr->ObMyModule;
 
-			/* if it's a module, which isn't inside another module */
+			// if it's a module, which isn't inside another module
 			if (modulePtr && modulePtr->name)
 			{
-				if( (!strcmp(modulePtr->name,"fall01"))
-				  ||(!strcmp(modulePtr->name,"well01"))
-				  ||(!strcmp(modulePtr->name,"well02"))
-				  ||(!strcmp(modulePtr->name,"well03"))
-				  ||(!strcmp(modulePtr->name,"well04"))
-				  ||(!strcmp(modulePtr->name,"well05"))
-				  ||(!strcmp(modulePtr->name,"well06"))
-				  ||(!strcmp(modulePtr->name,"well07"))
-				  ||(!strcmp(modulePtr->name,"well08"))
-				  ||(!strcmp(modulePtr->name,"well")))
+				if ((!strcmp(modulePtr->name, "fall01"))
+				  ||(!strcmp(modulePtr->name, "well01"))
+				  ||(!strcmp(modulePtr->name, "well02"))
+				  ||(!strcmp(modulePtr->name, "well03"))
+				  ||(!strcmp(modulePtr->name, "well04"))
+				  ||(!strcmp(modulePtr->name, "well05"))
+				  ||(!strcmp(modulePtr->name, "well06"))
+				  ||(!strcmp(modulePtr->name, "well07"))
+				  ||(!strcmp(modulePtr->name, "well08"))
+				  ||(!strcmp(modulePtr->name, "well")))
 				{
-					drawWaterFall = 1;
+					drawWaterFall = true;
 				}
-				else if( (!strcmp(modulePtr->name,"stream02"))
-				       ||(!strcmp(modulePtr->name,"stream03"))
-				       ||(!strcmp(modulePtr->name,"watergate")))
+				else if ((!strcmp(modulePtr->name, "stream02"))
+				       ||(!strcmp(modulePtr->name, "stream03"))
+				       ||(!strcmp(modulePtr->name, "watergate")))
 				{
-		   			drawStream = 1;
+		   			drawStream = true;
 				}
 			}
 		}
@@ -2948,10 +2950,10 @@ void PostLandscapeRendering()
 	   		//UpdateWaterFall();
 			WaterFallBase = 109952;
 
-			MeshZScale = (66572-51026)/15;
-			MeshXScale = (109952+3039)/45;
+			MeshZScale = (66572 - 51026)/15;
+			MeshXScale = (109952 + 3039)/45;
 
-	   		D3D_DrawWaterFall(175545,-3039,51026);
+	   		D3D_DrawWaterFall(175545, -3039, 51026);
 		}
 		if (drawStream)
 		{
@@ -2960,16 +2962,15 @@ void PostLandscapeRendering()
 			int z = 93696;
 			MeshXScale = (87869-68581);
 			MeshZScale = (105385-93696);
-			{
-				CheckForObjectsInWater(x, x+MeshXScale, z, z+MeshZScale, y);
-			}
 
-			WaterXOrigin=x;
-			WaterZOrigin=z;
-			WaterUScale = 4.0f/(float)MeshXScale;
-			WaterVScale = 4.0f/(float)MeshZScale;
-		 	MeshXScale/=4;
-		 	MeshZScale/=2;
+			CheckForObjectsInWater(x, x+MeshXScale, z, z+MeshZScale, y);
+
+			WaterXOrigin = x;
+			WaterZOrigin = z;
+			WaterUScale = 4.0f / (float)MeshXScale;
+			WaterVScale = 4.0f / (float)MeshZScale;
+		 	MeshXScale /= 4;
+		 	MeshZScale /= 2;
 
 			currentWaterTexture = ChromeImageNumber;
 
@@ -2983,44 +2984,40 @@ void PostLandscapeRendering()
 		 	D3D_DrawWaterPatch(x+MeshXScale*3, y, z+MeshZScale);
 		}
 	}
-	else if (!_stricmp(LevelName,"hangar"))
-	{
-		// unused code removed
-	}
 	else if (!_stricmp(LevelName,"invasion_a"))
 	{
-		char drawWater = 0;
-		char drawEndWater = 0;
+		bool drawWater = false;
+		bool drawEndWater = false;
 
-		while(numOfObjects)
+		while (numOfObjects)
 		{
 			DISPLAYBLOCK *objectPtr = OnScreenBlockList[--numOfObjects];
 			MODULE *modulePtr = objectPtr->ObMyModule;
 
-			/* if it's a module, which isn't inside another module */
+			// if it's a module, which isn't inside another module
 			if (modulePtr && modulePtr->name)
 			{
-				if( (!strcmp(modulePtr->name,"hivepool"))
-				  ||(!strcmp(modulePtr->name,"hivepool04")))
+				if ((!strcmp(modulePtr->name, "hivepool"))
+				  ||(!strcmp(modulePtr->name, "hivepool04")))
 				{
-					drawWater = 1;
+					drawWater = true;
 					break;
 				}
 				else
 				{
-					if (!strcmp(modulePtr->name,"shaftbot"))
+					if (!strcmp(modulePtr->name, "shaftbot"))
 					{
-						drawEndWater = 1;
+						drawEndWater = true;
 					}
-					if ((!_stricmp(modulePtr->name,"shaft01"))
-					 ||(!_stricmp(modulePtr->name,"shaft02"))
-					 ||(!_stricmp(modulePtr->name,"shaft03"))
-					 ||(!_stricmp(modulePtr->name,"shaft04"))
-					 ||(!_stricmp(modulePtr->name,"shaft05"))
-					 ||(!_stricmp(modulePtr->name,"shaft06")))
+					if ((!_stricmp(modulePtr->name, "shaft01"))
+					 ||(!_stricmp(modulePtr->name, "shaft02"))
+					 ||(!_stricmp(modulePtr->name, "shaft03"))
+					 ||(!_stricmp(modulePtr->name, "shaft04"))
+					 ||(!_stricmp(modulePtr->name, "shaft05"))
+					 ||(!_stricmp(modulePtr->name, "shaft06")))
 					{
 						HandleRainShaft(modulePtr, -11726,-107080,10);
-						drawEndWater = 1;
+						drawEndWater = true;
 						break;
 					}
 				}
@@ -3034,16 +3031,15 @@ void PostLandscapeRendering()
 			int z = 30238;
 			MeshXScale = (36353-20767);
 			MeshZScale = (41927-30238);
-			{
-				CheckForObjectsInWater(x, x+MeshXScale, z, z+MeshZScale, y);
-			}
+				
+			CheckForObjectsInWater(x, x+MeshXScale, z, z+MeshZScale, y);
 
-			WaterXOrigin=x;
-			WaterZOrigin=z;
-			WaterUScale = 4.0f/(float)MeshXScale;
-			WaterVScale = 4.0f/(float)MeshZScale;
-		 	MeshXScale/=4;
-		 	MeshZScale/=2;
+			WaterXOrigin = x;
+			WaterZOrigin = z;
+			WaterUScale = 4.0f / (float)MeshXScale;
+			WaterVScale = 4.0f / (float)MeshZScale;
+		 	MeshXScale /= 4;
+		 	MeshZScale /= 2;
 
 			currentWaterTexture = ChromeImageNumber;
 
@@ -3063,15 +3059,15 @@ void PostLandscapeRendering()
 			int z = -55875;
 			MeshXScale = (15471-1800);
 			MeshZScale = (55875-36392);
-			{
-				CheckForObjectsInWater(x, x+MeshXScale, z, z+MeshZScale, y);
-			}
-			WaterXOrigin=x;
-			WaterZOrigin=z;
+
+			CheckForObjectsInWater(x, x+MeshXScale, z, z+MeshZScale, y);
+
+			WaterXOrigin = x;
+			WaterZOrigin = z;
 			WaterUScale = 4.0f/(float)(MeshXScale+1800-3782);
 			WaterVScale = 4.0f/(float)MeshZScale;
-		 	MeshXScale/=4;
-		 	MeshZScale/=2;
+		 	MeshXScale /= 4;
+		 	MeshZScale /= 2;
 
 			currentWaterTexture = WaterShaftImageNumber;
 
@@ -3085,27 +3081,27 @@ void PostLandscapeRendering()
 		 	D3D_DrawWaterPatch(x+MeshXScale*3, y, z+MeshZScale);
 		}
 	}
-	else if (!_stricmp(LevelName,"derelict"))
+	else if (!_stricmp(LevelName, "derelict"))
 	{
-		char drawMirrorSurfaces = 0;
-		char drawWater = 0;
+		bool drawMirrorSurfaces = false;
+		bool drawWater = false;
 
-		while(numOfObjects)
+		while (numOfObjects)
 		{
 			DISPLAYBLOCK *objectPtr = OnScreenBlockList[--numOfObjects];
 			MODULE *modulePtr = objectPtr->ObMyModule;
 
-			/* if it's a module, which isn't inside another module */
+			// if it's a module, which isn't inside another module
 			if (modulePtr && modulePtr->name)
 			{
-			  	if ((!_stricmp(modulePtr->name,"start-en01"))
-			  	  ||(!_stricmp(modulePtr->name,"start")))
+			  	if ((!_stricmp(modulePtr->name, "start-en01"))
+			  	  ||(!_stricmp(modulePtr->name, "start")))
 				{
-					drawMirrorSurfaces = 1;
+					drawMirrorSurfaces = true;
 				}
-				else if (!_stricmp(modulePtr->name,"water-01"))
+				else if (!_stricmp(modulePtr->name, "water-01"))
 				{
-					drawWater = 1;
+					drawWater = true;
 					HandleRainShaft(modulePtr, 32000, 0, 16);
 				}
 			}
@@ -3124,16 +3120,15 @@ void PostLandscapeRendering()
 			int z = -200964;
 			MeshXScale = (102799-87216);
 			MeshZScale = (200964-180986);
-			{
-				CheckForObjectsInWater(x, x+MeshXScale, z, z+MeshZScale, y);
-			}
 
-			WaterXOrigin=x;
-			WaterZOrigin=z;
-			WaterUScale = 4.0f/(float)MeshXScale;
-			WaterVScale = 4.0f/(float)MeshZScale;
-		 	MeshXScale/=2;
-		 	MeshZScale/=2;
+			CheckForObjectsInWater(x, x+MeshXScale, z, z+MeshZScale, y);
+
+			WaterXOrigin = x;
+			WaterZOrigin = z;
+			WaterUScale = 4.0f / (float)MeshXScale;
+			WaterVScale = 4.0f / (float)MeshZScale;
+		 	MeshXScale /= 2;
+		 	MeshZScale /= 2;
 
 			currentWaterTexture = ChromeImageNumber;
 
@@ -3144,9 +3139,9 @@ void PostLandscapeRendering()
 		}
 
 	}
-	else if (!_stricmp(LevelName,"genshd1"))
+	else if (!_stricmp(LevelName, "genshd1"))
 	{
-		char drawWater = 0;
+		bool drawWater = 0;
 
 		while (numOfObjects)
 		{
@@ -3156,17 +3151,17 @@ void PostLandscapeRendering()
 			/* if it's a module, which isn't inside another module */
 			if (modulePtr && modulePtr->name)
 			{
-				if ((!_stricmp(modulePtr->name,"largespace"))
-				  ||(!_stricmp(modulePtr->name,"proc13"))
-				  ||(!_stricmp(modulePtr->name,"trench01"))
-				  ||(!_stricmp(modulePtr->name,"trench02"))
-				  ||(!_stricmp(modulePtr->name,"trench03"))
-				  ||(!_stricmp(modulePtr->name,"trench04"))
-				  ||(!_stricmp(modulePtr->name,"trench05"))
-				  ||(!_stricmp(modulePtr->name,"trench06"))
-				  ||(!_stricmp(modulePtr->name,"trench07"))
-				  ||(!_stricmp(modulePtr->name,"trench08"))
-				  ||(!_stricmp(modulePtr->name,"trench09")))
+				if ((!_stricmp(modulePtr->name, "largespace"))
+				  ||(!_stricmp(modulePtr->name, "proc13"))
+				  ||(!_stricmp(modulePtr->name, "trench01"))
+				  ||(!_stricmp(modulePtr->name, "trench02"))
+				  ||(!_stricmp(modulePtr->name, "trench03"))
+				  ||(!_stricmp(modulePtr->name, "trench04"))
+				  ||(!_stricmp(modulePtr->name, "trench05"))
+				  ||(!_stricmp(modulePtr->name, "trench06"))
+				  ||(!_stricmp(modulePtr->name, "trench07"))
+				  ||(!_stricmp(modulePtr->name, "trench08"))
+				  ||(!_stricmp(modulePtr->name, "trench09")))
 				{
 					HandleRain(999);
 					break;
@@ -3179,7 +3174,7 @@ void PostLandscapeRendering()
 void D3D_DrawWaterTest(MODULE *testModulePtr)
 {
 	extern char LevelName[];
-	if (!strcmp(LevelName,"genshd1"))
+	if (!strcmp(LevelName, "genshd1"))
 	{
 		extern DISPLAYBLOCK *Player;
 
