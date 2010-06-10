@@ -1,0 +1,44 @@
+
+ // Pixel shader input structure
+struct PS_INPUT
+{
+    float4 Position   : POSITION;
+    float4 Diffuse    : COLOR0;
+    float2 Texture1   : TEXCOORD0;
+    float2 Texture2   : TEXCOORD1;
+};
+
+
+// Pixel shader output structure
+struct PS_OUTPUT
+{
+    float4 Color   : COLOR0;
+};
+
+
+// Global variables
+sampler2D Tex0;
+sampler2D Tex1;
+
+
+// Name: Simple Pixel Shader
+// Type: Pixel shader
+// Desc: Fetch texture and blend with constant color
+//
+PS_OUTPUT ps_main( in PS_INPUT In )
+{
+	PS_OUTPUT Out; //create an output pixel
+	
+	float4 destColour;
+	float4 srcColour1 = tex2D(Tex0, In.Texture1);
+	float4 srcColour2 = tex2D(Tex1, In.Texture2);
+	
+	if ((srcColour1.r) && (srcColour1.g) && (srcColour1.b))
+	{
+		destColour = srcColour1 * srcColour2 * In.Diffuse;
+	}
+	
+	Out.Color = destColour;	//tex2D(Tex0, In.Texture1) * In.Diffuse;
+
+	return Out; //return output pixel
+}

@@ -654,14 +654,14 @@ int32_t CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 
 
 	// set up vertex shader
 	LastError = D3DXCompileShaderFromFile(actualPath.c_str(), //filepath
-						NULL,            //macro's
-						NULL,            //includes
-						"vs_main",       //main function
-						"vs_2_0",        //shader profile
-						0,               //flags
-						&pCode,          //compiled operations
-						&pErrors,        //errors
-						constantTable); //constants
+						NULL,            // macro's
+						NULL,            // includes
+						"vs_main",       // main function
+						"vs_2_0",        // shader profile
+						0,               // flags
+						&pCode,          // compiled operations
+						&pErrors,        // errors
+						constantTable);  // constants
 
 	if (FAILED(LastError))
 	{
@@ -694,14 +694,14 @@ int32_t CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *p
 
 	// set up pixel shader
 	LastError = D3DXCompileShaderFromFile(actualPath.c_str(), //filepath
-						NULL,            //macro's
-						NULL,            //includes
-						"ps_main",       //main function
-						"ps_2_0",        //shader profile
-						0,               //flags
-						&pCode,          //compiled operations
-						&pErrors,        //errors
-						NULL); //constants
+						NULL,            // macro's
+						NULL,            // includes
+						"ps_main",       // main function
+						"ps_2_0",        // shader profile
+						0,               // flags
+						&pCode,          // compiled operations
+						&pErrors,        // errors
+						NULL);			 // constants
 
 	if (pErrors)
 	{
@@ -1525,7 +1525,11 @@ BOOL InitialiseDirect3D()
 	d3d.lpD3DDevice->CreateVertexDeclaration(decl, &d3d.vertexDecl);
 	d3d.lpD3DDevice->CreateVertexDeclaration(orthoDecl, &d3d.orthoVertexDecl);
 	d3d.lpD3DDevice->CreateVertexDeclaration(fmvDecl, &d3d.fmvVertexDecl);
-	d3d.lpD3DDevice->CreateVertexDeclaration(cloudDecl, &d3d.cloudVertexDecl);
+	LastError = d3d.lpD3DDevice->CreateVertexDeclaration(cloudDecl, &d3d.cloudVertexDecl);
+	if (FAILED(LastError))
+	{
+		OutputDebugString("CreateVertexDeclaration failed\n");
+	}
 
 	if (CreateVertexShader("vertex.vsh", &d3d.vertexShader, &vertexConstantTable) != 0)
 	{

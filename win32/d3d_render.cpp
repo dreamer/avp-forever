@@ -57,10 +57,10 @@ D3DVERTEXELEMENT9 fmvDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT
 							   {0, 28, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	2},
                             D3DDECL_END()};
 
-D3DVERTEXELEMENT9 cloudDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
+D3DVERTEXELEMENT9 cloudDecl[] = {{0, 0, D3DDECLTYPE_FLOAT3,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
 								{0, 12, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		0},	
-							    {0, 16, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
-							    {0, 24, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	1},
+							    {0, 16, D3DDECLTYPE_FLOAT2,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
+							    {0, 24, D3DDECLTYPE_FLOAT2,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	1},
                             D3DDECL_END()};
 
 LPD3DXCONSTANTTABLE	vertexConstantTable = NULL;
@@ -90,6 +90,7 @@ extern IMAGEHEADER ImageHeaderArray[];
 extern AVPMENUGFX AvPMenuGfxStorage[];
 extern AVPIndexedFont IntroFont_Light;
 extern VIEWDESCRIPTORBLOCK* Global_VDB_Ptr;
+extern int CloakingPhase;
 #include "particle.h"
 #include "kshape.h"
 }
@@ -1115,6 +1116,20 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, int32_t textureID, uint
 	ChangeTexture(textureID);
 	d3d.lpD3DDevice->SetTexture(1, AvPMenuGfxStorage[AVPMENUGFX_CLOUDY].menuTexture);
 
+	d3d.lpD3DDevice->SetVertexDeclaration(d3d.cloudVertexDecl);
+	d3d.lpD3DDevice->SetVertexShader(d3d.cloudVertexShader);
+	d3d.lpD3DDevice->SetPixelShader(d3d.cloudPixelShader);
+
+	cloudConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
+	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "CloakingPhase", CloakingPhase);
+	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "pX", topX);
+	if (FAILED(LastError))
+	{
+		OutputDebugString("SetInt failed\n");
+	}
+
+	ChangeFilteringMode(FILTERING_BILINEAR_ON);
+
 	ORTHOVERTEX testOrtho[4];
 	int16_t indices[6];
 
@@ -1158,7 +1173,6 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, int32_t textureID, uint
 	testOrtho[3].u = (float)((texU + charWidth) * RecipW);
 	testOrtho[3].v = (float)((texV) * RecipH);
 
-//	LastError = d3d.lpD3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, 4, 2, &indices[0], D3DFMT_INDEX16, testOrtho, sizeof(ORTHOVERTEX));
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, testOrtho, sizeof(ORTHOVERTEX));
 	if (FAILED(LastError)) 
 	{
@@ -1873,8 +1887,6 @@ extern MODULE *playerPherModule;
 extern int NumOnScreenBlocks;
 extern DISPLAYBLOCK *OnScreenBlockList[];
 extern char LevelName[];
-
-extern int CloakingPhase;
 extern int NumActiveBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
 
