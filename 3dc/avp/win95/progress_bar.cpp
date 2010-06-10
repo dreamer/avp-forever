@@ -264,7 +264,7 @@ void Game_Has_Loaded()
 	SoundSys_StopAll();
 	SoundSys_Management();
 
-	uint32_t f = 65536;
+	int32_t f = 65536;
 	ResetFrameCounter();
 
 	do
@@ -321,8 +321,8 @@ void Game_Has_Loaded()
 		if (AvP.Network != I_No_Network)
 		{
 			MinimalNetCollectMessages();
-			//send messages , mainly  needed so that the host will send the game description
-			//allowing people to join while the host is loading
+			// send messages , mainly  needed so that the host will send the game description
+			// allowing people to join while the host is loading
 			NetSendMessages();
 		}
 	}
