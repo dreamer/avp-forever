@@ -146,10 +146,10 @@ STICKYKEYS skOff;
 // entry point
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-	char * instr;
-
+	
 	I_AVP_ENVIRONMENTS level_to_load = I_Num_Environments;
-	char * command_line = lpCmdLine;
+	char *command_line = lpCmdLine;
+	char *instr = 0;
 
 	AVP_HInstance = hInst = hInstance;
 	AVP_NCmd = nCmdShow;

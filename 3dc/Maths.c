@@ -785,6 +785,14 @@ void SubVector(VECTORCH *v1, VECTORCH *v2)
 	v2->vz -= v1->vz;
 }
 
+// float based version of the above function
+void SubVectorF(VECTORCHF *v1, VECTORCHF *v2)
+{
+	v2->vx -= v1->vx;
+	v2->vy -= v1->vy;
+	v2->vz -= v1->vz;
+}
+
 
 /*
 
@@ -2595,6 +2603,14 @@ void CrossProduct(VECTORCH *a, VECTORCH *b, VECTORCH *c)
 	c->vx = MUL_FIXED(a->vy,b->vz) - MUL_FIXED(a->vz,b->vy);
 	c->vy = MUL_FIXED(a->vz,b->vx) - MUL_FIXED(a->vx,b->vz);
 	c->vz = MUL_FIXED(a->vx,b->vy) - MUL_FIXED(a->vy,b->vx);
+}
+
+// float based version of the above function
+void CrossProductF(VECTORCHF *a, VECTORCHF *b, VECTORCHF *c)
+{
+	c->vx = (a->vy * b->vz) - (a->vz * b->vy);
+	c->vy = (a->vz * b->vx) - (a->vx * b->vz);
+	c->vz = (a->vx * b->vy) - (a->vy * b->vx);
 }
 
 

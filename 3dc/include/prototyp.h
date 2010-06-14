@@ -1220,9 +1220,13 @@ void CopyMatrix(MATRIXCH *m1, MATRIXCH *m2);
 
 void MakeVector(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3);
 void AddVector(VECTORCH *v1, VECTORCH *v2);
-void SubVector(VECTORCH *v1, VECTORCH *v2);
-void QuatToMat(QUAT *q,MATRIXCH *m);
 
+void SubVector(VECTORCH *v1, VECTORCH *v2);
+
+// float based version of the above function
+void SubVectorF(VECTORCHF *v1, VECTORCHF *v2);
+
+void QuatToMat(QUAT *q,MATRIXCH *m);
 
 void _RotateVector(VECTORCH *v, MATRIXCH *m);
 void _RotateAndCopyVector(VECTORCH *v1, VECTORCH *v2, MATRIXCH *m);
@@ -1407,6 +1411,9 @@ int MagnitudeOfCrossProduct(VECTORCH *a, VECTORCH *b);
 /* KJL 15:08:01 01/08/97 - sets the vector c to be the
    cross product of the vectors a and b. */
 void CrossProduct(VECTORCH *a, VECTORCH *b, VECTORCH *c);
+
+// float based version of the above function
+void CrossProductF(VECTORCHF *a, VECTORCHF *b, VECTORCHF *c);
 
 /* KJL 12:01:08 7/16/97 - returns the magnitude of a vector - max error about 13%, though average error
    less than half this. Very fast compared to other approaches. */

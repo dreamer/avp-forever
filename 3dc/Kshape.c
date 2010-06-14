@@ -4052,7 +4052,7 @@ extern void TranslationSetup(void)
 	ViewMatrix[5] = (float)(Global_VDB_Ptr->VDB_Mat.mat22)/65536.0f*p;
 	ViewMatrix[6] = (float)(Global_VDB_Ptr->VDB_Mat.mat32)/65536.0f*p;
 
-	// front vector
+	// lookat vector
 	ViewMatrix[8] = (float)(Global_VDB_Ptr->VDB_Mat.mat13)/65536.0f*CameraZoomScale;
 	ViewMatrix[9] = (float)(Global_VDB_Ptr->VDB_Mat.mat23)/65536.0f*CameraZoomScale;
 	ViewMatrix[10] = (float)(Global_VDB_Ptr->VDB_Mat.mat33)/65536.0f*CameraZoomScale;
@@ -4292,9 +4292,9 @@ void TranslateShapeVertices(SHAPEINSTR *shapeinstrptr)
 		ObjectViewMatrix[1] = (float)(Global_ODB_Ptr->ObMat.mat21)/65536.0f;
 		ObjectViewMatrix[2] = (float)(Global_ODB_Ptr->ObMat.mat31)/65536.0f;
 
-		ObjectViewMatrix[4] = (float)(Global_ODB_Ptr->ObMat.mat12)/(65536.0f);
-		ObjectViewMatrix[5] = (float)(Global_ODB_Ptr->ObMat.mat22)/(65536.0f);
-		ObjectViewMatrix[6] = (float)(Global_ODB_Ptr->ObMat.mat32)/(65536.0f);
+		ObjectViewMatrix[4] = (float)(Global_ODB_Ptr->ObMat.mat12)/65536.0f;
+		ObjectViewMatrix[5] = (float)(Global_ODB_Ptr->ObMat.mat22)/65536.0f;
+		ObjectViewMatrix[6] = (float)(Global_ODB_Ptr->ObMat.mat32)/65536.0f;
 
 		ObjectViewMatrix[8] = (float)(Global_ODB_Ptr->ObMat.mat13)/65536.0f;
 		ObjectViewMatrix[9] = (float)(Global_ODB_Ptr->ObMat.mat23)/65536.0f;
@@ -5975,6 +5975,53 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 
 	PARTICLE particle;
 	VECTORCH point = *positionPtr;
+	VECTORCHF pointF;
+	VECTORCHF vLookAt;// = Global_VDB_Ptr->VDB_World;
+	VECTORCHF vCameraUp;
+	VECTORCHF vRight;
+	VECTORCHF vUp;
+	float Source[3];
+	float Dest[3];
+	int i;
+
+	vLookAt.vx = (float)Global_VDB_Ptr->VDB_World.vx;
+	vLookAt.vy = (float)Global_VDB_Ptr->VDB_World.vy;
+	vLookAt.vz = (float)Global_VDB_Ptr->VDB_World.vz;
+
+	pointF.vx = (float)point.vx;
+	pointF.vy = (float)point.vy;
+	pointF.vz = (float)point.vz;
+
+	vCameraUp.vx = Global_VDB_Ptr->VDB_Mat.mat12 / 65536.0f;
+	vCameraUp.vy = Global_VDB_Ptr->VDB_Mat.mat22 / 65536.0f;
+	vCameraUp.vz = Global_VDB_Ptr->VDB_Mat.mat32 / 65536.0f;
+	FNormalise(&vCameraUp);
+
+	// find billboards look at vector (camera position - billboard position)
+	SubVectorF(&pointF, &vLookAt);
+	FNormalise(&vLookAt);
+
+	// get billboard right vector using camera up and billboard look at
+	CrossProductF(&vCameraUp, &vLookAt, &vRight);
+
+	// now get billboard up vector from billboard right and lookat
+	CrossProductF(&vRight, &vLookAt, &vUp);
+
+	ObjectViewMatrix[0] = vRight.vx;
+	ObjectViewMatrix[1] = vRight.vy;
+	ObjectViewMatrix[2] = vRight.vz;
+
+	ObjectViewMatrix[4] = vUp.vx;
+	ObjectViewMatrix[5] = vUp.vy;
+	ObjectViewMatrix[6] = vUp.vz;
+
+	ObjectViewMatrix[8] = vLookAt.vx;
+	ObjectViewMatrix[9] = vLookAt.vy;
+	ObjectViewMatrix[10] = vLookAt.vz;
+
+	ObjectViewMatrix[3] = pointF.vx;
+	ObjectViewMatrix[7] = pointF.vy;
+	ObjectViewMatrix[11] = pointF.vz;
 
 //	TranslatePointIntoViewspace(&point);
 
@@ -6015,6 +6062,19 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 	VerticesBuffer[3].X = centreX - sizeX;
 	VerticesBuffer[3].Y = centreY + sizeY;
 	VerticesBuffer[3].Z = z;
+
+	for (i = 0; i < 4; i++)
+	{
+		Source[0] = (float)VerticesBuffer[i].X;
+		Source[1] = (float)VerticesBuffer[i].Y;
+		Source[2] = (float)VerticesBuffer[i].Z;
+
+		TranslatePoint(Source, Dest, ObjectViewMatrix); // local to world?
+
+		f2i(VerticesBuffer[i].X, Dest[0]);
+		f2i(VerticesBuffer[i].Y, Dest[1]);
+		f2i(VerticesBuffer[i].Z, Dest[2]);
+	}
 
 	{
 		int outcode = QuadWithinFrustum();
