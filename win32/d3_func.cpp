@@ -51,6 +51,10 @@ extern LPD3DXCONSTANTTABLE	orthoConstantTable;
 extern LPD3DXCONSTANTTABLE	fmvConstantTable;
 extern LPD3DXCONSTANTTABLE	cloudConstantTable;
 
+//LPDIRECT3DVERTEXDECLARATION9 fmvVertexDecl;
+LPDIRECT3DVERTEXSHADER9      preTransVertexShader;
+//LPDIRECT3DPIXELSHADER9       fmvPixelShader;
+
 extern void DeleteRenderMemory();
 
 LPDIRECT3DTEXTURE9 blankTexture;
@@ -1538,6 +1542,8 @@ BOOL InitialiseDirect3D()
 	CreateVertexShader("orthoVertex.vsh", &d3d.orthoVertexShader, &orthoConstantTable);
 	CreateVertexShader("fmvVertex.vsh", &d3d.fmvVertexShader, &fmvConstantTable);
 	CreateVertexShader("cloudTextVertex.vsh", &d3d.cloudVertexShader, &cloudConstantTable);
+
+	CreateVertexShader("pretransformedVert.vsh", &preTransVertexShader, 0);
 
 	CreatePixelShader("pixel.psh", &d3d.pixelShader);
 	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);

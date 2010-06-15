@@ -68,6 +68,8 @@ LPD3DXCONSTANTTABLE	orthoConstantTable = NULL;
 LPD3DXCONSTANTTABLE	fmvConstantTable = NULL;
 LPD3DXCONSTANTTABLE	cloudConstantTable = NULL;
 
+extern LPDIRECT3DVERTEXSHADER9 preTransVertexShader;
+
 D3DXMATRIX viewMatrix;
 
 extern D3DXMATRIX matOrtho;
@@ -175,7 +177,18 @@ struct renderParticle
 	inline bool operator<(const renderParticle& rhs) const {return translucency < rhs.translucency;}
 };
 
+struct renderCorona
+{
+	PARTICLE		particle;
+	RENDERVERTEX	vertices[9];
+	uint32_t		numVerts;
+	int				translucency;
+
+	inline bool operator<(const renderCorona& rhs) const {return translucency < rhs.translucency;}
+};
+
 std::vector<renderParticle> particleArray;
+std::vector<renderCorona>   coronaArray;
 
 void DeleteRenderMemory()
 {
@@ -1007,7 +1020,6 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	d3d.lpD3DDevice->SetVertexShader(d3d.fmvVertexShader);
 	d3d.lpD3DDevice->SetPixelShader(d3d.fmvPixelShader);
 
-
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(FMVVERTEX));
 	if (FAILED(LastError))
 	{
@@ -1704,6 +1716,21 @@ extern "C" {
 #include "d3d_render.h"
 #include "bh_types.h"
 
+extern "C"
+{
+	void TransformToViewspace(float *vals)
+	{
+		D3DXVECTOR3 returnvar;
+		D3DXVECTOR3 temp(vals[0], vals[1], vals[2]);
+
+		D3DXVec3TransformCoord(&returnvar, &temp, &viewMatrix);
+
+		vals[0] = returnvar.x;
+		vals[1] = returnvar.y;
+		vals[2] = returnvar.z;
+	}
+} // extern C
+
 void UpdateViewMatrix(float *viewMat)
 {
 	D3DXVECTOR3 vecRight	(viewMat[0], viewMat[1], viewMat[2]);
@@ -1743,6 +1770,64 @@ void UpdateViewMatrix(float *viewMat)
 	viewMatrix._41 = -D3DXVec3Dot(&vecPosition, &vecRight);
 	viewMatrix._42 = -D3DXVec3Dot(&vecPosition, &vecUp);
 	viewMatrix._43 = -D3DXVec3Dot(&vecPosition, &vecFront);
+}
+
+void DrawCoronas()
+{
+	if (coronaArray.size() == 0)
+		return;
+
+	uint32_t numVertsBackup = RenderPolygon.NumberOfVertices;
+
+	LastError = d3d.lpD3DDevice->SetTexture(0, blankTexture);
+
+	d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
+	d3d.lpD3DDevice->SetVertexShader(preTransVertexShader);
+	d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
+
+	D3DLVERTEX verts[4];
+
+	for (size_t i = 0; i < coronaArray.size(); i++)
+	{
+		PARTICLE_DESC *particleDescPtr = &ParticleDescription[coronaArray[i].particle.ParticleID];
+
+//		float RecipW = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
+//		float RecipH = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
+
+		for (uint32_t j = 0; j < coronaArray[i].numVerts; j++)
+		{
+			RENDERVERTEX *vertices = &coronaArray[i].vertices[j];
+
+			D3DXVECTOR3 tempVec;
+			D3DXVECTOR3 newVec;
+			tempVec.x = (float)vertices->X;
+			tempVec.y = (float)-vertices->Y;
+			tempVec.z = (float)vertices->Z;
+
+			// projection transform
+			D3DXVec3TransformCoord(&newVec, &tempVec, &matProjection);
+
+			verts[j].sx = newVec.x;
+			verts[j].sy = newVec.y;
+			verts[j].sz = newVec.z;
+			verts[j].color = D3DCOLOR_ARGB(255, 128, 0, 128);
+			verts[j].specular = D3DCOLOR_ARGB(255, 255, 255, 255);
+			verts[j].tu = 0.0f;
+			verts[j].tv = 0.0f;
+		}
+
+		LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &verts[0], sizeof(D3DLVERTEX));
+		if (FAILED(LastError))
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+			OutputDebugString("DrawPrimitiveUP failed\n");
+		}
+	}
+
+	coronaArray.clear();
+
+	// restore RenderPolygon.NumberOfVertices value...
+	RenderPolygon.NumberOfVertices = numVertsBackup;
 }
 
 void DrawParticles()
@@ -2692,6 +2777,7 @@ void D3D_DecalSystem_Setup(void)
 void D3D_DecalSystem_End(void)
 {
 	DrawParticles();
+	DrawCoronas();
 
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
@@ -2798,6 +2884,19 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 	}
 
 	D3D_OutputTriangles();
+}
+
+void AddCorona(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
+{
+	renderCorona newCorona;
+
+	newCorona.numVerts = RenderPolygon.NumberOfVertices;
+	newCorona.particle = *particlePtr;
+
+	memcpy(&newCorona.vertices[0], renderVerticesPtr, newCorona.numVerts * sizeof(RENDERVERTEX));
+	newCorona.translucency = ParticleDescription[particlePtr->ParticleID].TranslucencyType;
+
+	coronaArray.push_back(newCorona);
 }
 
 void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
@@ -4734,108 +4833,6 @@ extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, in
 		}
 	   	y -= AAFontWidths[(unsigned char)c];
 	}
-}
-
-void DrawCloudTable(uint32_t topX, uint32_t topY, uint32_t word_length, uint32_t alpha)
-{
-#if 0
-	LastError = d3d.lpD3DDevice->SetTexture(0, AvPMenuGfxStorage[AVPMENUGFX_CLOUDY].menuTexture);
-	if(FAILED(LastError)) {
-		OutputDebugString("Couldn't set cloudy texture");
-	}
-
-	// height of a char
-	int height =  33;
-	int width = word_length;
-
-	float RecipW = (1.0f / 256);
-	float RecipH = (1.0f / 256);
-
-	// bottom left
-	quadVert[0].sx = (float)topX - 0.5f;
-	quadVert[0].sy = (float)topY + height - 0.5f;
-	quadVert[0].sz = 0.0f;
-	quadVert[0].rhw = 1.0f;
-	quadVert[0].color = D3DCOLOR_ARGB(255,255,255,255);
-	quadVert[0].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[0].tu = 0.0f;
-//	quadVert[0].tv = (1.0f / real_height) * height;
-	quadVert[0].tv = 1.0f;
-
-	// top left
-	quadVert[1].sx = (float)topX - 0.5f;
-	quadVert[1].sy = (float)topY - 0.5f;
-	quadVert[1].sz = 0.0f;
-	quadVert[1].rhw = 1.0f;
-	quadVert[1].color = D3DCOLOR_ARGB(255,255,255,255);
-	quadVert[1].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[1].tu = 0.0f;
-	quadVert[1].tv = 0.0f;
-
-	// bottom right
-	quadVert[2].sx = (float)topX + width - 0.5f;
-	quadVert[2].sy = (float)topY + height - 0.5f;
-	quadVert[2].sz = 0.0f;
-	quadVert[2].rhw = 1.0f;
-	quadVert[2].color = D3DCOLOR_ARGB(255,255,255,255);
-	quadVert[2].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[2].tu = 1.0f;
-	quadVert[2].tv = 1.0f;
-
-	// top right
-	quadVert[3].sx = (float)topX + width - 0.5f;
-	quadVert[3].sy = (float)topY - 0.5f;
-	quadVert[3].sz = 0.0f;
-	quadVert[3].rhw = 1.0f;
-	quadVert[3].color = D3DCOLOR_ARGB(255,255,255,255);
-	quadVert[3].specular = RGBALIGHT_MAKE(0,0,0,255);
-	quadVert[3].tu = 1.0f;
-	quadVert[3].tv = 0.0f;
-
-	if (D3DStencilEnable != TRUE) {
-		d3d.lpD3DDevice->SetRenderState( D3DRS_STENCILENABLE, TRUE );
-		D3DStencilEnable = TRUE;
-	}
-
-	// Now set the device to cull pixels that don't match the reference value of 1
-	d3d.lpD3DDevice->SetRenderState( D3DRS_STENCILFUNC, D3DCMP_EQUAL );
-
-	// Disable alpha-testing
-	if (D3DAlphaTestEnable != FALSE) {
-		d3d.lpD3DDevice->SetRenderState( D3DRS_ALPHATESTENABLE, FALSE );
-		D3DAlphaTestEnable = FALSE;
-	}
-
-	if (D3DAlphaBlendEnable != TRUE) {
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-		D3DAlphaBlendEnable = TRUE;
-	}
-	if (D3DSrcBlend != D3DBLEND_SRCALPHA ) {
-		d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-		D3DSrcBlend = D3DBLEND_SRCALPHA;
-	}
-	if (D3DDestBlend != D3DBLEND_ONE) {
-		d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_ONE);
-		D3DDestBlend = D3DBLEND_ONE;
-	}
-
-	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
-	if(FAILED(LastError)) {
-		OutputDebugString(" draw cloudy quad failed ");
-	}
-#endif
-
-		// Disable alpha-testing
-	if (D3DAlphaTestEnable != FALSE) {
-		d3d.lpD3DDevice->SetRenderState( D3DRS_ALPHATESTENABLE, FALSE );
-		D3DAlphaTestEnable = FALSE;
-	}
-
-	if (D3DStencilEnable != FALSE) {
-		d3d.lpD3DDevice->SetRenderState( D3DRS_STENCILENABLE, FALSE );
-		D3DStencilEnable = FALSE;
-	}
-//#endif
 }
 
 };

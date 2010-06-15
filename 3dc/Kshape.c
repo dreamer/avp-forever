@@ -4122,6 +4122,35 @@ void TranslatePointIntoViewspace(VECTORCH *pointPtr)
 #endif
 }
 
+void TranslatePointIntoViewspace2(VECTORCH *pointPtr)
+{
+	Source[0] = (float)pointPtr->vx;
+	Source[1] = (float)pointPtr->vy;
+	Source[2] = (float)pointPtr->vz;
+
+	TranslatePoint(Source, Dest, ViewMatrix);
+
+	pointPtr->vx = (int)Dest[0];
+	pointPtr->vy = (int)Dest[1];
+	pointPtr->vz = (int)Dest[2];
+}
+
+void TranslatePointIntoViewspaceF(VECTORCHF *pointPtr)
+{
+	float Dest[3];
+	float Src[3];
+
+	Src[0] = pointPtr->vx;
+	Src[1] = pointPtr->vy;
+	Src[2] = pointPtr->vz;
+
+	TranslatePoint(Src, Dest, ViewMatrix);
+
+	pointPtr->vx = Dest[0];
+	pointPtr->vy = Dest[1];
+	pointPtr->vz = Dest[2];
+}
+
 void SquishPoints(SHAPEINSTR *shapeinstrptr)
 {
 	int **shapeitemarrayptr = shapeinstrptr->sh_instr_data;
@@ -5969,61 +5998,28 @@ void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRI
 
 int LightFlareAlpha = 65535;
 
+extern void TransformToViewspace(float *vals);
+extern void AddCorona(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr);
+
 void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 {
 	int centreX, centreY, sizeX, sizeY, z;
 
 	PARTICLE particle;
 	VECTORCH point = *positionPtr;
-	VECTORCHF pointF;
-	VECTORCHF vLookAt;// = Global_VDB_Ptr->VDB_World;
-	VECTORCHF vCameraUp;
-	VECTORCHF vRight;
-	VECTORCHF vUp;
-	float Source[3];
-	float Dest[3];
-	int i;
+	
+	float test[3];
+	test[0] = (float)point.vx;
+	test[1] = (float)point.vy;
+	test[2] = (float)point.vz;
 
-	vLookAt.vx = (float)Global_VDB_Ptr->VDB_World.vx;
-	vLookAt.vy = (float)Global_VDB_Ptr->VDB_World.vy;
-	vLookAt.vz = (float)Global_VDB_Ptr->VDB_World.vz;
+	TransformToViewspace(test);
 
-	pointF.vx = (float)point.vx;
-	pointF.vy = (float)point.vy;
-	pointF.vz = (float)point.vz;
+	point.vx = (int)test[0];
+	point.vy = (int)test[1];
+	point.vz = (int)test[2];
 
-	vCameraUp.vx = Global_VDB_Ptr->VDB_Mat.mat12 / 65536.0f;
-	vCameraUp.vy = Global_VDB_Ptr->VDB_Mat.mat22 / 65536.0f;
-	vCameraUp.vz = Global_VDB_Ptr->VDB_Mat.mat32 / 65536.0f;
-	FNormalise(&vCameraUp);
-
-	// find billboards look at vector (camera position - billboard position)
-	SubVectorF(&pointF, &vLookAt);
-	FNormalise(&vLookAt);
-
-	// get billboard right vector using camera up and billboard look at
-	CrossProductF(&vCameraUp, &vLookAt, &vRight);
-
-	// now get billboard up vector from billboard right and lookat
-	CrossProductF(&vRight, &vLookAt, &vUp);
-
-	ObjectViewMatrix[0] = vRight.vx;
-	ObjectViewMatrix[1] = vRight.vy;
-	ObjectViewMatrix[2] = vRight.vz;
-
-	ObjectViewMatrix[4] = vUp.vx;
-	ObjectViewMatrix[5] = vUp.vy;
-	ObjectViewMatrix[6] = vUp.vz;
-
-	ObjectViewMatrix[8] = vLookAt.vx;
-	ObjectViewMatrix[9] = vLookAt.vy;
-	ObjectViewMatrix[10] = vLookAt.vz;
-
-	ObjectViewMatrix[3] = pointF.vx;
-	ObjectViewMatrix[7] = pointF.vy;
-	ObjectViewMatrix[11] = pointF.vz;
-
-//	TranslatePointIntoViewspace(&point);
+//	TranslatePointIntoViewspace2(&point);
 
 //	if (point.vz < 64)
 //		return;
@@ -6036,12 +6032,20 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 
 //	textprint("render fn %d %d %d\n",positionPtr->vx,positionPtr->vy,positionPtr->vz);
 
-	z = point.vz;//ONE_FIXED;
+/*
+	z = point.vz;
 
-	centreX = point.vx;//DIV_FIXED(point.vx, point.vz);
-	centreY = point.vy;//DIV_FIXED(point.vy, point.vz);
-	sizeX = 1200;//(ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
-	sizeY = 1200;//MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
+	centreX = point.vx;
+	centreY = point.vy;
+	sizeX = 1200;
+	sizeY = 1200;
+*/
+
+	z = ONE_FIXED;
+	centreX = DIV_FIXED(point.vx, point.vz);
+	centreY = DIV_FIXED(point.vy, point.vz);
+	sizeX = (ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
+	sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
 
 	// top left?
 	VerticesBuffer[0].X = centreX - sizeX;
@@ -6063,19 +6067,6 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 	VerticesBuffer[3].Y = centreY + sizeY;
 	VerticesBuffer[3].Z = z;
 
-	for (i = 0; i < 4; i++)
-	{
-		Source[0] = (float)VerticesBuffer[i].X;
-		Source[1] = (float)VerticesBuffer[i].Y;
-		Source[2] = (float)VerticesBuffer[i].Z;
-
-		TranslatePoint(Source, Dest, ObjectViewMatrix); // local to world?
-
-		f2i(VerticesBuffer[i].X, Dest[0]);
-		f2i(VerticesBuffer[i].Y, Dest[1]);
-		f2i(VerticesBuffer[i].Z, Dest[2]);
-	}
-
 	{
 		int outcode = QuadWithinFrustum();
 
@@ -6096,31 +6087,8 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 			VerticesBuffer[3].U = 192;
 			VerticesBuffer[3].V = 63;
 
-/* bjd - bypass clipping code
-			if (outcode!=2)
-			{
-				TexturedPolygon_ClipWithZ();
-				if (RenderPolygon.NumberOfVertices<3)
-					return;
-				TexturedPolygon_ClipWithNegativeX();
-				if (RenderPolygon.NumberOfVertices<3)
-					return;
-				TexturedPolygon_ClipWithPositiveY();
-				if (RenderPolygon.NumberOfVertices<3)
-					return;
-				TexturedPolygon_ClipWithNegativeY();
-				if (RenderPolygon.NumberOfVertices<3)
-					return;
-				TexturedPolygon_ClipWithPositiveX();
-				if (RenderPolygon.NumberOfVertices<3)
-					return;
-//				D3D_Particle_Output(&particle, RenderPolygon.Vertices);
-				AddParticle(&particle, &RenderPolygon.Vertices[0]);
-  			}
-//			else D3D_Particle_Output(&particle, VerticesBuffer);
-			else AddParticle(&particle, &VerticesBuffer[0]);
-*/
-			AddParticle(&particle, VerticesBuffer);
+//			AddParticle(&particle, VerticesBuffer);
+			AddCorona(&particle, VerticesBuffer);
 		}
 	}
 }
