@@ -6041,21 +6041,21 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 	sizeY = 1200;
 */
 
-	z = ONE_FIXED;
+	z = point.vz;//ONE_FIXED;
 	centreX = DIV_FIXED(point.vx, point.vz);
 	centreY = DIV_FIXED(point.vy, point.vz);
 	sizeX = (ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
 	sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
-
+/*
 	// top left?
-	VerticesBuffer[0].X = centreX - sizeX;
-	VerticesBuffer[0].Y = centreY - sizeY;
-	VerticesBuffer[0].Z = z;
-
-	// top right?
-	VerticesBuffer[1].X = centreX + sizeX;
+	VerticesBuffer[1].X = centreX - sizeX;
 	VerticesBuffer[1].Y = centreY - sizeY;
 	VerticesBuffer[1].Z = z;
+
+	// top right?
+	VerticesBuffer[3].X = centreX + sizeX;
+	VerticesBuffer[3].Y = centreY - sizeY;
+	VerticesBuffer[3].Z = z;
 
 	// bottom right?
 	VerticesBuffer[2].X = centreX + sizeX;
@@ -6063,10 +6063,10 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 	VerticesBuffer[2].Z = z;
 
 	// bottom left?
-	VerticesBuffer[3].X = centreX - sizeX;
-	VerticesBuffer[3].Y = centreY + sizeY;
-	VerticesBuffer[3].Z = z;
-
+	VerticesBuffer[0].X = centreX - sizeX;
+	VerticesBuffer[0].Y = centreY + sizeY;
+	VerticesBuffer[0].Z = z;
+*/
 	{
 		int outcode = QuadWithinFrustum();
 
@@ -6088,9 +6088,33 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 			VerticesBuffer[3].V = 63;
 
 //			AddParticle(&particle, VerticesBuffer);
-			AddCorona(&particle, VerticesBuffer);
+//			AddCorona(&particle, VerticesBuffer);
 		}
 	}
+
+	// test
+		
+		// bottom left?
+		VerticesBuffer[0].X = point.vx;
+		VerticesBuffer[0].Y = point.vy + sizeY;
+		VerticesBuffer[0].Z = z;
+
+		// top left?
+		VerticesBuffer[1].X = point.vx;
+		VerticesBuffer[1].Y = -point.vy;
+		VerticesBuffer[1].Z = z;
+
+		// bottom right?
+		VerticesBuffer[2].X = point.vx + sizeX;
+		VerticesBuffer[2].Y = point.vy + sizeY;
+		VerticesBuffer[2].Z = z;
+
+		// top right?
+		VerticesBuffer[3].X = point.vx + sizeX;
+		VerticesBuffer[3].Y = point.vy;
+		VerticesBuffer[3].Z = z;
+
+		AddCorona(&particle, VerticesBuffer);
 }
 
 #if VOLUMETRIC_FOG

@@ -414,15 +414,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		case WM_CLOSE:
 		{
 			bRunning = FALSE;
-			OutputDebugString("WM_CLOSE\n");
-			//break;
 			return 0;
 		}
 
 		case WM_DESTROY:
 		{
-			OutputDebugString("WM_DESTROY\n");
-
 	   		PostQuitMessage(0);
 			break;
 		}

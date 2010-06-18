@@ -40,6 +40,7 @@ D3DXMATRIX matOrtho;
 D3DXMATRIX matProjection;
 D3DXMATRIX matView;
 D3DXMATRIX matIdentity;
+D3DXMATRIX matViewPort;
 
 extern D3DVERTEXELEMENT9 decl[];
 extern D3DVERTEXELEMENT9 orthoDecl[];
@@ -50,6 +51,7 @@ extern LPD3DXCONSTANTTABLE	vertexConstantTable;
 extern LPD3DXCONSTANTTABLE	orthoConstantTable;
 extern LPD3DXCONSTANTTABLE	fmvConstantTable;
 extern LPD3DXCONSTANTTABLE	cloudConstantTable;
+extern LPD3DXCONSTANTTABLE	pretConstantTable;
 
 //LPDIRECT3DVERTEXDECLARATION9 fmvVertexDecl;
 LPDIRECT3DVERTEXSHADER9      preTransVertexShader;
@@ -1543,7 +1545,7 @@ BOOL InitialiseDirect3D()
 	CreateVertexShader("fmvVertex.vsh", &d3d.fmvVertexShader, &fmvConstantTable);
 	CreateVertexShader("cloudTextVertex.vsh", &d3d.cloudVertexShader, &cloudConstantTable);
 
-	CreateVertexShader("pretransformedVert.vsh", &preTransVertexShader, 0);
+//	CreateVertexShader("pretransformedVert.vsh", &preTransVertexShader, &pretConstantTable);
 
 	CreatePixelShader("pixel.psh", &d3d.pixelShader);
 	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
@@ -1585,6 +1587,18 @@ void SetTransforms()
 
 	// set up projection matrix
 	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+
+	// set up a viewport transform matrix
+	matViewPort = matIdentity;
+	
+	matViewPort._11 = (ScreenDescriptorBlock.SDB_Width / 2);
+	matViewPort._22 = ((-ScreenDescriptorBlock.SDB_Height) / 2);
+	matViewPort._33 = (1.0f - 0.0f);
+	matViewPort._41 = (0 + matViewPort._11); // dwX + dwWidth / 2
+	matViewPort._42 = (ScreenDescriptorBlock.SDB_Height / 2) + 0;
+	matViewPort._43 = 0.0f; // minZ
+	matViewPort._44 = 1.0f;
+
 /*
 	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,		&matIdentity);
 	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,		&matIdentity);

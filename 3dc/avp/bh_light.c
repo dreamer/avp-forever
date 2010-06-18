@@ -177,10 +177,10 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 					else *pptxactrlblk = NULL; 
 				}
 
-			if((Request_PolyFlags((void *)poly)) & iflag_light_corona)
+			if ((Request_PolyFlags((void *)poly)) & iflag_light_corona)
 			{
 				int* vertexptr = &poly->Poly1stPt;
-				int num_verts=0;
+				int num_verts = 0;
 
 				pl_bhv->has_corona = 1;
 				pl_bhv->corona_location.vx = 0;

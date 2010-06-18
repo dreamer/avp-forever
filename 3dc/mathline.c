@@ -505,7 +505,7 @@ __asm__("imull	%2			\n\t"
 /*
 	__int64 aa = (__int64) a;
 	__int64 bb = (__int64) b;
-	
+
 	__int64 cc = aa * bb;
 	
 	return (int) ((cc >> 16) & 0xffffffff);
@@ -514,12 +514,12 @@ __asm__("imull	%2			\n\t"
 #endif
 }
 
-/*
-
- Fixed Point Divide - returns a / b
-
+/**
+* Fixed point division
+* \param a Fixed-point multiplicand
+* \param b Fixed-point multiplier
+* \returns integral result of division
 */
-
 int DIV_FIXED(int a, int b)
 {
 	if (b == 0) printf("DEBUG THIS: a = %d, b = %d\n", a, b);	
@@ -555,7 +555,7 @@ __asm__("cdq				\n\t"
 	__int64 aa = (__int64) a;
 	__int64 bb = (__int64) b;
 	__int64 cc = (aa << 16) / bb;
-	
+
 	return (int) (cc & 0xffffffff);
 	}
 #endif

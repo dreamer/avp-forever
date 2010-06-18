@@ -63,7 +63,6 @@ static LIGHTBLOCK FreeLightBlockData[maxlightblocks];
 */
 void InitialiseObjectBlocks(void)
 {
-
 	DISPLAYBLOCK *FreeBlkPtr = &FreeBlockData[0];
 
 	NumActiveBlocks = 0;
@@ -88,7 +87,6 @@ void InitialiseObjectBlocks(void)
 
 DISPLAYBLOCK* AllocateObjectBlock(void)
 {
-
 	DISPLAYBLOCK *FreeBlkPtr = 0;		/* Default to null ptr */
 	int *sptr;
 	int i;
@@ -102,7 +100,7 @@ DISPLAYBLOCK* AllocateObjectBlock(void)
 		/* Clear the block */
 		sptr = (int *)FreeBlkPtr;
 
-		for(i = sizeof(DISPLAYBLOCK)/4; i!=0; i--)
+		for (i = sizeof(DISPLAYBLOCK)/4; i!=0; i--)
 		{
 			*sptr++ = 0;
 		}
@@ -140,7 +138,6 @@ void DeallocateObjectBlock(DISPLAYBLOCK *dblockptr)
 
 DISPLAYBLOCK* CreateActiveObject(void)
 {
-
 	DISPLAYBLOCK *dblockptr;
 
 	dblockptr = AllocateObjectBlock();
@@ -176,9 +173,9 @@ int DestroyActiveObject(DISPLAYBLOCK *dblockptr)
 	/* If the block ptr is OK, search the Active Blocks List */
 	if (dblockptr) 
 	{
-		for (i = 0; i < NumActiveBlocks; i++) 
+		for (i = 0; i < NumActiveBlocks; i++)
 		{
-			if (ActiveBlockList[i] == dblockptr) 
+			if (ActiveBlockList[i] == dblockptr)
 			{
 				ActiveBlockList[i] = ActiveBlockList[NumActiveBlocks-1];
 				NumActiveBlocks--;
@@ -186,7 +183,7 @@ int DestroyActiveObject(DISPLAYBLOCK *dblockptr)
 
 				DestroyActiveVDB(dblockptr->ObVDBPtr);	/* Checks for null */
 
-				if (dblockptr->ObNumLights) 
+				if (dblockptr->ObNumLights)
 				{
 					for(light = dblockptr->ObNumLights - 1; light != -1; light--)
 						DeleteLightBlock(dblockptr->ObLights[light], dblockptr);
@@ -194,13 +191,13 @@ int DestroyActiveObject(DISPLAYBLOCK *dblockptr)
 
 				/* If no SB, deallocate any Texture Animation Blocks */
 
-				if (dblockptr->ObStrategyBlock == 0) 
+				if (dblockptr->ObStrategyBlock == 0)
 				{
-					if (dblockptr->ObTxAnimCtrlBlks) 
+					if (dblockptr->ObTxAnimCtrlBlks)
 					{
 						taptr = dblockptr->ObTxAnimCtrlBlks;
 
-						while(taptr) 
+						while (taptr)
 						{
 							DeallocateTxAnimBlock(taptr);
 
@@ -246,22 +243,16 @@ int DestroyActiveObject(DISPLAYBLOCK *dblockptr)
 */
 
 void InitialiseTxAnimBlocks(void)
-
 {
-
 	TXACTRLBLK *FreeBlkPtr = &FreeTxAnimBlockData[0];
-
 
 	FreeTxAnimBlockListPtr = &FreeTxAnimBlockList[maxTxAnimblocks-1];
 
-	for(NumFreeTxAnimBlocks=0; NumFreeTxAnimBlocks < maxTxAnimblocks; NumFreeTxAnimBlocks++) {
-
+	for (NumFreeTxAnimBlocks=0; NumFreeTxAnimBlocks < maxTxAnimblocks; NumFreeTxAnimBlocks++) 
+	{
 		FreeTxAnimBlockList[NumFreeTxAnimBlocks] = FreeBlkPtr;
-
 		FreeBlkPtr++;
-
 	}
-
 }
 
 
@@ -272,16 +263,13 @@ void InitialiseTxAnimBlocks(void)
 */
 
 TXACTRLBLK* AllocateTxAnimBlock(void)
-
 {
-
 	TXACTRLBLK *FreeBlkPtr = 0;		/* Default to null ptr */
 	int *sptr;
 	int i;
 
-
-	if(NumFreeTxAnimBlocks) {
-
+	if (NumFreeTxAnimBlocks) 
+	{
 		FreeBlkPtr = *FreeTxAnimBlockListPtr--;
 
 		NumFreeTxAnimBlocks--;					/* One less free block */
@@ -289,13 +277,11 @@ TXACTRLBLK* AllocateTxAnimBlock(void)
 		/* Clear the block */
 
 		sptr = (int *)FreeBlkPtr;
-		for(i = sizeof(TXACTRLBLK)/4; i!=0; i--)
+		for (i = sizeof(TXACTRLBLK) / 4; i != 0; i--)
 			*sptr++ = 0;
-
 	}
 
 	return FreeBlkPtr;
-
 }
 
 
@@ -306,15 +292,12 @@ TXACTRLBLK* AllocateTxAnimBlock(void)
 */
 
 void DeallocateTxAnimBlock(TXACTRLBLK *TxAnimblockptr)
-
 {
-
 	FreeTxAnimBlockListPtr++;
 
 	*FreeTxAnimBlockListPtr = TxAnimblockptr;
 
 	NumFreeTxAnimBlocks++;						/* One more free block */
-
 }
 
 
@@ -325,29 +308,21 @@ void DeallocateTxAnimBlock(TXACTRLBLK *TxAnimblockptr)
 */
 
 void AddTxAnimBlock(DISPLAYBLOCK *dptr, TXACTRLBLK *taptr)
-
 {
-
 	TXACTRLBLK *taptr_tmp;
 
-
-	if(dptr->ObTxAnimCtrlBlks) {
-
+	if (dptr->ObTxAnimCtrlBlks) 
+	{
 		taptr_tmp = dptr->ObTxAnimCtrlBlks;
 
-		while(taptr_tmp->tac_next)
+		while (taptr_tmp->tac_next)
 			taptr_tmp = taptr_tmp->tac_next;
 
 		taptr_tmp->tac_next = taptr;
-
 	}
 
 	else dptr->ObTxAnimCtrlBlks = taptr;
-
 }
-
-
-
 
 
 /*
@@ -357,36 +332,29 @@ void AddTxAnimBlock(DISPLAYBLOCK *dptr, TXACTRLBLK *taptr)
 */
 
 void InitialiseLightBlocks(void)
-
 {
-
 	LIGHTBLOCK *FreeBlkPtr = &FreeLightBlockData[0];
-
 
 	FreeLightBlockListPtr = &FreeLightBlockList[maxlightblocks-1];
 
-	for(NumFreeLightBlocks=0; NumFreeLightBlocks < maxlightblocks; NumFreeLightBlocks++) {
+	for (NumFreeLightBlocks=0; NumFreeLightBlocks < maxlightblocks; NumFreeLightBlocks++)
+	{
 
 		FreeLightBlockList[NumFreeLightBlocks] = FreeBlkPtr;
 
 		FreeBlkPtr++;
-
 	}
-
 }
 
 
 LIGHTBLOCK* AllocateLightBlock(void)
-
 {
-
 	LIGHTBLOCK *FreeBlkPtr = 0;		/* Default to null ptr */
 	int *lptr;
 	int i;
 
-
-	if(NumFreeLightBlocks) {
-
+	if (NumFreeLightBlocks) 
+	{
 		FreeBlkPtr = *FreeLightBlockListPtr--;
 
 		NumFreeLightBlocks--;					/* One less free block */
@@ -394,24 +362,19 @@ LIGHTBLOCK* AllocateLightBlock(void)
 		/* Clear the block */
 
 		lptr = (int *)FreeBlkPtr;
-		for(i = sizeof(LIGHTBLOCK)/4; i!=0; i--)
+		for (i = sizeof(LIGHTBLOCK) / 4; i!=0; i--)
 			*lptr++ = 0;
-
 	}
 
 	return(FreeBlkPtr);
-
 }
 
 
 void DeallocateLightBlock(LIGHTBLOCK *lptr)
-
 {
-
 	/* Not all lights come from the free light list */
-
-	if(lptr->LightFlags & LFlag_WasNotAllocated) return;
-
+	if (lptr->LightFlags & LFlag_WasNotAllocated) 
+		return;
 
 	/* Make sure that this light IS from the free light list */
 
@@ -428,7 +391,6 @@ void DeallocateLightBlock(LIGHTBLOCK *lptr)
 	*FreeLightBlockListPtr = lptr;
 
 	NumFreeLightBlocks++;						/* One more free block */
-
 }
 
 
@@ -445,59 +407,48 @@ void DeallocateLightBlock(LIGHTBLOCK *lptr)
 */
 
 LIGHTBLOCK* AddLightBlock(DISPLAYBLOCK *dptr, LIGHTBLOCK *lptr_to_add)
-
 {
-
 	LIGHTBLOCK **larrayptr;
 	LIGHTBLOCK **freelarrayptr;
 	LIGHTBLOCK *lptr = 0;
 	int i, lfree;
 
-
 	/* Are there any free slots? */
-
 	lfree = FALSE;
 
 	larrayptr = &dptr->ObLights[0];
 	freelarrayptr = NULL;
 
-	for(i = MaxObjectLights; i!=0 && lfree == FALSE; i--) {
-
-		if(*larrayptr == 0) {
-
+	for (i = MaxObjectLights; i!=0 && lfree == FALSE; i--) 
+	{
+		if (*larrayptr == 0) 
+		{
 			freelarrayptr = larrayptr;
 			lfree = TRUE;
-
 		}
 
 		larrayptr++;
-
 	}
 
-	if(lfree) {
-
-		if(lptr_to_add) {
-
+	if (lfree)
+	{
+		if (lptr_to_add) 
+		{
 			lptr = lptr_to_add;
-
 		}
-
-		else {
-
+		else
+		{
 			lptr = AllocateLightBlock();
-
 		}
 
-		if(lptr)
+		if (lptr)
 		{
 			*freelarrayptr = lptr;
 			dptr->ObNumLights++;
 		}
-
 	}
 
 	return lptr;
-
 }
 
 
@@ -510,7 +461,6 @@ LIGHTBLOCK* AddLightBlock(DISPLAYBLOCK *dptr, LIGHTBLOCK *lptr_to_add)
 
 void DeleteLightBlock(LIGHTBLOCK *lptr, DISPLAYBLOCK *dptr)
 {
-
 	int i, larrayi;
 
 	DeallocateLightBlock(lptr);
@@ -519,15 +469,15 @@ void DeleteLightBlock(LIGHTBLOCK *lptr, DISPLAYBLOCK *dptr)
 
 	larrayi = -1;							/* null value */
 
-	for(i = 0; i < dptr->ObNumLights; i++)
-		if(dptr->ObLights[i] == lptr) larrayi = i;
-
-
+	for (i = 0; i < dptr->ObNumLights; i++)
+	{
+		if (dptr->ObLights[i] == lptr) 
+			larrayi = i;
+	}
 
 	/* Proceed only if lptr has been found in the array */
-
-	if(larrayi != -1) {
-
+	if (larrayi != -1) 
+	{
 		/* Copy the end block to that of lptr */
 
 		dptr->ObLights[larrayi] = dptr->ObLights[dptr->ObNumLights - 1];
@@ -539,11 +489,8 @@ void DeleteLightBlock(LIGHTBLOCK *lptr, DISPLAYBLOCK *dptr)
 		/* One less light in the dptr list */
 
 		dptr->ObNumLights--;
-
 	}
 }
-
-
 
 
 /*
@@ -556,7 +503,6 @@ void DeleteLightBlock(LIGHTBLOCK *lptr, DISPLAYBLOCK *dptr)
 
 int DisplayAndLightBlockDeallocation(void)
 {
-
 	DISPLAYBLOCK **activeblocksptr;
 	DISPLAYBLOCK *dptr;
 	int i, j;

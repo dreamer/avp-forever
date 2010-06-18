@@ -67,6 +67,7 @@ LPD3DXCONSTANTTABLE	vertexConstantTable = NULL;
 LPD3DXCONSTANTTABLE	orthoConstantTable = NULL;
 LPD3DXCONSTANTTABLE	fmvConstantTable = NULL;
 LPD3DXCONSTANTTABLE	cloudConstantTable = NULL;
+LPD3DXCONSTANTTABLE	pretConstantTable = NULL;
 
 extern LPDIRECT3DVERTEXSHADER9 preTransVertexShader;
 
@@ -75,6 +76,7 @@ D3DXMATRIX viewMatrix;
 extern D3DXMATRIX matOrtho;
 extern D3DXMATRIX matProjection;
 extern D3DXMATRIX matIdentity;
+extern D3DXMATRIX matViewPort;
 
 // externs
 extern LPDIRECT3DTEXTURE9 blankTexture;
@@ -949,18 +951,18 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 
 	FMVVERTEX fmvVerts[4];
 
-	D3DXMATRIX matOrtho;
-	D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
+//	D3DXMATRIX matOrtho;
+//	D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 
-	D3DXMATRIXA16 matWorldViewProj = matOrtho;
-	fmvConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
+//	D3DXMATRIXA16 matWorldViewProj = matOrtho;
+	fmvConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", /*&matWorldViewProj*/&matOrtho);
 
 	// bottom left
 	fmvVerts[0].x = x1;
 	fmvVerts[0].y = y2;
 	fmvVerts[0].z = 1.0f;
 	fmvVerts[0].u1 = 0.0f;
-	fmvVerts[0].v1 = 1.0f;//(1.0f / textureHeight) * frameHeight;
+	fmvVerts[0].v1 = 1.0f; //(1.0f / textureHeight) * frameHeight;
 
 	fmvVerts[0].u2 = 0.0f;
 	fmvVerts[0].v2 = 1.0f;
@@ -985,8 +987,8 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	fmvVerts[2].x = x2;
 	fmvVerts[2].y = y2;
 	fmvVerts[2].z = 1.0f;
-	fmvVerts[2].u1 = 1.0f;//(1.0f / textureWidth) * frameWidth;
-	fmvVerts[2].v1 = 1.0f;//(1.0f / textureHeight) * frameHeight;
+	fmvVerts[2].u1 = 1.0f; //(1.0f / textureWidth) * frameWidth;
+	fmvVerts[2].v1 = 1.0f; //(1.0f / textureHeight) * frameHeight;
 
 	fmvVerts[2].u2 = 1.0f;
 	fmvVerts[2].v2 = 1.0f;
@@ -998,7 +1000,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	fmvVerts[3].x = x2;
 	fmvVerts[3].y = y1;
 	fmvVerts[3].z = 1.0f;
-	fmvVerts[3].u1 = 1.0f;//(1.0f / textureWidth) * frameWidth;
+	fmvVerts[3].u1 = 1.0f; //(1.0f / textureWidth) * frameWidth;
 	fmvVerts[3].v1 = 0.0f;
 
 	fmvVerts[3].u2 = 1.0f;
@@ -1716,18 +1718,20 @@ extern "C" {
 #include "d3d_render.h"
 #include "bh_types.h"
 
+extern int SpecialFXImageNumber;
+
 extern "C"
 {
 	void TransformToViewspace(float *vals)
 	{
-		D3DXVECTOR3 returnvar;
-		D3DXVECTOR3 temp(vals[0], vals[1], vals[2]);
+		D3DXVECTOR3 output;
+		D3DXVECTOR3 input(vals[0], vals[1], vals[2]);
 
-		D3DXVec3TransformCoord(&returnvar, &temp, &viewMatrix);
+		D3DXVec3TransformCoord(&output, &input, &viewMatrix);
 
-		vals[0] = returnvar.x;
-		vals[1] = returnvar.y;
-		vals[2] = returnvar.z;
+		vals[0] = output.x;
+		vals[1] = output.y;
+		vals[2] = output.z;
 	}
 } // extern C
 
@@ -1779,11 +1783,13 @@ void DrawCoronas()
 
 	uint32_t numVertsBackup = RenderPolygon.NumberOfVertices;
 
-	LastError = d3d.lpD3DDevice->SetTexture(0, blankTexture);
+	LastError = d3d.lpD3DDevice->SetTexture(0, /*ImageHeaderArray[SpecialFXImageNumber].Direct3DTexture*/blankTexture);
 
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
 	d3d.lpD3DDevice->SetVertexShader(preTransVertexShader);
 	d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
+
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 
 	D3DLVERTEX verts[4];
 
@@ -1791,9 +1797,14 @@ void DrawCoronas()
 	{
 		PARTICLE_DESC *particleDescPtr = &ParticleDescription[coronaArray[i].particle.ParticleID];
 
-//		float RecipW = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
-//		float RecipH = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
+		float RecipW = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
+		float RecipH = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
 
+		assert (coronaArray[i].numVerts == 4);
+
+		/*
+			transform all points by projection matrix
+		*/
 		for (uint32_t j = 0; j < coronaArray[i].numVerts; j++)
 		{
 			RENDERVERTEX *vertices = &coronaArray[i].vertices[j];
@@ -1801,7 +1812,7 @@ void DrawCoronas()
 			D3DXVECTOR3 tempVec;
 			D3DXVECTOR3 newVec;
 			tempVec.x = (float)vertices->X;
-			tempVec.y = (float)-vertices->Y;
+			tempVec.y = (float)vertices->Y;
 			tempVec.z = (float)vertices->Z;
 
 			// projection transform
@@ -1810,19 +1821,87 @@ void DrawCoronas()
 			verts[j].sx = newVec.x;
 			verts[j].sy = newVec.y;
 			verts[j].sz = newVec.z;
-			verts[j].color = D3DCOLOR_ARGB(255, 128, 0, 128);
+			verts[j].color = D3DCOLOR_ARGB(255, 255, 255, 255);
 			verts[j].specular = D3DCOLOR_ARGB(255, 255, 255, 255);
-			verts[j].tu = 0.0f;
-			verts[j].tv = 0.0f;
+			verts[j].tu = (float)(vertices->U) * RecipW;
+			verts[j].tv = (float)(vertices->V) * RecipH;
 		}
 
-		LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &verts[0], sizeof(D3DLVERTEX));
+		/* 
+			Draw a point using the vertex in position 1, which contains the light's 
+			position (already transformed by view matrix and just now by projection
+		*/
+
+/*
+		LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_POINTLIST , 1, &verts[1], sizeof(D3DLVERTEX));
+		if (FAILED(LastError))
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+			OutputDebugString("DrawPrimitiveUP failed\n");
+		}
+*/
+		/*
+			now try to construct a quad around this point in screen space..
+		*/
+
+		// grab a copy of the point
+		D3DXVECTOR3 origin(verts[1].sx, verts[1].sy, verts[1].sz);
+		D3DXVECTOR3 tempVec;
+
+		// do viewport transform on this
+		D3DXVec3TransformCoord(&tempVec, &origin, &matViewPort);
+
+		// generate the quad around this point
+		ORTHOVERTEX ortho[4];
+		uint32_t size = 100;
+
+		// bottom left
+		ortho[0].x = tempVec.x - size;
+		ortho[0].y = tempVec.y + size;
+
+		// top left
+		ortho[1].x = tempVec.x - size;
+		ortho[1].y = tempVec.y - size;
+
+		// bottom right
+		ortho[2].x = tempVec.x + size;
+		ortho[2].y = tempVec.y + size;
+
+		// top right
+		ortho[3].x = tempVec.x + size;
+		ortho[3].y = tempVec.y - size;
+
+		for (uint32_t i = 0; i < 4; i++)
+		{
+			ortho[i].x = WPos2DC(ortho[i].x); // resolution x,y to device coordinates
+			ortho[i].y = HPos2DC(ortho[i].y);
+			ortho[i].z = 1.0f;
+			ortho[i].colour = D3DCOLOR_ARGB(128, 255, 255, 255);
+			ortho[i].u = 0.0f;
+			ortho[i].v = 0.0f;
+		}
+
+		d3d.lpD3DDevice->SetVertexShader(d3d.orthoVertexShader);
+		orthoConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
+
+		ChangeTranslucencyMode(TRANSLUCENCY_OFF);
+
+		LastError = d3d.lpD3DDevice->SetVertexDeclaration(d3d.orthoVertexDecl);
+		if (FAILED(LastError))
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+
+		// draw the quad
+		LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, ortho, sizeof(ORTHOVERTEX));
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 			OutputDebugString("DrawPrimitiveUP failed\n");
 		}
 	}
+
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
 
 	coronaArray.clear();
 
@@ -1935,7 +2014,6 @@ const float Zoffset = 2.0f;
 #define FMV_EVERYWHERE 0
 #define FMV_SIZE 128
 
-extern int SpecialFXImageNumber;
 extern int SmokyImageNumber;
 extern int ChromeImageNumber;
 extern int HUDFontsImageNumber;

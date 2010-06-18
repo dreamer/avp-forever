@@ -59,7 +59,7 @@ typedef struct ORTHOVERTEX
 {
 	float x;
 	float y;
-	float z;		// Position in 3d space
+	float z;
 
 	DWORD colour;	// Colour
 
