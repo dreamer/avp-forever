@@ -495,8 +495,9 @@ int PlatStartSoundSys()
 		}
 	}
 */
+
 	// Create a mastering voice
-	LastError = pXAudio2->CreateMasteringVoice(&pMasteringVoice, 0, sampleRate, 0, 0, 0);
+	LastError = pXAudio2->CreateMasteringVoice(&pMasteringVoice, XAUDIO2_DEFAULT_CHANNELS, sampleRate, 0, 0, 0);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Couldn't create XAudio2 Mastering Voice");
@@ -541,9 +542,8 @@ int PlatStartSoundSys()
 	XAUDIO2_EFFECT_DESCRIPTOR effects[] = {{pReverbEffect, TRUE, 1}};
 	XAUDIO2_EFFECT_CHAIN effectChain = {1, effects};
 
-	LastError = pXAudio2->CreateSubmixVoice(&pSubmixVoice, 1, deviceDetails.OutputFormat.Format.nSamplesPerSec, 0, 0,
+	LastError = pXAudio2->CreateSubmixVoice(&pSubmixVoice, 1, /*deviceDetails.OutputFormat.Format.nSamplesPerSec*/sampleRate, 0, 0,
                                                                NULL, &effectChain);
-
 	if (FAILED(LastError))
 	{
 		Con_PrintError("CreateSubmixVoice call failed");

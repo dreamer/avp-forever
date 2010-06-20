@@ -284,7 +284,8 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 		}
 	}
 
-	LOCALASSERT(pX > 0);
+	// bjd - fixme. Long video card names wont fit on screen!
+//	LOCALASSERT(pX > 0);
 	
 	extern enum MENUSSTATE_ID;
 
@@ -299,11 +300,7 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 			int size = width - 18;
 			if (size < 18) 
 				size = 18;
-/*
-			DrawAvPMenuGfx(AVPMENUGFX_GLOWY_LEFT, pX+18, pY-8, alpha, AVPMENUFORMAT_RIGHTJUSTIFIED);
-			DrawAvPMenuGlowyBar(pX+18, pY-8, alpha, size-18);
-			DrawAvPMenuGfx(AVPMENUGFX_GLOWY_RIGHT, pX+size, pY-8, alpha, AVPMENUFORMAT_LEFTJUSTIFIED);
-*/
+
 			DrawMenuTextGlow(pX+18, pY-8, size-18, alpha);
 		}
 	}
@@ -318,9 +315,6 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 
 		if (c >= ' ') 
 		{
-//			int topLeftU = 1;
-//			int topLeftV = 1+(c-32)*33;
-//			int x, y;
 			uint32_t charWidth = IntroFont_Light.FontWidth[(unsigned int) c];
 
 			c = c - 32;
@@ -341,10 +335,6 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 			*/
 
 			DrawTallFontCharacter(positionX, positionY, IntroFont_Light.info.textureID, topLeftU, topLeftV, charWidth, alpha);
-
-//			DrawCloudTable(pX, pY, word_length, 255);
-
-//			int r = CloudTable[(x+pX+CloakingPhase/64)&127][(y+CloakingPhase/128)&127];
 /*			
 			srcPtr = &image->buf[(topLeftU+topLeftV*image->w)*4];
 			
@@ -383,7 +373,7 @@ extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum A
 			word_length += charWidth;
 		}
 	}
-//	DrawCloudTable(pX, pY, word_length, alpha);
+
 	return positionX;
 }
 

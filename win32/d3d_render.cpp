@@ -97,6 +97,7 @@ extern VIEWDESCRIPTORBLOCK* Global_VDB_Ptr;
 extern int CloakingPhase;
 #include "particle.h"
 #include "kshape.h"
+int LightIntensityAtPoint(VECTORCH *pointPtr);
 }
 
 const uint32_t MAX_VERTEXES = 4096;
@@ -129,6 +130,9 @@ bool LockExecuteBuffer();
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
 void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
 void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
+
+#define RGBLIGHT_MAKE(r,g,b) RGB_MAKE(r,g,b)
+#define RGBALIGHT_MAKE(r,g,b,a) RGBA_MAKE(r,g,b,a)
 
 static HRESULT LastError;
 
@@ -191,6 +195,16 @@ struct renderCorona
 
 std::vector<renderParticle> particleArray;
 std::vector<renderCorona>   coronaArray;
+
+inline float WPos2DC(int32_t pos)
+{
+	return (float(pos / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
+}
+
+inline float HPos2DC(int32_t pos)
+{
+	return (float(pos / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
+}
 
 void DeleteRenderMemory()
 {
@@ -940,8 +954,8 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWid
 
 void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE9 tex1, LPDIRECT3DTEXTURE9 tex2, LPDIRECT3DTEXTURE9 tex3)
 {
-	uint32_t topX = (640 - frameWidth) / 2;
-	uint32_t topY = (480 - frameHeight) / 2;
+	uint32_t topX = 0;//(640 - frameWidth) / 2;
+	uint32_t topY = 0;//(480 - frameHeight) / 2;
 
 	float x1 = (float(topX / 640.0f) * 2) - 1;
 	float y1 = (float(topY / 480.0f) * 2) - 1;
@@ -949,13 +963,17 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	float x2 = ((float(topX + frameWidth) / 640.0f) * 2) - 1;
 	float y2 = ((float(topY + frameHeight) / 480.0f) * 2) - 1;
 
+	x1 = WPos2DC(0);
+	y1 = HPos2DC(0);
+
+	x2 = WPos2DC(frameWidth);
+	y2 = HPos2DC(frameHeight);
+
+
 	FMVVERTEX fmvVerts[4];
 
-//	D3DXMATRIX matOrtho;
-//	D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
-
-//	D3DXMATRIXA16 matWorldViewProj = matOrtho;
-	fmvConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", /*&matWorldViewProj*/&matOrtho);
+	// set orthographic projection
+	fmvConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
 
 	// bottom left
 	fmvVerts[0].x = x1;
@@ -1094,16 +1112,6 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, int32_t textureI
 	orthoVBOffset++;
 }
 
-inline float WPos2DC(int32_t pos)
-{
-	return (float(pos / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
-}
-
-inline float HPos2DC(int32_t pos)
-{
-	return (float(pos / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
-}
-
 void DrawTallFontCharacter(uint32_t topX, uint32_t topY, int32_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha)
 {
 	alpha = (alpha / 256);
@@ -1126,7 +1134,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, int32_t textureID, uint
 	float x2 = ((float(topX + charWidth) / 640.0f) * 2) - 1;
 	float y2 = ((float(topY + charHeight) / 480.0f) * 2) - 1;
 
-#if 0
+#if 1
 	ChangeTexture(textureID);
 	d3d.lpD3DDevice->SetTexture(1, AvPMenuGfxStorage[AVPMENUGFX_CLOUDY].menuTexture);
 
@@ -1783,7 +1791,7 @@ void DrawCoronas()
 
 	uint32_t numVertsBackup = RenderPolygon.NumberOfVertices;
 
-	LastError = d3d.lpD3DDevice->SetTexture(0, /*ImageHeaderArray[SpecialFXImageNumber].Direct3DTexture*/blankTexture);
+	LastError = d3d.lpD3DDevice->SetTexture(0, ImageHeaderArray[SpecialFXImageNumber].Direct3DTexture);
 
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
 	d3d.lpD3DDevice->SetVertexShader(preTransVertexShader);
@@ -1792,6 +1800,7 @@ void DrawCoronas()
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 
 	D3DLVERTEX verts[4];
+	D3DCOLOR colour;
 
 	for (size_t i = 0; i < coronaArray.size(); i++)
 	{
@@ -1801,6 +1810,46 @@ void DrawCoronas()
 		float RecipH = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
 
 		assert (coronaArray[i].numVerts == 4);
+
+		if (particleDescPtr->IsLit && !(coronaArray[i].particle.ParticleID == PARTICLE_ALIEN_BLOOD && CurrentVisionMode == VISION_MODE_PRED_SEEALIENS))
+		{
+			int intensity = LightIntensityAtPoint(&coronaArray[i].particle.Position);
+			if (coronaArray[i].particle.ParticleID == PARTICLE_SMOKECLOUD || coronaArray[i].particle.ParticleID == PARTICLE_ANDROID_BLOOD)
+			{
+				colour = RGBALIGHT_MAKE
+				  		(
+				   			MUL_FIXED(intensity, coronaArray[i].particle.ColourComponents.Red),
+				   			MUL_FIXED(intensity, coronaArray[i].particle.ColourComponents.Green),
+				   			MUL_FIXED(intensity, coronaArray[i].particle.ColourComponents.Blue),
+				   			coronaArray[i].particle.ColourComponents.Alpha
+				   		);
+			}
+			else
+			{
+				colour = RGBALIGHT_MAKE
+				  		(
+				   			MUL_FIXED(intensity, particleDescPtr->RedScale[CurrentVisionMode]),
+				   			MUL_FIXED(intensity, particleDescPtr->GreenScale[CurrentVisionMode]),
+				   			MUL_FIXED(intensity, particleDescPtr->BlueScale[CurrentVisionMode]),
+				   			particleDescPtr->Alpha
+				   		);
+			}
+		}
+		else
+		{
+			colour = coronaArray[i].particle.Colour;
+		}
+
+		if (RAINBOWBLOOD_CHEATMODE)
+		{
+			colour = RGBALIGHT_MAKE
+						(
+							FastRandom()&255,
+							FastRandom()&255,
+							FastRandom()&255,
+							particleDescPtr->Alpha
+						);
+		}
 
 		/*
 			transform all points by projection matrix
@@ -1821,8 +1870,8 @@ void DrawCoronas()
 			verts[j].sx = newVec.x;
 			verts[j].sy = newVec.y;
 			verts[j].sz = newVec.z;
-			verts[j].color = D3DCOLOR_ARGB(255, 255, 255, 255);
-			verts[j].specular = D3DCOLOR_ARGB(255, 255, 255, 255);
+			verts[j].color = colour;
+			verts[j].specular = RGBALIGHT_MAKE(0,0,0,255);
 			verts[j].tu = (float)(vertices->U) * RecipW;
 			verts[j].tv = (float)(vertices->V) * RecipH;
 		}
@@ -1877,14 +1926,14 @@ void DrawCoronas()
 			ortho[i].y = HPos2DC(ortho[i].y);
 			ortho[i].z = 1.0f;
 			ortho[i].colour = D3DCOLOR_ARGB(128, 255, 255, 255);
-			ortho[i].u = 0.0f;
-			ortho[i].v = 0.0f;
+			ortho[i].u = verts[i].tu;//0.0f;
+			ortho[i].v = verts[i].tv;//0.0f;
 		}
 
 		d3d.lpD3DDevice->SetVertexShader(d3d.orthoVertexShader);
 		orthoConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
 
-		ChangeTranslucencyMode(TRANSLUCENCY_OFF);
+		ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType);
 
 		LastError = d3d.lpD3DDevice->SetVertexDeclaration(d3d.orthoVertexDecl);
 		if (FAILED(LastError))
@@ -2007,9 +2056,6 @@ void DrawParticles()
 
 const float Zoffset = 2.0f;
 
-#define RGBLIGHT_MAKE(r,g,b) RGB_MAKE(r,g,b)
-#define RGBALIGHT_MAKE(r,g,b,a) RGBA_MAKE(r,g,b,a)
-
 #define FMV_ON 0
 #define FMV_EVERYWHERE 0
 #define FMV_SIZE 128
@@ -2036,8 +2082,6 @@ float WaterVScale;
 int MeshZScale;
 int MeshXScale;
 int WaterFallBase;
-
-int LightIntensityAtPoint(VECTORCH *pointPtr);
 
 VECTORCH MeshWorldVertex[256];
 uint32_t MeshVertexColour[256];

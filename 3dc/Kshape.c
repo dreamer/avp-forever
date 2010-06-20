@@ -3902,7 +3902,6 @@ static void FindAlienEnergySource_Recursion(HMODELCONTROLLER *controllerPtr, SEC
 	}
 	if (sectionDataPtr->Shape && sectionDataPtr->Shape->shaperadius>LocalDetailLevels.AlienEnergyViewThreshold)
 	{
-#if 1 // bjd - revert
 		PARTICLE particle;
 
 		particle.Position = sectionDataPtr->World_Offset;
@@ -3913,7 +3912,6 @@ static void FindAlienEnergySource_Recursion(HMODELCONTROLLER *controllerPtr, SEC
 //		particle.Colour = 0x20ffffff;
 		particle.Size = sectionDataPtr->Shape->shaperadius*2;
 		RenderParticle(&particle);
-#endif
 	}
 }
 
@@ -4471,8 +4469,6 @@ void RenderParticle(PARTICLE *particlePtr)
 	  ||(particlePtr->ParticleID == PARTICLE_PREDPISTOL_FLECHETTE_NONDAMAGING)
 	  )
 	{
-
-#if 1 // bjd - revert
 		VECTORCH translatedPosition = particlePtr->Offset;
 		TranslatePointIntoViewspace(&translatedPosition);
 		VerticesBuffer[1].X = translatedPosition.vx;
@@ -4570,7 +4566,6 @@ void RenderParticle(PARTICLE *particlePtr)
 				}
 			}
 		}
-#endif // bjd
 	}
 	else // pulse rifle muzzle flash handled here - bjd
 	{
@@ -4596,7 +4591,6 @@ void RenderParticle(PARTICLE *particlePtr)
 
 		offset[3].vx = -particleSize;
 		offset[3].vy = +particleSize;
-#if 1 // bjd - revert
 		if ((particlePtr->ParticleID == PARTICLE_MUZZLEFLASH))
 		{
 			int theta = FastRandom()&4095;
@@ -4605,8 +4599,6 @@ void RenderParticle(PARTICLE *particlePtr)
 			RotateVertex(&offset[2], theta);
 			RotateVertex(&offset[3], theta);
 		}
-#endif // bjd
-#if 1 // bjd - revert
 		else if ((particlePtr->ParticleID == PARTICLE_SMOKECLOUD)
 			||(particlePtr->ParticleID == PARTICLE_GUNMUZZLE_SMOKE)
 			||(particlePtr->ParticleID == PARTICLE_PARGEN_FLAME)
@@ -4618,7 +4610,6 @@ void RenderParticle(PARTICLE *particlePtr)
 			RotateVertex(&offset[2], theta);
 			RotateVertex(&offset[3], theta);
 		}
-#endif // bjd
 
 		VerticesBuffer[0].X += offset[0].vx;
 		VerticesBuffer[0].Y += MUL_FIXED(offset[0].vy, 87381);
@@ -6075,17 +6066,22 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 			RenderPolygon.NumberOfVertices = 4;
 
 //			textprint("On Screen!\n");
-			VerticesBuffer[0].U = 192;
-			VerticesBuffer[0].V = 0;
 
-			VerticesBuffer[1].U = 255;
+			// top left
+			VerticesBuffer[1].U = 192;
 			VerticesBuffer[1].V = 0;
 
+			// top right
+			VerticesBuffer[3].U = 255;
+			VerticesBuffer[3].V = 0;
+
+			// bottom right
 			VerticesBuffer[2].U = 255;
 			VerticesBuffer[2].V = 63;
 
-			VerticesBuffer[3].U = 192;
-			VerticesBuffer[3].V = 63;
+			// bottom left
+			VerticesBuffer[0].U = 192;
+			VerticesBuffer[0].V = 63;
 
 //			AddParticle(&particle, VerticesBuffer);
 //			AddCorona(&particle, VerticesBuffer);

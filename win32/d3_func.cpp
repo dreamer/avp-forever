@@ -671,17 +671,13 @@ int32_t CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 
 
 	if (FAILED(LastError))
 	{
+		OutputDebugString(DXGetErrorDescription(LastError));
+
 		if (pErrors)
 		{
 			// shader didn't compile for some reason
 			OutputDebugString((const char*)pErrors->GetBufferPointer());
 			pErrors->Release();
-			return -1;
-		}
-		else
-		{
-			// other error. can't load file?
-			OutputDebugString(DXGetErrorDescription(LastError));
 			return -1;
 		}
 	}
@@ -709,18 +705,18 @@ int32_t CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *p
 						&pErrors,        // errors
 						NULL);			 // constants
 
-	if (pErrors)
-	{
-		// shader didn't compile for some reason
-		OutputDebugString((const char*)pErrors->GetBufferPointer());
-		pErrors->Release();
-//		return -1;
-	}
-
 	if (FAILED(LastError))
 	{
-		// other error. can't load file?
 		OutputDebugString(DXGetErrorDescription(LastError));
+
+		if (pErrors)
+		{
+			// shader didn't compile for some reason
+			OutputDebugString((const char*)pErrors->GetBufferPointer());
+			pErrors->Release();
+	//		return -1;
+		}
+
 		return -1;
 	}
 
@@ -736,9 +732,10 @@ int imageNum = 0;
 
 
 // removes pure red colour from a texture. used to remove red outline grid on small font texture.
-// we remove the grid as it can sometimes bleed onto text when we use texture filtering.
+// we remove the grid as it can sometimes bleed onto text when we use texture filtering. maybe add params for passing width/height?
 void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
 {
+	// lock texture
 	D3DLOCKED_RECT	lock;
 
 	LastError = texture->LockRect(0, &lock, NULL, NULL );
@@ -750,7 +747,8 @@ void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
 
 	uint8_t *destPtr = NULL;
 
-	for (int y = 0; y < 256; y++)
+	// loop, setting all full red pixels to black
+	for (uint32_t y = 0; y < 256; y++)
 	{
 		destPtr = (((uint8_t*)lock.pBits) + y*lock.Pitch);
 
@@ -758,13 +756,14 @@ void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
 		{
 			if ((destPtr[BO_RED] == 255) && (destPtr[BO_BLUE] == 0) && (destPtr[BO_GREEN] == 0))
 			{
-				destPtr[BO_RED] = 0;
+				destPtr[BO_RED] = 0; // set to black
 			}
 
 			destPtr += sizeof(uint32_t); // move over an entire 4 byte pixel
 		}
 	}
 
+	// unlock texture as we're done
 	LastError = texture->UnlockRect(0);
 	if (FAILED(LastError))
 	{
@@ -783,25 +782,23 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, 
 		return NULL;
 	}
 
-	uint32_t original_width = tex->width;
-	uint32_t original_height = tex->height;
-	uint32_t new_width = original_width;
-	uint32_t new_height = original_height;
-
-	D3DCOLOR padColour = D3DCOLOR_ARGB(255, 255, 0, 255);
+	uint32_t originalWidth = tex->width;
+	uint32_t originalHeight = tex->height;
+	uint32_t newWidth = originalWidth;
+	uint32_t newHeight = originalHeight;
 
 	// check if passed value is already a power of 2
 	if (!IsPowerOf2(tex->width))
 	{
-		new_width = NearestSuperiorPow2(tex->width);
+		newWidth = NearestSuperiorPow2(tex->width);
 	}
-	else { new_width = original_width; }
+	else { newWidth = originalWidth; }
 
 	if (!IsPowerOf2(tex->height))
 	{
-		new_height = NearestSuperiorPow2(tex->height);
+		newHeight = NearestSuperiorPow2(tex->height);
 	}
-	else { new_height = original_height; }
+	else { newHeight = originalHeight; }
 
 	// set passed in width and height values to be used later
 //	(*real_height) = new_height;
@@ -809,8 +806,8 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, 
 
 //	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)&new_width, (UINT*)&new_height, NULL, 0, NULL, D3DPOOL_MANAGED);
 
-	(*realHeight) = new_height;
-	(*realWidth) = new_width;
+	(*realHeight) = newHeight;
+	(*realWidth) = newWidth;
 
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
 
@@ -888,7 +885,6 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, 
 
 uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture)
 {
-//	D3DTEXTURE destTexture = NULL;
 	D3DXIMAGE_INFO imageInfo;
 
 	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice,
@@ -1394,6 +1390,18 @@ BOOL InitialiseDirect3D()
 	// get device capabilities
 	D3DCAPS9 d3dCaps;
 	d3d.lpD3DDevice->GetDeviceCaps(&d3dCaps);
+
+	// check pixel shader support
+	if (d3dCaps.PixelShaderVersion < (D3DPS_VERSION(2,0)))
+	{
+		Con_PrintError("Need Pixel Shader version 2.0 support");
+	}
+
+	// check vertex shader support
+	if (d3dCaps.VertexShaderVersion < (D3DVS_VERSION(2,0)))
+	{
+		Con_PrintError("Need Vertex Shader version 2.0 support");
+	}
 
 	// check and remember if we have dynamic texture support
 	if (d3dCaps.Caps2 & D3DCAPS2_DYNAMICTEXTURES)

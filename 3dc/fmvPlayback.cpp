@@ -484,13 +484,20 @@ bool TheoraFMV::NextFrame()
 			uint8_t *destPtr = static_cast<uint8_t*>(texLock[i].pBits) + y * texLock[i].Pitch;
 			uint8_t *srcPtr = mYuvBuffer[i].data + (y * mYuvBuffer[i].stride);
 
+			// copy entire width row in one go
+			memcpy(destPtr, srcPtr, frameTextures[i].width * sizeof(uint8_t));
+
+			destPtr += frameTextures[i].width * sizeof(uint8_t);
+			srcPtr += frameTextures[i].width * sizeof(uint8_t);
+/*
 			for (uint32_t x = 0; x < frameTextures[i].width; x++)
 			{
-				memcpy(destPtr, srcPtr, 1);
+				memcpy(destPtr, srcPtr, sizeof(uint8_t));
 
-				destPtr += 1;
-				srcPtr += 1;
+				destPtr += sizeof(uint8_t);
+				srcPtr += sizeof(uint8_t);
 			}
+*/
 		}
 	}
 

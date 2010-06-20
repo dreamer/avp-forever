@@ -3926,7 +3926,6 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 	
 	switch (muzzleFlashID)
 	{
-#if 1 // bjd - revert
 		case MUZZLE_FLASH_SMARTGUN:
 		{
 			PARTICLE_DESC *particleDescPtr = &ParticleDescription[PARTICLE_MUZZLEFLASH];
@@ -4004,7 +4003,6 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 			}
 			break;
 		}
-#endif
 		case MUZZLE_FLASH_AMORPHOUS: // include pulse rifle muzzle flash
 		{
 			PARTICLE_DESC *particleDescPtr;
@@ -4026,7 +4024,7 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 			{
 				int i = 16;
 				particle.Size = 20;
-#if 1 // bjd - revert
+
 				while (i--)
 				{
 					RenderParticle(&particle);
@@ -4034,7 +4032,6 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 					particle.Position.vy = positionPtr->vy + MUL_FIXED(100, directionPtr->vy) + (FastRandom()&127)-64;
 					particle.Position.vz = positionPtr->vz + MUL_FIXED(100, directionPtr->vz) + (FastRandom()&127)-64;
 				}
-#endif // bjd
 			}
 			break;
 		}

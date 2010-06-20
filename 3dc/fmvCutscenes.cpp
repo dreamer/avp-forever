@@ -485,7 +485,7 @@ void StartMenuMusic()
 {
 	// we need to load IntroSound.ogg here using vorbisPlayer
 	menuMusic = new VorbisPlayback;
-	if (!menuMusic->Open("IntroSound.ogg"))
+	if (!menuMusic->Open("FMVs\\IntroSound.ogg"))
 	{
 		Con_PrintError("Can't open file IntroSound.ogg");
 		delete menuMusic;
