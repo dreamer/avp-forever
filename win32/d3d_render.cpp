@@ -1143,8 +1143,11 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, int32_t textureID, uint
 	d3d.lpD3DDevice->SetPixelShader(d3d.cloudPixelShader);
 
 	cloudConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
-	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "CloakingPhase", CloakingPhase);
+//	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "CloakingPhase", CloakingPhase);
 	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "pX", topX);
+	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "CloakPhaseX", (CloakingPhase/64)&127);
+	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "CloakPhaseY", (CloakingPhase/128)&127);
+	
 	if (FAILED(LastError))
 	{
 		OutputDebugString("SetInt failed\n");
@@ -1730,16 +1733,16 @@ extern int SpecialFXImageNumber;
 
 extern "C"
 {
-	void TransformToViewspace(float *vals)
+	void TransformToViewspace(VECTORCHF *vector)
 	{
 		D3DXVECTOR3 output;
-		D3DXVECTOR3 input(vals[0], vals[1], vals[2]);
+		D3DXVECTOR3 input(vector->vx, vector->vy, vector->vz);
 
 		D3DXVec3TransformCoord(&output, &input, &viewMatrix);
 
-		vals[0] = output.x;
-		vals[1] = output.y;
-		vals[2] = output.z;
+		vector->vx = output.x;
+		vector->vy = output.y;
+		vector->vz = output.z;
 	}
 } // extern C
 
@@ -1792,6 +1795,7 @@ void DrawCoronas()
 	uint32_t numVertsBackup = RenderPolygon.NumberOfVertices;
 
 	LastError = d3d.lpD3DDevice->SetTexture(0, ImageHeaderArray[SpecialFXImageNumber].Direct3DTexture);
+	currentTextureID = SpecialFXImageNumber;
 
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
 	d3d.lpD3DDevice->SetVertexShader(preTransVertexShader);
@@ -1801,13 +1805,13 @@ void DrawCoronas()
 
 	D3DLVERTEX verts[4];
 	D3DCOLOR colour;
+	
+	float RecipW = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
+	float RecipH = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
 
 	for (size_t i = 0; i < coronaArray.size(); i++)
 	{
 		PARTICLE_DESC *particleDescPtr = &ParticleDescription[coronaArray[i].particle.ParticleID];
-
-		float RecipW = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
-		float RecipH = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
 
 		assert (coronaArray[i].numVerts == 4);
 
@@ -1925,9 +1929,9 @@ void DrawCoronas()
 			ortho[i].x = WPos2DC(ortho[i].x); // resolution x,y to device coordinates
 			ortho[i].y = HPos2DC(ortho[i].y);
 			ortho[i].z = 1.0f;
-			ortho[i].colour = D3DCOLOR_ARGB(128, 255, 255, 255);
-			ortho[i].u = verts[i].tu;//0.0f;
-			ortho[i].v = verts[i].tv;//0.0f;
+			ortho[i].colour = verts[i].color;
+			ortho[i].u = verts[i].tu;
+			ortho[i].v = verts[i].tv;
 		}
 
 		d3d.lpD3DDevice->SetVertexShader(d3d.orthoVertexShader);
