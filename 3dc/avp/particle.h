@@ -3,7 +3,6 @@
 
 #include "decal.h"
 #include "dynblock.h"
-//#include "renderer.h"
 
 enum PARTICLE_ID
 {

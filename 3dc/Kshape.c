@@ -5990,7 +5990,7 @@ void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRI
 int LightFlareAlpha = 65535;
 
 extern void TransformToViewspace(VECTORCHF *vector);
-extern void AddCorona(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr);
+extern void AddCorona(PARTICLE *particlePtr, VECTORCHF *coronaPoint);
 
 void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 {
@@ -6005,12 +6005,16 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 	tempVector.vz = (float)point.vz;
 
 	TransformToViewspace(&tempVector);
-
+/*
 	point.vx = (int)tempVector.vx;
 	point.vy = (int)tempVector.vy;
 	point.vz = (int)tempVector.vz;
 
 	if (point.vz < 64)
+		return;
+*/
+
+	if (tempVector.vz < 64)
 		return;
 
 	particle.ParticleID = PARTICLE_LIGHTFLARE;
@@ -6026,26 +6030,6 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 	centreY = DIV_FIXED(point.vy, point.vz);
 	sizeX = (ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
 	sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
-		
-	// bottom left?
-	VerticesBuffer[0].X = point.vx;
-	VerticesBuffer[0].Y = point.vy + sizeY;
-	VerticesBuffer[0].Z = z;
-
-	// top left?
-	VerticesBuffer[1].X = point.vx;
-	VerticesBuffer[1].Y = point.vy;
-	VerticesBuffer[1].Z = z;
-
-	// bottom right?
-	VerticesBuffer[2].X = point.vx + sizeX;
-	VerticesBuffer[2].Y = point.vy + sizeY;
-	VerticesBuffer[2].Z = z;
-
-	// top right?
-	VerticesBuffer[3].X = point.vx + sizeX;
-	VerticesBuffer[3].Y = point.vy;
-	VerticesBuffer[3].Z = z;
 
 	{
 		int outcode = QuadWithinFrustum();
@@ -6055,7 +6039,7 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 			RenderPolygon.NumberOfVertices = 4;
 
 //			textprint("On Screen!\n");
-
+/*
 			// top left
 			VerticesBuffer[1].U = 192;
 			VerticesBuffer[1].V = 0;
@@ -6071,9 +6055,8 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 			// bottom left
 			VerticesBuffer[0].U = 192;
 			VerticesBuffer[0].V = 63;
-
-//			AddParticle(&particle, VerticesBuffer);
-			AddCorona(&particle, VerticesBuffer);
+*/
+			AddCorona(&particle, &tempVector);
 		}
 	}
 }

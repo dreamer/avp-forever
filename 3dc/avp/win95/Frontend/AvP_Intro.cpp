@@ -46,6 +46,7 @@ extern void PlayIntroSequence(void)
 		StartMenuMusic();
 		return;
 	}
+
 	IntroHasAlreadyBeenPlayed = TRUE;
 
 	ResetFrameCounter();

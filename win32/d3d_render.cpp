@@ -186,7 +186,7 @@ struct renderParticle
 struct renderCorona
 {
 	PARTICLE		particle;
-	RENDERVERTEX	vertices[9];
+	VECTORCHF		coronaPoint;
 	uint32_t		numVerts;
 	int				translucency;
 
@@ -198,12 +198,18 @@ std::vector<renderCorona>   coronaArray;
 
 inline float WPos2DC(int32_t pos)
 {
-	return (float(pos / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
+	if (mainMenu)
+		return (float(pos / (float)640) * 2) - 1;
+	else
+		return (float(pos / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
 }
 
 inline float HPos2DC(int32_t pos)
 {
-	return (float(pos / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
+	if (mainMenu)
+		return (float(pos / (float)480) * 2) - 1;
+	else
+		return (float(pos / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
 }
 
 void DeleteRenderMemory()
@@ -896,11 +902,11 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWid
 	uint32_t topX = (640 - frameWidth) / 2;
 	uint32_t topY = (480 - frameHeight) / 2;
 
-	float x1 = (float(topX / 640.0f) * 2) - 1;
-	float y1 = (float(topY / 480.0f) * 2) - 1;
+	float x1 = WPos2DC(topX);
+	float y1 = HPos2DC(topY);
 
-	float x2 = ((float(topX + frameWidth) / 640.0f) * 2) - 1;
-	float y2 = ((float(topY + frameHeight) / 480.0f) * 2) - 1;
+	float x2 = WPos2DC(topX + frameWidth);
+	float y2 = HPos2DC(topY + frameHeight);
 
 	D3DCOLOR colour = D3DCOLOR_ARGB(255, 255, 255, 255);
 
@@ -954,21 +960,15 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWid
 
 void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE9 tex1, LPDIRECT3DTEXTURE9 tex2, LPDIRECT3DTEXTURE9 tex3)
 {
-	uint32_t topX = 0;//(640 - frameWidth) / 2;
-	uint32_t topY = 0;//(480 - frameHeight) / 2;
+	// offset the video vertically in the centre of the screen
+	uint32_t topX = (640 - frameWidth) / 2;
+	uint32_t topY = (480 - frameHeight) / 2;
 
-	float x1 = (float(topX / 640.0f) * 2) - 1;
-	float y1 = (float(topY / 480.0f) * 2) - 1;
+	float x1 = WPos2DC(topX);
+	float y1 = HPos2DC(topY);
 
-	float x2 = ((float(topX + frameWidth) / 640.0f) * 2) - 1;
-	float y2 = ((float(topY + frameHeight) / 480.0f) * 2) - 1;
-
-	x1 = WPos2DC(0);
-	y1 = HPos2DC(0);
-
-	x2 = WPos2DC(frameWidth);
-	y2 = HPos2DC(frameHeight);
-
+	float x2 = WPos2DC(topX + frameWidth);
+	float y2 = HPos2DC(topY + frameHeight);
 
 	FMVVERTEX fmvVerts[4];
 
@@ -1052,11 +1052,11 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, int32_t textureI
 {
 	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_OFF, TEXTURE_CLAMP, FILTERING_BILINEAR_ON);
 
-	float x1 = (float(destRect.left / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
-	float y1 = (float(destRect.top / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
+	float x1 = WPos2DC(destRect.left);
+	float y1 = HPos2DC(destRect.top);
 
-	float x2 = ((float(destRect.right) / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
-	float y2 = ((float(destRect.bottom) / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
+	float x2 = WPos2DC(destRect.right);
+	float y2 = HPos2DC(destRect.bottom);
 
 	if (!tex)
 	{
@@ -1128,11 +1128,11 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, int32_t textureID, uint
 
 	uint32_t charHeight = 33;
 
-	float x1 = (float(topX / 640.0f) * 2) - 1;
-	float y1 = (float(topY / 480.0f) * 2) - 1;
+	float x1 = WPos2DC(topX);
+	float y1 = HPos2DC(topY);
 
-	float x2 = ((float(topX + charWidth) / 640.0f) * 2) - 1;
-	float y2 = ((float(topY + charHeight) / 480.0f) * 2) - 1;
+	float x2 = WPos2DC(topX + charWidth);
+	float y2 = HPos2DC(topY + charHeight);
 
 #if 1
 	ChangeTexture(textureID);
@@ -1405,11 +1405,11 @@ void DrawHUDQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, float 
 
 	assert (textureID != -1);
 
-	float x1 = (float(x / 640.0f) * 2) - 1;
-	float y1 = (float(y / 480.0f) * 2) - 1;
+	float x1 = WPos2DC(x);
+	float y1 = HPos2DC(y);
 
-	float x2 = ((float(x + width) / 640.0f) * 2) - 1;
-	float y2 = ((float(y + height) / 480.0f) * 2) - 1;
+	float x2 = WPos2DC(x + width);
+	float y2 = HPos2DC(y + height);
 
 	uint32_t texturePOW2Width, texturePOW2Height;
 
@@ -1513,11 +1513,11 @@ void DrawFontQuad(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeigh
 
 void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
 {
-	float x1 = (float(x / 640.0f) * 2) - 1;
-	float y1 = (float(y / 480.0f) * 2) - 1;
+	float x1 = WPos2DC(x);
+	float y1 = HPos2DC(y);
 
-	float x2 = ((float(x + width) / 640.0f) * 2) - 1;
-	float y2 = ((float(y + height) / 480.0f) * 2) - 1;
+	float x2 = WPos2DC(x + width);
+	float y2 = HPos2DC(y + height);
 
 	uint32_t texturePOW2Width, texturePOW2Height;
 
@@ -1667,11 +1667,11 @@ void DrawSmallMenuCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_
 	float RecipW = 1.0f / image_width; // 0.00390625
 	float RecipH = 1.0f / image_height;
 
-	float x1 = (float(topX / 640.0f) * 2) - 1;
-	float y1 = (float(topY / 480.0f) * 2) - 1;
+	float x1 = WPos2DC(topX);
+	float y1 = HPos2DC(topY);
 
-	float x2 = ((float(topX + font_width) / 640.0f) * 2) - 1;
-	float y2 = ((float(topY + font_height) / 480.0f) * 2) - 1;
+	float x2 = WPos2DC(topX + font_width);
+	float y2 = HPos2DC(topY + font_height);
 
 	CheckOrthoBuffer(4, AVPMENUGFX_SMALL_FONT, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
 
@@ -1803,7 +1803,6 @@ void DrawCoronas()
 
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 
-	D3DLVERTEX verts[4];
 	D3DCOLOR colour;
 	
 	float RecipW = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
@@ -1855,84 +1854,59 @@ void DrawCoronas()
 						);
 		}
 
-		/*
-			transform all points by projection matrix
-		*/
-		for (uint32_t j = 0; j < coronaArray[i].numVerts; j++)
-		{
-			RENDERVERTEX *vertices = &coronaArray[i].vertices[j];
-
-			D3DXVECTOR3 tempVec;
-			D3DXVECTOR3 newVec;
-			tempVec.x = (float)vertices->X;
-			tempVec.y = (float)vertices->Y;
-			tempVec.z = (float)vertices->Z;
-
-			// projection transform
-			D3DXVec3TransformCoord(&newVec, &tempVec, &matProjection);
-
-			verts[j].sx = newVec.x;
-			verts[j].sy = newVec.y;
-			verts[j].sz = newVec.z;
-			verts[j].color = colour;
-			verts[j].specular = RGBALIGHT_MAKE(0,0,0,255);
-			verts[j].tu = (float)(vertices->U) * RecipW;
-			verts[j].tv = (float)(vertices->V) * RecipH;
-		}
-
-		/* 
-			Draw a point using the vertex in position 1, which contains the light's 
-			position (already transformed by view matrix and just now by projection
-		*/
-
-/*
-		LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_POINTLIST , 1, &verts[1], sizeof(D3DLVERTEX));
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-			OutputDebugString("DrawPrimitiveUP failed\n");
-		}
-*/
-		/*
-			now try to construct a quad around this point in screen space..
-		*/
-
-		// grab a copy of the point
-		D3DXVECTOR3 origin(verts[1].sx, verts[1].sy, verts[1].sz);
+		// transform our coronas world position into projection then viewport space
 		D3DXVECTOR3 tempVec;
+		D3DXVECTOR3 newVec;
+
+		tempVec.x = coronaArray[i].coronaPoint.vx;
+		tempVec.y = coronaArray[i].coronaPoint.vy;
+		tempVec.z = coronaArray[i].coronaPoint.vz;
+
+		// projection transform
+		D3DXVec3TransformCoord(&newVec, &tempVec, &matProjection);
 
 		// do viewport transform on this
-		D3DXVec3TransformCoord(&tempVec, &origin, &matViewPort);
+		D3DXVec3TransformCoord(&tempVec, &newVec, &matViewPort);
 
 		// generate the quad around this point
 		ORTHOVERTEX ortho[4];
 		uint32_t size = 100;
 
 		// bottom left
-		ortho[0].x = tempVec.x - size;
-		ortho[0].y = tempVec.y + size;
+		ortho[0].x = WPos2DC(tempVec.x - size);
+		ortho[0].y = HPos2DC(tempVec.y + size);
+		ortho[0].z = 1.0f;
+		ortho[0].colour = colour;
+//		ortho[0].specular = RGBALIGHT_MAKE(0,0,0,255);
+		ortho[0].u = (float)192 * RecipW;
+		ortho[0].v = (float)63 * RecipH;
 
 		// top left
-		ortho[1].x = tempVec.x - size;
-		ortho[1].y = tempVec.y - size;
+		ortho[1].x = WPos2DC(tempVec.x - size);
+		ortho[1].y = HPos2DC(tempVec.y - size);
+		ortho[1].z = 1.0f;
+		ortho[1].colour = colour;
+//		ortho[1].specular = RGBALIGHT_MAKE(0,0,0,255);
+		ortho[1].u = (float)192 * RecipW;
+		ortho[1].v = (float)0 * RecipH;
 
 		// bottom right
-		ortho[2].x = tempVec.x + size;
-		ortho[2].y = tempVec.y + size;
+		ortho[2].x = WPos2DC(tempVec.x + size);
+		ortho[2].y = HPos2DC(tempVec.y + size);
+		ortho[2].z = 1.0f;
+		ortho[2].colour = colour;
+//		ortho[2].specular = RGBALIGHT_MAKE(0,0,0,255);
+		ortho[2].u = (float)255 * RecipW;
+		ortho[2].v = (float)63 * RecipH;
 
 		// top right
-		ortho[3].x = tempVec.x + size;
-		ortho[3].y = tempVec.y - size;
-
-		for (uint32_t i = 0; i < 4; i++)
-		{
-			ortho[i].x = WPos2DC(ortho[i].x); // resolution x,y to device coordinates
-			ortho[i].y = HPos2DC(ortho[i].y);
-			ortho[i].z = 1.0f;
-			ortho[i].colour = verts[i].color;
-			ortho[i].u = verts[i].tu;
-			ortho[i].v = verts[i].tv;
-		}
+		ortho[3].x = WPos2DC(tempVec.x + size);
+		ortho[3].y = HPos2DC(tempVec.y - size);
+		ortho[3].z = 1.0f;
+		ortho[3].colour = colour;
+//		ortho[3].specular = RGBALIGHT_MAKE(0,0,0,255);
+		ortho[3].u = (float)255 * RecipW;
+		ortho[3].v = (float)0 * RecipH;
 
 		d3d.lpD3DDevice->SetVertexShader(d3d.orthoVertexShader);
 		orthoConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
@@ -2632,22 +2606,11 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 {
 	float new_x1, new_y1, new_x2, new_y2;
 
-	if (mainMenu)
-	{
-		new_x1 = (float(x0 / 640.0f) * 2) - 1;
-		new_y1 = (float(y0 / 480.0f) * 2) - 1;
+	new_x1 = WPos2DC(x0);
+	new_y1 = HPos2DC(y0);
 
-		new_x2 = ((float(x1) / 640.0f) * 2) - 1;
-		new_y2 = ((float(y1) / 480.0f) * 2) - 1;
-	}
-	else
-	{
-		new_x1 = (float(x0 / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
-		new_y1 = (float(y0 / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
-
-		new_x2 = ((float(x1) / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
-		new_y2 = ((float(y1) / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
-	}
+	new_x2 = WPos2DC(x1);
+	new_y2 = HPos2DC(y1);
 
 	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
 
@@ -2814,77 +2777,6 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 	}
 }
 
-void D3D_DrawParticle_Smoke(PARTICLE *particlePtr)
-{
-	VECTORCH vertices[3];
-	vertices[0] = particlePtr->Position;
-
-	/* translate second vertex into view space */
-	TranslatePointIntoViewspace(&vertices[0]);
-
-	/* is particle within normal view frustum ? */
-	int inView = 0;
-
-	if (AvP.PlayerType == I_Alien)
-	{
-		if ((-vertices[0].vx <= vertices[0].vz*2)
-		&&(vertices[0].vx <= vertices[0].vz*2)
-		&&(-vertices[0].vy <= vertices[0].vz*2)
-		&&(vertices[0].vy <= vertices[0].vz*2))
-		{
-			inView = 1;
-		}
-	}
-	else
-	{
-		if ((-vertices[0].vx <= vertices[0].vz)
-		&&(vertices[0].vx <= vertices[0].vz)
-		&&(-vertices[0].vy <= vertices[0].vz)
-		&&(vertices[0].vy <= vertices[0].vz))
-		{
-			inView = 1;
-		}
-	}
-
-	if (/*inView*/1) // bjd - override frustum test
-	{
-		vertices[1] = particlePtr->Position;
-		vertices[2] = particlePtr->Position;
-		vertices[1].vx += ((FastRandom()&15)-8)*2;
-		vertices[1].vy += ((FastRandom()&15)-8)*2;
-		vertices[1].vz += ((FastRandom()&15)-8)*2;
-		vertices[2].vx += ((FastRandom()&15)-8)*2;
-		vertices[2].vy += ((FastRandom()&15)-8)*2;
-		vertices[2].vz += ((FastRandom()&15)-8)*2;
-
-		/* translate particle into view space */
-//		TranslatePointIntoViewspace(&vertices[1]);
-//		TranslatePointIntoViewspace(&vertices[2]);
-
-		CheckVertexBuffer(3, NO_TEXTURE, TRANSLUCENCY_NORMAL);
-
-		VECTORCH *verticesPtr = vertices;
-
-		for (uint32_t i = 0; i < 3; i++)
-		{
-			mainVertex[vb].sx = (float)verticesPtr->vx;
-			mainVertex[vb].sy = (float)-verticesPtr->vy;
-			mainVertex[vb].sz = (float)vertices->vz;
-
-			mainVertex[vb].color = RGBALIGHT_MAKE((particlePtr->LifeTime>>8),(particlePtr->LifeTime>>8),0,(particlePtr->LifeTime>>7)+64);
-
-			mainVertex[vb].specular = (D3DCOLOR)1.0f;
-			mainVertex[vb].tu = 0.0f;
-			mainVertex[vb].tv = 0.0f;
-
-			vb++;
-			verticesPtr++;
-		}
-
-		OUTPUT_TRIANGLE(0,2,1, 3);
-	}
-}
-
 void D3D_DecalSystem_Setup(void)
 {
 	UnlockExecuteBufferAndPrepareForUse();
@@ -3012,14 +2904,14 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 	D3D_OutputTriangles();
 }
 
-void AddCorona(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
+void AddCorona(PARTICLE *particlePtr, VECTORCHF *coronaPoint)
 {
 	renderCorona newCorona;
 
 	newCorona.numVerts = RenderPolygon.NumberOfVertices;
 	newCorona.particle = *particlePtr;
 
-	memcpy(&newCorona.vertices[0], renderVerticesPtr, newCorona.numVerts * sizeof(RENDERVERTEX));
+	memcpy(&newCorona.coronaPoint, coronaPoint, sizeof(VECTORCHF));
 	newCorona.translucency = ParticleDescription[particlePtr->ParticleID].TranslucencyType;
 
 	coronaArray.push_back(newCorona);

@@ -120,7 +120,7 @@ extern struct DEBUGGINGTEXTOPTIONS ShowDebuggingText;
 
 extern BOOL bRunning;
 
-int unlimitedSaves = 0;
+BOOL unlimitedSaves = FALSE;
 
 void exit_break_point_fucntion ()
 {
@@ -393,14 +393,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	// support removing limit on number of game saves
 	if (!Config_GetBool("[Misc]", "UnlimitedSaves", false))
 	{
-		unlimitedSaves = 0;
+		unlimitedSaves = FALSE;
 	}
-	else unlimitedSaves = 1;
+	else unlimitedSaves = TRUE;
 
 	while (AvP_MainMenus() && bRunning)
 	#endif
 	{
-		int menusActive = 0;
+		BOOL menusActive = FALSE;
 		int thisLevelHasBeenCompleted = 0;
 
 		mainMenu = 0;
@@ -530,7 +530,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 					{
 						menusActive = AvP_InGameMenus();
-						if (AvP.RestartLevel) menusActive = 0;
+						if (AvP.RestartLevel) menusActive = FALSE;
 					}
 					if (AvP.LevelCompleted)
 					{

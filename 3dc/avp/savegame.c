@@ -43,7 +43,7 @@ void RestartLevel();
 extern void StartFMVAtFrame(int number, int frame);
 extern void GetFMVInformation(int *messageNumberPtr, int *frameNumberPtr);
 
-extern int unlimitedSaves;
+extern BOOL unlimitedSaves;
 
 static struct
 {
