@@ -3462,10 +3462,10 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 				textPtr = GetTextString(elementPtr->FirstTextSliderString+*(elementPtr->SliderValuePtr));
 			}
 			
-			if(elementPtr->TextDescription!=TEXTSTRING_BLANK)
+			if (elementPtr->TextDescription!=TEXTSTRING_BLANK)
 			{
 		
-				if(AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
+				if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 				{
 					RenderText
 					(
@@ -3757,7 +3757,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 			
 			if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 			{
-				D3D_DrawSliderBar(MENU_CENTREX+MENU_ELEMENT_SPACING,y+1,elementPtr->Brightness);
+				D3D_DrawSliderBar(/*MENU_CENTREX*/ScreenDescriptorBlock.SDB_Width+MENU_ELEMENT_SPACING,y+1,elementPtr->Brightness);
 				D3D_DrawSlider(x,y+4,elementPtr->Brightness);
 			}
 			else

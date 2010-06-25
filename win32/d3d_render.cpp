@@ -67,9 +67,6 @@ LPD3DXCONSTANTTABLE	vertexConstantTable = NULL;
 LPD3DXCONSTANTTABLE	orthoConstantTable = NULL;
 LPD3DXCONSTANTTABLE	fmvConstantTable = NULL;
 LPD3DXCONSTANTTABLE	cloudConstantTable = NULL;
-LPD3DXCONSTANTTABLE	pretConstantTable = NULL;
-
-extern LPDIRECT3DVERTEXSHADER9 preTransVertexShader;
 
 D3DXMATRIX viewMatrix;
 
@@ -1143,10 +1140,8 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, int32_t textureID, uint
 	d3d.lpD3DDevice->SetPixelShader(d3d.cloudPixelShader);
 
 	cloudConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
-//	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "CloakingPhase", CloakingPhase);
+	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "CloakingPhase", CloakingPhase);
 	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "pX", topX);
-	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "CloakPhaseX", (CloakingPhase/64)&127);
-	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "CloakPhaseY", (CloakingPhase/128)&127);
 	
 	if (FAILED(LastError))
 	{
@@ -1243,50 +1238,6 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, int32_t textureID, uint
 	orthoVerts[orthoVBOffset].v = (float)((texV) * RecipH);
 	orthoVBOffset++;
 
-#endif
-#if 0
-//	d3d.lpD3DDevice->SetRenderState(D3DRS_COLORWRITEENABLE, 0x00000000);
-/*
-	if (D3DAlphaBlendEnable != FALSE) {
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-		D3DAlphaBlendEnable = FALSE;
-	}
-*/
-/*
-	// Enable alpha-testing, set threshold at zero
-	if (D3DAlphaTestEnable != TRUE) {
-		d3d.lpD3DDevice->SetRenderState( D3DRS_ALPHATESTENABLE, TRUE );
-		D3DAlphaTestEnable = TRUE;
-
-		d3d.lpD3DDevice->SetRenderState( D3DRS_ALPHAFUNC, D3DCMP_GREATER );
-		d3d.lpD3DDevice->SetRenderState( D3DRS_ALPHAREF, 0x00 );
-	}
-*/
-	// Now enable stenciling.  Have the device set the stencil value to 1
-	// if the pixel passes the depth test.
-
-//	if (D3DStencilEnable != TRUE) {
-		d3d.lpD3DDevice->SetRenderState( D3DRS_STENCILENABLE, TRUE );
-		D3DStencilEnable = TRUE;
-
-		d3d.lpD3DDevice->SetRenderState( D3DRS_STENCILFUNC, D3DCMP_EQUAL );
-//		d3d.lpD3DDevice->SetRenderState( D3DRS_STENCILZFAIL, D3DSTENCILOP_REPLACE );
-		d3d.lpD3DDevice->SetRenderState( D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE );
-		d3d.lpD3DDevice->SetRenderState( D3DRS_STENCILREF, 1 );
-		d3d.lpD3DDevice->SetRenderState( D3DRS_STENCILMASK, 0);
-//	}
-
-	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quadVert, sizeof(D3DTLVERTEX));
-	if(FAILED(LastError)) {
-		OutputDebugString(" draw menu quad failed ");
-	}
-
-//	d3d.lpD3DDevice->SetRenderState(D3DRS_COLORWRITEENABLE, 0x0000000f);
-
-	if (D3DStencilEnable != FALSE) {
-		d3d.lpD3DDevice->SetRenderState( D3DRS_STENCILENABLE, FALSE );
-		D3DStencilEnable = FALSE;
-	}
 #endif
 }
 
@@ -1598,8 +1549,6 @@ void DrawAlphaMenuQuad(uint32_t topX, uint32_t topY, int32_t textureID, uint32_t
 		alpha = 255;
 
 	DrawQuad(topX, topY, textureWidth, textureHeight, textureID, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
-
-	return;
 }
 
 void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint32_t alpha)
@@ -1798,7 +1747,6 @@ void DrawCoronas()
 	currentTextureID = SpecialFXImageNumber;
 
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
-	d3d.lpD3DDevice->SetVertexShader(preTransVertexShader);
 	d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
 
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
@@ -2063,7 +2011,6 @@ int WaterFallBase;
 
 VECTORCH MeshWorldVertex[256];
 uint32_t MeshVertexColour[256];
-char MeshVertexOutcode[256];
 
 int WireFrameMode;
 
@@ -3378,184 +3325,11 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 
 //bjd			TranslatePointIntoViewspace(point);
 
-/*
-			// is particle within normal view frustum ?
-			if (AvP.PlayerType==I_Alien)	// wide frustum
-			{
-				if(( (-point->vx <= point->vz*2)
-		   			&&(point->vx <= point->vz*2)
-					&&(-point->vy <= point->vz*2)
-					&&(point->vy <= point->vz*2) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-			else
-			{
-				if(( (-point->vx <= point->vz)
-		   			&&(point->vx <= point->vz)
-					&&(-point->vy <= point->vz)
-					&&(point->vy <= point->vz) ))
-				{
-					MeshVertexOutcode[i]=1;
-				}
-				else
-				{
-					MeshVertexOutcode[i]=0;
-				}
-			}
-*/
-			// bjd - ignore tests, say its in
-			MeshVertexOutcode[i] = 1;
-
 			i++;
 		}
 	}
 
 	D3D_DrawMoltenMetalMesh_Unclipped();
-}
-
-int LightSourceWaterPoint(VECTORCH *pointPtr, int offset)
-{
-	// this needs a rewrite...
-	// make a list of lights which will affect some part of the mesh
-	// and go throught that for each point.
-
-   	int redI=0,greenI=0,blueI=0;
-
-	DISPLAYBLOCK **activeBlockListPtr = ActiveBlockList;
-	for (int i = NumActiveBlocks; i!=0; i--)
-	{
-		DISPLAYBLOCK *dispPtr = *activeBlockListPtr++;
-
-		if(dispPtr->ObNumLights)
-		{
-			for(int j = 0; j < dispPtr->ObNumLights; j++)
-			{
-				LIGHTBLOCK *lptr = dispPtr->ObLights[j];
-
-				VECTORCH disp = lptr->LightWorld;
-				disp.vx -= pointPtr->vx;
-				disp.vy -= pointPtr->vy;
-				disp.vz -= pointPtr->vz;
-
-				int dist = Approximate3dMagnitude(&disp);
-
-				if (dist<lptr->LightRange)
-				{
-					int brightness = MUL_FIXED(lptr->BrightnessOverRange,lptr->LightRange-dist);
-					redI += MUL_FIXED(brightness,lptr->RedScale);
-					greenI += MUL_FIXED(brightness,lptr->GreenScale);
-					blueI += MUL_FIXED(brightness,lptr->BlueScale);
-				}
-			}
-		}
-	}
-
-	if (redI>ONE_FIXED) redI=ONE_FIXED;
-	else if (redI<GlobalAmbience) redI=GlobalAmbience;
-	if (greenI>ONE_FIXED) greenI=ONE_FIXED;
-	else if (greenI<GlobalAmbience) greenI=GlobalAmbience;
- 	if (blueI>ONE_FIXED) blueI=ONE_FIXED;
-	else if (blueI<GlobalAmbience) blueI=GlobalAmbience;
-
-	int alpha = 192-offset/4;
-	if (alpha>255) alpha = 255;
-	if (alpha<128) alpha = 128;
-
-	return RGBALIGHT_MAKE(MUL_FIXED(10,redI),MUL_FIXED(51,greenI),MUL_FIXED(28,blueI),alpha);
-}
-
-int LightIntensityAtPoint(VECTORCH *pointPtr)
-{
-	int intensity=0;
-
-	DISPLAYBLOCK **activeBlockListPtr = ActiveBlockList;
-	for (int i = NumActiveBlocks; i!=0; i--)
-	{
-		DISPLAYBLOCK *dispPtr = *activeBlockListPtr++;
-
-		if (dispPtr->ObNumLights)
-		{
-			for (int j = 0; j < dispPtr->ObNumLights; j++)
-			{
-				LIGHTBLOCK *lptr = dispPtr->ObLights[j];
-
-				VECTORCH disp = lptr->LightWorld;
-				disp.vx -= pointPtr->vx;
-				disp.vy -= pointPtr->vy;
-				disp.vz -= pointPtr->vz;
-
-				int dist = Approximate3dMagnitude(&disp);
-
-				if (dist<lptr->LightRange)
-				{
-					intensity += WideMulNarrowDiv(lptr->LightBright,lptr->LightRange-dist,lptr->LightRange);
-				}
-			}
-		}
-	}
-	if (intensity>ONE_FIXED) intensity=ONE_FIXED;
-	else if (intensity<GlobalAmbience) intensity=GlobalAmbience;
-
-	/* KJL 20:31:39 12/1/97 - limit how dark things can be so blood doesn't go green */
-	if (intensity<10*256) intensity = 10*256;
-
-	return intensity;
-}
-
-signed int ForceFieldPointDisplacement[15*3+1][16];
-signed int ForceFieldPointDisplacement2[15*3+1][16];
-signed int ForceFieldPointVelocity[15*3+1][16];
-unsigned char ForceFieldPointColour1[15*3+1][16];
-unsigned char ForceFieldPointColour2[15*3+1][16];
-
-int Phase = 0;
-int ForceFieldPhase = 0;
-
-void InitForceField(void)
-{
-	for (int x=0; x<15*3+1; x++)
-		for (int y=0; y<16; y++)
-		{
-			ForceFieldPointDisplacement[x][y]=0;
-			ForceFieldPointDisplacement2[x][y]=0;
-			ForceFieldPointVelocity[x][y]=0;
-		}
-	ForceFieldPhase=0;
-}
-
-void UpdateWaterFall(void)
-{
-	int x;
-	int y;
-	for (y=0; y<=15; y++)
-	{
-		ForceFieldPointDisplacement[0][y] += (FastRandom()&127)-64;
-		if(ForceFieldPointDisplacement[0][y]>512) ForceFieldPointDisplacement[0][y]=512;
-		if(ForceFieldPointDisplacement[0][y]<-512) ForceFieldPointDisplacement[0][y]=-512;
-		ForceFieldPointVelocity[0][y] = (FastRandom()&16383)-8192;
-	}
-	for (x=15*3-1; x>0; x--)
-	{
-		for (y=0; y<=15; y++)
-		{
-			ForceFieldPointDisplacement[x][y] = ForceFieldPointDisplacement[x-1][y];
-			ForceFieldPointVelocity[x][y] = ForceFieldPointVelocity[x-1][y];
-		}
-
-	}
-	for (x=15*3-1; x>1; x--)
-	{
-		y = FastRandom()&15;
-	 	ForceFieldPointDisplacement[x][y] = ForceFieldPointDisplacement[x-1][y];
-		y = (FastRandom()&15)-1;
-	 	ForceFieldPointDisplacement[x][y] = ForceFieldPointDisplacement[x-1][y];
-	}
 }
 
 void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin)
@@ -3573,7 +3347,7 @@ void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin)
 		velocity.vy = (FastRandom()&511)+512;//-((FastRandom()&1023)+2048)*8;
 		velocity.vx = ((FastRandom()&511)+256)*2;
 		velocity.vz = 0;//-((FastRandom()&511))*8;
-		MakeParticle(&(position), &velocity, PARTICLE_WATERFALLSPRAY);
+		MakeParticle(&position, &velocity, PARTICLE_WATERFALLSPRAY);
 	}
 }
 
@@ -4449,7 +4223,7 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 		for (x=(0+field*15); x<(16+field*15); x++)
 		{
 			int z;
-			for(z=0; z<16; z++)
+			for (z=0; z<16; z++)
 			{
 				VECTORCH *point = &MeshVertex[i];
 				{
@@ -4473,40 +4247,6 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 				}
 
 //bjd				TranslatePointIntoViewspace(point);
-
-/*
-				// is particle within normal view frustum ?
-				if(AvP.PlayerType==I_Alien)	// wide frustum
-				{
-					if(( (-point->vx <= point->vz*2)
-		   				&&(point->vx <= point->vz*2)
-						&&(-point->vy <= point->vz*2)
-						&&(point->vy <= point->vz*2) ))
-					{
-						MeshVertexOutcode[i]=1;
-					}
-					else
-					{
-						MeshVertexOutcode[i]=0;
-					}
-				}
-				else
-				{
-					if(( (-point->vx <= point->vz)
-		   				&&(point->vx <= point->vz)
-						&&(-point->vy <= point->vz)
-						&&(point->vy <= point->vz) ))
-					{
-						MeshVertexOutcode[i]=1;
-					}
-					else
-					{
-						MeshVertexOutcode[i]=0;
-					}
-				}
-*/
-				// bjd - override above
-				MeshVertexOutcode[i] = 1;
 
 				i++;
 			}

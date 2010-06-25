@@ -6498,3 +6498,68 @@ void RenderStarfield(void)
 		}
 	}
 }
+
+signed int ForceFieldPointDisplacement[15*3+1][16];
+signed int ForceFieldPointDisplacement2[15*3+1][16];
+signed int ForceFieldPointVelocity[15*3+1][16];
+unsigned char ForceFieldPointColour1[15*3+1][16];
+unsigned char ForceFieldPointColour2[15*3+1][16];
+
+void InitForceField(void)
+{
+	int x, y;
+
+	for (x=0; x<15*3+1; x++)
+	{
+		for (y=0; y<16; y++)
+		{
+			ForceFieldPointDisplacement[x][y]=0;
+			ForceFieldPointDisplacement2[x][y]=0;
+			ForceFieldPointVelocity[x][y]=0;
+		}
+	}
+}
+
+int LightIntensityAtPoint(VECTORCH *pointPtr)
+{
+	int intensity=0;
+	int i, j, dist;
+
+	DISPLAYBLOCK **activeBlockListPtr = ActiveBlockList;
+	for (i = NumActiveBlocks; i!=0; i--)
+	{
+		DISPLAYBLOCK *dispPtr = *activeBlockListPtr++;
+
+		if (dispPtr->ObNumLights)
+		{
+			for (j = 0; j < dispPtr->ObNumLights; j++)
+			{
+				LIGHTBLOCK *lptr = dispPtr->ObLights[j];
+
+				VECTORCH disp = lptr->LightWorld;
+				disp.vx -= pointPtr->vx;
+				disp.vy -= pointPtr->vy;
+				disp.vz -= pointPtr->vz;
+
+				dist = Approximate3dMagnitude(&disp);
+
+				if (dist < lptr->LightRange)
+				{
+					intensity += WideMulNarrowDiv(lptr->LightBright, lptr->LightRange-dist, lptr->LightRange);
+				}
+			}
+		}
+	}
+	if (intensity>ONE_FIXED) 
+		intensity = ONE_FIXED;
+	else if (intensity < GlobalAmbience) 
+		intensity = GlobalAmbience;
+
+	/* KJL 20:31:39 12/1/97 - limit how dark things can be so blood doesn't go green */
+	if (intensity < 10*256) 
+		intensity = 10*256;
+
+	return intensity;
+}
+
+
