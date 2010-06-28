@@ -121,6 +121,8 @@ bool ReleaseVolatileResources()
 	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
 	SAFE_RELEASE(d3d.lpD3DOrthoVertexBuffer);
 	SAFE_RELEASE(d3d.lpD3DOrthoIndexBuffer);
+	SAFE_RELEASE(d3d.lpD3DParticleVertexBuffer);
+	SAFE_RELEASE(d3d.lpD3DParticleIndexBuffer);
 
 	return true;
 }
@@ -155,6 +157,22 @@ bool CreateVolatileResources()
 
 	// create our 2D index buffer
 	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoIndexBuffer, NULL);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	// create particle vertex buffer
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DLVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &d3d.lpD3DParticleVertexBuffer, NULL);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	// create particle index buffer
+	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DParticleIndexBuffer, NULL);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);

@@ -36,6 +36,7 @@ class RingBuffer
 		uint8_t		*buffer;
 		uint32_t	bufferCapacity;
 		CRITICAL_SECTION mCriticalSection;
+
 	public:
 		RingBuffer(uint32_t size);
 		~RingBuffer();

@@ -52,8 +52,6 @@ uint32_t RingBuffer::GetWritableSize()
 {
 	// load ring buffer
 	int32_t freeSpace = 0;
-//	uint32_t firstSize = 0;
-//	uint32_t secondSize = 0;
 
 	EnterCriticalSection(&mCriticalSection);
 
@@ -87,9 +85,7 @@ uint32_t RingBuffer::GetWritableSize()
 
 uint32_t RingBuffer::GetReadableSize()
 {
-	// find out how we need to read data. do we split into 2 memcpys or not?
-//	uint32_t firstSize = 0;
-//	uint32_t secondSize = 0;
+	// find out how we need to read data. do we split into 2 memcpy-s or not?
 	int32_t readableSpace = 0;
 
 	EnterCriticalSection(&mCriticalSection);

@@ -143,6 +143,9 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold);
 extern void UpdateViewMatrix(float *viewMat);
 void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr);
 
+extern void TransformToViewspace(VECTORCHF *vector);
+extern void AddCorona(PARTICLE *particlePtr, VECTORCHF *coronaPoint);
+
 /*KJL************************************************************************************
 * N.B. All the following global variables have their first elements initialised so that *
 * they will end up in high memory on the Saturn.                                        *
@@ -4442,8 +4445,20 @@ void RenderDecal(DECAL *decalPtr)
 void RenderParticle(PARTICLE *particlePtr)
 {
 	int particleSize = particlePtr->Size;
+	VECTORCHF tempVector;
 
 	VECTORCH translatedPosition = particlePtr->Position;
+
+	tempVector.vx = (float)particlePtr->Position.vx;
+	tempVector.vy = (float)-particlePtr->Position.vy;
+	tempVector.vz = (float)particlePtr->Position.vz;
+
+	TransformToViewspace(&tempVector);
+
+	translatedPosition.vx = tempVector.vx;
+	translatedPosition.vy = tempVector.vy;
+	translatedPosition.vz = tempVector.vz;
+
 //	TranslatePointIntoViewspace2(&translatedPosition);
 
 	VerticesBuffer[0].X = translatedPosition.vx;
@@ -5988,9 +6003,6 @@ void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRI
 }
 
 int LightFlareAlpha = 65535;
-
-extern void TransformToViewspace(VECTORCHF *vector);
-extern void AddCorona(PARTICLE *particlePtr, VECTORCHF *coronaPoint);
 
 void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 {

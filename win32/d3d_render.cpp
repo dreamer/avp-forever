@@ -35,7 +35,6 @@ int32_t	currentWaterTexture = NO_TEXTURE;
 
 uint32_t	NumIndicies = 0;
 uint32_t	vb = 0;
-uint32_t	particleIndex = 0;
 static uint32_t	renderCount = 0;
 static uint32_t	transRenderCount = 0;
 static uint32_t NumberOfRenderedTriangles = 0;
@@ -100,8 +99,46 @@ int LightIntensityAtPoint(VECTORCH *pointPtr);
 const uint32_t MAX_VERTEXES = 4096;
 const uint32_t MAX_INDICES = 9216;
 
+struct RENDER_STATES
+{
+	int32_t		textureID;
+	uint32_t	vertStart;
+	uint32_t	vertEnd;
+	uint32_t	indexStart;
+	uint32_t	indexEnd;
+
+	enum TRANSLUCENCY_TYPE translucencyType;
+	enum FILTERING_MODE_ID filteringType;
+
+	bool operator<(const RENDER_STATES& rhs) const {return textureID < rhs.textureID;}
+//	bool operator<(const RENDER_STATES& rhs) const {return translucency_type < rhs.translucency_type;}
+};
+
+struct ORTHO_OBJECTS
+{
+	int32_t		textureID;
+	uint32_t	vertStart;
+	uint32_t	vertEnd;
+
+	uint32_t	indexStart;
+	uint32_t	indexEnd;
+
+	enum TRANSLUCENCY_TYPE translucencyType;
+	enum FILTERING_MODE_ID filteringType;
+	enum TEXTURE_ADDRESS_MODE textureAddressMode;
+};
+
 D3DLVERTEX *mainVertex = NULL;
 WORD *mainIndex = NULL;
+
+D3DLVERTEX *particleVertex = NULL;
+WORD *particleIndex = NULL;
+uint32_t	pVb = 0;
+uint32_t	pIb = 0;
+uint32_t	pIndexCount = 0;
+uint32_t	numPVertices = 0;
+RENDER_STATES *particleList = new RENDER_STATES[MAX_VERTEXES];
+uint32_t particleListCount = 0;
 
 ORTHOVERTEX *orthoVerts = NULL;
 WORD *orthoIndex = NULL;
@@ -133,39 +170,11 @@ void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 
 static HRESULT LastError;
 
-struct RENDER_STATES
-{
-	int32_t		textureID;
-	uint32_t	vertStart;
-	uint32_t	vertEnd;
-	uint32_t	indexStart;
-	uint32_t	indexEnd;
-
-	enum TRANSLUCENCY_TYPE translucencyType;
-	enum FILTERING_MODE_ID filteringType;
-
-	bool operator<(const RENDER_STATES& rhs) const {return textureID < rhs.textureID;}
-//	bool operator<(const RENDER_STATES& rhs) const {return translucency_type < rhs.translucency_type;}
-};
 
 RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
 RENDER_STATES *transRenderList = new RENDER_STATES[MAX_VERTEXES];
 
 std::vector<RENDER_STATES> renderTest;
-
-struct ORTHO_OBJECTS
-{
-	int32_t		textureID;
-	uint32_t	vertStart;
-	uint32_t	vertEnd;
-
-	uint32_t	indexStart;
-	uint32_t	indexEnd;
-
-	enum TRANSLUCENCY_TYPE translucencyType;
-	enum FILTERING_MODE_ID filteringType;
-	enum TEXTURE_ADDRESS_MODE textureAddressMode;
-};
 
 // array of 2d objects
 ORTHO_OBJECTS *orthoList = new ORTHO_OBJECTS[MAX_VERTEXES]; // lower me!
@@ -457,43 +466,6 @@ void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 	}
 }
 
-bool UnlockExecuteBufferAndPrepareForUse()
-{
-	// unlock main vertex buffer
-	LastError = d3d.lpD3DVertexBuffer->Unlock();
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	// unlock index buffer for main vertex buffer
-	LastError = d3d.lpD3DIndexBuffer->Unlock();
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	// unlock orthographic quad vertex buffer
-	LastError = d3d.lpD3DOrthoVertexBuffer->Unlock();
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	// unlock orthographic index buffer
-	LastError = d3d.lpD3DOrthoIndexBuffer->Unlock();
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	return true;
-}
-
 bool LockExecuteBuffer()
 {
 	LastError = d3d.lpD3DVertexBuffer->Lock(0, 0, (void**)&mainVertex, D3DLOCK_DISCARD);
@@ -504,6 +476,22 @@ bool LockExecuteBuffer()
 	}
 
 	LastError = d3d.lpD3DIndexBuffer->Lock(0, 0, (void**)&mainIndex, D3DLOCK_DISCARD);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	// lock particle vertex buffer
+	LastError = d3d.lpD3DParticleVertexBuffer->Lock(0, 0, (void**)&particleVertex, D3DLOCK_DISCARD);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	// lock particle index buffer
+	LastError = d3d.lpD3DParticleIndexBuffer->Lock(0, 0, (void**)&particleIndex, D3DLOCK_DISCARD);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -536,9 +524,67 @@ bool LockExecuteBuffer()
 	orthoIBOffset = 0;
 	orthoListCount = 0;
 
+	pVb = 0;
+	pIb = 0;
+	particleListCount = 0;
+	numPVertices = 0;
+
 	renderTest.clear();
 
     return true;
+}
+
+bool UnlockExecuteBufferAndPrepareForUse()
+{
+	// unlock main vertex buffer
+	LastError = d3d.lpD3DVertexBuffer->Unlock();
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	// unlock index buffer for main vertex buffer
+	LastError = d3d.lpD3DIndexBuffer->Unlock();
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	// unlock particle vertex buffer
+	LastError = d3d.lpD3DParticleVertexBuffer->Unlock();
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	// unlock particle index buffer
+	LastError = d3d.lpD3DParticleIndexBuffer->Unlock();
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	// unlock orthographic quad vertex buffer
+	LastError = d3d.lpD3DOrthoVertexBuffer->Unlock();
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	// unlock orthographic index buffer
+	LastError = d3d.lpD3DOrthoIndexBuffer->Unlock();
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
 }
 
 static void ChangeTexture(const int32_t textureID)
@@ -2086,6 +2132,14 @@ static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n)
 	NumIndicies+=3;
 }
 
+static inline void OUTPUT_TRIANGLE2(int a, int b, int c, int n)
+{
+	particleIndex[pIb]   = (numPVertices - (n) + (a));
+	particleIndex[pIb+1] = (numPVertices - (n) + (b));
+	particleIndex[pIb+2] = (numPVertices - (n) + (c));
+	pIndexCount+=3;
+}
+
 static inline void D3D_OutputTriangles()
 {
 	switch (RenderPolygon.NumberOfVertices)
@@ -2885,7 +2939,78 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	float RecipW = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
 	float RecipH = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
 
-	CheckVertexBuffer(RenderPolygon.NumberOfVertices, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType);
+//	CheckVertexBuffer(RenderPolygon.NumberOfVertices, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType);
+//	void CheckVertexBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
+
+	uint32_t realNumVerts = 0;
+
+	switch (RenderPolygon.NumberOfVertices)
+	{
+		case 3:
+			realNumVerts = 3;
+			break;
+		case 4:
+			realNumVerts = 6;
+			break;
+		case 5:
+			realNumVerts = 9;
+			break;
+		case 6:
+			realNumVerts = 12;
+			break;
+		case 7:
+			realNumVerts = 15;
+			break;
+		case 8:
+			realNumVerts = 18;
+			break;
+		case 0:
+			return;
+		case 256:
+			realNumVerts = 1350;
+			break;
+		default:
+			// need to check this is ok!!
+			realNumVerts = RenderPolygon.NumberOfVertices;
+	}
+
+	// check if we have enough room here
+
+	particleList[particleListCount].textureID = SpecialFXImageNumber;
+	particleList[particleListCount].vertStart = 0;
+	particleList[particleListCount].vertEnd = 0;
+
+	particleList[particleListCount].indexStart = 0;
+	particleList[particleListCount].indexEnd = 0;
+
+	particleList[particleListCount].translucencyType = (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType;
+	particleList[particleListCount].filteringType = FILTERING_BILINEAR_ON;
+
+	// check if current vertexes use the same texture and render states as the previous
+	// if they do, we can 'merge' the two together
+	if (particleListCount != 0 &&
+		SpecialFXImageNumber == particleList[particleListCount-1].textureID &&
+		(enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType == particleList[particleListCount-1].translucencyType &&
+		FILTERING_BILINEAR_ON	 == particleList[particleListCount-1].filteringType)
+	{
+		// ok, drop back to the previous data
+//		renderTest.pop_back();
+		particleListCount--;
+	}
+	else
+	{
+		particleList[particleListCount].vertStart = numPVertices;
+		particleList[particleListCount].indexStart = pIb;
+	}
+
+	particleList[particleListCount].vertEnd = numPVertices + RenderPolygon.NumberOfVertices;
+	particleList[particleListCount].indexEnd = pIb + realNumVerts;
+
+//	renderTest.push_back(renderList[renderCount]);
+	particleListCount++;
+
+	numPVertices += RenderPolygon.NumberOfVertices;
+
 /*
 	char buf[100];
 	sprintf(buf, "trans type: %d\n", particleDescPtr->TranslucencyType);
@@ -2952,20 +3077,87 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 			zvalue = (float)vertices->Z;
 		}
 
-		mainVertex[vb].sx = (float)vertices->X;
-		mainVertex[vb].sy = (float)-vertices->Y;
-		mainVertex[vb].sz = (float)vertices->Z;//zvalue;
+		particleVertex[pVb].sx = (float)vertices->X;
+		particleVertex[pVb].sy = (float)-vertices->Y;
+		particleVertex[pVb].sz = (float)vertices->Z;
 
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+		particleVertex[pVb].color = colour;
+		particleVertex[pVb].specular = RGBALIGHT_MAKE(0,0,0,255);
 
-		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
-		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
+		particleVertex[pVb].tu = (float)(vertices->U) * RecipW;
+		particleVertex[pVb].tv = (float)(vertices->V) * RecipH;
 
-		vb++;
+		pVb++;
 	}
 
-	D3D_OutputTriangles();
+//	D3D_OutputTriangles();
+
+	switch (RenderPolygon.NumberOfVertices)
+	{
+		default:
+			OutputDebugString("unexpected number of verts to render\n");
+			break;
+		case 0:
+			OutputDebugString("Asked to render 0 verts\n");
+			break;
+		case 3:
+		{
+			OUTPUT_TRIANGLE2(0,2,1, 3);
+			break;
+		}
+		case 4:
+		{
+			OUTPUT_TRIANGLE2(0,1,2, 4);
+			OUTPUT_TRIANGLE2(0,2,3, 4);
+			break;
+		}
+		case 5:
+		{
+			OUTPUT_TRIANGLE2(0,1,4, 5);
+		    OUTPUT_TRIANGLE2(1,3,4, 5);
+		    OUTPUT_TRIANGLE2(1,2,3, 5);
+
+			break;
+		}
+		case 6:
+		{
+			OUTPUT_TRIANGLE2(0,4,5, 6);
+		    OUTPUT_TRIANGLE2(0,3,4, 6);
+		    OUTPUT_TRIANGLE2(0,2,3, 6);
+		    OUTPUT_TRIANGLE2(0,1,2, 6);
+
+			break;
+		}
+		case 7:
+		{
+			OUTPUT_TRIANGLE2(0,5,6, 7);
+		    OUTPUT_TRIANGLE2(0,4,5, 7);
+		    OUTPUT_TRIANGLE2(0,3,4, 7);
+		    OUTPUT_TRIANGLE2(0,2,3, 7);
+		    OUTPUT_TRIANGLE2(0,1,2, 7);
+
+			break;
+		}
+		case 8:
+		{
+			OUTPUT_TRIANGLE2(0,6,7, 8);
+		    OUTPUT_TRIANGLE2(0,5,6, 8);
+		    OUTPUT_TRIANGLE2(0,4,5, 8);
+		    OUTPUT_TRIANGLE2(0,3,4, 8);
+		    OUTPUT_TRIANGLE2(0,2,3, 8);
+		    OUTPUT_TRIANGLE2(0,1,2, 8);
+
+			break;
+		}
+	}
+/*
+	if (NumVertices > (MAX_VERTEXES-12))
+	{
+		UnlockExecuteBufferAndPrepareForUse();
+		ExecuteBuffer();
+		LockExecuteBuffer();
+	}
+*/
 }
 
 void PostLandscapeRendering()
