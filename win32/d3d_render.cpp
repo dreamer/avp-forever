@@ -39,24 +39,25 @@ static uint32_t	renderCount = 0;
 static uint32_t	transRenderCount = 0;
 static uint32_t NumberOfRenderedTriangles = 0;
 
-D3DVERTEXELEMENT9 decl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
+// vertex declarations
+D3DVERTEXELEMENT9 declMain[] = {{0, 0,  D3DDECLTYPE_FLOAT3,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
 							{0, 12, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		0},
 							{0, 16, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		1},
                             {0, 20, D3DDECLTYPE_FLOAT2,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
                             D3DDECL_END()};
 
-D3DVERTEXELEMENT9 orthoDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
+D3DVERTEXELEMENT9 declOrtho[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
 								 {0, 12, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		0},
 								 {0, 16, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
                             D3DDECL_END()};
 
-D3DVERTEXELEMENT9 fmvDecl[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
+D3DVERTEXELEMENT9 declFMV[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
 							   {0, 12, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
 							   {0, 20, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	1},
 							   {0, 28, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	2},
                             D3DDECL_END()};
 
-D3DVERTEXELEMENT9 cloudDecl[] = {{0, 0, D3DDECLTYPE_FLOAT3,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
+D3DVERTEXELEMENT9 declTallFontText[] = {{0, 0, D3DDECLTYPE_FLOAT3,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
 								{0, 12, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		0},	
 							    {0, 16, D3DDECLTYPE_FLOAT2,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
 							    {0, 24, D3DDECLTYPE_FLOAT2,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	1},
@@ -70,6 +71,7 @@ LPD3DXCONSTANTTABLE	cloudConstantTable = NULL;
 D3DXMATRIX viewMatrix;
 
 extern D3DXMATRIX matOrtho;
+extern D3DXMATRIX matOrtho2;
 extern D3DXMATRIX matProjection;
 extern D3DXMATRIX matIdentity;
 extern D3DXMATRIX matViewPort;
@@ -733,6 +735,52 @@ bool ExecuteBuffer()
 		NumberOfRenderedTriangles += numPrimitives / 3;
 
 //		D3DPERF_EndEvent();
+	}
+
+	// render any particles
+	if (particleListCount)
+	{
+		D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Starting to draw particles..."));
+
+		LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DParticleVertexBuffer, 0, sizeof(D3DLVERTEX));
+		if (FAILED(LastError))
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+
+		LastError = d3d.lpD3DDevice->SetIndices(d3d.lpD3DParticleIndexBuffer);
+		if (FAILED(LastError))
+		{
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+
+		vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho2);
+
+		for (uint32_t i = 0; i < particleListCount; i++)
+		{
+			ChangeTexture(particleList[i].textureID);
+			ChangeTranslucencyMode(particleList[i].translucencyType);
+			ChangeFilteringMode(particleList[i].filteringType);
+
+			uint32_t numPrimitives = (particleList[i].indexEnd - particleList[i].indexStart) / 3;
+
+			if (numPrimitives > 0)
+			{
+				LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
+					0,
+					0,
+					numPVertices,
+					particleList[i].indexStart,
+					numPrimitives);
+	
+				if (FAILED(LastError))
+				{
+					LogDxError(LastError, __LINE__, __FILE__);
+				}
+			}
+		}
+
+		D3DPERF_EndEvent();
 	}
 
 	// render any orthographic quads
@@ -1795,7 +1843,10 @@ void DrawCoronas()
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
 	d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
 
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE);
+
+//	int sizeX = (ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
+//	int sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
 
 	D3DCOLOR colour;
 	
@@ -1871,7 +1922,6 @@ void DrawCoronas()
 		ortho[0].y = HPos2DC(tempVec.y + size);
 		ortho[0].z = 1.0f;
 		ortho[0].colour = colour;
-//		ortho[0].specular = RGBALIGHT_MAKE(0,0,0,255);
 		ortho[0].u = (float)192 * RecipW;
 		ortho[0].v = (float)63 * RecipH;
 
@@ -1880,7 +1930,6 @@ void DrawCoronas()
 		ortho[1].y = HPos2DC(tempVec.y - size);
 		ortho[1].z = 1.0f;
 		ortho[1].colour = colour;
-//		ortho[1].specular = RGBALIGHT_MAKE(0,0,0,255);
 		ortho[1].u = (float)192 * RecipW;
 		ortho[1].v = (float)0 * RecipH;
 
@@ -1889,7 +1938,6 @@ void DrawCoronas()
 		ortho[2].y = HPos2DC(tempVec.y + size);
 		ortho[2].z = 1.0f;
 		ortho[2].colour = colour;
-//		ortho[2].specular = RGBALIGHT_MAKE(0,0,0,255);
 		ortho[2].u = (float)255 * RecipW;
 		ortho[2].v = (float)63 * RecipH;
 
@@ -1898,7 +1946,6 @@ void DrawCoronas()
 		ortho[3].y = HPos2DC(tempVec.y - size);
 		ortho[3].z = 1.0f;
 		ortho[3].colour = colour;
-//		ortho[3].specular = RGBALIGHT_MAKE(0,0,0,255);
 		ortho[3].u = (float)255 * RecipW;
 		ortho[3].v = (float)0 * RecipH;
 
@@ -1922,7 +1969,7 @@ void DrawCoronas()
 		}
 	}
 
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE);
 
 	coronaArray.clear();
 

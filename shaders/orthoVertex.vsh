@@ -29,8 +29,7 @@ VS_OUTPUT vs_main( in VS_INPUT In )
 {
     VS_OUTPUT Out;                      //create an output vertex
 
-    Out.Position = mul(In.Position,
-                       WorldViewProj);  //apply vertex transformation
+    Out.Position = mul(In.Position, WorldViewProj);  //apply vertex transformation
     Out.Texture  = In.Texture;          //copy original texcoords
     
     Out.Diffuse = In.Diffuse;

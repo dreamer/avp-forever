@@ -37,15 +37,16 @@ extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 #include "font2.h"
 
 D3DXMATRIX matOrtho;
+D3DXMATRIX matOrtho2;
 D3DXMATRIX matProjection;
 D3DXMATRIX matView;
 D3DXMATRIX matIdentity;
 D3DXMATRIX matViewPort;
 
-extern D3DVERTEXELEMENT9 decl[];
-extern D3DVERTEXELEMENT9 orthoDecl[];
-extern D3DVERTEXELEMENT9 fmvDecl[];
-extern D3DVERTEXELEMENT9 cloudDecl[];
+extern D3DVERTEXELEMENT9 declMain[];
+extern D3DVERTEXELEMENT9 declOrtho[];
+extern D3DVERTEXELEMENT9 declFMV[];
+extern D3DVERTEXELEMENT9 declTallFontText[];
 
 extern LPD3DXCONSTANTTABLE	vertexConstantTable;
 extern LPD3DXCONSTANTTABLE	orthoConstantTable;
@@ -1133,9 +1134,9 @@ BOOL InitialiseDirect3D()
 	Con_PrintMessage("\t Found " + LogInteger(d3d.NumDrivers) + " video adapter(s)");
 
 	// Get adapter information for all available devices (vid card name, etc)
-	for (int i = 0; i < d3d.NumDrivers; i++)
+	for (uint32_t driverIndex = 0; driverIndex < d3d.NumDrivers; driverIndex++)
 	{
-		LastError = d3d.lpD3D->GetAdapterIdentifier(i, /*D3DENUM_WHQL_LEVEL*/0, &d3d.Driver[i].AdapterInfo);
+		LastError = d3d.lpD3D->GetAdapterIdentifier(driverIndex, /*D3DENUM_WHQL_LEVEL*/0, &d3d.Driver[driverIndex].AdapterInfo);
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
@@ -1549,10 +1550,10 @@ BOOL InitialiseDirect3D()
 	Con_AddCommand("r_toggleWireframe", ToggleWireframe);
 	Con_AddCommand("r_setfov", SetFov);
 
-	d3d.lpD3DDevice->CreateVertexDeclaration(decl, &d3d.vertexDecl);
-	d3d.lpD3DDevice->CreateVertexDeclaration(orthoDecl, &d3d.orthoVertexDecl);
-	d3d.lpD3DDevice->CreateVertexDeclaration(fmvDecl, &d3d.fmvVertexDecl);
-	LastError = d3d.lpD3DDevice->CreateVertexDeclaration(cloudDecl, &d3d.cloudVertexDecl);
+	d3d.lpD3DDevice->CreateVertexDeclaration(declMain, &d3d.vertexDecl);
+	d3d.lpD3DDevice->CreateVertexDeclaration(declOrtho, &d3d.orthoVertexDecl);
+	d3d.lpD3DDevice->CreateVertexDeclaration(declFMV, &d3d.fmvVertexDecl);
+	LastError = d3d.lpD3DDevice->CreateVertexDeclaration(declTallFontText, &d3d.cloudVertexDecl);
 	if (FAILED(LastError))
 	{
 		OutputDebugString("CreateVertexDeclaration failed\n");
@@ -1564,13 +1565,13 @@ BOOL InitialiseDirect3D()
 	}
 	CreateVertexShader("orthoVertex.vsh", &d3d.orthoVertexShader, &orthoConstantTable);
 	CreateVertexShader("fmvVertex.vsh", &d3d.fmvVertexShader, &fmvConstantTable);
-	CreateVertexShader("cloudTextVertex.vsh", &d3d.cloudVertexShader, &cloudConstantTable);
+	CreateVertexShader("tallFontTextVertex.vsh", &d3d.cloudVertexShader, &cloudConstantTable);
 
 //	CreateVertexShader("pretransformedVert.vsh", &preTransVertexShader, &pretConstantTable);
 
 	CreatePixelShader("pixel.psh", &d3d.pixelShader);
 	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
-	CreatePixelShader("cloudTextPixel.psh", &d3d.cloudPixelShader);
+	CreatePixelShader("tallFontTextPixel.psh", &d3d.cloudPixelShader);
 
 	// create a 1x1 resolution texture to set to shader for sampling when we don't want to texture an object (eg what was NULL texture in fixed function pipeline)
 	d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &blankTexture, NULL);
@@ -1606,17 +1607,20 @@ void SetTransforms()
 	// set up orthographic projection matrix
 	D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 
+	// set up orthographic projection matrix
+	D3DXMatrixOrthoLH(&matOrtho2, (float)ScreenDescriptorBlock.SDB_Width, (float)ScreenDescriptorBlock.SDB_Height, 1.0f, 10.0f);
+
 	// set up projection matrix
 	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
 
 	// set up a viewport transform matrix
 	matViewPort = matIdentity;
 	
-	matViewPort._11 = (ScreenDescriptorBlock.SDB_Width / 2);
-	matViewPort._22 = ((-ScreenDescriptorBlock.SDB_Height) / 2);
+	matViewPort._11 = (float)(ScreenDescriptorBlock.SDB_Width / 2);
+	matViewPort._22 = (float)((-ScreenDescriptorBlock.SDB_Height) / 2);
 	matViewPort._33 = (1.0f - 0.0f);
 	matViewPort._41 = (0 + matViewPort._11); // dwX + dwWidth / 2
-	matViewPort._42 = (ScreenDescriptorBlock.SDB_Height / 2) + 0;
+	matViewPort._42 = (float)(ScreenDescriptorBlock.SDB_Height / 2) + 0;
 	matViewPort._43 = 0.0f; // minZ
 	matViewPort._44 = 1.0f;
 

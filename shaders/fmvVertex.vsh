@@ -28,14 +28,13 @@ float4x4 WorldViewProj;
 //
 VS_OUTPUT vs_main( in VS_INPUT In )
 {
-    VS_OUTPUT Out;                      //create an output vertex
+    VS_OUTPUT Out;                        //create an output vertex
 
-    Out.Position = mul(In.Position,
-                       WorldViewProj);  //apply vertex transformation
+    Out.Position = mul(In.Position, WorldViewProj);  //apply vertex transformation
 
     Out.Texture1  = In.Texture1;          //copy original texcoords
     Out.Texture2  = In.Texture2;          //copy original texcoords
     Out.Texture3  = In.Texture3;          //copy original texcoords
 
-    return Out;                         //return output vertex
+    return Out;                           //return output vertex
 }
