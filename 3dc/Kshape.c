@@ -4459,8 +4459,6 @@ void RenderParticle(PARTICLE *particlePtr)
 	translatedPosition.vy = tempVector.vy;
 	translatedPosition.vz = tempVector.vz;
 
-//	TranslatePointIntoViewspace2(&translatedPosition);
-
 	VerticesBuffer[0].X = translatedPosition.vx;
 	VerticesBuffer[3].X = translatedPosition.vx;
 	VerticesBuffer[0].Y = translatedPosition.vy;
@@ -4944,204 +4942,6 @@ VECTORCH shaftVertices[]=
 		{0, 	14500,	0},
 };
 */
-
-#if 0 // bjd
-void RenderShaftOfLight(MODULE *modulePtr)
-{
-	/* translate shaft into view space */
-	#define NUM_OF_SHAFT_VERTICES 12
-	VECTORCH translatedPts[NUM_OF_SHAFT_VERTICES];
-
-	POLYHEADER fakeHeader;
-	DECAL fakeDecal;
-	int polyNumber;
-	VECTORCH lightDirection1 = {29309,29309,-2000};
-	VECTORCH lightDirection2 = {29309,29309,2000};
-
-	{
-		int offset = GetSin((CloakingPhase/16)&4095);
-		if (offset<0) offset=-offset;
-		offset = MUL_FIXED(offset,offset);
-		offset = MUL_FIXED(offset,offset);
-		offset = MUL_FIXED(offset,4000);
-		lightDirection1.vz += offset;
-		lightDirection2.vz += offset;
-	}
-	Normalise(&lightDirection1);
-	Normalise(&lightDirection2);
-//	textprint("light shaft active");
-	fakeDecal.ModuleIndex = modulePtr->m_index;
-	fakeHeader.PolyFlags = iflag_transparent;
-
-	FindIntersectionWithYPlane(&shaftVertices[2],&lightDirection1,&shaftVertices[4]);
-	FindIntersectionWithYPlane(&shaftVertices[3],&lightDirection2,&shaftVertices[5]);
-	FindZFromXYIntersection(&shaftVertices[2],&lightDirection1,&shaftVertices[6]);
-	FindZFromXYIntersection(&shaftVertices[3],&lightDirection2,&shaftVertices[7]);
-	FindIntersectionWithYPlane(&shaftVertices[0],&lightDirection1,&shaftVertices[10]);
-	FindIntersectionWithYPlane(&shaftVertices[1],&lightDirection2,&shaftVertices[11]);
-	FindIntersectionWithYPlane(&shaftVertices[6],&lightDirection1,&shaftVertices[8]);
-	FindIntersectionWithYPlane(&shaftVertices[7],&lightDirection2,&shaftVertices[9]);
-
-	{
-
-		int i = NUM_OF_SHAFT_VERTICES-1;
-		do
-		{
-			translatedPts[i] = shaftVertices[i];
-			translatedPts[i].vx+=11762;
-			translatedPts[i].vy+=-6919;
-			translatedPts[i].vz+=-26312;
-			TranslatePointIntoViewspace(&translatedPts[i]);
-		}
-	   	while(i--);
-   	}
-
-
-	for(polyNumber=0; polyNumber<9; polyNumber++)
-	{
-		{
-			int i;
-			for (i=0; i<4; i++)
-			{
-				int v = polys[polyNumber][i];
-				VerticesBuffer[i].A = alphaValue[v];
-				VerticesBuffer[i].X	= translatedPts[v].vx;
-				VerticesBuffer[i].Y	= translatedPts[v].vy;
-				VerticesBuffer[i].Z	= translatedPts[v].vz;
-				VerticesBuffer[i].R = 255;
-				VerticesBuffer[i].G	= 255;
-				VerticesBuffer[i].B = 192;
-			}
-			RenderPolygon.NumberOfVertices=4;
-		}
-		{
-			int outcode = DecalWithinFrustum(&fakeDecal);
-
-			if (outcode)
-			{
-				if (outcode!=2)
-				{
-					GouraudPolygon_ClipWithZ();
-					if(RenderPolygon.NumberOfVertices<3) continue;
-					GouraudPolygon_ClipWithNegativeX();
-					if(RenderPolygon.NumberOfVertices<3) continue;
-					GouraudPolygon_ClipWithPositiveY();
-					if(RenderPolygon.NumberOfVertices<3) continue;
-					GouraudPolygon_ClipWithNegativeY();
-					if(RenderPolygon.NumberOfVertices<3) continue;
-					GouraudPolygon_ClipWithPositiveX();
-					if(RenderPolygon.NumberOfVertices<3) continue;
-					D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
-	  			}
-				else D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,VerticesBuffer);
-			}
-		}
-	}
-	RenderShaftOfLight2(modulePtr);
-}
-
-void RenderShaftOfLight2(MODULE *modulePtr)
-{
-	/* translate shaft into view space */
-	#define NUM_OF_SHAFT_VERTICES 12
-	VECTORCH translatedPts[NUM_OF_SHAFT_VERTICES];
-
-	POLYHEADER fakeHeader;
-	DECAL fakeDecal;
-	int polyNumber;
-	VECTORCH lightDirection1 = {29309+1000,29309,-3000};
-	VECTORCH lightDirection2 = {29309+1000,29309,3000};
-	VECTORCH lightDirection3 = {29309-1000,29309,-3000};
-	VECTORCH lightDirection4 = {29309-1000,29309,3000};
-	{
-		int offset = GetSin((CloakingPhase/16)&4095);
-		if (offset<0) offset=-offset;
-		offset = MUL_FIXED(offset,offset);
-		offset = MUL_FIXED(offset,offset);
-		offset=MUL_FIXED(offset,4000);
-		lightDirection1.vz += offset;
-		lightDirection2.vz += offset;
-		lightDirection3.vz += offset;
-		lightDirection4.vz += offset;
-	}
-	Normalise(&lightDirection1);
-	Normalise(&lightDirection2);
-	Normalise(&lightDirection3);
-	Normalise(&lightDirection4);
-
-	fakeDecal.ModuleIndex=modulePtr->m_index;
-	fakeHeader.PolyFlags = iflag_transparent;
-
-
-	FindIntersectionWithYPlane(&shaftVertices[2],&lightDirection1,&shaftVertices[4]);
-	FindIntersectionWithYPlane(&shaftVertices[3],&lightDirection2,&shaftVertices[5]);
-	FindZFromXYIntersection(&shaftVertices[2],&lightDirection3,&shaftVertices[6]);
-	FindZFromXYIntersection(&shaftVertices[3],&lightDirection4,&shaftVertices[7]);
-	FindIntersectionWithYPlane(&shaftVertices[0],&lightDirection1,&shaftVertices[10]);
-	FindIntersectionWithYPlane(&shaftVertices[1],&lightDirection2,&shaftVertices[11]);
-	FindIntersectionWithYPlane(&shaftVertices[6],&lightDirection3,&shaftVertices[8]);
-	FindIntersectionWithYPlane(&shaftVertices[7],&lightDirection4,&shaftVertices[9]);
-
-
-	{
-		int i = NUM_OF_SHAFT_VERTICES-1;
-		do
-		{
-			translatedPts[i] = shaftVertices[i];
-			translatedPts[i].vx+=11762;
-			translatedPts[i].vy+=-6919;
-			translatedPts[i].vz+=-26312;
-//			translatedPts[i].vx+=10712;
-//			translatedPts[i].vy+=-6480;
-//			translatedPts[i].vz+=-25898;
-			TranslatePointIntoViewspace(&translatedPts[i]);
-		}
-	   	while(i--);
-   	}
-
-
-	for(polyNumber=0; polyNumber<9; polyNumber++)
-	{
-		{
-			int i;
-			for (i=0; i<4; i++)
-			{
-				int v = polys[polyNumber][i];
-				VerticesBuffer[i].A = alphaValue[v]/2;
-				VerticesBuffer[i].X	= translatedPts[v].vx;
-				VerticesBuffer[i].Y	= translatedPts[v].vy;
-				VerticesBuffer[i].Z	= translatedPts[v].vz;
-				VerticesBuffer[i].R = 255;
-				VerticesBuffer[i].G	= 255;
-				VerticesBuffer[i].B = 192;
-			}
-			RenderPolygon.NumberOfVertices=4;
-		}
-		{
-			int outcode = DecalWithinFrustum(&fakeDecal);
-
-			if (outcode)
-			{
-				if (outcode!=2)
-				{
-					GouraudPolygon_ClipWithZ();
-					if(RenderPolygon.NumberOfVertices<3) continue;
-					GouraudPolygon_ClipWithNegativeX();
-					if(RenderPolygon.NumberOfVertices<3) continue;
-					GouraudPolygon_ClipWithPositiveY();
-					if(RenderPolygon.NumberOfVertices<3) continue;
-					GouraudPolygon_ClipWithNegativeY();
-					if(RenderPolygon.NumberOfVertices<3) continue;
-					GouraudPolygon_ClipWithPositiveX();
-					if(RenderPolygon.NumberOfVertices<3) continue;
-					D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
-	  			}
-				else D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,VerticesBuffer);
-			}
-		}
-	}
-}
-#endif
 
 void FindIntersectionWithYPlane(VECTORCH *startPtr, VECTORCH *directionPtr, VECTORCH *intersectionPtr)
 {
@@ -6214,7 +6014,6 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 					{
 						int n = SphereFace[f].v[i];
 						vertex[i] = SphereRotatedVertex[n];
-
 					}
 				}
 				for (i=0; i<3; i++)
@@ -6333,7 +6132,6 @@ void RenderInsideAlienTongue(int offset)
 	int polyNumber;
 
 	{
-
 		int i = 7;
 		do
 		{
@@ -6372,7 +6170,6 @@ void RenderInsideAlienTongue(int offset)
 				VerticesBuffer[i].SpecularR = 0;
 				VerticesBuffer[i].SpecularG = 0;
 				VerticesBuffer[i].SpecularB = 0;
-
 			}
 			RenderPolygon.NumberOfVertices=4;
 		}

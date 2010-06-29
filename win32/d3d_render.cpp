@@ -137,7 +137,7 @@ D3DLVERTEX *particleVertex = NULL;
 WORD *particleIndex = NULL;
 uint32_t	pVb = 0;
 uint32_t	pIb = 0;
-uint32_t	pIndexCount = 0;
+//uint32_t	pIndexCount = 0;
 uint32_t	numPVertices = 0;
 RENDER_STATES *particleList = new RENDER_STATES[MAX_VERTEXES];
 uint32_t particleListCount = 0;
@@ -647,7 +647,7 @@ bool ExecuteBuffer()
 		D3DXMatrixIdentity(&viewMatrix); // we want to use the identity matrix in this case
 	#endif
 
-	// we dont need world matrix here as avp has done all the world transforms itself
+	// we don't need world matrix here as avp has done all the world transforms itself
 	D3DXMATRIXA16 matWorldViewProj = viewMatrix * matProjection;
 	vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
 
@@ -754,7 +754,9 @@ bool ExecuteBuffer()
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
 
-		vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho2);
+		vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matProjection);
+
+		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE);
 
 		for (uint32_t i = 0; i < particleListCount; i++)
 		{
@@ -779,6 +781,8 @@ bool ExecuteBuffer()
 				}
 			}
 		}
+
+		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE);
 
 		D3DPERF_EndEvent();
 	}
@@ -2184,7 +2188,7 @@ static inline void OUTPUT_TRIANGLE2(int a, int b, int c, int n)
 	particleIndex[pIb]   = (numPVertices - (n) + (a));
 	particleIndex[pIb+1] = (numPVertices - (n) + (b));
 	particleIndex[pIb+2] = (numPVertices - (n) + (c));
-	pIndexCount+=3;
+	pIb+=3;
 }
 
 static inline void D3D_OutputTriangles()
@@ -3038,7 +3042,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	if (particleListCount != 0 &&
 		SpecialFXImageNumber == particleList[particleListCount-1].textureID &&
 		(enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType == particleList[particleListCount-1].translucencyType &&
-		FILTERING_BILINEAR_ON	 == particleList[particleListCount-1].filteringType)
+		FILTERING_BILINEAR_ON == particleList[particleListCount-1].filteringType)
 	{
 		// ok, drop back to the previous data
 //		renderTest.pop_back();
@@ -3125,7 +3129,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		}
 
 		particleVertex[pVb].sx = (float)vertices->X;
-		particleVertex[pVb].sy = (float)-vertices->Y;
+		particleVertex[pVb].sy = (float)vertices->Y;
 		particleVertex[pVb].sz = (float)vertices->Z;
 
 		particleVertex[pVb].color = colour;

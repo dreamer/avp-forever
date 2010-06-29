@@ -672,6 +672,14 @@ int32_t CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 
 	LPD3DXBUFFER pCode = NULL;
 	std::string actualPath = shaderPath + fileName;
 
+	// test that the path to the file is valid first (d3dx doesn't give a specific error message for this)
+	std::ifstream fileOpenTest(actualPath.c_str(), std::ifstream::in | std::ifstream::binary);
+	if (!fileOpenTest.good())
+	{
+		LogErrorString("Can't open vertex shader file " + actualPath, __LINE__, __FILE__);
+		return -1;
+	}
+
 	// set up vertex shader
 	LastError = D3DXCompileShaderFromFile(actualPath.c_str(), //filepath
 						NULL,            // macro's
@@ -685,6 +693,7 @@ int32_t CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 
 
 	if (FAILED(LastError))
 	{
+		OutputDebugString(DXGetErrorString(LastError));
 		OutputDebugString(DXGetErrorDescription(LastError));
 
 		if (pErrors)
@@ -708,6 +717,14 @@ int32_t CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *p
 	LPD3DXBUFFER pCode = NULL;
 	std::string actualPath = shaderPath + fileName;
 
+	// test that the path to the file is valid first (d3dx doesn't give a specific error message for this)
+	std::ifstream fileOpenTest(actualPath.c_str(), std::ifstream::in | std::ifstream::binary);
+	if (!fileOpenTest.good())
+	{
+		LogErrorString("Can't open pixel shader file " + actualPath, __LINE__, __FILE__);
+		return -1;
+	}
+
 	// set up pixel shader
 	LastError = D3DXCompileShaderFromFile(actualPath.c_str(), //filepath
 						NULL,            // macro's
@@ -721,6 +738,7 @@ int32_t CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *p
 
 	if (FAILED(LastError))
 	{
+		OutputDebugString(DXGetErrorString(LastError));
 		OutputDebugString(DXGetErrorDescription(LastError));
 
 		if (pErrors)
@@ -1566,8 +1584,6 @@ BOOL InitialiseDirect3D()
 	CreateVertexShader("orthoVertex.vsh", &d3d.orthoVertexShader, &orthoConstantTable);
 	CreateVertexShader("fmvVertex.vsh", &d3d.fmvVertexShader, &fmvConstantTable);
 	CreateVertexShader("tallFontTextVertex.vsh", &d3d.cloudVertexShader, &cloudConstantTable);
-
-//	CreateVertexShader("pretransformedVert.vsh", &preTransVertexShader, &pretConstantTable);
 
 	CreatePixelShader("pixel.psh", &d3d.pixelShader);
 	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
