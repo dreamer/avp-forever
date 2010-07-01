@@ -258,7 +258,6 @@ void WriteMenuTextures()
 void ColourFillBackBuffer(int FillColour)
 {
 	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_TARGET, FillColour, 1.0f, 0);
-
 }
 
 char* GetDeviceName()
@@ -666,7 +665,7 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture2(uint32_t *width, uint32_t *height)
 	return destTexture;
 }
 
-int32_t CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 *vertexShader, LPD3DXCONSTANTTABLE *constantTable)
+bool CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 *vertexShader, LPD3DXCONSTANTTABLE *constantTable)
 {
 	LPD3DXBUFFER pErrors = NULL;
 	LPD3DXBUFFER pCode = NULL;
@@ -677,8 +676,10 @@ int32_t CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 
 	if (!fileOpenTest.good())
 	{
 		LogErrorString("Can't open vertex shader file " + actualPath, __LINE__, __FILE__);
-		return -1;
+		return false;
 	}
+	// close the file
+	fileOpenTest.close();
 
 	// set up vertex shader
 	LastError = D3DXCompileShaderFromFile(actualPath.c_str(), //filepath
@@ -701,17 +702,18 @@ int32_t CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 
 			// shader didn't compile for some reason
 			OutputDebugString((const char*)pErrors->GetBufferPointer());
 			pErrors->Release();
-			return -1;
 		}
+			
+		return false;
 	}
 
 	d3d.lpD3DDevice->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), vertexShader);
 	pCode->Release();
 
-	return 0;
+	return true;
 }
 
-int32_t CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *pixelShader)
+bool CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *pixelShader)
 {
 	LPD3DXBUFFER pErrors = NULL;
 	LPD3DXBUFFER pCode = NULL;
@@ -722,8 +724,10 @@ int32_t CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *p
 	if (!fileOpenTest.good())
 	{
 		LogErrorString("Can't open pixel shader file " + actualPath, __LINE__, __FILE__);
-		return -1;
+		return false;
 	}
+	// close the file
+	fileOpenTest.close();
 
 	// set up pixel shader
 	LastError = D3DXCompileShaderFromFile(actualPath.c_str(), //filepath
@@ -746,16 +750,15 @@ int32_t CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *p
 			// shader didn't compile for some reason
 			OutputDebugString((const char*)pErrors->GetBufferPointer());
 			pErrors->Release();
-	//		return -1;
 		}
 
-		return -1;
+		return false;
 	}
 
 	d3d.lpD3DDevice->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), pixelShader);
 	pCode->Release();
 
-	return 0;
+	return true;
 }
 
 
@@ -1215,11 +1218,11 @@ BOOL InitialiseDirect3D()
 				uint32_t j = 0;
 
 				// Check if the mode already exists (to filter out refresh rates)
-				for(; j < d3d.Driver[thisDevice].NumModes; j++ )
+				for(; j < d3d.Driver[thisDevice].NumModes; j++)
 				{
-					if (( d3d.Driver[thisDevice].DisplayMode[j].Width  == DisplayMode.Width ) &&
-						( d3d.Driver[thisDevice].DisplayMode[j].Height == DisplayMode.Height) &&
-						( d3d.Driver[thisDevice].DisplayMode[j].Format == DisplayMode.Format))
+					if ((d3d.Driver[thisDevice].DisplayMode[j].Width  == DisplayMode.Width) &&
+						(d3d.Driver[thisDevice].DisplayMode[j].Height == DisplayMode.Height) &&
+						(d3d.Driver[thisDevice].DisplayMode[j].Format == DisplayMode.Format))
 							break;
 				}
 
@@ -1340,8 +1343,8 @@ BOOL InitialiseDirect3D()
 		d3dpp.BackBufferHeight = height;
 		// setting this to interval one will cap the framerate to monitor refresh
 		// the timer goes a bit mad if this isnt capped!
-		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 //		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 		ChangeWindowsSize(d3dpp.BackBufferWidth, d3dpp.BackBufferHeight);
 	}
@@ -1577,7 +1580,7 @@ BOOL InitialiseDirect3D()
 		OutputDebugString("CreateVertexDeclaration failed\n");
 	}
 
-	if (CreateVertexShader("vertex.vsh", &d3d.vertexShader, &vertexConstantTable) != 0)
+	if (!CreateVertexShader("vertex.vsh", &d3d.vertexShader, &vertexConstantTable))
 	{
 		return FALSE;
 	}

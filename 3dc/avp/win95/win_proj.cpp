@@ -449,7 +449,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 { 
 	WNDCLASSEX	wcex;
-	BOOL		rc;
 	RECT		clientRect;
 
 	memset(&wcex, 0, sizeof(WNDCLASSEX));
@@ -465,11 +464,11 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 	wcex.lpszMenuName = NAME;
 	wcex.lpszClassName = NAME;
 
-	rc = RegisterClassEx(&wcex);
-
-	if (!rc)
+	if (!RegisterClassEx(&wcex))
+	{
+		MessageBox(NULL, "Could not register Window", "Error!", MB_ICONEXCLAMATION | MB_OK);
 		return FALSE;
-
+	}
 
 //	MakeToAsciiTable();
 /*
@@ -532,7 +531,8 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 
     if (!hWndMain)
 	{
-		OutputDebugString("!hWndMain\n");
+		UnregisterClass(NULL, wcex.hInstance);
+		MessageBox(NULL, "Could not create Window", "Error!", MB_ICONEXCLAMATION | MB_OK);
 		return FALSE;
 	}
 

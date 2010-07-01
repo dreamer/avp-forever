@@ -23,15 +23,15 @@ static bool net_IsInitialised = false;
 extern void NewOnScreenMessage(char *messagePtr);
 
 int glpDP = 0;
-int AvPNetID = 0;
+uint32_t AvPNetID = 0;
 PlayerDetails thisClientPlayer;
 
 // used to hold message data
 static uint8_t packetBuffer[NET_MESSAGEBUFFERSIZE];
 
-static int netPortNumber = 23513;
-static int incomingBandwidth = 0;
-static int outgoingBandwidth = 0;
+static uint32_t netPortNumber = 23513;
+static uint32_t incomingBandwidth = 0;
+static uint32_t outgoingBandwidth = 0;
 
 NET_SESSIONDESC netSession; // main game session
 
@@ -55,12 +55,12 @@ int Net_UpdateSessionDescForLobbiedGame(int gamestyle, int level);
 // {379CCA80-8BDD-11d0-A078-004095E16EA5}
 static const GUID AvPGuid = { 0x379cca80, 0x8bdd, 0x11d0, { 0xa0, 0x78, 0x0, 0x40, 0x95, 0xe1, 0x6e, 0xa5 } };
 
-const int MESSAGEHEADERSIZE = sizeof(messageHeader);
+const uint32_t MESSAGEHEADERSIZE = sizeof(messageHeader);
 
 BOOL Net_UpdateSessionList(int *SelectedItem)
 {
 	GUID OldSessionGuids[MAX_NO_OF_SESSIONS];
-	int OldNumberOfSessions = NumberOfSessionsFound;
+	uint32_t OldNumberOfSessions = NumberOfSessionsFound;
 	BOOL changed = FALSE;
 
 	// test, remove
@@ -68,7 +68,7 @@ BOOL Net_UpdateSessionList(int *SelectedItem)
 //		return FALSE;
 
 	// take a list of the old session guids
-	for (int i = 0; i < NumberOfSessionsFound; i++)
+	for (uint32_t i = 0; i < NumberOfSessionsFound; i++)
 	{
 		OldSessionGuids[i] = SessionData[i].Guid;
 	}
@@ -84,7 +84,7 @@ BOOL Net_UpdateSessionList(int *SelectedItem)
 	else
 	{
 		// now check the guids of the new sessions against our previous list
-		for (int i = 0; i < NumberOfSessionsFound; i++)
+		for (uint32_t i = 0; i < NumberOfSessionsFound; i++)
 		{
 			if (!IsEqualGUID(OldSessionGuids[i], SessionData[i].Guid))
 			{
@@ -99,7 +99,7 @@ BOOL Net_UpdateSessionList(int *SelectedItem)
 		int OldSelection = *SelectedItem;
 		*SelectedItem=0;
 
-		for (int i = 0; i < NumberOfSessionsFound; i++)
+		for (uint32_t i = 0; i < NumberOfSessionsFound; i++)
 		{
 			if (IsEqualGUID(OldSessionGuids[OldSelection], SessionData[i].Guid))
 			{

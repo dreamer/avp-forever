@@ -23,7 +23,7 @@ int Net_JoinGame();
 int Net_ConnectToSession(int sessionNumber, char *playerName);
 
 extern int glpDP;
-extern int AvPNetID;
+extern uint32_t AvPNetID;
 
 typedef struct messageHeader
 {
@@ -39,7 +39,7 @@ Version 100 - Added pistol,skeeter (and new levels)
 #define AVP_MULTIPLAYER_VERSION 101 // bjd - my version, not directplay compatible
 
 struct messageHeader; // forward declare the structure
-extern const int MESSAGEHEADERSIZE;
+extern const uint32_t MESSAGEHEADERSIZE;
 
 // system messages
 #define NET_CREATEPLAYERORGROUP			1
