@@ -115,7 +115,7 @@ class TheoraFMV
 			mDataOffset(0),
 			mFrameCriticalSectionInited(false)
 		{
-
+			memset(&mState, 0, sizeof(ogg_sync_state));
 		}
 		~TheoraFMV();
 

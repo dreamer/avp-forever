@@ -117,15 +117,11 @@ VorbisPlayback::~VorbisPlayback()
 	if (audioStream)
 		delete audioStream;
 
-	if (mVorbisInfo) // hmm..
-	{
-		ov_clear(&mOggFile);
-	}
+	// clear out the OggVorbis_File struct
+	ov_clear(&mOggFile);
 
 	if (mAudioData)
-	{
 		delete[] mAudioData;
-	}
 }
 
 uint32_t VorbisPlayback::GetVorbisData(uint32_t sizeToRead)

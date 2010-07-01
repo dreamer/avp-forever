@@ -63,6 +63,7 @@ class VorbisPlayback
 			mPlaybackThreadFinished(0),
 			mAudioData(0)
 		{
+			memset(&mOggFile, 0, sizeof(OggVorbis_File));
 		}
 		~VorbisPlayback();
 

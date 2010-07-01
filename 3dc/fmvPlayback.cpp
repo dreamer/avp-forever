@@ -137,22 +137,17 @@ TheoraFMV::~TheoraFMV()
 			WaitForSingleObject(mAudioThreadHandle, INFINITE);
 			CloseHandle(mAudioThreadHandle);
 		}
-		
-	//FIXME	int ret = ogg_sync_clear(&mState);
-	//	assert(ret == 0);
+
+		ogg_sync_clear(&mState);
 
 		if (audioStream)
 			delete audioStream;
 
 		if (mAudioData)
-		{
 			delete []mAudioData;
-		}
 
 		if (mAudioDataBuffer)
-		{
 			delete []mAudioDataBuffer;
-		}
 
 		delete mRingBuffer;
 	}
