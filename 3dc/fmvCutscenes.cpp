@@ -247,7 +247,7 @@ int32_t FindFreeFmvHandle()
 	return -1;
 }
 
-int OpenFMV(const char *filenamePtr)
+int32_t OpenFMV(const char *filenamePtr)
 {
 	// find a free handle in our fmv list to use
 	int32_t fmvHandle = FindFreeFmvHandle();
@@ -462,7 +462,6 @@ void ReleaseAllFMVTextures()
 		{
 			if (fmvList[FMVTexture[i].fmvHandle].isPlaying)
 			{
-//				fmvList[FMVTexture[i].fmvHandle].fmvClass->Close();
 				delete fmvList[FMVTexture[i].fmvHandle].fmvClass;
 				fmvList[FMVTexture[i].fmvHandle].fmvClass = NULL;
 			}
