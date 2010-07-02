@@ -89,7 +89,6 @@ extern int NormalFrameTime;
 int LeanScale;
 EULER deathTargetOrientation = {0,0,0};
 
-extern void ColourFillBackBuffer(int FillColour);
 void CheckIfMirroringIsRequired(void);
 static void ModifyHeadOrientation(void);
 void FlushD3DZBuffer();

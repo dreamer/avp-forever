@@ -329,7 +329,6 @@ int  CheckForJoystick(void);
 
 
 /* Direct 3D */
-void ColourFillBackBuffer(int FillColour);
 void FlipBuffers(void);
 BOOL InitialiseDirect3D(void);
 void ReleaseDirect3D(void);

@@ -28,8 +28,6 @@ char AAFontWidths[256];
 extern int CloudTable[128][128];
 extern int CloakingPhase;
 
-extern D3DInfo d3d;
-
 AVPMENUGFX AvPMenuGfxStorage[MAX_NO_OF_AVPMENUGFXS] =
 {
 	{"Menus\\fractal.rim"},

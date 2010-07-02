@@ -64,7 +64,7 @@ static Font Fonts[NUM_FONT_TYPES];
 
 void Font_Release()
 {
-	for (int i = 0; i < NUM_FONT_TYPES; i++)
+	for (uint32_t i = 0; i < NUM_FONT_TYPES; i++)
 	{
 		Tex_Release(Fonts[i].textureHeight);
 	}

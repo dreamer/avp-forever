@@ -199,6 +199,25 @@ bool CreateVolatileResources()
 	return true;
 }
 
+void ColourFillBackBuffer(int FillColour)
+{
+	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_TARGET, FillColour, 1.0f, 0);
+}
+
+// console command : set a new field of view value
+void SetFov()
+{
+	if (Con_GetNumArguments() == 0)
+	{
+		Con_PrintMessage("usage: r_setfov 75");
+		return;
+	}
+
+	fov = atoi(Con_GetArgument(0).c_str());
+
+	SetTransforms();
+}
+
 extern "C" {
 
 #define INITGUID
@@ -222,42 +241,23 @@ extern void ToggleWireframe();
 
 extern HWND hWndMain;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern void ChangeWindowsSize(int width, int height);
+extern void ChangeWindowsSize(uint32_t width, uint32_t height);
 extern int WindowMode;
 int	VideoModeColourDepth;
 int	NumAvailableVideoModes;
 D3DINFO d3d;
-
-// console command : set a new field of view value
-void SetFov()
-{
-	if (Con_GetNumArguments() == 0)
-	{
-		Con_PrintMessage("usage: r_setfov 75");
-		return;
-	}
-
-	fov = atoi(Con_GetArgument(0).c_str());
-
-	SetTransforms();
-}
 
 // console command : output all menu textures as .png files
 void WriteMenuTextures()
 {
 	char *filename = new char[strlen(GetSaveFolderPath()) + MAX_PATH];
 
-	for (int i = 0; i < 54; i++)
+	for (uint32_t i = 0; i < 54; i++) // 54 == MAX_NO_OF_AVPMENUGFXS
 	{
 		sprintf(filename, "%s%d.png", GetSaveFolderPath(), i);
 
 		D3DXSaveTextureToFileA(filename, D3DXIFF_PNG, AvPMenuGfxStorage[i].menuTexture, NULL);
 	}
-}
-
-void ColourFillBackBuffer(int FillColour)
-{
-	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_TARGET, FillColour, 1.0f, 0);
 }
 
 char* GetDeviceName()
@@ -377,7 +377,7 @@ void CreateScreenShotImage()
 	if (FAILED(D3DXSaveSurfaceToFile(fileName.str().c_str(), D3DXIFF_JPG, frontBuffer, NULL, NULL)))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		OutputDebugString("Save Surface to file failed!!!\n");
+		OutputDebugString("Save Surface to file failed\n");
 	}
 
 	// release surface
@@ -1126,6 +1126,7 @@ BOOL InitialiseDirect3D()
 	uint32_t height      = Config_GetInt("[VideoMode]", "Height", 600);
 //	uint32_t colourDepth = Config_GetInt("[VideoMode]", "ColourDepth", 32);
 	bool useTripleBuffering = Config_GetBool("[VideoMode]", "UseTripleBuffering", false);
+	bool useVSync = Config_GetBool("[VideoMode]", "UseVSync", true);
 	shaderPath = Config_GetString("[VideoMode]", "ShaderPath", "shaders\\");
 
 	// set some defaults
@@ -1174,7 +1175,7 @@ BOOL InitialiseDirect3D()
 		LastError = d3d.lpD3D->GetAdapterDisplayMode(defaultDevice, &d3ddm);
 		if (FAILED(LastError))
 		{
-			Con_PrintError("GetAdapterDisplayMode call failed!");
+			Con_PrintError("GetAdapterDisplayMode call failed");
 			LogDxError(LastError, __LINE__, __FILE__);
 			return FALSE;
 		}
@@ -1297,18 +1298,19 @@ BOOL InitialiseDirect3D()
 						//break;
 
 						// fix this..
-						goto wereDone;
+						goto gotValidFormats;
 					}
 				}
 			}
 		}
 	}
 
-	wereDone:
+	// we jump to here when we have picked all valid formats
+	gotValidFormats:
 
 	if (!gotOne)
 	{
-		Con_PrintError("Couldn't find match for user requested resolution!");
+		Con_PrintError("Couldn't find match for user requested resolution");
 
 		// set some default values?
 		width = 800;
@@ -1318,7 +1320,7 @@ BOOL InitialiseDirect3D()
 
 	// set up the presentation parameters
 	D3DPRESENT_PARAMETERS d3dpp;
-	ZeroMemory (&d3dpp, sizeof(d3dpp));
+	ZeroMemory (&d3dpp, sizeof(D3DPRESENT_PARAMETERS));
 	d3dpp.hDeviceWindow = hWndMain;
     d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
 
@@ -1326,28 +1328,26 @@ BOOL InitialiseDirect3D()
 	d3dpp.AutoDepthStencilFormat = SelectedDepthFormat;
 	d3dpp.BackBufferFormat = SelectedBackbufferFormat;
 
-	if (windowed)
+	d3dpp.Windowed = (windowed) ? TRUE : FALSE;
+
+	d3dpp.BackBufferWidth = width;
+	d3dpp.BackBufferHeight = height;
+
+	// setting this to interval one will cap the framerate to monitor refresh
+	// the timer goes a bit mad if this isnt capped!
+	if (useVSync)
 	{
-		d3dpp.Windowed = TRUE;
-		d3dpp.BackBufferWidth = width;
-		d3dpp.BackBufferHeight = height;
-		// setting this to interval one will cap the framerate to monitor refresh
-		// the timer goes a bit mad if this isnt capped!
 		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-		ChangeWindowsSize(d3dpp.BackBufferWidth, d3dpp.BackBufferHeight);
+		Con_PrintMessage("V-Sync is on");
 	}
 	else
 	{
-		d3dpp.Windowed = FALSE;
-		d3dpp.BackBufferWidth = width;
-		d3dpp.BackBufferHeight = height;
-		// setting this to interval one will cap the framerate to monitor refresh
-		// the timer goes a bit mad if this isnt capped!
-//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
-//		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
-		ChangeWindowsSize(d3dpp.BackBufferWidth, d3dpp.BackBufferHeight);
+		Con_PrintMessage("V-Sync is off");
 	}
+
+	// resize the win32 window to match our d3d backbuffer size
+	ChangeWindowsSize(d3dpp.BackBufferWidth, d3dpp.BackBufferHeight);
 
 	d3dpp.BackBufferCount = 1;
 
@@ -1429,13 +1429,13 @@ BOOL InitialiseDirect3D()
 	// check pixel shader support
 	if (d3dCaps.PixelShaderVersion < (D3DPS_VERSION(2,0)))
 	{
-		Con_PrintError("Need Pixel Shader version 2.0 support");
+		Con_PrintError("Device does not support Pixel Shader version 2.0 or greater");
 	}
 
 	// check vertex shader support
 	if (d3dCaps.VertexShaderVersion < (D3DVS_VERSION(2,0)))
 	{
-		Con_PrintError("Need Vertex Shader version 2.0 support");
+		Con_PrintError("Device does not support Vertex Shader version 2.0 or greater");
 	}
 
 	// check and remember if we have dynamic texture support

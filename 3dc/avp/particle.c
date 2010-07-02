@@ -4255,19 +4255,19 @@ void MakeImpactSparks(VECTORCH *incidentPtr, VECTORCH *normalPtr, VECTORCH *posi
 void MakeSprayOfSparks(MATRIXCH *orientationPtr, VECTORCH *positionPtr)
 {
 	int noOfSparks = 15;
+
 	do
 	{
-		
 		VECTORCH velocity;
 		velocity.vx = (FastRandom()&2047)-1024;
 		velocity.vy = (FastRandom()&2047);
 		velocity.vz = -(FastRandom()&2047)-1024;
-		RotateVector(&velocity,orientationPtr);
-		MakeParticle(positionPtr,&velocity,PARTICLE_SPARK);	
+		RotateVector(&velocity, orientationPtr);
+		MakeParticle(positionPtr, &velocity, PARTICLE_SPARK);	
 	}
-	while(--noOfSparks);
+	while (--noOfSparks);
 
-	MakeLightElement(positionPtr,LIGHTELEMENT_ELECTRICAL_SPARKS);
+	MakeLightElement(positionPtr, LIGHTELEMENT_ELECTRICAL_SPARKS);
 }
 
 void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosionID)

@@ -556,7 +556,7 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
     return TRUE;
 }
 
-void ChangeWindowsSize(int width, int height)
+void ChangeWindowsSize(uint32_t width, uint32_t height)
 {
 	RECT testRect;
 	RECT newWindowSize;
@@ -567,7 +567,7 @@ void ChangeWindowsSize(int width, int height)
 	newWindowSize.right = width;
 	newWindowSize.bottom = height;
 
-	if (AdjustWindowRect(&newWindowSize, GetWindowLongPtr( hWndMain, GWL_STYLE ), FALSE ) == 0)
+	if (AdjustWindowRect(&newWindowSize, GetWindowLongPtr(hWndMain, GWL_STYLE), FALSE) == 0)
 	{
 		LastError = HRESULT_FROM_WIN32(GetLastError());
 		LogDxError(LastError, __LINE__, __FILE__);

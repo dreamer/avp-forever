@@ -72,13 +72,14 @@ extern void PlayIntroSequence(void)
 extern void ShowSplashScreens(void)
 {
 	LoadAllSplashScreenGfx();
-	int i;
+
 	enum AVPMENUGFX_ID graphic[] =
 	{
 		AVPMENUGFX_SPLASH_SCREEN1,AVPMENUGFX_SPLASH_SCREEN2,AVPMENUGFX_SPLASH_SCREEN3,
 		AVPMENUGFX_SPLASH_SCREEN4,AVPMENUGFX_SPLASH_SCREEN5,
 	};
-	for (i=0; i<5; i++)
+
+	for (int i = 0; i < 5; i++)
 	{
 		int timeRemaining = 5*ONE_FIXED;
 		do
@@ -86,16 +87,16 @@ extern void ShowSplashScreens(void)
 			ThisFramesRenderingHasBegun();
 
 			int a = timeRemaining*2;
-			if (a>ONE_FIXED) a=ONE_FIXED;
+			if (a > ONE_FIXED) 
+				a = ONE_FIXED;
 
-			if (i!=4)
+			if (i != 4)
 			{
-//			  	DrawAvPMenuGfx_CrossFade(graphic[i],graphic[i+1], a);
-				timeRemaining-=NormalFrameTime;
+				timeRemaining -= NormalFrameTime;
 			}
 			else
 			{
-				if (a==ONE_FIXED)
+				if (a == ONE_FIXED)
 				{
 				  	DrawAvPMenuGfx(graphic[i], 0, 0, ONE_FIXED+1,AVPMENUFORMAT_LEFTJUSTIFIED);
 				}
@@ -104,7 +105,7 @@ extern void ShowSplashScreens(void)
 				  	DrawAvPMenuGfx_Faded(graphic[i], 0, 0, a,AVPMENUFORMAT_LEFTJUSTIFIED);
 					DrawFadeQuad(0, 0, a);
 				}
-				timeRemaining-=NormalFrameTime/2;
+				timeRemaining -= NormalFrameTime / 2;
 			}
 			CheckForWindowsMessages();
 
@@ -114,7 +115,7 @@ extern void ShowSplashScreens(void)
 		  	DirectReadKeyboard();
 			FrameCounterHandler();
 		}
-		while(timeRemaining>=0 && !DebouncedGotAnyKey && bRunning);
+		while (timeRemaining >= 0 && !DebouncedGotAnyKey && bRunning);
 	}
 }
 
