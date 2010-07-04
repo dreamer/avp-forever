@@ -19,15 +19,18 @@ struct PS_OUTPUT
 sampler2D Tex0;
 
 
-// Name: Simple Pixel Shader
+// Name: Main pixel shader used to render level geometry
 // Type: Pixel shader
-// Desc: Fetch texture and blend with constant color
+// Desc: Fetch texture and blend with constant color, then perform specular addition
 //
 PS_OUTPUT ps_main( in PS_INPUT In )
 {
 	PS_OUTPUT Out;                             // create an output pixel
 
 	Out.Color = tex2D(Tex0, In.Texture) * In.Diffuse;
+	
+	// specular addition
+	Out.Color += In.Specular;
 
 	return Out;                                // return output pixel
 }
