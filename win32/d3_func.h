@@ -149,6 +149,7 @@ typedef struct D3DInfo
     uint32_t				CurrentTextureFormat;
     uint32_t				NumTextureFormats;
 
+	BOOL					supportsShaders;
 	BOOL					supportsDynamicTextures;
 } D3DINFO;
 

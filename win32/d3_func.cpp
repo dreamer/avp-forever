@@ -299,8 +299,8 @@ const D3DFORMAT DisplayFormats32[] =
 // list of allowed depth buffer formats
 const D3DFORMAT DepthFormats[] =
 {
-	D3DFMT_D24S8,
 	D3DFMT_D32,
+	D3DFMT_D24S8,
 	D3DFMT_D24X8,
 	D3DFMT_D24FS8,
 	D3DFMT_D16
@@ -1426,16 +1426,21 @@ BOOL InitialiseDirect3D()
 	D3DCAPS9 d3dCaps;
 	d3d.lpD3DDevice->GetDeviceCaps(&d3dCaps);
 
+	// set this to true initially
+	d3d.supportsShaders = TRUE;
+
 	// check pixel shader support
 	if (d3dCaps.PixelShaderVersion < (D3DPS_VERSION(2,0)))
 	{
 		Con_PrintError("Device does not support Pixel Shader version 2.0 or greater");
+		d3d.supportsShaders = FALSE;
 	}
 
 	// check vertex shader support
 	if (d3dCaps.VertexShaderVersion < (D3DVS_VERSION(2,0)))
 	{
 		Con_PrintError("Device does not support Vertex Shader version 2.0 or greater");
+		d3d.supportsShaders = FALSE;
 	}
 
 	// check and remember if we have dynamic texture support
