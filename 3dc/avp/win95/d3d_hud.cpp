@@ -208,7 +208,7 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 				imageDescPtr->Blue,
 				imageDescPtr->Translucency
 			),
-			FILTERING_BILINEAR_OFF);
+			imageDescPtr->filterTexture	? FILTERING_BILINEAR_ON : FILTERING_BILINEAR_OFF);
 }
 
 
@@ -252,7 +252,7 @@ void D3D_InitialiseMarineHUD(void)
 	MotionTrackerCentreX = BlueBar.TopLeftX+(BlueBar.Width/2);
 	MotionTrackerScale = 65536;
 
-	HUDScaleFactor = DIV_FIXED(ScreenDescriptorBlock.SDB_Width, 640);	
+	HUDScaleFactor = DIV_FIXED(ScreenDescriptorBlock.SDB_Width, 640);
 
 	#if UseGadgets
 //	MotionTrackerGadget::SetCentre(r2pos(100,100));
@@ -466,6 +466,7 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 		imageDesc.Green = 255;
 		imageDesc.Blue = 255;
 		imageDesc.Translucency = HUDTranslucencyLevel;
+		imageDesc.filterTexture = TRUE;
 
  		Draw_HUDImage(&imageDesc);
 	}
@@ -506,18 +507,22 @@ void D3D_BLTMotionTrackerBlipToHUD(int x, int y, int brightness)
 	imageDesc.Width = MT_BlipWidth;
 	{
 		int trans = MUL_FIXED(brightness*2,HUDTranslucencyLevel);
-		if (trans>255) trans = 255;
+		if (trans > 255) 
+			trans = 255;
 		imageDesc.Translucency = trans;
 	}
 	imageDesc.Red = 255;
 	imageDesc.Green = 255;
 	imageDesc.Blue = 255;
-	if (imageDesc.TopLeftX<0) /* then we need to clip */
+	imageDesc.filterTexture = TRUE;
+
+	if (imageDesc.TopLeftX < 0) /* then we need to clip */
 	{
 		imageDesc.Width += imageDesc.TopLeftX;
 		imageDesc.TopLeftU -= imageDesc.TopLeftX;
 		imageDesc.TopLeftX = 0;
 	}
+
 	Draw_HUDImage(&imageDesc);
 }
 
@@ -544,6 +549,7 @@ extern void D3D_BlitWhiteChar(int x, int y, unsigned char c)
 	imageDesc.Red = 255;
 	imageDesc.Green = 255;
 	imageDesc.Blue = 255;
+	imageDesc.filterTexture = FALSE;
 
 	Draw_HUDImage(&imageDesc);
 } 
@@ -569,6 +575,7 @@ void D3D_DrawHUDFontCharacter(HUDCharDesc *charDescPtr)
 	imageDesc.Red = charDescPtr->Red;
 	imageDesc.Green = charDescPtr->Green;
 	imageDesc.Blue = charDescPtr->Blue;
+	imageDesc.filterTexture = FALSE;
 
 	Draw_HUDImage(&imageDesc);
 }
@@ -593,7 +600,6 @@ void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr)
 		imageDesc.TopLeftV = 81+24;
 	}
 
-
 	imageDesc.Height = HUD_DIGITAL_NUMBERS_HEIGHT;
 	imageDesc.Width = HUD_DIGITAL_NUMBERS_WIDTH;
 	imageDesc.Scale = ONE_FIXED;
@@ -601,6 +607,7 @@ void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr)
 	imageDesc.Red = charDescPtr->Red;
 	imageDesc.Green = charDescPtr->Green;
 	imageDesc.Blue = charDescPtr->Blue;
+	imageDesc.filterTexture = FALSE;
 
 	Draw_HUDImage(&imageDesc);
 }
@@ -618,7 +625,7 @@ void D3D_DrawHUDPredatorDigit(HUDCharDesc *charDescPtr, int scale)
 	** need to add or remove space depending on which side of screen the energy bar is on */
 	
 	/* if x is in the first half of screen, its the red bar..offset towards centre of screen */
-	if(charDescPtr->X <= ScreenDescriptorBlock.SDB_Width / 2)
+	if (charDescPtr->X <= ScreenDescriptorBlock.SDB_Width / 2)
 	{
 		imageDesc.TopLeftX = charDescPtr->X + ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
 	}
@@ -645,7 +652,6 @@ void D3D_DrawHUDPredatorDigit(HUDCharDesc *charDescPtr, int scale)
 		imageDesc.TopLeftV = 52;
 	}
 
-
 	imageDesc.Height = 50;
 	imageDesc.Width = 50;
 	imageDesc.Scale = scale;
@@ -653,6 +659,7 @@ void D3D_DrawHUDPredatorDigit(HUDCharDesc *charDescPtr, int scale)
 	imageDesc.Red = charDescPtr->Red;
 	imageDesc.Green = charDescPtr->Green;
 	imageDesc.Blue = charDescPtr->Blue;
+	imageDesc.filterTexture = TRUE;
 
 	Draw_HUDImage(&imageDesc);
 }
@@ -707,6 +714,7 @@ void D3D_BLTDigitToHUD(char digit, int x, int y, int font)
 	imageDesc.Red = 255;
 	imageDesc.Green = 255;
 	imageDesc.Blue = 255;
+	imageDesc.filterTexture = FALSE;
 
 	Draw_HUDImage(&imageDesc);
 }
@@ -731,6 +739,7 @@ void D3D_BLTGunSightToHUD(int screenX, int screenY, enum GUNSIGHT_SHAPE gunsight
 	imageDesc.Red = 255;
 	imageDesc.Green = 255;
 	imageDesc.Blue = 255;
+	imageDesc.filterTexture = FALSE;
 
 	Draw_HUDImage(&imageDesc);
 }

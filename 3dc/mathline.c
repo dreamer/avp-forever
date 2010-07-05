@@ -15,8 +15,6 @@ void IntToLL(LONGLONGCH *a, int *b);
 int MUL_FIXED(int a, int b);
 int DIV_FIXED(int a, int b);
 
-#define DIV_INT(a, b) ((a) / (b))
-
 int NarrowDivide(LONGLONGCH *a, int b);
 int WideMulNarrowDiv(int a, int b, int c);
 void RotateVector_ASM(VECTORCH *v, MATRIXCH *m);
@@ -28,6 +26,8 @@ int FloatToInt(float);
 #endif
 
 #undef ASM386
+
+//#define USE_ASM
 
 #if !defined(ASM386)
 static __int64 ConvertToLongLong(const LONGLONGCH* llch)
@@ -469,19 +469,13 @@ __asm__("movl	0(%%esi), %%eax		\n\t"
 
 */
 
-/*
-	These functions have been checked for suitability for 
-	a Pentium and look as if they would work adequately.
-	Might be worth a more detailed look at optimising
-	them though.
-*/
-
 // shift a to the right by 16, return the
 // return the lower 32 bits:
 
-int MUL_FIXED(int a, int b)
+fixed_int MUL_FIXED(fixed_int a, fixed_int b)
 {
-/*
+#ifdef USE_ASM
+
 	int retval;
 	_asm
 	{
@@ -490,27 +484,11 @@ int MUL_FIXED(int a, int b)
 		shrd eax,edx,16
 		mov retval,eax
 	}
-*/
 
-#if defined(ASM386)
-	int retval;
-__asm__("imull	%2			\n\t"
-	"shrdl	$16, %%edx, %%eax	\n\t"
-	: "=a" (retval)
-	: "0" (a), "m" (b)
-	: "%edx", "cc"
-	);
-	return retval;
 #else
-/*
-	__int64 aa = (__int64) a;
-	__int64 bb = (__int64) b;
 
-	__int64 cc = aa * bb;
-	
-	return (int) ((cc >> 16) & 0xffffffff);
-*/
-	return((__int64)a * b) >> 16;
+	return((__int64)a * b) >> ONE_FIXED_SHIFT;
+
 #endif
 }
 
@@ -520,13 +498,18 @@ __asm__("imull	%2			\n\t"
 * \param b Fixed-point multiplier
 * \returns integral result of division
 */
-int DIV_FIXED(int a, int b)
+fixed_int DIV_FIXED(fixed_int a, fixed_int b)
 {
-	if (b == 0) printf("DEBUG THIS: a = %d, b = %d\n", a, b);	
-	
-	if (b == 0) return 0; /* TODO: debug this! (start with alien on ferarco) */
-/*
-int retval;
+	fixed_int retval;
+
+	if (b == 0)
+	{
+		printf("DEBUG THIS: a = %d, b = %d\n", a, b);
+		return 0; /* TODO: debug this! (start with alien on ferarco) */
+	}
+
+#ifdef USE_ASM
+
 	_asm
 	{
 		mov eax,a
@@ -537,27 +520,17 @@ int retval;
 		idiv b
 		mov retval,eax
 	}
-*/
-#if defined(ASM386)
-	int retval;
-__asm__("cdq				\n\t"
-	"roll	$16, %%eax		\n\t"
-	"mov	%%ax, %%dx		\n\t"
-	"xor	%%ax, %%ax		\n\t"
-	"idivl	%2			\n\t"
-	: "=a" (retval)
-	: "0" (a), "m" (b)
-	: "%edx", "cc"
-	);
-	return retval;
-#else
-	{
-	__int64 aa = (__int64) a;
-	__int64 bb = (__int64) b;
-	__int64 cc = (aa << 16) / bb;
 
-	return (int) (cc & 0xffffffff);
+#else
+
+	{
+		__int64 aa = (__int64) a;
+		__int64 bb = (__int64) b;
+		__int64 cc = (aa << ONE_FIXED_SHIFT) / bb;
+
+		return (fixed_int) (cc & 0xffffffff);
 	}
+
 #endif
 }
 
@@ -569,14 +542,6 @@ __asm__("cdq				\n\t"
 
 
 /*
-
- 32/32 division
-
- This macro is a function on some other platforms
-
-*/
-
-#define DIV_INT(a, b) ((a) / (b))
 
 /*
 

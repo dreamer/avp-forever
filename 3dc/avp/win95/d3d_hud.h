@@ -29,10 +29,12 @@ typedef struct
 
 	int Scale;
 
+	BOOL filterTexture;
+
 	unsigned char Red;
 	unsigned char Green;
 	unsigned char Blue;
-	unsigned char Translucency; /* 0 == invisible, 255 == opaque */ 
+	unsigned char Translucency; /* 0 == invisible, 255 == opaque */
 
 } HUDImageDesc;
 

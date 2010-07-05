@@ -45,6 +45,7 @@ extern "C" {
 
 #define one14 16383
 
+typedef int fixed_int;
 #define ONE_FIXED 65536
 #define ONE_FIXED_SHIFT 16
 

@@ -589,8 +589,6 @@ void IntToLL(LONGLONGCH *a, int *b);
 int MUL_FIXED(int a, int b);
 int DIV_FIXED(int a, int b);
 
-#define DIV_INT(a, b) ((a) / (b))
-
 int NarrowDivide(LONGLONGCH *a, int b);
 int WideMulNarrowDiv(int a, int b, int c);
 void RotateVector_ASM(VECTORCH *v, MATRIXCH *m);

@@ -1666,6 +1666,7 @@ static void DrawPredatorSights(void)
 		imageDesc.Red = 255;
 		imageDesc.Green = 255;
 		imageDesc.Blue = 255;
+		imageDesc.filterTexture = FALSE;
 
 		Draw_HUDImage(&imageDesc);
 	}

@@ -1677,74 +1677,72 @@ int ArcSin(int s)
 
 int ArcTan(int height_x, int width_z)
 {
-
 	int abs_height_x, abs_width_z, angle, sign, signsame, temp;
 
-	sign=0;
+	sign = 0;
 
-	if((height_x<0 && width_z<0) || (height_x>=0 && width_z>=0))
-		signsame=TRUE;
+	if ((height_x < 0 && width_z < 0) || (height_x >= 0 && width_z >= 0))
+		signsame = TRUE;
 	else
-		signsame=FALSE;
+		signsame = FALSE;
 
-	abs_height_x=height_x;
-	if(abs_height_x<0) abs_height_x=-abs_height_x;
+	abs_height_x = height_x;
 
-	abs_width_z=width_z;
-	if(abs_width_z<0) abs_width_z=-abs_width_z;
+	if (abs_height_x < 0)
+		abs_height_x =- abs_height_x;
 
-/*
+	abs_width_z = width_z;
 
- Find ATN
+	if (abs_width_z < 0) 
+		abs_width_z =- abs_width_z;
 
-*/
+	/*
+		Find ATN
+	*/
 
-	if(width_z==0) angle=-deg90;
+	if (width_z == 0) 
+		angle =- deg90;
 
-	else if(abs_width_z==abs_height_x)
-		angle=deg45;
+	else if (abs_width_z == abs_height_x)
+		angle = deg45;
 
-	else {
-
-		if(abs_width_z>abs_height_x) {
-			temp=abs_width_z;
-			abs_width_z=abs_height_x;
-			abs_height_x=temp;
-			sign=-1;
+	else 
+	{
+		if (abs_width_z > abs_height_x) 
+		{
+			temp = abs_width_z;
+			abs_width_z = abs_height_x;
+			abs_height_x = temp;
+			sign = -1;
 		}
 
-		if(abs_height_x!=0)
-
+		if (abs_height_x != 0)
+		{
 			/* angle = (abs_width_z << 8) / abs_height_x; */
 
-
-
-			angle = DIV_INT((abs_width_z << 8), abs_height_x);
-
-
-
-
-
-		else
-			angle=deg22pt5;
-
-		angle=ArcTanTable[angle];
-
-		if(sign>=0) {
-			angle=-angle;
-			angle+=deg90;
+			angle = (abs_width_z << 8) / abs_height_x; //DIV_INT((abs_width_z << 8), abs_height_x);
 		}
+		else
+			angle = deg22pt5;
 
+		angle = ArcTanTable[angle];
+
+		if (sign >= 0) 
+		{
+			angle =- angle;
+			angle += deg90;
+		}
 	}
 
-	if(signsame==FALSE) angle=-angle;
+	if (signsame == FALSE) 
+		angle =- angle;
 
-	if(width_z<=0) angle+=deg180;
+	if (width_z <= 0) 
+		angle += deg180;
 
 	angle&=wrap360;
 
-	return(angle);
-
+	return angle;
 }
 
 
