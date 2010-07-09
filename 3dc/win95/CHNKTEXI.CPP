@@ -644,7 +644,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 	// safe to handle windows messages at this point (I think - JCWH)
 	CheckForWindowsMessages();
 
-//	int32_t texID = 0;
+	int32_t textureID = 0;
 
 	// get the filename
 	char szBuf[MAX_PATH];
@@ -734,7 +734,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, 0, D3DPOOL_MANAGED);
 							}
 
-//							texID = Tex_AddTexture(pImageHdr->Direct3DTexture, pImageHdr->ImageWidth, pImageHdr->ImageHeight);
+							textureID = Tex_AddTexture(pImageHdr->Direct3DTexture, pImageHdr->ImageWidth, pImageHdr->ImageHeight);
 
 							// free this, as d3d now holds the texture
 							free(pTexture->buffer);
@@ -743,8 +743,8 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 						else OutputDebugString("pTexture->buf was Null!");
 					}
 
-					return NumImages-1;
-					//return texID;
+					//return NumImages-1;
+					return textureID;
 				}
 				else
 				{
@@ -798,7 +798,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, 0, D3DPOOL_MANAGED);
 							}
 
-//							texID = Tex_AddTexture(pImageHdr->Direct3DTexture, pImageHdr->ImageWidth, pImageHdr->ImageHeight);
+							textureID = Tex_AddTexture(pImageHdr->Direct3DTexture, pImageHdr->ImageWidth, pImageHdr->ImageHeight);
 
 							if (pImageHdr->Direct3DTexture == NULL)
 							{
@@ -814,8 +814,8 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 						}
 					}
 
-					return NumImages-1;
-//					return texID;
+					//return NumImages-1;
+					return textureID;
 				}
 				else
 				{

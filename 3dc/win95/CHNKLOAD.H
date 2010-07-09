@@ -200,13 +200,6 @@ extern MAPBLOCK6 Term_Type6;
 
 extern unsigned char TestPalette[];
 
-#if 0
-extern int NumImages;								/* # current images */
-extern IMAGEHEADER *ImageHeaderPtrs[];	/* Ptrs to Image Header Blocks */
-extern IMAGEHEADER ImageHeaderArray[];	/* Array of Image Headers */
-extern IMAGEHEADER *NextFreeImageHeaderPtr;
-#endif
-
 #if SupportModules
 
 extern SCENEMODULE MainScene;

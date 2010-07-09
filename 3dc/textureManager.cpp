@@ -64,11 +64,11 @@ uint32_t Tex_AddTexture(RENDERTEXTURE texture, uint32_t width, uint32_t height)
 	{
 		textureList.push_back(newTexture);
 	}
-/*
+
 	char buf[100];
 	sprintf(buf, "added tex at ID: %d\n", textureID);
 	OutputDebugString(buf);
-*/
+
 	return textureID;
 }
 
@@ -116,11 +116,11 @@ void Tex_Release(uint32_t textureID)
 		textureList[textureID - texIDoffset].texture->Release();
 		textureList[textureID - texIDoffset].texture = NULL;
 	}
-/*
+
 	char buf[100];
 	sprintf(buf, "released tex at ID: %d\n", textureID);
 	OutputDebugString(buf);
-*/
+
 }
 
 void Tex_DeInit()

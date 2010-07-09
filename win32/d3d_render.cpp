@@ -138,7 +138,6 @@ D3DLVERTEX *particleVertex = NULL;
 WORD *particleIndex = NULL;
 uint32_t	pVb = 0;
 uint32_t	pIb = 0;
-//uint32_t	pIndexCount = 0;
 uint32_t	numPVertices = 0;
 RENDER_STATES *particleList = new RENDER_STATES[MAX_VERTEXES];
 uint32_t particleListCount = 0;
@@ -594,7 +593,11 @@ static void ChangeTexture(const int32_t textureID)
 {
 	if (textureID == currentTextureID)
 		return;
-
+/*
+	char buf[100];
+	sprintf(buf, "wants ted id: %d\n", textureID);
+	OutputDebugString(buf);
+*/
 	if (textureID >= texIDoffset)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(0, Tex_GetTexture(textureID));
@@ -658,21 +661,9 @@ bool ExecuteBuffer()
 
 	ChangeTextureAddressMode(TEXTURE_WRAP);
 
-	bool weHaveOpaques = false;
-	bool weHaveTransparents = false;
-
+	// draw opaque polygons
 	for (uint32_t i = 0; i < renderCount; i++)
 	{
-//		if (renderTest[i].translucencyType != TRANSLUCENCY_OFF)
-//			continue;
-
-		// just call this function once
-		if (!weHaveOpaques)
-		{
-//			D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Before DrawIndexedPrimitive for non transparents\n"));
-			weHaveOpaques = true;
-		}
-
 		// change render states if required
 		ChangeTexture(renderTest[i].textureID);
 		ChangeTranslucencyMode(renderTest[i].translucencyType);
@@ -695,23 +686,11 @@ bool ExecuteBuffer()
 			}
 		}
 		NumberOfRenderedTriangles += numPrimitives / 3;
-
-//		D3DPERF_EndEvent();
 	}
 
 	// do transparents here..
 	for (uint32_t i = 0; i < transRenderCount; i++)
 	{
-//		if (renderTest[i].translucencyType == TRANSLUCENCY_OFF)
-//			continue;
-
-		// just call this function once
-		if (!weHaveTransparents)
-		{
-//			D3DPERF_BeginEvent(D3DCOLOR_XRGB(140,36,70), WIDEN("Before DrawIndexedPrimitive for transparents\n"));
-			weHaveTransparents = true;
-		}
-
 		// change render states if required
 		ChangeTexture(transRenderList[i].textureID);
 		ChangeTranslucencyMode(transRenderList[i].translucencyType);
@@ -734,10 +713,9 @@ bool ExecuteBuffer()
 			}
 		}
 		NumberOfRenderedTriangles += numPrimitives / 3;
-
-//		D3DPERF_EndEvent();
 	}
 
+#if 0
 	// render any particles
 	if (particleListCount)
 	{
@@ -758,6 +736,7 @@ bool ExecuteBuffer()
 		vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matProjection);
 
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE);
+		ChangeTextureAddressMode(TEXTURE_CLAMP);
 
 		for (uint32_t i = 0; i < particleListCount; i++)
 		{
@@ -775,7 +754,7 @@ bool ExecuteBuffer()
 					numPVertices,
 					particleList[i].indexStart,
 					numPrimitives);
-	
+
 				if (FAILED(LastError))
 				{
 					LogDxError(LastError, __LINE__, __FILE__);
@@ -784,15 +763,15 @@ bool ExecuteBuffer()
 		}
 
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE);
+		ChangeTextureAddressMode(TEXTURE_WRAP);
 
 		D3DPERF_EndEvent();
 	}
+#endif
 
 	// render any orthographic quads
 	if (orthoListCount)
 	{
-//		D3DPERF_BeginEvent(D3DCOLOR_XRGB(200,29,89), WIDEN("Before DrawIndexedPrimitive for ortho quads\n"));
-
 		LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DOrthoVertexBuffer, 0, sizeof(ORTHOVERTEX));
 		if (FAILED(LastError))
 		{
@@ -849,12 +828,7 @@ bool ExecuteBuffer()
 				LogDxError(LastError, __LINE__, __FILE__);
 			}
 		}
-
-//		D3DPERF_EndEvent();
 	}
-
-	weHaveTransparents = false;
-	weHaveOpaques = false;
 
 	return true;
 }
@@ -1230,7 +1204,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, int32_t textureID, uint
 	float x2 = WPos2DC(topX + charWidth);
 	float y2 = HPos2DC(topY + charHeight);
 
-#if 1
+#if 0
 	ChangeTexture(textureID);
 	d3d.lpD3DDevice->SetTexture(1, AvPMenuGfxStorage[AVPMENUGFX_CLOUDY].menuTexture);
 
@@ -2452,11 +2426,24 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 	// properly cleared this time...
 	int32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
 
+	float RecipW, RecipH;
+
 	if (!textureID)
 		textureID = currentTextureID;
 
-	float RecipW = 1.0f / (float) ImageHeaderArray[textureID].ImageWidth;
-	float RecipH = 1.0f / (float) ImageHeaderArray[textureID].ImageHeight;
+	if (textureID >= texIDoffset)
+	{
+		uint32_t texWidth, texHeight;
+		Tex_GetDimensions(textureID, texWidth, texHeight);
+
+		RecipW = 1.0f / (float) texWidth;
+		RecipH = 1.0f / (float) texHeight;
+	}
+	else
+	{
+		RecipW = 1.0f / (float) ImageHeaderArray[textureID].ImageWidth;
+		RecipH = 1.0f / (float) ImageHeaderArray[textureID].ImageHeight;
+	}
 
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
 
@@ -3063,8 +3050,8 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		particleVertex[pVb].color = colour;
 		particleVertex[pVb].specular = RGBALIGHT_MAKE(0,0,0,255);
 
-		particleVertex[pVb].tu = (float)(vertices->U) * RecipW;
-		particleVertex[pVb].tv = (float)(vertices->V) * RecipH;
+		particleVertex[pVb].tu = ((float)(vertices->U) + 0.5f) * RecipW;
+		particleVertex[pVb].tv = ((float)(vertices->V) + 0.5f) * RecipH;
 
 		pVb++;
 	}
@@ -3738,8 +3725,8 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 	// properly cleared this time...
 	int32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-	float RecipW = 1.0f / (float) ImageHeaderArray[textureID].ImageWidth;
-	float RecipH = 1.0f / (float) ImageHeaderArray[textureID].ImageHeight;
+	float RecipW = 1.0f / (float)ImageHeaderArray[textureID].ImageWidth;
+	float RecipH = 1.0f / (float)ImageHeaderArray[textureID].ImageHeight;
 
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
 
