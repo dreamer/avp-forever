@@ -207,7 +207,7 @@ void Osk_Draw()
 //	OutputDebugString(buf);
 
 	// draw background rectangle
-	DrawQuad(osk_x, osk_y, oskWidth, oskHeight, -1, D3DCOLOR_ARGB(120, 80, 160, 120), TRANSLUCENCY_GLOWING);
+	DrawQuad(osk_x, osk_y, oskWidth, oskHeight, NO_TEXTURE, D3DCOLOR_ARGB(120, 80, 160, 120), TRANSLUCENCY_GLOWING);
 
 	// start off with an indent to space things out nicely
 	int pos_x = osk_x + indent_space;
@@ -229,12 +229,12 @@ void Osk_Draw()
 			// only draw keys not marked as blank keys
 			if (!keyVector.at(index).isBlank)
 			{
-				DrawQuad(pos_x, pos_y, keyVector.at(index).width, keyVector.at(index).height, -1, D3DCOLOR_ARGB(200, 255, 255, 255), TRANSLUCENCY_NORMAL);
+				DrawQuad(pos_x, pos_y, keyVector.at(index).width, keyVector.at(index).height, NO_TEXTURE, D3DCOLOR_ARGB(200, 255, 255, 255), TRANSLUCENCY_NORMAL);
 
 				if (Osk_GetCurrentLocation() == index) // draw the selected item differently (highlight it)
-					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, -1, D3DCOLOR_ARGB(220, 0, 128, 0), TRANSLUCENCY_OFF);
+					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, NO_TEXTURE, D3DCOLOR_ARGB(220, 0, 128, 0), TRANSLUCENCY_OFF);
 				else
-					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, -1, D3DCOLOR_ARGB(220, 38, 80, 145), TRANSLUCENCY_OFF);
+					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, NO_TEXTURE, D3DCOLOR_ARGB(220, 38, 80, 145), TRANSLUCENCY_OFF);
 
 //				int positionX = pos_x + ((keyVector.at(index).width - 16) / 2);
 

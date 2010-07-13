@@ -3726,7 +3726,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 		
 		case AVPMENU_ELEMENT_GOTOMENU_GFX:
 		{
-			DrawAvPMenuGfx(elementPtr->GfxID,MENU_CENTREX,y,elementPtr->Brightness,AVPMENUFORMAT_CENTREJUSTIFIED);
+			DrawAvPMenuGfx(/*elementPtr->GfxID*/elementPtr->textureID, MENU_CENTREX,y,elementPtr->Brightness,AVPMENUFORMAT_CENTREJUSTIFIED);
 			break;
 		}
 		case AVPMENU_ELEMENT_LISTCHOICE:
@@ -3981,7 +3981,7 @@ static int HeightOfMenuElement(AVPMENU_ELEMENT *elementPtr)
 		
 		case AVPMENU_ELEMENT_GOTOMENU_GFX:
 		{
-			h += HeightOfMenuGfx(elementPtr->GfxID);
+			h += HeightOfMenuGfx(/*elementPtr->GfxID*/elementPtr->textureID);
 			break;
 		}
 #if 0

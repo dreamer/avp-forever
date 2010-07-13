@@ -1,6 +1,6 @@
 #include "langenum.h"
 extern void D3D_HUD_Setup(void);
-extern void D3D_HUDQuad_Output(int32_t textureID, struct VertexTag *quadVerticesPtr, uint32_t colour, enum FILTERING_MODE_ID filteringType);
+extern void D3D_HUDQuad_Output(uint32_t textureID, struct VertexTag *quadVerticesPtr, uint32_t colour, enum FILTERING_MODE_ID filteringType);
 
 extern int TransparencyLevelOfHUD;
 /* takes values of 0 (not drawn) to 255 (opaque) */

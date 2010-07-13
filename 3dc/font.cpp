@@ -66,7 +66,7 @@ void Font_Release()
 {
 	for (uint32_t i = 0; i < NUM_FONT_TYPES; i++)
 	{
-		Tex_Release(Fonts[i].textureHeight);
+		Tex_Release(Fonts[i].textureID);
 	}
 }
 
@@ -103,7 +103,7 @@ void Font_Init()
 	Fonts[FONT_SMALL].blockHeight = Fonts[FONT_SMALL].textureHeight / 16;
 }
 
-void DrawFontQuad(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeight, int32_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
+void DrawFontQuad(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeight, uint32_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
 
 uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t colour, enum FONT_TYPE fontType)
 {

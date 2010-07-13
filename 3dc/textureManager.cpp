@@ -37,28 +37,40 @@ static uint32_t Tex_GetFreeID()
 	{
 		if (textureList[i].texture == NULL)
 		{
-			return texIDoffset + i; // this slot has no texture, return the ID so we can reuse it
+			return i; // this slot has no texture, return the ID so we can reuse it
 		}
 	}
 
 	// no free slots in the vector, we'll be adding to the end
-	return texIDoffset + textureList.size();
+	return textureList.size();
 }
 
-uint32_t Tex_AddTexture(RENDERTEXTURE texture, uint32_t width, uint32_t height)
+uint32_t Tex_CheckExists(const char* fileName)
+{
+	for (uint32_t i = 0; i < textureList.size(); i++)
+	{
+		if (textureList[i].name == fileName)
+			return i;
+	}
+
+	return 0; // what else to return if it doesnt exist?
+}
+
+uint32_t Tex_AddTexture(const std::string &fileName, RENDERTEXTURE texture, uint32_t width, uint32_t height)
 {
 	// get the next available ID
 	uint32_t textureID = Tex_GetFreeID();
 
 	Texture newTexture;
+	newTexture.name = fileName;
 	newTexture.texture = texture;
 	newTexture.width = width;
 	newTexture.height = height;
 
 	// store it
-	if ((textureID - texIDoffset) < textureList.size()) // we're reusing a slot in this case
+	if (textureID < textureList.size()) // we're reusing a slot in this case
 	{
-		textureList[textureID - texIDoffset] = newTexture; // replace in the old unused slot
+		textureList[textureID] = newTexture; // replace in the old unused slot
 	}
 	else // adding on to the end
 	{
@@ -81,10 +93,12 @@ uint32_t Tex_LoadFromFile(const std::string &fileName)
 
 	uint32_t ret = CreateD3DTextureFromFile(fileName.c_str(), newTexture);
 
+	newTexture.name = fileName;
+
 	// store it
-	if ((textureID - texIDoffset) < textureList.size()) // we're reusing a slot in this case
+	if (textureID < textureList.size()) // we're reusing a slot in this case
 	{
-		textureList[textureID - texIDoffset] = newTexture; // replace in the old unused slot
+		textureList[textureID] = newTexture; // replace in the old unused slot
 	}
 	else // adding on to the end
 	{
@@ -96,25 +110,30 @@ uint32_t Tex_LoadFromFile(const std::string &fileName)
 
 RENDERTEXTURE Tex_GetTexture(uint32_t textureID)
 {
-	return (textureList[textureID - texIDoffset].texture);
+	return (textureList[textureID].texture);
 }
 
 void Tex_GetDimensions(uint32_t textureID, uint32_t &width, uint32_t &height)
 {
-	width  = textureList[textureID - texIDoffset].width;
-	height = textureList[textureID - texIDoffset].height;
+	// the actual "no texture" texture is 1x1 resolution
+	if (textureID == 0)
+	{
+		width = 0;
+		height = 0;
+		return;
+	}
+
+	width  = textureList[textureID].width;
+	height = textureList[textureID].height;
 }
 
 void Tex_Release(uint32_t textureID)
 {
-	if (textureID < texIDoffset) // bad value
-		return;
-
-	if (textureList.at(textureID - texIDoffset).texture)
+	if (textureList.at(textureID).texture)
 	{
 		// this is bad, temporary..
-		textureList[textureID - texIDoffset].texture->Release();
-		textureList[textureID - texIDoffset].texture = NULL;
+		textureList[textureID].texture->Release();
+		textureList[textureID].texture = NULL;
 	}
 
 	char buf[100];

@@ -1,5 +1,6 @@
 
 #include "fmvCutscenes.h"
+#include "textureManager.h"
 
 extern "C"
 {
@@ -12,7 +13,7 @@ extern "C"
 	extern unsigned char GotAnyKey;
 	extern unsigned char DebouncedGotAnyKey;
 
-	extern AVPMENUGFX AvPMenuGfxStorage[];
+//	extern AVPMENUGFX AvPMenuGfxStorage[];
 extern void DirectReadKeyboard(void);
 
 extern void ThisFramesRenderingHasBegun(void);
@@ -71,9 +72,11 @@ extern void PlayIntroSequence(void)
 
 extern void ShowSplashScreens(void)
 {
+#if 1 // bjd - texture test
 	LoadAllSplashScreenGfx();
 
-	enum AVPMENUGFX_ID graphic[] =
+//	enum AVPMENUGFX_ID graphic[] =
+	uint32_t graphic[] =
 	{
 		AVPMENUGFX_SPLASH_SCREEN1,AVPMENUGFX_SPLASH_SCREEN2,AVPMENUGFX_SPLASH_SCREEN3,
 		AVPMENUGFX_SPLASH_SCREEN4,AVPMENUGFX_SPLASH_SCREEN5,
@@ -117,11 +120,13 @@ extern void ShowSplashScreens(void)
 		}
 		while (timeRemaining >= 0 && !DebouncedGotAnyKey && bRunning);
 	}
+#endif
 }
 
 extern void Show_WinnerScreen(void)
 {
-	LoadAvPMenuGfx(AVPMENUGFX_WINNER_SCREEN);
+#if 1 // bjd - texture test
+//bjd	LoadAvPMenuGfx(AVPMENUGFX_WINNER_SCREEN);
 
 	int timeRemaining = 10*ONE_FIXED;
 	do
@@ -145,9 +150,10 @@ extern void Show_WinnerScreen(void)
 
 	  	DirectReadKeyboard();
 		FrameCounterHandler();
-		timeRemaining-=NormalFrameTime;
+		timeRemaining -= NormalFrameTime;
 	}
-	while (timeRemaining>=0 && !DebouncedGotAnyKey && bRunning);
+	while (timeRemaining >= 0 && !DebouncedGotAnyKey && bRunning);
+#endif
 }
 
 void Show_CopyrightInfo(void)
@@ -210,7 +216,11 @@ void Show_Presents(void)
 		CheckForWindowsMessages();
 		{
 			char *textPtr = GetTextString(TEXTSTRING_FOXINTERACTIVE);
-			int y = (480-AvPMenuGfxStorage[AVPMENUGFX_PRESENTS].Height)/2;
+			//int y = (480 - AvPMenuGfxStorage[AVPMENUGFX_PRESENTS].Height) / 2;
+			uint32_t height, width;
+			Tex_GetDimensions(AVPMENUGFX_PRESENTS, width, height);
+			int y = (480 - height) / 2;
+
 			PlayMenuMusic();
 			DrawMainMenusBackdrop();
 
@@ -259,7 +269,11 @@ void Show_ARebellionGame(void)
 		CheckForWindowsMessages();
 		{
 			char *textPtr = GetTextString(TEXTSTRING_PRESENTS);
-			int y = (480-AvPMenuGfxStorage[AVPMENUGFX_AREBELLIONGAME].Height)/2;
+			//int y = (480-AvPMenuGfxStorage[AVPMENUGFX_AREBELLIONGAME].Height)/2;
+			uint32_t width, height;
+			Tex_GetDimensions(AVPMENUGFX_AREBELLIONGAME, width, height);
+			int y = (480-height)/2;
+
 			DrawMainMenusBackdrop();
 //			DrawAvPMenuGfx(AVPMENUGFX_BACKDROP, 0, 0, ONE_FIXED+1,AVPMENUFORMAT_LEFTJUSTIFIED);
 			PlayMenuMusic();
@@ -302,7 +316,12 @@ void Show_AvPLogo(void)
 
 		CheckForWindowsMessages();
 		{
-			int y = (480-AvPMenuGfxStorage[AVPMENUGFX_ALIENSVPREDATOR].Height)/2;
+			uint32_t width, height;
+			Tex_GetDimensions(AVPMENUGFX_ALIENSVPREDATOR, width, height);
+
+			//int y = (480-AvPMenuGfxStorage[AVPMENUGFX_ALIENSVPREDATOR].Height)/2;
+			int y = (480-height)/2;
+
 			DrawMainMenusBackdrop();
 //			DrawAvPMenuGfx(AVPMENUGFX_BACKDROP, 0, 0, ONE_FIXED+1,AVPMENUFORMAT_LEFTJUSTIFIED);
 			PlayMenuMusic();

@@ -25,13 +25,14 @@
 #include <assert.h>
 #include "avp_menus.h"
 #include "avp_userprofile.h"
+#include "avp_menugfx.hpp"
 
 uint32_t NumVertices = 0;
-const int32_t NO_TEXTURE = -1;
+//const int32_t NO_TEXTURE = 0;//-1;
 
 // set them to 'null' texture initially
-int32_t	currentTextureID	= NO_TEXTURE;
-int32_t	currentWaterTexture = NO_TEXTURE;
+uint32_t currentTextureID	 = NO_TEXTURE;
+uint32_t currentWaterTexture = NO_TEXTURE;
 
 uint32_t	NumIndicies = 0;
 uint32_t	vb = 0;
@@ -77,7 +78,6 @@ extern D3DXMATRIX matIdentity;
 extern D3DXMATRIX matViewPort;
 
 // externs
-extern LPDIRECT3DTEXTURE9 blankTexture;
 extern D3DINFO d3d;
 extern uint32_t fov;
 
@@ -89,8 +89,8 @@ void ColourFillBackBuffer(int FillColour);
 
 extern "C" {
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern IMAGEHEADER ImageHeaderArray[];
-extern AVPMENUGFX AvPMenuGfxStorage[];
+//extern IMAGEHEADER ImageHeaderArray[];
+//extern AVPMENUGFX AvPMenuGfxStorage[];
 extern AVPIndexedFont IntroFont_Light;
 extern VIEWDESCRIPTORBLOCK* Global_VDB_Ptr;
 extern int CloakingPhase;
@@ -104,7 +104,7 @@ const uint32_t MAX_INDICES = 9216;
 
 struct RENDER_STATES
 {
-	int32_t		textureID;
+	uint32_t	textureID;
 	uint32_t	vertStart;
 	uint32_t	vertEnd;
 	uint32_t	indexStart;
@@ -119,7 +119,7 @@ struct RENDER_STATES
 
 struct ORTHO_OBJECTS
 {
-	int32_t		textureID;
+	uint32_t	textureID;
 	uint32_t	vertStart;
 	uint32_t	vertEnd;
 
@@ -171,7 +171,6 @@ void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 #define RGBALIGHT_MAKE(r,g,b,a) RGBA_MAKE(r,g,b,a)
 
 static HRESULT LastError;
-
 
 RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
 RENDER_STATES *transRenderList = new RENDER_STATES[MAX_VERTEXES];
@@ -589,45 +588,13 @@ bool UnlockExecuteBufferAndPrepareForUse()
 	return true;
 }
 
-static void ChangeTexture(const int32_t textureID)
+static void ChangeTexture(const uint32_t textureID)
 {
 	if (textureID == currentTextureID)
 		return;
-/*
-	char buf[100];
-	sprintf(buf, "wants ted id: %d\n", textureID);
-	OutputDebugString(buf);
-*/
-	if (textureID >= texIDoffset)
-	{
-		LastError = d3d.lpD3DDevice->SetTexture(0, Tex_GetTexture(textureID));
-		if (!FAILED(LastError)) currentTextureID = textureID;
-			return;
-	}
 
-	// if texture was specified as 'null'
-	else if (textureID == NO_TEXTURE)
-	{
-		//LastError = d3d.lpD3DDevice->SetTexture(0, NULL);
-		LastError = d3d.lpD3DDevice->SetTexture(0, blankTexture);
-		if (!FAILED(LastError)) currentTextureID = NO_TEXTURE;
-		return;
-	}
-
-	// if in menus (outside game)
-	if (mainMenu)
-	{
-		LastError = d3d.lpD3DDevice->SetTexture(0, AvPMenuGfxStorage[textureID].menuTexture);
-		if (!FAILED(LastError)) currentTextureID = textureID;
-		return;
-	}
-	else
-	{
-		LastError = d3d.lpD3DDevice->SetTexture(0, ImageHeaderArray[textureID].Direct3DTexture);
-//		LastError = d3d.lpD3DDevice->SetTexture(0, Tex_GetTexture(textureID /*+ texIDoffset*/));
-		if (!FAILED(LastError)) currentTextureID = textureID;
-		return;
-	}
+	LastError = d3d.lpD3DDevice->SetTexture(0, Tex_GetTexture(textureID));
+	if (!FAILED(LastError)) currentTextureID = textureID;
 }
 
 bool ExecuteBuffer()
@@ -715,7 +682,7 @@ bool ExecuteBuffer()
 		NumberOfRenderedTriangles += numPrimitives / 3;
 	}
 
-#if 0
+#if 1
 	// render any particles
 	if (particleListCount)
 	{
@@ -914,7 +881,7 @@ void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired)
 	}
 }
 
-void CheckOrthoBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
+void CheckOrthoBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
 {
 	assert (numVerts == 4);
 
@@ -1118,7 +1085,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	}
 }
 
-void DrawProgressBar(const RECT &srcRect, const RECT &destRect, int32_t textureID, AVPTEXTURE *tex, uint32_t newWidth, uint32_t newHeight)
+void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t textureID, AVPTEXTURE *tex, uint32_t newWidth, uint32_t newHeight)
 {
 	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_OFF, TEXTURE_CLAMP, FILTERING_BILINEAR_ON);
 
@@ -1182,7 +1149,7 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, int32_t textureI
 	orthoVBOffset++;
 }
 
-void DrawTallFontCharacter(uint32_t topX, uint32_t topY, int32_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha)
+void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha)
 {
 	alpha = (alpha / 256);
 	if (alpha > 255)
@@ -1204,9 +1171,9 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, int32_t textureID, uint
 	float x2 = WPos2DC(topX + charWidth);
 	float y2 = HPos2DC(topY + charHeight);
 
-#if 0
+#if 1
 	ChangeTexture(textureID);
-	d3d.lpD3DDevice->SetTexture(1, AvPMenuGfxStorage[AVPMENUGFX_CLOUDY].menuTexture);
+	d3d.lpD3DDevice->SetTexture(1, /*AvPMenuGfxStorage[AVPMENUGFX_CLOUDY].menuTexture*/Tex_GetTexture(AVPMENUGFX_CLOUDY));
 
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.cloudVertexDecl);
 	d3d.lpD3DDevice->SetVertexShader(d3d.cloudVertexShader);
@@ -1436,7 +1403,9 @@ void DrawHUDQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, float 
 	float y2 = HPos2DC(y + height);
 
 	uint32_t texturePOW2Width, texturePOW2Height;
+	Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
 
+#if 0
 	// if in menus (outside game)
 	if (mainMenu)
 	{
@@ -1448,6 +1417,7 @@ void DrawHUDQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, float 
 		texturePOW2Width = ImageHeaderArray[textureID].ImageWidth;
 		texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
 	}
+#endif
 
 	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP);
 
@@ -1488,7 +1458,7 @@ void DrawHUDQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, float 
 	orthoVBOffset++;
 }
 
-void DrawFontQuad(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeight, int32_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
+void DrawFontQuad(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeight, uint32_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
 {
 	float x1 = WPos2DC(x);
 	float y1 = HPos2DC(y);
@@ -1535,7 +1505,7 @@ void DrawFontQuad(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeigh
 	orthoVBOffset++;
 }
 
-void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
+void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
 {
 	float x1 = WPos2DC(x);
 	float y1 = HPos2DC(y);
@@ -1543,20 +1513,16 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t t
 	float x2 = WPos2DC(x + width);
 	float y2 = HPos2DC(y + height);
 
-	uint32_t texturePOW2Width, texturePOW2Height;
+	uint32_t texturePOW2Width = 0;
+	uint32_t texturePOW2Height = 0;
 
 	// if in menus (outside game)
-	if (textureID >= texIDoffset)
+//	if (textureID >= texIDoffset)
 	{
 		Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
 	}
-	else
-	{
-		if (textureID == NO_TEXTURE)
-		{
-			texturePOW2Width = width;
-			texturePOW2Height = height;
-		}
+
+#if 0
 		else
 		{
 			if (mainMenu)
@@ -1571,6 +1537,7 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t t
 			}
 		}
 	}
+#endif
 
 	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP);
 
@@ -1611,11 +1578,13 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t t
 	orthoVBOffset++;
 }
 
-void DrawAlphaMenuQuad(uint32_t topX, uint32_t topY, int32_t textureID, uint32_t alpha)
+void DrawAlphaMenuQuad(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t alpha)
 {
 	// textures actual height/width (whether it's non power of two or not)
-	uint32_t textureWidth = AvPMenuGfxStorage[textureID].Width;
-	uint32_t textureHeight = AvPMenuGfxStorage[textureID].Height;
+//	uint32_t textureWidth = AvPMenuGfxStorage[textureID].Width;
+//	uint32_t textureHeight = AvPMenuGfxStorage[textureID].Height;
+	uint32_t textureWidth, textureHeight;
+	Tex_GetDimensions(textureID, textureWidth, textureHeight);
 
 	alpha = (alpha / 256);
 	if (alpha > 255)
@@ -1637,8 +1606,9 @@ void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint3
 		alpha = 255;
 
 	// textures original resolution (if it's a non power of 2, these will be the non power of 2 values)
-	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Width;
-	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Height;
+//	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Width;
+//	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Height;
+	Tex_GetDimensions(AVPMENUGFX_GLOWY_LEFT, textureWidth, textureHeight);
 
 	// do the text alignment justification
 	topLeftX -= textureWidth;
@@ -1648,16 +1618,18 @@ void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint3
 	// now do the middle section
 	topLeftX += textureWidth;
 
-	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Width;
-	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Height;
+//	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Width;
+//	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Height;
+	Tex_GetDimensions(AVPMENUGFX_GLOWY_MIDDLE, textureWidth, textureHeight);
 
 	DrawQuad(topLeftX, topLeftY, textureWidth * size, textureHeight, AVPMENUGFX_GLOWY_MIDDLE, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
 
 	// now do the right section
 	topLeftX += textureWidth * size;
 
-	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Width;
-	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Height;
+//	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Width;
+//	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Height;
+	Tex_GetDimensions(AVPMENUGFX_GLOWY_RIGHT, textureWidth, textureHeight);
 
 	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_RIGHT, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
 }
@@ -1816,7 +1788,7 @@ void DrawCoronas()
 
 	uint32_t numVertsBackup = RenderPolygon.NumberOfVertices;
 
-	LastError = d3d.lpD3DDevice->SetTexture(0, ImageHeaderArray[SpecialFXImageNumber].Direct3DTexture);
+	LastError = d3d.lpD3DDevice->SetTexture(0, /*ImageHeaderArray[SpecialFXImageNumber].Direct3DTexture*/Tex_GetTexture(SpecialFXImageNumber));
 	currentTextureID = SpecialFXImageNumber;
 
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
@@ -1828,10 +1800,23 @@ void DrawCoronas()
 //	int sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
 
 	D3DCOLOR colour;
-	
-	float RecipW = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
-	float RecipH = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
+	float RecipW, RecipH;
 
+//	if (SpecialFXImageNumber >= texIDoffset)
+	{
+		uint32_t texWidth, texHeight;
+		Tex_GetDimensions(SpecialFXImageNumber, texWidth, texHeight);
+
+		RecipW = 1.0f / (float) texWidth;
+		RecipH = 1.0f / (float) texHeight;
+	}
+/*
+	else
+	{
+		RecipW = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
+		RecipH = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
+	}
+*/
 	for (size_t i = 0; i < coronaArray.size(); i++)
 	{
 		PARTICLE_DESC *particleDescPtr = &ParticleDescription[coronaArray[i].particle.ParticleID];
@@ -1978,8 +1963,6 @@ void DrawParticles()
 	// restore RenderPolygon.NumberOfVertices value...
 	RenderPolygon.NumberOfVertices = numVertsBackup;
 }
-
-const float Zoffset = 2.0f;
 
 #define FMV_ON 0
 #define FMV_EVERYWHERE 0
@@ -2162,7 +2145,7 @@ static inline void D3D_OutputTriangles()
 	}
 }
 
-void CheckVertexBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
+void CheckVertexBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
 {
 	uint32_t realNumVerts = 0;
 
@@ -2424,14 +2407,14 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
-	int32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
+	uint32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
 
 	float RecipW, RecipH;
 
 	if (!textureID)
 		textureID = currentTextureID;
 
-	if (textureID >= texIDoffset)
+//	if (textureID >= texIDoffset)
 	{
 		uint32_t texWidth, texHeight;
 		Tex_GetDimensions(textureID, texWidth, texHeight);
@@ -2439,12 +2422,13 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 		RecipW = 1.0f / (float) texWidth;
 		RecipH = 1.0f / (float) texHeight;
 	}
+/*
 	else
 	{
 		RecipW = 1.0f / (float) ImageHeaderArray[textureID].ImageWidth;
 		RecipH = 1.0f / (float) ImageHeaderArray[textureID].ImageHeight;
 	}
-
+*/
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
@@ -2534,11 +2518,22 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 {
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
-	int32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
+	uint32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-	float RecipW = 1.0f / (float) ImageHeaderArray[textureID].ImageWidth;
-	float RecipH = 1.0f / (float) ImageHeaderArray[textureID].ImageHeight;
+	float RecipW, RecipH;
 
+	uint32_t texWidth, texHeight;
+	Tex_GetDimensions(textureID, texWidth, texHeight);
+
+	RecipW = 1.0f / (float) texWidth;
+	RecipH = 1.0f / (float) texHeight;
+/*
+	else
+	{
+		RecipW = 1.0f / (float) ImageHeaderArray[textureID].ImageWidth;
+		RecipH = 1.0f / (float) ImageHeaderArray[textureID].ImageHeight;
+	}
+*/
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, TRANSLUCENCY_NORMAL);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
@@ -2627,28 +2622,25 @@ void D3D_HUD_Setup(void)
 	}
 }
 
-void D3D_HUDQuad_Output(int32_t textureID, struct VertexTag *quadVerticesPtr, uint32_t colour, enum FILTERING_MODE_ID filteringType)
+void D3D_HUDQuad_Output(uint32_t textureID, struct VertexTag *quadVerticesPtr, uint32_t colour, enum FILTERING_MODE_ID filteringType)
 {
 	float RecipW, RecipH;
 
 	assert (textureID != -1);
 
-	// ugh..
-	if (textureID >= texIDoffset)
-	{
-		uint32_t texWidth, texHeight;
+	uint32_t texWidth, texHeight;
 
-		Tex_GetDimensions(textureID, texWidth, texHeight);
+	Tex_GetDimensions(textureID, texWidth, texHeight);
 
-		RecipW = 1.0f / texWidth;
-		RecipH = 1.0f / texHeight;
-	}
+	RecipW = 1.0f / texWidth;
+	RecipH = 1.0f / texHeight;
+/*
 	else
 	{
 		RecipW = 1.0f / ImageHeaderArray[textureID].ImageWidth;
 		RecipH = 1.0f / ImageHeaderArray[textureID].ImageHeight;
 	}
-
+*/
 	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP, filteringType);
 
 	// bottom left
@@ -2782,7 +2774,7 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 	// function responsible for bullet marks on walls, etc
 	DECAL_DESC *decalDescPtr = &DecalDescription[decalPtr->DecalID];
 
-	int32_t textureID;
+	uint32_t textureID = SpecialFXImageNumber;
 
 //	AVPTEXTURE *textureHandle = NULL;
 
@@ -2810,10 +2802,18 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 	}
 	else
 	{
-		RecipW = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
-		RecipH = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
+		uint32_t texWidth, texHeight;
+		Tex_GetDimensions(textureID, texWidth, texHeight);
 
-		textureID = SpecialFXImageNumber;
+		RecipW = 1.0f / (float) texWidth;
+		RecipH = 1.0f / (float) texHeight;
+/*
+		else
+		{
+			RecipW = 1.0f / (float) ImageHeaderArray[textureID].ImageWidth;
+			RecipH = 1.0f / (float) ImageHeaderArray[textureID].ImageHeight;
+		}
+*/
 	}
 
 	if (decalDescPtr->IsLit)
@@ -2902,9 +2902,22 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	// steam jets, wall lights, fire (inc aliens on fire) etc
 	PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
 
-	float RecipW = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
-	float RecipH = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
+	uint32_t textureID = SpecialFXImageNumber;
 
+	float RecipW, RecipH;
+
+	uint32_t texWidth, texHeight;
+	Tex_GetDimensions(textureID, texWidth, texHeight);
+
+	RecipW = 1.0f / (float) texWidth;
+	RecipH = 1.0f / (float) texHeight;
+/*
+	else
+	{
+		RecipW = 1.0f / (float) ImageHeaderArray[textureID].ImageWidth;
+		RecipH = 1.0f / (float) ImageHeaderArray[textureID].ImageHeight;
+	}
+*/
 //	CheckVertexBuffer(RenderPolygon.NumberOfVertices, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType);
 //	void CheckVertexBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
 
@@ -3723,11 +3736,22 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 {
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
-	int32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
+	uint32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-	float RecipW = 1.0f / (float)ImageHeaderArray[textureID].ImageWidth;
-	float RecipH = 1.0f / (float)ImageHeaderArray[textureID].ImageHeight;
+	float RecipW, RecipH;
 
+	uint32_t texWidth, texHeight;
+	Tex_GetDimensions(textureID, texWidth, texHeight);
+
+	RecipW = 1.0f / (float) texWidth;
+	RecipH = 1.0f / (float) texHeight;
+/*
+	else
+	{
+		RecipW = 1.0f / (float) ImageHeaderArray[textureID].ImageWidth;
+		RecipH = 1.0f / (float) ImageHeaderArray[textureID].ImageHeight;
+	}
+*/
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)

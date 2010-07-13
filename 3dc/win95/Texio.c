@@ -83,192 +83,6 @@ void ReleaseD3DTexture(RENDERTEXTURE *d3dTexture);
 
 */
 
-
-#if LoadingMapsShapesAndTexturesEtc
-
-
-void InitialiseImageHeaders(void)
-{
-	#ifdef MaxImageGroups
-
-	NumImages = CurrentImageGroup * MaxImages;
-	NextFreeImageHeaderPtr[CurrentImageGroup] = &ImageHeaderArray[CurrentImageGroup*MaxImages];
-
-	#else
-
-	NumImages = 0;
-	NextFreeImageHeaderPtr = ImageHeaderArray;
-
-	#endif
-}
-
-
-int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
-{
-
-	SHAPEHEADER **shlistptr;
-	SHAPEHEADER *shptr;
-	char **txfiles;
-	int TxIndex;
-	int LTxIndex;
-
-
-/*
-
- Build the Texture List
-
-*/
-
-	shlistptr = shapelist;
-
-	while(*shlistptr) {
-
-		shptr = *shlistptr++;
-
-		/* If the shape has textures */
-
-		if(shptr->sh_localtextures) {
-
-			txfiles = shptr->sh_localtextures;
-
-			LTxIndex = 0;
-
-			while(*txfiles) {
-
-				/* The RIFF Image loaders have changed to support not loading the same image twice - JH 17-2-96 */
-
-				char *src;
-				char *dst;
-				char fname[ImageNameSize];
-				char *texfilesptr;
-				#ifndef RIFF_SYSTEM
-				int i, j, NewImage;
-				char *iname;
-				IMAGEHEADER *ihptr;
-				IMAGEHEADER *new_ihptr;
-				void* im;
-				#endif
-
-				txfilesptr = *txfiles++;
-
-				/*
-
-				"txfilesptr" is in the form "textures\<fname>". We need to
-				prefix that text with the name of the current textures path.
-
-				Soon this path may be varied but for now it is just the name of
-				the current project subdirectory.
-
-				*/
-
-				src = projectsubdirectory;
-				dst = fname;
-
-				while(*src)
-					*dst++ = *src++;
-
-				src = txfilesptr;
-
-				while(*src)
-					*dst++ = *src++;
-
-				*dst = 0;
-
-				#ifdef RIFF_SYSTEM
-
-				/* This function calls GetExistingImageHeader to figure out if the image is already loaded */
-				TxIndex = CL_LoadImageOnce(fname,(/*ScanDrawDirectDraw == ScanDrawMode ? LIO_CHIMAGE : */LIO_D3DTEXTURE)|LIO_TRANSPARENT|LIO_RELATIVEPATH|LIO_RESTORABLE);
-				GLOBALASSERT(GEI_NOTLOADED != TxIndex);
-
-				#else
-
-				/* If there are already images, try and find this one */
-
-				NewImage = TRUE;
-
-				#ifdef MaxImageGroups
-
-				TxIndex = CurrentImageGroup * MaxImages;			/* Assume image 0 */
-
-				if(NumImagesArray[CurrentImageGroup]) {
-
-					for(i=NumImagesArray[CurrentImageGroup]; i!=0 && NewImage!=FALSE; i--) {
-
-				#else
-
-				TxIndex = 0;			/* Assume image 0 */
-
-				if(NumImages) {
-
-					for(i=NumImages; i!=0 && NewImage!=FALSE; i--) {
-
-				#endif
-
-						ihptr = ImageHeaderPtrs[TxIndex];
-
-						iname = &ihptr->ImageName[0];
-
-						j = CompareFilenameCH(txfilesptr, iname);
-
-						if(j) NewImage = FALSE;
-
-						else TxIndex++;
-					}
-				}
-
-				/* If this is a new image, add it */
-
-				if(NewImage) {
-
-					/* Get an Image Header */
-
-					new_ihptr = GetImageHeader();
-
-					if(new_ihptr) {
-
-			            if (ScanDrawMode == ScanDrawDirectDraw)
-						  im = (void*) LoadImageCH(&fname[0], new_ihptr);
-						else
-						  im = LoadImageIntoD3DImmediateSurface
-						     (&fname[0], new_ihptr, DefinedTextureType);
-					}
-				}
-
-				#endif
-
-				/*
-
-					The local index for this image in this shape is
-					"LTxIndex".
-
-					The global index for the image is "TxIndex".
-
-					We must go through the shape's items and change all the
-					local references to global.
-
-				*/
-
-				MakeShapeTexturesGlobal(shptr, TxIndex, LTxIndex);
-
-				LTxIndex++;			/* Next Local Texture */
-			}
-
-			/* Is this shape a sprite that requires resizing? */
-
-			if((shptr->shapeflags & ShapeFlag_Sprite) &&
-				(shptr->shapeflags & ShapeFlag_SpriteResizing)) {
-
-				SpriteResizing(shptr);
-			}
-		}
-	}
-	return TRUE;
-}
-
-
-#else
-
-
 #define InitTexPrnt FALSE
 
 int InitialiseTextures(void)
@@ -340,13 +154,6 @@ int InitialiseTextures(void)
 				char *dst;
 				char fname[ImageNameSize];
 				char *txfilesptr;
-				#ifndef RIFF_SYSTEM
-				int i, j, NewImage;
-				char *iname;
-				IMAGEHEADER *ihptr;
-				IMAGEHEADER *new_ihptr;
-				void* im;
-				#endif
 
 				txfilesptr = *txfiles++;
 
@@ -377,9 +184,6 @@ int InitialiseTextures(void)
 				textprint(" A Texture\n");
 				#endif
 
-
-				#ifdef RIFF_SYSTEM
-
 				/* This function calls GetExistingImageHeader to figure out if the image is already loaded */
 				TxIndex = CL_LoadImageOnce(fname, LIO_D3DTEXTURE|LIO_TRANSPARENT|LIO_RELATIVEPATH|LIO_RESTORABLE);
 
@@ -389,81 +193,6 @@ int InitialiseTextures(void)
 					OutputDebugString(buf);
 				}
 				GLOBALASSERT(GEI_NOTLOADED != TxIndex);
-
-				#else
-
-				/* If there are already images, try and find this one */
-
-				NewImage = TRUE;
-
-				#ifdef MaxImageGroups
-
-				TxIndex = CurrentImageGroup * MaxImages;			/* Assume image 0 */
-
-				if(NumImagesArray[CurrentImageGroup]) {
-
-					for(i=NumImagesArray[CurrentImageGroup]; i!=0 && NewImage!=FALSE; i--) {
-
-				#else
-
-				TxIndex = 0;			/* Assume image 0 */
-
-				if(NumImages) {
-
-					for(i=NumImages; i!=0 && NewImage!=FALSE; i--) {
-
-				#endif
-
-						ihptr = ImageHeaderPtrs[TxIndex];
-
-						iname = &ihptr->ImageName[0];
-
-						j = CompareFilenameCH(txfilesptr, iname);
-
-						if(j) NewImage = FALSE;
-
-						else TxIndex++;
-					}
-				}
-
-				/* If this is a new image, add it */
-
-				if(NewImage) {
-
-					#if InitTexPrnt
-					textprint("New Image\n");
-					WaitForReturn();
-					#endif
-
-					/* Get an Image Header */
-
-					new_ihptr = GetImageHeader();
-
-					if(new_ihptr) {
-
-			            if (ScanDrawMode == ScanDrawDirectDraw)
-						  im = (void*) LoadImageCH(&fname[0], new_ihptr);
-						else
-						  im = LoadImageIntoD3DImmediateSurface
-						     (&fname[0], new_ihptr, DefinedTextureType);
-
-						if(im) {
-
-							#if InitTexPrnt
-							textprint("Load OK, NumImages = %d\n", NumImages);
-							WaitForReturn();
-							#endif
-						}
-					}
-				}
-
-				/* test */
-
-				#if InitTexPrnt
-				else textprint("Image Already Exists\n");
-				#endif
-
-				#endif
 
 				/*
 
@@ -505,10 +234,6 @@ int InitialiseTextures(void)
 
 	return TRUE;
 }
-
-
-#endif
-
 
 /*
 
@@ -561,7 +286,6 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 	POLYHEADER *ShapeItemPtr;
 
 	int i, txi;
-
 
 	/* Are the items in a pointer array? */
 	if (shptr->items)

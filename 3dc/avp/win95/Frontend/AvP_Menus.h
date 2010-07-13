@@ -223,7 +223,8 @@ typedef struct
 	union
 	{
 		enum TEXTSTRING_ID TextDescription;
-		enum AVPMENUGFX_ID GfxID;
+//		enum AVPMENUGFX_ID GfxID;
+		uint32_t textureID;
 	};
 
 	union

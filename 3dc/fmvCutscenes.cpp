@@ -43,7 +43,8 @@ int PanningOfNearestVideoScreen = 0;
 #include "inline.h"
 }
 
-VorbisPlayback *menuMusic = NULL;
+VorbisPlayback	*menuMusic = NULL;
+TheoraFMV		*menuFMV = NULL;
 bool MenuBackground = false;
 
 void ReleaseAllFMVTexturesForDeviceReset()
@@ -102,9 +103,9 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 
 void FindLightingValuesFromTriggeredFMV(uint8_t *bufferPtr, FMVTEXTURE *ftPtr)
 {
-	unsigned int totalRed = 0;
-	unsigned int totalBlue = 0;
-	unsigned int totalGreen = 0;
+	uint32_t totalRed = 0;
+	uint32_t totalBlue = 0;
+	uint32_t totalGreen = 0;
 
 	FmvColourRed = totalRed/48*16;
 	FmvColourGreen = totalGreen/48*16;
@@ -170,6 +171,10 @@ void StartMenuBackgroundFmv()
 
 	const char *filenamePtr = "fmvs\\menubackground.ogv";
 
+	menuFMV = new TheoraFMV();
+	if (menuFMV->Open(filenamePtr) != FMV_OK)
+		return;
+	
 	MenuBackground = true;
 }
 
@@ -201,24 +206,36 @@ int GetVolumeOfNearestVideoScreen(void);
 extern int PlayMenuBackgroundFmv()
 {
 	return 0;
-#if 0 // temporarily disabled
+
 	if (!MenuBackground)
 		return 0;
 
 	int playing = 0;
 
-	if (frameReady)
+	if (menuFMV->mFrameReady)
+		playing = menuFMV->NextFrame();
+
+	if (menuFMV->mTexturesReady)
 	{
-		playing = NextFMVFrame();
-		DrawFmvFrame(frameWidth, frameHeight, textureWidth, textureHeight, mDisplayTexture);
+		DrawFmvFrame2(menuFMV->mFrameWidth, menuFMV->mFrameHeight, menuFMV->frameTextures[0].width, menuFMV->frameTextures[0].height, menuFMV->frameTextures[0].texture, menuFMV->frameTextures[1].texture, menuFMV->frameTextures[2].texture);
 	}
 
 	return 1;
-#endif
 }
 
 extern void EndMenuBackgroundFmv()
 {
+	return;
+
+	if (!MenuBackground)
+		return;
+
+	menuFMV->Close();
+	delete menuFMV;
+	menuFMV = 0;
+
+	MenuBackground = false;
+
 	return;
 #if 0 // temporarily disabled
 	if (!MenuBackground)

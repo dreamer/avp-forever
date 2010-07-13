@@ -1344,13 +1344,12 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 	#endif
 	
 	/*find this rif's sound directory*/
-	Rif_Sound_Directory=0;
-	Sound_Directory_Chunk* dir_chunk=(Sound_Directory_Chunk*)h->envd->lookup_single_child("SOUNDDIR");
-	if(dir_chunk)
+	Rif_Sound_Directory = 0;
+	Sound_Directory_Chunk* dir_chunk = (Sound_Directory_Chunk*)h->envd->lookup_single_child("SOUNDDIR");
+	if (dir_chunk)
 	{
-		Rif_Sound_Directory=dir_chunk->directory;
+		Rif_Sound_Directory = dir_chunk->directory;
 	}
-
 
 	load_rif_bitmaps(h,flags);
 

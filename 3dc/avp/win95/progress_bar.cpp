@@ -51,7 +51,7 @@ RENDERTEXTURE LoadingBarFullTexture;
 RENDERTEXTURE LoadingBarEmptyTexture;
 RENDERTEXTURE DemoBackgroundImage;
 
-void DrawProgressBar(const RECT &srcRect, const RECT &destRect, int32_t textureID, AVPTEXTURE *tex, uint32_t newWidth, uint32_t newHeight);
+void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t textureID, AVPTEXTURE *tex, uint32_t newWidth, uint32_t newHeight);
 
 uint32_t	fullTextureID = 0;
 uint32_t	emptyTextureID = 0;
@@ -94,7 +94,7 @@ void Start_Progress_Bar()
 		if (LoadingBarEmpty)
 		{
 			LoadingBarEmptyTexture = CreateD3DTexturePadded(LoadingBarEmpty, &emptybarWidth, &emptybarHeight);
-			emptyTextureID = Tex_AddTexture(LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height);
+			emptyTextureID = Tex_AddTexture(Loading_Bar_Empty_Image_Name, LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height);
 		}
 	}
 	{
@@ -118,7 +118,7 @@ void Start_Progress_Bar()
 		if (LoadingBarFull)
 		{
 			LoadingBarFullTexture = CreateD3DTexturePadded(LoadingBarFull, &fullbarWidth, &fullbarHeight);
-			fullTextureID = Tex_AddTexture(LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height);
+			fullTextureID = Tex_AddTexture(Loading_Bar_Full_Image_Name, LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height);
 		}
 	}
 	
@@ -143,7 +143,7 @@ void Start_Progress_Bar()
 	if (image) // background image on demo loading screen
 	{
 		DemoBackgroundImage = CreateD3DTexturePadded(image, &dbWidth, &dbHeight);
-		dbTextureID = Tex_AddTexture(DemoBackgroundImage, dbWidth, dbHeight);
+		dbTextureID = Tex_AddTexture(Loading_Image_Name, DemoBackgroundImage, dbWidth, dbHeight);
 	}
 
 	// draw initial progress bar
@@ -173,10 +173,10 @@ void Start_Progress_Bar()
 			DrawQuad(0, 0, dbWidth, dbHeight, dbTextureID, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
 			// white outline
-			DrawQuad(105, 413, 429, 46, -1, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
+			DrawQuad(105, 413, 429, 46, NO_TEXTURE, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
 			// blue background
-			DrawQuad(106, 414, 427, 44, -1, D3DCOLOR_XRGB(0, 0, 248), TRANSLUCENCY_OFF);
+			DrawQuad(106, 414, 427, 44, NO_TEXTURE, D3DCOLOR_XRGB(0, 0, 248), TRANSLUCENCY_OFF);
 		}
 
 		ThisFramesRenderingHasFinished();
@@ -211,13 +211,13 @@ void Set_Progress_Bar_Position(int pos)
 			DrawQuad(0, 0, dbWidth, dbHeight, dbTextureID, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
 			// white outline
-			DrawQuad(105, 413, 429, 46, -1, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
+			DrawQuad(105, 413, 429, 46, NO_TEXTURE, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
 			// blue background
-			DrawQuad(106, 414, 427, 44, -1, D3DCOLOR_XRGB(0, 0, 248), TRANSLUCENCY_OFF);
+			DrawQuad(106, 414, 427, 44, NO_TEXTURE, D3DCOLOR_XRGB(0, 0, 248), TRANSLUCENCY_OFF);
 
 			// red progress bar
-			DrawQuad(106, 414, MUL_FIXED(427, NewPosition), 44, -1, D3DCOLOR_XRGB(248, 0, 0), TRANSLUCENCY_OFF);
+			DrawQuad(106, 414, MUL_FIXED(427, NewPosition), 44, NO_TEXTURE, D3DCOLOR_XRGB(248, 0, 0), TRANSLUCENCY_OFF);
 		}
 		else		
 		{
@@ -299,10 +299,10 @@ void Game_Has_Loaded()
 				DrawQuad(0, 0, dbWidth, dbHeight, dbTextureID, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
 				// white outline
-				DrawQuad(105, 413, 429, 46, -1, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
+				DrawQuad(105, 413, 429, 46, NO_TEXTURE, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
 				// red background (no more blue as bar is now full with red)
-				DrawQuad(106, 414, 427, 44, -1, D3DCOLOR_XRGB(248, 0, 0), TRANSLUCENCY_OFF);
+				DrawQuad(106, 414, 427, 44, NO_TEXTURE, D3DCOLOR_XRGB(248, 0, 0), TRANSLUCENCY_OFF);
 			}
 
 			f -= NormalFrameTime;

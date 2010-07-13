@@ -719,8 +719,6 @@ typedef struct imageheader
 	uint32_t ImageWidth;
 	uint32_t ImageHeight;					/* Height, Pixels */
 
-	int ImageWidthShift;				/* Image Width as a power of 2 */
-
 	AVPTEXTURE *AvPTexture;
 
 	// graphics api texture
@@ -728,9 +726,6 @@ typedef struct imageheader
 
 	int ImageNum;						/* # MIP images */
 	char ImageName[ImageNameSize];		/* Filename */
-
-	int ImageSize;						/* Size of Image Data in bytes */
-	int ImageFlags;						/* Load / Display Options */
 
 } IMAGEHEADER;
 

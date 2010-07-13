@@ -644,7 +644,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 	// safe to handle windows messages at this point (I think - JCWH)
 	CheckForWindowsMessages();
 
-	int32_t textureID = 0;
+	uint32_t textureID = 0;
 
 	// get the filename
 	char szBuf[MAX_PATH];
@@ -657,10 +657,12 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 	db_logf4(("\tLoading '%s'",szBuf));
 
 	// already loaded ?
-	int iExistingImage = GetExistingImageNum(szBuf);
-	if (GEI_NOTLOADED != iExistingImage)
+//	int iExistingImage = GetExistingImageNum(szBuf);
+//	if (GEI_NOTLOADED != iExistingImage)
+	int iExistingImage = Tex_CheckExists(szBuf);
+	if (/*GEI_NOTLOADED*/0 != iExistingImage)
 	{
-		db_logf4(("\tImage already loaded to image number %d",iExistingImage));
+		db_logf4(("\tImage already loaded to image number %d", iExistingImage));
 		return iExistingImage;
 	}
 
@@ -703,6 +705,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					);
 				if (pTexture)
 				{
+/*
 					IMAGEHEADER * pImageHdr = GetImageHeader();
 					db_assert1(pImageHdr);
 					memset(pImageHdr,0,sizeof(IMAGEHEADER));
@@ -711,34 +714,40 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
 					strcpy(pImageHdr->ImageName, szBuf);
 					pImageHdr->AvPTexture = pTexture;
+*/
+					uint32_t ImageWidth = pTexture->width;
+					uint32_t ImageHeight = pTexture->height;
+					AVPTEXTURE *AvPTexture = pTexture;
+					char *ImageName = szBuf;
+					RENDERTEXTURE renderTexture;
 
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 
 					/* KJL 16:05:50 26/02/98 - attempt to get a texture handle */
 					{
 						// load Direct3D Texture here?
-						if (pTexture->buffer)
+						if (/*pTexture->*/AvPTexture->buffer)
 						{
-							if ((strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0) ||
-								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\alien.RIM") == 0) ||		// for alien demo
-								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\predator.RIM") == 0) ||  // for marine(?) demo
-								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\final.RIM") == 0))		// for predator demo
+							if ((strcmp(/*pImageHdr->*/ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0) ||
+								(strcmp(/*pImageHdr->*/ImageName, "Graphics\\FMVs\\alien.RIM") == 0) ||		// for alien demo
+								(strcmp(/*pImageHdr->*/ImageName, "Graphics\\FMVs\\predator.RIM") == 0) ||  // for marine(?) demo
+								(strcmp(/*pImageHdr->*/ImageName, "Graphics\\FMVs\\final.RIM") == 0))		// for predator demo
 							{
 								OutputDebugString("found fmv texture.. \n");
 								// is fmv texture, create in default pool so we can dynamically update it
-								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+								renderTexture = CreateD3DTexture(AvPTexture, AvPTexture->buffer, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 								// will need to be restored on alt/tab or device loss
 							}
 							else
 							{
-								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, 0, D3DPOOL_MANAGED);
+								renderTexture = CreateD3DTexture(AvPTexture, AvPTexture->buffer, 0, D3DPOOL_MANAGED);
 							}
 
-							textureID = Tex_AddTexture(pImageHdr->Direct3DTexture, pImageHdr->ImageWidth, pImageHdr->ImageHeight);
+							textureID = Tex_AddTexture(ImageName, renderTexture, ImageWidth, ImageHeight);
 
 							// free this, as d3d now holds the texture
-							free(pTexture->buffer);
-							pTexture->buffer = NULL;
+							free(AvPTexture->buffer);
+							AvPTexture->buffer = NULL;
 						}
 						else OutputDebugString("pTexture->buf was Null!");
 					}
@@ -798,7 +807,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, 0, D3DPOOL_MANAGED);
 							}
 
-							textureID = Tex_AddTexture(pImageHdr->Direct3DTexture, pImageHdr->ImageWidth, pImageHdr->ImageHeight);
+							textureID = Tex_AddTexture(pImageHdr->ImageName, pImageHdr->Direct3DTexture, pImageHdr->ImageWidth, pImageHdr->ImageHeight);
 
 							if (pImageHdr->Direct3DTexture == NULL)
 							{

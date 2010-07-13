@@ -472,7 +472,7 @@ __asm__("movl	0(%%esi), %%eax		\n\t"
 // shift a to the right by 16, return the
 // return the lower 32 bits:
 
-fixed_int MUL_FIXED(fixed_int a, fixed_int b)
+fixed_t MUL_FIXED(fixed_t a, fixed_t b)
 {
 #ifdef USE_ASM
 
@@ -498,9 +498,9 @@ fixed_int MUL_FIXED(fixed_int a, fixed_int b)
 * \param b Fixed-point multiplier
 * \returns integral result of division
 */
-fixed_int DIV_FIXED(fixed_int a, fixed_int b)
+fixed_t DIV_FIXED(fixed_t a, fixed_t b)
 {
-	fixed_int retval;
+	fixed_t retval;
 
 	if (b == 0)
 	{
@@ -528,7 +528,7 @@ fixed_int DIV_FIXED(fixed_int a, fixed_int b)
 		__int64 bb = (__int64) b;
 		__int64 cc = (aa << ONE_FIXED_SHIFT) / bb;
 
-		return (fixed_int) (cc & 0xffffffff);
+		return (fixed_t) (cc & 0xffffffff);
 	}
 
 #endif

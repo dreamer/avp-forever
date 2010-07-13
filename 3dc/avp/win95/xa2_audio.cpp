@@ -1607,39 +1607,6 @@ void PlatUpdatePlayer()
 				(Global_VDB_Ptr->VDB_World.vz == 0))
 			return;
 
-		D3DXMATRIX test;
-
-		//viewMatrix
-		D3DXVECTOR3 vPos;
-		D3DXVECTOR3 vLookAt;
-		D3DXVECTOR3 vUp;
-
-		D3DXMatrixInverse( &test, NULL, &viewMatrix );
-		D3DXVec3TransformCoord( &vPos, &D3DXVECTOR3(0.0f,0.0f,0.0f), &test );
-
-		// up
-		vUp.x = viewMatrix._12;
-		vUp.y = viewMatrix._22;
-		vUp.z = viewMatrix._32;
-
-		// front
-		vLookAt.x = viewMatrix._13;
-		vLookAt.y = viewMatrix._23;
-		vLookAt.z = viewMatrix._33;
-
-		XA2Listener.Position.x = vPos.x;
-		XA2Listener.Position.y = vPos.y;
-		XA2Listener.Position.z = vPos.z;
-
-		XA2Listener.OrientFront.x = vLookAt.x;
-		XA2Listener.OrientFront.y = vLookAt.y;
-		XA2Listener.OrientFront.z = vLookAt.z;
-
-		XA2Listener.OrientTop.x = vUp.x;
-		XA2Listener.OrientTop.y = vUp.y;
-		XA2Listener.OrientTop.z = vUp.z;
-
-/*
 		XA2Listener.Position.x = static_cast<float>(Global_VDB_Ptr->VDB_World.vx);
 		XA2Listener.Position.y = static_cast<float>(Global_VDB_Ptr->VDB_World.vy);
 		XA2Listener.Position.z = static_cast<float>(Global_VDB_Ptr->VDB_World.vz);
@@ -1653,7 +1620,7 @@ void PlatUpdatePlayer()
 		XA2Listener.OrientTop.x = (float)((Global_VDB_Ptr->VDB_Mat.mat12) / 65536.0F);
 		XA2Listener.OrientTop.y = (float)((Global_VDB_Ptr->VDB_Mat.mat22) / 65536.0F);
 		XA2Listener.OrientTop.z = (float)((Global_VDB_Ptr->VDB_Mat.mat32) / 65536.0F);
-*/
+
 /*
 			char buf2[250];
 			sprintf(buf2, "of:x %f of:y %f of:z :%f - ot:x %f ot:y %f ot:z :%f\n", 
@@ -1703,7 +1670,7 @@ void PlatUpdatePlayer()
 //			OutputDebugString(buf);
 
 			ActiveSounds[i].pSourceVoice->SetOutputMatrix(pMasteringVoice, 1, 2, XA2DSPSettings.pMatrixCoefficients);
-//			ActiveSounds[i].pSourceVoice->SetFrequencyRatio(XA2DSPSettings.DopplerFactor);
+			ActiveSounds[i].pSourceVoice->SetFrequencyRatio(XA2DSPSettings.DopplerFactor);
 		}
 	}
 #endif

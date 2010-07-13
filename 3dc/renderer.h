@@ -30,21 +30,17 @@
 #endif
 
 #ifdef USE_D3D9
-
 	#include "d3_func.h"
-
 #endif
 
 #ifdef _XBOX
-
 	#include "d3_func.h"
-
 #endif
 
 #ifdef USE_OPENGL
-
+	#include "ogl_func.h" // doesn't exist yet
 #endif
 
 #ifdef USE_GLIDE
-	#include <glide.h>
+	#include "glide_func.h" // hehe
 #endif

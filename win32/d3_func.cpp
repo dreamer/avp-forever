@@ -55,8 +55,6 @@ extern LPD3DXCONSTANTTABLE	cloudConstantTable;
 
 extern void DeleteRenderMemory();
 
-LPDIRECT3DTEXTURE9 blankTexture;
-
 // size of vertex and index buffers
 const uint32_t MAX_VERTEXES = 4096;
 const uint32_t MAX_INDICES = 9216;
@@ -231,7 +229,7 @@ extern "C" {
 #include "eax.h"
 
 #include "avp_menugfx.hpp"
-extern AVPMENUGFX AvPMenuGfxStorage[];
+//extern AVPMENUGFX AvPMenuGfxStorage[];
 extern void ReleaseAllFMVTextures(void);
 
 extern void ThisFramesRenderingHasBegun(void);
@@ -250,6 +248,7 @@ D3DINFO d3d;
 // console command : output all menu textures as .png files
 void WriteMenuTextures()
 {
+#if 0
 	char *filename = new char[strlen(GetSaveFolderPath()) + MAX_PATH];
 
 	for (uint32_t i = 0; i < 54; i++) // 54 == MAX_NO_OF_AVPMENUGFXS
@@ -258,6 +257,7 @@ void WriteMenuTextures()
 
 		D3DXSaveTextureToFileA(filename, D3DXIFF_PNG, AvPMenuGfxStorage[i].menuTexture, NULL);
 	}
+#endif
 }
 
 char* GetDeviceName()
@@ -760,11 +760,6 @@ bool CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *pixe
 
 	return true;
 }
-
-
-
-int imageNum = 0;
-
 
 // removes pure red colour from a texture. used to remove red outline grid on small font texture.
 // we remove the grid as it can sometimes bleed onto text when we use texture filtering. maybe add params for passing width/height?
@@ -1597,6 +1592,8 @@ BOOL InitialiseDirect3D()
 	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
 	CreatePixelShader("tallFontTextPixel.psh", &d3d.cloudPixelShader);
 
+	LPDIRECT3DTEXTURE9 blankTexture;
+
 	// create a 1x1 resolution texture to set to shader for sampling when we don't want to texture an object (eg what was NULL texture in fixed function pipeline)
 	d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &blankTexture, NULL);
 
@@ -1607,6 +1604,8 @@ BOOL InitialiseDirect3D()
 	memset(lock.pBits, 255, lock.Pitch);
 
 	blankTexture->UnlockRect(0);
+
+	Tex_AddTexture("Blank", blankTexture, 1, 1);
 
 	Con_PrintMessage("Initialised Direct3D9 succesfully");
 
@@ -1678,7 +1677,7 @@ void ReleaseDirect3D()
 	// delete up any new()-ed memory in d3d_render.cpp
 	DeleteRenderMemory();
 
-	SAFE_RELEASE(blankTexture);
+//	SAFE_RELEASE(blankTexture);
 
 	// release constant tables
 	SAFE_RELEASE(vertexConstantTable);

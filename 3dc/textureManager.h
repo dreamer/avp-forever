@@ -26,8 +26,6 @@
 #include "stdint.h"
 #include <string>
 
-const int32_t texIDoffset = 2000;
-
 struct Texture
 {
 	std::string		name;
@@ -38,8 +36,9 @@ struct Texture
 	RENDERTEXTURE	texture;
 };
 
-uint32_t Tex_AddTexture(RENDERTEXTURE texture, uint32_t width, uint32_t height);
+uint32_t Tex_AddTexture(const std::string &fileName, RENDERTEXTURE texture, uint32_t width, uint32_t height);
 uint32_t Tex_LoadFromFile(const std::string &fileName);
+uint32_t Tex_CheckExists(const char* fileName);
 void Tex_GetDimensions(uint32_t textureID, uint32_t &width, uint32_t &height);
 RENDERTEXTURE Tex_GetTexture(uint32_t textureID);
 void Tex_DeInit();

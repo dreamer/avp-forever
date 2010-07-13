@@ -17,6 +17,10 @@ extern "C" {
 #include <xaudio2fx.h>
 #include <x3daudio.h>
 #endif
+#ifdef USE_OPENAL
+#include <AL/al.h>
+#include <AL/alc.h>
+#endif
 #include "psnd.h"
 
 /* Patrick 10/6/97 -------------------------------------------------------------
