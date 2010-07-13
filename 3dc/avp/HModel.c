@@ -3406,16 +3406,16 @@ int FindHeatSourcesInHModel(DISPLAYBLOCK *dispPtr)
 static void FindHeatSource_Recursion(HMODELCONTROLLER *controllerPtr, SECTION_DATA *sectionDataPtr)
 {
 	/* KJL 16:29:40 10/02/98 - Recurse through hmodel */
-	if ((sectionDataPtr->First_Child!=NULL)&&(!(sectionDataPtr->flags&section_data_terminate_here)))
+	if ((sectionDataPtr->First_Child != NULL) && (!(sectionDataPtr->flags&section_data_terminate_here)))
 	{
 		SECTION_DATA *childSectionPtr = sectionDataPtr->First_Child;
 	
-		while (childSectionPtr!=NULL)
+		while (childSectionPtr != NULL)
 		{
-			LOCALASSERT(childSectionPtr->My_Parent==sectionDataPtr);
+			LOCALASSERT(childSectionPtr->My_Parent == sectionDataPtr);
 
-			FindHeatSource_Recursion(controllerPtr,childSectionPtr);
-			childSectionPtr=childSectionPtr->Next_Sibling;
+			FindHeatSource_Recursion(controllerPtr, childSectionPtr);
+			childSectionPtr = childSectionPtr->Next_Sibling;
 		}
 	}
 

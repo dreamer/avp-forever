@@ -7585,8 +7585,8 @@ void AlienTail_Poise(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 int tail_xcal=120;
 int tail_ycal=220;
 
-void ComputeTailDeltaValues(DELTA_CONTROLLER *XDelta,DELTA_CONTROLLER *YDelta) {
-	
+void ComputeTailDeltaValues(DELTA_CONTROLLER *XDelta,DELTA_CONTROLLER *YDelta) 
+{	
 	int temp_timer,screenX,screenY;
 	VECTORCH target_pos;
 
@@ -7629,7 +7629,6 @@ void ComputeTailDeltaValues(DELTA_CONTROLLER *XDelta,DELTA_CONTROLLER *YDelta) {
 	YDelta->timer=temp_timer;
 	
 	textprint("Target Screen X,Y %d %d\n",screenX,screenY);
-
 }
 
 void AlienTail_Strike(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {

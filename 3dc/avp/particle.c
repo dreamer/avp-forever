@@ -2757,7 +2757,6 @@ void HandleParticleSystem(void)
 				MakeParticle(&(particlePtr->Position),&zero,PARTICLE_IMPACTSMOKE);
 			}
 
-
 			DeallocateParticle(particlePtr);
 		}
 		else
@@ -3060,7 +3059,6 @@ void HandleParticleSystem(void)
 							MakeVector(&displayblock.ObWorld, &Global_VDB_Ptr->VDB_World, &displayblock.ObView);
 							RotateVector(&displayblock.ObView, &Global_VDB_Ptr->VDB_Mat);
 							RenderThisDisplayblock(&displayblock);
-							
 						}
 						break;
 					}

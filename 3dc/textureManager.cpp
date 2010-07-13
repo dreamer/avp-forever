@@ -25,11 +25,32 @@
 #include "textureManager.h"
 #include <vector>
 
+extern bool LockTexture(RENDERTEXTURE texture, uint8_t **data, uint32_t *pitch);
+extern bool UnlockTexture(RENDERTEXTURE texture);
+
 extern "C" {
 extern uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture);
 }
 
 std::vector<Texture> textureList;
+
+bool Tex_Lock(uint32_t textureID, uint8_t **data, uint32_t *pitch)
+{
+	RENDERTEXTURE texture = Tex_GetTexture(textureID);
+	if (!texture)
+		return false;
+
+	return LockTexture(texture, data, pitch);
+}
+
+bool Tex_Unlock(uint32_t textureID)
+{
+	RENDERTEXTURE texture = Tex_GetTexture(textureID);
+	if (!texture)
+		return false;
+
+	return UnlockTexture(texture);
+}
 
 static uint32_t Tex_GetFreeID()
 {
@@ -42,7 +63,7 @@ static uint32_t Tex_GetFreeID()
 	}
 
 	// no free slots in the vector, we'll be adding to the end
-	return textureList.size();
+	return static_cast<uint32_t>(textureList.size());
 }
 
 uint32_t Tex_CheckExists(const char* fileName)

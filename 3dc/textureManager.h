@@ -40,6 +40,8 @@ uint32_t Tex_AddTexture(const std::string &fileName, RENDERTEXTURE texture, uint
 uint32_t Tex_LoadFromFile(const std::string &fileName);
 uint32_t Tex_CheckExists(const char* fileName);
 void Tex_GetDimensions(uint32_t textureID, uint32_t &width, uint32_t &height);
+bool Tex_Lock(uint32_t textureID, uint8_t **data, uint32_t *pitch);
+bool Tex_Unlock(uint32_t textureID);
 RENDERTEXTURE Tex_GetTexture(uint32_t textureID);
 void Tex_DeInit();
 void Tex_Release(uint32_t textureID);

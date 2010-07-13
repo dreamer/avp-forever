@@ -197,6 +197,36 @@ bool CreateVolatileResources()
 	return true;
 }
 
+bool LockTexture(RENDERTEXTURE texture, uint8_t **data, uint32_t *pitch)
+{
+	D3DLOCKED_RECT lock;
+
+	LastError = texture->LockRect(0, &lock, NULL, NULL);
+
+	if (FAILED(LastError))
+	{
+		*data = 0;
+		*pitch = 0;
+		return false;
+	}
+	else
+	{
+		*data = static_cast<uint8_t*>(lock.pBits);
+		*pitch = lock.Pitch;
+		return true;
+	}
+}
+
+bool UnlockTexture(RENDERTEXTURE texture)
+{
+	LastError = texture->UnlockRect(0);
+
+	if (FAILED(LastError))
+		return false;
+	else
+		return true;
+}
+
 void ColourFillBackBuffer(int FillColour)
 {
 	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_TARGET, FillColour, 1.0f, 0);
@@ -382,36 +412,6 @@ void CreateScreenShotImage()
 
 	// release surface
 	SAFE_RELEASE(frontBuffer);
-}
-
-int32_t LockTexture(LPDIRECT3DTEXTURE9 texture, uint8_t **data, uint32_t *pitch)
-{
-	D3DLOCKED_RECT lock;
-
-	LastError = texture->LockRect(0, &lock, NULL, NULL);
-
-	if (FAILED(LastError))
-	{
-		*data = 0;
-		*pitch = 0;
-		return -1;
-	}
-	else
-	{
-		*data = static_cast<uint8_t*>(lock.pBits);
-		*pitch = lock.Pitch;
-		return 0;
-	}
-}
-
-int32_t UnlockTexture(LPDIRECT3DTEXTURE9 texture)
-{
-	LastError = texture->UnlockRect(0);
-
-	if (FAILED(LastError))
-		return -1;
-	else
-		return 0;
 }
 
 /*
@@ -766,6 +766,7 @@ bool CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *pixe
 void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
 {
 	// lock texture
+/*
 	D3DLOCKED_RECT	lock;
 
 	LastError = texture->LockRect(0, &lock, NULL, NULL );
@@ -774,13 +775,17 @@ void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
 		LogDxError(LastError, __LINE__, __FILE__);
 		return;
 	}
-
+*/
+	uint8_t *srcPtr = NULL;
 	uint8_t *destPtr = NULL;
+	uint32_t pitch = 0;
+
+	LockTexture(texture, &srcPtr, &pitch);
 
 	// loop, setting all full red pixels to black
 	for (uint32_t y = 0; y < 256; y++)
 	{
-		destPtr = (((uint8_t*)lock.pBits) + y*lock.Pitch);
+		destPtr = (srcPtr + y*pitch);
 
 		for (uint32_t x = 0; x < 256; x++)
 		{
@@ -793,6 +798,9 @@ void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
 		}
 	}
 
+	UnlockTexture(texture);
+
+/*
 	// unlock texture as we're done
 	LastError = texture->UnlockRect(0);
 	if (FAILED(LastError))
@@ -800,6 +808,7 @@ void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
 		LogDxError(LastError, __LINE__, __FILE__);
 		return;
 	}
+*/
 }
 
 // use this to make textures from non power of two images

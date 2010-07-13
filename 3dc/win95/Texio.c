@@ -727,7 +727,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 
 */
 
-void FindImageExtents(IMAGEHEADER *ihdr, int numuvs, int *uvdata, IMAGEEXTENTS *e, IMAGEEXTENTS *e_curr)
+void FindImageExtents(/*IMAGEHEADER *ihdr,*/ int numuvs, int *uvdata, IMAGEEXTENTS *e, IMAGEEXTENTS *e_curr)
 {
 	int i;
 	int *uvptr;
