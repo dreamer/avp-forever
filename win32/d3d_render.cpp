@@ -2070,6 +2070,7 @@ static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n)
 
 static inline void OUTPUT_TRIANGLE2(int a, int b, int c, int n)
 {
+	assert(pIb <= (9216 * 3) - 3);
 	particleIndex[pIb]   = (numPVertices - (n) + (a));
 	particleIndex[pIb+1] = (numPVertices - (n) + (b));
 	particleIndex[pIb+2] = (numPVertices - (n) + (c));
@@ -2911,13 +2912,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 	RecipW = 1.0f / (float) texWidth;
 	RecipH = 1.0f / (float) texHeight;
-/*
-	else
-	{
-		RecipW = 1.0f / (float) ImageHeaderArray[textureID].ImageWidth;
-		RecipH = 1.0f / (float) ImageHeaderArray[textureID].ImageHeight;
-	}
-*/
+
 //	CheckVertexBuffer(RenderPolygon.NumberOfVertices, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType);
 //	void CheckVertexBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
 
@@ -3055,6 +3050,8 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		{
 			zvalue = (float)vertices->Z;
 		}
+
+		assert(pVb <= MAX_VERTEXES - 12);
 
 		particleVertex[pVb].sx = (float)vertices->X;
 		particleVertex[pVb].sy = (float)vertices->Y;

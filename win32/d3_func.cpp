@@ -33,6 +33,7 @@ extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 #include <d3dx9.h>
 #include "console.h"
 #include "textureManager.h"
+#include "vertexBuffer.h"
 #include "networking.h"
 #include "font2.h"
 
@@ -1615,6 +1616,18 @@ BOOL InitialiseDirect3D()
 	blankTexture->UnlockRect(0);
 
 	Tex_AddTexture("Blank", blankTexture, 1, 1);
+
+	// test
+	VertexBuffer testVB(d3d.lpD3DDevice);
+	testVB.Create(4, testVB.VB_FVF_ORTHO, testVB.VB_STATIC);
+
+	ORTHOVERTEX *test;
+	testVB.Lock((void**)&test);
+
+	test[0].x = 0.0f;
+	test[3].x = 1.0f;
+
+	testVB.Unlock();
 
 	Con_PrintMessage("Initialised Direct3D9 succesfully");
 
