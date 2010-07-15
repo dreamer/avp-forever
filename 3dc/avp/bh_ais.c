@@ -1778,9 +1778,9 @@ A couple of functions for wandering
 -----------------------------------------------------------------------*/
 void NPC_InitWanderData(NPC_WANDERDATA *wanderData)
 {
-        LOCALASSERT(wanderData);
-        wanderData->currentModule = NPC_NOWANDERMODULE;
-        wanderData->worldPosition.vx = wanderData->worldPosition.vy = wanderData->worldPosition.vz = 0;
+	LOCALASSERT(wanderData);
+	wanderData->currentModule = NPC_NOWANDERMODULE;
+	wanderData->worldPosition.vx = wanderData->worldPosition.vy = wanderData->worldPosition.vz = 0;
 }
 
 
@@ -1942,108 +1942,122 @@ NL_ROUTE_QUEUE NearLink_Route_Queue[NEARLINK_QUEUE_LENGTH];
 
 int NL_Queue_End,NL_Queue_Exec;
 
-AIMODULE *GetNextModuleForLink(AIMODULE *source,AIMODULE *target,int max_depth,int alien) {
-
-        return(GetNextModuleForLink_Core(source,target,max_depth,0,alien));
-
+AIMODULE *GetNextModuleForLink(AIMODULE *source, AIMODULE *target, int max_depth, int alien) 
+{
+	return (GetNextModuleForLink_Core(source,target, max_depth, 0, alien));
 }
 
-AIMODULE *GetNextModuleForLink_Core(AIMODULE *source,AIMODULE *target,int max_depth,int visibility_check,int alien) {
-        
-		AIMODULE **AdjModuleRefPtr;
+AIMODULE *GetNextModuleForLink_Core(AIMODULE *source,AIMODULE *target, int max_depth, int visibility_check, int alien) 
+{
+	AIMODULE **AdjModuleRefPtr;
 
-        /* Recursively search AIModule tree, trying to connect source and target. *
-         * Return NULL on failure.                                                                                                */
+    /* Recursively search AIModule tree, trying to connect source and target. *
+     * Return NULL on failure.*/
 
-        if (source==target) {
-                return(source);
-        }
+	if (source == target)
+		return source;
 
-        /* Clear the start. */
+    /* Clear the start. */
+    NearLink_Route_Queue[0].depth = 0;
+    NearLink_Route_Queue[0].aimodule = source;
+    NearLink_Route_Queue[0].first_step = NULL;
+    NearLink_Route_Queue[1].aimodule = NULL; /* To set a standard. */
 
-        NearLink_Route_Queue[0].depth=0;
-        NearLink_Route_Queue[0].aimodule=source;
-        NearLink_Route_Queue[0].first_step=NULL;
-        NearLink_Route_Queue[1].aimodule=NULL; /* To set a standard. */
+    NL_Queue_End = 1;
+    NL_Queue_Exec = 0;
+    
+    RouteFinder_CallsThisFrame++;
 
-        NL_Queue_End=1;
-        NL_Queue_Exec=0;
-        
-        RouteFinder_CallsThisFrame++;
+    while (NearLink_Route_Queue[NL_Queue_Exec].aimodule != NULL) 
+	{
+        AIMODULE *thisModule;
 
-        while (NearLink_Route_Queue[NL_Queue_Exec].aimodule!=NULL) {
-                
-                AIMODULE *thisModule;
+        thisModule=NearLink_Route_Queue[NL_Queue_Exec].aimodule;
 
-                thisModule=NearLink_Route_Queue[NL_Queue_Exec].aimodule;
+        AdjModuleRefPtr = thisModule->m_link_ptrs;
 
-                AdjModuleRefPtr = thisModule->m_link_ptrs;
-        
-                if(AdjModuleRefPtr)     /* check that there is a list of adjacent modules */
-                {
-                        while(*AdjModuleRefPtr != 0)
-                        {
-                                /* Probably want some validity test for the link. */
-                                if ((AIModuleIsPhysical(*AdjModuleRefPtr))
-                                        &&(AIModuleAdmitsPheromones(*AdjModuleRefPtr))
-                                        &&(CheckAdjacencyValidity((*AdjModuleRefPtr),thisModule,alien))
-                                        &&((visibility_check==0)||(IsAIModuleVisibleFromAIModule(source,
-                                        (*AdjModuleRefPtr)))
-                                        )) {
-                                        /* Is this the target? */
-                                        if ( (*AdjModuleRefPtr)==target) {
-                                                /* Yes!!! */
-                                                if (NearLink_Route_Queue[NL_Queue_Exec].first_step) {
-                                                        return(NearLink_Route_Queue[NL_Queue_Exec].first_step);
-                                                } else {
-                                                        /* Must be the next one. */
-                                                        return(target);
-                                                }
-                                        } else if (
-                                                (NearLink_Route_Queue[NL_Queue_Exec].depth<max_depth)
-                                                &&( /* Test for 'used this time round' */
-                                                        ((*AdjModuleRefPtr)->RouteFinder_FrameStamp!=GlobalFrameCounter)
-                                                        ||((*AdjModuleRefPtr)->RouteFinder_IterationNumber!=RouteFinder_CallsThisFrame)
-                                                )) {
-                                                /* Add to queue. */
-                                                NearLink_Route_Queue[NL_Queue_End].aimodule=(*AdjModuleRefPtr);
-                                                NearLink_Route_Queue[NL_Queue_End].depth=NearLink_Route_Queue[NL_Queue_Exec].depth+1;
-                                                /* Remember first step. */
-                                                if (NearLink_Route_Queue[NL_Queue_Exec].first_step==NULL) {
-                                                        NearLink_Route_Queue[NL_Queue_End].first_step=(*AdjModuleRefPtr);
-                                                } else {
-                                                        NearLink_Route_Queue[NL_Queue_End].first_step=NearLink_Route_Queue[NL_Queue_Exec].first_step;
-                                                }
-                                                /* Stamp as used. */
-                                                (*AdjModuleRefPtr)->RouteFinder_FrameStamp=GlobalFrameCounter;
-                                                (*AdjModuleRefPtr)->RouteFinder_IterationNumber=RouteFinder_CallsThisFrame;
-                                                NL_Queue_End++;
-                                                if (NL_Queue_End>=NEARLINK_QUEUE_LENGTH) {
-                                                        NL_Queue_End=0;
-                                                        textprint("Wrapping Nearlink Queue!\n");
-                                                }
-                                                NearLink_Route_Queue[NL_Queue_End].aimodule=NULL;
-                                                if (NL_Queue_End==NL_Queue_Exec) {
-                                                        LOGDXFMT(("Oh, no.  NearLinkQueue screwed.  NL_Queue_End=%d, depth = %d\n",NL_Queue_End,NearLink_Route_Queue[NL_Queue_Exec].depth));
-                                                        LOCALASSERT(NL_Queue_End!=NL_Queue_Exec); //if this happens the queue probably needs to be longer
-                                                }
-                                        }
-                                }
-                                /* next adjacent module reference pointer */
-                                AdjModuleRefPtr++;
+        if (AdjModuleRefPtr)     /* check that there is a list of adjacent modules */
+        {
+            while (*AdjModuleRefPtr != 0)
+            {
+                /* Probably want some validity test for the link. */
+                if ((AIModuleIsPhysical(*AdjModuleRefPtr))
+                    &&(AIModuleAdmitsPheromones(*AdjModuleRefPtr))
+                    &&(CheckAdjacencyValidity((*AdjModuleRefPtr),thisModule,alien))
+                    &&((visibility_check==0)||(IsAIModuleVisibleFromAIModule(source,
+                    (*AdjModuleRefPtr)))
+                    )) 
+				{
+                    /* Is this the target? */
+                    if ((*AdjModuleRefPtr) == target) 
+					{
+                        /* Yes!!! */
+                        if (NearLink_Route_Queue[NL_Queue_Exec].first_step) 
+						{
+							return NearLink_Route_Queue[NL_Queue_Exec].first_step;
+                        } 
+						else 
+						{
+							/* Must be the next one. */
+							return(target);
                         }
+					}
+					else if (
+                        (NearLink_Route_Queue[NL_Queue_Exec].depth<max_depth)
+                        &&( /* Test for 'used this time round' */
+						((*AdjModuleRefPtr)->RouteFinder_FrameStamp != GlobalFrameCounter)
+						|| ((*AdjModuleRefPtr)->RouteFinder_IterationNumber != RouteFinder_CallsThisFrame)
+                        )) 
+					{
+                        /* Add to queue. */
+                        NearLink_Route_Queue[NL_Queue_End].aimodule = (*AdjModuleRefPtr);
+                        NearLink_Route_Queue[NL_Queue_End].depth = NearLink_Route_Queue[NL_Queue_Exec].depth+1;
+
+                        /* Remember first step. */
+                        if (NearLink_Route_Queue[NL_Queue_Exec].first_step == NULL) 
+						{
+							NearLink_Route_Queue[NL_Queue_End].first_step = (*AdjModuleRefPtr);
+                        } 
+						else 
+						{
+							NearLink_Route_Queue[NL_Queue_End].first_step = NearLink_Route_Queue[NL_Queue_Exec].first_step;
+                        }
+
+                        /* Stamp as used. */
+                        (*AdjModuleRefPtr)->RouteFinder_FrameStamp = GlobalFrameCounter;
+                        (*AdjModuleRefPtr)->RouteFinder_IterationNumber = RouteFinder_CallsThisFrame;
+                        NL_Queue_End++;
+
+                        if (NL_Queue_End >= NEARLINK_QUEUE_LENGTH) 
+						{
+							NL_Queue_End = 0;
+							textprint("Wrapping Nearlink Queue!\n");
+                        }
+
+                        NearLink_Route_Queue[NL_Queue_End].aimodule = NULL;
+
+                        if (NL_Queue_End == NL_Queue_Exec) 
+						{
+							LOGDXFMT(("Oh, no.  NearLinkQueue screwed.  NL_Queue_End=%d, depth = %d\n",NL_Queue_End,NearLink_Route_Queue[NL_Queue_Exec].depth));
+							LOCALASSERT(NL_Queue_End!=NL_Queue_Exec); //if this happens the queue probably needs to be longer
+                        }
+                    }
                 }
-
-                /* Done all the links. */
-
-                NL_Queue_Exec++;
-                if (NL_Queue_Exec>=NEARLINK_QUEUE_LENGTH) NL_Queue_Exec=0;
-
+                /* next adjacent module reference pointer */
+                AdjModuleRefPtr++;
+            }
         }
 
-        /* Still here?  Must have hit the end, then. */
+		/* Done all the links. */
 
-        return(NULL);
+		NL_Queue_Exec++;
+		if (NL_Queue_Exec >= NEARLINK_QUEUE_LENGTH) 
+			NL_Queue_Exec = 0;
+    }
+
+    /* Still here?  Must have hit the end, then. */
+
+    return(NULL);
 }
 
 

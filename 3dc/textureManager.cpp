@@ -105,11 +105,11 @@ uint32_t Tex_AddTexture(const std::string &fileName, RENDERTEXTURE texture, uint
 	{
 		textureList.push_back(newTexture);
 	}
-
+/*
 	char buf[100];
 	sprintf(buf, "added tex at ID: %d\n", textureID);
 	OutputDebugString(buf);
-
+*/
 	return textureID;
 }
 
@@ -137,7 +137,7 @@ uint32_t Tex_LoadFromFile(const std::string &fileName)
 	return textureID;
 }
 
-RENDERTEXTURE Tex_GetTexture(uint32_t textureID)
+RENDERTEXTURE& Tex_GetTexture(uint32_t textureID)
 {
 	return (textureList[textureID].texture);
 }
@@ -169,11 +169,11 @@ void Tex_Release(uint32_t textureID)
 		textureList[textureID].texture->Release();
 		textureList[textureID].texture = NULL;
 	}
-
+/*
 	char buf[100];
 	sprintf(buf, "released tex at ID: %d\n", textureID);
 	OutputDebugString(buf);
-
+*/
 }
 
 void Tex_DeInit()

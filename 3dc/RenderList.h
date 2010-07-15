@@ -38,7 +38,6 @@ enum Shaders
 #define SORT_TEXTURE_SHIFT	16
 #define SORT_SHADER_SHIFT	32
 
-
 struct RenderItem2
 {
 	uint32_t	vertStart;

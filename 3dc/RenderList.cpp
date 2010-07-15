@@ -23,8 +23,6 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "RenderList.h"
-#include <cstring>
-#include <cstdio>
 #include <windows.h>
 #include <algorithm>
 

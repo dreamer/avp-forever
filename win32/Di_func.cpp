@@ -99,7 +99,7 @@ struct CONTROLER_STATE
 };
 
 #define MAX_CONTROLLERS 4  // XInput handles up to 4 controllers 
-#define INPUT_DEADZONE  ( 0.24f * FLOAT(0x7FFF) )  // Default to 24% of the +/- 32767 range.   This is a reasonable default value but can be altered if needed.
+#define INPUT_DEADZONE  (0.24f * FLOAT(0x7FFF))  // Default to 24% of the +/- 32767 range.   This is a reasonable default value but can be altered if needed.
 
 CONTROLER_STATE g_Controllers[MAX_CONTROLLERS];
 
@@ -1410,19 +1410,19 @@ void ReadJoysticks(void)
 			/* handle analogue stick movement */
 
 			/* Zero value if thumbsticks are within the dead zone */
-			if( ( g_Controllers[i].state.Gamepad.sThumbLX < INPUT_DEADZONE &&
-				  g_Controllers[i].state.Gamepad.sThumbLX > -INPUT_DEADZONE ) &&
-				( g_Controllers[i].state.Gamepad.sThumbLY < INPUT_DEADZONE &&
-				  g_Controllers[i].state.Gamepad.sThumbLY > -INPUT_DEADZONE ) )
+			if (( g_Controllers[i].state.Gamepad.sThumbLX < INPUT_DEADZONE &&
+				  g_Controllers[i].state.Gamepad.sThumbLX > -INPUT_DEADZONE) &&
+				 (g_Controllers[i].state.Gamepad.sThumbLY < INPUT_DEADZONE &&
+				  g_Controllers[i].state.Gamepad.sThumbLY > -INPUT_DEADZONE))
 			{
 				g_Controllers[i].state.Gamepad.sThumbLX = 0;
 				g_Controllers[i].state.Gamepad.sThumbLY = 0;
 			}
 
-			if( ( g_Controllers[i].state.Gamepad.sThumbRX < INPUT_DEADZONE &&
-				  g_Controllers[i].state.Gamepad.sThumbRX > -INPUT_DEADZONE ) &&
-				( g_Controllers[i].state.Gamepad.sThumbRY < INPUT_DEADZONE &&
-				  g_Controllers[i].state.Gamepad.sThumbRY > -INPUT_DEADZONE ) )
+			if ((g_Controllers[i].state.Gamepad.sThumbRX < INPUT_DEADZONE &&
+				  g_Controllers[i].state.Gamepad.sThumbRX > -INPUT_DEADZONE) &&
+				 (g_Controllers[i].state.Gamepad.sThumbRY < INPUT_DEADZONE &&
+				  g_Controllers[i].state.Gamepad.sThumbRY > -INPUT_DEADZONE))
 			{
 				g_Controllers[i].state.Gamepad.sThumbRX = 0;
 				g_Controllers[i].state.Gamepad.sThumbRY = 0;
@@ -1455,11 +1455,13 @@ int ReadJoystick(void)
 	return FALSE;
 	MMRESULT joyreturn;
 
-	if(!JoystickControlMethods.JoystickEnabled) return FALSE;
+	if (!JoystickControlMethods.JoystickEnabled) 
+		return FALSE;
 
-	joyreturn = joyGetPosEx(JOYSTICKID1,&JoystickData);
+	joyreturn = joyGetPosEx(JOYSTICKID1, &JoystickData);
 
-	if (joyreturn == JOYERR_NOERROR) return TRUE;
+	if (joyreturn == JOYERR_NOERROR) 
+		return TRUE;
 
 	return FALSE;
 }
@@ -1473,7 +1475,8 @@ int CheckForJoystick(void)
                 &JoystickCaps,
                 sizeof(JOYCAPS));
 
-    if (joyreturn == JOYERR_NOERROR) return TRUE;
+    if (joyreturn == JOYERR_NOERROR) 
+		return TRUE;
 
 	return FALSE;
 }
@@ -1622,7 +1625,7 @@ extern void IngameKeyboardInput_ClearBuffer(void)
 		GamePadButtons[i] = 0;
 	}
 
-	/* start timer to ignore gamepad input */
+	// start timer to ignore gamepad input
 	blockGamepadInputTimer = ONE_FIXED;
 }
 

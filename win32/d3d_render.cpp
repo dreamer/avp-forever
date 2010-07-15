@@ -39,6 +39,7 @@ uint32_t	vb = 0;
 static uint32_t	renderCount = 0;
 static uint32_t	transRenderCount = 0;
 static uint32_t NumberOfRenderedTriangles = 0;
+bool ZWritesEnabled = false;
 
 // vertex declarations
 D3DVERTEXELEMENT9 declMain[] = {{0, 0,  D3DDECLTYPE_FLOAT3,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
@@ -87,10 +88,26 @@ bool CreateVolatileResources();
 bool ReleaseVolatileResources();
 void ColourFillBackBuffer(int FillColour);
 
+void EnableZBufferWrites()
+{
+	if (!ZWritesEnabled)
+	{
+		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE);
+		ZWritesEnabled = true;
+	}
+}
+
+void DisableZBufferWrites()
+{
+	if (ZWritesEnabled)
+	{
+		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE);
+		ZWritesEnabled = false;
+	}
+}
+
 extern "C" {
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-//extern IMAGEHEADER ImageHeaderArray[];
-//extern AVPMENUGFX AvPMenuGfxStorage[];
 extern AVPIndexedFont IntroFont_Light;
 extern VIEWDESCRIPTORBLOCK* Global_VDB_Ptr;
 extern int CloakingPhase;
@@ -282,6 +299,7 @@ bool SetRenderStateDefaults()
 
 	// enable z writes (already on by default)
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+	ZWritesEnabled = true;
 	D3DZWriteEnable = TRUE;
 
 	// set less + equal z buffer test
@@ -702,7 +720,7 @@ bool ExecuteBuffer()
 
 		vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matProjection);
 
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE);
+		DisableZBufferWrites();
 		ChangeTextureAddressMode(TEXTURE_CLAMP);
 
 		for (uint32_t i = 0; i < particleListCount; i++)
@@ -729,7 +747,7 @@ bool ExecuteBuffer()
 			}
 		}
 
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE);
+		EnableZBufferWrites();
 		ChangeTextureAddressMode(TEXTURE_WRAP);
 
 		D3DPERF_EndEvent();
@@ -1173,7 +1191,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 
 #if 1
 	ChangeTexture(textureID);
-	d3d.lpD3DDevice->SetTexture(1, /*AvPMenuGfxStorage[AVPMENUGFX_CLOUDY].menuTexture*/Tex_GetTexture(AVPMENUGFX_CLOUDY));
+	d3d.lpD3DDevice->SetTexture(1, Tex_GetTexture(AVPMENUGFX_CLOUDY));
 
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.cloudVertexDecl);
 	d3d.lpD3DDevice->SetVertexShader(d3d.cloudVertexShader);
@@ -1419,20 +1437,6 @@ void DrawHUDQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, float 
 	uint32_t texturePOW2Width, texturePOW2Height;
 	Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
 
-#if 0
-	// if in menus (outside game)
-	if (mainMenu)
-	{
-		texturePOW2Width = AvPMenuGfxStorage[textureID].newWidth;
-		texturePOW2Height = AvPMenuGfxStorage[textureID].newHeight;
-	}
-	else
-	{
-		texturePOW2Width = ImageHeaderArray[textureID].ImageWidth;
-		texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
-	}
-#endif
-
 	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP);
 
 	// bottom left
@@ -1529,29 +1533,7 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t 
 
 	uint32_t texturePOW2Width = 0;
 	uint32_t texturePOW2Height = 0;
-
-	// if in menus (outside game)
-//	if (textureID >= texIDoffset)
-	{
-		Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
-	}
-
-#if 0
-		else
-		{
-			if (mainMenu)
-			{
-				texturePOW2Width = AvPMenuGfxStorage[textureID].newWidth;
-				texturePOW2Height = AvPMenuGfxStorage[textureID].newHeight;
-			}
-			else
-			{
-				texturePOW2Width = ImageHeaderArray[textureID].ImageWidth;
-				texturePOW2Height = ImageHeaderArray[textureID].ImageHeight;
-			}
-		}
-	}
-#endif
+	Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
 
 	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP);
 
@@ -1595,8 +1577,6 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t 
 void DrawAlphaMenuQuad(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t alpha)
 {
 	// textures actual height/width (whether it's non power of two or not)
-//	uint32_t textureWidth = AvPMenuGfxStorage[textureID].Width;
-//	uint32_t textureHeight = AvPMenuGfxStorage[textureID].Height;
 	uint32_t textureWidth, textureHeight;
 	Tex_GetDimensions(textureID, textureWidth, textureHeight);
 
@@ -1620,8 +1600,6 @@ void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint3
 		alpha = 255;
 
 	// textures original resolution (if it's a non power of 2, these will be the non power of 2 values)
-//	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Width;
-//	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_LEFT].Height;
 	Tex_GetDimensions(AVPMENUGFX_GLOWY_LEFT, textureWidth, textureHeight);
 
 	// do the text alignment justification
@@ -1632,8 +1610,6 @@ void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint3
 	// now do the middle section
 	topLeftX += textureWidth;
 
-//	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Width;
-//	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_MIDDLE].Height;
 	Tex_GetDimensions(AVPMENUGFX_GLOWY_MIDDLE, textureWidth, textureHeight);
 
 	DrawQuad(topLeftX, topLeftY, textureWidth * size, textureHeight, AVPMENUGFX_GLOWY_MIDDLE, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
@@ -1641,8 +1617,6 @@ void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint3
 	// now do the right section
 	topLeftX += textureWidth * size;
 
-//	textureWidth = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Width;
-//	textureHeight = AvPMenuGfxStorage[AVPMENUGFX_GLOWY_RIGHT].Height;
 	Tex_GetDimensions(AVPMENUGFX_GLOWY_RIGHT, textureWidth, textureHeight);
 
 	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_RIGHT, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
@@ -1808,7 +1782,7 @@ void DrawCoronas()
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
 	d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
 
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE);
+	DisableZBufferWrites();
 
 //	int sizeX = (ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
 //	int sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
@@ -1816,21 +1790,12 @@ void DrawCoronas()
 	D3DCOLOR colour;
 	float RecipW, RecipH;
 
-//	if (SpecialFXImageNumber >= texIDoffset)
-	{
-		uint32_t texWidth, texHeight;
-		Tex_GetDimensions(SpecialFXImageNumber, texWidth, texHeight);
+	uint32_t texWidth, texHeight;
+	Tex_GetDimensions(SpecialFXImageNumber, texWidth, texHeight);
 
-		RecipW = 1.0f / (float) texWidth;
-		RecipH = 1.0f / (float) texHeight;
-	}
-/*
-	else
-	{
-		RecipW = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageWidth;
-		RecipH = 1.0f / (float) ImageHeaderArray[SpecialFXImageNumber].ImageHeight;
-	}
-*/
+	RecipW = 1.0f / (float) texWidth;
+	RecipH = 1.0f / (float) texHeight;
+
 	for (size_t i = 0; i < coronaArray.size(); i++)
 	{
 		PARTICLE_DESC *particleDescPtr = &ParticleDescription[coronaArray[i].particle.ParticleID];
@@ -1947,7 +1912,7 @@ void DrawCoronas()
 		}
 	}
 
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE);
+	EnableZBufferWrites();
 
 	coronaArray.clear();
 
@@ -2429,21 +2394,12 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 	if (!textureID)
 		textureID = currentTextureID;
 
-//	if (textureID >= texIDoffset)
-	{
-		uint32_t texWidth, texHeight;
-		Tex_GetDimensions(textureID, texWidth, texHeight);
+	uint32_t texWidth, texHeight;
+	Tex_GetDimensions(textureID, texWidth, texHeight);
 
-		RecipW = 1.0f / (float) texWidth;
-		RecipH = 1.0f / (float) texHeight;
-	}
-/*
-	else
-	{
-		RecipW = 1.0f / (float) ImageHeaderArray[textureID].ImageWidth;
-		RecipH = 1.0f / (float) ImageHeaderArray[textureID].ImageHeight;
-	}
-*/
+	RecipW = 1.0f / (float) texWidth;
+	RecipH = 1.0f / (float) texHeight;
+
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
@@ -2542,13 +2498,7 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 
 	RecipW = 1.0f / (float) texWidth;
 	RecipH = 1.0f / (float) texHeight;
-/*
-	else
-	{
-		RecipW = 1.0f / (float) ImageHeaderArray[textureID].ImageWidth;
-		RecipH = 1.0f / (float) ImageHeaderArray[textureID].ImageHeight;
-	}
-*/
+
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, TRANSLUCENCY_NORMAL);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
@@ -2649,13 +2599,7 @@ void D3D_HUDQuad_Output(uint32_t textureID, struct VertexTag *quadVerticesPtr, u
 
 	RecipW = 1.0f / texWidth;
 	RecipH = 1.0f / texHeight;
-/*
-	else
-	{
-		RecipW = 1.0f / ImageHeaderArray[textureID].ImageWidth;
-		RecipH = 1.0f / ImageHeaderArray[textureID].ImageHeight;
-	}
-*/
+
 	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP, filteringType);
 
 	// bottom left
@@ -2757,12 +2701,14 @@ void D3D_DecalSystem_Setup(void)
 	ExecuteBuffer();
 	LockExecuteBuffer();
 
+	DisableZBufferWrites();
+/*
 	if (D3DZWriteEnable != FALSE)
 	{
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 		D3DZWriteEnable = FALSE;
 	}
-
+*/
 //	D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Starting to draw Decals...\n"));
 }
 
@@ -2775,12 +2721,14 @@ void D3D_DecalSystem_End(void)
 	ExecuteBuffer();
 	LockExecuteBuffer();
 
+	EnableZBufferWrites();
+/*
 	if (D3DZWriteEnable != TRUE)
 	{
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 		D3DZWriteEnable = TRUE;
 	}
-
+*/
 //	D3DPERF_EndEvent();
 }
 
@@ -2822,13 +2770,6 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 
 		RecipW = 1.0f / (float) texWidth;
 		RecipH = 1.0f / (float) texHeight;
-/*
-		else
-		{
-			RecipW = 1.0f / (float) ImageHeaderArray[textureID].ImageWidth;
-			RecipH = 1.0f / (float) ImageHeaderArray[textureID].ImageHeight;
-		}
-*/
 	}
 
 	if (decalDescPtr->IsLit)
@@ -3756,13 +3697,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 
 	RecipW = 1.0f / (float) texWidth;
 	RecipH = 1.0f / (float) texHeight;
-/*
-	else
-	{
-		RecipW = 1.0f / (float) ImageHeaderArray[textureID].ImageWidth;
-		RecipH = 1.0f / (float) ImageHeaderArray[textureID].ImageHeight;
-	}
-*/
+
 	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
