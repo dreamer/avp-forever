@@ -23,7 +23,6 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "textureManager.h"
-#include <vector>
 
 extern bool LockTexture(RENDERTEXTURE texture, uint8_t **data, uint32_t *pitch);
 extern bool UnlockTexture(RENDERTEXTURE texture);
@@ -50,6 +49,15 @@ bool Tex_Unlock(uint32_t textureID)
 		return false;
 
 	return UnlockTexture(texture);
+}
+
+// for avp's fmv code
+void Tex_GetNamesVector(std::vector<std::string> &namesArray)
+{
+	for (uint32_t i = 0; i < textureList.size(); i++)
+	{
+		namesArray.push_back(textureList[i].name);
+	}
 }
 
 static uint32_t Tex_GetFreeID()
@@ -132,6 +140,11 @@ uint32_t Tex_LoadFromFile(const std::string &fileName)
 RENDERTEXTURE Tex_GetTexture(uint32_t textureID)
 {
 	return (textureList[textureID].texture);
+}
+
+Texture& Tex_GetTextureDetails(uint32_t textureID)
+{
+	return (textureList[textureID]);
 }
 
 void Tex_GetDimensions(uint32_t textureID, uint32_t &width, uint32_t &height)

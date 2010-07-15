@@ -34,6 +34,8 @@
 #include "savegame.h"
 #include "los.h"
 
+#include "renderer.h"
+
 #include <math.h>
 
 #define RGBALIGHT_MAKE(r,g,b,a) RGBA_MAKE(r,g,b,a)

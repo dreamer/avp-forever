@@ -22,6 +22,8 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef _renderer_h_
+#define _renderer_h_
 
 // temp
 
@@ -44,3 +46,5 @@
 #ifdef USE_GLIDE
 	#include "glide_func.h" // hehe
 #endif
+
+#endif // include guard

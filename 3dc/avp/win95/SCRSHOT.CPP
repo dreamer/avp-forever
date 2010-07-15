@@ -1,5 +1,5 @@
 #include "3dc.h"
-#include "bmp2.h"
+//#include "bmp2.h"
 #include "endianio.h"
 #include <String.hpp>
 #include "scrshot.hpp"

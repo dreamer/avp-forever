@@ -31,7 +31,7 @@ bool VertexBuffer::Lock(void **data)
 	if (this->vbUsage == VB_DYNAMIC)
 		lockType = D3DLOCK_DISCARD;
 
-	LastError = vertexBuffer->Lock(0, 0, /*(void**)&data*/data, this->vbUsage);
+	LastError = vertexBuffer->Lock(0, 0, data, this->vbUsage);
 	if (FAILED(LastError))
 	{
 //		LogDxError(LastError, __LINE__, __FILE__);

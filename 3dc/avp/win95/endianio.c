@@ -1,19 +1,19 @@
 #include "endianio.h"
 
-BYTE GetByte(FILE *fp)
+uint8_t GetByte(FILE *fp)
 {
-  unsigned char c = fgetc(fp);
+  uint8_t c = fgetc(fp);
   return c;
 }
  
-WORD GetLittleWord(FILE *fp)
+uint16_t GetLittleWord(FILE *fp)
 {
   unsigned char c1 = fgetc(fp);
   unsigned char c2 = fgetc(fp);
   return c1 + (c2 << 8);
 }
 
-DWORD GetLittleDword(FILE *fp)
+uint32_t GetLittleDword(FILE *fp)
 {
   unsigned char c1 = fgetc(fp);
   unsigned char c2 = fgetc(fp);
@@ -23,12 +23,12 @@ DWORD GetLittleDword(FILE *fp)
   return c1 + ((c2 + ((c3 + (c4 << 8)) << 8)) << 8);
 }
 
-VOID PutByte(BYTE v, FILE *fp)
+void PutByte(uint8_t v, FILE *fp)
 {
   fputc(v, fp);
 }
 
-VOID PutLittleWord(WORD v, FILE *fp)
+void PutLittleWord(uint16_t v, FILE *fp)
 {
   unsigned char c1 = v & 0xff;
   unsigned char c2 = (v >> 8) & 0xff;
@@ -36,7 +36,7 @@ VOID PutLittleWord(WORD v, FILE *fp)
   fputc(c2, fp);
 }
 
-VOID PutLittleDword(DWORD v, FILE *fp)
+void PutLittleDword(uint32_t v, FILE *fp)
 {
   unsigned char c1 = v & 0xff;
   unsigned char c2 = (v >> 8) & 0xff;

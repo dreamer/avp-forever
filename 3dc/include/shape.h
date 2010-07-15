@@ -6,7 +6,7 @@
 
 */
 
-#include "renderer.h"
+//#include "renderer.h"
 
 #include "aw.h"
 #include "shpanim.h"
@@ -722,7 +722,7 @@ typedef struct imageheader
 	AVPTEXTURE *AvPTexture;
 
 	// graphics api texture
-	RENDERTEXTURE Direct3DTexture;
+//	RENDERTEXTURE Direct3DTexture;
 
 	int ImageNum;						/* # MIP images */
 	char ImageName[ImageNameSize];		/* Filename */

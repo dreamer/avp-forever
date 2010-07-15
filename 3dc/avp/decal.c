@@ -27,6 +27,8 @@
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 
+#include "renderer.h"
+
 #define MAX_NO_OF_DECALS 1024
 #define MAX_NO_OF_FIXED_DECALS 1024
 #define DECAL_Z_OFFSET 0

@@ -6,6 +6,12 @@
 #include "fmvPlayback.h"
 #include "fmvCutscenes.h"
 #include "console.h"
+#include "textureManager.h"
+#include "logString.h"
+#include "vorbisPlayer.h"
+#include "console.h"
+#include <vector>
+#include <string>
 
 #define MAX_FMVS 4
 
@@ -16,11 +22,6 @@ struct fmvCutscene
 };
 
 fmvCutscene fmvList[MAX_FMVS];
-
-
-#include "logString.h"
-#include "vorbisPlayer.h"
-#include "console.h"
 
 #define MAX_NO_FMVTEXTURES 10
 FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
@@ -51,7 +52,8 @@ void ReleaseAllFMVTexturesForDeviceReset()
 {
 	for (uint32_t i = 0; i < NumberOfFMVTextures; i++)
 	{
-		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
+//		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
+		Tex_Release(FMVTexture[i].textureID);
 	}
 
 	// check for fullscreen intro/outro fmvs
@@ -83,7 +85,8 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 {
 	for (uint32_t i = 0; i < NumberOfFMVTextures; i++)
 	{
-		FMVTexture[i].ImagePtr->Direct3DTexture = CreateFmvTexture(&FMVTexture[i].ImagePtr->ImageWidth, &FMVTexture[i].ImagePtr->ImageHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+		FMVTexture[i].textureID = Tex_AddTexture("CUTSCENE", CreateFmvTexture(&FMVTexture[i].width, &FMVTexture[i].height, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT), FMVTexture[i].width, FMVTexture[i].height);
+//		FMVTexture[i].ImagePtr->Direct3DTexture = CreateFmvTexture(&FMVTexture[i].ImagePtr->ImageWidth, &FMVTexture[i].ImagePtr->ImageHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 	}
 /*
 	// check for fullscreen intro/outro fmvs
@@ -114,8 +117,12 @@ void FindLightingValuesFromTriggeredFMV(uint8_t *bufferPtr, FMVTEXTURE *ftPtr)
 
 int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 {
-	uint32_t w = ftPtr->ImagePtr->ImageWidth;
-	uint32_t h = ftPtr->ImagePtr->ImageHeight;
+	return 1;
+//	uint32_t w = ftPtr->ImagePtr->ImageWidth;
+//	uint32_t h = ftPtr->ImagePtr->ImageHeight;
+	uint32_t w = 0;
+	uint32_t h = 0;
+	Tex_GetDimensions(ftPtr->textureID, w, h);
 
 	uint8_t *DestBufferPtr = ftPtr->RGBBuffer;
 
@@ -409,6 +416,51 @@ void ScanImagesForFMVs()
 	IMAGEHEADER *ihPtr;
 	NumberOfFMVTextures = 0;
 
+	std::vector<std::string> fmvTextures;
+
+	// fill fmvTextures with all texture names
+	Tex_GetNamesVector(fmvTextures);
+
+	for (uint32_t i = 0; i < fmvTextures.size(); i++)
+	{
+		// find occurrence of "FMVs" in string and store position of occurrence
+		std::string::size_type offset1 = fmvTextures[i].find("FMVs");
+		if (offset1 == std::string::npos)
+		{
+			// "FMVs" not found in string, continue
+			continue;
+		}
+		else
+		{
+			// we found an occurrence. Now find offset of fullstop to allow us to remove the .RIM extension
+			std::string::size_type offset2 = fmvTextures[i].find(".");
+
+			// generate a new string, from occurrence of "FMVs" in string to before the fullstop, then append ".ogv" extension
+			std::string fileName = fmvTextures[i].substr(offset1, offset2-offset1) + ".ogv";
+			
+			// do a check here to see if it's a theora file rather than just any old file with the right name?
+			FILE *file = avp_fopen(fileName.c_str(), "rb");
+			if (file)
+			{
+				fclose(file);
+				FMVTexture[NumberOfFMVTextures].IsTriggeredPlotFMV = 0;
+			}
+			else
+			{
+				FMVTexture[NumberOfFMVTextures].IsTriggeredPlotFMV = 1;
+			}
+
+			uint32_t width = 0;
+			uint32_t height = 0;
+
+//			FMVTexture[NumberOfFMVTextures].ImagePtr = ihPtr;
+			FMVTexture[NumberOfFMVTextures].fmvHandle = -1; // just to be sure
+			FMVTexture[NumberOfFMVTextures].StaticImageDrawn = 0;
+			SetupFMVTexture(&FMVTexture[NumberOfFMVTextures]);
+			NumberOfFMVTextures++;
+		}
+	}
+#if 0
 	#if MaxImageGroups>1
 	for (j=0; j<MaxImageGroups; j++)
 	{
@@ -464,6 +516,7 @@ void ScanImagesForFMVs()
 			}
 		}
 	}
+#endif
 }
 
 // called when player quits level and returns to main menu
@@ -491,7 +544,8 @@ void ReleaseAllFMVTextures()
 			delete []FMVTexture[i].RGBBuffer;
 			FMVTexture[i].RGBBuffer = NULL;
 		}
-		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
+//		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
+		Tex_Release(FMVTexture[i].textureID);
 	}
 	NumberOfFMVTextures = 0;
 }

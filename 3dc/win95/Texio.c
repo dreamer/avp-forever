@@ -23,7 +23,7 @@
 extern SHAPEHEADER **mainshapelist;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern char projectsubdirectory[];
-void ReleaseD3DTexture(RENDERTEXTURE *d3dTexture);
+//void ReleaseD3DTexture(RENDERTEXTURE *d3dTexture);
 
 /*
 
@@ -566,7 +566,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 					txf_uvarray = txf_uvarrayptr[image];
 
 					/* Find the extents of the image, assuming transparency */
-					FindImageExtents(ihdr, txaf->txf_numuvs, txf_uvarray, &e, &e_curr);
+					FindImageExtents(/*ihdr,*/ txaf->txf_numuvs, txf_uvarray, &e, &e_curr);
 
 					/* Convert the image extents to fixed point */
 
@@ -801,11 +801,12 @@ static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 		ReleaseAvPTexture(ihptr->AvPTexture);
 		ihptr->AvPTexture = (void*) 0;
 	}
-
+/*
 	if (ihptr->Direct3DTexture)
 	{
 		ReleaseD3DTexture(&ihptr->Direct3DTexture);
 	}
+*/
 }
 
 static void MinimizeImageHeader(IMAGEHEADER * ihptr)
@@ -815,11 +816,12 @@ static void MinimizeImageHeader(IMAGEHEADER * ihptr)
 		ReleaseAvPTexture(ihptr->AvPTexture);
 		ihptr->AvPTexture = (void*) 0;
 	}
-
+/*
 	if (ihptr->Direct3DTexture)
 	{
 		ReleaseD3DTexture(&ihptr->Direct3DTexture);
 	}
+*/
 }
 
 #ifdef MaxImageGroups

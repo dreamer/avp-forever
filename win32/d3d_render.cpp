@@ -1291,8 +1291,8 @@ void SetupFMVTexture(FMVTEXTURE *ftPtr)
 void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 {
 	assert(ftPtr);
-	assert(ftPtr->ImagePtr);
-	assert(ftPtr->ImagePtr->Direct3DTexture);
+//	assert(ftPtr->ImagePtr);
+//	assert(ftPtr->ImagePtr->Direct3DTexture);
 
 	if (!ftPtr)
 		return;
@@ -1302,6 +1302,16 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	 	return;
 	}
 
+	uint32_t width = 0;
+	uint32_t height = 0;
+	Tex_GetDimensions(ftPtr->textureID, width, height);
+
+	uint8_t *srcPtr = &ftPtr->RGBBuffer[0];
+	uint8_t *destPtr = 0;
+	uint32_t pitch = 0;
+
+	Tex_Lock(ftPtr->textureID, &destPtr, &pitch);
+/*
 	// lock the d3d texture
 	D3DLOCKED_RECT textureRect;
 	LastError = ftPtr->ImagePtr->Direct3DTexture->LockRect(0, &textureRect, NULL, D3DLOCK_DISCARD);
@@ -1313,12 +1323,13 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 
 	uint8_t *destPtr = 0;
 	uint8_t *srcPtr = &ftPtr->RGBBuffer[0];
+*/
 
-	for (uint32_t y = 0; y < ftPtr->ImagePtr->ImageHeight; y++)
+	for (uint32_t y = 0; y < height; y++)
 	{
-		destPtr = static_cast<uint8_t*>(textureRect.pBits) + y * textureRect.Pitch;
+		destPtr = /*static_cast<uint8_t*>(textureRect.pBits)*/destPtr + y * /*textureRect.Pitch*/pitch;
 
-		for (uint32_t x = 0; x < ftPtr->ImagePtr->ImageWidth; x++)
+		for (uint32_t x = 0; x < width; x++)
 		{
 /*
 			destPtr[0] = srcPtr[0];
@@ -1333,6 +1344,8 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 		}
 	}
 
+	Tex_Unlock(ftPtr->textureID);
+/*
 	// unlock d3d texture
 	LastError = ftPtr->ImagePtr->Direct3DTexture->UnlockRect(0);
 	if (FAILED(LastError))
@@ -1340,6 +1353,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 		LogErrorString("Could not unlock Direct3D texture ftPtr->DestTexture", __LINE__, __FILE__);
 		return;
 	}
+*/
 }
 
 void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha)

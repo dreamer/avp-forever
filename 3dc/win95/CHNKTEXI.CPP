@@ -794,25 +794,27 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					{
 						if (pTexture->buffer)
 						{
+							RENDERTEXTURE texture;
+
 							if ((strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0) ||
 								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\alien.RIM") == 0) ||		// for alien demo
 								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\predator.RIM") == 0) ||  // for marine(?) demo
 								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\final.RIM") == 0))		// for predator demo
 							{
-								/* is fmv texture, create in default pool so we can dynamically update it */
-								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+								// is fmv texture, create in default pool so we can dynamically update it
+								texture = CreateD3DTexture(pTexture, pTexture->buffer, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 							}
 							else
 							{
-								pImageHdr->Direct3DTexture = CreateD3DTexture(pTexture, pTexture->buffer, 0, D3DPOOL_MANAGED);
+								texture = CreateD3DTexture(pTexture, pTexture->buffer, 0, D3DPOOL_MANAGED);
 							}
 
-							textureID = Tex_AddTexture(pImageHdr->ImageName, pImageHdr->Direct3DTexture, pImageHdr->ImageWidth, pImageHdr->ImageHeight);
-
-							if (pImageHdr->Direct3DTexture == NULL)
+							if (texture == NULL)
 							{
 								OutputDebugString("Direct3DTexture was null!");
 							}
+
+							textureID = Tex_AddTexture(pImageHdr->ImageName, texture, pImageHdr->ImageWidth, pImageHdr->ImageHeight);
 
 							// free this, as d3d now holds the texture
 							free(pTexture->buffer);

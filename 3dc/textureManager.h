@@ -22,26 +22,35 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef _textureManager_h_
+#define _textureManager_h_
+
 #include "renderer.h"
 #include "stdint.h"
 #include <string>
+#include <vector>
 
 struct Texture
 {
 	std::string		name;
 	uint32_t		width;
 	uint32_t		height;
-	D3DPOOL			poolType;
-	D3DFORMAT		format;
+//	D3DPOOL			poolType;
+//	D3DFORMAT		format;
 	RENDERTEXTURE	texture;
 };
 
 uint32_t Tex_AddTexture(const std::string &fileName, RENDERTEXTURE texture, uint32_t width, uint32_t height);
 uint32_t Tex_LoadFromFile(const std::string &fileName);
 uint32_t Tex_CheckExists(const char* fileName);
+Texture& Tex_GetTextureDetails(uint32_t textureID);
+void Tex_GetNamesVector(std::vector<std::string> &namesArray);
 void Tex_GetDimensions(uint32_t textureID, uint32_t &width, uint32_t &height);
 bool Tex_Lock(uint32_t textureID, uint8_t **data, uint32_t *pitch);
 bool Tex_Unlock(uint32_t textureID);
 RENDERTEXTURE Tex_GetTexture(uint32_t textureID);
 void Tex_DeInit();
 void Tex_Release(uint32_t textureID);
+
+#endif
+

@@ -232,7 +232,7 @@ static void LoadMenuFont(void)
 	IntroFont_Light.ascii = 32;
 
 	gfxPtr = &IntroFont_Light.info;
-	gfxPtr->menuTexture = NULL;
+//	gfxPtr->menuTexture = NULL;
 	
 	CL_GetImageFileName(buffer, 100, "Menus\\IntroFont.rim", LIO_RELATIVEPATH);
 	
@@ -307,9 +307,9 @@ static void LoadMenuFont(void)
 	}
 
 	// we're going to try create a square texture
-	gfxPtr->menuTexture = CreateD3DTallFontTexture(image);
-	gfxPtr->textureID = Tex_AddTexture(buffer, gfxPtr->menuTexture, image->width, image->height);
-	gfxPtr->menuTexture = NULL; // bjd - fixme
+	RENDERTEXTURE texture = CreateD3DTallFontTexture(image);
+	gfxPtr->textureID = Tex_AddTexture(buffer, texture, image->width, image->height);
+//	gfxPtr->menuTexture = NULL; // bjd - fixme
 }
 
 static void UnloadMenuFont(void)

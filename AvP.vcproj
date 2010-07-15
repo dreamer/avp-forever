@@ -8980,6 +8980,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\3dc\vertexBuffer.cpp"
+				>
+			</File>
+			<File
 				RelativePath="3dc\win95\VideoModes.cpp"
 				>
 				<FileConfiguration
@@ -10313,6 +10317,10 @@
 				</File>
 				<File
 					RelativePath="3dc\version.h"
+					>
+				</File>
+				<File
+					RelativePath=".\3dc\vertexBuffer.h"
 					>
 				</File>
 				<File

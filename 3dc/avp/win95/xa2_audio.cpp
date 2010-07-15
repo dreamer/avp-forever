@@ -9,6 +9,8 @@
 #include "audioStreaming.h"
 #include <d3dx9math.h>
 
+#define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
+
 extern D3DXMATRIX viewMatrix;
 
 extern "C" {

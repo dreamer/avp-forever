@@ -7,15 +7,15 @@ extern "C" {
 
 #include <stdio.h>
 
-#include "datatype.h"
+#include <stdint.h>
 
-BYTE GetByte(FILE *fp);
-WORD GetLittleWord(FILE *fp);
-DWORD GetLittleDword(FILE *fp);
+uint8_t GetByte(FILE *fp);
+uint16_t GetLittleWord(FILE *fp);
+uint32_t GetLittleDword(FILE *fp);
 
-VOID PutByte(BYTE v, FILE *fp);
-VOID PutLittleWord(WORD v, FILE *fp);
-VOID PutLittleDword(DWORD v, FILE *fp);
+void PutByte(uint8_t v, FILE *fp);
+void PutLittleWord(uint16_t v, FILE *fp);
+void PutLittleDword(uint32_t v, FILE *fp);
 
 #ifdef __cplusplus
 };
