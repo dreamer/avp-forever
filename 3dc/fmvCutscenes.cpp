@@ -85,7 +85,7 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 {
 	for (uint32_t i = 0; i < NumberOfFMVTextures; i++)
 	{
-		FMVTexture[i].textureID = Tex_AddTexture("CUTSCENE", CreateFmvTexture(&FMVTexture[i].width, &FMVTexture[i].height, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT), FMVTexture[i].width, FMVTexture[i].height);
+		FMVTexture[i].textureID = Tex_AddTexture("CUTSCENE" + IntToString(i), CreateFmvTexture(&FMVTexture[i].width, &FMVTexture[i].height, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT), FMVTexture[i].width, FMVTexture[i].height);
 //		FMVTexture[i].ImagePtr->Direct3DTexture = CreateFmvTexture(&FMVTexture[i].ImagePtr->ImageWidth, &FMVTexture[i].ImagePtr->ImageHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 	}
 /*

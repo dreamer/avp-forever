@@ -27,19 +27,16 @@
 class VertexBuffer
 {
 	public:
-		uint32_t test;
-
 		enum USAGE
 		{
-			VB_STATIC,
-			VB_DYNAMIC
+			USAGE_STATIC,
+			USAGE_DYNAMIC
 		};
-
-		enum VB_FVF
+		enum FVF
 		{
-			VB_FVF_LVERTEX,
-			VB_FVF_ORTHO,
-			VB_FVF_FMV
+			FVF_LVERTEX,
+			FVF_ORTHO,
+			FVF_FMV
 		};
 
 		// constructor
@@ -49,11 +46,13 @@ class VertexBuffer
 			vbLength(0),
 			vbUsage(0),
 			vbPool(D3DPOOL_DEFAULT),
+			vbFVF(FVF_ORTHO),
+			vbFVFsize(0),
 			vbIsLocked(false),
 			ibIsLocked(false)
 		{
 			this->d3dDevice = d3dDevice;
-
+			d3dDevice->AddRef();
 			// addRef?
 		}
 
@@ -64,9 +63,10 @@ class VertexBuffer
 			SAFE_RELEASE(indexBuffer);
 		}
 
-	bool VertexBuffer::Create(uint32_t size, enum VB_FVF fvf, enum USAGE usage);
+	bool VertexBuffer::Create(uint32_t size, enum FVF fvf, enum USAGE usage);
 	bool VertexBuffer::Lock(void **data);
 	bool VertexBuffer::Unlock();
+	bool VertexBuffer::Draw();
 
 	private:
 		IDirect3DDevice9		*d3dDevice;
@@ -79,6 +79,8 @@ class VertexBuffer
 		uint32_t	vbLength;
 		uint32_t	vbUsage;
 		D3DPOOL		vbPool;
+		FVF			vbFVF;
+		uint32_t	vbFVFsize;
 
 		bool	vbIsLocked;
 		bool	ibIsLocked;

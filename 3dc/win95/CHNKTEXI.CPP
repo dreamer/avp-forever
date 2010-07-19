@@ -735,12 +735,12 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 							{
 								OutputDebugString("found fmv texture.. \n");
 								// is fmv texture, create in default pool so we can dynamically update it
-								renderTexture = CreateD3DTexture(AvPTexture, AvPTexture->buffer, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+								renderTexture = CreateD3DTexture(AvPTexture, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 								// will need to be restored on alt/tab or device loss
 							}
 							else
 							{
-								renderTexture = CreateD3DTexture(AvPTexture, AvPTexture->buffer, 0, D3DPOOL_MANAGED);
+								renderTexture = CreateD3DTexture(AvPTexture, 0, D3DPOOL_MANAGED);
 							}
 
 							textureID = Tex_AddTexture(ImageName, renderTexture, ImageWidth, ImageHeight);
@@ -779,6 +779,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					);
 				if (pTexture)
 				{
+/*
 					IMAGEHEADER * pImageHdr = GetImageHeader();
 					db_assert1(pImageHdr);
 					memset(pImageHdr,0,sizeof(IMAGEHEADER));
@@ -787,38 +788,42 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
 					strcpy(pImageHdr->ImageName,szBuf);
 					pImageHdr->AvPTexture = pTexture;
+*/
+					uint32_t ImageWidth = pTexture->width;
+					uint32_t ImageHeight = pTexture->height;
+					AVPTEXTURE *AvPTexture = pTexture;
+					char *ImageName = szBuf;
+					RENDERTEXTURE renderTexture;
 
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 
 					/* KJL 16:05:50 26/02/98 - attempt to get a texture handle */
 					{
-						if (pTexture->buffer)
+						if (AvPTexture->buffer)
 						{
-							RENDERTEXTURE texture;
-
-							if ((strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0) ||
-								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\alien.RIM") == 0) ||		// for alien demo
-								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\predator.RIM") == 0) ||  // for marine(?) demo
-								(strcmp(pImageHdr->ImageName, "Graphics\\FMVs\\final.RIM") == 0))		// for predator demo
+							if ((strcmp(ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0) ||
+								(strcmp(ImageName, "Graphics\\FMVs\\alien.RIM") == 0) ||		// for alien demo
+								(strcmp(ImageName, "Graphics\\FMVs\\predator.RIM") == 0) ||  // for marine(?) demo
+								(strcmp(ImageName, "Graphics\\FMVs\\final.RIM") == 0))		// for predator demo
 							{
 								// is fmv texture, create in default pool so we can dynamically update it
-								texture = CreateD3DTexture(pTexture, pTexture->buffer, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+								renderTexture = CreateD3DTexture(AvPTexture, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 							}
 							else
 							{
-								texture = CreateD3DTexture(pTexture, pTexture->buffer, 0, D3DPOOL_MANAGED);
+								renderTexture = CreateD3DTexture(AvPTexture, 0, D3DPOOL_MANAGED);
 							}
 
-							if (texture == NULL)
+							if (renderTexture == NULL)
 							{
 								OutputDebugString("Direct3DTexture was null!");
 							}
 
-							textureID = Tex_AddTexture(pImageHdr->ImageName, texture, pImageHdr->ImageWidth, pImageHdr->ImageHeight);
+							textureID = Tex_AddTexture(ImageName, renderTexture, ImageWidth, ImageHeight);
 
 							// free this, as d3d now holds the texture
-							free(pTexture->buffer);
-							pTexture->buffer = NULL;
+							free(AvPTexture->buffer);
+							AvPTexture->buffer = NULL;
 						}
 						else {
 							OutputDebugString("pTexture->buf was null!");

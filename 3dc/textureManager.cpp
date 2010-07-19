@@ -137,12 +137,12 @@ uint32_t Tex_LoadFromFile(const std::string &fileName)
 	return textureID;
 }
 
-RENDERTEXTURE& Tex_GetTexture(uint32_t textureID)
+const RENDERTEXTURE& Tex_GetTexture(uint32_t textureID)
 {
 	return (textureList[textureID].texture);
 }
 
-Texture& Tex_GetTextureDetails(uint32_t textureID)
+const Texture& Tex_GetTextureDetails(uint32_t textureID)
 {
 	return (textureList[textureID]);
 }
@@ -180,10 +180,10 @@ void Tex_DeInit()
 {
 	for (std::vector<Texture>::iterator it = textureList.begin(); it != textureList.end(); ++it)
 	{
-		if ((*it).texture)
+		if (it->texture)
 		{
-			(*it).texture->Release();
-			(*it).texture = NULL;
+			it->texture->Release();
+			it->texture = NULL;
 		}
 	}
 }

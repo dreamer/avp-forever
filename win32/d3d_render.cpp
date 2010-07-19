@@ -16,6 +16,10 @@
 #include <XInput.h> // XInput API
 
 #include "logString.h"
+#include "RenderList.h"
+#include "vertexBuffer.h"
+
+VertexBuffer *FMVvertexBuffer = 0;
 
 #include <d3dx9math.h>
 #include "fmvCutscenes.h"
@@ -28,7 +32,6 @@
 #include "avp_menugfx.hpp"
 
 uint32_t NumVertices = 0;
-//const int32_t NO_TEXTURE = 0;//-1;
 
 // set them to 'null' texture initially
 uint32_t currentTextureID	 = NO_TEXTURE;
@@ -36,8 +39,6 @@ uint32_t currentWaterTexture = NO_TEXTURE;
 
 uint32_t	NumIndicies = 0;
 uint32_t	vb = 0;
-static uint32_t	renderCount = 0;
-static uint32_t	transRenderCount = 0;
 static uint32_t NumberOfRenderedTriangles = 0;
 bool ZWritesEnabled = false;
 
@@ -121,31 +122,14 @@ const uint32_t MAX_INDICES = 9216;
 
 struct RENDER_STATES
 {
-	uint32_t	textureID;
 	uint32_t	vertStart;
 	uint32_t	vertEnd;
 	uint32_t	indexStart;
 	uint32_t	indexEnd;
 
-	enum TRANSLUCENCY_TYPE translucencyType;
-	enum FILTERING_MODE_ID filteringType;
+	uint32_t	sortKey;
 
-	bool operator<(const RENDER_STATES& rhs) const {return textureID < rhs.textureID;}
-//	bool operator<(const RENDER_STATES& rhs) const {return translucency_type < rhs.translucency_type;}
-};
-
-struct ORTHO_OBJECTS
-{
-	uint32_t	textureID;
-	uint32_t	vertStart;
-	uint32_t	vertEnd;
-
-	uint32_t	indexStart;
-	uint32_t	indexEnd;
-
-	enum TRANSLUCENCY_TYPE translucencyType;
-	enum FILTERING_MODE_ID filteringType;
-	enum TEXTURE_ADDRESS_MODE textureAddressMode;
+	bool operator<(const RENDER_STATES& rhs) const {return sortKey < rhs.sortKey;}
 };
 
 D3DLVERTEX *mainVertex = NULL;
@@ -156,15 +140,22 @@ WORD *particleIndex = NULL;
 uint32_t	pVb = 0;
 uint32_t	pIb = 0;
 uint32_t	numPVertices = 0;
-RENDER_STATES *particleList = new RENDER_STATES[MAX_VERTEXES];
+
+std::vector<RENDER_STATES> particleList;
+std::vector<RENDER_STATES> renderList;
+std::vector<RENDER_STATES> transRenderList;
+std::vector<RENDER_STATES> orthoList;
+
 uint32_t particleListCount = 0;
+uint32_t renderListCount = 0;
+uint32_t transRenderListCount = 0;
+uint32_t orthoListCount = 0;
 
 ORTHOVERTEX *orthoVerts = NULL;
 WORD *orthoIndex = NULL;
 
 static uint32_t orthoVBOffset = 0;
 static uint32_t orthoIBOffset = 0;
-static uint32_t orthoListCount = 0;
 
 // keep track of set render states
 static bool	D3DAlphaBlendEnable;
@@ -189,13 +180,24 @@ void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 
 static HRESULT LastError;
 
-RENDER_STATES *renderList = new RENDER_STATES[MAX_VERTEXES];
-RENDER_STATES *transRenderList = new RENDER_STATES[MAX_VERTEXES];
+void Init()
+{
+	particleList.reserve(MAX_VERTEXES);
+	particleList.resize(MAX_VERTEXES);
+	memset(&particleList[0], 0, sizeof(RENDER_STATES));
 
-std::vector<RENDER_STATES> renderTest;
+	renderList.reserve(MAX_VERTEXES);
+	renderList.resize(MAX_VERTEXES);
+	memset(&renderList[0], 0, sizeof(RENDER_STATES));
 
-// array of 2d objects
-ORTHO_OBJECTS *orthoList = new ORTHO_OBJECTS[MAX_VERTEXES]; // lower me!
+	transRenderList.reserve(MAX_VERTEXES);
+	transRenderList.resize(MAX_VERTEXES);
+	memset(&transRenderList[0], 0, sizeof(RENDER_STATES));
+
+	orthoList.reserve(MAX_VERTEXES);
+	orthoList.resize(MAX_VERTEXES);
+	memset(&orthoList[0], 0, sizeof(RENDER_STATES));
+}
 
 struct renderParticle
 {
@@ -236,10 +238,41 @@ inline float HPos2DC(int32_t pos)
 		return (float(pos / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
 }
 
-void DeleteRenderMemory()
+uint32_t GetRealNumVerts(uint32_t numVerts)
 {
-	delete[] orthoList;
-	delete[] renderList;
+	uint32_t realNumVerts = 0;
+
+	switch (numVerts)
+	{
+		case 3:
+			realNumVerts = 3;
+			break;
+		case 4:
+			realNumVerts = 6;
+			break;
+		case 5:
+			realNumVerts = 9;
+			break;
+		case 6:
+			realNumVerts = 12;
+			break;
+		case 7:
+			realNumVerts = 15;
+			break;
+		case 8:
+			realNumVerts = 18;
+			break;
+		case 0:
+			realNumVerts = 0;
+			break;
+		case 256:
+			realNumVerts = 1350;
+			break;
+		default:
+			// need to check this is ok!!
+			realNumVerts = numVerts;
+	}
+	return realNumVerts;
 }
 
 bool SetRenderStateDefaults()
@@ -305,16 +338,6 @@ bool SetRenderStateDefaults()
 	// set less + equal z buffer test
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 	D3DZFunc = D3DCMP_LESSEQUAL;
-
-	// fill out first render list struct
-	memset(&renderList[0], 0, sizeof(RENDER_STATES));
-	renderList[0].textureID = NO_TEXTURE;
-
-	// fill out first ortho render list struct
-	memset(&orthoList[0], 0, sizeof(ORTHO_OBJECTS));
-	orthoList[0].textureID = NO_TEXTURE;
-
-	renderTest.push_back(renderList[0]);
 
     return true;
 }
@@ -535,20 +558,19 @@ bool LockExecuteBuffer()
 
 	NumVertices = 0;
 	NumIndicies = 0;
-	renderCount = 0;
-	transRenderCount = 0;
 	vb = 0;
 
 	orthoVBOffset = 0;
 	orthoIBOffset = 0;
 	orthoListCount = 0;
 
+	renderListCount = 0;
+	transRenderListCount = 0;
+
 	pVb = 0;
 	pIb = 0;
 	particleListCount = 0;
 	numPVertices = 0;
-
-	renderTest.clear();
 
     return true;
 }
@@ -618,7 +640,8 @@ static void ChangeTexture(const uint32_t textureID)
 bool ExecuteBuffer()
 {
 	// sort the list of render objects
-	std::sort(renderTest.begin(), renderTest.end());
+	std::sort(renderList.begin(), renderList.begin() + renderListCount);
+	std::sort(particleList.begin(), particleList.begin() + particleListCount);
 
 	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));
 	if (FAILED(LastError))
@@ -647,14 +670,14 @@ bool ExecuteBuffer()
 	ChangeTextureAddressMode(TEXTURE_WRAP);
 
 	// draw opaque polygons
-	for (uint32_t i = 0; i < renderCount; i++)
+	for (uint32_t i = 0; i < renderListCount; i++)
 	{
 		// change render states if required
-		ChangeTexture(renderTest[i].textureID);
-		ChangeTranslucencyMode(renderTest[i].translucencyType);
-		ChangeFilteringMode(renderTest[i].filteringType);
+		ChangeTexture(renderList[i].sortKey >> 24);
+		ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((renderList[i].sortKey >> 20) & 15));
+		ChangeFilteringMode((enum FILTERING_MODE_ID)	((renderList[i].sortKey >> 16) & 15));
 
-		uint32_t numPrimitives = (renderTest[i].indexEnd - renderTest[i].indexStart) / 3;
+		uint32_t numPrimitives = (renderList[i].indexEnd - renderList[i].indexStart) / 3;
 
 		if (numPrimitives > 0)
 		{
@@ -662,7 +685,7 @@ bool ExecuteBuffer()
 				0,
 				0,
 				NumVertices,
-				renderTest[i].indexStart,
+				renderList[i].indexStart,
 				numPrimitives);
 
 			if (FAILED(LastError))
@@ -674,12 +697,12 @@ bool ExecuteBuffer()
 	}
 
 	// do transparents here..
-	for (uint32_t i = 0; i < transRenderCount; i++)
+	for (uint32_t i = 0; i < transRenderListCount; i++)
 	{
 		// change render states if required
-		ChangeTexture(transRenderList[i].textureID);
-		ChangeTranslucencyMode(transRenderList[i].translucencyType);
-		ChangeFilteringMode(transRenderList[i].filteringType);
+		ChangeTexture(transRenderList[i].sortKey >> 24);
+		ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((transRenderList[i].sortKey >> 20) & 15));
+		ChangeFilteringMode((enum FILTERING_MODE_ID)	((transRenderList[i].sortKey >> 16) & 15));
 
 		uint32_t numPrimitives = (transRenderList[i].indexEnd - transRenderList[i].indexStart) / 3;
 
@@ -725,9 +748,10 @@ bool ExecuteBuffer()
 
 		for (uint32_t i = 0; i < particleListCount; i++)
 		{
-			ChangeTexture(particleList[i].textureID);
-			ChangeTranslucencyMode(particleList[i].translucencyType);
-			ChangeFilteringMode(particleList[i].filteringType);
+			// change render states if required
+			ChangeTexture(particleList[i].sortKey >> 24);
+			ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((particleList[i].sortKey >> 20) & 15));
+			ChangeFilteringMode((enum FILTERING_MODE_ID)	((particleList[i].sortKey >> 16) & 15));
 
 			uint32_t numPrimitives = (particleList[i].indexEnd - particleList[i].indexStart) / 3;
 
@@ -794,10 +818,10 @@ bool ExecuteBuffer()
 		for (uint32_t i = 0; i < orthoListCount; i++)
 		{
 			// change render states if required
-			ChangeTexture(orthoList[i].textureID);
-			ChangeTranslucencyMode(orthoList[i].translucencyType);
-			ChangeTextureAddressMode(orthoList[i].textureAddressMode);
-			ChangeFilteringMode(orthoList[i].filteringType);
+			ChangeTexture(orthoList[i].sortKey >> 24);
+			ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((orthoList[i].sortKey >> 20) & 15));
+			ChangeFilteringMode((enum FILTERING_MODE_ID)	((orthoList[i].sortKey >> 16) & 15));
+			ChangeTextureAddressMode((enum TEXTURE_ADDRESS_MODE) ((orthoList[i].sortKey >> 14) & 3));
 
 			uint32_t primitiveCount = (orthoList[i].indexEnd - orthoList[i].indexStart) / 3;
 
@@ -906,29 +930,26 @@ void CheckOrthoBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_T
 	// check if we've got enough room. if not, flush
 		// TODO
 
-	assert (orthoListCount < MAX_VERTEXES);
+	assert(orthoIBOffset <= MAX_VERTEXES - 12);
+
+	orthoList[orthoListCount].sortKey = 0; // zero it out
+
+	// store our render state values in sortKey which we can use as a sorting value
+	orthoList[orthoListCount].sortKey = (textureID << 24) | (translucencyMode << 20) | (filteringMode << 16) | (textureAddressMode << 14);
 
 	// create a new list item for it
-	orthoList[orthoListCount].textureID = textureID;
 	orthoList[orthoListCount].vertStart = 0;
 	orthoList[orthoListCount].vertEnd = 0;
-	orthoList[orthoListCount].translucencyType = translucencyMode;
-	orthoList[orthoListCount].textureAddressMode = textureAddressMode;
-	orthoList[orthoListCount].filteringType = filteringMode;
 
-	// check if current vertexes use the same texture and render states as the previous. if they do, we can 'merge' the two together
 	if (orthoListCount != 0 &&
-		textureID == orthoList[orthoListCount-1].textureID &&
-		translucencyMode == orthoList[orthoListCount-1].translucencyType &&
-		textureAddressMode == orthoList[orthoListCount-1].textureAddressMode &&
-		filteringMode == orthoList[orthoListCount-1].filteringType)
+		// if sort keys match, render states match so we can merge the two list items
+		orthoList[orthoListCount-1].sortKey == orthoList[orthoListCount].sortKey)
 	{
-		// ok, drop back to the previous data
 		orthoListCount--;
 	}
 	else
 	{
-		// new unique entry
+		orthoList[orthoListCount].vertStart = orthoVBOffset;
 		orthoList[orthoListCount].indexStart = orthoIBOffset;
 	}
 
@@ -948,7 +969,6 @@ void CheckOrthoBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_T
 
 	orthoList[orthoListCount].vertEnd = orthoVBOffset + numVerts;
 	orthoList[orthoListCount].indexEnd = orthoIBOffset;
-
 	orthoListCount++;
 }
 
@@ -1025,62 +1045,71 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	float x2 = WPos2DC(topX + frameWidth);
 	float y2 = HPos2DC(topY + frameHeight);
 
-	FMVVERTEX fmvVerts[4];
+	FMVVERTEX *fmvVerts;
+
+	if (!FMVvertexBuffer)
+	{
+		FMVvertexBuffer = new VertexBuffer(d3d.lpD3DDevice);
+		FMVvertexBuffer->Create(4, FMVvertexBuffer->FVF_FMV, FMVvertexBuffer->USAGE_STATIC);
+		FMVvertexBuffer->Lock((void**)&fmvVerts);
+
+		// bottom left
+		fmvVerts[0].x = x1;
+		fmvVerts[0].y = y2;
+		fmvVerts[0].z = 1.0f;
+		fmvVerts[0].u1 = 0.0f;
+		fmvVerts[0].v1 = 1.0f; //(1.0f / textureHeight) * frameHeight;
+
+		fmvVerts[0].u2 = 0.0f;
+		fmvVerts[0].v2 = 1.0f;
+
+		fmvVerts[0].u3 = 0.0f;
+		fmvVerts[0].v3 = 1.0f;
+
+		// top left
+		fmvVerts[1].x = x1;
+		fmvVerts[1].y = y1;
+		fmvVerts[1].z = 1.0f;
+		fmvVerts[1].u1 = 0.0f;
+		fmvVerts[1].v1 = 0.0f;
+
+		fmvVerts[1].u2 = 0.0f;
+		fmvVerts[1].v2 = 0.0f;
+
+		fmvVerts[1].u3 = 0.0f;
+		fmvVerts[1].v3 = 0.0f;
+
+		// bottom right
+		fmvVerts[2].x = x2;
+		fmvVerts[2].y = y2;
+		fmvVerts[2].z = 1.0f;
+		fmvVerts[2].u1 = 1.0f; //(1.0f / textureWidth) * frameWidth;
+		fmvVerts[2].v1 = 1.0f; //(1.0f / textureHeight) * frameHeight;
+
+		fmvVerts[2].u2 = 1.0f;
+		fmvVerts[2].v2 = 1.0f;
+
+		fmvVerts[2].u3 = 1.0f;
+		fmvVerts[2].v3 = 1.0f;
+
+		// top right
+		fmvVerts[3].x = x2;
+		fmvVerts[3].y = y1;
+		fmvVerts[3].z = 1.0f;
+		fmvVerts[3].u1 = 1.0f; //(1.0f / textureWidth) * frameWidth;
+		fmvVerts[3].v1 = 0.0f;
+
+		fmvVerts[3].u2 = 1.0f;
+		fmvVerts[3].v2 = 0.0f;
+
+		fmvVerts[3].u3 = 1.0f;
+		fmvVerts[3].v3 = 0.0f;
+	
+		FMVvertexBuffer->Unlock();
+	}
 
 	// set orthographic projection
 	fmvConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
-
-	// bottom left
-	fmvVerts[0].x = x1;
-	fmvVerts[0].y = y2;
-	fmvVerts[0].z = 1.0f;
-	fmvVerts[0].u1 = 0.0f;
-	fmvVerts[0].v1 = 1.0f; //(1.0f / textureHeight) * frameHeight;
-
-	fmvVerts[0].u2 = 0.0f;
-	fmvVerts[0].v2 = 1.0f;
-
-	fmvVerts[0].u3 = 0.0f;
-	fmvVerts[0].v3 = 1.0f;
-
-	// top left
-	fmvVerts[1].x = x1;
-	fmvVerts[1].y = y1;
-	fmvVerts[1].z = 1.0f;
-	fmvVerts[1].u1 = 0.0f;
-	fmvVerts[1].v1 = 0.0f;
-
-	fmvVerts[1].u2 = 0.0f;
-	fmvVerts[1].v2 = 0.0f;
-
-	fmvVerts[1].u3 = 0.0f;
-	fmvVerts[1].v3 = 0.0f;
-
-	// bottom right
-	fmvVerts[2].x = x2;
-	fmvVerts[2].y = y2;
-	fmvVerts[2].z = 1.0f;
-	fmvVerts[2].u1 = 1.0f; //(1.0f / textureWidth) * frameWidth;
-	fmvVerts[2].v1 = 1.0f; //(1.0f / textureHeight) * frameHeight;
-
-	fmvVerts[2].u2 = 1.0f;
-	fmvVerts[2].v2 = 1.0f;
-
-	fmvVerts[2].u3 = 1.0f;
-	fmvVerts[2].v3 = 1.0f;
-
-	// top right
-	fmvVerts[3].x = x2;
-	fmvVerts[3].y = y1;
-	fmvVerts[3].z = 1.0f;
-	fmvVerts[3].u1 = 1.0f; //(1.0f / textureWidth) * frameWidth;
-	fmvVerts[3].v1 = 0.0f;
-
-	fmvVerts[3].u2 = 1.0f;
-	fmvVerts[3].v2 = 0.0f;
-
-	fmvVerts[3].u3 = 1.0f;
-	fmvVerts[3].v3 = 0.0f;
 
 	ChangeTextureAddressMode(TEXTURE_CLAMP);
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
@@ -1095,12 +1124,15 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	d3d.lpD3DDevice->SetVertexShader(d3d.fmvVertexShader);
 	d3d.lpD3DDevice->SetPixelShader(d3d.fmvPixelShader);
 
+	FMVvertexBuffer->Draw();
+/*
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(FMVVERTEX));
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("DrawPrimitiveUP failed\n");
 	}
+*/
 }
 
 void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t textureID, AVPTEXTURE *tex, uint32_t newWidth, uint32_t newHeight)
@@ -1302,15 +1334,12 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
 {
 	ftPtr->RGBBuffer = new uint8_t[128 * 128 * 4];
-
 	ftPtr->SoundVolume = 0;
 }
 
 void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 {
 	assert(ftPtr);
-//	assert(ftPtr->ImagePtr);
-//	assert(ftPtr->ImagePtr->Direct3DTexture);
 
 	if (!ftPtr)
 		return;
@@ -1776,16 +1805,13 @@ void DrawCoronas()
 
 	uint32_t numVertsBackup = RenderPolygon.NumberOfVertices;
 
-	LastError = d3d.lpD3DDevice->SetTexture(0, /*ImageHeaderArray[SpecialFXImageNumber].Direct3DTexture*/Tex_GetTexture(SpecialFXImageNumber));
+	LastError = d3d.lpD3DDevice->SetTexture(0, Tex_GetTexture(SpecialFXImageNumber));
 	currentTextureID = SpecialFXImageNumber;
 
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
 	d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
 
 	DisableZBufferWrites();
-
-//	int sizeX = (ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
-//	int sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
 
 	D3DCOLOR colour;
 	float RecipW, RecipH;
@@ -2127,37 +2153,7 @@ static inline void D3D_OutputTriangles()
 
 void CheckVertexBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
 {
-	uint32_t realNumVerts = 0;
-
-	switch (numVerts)
-	{
-		case 3:
-			realNumVerts = 3;
-			break;
-		case 4:
-			realNumVerts = 6;
-			break;
-		case 5:
-			realNumVerts = 9;
-			break;
-		case 6:
-			realNumVerts = 12;
-			break;
-		case 7:
-			realNumVerts = 15;
-			break;
-		case 8:
-			realNumVerts = 18;
-			break;
-		case 0:
-			return;
-		case 256:
-			realNumVerts = 1350;
-			break;
-		default:
-			// need to check this is ok!!
-			realNumVerts = numVerts;
-	}
+	uint32_t realNumVerts = GetRealNumVerts(numVerts);
 
 	// check if we've got enough room. if not, flush
 	if (NumVertices + numVerts > (MAX_VERTEXES-12))
@@ -2169,73 +2165,58 @@ void CheckVertexBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_
 
 	if (translucencyMode == TRANSLUCENCY_OFF)
 	{
-		renderList[renderCount].textureID = textureID;
-		renderList[renderCount].vertStart = 0;
-		renderList[renderCount].vertEnd = 0;
+		renderList[renderListCount].sortKey = 0; // zero it out
 
-		renderList[renderCount].indexStart = 0;
-		renderList[renderCount].indexEnd = 0;
+		// store our render state values in sortKey which we can use as a sorting value
+		renderList[renderListCount].sortKey = (textureID << 24) | (translucencyMode << 20) | (filteringMode << 16);
 
-		renderList[renderCount].translucencyType = translucencyMode;
-		renderList[renderCount].filteringType = filteringMode;
+		renderList[renderListCount].vertStart = 0;
+		renderList[renderListCount].vertEnd = 0;
 
-		// check if current vertexes use the same texture and render states as the previous
-		// if they do, we can 'merge' the two together
-		if (renderCount != 0 &&
-			textureID == renderList[renderCount-1].textureID &&
-			translucencyMode == renderList[renderCount-1].translucencyType &&
-			filteringMode	 == renderList[renderCount-1].filteringType)
+		renderList[renderListCount].indexStart = 0;
+		renderList[renderListCount].indexEnd = 0;
+
+		if (renderListCount != 0 &&
+			// if the two keys match, render states match so we can merge the list items
+			renderList[renderListCount-1].sortKey == renderList[renderListCount].sortKey)
 		{
-			// ok, drop back to the previous data
-			renderTest.pop_back();
-			renderCount--;
+			renderListCount--;
 		}
 		else
 		{
-			renderList[renderCount].vertStart = NumVertices;
-			renderList[renderCount].indexStart = NumIndicies;
+			renderList[renderListCount].vertStart = NumVertices;
+			renderList[renderListCount].indexStart = NumIndicies;
 		}
 
-		renderList[renderCount].vertEnd = NumVertices + numVerts;
-		renderList[renderCount].indexEnd = NumIndicies + realNumVerts;
-
-		renderTest.push_back(renderList[renderCount]);
-		renderCount++;
+		renderList[renderListCount].vertEnd = NumVertices + numVerts;
+		renderList[renderListCount].indexEnd = NumIndicies + realNumVerts;
+		renderListCount++;
 	}
 	else
 	{
-		transRenderList[transRenderCount].textureID = textureID;
-		transRenderList[transRenderCount].vertStart = 0;
-		transRenderList[transRenderCount].vertEnd = 0;
+		transRenderList[transRenderListCount].sortKey = 0; // zero it out
+		transRenderList[transRenderListCount].sortKey = (textureID << 24) | (translucencyMode << 20) | (filteringMode << 16);
 
-		transRenderList[transRenderCount].indexStart = 0;
-		transRenderList[transRenderCount].indexEnd = 0;
+		transRenderList[transRenderListCount].vertStart = 0;
+		transRenderList[transRenderListCount].vertEnd = 0;
 
-		transRenderList[transRenderCount].translucencyType = translucencyMode;
-		transRenderList[transRenderCount].filteringType = filteringMode;
+		transRenderList[transRenderListCount].indexStart = 0;
+		transRenderList[transRenderListCount].indexEnd = 0;
 
-		// check if current vertexes use the same texture and render states as the previous
-		// if they do, we can 'merge' the two together
-		if (transRenderCount != 0 &&
-			textureID == transRenderList[transRenderCount-1].textureID &&
-			translucencyMode == transRenderList[transRenderCount-1].translucencyType &&
-			filteringMode	 == transRenderList[transRenderCount-1].filteringType)
+		if (transRenderListCount != 0 &&
+			transRenderList[transRenderListCount-1].sortKey == transRenderList[transRenderListCount].sortKey)
 		{
-			// ok, drop back to the previous data
-//			renderTest.pop_back();
-			transRenderCount--;
+			transRenderListCount--;
 		}
 		else
 		{
-			transRenderList[transRenderCount].vertStart = NumVertices;
-			transRenderList[transRenderCount].indexStart = NumIndicies;
+			transRenderList[transRenderListCount].vertStart = NumVertices;
+			transRenderList[transRenderListCount].indexStart = NumIndicies;
 		}
 
-		transRenderList[transRenderCount].vertEnd = NumVertices + numVerts;
-		transRenderList[transRenderCount].indexEnd = NumIndicies + realNumVerts;
-
-//		renderTest.push_back(renderList[renderCount]);
-		transRenderCount++;
+		transRenderList[transRenderListCount].vertEnd = NumVertices + numVerts;
+		transRenderList[transRenderListCount].indexEnd = NumIndicies + realNumVerts;
+		transRenderListCount++;
 	}
 
 	NumVertices += numVerts;
@@ -2594,7 +2575,6 @@ void D3D_HUDQuad_Output(uint32_t textureID, struct VertexTag *quadVerticesPtr, u
 	assert (textureID != -1);
 
 	uint32_t texWidth, texHeight;
-
 	Tex_GetDimensions(textureID, texWidth, texHeight);
 
 	RecipW = 1.0f / texWidth;
@@ -2722,6 +2702,7 @@ void D3D_DecalSystem_End(void)
 	LockExecuteBuffer();
 
 	EnableZBufferWrites();
+
 /*
 	if (D3DZWriteEnable != TRUE)
 	{
@@ -2871,59 +2852,22 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 //	CheckVertexBuffer(RenderPolygon.NumberOfVertices, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType);
 //	void CheckVertexBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
 
-	uint32_t realNumVerts = 0;
+	uint32_t realNumVerts = GetRealNumVerts(RenderPolygon.NumberOfVertices);
 
-	switch (RenderPolygon.NumberOfVertices)
-	{
-		case 3:
-			realNumVerts = 3;
-			break;
-		case 4:
-			realNumVerts = 6;
-			break;
-		case 5:
-			realNumVerts = 9;
-			break;
-		case 6:
-			realNumVerts = 12;
-			break;
-		case 7:
-			realNumVerts = 15;
-			break;
-		case 8:
-			realNumVerts = 18;
-			break;
-		case 0:
-			return;
-		case 256:
-			realNumVerts = 1350;
-			break;
-		default:
-			// need to check this is ok!!
-			realNumVerts = RenderPolygon.NumberOfVertices;
-	}
+	assert(textureID >= 0 && textureID <= 255);
 
-	// check if we have enough room here
+	particleList[particleListCount].sortKey = 0; // zero it out
+	particleList[particleListCount].sortKey = (textureID << 24) | (particleDescPtr->TranslucencyType << 20) | (FILTERING_BILINEAR_ON << 16);
 
-	particleList[particleListCount].textureID = SpecialFXImageNumber;
 	particleList[particleListCount].vertStart = 0;
 	particleList[particleListCount].vertEnd = 0;
 
 	particleList[particleListCount].indexStart = 0;
 	particleList[particleListCount].indexEnd = 0;
 
-	particleList[particleListCount].translucencyType = (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType;
-	particleList[particleListCount].filteringType = FILTERING_BILINEAR_ON;
-
-	// check if current vertexes use the same texture and render states as the previous
-	// if they do, we can 'merge' the two together
 	if (particleListCount != 0 &&
-		SpecialFXImageNumber == particleList[particleListCount-1].textureID &&
-		(enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType == particleList[particleListCount-1].translucencyType &&
-		FILTERING_BILINEAR_ON == particleList[particleListCount-1].filteringType)
+		particleList[particleListCount-1].sortKey == particleList[particleListCount].sortKey)
 	{
-		// ok, drop back to the previous data
-//		renderTest.pop_back();
 		particleListCount--;
 	}
 	else
@@ -2935,7 +2879,6 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	particleList[particleListCount].vertEnd = numPVertices + RenderPolygon.NumberOfVertices;
 	particleList[particleListCount].indexEnd = pIb + realNumVerts;
 
-//	renderTest.push_back(renderList[renderCount]);
 	particleListCount++;
 
 	numPVertices += RenderPolygon.NumberOfVertices;
@@ -3015,8 +2958,8 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		particleVertex[pVb].color = colour;
 		particleVertex[pVb].specular = RGBALIGHT_MAKE(0,0,0,255);
 
-		particleVertex[pVb].tu = ((float)(vertices->U) + 0.5f) * RecipW;
-		particleVertex[pVb].tv = ((float)(vertices->V) + 0.5f) * RecipH;
+		particleVertex[pVb].tu = ((float)(vertices->U)/* + 0.5f*/) * RecipW;
+		particleVertex[pVb].tv = ((float)(vertices->V)/* + 0.5f*/) * RecipH;
 
 		pVb++;
 	}

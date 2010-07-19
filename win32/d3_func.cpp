@@ -54,7 +54,7 @@ extern LPD3DXCONSTANTTABLE	orthoConstantTable;
 extern LPD3DXCONSTANTTABLE	fmvConstantTable;
 extern LPD3DXCONSTANTTABLE	cloudConstantTable;
 
-extern void DeleteRenderMemory();
+extern void Init();
 
 // size of vertex and index buffers
 const uint32_t MAX_VERTEXES = 4096;
@@ -62,6 +62,7 @@ const uint32_t MAX_INDICES = 9216;
 uint32_t fov = 75;
 
 static HRESULT LastError;
+uint32_t NO_TEXTURE;
 
 std::string shaderPath;
 
@@ -260,7 +261,6 @@ extern "C" {
 #include "eax.h"
 
 #include "avp_menugfx.hpp"
-//extern AVPMENUGFX AvPMenuGfxStorage[];
 extern void ReleaseAllFMVTextures(void);
 
 extern void ThisFramesRenderingHasBegun(void);
@@ -371,7 +371,8 @@ void CreateScreenShotImage()
 	//	otherwise 9 seconds appears as '9' instead of '09'
 	{
 		bool prefixSeconds = false;
-		if (systemTime.wYear < 10) prefixSeconds = true;
+		if (systemTime.wYear < 10) 
+			prefixSeconds = true;
 
 		fileName << "AvP_" << systemTime.wDay << "-" << systemTime.wMonth << "-" << systemTime.wYear << "_" << systemTime.wHour << "-" << systemTime.wMinute << "-";
 
@@ -571,12 +572,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 		LogDxError(LastError, __LINE__, __FILE__);
 		return NULL;
 	}
-/*
-	if (FAILED(D3DXSaveTextureToFileA("c:\\temp\\tallfont.png", D3DXIFF_PNG, destTexture, NULL)))
-	{
-		OutputDebugString("\n couldnt save tex to file");
-	}
-*/
+
 	return destTexture;
 }
 
@@ -767,16 +763,7 @@ bool CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *pixe
 void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
 {
 	// lock texture
-/*
-	D3DLOCKED_RECT	lock;
 
-	LastError = texture->LockRect(0, &lock, NULL, NULL );
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return;
-	}
-*/
 	uint8_t *srcPtr = NULL;
 	uint8_t *destPtr = NULL;
 	uint32_t pitch = 0;
@@ -800,16 +787,6 @@ void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
 	}
 
 	UnlockTexture(texture);
-
-/*
-	// unlock texture as we're done
-	LastError = texture->UnlockRect(0);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return;
-	}
-*/
 }
 
 // use this to make textures from non power of two images
@@ -888,7 +865,6 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, 
 	// loop, converting RGB to BGR for D3DX function
 	for (uint32_t i = 0; i < imageSize; i+=4)
 	{
-
 		// BGRA			 // RGBA
 		imageData[i+2] = tex->buffer[i];
 		imageData[i+1] = tex->buffer[i+1];
@@ -956,7 +932,7 @@ uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture)
 	return 0;
 }
 
-LPDIRECT3DTEXTURE9 CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usage, D3DPOOL poolType)
+LPDIRECT3DTEXTURE9 CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poolType)
 {
 	LPDIRECT3DTEXTURE9 destTexture = NULL;
 
@@ -990,10 +966,10 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usag
 	{
 		// ARGB
 		// BGR
-		imageData[i+2] = buf[i];
-		imageData[i+1] = buf[i+1];
-		imageData[i]   = buf[i+2];
-		imageData[i+3] = buf[i+3];
+		imageData[i+2] = tex->buffer[i];
+		imageData[i+1] = tex->buffer[i+1];
+		imageData[i]   = tex->buffer[i+2];
+		imageData[i+3] = tex->buffer[i+3];
 	}
 
 	D3DXIMAGE_INFO image;
@@ -1615,25 +1591,15 @@ BOOL InitialiseDirect3D()
 
 	blankTexture->UnlockRect(0);
 
-	Tex_AddTexture("Blank", blankTexture, 1, 1);
-
-	// test
-	VertexBuffer testVB(d3d.lpD3DDevice);
-	testVB.Create(4, testVB.VB_FVF_ORTHO, testVB.VB_STATIC);
-
-	ORTHOVERTEX *test;
-	testVB.Lock((void**)&test);
-
-	test[0].x = 0.0f;
-	test[3].x = 1.0f;
-
-	testVB.Unlock();
+	NO_TEXTURE = Tex_AddTexture("Blank", blankTexture, 1, 1);
 
 	Con_PrintMessage("Initialised Direct3D9 succesfully");
 
 	Con_Init();
 	Net_Initialise();
 	Font_Init();
+
+	Init();
 
 	return TRUE;
 }
@@ -1695,11 +1661,6 @@ void ReleaseDirect3D()
 
 	// release back-buffer copy surface, vertex buffer and index buffer
 	ReleaseVolatileResources();
-
-	// delete up any new()-ed memory in d3d_render.cpp
-	DeleteRenderMemory();
-
-//	SAFE_RELEASE(blankTexture);
 
 	// release constant tables
 	SAFE_RELEASE(vertexConstantTable);

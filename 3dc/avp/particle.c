@@ -1839,7 +1839,6 @@ void HandleParticleSystem(void)
 					if (particlePtr->Velocity.vz > 0) particlePtr->Velocity.vz = 0;
 				}
 
-				
 				particlePtr->Position.vx += MUL_FIXED
 											(
 												particlePtr->Velocity.vx+
@@ -1863,7 +1862,6 @@ void HandleParticleSystem(void)
 												NormalFrameTime
 											
 											);
-
 				{
 					int colour = particlePtr->LifeTime>>11;
 		  			particlePtr->Colour = RGBALIGHT_MAKE(colour,colour,colour,255);
@@ -3379,128 +3377,6 @@ void InitialiseRainDrops(void)
 		ActiveRippleNumber=0;
 	}
 }
-
-/* bjd - not called
-void HandleRainDrops(MODULE *modulePtr, int numberOfRaindrops)
-{
-	int i = numberOfRaindrops;
-
-	PARTICLE *particlePtr = RainDropStorage;
-	LOCALASSERT(i<MAX_RAINDROPS);
-	do
-	{
-		if((particlePtr->Position.vy > modulePtr->m_world.vy+modulePtr->m_maxy-500)
-		 ||(particlePtr->Position.vx < modulePtr->m_world.vx+modulePtr->m_minx)
-		 ||(particlePtr->Position.vx > modulePtr->m_world.vx+modulePtr->m_maxx)
-		 ||(particlePtr->Position.vz < modulePtr->m_world.vz+modulePtr->m_minz)
-		 ||(particlePtr->Position.vz > modulePtr->m_world.vz+modulePtr->m_maxz))
-		{
-			AddRipple(particlePtr->Position.vx,particlePtr->Position.vz,400);
-			particlePtr->Position.vy = modulePtr->m_world.vy+modulePtr->m_miny;
-			particlePtr->Position.vx = modulePtr->m_world.vx+modulePtr->m_minx+(FastRandom()%(modulePtr->m_maxz-modulePtr->m_minx));
-			particlePtr->Position.vz = modulePtr->m_world.vz+modulePtr->m_minz+(FastRandom()%(modulePtr->m_maxz-modulePtr->m_minz));
-  //		particlePtr->Velocity.vy = (FastRandom()&8191)+15000;
-  //		particlePtr->Velocity.vx = (FastRandom()&255)+5000;
- //			particlePtr->Velocity.vz = (FastRandom()&255)-128;
-			particlePtr->Velocity.vy = (FastRandom()&8191)+15000;
-			particlePtr->Velocity.vx = (FastRandom()&255)-128;
-			particlePtr->Velocity.vz = (FastRandom()&255)-128;
-			{
-				particlePtr->Offset.vx = -particlePtr->Velocity.vz;
-				particlePtr->Offset.vy = 0;
-				particlePtr->Offset.vz = particlePtr->Velocity.vx;
-				Normalise(&(particlePtr->Offset));
-//				particlePtr->Offset.vx = MUL_FIXED(particlePtr->Offset.vx,20);
-//				particlePtr->Offset.vz = MUL_FIXED(particlePtr->Offset.vz,20);
-				particlePtr->Offset.vx = MUL_FIXED(particlePtr->Offset.vx,50);
-				particlePtr->Offset.vz = MUL_FIXED(particlePtr->Offset.vz,50);
-			}
-		}
-		{
-			VECTORCH prevPosition = particlePtr->Position;
-
-			#if 0
-			ParticleDynamics(particlePtr);
-			#else
-			particlePtr->Position.vx += MUL_FIXED(particlePtr->Velocity.vx,NormalFrameTime);
-			particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
-			particlePtr->Position.vz += MUL_FIXED(particlePtr->Velocity.vz,NormalFrameTime);
-			#endif
-			if (particlePtr->Position.vy>modulePtr->m_world.vy+modulePtr->m_maxy-500)
-				particlePtr->Position.vy=modulePtr->m_world.vy+modulePtr->m_maxy-495;
-			D3D_DrawParticle_Rain(particlePtr,&prevPosition);
-		}
-		particlePtr++;
-	}
-	while(--i);
-	
-}
-*/
-
-#if 0
-void HandleRain(MODULE *modulePtr,int numberOfRaindrops)
-{
-	int i = numberOfRaindrops;
-	/* KJL 15:23:37 12/8/97 - this is written to work with the yard in genshd1 */
-
-	PARTICLE *particlePtr = RainDropStorage;
-	LOCALASSERT(i<MAX_RAINDROPS);
-	do
-	{
-		int killDrop=0;
-		
-		if((particlePtr->Position.vx > -10418)
-		 &&(particlePtr->Position.vy > -4030)
-		 &&(particlePtr->Position.vz < 35070)
-		 &&(particlePtr->Position.vz > -11600))
-		{
-			killDrop=1;
-		}
-		
-		if((particlePtr->Position.vy > 3000)
-		 ||(particlePtr->Position.vx < modulePtr->m_world.vx+modulePtr->m_minx)
-		 ||(particlePtr->Position.vx > modulePtr->m_world.vx+modulePtr->m_maxx)
-		 ||(particlePtr->Position.vz < -50655)//modulePtr->m_world.vz+modulePtr->m_minz)
-		 ||(particlePtr->Position.vz > modulePtr->m_world.vz+modulePtr->m_maxz))
-		{
-			killDrop=1;
-		}
-		
-		if (killDrop)
-		{
-			particlePtr->Position.vy = modulePtr->m_world.vy+modulePtr->m_miny;
-			particlePtr->Position.vx = modulePtr->m_world.vx+modulePtr->m_minx+(FastRandom()%(modulePtr->m_maxz-modulePtr->m_minx));
-			particlePtr->Position.vz = -50655/*+modulePtr->m_minz*/+(FastRandom()%(modulePtr->m_maxz+50655));//-modulePtr->m_minz));
-	  		particlePtr->Velocity.vy = (FastRandom()&8191)+15000;
-  			particlePtr->Velocity.vx = (FastRandom()&255)+5000;
- 			particlePtr->Velocity.vz = (FastRandom()&255)-128;
-			{
-				particlePtr->Offset.vx = -particlePtr->Velocity.vz;
-				particlePtr->Offset.vy = 0;
-				particlePtr->Offset.vz = particlePtr->Velocity.vx;
-				Normalise(&(particlePtr->Offset));
-				particlePtr->Offset.vx = MUL_FIXED(particlePtr->Offset.vx,20);
-				particlePtr->Offset.vz = MUL_FIXED(particlePtr->Offset.vz,20);
-			}
-		}
-		{
-			VECTORCH prevPosition = particlePtr->Position;
-
-			#if 0
-			ParticleDynamics(particlePtr);
-			#else
-			particlePtr->Position.vx += MUL_FIXED(particlePtr->Velocity.vx,NormalFrameTime);
-			particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
-			particlePtr->Position.vz += MUL_FIXED(particlePtr->Velocity.vz,NormalFrameTime);
-			#endif
-			D3D_DrawParticle_Rain(particlePtr,&prevPosition);
-		}
-		particlePtr++;
-	}
-	while(--i);
-	
-}
-#endif
 
 void HandleRain(int numberOfRaindrops)
 {

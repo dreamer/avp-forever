@@ -192,7 +192,7 @@ typedef struct
 
 } RENDERSTATES;
 
-LPDIRECT3DTEXTURE9 CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usage, D3DPOOL poolType);
+LPDIRECT3DTEXTURE9 CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poolType);
 LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight);
 LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
@@ -212,7 +212,7 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture (uint32_t *width, uint32_t *height, uint32_t
 LPDIRECT3DTEXTURE9 CreateFmvTexture2(uint32_t *width, uint32_t *height);
 void SetTransforms();
 
-#define NO_TEXTURE	0
+extern uint32_t NO_TEXTURE;
 
 D3DINFO GetD3DInfo();
 char* GetDeviceName();

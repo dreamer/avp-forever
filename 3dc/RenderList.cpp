@@ -26,12 +26,18 @@
 #include <windows.h>
 #include <algorithm>
 
-RenderList::RenderList()
+RenderList::RenderList(size_t size)
 {
 	listCapacity = 0;
 	listIndex = 0;
 
 	totalVerts = 0;
+
+	// treat the vector as an array so resize it to desired size
+	Items.reserve(size);
+	Items.resize(size);
+
+	listCapacity = size;
 }
 
 RenderList::~RenderList()
@@ -71,7 +77,7 @@ size_t RenderList::GetSize()
 {
 	return listIndex;
 }
-
+/*
 void RenderList::Init(size_t size)
 {
 	// treat the vector as an array so resize it to desired size
@@ -80,7 +86,7 @@ void RenderList::Init(size_t size)
 
 	listCapacity = size;
 }
-
+*/
 void RenderList::Sort()
 {
 	std::sort(Items.begin(), Items.begin() + listIndex);

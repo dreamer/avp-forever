@@ -27,7 +27,7 @@ typedef struct
 	int Width;
 	int Height;
 
-	int Scale;
+	fixed_t Scale;
 
 	BOOL filterTexture;
 

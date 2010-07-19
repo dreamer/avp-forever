@@ -115,9 +115,6 @@ extern int ChangingLevelGameFlowUpdate (I_AVP_ENVIRONMENTS current, I_AVP_ENVIRO
 
 extern void InitGameFlowSystem (struct player_status * ps, INITGAMEFLOWTYPE igft);
 
-// returns 1 if the Object should be picked up, 0 otherwise
-extern BOOL GameFlowStateChangeObjectEncountered (STRATEGYBLOCK * sbPtr);
-
 // Internal Platform dependent fns.
 // see glfwplat.c
 extern void DoStartMissionSequence (PLAYERMISSION mission);

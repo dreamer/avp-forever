@@ -65,7 +65,7 @@ class RenderList
 
 	public:
 		std::vector<RenderItem2> Items;
-		RenderList();
+		RenderList(size_t size);
 		~RenderList();
 
 	void Reset();

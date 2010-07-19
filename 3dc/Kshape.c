@@ -4637,16 +4637,16 @@ void RenderParticle(PARTICLE *particlePtr)
 		}
 
 		VerticesBuffer[0].X += offset[0].vx;
-		VerticesBuffer[0].Y += MUL_FIXED(offset[0].vy, 87381);
+		VerticesBuffer[0].Y += offset[0].vy;//MUL_FIXED(offset[0].vy, 87381);
 
 		VerticesBuffer[1].X += offset[1].vx;
-		VerticesBuffer[1].Y += MUL_FIXED(offset[1].vy, 87381);
+		VerticesBuffer[1].Y += offset[1].vy;//MUL_FIXED(offset[1].vy, 87381);
 
 		VerticesBuffer[2].X += offset[2].vx;
-		VerticesBuffer[2].Y += MUL_FIXED(offset[2].vy, 87381);
+		VerticesBuffer[2].Y += offset[2].vy;//MUL_FIXED(offset[2].vy, 87381);
 
 		VerticesBuffer[3].X += offset[3].vx;
-		VerticesBuffer[3].Y += MUL_FIXED(offset[3].vy, 87381);
+		VerticesBuffer[3].Y += offset[3].vy;//MUL_FIXED(offset[3].vy, 87381);
 	}
 
 	{
@@ -5201,80 +5201,6 @@ void RenderMirrorSurface2(void)
 */
 	D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader, RenderPolygon.Vertices);
 }
-
-/* bjd - not called
-void RenderSmokeTest(void)
-{
- 	int mirrorUV[]=
-	{
-		64, 0,
-		64, 31,
-		95, 31,
-		95, 0
-	};
- 	POLYHEADER fakeHeader;
-	int a = GetSin(CloakingPhase&4095);
-	int image;
-
-	a = MUL_FIXED(MUL_FIXED(a,a),255);
-	{
-		extern int SpecialFXImageNumber;
-		fakeHeader.PolyFlags = iflag_transparent;
-		fakeHeader.PolyColour = SpecialFXImageNumber;
-	}
-
- 	for (image = 0; image<=1; image++)
- 	{
-	 	{
-			VECTORCH translatedPts[4] =
-			{
-				{45300,0+-1000, 26000+-1000},
-				{45300,0+-1000, 26000+ 1000},
-				{45300,0+ 1000, 26000+ 1000},
-				{45300,0+ 1000, 26000+-1000},
-
-			};
-			extern int CurrentLightAtPlayer;
-			int i;
-
-			if (image) a = 255-a;
-			for (i=0; i<4; i++)
-			{
-				VerticesBuffer[i].A = a/2;
-
-				TranslatePointIntoViewspace(&translatedPts[i]);
-				VerticesBuffer[i].X	= translatedPts[i].vx;
-				VerticesBuffer[i].Y	= translatedPts[i].vy;
-				VerticesBuffer[i].Z	= translatedPts[i].vz;
-				VerticesBuffer[i].U = mirrorUV[i*2];
-				VerticesBuffer[i].V = mirrorUV[i*2+1]+image*(32);
-
-				VerticesBuffer[i].R = 255;
-				VerticesBuffer[i].G	= 255;
-				VerticesBuffer[i].B = 255;
-				VerticesBuffer[i].SpecularR = 0;
-				VerticesBuffer[i].SpecularG = 0;
-				VerticesBuffer[i].SpecularB = 0;
-
-			}
-			RenderPolygon.NumberOfVertices=4;
-			RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
-		}
-
-		GouraudTexturedPolygon_ClipWithZ();
-		if(RenderPolygon.NumberOfVertices<3) return;
-		GouraudTexturedPolygon_ClipWithNegativeX();
-		if(RenderPolygon.NumberOfVertices<3) return;
-		GouraudTexturedPolygon_ClipWithPositiveY();
-		if(RenderPolygon.NumberOfVertices<3) return;
-		GouraudTexturedPolygon_ClipWithNegativeY();
-		if(RenderPolygon.NumberOfVertices<3) return;
-		GouraudTexturedPolygon_ClipWithPositiveX();
-		if(RenderPolygon.NumberOfVertices<3) return;
-		D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
-	}
-}
-*/
 
 #define OCTAVES 3
 int u[OCTAVES];

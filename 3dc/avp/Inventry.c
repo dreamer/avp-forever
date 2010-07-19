@@ -1545,17 +1545,21 @@ int SlotForThisWeapon(enum WEAPON_ID weaponID)
 	int a;
 
 	psptr=(PLAYER_STATUS *)Player->ObStrategyBlock->SBdataptr;
-	for (a=0; a<MAX_NO_OF_WEAPON_SLOTS; a++) {
-		if (psptr->WeaponSlot[a].WeaponIDNumber==weaponID) {
+	for (a=0; a<MAX_NO_OF_WEAPON_SLOTS; a++) 
+	{
+		if (psptr->WeaponSlot[a].WeaponIDNumber==weaponID) 
+		{
 			break;
 		}
 	}
-	if (a!=MAX_NO_OF_WEAPON_SLOTS) {
-		return(a);
-	} else 
+	if (a!=MAX_NO_OF_WEAPON_SLOTS) 
+	{
+		return a;
+	} 
+	else 
 	{
 		/* bjd - HAS to be checked by calling function. */
-		return(-1);
+		return -1;
 	}
 }
 

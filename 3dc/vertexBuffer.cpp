@@ -23,18 +23,38 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "vertexBuffer.h"
+#include "logString.h"
+
+bool VertexBuffer::Draw()
+{
+	LastError = this->d3dDevice->SetStreamSource(0, this->vertexBuffer, 0, this->vbFVFsize);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	LastError = this->d3dDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
 
 bool VertexBuffer::Lock(void **data)
 {
 	uint32_t lockType = 0;
 
-	if (this->vbUsage == VB_DYNAMIC)
+	if (this->vbUsage == USAGE_DYNAMIC)
 		lockType = D3DLOCK_DISCARD;
 
 	LastError = vertexBuffer->Lock(0, 0, data, this->vbUsage);
 	if (FAILED(LastError))
 	{
-//		LogDxError(LastError, __LINE__, __FILE__);
+		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
 /*
@@ -53,38 +73,42 @@ bool VertexBuffer::Unlock()
 	LastError = vertexBuffer->Unlock();
 	if (FAILED(LastError))
 	{
-//		LogDxError(LastError, __LINE__, __FILE__);
+		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
 
 	return true;
 }
 
-bool VertexBuffer::Create(uint32_t size, enum VB_FVF fvf, enum USAGE usage)
+bool VertexBuffer::Create(uint32_t size, enum FVF fvf, enum USAGE usage)
 {
-	switch (fvf)
+	this->vbFVF = fvf;
+
+	switch (this->vbFVF)
 	{
-		case VB_FVF_LVERTEX:
-			this->vbLength = size * sizeof(D3DLVERTEX);
+		case FVF_LVERTEX:
+			this->vbFVFsize = sizeof(D3DLVERTEX);
 			break;
-		case VB_FVF_ORTHO:
-			this->vbLength = size * sizeof(ORTHOVERTEX);
+		case FVF_ORTHO:
+			this->vbFVFsize = sizeof(ORTHOVERTEX);
 			break;
-		case VB_FVF_FMV:
-			this->vbLength = size * sizeof(FMVVERTEX);
+		case FVF_FMV:
+			this->vbFVFsize = sizeof(FMVVERTEX);
 			break;
 		default:
 			// error and return
 			break;
 	}
 
+	this->vbLength = size * this->vbFVFsize;
+
 	switch (usage)
 	{
-		case VB_STATIC:
+		case USAGE_STATIC:
 			this->vbUsage = 0;
 			this->vbPool = D3DPOOL_MANAGED;
 			break;
-		case VB_DYNAMIC:
+		case USAGE_DYNAMIC:
 			this->vbUsage = D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY;
 			this->vbPool = D3DPOOL_DEFAULT;
 			break;
@@ -96,7 +120,7 @@ bool VertexBuffer::Create(uint32_t size, enum VB_FVF fvf, enum USAGE usage)
 	LastError = d3dDevice->CreateVertexBuffer(this->vbLength, this->vbUsage, 0, this->vbPool, &vertexBuffer, NULL);
 	if (FAILED(LastError))
 	{
-//		LogDxError(LastError, __LINE__, __FILE__);
+		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
 
