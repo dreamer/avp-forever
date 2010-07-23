@@ -32,7 +32,7 @@
 #include "detaillevels.h"
 #include "avp_userprofile.h"
 
-#include "renderer.h"
+#include "renderStates.h"
 
 #define ALIENS_LIFEFORCE_GLOW_COLOUR 0x20ff8080
 #define MARINES_LIFEFORCE_GLOW_COLOUR 0x208080ff

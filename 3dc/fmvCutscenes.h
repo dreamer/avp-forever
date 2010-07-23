@@ -4,7 +4,6 @@
 #include "3dc.h"
 #include "module.h"
 #include "stratdef.h"
-#include "renderer.h"
 
 #ifdef __cplusplus
 extern "C"

@@ -307,9 +307,8 @@ static void LoadMenuFont(void)
 	}
 
 	// we're going to try create a square texture
-	RENDERTEXTURE texture = CreateD3DTallFontTexture(image);
+	r_Texture texture = CreateD3DTallFontTexture(image);
 	gfxPtr->textureID = Tex_AddTexture(buffer, texture, image->width, image->height);
-//	gfxPtr->menuTexture = NULL; // bjd - fixme
 }
 
 static void UnloadMenuFont(void)
@@ -1142,8 +1141,6 @@ void LoadTest()
 		AVPMENUGFX_SPLASH_SCREEN4 = CL_LoadImageOnce("PredatorSplash\\splash04.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 		AVPMENUGFX_SPLASH_SCREEN5 = CL_LoadImageOnce("PredatorSplash\\splash05.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 	#endif
-
-	OutputDebugString("blah\n");
 }
 
 extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
@@ -1776,7 +1773,7 @@ static void CalculateWidthsOfAAFont(void)
 	Tex_GetDimensions(AVPMENUGFX_SMALL_FONT, textureWidth, textureHeight);
 
 	D3DLOCKED_RECT lock;
-	RENDERTEXTURE srcTexture = Tex_GetTexture(AVPMENUGFX_SMALL_FONT);
+	r_Texture srcTexture = Tex_GetTexture(AVPMENUGFX_SMALL_FONT);
 	HRESULT LastError = srcTexture->LockRect(0, &lock, NULL, NULL );
 	if (FAILED(LastError))
 	{

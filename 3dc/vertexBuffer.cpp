@@ -27,60 +27,27 @@
 
 bool VertexBuffer::Draw()
 {
-	LastError = this->d3dDevice->SetStreamSource(0, this->vertexBuffer, 0, this->vbFVFsize);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	LastError = this->d3dDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
+	R_SetVertexBuffer(this->vertexBuffer, this->vbFVFsize);
+	R_DrawPrimitive(2);
 
 	return true;
 }
 
 bool VertexBuffer::Lock(void **data)
 {
-	uint32_t lockType = 0;
+	R_LockVertexBuffer(this->vertexBuffer, 0, 0, data, this->vbUsage);
 
-	if (this->vbUsage == USAGE_DYNAMIC)
-		lockType = D3DLOCK_DISCARD;
-
-	LastError = vertexBuffer->Lock(0, 0, data, this->vbUsage);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-/*
-	LastError = d3d.lpD3DIndexBuffer->Lock(0, 0, (void**)&mainIndex, D3DLOCK_DISCARD);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-*/
 	return true;
 }
 
 bool VertexBuffer::Unlock()
 {
-	LastError = vertexBuffer->Unlock();
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
+	R_UnlockVertexBuffer(this->vertexBuffer);
 
 	return true;
 }
 
-bool VertexBuffer::Create(uint32_t size, enum FVF fvf, enum USAGE usage)
+bool VertexBuffer::Create(uint32_t size, enum FVF fvf, enum R_USAGE usage)
 {
 	this->vbFVF = fvf;
 
@@ -102,27 +69,7 @@ bool VertexBuffer::Create(uint32_t size, enum FVF fvf, enum USAGE usage)
 
 	this->vbLength = size * this->vbFVFsize;
 
-	switch (usage)
-	{
-		case USAGE_STATIC:
-			this->vbUsage = 0;
-			this->vbPool = D3DPOOL_MANAGED;
-			break;
-		case USAGE_DYNAMIC:
-			this->vbUsage = D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY;
-			this->vbPool = D3DPOOL_DEFAULT;
-			break;
-		default:
-			// error and return
-			break;
-	}
-
-	LastError = d3dDevice->CreateVertexBuffer(this->vbLength, this->vbUsage, 0, this->vbPool, &vertexBuffer, NULL);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
+	R_CreateVertexBuffer(this->vbLength, this->vbUsage, &vertexBuffer);
 
 	return true;
 }

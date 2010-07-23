@@ -72,7 +72,7 @@
 		extern unsigned char KeyboardInput[];
 
 		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-		extern int VideoModeColourDepth;
+//		extern int VideoModeColourDepth;
 
 		extern int bEnableTextprint;
 		extern int bEnableTextprintXY;
@@ -100,7 +100,7 @@
 		int IITest(int);
 
 		void DumpRefCounts(void);
-		void DumpVideoMode(void);
+//		void DumpVideoMode(void);
 	};
 	static int bFirstFrame = FALSE;
 
@@ -453,6 +453,7 @@ void Testing :: DumpRefCounts(void)
 	#endif
 }
 
+/*
 void Testing :: DumpVideoMode(void)
 {
 	char msg[256];
@@ -469,3 +470,4 @@ void Testing :: DumpVideoMode(void)
 	pSCString_Feedback -> SendToScreen();
 	pSCString_Feedback -> R_Release();
 }
+*/

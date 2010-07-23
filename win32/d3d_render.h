@@ -2,7 +2,6 @@
 #define _included_d3d_render_h_ 1
 #include "particle.h"
 
-extern void D3D_SetupSceneDefaults(void);
 extern void D3D_DrawBackdrop(void);
 extern void PostLandscapeRendering(void);
 extern void D3D_DrawWaterTest(MODULE *testModulePtr);

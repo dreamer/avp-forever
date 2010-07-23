@@ -22,20 +22,132 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-extern int NumberOfFMVTextures;
+#include "d3_func.h"
+#include <d3dx9.h>
 #include "fmvCutscenes.h"
-#define MAX_NO_FMVTEXTURES 10
-extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
-
 #include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 #include "logString.h"
 #include "configFile.h"
-#include <d3dx9.h>
 #include "console.h"
 #include "textureManager.h"
 #include "vertexBuffer.h"
 #include "networking.h"
 #include "font2.h"
+
+//test
+class D3D9Renderer : public Renderer
+{
+	private:
+		IDirect3D9				*D3D;
+		IDirect3DDevice9		*D3DDevice;
+		D3DVIEWPORT9			D3DViewport;
+		D3DPRESENT_PARAMETERS	D3DPresentationParams;
+
+		D3DXMATRIX	matIdentity;
+		D3DXMATRIX	matView;
+		D3DXMATRIX	matProjection;
+		D3DXMATRIX	matOrtho;
+		D3DXMATRIX	matViewPort;
+
+		HRESULT					LastError;
+
+		std::string				deviceName;
+
+	public:
+		D3D9Renderer():
+			D3D(0),
+			D3DDevice(0)
+		{
+			memset(&D3DPresentationParams, 0, sizeof(D3DPRESENT_PARAMETERS));
+		}
+		void Initialise();
+		void BeginFrame();
+		void EndFrame();
+};
+
+void D3D9Renderer::Initialise()
+{
+
+}
+
+void D3D9Renderer::BeginFrame()
+{
+	// check for a lost device
+	LastError = D3DDevice->TestCooperativeLevel();
+
+	if (FAILED(LastError))
+	{
+		// release vertex + index buffers, and dynamic textures
+//		ReleaseVolatileResources();
+
+		// disable XInput
+//		XInputEnable(false);
+
+		while (1)
+		{
+			CheckForWindowsMessages();
+
+			if (D3DERR_DEVICENOTRESET == LastError)
+			{
+				OutputDebugString("Releasing resources for a device reset..\n");
+
+				if (FAILED(D3DDevice->Reset(&d3d.d3dpp)))
+				{
+					OutputDebugString("Couldn't reset device\n");
+				}
+				else
+				{
+					OutputDebugString("We have reset the device. recreating resources..\n");
+//					CreateVolatileResources();
+
+					SetTransforms();
+
+					// re-enable XInput
+//					XInputEnable(true);
+					break;
+				}
+			}
+			else if (D3DERR_DEVICELOST == LastError)
+			{
+				OutputDebugString("D3D device lost\n");
+			}
+			else if (D3DERR_DRIVERINTERNALERROR == LastError)
+			{
+				// handle this a lot better (exit the game etc)
+				Con_PrintError("need to close avp as a display adapter error occured");
+//				return false;
+			}
+			Sleep(50);
+		}
+	}
+
+	LastError = D3DDevice->BeginScene();
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+//		return false;
+	}
+
+	LastError = D3DDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+//		return false;
+	}
+}
+
+void D3D9Renderer::EndFrame()
+{
+	LastError = D3DDevice->EndScene();
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+}
+
+extern int NumberOfFMVTextures;
+#define MAX_NO_FMVTEXTURES 10
+extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 
 D3DXMATRIX matOrtho;
 D3DXMATRIX matOrtho2;
@@ -55,6 +167,7 @@ extern LPD3DXCONSTANTTABLE	fmvConstantTable;
 extern LPD3DXCONSTANTTABLE	cloudConstantTable;
 
 extern void Init();
+extern void ReleaseAllFMVTextures(void);
 
 // size of vertex and index buffers
 const uint32_t MAX_VERTEXES = 4096;
@@ -64,11 +177,28 @@ uint32_t fov = 75;
 static HRESULT LastError;
 uint32_t NO_TEXTURE;
 
+// keep track of set render states
+static bool	D3DAlphaBlendEnable;
+D3DBLEND D3DSrcBlend;
+D3DBLEND D3DDestBlend;
+RENDERSTATES CurrentRenderStates;
+bool D3DAlphaTestEnable = FALSE;
+static bool D3DStencilEnable;
+D3DCMPFUNC D3DStencilFunc;
+static D3DCMPFUNC D3DZFunc;
+bool ZWritesEnabled = false;
+
+int	VideoModeColourDepth;
+int	NumAvailableVideoModes;
+D3DINFO d3d;
+bool usingStencil = false;
+
 std::string shaderPath;
 
 bool CreateVolatileResources();
 bool ReleaseVolatileResources();
 bool SetRenderStateDefaults();
+void ToggleWireframe();
 
 // byte order macros for A8R8G8B8 d3d texture
 enum
@@ -124,6 +254,90 @@ bool ReleaseVolatileResources()
 	SAFE_RELEASE(d3d.lpD3DOrthoIndexBuffer);
 	SAFE_RELEASE(d3d.lpD3DParticleVertexBuffer);
 	SAFE_RELEASE(d3d.lpD3DParticleIndexBuffer);
+
+	return true;
+}
+
+bool R_CreateVertexBuffer(uint32_t length, uint32_t usage, r_VertexBuffer **vertexBuffer)
+{
+	D3DPOOL vbPool;
+	DWORD	vbUsage;
+
+	switch (usage)
+	{
+		case USAGE_STATIC:
+			vbUsage = 0;
+			vbPool = D3DPOOL_MANAGED;
+			break;
+		case USAGE_DYNAMIC:
+			vbUsage = D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY;
+			vbPool = D3DPOOL_DEFAULT;
+			break;
+		default:
+			// error and return
+			break;
+	}
+
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(length, vbUsage, 0, vbPool, vertexBuffer, NULL);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+bool R_DrawPrimitive(uint32_t numPrimitives)
+{
+	LastError = d3d.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, numPrimitives);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+bool R_LockVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage)
+{
+	DWORD vbFlags = 0;
+	if (usage == USAGE_DYNAMIC)
+	{
+		vbFlags = D3DLOCK_DISCARD;
+	}
+
+	LastError = vertexBuffer->Lock(offsetToLock, sizeToLock, data, vbFlags);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+bool R_SetVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t FVFsize)
+{
+	LastError = d3d.lpD3DDevice->SetStreamSource(0, vertexBuffer, 0, FVFsize);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+bool R_UnlockVertexBuffer(r_VertexBuffer *vertexBuffer)
+{
+	LastError = vertexBuffer->Unlock();
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
 
 	return true;
 }
@@ -199,7 +413,7 @@ bool CreateVolatileResources()
 	return true;
 }
 
-bool LockTexture(RENDERTEXTURE texture, uint8_t **data, uint32_t *pitch)
+bool R_LockTexture(r_Texture texture, uint8_t **data, uint32_t *pitch)
 {
 	D3DLOCKED_RECT lock;
 
@@ -219,7 +433,7 @@ bool LockTexture(RENDERTEXTURE texture, uint8_t **data, uint32_t *pitch)
 	}
 }
 
-bool UnlockTexture(RENDERTEXTURE texture)
+bool R_UnlockTexture(r_Texture texture)
 {
 	LastError = texture->UnlockRect(0);
 
@@ -248,33 +462,39 @@ void SetFov()
 	SetTransforms();
 }
 
-extern "C" {
+extern "C"
+{
+	extern void ThisFramesRenderingHasBegun(void);
+	extern void ThisFramesRenderingHasFinished(void);
+	extern HWND hWndMain;
+	extern int WindowMode;
+	extern void ChangeWindowsSize(uint32_t width, uint32_t height);
 
-#define INITGUID
+	// Functions
+	extern void CheckWireFrameMode(int shouldBeOn)
+	{
+		if (shouldBeOn)
+			shouldBeOn = 1;
 
-#include "3dc.h"
-#include "awTexLd.h"
-#include "module.h"
-#include "d3_func.h"
-#include "avp_menus.h"
-#include "kshape.h"
-#include "eax.h"
+		if (CurrentRenderStates.WireFrameModeIsOn != shouldBeOn)
+		{
+			CurrentRenderStates.WireFrameModeIsOn = shouldBeOn;
+			if (shouldBeOn)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+			}
+			else
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+			}
+		}
+	}
 
-#include "avp_menugfx.hpp"
-extern void ReleaseAllFMVTextures(void);
-
-extern void ThisFramesRenderingHasBegun(void);
-extern void ThisFramesRenderingHasFinished(void);
-
-extern void ToggleWireframe();
-
-extern HWND hWndMain;
-extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern void ChangeWindowsSize(uint32_t width, uint32_t height);
-extern int WindowMode;
-int	VideoModeColourDepth;
-int	NumAvailableVideoModes;
-D3DINFO d3d;
+	void FlushD3DZBuffer()
+	{
+		d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
+	}
+}
 
 // console command : output all menu textures as .png files
 void WriteMenuTextures()
@@ -337,8 +557,6 @@ const D3DFORMAT DepthFormats[] =
 	D3DFMT_D16
 };
 
-bool usingStencil = false;
-
 void PrintD3DMatrix(const char* name, D3DXMATRIX &mat)
 {
 	char buf[300];
@@ -371,7 +589,7 @@ void CreateScreenShotImage()
 	//	otherwise 9 seconds appears as '9' instead of '09'
 	{
 		bool prefixSeconds = false;
-		if (systemTime.wYear < 10) 
+		if (systemTime.wYear < 10)
 			prefixSeconds = true;
 
 		fileName << "AvP_" << systemTime.wDay << "-" << systemTime.wMonth << "-" << systemTime.wYear << "_" << systemTime.wHour << "-" << systemTime.wMinute << "-";
@@ -417,15 +635,15 @@ void CreateScreenShotImage()
 }
 
 /*
- * This function is responsible for creating the large sized font texture, as used in the game menu system. Originally this 
+ * This function is responsible for creating the large sized font texture, as used in the game menu system. Originally this
  * texture was only handled by DirectDraw, and has a resolution of 30 x 7392, which cannot be loaded as a standard Direct3D texture.
- * The original image (IntroFont.RIM) is a bitmap font, containing one letter per row (width of 30px). The below function takes this 
+ * The original image (IntroFont.RIM) is a bitmap font, containing one letter per row (width of 30px). The below function takes this
  * bitmap font and rearranges it into a square texture, now containing more letters per row (as a standard bitmap font would be)
  * which can be used by Direct3D without issue.
  */
-LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
+r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
 {
-	LPDIRECT3DTEXTURE9 destTexture = NULL;
+	r_Texture destTexture = NULL;
 	D3DLOCKED_RECT lock;
 
 	// default colour format
@@ -576,9 +794,9 @@ LPDIRECT3DTEXTURE9 CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	return destTexture;
 }
 
-LPDIRECT3DTEXTURE9 CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool)
+r_Texture CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool)
 {
-	LPDIRECT3DTEXTURE9 destTexture = NULL;
+	r_Texture destTexture = NULL;
 
 	uint32_t newWidth, newHeight;
 
@@ -631,11 +849,11 @@ LPDIRECT3DTEXTURE9 CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t 
 	return destTexture;
 }
 
-LPDIRECT3DTEXTURE9 CreateFmvTexture2(uint32_t *width, uint32_t *height)
+r_Texture CreateFmvTexture2(uint32_t *width, uint32_t *height)
 {
 	/* TODO - Add support for rendering FMVs on GPUs that can't use non power of 2 textures */
 
-	LPDIRECT3DTEXTURE9 destTexture = NULL;
+	r_Texture destTexture = NULL;
 #if 0
 	int newWidth, newHeight;
 
@@ -700,7 +918,7 @@ bool CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 *ve
 			OutputDebugString((const char*)pErrors->GetBufferPointer());
 			pErrors->Release();
 		}
-			
+
 		return false;
 	}
 
@@ -760,7 +978,7 @@ bool CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *pixe
 
 // removes pure red colour from a texture. used to remove red outline grid on small font texture.
 // we remove the grid as it can sometimes bleed onto text when we use texture filtering. maybe add params for passing width/height?
-void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
+void DeRedTexture(r_Texture texture)
 {
 	// lock texture
 
@@ -768,7 +986,7 @@ void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
 	uint8_t *destPtr = NULL;
 	uint32_t pitch = 0;
 
-	LockTexture(texture, &srcPtr, &pitch);
+	R_LockTexture(texture, &srcPtr, &pitch);
 
 	// loop, setting all full red pixels to black
 	for (uint32_t y = 0; y < 256; y++)
@@ -786,11 +1004,11 @@ void DeRedTexture(LPDIRECT3DTEXTURE9 texture)
 		}
 	}
 
-	UnlockTexture(texture);
+	R_UnlockTexture(texture);
 }
 
 // use this to make textures from non power of two images
-LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight)
+r_Texture CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight)
 {
 	if (tex == NULL)
 	{
@@ -826,7 +1044,7 @@ LPDIRECT3DTEXTURE9 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, 
 	(*realHeight) = newHeight;
 	(*realWidth) = newWidth;
 
-	LPDIRECT3DTEXTURE9 destTexture = NULL;
+	r_Texture destTexture = NULL;
 
 	D3DXIMAGE_INFO image;
 	image.Depth = 32;
@@ -932,9 +1150,9 @@ uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture)
 	return 0;
 }
 
-LPDIRECT3DTEXTURE9 CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poolType)
+r_Texture CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poolType)
 {
-	LPDIRECT3DTEXTURE9 destTexture = NULL;
+	r_Texture destTexture = NULL;
 
 	// fill tga header
 	TgaHeader.idlength = 0;
@@ -1004,12 +1222,12 @@ LPDIRECT3DTEXTURE9 CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poo
 	return destTexture;
 }
 
-BOOL ChangeGameResolution(uint32_t width, uint32_t height/*, uint32_t colourDepth*/)
+bool ChangeGameResolution(uint32_t width, uint32_t height/*, uint32_t colourDepth*/)
 {
 	// don't bother resetting device if we're already using the requested settings
 	if ((width == d3d.d3dpp.BackBufferWidth) && (height == d3d.d3dpp.BackBufferHeight))
 	{
-		return TRUE;
+		return true;
 	}
 
 	ThisFramesRenderingHasFinished();
@@ -1052,13 +1270,13 @@ BOOL ChangeGameResolution(uint32_t width, uint32_t height/*, uint32_t colourDept
 			if (FAILED(LastError))
 			{
 				LogDxError(LastError, __LINE__, __FILE__);
-				return FALSE;
+				return false;
 			}
 		}
 		else
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -1092,7 +1310,7 @@ BOOL ChangeGameResolution(uint32_t width, uint32_t height/*, uint32_t colourDept
 
 	ThisFramesRenderingHasBegun();
 
-	return TRUE;
+	return true;
 }
 
 // need to redo all the enumeration code here, as it's not very good..
@@ -1408,30 +1626,30 @@ BOOL InitialiseDirect3D()
 	d3d.lpD3DDevice->GetDeviceCaps(&d3dCaps);
 
 	// set this to true initially
-	d3d.supportsShaders = TRUE;
+	d3d.supportsShaders = true;
 
 	// check pixel shader support
 	if (d3dCaps.PixelShaderVersion < (D3DPS_VERSION(2,0)))
 	{
 		Con_PrintError("Device does not support Pixel Shader version 2.0 or greater");
-		d3d.supportsShaders = FALSE;
+		d3d.supportsShaders = false;
 	}
 
 	// check vertex shader support
 	if (d3dCaps.VertexShaderVersion < (D3DVS_VERSION(2,0)))
 	{
 		Con_PrintError("Device does not support Vertex Shader version 2.0 or greater");
-		d3d.supportsShaders = FALSE;
+		d3d.supportsShaders = false;
 	}
 
 	// check and remember if we have dynamic texture support
 	if (d3dCaps.Caps2 & D3DCAPS2_DYNAMICTEXTURES)
 	{
-		d3d.supportsDynamicTextures = TRUE;
+		d3d.supportsDynamicTextures = true;
 	}
 	else
 	{
-		d3d.supportsDynamicTextures = FALSE;
+		d3d.supportsDynamicTextures = false;
 		Con_PrintError("Device does not support D3DUSAGE_DYNAMIC");
 	}
 
@@ -1578,7 +1796,7 @@ BOOL InitialiseDirect3D()
 	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
 	CreatePixelShader("tallFontTextPixel.psh", &d3d.cloudPixelShader);
 
-	LPDIRECT3DTEXTURE9 blankTexture;
+	r_Texture blankTexture;
 
 	// create a 1x1 resolution texture to set to shader for sampling when we don't want to texture an object (eg what was NULL texture in fixed function pipeline)
 	d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &blankTexture, NULL);
@@ -1626,7 +1844,7 @@ void SetTransforms()
 
 	// set up a viewport transform matrix
 	matViewPort = matIdentity;
-	
+
 	matViewPort._11 = (float)(ScreenDescriptorBlock.SDB_Width / 2);
 	matViewPort._22 = (float)((-ScreenDescriptorBlock.SDB_Height) / 2);
 	matViewPort._33 = (1.0f - 0.0f);
@@ -1715,15 +1933,349 @@ void ReleaseAvPTexture(AVPTEXTURE *texture)
 	}
 }
 
-void ReleaseD3DTexture(LPDIRECT3DTEXTURE9 *d3dTexture)
+void ReleaseD3DTexture(r_Texture *d3dTexture)
 {
 	// release d3d texture
 	SAFE_RELEASE(*d3dTexture);
 }
 
-void FlushD3DZBuffer()
+void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 {
-	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
+	if (CurrentRenderStates.TranslucencyMode == translucencyRequired)
+		return;
+
+	CurrentRenderStates.TranslucencyMode = translucencyRequired;
+
+	switch (CurrentRenderStates.TranslucencyMode)
+	{
+	 	case TRANSLUCENCY_OFF:
+		{
+//bjd - fixme			if (TRIPTASTIC_CHEATMODE || MOTIONBLUR_CHEATMODE)
+			if (0)
+			{
+				if (D3DAlphaBlendEnable != TRUE)
+				{
+					d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+					D3DAlphaBlendEnable = TRUE;
+				}
+				if (D3DSrcBlend != D3DBLEND_INVSRCALPHA)
+				{
+					d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_INVSRCALPHA);
+					D3DSrcBlend = D3DBLEND_INVSRCALPHA;
+				}
+				if (D3DDestBlend != D3DBLEND_SRCALPHA)
+				{
+					d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCALPHA);
+					D3DDestBlend = D3DBLEND_SRCALPHA;
+				}
+			}
+			else
+			{
+				if (D3DAlphaBlendEnable != FALSE)
+				{
+					d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+					D3DAlphaBlendEnable = FALSE;
+				}
+				if (D3DSrcBlend != D3DBLEND_ONE)
+				{
+					d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+					D3DSrcBlend = D3DBLEND_ONE;
+				}
+				if (D3DDestBlend != D3DBLEND_ZERO)
+				{
+					d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+					D3DDestBlend = D3DBLEND_ZERO;
+				}
+			}
+			break;
+		}
+	 	case TRANSLUCENCY_NORMAL:
+		{
+			if (D3DAlphaBlendEnable != TRUE)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				D3DAlphaBlendEnable = TRUE;
+			}
+			if (D3DSrcBlend != D3DBLEND_SRCALPHA)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				D3DSrcBlend = D3DBLEND_SRCALPHA;
+			}
+			if (D3DDestBlend != D3DBLEND_INVSRCALPHA)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+				D3DDestBlend = D3DBLEND_INVSRCALPHA;
+			}
+			break;
+		}
+	 	case TRANSLUCENCY_COLOUR:
+		{
+			if (D3DAlphaBlendEnable != TRUE)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				D3DAlphaBlendEnable = TRUE;
+			}
+			if (D3DSrcBlend != D3DBLEND_ZERO)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
+				D3DSrcBlend = D3DBLEND_ZERO;
+			}
+			if (D3DDestBlend != D3DBLEND_SRCCOLOR)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCCOLOR);
+				D3DDestBlend = D3DBLEND_SRCCOLOR;
+			}
+			break;
+		}
+	 	case TRANSLUCENCY_INVCOLOUR:
+		{
+			if (D3DAlphaBlendEnable != TRUE)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				D3DAlphaBlendEnable = TRUE;
+			}
+			if (D3DSrcBlend != D3DBLEND_ZERO)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
+				D3DSrcBlend = D3DBLEND_ZERO;
+			}
+			if (D3DDestBlend != D3DBLEND_INVSRCCOLOR)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
+				D3DDestBlend = D3DBLEND_INVSRCCOLOR;
+			}
+			break;
+		}
+  		case TRANSLUCENCY_GLOWING:
+		{
+			if (D3DAlphaBlendEnable != TRUE)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				D3DAlphaBlendEnable = TRUE;
+			}
+			if (D3DSrcBlend != D3DBLEND_SRCALPHA)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				D3DSrcBlend = D3DBLEND_SRCALPHA;
+			}
+			if (D3DDestBlend != D3DBLEND_ONE)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+				D3DDestBlend = D3DBLEND_ONE;
+			}
+			break;
+		}
+  		case TRANSLUCENCY_DARKENINGCOLOUR:
+		{
+			if (D3DAlphaBlendEnable != TRUE)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				D3DAlphaBlendEnable = TRUE;
+			}
+			if (D3DSrcBlend != D3DBLEND_INVDESTCOLOR)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_INVDESTCOLOR);
+				D3DSrcBlend = D3DBLEND_INVDESTCOLOR;
+			}
+
+			if (D3DDestBlend != D3DBLEND_ZERO)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+				D3DDestBlend = D3DBLEND_ZERO;
+			}
+			break;
+		}
+		case TRANSLUCENCY_JUSTSETZ:
+		{
+			if (D3DAlphaBlendEnable != TRUE)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				D3DAlphaBlendEnable = TRUE;
+			}
+			if (D3DSrcBlend != D3DBLEND_ZERO)
+			{
+				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
+				D3DSrcBlend = D3DBLEND_ZERO;
+			}
+			if (D3DDestBlend != D3DBLEND_ONE) {
+				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+				D3DDestBlend = D3DBLEND_ONE;
+			}
+		}
+		default: break;
+	}
 }
 
-} // For extern "C"
+void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode)
+{
+	if (CurrentRenderStates.TextureAddressMode == textureAddressMode)
+		return;
+
+	CurrentRenderStates.TextureAddressMode = textureAddressMode;
+
+	if (textureAddressMode == TEXTURE_WRAP)
+	{
+		// wrap texture addresses
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSU Wrap fail");
+		}
+
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSV Wrap fail");
+		}
+
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSW Wrap fail");
+		}
+	}
+	else if (textureAddressMode == TEXTURE_CLAMP)
+	{
+		// clamp texture addresses
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSU Clamp fail");
+		}
+
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSV Clamp fail");
+		}
+
+		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DSAMP_ADDRESSW Clamp fail");
+		}
+	}
+}
+
+void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired)
+{
+	if (CurrentRenderStates.FilteringMode == filteringRequired)
+		return;
+
+	CurrentRenderStates.FilteringMode = filteringRequired;
+
+	switch (CurrentRenderStates.FilteringMode)
+	{
+		case FILTERING_BILINEAR_OFF:
+		{
+			d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+			d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+			break;
+		}
+		case FILTERING_BILINEAR_ON:
+		{
+			d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+			d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+			break;
+		}
+		default:
+		{
+			LOCALASSERT("Unrecognized filtering mode"==0);
+			OutputDebugString("Unrecognized filtering mode\n");
+			break;
+		}
+	}
+}
+
+void ToggleWireframe()
+{
+	if (CurrentRenderStates.WireFrameModeIsOn)
+		CheckWireFrameMode(0);
+	else
+		CheckWireFrameMode(1);
+}
+
+void EnableZBufferWrites()
+{
+	if (!ZWritesEnabled)
+	{
+		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE);
+		ZWritesEnabled = true;
+	}
+}
+
+void DisableZBufferWrites()
+{
+	if (ZWritesEnabled)
+	{
+		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE);
+		ZWritesEnabled = false;
+	}
+}
+
+bool SetRenderStateDefaults()
+{
+/*
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC );
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC );
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+*/
+//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 8);
+
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+/*
+	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP,	D3DTOP_MODULATE);
+	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1,	D3DTA_TEXTURE);
+	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG2,	D3DTA_DIFFUSE);
+
+	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP,	D3DTOP_MODULATE);
+	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1,	D3DTA_TEXTURE);
+	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2,	D3DTA_DIFFUSE);
+
+	d3d.lpD3DDevice->SetTextureStageState(1, D3DTSS_COLOROP,	D3DTOP_DISABLE);
+	d3d.lpD3DDevice->SetTextureStageState(1, D3DTSS_ALPHAOP,	D3DTOP_DISABLE);
+
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
+*/
+	float alphaRef = 0.5f;
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF,			*((DWORD*)&alphaRef));//(DWORD)0.5);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAFUNC,		D3DCMP_GREATER);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,	TRUE);
+
+	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSPRITEENABLE, TRUE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSCALEENABLE,  TRUE);
+
+	float pointSize = 1.0f;
+	float pointScale = 1.0f;
+	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSIZE,	*((DWORD*)&pointSize));
+	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSCALE_B, *((DWORD*)&pointScale));
+
+//	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
+//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+
+	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
+
+	d3d.lpD3DDevice->SetRenderState(D3DRS_CULLMODE,			D3DCULL_NONE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_CLIPPING,			TRUE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_LIGHTING,			FALSE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_SPECULARENABLE,	TRUE);
+
+	// enable z-buffer
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+
+	// enable z writes (already on by default)
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+	ZWritesEnabled = true;
+
+	// set less + equal z buffer test
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+	D3DZFunc = D3DCMP_LESSEQUAL;
+
+    return true;
+}
+

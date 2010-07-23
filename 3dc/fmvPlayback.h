@@ -5,7 +5,6 @@
 	#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
 #endif
 
-#include "renderer.h"
 #include <fstream>
 #include <map>
 #include <string>

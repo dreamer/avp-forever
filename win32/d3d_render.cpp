@@ -2,6 +2,8 @@
 #include "onscreenKeyboard.h"
 #include "textureManager.h"
 
+#include "d3_func.h"
+
 #include "r2base.h"
 #include "font2.h"
 
@@ -18,6 +20,9 @@
 #include "logString.h"
 #include "RenderList.h"
 #include "vertexBuffer.h"
+
+extern void DisableZBufferWrites();
+extern void EnableZBufferWrites();
 
 VertexBuffer *FMVvertexBuffer = 0;
 
@@ -40,7 +45,6 @@ uint32_t currentWaterTexture = NO_TEXTURE;
 uint32_t	NumIndicies = 0;
 uint32_t	vb = 0;
 static uint32_t NumberOfRenderedTriangles = 0;
-bool ZWritesEnabled = false;
 
 // vertex declarations
 D3DVERTEXELEMENT9 declMain[] = {{0, 0,  D3DDECLTYPE_FLOAT3,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
@@ -88,24 +92,6 @@ extern int NumImagesArray[];
 bool CreateVolatileResources();
 bool ReleaseVolatileResources();
 void ColourFillBackBuffer(int FillColour);
-
-void EnableZBufferWrites()
-{
-	if (!ZWritesEnabled)
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE);
-		ZWritesEnabled = true;
-	}
-}
-
-void DisableZBufferWrites()
-{
-	if (ZWritesEnabled)
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE);
-		ZWritesEnabled = false;
-	}
-}
 
 extern "C" {
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
@@ -156,17 +142,6 @@ WORD *orthoIndex = NULL;
 
 static uint32_t orthoVBOffset = 0;
 static uint32_t orthoIBOffset = 0;
-
-// keep track of set render states
-static bool	D3DAlphaBlendEnable;
-D3DBLEND D3DSrcBlend;
-D3DBLEND D3DDestBlend;
-RENDERSTATES CurrentRenderStates;
-bool D3DAlphaTestEnable = FALSE;
-static bool D3DStencilEnable;
-D3DCMPFUNC D3DStencilFunc;
-static D3DCMPFUNC D3DZFunc;
-static bool D3DZWriteEnable;
 
 bool UnlockExecuteBufferAndPrepareForUse();
 bool ExecuteBuffer();
@@ -273,239 +248,6 @@ uint32_t GetRealNumVerts(uint32_t numVerts)
 			realNumVerts = numVerts;
 	}
 	return realNumVerts;
-}
-
-bool SetRenderStateDefaults()
-{
-/*
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC );
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC );
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-*/
-//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 8);
-
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-/*
-	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP,	D3DTOP_MODULATE);
-	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1,	D3DTA_TEXTURE);
-	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG2,	D3DTA_DIFFUSE);
-
-	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP,	D3DTOP_MODULATE);
-	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1,	D3DTA_TEXTURE);
-	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2,	D3DTA_DIFFUSE);
-
-	d3d.lpD3DDevice->SetTextureStageState(1, D3DTSS_COLOROP,	D3DTOP_DISABLE);
-	d3d.lpD3DDevice->SetTextureStageState(1, D3DTSS_ALPHAOP,	D3DTOP_DISABLE);
-
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
-*/
-	float alphaRef = 0.5f;
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF,			*((DWORD*)&alphaRef));//(DWORD)0.5);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAFUNC,		D3DCMP_GREATER);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,	TRUE);
-
-	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSPRITEENABLE, TRUE);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSCALEENABLE,  TRUE);
-
-	float pointSize = 1.0f;
-	float pointScale = 1.0f;
-	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSIZE,	*((DWORD*)&pointSize));
-	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSCALE_B, *((DWORD*)&pointScale));
-
-//	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
-//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-
-	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
-
-	d3d.lpD3DDevice->SetRenderState(D3DRS_CULLMODE,			D3DCULL_NONE);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_CLIPPING,			TRUE);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_LIGHTING,			FALSE);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_SPECULARENABLE,	TRUE);
-
-	// enable z-buffer
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
-
-	// enable z writes (already on by default)
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-	ZWritesEnabled = true;
-	D3DZWriteEnable = TRUE;
-
-	// set less + equal z buffer test
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
-	D3DZFunc = D3DCMP_LESSEQUAL;
-
-    return true;
-}
-
-void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
-{
-	if (CurrentRenderStates.TranslucencyMode == translucencyRequired)
-		return;
-
-	CurrentRenderStates.TranslucencyMode = translucencyRequired;
-
-	switch (CurrentRenderStates.TranslucencyMode)
-	{
-	 	case TRANSLUCENCY_OFF:
-		{
-			if (TRIPTASTIC_CHEATMODE || MOTIONBLUR_CHEATMODE)
-			{
-				if (D3DAlphaBlendEnable != TRUE)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-					D3DAlphaBlendEnable = TRUE;
-				}
-				if (D3DSrcBlend != D3DBLEND_INVSRCALPHA)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_INVSRCALPHA);
-					D3DSrcBlend = D3DBLEND_INVSRCALPHA;
-				}
-				if (D3DDestBlend != D3DBLEND_SRCALPHA)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCALPHA);
-					D3DDestBlend = D3DBLEND_SRCALPHA;
-				}
-			}
-			else
-			{
-				if (D3DAlphaBlendEnable != FALSE)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-					D3DAlphaBlendEnable = FALSE;
-				}
-				if (D3DSrcBlend != D3DBLEND_ONE)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-					D3DSrcBlend = D3DBLEND_ONE;
-				}
-				if (D3DDestBlend != D3DBLEND_ZERO)
-				{
-					d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
-					D3DDestBlend = D3DBLEND_ZERO;
-				}
-			}
-			break;
-		}
-	 	case TRANSLUCENCY_NORMAL:
-		{
-			if (D3DAlphaBlendEnable != TRUE)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				D3DAlphaBlendEnable = TRUE;
-			}
-			if (D3DSrcBlend != D3DBLEND_SRCALPHA)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-				D3DSrcBlend = D3DBLEND_SRCALPHA;
-			}
-			if (D3DDestBlend != D3DBLEND_INVSRCALPHA)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-				D3DDestBlend = D3DBLEND_INVSRCALPHA;
-			}
-			break;
-		}
-	 	case TRANSLUCENCY_COLOUR:
-		{
-			if (D3DAlphaBlendEnable != TRUE)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				D3DAlphaBlendEnable = TRUE;
-			}
-			if (D3DSrcBlend != D3DBLEND_ZERO)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
-				D3DSrcBlend = D3DBLEND_ZERO;
-			}
-			if (D3DDestBlend != D3DBLEND_SRCCOLOR)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCCOLOR);
-				D3DDestBlend = D3DBLEND_SRCCOLOR;
-			}
-			break;
-		}
-	 	case TRANSLUCENCY_INVCOLOUR:
-		{
-			if (D3DAlphaBlendEnable != TRUE)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				D3DAlphaBlendEnable = TRUE;
-			}
-			if (D3DSrcBlend != D3DBLEND_ZERO)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
-				D3DSrcBlend = D3DBLEND_ZERO;
-			}
-			if (D3DDestBlend != D3DBLEND_INVSRCCOLOR)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
-				D3DDestBlend = D3DBLEND_INVSRCCOLOR;
-			}
-			break;
-		}
-  		case TRANSLUCENCY_GLOWING:
-		{
-			if (D3DAlphaBlendEnable != TRUE)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				D3DAlphaBlendEnable = TRUE;
-			}
-			if (D3DSrcBlend != D3DBLEND_SRCALPHA)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-				D3DSrcBlend = D3DBLEND_SRCALPHA;
-			}
-			if (D3DDestBlend != D3DBLEND_ONE)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
-				D3DDestBlend = D3DBLEND_ONE;
-			}
-			break;
-		}
-  		case TRANSLUCENCY_DARKENINGCOLOUR:
-		{
-			if (D3DAlphaBlendEnable != TRUE)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				D3DAlphaBlendEnable = TRUE;
-			}
-			if (D3DSrcBlend != D3DBLEND_INVDESTCOLOR)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_INVDESTCOLOR);
-				D3DSrcBlend = D3DBLEND_INVDESTCOLOR;
-			}
-
-			if (D3DDestBlend != D3DBLEND_ZERO)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
-				D3DDestBlend = D3DBLEND_ZERO;
-			}
-			break;
-		}
-		case TRANSLUCENCY_JUSTSETZ:
-		{
-			if (D3DAlphaBlendEnable != TRUE)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				D3DAlphaBlendEnable = TRUE;
-			}
-			if (D3DSrcBlend != D3DBLEND_ZERO)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
-				D3DSrcBlend = D3DBLEND_ZERO;
-			}
-			if (D3DDestBlend != D3DBLEND_ONE) {
-				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
-				D3DDestBlend = D3DBLEND_ONE;
-			}
-		}
-		default: break;
-	}
 }
 
 bool LockExecuteBuffer()
@@ -842,87 +584,6 @@ bool ExecuteBuffer()
 	return true;
 }
 
-void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode)
-{
-	if (CurrentRenderStates.TextureAddressMode == textureAddressMode)
-		return;
-
-	CurrentRenderStates.TextureAddressMode = textureAddressMode;
-
-	if (textureAddressMode == TEXTURE_WRAP)
-	{
-		// wrap texture addresses
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-		if (FAILED(LastError))
-		{
-			OutputDebugString("D3DSAMP_ADDRESSU Wrap fail");
-		}
-
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
-		if (FAILED(LastError))
-		{
-			OutputDebugString("D3DSAMP_ADDRESSV Wrap fail");
-		}
-
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
-		if (FAILED(LastError))
-		{
-			OutputDebugString("D3DSAMP_ADDRESSW Wrap fail");
-		}
-	}
-	else if (textureAddressMode == TEXTURE_CLAMP)
-	{
-		// clamp texture addresses
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
-		if (FAILED(LastError))
-		{
-			OutputDebugString("D3DSAMP_ADDRESSU Clamp fail");
-		}
-
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
-		if (FAILED(LastError))
-		{
-			OutputDebugString("D3DSAMP_ADDRESSV Clamp fail");
-		}
-
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
-		if (FAILED(LastError))
-		{
-			OutputDebugString("D3DSAMP_ADDRESSW Clamp fail");
-		}
-	}
-}
-
-void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired)
-{
-	if (CurrentRenderStates.FilteringMode == filteringRequired)
-		return;
-
-	CurrentRenderStates.FilteringMode = filteringRequired;
-
-	switch (CurrentRenderStates.FilteringMode)
-	{
-		case FILTERING_BILINEAR_OFF:
-		{
-			d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-			d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-			break;
-		}
-		case FILTERING_BILINEAR_ON:
-		{
-			d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-			d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-			break;
-		}
-		default:
-		{
-			LOCALASSERT("Unrecognized filtering mode"==0);
-			OutputDebugString("Unrecognized filtering mode\n");
-			break;
-		}
-	}
-}
-
 void CheckOrthoBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
 {
 	assert (numVerts == 4);
@@ -972,7 +633,7 @@ void CheckOrthoBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_T
 	orthoListCount++;
 }
 
-void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE9 fmvTexture)
+void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, r_Texture fmvTexture)
 {
 	uint32_t topX = (640 - frameWidth) / 2;
 	uint32_t topY = (480 - frameHeight) / 2;
@@ -1033,7 +694,7 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWid
 	}
 }
 
-void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE9 tex1, LPDIRECT3DTEXTURE9 tex2, LPDIRECT3DTEXTURE9 tex3)
+void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, r_Texture tex1, r_Texture tex2, r_Texture tex3)
 {
 	// offset the video vertically in the centre of the screen
 	uint32_t topX = (640 - frameWidth) / 2;
@@ -1049,8 +710,8 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 
 	if (!FMVvertexBuffer)
 	{
-		FMVvertexBuffer = new VertexBuffer(d3d.lpD3DDevice);
-		FMVvertexBuffer->Create(4, FMVvertexBuffer->FVF_FMV, FMVvertexBuffer->USAGE_STATIC);
+		FMVvertexBuffer = new VertexBuffer;
+		FMVvertexBuffer->Create(4, FMVvertexBuffer->FVF_FMV, /*FMVvertexBuffer->USAGE_STATIC*/USAGE_STATIC);
 		FMVvertexBuffer->Lock((void**)&fmvVerts);
 
 		// bottom left
@@ -1729,7 +1390,6 @@ extern "C" {
 #include "inline.h"
 #include "gamedef.h"
 #include "dxlog.h"
-#include "d3_func.h"
 #include "d3d_hud.h"
 
 #include "HUD_layout.h"
@@ -2314,16 +1974,7 @@ bool EndD3DScene()
 	return true;
 }
 
-void D3D_SetupSceneDefaults()
-{
-	// force translucency state to be reset
-	CurrentRenderStates.TranslucencyMode = TRANSLUCENCY_NOT_SET;
-	CurrentRenderStates.FilteringMode = FILTERING_NOT_SET;
-	CurrentRenderStates.TextureAddressMode = TEXTURE_CLAMP;
-//	CheckFilteringModeIsCorrect(FILTERING_BILINEAR_ON);
-	CheckWireFrameMode(0);
-}
-
+#if 0 // bjd - commenting out
 void SetFogDistance(int fogDistance)
 {
 	if (fogDistance > 10000)
@@ -2334,33 +1985,7 @@ void SetFogDistance(int fogDistance)
 	CurrentRenderStates.FogDistance = fogDistance;
 //	textprint("fog distance %d\n",fogDistance);
 }
-
-void ToggleWireframe()
-{
-	if (CurrentRenderStates.WireFrameModeIsOn)
-		CheckWireFrameMode(0);
-	else
-		CheckWireFrameMode(1);
-}
-
-extern void CheckWireFrameMode(int shouldBeOn)
-{
-	if (shouldBeOn)
-		shouldBeOn = 1;
-
-	if (CurrentRenderStates.WireFrameModeIsOn != shouldBeOn)
-	{
-		CurrentRenderStates.WireFrameModeIsOn = shouldBeOn;
-		if (shouldBeOn)
-		{
-			d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
-		}
-		else
-		{
-			d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
-		}
-	}
-}
+#endif
 
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
@@ -2561,11 +2186,13 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 
 void D3D_HUD_Setup(void)
 {
+	/*
 	if (D3DZFunc != D3DCMP_LESSEQUAL)
 	{
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 		D3DZFunc = D3DCMP_LESSEQUAL;
 	}
+	*/ // bjd - fixme
 }
 
 void D3D_HUDQuad_Output(uint32_t textureID, struct VertexTag *quadVerticesPtr, uint32_t colour, enum FILTERING_MODE_ID filteringType)
@@ -3038,7 +2665,7 @@ void PostLandscapeRendering()
 {
 	int numOfObjects = NumOnScreenBlocks;
 
-  	CurrentRenderStates.FogIsOn = 1;
+ //bjd - commenting out 	CurrentRenderStates.FogIsOn = 1;
 
 	if (!strcmp(LevelName,"fall") || !strcmp(LevelName,"fall_m"))
 	{

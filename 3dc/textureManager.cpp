@@ -24,31 +24,26 @@
 
 #include "textureManager.h"
 
-extern bool LockTexture(RENDERTEXTURE texture, uint8_t **data, uint32_t *pitch);
-extern bool UnlockTexture(RENDERTEXTURE texture);
-
-extern "C" {
-extern uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture);
-}
-
 std::vector<Texture> textureList;
+
+extern uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture);
 
 bool Tex_Lock(uint32_t textureID, uint8_t **data, uint32_t *pitch)
 {
-	RENDERTEXTURE texture = Tex_GetTexture(textureID);
+	r_Texture texture = Tex_GetTexture(textureID);
 	if (!texture)
 		return false;
 
-	return LockTexture(texture, data, pitch);
+	return R_LockTexture(texture, data, pitch);
 }
 
 bool Tex_Unlock(uint32_t textureID)
 {
-	RENDERTEXTURE texture = Tex_GetTexture(textureID);
+	r_Texture texture = Tex_GetTexture(textureID);
 	if (!texture)
 		return false;
 
-	return UnlockTexture(texture);
+	return R_UnlockTexture(texture);
 }
 
 // for avp's fmv code
@@ -85,7 +80,7 @@ uint32_t Tex_CheckExists(const char* fileName)
 	return 0; // what else to return if it doesnt exist?
 }
 
-uint32_t Tex_AddTexture(const std::string &fileName, RENDERTEXTURE texture, uint32_t width, uint32_t height)
+uint32_t Tex_AddTexture(const std::string &fileName, r_Texture texture, uint32_t width, uint32_t height)
 {
 	// get the next available ID
 	uint32_t textureID = Tex_GetFreeID();
@@ -137,7 +132,7 @@ uint32_t Tex_LoadFromFile(const std::string &fileName)
 	return textureID;
 }
 
-const RENDERTEXTURE& Tex_GetTexture(uint32_t textureID)
+const r_Texture& Tex_GetTexture(uint32_t textureID)
 {
 	return (textureList[textureID].texture);
 }

@@ -1,6 +1,7 @@
 #include "3dc.h"
 #include "conscmnd.hpp"
 #include "strutil.h"
+#include "fmvCutscenes.h"
 
 // Includes for the actual commands:
 //#include "consvar.hpp"
@@ -16,13 +17,10 @@ extern "C"
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
-
 #include "stratdef.h"
 #include "gamedef.h"
 #include "gameplat.h"
-
 #include "bh_types.h"
-
 #include "showcmds.h"
 #include "version.h"
 #include "equipmnt.h"
@@ -32,14 +30,12 @@ extern "C"
 #include "bh_RubberDuck.h"
 #include "pvisible.h"
 #include "pldnet.h"
-
 #include "lighting.h"
 #include "paintball.h"		  
 #include "decal.h"
 #include "ConsoleLog.hpp"
 #include "psndplat.h"
 #include "avp_menus.h"
-#include "fmvCutscenes.h"
 #include "detaillevels.h"
 #include "savegame.h"
 

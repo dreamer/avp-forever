@@ -26,7 +26,7 @@ char const * cl_pszGameMode = NULL;
 // used to determine if the display is palettized
 // currently assuming that if this is <= 8 then all
 // surfaces et. except d3d textures have a global palette
-extern "C" { extern int VideoModeColourDepth; }
+/*extern "C" {*/ extern int VideoModeColourDepth; //}
 
 // useful filename handling functions
 
@@ -719,7 +719,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					uint32_t ImageHeight = pTexture->height;
 					AVPTEXTURE *AvPTexture = pTexture;
 					char *ImageName = szBuf;
-					RENDERTEXTURE renderTexture;
+					r_Texture renderTexture;
 
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 
@@ -793,7 +793,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					uint32_t ImageHeight = pTexture->height;
 					AVPTEXTURE *AvPTexture = pTexture;
 					char *ImageName = szBuf;
-					RENDERTEXTURE renderTexture;
+					r_Texture renderTexture;
 
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 

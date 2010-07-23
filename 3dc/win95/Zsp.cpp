@@ -67,9 +67,7 @@ ZSP_Data::ZSP_Data (const char * zdata, size_t /*zsize*/)
 		
 		zone_array.add_entry(tmpzone);
 	}
-
-}	
-
+}
 
 ZSP_zone::ZSP_zone ()
 {
@@ -77,7 +75,7 @@ ZSP_zone::ZSP_zone ()
 	z_poly_list = 0;
 	num_z_verts = 0;
 	z_vert_list = 0;
-}	
+}
 
 ZSP_zone::~ZSP_zone ()
 {
@@ -85,11 +83,11 @@ ZSP_zone::~ZSP_zone ()
 		delete [] z_poly_list;
 	if (num_z_verts)
 		delete [] z_vert_list;
-}	
+}
 
 ZSP_zone::ZSP_zone (const ZSP_zone &zz)
 {
-	if (zz.num_z_polys)	
+	if (zz.num_z_polys)
 	{
 		num_z_polys = zz.num_z_polys;
 		z_poly_list = new int [num_z_polys];
@@ -107,8 +105,7 @@ ZSP_zone::ZSP_zone (const ZSP_zone &zz)
 		num_z_polys = 0;
 	}
 
-
-	if (zz.num_z_verts)	
+	if (zz.num_z_verts)
 	{
 		num_z_verts = zz.num_z_verts;
 		z_vert_list = new int [num_z_verts];
@@ -125,18 +122,17 @@ ZSP_zone::ZSP_zone (const ZSP_zone &zz)
 		z_vert_list = 0;
 		num_z_verts = 0;
 	}
-	
 }
 
 ZSP_zone & ZSP_zone::operator=(const ZSP_zone &zz)
 {
-	
+
 	if (num_z_polys)
 		delete [] z_poly_list;
 	if (num_z_verts)
 		delete [] z_vert_list;
 
-	if (zz.num_z_polys)	
+	if (zz.num_z_polys)
 	{
 		num_z_polys = zz.num_z_polys;
 		z_poly_list = new int [num_z_polys];
@@ -154,8 +150,7 @@ ZSP_zone & ZSP_zone::operator=(const ZSP_zone &zz)
 		num_z_polys = 0;
 	}
 
-
-	if (zz.num_z_verts)	
+	if (zz.num_z_verts)
 	{
 		num_z_verts = zz.num_z_verts;
 		z_vert_list = new int [num_z_verts];
@@ -174,21 +169,17 @@ ZSP_zone & ZSP_zone::operator=(const ZSP_zone &zz)
 	}
 	
 	return(*this);
-	
 }
-	
 
 unsigned char operator==(const ZSP_zone &z1, const ZSP_zone &z2)
 {
 	return(&z1 == &z2);
-}	
+}
 
 unsigned char operator!=(const ZSP_zone &z1, const ZSP_zone &z2)
 {
 	return(&z1 != &z2);
-}	
-
-
+}
 
 /////////////////////////////////////////
 
@@ -256,4 +247,4 @@ void Shape_ZSP_Data_Chunk::fill_data_block ( char * data_start)
 			data_start += 4;
 		}
 	}
-}	
+}

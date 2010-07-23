@@ -6,17 +6,13 @@
 
 */
 
-//#include "renderer.h"
-
 #include "aw.h"
 #include "shpanim.h"
 
 #include <stdint.h>
 
 #ifdef __cplusplus
-
 	extern "C" {
-
 #endif
 
 

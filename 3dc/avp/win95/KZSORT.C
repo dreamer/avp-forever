@@ -396,9 +396,10 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 				VisibleObjects[o].DrawBeforeEnvironment = 0;
 			}
 		}
-
+#if 0 // bjd - commenting out
 		if (fogDistance<0) fogDistance=0;
 		SetFogDistance(fogDistance);
+#endif
 	}
 	DrawingAReflection=0;
 	{

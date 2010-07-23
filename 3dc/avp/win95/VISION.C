@@ -136,7 +136,6 @@ alien character will still have the same vision settings.
 /* Pred-O-Vision */
 void SetupPredOVision(void)
 {
-
 	/* setup in-game data */
 	PredOVision.VisionMode = PREDOVISION_NORMAL;
 	PredOVision.VisionIsChanging=0;
@@ -244,7 +243,7 @@ void SetupMarineOVision(void)
 
 void HandleMarineOVision(void)
 {
-	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 
 	if (playerStatusPtr->IsAlive)
 	{

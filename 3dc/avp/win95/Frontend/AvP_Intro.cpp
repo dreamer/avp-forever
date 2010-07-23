@@ -2,6 +2,8 @@
 #include "fmvCutscenes.h"
 #include "textureManager.h"
 
+extern void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha);
+
 extern "C"
 {
 	#include "3dc.h"
@@ -30,8 +32,6 @@ extern void ShowSplashScreens(void);
 extern void Show_WinnerScreen(void);
 extern void DrawMainMenusBackdrop(void);
 extern void FadedScreen(int alpha);
-
-extern void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha);
 
 extern BOOL bRunning;
 

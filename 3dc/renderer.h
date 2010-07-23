@@ -25,6 +25,15 @@
 #ifndef _renderer_h_
 #define _renderer_h_
 
+//test
+class Renderer
+{
+	public:
+		virtual void Initialise() = 0;
+		virtual void BeginFrame() = 0;
+		virtual void EndFrame() = 0;
+};
+
 // temp
 
 #ifdef _WIN32
@@ -46,5 +55,11 @@
 #ifdef USE_GLIDE
 	#include "glide_func.h" // hehe
 #endif
+
+enum R_USAGE
+{
+	USAGE_DYNAMIC,
+	USAGE_STATIC
+};
 
 #endif // include guard

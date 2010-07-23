@@ -76,6 +76,7 @@
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
 				CompileAs="0"
+				ShowIncludes="false"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -10161,6 +10162,10 @@
 				</File>
 				<File
 					RelativePath=".\3dc\RenderList.h"
+					>
+				</File>
+				<File
+					RelativePath=".\3dc\renderStates.h"
 					>
 				</File>
 				<File

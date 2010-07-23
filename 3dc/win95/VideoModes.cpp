@@ -5,11 +5,12 @@
 #include "configFile.h"
 #include <assert.h>
 
+#include "renderer.h"
+
 extern "C"
 {
 #include "VideoModes.h"
 #include <stdio.h>
-#include "renderer.h"
 
 extern D3DInfo d3d;
 

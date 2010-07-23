@@ -34,7 +34,7 @@
 #include "savegame.h"
 #include "los.h"
 
-#include "renderer.h"
+#include "renderStates.h"
 
 #include <math.h>
 
