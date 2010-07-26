@@ -18,7 +18,6 @@
 #include "pldnet.h"
 #include "pldghost.h"
 #include "kshape.h"
-#include "d3d_render.h"
 #include "hmodel.h"
 #include "paintball.h"
 #include "detaillevels.h"

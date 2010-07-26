@@ -26,7 +26,6 @@
 #include "particle.h"
 #include "vision.h"
 #include "sfx.h"
-#include "d3d_render.h"
 #include "avpview.h"
 #include "sphere.h"
 #include "detaillevels.h"

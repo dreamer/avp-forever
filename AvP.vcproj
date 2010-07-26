@@ -91,7 +91,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib shell32.lib shlwapi.lib d3d9.lib d3dx9d.lib dxerr.lib dsound.lib x3daudio.lib dxguid.lib ws2_32.lib ole32.lib enet.lib enet.exp libvorbisfile.lib libvorbis.lib libogg.lib libtheora.lib user32.lib xinput.lib $(NOINHERIT)"
+				AdditionalDependencies="winmm.lib shell32.lib shlwapi.lib d3d9.lib d3dx9d.lib dxerr.lib x3daudio.lib dxguid.lib ws2_32.lib ole32.lib enet.lib enet.exp libvorbisfile.lib libvorbis.lib libogg.lib libtheora.lib user32.lib xinput.lib $(NOINHERIT)"
 				OutputFile="debug_AvPx.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -4085,10 +4085,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\3dc\avp\win95\dx_audio.cpp"
-				>
 			</File>
 			<File
 				RelativePath="3dc\win95\Dxlog.c"

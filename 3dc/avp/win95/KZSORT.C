@@ -1,14 +1,11 @@
 #include "3dc.h"
 #include "inline.h"
 #include "module.h"
-
 #include "stratdef.h"
 #include "gamedef.h"
-
 #include "kzsort.h"
 #include "kshape.h"
 
-#include "d3d_render.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "avp_userprofile.h"

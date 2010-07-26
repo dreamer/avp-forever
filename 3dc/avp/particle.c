@@ -15,7 +15,6 @@
 #include "particle.h"
 #include "kshape.h"
 #include "sfx.h"
-#include "d3d_render.h"
 #include "psndproj.h"
 #include "lighting.h"
 #include "bh_light.h"

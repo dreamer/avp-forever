@@ -16,96 +16,72 @@ enum
 
 struct StreamingVoiceContext : public IXAudio2VoiceCallback
 {
-	STDMETHOD_( void, OnVoiceProcessingPassStart )( UINT32 )
+	STDMETHOD_(void, OnVoiceProcessingPassStart)(UINT32)
 	{
 	}
-	STDMETHOD_( void, OnVoiceProcessingPassEnd )()
+	STDMETHOD_(void, OnVoiceProcessingPassEnd)()
 	{
 	}
-	STDMETHOD_( void, OnStreamEnd )()
+	STDMETHOD_(void, OnStreamEnd)()
 	{
 	}
-	STDMETHOD_( void, OnBufferStart )( void* )
+	STDMETHOD_(void, OnBufferStart)(void*)
 	{
 	}
-	STDMETHOD_( void, OnBufferEnd )( void* )
+	STDMETHOD_(void, OnBufferEnd)(void*)
 	{
-		SetEvent( hBufferEndEvent );
+		SetEvent(hBufferEndEvent);
 	}
-	STDMETHOD_( void, OnLoopEnd )( void* )
+	STDMETHOD_(void, OnLoopEnd)(void*)
 	{
 	}
-	STDMETHOD_( void, OnVoiceError )( void*, HRESULT )
+	STDMETHOD_(void, OnVoiceError)(void*, HRESULT)
 	{
 	}
 
     HANDLE hBufferEndEvent;
 
-            StreamingVoiceContext() : hBufferEndEvent( CreateEvent( NULL, FALSE, FALSE, NULL ) )
-            {
-            }
+    StreamingVoiceContext() : hBufferEndEvent(CreateEvent(NULL, FALSE, FALSE, NULL))
+    {
+    }
+
     virtual ~StreamingVoiceContext()
     {
-        CloseHandle( hBufferEndEvent );
+        CloseHandle(hBufferEndEvent);
     }
 };
 
 class AudioStream
 {
+	private:
+		uint32_t	bufferSize;
+		uint32_t	bufferCount;
+		uint32_t	currentBuffer;
+		uint32_t	numChannels;
+		uint32_t	rate;
+		uint32_t	bytesPerSample;
+		uint64_t	totalBytesPlayed;
+		uint64_t	totalSamplesWritten;
+		bool		isPaused;
+		uint8_t		*buffers;
+		IXAudio2SourceVoice *pSourceVoice;
 
-private:
-	uint32_t	bufferSize;
-	uint32_t	bufferCount;
-	uint32_t	currentBuffer;
-	uint32_t	numChannels;
-	uint32_t	rate;
-	uint32_t	bytesPerSample;
-	uint64_t	totalBytesPlayed;
-	uint64_t	totalSamplesWritten;
-	bool		isPaused;
-	uint8_t		*buffers;
-	IXAudio2SourceVoice *pSourceVoice;
+	public:
+		AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers);
+		int32_t  Stop();
+		int32_t  Play();
+		int32_t  SetVolume(uint32_t volume);
+		int32_t  SetPan(uint32_t pan);
+		uint32_t WriteData(uint8_t *audioData, uint32_t size);
+		uint32_t GetNumFreeBuffers();
+		uint64_t GetNumSamplesPlayed();
+		uint64_t GetNumSamplesWritten();
+		uint32_t GetWritableBufferSize();
+		uint32_t GetBytesWritten();
+		uint32_t GetBufferSize();
+		StreamingVoiceContext *voiceContext;
 
-public:
-	AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers);
-	int32_t  Stop();
-	int32_t  Play();
-	int32_t  SetVolume(uint32_t volume);
-	int32_t  SetPan(uint32_t pan);
-	uint32_t WriteData(uint8_t *audioData, uint32_t size);
-	uint32_t GetNumFreeBuffers();
-	uint64_t GetNumSamplesPlayed();
-	uint64_t GetNumSamplesWritten();
-	uint32_t GetWritableBufferSize();
-	uint32_t GetBytesWritten();
-	uint32_t GetBufferSize();
-	StreamingVoiceContext *voiceContext;
-
-	~AudioStream();
-};
-
-#endif
-
-#ifdef USE_DSOUND
-
-#include <dsound.h>
-
-struct StreamingAudioBuffer
-{
-	int bufferSize;
-	int bufferCount;
-	int currentBuffer;
-	int numChannels;
-	int rate;
-	int bytesPerSample;
-	int writeOffset;
-	int lastPlayCursor;
-	int msPerBuffer;
-	int lastCheckedTime;
-	UINT64 totalBytesPlayed;
-	UINT64 totalSamplesWritten;
-	uint8_t *buffers;
-	LPDIRECTSOUNDBUFFER	dsBuffer;
+		~AudioStream();
 };
 
 #endif
@@ -135,36 +111,35 @@ struct StreamingVoiceContext
 
 class AudioStream
 {
+	private:
+		uint32_t	bufferSize;
+		uint32_t	bufferCount;
+		uint32_t	currentBuffer;
+		uint32_t	numChannels;
+		uint32_t	rate;
+		uint32_t	bytesPerSample;
+		uint64_t	totalSamplesWritten;
+		bool		isPaused;
+		uint8_t		*buffers;
+		std::vector<DWORD> PacketStatus;
+		LPDIRECTSOUNDSTREAM	dsStreamBuffer;
 
-private:
-	uint32_t	bufferSize;
-	uint32_t	bufferCount;
-	uint32_t	currentBuffer;
-	uint32_t	numChannels;
-	uint32_t	rate;
-	uint32_t	bytesPerSample;
-	uint64_t	totalSamplesWritten;
-	bool		isPaused;
-	uint8_t		*buffers;
-	std::vector<DWORD> PacketStatus;
-	LPDIRECTSOUNDSTREAM	dsStreamBuffer;
+	public:
+		AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers);
+		int32_t  Stop();
+		int32_t  Play();
+		int32_t  SetVolume(uint32_t volume);
+		int32_t  SetPan(uint32_t pan);
+		uint32_t WriteData(uint8_t *audioData, uint32_t size);
+		uint32_t GetNumFreeBuffers();
+		uint64_t GetNumSamplesPlayed();
+		uint64_t GetNumSamplesWritten();
+		uint32_t GetWritableBufferSize();
+		uint32_t GetBufferSize();
+		StreamingVoiceContext *voiceContext;
+		uint64_t	totalBytesPlayed;
 
-public:
-	AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers);
-	int32_t  Stop();
-	int32_t  Play();
-	int32_t  SetVolume(uint32_t volume);
-	int32_t  SetPan(uint32_t pan);
-	uint32_t WriteData(uint8_t *audioData, uint32_t size);
-	uint32_t GetNumFreeBuffers();
-	uint64_t GetNumSamplesPlayed();
-	uint64_t GetNumSamplesWritten();
-	uint32_t GetWritableBufferSize();
-	uint32_t GetBufferSize();
-	StreamingVoiceContext *voiceContext;
-	uint64_t	totalBytesPlayed;
-
-	~AudioStream();
+		~AudioStream();
 };
 
 /*

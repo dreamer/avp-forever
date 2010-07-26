@@ -10,11 +10,11 @@
 #include "gamedef.h"
 #include "psnd.h"
 #include "textureManager.h"
+#include "d3d_render.h"
 
 extern "C"
 {
 #include "language.h"
-#include "d3d_render.h"
 
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern unsigned char DebouncedGotAnyKey;

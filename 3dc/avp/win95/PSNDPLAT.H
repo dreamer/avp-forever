@@ -9,9 +9,6 @@
 extern "C" {
 #endif
 
-#ifdef USE_DSOUND
-#include <dsound.h>
-#endif
 #ifdef USE_XAUDIO2
 #include <xaudio2.h>
 #include <xaudio2fx.h>
@@ -37,12 +34,11 @@ typedef struct soundsampledata
 	int activeInstances;	 
 	int volume;		
 	int pitch;
-#ifdef USE_DSOUND
-	LPDIRECTSOUNDBUFFER dsBufferP;
-#endif
+
 #ifdef _XBOX
 	LPDIRECTSOUNDBUFFER dsBufferP;
 #endif
+
 #ifdef USE_XAUDIO2
 	BOOL is3D;
 	uint8_t *audioBuffer;
@@ -52,7 +48,8 @@ typedef struct soundsampledata
 	WAVEFORMATEX audioWaveFormat;
 //	FLOAT32 emitterAzimuths;//[1];
 #endif
-	unsigned int flags;
+
+	uint32_t flags;
 	int dsFrequency;
 	char * wavName;
 	int length; //time in fixed point seconds
@@ -81,15 +78,12 @@ typedef struct activesoundsample
 	unsigned int marine_ignore	:1;
 	unsigned int reverb_off :1;
 	SOUND3DDATA threedeedata;
-#ifdef USE_DSOUND
-	LPDIRECTSOUNDBUFFER dsBufferP;
-	LPDIRECTSOUND3DBUFFER ds3DBufferP;
-	LPKSPROPERTYSET	PropSetP;
-#endif
+
 #ifdef _XBOX
 	LPDIRECTSOUNDBUFFER dsBufferP;
 	LPDIRECTSOUND3DBUFFER ds3DBufferP;
 #endif
+
 #ifdef USE_XAUDIO2
 	BOOL is3D;
 	uint8_t *audioBuffer;

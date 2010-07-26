@@ -28,7 +28,6 @@
 #include "d3d_hud.h"
 #include "frustum.h"
 #include "pldghost.h"
-#include "d3d_render.h"
 #include "bh_ais.h"
 #include "bh_alien.h"
 

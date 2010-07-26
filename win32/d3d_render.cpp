@@ -633,6 +633,66 @@ void CheckOrthoBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_T
 	orthoListCount++;
 }
 
+void NewQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t colour, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyType, float *UVList = NULL)
+{
+	float x1 = WPos2DC(x);
+	float y1 = HPos2DC(y);
+
+	float x2 = WPos2DC(x + width);
+	float y2 = HPos2DC(y + height);
+
+	uint32_t texturePOW2Width = 0;
+	uint32_t texturePOW2Height = 0;
+
+	if (textureID != NO_TEXTURE)
+	{
+		Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
+		CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP);
+	}
+	else
+	{
+		texturePOW2Width = 1;
+		texturePOW2Height = 1;
+		CheckOrthoBuffer(4, NO_TEXTURE, translucencyType, TEXTURE_CLAMP);
+	}
+	
+	// bottom left
+	orthoVerts[orthoVBOffset].x = x1;
+	orthoVerts[orthoVBOffset].y = y2;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
+	orthoVBOffset++;
+
+	// top left
+	orthoVerts[orthoVBOffset].x = x1;
+	orthoVerts[orthoVBOffset].y = y1;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = 0.0f;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+
+	// bottom right
+	orthoVerts[orthoVBOffset].x = x2;
+	orthoVerts[orthoVBOffset].y = y2;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVerts[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
+	orthoVBOffset++;
+
+	// top right
+	orthoVerts[orthoVBOffset].x = x2;
+	orthoVerts[orthoVBOffset].y = y1;
+	orthoVerts[orthoVBOffset].z = 1.0f;
+	orthoVerts[orthoVBOffset].colour = colour;
+	orthoVerts[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVBOffset++;
+}
+
 void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, r_Texture fmvTexture)
 {
 	uint32_t topX = (640 - frameWidth) / 2;
@@ -1034,10 +1094,9 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 			destPtr[3] = srcPtr[3];
 */
 			memcpy(destPtr, srcPtr, sizeof(uint32_t));
-//			memset(destPtr, 0, sizeof(uint32_t));
 
 			destPtr += sizeof(uint32_t);
-			srcPtr +=  sizeof(uint32_t);
+			srcPtr  += sizeof(uint32_t);
 		}
 	}
 
