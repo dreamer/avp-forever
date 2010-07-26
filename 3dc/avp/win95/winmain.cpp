@@ -48,6 +48,7 @@ New sound system
 #include "vorbisPlayer.h"
 #include "networking.h"
 #include "avpview.h"
+#include "renderer.h"
 
 /*
 	externs for commonly used global variables and arrays
