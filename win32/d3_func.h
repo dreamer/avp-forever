@@ -3,14 +3,47 @@
 
 #ifdef WIN32
 #include <d3d9.h>
+#include <d3dx9.h>
 #include <Dxerr.h>
 #include "aw.h"
 #include <stdint.h>
+#include "renderer.h"
 #include "renderStates.h"
 
 typedef IDirect3DVertexBuffer9 r_VertexBuffer;
 typedef IDirect3DIndexBuffer9  r_IndexBuffer;
 typedef IDirect3DTexture9	   *r_Texture; // keep this as pointer type?
+
+/*
+class D3D9Renderer : public Renderer
+{
+	private:
+		IDirect3D9				*D3D;
+		IDirect3DDevice9		*D3DDevice;
+		D3DVIEWPORT9			D3DViewport;
+		D3DPRESENT_PARAMETERS	D3DPresentationParams;
+
+		D3DXMATRIX	matIdentity;
+		D3DXMATRIX	matView;
+		D3DXMATRIX	matProjection;
+		D3DXMATRIX	matOrtho;
+		D3DXMATRIX	matViewPort;
+
+		HRESULT					LastError;
+
+	public:
+		D3D9Renderer():
+			D3D(0),
+			D3DDevice(0)
+		{
+			memset(&D3DPresentationParams, 0, sizeof(D3DPRESENT_PARAMETERS));
+		}
+		~D3D9Renderer();
+		bool Initialise();
+		void BeginFrame();
+		void EndFrame();
+};
+*/
 
 bool R_CreateVertexBuffer(uint32_t length, uint32_t usage, r_VertexBuffer **vertexBuffer);
 bool R_LockVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage);
@@ -161,6 +194,7 @@ r_Texture CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poolType);
 r_Texture CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight);
 r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
+bool InitialiseDirect3D();
 bool ChangeGameResolution	(uint32_t width, uint32_t height/*, uint32_t colour_depth*/);
 void DrawAlphaMenuQuad		(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t alpha);
 void DrawTallFontCharacter	(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha);

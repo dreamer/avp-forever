@@ -20,7 +20,6 @@ void UpdateAllFMVTextures();
 
 typedef struct FMVTEXTURE
 {
-//	IMAGEHEADER *ImagePtr;
 	uint32_t textureID;
 	uint32_t width;
 	uint32_t height;

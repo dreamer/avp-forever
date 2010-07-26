@@ -28,6 +28,7 @@ FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 uint32_t NumberOfFMVTextures = 0;
 
 extern void UpdateFMVTexture(FMVTEXTURE *ftPtr);
+extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
 
 extern "C" {
 int FmvColourRed;
@@ -117,11 +118,9 @@ void FindLightingValuesFromTriggeredFMV(uint8_t *bufferPtr, FMVTEXTURE *ftPtr)
 
 int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 {
-	return 1;
-//	uint32_t w = ftPtr->ImagePtr->ImageWidth;
-//	uint32_t h = ftPtr->ImagePtr->ImageHeight;
-	uint32_t w = 0;
-	uint32_t h = 0;
+	// i think these are always 128x128 for ingame textures? fix this later I guess..
+	uint32_t w = 0;//128;
+	uint32_t h = 0;//128;
 	Tex_GetDimensions(ftPtr->textureID, w, h);
 
 	uint8_t *DestBufferPtr = ftPtr->RGBBuffer;
@@ -150,7 +149,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 			if (!fmvList[ftPtr->fmvHandle].fmvClass->mFrameReady)
 				return 0;
 
-			fmvList[ftPtr->fmvHandle].fmvClass->NextFrame(w, h, DestBufferPtr, w * 4);
+			fmvList[ftPtr->fmvHandle].fmvClass->NextFrame(w, h, DestBufferPtr, w * sizeof(uint32_t));
 		}
 
 		ftPtr->StaticImageDrawn = 0;
@@ -168,7 +167,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 		while (--i);
 		ftPtr->StaticImageDrawn = 1;
 	}
-	FindLightingValuesFromTriggeredFMV((uint8_t*)ftPtr->RGBBuffer, ftPtr);
+	FindLightingValuesFromTriggeredFMV(ftPtr->RGBBuffer, ftPtr);
 	return 1;
 }
 
@@ -349,7 +348,6 @@ void FmvClose()
 
 void UpdateAllFMVTextures()
 {
-	extern void UpdateFMVTexture(FMVTEXTURE *ftPtr);
 	uint32_t i = NumberOfFMVTextures;
 
 	while (i--)
@@ -385,8 +383,10 @@ extern void StartTriggerPlotFMV(int number)
 			if (FMVTexture[i].fmvHandle)
 			{
 				if (fmvList[FMVTexture[i].fmvHandle].isPlaying)
+				{
 					fmvList[FMVTexture[i].fmvHandle].fmvClass->Close();
 					FMVTexture[i].fmvHandle = -1;
+				}
 			}
 
 			int32_t fmvHandle = OpenFMV(buffer);
@@ -411,9 +411,6 @@ extern void StartFMVAtFrame(int number, int frame)
 // called during each level load
 void ScanImagesForFMVs()
 {
-	extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
-	int i;
-	IMAGEHEADER *ihPtr;
 	NumberOfFMVTextures = 0;
 
 	std::vector<std::string> fmvTextures;
@@ -453,7 +450,13 @@ void ScanImagesForFMVs()
 			uint32_t width = 0;
 			uint32_t height = 0;
 
-//			FMVTexture[NumberOfFMVTextures].ImagePtr = ihPtr;
+			Tex_GetDimensions(i, width, height); // TODO: check that i is always going to be correct as texture id
+
+			assert((width == 128) && (height == 128));
+
+			FMVTexture[NumberOfFMVTextures].textureID = i;
+			FMVTexture[NumberOfFMVTextures].width = width;
+			FMVTexture[NumberOfFMVTextures].height = height;
 			FMVTexture[NumberOfFMVTextures].fmvHandle = -1; // just to be sure
 			FMVTexture[NumberOfFMVTextures].StaticImageDrawn = 0;
 			SetupFMVTexture(&FMVTexture[NumberOfFMVTextures]);

@@ -330,7 +330,6 @@ int  CheckForJoystick(void);
 
 /* Direct 3D */
 void FlipBuffers(void);
-BOOL InitialiseDirect3D(void);
 void ReleaseDirect3D(void);
 void ReleaseAvPTexture(AVPTEXTURE *texture);
 

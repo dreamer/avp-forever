@@ -34,7 +34,13 @@
 #include "networking.h"
 #include "font2.h"
 
+extern "C"
+{
+	extern HWND hWndMain;
+}
+
 //test
+/*
 class D3D9Renderer : public Renderer
 {
 	private:
@@ -65,9 +71,67 @@ class D3D9Renderer : public Renderer
 		void EndFrame();
 };
 
-void D3D9Renderer::Initialise()
-{
 
+bool D3D9Renderer::Initialise()
+{
+	// create Direct3D9 interface object
+	D3D = Direct3DCreate9(D3D_SDK_VERSION);
+	if (!D3D)
+	{
+		Con_PrintError("Could not create Direct3D9 object");
+		return false;
+	}
+
+	// fill out presentation parameters
+	D3DPresentationParams.hDeviceWindow = hWndMain;
+	D3DPresentationParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
+
+	D3DPresentationParams.Windowed = TRUE;
+	D3DPresentationParams.BackBufferWidth = 800;
+	D3DPresentationParams.BackBufferHeight = 600;
+	D3DPresentationParams.PresentationInterval = 0;
+
+	D3DPresentationParams.BackBufferCount = 1;
+	D3DPresentationParams.AutoDepthStencilFormat = D3DFMT_D24S8;
+	D3DPresentationParams.EnableAutoDepthStencil = TRUE;
+
+	D3DPresentationParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+
+	// create the Direct3D9 device
+	LastError = D3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWndMain,
+			D3DCREATE_HARDWARE_VERTEXPROCESSING, &D3DPresentationParams, &D3DDevice);
+
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Could not create Direct3D device");
+		return false;
+	}
+
+	// set up viewport
+	D3DViewport.X = 0;
+	D3DViewport.Y = 0;
+	D3DViewport.Width = 800;
+	D3DViewport.Height = 600;
+	D3DViewport.MinZ = 0.0f;
+	D3DViewport.MaxZ = 1.0f;
+
+	LastError = D3DDevice->SetViewport(&D3DViewport);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Could not set Direct3D viewport");
+		return false;
+	}
+
+	// create identity matrix
+	D3DXMatrixIdentity(&matIdentity);
+
+	return true;
+}
+
+D3D9Renderer::~D3D9Renderer()
+{
+	SAFE_RELEASE(D3D);
+	SAFE_RELEASE(D3DDevice);
 }
 
 void D3D9Renderer::BeginFrame()
@@ -145,6 +209,37 @@ void D3D9Renderer::EndFrame()
 	}
 }
 
+bool D3D9Renderer::CreateVertexBuffer(uint32_t length, uint32_t usage, r_VertexBuffer **vertexBuffer)
+{
+	D3DPOOL vbPool;
+	DWORD	vbUsage;
+
+	switch (usage)
+	{
+		case USAGE_STATIC:
+			vbUsage = 0;
+			vbPool = D3DPOOL_MANAGED;
+			break;
+		case USAGE_DYNAMIC:
+			vbUsage = D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY;
+			vbPool = D3DPOOL_DEFAULT;
+			break;
+		default:
+			// error and return
+			break;
+	}
+
+	LastError = D3DDevice->CreateVertexBuffer(length, vbUsage, 0, vbPool, vertexBuffer, NULL);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+*/
+
 extern int NumberOfFMVTextures;
 #define MAX_NO_FMVTEXTURES 10
 extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
@@ -155,6 +250,14 @@ D3DXMATRIX matProjection;
 D3DXMATRIX matView;
 D3DXMATRIX matIdentity;
 D3DXMATRIX matViewPort;
+
+struct D3D_SHADER
+{
+	LPDIRECT3DVERTEXDECLARATION9	vertexDeclaration;
+	LPDIRECT3DVERTEXSHADER9			vertexShader;
+	LPDIRECT3DPIXELSHADER9			pixelShader;
+	LPD3DXCONSTANTTABLE				constantTable;
+};
 
 extern D3DVERTEXELEMENT9 declMain[];
 extern D3DVERTEXELEMENT9 declOrtho[];
@@ -417,7 +520,7 @@ bool R_LockTexture(r_Texture texture, uint8_t **data, uint32_t *pitch)
 {
 	D3DLOCKED_RECT lock;
 
-	LastError = texture->LockRect(0, &lock, NULL, NULL);
+	LastError = texture->LockRect(0, &lock, NULL, D3DLOCK_DISCARD);
 
 	if (FAILED(LastError))
 	{
@@ -1314,7 +1417,7 @@ bool ChangeGameResolution(uint32_t width, uint32_t height/*, uint32_t colourDept
 }
 
 // need to redo all the enumeration code here, as it's not very good..
-BOOL InitialiseDirect3D()
+bool InitialiseDirect3D()
 {
 	// clear log file first, then write header text
 	ClearLog();
@@ -1346,7 +1449,7 @@ BOOL InitialiseDirect3D()
 	if (!d3d.lpD3D)
 	{
 		Con_PrintError("Could not create Direct3D9 object");
-		return FALSE;
+		return false;
 	}
 
 	// Get the number of devices/video cards in the system
@@ -1361,7 +1464,7 @@ BOOL InitialiseDirect3D()
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -1376,7 +1479,7 @@ BOOL InitialiseDirect3D()
 		{
 			Con_PrintError("GetAdapterDisplayMode call failed");
 			LogDxError(LastError, __LINE__, __FILE__);
-			return FALSE;
+			return false;
 		}
 		else
 		{
@@ -1618,7 +1721,7 @@ BOOL InitialiseDirect3D()
 	{
 		Con_PrintError("Could not create Direct3D device");
 		LogDxError(LastError, __LINE__, __FILE__);
-		return FALSE;
+		return false;
 	}
 
 	// get device capabilities
@@ -1786,7 +1889,7 @@ BOOL InitialiseDirect3D()
 
 	if (!CreateVertexShader("vertex.vsh", &d3d.vertexShader, &vertexConstantTable))
 	{
-		return FALSE;
+		return false;
 	}
 	CreateVertexShader("orthoVertex.vsh", &d3d.orthoVertexShader, &orthoConstantTable);
 	CreateVertexShader("fmvVertex.vsh", &d3d.fmvVertexShader, &fmvConstantTable);
@@ -1819,7 +1922,7 @@ BOOL InitialiseDirect3D()
 
 	Init();
 
-	return TRUE;
+	return true;
 }
 
 void SetTransforms()

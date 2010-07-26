@@ -994,7 +994,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
 {
-	ftPtr->RGBBuffer = new uint8_t[128 * 128 * 4];
+	ftPtr->RGBBuffer = new uint8_t[128 * 128 * sizeof(uint32_t)];
 	ftPtr->SoundVolume = 0;
 }
 
@@ -1016,26 +1016,14 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 
 	uint8_t *srcPtr = &ftPtr->RGBBuffer[0];
 	uint8_t *destPtr = 0;
+	uint8_t *originalPtr = 0;
 	uint32_t pitch = 0;
 
-	Tex_Lock(ftPtr->textureID, &destPtr, &pitch);
-/*
-	// lock the d3d texture
-	D3DLOCKED_RECT textureRect;
-	LastError = ftPtr->ImagePtr->Direct3DTexture->LockRect(0, &textureRect, NULL, D3DLOCK_DISCARD);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return;
-	}
-
-	uint8_t *destPtr = 0;
-	uint8_t *srcPtr = &ftPtr->RGBBuffer[0];
-*/
+	Tex_Lock(ftPtr->textureID, &originalPtr, &pitch);
 
 	for (uint32_t y = 0; y < height; y++)
 	{
-		destPtr = /*static_cast<uint8_t*>(textureRect.pBits)*/destPtr + y * /*textureRect.Pitch*/pitch;
+		destPtr = originalPtr + y * pitch;
 
 		for (uint32_t x = 0; x < width; x++)
 		{
@@ -1045,23 +1033,15 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 			destPtr[2] = srcPtr[2];
 			destPtr[3] = srcPtr[3];
 */
-			memcpy(destPtr, srcPtr, 4);
+			memcpy(destPtr, srcPtr, sizeof(uint32_t));
+//			memset(destPtr, 0, sizeof(uint32_t));
 
-			destPtr += 4;
-			srcPtr += 4;
+			destPtr += sizeof(uint32_t);
+			srcPtr +=  sizeof(uint32_t);
 		}
 	}
 
 	Tex_Unlock(ftPtr->textureID);
-/*
-	// unlock d3d texture
-	LastError = ftPtr->ImagePtr->Direct3DTexture->UnlockRect(0);
-	if (FAILED(LastError))
-	{
-		LogErrorString("Could not unlock Direct3D texture ftPtr->DestTexture", __LINE__, __FILE__);
-		return;
-	}
-*/
 }
 
 void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha)
