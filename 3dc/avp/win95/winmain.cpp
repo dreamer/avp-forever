@@ -10,6 +10,7 @@
 #include "usr_io.h"
 #include "font.h"
 #include <mmsystem.h>
+#include "renderer.h"
 
 /* JH 27/1/97 */
 extern "C" {
@@ -147,7 +148,6 @@ STICKYKEYS skOff;
 // entry point
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-	
 	I_AVP_ENVIRONMENTS level_to_load = I_Num_Environments;
 	char *command_line = lpCmdLine;
 	char *instr = 0;
@@ -174,7 +174,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	LoadVorbisTrackList(); // do the same for any user ogg vorbis music files
 
 	SetFastRandom();
-	
+
 	/****
 		init game now ONLY sets up varibles for the whole
 		game. If you want to put something in it it must
@@ -291,7 +291,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	if (strstr(command_line, "-server"))
 	{
 		//game has been launched by mplayer , we best humour it
-		LobbiedGame = LobbiedGame_Server;	
+		LobbiedGame = LobbiedGame_Server;
 		if (!Net_InitLobbiedGame())
 		{
 			exit(0x6364);
@@ -300,11 +300,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	else if (strstr(command_line, "-client"))
 	{
 		//ditto
-		LobbiedGame = LobbiedGame_Client;			
+		LobbiedGame = LobbiedGame_Client;
 		if (!Net_InitLobbiedGame())
 		{
 			exit(0x6364);
-		}		
+		}
 	}
 	else if (strstr(command_line, "-debug"))
 	{
@@ -312,13 +312,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	}
 
 	if (instr = strstr(command_line, "-ip"))
-	{								  
+	{
 		char buffer[100];
 		sscanf(instr, "-ip %s", &buffer);
 		strncpy(CommandLineIPAddressString,buffer,15);
 		CommandLineIPAddressString[15] = 0;
 	}
- 	
+ 
  	#if PLAY_INTRO//(MARINE_DEMO||ALIEN_DEMO||PREDATOR_DEMO)
   	if (!LobbiedGame)  // Edmond
 	 	WeWantAnIntro();
@@ -344,7 +344,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	if (instr = strstr(command_line, "-s"))
 		sscanf(instr, "-s%d", &level_to_load);
-	
+
 	#endif
 
 	Env_List[0]->main = LevelName;
@@ -359,6 +359,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	InitialiseSystem(hInstance, nCmdShow);
 	InitialiseRenderer();
 
+//	Renderer *testRenderer = new D3D9Renderer();
+//	testRenderer->Initialise();
+
+//	delete testRenderer;
+
 	if (!InitialiseDirect3D())
 	{
 		MessageBox(hWndMain, "Couldn't create a Direct3D device. See avp_log.txt for details", "Couldn't create render device!", MB_OK | MB_ICONSTOP);
@@ -369,21 +374,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	LoadDeviceAndVideoModePreferences();
 
 	LoadKeyConfiguration();
-  	
+
 	/*-------------------Patrick 2/6/97-----------------------
 	Start the sound system
 	----------------------------------------------------------*/
 	SoundSys_Start();
 	CDDA_Start();
-	
+
 	// get rid of the mouse cursor
 	SetCursor(NULL);
 
 	// load language file and setup text string access
 	InitTextStrings();
-	
+
 	BuildMultiplayerLevelNameArray();//sort out multiplayer level names
-	
+
 	AvP.LevelCompleted = 0;
 	LoadSounds("PLAYER"); 
 
@@ -408,7 +413,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
 		if (instr = strstr(command_line, "-n"))
-		{								  
+		{
 			sscanf(instr, "-n %s", &LevelName);
 		}
 		#endif
@@ -441,7 +446,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		/* KJL 15:43:25 03/11/97 - run until this boolean is set to 0 */
 		AvP.MainLoopRunning = 1;
-		
+
 		ScanImagesForFMVs();
 
 		ResetFrameCounter();
@@ -456,12 +461,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			MinimalNetCollectMessages();
 			TeleportNetPlayerToAStartingPosition(Player->ObStrategyBlock,1);
 		}
-		
+
 		IngameKeyboardInput_ClearBuffer();
 
 		while (AvP.MainLoopRunning && bRunning) 
 		{
-		 	CheckForWindowsMessages();
+			CheckForWindowsMessages();
 			CursorHome();
 
 			#if debug
@@ -484,7 +489,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 							if (ShowDebuggingText.FPS) ReleasePrintDebuggingText("FrameRate = %d fps\n",FrameRate);
 							if (ShowDebuggingText.Environment) ReleasePrintDebuggingText("Environment %s\n", Env_List[AvP.CurrentEnv]->main);
 							if (ShowDebuggingText.Coords) ReleasePrintDebuggingText("Player World Coords: %d,%d,%d\n",Player->ObWorld.vx,Player->ObWorld.vy,Player->ObWorld.vz);
-
 							{
 								PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 								PLAYER_WEAPON_DATA *weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
@@ -517,13 +521,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		
 						// check to see if we're pausing the game;
 						// if so kill off any sound effects
-						if (InGameMenusAreRunning() && ( (AvP.Network!=I_No_Network && netGameData.skirmishMode) || (AvP.Network==I_No_Network))	)
+						if (InGameMenusAreRunning() && ((AvP.Network!=I_No_Network && netGameData.skirmishMode) || (AvP.Network==I_No_Network)))
 							SoundSys_StopAll();
 					}
 					else
 					{
 						ReadUserInput();
-//						UpdateAllFMVTextures();	
+//						UpdateAllFMVTextures();
 						SoundSys_Management();
 
 						ThisFramesRenderingHasBegun();
@@ -574,7 +578,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 					break;
 				}
 			}
-			
+
 			if (AvP.RestartLevel)
 			{
 				AvP.RestartLevel=0;
@@ -629,14 +633,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		Vorbis_CloseSystem(); // stop ogg vorbis player
 
 		// netgame support
-		if (AvP.Network != I_No_Network) 
+		if (AvP.Network != I_No_Network)
 		{
 			/* we cleanup and reset our game mode here, at the end of the game loop, as other 
 			clean-up functions need to know if we've just exited a netgame */
 			EndAVPNetGame();
 			//EndOfNetworkGameScreen();
 		}
-				
+
 		ClearMemoryPool();
 
 #if 0 //bjd - FIXME
@@ -655,13 +659,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	/* Added 28/1/98 by DHM: hook for my code on program shutdown */
 	DAVEHOOK_UnInit();
-	
+
 	/*-------------------Patrick 2/6/97-----------------------
 	End the sound system
 	----------------------------------------------------------*/
 
 	SoundSys_StopAll();
-  	SoundSys_RemoveAll(); 
+	SoundSys_RemoveAll(); 
 
 	/* bjd - delete some profile data that was showing up as memory leaks */
 	EmptyUserProfilesList();
@@ -677,7 +681,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	SoundSys_End();
 	ReleaseDirect3D();
 	//TimeStampedMessage("after ReleaseDirect3D");
-	
+
 	/* Kill windows procedures */
 //	ExitWindowsSystem();
 	//TimeStampedMessage("after ExitWindowsSystem");
@@ -691,7 +695,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	dx_log_close();
 #endif
 
- 	CDDA_End();
+	CDDA_End();
 	ClearMemoryPool();
 
 	// restore stickey keys setting

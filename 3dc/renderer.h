@@ -25,15 +25,6 @@
 #ifndef _renderer_h_
 #define _renderer_h_
 
-//test
-class Renderer
-{
-	public:
-		virtual void Initialise() = 0;
-		virtual void BeginFrame() = 0;
-		virtual void EndFrame() = 0;
-};
-
 // temp
 
 #ifdef _WIN32
@@ -61,5 +52,17 @@ enum R_USAGE
 	USAGE_DYNAMIC,
 	USAGE_STATIC
 };
+
+/*
+//test
+class Renderer
+{
+	public:
+		virtual bool Initialise() = 0;
+		virtual void BeginFrame() = 0;
+		virtual void EndFrame() = 0;
+		virtual bool CreateVertexBuffer(uint32_t length, uint32_t usage, r_VertexBuffer **vertexBuffer) = 0;
+};
+*/
 
 #endif // include guard

@@ -49,14 +49,14 @@ class MediaMedium
 			m_nBufLenUsed(0),
 			m_nRefCnt(1)
 			{}
-			
+
 		virtual ~MediaMedium() {}
-	
+
 	public:
 		// allow reference counting
 		unsigned AddRef() { return ++m_nRefCnt; }
 		unsigned Release() { if (0==(--m_nRefCnt)) { delete this; return 0;} else return m_nRefCnt; }
-	
+
 		enum
 		{
 			// error code flags
@@ -68,9 +68,9 @@ class MediaMedium
 			,MME_IOERROR   = 0x00000020 // read/write operation failed
 		};
 		unsigned m_fError;
-		
+
 		unsigned m_nDefBufSize; // default read or write buffer sizes for buffering small objects
-		
+
 		// flush read/write buffers. You should call this function after the last read or write operation on the object
 		// alternatively, derived (implementation) classes close methods should call this
 		void Flush()
@@ -94,14 +94,14 @@ class MediaMedium
 			m_nBufSize = 0;
 			m_nBufLenUsed = 0;
 		}
-		
+
 		// use this to write a block of raw data
 		void WriteBlock(void const * pData, unsigned nSize)
 		{
 			Flush();
 			DoWriteBlock(pData,nSize);
 		}
-		
+
 		// this may be faster, but will only work if the block size no more than the default buffer size
 		void WriteBufferedBlock(void const * pData, unsigned nSize)
 		{
@@ -125,14 +125,14 @@ class MediaMedium
 				}
 			}
 		}
-		
+
 		// use this to read a block of raw data
 		void ReadBlock(void * pData, unsigned nSize)
 		{
 			Flush();
 			DoReadBlock(pData,nSize);
 		}
-		
+
 		// this may be faster, but will only work if the block size no more than the default buffer size
 		void ReadBufferedBlock(void * pData, unsigned nSize)
 		{
@@ -156,7 +156,7 @@ class MediaMedium
 				}
 			}
 		}
-		
+
 		// move the 'file' pointer nOffset bytes
 		// this will not necessarily cause buffers to be flushed
 		// if the pointer can be moved within the current buffer,
@@ -197,7 +197,7 @@ class MediaMedium
 			Flush();
 			DoSetPos(DoGetPos()+nOffset);
 		}
-		
+
 		// set the 'file' pointer
 		// you would normally only pass values which have been
 		// previously returned by a call to GetPos
@@ -228,16 +228,16 @@ class MediaMedium
 				DoSetPos(nPos);
 			}
 		}
-		
+
 		// get the 'file' pointer. The returned value
 		// can be used in a call to SetPos
 		unsigned GetPos()
 		{
 			return DoGetPos()+m_nReadBufPos+m_nWriteBufPos;
 		}
-		
+
 		virtual unsigned GetRemainingSize();
-		
+
 	private:
 		void * m_pWriteBuffer;
 		void const * m_pReadBuffer;
@@ -245,43 +245,43 @@ class MediaMedium
 		unsigned m_nWriteBufPos;
 		unsigned m_nBufSize;
 		unsigned m_nBufLenUsed;
-		
+
 		unsigned m_nRefCnt;
-	
+
 	protected:
-	
+
 		// the non-pure functions default implementation sets the unavailable error flag
-		
+
 		// it is safe to assume that these four functions will be called in a logical order
 		// and that only one buffer (read or write) will be required at once
-		
+
 		// this two functions may return NULL only if *pSize is set to zero
 		// *pSize should otherwise be set to the actual size of the buffer returned
-		
+
 		// get a pointer to memory where data can be written to directly
 		virtual void * GetWriteBuffer(unsigned * pSize, unsigned nDesiredSize);
-		
+
 		// get a pointer to memory where data can be read from directly
 		virtual void const * GetReadBuffer(unsigned * pSize, unsigned nDesiredSize);
-		
+
 		// close the buffer 'allocated' above and assume nPosOffset bytes were transferred
 		// and that the 'file' pointer should be positioned at the end of the transferred data
 		virtual void CloseWriteBuffer(unsigned nPosOffset);
 		virtual void CloseReadBuffer(unsigned nPosOffset);
-		
+
 		// transfer a block of data
 		// it is safe to assume that no buffer will be open
 		virtual void DoWriteBlock(void const * pData, unsigned nSize);
 		virtual void DoReadBlock(void * pData, unsigned nSize);
-		
+
 		// if a buffer is open, should return pos at start of buffer
 		virtual unsigned DoGetPos() = 0;
-		
+
 		// it is safe to assume that no buffer will be open
 		virtual void DoSetPos(unsigned nPos) = 0;
-		
+
 	friend class MediaSection;
-	
+
 	friend class _Media_CompilerHack;
 };
 
@@ -312,7 +312,7 @@ class _Media_CompilerHack
 				}
 			}
 		}
-	
+
 		template <class TYPE>
 		static inline void MediaWrite(MediaMedium * pThis, TYPE d)
 		{
@@ -377,7 +377,7 @@ class MediaWinFileMedium : public MediaMedium
 			Flush();
 			m_hFile = INVALID_HANDLE_VALUE;
 		}
-		
+
 		void Open(LPCTSTR pszFileName, DWORD dwDesiredAccess)
 		{
 			DWORD dwShareMode;
@@ -426,7 +426,7 @@ class MediaWinFileMedium : public MediaMedium
 					m_hFile = INVALID_HANDLE_VALUE;
 			}
 		}
-		
+
 		~MediaWinFileMedium()
 		{
 			// should already be closed...
@@ -434,32 +434,32 @@ class MediaWinFileMedium : public MediaMedium
 		}
 
 		virtual unsigned GetRemainingSize();
-	
+
 	private:
 		HANDLE m_hFile;
-		
+
 		char * m_pBuffer;
 		unsigned m_nReadBufLen;
 
 	protected:
-	
+
 		// get a pointer to memory where data can be written to directly
 		virtual void * GetWriteBuffer(unsigned * pSize, unsigned nDesiredSize);
-		
+
 		// get a pointer to memory where data can be read from directly
 		virtual void const * GetReadBuffer(unsigned * pSize, unsigned nDesiredSize);
-		
+
 		// close the buffer allocated above and assume nPosOffset were transferred
 		virtual void CloseWriteBuffer(unsigned nPosOffset);
 		virtual void CloseReadBuffer(unsigned nPosOffset);
-		
+
 		// transfer a block of data: the buffer should be closed
 		virtual void DoWriteBlock(void const * pData, unsigned nSize);
 		virtual void DoReadBlock(void * pData, unsigned nSize);
-		
+
 		// if a buffer is open, should return pos at start of buffer
 		virtual unsigned DoGetPos();
-		
+
 		// requires that no buffer is oben
 		virtual void DoSetPos(unsigned nPos);
 };
@@ -480,7 +480,7 @@ class MediaStdFileMedium : public MediaMedium
 			Flush();
 			m_pFile = NULL;
 		}
-		
+
 		void Open(char const * pszFileName, char const * pszOpenMode)
 		{
 			m_pFile = avp_fopen(pszFileName,pszOpenMode);
@@ -500,40 +500,40 @@ class MediaStdFileMedium : public MediaMedium
 					m_pFile = NULL;
 			}
 		}
-		
+
 		~MediaStdFileMedium()
 		{
 			// should already be closed...
 			Close();
 		}
-	
+
 		virtual unsigned GetRemainingSize();
 
 	private:
 		FILE * m_pFile;
-		
+
 		char * m_pBuffer;
 		unsigned m_nReadBufLen;
 
 	protected:
-	
+
 		// get a pointer to memory where data can be written to directly
 		virtual void * GetWriteBuffer(unsigned * pSize, unsigned nDesiredSize);
-		
+
 		// get a pointer to memory where data can be read from directly
 		virtual void const * GetReadBuffer(unsigned * pSize, unsigned nDesiredSize);
-		
+
 		// close the buffer allocated above and assume nPosOffset were transferred
 		virtual void CloseWriteBuffer(unsigned nPosOffset);
 		virtual void CloseReadBuffer(unsigned nPosOffset);
-		
+
 		// transfer a block of data: the buffer should be closed
 		virtual void DoWriteBlock(void const * pData, unsigned nSize);
 		virtual void DoReadBlock(void * pData, unsigned nSize);
-		
+
 		// if a buffer is open, should return pos at start of buffer
 		virtual unsigned DoGetPos();
-		
+
 		// requires that no buffer is oben
 		virtual void DoSetPos(unsigned nPos);
 };
@@ -542,13 +542,13 @@ class MediaMemoryReadMedium : public MediaMedium
 {
 	public:
 		MediaMemoryReadMedium() : m_pMem(NULL) {}
-		
+
 		void Open(void const * p)
 		{
 			m_pMem = p;
 			m_nOffset = 0;
 		}
-		
+
 		void Close()
 		{
 			if (m_pMem)
@@ -559,25 +559,25 @@ class MediaMemoryReadMedium : public MediaMedium
 			else
 				m_fError |= MME_CLOSEFAIL;
 		}
-		
+
 	private:
 		void const * m_pMem;
-		
+
 	protected:
 		unsigned m_nOffset;
-	
+
 		// get a pointer to memory where data can be read from directly
 		virtual void const * GetReadBuffer(unsigned * pSize, unsigned nDesiredSize);
-		
+
 		// close the buffer allocated above and assume nPosOffset were transferred
 		virtual void CloseReadBuffer(unsigned nPosOffset);
-		
+
 		// transfer a block of data: the buffer should be closed
 		virtual void DoReadBlock(void * pData, unsigned nSize);
-		
+
 		// if a buffer is open, should return pos at start of buffer
 		virtual unsigned DoGetPos();
-		
+
 		// requires that no buffer is oben
 		virtual void DoSetPos(unsigned nPos);
 };
@@ -586,30 +586,30 @@ class MediaMemoryMedium : public MediaMemoryReadMedium
 {
 	public:
 		MediaMemoryMedium() : m_pMem(NULL) {}
-		
+
 		void Open(void * p)
 		{
 			m_pMem = p;
 			MediaMemoryReadMedium::Open(p);
 		}
-		
+
 		void Close()
 		{
 			MediaMemoryReadMedium::Close();
 			m_pMem = NULL;
 		}
-		
+
 	private:
 		void * m_pMem;
-		
+
 	protected:
-	
+
 		// get a pointer to memory where data can be written to directly
 		virtual void * GetWriteBuffer(unsigned * pSize, unsigned nDesiredSize);
-		
+
 		// close the buffer allocated above and assume nPosOffset were transferred
 		virtual void CloseWriteBuffer(unsigned nPosOffset);
-		
+
 		// transfer a block of data: the buffer should be closed
 		virtual void DoWriteBlock(void const * pData, unsigned nSize);
 };
@@ -619,7 +619,7 @@ class MediaSection : public MediaMedium
 {
 	public:
 		MediaSection() : m_pMedium(NULL) {}
-		
+
 		void Open(MediaMedium * pMedium, unsigned nMaxSize = UINT_MAX)
 		{
 			m_pMedium = pMedium;
@@ -638,7 +638,7 @@ class MediaSection : public MediaMedium
 		{
 			return (m_nPos > m_nUsedPos) ? m_nPos : m_nUsedPos;
 		}
-		
+
 		virtual unsigned GetRemainingSize();
 
 	private:
@@ -646,25 +646,25 @@ class MediaSection : public MediaMedium
 		unsigned m_nMaxSize;
 		unsigned m_nPos;
 		unsigned m_nUsedPos;
-		
+
 	protected:
 		// get a pointer to memory where data can be written to directly
 		virtual void * GetWriteBuffer(unsigned * pSize, unsigned nDesiredSize);
-		
+
 		// get a pointer to memory where data can be read from directly
 		virtual void const * GetReadBuffer(unsigned * pSize, unsigned nDesiredSize);
-		
+
 		// close the buffer allocated above and assume nPosOffset were transferred
 		virtual void CloseWriteBuffer(unsigned nPosOffset);
 		virtual void CloseReadBuffer(unsigned nPosOffset);
-		
+
 		// transfer a block of data: the buffer should be closed
 		virtual void DoWriteBlock(void const * pData, unsigned nSize);
 		virtual void DoReadBlock(void * pData, unsigned nSize);
-		
+
 		// if a buffer is open, should return pos at start of buffer
 		virtual unsigned DoGetPos();
-		
+
 		// requires that no buffer is oben
 		virtual void DoSetPos(unsigned nPos);
 };

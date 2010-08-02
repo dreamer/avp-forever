@@ -1179,7 +1179,8 @@ SHAPEHEADER *Get_Degraded_Shape(SHAPEHEADER *base_shape)
 	int lodScale;
 	extern float CameraZoomScale;
 
-	if ((base_shape->shape_degradation_array==NULL)||(Global_HModel_Sptr==NULL)) {
+	if ((base_shape->shape_degradation_array==NULL)||(Global_HModel_Sptr==NULL)) 
+	{
 		return(base_shape);
 	}
 
@@ -1188,15 +1189,12 @@ SHAPEHEADER *Get_Degraded_Shape(SHAPEHEADER *base_shape)
 	MakeVector(worldposition, &Global_VDB_Ptr->VDB_World, &viewposition);
 	RotateVector(&viewposition, &Global_VDB_Ptr->VDB_Mat);
 
-	array_ptr=base_shape->shape_degradation_array;
+	array_ptr = base_shape->shape_degradation_array;
 
-	{
-		lodScale = (float)GlobalLevelOfDetail_Hierarchical*CameraZoomScale;
+	lodScale = (float)GlobalLevelOfDetail_Hierarchical*CameraZoomScale;
 
-	}
 	/* Now walk array. */
 	{
-
 		int objectDistance = viewposition.vz;
 
 		if (lodScale!=ONE_FIXED)

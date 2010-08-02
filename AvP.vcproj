@@ -5949,6 +5949,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\3dc\mathline.c"
+				>
+			</File>
+			<File
 				RelativePath="3dc\Maths.c"
 				>
 				<FileConfiguration
@@ -9909,10 +9913,6 @@
 					>
 				</File>
 				<File
-					RelativePath="3dc\avp\win95\intro.hpp"
-					>
-				</File>
-				<File
 					RelativePath="3dc\avp\Inventry.h"
 					>
 				</File>
@@ -9969,10 +9969,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\3dc\mathline.c"
-					>
-				</File>
-				<File
 					RelativePath="3dc\win95\md5.h"
 					>
 				</File>
@@ -9982,14 +9978,6 @@
 				</File>
 				<File
 					RelativePath="3dc\avp\mempool.h"
-					>
-				</File>
-				<File
-					RelativePath="3dc\avp\menudefs.h"
-					>
-				</File>
-				<File
-					RelativePath="3dc\avp\win95\menugfx.h"
 					>
 				</File>
 				<File
@@ -10065,10 +10053,6 @@
 					>
 				</File>
 				<File
-					RelativePath="3dc\win95\Pentime.h"
-					>
-				</File>
-				<File
 					RelativePath="3dc\avp\Pfarlocs.h"
 					>
 				</File>
@@ -10106,10 +10090,6 @@
 				</File>
 				<File
 					RelativePath="3dc\avp\win95\Projload.hpp"
-					>
-				</File>
-				<File
-					RelativePath="3dc\avp\projmenu.hpp"
 					>
 				</File>
 				<File
@@ -10218,10 +10198,6 @@
 				</File>
 				<File
 					RelativePath="3dc\win95\Shpchunk.hpp"
-					>
-				</File>
-				<File
-					RelativePath="3dc\win95\Smsopt.h"
 					>
 				</File>
 				<File

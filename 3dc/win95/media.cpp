@@ -50,15 +50,15 @@ unsigned MediaWinFileMedium::GetRemainingSize()
 		m_fError |= MME_UNAVAIL;
 		return 0;
 	}
-	
+
 	unsigned nSize = GetFileSize(m_hFile,NULL);
-	
+
 	if (0xffffffff == nSize)
 	{
 		m_fError |= MME_UNAVAIL;
 		return 0;
 	}
-	
+
 	return nSize - GetPos();	
 }
 
@@ -74,18 +74,18 @@ void const * MediaWinFileMedium::GetReadBuffer(unsigned * pSize, unsigned nDesir
 	if (INVALID_HANDLE_VALUE == m_hFile)
 		// the base/default implementation raises an error
 		return MediaMedium::GetReadBuffer(pSize,nDesiredSize);
-		
+
 	m_pBuffer = new char [nDesiredSize];
-	
+
 	DWORD nBytesRead = 0;
-	
+
 	if (!ReadFile(m_hFile, m_pBuffer, nDesiredSize, &nBytesRead, NULL))
 		m_fError |= MME_IOERROR;
 	else if (!nBytesRead)
 		m_fError |= MME_EOFMET;
-		
+
 	*pSize = m_nReadBufLen = nBytesRead;
-	
+
 	return m_pBuffer;
 }
 
@@ -97,14 +97,14 @@ void MediaWinFileMedium::CloseWriteBuffer(unsigned nPosOffset)
 		MediaMedium::CloseWriteBuffer(nPosOffset);
 		return;
 	}
-		
+
 	DWORD nBytesWritten = 0;
 	
 	if (!WriteFile(m_hFile, m_pBuffer, nPosOffset, &nBytesWritten, NULL))
 		m_fError |= MME_IOERROR;
 	else if (nBytesWritten < nPosOffset)
 		m_fError |= MME_EOFMET;
-		
+
 	delete [] m_pBuffer;
 }
 
@@ -116,12 +116,12 @@ void MediaWinFileMedium::CloseReadBuffer(unsigned nPosOffset)
 		MediaMedium::CloseReadBuffer(nPosOffset);
 		return;
 	}
-		
+
 	if (nPosOffset != m_nReadBufLen && 0xffffffff == SetFilePointer(m_hFile,nPosOffset - m_nReadBufLen,NULL,FILE_CURRENT))
 		m_fError |= MME_UNAVAIL;
 		
 	m_nReadBufLen = 0;
-	
+
 	delete [] m_pBuffer;
 }
 
@@ -132,9 +132,9 @@ void MediaWinFileMedium::DoWriteBlock(void const * pData, unsigned nSize)
 		MediaMedium::DoWriteBlock(pData,nSize);
 		return;
 	}
-	
+
 	DWORD nBytesWritten = 0;
-	
+
 	if (!WriteFile(m_hFile, pData, nSize, &nBytesWritten, NULL))
 		m_fError |= MME_IOERROR;
 	else if (nBytesWritten < nSize)
@@ -148,9 +148,9 @@ void MediaWinFileMedium::DoReadBlock(void * pData, unsigned nSize)
 		MediaMedium::DoReadBlock(pData,nSize);
 		return;
 	}
-	
+
 	DWORD nBytesRead = 0;
-	
+
 	if (!ReadFile(m_hFile, pData, nSize, &nBytesRead, NULL))
 		m_fError |= MME_IOERROR;
 	else if (nBytesRead < nSize)
@@ -166,7 +166,7 @@ unsigned MediaWinFileMedium::DoGetPos()
 		m_fError |= MME_UNAVAIL;
 		return 0;
 	}
-	
+
 	return nFilePos - m_nReadBufLen;
 }
 
@@ -187,25 +187,25 @@ unsigned MediaStdFileMedium::GetRemainingSize()
 		m_fError |= MME_UNAVAIL;
 		return 0;
 	}
-	
+
 	long nPos = ftell(m_pFile);
-	
+
 	if (-1L == nPos || fseek(m_pFile,0,SEEK_END))
 	{
 		m_fError |= MME_UNAVAIL;
 		return 0;
 	}
-	
+
 	long nSize = ftell(m_pFile);
-	
+
 	fseek(m_pFile,nPos,SEEK_SET);
-	
+
 	if (-1L == nSize)
 	{
 		m_fError |= MME_UNAVAIL;
 		return 0;
 	}
-	
+
 	return nSize - GetPos();	
 }
 
@@ -221,11 +221,11 @@ void const * MediaStdFileMedium::GetReadBuffer(unsigned * pSize, unsigned nDesir
 	if (!m_pFile)
 		// the base/default implementation raises an error
 		return MediaMedium::GetReadBuffer(pSize,nDesiredSize);
-		
+
 	m_pBuffer = new char [nDesiredSize];
 	
 	*pSize = m_nReadBufLen = fread(m_pBuffer, 1, nDesiredSize, m_pFile);
-	
+
 	if (!m_nReadBufLen)
 	{
 		if (feof(m_pFile))
@@ -233,7 +233,7 @@ void const * MediaStdFileMedium::GetReadBuffer(unsigned * pSize, unsigned nDesir
 		else
 			m_fError |= MME_IOERROR;
 	}
-	
+
 	return m_pBuffer;
 }
 
@@ -245,7 +245,7 @@ void MediaStdFileMedium::CloseWriteBuffer(unsigned nPosOffset)
 		MediaMedium::CloseWriteBuffer(nPosOffset);
 		return;
 	}
-		
+
 	if (fwrite(m_pBuffer, 1, nPosOffset, m_pFile) < nPosOffset)
 	{
 		if (feof(m_pFile))
@@ -253,7 +253,7 @@ void MediaStdFileMedium::CloseWriteBuffer(unsigned nPosOffset)
 		else
 			m_fError |= MME_IOERROR;
 	}
-	
+
 	delete [] m_pBuffer;
 }
 
@@ -265,10 +265,10 @@ void MediaStdFileMedium::CloseReadBuffer(unsigned nPosOffset)
 		MediaMedium::CloseReadBuffer(nPosOffset);
 		return;
 	}
-		
+
 	if (nPosOffset != m_nReadBufLen && fseek(m_pFile,nPosOffset - m_nReadBufLen,SEEK_CUR))
 		m_fError |= MME_UNAVAIL;
-		
+
 	m_nReadBufLen = 0;
 	delete [] m_pBuffer;
 }
@@ -280,7 +280,7 @@ void MediaStdFileMedium::DoWriteBlock(void const * pData, unsigned nSize)
 		MediaMedium::DoWriteBlock(pData,nSize);
 		return;
 	}
-	
+
 	if (fwrite(pData, 1, nSize, m_pFile) < nSize)
 	{
 		if (feof(m_pFile))
@@ -297,7 +297,7 @@ void MediaStdFileMedium::DoReadBlock(void * pData, unsigned nSize)
 		MediaMedium::DoReadBlock(pData,nSize);
 		return;
 	}
-	
+
 	if (fread(pData, 1, nSize, m_pFile) < nSize)
 	{
 		if (feof(m_pFile))
@@ -310,13 +310,13 @@ void MediaStdFileMedium::DoReadBlock(void * pData, unsigned nSize)
 unsigned MediaStdFileMedium::DoGetPos()
 {
 	long nFilePos = ftell(m_pFile);
-	
+
 	if (-1L == nFilePos)
 	{
 		m_fError |= MME_UNAVAIL;
 		return 0;
 	}
-	
+
 	return nFilePos - m_nReadBufLen;
 }
 
@@ -335,7 +335,7 @@ void const * MediaMemoryReadMedium::GetReadBuffer(unsigned * pSize, unsigned nDe
 		return MediaMedium::GetReadBuffer(pSize,nDesiredSize);
 		
 	*pSize = nDesiredSize;
-	
+
 	return static_cast<char const *>(m_pMem)+m_nOffset/sizeof(char);
 }
 
@@ -347,7 +347,7 @@ void MediaMemoryReadMedium::CloseReadBuffer(unsigned nPosOffset)
 		MediaMedium::CloseReadBuffer(nPosOffset);
 		return;
 	}
-	
+
 	m_nOffset += nPosOffset;
 }
 
@@ -358,9 +358,9 @@ void MediaMemoryReadMedium::DoReadBlock(void * pData, unsigned nSize)
 		MediaMedium::DoReadBlock(pData,nSize);
 		return;
 	}
-	
+
 	memcpy(pData,static_cast<char const *>(m_pMem)+m_nOffset/sizeof(char),nSize);
-	
+
 	m_nOffset += nSize;
 }
 
@@ -381,9 +381,9 @@ void * MediaMemoryMedium::GetWriteBuffer(unsigned * pSize, unsigned nDesiredSize
 	if (!m_pMem)
 		// the base/default implementation raises an error
 		return MediaMedium::GetWriteBuffer(pSize,nDesiredSize);
-		
+
 	*pSize = nDesiredSize;
-	
+
 	return static_cast<char *>(m_pMem)+m_nOffset/sizeof(char);
 }
 
@@ -395,7 +395,7 @@ void MediaMemoryMedium::CloseWriteBuffer(unsigned nPosOffset)
 		MediaMedium::CloseWriteBuffer(nPosOffset);
 		return;
 	}
-	
+
 	m_nOffset += nPosOffset;
 }
 
@@ -406,9 +406,9 @@ void MediaMemoryMedium::DoWriteBlock(void const * pData, unsigned nSize)
 		MediaMedium::DoWriteBlock(pData,nSize);
 		return;
 	}
-	
+
 	memcpy(static_cast<char *>(m_pMem)+m_nOffset/sizeof(char),pData,nSize);
-	
+
 	m_nOffset += nSize;
 }
 
@@ -421,11 +421,11 @@ unsigned MediaSection::GetRemainingSize()
 		m_fError |= MME_UNAVAIL;
 		return 0;
 	}
-	
+
 	unsigned nSectionSize = m_nMaxSize - GetPos();
 	unsigned nMediaSize = m_pMedium->GetRemainingSize();
 	m_fError |= m_pMedium->m_fError;
-	
+
 	return nSectionSize < nMediaSize ? nSectionSize : nMediaSize;
 }
 
@@ -433,12 +433,12 @@ void * MediaSection::GetWriteBuffer(unsigned * pSize, unsigned nDesiredSize)
 {
 	if (!m_pMedium)
 		return MediaMedium::GetWriteBuffer(pSize,nDesiredSize);
-	
+
 	if (m_nPos + nDesiredSize > m_nMaxSize)
 	{
 		nDesiredSize = m_nMaxSize - m_nPos;
 	}
-	
+
 	void * p = m_pMedium->GetWriteBuffer(pSize,nDesiredSize);
 	m_fError |= m_pMedium->m_fError;
 	return p;
@@ -448,12 +448,12 @@ void const * MediaSection::GetReadBuffer(unsigned * pSize, unsigned nDesiredSize
 {
 	if (!m_pMedium)
 		return MediaMedium::GetReadBuffer(pSize,nDesiredSize);
-	
+
 	if (m_nPos + nDesiredSize > m_nMaxSize)
 	{
 		nDesiredSize = m_nMaxSize - m_nPos;
 	}
-	
+
 	void const * p = m_pMedium->GetReadBuffer(pSize,nDesiredSize);
 	m_fError |= m_pMedium->m_fError;
 	return p;
@@ -466,9 +466,9 @@ void MediaSection::CloseWriteBuffer(unsigned nPosOffset)
 		MediaMedium::CloseWriteBuffer(nPosOffset);
 		return;
 	}
-	
+
 	m_nPos += nPosOffset;
-	
+
 	m_pMedium->CloseWriteBuffer(nPosOffset);
 	m_fError |= m_pMedium->m_fError;
 }
@@ -480,9 +480,9 @@ void MediaSection::CloseReadBuffer(unsigned nPosOffset)
 		MediaMedium::CloseReadBuffer(nPosOffset);
 		return;
 	}
-	
+
 	m_nPos += nPosOffset;
-	
+
 	m_pMedium->CloseReadBuffer(nPosOffset);
 	m_fError |= m_pMedium->m_fError;
 }
@@ -494,15 +494,15 @@ void MediaSection::DoWriteBlock(void const * pData, unsigned nSize)
 		MediaMedium::DoWriteBlock(pData,nSize);
 		return;
 	}
-	
+
 	if (m_nPos + nSize > m_nMaxSize)
 	{
 		m_fError |= MME_VEOFMET;
 		return;
 	}
-	
+
 	m_nPos += nSize;
-	
+
 	m_pMedium->DoWriteBlock(pData,nSize);
 	m_fError |= m_pMedium->m_fError;
 }
@@ -514,15 +514,15 @@ void MediaSection::DoReadBlock(void * pData, unsigned nSize)
 		MediaMedium::DoReadBlock(pData,nSize);
 		return;
 	}
-	
+
 	if (m_nPos + nSize > m_nMaxSize)
 	{
 		m_fError |= MME_VEOFMET;
 		return;
 	}
-	
+
 	m_nPos += nSize;
-	
+
 	m_pMedium->DoReadBlock(pData,nSize);
 	m_fError |= m_pMedium->m_fError;
 }
@@ -539,17 +539,17 @@ void MediaSection::DoSetPos(unsigned nPos)
 		m_fError |= MME_UNAVAIL;
 		return;
 	}
-	
+
 	if (nPos > m_nMaxSize)
 	{
 		m_fError |= MME_VEOFMET;
 		return;
 	}
-	
+
 	m_pMedium->DoSetPos(m_pMedium->DoGetPos()+nPos-m_nPos);
 	if (m_nPos > m_nUsedPos) m_nUsedPos = m_nPos;
 	m_nPos = nPos;
-	
+
 	m_fError |= m_pMedium->m_fError;
 }
 

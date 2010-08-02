@@ -474,7 +474,6 @@ void SaveGame()
 
 	NewOnScreenMessage(GetTextString(TEXTSTRING_SAVEGAME_GAMESAVED));
 	DisplaySavesLeft();
-
 }
 
 static void EndLoadGame()
@@ -495,6 +494,7 @@ extern SAVE_SLOT_HEADER SaveGameSlot[];
 extern int AlienEpisodeToPlay;
 extern int MarineEpisodeToPlay;
 extern int PredatorEpisodeToPlay;
+
 BOOL ValidateLevelForLoadGameRequest(SAVE_SLOT_HEADER* save_slot)
 {
 	//see if we will need to change level
@@ -535,7 +535,7 @@ void LoadSavedGame()
 
 	if(LoadGameRequest<0 || LoadGameRequest>=NUMBER_OF_SAVE_SLOTS)
 	{
-		LoadGameRequest = SAVELOAD_REQUEST_NONE;		
+		LoadGameRequest = SAVELOAD_REQUEST_NONE;
 		return;
 	}
 
@@ -589,8 +589,6 @@ void LoadSavedGame()
 	ReadFile(file,LoadInfo.BufferStart,LoadInfo.BufferSize,(LPDWORD)&bytes_read,0);
 	CloseHandle(file);
 
-	
-	
 	LoadInfo.BufferPos = LoadInfo.BufferStart;
 	LoadInfo.BufferSpaceLeft = LoadInfo.BufferSize;
 	
@@ -638,7 +636,6 @@ void LoadSavedGame()
 		{
 			terminal_error = TRUE;
 		}
-		
 	}
 
 	//go through loading things
@@ -719,7 +716,7 @@ void LoadSavedGame()
 			case SaveBlock_Particles :
 				Load_Particles(header);
 				break;
-			
+
 			case SaveBlock_Decals :
 				Load_Decals(header);
 				break;
@@ -735,7 +732,7 @@ void LoadSavedGame()
 			case SaveBlock_LightElements :
 				Load_LightElements(header);
 				break;
-			
+
 			case SaveBlock_MessageHistory :
 				Load_MessageHistory(header);
 				break;
@@ -747,7 +744,6 @@ void LoadSavedGame()
 			case SaveBlock_SoundState :
 				Load_SoundState_NoRef(header);
 				break;
-				
 
 			default :
 				GLOBALASSERT("Unrecognized save block type"==0);
@@ -755,7 +751,7 @@ void LoadSavedGame()
 				break;
 		}
 	}
-	
+
 	if(terminal_error)
 	{
 		//the save file was screwed , restart the level to be on the safe side
@@ -770,7 +766,7 @@ void LoadSavedGame()
 	//make sure all the containing modules are set properly
 	{
         extern int NumActiveStBlocks;
-        extern STRATEGYBLOCK *ActiveStBlockList[];      
+        extern STRATEGYBLOCK *ActiveStBlockList[];
 
         int sbIndex = 0;
         STRATEGYBLOCK *sbPtr;
@@ -778,12 +774,12 @@ void LoadSavedGame()
         /* loop thro' the strategy block list, looking for objects that need to have
         their visibilities managed ... */
         while(sbIndex < NumActiveStBlocks)
-        {       
+        {
         	sbPtr = ActiveStBlockList[sbIndex++];
         	if(sbPtr->maintainVisibility && sbPtr->DynPtr)
 			{
         		MODULE* newModule;
-        		newModule = ModuleFromPosition(&(sbPtr->DynPtr->Position), (sbPtr->containingModule));                              
+        		newModule = ModuleFromPosition(&(sbPtr->DynPtr->Position), (sbPtr->containingModule));
 
 				if(newModule) sbPtr->containingModule = newModule;
 			}
@@ -838,7 +834,6 @@ SAVE_BLOCK_HEADER* GetNextBlockIfOfType(SAVE_BLOCK_TYPE type)
 		//out of luck
 		return 0;
 	}
-
 }
 
 static void SaveStrategies()
@@ -854,7 +849,7 @@ static void SaveStrategies()
 			case I_BehaviourMarinePlayer :
 				SaveStrategy_Player(sbPtr);
 				break;
-			
+
 			case I_BehaviourLiftDoor :
 				SaveStrategy_LiftDoor(sbPtr);
 				break;
@@ -886,7 +881,7 @@ static void SaveStrategies()
 			case I_BehaviourInanimateObject :
 				SaveStrategy_InanimateObject(sbPtr);
 				break;
-	
+
 			case I_BehaviourLightFX :
 				SaveStrategy_LightFx(sbPtr);
 				break;
@@ -962,11 +957,11 @@ static void SaveStrategies()
 			case I_BehaviourQueenAlien :
 			   	SaveStrategy_Queen(sbPtr);
 				break;
-		
+
 			case I_BehaviourAutoGun :
 			   	SaveStrategy_Autogun(sbPtr);
 				break;
-	
+
 			case I_BehaviourHierarchicalFragment :
 			   	SaveStrategy_HierarchicalDebris(sbPtr);
 				break;
@@ -1014,7 +1009,7 @@ static void SaveStrategies()
 			case I_BehaviourPredatorDisc_SeekTrack :
 				SaveStrategy_PredatorDisc(sbPtr);
 				break;
-			
+
 			case I_BehaviourSpeargunBolt :
 				SaveStrategy_SpearBolt(sbPtr);
 				break;
@@ -1034,7 +1029,6 @@ static void SaveStrategies()
 			default: ;
 		}
 	}
-	
 }
 
 static void LoadStrategy(SAVE_BLOCK_STRATEGY_HEADER* header)
@@ -1076,7 +1070,7 @@ static void LoadStrategy(SAVE_BLOCK_STRATEGY_HEADER* header)
 		case I_BehaviourInanimateObject :
 			LoadStrategy_InanimateObject(header);
 			break;
-		
+
 		case I_BehaviourLightFX :
 			LoadStrategy_LightFx(header);
 			break;
@@ -1100,7 +1094,7 @@ static void LoadStrategy(SAVE_BLOCK_STRATEGY_HEADER* header)
 		case I_BehaviourFan :
 			LoadStrategy_Fan(header);
 			break;
-	
+
 		case I_BehaviourPlacedLight :
 			LoadStrategy_PlacedLight(header);
 			break;
@@ -1136,7 +1130,7 @@ static void LoadStrategy(SAVE_BLOCK_STRATEGY_HEADER* header)
 		case I_BehaviourMarine :
 		   	LoadStrategy_Marine(header);
 			break;
-		
+
 		case I_BehaviourPlacedHierarchy :
 		   	LoadStrategy_PlacedHierarchy(header);
 			break;
@@ -1144,7 +1138,7 @@ static void LoadStrategy(SAVE_BLOCK_STRATEGY_HEADER* header)
 		case I_BehaviourPredator :
 		   	LoadStrategy_Predator(header);
 			break;
-	
+
 		case I_BehaviourXenoborg :
 		   	LoadStrategy_Xenoborg(header);
 			break;
@@ -1152,7 +1146,7 @@ static void LoadStrategy(SAVE_BLOCK_STRATEGY_HEADER* header)
 		case I_BehaviourQueenAlien :
 		   	LoadStrategy_Queen(header);
 			break;
-	
+
 		case I_BehaviourAutoGun :
 		   	LoadStrategy_Autogun(header);
 			break;
@@ -1233,7 +1227,6 @@ typedef struct dead_strategy_save_block
 {
 	SAVE_BLOCK_HEADER header;
 	char SBname[SB_NAME_LENGTH];
-
 }DEAD_STRATEGY_SAVE_BLOCK;
 
 static void SaveDeadStrategies()
@@ -1254,7 +1247,7 @@ static void SaveDeadStrategies()
 			block->header.size = sizeof(*block);
 
 			COPY_NAME(block->SBname,sbPtr->SBname);
-		}	
+		}
 	}
 }
 
@@ -1340,7 +1333,7 @@ extern void ResetNumberOfSaves()
 		case I_Easy :
 			NumberOfSavesLeft = NUM_SAVES_FOR_EASY_MODE;
 			break;
-		case I_Medium : 
+		case I_Medium :
 			NumberOfSavesLeft = NUM_SAVES_FOR_MEDIUM_MODE;
 			break;
 		case I_Hard :

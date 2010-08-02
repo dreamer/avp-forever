@@ -22,6 +22,10 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef _vertexBuffer_h_
+#define _vertexBuffer_h_
+
+#include <stdint.h>
 #include "renderer.h"
 
 class VertexBuffer
@@ -40,7 +44,7 @@ class VertexBuffer
 //			indexBuffer(0),
 			vbLength(0),
 			vbUsage(USAGE_DYNAMIC),
-			vbPool(D3DPOOL_DEFAULT),
+//			vbPool(D3DPOOL_DEFAULT),
 			vbFVF(FVF_ORTHO),
 			vbFVFsize(0),
 			vbIsLocked(false),
@@ -66,7 +70,7 @@ class VertexBuffer
 		uint32_t		ibSize;
 		uint32_t		vbLength;
 		enum R_USAGE	vbUsage;
-		D3DPOOL			vbPool;
+//		D3DPOOL			vbPool;
 		FVF				vbFVF;
 		uint32_t		vbFVFsize;
 
@@ -75,3 +79,5 @@ class VertexBuffer
 
 		HRESULT	LastError;
 };
+
+#endif

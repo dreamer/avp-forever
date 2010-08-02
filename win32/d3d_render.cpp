@@ -155,6 +155,8 @@ void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 
 static HRESULT LastError;
 
+// initialise our std::vectors to a particle size, allowing us to use them as
+// regular arrays
 void Init()
 {
 	particleList.reserve(MAX_VERTEXES);
@@ -197,6 +199,7 @@ struct renderCorona
 std::vector<renderParticle> particleArray;
 std::vector<renderCorona>   coronaArray;
 
+// convert a width pixel range value (eg 0-640) to device coordinate (eg -1.0 to 1.0)
 inline float WPos2DC(int32_t pos)
 {
 	if (mainMenu)
@@ -205,6 +208,7 @@ inline float WPos2DC(int32_t pos)
 		return (float(pos / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
 }
 
+// convert a width pixel range value (eg 0-480) to device coordinate (eg -1.0 to 1.0)
 inline float HPos2DC(int32_t pos)
 {
 	if (mainMenu)
@@ -212,6 +216,11 @@ inline float HPos2DC(int32_t pos)
 	else
 		return (float(pos / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
 }
+
+// AvP uses numVerts to represent the actual number of polygon vertices we're passing to the backend.
+// we then use the OUTPUT_TRIANGLE function to generate the indicies required to represent those
+// polygons. This function calculates the number of indicies required based on the number of verts.
+// AvP code defined these, so hence the magic numbers.
 
 uint32_t GetRealNumVerts(uint32_t numVerts)
 {
@@ -250,6 +259,9 @@ uint32_t GetRealNumVerts(uint32_t numVerts)
 	return realNumVerts;
 }
 
+// lock our vertex and index buffers, and reset counters and array indexes used to keep track 
+// of the number of verts and indicies in those buffers. Function needs to be renamed as we no 
+// longer use an execute buffer
 bool LockExecuteBuffer()
 {
 	LastError = d3d.lpD3DVertexBuffer->Lock(0, 0, (void**)&mainVertex, D3DLOCK_DISCARD);
@@ -298,6 +310,7 @@ bool LockExecuteBuffer()
 		return false;
 	}
 
+	// reset counters and indexes
 	NumVertices = 0;
 	NumIndicies = 0;
 	vb = 0;
@@ -317,6 +330,7 @@ bool LockExecuteBuffer()
     return true;
 }
 
+// unlock all vertex and index buffers. function needs to be renamed as no longer using execute buffers
 bool UnlockExecuteBufferAndPrepareForUse()
 {
 	// unlock main vertex buffer
@@ -370,6 +384,7 @@ bool UnlockExecuteBufferAndPrepareForUse()
 	return true;
 }
 
+// set a new texture provided that it isn't already set
 static void ChangeTexture(const uint32_t textureID)
 {
 	if (textureID == currentTextureID)
@@ -1590,32 +1605,32 @@ void DrawCoronas()
 		ortho[0].y = HPos2DC(tempVec.y + size);
 		ortho[0].z = 1.0f;
 		ortho[0].colour = colour;
-		ortho[0].u = (float)192 * RecipW;
-		ortho[0].v = (float)63 * RecipH;
+		ortho[0].u = 192.0f * RecipW;
+		ortho[0].v = 63.0f * RecipH;
 
 		// top left
 		ortho[1].x = WPos2DC(tempVec.x - size);
 		ortho[1].y = HPos2DC(tempVec.y - size);
 		ortho[1].z = 1.0f;
 		ortho[1].colour = colour;
-		ortho[1].u = (float)192 * RecipW;
-		ortho[1].v = (float)0 * RecipH;
+		ortho[1].u = 192.0f * RecipW;
+		ortho[1].v = 0.0f * RecipH;
 
 		// bottom right
 		ortho[2].x = WPos2DC(tempVec.x + size);
 		ortho[2].y = HPos2DC(tempVec.y + size);
 		ortho[2].z = 1.0f;
 		ortho[2].colour = colour;
-		ortho[2].u = (float)255 * RecipW;
-		ortho[2].v = (float)63 * RecipH;
+		ortho[2].u = 255.0f * RecipW;
+		ortho[2].v = 63.0f * RecipH;
 
 		// top right
 		ortho[3].x = WPos2DC(tempVec.x + size);
 		ortho[3].y = HPos2DC(tempVec.y - size);
 		ortho[3].z = 1.0f;
 		ortho[3].colour = colour;
-		ortho[3].u = (float)255 * RecipW;
-		ortho[3].v = (float)0 * RecipH;
+		ortho[3].u = 255.0f * RecipW;
+		ortho[3].v = 0.0f * RecipH;
 
 		d3d.lpD3DDevice->SetVertexShader(d3d.orthoVertexShader);
 		orthoConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
@@ -2060,7 +2075,6 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 
 		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
 		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
-
 		vb++;
 	}
 
@@ -2100,7 +2114,6 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 		mainVertex[vb].specular = (D3DCOLOR)1.0f;
 		mainVertex[vb].tu = 0.0f;
 		mainVertex[vb].tv = 0.0f;
-
 		vb++;
 	}
 
@@ -2123,7 +2136,6 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
 		mainVertex[vb].specular = (D3DCOLOR)1.0f;
 		mainVertex[vb].tu = 0.0f;
 		mainVertex[vb].tv = 0.0f;
-
 		vb++;
 	}
 
@@ -2167,7 +2179,6 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 
 		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
 		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
-
 		vb++;
 	}
 
@@ -2467,7 +2478,6 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 
 		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
 		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
-
 		vb++;
 	}
 
@@ -2626,7 +2636,6 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 		particleVertex[pVb].tu = ((float)(vertices->U)/* + 0.5f*/) * RecipW;
 		particleVertex[pVb].tv = ((float)(vertices->V)/* + 0.5f*/) * RecipH;
-
 		pVb++;
 	}
 
@@ -3869,7 +3878,7 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 	theta[0] = (CloakingPhase/8)&4095;
 	theta[1] = (800-CloakingPhase/8)&4095;
 
-	switch(AvP.PlayerType)
+	switch (AvP.PlayerType)
 	{
 		default:
 			LOCALASSERT(0);
@@ -3901,8 +3910,8 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 			orthoVerts[orthoVBOffset].y = 1.0f;
 			orthoVerts[orthoVBOffset].z = 1.0f;
 			orthoVerts[orthoVBOffset].colour = colour;
-			orthoVerts[orthoVBOffset].u = (float)(0.875 + (cos*(-1) - sin*(+1)));
-			orthoVerts[orthoVBOffset].v = (float)(0.375 + (sin*(-1) + cos*(+1)));
+			orthoVerts[orthoVBOffset].u = (float)(0.875f + (cos*(-1) - sin*(+1)));
+			orthoVerts[orthoVBOffset].v = (float)(0.375f + (sin*(-1) + cos*(+1)));
 			orthoVBOffset++;
 
 			// top left
@@ -3910,8 +3919,8 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 			orthoVerts[orthoVBOffset].y = -1.0f;
 			orthoVerts[orthoVBOffset].z = 1.0f;
 			orthoVerts[orthoVBOffset].colour = colour;
-			orthoVerts[orthoVBOffset].u = (float)(0.875 + (cos*(-1) - sin*(-1)));
-			orthoVerts[orthoVBOffset].v = (float)(0.375 + (sin*(-1) + cos*(-1)));
+			orthoVerts[orthoVBOffset].u = (float)(0.875f + (cos*(-1) - sin*(-1)));
+			orthoVerts[orthoVBOffset].v = (float)(0.375f + (sin*(-1) + cos*(-1)));
 			orthoVBOffset++;
 
 			// bottom right
@@ -3919,8 +3928,8 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 			orthoVerts[orthoVBOffset].y = 1.0f;
 			orthoVerts[orthoVBOffset].z = 1.0f;
 			orthoVerts[orthoVBOffset].colour = colour;
-			orthoVerts[orthoVBOffset].u = (float)(0.875 + (cos*(+1) - sin*(+1)));
-			orthoVerts[orthoVBOffset].v = (float)(0.375 + (sin*(+1) + cos*(+1)));
+			orthoVerts[orthoVBOffset].u = (float)(0.875f + (cos*(+1) - sin*(+1)));
+			orthoVerts[orthoVBOffset].v = (float)(0.375f + (sin*(+1) + cos*(+1)));
 			orthoVBOffset++;
 
 			// top right
@@ -3928,8 +3937,8 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 			orthoVerts[orthoVBOffset].y = -1.0f;
 			orthoVerts[orthoVBOffset].z = 1.0f;
 			orthoVerts[orthoVBOffset].colour = colour;
-			orthoVerts[orthoVBOffset].u = (float)(0.875 + (cos*(+1) - sin*(-1)));
-			orthoVerts[orthoVBOffset].v = (float)(0.375 + (sin*(+1) + cos*(-1)));
+			orthoVerts[orthoVBOffset].u = (float)(0.875f + (cos*(+1) - sin*(-1)));
+			orthoVerts[orthoVBOffset].v = (float)(0.375f + (sin*(+1) + cos*(-1)));
 			orthoVBOffset++;
 		}
 
@@ -4211,7 +4220,7 @@ void D3D_RenderHUDString_Centred(char *stringPtr, uint32_t centreX, uint32_t y, 
 
 	while (*ptr)
 	{
-		length+=AAFontWidths[(unsigned char)*ptr++];
+		length+=AAFontWidths[(uint8_t)*ptr++];
 	}
 
 	length = MUL_FIXED(HUDScaleFactor,length);
@@ -4256,7 +4265,7 @@ void D3D_RenderHUDString_Centred(char *stringPtr, uint32_t centreX, uint32_t y, 
 			D3D_HUDQuad_Output(AAFontImageNumber, quadVertices, colour, FILTERING_BILINEAR_OFF);
 
 		}
-		x += MUL_FIXED(HUDScaleFactor,AAFontWidths[(unsigned char)c]);
+		x += MUL_FIXED(HUDScaleFactor,AAFontWidths[(uint8_t)c]);
 	}
 }
 
@@ -4275,7 +4284,7 @@ extern void RenderStringCentred(char *stringPtr, int centreX, int y, int colour)
 
 	while (*ptr)
 	{
-		length += AAFontWidths[(unsigned char)*ptr++];
+		length += AAFontWidths[(uint8_t)*ptr++];
 	}
 
 	D3D_RenderHUDString(stringPtr,centreX-length/2,y,colour);

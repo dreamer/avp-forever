@@ -53,10 +53,7 @@ enum CHEATMODE_ID
 
 	MAX_NUMBER_OF_CHEATMODES,
 
-
 	CHEATMODE_NONACTIVE// leave me at the end!
-
-
 };
 
 /* Putting this here to get the definition of the cheat enum. */

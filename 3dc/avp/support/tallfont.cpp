@@ -1027,7 +1027,7 @@ IndexedFont_Kerned_Column :: OverlapOnRow
 	#if 1
 	{
 		// Find right-most pixel in row of first character
-		int rightmostX;
+		int rightmostX = 0;
 		int firstoffsetY = Row+(currentOffset*GetHeight());
 
 #if 0 // bjd
@@ -1050,7 +1050,7 @@ IndexedFont_Kerned_Column :: OverlapOnRow
 #endif
 		
 		// Find left-most pixel in row of second character
-		int leftmostX;
+		int leftmostX = 0;
 		int nextoffsetY = Row+(nextOffset*GetHeight());
 
 #if 0 // bjd

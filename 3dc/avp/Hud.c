@@ -452,8 +452,11 @@ void MaintainHUD(void)
 			int b;
 			if (CameraZoomScale!=0.25f)
 			{
-				f2i(b,CameraZoomScale*65536.0f);
-				if (b<32768) b=32768;
+				//f2i(b,CameraZoomScale*65536.0f);
+				b = (int)(CameraZoomScale * 65536.0f);
+
+				if (b < 32768) 
+					b = 32768;
 				D3D_FadeDownScreen(b,0xff0000);
 			}
 		}
@@ -2058,41 +2061,38 @@ void MaintainZoomingLevel(void)
 	i = 0;
 	while (CameraZoomScale<=ZoomLevels[++i]);
 
-
 	deltaZoom = (ZoomLevels[i-1] - ZoomLevels[i])*(float)NormalFrameTime/32768.0f;
 //	textprint("deltaZoom %f, zone %d\n",deltaZoom,i);
 
    	requestedZoomScale = ZoomLevels[CameraZoomLevel];
 
-	if (requestedZoomScale<CameraZoomScale)
+	if (requestedZoomScale < CameraZoomScale)
 	{
-		if (CameraZoomScale==ZoomLevels[i-1]) Sound_Play(SID_PRED_ZOOM_IN,"h");
+		if (CameraZoomScale == ZoomLevels[i-1])
+		{
+			Sound_Play(SID_PRED_ZOOM_IN,"h");
+		}
 
 		CameraZoomScale -= deltaZoom;
-		if (CameraZoomScale<ZoomLevels[i]) CameraZoomScale = ZoomLevels[i];
+		if (CameraZoomScale < ZoomLevels[i])
+		{
+			CameraZoomScale = ZoomLevels[i];
+		}
 		DrawScanlineOverlay = 1;
 		ScanlineLevel = (CameraZoomScale - ZoomLevels[i-1])/(ZoomLevels[i]-ZoomLevels[i-1]);
-
 	}
-	else if (requestedZoomScale>CameraZoomScale)
+	else if (requestedZoomScale > CameraZoomScale)
 	{
-		#if 0
-		CameraZoomScale += deltaZoom;
-		if (requestedZoomScale<CameraZoomScale)
-		#endif
 		CameraZoomScale = requestedZoomScale;
 		DrawScanlineOverlay = 1;
-		ScanlineLevel=1.0f;
+		ScanlineLevel = 1.0f;
 		Sound_Play(SID_PRED_ZOOM_OUT,"h");
 	}
 	else
 	{
 		DrawScanlineOverlay = 0;
 	}
-
 //	textprint("ScanlineLevel %f\n",ScanlineLevel);
-
-
 }
 
 

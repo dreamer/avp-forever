@@ -51,10 +51,8 @@ extern "C"
 	#include "platform.h"
 }
 
-#define ONE_FIXED	65536
-
 static int Osk_GetCurrentLocation();
-std::string Osk_GetKeyLabel(int buttonIndex);
+std::string Osk_GetKeyLabel(uint32_t buttonIndex);
 
 static int currentRow = 0;
 static int currentColumn = 0;
@@ -75,10 +73,10 @@ static const uint32_t indent_space = 5;
 
 struct ButtonStruct
 {
-	int			numWidthBlocks;
+	uint32_t	numWidthBlocks;
 	uint32_t	height;
 	uint32_t	width;
-	int			positionOffset;
+	uint32_t	positionOffset;
 	uint32_t	stringId;
 	bool		isBlank;
 };
@@ -145,7 +143,7 @@ void Osk_Init()
 	currentColumn = 0;
 
 	// do top row of numbers
-	for (int i = 9; i >= 0; i--)
+	for (int32_t i = 9; i >= 0; i--)
 	{
 		Osk_AddKey(i, 1);
 	}
@@ -213,10 +211,7 @@ void Osk_Draw()
 	int pos_x = osk_x + indent_space;
 	int pos_y = osk_y + indent_space;
 
-//	int innerSquareWidth = keyWidth - outline_border_size * 2;
-//	int innerSquareHeight = keyHeight - outline_border_size * 2;
-
-	int index = 0;
+	uint32_t index = 0;
 
 	for (uint32_t y = 0; y < numVerticalKeys; y++)
 	{
@@ -255,7 +250,7 @@ bool Osk_IsActive()
 	return is_active; // sort this later to only appear for text entry on xbox
 }
 
-std::string Osk_GetKeyLabel(int buttonIndex)
+std::string Osk_GetKeyLabel(uint32_t buttonIndex)
 {
 	// quick test for shift and caps lock..
 	if ((shift || capsLock) && ((stringVector.at(keyVector.at(buttonIndex).stringId).length() == 1)))

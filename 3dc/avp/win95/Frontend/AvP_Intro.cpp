@@ -101,11 +101,11 @@ extern void ShowSplashScreens(void)
 			{
 				if (a == ONE_FIXED)
 				{
-				  	DrawAvPMenuGfx(graphic[i], 0, 0, ONE_FIXED+1,AVPMENUFORMAT_LEFTJUSTIFIED);
+				  	DrawAvPMenuGfx(graphic[i], 0, 0, ONE_FIXED+1, AVPMENUFORMAT_LEFTJUSTIFIED);
 				}
 				else
 				{
-				  	DrawAvPMenuGfx_Faded(graphic[i], 0, 0, a,AVPMENUFORMAT_LEFTJUSTIFIED);
+				  	DrawAvPMenuGfx_Faded(graphic[i], 0, 0, a, AVPMENUFORMAT_LEFTJUSTIFIED);
 					DrawFadeQuad(0, 0, a);
 				}
 				timeRemaining -= NormalFrameTime / 2;

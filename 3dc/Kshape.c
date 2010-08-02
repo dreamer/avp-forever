@@ -587,7 +587,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 
 				pif = PolygonWithinFrustum(polyPtr);
 
-				if (/*pif*/1) // bjd
+				if (pif)
 				{
 					switch (polyPtr->PolyItemType)
 					{
@@ -595,7 +595,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						case I_ZB_Gouraud2dTexturedPolygon:
 						CloakedPolygon_Construct(polyPtr);
 
-/* bjd - bypass clipping
 						if (pif!=2)
 						{
 							GouraudTexturedPolygon_ClipWithZ();
@@ -611,8 +610,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 							D3D_ZBufferedCloakedPolygon_Output(polyPtr,RenderPolygon.Vertices);
 						}
 						else D3D_ZBufferedCloakedPolygon_Output(polyPtr,VerticesBuffer);
-*/
-						D3D_ZBufferedCloakedPolygon_Output(polyPtr, VerticesBuffer);
 
 						break;
 						default:
@@ -638,7 +635,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 				POLYHEADER *polyPtr = (POLYHEADER*) (*itemArrayPtr++);
 				int pif;
 				pif = PolygonWithinFrustum(polyPtr);
-				if (/*pif*/1) // bjd
+				if (pif)
 				{
 					switch (polyPtr->PolyItemType)
 					{
@@ -646,7 +643,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						case I_ZB_Gouraud2dTexturedPolygon:
 						CloakedPolygon_Construct(polyPtr);
 
-/* bjd - bypass clipping
 						if (pif!=2)
 						{
 							GouraudTexturedPolygon_ClipWithZ();
@@ -662,8 +658,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 							D3D_ZBufferedCloakedPolygon_Output(polyPtr,RenderPolygon.Vertices);
 						}
 						else D3D_ZBufferedCloakedPolygon_Output(polyPtr,VerticesBuffer);
-*/
-						D3D_ZBufferedCloakedPolygon_Output(polyPtr, VerticesBuffer);
 
 						break;
 						default:
@@ -716,15 +710,15 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 					if (pif!=2)
 					{
 						GouraudPolygon_ClipWithZ();
-						if(RenderPolygon.NumberOfVertices<3) continue;
+						if (RenderPolygon.NumberOfVertices<3) continue;
 						GouraudPolygon_ClipWithNegativeX();
-						if(RenderPolygon.NumberOfVertices<3) continue;
+						if (RenderPolygon.NumberOfVertices<3) continue;
 						GouraudPolygon_ClipWithPositiveY();
-						if(RenderPolygon.NumberOfVertices<3) continue;
+						if (RenderPolygon.NumberOfVertices<3) continue;
 						GouraudPolygon_ClipWithNegativeY();
-						if(RenderPolygon.NumberOfVertices<3) continue;
+						if (RenderPolygon.NumberOfVertices<3) continue;
 						GouraudPolygon_ClipWithPositiveX();
-						if(RenderPolygon.NumberOfVertices<3) continue;
+						if (RenderPolygon.NumberOfVertices<3) continue;
 						D3D_ZBufferedGouraudPolygon_Output(polyPtr,RenderPolygon.Vertices);
 
 		  			}
@@ -737,7 +731,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 					GouraudTexturedPolygon_Construct(polyPtr);
 				   	if (pif != 2)
 					{
-						/* if this polygon is a quad, split it into two */
+						// if this polygon is a quad, split it into two
 						if (RenderPolygon.NumberOfVertices == 4)
 						{
 							RenderPolygon.NumberOfVertices = 3;
@@ -746,15 +740,15 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 							TriangleVerticesBuffer[2] = VerticesBuffer[3];
 
 							GouraudTexturedPolygon_ClipWithZ();
-							if(RenderPolygon.NumberOfVertices<3) goto SecondTriangle;
+							if (RenderPolygon.NumberOfVertices<3) goto SecondTriangle;
 							GouraudTexturedPolygon_ClipWithNegativeX();
-							if(RenderPolygon.NumberOfVertices<3) goto SecondTriangle;
+							if (RenderPolygon.NumberOfVertices<3) goto SecondTriangle;
 							GouraudTexturedPolygon_ClipWithPositiveY();
-							if(RenderPolygon.NumberOfVertices<3) goto SecondTriangle;
+							if (RenderPolygon.NumberOfVertices<3) goto SecondTriangle;
 							GouraudTexturedPolygon_ClipWithNegativeY();
-							if(RenderPolygon.NumberOfVertices<3) goto SecondTriangle;
+							if (RenderPolygon.NumberOfVertices<3) goto SecondTriangle;
 							GouraudTexturedPolygon_ClipWithPositiveX();
-							if(RenderPolygon.NumberOfVertices<3) goto SecondTriangle;
+							if (RenderPolygon.NumberOfVertices<3) goto SecondTriangle;
 
 							if (polyPtr->PolyFlags & iflag_transparent)
 							{
@@ -772,15 +766,15 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 							VerticesBuffer[2] = TriangleVerticesBuffer[2];
 						}
 						GouraudTexturedPolygon_ClipWithZ();
-						if(RenderPolygon.NumberOfVertices<3) continue;
+						if (RenderPolygon.NumberOfVertices<3) continue;
 						GouraudTexturedPolygon_ClipWithNegativeX();
-						if(RenderPolygon.NumberOfVertices<3) continue;
+						if (RenderPolygon.NumberOfVertices<3) continue;
 						GouraudTexturedPolygon_ClipWithPositiveY();
-						if(RenderPolygon.NumberOfVertices<3) continue;
+						if (RenderPolygon.NumberOfVertices<3) continue;
 						GouraudTexturedPolygon_ClipWithNegativeY();
-						if(RenderPolygon.NumberOfVertices<3) continue;
+						if (RenderPolygon.NumberOfVertices<3) continue;
 						GouraudTexturedPolygon_ClipWithPositiveX();
-						if(RenderPolygon.NumberOfVertices<3) continue;
+						if (RenderPolygon.NumberOfVertices<3) continue;
 
 						if (polyPtr->PolyFlags & iflag_transparent)
 						{
@@ -859,6 +853,7 @@ void PredatorSeeAliensVision_ShapePipeline(SHAPEHEADER *shapePtr)
 	LOCALASSERT(numitems);
 
 	TestVerticesWithFrustum();
+
 	do
 	{
 		POLYHEADER *polyPtr = (POLYHEADER*) (*itemArrayPtr++);
@@ -877,15 +872,15 @@ void PredatorSeeAliensVision_ShapePipeline(SHAPEHEADER *shapePtr)
 					if (pif!=2)
 					{
 						GouraudTexturedPolygon_ClipWithZ();
-						if(RenderPolygon.NumberOfVertices<3) continue;
+						if (RenderPolygon.NumberOfVertices<3) continue;
 						GouraudTexturedPolygon_ClipWithNegativeX();
-						if(RenderPolygon.NumberOfVertices<3) continue;
+						if (RenderPolygon.NumberOfVertices<3) continue;
 						GouraudTexturedPolygon_ClipWithPositiveY();
-						if(RenderPolygon.NumberOfVertices<3) continue;
+						if (RenderPolygon.NumberOfVertices<3) continue;
 						GouraudTexturedPolygon_ClipWithNegativeY();
-						if(RenderPolygon.NumberOfVertices<3) continue;
+						if (RenderPolygon.NumberOfVertices<3) continue;
 						GouraudTexturedPolygon_ClipWithPositiveX();
-						if(RenderPolygon.NumberOfVertices<3) continue;
+						if (RenderPolygon.NumberOfVertices<3) continue;
 						D3D_ZBufferedGouraudTexturedPolygon_Output(polyPtr,RenderPolygon.Vertices);
 					}
 					else D3D_ZBufferedGouraudTexturedPolygon_Output(polyPtr,VerticesBuffer);
@@ -1114,13 +1109,11 @@ static void PredatorSeeAliensVisionPolygon_Construct(POLYHEADER *polyPtr)
 	VertexNumberPtr = &polyPtr->Poly1stPt;
 
 	{
-		{
-			int texture_defn_index = (polyPtr->PolyColour >> TxDefn);
-			texture_defn_ptr = Global_ShapeTextures[texture_defn_index];
-		}
+		int texture_defn_index = (polyPtr->PolyColour >> TxDefn);
+		texture_defn_ptr = Global_ShapeTextures[texture_defn_index];
 
 		/* get ptr to uv coords for this polygon */
-		if(polyPtr->PolyFlags & iflag_txanim)
+		if (polyPtr->PolyFlags & iflag_txanim)
 		{
 			/* Create the UV array */
 			int uv_array[maxpolypts * 2];
@@ -1154,7 +1147,6 @@ static void PredatorSeeAliensVisionPolygon_Construct(POLYHEADER *polyPtr)
 				renderVerticesPtr->U = texture_defn_ptr[0];// << 16;
 				renderVerticesPtr->V = texture_defn_ptr[1];// << 16;
 			}
-
 
 			renderVerticesPtr->X = vertexPtr->vx;
 			renderVerticesPtr->Y = vertexPtr->vy;
@@ -5085,13 +5077,12 @@ void RenderMirrorSurface(void)
 		{-5596,1212,-1872},
 
 	};
+
  	int mirrorUV[]=
 	{ 0,0, 127,0, 127,127, 0,127};
  	POLYHEADER fakeHeader;
 
-
 	{
-		extern int CloudyImageNumber;
 		fakeHeader.PolyFlags = iflag_transparent;
 		fakeHeader.PolyColour = CloudyImageNumber;
 	}
@@ -5148,13 +5139,12 @@ void RenderMirrorSurface2(void)
 		{-5596,140,562},
 
 	};
+
  	int mirrorUV[]=
 	{ 0,0, 127,0, 127,127, 0,127};
  	POLYHEADER fakeHeader;
 
-
 	{
-		extern int CloudyImageNumber;
 		fakeHeader.PolyFlags = iflag_transparent;
 		fakeHeader.PolyColour = CloudyImageNumber;
 	}
@@ -5181,7 +5171,7 @@ void RenderMirrorSurface2(void)
 			VerticesBuffer[i].SpecularB = 0;
 
 		}
-		RenderPolygon.NumberOfVertices=4;
+		RenderPolygon.NumberOfVertices = 4;
 		RenderPolygon.TranslucencyMode = TRANSLUCENCY_COLOUR;
 	}
 
@@ -5455,7 +5445,6 @@ void DrawWaterFallPoly(VECTORCH *v)
    	POLYHEADER fakeHeader;
 
 	{
-		extern int CloudyImageNumber;
 		fakeHeader.PolyFlags = iflag_transparent;
 		fakeHeader.PolyColour = CloudyImageNumber;
 		RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
@@ -5486,19 +5475,19 @@ void DrawWaterFallPoly(VECTORCH *v)
 	}
 
 	GouraudTexturedPolygon_ClipWithZ();
-	if(RenderPolygon.NumberOfVertices>=3)
+	if (RenderPolygon.NumberOfVertices>=3)
 	{
 		GouraudTexturedPolygon_ClipWithNegativeX();
-		if(RenderPolygon.NumberOfVertices>=3)
+		if (RenderPolygon.NumberOfVertices>=3)
 		{
 			GouraudTexturedPolygon_ClipWithPositiveY();
-			if(RenderPolygon.NumberOfVertices>=3)
+			if (RenderPolygon.NumberOfVertices>=3)
 			{
 				GouraudTexturedPolygon_ClipWithNegativeY();
-				if(RenderPolygon.NumberOfVertices>=3)
+				if (RenderPolygon.NumberOfVertices>=3)
 				{
 					GouraudTexturedPolygon_ClipWithPositiveX();
-					if(RenderPolygon.NumberOfVertices>=3)
+					if (RenderPolygon.NumberOfVertices>=3)
 					{
 						D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
 					}
@@ -5579,8 +5568,6 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 	}
 	fakeHeader.PolyFlags = iflag_transparent;
 	RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
-
-
  	{
 		int i;
 		for (i=0; i<4; i++)
@@ -5692,7 +5679,6 @@ void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRI
 	fakeHeader.PolyFlags = iflag_transparent;
 	RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
 
-
 	{
 		int i;
 		for (i=0; i<4; i++)
@@ -5738,8 +5724,6 @@ void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRI
 		}
 	}
 }
-
-int LightFlareAlpha = 65535;
 
 void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 {
@@ -6125,7 +6109,6 @@ void RenderInsideAlienTongue(int offset)
 			GouraudTexturedPolygon_ClipWithPositiveX();
 			if(RenderPolygon.NumberOfVertices<3) continue;
 			D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
-
 		}
 	}
 }

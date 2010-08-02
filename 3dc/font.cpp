@@ -86,7 +86,7 @@ void Font_Init()
 		// find out the size of the file
 		infile.seekg(0, std::ios::end);
 		size_t fileLength = infile.tellg();
-		infile.seekg(0, std::ios.beg);
+		infile.seekg(0, std::ios::beg);
 
 		if (fileLength == sizeof(BFD))
 		{

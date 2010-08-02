@@ -605,8 +605,6 @@ void ReflectObject(DISPLAYBLOCK *dPtr)
 
 void AvpShowViews(void)
 {
-//	FlushD3DZBuffer();
-
 	UpdateAllFMVTextures();
 
 	/* Update attached object positions and orientations etc. */

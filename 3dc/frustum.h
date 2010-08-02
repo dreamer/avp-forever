@@ -55,10 +55,10 @@ extern int TriangleWithinFrustum(void);
 /* pass a pointer to a vertex to be tested; results are returned in an int,
 using the following defines */
 #define INSIDE_FRUSTUM_Z_PLANE		1
-#define INSIDE_FRUSTUM_PX_PLANE	2
-#define INSIDE_FRUSTUM_NX_PLANE	4
-#define INSIDE_FRUSTUM_PY_PLANE	8
-#define INSIDE_FRUSTUM_NY_PLANE	16
+#define INSIDE_FRUSTUM_PX_PLANE		2
+#define INSIDE_FRUSTUM_NX_PLANE		4
+#define INSIDE_FRUSTUM_PY_PLANE		8
+#define INSIDE_FRUSTUM_NY_PLANE		16
 #define INSIDE_FRUSTUM				31
 
 extern char FrustumFlagForVertex[maxrotpts];

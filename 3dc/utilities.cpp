@@ -25,6 +25,7 @@
 #include "utilities.h"
 #include <string>
 #include "configFile.h"
+#include "logString.h"
 #include <assert.h>
 
 #ifdef WIN32
@@ -57,6 +58,7 @@ char *GetSaveFolderPath()
 
 	if (FAILED(SHGetFolderPath(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, saveFolder)))
 	{
+		LogErrorString("Can't find save folder path", __LINE__, __FILE__);
 		return 0;
 	}
 
@@ -73,6 +75,7 @@ char *GetSaveFolderPath()
 		}
 		else if (error == ERROR_PATH_NOT_FOUND)
 		{
+			LogErrorString("Can't create directory" + std::string(saveFolder), __LINE__, __FILE__);
 			return NULL;
 		}
 	}
@@ -90,6 +93,7 @@ char *GetSaveFolderPath()
 		}
 		else if (error == ERROR_PATH_NOT_FOUND)
 		{
+			LogErrorString("Can't create directory" + std::string(saveFolder), __LINE__, __FILE__);
 			return NULL;
 		}
 	}
@@ -111,6 +115,7 @@ char *GetSaveFolderPath()
 		}
 		else if (error == ERROR_PATH_NOT_FOUND)
 		{
+			LogErrorString("Can't create directory" + std::string(saveFolder), __LINE__, __FILE__);
 			return NULL;
 		}
 	}
@@ -130,6 +135,7 @@ char *GetSaveFolderPath()
 		}
 		else if (error == ERROR_PATH_NOT_FOUND)
 		{
+			LogErrorString("Can't create directory" + std::string(saveFolder), __LINE__, __FILE__);
 			return NULL;
 		}
 	}
@@ -141,7 +147,6 @@ char *GetSaveFolderPath()
 
 FILE *avp_fopen(const char *fileName, const char *mode)
 {
-//	FILE *theFile = 0;
 	std::string finalPath;
 
 #ifdef _XBOX

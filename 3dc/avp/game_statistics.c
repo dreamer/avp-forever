@@ -1348,9 +1348,11 @@ extern void DoStatisticsScreen(int completed_level)
 						y+=NEWLINE_SPACING;
 						colour_to_draw=COLOUR_WHITE;
 
-						if ((completed_level)&&(level_num<AVP_ENVIRONMENT_END_OF_LIST)&&(NotCheating)) {
+						if ((completed_level)&&(level_num<AVP_ENVIRONMENT_END_OF_LIST)&&(NotCheating)) 
+						{
 							/* Is it a new best? */
-							if (UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].DeadHeadBites[i]<=CurrentGameStatistics.DeadHeadBites[i]) {
+							if (UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].DeadHeadBites[i]<=CurrentGameStatistics.DeadHeadBites[i]) 
+							{
 								UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].DeadHeadBites[i]=CurrentGameStatistics.DeadHeadBites[i];
 								colour_to_draw=COLOUR_GREEN;
 							}
@@ -1362,19 +1364,24 @@ extern void DoStatisticsScreen(int completed_level)
 						sprintf(buffer,"%d",CurrentGameStatistics.DeadHeadBites[i]);
 						RenderStringCentred(buffer,TABPOINT2,y,colour_to_draw);
 
-						if ((level_num<AVP_ENVIRONMENT_END_OF_LIST)&&(NotCheating)) {
+						if ((level_num<AVP_ENVIRONMENT_END_OF_LIST)&&(NotCheating)) 
+						{
 							sprintf(buffer,"%d",
 								UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].DeadHeadBites[i]
 							);
 							RenderStringCentred(buffer,TABPOINT3,y,colour_to_draw);
-						} else {
+						} 
+						else 
+						{
 							RenderStringCentred("---",TABPOINT3,y,COLOUR_WHITE);
 						}
 
 						colour_to_draw=COLOUR_WHITE;
-						if ((completed_level)&&(level_num<AVP_ENVIRONMENT_END_OF_LIST)) {
+						if ((completed_level)&&(level_num<AVP_ENVIRONMENT_END_OF_LIST)) 
+						{
 							/* Is it a completed target? */
-							if (LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.DeadHeadBites[i]>-1) {
+							if (LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.DeadHeadBites[i]>-1) 
+							{
 								targets++;
 								if (LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.DeadHeadBites[i]<=CurrentGameStatistics.DeadHeadBites[i]) {
 									colour_to_draw=COLOUR_RED;

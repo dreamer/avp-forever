@@ -318,7 +318,7 @@ ObjectID Virtual_Object_Properties_Chunk::CalculateID()
 	strcat(Name,name);
 	
 	char buffer[16];
-	md5_buffer(Name,strlen(Name),&buffer[0]);
+	md5_buffer(Name, strlen(Name), &buffer[0]);
 	buffer[7]=0;
 	ID = *(ObjectID*)&buffer[0];
 	return ID;
@@ -344,12 +344,12 @@ Virtual_Object_Properties_Chunk::Virtual_Object_Properties_Chunk(Chunk_With_Chil
 	size=*(int*)data;
 	data+=sizeof(int);
 	
-	int length=strlen(data);
-	name=new char[length+1];
-	strcpy(name,data);
-	data+=(length+4)&~3;
+	size_t length = strlen(data);
+	name = new char[length+1];
+	strcpy(name, data);
+	data += (length+4)&~3;
 	
-	ID=*(ObjectID*)data;
+	ID = *(ObjectID*)data;
 	data+=sizeof(ObjectID);
 
 	pad1=*(int*)data;
@@ -433,7 +433,7 @@ MiscStrategy::MiscStrategy(const char* data_start,size_t size)
 {
 	data_start+=AvpStrat::GetStrategySize();
 	blocksize=size-AvpStrat::GetStrategySize();
-	if(blocksize)
+	if (blocksize)
 	{
 		datablock=new char[blocksize];
 		memcpy(datablock,data_start,blocksize);		

@@ -38,7 +38,7 @@ extern int AutoWeaponChangeOn;
 
 
 List<AVP_USER_PROFILE *> UserProfilesList;
-static AVP_USER_PROFILE DefaultUserProfile = 
+static AVP_USER_PROFILE DefaultUserProfile =
 {
 	"",
 };
@@ -48,7 +48,7 @@ extern void ExamineSavedUserProfiles(void)
 {
 	// delete any existing profiles
 	EmptyUserProfilesList();
-	
+
 	LoadUserProfiles();
 
 	// this creates the "New Profile" entry which allows you to make new profiles ingame
@@ -104,6 +104,7 @@ extern AVP_USER_PROFILE *GetNextUserProfile(void)
 
 extern int SaveUserProfile(AVP_USER_PROFILE *profilePtr)
 {
+	// avp_fopen will add SaveFolderPath for us
 	char *filename = new char [/*strlen(GetSaveFolderPath()) +*/ strlen(USER_PROFILES_PATH)+strlen(profilePtr->Name)+strlen(USER_PROFILES_SUFFIX)+1];
 //	strcpy(filename, GetSaveFolderPath());
 	strcpy(filename, USER_PROFILES_PATH);
@@ -116,9 +117,9 @@ extern int SaveUserProfile(AVP_USER_PROFILE *profilePtr)
 
 	if (!file)
 		return 0;
-	
+
 	SaveSettingsToUserProfile(profilePtr);
-	
+
 	fwrite(profilePtr, sizeof(AVP_USER_PROFILE), 1, file);
 	fclose(file);
 
@@ -239,8 +240,7 @@ static int LoadUserProfiles(void)
 			char * pszFullPath = new char [nPathLen+strlen(wfd.cFileName)+1];
 			strncpy(pszFullPath,load_name,nPathLen);
 			strcpy(pszFullPath+nPathLen,wfd.cFileName);
-			
-			
+
 			//make sure the file is a rif file
 			HANDLE rif_file;
 			rif_file = avp_CreateFile (pszFullPath, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, 0);
