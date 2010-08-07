@@ -26,7 +26,7 @@
 
 std::vector<Texture> textureList;
 
-extern uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture);
+extern bool CreateD3DTextureFromFile(const char* fileName, Texture &texture);
 
 bool Tex_Lock(uint32_t textureID, uint8_t **data, uint32_t *pitch)
 {
@@ -80,7 +80,7 @@ uint32_t Tex_CheckExists(const char* fileName)
 	return 0; // what else to return if it doesnt exist?
 }
 
-uint32_t Tex_AddTexture(const std::string &fileName, r_Texture texture, uint32_t width, uint32_t height)
+uint32_t Tex_AddTexture(const std::string &fileName, r_Texture texture, uint32_t width, uint32_t height, enum TexturePool pool)
 {
 	// get the next available ID
 	uint32_t textureID = Tex_GetFreeID();
@@ -90,6 +90,7 @@ uint32_t Tex_AddTexture(const std::string &fileName, r_Texture texture, uint32_t
 	newTexture.texture = texture;
 	newTexture.width = width;
 	newTexture.height = height;
+	newTexture.pool = pool;
 
 	// store it
 	if (textureID < textureList.size()) // we're reusing a slot in this case
@@ -115,7 +116,11 @@ uint32_t Tex_LoadFromFile(const std::string &fileName)
 
 	Texture	newTexture;
 
-	uint32_t ret = CreateD3DTextureFromFile(fileName.c_str(), newTexture);
+	if (!CreateD3DTextureFromFile(fileName.c_str(), newTexture))
+	{
+		// return no textureID as texture wasn't loaded
+		return NO_TEXTURE;
+	}
 
 	newTexture.name = fileName;
 
@@ -142,6 +147,18 @@ const Texture& Tex_GetTextureDetails(uint32_t textureID)
 	return (textureList[textureID]);
 }
 
+void Tex_ReloadDynamicTextures()
+{
+	for (std::vector<Texture>::iterator it = textureList.begin(); it != textureList.end(); ++it)
+	{
+		if ((it->texture) && (it->pool == TexturePool_DYNAMIC))
+		{
+			// release and restore texture (just release for now..)
+			R_ReleaseTexture(it->texture);
+		}
+	}
+}
+
 void Tex_GetDimensions(uint32_t textureID, uint32_t &width, uint32_t &height)
 {
 	// the actual "no texture" texture is 1x1 resolution
@@ -160,9 +177,7 @@ void Tex_Release(uint32_t textureID)
 {
 	if (textureList.at(textureID).texture)
 	{
-		// this is bad, temporary..
-		textureList[textureID].texture->Release();
-		textureList[textureID].texture = NULL;
+		R_ReleaseTexture(textureList[textureID].texture);
 	}
 /*
 	char buf[100];

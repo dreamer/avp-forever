@@ -18,7 +18,7 @@
 struct fmvCutscene
 {
 	BOOL isPlaying;
-	TheoraFMV *fmvClass;
+	TheoraFMV *FMVclass;
 };
 
 fmvCutscene fmvList[MAX_FMVS];
@@ -51,33 +51,21 @@ bool MenuBackground = false;
 
 void ReleaseAllFMVTexturesForDeviceReset()
 {
+	// do ingame videoscreen textures
 	for (uint32_t i = 0; i < NumberOfFMVTextures; i++)
 	{
-//		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
 		Tex_Release(FMVTexture[i].textureID);
 	}
 
 	// check for fullscreen intro/outro fmvs
 	for (uint32_t i = 0; i < MAX_FMVS; i++)
 	{
-		if (fmvList[i].isPlaying && fmvList[i].fmvClass)
+		if (fmvList[i].isPlaying && fmvList[i].FMVclass)
 		{
 			for (uint32_t j = 0; j < 3; j++)
 			{
-				if (fmvList[i].fmvClass->frameTextures[j].texture)
-				{
-					fmvList[i].fmvClass->frameTextures[j].texture->Release();
-					fmvList[i].fmvClass->frameTextures[j].texture = NULL;
-				}
+				Tex_Release(fmvList[i].FMVclass->frameTextures[j]);
 			}
-/*
-			// lets double check..
-			if (fmvList[i].fmvClass->mDisplayTexture)
-			{
-				fmvList[i].fmvClass->mDisplayTexture->Release();
-				fmvList[i].fmvClass->mDisplayTexture = NULL;
-			}
-*/
 		}
 	}
 }
@@ -86,8 +74,7 @@ void RecreateAllFMVTexturesAfterDeviceReset()
 {
 	for (uint32_t i = 0; i < NumberOfFMVTextures; i++)
 	{
-		FMVTexture[i].textureID = Tex_AddTexture("CUTSCENE" + IntToString(i), CreateFmvTexture(&FMVTexture[i].width, &FMVTexture[i].height, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT), FMVTexture[i].width, FMVTexture[i].height);
-//		FMVTexture[i].ImagePtr->Direct3DTexture = CreateFmvTexture(&FMVTexture[i].ImagePtr->ImageWidth, &FMVTexture[i].ImagePtr->ImageHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+		FMVTexture[i].textureID = Tex_AddTexture("INGAME_CUTSCENE_" + IntToString(i), CreateFmvTexture(&FMVTexture[i].width, &FMVTexture[i].height, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT), FMVTexture[i].width, FMVTexture[i].height, TexturePool_DYNAMIC);
 	}
 /*
 	// check for fullscreen intro/outro fmvs
@@ -134,22 +121,22 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 
 		ftPtr->SoundVolume = FmvSoundVolume;
 
-		if (ftPtr->IsTriggeredPlotFMV && (!fmvList[ftPtr->fmvHandle].fmvClass->IsPlaying()))
+		if (ftPtr->IsTriggeredPlotFMV && (!fmvList[ftPtr->fmvHandle].FMVclass->IsPlaying()))
 		{
 			OutputDebugString("closing ingame fmv..\n");
 
 			ftPtr->MessageNumber = 0;
-			delete fmvList[ftPtr->fmvHandle].fmvClass;
-			fmvList[ftPtr->fmvHandle].fmvClass = NULL;
+			delete fmvList[ftPtr->fmvHandle].FMVclass;
+			fmvList[ftPtr->fmvHandle].FMVclass = NULL;
 			fmvList[ftPtr->fmvHandle].isPlaying = FALSE;
 			ftPtr->fmvHandle = -1;
 		}
 		else
 		{
-			if (!fmvList[ftPtr->fmvHandle].fmvClass->mFrameReady)
+			if (!fmvList[ftPtr->fmvHandle].FMVclass->mFrameReady)
 				return 0;
 
-			fmvList[ftPtr->fmvHandle].fmvClass->NextFrame(w, h, DestBufferPtr, w * sizeof(uint32_t));
+			fmvList[ftPtr->fmvHandle].FMVclass->NextFrame(w, h, DestBufferPtr, w * sizeof(uint32_t));
 		}
 
 		ftPtr->StaticImageDrawn = 0;
@@ -212,7 +199,7 @@ int GetVolumeOfNearestVideoScreen(void);
 extern int PlayMenuBackgroundFmv()
 {
 	return 0;
-
+/*
 	if (!MenuBackground)
 		return 0;
 
@@ -227,6 +214,7 @@ extern int PlayMenuBackgroundFmv()
 	}
 
 	return 1;
+*/
 }
 
 extern void EndMenuBackgroundFmv()
@@ -278,11 +266,11 @@ int32_t OpenFMV(const char *filenamePtr)
 	if (fmvHandle != -1)
 	{
 		// found a free slot
-		fmvList[fmvHandle].fmvClass = new TheoraFMV();
-		if (fmvList[fmvHandle].fmvClass->Open(filenamePtr) != FMV_OK)
+		fmvList[fmvHandle].FMVclass = new TheoraFMV();
+		if (fmvList[fmvHandle].FMVclass->Open(filenamePtr) != FMV_OK)
 		{
-			delete fmvList[fmvHandle].fmvClass;
-			fmvList[fmvHandle].fmvClass = NULL;
+			delete fmvList[fmvHandle].FMVclass;
+			fmvList[fmvHandle].FMVclass = NULL;
 			return -1;
 		}
 		fmvList[fmvHandle].isPlaying = TRUE;
@@ -321,7 +309,7 @@ extern void PlayFMV(const char *filenamePtr)
 
 		if (fmv.mTexturesReady)
 		{
-			DrawFmvFrame2(fmv.mFrameWidth, fmv.mFrameHeight, fmv.frameTextures[0].width, fmv.frameTextures[0].height, fmv.frameTextures[0].texture, fmv.frameTextures[1].texture, fmv.frameTextures[2].texture);
+			DrawFmvFrame2(fmv.mFrameWidth, fmv.mFrameHeight, &fmv.frameTextures[0], /*FIXME*/3 /*numTextures*/);
 		}
 
 		ThisFramesRenderingHasFinished();
@@ -384,7 +372,7 @@ extern void StartTriggerPlotFMV(int number)
 			{
 				if (fmvList[FMVTexture[i].fmvHandle].isPlaying)
 				{
-					fmvList[FMVTexture[i].fmvHandle].fmvClass->Close();
+					fmvList[FMVTexture[i].fmvHandle].FMVclass->Close();
 					FMVTexture[i].fmvHandle = -1;
 				}
 			}
@@ -535,8 +523,8 @@ void ReleaseAllFMVTextures()
 		{
 			if (fmvList[FMVTexture[i].fmvHandle].isPlaying)
 			{
-				delete fmvList[FMVTexture[i].fmvHandle].fmvClass;
-				fmvList[FMVTexture[i].fmvHandle].fmvClass = NULL;
+				delete fmvList[FMVTexture[i].fmvHandle].FMVclass;
+				fmvList[FMVTexture[i].fmvHandle].FMVclass = NULL;
 			}
 
 			FMVTexture[i].fmvHandle = -1;
@@ -587,8 +575,8 @@ extern void InitialiseTriggeredFMVs()
 	{
 		if (FMVTexture[i].fmvHandle != -1)
 		{
-			delete fmvList[FMVTexture[i].fmvHandle].fmvClass;
-			fmvList[FMVTexture[i].fmvHandle].fmvClass = NULL;
+			delete fmvList[FMVTexture[i].fmvHandle].FMVclass;
+			fmvList[FMVTexture[i].fmvHandle].FMVclass = NULL;
 		}
 		FMVTexture[i].MessageNumber = 0;
 		FMVTexture[i].fmvHandle = -1;

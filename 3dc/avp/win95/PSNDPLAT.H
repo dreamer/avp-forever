@@ -31,8 +31,8 @@ extern "C" {
 typedef struct soundsampledata
 {
   	int loaded;
-	int activeInstances;	 
-	int volume;		
+	int activeInstances;
+	int volume;
 	int pitch;
 
 #ifdef _XBOX
@@ -68,11 +68,11 @@ typedef struct soundsampledata
 typedef struct activesoundsample
 {
 	SOUNDINDEX soundIndex;
-	ACTIVESOUNDPRIORITY priority;	
+	ACTIVESOUNDPRIORITY priority;
 	int volume;
 	int	pitch;
-	int *externalRef;			
-	unsigned int loop :1;		
+	int *externalRef;
+	unsigned int loop :1;
 	unsigned int threedee :1;
 	unsigned int paused :1;
 	unsigned int marine_ignore	:1;
@@ -100,7 +100,7 @@ typedef struct activesoundsample
 typedef struct pwavchunkheader
 {
 	char chunkName[4];
-	int chunkLength;	
+	int chunkLength;
 } PWAVCHUNKHEADER;
 
 typedef struct pwavriffheader
@@ -120,7 +120,7 @@ extern int PlatStartSoundSys(void);
 extern void PlatEndSoundSys(void);
 /* Patrick 5/6/97 -------------------------------------------------------------
   Sets the global volume, and returns true (1) if successful, or false (0) 
-  otherwise. 
+  otherwise.
   ----------------------------------------------------------------------------*/
 extern int PlatChangeGlobalVolume(int volume);
 /* Patrick 5/6/97 -------------------------------------------------------------
@@ -146,12 +146,12 @@ extern int PlatChangeSoundPitch(int activeIndex, int pitch);
 /* Patrick 5/6/97 -------------------------------------------------------------
  The following function performs the neccessary operations required for a 3d 
  sound (eg volume, pan). Return true (1) if successful, or SOUND_PLATFORMERROR 
- (-1) otherwise. 
+ (-1) otherwise.
   ----------------------------------------------------------------------------*/
 extern int PlatDo3dSound(int activeIndex);
 /* Patrick 5/6/97 -------------------------------------------------------------
 	Return true (1) if the sound has stopped, false (0) if it is still playing
-	or SOUND_PLATFORMERROR (-1) otherwise.   
+	or SOUND_PLATFORMERROR (-1) otherwise.
   ----------------------------------------------------------------------------*/
 extern int PlatSoundHasStopped(int activeIndex);
 /* Patrick 5/6/97 -------------------------------------------------------------
@@ -197,7 +197,7 @@ int CheckSoundBufferIsValid(ACTIVESOUNDSAMPLE *activeSound);
 #define SOUND_DEACTIVATERANGE (10000 * GlobalScale)
 
 #define VOLUME_MAXPLAT			(0)			/* attenuation values, in db's */
-#define VOLUME_MINPLAT			(-10000)	
+#define VOLUME_MINPLAT			(-10000)
 #define VOLUME_PLAT2DSCALE		(96)		/* in 128ths of the original volume */
 
 /* frequency values are those accepted by ds. Pitch is measured in semi-tones,
@@ -208,7 +208,7 @@ and is applied relative to the loaded frequency of the sound */
 #define PITCH_MINPLAT				(-6144)
 #define PITCH_DEFAULTPLAT			(0)
 
-#define PAN_MAXPLAT					(1200) 	   
+#define PAN_MAXPLAT					(1200)
 #define PAN_MINPLAT					(-1200)
 #define PAN_3DDAMPDISTANCE			(1000)
 
@@ -228,11 +228,10 @@ and is applied relative to the loaded frequency of the sound */
   Global references to sound management data areas, and blank instances of data
   structures storted in those areas    
   ----------------------------------------------------------------------------*/
-extern SOUNDSAMPLEDATA GameSounds[];		   
-extern ACTIVESOUNDSAMPLE ActiveSounds[]; 
+extern SOUNDSAMPLEDATA GameSounds[];
+extern ACTIVESOUNDSAMPLE ActiveSounds[];
 extern SOUNDSAMPLEDATA BlankGameSound;
 extern ACTIVESOUNDSAMPLE BlankActiveSound;
-
 
 
 #ifdef __cplusplus

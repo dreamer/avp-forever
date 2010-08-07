@@ -89,7 +89,7 @@ int JoystickEnabled;
 DIJOYSTATE JoystickState;          // DirectInput joystick state 
 
 // XInput stuff from dx sdk samples
-int GotXPad = 0;
+BOOL GotXPad = FALSE;
 
 // XInput controller state
 struct CONTROLER_STATE
@@ -98,7 +98,7 @@ struct CONTROLER_STATE
     bool bConnected;
 };
 
-#define MAX_CONTROLLERS 4  // XInput handles up to 4 controllers 
+const int MAX_CONTROLLERS = 4; // XInput handles up to 4 controllers
 #define INPUT_DEADZONE  (0.24f * FLOAT(0x7FFF))  // Default to 24% of the +/- 32767 range.   This is a reasonable default value but can be altered if needed.
 
 CONTROLER_STATE g_Controllers[MAX_CONTROLLERS];
@@ -133,12 +133,7 @@ enum
 	DRIGHT			// KEY_JOYSTICK_BUTTON_16
 };
 
-enum
-{
-	XBOX2KEYARRAY_A
-};
-
-#define NUMPADBUTTONS 16
+const int NUMPADBUTTONS = 16;
 static unsigned char GamePadButtons[NUMPADBUTTONS];
 
 int blockGamepadInputTimer = 0;
@@ -1226,18 +1221,20 @@ int UpdateControllerState()
 {
     DWORD dwResult;
 	int numConnected = 0;
-    for( DWORD i = 0; i < MAX_CONTROLLERS; i++ )
+    for (DWORD i = 0; i < MAX_CONTROLLERS; i++)
     {
         // Simply get the state of the controller from XInput.
-        dwResult = XInputGetState( i, &g_Controllers[i].state );
+        dwResult = XInputGetState(i, &g_Controllers[i].state);
 
-        if( dwResult == ERROR_SUCCESS )
+        if (dwResult == ERROR_SUCCESS)
 		{
             g_Controllers[i].bConnected = true;
 			numConnected++;
 		}
         else
+		{
             g_Controllers[i].bConnected = false;
+		}
     }
 
     return numConnected;
@@ -1295,45 +1292,45 @@ void ReadJoysticks(void)
 	xPadMoveX = 0;
 	xPadMoveY = 0;
 
-	/* Save right x and y for velocity determination */
+	// Save right x and y for velocity determination
 	oldxPadLookX = xPadRightX;
 	oldxPadLookY = xPadRightY;
 
 	GotJoystick = 0;//= ReadJoystick();
 
-	/* check XInput pads */
+	// check XInput pads
 	GotXPad = UpdateControllerState();
 
 	memset(&GamePadButtons[0], 0, NUMPADBUTTONS);
 
-	for( DWORD i = 0; i < MAX_CONTROLLERS; i++ )
+	for (int i = 0; i < MAX_CONTROLLERS; i++)
 	{
-		/* check buttons if the controller is actually connected */
-		if( g_Controllers[i].bConnected )
+		// check buttons if the controller is actually connected
+		if (g_Controllers[i].bConnected)
 		{
-			/* handle d-pad */
-			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP )
+			// handle d-pad
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP)
 			{
 				GamePadButtons[DUP] = TRUE;
 				//OutputDebugString("xinput DPAD UP\n");
 			}
-			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN )
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN)
 			{
 				GamePadButtons[DDOWN] = TRUE;
 				//OutputDebugString("xinput DPAD DOWN\n");
 			}
-			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT )
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT)
 			{
 				GamePadButtons[DLEFT] = TRUE;
 				//OutputDebugString("xinput DPAD LEFT\n");
 			}
-			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT )
+			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT)
 			{
 				GamePadButtons[DRIGHT] = TRUE;
 				//OutputDebugString("xinput DPAD RIGHT\n");
 			}
 
-			/* handle coloured buttons - X A Y B */
+			// handle coloured buttons - X A Y B
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_X)
 			{
 				GamePadButtons[X] = TRUE;
@@ -1355,7 +1352,7 @@ void ReadJoysticks(void)
 				//OutputDebugString("xinput button B pressed\n");
 			}
 
-			/* handle triggers */
+			// handle triggers
 			if (g_Controllers[0].state.Gamepad.bLeftTrigger && 
 				g_Controllers[0].state.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
 			{
@@ -1370,7 +1367,7 @@ void ReadJoysticks(void)
 				//OutputDebugString("xinput right trigger pressed\n");
 			}
 
-			/* handle bumper buttons */
+			// handle bumper buttons
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER)
 			{
 				GamePadButtons[LB] = TRUE;
@@ -1383,7 +1380,7 @@ void ReadJoysticks(void)
 				//OutputDebugString("xinput right bumper pressed\n");
 			}
 
-			/* handle back and start */
+			// handle back and start
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_START)
 			{
 				GamePadButtons[START] = TRUE;
@@ -1395,7 +1392,7 @@ void ReadJoysticks(void)
 				//OutputDebugString("xinput back pressed\n");
 			}
 
-			/* handle stick clicks */
+			// handle stick clicks
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB)
 			{
 				GamePadButtons[LEFTCLICK] = TRUE;
@@ -1407,10 +1404,10 @@ void ReadJoysticks(void)
 				//OutputDebugString("xinput right stick clicked\n");
 			}
 
-			/* handle analogue stick movement */
+			// handle analogue stick movement
 
-			/* Zero value if thumbsticks are within the dead zone */
-			if (( g_Controllers[i].state.Gamepad.sThumbLX < INPUT_DEADZONE &&
+			// Zero value if thumbsticks are within the dead zone
+			if ((g_Controllers[i].state.Gamepad.sThumbLX < INPUT_DEADZONE &&
 				  g_Controllers[i].state.Gamepad.sThumbLX > -INPUT_DEADZONE) &&
 				 (g_Controllers[i].state.Gamepad.sThumbLY < INPUT_DEADZONE &&
 				  g_Controllers[i].state.Gamepad.sThumbLY > -INPUT_DEADZONE))
@@ -1428,13 +1425,13 @@ void ReadJoysticks(void)
 				g_Controllers[i].state.Gamepad.sThumbRY = 0;
 			}
 
-			/* Right Stick */
+			// Right Stick
 			tempX = g_Controllers[i].state.Gamepad.sThumbRX;
 			tempY = g_Controllers[i].state.Gamepad.sThumbRY;
 
-			/* scale it down a bit */
-			xPadRightX += static_cast<int>(tempX * 0.002);
-			xPadRightY += static_cast<int>(tempY * 0.002);
+			// scale it down a bit
+			xPadRightX += static_cast<int>(tempX * 0.002f);
+			xPadRightY += static_cast<int>(tempY * 0.002f);
 
 			xPadLookX = DIV_FIXED(xPadRightX - oldxPadLookX, NormalFrameTime);
 			xPadLookY = DIV_FIXED(xPadRightY - oldxPadLookY, NormalFrameTime);
@@ -1443,7 +1440,7 @@ void ReadJoysticks(void)
 			sprintf(buf,"xpad x: %d xpad y: %d\n", xPadLookX, xPadLookY);
 			OutputDebugString(buf);
 */
-			/* Left Stick - can grab this value directly */
+			// Left Stick - can grab this value directly
 			xPadMoveX = g_Controllers[i].state.Gamepad.sThumbLX;
 			xPadMoveY = g_Controllers[i].state.Gamepad.sThumbLY;
 		}
@@ -1471,12 +1468,12 @@ int CheckForJoystick(void)
 	return FALSE;
 	MMRESULT joyreturn;
 
-    joyreturn = joyGetDevCaps(JOYSTICKID1, 
-                &JoystickCaps,
-                sizeof(JOYCAPS));
+    joyreturn = joyGetDevCaps(JOYSTICKID1, &JoystickCaps, sizeof(JOYCAPS));
 
-    if (joyreturn == JOYERR_NOERROR) 
+    if (joyreturn == JOYERR_NOERROR)
+	{
 		return TRUE;
+	}
 
 	return FALSE;
 }
@@ -1608,19 +1605,17 @@ extern void Mouse_ButtonUp(unsigned char button)
 
 extern void IngameKeyboardInput_ClearBuffer(void)
 {
-	int i;
-
-	for (i = 0; i <= 255; i++)
+	for (int i = 0; i <= 255; i++)
 	{
 		IngameKeyboardInput[i] = 0;
 	}
 
-	for (i = 0; i < 5; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		MouseButtons[i] = 0;
 	}
 
-	for (i = 0; i < NUMPADBUTTONS; i++)
+	for (int i = 0; i < NUMPADBUTTONS; i++)
 	{
 		GamePadButtons[i] = 0;
 	}

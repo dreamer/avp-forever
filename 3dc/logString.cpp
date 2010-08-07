@@ -33,18 +33,16 @@
 	std::string logFilename = "avp_log.txt";
 #endif
 
-/* converts an int to a string and returns it */
+// converts an int to a string and returns it
 std::string IntToString(const int value)
 {
-	std::stringstream ss;
+	std::stringstream stream;
 	std::string temp;
 
-	/* copy int to stringstream */
-	ss << value;
-	/* copy from stringstream to string */
-	ss >> temp;
-	
-	return temp;
+	// format int as a string
+	stream << value;
+
+	return stream.str();
 }
 
 /* parses an int from a string and returns it */
@@ -129,12 +127,4 @@ void LogDebugValue(int value)
 	std::ostringstream stream;
 	stream << "\n value was: " << value;
 	OutputDebugString(stream.str().c_str());
-}
-
-std::string LogInteger(int value)
-{
-	// returns a string containing value
-	std::ostringstream stream;
-	stream << value;
-	return stream.str();
 }

@@ -769,7 +769,7 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWid
 	}
 }
 
-void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, r_Texture tex1, r_Texture tex2, r_Texture tex3)
+void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures, uint32_t numTextures)
 {
 	// offset the video vertically in the centre of the screen
 	uint32_t topX = (640 - frameWidth) / 2;
@@ -852,9 +852,10 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWi
 	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 
 	// set the texture
-	LastError = d3d.lpD3DDevice->SetTexture(0, tex1);
-	LastError = d3d.lpD3DDevice->SetTexture(1, tex2);
-	LastError = d3d.lpD3DDevice->SetTexture(2, tex3);
+	for (uint32_t i = 0; i < numTextures; i++)
+	{
+		LastError = d3d.lpD3DDevice->SetTexture(i, Tex_GetTexture(textures[i]));
+	}
 
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.fmvVertexDecl);
 	d3d.lpD3DDevice->SetVertexShader(d3d.fmvVertexShader);
@@ -1510,6 +1511,13 @@ void UpdateViewMatrix(float *viewMat)
 	viewMatrix._41 = -D3DXVec3Dot(&vecPosition, &vecRight);
 	viewMatrix._42 = -D3DXVec3Dot(&vecPosition, &vecUp);
 	viewMatrix._43 = -D3DXVec3Dot(&vecPosition, &vecFront);
+/*
+	viewMatrix = D3DXMATRIX(
+			vecRight.x, vecRight.y, vecRight.z, 0.0f,
+			vecUp.x, vecUp.y, vecUp.z, 0.0f,
+			vecFront.x, vecFront.y, vecFront.z, 0.0f,
+			vecPosition.x, vecPosition.y, vecPosition.z, 1.0f);
+*/
 }
 
 void DrawCoronas()

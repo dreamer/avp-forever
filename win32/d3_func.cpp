@@ -349,6 +349,8 @@ int NearestSuperiorPow2(int i)
 
 bool ReleaseVolatileResources()
 {
+	Tex_ReloadDynamicTextures();
+
 	ReleaseAllFMVTexturesForDeviceReset();
 
 	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
@@ -952,7 +954,7 @@ r_Texture CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t usage, ui
 	return destTexture;
 }
 
-r_Texture CreateFmvTexture2(uint32_t *width, uint32_t *height)
+r_Texture CreateFmvTexture2(uint32_t &width, uint32_t &height)
 {
 	/* TODO - Add support for rendering FMVs on GPUs that can't use non power of 2 textures */
 
@@ -973,7 +975,7 @@ r_Texture CreateFmvTexture2(uint32_t *width, uint32_t *height)
 	}
 	else { newHeight = *height; }
 #endif
-	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, D3DUSAGE_DYNAMIC, D3DFMT_L8, D3DPOOL_DEFAULT, &destTexture, NULL);
+	LastError = d3d.lpD3DDevice->CreateTexture(width, height, 1, D3DUSAGE_DYNAMIC, D3DFMT_L8, D3DPOOL_DEFAULT, &destTexture, NULL);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -1220,7 +1222,7 @@ r_Texture CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t 
 	return destTexture;
 }
 
-uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture)
+bool CreateD3DTextureFromFile(const char* fileName, Texture &texture)
 {
 	D3DXIMAGE_INFO imageInfo;
 
@@ -1244,13 +1246,14 @@ uint32_t CreateD3DTextureFromFile(const char* fileName, Texture &texture)
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		texture.texture = NULL;
-		return -1;
+		return false;
 	}
 
 	texture.width = imageInfo.Width;
 	texture.height = imageInfo.Height;
+	texture.pool = TexturePool_MANAGED;
 
-	return 0;
+	return true;
 }
 
 r_Texture CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poolType)
@@ -1323,6 +1326,15 @@ r_Texture CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poolType)
 
 	delete[] buffer;
 	return destTexture;
+}
+
+void R_ReleaseTexture(r_Texture &texture)
+{
+	if (texture)
+	{
+		texture->Release();
+		texture = NULL;
+	}
 }
 
 bool ChangeGameResolution(uint32_t width, uint32_t height/*, uint32_t colourDepth*/)
@@ -1455,7 +1467,7 @@ bool InitialiseDirect3D()
 	// Get the number of devices/video cards in the system
 	d3d.NumDrivers = d3d.lpD3D->GetAdapterCount();
 
-	Con_PrintMessage("\t Found " + LogInteger(d3d.NumDrivers) + " video adapter(s)");
+	Con_PrintMessage("\t Found " + IntToString(d3d.NumDrivers) + " video adapter(s)");
 
 	// Get adapter information for all available devices (vid card name, etc)
 	for (uint32_t driverIndex = 0; driverIndex < d3d.NumDrivers; driverIndex++)
@@ -1774,10 +1786,10 @@ bool InitialiseDirect3D()
 	}
 
 	// check max texture size
-	Con_PrintMessage("Max texture size: " + LogInteger(d3dCaps.MaxTextureWidth));
+	Con_PrintMessage("Max texture size: " + IntToString(d3dCaps.MaxTextureWidth));
 
 	// Log resolution set
-	Con_PrintMessage("\t Resolution set: " + LogInteger(d3dpp.BackBufferWidth) + " x " + LogInteger(d3dpp.BackBufferHeight));
+	Con_PrintMessage("\t Resolution set: " + IntToString(d3dpp.BackBufferWidth) + " x " + IntToString(d3dpp.BackBufferHeight));
 
 	// Log format set
 	switch (d3dpp.BackBufferFormat)

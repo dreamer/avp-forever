@@ -62,12 +62,7 @@ class TheoraFMV
 		uint32_t		mAudioDataBufferSize;
 
 		// textures for video frames
-/*
-		RENDERTEXTURE texArray[3];
-		uint32_t   texWidth[3];
-		uint32_t   texHeight[3];
-*/
-		Texture frameTextures[3];
+		uint32_t frameTextures[3];
 
 		uint32_t mTextureWidth;
 		uint32_t mTextureHeight;

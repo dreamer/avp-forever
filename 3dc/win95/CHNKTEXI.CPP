@@ -720,6 +720,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					AVPTEXTURE *AvPTexture = pTexture;
 					char *ImageName = szBuf;
 					r_Texture renderTexture;
+					TexturePool pool;
 
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 
@@ -736,14 +737,16 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 								OutputDebugString("found fmv texture.. \n");
 								// is fmv texture, create in default pool so we can dynamically update it
 								renderTexture = CreateD3DTexture(AvPTexture, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+								pool = TexturePool_MANAGED;
 								// will need to be restored on alt/tab or device loss
 							}
 							else
 							{
 								renderTexture = CreateD3DTexture(AvPTexture, 0, D3DPOOL_MANAGED);
+								pool = TexturePool_DYNAMIC;
 							}
 
-							textureID = Tex_AddTexture(ImageName, renderTexture, ImageWidth, ImageHeight);
+							textureID = Tex_AddTexture(ImageName, renderTexture, ImageWidth, ImageHeight, pool);
 
 							// free this, as d3d now holds the texture
 							free(AvPTexture->buffer);
@@ -794,6 +797,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					AVPTEXTURE *AvPTexture = pTexture;
 					char *ImageName = szBuf;
 					r_Texture renderTexture;
+					TexturePool pool;
 
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 
@@ -808,10 +812,12 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 							{
 								// is fmv texture, create in default pool so we can dynamically update it
 								renderTexture = CreateD3DTexture(AvPTexture, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+								pool = TexturePool_MANAGED;
 							}
 							else
 							{
 								renderTexture = CreateD3DTexture(AvPTexture, 0, D3DPOOL_MANAGED);
+								pool = TexturePool_DYNAMIC;
 							}
 
 							if (renderTexture == NULL)
@@ -819,7 +825,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 								OutputDebugString("Direct3DTexture was null!");
 							}
 
-							textureID = Tex_AddTexture(ImageName, renderTexture, ImageWidth, ImageHeight);
+							textureID = Tex_AddTexture(ImageName, renderTexture, ImageWidth, ImageHeight, pool);
 
 							// free this, as d3d now holds the texture
 							free(AvPTexture->buffer);

@@ -30,15 +30,23 @@
 #include <string>
 #include <vector>
 
+enum TexturePool
+{
+	TexturePool_DYNAMIC,
+	TexturePool_MANAGED
+};
+
 struct Texture
 {
 	std::string		name;
 	uint32_t		width;
 	uint32_t		height;
 	r_Texture		texture;
+	TexturePool		pool;
 };
 
-uint32_t Tex_AddTexture(const std::string &fileName, r_Texture texture, uint32_t width, uint32_t height);
+
+uint32_t Tex_AddTexture(const std::string &fileName, r_Texture texture, uint32_t width, uint32_t height, enum TexturePool pool = TexturePool_MANAGED);
 uint32_t Tex_LoadFromFile(const std::string &fileName);
 uint32_t Tex_CheckExists(const char* fileName);
 const Texture& Tex_GetTextureDetails(uint32_t textureID);
@@ -49,6 +57,7 @@ bool Tex_Unlock(uint32_t textureID);
 const r_Texture& Tex_GetTexture(uint32_t textureID);
 void Tex_DeInit();
 void Tex_Release(uint32_t textureID);
+void Tex_ReloadDynamicTextures();
 
 #endif
 

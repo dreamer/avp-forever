@@ -193,6 +193,7 @@ extern D3DINFO d3d;
 r_Texture CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poolType);
 r_Texture CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight);
 r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex);
+void R_ReleaseTexture(r_Texture &texture);
 
 bool InitialiseDirect3D();
 bool ChangeGameResolution	(uint32_t width, uint32_t height/*, uint32_t colour_depth*/);
@@ -203,13 +204,13 @@ void DrawFadeQuad			(uint32_t topX, uint32_t topY, uint32_t alpha);
 void DrawSmallMenuCharacter (uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t red, uint32_t green, uint32_t blue, uint32_t alpha);
 void DrawQuad				(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
 void DrawFmvFrame			(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, r_Texture fmvTexture);
-void DrawFmvFrame2			(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, r_Texture tex1, r_Texture tex2, r_Texture tex3);
+void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures, uint32_t numTextures);
 void NewQuad				(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t colour, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyType, float *UVList);
 void CreateScreenShotImage();
 void DeRedTexture(r_Texture texture);
 void ReleaseD3DTexture(r_Texture *d3dTexture);
 r_Texture CreateFmvTexture (uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool);
-r_Texture CreateFmvTexture2(uint32_t *width, uint32_t *height);
+r_Texture CreateFmvTexture2(uint32_t &width, uint32_t &height);
 void SetTransforms();
 
 extern uint32_t NO_TEXTURE;

@@ -24,12 +24,10 @@ extern "C" {
 #include "3dc.h"
 #include "inline.h"
 #include <assert.h>
-
 #include "module.h"
 #include "stratdef.h"
 #include "gamedef.h"
 #include "dynamics.h"
-
 #include "psndplat.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
@@ -61,9 +59,9 @@ struct SoundConfigTag
 /* Patrick 5/6/97 -------------------------------------------------------------
   Sound system globals
   ----------------------------------------------------------------------------*/
-SOUNDSAMPLEDATA GameSounds[SID_MAXIMUM];		   
+SOUNDSAMPLEDATA GameSounds[SID_MAXIMUM];
 ACTIVESOUNDSAMPLE ActiveSounds[SOUND_MAXACTIVE];
-SOUNDSAMPLEDATA BlankGameSound = {0,0,0,0,FALSE,NULL,0,0,NULL,0,0,NULL,0};
+SOUNDSAMPLEDATA BlankGameSound;// = {0,0,0,0,FALSE,NULL,0,0,NULL,0,0,NULL,0};
 ACTIVESOUNDSAMPLE BlankActiveSound = {SID_NOSOUND,ASP_Minimum,0,0,NULL,0,0,0,0,0,{{0,0,0},0,0},FALSE, 0, 0, NULL};
 
 
@@ -368,7 +366,7 @@ static const float pitch_to_frequency_mult_table [] =
 };
 
 /* Enviromental Presets. */
-EAX_REVERBPROPERTIES Sound_Enviroments[] = 
+EAX_REVERBPROPERTIES Sound_Enviroments[] =
 {
 /*	Enviroment							Volume	Decay	Damping */
 	{EAX_ENVIRONMENT_GENERIC,			0.5F,	1.493F,	0.5F},
@@ -433,7 +431,20 @@ int PlatStartSoundSys()
 	db_log4("PlatStartSound called");
 	Con_PrintMessage("Starting to initialise XAudio2");
 
-//	LOG_RC();
+	// initialise sound structs
+	BlankGameSound.loaded = 0;
+	BlankGameSound.activeInstances = 0;
+	BlankGameSound.volume = 0;
+	BlankGameSound.pitch = 0;
+	BlankGameSound.is3D = FALSE;
+	BlankGameSound.audioBuffer = NULL;
+	memset(&BlankGameSound.xa2Buffer, 0, sizeof(XAUDIO2_BUFFER));
+	memset(&BlankGameSound.xa2Emitter, 0, sizeof(X3DAUDIO_EMITTER));
+	BlankGameSound.pSourceVoice = NULL;
+	BlankGameSound.flags = 0;
+	BlankGameSound.dsFrequency = 0;
+	BlankGameSound.wavName = NULL;
+	BlankGameSound.length = 0;
 
 	uint32_t sampleRate = Config_GetInt("[Audio]", "SampleRate", 44100);
 
@@ -463,17 +474,25 @@ int PlatStartSoundSys()
 		switch (LastError)
 		{
 			case XAUDIO2_E_INVALID_CALL:
-					Con_PrintError("XAUDIO2_E_INVALID_CALL");
+			{
+				Con_PrintError("XAUDIO2_E_INVALID_CALL");
 				break;
+			}
 			case XAUDIO2_E_XMA_DECODER_ERROR:
-					Con_PrintError("XAUDIO2_E_XMA_DECODER_ERROR");
+			{
+				Con_PrintError("XAUDIO2_E_XMA_DECODER_ERROR");
 				break;
+			}
 			case XAUDIO2_E_XAPO_CREATION_FAILED:
-					Con_PrintError("XAUDIO2_E_XAPO_CREATION_FAILED");
+			{
+				Con_PrintError("XAUDIO2_E_XAPO_CREATION_FAILED");
 				break;
+			}
 			case XAUDIO2_E_DEVICE_INVALIDATED:
-					Con_PrintError("XAUDIO2_E_DEVICE_INVALIDATED");
+			{
+				Con_PrintError("XAUDIO2_E_DEVICE_INVALIDATED");
 				break;
+			}
 		}
 		Con_PrintError("Couldn't initialise XAudio2");
 		LogDxError (LastError, __LINE__, __FILE__);
@@ -512,7 +531,7 @@ int PlatStartSoundSys()
 	XAUDIO2_VOICE_DETAILS voiceDetails;
 	pMasteringVoice->GetVoiceDetails(&voiceDetails);
 
-	Con_PrintMessage("\t Created Master Voice with " + LogInteger(voiceDetails.InputChannels) + " channel(s) and sample rate of " + LogInteger(voiceDetails.InputSampleRate));
+	Con_PrintMessage("\t Created Master Voice with " + IntToString(voiceDetails.InputChannels) + " channel(s) and sample rate of " + IntToString(voiceDetails.InputSampleRate));
 
 	// Get the device details
 	XAUDIO2_DEVICE_DETAILS deviceDetails;
@@ -526,6 +545,7 @@ int PlatStartSoundSys()
 	}
 
 	numOutputChannels = deviceDetails.OutputFormat.Format.nChannels;
+	Con_PrintMessage("\t using " + IntToString(numOutputChannels) + " output channel(s)");
 
 	// create reverb
 	flags = 0;
@@ -589,7 +609,6 @@ int PlatStartSoundSys()
 	Con_PrintMessage("Initialised XAudio2 successfully");
 
 	db_log4("PlatStartSound finished");
-//	LOG_RC();
 
 	soundEnabled = true;
 
@@ -882,10 +901,10 @@ int PlatChangeSoundPitch(int activeIndex, int pitch)
 	{
 		frequency = (float)GameSounds[gameSoundIndex].dsFrequency;
 	}
-	else 
+	else
 	{
-		frequency = (float)ToneToFrequency(GameSounds[gameSoundIndex].dsFrequency, 
-			GameSounds[gameSoundIndex].pitch, pitch);	
+		frequency = (float)ToneToFrequency(GameSounds[gameSoundIndex].dsFrequency,
+			GameSounds[gameSoundIndex].pitch, pitch);
 	}
 
 	frequency = frequency / GameSounds[gameSoundIndex].dsFrequency;
@@ -918,8 +937,8 @@ int PlatSoundHasStopped(int activeIndex)
 	{
 		return 1;
 	}
-	else 
-		return SOUND_PLATFORMERROR;
+
+	return SOUND_PLATFORMERROR;
 }
 
 int PlatDo3dSound(int activeIndex)
@@ -929,15 +948,15 @@ int PlatDo3dSound(int activeIndex)
 	int newVolume = 0;
 	int newPan = 0;
 
-	/* find the distance of the sound */
+	// find the distance of the sound
 	relativePosn.vx = ActiveSounds[activeIndex].threedeedata.position.vx - Global_VDB_Ptr->VDB_World.vx;
 	relativePosn.vy = ActiveSounds[activeIndex].threedeedata.position.vy - Global_VDB_Ptr->VDB_World.vy;
 	relativePosn.vz = ActiveSounds[activeIndex].threedeedata.position.vz - Global_VDB_Ptr->VDB_World.vz;
 	distance = Magnitude(&relativePosn);
 
-	ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vx);// / 65536.0f);
-	ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vy);// / 65536.0f);
-	ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vz);// / 65536.0f);
+//	ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vx);// / 65536.0f);
+//	ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vy);// / 65536.0f);
+//	ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vz);// / 65536.0f);
 /*
 	sprintf(buf, "Sound Id: %d Posn (%f, %f, %f)\n", activeIndex, ActiveSounds[activeIndex].xa2Emitter.Position.x, ActiveSounds[activeIndex].xa2Emitter.Position.y, ActiveSounds[activeIndex].xa2Emitter.Position.z);
 	OutputDebugString(buf);
@@ -949,7 +968,7 @@ int PlatDo3dSound(int activeIndex)
 	db_logf5(("distance %i", distance));
 	db_logf5(("range (%i, %i)", ActiveSounds[activeIndex].threedeedata.inner_range, ActiveSounds[activeIndex].threedeedata.outer_range));
 
-	/* Deal with paused looping sounds. */
+	// Deal with paused looping sounds.
 	if (ActiveSounds[activeIndex].paused)
 	{
 		if (distance < (ActiveSounds[activeIndex].threedeedata.outer_range + SOUND_DEACTIVATERANGE))
@@ -960,14 +979,6 @@ int PlatDo3dSound(int activeIndex)
 				loopCount = XAUDIO2_LOOP_INFINITE;
 			}
 			ActiveSounds[activeIndex].xa2Buffer.LoopCount = loopCount;
-/*
-			LastError = ActiveSounds[activeIndex].pSourceVoice->SubmitSourceBuffer(&ActiveSounds[activeIndex].xa2Buffer);
-			if (FAILED(LastError))
-			{
-				LogDxError(LastError, __LINE__, __FILE__);
-				return SOUND_PLATFORMERROR;	
-			}
-*/
 			ActiveSounds[activeIndex].pSourceVoice->Start(0);
 			newVolume = 0;
 			ActiveSounds[activeIndex].paused = 0;
@@ -1003,7 +1014,7 @@ int PlatDo3dSound(int activeIndex)
 		{
 			newVolume = 0;
 
-			/* Deal with looping sounds. */
+			// Deal with looping sounds.
 			if ((distance < (ActiveSounds[activeIndex].threedeedata.outer_range + SOUND_DEACTIVATERANGE)) &&
 				ActiveSounds[activeIndex].loop)
 			{
@@ -1029,14 +1040,14 @@ int PlatDo3dSound(int activeIndex)
 		return SOUND_PLATFORMERROR;
 	}
 
-	/* Now deal with the panning issues. */
+	// Now deal with the panning issues.
 	if (distance < ActiveSounds[activeIndex].threedeedata.outer_range)
 	{
-		if (ActiveSounds[activeIndex].is3D)
+		if (1)//(ActiveSounds[activeIndex].is3D)
 		{
-//			ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(relativePosn.vx);
-//			ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(relativePosn.vy);
-//			ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(relativePosn.vz);
+			ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(relativePosn.vx);
+			ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(relativePosn.vy);
+			ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(relativePosn.vz);
 
 
 			/* Use the Hardware. */
@@ -1215,7 +1226,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 	if (!myFile)
 	{
 		GLOBALASSERT (0);
-		return(0);
+		return 0;
 	}
 
 	/* Read the WAV RIFF header */
@@ -1228,11 +1239,11 @@ int LoadWavFile(int soundNum, char * wavFileName)
 	{
 		/* a standard PCM wave format chunk */
 		PCMWAVEFORMAT tmpWaveFormat;
-		res = fread(&tmpWaveFormat, sizeof(PCMWAVEFORMAT), 1, myFile);	
-		myWaveFormat.wFormatTag = tmpWaveFormat.wf.wFormatTag;        
+		res = fread(&tmpWaveFormat, sizeof(PCMWAVEFORMAT), 1, myFile);
+		myWaveFormat.wFormatTag = tmpWaveFormat.wf.wFormatTag;
 		myWaveFormat.nChannels = tmpWaveFormat.wf.nChannels;
-		myWaveFormat.nSamplesPerSec = tmpWaveFormat.wf.nSamplesPerSec;;
-		myWaveFormat.nAvgBytesPerSec = tmpWaveFormat.wf.nAvgBytesPerSec;   
+		myWaveFormat.nSamplesPerSec = tmpWaveFormat.wf.nSamplesPerSec;
+		myWaveFormat.nAvgBytesPerSec = tmpWaveFormat.wf.nAvgBytesPerSec;
 		myWaveFormat.nBlockAlign = tmpWaveFormat.wf.nBlockAlign;
 		myWaveFormat.wBitsPerSample = tmpWaveFormat.wBitsPerSample;
 		myWaveFormat.cbSize = 0;
@@ -1245,7 +1256,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 	else if (myChunkHeader.chunkLength == 18)
 	{
 		/* an extended PCM wave format chunk */
-		res = fread(&myWaveFormat, sizeof(WAVEFORMATEX), 1, myFile);	
+		res = fread(&myWaveFormat, sizeof(WAVEFORMATEX), 1, myFile);
 		myWaveFormat.cbSize = 0;
 	}
 	else
@@ -1279,7 +1290,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		/* chunk alignment disaster */
 		LOCALASSERT(1==0);
 		fclose(myFile);
-		return 0;	
+		return 0;
 	}
 
 	// Calculate length of sample
@@ -1289,27 +1300,27 @@ int LoadWavFile(int soundNum, char * wavFileName)
 	{
 		LOCALASSERT(1==0);
 		fclose(myFile);
-		return 0;	
-	}	
+		return 0;
+	}
 	if (myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
 	{
 		LOCALASSERT(1==0);
 		fclose(myFile);
-		return 0;	
-	}	
+		return 0;
+	}
 	if ((myWaveFormat.nChannels != 1)&&(myWaveFormat.nChannels != 2))
 	{
 		LOCALASSERT(1==0);
 		fclose(myFile);
-		return 0;	
-	}	
+		return 0;
+	}
 	if ((myWaveFormat.wBitsPerSample != 8)&&(myWaveFormat.wBitsPerSample != 16))
 	{
 		LOCALASSERT(1==0);
 		fclose(myFile);
-		return 0;	
+		return 0;
 	}
-		
+
 	{
 		// Now set the buffer description and make a sound object
 		GameSounds[soundNum].audioBuffer = new uint8_t[myChunkHeader.chunkLength];
@@ -1324,7 +1335,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 			fclose(myFile);
 			return 0;
 		}
-		
+
 		memset(&GameSounds[soundNum].xa2Buffer, 0, sizeof(XAUDIO2_BUFFER));
 		GameSounds[soundNum].xa2Buffer.AudioBytes = myChunkHeader.chunkLength;
 		GameSounds[soundNum].xa2Buffer.pAudioData = GameSounds[soundNum].audioBuffer;
@@ -1390,7 +1401,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	if (!myFile)
 	{
 		GLOBALASSERT (0);
-		return(0);
+		return 0;
 	}
 
 	/* Read the WAV RIFF header */
@@ -1403,11 +1414,11 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	{
 		/* a standard PCM wave format chunk */
 		PCMWAVEFORMAT tmpWaveFormat;
-		res = ffread(&tmpWaveFormat,sizeof(PCMWAVEFORMAT),1,myFile);	
-		myWaveFormat.wFormatTag = tmpWaveFormat.wf.wFormatTag;        
+		res = ffread(&tmpWaveFormat, sizeof(PCMWAVEFORMAT), 1, myFile);
+		myWaveFormat.wFormatTag = tmpWaveFormat.wf.wFormatTag;
 		myWaveFormat.nChannels = tmpWaveFormat.wf.nChannels;
 		myWaveFormat.nSamplesPerSec = tmpWaveFormat.wf.nSamplesPerSec;;
-		myWaveFormat.nAvgBytesPerSec = tmpWaveFormat.wf.nAvgBytesPerSec;   
+		myWaveFormat.nAvgBytesPerSec = tmpWaveFormat.wf.nAvgBytesPerSec;
 		myWaveFormat.nBlockAlign = tmpWaveFormat.wf.nBlockAlign;
 		myWaveFormat.wBitsPerSample = tmpWaveFormat.wBitsPerSample;
 		myWaveFormat.cbSize = 0;
@@ -1420,7 +1431,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	else if (myChunkHeader.chunkLength==18)
 	{
 		/* an extended PCM wave format chunk */
-		res = ffread(&myWaveFormat,sizeof(WAVEFORMATEX),1,myFile);	
+		res = ffread(&myWaveFormat, sizeof(WAVEFORMATEX), 1, myFile);
 		myWaveFormat.cbSize = 0;
 	}
 	else
@@ -1442,7 +1453,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		{
 			break;
 		}
-	
+
 		ffseek(myFile,myChunkHeader.chunkLength,SEEK_CUR);
 	} while(res);
 
@@ -1453,7 +1464,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		/* chunk alignment disaster */
 		LOCALASSERT(1==0);
 		ffclose(myFile);
-		return 0;	
+		return 0;
 	}
 	
 	//calculate length of sample
@@ -1463,27 +1474,27 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	{
 		LOCALASSERT(1==0);
 		ffclose(myFile);
-		return 0;	
-	}	
+		return 0;
+	}
 	if (myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
 	{
 		LOCALASSERT(1==0);
 		ffclose(myFile);
-		return 0;	
-	}	
+		return 0;
+	}
 	if ((myWaveFormat.nChannels != 1)&&(myWaveFormat.nChannels != 2))
 	{
 		LOCALASSERT(1==0);
 		ffclose(myFile);
-		return 0;	
-	}	
+		return 0;
+	}
 	if ((myWaveFormat.wBitsPerSample != 8)&&(myWaveFormat.wBitsPerSample != 16))
 	{
 		LOCALASSERT(1==0);
 		ffclose(myFile);
-		return 0;	
-	}	
-		
+		return 0;
+	}
+
 	{
 		GameSounds[soundNum].audioBuffer = new uint8_t[myChunkHeader.chunkLength];
 
@@ -1493,11 +1504,11 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		{
 			LOCALASSERT(1==0);
 			delete []GameSounds[soundNum].audioBuffer;
-			GameSounds[soundNum].audioBuffer = NULL;	
+			GameSounds[soundNum].audioBuffer = NULL;
 			ffclose(myFile);
 			return 0;
 		}
-	
+
 		memset(&GameSounds[soundNum].xa2Buffer, 0, sizeof(XAUDIO2_BUFFER));
 		GameSounds[soundNum].xa2Buffer.AudioBytes = myChunkHeader.chunkLength;
 		GameSounds[soundNum].xa2Buffer.pAudioData = GameSounds[soundNum].audioBuffer;
@@ -1535,7 +1546,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 			{
 				wavname = wavFileName;
 			}
-			
+
 			GameSounds[soundNum].wavName = (char *)AllocateMem (strlen (wavname) + 1);
 			strcpy (GameSounds[soundNum].wavName, wavname);
 		}
@@ -1572,9 +1583,9 @@ static int ToneToFrequency(int currentFrequency, int currentPitch, int newPitch)
 
 	if(newPitch>currentPitch)
 	{
-		/* scale up */		
+		/* scale up */
 		int numOctaves, numTones;
-  	 	numOctaves = (newPitch-currentPitch)/1536;
+		numOctaves = (newPitch-currentPitch)/1536;
 		numTones = (newPitch-currentPitch)%1536;
 
 		newFrequency<<=numOctaves;
@@ -1587,17 +1598,17 @@ static int ToneToFrequency(int currentFrequency, int currentPitch, int newPitch)
 	{
 		/* scale down */
 		int numOctaves, numTones;
-  	 	numOctaves = (currentPitch-newPitch)/1536;
+		numOctaves = (currentPitch-newPitch)/1536;
 		numTones = (currentPitch-newPitch)%1536;
 
 		newFrequency>>=numOctaves;
-	 	if(newFrequency<FREQUENCY_MINPLAT) newFrequency=FREQUENCY_MINPLAT;
-		
+		if(newFrequency<FREQUENCY_MINPLAT) newFrequency=FREQUENCY_MINPLAT;
+
 		if(numTones>0) newFrequency = (int)((float)(newFrequency)/pitch_to_frequency_mult_table[numTones]);
 		if(newFrequency<FREQUENCY_MINPLAT) newFrequency=FREQUENCY_MINPLAT;
 	}
 	return newFrequency;
-} 
+}
 
 void PlatUpdatePlayer()
 {
@@ -1609,19 +1620,19 @@ void PlatUpdatePlayer()
 				(Global_VDB_Ptr->VDB_World.vz == 0))
 			return;
 
-		XA2Listener.Position.x = static_cast<float>(Global_VDB_Ptr->VDB_World.vx);
-		XA2Listener.Position.y = static_cast<float>(Global_VDB_Ptr->VDB_World.vy);
-		XA2Listener.Position.z = static_cast<float>(Global_VDB_Ptr->VDB_World.vz);
+		XA2Listener.Position.x = 0.0f;//static_cast<float>(Global_VDB_Ptr->VDB_World.vx);
+		XA2Listener.Position.y = 0.0f;//static_cast<float>(Global_VDB_Ptr->VDB_World.vy);
+		XA2Listener.Position.z = 0.0f;//static_cast<float>(Global_VDB_Ptr->VDB_World.vz);
 
 		// look-at
-		XA2Listener.OrientFront.x = (float)((Global_VDB_Ptr->VDB_Mat.mat13) / 65536.0F);
-		XA2Listener.OrientFront.y = (float)((Global_VDB_Ptr->VDB_Mat.mat23) / 65536.0F);
-		XA2Listener.OrientFront.z = (float)((Global_VDB_Ptr->VDB_Mat.mat33) / 65536.0F);
+		XA2Listener.OrientFront.x = (float)(Global_VDB_Ptr->VDB_Mat.mat13 / 65536.0f);
+		XA2Listener.OrientFront.y = (float)(Global_VDB_Ptr->VDB_Mat.mat23 / 65536.0f);
+		XA2Listener.OrientFront.z = (float)(Global_VDB_Ptr->VDB_Mat.mat33 / 65536.0f);
 
 		// up
-		XA2Listener.OrientTop.x = (float)((Global_VDB_Ptr->VDB_Mat.mat12) / 65536.0F);
-		XA2Listener.OrientTop.y = (float)((Global_VDB_Ptr->VDB_Mat.mat22) / 65536.0F);
-		XA2Listener.OrientTop.z = (float)((Global_VDB_Ptr->VDB_Mat.mat32) / 65536.0F);
+		XA2Listener.OrientTop.x = (float)(Global_VDB_Ptr->VDB_Mat.mat12 / 65536.0f);
+		XA2Listener.OrientTop.y = (float)(Global_VDB_Ptr->VDB_Mat.mat22 / 65536.0f);
+		XA2Listener.OrientTop.z = (float)(Global_VDB_Ptr->VDB_Mat.mat32 / 65536.0f);
 
 /*
 			char buf2[250];
@@ -1655,7 +1666,7 @@ void PlatUpdatePlayer()
 #if 0 // not doing reverb stuff yet
 //
 #endif
-#if 0
+#if 1
 	char buf[100];
 	UINT32 calcFlags = X3DAUDIO_CALCULATE_MATRIX/* | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT | X3DAUDIO_CALCULATE_REVERB*/; // ????????????????????????????
 
@@ -1668,8 +1679,8 @@ void PlatUpdatePlayer()
 
 			X3DAudioCalculate(x3DInstance, &XA2Listener, &ActiveSounds[i].xa2Emitter, calcFlags, &XA2DSPSettings);
 
-//			sprintf(buf, "1: %f 2: %f\n", XA2DSPSettings.pMatrixCoefficients[0], XA2DSPSettings.pMatrixCoefficients[1]);
-//			OutputDebugString(buf);
+			sprintf(buf, "1: %f 2: %f\n", XA2DSPSettings.pMatrixCoefficients[0], XA2DSPSettings.pMatrixCoefficients[1]);
+			OutputDebugString(buf);
 
 			ActiveSounds[i].pSourceVoice->SetOutputMatrix(pMasteringVoice, 1, 2, XA2DSPSettings.pMatrixCoefficients);
 			ActiveSounds[i].pSourceVoice->SetFrequencyRatio(XA2DSPSettings.DopplerFactor);
@@ -1770,7 +1781,7 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 	PWAVCHUNKHEADER myChunkHeader = {0};
 	PWAVRIFFHEADER myRiffHeader = {0};
 	WAVEFORMATEX myWaveFormat = {0};
-	uint8_t *endOfBufferPtr = NULL;   
+	uint8_t *endOfBufferPtr = NULL;
 	uint32_t lengthInSeconds = 0;
 
 	{
@@ -1792,11 +1803,11 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 	{
 		/* a standard PCM wave format chunk */
 		PCMWAVEFORMAT tmpWaveFormat;
-		RebSndRead(&tmpWaveFormat, sizeof(PCMWAVEFORMAT), 1, &bufferPtr);	
-		myWaveFormat.wFormatTag = tmpWaveFormat.wf.wFormatTag;        
+		RebSndRead(&tmpWaveFormat, sizeof(PCMWAVEFORMAT), 1, &bufferPtr);
+		myWaveFormat.wFormatTag = tmpWaveFormat.wf.wFormatTag;
 		myWaveFormat.nChannels = tmpWaveFormat.wf.nChannels;
 		myWaveFormat.nSamplesPerSec = tmpWaveFormat.wf.nSamplesPerSec;;
-		myWaveFormat.nAvgBytesPerSec = tmpWaveFormat.wf.nAvgBytesPerSec;   
+		myWaveFormat.nAvgBytesPerSec = tmpWaveFormat.wf.nAvgBytesPerSec;
 		myWaveFormat.nBlockAlign = tmpWaveFormat.wf.nBlockAlign;
 		myWaveFormat.wBitsPerSample = tmpWaveFormat.wBitsPerSample;
 		myWaveFormat.cbSize = 0;
@@ -1809,7 +1820,7 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 	else if (myChunkHeader.chunkLength == 18)
 	{
 		/* an extended PCM wave format chunk */
-		RebSndRead(&myWaveFormat, sizeof(WAVEFORMATEX), 1, &bufferPtr);	
+		RebSndRead(&myWaveFormat, sizeof(WAVEFORMATEX), 1, &bufferPtr);
 		myWaveFormat.cbSize = 0;
 	}
 	else
@@ -1826,7 +1837,7 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 		/* Read	the data chunk header */
 		RebSndRead(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, &bufferPtr);
 		if ((myChunkHeader.chunkName[0]=='d')&&(myChunkHeader.chunkName[1]=='a')&&
-	   		(myChunkHeader.chunkName[2]=='t')&&(myChunkHeader.chunkName[3]=='a'))
+			(myChunkHeader.chunkName[2]=='t')&&(myChunkHeader.chunkName[3]=='a'))
 		{
 			break;
 		}
@@ -1836,11 +1847,11 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 
 	/* Now do a few checks */
 	if ((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
-	    (myChunkHeader.chunkName[2]!='t')||(myChunkHeader.chunkName[3]!='a'))
+		(myChunkHeader.chunkName[2]!='t')||(myChunkHeader.chunkName[3]!='a'))
 	{
 		/* chunk alignment disaster */
 		LOCALASSERT(1==0);
-		return 0;	
+		return 0;
 	}
 	
 	// calculate length of sample
@@ -1849,22 +1860,22 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 	if ((myChunkHeader.chunkLength < 0) || (myChunkHeader.chunkLength > SOUND_MAXSIZE))
 	{
 		LOCALASSERT(1==0);
-		return 0;	
-	}	
+		return 0;
+	}
 	if (myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
 	{
 		LOCALASSERT(1==0);
-		return 0;	
-	}	
+		return 0;
+	}
 	if ((myWaveFormat.nChannels != 1) && (myWaveFormat.nChannels != 2))
 	{
 		LOCALASSERT(1==0);
-		return 0;	
-	}	
+		return 0;
+	}
 	if ((myWaveFormat.wBitsPerSample != 8) && (myWaveFormat.wBitsPerSample != 16))
 	{
 		LOCALASSERT(1==0);
-		return 0;	
+		return 0;
 	}
 
 	{
@@ -1913,7 +1924,7 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 		GameSounds[soundIndex].dsFrequency = myWaveFormat.nSamplesPerSec;
 	}
 
-    return endOfBufferPtr;
+	return endOfBufferPtr;
 }
 
 int PlatUse3DSoundHW()
@@ -1941,8 +1952,8 @@ int PlatUse3DSoundHW()
 	// Go through and get 3DBuffers for all active sounds.
 	while (count--)
 	{
-	   	if (ActiveSounds[count].audioBuffer) // instead of dsBuffer
- 	  	{
+		if (ActiveSounds[count].audioBuffer) // instead of dsBuffer
+		{
 			ActiveSounds[count].is3D = TRUE;
 /*
 			HRESULT hres = IDirectSoundBuffer_QueryInterface
@@ -1957,7 +1968,7 @@ int PlatUse3DSoundHW()
 				db_logf3(("Error: Failed to get a DirectSound3DBuffer. res %x", hres));
 			}
 */
-	   	}
+		}
 	}
 
 	return 1;
@@ -1982,12 +1993,12 @@ int PlatDontUse3DSoundHW()
 	// Go through and release 3DBuffers for all active sounds.
 	while (count--)
 	{
-	   	if (ActiveSounds[count].audioBuffer) // instead of dsBuffer 
- 	  	{
+		if (ActiveSounds[count].audioBuffer) // instead of dsBuffer 
+		{
 			ActiveSounds[count].is3D = FALSE;
 //			IDirectSound3DBuffer_Release(ActiveSounds[count].ds3DBufferP);
 //			ActiveSounds[count].ds3DBufferP = NULL;
-	   	}
+	 	}
 	}
 
 	return 1;

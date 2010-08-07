@@ -39,6 +39,5 @@ std::string IntToString(const int value);
 int StringToInt(const std::string &string);
 void LogString(const std::string &logString);
 void LogDebugValue(int value);
-std::string LogInteger(int value);
 
 #endif // include guard

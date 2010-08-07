@@ -1020,7 +1020,7 @@ extern unsigned char KeyboardInput[];
 extern unsigned char DebouncedKeyboardInput[];
 extern int GotJoystick;
 extern int GotMouse;
-extern int GotXPad;
+extern BOOL GotXPad;
 
 /* XInput value externs */
 extern int xPadLookX;

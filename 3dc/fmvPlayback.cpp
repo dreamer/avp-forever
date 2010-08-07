@@ -7,6 +7,7 @@
 #define restrict
 #include <emmintrin.h>
 #include <math.h>
+#include "logString.h"
 
 #ifdef _XBOX
 #define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
@@ -130,7 +131,6 @@ TheoraFMV::~TheoraFMV()
 
 	if (mAudio)
 	{
-
 		// wait for audio thread to finish
 		if (mAudioThreadHandle)
 		{
@@ -154,8 +154,7 @@ TheoraFMV::~TheoraFMV()
 
 	for (uint32_t i = 0; i < 3; i++)
 	{
-		if (frameTextures[i].texture)
-			frameTextures[i].texture->Release();
+		Tex_Release(frameTextures[i]);
 	}
 
 	if (mFrameCriticalSectionInited)
@@ -199,9 +198,9 @@ int TheoraFMV::Open(const std::string &fileName)
 	mFileName = fileName;
 #endif
 
-	frameTextures[0].texture = 0;
-	frameTextures[1].texture = 0;
-	frameTextures[2].texture = 0;
+	frameTextures[0] = NO_TEXTURE;
+	frameTextures[1] = NO_TEXTURE;
+	frameTextures[2] = NO_TEXTURE;
 
 	// open the file
 	mFileStream.open(mFileName.c_str(), std::ios::in | std::ios::binary);
@@ -257,42 +256,32 @@ int TheoraFMV::Open(const std::string &fileName)
 
 		mAudioDataBuffer = NULL;
 	}
-/*
-	if (!mDisplayTexture)
-	{
-		mFrameWidth = mVideo->mTheora.mInfo.frame_width;
-		mFrameHeight = mVideo->mTheora.mInfo.frame_height;
 
-		mTextureWidth = mFrameWidth;
-		mTextureHeight = mFrameHeight;
-
-		// create a new texture, passing width and height which will be set to the actual size of the created texture
-		mDisplayTexture = CreateFmvTexture(&mTextureWidth, &mTextureHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
-		if (!mDisplayTexture)
-		{
-			Con_PrintError("can't create FMV texture");
-			return FMV_ERROR;
-		}
-	}
-*/
 	mFrameWidth = mVideo->mTheora.mInfo.frame_width;
 	mFrameHeight = mVideo->mTheora.mInfo.frame_height;
 
-	frameTextures[0].width = mFrameWidth;
-	frameTextures[0].height = mFrameHeight;
-
-	frameTextures[1].width = frameTextures[2].width = mFrameWidth / 2;
-	frameTextures[1].height = frameTextures[2].height = mFrameHeight / 2;
-
 	for (uint32_t i = 0; i < 3; i++)
 	{
+		uint32_t width = mFrameWidth;
+		uint32_t height = mFrameHeight;
+
+		// the first texture is fullsize, the second two are quartersize
+		if (i > 0)
+		{
+			width /= 2;
+			height /= 2;
+		}
+
 		// create a new texture, passing width and height which will be set to the actual size of the created texture
-		frameTextures[i].texture = CreateFmvTexture2(&frameTextures[i].width, &frameTextures[i].height);
-		if (!frameTextures[i].texture)
+		r_Texture newTexture = CreateFmvTexture2(width, height);
+		if (!newTexture)
 		{
 			Con_PrintError("can't create FMV texture");
 			return FMV_ERROR;
 		}
+
+		// add it to texture manager
+		frameTextures[i] = Tex_AddTexture("CUTSCENE_" + IntToString(i), newTexture, width, height, TexturePool_DYNAMIC);
 	}
 
 	mFmvPlaying = true;
@@ -450,40 +439,34 @@ bool TheoraFMV::NextFrame()
 {
 	if (mFmvPlaying == false)
 		return false;
-/*
-	D3DLOCKED_RECT textureLock;
-	if (FAILED(mDisplayTexture->LockRect(0, &textureLock, NULL, D3DLOCK_DISCARD)))
-	{
-		OutputDebugString("can't lock FMV texture\n");
-		return false;
-	}
-*/
+
 	// critical section
 	EnterCriticalSection(&mFrameCriticalSection);
 
-	D3DLOCKED_RECT texLock[3];
-
 	for (uint32_t i = 0; i < 3; i++)
 	{
-		if (FAILED(frameTextures[i].texture->LockRect(0, &texLock[i], NULL, D3DLOCK_DISCARD)))
-		{
-			OutputDebugString("can't lock FMV texture\n");
-			return false;
-		}
-	}
+		uint8_t *originalDestPtr = NULL;
+		uint32_t pitch = 0;
 
-	for (uint32_t i = 0; i < 3; i++)
-	{
-		for (uint32_t y = 0; y < frameTextures[i].height; y++)
+		uint32_t width = 0;
+		uint32_t height = 0;
+
+		// get width and height
+		Tex_GetDimensions(frameTextures[i], width, height);
+
+		// lock the texture
+		Tex_Lock(frameTextures[i], &originalDestPtr, &pitch);
+
+		for (uint32_t y = 0; y < height; y++)
 		{
-			uint8_t *destPtr = static_cast<uint8_t*>(texLock[i].pBits) + y * texLock[i].Pitch;
+			uint8_t *destPtr = originalDestPtr + y * pitch;
 			uint8_t *srcPtr = mYuvBuffer[i].data + (y * mYuvBuffer[i].stride);
 
 			// copy entire width row in one go
-			memcpy(destPtr, srcPtr, frameTextures[i].width * sizeof(uint8_t));
+			memcpy(destPtr, srcPtr, width * sizeof(uint8_t));
 
-			destPtr += frameTextures[i].width * sizeof(uint8_t);
-			srcPtr += frameTextures[i].width * sizeof(uint8_t);
+			destPtr += width * sizeof(uint8_t);
+			srcPtr += width * sizeof(uint8_t);
 /*
 			for (uint32_t x = 0; x < frameTextures[i].width; x++)
 			{
@@ -494,6 +477,9 @@ bool TheoraFMV::NextFrame()
 			}
 */
 		}
+
+		// unlock texture
+		Tex_Unlock(frameTextures[i]);
 	}
 
 /*
@@ -517,25 +503,12 @@ bool TheoraFMV::NextFrame()
 	oggRgb.rgb_pitch = textureLock.Pitch;
 
 	oggplay_yuv2rgb(&oggYuv, &oggRgb);
-
-	if (FAILED(mDisplayTexture->UnlockRect(0)))
-	{
-		OutputDebugString("can't unlock FMV texture\n");
-		return false;
-	}
 */
-	frameTextures[0].texture->UnlockRect(0);
-	frameTextures[1].texture->UnlockRect(0);
-	frameTextures[2].texture->UnlockRect(0);
 
 	// set this value to true so we can now begin to draw the textured fmv frame
 	if (!mTexturesReady)
 		mTexturesReady = true;
-/*
-	tex[0]->UnlockRect(0);
-	tex[1]->UnlockRect(0);
-	tex[2]->UnlockRect(0);
-*/
+
 	mFrameReady = false;
 
 	LeaveCriticalSection(&mFrameCriticalSection);
