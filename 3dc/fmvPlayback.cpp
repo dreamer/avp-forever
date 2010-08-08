@@ -272,16 +272,8 @@ int TheoraFMV::Open(const std::string &fileName)
 			height /= 2;
 		}
 
-		// create a new texture, passing width and height which will be set to the actual size of the created texture
-		r_Texture newTexture = CreateFmvTexture2(width, height);
-		if (!newTexture)
-		{
-			Con_PrintError("can't create FMV texture");
-			return FMV_ERROR;
-		}
-
-		// add it to texture manager
-		frameTextures[i] = Tex_AddTexture("CUTSCENE_" + IntToString(i), newTexture, width, height, TexturePool_DYNAMIC);
+		// create the texture with desired parameters
+		frameTextures[i] = Tex_Create("CUTSCENE_" + IntToString(i), width, height, 8, TextureUsage_Dynamic);
 	}
 
 	mFmvPlaying = true;

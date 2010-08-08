@@ -80,7 +80,7 @@ uint32_t Tex_CheckExists(const char* fileName)
 	return 0; // what else to return if it doesnt exist?
 }
 
-uint32_t Tex_AddTexture(const std::string &fileName, r_Texture texture, uint32_t width, uint32_t height, enum TexturePool pool)
+uint32_t Tex_AddTexture(const std::string &fileName, r_Texture texture, uint32_t width, uint32_t height, enum TextureUsage usage)
 {
 	// get the next available ID
 	uint32_t textureID = Tex_GetFreeID();
@@ -90,7 +90,7 @@ uint32_t Tex_AddTexture(const std::string &fileName, r_Texture texture, uint32_t
 	newTexture.texture = texture;
 	newTexture.width = width;
 	newTexture.height = height;
-	newTexture.pool = pool;
+	newTexture.usage = usage;
 
 	// store it
 	if (textureID < textureList.size()) // we're reusing a slot in this case
@@ -106,6 +106,60 @@ uint32_t Tex_AddTexture(const std::string &fileName, r_Texture texture, uint32_t
 	sprintf(buf, "added tex at ID: %d\n", textureID);
 	OutputDebugString(buf);
 */
+	return textureID;
+}
+
+uint32_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType)
+{
+	Texture newTexture;
+	newTexture.name = textureName;
+
+	if (!R_CreateTextureFromAvPTexture(AvPTexure, usageType, newTexture))
+	{
+		// log error
+		//return false;
+	}
+
+	// get the next available ID
+	uint32_t textureID = Tex_GetFreeID();
+
+	// add texture to manager
+	if (textureID < textureList.size()) // we're reusing a slot in this case
+	{
+		textureList[textureID] = newTexture; // replace in the old unused slot
+	}
+	else // adding on to the end
+	{
+		textureList.push_back(newTexture);
+	}
+
+	return textureID;
+}
+
+uint32_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t height, uint32_t bpp, enum TextureUsage usageType)
+{
+	Texture newTexture;
+	newTexture.name = textureName;
+
+	if (!R_CreateTexture(width, height, bpp, usageType, newTexture))
+	{
+		// log error
+		//return false;
+	}
+	
+	// get the next available ID
+	uint32_t textureID = Tex_GetFreeID();
+
+	// add texture to manager
+	if (textureID < textureList.size()) // we're reusing a slot in this case
+	{
+		textureList[textureID] = newTexture; // replace in the old unused slot
+	}
+	else // adding on to the end
+	{
+		textureList.push_back(newTexture);
+	}
+
 	return textureID;
 }
 
@@ -151,7 +205,7 @@ void Tex_ReloadDynamicTextures()
 {
 	for (std::vector<Texture>::iterator it = textureList.begin(); it != textureList.end(); ++it)
 	{
-		if ((it->texture) && (it->pool == TexturePool_DYNAMIC))
+		if ((it->texture) && (it->usage == TextureUsage_Dynamic))
 		{
 			// release and restore texture (just release for now..)
 			R_ReleaseTexture(it->texture);

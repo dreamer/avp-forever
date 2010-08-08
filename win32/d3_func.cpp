@@ -29,7 +29,6 @@
 #include "logString.h"
 #include "configFile.h"
 #include "console.h"
-#include "textureManager.h"
 #include "vertexBuffer.h"
 #include "networking.h"
 #include "font2.h"
@@ -899,64 +898,10 @@ r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	return destTexture;
 }
 
-r_Texture CreateFmvTexture(uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool)
-{
-	r_Texture destTexture = NULL;
-
-	uint32_t newWidth, newHeight;
-
-	// check if passed value is already a power of 2
-	if (!IsPowerOf2(*width))
-	{
-		newWidth = NearestSuperiorPow2(*width);
-	}
-	else { newWidth = *width; }
-
-	if (!IsPowerOf2(*height))
-	{
-		newHeight = NearestSuperiorPow2(*height);
-	}
-	else { newHeight = *height; }
-
-//	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)width, (UINT*)height, NULL, usage, NULL, (D3DPOOL)pool);
-
-//	LastError = d3d.lpD3DDevice->CreateTexture(*width, *height, 1, usage, D3DFMT_X8R8G8B8, (D3DPOOL)pool, &destTexture, NULL);
-	LastError = d3d.lpD3DDevice->CreateTexture(newWidth, newHeight, 1, usage, D3DFMT_X8R8G8B8, (D3DPOOL)pool, &destTexture, NULL);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return NULL;
-	}
-
-	*width = newWidth;
-	*height = newHeight;
-
-	// lock and clear texture to black
-	D3DLOCKED_RECT lock;
-
-	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
-	if (FAILED(LastError))
-	{
-		destTexture->Release();
-		LogDxError(LastError, __LINE__, __FILE__);
-		return NULL;
-	}
-
-	memset(lock.pBits, 0, newHeight * lock.Pitch);
-
-	LastError = destTexture->UnlockRect(0);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return NULL;
-	}
-
-	return destTexture;
-}
-
+/*
 r_Texture CreateFmvTexture2(uint32_t &width, uint32_t &height)
 {
-	/* TODO - Add support for rendering FMVs on GPUs that can't use non power of 2 textures */
+	// TODO - Add support for rendering FMVs on GPUs that can't use non power of 2 textures
 
 	r_Texture destTexture = NULL;
 #if 0
@@ -984,6 +929,7 @@ r_Texture CreateFmvTexture2(uint32_t &width, uint32_t &height)
 
 	return destTexture;
 }
+*/
 
 bool CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 *vertexShader, LPD3DXCONSTANTTABLE *constantTable)
 {
@@ -1251,7 +1197,165 @@ bool CreateD3DTextureFromFile(const char* fileName, Texture &texture)
 
 	texture.width = imageInfo.Width;
 	texture.height = imageInfo.Height;
-	texture.pool = TexturePool_MANAGED;
+	texture.usage = TextureUsage_Normal;
+
+	return true;
+}
+
+bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usageType, Texture &texture)
+{
+	D3DPOOL texturePool;
+	D3DFORMAT textureFormat;
+	uint32_t textureUsage;
+	LPDIRECT3DTEXTURE9 d3dTexture = NULL;
+
+	switch (usageType)
+	{
+		case TextureUsage_Normal:
+		{
+			texturePool = D3DPOOL_MANAGED;
+			textureUsage = 0;
+			break;
+		}
+		case TextureUsage_Dynamic:
+		{
+			texturePool = D3DPOOL_DEFAULT;
+			textureUsage = D3DUSAGE_DYNAMIC;
+			break;
+		}
+	}
+
+	// fill tga header
+	TgaHeader.idlength = 0;
+	TgaHeader.x_origin = AvPTexture.width;
+	TgaHeader.y_origin = AvPTexture.height;
+	TgaHeader.colourmapdepth	= 0;
+	TgaHeader.colourmaplength	= 0;
+	TgaHeader.colourmaporigin	= 0;
+	TgaHeader.colourmaptype		= 0;
+	TgaHeader.datatypecode		= 2;		// RGB
+	TgaHeader.bitsperpixel		= 32;
+	TgaHeader.imagedescriptor	= 0x20;		// set origin to top left
+	TgaHeader.width = AvPTexture.width;
+	TgaHeader.height = AvPTexture.height;
+
+	// size of raw image data
+	uint32_t imageSize = AvPTexture.height * AvPTexture.width * sizeof(uint32_t);
+
+	// create new buffer for header and image data
+	uint8_t *buffer = new uint8_t[sizeof(TGA_HEADER) + imageSize];
+
+	// copy header and image data to buffer
+	memcpy(buffer, &TgaHeader, sizeof(TGA_HEADER));
+
+	uint8_t *imageData = buffer + sizeof(TGA_HEADER);
+
+	// loop, converting RGB to BGR for D3DX function
+	for (uint32_t i = 0; i < imageSize; i+=4)
+	{
+		// ARGB
+		// BGR
+		imageData[i+2] = AvPTexture.buffer[i];
+		imageData[i+1] = AvPTexture.buffer[i+1];
+		imageData[i]   = AvPTexture.buffer[i+2];
+		imageData[i+3] = AvPTexture.buffer[i+3];
+	}
+
+	D3DXIMAGE_INFO image;
+	image.Depth = 32;
+	image.Width = AvPTexture.width;
+	image.Height = AvPTexture.height;
+	image.MipLevels = 1;
+	image.Depth = D3DFMT_A8R8G8B8;
+
+	if (FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
+		buffer,
+		sizeof(TGA_HEADER) + imageSize,
+		AvPTexture.width,
+		AvPTexture.height,
+		1, // mips
+		textureUsage,
+		D3DFMT_A8R8G8B8,
+		texturePool,
+		D3DX_FILTER_NONE,
+		D3DX_FILTER_NONE,
+		0,
+		&image,
+		0,
+		&d3dTexture)))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		delete[] buffer;
+		texture.texture = NULL;
+		return false;
+	}
+
+	// set texture struct members
+	texture.bitsPerPixel = 32; // set to 32 for now
+	texture.width = AvPTexture.width;
+	texture.height = AvPTexture.height;
+	texture.usage = usageType;
+	texture.texture = d3dTexture;
+
+	delete[] buffer;
+	return true;
+}
+
+bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum TextureUsage usageType, Texture &texture)
+{
+	D3DPOOL texturePool;
+	D3DFORMAT textureFormat;
+	uint32_t textureUsage;
+	LPDIRECT3DTEXTURE9 d3dTexture = NULL;
+
+	switch (usageType)
+	{
+		case TextureUsage_Normal:
+		{
+			texturePool = D3DPOOL_MANAGED;
+			textureUsage = 0;
+			break;
+		}
+		case TextureUsage_Dynamic:
+		{
+			texturePool = D3DPOOL_DEFAULT;
+			textureUsage = D3DUSAGE_DYNAMIC;
+			break;
+		}
+	}
+
+	switch (bpp)
+	{
+		case 32:
+		{
+			textureFormat = D3DFMT_A8R8G8B8;
+			break;
+		}
+		case 16:
+		{
+			textureFormat = D3DFMT_A1R5G5B5;
+			break;
+		}
+		case 8:
+		{
+			textureFormat = D3DFMT_L8;
+			break;
+		}
+	}
+
+	// create the d3d9 texture
+	LastError = d3d.lpD3DDevice->CreateTexture(width, height, 1, textureUsage, textureFormat, texturePool, &d3dTexture, NULL);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+
+	// set texture struct members
+	texture.bitsPerPixel = bpp;
+	texture.width = width;
+	texture.height = height;
+	texture.usage = usageType;
+	texture.texture = d3dTexture;
 
 	return true;
 }

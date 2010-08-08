@@ -244,7 +244,7 @@ static int LoadUserProfiles(void)
 			//make sure the file is a rif file
 			HANDLE rif_file;
 			rif_file = avp_CreateFile (pszFullPath, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, 0);
-			if(rif_file==INVALID_HANDLE_VALUE)
+			if (rif_file==INVALID_HANDLE_VALUE)
 			{
 //				printf("couldn't open %s\n",pszFullPath);
 				delete[] pszFullPath;
@@ -262,8 +262,8 @@ static int LoadUserProfiles(void)
 				continue;
 			}
 			FILETIME ftLocal;
-			FileTimeToLocalFileTime(&wfd.ftLastWriteTime,&ftLocal);
-			FileTimeToSystemTime(&ftLocal,&profilePtr->TimeLastUpdated);
+			FileTimeToLocalFileTime(&wfd.ftLastWriteTime, &ftLocal);
+			FileTimeToSystemTime(&ftLocal, &profilePtr->TimeLastUpdated);
 			profilePtr->FileTime = ftLocal;
 			InsertProfileIntoList(profilePtr);
 			CloseHandle (rif_file);
@@ -271,7 +271,6 @@ static int LoadUserProfiles(void)
 		}
 	}
 	while (::FindNextFile(hFindFile,&wfd));
-
 
 	if (ERROR_NO_MORE_FILES != GetLastError())
 	{

@@ -1666,7 +1666,7 @@ void PlatUpdatePlayer()
 #if 0 // not doing reverb stuff yet
 //
 #endif
-#if 1
+#if 0
 	char buf[100];
 	UINT32 calcFlags = X3DAUDIO_CALCULATE_MATRIX/* | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT | X3DAUDIO_CALCULATE_REVERB*/; // ????????????????????????????
 

@@ -311,7 +311,7 @@ void Con_Draw()
 	Font_DrawText(">", console.indent, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 	Font_DrawText("_", console.indent + charWidth, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 
-	y-= CHAR_HEIGHT;
+	y -= CHAR_HEIGHT;
 
 	int32_t rows = console.text.size() - 1;
 

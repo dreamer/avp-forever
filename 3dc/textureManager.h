@@ -30,10 +30,10 @@
 #include <string>
 #include <vector>
 
-enum TexturePool
+enum TextureUsage
 {
-	TexturePool_DYNAMIC,
-	TexturePool_MANAGED
+	TextureUsage_Normal,
+	TextureUsage_Dynamic
 };
 
 struct Texture
@@ -42,11 +42,13 @@ struct Texture
 	uint32_t		width;
 	uint32_t		height;
 	r_Texture		texture;
-	TexturePool		pool;
+	TextureUsage	usage;
+	uint8_t			bitsPerPixel;
 };
 
-
-uint32_t Tex_AddTexture(const std::string &fileName, r_Texture texture, uint32_t width, uint32_t height, enum TexturePool pool = TexturePool_MANAGED);
+uint32_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t height, uint32_t bpp, enum TextureUsage usageType);
+uint32_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType);
+uint32_t Tex_AddTexture(const std::string &fileName, r_Texture texture, uint32_t width, uint32_t height, enum TextureUsage usage = TextureUsage_Normal);
 uint32_t Tex_LoadFromFile(const std::string &fileName);
 uint32_t Tex_CheckExists(const char* fileName);
 const Texture& Tex_GetTextureDetails(uint32_t textureID);

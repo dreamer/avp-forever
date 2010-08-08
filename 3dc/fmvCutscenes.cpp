@@ -51,6 +51,7 @@ bool MenuBackground = false;
 
 void ReleaseAllFMVTexturesForDeviceReset()
 {
+/*
 	// do ingame videoscreen textures
 	for (uint32_t i = 0; i < NumberOfFMVTextures; i++)
 	{
@@ -68,14 +69,17 @@ void ReleaseAllFMVTexturesForDeviceReset()
 			}
 		}
 	}
+*/
 }
 
 void RecreateAllFMVTexturesAfterDeviceReset()
 {
+/*
 	for (uint32_t i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].textureID = Tex_AddTexture("INGAME_CUTSCENE_" + IntToString(i), CreateFmvTexture(&FMVTexture[i].width, &FMVTexture[i].height, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT), FMVTexture[i].width, FMVTexture[i].height, TexturePool_DYNAMIC);
 	}
+*/
 /*
 	// check for fullscreen intro/outro fmvs
 	for (int i = 0; i < MAX_FMVS; i++)

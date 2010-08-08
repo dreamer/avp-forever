@@ -705,48 +705,35 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					);
 				if (pTexture)
 				{
-/*
-					IMAGEHEADER * pImageHdr = GetImageHeader();
-					db_assert1(pImageHdr);
-					memset(pImageHdr,0,sizeof(IMAGEHEADER));
-					pImageHdr->ImageWidth = pTexture->width;
-					pImageHdr->ImageHeight = pTexture->height;
-					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
-					strcpy(pImageHdr->ImageName, szBuf);
-					pImageHdr->AvPTexture = pTexture;
-*/
 					uint32_t ImageWidth = pTexture->width;
 					uint32_t ImageHeight = pTexture->height;
 					AVPTEXTURE *AvPTexture = pTexture;
 					char *ImageName = szBuf;
-					r_Texture renderTexture;
-					TexturePool pool;
+					TextureUsage textureUsage;
 
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 
 					/* KJL 16:05:50 26/02/98 - attempt to get a texture handle */
 					{
 						// load Direct3D Texture here?
-						if (/*pTexture->*/AvPTexture->buffer)
+						if (AvPTexture->buffer)
 						{
-							if ((strcmp(/*pImageHdr->*/ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0) ||
-								(strcmp(/*pImageHdr->*/ImageName, "Graphics\\FMVs\\alien.RIM") == 0) ||		// for alien demo
-								(strcmp(/*pImageHdr->*/ImageName, "Graphics\\FMVs\\predator.RIM") == 0) ||  // for marine(?) demo
-								(strcmp(/*pImageHdr->*/ImageName, "Graphics\\FMVs\\final.RIM") == 0))		// for predator demo
+							if ((strcmp(ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0) ||
+								(strcmp(ImageName, "Graphics\\FMVs\\alien.RIM") == 0) ||		// for alien demo
+								(strcmp(ImageName, "Graphics\\FMVs\\predator.RIM") == 0) ||  // for marine(?) demo
+								(strcmp(ImageName, "Graphics\\FMVs\\final.RIM") == 0))		// for predator demo
 							{
-								OutputDebugString("found fmv texture.. \n");
 								// is fmv texture, create in default pool so we can dynamically update it
-								renderTexture = CreateD3DTexture(AvPTexture, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
-								pool = TexturePool_MANAGED;
+
 								// will need to be restored on alt/tab or device loss
+								textureUsage = TextureUsage_Dynamic;
 							}
 							else
 							{
-								renderTexture = CreateD3DTexture(AvPTexture, 0, D3DPOOL_MANAGED);
-								pool = TexturePool_DYNAMIC;
+								textureUsage = TextureUsage_Normal;
 							}
 
-							textureID = Tex_AddTexture(ImageName, renderTexture, ImageWidth, ImageHeight, pool);
+							textureID = Tex_CreateFromAvPTexture(ImageName, *AvPTexture, textureUsage);
 
 							// free this, as d3d now holds the texture
 							free(AvPTexture->buffer);
@@ -755,7 +742,6 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 						else OutputDebugString("pTexture->buf was Null!");
 					}
 
-					//return NumImages-1;
 					return textureID;
 				}
 				else
@@ -782,22 +768,11 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					);
 				if (pTexture)
 				{
-/*
-					IMAGEHEADER * pImageHdr = GetImageHeader();
-					db_assert1(pImageHdr);
-					memset(pImageHdr,0,sizeof(IMAGEHEADER));
-					pImageHdr->ImageWidth = pTexture->width;
-					pImageHdr->ImageHeight = pTexture->height;
-					db_assert1(sizeof pImageHdr->ImageName / sizeof pImageHdr->ImageName[0] > strlen(szBuf));
-					strcpy(pImageHdr->ImageName,szBuf);
-					pImageHdr->AvPTexture = pTexture;
-*/
 					uint32_t ImageWidth = pTexture->width;
 					uint32_t ImageHeight = pTexture->height;
 					AVPTEXTURE *AvPTexture = pTexture;
 					char *ImageName = szBuf;
-					r_Texture renderTexture;
-					TexturePool pool;
+					TextureUsage textureUsage;
 
 					db_logf4(("\tloaded to image number %d",NumImages-1));
 
@@ -811,32 +786,25 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 								(strcmp(ImageName, "Graphics\\FMVs\\final.RIM") == 0))		// for predator demo
 							{
 								// is fmv texture, create in default pool so we can dynamically update it
-								renderTexture = CreateD3DTexture(AvPTexture, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
-								pool = TexturePool_MANAGED;
+								textureUsage = TextureUsage_Dynamic;
 							}
 							else
 							{
-								renderTexture = CreateD3DTexture(AvPTexture, 0, D3DPOOL_MANAGED);
-								pool = TexturePool_DYNAMIC;
+								textureUsage = TextureUsage_Normal;
 							}
 
-							if (renderTexture == NULL)
-							{
-								OutputDebugString("Direct3DTexture was null!");
-							}
-
-							textureID = Tex_AddTexture(ImageName, renderTexture, ImageWidth, ImageHeight, pool);
+							textureID = Tex_CreateFromAvPTexture(ImageName, *AvPTexture, textureUsage);
 
 							// free this, as d3d now holds the texture
 							free(AvPTexture->buffer);
 							AvPTexture->buffer = NULL;
 						}
-						else {
+						else 
+						{
 							OutputDebugString("pTexture->buf was null!");
 						}
 					}
 
-					//return NumImages-1;
 					return textureID;
 				}
 				else
