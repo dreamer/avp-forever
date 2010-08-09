@@ -48,8 +48,8 @@ struct Texture
 
 uint32_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t height, uint32_t bpp, enum TextureUsage usageType);
 uint32_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType);
-uint32_t Tex_AddTexture(const std::string &fileName, r_Texture texture, uint32_t width, uint32_t height, enum TextureUsage usage = TextureUsage_Normal);
-uint32_t Tex_LoadFromFile(const std::string &fileName);
+uint32_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32_t width, uint32_t height, enum TextureUsage usage = TextureUsage_Normal);
+uint32_t Tex_CreateFromFile(const std::string &filePath);
 uint32_t Tex_CheckExists(const char* fileName);
 const Texture& Tex_GetTextureDetails(uint32_t textureID);
 void Tex_GetNamesVector(std::vector<std::string> &namesArray);

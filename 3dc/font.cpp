@@ -72,7 +72,7 @@ void Font_Release()
 
 void Font_Init()
 {
-	Fonts[FONT_SMALL].textureID = Tex_LoadFromFile("avp_font.tga");
+	Fonts[FONT_SMALL].textureID = Tex_CreateFromFile("avp_font.tga");
 
 	// zero out all values in the description struct
 	memset(&Fonts[FONT_SMALL].desc, 0, sizeof(BFD));

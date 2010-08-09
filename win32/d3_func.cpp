@@ -1168,12 +1168,12 @@ r_Texture CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t 
 	return destTexture;
 }
 
-bool CreateD3DTextureFromFile(const char* fileName, Texture &texture)
+bool R_CreateTextureFromFile(const std::string &fileName, Texture &texture)
 {
 	D3DXIMAGE_INFO imageInfo;
 
 	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice,
-		fileName,
+		fileName.c_str(),
 		D3DX_DEFAULT,			// width
 		D3DX_DEFAULT,			// height
 		1,						// mip levels

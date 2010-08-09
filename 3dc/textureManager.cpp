@@ -26,8 +26,6 @@
 
 std::vector<Texture> textureList;
 
-extern bool CreateD3DTextureFromFile(const char* fileName, Texture &texture);
-
 bool Tex_Lock(uint32_t textureID, uint8_t **data, uint32_t *pitch)
 {
 	r_Texture texture = Tex_GetTexture(textureID);
@@ -80,13 +78,13 @@ uint32_t Tex_CheckExists(const char* fileName)
 	return 0; // what else to return if it doesnt exist?
 }
 
-uint32_t Tex_AddTexture(const std::string &fileName, r_Texture texture, uint32_t width, uint32_t height, enum TextureUsage usage)
+uint32_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32_t width, uint32_t height, enum TextureUsage usage)
 {
 	// get the next available ID
 	uint32_t textureID = Tex_GetFreeID();
 
 	Texture newTexture;
-	newTexture.name = fileName;
+	newTexture.name = textureName;
 	newTexture.texture = texture;
 	newTexture.width = width;
 	newTexture.height = height;
@@ -117,7 +115,7 @@ uint32_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &Av
 	if (!R_CreateTextureFromAvPTexture(AvPTexure, usageType, newTexture))
 	{
 		// log error
-		//return false;
+		return NO_TEXTURE;
 	}
 
 	// get the next available ID
@@ -144,7 +142,7 @@ uint32_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t hei
 	if (!R_CreateTexture(width, height, bpp, usageType, newTexture))
 	{
 		// log error
-		//return false;
+		return NO_TEXTURE;
 	}
 	
 	// get the next available ID
@@ -163,20 +161,19 @@ uint32_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t hei
 	return textureID;
 }
 
-uint32_t Tex_LoadFromFile(const std::string &fileName)
+uint32_t Tex_CreateFromFile(const std::string &filePath)
 {
 	// get the next available ID
 	uint32_t textureID = Tex_GetFreeID();
 
 	Texture	newTexture;
+	newTexture.name = filePath; // use file path as name
 
-	if (!CreateD3DTextureFromFile(fileName.c_str(), newTexture))
+	if (!R_CreateTextureFromFile(filePath, newTexture))
 	{
 		// return no textureID as texture wasn't loaded
 		return NO_TEXTURE;
 	}
-
-	newTexture.name = fileName;
 
 	// store it
 	if (textureID < textureList.size()) // we're reusing a slot in this case
