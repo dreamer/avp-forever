@@ -59,6 +59,7 @@ bool Tex_Unlock(uint32_t textureID);
 const r_Texture& Tex_GetTexture(uint32_t textureID);
 void Tex_DeInit();
 void Tex_Release(uint32_t textureID);
+void Tex_ReleaseDynamicTextures();
 void Tex_ReloadDynamicTextures();
 
 #endif

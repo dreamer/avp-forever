@@ -198,14 +198,24 @@ const Texture& Tex_GetTextureDetails(uint32_t textureID)
 	return (textureList[textureID]);
 }
 
+void Tex_ReleaseDynamicTextures()
+{
+	for (std::vector<Texture>::iterator it = textureList.begin(); it != textureList.end(); ++it)
+	{
+		if ((it->texture) && (it->usage == TextureUsage_Dynamic))
+		{
+			R_ReleaseTexture(it->texture);
+		}
+	}
+}
+
 void Tex_ReloadDynamicTextures()
 {
 	for (std::vector<Texture>::iterator it = textureList.begin(); it != textureList.end(); ++it)
 	{
 		if ((it->texture) && (it->usage == TextureUsage_Dynamic))
 		{
-			// release and restore texture (just release for now..)
-			R_ReleaseTexture(it->texture);
+			R_CreateTexture(it->width, it->height, it->bitsPerPixel, it->usage, (*it));
 		}
 	}
 }

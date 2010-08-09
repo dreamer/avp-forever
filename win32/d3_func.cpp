@@ -348,9 +348,9 @@ int NearestSuperiorPow2(int i)
 
 bool ReleaseVolatileResources()
 {
-	Tex_ReloadDynamicTextures();
+	Tex_ReleaseDynamicTextures();
 
-	ReleaseAllFMVTexturesForDeviceReset();
+//	ReleaseAllFMVTexturesForDeviceReset();
 
 	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
 	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
@@ -448,7 +448,8 @@ bool R_UnlockVertexBuffer(r_VertexBuffer *vertexBuffer)
 
 bool CreateVolatileResources()
 {
-	RecreateAllFMVTexturesAfterDeviceReset();
+//	RecreateAllFMVTexturesAfterDeviceReset();
+	Tex_ReloadDynamicTextures();
 
 	// create dynamic vertex buffer
 	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DLVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, /*D3DFVF_LVERTEX*/0, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
@@ -1031,6 +1032,7 @@ bool CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *pixe
 // we remove the grid as it can sometimes bleed onto text when we use texture filtering. maybe add params for passing width/height?
 void DeRedTexture(r_Texture texture)
 {
+	return; // FIXME - we need to pass the usage type to lock function to determine whether we use D3DLOCK_DISCARD or not
 	// lock texture
 
 	uint8_t *srcPtr = NULL;
@@ -1360,6 +1362,7 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum Texture
 	return true;
 }
 
+/*
 r_Texture CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poolType)
 {
 	r_Texture destTexture = NULL;
@@ -1431,6 +1434,7 @@ r_Texture CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poolType)
 	delete[] buffer;
 	return destTexture;
 }
+*/
 
 void R_ReleaseTexture(r_Texture &texture)
 {

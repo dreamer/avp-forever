@@ -359,11 +359,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	InitialiseSystem(hInstance, nCmdShow);
 	InitialiseRenderer();
 
-//	Renderer *testRenderer = new D3D9Renderer();
-//	testRenderer->Initialise();
-
-//	delete testRenderer;
-
 	if (!InitialiseDirect3D())
 	{
 		MessageBox(hWndMain, "Couldn't create a Direct3D device. See avp_log.txt for details", "Couldn't create render device!", MB_OK | MB_ICONSTOP);
