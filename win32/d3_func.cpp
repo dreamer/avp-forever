@@ -268,7 +268,7 @@ extern LPD3DXCONSTANTTABLE	orthoConstantTable;
 extern LPD3DXCONSTANTTABLE	fmvConstantTable;
 extern LPD3DXCONSTANTTABLE	cloudConstantTable;
 
-extern void Init();
+extern void RenderListInit();
 extern void ReleaseAllFMVTextures(void);
 
 // size of vertex and index buffers
@@ -2040,7 +2040,7 @@ bool InitialiseDirect3D()
 	Net_Initialise();
 	Font_Init();
 
-	Init();
+	RenderListInit();
 
 	return true;
 }

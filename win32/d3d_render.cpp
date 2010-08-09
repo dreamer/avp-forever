@@ -157,7 +157,7 @@ static HRESULT LastError;
 
 // initialise our std::vectors to a particle size, allowing us to use them as
 // regular arrays
-void Init()
+void RenderListInit()
 {
 	particleList.reserve(MAX_VERTEXES);
 	particleList.resize(MAX_VERTEXES);
