@@ -447,55 +447,33 @@ bool TheoraFMV::NextFrame()
 		Tex_GetDimensions(frameTextures[i], width, height);
 
 		// lock the texture
-		Tex_Lock(frameTextures[i], &originalDestPtr, &pitch);
-
-		for (uint32_t y = 0; y < height; y++)
+		if (Tex_Lock(frameTextures[i], &originalDestPtr, &pitch, TextureLock_Discard)) // only do below if lock succeeds
 		{
-			uint8_t *destPtr = originalDestPtr + y * pitch;
-			uint8_t *srcPtr = mYuvBuffer[i].data + (y * mYuvBuffer[i].stride);
-
-			// copy entire width row in one go
-			memcpy(destPtr, srcPtr, width * sizeof(uint8_t));
-
-			destPtr += width * sizeof(uint8_t);
-			srcPtr += width * sizeof(uint8_t);
-/*
-			for (uint32_t x = 0; x < frameTextures[i].width; x++)
+			for (uint32_t y = 0; y < height; y++)
 			{
-				memcpy(destPtr, srcPtr, sizeof(uint8_t));
+				uint8_t *destPtr = originalDestPtr + y * pitch;
+				uint8_t *srcPtr = mYuvBuffer[i].data + (y * mYuvBuffer[i].stride);
 
-				destPtr += sizeof(uint8_t);
-				srcPtr += sizeof(uint8_t);
+				// copy entire width row in one go
+				memcpy(destPtr, srcPtr, width * sizeof(uint8_t));
+
+				destPtr += width * sizeof(uint8_t);
+				srcPtr += width * sizeof(uint8_t);
+	/*
+				for (uint32_t x = 0; x < frameTextures[i].width; x++)
+				{
+					memcpy(destPtr, srcPtr, sizeof(uint8_t));
+
+					destPtr += sizeof(uint8_t);
+					srcPtr += sizeof(uint8_t);
+				}
+	*/
 			}
-*/
+
+			// unlock texture
+			Tex_Unlock(frameTextures[i]);
 		}
-
-		// unlock texture
-		Tex_Unlock(frameTextures[i]);
 	}
-
-/*
-	OggPlayYUVChannels oggYuv;
-	oggYuv.ptry = mYuvBuffer[0].data;
-	oggYuv.ptru = mYuvBuffer[2].data;
-	oggYuv.ptrv = mYuvBuffer[1].data;
-
-	oggYuv.y_width = mYuvBuffer[0].width;
-	oggYuv.y_height = mYuvBuffer[0].height;
-	oggYuv.y_pitch = mYuvBuffer[0].stride;
-
-	oggYuv.uv_width = mYuvBuffer[1].width;
-	oggYuv.uv_height = mYuvBuffer[1].height;
-	oggYuv.uv_pitch = mYuvBuffer[1].stride;
-
-	OggPlayRGBChannels oggRgb;
-	oggRgb.ptro = static_cast<uint8_t*>(textureLock.pBits);
-	oggRgb.rgb_height = mFrameHeight;
-	oggRgb.rgb_width = mFrameWidth;
-	oggRgb.rgb_pitch = textureLock.Pitch;
-
-	oggplay_yuv2rgb(&oggYuv, &oggRgb);
-*/
 
 	// set this value to true so we can now begin to draw the textured fmv frame
 	if (!mTexturesReady)

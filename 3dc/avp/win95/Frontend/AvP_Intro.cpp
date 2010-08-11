@@ -87,6 +87,8 @@ extern void ShowSplashScreens(void)
 		int timeRemaining = 5*ONE_FIXED;
 		do
 		{
+			CheckForWindowsMessages();
+
 			ThisFramesRenderingHasBegun();
 
 			int a = timeRemaining*2;
@@ -110,7 +112,6 @@ extern void ShowSplashScreens(void)
 				}
 				timeRemaining -= NormalFrameTime / 2;
 			}
-			CheckForWindowsMessages();
 
 			ThisFramesRenderingHasFinished();
 			FlipBuffers();
@@ -131,6 +132,8 @@ extern void Show_WinnerScreen(void)
 	int timeRemaining = 10*ONE_FIXED;
 	do
 	{
+		CheckForWindowsMessages();
+
 		ThisFramesRenderingHasBegun();
 
 		int a = timeRemaining*2;
@@ -142,8 +145,6 @@ extern void Show_WinnerScreen(void)
 		{
 		  	DrawAvPMenuGfx_Faded(AVPMENUGFX_WINNER_SCREEN, 0, 0, a,AVPMENUFORMAT_LEFTJUSTIFIED);
 		}
-
-		CheckForWindowsMessages();
 
 		ThisFramesRenderingHasFinished();
 		FlipBuffers();
@@ -162,12 +163,12 @@ void Show_CopyrightInfo(void)
 	do
 	{
 		CheckForWindowsMessages();
-		{
-			ThisFramesRenderingHasBegun();
-			DrawAvPMenuGfx_Faded(AVPMENUGFX_COPYRIGHT_SCREEN, 0, 0, ONE_FIXED-timeRemaining*2,AVPMENUFORMAT_LEFTJUSTIFIED);
-			ThisFramesRenderingHasFinished();
-			FlipBuffers();
-		}
+
+		ThisFramesRenderingHasBegun();
+		DrawAvPMenuGfx_Faded(AVPMENUGFX_COPYRIGHT_SCREEN, 0, 0, ONE_FIXED-timeRemaining*2,AVPMENUFORMAT_LEFTJUSTIFIED);
+		ThisFramesRenderingHasFinished();
+		FlipBuffers();
+
 		FrameCounterHandler();
 		timeRemaining-=NormalFrameTime;
 	}
@@ -178,12 +179,12 @@ void Show_CopyrightInfo(void)
 	do
 	{
 		CheckForWindowsMessages();
-		{
-			ThisFramesRenderingHasBegun();
-			DrawAvPMenuGfx_Faded(AVPMENUGFX_COPYRIGHT_SCREEN, 0, 0, ONE_FIXED,AVPMENUFORMAT_LEFTJUSTIFIED);
-			ThisFramesRenderingHasFinished();
-			FlipBuffers();
-		}
+
+		ThisFramesRenderingHasBegun();
+		DrawAvPMenuGfx_Faded(AVPMENUGFX_COPYRIGHT_SCREEN, 0, 0, ONE_FIXED,AVPMENUFORMAT_LEFTJUSTIFIED);
+		ThisFramesRenderingHasFinished();
+		FlipBuffers();
+
 		FrameCounterHandler();
 		timeRemaining-=NormalFrameTime;
 	}
@@ -193,12 +194,12 @@ void Show_CopyrightInfo(void)
 	do
 	{
 		CheckForWindowsMessages();
-		{
-			ThisFramesRenderingHasBegun();
-			DrawAvPMenuGfx_Faded(AVPMENUGFX_COPYRIGHT_SCREEN, 0, 0, timeRemaining*2,AVPMENUFORMAT_LEFTJUSTIFIED);
-			ThisFramesRenderingHasFinished();
-			FlipBuffers();
-		}
+
+		ThisFramesRenderingHasBegun();
+		DrawAvPMenuGfx_Faded(AVPMENUGFX_COPYRIGHT_SCREEN, 0, 0, timeRemaining*2,AVPMENUFORMAT_LEFTJUSTIFIED);
+		ThisFramesRenderingHasFinished();
+		FlipBuffers();
+
 		FrameCounterHandler();
 		timeRemaining-=NormalFrameTime;
 	}
@@ -211,9 +212,9 @@ void Show_Presents(void)
 
 	do
 	{
-		ThisFramesRenderingHasBegun();
-
 		CheckForWindowsMessages();
+
+		ThisFramesRenderingHasBegun();
 		{
 			char *textPtr = GetTextString(TEXTSTRING_FOXINTERACTIVE);
 			//int y = (480 - AvPMenuGfxStorage[AVPMENUGFX_PRESENTS].Height) / 2;
@@ -264,9 +265,9 @@ void Show_ARebellionGame(void)
 	int timeRemaining = 7*ONE_FIXED;
 	do
 	{
-		ThisFramesRenderingHasBegun();
-
 		CheckForWindowsMessages();
+
+		ThisFramesRenderingHasBegun();
 		{
 			char *textPtr = GetTextString(TEXTSTRING_PRESENTS);
 			//int y = (480-AvPMenuGfxStorage[AVPMENUGFX_AREBELLIONGAME].Height)/2;
@@ -312,9 +313,9 @@ void Show_AvPLogo(void)
 	int timeRemaining = 5*ONE_FIXED;
 	do
 	{
-		ThisFramesRenderingHasBegun();
-
 		CheckForWindowsMessages();
+
+		ThisFramesRenderingHasBegun();
 		{
 			uint32_t width, height;
 			Tex_GetDimensions(AVPMENUGFX_ALIENSVPREDATOR, width, height);

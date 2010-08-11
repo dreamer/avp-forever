@@ -781,6 +781,61 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 	float x2 = WPos2DC(topX + frameWidth);
 	float y2 = HPos2DC(topY + frameHeight);
 
+	FMVVERTEX fmvVerts[4];
+
+	// bottom left
+	fmvVerts[0].x = x1;
+	fmvVerts[0].y = y2;
+	fmvVerts[0].z = 1.0f;
+	fmvVerts[0].u1 = 0.0f;
+	fmvVerts[0].v1 = 1.0f; //(1.0f / textureHeight) * frameHeight;
+
+	fmvVerts[0].u2 = 0.0f;
+	fmvVerts[0].v2 = 1.0f;
+
+	fmvVerts[0].u3 = 0.0f;
+	fmvVerts[0].v3 = 1.0f;
+
+	// top left
+	fmvVerts[1].x = x1;
+	fmvVerts[1].y = y1;
+	fmvVerts[1].z = 1.0f;
+	fmvVerts[1].u1 = 0.0f;
+	fmvVerts[1].v1 = 0.0f;
+
+	fmvVerts[1].u2 = 0.0f;
+	fmvVerts[1].v2 = 0.0f;
+
+	fmvVerts[1].u3 = 0.0f;
+	fmvVerts[1].v3 = 0.0f;
+
+	// bottom right
+	fmvVerts[2].x = x2;
+	fmvVerts[2].y = y2;
+	fmvVerts[2].z = 1.0f;
+	fmvVerts[2].u1 = 1.0f; //(1.0f / textureWidth) * frameWidth;
+	fmvVerts[2].v1 = 1.0f; //(1.0f / textureHeight) * frameHeight;
+
+	fmvVerts[2].u2 = 1.0f;
+	fmvVerts[2].v2 = 1.0f;
+
+	fmvVerts[2].u3 = 1.0f;
+	fmvVerts[2].v3 = 1.0f;
+
+	// top right
+	fmvVerts[3].x = x2;
+	fmvVerts[3].y = y1;
+	fmvVerts[3].z = 1.0f;
+	fmvVerts[3].u1 = 1.0f; //(1.0f / textureWidth) * frameWidth;
+	fmvVerts[3].v1 = 0.0f;
+
+	fmvVerts[3].u2 = 1.0f;
+	fmvVerts[3].v2 = 0.0f;
+
+	fmvVerts[3].u3 = 1.0f;
+	fmvVerts[3].v3 = 0.0f;
+
+#if 0
 	FMVVERTEX *fmvVerts;
 
 	if (!FMVvertexBuffer)
@@ -843,7 +898,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 	
 		FMVvertexBuffer->Unlock();
 	}
-
+#endif
 	// set orthographic projection
 	fmvConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
 
@@ -861,15 +916,14 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 	d3d.lpD3DDevice->SetVertexShader(d3d.fmvVertexShader);
 	d3d.lpD3DDevice->SetPixelShader(d3d.fmvPixelShader);
 
-	FMVvertexBuffer->Draw();
-/*
+//	FMVvertexBuffer->Draw();
+
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(FMVVERTEX));
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("DrawPrimitiveUP failed\n");
 	}
-*/
 }
 
 void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t textureID, AVPTEXTURE *tex, uint32_t newWidth, uint32_t newHeight)
@@ -1095,7 +1149,11 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	uint8_t *originalPtr = 0;
 	uint32_t pitch = 0;
 
-	Tex_Lock(ftPtr->textureID, &originalPtr, &pitch);
+	if (!Tex_Lock(ftPtr->textureID, &originalPtr, &pitch, TextureLock_Discard))
+	{
+		// don't touch the pointer if the lock failed
+		return;
+	}
 
 	for (uint32_t y = 0; y < height; y++)
 	{

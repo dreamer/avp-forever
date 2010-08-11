@@ -36,6 +36,12 @@ enum TextureUsage
 	TextureUsage_Dynamic
 };
 
+enum TextureLock
+{
+	TextureLock_Normal,
+	TextureLock_Discard
+};
+
 struct Texture
 {
 	std::string		name;
@@ -54,7 +60,7 @@ uint32_t Tex_CheckExists(const char* fileName);
 const Texture& Tex_GetTextureDetails(uint32_t textureID);
 void Tex_GetNamesVector(std::vector<std::string> &namesArray);
 void Tex_GetDimensions(uint32_t textureID, uint32_t &width, uint32_t &height);
-bool Tex_Lock(uint32_t textureID, uint8_t **data, uint32_t *pitch);
+bool Tex_Lock(uint32_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLock lockType = TextureLock_Normal);
 bool Tex_Unlock(uint32_t textureID);
 const r_Texture& Tex_GetTexture(uint32_t textureID);
 void Tex_DeInit();

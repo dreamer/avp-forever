@@ -26,13 +26,13 @@
 
 std::vector<Texture> textureList;
 
-bool Tex_Lock(uint32_t textureID, uint8_t **data, uint32_t *pitch)
+bool Tex_Lock(uint32_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
 {
 	r_Texture texture = Tex_GetTexture(textureID);
 	if (!texture)
 		return false;
 
-	return R_LockTexture(texture, data, pitch);
+	return R_LockTexture(texture, data, pitch, lockType);
 }
 
 bool Tex_Unlock(uint32_t textureID)
@@ -213,7 +213,8 @@ void Tex_ReloadDynamicTextures()
 {
 	for (std::vector<Texture>::iterator it = textureList.begin(); it != textureList.end(); ++it)
 	{
-		if ((it->texture) && (it->usage == TextureUsage_Dynamic))
+		// check for NOT texture (ie released ones)
+		if ((!it->texture) && (it->usage == TextureUsage_Dynamic))
 		{
 			R_CreateTexture(it->width, it->height, it->bitsPerPixel, it->usage, (*it));
 		}

@@ -49,53 +49,6 @@ VorbisPlayback	*menuMusic = NULL;
 TheoraFMV		*menuFMV = NULL;
 bool MenuBackground = false;
 
-void ReleaseAllFMVTexturesForDeviceReset()
-{
-/*
-	// do ingame videoscreen textures
-	for (uint32_t i = 0; i < NumberOfFMVTextures; i++)
-	{
-		Tex_Release(FMVTexture[i].textureID);
-	}
-
-	// check for fullscreen intro/outro fmvs
-	for (uint32_t i = 0; i < MAX_FMVS; i++)
-	{
-		if (fmvList[i].isPlaying && fmvList[i].FMVclass)
-		{
-			for (uint32_t j = 0; j < 3; j++)
-			{
-				Tex_Release(fmvList[i].FMVclass->frameTextures[j]);
-			}
-		}
-	}
-*/
-}
-
-void RecreateAllFMVTexturesAfterDeviceReset()
-{
-/*
-	for (uint32_t i = 0; i < NumberOfFMVTextures; i++)
-	{
-		FMVTexture[i].textureID = Tex_AddTexture("INGAME_CUTSCENE_" + IntToString(i), CreateFmvTexture(&FMVTexture[i].width, &FMVTexture[i].height, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT), FMVTexture[i].width, FMVTexture[i].height, TexturePool_DYNAMIC);
-	}
-*/
-/*
-	// check for fullscreen intro/outro fmvs
-	for (int i = 0; i < MAX_FMVS; i++)
-	{
-		if (fmvList[i].isPlaying && fmvList[i].fmvClass)
-		{
-			// lets double check..
-			if (fmvList[i].fmvClass->mTextureWidth > 0)
-			{
-				fmvList[i].fmvClass->mDisplayTexture = CreateFmvTexture(&fmvList[i].fmvClass->mTextureWidth, &fmvList[i].fmvClass->mTextureHeight, D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
-			}
-		}
-	}
-*/
-}
-
 void FindLightingValuesFromTriggeredFMV(uint8_t *bufferPtr, FMVTEXTURE *ftPtr)
 {
 	uint32_t totalRed = 0;
@@ -303,13 +256,13 @@ extern void PlayFMV(const char *filenamePtr)
 	{
 		CheckForWindowsMessages();
 
+		ThisFramesRenderingHasBegun();
+
 		if (!fmv.IsPlaying())
 			playing = false;
 
 		if (fmv.mFrameReady)
 			playing = fmv.NextFrame();
-
-		ThisFramesRenderingHasBegun();
 
 		if (fmv.mTexturesReady)
 		{

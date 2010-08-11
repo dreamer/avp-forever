@@ -9,7 +9,7 @@
 #include "ourasert.h"
 #include "ffstdio.h"
 #include "renderer.h"
-
+#include "console.h"
 #include "textureManager.h"
 
 extern int Font_DrawText(const char* text, int x, int y, int colour, int fontType);
@@ -195,8 +195,6 @@ static void LoadMenuFont(void);
 static void UnloadMenuFont(void);
 /*static*/ extern int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red, int green, int blue);
 static void CalculateWidthsOfAAFont(void);
-extern void DrawAvPMenuGlowyBar(int topleftX, int topleftY, int alpha, int length);
-extern void DrawAvPMenuGlowyBar_Clipped(int topleftX, int topleftY, int alpha, int length, int topY, int bottomY);
 
 extern void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a);
 
@@ -457,106 +455,8 @@ extern int RenderMenuText_Clipped(char *textPtr, int pX, int pY, int alpha, enum
 {
 	// this'll do for now :)
 	RenderMenuText(textPtr, pX, pY, alpha, format); 
-#if 0
-	int width = LengthOfMenuText(textPtr);
-	
-	switch(format) {
-		default:
-			GLOBALASSERT("UNKNOWN TEXT FORMAT"==0);
-			return 0;
-		case AVPMENUFORMAT_LEFTJUSTIFIED:
-			break;
-		case AVPMENUFORMAT_RIGHTJUSTIFIED:
-			pX -= width;
-			break;
-		case AVPMENUFORMAT_CENTREJUSTIFIED:
-			pX -= width / 2;
-			break;
-	}
-	
-	LOCALASSERT(pX>0);
-	
-	if (alpha > BRIGHTNESS_OF_DARKENED_ELEMENT) {
-		int size = width - 18;
-		if (size<18) size = 18;
-		
-		DrawAvPMenuGfx_Clipped(AVPMENUGFX_GLOWY_LEFT,pX+18,pY-8,alpha,AVPMENUFORMAT_RIGHTJUSTIFIED,topY,bottomY);
-		DrawAvPMenuGlowyBar_Clipped(pX+18,pY-8,alpha,size-18,topY,bottomY);
-		DrawAvPMenuGfx_Clipped(AVPMENUGFX_GLOWY_RIGHT,pX+size,pY-8,alpha,AVPMENUFORMAT_LEFTJUSTIFIED,topY,bottomY);
-	}
-{
-	unsigned char *srcPtr;
-	unsigned short *destPtr;
-	AVPMENUGFX *gfxPtr;
-	D3DTexture *image;
-	
-	gfxPtr = &IntroFont_Light.info;
-	image = (D3DTexture*)gfxPtr->ImagePtr;
-	
-	D3DInfo temp;
 
-	temp = GetD3DInfo();
-
-	D3DSURFACE_DESC surface_desc;
-	temp.lpD3DBackSurface->GetDesc(&surface_desc);
-
-	D3DLOCKED_RECT lock = {0,NULL};
-
-	temp.lpD3DBackSurface->LockRect(&lock, NULL, 0); if (lock.pBits == NULL) return 0;
-
-	while( *textPtr ) {
-		char c = *textPtr++;
-
-		if (c>=' ') {
-			int topLeftU = 1;
-			int topLeftV = 1+(c-32)*33;
-			int x, y;
-			int width = IntroFont_Light.FontWidth[(unsigned int) c];
-			
-			srcPtr = &image->buf[(topLeftU+topLeftV*image->w)*4];
-			
-			for (y=pY; y<33+pY; y++) {
-				if(y>=topY && y<=bottomY) {
-					destPtr = (unsigned short *)(((unsigned char *)lock.pBits)+y*lock.Pitch) + pX;
-				
-					for (x=width; x>0; x--) {
-						if (srcPtr[0] || srcPtr[1] || srcPtr[2]) {
-							unsigned int destR, destG, destB;
-						
-							int r = CloudTable[(x+pX+CloakingPhase/64)&127][(y+CloakingPhase/128)&127];
-							r = MUL_FIXED(alpha, r);
-							
-							destR = (*destPtr & 0xF800)>>8;
-							destG = (*destPtr & 0x07E0)>>3;
-							destB = (*destPtr & 0x001F)<<3;
-						
-							destR += MUL_FIXED(r, srcPtr[0]);
-							destG += MUL_FIXED(r, srcPtr[1]);
-							destB += MUL_FIXED(r, srcPtr[2]);
-							if (destR > 0x00FF) destR = 0x00FF;
-							if (destG > 0x00FF) destG = 0x00FF;
-							if (destB > 0x00FF) destB = 0x00FF;
-						
-							*destPtr =	((destR>>3)<<11) |
-									((destG>>2)<<5 ) |
-									((destB>>3));
-						}
-						srcPtr += 4;
-						destPtr++;
-					}
-					srcPtr += (image->w - width) * 4;	
-				} else {
-					srcPtr += image->w * 4;
-				}
-			}
-			pX += width;
-		}
-	}
-
-	temp.lpD3DBackSurface->UnlockRect();
-	}
-#endif
-return pX;
+	return pX;
 }
 
 
@@ -1407,238 +1307,6 @@ extern void DrawAvPMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/uint32_t textureID, i
 	DrawAlphaMenuQuad(topleftX, topleftY, /*menuGfxID*/textureID, alpha);
 }
 
-extern void DrawAvPMenuGlowyBar(int topleftX, int topleftY, int alpha, int length)
-{	
-// bjd - texture test	enum AVPMENUGFX_ID menuGfxID = AVPMENUGFX_GLOWY_MIDDLE;
-
-	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length)
-	{
-		length = /*ScreenDescriptorBlock.SDB_Width*/640 - topleftX;
-	}
-
-	if (length < 0)
-	{
-		length = 0;
-	}
-
-	// the image we're working with is only 1 pixel wide. we'll have to draw it a couple of 
-	//times shifting the x position over 1 pixel each time until we reach the length of the bar
-/*
-	for (int i = 0; i < length; i++) 
-	{
-		if (alpha > ONE_FIXED) // ONE_FIXED = 65536
-			alpha = ONE_FIXED;
-
-//		DrawAlphaMenuQuad(topleftX + i, topleftY, menuGfxID, alpha);
-	}
-*/
-//	DrawGlowyTest(topleftX, topleftY, length, alpha);
-		
-#if 0 // bjd
-	image = (D3DTexture*)gfxPtr->ImagePtr;
-	srcPtr = image->buf;
-
-	D3DInfo temp;
-
-	temp = GetD3DInfo();
-
-	D3DSURFACE_DESC surface_desc;
-	temp.lpD3DBackSurface->GetDesc(&surface_desc);
-
-	D3DLOCKED_RECT lock = {0,NULL};
-
-	temp.lpD3DBackSurface->LockRect(&lock, NULL, 0); if (lock.pBits == NULL) return;
-
-	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length)
-	{
-		length = /*ScreenDescriptorBlock.SDB_Width*/640 - topleftX;
-	}
-
-	if (length<0) length = 0;
-
-	if (alpha>ONE_FIXED)
-	{
-		int x,y;
-
-		for (y=topleftY; y<gfxPtr->Height+topleftY; y++)
-		{
-			//destPtr = (unsigned short *)(ScreenBuffer + topleftX*2 + y*BackBufferPitch);
-			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch)) + topleftX;
-
-			for (x=0; x<length; x++)
-			{
-				//*destPtr = *srcPtr;
-				*destPtr =	((srcPtr[0]>>3)<<11) |
-						((srcPtr[1]>>2)<<5 ) |
-						((srcPtr[2]>>3));
-				destPtr++;
-			}
-			//srcPtr += (ddsdimage.lPitch/2); 
-			srcPtr += image->w * 4;
-		}
-	}
-	else
-	{
-		int x,y;
-
-		for (y=topleftY; y<gfxPtr->Height+topleftY; y++)
-		{
-			//destPtr = (unsigned short *)(ScreenBuffer + topleftX*2 + y*BackBufferPitch);
-			destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch)) + topleftX;
-
-			for (x=0; x<length; x++)
-			{
-				//if (*srcPtr)
-				if (srcPtr[0] || srcPtr[1] || srcPtr[2])
-				{
-					//unsigned int srcR,srcG,srcB;
-					unsigned int destR,destG,destB;
-
-					destR = (*destPtr & 0xF800)>>8;
-					destG = (*destPtr & 0x07E0)>>3;
-					destB = (*destPtr & 0x001F)<<3;
-						
-					destR += MUL_FIXED(alpha, srcPtr[0]);
-					destG += MUL_FIXED(alpha, srcPtr[1]);
-					destB += MUL_FIXED(alpha, srcPtr[2]);
-					if (destR > 0x00FF) destR = 0x00FF;
-					if (destG > 0x00FF) destG = 0x00FF;
-					if (destB > 0x00FF) destB = 0x00FF;
-						
-					*destPtr =	((destR>>3)<<11) |
-							((destG>>2)<<5 ) |
-							((destB>>3));
-
-				}
-				destPtr++;
-			}
-			//srcPtr += (ddsdimage.lPitch/2); 
-			srcPtr += image->w * 4;
-		}
-	}
-
-	temp.lpD3DBackSurface->UnlockRect();
-#endif
-}
-
-extern void DrawAvPMenuGlowyBar_Clipped(int topleftX, int topleftY, int alpha, int length, int topY, int bottomY)
-{		
-#if 0
-	enum AVPMENUGFX_ID menuGfxID = AVPMENUGFX_GLOWY_MIDDLE;	
-	GLOBALASSERT(menuGfxID < MAX_NO_OF_AVPMENUGFXS);
-
-	if (length<0) length = 0;
-
-//	DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
-
-	// the image we're working with is only 1 pixel wide. we'll have to draw it a couple of 
-	//times shifting the x position over each time until we reach the length of the bar
-	for (int i = 0; i < length; i++) 
-	{
-		if (alpha > ONE_FIXED) // ONE_FIXED = 65536
-		{
-			DrawMenuQuad(topleftX + i, topleftY, topleftX + i, topleftY, menuGfxID, FALSE);
-		}
-		else {
-			DrawAlphaMenuQuad(topleftX + i, topleftY, topleftX + i, topleftY, menuGfxID, alpha);
-		}
-	}
-
-#endif
-#if 0 // bjd
-   	unsigned short *destPtr;
-	unsigned char *srcPtr;
-	AVPMENUGFX *gfxPtr;
-	D3DTexture *image;
-
-	GLOBALASSERT(menuGfxID < MAX_NO_OF_AVPMENUGFXS);
-	gfxPtr = &AvPMenuGfxStorage[menuGfxID];
-	image = (D3DTexture*)gfxPtr->ImagePtr;
-
-	srcPtr = image->buf;
-
-	D3DInfo temp;
-
-	temp = GetD3DInfo();
-
-	D3DSURFACE_DESC surface_desc;
-	temp.lpD3DBackSurface->GetDesc(&surface_desc);
-
-	D3DLOCKED_RECT lock = {0,NULL};
-
-	temp.lpD3DBackSurface->LockRect(&lock, NULL, 0); if (lock.pBits == NULL) return;
-
-	if (length<0) length = 0;
-
-	if (alpha>ONE_FIXED)
-	{
-		int x,y;
-
-		for (y=topleftY; y<gfxPtr->Height+topleftY; y++)
-		{
-			if(y>=topY && y<=bottomY)
-			{
-				//destPtr = (unsigned short *)(ScreenBuffer + topleftX*2 + y*BackBufferPitch);
-				destPtr = (unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch) + topleftX;
-
-				for (x=0; x<length; x++)
-				{
-					*destPtr =	((srcPtr[0]>>3)<<11) |
-							((srcPtr[1]>>2)<<5 ) |
-							((srcPtr[2]>>3));
-					destPtr++;
-				}
-				//srcPtr += (ddsdimage.lPitch/2); 
-				srcPtr += image->w * 4;
-			}
-		}
-	}
-	else
-	{
-		int x,y;
-
-		for (y=topleftY; y<gfxPtr->Height+topleftY; y++)
-		{
-			if(y>=topY && y<=bottomY)
-			{
-				//destPtr = (unsigned short *)(ScreenBuffer + topleftX*2 + y*BackBufferPitch);
-				destPtr = ((unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch)) + topleftX;
-
-				for (x=0; x<length; x++)
-				{
-					//if (*srcPtr)
-					if (srcPtr[0] || srcPtr[1] || srcPtr[2])
-					{
-						//unsigned int srcR,srcG,srcB;
-						unsigned int destR,destG,destB;
-
-						destR = (*destPtr & 0xF800)>>8;
-						destG = (*destPtr & 0x07E0)>>3;
-						destB = (*destPtr & 0x001F)<<3;
-						
-						destR += MUL_FIXED(alpha, srcPtr[0]);
-						destG += MUL_FIXED(alpha, srcPtr[1]);
-						destB += MUL_FIXED(alpha, srcPtr[2]);
-						if (destR > 0x00FF) destR = 0x00FF;
-						if (destG > 0x00FF) destG = 0x00FF;
-						if (destB > 0x00FF) destB = 0x00FF;
-						
-						*destPtr =	((destR>>3)<<11) |
-								((destG>>2)<<5 ) |
-								((destB>>3));
-					}
-					destPtr++;
-				}
-			}
-			//srcPtr += (ddsdimage.lPitch/2); 
-			srcPtr += image->w * 4;
-		}
-	}
-   	
-	temp.lpD3DBackSurface->UnlockRect();
-#endif
-}
-
 extern void DrawAvPMenuGfx_Faded(/*enum AVPMENUGFX_ID menuGfxID*/uint32_t textureID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format)
 {
 	// bjd - texture test
@@ -1753,36 +1421,23 @@ extern int HeightOfMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/uint32_t textureID)
 static void CalculateWidthsOfAAFont(void)
 {
 	// bjd - texture test
-
-#if 1
-//	unsigned char *srcPtr;
-//	AVPMENUGFX *gfxPtr;
-//	AVPTEXTURE *image;
 	int c;
-
-//	gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_SMALL_FONT];
-//	image = gfxPtr->ImagePtr;
-
-//	if (image == NULL)
-//		return;
-
-//	srcPtr = image->buffer;
 
 	uint32_t textureWidth = 0;
 	uint32_t textureHeight = 0;
+
 	Tex_GetDimensions(AVPMENUGFX_SMALL_FONT, textureWidth, textureHeight);
 
-	D3DLOCKED_RECT lock;
-	r_Texture srcTexture = Tex_GetTexture(AVPMENUGFX_SMALL_FONT);
-	HRESULT LastError = srcTexture->LockRect(0, &lock, NULL, NULL );
-	if (FAILED(LastError))
+	uint8_t *originalSrcPtr = NULL;
+	uint32_t pitch = 0;
+
+	if (!Tex_Lock(AVPMENUGFX_SMALL_FONT, &originalSrcPtr, &pitch))
 	{
-		srcTexture->Release();
-//		LogDxError(LastError, __LINE__, __FILE__);
+		Con_PrintError("CalculateWidthsOfAAFont() failed - Can't lock texture");
 		return;
 	}
 
-	uint8_t *srcPtr = static_cast<uint8_t*>(lock.pBits);
+	uint8_t *srcPtr = originalSrcPtr;
 
 	AAFontWidths[32] = 3;
 
@@ -1800,8 +1455,8 @@ static void CalculateWidthsOfAAFont(void)
 
 			for (y = y1; y < y1 + HUD_FONT_HEIGHT; y++)
 			{
-				uint8_t *s = &srcPtr[(x + y*textureWidth) * 4];
-//				uint8_t *s = &srcPtr[x + y * lock.Pitch];
+				uint8_t *s = &srcPtr[(x + y*textureWidth) * 4]; // FIXME - pitch?
+
 				if (s[0] >= 0x80) // checking blue.
 				{
 					blank = false;
@@ -1820,8 +1475,7 @@ static void CalculateWidthsOfAAFont(void)
 		}
 	}
 
-	srcTexture->UnlockRect(0);
-#endif
+	Tex_Unlock(AVPMENUGFX_SMALL_FONT);
 }
 
 };

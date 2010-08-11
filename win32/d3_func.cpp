@@ -518,11 +518,25 @@ bool CreateVolatileResources()
 	return true;
 }
 
-bool R_LockTexture(r_Texture texture, uint8_t **data, uint32_t *pitch)
+bool R_LockTexture(r_Texture texture, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
 {
 	D3DLOCKED_RECT lock;
+	uint32_t lockFlag;
 
-	LastError = texture->LockRect(0, &lock, NULL, D3DLOCK_DISCARD);
+	switch (lockType)
+	{
+		case TextureLock_Normal:
+			lockFlag = 0;
+			break;
+		case TextureLock_Discard:
+			lockFlag = D3DLOCK_DISCARD;
+			break;
+		default:
+			// error and return
+			break;
+	}
+
+	LastError = texture->LockRect(0, &lock, NULL, lockFlag);
 
 	if (FAILED(LastError))
 	{
@@ -562,7 +576,7 @@ void SetFov()
 		return;
 	}
 
-	fov = atoi(Con_GetArgument(0).c_str());
+	fov = StringToInt(Con_GetArgument(0));
 
 	SetTransforms();
 }
@@ -782,7 +796,7 @@ r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
 		return NULL;
 	}
 
-	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
+	LastError = destTexture->LockRect(0, &lock, NULL, NULL);
 	if (FAILED(LastError))
 	{
 		destTexture->Release();
@@ -899,39 +913,6 @@ r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	return destTexture;
 }
 
-/*
-r_Texture CreateFmvTexture2(uint32_t &width, uint32_t &height)
-{
-	// TODO - Add support for rendering FMVs on GPUs that can't use non power of 2 textures
-
-	r_Texture destTexture = NULL;
-#if 0
-	int newWidth, newHeight;
-
-	// check if passed value is already a power of 2
-	if (!IsPowerOf2(*width))
-	{
-		newWidth = NearestSuperiorPow2(*width);
-	}
-	else { newWidth = *width; }
-
-	if (!IsPowerOf2(*height))
-	{
-		newHeight = NearestSuperiorPow2(*height);
-	}
-	else { newHeight = *height; }
-#endif
-	LastError = d3d.lpD3DDevice->CreateTexture(width, height, 1, D3DUSAGE_DYNAMIC, D3DFMT_L8, D3DPOOL_DEFAULT, &destTexture, NULL);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return NULL;
-	}
-
-	return destTexture;
-}
-*/
-
 bool CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 *vertexShader, LPD3DXCONSTANTTABLE *constantTable)
 {
 	LPD3DXBUFFER pErrors = NULL;
@@ -1032,14 +1013,16 @@ bool CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *pixe
 // we remove the grid as it can sometimes bleed onto text when we use texture filtering. maybe add params for passing width/height?
 void DeRedTexture(r_Texture texture)
 {
-	return; // FIXME - we need to pass the usage type to lock function to determine whether we use D3DLOCK_DISCARD or not
-	// lock texture
-
 	uint8_t *srcPtr = NULL;
 	uint8_t *destPtr = NULL;
 	uint32_t pitch = 0;
 
-	R_LockTexture(texture, &srcPtr, &pitch);
+	// lock texture
+	if (!R_LockTexture(texture, &srcPtr, &pitch, TextureLock_Normal))
+	{
+		Con_PrintError("DeRedTexture call failed - can't lock texture");
+		return;
+	}
 
 	// loop, setting all full red pixels to black
 	for (uint32_t y = 0; y < 256; y++)
@@ -1223,7 +1206,12 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 		{
 			texturePool = D3DPOOL_DEFAULT;
 			textureUsage = D3DUSAGE_DYNAMIC;
+			OutputDebugString("creating dynamic texture..\n");
 			break;
+		}
+		default:
+		{
+			OutputDebugString("uh oh!\n");
 		}
 	}
 
@@ -1322,7 +1310,13 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum Texture
 		{
 			texturePool = D3DPOOL_DEFAULT;
 			textureUsage = D3DUSAGE_DYNAMIC;
+
+			OutputDebugString("creating dynamic texture..\n");
 			break;
+		}
+		default:
+		{
+			OutputDebugString("uh oh!\n");
 		}
 	}
 
@@ -2094,7 +2088,7 @@ void FlipBuffers()
 
 void ReleaseDirect3D()
 {
-    DeallocateAllImages();
+//	DeallocateAllImages();
 
 	Font_Release();
 
@@ -2155,13 +2149,13 @@ void ReleaseAvPTexture(AVPTEXTURE *texture)
 		free(texture);
 	}
 }
-
+/*
 void ReleaseD3DTexture(r_Texture *d3dTexture)
 {
 	// release d3d texture
 	SAFE_RELEASE(*d3dTexture);
 }
-
+*/
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 {
 	if (CurrentRenderStates.TranslucencyMode == translucencyRequired)

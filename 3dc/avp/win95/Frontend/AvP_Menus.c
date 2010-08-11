@@ -30,6 +30,8 @@
 #define stricmp		_stricmp
 #endif
 
+char buf[100];
+
 /* KJL 11:22:37 23/06/98 - Hopefully these will be the final menus! */
 
 extern int IDemandSelect(void);
@@ -333,21 +335,19 @@ int AvP_MainMenus(void)
 	while (AvPMenus.MenusState == MENUSSTATE_MAINMENUS && bRunning)
 	{
 		mainMenu = 1;
-		ThisFramesRenderingHasBegun();
 
 		CheckForWindowsMessages();
+
+		ThisFramesRenderingHasBegun();
 
 		DrawMainMenusBackdrop();
 
 		ReadUserInput();
 
 		AvP_UpdateMenus();
-
-   //	BezierCurve();
 		
 		ShowMenuFrameRate();
 
-//		FlipBuffers();
 		FrameCounterHandler();
 		PlayMenuMusic();
 
@@ -1371,6 +1371,7 @@ static void RenderEpisodeSelectMenu(void)
 	I_PLAYER_TYPE playerID;
 	int i;
 	int numberOfBasicLevels;
+	int correctGraphicID;
 	
 	switch (AvPMenus.CurrentMenu)
 	{
@@ -1407,6 +1408,8 @@ static void RenderEpisodeSelectMenu(void)
 	for (i=0; i<=elementPtr->MaxSliderValue; i++)
 	{
 		int y;
+
+		correctGraphicID = graphicID;
 
 		y = MUL_FIXED(i*65536-centrePosition,100);
 
@@ -1446,8 +1449,22 @@ static void RenderEpisodeSelectMenu(void)
 			{
 				int yCoord = MENU_CENTREY+y-60;
 
+				/* 
+				 * bjd - hack to handle bonus level graphics with new texture system
+				 * if 'i' is a bonus level index, just set the new adjusted graphic id
+                 * to a bonus level image. otherwise, index like originally
+				 */
+				if (i >= numberOfBasicLevels)
+				{
+					correctGraphicID = AVPMENUGFX_MARINE_EPISODE7;
+				}
+				else
+				{
+					correctGraphicID += i;
+				}
+
 				RenderMenuText_Clipped(textPtr,MENU_LEFTXEDGE+150, yCoord, b,AVPMENUFORMAT_LEFTJUSTIFIED,MENU_CENTREY-60-100,MENU_CENTREY-60+180);
-				DrawAvPMenuGfx_Clipped(graphicID+i, MENU_LEFTXEDGE, yCoord, b,AVPMENUFORMAT_LEFTJUSTIFIED, MENU_CENTREY-60-100, MENU_CENTREY-60+180);
+				DrawAvPMenuGfx_Clipped(correctGraphicID/*+i*/, MENU_LEFTXEDGE, yCoord, b,AVPMENUFORMAT_LEFTJUSTIFIED, MENU_CENTREY-60-100, MENU_CENTREY-60+180);
 
 				if (MaximumSelectableLevel>=i)
 				{
@@ -2545,7 +2562,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 			}
 			break;
 		}
-		case AVPMENU_ELEMENT_SAVEMPCONFIG :
+		case AVPMENU_ELEMENT_SAVEMPCONFIG:
 		{
 			if (interactionID == AVPMENU_ELEMENT_INTERACTION_SELECT)
 			{
@@ -2870,7 +2887,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 				AvP.PlayerType = I_Marine;
 				SetLevelToLoadForMarine(MarineEpisodeToPlay);
 
-				if (MarineEpisodeToPlay<MAX_NO_OF_BASIC_MARINE_EPISODES)
+				if (MarineEpisodeToPlay < MAX_NO_OF_BASIC_MARINE_EPISODES)
 				{
 					SetupNewMenu(AVPMENU_LEVELBRIEFING_BASIC);
 				}
@@ -4581,7 +4598,6 @@ void DisplayVideoModeUnavailableScreen(void)
 			area.bottom=ScreenDescriptorBlock.SDB_Height;
 
 			RenderSmallFontString_Wrapped(GetTextString(TEXTSTRING_NOTENOUGHMEMORY),&area,BRIGHTNESS_OF_HIGHLIGHTED_ELEMENT,0,0);
-			
 		}
 				
 		ShowMenuFrameRate();
@@ -4590,7 +4606,7 @@ void DisplayVideoModeUnavailableScreen(void)
 		FrameCounterHandler();
 		PlayMenuMusic();
 	}
-	while(!DebouncedGotAnyKey);
+	while (!DebouncedGotAnyKey);
 }
 
 
@@ -4641,9 +4657,10 @@ void DoCredits(void)
 
 	do
 	{
+		CheckForWindowsMessages();
+
 		ThisFramesRenderingHasBegun();
 
-		CheckForWindowsMessages();
 		DrawMainMenusBackdrop();
 		ReadUserInput();
 	

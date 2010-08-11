@@ -75,20 +75,6 @@ void CheckForWindowsMessages(void)
 
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
-
-			#if (!SupportAltTab)
-			// Panic
-			if (!bActive)
-			{
-				// Dubious hack...
-				#if 0
-				ExitSystem();
-				#else
-				ReleaseDirect3D();
-				exit(0x00);
-				#endif
-			}
-			#endif
 		}
 		
 		// JH 13/2/98 - if the app is not active we should not return from the message lopp
