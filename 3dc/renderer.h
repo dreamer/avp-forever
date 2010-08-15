@@ -53,6 +53,9 @@ enum R_USAGE
 	USAGE_STATIC
 };
 
+uint32_t R_GetNumVideoModes();
+char* R_GetDeviceName();
+
 /*
 //test
 class Renderer

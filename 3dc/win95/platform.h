@@ -358,7 +358,6 @@ void InitPrintQueue(void);
 void InitJoysticks(void);
 void ReadJoysticks(void);
 int DeallocateAllImages(void);
-int MinimizeAllImages(void);
 int RestoreAllImages(void);
 
 /*

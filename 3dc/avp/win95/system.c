@@ -95,200 +95,9 @@ RIFFHANDLE predator_weapon_rif = INVALID_RIFFHANDLE;
 
 void ProcessSystemObjects();
 
-/*
-
- Video Mode at start-up
-
- The source to set up the initial video mode obviously
- depends on the platform, and so this routine is best placed
- in this file
-
-*/
-
-/* THIS IS FOR THE MENU SCREEN */
-
-void InitialVideoMode(void)
-{
-/*
-	Note that video modes are now only
-	REQUESTED, not set.  
-	Sound will also be dealt with in the 
-	same way.
-*/
-
-	ScreenDescriptorBlock.SDB_Flags = SDB_Flag_Raw256 | SDB_Flag_MIP;
-
-    /*
-		Setup for Windows mode.  Note that
-		TopLeftSubWindow and ExtentXYSubWindow
-		should be set to sensible defaults even
-		if we are in FullScreen mode.
-		Also: TopLeftSubWindow and ExtentXYSubWindow
-		are proportions of the current Windows display
-		extents, set in floating point in a range of
-		0.0-1.0 THIS CODE IS INTENDED FOR PENTIUM TARGETS
-		ONLY, AND THEREFORE USES FLOATING PT.  IT MUST
-		NOT
-		 LEAK.
-	*/
-
-    /*
-	  Note this is now only a request mode.
-	*/
-
-    #if 1
-    WindowRequestMode = WindowModeFullScreen;
-	#else
-    WindowRequestMode = WindowModeSubWindow;
-	#endif
-
-    TopLeftSubWindow.x = 0.3f;
-	TopLeftSubWindow.y = 0.3f;
-	ExtentXYSubWindow.x = 0.6f;
-	ExtentXYSubWindow.y = 0.6f;
-
-/*
-	Experimental settings for other 
-	request modes affecting rendering.
-*/
-
-	/*VideoRequestMode = VideoMode_DX_640x480x8;  for menus - is this guaranteed? */
-	VideoRequestMode = AvP.MenuVideoRequestMode;
-}
-
-
-/****************** AVP Change Display Modes*/
-
-/*
-	This function is intended to allow YOU,
-	the user, to obtain your heart's fondest desires
-	by one simple call.  Money? Love? A better job?
-	It's all here, you have only to ask...
-	No, I was lying actually.
-	In fact, this should allow you to change
-	display modes cleanly.  Pass your request modes
-	(as normally set up in system.c).  For all entries
-	which you do not want to change, simply pass
-	the current global value (e.g. ZBufferRequestMode
-	in the NewZBufferMode entry).
-
-    Note that the function must always be passed the
-	HINSTANCE and nCmdShow from winmain.
-*/
-
-/*
-	Note that this function will NOT
-	reinitialise the DirectDraw object
-	or switch to or from a hardware DD
-	device, but it will release and rebuild
-	all the Direct3D objects.
-*/
-
-/*
-	Note that you MUST be in the right
-	directory for a texture reload before you
-	call this, and normal operations CAN change
-	the directory...
-*/
-
-/*
-	NOTE!!! If you start in DirectDraw mode
-	and go to Direct3D mode, this function
-	CANNOT POSSIBLY WORK WITHOUT A FULL SHAPE 
-	RELOAD, since the shape data is overwritten
-	during DirectDraw initialisation!!!!
-
-    NOTE ALSO: TEXTURE RELOAD MAY BE DODGY 
-	WITHOUT A SHAPE RELOAD!!!
-*/
-
-
-int AVP_ChangeDisplayMode
-	(
-		HINSTANCE hInst, 
-		int nCmd, 
-		int NewVideoMode, 
-		int NewWindowMode,
-		int NewZBufferMode, 
-		int NewRasterisationMode, 
-		int NewSoftwareScanDrawMode, 
-		int NewDXMemoryMode
-	)
-{
-	BOOL ChangeWindow = FALSE;
-
-	/*
-		Shut down DirectX objects and destroy
-		the current window, if necessary.
-	*/
-
-	if (NewWindowMode != WindowMode)
-	{
-		ChangeWindow = TRUE;
-	}
-
-    /* JH 30/5/97 - added this line back in so that d3d is cleaned up properly when the
-	   display is changed back to 8-but for the menus */
-	/* JH 3/6/97 - don't quit kill off the images - still keep buffers in system memory
-	   that are not linked to direct draw */
-	MinimizeAllImages();
-//	MinimizeAllDDGraphics();
-
-	if (ChangeWindow)
-		ExitWindowsSystem(); 
-
-
-	/*
-		Set the request modes and actual modes
-		according to the passed values.
-	*/
-
-    VideoRequestMode = NewVideoMode;
-    WindowRequestMode = NewWindowMode;
-	RasterisationRequestMode = NewRasterisationMode;
-	SoftwareScanDrawRequestMode = NewSoftwareScanDrawMode;
-
-    VideoMode = VideoRequestMode;
-	WindowMode = WindowRequestMode;
-
-	/* this may reconstruct the dd object depending
-	   on the rasterisation request mode and whether
-	   a hardware dd driver is selected or could be
-	   available - JH 20/5/97 */
-//	ChangeDirectDrawObject();
-
-	/*
-		Recreate the window, allowing
-		for possible change in WindowMode.
-	*/
-
-	if (ChangeWindow)
-	{
-		BOOL rc = InitialiseWindowsSystem
-		(
-			hInst, 
-			nCmd, 
-			WinInitChange
-		);
-
-		if (rc == FALSE)
-			return rc;
-	}
-
-	/*
-		Set the video mode again.  This
-		will handle all changes to DirectDraw
-		objects, all Direct3D initialisation,
-		and other request modes such as
-		zbuffering.
-	*/
-
-    return TRUE;
-}
-
 /*******************************************************************************************/
 /*******************************************************************************************/
-/***************		   GAME AND ENIVROMENT CONTROL 			  **************************/
+/***************		   GAME AND ENIVROMENT CONTROL			  **************************/
 
 void InitCharacter()
 {
@@ -298,7 +107,6 @@ void InitCharacter()
 	***/
 	
 	// load charcater specific rif and sounds
-
 
 	if (player_rif != INVALID_RIFFHANDLE)
 	{
@@ -320,16 +128,16 @@ void InitCharacter()
 		// we already have a player loaded - delete the bastard
 		avp_undo_rif_load(predator_weapon_rif);
 	}
-	
+
 	#if MaxImageGroups==1
 	InitialiseTextures();
 	#else
 	SetCurrentImageGroup(0);
 	DeallocateCurrentImages();
 	#endif
-	
+
 	Start_Progress_Bar();
-	
+
 	Set_Progress_Bar_Position(PBAR_HUD_START);
 
 	switch(AvP.Network)
@@ -375,14 +183,14 @@ void InitCharacter()
 				break;
 			}
 			default:
-			{	
+			{
 				// set up a multiplayer game - here becuse we might end
 				// up with a cooperative game
 				//load all weapon rifs
 				marine_weapon_rif = avp_load_rif("avp_huds\\marwep.rif");
 				predator_weapon_rif = avp_load_rif("avp_huds\\pred_hud.rif");
 				alien_weapon_rif = avp_load_rif("avp_huds\\alien_hud.rif");
-				
+
 				Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.25);
 				player_rif = avp_load_rif("avp_huds\\multip.rif");
 			}
@@ -393,9 +201,9 @@ void InitCharacter()
 	SetCurrentImageGroup(0);
 	#endif
 	copy_rif_data(player_rif,CCF_IMAGEGROUPSET,PBAR_HUD_START+PBAR_HUD_INTERVAL*.5,PBAR_HUD_INTERVAL*.25);
-	
+
 	Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.75);
-	
+
 	if (alien_weapon_rif != INVALID_RIFFHANDLE)
 		copy_rif_data(alien_weapon_rif, CCF_LOAD_AS_HIERARCHY_IF_EXISTS|CCF_IMAGEGROUPSET|CCF_DONT_INITIALISE_TEXTURES, PBAR_HUD_START+PBAR_HUD_INTERVAL*.5, PBAR_HUD_INTERVAL*.25);
 
@@ -412,10 +220,9 @@ void InitCharacter()
 	*   Setup generic data for weapons etc   *
 	*************************************KJL*/
 
- 	InitialiseEquipment();
+	InitialiseEquipment();
 
 	InitHUD();
-
 }
 
 extern void create_strategies_from_list ();
@@ -425,16 +232,16 @@ void RestartLevel()
 {
 	//get the cd to start again at the beginning of the play list.
 	ResetCDPlayForLevel();
-	
+
 	CleanUpPheromoneSystem();
 	// now deallocate the module vis array
 	DeallocateModuleVisArrays();
-	
-	/* destroy the VDB list */	
+
+	/* destroy the VDB list */
 	InitialiseVDBs();
-	InitialiseTxAnimBlocks(); 
-	
-	
+	InitialiseTxAnimBlocks();
+
+
 	// deallocate strategy and display blocks
 	{
 		int i ;
@@ -442,17 +249,21 @@ void RestartLevel()
 		i = maxstblocks;
 		DestroyAllStrategyBlocks();
 		while(i--)
+		{
 			ActiveStBlockList[i] = NULL;
+		}
 
 		i = maxobjects;
-	 	InitialiseObjectBlocks();
-		while(i --)
+		InitialiseObjectBlocks();
+		while (i --)
+		{
 			ActiveBlockList[i] = NULL;
+		}
 	}
 
 	//stop all sound
 	SoundSys_StopAll();
-	
+
 	//reset the displayblock for modules to 0
 	{
 		int i=2;
@@ -462,14 +273,11 @@ void RestartLevel()
 			i++;
 		}
 	}
- 	
+
 	// set the Onscreenbloock lsit to zero
- 	NumOnScreenBlocks = 0;
- 	
- 	//start reinitialising stuff
- 	
-// 	InitialiseEquipment();
-//	InitHUD();
+	NumOnScreenBlocks = 0;
+
+	//start reinitialising stuff
 
 	/* surely we should init squad data here?
 	* funtion calls in create_strategies_from_list(); test data in squad struct
@@ -479,20 +287,20 @@ void RestartLevel()
 	InitSquad();
 	
 	ProcessSystemObjects();
-	
+
 	create_strategies_from_list();
 	AssignAllSBNames();
-	
+
 	SetupVision();
 	InitObjectVisibilities();
 	InitPheromoneSystem();
 	InitHive();
 //	InitSquad();
-	
+
 	/* KJL 14:22:41 17/11/98 - reset HUD data, such as where the crosshair is,
 	whether the Alien jaw is on-screen, and so on */
 	ReInitHUD();
-	
+
 	InitialiseParticleSystem();
 	InitialiseSfxBlocks();
 	InitialiseLightElementSystem();
@@ -506,8 +314,8 @@ void RestartLevel()
 
 	CurrentGameStats_Initialise();
 	MessageHistory_Initialise();
-	
-	if(AvP.Network!=I_No_Network)
+
+	if (AvP.Network!=I_No_Network)
 	{
 		TeleportNetPlayerToAStartingPosition(Player->ObStrategyBlock,1);
 	}
@@ -528,7 +336,7 @@ ELO* Env_List[I_Num_Environments] = { &JunkEnv };
 
 void catpathandextension(char*, char*);
 void DestroyActiveBlockList(void);
-void InitialiseObjectBlocks(void);	
+void InitialiseObjectBlocks(void);
 
 
 char EnvFileName[100];
@@ -548,7 +356,7 @@ void ProcessSystemObjects()
 					c sets maps ans SBs for loaded maps
 					
 		 2 
-	*/	
+	*/
 
 
 	#if TestRiffLoaders
@@ -574,8 +382,7 @@ void ProcessSystemObjects()
 	Global_ModulePtr = MainSceneArray;
 	PreprocessAllModules();
 	i = GetModuleVisArrays();
-	if(i == FALSE) textprint("GetModuleVisArrays() failed\n");
-
+	if (i == FALSE) textprint("GetModuleVisArrays() failed\n");
 
 	/*WaitForReturn();*/
 
@@ -590,7 +397,7 @@ static int ReadModuleMapList(MODULEMAPBLOCK *mmbptr)
 	STRATEGYBLOCK *sbptr;
 	/* this automatically attaches sbs to dbs */
 
-	while(mmbptr->MapType != MapType_Term)
+	while (mmbptr->MapType != MapType_Term)
 	{
 		m_temp.m_mapptr = mmbptr;
 		m_temp.m_sbptr = (STRATEGYBLOCK*)NULL;
@@ -606,26 +413,23 @@ static int ReadModuleMapList(MODULEMAPBLOCK *mmbptr)
 		mmbptr++;
 	}
 
-	return(0);
+	return 0;
 }
-	
 
 void UnloadRifFile()
 {
 	unload_rif(env_rif);
-}  
-
+}
 
 void ChangeEnvironmentToEnv(I_AVP_ENVIRONMENTS env_to_load)
 {
-
 	GLOBALASSERT(env_to_load != AvP.CurrentEnv);
- 
+
 	GLOBALASSERT(Env_List[env_to_load]);
 
 	Destroy_CurrentEnvironment(); 
 	/* Patrick: 26/6/97
-	Stop and remove all sounds here */	
+	Stop and remove all sounds here */
 	SoundSys_StopAll();
 	SoundSys_RemoveAll(); 
 	CDDA_Stop();
@@ -633,7 +437,6 @@ void ChangeEnvironmentToEnv(I_AVP_ENVIRONMENTS env_to_load)
 	// Loading functions
 	AvP.CurrentEnv = env_to_load;
 	LoadRifFile();
-
 }
 
 
@@ -650,9 +453,8 @@ void IntegrateNewEnvironment()
 	Global_ModulePtr = MainSceneArray;
 	PreprocessAllModules();
 	i = GetModuleVisArrays();
-	if(i == FALSE) textprint("GetModuleVisArrays() failed\n");
+	if (i == FALSE) textprint("GetModuleVisArrays() failed\n");
 
- 
 	// elements from start game for AI
 
 	InitObjectVisibilities();
@@ -699,7 +501,7 @@ void LoadRifFile()
 	// Set up the dirname for the Rif load
 	catpathandextension(&file_and_path[0], (char *)&GameDataDirName[0]);
 	catpathandextension(&file_and_path[0], Env_List[AvP.CurrentEnv]->main); /* root of the file name,smae as dir*/
-	catpathandextension(&file_and_path[0], (char *)&FileNameExtension[0]);	/* extension*/
+	catpathandextension(&file_and_path[0], (char *)&FileNameExtension[0]);  /* extension*/
 	
 	env_rif = avp_load_rif((const char*)&file_and_path[0]);
 	Set_Progress_Bar_Position(PBAR_LEVEL_START+PBAR_LEVEL_INTERVAL*.4);
@@ -739,13 +541,17 @@ int Destroy_CurrentEnvironment(void)
 
 		i = maxstblocks;
 		DestroyAllStrategyBlocks();
-		while(i--)
+		while (i--)
+		{
 			ActiveStBlockList[i] = NULL;
+		}
 
 		i = maxobjects;
-	 	InitialiseObjectBlocks();
-		while(i --)
+		InitialiseObjectBlocks();
+		while (i --)
+		{
 			ActiveBlockList[i] = NULL;
+		}
 	}
 	TimeStampedMessage("After object blocks");
 	
@@ -769,16 +575,12 @@ int Destroy_CurrentEnvironment(void)
 	DeallocateModuleVisArrays();
 	TimeStampedMessage("After DeallocateModuleVisArrays");
 
-		
-
-	/* destroy the VDB list */	
+	/* destroy the VDB list */
 	InitialiseVDBs();
 	TimeStampedMessage("After InitialiseVDBs");
 
-	
 	InitialiseTxAnimBlocks(); // RUN THE npcS ON OUR OWN
 	TimeStampedMessage("After InitialiseTxAnimBlocks");
-
 
 	/* frees the memory from the env load*/
 	DeallocateModules();
@@ -787,97 +589,11 @@ int Destroy_CurrentEnvironment(void)
 	avp_undo_rif_load(env_rif);
 	TimeStampedMessage("After avp_undo_rif_load");
 
-
 	// set the Onscreenbloock lsit to zero
- 	NumOnScreenBlocks = 0;
- 
- 	return(0);
+	NumOnScreenBlocks = 0;
+
+	return 0;
 }
-
-
-
-#if 0
-void InitEnvironmentFromLoad(void) 
-{
-	// in DB menus - we only destroy the current environment
-	// after we have selected a leve, to load - WE could
-	// be going TO ANY ENV or CHARACTER here (ughh) 
-
-	// this is an entire game destroy (with no save) killing
-	// both the env and the character followed by a complete
-	// game restart 
-	
-	// environment clean up - sets up the load info
-	Destroy_CurrentEnvironment();
-	// then the REST
-	DestroyAllStrategyBlocks();
-	#if MaxImageGroups>1
-	SetCurrentImageGroup(0); // FOR ENV
-	DeallocateCurrentImages();
-	#endif
-	/* Patrick: 26/6/97
-	Stop and remove all sounds here */	
-	SoundSys_StopAll();
-	SoundSys_RemoveAll(); 
-	CDDA_Stop();
-
-	// start the loading - we load the player
-	InitCharacter();	// intis the char
-	LoadRifFile();    // env
-
-	// do all the ness processing
-	// start games calles FormatSaveBuffer and
-	// Process System Objects
-
-	AssignAllSBNames();
-	
-	// Set the timer, or we have just taken
-	// 10 secs for the frame
-
-	/***** No need to do frame counter stuff in a computer! *****/
-
-	/* Patrick: 26/6/97
-	Load our sounds for the new env */	
-	LoadSounds("PLAYER");
-}
-
-
-
-/************************ SAVE AND LOAD **********************/
-
-
-
-
-
-
-
-
-void LoadGameFromFile(void)
-{
-	// now we right to a file
-	char * savename = "slot1.AvP";
-	FILE* fp = avp_fopen(savename, "rb");
-	if(fp == NULL)
-		return;
-	fread(&AvP, sizeof(AVP_GAME_DESC), 1, fp);
-	fread(&save_game_buffer, SAVEBUFFERSIZE, 1, fp);
-	UnpackSaveBuffer();
-	fclose(fp);
-}
-
-
-void SaveGameToFile(void)
-{
-	char * savename = "slot1.AvP";
-	FILE* fp = avp_fopen(savename, "wb");
-	CreateLevelMetablocks(AvP.CurrentEnv);
-	PackSaveBuffer();
-	fwrite(&AvP, sizeof(AVP_GAME_DESC), 1, fp);
-	fwrite(&save_game_buffer, SAVEBUFFERSIZE, 1, fp);
-	fclose(fp);
-}
-
-#endif
 
 // project spec game exit
 void ExitGame(void)
@@ -885,7 +601,7 @@ void ExitGame(void)
 	if (player_rif != INVALID_RIFFHANDLE)
 	{
 		avp_undo_rif_load(player_rif);
-	  	player_rif=INVALID_RIFFHANDLE;
+		player_rif=INVALID_RIFFHANDLE;
 	}
 	
 	if (alien_weapon_rif != INVALID_RIFFHANDLE)

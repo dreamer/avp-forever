@@ -37,7 +37,7 @@
 #include "ourasert.h"
 
 extern void NewOnScreenMessage(char *messagePtr);
-extern void GetFilenameForSaveSlot(int i, unsigned char *filenamePtr);
+extern void GetFilenameForSaveSlot(int i, char *filenamePtr);
 void ScanSaveSlots(void);
 void RestartLevel();
 extern void StartFMVAtFrame(int number, int frame);

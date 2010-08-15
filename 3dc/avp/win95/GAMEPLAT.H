@@ -19,20 +19,6 @@ extern void LoadRifFile();
 extern HINSTANCE AVP_HInstance;
 extern int AVP_NCmd;
 
-extern int AVP_ChangeDisplayMode
-					(
-						HINSTANCE hInst,
-						int nCmd,
-						int NewVideoMode,
-						int NewWindowMode,
-						int NewZBufferMode,
-						int NewRasterisationMode,
-						int NewSoftwareScanDrawMode,
-						int NewDXMemoryMode
-					);
-
-
-
 extern int WindowMode;
 extern int WindowRequestMode;
 extern int VideoRequestMode;

@@ -25,8 +25,8 @@
 #define MAX_IPADDRESS_LENGTH 15
 char MP_PlayerName[NET_PLAYERNAMELENGTH+3] = "";
 char MP_SessionName[MAX_MULTIPLAYER_NAME_LENGTH+23] = "TEST SESH";
-char IPAddressString[MAX_IPADDRESS_LENGTH+1]= ""; 
-char CommandLineIPAddressString[MAX_IPADDRESS_LENGTH+1]= ""; 
+char IPAddressString[MAX_IPADDRESS_LENGTH+1]= "";
+char CommandLineIPAddressString[MAX_IPADDRESS_LENGTH+1]= "";
 char UserProfileName[MAX_SIZE_OF_USERS_NAME+1]="";
 char IP_Address_Name[22];
 
@@ -1083,7 +1083,7 @@ extern void MakeOpenIPAddressMenu()
 {
 	IP_Address_Name[0] = 0;
 	//determine whether the load ip address option should be available
-	if (BuildLoadIPAddressMenu())	
+	if (BuildLoadIPAddressMenu())
 	{
 		AvPMenu_MultiplayerOpenAddress[3].ElementID = AVPMENU_ELEMENT_GOTOMENU;
 	}

@@ -41,10 +41,8 @@ class VertexBuffer
 		// constructor
 		VertexBuffer():
 			vertexBuffer(0),
-//			indexBuffer(0),
-			vbLength(0),
+			vbSizeInBytes(0),
 			vbUsage(USAGE_DYNAMIC),
-//			vbPool(D3DPOOL_DEFAULT),
 			vbFVF(FVF_ORTHO),
 			vbFVFsize(0),
 			vbIsLocked(false),
@@ -55,8 +53,7 @@ class VertexBuffer
 		// deconstructor
 		~VertexBuffer()
 		{
-//			SAFE_RELEASE(vertexBuffer);
-//			SAFE_RELEASE(indexBuffer);
+			R_ReleaseVertexBuffer(vertexBuffer);
 		}
 
 	bool VertexBuffer::Create(uint32_t size, enum FVF fvf, enum R_USAGE usage);
@@ -68,9 +65,8 @@ class VertexBuffer
 		r_VertexBuffer	*vertexBuffer;
 		uint32_t		vbSize;
 		uint32_t		ibSize;
-		uint32_t		vbLength;
+		uint32_t		vbSizeInBytes;//vbLength;
 		enum R_USAGE	vbUsage;
-//		D3DPOOL			vbPool;
 		FVF				vbFVF;
 		uint32_t		vbFVFsize;
 

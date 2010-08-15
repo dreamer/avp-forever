@@ -392,6 +392,71 @@ bool R_CreateVertexBuffer(uint32_t length, uint32_t usage, r_VertexBuffer **vert
 	return true;
 }
 
+void R_ReleaseVertexBuffer(r_VertexBuffer *vertexBuffer)
+{
+	if (vertexBuffer)
+	{
+		vertexBuffer->Release();
+	}
+}
+
+uint32_t R_GetNumVideoModes()
+{
+	return d3d.Driver[d3d.CurrentDriver].NumModes;
+}
+
+void R_NextVideoMode()
+{
+	uint32_t numModes = R_GetNumVideoModes();
+
+	if (++d3d.CurrentVideoMode >= numModes)
+	{
+		d3d.CurrentVideoMode = 0;
+	}
+}
+
+void R_PreviousVideoMode()
+{
+	uint32_t numModes = R_GetNumVideoModes();
+
+	if (--d3d.CurrentVideoMode < 0)
+	{
+		d3d.CurrentVideoMode = numModes - 1;
+	}
+}
+
+std::string videoModeDescription;
+
+std::string& R_GetVideoModeDescription()
+{
+	videoModeDescription = IntToString(d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Width)
+						   + "x" +
+						   IntToString(d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Height);
+
+	return videoModeDescription;
+}
+
+char* R_GetDeviceName()
+{
+	return d3d.Driver[d3d.CurrentDriver].AdapterInfo.Description;
+}
+
+void R_SetCurrentVideoMode()
+{
+	uint32_t currentWidth = d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Width;
+	uint32_t currentHeight = d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Height;
+
+	// set the new values in the config file
+	Config_SetInt("[VideoMode]", "Width" , currentWidth);
+	Config_SetInt("[VideoMode]", "Height", currentHeight);
+
+	// save the changes to the config file
+	Config_Save();
+
+	// and actually change the resolution on the device
+	R_ChangeResolution(currentWidth, currentHeight);
+}
+
 bool R_DrawPrimitive(uint32_t numPrimitives)
 {
 	LastError = d3d.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, numPrimitives);
@@ -1145,7 +1210,6 @@ r_Texture CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t 
 		LogDxError(LastError, __LINE__, __FILE__);
 		delete[] buffer;
 		return NULL;
-
 	}
 
 	delete[] buffer;
@@ -1190,7 +1254,6 @@ bool R_CreateTextureFromFile(const std::string &fileName, Texture &texture)
 bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usageType, Texture &texture)
 {
 	D3DPOOL texturePool;
-	D3DFORMAT textureFormat;
 	uint32_t textureUsage;
 	LPDIRECT3DTEXTURE9 d3dTexture = NULL;
 
@@ -1206,7 +1269,6 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 		{
 			texturePool = D3DPOOL_DEFAULT;
 			textureUsage = D3DUSAGE_DYNAMIC;
-			OutputDebugString("creating dynamic texture..\n");
 			break;
 		}
 		default:
@@ -1310,8 +1372,6 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum Texture
 		{
 			texturePool = D3DPOOL_DEFAULT;
 			textureUsage = D3DUSAGE_DYNAMIC;
-
-			OutputDebugString("creating dynamic texture..\n");
 			break;
 		}
 		default:
@@ -1439,7 +1499,7 @@ void R_ReleaseTexture(r_Texture &texture)
 	}
 }
 
-bool ChangeGameResolution(uint32_t width, uint32_t height/*, uint32_t colourDepth*/)
+bool R_ChangeResolution(uint32_t width, uint32_t height)
 {
 	// don't bother resetting device if we're already using the requested settings
 	if ((width == d3d.d3dpp.BackBufferWidth) && (height == d3d.d3dpp.BackBufferHeight))
@@ -1673,6 +1733,17 @@ bool InitialiseDirect3D()
 		}
 	}
 
+	// set CurrentVideoMode variable to index display mode that matches user requested settings
+	for (uint32_t i = 0; i < d3d.Driver[d3d.CurrentDriver].NumModes; i++)
+	{
+		if ((width == d3d.Driver[d3d.CurrentDriver].DisplayMode[i].Width)
+		 &&(height == d3d.Driver[d3d.CurrentDriver].DisplayMode[i].Height))
+		{
+			d3d.CurrentVideoMode = i;
+			break;
+		}
+	}
+
 	// check that the resolution and colour depth the user wants is supported
 	bool gotOne = false;
 	bool gotValidFormats = false;
@@ -1711,7 +1782,6 @@ bool InitialiseDirect3D()
 						SelectedBackbufferFormat = DisplayFormats[i];
 						gotValidFormats = true;
 						gotOne = true;
-						//break;
 
 						// fix this..
 						goto gotValidFormats;

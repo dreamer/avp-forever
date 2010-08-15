@@ -18,6 +18,7 @@ typedef IDirect3DTexture9	   *r_Texture; // keep this as pointer type?
 #include <string>
 
 bool R_CreateVertexBuffer(uint32_t length, uint32_t usage, r_VertexBuffer **vertexBuffer);
+void R_ReleaseVertexBuffer(r_VertexBuffer *vertexBuffer);
 bool R_LockVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage);
 bool R_UnlockVertexBuffer(r_VertexBuffer *vertexBuffer);
 bool R_SetVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t FVFsize);
@@ -30,6 +31,11 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum Texture
 bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usageType, Texture &texture);
 bool R_CreateTextureFromFile(const std::string &fileName, Texture &texture);
 void R_ReleaseTexture(r_Texture &texture);
+
+void R_NextVideoMode();
+void R_PreviousVideoMode();
+std::string& R_GetVideoModeDescription();
+void R_SetCurrentVideoMode();
 
 /*
   Direct3D globals
@@ -126,9 +132,9 @@ typedef struct D3DDriverInfo
 
 typedef struct D3DInfo
 {
-    LPDIRECT3D9				lpD3D;
-    LPDIRECT3DDEVICE9		lpD3DDevice;
-    D3DVIEWPORT9			D3DViewport;
+	LPDIRECT3D9				lpD3D;
+	LPDIRECT3DDEVICE9		lpD3DDevice;
+	D3DVIEWPORT9			D3DViewport;
 	D3DPRESENT_PARAMETERS	d3dpp;
 
 	LPDIRECT3DVERTEXBUFFER9 lpD3DVertexBuffer;
@@ -155,11 +161,12 @@ typedef struct D3DInfo
 	LPDIRECT3DVERTEXSHADER9      cloudVertexShader;
 	LPDIRECT3DPIXELSHADER9       cloudPixelShader;
 
-    uint32_t				NumDrivers;
-    uint32_t				CurrentDriver;
-    D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS];
-    uint32_t				CurrentTextureFormat;
-    uint32_t				NumTextureFormats;
+	uint32_t				NumDrivers;
+	uint32_t				CurrentDriver;
+	int32_t					CurrentVideoMode;
+	D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS];
+	uint32_t				CurrentTextureFormat;
+	uint32_t				NumTextureFormats;
 
 	bool					supportsShaders;
 	bool					supportsDynamicTextures;
@@ -172,7 +179,7 @@ r_Texture CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t 
 r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
 bool InitialiseDirect3D();
-bool ChangeGameResolution	(uint32_t width, uint32_t height/*, uint32_t colour_depth*/);
+bool R_ChangeResolution		(uint32_t width, uint32_t height);
 void DrawAlphaMenuQuad		(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t alpha);
 void DrawTallFontCharacter	(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha);
 void DrawCloudTable			(uint32_t topX, uint32_t topY, uint32_t wordLength, uint32_t alpha);
@@ -180,7 +187,7 @@ void DrawFadeQuad			(uint32_t topX, uint32_t topY, uint32_t alpha);
 void DrawSmallMenuCharacter (uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t red, uint32_t green, uint32_t blue, uint32_t alpha);
 void DrawQuad				(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
 void DrawFmvFrame			(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, r_Texture fmvTexture);
-void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures, uint32_t numTextures);
+void DrawFmvFrame2			(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures, uint32_t numTextures);
 void NewQuad				(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t colour, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyType, float *UVList);
 void CreateScreenShotImage();
 void DeRedTexture(r_Texture texture);

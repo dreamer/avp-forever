@@ -3158,46 +3158,6 @@ void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin)
 	}
 }
 
-void DrawFrameRateBar(void)
-{
-	int width = DIV_FIXED(ScreenDescriptorBlock.SDB_Width/120,NormalFrameTime);
-	if (width>ScreenDescriptorBlock.SDB_Width) width = ScreenDescriptorBlock.SDB_Width;
-
-	r2rect rectangle
-	(
-		0,0,
-		width,
-		24
-	);
-//		textprint("width %d\n",width);
-
-	rectangle.AlphaFill
-	(
-		0xff, // unsigned char R,
-		0x00,// unsigned char G,
-		0x00,// unsigned char B,
-	   	128 // unsigned char translucency
-	);
-}
-
-void D3D_DrawAlienRedBlipIndicatingJawAttack(void)
-{
-	r2rect rectangle
-	(
-		16,16,
-		32,
-		32
-	);
-
-	rectangle.AlphaFill
-	(
-		0xff, // unsigned char R,
-		0x00,// unsigned char G,
-		0x00,// unsigned char B,
-	   	128 // unsigned char translucency
-	);
-}
-
 void D3D_DrawBackdrop(void)
 {
 	if (TRIPTASTIC_CHEATMODE||MOTIONBLUR_CHEATMODE)

@@ -1025,23 +1025,6 @@ int DeallocateAllImages(void)
 	return TRUE; /* ok for the moment */
 }
 
-int MinimizeAllImages(void)
-{
-	int i;
-	IMAGEHEADER *ihptr;
-
-	if (NumImages)
-	{
-		ihptr = ImageHeaderArray;
-		for (i = NumImages; i!=0; i--)
-		{
-			MinimizeImageHeader(ihptr++);
-		}
-	}
-
-	return TRUE; /* ok for the moment */
-}
-
 #endif
 
 

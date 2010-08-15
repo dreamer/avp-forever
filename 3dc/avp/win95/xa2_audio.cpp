@@ -33,7 +33,6 @@ extern "C" {
 #include "ourasert.h"
 #include "db.h"
 #include "eax.h"
-#include "vmanpset.h"
 #include <windows.h>
 #include "ffstdio.h"
 #include <math.h>
@@ -76,7 +75,7 @@ X3DAUDIO_DSP_SETTINGS	XA2DSPSettings = {0};
 IUnknown				*pReverbEffect = NULL;
 static uint32_t			numOutputChannels = 0;
 static DWORD			channelMask = 0;
-static uint32_t		 	SoundMinBufferFree = 0;
+static uint32_t			SoundMinBufferFree = 0;
 static bool				soundEnabled = false;
 
 static HRESULT LastError;

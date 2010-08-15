@@ -301,7 +301,7 @@
 				EnableEnhancedInstructionSet="1"
 				FloatingPointModel="2"
 				DefaultCharIsUnsigned="true"
-				RuntimeTypeInfo="false"
+				RuntimeTypeInfo="true"
 				PrecompiledHeaderFile=""
 				AssemblerListingLocation="$(IntDir)\"
 				ObjectFile="$(IntDir)\"
@@ -823,44 +823,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="3dc\avp\win95\Frontend\AvP_Menus.c"
+				RelativePath=".\3dc\avp\win95\Frontend\AvP_Menus.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="3dc\avp\win95\Frontend\AvP_MP_Config.cpp"

@@ -25,26 +25,35 @@
 #include "vertexBuffer.h"
 #include "logString.h"
 
+enum VertexPrimitive
+{
+	VertexPrimitive_List,
+	VertexPrimitive_Strip
+};
+
 bool VertexBuffer::Draw()
 {
-	R_SetVertexBuffer(this->vertexBuffer, this->vbFVFsize);
-	R_DrawPrimitive(2);
+	if (!R_SetVertexBuffer(this->vertexBuffer, this->vbFVFsize))
+	{
+		return false;
+	}
+
+	if (!R_DrawPrimitive(2))
+	{
+		return false;
+	}
 
 	return true;
 }
 
 bool VertexBuffer::Lock(void **data)
 {
-	R_LockVertexBuffer(this->vertexBuffer, 0, 0, data, this->vbUsage);
-
-	return true;
+	return R_LockVertexBuffer(this->vertexBuffer, 0, 0, data, this->vbUsage);
 }
 
 bool VertexBuffer::Unlock()
 {
-	R_UnlockVertexBuffer(this->vertexBuffer);
-
-	return true;
+	return R_UnlockVertexBuffer(this->vertexBuffer);
 }
 
 bool VertexBuffer::Create(uint32_t size, enum FVF fvf, enum R_USAGE usage)
@@ -67,9 +76,7 @@ bool VertexBuffer::Create(uint32_t size, enum FVF fvf, enum R_USAGE usage)
 			break;
 	}
 
-	this->vbLength = size * this->vbFVFsize;
+	this->vbSizeInBytes = size * this->vbFVFsize;
 
-	R_CreateVertexBuffer(this->vbLength, this->vbUsage, &vertexBuffer);
-
-	return true;
+	return R_CreateVertexBuffer(this->vbSizeInBytes, this->vbUsage, &vertexBuffer);
 }

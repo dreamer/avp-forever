@@ -329,9 +329,6 @@ typedef struct
 extern SESSION_DESC SessionData[];
 extern int NumberOfSessionsFound;
 
-extern char IP_Address_Name[];
-
-
 
 typedef struct
 {

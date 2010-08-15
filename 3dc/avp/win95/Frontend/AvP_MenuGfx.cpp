@@ -330,7 +330,7 @@ extern int LengthOfMenuText(const char *textPtr)
 	return width;
 }
 
-extern int RenderMenuText(const char *textPtr, int pX, int pY, int alpha, enum AVPMENUFORMAT_ID format) 
+extern int RenderMenuText(char *textPtr, int pX, int pY, int alpha, enum AVPMENUFORMAT_ID format) 
 {
 	int width = LengthOfMenuText(textPtr);
 	int word_length = 0;
@@ -644,7 +644,7 @@ extern int Hardware_RenderSmallMenuText_Coloured(char *textPtr, int x, int y, in
 
 			x -= length/2;
 			break;
-		}	
+		}
 	}
 
 	LOCALASSERT(x>0);
@@ -746,7 +746,7 @@ extern int RenderSmallChar(char c, int x, int y, int alpha, int red, int green, 
 	return sx;
 }
 
-extern void RenderSmallFontString_Wrapped(const char *textPtr, RECT* area, int alpha, int* output_x, int* output_y)
+extern void RenderSmallFontString_Wrapped(char *textPtr, RECT* area, int alpha, int* output_x, int* output_y)
 {
 	// text on menus in bottom black space
 

@@ -1268,13 +1268,8 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr);
 */
 
 void InitialiseSystem(HINSTANCE hInstance, int nCmdShow);
-
 void InitialiseRenderer(void);
-
 void ExitSystem(void);
-
-void InitialVideoMode(void);
-
 void ResetFrameCounter(void);
 void FrameCounterHandler(void);
 

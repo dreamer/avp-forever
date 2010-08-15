@@ -113,11 +113,8 @@ extern char CommandLineIPAddressString[];
 extern int AvP_MainMenus(void);
 extern int AvP_InGameMenus(void);
 extern int InGameMenusAreRunning(void);
-extern void LoadDeviceAndVideoModePreferences();
 extern void InitFmvCutscenes();
 
-#include "VideoModes.h"
-extern DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
 extern struct DEBUGGINGTEXTOPTIONS ShowDebuggingText;
 
 extern BOOL bRunning;
@@ -365,8 +362,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		ReleaseDirect3D();
 		exit(-1);
 	}
-
-	LoadDeviceAndVideoModePreferences();
 
 	LoadKeyConfiguration();
 
