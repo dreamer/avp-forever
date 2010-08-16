@@ -77,7 +77,6 @@ int ChromeImageNumber;
 int CloudyImageNumber;
 int BurningImageNumber;
 int HUDFontsImageNumber;
-int MotionTrackerScale;
 int PredatorVisionChangeImageNumber;
 int PredatorNumbersImageNumber;
 int StaticImageNumber;
@@ -85,8 +84,11 @@ int AlienTongueImageNumber;
 int AAFontImageNumber;
 int WaterShaftImageNumber;
 
+fixed_t HUDScaleFactor;
+fixed_t MotionTrackerScale;
 
-int HUDScaleFactor;
+float HUDScaleFactorf = 1.0f;
+float MotionTrackerScalef = 1.0f;
 
 static struct HUDFontDescTag HUDFontDesc[] =
 {
@@ -251,9 +253,11 @@ void D3D_InitialiseMarineHUD(void)
 	/* centre of motion tracker */
 	MotionTrackerCentreY = BlueBar.TopLeftY;
 	MotionTrackerCentreX = BlueBar.TopLeftX+(BlueBar.Width/2);
-	MotionTrackerScale = 65536;
+	MotionTrackerScale = ONE_FIXED;
+	MotionTrackerScalef = 1.0f;
 
 	HUDScaleFactor = DIV_FIXED(ScreenDescriptorBlock.SDB_Width, 640);
+	HUDScaleFactorf = (float)ScreenDescriptorBlock.SDB_Width / 640.0f;
 
 	#if UseGadgets
 //	MotionTrackerGadget::SetCentre(r2pos(100,100));
@@ -410,10 +414,10 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 	quadVertices[3].V = 1+MotionTrackerTextureSize;
 
 	/* clip to Y<=0 */
-	YClipMotionTrackerVertices(&quadVertices[0],&quadVertices[1]);
-	YClipMotionTrackerVertices(&quadVertices[1],&quadVertices[2]);
-	YClipMotionTrackerVertices(&quadVertices[2],&quadVertices[3]);
-	YClipMotionTrackerVertices(&quadVertices[3],&quadVertices[0]);
+	YClipMotionTrackerVertices(&quadVertices[0], &quadVertices[1]);
+	YClipMotionTrackerVertices(&quadVertices[1], &quadVertices[2]);
+	YClipMotionTrackerVertices(&quadVertices[2], &quadVertices[3]);
+	YClipMotionTrackerVertices(&quadVertices[3], &quadVertices[0]);
 
 	/* translate into screen coords */
 	quadVertices[0].X += MotionTrackerCentreX;
@@ -545,7 +549,7 @@ extern void D3D_BlitWhiteChar(int x, int y, unsigned char c)
 	imageDesc.Height = 15;
 	imageDesc.Width = 15;
 
-	imageDesc.Scale = ONE_FIXED;
+	imageDesc.Scale = DIV_FIXED(640, ScreenDescriptorBlock.SDB_Width);//ONE_FIXED;
 	imageDesc.Translucency = 255;
 	imageDesc.Red = 255;
 	imageDesc.Green = 255;

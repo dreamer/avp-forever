@@ -77,12 +77,12 @@ struct ButtonStruct
 	uint32_t	height;
 	uint32_t	width;
 	uint32_t	positionOffset;
-	uint32_t	stringId;
+	uint32_t	stringID;
 	bool		isBlank;
 };
 std::vector<ButtonStruct> keyVector;
 
-// we store our strings seperately and index using the stringId (to avoid duplicates)
+// we store our strings seperately and index using the stringID (to avoid duplicates)
 std::vector<std::string> stringVector;
 
 static const uint32_t numVerticalKeys = 5;
@@ -95,7 +95,7 @@ static bool is_inited = false;
 bool shift = false;
 bool capsLock = false;
 
-static int buttonId = 0;
+uint32_t buttonID = 0;
 
 //static char buf[100];
 
@@ -107,7 +107,7 @@ template <class T> void Osk_AddKey(T buttonLabel, uint32_t numWidthBlocks)
 
 	stringStream << buttonLabel;
 
-	newButton.stringId = buttonId;
+	newButton.stringID = buttonID;
 	newButton.numWidthBlocks = numWidthBlocks;
 	newButton.width = (numWidthBlocks * keyWidth) + space_between_keys * (numWidthBlocks - 1);
 	newButton.height = keyHeight;
@@ -134,7 +134,7 @@ template <class T> void Osk_AddKey(T buttonLabel, uint32_t numWidthBlocks)
 		blockCount--;
 	}
 
-	buttonId++;
+	buttonID++;
 }
 
 void Osk_Init()
@@ -227,9 +227,13 @@ void Osk_Draw()
 				DrawQuad(pos_x, pos_y, keyVector.at(index).width, keyVector.at(index).height, NO_TEXTURE, D3DCOLOR_ARGB(200, 255, 255, 255), TRANSLUCENCY_NORMAL);
 
 				if (Osk_GetCurrentLocation() == index) // draw the selected item differently (highlight it)
+				{
 					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, NO_TEXTURE, D3DCOLOR_ARGB(220, 0, 128, 0), TRANSLUCENCY_OFF);
+				}
 				else
+				{
 					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, NO_TEXTURE, D3DCOLOR_ARGB(220, 38, 80, 145), TRANSLUCENCY_OFF);
+				}
 
 //				int positionX = pos_x + ((keyVector.at(index).width - 16) / 2);
 
@@ -253,16 +257,16 @@ bool Osk_IsActive()
 std::string Osk_GetKeyLabel(uint32_t buttonIndex)
 {
 	// quick test for shift and caps lock..
-	if ((shift || capsLock) && ((stringVector.at(keyVector.at(buttonIndex).stringId).length() == 1)))
+	if ((shift || capsLock) && ((stringVector.at(keyVector.at(buttonIndex).stringID).length() == 1)))
 	{
-		std::string tempString = stringVector.at(keyVector.at(buttonIndex).stringId);
+		std::string tempString = stringVector.at(keyVector.at(buttonIndex).stringID);
 
 		std::transform(tempString.begin(), tempString.end(), tempString.begin(), toupper);
 
 		return tempString;
 	}
 
-	return stringVector.at(keyVector.at(buttonIndex).stringId);
+	return stringVector.at(keyVector.at(buttonIndex).stringID);
 }
 
 void Osk_Activate()

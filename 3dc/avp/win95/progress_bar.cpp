@@ -18,7 +18,6 @@ extern "C"
 
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern unsigned char DebouncedGotAnyKey;
-extern IMAGEHEADER ImageHeaderArray[];
 extern int AAFontImageNumber;
 extern int FadingGameInAfterLoading;
 extern int NormalFrameTime;

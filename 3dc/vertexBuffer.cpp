@@ -77,6 +77,7 @@ bool VertexBuffer::Create(uint32_t size, enum FVF fvf, enum R_USAGE usage)
 	}
 
 	this->vbSizeInBytes = size * this->vbFVFsize;
+	this->vbMaxVerts = size;
 
 	return R_CreateVertexBuffer(this->vbSizeInBytes, this->vbUsage, &vertexBuffer);
 }

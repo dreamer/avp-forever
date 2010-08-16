@@ -63,9 +63,9 @@ class VertexBuffer
 
 	private:
 		r_VertexBuffer	*vertexBuffer;
-		uint32_t		vbSize;
+		uint32_t		vbMaxVerts;
 		uint32_t		ibSize;
-		uint32_t		vbSizeInBytes;//vbLength;
+		uint32_t		vbSizeInBytes;
 		enum R_USAGE	vbUsage;
 		FVF				vbFVF;
 		uint32_t		vbFVFsize;
