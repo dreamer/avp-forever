@@ -38,8 +38,7 @@ VertexBuffer *FMVvertexBuffer = 0;
 
 uint32_t NumVertices = 0;
 
-// set them to 'null' texture initially
-uint32_t currentTextureID	 = NO_TEXTURE;
+// set to 'null' texture initially
 uint32_t currentWaterTexture = NO_TEXTURE;
 
 uint32_t	NumIndicies = 0;
@@ -203,18 +202,26 @@ std::vector<renderCorona>   coronaArray;
 inline float WPos2DC(int32_t pos)
 {
 	if (mainMenu)
+	{
 		return (float(pos / (float)640) * 2) - 1;
+	}
 	else
+	{
 		return (float(pos / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
+	}
 }
 
 // convert a width pixel range value (eg 0-480) to device coordinate (eg -1.0 to 1.0)
 inline float HPos2DC(int32_t pos)
 {
 	if (mainMenu)
+	{
 		return (float(pos / (float)480) * 2) - 1;
+	}
 	else
+	{
 		return (float(pos / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
+	}
 }
 
 // AvP uses numVerts to represent the actual number of polygon vertices we're passing to the backend.
@@ -384,16 +391,6 @@ bool UnlockExecuteBufferAndPrepareForUse()
 	return true;
 }
 
-// set a new texture provided that it isn't already set
-static void ChangeTexture(const uint32_t textureID)
-{
-	if (textureID == currentTextureID)
-		return;
-
-	LastError = d3d.lpD3DDevice->SetTexture(0, Tex_GetTexture(textureID));
-	if (!FAILED(LastError)) currentTextureID = textureID;
-}
-
 bool ExecuteBuffer()
 {
 	// sort the list of render objects
@@ -430,7 +427,8 @@ bool ExecuteBuffer()
 	for (uint32_t i = 0; i < renderListCount; i++)
 	{
 		// change render states if required
-		ChangeTexture(renderList[i].sortKey >> 24);
+		R_SetTexture(0, renderList[i].sortKey >> 24);
+
 		ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((renderList[i].sortKey >> 20) & 15));
 		ChangeFilteringMode((enum FILTERING_MODE_ID)	((renderList[i].sortKey >> 16) & 15));
 
@@ -457,7 +455,8 @@ bool ExecuteBuffer()
 	for (uint32_t i = 0; i < transRenderListCount; i++)
 	{
 		// change render states if required
-		ChangeTexture(transRenderList[i].sortKey >> 24);
+		R_SetTexture(0, transRenderList[i].sortKey >> 24);
+
 		ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((transRenderList[i].sortKey >> 20) & 15));
 		ChangeFilteringMode((enum FILTERING_MODE_ID)	((transRenderList[i].sortKey >> 16) & 15));
 
@@ -506,7 +505,8 @@ bool ExecuteBuffer()
 		for (uint32_t i = 0; i < particleListCount; i++)
 		{
 			// change render states if required
-			ChangeTexture(particleList[i].sortKey >> 24);
+			R_SetTexture(0, particleList[i].sortKey >> 24);
+
 			ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((particleList[i].sortKey >> 20) & 15));
 			ChangeFilteringMode((enum FILTERING_MODE_ID)	((particleList[i].sortKey >> 16) & 15));
 
@@ -575,7 +575,8 @@ bool ExecuteBuffer()
 		for (uint32_t i = 0; i < orthoListCount; i++)
 		{
 			// change render states if required
-			ChangeTexture(orthoList[i].sortKey >> 24);
+			R_SetTexture(0, orthoList[i].sortKey >> 24);
+
 			ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((orthoList[i].sortKey >> 20) & 15));
 			ChangeFilteringMode((enum FILTERING_MODE_ID)	((orthoList[i].sortKey >> 16) & 15));
 			ChangeTextureAddressMode((enum TEXTURE_ADDRESS_MODE) ((orthoList[i].sortKey >> 14) & 3));
@@ -909,7 +910,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 	// set the texture
 	for (uint32_t i = 0; i < numTextures; i++)
 	{
-		LastError = d3d.lpD3DDevice->SetTexture(i, Tex_GetTexture(textures[i]));
+		R_SetTexture(i, textures[i]);
 	}
 
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.fmvVertexDecl);
@@ -1013,8 +1014,9 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 	float y2 = HPos2DC(topY + charHeight);
 
 #if 1
-	ChangeTexture(textureID);
-	d3d.lpD3DDevice->SetTexture(1, Tex_GetTexture(AVPMENUGFX_CLOUDY));
+
+	R_SetTexture(0, textureID);
+	R_SetTexture(1, AVPMENUGFX_CLOUDY);
 
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.cloudVertexDecl);
 	d3d.lpD3DDevice->SetVertexShader(d3d.cloudVertexShader);
@@ -1585,8 +1587,7 @@ void DrawCoronas()
 
 	uint32_t numVertsBackup = RenderPolygon.NumberOfVertices;
 
-	LastError = d3d.lpD3DDevice->SetTexture(0, Tex_GetTexture(SpecialFXImageNumber));
-	currentTextureID = SpecialFXImageNumber;
+	R_SetTexture(0, SpecialFXImageNumber);
 
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
 	d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
@@ -2116,9 +2117,6 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 	uint32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
 
 	float RecipW, RecipH;
-
-	if (!textureID)
-		textureID = currentTextureID;
 
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(textureID, texWidth, texHeight);
@@ -3325,7 +3323,9 @@ void DrawScanlinesOverlay(float level)
 	orthoVBOffset++;
 
 	if (level == 1.0f)
+	{
 		DrawNoiseOverlay(128);
+	}
 }
 
 void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
@@ -3486,7 +3486,6 @@ extern void D3D_DrawSliderBar(int x, int y, int alpha)
 			colour,
 			FILTERING_BILINEAR_ON
 		);
-
 	}
 	{
 		int topLeftU = 7;
@@ -3584,7 +3583,9 @@ extern void D3D_DrawSlider(int x, int y, int alpha)
 	uint32_t colour = alpha >> 8;
 
 	if (colour > 255)
+	{
 		colour = 255;
+	}
 
 	colour = (colour << 24) + 0xffffff;
 
@@ -3643,8 +3644,8 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 		colour = RGBA_MAKE(MUL_FIXED(c,rScale),MUL_FIXED(c,gScale),MUL_FIXED(c,bScale),255);
 /*
 		// top right?
-	  	mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
-	  	mainVertex[vb].sy = (float)yTop;
+		mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		mainVertex[vb].sy = (float)yTop;
 		mainVertex[vb].sz = 0.0f;
 //		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
@@ -3655,8 +3656,8 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 		vb++;
 
 		// bottom right?
-	  	mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
-	  	mainVertex[vb].sy = (float)yBottom;
+		mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		mainVertex[vb].sy = (float)yBottom;
 		mainVertex[vb].sz = 0.0f;
 //		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
@@ -3672,7 +3673,7 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 /*
 		//
 		mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
-	  	mainVertex[vb].sy = (float)yBottom;
+		mainVertex[vb].sy = (float)yBottom;
 		mainVertex[vb].sz = 0.0f;
 //		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
@@ -3682,8 +3683,8 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 
 		vb++;
 
-	  	mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
-	  	mainVertex[vb].sy = (float)yTop;
+		mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		mainVertex[vb].sy = (float)yTop;
 		mainVertex[vb].sz = 0.0f;
 //		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
@@ -3704,7 +3705,9 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
 {
 	int t = 255 - (brightness>>8);
 	if (t < 0)
+	{
 		t = 0;
+	}
 
 	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_NORMAL, TEXTURE_WRAP);
 
@@ -4192,7 +4195,7 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr, int x, int y, int colou
 
 	struct VertexTag quadVertices[4];
 
- 	LOCALASSERT(y<=0);
+	LOCALASSERT(y<=0);
 
 	quadVertices[2].Y = y + HUD_FONT_HEIGHT + 1;
 	quadVertices[3].Y = y + HUD_FONT_HEIGHT + 1;
@@ -4361,7 +4364,7 @@ extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, in
 			D3D_HUDQuad_Output(AAFontImageNumber, quadVertices, colour, FILTERING_BILINEAR_OFF);
 
 		}
-	   	y -= AAFontWidths[(unsigned char)c];
+		y -= AAFontWidths[(unsigned char)c];
 	}
 }
 

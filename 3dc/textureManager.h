@@ -58,6 +58,7 @@ uint32_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint3
 uint32_t Tex_CreateFromFile(const std::string &filePath);
 uint32_t Tex_CheckExists(const char* fileName);
 const Texture& Tex_GetTextureDetails(uint32_t textureID);
+std::string& Tex_GetName(uint32_t textureID);
 void Tex_GetNamesVector(std::vector<std::string> &namesArray);
 void Tex_GetDimensions(uint32_t textureID, uint32_t &width, uint32_t &height);
 bool Tex_Lock(uint32_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLock lockType = TextureLock_Normal);

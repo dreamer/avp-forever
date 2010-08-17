@@ -188,6 +188,11 @@ uint32_t Tex_CreateFromFile(const std::string &filePath)
 	return textureID;
 }
 
+std::string& Tex_GetName(uint32_t textureID)
+{
+	return textureList[textureID].name;
+}
+
 const r_Texture& Tex_GetTexture(uint32_t textureID)
 {
 	return (textureList[textureID].texture);

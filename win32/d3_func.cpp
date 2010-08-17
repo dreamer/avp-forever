@@ -302,6 +302,9 @@ bool ReleaseVolatileResources();
 bool SetRenderStateDefaults();
 void ToggleWireframe();
 
+const int MAX_TEXTURE_STAGES = 8;
+std::vector<uint32_t> setTextureArray;
+
 // byte order macros for A8R8G8B8 d3d texture
 enum
 {
@@ -455,6 +458,38 @@ void R_SetCurrentVideoMode()
 
 	// and actually change the resolution on the device
 	R_ChangeResolution(currentWidth, currentHeight);
+}
+
+bool R_SetTexture(uint32_t stage, uint32_t textureID)
+{
+	// check that the stage value is within range
+	if (stage > MAX_TEXTURE_STAGES-1)
+	{
+		Con_PrintError("Invalid texture stage: " + IntToString(stage) + " set for texture: " + Tex_GetName(textureID));
+		return false;
+	}
+
+	// check if the texture is already set
+	if (setTextureArray[stage] == textureID)
+	{
+		// already set, just return
+		return true;
+	}
+
+	// we need to set it
+	LastError = d3d.lpD3DDevice->SetTexture(stage, Tex_GetTexture(textureID));
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Unable to set texture: " + Tex_GetName(textureID));
+		return false;
+	}
+	else
+	{
+		// ok, update set texture array
+		setTextureArray[stage] = textureID;
+	}
+
+	return true;
 }
 
 bool R_DrawPrimitive(uint32_t numPrimitives)
@@ -2098,13 +2133,22 @@ bool InitialiseDirect3D()
 
 	NO_TEXTURE = Tex_AddTexture("Blank", blankTexture, 1, 1);
 
-	Con_PrintMessage("Initialised Direct3D9 succesfully");
+	setTextureArray.resize(MAX_TEXTURE_STAGES);
+
+	// set all texture stages to sample the blank texture
+	for (uint32_t i = 0; i < MAX_TEXTURE_STAGES; i++)
+	{
+		setTextureArray[i] = NO_TEXTURE;
+		d3d.lpD3DDevice->SetTexture(i, Tex_GetTexture(NO_TEXTURE));
+	}
 
 	Con_Init();
 	Net_Initialise();
 	Font_Init();
 
 	RenderListInit();
+
+	Con_PrintMessage("Initialised Direct3D9 succesfully");
 
 	return true;
 }

@@ -25,6 +25,7 @@ bool R_SetVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t FVFsize);
 bool R_DrawPrimitive(uint32_t numPrimitives);
 
 // texture functions
+bool R_SetTexture(uint32_t stage, uint32_t textureID);
 bool R_LockTexture(r_Texture texture, uint8_t **data, uint32_t *pitch, enum TextureLock lockType);
 bool R_UnlockTexture(r_Texture texture);
 bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum TextureUsage usageType, struct Texture &texture);
