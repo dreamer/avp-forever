@@ -32,6 +32,7 @@
 #include "vertexBuffer.h"
 #include "networking.h"
 #include "font2.h"
+#include <XInput.h> // XInput API
 
 extern "C"
 {
@@ -361,6 +362,85 @@ bool ReleaseVolatileResources()
 	SAFE_RELEASE(d3d.lpD3DOrthoIndexBuffer);
 	SAFE_RELEASE(d3d.lpD3DParticleVertexBuffer);
 	SAFE_RELEASE(d3d.lpD3DParticleIndexBuffer);
+
+	return true;
+}
+
+bool R_BeginScene()
+{
+	// check for lost device
+	LastError = d3d.lpD3DDevice->TestCooperativeLevel();
+	if (FAILED(LastError))
+	{
+		// release vertex + index buffers, and dynamic textures
+		ReleaseVolatileResources();
+
+		// disable XInput
+		XInputEnable(false);
+
+		while (1)
+		{
+			CheckForWindowsMessages();
+
+			if (D3DERR_DEVICENOTRESET == LastError)
+			{
+				OutputDebugString("Releasing resources for a device reset..\n");
+
+				if (FAILED(d3d.lpD3DDevice->Reset(&d3d.d3dpp)))
+				{
+					OutputDebugString("Couldn't reset device\n");
+				}
+				else
+				{
+					OutputDebugString("We have reset the device. recreating resources..\n");
+					CreateVolatileResources();
+
+					SetTransforms();
+
+					// re-enable XInput
+					XInputEnable(true);
+					break;
+				}
+			}
+			else if (D3DERR_DEVICELOST == LastError)
+			{
+				OutputDebugString("D3D device lost\n");
+			}
+			else if (D3DERR_DRIVERINTERNALERROR == LastError)
+			{
+				// handle this a lot better (exit the game etc)
+				Con_PrintError("need to close avp as a display adapter error occured");
+				return false;
+			}
+			Sleep(50);
+		}
+	}
+
+	LastError = d3d.lpD3DDevice->BeginScene();
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	LastError = d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+bool R_EndScene()
+{
+	 LastError = d3d.lpD3DDevice->EndScene();
+	 if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
 
 	return true;
 }

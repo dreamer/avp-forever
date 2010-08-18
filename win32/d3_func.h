@@ -17,6 +17,8 @@ typedef IDirect3DTexture9	   *r_Texture; // keep this as pointer type?
 #include "textureManager.h"
 #include <string>
 
+bool R_BeginScene();
+bool R_EndScene();
 bool R_CreateVertexBuffer(uint32_t length, uint32_t usage, r_VertexBuffer **vertexBuffer);
 void R_ReleaseVertexBuffer(r_VertexBuffer *vertexBuffer);
 bool R_LockVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage);

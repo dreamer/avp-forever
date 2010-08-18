@@ -15,8 +15,6 @@
 #include <vector>
 #include <algorithm>
 
-#include <XInput.h> // XInput API
-
 #include "logString.h"
 #include "RenderList.h"
 #include "vertexBuffer.h"
@@ -2003,98 +2001,6 @@ void CheckVertexBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_
 	NumVertices += numVerts;
 }
 
-bool BeginD3DScene()
-{
-	if (d3d.lpD3DDevice == NULL)
-		return false;
-
-	// check for lost device
-	LastError = d3d.lpD3DDevice->TestCooperativeLevel();
-	if (FAILED(LastError))
-	{
-		// release vertex + index buffers, and dynamic textures
-		ReleaseVolatileResources();
-
-		// disable XInput
-		XInputEnable(false);
-
-		while (1)
-		{
-			CheckForWindowsMessages();
-
-			if (D3DERR_DEVICENOTRESET == LastError)
-			{
-				OutputDebugString("Releasing resources for a device reset..\n");
-
-				if (FAILED(d3d.lpD3DDevice->Reset(&d3d.d3dpp)))
-				{
-					OutputDebugString("Couldn't reset device\n");
-				}
-				else
-				{
-					OutputDebugString("We have reset the device. recreating resources..\n");
-					CreateVolatileResources();
-
-					SetTransforms();
-
-					// re-enable XInput
-					XInputEnable(true);
-					break;
-				}
-			}
-			else if (D3DERR_DEVICELOST == LastError)
-			{
-				OutputDebugString("D3D device lost\n");
-			}
-			else if (D3DERR_DRIVERINTERNALERROR == LastError)
-			{
-				// handle this a lot better (exit the game etc)
-				Con_PrintError("need to close avp as a display adapter error occured");
-				return false;
-			}
-			Sleep(50);
-		}
-	}
-
-	LastError = d3d.lpD3DDevice->BeginScene();
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	LastError = d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	return true;
-}
-
-bool EndD3DScene()
-{
-    LastError = d3d.lpD3DDevice->EndScene();
-
-	if (ShowDebuggingText.PolyCount)
-	{
-		ReleasePrintDebuggingText("NumberOfLandscapePolygons: %d\n",NumberOfLandscapePolygons);
-		ReleasePrintDebuggingText("NumberOfRenderedTriangles: %d\n",NumberOfRenderedTriangles);
-	}
-//	textprint ("NumberOfRenderedTrianglesPerSecond: %d\n",DIV_FIXED(NumberOfRenderedTriangles,NormalFrameTime));
-	NumberOfLandscapePolygons = 0;
-	NumberOfRenderedTriangles = 0;
-
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	return true;
-}
-
 #if 0 // bjd - commenting out
 void SetFogDistance(int fogDistance)
 {
@@ -3425,7 +3331,7 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 
 void ThisFramesRenderingHasBegun(void)
 {
-	if (BeginD3DScene()) // calls a function to perform d3d_device->Begin();
+	if (R_BeginScene()) // calls a function to perform d3d_device->Begin();
 	{
 		LockExecuteBuffer(); // lock vertex buffer
 	}
@@ -3439,7 +3345,7 @@ void ThisFramesRenderingHasFinished(void)
 
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
-	EndD3DScene();
+	R_EndScene();
 
  	/* KJL 11:46:56 01/16/97 - kill off any lights which are fated to be removed */
 	LightBlockDeallocation();
