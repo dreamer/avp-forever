@@ -43,30 +43,6 @@ uint32_t	NumIndicies = 0;
 uint32_t	vb = 0;
 static uint32_t NumberOfRenderedTriangles = 0;
 
-// vertex declarations
-D3DVERTEXELEMENT9 declMain[] = {{0, 0,  D3DDECLTYPE_FLOAT3,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
-							{0, 12, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		0},
-							{0, 16, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		1},
-                            {0, 20, D3DDECLTYPE_FLOAT2,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
-                            D3DDECL_END()};
-
-D3DVERTEXELEMENT9 declOrtho[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
-								 {0, 12, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		0},
-								 {0, 16, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
-                            D3DDECL_END()};
-
-D3DVERTEXELEMENT9 declFMV[] = {{0, 0,  D3DDECLTYPE_FLOAT3,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
-							   {0, 12, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
-							   {0, 20, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	1},
-							   {0, 28, D3DDECLTYPE_FLOAT2,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	2},
-                            D3DDECL_END()};
-
-D3DVERTEXELEMENT9 declTallFontText[] = {{0, 0, D3DDECLTYPE_FLOAT3,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION,	0},
-								{0, 12, D3DDECLTYPE_D3DCOLOR,	D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,		0},	
-							    {0, 16, D3DDECLTYPE_FLOAT2,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	0},
-							    {0, 24, D3DDECLTYPE_FLOAT2,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	1},
-                            D3DDECL_END()};
-
 LPD3DXCONSTANTTABLE	vertexConstantTable = NULL;
 LPD3DXCONSTANTTABLE	orthoConstantTable = NULL;
 LPD3DXCONSTANTTABLE	fmvConstantTable = NULL;
@@ -899,6 +875,10 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 	}
 #endif
 	// set orthographic projection
+	d3d.lpD3DDevice->SetVertexDeclaration(d3d.fmvVertexDecl);
+	d3d.lpD3DDevice->SetVertexShader(d3d.fmvVertexShader);
+	d3d.lpD3DDevice->SetPixelShader(d3d.fmvPixelShader);
+
 	fmvConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
 
 	ChangeTextureAddressMode(TEXTURE_CLAMP);
@@ -910,10 +890,6 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 	{
 		R_SetTexture(i, textures[i]);
 	}
-
-	d3d.lpD3DDevice->SetVertexDeclaration(d3d.fmvVertexDecl);
-	d3d.lpD3DDevice->SetVertexShader(d3d.fmvVertexShader);
-	d3d.lpD3DDevice->SetPixelShader(d3d.fmvPixelShader);
 
 //	FMVvertexBuffer->Draw();
 
@@ -1665,6 +1641,9 @@ void DrawCoronas()
 		ORTHOVERTEX ortho[4];
 		uint32_t size = 100;
 
+		uint32_t sizeX = (ScreenDescriptorBlock.SDB_Width<<13)/Global_VDB_Ptr->VDB_ProjX;
+		uint32_t sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13,87381)/Global_VDB_Ptr->VDB_ProjY;
+
 		// bottom left
 		ortho[0].x = WPos2DC(tempVec.x - size);
 		ortho[0].y = HPos2DC(tempVec.y + size);
@@ -1749,7 +1728,6 @@ void DrawParticles()
 }
 
 #define FMV_ON 0
-#define FMV_EVERYWHERE 0
 #define FMV_SIZE 128
 
 extern int SmokyImageNumber;
@@ -2047,10 +2025,6 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
 		vb++;
 	}
-
-	#if FMV_EVERYWHERE
-	TextureHandle = FMVTextureHandle[0];
-	#endif
 
 	D3D_OutputTriangles();
 }
@@ -3266,10 +3240,6 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 
 		vb++;
 	}
-
-	#if FMV_EVERYWHERE
-	TextureHandle = FMVTextureHandle[0];
-	#endif
 
 	D3D_OutputTriangles();
 }

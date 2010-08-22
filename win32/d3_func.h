@@ -34,11 +34,20 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum Texture
 bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usageType, Texture &texture);
 bool R_CreateTextureFromFile(const std::string &fileName, Texture &texture);
 void R_ReleaseTexture(r_Texture &texture);
+r_Texture CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poolType);
+r_Texture CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight);
+r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
 void R_NextVideoMode();
 void R_PreviousVideoMode();
 std::string& R_GetVideoModeDescription();
 void R_SetCurrentVideoMode();
+
+// vertex declarations
+extern D3DVERTEXELEMENT9 declMain[];
+extern D3DVERTEXELEMENT9 declOrtho[];
+extern D3DVERTEXELEMENT9 declFMV[];
+extern D3DVERTEXELEMENT9 declTallFontText[];
 
 /*
   Direct3D globals
@@ -176,10 +185,6 @@ typedef struct D3DInfo
 } D3DINFO;
 
 extern D3DINFO d3d;
-
-r_Texture CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poolType);
-r_Texture CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight);
-r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
 bool InitialiseDirect3D();
 bool R_ChangeResolution		(uint32_t width, uint32_t height);
