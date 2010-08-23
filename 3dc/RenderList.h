@@ -58,9 +58,8 @@ struct RenderItem2
 class RenderList
 {
 	private:
-		size_t	listCapacity;
+		size_t	capacity;
 		size_t	listIndex; // used as list size
-
 		uint32_t totalVerts;
 
 	public:
@@ -70,7 +69,7 @@ class RenderList
 
 	void Reset();
 	void RenderList::Init(size_t size);
-	size_t RenderList::GetSize();
+	size_t RenderList::GetCapacity();
 	void RenderList::Sort();
 	void AddItem(uint32_t numVerts, uint32_t textureID, uint32_t shaderID);
 };

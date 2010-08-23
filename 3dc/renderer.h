@@ -27,6 +27,12 @@
 
 // temp
 
+enum R_USAGE
+{
+	USAGE_DYNAMIC,
+	USAGE_STATIC
+};
+
 #ifdef _WIN32
 	#define USE_D3D9
 #endif
@@ -47,25 +53,7 @@
 	#include "glide_func.h" // hehe
 #endif
 
-enum R_USAGE
-{
-	USAGE_DYNAMIC,
-	USAGE_STATIC
-};
-
 uint32_t R_GetNumVideoModes();
 char* R_GetDeviceName();
-
-/*
-//test
-class Renderer
-{
-	public:
-		virtual bool Initialise() = 0;
-		virtual void BeginFrame() = 0;
-		virtual void EndFrame() = 0;
-		virtual bool CreateVertexBuffer(uint32_t length, uint32_t usage, r_VertexBuffer **vertexBuffer) = 0;
-};
-*/
 
 #endif // include guard

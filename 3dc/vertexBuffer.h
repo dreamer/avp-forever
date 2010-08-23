@@ -11,7 +11,7 @@
 //    this list of conditions and the following disclaimer in the documentation
 //    and/or other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+// THIS SOFTWARE IS PROVIDED ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
 // INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
 // FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 // DEVELOPERS AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
@@ -41,6 +41,8 @@ class VertexBuffer
 		// constructor
 		VertexBuffer():
 			vertexBuffer(0),
+			vbMaxVerts(0),
+			ibSize(0),
 			vbSizeInBytes(0),
 			vbUsage(USAGE_DYNAMIC),
 			vbFVF(FVF_ORTHO),
@@ -56,10 +58,13 @@ class VertexBuffer
 			R_ReleaseVertexBuffer(vertexBuffer);
 		}
 
-	bool VertexBuffer::Create(uint32_t size, enum FVF fvf, enum R_USAGE usage);
-	bool VertexBuffer::Lock(void **data);
-	bool VertexBuffer::Unlock();
-	bool VertexBuffer::Draw();
+		// public functions
+		bool VertexBuffer::Create(uint32_t size, enum FVF fvf, enum R_USAGE usage);
+		bool VertexBuffer::Release();
+		bool VertexBuffer::Lock(void **data);
+		bool VertexBuffer::Unlock();
+		bool VertexBuffer::Draw();
+		uint32_t VertexBuffer::GetCapacity();
 
 	private:
 		r_VertexBuffer	*vertexBuffer;
@@ -72,8 +77,6 @@ class VertexBuffer
 
 		bool	vbIsLocked;
 		bool	ibIsLocked;
-
-		HRESULT	LastError;
 };
 
 #endif

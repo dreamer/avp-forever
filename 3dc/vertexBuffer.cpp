@@ -56,6 +56,17 @@ bool VertexBuffer::Unlock()
 	return R_UnlockVertexBuffer(this->vertexBuffer);
 }
 
+bool VertexBuffer::Release()
+{
+	return R_ReleaseVertexBuffer(this->vertexBuffer);
+}
+
+// return number of verts the VB can hold
+uint32_t VertexBuffer::GetCapacity()
+{
+	return this->vbMaxVerts;
+}
+
 bool VertexBuffer::Create(uint32_t size, enum FVF fvf, enum R_USAGE usage)
 {
 	this->vbFVF = fvf;

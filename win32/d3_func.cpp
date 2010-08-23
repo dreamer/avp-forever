@@ -394,6 +394,8 @@ bool ReleaseVolatileResources()
 	SAFE_RELEASE(d3d.lpD3DParticleVertexBuffer);
 	SAFE_RELEASE(d3d.lpD3DParticleIndexBuffer);
 
+	d3d.testVB->Release();
+
 	return true;
 }
 
@@ -506,12 +508,14 @@ bool R_CreateVertexBuffer(uint32_t length, uint32_t usage, r_VertexBuffer **vert
 	return true;
 }
 
-void R_ReleaseVertexBuffer(r_VertexBuffer *vertexBuffer)
+bool R_ReleaseVertexBuffer(r_VertexBuffer *vertexBuffer)
 {
 	if (vertexBuffer)
 	{
 		vertexBuffer->Release();
 	}
+
+	return true;
 }
 
 uint32_t R_GetNumVideoModes()
@@ -723,6 +727,10 @@ bool CreateVolatileResources()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
+
+	// test vertex buffer
+	d3d.testVB = new VertexBuffer;
+	d3d.testVB->Create(10, d3d.testVB->FVF_ORTHO, USAGE_DYNAMIC);
 
 	SetRenderStateDefaults();
 

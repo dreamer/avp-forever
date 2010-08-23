@@ -28,16 +28,13 @@
 
 RenderList::RenderList(size_t size)
 {
-	listCapacity = 0;
+	capacity = size;
 	listIndex = 0;
-
 	totalVerts = 0;
 
 	// treat the vector as an array so resize it to desired size
 	Items.reserve(size);
 	Items.resize(size);
-
-	listCapacity = size;
 }
 
 RenderList::~RenderList()
@@ -73,9 +70,9 @@ void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, uint32_t shaderI
 	totalVerts += numVerts;
 }
 
-size_t RenderList::GetSize()
+size_t RenderList::GetCapacity()
 {
-	return listIndex;
+	return capacity;
 }
 /*
 void RenderList::Init(size_t size)

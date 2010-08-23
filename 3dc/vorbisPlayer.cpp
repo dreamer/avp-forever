@@ -115,13 +115,17 @@ VorbisPlayback::~VorbisPlayback()
 	Stop();
 
 	if (audioStream)
+	{
 		delete audioStream;
+	}
 
 	// clear out the OggVorbis_File struct
 	ov_clear(&mOggFile);
 
 	if (mAudioData)
+	{
 		delete[] mAudioData;
+	}
 }
 
 uint32_t VorbisPlayback::GetVorbisData(uint32_t sizeToRead)
@@ -219,11 +223,15 @@ void LoadVorbisTrack(size_t track)
 
 	// TODO? rather than return, pick a random track or just play last?
 	if (track > TrackList.size())
+	{
 		return;
+	}
 
 	// if user enters 1, decrement to 0 to align to array (enters 2, decrement to 1 etc)
 	if (track != 0)
+	{
 		track--;
+	}
 
 	inGameMusic = new VorbisPlayback;
 	if (!inGameMusic->Open(TrackList[track]))
@@ -271,17 +279,25 @@ size_t CheckNumberOfVorbisTracks()
 bool IsVorbisPlaying()
 {
 	if (inGameMusic)
+	{
 		return inGameMusic->mIsPlaying;
+	}
 	else
+	{
 		return false;
+	}
 }
 
 int SetStreamingMusicVolume(int volume)
 {
 	if (inGameMusic) // hack to stop this call before the audio stream is initialised
+	{
 		return inGameMusic->audioStream->SetVolume(volume);
+	}
 	else
+	{
 		return 0;
+	}
 }
 
 void Vorbis_CloseSystem()

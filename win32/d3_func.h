@@ -20,7 +20,7 @@ typedef IDirect3DTexture9	   *r_Texture; // keep this as pointer type?
 bool R_BeginScene();
 bool R_EndScene();
 bool R_CreateVertexBuffer(uint32_t length, uint32_t usage, r_VertexBuffer **vertexBuffer);
-void R_ReleaseVertexBuffer(r_VertexBuffer *vertexBuffer);
+bool R_ReleaseVertexBuffer(r_VertexBuffer *vertexBuffer);
 bool R_LockVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage);
 bool R_UnlockVertexBuffer(r_VertexBuffer *vertexBuffer);
 bool R_SetVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t FVFsize);
@@ -148,6 +148,8 @@ typedef struct D3DInfo
 	LPDIRECT3DDEVICE9		lpD3DDevice;
 	D3DVIEWPORT9			D3DViewport;
 	D3DPRESENT_PARAMETERS	d3dpp;
+
+	class VertexBuffer		*testVB;
 
 	LPDIRECT3DVERTEXBUFFER9 lpD3DVertexBuffer;
 	LPDIRECT3DINDEXBUFFER9	lpD3DIndexBuffer;

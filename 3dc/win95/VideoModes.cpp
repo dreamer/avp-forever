@@ -40,7 +40,7 @@ char *GetVideoModeDescription3()
 }
 
 // called when you select "use selected settings" when selecting a video mode
-void SetAndSaveDeviceAndVideoModePreferences(void)
+void SetAndSaveDeviceAndVideoModePreferences()
 {
 	R_SetCurrentVideoMode();
 }

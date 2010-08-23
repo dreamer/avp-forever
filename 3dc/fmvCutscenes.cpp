@@ -408,63 +408,6 @@ void ScanImagesForFMVs()
 			NumberOfFMVTextures++;
 		}
 	}
-#if 0
-	#if MaxImageGroups>1
-	for (j=0; j<MaxImageGroups; j++)
-	{
-		if (NumImagesArray[j])
-		{
-			ihPtr = &ImageHeaderArray[j*MaxImages];
-			for (i = 0; i<NumImagesArray[j]; i++, ihPtr++)
-			{
-	#else
-	{
-		if (NumImages)
-		{
-			ihPtr = &ImageHeaderArray[0];
-			for (i = 0; i < NumImages; i++, ihPtr++)
-			{
-	#endif
-				char *strPtr;
-				if (strPtr = strstr(ihPtr->ImageName,"FMVs"))
-				{
-					char filename[30];
-					{
-						char *filenamePtr = filename;
-						do
-						{
-							*filenamePtr++ = *strPtr;
-						}
-						while (*strPtr++!='.');
-
-						*filenamePtr++='o';
-						*filenamePtr++='g';
-						*filenamePtr++='v';
-						*filenamePtr=0;
-					}
-
-					// do a check here to see if it's a theora file rather than just any old file with the right name?
-					FILE *file = avp_fopen(filename, "rb");
-					if (file)
-					{
-						fclose(file);
-						FMVTexture[NumberOfFMVTextures].IsTriggeredPlotFMV = 0;
-					}
-					else
-					{
-						FMVTexture[NumberOfFMVTextures].IsTriggeredPlotFMV = 1;
-					}
-
-					FMVTexture[NumberOfFMVTextures].ImagePtr = ihPtr;
-					FMVTexture[NumberOfFMVTextures].fmvHandle = -1; // just to be sure
-					FMVTexture[NumberOfFMVTextures].StaticImageDrawn = 0;
-					SetupFMVTexture(&FMVTexture[NumberOfFMVTextures]);
-					NumberOfFMVTextures++;
-				}
-			}
-		}
-	}
-#endif
 }
 
 // called when player quits level and returns to main menu
@@ -492,7 +435,7 @@ void ReleaseAllFMVTextures()
 			delete []FMVTexture[i].RGBBuffer;
 			FMVTexture[i].RGBBuffer = NULL;
 		}
-//		SAFE_RELEASE(FMVTexture[i].ImagePtr->Direct3DTexture);
+
 		Tex_Release(FMVTexture[i].textureID);
 	}
 	NumberOfFMVTextures = 0;

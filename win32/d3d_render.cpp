@@ -66,14 +66,15 @@ bool CreateVolatileResources();
 bool ReleaseVolatileResources();
 void ColourFillBackBuffer(int FillColour);
 
-extern "C" {
-extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern AVPIndexedFont IntroFont_Light;
-extern VIEWDESCRIPTORBLOCK* Global_VDB_Ptr;
-extern int CloakingPhase;
-#include "particle.h"
-#include "kshape.h"
-int LightIntensityAtPoint(VECTORCH *pointPtr);
+extern "C" 
+{
+	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+	extern AVPIndexedFont IntroFont_Light;
+	extern VIEWDESCRIPTORBLOCK* Global_VDB_Ptr;
+	extern int CloakingPhase;
+	#include "particle.h"
+	#include "kshape.h"
+	int LightIntensityAtPoint(VECTORCH *pointPtr);
 }
 
 const uint32_t MAX_VERTEXES = 4096;
@@ -112,6 +113,8 @@ uint32_t orthoListCount = 0;
 
 ORTHOVERTEX *orthoVerts = NULL;
 WORD *orthoIndex = NULL;
+
+ORTHOVERTEX *testOrtho = NULL;
 
 static uint32_t orthoVBOffset = 0;
 static uint32_t orthoIBOffset = 0;
@@ -291,6 +294,9 @@ bool LockExecuteBuffer()
 		return false;
 	}
 
+	// test vertex buffer
+	d3d.testVB->Lock((void**)&testOrtho);
+
 	// reset counters and indexes
 	NumVertices = 0;
 	NumIndicies = 0;
@@ -361,6 +367,9 @@ bool UnlockExecuteBufferAndPrepareForUse()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
+
+	// test vertex buffer
+	d3d.testVB->Unlock();
 
 	return true;
 }
