@@ -37,6 +37,7 @@
 extern "C"
 {
 	extern HWND hWndMain;
+}
 
 //test
 /*
