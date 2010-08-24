@@ -169,13 +169,13 @@ void Start_Progress_Bar()
 			// user is using demo files, therefor no progress bar graphics? draw demo style..
 
 			// background image
-			DrawQuad(0, 0, dbWidth, dbHeight, dbTextureID, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
+			DrawQuad(0, 0, dbWidth, dbHeight, dbTextureID, RCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
 			// white outline
-			DrawQuad(105, 413, 429, 46, NO_TEXTURE, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
+			DrawQuad(105, 413, 429, 46, NO_TEXTURE, RCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
 			// blue background
-			DrawQuad(106, 414, 427, 44, NO_TEXTURE, D3DCOLOR_XRGB(0, 0, 248), TRANSLUCENCY_OFF);
+			DrawQuad(106, 414, 427, 44, NO_TEXTURE, RCOLOR_XRGB(0, 0, 248), TRANSLUCENCY_OFF);
 		}
 
 		ThisFramesRenderingHasFinished();
@@ -207,16 +207,16 @@ void Set_Progress_Bar_Position(int pos)
 		if (!LoadingBarEmpty) // if we're using demo assets, draw the demo style progress bar
 		{
 			// background image
-			DrawQuad(0, 0, dbWidth, dbHeight, dbTextureID, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
+			DrawQuad(0, 0, dbWidth, dbHeight, dbTextureID, RCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
 			// white outline
-			DrawQuad(105, 413, 429, 46, NO_TEXTURE, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
+			DrawQuad(105, 413, 429, 46, NO_TEXTURE, RCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
 			// blue background
-			DrawQuad(106, 414, 427, 44, NO_TEXTURE, D3DCOLOR_XRGB(0, 0, 248), TRANSLUCENCY_OFF);
+			DrawQuad(106, 414, 427, 44, NO_TEXTURE, RCOLOR_XRGB(0, 0, 248), TRANSLUCENCY_OFF);
 
 			// red progress bar
-			DrawQuad(106, 414, MUL_FIXED(427, NewPosition), 44, NO_TEXTURE, D3DCOLOR_XRGB(248, 0, 0), TRANSLUCENCY_OFF);
+			DrawQuad(106, 414, MUL_FIXED(427, NewPosition), 44, NO_TEXTURE, RCOLOR_XRGB(248, 0, 0), TRANSLUCENCY_OFF);
 		}
 		else		
 		{
@@ -295,13 +295,13 @@ void Game_Has_Loaded()
 			else
 			{
 				// background image
-				DrawQuad(0, 0, dbWidth, dbHeight, dbTextureID, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
+				DrawQuad(0, 0, dbWidth, dbHeight, dbTextureID, RCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
 				// white outline
-				DrawQuad(105, 413, 429, 46, NO_TEXTURE, D3DCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
+				DrawQuad(105, 413, 429, 46, NO_TEXTURE, RCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
 				// red background (no more blue as bar is now full with red)
-				DrawQuad(106, 414, 427, 44, NO_TEXTURE, D3DCOLOR_XRGB(248, 0, 0), TRANSLUCENCY_OFF);
+				DrawQuad(106, 414, 427, 44, NO_TEXTURE, RCOLOR_XRGB(248, 0, 0), TRANSLUCENCY_OFF);
 			}
 
 			f -= NormalFrameTime;

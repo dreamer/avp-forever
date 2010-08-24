@@ -1132,6 +1132,19 @@ r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	return destTexture;
 }
 
+bool CreateVertexDeclaration(const D3DVERTEXELEMENT9* pVertexElements, LPDIRECT3DVERTEXDECLARATION9 *vertexDeclaration)
+{
+	LastError = d3d.lpD3DDevice->CreateVertexDeclaration(pVertexElements, vertexDeclaration);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Could not create vertex declaration");
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
 bool CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 *vertexShader, LPD3DXCONSTANTTABLE *constantTable)
 {
 	LPD3DXBUFFER pErrors = NULL;
@@ -2216,15 +2229,13 @@ bool InitialiseDirect3D()
 	Con_AddCommand("r_toggleWireframe", ToggleWireframe);
 	Con_AddCommand("r_setfov", SetFov);
 
-	d3d.lpD3DDevice->CreateVertexDeclaration(declMain, &d3d.vertexDecl);
-	d3d.lpD3DDevice->CreateVertexDeclaration(declOrtho, &d3d.orthoVertexDecl);
-	d3d.lpD3DDevice->CreateVertexDeclaration(declFMV, &d3d.fmvVertexDecl);
-	LastError = d3d.lpD3DDevice->CreateVertexDeclaration(declTallFontText, &d3d.cloudVertexDecl);
-	if (FAILED(LastError))
-	{
-		OutputDebugString("CreateVertexDeclaration failed\n");
-	}
+	// create vertex declarations
+	CreateVertexDeclaration(declMain, &d3d.vertexDecl);
+	CreateVertexDeclaration(declOrtho, &d3d.orthoVertexDecl);
+	CreateVertexDeclaration(declFMV, &d3d.fmvVertexDecl);
+	CreateVertexDeclaration(declTallFontText, &d3d.cloudVertexDecl);
 
+	// create vertex shaders
 	if (!CreateVertexShader("vertex.vsh", &d3d.vertexShader, &vertexConstantTable))
 	{
 		return false;
@@ -2233,6 +2244,7 @@ bool InitialiseDirect3D()
 	CreateVertexShader("fmvVertex.vsh", &d3d.fmvVertexShader, &fmvConstantTable);
 	CreateVertexShader("tallFontTextVertex.vsh", &d3d.cloudVertexShader, &cloudConstantTable);
 
+	// create pixel shaders
 	CreatePixelShader("pixel.psh", &d3d.pixelShader);
 	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
 	CreatePixelShader("tallFontTextPixel.psh", &d3d.cloudPixelShader);
@@ -2240,17 +2252,30 @@ bool InitialiseDirect3D()
 	r_Texture blankTexture;
 
 	// create a 1x1 resolution texture to set to shader for sampling when we don't want to texture an object (eg what was NULL texture in fixed function pipeline)
-	d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &blankTexture, NULL);
+	LastError = d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &blankTexture, NULL);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Could not create null texture for shader sampling");
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
 
 	D3DLOCKED_RECT lock;
-	blankTexture->LockRect(0, &lock, NULL, 0);
+	LastError = blankTexture->LockRect(0, &lock, NULL, 0);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Could not lock null texture for shader sampling");
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+	else
+	{
+		// set pixel to white
+		memset(lock.pBits, 255, lock.Pitch);
 
-	// set pixel to white
-	memset(lock.pBits, 255, lock.Pitch);
+		blankTexture->UnlockRect(0);
 
-	blankTexture->UnlockRect(0);
-
-	NO_TEXTURE = Tex_AddTexture("Blank", blankTexture, 1, 1);
+		// should we just add it even if it fails?
+		NO_TEXTURE = Tex_AddTexture("Blank", blankTexture, 1, 1);
+	}
 
 	setTextureArray.resize(MAX_TEXTURE_STAGES);
 

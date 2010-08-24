@@ -703,7 +703,7 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWid
 	float x2 = WPos2DC(topX + frameWidth);
 	float y2 = HPos2DC(topY + frameHeight);
 
-	D3DCOLOR colour = D3DCOLOR_ARGB(255, 255, 255, 255);
+	RCOLOR colour = RCOLOR_ARGB(255, 255, 255, 255);
 
 	ORTHOVERTEX fmvVerts[4];
 
@@ -935,7 +935,7 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t texture
 	float RecipW = (1.0f / realWidth);
 	float RecipH = (1.0f / realHeight);
 
-	D3DCOLOR colour = D3DCOLOR_XRGB(255, 255, 255);
+	RCOLOR colour = RCOLOR_XRGB(255, 255, 255);
 
 	// bottom left
 	orthoVerts[orthoVBOffset].x = x1;
@@ -980,7 +980,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 	if (alpha > 255)
 		alpha = 255;
 
-	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
+	RCOLOR colour = RCOLOR_ARGB(alpha, 255, 255, 255);
 
 	uint32_t realWidth = 512;
 	uint32_t realHeight = 512;
@@ -1168,7 +1168,7 @@ void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha)
 	if (alpha > 255)
 		alpha = 255;
 
-	D3DCOLOR colour = D3DCOLOR_ARGB(alpha,0,0,0);
+	RCOLOR colour = RCOLOR_ARGB(alpha,0,0,0);
 
 	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING, TEXTURE_WRAP);
 
@@ -1372,7 +1372,7 @@ void DrawAlphaMenuQuad(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_
 	if (alpha > 255)
 		alpha = 255;
 
-	DrawQuad(topX, topY, textureWidth, textureHeight, textureID, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
+	DrawQuad(topX, topY, textureWidth, textureHeight, textureID, RCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
 }
 
 void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint32_t alpha)
@@ -1393,21 +1393,21 @@ void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint3
 	// do the text alignment justification
 	topLeftX -= textureWidth;
 
-	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_LEFT, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
+	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_LEFT, RCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
 
 	// now do the middle section
 	topLeftX += textureWidth;
 
 	Tex_GetDimensions(AVPMENUGFX_GLOWY_MIDDLE, textureWidth, textureHeight);
 
-	DrawQuad(topLeftX, topLeftY, textureWidth * size, textureHeight, AVPMENUGFX_GLOWY_MIDDLE, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
+	DrawQuad(topLeftX, topLeftY, textureWidth * size, textureHeight, AVPMENUGFX_GLOWY_MIDDLE, RCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
 
 	// now do the right section
 	topLeftX += textureWidth * size;
 
 	Tex_GetDimensions(AVPMENUGFX_GLOWY_RIGHT, textureWidth, textureHeight);
 
-	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_RIGHT, D3DCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
+	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_RIGHT, RCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
 }
 
 void DrawSmallMenuCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t red, uint32_t green, uint32_t blue, uint32_t alpha)
@@ -1424,8 +1424,7 @@ void DrawSmallMenuCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_
 	if (green > 255) green = 255;
 	if (blue > 255) blue = 255;
 
-	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, 255, 255, 255);
-//	D3DCOLOR colour = D3DCOLOR_ARGB(alpha, red, green, blue);
+	RCOLOR colour = RCOLOR_ARGB(alpha, 255, 255, 255);
 
 	uint32_t font_height = 15;
 	uint32_t font_width = 15;
@@ -1577,7 +1576,7 @@ void DrawCoronas()
 
 	DisableZBufferWrites();
 
-	D3DCOLOR colour;
+	RCOLOR colour;
 	float RecipW, RecipH;
 
 	uint32_t texWidth, texHeight;
@@ -2064,7 +2063,7 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 			mainVertex[vb].color = RGBLIGHT_MAKE(vertices->R, vertices->G, vertices->B);
 		}
 
-		mainVertex[vb].specular = (D3DCOLOR)1.0f;
+		mainVertex[vb].specular = (RCOLOR)1.0f;
 		mainVertex[vb].tu = 0.0f;
 		mainVertex[vb].tv = 0.0f;
 		vb++;
@@ -2086,7 +2085,7 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
 		mainVertex[vb].sz = (float)vertices->Z;
 
 		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R, vertices->G, vertices->B, vertices->A);
-		mainVertex[vb].specular = (D3DCOLOR)1.0f;
+		mainVertex[vb].specular = (RCOLOR)1.0f;
 		mainVertex[vb].tu = 0.0f;
 		mainVertex[vb].tv = 0.0f;
 		vb++;
@@ -2353,8 +2352,8 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 //	AVPTEXTURE *textureHandle = NULL;
 
 	float RecipW, RecipH;
-	D3DCOLOR colour;
-	D3DCOLOR specular = RGBALIGHT_MAKE(0, 0, 0, 0);
+	RCOLOR colour;
+	RCOLOR specular = RGBALIGHT_MAKE(0, 0, 0, 0);
 
 	if (decalPtr->DecalID == DECAL_FMV)
 	{
@@ -2517,7 +2516,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	sprintf(buf, "trans type: %d\n", particleDescPtr->TranslucencyType);
 	OutputDebugString(buf);
 */
-	D3DCOLOR colour;
+	RCOLOR colour;
 
 	if (particleDescPtr->IsLit && !(particlePtr->ParticleID == PARTICLE_ALIEN_BLOOD && CurrentVisionMode == VISION_MODE_PRED_SEEALIENS))
 	{

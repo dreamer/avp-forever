@@ -295,12 +295,12 @@ void Con_Draw()
 		return;
 
 	// draw the background quad
-	DrawQuad(console.xPos, console.yPos, console.width, console.height, NO_TEXTURE, D3DCOLOR_ARGB(255, 38, 80, 145), TRANSLUCENCY_OFF);
+	DrawQuad(console.xPos, console.yPos, console.width, console.height, NO_TEXTURE, RCOLOR_ARGB(255, 38, 80, 145), TRANSLUCENCY_OFF);
 
 	if (console.height > 0)
 	{
 		// draw the outline bar that runs along the bottom of the console
-		DrawQuad(console.xPos, console.yPos + console.height, console.width, 2, NO_TEXTURE, D3DCOLOR_ARGB(255, 255, 255, 255), TRANSLUCENCY_OFF);
+		DrawQuad(console.xPos, console.yPos + console.height, console.width, 2, NO_TEXTURE, RCOLOR_ARGB(255, 255, 255, 255), TRANSLUCENCY_OFF);
 	}
 
 //	int charCount = 0;
@@ -308,8 +308,8 @@ void Con_Draw()
 	uint32_t y = console.height;
 
 	// draw input cusor
-	Font_DrawText(">", console.indent, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
-	Font_DrawText("_", console.indent + charWidth, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
+	Font_DrawText(">", console.indent, y, RCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
+	Font_DrawText("_", console.indent + charWidth, y, RCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 
 	y -= CHAR_HEIGHT;
 
@@ -324,12 +324,12 @@ void Con_Draw()
 		xOffset = 0;
 		charWidth = 0;
 
-		Font_DrawText(console.text.at(rows), console.indent + xOffset, y, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
+		Font_DrawText(console.text.at(rows), console.indent + xOffset, y, RCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 	}
 
 	xOffset = CHAR_WIDTH;
 	charWidth = 0;
 
 	// draw the line of text we're currently typing
-	Font_DrawText(console.inputLine, console.indent + xOffset, console.height - CHAR_HEIGHT, D3DCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
+	Font_DrawText(console.inputLine, console.indent + xOffset, console.height - CHAR_HEIGHT, RCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 }
