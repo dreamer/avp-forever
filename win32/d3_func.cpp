@@ -2249,21 +2249,21 @@ bool InitialiseDirect3D()
 	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
 	CreatePixelShader("tallFontTextPixel.psh", &d3d.cloudPixelShader);
 
-	r_Texture blankTexture;
+	r_Texture whiteTexture;
 
-	// create a 1x1 resolution texture to set to shader for sampling when we don't want to texture an object (eg what was NULL texture in fixed function pipeline)
-	LastError = d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &blankTexture, NULL);
+	// create a 1x1 resolution white texture to set to shader for sampling when we don't want to texture an object (eg what was NULL texture in fixed function pipeline)
+	LastError = d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &whiteTexture, NULL);
 	if (FAILED(LastError))
 	{
-		Con_PrintError("Could not create null texture for shader sampling");
+		Con_PrintError("Could not create white texture for shader sampling");
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
 	D3DLOCKED_RECT lock;
-	LastError = blankTexture->LockRect(0, &lock, NULL, 0);
+	LastError = whiteTexture->LockRect(0, &lock, NULL, 0);
 	if (FAILED(LastError))
 	{
-		Con_PrintError("Could not lock null texture for shader sampling");
+		Con_PrintError("Could not lock white texture for shader sampling");
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 	else
@@ -2271,15 +2271,15 @@ bool InitialiseDirect3D()
 		// set pixel to white
 		memset(lock.pBits, 255, lock.Pitch);
 
-		blankTexture->UnlockRect(0);
+		whiteTexture->UnlockRect(0);
 
 		// should we just add it even if it fails?
-		NO_TEXTURE = Tex_AddTexture("Blank", blankTexture, 1, 1);
+		NO_TEXTURE = Tex_AddTexture("white", whiteTexture, 1, 1);
 	}
 
 	setTextureArray.resize(MAX_TEXTURE_STAGES);
 
-	// set all texture stages to sample the blank texture
+	// set all texture stages to sample the white texture
 	for (uint32_t i = 0; i < MAX_TEXTURE_STAGES; i++)
 	{
 		setTextureArray[i] = NO_TEXTURE;
