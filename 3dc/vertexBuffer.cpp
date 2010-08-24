@@ -33,7 +33,7 @@ enum VertexPrimitive
 
 bool VertexBuffer::Draw()
 {
-	if (!R_SetVertexBuffer(this->vertexBuffer, this->vbFVFsize))
+	if (!R_SetVertexBuffer(this->vertexBuffer, this->FVFsize))
 	{
 		return false;
 	}
@@ -48,7 +48,7 @@ bool VertexBuffer::Draw()
 
 bool VertexBuffer::Lock(void **data)
 {
-	return R_LockVertexBuffer(this->vertexBuffer, 0, 0, data, this->vbUsage);
+	return R_LockVertexBuffer(this->vertexBuffer, 0, 0, data, this->usage);
 }
 
 bool VertexBuffer::Unlock()
@@ -61,34 +61,30 @@ bool VertexBuffer::Release()
 	return R_ReleaseVertexBuffer(this->vertexBuffer);
 }
 
-// return number of verts the VB can hold
-uint32_t VertexBuffer::GetCapacity()
-{
-	return this->vbMaxVerts;
-}
-
 bool VertexBuffer::Create(uint32_t size, enum FVF fvf, enum R_USAGE usage)
 {
-	this->vbFVF = fvf;
+	// store values for later use
+	this->size = size;
+	this->usage = usage;
+	this->FVF = fvf;
 
-	switch (this->vbFVF)
+	switch (this->FVF)
 	{
 		case FVF_LVERTEX:
-			this->vbFVFsize = sizeof(D3DLVERTEX);
+			this->FVFsize = sizeof(D3DLVERTEX);
 			break;
 		case FVF_ORTHO:
-			this->vbFVFsize = sizeof(ORTHOVERTEX);
+			this->FVFsize = sizeof(ORTHOVERTEX);
 			break;
 		case FVF_FMV:
-			this->vbFVFsize = sizeof(FMVVERTEX);
+			this->FVFsize = sizeof(FMVVERTEX);
 			break;
 		default:
 			// error and return
 			break;
 	}
 
-	this->vbSizeInBytes = size * this->vbFVFsize;
-	this->vbMaxVerts = size;
+	this->sizeInBytes = this->size * this->FVFsize;
 
-	return R_CreateVertexBuffer(this->vbSizeInBytes, this->vbUsage, &vertexBuffer);
+	return R_CreateVertexBuffer(this->sizeInBytes, this->usage, &vertexBuffer);
 }

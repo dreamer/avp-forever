@@ -19,12 +19,21 @@ typedef IDirect3DTexture9	   *r_Texture; // keep this as pointer type?
 
 bool R_BeginScene();
 bool R_EndScene();
-bool R_CreateVertexBuffer(uint32_t length, uint32_t usage, r_VertexBuffer **vertexBuffer);
+
+// vertex buffer functions
+bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer **vertexBuffer);
 bool R_ReleaseVertexBuffer(r_VertexBuffer *vertexBuffer);
 bool R_LockVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage);
 bool R_UnlockVertexBuffer(r_VertexBuffer *vertexBuffer);
 bool R_SetVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t FVFsize);
 bool R_DrawPrimitive(uint32_t numPrimitives);
+
+// index buffer functions
+bool R_CreateIndexBuffer(uint32_t size, uint32_t usage, r_IndexBuffer **indexBuffer);
+bool R_ReleaseIndexBuffer(r_IndexBuffer *indexBuffer);
+bool R_LockIndexBuffer(r_IndexBuffer *indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage);
+bool R_UnlockIndexBuffer(r_IndexBuffer *indexBuffer);
+bool R_SetIndexBuffer(r_IndexBuffer *indexBuffer);
 
 // texture functions
 bool R_SetTexture(uint32_t stage, uint32_t textureID);

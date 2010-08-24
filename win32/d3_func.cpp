@@ -478,7 +478,7 @@ bool R_EndScene()
 	return true;
 }
 
-bool R_CreateVertexBuffer(uint32_t length, uint32_t usage, r_VertexBuffer **vertexBuffer)
+bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer **vertexBuffer)
 {
 	D3DPOOL vbPool;
 	DWORD	vbUsage;
@@ -498,9 +498,10 @@ bool R_CreateVertexBuffer(uint32_t length, uint32_t usage, r_VertexBuffer **vert
 			break;
 	}
 
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(length, vbUsage, 0, vbPool, vertexBuffer, NULL);
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(size, vbUsage, 0, vbPool, vertexBuffer, NULL);
 	if (FAILED(LastError))
 	{
+		Con_PrintError("Can't create vertex buffer");
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
@@ -513,6 +514,48 @@ bool R_ReleaseVertexBuffer(r_VertexBuffer *vertexBuffer)
 	if (vertexBuffer)
 	{
 		vertexBuffer->Release();
+	}
+
+	return true;
+}
+
+bool R_CreateIndexBuffer(uint32_t size, uint32_t usage, r_IndexBuffer **indexBuffer)
+{
+	D3DPOOL ibPool;
+	DWORD	ibUsage;
+
+	switch (usage)
+	{
+		case USAGE_STATIC:
+			ibUsage = 0;
+			ibPool = D3DPOOL_MANAGED;
+			break;
+		case USAGE_DYNAMIC:
+			ibUsage = D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY;
+			ibPool = D3DPOOL_DEFAULT;
+			break;
+		default:
+			// error and return
+			break;
+	}
+	
+	// create index buffer
+	LastError = d3d.lpD3DDevice->CreateIndexBuffer(size * 3 * sizeof(WORD), ibUsage, D3DFMT_INDEX16, ibPool, indexBuffer, NULL);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't create index buffer");
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+bool R_ReleaseIndexBuffer(r_IndexBuffer *indexBuffer)
+{
+	if (indexBuffer)
+	{
+		indexBuffer->Release();
 	}
 
 	return true;
@@ -630,6 +673,26 @@ bool R_LockVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t offsetToLock, uin
 	LastError = vertexBuffer->Lock(offsetToLock, sizeToLock, data, vbFlags);
 	if (FAILED(LastError))
 	{
+		Con_PrintError("Can't vertex index buffer");
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+bool R_LockIndexBuffer(r_IndexBuffer *indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage)
+{
+	DWORD ibFlags = 0;
+	if (usage == USAGE_DYNAMIC)
+	{
+		ibFlags = D3DLOCK_DISCARD;
+	}
+
+	LastError = indexBuffer->Lock(offsetToLock, sizeToLock, (void**)data, ibFlags);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't lock index buffer");
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
@@ -642,6 +705,20 @@ bool R_SetVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t FVFsize)
 	LastError = d3d.lpD3DDevice->SetStreamSource(0, vertexBuffer, 0, FVFsize);
 	if (FAILED(LastError))
 	{
+		Con_PrintError("Can't set vertex buffer");
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+bool R_SetIndexBuffer(r_IndexBuffer *indexBuffer)
+{
+	LastError = d3d.lpD3DDevice->SetIndices(indexBuffer);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't set index buffer");
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
@@ -654,6 +731,20 @@ bool R_UnlockVertexBuffer(r_VertexBuffer *vertexBuffer)
 	LastError = vertexBuffer->Unlock();
 	if (FAILED(LastError))
 	{
+		Con_PrintError("Can't unlock vertex buffer");
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+bool R_UnlockIndexBuffer(r_IndexBuffer *indexBuffer)
+{
+	LastError = indexBuffer->Unlock();
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't unlock index buffer");
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}

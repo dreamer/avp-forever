@@ -11,7 +11,7 @@
 //    this list of conditions and the following disclaimer in the documentation
 //    and/or other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+// THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
 // INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
 // FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 // DEVELOPERS AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
@@ -22,55 +22,41 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _vertexBuffer_h_
-#define _vertexBuffer_h_
+#ifndef _indexBuffer_h_
+#define _indexBuffer_h_
 
 #include <stdint.h>
 #include "renderer.h"
 
-class VertexBuffer
+class IndexBuffer
 {
 	public:
-		enum FVF
-		{
-			FVF_LVERTEX,
-			FVF_ORTHO,
-			FVF_FMV
-		};
-
 		// constructor
-		VertexBuffer():
-			vertexBuffer(0),
+		IndexBuffer():
+			indexBuffer(0),
 			size(0),
-			sizeInBytes(0),
 			usage(USAGE_DYNAMIC),
-			FVF(FVF_ORTHO),
-			FVFsize(0),
 			isLocked(false)
 		{
 		}
 
 		// deconstructor
-		~VertexBuffer()
+		~IndexBuffer()
 		{
 			this->Release();
 		}
 
 		// public functions
-		bool VertexBuffer::Create(uint32_t size, enum FVF fvf, enum R_USAGE usage);
-		bool VertexBuffer::Release();
-		bool VertexBuffer::Lock(void **data);
-		bool VertexBuffer::Unlock();
-		bool VertexBuffer::Draw();
-		uint32_t VertexBuffer::GetCapacity() const { return size; }
+		bool IndexBuffer::Create(uint32_t size, enum R_USAGE usage);
+		bool IndexBuffer::Release();
+		bool IndexBuffer::Lock(uint16_t **data);
+		bool IndexBuffer::Unlock();
+		uint32_t IndexBuffer::GetCapacity() const { return size; }
 
 	private:
-		r_VertexBuffer	*vertexBuffer;
+		r_IndexBuffer	*indexBuffer;
 		uint32_t		size;
-		uint32_t		sizeInBytes;
 		enum R_USAGE	usage;
-		FVF				FVF;
-		uint32_t		FVFsize;
 		bool			isLocked;
 };
 

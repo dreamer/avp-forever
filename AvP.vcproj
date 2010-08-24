@@ -5307,6 +5307,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\3dc\indexBuffer.cpp"
+				>
+			</File>
+			<File
 				RelativePath="3dc\avp\support\indexfnt.cpp"
 				>
 				<FileConfiguration
@@ -9866,6 +9870,10 @@
 				</File>
 				<File
 					RelativePath="3dc\win95\ILBM_ext.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\3dc\indexBuffer.h"
 					>
 				</File>
 				<File
