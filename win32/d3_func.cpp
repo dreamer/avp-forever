@@ -23,13 +23,11 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "d3_func.h"
-#include <d3dx9.h>
 #include "fmvCutscenes.h"
 #include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 #include "logString.h"
 #include "configFile.h"
 #include "console.h"
-#include "vertexBuffer.h"
 #include "networking.h"
 #include "font2.h"
 #include <XInput.h> // XInput API
@@ -301,7 +299,6 @@ extern LPD3DXCONSTANTTABLE	fmvConstantTable;
 extern LPD3DXCONSTANTTABLE	cloudConstantTable;
 
 extern void RenderListInit();
-extern void ReleaseAllFMVTextures(void);
 
 // size of vertex and index buffers
 const uint32_t MAX_VERTEXES = 4096;
@@ -394,7 +391,8 @@ bool ReleaseVolatileResources()
 	SAFE_RELEASE(d3d.lpD3DParticleVertexBuffer);
 	SAFE_RELEASE(d3d.lpD3DParticleIndexBuffer);
 
-	d3d.testVB->Release();
+	d3d.particleTestVB->Release();
+	d3d.particleTestIB->Release();
 
 	return true;
 }
@@ -820,8 +818,11 @@ bool CreateVolatileResources()
 	}
 
 	// test vertex buffer
-	d3d.testVB = new VertexBuffer;
-	d3d.testVB->Create(10, d3d.testVB->FVF_ORTHO, USAGE_DYNAMIC);
+	d3d.particleTestVB = new VertexBuffer;
+	d3d.particleTestVB->Create(MAX_VERTEXES, FVF_LVERTEX, USAGE_DYNAMIC);
+
+	d3d.particleTestIB = new IndexBuffer;
+	d3d.particleTestIB->Create(MAX_INDICES, USAGE_DYNAMIC);
 
 	SetRenderStateDefaults();
 

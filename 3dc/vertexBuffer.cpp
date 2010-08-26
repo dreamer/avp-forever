@@ -31,6 +31,11 @@ enum VertexPrimitive
 	VertexPrimitive_Strip
 };
 
+bool VertexBuffer::Set()
+{
+	return R_SetVertexBuffer(this->vertexBuffer, this->FVFsize);
+}
+
 bool VertexBuffer::Draw()
 {
 	if (!R_SetVertexBuffer(this->vertexBuffer, this->FVFsize))
@@ -61,7 +66,7 @@ bool VertexBuffer::Release()
 	return R_ReleaseVertexBuffer(this->vertexBuffer);
 }
 
-bool VertexBuffer::Create(uint32_t size, enum FVF fvf, enum R_USAGE usage)
+bool VertexBuffer::Create(uint32_t size, enum R_FVF fvf, enum R_USAGE usage)
 {
 	// store values for later use
 	this->size = size;

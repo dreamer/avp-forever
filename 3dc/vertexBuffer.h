@@ -31,12 +31,6 @@
 class VertexBuffer
 {
 	public:
-		enum FVF
-		{
-			FVF_LVERTEX,
-			FVF_ORTHO,
-			FVF_FMV
-		};
 
 		// constructor
 		VertexBuffer():
@@ -57,10 +51,11 @@ class VertexBuffer
 		}
 
 		// public functions
-		bool VertexBuffer::Create(uint32_t size, enum FVF fvf, enum R_USAGE usage);
+		bool VertexBuffer::Create(uint32_t size, enum R_FVF fvf, enum R_USAGE usage);
 		bool VertexBuffer::Release();
 		bool VertexBuffer::Lock(void **data);
 		bool VertexBuffer::Unlock();
+		bool VertexBuffer::Set();
 		bool VertexBuffer::Draw();
 		uint32_t VertexBuffer::GetCapacity() const { return size; }
 
@@ -69,7 +64,7 @@ class VertexBuffer
 		uint32_t		size;
 		uint32_t		sizeInBytes;
 		enum R_USAGE	usage;
-		FVF				FVF;
+		enum R_FVF		FVF;
 		uint32_t		FVFsize;
 		bool			isLocked;
 };

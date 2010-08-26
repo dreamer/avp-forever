@@ -12,7 +12,9 @@ typedef IDirect3DTexture9	   *r_Texture; // keep this as pointer type?
 
 #include "aw.h"
 #include <stdint.h>
-#include "renderer.h"
+//#include "renderer.h"
+#include "vertexBuffer.h"
+#include "indexBuffer.h"
 #include "renderStates.h"
 #include "textureManager.h"
 #include <string>
@@ -158,7 +160,8 @@ typedef struct D3DInfo
 	D3DVIEWPORT9			D3DViewport;
 	D3DPRESENT_PARAMETERS	d3dpp;
 
-	class VertexBuffer		*testVB;
+	class VertexBuffer		*particleTestVB;
+	class IndexBuffer		*particleTestIB;
 
 	LPDIRECT3DVERTEXBUFFER9 lpD3DVertexBuffer;
 	LPDIRECT3DINDEXBUFFER9	lpD3DIndexBuffer;

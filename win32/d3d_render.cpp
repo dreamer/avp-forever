@@ -114,7 +114,8 @@ uint32_t orthoListCount = 0;
 ORTHOVERTEX *orthoVerts = NULL;
 WORD *orthoIndex = NULL;
 
-ORTHOVERTEX *testOrtho = NULL;
+D3DLVERTEX *testParticleVertex = NULL;
+WORD *testParticleIndex = NULL;
 
 static uint32_t orthoVBOffset = 0;
 static uint32_t orthoIBOffset = 0;
@@ -295,7 +296,8 @@ bool LockExecuteBuffer()
 	}
 
 	// test vertex buffer
-	d3d.testVB->Lock((void**)&testOrtho);
+	d3d.particleTestVB->Lock((void**)&testParticleVertex);
+	d3d.particleTestIB->Lock((uint16_t**)&testParticleIndex);
 
 	// reset counters and indexes
 	NumVertices = 0;
@@ -369,7 +371,8 @@ bool UnlockExecuteBufferAndPrepareForUse()
 	}
 
 	// test vertex buffer
-	d3d.testVB->Unlock();
+	d3d.particleTestVB->Unlock();
+	d3d.particleTestIB->Unlock();
 
 	return true;
 }
@@ -468,6 +471,9 @@ bool ExecuteBuffer()
 	{
 		D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Starting to draw particles..."));
 
+		d3d.particleTestVB->Set();
+		d3d.particleTestIB->Set();
+/*
 		LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DParticleVertexBuffer, 0, sizeof(D3DLVERTEX));
 		if (FAILED(LastError))
 		{
@@ -479,7 +485,7 @@ bool ExecuteBuffer()
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
-
+*/
 		vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matProjection);
 
 		DisableZBufferWrites();
@@ -1844,6 +1850,12 @@ static inline void OUTPUT_TRIANGLE2(int a, int b, int c, int n)
 	particleIndex[pIb]   = (numPVertices - (n) + (a));
 	particleIndex[pIb+1] = (numPVertices - (n) + (b));
 	particleIndex[pIb+2] = (numPVertices - (n) + (c));
+
+	// test
+	testParticleIndex[pIb]   = (numPVertices - (n) + (a));
+	testParticleIndex[pIb+1] = (numPVertices - (n) + (b));
+	testParticleIndex[pIb+2] = (numPVertices - (n) + (c));
+
 	pIb+=3;
 }
 
@@ -2588,6 +2600,10 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 		particleVertex[pVb].tu = ((float)(vertices->U)/* + 0.5f*/) * RecipW;
 		particleVertex[pVb].tv = ((float)(vertices->V)/* + 0.5f*/) * RecipH;
+
+		// test
+		memcpy(&testParticleVertex[pVb], &particleVertex[pVb], sizeof(D3DLVERTEX));
+
 		pVb++;
 	}
 

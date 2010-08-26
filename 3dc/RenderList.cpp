@@ -42,8 +42,34 @@ RenderList::~RenderList()
 //	delete Items;
 }
 
-void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, uint32_t shaderID)
+//void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, uint32_t shaderID)
+void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
 {
+	Items[listIndex].sortKey = 0; // zero it out
+	Items[listIndex].sortKey = (textureID << 24) | (translucencyMode << 20) | (filteringMode << 16);
+
+	// lets see if we can merge this item with the previous item
+	if ((listIndex != 0) &&		// only do this check if we're not adding the first item
+		(Items[listIndex-1].sortKey == Items[listIndex].sortKey))
+	{
+		// our new item uses the same states as previous item.
+		listIndex--;
+	}
+	else
+	{
+		// we need to add a new item
+		Items[listIndex].vertStart = totalVerts;
+		Items[listIndex].indexStart = 0; // TODO. totalIndices
+	}
+
+	Items[listIndex].vertEnd = totalVerts + numVerts;
+	Items[listIndex].indexEnd = 0; // TODO. totalIndicies + numIndices
+	listIndex++;
+
+	totalVerts += numVerts;
+
+
+/*
 	// lets see if we can merge this item with the previous item
 	if ((listIndex != 0) &&		// only do this check if we're not adding the first item
 		(shaderID == Items[listIndex-1].shaderID) &&
@@ -68,6 +94,7 @@ void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, uint32_t shaderI
 	listIndex++;
 
 	totalVerts += numVerts;
+*/
 }
 
 size_t RenderList::GetCapacity()

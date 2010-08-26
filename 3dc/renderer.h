@@ -33,6 +33,13 @@ enum R_USAGE
 	USAGE_STATIC
 };
 
+enum R_FVF
+{
+	FVF_LVERTEX,
+	FVF_ORTHO,
+	FVF_FMV
+};
+
 #ifdef _WIN32
 	#define USE_D3D9
 #endif

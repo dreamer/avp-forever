@@ -51,6 +51,7 @@ class IndexBuffer
 		bool IndexBuffer::Release();
 		bool IndexBuffer::Lock(uint16_t **data);
 		bool IndexBuffer::Unlock();
+		bool IndexBuffer::Set();
 		uint32_t IndexBuffer::GetCapacity() const { return size; }
 
 	private:

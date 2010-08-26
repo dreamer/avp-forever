@@ -24,6 +24,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include "renderStates.h"
 
 // part of sort test
 enum Shaders
@@ -46,10 +47,9 @@ struct RenderItem2
 	uint32_t	indexStart;
 	uint32_t	indexEnd;
 
-	uint32_t	textureID;
-	uint32_t	shaderID;
+//	uint32_t	textureID;
+//	uint32_t	shaderID;
 
-	// test sort key
 	uint32_t	sortKey;
 
 	bool operator<(const RenderItem2& rhs) const {return sortKey < rhs.sortKey;}
@@ -58,9 +58,9 @@ struct RenderItem2
 class RenderList
 {
 	private:
-		size_t	capacity;
-		size_t	listIndex; // used as list size
-		uint32_t totalVerts;
+		size_t		capacity;
+		size_t		listIndex;	// used as list size
+		uint32_t	totalVerts;
 
 	public:
 		std::vector<RenderItem2> Items;
@@ -71,5 +71,6 @@ class RenderList
 	void RenderList::Init(size_t size);
 	size_t RenderList::GetCapacity();
 	void RenderList::Sort();
-	void AddItem(uint32_t numVerts, uint32_t textureID, uint32_t shaderID);
+//	void AddItem(uint32_t numVerts, uint32_t textureID, uint32_t shaderID);
+	void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode);
 };
