@@ -382,17 +382,18 @@ bool ReleaseVolatileResources()
 {
 	Tex_ReleaseDynamicTextures();
 
-//	ReleaseAllFMVTexturesForDeviceReset();
-
 	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
 	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
 	SAFE_RELEASE(d3d.lpD3DOrthoVertexBuffer);
 	SAFE_RELEASE(d3d.lpD3DOrthoIndexBuffer);
-	SAFE_RELEASE(d3d.lpD3DParticleVertexBuffer);
-	SAFE_RELEASE(d3d.lpD3DParticleIndexBuffer);
+//	SAFE_RELEASE(d3d.lpD3DParticleVertexBuffer);
+//	SAFE_RELEASE(d3d.lpD3DParticleIndexBuffer);
 
 	d3d.particleTestVB->Release();
 	d3d.particleTestIB->Release();
+
+	d3d.mainTestVB->Release();
+	d3d.mainTestIB->Release();
 
 	return true;
 }
@@ -679,6 +680,25 @@ bool R_LockVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t offsetToLock, uin
 	return true;
 }
 
+bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives)
+{
+	LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
+			0,
+			0,
+			numVerts,				// total num verts in VB
+			startIndex,
+			numPrimitives);
+
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't draw indexed primitive");
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
 bool R_LockIndexBuffer(r_IndexBuffer *indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage)
 {
 	DWORD ibFlags = 0;
@@ -752,7 +772,6 @@ bool R_UnlockIndexBuffer(r_IndexBuffer *indexBuffer)
 
 bool CreateVolatileResources()
 {
-//	RecreateAllFMVTexturesAfterDeviceReset();
 	Tex_ReloadDynamicTextures();
 
 	// create dynamic vertex buffer
@@ -786,7 +805,7 @@ bool CreateVolatileResources()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
-
+#if 0
 	// create particle vertex buffer
 	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DLVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &d3d.lpD3DParticleVertexBuffer, NULL);
 	if (FAILED(LastError))
@@ -802,27 +821,36 @@ bool CreateVolatileResources()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
-
+#endif
+/*
 	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
-
+*/
+/*
 	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_LVERTEX);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
-
+*/
 	// test vertex buffer
 	d3d.particleTestVB = new VertexBuffer;
 	d3d.particleTestVB->Create(MAX_VERTEXES, FVF_LVERTEX, USAGE_DYNAMIC);
 
 	d3d.particleTestIB = new IndexBuffer;
 	d3d.particleTestIB->Create(MAX_INDICES, USAGE_DYNAMIC);
+
+	// test main
+	d3d.mainTestVB = new VertexBuffer;
+	d3d.mainTestVB->Create(MAX_VERTEXES*5, FVF_LVERTEX, USAGE_DYNAMIC);
+
+	d3d.mainTestIB = new IndexBuffer;
+	d3d.mainTestIB->Create(MAX_INDICES*5, USAGE_DYNAMIC);
 
 	SetRenderStateDefaults();
 

@@ -24,6 +24,11 @@
 
 #include "indexBuffer.h"
 
+bool IndexBuffer::Set()
+{
+	return R_SetIndexBuffer(this->indexBuffer);
+}
+
 bool IndexBuffer::Create(uint32_t size, enum R_USAGE usage)
 {
 	this->size = size;

@@ -30,6 +30,8 @@ bool R_UnlockVertexBuffer(r_VertexBuffer *vertexBuffer);
 bool R_SetVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t FVFsize);
 bool R_DrawPrimitive(uint32_t numPrimitives);
 
+bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives);
+
 // index buffer functions
 bool R_CreateIndexBuffer(uint32_t size, uint32_t usage, r_IndexBuffer **indexBuffer);
 bool R_ReleaseIndexBuffer(r_IndexBuffer *indexBuffer);
@@ -53,6 +55,10 @@ void R_NextVideoMode();
 void R_PreviousVideoMode();
 std::string& R_GetVideoModeDescription();
 void R_SetCurrentVideoMode();
+
+void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
+void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
+void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 
 // vertex declarations
 extern D3DVERTEXELEMENT9 declMain[];
@@ -163,14 +169,17 @@ typedef struct D3DInfo
 	class VertexBuffer		*particleTestVB;
 	class IndexBuffer		*particleTestIB;
 
+	class VertexBuffer		*mainTestVB;
+	class IndexBuffer		*mainTestIB;
+
 	LPDIRECT3DVERTEXBUFFER9 lpD3DVertexBuffer;
 	LPDIRECT3DINDEXBUFFER9	lpD3DIndexBuffer;
 
 	LPDIRECT3DVERTEXBUFFER9 lpD3DOrthoVertexBuffer;
 	LPDIRECT3DINDEXBUFFER9	lpD3DOrthoIndexBuffer;
 
-	LPDIRECT3DVERTEXBUFFER9 lpD3DParticleVertexBuffer;
-	LPDIRECT3DINDEXBUFFER9	lpD3DParticleIndexBuffer;
+//	LPDIRECT3DVERTEXBUFFER9 lpD3DParticleVertexBuffer;
+//	LPDIRECT3DINDEXBUFFER9	lpD3DParticleIndexBuffer;
 
 	LPDIRECT3DVERTEXDECLARATION9 vertexDecl;
 	LPDIRECT3DVERTEXSHADER9      vertexShader;

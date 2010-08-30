@@ -95,18 +95,22 @@ struct RENDER_STATES
 D3DLVERTEX *mainVertex = NULL;
 WORD *mainIndex = NULL;
 
+D3DLVERTEX *testMainVertex = NULL;
+WORD *testMainIndex = NULL;
+
 D3DLVERTEX *particleVertex = NULL;
 WORD *particleIndex = NULL;
 uint32_t	pVb = 0;
-uint32_t	pIb = 0;
-uint32_t	numPVertices = 0;
 
-std::vector<RENDER_STATES> particleList;
+uint32_t tempIndex = 0;
+
 std::vector<RENDER_STATES> renderList;
 std::vector<RENDER_STATES> transRenderList;
 std::vector<RENDER_STATES> orthoList;
 
-uint32_t particleListCount = 0;
+RenderList *pListTest;
+RenderList *testMainList;
+
 uint32_t renderListCount = 0;
 uint32_t transRenderListCount = 0;
 uint32_t orthoListCount = 0;
@@ -114,18 +118,12 @@ uint32_t orthoListCount = 0;
 ORTHOVERTEX *orthoVerts = NULL;
 WORD *orthoIndex = NULL;
 
-D3DLVERTEX *testParticleVertex = NULL;
-WORD *testParticleIndex = NULL;
-
 static uint32_t orthoVBOffset = 0;
 static uint32_t orthoIBOffset = 0;
 
 bool UnlockExecuteBufferAndPrepareForUse();
 bool ExecuteBuffer();
 bool LockExecuteBuffer();
-void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
-void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
-void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 
 #define RGBLIGHT_MAKE(r,g,b) RGB_MAKE(r,g,b)
 #define RGBALIGHT_MAKE(r,g,b,a) RGBA_MAKE(r,g,b,a)
@@ -136,9 +134,9 @@ static HRESULT LastError;
 // regular arrays
 void RenderListInit()
 {
-	particleList.reserve(MAX_VERTEXES);
-	particleList.resize(MAX_VERTEXES);
-	memset(&particleList[0], 0, sizeof(RENDER_STATES));
+	// new, test particle list
+	pListTest = new RenderList(200);
+	testMainList = new RenderList(800);
 
 	renderList.reserve(MAX_VERTEXES);
 	renderList.resize(MAX_VERTEXES);
@@ -206,6 +204,7 @@ inline float HPos2DC(int32_t pos)
 // we then use the OUTPUT_TRIANGLE function to generate the indicies required to represent those
 // polygons. This function calculates the number of indicies required based on the number of verts.
 // AvP code defined these, so hence the magic numbers.
+// TODO: rename to GetNumIndices to more accurately reflect what this function does?
 
 uint32_t GetRealNumVerts(uint32_t numVerts)
 {
@@ -262,7 +261,7 @@ bool LockExecuteBuffer()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
-
+#if 0
 	// lock particle vertex buffer
 	LastError = d3d.lpD3DParticleVertexBuffer->Lock(0, 0, (void**)&particleVertex, D3DLOCK_DISCARD);
 	if (FAILED(LastError))
@@ -278,7 +277,7 @@ bool LockExecuteBuffer()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
-
+#endif
 	// lock 2D ortho vertex buffer
 	LastError = d3d.lpD3DOrthoVertexBuffer->Lock(0, 0, (void**)&orthoVerts, D3DLOCK_DISCARD);
 	if (FAILED(LastError))
@@ -295,9 +294,17 @@ bool LockExecuteBuffer()
 		return false;
 	}
 
-	// test vertex buffer
-	d3d.particleTestVB->Lock((void**)&testParticleVertex);
-	d3d.particleTestIB->Lock((uint16_t**)&testParticleIndex);
+	// test particle
+	d3d.particleTestVB->Lock((void**)&particleVertex);
+	d3d.particleTestIB->Lock(&particleIndex);
+
+	pListTest->Reset();
+
+	// test main vertex buffer
+	d3d.mainTestVB->Lock((void**)&testMainVertex);
+	d3d.mainTestIB->Lock(&testMainIndex);
+
+	testMainList->Reset();
 
 	// reset counters and indexes
 	NumVertices = 0;
@@ -311,10 +318,9 @@ bool LockExecuteBuffer()
 	renderListCount = 0;
 	transRenderListCount = 0;
 
+	tempIndex = 0;
+
 	pVb = 0;
-	pIb = 0;
-	particleListCount = 0;
-	numPVertices = 0;
 
     return true;
 }
@@ -337,7 +343,7 @@ bool UnlockExecuteBufferAndPrepareForUse()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
-
+#if 0
 	// unlock particle vertex buffer
 	LastError = d3d.lpD3DParticleVertexBuffer->Unlock();
 	if (FAILED(LastError))
@@ -353,7 +359,7 @@ bool UnlockExecuteBufferAndPrepareForUse()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
-
+#endif
 	// unlock orthographic quad vertex buffer
 	LastError = d3d.lpD3DOrthoVertexBuffer->Unlock();
 	if (FAILED(LastError))
@@ -374,15 +380,20 @@ bool UnlockExecuteBufferAndPrepareForUse()
 	d3d.particleTestVB->Unlock();
 	d3d.particleTestIB->Unlock();
 
+	d3d.mainTestVB->Unlock();
+	d3d.mainTestIB->Unlock();
+
 	return true;
 }
 
 bool ExecuteBuffer()
 {
 	// sort the list of render objects
-	std::sort(renderList.begin(), renderList.begin() + renderListCount);
-	std::sort(particleList.begin(), particleList.begin() + particleListCount);
+//	std::sort(renderList.begin(), renderList.begin() + renderListCount);
+	pListTest->Sort();
+	testMainList->Sort();
 
+/*
 	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));
 	if (FAILED(LastError))
 	{
@@ -394,6 +405,28 @@ bool ExecuteBuffer()
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
+*/
+
+	LastError = d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+
+	LastError = d3d.lpD3DDevice->SetVertexShader(d3d.vertexShader);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+
+	LastError = d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+	}
+
+	d3d.mainTestVB->Set();
+	d3d.mainTestIB->Set();
 
 	#ifndef USE_D3DVIEWTRANSFORM
 		D3DXMatrixIdentity(&viewMatrix); // we want to use the identity matrix in this case
@@ -403,12 +436,11 @@ bool ExecuteBuffer()
 	D3DXMATRIXA16 matWorldViewProj = viewMatrix * matProjection;
 	vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
 
-	d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
-	d3d.lpD3DDevice->SetVertexShader(d3d.vertexShader);
-	d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
-
 	ChangeTextureAddressMode(TEXTURE_WRAP);
 
+	testMainList->Draw();
+
+#if 0
 	// draw opaque polygons
 	for (uint32_t i = 0; i < renderListCount; i++)
 	{
@@ -420,7 +452,7 @@ bool ExecuteBuffer()
 
 		uint32_t numPrimitives = (renderList[i].indexEnd - renderList[i].indexStart) / 3;
 
-		if (numPrimitives > 0)
+		if (numPrimitives)
 		{
 			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
 				0,
@@ -448,7 +480,7 @@ bool ExecuteBuffer()
 
 		uint32_t numPrimitives = (transRenderList[i].indexEnd - transRenderList[i].indexStart) / 3;
 
-		if (numPrimitives > 0)
+		if (numPrimitives)
 		{
 			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
 			   0,
@@ -464,58 +496,25 @@ bool ExecuteBuffer()
 		}
 		NumberOfRenderedTriangles += numPrimitives / 3;
 	}
+#endif
 
 #if 1
 	// render any particles
-	if (particleListCount)
+	//if (particleListCount)
 	{
 		D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Starting to draw particles..."));
 
+		// set the VB and IBs as active
 		d3d.particleTestVB->Set();
 		d3d.particleTestIB->Set();
-/*
-		LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DParticleVertexBuffer, 0, sizeof(D3DLVERTEX));
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-		}
 
-		LastError = d3d.lpD3DDevice->SetIndices(d3d.lpD3DParticleIndexBuffer);
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-		}
-*/
 		vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matProjection);
 
 		DisableZBufferWrites();
 		ChangeTextureAddressMode(TEXTURE_CLAMP);
 
-		for (uint32_t i = 0; i < particleListCount; i++)
-		{
-			// change render states if required
-			R_SetTexture(0, particleList[i].sortKey >> 24);
-
-			ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((particleList[i].sortKey >> 20) & 15));
-			ChangeFilteringMode((enum FILTERING_MODE_ID)	((particleList[i].sortKey >> 16) & 15));
-
-			uint32_t numPrimitives = (particleList[i].indexEnd - particleList[i].indexStart) / 3;
-
-			if (numPrimitives > 0)
-			{
-				LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
-					0,
-					0,
-					numPVertices,
-					particleList[i].indexStart,
-					numPrimitives);
-
-				if (FAILED(LastError))
-				{
-					LogDxError(LastError, __LINE__, __FILE__);
-				}
-			}
-		}
+		// Draw the particles in the list
+		pListTest->Draw();
 
 		EnableZBufferWrites();
 		ChangeTextureAddressMode(TEXTURE_WRAP);
@@ -1843,7 +1842,7 @@ static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n)
 	mainIndex[NumIndicies+2] = (NumVertices - (n) + (c));
 	NumIndicies+=3;
 }
-
+/*
 static inline void OUTPUT_TRIANGLE2(int a, int b, int c, int n)
 {
 	assert(pIb <= (9216 * 3) - 3);
@@ -1858,7 +1857,7 @@ static inline void OUTPUT_TRIANGLE2(int a, int b, int c, int n)
 
 	pIb+=3;
 }
-
+*/
 static inline void D3D_OutputTriangles()
 {
 	switch (RenderPolygon.NumberOfVertices)
@@ -1885,7 +1884,6 @@ static inline void D3D_OutputTriangles()
 			OUTPUT_TRIANGLE(0,1,4, 5);
 		    OUTPUT_TRIANGLE(1,3,4, 5);
 		    OUTPUT_TRIANGLE(1,2,3, 5);
-
 			break;
 		}
 		case 6:
@@ -1894,7 +1892,6 @@ static inline void D3D_OutputTriangles()
 		    OUTPUT_TRIANGLE(0,3,4, 6);
 		    OUTPUT_TRIANGLE(0,2,3, 6);
 		    OUTPUT_TRIANGLE(0,1,2, 6);
-
 			break;
 		}
 		case 7:
@@ -1904,7 +1901,6 @@ static inline void D3D_OutputTriangles()
 		    OUTPUT_TRIANGLE(0,3,4, 7);
 		    OUTPUT_TRIANGLE(0,2,3, 7);
 		    OUTPUT_TRIANGLE(0,1,2, 7);
-
 			break;
 		}
 		case 8:
@@ -1915,7 +1911,6 @@ static inline void D3D_OutputTriangles()
 		    OUTPUT_TRIANGLE(0,3,4, 8);
 		    OUTPUT_TRIANGLE(0,2,3, 8);
 		    OUTPUT_TRIANGLE(0,1,2, 8);
-
 			break;
 		}
 	}
@@ -2028,12 +2023,14 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 	RecipW = 1.0f / (float) texWidth;
 	RecipH = 1.0f / (float) texHeight;
 
-	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
+//	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
+
+	testMainList->AddItem(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
-
+/*
 		mainVertex[vb].sx = (float)vertices->X;
 		mainVertex[vb].sy = (float)-vertices->Y;
 		mainVertex[vb].sz = (float)vertices->Z;
@@ -2043,10 +2040,26 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 
 		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
 		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
+
+		memcpy(&testMainVertex[tempIndex], &mainVertex[vb], sizeof(D3DLVERTEX));
+*/
+		testMainVertex[tempIndex].sx = (float)vertices->X;
+		testMainVertex[tempIndex].sy = (float)-vertices->Y;
+		testMainVertex[tempIndex].sz = (float)vertices->Z;
+
+		testMainVertex[tempIndex].color = RGBALIGHT_MAKE(GammaValues[vertices->R], GammaValues[vertices->G], GammaValues[vertices->B], vertices->A);
+		testMainVertex[tempIndex].specular = RGBALIGHT_MAKE(GammaValues[vertices->SpecularR], GammaValues[vertices->SpecularG], GammaValues[vertices->SpecularB], 255);
+
+		testMainVertex[tempIndex].tu = (float)(vertices->U) * RecipW;
+		testMainVertex[tempIndex].tv = (float)(vertices->V) * RecipH;
+
+		tempIndex++;
 		vb++;
 	}
 
-	D3D_OutputTriangles();
+	testMainList->CreateIndicies(testMainIndex, RenderPolygon.NumberOfVertices);
+
+//	D3D_OutputTriangles();
 }
 
 void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
@@ -2492,42 +2505,12 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 //	CheckVertexBuffer(RenderPolygon.NumberOfVertices, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType);
 //	void CheckVertexBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
 
-	uint32_t realNumVerts = GetRealNumVerts(RenderPolygon.NumberOfVertices);
+	// add the item to our test list
+	// 1: Check our VB and IBs are big enough?
 
-	assert(textureID >= 0 && textureID <= 255);
+	// 2: If we're ok to add, add a RenderItem
+	pListTest->AddItem(RenderPolygon.NumberOfVertices, textureID, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON);
 
-	particleList[particleListCount].sortKey = 0; // zero it out
-	particleList[particleListCount].sortKey = (textureID << 24) | (particleDescPtr->TranslucencyType << 20) | (FILTERING_BILINEAR_ON << 16);
-
-	particleList[particleListCount].vertStart = 0;
-	particleList[particleListCount].vertEnd = 0;
-
-	particleList[particleListCount].indexStart = 0;
-	particleList[particleListCount].indexEnd = 0;
-
-	if (particleListCount != 0 &&
-		particleList[particleListCount-1].sortKey == particleList[particleListCount].sortKey)
-	{
-		particleListCount--;
-	}
-	else
-	{
-		particleList[particleListCount].vertStart = numPVertices;
-		particleList[particleListCount].indexStart = pIb;
-	}
-
-	particleList[particleListCount].vertEnd = numPVertices + RenderPolygon.NumberOfVertices;
-	particleList[particleListCount].indexEnd = pIb + realNumVerts;
-
-	particleListCount++;
-
-	numPVertices += RenderPolygon.NumberOfVertices;
-
-/*
-	char buf[100];
-	sprintf(buf, "trans type: %d\n", particleDescPtr->TranslucencyType);
-	OutputDebugString(buf);
-*/
 	RCOLOR colour;
 
 	if (particleDescPtr->IsLit && !(particlePtr->ParticleID == PARTICLE_ALIEN_BLOOD && CurrentVisionMode == VISION_MODE_PRED_SEEALIENS))
@@ -2589,7 +2572,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 			zvalue = (float)vertices->Z;
 		}
 
-		assert(pVb <= MAX_VERTEXES - 12);
+//		assert(pVb <= MAX_VERTEXES - 12);
 
 		particleVertex[pVb].sx = (float)vertices->X;
 		particleVertex[pVb].sy = (float)vertices->Y;
@@ -2600,81 +2583,11 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 		particleVertex[pVb].tu = ((float)(vertices->U)/* + 0.5f*/) * RecipW;
 		particleVertex[pVb].tv = ((float)(vertices->V)/* + 0.5f*/) * RecipH;
-
-		// test
-		memcpy(&testParticleVertex[pVb], &particleVertex[pVb], sizeof(D3DLVERTEX));
-
 		pVb++;
 	}
 
-//	D3D_OutputTriangles();
-
-	switch (RenderPolygon.NumberOfVertices)
-	{
-		default:
-			OutputDebugString("unexpected number of verts to render\n");
-			break;
-		case 0:
-			OutputDebugString("Asked to render 0 verts\n");
-			break;
-		case 3:
-		{
-			OUTPUT_TRIANGLE2(0,2,1, 3);
-			break;
-		}
-		case 4:
-		{
-			OUTPUT_TRIANGLE2(0,1,2, 4);
-			OUTPUT_TRIANGLE2(0,2,3, 4);
-			break;
-		}
-		case 5:
-		{
-			OUTPUT_TRIANGLE2(0,1,4, 5);
-		    OUTPUT_TRIANGLE2(1,3,4, 5);
-		    OUTPUT_TRIANGLE2(1,2,3, 5);
-
-			break;
-		}
-		case 6:
-		{
-			OUTPUT_TRIANGLE2(0,4,5, 6);
-		    OUTPUT_TRIANGLE2(0,3,4, 6);
-		    OUTPUT_TRIANGLE2(0,2,3, 6);
-		    OUTPUT_TRIANGLE2(0,1,2, 6);
-
-			break;
-		}
-		case 7:
-		{
-			OUTPUT_TRIANGLE2(0,5,6, 7);
-		    OUTPUT_TRIANGLE2(0,4,5, 7);
-		    OUTPUT_TRIANGLE2(0,3,4, 7);
-		    OUTPUT_TRIANGLE2(0,2,3, 7);
-		    OUTPUT_TRIANGLE2(0,1,2, 7);
-
-			break;
-		}
-		case 8:
-		{
-			OUTPUT_TRIANGLE2(0,6,7, 8);
-		    OUTPUT_TRIANGLE2(0,5,6, 8);
-		    OUTPUT_TRIANGLE2(0,4,5, 8);
-		    OUTPUT_TRIANGLE2(0,3,4, 8);
-		    OUTPUT_TRIANGLE2(0,2,3, 8);
-		    OUTPUT_TRIANGLE2(0,1,2, 8);
-
-			break;
-		}
-	}
-/*
-	if (NumVertices > (MAX_VERTEXES-12))
-	{
-		UnlockExecuteBufferAndPrepareForUse();
-		ExecuteBuffer();
-		LockExecuteBuffer();
-	}
-*/
+	// 3: Create Indices
+	pListTest->CreateIndicies(particleIndex, RenderPolygon.NumberOfVertices);
 }
 
 void PostLandscapeRendering()

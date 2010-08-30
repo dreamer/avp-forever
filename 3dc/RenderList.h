@@ -47,9 +47,6 @@ struct RenderItem2
 	uint32_t	indexStart;
 	uint32_t	indexEnd;
 
-//	uint32_t	textureID;
-//	uint32_t	shaderID;
-
 	uint32_t	sortKey;
 
 	bool operator<(const RenderItem2& rhs) const {return sortKey < rhs.sortKey;}
@@ -60,7 +57,11 @@ class RenderList
 	private:
 		size_t		capacity;
 		size_t		listIndex;	// used as list size
-		uint32_t	totalVerts;
+
+		uint32_t	vertexCount;
+		uint32_t	indexCount;
+
+		void RenderList::AddIndicies(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n);
 
 	public:
 		std::vector<RenderItem2> Items;
@@ -69,8 +70,11 @@ class RenderList
 
 	void Reset();
 	void RenderList::Init(size_t size);
-	size_t RenderList::GetCapacity();
+	size_t RenderList::GetCapacity() const { return capacity; }
+	uint32_t RenderList::GetVertexCount() const { return vertexCount; }
+	uint32_t RenderList::GetIndexCount() const { return indexCount; }
 	void RenderList::Sort();
-//	void AddItem(uint32_t numVerts, uint32_t textureID, uint32_t shaderID);
-	void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode);
+	void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON);
+	void RenderList::CreateIndicies(uint16_t *indexArray, uint32_t numVerts);
+	void RenderList::Draw();
 };

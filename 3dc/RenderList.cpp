@@ -23,14 +23,19 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "RenderList.h"
+#include "renderer.h"
 #include <windows.h>
 #include <algorithm>
+#include <assert.h>
+
+extern uint32_t GetRealNumVerts(uint32_t numVerts);
 
 RenderList::RenderList(size_t size)
 {
 	capacity = size;
 	listIndex = 0;
-	totalVerts = 0;
+	vertexCount = 0;
+	indexCount = 0;
 
 	// treat the vector as an array so resize it to desired size
 	Items.reserve(size);
@@ -42,9 +47,78 @@ RenderList::~RenderList()
 //	delete Items;
 }
 
-//void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, uint32_t shaderID)
-void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
+void RenderList::CreateIndicies(uint16_t *indexArray, uint32_t numVerts)
 {
+	switch (numVerts)
+	{
+		default:
+			OutputDebugString("unexpected number of verts to render\n");
+			break;
+		case 0:
+			OutputDebugString("Asked to render 0 verts\n");
+			break;
+		case 3:
+		{
+			AddIndicies(indexArray, 0,2,1, 3);
+			break;
+		}
+		case 4:
+		{
+			AddIndicies(indexArray, 0,1,2, 4);
+			AddIndicies(indexArray, 0,2,3, 4);
+			break;
+		}
+		case 5:
+		{
+			AddIndicies(indexArray, 0,1,4, 5);
+			AddIndicies(indexArray, 1,3,4, 5);
+			AddIndicies(indexArray, 1,2,3, 5);
+			break;
+		}
+		case 6:
+		{
+			AddIndicies(indexArray, 0,4,5, 6);
+			AddIndicies(indexArray, 0,3,4, 6);
+			AddIndicies(indexArray, 0,2,3, 6);
+			AddIndicies(indexArray, 0,1,2, 6);
+			break;
+		}
+		case 7:
+		{
+			AddIndicies(indexArray, 0,5,6, 7);
+			AddIndicies(indexArray, 0,4,5, 7);
+			AddIndicies(indexArray, 0,3,4, 7);
+			AddIndicies(indexArray, 0,2,3, 7);
+			AddIndicies(indexArray, 0,1,2, 7);
+			break;
+		}
+		case 8:
+		{
+			AddIndicies(indexArray, 0,6,7, 8);
+			AddIndicies(indexArray, 0,5,6, 8);
+			AddIndicies(indexArray, 0,4,5, 8);
+			AddIndicies(indexArray, 0,3,4, 8);
+			AddIndicies(indexArray, 0,2,3, 8);
+			AddIndicies(indexArray, 0,1,2, 8);
+			break;
+		}
+	}
+}
+
+void RenderList::AddIndicies(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n)
+{
+	indexArray[this->indexCount]   = (vertexCount - (n) + (a));
+	indexArray[this->indexCount+1] = (vertexCount - (n) + (b));
+	indexArray[this->indexCount+2] = (vertexCount - (n) + (c));
+	this->indexCount+=3;
+}
+
+void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode)
+{
+	assert(numVerts != 0);
+
+	uint32_t realNumVerts = GetRealNumVerts(numVerts);
+
 	Items[listIndex].sortKey = 0; // zero it out
 	Items[listIndex].sortKey = (textureID << 24) | (translucencyMode << 20) | (filteringMode << 16);
 
@@ -58,59 +132,17 @@ void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENC
 	else
 	{
 		// we need to add a new item
-		Items[listIndex].vertStart = totalVerts;
-		Items[listIndex].indexStart = 0; // TODO. totalIndices
+		Items[listIndex].vertStart = vertexCount;
+		Items[listIndex].indexStart = indexCount;
 	}
 
-	Items[listIndex].vertEnd = totalVerts + numVerts;
-	Items[listIndex].indexEnd = 0; // TODO. totalIndicies + numIndices
+	Items[listIndex].vertEnd = vertexCount + numVerts;
+	Items[listIndex].indexEnd = indexCount + realNumVerts;
 	listIndex++;
 
-	totalVerts += numVerts;
-
-
-/*
-	// lets see if we can merge this item with the previous item
-	if ((listIndex != 0) &&		// only do this check if we're not adding the first item
-		(shaderID == Items[listIndex-1].shaderID) &&
-		(textureID == Items[listIndex-1].textureID))
-	{
-		// our new item uses the same states as previous item.
-		listIndex--;
-	}
-	else
-	{
-		// we need to add a new item
-		Items[listIndex].vertStart = totalVerts;
-		Items[listIndex].indexStart = 0; // TODO. totalIndices
-	}
-
-	Items[listIndex].sortKey = (textureID << SORT_TEXTURE_SHIFT) | shaderID;
-
-	Items[listIndex].textureID = textureID;
-	Items[listIndex].shaderID = shaderID;
-	Items[listIndex].vertEnd = totalVerts + numVerts;
-	Items[listIndex].indexEnd = 0; // TODO. totalIndicies + numIndices
-	listIndex++;
-
-	totalVerts += numVerts;
-*/
+	vertexCount += numVerts;
 }
 
-size_t RenderList::GetCapacity()
-{
-	return capacity;
-}
-/*
-void RenderList::Init(size_t size)
-{
-	// treat the vector as an array so resize it to desired size
-	Items.reserve(size);
-	Items.resize(size);
-
-	listCapacity = size;
-}
-*/
 void RenderList::Sort()
 {
 	std::sort(Items.begin(), Items.begin() + listIndex);
@@ -120,6 +152,32 @@ void RenderList::Reset()
 {
 	// reset our index back to the first item
 	listIndex = 0;
+
+	vertexCount = 0;
+	indexCount = 0;
+}
+
+void RenderList::Draw()
+{
+	for (std::vector<RenderItem2>::iterator it = Items.begin(); it != /*Items.end()*/Items.begin() + listIndex; ++it)
+	{
+		// set texture
+		R_SetTexture(0, it->sortKey >> 24);
+		ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((it->sortKey >> 20) & 15));
+		ChangeFilteringMode((enum FILTERING_MODE_ID)	((it->sortKey >> 16) & 15));
+
+		uint32_t numPrimitives = (it->indexEnd - it->indexStart) / 3;
+
+		if (numPrimitives)
+		{
+			// bjd - FIXME
+			if (this->vertexCount == 0)
+			{
+				return;
+			}
+			R_DrawIndexedPrimitive(this->vertexCount, it->indexStart, numPrimitives);
+		}
+	}
 }
 
 #if 0
