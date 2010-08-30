@@ -74,7 +74,7 @@ class RenderList
 	uint32_t RenderList::GetVertexCount() const { return vertexCount; }
 	uint32_t RenderList::GetIndexCount() const { return indexCount; }
 	void RenderList::Sort();
-	void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON);
+	void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON, enum TEXTURE_ADDRESS_MODE textureAddress = TEXTURE_WRAP);
 	void RenderList::CreateIndicies(uint16_t *indexArray, uint32_t numVerts);
 	void RenderList::Draw();
 };

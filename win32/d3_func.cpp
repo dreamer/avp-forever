@@ -852,6 +852,13 @@ bool CreateVolatileResources()
 	d3d.mainTestIB = new IndexBuffer;
 	d3d.mainTestIB->Create(MAX_INDICES*5, USAGE_DYNAMIC);
 
+	// ortho test
+	d3d.orthoVB = new VertexBuffer;
+	d3d.orthoIB = new IndexBuffer;
+
+	d3d.orthoVB->Create(MAX_VERTEXES, FVF_ORTHO, USAGE_DYNAMIC);
+	d3d.orthoIB->Create(MAX_INDICES, USAGE_DYNAMIC);
+
 	SetRenderStateDefaults();
 
 	return true;

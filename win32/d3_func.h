@@ -172,6 +172,9 @@ typedef struct D3DInfo
 	class VertexBuffer		*mainTestVB;
 	class IndexBuffer		*mainTestIB;
 
+	class VertexBuffer		*orthoVB;
+	class IndexBuffer		*orthoIB;
+
 	LPDIRECT3DVERTEXBUFFER9 lpD3DVertexBuffer;
 	LPDIRECT3DINDEXBUFFER9	lpD3DIndexBuffer;
 

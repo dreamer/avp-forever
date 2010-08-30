@@ -4976,14 +4976,11 @@ void RenderTrailSegment(PHEROMONE_TRAIL *trailPtr)
 		fakeHeader.PolyColour = CloudyImageNumber;
 	}
 	RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
-	
-
  	{
 		int i;
 		for (i=0; i<4; i++) 
 		{
 			VerticesBuffer[i].A = trailPtr->Size[i/2]/65536;
-
 
 			VerticesBuffer[i].R = 255;
 			VerticesBuffer[i].G	= 255;
@@ -4991,21 +4988,21 @@ void RenderTrailSegment(PHEROMONE_TRAIL *trailPtr)
 			VerticesBuffer[i].SpecularR = 0;
 			VerticesBuffer[i].SpecularG = 0;
 			VerticesBuffer[i].SpecularB = 0;
-
 		}
 		RenderPolygon.NumberOfVertices=4;
 	}
 			
 	GouraudTexturedPolygon_ClipWithZ();
-	if(RenderPolygon.NumberOfVertices<3) return;
+	if (RenderPolygon.NumberOfVertices<3) return;
 	GouraudTexturedPolygon_ClipWithNegativeX();
-	if(RenderPolygon.NumberOfVertices<3) return;
+	if (RenderPolygon.NumberOfVertices<3) return;
 	GouraudTexturedPolygon_ClipWithPositiveY();
-	if(RenderPolygon.NumberOfVertices<3) return;
+	if (RenderPolygon.NumberOfVertices<3) return;
 	GouraudTexturedPolygon_ClipWithNegativeY();
-	if(RenderPolygon.NumberOfVertices<3) return;
+	if (RenderPolygon.NumberOfVertices<3) return;
 	GouraudTexturedPolygon_ClipWithPositiveX();
-	if(RenderPolygon.NumberOfVertices<3) return;
+	if (RenderPolygon.NumberOfVertices<3) return;
+
 	D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
 }
 

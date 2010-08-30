@@ -98,25 +98,28 @@ WORD *mainIndex = NULL;
 D3DLVERTEX *testMainVertex = NULL;
 WORD *testMainIndex = NULL;
 
+ORTHOVERTEX *orthoVerts = NULL;
+WORD *orthoIndex = NULL;
+
+ORTHOVERTEX *testOrthoVertex = NULL;
+WORD *testOrthoIndex = NULL;
+
 D3DLVERTEX *particleVertex = NULL;
 WORD *particleIndex = NULL;
-uint32_t	pVb = 0;
-
+uint32_t pVb = 0;
 uint32_t tempIndex = 0;
 
 std::vector<RENDER_STATES> renderList;
 std::vector<RENDER_STATES> transRenderList;
 std::vector<RENDER_STATES> orthoList;
 
-RenderList *pListTest;
-RenderList *testMainList;
+RenderList *particleList;
+RenderList *mainList;
+RenderList *testOrthoList;
 
 uint32_t renderListCount = 0;
 uint32_t transRenderListCount = 0;
 uint32_t orthoListCount = 0;
-
-ORTHOVERTEX *orthoVerts = NULL;
-WORD *orthoIndex = NULL;
 
 static uint32_t orthoVBOffset = 0;
 static uint32_t orthoIBOffset = 0;
@@ -135,8 +138,9 @@ static HRESULT LastError;
 void RenderListInit()
 {
 	// new, test particle list
-	pListTest = new RenderList(200);
-	testMainList = new RenderList(800);
+	particleList = new RenderList(200);
+	mainList = new RenderList(800);
+	testOrthoList = new RenderList(400);
 
 	renderList.reserve(MAX_VERTEXES);
 	renderList.resize(MAX_VERTEXES);
@@ -298,13 +302,18 @@ bool LockExecuteBuffer()
 	d3d.particleTestVB->Lock((void**)&particleVertex);
 	d3d.particleTestIB->Lock(&particleIndex);
 
-	pListTest->Reset();
+	particleList->Reset();
 
 	// test main vertex buffer
 	d3d.mainTestVB->Lock((void**)&testMainVertex);
 	d3d.mainTestIB->Lock(&testMainIndex);
 
-	testMainList->Reset();
+	mainList->Reset();
+
+	d3d.orthoVB->Lock((void**)&testOrthoVertex);
+	d3d.orthoIB->Lock(&testOrthoIndex);
+
+	testOrthoList->Reset();
 
 	// reset counters and indexes
 	NumVertices = 0;
@@ -390,8 +399,8 @@ bool ExecuteBuffer()
 {
 	// sort the list of render objects
 //	std::sort(renderList.begin(), renderList.begin() + renderListCount);
-	pListTest->Sort();
-	testMainList->Sort();
+	particleList->Sort();
+	mainList->Sort();
 
 /*
 	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));
@@ -438,7 +447,7 @@ bool ExecuteBuffer()
 
 	ChangeTextureAddressMode(TEXTURE_WRAP);
 
-	testMainList->Draw();
+	mainList->Draw();
 
 #if 0
 	// draw opaque polygons
@@ -514,7 +523,7 @@ bool ExecuteBuffer()
 		ChangeTextureAddressMode(TEXTURE_CLAMP);
 
 		// Draw the particles in the list
-		pListTest->Draw();
+		particleList->Draw();
 
 		EnableZBufferWrites();
 		ChangeTextureAddressMode(TEXTURE_WRAP);
@@ -1329,6 +1338,7 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t 
 	Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
 
 	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP);
+//	testOrthoList->AddItem(4, textureID, translucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 	// bottom left
 	orthoVerts[orthoVBOffset].x = x1;
@@ -2025,7 +2035,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 
 //	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
 
-	testMainList->AddItem(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
+	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
@@ -2057,7 +2067,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 		vb++;
 	}
 
-	testMainList->CreateIndicies(testMainIndex, RenderPolygon.NumberOfVertices);
+	mainList->CreateIndicies(testMainIndex, RenderPolygon.NumberOfVertices);
 
 //	D3D_OutputTriangles();
 }
@@ -2509,7 +2519,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	// 1: Check our VB and IBs are big enough?
 
 	// 2: If we're ok to add, add a RenderItem
-	pListTest->AddItem(RenderPolygon.NumberOfVertices, textureID, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON);
+	particleList->AddItem(RenderPolygon.NumberOfVertices, textureID, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON);
 
 	RCOLOR colour;
 
@@ -2587,7 +2597,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	}
 
 	// 3: Create Indices
-	pListTest->CreateIndicies(particleIndex, RenderPolygon.NumberOfVertices);
+	particleList->CreateIndicies(particleIndex, RenderPolygon.NumberOfVertices);
 }
 
 void PostLandscapeRendering()

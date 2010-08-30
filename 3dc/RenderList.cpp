@@ -113,7 +113,7 @@ void RenderList::AddIndicies(uint16_t *indexArray, uint32_t a, uint32_t b, uint3
 	this->indexCount+=3;
 }
 
-void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode)
+void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode, enum TEXTURE_ADDRESS_MODE textureAddress)
 {
 	assert(numVerts != 0);
 
@@ -159,7 +159,7 @@ void RenderList::Reset()
 
 void RenderList::Draw()
 {
-	for (std::vector<RenderItem2>::iterator it = Items.begin(); it != /*Items.end()*/Items.begin() + listIndex; ++it)
+	for (std::vector<RenderItem2>::iterator it = Items.begin(); it != Items.begin() + listIndex; ++it)
 	{
 		// set texture
 		R_SetTexture(0, it->sortKey >> 24);
