@@ -49,6 +49,7 @@ RenderList::~RenderList()
 
 void RenderList::CreateIndicies(uint16_t *indexArray, uint32_t numVerts)
 {
+	// handle ortho quad index order differently..
 	switch (numVerts)
 	{
 		default:
@@ -64,8 +65,15 @@ void RenderList::CreateIndicies(uint16_t *indexArray, uint32_t numVerts)
 		}
 		case 4:
 		{
+			// winding order for main avp rendering system
 			AddIndicies(indexArray, 0,1,2, 4);
 			AddIndicies(indexArray, 0,2,3, 4);
+
+			// winding order for my ortho quad system
+				// bottom left, top left, bottom right
+				// bottom right, top left, top right
+			//AddIndicies(indexArray, 0,1,2, 4);
+			//AddIndicies(indexArray, 2,1,3, 4);
 			break;
 		}
 		case 5:
@@ -120,7 +128,7 @@ void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENC
 	uint32_t realNumVerts = GetRealNumVerts(numVerts);
 
 	Items[listIndex].sortKey = 0; // zero it out
-	Items[listIndex].sortKey = (textureID << 24) | (translucencyMode << 20) | (filteringMode << 16);
+	Items[listIndex].sortKey = (textureID << 24) | (translucencyMode << 20) | (filteringMode << 16) | (textureAddress << 15);
 
 	// lets see if we can merge this item with the previous item
 	if ((listIndex != 0) &&		// only do this check if we're not adding the first item
@@ -165,6 +173,7 @@ void RenderList::Draw()
 		R_SetTexture(0, it->sortKey >> 24);
 		ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((it->sortKey >> 20) & 15));
 		ChangeFilteringMode((enum FILTERING_MODE_ID)	((it->sortKey >> 16) & 15));
+		ChangeTextureAddressMode((enum TEXTURE_ADDRESS_MODE) ((it->sortKey >> 15) & 1));
 
 		uint32_t numPrimitives = (it->indexEnd - it->indexStart) / 3;
 

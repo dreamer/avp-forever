@@ -166,17 +166,17 @@ typedef struct D3DInfo
 	D3DVIEWPORT9			D3DViewport;
 	D3DPRESENT_PARAMETERS	d3dpp;
 
-	class VertexBuffer		*particleTestVB;
-	class IndexBuffer		*particleTestIB;
+	class VertexBuffer		*particleVB;
+	class IndexBuffer		*particleIB;
 
-	class VertexBuffer		*mainTestVB;
-	class IndexBuffer		*mainTestIB;
+	class VertexBuffer		*mainVB;
+	class IndexBuffer		*mainIB;
 
 	class VertexBuffer		*orthoVB;
 	class IndexBuffer		*orthoIB;
 
-	LPDIRECT3DVERTEXBUFFER9 lpD3DVertexBuffer;
-	LPDIRECT3DINDEXBUFFER9	lpD3DIndexBuffer;
+//	LPDIRECT3DVERTEXBUFFER9 lpD3DVertexBuffer;
+//	LPDIRECT3DINDEXBUFFER9	lpD3DIndexBuffer;
 
 	LPDIRECT3DVERTEXBUFFER9 lpD3DOrthoVertexBuffer;
 	LPDIRECT3DINDEXBUFFER9	lpD3DOrthoIndexBuffer;

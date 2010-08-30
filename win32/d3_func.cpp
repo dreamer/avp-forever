@@ -382,18 +382,18 @@ bool ReleaseVolatileResources()
 {
 	Tex_ReleaseDynamicTextures();
 
-	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
-	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
+//	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
+//	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
 	SAFE_RELEASE(d3d.lpD3DOrthoVertexBuffer);
 	SAFE_RELEASE(d3d.lpD3DOrthoIndexBuffer);
 //	SAFE_RELEASE(d3d.lpD3DParticleVertexBuffer);
 //	SAFE_RELEASE(d3d.lpD3DParticleIndexBuffer);
 
-	d3d.particleTestVB->Release();
-	d3d.particleTestIB->Release();
+	d3d.particleVB->Release();
+	d3d.particleIB->Release();
 
-	d3d.mainTestVB->Release();
-	d3d.mainTestIB->Release();
+	d3d.mainVB->Release();
+	d3d.mainIB->Release();
 
 	return true;
 }
@@ -774,6 +774,7 @@ bool CreateVolatileResources()
 {
 	Tex_ReloadDynamicTextures();
 
+#if 0
 	// create dynamic vertex buffer
 	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DLVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, /*D3DFVF_LVERTEX*/0, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
 	if (FAILED(LastError))
@@ -789,6 +790,7 @@ bool CreateVolatileResources()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
+#endif
 
 	// create our 2D vertex buffer
 	LastError = d3d.lpD3DDevice->CreateVertexBuffer(4 * 2000 * sizeof(ORTHOVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, /*D3DFVF_ORTHOVERTEX*/0, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoVertexBuffer, NULL);
@@ -839,18 +841,18 @@ bool CreateVolatileResources()
 	}
 */
 	// test vertex buffer
-	d3d.particleTestVB = new VertexBuffer;
-	d3d.particleTestVB->Create(MAX_VERTEXES, FVF_LVERTEX, USAGE_DYNAMIC);
+	d3d.particleVB = new VertexBuffer;
+	d3d.particleVB->Create(MAX_VERTEXES, FVF_LVERTEX, USAGE_DYNAMIC);
 
-	d3d.particleTestIB = new IndexBuffer;
-	d3d.particleTestIB->Create(MAX_INDICES, USAGE_DYNAMIC);
+	d3d.particleIB = new IndexBuffer;
+	d3d.particleIB->Create(MAX_INDICES, USAGE_DYNAMIC);
 
 	// test main
-	d3d.mainTestVB = new VertexBuffer;
-	d3d.mainTestVB->Create(MAX_VERTEXES*5, FVF_LVERTEX, USAGE_DYNAMIC);
+	d3d.mainVB = new VertexBuffer;
+	d3d.mainVB->Create(MAX_VERTEXES*5, FVF_LVERTEX, USAGE_DYNAMIC);
 
-	d3d.mainTestIB = new IndexBuffer;
-	d3d.mainTestIB->Create(MAX_INDICES*5, USAGE_DYNAMIC);
+	d3d.mainIB = new IndexBuffer;
+	d3d.mainIB->Create(MAX_INDICES*5, USAGE_DYNAMIC);
 
 	// ortho test
 	d3d.orthoVB = new VertexBuffer;
