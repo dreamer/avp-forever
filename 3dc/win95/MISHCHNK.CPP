@@ -231,7 +231,7 @@ BOOL Lockable_Chunk_With_Children::update_chunk_in_file(HANDLE &rif_file)
 
 	if (!sfpl.done())
 	{
-		int file_length = GetFileSize(rif_file,0);
+		int file_length = GetFileSize(rif_file, 0);
 
 		if (file_length > (sfpl() + length))
 		{
@@ -282,7 +282,7 @@ BOOL Lockable_Chunk_With_Children::update_chunk_in_file(HANDLE &rif_file)
 
 	updated = FALSE;
 	
-	int file_length = GetFileSize(rif_file,0);
+	int file_length = GetFileSize(rif_file, 0);
 	SetFilePointer (rif_file,8,0,FILE_BEGIN);
 
 	WriteFile (rif_file, (long *) &file_length, 4, &bytes_read, 0);
@@ -372,7 +372,7 @@ File_Chunk::File_Chunk(const char * file_name)
 		return;
 	}
 
-	file_size = GetFileSize (rif_file, NULL);
+	file_size = GetFileSize(rif_file, NULL);
 
 	if (!ReadFile(rif_file, id_buffer, 8, &bytes_read, 0))
 	{
@@ -1218,7 +1218,7 @@ BOOL File_Chunk::update_file()
 
 	//
 
-	int file_length = GetFileSize(rif_file,0);
+	int file_length = GetFileSize(rif_file, 0);
 	SetFilePointer (rif_file,8,0,FILE_BEGIN);
 
 	WriteFile (rif_file, (long *) &file_length, 4, &bytes_read, 0);
@@ -1725,7 +1725,7 @@ RIF_File_Chunk::RIF_File_Chunk (Chunk_With_Children * parent, const char * file_
 		return;
 	}
 
-	file_size = GetFileSize (rif_file, NULL);
+	file_size = GetFileSize(rif_file, NULL);
 
 	if (!ReadFile(rif_file, id_buffer, 8, &bytes_read, 0))
 	{

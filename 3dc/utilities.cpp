@@ -37,6 +37,7 @@ static char saveFolder[MAX_PATH] = {0};
 
 extern "C" {
 
+// TODO: remove this
 extern void ReleaseDirect3D();
 
 #ifdef WIN32

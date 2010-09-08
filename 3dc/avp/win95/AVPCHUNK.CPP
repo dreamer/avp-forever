@@ -634,51 +634,49 @@ RIF_IMPLEMENT_DYNCREATE("AVPDECAL",AVP_Decal_Chunk)
 AVP_Decal_Chunk::AVP_Decal_Chunk(Chunk_With_Children* parent,const char* data,size_t)
 :Chunk(parent,"AVPDECAL")
 {
-	num_decals=*(int*)data;
+	num_decals = *(int*)data;
 	data+=4;
 
-	int loaded_decal_size=*(int*)data;
+	int loaded_decal_size = *(int*)data;
 	data+=4;
 
-	decal_size=max(loaded_decal_size,(int)sizeof(AVP_Decal));
+	decal_size = max(loaded_decal_size, (int)sizeof(AVP_Decal));
 
 	//allocate buffer for decals , and initialise to zero
-	decal_buffer=new char[num_decals*decal_size];
-	memset(decal_buffer,0,num_decals*decal_size);
+	decal_buffer = new char[num_decals*decal_size];
+	memset(decal_buffer, 0, num_decals*decal_size);
 
-	char* buffer_ptr=decal_buffer;
-	for(int i=0;i<num_decals;i++)
+	char* buffer_ptr = decal_buffer;
+	for (int i = 0; i < num_decals; i++)
 	{
-		memcpy(buffer_ptr,data,loaded_decal_size);
-		buffer_ptr+=decal_size;
-		data+=loaded_decal_size;
+		memcpy(buffer_ptr, data, loaded_decal_size);
+		buffer_ptr += decal_size;
+		data += loaded_decal_size;
 	}
 
 	//only allow access to the decals if the loaded structure size is less than or equal
 	//to the current stucture size
-	if(loaded_decal_size<=(int)sizeof(AVP_Decal))
+	if (loaded_decal_size <= (int)sizeof(AVP_Decal))
 	{
-		decals=(AVP_Decal*)decal_buffer;
+		decals = (AVP_Decal*)decal_buffer;
 	}
 	else
 	{
-		decals=0;
+		decals = 0;
 	}
-	
 }
 
-AVP_Decal_Chunk::AVP_Decal_Chunk(Chunk_With_Children* parent,int num_dec)
+AVP_Decal_Chunk::AVP_Decal_Chunk(Chunk_With_Children* parent, int num_dec)
 :Chunk(parent,"AVPDECAL")
 {
-	num_decals=num_dec;
-	decal_size=sizeof(AVP_Decal);
+	num_decals = num_dec;
+	decal_size = sizeof(AVP_Decal);
 
 	//allocate buffer for decals , and initialise to zero
-	decal_buffer=new char[num_decals*decal_size];
-	memset(decal_buffer,0,num_decals*decal_size);
+	decal_buffer = new char[num_decals*decal_size];
+	memset(decal_buffer, 0, num_decals*decal_size);
 
-	decals=(AVP_Decal*)decal_buffer;
-	
+	decals = (AVP_Decal*)decal_buffer;
 }
 
 AVP_Decal_Chunk::~AVP_Decal_Chunk()

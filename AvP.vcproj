@@ -7937,6 +7937,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\3dc\shaderManager.cpp"
+				>
+			</File>
+			<File
 				RelativePath="3dc\shpanim.c"
 				>
 				<FileConfiguration
@@ -10154,6 +10158,10 @@
 				</File>
 				<File
 					RelativePath="3dc\avp\sfx.h"
+					>
+				</File>
+				<File
+					RelativePath=".\3dc\shaderManager.h"
 					>
 				</File>
 				<File

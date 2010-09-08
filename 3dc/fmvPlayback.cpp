@@ -154,7 +154,7 @@ TheoraFMV::~TheoraFMV()
 
 	for (uint32_t i = 0; i < 3; i++)
 	{
-		Tex_Release(frameTextures[i]);
+//		Tex_Release(frameTextures[i]);
 	}
 
 	if (mFrameCriticalSectionInited)
@@ -789,7 +789,7 @@ unsigned int __stdcall audioThread(void *args)
 
 	TheoraFMV *fmv = static_cast<TheoraFMV*>(args);
 
-	DWORD dwQuantum = 1000 / 60;
+	uint32_t quantum = 1000 / 60;
 
 	static int totalRead = 0;
 	static int lastRead = 0;
@@ -833,7 +833,7 @@ unsigned int __stdcall audioThread(void *args)
 
 		timetoSleep = endTime - startTime;
 
-		Sleep(dwQuantum - timetoSleep);
+		Sleep(quantum - timetoSleep);
 	}
 
 	_endthreadex(0);

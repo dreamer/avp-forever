@@ -76,7 +76,7 @@ void CharacterSoundEffects::LoadSounds(const char* filename, const char* directo
 	int file_size;
 	unsigned long bytes_read;
 
-	file_size = GetFileSize(file,0);
+	file_size = GetFileSize(file, 0);
 	buffer = new char[file_size+1];
 	ReadFile(file,buffer, file_size, &bytes_read, 0);
 	CloseHandle(file);

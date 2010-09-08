@@ -191,41 +191,45 @@ Sprite_Header_Chunk::Sprite_Header_Chunk(const char * file_name, Chunk_With_Chil
 	rif_file = avp_CreateFile (file_name, GENERIC_READ, 0, 0, OPEN_EXISTING, 
 					FILE_FLAG_RANDOM_ACCESS, 0);
 
-	if (rif_file == INVALID_HANDLE_VALUE) {
+	if (rif_file == INVALID_HANDLE_VALUE) 
+	{
 		return;
 	}
 
-	file_size = GetFileSize (rif_file, NULL);	
+	file_size = GetFileSize(rif_file, NULL);	
 
-	
-	if (!ReadFile(rif_file, id_buffer, 8, &bytes_read, 0)) {
+	if (!ReadFile(rif_file, id_buffer, 8, &bytes_read, 0)) 
+	{
 		error_code = CHUNK_FAILED_ON_LOAD;
 		CloseHandle (rif_file);
 		return;
 	}	
 
-	if (strncmp (id_buffer, "SPRIHEAD", 8)) {
+	if (strncmp (id_buffer, "SPRIHEAD", 8)) 
+	{
 		error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
 		CloseHandle (rif_file);
 		return;
 	}	
 
-	if (!ReadFile(rif_file, &file_size_from_file, 4, &bytes_read, 0)) {
+	if (!ReadFile(rif_file, &file_size_from_file, 4, &bytes_read, 0))
+	{
 		error_code = CHUNK_FAILED_ON_LOAD;
 		CloseHandle (rif_file);
 		return;
 	}	
 
-	if (file_size != file_size_from_file) {
+	if (file_size != file_size_from_file) 
+	{
 		error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
 		CloseHandle (rif_file);
 		return;
 	}	
 
+	buffer = new char[file_size];
 
-	buffer = new char [file_size];
-
-	if (!ReadFile(rif_file, buffer, (file_size-12), &bytes_read, 0)) {
+	if (!ReadFile(rif_file, buffer, (file_size-12), &bytes_read, 0)) 
+	{
 		error_code = CHUNK_FAILED_ON_LOAD;
 		CloseHandle (rif_file);
 		return;
@@ -238,24 +242,22 @@ Sprite_Header_Chunk::Sprite_Header_Chunk(const char * file_name, Chunk_With_Chil
 	
 	// The start of the first chunk
 
-	while ((buffer_ptr-buffer)< ((signed) file_size-12) && !error_code) {
-
-		if ((*(int *)(buffer_ptr + 8)) + (buffer_ptr-buffer) > ((signed) file_size-12)) {
+	while ((buffer_ptr-buffer)< ((signed) file_size-12) && !error_code) 
+	{
+		if ((*(int *)(buffer_ptr + 8)) + (buffer_ptr-buffer) > ((signed) file_size-12)) 
+		{
 			error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
 			break;
 		}
 
 		DynCreate(buffer_ptr);
 		buffer_ptr += *(int *)(buffer_ptr + 8);
-
 	}
 
 	delete [] buffer;
 
 	CloseHandle (rif_file);
-
 }
-
 
 int Sprite_Header_Chunk::write_file(const char* fname)
 {
@@ -264,14 +266,17 @@ int Sprite_Header_Chunk::write_file(const char* fname)
 	rif_file = avp_CreateFile(fname, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 
 					FILE_FLAG_RANDOM_ACCESS, 0);
 
-	if (rif_file == INVALID_HANDLE_VALUE) {
+	if (rif_file == INVALID_HANDLE_VALUE)
+	{
 		return CHUNK_FAILED_ON_WRITE;
 	}
 
 	size_chunk();
 
 	if (!(this->output_chunk(rif_file)))
+	{
 		return CHUNK_FAILED_ON_WRITE;
+	}
 
 	CloseHandle (rif_file);
 
@@ -302,23 +307,24 @@ PC_Sprite_Chunk::PC_Sprite_Chunk(Sprite_Header_Chunk* parent,const char* data,si
 {
 	const char * buffer_ptr = data;
 
-	
-	while ((data-buffer_ptr)< (signed) datasize) {
-
-		if ((*(int *)(data + 8)) + (data-buffer_ptr) > (signed) datasize) {
+	while ((data-buffer_ptr)< (signed) datasize) 
+	{
+		if ((*(int *)(data + 8)) + (data-buffer_ptr) > (signed) datasize) 
+		{
 			Parent_File->error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
 			break;
 		}
 
-		if (!strncmp(data, "SPRACTIO",8)) {
+		if (!strncmp(data, "SPRACTIO",8)) 
+		{
 			new Sprite_Action_Chunk (this, (data + 12), (*(int *) (data + 8))-12);
 			data += *(int *)(data + 8);
 		}
-		else {
-			new Miscellaneous_Chunk (this, data, (data + 12), (*(int *) (data + 8)) -12 );
+		else 
+		{
+			new Miscellaneous_Chunk (this, data, (data + 12), (*(int *) (data + 8)) -12);
 			data += *(int *)(data + 8);
 		}
-
 	}
 }
 /////////////////////////////////////////
@@ -329,24 +335,25 @@ Saturn_Sprite_Chunk::Saturn_Sprite_Chunk(Sprite_Header_Chunk* parent,const char*
 :Chunk_With_Children(parent,"SPRITESA")
 {
 	const char * buffer_ptr = data;
-
 	
-	while ((data-buffer_ptr)< (signed) datasize) {
-
-		if ((*(int *)(data + 8)) + (data-buffer_ptr) > (signed) datasize) {
+	while ((data-buffer_ptr)< (signed) datasize) 
+	{
+		if ((*(int *)(data + 8)) + (data-buffer_ptr) > (signed) datasize) 
+		{
 			Parent_File->error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
 			break;
 		}
 
-		if (!strncmp(data, "SPRACTIO",8)) {
+		if (!strncmp(data, "SPRACTIO",8)) 
+		{
 			new Sprite_Action_Chunk (this, (data + 12), (*(int *) (data + 8))-12);
 			data += *(int *)(data + 8);
 		}
-		else {
+		else 
+		{
 			new Miscellaneous_Chunk (this, data, (data + 12), (*(int *) (data + 8)) -12 );
 			data += *(int *)(data + 8);
 		}
-
 	}
 }
 /////////////////////////////////////////////
@@ -356,24 +363,25 @@ Playstation_Sprite_Chunk::Playstation_Sprite_Chunk(Sprite_Header_Chunk* parent,c
 :Chunk_With_Children(parent,"SPRITEPS")
 {
 	const char * buffer_ptr = data;
-
 	
-	while ((data-buffer_ptr)< (signed) datasize) {
-
-		if ((*(int *)(data + 8)) + (data-buffer_ptr) > (signed) datasize) {
+	while ((data-buffer_ptr)< (signed) datasize) 
+	{
+		if ((*(int *)(data + 8)) + (data-buffer_ptr) > (signed) datasize) 
+		{
 			Parent_File->error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
 			break;
 		}
 
-		if (!strncmp(data, "SPRACTIO",8)) {
+		if (!strncmp(data, "SPRACTIO",8)) 
+		{
 			new Sprite_Action_Chunk (this, (data + 12), (*(int *) (data + 8))-12);
 			data += *(int *)(data + 8);
 		}
-		else {
+		else
+		{
 			new Miscellaneous_Chunk (this, data, (data + 12), (*(int *) (data + 8)) -12 );
 			data += *(int *)(data + 8);
 		}
-
 	}
 }
 

@@ -45,15 +45,15 @@ std::string IntToString(const int value)
 	return stream.str();
 }
 
-/* parses an int from a string and returns it */
+// parses an int from a string and returns it
 int StringToInt(const std::string &string)
 {
 	std::stringstream ss;
 	int value = 0;
 
-	/* copy string to stringstream */
+	// copy string to stringstream
 	ss << string;
-	/* copy from stringstream to int */
+	// copy from stringstream to int
 	ss >> value;
 	
 	return value;
@@ -102,14 +102,14 @@ void LogDxError(HRESULT hr, int LINE, const char* FILE)
 	WriteToLog(temp);
 }
 
-/* logs a string to file, stating line number of error, and source file it occured in */
+// logs a string to file, stating line number of error, and source file it occured in
 void LogErrorString(const std::string &errorString, int LINE, const char* FILE)
 {
 	std::string temp = "\t Error: " + errorString + " Line: " + IntToString(LINE) + " File: " + FILE + "\n";
 	WriteToLog(temp);
 }
 
-/* more basic version of above function. just log a string. */
+// more basic version of above function. just log a string.
 void LogErrorString(const std::string &errorString)
 {
 	std::string temp = "\t Error: " + errorString + "\n";

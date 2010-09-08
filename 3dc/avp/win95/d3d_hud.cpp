@@ -219,9 +219,13 @@ void D3D_InitialiseMarineHUD(void)
 {
 	/* set game mode: different though for multiplayer game */
 	if (AvP.Network == I_No_Network)
+	{
 		cl_pszGameMode = "marine";
+	}
 	else
+	{
 		cl_pszGameMode = "multip";
+	}
 
 	/* load HUD gfx of correct resolution */
 	{

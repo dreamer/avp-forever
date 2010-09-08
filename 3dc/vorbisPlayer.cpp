@@ -136,12 +136,12 @@ uint32_t VorbisPlayback::GetVorbisData(uint32_t sizeToRead)
 	while (bytesReadTotal < sizeToRead)
 	{
 		bytesReadPerLoop = ov_read(
-			&mOggFile,									//what file to read from
+			&mOggFile,									// what file to read from
 			reinterpret_cast<char*>(mAudioData + bytesReadTotal),
-			sizeToRead - bytesReadTotal,				//how much data to read
-			0,											//0 specifies little endian decoding mode
-			2,											//2 specifies 16-bit samples
-			1,											//1 specifies signed data
+			sizeToRead - bytesReadTotal,				// how much data to read
+			0,											// 0 specifies little endian decoding mode
+			2,											// 2 specifies 16-bit samples
+			1,											// 1 specifies signed data
 			0
 		);
 

@@ -39,7 +39,7 @@ enum Shaders
 #define SORT_TEXTURE_SHIFT	16
 #define SORT_SHADER_SHIFT	32
 
-struct RenderItem2
+struct RenderItem
 {
 	uint32_t	vertStart;
 	uint32_t	vertEnd;
@@ -49,7 +49,7 @@ struct RenderItem2
 
 	uint32_t	sortKey;
 
-	bool operator<(const RenderItem2& rhs) const {return sortKey < rhs.sortKey;}
+	bool operator<(const RenderItem& rhs) const {return sortKey < rhs.sortKey;}
 };
 
 class RenderList
@@ -61,10 +61,10 @@ class RenderList
 		uint32_t	vertexCount;
 		uint32_t	indexCount;
 
-		void RenderList::AddIndicies(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n);
+		void RenderList::AddIndices(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n);
 
 	public:
-		std::vector<RenderItem2> Items;
+		std::vector<RenderItem> Items;
 		RenderList(size_t size);
 		~RenderList();
 
@@ -72,9 +72,10 @@ class RenderList
 	void RenderList::Init(size_t size);
 	size_t RenderList::GetCapacity() const { return capacity; }
 	uint32_t RenderList::GetVertexCount() const { return vertexCount; }
-	uint32_t RenderList::GetIndexCount() const { return indexCount; }
+	uint32_t RenderList::GetSize() const { return indexCount; }
 	void RenderList::Sort();
 	void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON, enum TEXTURE_ADDRESS_MODE textureAddress = TEXTURE_WRAP);
-	void RenderList::CreateIndicies(uint16_t *indexArray, uint32_t numVerts);
+	void RenderList::CreateIndices(uint16_t *indexArray, uint32_t numVerts);
+	void RenderList::CreateOrthoIndices(uint16_t *indexArray);
 	void RenderList::Draw();
 };

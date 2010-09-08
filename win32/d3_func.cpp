@@ -37,207 +37,6 @@ extern "C"
 	extern HWND hWndMain;
 }
 
-//test
-/*
-class D3D9Renderer : public Renderer
-{
-	private:
-		IDirect3D9				*D3D;
-		IDirect3DDevice9		*D3DDevice;
-		D3DVIEWPORT9			D3DViewport;
-		D3DPRESENT_PARAMETERS	D3DPresentationParams;
-
-		D3DXMATRIX	matIdentity;
-		D3DXMATRIX	matView;
-		D3DXMATRIX	matProjection;
-		D3DXMATRIX	matOrtho;
-		D3DXMATRIX	matViewPort;
-
-		HRESULT					LastError;
-
-		std::string				deviceName;
-
-	public:
-		D3D9Renderer():
-			D3D(0),
-			D3DDevice(0)
-		{
-			memset(&D3DPresentationParams, 0, sizeof(D3DPRESENT_PARAMETERS));
-		}
-		void Initialise();
-		void BeginFrame();
-		void EndFrame();
-};
-
-
-bool D3D9Renderer::Initialise()
-{
-	// create Direct3D9 interface object
-	D3D = Direct3DCreate9(D3D_SDK_VERSION);
-	if (!D3D)
-	{
-		Con_PrintError("Could not create Direct3D9 object");
-		return false;
-	}
-
-	// fill out presentation parameters
-	D3DPresentationParams.hDeviceWindow = hWndMain;
-	D3DPresentationParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
-
-	D3DPresentationParams.Windowed = TRUE;
-	D3DPresentationParams.BackBufferWidth = 800;
-	D3DPresentationParams.BackBufferHeight = 600;
-	D3DPresentationParams.PresentationInterval = 0;
-
-	D3DPresentationParams.BackBufferCount = 1;
-	D3DPresentationParams.AutoDepthStencilFormat = D3DFMT_D24S8;
-	D3DPresentationParams.EnableAutoDepthStencil = TRUE;
-
-	D3DPresentationParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
-
-	// create the Direct3D9 device
-	LastError = D3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWndMain,
-			D3DCREATE_HARDWARE_VERTEXPROCESSING, &D3DPresentationParams, &D3DDevice);
-
-	if (FAILED(LastError))
-	{
-		Con_PrintError("Could not create Direct3D device");
-		return false;
-	}
-
-	// set up viewport
-	D3DViewport.X = 0;
-	D3DViewport.Y = 0;
-	D3DViewport.Width = 800;
-	D3DViewport.Height = 600;
-	D3DViewport.MinZ = 0.0f;
-	D3DViewport.MaxZ = 1.0f;
-
-	LastError = D3DDevice->SetViewport(&D3DViewport);
-	if (FAILED(LastError))
-	{
-		Con_PrintError("Could not set Direct3D viewport");
-		return false;
-	}
-
-	// create identity matrix
-	D3DXMatrixIdentity(&matIdentity);
-
-	return true;
-}
-
-D3D9Renderer::~D3D9Renderer()
-{
-	SAFE_RELEASE(D3D);
-	SAFE_RELEASE(D3DDevice);
-}
-
-void D3D9Renderer::BeginFrame()
-{
-	// check for a lost device
-	LastError = D3DDevice->TestCooperativeLevel();
-
-	if (FAILED(LastError))
-	{
-		// release vertex + index buffers, and dynamic textures
-//		ReleaseVolatileResources();
-
-		// disable XInput
-//		XInputEnable(false);
-
-		while (1)
-		{
-			CheckForWindowsMessages();
-
-			if (D3DERR_DEVICENOTRESET == LastError)
-			{
-				OutputDebugString("Releasing resources for a device reset..\n");
-
-				if (FAILED(D3DDevice->Reset(&d3d.d3dpp)))
-				{
-					OutputDebugString("Couldn't reset device\n");
-				}
-				else
-				{
-					OutputDebugString("We have reset the device. recreating resources..\n");
-//					CreateVolatileResources();
-
-					SetTransforms();
-
-					// re-enable XInput
-//					XInputEnable(true);
-					break;
-				}
-			}
-			else if (D3DERR_DEVICELOST == LastError)
-			{
-				OutputDebugString("D3D device lost\n");
-			}
-			else if (D3DERR_DRIVERINTERNALERROR == LastError)
-			{
-				// handle this a lot better (exit the game etc)
-				Con_PrintError("need to close avp as a display adapter error occured");
-//				return false;
-			}
-			Sleep(50);
-		}
-	}
-
-	LastError = D3DDevice->BeginScene();
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-//		return false;
-	}
-
-	LastError = D3DDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-//		return false;
-	}
-}
-
-void D3D9Renderer::EndFrame()
-{
-	LastError = D3DDevice->EndScene();
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
-}
-
-bool D3D9Renderer::CreateVertexBuffer(uint32_t length, uint32_t usage, r_VertexBuffer **vertexBuffer)
-{
-	D3DPOOL vbPool;
-	DWORD	vbUsage;
-
-	switch (usage)
-	{
-		case USAGE_STATIC:
-			vbUsage = 0;
-			vbPool = D3DPOOL_MANAGED;
-			break;
-		case USAGE_DYNAMIC:
-			vbUsage = D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY;
-			vbPool = D3DPOOL_DEFAULT;
-			break;
-		default:
-			// error and return
-			break;
-	}
-
-	LastError = D3DDevice->CreateVertexBuffer(length, vbUsage, 0, vbPool, vertexBuffer, NULL);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	return true;
-}
-*/
-
 extern int NumberOfFMVTextures;
 #define MAX_NO_FMVTEXTURES 10
 extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
@@ -299,6 +98,7 @@ extern LPD3DXCONSTANTTABLE	fmvConstantTable;
 extern LPD3DXCONSTANTTABLE	cloudConstantTable;
 
 extern void RenderListInit();
+extern void RenderListDeInit();
 
 // size of vertex and index buffers
 const uint32_t MAX_VERTEXES = 4096;
@@ -384,8 +184,8 @@ bool ReleaseVolatileResources()
 
 //	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
 //	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
-	SAFE_RELEASE(d3d.lpD3DOrthoVertexBuffer);
-	SAFE_RELEASE(d3d.lpD3DOrthoIndexBuffer);
+//	SAFE_RELEASE(d3d.lpD3DOrthoVertexBuffer);
+//	SAFE_RELEASE(d3d.lpD3DOrthoIndexBuffer);
 //	SAFE_RELEASE(d3d.lpD3DParticleVertexBuffer);
 //	SAFE_RELEASE(d3d.lpD3DParticleIndexBuffer);
 
@@ -394,6 +194,9 @@ bool ReleaseVolatileResources()
 
 	d3d.mainVB->Release();
 	d3d.mainIB->Release();
+
+	d3d.orthoVB->Release();
+	d3d.orthoIB->Release();
 
 	return true;
 }
@@ -467,8 +270,8 @@ bool R_BeginScene()
 
 bool R_EndScene()
 {
-	 LastError = d3d.lpD3DDevice->EndScene();
-	 if (FAILED(LastError))
+	LastError = d3d.lpD3DDevice->EndScene();
+	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
@@ -792,6 +595,7 @@ bool CreateVolatileResources()
 	}
 #endif
 
+#if 0
 	// create our 2D vertex buffer
 	LastError = d3d.lpD3DDevice->CreateVertexBuffer(4 * 2000 * sizeof(ORTHOVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, /*D3DFVF_ORTHOVERTEX*/0, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoVertexBuffer, NULL);
 	if (FAILED(LastError))
@@ -807,6 +611,8 @@ bool CreateVolatileResources()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
+#endif
+
 #if 0
 	// create particle vertex buffer
 	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DLVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &d3d.lpD3DParticleVertexBuffer, NULL);
@@ -1366,6 +1172,42 @@ bool CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *pixe
 
 	d3d.lpD3DDevice->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), pixelShader);
 	pCode->Release();
+
+	return true;
+}
+
+bool R_CreateVertexShader(const std::string &fileName, vertexShader_t &vertexShader)
+{
+	return CreateVertexShader(fileName, &vertexShader.vertexShader, &vertexShader.constantTable);
+}
+
+bool R_CreatePixelShader(const std::string &fileName, pixelShader_t &pixelShader)
+{
+	return CreatePixelShader(fileName, &pixelShader.pixelShader);
+}
+
+bool R_SetVertexShader(vertexShader_t &vertexShader)
+{
+	LastError = d3d.lpD3DDevice->SetVertexShader(vertexShader.vertexShader);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't set vertex shader " + vertexShader.vertexShaderName);
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+bool R_SetPixelShader(pixelShader_t &pixelShader)
+{
+	LastError = d3d.lpD3DDevice->SetPixelShader(pixelShader.pixelShader);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't set pixel shader " + pixelShader.pixelShaderName);
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
 
 	return true;
 }
@@ -2415,6 +2257,13 @@ bool InitialiseDirect3D()
 		d3d.lpD3DDevice->SetTexture(i, Tex_GetTexture(NO_TEXTURE));
 	}
 
+	d3d.effectSystem = new EffectManager;
+
+	d3d.mainEffect  = d3d.effectSystem->AddEffect("main", "vertex.vsh", "pixel.psh");
+	d3d.orthoEffect = d3d.effectSystem->AddEffect("ortho", "orthoVertex.vsh", "pixel.psh");
+	d3d.fmvEffect   = d3d.effectSystem->AddEffect("fmv", "fmvVertex.vsh", "fmvPixel.psh");
+	d3d.cloudEffect = d3d.effectSystem->AddEffect("cloud", "tallFontTextVertex.vsh", "tallFontTextPixel.psh");
+
 	Con_Init();
 	Net_Initialise();
 	Font_Init();
@@ -2507,6 +2356,9 @@ void ReleaseDirect3D()
 	SAFE_RELEASE(d3d.orthoVertexShader);
 	SAFE_RELEASE(d3d.cloudVertexShader);
 
+	// clean up render list classes
+	RenderListDeInit();
+
 	// release device
 	SAFE_RELEASE(d3d.lpD3DDevice);
 	LogString("Releasing Direct3D9 device...");
@@ -2536,13 +2388,7 @@ void ReleaseAvPTexture(AVPTEXTURE *texture)
 		free(texture);
 	}
 }
-/*
-void ReleaseD3DTexture(r_Texture *d3dTexture)
-{
-	// release d3d texture
-	SAFE_RELEASE(*d3dTexture);
-}
-*/
+
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 {
 	if (CurrentRenderStates.TranslucencyMode == translucencyRequired)
@@ -2880,6 +2726,5 @@ bool SetRenderStateDefaults()
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 	D3DZFunc = D3DCMP_LESSEQUAL;
 
-    return true;
+	return true;
 }
-

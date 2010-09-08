@@ -24,8 +24,6 @@ extern "C"
 #define CHAR_WIDTH	12//16
 #define CHAR_HEIGHT	16
 
-#define ONE_FIXED	65536
-
 char buf[100];
 
 struct Command

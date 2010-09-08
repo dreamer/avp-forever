@@ -54,8 +54,6 @@ extern D3DXMATRIX matViewPort;
 extern D3DINFO d3d;
 extern uint32_t fov;
 
-extern int NumImagesArray[];
-
 bool CreateVolatileResources();
 bool ReleaseVolatileResources();
 void ColourFillBackBuffer(int FillColour);
@@ -63,7 +61,6 @@ void ColourFillBackBuffer(int FillColour);
 extern "C" 
 {
 	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-	extern AVPIndexedFont IntroFont_Light;
 	extern VIEWDESCRIPTORBLOCK* Global_VDB_Ptr;
 	extern int CloakingPhase;
 	#include "particle.h"
@@ -74,54 +71,23 @@ extern "C"
 const uint32_t MAX_VERTEXES = 4096;
 const uint32_t MAX_INDICES = 9216;
 
-struct RENDER_STATES
-{
-	uint32_t	vertStart;
-	uint32_t	vertEnd;
-	uint32_t	indexStart;
-	uint32_t	indexEnd;
-
-	uint32_t	sortKey;
-
-	bool operator<(const RENDER_STATES& rhs) const {return sortKey < rhs.sortKey;}
-};
-
 D3DLVERTEX *mainVertex = NULL;
-WORD *mainIndex = NULL;
+uint16_t *mainIndex = NULL;
 
-//D3DLVERTEX *testMainVertex = NULL;
-//WORD *testMainIndex = NULL;
-
-ORTHOVERTEX *orthoVerts = NULL;
-WORD *orthoIndex = NULL;
-
-ORTHOVERTEX *testOrthoVertex = NULL;
-WORD *testOrthoIndex = NULL;
+ORTHOVERTEX *orthoVertex = NULL;
+uint16_t *orthoIndex = NULL;
 
 D3DLVERTEX *particleVertex = NULL;
-WORD *particleIndex = NULL;
-uint32_t pVb = 0;
-uint32_t tempIndex = 0;
-uint32_t testOrthoArrayIndex = 0;
-uint32_t	NumIndicies = 0;
-uint32_t	vb = 0;
-static uint32_t NumberOfRenderedTriangles = 0;
-uint32_t NumVertices = 0;
+uint16_t *particleIndex = NULL;
 
-//std::vector<RENDER_STATES> renderList;
-std::vector<RENDER_STATES> transRenderList;
-std::vector<RENDER_STATES> orthoList;
+uint32_t pVb = 0;
+uint32_t vb = 0;
+static uint32_t orthoVBOffset = 0;
+static uint32_t NumberOfRenderedTriangles = 0;
 
 RenderList *particleList;
 RenderList *mainList;
-RenderList *testOrthoList;
-
-//uint32_t renderListCount = 0;
-//uint32_t transRenderListCount = 0;
-uint32_t orthoListCount = 0;
-
-static uint32_t orthoVBOffset = 0;
-static uint32_t orthoIBOffset = 0;
+RenderList *orthoList;
 
 bool UnlockExecuteBufferAndPrepareForUse();
 bool ExecuteBuffer();
@@ -130,7 +96,7 @@ bool LockExecuteBuffer();
 #define RGBLIGHT_MAKE(r,g,b) RGB_MAKE(r,g,b)
 #define RGBALIGHT_MAKE(r,g,b,a) RGBA_MAKE(r,g,b,a)
 
-static HRESULT LastError;
+static HRESULT LastError; // remove me
 
 // initialise our std::vectors to a particle size, allowing us to use them as
 // regular arrays
@@ -139,19 +105,19 @@ void RenderListInit()
 	// new, test particle list
 	particleList = new RenderList(200);
 	mainList = new RenderList(800);
-	testOrthoList = new RenderList(400);
+	orthoList = new RenderList(400);
+}
 
-//	renderList.reserve(MAX_VERTEXES);
-///	renderList.resize(MAX_VERTEXES);
-//	memset(&renderList[0], 0, sizeof(RENDER_STATES));
+void RenderListDeInit()
+{
+	delete particleList;
+	particleList = 0;
 
-//	transRenderList.reserve(MAX_VERTEXES);
-//	transRenderList.resize(MAX_VERTEXES);
-//	memset(&transRenderList[0], 0, sizeof(RENDER_STATES));
+	delete mainList;
+	mainList = 0;
 
-	orthoList.reserve(MAX_VERTEXES);
-	orthoList.resize(MAX_VERTEXES);
-	memset(&orthoList[0], 0, sizeof(RENDER_STATES));
+	delete orthoList;
+	orthoList = 0;
 }
 
 struct renderParticle
@@ -204,8 +170,8 @@ inline float HPos2DC(int32_t pos)
 }
 
 // AvP uses numVerts to represent the actual number of polygon vertices we're passing to the backend.
-// we then use the OUTPUT_TRIANGLE function to generate the indicies required to represent those
-// polygons. This function calculates the number of indicies required based on the number of verts.
+// we then use the OUTPUT_TRIANGLE function to generate the indices required to represent those
+// polygons. This function calculates the number of indices required based on the number of verts.
 // AvP code defined these, so hence the magic numbers.
 // TODO: rename to GetNumIndices to more accurately reflect what this function does?
 
@@ -247,7 +213,7 @@ uint32_t GetRealNumVerts(uint32_t numVerts)
 }
 
 // lock our vertex and index buffers, and reset counters and array indexes used to keep track 
-// of the number of verts and indicies in those buffers. Function needs to be renamed as we no 
+// of the number of verts and indices in those buffers. Function needs to be renamed as we no 
 // longer use an execute buffer
 bool LockExecuteBuffer()
 {
@@ -284,8 +250,10 @@ bool LockExecuteBuffer()
 		return false;
 	}
 #endif
+
+/*
 	// lock 2D ortho vertex buffer
-	LastError = d3d.lpD3DOrthoVertexBuffer->Lock(0, 0, (void**)&orthoVerts, D3DLOCK_DISCARD);
+	LastError = d3d.lpD3DOrthoVertexBuffer->Lock(0, 0, (void**)&orthoVertex, D3DLOCK_DISCARD);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -299,38 +267,31 @@ bool LockExecuteBuffer()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
-
-	// test particle
+*/
+	// lock particle vertex and index buffers
 	d3d.particleVB->Lock((void**)&particleVertex);
 	d3d.particleIB->Lock(&particleIndex);
 
+	// reset list to empty state
 	particleList->Reset();
 
-	// test main vertex buffer
+	// lock main vertex and index buffers
 	d3d.mainVB->Lock((void**)&mainVertex);
 	d3d.mainIB->Lock(&mainIndex);
 
+	// reset list to empty state
 	mainList->Reset();
 
-	d3d.orthoVB->Lock((void**)&testOrthoVertex);
-	d3d.orthoIB->Lock(&testOrthoIndex);
+	// lock ortho vertex and index buffers
+	d3d.orthoVB->Lock((void**)&orthoVertex);
+	d3d.orthoIB->Lock(&orthoIndex);
 
-	testOrthoList->Reset();
+	// reset list to empty state
+	orthoList->Reset();
 
 	// reset counters and indexes
-//	NumVertices = 0;
-//	NumIndicies = 0;
 	vb = 0;
-
 	orthoVBOffset = 0;
-	orthoIBOffset = 0;
-	orthoListCount = 0;
-
-//	renderListCount = 0;
-//	transRenderListCount = 0;
-
-	tempIndex = 0;
-	testOrthoArrayIndex = 0;
 	pVb = 0;
 
     return true;
@@ -357,7 +318,7 @@ bool UnlockExecuteBufferAndPrepareForUse()
 	}
 */
 
-#if 0
+/*
 	// unlock particle vertex buffer
 	LastError = d3d.lpD3DParticleVertexBuffer->Unlock();
 	if (FAILED(LastError))
@@ -373,7 +334,9 @@ bool UnlockExecuteBufferAndPrepareForUse()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
-#endif
+*/
+
+/*
 	// unlock orthographic quad vertex buffer
 	LastError = d3d.lpD3DOrthoVertexBuffer->Unlock();
 	if (FAILED(LastError))
@@ -389,16 +352,18 @@ bool UnlockExecuteBufferAndPrepareForUse()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
-
-	// test vertex buffer
+*/
+	// unlock particle vertex and index buffers
 	d3d.particleVB->Unlock();
 	d3d.particleIB->Unlock();
 
+	// unlock main vertex and index buffers
 	d3d.mainVB->Unlock();
 	d3d.mainIB->Unlock();
 
-	d3d.orthoIB->Unlock();
+	// unlock ortho vertex and index buffers
 	d3d.orthoVB->Unlock();
+	d3d.orthoIB->Unlock();
 
 	return true;
 }
@@ -407,6 +372,7 @@ bool ExecuteBuffer()
 {
 	// sort the list of render objects
 //	std::sort(renderList.begin(), renderList.begin() + renderListCount);
+	orthoList->Sort();
 	particleList->Sort();
 	mainList->Sort();
 
@@ -429,7 +395,7 @@ bool ExecuteBuffer()
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
-
+/*
 	LastError = d3d.lpD3DDevice->SetVertexShader(d3d.vertexShader);
 	if (FAILED(LastError))
 	{
@@ -441,9 +407,11 @@ bool ExecuteBuffer()
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
-
+*/
 	d3d.mainVB->Set();
 	d3d.mainIB->Set();
+
+	d3d.effectSystem->Set(d3d.mainEffect);
 
 	#ifndef USE_D3DVIEWTRANSFORM
 		D3DXMatrixIdentity(&viewMatrix); // we want to use the identity matrix in this case
@@ -453,7 +421,7 @@ bool ExecuteBuffer()
 	D3DXMATRIXA16 matWorldViewProj = viewMatrix * matProjection;
 	vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
 
-	ChangeTextureAddressMode(TEXTURE_WRAP);
+//	ChangeTextureAddressMode(TEXTURE_WRAP);
 
 	mainList->Draw();
 
@@ -515,7 +483,6 @@ bool ExecuteBuffer()
 	}
 #endif
 
-#if 1
 	// render any particles
 	//if (particleListCount)
 	{
@@ -538,14 +505,13 @@ bool ExecuteBuffer()
 
 		D3DPERF_EndEvent();
 	}
-#endif
 
 	// render any orthographic quads
-	if (orthoListCount)
+//	if (orthoListCount)
 	{
-//		d3d.orthoVB->Set();
-//		d3d.orthoIB->Set();
-
+		d3d.orthoVB->Set();
+		d3d.orthoIB->Set();
+/*
 		LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DOrthoVertexBuffer, 0, sizeof(ORTHOVERTEX));
 		if (FAILED(LastError))
 		{
@@ -557,13 +523,15 @@ bool ExecuteBuffer()
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
-
+*/
 		LastError = d3d.lpD3DDevice->SetVertexDeclaration(d3d.orthoVertexDecl);
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
 
+		d3d.effectSystem->Set(d3d.orthoEffect);
+/*
 		LastError = d3d.lpD3DDevice->SetVertexShader(d3d.orthoVertexShader);
 		if (FAILED(LastError))
 		{
@@ -575,12 +543,12 @@ bool ExecuteBuffer()
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
-
+*/
 		// pass the orthographicp projection matrix to the vertex shader
 		orthoConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
 
-//		testOrthoList->Draw();
-
+		orthoList->Draw();
+/*
 		// loop through list drawing the quads
 		for (uint32_t i = 0; i < orthoListCount; i++)
 		{
@@ -605,11 +573,13 @@ bool ExecuteBuffer()
 				LogDxError(LastError, __LINE__, __FILE__);
 			}
 		}
+*/
 	}
 
 	return true;
 }
 
+/*
 void CheckOrthoBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
 {
 	assert (numVerts == 4);
@@ -640,7 +610,7 @@ void CheckOrthoBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_T
 		orthoList[orthoListCount].indexStart = orthoIBOffset;
 	}
 
-	// create the indicies for each triangle
+	// create the indices for each triangle
 	for (uint32_t i = 0; i < numVerts; i+=4)
 	{
 		orthoIndex[orthoIBOffset]   = orthoVBOffset+i+0;
@@ -658,66 +628,7 @@ void CheckOrthoBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_T
 	orthoList[orthoListCount].indexEnd = orthoIBOffset;
 	orthoListCount++;
 }
-
-void NewQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t colour, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyType, float *UVList = NULL)
-{
-	float x1 = WPos2DC(x);
-	float y1 = HPos2DC(y);
-
-	float x2 = WPos2DC(x + width);
-	float y2 = HPos2DC(y + height);
-
-	uint32_t texturePOW2Width = 0;
-	uint32_t texturePOW2Height = 0;
-
-	if (textureID != NO_TEXTURE)
-	{
-		Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
-		CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP);
-	}
-	else
-	{
-		texturePOW2Width = 1;
-		texturePOW2Height = 1;
-		CheckOrthoBuffer(4, NO_TEXTURE, translucencyType, TEXTURE_CLAMP);
-	}
-	
-	// bottom left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
-	orthoVBOffset++;
-
-	// top left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
-	orthoVBOffset++;
-
-	// bottom right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
-	orthoVerts[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
-	orthoVBOffset++;
-
-	// top right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
-	orthoVerts[orthoVBOffset].v = 0.0f;
-	orthoVBOffset++;
-}
+*/
 
 void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, r_Texture fmvTexture)
 {
@@ -939,8 +850,6 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 
 void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t textureID, AVPTEXTURE *tex, uint32_t newWidth, uint32_t newHeight)
 {
-	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_OFF, TEXTURE_CLAMP, FILTERING_BILINEAR_ON);
-
 	float x1 = WPos2DC(destRect.left);
 	float y1 = HPos2DC(destRect.top);
 
@@ -962,43 +871,47 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t texture
 	float RecipW = (1.0f / realWidth);
 	float RecipH = (1.0f / realHeight);
 
+	orthoList->AddItem(4, textureID, TRANSLUCENCY_OFF, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
+
 	RCOLOR colour = RCOLOR_XRGB(255, 255, 255);
 
 	// bottom left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((width - srcRect.left) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((height - srcRect.bottom) * RecipH);
+	orthoVertex[orthoVBOffset].x = x1;
+	orthoVertex[orthoVBOffset].y = y2;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = (float)((width - srcRect.left) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((height - srcRect.bottom) * RecipH);
 	orthoVBOffset++;
 
 	// top left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((width - srcRect.left) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((height - srcRect.top) * RecipH);
+	orthoVertex[orthoVBOffset].x = x1;
+	orthoVertex[orthoVBOffset].y = y1;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = (float)((width - srcRect.left) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((height - srcRect.top) * RecipH);
 	orthoVBOffset++;
 
 	// bottom right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((width - srcRect.right) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((height - srcRect.bottom) * RecipH);
+	orthoVertex[orthoVBOffset].x = x2;
+	orthoVertex[orthoVBOffset].y = y2;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = (float)((width - srcRect.right) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((height - srcRect.bottom) * RecipH);
 	orthoVBOffset++;
 
 	// top right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((width - srcRect.right) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((height - srcRect.top) * RecipH);
+	orthoVertex[orthoVBOffset].x = x2;
+	orthoVertex[orthoVBOffset].y = y1;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = (float)((width - srcRect.right) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((height - srcRect.top) * RecipH);
 	orthoVBOffset++;
+
+	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
 void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha)
@@ -1096,39 +1009,39 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
 
 	// bottom left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((texU) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((texV + charHeight) * RecipH);
+	orthoVertex[orthoVBOffset].x = x1;
+	orthoVertex[orthoVBOffset].y = y2;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = (float)((texU) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((texV + charHeight) * RecipH);
 	orthoVBOffset++;
 
 	// top left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((texU) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((texV) * RecipH);
+	orthoVertex[orthoVBOffset].x = x1;
+	orthoVertex[orthoVBOffset].y = y1;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = (float)((texU) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((texV) * RecipH);
 	orthoVBOffset++;
 
 	// bottom right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((texU + charWidth) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((texV + charHeight) * RecipH);
+	orthoVertex[orthoVBOffset].x = x2;
+	orthoVertex[orthoVBOffset].y = y2;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = (float)((texU + charWidth) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((texV + charHeight) * RecipH);
 	orthoVBOffset++;
 
 	// top right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((texU + charWidth) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((texV) * RecipH);
+	orthoVertex[orthoVBOffset].x = x2;
+	orthoVertex[orthoVBOffset].y = y1;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = (float)((texU + charWidth) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((texV) * RecipH);
 	orthoVBOffset++;
 
 #endif
@@ -1197,43 +1110,45 @@ void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha)
 
 	RCOLOR colour = RCOLOR_ARGB(alpha,0,0,0);
 
-	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING, TEXTURE_WRAP);
+	orthoList->AddItem(4, NO_TEXTURE, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON, TEXTURE_WRAP);
 
 	// bottom left
-	orthoVerts[orthoVBOffset].x = -1.0f;
-	orthoVerts[orthoVBOffset].y = 1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = -1.0f;
+	orthoVertex[orthoVBOffset].y = 1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 
 	// top left
-	orthoVerts[orthoVBOffset].x = -1.0f;
-	orthoVerts[orthoVBOffset].y = -1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = -1.0f;
+	orthoVertex[orthoVBOffset].y = -1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 
 	// bottom right
-	orthoVerts[orthoVBOffset].x = 1.0f;
-	orthoVerts[orthoVBOffset].y = 1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = 1.0f;
+	orthoVertex[orthoVBOffset].y = 1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 
 	// top right
-	orthoVerts[orthoVBOffset].x = 1.0f;;
-	orthoVerts[orthoVBOffset].y = -1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = 1.0f;;
+	orthoVertex[orthoVBOffset].y = -1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
+
+	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
 void DrawHUDQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, float *UVList, int32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
@@ -1252,43 +1167,45 @@ void DrawHUDQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, float 
 	uint32_t texturePOW2Width, texturePOW2Height;
 	Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
 
-	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP);
+	orthoList->AddItem(4, textureID, translucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 	// bottom left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
+	orthoVertex[orthoVBOffset].x = x1;
+	orthoVertex[orthoVBOffset].y = y2;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
 	orthoVBOffset++;
 
 	// top left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = x1;
+	orthoVertex[orthoVBOffset].y = y1;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 
 	// bottom right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
-	orthoVerts[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
+	orthoVertex[orthoVBOffset].x = x2;
+	orthoVertex[orthoVBOffset].y = y2;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVertex[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
 	orthoVBOffset++;
 
 	// top right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = x2;
+	orthoVertex[orthoVBOffset].y = y1;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
+
+	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
 void DrawFontQuad(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeight, uint32_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
@@ -1299,43 +1216,45 @@ void DrawFontQuad(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeigh
 	float x2 = WPos2DC(x + charWidth);
 	float y2 = HPos2DC(y + charHeight);
 
-	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP, FILTERING_BILINEAR_OFF);
+	orthoList->AddItem(4, textureID, translucencyType, FILTERING_BILINEAR_OFF, TEXTURE_CLAMP);
 
 	// bottom left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = uvArray[0];
-	orthoVerts[orthoVBOffset].v = uvArray[1];
+	orthoVertex[orthoVBOffset].x = x1;
+	orthoVertex[orthoVBOffset].y = y2;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = uvArray[0];
+	orthoVertex[orthoVBOffset].v = uvArray[1];
 	orthoVBOffset++;
 
 	// top left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = uvArray[2];
-	orthoVerts[orthoVBOffset].v = uvArray[3];
+	orthoVertex[orthoVBOffset].x = x1;
+	orthoVertex[orthoVBOffset].y = y1;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = uvArray[2];
+	orthoVertex[orthoVBOffset].v = uvArray[3];
 	orthoVBOffset++;
 
 	// bottom right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = uvArray[4];
-	orthoVerts[orthoVBOffset].v = uvArray[5];
+	orthoVertex[orthoVBOffset].x = x2;
+	orthoVertex[orthoVBOffset].y = y2;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = uvArray[4];
+	orthoVertex[orthoVBOffset].v = uvArray[5];
 	orthoVBOffset++;
 
 	// top right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = uvArray[6];
-	orthoVerts[orthoVBOffset].v = uvArray[7];
+	orthoVertex[orthoVBOffset].x = x2;
+	orthoVertex[orthoVBOffset].y = y1;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = uvArray[6];
+	orthoVertex[orthoVBOffset].v = uvArray[7];
 	orthoVBOffset++;
+
+	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
 void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
@@ -1350,48 +1269,45 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t 
 	uint32_t texturePOW2Height = 0;
 	Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
 
-	CheckOrthoBuffer(4, textureID, translucencyType, TEXTURE_CLAMP);
-//	testOrthoList->AddItem(4, textureID, translucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
+	orthoList->AddItem(4, textureID, translucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 	// bottom left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
+	orthoVertex[orthoVBOffset].x = x1;
+	orthoVertex[orthoVBOffset].y = y2;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
 	orthoVBOffset++;
 
 	// top left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = x1;
+	orthoVertex[orthoVBOffset].y = y1;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 
 	// bottom right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
-	orthoVerts[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
+	orthoVertex[orthoVBOffset].x = x2;
+	orthoVertex[orthoVBOffset].y = y2;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVertex[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
 	orthoVBOffset++;
 
 	// top right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = x2;
+	orthoVertex[orthoVBOffset].y = y1;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 
-//	memcpy(&testOrthoVertex[testOrthoArrayIndex], &orthoVerts[orthoVBOffset-4], sizeof(ORTHOVERTEX)*4);
-//	testOrthoVertex+=4;
-//	testOrthoList->CreateIndicies(testOrthoIndex, 4);
+	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
 void DrawAlphaMenuQuad(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t alpha)
@@ -1474,43 +1390,45 @@ void DrawSmallMenuCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_
 	float x2 = WPos2DC(topX + font_width);
 	float y2 = HPos2DC(topY + font_height);
 
-	CheckOrthoBuffer(4, AVPMENUGFX_SMALL_FONT, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
+	orthoList->AddItem(4, AVPMENUGFX_SMALL_FONT, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 	// bottom left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((texU) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((texV + font_height) * RecipH);
+	orthoVertex[orthoVBOffset].x = x1;
+	orthoVertex[orthoVBOffset].y = y2;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = (float)((texU) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((texV + font_height) * RecipH);
 	orthoVBOffset++;
 
 	// top left
-	orthoVerts[orthoVBOffset].x = x1;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((texU) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((texV) * RecipH);
+	orthoVertex[orthoVBOffset].x = x1;
+	orthoVertex[orthoVBOffset].y = y1;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = (float)((texU) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((texV) * RecipH);
 	orthoVBOffset++;
 
 	// bottom right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((texU + font_height) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((texV + font_height) * RecipH);
+	orthoVertex[orthoVBOffset].x = x2;
+	orthoVertex[orthoVBOffset].y = y2;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = (float)((texU + font_height) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((texV + font_height) * RecipH);
 	orthoVBOffset++;
 
 	// top right
-	orthoVerts[orthoVBOffset].x = x2;
-	orthoVerts[orthoVBOffset].y = y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = (float)((texU + font_width) * RecipW);
-	orthoVerts[orthoVBOffset].v = (float)((texV) * RecipH);
+	orthoVertex[orthoVBOffset].x = x2;
+	orthoVertex[orthoVBOffset].y = y1;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = (float)((texU + font_width) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((texV) * RecipH);
 	orthoVBOffset++;
+
+	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
 extern "C" {
@@ -1862,13 +1780,16 @@ int NumberOfLandscapePolygons;
 		edit: the above is probably really wrong. figure it out yourself :D
 */
 
+/*
 static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n)
 {
-	mainIndex[NumIndicies]   = (NumVertices - (n) + (a));
-	mainIndex[NumIndicies+1] = (NumVertices - (n) + (b));
-	mainIndex[NumIndicies+2] = (NumVertices - (n) + (c));
-	NumIndicies+=3;
+	mainIndex[NumIndices]   = (NumVertices - (n) + (a));
+	mainIndex[NumIndices+1] = (NumVertices - (n) + (b));
+	mainIndex[NumIndices+2] = (NumVertices - (n) + (c));
+	NumIndices+=3;
 }
+*/
+
 /*
 static inline void OUTPUT_TRIANGLE2(int a, int b, int c, int n)
 {
@@ -1988,11 +1909,11 @@ void CheckVertexBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_
 		else
 		{
 			renderList[renderListCount].vertStart = NumVertices;
-			renderList[renderListCount].indexStart = NumIndicies;
+			renderList[renderListCount].indexStart = NumIndices;
 		}
 
 		renderList[renderListCount].vertEnd = NumVertices + numVerts;
-		renderList[renderListCount].indexEnd = NumIndicies + realNumVerts;
+		renderList[renderListCount].indexEnd = NumIndices + realNumVerts;
 		renderListCount++;
 	}
 	else
@@ -2014,11 +1935,11 @@ void CheckVertexBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_
 		else
 		{
 			transRenderList[transRenderListCount].vertStart = NumVertices;
-			transRenderList[transRenderListCount].indexStart = NumIndicies;
+			transRenderList[transRenderListCount].indexStart = NumIndices;
 		}
 
 		transRenderList[transRenderListCount].vertEnd = NumVertices + numVerts;
-		transRenderList[transRenderListCount].indexEnd = NumIndicies + realNumVerts;
+		transRenderList[transRenderListCount].indexEnd = NumIndices + realNumVerts;
 		transRenderListCount++;
 	}
 
@@ -2076,7 +1997,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 		vb++;
 	}
 
-	mainList->CreateIndicies(mainIndex, RenderPolygon.NumberOfVertices);
+	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
 
 //	D3D_OutputTriangles();
 }
@@ -2114,7 +2035,7 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 		vb++;
 	}
 
-	mainList->CreateIndicies(mainIndex, RenderPolygon.NumberOfVertices);
+	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
 
 //	D3D_OutputTriangles();
 }
@@ -2139,7 +2060,7 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
 		vb++;
 	}
 
-	mainList->CreateIndicies(mainIndex, RenderPolygon.NumberOfVertices);
+	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
 
 //	D3D_OutputTriangles();
 }
@@ -2186,7 +2107,7 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 	}
 
 //	D3D_OutputTriangles();
-	mainList->CreateIndicies(mainIndex, RenderPolygon.NumberOfVertices);
+	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
 }
 
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
@@ -2199,43 +2120,45 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	new_x2 = WPos2DC(x1);
 	new_y2 = HPos2DC(y1);
 
-	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
+	orthoList->AddItem(4, NO_TEXTURE, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 	// bottom left
-	orthoVerts[orthoVBOffset].x = new_x1;
-	orthoVerts[orthoVBOffset].y = new_y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = new_x1;
+	orthoVertex[orthoVBOffset].y = new_y2;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 
 	// top left
-	orthoVerts[orthoVBOffset].x = new_x1;
-	orthoVerts[orthoVBOffset].y = new_y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = new_x1;
+	orthoVertex[orthoVBOffset].y = new_y1;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 
 	// bottom right
-	orthoVerts[orthoVBOffset].x = new_x2;
-	orthoVerts[orthoVBOffset].y = new_y2;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = new_x2;
+	orthoVertex[orthoVBOffset].y = new_y2;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 
 	// top right
-	orthoVerts[orthoVBOffset].x = new_x2;
-	orthoVerts[orthoVBOffset].y = new_y1;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = new_x2;
+	orthoVertex[orthoVBOffset].y = new_y1;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
+
+	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
 void D3D_HUD_Setup(void)
@@ -2253,51 +2176,51 @@ void D3D_HUDQuad_Output(uint32_t textureID, struct VertexTag *quadVerticesPtr, u
 {
 	float RecipW, RecipH;
 
-	assert (textureID != -1);
-
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(textureID, texWidth, texHeight);
 
 	RecipW = 1.0f / texWidth;
 	RecipH = 1.0f / texHeight;
 
-	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP, filteringType);
+	orthoList->AddItem(4, textureID, TRANSLUCENCY_GLOWING, filteringType, TEXTURE_CLAMP);
 
 	// bottom left
-	orthoVerts[orthoVBOffset].x = WPos2DC(quadVerticesPtr[3].X);
-	orthoVerts[orthoVBOffset].y = HPos2DC(quadVerticesPtr[3].Y);
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = quadVerticesPtr[3].U * RecipW;
-	orthoVerts[orthoVBOffset].v = quadVerticesPtr[3].V * RecipH;
+	orthoVertex[orthoVBOffset].x = WPos2DC(quadVerticesPtr[3].X);
+	orthoVertex[orthoVBOffset].y = HPos2DC(quadVerticesPtr[3].Y);
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = quadVerticesPtr[3].U * RecipW;
+	orthoVertex[orthoVBOffset].v = quadVerticesPtr[3].V * RecipH;
 	orthoVBOffset++;
 
 	// top left
-	orthoVerts[orthoVBOffset].x = WPos2DC(quadVerticesPtr[0].X);
-	orthoVerts[orthoVBOffset].y = HPos2DC(quadVerticesPtr[0].Y);
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = quadVerticesPtr[0].U * RecipW;
-	orthoVerts[orthoVBOffset].v = quadVerticesPtr[0].V * RecipH;
+	orthoVertex[orthoVBOffset].x = WPos2DC(quadVerticesPtr[0].X);
+	orthoVertex[orthoVBOffset].y = HPos2DC(quadVerticesPtr[0].Y);
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = quadVerticesPtr[0].U * RecipW;
+	orthoVertex[orthoVBOffset].v = quadVerticesPtr[0].V * RecipH;
 	orthoVBOffset++;
 
 	// bottom right
-	orthoVerts[orthoVBOffset].x = WPos2DC(quadVerticesPtr[2].X);
-	orthoVerts[orthoVBOffset].y = HPos2DC(quadVerticesPtr[2].Y);
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = quadVerticesPtr[2].U * RecipW;
-	orthoVerts[orthoVBOffset].v = quadVerticesPtr[2].V * RecipH;
+	orthoVertex[orthoVBOffset].x = WPos2DC(quadVerticesPtr[2].X);
+	orthoVertex[orthoVBOffset].y = HPos2DC(quadVerticesPtr[2].Y);
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = quadVerticesPtr[2].U * RecipW;
+	orthoVertex[orthoVBOffset].v = quadVerticesPtr[2].V * RecipH;
 	orthoVBOffset++;
 
 	// top right
-	orthoVerts[orthoVBOffset].x = WPos2DC(quadVerticesPtr[1].X);
-	orthoVerts[orthoVBOffset].y = HPos2DC(quadVerticesPtr[1].Y);
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = quadVerticesPtr[1].U * RecipW;
-	orthoVerts[orthoVBOffset].v = quadVerticesPtr[1].V * RecipH;
+	orthoVertex[orthoVBOffset].x = WPos2DC(quadVerticesPtr[1].X);
+	orthoVertex[orthoVBOffset].y = HPos2DC(quadVerticesPtr[1].Y);
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = quadVerticesPtr[1].U * RecipW;
+	orthoVertex[orthoVBOffset].v = quadVerticesPtr[1].V * RecipH;
 	orthoVBOffset++;
+
+	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
 void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
@@ -2358,7 +2281,7 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 		}
 
 //		OUTPUT_TRIANGLE(0,2,1, 3);
-		mainList->CreateIndicies(mainIndex, RenderPolygon.NumberOfVertices);
+		mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
 	}
 }
 
@@ -2493,7 +2416,7 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 	}
 
 //	D3D_OutputTriangles();
-	mainList->CreateIndicies(mainIndex, RenderPolygon.NumberOfVertices);
+	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
 }
 
 void AddCorona(PARTICLE *particlePtr, VECTORCHF *coronaPoint)
@@ -2622,7 +2545,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	}
 
 	// 3: Create Indices
-	particleList->CreateIndicies(particleIndex, RenderPolygon.NumberOfVertices);
+	particleList->CreateIndices(particleIndex, RenderPolygon.NumberOfVertices);
 }
 
 void PostLandscapeRendering()
@@ -3087,43 +3010,45 @@ void DrawNoiseOverlay(int t)
 	uint32_t c = 255;
 	uint32_t size = 256;//*CameraZoomScale;
 
-	CheckOrthoBuffer(4, StaticImageNumber, TRANSLUCENCY_GLOWING, TEXTURE_WRAP);
+	orthoList->AddItem(4, StaticImageNumber, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON, TEXTURE_WRAP);
 
 	// bottom left
-	orthoVerts[orthoVBOffset].x = -1.0f;
-	orthoVerts[orthoVBOffset].y = 1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
-	orthoVerts[orthoVBOffset].u = u/256.0f;
-	orthoVerts[orthoVBOffset].v = (v+size)/256.0f;
+	orthoVertex[orthoVBOffset].x = -1.0f;
+	orthoVertex[orthoVBOffset].y = 1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVertex[orthoVBOffset].u = u/256.0f;
+	orthoVertex[orthoVBOffset].v = (v+size)/256.0f;
 	orthoVBOffset++;
 
 	// top left
-	orthoVerts[orthoVBOffset].x = -1.0f;
-	orthoVerts[orthoVBOffset].y = -1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
-	orthoVerts[orthoVBOffset].u = u/256.0f;
-	orthoVerts[orthoVBOffset].v = v/256.0f;
+	orthoVertex[orthoVBOffset].x = -1.0f;
+	orthoVertex[orthoVBOffset].y = -1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVertex[orthoVBOffset].u = u/256.0f;
+	orthoVertex[orthoVBOffset].v = v/256.0f;
 	orthoVBOffset++;
 
 	// bottom right
-	orthoVerts[orthoVBOffset].x = 1.0f;
-	orthoVerts[orthoVBOffset].y = 1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
-	orthoVerts[orthoVBOffset].u = (u+size)/256.0f;
-	orthoVerts[orthoVBOffset].v = (v+size)/256.0f;
+	orthoVertex[orthoVBOffset].x = 1.0f;
+	orthoVertex[orthoVBOffset].y = 1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVertex[orthoVBOffset].u = (u+size)/256.0f;
+	orthoVertex[orthoVBOffset].v = (v+size)/256.0f;
 	orthoVBOffset++;
 
 	// top right
-	orthoVerts[orthoVBOffset].x = 1.0f;
-	orthoVerts[orthoVBOffset].y = -1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
-	orthoVerts[orthoVBOffset].u = (u+size)/256.0f;
-	orthoVerts[orthoVBOffset].v = v/256.0f;
+	orthoVertex[orthoVBOffset].x = 1.0f;
+	orthoVertex[orthoVBOffset].y = -1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVertex[orthoVBOffset].u = (u+size)/256.0f;
+	orthoVertex[orthoVBOffset].v = v/256.0f;
 	orthoVBOffset++;
+
+	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
 void DrawScanlinesOverlay(float level)
@@ -3136,43 +3061,45 @@ void DrawScanlinesOverlay(float level)
 
 	float size = 128.0f*(1.0f-level*0.8f);//*CameraZoomScale;
 
-	CheckOrthoBuffer(4, PredatorNumbersImageNumber, TRANSLUCENCY_NORMAL, TEXTURE_WRAP);
+	orthoList->AddItem(4, PredatorNumbersImageNumber, TRANSLUCENCY_NORMAL, FILTERING_BILINEAR_ON, TEXTURE_WRAP);
 
 	// bottom left
-	orthoVerts[orthoVBOffset].x = -1.0f;
-	orthoVerts[orthoVBOffset].y = 1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
-	orthoVerts[orthoVBOffset].u = (v+size)/256.0f;
-	orthoVerts[orthoVBOffset].v = 1.0f;
+	orthoVertex[orthoVBOffset].x = -1.0f;
+	orthoVertex[orthoVBOffset].y = 1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVertex[orthoVBOffset].u = (v+size)/256.0f;
+	orthoVertex[orthoVBOffset].v = 1.0f;
 	orthoVBOffset++;
 
 	// top left
-	orthoVerts[orthoVBOffset].x = -1.0f;
-	orthoVerts[orthoVBOffset].y = -1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
-	orthoVerts[orthoVBOffset].u = (v-size)/256.0f;
-	orthoVerts[orthoVBOffset].v = 1.0f;
+	orthoVertex[orthoVBOffset].x = -1.0f;
+	orthoVertex[orthoVBOffset].y = -1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVertex[orthoVBOffset].u = (v-size)/256.0f;
+	orthoVertex[orthoVBOffset].v = 1.0f;
 	orthoVBOffset++;
 
 	// bottom right
-	orthoVerts[orthoVBOffset].x = 1.0f;
-	orthoVerts[orthoVBOffset].y = 1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
-	orthoVerts[orthoVBOffset].u = (v+size)/256.0f;
-	orthoVerts[orthoVBOffset].v = 1.0f;
+	orthoVertex[orthoVBOffset].x = 1.0f;
+	orthoVertex[orthoVBOffset].y = 1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVertex[orthoVBOffset].u = (v+size)/256.0f;
+	orthoVertex[orthoVBOffset].v = 1.0f;
 	orthoVBOffset++;
 
 	// top right
-	orthoVerts[orthoVBOffset].x = 1.0f;;
-	orthoVerts[orthoVBOffset].y = -1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
-	orthoVerts[orthoVBOffset].u = (v-size)/256.0f;
-	orthoVerts[orthoVBOffset].v = 1.0f;
+	orthoVertex[orthoVBOffset].x = 1.0f;;
+	orthoVertex[orthoVBOffset].y = -1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVertex[orthoVBOffset].u = (v-size)/256.0f;
+	orthoVertex[orthoVBOffset].v = 1.0f;
 	orthoVBOffset++;
+
+	orthoList->CreateOrthoIndices(orthoIndex);
 
 	if (level == 1.0f)
 	{
@@ -3215,13 +3142,13 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 	}
 
 //	D3D_OutputTriangles();
-	mainList->CreateIndicies(mainIndex, RenderPolygon.NumberOfVertices);
+	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
 }
 
 void D3D_DrawMoltenMetalMesh_Unclipped(void)
 {
 	return; // bjd - TODO
-
+#if 0
 	VECTORCH *point = MeshVertex;
 	VECTORCH *pointWS = MeshWorldVertex;
 
@@ -3274,6 +3201,7 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 			OUTPUT_TRIANGLE(1+x+(16*y),17+x+(16*y),16+x+(16*y), 256);
 		}
 	}
+#endif
 }
 
 void ThisFramesRenderingHasBegun(void)
@@ -3562,43 +3490,45 @@ extern void D3D_FadeDownScreen(int brightness, int colour)
 		t = 0;
 	}
 
-	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_NORMAL, TEXTURE_WRAP);
+	orthoList->AddItem(4, NO_TEXTURE, TRANSLUCENCY_NORMAL, FILTERING_BILINEAR_ON, TEXTURE_WRAP);
 
 	// bottom left
-	orthoVerts[orthoVBOffset].x = -1.0f;
-	orthoVerts[orthoVBOffset].y = 1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = (t<<24)+colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = -1.0f;
+	orthoVertex[orthoVBOffset].y = 1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = (t<<24)+colour;
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 
 	// top left
-	orthoVerts[orthoVBOffset].x = -1.0f;
-	orthoVerts[orthoVBOffset].y = -1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = (t<<24)+colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = -1.0f;
+	orthoVertex[orthoVBOffset].y = -1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = (t<<24)+colour;
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 
 	// bottom right
-	orthoVerts[orthoVBOffset].x = 1.0f;
-	orthoVerts[orthoVBOffset].y = 1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = (t<<24)+colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = 1.0f;
+	orthoVertex[orthoVBOffset].y = 1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = (t<<24)+colour;
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 
 	// top right
-	orthoVerts[orthoVBOffset].x = 1.0f;;
-	orthoVerts[orthoVBOffset].y = -1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = (t<<24)+colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = 1.0f;;
+	orthoVertex[orthoVBOffset].y = -1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = (t<<24)+colour;
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
+
+	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
 extern void D3D_PlayerOnFireOverlay(void)
@@ -3609,43 +3539,45 @@ extern void D3D_PlayerOnFireOverlay(void)
 	float u = (FastRandom()&255)/256.0f;
 	float v = (FastRandom()&255)/256.0f;
 
-	CheckOrthoBuffer(4, BurningImageNumber, TRANSLUCENCY_GLOWING, TEXTURE_WRAP);
+	orthoList->AddItem(4, BurningImageNumber, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON, TEXTURE_WRAP);
 
 	// bottom left
-	orthoVerts[orthoVBOffset].x = -1.0f;
-	orthoVerts[orthoVBOffset].y = 1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = u;
-	orthoVerts[orthoVBOffset].v = v+1.0f;
+	orthoVertex[orthoVBOffset].x = -1.0f;
+	orthoVertex[orthoVBOffset].y = 1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = u;
+	orthoVertex[orthoVBOffset].v = v+1.0f;
 	orthoVBOffset++;
 
 	// top left
-	orthoVerts[orthoVBOffset].x = -1.0f;
-	orthoVerts[orthoVBOffset].y = -1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = u;
-	orthoVerts[orthoVBOffset].v = v;
+	orthoVertex[orthoVBOffset].x = -1.0f;
+	orthoVertex[orthoVBOffset].y = -1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = u;
+	orthoVertex[orthoVBOffset].v = v;
 	orthoVBOffset++;
 
 	// bottom right
-	orthoVerts[orthoVBOffset].x = 1.0f;
-	orthoVerts[orthoVBOffset].y = 1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = u+1.0f;
-	orthoVerts[orthoVBOffset].v = v+1.0f;
+	orthoVertex[orthoVBOffset].x = 1.0f;
+	orthoVertex[orthoVBOffset].y = 1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = u+1.0f;
+	orthoVertex[orthoVBOffset].v = v+1.0f;
 	orthoVBOffset++;
 
 	// top right
-	orthoVerts[orthoVBOffset].x = 1.0f;;
-	orthoVerts[orthoVBOffset].y = -1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = u+1.0f;
-	orthoVerts[orthoVBOffset].v = v;
+	orthoVertex[orthoVBOffset].x = 1.0f;;
+	orthoVertex[orthoVBOffset].y = -1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = u+1.0f;
+	orthoVertex[orthoVBOffset].v = v;
 	orthoVBOffset++;
+
+	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
 extern void D3D_ScreenInversionOverlay()
@@ -3657,7 +3589,7 @@ extern void D3D_ScreenInversionOverlay()
 	theta[0] = (CloakingPhase/8)&4095;
 	theta[1] = (800-CloakingPhase/8)&4095;
 
-	CheckOrthoBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_DARKENINGCOLOUR, TEXTURE_WRAP);
+	orthoList->AddItem(4, SpecialFXImageNumber, TRANSLUCENCY_DARKENINGCOLOUR, FILTERING_BILINEAR_ON, TEXTURE_WRAP);
 
 	for (uint32_t i = 0; i < 2; i++)
 	{
@@ -3665,46 +3597,48 @@ extern void D3D_ScreenInversionOverlay()
 		float cos = (GetCos(theta[i]))/65536.0f/16.0f;
 		{
 			// bottom left
-			orthoVerts[orthoVBOffset].x = -1.0f;
-			orthoVerts[orthoVBOffset].y = 1.0f;
-			orthoVerts[orthoVBOffset].z = 1.0f;
-			orthoVerts[orthoVBOffset].colour = colour;
-			orthoVerts[orthoVBOffset].u = 0.375f + (cos*(-1) - sin*(+1));
-			orthoVerts[orthoVBOffset].v = 0.375f + (sin*(-1) + cos*(+1));
+			orthoVertex[orthoVBOffset].x = -1.0f;
+			orthoVertex[orthoVBOffset].y = 1.0f;
+			orthoVertex[orthoVBOffset].z = 1.0f;
+			orthoVertex[orthoVBOffset].colour = colour;
+			orthoVertex[orthoVBOffset].u = 0.375f + (cos*(-1) - sin*(+1));
+			orthoVertex[orthoVBOffset].v = 0.375f + (sin*(-1) + cos*(+1));
 			orthoVBOffset++;
 
 			// top left
-			orthoVerts[orthoVBOffset].x = -1.0f;
-			orthoVerts[orthoVBOffset].y = -1.0f;
-			orthoVerts[orthoVBOffset].z = 1.0f;
-			orthoVerts[orthoVBOffset].colour = colour;
-			orthoVerts[orthoVBOffset].u = 0.375f + (cos*(-1) - sin*(-1));
-			orthoVerts[orthoVBOffset].v = 0.375f + (sin*(-1) + cos*(-1));
+			orthoVertex[orthoVBOffset].x = -1.0f;
+			orthoVertex[orthoVBOffset].y = -1.0f;
+			orthoVertex[orthoVBOffset].z = 1.0f;
+			orthoVertex[orthoVBOffset].colour = colour;
+			orthoVertex[orthoVBOffset].u = 0.375f + (cos*(-1) - sin*(-1));
+			orthoVertex[orthoVBOffset].v = 0.375f + (sin*(-1) + cos*(-1));
 			orthoVBOffset++;
 
 			// bottom right
-			orthoVerts[orthoVBOffset].x = 1.0f;
-			orthoVerts[orthoVBOffset].y = 1.0f;
-			orthoVerts[orthoVBOffset].z = 1.0f;
-			orthoVerts[orthoVBOffset].colour = colour;
-			orthoVerts[orthoVBOffset].u = 0.375f + (cos*(+1) - sin*(+1));
-			orthoVerts[orthoVBOffset].v = 0.375f + (sin*(+1) + cos*(+1));
+			orthoVertex[orthoVBOffset].x = 1.0f;
+			orthoVertex[orthoVBOffset].y = 1.0f;
+			orthoVertex[orthoVBOffset].z = 1.0f;
+			orthoVertex[orthoVBOffset].colour = colour;
+			orthoVertex[orthoVBOffset].u = 0.375f + (cos*(+1) - sin*(+1));
+			orthoVertex[orthoVBOffset].v = 0.375f + (sin*(+1) + cos*(+1));
 			orthoVBOffset++;
 
 			// top right
-			orthoVerts[orthoVBOffset].x = 1.0f;;
-			orthoVerts[orthoVBOffset].y = -1.0f;
-			orthoVerts[orthoVBOffset].z = 1.0f;
-			orthoVerts[orthoVBOffset].colour = colour;
-			orthoVerts[orthoVBOffset].u = 0.375f + (cos*(+1) - sin*(-1));
-			orthoVerts[orthoVBOffset].v = 0.375f + (sin*(+1) + cos*(-1));
+			orthoVertex[orthoVBOffset].x = 1.0f;;
+			orthoVertex[orthoVBOffset].y = -1.0f;
+			orthoVertex[orthoVBOffset].z = 1.0f;
+			orthoVertex[orthoVBOffset].colour = colour;
+			orthoVertex[orthoVBOffset].u = 0.375f + (cos*(+1) - sin*(-1));
+			orthoVertex[orthoVBOffset].v = 0.375f + (sin*(+1) + cos*(-1));
 			orthoVBOffset++;
+
+			orthoList->CreateOrthoIndices(orthoIndex);
 		}
 
 		// only do this when finishing first loop, otherwise we reserve space for 4 verts we never add
 		if (i == 0)
 		{
-			CheckOrthoBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_COLOUR, TEXTURE_WRAP);
+			orthoList->AddItem(4, SpecialFXImageNumber, TRANSLUCENCY_COLOUR, FILTERING_BILINEAR_ON, TEXTURE_WRAP);
 		}
 	}
 }
@@ -3713,43 +3647,45 @@ extern void D3D_PredatorScreenInversionOverlay()
 {
 	int colour = 0xffffffff;
 
-	CheckOrthoBuffer(4, NO_TEXTURE, TRANSLUCENCY_DARKENINGCOLOUR, TEXTURE_WRAP);
+	orthoList->AddItem(4, NO_TEXTURE, TRANSLUCENCY_DARKENINGCOLOUR, FILTERING_BILINEAR_ON, TEXTURE_WRAP);
 
 	// bottom left
-	orthoVerts[orthoVBOffset].x = -1.0f;
-	orthoVerts[orthoVBOffset].y = 1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = -1.0f;
+	orthoVertex[orthoVBOffset].y = 1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 
 	// top left
-	orthoVerts[orthoVBOffset].x = -1.0f;
-	orthoVerts[orthoVBOffset].y = -1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = -1.0f;
+	orthoVertex[orthoVBOffset].y = -1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 
 	// bottom right
-	orthoVerts[orthoVBOffset].x = 1.0f;
-	orthoVerts[orthoVBOffset].y = 1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = 1.0f;
+	orthoVertex[orthoVBOffset].y = 1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 
 	// top right
-	orthoVerts[orthoVBOffset].x = 1.0f;
-	orthoVerts[orthoVBOffset].y = -1.0f;
-	orthoVerts[orthoVBOffset].z = 1.0f;
-	orthoVerts[orthoVBOffset].colour = colour;
-	orthoVerts[orthoVBOffset].u = 0.0f;
-	orthoVerts[orthoVBOffset].v = 0.0f;
+	orthoVertex[orthoVBOffset].x = 1.0f;
+	orthoVertex[orthoVBOffset].y = -1.0f;
+	orthoVertex[orthoVBOffset].z = 1.0f;
+	orthoVertex[orthoVBOffset].colour = colour;
+	orthoVertex[orthoVBOffset].u = 0.0f;
+	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
+
+	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
 extern void D3D_PlayerDamagedOverlay(int intensity)
@@ -3780,7 +3716,7 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 
 	colour = 0xffffff - baseColour + (intensity<<24);
 
-	CheckOrthoBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_INVCOLOUR, TEXTURE_WRAP);
+	orthoList->AddItem(4, SpecialFXImageNumber, TRANSLUCENCY_INVCOLOUR, FILTERING_BILINEAR_ON, TEXTURE_WRAP);
 
 	for (uint32_t i = 0; i < 2; i++)
 	{
@@ -3788,40 +3724,42 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 		float cos = (GetCos(theta[i]))/65536.0f/16.0f;
 		{
 			// bottom left
-			orthoVerts[orthoVBOffset].x = -1.0f;
-			orthoVerts[orthoVBOffset].y = 1.0f;
-			orthoVerts[orthoVBOffset].z = 1.0f;
-			orthoVerts[orthoVBOffset].colour = colour;
-			orthoVerts[orthoVBOffset].u = (float)(0.875f + (cos*(-1) - sin*(+1)));
-			orthoVerts[orthoVBOffset].v = (float)(0.375f + (sin*(-1) + cos*(+1)));
+			orthoVertex[orthoVBOffset].x = -1.0f;
+			orthoVertex[orthoVBOffset].y = 1.0f;
+			orthoVertex[orthoVBOffset].z = 1.0f;
+			orthoVertex[orthoVBOffset].colour = colour;
+			orthoVertex[orthoVBOffset].u = (float)(0.875f + (cos*(-1) - sin*(+1)));
+			orthoVertex[orthoVBOffset].v = (float)(0.375f + (sin*(-1) + cos*(+1)));
 			orthoVBOffset++;
 
 			// top left
-			orthoVerts[orthoVBOffset].x = -1.0f;
-			orthoVerts[orthoVBOffset].y = -1.0f;
-			orthoVerts[orthoVBOffset].z = 1.0f;
-			orthoVerts[orthoVBOffset].colour = colour;
-			orthoVerts[orthoVBOffset].u = (float)(0.875f + (cos*(-1) - sin*(-1)));
-			orthoVerts[orthoVBOffset].v = (float)(0.375f + (sin*(-1) + cos*(-1)));
+			orthoVertex[orthoVBOffset].x = -1.0f;
+			orthoVertex[orthoVBOffset].y = -1.0f;
+			orthoVertex[orthoVBOffset].z = 1.0f;
+			orthoVertex[orthoVBOffset].colour = colour;
+			orthoVertex[orthoVBOffset].u = (float)(0.875f + (cos*(-1) - sin*(-1)));
+			orthoVertex[orthoVBOffset].v = (float)(0.375f + (sin*(-1) + cos*(-1)));
 			orthoVBOffset++;
 
 			// bottom right
-			orthoVerts[orthoVBOffset].x = 1.0f;
-			orthoVerts[orthoVBOffset].y = 1.0f;
-			orthoVerts[orthoVBOffset].z = 1.0f;
-			orthoVerts[orthoVBOffset].colour = colour;
-			orthoVerts[orthoVBOffset].u = (float)(0.875f + (cos*(+1) - sin*(+1)));
-			orthoVerts[orthoVBOffset].v = (float)(0.375f + (sin*(+1) + cos*(+1)));
+			orthoVertex[orthoVBOffset].x = 1.0f;
+			orthoVertex[orthoVBOffset].y = 1.0f;
+			orthoVertex[orthoVBOffset].z = 1.0f;
+			orthoVertex[orthoVBOffset].colour = colour;
+			orthoVertex[orthoVBOffset].u = (float)(0.875f + (cos*(+1) - sin*(+1)));
+			orthoVertex[orthoVBOffset].v = (float)(0.375f + (sin*(+1) + cos*(+1)));
 			orthoVBOffset++;
 
 			// top right
-			orthoVerts[orthoVBOffset].x = 1.0f;
-			orthoVerts[orthoVBOffset].y = -1.0f;
-			orthoVerts[orthoVBOffset].z = 1.0f;
-			orthoVerts[orthoVBOffset].colour = colour;
-			orthoVerts[orthoVBOffset].u = (float)(0.875f + (cos*(+1) - sin*(-1)));
-			orthoVerts[orthoVBOffset].v = (float)(0.375f + (sin*(+1) + cos*(-1)));
+			orthoVertex[orthoVBOffset].x = 1.0f;
+			orthoVertex[orthoVBOffset].y = -1.0f;
+			orthoVertex[orthoVBOffset].z = 1.0f;
+			orthoVertex[orthoVBOffset].colour = colour;
+			orthoVertex[orthoVBOffset].u = (float)(0.875f + (cos*(+1) - sin*(-1)));
+			orthoVertex[orthoVBOffset].v = (float)(0.375f + (sin*(+1) + cos*(-1)));
 			orthoVBOffset++;
+
+			orthoList->CreateOrthoIndices(orthoIndex);
 		}
 
 		colour = baseColour +(intensity<<24);
@@ -3829,7 +3767,7 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 		// only do this when finishing first loop, otherwise we reserve space for 4 verts we never add
 		if (i == 0)
 		{
-			CheckOrthoBuffer(4, SpecialFXImageNumber, TRANSLUCENCY_GLOWING, TEXTURE_WRAP);
+			orthoList->AddItem(4, SpecialFXImageNumber, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON, TEXTURE_WRAP);
 		}
 	}
 }

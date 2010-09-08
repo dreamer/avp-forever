@@ -25,6 +25,7 @@
 #include "textureManager.h"
 
 std::vector<Texture> textureList;
+std::vector<Texture>::iterator texIt;
 
 bool Tex_Lock(uint32_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
 {
@@ -195,6 +196,11 @@ std::string& Tex_GetName(uint32_t textureID)
 
 const r_Texture& Tex_GetTexture(uint32_t textureID)
 {
+	if (textureID == NO_TEXTURE)
+	{
+		int i = 0;
+	}
+
 	return (textureList[textureID].texture);
 }
 
@@ -205,23 +211,23 @@ const Texture& Tex_GetTextureDetails(uint32_t textureID)
 
 void Tex_ReleaseDynamicTextures()
 {
-	for (std::vector<Texture>::iterator it = textureList.begin(); it != textureList.end(); ++it)
+	for (texIt = textureList.begin(); texIt != textureList.end(); ++texIt)
 	{
-		if ((it->texture) && (it->usage == TextureUsage_Dynamic))
+		if ((texIt->texture) && (texIt->usage == TextureUsage_Dynamic))
 		{
-			R_ReleaseTexture(it->texture);
+			R_ReleaseTexture(texIt->texture);
 		}
 	}
 }
 
 void Tex_ReloadDynamicTextures()
 {
-	for (std::vector<Texture>::iterator it = textureList.begin(); it != textureList.end(); ++it)
+	for (texIt = textureList.begin(); texIt != textureList.end(); ++texIt)
 	{
 		// check for NOT texture (ie released ones)
-		if ((!it->texture) && (it->usage == TextureUsage_Dynamic))
+		if ((!texIt->texture) && (texIt->usage == TextureUsage_Dynamic))
 		{
-			R_CreateTexture(it->width, it->height, it->bitsPerPixel, it->usage, (*it));
+			R_CreateTexture(texIt->width, texIt->height, texIt->bitsPerPixel, texIt->usage, (*texIt));
 		}
 	}
 }
@@ -229,13 +235,14 @@ void Tex_ReloadDynamicTextures()
 void Tex_GetDimensions(uint32_t textureID, uint32_t &width, uint32_t &height)
 {
 	// the actual "no texture" texture is 1x1 resolution
+/*
 	if (textureID == NO_TEXTURE)
 	{
 		width = 0;
 		height = 0;
 		return;
 	}
-
+*/
 	width  = textureList[textureID].width;
 	height = textureList[textureID].height;
 }
@@ -246,21 +253,21 @@ void Tex_Release(uint32_t textureID)
 	{
 		R_ReleaseTexture(textureList[textureID].texture);
 	}
-/*
+
 	char buf[100];
 	sprintf(buf, "released tex at ID: %d\n", textureID);
 	OutputDebugString(buf);
-*/
+
 }
 
 void Tex_DeInit()
 {
-	for (std::vector<Texture>::iterator it = textureList.begin(); it != textureList.end(); ++it)
+	for (texIt = textureList.begin(); texIt != textureList.end(); ++texIt)
 	{
-		if (it->texture)
+		if (texIt->texture)
 		{
-			it->texture->Release();
-			it->texture = NULL;
+			texIt->texture->Release();
+			texIt->texture = NULL;
 		}
 	}
 }

@@ -196,7 +196,7 @@ void LoadCDTrackList()
 	unsigned long bytes_read;
 
 	//copy the file contents into a buffer
-	file_size = GetFileSize(file,0);
+	file_size = GetFileSize(file, 0);
 	buffer = new char[file_size+1];
 	ReadFile(file, buffer, file_size, &bytes_read,0);
 	CloseHandle(file);
@@ -206,7 +206,7 @@ void LoadCDTrackList()
 	char* bufferptr = buffer;
 
 	//first extract the multiplayer tracks
-	for(int i=0;i<3;i++)
+	for (int i=0;i<3;i++)
 	{
 		ExtractTracksForLevel(bufferptr,MultiplayerCDTracks[i]);
 	}

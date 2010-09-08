@@ -3033,7 +3033,7 @@ void LoadModuleData()
 		return;
 	}
 
-	int file_size=GetFileSize(file,0);
+	int file_size = GetFileSize(file, 0);
 	GLOBALASSERT((file_size % 4)==0);
 	int pos=0;
 	unsigned long bytesread;

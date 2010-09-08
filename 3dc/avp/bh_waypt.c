@@ -444,39 +444,35 @@ void SweepWaypoints(WAYPOINT_HEADER *waypoints, STRATEGYBLOCK *sbPtr, VECTORCH *
 
 }
 
-void Trickle_Down(WAYPOINT_HEADER *waypoints, WAYPOINT_VOLUME *this_waypoint, int trickle_value) {
-
+void Trickle_Down(WAYPOINT_HEADER *waypoints, WAYPOINT_VOLUME *this_waypoint, int trickle_value) 
+{
 	int a;
 
 	LOCALASSERT(this_waypoint->workspace<=trickle_value);
 
 	this_waypoint->workspace=trickle_value;
 
-	for (a=0; a<this_waypoint->num_links; a++) {
-		
+	for (a=0; a<this_waypoint->num_links; a++) 
+	{
 		WAYPOINT_LINK *link_to_next;
 		WAYPOINT_VOLUME *next_waypoint;
 
 		link_to_next=this_waypoint->first_link;
 		link_to_next+=a;
 
-		if ((link_to_next->link_flags&linkflag_oneway)==0) {
-		
+		if ((link_to_next->link_flags&linkflag_oneway)==0) 
+		{
 			next_waypoint=waypoints->first_waypoint;
 			next_waypoint+=link_to_next->link_target_index;
 	
-			if (next_waypoint->workspace<trickle_value) {
-	
+			if (next_waypoint->workspace<trickle_value) 
+			{
 				LOCALASSERT(trickle_value>0);
-	
+
 				Trickle_Down(waypoints,next_waypoint,trickle_value-1);
-	
 			}
-
 		}
-
 	}
-
 }
 
 void FindThisRoute(WAYPOINT_HEADER *waypoints, WAYPOINT_ROUTE *thisroute,WAYPOINT_VOLUME *startwaypoint, WAYPOINT_VOLUME *endwaypoint) {
@@ -486,7 +482,8 @@ void FindThisRoute(WAYPOINT_HEADER *waypoints, WAYPOINT_ROUTE *thisroute,WAYPOIN
 	WAYPOINT_VOLUME *thiswaypoint;
 
 	/* Trivial case... */
-	if ( (startwaypoint->contains_npc) && (startwaypoint->contains_target) ) {
+	if ( (startwaypoint->contains_npc) && (startwaypoint->contains_target) ) 
+	{
 		thisroute->num_waypoints=0;
 		thisroute->start=startwaypoint;
 		thisroute->second=startwaypoint;
@@ -521,35 +518,32 @@ void FindThisRoute(WAYPOINT_HEADER *waypoints, WAYPOINT_ROUTE *thisroute,WAYPOIN
 	b=0; /* Number of waypoints stepped. */
 	thiswaypoint=startwaypoint;
 	
-	while (thiswaypoint!=endwaypoint) {
-		
+	while (thiswaypoint!=endwaypoint) 
+	{
 		/* Look through links for highest increment. */
-
 		int nextstep=0;
 		WAYPOINT_VOLUME *bestnextwaypoint=NULL;
 
-		for (a=0; a<thiswaypoint->num_links; a++) {
-
+		for (a=0; a<thiswaypoint->num_links; a++) 
+		{
 			WAYPOINT_LINK *link_to_next;
 			WAYPOINT_VOLUME *next_waypoint;
 	
 			link_to_next=thiswaypoint->first_link;
 			link_to_next+=a;
 	
-			if ((link_to_next->link_flags&linkflag_reversed_oneway)==0) {
-			
+			if ((link_to_next->link_flags&linkflag_reversed_oneway)==0) 
+			{
 				next_waypoint=waypoints->first_waypoint;
 				next_waypoint+=link_to_next->link_target_index;
-				
-				if (next_waypoint->workspace>thiswaypoint->workspace) {				
-					if (next_waypoint->workspace>nextstep) {
-		
-						/* Found a better step. */
-		
 
+				if (next_waypoint->workspace>thiswaypoint->workspace) 
+				{
+					if (next_waypoint->workspace>nextstep) 
+					{
+						/* Found a better step. */
 						nextstep=next_waypoint->workspace;
 						bestnextwaypoint=next_waypoint;
-
 					}
 				}
 			}
@@ -568,13 +562,11 @@ void FindThisRoute(WAYPOINT_HEADER *waypoints, WAYPOINT_ROUTE *thisroute,WAYPOIN
 		thiswaypoint=bestnextwaypoint;
 
 		/* Go round again... */
-
 	}
 	
 	thisroute->num_waypoints=b;
 
 	/* That may be it... */
-
 }
 
 int FindBestRoute(WAYPOINT_ROUTE *bestroute,WAYPOINT_HEADER *waypoints) {

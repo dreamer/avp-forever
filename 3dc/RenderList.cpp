@@ -27,6 +27,7 @@
 #include <windows.h>
 #include <algorithm>
 #include <assert.h>
+#include "console.h"
 
 extern uint32_t GetRealNumVerts(uint32_t numVerts);
 
@@ -44,76 +45,82 @@ RenderList::RenderList(size_t size)
 
 RenderList::~RenderList()
 {
-//	delete Items;
+	// nothing to do here
 }
 
-void RenderList::CreateIndicies(uint16_t *indexArray, uint32_t numVerts)
+// we use this function to create the indices needed to render our screen space quads. 
+// We generate the indices differently here than the engine itself does for quads 
+//(which it uses for general level geometry.
+void RenderList::CreateOrthoIndices(uint16_t *indexArray)
 {
-	// handle ortho quad index order differently..
+	AddIndices(indexArray, 0,1,2, 4);
+	AddIndices(indexArray, 2,1,3, 4);
+}
+
+// generates triangle indices for the verts we've just added to a vertex buffer
+// this function was originally in d3d_render.cpp
+void RenderList::CreateIndices(uint16_t *indexArray, uint32_t numVerts)
+{
 	switch (numVerts)
 	{
 		default:
-			OutputDebugString("unexpected number of verts to render\n");
+			Con_PrintError("Asked to render unexpected number of verts in CreateIndices");
 			break;
 		case 0:
-			OutputDebugString("Asked to render 0 verts\n");
+			Con_PrintError("Asked to render 0 verts in CreateIndices");
 			break;
 		case 3:
 		{
-			AddIndicies(indexArray, 0,2,1, 3);
+			AddIndices(indexArray, 0,2,1, 3);
 			break;
 		}
 		case 4:
 		{
 			// winding order for main avp rendering system
-			AddIndicies(indexArray, 0,1,2, 4);
-			AddIndicies(indexArray, 0,2,3, 4);
-
-			// winding order for my ortho quad system
-				// bottom left, top left, bottom right
-				// bottom right, top left, top right
-			//AddIndicies(indexArray, 0,1,2, 4);
-			//AddIndicies(indexArray, 2,1,3, 4);
+			AddIndices(indexArray, 0,1,2, 4);
+			AddIndices(indexArray, 0,2,3, 4);
 			break;
 		}
 		case 5:
 		{
-			AddIndicies(indexArray, 0,1,4, 5);
-			AddIndicies(indexArray, 1,3,4, 5);
-			AddIndicies(indexArray, 1,2,3, 5);
+			AddIndices(indexArray, 0,1,4, 5);
+			AddIndices(indexArray, 1,3,4, 5);
+			AddIndices(indexArray, 1,2,3, 5);
 			break;
 		}
 		case 6:
 		{
-			AddIndicies(indexArray, 0,4,5, 6);
-			AddIndicies(indexArray, 0,3,4, 6);
-			AddIndicies(indexArray, 0,2,3, 6);
-			AddIndicies(indexArray, 0,1,2, 6);
+			AddIndices(indexArray, 0,4,5, 6);
+			AddIndices(indexArray, 0,3,4, 6);
+			AddIndices(indexArray, 0,2,3, 6);
+			AddIndices(indexArray, 0,1,2, 6);
 			break;
 		}
 		case 7:
 		{
-			AddIndicies(indexArray, 0,5,6, 7);
-			AddIndicies(indexArray, 0,4,5, 7);
-			AddIndicies(indexArray, 0,3,4, 7);
-			AddIndicies(indexArray, 0,2,3, 7);
-			AddIndicies(indexArray, 0,1,2, 7);
+			AddIndices(indexArray, 0,5,6, 7);
+			AddIndices(indexArray, 0,4,5, 7);
+			AddIndices(indexArray, 0,3,4, 7);
+			AddIndices(indexArray, 0,2,3, 7);
+			AddIndices(indexArray, 0,1,2, 7);
 			break;
 		}
 		case 8:
 		{
-			AddIndicies(indexArray, 0,6,7, 8);
-			AddIndicies(indexArray, 0,5,6, 8);
-			AddIndicies(indexArray, 0,4,5, 8);
-			AddIndicies(indexArray, 0,3,4, 8);
-			AddIndicies(indexArray, 0,2,3, 8);
-			AddIndicies(indexArray, 0,1,2, 8);
+			AddIndices(indexArray, 0,6,7, 8);
+			AddIndices(indexArray, 0,5,6, 8);
+			AddIndices(indexArray, 0,4,5, 8);
+			AddIndices(indexArray, 0,3,4, 8);
+			AddIndices(indexArray, 0,2,3, 8);
+			AddIndices(indexArray, 0,1,2, 8);
 			break;
 		}
 	}
 }
 
-void RenderList::AddIndicies(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n)
+// adds a single triangle's worth of indices to an index buffer in the correct order
+// where a, b and c are the index order, and n is the number of verts we've just added to the VB
+void RenderList::AddIndices(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n)
 {
 	indexArray[this->indexCount]   = (vertexCount - (n) + (a));
 	indexArray[this->indexCount+1] = (vertexCount - (n) + (b));
@@ -153,6 +160,9 @@ void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENC
 
 void RenderList::Sort()
 {
+	// sort the list on the sortKey int value. We use the vector
+	// as an array so we can't do Items.end() as we don't use push_back
+	// or pop_back. Our size is controlled by the value of listIndex
 	std::sort(Items.begin(), Items.begin() + listIndex);
 }
 
@@ -167,10 +177,10 @@ void RenderList::Reset()
 
 void RenderList::Draw()
 {
-	for (std::vector<RenderItem2>::iterator it = Items.begin(); it != Items.begin() + listIndex; ++it)
+	for (std::vector<RenderItem>::iterator it = Items.begin(); it != Items.begin() + listIndex; ++it)
 	{
 		// set texture
-		R_SetTexture(0, it->sortKey >> 24);
+		R_SetTexture(0, (it->sortKey >> 24) & 65535);
 		ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((it->sortKey >> 20) & 15));
 		ChangeFilteringMode((enum FILTERING_MODE_ID)	((it->sortKey >> 16) & 15));
 		ChangeTextureAddressMode((enum TEXTURE_ADDRESS_MODE) ((it->sortKey >> 15) & 1));
@@ -213,7 +223,7 @@ int main(int argc, char *argv[])
 
 	for (uint32_t i = 0; i < list.GetSize(); i++)
 	{
-//		sprintf(buf, "textureID %d, numVerts: %d, numIndicies: %d\n", list.Items[i].textureID, list.Items[i].vertEnd - list.Items[i].vertStart, list.Items[i].indexEnd - list.Items[i].indexStart);
+//		sprintf(buf, "textureID %d, numVerts: %d, numIndices: %d\n", list.Items[i].textureID, list.Items[i].vertEnd - list.Items[i].vertStart, list.Items[i].indexEnd - list.Items[i].indexStart);
 //		OutputDebugString(buf);
 
 		sprintf(buf, "textureID %d, shaderID: %d, sortKey: %d\n", list.Items[i].sortKey >> SORT_TEXTURE_SHIFT, (uint16_t)list.Items[i].sortKey, list.Items[i].sortKey);
@@ -227,7 +237,7 @@ int main(int argc, char *argv[])
 
 	for (uint32_t i = 0; i < list.GetSize(); i++)
 	{
-//		sprintf(buf, "textureID %d, numVerts: %d, numIndicies: %d\n", list.Items[i].textureID, list.Items[i].vertEnd - list.Items[i].vertStart, list.Items[i].indexEnd - list.Items[i].indexStart);
+//		sprintf(buf, "textureID %d, numVerts: %d, numIndices: %d\n", list.Items[i].textureID, list.Items[i].vertEnd - list.Items[i].vertStart, list.Items[i].indexEnd - list.Items[i].indexStart);
 //		OutputDebugString(buf);
 
 		sprintf(buf, "textureID %d, shaderID: %d\n", list.Items[i].sortKey >> SORT_TEXTURE_SHIFT, (uint16_t)list.Items[i].sortKey);

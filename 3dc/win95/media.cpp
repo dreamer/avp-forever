@@ -51,7 +51,7 @@ unsigned MediaWinFileMedium::GetRemainingSize()
 		return 0;
 	}
 
-	unsigned nSize = GetFileSize(m_hFile,NULL);
+	unsigned nSize = GetFileSize(m_hFile, NULL);
 
 	if (0xffffffff == nSize)
 	{

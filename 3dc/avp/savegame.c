@@ -576,8 +576,8 @@ void LoadSavedGame()
 		return;
 	}
 
-	LoadInfo.BufferSize = GetFileSize(file,0);
-   	if(!LoadInfo.BufferSize)
+	LoadInfo.BufferSize = GetFileSize(file, 0);
+   	if (!LoadInfo.BufferSize)
 	{
 		CloseHandle(file);
 		EndLoadGame();
