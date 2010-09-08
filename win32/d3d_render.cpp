@@ -1,15 +1,9 @@
 #include "console.h"
 #include "onscreenKeyboard.h"
 #include "textureManager.h"
-
 #include "d3_func.h"
-
 #include "r2base.h"
 #include "font2.h"
-
-// macros for Pix functions
-#define WIDEN2(x) L ## x
-#define WIDEN(x) WIDEN2(x)
 
 // STL stuff
 #include <vector>
@@ -21,8 +15,6 @@
 
 extern void DisableZBufferWrites();
 extern void EnableZBufferWrites();
-
-VertexBuffer *FMVvertexBuffer = 0;
 
 #include <d3dx9math.h>
 #include "fmvCutscenes.h"
@@ -217,57 +209,6 @@ uint32_t GetRealNumVerts(uint32_t numVerts)
 // longer use an execute buffer
 bool LockExecuteBuffer()
 {
-/*
-	LastError = d3d.lpD3DVertexBuffer->Lock(0, 0, (void**)&mainVertex, D3DLOCK_DISCARD);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	LastError = d3d.lpD3DIndexBuffer->Lock(0, 0, (void**)&mainIndex, D3DLOCK_DISCARD);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-*/
-
-#if 0
-	// lock particle vertex buffer
-	LastError = d3d.lpD3DParticleVertexBuffer->Lock(0, 0, (void**)&particleVertex, D3DLOCK_DISCARD);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	// lock particle index buffer
-	LastError = d3d.lpD3DParticleIndexBuffer->Lock(0, 0, (void**)&particleIndex, D3DLOCK_DISCARD);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-#endif
-
-/*
-	// lock 2D ortho vertex buffer
-	LastError = d3d.lpD3DOrthoVertexBuffer->Lock(0, 0, (void**)&orthoVertex, D3DLOCK_DISCARD);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	// lock 2D ortho index buffer
-	LastError = d3d.lpD3DOrthoIndexBuffer->Lock(0, 0, (void**)&orthoIndex, D3DLOCK_DISCARD);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-*/
 	// lock particle vertex and index buffers
 	d3d.particleVB->Lock((void**)&particleVertex);
 	d3d.particleIB->Lock(&particleIndex);
@@ -300,59 +241,6 @@ bool LockExecuteBuffer()
 // unlock all vertex and index buffers. function needs to be renamed as no longer using execute buffers
 bool UnlockExecuteBufferAndPrepareForUse()
 {
-/*
-	// unlock main vertex buffer
-	LastError = d3d.lpD3DVertexBuffer->Unlock();
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	// unlock index buffer for main vertex buffer
-	LastError = d3d.lpD3DIndexBuffer->Unlock();
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-*/
-
-/*
-	// unlock particle vertex buffer
-	LastError = d3d.lpD3DParticleVertexBuffer->Unlock();
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	// unlock particle index buffer
-	LastError = d3d.lpD3DParticleIndexBuffer->Unlock();
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-*/
-
-/*
-	// unlock orthographic quad vertex buffer
-	LastError = d3d.lpD3DOrthoVertexBuffer->Unlock();
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	// unlock orthographic index buffer
-	LastError = d3d.lpD3DOrthoIndexBuffer->Unlock();
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-*/
 	// unlock particle vertex and index buffers
 	d3d.particleVB->Unlock();
 	d3d.particleIB->Unlock();
@@ -371,46 +259,21 @@ bool UnlockExecuteBufferAndPrepareForUse()
 bool ExecuteBuffer()
 {
 	// sort the list of render objects
-//	std::sort(renderList.begin(), renderList.begin() + renderListCount);
 	orthoList->Sort();
 	particleList->Sort();
 	mainList->Sort();
-
-/*
-	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
-
-	LastError = d3d.lpD3DDevice->SetIndices(d3d.lpD3DIndexBuffer);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
-*/
 
 	LastError = d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
-/*
-	LastError = d3d.lpD3DDevice->SetVertexShader(d3d.vertexShader);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
 
-	LastError = d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
-*/
+	// set main rendering vb and ibs to active
 	d3d.mainVB->Set();
 	d3d.mainIB->Set();
 
+	// set main shaders to active
 	d3d.effectSystem->Set(d3d.mainEffect);
 
 	#ifndef USE_D3DVIEWTRANSFORM
@@ -421,74 +284,12 @@ bool ExecuteBuffer()
 	D3DXMATRIXA16 matWorldViewProj = viewMatrix * matProjection;
 	vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
 
-//	ChangeTextureAddressMode(TEXTURE_WRAP);
-
+	// draw our main list (level geometry, player weapon etc)
 	mainList->Draw();
 
-#if 0
-	// draw opaque polygons
-	for (uint32_t i = 0; i < renderListCount; i++)
-	{
-		// change render states if required
-		R_SetTexture(0, renderList[i].sortKey >> 24);
-
-		ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((renderList[i].sortKey >> 20) & 15));
-		ChangeFilteringMode((enum FILTERING_MODE_ID)	((renderList[i].sortKey >> 16) & 15));
-
-		uint32_t numPrimitives = (renderList[i].indexEnd - renderList[i].indexStart) / 3;
-
-		if (numPrimitives)
-		{
-			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
-				0,
-				0,
-				NumVertices,
-				renderList[i].indexStart,
-				numPrimitives);
-
-			if (FAILED(LastError))
-			{
-				LogDxError(LastError, __LINE__, __FILE__);
-			}
-		}
-		NumberOfRenderedTriangles += numPrimitives / 3;
-	}
-
-	// do transparents here..
-	for (uint32_t i = 0; i < transRenderListCount; i++)
-	{
-		// change render states if required
-		R_SetTexture(0, transRenderList[i].sortKey >> 24);
-
-		ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((transRenderList[i].sortKey >> 20) & 15));
-		ChangeFilteringMode((enum FILTERING_MODE_ID)	((transRenderList[i].sortKey >> 16) & 15));
-
-		uint32_t numPrimitives = (transRenderList[i].indexEnd - transRenderList[i].indexStart) / 3;
-
-		if (numPrimitives)
-		{
-			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
-			   0,
-			   0,
-			   NumVertices,
-			   transRenderList[i].indexStart,
-			   numPrimitives);
-
-			if (FAILED(LastError))
-			{
-				LogDxError(LastError, __LINE__, __FILE__);
-			}
-		}
-		NumberOfRenderedTriangles += numPrimitives / 3;
-	}
-#endif
-
 	// render any particles
-	//if (particleListCount)
 	{
-		D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Starting to draw particles..."));
-
-		// set the VB and IBs as active
+		// set the particle VB and IBs as active
 		d3d.particleVB->Set();
 		d3d.particleIB->Set();
 
@@ -502,133 +303,31 @@ bool ExecuteBuffer()
 
 		EnableZBufferWrites();
 		ChangeTextureAddressMode(TEXTURE_WRAP);
-
-		D3DPERF_EndEvent();
 	}
 
 	// render any orthographic quads
-//	if (orthoListCount)
 	{
 		d3d.orthoVB->Set();
 		d3d.orthoIB->Set();
-/*
-		LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DOrthoVertexBuffer, 0, sizeof(ORTHOVERTEX));
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-		}
 
-		LastError = d3d.lpD3DDevice->SetIndices(d3d.lpD3DOrthoIndexBuffer);
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-		}
-*/
 		LastError = d3d.lpD3DDevice->SetVertexDeclaration(d3d.orthoVertexDecl);
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
 
+		// set orthographic projection shaders as active
 		d3d.effectSystem->Set(d3d.orthoEffect);
-/*
-		LastError = d3d.lpD3DDevice->SetVertexShader(d3d.orthoVertexShader);
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-		}
 
-		LastError = d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-		}
-*/
 		// pass the orthographicp projection matrix to the vertex shader
 		orthoConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
 
+		// daw the ortho list
 		orthoList->Draw();
-/*
-		// loop through list drawing the quads
-		for (uint32_t i = 0; i < orthoListCount; i++)
-		{
-			// change render states if required
-			R_SetTexture(0, orthoList[i].sortKey >> 24);
-
-			ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((orthoList[i].sortKey >> 20) & 15));
-			ChangeFilteringMode((enum FILTERING_MODE_ID)	((orthoList[i].sortKey >> 16) & 15));
-			ChangeTextureAddressMode((enum TEXTURE_ADDRESS_MODE) ((orthoList[i].sortKey >> 14) & 3));
-
-			uint32_t primitiveCount = (orthoList[i].indexEnd - orthoList[i].indexStart) / 3;
-
-			LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
-			   0,
-			   0,
-			   orthoVBOffset,
-			   orthoList[i].indexStart,
-			   primitiveCount);
-
-			if (FAILED(LastError))
-			{
-				LogDxError(LastError, __LINE__, __FILE__);
-			}
-		}
-*/
 	}
 
 	return true;
 }
-
-/*
-void CheckOrthoBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum TEXTURE_ADDRESS_MODE textureAddressMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
-{
-	assert (numVerts == 4);
-
-	// check if we've got enough room. if not, flush
-		// TODO
-
-	assert(orthoIBOffset <= MAX_VERTEXES - 12);
-
-	orthoList[orthoListCount].sortKey = 0; // zero it out
-
-	// store our render state values in sortKey which we can use as a sorting value
-	orthoList[orthoListCount].sortKey = (textureID << 24) | (translucencyMode << 20) | (filteringMode << 16) | (textureAddressMode << 14);
-
-	// create a new list item for it
-	orthoList[orthoListCount].vertStart = 0;
-	orthoList[orthoListCount].vertEnd = 0;
-
-	if (orthoListCount != 0 &&
-		// if sort keys match, render states match so we can merge the two list items
-		orthoList[orthoListCount-1].sortKey == orthoList[orthoListCount].sortKey)
-	{
-		orthoListCount--;
-	}
-	else
-	{
-		orthoList[orthoListCount].vertStart = orthoVBOffset;
-		orthoList[orthoListCount].indexStart = orthoIBOffset;
-	}
-
-	// create the indices for each triangle
-	for (uint32_t i = 0; i < numVerts; i+=4)
-	{
-		orthoIndex[orthoIBOffset]   = orthoVBOffset+i+0;
-		orthoIndex[orthoIBOffset+1] = orthoVBOffset+i+1;
-		orthoIndex[orthoIBOffset+2] = orthoVBOffset+i+2;
-		orthoIBOffset+=3;
-
-		orthoIndex[orthoIBOffset]   = orthoVBOffset+i+2;
-		orthoIndex[orthoIBOffset+1] = orthoVBOffset+i+1;
-		orthoIndex[orthoIBOffset+2] = orthoVBOffset+i+3;
-		orthoIBOffset+=3;
-	}
-
-	orthoList[orthoListCount].vertEnd = orthoVBOffset + numVerts;
-	orthoList[orthoListCount].indexEnd = orthoIBOffset;
-	orthoListCount++;
-}
-*/
 
 void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, r_Texture fmvTexture)
 {
@@ -1503,13 +1202,6 @@ void UpdateViewMatrix(float *viewMat)
 	viewMatrix._41 = -D3DXVec3Dot(&vecPosition, &vecRight);
 	viewMatrix._42 = -D3DXVec3Dot(&vecPosition, &vecUp);
 	viewMatrix._43 = -D3DXVec3Dot(&vecPosition, &vecFront);
-/*
-	viewMatrix = D3DXMATRIX(
-			vecRight.x, vecRight.y, vecRight.z, 0.0f,
-			vecUp.x, vecUp.y, vecUp.z, 0.0f,
-			vecFront.x, vecFront.y, vecFront.z, 0.0f,
-			vecPosition.x, vecPosition.y, vecPosition.z, 1.0f);
-*/
 }
 
 void DrawCoronas()
@@ -1752,201 +1444,6 @@ extern void ScanImagesForFMVs();
 
 int NumberOfLandscapePolygons;
 
-/* OUTPUT_TRIANGLE - how this bugger works
-
-	For example, if this takes in the parameters:
-	( 0 , 2 , 3, 4)
-
-	Image we have already got 12 vertexes counted in NumVertices
-	What below does is construct a triangle in a certain order (ie as specified
-	by the first 3 params passed into the function) using the data already in our vertex buffer
-	so, for first parameter, set our first vertex to:
-
-		v1 = 12 + 0 - 4
-		v1 is therefore = 8;
-
-		8 refers to the 8th vertice in our vertex buffer, ie 4 back from the end (as 12 - 4 = 8)
-
-		then,
-		v2 = 12 + 2 - 4
-		v2 is therefore = 10;
-
-		10 is 2 back, and 2 above the previous value. We've stepped over 9 :)
-
-		IE.. 0, 2 order is forming. v1 is set to 11, so the '0,2,3' pattern emerged.
-
-		that's a 2am explanation for ya :p
-
-		edit: the above is probably really wrong. figure it out yourself :D
-*/
-
-/*
-static inline void OUTPUT_TRIANGLE(int a, int b, int c, int n)
-{
-	mainIndex[NumIndices]   = (NumVertices - (n) + (a));
-	mainIndex[NumIndices+1] = (NumVertices - (n) + (b));
-	mainIndex[NumIndices+2] = (NumVertices - (n) + (c));
-	NumIndices+=3;
-}
-*/
-
-/*
-static inline void OUTPUT_TRIANGLE2(int a, int b, int c, int n)
-{
-	assert(pIb <= (9216 * 3) - 3);
-	particleIndex[pIb]   = (numPVertices - (n) + (a));
-	particleIndex[pIb+1] = (numPVertices - (n) + (b));
-	particleIndex[pIb+2] = (numPVertices - (n) + (c));
-
-	// test
-	testParticleIndex[pIb]   = (numPVertices - (n) + (a));
-	testParticleIndex[pIb+1] = (numPVertices - (n) + (b));
-	testParticleIndex[pIb+2] = (numPVertices - (n) + (c));
-
-	pIb+=3;
-}
-*/
-
-/*
-static inline void D3D_OutputTriangles()
-{
-	switch (RenderPolygon.NumberOfVertices)
-	{
-		default:
-			OutputDebugString("unexpected number of verts to render\n");
-			break;
-		case 0:
-			OutputDebugString("Asked to render 0 verts\n");
-			break;
-		case 3:
-		{
-			OUTPUT_TRIANGLE(0,2,1, 3);
-			break;
-		}
-		case 4:
-		{
-			OUTPUT_TRIANGLE(0,1,2, 4);
-			OUTPUT_TRIANGLE(0,2,3, 4);
-			break;
-		}
-		case 5:
-		{
-			OUTPUT_TRIANGLE(0,1,4, 5);
-		    OUTPUT_TRIANGLE(1,3,4, 5);
-		    OUTPUT_TRIANGLE(1,2,3, 5);
-			break;
-		}
-		case 6:
-		{
-			OUTPUT_TRIANGLE(0,4,5, 6);
-		    OUTPUT_TRIANGLE(0,3,4, 6);
-		    OUTPUT_TRIANGLE(0,2,3, 6);
-		    OUTPUT_TRIANGLE(0,1,2, 6);
-			break;
-		}
-		case 7:
-		{
-			OUTPUT_TRIANGLE(0,5,6, 7);
-		    OUTPUT_TRIANGLE(0,4,5, 7);
-		    OUTPUT_TRIANGLE(0,3,4, 7);
-		    OUTPUT_TRIANGLE(0,2,3, 7);
-		    OUTPUT_TRIANGLE(0,1,2, 7);
-			break;
-		}
-		case 8:
-		{
-			OUTPUT_TRIANGLE(0,6,7, 8);
-		    OUTPUT_TRIANGLE(0,5,6, 8);
-		    OUTPUT_TRIANGLE(0,4,5, 8);
-		    OUTPUT_TRIANGLE(0,3,4, 8);
-		    OUTPUT_TRIANGLE(0,2,3, 8);
-		    OUTPUT_TRIANGLE(0,1,2, 8);
-			break;
-		}
-	}
-
-	if (NumVertices > (MAX_VERTEXES-12))
-	{
-		UnlockExecuteBufferAndPrepareForUse();
-		ExecuteBuffer();
-		LockExecuteBuffer();
-	}
-}
-*/
-
-/*
-void CheckVertexBuffer(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
-{
-	uint32_t realNumVerts = GetRealNumVerts(numVerts);
-
-	// check if we've got enough room. if not, flush
-	if (NumVertices + numVerts > (MAX_VERTEXES-12))
-	{
-		UnlockExecuteBufferAndPrepareForUse();
-		ExecuteBuffer();
-		LockExecuteBuffer();
-	}
-
-	if (translucencyMode == TRANSLUCENCY_OFF)
-	{
-		renderList[renderListCount].sortKey = 0; // zero it out
-
-		// store our render state values in sortKey which we can use as a sorting value
-		renderList[renderListCount].sortKey = (textureID << 24) | (translucencyMode << 20) | (filteringMode << 16);
-
-		renderList[renderListCount].vertStart = 0;
-		renderList[renderListCount].vertEnd = 0;
-
-		renderList[renderListCount].indexStart = 0;
-		renderList[renderListCount].indexEnd = 0;
-
-		if (renderListCount != 0 &&
-			// if the two keys match, render states match so we can merge the list items
-			renderList[renderListCount-1].sortKey == renderList[renderListCount].sortKey)
-		{
-			renderListCount--;
-		}
-		else
-		{
-			renderList[renderListCount].vertStart = NumVertices;
-			renderList[renderListCount].indexStart = NumIndices;
-		}
-
-		renderList[renderListCount].vertEnd = NumVertices + numVerts;
-		renderList[renderListCount].indexEnd = NumIndices + realNumVerts;
-		renderListCount++;
-	}
-	else
-	{
-		transRenderList[transRenderListCount].sortKey = 0; // zero it out
-		transRenderList[transRenderListCount].sortKey = (textureID << 24) | (translucencyMode << 20) | (filteringMode << 16);
-
-		transRenderList[transRenderListCount].vertStart = 0;
-		transRenderList[transRenderListCount].vertEnd = 0;
-
-		transRenderList[transRenderListCount].indexStart = 0;
-		transRenderList[transRenderListCount].indexEnd = 0;
-
-		if (transRenderListCount != 0 &&
-			transRenderList[transRenderListCount-1].sortKey == transRenderList[transRenderListCount].sortKey)
-		{
-			transRenderListCount--;
-		}
-		else
-		{
-			transRenderList[transRenderListCount].vertStart = NumVertices;
-			transRenderList[transRenderListCount].indexStart = NumIndices;
-		}
-
-		transRenderList[transRenderListCount].vertEnd = NumVertices + numVerts;
-		transRenderList[transRenderListCount].indexEnd = NumIndices + realNumVerts;
-		transRenderListCount++;
-	}
-
-	NumVertices += numVerts;
-}
-*/
-
 #if 0 // bjd - commenting out
 void SetFogDistance(int fogDistance)
 {
@@ -1976,8 +1473,6 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 	RecipW = 1.0f / (float) texWidth;
 	RecipH = 1.0f / (float) texHeight;
 
-//	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
-
 	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
@@ -1998,8 +1493,6 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 	}
 
 	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
-
-//	D3D_OutputTriangles();
 }
 
 void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
@@ -2009,7 +1502,6 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 	// Take header information
 	int32_t flags = inputPolyPtr->PolyFlags;
 
-//	CheckVertexBuffer(RenderPolygon.NumberOfVertices, NO_TEXTURE, RenderPolygon.TranslucencyMode);
 	mainList->AddItem(RenderPolygon.NumberOfVertices, NO_TEXTURE, RenderPolygon.TranslucencyMode);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
@@ -2036,13 +1528,10 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 	}
 
 	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
-
-//	D3D_OutputTriangles();
 }
 
 void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
-//	CheckVertexBuffer(RenderPolygon.NumberOfVertices, NO_TEXTURE, TRANSLUCENCY_OFF);
 	mainList->AddItem(RenderPolygon.NumberOfVertices, NO_TEXTURE, TRANSLUCENCY_OFF);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
@@ -2061,8 +1550,6 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
 	}
 
 	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
-
-//	D3D_OutputTriangles();
 }
 
 void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
@@ -2079,7 +1566,6 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 	RecipW = 1.0f / (float) texWidth;
 	RecipH = 1.0f / (float) texHeight;
 
-//	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, TRANSLUCENCY_NORMAL);
 	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, TRANSLUCENCY_NORMAL);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
@@ -2106,7 +1592,6 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 		vb++;
 	}
 
-//	D3D_OutputTriangles();
 	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
 }
 
@@ -2252,7 +1737,6 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 //		TranslatePointIntoViewspace(&vertices[1]);
 //		TranslatePointIntoViewspace(&vertices[2]);
 
-//		CheckVertexBuffer(3, NO_TEXTURE, TRANSLUCENCY_NORMAL);
 		mainList->AddItem(3, NO_TEXTURE, TRANSLUCENCY_NORMAL);
 
 		VECTORCH *verticesPtr = vertices;
@@ -2280,7 +1764,6 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 			verticesPtr++;
 		}
 
-//		OUTPUT_TRIANGLE(0,2,1, 3);
 		mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
 	}
 }
@@ -2292,14 +1775,6 @@ void D3D_DecalSystem_Setup(void)
 	LockExecuteBuffer();
 
 	DisableZBufferWrites();
-/*
-	if (D3DZWriteEnable != FALSE)
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-		D3DZWriteEnable = FALSE;
-	}
-*/
-//	D3DPERF_BeginEvent(D3DCOLOR_XRGB(128,0,128), WIDEN("Starting to draw Decals...\n"));
 }
 
 void D3D_DecalSystem_End(void)
@@ -2312,15 +1787,6 @@ void D3D_DecalSystem_End(void)
 	LockExecuteBuffer();
 
 	EnableZBufferWrites();
-
-/*
-	if (D3DZWriteEnable != TRUE)
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-		D3DZWriteEnable = TRUE;
-	}
-*/
-//	D3DPERF_EndEvent();
 }
 
 void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
@@ -2396,7 +1862,6 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 				);
 	}
 
-//	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, decalDescPtr->TranslucencyType);
 	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, decalDescPtr->TranslucencyType);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
@@ -2415,7 +1880,6 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 		vb++;
 	}
 
-//	D3D_OutputTriangles();
 	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
 }
 
@@ -2459,9 +1923,6 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 	RecipW = 1.0f / (float) texWidth;
 	RecipH = 1.0f / (float) texHeight;
-
-//	CheckVertexBuffer(RenderPolygon.NumberOfVertices, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType);
-//	void CheckVertexBuffer(uint32_t numVerts, int32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON)
 
 	// add the item to our test list
 	// 1: Check our VB and IBs are big enough?
@@ -2529,8 +1990,6 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		{
 			zvalue = (float)vertices->Z;
 		}
-
-//		assert(pVb <= MAX_VERTEXES - 12);
 
 		particleVertex[pVb].sx = (float)vertices->X;
 		particleVertex[pVb].sy = (float)vertices->Y;
@@ -3000,8 +2459,6 @@ void D3D_DrawBackdrop(void)
 	}
 }
 
-// bjd - removed function void MakeNoiseTexture(void)
-
 void DrawNoiseOverlay(int t)
 {
 	// t == 64 for image intensifier
@@ -3121,7 +2578,6 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 	RecipW = 1.0f / (float) texWidth;
 	RecipH = 1.0f / (float) texHeight;
 
-//	CheckVertexBuffer(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
 	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
@@ -3141,7 +2597,6 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 		vb++;
 	}
 
-//	D3D_OutputTriangles();
 	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
 }
 
@@ -3822,45 +3277,6 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 	}
 }
 
-#if 0
-static int GammaSetting;
-void UpdateGammaSettings(int g, int forceUpdate)
-{
-	LPDIRECTDRAWGAMMACONTROL handle;
-	DDGAMMARAMP gammaValues;
-
-	if (g==GammaSetting && !forceUpdate) return;
-
-	lpDDSPrimary->QueryInterface(IID_IDirectDrawGammaControl,(LPVOID*)&handle);
-
-//	handle->GetGammaRamp(0,&gammaValues);
-	for (int i=0; i<=255; i++)
-	{
-		int u = ((i*65536)/255);
-		int m = MUL_FIXED(u,u);
-		int l = MUL_FIXED(2*u,ONE_FIXED-u);
-
-		int a;
-
-		a = m/256+MUL_FIXED(g,l);
-		if (a<0) a=0;
-		if (a>255) a=255;
-
-		gammaValues.red[i]=a*256;
-		gammaValues.green[i]=a*256;
-		gammaValues.blue[i]=a*256;
-	}
-//	handle->SetGammaRamp(0,&gammaValues);
-	handle->SetGammaRamp(DDSGR_CALIBRATE,&gammaValues);
-	GammaSetting=g;
-//	handle->SetGammaRamp(DDSGR_CALIBRATE,&gammaValues);
-	//handle->GetGammaRamp(0,&gammaValues);
-	RELEASE(handle);
-}
-#endif
-
-
-
 // For extern "C"
 
 };
@@ -3878,8 +3294,10 @@ void r2rect :: AlphaFill
 		bValidPhys()
 	);
 
-	if (y1<=y0)
+	if (y1 <= y0)
+	{
 		return;
+	}
 
 	D3D_Rectangle(x0, y0, x1, y1, R, G, B, translucency);
 }
@@ -3997,7 +3415,6 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr, int x, int y, int colou
 	while (*stringPtr)
 	{
 		char c = *stringPtr++;
-
 		{
 			int topLeftU = 1+((c-32)&15)*16;
 			int topLeftV = 1+((c-32)>>4)*16;

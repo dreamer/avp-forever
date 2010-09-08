@@ -461,7 +461,7 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 	wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = NULL;
-	wcex.lpszMenuName = NAME;
+	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = NAME;
 
 	if (!RegisterClassEx(&wcex))
@@ -484,7 +484,7 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 	/* if "-w" passed to command line */
 	if (WindowMode == WindowModeSubWindow)
 	{
-		//force window to be 800x600 to avoid stretch blits.
+		// force window to be 800x600 to avoid stretch blits.
 		WinWidth = 800;
 		WinHeight = 600;
 
@@ -495,7 +495,7 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 
 		hWndMain = CreateWindowEx(
 			WS_EX_TOPMOST,
-			NAME, //  Name of class (registered by RegisterClass call above) 
+			NAME,  // Name of class (registered by RegisterClass call above) 
 			TITLE, // Name of window 
 			WS_OVERLAPPEDWINDOW,
 			clientRect.left,
@@ -508,20 +508,27 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 			NULL
 		);
 
-		AdjustWindowRect(&clientRect, GetWindowLongPtr( hWndMain, GWL_STYLE ), FALSE );
+		AdjustWindowRect(&clientRect, GetWindowLongPtr(hWndMain, GWL_STYLE), FALSE);
 		SetWindowPos(hWndMain, 0, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, SWP_SHOWWINDOW);
 	}
 	else if (WindowMode == WindowModeFullScreen)
 	{
+		// test DXUT code..
+		RECT rc;
+        SetRect(&rc, 0, 0, 800, 600);
+		AdjustWindowRect(&rc, WS_EX_TOPMOST, FALSE);
+
 		hWndMain = CreateWindowEx(
 			WS_EX_TOPMOST,
-			NAME, //  Name of class (registered by RegisterClass call above) 
+			NAME,  // Name of class (registered by RegisterClass call above) 
 			TITLE, // Name of window 
 			WS_POPUP,
 			0,
 			0,
-			GetSystemMetrics(SM_CXSCREEN),
-			GetSystemMetrics(SM_CYSCREEN),
+			(rc.right - rc.left),
+			(rc.bottom - rc.top),
+//			GetSystemMetrics(SM_CXSCREEN),
+//			GetSystemMetrics(SM_CYSCREEN),
 			NULL,
 			NULL,
 			hInstance,
