@@ -1725,7 +1725,6 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 	&& (vertices[0].vy <= vertices[0].vz))
 */
 	{
-
 		vertices[1] = particlePtr->Position;
 		vertices[2] = particlePtr->Position;
 		vertices[1].vx += particlePtr->Offset.vx;
@@ -1764,7 +1763,7 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 			verticesPtr++;
 		}
 
-		mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
+		mainList->CreateIndices(mainIndex, 3);
 	}
 }
 
