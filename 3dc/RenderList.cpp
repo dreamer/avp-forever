@@ -24,7 +24,6 @@
 
 #include "RenderList.h"
 #include "renderer.h"
-#include <windows.h>
 #include <algorithm>
 #include <assert.h>
 #include "console.h"
@@ -198,50 +197,3 @@ void RenderList::Draw()
 		}
 	}
 }
-
-#if 0
-int main(int argc, char *argv[])
-{
-	RenderList list;
-	list.Init(300);
-
-	list.AddItem(123, 1, 3);
-	list.AddItem(1024, 1, 5);
-	list.AddItem(30, 2, 9);
-	list.AddItem(30, 3, 6);
-	list.AddItem(45, 2, 5);
-	list.AddItem(12, 3, 3);
-
-	list.AddItem(70, 3, 6);
-
-	list.AddItem(1200, 3, 3);
-
-	// loop and print list
-	char buf[100];
-	sprintf(buf, "%d list items\n", list.GetSize());
-	OutputDebugString(buf);
-
-	for (uint32_t i = 0; i < list.GetSize(); i++)
-	{
-//		sprintf(buf, "textureID %d, numVerts: %d, numIndices: %d\n", list.Items[i].textureID, list.Items[i].vertEnd - list.Items[i].vertStart, list.Items[i].indexEnd - list.Items[i].indexStart);
-//		OutputDebugString(buf);
-
-		sprintf(buf, "textureID %d, shaderID: %d, sortKey: %d\n", list.Items[i].sortKey >> SORT_TEXTURE_SHIFT, (uint16_t)list.Items[i].sortKey, list.Items[i].sortKey);
-		OutputDebugString(buf);
-	}
-
-	// sort and list again
-	OutputDebugString("\n");
-
-	list.Sort();
-
-	for (uint32_t i = 0; i < list.GetSize(); i++)
-	{
-//		sprintf(buf, "textureID %d, numVerts: %d, numIndices: %d\n", list.Items[i].textureID, list.Items[i].vertEnd - list.Items[i].vertStart, list.Items[i].indexEnd - list.Items[i].indexStart);
-//		OutputDebugString(buf);
-
-		sprintf(buf, "textureID %d, shaderID: %d\n", list.Items[i].sortKey >> SORT_TEXTURE_SHIFT, (uint16_t)list.Items[i].sortKey);
-		OutputDebugString(buf);
-	}
-}
-#endif

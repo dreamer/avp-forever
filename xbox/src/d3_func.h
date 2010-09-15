@@ -2,26 +2,97 @@
 #define _included_d3_func_h_
 
 #include <xtl.h>
-#include "aw.h"
 #include <stdint.h>
 
-#ifdef __cplusplus
-	extern "C" {
-#endif
-
-typedef LPDIRECT3DTEXTURE8 RENDERTEXTURE;
+typedef IDirect3DVertexBuffer8	r_VertexBuffer;
+typedef IDirect3DIndexBuffer8	r_IndexBuffer;
+typedef IDirect3DTexture8		*r_Texture;		// keep this as pointer type?
+typedef /*IDirect3DVertexShader8*/uint32_t	*r_VertexShader;
+typedef /*IDirect3DPixelShader8*/uint32_t	*r_PixelShader;
 #define D3DLOCK_DISCARD	0
+
+#include "aw.h"
+#include "vertexBuffer.h"
+#include "indexBuffer.h"
+#include "renderStates.h"
+#include "textureManager.h"
+#include "shaderManager.h"
+#include <string>
+
+bool R_BeginScene();
+bool R_EndScene();
+
+// vertex buffer functions
+bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer **vertexBuffer);
+bool R_ReleaseVertexBuffer(r_VertexBuffer *vertexBuffer);
+bool R_LockVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage);
+bool R_UnlockVertexBuffer(r_VertexBuffer *vertexBuffer);
+bool R_SetVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t FVFsize);
+bool R_DrawPrimitive(uint32_t numPrimitives);
+
+bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives);
+
+// index buffer functions
+bool R_CreateIndexBuffer(uint32_t size, uint32_t usage, r_IndexBuffer **indexBuffer);
+bool R_ReleaseIndexBuffer(r_IndexBuffer *indexBuffer);
+bool R_LockIndexBuffer(r_IndexBuffer *indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage);
+bool R_UnlockIndexBuffer(r_IndexBuffer *indexBuffer);
+bool R_SetIndexBuffer(r_IndexBuffer *indexBuffer);
+
+// texture functions
+bool R_SetTexture(uint32_t stage, uint32_t textureID);
+bool R_LockTexture(r_Texture texture, uint8_t **data, uint32_t *pitch, enum TextureLock lockType);
+bool R_UnlockTexture(r_Texture texture);
+bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum TextureUsage usageType, struct Texture &texture);
+bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usageType, Texture &texture);
+bool R_CreateTextureFromFile(const std::string &fileName, Texture &texture);
+void R_ReleaseTexture(r_Texture &texture);
+r_Texture CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poolType);
+r_Texture CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight);
+r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex);
+
+// shader functions
+bool R_CreateVertexShader(const std::string &fileName, struct vertexShader_t &vertexShader);
+bool R_CreatePixelShader(const std::string &fileName, struct pixelShader_t &pixelShader);
+bool R_SetVertexShader(vertexShader_t &vertexShader);
+bool R_SetPixelShader(pixelShader_t &pixelShader);
+void R_ReleaseVertexShader(r_VertexShader &vertexShader);
+void R_ReleasePixelShader(r_PixelShader &pixelShader);
+
+void R_NextVideoMode();
+void R_PreviousVideoMode();
+std::string& R_GetVideoModeDescription();
+void R_SetCurrentVideoMode();
+
+void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
+void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
+void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
+
+struct R_MATRIX
+{
+	union
+	{
+		struct
+		{
+			float _11, _12, _13, _14;
+			float _21, _22, _23, _24;
+			float _31, _32, _33, _34;
+			float _41, _42, _43, _44;
+		};
+		float m[4][4];
+	};
+};
 
 /*
   Direct3D globals
 */
 
-/* 
+/*
  *	Pre-DX8 vertex format
  *	taken from http://www.mvps.org/directx/articles/definitions_for_dx7_vertex_types.htm
  */
 
-typedef struct _D3DTVERTEX 
+typedef struct _D3DTVERTEX
 {
 	float sx;
 	float sy;
@@ -37,28 +108,27 @@ typedef struct _D3DTVERTEX
 
 #define D3DFVF_LVERTEX	(D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_SPECULAR | D3DFVF_TEX1)
 
-typedef struct POINTSPRITEVERTEX
+typedef struct ORTHOVERTEX
 {
 	float x;
 	float y;
-	float z;
+	float z;		// Position in 3d space
 
-	float size;
-
-	DWORD colour;
+	DWORD colour;	// Colour
 
 	float u;
-	float v;
+	float v;		// Texture coordinates
 
-} POINTSPRITEVERTEX;
+} ORTHOVERTEX;
 
-#define D3DFVF_POINTSPRITEVERTEX (D3DFVF_XYZ | D3DFVF_PSIZE | D3DFVF_DIFFUSE | D3DFVF_TEX1)
+// orthographic quad vertex format
+#define D3DFVF_ORTHOVERTEX (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 
-typedef struct FMVVERTEX 
+typedef struct FMVVERTEX
 {
 	float x;
 	float y;
-	float z;		// Position in 3d space 
+	float z;		// Position in 3d space
 
 	float u1;
 	float v1;		// Texture coordinates 1
@@ -71,27 +141,12 @@ typedef struct FMVVERTEX
 
 } FMVVERTEX;
 
-typedef struct ORTHOVERTEX 
-{
-	float x;
-	float y;
-	float z;		// Position in 3d space 
-
-	DWORD colour;	// Colour  
-
-	float u;
-	float v;		// Texture coordinates 
-
-} ORTHOVERTEX;
-
-// orthographic quad vertex format
-#define D3DFVF_ORTHOVERTEX (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1)
-
 /* 
   Maximum number of Direct3D drivers ever
   expected to be resident on the system.
 */
 #define MAX_D3D_DRIVERS 2
+
 /*
   Maximum number of texture formats ever
   expected to be reported by a Direct3D
@@ -103,7 +158,8 @@ typedef struct ORTHOVERTEX
   Description of a D3D driver.
 */
 
-typedef struct D3DDriverInfo {
+typedef struct D3DDriverInfo 
+{
 	D3DFORMAT				Formats[20];
 	D3DADAPTER_IDENTIFIER8	AdapterInfo;
 	D3DDISPLAYMODE			DisplayMode[100];
@@ -111,11 +167,28 @@ typedef struct D3DDriverInfo {
 } D3DDRIVERINFO;
 
 
-typedef struct D3DInfo {
-    LPDIRECT3D8				lpD3D;
-    LPDIRECT3DDEVICE8		lpD3DDevice; 
-    D3DVIEWPORT8			D3DViewport; 
+typedef struct D3DInfo 
+{
+	LPDIRECT3D8				lpD3D;
+	LPDIRECT3DDEVICE8		lpD3DDevice;
+	D3DVIEWPORT8			D3DViewport;
 	D3DPRESENT_PARAMETERS	d3dpp;
+
+	class VertexBuffer		*particleVB;
+	class IndexBuffer		*particleIB;
+
+	class VertexBuffer		*mainVB;
+	class IndexBuffer		*mainIB;
+
+	class VertexBuffer		*orthoVB;
+	class IndexBuffer		*orthoIB;
+
+	class EffectManager		*effectSystem;
+
+	uint32_t				mainEffect;
+	uint32_t				orthoEffect;
+	uint32_t				cloudEffect;
+	uint32_t				fmvEffect;
 
 	LPDIRECT3DVERTEXBUFFER8 lpD3DVertexBuffer;
 	LPDIRECT3DINDEXBUFFER8	lpD3DIndexBuffer;
@@ -128,82 +201,43 @@ typedef struct D3DInfo {
 	DWORD					fmvVertexShader;
 
 	DWORD					pixelShader;
-	DWORD					fmvPixelShader;				
+	DWORD					fmvPixelShader;
 
-    uint32_t				NumDrivers;
-    uint32_t				CurrentDriver;
+	DWORD					cloudVertexShader;
+	DWORD					cloudPixelShader;
+
+	uint32_t				NumDrivers;
+	uint32_t				CurrentDriver;
+	int32_t					CurrentVideoMode;
 	D3DDRIVERINFO			Driver[MAX_D3D_DRIVERS];
-    uint32_t				CurrentTextureFormat;
-    uint32_t				NumTextureFormats;
+	uint32_t				CurrentTextureFormat;
+	uint32_t				NumTextureFormats;
+
+	bool					supportsShaders;
+	bool					supportsDynamicTextures;
 
 } D3DINFO;
 
 extern D3DINFO d3d;
 
-/* KJL 14:24:45 12/4/97 - render state information */
-enum TRANSLUCENCY_TYPE
-{
-	TRANSLUCENCY_OFF,
-	TRANSLUCENCY_NORMAL,
-	TRANSLUCENCY_INVCOLOUR,
-	TRANSLUCENCY_COLOUR,
-	TRANSLUCENCY_GLOWING,
-	TRANSLUCENCY_DARKENINGCOLOUR,
-	TRANSLUCENCY_JUSTSETZ,
-	TRANSLUCENCY_NOT_SET
-};
-
-enum FILTERING_MODE_ID
-{
-	FILTERING_BILINEAR_OFF,
-	FILTERING_BILINEAR_ON,
-	FILTERING_NOT_SET
-};
-
-enum TEXTURE_ADDRESS_MODE
-{
-	TEXTURE_WRAP,
-	TEXTURE_CLAMP
-};
-
-typedef struct
-{
-	enum TRANSLUCENCY_TYPE TranslucencyMode;
-	enum FILTERING_MODE_ID FilteringMode;
-	enum TEXTURE_ADDRESS_MODE TextureAddressMode;
-	int FogDistance;
-	unsigned int FogIsOn :1;
-	unsigned int WireFrameModeIsOn :1;
-
-} RENDERSTATES;
-
-LPDIRECT3DTEXTURE8 CreateD3DTexture(AVPTEXTURE *tex, uint8_t *buf, uint32_t usage, D3DPOOL poolType);
-LPDIRECT3DTEXTURE8 CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight);
-LPDIRECT3DTEXTURE8 CreateD3DTallFontTexture(AVPTEXTURE *tex);
-
-BOOL ChangeGameResolution(uint32_t width, uint32_t height);
-void DrawAlphaMenuQuad		(uint32_t topX, uint32_t topY, int32_t image_num, uint32_t alpha);
-void DrawTallFontCharacter  (uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t char_width, uint32_t alpha);
-void DrawCloudTable			(uint32_t topX, uint32_t topY, uint32_t word_length, uint32_t alpha);
+bool InitialiseDirect3D();
+bool R_ChangeResolution		(uint32_t width, uint32_t height);
+void DrawAlphaMenuQuad		(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t alpha);
+void DrawTallFontCharacter	(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha);
+void DrawCloudTable			(uint32_t topX, uint32_t topY, uint32_t wordLength, uint32_t alpha);
 void DrawFadeQuad			(uint32_t topX, uint32_t topY, uint32_t alpha);
 void DrawSmallMenuCharacter (uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t red, uint32_t green, uint32_t blue, uint32_t alpha);
-void DrawQuad				(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
-void DrawFmvFrame			(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE8 fmvTexture);
-void DrawFmvFrame2			(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, LPDIRECT3DTEXTURE8 tex1, LPDIRECT3DTEXTURE8 tex2, LPDIRECT3DTEXTURE8 tex3);
+void DrawQuad				(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
+void DrawFmvFrame			(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, r_Texture fmvTexture);
+void DrawFmvFrame2			(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures, uint32_t numTextures);
 void CreateScreenShotImage();
-void DeRedTexture(LPDIRECT3DTEXTURE8 texture);
-void ReleaseD3DTexture(LPDIRECT3DTEXTURE8 *d3dTexture);
-LPDIRECT3DTEXTURE8 CreateFmvTexture (uint32_t *width, uint32_t *height, uint32_t usage, uint32_t pool);
-LPDIRECT3DTEXTURE8 CreateFmvTexture2(uint32_t *width, uint32_t *height);
+void DeRedTexture(r_Texture texture);
+void ReleaseD3DTexture(r_Texture *d3dTexture);
 void SetTransforms();
 
-D3DINFO GetD3DInfo();
-char* GetDeviceName();
-#define RGB_MAKE	D3DCOLOR_XRGB
+extern uint32_t NO_TEXTURE;
 
-#ifdef __cplusplus
-}
-#endif
+#define RGB_MAKE	D3DCOLOR_XRGB
 
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 

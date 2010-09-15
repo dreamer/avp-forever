@@ -101,7 +101,7 @@ FFDataI::FFDataI(char const *_filename, void *_data, size_t _length)
 
 FFDataI::FFDataI(FFDataI const & ffd, ptrdiff_t offset)
 : filename(0)
-, data((void *)((ptrdiff_t)ffd.data + offset))
+, data((void *)((intptr_t)ffd.data + offset))
 , length(ffd.length)
 {
 	if (ffd.filename)
@@ -199,7 +199,7 @@ FFHeaderI::FFHeaderI(FFHeaderI const & ffh)
 		data = malloc(length);
 		memcpy(data,ffh.data,length);
 	}
-	ptrdiff_t offset = (ptrdiff_t)data - (ptrdiff_t)ffh.data;
+	ptrdiff_t offset = (intptr_t)data - (intptr_t)ffh.data;
 	for (int i=0; i<FFHI_HASHTABLESIZE; ++i)
 	{
 		for (CLIF<FFDataI> i_file(&ffh.files[i]); !i_file.done(); i_file.next())
@@ -230,7 +230,7 @@ FFHeaderI & FFHeaderI::operator = (FFHeaderI const & ffh)
 			data = malloc(length);
 			memcpy(data,ffh.data,length);
 		}
-		ptrdiff_t offset = (ptrdiff_t)data - (ptrdiff_t)ffh.data;
+		ptrdiff_t offset = (intptr_t)data - (intptr_t)ffh.data;
 		for (int i=0; i<FFHI_HASHTABLESIZE; ++i)
 		{
 			for (CLIF<FFDataI> i_file(&ffh.files[i]); !i_file.done(); i_file.next())

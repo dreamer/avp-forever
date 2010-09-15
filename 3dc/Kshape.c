@@ -38,7 +38,7 @@
 #define PREDATORS_LIFEFORCE_GLOW_COLOUR 0x2080ff80
 
 /* KJL 15:02:50 05/14/97 - new max lighting intensity */
-#define MAX_INTENSITY (65536*4-1)
+//#define MAX_INTENSITY (65536*4-1)
 
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
@@ -58,7 +58,7 @@ extern MATRIXCH LToVMat;
 extern EULER LToVMat_Euler;
 extern MATRIXCH WToLMat;
 extern VECTORCH LocalView;
-extern VECTORCH LocalLightCH;
+//extern VECTORCH LocalLightCH;
 
 extern int NumLightSourcesForObject;
 extern LIGHTBLOCK *LightSourcesForObject[];
@@ -310,8 +310,8 @@ void ChooseLightingModel(DISPLAYBLOCK *dispPtr)
 			}
 			case VISION_MODE_PRED_THERMAL:
 			{
-			  	VertexIntensity = VertexIntensity_Pred_Thermal;
-			  	break;
+				VertexIntensity = VertexIntensity_Pred_Thermal;
+				break;
 			}
 			case VISION_MODE_PRED_SEEALIENS:
 			{
@@ -355,13 +355,13 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 		case VISION_MODE_PRED_SEEALIENS:
 		{
 			STRATEGYBLOCK *sbPtr = Global_ODB_Ptr->ObStrategyBlock;
-		 	if (sbPtr)
-		 	{
+			if (sbPtr)
+			{
 				int useVision=0;
-		 		switch (sbPtr->I_SBtype)
+				switch (sbPtr->I_SBtype)
 				{
 					case I_BehaviourAutoGun:
-			 		case I_BehaviourAlien:
+					case I_BehaviourAlien:
 					case I_BehaviourQueenAlien:
 					case I_BehaviourFaceHugger:
 					case I_BehaviourPredatorAlien:
@@ -384,10 +384,10 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 
 					case I_BehaviourNetGhost:
 					{
-			   			NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)Global_ODB_Ptr->ObStrategyBlock->SBdataptr;
+						NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)Global_ODB_Ptr->ObStrategyBlock->SBdataptr;
 
 						if (ghostDataPtr->type==I_BehaviourAlienPlayer || ghostDataPtr->type==I_BehaviourAlien
-						 	|| (ghostDataPtr->type==I_BehaviourNetCorpse&&ghostDataPtr->subtype==I_BehaviourAlienPlayer) )
+							|| (ghostDataPtr->type==I_BehaviourNetCorpse&&ghostDataPtr->subtype==I_BehaviourAlienPlayer))
 						{
 							useVision = 1;
 						}
@@ -443,14 +443,14 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 		case VISION_MODE_PRED_SEEPREDTECH:
 		{
 			STRATEGYBLOCK *sbPtr = Global_ODB_Ptr->ObStrategyBlock;
-		 	if (sbPtr)
-		 	{
+			if (sbPtr)
+			{
 				int useVision = 0;
-		 		switch (sbPtr->I_SBtype)
+				switch (sbPtr->I_SBtype)
 				{
-			 		case I_BehaviourPredator:
+					case I_BehaviourPredator:
 					{
-			   			PREDATOR_STATUS_BLOCK *predData = (PREDATOR_STATUS_BLOCK *)Global_ODB_Ptr->ObStrategyBlock->SBdataptr;
+						PREDATOR_STATUS_BLOCK *predData = (PREDATOR_STATUS_BLOCK *)Global_ODB_Ptr->ObStrategyBlock->SBdataptr;
 
 						if (!predData->CloakingEffectiveness)
 						{
@@ -466,13 +466,13 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 					}
 					case I_BehaviourNetGhost:
 					{
-			   			NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)Global_ODB_Ptr->ObStrategyBlock->SBdataptr;
+						NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)Global_ODB_Ptr->ObStrategyBlock->SBdataptr;
 
 						if((ghostDataPtr->CloakingEffectiveness == 0)
 						&& (ghostDataPtr->type==I_BehaviourPredatorPlayer || ghostDataPtr->type==I_BehaviourPredator
-					 	|| (ghostDataPtr->type==I_BehaviourInanimateObject&&ghostDataPtr->IOType==IOT_Ammo&&ghostDataPtr->subtype==AMMO_PRED_DISC)
-					 	|| (ghostDataPtr->type==I_BehaviourPredatorDisc_SeekTrack)
-					 	|| (ghostDataPtr->type==I_BehaviourNetCorpse&&ghostDataPtr->subtype==I_BehaviourPredatorPlayer) ))
+						|| (ghostDataPtr->type==I_BehaviourInanimateObject&&ghostDataPtr->IOType==IOT_Ammo&&ghostDataPtr->subtype==AMMO_PRED_DISC)
+						|| (ghostDataPtr->type==I_BehaviourPredatorDisc_SeekTrack)
+						|| (ghostDataPtr->type==I_BehaviourNetCorpse&&ghostDataPtr->subtype==I_BehaviourPredatorPlayer) ))
 						{
 							useVision=1;
 						}
@@ -553,13 +553,13 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 	TestVerticesWithFrustum();
 
 	/* interesting hack for predator cloaking */
-  	if (Global_ODB_Ptr->ObStrategyBlock)
+	if (Global_ODB_Ptr->ObStrategyBlock)
 	{
 		PRED_CLOAKSTATE cloakingStatus =  PCLOAK_Off;
 
-	 	if (Global_ODB_Ptr->ObStrategyBlock->I_SBtype == I_BehaviourNetGhost)
+		if (Global_ODB_Ptr->ObStrategyBlock->I_SBtype == I_BehaviourNetGhost)
 		{
-   			NETGHOSTDATABLOCK *ghostData = (NETGHOSTDATABLOCK *)Global_ODB_Ptr->ObStrategyBlock->SBdataptr;
+			NETGHOSTDATABLOCK *ghostData = (NETGHOSTDATABLOCK *)Global_ODB_Ptr->ObStrategyBlock->SBdataptr;
 
 			if (ghostData->CloakingEffectiveness)
 			{
@@ -567,9 +567,9 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 				CloakingMode = ONE_FIXED*5/4-ghostData->CloakingEffectiveness;
 			}
 		}
-	 	if (Global_ODB_Ptr->ObStrategyBlock->I_SBtype == I_BehaviourPredator)
+		if (Global_ODB_Ptr->ObStrategyBlock->I_SBtype == I_BehaviourPredator)
 		{
-   			PREDATOR_STATUS_BLOCK *predData = (PREDATOR_STATUS_BLOCK *)Global_ODB_Ptr->ObStrategyBlock->SBdataptr;
+			PREDATOR_STATUS_BLOCK *predData = (PREDATOR_STATUS_BLOCK *)Global_ODB_Ptr->ObStrategyBlock->SBdataptr;
 
 			if (predData->CloakingEffectiveness)
 			{
@@ -720,16 +720,15 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						GouraudPolygon_ClipWithPositiveX();
 						if (RenderPolygon.NumberOfVertices<3) continue;
 						D3D_ZBufferedGouraudPolygon_Output(polyPtr,RenderPolygon.Vertices);
-
-		  			}
+					}
 					else D3D_ZBufferedGouraudPolygon_Output(polyPtr,VerticesBuffer);
 					break;
 				}
-	 			case I_ZB_Gouraud3dTexturedPolygon:
+				case I_ZB_Gouraud3dTexturedPolygon:
 				case I_ZB_Gouraud2dTexturedPolygon:
 				{
 					GouraudTexturedPolygon_Construct(polyPtr);
-				   	if (pif != 2)
+					if (pif != 2)
 					{
 						// if this polygon is a quad, split it into two
 						if (RenderPolygon.NumberOfVertices == 4)
@@ -784,7 +783,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						{
 							D3D_ZBufferedGouraudTexturedPolygon_Output(polyPtr,RenderPolygon.Vertices);
 						}
-		  			}
+					}
 					else
 					{
 						if (polyPtr->PolyFlags & iflag_transparent)
@@ -798,10 +797,10 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 					}
 					break;
 				}
-   				default:
+				default:
 					break;
 			}
- 		}
+		}
 	}
 	while(--numitems);
 }
@@ -827,19 +826,19 @@ void PredatorThermalVision_ShapePipeline(SHAPEHEADER *shapePtr)
 			if (pif!=2)
 			{
 				GouraudPolygon_ClipWithZ();
-				if(RenderPolygon.NumberOfVertices<3) continue;
+				if (RenderPolygon.NumberOfVertices<3) continue;
 				GouraudPolygon_ClipWithNegativeX();
-				if(RenderPolygon.NumberOfVertices<3) continue;
+				if (RenderPolygon.NumberOfVertices<3) continue;
 				GouraudPolygon_ClipWithPositiveY();
-				if(RenderPolygon.NumberOfVertices<3) continue;
+				if (RenderPolygon.NumberOfVertices<3) continue;
 				GouraudPolygon_ClipWithNegativeY();
-				if(RenderPolygon.NumberOfVertices<3) continue;
+				if (RenderPolygon.NumberOfVertices<3) continue;
 				GouraudPolygon_ClipWithPositiveX();
-				if(RenderPolygon.NumberOfVertices<3) continue;
+				if (RenderPolygon.NumberOfVertices<3) continue;
 
-  				D3D_PredatorThermalVisionPolygon_Output(polyPtr,RenderPolygon.Vertices);
-  			}
-  			else D3D_PredatorThermalVisionPolygon_Output(polyPtr,VerticesBuffer);
+				D3D_PredatorThermalVisionPolygon_Output(polyPtr,RenderPolygon.Vertices);
+			}
+			else D3D_PredatorThermalVisionPolygon_Output(polyPtr,VerticesBuffer);
 		}
 	}
 	while(--numitems);
@@ -860,7 +859,7 @@ void PredatorSeeAliensVision_ShapePipeline(SHAPEHEADER *shapePtr)
 
 		switch (polyPtr->PolyItemType)
 		{
-	 		case I_ZB_Gouraud3dTexturedPolygon:
+			case I_ZB_Gouraud3dTexturedPolygon:
 			case I_ZB_Gouraud2dTexturedPolygon:
 			{
 				int pif = PolygonWithinFrustum(polyPtr);
@@ -911,7 +910,7 @@ static void CloakedPolygon_Construct(POLYHEADER *polyPtr)
 	VertexNumberPtr = &polyPtr->Poly1stPt;
 
 	/* If this texture is animated the UV array must be calculated */
-	if(polyPtr->PolyFlags & iflag_txanim)
+	if (polyPtr->PolyFlags & iflag_txanim)
 	{
 		/* Create the UV array */
 		int uv_array[maxpolypts * 2];
@@ -935,7 +934,6 @@ static void CloakedPolygon_Construct(POLYHEADER *polyPtr)
 				mag.vy = vertexPtr->vy - Global_ODB_Ptr->ObView.vy;
 				mag.vz = vertexPtr->vz - Global_ODB_Ptr->ObView.vz;
 
-
 				if (mag.vx<0) mag.vx = -mag.vx;
 				if (mag.vy<0) mag.vy = -mag.vy;
 				if (mag.vz<0) mag.vz = -mag.vz;
@@ -956,7 +954,7 @@ static void CloakedPolygon_Construct(POLYHEADER *polyPtr)
 
 			texture_defn_ptr += 2;
 		}
-	    while(--i);
+		while(--i);
 	}
 	else
 	{
@@ -992,11 +990,11 @@ static void CloakedPolygon_Construct(POLYHEADER *polyPtr)
 				if (alpha>255) alpha = 255;
 				renderVerticesPtr->A = alpha;
 
-				if(CloakingMode>ONE_FIXED)
+				if (CloakingMode>ONE_FIXED)
 				{
 					alpha = GetSin(((mag.vx+mag.vy+mag.vz)+CloakingPhase)&4095);
 					alpha = MUL_FIXED(alpha,alpha)>>8;
-					if(alpha==255)
+					if (alpha==255)
 					{
 						renderVerticesPtr->A = 255;
 						renderVerticesPtr->G = 128;
@@ -1009,7 +1007,7 @@ static void CloakedPolygon_Construct(POLYHEADER *polyPtr)
 
 			texture_defn_ptr += 2;
 		}
-	    while(--i);
+		while(--i);
 	}
 }
 
@@ -1033,7 +1031,7 @@ static void PredatorThermalVisionPolygon_Construct(POLYHEADER *polyPtr)
 			{
 				int distanceFromHeatSource = 100000;
 				int sourceNumber=NumberOfHeatSources;
-				while(sourceNumber--)
+				while (sourceNumber--)
 				{
 					VECTORCH mag;
 					int m;
@@ -1043,7 +1041,7 @@ static void PredatorThermalVisionPolygon_Construct(POLYHEADER *polyPtr)
 
 					m = Approximate3dMagnitude(&mag)*64;
 
-					if(m<distanceFromHeatSource) distanceFromHeatSource = m;
+					if (m<distanceFromHeatSource) distanceFromHeatSource = m;
 				}
 
 				alpha = distanceFromHeatSource+(GetSin(CloakingPhase&4095)>>3);
@@ -1091,12 +1089,12 @@ static void PredatorThermalVisionPolygon_Construct(POLYHEADER *polyPtr)
 					renderVerticesPtr->G=0;
 					renderVerticesPtr->B=255-b/2;
 				}
-		 	}
+			}
 		}
 		renderVerticesPtr++;
 		VertexNumberPtr++;
 	}
-    while(--i);
+	while(--i);
 }
 
 static void PredatorSeeAliensVisionPolygon_Construct(POLYHEADER *polyPtr)
@@ -1177,7 +1175,7 @@ static void PredatorSeeAliensVisionPolygon_Construct(POLYHEADER *polyPtr)
 			renderVerticesPtr++;
 			VertexNumberPtr++;
 		}
-	    while(--i);
+		while(--i);
 	}
 }
 
@@ -1203,7 +1201,7 @@ static void GouraudPolygon_Construct(POLYHEADER *polyPtr)
 		renderVerticesPtr++;
 		VertexNumberPtr++;
 	}
-    while(--i);
+	while(--i);
 }
 
 
@@ -1287,7 +1285,7 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 				RenderPolygon.TranslucencyMode = TRANSLUCENCY_OFF;
 			}
 
-	 		if (polyPtr->PolyFlags & iflag_nolight)
+			if (polyPtr->PolyFlags & iflag_nolight)
 			{
 				switch (CurrentVisionMode)
 				{
@@ -1320,7 +1318,7 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 						renderVerticesPtr->SpecularR = 0;
 						renderVerticesPtr->SpecularG = 0;
 						renderVerticesPtr->SpecularB = 0;
-					  	break;
+						break;
 					}
 					case VISION_MODE_PRED_SEEALIENS:
 					{
@@ -1330,7 +1328,7 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 						renderVerticesPtr->SpecularR = 0;
 						renderVerticesPtr->SpecularG = 0;
 						renderVerticesPtr->SpecularB = 0;
-					  	break;
+						break;
 					}
 					case VISION_MODE_PRED_SEEPREDTECH:
 					{
@@ -1340,7 +1338,7 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 						renderVerticesPtr->SpecularR = 255;
 						renderVerticesPtr->SpecularG = 0;
 						renderVerticesPtr->SpecularB = 255;
-					  	break;
+						break;
 					}
 				}
 			}
@@ -1353,7 +1351,7 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 
 			texture_defn_ptr += 2;
 		}
-	    while(--i);
+		while(--i);
 	}
 	else
 	{
@@ -1444,7 +1442,7 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 				RenderPolygon.TranslucencyMode = TRANSLUCENCY_OFF;
 			}
 
-	 		if (polyPtr->PolyFlags & iflag_nolight)
+			if (polyPtr->PolyFlags & iflag_nolight)
 			{
 				switch (CurrentVisionMode)
 				{
@@ -1477,7 +1475,7 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 						renderVerticesPtr->SpecularR = 0;
 						renderVerticesPtr->SpecularG = 0;
 						renderVerticesPtr->SpecularB = 0;
-					  	break;
+						break;
 					}
 					case VISION_MODE_PRED_SEEALIENS:
 					{
@@ -1487,7 +1485,7 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 						renderVerticesPtr->SpecularR = 0;
 						renderVerticesPtr->SpecularG = 0;
 						renderVerticesPtr->SpecularB = 0;
-					  	break;
+						break;
 					}
 					case VISION_MODE_PRED_SEEPREDTECH:
 					{
@@ -1497,20 +1495,20 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 						renderVerticesPtr->SpecularR = 255;
 						renderVerticesPtr->SpecularG = 0;
 						renderVerticesPtr->SpecularB = 255;
-					  	break;
+						break;
 					}
 				}
 			}
 			else
 			{
-		 		VertexIntensity(renderVerticesPtr);
+				VertexIntensity(renderVerticesPtr);
 			}
 			renderVerticesPtr++;
 			VertexNumberPtr++;
 
 			texture_defn_ptr += 2;
 		}
-	    while(--i);
+		while(--i);
 	}
 }
 
@@ -1567,7 +1565,7 @@ static void VertexIntensity_Pred_Thermal(RENDERVERTEX *renderVertexPtr)
 
 				if( (distanceToLight>0) && (!(Global_ODB_Ptr->ObFlags3 & ObFlag3_NoLightDot)) )
 				{
-				 	int dotproduct = MUL_FIXED(vertexNormalPtr->vx,vertexToLight.vx)
+					int dotproduct = MUL_FIXED(vertexNormalPtr->vx,vertexToLight.vx)
 					     + MUL_FIXED(vertexNormalPtr->vy,vertexToLight.vy)
 					     + MUL_FIXED(vertexNormalPtr->vz,vertexToLight.vz);
 					if(dotproduct>0)
@@ -1582,14 +1580,13 @@ static void VertexIntensity_Pred_Thermal(RENDERVERTEX *renderVertexPtr)
 					idot = WideMulNarrowDiv(idot,dotproduct,distanceToLight);
 				}
 
-
-		  		redI += idot;
+				redI += idot;
 				if (lptr->LightFlags&LFlag_Thermal)
 				{
 					specular += idot;
 				}
 			}
-	  	}
+		}
 	}
 	blueI = ONE_FIXED/2;
 	if (renderVertexPtr->Z>5000)
@@ -1600,7 +1597,7 @@ static void VertexIntensity_Pred_Thermal(RENDERVERTEX *renderVertexPtr)
 
 	blueI >>= 8;
 
- 	if(redI >= ONE_FIXED)	redI = (ONE_FIXED - 1);
+	if(redI >= ONE_FIXED)	redI = (ONE_FIXED - 1);
 	redI >>=8;
 
 	specular>>=6;
@@ -1613,7 +1610,6 @@ static void VertexIntensity_Pred_Thermal(RENDERVERTEX *renderVertexPtr)
 	ColourIntensityArray[vertexNumber].B = blueI;
 	renderVertexPtr->G = redI/2;
 	ColourIntensityArray[vertexNumber].G = redI/2;
-
 
 	renderVertexPtr->SpecularR = specular;//specularR;
 	ColourIntensityArray[vertexNumber].SpecularR = specular;//specularR;
@@ -1656,9 +1652,8 @@ static void VertexIntensity_Pred_SeeAliens(RENDERVERTEX *renderVertexPtr)
 
 		larrayptr = LightSourcesForObject;
 
-		for(i = NumLightSourcesForObject; i!=0; i--)
+		for (i = NumLightSourcesForObject; i!=0; i--)
 		{
-
 			VECTORCH vertexToLight;
 			int distanceToLight;
 
@@ -1675,16 +1670,16 @@ static void VertexIntensity_Pred_SeeAliens(RENDERVERTEX *renderVertexPtr)
 			{
 				int idot = MUL_FIXED(lptr->LightRange-distanceToLight,lptr->BrightnessOverRange);
 
-		  		redI += idot;
-			 	if(lptr->LightFlags&LFlag_Electrical)
+				redI += idot;
+				if(lptr->LightFlags&LFlag_Electrical)
 				{
 					specular += idot;
-			 	}
+				}
 			}
-	  	}
+		}
 	}
 	redI >>=11;
- 	if(redI > 255) redI = 255;
+	if(redI > 255) redI = 255;
 	renderVertexPtr->G = redI;
 	ColourIntensityArray[vertexNumber].G = redI;
 
@@ -1703,7 +1698,7 @@ static void VertexIntensity_Pred_SeeAliens(RENDERVERTEX *renderVertexPtr)
 	ColourIntensityArray[vertexNumber].B = 0;
 
 	specular >>=10;
- 	if(specular>255) specular = 255;
+	if(specular>255) specular = 255;
 	renderVertexPtr->SpecularR = specular;//specularR;
 	ColourIntensityArray[vertexNumber].SpecularR = specular;//specularR;
 	renderVertexPtr->SpecularG = specular;
@@ -1711,13 +1706,14 @@ static void VertexIntensity_Pred_SeeAliens(RENDERVERTEX *renderVertexPtr)
 	renderVertexPtr->SpecularB = specular;//specularB;
 	ColourIntensityArray[vertexNumber].SpecularB = specular;//specularB;
 }
+
 static void VertexIntensity_Pred_SeePredatorTech(RENDERVERTEX *renderVertexPtr)
 {
 	int redI,blueI;
 
 	int vertexNumber = *VertexNumberPtr;
 
-	if(ColourIntensityArray[vertexNumber].Stamp==ObjectCounter)
+	if (ColourIntensityArray[vertexNumber].Stamp==ObjectCounter)
 	{
 		renderVertexPtr->R = ColourIntensityArray[vertexNumber].R;
 		renderVertexPtr->G = ColourIntensityArray[vertexNumber].G;
@@ -1739,7 +1735,7 @@ static void VertexIntensity_Pred_SeePredatorTech(RENDERVERTEX *renderVertexPtr)
 
 		larrayptr = LightSourcesForObject;
 
-		for(i = NumLightSourcesForObject; i!=0; i--)
+		for (i = NumLightSourcesForObject; i!=0; i--)
 		{
 
 			VECTORCH vertexToLight;
@@ -1758,9 +1754,9 @@ static void VertexIntensity_Pred_SeePredatorTech(RENDERVERTEX *renderVertexPtr)
 			{
 				int idot = MUL_FIXED(lptr->LightRange-distanceToLight,lptr->BrightnessOverRange);
 
-		  		redI += idot;
+				redI += idot;
 			}
-	  	}
+		}
 	}
 	blueI = ONE_FIXED-1;
 	if (renderVertexPtr->Z>5000)
@@ -1791,7 +1787,6 @@ static void VertexIntensity_Pred_SeePredatorTech(RENDERVERTEX *renderVertexPtr)
 
 	renderVertexPtr->SpecularB = 255;//specularB;
 	ColourIntensityArray[vertexNumber].SpecularB = 255;//specularB;
-
 }
 
 static void VertexIntensity_ImageIntensifier(RENDERVERTEX *renderVertexPtr)
@@ -1811,6 +1806,7 @@ static void VertexIntensity_ImageIntensifier(RENDERVERTEX *renderVertexPtr)
 		renderVertexPtr->SpecularB = ColourIntensityArray[vertexNumber].SpecularB;
 		return;
 	}
+
 	ColourIntensityArray[vertexNumber].Stamp=ObjectCounter;
 
 	{
@@ -1824,9 +1820,9 @@ static void VertexIntensity_ImageIntensifier(RENDERVERTEX *renderVertexPtr)
 		greenI = 0;
 		specular = 0;
 
-  		larrayptr = LightSourcesForObject;
+		larrayptr = LightSourcesForObject;
 
-		for(i = NumLightSourcesForObject; i!=0; i--)
+		for (i = NumLightSourcesForObject; i!=0; i--)
 		{
 
 			VECTORCH vertexToLight;
@@ -1848,7 +1844,6 @@ static void VertexIntensity_ImageIntensifier(RENDERVERTEX *renderVertexPtr)
 
 				dz = vertexToLight.vz;
 				if (dz<0) dz = -dz;
-
 
 				if (dx>dy)
 				{
@@ -1874,13 +1869,13 @@ static void VertexIntensity_ImageIntensifier(RENDERVERTEX *renderVertexPtr)
 				}
 			}
 
-			if(distanceToLight < lptr->LightRange)
+			if (distanceToLight < lptr->LightRange)
 			{
 				int idot = MUL_FIXED(lptr->LightRange-distanceToLight,lptr->BrightnessOverRange);
 
 				if(distanceToLight>0)
 				{
-				 	int dotproduct = MUL_FIXED(vertexNormalPtr->vx,vertexToLight.vx)
+					int dotproduct = MUL_FIXED(vertexNormalPtr->vx,vertexToLight.vx)
 					     + MUL_FIXED(vertexNormalPtr->vy,vertexToLight.vy)
 					     + MUL_FIXED(vertexNormalPtr->vz,vertexToLight.vz);
 
@@ -1899,7 +1894,7 @@ static void VertexIntensity_ImageIntensifier(RENDERVERTEX *renderVertexPtr)
 				}
 				specular += idot;
 			}
-	  	}
+		}
 	}
 
 	greenI = 255;
@@ -1916,8 +1911,8 @@ static void VertexIntensity_ImageIntensifier(RENDERVERTEX *renderVertexPtr)
 	renderVertexPtr->B = 0;
 	ColourIntensityArray[vertexNumber].B = 0;
 
- 	specular>>=7;
- 	if (specular>254) specular=254;
+	specular>>=7;
+	if (specular>254) specular=254;
 	LOCALASSERT(specular>=0 && specular<=254);
 	renderVertexPtr->SpecularR = specular;
 	ColourIntensityArray[vertexNumber].SpecularR = specular;
@@ -1932,7 +1927,7 @@ static void VertexIntensity_Alien_Sense(RENDERVERTEX *renderVertexPtr)
 	int intensity;
 	int vertexNumber = *VertexNumberPtr;
 
-	if(ColourIntensityArray[vertexNumber].Stamp==ObjectCounter)
+	if (ColourIntensityArray[vertexNumber].Stamp==ObjectCounter)
 	{
 		renderVertexPtr->R = ColourIntensityArray[vertexNumber].R;
 		renderVertexPtr->G = ColourIntensityArray[vertexNumber].G;
@@ -1965,8 +1960,6 @@ static void VertexIntensity_Alien_Sense(RENDERVERTEX *renderVertexPtr)
 	renderVertexPtr->SpecularB = 0;
 }
 
-
-
 static void VertexIntensity_Standard_Opt(RENDERVERTEX *renderVertexPtr)
 {
 	int redI,greenI,blueI;
@@ -1974,7 +1967,7 @@ static void VertexIntensity_Standard_Opt(RENDERVERTEX *renderVertexPtr)
 
 	int vertexNumber = *VertexNumberPtr;
 
-	if(ColourIntensityArray[vertexNumber].Stamp==ObjectCounter)
+	if (ColourIntensityArray[vertexNumber].Stamp==ObjectCounter)
 	{
 		renderVertexPtr->R = ColourIntensityArray[vertexNumber].R;
 		renderVertexPtr->G = ColourIntensityArray[vertexNumber].G;
@@ -2015,12 +2008,10 @@ static void VertexIntensity_Standard_Opt(RENDERVERTEX *renderVertexPtr)
 		specularG = 0;
 		specularB = 0;
 
-
 		larrayptr = LightSourcesForObject;
 
-		for(i = NumLightSourcesForObject; i!=0; i--)
+		for (i = NumLightSourcesForObject; i!=0; i--)
 		{
-
 			VECTORCH vertexToLight;
 			int distanceToLight;
 
@@ -2040,7 +2031,6 @@ static void VertexIntensity_Standard_Opt(RENDERVERTEX *renderVertexPtr)
 
 				dz = vertexToLight.vz;
 				if (dz<0) dz = -dz;
-
 
 				if (dx>dy)
 				{
@@ -2071,15 +2061,15 @@ static void VertexIntensity_Standard_Opt(RENDERVERTEX *renderVertexPtr)
 				int idot = MUL_FIXED(lptr->LightRange-distanceToLight,lptr->BrightnessOverRange);
 				int r,g,b;
 
-				if(distanceToLight>0)
+				if (distanceToLight>0)
 				{
-				 	int dotproduct = MUL_FIXED(vertexNormalPtr->vx,vertexToLight.vx)
+					int dotproduct = MUL_FIXED(vertexNormalPtr->vx,vertexToLight.vx)
 					     + MUL_FIXED(vertexNormalPtr->vy,vertexToLight.vy)
 					     + MUL_FIXED(vertexNormalPtr->vz,vertexToLight.vz);
 
-					if(dotproduct>0)
+					if (dotproduct>0)
 					{
-						idot = (WideMulNarrowDiv(idot,dotproduct,distanceToLight)+idot/4)/2;
+						idot = (WideMulNarrowDiv(idot, dotproduct, distanceToLight)+idot/4)/2;
 					}
 					else
 					{
@@ -2087,15 +2077,15 @@ static void VertexIntensity_Standard_Opt(RENDERVERTEX *renderVertexPtr)
 					}
 				}
 
-				r = MUL_FIXED(idot,lptr->RedScale);
-				g = MUL_FIXED(idot,lptr->GreenScale);
-				b = MUL_FIXED(idot,lptr->BlueScale);
+				r = MUL_FIXED(idot, lptr->RedScale);
+				g = MUL_FIXED(idot, lptr->GreenScale);
+				b = MUL_FIXED(idot, lptr->BlueScale);
 
 				redI += r;
 				greenI += g;
 				blueI += b;
 
-				if( !(lptr->LightFlags & LFlag_PreLitSource)
+				if ( !(lptr->LightFlags & LFlag_PreLitSource)
 				 && !(lptr->LightFlags & LFlag_NoSpecular) )
 				{
 					specularR += r;
@@ -2103,7 +2093,7 @@ static void VertexIntensity_Standard_Opt(RENDERVERTEX *renderVertexPtr)
 					specularB += b;
 				}
 			}
-	  	}
+		}
 	}
 
 	if(Global_ODB_Ptr->SpecialFXFlags & SFXFLAG_ONFIRE)
@@ -2119,32 +2109,32 @@ static void VertexIntensity_Standard_Opt(RENDERVERTEX *renderVertexPtr)
 
 	/* Intensity for Textures */
 	redI >>= 8;
-	if(redI > 255) redI = 255;
+	if (redI > 255) redI = 255;
 	renderVertexPtr->R = redI;
 	ColourIntensityArray[vertexNumber].R = redI;
 
 	greenI >>= 8;
-	if(greenI > 255) greenI = 255;
+	if (greenI > 255) greenI = 255;
 	renderVertexPtr->G = greenI;
 	ColourIntensityArray[vertexNumber].G = greenI;
 
 	blueI >>= 8;
-	if(blueI > 255) blueI = 255;
+	if (blueI > 255) blueI = 255;
 	renderVertexPtr->B = blueI;
 	ColourIntensityArray[vertexNumber].B = blueI;
 
 	specularR >>= 10;
-	if(specularR > 255) specularR = 255;
+	if (specularR > 255) specularR = 255;
 	renderVertexPtr->SpecularR = specularR;
 	ColourIntensityArray[vertexNumber].SpecularR = specularR;
 
 	specularG >>= 10;
-	if(specularG > 255) specularG = 255;
+	if (specularG > 255) specularG = 255;
 	renderVertexPtr->SpecularG = specularG;
 	ColourIntensityArray[vertexNumber].SpecularG = specularG;
 
 	specularB >>= 10;
-	if(specularB > 255) specularB = 255;
+	if (specularB > 255) specularB = 255;
 	renderVertexPtr->SpecularB = specularB;
 	ColourIntensityArray[vertexNumber].SpecularB = specularB;
 }
@@ -2174,7 +2164,7 @@ static void VertexIntensity_DiscoInferno(RENDERVERTEX *renderVertexPtr)
 
 	int vertexNumber = *VertexNumberPtr;
 
-	if(ColourIntensityArray[vertexNumber].Stamp==ObjectCounter)
+	if (ColourIntensityArray[vertexNumber].Stamp==ObjectCounter)
 	{
 		renderVertexPtr->R = ColourIntensityArray[vertexNumber].R;
 		renderVertexPtr->G = ColourIntensityArray[vertexNumber].G;
@@ -2193,7 +2183,7 @@ static void VertexIntensity_DiscoInferno(RENDERVERTEX *renderVertexPtr)
 		LIGHTBLOCK *lptr;
 		int i;
 
-		if(Global_ShapeHeaderPtr->shapeflags & ShapeFlag_PreLit)
+		if (Global_ShapeHeaderPtr->shapeflags & ShapeFlag_PreLit)
 		{
 			unsigned int packedI = Global_EID_IPtr[vertexNumber];
 			blueI = (packedI&255)*257;
@@ -2217,7 +2207,7 @@ static void VertexIntensity_DiscoInferno(RENDERVERTEX *renderVertexPtr)
 
 		larrayptr = LightSourcesForObject;
 
-		for(i = NumLightSourcesForObject; i!=0; i--)
+		for (i = NumLightSourcesForObject; i!=0; i--)
 		{
 
 			VECTORCH vertexToLight;
@@ -2265,14 +2255,14 @@ static void VertexIntensity_DiscoInferno(RENDERVERTEX *renderVertexPtr)
 				}
 			}
 
-			if(distanceToLight < lptr->LightRange)
+			if (distanceToLight < lptr->LightRange)
 			{
 				int idot = MUL_FIXED(lptr->LightRange-distanceToLight,lptr->BrightnessOverRange);
 				int r,g,b;
 
-				if(distanceToLight>0)
+				if (distanceToLight>0)
 				{
-				 	int dotproduct = MUL_FIXED(vertexNormalPtr->vx,vertexToLight.vx)
+					int dotproduct = MUL_FIXED(vertexNormalPtr->vx,vertexToLight.vx)
 					     + MUL_FIXED(vertexNormalPtr->vy,vertexToLight.vy)
 					     + MUL_FIXED(vertexNormalPtr->vz,vertexToLight.vz);
 
@@ -2302,10 +2292,10 @@ static void VertexIntensity_DiscoInferno(RENDERVERTEX *renderVertexPtr)
 					specularB += b;
 				}
 			}
-	  	}
+		}
 	}
 
-	if(Global_ODB_Ptr->SpecialFXFlags & SFXFLAG_ONFIRE)
+	if (Global_ODB_Ptr->SpecialFXFlags & SFXFLAG_ONFIRE)
 	{
 		specularR>>=2;
 		specularG>>=2;
@@ -2342,35 +2332,34 @@ static void VertexIntensity_DiscoInferno(RENDERVERTEX *renderVertexPtr)
 		specularB = MUL_FIXED(b,si);
 	}
 
-
 	/* Intensity for Textures */
 	redI >>= 8;
-	if(redI > 255) redI = 255;
+	if (redI > 255) redI = 255;
 	renderVertexPtr->R = redI;
 	ColourIntensityArray[vertexNumber].R = redI;
 
 	greenI >>= 8;
-	if(greenI > 255) greenI = 255;
+	if (greenI > 255) greenI = 255;
 	renderVertexPtr->G = greenI;
 	ColourIntensityArray[vertexNumber].G = greenI;
 
 	blueI >>= 8;
-	if(blueI > 255) blueI = 255;
+	if (blueI > 255) blueI = 255;
 	renderVertexPtr->B = blueI;
 	ColourIntensityArray[vertexNumber].B = blueI;
 
 	specularR >>= 10;
-	if(specularR > 255) specularR = 255;
+	if (specularR > 255) specularR = 255;
 	renderVertexPtr->SpecularR = specularR;
 	ColourIntensityArray[vertexNumber].SpecularR = specularR;
 
 	specularG >>= 10;
-	if(specularG > 255) specularG = 255;
+	if (specularG > 255) specularG = 255;
 	renderVertexPtr->SpecularG = specularG;
 	ColourIntensityArray[vertexNumber].SpecularG = specularG;
 
 	specularB >>= 10;
-	if(specularB > 255) specularB = 255;
+	if (specularB > 255) specularB = 255;
 	renderVertexPtr->SpecularB = specularB;
 	ColourIntensityArray[vertexNumber].SpecularB = specularB;
 }
@@ -2382,7 +2371,7 @@ static void VertexIntensity_Underwater(RENDERVERTEX *renderVertexPtr)
 
 	int vertexNumber = *VertexNumberPtr;
 
-	if(ColourIntensityArray[vertexNumber].Stamp==ObjectCounter)
+	if (ColourIntensityArray[vertexNumber].Stamp==ObjectCounter)
 	{
 		renderVertexPtr->R = ColourIntensityArray[vertexNumber].R;
 		renderVertexPtr->G = ColourIntensityArray[vertexNumber].G;
@@ -2401,7 +2390,7 @@ static void VertexIntensity_Underwater(RENDERVERTEX *renderVertexPtr)
 		LIGHTBLOCK *lptr;
 		int i;
 
-		if(Global_ShapeHeaderPtr->shapeflags & ShapeFlag_PreLit)
+		if (Global_ShapeHeaderPtr->shapeflags & ShapeFlag_PreLit)
 		{
 			unsigned int packedI = Global_EID_IPtr[vertexNumber];
 			blueI = (packedI&255)*257;
@@ -2425,7 +2414,7 @@ static void VertexIntensity_Underwater(RENDERVERTEX *renderVertexPtr)
 
 		larrayptr = LightSourcesForObject;
 
-		for(i = NumLightSourcesForObject; i!=0; i--)
+		for (i = NumLightSourcesForObject; i!=0; i--)
 		{
 
 			VECTORCH vertexToLight;
@@ -2473,14 +2462,14 @@ static void VertexIntensity_Underwater(RENDERVERTEX *renderVertexPtr)
 				}
 			}
 
-			if(distanceToLight < lptr->LightRange)
+			if (distanceToLight < lptr->LightRange)
 			{
 				int idot = MUL_FIXED(lptr->LightRange-distanceToLight,lptr->BrightnessOverRange);
 				int r,g,b;
 
-				if(distanceToLight>0)
+				if (distanceToLight>0)
 				{
-				 	int dotproduct = MUL_FIXED(vertexNormalPtr->vx,vertexToLight.vx)
+					int dotproduct = MUL_FIXED(vertexNormalPtr->vx,vertexToLight.vx)
 					     + MUL_FIXED(vertexNormalPtr->vy,vertexToLight.vy)
 					     + MUL_FIXED(vertexNormalPtr->vz,vertexToLight.vz);
 
@@ -2502,7 +2491,7 @@ static void VertexIntensity_Underwater(RENDERVERTEX *renderVertexPtr)
 				greenI += g;
 				blueI += b;
 
-				if( !(lptr->LightFlags & LFlag_PreLitSource)
+				if ( !(lptr->LightFlags & LFlag_PreLitSource)
 				 && !(lptr->LightFlags & LFlag_NoSpecular) )
 				{
 					specularR += r;
@@ -2510,10 +2499,10 @@ static void VertexIntensity_Underwater(RENDERVERTEX *renderVertexPtr)
 					specularB += b;
 				}
 			}
-	  	}
+		}
 	}
 
-	if(Global_ODB_Ptr->SpecialFXFlags & SFXFLAG_ONFIRE)
+	if (Global_ODB_Ptr->SpecialFXFlags & SFXFLAG_ONFIRE)
 	{
 		specularR>>=2;
 		specularG>>=2;
@@ -2523,45 +2512,43 @@ static void VertexIntensity_Underwater(RENDERVERTEX *renderVertexPtr)
 		greenI>>=1;
 		blueI>>=1;
 	}
-
+	
+	if (specularB<renderVertexPtr->Z*4)
 	{
-		if (specularB<renderVertexPtr->Z*4)
-			specularB = renderVertexPtr->Z*4;
-
+		specularB = renderVertexPtr->Z*4;
 	}
-
 
 	/* Intensity for Textures */
 	redI >>= 8;
-	if(redI > 255) redI = 255;
+	if (redI > 255) redI = 255;
 	renderVertexPtr->R = redI;
 	ColourIntensityArray[vertexNumber].R = redI;
 
 	greenI >>= 8;
-	if(greenI > 255) greenI = 255;
+	if (greenI > 255) greenI = 255;
 	renderVertexPtr->G = greenI;
 	ColourIntensityArray[vertexNumber].G = greenI;
 
 	blueI >>= 8;
-	if(blueI > 255) blueI = 255;
+	if (blueI > 255) blueI = 255;
 	renderVertexPtr->B = blueI;
 	ColourIntensityArray[vertexNumber].B = blueI;
 
 	specularR >>= 10;
-	if(specularR > 255) specularR = 255;
+	if (specularR > 255) specularR = 255;
 	renderVertexPtr->SpecularR = specularR;
 	ColourIntensityArray[vertexNumber].SpecularR = specularR;
 
 	specularG >>= 10;
-	if(specularG > 255) specularG = 255;
+	if (specularG > 255) specularG = 255;
 	renderVertexPtr->SpecularG = specularG;
 	ColourIntensityArray[vertexNumber].SpecularG = specularG;
 
 	specularB >>= 10;
-	if(specularB > 255) specularB = 255;
+	if (specularB > 255) specularB = 255;
 	renderVertexPtr->SpecularB = specularB;
 	ColourIntensityArray[vertexNumber].SpecularB = specularB;
- }
+}
 
 /*KJL***********************************************************************
 * The following functions have been transplanted from the old shape.c, and *
@@ -2660,17 +2647,13 @@ TXANIMHEADER* GetTxAnimDataZ(int shape, int item, int sequence)
 
 void ChangeSequence(TXANIMHEADER *txah_old, TXANIMHEADER *txah_new)
 {
-
-	if(txah_new->txa_numframes == txah_old->txa_numframes) {
-
+	if(txah_new->txa_numframes == txah_old->txa_numframes)
+	{
 		txah_new->txa_currentframe = txah_old->txa_currentframe;
-
 	}
-	else {
-
-		txah_new->txa_currentframe =
-
-		WideMulNarrowDiv(txah_old->txa_currentframe,
+	else
+	{
+		txah_new->txa_currentframe = WideMulNarrowDiv(txah_old->txa_currentframe,
 								txah_new->txa_maxframe,
 								txah_old->txa_maxframe);
 	}
@@ -2690,7 +2673,8 @@ TXANIMHEADER* GetTxAnimHeaderFromShape(TXACTRLBLK *taptr, int shape)
 
 	txah = GetTxAnimDataZ(shape, taptr->tac_item, taptr->tac_sequence);
 
-	if(txah) {
+	if (txah)
+	{
 		taptr->tac_txah.txa_flags        = txah->txa_flags;
 		taptr->tac_txah.txa_state        = txah->txa_state;
 		taptr->tac_txah.txa_numframes    = txah->txa_numframes;
@@ -2698,7 +2682,6 @@ TXANIMHEADER* GetTxAnimHeaderFromShape(TXACTRLBLK *taptr, int shape)
 		taptr->tac_txah.txa_currentframe = txah->txa_currentframe;
 		taptr->tac_txah.txa_maxframe     = txah->txa_maxframe;
 		taptr->tac_txah.txa_speed        = txah->txa_speed;
-
 	}
 	return txah;
 }
@@ -3093,7 +3076,7 @@ void ShapeSpritePointsInstr(SHAPEINSTR *shapeinstrptr)
 {
 	int **shapeitemarrayptr = shapeinstrptr->sh_instr_data;
 	int *shapeitemptr       = *shapeitemarrayptr;
-	VECTORCH *rotptsptr       = RotatedPts;
+	VECTORCH *rotptsptr     = RotatedPts;
 	int numitems;
 
 	for (numitems = shapeinstrptr->sh_numitems; numitems!=0; numitems--)
@@ -3399,14 +3382,17 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 
 		/* Because the current frame can be set from outside, clamp it first */
 		if (txah->txa_currentframe < 0)
+		{
 			txah->txa_currentframe = 0;
+		}
 		if (txah->txa_currentframe >= txah->txa_maxframe)
+		{
 			txah->txa_currentframe = txah->txa_maxframe - 1;
+		}
 
 		CurrentFrame  = txah->txa_currentframe >> 16;
 
 		txaf0 = &txaf[CurrentFrame];
-
 
 		/* UV array */
 		if (Global_ShapeHeaderPtr->shapeflags & ShapeFlag_Sprite)
@@ -3420,7 +3406,6 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 		}
 
 		iptr += (txaf0->txf_numuvs * 2);
-
 
 		/* Redefine the Shape Points */
 		mypolystart = &pheader->Poly1stPt;
@@ -3439,16 +3424,16 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 		}
 	}
 
-   	//project the object's y vector onto the screen.
+	//project the object's y vector onto the screen.
 	//then rotate the sprite's points according to the vector's orintation
 	//relative to the screen's y vector.
-   	vecty = *(VECTORCH*)&Global_ODB_Ptr->ObMat.mat21;
+	vecty = *(VECTORCH*)&Global_ODB_Ptr->ObMat.mat21;
 
 	RotateVector(&vecty,&Global_VDB_Ptr->VDB_Mat);
 
-   	if (Global_VDB_Ptr->VDB_ProjX != Global_VDB_Ptr->VDB_ProjY)
-   	{
-   		vecty.vx = MUL_FIXED(vecty.vx, Global_VDB_Ptr->VDB_ProjX);
+	if (Global_VDB_Ptr->VDB_ProjX != Global_VDB_Ptr->VDB_ProjY)
+	{
+		vecty.vx = MUL_FIXED(vecty.vx, Global_VDB_Ptr->VDB_ProjX);
 		vecty.vy = MUL_FIXED(vecty.vy, Global_VDB_Ptr->VDB_ProjY);
 	}
 
@@ -3545,7 +3530,7 @@ int GetMVSIndex(TXANIMHEADER *txah, EULER *e )
 	EulerXIndex = phi;
 	EulerXIndex >>= txah->txa_eulerxshift;
 
-    GLOBALASSERT((EulerXIndex+EulerYIndex)<txah->txa_num_mvs_images);
+	GLOBALASSERT((EulerXIndex+EulerYIndex)<txah->txa_num_mvs_images);
 
 	return (EulerXIndex + EulerYIndex);
 }
@@ -3575,11 +3560,11 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	}
 
 	/* is object a morphing one? */
- 	if (dptr->ObMorphCtrl)
+	if (dptr->ObMorphCtrl)
 	{
 		LOCALASSERT(dptr->ObMorphCtrl->ObMorphHeader);
 		//if(dptr->ObMorphCtrl->ObMorphHeader)
-	 	{
+		{
 			GetMorphDisplay(&MorphDisplay, dptr);
 			dptr->ObShape     = MorphDisplay.md_shape1;
 			dptr->ObShapeData = MorphDisplay.md_sptr1;
@@ -3667,7 +3652,7 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 		if (dptr->ObStrategyBlock)
 		{
 			HierarchicalObjectsLowestYValue = dptr->ObStrategyBlock->DynPtr->ObjectVertices[0].vy;
-		 	if (CurrentVisionMode == VISION_MODE_NORMAL && AvP.PlayerType==I_Alien)
+			if (CurrentVisionMode == VISION_MODE_NORMAL && AvP.PlayerType==I_Alien)
 			{
 				DoAlienEnergyView(dptr);
 			}
@@ -3681,7 +3666,7 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 		return;
 	}
 
-  	/* Find out which light sources are in range of of the object */
+	/* Find out which light sources are in range of of the object */
 	LightSourcesInRangeOfObject(dptr);
 
 	/* Shape Language Execution Shell */
@@ -3691,8 +3676,8 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 		/* 	setup the rotated points array */
 		switch (shapeinstrptr->sh_instr)
 		{
-		 	default:
-		 	case I_ShapePoints:
+			default:
+			case I_ShapePoints:
 			{
 				if(Global_ODB_Ptr->ObMorphCtrl)
 				{
@@ -3703,7 +3688,7 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 					TranslateShapeVertices(shapeinstrptr);
 				}
 				break;
-	 		}
+			}
 		}
 	}
 	/* call polygon pipeline */
@@ -3718,9 +3703,9 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 			INANIMATEOBJECT_STATUSBLOCK* objStatPtr = dptr->ObStrategyBlock->SBdataptr;
 			if (objStatPtr->typeId == IOT_FieldCharge)
 			{
-			   	int i;
+				int i;
 
-		  		D3D_DecalSystem_Setup();
+				D3D_DecalSystem_Setup();
 
 				for (i = 0; i < 63; i++)
 				{
@@ -3742,7 +3727,7 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 					RenderParticle(&particle);
 				}
 
-			 	D3D_DecalSystem_End();
+				D3D_DecalSystem_End();
 			}
 		}
 	}
@@ -3758,16 +3743,16 @@ void DoAlienEnergyView(DISPLAYBLOCK *dispPtr)
 	/* KJL 16:36:25 10/02/98 - process model */
 	{
 		STRATEGYBLOCK *sbPtr = Global_ODB_Ptr->ObStrategyBlock;
-	 	if(sbPtr)
-	 	{
-	 		switch (sbPtr->I_SBtype)
+		if(sbPtr)
+		{
+			switch (sbPtr->I_SBtype)
 			{
-		 		case I_BehaviourAlien:
+				case I_BehaviourAlien:
 				{
 					colour = ALIENS_LIFEFORCE_GLOW_COLOUR;
 					break;
 				}
-		 		case I_BehaviourPredator:
+				case I_BehaviourPredator:
 				{
 					colour = PREDATORS_LIFEFORCE_GLOW_COLOUR;
 					break;
@@ -3787,15 +3772,15 @@ void DoAlienEnergyView(DISPLAYBLOCK *dispPtr)
 
 				case I_BehaviourNetGhost:
 				{
-		   			NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)Global_ODB_Ptr->ObStrategyBlock->SBdataptr;
+					NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)Global_ODB_Ptr->ObStrategyBlock->SBdataptr;
 
 					if (ghostDataPtr->type==I_BehaviourAlienPlayer || ghostDataPtr->type==I_BehaviourAlien
-					 	|| (ghostDataPtr->type==I_BehaviourNetCorpse&&ghostDataPtr->subtype==I_BehaviourAlienPlayer) )
+						|| (ghostDataPtr->type==I_BehaviourNetCorpse&&ghostDataPtr->subtype==I_BehaviourAlienPlayer) )
 					{
 						colour = ALIENS_LIFEFORCE_GLOW_COLOUR;
 					}
 					else if (ghostDataPtr->type==I_BehaviourPredatorPlayer || ghostDataPtr->type==I_BehaviourPredator
-					 	|| (ghostDataPtr->type==I_BehaviourNetCorpse&&ghostDataPtr->subtype==I_BehaviourPredatorPlayer) )
+						|| (ghostDataPtr->type==I_BehaviourNetCorpse&&ghostDataPtr->subtype==I_BehaviourPredatorPlayer) )
 					{
 						colour = PREDATORS_LIFEFORCE_GLOW_COLOUR;
 					}
@@ -3971,7 +3956,7 @@ void AddHierarchicalShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 
 	if (!(PIPECLEANER_CHEATMODE||BALLSOFFIRE_CHEATMODE) || !dptr->ObStrategyBlock)
 	{
-	  	/* Find out which light sources are in range of of the object */
+		/* Find out which light sources are in range of of the object */
 		LightSourcesInRangeOfObject(dptr);
 
 		/* Shape Language Execution Shell */
@@ -3989,7 +3974,7 @@ void AddHierarchicalShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 		}
 
 		/* call polygon pipeline */
-	  	ShapePipeline(shapeheaderptr);
+		ShapePipeline(shapeheaderptr);
 	}
 
 	if (BALLSOFFIRE_CHEATMODE && dptr->ObStrategyBlock)
@@ -4206,7 +4191,7 @@ void MorphPoints(SHAPEINSTR *shapeinstrptr)
 			shape2Ptr = MorphDisplay.md_sptr2;
 
 			srcPtr = (VECTORCH *)*shape2Ptr->points;
-			Global_ShapePoints    = *(shape2Ptr->points);
+			Global_ShapePoints = *(shape2Ptr->points);
 		}
 		else
 		{
@@ -4217,13 +4202,13 @@ void MorphPoints(SHAPEINSTR *shapeinstrptr)
 			shape2PointsPtr = (VECTORCH *)(*shape2Ptr->points);
 
 			{
-		    	int numberOfPoints = shape1Ptr->numpoints;
+				int numberOfPoints = shape1Ptr->numpoints;
 				VECTORCH *morphedPointsPtr = (VECTORCH *) MorphedPts;
 
 				while (numberOfPoints--)
 				{
-				   	VECTORCH vertex1 = *shape1PointsPtr;
-				   	VECTORCH vertex2 = *shape2PointsPtr;
+					VECTORCH vertex1 = *shape1PointsPtr;
+					VECTORCH vertex2 = *shape2PointsPtr;
 
 					if ((vertex1.vx == vertex2.vx && vertex1.vy == vertex2.vy && vertex1.vz == vertex2.vz))
 					{
@@ -4238,14 +4223,14 @@ void MorphPoints(SHAPEINSTR *shapeinstrptr)
 						morphedPointsPtr->vz = vertex1.vz + (((vertex2.vz-vertex1.vz)*MorphDisplay.md_lerp)>>16);
 					}
 
-		            shape1PointsPtr++;
-		            shape2PointsPtr++;
+					shape1PointsPtr++;
+					shape2PointsPtr++;
 					morphedPointsPtr++;
 				}
 			}
 
 			Global_ShapePoints = (int*)MorphedPts;
-		    srcPtr = (VECTORCH *)MorphedPts;
+			srcPtr = (VECTORCH *)MorphedPts;
 		}
 	}
 	{
@@ -4419,7 +4404,7 @@ void RenderDecal(DECAL *decalPtr)
 							return;
 
 						D3D_Decal_Output(decalPtr, RenderPolygon.Vertices);
-		  			}
+					}
 					else D3D_Decal_Output(decalPtr, VerticesBuffer);
 					break;
 				}
@@ -4663,7 +4648,7 @@ void RenderParticle(PARTICLE *particlePtr)
 				if (RenderPolygon.NumberOfVertices<3) return;
 //				D3D_Particle_Output(particlePtr,RenderPolygon.Vertices);
 				AddParticle(particlePtr, &RenderPolygon.Vertices[0]);
-  			}
+			}
 			else AddParticle(particlePtr, &VerticesBuffer[0]);//D3D_Particle_Output(particlePtr,VerticesBuffer);
 		}
 */
@@ -4752,7 +4737,7 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 				GouraudPolygon_ClipWithPositiveX();
 				if (RenderPolygon.NumberOfVertices<3) continue;
 				D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
-  			}
+			}
 			else D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,VerticesBuffer);
 		}
 		}
@@ -4796,7 +4781,7 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 				GouraudPolygon_ClipWithPositiveX();
 				if (RenderPolygon.NumberOfVertices<3) continue;
 				D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
-  			}
+			}
 			else D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,VerticesBuffer);
 		}
 		}
@@ -4883,7 +4868,7 @@ void RenderMirroredDecal(DECAL *decalPtr)
 						if (RenderPolygon.NumberOfVertices<3) return;
 						D3D_Decal_Output(decalPtr,RenderPolygon.Vertices);
 
-		  			}
+					}
 					else D3D_Decal_Output(decalPtr,VerticesBuffer);
 					break;
 				}
@@ -5078,16 +5063,16 @@ void RenderMirrorSurface(void)
 
 	};
 
- 	int mirrorUV[]=
+	int mirrorUV[]=
 	{ 0,0, 127,0, 127,127, 0,127};
- 	POLYHEADER fakeHeader;
+	POLYHEADER fakeHeader;
 
 	{
 		fakeHeader.PolyFlags = iflag_transparent;
 		fakeHeader.PolyColour = CloudyImageNumber;
 	}
 
- 	{
+	{
 		int i;
 		for (i=0; i<4; i++)
 		{
@@ -5140,16 +5125,16 @@ void RenderMirrorSurface2(void)
 
 	};
 
- 	int mirrorUV[]=
+	int mirrorUV[]=
 	{ 0,0, 127,0, 127,127, 0,127};
- 	POLYHEADER fakeHeader;
+	POLYHEADER fakeHeader;
 
 	{
 		fakeHeader.PolyFlags = iflag_transparent;
 		fakeHeader.PolyColour = CloudyImageNumber;
 	}
 
- 	{
+	{
 		int i;
 		for (i=0; i<4; i++)
 		{
@@ -5204,7 +5189,7 @@ int SkyColour_B=200;
 
 void RenderSky(void)
 {
-   	POLYHEADER fakeHeader;
+	POLYHEADER fakeHeader;
 	int x,z,o,i;
 
 	// if this is our first time in the function, initialise some values just the once
@@ -5240,7 +5225,7 @@ void RenderSky(void)
 
 			for (o = 0; o < OCTAVES; o++)
 			{
- 			   VECTORCH translatedPts[4] =
+				VECTORCH translatedPts[4] =
 				{
 					// x   // y  // z
 					{-16384,-11000,-16384},
@@ -5260,9 +5245,9 @@ void RenderSky(void)
 
 //					TranslatePointIntoViewspace(&translatedPts[i]);
 
-					VerticesBuffer[i].X	= translatedPts[i].vx;
-					VerticesBuffer[i].Y	= translatedPts[i].vy;
-					VerticesBuffer[i].Z	= translatedPts[i].vz;
+					VerticesBuffer[i].X = translatedPts[i].vx;
+					VerticesBuffer[i].Y = translatedPts[i].vy;
+					VerticesBuffer[i].Z = translatedPts[i].vz;
 
 					switch (CurrentVisionMode)
 					{
@@ -5270,14 +5255,14 @@ void RenderSky(void)
 						case VISION_MODE_NORMAL:
 						{
 							VerticesBuffer[i].R = SkyColour_R;
-							VerticesBuffer[i].G	= SkyColour_G;
+							VerticesBuffer[i].G = SkyColour_G;
 							VerticesBuffer[i].B = SkyColour_B;
 							break;
 						}
 						case VISION_MODE_IMAGEINTENSIFIER:
 						{
 							VerticesBuffer[i].R = 0;
-							VerticesBuffer[i].G	= 255;
+							VerticesBuffer[i].G = 255;
 							VerticesBuffer[i].B = 0;
 							break;
 						}
@@ -5286,9 +5271,9 @@ void RenderSky(void)
 						case VISION_MODE_PRED_SEEPREDTECH:
 						{
 							VerticesBuffer[i].R = 0;
-							VerticesBuffer[i].G	= 0;
+							VerticesBuffer[i].G = 0;
 							VerticesBuffer[i].B = 255;
-			  				break;
+							break;
 						}
 					}
 
@@ -5402,7 +5387,7 @@ void RenderWaterFall(int xOrigin, int yOrigin, int zOrigin)
 			v[2].vy = 4742;
 			v[3].vy = 4742;
 
-		 	v[0].vz = waterfallZ[z];
+			v[0].vz = waterfallZ[z];
 			v[1].vz = waterfallZ[z+1];
 			v[2].vz = v[1].vz;
 			v[3].vz = v[0].vz;
@@ -5429,8 +5414,7 @@ void RenderWaterFall(int xOrigin, int yOrigin, int zOrigin)
 			v[2].vy = 4742+(i+1)*4096;
 			v[3].vy = 4742+(i+1)*4096;
 
-
-		 	v[0].vz = waterfallZ[z];
+			v[0].vz = waterfallZ[z];
 			v[1].vz = waterfallZ[z+1];
 			v[2].vz = v[1].vz;
 			v[3].vz = v[0].vz;
@@ -5442,7 +5426,7 @@ void RenderWaterFall(int xOrigin, int yOrigin, int zOrigin)
 
 void DrawWaterFallPoly(VECTORCH *v)
 {
-   	POLYHEADER fakeHeader;
+	POLYHEADER fakeHeader;
 
 	{
 		fakeHeader.PolyFlags = iflag_transparent;
@@ -5470,7 +5454,7 @@ void DrawWaterFallPoly(VECTORCH *v)
 			VerticesBuffer[a].SpecularB = 0;
 		}
 
- 		wv+=NormalFrameTime*2;
+		wv+=NormalFrameTime*2;
 		RenderPolygon.NumberOfVertices=4;
 	}
 
@@ -5500,7 +5484,7 @@ void DrawWaterFallPoly(VECTORCH *v)
 void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 {
 	VECTOR2D offset[4];
- 	POLYHEADER fakeHeader;
+	POLYHEADER fakeHeader;
 	int centreX,centreY;
 	int z = ONE_FIXED-scale;
 	z = MUL_FIXED(MUL_FIXED(z,z),2048);
@@ -5568,7 +5552,7 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 	}
 	fakeHeader.PolyFlags = iflag_transparent;
 	RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
- 	{
+	{
 		int i;
 		for (i=0; i<4; i++)
 		{
@@ -5588,21 +5572,20 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 				VerticesBuffer[i].G	= 255;
 				VerticesBuffer[i].B = 255;
 			}
-
 		}
 		RenderPolygon.NumberOfVertices=4;
 	}
 
 	GouraudPolygon_ClipWithZ();
-	if(RenderPolygon.NumberOfVertices<3) return;
+	if (RenderPolygon.NumberOfVertices<3) return;
 	GouraudPolygon_ClipWithNegativeX();
-	if(RenderPolygon.NumberOfVertices<3) return;
+	if (RenderPolygon.NumberOfVertices<3) return;
 	GouraudPolygon_ClipWithPositiveY();
-	if(RenderPolygon.NumberOfVertices<3) return;
+	if (RenderPolygon.NumberOfVertices<3) return;
 	GouraudPolygon_ClipWithNegativeY();
-	if(RenderPolygon.NumberOfVertices<3) return;
+	if (RenderPolygon.NumberOfVertices<3) return;
 	GouraudPolygon_ClipWithPositiveX();
-	if(RenderPolygon.NumberOfVertices<3) return;
+	if (RenderPolygon.NumberOfVertices<3) return;
 	D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
 
 	if (drawInRed)
@@ -5618,7 +5601,7 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 
 		VerticesBuffer[3].X = offset[3].vx+centreX;
 		VerticesBuffer[3].Y = MUL_FIXED(offset[3].vy,87381)+centreY;
-	 	{
+		{
 			int i;
 			for (i=0; i<2; i++)
 			{
@@ -5655,8 +5638,8 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 
 void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRIXCH *orientationPtr)
 {
- 	POLYHEADER fakeHeader;
- 	VECTORCH translatedPts[4];
+	POLYHEADER fakeHeader;
+	VECTORCH translatedPts[4];
 	int halfWidth = 100;
 	int halfHeight = 4;
 	int z = -1;
@@ -5709,17 +5692,17 @@ void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRI
 			if (outcode!=2)
 			{
 				GouraudPolygon_ClipWithZ();
-				if(RenderPolygon.NumberOfVertices<3) return;
+				if (RenderPolygon.NumberOfVertices<3) return;
 				GouraudPolygon_ClipWithNegativeX();
-				if(RenderPolygon.NumberOfVertices<3) return;
+				if (RenderPolygon.NumberOfVertices<3) return;
 				GouraudPolygon_ClipWithPositiveY();
-				if(RenderPolygon.NumberOfVertices<3) return;
+				if (RenderPolygon.NumberOfVertices<3) return;
 				GouraudPolygon_ClipWithNegativeY();
-				if(RenderPolygon.NumberOfVertices<3) return;
+				if (RenderPolygon.NumberOfVertices<3) return;
 				GouraudPolygon_ClipWithPositiveX();
-				if(RenderPolygon.NumberOfVertices<3) return;
+				if (RenderPolygon.NumberOfVertices<3) return;
 				D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
-  			}
+			}
 			else D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,VerticesBuffer);
 		}
 	}
@@ -5888,12 +5871,12 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 			red   = 255;
 			green = 0;
 			blue  = 255;
-		  	break;
+			break;
 		}
 	}
 	{
-	   	int f;
-	   	POLYHEADER fakeHeader;
+		int f;
+		POLYHEADER fakeHeader;
 		VECTORCH *vSphere = SphereRotatedVertex;
 			static int o=0;
 			o++;
@@ -5978,22 +5961,22 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 					}
 					if (ad3>(128*(SPHERE_TEXTURE_WRAP-1)+64)*65536)
 					{
-						if (d3 > 0) 
+						if (d3 > 0)
 							i3 = 1;
 						else 
 							i2 = 1;
 					}
 
-					if (i1) 
+					if (i1)
 						VerticesBuffer[0].U += 128*65536*SPHERE_TEXTURE_WRAP;
-					if (i2) 
+					if (i2)
 						VerticesBuffer[1].U += 128*65536*SPHERE_TEXTURE_WRAP;
-					if (i3) 
+					if (i3)
 						VerticesBuffer[2].U += 128*65536*SPHERE_TEXTURE_WRAP;
 				}
 
 				VerticesBuffer[i].A = explosionPtr->LifeTime/256;
-	  			VerticesBuffer[i].R = red;
+				VerticesBuffer[i].R = red;
 				VerticesBuffer[i].G	= green;
 				VerticesBuffer[i].B = blue;
 				VerticesBuffer[i].SpecularR = 0;
@@ -6024,7 +6007,7 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 					}
 				}
 			}
-	   	}
+		}
 	}
 }
 
@@ -6063,8 +6046,8 @@ void RenderInsideAlienTongue(int offset)
 			translatedPts[i].vz -= (ONE_FIXED-offset)/16;
 //			TranslatePointIntoViewspace(&translatedPts[i]);
 		}
-	   	while(i--);
-   	}
+		while(i--);
+	}
 
 	{
 		extern int AlienTongueImageNumber;
@@ -6073,7 +6056,7 @@ void RenderInsideAlienTongue(int offset)
 		RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
 	}
 
-	for(polyNumber=0; polyNumber<4; polyNumber++)
+	for (polyNumber=0; polyNumber<4; polyNumber++)
 	{
 		{
 			int i;
@@ -6081,15 +6064,14 @@ void RenderInsideAlienTongue(int offset)
 			{
 				int v = TonguePolyVertexList[polyNumber][i];
 				VerticesBuffer[i].A = 255;
-				VerticesBuffer[i].X	= translatedPts[v].vx;
-				VerticesBuffer[i].Y	= translatedPts[v].vy;
-				VerticesBuffer[i].Z	= translatedPts[v].vz;
+				VerticesBuffer[i].X = translatedPts[v].vx;
+				VerticesBuffer[i].Y = translatedPts[v].vy;
+				VerticesBuffer[i].Z = translatedPts[v].vz;
 				VerticesBuffer[i].U = CuboidPolyVertexU[3][i];
 				VerticesBuffer[i].V = CuboidPolyVertexV[3][i];
 
-
 				VerticesBuffer[i].R = offset/2048;
-				VerticesBuffer[i].G	= offset/2048;
+				VerticesBuffer[i].G = offset/2048;
 				VerticesBuffer[i].B = offset/2048;
 				VerticesBuffer[i].SpecularR = 0;
 				VerticesBuffer[i].SpecularG = 0;
@@ -6099,15 +6081,15 @@ void RenderInsideAlienTongue(int offset)
 		}
 		{
 			GouraudTexturedPolygon_ClipWithZ();
-			if(RenderPolygon.NumberOfVertices<3) continue;
+			if (RenderPolygon.NumberOfVertices<3) continue;
 			GouraudTexturedPolygon_ClipWithNegativeX();
-			if(RenderPolygon.NumberOfVertices<3) continue;
+			if (RenderPolygon.NumberOfVertices<3) continue;
 			GouraudTexturedPolygon_ClipWithPositiveY();
-			if(RenderPolygon.NumberOfVertices<3) continue;
+			if (RenderPolygon.NumberOfVertices<3) continue;
 			GouraudTexturedPolygon_ClipWithNegativeY();
-			if(RenderPolygon.NumberOfVertices<3) continue;
+			if (RenderPolygon.NumberOfVertices<3) continue;
 			GouraudTexturedPolygon_ClipWithPositiveX();
-			if(RenderPolygon.NumberOfVertices<3) continue;
+			if (RenderPolygon.NumberOfVertices<3) continue;
 			D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
 		}
 	}
@@ -6212,18 +6194,18 @@ void RenderStarfield(void)
 				if (outcode!=2)
 				{
 					TexturedPolygon_ClipWithZ();
-					if(RenderPolygon.NumberOfVertices<3) return;
+					if (RenderPolygon.NumberOfVertices<3) return;
 					TexturedPolygon_ClipWithNegativeX();
-					if(RenderPolygon.NumberOfVertices<3) return;
+					if (RenderPolygon.NumberOfVertices<3) return;
 					TexturedPolygon_ClipWithPositiveY();
-					if(RenderPolygon.NumberOfVertices<3) return;
+					if (RenderPolygon.NumberOfVertices<3) return;
 					TexturedPolygon_ClipWithNegativeY();
-					if(RenderPolygon.NumberOfVertices<3) return;
+					if (RenderPolygon.NumberOfVertices<3) return;
 					TexturedPolygon_ClipWithPositiveX();
-					if(RenderPolygon.NumberOfVertices<3) return;
+					if (RenderPolygon.NumberOfVertices<3) return;
 //					D3D_Particle_Output(&particle,RenderPolygon.Vertices);
 					AddParticle(&particle, &RenderPolygon.Vertices[0]);
-	  			}
+				}
 //				else D3D_Particle_Output(&particle,VerticesBuffer);
 				else AddParticle(&particle, &VerticesBuffer[0]);
 			}
@@ -6282,10 +6264,14 @@ int LightIntensityAtPoint(VECTORCH *pointPtr)
 			}
 		}
 	}
-	if (intensity>ONE_FIXED) 
+	if (intensity>ONE_FIXED)
+	{
 		intensity = ONE_FIXED;
-	else if (intensity < GlobalAmbience) 
+	}
+	else if (intensity < GlobalAmbience)
+	{
 		intensity = GlobalAmbience;
+	}
 
 	/* KJL 20:31:39 12/1/97 - limit how dark things can be so blood doesn't go green */
 	if (intensity < 10*256) 
@@ -6293,5 +6279,4 @@ int LightIntensityAtPoint(VECTORCH *pointPtr)
 
 	return intensity;
 }
-
 

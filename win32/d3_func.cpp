@@ -48,6 +48,8 @@ D3DXMATRIX matView;
 D3DXMATRIX matIdentity;
 D3DXMATRIX matViewPort;
 
+//D3DXMATRIX viewMatrix;
+
 // vertex declarations
 D3DVERTEXELEMENT9 declMain[] =
 {
@@ -711,9 +713,11 @@ bool R_UnlockTexture(r_Texture texture)
 	LastError = texture->UnlockRect(0);
 
 	if (FAILED(LastError))
+	{
 		return false;
-	else
-		return true;
+	}
+
+	return true;
 }
 
 void ColourFillBackBuffer(int FillColour)
@@ -782,15 +786,6 @@ void WriteMenuTextures()
 		D3DXSaveTextureToFileA(filename, D3DXIFF_PNG, AvPMenuGfxStorage[i].menuTexture, NULL);
 	}
 #endif
-}
-
-char* GetDeviceName()
-{
-	if (d3d.Driver[d3d.CurrentDriver].AdapterInfo.Description != NULL)
-	{
-		return d3d.Driver[d3d.CurrentDriver].AdapterInfo.Description;
-	}
-	else return "Default Adapter";
 }
 
 // list of allowed display formats
@@ -1067,7 +1062,7 @@ r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	return destTexture;
 }
 
-bool CreateVertexDeclaration(const D3DVERTEXELEMENT9* pVertexElements, LPDIRECT3DVERTEXDECLARATION9 *vertexDeclaration)
+static bool CreateVertexDeclaration(const D3DVERTEXELEMENT9* pVertexElements, LPDIRECT3DVERTEXDECLARATION9 *vertexDeclaration)
 {
 	LastError = d3d.lpD3DDevice->CreateVertexDeclaration(pVertexElements, vertexDeclaration);
 	if (FAILED(LastError))
@@ -1080,7 +1075,7 @@ bool CreateVertexDeclaration(const D3DVERTEXELEMENT9* pVertexElements, LPDIRECT3
 	return true;
 }
 
-bool CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 *vertexShader, LPD3DXCONSTANTTABLE *constantTable)
+static bool CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 *vertexShader, LPD3DXCONSTANTTABLE *constantTable)
 {
 	LPD3DXBUFFER pErrors = NULL;
 	LPD3DXBUFFER pCode = NULL;
@@ -1128,7 +1123,7 @@ bool CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 *ve
 	return true;
 }
 
-bool CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *pixelShader)
+static bool CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *pixelShader)
 {
 	LPD3DXBUFFER pErrors = NULL;
 	LPD3DXBUFFER pCode = NULL;
@@ -1634,6 +1629,24 @@ void R_ReleaseTexture(r_Texture &texture)
 	{
 		texture->Release();
 		texture = NULL;
+	}
+}
+
+void R_ReleaseVertexShader(r_VertexShader &vertexShader)
+{
+	if (vertexShader)
+	{
+		vertexShader->Release();
+		vertexShader = 0;
+	}
+}
+
+void R_ReleasePixelShader(r_PixelShader &pixelShader)
+{
+	if (pixelShader)
+	{
+		pixelShader->Release();
+		pixelShader = 0;
 	}
 }
 
@@ -2275,6 +2288,47 @@ bool InitialiseDirect3D()
 	return true;
 }
 
+void R_UpdateViewMatrix(float *viewMat)
+{
+	D3DXVECTOR3 vecRight	(viewMat[0], viewMat[1], viewMat[2]);
+	D3DXVECTOR3 vecUp		(viewMat[4], viewMat[5], viewMat[6]);
+	D3DXVECTOR3 vecFront	(viewMat[8], -viewMat[9], viewMat[10]);
+	D3DXVECTOR3 vecPosition (viewMat[3], -viewMat[7], viewMat[11]);
+
+	D3DXVec3Normalize(&vecFront, &vecFront);
+
+	D3DXVec3Cross(&vecUp, &vecFront, &vecRight);
+	D3DXVec3Normalize(&vecUp, &vecUp);
+
+	D3DXVec3Cross(&vecRight, &vecUp, &vecFront);
+	D3DXVec3Normalize(&vecRight, &vecRight);
+
+	// right
+	matView._11 = vecRight.x;
+	matView._21 = vecRight.y;
+	matView._31 = vecRight.z;
+
+	// up
+	matView._12 = vecUp.x;
+	matView._22 = vecUp.y;
+	matView._32 = vecUp.z;
+
+	// front
+	matView._13 = vecFront.x;
+	matView._23 = vecFront.y;
+	matView._33 = vecFront.z;
+
+	// 4th
+	matView._14 = 0.0f;
+	matView._24 = 0.0f;
+	matView._34 = 0.0f;
+	matView._44 = 1.0f;
+
+	matView._41 = -D3DXVec3Dot(&vecPosition, &vecRight);
+	matView._42 = -D3DXVec3Dot(&vecPosition, &vecUp);
+	matView._43 = -D3DXVec3Dot(&vecPosition, &vecFront);
+}
+
 void SetTransforms()
 {
 	// Setup orthographic projection matrix
@@ -2358,6 +2412,8 @@ void ReleaseDirect3D()
 
 	// clean up render list classes
 	RenderListDeInit();
+
+	delete d3d.effectSystem;
 
 	// release device
 	SAFE_RELEASE(d3d.lpD3DDevice);
@@ -2640,9 +2696,13 @@ void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired)
 void ToggleWireframe()
 {
 	if (CurrentRenderStates.WireFrameModeIsOn)
+	{
 		CheckWireFrameMode(0);
+	}
 	else
+	{
 		CheckWireFrameMode(1);
+	}
 }
 
 void EnableZBufferWrites()

@@ -2018,21 +2018,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\frustrum.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\frustum.c">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\gadgets\gadget.cpp">
@@ -2322,6 +2308,9 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\3dc\indexBuffer.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\indexfnt.cpp">
@@ -3335,6 +3324,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\3dc\RenderList.cpp">
+			</File>
+			<File
 				RelativePath="..\3dc\avp\support\rentrntq.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -3472,6 +3464,9 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\3dc\shaderManager.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\shpanim.c">
@@ -3906,6 +3901,9 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\3dc\vertexBuffer.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\VideoModes.cpp">
@@ -4389,7 +4387,7 @@
 				RelativePath="..\3dc\win95\fragchnk.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\frustrum.h">
+				RelativePath="..\3dc\frustum.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\gadgets\gadget.h">
@@ -4459,6 +4457,9 @@
 			</File>
 			<File
 				RelativePath="..\3dc\win95\ILBM_ext.hpp">
+			</File>
+			<File
+				RelativePath="..\3dc\indexBuffer.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\indexfnt.hpp">
@@ -4667,6 +4668,15 @@
 				RelativePath="..\3dc\avp\support\refobj.hpp">
 			</File>
 			<File
+				RelativePath="..\3dc\renderer.h">
+			</File>
+			<File
+				RelativePath="..\3dc\RenderList.h">
+			</File>
+			<File
+				RelativePath="..\3dc\renderStates.h">
+			</File>
+			<File
 				RelativePath="..\3dc\avp\support\rentrntq.h">
 			</File>
 			<File
@@ -4692,6 +4702,9 @@
 			</File>
 			<File
 				RelativePath="..\3dc\avp\sfx.h">
+			</File>
+			<File
+				RelativePath="..\3dc\shaderManager.h">
 			</File>
 			<File
 				RelativePath="..\3dc\include\shape.h">
@@ -4757,6 +4770,9 @@
 				RelativePath="..\3dc\avp\win95\gadgets\textin.hpp">
 			</File>
 			<File
+				RelativePath="..\3dc\textureManager.h">
+			</File>
+			<File
 				RelativePath="..\3dc\avp\track.h">
 			</File>
 			<File
@@ -4779,6 +4795,9 @@
 			</File>
 			<File
 				RelativePath="..\3dc\version.h">
+			</File>
+			<File
+				RelativePath="..\3dc\vertexBuffer.h">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\VideoModes.h">

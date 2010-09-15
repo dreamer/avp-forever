@@ -1,6 +1,5 @@
 #ifndef _included_d3d_render_h_ /* Is this your first time? */
 #define _included_d3d_render_h_ 1
-#include "particle.h"
 
 extern void D3D_SetupSceneDefaults(void);
 extern void D3D_DrawBackdrop(void);
@@ -25,8 +24,6 @@ extern void D3D_FadeDownScreen(int brightness, int colour);
 extern void D3D_PlayerOnFireOverlay(void);
 
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a);
-
-void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
 
 extern void CheckWireFrameMode(int shouldBeOn);
 

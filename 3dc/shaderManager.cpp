@@ -28,6 +28,25 @@
 
 const int nullID = 999;
 
+void VertexShader::Release()
+{
+	refCount--;
+	if (!refCount)
+	{
+		R_ReleaseVertexShader(vertexShader);
+	}
+}
+
+bool VertexShader::SetInt(const char* constant, uint32_t n)
+{
+	return true;
+}
+
+bool VertexShader::SetMatrix(const char* constant, struct R_MATRIX &matrix)
+{
+	return true;
+}
+
 EffectManager::EffectManager()
 {
 }
@@ -38,13 +57,25 @@ bool EffectManager::Set(effectID_t effectID)
 	R_SetPixelShader(this->pixelShaderList[this->effectList[effectID].pixelShaderID]);
 	return true;
 }
+
 /*
 void EffectManager::Release(effectID_t effectID)
 {
 	// release vertex shader if we're the only one with a reference to it
-	if (effectList[effectID].vertexShaderList[effectList[effectID].vertexShaderID.refCount)
-	{
+	vertexShaderList[effectList[effectID].vertexShaderID].refCount--;
 
+	if (vertexShaderList[effectList[effectID].vertexShaderID].refCount)
+	{
+		
+	}
+}
+
+void EffectManager::Release(effectID_t effectID)
+{
+	vertexShaderList[effectList[effectID].vertexShaderID].refCount--;
+	if (!vertexShaderList[effectList[effectID].vertexShaderID].refCount)
+	{
+		R_ReleaseVertexShader(vertexShaderList[effectList[effectID].vertexShaderID]);
 	}
 }
 */

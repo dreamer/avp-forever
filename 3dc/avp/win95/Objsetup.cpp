@@ -915,7 +915,6 @@ static void add_trackobject(Object_Chunk* ob, int list_pos,AVP_Strategy_Chunk* a
 					stp->targets[j].flags=tpe->targets[j].flags;
 					*(ObjectID*)&stp->targets[j].target_name[0]=tpe->targets[j].targetID;
 				}
-			
 			}
 			else
 				stp->targets=0;

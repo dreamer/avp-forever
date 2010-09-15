@@ -49,10 +49,10 @@ FFileDesc::FFileDesc(char const * infoline, char const * path)
 			strcpy(fbuf,path);
 			fbufP += strlen(path);
 		}
-		
+
 		int c1;
 		int c2;
-		
+
 		do
 		{
 			c2 = c1 = *infoline++;
@@ -85,7 +85,7 @@ FFileDesc::FFileDesc(char const * infoline, char const * path)
 FFileDesc::FFileDesc(FFileDesc const & ffd)
 : dname_len(ffd.dname_len)
 , dir_name(0)
-, file_name(0) 
+, file_name(0)
 {
 	if (ffd.dir_name)
 	{
@@ -239,10 +239,10 @@ int ffclose_almost_all(void)
 		delete fp;
 		i_open.delete_current();
 	}
-	
-	for(LIF<FFHeaderI*> fflif(&fflist);!fflif.done();)
+
+	for (LIF<FFHeaderI*> fflif(&fflist);!fflif.done();)
 	{
-		if(fflif()->ShouldBeKept())
+		if (fflif()->ShouldBeKept())
 		{
 			fflif.next();
 		}
@@ -253,9 +253,9 @@ int ffclose_almost_all(void)
 		}
 	}
 
-	for(LIF<FFileDesc> desc_lif(&floadeddesclist);!desc_lif.done();)
+	for (LIF<FFileDesc> desc_lif(&floadeddesclist);!desc_lif.done();)
 	{
-		if(desc_lif().ShouldBeKept())
+		if (desc_lif().ShouldBeKept())
 		{
 			desc_lif.next();
 		}
@@ -264,11 +264,10 @@ int ffclose_almost_all(void)
 			desc_lif.delete_current();
 		}
 	}
-	
+
 	LOGDXFMT(("Keeping %d fastfile(s)",fflist.size()));
 	return cnt;
 }
-
 
 int ffclose(FFILE * fp)
 {

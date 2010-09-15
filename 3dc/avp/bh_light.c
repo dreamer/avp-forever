@@ -44,7 +44,7 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 
 	/* create, initialise and attach a data block */
 	pl_bhv = (void *)AllocateMem(sizeof(PLACED_LIGHT_BEHAV_BLOCK));
-	if(!pl_bhv)
+	if (!pl_bhv)
 	{
 		memoryInitialisationFailure = 1;
 		return ((void *)NULL);
@@ -109,7 +109,7 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 		sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_INANIMATE);
 	}
 	
-	if(!sbPtr->DynPtr)
+	if (!sbPtr->DynPtr)
 	{
 		RemoveBehaviourStrategy(sbPtr);
 		return 0;
@@ -141,41 +141,43 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 		int shape_num = toolsData->shapeIndex;
 		SHAPEHEADER *shptr = GetShapeData(shape_num);
 		pptxactrlblk = &pl_bhv->inan_tac;
-		for(item_num = 0; item_num < shptr->numitems; item_num ++)
+		for (item_num = 0; item_num < shptr->numitems; item_num ++)
 		{
 			POLYHEADER *poly = (POLYHEADER*)(shptr->items[item_num]);
 			LOCALASSERT(poly);
-				
-			if((Request_PolyFlags((void *)poly)) & iflag_txanim)
+
+			if ((Request_PolyFlags((void *)poly)) & iflag_txanim)
+			{
+				TXACTRLBLK *pnew_txactrlblk;
+
+				pnew_txactrlblk = (TXACTRLBLK*)AllocateMem(sizeof(TXACTRLBLK));
+				if (pnew_txactrlblk)
 				{
-					TXACTRLBLK *pnew_txactrlblk;
+					pnew_txactrlblk->tac_flags = 0;
+					pnew_txactrlblk->tac_item = item_num;
+					pnew_txactrlblk->tac_sequence = 0;
+					pnew_txactrlblk->tac_node = 0;
+					pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);
+					pnew_txactrlblk->tac_txah_s = GetTxAnimHeaderFromShape(pnew_txactrlblk, shape_num);
 
-					pnew_txactrlblk = (TXACTRLBLK*)AllocateMem(sizeof(TXACTRLBLK));
-					if (pnew_txactrlblk)
+					*pptxactrlblk = pnew_txactrlblk;
+					pptxactrlblk = &pnew_txactrlblk->tac_next;
 					{
-						pnew_txactrlblk->tac_flags = 0;										
-						pnew_txactrlblk->tac_item = item_num;										
-						pnew_txactrlblk->tac_sequence = 0;										
-						pnew_txactrlblk->tac_node = 0;										
-						pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);										
-						pnew_txactrlblk->tac_txah_s = GetTxAnimHeaderFromShape(pnew_txactrlblk, shape_num);
-
-						*pptxactrlblk = pnew_txactrlblk;
-						pptxactrlblk = &pnew_txactrlblk->tac_next;
+						//see how many sequences there are
+						int num_seq = 0;
+						while (pnew_txactrlblk->tac_txarray[num_seq+1])
 						{
-							//see how many sequences there are
-							int num_seq = 0;
-							while (pnew_txactrlblk->tac_txarray[num_seq+1])
-								num_seq++;
-
-							if (num_seq < 3) 
-								pl_bhv->has_broken_sequence = 0;
-
-							GLOBALASSERT(num_seq >= 2);
+							num_seq++;
 						}
+
+						if (num_seq < 3) 
+							pl_bhv->has_broken_sequence = 0;
+
+						GLOBALASSERT(num_seq >= 2);
 					}
-					else *pptxactrlblk = NULL; 
 				}
+				else *pptxactrlblk = NULL; 
+			}
 
 			if ((Request_PolyFlags((void *)poly)) & iflag_light_corona)
 			{
@@ -237,10 +239,7 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 	pl_bhv->startingArmour = sbPtr->SBDamageBlock.Armour;
 	
 	return((void*)pl_bhv);
-
 }
-
-
 
 void PlacedLightBehaviour(STRATEGYBLOCK *sbPtr)
 {		

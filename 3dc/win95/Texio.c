@@ -1,8 +1,6 @@
 
 #include "3dc.h"
-
 #include <conio.h>
-
 #include "inline.h"
 
 #ifdef RIFF_SYSTEM
@@ -11,24 +9,18 @@
 
 #define UseLocalAssert 0
 #include "ourasert.h"
-
 #include "awTexLd.h"
 
 /*
-
- externs for commonly used global variables and arrays
-
+	externs for commonly used global variables and arrays
 */
 
 extern SHAPEHEADER **mainshapelist;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern char projectsubdirectory[];
-//void ReleaseD3DTexture(RENDERTEXTURE *d3dTexture);
 
 /*
-
- Global Variables for PC Functions
-
+	Global Variables for PC Functions
 */
 
 	#ifdef MaxImageGroups
@@ -68,7 +60,7 @@ extern char projectsubdirectory[];
 
 	#else /* ! MaxImageGroups */
 
-	int NumImages = 0;								/* # current images */
+	int NumImages = 0;							/* # current images */
 	IMAGEHEADER *ImageHeaderPtrs[MaxImages];	/* Ptrs to Image Header Blocks */
 	IMAGEHEADER ImageHeaderArray[MaxImages];	/* Array of Image Headers */
 
@@ -87,12 +79,11 @@ extern char projectsubdirectory[];
 
 int InitialiseTextures(void)
 {
-
-	SHAPEHEADER **shlistptr;
-	SHAPEHEADER *shptr;
+	SHAPEHEADER **shapelistptr;
+	SHAPEHEADER *shapePtr;
 	char **txfiles;
 	int TxIndex;
-	int LTxIndex;
+	int LocalTxIndex;
 
 	/*
 
@@ -105,14 +96,14 @@ int InitialiseTextures(void)
 
 	#ifdef MaxImageGroups
 
-    DeallocateCurrentImages();
+	DeallocateCurrentImages();
 
 	NumImages = CurrentImageGroup * MaxImages;
 	NextFreeImageHeaderPtr[CurrentImageGroup] = &ImageHeaderArray[CurrentImageGroup*MaxImages];
 
 	#else
 
-    DeallocateAllImages();
+	DeallocateAllImages();
 
 	/* Initialise Image Header Variables */
 
@@ -124,28 +115,28 @@ int InitialiseTextures(void)
 	/* Added 23/3/98 by DHM so that this can be called without loading any
 	shapes (to get textprint working in the menus):
 	*/
-	if ( NULL == mainshapelist )
+	if (NULL == mainshapelist)
 	{
 		return TRUE; // early exit
 	}
 
 	/* Build the Texture List */
-	shlistptr = &mainshapelist[0];
+	shapelistptr = &mainshapelist[0];
 
-	while (*shlistptr)
+	while (*shapelistptr)
 	{
-		shptr = *shlistptr++;
+		shapePtr = *shapelistptr++;
 
 		/* If the shape has textures */
-		if  (shptr->sh_localtextures)
+		if (shapePtr->sh_localtextures)
 		{
 			#if InitTexPrnt
 			textprint("This shape has textures\n");
 			#endif
 
-			txfiles = shptr->sh_localtextures;
+			txfiles = shapePtr->sh_localtextures;
 
-			LTxIndex = 0;
+			LocalTxIndex = 0;
 
 			while (*txfiles)
 			{
@@ -170,13 +161,17 @@ int InitialiseTextures(void)
 				src = projectsubdirectory;
 				dst = fname;
 
-				while(*src)
+				while (*src)
+				{
 					*dst++ = *src++;
+				}
 
 				src = txfilesptr;
 
-				while(*src)
+				while (*src)
+				{
 					*dst++ = *src++;
+				}
 
 				*dst = 0;
 
@@ -187,11 +182,6 @@ int InitialiseTextures(void)
 				/* This function calls GetExistingImageHeader to figure out if the image is already loaded */
 				TxIndex = CL_LoadImageOnce(fname, LIO_D3DTEXTURE|LIO_TRANSPARENT|LIO_RELATIVEPATH|LIO_RESTORABLE);
 
-				{
-					char buf[100];
-					sprintf(buf, "TxIndex: %d\n", TxIndex);
-					OutputDebugString(buf);
-				}
 				GLOBALASSERT(GEI_NOTLOADED != TxIndex);
 
 				/*
@@ -210,17 +200,16 @@ int InitialiseTextures(void)
 				textprint("\nLocal to Global for Shape\n");
 				#endif
 
-				MakeShapeTexturesGlobal(shptr, TxIndex, LTxIndex);
+				MakeShapeTexturesGlobal(shapePtr, TxIndex, LocalTxIndex);
 
-				LTxIndex++;			/* Next Local Texture */
+				LocalTxIndex++;	/* Next Local Texture */
 			}
 
 			/* Is this shape a sprite that requires resizing? */
-
-			if ((shptr->shapeflags & ShapeFlag_Sprite) &&
-				(shptr->shapeflags & ShapeFlag_SpriteResizing))
+			if ((shapePtr->shapeflags & ShapeFlag_Sprite) &&
+				(shapePtr->shapeflags & ShapeFlag_SpriteResizing))
 			{
-				SpriteResizing(shptr);
+				SpriteResizing(shapePtr);
 			}
 		}
 	}
@@ -308,7 +297,8 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 				|| ShapeItemPtr->PolyItemType == I_ZB_Gouraud3dTexturedPolygon
 				|| ShapeItemPtr->PolyItemType == I_ScaledSprite
 				|| ShapeItemPtr->PolyItemType == I_3dTexturedPolygon
-				|| ShapeItemPtr->PolyItemType == I_ZB_3dTexturedPolygon) {
+				|| ShapeItemPtr->PolyItemType == I_ZB_3dTexturedPolygon) 
+			{
 
 				if (ShapeItemPtr->PolyFlags & iflag_txanim)
 				{
@@ -353,14 +343,8 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr, POLYHEADER *pheader, int L
 	int **shape_textures;
 	int *txf_imageptr;
 	int texture_defn_index;
-	int i, /*txi,*/ image;
-	intptr_t txi;
-
-	#if 0
-	textprint("LTxIndex = %d, TxIndex = %d\n", LTxIndex, TxIndex);
-	WaitForReturn();
-	#endif
-
+	int i, image;
+	int txi;
 
 	/* Get the animation sequence header */
 	shape_textures = sptr->sh_textures;
@@ -408,7 +392,7 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr, POLYHEADER *pheader, int L
 				{
 					if (txaf->txf_image & TxLocal)
 					{
- 						txi = txaf->txf_image;
+						txi = txaf->txf_image;
 						txi &= ~TxLocal;					/* Clear Flag */
 
 						if (txi == LTxIndex)
@@ -506,10 +490,10 @@ void SpriteResizing(SHAPEHEADER *sptr)
 		iptr[iy] = ((VECTORCH*)ShapePoints)[*mypolystart].vy;
 		iptr[iz] = ((VECTORCH*)ShapePoints)[*mypolystart].vz;
 
-		if(iptr[ix] < e_poly.x_low) e_poly.x_low = iptr[ix];
-		if(iptr[iy] < e_poly.y_low) e_poly.y_low = iptr[iy];
-		if(iptr[ix] > e_poly.x_high) e_poly.x_high = iptr[ix];
-		if(iptr[iy] > e_poly.y_high) e_poly.y_high = iptr[iy];
+		if (iptr[ix] < e_poly.x_low)  e_poly.x_low = iptr[ix];
+		if (iptr[iy] < e_poly.y_low)  e_poly.y_low = iptr[iy];
+		if (iptr[ix] > e_poly.x_high) e_poly.x_high = iptr[ix];
+		if (iptr[iy] > e_poly.y_high) e_poly.y_high = iptr[iy];
 
 		iptr += vsize;
 		mypolystart++;
@@ -663,12 +647,10 @@ void SpriteResizing(SHAPEHEADER *sptr)
 
 					for (i = 4; i!=0; i--)
 					{
-
 						iptr[0] = WideMulNarrowDiv(iptr[0], size_uv.vx, size_uv_curr.vx);
 						iptr[1] = WideMulNarrowDiv(iptr[1], size_uv.vy, size_uv_curr.vy);
 
 						iptr += 2;
-
 					}
 
 					/* The translation vector in UV space */
@@ -801,12 +783,6 @@ static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 		ReleaseAvPTexture(ihptr->AvPTexture);
 		ihptr->AvPTexture = (void*) 0;
 	}
-/*
-	if (ihptr->Direct3DTexture)
-	{
-		ReleaseD3DTexture(&ihptr->Direct3DTexture);
-	}
-*/
 }
 
 static void MinimizeImageHeader(IMAGEHEADER * ihptr)
@@ -816,12 +792,6 @@ static void MinimizeImageHeader(IMAGEHEADER * ihptr)
 		ReleaseAvPTexture(ihptr->AvPTexture);
 		ihptr->AvPTexture = (void*) 0;
 	}
-/*
-	if (ihptr->Direct3DTexture)
-	{
-		ReleaseD3DTexture(&ihptr->Direct3DTexture);
-	}
-*/
 }
 
 #ifdef MaxImageGroups

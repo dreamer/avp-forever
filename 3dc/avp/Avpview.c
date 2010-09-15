@@ -59,7 +59,7 @@ MATRIXCH WToLMat = {1,};
 VECTORCH LocalView;
 
 /* KJL 11:16:37 06/06/97 - lights */
-VECTORCH LocalLightCH;
+//VECTORCH LocalLightCH;
 int NumLightSourcesForObject;
 LIGHTBLOCK *LightSourcesForObject[MaxLightsPerObject];
 int GlobalAmbience;

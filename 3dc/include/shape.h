@@ -113,8 +113,8 @@ typedef enum {
 
 */
 
-typedef struct bsp_block {
-
+typedef struct bsp_block
+{
 	void *frontblock;		/* +ve side of normal */
 	void *backblock;		/* -ve side of normal */
 
@@ -131,15 +131,14 @@ typedef struct bsp_block {
 } BSP_BLOCK;
 
 
-
 /*
 
  This struct is the form that Static BSP Tree blocks are allocated in
 
 */
 
-typedef struct static_bsp_block {
-
+typedef struct static_bsp_block 
+{
 	void *frontblock;		/* +ve side of normal */
 	void *backblock;		/* -ve side of normal */
 
@@ -156,23 +155,14 @@ typedef struct static_bsp_block {
 } STATIC_BSP_BLOCK;
 
 
-
-
-
-
-
-
-
-
-
 /*
 
  Shape Instruction Block
 
 */
 
-typedef struct shapeinstr {
-
+typedef struct shapeinstr 
+{
 	int sh_instr;								/* int data */
 	int sh_numitems;
 	int **sh_instr_data;						/* ptr to int data */
@@ -190,8 +180,8 @@ typedef struct shapeinstr {
 
 */
 
-typedef struct zspheader {
-
+typedef struct zspheader 
+{
 	int zsp_x;						/* ZSP Array dimensions */
 	int zsp_y;
 	int zsp_z;
@@ -211,8 +201,8 @@ typedef struct zspheader {
 
 */
 
-typedef struct zspzone {
-
+typedef struct zspzone 
+{
 	int zsp_numitems;
 	int zsp_numpoints;
 
@@ -257,8 +247,8 @@ typedef struct zspzone {
 
 */
 
-typedef struct extraitemdata {
-
+typedef struct extraitemdata 
+{
 	int EID_VertexI;				/* Prelighting Intensity for each Vertex */
 
 } EXTRAITEMDATA;
@@ -310,8 +300,8 @@ typedef struct	Adaptive_Degradation_Desc
 
 }ADAPTIVE_DEGRADATION_DESC;
 
-typedef struct shapeheader {
-
+typedef struct shapeheader 
+{
 	int numpoints;								/* Total #points in shape */
 	int numitems;								/* Total #items in shape */
 
@@ -358,17 +348,17 @@ typedef struct shapeheader {
 
 /* Shape Flags */
 
-#define ShapeFlag_3DS_AxisFlip	0x00000001
+#define ShapeFlag_3DS_AxisFlip		0x00000001
 #define ShapeFlag_RSP				0x00000002		/* Run time creation */
 #define ShapeFlag_Detail			0x00000004		/* Run time creation */
 
 
 #define ShapeFlag_AugZ				0x00000010		/* For the Preprocessor */
-#define ShapeFlag_AugZ_Lite		0x00000020		/* No points array */
+#define ShapeFlag_AugZ_Lite			0x00000020		/* No points array */
 
 #define ShapeFlag_Free1				0x00000040
 
-#define ShapeFlag_SizeSortItems	0x00000080		/* For PP, AugZ only */
+#define ShapeFlag_SizeSortItems		0x00000080		/* For PP, AugZ only */
 #define ShapeFlag_VSC_tx3d			0x00000100		/* Test for VSC usage */
 #define ShapeFlag_ZSP				0x00000200		/* Run time creation */
 #define ShapeFlag_Sprite			0x00000400		/* Object is a sprite */
@@ -377,7 +367,7 @@ typedef struct shapeheader {
 #define ShapeFlag_Cylinder			0x00002000		/* For binary loaders */
 
 
-#define ShapeFlag_SpriteResizing		0x00008000		/* Resize polygon */
+#define ShapeFlag_SpriteResizing	0x00008000		/* Resize polygon */
 
 #define ShapeFlag_MultiViewSprite	0x00010000		/* See "c7.doc" */
 
@@ -401,50 +391,6 @@ typedef struct shapeheader {
 
 #endif	/* StandardShapeLanguage */
 
-
-
-/*
-
- Outcode Return Structure
-
-*/
-
-typedef struct ocs_block {
-
-	int ocs_flags;			/* For general flagged messages */
-	int ocs_viewdot;
-	int ocs_clip_or;
-	int ocs_clip_and;
-	int ocs_clipstate;
-	int ocs_ptsoutstate;
-
-} OCS_BLOCK;
-
-#define ocs_flag_outcoded		0x00000001
-#define ocs_flag_nobfc			0x00000002
-#define ocs_flag_noclipoc		0x00000004
-#define ocs_flag_hazed			0x00000008
-#define ocs_flag_hazehue_n0	0x00000010
-#define ocs_flag_cwise			0x00000020
-
-
-typedef enum {
-
-	ocs_cs_totally_off,		/* Item will be flagged as outcoded */
-	ocs_cs_partially_on,
-	ocs_cs_totally_on,
-
-} OCS_CLIPSTATES;
-
-
-typedef enum {
-
-	ocs_pout_2d,			/* "ocs_cs_partially_on" or "ocs_cs_totally_on" */
-	ocs_pout_3d				/* "ocs_cs_partially_on" */
-
-} OCS_PTSOUTSTATES;
-
-
 /*
 
  Polygon Header Block
@@ -461,8 +407,8 @@ typedef enum {
 #define IHdrSize 4
 #define ITrmSize 1
 
-typedef struct polyheader {
-
+typedef struct polyheader 
+{
 	int PolyItemType;
 	int PolyNormalIndex;
 	int PolyFlags;
@@ -481,7 +427,7 @@ typedef struct polyheader {
 
 */
 
-#define iflag_notvis				0x00000001	/* Don't draw this item */
+#define iflag_notvis			0x00000001	/* Don't draw this item */
 #define iflag_nolight			0x00000002	/* Take colour as is */
 #define iflag_ignore0			0x00000004	/* Don't draw colour 0 - textures */
 
@@ -489,19 +435,19 @@ typedef struct polyheader {
 #define iflag_noviewportclip	0x00000008	/* See object level option too */
 #endif
 
-#define iflag_nosubdiv	0x00000008	// polygon too small to need sub dividing
+#define iflag_nosubdiv			0x00000008	// polygon too small to need sub dividing
 
 #define iflag_transparent		0x00000010	/* Function depends on Video Mode */
-#define iflag_no_bfc				0x00000020	/* No Back Face Cull */
-#define iflag_hazing				0x00000040	/* Haze / Depth Cue colour */
+#define iflag_no_bfc			0x00000020	/* No Back Face Cull */
+#define iflag_hazing			0x00000040	/* Haze / Depth Cue colour */
 
-#define iflag_zbuffer_w		0x00000080	/* Z-Buffer, Write-Only */
+#define iflag_zbuffer_w			0x00000080	/* Z-Buffer, Write-Only */
 
 #define iflag_shadingtable		0x00000100	/* Hue is a table index */
 #define iflag_tab_gour_8		0x00000200	/* Gour. for 8-bit modes uses tab. */
 #define iflag_extended			0x00000400	/* N. Index ptr to item ext. blk */
 
-#define iflag_verticaledges	0x00000800	/* A collision option whereby the
+#define iflag_verticaledges	0x00000800		/* A collision option whereby the
 															item is treated as if it is a
 															prism of infinite extent formed
 															by extrusion of its world xz
@@ -512,23 +458,22 @@ typedef struct polyheader {
 
 #define iflag_hue_per_vertex	0x00004000	/* INTERNAL USE ONLY! */
 
-#define iflag_no_mip				0x00008000	/* Use Index #0 */
+#define iflag_no_mip			0x00008000	/* Use Index #0 */
 
 #define iflag_zbuffer_r			0x00010000	/* Z-Buffer, Read-Only */
 
-#define iflag_linear				0x00020000	/* Linear Interpolation */
+#define iflag_linear			0x00020000	/* Linear Interpolation */
 
 #define iflag_sortnearz			0x00040000	/* Use minz for depth value */
 
-#define iflag_detail				0x00080000	/* Item can be range outcoded */
+#define iflag_detail			0x00080000	/* Item can be range outcoded */
 #define iflag_dtest_not_done	0x00100000	/* Ensure just one range test */
 
 #define iflag_augz_planetest	0x00200000	/* Plane Test to help build tree */
 
 #define iflag_tx2dor3d			0x00400000	/* Decide each frame which it is */
 
-#define iflag_linear_s			0x00800000	/* Subdivided linear scans for
-															3d textured polygons */
+#define iflag_linear_s			0x00800000	/* Subdivided linear scans for 3d textured polygons */
 
 #define iflag_gsort_ptest		0x01000000	/* Global sort, use plane test */
 
@@ -538,7 +483,7 @@ typedef struct polyheader {
 
 #define iflag_light_corona		0x20000000 /* For use by the placed light strategy */
 
-#define iflag_txanim				0x40000000	/* UV array has animation data */
+#define iflag_txanim			0x40000000	/* UV array has animation data */
 
 // Taken this flag
 #if SupportViewports && 0
@@ -546,57 +491,6 @@ typedef struct polyheader {
 #endif
 
 #define iflag_cwise				0x80000000	/* Polygon is clockwise */
-
-/*
-
- Item Extension
-
-*/
-
-typedef struct itemextension {
-
-	int ie_nindex;
-
-	int ie_nx;		/* view space normal */
-	int ie_ny;
-	int ie_nz;
-
-	int ie_popx;	/* view space pop */
-	int ie_popy;
-	int ie_popz;
-
-	int ie_d;		/* distance of plane from view */
-
-	int ie_bigz;
-	int ie_smallz;
-	int ie_midz;
-
-	int ie_axis_state;
-
-	int ie_numpoints;
-	int *ie_points_array;
-
-} ITEMEXTENSION;
-
-
-/*
-
- Poly Header for Extended Items
-
-*/
-
-typedef struct polyheader_ie {
-
-	int PolyItemType;
-//	ITEMEXTENSION *PolyItemExtension;
-	int PolyFlags;
-	int PolyColour;
-	int Poly1stPt;
-	ITEMEXTENSION *PolyItemExtension;
-
-} POLYHEADER_IE;
-
-
 
 #if SupportViewports
 
@@ -643,60 +537,25 @@ typedef struct polyheader_vp {
 
 #endif	/* StandardShapeLanguage */
 
-
-typedef enum {
-
-	axis_yz,		/* x axis plane - normal x biggest */
-	axis_xz,		/* y axis plane - normal y biggest */
-	axis_xy		/* z axis plane - normal z biggest */
-
-} AXISSTATES;
-
-
-/*
-
- Structure for Item Size Sort
-
-*/
-
-typedef struct itemsizeblock {
-
-	struct itemsizeblock *isb_lower;
-	struct itemsizeblock *isb_higher;
-	int *isb_itemptr;
-	int isb_itemsize;
-
-} ITEMSIZEBLOCK;
-
-
-
-
 /*
 
  Texels
 
 */
 
-typedef struct texel {
-
+typedef struct texel 
+{
 	int uuu;
 	int vee;
 
 } TEXEL;
 
-typedef struct texelf {
-
+typedef struct texelf 
+{
 	float uuuf;
 	float veef;
 
 } TEXELF;
-
-typedef struct texelgtx3d {
-
-	float uuuf;
-	float veef;
-
-} TEXELGTX3D;
 
 
 /*
@@ -750,8 +609,8 @@ typedef struct imageheader
 #endif	/* StandardShapeLanguage */
 
 
-typedef struct imageextents {
-
+typedef struct imageextents 
+{
 	int u_low;
 	int v_low;
 
@@ -761,8 +620,8 @@ typedef struct imageextents {
 } IMAGEEXTENTS;
 
 
-typedef struct imagepolyextents {
-
+typedef struct imagepolyextents 
+{
 	int x_low;
 	int y_low;
 
@@ -790,17 +649,17 @@ typedef struct imagepolyextents {
 
 */
 
-typedef struct txanimheader {
-
+typedef struct txanimheader 
+{
 	int txa_flags;
 	int txa_state;
 	int txa_numframes;
 	int txa_currentframe;
 	int txa_maxframe;
 	int txa_speed;
-	int txa_anim_id;	  //this will be the same for all sequences on a given polygon
+	int txa_anim_id;			//this will be the same for all sequences on a given polygon
 
-	int txa_num_mvs_images;	/* Multi-View Sprites - TOTAL number of images */
+	int txa_num_mvs_images;		/* Multi-View Sprites - TOTAL number of images */
 	int txa_eulerxshift;		/* Multi-View Sprites, scale Euler X for index */
 	int txa_euleryshift;		/* As above, for Euler Y */
 
@@ -824,8 +683,8 @@ typedef struct txanimheader {
 
 */
 
-typedef struct txanimframe {
-
+typedef struct txanimframe 
+{
 	int txf_flags;
 	int txf_scale;
 	int txf_scalex;
@@ -842,8 +701,8 @@ typedef struct txanimframe {
 
 /* For a multi-view sprite use this structure instead */
 
-typedef struct txanimframe_mvs {
-
+typedef struct txanimframe_mvs 
+{
 	int txf_flags;
 	int txf_scale;
 	int txf_scalex;
@@ -859,7 +718,6 @@ typedef struct txanimframe_mvs {
 
 } TXANIMFRAME_MVS;
 
-
 /*
 
  Display Block Texture Animation Control Block
@@ -869,8 +727,8 @@ typedef struct txanimframe_mvs {
 
 */
 
-typedef struct txactrlblk {
-
+typedef struct txactrlblk 
+{
 	int tac_flags;
 	int tac_item;
 	int tac_sequence;
@@ -892,8 +750,8 @@ typedef struct txactrlblk {
 
 */
 
-typedef enum {
-
+typedef enum 
+{
 	I_ShapePoints,
 	I_ShapeProject,
 	I_ShapeNormals,

@@ -9,6 +9,7 @@
 #include "bh_types.h"
 #include "usr_io.h"
 #include "font.h"
+#include "renderer.h"
 
 /* JH 27/1/97 */
 extern "C" {

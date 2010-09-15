@@ -1,7 +1,7 @@
 #ifndef _included_d3_func_h_
 #define _included_d3_func_h_
 
-#ifdef WIN32
+//#ifdef WIN32
 #include <d3d9.h>
 #include <d3dx9.h>
 #include <Dxerr.h>
@@ -58,6 +58,8 @@ bool R_CreateVertexShader(const std::string &fileName, struct vertexShader_t &ve
 bool R_CreatePixelShader(const std::string &fileName, struct pixelShader_t &pixelShader);
 bool R_SetVertexShader(vertexShader_t &vertexShader);
 bool R_SetPixelShader(pixelShader_t &pixelShader);
+void R_ReleaseVertexShader(r_VertexShader &vertexShader);
+void R_ReleasePixelShader(r_PixelShader &pixelShader);
 
 void R_NextVideoMode();
 void R_PreviousVideoMode();
@@ -73,6 +75,21 @@ extern D3DVERTEXELEMENT9 declMain[];
 extern D3DVERTEXELEMENT9 declOrtho[];
 extern D3DVERTEXELEMENT9 declFMV[];
 extern D3DVERTEXELEMENT9 declTallFontText[];
+
+struct R_MATRIX
+{
+	union
+	{
+		struct
+		{
+			float _11, _12, _13, _14;
+			float _21, _22, _23, _24;
+			float _31, _32, _33, _34;
+			float _41, _42, _43, _44;
+		};
+		float m[4][4];
+	};
+};
 
 /*
   Direct3D globals
@@ -98,23 +115,6 @@ typedef struct _D3DTVERTEX
 } D3DLVERTEX;
 
 #define D3DFVF_LVERTEX	(D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_SPECULAR | D3DFVF_TEX1)
-
-typedef struct POINTSPRITEVERTEX
-{
-	float x;
-	float y;
-	float z;
-
-	float size;
-
-	DWORD colour;
-
-	float u;
-	float v;
-
-} POINTSPRITEVERTEX;
-
-#define D3DFVF_POINTSPRITEVERTEX (D3DFVF_XYZ | D3DFVF_PSIZE | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 
 typedef struct ORTHOVERTEX
 {
@@ -244,12 +244,10 @@ void SetTransforms();
 
 extern uint32_t NO_TEXTURE;
 
-D3DINFO GetD3DInfo();
-char* GetDeviceName();
 #define RGB_MAKE	D3DCOLOR_XRGB
 
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 
-#endif /* ifdef WIN32 */
+//#endif /* ifdef WIN32 */
 
 #endif /* ! _included_d3_func_h_ */

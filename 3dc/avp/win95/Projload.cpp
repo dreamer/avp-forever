@@ -925,8 +925,6 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 						kfd->frame_has_extended_data=1;
 						kfd_extended->sound=sound;
 						kfd_extended->flags=flags;
-
-						
 					}
 					else
 					{
@@ -1411,7 +1409,6 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 		
 		if (svic)
 		{
-		
 			mainshapelist[osnp->sh_num]->sh_extraitemdata = (EXTRAITEMDATA *)PoolAllocateMem(12 * svic->num_vertices);
 			if (!mainshapelist[osnp->sh_num]->sh_extraitemdata)
 			{
@@ -1847,7 +1844,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 			return FALSE;
 		}
 		
-		MainScene.sm_marray = (MODULE **) PoolAllocateMem (sizeof(MODULE) * (num_modules + 3));
+		MainScene.sm_marray = (MODULE **) PoolAllocateMem (sizeof(MODULE*) * (num_modules + 3)); // bjd - x64
 		if (!MainScene.sm_marray)
 		{
 			memoryInitialisationFailure = 1;

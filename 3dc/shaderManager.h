@@ -55,6 +55,7 @@ class EffectManager
 		EffectManager();
 		effectID_t AddEffect(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName);
 		bool Set(effectID_t effectID);
+		void Release(effectID_t effectID);
 };
 
 // keep these separate
@@ -63,8 +64,36 @@ struct vertexShader_t
 	bool 			isValid;
 	uint32_t		refCount;
 	r_VertexShader	vertexShader;
+#ifndef _XBOX
 	LPD3DXCONSTANTTABLE	constantTable;
+#endif
 	std::string 	vertexShaderName;
+};
+
+// class version of above
+class VertexShader
+{
+	public:
+		bool 			isValid;
+		int32_t			refCount;
+		r_VertexShader	vertexShader;
+#ifndef _XBOX
+		LPD3DXCONSTANTTABLE	constantTable;
+#endif
+		std::string 	vertexShaderName;
+	
+		VertexShader():
+			isValid(false),
+			refCount(0),
+			vertexShader(0)
+//			constantTable(0)
+		{
+		}
+
+		// pass values to the vertex shader (similar to d3d constant table stuff)
+		bool SetInt(const char* constant, uint32_t n);
+		bool SetMatrix(const char* constant, struct R_MATRIX &matrix);
+		void Release();
 };
 
 struct pixelShader_t

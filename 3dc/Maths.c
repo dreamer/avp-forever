@@ -170,7 +170,6 @@ int OutcodeVectorDistance(VECTORCH *v1, VECTORCH *v2, int d)
 
 void GetNormalVector(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3)
 {
-
 	v3->vx = v1->vx - v2->vx;
 	v3->vy = v1->vy - v2->vy;
 	v3->vz = v1->vz - v2->vz;
@@ -187,7 +186,6 @@ void GetNormalVector(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3)
 
 void Renormalise(VECTORCH *nvector)
 {
-
 	int m;
 	int xsq, ysq, zsq;
 
@@ -253,7 +251,6 @@ int FindShift32(int value, int limit)
 
 int MaxInt(int *iarray, int iarraysize)
 {
-
 	int imax = smallint;
 	int i;
 
@@ -277,7 +274,6 @@ int MaxInt(int *iarray, int iarraysize)
 
 int MinInt(int *iarray, int iarraysize)
 {
-
 	int imin = bigint;
 	int i;
 
@@ -405,7 +401,6 @@ void CreateEulerMatrix(e, m1)
 	m1->mat33=MUL_FIXED(cx,cy);
 
 #endif
-
 }
 
 
@@ -419,7 +414,6 @@ void CreateEulerVector(EULER *e, VECTORCH *v)
 {
 	int t, sx, sy, sz, cx, cy, cz;
 
-
 	sx = GetSin(e->EulerX);
 	sy = GetSin(e->EulerY);
 	sz = GetSin(e->EulerZ);
@@ -428,25 +422,19 @@ void CreateEulerVector(EULER *e, VECTORCH *v)
 	cy = GetCos(e->EulerY);
 	cz = GetCos(e->EulerZ);
 
-
 	/* x = -sy*cz + sx*cy*sz */
-
 	v->vx  = MUL_FIXED(-sy, cz);
 	t      = MUL_FIXED(sx, cy);
 	t      = MUL_FIXED(t, sz);
 	v->vx += t;
 
-
 	/* y = sy*sz + sx*cy*cz */
-
 	v->vy  = MUL_FIXED(sy, sz);
 	t      = MUL_FIXED(sx, cy);
 	t      = MUL_FIXED(t, cz);
 	v->vy += t;
 
-
 	/* z = cx*cy */
-
 	v->vz = MUL_FIXED(cx,cy);
 }
 

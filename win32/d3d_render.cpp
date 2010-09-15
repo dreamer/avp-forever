@@ -41,7 +41,6 @@ extern D3DXMATRIX matOrtho2;
 extern D3DXMATRIX matProjection;
 extern D3DXMATRIX matIdentity;
 extern D3DXMATRIX matViewPort;
-
 // externs
 extern D3DINFO d3d;
 extern uint32_t fov;
@@ -1148,20 +1147,17 @@ extern "C" {
 
 extern int SpecialFXImageNumber;
 
-extern "C"
+void TransformToViewspace(VECTORCHF *vector)
 {
-	void TransformToViewspace(VECTORCHF *vector)
-	{
-		D3DXVECTOR3 output;
-		D3DXVECTOR3 input(vector->vx, vector->vy, vector->vz);
+	D3DXVECTOR3 output;
+	D3DXVECTOR3 input(vector->vx, vector->vy, vector->vz);
 
-		D3DXVec3TransformCoord(&output, &input, &viewMatrix);
+	D3DXVec3TransformCoord(&output, &input, &viewMatrix);
 
-		vector->vx = output.x;
-		vector->vy = output.y;
-		vector->vz = output.z;
-	}
-} // extern C
+	vector->vx = output.x;
+	vector->vy = output.y;
+	vector->vz = output.z;
+}
 
 void UpdateViewMatrix(float *viewMat)
 {
@@ -2239,7 +2235,6 @@ void PostLandscapeRendering()
 		 	D3D_DrawWaterPatch(x, y, z+MeshZScale);
 		 	D3D_DrawWaterPatch(x+MeshXScale, y, z+MeshZScale);
 		}
-
 	}
 	else if (!_stricmp(LevelName, "genshd1"))
 	{

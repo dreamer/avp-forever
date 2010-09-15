@@ -25,7 +25,14 @@
 #pragma once
 
 #include <stdint.h>
+
+#ifndef _XBOX
 #include <windows.h>
+#endif
+
+#ifdef _XBOX
+#include <xtl.h>
+#endif
 
 class RingBuffer
 {
