@@ -1207,13 +1207,6 @@ void DrawCoronas()
 
 	uint32_t numVertsBackup = RenderPolygon.NumberOfVertices;
 
-	R_SetTexture(0, SpecialFXImageNumber);
-
-	d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
-	d3d.lpD3DDevice->SetPixelShader(d3d.pixelShader);
-
-	DisableZBufferWrites();
-
 	RCOLOR colour;
 	float RecipW, RecipH;
 
@@ -1277,7 +1270,7 @@ void DrawCoronas()
 		tempVec.y = coronaArray[i].coronaPoint.vy;
 		tempVec.z = coronaArray[i].coronaPoint.vz;
 
-		// projection transform
+		// already view transformed, do projection transform
 		D3DXVec3TransformCoord(&newVec, &tempVec, &matProjection);
 
 		// do viewport transform on this
@@ -1290,59 +1283,46 @@ void DrawCoronas()
 		uint32_t sizeX = (ScreenDescriptorBlock.SDB_Width<<13)/Global_VDB_Ptr->VDB_ProjX;
 		uint32_t sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13,87381)/Global_VDB_Ptr->VDB_ProjY;
 
+		orthoList->AddItem(4, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
+
 		// bottom left
-		ortho[0].x = WPos2DC(tempVec.x - size);
-		ortho[0].y = HPos2DC(tempVec.y + size);
-		ortho[0].z = 1.0f;
-		ortho[0].colour = colour;
-		ortho[0].u = 192.0f * RecipW;
-		ortho[0].v = 63.0f * RecipH;
+		orthoVertex[orthoVBOffset].x = WPos2DC(tempVec.x - size);
+		orthoVertex[orthoVBOffset].y = HPos2DC(tempVec.y + size);
+		orthoVertex[orthoVBOffset].z = 1.0f;
+		orthoVertex[orthoVBOffset].colour = colour;
+		orthoVertex[orthoVBOffset].u = 192.0f * RecipW;
+		orthoVertex[orthoVBOffset].v = 63.0f * RecipH;
+		orthoVBOffset++;
 
 		// top left
-		ortho[1].x = WPos2DC(tempVec.x - size);
-		ortho[1].y = HPos2DC(tempVec.y - size);
-		ortho[1].z = 1.0f;
-		ortho[1].colour = colour;
-		ortho[1].u = 192.0f * RecipW;
-		ortho[1].v = 0.0f * RecipH;
+		orthoVertex[orthoVBOffset].x = WPos2DC(tempVec.x - size);
+		orthoVertex[orthoVBOffset].y = HPos2DC(tempVec.y - size);
+		orthoVertex[orthoVBOffset].z = 1.0f;
+		orthoVertex[orthoVBOffset].colour = colour;
+		orthoVertex[orthoVBOffset].u = 192.0f * RecipW;
+		orthoVertex[orthoVBOffset].v = 0.0f * RecipH;
+		orthoVBOffset++;
 
 		// bottom right
-		ortho[2].x = WPos2DC(tempVec.x + size);
-		ortho[2].y = HPos2DC(tempVec.y + size);
-		ortho[2].z = 1.0f;
-		ortho[2].colour = colour;
-		ortho[2].u = 255.0f * RecipW;
-		ortho[2].v = 63.0f * RecipH;
+		orthoVertex[orthoVBOffset].x = WPos2DC(tempVec.x + size);
+		orthoVertex[orthoVBOffset].y = HPos2DC(tempVec.y + size);
+		orthoVertex[orthoVBOffset].z = 1.0f;
+		orthoVertex[orthoVBOffset].colour = colour;
+		orthoVertex[orthoVBOffset].u = 255.0f * RecipW;
+		orthoVertex[orthoVBOffset].v = 63.0f * RecipH;
+		orthoVBOffset++;
 
 		// top right
-		ortho[3].x = WPos2DC(tempVec.x + size);
-		ortho[3].y = HPos2DC(tempVec.y - size);
-		ortho[3].z = 1.0f;
-		ortho[3].colour = colour;
-		ortho[3].u = 255.0f * RecipW;
-		ortho[3].v = 0.0f * RecipH;
+		orthoVertex[orthoVBOffset].x = WPos2DC(tempVec.x + size);
+		orthoVertex[orthoVBOffset].y = HPos2DC(tempVec.y - size);
+		orthoVertex[orthoVBOffset].z = 1.0f;
+		orthoVertex[orthoVBOffset].colour = colour;
+		orthoVertex[orthoVBOffset].u = 255.0f * RecipW;
+		orthoVertex[orthoVBOffset].v = 0.0f * RecipH;
+		orthoVBOffset++;
 
-		d3d.lpD3DDevice->SetVertexShader(d3d.orthoVertexShader);
-		orthoConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
-
-		ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType);
-
-		LastError = d3d.lpD3DDevice->SetVertexDeclaration(d3d.orthoVertexDecl);
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-		}
-
-		// draw the quad
-		LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, ortho, sizeof(ORTHOVERTEX));
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-			OutputDebugString("DrawPrimitiveUP failed\n");
-		}
+		orthoList->CreateOrthoIndices(orthoIndex);
 	}
-
-	EnableZBufferWrites();
 
 	coronaArray.clear();
 
