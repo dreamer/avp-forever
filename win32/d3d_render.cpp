@@ -1262,7 +1262,7 @@ void DrawCoronas()
 						);
 		}
 
-		// transform our coronas world position into projection then viewport space
+		// transform our coronas worldview position into projection then viewport space
 		D3DXVECTOR3 tempVec;
 		D3DXVECTOR3 newVec;
 
@@ -1464,7 +1464,6 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 
 		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
 		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
-
 		vb++;
 	}
 
@@ -2576,14 +2575,16 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 
 void D3D_DrawMoltenMetalMesh_Unclipped(void)
 {
-	return; // bjd - TODO
-#if 0
+//	return; // bjd - TODO
+#if 1
 	VECTORCH *point = MeshVertex;
 	VECTORCH *pointWS = MeshWorldVertex;
 
 	// outputs 450 triangles with each run of the loop
 	// 450 triangles has 3 * 450 vertices which = 1350
 //	CheckVertexBuffer(256, currentWaterTexture, TRANSLUCENCY_NORMAL);
+
+#if 1
 	mainList->AddItem(256, currentWaterTexture, TRANSLUCENCY_NORMAL);
 
 	for (uint32_t i = 0; i < 256; i++)
@@ -2620,14 +2621,24 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 		point++;
 		pointWS++;
 	}
-
+#endif
 	/* CONSTRUCT POLYS */
 	for (uint32_t x = 0; x < 15; x++)
 	{
 		for (uint32_t y = 0; y < 15; y++)
 		{
-			OUTPUT_TRIANGLE(0+x+(16*y),1+x+(16*y),16+x+(16*y), 256);
-			OUTPUT_TRIANGLE(1+x+(16*y),17+x+(16*y),16+x+(16*y), 256);
+//			OUTPUT_TRIANGLE(0+x+(16*y),1+x+(16*y),16+x+(16*y), 256);
+//			OUTPUT_TRIANGLE(1+x+(16*y),17+x+(16*y),16+x+(16*y), 256);
+
+			mainList->AddTriangle(mainIndex, 0+x+(16*y),1+x+(16*y),16+x+(16*y), 256);
+			mainList->AddTriangle(mainIndex, 1+x+(16*y),17+x+(16*y),16+x+(16*y), 256);
+/*
+			char buf[200];
+			sprintf(buf, "call 1: %d %d %d\n", 0+x+(16*y), 1+x+(16*y), 16+x+(16*y));
+			OutputDebugString(buf);
+			sprintf(buf, "call 2: %d %d %d\n", 1+x+(16*y), 17+x+(16*y), 16+x+(16*y));
+			OutputDebugString(buf);
+*/
 		}
 	}
 #endif

@@ -47,6 +47,11 @@ RenderList::~RenderList()
 	// nothing to do here
 }
 
+void RenderList::AddTriangle(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n)
+{
+	AddIndices(indexArray, a,b,c, n);
+}
+
 // we use this function to create the indices needed to render our screen space quads. 
 // We generate the indices differently here than the engine itself does for quads 
 //(which it uses for general level geometry.

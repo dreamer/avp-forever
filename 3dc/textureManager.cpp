@@ -234,15 +234,6 @@ void Tex_ReloadDynamicTextures()
 
 void Tex_GetDimensions(uint32_t textureID, uint32_t &width, uint32_t &height)
 {
-	// the actual "no texture" texture is 1x1 resolution
-/*
-	if (textureID == NO_TEXTURE)
-	{
-		width = 0;
-		height = 0;
-		return;
-	}
-*/
 	width  = textureList[textureID].width;
 	height = textureList[textureID].height;
 }
