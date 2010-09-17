@@ -2573,45 +2573,21 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
 }
 
-void D3D_DrawMoltenMetalMesh_Unclipped(void)
+// draws water etc
+void D3D_DrawMoltenMetalMesh_Unclipped()
 {
-//	return; // bjd - TODO
-#if 1
 	VECTORCH *point = MeshVertex;
 	VECTORCH *pointWS = MeshWorldVertex;
 
-	// outputs 450 triangles with each run of the loop
-	// 450 triangles has 3 * 450 vertices which = 1350
-//	CheckVertexBuffer(256, currentWaterTexture, TRANSLUCENCY_NORMAL);
-
-#if 1
 	mainList->AddItem(256, currentWaterTexture, TRANSLUCENCY_NORMAL);
 
 	for (uint32_t i = 0; i < 256; i++)
 	{
-		if (point->vz <= 1)
-			point->vz = 1;
-/*
-		int x = (point->vx*(Global_VDB_Ptr->VDB_ProjX+1))/point->vz+Global_VDB_Ptr->VDB_CentreX;
-		int y = (point->vy*(Global_VDB_Ptr->VDB_ProjY+1))/point->vz+Global_VDB_Ptr->VDB_CentreY;
-//			textprint("%d, %d\n",x,y);
-
-		int z = point->vz + HeadUpDisplayZOffset;
-		float rhw = 1.0f / (float)point->vz;
-		float zf = 1.0f - Zoffset * ZNear/(float)z;
-
-	  	float oneOverZ = ((float)(point->vz)-ZNear)/(float)(point->vz);
-
-		mainVertex[vb].sx = (float)x;
-		mainVertex[vb].sy = (float)y;
-		mainVertex[vb].sz = zf;
-		mainVertex[vb].rhw = rhw;
-*/
 		mainVertex[vb].sx = (float)point->vx;
 		mainVertex[vb].sy = (float)-point->vy;
 		mainVertex[vb].sz = (float)point->vz;
 
-	   	mainVertex[vb].color = MeshVertexColour[i];
+		mainVertex[vb].color = MeshVertexColour[i];
 		mainVertex[vb].specular = 0;
 
 		mainVertex[vb].tu = pointWS->vx*WaterUScale+(1.0f/256.0f);
@@ -2621,27 +2597,15 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 		point++;
 		pointWS++;
 	}
-#endif
-	/* CONSTRUCT POLYS */
+
 	for (uint32_t x = 0; x < 15; x++)
 	{
 		for (uint32_t y = 0; y < 15; y++)
 		{
-//			OUTPUT_TRIANGLE(0+x+(16*y),1+x+(16*y),16+x+(16*y), 256);
-//			OUTPUT_TRIANGLE(1+x+(16*y),17+x+(16*y),16+x+(16*y), 256);
-
 			mainList->AddTriangle(mainIndex, 0+x+(16*y),1+x+(16*y),16+x+(16*y), 256);
 			mainList->AddTriangle(mainIndex, 1+x+(16*y),17+x+(16*y),16+x+(16*y), 256);
-/*
-			char buf[200];
-			sprintf(buf, "call 1: %d %d %d\n", 0+x+(16*y), 1+x+(16*y), 16+x+(16*y));
-			OutputDebugString(buf);
-			sprintf(buf, "call 2: %d %d %d\n", 1+x+(16*y), 17+x+(16*y), 16+x+(16*y));
-			OutputDebugString(buf);
-*/
 		}
 	}
-#endif
 }
 
 void ThisFramesRenderingHasBegun(void)
