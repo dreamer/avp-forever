@@ -3963,7 +3963,7 @@ void AddHierarchicalShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 		shapeinstrptr = shapeheaderptr->sh_instruction;
 
 		/* 	setup the rotated points array */
-		if( (dptr->SpecialFXFlags & SFXFLAG_MELTINGINTOGROUND)
+		if ((dptr->SpecialFXFlags & SFXFLAG_MELTINGINTOGROUND)
 		  &&(dptr->ObFlags2 <= ONE_FIXED) )
 		{
 			SquishPoints(shapeinstrptr);
@@ -4960,9 +4960,17 @@ void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerti
 	/* copy the data to the list for processing later */
 	int i = RenderPolygon.NumberOfVertices;
 	int maxZ = 0;
+	int breaker = 0;
 	RENDERVERTEX *vertexPtr = TranslucentPolygons[CurrentNumberOfTranslucentPolygons].Vertices;
 
 	TranslucentPolygons[CurrentNumberOfTranslucentPolygons].NumberOfVertices = i;
+
+	if ((renderVerticesPtr->X == 587)
+	&& (renderVerticesPtr->Y == 550))
+
+	{
+		int breaker = 123;
+	}
 
 	do
 	{

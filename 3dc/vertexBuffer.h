@@ -34,7 +34,7 @@ class VertexBuffer
 
 		// constructor
 		VertexBuffer():
-			vertexBuffer(0),
+			//vertexBuffer(0),
 			size(0),
 			sizeInBytes(0),
 			usage(USAGE_DYNAMIC),
@@ -60,7 +60,7 @@ class VertexBuffer
 		uint32_t VertexBuffer::GetCapacity() const { return size; }
 
 	private:
-		r_VertexBuffer	*vertexBuffer;
+		r_VertexBuffer	vertexBuffer;
 		uint32_t		size;
 		uint32_t		sizeInBytes;
 		enum R_USAGE	usage;

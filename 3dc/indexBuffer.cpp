@@ -34,7 +34,7 @@ bool IndexBuffer::Create(uint32_t size, enum R_USAGE usage)
 	this->size = size;
 	this->usage = usage;
 
-	return R_CreateIndexBuffer(this->size, this->usage, &this->indexBuffer);
+	return R_CreateIndexBuffer(this->size, this->usage, this->indexBuffer);
 }
 
 bool IndexBuffer::Release()

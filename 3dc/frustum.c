@@ -1342,8 +1342,6 @@ void TestVerticesWith_Norm_Frustum(void)
 			vertexFlag |= INSIDE_FRUSTUM_NY_PLANE;
 
 #endif
-
-
 		FrustumFlagForVertex[v] = vertexFlag;
 	}
 }

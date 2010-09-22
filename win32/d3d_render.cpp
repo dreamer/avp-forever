@@ -28,12 +28,12 @@ extern void EnableZBufferWrites();
 
 // set to 'null' texture initially
 uint32_t currentWaterTexture = NO_TEXTURE;
-
+/*
 LPD3DXCONSTANTTABLE	vertexConstantTable = NULL;
 LPD3DXCONSTANTTABLE	orthoConstantTable = NULL;
 LPD3DXCONSTANTTABLE	fmvConstantTable = NULL;
 LPD3DXCONSTANTTABLE	cloudConstantTable = NULL;
-
+*/
 D3DXMATRIX viewMatrix;
 
 extern D3DXMATRIX matOrtho;
@@ -43,7 +43,6 @@ extern D3DXMATRIX matIdentity;
 extern D3DXMATRIX matViewPort;
 // externs
 extern D3DINFO d3d;
-extern uint32_t fov;
 
 bool CreateVolatileResources();
 bool ReleaseVolatileResources();
@@ -273,15 +272,17 @@ bool ExecuteBuffer()
 	d3d.mainIB->Set();
 
 	// set main shaders to active
-	d3d.effectSystem->Set(d3d.mainEffect);
+	d3d.effectSystem->SetActive(d3d.mainEffect);
 
 	#ifndef USE_D3DVIEWTRANSFORM
 		D3DXMatrixIdentity(&viewMatrix); // we want to use the identity matrix in this case
 	#endif
 
 	// we don't need world matrix here as avp has done all the world transforms itself
-	D3DXMATRIXA16 matWorldViewProj = viewMatrix * matProjection;
-	vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
+//	D3DXMATRIXA16 matWorldViewProj = viewMatrix * matProjection;
+	R_MATRIX matWorldViewProj = viewMatrix * matProjection;
+//	vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
+	d3d.effectSystem->SetMatrix(d3d.mainEffect, "WorldViewProj", matWorldViewProj);
 
 	// draw our main list (level geometry, player weapon etc)
 	mainList->Draw();
@@ -292,7 +293,8 @@ bool ExecuteBuffer()
 		d3d.particleVB->Set();
 		d3d.particleIB->Set();
 
-		vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matProjection);
+//		vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matProjection);
+		d3d.effectSystem->SetMatrix(d3d.mainEffect, "WorldViewProj", matProjection);
 
 		DisableZBufferWrites();
 		ChangeTextureAddressMode(TEXTURE_CLAMP);
@@ -316,10 +318,11 @@ bool ExecuteBuffer()
 		}
 
 		// set orthographic projection shaders as active
-		d3d.effectSystem->Set(d3d.orthoEffect);
+		d3d.effectSystem->SetActive(d3d.orthoEffect);
 
 		// pass the orthographicp projection matrix to the vertex shader
-		orthoConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
+//		orthoConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
+		d3d.effectSystem->SetMatrix(d3d.orthoEffect, "WorldViewProj", matOrtho);
 
 		// daw the ortho list
 		orthoList->Draw();
@@ -524,7 +527,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 	d3d.lpD3DDevice->SetVertexShader(d3d.fmvVertexShader);
 	d3d.lpD3DDevice->SetPixelShader(d3d.fmvPixelShader);
 
-	fmvConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
+//	fmvConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
 
 	ChangeTextureAddressMode(TEXTURE_CLAMP);
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
@@ -634,7 +637,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 	float x2 = WPos2DC(topX + charWidth);
 	float y2 = HPos2DC(topY + charHeight);
 
-#if 1
+#if 0
 
 	R_SetTexture(0, textureID);
 	R_SetTexture(1, AVPMENUGFX_CLOUDY);
@@ -643,9 +646,9 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 	d3d.lpD3DDevice->SetVertexShader(d3d.cloudVertexShader);
 	d3d.lpD3DDevice->SetPixelShader(d3d.cloudPixelShader);
 
-	cloudConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
-	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "CloakingPhase", CloakingPhase);
-	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "pX", topX);
+//	cloudConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
+//	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "CloakingPhase", CloakingPhase);
+//	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "pX", topX);
 	
 	if (FAILED(LastError))
 	{
@@ -704,7 +707,8 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 	}
 
 #else // turned off for testing
-	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
+//	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
+	orthoList->AddItem(4, textureID, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 	// bottom left
 	orthoVertex[orthoVBOffset].x = x1;
@@ -741,6 +745,8 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 	orthoVertex[orthoVBOffset].u = (float)((texU + charWidth) * RecipW);
 	orthoVertex[orthoVBOffset].v = (float)((texV) * RecipH);
 	orthoVBOffset++;
+
+	orthoList->CreateOrthoIndices(orthoIndex);
 
 #endif
 }
@@ -2566,7 +2572,6 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 
 		mainVertex[vb].tu = ((float)vertices->U) * RecipW;
 		mainVertex[vb].tv = ((float)vertices->V) * RecipH;
-
 		vb++;
 	}
 
@@ -2813,12 +2818,13 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 #if 0 // fixme
 //	CheckVertexBuffer(255, NO_TEXTURE, TRANSLUCENCY_OFF);
 
-	CheckOrthoBuffer(255, NO_TEXTURE, TRANSLUCENCY_OFF, TEXTURE_CLAMP, FILTERING_BILINEAR_ON);
+//	CheckOrthoBuffer(255, NO_TEXTURE, TRANSLUCENCY_OFF, TEXTURE_CLAMP, FILTERING_BILINEAR_ON);
 
 	for (uint32_t i = 0; i < 255; )
 	{
 		/* this'll do.. */
 //		CheckVertexBuffer(/*1530*/4, NO_TEXTURE, TRANSLUCENCY_OFF);
+		orthoList->AddItem(4, NO_TEXTURE, TRANSLUCENCY_OFF, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 		unsigned int colour = 0;
 		unsigned int c = 0;

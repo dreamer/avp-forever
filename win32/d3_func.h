@@ -6,11 +6,30 @@
 #include <d3dx9.h>
 #include <Dxerr.h>
 
-typedef IDirect3DVertexBuffer9	r_VertexBuffer;
-typedef IDirect3DIndexBuffer9	r_IndexBuffer;
-typedef IDirect3DTexture9		*r_Texture;		// keep this as pointer type?
-typedef IDirect3DVertexShader9	*r_VertexShader;
-typedef IDirect3DPixelShader9	*r_PixelShader;
+typedef D3DXMATRIX R_MATRIX;
+
+struct r_VertexBuffer
+{
+	IDirect3DVertexBuffer9	*vertexBuffer;
+};
+
+struct r_IndexBuffer
+{
+	IDirect3DIndexBuffer9	*indexBuffer;
+};
+
+typedef IDirect3DTexture9	*r_Texture;		// keep this as pointer type?
+
+struct r_VertexShader
+{
+	IDirect3DVertexShader9	*vertexShader;
+	ID3DXConstantTable		*constantTable;
+};
+
+struct r_PixelShader
+{
+	IDirect3DPixelShader9 *pixelShader;
+};
 
 #include "aw.h"
 #include <stdint.h>
@@ -25,21 +44,21 @@ bool R_BeginScene();
 bool R_EndScene();
 
 // vertex buffer functions
-bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer **vertexBuffer);
-bool R_ReleaseVertexBuffer(r_VertexBuffer *vertexBuffer);
-bool R_LockVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage);
-bool R_UnlockVertexBuffer(r_VertexBuffer *vertexBuffer);
-bool R_SetVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t FVFsize);
+bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer &vertexBuffer);
+bool R_ReleaseVertexBuffer(r_VertexBuffer &vertexBuffer);
+bool R_LockVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage);
+bool R_UnlockVertexBuffer(r_VertexBuffer &vertexBuffer);
+bool R_SetVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t FVFsize);
 bool R_DrawPrimitive(uint32_t numPrimitives);
 
 bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives);
 
 // index buffer functions
-bool R_CreateIndexBuffer(uint32_t size, uint32_t usage, r_IndexBuffer **indexBuffer);
-bool R_ReleaseIndexBuffer(r_IndexBuffer *indexBuffer);
-bool R_LockIndexBuffer(r_IndexBuffer *indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage);
-bool R_UnlockIndexBuffer(r_IndexBuffer *indexBuffer);
-bool R_SetIndexBuffer(r_IndexBuffer *indexBuffer);
+bool R_CreateIndexBuffer(uint32_t size, uint32_t usage, r_IndexBuffer &indexBuffer);
+bool R_ReleaseIndexBuffer(r_IndexBuffer &indexBuffer);
+bool R_LockIndexBuffer(r_IndexBuffer &indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage);
+bool R_UnlockIndexBuffer(r_IndexBuffer &indexBuffer);
+bool R_SetIndexBuffer(r_IndexBuffer &indexBuffer);
 
 // texture functions
 bool R_SetTexture(uint32_t stage, uint32_t textureID);
@@ -60,6 +79,7 @@ bool R_SetVertexShader(vertexShader_t &vertexShader);
 bool R_SetPixelShader(pixelShader_t &pixelShader);
 void R_ReleaseVertexShader(r_VertexShader &vertexShader);
 void R_ReleasePixelShader(r_PixelShader &pixelShader);
+bool R_SetVertexShaderMatrix(vertexShader_t &vertexShader, const char* constant, R_MATRIX &matrix);
 
 void R_NextVideoMode();
 void R_PreviousVideoMode();
@@ -76,6 +96,7 @@ extern D3DVERTEXELEMENT9 declOrtho[];
 extern D3DVERTEXELEMENT9 declFMV[];
 extern D3DVERTEXELEMENT9 declTallFontText[];
 
+/*
 struct R_MATRIX
 {
 	union
@@ -90,6 +111,7 @@ struct R_MATRIX
 		float m[4][4];
 	};
 };
+*/
 
 /*
   Direct3D globals

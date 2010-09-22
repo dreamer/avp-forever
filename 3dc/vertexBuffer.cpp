@@ -36,6 +36,7 @@ bool VertexBuffer::Set()
 	return R_SetVertexBuffer(this->vertexBuffer, this->FVFsize);
 }
 
+/*
 bool VertexBuffer::Draw()
 {
 	if (!R_SetVertexBuffer(this->vertexBuffer, this->FVFsize))
@@ -50,6 +51,7 @@ bool VertexBuffer::Draw()
 
 	return true;
 }
+*/
 
 bool VertexBuffer::Lock(void **data)
 {
@@ -91,5 +93,5 @@ bool VertexBuffer::Create(uint32_t size, enum R_FVF fvf, enum R_USAGE usage)
 
 	this->sizeInBytes = this->size * this->FVFsize;
 
-	return R_CreateVertexBuffer(this->sizeInBytes, this->usage, &vertexBuffer);
+	return R_CreateVertexBuffer(this->sizeInBytes, this->usage, vertexBuffer);
 }

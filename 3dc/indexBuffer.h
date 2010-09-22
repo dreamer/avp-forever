@@ -33,7 +33,7 @@ class IndexBuffer
 	public:
 		// constructor
 		IndexBuffer():
-			indexBuffer(0),
+			//indexBuffer(0),
 			size(0),
 			usage(USAGE_DYNAMIC),
 			isLocked(false)
@@ -55,7 +55,7 @@ class IndexBuffer
 		uint32_t IndexBuffer::GetCapacity() const { return size; }
 
 	private:
-		r_IndexBuffer	*indexBuffer;
+		r_IndexBuffer	indexBuffer;
 		uint32_t		size;
 		enum R_USAGE	usage;
 		bool			isLocked;

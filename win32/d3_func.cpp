@@ -86,14 +86,6 @@ D3DVERTEXELEMENT9 declTallFontText[] =
 	D3DDECL_END()
 };
 
-struct D3D_SHADER
-{
-	LPDIRECT3DVERTEXDECLARATION9	vertexDeclaration;
-	LPDIRECT3DVERTEXSHADER9			vertexShader;
-	LPDIRECT3DPIXELSHADER9			pixelShader;
-	LPD3DXCONSTANTTABLE				constantTable;
-};
-
 extern LPD3DXCONSTANTTABLE	vertexConstantTable;
 extern LPD3DXCONSTANTTABLE	orthoConstantTable;
 extern LPD3DXCONSTANTTABLE	fmvConstantTable;
@@ -105,7 +97,7 @@ extern void RenderListDeInit();
 // size of vertex and index buffers
 const uint32_t MAX_VERTEXES = 4096;
 const uint32_t MAX_INDICES = 9216;
-uint32_t fov = 75;
+static uint32_t fov = 75;
 
 static HRESULT LastError;
 uint32_t NO_TEXTURE;
@@ -282,7 +274,7 @@ bool R_EndScene()
 	return true;
 }
 
-bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer **vertexBuffer)
+bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer &vertexBuffer)
 {
 	D3DPOOL vbPool;
 	DWORD	vbUsage;
@@ -302,7 +294,7 @@ bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer **vertex
 			break;
 	}
 
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(size, vbUsage, 0, vbPool, vertexBuffer, NULL);
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(size, vbUsage, 0, vbPool, &vertexBuffer.vertexBuffer, NULL);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't create vertex buffer");
@@ -313,17 +305,17 @@ bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer **vertex
 	return true;
 }
 
-bool R_ReleaseVertexBuffer(r_VertexBuffer *vertexBuffer)
+bool R_ReleaseVertexBuffer(r_VertexBuffer &vertexBuffer)
 {
-	if (vertexBuffer)
+	if (vertexBuffer.vertexBuffer)
 	{
-		vertexBuffer->Release();
+		vertexBuffer.vertexBuffer->Release();
 	}
 
 	return true;
 }
 
-bool R_CreateIndexBuffer(uint32_t size, uint32_t usage, r_IndexBuffer **indexBuffer)
+bool R_CreateIndexBuffer(uint32_t size, uint32_t usage, r_IndexBuffer &indexBuffer)
 {
 	D3DPOOL ibPool;
 	DWORD	ibUsage;
@@ -344,7 +336,7 @@ bool R_CreateIndexBuffer(uint32_t size, uint32_t usage, r_IndexBuffer **indexBuf
 	}
 	
 	// create index buffer
-	LastError = d3d.lpD3DDevice->CreateIndexBuffer(size * 3 * sizeof(WORD), ibUsage, D3DFMT_INDEX16, ibPool, indexBuffer, NULL);
+	LastError = d3d.lpD3DDevice->CreateIndexBuffer(size * 3 * sizeof(WORD), ibUsage, D3DFMT_INDEX16, ibPool, &indexBuffer.indexBuffer, NULL);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't create index buffer");
@@ -355,11 +347,11 @@ bool R_CreateIndexBuffer(uint32_t size, uint32_t usage, r_IndexBuffer **indexBuf
 	return true;
 }
 
-bool R_ReleaseIndexBuffer(r_IndexBuffer *indexBuffer)
+bool R_ReleaseIndexBuffer(r_IndexBuffer &indexBuffer)
 {
-	if (indexBuffer)
+	if (indexBuffer.indexBuffer)
 	{
-		indexBuffer->Release();
+		indexBuffer.indexBuffer->Release();
 	}
 
 	return true;
@@ -466,7 +458,7 @@ bool R_DrawPrimitive(uint32_t numPrimitives)
 	return true;
 }
 
-bool R_LockVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage)
+bool R_LockVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage)
 {
 	DWORD vbFlags = 0;
 	if (usage == USAGE_DYNAMIC)
@@ -474,7 +466,7 @@ bool R_LockVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t offsetToLock, uin
 		vbFlags = D3DLOCK_DISCARD;
 	}
 
-	LastError = vertexBuffer->Lock(offsetToLock, sizeToLock, data, vbFlags);
+	LastError = vertexBuffer.vertexBuffer->Lock(offsetToLock, sizeToLock, data, vbFlags);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't vertex index buffer");
@@ -504,7 +496,7 @@ bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t num
 	return true;
 }
 
-bool R_LockIndexBuffer(r_IndexBuffer *indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage)
+bool R_LockIndexBuffer(r_IndexBuffer &indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage)
 {
 	DWORD ibFlags = 0;
 	if (usage == USAGE_DYNAMIC)
@@ -512,7 +504,7 @@ bool R_LockIndexBuffer(r_IndexBuffer *indexBuffer, uint32_t offsetToLock, uint32
 		ibFlags = D3DLOCK_DISCARD;
 	}
 
-	LastError = indexBuffer->Lock(offsetToLock, sizeToLock, (void**)data, ibFlags);
+	LastError = indexBuffer.indexBuffer->Lock(offsetToLock, sizeToLock, (void**)data, ibFlags);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't lock index buffer");
@@ -523,9 +515,9 @@ bool R_LockIndexBuffer(r_IndexBuffer *indexBuffer, uint32_t offsetToLock, uint32
 	return true;
 }
 
-bool R_SetVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t FVFsize)
+bool R_SetVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t FVFsize)
 {
-	LastError = d3d.lpD3DDevice->SetStreamSource(0, vertexBuffer, 0, FVFsize);
+	LastError = d3d.lpD3DDevice->SetStreamSource(0, vertexBuffer.vertexBuffer, 0, FVFsize);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't set vertex buffer");
@@ -536,9 +528,9 @@ bool R_SetVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t FVFsize)
 	return true;
 }
 
-bool R_SetIndexBuffer(r_IndexBuffer *indexBuffer)
+bool R_SetIndexBuffer(r_IndexBuffer &indexBuffer)
 {
-	LastError = d3d.lpD3DDevice->SetIndices(indexBuffer);
+	LastError = d3d.lpD3DDevice->SetIndices(indexBuffer.indexBuffer);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't set index buffer");
@@ -549,9 +541,9 @@ bool R_SetIndexBuffer(r_IndexBuffer *indexBuffer)
 	return true;
 }
 
-bool R_UnlockVertexBuffer(r_VertexBuffer *vertexBuffer)
+bool R_UnlockVertexBuffer(r_VertexBuffer &vertexBuffer)
 {
-	LastError = vertexBuffer->Unlock();
+	LastError = vertexBuffer.vertexBuffer->Unlock();
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't unlock vertex buffer");
@@ -562,9 +554,9 @@ bool R_UnlockVertexBuffer(r_VertexBuffer *vertexBuffer)
 	return true;
 }
 
-bool R_UnlockIndexBuffer(r_IndexBuffer *indexBuffer)
+bool R_UnlockIndexBuffer(r_IndexBuffer &indexBuffer)
 {
-	LastError = indexBuffer->Unlock();
+	LastError = indexBuffer.indexBuffer->Unlock();
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't unlock index buffer");
@@ -1075,7 +1067,7 @@ static bool CreateVertexDeclaration(const D3DVERTEXELEMENT9* pVertexElements, LP
 	return true;
 }
 
-static bool CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHADER9 *vertexShader, LPD3DXCONSTANTTABLE *constantTable)
+static bool CreateVertexShader(const std::string &fileName, vertexShader_t &vertexShader)
 {
 	LPD3DXBUFFER pErrors = NULL;
 	LPD3DXBUFFER pCode = NULL;
@@ -1100,7 +1092,7 @@ static bool CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHAD
 						0,               // flags
 						&pCode,          // compiled operations
 						&pErrors,        // errors
-						constantTable);  // constants
+						&vertexShader.shader.constantTable);  // constants
 
 	if (FAILED(LastError))
 	{
@@ -1117,13 +1109,13 @@ static bool CreateVertexShader(const std::string &fileName, LPDIRECT3DVERTEXSHAD
 		return false;
 	}
 
-	d3d.lpD3DDevice->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), vertexShader);
+	d3d.lpD3DDevice->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), &vertexShader.shader.vertexShader);
 	pCode->Release();
 
 	return true;
 }
 
-static bool CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER9 *pixelShader)
+static bool CreatePixelShader(const std::string &fileName, pixelShader_t &pixelShader)
 {
 	LPD3DXBUFFER pErrors = NULL;
 	LPD3DXBUFFER pCode = NULL;
@@ -1165,7 +1157,7 @@ static bool CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER
 		return false;
 	}
 
-	d3d.lpD3DDevice->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), pixelShader);
+	d3d.lpD3DDevice->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), &pixelShader.shader.pixelShader);
 	pCode->Release();
 
 	return true;
@@ -1173,20 +1165,54 @@ static bool CreatePixelShader(const std::string &fileName, LPDIRECT3DPIXELSHADER
 
 bool R_CreateVertexShader(const std::string &fileName, vertexShader_t &vertexShader)
 {
-	return CreateVertexShader(fileName, &vertexShader.vertexShader, &vertexShader.constantTable);
+	return CreateVertexShader(fileName, vertexShader);
 }
 
 bool R_CreatePixelShader(const std::string &fileName, pixelShader_t &pixelShader)
 {
-	return CreatePixelShader(fileName, &pixelShader.pixelShader);
+	return CreatePixelShader(fileName, pixelShader);
 }
 
 bool R_SetVertexShader(vertexShader_t &vertexShader)
 {
-	LastError = d3d.lpD3DDevice->SetVertexShader(vertexShader.vertexShader);
+	LastError = d3d.lpD3DDevice->SetVertexShader(vertexShader.shader.vertexShader); // fix this insanity :)
 	if (FAILED(LastError))
 	{
-		Con_PrintError("Can't set vertex shader " + vertexShader.vertexShaderName);
+		Con_PrintError("Can't set vertex shader " + vertexShader.shaderName);
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+bool R_SetVertexShaderMatrix(vertexShader_t &vertexShader, const char* constant, R_MATRIX &matrix)
+{
+	D3DXMATRIX tempMat;
+	tempMat._11 = matrix._11;
+	tempMat._12 = matrix._12;
+	tempMat._13 = matrix._13;
+	tempMat._14 = matrix._14;
+
+	tempMat._21 = matrix._21;
+	tempMat._22 = matrix._22;
+	tempMat._23 = matrix._23;
+	tempMat._24 = matrix._24;
+
+	tempMat._31 = matrix._31;
+	tempMat._32 = matrix._32;
+	tempMat._33 = matrix._33;
+	tempMat._34 = matrix._34;
+
+	tempMat._41 = matrix._41;
+	tempMat._42 = matrix._42;
+	tempMat._43 = matrix._43;
+	tempMat._44 = matrix._44;
+
+	LastError = vertexShader.shader.constantTable->SetMatrix(d3d.lpD3DDevice, constant, &tempMat);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't set matrix for vertex shader " + vertexShader.shaderName);
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
@@ -1196,10 +1222,10 @@ bool R_SetVertexShader(vertexShader_t &vertexShader)
 
 bool R_SetPixelShader(pixelShader_t &pixelShader)
 {
-	LastError = d3d.lpD3DDevice->SetPixelShader(pixelShader.pixelShader);
+	LastError = d3d.lpD3DDevice->SetPixelShader(pixelShader.shader.pixelShader);
 	if (FAILED(LastError))
 	{
-		Con_PrintError("Can't set pixel shader " + pixelShader.pixelShaderName);
+		Con_PrintError("Can't set pixel shader " + pixelShader.shaderName);
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
@@ -1634,19 +1660,19 @@ void R_ReleaseTexture(r_Texture &texture)
 
 void R_ReleaseVertexShader(r_VertexShader &vertexShader)
 {
-	if (vertexShader)
+	if (vertexShader.vertexShader)
 	{
-		vertexShader->Release();
-		vertexShader = 0;
+		vertexShader.vertexShader->Release();
+		vertexShader.vertexShader = 0;
 	}
 }
 
 void R_ReleasePixelShader(r_PixelShader &pixelShader)
 {
-	if (pixelShader)
+	if (pixelShader.pixelShader)
 	{
-		pixelShader->Release();
-		pixelShader = 0;
+		pixelShader.pixelShader->Release();
+		pixelShader.pixelShader = 0;
 	}
 }
 
@@ -2219,6 +2245,7 @@ bool InitialiseDirect3D()
 	CreateVertexDeclaration(declFMV, &d3d.fmvVertexDecl);
 	CreateVertexDeclaration(declTallFontText, &d3d.cloudVertexDecl);
 
+/*
 	// create vertex shaders
 	if (!CreateVertexShader("vertex.vsh", &d3d.vertexShader, &vertexConstantTable))
 	{
@@ -2227,11 +2254,11 @@ bool InitialiseDirect3D()
 	CreateVertexShader("orthoVertex.vsh", &d3d.orthoVertexShader, &orthoConstantTable);
 	CreateVertexShader("fmvVertex.vsh", &d3d.fmvVertexShader, &fmvConstantTable);
 	CreateVertexShader("tallFontTextVertex.vsh", &d3d.cloudVertexShader, &cloudConstantTable);
-
+*/
 	// create pixel shaders
-	CreatePixelShader("pixel.psh", &d3d.pixelShader);
-	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
-	CreatePixelShader("tallFontTextPixel.psh", &d3d.cloudPixelShader);
+//	CreatePixelShader("pixel.psh", &d3d.pixelShader);
+//	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
+//	CreatePixelShader("tallFontTextPixel.psh", &d3d.cloudPixelShader);
 
 	r_Texture whiteTexture;
 
@@ -2388,10 +2415,10 @@ void ReleaseDirect3D()
 	ReleaseVolatileResources();
 
 	// release constant tables
-	SAFE_RELEASE(vertexConstantTable);
-	SAFE_RELEASE(orthoConstantTable);
-	SAFE_RELEASE(fmvConstantTable);
-	SAFE_RELEASE(cloudConstantTable);
+//	SAFE_RELEASE(vertexConstantTable);
+//	SAFE_RELEASE(orthoConstantTable);
+//	SAFE_RELEASE(fmvConstantTable);
+//	SAFE_RELEASE(cloudConstantTable);
 
 	// release vertex declarations
 	SAFE_RELEASE(d3d.vertexDecl);
@@ -2732,8 +2759,8 @@ bool SetRenderStateDefaults()
 */
 //	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 8);
 
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
 /*
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP,	D3DTOP_MODULATE);
@@ -2755,7 +2782,7 @@ bool SetRenderStateDefaults()
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF,			*((DWORD*)&alphaRef));//(DWORD)0.5);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAFUNC,		D3DCMP_GREATER);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,	TRUE);
-
+/*
 	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSPRITEENABLE, TRUE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSCALEENABLE,  TRUE);
 
@@ -2763,7 +2790,7 @@ bool SetRenderStateDefaults()
 	float pointScale = 1.0f;
 	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSIZE,	*((DWORD*)&pointSize));
 	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSCALE_B, *((DWORD*)&pointScale));
-
+*/
 //	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 //	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 //	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);

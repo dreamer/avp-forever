@@ -301,9 +301,7 @@ void Con_Draw()
 		DrawQuad(console.xPos, console.yPos + console.height, console.width, 2, NO_TEXTURE, RCOLOR_ARGB(255, 255, 255, 255), TRANSLUCENCY_OFF);
 	}
 
-//	int charCount = 0;
-
-	uint32_t y = console.height;
+	uint32_t y = console.height - CHAR_HEIGHT;
 
 	// draw input cusor
 	Font_DrawText(">", console.indent, y, RCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
@@ -313,7 +311,6 @@ void Con_Draw()
 
 	int32_t rows = console.text.size() - 1;
 
-//	int lines = console.lines;
 	int xOffset = 0;
 
 	// draw all the lines of text

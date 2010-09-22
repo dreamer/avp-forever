@@ -29,12 +29,56 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <utility>
 
 typedef uint32_t effectID_t;
 typedef uint32_t shaderID_t;
 
 struct vertexShader_t;
 struct pixelShader_t;
+
+// keep these separate
+struct vertexShader_t
+{
+	bool 			isValid;
+	uint32_t		refCount;
+	r_VertexShader	shader;
+	std::string 	shaderName;
+};
+
+// class version of above
+class VertexShaderPool
+{
+	public:
+		std::vector<vertexShader_t> shaderList;
+
+		uint32_t Add(vertexShader_t newShader);
+		bool SetActive(uint32_t shaderID);
+		uint32_t GetShaderByName(const std::string &shaderName);
+		void Remove(uint32_t shaderID);
+		void AddRef(uint32_t shaderID) { shaderList[shaderID].refCount++; }
+		bool SetMatrix(uint32_t shaderID, const char* constant, R_MATRIX &matrix);
+};
+
+struct pixelShader_t
+{
+	bool			isValid;
+	uint32_t		refCount;
+	r_PixelShader	shader;
+	std::string 	shaderName;
+};
+
+class PixelShaderPool
+{
+	public:
+		std::vector<pixelShader_t> shaderList;
+
+		uint32_t Add(pixelShader_t newShader);
+		bool SetActive(uint32_t shaderID);
+		uint32_t GetShaderByName(const std::string &shaderName);
+		void Remove(uint32_t shaderID);
+		void AddRef(uint32_t shaderID) { shaderList[shaderID].refCount++; }
+};
 
 struct effect_t
 {
@@ -47,61 +91,15 @@ struct effect_t
 class EffectManager
 {
 	private:
-		std::vector<effect_t>	effectList;
-		std::vector<vertexShader_t> vertexShaderList;
-		std::vector<pixelShader_t>   pixelShaderList;
+		std::vector<effect_t> effectList;
+		VertexShaderPool vsPool;
+		PixelShaderPool	 psPool;
 
 	public:
 		EffectManager();
+		bool SetActive(effectID_t effectID);
+		bool SetMatrix(effectID_t effectID, const char* constant, R_MATRIX &matrix);
 		effectID_t AddEffect(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName);
-		bool Set(effectID_t effectID);
-		void Release(effectID_t effectID);
-};
-
-// keep these separate
-struct vertexShader_t
-{
-	bool 			isValid;
-	uint32_t		refCount;
-	r_VertexShader	vertexShader;
-#ifndef _XBOX
-	LPD3DXCONSTANTTABLE	constantTable;
-#endif
-	std::string 	vertexShaderName;
-};
-
-// class version of above
-class VertexShader
-{
-	public:
-		bool 			isValid;
-		int32_t			refCount;
-		r_VertexShader	vertexShader;
-#ifndef _XBOX
-		LPD3DXCONSTANTTABLE	constantTable;
-#endif
-		std::string 	vertexShaderName;
-	
-		VertexShader():
-			isValid(false),
-			refCount(0),
-			vertexShader(0)
-//			constantTable(0)
-		{
-		}
-
-		// pass values to the vertex shader (similar to d3d constant table stuff)
-		bool SetInt(const char* constant, uint32_t n);
-		bool SetMatrix(const char* constant, struct R_MATRIX &matrix);
-		void Release();
-};
-
-struct pixelShader_t
-{
-	bool			isValid;
-	uint32_t		refCount;
-	r_PixelShader	pixelShader;
-	std::string 	pixelShaderName;
 };
 
 #endif
