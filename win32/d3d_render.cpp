@@ -1,30 +1,23 @@
 #include "console.h"
 #include "onscreenKeyboard.h"
 #include "textureManager.h"
-#include "d3_func.h"
 #include "r2base.h"
 #include "font2.h"
-
-// STL stuff
 #include <vector>
 #include <algorithm>
-
 #include "logString.h"
 #include "RenderList.h"
 #include "vertexBuffer.h"
-
-extern void DisableZBufferWrites();
-extern void EnableZBufferWrites();
-
-#include <d3dx9math.h>
 #include "fmvCutscenes.h"
-
 #define UseLocalAssert FALSE
 #include "ourasert.h"
 #include <assert.h>
 #include "avp_menus.h"
 #include "avp_userprofile.h"
 #include "avp_menugfx.hpp"
+
+extern void DisableZBufferWrites();
+extern void EnableZBufferWrites();
 
 // set to 'null' texture initially
 uint32_t currentWaterTexture = NO_TEXTURE;
@@ -1283,7 +1276,6 @@ void DrawCoronas()
 		D3DXVec3TransformCoord(&tempVec, &newVec, &matViewPort);
 
 		// generate the quad around this point
-		ORTHOVERTEX ortho[4];
 		uint32_t size = 100;
 
 		uint32_t sizeX = (ScreenDescriptorBlock.SDB_Width<<13)/Global_VDB_Ptr->VDB_ProjX;

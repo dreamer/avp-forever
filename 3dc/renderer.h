@@ -25,6 +25,8 @@
 #ifndef _renderer_h_
 #define _renderer_h_
 
+#include <stdint.h>
+
 // temp
 
 enum R_USAGE
@@ -40,16 +42,12 @@ enum R_FVF
 	FVF_FMV
 };
 
-#ifdef _WIN32
-	#define USE_D3D9
-#endif
-
 #ifdef USE_D3D9
-	#include "d3_func.h"
+	#include <../win32/d3_func.h>
 #endif
 
-#ifdef _XBOX
-	#include "d3_func.h"
+#ifdef USE_D3D_XBOX
+	#include <../xbox/src/d3_func.h>
 #endif
 
 #ifdef USE_OPENGL

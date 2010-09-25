@@ -136,6 +136,13 @@ void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENC
 {
 	assert(numVerts != 0);
 
+	if (listIndex >= GetCapacity())
+	{
+		// list is full, flush it
+		OutputDebugString("List full. Flushing...\n");
+		Draw();
+	}
+
 	uint32_t realNumVerts = GetRealNumVerts(numVerts);
 
 	Items[listIndex].sortKey = 0; // zero it out

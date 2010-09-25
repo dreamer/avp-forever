@@ -1,10 +1,12 @@
+#ifdef WIN32
+
 #ifndef _included_d3_func_h_
 #define _included_d3_func_h_
 
-//#ifdef WIN32
 #include <d3d9.h>
 #include <d3dx9.h>
 #include <Dxerr.h>
+#include <stdint.h>
 
 typedef D3DXMATRIX R_MATRIX;
 
@@ -32,7 +34,6 @@ struct r_PixelShader
 };
 
 #include "aw.h"
-#include <stdint.h>
 #include "vertexBuffer.h"
 #include "indexBuffer.h"
 #include "renderStates.h"
@@ -270,6 +271,6 @@ extern uint32_t NO_TEXTURE;
 
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 
-//#endif /* ifdef WIN32 */
-
 #endif /* ! _included_d3_func_h_ */
+
+#endif /* ifdef WIN32 */
