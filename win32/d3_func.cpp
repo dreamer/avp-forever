@@ -48,8 +48,6 @@ D3DXMATRIX matView;
 D3DXMATRIX matIdentity;
 D3DXMATRIX matViewPort;
 
-//D3DXMATRIX viewMatrix;
-
 // vertex declarations
 D3DVERTEXELEMENT9 declMain[] =
 {

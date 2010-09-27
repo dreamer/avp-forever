@@ -399,7 +399,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		BOOL menusActive = FALSE;
 		int thisLevelHasBeenCompleted = 0;
 
-		mainMenu = 0;
+		mainMenu = FALSE;
 
 		#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
 		if (instr = strstr(command_line, "-n"))
@@ -571,7 +571,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 			if (AvP.RestartLevel)
 			{
-				AvP.RestartLevel=0;
+				AvP.RestartLevel = 0;
 				AvP.LevelCompleted = 0;
 				FixCheatModesInUserProfile(UserProfilePtr);
 				RestartLevel();
@@ -579,7 +579,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		}// end of main game loop
 
 		AvP.LevelCompleted = thisLevelHasBeenCompleted;
-		mainMenu = 1;
+		mainMenu = TRUE;
 
 		FixCheatModesInUserProfile(UserProfilePtr);
 

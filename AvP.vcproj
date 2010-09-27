@@ -10312,6 +10312,50 @@
 					RelativePath="3dc\win95\Zsp.hpp"
 					>
 				</File>
+				<Filter
+					Name="Shaders"
+					>
+					<File
+						RelativePath=".\shaders\fmvPixel.psh"
+						>
+					</File>
+					<File
+						RelativePath=".\shaders\fmvVertex.vsh"
+						>
+					</File>
+					<File
+						RelativePath=".\shaders\orthoVertex.vsh"
+						>
+					</File>
+					<File
+						RelativePath=".\shaders\pixel.psh"
+						>
+					</File>
+					<File
+						RelativePath=".\shaders\PointSpritePixel.psh"
+						>
+					</File>
+					<File
+						RelativePath=".\shaders\PointSpriteVertex.vsh"
+						>
+					</File>
+					<File
+						RelativePath=".\shaders\pretransformedVert.vsh"
+						>
+					</File>
+					<File
+						RelativePath=".\shaders\tallFontTexttPixel.psh"
+						>
+					</File>
+					<File
+						RelativePath=".\shaders\tallFontTextVertex.vsh"
+						>
+					</File>
+					<File
+						RelativePath=".\shaders\vertex.vsh"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
@@ -10320,50 +10364,6 @@
 			>
 			<File
 				RelativePath=".\3dc\avp.ico"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Shaders"
-			>
-			<File
-				RelativePath=".\shaders\fmvPixel.psh"
-				>
-			</File>
-			<File
-				RelativePath=".\shaders\fmvVertex.vsh"
-				>
-			</File>
-			<File
-				RelativePath=".\shaders\orthoVertex.vsh"
-				>
-			</File>
-			<File
-				RelativePath=".\shaders\pixel.psh"
-				>
-			</File>
-			<File
-				RelativePath=".\shaders\PointSpritePixel.psh"
-				>
-			</File>
-			<File
-				RelativePath=".\shaders\PointSpriteVertex.vsh"
-				>
-			</File>
-			<File
-				RelativePath=".\shaders\pretransformedVert.vsh"
-				>
-			</File>
-			<File
-				RelativePath=".\shaders\tallFontTexttPixel.psh"
-				>
-			</File>
-			<File
-				RelativePath=".\shaders\tallFontTextVertex.vsh"
-				>
-			</File>
-			<File
-				RelativePath=".\shaders\vertex.vsh"
 				>
 			</File>
 		</Filter>

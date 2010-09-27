@@ -5,7 +5,7 @@
 extern "C" {
 #endif // __cplusplus
 
-	extern int mainMenu;
+	extern BOOL mainMenu;
 
 #ifdef __cplusplus
 }

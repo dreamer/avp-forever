@@ -250,7 +250,7 @@ extern int DebuggingCommandsActive;
 
 extern BOOL bRunning;
 
-int mainMenu = 1;
+BOOL mainMenu = TRUE;
 
 int GetAvPMenuState()
 {
@@ -335,7 +335,7 @@ int AvP_MainMenus(void)
 
 	while (AvPMenus.MenusState == MENUSSTATE_MAINMENUS && bRunning)
 	{
-		mainMenu = 1;
+		mainMenu = TRUE;
 
 		CheckForWindowsMessages();
 
@@ -483,7 +483,7 @@ extern int AvP_InGameMenus(void)
 
 		return 1;
 	}
-	else return 0;
+	return 0;
 }
 
 extern int InGameMenusAreRunning(void)
@@ -539,7 +539,7 @@ extern void AvP_UpdateMenus(void)
 	    AvPMenus.CurrentMenu == AVPMENU_MULTIPLAYER_CONFIG_JOIN)
 	{
 		MinimalNetCollectMessages();
-		if(AvP.Network==I_Host)
+		if (AvP.Network == I_Host)
 		{	/*
 			We have become host while in the process of joining.
 			This is bad.
@@ -681,7 +681,9 @@ extern void AvP_UpdateMenus(void)
 			int i;
 			AVP_USER_PROFILE *profilePtr = GetFirstUserProfile();
 			for (i=0; i<UserProfileNumber; i++)
+			{
 				profilePtr = GetNextUserProfile();
+			}
 
 			RenderMenuText(profilePtr->Name,MENU_CENTREX,MENU_CENTREY-100,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
 			{

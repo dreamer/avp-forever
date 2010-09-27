@@ -21,12 +21,7 @@ extern void EnableZBufferWrites();
 
 // set to 'null' texture initially
 uint32_t currentWaterTexture = NO_TEXTURE;
-/*
-LPD3DXCONSTANTTABLE	vertexConstantTable = NULL;
-LPD3DXCONSTANTTABLE	orthoConstantTable = NULL;
-LPD3DXCONSTANTTABLE	fmvConstantTable = NULL;
-LPD3DXCONSTANTTABLE	cloudConstantTable = NULL;
-*/
+
 D3DXMATRIX viewMatrix;
 
 extern D3DXMATRIX matOrtho;
@@ -250,7 +245,6 @@ bool UnlockExecuteBufferAndPrepareForUse()
 bool ExecuteBuffer()
 {
 	// sort the list of render objects
-	orthoList->Sort();
 	particleList->Sort();
 	mainList->Sort();
 
@@ -451,76 +445,13 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 	fmvVerts[3].u3 = 1.0f;
 	fmvVerts[3].v3 = 0.0f;
 
-#if 0
-	FMVVERTEX *fmvVerts;
-
-	if (!FMVvertexBuffer)
-	{
-		FMVvertexBuffer = new VertexBuffer;
-		FMVvertexBuffer->Create(4, FMVvertexBuffer->FVF_FMV, /*FMVvertexBuffer->USAGE_STATIC*/USAGE_STATIC);
-		FMVvertexBuffer->Lock((void**)&fmvVerts);
-
-		// bottom left
-		fmvVerts[0].x = x1;
-		fmvVerts[0].y = y2;
-		fmvVerts[0].z = 1.0f;
-		fmvVerts[0].u1 = 0.0f;
-		fmvVerts[0].v1 = 1.0f; //(1.0f / textureHeight) * frameHeight;
-
-		fmvVerts[0].u2 = 0.0f;
-		fmvVerts[0].v2 = 1.0f;
-
-		fmvVerts[0].u3 = 0.0f;
-		fmvVerts[0].v3 = 1.0f;
-
-		// top left
-		fmvVerts[1].x = x1;
-		fmvVerts[1].y = y1;
-		fmvVerts[1].z = 1.0f;
-		fmvVerts[1].u1 = 0.0f;
-		fmvVerts[1].v1 = 0.0f;
-
-		fmvVerts[1].u2 = 0.0f;
-		fmvVerts[1].v2 = 0.0f;
-
-		fmvVerts[1].u3 = 0.0f;
-		fmvVerts[1].v3 = 0.0f;
-
-		// bottom right
-		fmvVerts[2].x = x2;
-		fmvVerts[2].y = y2;
-		fmvVerts[2].z = 1.0f;
-		fmvVerts[2].u1 = 1.0f; //(1.0f / textureWidth) * frameWidth;
-		fmvVerts[2].v1 = 1.0f; //(1.0f / textureHeight) * frameHeight;
-
-		fmvVerts[2].u2 = 1.0f;
-		fmvVerts[2].v2 = 1.0f;
-
-		fmvVerts[2].u3 = 1.0f;
-		fmvVerts[2].v3 = 1.0f;
-
-		// top right
-		fmvVerts[3].x = x2;
-		fmvVerts[3].y = y1;
-		fmvVerts[3].z = 1.0f;
-		fmvVerts[3].u1 = 1.0f; //(1.0f / textureWidth) * frameWidth;
-		fmvVerts[3].v1 = 0.0f;
-
-		fmvVerts[3].u2 = 1.0f;
-		fmvVerts[3].v2 = 0.0f;
-
-		fmvVerts[3].u3 = 1.0f;
-		fmvVerts[3].v3 = 0.0f;
-	
-		FMVvertexBuffer->Unlock();
-	}
-#endif
-	// set orthographic projection
 	d3d.lpD3DDevice->SetVertexDeclaration(d3d.fmvVertexDecl);
-	d3d.lpD3DDevice->SetVertexShader(d3d.fmvVertexShader);
-	d3d.lpD3DDevice->SetPixelShader(d3d.fmvPixelShader);
 
-//	fmvConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
+	// set the yuv fmv shader
+	d3d.effectSystem->SetActive(d3d.fmvEffect);
+
+	// set orthographic projection
+	d3d.effectSystem->SetMatrix(d3d.fmvEffect, "WorldViewProj", matOrtho);
 
 	ChangeTextureAddressMode(TEXTURE_CLAMP);
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
@@ -531,8 +462,6 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 	{
 		R_SetTexture(i, textures[i]);
 	}
-
-//	FMVvertexBuffer->Draw();
 
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(FMVVERTEX));
 	if (FAILED(LastError))
