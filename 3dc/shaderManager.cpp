@@ -29,7 +29,7 @@
 const int nullID = 999;
 
 // add an already created vertexShader_t struct to our pool.
-uint32_t VertexShaderPool::Add(vertexShader_t newShader)
+uint32_t VertexShaderPool::Add(r_VertexShader newShader)
 {
 	// see if it already exists, and return the ID to it if it does
 	uint32_t shaderID = GetShaderByName(newShader.shaderName);
@@ -80,7 +80,7 @@ bool VertexShaderPool::SetMatrix(uint32_t shaderID, const char* constant, R_MATR
 }
 
 // add an already created pixelShader_t struct to our pool.
-uint32_t PixelShaderPool::Add(pixelShader_t newShader)
+uint32_t PixelShaderPool::Add(r_PixelShader newShader)
 {
 	// see if it already exists, and return the ID to it if it does
 	uint32_t shaderID = GetShaderByName(newShader.shaderName);
@@ -176,7 +176,7 @@ effectID_t EffectManager::AddEffect(const std::string &effectName, const std::st
 	// load a vertex shader if required
 	if (vertexID == nullID) // we have no slot or we don't already exist
 	{
-		vertexShader_t newVertexShader;
+		r_VertexShader newVertexShader;
 		newVertexShader.isValid = false;
 
 		if (R_CreateVertexShader(vertexShaderName, newVertexShader))
@@ -192,7 +192,7 @@ effectID_t EffectManager::AddEffect(const std::string &effectName, const std::st
 	// load the pixel shader if required
 	if (pixelID == nullID) // we have no slot or we don't already exist
 	{
-		pixelShader_t newPixelShader;
+		r_PixelShader newPixelShader;
 		newPixelShader.isValid = false;
 
 		if (R_CreatePixelShader(pixelShaderName, newPixelShader))

@@ -1065,7 +1065,7 @@ static bool CreateVertexDeclaration(const D3DVERTEXELEMENT9* pVertexElements, LP
 	return true;
 }
 
-static bool CreateVertexShader(const std::string &fileName, vertexShader_t &vertexShader)
+static bool CreateVertexShader(const std::string &fileName, r_VertexShader &vertexShader)
 {
 	LPD3DXBUFFER pErrors = NULL;
 	LPD3DXBUFFER pCode = NULL;
@@ -1090,7 +1090,7 @@ static bool CreateVertexShader(const std::string &fileName, vertexShader_t &vert
 						0,               // flags
 						&pCode,          // compiled operations
 						&pErrors,        // errors
-						&vertexShader.shader.constantTable);  // constants
+						&vertexShader.constantTable); // constants
 
 	if (FAILED(LastError))
 	{
@@ -1107,13 +1107,13 @@ static bool CreateVertexShader(const std::string &fileName, vertexShader_t &vert
 		return false;
 	}
 
-	d3d.lpD3DDevice->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), &vertexShader.shader.vertexShader);
+	d3d.lpD3DDevice->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), &vertexShader.shader);
 	pCode->Release();
 
 	return true;
 }
 
-static bool CreatePixelShader(const std::string &fileName, pixelShader_t &pixelShader)
+static bool CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader)
 {
 	LPD3DXBUFFER pErrors = NULL;
 	LPD3DXBUFFER pCode = NULL;
@@ -1155,25 +1155,25 @@ static bool CreatePixelShader(const std::string &fileName, pixelShader_t &pixelS
 		return false;
 	}
 
-	d3d.lpD3DDevice->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), &pixelShader.shader.pixelShader);
+	d3d.lpD3DDevice->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), &pixelShader.shader);
 	pCode->Release();
 
 	return true;
 }
 
-bool R_CreateVertexShader(const std::string &fileName, vertexShader_t &vertexShader)
+bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexShader)
 {
 	return CreateVertexShader(fileName, vertexShader);
 }
 
-bool R_CreatePixelShader(const std::string &fileName, pixelShader_t &pixelShader)
+bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader)
 {
 	return CreatePixelShader(fileName, pixelShader);
 }
 
-bool R_SetVertexShader(vertexShader_t &vertexShader)
+bool R_SetVertexShader(r_VertexShader &vertexShader)
 {
-	LastError = d3d.lpD3DDevice->SetVertexShader(vertexShader.shader.vertexShader); // fix this insanity :)
+	LastError = d3d.lpD3DDevice->SetVertexShader(vertexShader.shader);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't set vertex shader " + vertexShader.shaderName);
@@ -1184,7 +1184,7 @@ bool R_SetVertexShader(vertexShader_t &vertexShader)
 	return true;
 }
 
-bool R_SetVertexShaderMatrix(vertexShader_t &vertexShader, const char* constant, R_MATRIX &matrix)
+bool R_SetVertexShaderMatrix(r_VertexShader &vertexShader, const char* constant, R_MATRIX &matrix)
 {
 	D3DXMATRIX tempMat;
 	tempMat._11 = matrix._11;
@@ -1207,7 +1207,7 @@ bool R_SetVertexShaderMatrix(vertexShader_t &vertexShader, const char* constant,
 	tempMat._43 = matrix._43;
 	tempMat._44 = matrix._44;
 
-	LastError = vertexShader.shader.constantTable->SetMatrix(d3d.lpD3DDevice, constant, &tempMat);
+	LastError = vertexShader.constantTable->SetMatrix(d3d.lpD3DDevice, constant, &tempMat);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't set matrix for vertex shader " + vertexShader.shaderName);
@@ -1218,9 +1218,9 @@ bool R_SetVertexShaderMatrix(vertexShader_t &vertexShader, const char* constant,
 	return true;
 }
 
-bool R_SetPixelShader(pixelShader_t &pixelShader)
+bool R_SetPixelShader(r_PixelShader &pixelShader)
 {
-	LastError = d3d.lpD3DDevice->SetPixelShader(pixelShader.shader.pixelShader);
+	LastError = d3d.lpD3DDevice->SetPixelShader(pixelShader.shader);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't set pixel shader " + pixelShader.shaderName);
@@ -1658,19 +1658,19 @@ void R_ReleaseTexture(r_Texture &texture)
 
 void R_ReleaseVertexShader(r_VertexShader &vertexShader)
 {
-	if (vertexShader.vertexShader)
+	if (vertexShader.shader)
 	{
-		vertexShader.vertexShader->Release();
-		vertexShader.vertexShader = 0;
+		vertexShader.shader->Release();
+		vertexShader.shader = 0;
 	}
 }
 
 void R_ReleasePixelShader(r_PixelShader &pixelShader)
 {
-	if (pixelShader.pixelShader)
+	if (pixelShader.shader)
 	{
-		pixelShader.pixelShader->Release();
-		pixelShader.pixelShader = 0;
+		pixelShader.shader->Release();
+		pixelShader.shader = 0;
 	}
 }
 

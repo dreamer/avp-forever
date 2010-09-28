@@ -34,25 +34,13 @@
 typedef uint32_t effectID_t;
 typedef uint32_t shaderID_t;
 
-struct vertexShader_t;
-struct pixelShader_t;
-
-// keep these separate
-struct vertexShader_t
-{
-	bool 			isValid;
-	uint32_t		refCount;
-	r_VertexShader	shader;
-	std::string 	shaderName;
-};
-
 // class version of above
 class VertexShaderPool
 {
 	public:
-		std::vector<vertexShader_t> shaderList;
+		std::vector<r_VertexShader> shaderList;
 
-		uint32_t Add(vertexShader_t newShader);
+		uint32_t Add(r_VertexShader newShader);
 		bool SetActive(uint32_t shaderID);
 		uint32_t GetShaderByName(const std::string &shaderName);
 		void Remove(uint32_t shaderID);
@@ -60,20 +48,12 @@ class VertexShaderPool
 		bool SetMatrix(uint32_t shaderID, const char* constant, R_MATRIX &matrix);
 };
 
-struct pixelShader_t
-{
-	bool			isValid;
-	uint32_t		refCount;
-	r_PixelShader	shader;
-	std::string 	shaderName;
-};
-
 class PixelShaderPool
 {
 	public:
-		std::vector<pixelShader_t> shaderList;
+		std::vector<r_PixelShader> shaderList;
 
-		uint32_t Add(pixelShader_t newShader);
+		uint32_t Add(r_PixelShader newShader);
 		bool SetActive(uint32_t shaderID);
 		uint32_t GetShaderByName(const std::string &shaderName);
 		void Remove(uint32_t shaderID);

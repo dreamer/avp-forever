@@ -7,6 +7,7 @@
 #include <d3dx9.h>
 #include <Dxerr.h>
 #include <stdint.h>
+#include <string>
 
 typedef D3DXMATRIX R_MATRIX;
 
@@ -22,15 +23,23 @@ struct r_IndexBuffer
 
 typedef IDirect3DTexture9	*r_Texture;		// keep this as pointer type?
 
+struct Texture;
+
 struct r_VertexShader
 {
-	IDirect3DVertexShader9	*vertexShader;
+	bool 			isValid;
+	uint32_t		refCount;
+	IDirect3DVertexShader9	*shader;
 	ID3DXConstantTable		*constantTable;
+	std::string 	shaderName;
 };
 
 struct r_PixelShader
 {
-	IDirect3DPixelShader9 *pixelShader;
+	bool			isValid;
+	uint32_t		refCount;
+	IDirect3DPixelShader9 *shader;
+	std::string 	shaderName;
 };
 
 #include "aw.h"
@@ -65,7 +74,7 @@ bool R_SetIndexBuffer(r_IndexBuffer &indexBuffer);
 bool R_SetTexture(uint32_t stage, uint32_t textureID);
 bool R_LockTexture(r_Texture texture, uint8_t **data, uint32_t *pitch, enum TextureLock lockType);
 bool R_UnlockTexture(r_Texture texture);
-bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum TextureUsage usageType, struct Texture &texture);
+bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum TextureUsage usageType, Texture &texture);
 bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usageType, Texture &texture);
 bool R_CreateTextureFromFile(const std::string &fileName, Texture &texture);
 void R_ReleaseTexture(r_Texture &texture);
@@ -74,13 +83,13 @@ r_Texture CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t 
 r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex);
 
 // shader functions
-bool R_CreateVertexShader(const std::string &fileName, struct vertexShader_t &vertexShader);
-bool R_CreatePixelShader(const std::string &fileName, struct pixelShader_t &pixelShader);
-bool R_SetVertexShader(vertexShader_t &vertexShader);
-bool R_SetPixelShader(pixelShader_t &pixelShader);
+bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexShader);
+bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader);
+bool R_SetVertexShader(r_VertexShader &vertexShader);
+bool R_SetPixelShader(r_PixelShader &pixelShader);
 void R_ReleaseVertexShader(r_VertexShader &vertexShader);
 void R_ReleasePixelShader(r_PixelShader &pixelShader);
-bool R_SetVertexShaderMatrix(vertexShader_t &vertexShader, const char* constant, R_MATRIX &matrix);
+bool R_SetVertexShaderMatrix(r_VertexShader &vertexShader, const char* constant, R_MATRIX &matrix);
 
 void R_NextVideoMode();
 void R_PreviousVideoMode();
@@ -96,23 +105,6 @@ extern D3DVERTEXELEMENT9 declMain[];
 extern D3DVERTEXELEMENT9 declOrtho[];
 extern D3DVERTEXELEMENT9 declFMV[];
 extern D3DVERTEXELEMENT9 declTallFontText[];
-
-/*
-struct R_MATRIX
-{
-	union
-	{
-		struct
-		{
-			float _11, _12, _13, _14;
-			float _21, _22, _23, _24;
-			float _31, _32, _33, _34;
-			float _41, _42, _43, _44;
-		};
-		float m[4][4];
-	};
-};
-*/
 
 /*
   Direct3D globals
@@ -212,15 +204,6 @@ typedef struct D3DInfo
 	uint32_t				orthoEffect;
 	uint32_t				cloudEffect;
 	uint32_t				fmvEffect;
-
-//	LPDIRECT3DVERTEXBUFFER9 lpD3DVertexBuffer;
-//	LPDIRECT3DINDEXBUFFER9	lpD3DIndexBuffer;
-
-//	LPDIRECT3DVERTEXBUFFER9 lpD3DOrthoVertexBuffer;
-//	LPDIRECT3DINDEXBUFFER9	lpD3DOrthoIndexBuffer;
-
-//	LPDIRECT3DVERTEXBUFFER9 lpD3DParticleVertexBuffer;
-//	LPDIRECT3DINDEXBUFFER9	lpD3DParticleIndexBuffer;
 
 	LPDIRECT3DVERTEXDECLARATION9 vertexDecl;
 	LPDIRECT3DVERTEXSHADER9      vertexShader;
