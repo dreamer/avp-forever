@@ -42,7 +42,6 @@ extern int NumberOfFMVTextures;
 extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 
 D3DXMATRIX matOrtho;
-D3DXMATRIX matOrtho2;
 D3DXMATRIX matProjection;
 D3DXMATRIX matView;
 D3DXMATRIX matIdentity;
@@ -2367,9 +2366,6 @@ void SetTransforms()
 
 	// set up orthographic projection matrix
 	D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
-
-	// set up orthographic projection matrix
-	D3DXMatrixOrthoLH(&matOrtho2, (float)ScreenDescriptorBlock.SDB_Width, (float)ScreenDescriptorBlock.SDB_Height, 1.0f, 10.0f);
 
 	// set up projection matrix
 	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);

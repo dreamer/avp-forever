@@ -23,6 +23,8 @@ struct r_IndexBuffer
 
 typedef IDirect3DTexture9	*r_Texture;		// keep this as pointer type?
 
+typedef IDirect3DVertexDeclaration9 *r_vertexDeclaration;
+
 struct Texture;
 
 struct r_VertexShader

@@ -8957,6 +8957,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\3dc\VertexDeclaration.cpp"
+				>
+			</File>
+			<File
 				RelativePath="3dc\win95\VideoModes.cpp"
 				>
 				<FileConfiguration

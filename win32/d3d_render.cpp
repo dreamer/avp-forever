@@ -25,7 +25,6 @@ uint32_t currentWaterTexture = NO_TEXTURE;
 D3DXMATRIX viewMatrix;
 
 extern D3DXMATRIX matOrtho;
-extern D3DXMATRIX matOrtho2;
 extern D3DXMATRIX matProjection;
 extern D3DXMATRIX matIdentity;
 extern D3DXMATRIX matViewPort;
