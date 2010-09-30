@@ -246,12 +246,14 @@ bool ExecuteBuffer()
 	// sort the list of render objects
 	particleList->Sort();
 	mainList->Sort();
-
+/*
 	LastError = d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
+*/
+	d3d.mainDecl->Set();
 
 	// set main rendering vb and ibs to active
 	d3d.mainVB->Set();
@@ -296,12 +298,14 @@ bool ExecuteBuffer()
 	{
 		d3d.orthoVB->Set();
 		d3d.orthoIB->Set();
-
+/*
 		LastError = d3d.lpD3DDevice->SetVertexDeclaration(d3d.orthoVertexDecl);
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
+*/
+		d3d.orthoDecl->Set();
 
 		// set orthographic projection shaders as active
 		d3d.effectSystem->SetActive(d3d.orthoEffect);
@@ -444,7 +448,8 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 	fmvVerts[3].u3 = 1.0f;
 	fmvVerts[3].v3 = 0.0f;
 
-	d3d.lpD3DDevice->SetVertexDeclaration(d3d.fmvVertexDecl);
+//	d3d.lpD3DDevice->SetVertexDeclaration(d3d.fmvVertexDecl);
+	d3d.fmvDecl->Set();
 
 	// set the yuv fmv shader
 	d3d.effectSystem->SetActive(d3d.fmvEffect);

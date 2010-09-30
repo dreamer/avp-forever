@@ -50,6 +50,7 @@ struct r_PixelShader
 #include "renderStates.h"
 #include "textureManager.h"
 #include "shaderManager.h"
+#include "VertexDeclaration.h"
 #include <string>
 
 bool R_BeginScene();
@@ -83,6 +84,10 @@ void R_ReleaseTexture(r_Texture &texture);
 r_Texture CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poolType);
 r_Texture CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight);
 r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex);
+
+// vertex declaration
+bool R_CreateVertexDeclaration(r_vertexDeclaration &declaration, std::vector<struct vertexElement> &elements);
+bool R_SetVertexDeclaration(r_vertexDeclaration &declaration);
 
 // shader functions
 bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexShader);
@@ -191,6 +196,7 @@ typedef struct D3DInfo
 	D3DVIEWPORT9			D3DViewport;
 	D3DPRESENT_PARAMETERS	d3dpp;
 
+	// vertex and index buffers
 	class VertexBuffer		*particleVB;
 	class IndexBuffer		*particleIB;
 
@@ -200,28 +206,21 @@ typedef struct D3DInfo
 	class VertexBuffer		*orthoVB;
 	class IndexBuffer		*orthoIB;
 
+	// effect manager to handle shaders
 	class EffectManager		*effectSystem;
 
+	// shader IDs
 	uint32_t				mainEffect;
 	uint32_t				orthoEffect;
 	uint32_t				cloudEffect;
 	uint32_t				fmvEffect;
 
-	LPDIRECT3DVERTEXDECLARATION9 vertexDecl;
-	LPDIRECT3DVERTEXSHADER9      vertexShader;
-	LPDIRECT3DPIXELSHADER9       pixelShader;
+	// vertex declarations
+	class VertexDeclaration		*mainDecl;
+	class VertexDeclaration		*orthoDecl;
+	class VertexDeclaration		*fmvDecl;
 
-	LPDIRECT3DVERTEXDECLARATION9 orthoVertexDecl;
-	LPDIRECT3DVERTEXSHADER9      orthoVertexShader;
-
-	LPDIRECT3DVERTEXDECLARATION9 fmvVertexDecl;
-	LPDIRECT3DVERTEXSHADER9      fmvVertexShader;
-	LPDIRECT3DPIXELSHADER9       fmvPixelShader;
-
-	LPDIRECT3DVERTEXDECLARATION9 cloudVertexDecl;
-	LPDIRECT3DVERTEXSHADER9      cloudVertexShader;
-	LPDIRECT3DPIXELSHADER9       cloudPixelShader;
-
+	// enumeration
 	uint32_t				NumDrivers;
 	uint32_t				CurrentDriver;
 	int32_t					CurrentVideoMode;

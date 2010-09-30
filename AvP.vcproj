@@ -10285,6 +10285,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\3dc\VertexDeclaration.h"
+					>
+				</File>
+				<File
 					RelativePath="3dc\win95\VideoModes.h"
 					>
 				</File>

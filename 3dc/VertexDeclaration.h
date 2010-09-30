@@ -22,75 +22,84 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "VertexDeclaration.h"
-#include <assert.h>
+#ifndef _VertexDeclaration_h_
+#define _VertexDeclaration_h_
 
-VertexDeclaration::VertexDeclaration()
+#include "renderer.h"
+#include <stdint.h>
+#include <vector>
+
+enum VD_TYPE
 {
-	declaration = 0;
-	offset = 0;
-}
+	VDTYPE_FLOAT1,
+	VDTYPE_FLOAT2,
+	VDTYPE_FLOAT3,
+	VDTYPE_FLOAT4,
 
-bool VertexDeclaration::Create()
+	VDTYPE_COLOR,
+
+	VDTYPE_UBYTE4,
+	VDTYPE_SHORT2,
+	VDTYPE_SHORT4,
+
+	VDTYPE_UBYTE4N,
+	VDTYPE_SHORT2N,
+	VDTYPE_SHORT4N,
+	VDTYPE_USHORT2N,
+	VDTYPE_USHORT4N,
+	VDTYPE_UDEC3,
+	VDTYPE_DEC3N,
+	VDTYPE_FLOAT16_2,
+	VDTYPE_FLOAT16_4,
+	VDTYPE_UNUSED
+};
+
+enum VD_METHOD
 {
-	if (elements.size() == 0)
-	{
-		// log error
-		return false;
-	}
+	VDMETHOD_DEFAULT
+};
 
-	if (R_CreateVertexDeclaration(this->declaration, this->elements))
-	{
-		// we don't need this anymore?
-		this->elements.clear();
-		return true;
-	}
-	else return false;
-}
-
-bool VertexDeclaration::Set()
+enum VD_USAGE
 {
-	return R_SetVertexDeclaration(this->declaration);
-}
+	VDUSAGE_POSITION,
+	VDUSAGE_BLENDWEIGHT,
+	VDUSAGE_BLENDINDICES,
+	VDUSAGE_NORMAL,
+	VDUSAGE_PSIZE,
+	VDUSAGE_TEXCOORD,
+	VDUSAGE_TANGENT,
+	VDUSAGE_BINORMAL,
+	VDUSAGE_TESSFACTOR,
+	VDUSAGE_POSITIONT,
+	VDUSAGE_COLOR,
+	VDUSAGE_FOG,
+	VDUSAGE_DEPTH,
+	VDUSAGE_SAMPLE
+};
 
-void VertexDeclaration::Add(uint16_t stream, VD_TYPE type, VD_METHOD method, VD_USAGE usage, uint8_t usageIndex)
+struct vertexElement
 {
-	vertexElement newElement;
+	uint16_t	stream;     // Stream index
+	uint16_t	offset;     // Offset in the stream in bytes
+	VD_USAGE	usage;
+	VD_METHOD	method;
+	VD_TYPE		type;
+	uint8_t		usageIndex; // Semantic index
+};
 
-	uint16_t elementSize = 0;
+class VertexDeclaration
+{
+	private:
+		r_vertexDeclaration	declaration;
+		std::vector<vertexElement> elements;
+		uint32_t offset;
 
-	// calculate element size
-	switch (type)
-	{
-		case VDTYPE_FLOAT1:
-			elementSize = sizeof(float);
-			break;
-		case VDTYPE_FLOAT2:
-			elementSize = sizeof(float) * 2;
-			break;
-		case VDTYPE_FLOAT3:
-			elementSize = sizeof(float) * 3;
-			break;
-		case VDTYPE_FLOAT4:
-			elementSize = sizeof(float) * 4;
-			break;
-		case VDTYPE_COLOR:
-			elementSize = sizeof(uint32_t);
-			break;
-		default:
-			assert (1==0);
-			break;
-	}
+	public:
+		VertexDeclaration();
+		void Add(uint16_t stream, VD_TYPE type, VD_METHOD method, VD_USAGE usage, uint8_t usageIndex);
+		bool Create();
+		bool Set();
+		void Delete();
+};
 
-	newElement.stream = stream;
-	newElement.offset = this->offset;
-	newElement.usage = usage;
-	newElement.method = method;
-	newElement.type = type;
-	newElement.usageIndex = usageIndex;
-
-	// increment our declaration element size offset
-	this->offset += elementSize; 
-
-	this->elements.push_back(newElement);
-}
+#endif

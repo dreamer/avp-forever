@@ -47,6 +47,7 @@ D3DXMATRIX matView;
 D3DXMATRIX matIdentity;
 D3DXMATRIX matViewPort;
 
+/*
 // vertex declarations
 D3DVERTEXELEMENT9 declMain[] =
 {
@@ -82,11 +83,14 @@ D3DVERTEXELEMENT9 declTallFontText[] =
 	{0, 24, D3DDECLTYPE_FLOAT2,		D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,	1},
 	D3DDECL_END()
 };
+*/
 
+/*
 extern LPD3DXCONSTANTTABLE	vertexConstantTable;
 extern LPD3DXCONSTANTTABLE	orthoConstantTable;
 extern LPD3DXCONSTANTTABLE	fmvConstantTable;
 extern LPD3DXCONSTANTTABLE	cloudConstantTable;
+*/
 
 extern void RenderListInit();
 extern void RenderListDeInit();
@@ -1157,6 +1161,138 @@ static bool CreatePixelShader(const std::string &fileName, r_PixelShader &pixelS
 	d3d.lpD3DDevice->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), &pixelShader.shader);
 	pCode->Release();
 
+	return true;
+}
+
+static BYTE VD_USAGEtoD3DDECLUSAGE(VD_USAGE usage)
+{
+	BYTE d3dUsage;
+
+	switch (usage)
+	{
+		case VDUSAGE_POSITION:
+			d3dUsage = D3DDECLUSAGE_POSITION;
+			break;
+		case VDUSAGE_BLENDWEIGHT:
+			d3dUsage = D3DDECLUSAGE_BLENDWEIGHT;
+			break;
+		case VDUSAGE_BLENDINDICES:
+			d3dUsage = D3DDECLUSAGE_BLENDINDICES;
+			break;
+		case VDUSAGE_NORMAL:
+			d3dUsage = D3DDECLUSAGE_NORMAL;
+			break;
+		case VDUSAGE_PSIZE:
+			d3dUsage = D3DDECLUSAGE_PSIZE;
+			break;
+		case VDUSAGE_TEXCOORD:
+			d3dUsage = D3DDECLUSAGE_TEXCOORD;
+			break;
+		case VDUSAGE_TANGENT:
+			d3dUsage = D3DDECLUSAGE_TANGENT;
+			break;
+		case VDUSAGE_BINORMAL:
+			d3dUsage = D3DDECLUSAGE_BINORMAL;
+			break;
+		case VDUSAGE_TESSFACTOR:
+			d3dUsage = D3DDECLUSAGE_TESSFACTOR;
+			break;
+		case VDUSAGE_POSITIONT:
+			d3dUsage = D3DDECLUSAGE_POSITIONT;
+			break;
+		case VDUSAGE_COLOR:
+			d3dUsage = D3DDECLUSAGE_COLOR;
+			break;
+		case VDUSAGE_FOG:
+			d3dUsage = D3DDECLUSAGE_FOG;
+			break;
+		case VDUSAGE_DEPTH:
+			d3dUsage = D3DDECLUSAGE_DEPTH;
+			break;
+		case VDUSAGE_SAMPLE:
+			d3dUsage = D3DDECLUSAGE_SAMPLE;
+			break;
+		default:
+			assert (1==0);
+			break;
+	}
+
+	return d3dUsage;
+}
+
+static BYTE VD_TYPEtoD3DDECLTYPE(VD_TYPE type)
+{
+	BYTE d3dType;
+
+	switch (type)
+	{
+		case VDTYPE_FLOAT1:
+			d3dType = D3DDECLTYPE_FLOAT1;
+			break;
+		case VDTYPE_FLOAT2:
+			d3dType = D3DDECLTYPE_FLOAT2;
+			break;
+		case VDTYPE_FLOAT3:
+			d3dType = D3DDECLTYPE_FLOAT3;
+			break;
+		case VDTYPE_FLOAT4:
+			d3dType = D3DDECLTYPE_FLOAT4;
+			break;
+		case VDTYPE_COLOR:
+			d3dType = D3DDECLTYPE_D3DCOLOR;
+			break;
+		default:
+			assert (1==0);
+			break;
+	}
+
+	return d3dType;
+}
+
+bool R_CreateVertexDeclaration(r_vertexDeclaration &declaration, std::vector<vertexElement> &elements)
+{
+	std::vector<D3DVERTEXELEMENT9> d3dElement; // +1 for DECL_END()
+	d3dElement.resize(elements.size() + 1);
+
+	for (uint32_t i = 0; i < elements.size(); i++)
+	{
+		d3dElement[i].Stream = elements[i].stream;
+		d3dElement[i].Offset = elements[i].offset;
+		d3dElement[i].Type = VD_TYPEtoD3DDECLTYPE(elements[i].type);
+		d3dElement[i].Method = D3DDECLMETHOD_DEFAULT; // TODO
+		d3dElement[i].Usage = VD_USAGEtoD3DDECLUSAGE(elements[i].usage);
+		d3dElement[i].UsageIndex = elements[i].usageIndex;
+	}
+
+	// add D3DDECL_END() which is {0xFF,0,D3DDECLTYPE_UNUSED,0,0,0}
+	d3dElement[elements.size()].Stream = 0xFF;
+	d3dElement[elements.size()].Offset = 0;
+	d3dElement[elements.size()].Type = D3DDECLTYPE_UNUSED;
+	d3dElement[elements.size()].Method = 0;
+	d3dElement[elements.size()].Usage = 0;
+	d3dElement[elements.size()].UsageIndex = 0;
+
+	// try and create it now
+	LastError = d3d.lpD3DDevice->CreateVertexDeclaration(&d3dElement[0], &declaration);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Could not create vertex declaration");
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+bool R_SetVertexDeclaration(r_vertexDeclaration &declaration)
+{
+	LastError = d3d.lpD3DDevice->SetVertexDeclaration(declaration);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Could not set vertex declaration");
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
 	return true;
 }
 
@@ -2237,10 +2373,25 @@ bool InitialiseDirect3D()
 	Con_AddCommand("r_setfov", SetFov);
 
 	// create vertex declarations
-	CreateVertexDeclaration(declMain, &d3d.vertexDecl);
-	CreateVertexDeclaration(declOrtho, &d3d.orthoVertexDecl);
-	CreateVertexDeclaration(declFMV, &d3d.fmvVertexDecl);
-	CreateVertexDeclaration(declTallFontText, &d3d.cloudVertexDecl);
+	d3d.mainDecl = new VertexDeclaration;
+	d3d.mainDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
+	d3d.mainDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
+	d3d.mainDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    1);
+	d3d.mainDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
+	d3d.mainDecl->Create();
+
+	d3d.orthoDecl = new VertexDeclaration;
+	d3d.orthoDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
+	d3d.orthoDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
+	d3d.orthoDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
+	d3d.orthoDecl->Create();
+
+	d3d.fmvDecl = new VertexDeclaration;
+	d3d.fmvDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
+	d3d.fmvDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
+	d3d.fmvDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 1);
+	d3d.fmvDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 2);
+	d3d.fmvDecl->Create();
 
 /*
 	// create vertex shaders
@@ -2415,21 +2566,21 @@ void ReleaseDirect3D()
 //	SAFE_RELEASE(cloudConstantTable);
 
 	// release vertex declarations
-	SAFE_RELEASE(d3d.vertexDecl);
-	SAFE_RELEASE(d3d.orthoVertexDecl);
-	SAFE_RELEASE(d3d.fmvVertexDecl);
-	SAFE_RELEASE(d3d.cloudVertexDecl);
+//	SAFE_RELEASE(d3d.vertexDecl);
+//	SAFE_RELEASE(d3d.orthoVertexDecl);
+//	SAFE_RELEASE(d3d.fmvVertexDecl);
+//	SAFE_RELEASE(d3d.cloudVertexDecl);
 
 	// release pixel shaders
-	SAFE_RELEASE(d3d.pixelShader);
-	SAFE_RELEASE(d3d.fmvPixelShader);
-	SAFE_RELEASE(d3d.cloudPixelShader);
+//	SAFE_RELEASE(d3d.pixelShader);
+///	SAFE_RELEASE(d3d.fmvPixelShader);
+//	SAFE_RELEASE(d3d.cloudPixelShader);
 
 	// release vertex shaders
-	SAFE_RELEASE(d3d.vertexShader);
-	SAFE_RELEASE(d3d.fmvVertexShader);
-	SAFE_RELEASE(d3d.orthoVertexShader);
-	SAFE_RELEASE(d3d.cloudVertexShader);
+//	SAFE_RELEASE(d3d.vertexShader);
+//	SAFE_RELEASE(d3d.fmvVertexShader);
+//	SAFE_RELEASE(d3d.orthoVertexShader);
+//	SAFE_RELEASE(d3d.cloudVertexShader);
 
 	// clean up render list classes
 	RenderListDeInit();
