@@ -246,34 +246,29 @@ bool ExecuteBuffer()
 	// sort the list of render objects
 	particleList->Sort();
 	mainList->Sort();
-/*
-	LastError = d3d.lpD3DDevice->SetVertexDeclaration(d3d.vertexDecl);
-	if (FAILED(LastError))
+
 	{
-		LogDxError(LastError, __LINE__, __FILE__);
+		// set vertex declaration
+		d3d.mainDecl->Set();
+
+		// set main rendering vb and ibs to active
+		d3d.mainVB->Set();
+		d3d.mainIB->Set();
+
+		// set main shaders to active
+		d3d.effectSystem->SetActive(d3d.mainEffect);
+
+		#ifndef USE_D3DVIEWTRANSFORM
+			D3DXMatrixIdentity(&viewMatrix); // we want to use the identity matrix in this case
+		#endif
+
+		// we don't need world matrix here as avp has done all the world transforms itself
+		R_MATRIX matWorldViewProj = viewMatrix * matProjection;
+		d3d.effectSystem->SetMatrix(d3d.mainEffect, "WorldViewProj", matWorldViewProj);
+
+		// draw our main list (level geometry, player weapon etc)
+		mainList->Draw();
 	}
-*/
-	d3d.mainDecl->Set();
-
-	// set main rendering vb and ibs to active
-	d3d.mainVB->Set();
-	d3d.mainIB->Set();
-
-	// set main shaders to active
-	d3d.effectSystem->SetActive(d3d.mainEffect);
-
-	#ifndef USE_D3DVIEWTRANSFORM
-		D3DXMatrixIdentity(&viewMatrix); // we want to use the identity matrix in this case
-	#endif
-
-	// we don't need world matrix here as avp has done all the world transforms itself
-//	D3DXMATRIXA16 matWorldViewProj = viewMatrix * matProjection;
-	R_MATRIX matWorldViewProj = viewMatrix * matProjection;
-//	vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matWorldViewProj);
-	d3d.effectSystem->SetMatrix(d3d.mainEffect, "WorldViewProj", matWorldViewProj);
-
-	// draw our main list (level geometry, player weapon etc)
-	mainList->Draw();
 
 	// render any particles
 	{
@@ -281,7 +276,6 @@ bool ExecuteBuffer()
 		d3d.particleVB->Set();
 		d3d.particleIB->Set();
 
-//		vertexConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matProjection);
 		d3d.effectSystem->SetMatrix(d3d.mainEffect, "WorldViewProj", matProjection);
 
 		DisableZBufferWrites();
@@ -298,20 +292,14 @@ bool ExecuteBuffer()
 	{
 		d3d.orthoVB->Set();
 		d3d.orthoIB->Set();
-/*
-		LastError = d3d.lpD3DDevice->SetVertexDeclaration(d3d.orthoVertexDecl);
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-		}
-*/
+		
+		// set vertex declaration
 		d3d.orthoDecl->Set();
 
 		// set orthographic projection shaders as active
 		d3d.effectSystem->SetActive(d3d.orthoEffect);
 
 		// pass the orthographicp projection matrix to the vertex shader
-//		orthoConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
 		d3d.effectSystem->SetMatrix(d3d.orthoEffect, "WorldViewProj", matOrtho);
 
 		// daw the ortho list
@@ -448,7 +436,6 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 	fmvVerts[3].u3 = 1.0f;
 	fmvVerts[3].v3 = 0.0f;
 
-//	d3d.lpD3DDevice->SetVertexDeclaration(d3d.fmvVertexDecl);
 	d3d.fmvDecl->Set();
 
 	// set the yuv fmv shader
@@ -633,7 +620,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 	}
 
 #else // turned off for testing
-//	CheckOrthoBuffer(4, textureID, TRANSLUCENCY_GLOWING, TEXTURE_CLAMP);
+
 	orthoList->AddItem(4, textureID, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 	// bottom left

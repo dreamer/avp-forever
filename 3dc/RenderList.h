@@ -72,6 +72,7 @@ class RenderList
 	void RenderList::Init(size_t size);
 	size_t RenderList::GetCapacity() const { return capacity; }
 	uint32_t RenderList::GetVertexCount() const { return vertexCount; }
+	uint32_t RenderList::GetIndexCount() const { return indexCount; }
 	uint32_t RenderList::GetSize() const { return indexCount; }
 	void RenderList::Sort();
 	void RenderList::AddTriangle(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n);

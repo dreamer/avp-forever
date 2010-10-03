@@ -34,6 +34,7 @@
 
 extern "C"
 {
+	#include "AvP_UserProfile.h"
 	extern HWND hWndMain;
 }
 
@@ -176,13 +177,6 @@ int NearestSuperiorPow2(int i)
 bool ReleaseVolatileResources()
 {
 	Tex_ReleaseDynamicTextures();
-
-//	SAFE_RELEASE(d3d.lpD3DIndexBuffer);
-//	SAFE_RELEASE(d3d.lpD3DVertexBuffer);
-//	SAFE_RELEASE(d3d.lpD3DOrthoVertexBuffer);
-//	SAFE_RELEASE(d3d.lpD3DOrthoIndexBuffer);
-//	SAFE_RELEASE(d3d.lpD3DParticleVertexBuffer);
-//	SAFE_RELEASE(d3d.lpD3DParticleIndexBuffer);
 
 	d3d.particleVB->Release();
 	d3d.particleIB->Release();
@@ -572,75 +566,6 @@ bool CreateVolatileResources()
 {
 	Tex_ReloadDynamicTextures();
 
-#if 0
-	// create dynamic vertex buffer
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DLVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, /*D3DFVF_LVERTEX*/0, D3DPOOL_DEFAULT, &d3d.lpD3DVertexBuffer, NULL);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	// create index buffer
-	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DIndexBuffer, NULL);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-#endif
-
-#if 0
-	// create our 2D vertex buffer
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(4 * 2000 * sizeof(ORTHOVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, /*D3DFVF_ORTHOVERTEX*/0, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoVertexBuffer, NULL);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	// create our 2D index buffer
-	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DOrthoIndexBuffer, NULL);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-#endif
-
-#if 0
-	// create particle vertex buffer
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(MAX_VERTEXES * sizeof(D3DLVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &d3d.lpD3DParticleVertexBuffer, NULL);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	// create particle index buffer
-	LastError = d3d.lpD3DDevice->CreateIndexBuffer(MAX_INDICES * 3 * sizeof(WORD), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d.lpD3DParticleIndexBuffer, NULL);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-#endif
-/*
-	LastError = d3d.lpD3DDevice->SetStreamSource(0, d3d.lpD3DVertexBuffer, 0, sizeof(D3DLVERTEX));
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-*/
-/*
-	LastError = d3d.lpD3DDevice->SetFVF(D3DFVF_LVERTEX);
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-*/
 	// test vertex buffer
 	d3d.particleVB = new VertexBuffer;
 	d3d.particleVB->Create(MAX_VERTEXES, FVF_LVERTEX, USAGE_DYNAMIC);
@@ -1055,6 +980,7 @@ r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	return destTexture;
 }
 
+/*
 static bool CreateVertexDeclaration(const D3DVERTEXELEMENT9* pVertexElements, LPDIRECT3DVERTEXDECLARATION9 *vertexDeclaration)
 {
 	LastError = d3d.lpD3DDevice->CreateVertexDeclaration(pVertexElements, vertexDeclaration);
@@ -1067,6 +993,7 @@ static bool CreateVertexDeclaration(const D3DVERTEXELEMENT9* pVertexElements, LP
 
 	return true;
 }
+*/
 
 static bool CreateVertexShader(const std::string &fileName, r_VertexShader &vertexShader)
 {
@@ -1251,8 +1178,8 @@ static BYTE VD_TYPEtoD3DDECLTYPE(VD_TYPE type)
 
 bool R_CreateVertexDeclaration(r_vertexDeclaration &declaration, std::vector<vertexElement> &elements)
 {
-	std::vector<D3DVERTEXELEMENT9> d3dElement; // +1 for DECL_END()
-	d3dElement.resize(elements.size() + 1);
+	std::vector<D3DVERTEXELEMENT9> d3dElement;
+	d3dElement.resize(elements.size() + 1); // +1 for DECL_END()
 
 	for (uint32_t i = 0; i < elements.size(); i++)
 	{
@@ -1290,6 +1217,18 @@ bool R_SetVertexDeclaration(r_vertexDeclaration &declaration)
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Could not set vertex declaration");
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+	return true;
+}
+
+bool R_ReleaseVertexDeclaration(r_vertexDeclaration &declaration)
+{
+	LastError = declaration->Release();
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Could not release vertex declaration");
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
@@ -2393,21 +2332,6 @@ bool InitialiseDirect3D()
 	d3d.fmvDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 2);
 	d3d.fmvDecl->Create();
 
-/*
-	// create vertex shaders
-	if (!CreateVertexShader("vertex.vsh", &d3d.vertexShader, &vertexConstantTable))
-	{
-		return false;
-	}
-	CreateVertexShader("orthoVertex.vsh", &d3d.orthoVertexShader, &orthoConstantTable);
-	CreateVertexShader("fmvVertex.vsh", &d3d.fmvVertexShader, &fmvConstantTable);
-	CreateVertexShader("tallFontTextVertex.vsh", &d3d.cloudVertexShader, &cloudConstantTable);
-*/
-	// create pixel shaders
-//	CreatePixelShader("pixel.psh", &d3d.pixelShader);
-//	CreatePixelShader("fmvPixel.psh", &d3d.fmvPixelShader);
-//	CreatePixelShader("tallFontTextPixel.psh", &d3d.cloudPixelShader);
-
 	r_Texture whiteTexture;
 
 	// create a 1x1 resolution white texture to set to shader for sampling when we don't want to texture an object (eg what was NULL texture in fixed function pipeline)
@@ -2550,8 +2474,6 @@ void FlipBuffers()
 
 void ReleaseDirect3D()
 {
-//	DeallocateAllImages();
-
 	Font_Release();
 
 	Tex_DeInit();
@@ -2566,10 +2488,9 @@ void ReleaseDirect3D()
 //	SAFE_RELEASE(cloudConstantTable);
 
 	// release vertex declarations
-//	SAFE_RELEASE(d3d.vertexDecl);
-//	SAFE_RELEASE(d3d.orthoVertexDecl);
-//	SAFE_RELEASE(d3d.fmvVertexDecl);
-//	SAFE_RELEASE(d3d.cloudVertexDecl);
+	delete d3d.mainDecl;
+	delete d3d.orthoDecl;
+	delete d3d.fmvDecl;
 
 	// release pixel shaders
 //	SAFE_RELEASE(d3d.pixelShader);
@@ -2628,8 +2549,7 @@ void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 	{
 	 	case TRANSLUCENCY_OFF:
 		{
-//bjd - fixme			if (TRIPTASTIC_CHEATMODE || MOTIONBLUR_CHEATMODE)
-			if (0)
+			if (TRIPTASTIC_CHEATMODE || MOTIONBLUR_CHEATMODE)
 			{
 				if (D3DAlphaBlendEnable != TRUE)
 				{

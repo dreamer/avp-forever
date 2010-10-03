@@ -96,10 +96,11 @@ class VertexDeclaration
 
 	public:
 		VertexDeclaration();
+		~VertexDeclaration();
 		void Add(uint16_t stream, VD_TYPE type, VD_METHOD method, VD_USAGE usage, uint8_t usageIndex);
 		bool Create();
 		bool Set();
-		void Delete();
+		bool Release();
 };
 
 #endif

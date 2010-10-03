@@ -31,6 +31,11 @@ VertexDeclaration::VertexDeclaration()
 	offset = 0;
 }
 
+VertexDeclaration::~VertexDeclaration()
+{
+	Release();
+}
+
 bool VertexDeclaration::Create()
 {
 	if (elements.size() == 0)
@@ -46,6 +51,11 @@ bool VertexDeclaration::Create()
 		return true;
 	}
 	else return false;
+}
+
+bool VertexDeclaration::Release()
+{
+	return R_ReleaseVertexDeclaration(this->declaration);
 }
 
 bool VertexDeclaration::Set()

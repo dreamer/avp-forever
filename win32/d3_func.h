@@ -88,6 +88,7 @@ r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex);
 // vertex declaration
 bool R_CreateVertexDeclaration(r_vertexDeclaration &declaration, std::vector<struct vertexElement> &elements);
 bool R_SetVertexDeclaration(r_vertexDeclaration &declaration);
+bool R_ReleaseVertexDeclaration(r_vertexDeclaration &declaration);
 
 // shader functions
 bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexShader);
