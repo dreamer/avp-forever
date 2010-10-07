@@ -3470,7 +3470,7 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 
 #endif		/* UseKevinsModifiedSSRPI */
 
-int GetMVSIndex(TXANIMHEADER *txah, EULER *e )
+int GetMVSIndex(TXANIMHEADER *txah, EULER *e)
 {
 	int EulerXIndex, EulerYIndex;
 	int theta,phi; //angles in spherical polar coordinates
@@ -3484,7 +3484,9 @@ int GetMVSIndex(TXANIMHEADER *txah, EULER *e )
 	phi&=wrap360;
 
 	if (phi == deg180)
+	{
 		phi--;
+	}
 
 	if (!v.vx && !v.vz)
 	{
@@ -3504,8 +3506,8 @@ int GetMVSIndex(TXANIMHEADER *txah, EULER *e )
 			}
 			else
 			{
-				theta+=deg180;
-				theta =-theta;
+				theta += deg180;
+				theta =- theta;
 				theta &= wrap360;
 			}
 		}
@@ -3515,9 +3517,9 @@ int GetMVSIndex(TXANIMHEADER *txah, EULER *e )
 
 			if (v.vx < 0)
 			{
-				theta =  -theta;
+				theta = -theta;
 			}
-			theta+=deg180;
+			theta += deg180;
 			theta &= wrap360;
 		}
 	}
@@ -4652,6 +4654,8 @@ void RenderParticle(PARTICLE *particlePtr)
 			else AddParticle(particlePtr, &VerticesBuffer[0]);//D3D_Particle_Output(particlePtr,VerticesBuffer);
 		}
 */
+		ParticlePolygon_Construct(particlePtr); // bjd - copy from commented out code above, remove this is above is uncommented
+
 		AddParticle(particlePtr, VerticesBuffer);
 	}
 }
@@ -4960,17 +4964,10 @@ void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerti
 	/* copy the data to the list for processing later */
 	int i = RenderPolygon.NumberOfVertices;
 	int maxZ = 0;
-	int breaker = 0;
+
 	RENDERVERTEX *vertexPtr = TranslucentPolygons[CurrentNumberOfTranslucentPolygons].Vertices;
 
 	TranslucentPolygons[CurrentNumberOfTranslucentPolygons].NumberOfVertices = i;
-
-	if ((renderVerticesPtr->X == 587)
-	&& (renderVerticesPtr->Y == 550))
-
-	{
-		int breaker = 123;
-	}
 
 	do
 	{
@@ -5248,7 +5245,7 @@ void RenderSky(void)
 					translatedPts[i].vz += 32768*z;
 
 					translatedPts[i].vx += Global_VDB_Ptr->VDB_World.vx;
-					//translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy;//-10000;
+					translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy;//-10000;
 					translatedPts[i].vz += Global_VDB_Ptr->VDB_World.vz;
 
 //					TranslatePointIntoViewspace(&translatedPts[i]);
