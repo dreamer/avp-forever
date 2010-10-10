@@ -20,13 +20,13 @@ sampler2D Tex0;
 sampler2D Tex1;
 
 
-// Name: Simple Pixel Shader
+// Name: Large font smoke effect shader
 // Type: Pixel shader
-// Desc: Fetch texture and blend with constant color
+// Desc: Blends the cloud texture on to the menu text
 //
 PS_OUTPUT ps_main( in PS_INPUT In )
 {
-	PS_OUTPUT Out; //create an output pixel
+	PS_OUTPUT Out; // create an output pixel
 
 	float4 destColour;
 	float4 srcColour1 = tex2D(Tex0, In.Texture1);
@@ -37,7 +37,7 @@ PS_OUTPUT ps_main( in PS_INPUT In )
 		destColour = srcColour1 * srcColour2 * In.Diffuse;
 	}
 
-	Out.Color = destColour;	//tex2D(Tex0, In.Texture1) * In.Diffuse;
+	Out.Color = destColour;
 
-	return Out; //return output pixel
+	return Out; // return output pixel
 }

@@ -20,30 +20,31 @@ struct VS_OUTPUT
 
 // Global variables
 float4x4 WorldViewProj;
-int	 CloakingPhase;
+int  CloakingPhase;
 int  pX;
 
 
-// Name: Simple Vertex Shader
+// Name: Large font smoke effect shader
 // Type: Vertex shader
-// Desc: Vertex transformation and texture coord pass-through
+// Desc: Animated cloud texture based on constant values CloakingPhase and pX
 //
 VS_OUTPUT vs_main( in VS_INPUT In )
 {
-    VS_OUTPUT Out;                      //create an output vertex
+    VS_OUTPUT Out;	// create an output vertex
     
-	float texX = pX + (CloakingPhase/64) * 0.005f;
+    float texX = pX + (CloakingPhase/64) * 0.005f;
     float texY = (CloakingPhase/128) * 0.005f;
     
-    In.Texture2.x += texX;
-    In.Texture2.y += texY;
+    // -= here instead of += to get the effect to move left to right 
+    In.Texture2.x -= texX;
+    In.Texture2.y -= texY;
 
-    Out.Position = mul(In.Position, WorldViewProj);  //apply vertex transformation
+    Out.Position = mul(In.Position, WorldViewProj);	// apply vertex transformation
 
-    Out.Texture1 = In.Texture1;          //copy original texcoords
+    Out.Texture1 = In.Texture1;	// copy original texcoords
     Out.Texture2 = In.Texture2; 
     
     Out.Diffuse = In.Diffuse;
 
-    return Out;                         //return output vertex
+    return Out;	// return output vertex
 }
