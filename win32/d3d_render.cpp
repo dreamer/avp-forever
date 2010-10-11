@@ -16,9 +16,6 @@
 #include "avp_userprofile.h"
 #include "avp_menugfx.hpp"
 
-extern void DisableZBufferWrites();
-extern void EnableZBufferWrites();
-
 // set to 'null' texture initially
 uint32_t currentWaterTexture = NO_TEXTURE;
 
@@ -258,10 +255,6 @@ bool ExecuteBuffer()
 		// set main shaders to active
 		d3d.effectSystem->SetActive(d3d.mainEffect);
 
-		#ifndef USE_D3DVIEWTRANSFORM
-			D3DXMatrixIdentity(&viewMatrix); // we want to use the identity matrix in this case
-		#endif
-
 		// we don't need world matrix here as avp has done all the world transforms itself
 		R_MATRIX matWorldViewProj = viewMatrix * matProjection;
 		d3d.effectSystem->SetMatrix(d3d.mainEffect, "WorldViewProj", matWorldViewProj);
@@ -278,14 +271,12 @@ bool ExecuteBuffer()
 
 		d3d.effectSystem->SetMatrix(d3d.mainEffect, "WorldViewProj", matProjection);
 
-		DisableZBufferWrites();
-		ChangeTextureAddressMode(TEXTURE_CLAMP);
+//		ChangeTextureAddressMode(TEXTURE_CLAMP);
 
 		// Draw the particles in the list
 		particleList->Draw();
 
-		EnableZBufferWrites();
-		ChangeTextureAddressMode(TEXTURE_WRAP);
+//		ChangeTextureAddressMode(TEXTURE_WRAP);
 	}
 
 	// render any orthographic quads
@@ -550,23 +541,20 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 	float x2 = WPos2DC(topX + charWidth);
 	float y2 = HPos2DC(topY + charHeight);
 
-#if 0
+#if 1
 
 	R_SetTexture(0, textureID);
 	R_SetTexture(1, AVPMENUGFX_CLOUDY);
 
-	d3d.lpD3DDevice->SetVertexDeclaration(d3d.cloudVertexDecl);
-	d3d.lpD3DDevice->SetVertexShader(d3d.cloudVertexShader);
-	d3d.lpD3DDevice->SetPixelShader(d3d.cloudPixelShader);
+	// set vertex declaration
+	d3d.tallFontText->Set();
 
-//	cloudConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
-//	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "CloakingPhase", CloakingPhase);
-//	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "pX", topX);
-	
-	if (FAILED(LastError))
-	{
-		OutputDebugString("SetInt failed\n");
-	}
+	// set orthographic projection shaders as active
+	d3d.effectSystem->SetActive(d3d.cloudEffect);
+
+	d3d.effectSystem->SetMatrix(d3d.cloudEffect, "WorldViewProj", matOrtho);
+	d3d.effectSystem->SetInt(d3d.cloudEffect, "CloakingPhase", CloakingPhase);
+	d3d.effectSystem->SetInt(d3d.cloudEffect, "pX", static_cast<int32_t>(topX));
 
 	ChangeFilteringMode(FILTERING_BILINEAR_ON);
 
@@ -616,7 +604,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, testOrtho, sizeof(ORTHOVERTEX));
 	if (FAILED(LastError)) 
 	{
-		OutputDebugString(" draw menu quad failed ");
+		OutputDebugString("draw menu quad failed\n");
 	}
 
 #else // turned off for testing
@@ -1662,23 +1650,27 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 
 void D3D_DecalSystem_Setup(void)
 {
+/*
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
 	LockExecuteBuffer();
 
-	DisableZBufferWrites();
+	ChangeZWriteEnable(ZWRITE_DISABLED);
+*/
 }
 
 void D3D_DecalSystem_End(void)
 {
+
 	DrawParticles();
 	DrawCoronas();
-
+/*
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
 	LockExecuteBuffer();
 
-	EnableZBufferWrites();
+	ChangeZWriteEnable(ZWRITE_ENABLED);
+*/
 }
 
 void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
@@ -1754,7 +1746,7 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 				);
 	}
 
-	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, decalDescPtr->TranslucencyType);
+	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, decalDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP, ZWRITE_DISABLED);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
@@ -1820,7 +1812,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	// 1: Check our VB and IBs are big enough?
 
 	// 2: If we're ok to add, add a RenderItem
-	particleList->AddItem(RenderPolygon.NumberOfVertices, textureID, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON);
+	particleList->AddItem(RenderPolygon.NumberOfVertices, textureID, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP, ZWRITE_DISABLED);
 
 	RCOLOR colour;
 
@@ -2469,7 +2461,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 	RecipW = 1.0f / (float) texWidth;
 	RecipH = 1.0f / (float) texHeight;
 
-	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
+	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode, FILTERING_BILINEAR_ON, TEXTURE_WRAP, ZWRITE_DISABLED);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{

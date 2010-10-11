@@ -5245,7 +5245,7 @@ void RenderSky(void)
 					translatedPts[i].vz += 32768*z;
 
 					translatedPts[i].vx += Global_VDB_Ptr->VDB_World.vx;
-					translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy;//-10000;
+					translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy+1000;
 					translatedPts[i].vz += Global_VDB_Ptr->VDB_World.vz;
 
 //					TranslatePointIntoViewspace(&translatedPts[i]);

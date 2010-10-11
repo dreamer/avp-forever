@@ -31,11 +31,18 @@ enum TEXTURE_ADDRESS_MODE
 	TEXTURE_WRAP
 };
 
+enum ZWRITE_ENABLE
+{
+	ZWRITE_DISABLED,
+	ZWRITE_ENABLED
+};
+
 typedef struct
 {
-	enum TRANSLUCENCY_TYPE TranslucencyMode;
-	enum FILTERING_MODE_ID FilteringMode;
-	enum TEXTURE_ADDRESS_MODE TextureAddressMode;
+	enum TRANSLUCENCY_TYPE		TranslucencyMode;
+	enum FILTERING_MODE_ID		FilteringMode;
+	enum TEXTURE_ADDRESS_MODE	TextureAddressMode;
+	enum ZWRITE_ENABLE			ZWriteEnable;
 	int FogDistance;
 	unsigned int FogIsOn :1;
 	unsigned int WireFrameModeIsOn :1;

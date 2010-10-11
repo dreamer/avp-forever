@@ -86,13 +86,6 @@ D3DVERTEXELEMENT9 declTallFontText[] =
 };
 */
 
-/*
-extern LPD3DXCONSTANTTABLE	vertexConstantTable;
-extern LPD3DXCONSTANTTABLE	orthoConstantTable;
-extern LPD3DXCONSTANTTABLE	fmvConstantTable;
-extern LPD3DXCONSTANTTABLE	cloudConstantTable;
-*/
-
 extern void RenderListInit();
 extern void RenderListDeInit();
 
@@ -113,7 +106,6 @@ bool D3DAlphaTestEnable = FALSE;
 static bool D3DStencilEnable;
 D3DCMPFUNC D3DStencilFunc;
 static D3DCMPFUNC D3DZFunc;
-bool ZWritesEnabled = false;
 
 int	VideoModeColourDepth;
 int	NumAvailableVideoModes;
@@ -1292,6 +1284,19 @@ bool R_SetVertexShaderMatrix(r_VertexShader &vertexShader, const char* constant,
 	return true;
 }
 
+bool R_SetVertexShaderInt(r_VertexShader &vertexShader, const char* constant, int32_t n)
+{
+	LastError = vertexShader.constantTable->SetInt(d3d.lpD3DDevice, constant, n);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't set int for vertex shader " + vertexShader.shaderName);
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
 bool R_SetPixelShader(r_PixelShader &pixelShader)
 {
 	LastError = d3d.lpD3DDevice->SetPixelShader(pixelShader.shader);
@@ -2332,6 +2337,13 @@ bool InitialiseDirect3D()
 	d3d.fmvDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 2);
 	d3d.fmvDecl->Create();
 
+	d3d.tallFontText = new VertexDeclaration;
+	d3d.tallFontText->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
+	d3d.tallFontText->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
+	d3d.tallFontText->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
+	d3d.tallFontText->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 1);
+	d3d.tallFontText->Create();
+
 	r_Texture whiteTexture;
 
 	// create a 1x1 resolution white texture to set to shader for sampling when we don't want to texture an object (eg what was NULL texture in fixed function pipeline)
@@ -2371,10 +2383,10 @@ bool InitialiseDirect3D()
 
 	d3d.effectSystem = new EffectManager;
 
-	d3d.mainEffect  = d3d.effectSystem->AddEffect("main", "vertex.vsh", "pixel.psh");
-	d3d.orthoEffect = d3d.effectSystem->AddEffect("ortho", "orthoVertex.vsh", "pixel.psh");
-	d3d.fmvEffect   = d3d.effectSystem->AddEffect("fmv", "fmvVertex.vsh", "fmvPixel.psh");
-	d3d.cloudEffect = d3d.effectSystem->AddEffect("cloud", "tallFontTextVertex.vsh", "tallFontTextPixel.psh");
+	d3d.mainEffect  = d3d.effectSystem->AddEffect("main", "vertex.vsh", "pixel.psh", d3d.mainDecl);
+	d3d.orthoEffect = d3d.effectSystem->AddEffect("ortho", "orthoVertex.vsh", "pixel.psh", d3d.orthoDecl);
+	d3d.fmvEffect   = d3d.effectSystem->AddEffect("fmv", "fmvVertex.vsh", "fmvPixel.psh", d3d.fmvDecl);
+	d3d.cloudEffect = d3d.effectSystem->AddEffect("cloud", "tallFontTextVertex.vsh", "tallFontTextPixel.psh", d3d.tallFontText);
 
 	Con_Init();
 	Net_Initialise();
@@ -2491,6 +2503,7 @@ void ReleaseDirect3D()
 	delete d3d.mainDecl;
 	delete d3d.orthoDecl;
 	delete d3d.fmvDecl;
+	delete d3d.tallFontText;
 
 	// release pixel shaders
 //	SAFE_RELEASE(d3d.pixelShader);
@@ -2695,13 +2708,44 @@ void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
 				D3DSrcBlend = D3DBLEND_ZERO;
 			}
-			if (D3DDestBlend != D3DBLEND_ONE) {
+			if (D3DDestBlend != D3DBLEND_ONE) 
+			{
 				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 				D3DDestBlend = D3DBLEND_ONE;
 			}
 		}
 		default: break;
 	}
+}
+
+void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable)
+{
+	if (CurrentRenderStates.ZWriteEnable == zWriteEnable)
+		return;
+
+	if (zWriteEnable == ZWRITE_ENABLED)
+	{
+		LastError = d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DRS_ZWRITEENABLE D3DZB_TRUE failed\n");
+		}
+	}
+	else if (zWriteEnable == ZWRITE_DISABLED)
+	{
+		LastError = d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DRS_ZWRITEENABLE D3DZB_FALSE failed\n");
+			OutputDebugString("DISABLING Z WRITES\n");
+		}
+	}
+	else
+	{
+		LOCALASSERT("Unrecognized ZWriteEnable mode"==0);
+	}
+
+	CurrentRenderStates.ZWriteEnable = zWriteEnable;
 }
 
 void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode)
@@ -2717,19 +2761,19 @@ void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode)
 		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
 		if (FAILED(LastError))
 		{
-			OutputDebugString("D3DSAMP_ADDRESSU Wrap fail");
+			OutputDebugString("D3DSAMP_ADDRESSU Wrap fail\n");
 		}
 
 		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 		if (FAILED(LastError))
 		{
-			OutputDebugString("D3DSAMP_ADDRESSV Wrap fail");
+			OutputDebugString("D3DSAMP_ADDRESSV Wrap fail\n");
 		}
 
 		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
 		if (FAILED(LastError))
 		{
-			OutputDebugString("D3DSAMP_ADDRESSW Wrap fail");
+			OutputDebugString("D3DSAMP_ADDRESSW Wrap fail\n");
 		}
 	}
 	else if (textureAddressMode == TEXTURE_CLAMP)
@@ -2738,19 +2782,19 @@ void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode)
 		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
 		if (FAILED(LastError))
 		{
-			OutputDebugString("D3DSAMP_ADDRESSU Clamp fail");
+			OutputDebugString("D3DSAMP_ADDRESSU Clamp fail\n");
 		}
 
 		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 		if (FAILED(LastError))
 		{
-			OutputDebugString("D3DSAMP_ADDRESSV Clamp fail");
+			OutputDebugString("D3DSAMP_ADDRESSV Clamp fail\n");
 		}
 
 		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
 		if (FAILED(LastError))
 		{
-			OutputDebugString("D3DSAMP_ADDRESSW Clamp fail");
+			OutputDebugString("D3DSAMP_ADDRESSW Clamp fail\n");
 		}
 	}
 }
@@ -2797,24 +2841,6 @@ void ToggleWireframe()
 	}
 }
 
-void EnableZBufferWrites()
-{
-	if (!ZWritesEnabled)
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE);
-		ZWritesEnabled = true;
-	}
-}
-
-void DisableZBufferWrites()
-{
-	if (ZWritesEnabled)
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE);
-		ZWritesEnabled = false;
-	}
-}
-
 bool SetRenderStateDefaults()
 {
 /*
@@ -2847,36 +2873,60 @@ bool SetRenderStateDefaults()
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF,			*((DWORD*)&alphaRef));//(DWORD)0.5);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAFUNC,		D3DCMP_GREATER);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,	TRUE);
-/*
-	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSPRITEENABLE, TRUE);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSCALEENABLE,  TRUE);
-
-	float pointSize = 1.0f;
-	float pointScale = 1.0f;
-	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSIZE,	*((DWORD*)&pointSize));
-	d3d.lpD3DDevice->SetRenderState(D3DRS_POINTSCALE_B, *((DWORD*)&pointScale));
-*/
-//	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
-//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-
-	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 
 	d3d.lpD3DDevice->SetRenderState(D3DRS_CULLMODE,			D3DCULL_NONE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_CLIPPING,			TRUE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_LIGHTING,			FALSE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_SPECULARENABLE,	TRUE);
+	
+	{
+		// set transparency to TRANSLUCENCY_OFF
+		d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+		D3DAlphaBlendEnable = FALSE;
+		
+		d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+		D3DSrcBlend = D3DBLEND_ONE;
+		
+		d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+		D3DDestBlend = D3DBLEND_ZERO;
 
-	// enable z-buffer
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+		// make sure render state tracking reflects above setting
+		CurrentRenderStates.TranslucencyMode = TRANSLUCENCY_OFF;
+	}
 
-	// enable z writes (already on by default)
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-	ZWritesEnabled = true;
+	{
+		// enable bilinear filtering (FILTERING_BILINEAR_ON)
+		d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+		d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 
-	// set less + equal z buffer test
-	d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
-	D3DZFunc = D3DCMP_LESSEQUAL;
+		// make sure render state tracking reflects above setting
+		CurrentRenderStates.FilteringMode = FILTERING_BILINEAR_ON;
+	}
+
+	{
+		// set texture addressing mode to clamp (TEXTURE_CLAMP)
+		d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+		d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+		d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
+
+		// make sure render state tracking reflects above setting
+		CurrentRenderStates.TextureAddressMode = TEXTURE_CLAMP;
+	}
+
+	{
+		// enable z-buffer
+		d3d.lpD3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+
+		// enable z writes (already on by default)
+		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+
+		// make sure render state tracking reflects above setting
+		CurrentRenderStates.ZWriteEnable = ZWRITE_ENABLED;
+
+		// set less + equal z buffer test
+		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+		D3DZFunc = D3DCMP_LESSEQUAL;
+	}
 
 	return true;
 }

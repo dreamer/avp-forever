@@ -132,7 +132,7 @@ void RenderList::AddIndices(uint16_t *indexArray, uint32_t a, uint32_t b, uint32
 	this->indexCount+=3;
 }
 
-void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode, enum TEXTURE_ADDRESS_MODE textureAddress)
+void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode, enum TEXTURE_ADDRESS_MODE textureAddress, enum ZWRITE_ENABLE zWriteEnable)
 {
 	assert(numVerts != 0);
 
@@ -146,7 +146,7 @@ void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENC
 	uint32_t realNumVerts = GetRealNumVerts(numVerts);
 
 	Items[listIndex].sortKey = 0; // zero it out
-	Items[listIndex].sortKey = (textureID << 24) | (translucencyMode << 20) | (filteringMode << 16) | (textureAddress << 15);
+	Items[listIndex].sortKey = (textureID << 24) | (translucencyMode << 20) | (filteringMode << 16) | (textureAddress << 15) | (zWriteEnable << 14);
 
 	// lets see if we can merge this item with the previous item
 	if ((listIndex != 0) &&		// only do this check if we're not adding the first item
@@ -195,16 +195,12 @@ void RenderList::Draw()
 		ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((it->sortKey >> 20) & 15));
 		ChangeFilteringMode((enum FILTERING_MODE_ID)	((it->sortKey >> 16) & 15));
 		ChangeTextureAddressMode((enum TEXTURE_ADDRESS_MODE) ((it->sortKey >> 15) & 1));
+		ChangeZWriteEnable((enum ZWRITE_ENABLE) ((it->sortKey >> 14) & 1));
 
 		uint32_t numPrimitives = (it->indexEnd - it->indexStart) / 3;
 
 		if (numPrimitives)
 		{
-			// bjd - FIXME
-			if (this->vertexCount == 0)
-			{
-				return;
-			}
 			R_DrawIndexedPrimitive(this->vertexCount, it->indexStart, numPrimitives);
 		}
 	}

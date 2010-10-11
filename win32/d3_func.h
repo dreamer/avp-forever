@@ -33,6 +33,7 @@ struct r_VertexShader
 	uint32_t		refCount;
 	IDirect3DVertexShader9	*shader;
 	ID3DXConstantTable		*constantTable;
+	r_vertexDeclaration		vertexDeclaration;
 	std::string 	shaderName;
 };
 
@@ -98,6 +99,7 @@ bool R_SetPixelShader(r_PixelShader &pixelShader);
 void R_ReleaseVertexShader(r_VertexShader &vertexShader);
 void R_ReleasePixelShader(r_PixelShader &pixelShader);
 bool R_SetVertexShaderMatrix(r_VertexShader &vertexShader, const char* constant, R_MATRIX &matrix);
+bool R_SetVertexShaderInt(r_VertexShader &vertexShader, const char* constant, int32_t n);
 
 void R_NextVideoMode();
 void R_PreviousVideoMode();
@@ -107,6 +109,7 @@ void R_SetCurrentVideoMode();
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
 void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
 void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
+void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable);
 
 // vertex declarations
 extern D3DVERTEXELEMENT9 declMain[];
@@ -220,6 +223,7 @@ typedef struct D3DInfo
 	class VertexDeclaration		*mainDecl;
 	class VertexDeclaration		*orthoDecl;
 	class VertexDeclaration		*fmvDecl;
+	class VertexDeclaration		*tallFontText;
 
 	// enumeration
 	uint32_t				NumDrivers;
@@ -245,9 +249,10 @@ void DrawSmallMenuCharacter (uint32_t topX, uint32_t topY, uint32_t texU, uint32
 void DrawQuad				(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
 void DrawFmvFrame			(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, r_Texture fmvTexture);
 void DrawFmvFrame2			(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures, uint32_t numTextures);
-void CreateScreenShotImage();
-void DeRedTexture(r_Texture texture);
-void ReleaseD3DTexture(r_Texture *d3dTexture);
+void DrawFontQuad			(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeight, uint32_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
+void CreateScreenShotImage  ();
+void DeRedTexture			(r_Texture texture);
+void ReleaseD3DTexture		(r_Texture *d3dTexture);
 void SetTransforms();
 
 extern uint32_t NO_TEXTURE;
