@@ -37,7 +37,15 @@ typedef uint32_t shaderID_t;
 // class version of above
 class VertexShaderPool
 {
+	private:
+		int32_t currentSetShaderID;
+		
 	public:
+		VertexShaderPool()
+		{
+			currentSetShaderID = -1;
+		}
+
 		std::vector<r_VertexShader> shaderList;
 
 		uint32_t Add(r_VertexShader newShader);
@@ -46,11 +54,20 @@ class VertexShaderPool
 		void Remove(uint32_t shaderID);
 		void AddRef(uint32_t shaderID) { shaderList[shaderID].refCount++; }
 		bool SetMatrix(uint32_t shaderID, const char* constant, R_MATRIX &matrix);
+		bool SetInt(uint32_t effectID, const char* constant, int32_t n);
 };
 
 class PixelShaderPool
 {
+	private:
+		int32_t currentSetShaderID;
+
 	public:
+		PixelShaderPool()
+		{
+			currentSetShaderID = -1;
+		}
+
 		std::vector<r_PixelShader> shaderList;
 
 		uint32_t Add(r_PixelShader newShader);
@@ -79,7 +96,8 @@ class EffectManager
 		EffectManager();
 		bool SetActive(effectID_t effectID);
 		bool SetMatrix(effectID_t effectID, const char* constant, R_MATRIX &matrix);
-		effectID_t AddEffect(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName);
+		bool SetInt(effectID_t effectID, const char* constant, int32_t n);
+		effectID_t AddEffect(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName, const class VertexDeclaration *vertexDeclaration);
 };
 
 #endif

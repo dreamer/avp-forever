@@ -55,7 +55,18 @@ void VertexShaderPool::Remove(uint32_t shaderID)
 // set the shader as active (eg SetVertexShader() in D3D)
 bool VertexShaderPool::SetActive(uint32_t shaderID)
 {
-	return R_SetVertexShader(this->shaderList[shaderID]);
+	if (this->currentSetShaderID == shaderID) // already set
+	{
+		return true;
+	}
+
+	if (R_SetVertexShader(this->shaderList[shaderID]))
+	{
+		currentSetShaderID = shaderID;
+		return true;
+	}
+
+	return false;
 }
 
 // pass a shader name in and see if it exists in the list. If it does, return
@@ -77,6 +88,11 @@ uint32_t VertexShaderPool::GetShaderByName(const std::string &shaderName)
 bool VertexShaderPool::SetMatrix(uint32_t shaderID, const char* constant, R_MATRIX &matrix)
 {
 	return R_SetVertexShaderMatrix(shaderList[shaderID], constant, matrix);
+}
+
+bool VertexShaderPool::SetInt(uint32_t shaderID, const char* constant, int32_t n)
+{
+	return R_SetVertexShaderInt(shaderList[shaderID], constant, n);
 }
 
 // add an already created pixelShader_t struct to our pool.
@@ -106,7 +122,18 @@ void PixelShaderPool::Remove(uint32_t shaderID)
 // set the shader as active (eg SetPixelShader() in D3D)
 bool PixelShaderPool::SetActive(uint32_t shaderID)
 {
-	return R_SetPixelShader(this->shaderList[shaderID]);
+	if (this->currentSetShaderID == shaderID) // already set
+	{
+		return true;
+	}
+
+	if (R_SetPixelShader(this->shaderList[shaderID]))
+	{
+		currentSetShaderID = shaderID;
+		return true;
+	}
+
+	return false;
 }
 
 // pass a shader name in and see if it exists in the list. If it does, return
@@ -145,7 +172,15 @@ bool EffectManager::SetMatrix(effectID_t effectID, const char* constant, R_MATRI
 	return true;
 }
 
-effectID_t EffectManager::AddEffect(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName)
+bool EffectManager::SetInt(effectID_t effectID, const char* constant, int32_t n)
+{
+	// just call another SetInt function within the vertex shader class
+	// until I find a tidier way to do this
+	vsPool.SetInt(effectList[effectID].vertexShaderID, constant, n);
+	return true;
+}
+
+effectID_t EffectManager::AddEffect(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName, const VertexDeclaration *vertexDeclaration)
 {
 	shaderID_t vertexID = nullID;
 	shaderID_t pixelID = nullID;
