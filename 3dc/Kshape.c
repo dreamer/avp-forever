@@ -83,7 +83,7 @@ float FogMagnitude;
 #define VOLUMETRIC_FOG 0
 #define UNDERWATER 0
 #define SPATIAL_SHOCKWAVE 0
-float CameraZoomScale;
+float CameraZoomScale = 1.0f;
 
 int DrawFullBright;
 
@@ -3997,14 +3997,12 @@ float Dest[3];
 
 extern void TranslationSetup(void)
 {
+	char buf[100];
 	VECTORCH v = Global_VDB_Ptr->VDB_World;
 	extern int PredatorVisionChangeCounter;
 	float p = PredatorVisionChangeCounter / 65536.0f;
 	float o = 1.0f;
 	p = 1.0f+p;
-
-//	sprintf(buf, "CameraZoomScale: %f\n", CameraZoomScale);
-//	OutputDebugString(buf);
 
 	if (NAUSEA_CHEATMODE)
 	{
@@ -4026,9 +4024,9 @@ extern void TranslationSetup(void)
 	ViewMatrix[6] = (float)(Global_VDB_Ptr->VDB_Mat.mat32)/65536.0f*p;
 
 	// lookat vector
-	ViewMatrix[8] = (float)(Global_VDB_Ptr->VDB_Mat.mat13)/65536.0f*CameraZoomScale;
-	ViewMatrix[9] = (float)(Global_VDB_Ptr->VDB_Mat.mat23)/65536.0f*CameraZoomScale;
-	ViewMatrix[10] = (float)(Global_VDB_Ptr->VDB_Mat.mat33)/65536.0f*CameraZoomScale;
+	ViewMatrix[8] = (float)(Global_VDB_Ptr->VDB_Mat.mat13)/65536.0f;
+	ViewMatrix[9] = (float)(Global_VDB_Ptr->VDB_Mat.mat23)/65536.0f;
+	ViewMatrix[10] = (float)(Global_VDB_Ptr->VDB_Mat.mat33)/65536.0f;
 
 	#ifndef USE_D3DVIEWTRANSFORM
 	RotateVector(&v, &Global_VDB_Ptr->VDB_Mat);
@@ -4042,7 +4040,7 @@ extern void TranslationSetup(void)
 	#else
 	ViewMatrix[3] = ((float)v.vx)*o;
 	ViewMatrix[7] = ((float)v.vy)*p;
-	ViewMatrix[11] = ((float)v.vz)*CameraZoomScale;
+	ViewMatrix[11] = ((float)v.vz);;
 	#endif
 /*
 	sprintf(buf,

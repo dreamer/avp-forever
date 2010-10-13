@@ -40,7 +40,10 @@ extern "C"
 	#include "particle.h"
 	#include "kshape.h"
 	int LightIntensityAtPoint(VECTORCH *pointPtr);
+	extern float CameraZoomScale;
 }
+
+static float currentCameraZoomScale = 1.0f;
 
 const uint32_t MAX_VERTEXES = 4096;
 const uint32_t MAX_INDICES = 9216;
@@ -243,6 +246,13 @@ bool ExecuteBuffer()
 	// sort the list of render objects
 	particleList->Sort();
 	mainList->Sort();
+
+	// check if we're zooming in (Predator zoom)
+	if (currentCameraZoomScale != CameraZoomScale)
+	{
+		R_CameraZoom(CameraZoomScale);
+		currentCameraZoomScale = CameraZoomScale;
+	}
 
 	{
 		// set vertex declaration

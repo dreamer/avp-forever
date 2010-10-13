@@ -111,6 +111,8 @@ void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
 void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable);
 
+void R_CameraZoom(float zoomScale);
+
 // vertex declarations
 extern D3DVERTEXELEMENT9 declMain[];
 extern D3DVERTEXELEMENT9 declOrtho[];
@@ -235,6 +237,8 @@ typedef struct D3DInfo
 
 	bool					supportsShaders;
 	bool					supportsDynamicTextures;
+
+	uint32_t				fieldOfView;
 } D3DINFO;
 
 extern D3DINFO d3d;

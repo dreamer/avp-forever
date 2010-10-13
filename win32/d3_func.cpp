@@ -92,7 +92,6 @@ extern void RenderListDeInit();
 // size of vertex and index buffers
 const uint32_t MAX_VERTEXES = 4096;
 const uint32_t MAX_INDICES = 9216;
-static uint32_t fov = 75;
 
 static HRESULT LastError;
 uint32_t NO_TEXTURE;
@@ -657,7 +656,7 @@ void SetFov()
 		return;
 	}
 
-	fov = StringToInt(Con_GetArgument(0));
+	d3d.fieldOfView = StringToInt(Con_GetArgument(0));
 
 	SetTransforms();
 }
@@ -2320,6 +2319,9 @@ bool InitialiseDirect3D()
 	// save a copy of the presentation parameters for use later (device reset, resolution/depth change)
 	d3d.d3dpp = d3dpp;
 
+	// set field of view (this needs to be set differently for alien but 75 seems ok for marine and predator
+	d3d.fieldOfView = 75;
+
 	SetTransforms();
 
 	Con_AddCommand("dumptex", WriteMenuTextures);
@@ -2453,6 +2455,12 @@ void R_UpdateViewMatrix(float *viewMat)
 	matView._43 = -D3DXVec3Dot(&vecPosition, &vecFront);
 }
 
+// we need this for zooming
+void R_CameraZoom(float zoomScale)
+{
+	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(d3d.fieldOfView * zoomScale), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+}
+
 void SetTransforms()
 {
 	// Setup orthographic projection matrix
@@ -2468,7 +2476,7 @@ void SetTransforms()
 	D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 
 	// set up projection matrix
-	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(75), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(d3d.fieldOfView), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
 
 	// set up a viewport transform matrix
 	matViewPort = matIdentity;
