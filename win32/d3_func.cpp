@@ -581,6 +581,19 @@ bool CreateVolatileResources()
 
 	SetRenderStateDefaults();
 
+	// going to clear texture stages too
+	for (int stage = 0; stage < MAX_TEXTURE_STAGES; stage++)
+	{
+		LastError = d3d.lpD3DDevice->SetTexture(stage, Tex_GetTexture(NO_TEXTURE));
+		if (FAILED(LastError))
+		{
+			Con_PrintError("Unable to reset texture stage: " + stage);
+			return false;
+		}
+
+		setTextureArray[stage] = NO_TEXTURE;
+	}
+
 	return true;
 }
 
@@ -2307,9 +2320,6 @@ bool InitialiseDirect3D()
 	// save a copy of the presentation parameters for use later (device reset, resolution/depth change)
 	d3d.d3dpp = d3dpp;
 
-	// create vertex and index buffers
-	CreateVolatileResources();
-
 	SetTransforms();
 
 	Con_AddCommand("dumptex", WriteMenuTextures);
@@ -2387,6 +2397,9 @@ bool InitialiseDirect3D()
 	d3d.orthoEffect = d3d.effectSystem->AddEffect("ortho", "orthoVertex.vsh", "pixel.psh", d3d.orthoDecl);
 	d3d.fmvEffect   = d3d.effectSystem->AddEffect("fmv", "fmvVertex.vsh", "fmvPixel.psh", d3d.fmvDecl);
 	d3d.cloudEffect = d3d.effectSystem->AddEffect("cloud", "tallFontTextVertex.vsh", "tallFontTextPixel.psh", d3d.tallFontText);
+
+	// create vertex and index buffers
+	CreateVolatileResources();
 
 	Con_Init();
 	Net_Initialise();
