@@ -786,8 +786,10 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 					}
 					else
 					{
+						//if (0)//if (polyPtr->PolyFlags & iflag_transparent)
 						if (polyPtr->PolyFlags & iflag_transparent)
 						{
+							// bjd - glass rendering goes through here
 							AddToTranslucentPolyList(polyPtr,VerticesBuffer);
 						}
 						else
@@ -1225,7 +1227,7 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 	VertexNumberPtr = &polyPtr->Poly1stPt;
 
 	/* If this texture is animated the UV array must be calculated */
-	if(polyPtr->PolyFlags & iflag_txanim)
+	if (polyPtr->PolyFlags & iflag_txanim)
 	{
 		/* Create the UV array */
 		int uv_array[maxpolypts * 2];
@@ -1256,8 +1258,8 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 			renderVerticesPtr->U = texture_defn_ptr[0];
 			renderVerticesPtr->V = texture_defn_ptr[1];
 
-			if( (Global_ODB_Ptr->SpecialFXFlags & SFXFLAG_MELTINGINTOGROUND)
-			  &&(Global_ODB_Ptr->ObFlags2 < ONE_FIXED) )
+			if ((Global_ODB_Ptr->SpecialFXFlags & SFXFLAG_MELTINGINTOGROUND)
+			  &&(Global_ODB_Ptr->ObFlags2 < ONE_FIXED))
 			{
 				renderVerticesPtr->A = Global_ODB_Ptr->ObFlags2 >> 8;
 				RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
@@ -1351,7 +1353,7 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 
 			texture_defn_ptr += 2;
 		}
-		while(--i);
+		while (--i);
 	}
 	else
 	{
@@ -1412,8 +1414,8 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 			renderVerticesPtr->U = texture_defn_ptr[0];// << 16;
 			renderVerticesPtr->V = texture_defn_ptr[1];// << 16;
 
-			if( (Global_ODB_Ptr->SpecialFXFlags & SFXFLAG_MELTINGINTOGROUND)
-			  &&(Global_ODB_Ptr->ObFlags2 < ONE_FIXED) )
+			if ((Global_ODB_Ptr->SpecialFXFlags & SFXFLAG_MELTINGINTOGROUND)
+			  &&(Global_ODB_Ptr->ObFlags2 < ONE_FIXED))
 			{
 				renderVerticesPtr->A = Global_ODB_Ptr->ObFlags2 >> 8;
 				RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
@@ -1508,7 +1510,7 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 
 			texture_defn_ptr += 2;
 		}
-		while(--i);
+		while (--i);
 	}
 }
 
@@ -4962,6 +4964,7 @@ void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerti
 	/* copy the data to the list for processing later */
 	int i = RenderPolygon.NumberOfVertices;
 	int maxZ = 0;
+	char buf[100];
 
 	RENDERVERTEX *vertexPtr = TranslucentPolygons[CurrentNumberOfTranslucentPolygons].Vertices;
 
@@ -4969,11 +4972,26 @@ void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerti
 
 	do
 	{
+#if 1 // bjd - temp fix to get glass to render correctly. should I need to views transform these?
+		VECTORCHF test;
+		test.vx = renderVerticesPtr->X;
+		test.vy = renderVerticesPtr->Y;
+		test.vz = renderVerticesPtr->Z;
+
+		TransformToViewspace(&test);
+
+		if (maxZ < test.vz)
+			maxZ = test.vz;
+#else
 		if (maxZ < renderVerticesPtr->Z)
 			maxZ = renderVerticesPtr->Z;
+#endif
 		*vertexPtr++ = *renderVerticesPtr++;
 	}
 	while(--i);
+
+//	sprintf(buf, "maxZ is :%d\n", maxZ);
+//	OutputDebugString(buf);
 
 	TranslucentPolygons[CurrentNumberOfTranslucentPolygons].MaxZ = maxZ;
 	TranslucentPolygonHeaders[CurrentNumberOfTranslucentPolygons] = *inputPolyPtr;
@@ -5004,6 +5022,7 @@ void OutputTranslucentPolyList(void)
 
 		RenderPolygon.NumberOfVertices = TranslucentPolygons[maxFound].NumberOfVertices;
 		RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
+
 		D3D_ZBufferedGouraudTexturedPolygon_Output(&TranslucentPolygonHeaders[maxFound], TranslucentPolygons[maxFound].Vertices);
 		TranslucentPolygons[maxFound].MaxZ = 0;
 	}
@@ -5490,6 +5509,8 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 	POLYHEADER fakeHeader;
 	int centreX,centreY;
 	int z = ONE_FIXED-scale;
+	char buf[100];
+
 	z = MUL_FIXED(MUL_FIXED(z,z),2048);
 	{
 		extern int SmartTargetSightX, SmartTargetSightY;
@@ -5505,6 +5526,9 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 		}
 	}
 	z = (float)z*CameraZoomScale;
+
+	sprintf(buf, "centreX: %d\n", centreX);
+	OutputDebugString(buf);
 
 	{
 		int a = 160;
@@ -5578,7 +5602,7 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 		}
 		RenderPolygon.NumberOfVertices=4;
 	}
-
+/*
 	GouraudPolygon_ClipWithZ();
 	if (RenderPolygon.NumberOfVertices<3) return;
 	GouraudPolygon_ClipWithNegativeX();
@@ -5589,7 +5613,8 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 	if (RenderPolygon.NumberOfVertices<3) return;
 	GouraudPolygon_ClipWithPositiveX();
 	if (RenderPolygon.NumberOfVertices<3) return;
-	D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
+*/
+	D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,/*RenderPolygon.Vertices*/&VerticesBuffer[0]);
 
 	if (drawInRed)
 	{
@@ -5624,7 +5649,7 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 			}
 			RenderPolygon.NumberOfVertices=4;
 		}
-
+/*
 		GouraudPolygon_ClipWithZ();
 		if(RenderPolygon.NumberOfVertices<3) return;
 		GouraudPolygon_ClipWithNegativeX();
@@ -5635,7 +5660,8 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 		if(RenderPolygon.NumberOfVertices<3) return;
 		GouraudPolygon_ClipWithPositiveX();
 		if(RenderPolygon.NumberOfVertices<3) return;
-		D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
+*/
+		D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,/*RenderPolygon.Vertices*/&VerticesBuffer[0]);
 	}
 }
 
@@ -6282,4 +6308,3 @@ int LightIntensityAtPoint(VECTORCH *pointPtr)
 
 	return intensity;
 }
-
