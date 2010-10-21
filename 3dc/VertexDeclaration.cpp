@@ -44,7 +44,7 @@ bool VertexDeclaration::Create()
 		return false;
 	}
 
-	if (R_CreateVertexDeclaration(this->declaration, this->elements))
+	if (R_CreateVertexDeclaration(this))
 	{
 		// we don't need this anymore?
 		this->elements.clear();

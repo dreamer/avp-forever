@@ -180,7 +180,7 @@ bool EffectManager::SetInt(effectID_t effectID, const char* constant, int32_t n)
 	return true;
 }
 
-effectID_t EffectManager::AddEffect(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName, const VertexDeclaration *vertexDeclaration)
+effectID_t EffectManager::AddEffect(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName, VertexDeclaration *vertexDeclaration)
 {
 	shaderID_t vertexID = nullID;
 	shaderID_t pixelID = nullID;
@@ -214,7 +214,7 @@ effectID_t EffectManager::AddEffect(const std::string &effectName, const std::st
 		r_VertexShader newVertexShader;
 		newVertexShader.isValid = false;
 
-		if (R_CreateVertexShader(vertexShaderName, newVertexShader))
+		if (R_CreateVertexShader(vertexShaderName, newVertexShader, vertexDeclaration))
 		{
 			// ok, store it
 			newVertexShader.isValid = true;

@@ -41,6 +41,7 @@ extern "C"
 	#include "kshape.h"
 	int LightIntensityAtPoint(VECTORCH *pointPtr);
 	extern float CameraZoomScale;
+	extern float p, o;
 }
 
 static float currentCameraZoomScale = 1.0f;
@@ -248,10 +249,11 @@ bool ExecuteBuffer()
 	mainList->Sort();
 
 	// check if we're zooming in (Predator zoom)
-	if (currentCameraZoomScale != CameraZoomScale)
+//	if (currentCameraZoomScale != CameraZoomScale)
 	{
-		R_CameraZoom(CameraZoomScale);
-		currentCameraZoomScale = CameraZoomScale;
+//		R_CameraZoom(CameraZoomScale);
+//		currentCameraZoomScale = CameraZoomScale;
+		D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(d3d.fieldOfView * CameraZoomScale), (((float)ScreenDescriptorBlock.SDB_Width) *1) / (((float)ScreenDescriptorBlock.SDB_Height) *p), 64.0f, 1000000.0f);
 	}
 
 	{
@@ -312,6 +314,7 @@ bool ExecuteBuffer()
 
 void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, r_Texture fmvTexture)
 {
+/*
 	uint32_t topX = (640 - frameWidth) / 2;
 	uint32_t topY = (480 - frameHeight) / 2;
 
@@ -369,6 +372,7 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWid
 	{
 		OutputDebugString("DrawPrimitiveUP failed\n");
 	}
+*/
 }
 
 void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures, uint32_t numTextures)
@@ -1046,6 +1050,8 @@ void DrawSmallMenuCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_
 	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
+extern void BuildFrustum();
+
 extern "C" {
 
 #include "3dc.h"
@@ -1115,6 +1121,9 @@ void UpdateViewMatrix(float *viewMat)
 	viewMatrix._41 = -D3DXVec3Dot(&vecPosition, &vecRight);
 	viewMatrix._42 = -D3DXVec3Dot(&vecPosition, &vecUp);
 	viewMatrix._43 = -D3DXVec3Dot(&vecPosition, &vecFront);
+
+	// move this later (we may not catch projection matrix changes otherwise)
+//	BuildFrustum();
 }
 
 void DrawCoronas()
@@ -1349,10 +1358,47 @@ void SetFogDistance(int fogDistance)
 }
 #endif
 
+extern BOOL CheckPointIsInFrustum(D3DXVECTOR3 *point);
+
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
 	// bjd - This is the function responsible for drawing level geometry and the players weapon
 
+	bool valid = false;
+/*
+	// test frustum culling for each point
+	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
+	{
+		RENDERVERTEX *vertices = &renderVerticesPtr[i];
+
+		VECTORCHF test;
+		test.vx = vertices->X;
+		test.vy = vertices->Y;
+		test.vz = vertices->Z;
+
+		TransformToViewspace(&test);
+
+		D3DXVECTOR3 temp;
+//		temp.x = (float)vertices->X;
+//		temp.y = (float)-vertices->Y;
+//		temp.z = (float)vertices->Z;
+
+		temp.x = (float)test.vx;
+		temp.y = (float)-test.vy;
+		temp.z = (float)test.vz;
+
+		if (CheckPointIsInFrustum(&temp) == TRUE)
+		{
+			// true
+			valid = true;
+			break;
+		}
+	}
+
+	// lets bail out of this function and not draw this poly if none of the points are inside the view frustum
+	if (valid == false)
+		return;
+*/
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
 	uint32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
@@ -1660,27 +1706,23 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 
 void D3D_DecalSystem_Setup(void)
 {
-/*
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
 	LockExecuteBuffer();
 
 	ChangeZWriteEnable(ZWRITE_DISABLED);
-*/
 }
 
 void D3D_DecalSystem_End(void)
 {
-
 	DrawParticles();
 	DrawCoronas();
-/*
+
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
 	LockExecuteBuffer();
 
 	ChangeZWriteEnable(ZWRITE_ENABLED);
-*/
 }
 
 void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)

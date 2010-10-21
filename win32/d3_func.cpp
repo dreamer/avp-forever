@@ -32,6 +32,9 @@
 #include "font2.h"
 #include <XInput.h> // XInput API
 
+// Alien FOV - 115
+// Marine & Predator FOV - 77
+
 extern "C"
 {
 	#include "AvP_UserProfile.h"
@@ -47,6 +50,76 @@ D3DXMATRIX matProjection;
 D3DXMATRIX matView;
 D3DXMATRIX matIdentity;
 D3DXMATRIX matViewPort;
+
+static D3DXPLANE m_frustum[6];
+
+extern "C"
+{
+	BOOL CheckPointIsInFrustum(D3DXVECTOR3 *point)
+	{
+		// check if point is in front of each plane
+		for (int i = 0; i < 6; i++)
+		{
+			if (D3DXPlaneDotCoord(&m_frustum[i], point) < 0.0f)
+			{
+				// its outside
+				return FALSE;
+			}
+		}
+
+		// return here if the point is entirely within
+		return TRUE;
+	}
+}
+
+// call per frame after we've updated view and projection matrixes
+void BuildFrustum()
+{
+	D3DXMATRIX viewProjection;
+	D3DXMatrixMultiply(&viewProjection, &matView, &matProjection);
+
+	// Left plane
+	m_frustum[0].a = viewProjection._14 + viewProjection._11;
+	m_frustum[0].b = viewProjection._24 + viewProjection._21;
+	m_frustum[0].c = viewProjection._34 + viewProjection._31;
+	m_frustum[0].d = viewProjection._44 + viewProjection._41;
+
+	// Right plane
+	m_frustum[1].a = viewProjection._14 - viewProjection._11;
+	m_frustum[1].b = viewProjection._24 - viewProjection._21;
+	m_frustum[1].c = viewProjection._34 - viewProjection._31;
+	m_frustum[1].d = viewProjection._44 - viewProjection._41;
+
+	// Top plane
+	m_frustum[2].a = viewProjection._14 - viewProjection._12;
+	m_frustum[2].b = viewProjection._24 - viewProjection._22;
+	m_frustum[2].c = viewProjection._34 - viewProjection._32;
+	m_frustum[2].d = viewProjection._44 - viewProjection._42;
+
+	// Bottom plane
+	m_frustum[3].a = viewProjection._14 + viewProjection._12;
+	m_frustum[3].b = viewProjection._24 + viewProjection._22;
+	m_frustum[3].c = viewProjection._34 + viewProjection._32;
+	m_frustum[3].d = viewProjection._44 + viewProjection._42;
+
+	// Near plane
+	m_frustum[4].a = viewProjection._13;
+	m_frustum[4].b = viewProjection._23;
+	m_frustum[4].c = viewProjection._33;
+	m_frustum[4].d = viewProjection._43;
+
+	// Far plane
+	m_frustum[5].a = viewProjection._14 - viewProjection._13;
+	m_frustum[5].b = viewProjection._24 - viewProjection._23;
+	m_frustum[5].c = viewProjection._34 - viewProjection._33;
+	m_frustum[5].d = viewProjection._44 - viewProjection._43;
+
+	// Normalize planes
+	for (int i = 0; i < 6; i++)
+	{
+		D3DXPlaneNormalize(&m_frustum[i], &m_frustum[i]);
+	}
+}
 
 /*
 // vertex declarations
@@ -559,10 +632,10 @@ bool CreateVolatileResources()
 
 	// test vertex buffer
 	d3d.particleVB = new VertexBuffer;
-	d3d.particleVB->Create(MAX_VERTEXES, FVF_LVERTEX, USAGE_DYNAMIC);
+	d3d.particleVB->Create(MAX_VERTEXES*6, FVF_LVERTEX, USAGE_DYNAMIC);
 
 	d3d.particleIB = new IndexBuffer;
-	d3d.particleIB->Create(MAX_INDICES, USAGE_DYNAMIC);
+	d3d.particleIB->Create(MAX_INDICES*6, USAGE_DYNAMIC);
 
 	// test main
 	d3d.mainVB = new VertexBuffer;
@@ -687,6 +760,11 @@ extern "C"
 				d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 			}
 		}
+	}
+
+	void R_SetFov(uint32_t fov)
+	{
+		d3d.fieldOfView = fov;
 	}
 
 	void FlushD3DZBuffer()
@@ -999,6 +1077,7 @@ static bool CreateVertexDeclaration(const D3DVERTEXELEMENT9* pVertexElements, LP
 }
 */
 
+/*
 static bool CreateVertexShader(const std::string &fileName, r_VertexShader &vertexShader)
 {
 	LPD3DXBUFFER pErrors = NULL;
@@ -1046,6 +1125,7 @@ static bool CreateVertexShader(const std::string &fileName, r_VertexShader &vert
 
 	return true;
 }
+*/
 
 static bool CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader)
 {
@@ -1180,31 +1260,34 @@ static BYTE VD_TYPEtoD3DDECLTYPE(VD_TYPE type)
 	return d3dType;
 }
 
-bool R_CreateVertexDeclaration(r_vertexDeclaration &declaration, std::vector<vertexElement> &elements)
+bool R_CreateVertexDeclaration(class VertexDeclaration *vertexDeclaration)
 {
-	std::vector<D3DVERTEXELEMENT9> d3dElement;
-	d3dElement.resize(elements.size() + 1); // +1 for DECL_END()
+	// take a local copy of this to aid in keeping the code below a bit tidier..
+	size_t elementsSize = vertexDeclaration->elements.size();
 
-	for (uint32_t i = 0; i < elements.size(); i++)
+	std::vector<D3DVERTEXELEMENT9> d3dElement;
+	d3dElement.resize(elementsSize+1); // +1 for DECL_END()
+
+	for (uint32_t i = 0; i < elementsSize; i++)
 	{
-		d3dElement[i].Stream = elements[i].stream;
-		d3dElement[i].Offset = elements[i].offset;
-		d3dElement[i].Type = VD_TYPEtoD3DDECLTYPE(elements[i].type);
+		d3dElement[i].Stream = vertexDeclaration->elements[i].stream;
+		d3dElement[i].Offset = vertexDeclaration->elements[i].offset;
+		d3dElement[i].Type   = VD_TYPEtoD3DDECLTYPE(vertexDeclaration->elements[i].type);
 		d3dElement[i].Method = D3DDECLMETHOD_DEFAULT; // TODO
-		d3dElement[i].Usage = VD_USAGEtoD3DDECLUSAGE(elements[i].usage);
-		d3dElement[i].UsageIndex = elements[i].usageIndex;
+		d3dElement[i].Usage  = VD_USAGEtoD3DDECLUSAGE(vertexDeclaration->elements[i].usage);
+		d3dElement[i].UsageIndex = vertexDeclaration->elements[i].usageIndex;
 	}
 
 	// add D3DDECL_END() which is {0xFF,0,D3DDECLTYPE_UNUSED,0,0,0}
-	d3dElement[elements.size()].Stream = 0xFF;
-	d3dElement[elements.size()].Offset = 0;
-	d3dElement[elements.size()].Type = D3DDECLTYPE_UNUSED;
-	d3dElement[elements.size()].Method = 0;
-	d3dElement[elements.size()].Usage = 0;
-	d3dElement[elements.size()].UsageIndex = 0;
+	d3dElement[elementsSize].Stream = 0xFF;
+	d3dElement[elementsSize].Offset = 0;
+	d3dElement[elementsSize].Type = D3DDECLTYPE_UNUSED;
+	d3dElement[elementsSize].Method = 0;
+	d3dElement[elementsSize].Usage = 0;
+	d3dElement[elementsSize].UsageIndex = 0;
 
 	// try and create it now
-	LastError = d3d.lpD3DDevice->CreateVertexDeclaration(&d3dElement[0], &declaration);
+	LastError = d3d.lpD3DDevice->CreateVertexDeclaration(&d3dElement[0], &vertexDeclaration->declaration);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Could not create vertex declaration");
@@ -1239,9 +1322,53 @@ bool R_ReleaseVertexDeclaration(r_vertexDeclaration &declaration)
 	return true;
 }
 
-bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexShader)
+bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexShader, VertexDeclaration *vertexDeclaration)
 {
-	return CreateVertexShader(fileName, vertexShader);
+	LPD3DXBUFFER pErrors = NULL;
+	LPD3DXBUFFER pCode = NULL;
+	std::string actualPath = shaderPath + fileName;
+
+	// test that the path to the file is valid first (d3dx doesn't give a specific error message for this)
+	std::ifstream fileOpenTest(actualPath.c_str(), std::ifstream::in | std::ifstream::binary);
+	if (!fileOpenTest.good())
+	{
+		LogErrorString("Can't open vertex shader file " + actualPath, __LINE__, __FILE__);
+		return false;
+	}
+	// close the file
+	fileOpenTest.close();
+
+	// set up vertex shader
+	LastError = D3DXCompileShaderFromFile(actualPath.c_str(), //filepath
+						NULL,            // macro's
+						NULL,            // includes
+						"vs_main",       // main function
+						"vs_2_0",        // shader profile
+						0,               // flags
+						&pCode,          // compiled operations
+						&pErrors,        // errors
+						&vertexShader.constantTable); // constants
+
+	if (FAILED(LastError))
+	{
+		OutputDebugString(DXGetErrorString(LastError));
+		OutputDebugString(DXGetErrorDescription(LastError));
+
+		if (pErrors)
+		{
+			// shader didn't compile for some reason
+			OutputDebugString((const char*)pErrors->GetBufferPointer());
+			pErrors->Release();
+		}
+
+		return false;
+	}
+
+	d3d.lpD3DDevice->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), &vertexShader.shader);
+	pCode->Release();
+
+	return true;
+//	return CreateVertexShader(fileName, vertexShader);
 }
 
 bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader)
@@ -2412,47 +2539,6 @@ bool InitialiseDirect3D()
 	Con_PrintMessage("Initialised Direct3D9 succesfully");
 
 	return true;
-}
-
-void R_UpdateViewMatrix(float *viewMat)
-{
-	D3DXVECTOR3 vecRight	(viewMat[0], viewMat[1], viewMat[2]);
-	D3DXVECTOR3 vecUp		(viewMat[4], viewMat[5], viewMat[6]);
-	D3DXVECTOR3 vecFront	(viewMat[8], -viewMat[9], viewMat[10]);
-	D3DXVECTOR3 vecPosition (viewMat[3], -viewMat[7], viewMat[11]);
-
-	D3DXVec3Normalize(&vecFront, &vecFront);
-
-	D3DXVec3Cross(&vecUp, &vecFront, &vecRight);
-	D3DXVec3Normalize(&vecUp, &vecUp);
-
-	D3DXVec3Cross(&vecRight, &vecUp, &vecFront);
-	D3DXVec3Normalize(&vecRight, &vecRight);
-
-	// right
-	matView._11 = vecRight.x;
-	matView._21 = vecRight.y;
-	matView._31 = vecRight.z;
-
-	// up
-	matView._12 = vecUp.x;
-	matView._22 = vecUp.y;
-	matView._32 = vecUp.z;
-
-	// front
-	matView._13 = vecFront.x;
-	matView._23 = vecFront.y;
-	matView._33 = vecFront.z;
-
-	// 4th
-	matView._14 = 0.0f;
-	matView._24 = 0.0f;
-	matView._34 = 0.0f;
-	matView._44 = 1.0f;
-
-	matView._41 = -D3DXVec3Dot(&vecPosition, &vecRight);
-	matView._42 = -D3DXVec3Dot(&vecPosition, &vecUp);
-	matView._43 = -D3DXVec3Dot(&vecPosition, &vecFront);
 }
 
 // we need this for zooming

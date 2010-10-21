@@ -56,15 +56,21 @@ extern void D3D_PredatorScreenInversionOverlay();
 extern void D3D_FadeDownScreen(int brightness, int colour);
 extern void D3D_ScreenInversionOverlay();
 
+extern VIEWDESCRIPTORBLOCK *ActiveVDBList[];
+extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+
+const int MARINE_FOV =	77;
+const int ALIEN_FOV	 =	110;
+
+extern void R_SetFov(uint32_t fov);
+
 void SetupVision(void)
 {
 	/* KJL 16:33:47 01/10/97 - change view for alien;
 	this must be called after ProcessSystemObjects() */
-	if(AvP.PlayerType == I_Alien)
+	if (AvP.PlayerType == I_Alien)
    	{
 		/* setup wide-angle lens */
-		extern VIEWDESCRIPTORBLOCK *ActiveVDBList[];
-		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 		VIEWDESCRIPTORBLOCK *VDBPtr = ActiveVDBList[0];
 
 		LOCALASSERT(VDBPtr);
@@ -76,12 +82,11 @@ void SetupVision(void)
 
 		/* KJL 17:37:51 7/17/97 - frustum setup */
 		SetFrustumType(FRUSTUM_TYPE_WIDE);
+		R_SetFov(ALIEN_FOV);
 	}
 	else if (AvP.PlayerType == I_Predator)
 	{
 		/* setup normal-angle lens */
-		extern VIEWDESCRIPTORBLOCK *ActiveVDBList[];
-		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 		VIEWDESCRIPTORBLOCK *VDBPtr = ActiveVDBList[0];
 
 		LOCALASSERT(VDBPtr);
@@ -93,12 +98,11 @@ void SetupVision(void)
 		SetupPredOVision();
 		/* KJL 17:37:51 7/17/97 - frustum setup */
 		SetFrustumType(FRUSTUM_TYPE_NORMAL);
+		R_SetFov(MARINE_FOV);
 	}
 	else
 	{
 		/* setup normal-angle lens */
-		extern VIEWDESCRIPTORBLOCK *ActiveVDBList[];
-		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 		VIEWDESCRIPTORBLOCK *VDBPtr = ActiveVDBList[0];
 
 		LOCALASSERT(VDBPtr);
@@ -110,6 +114,7 @@ void SetupVision(void)
 		SetupMarineOVision();
 		/* KJL 17:37:51 7/17/97 - frustum setup */
 		SetFrustumType(FRUSTUM_TYPE_NORMAL);
+		R_SetFov(MARINE_FOV);
 	}
 
 	InitCameraValues();
@@ -138,7 +143,7 @@ void SetupPredOVision(void)
 {
 	/* setup in-game data */
 	PredOVision.VisionMode = PREDOVISION_NORMAL;
-	PredOVision.VisionIsChanging=0;
+	PredOVision.VisionIsChanging = 0;
 	/* JH - 29/5/97 for d3d */
 	d3d_light_ctrl.ctrl = LCCM_NORMAL;
 }
@@ -146,7 +151,7 @@ void SetupPredOVision(void)
 
 void HandlePredOVision(void)
 {
-	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 
 	if (playerStatusPtr->IsAlive)
 	{

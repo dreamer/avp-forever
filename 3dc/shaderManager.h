@@ -97,7 +97,7 @@ class EffectManager
 		bool SetActive(effectID_t effectID);
 		bool SetMatrix(effectID_t effectID, const char* constant, R_MATRIX &matrix);
 		bool SetInt(effectID_t effectID, const char* constant, int32_t n);
-		effectID_t AddEffect(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName, const class VertexDeclaration *vertexDeclaration);
+		effectID_t AddEffect(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName, class VertexDeclaration *vertexDeclaration);
 };
 
 #endif

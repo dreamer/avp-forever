@@ -3997,13 +3997,16 @@ float ObjectViewMatrix[12];
 float Source[3];
 float Dest[3];
 
+float p = 1.0f;
+float o = 1.0f;
+
 extern void TranslationSetup(void)
 {
 	char buf[100];
 	VECTORCH v = Global_VDB_Ptr->VDB_World;
 	extern int PredatorVisionChangeCounter;
-	float p = PredatorVisionChangeCounter / 65536.0f;
-	float o = 1.0f;
+	/*float*/ p = PredatorVisionChangeCounter / 65536.0f;
+	/*float*/ o = 1.0f;
 	p = 1.0f+p;
 
 	if (NAUSEA_CHEATMODE)
@@ -4016,14 +4019,14 @@ extern void TranslationSetup(void)
 	}
 
 	// right vector
-	ViewMatrix[0] = (float)(Global_VDB_Ptr->VDB_Mat.mat11)/65536.0f*o;
-	ViewMatrix[1] = (float)(Global_VDB_Ptr->VDB_Mat.mat21)/65536.0f*o;
-	ViewMatrix[2] = (float)(Global_VDB_Ptr->VDB_Mat.mat31)/65536.0f*o;
+	ViewMatrix[0] = (float)(Global_VDB_Ptr->VDB_Mat.mat11)/65536.0f;//*o;
+	ViewMatrix[1] = (float)(Global_VDB_Ptr->VDB_Mat.mat21)/65536.0f;//*o;
+	ViewMatrix[2] = (float)(Global_VDB_Ptr->VDB_Mat.mat31)/65536.0f;//*o;
 
 	// up vector
-	ViewMatrix[4] = (float)(Global_VDB_Ptr->VDB_Mat.mat12)/65536.0f*p;
-	ViewMatrix[5] = (float)(Global_VDB_Ptr->VDB_Mat.mat22)/65536.0f*p;
-	ViewMatrix[6] = (float)(Global_VDB_Ptr->VDB_Mat.mat32)/65536.0f*p;
+	ViewMatrix[4] = (float)(Global_VDB_Ptr->VDB_Mat.mat12)/65536.0f;//*p;
+	ViewMatrix[5] = (float)(Global_VDB_Ptr->VDB_Mat.mat22)/65536.0f;//*p;
+	ViewMatrix[6] = (float)(Global_VDB_Ptr->VDB_Mat.mat32)/65536.0f;//*p;
 
 	// lookat vector
 	ViewMatrix[8] = (float)(Global_VDB_Ptr->VDB_Mat.mat13)/65536.0f;
@@ -4040,9 +4043,9 @@ extern void TranslationSetup(void)
 	ViewMatrix[7] = ((float)-v.vy)*p;
 	ViewMatrix[11] = ((float)-v.vz)*CameraZoomScale;
 	#else
-	ViewMatrix[3] = ((float)v.vx)*o;
-	ViewMatrix[7] = ((float)v.vy)*p;
-	ViewMatrix[11] = ((float)v.vz);;
+	ViewMatrix[3] = ((float)v.vx);//*o;
+	ViewMatrix[7] = ((float)v.vy);//*p;
+	ViewMatrix[11] = ((float)v.vz);
 	#endif
 /*
 	sprintf(buf,
@@ -6178,9 +6181,9 @@ void RenderStarfield(void)
 		particle.ParticleID = PARTICLE_STAR;
 		particle.Colour = StarArray[i].Colour;
 
-		position.vx += Global_VDB_Ptr->VDB_World.vx;
-		position.vy += Global_VDB_Ptr->VDB_World.vy;
-		position.vz += Global_VDB_Ptr->VDB_World.vz;
+//		position.vx += Global_VDB_Ptr->VDB_World.vx;
+//		position.vy += Global_VDB_Ptr->VDB_World.vy;
+//		position.vz += Global_VDB_Ptr->VDB_World.vz;
 
 		TranslatePointIntoViewspace(&position);
 

@@ -90,13 +90,21 @@ struct vertexElement
 class VertexDeclaration
 {
 	private:
-		r_vertexDeclaration	declaration;
-		std::vector<vertexElement> elements;
 		uint32_t offset;
 
 	public:
 		VertexDeclaration();
 		~VertexDeclaration();
+
+		// members
+		std::vector<vertexElement> elements;
+		r_vertexDeclaration	declaration;
+
+#ifdef _XBOX
+		std::vector<DWORD> d3dElement;
+#endif
+
+		// functions
 		void Add(uint16_t stream, VD_TYPE type, VD_METHOD method, VD_USAGE usage, uint8_t usageIndex);
 		bool Create();
 		bool Set();
