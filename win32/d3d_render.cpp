@@ -2651,7 +2651,7 @@ void ThisFramesRenderingHasFinished(void)
 	ExecuteBuffer();
 	R_EndScene();
 
-#if 1 // output how much memory is free
+#if 0 // output how much memory is free
 	#define MB	(1024*1024)
 	MEMORYSTATUS stat;
 	char buf[100];
