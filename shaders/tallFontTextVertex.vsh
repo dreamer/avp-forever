@@ -20,8 +20,8 @@ struct VS_OUTPUT
 
 // Global variables
 float4x4 WorldViewProj;
-int  CloakingPhase;
-int  pX;
+float	CloakingPhase;
+float	pX;
 
 
 // Name: Large font smoke effect shader
@@ -32,8 +32,8 @@ VS_OUTPUT vs_main( in VS_INPUT In )
 {
     VS_OUTPUT Out;	// create an output vertex
     
-    float texX = pX + (CloakingPhase/64) * 0.005f;
-    float texY = (CloakingPhase/128) * 0.005f;
+    float texX = pX + (CloakingPhase/64.0f) * 0.005f;
+    float texY = (CloakingPhase/128.0f) * 0.005f;
     
     // -= here instead of += to get the effect to move left to right 
     In.Texture2.x -= texX;
