@@ -8,6 +8,7 @@
 #include <Dxerr.h>
 #include <stdint.h>
 #include <string>
+#include <vector>
 
 typedef D3DXMATRIX R_MATRIX;
 
@@ -34,15 +35,18 @@ struct r_VertexShader
 	IDirect3DVertexShader9	*shader;
 	ID3DXConstantTable		*constantTable;
 	r_vertexDeclaration		vertexDeclaration;
-	std::string 	shaderName;
+	std::string 			shaderName;
+	std::vector<D3DXHANDLE>	constantsArray;
 };
 
 struct r_PixelShader
 {
 	bool			isValid;
 	uint32_t		refCount;
-	IDirect3DPixelShader9 *shader;
-	std::string 	shaderName;
+	IDirect3DPixelShader9	*shader;
+	ID3DXConstantTable		*constantTable;
+	std::string 			shaderName;
+	std::vector<D3DXHANDLE>	constantsArray;
 };
 
 #include "aw.h"
@@ -64,7 +68,6 @@ bool R_LockVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t offsetToLock, uin
 bool R_UnlockVertexBuffer(r_VertexBuffer &vertexBuffer);
 bool R_SetVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t FVFsize);
 bool R_DrawPrimitive(uint32_t numPrimitives);
-
 bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives);
 
 // index buffer functions
@@ -91,15 +94,17 @@ bool R_CreateVertexDeclaration(class VertexDeclaration *vertexDeclaration);
 bool R_SetVertexDeclaration(r_vertexDeclaration &declaration);
 bool R_ReleaseVertexDeclaration(r_vertexDeclaration &declaration);
 
-// shader functions
+// vertex shader functions
 bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexShader, VertexDeclaration *vertexDeclaration);
-bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader);
 bool R_SetVertexShader(r_VertexShader &vertexShader);
-bool R_SetPixelShader(r_PixelShader &pixelShader);
 void R_ReleaseVertexShader(r_VertexShader &vertexShader);
+bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
+
+// pixel shader functions
+bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader);
+bool R_SetPixelShader(r_PixelShader &pixelShader);
 void R_ReleasePixelShader(r_PixelShader &pixelShader);
-bool R_SetVertexShaderMatrix(r_VertexShader &vertexShader, const char* constant, R_MATRIX &matrix);
-bool R_SetVertexShaderInt(r_VertexShader &vertexShader, const char* constant, int32_t n);
+
 
 void R_NextVideoMode();
 void R_PreviousVideoMode();
@@ -110,14 +115,6 @@ void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
 void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
 void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable);
-
-void R_CameraZoom(float zoomScale);
-
-// vertex declarations
-extern D3DVERTEXELEMENT9 declMain[];
-extern D3DVERTEXELEMENT9 declOrtho[];
-extern D3DVERTEXELEMENT9 declFMV[];
-extern D3DVERTEXELEMENT9 declTallFontText[];
 
 /*
   Direct3D globals
@@ -258,6 +255,9 @@ void CreateScreenShotImage  ();
 void DeRedTexture			(r_Texture texture);
 void ReleaseD3DTexture		(r_Texture *d3dTexture);
 void SetTransforms();
+
+uint32_t XPercentToScreen(float percent);
+uint32_t YPercentToScreen(float percent);
 
 extern uint32_t NO_TEXTURE;
 

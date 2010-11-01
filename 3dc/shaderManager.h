@@ -34,6 +34,15 @@
 typedef uint32_t effectID_t;
 typedef uint32_t shaderID_t;
 
+// shader constant types
+enum SHADER_CONSTANT
+{
+	CONST_INT,
+	CONST_FLOAT,
+	CONST_MATRIX
+	// etc etc
+};
+
 // class version of above
 class VertexShaderPool
 {
@@ -53,8 +62,10 @@ class VertexShaderPool
 		uint32_t GetShaderByName(const std::string &shaderName);
 		void Remove(uint32_t shaderID);
 		void AddRef(uint32_t shaderID) { shaderList[shaderID].refCount++; }
-		bool SetMatrix(uint32_t shaderID, const char* constant, R_MATRIX &matrix);
-		bool SetInt(uint32_t effectID, const char* constant, int32_t n);
+//		bool SetMatrix(uint32_t shaderID, const char* constant, R_MATRIX &matrix);
+//		bool SetFloat(uint32_t shaderID, const char* constant, float n);
+//		bool SetInt(uint32_t shaderID, const char* constant, int32_t n);
+		bool SetVertexShaderConstant(uint32_t shaderID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
 };
 
 class PixelShaderPool
@@ -95,8 +106,10 @@ class EffectManager
 	public:
 		EffectManager();
 		bool SetActive(effectID_t effectID);
-		bool SetMatrix(effectID_t effectID, const char* constant, R_MATRIX &matrix);
-		bool SetInt(effectID_t effectID, const char* constant, int32_t n);
+		bool SetVertexShaderConstant(effectID_t effectID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
+//		bool SetMatrix(effectID_t effectID, const char* constant, R_MATRIX &matrix);
+//		bool SetFloat(effectID_t effectID, const char* constant, float n);
+//		bool SetInt(effectID_t effectID, const char* constant, int32_t n);
 		effectID_t AddEffect(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName, class VertexDeclaration *vertexDeclaration);
 };
 

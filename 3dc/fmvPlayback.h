@@ -80,6 +80,8 @@ class TheoraFMV
 		bool mAudioStarted;
 		bool mTexturesReady;
 
+		bool isLooped;
+
 		// Offset of the page which was last read.
 		ogg_int64_t mPageOffset;
 
@@ -105,6 +107,7 @@ class TheoraFMV
 			mFrameReady(false),
 			mAudioStarted(false),
 			mTexturesReady(false),
+			isLooped(false),
 			mPageOffset(0),
 			mDataOffset(0),
 			mFrameCriticalSectionInited(false)

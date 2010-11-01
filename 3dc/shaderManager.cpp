@@ -85,15 +85,32 @@ uint32_t VertexShaderPool::GetShaderByName(const std::string &shaderName)
 	return nullID;
 }
 
+bool VertexShaderPool::SetVertexShaderConstant(uint32_t shaderID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
+{
+	return R_SetVertexShaderConstant(shaderList[shaderID], registerIndex, type, constantData);
+}
+
+bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
+{
+	return true;
+}
+
+/*
 bool VertexShaderPool::SetMatrix(uint32_t shaderID, const char* constant, R_MATRIX &matrix)
 {
 	return R_SetVertexShaderMatrix(shaderList[shaderID], constant, matrix);
+}
+
+bool VertexShaderPool::SetFloat(uint32_t shaderID, const char* constant, float n)
+{
+	return R_SetVertexShaderFloat(shaderList[shaderID], constant, n);
 }
 
 bool VertexShaderPool::SetInt(uint32_t shaderID, const char* constant, int32_t n)
 {
 	return R_SetVertexShaderInt(shaderList[shaderID], constant, n);
 }
+*/
 
 // add an already created pixelShader_t struct to our pool.
 uint32_t PixelShaderPool::Add(r_PixelShader newShader)
@@ -164,21 +181,33 @@ bool EffectManager::SetActive(effectID_t effectID)
 	return true;
 }
 
+bool EffectManager::SetVertexShaderConstant(effectID_t effectID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
+{
+	return vsPool.SetVertexShaderConstant(effectList[effectID].vertexShaderID, registerIndex, type, constantData);
+}
+
+/*
 bool EffectManager::SetMatrix(effectID_t effectID, const char* constant, R_MATRIX &matrix)
 {
 	// just call another SetMatrix function within the vertex shader class
 	// until I find a tidier way to do this
-	vsPool.SetMatrix(effectList[effectID].vertexShaderID, constant, matrix);
-	return true;
+	return vsPool.SetMatrix(effectList[effectID].vertexShaderID, constant, matrix);
+}
+
+bool EffectManager::SetFloat(effectID_t effectID, const char* constant, float n)
+{
+	// just call another SetMatrix function within the vertex shader class
+	// until I find a tidier way to do this
+	return vsPool.SetFloat(effectList[effectID].vertexShaderID, constant, n);
 }
 
 bool EffectManager::SetInt(effectID_t effectID, const char* constant, int32_t n)
 {
 	// just call another SetInt function within the vertex shader class
 	// until I find a tidier way to do this
-	vsPool.SetInt(effectList[effectID].vertexShaderID, constant, n);
-	return true;
+	return vsPool.SetInt(effectList[effectID].vertexShaderID, constant, n);
 }
+*/
 
 effectID_t EffectManager::AddEffect(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName, VertexDeclaration *vertexDeclaration)
 {

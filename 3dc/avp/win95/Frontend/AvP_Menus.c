@@ -66,7 +66,7 @@ extern void Show_WinnerScreen(void);
 extern void GetNextAllowedSpecies(int* species,BOOL search_forwards);
 static void SetBriefingTextForMultiplayer();
 
-int CloudTable[128][128];
+//int CloudTable[128][128];
 
 extern char MP_Config_Name[];
 
@@ -89,7 +89,6 @@ void CheckForCredits(void);
 void DoCredits(void);
 BOOL RollCreditsText(int position, unsigned char *textPtr);
 extern void SelectMenuDisplayMode(void);
-static void InitMainMenusBackdrop(void);
 extern void DrawMainMenusBackdrop(void);
 static void TestValidityOfCheatMenu(void);
 void SetBriefingTextForEpisode(int episode, I_PLAYER_TYPE playerID);
@@ -276,10 +275,9 @@ int AvP_MainMenus(void)
 	InitialiseMenuGfx();
 	TimeStampedMessage("after InitialiseMenuGfx");
 
-	// inform backdrop code
-	InitMainMenusBackdrop();
-	TimeStampedMessage("after InitMainMenusBackdrop");
-
+	// start background FMV
+	StartMenuBackgroundFmv();
+	TimeStampedMessage("after StartMenuBackgroundFmv");
 
 	#if PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO
 	if (AvP.LevelCompleted)
@@ -4790,10 +4788,6 @@ extern int VideoMode;
 extern int WindowMode;
 extern int WindowRequestMode;
 
-static void InitMainMenusBackdrop(void)
-{
-// bjd - lets relocate this call -	StartMenuBackgroundFmv();
-}
 
 extern void DrawMainMenusBackdrop(void)
 {

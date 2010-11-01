@@ -154,7 +154,10 @@ TheoraFMV::~TheoraFMV()
 
 	for (uint32_t i = 0; i < 3; i++)
 	{
-//		Tex_Release(frameTextures[i]);
+//		if (frameTextures[i] != NO_TEXTURE)
+		{
+//			Tex_Release(frameTextures[i]);
+		}
 	}
 
 	if (mFrameCriticalSectionInited)
@@ -190,7 +193,6 @@ void VorbisDecode::Init()
 
 int TheoraFMV::Open(const std::string &fileName)
 {
-
 #ifdef _XBOX
 	mFileName = "d:\\";
 	mFileName += fileName;
@@ -201,6 +203,12 @@ int TheoraFMV::Open(const std::string &fileName)
 	frameTextures[0] = NO_TEXTURE;
 	frameTextures[1] = NO_TEXTURE;
 	frameTextures[2] = NO_TEXTURE;
+
+	// this'll do for now..
+	if (mFileName == "fmvs\\menubackground.ogv")
+	{
+		isLooped = true;
+	}
 
 	// open the file
 	mFileStream.open(mFileName.c_str(), std::ios::in | std::ios::binary);
@@ -502,7 +510,18 @@ ogg_int64_t TheoraFMV::ReadPage(ogg_page *page)
 		}
 		else
 		{
-			return -1;
+			if (isLooped)
+			{
+				// we have to loop, so reset back to the start and keep going (dont return)
+				mFileStream.clear();
+				mFileStream.seekg(mDataOffset, std::ios::beg);
+				mPageOffset = mDataOffset;
+				ogg_sync_reset(&mState);
+			}
+			else 
+			{
+				return -1;
+			}
 		}
 	}
 
@@ -526,6 +545,7 @@ ogg_int64_t TheoraFMV::ReadPage(ogg_page *page)
 
 	offset = mPageOffset;
 	mPageOffset += page->header_len + page->body_len;
+
 	return offset;
 }
 

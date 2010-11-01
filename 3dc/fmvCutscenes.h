@@ -14,6 +14,7 @@ extern void PlayFMV(const char *filenamePtr);
 void StartMenuMusic();
 extern void StartTriggerPlotFMV(int number);
 void UpdateAllFMVTextures();
+void StartMenuBackgroundFmv();
 #ifdef __cplusplus
 }
 #endif
@@ -36,7 +37,6 @@ typedef struct FMVTEXTURE
 int NextFMVTextureFrame(FMVTEXTURE *ftPtr);
 void ReleaseAllFMVTexturesForDeviceReset();
 void RecreateAllFMVTexturesAfterDeviceReset();
-void StartMenuBackgroundFmv();
 void SetupFMVTexture(FMVTEXTURE *ftPtr);
 
 #endif // #ifndef _FMV_

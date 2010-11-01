@@ -238,6 +238,16 @@ int NearestSuperiorPow2(int i)
 	return x ? NearestSuperiorPow2(x) : i << 1;
 }
 
+uint32_t XPercentToScreen(float percent)
+{
+	return ((((float)ScreenDescriptorBlock.SDB_Width) / 100) * percent);
+}
+
+uint32_t YPercentToScreen(float percent)
+{
+	return ((((float)ScreenDescriptorBlock.SDB_Height) / 100) * percent);
+}
+
 bool ReleaseVolatileResources()
 {
 	Tex_ReleaseDynamicTextures();
@@ -1127,54 +1137,6 @@ static bool CreateVertexShader(const std::string &fileName, r_VertexShader &vert
 }
 */
 
-static bool CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader)
-{
-	LPD3DXBUFFER pErrors = NULL;
-	LPD3DXBUFFER pCode = NULL;
-	std::string actualPath = shaderPath + fileName;
-
-	// test that the path to the file is valid first (d3dx doesn't give a specific error message for this)
-	std::ifstream fileOpenTest(actualPath.c_str(), std::ifstream::in | std::ifstream::binary);
-	if (!fileOpenTest.good())
-	{
-		LogErrorString("Can't open pixel shader file " + actualPath, __LINE__, __FILE__);
-		return false;
-	}
-	// close the file
-	fileOpenTest.close();
-
-	// set up pixel shader
-	LastError = D3DXCompileShaderFromFile(actualPath.c_str(), //filepath
-						NULL,            // macro's
-						NULL,            // includes
-						"ps_main",       // main function
-						"ps_2_0",        // shader profile
-						0,               // flags
-						&pCode,          // compiled operations
-						&pErrors,        // errors
-						NULL);			 // constants
-
-	if (FAILED(LastError))
-	{
-		OutputDebugString(DXGetErrorString(LastError));
-		OutputDebugString(DXGetErrorDescription(LastError));
-
-		if (pErrors)
-		{
-			// shader didn't compile for some reason
-			OutputDebugString((const char*)pErrors->GetBufferPointer());
-			pErrors->Release();
-		}
-
-		return false;
-	}
-
-	d3d.lpD3DDevice->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), &pixelShader.shader);
-	pCode->Release();
-
-	return true;
-}
-
 static BYTE VD_USAGEtoD3DDECLUSAGE(VD_USAGE usage)
 {
 	BYTE d3dUsage;
@@ -1354,26 +1316,134 @@ bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexSha
 		OutputDebugString(DXGetErrorString(LastError));
 		OutputDebugString(DXGetErrorDescription(LastError));
 
+		LogErrorString("D3DXCompileShaderFromFile failed for " + actualPath, __LINE__, __FILE__);
+
 		if (pErrors)
 		{
 			// shader didn't compile for some reason
-			OutputDebugString((const char*)pErrors->GetBufferPointer());
+			LogErrorString("Shader compile errors found for " + actualPath, __LINE__, __FILE__);
+			LogErrorString("\n" + std::string((const char*)pErrors->GetBufferPointer()));
+
 			pErrors->Release();
 		}
 
 		return false;
 	}
 
-	d3d.lpD3DDevice->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), &vertexShader.shader);
+	LastError = d3d.lpD3DDevice->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), &vertexShader.shader);
+	if (FAILED(LastError))
+	{
+		LogErrorString("CreateVertexShader failed for " + actualPath, __LINE__, __FILE__);
+		return false;
+	}
+
+	// no longer need pCode
 	pCode->Release();
 
+	// now find out how many constant registers our shader uses
+	D3DXCONSTANTTABLE_DESC constantDesc;
+	vertexShader.constantTable->GetDesc(&constantDesc);
+
+//	LogErrorString(actualPath + " has " + IntToString(constantDesc.Constants));
+
+	// we're going to store handles to each register in our std::vector so make it the right size
+	vertexShader.constantsArray.resize(constantDesc.Constants);
+
+	D3DXCONSTANT_DESC desc2;
+	uint32_t size = 1;
+
+	// loop, getting and storing a handle to each shader constant
+	for (uint32_t i = 0; i < constantDesc.Constants; i++)
+	{
+		vertexShader.constantsArray[i] = vertexShader.constantTable->GetConstant(NULL, i);
+		vertexShader.constantTable->GetConstantDesc(vertexShader.constantsArray[i], &desc2, &size);
+		char buf[1000];
+		sprintf(buf, "name: %s, Index: %d, regCount: %d\n", desc2.Name, desc2.RegisterIndex, desc2.RegisterCount);
+		OutputDebugString(buf);
+	}
+
 	return true;
-//	return CreateVertexShader(fileName, vertexShader);
 }
 
 bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader)
 {
-	return CreatePixelShader(fileName, pixelShader);
+	LPD3DXBUFFER pErrors = NULL;
+	LPD3DXBUFFER pCode = NULL;
+	std::string actualPath = shaderPath + fileName;
+
+	// test that the path to the file is valid first (d3dx doesn't give a specific error message for this)
+	std::ifstream fileOpenTest(actualPath.c_str(), std::ifstream::in | std::ifstream::binary);
+	if (!fileOpenTest.good())
+	{
+		LogErrorString("Can't open pixel shader file " + actualPath, __LINE__, __FILE__);
+		return false;
+	}
+	// close the file
+	fileOpenTest.close();
+
+	// set up pixel shader
+	LastError = D3DXCompileShaderFromFile(actualPath.c_str(), //filepath
+						NULL,            // macro's
+						NULL,            // includes
+						"ps_main",       // main function
+						"ps_2_0",        // shader profile
+						0,               // flags
+						&pCode,          // compiled operations
+						&pErrors,        // errors
+						&pixelShader.constantTable);			 // constants
+
+	if (FAILED(LastError))
+	{
+		OutputDebugString(DXGetErrorString(LastError));
+		OutputDebugString(DXGetErrorDescription(LastError));
+
+		LogErrorString("D3DXCompileShaderFromFile failed for " + actualPath, __LINE__, __FILE__);
+
+		if (pErrors)
+		{
+			// shader didn't compile for some reason
+			OutputDebugString((const char*)pErrors->GetBufferPointer());
+
+			LogErrorString("Shader compile errors found for " + actualPath, __LINE__, __FILE__);
+			LogErrorString("\n" + std::string((const char*)pErrors->GetBufferPointer()));
+
+			pErrors->Release();
+		}
+
+		return false;
+	}
+
+	LastError = d3d.lpD3DDevice->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), &pixelShader.shader);
+	if (FAILED(LastError))
+	{
+		LogErrorString("CreatePixelShader failed for " + actualPath, __LINE__, __FILE__);
+		return false;
+	}
+
+	// no longer need pCode
+	pCode->Release();
+
+	// now find out how many constant registers our shader uses
+	D3DXCONSTANTTABLE_DESC constantDesc;
+	pixelShader.constantTable->GetDesc(&constantDesc);
+
+	// we're going to store handles to each register in our std::vector so make it the right size
+	pixelShader.constantsArray.resize(constantDesc.Constants);
+
+	D3DXCONSTANT_DESC desc2;
+	uint32_t size = 1;
+
+	// loop, getting and storing a handle to each shader constant
+	for (uint32_t i = 0; i < constantDesc.Constants; i++)
+	{
+		pixelShader.constantsArray[i] = pixelShader.constantTable->GetConstant(NULL, i);
+		pixelShader.constantTable->GetConstantDesc(pixelShader.constantsArray[i], &desc2, &size);
+		char buf[1000];
+		sprintf(buf, "name: %s, Index: %d, regCount: %d\n", desc2.Name, desc2.RegisterIndex, desc2.RegisterCount);
+		OutputDebugString(buf);
+	}
+
+	return true;
 }
 
 bool R_SetVertexShader(r_VertexShader &vertexShader)
@@ -1389,6 +1459,7 @@ bool R_SetVertexShader(r_VertexShader &vertexShader)
 	return true;
 }
 
+/*
 bool R_SetVertexShaderMatrix(r_VertexShader &vertexShader, const char* constant, R_MATRIX &matrix)
 {
 	D3DXMATRIX tempMat;
@@ -1422,6 +1493,56 @@ bool R_SetVertexShaderMatrix(r_VertexShader &vertexShader, const char* constant,
 
 	return true;
 }
+*/
+
+bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
+{
+	uint32_t sizeInBytes = 0;
+
+	switch (type)
+	{
+		case CONST_INT:
+			sizeInBytes = sizeof(float);
+			break;
+
+		case CONST_FLOAT:
+			sizeInBytes = sizeof(float);
+			break;
+
+		case CONST_MATRIX:
+			sizeInBytes = sizeof(float) * 16;
+			break;
+
+		default:
+			LogErrorString("Unknown shader constant type");
+			return false;
+			break;
+	}
+
+	LastError = vertexShader.constantTable->SetValue(d3d.lpD3DDevice, vertexShader.constantsArray[registerIndex], constantData, sizeInBytes);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't SetValue for vertex shader " + vertexShader.shaderName);
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+/*
+bool R_SetVertexShaderFloat(r_VertexShader &vertexShader, const char* constant, float n)
+{
+	LastError = vertexShader.constantTable->SetFloat(d3d.lpD3DDevice, constant, n);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't set float for vertex shader " + vertexShader.shaderName);
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
 
 bool R_SetVertexShaderInt(r_VertexShader &vertexShader, const char* constant, int32_t n)
 {
@@ -1435,6 +1556,7 @@ bool R_SetVertexShaderInt(r_VertexShader &vertexShader, const char* constant, in
 
 	return true;
 }
+*/
 
 bool R_SetPixelShader(r_PixelShader &pixelShader)
 {
@@ -2447,7 +2569,7 @@ bool InitialiseDirect3D()
 	d3d.d3dpp = d3dpp;
 
 	// set field of view (this needs to be set differently for alien but 75 seems ok for marine and predator
-	d3d.fieldOfView = 75;
+	d3d.fieldOfView = 77;
 
 	SetTransforms();
 
@@ -2539,12 +2661,6 @@ bool InitialiseDirect3D()
 	Con_PrintMessage("Initialised Direct3D9 succesfully");
 
 	return true;
-}
-
-// we need this for zooming
-void R_CameraZoom(float zoomScale)
-{
-	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(d3d.fieldOfView * zoomScale), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
 }
 
 void SetTransforms()

@@ -34,7 +34,11 @@ PS_OUTPUT ps_main( in PS_INPUT In )
 
 	if ((srcColour1.r) && (srcColour1.g) && (srcColour1.b))
 	{
-		destColour = srcColour1 * srcColour2 * In.Diffuse;
+		destColour = (srcColour1 * srcColour2) * In.Diffuse;
+	}
+	else
+	{
+		destColour = srcColour1 * In.Diffuse;	
 	}
 
 	Out.Color = destColour;

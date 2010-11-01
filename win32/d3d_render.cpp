@@ -242,6 +242,11 @@ bool UnlockExecuteBufferAndPrepareForUse()
 	return true;
 }
 
+float cot(float in)
+{
+	return 1.0f / tan(in);
+}
+
 bool ExecuteBuffer()
 {
 	// sort the list of render objects
@@ -253,7 +258,47 @@ bool ExecuteBuffer()
 	{
 //		R_CameraZoom(CameraZoomScale);
 //		currentCameraZoomScale = CameraZoomScale;
-		D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(d3d.fieldOfView * CameraZoomScale), (((float)ScreenDescriptorBlock.SDB_Width) *1) / (((float)ScreenDescriptorBlock.SDB_Height) *p), 64.0f, 1000000.0f);
+
+//		D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(d3d.fieldOfView * CameraZoomScale * p), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+
+		// manually generate the perspective matrix as per http://msdn.microsoft.com/en-us/library/bb205350(VS.85).aspx
+		float zf = 1000000.0f;
+		float zn = 64.0f;
+		float fovY = D3DXToRadian(d3d.fieldOfView * CameraZoomScale);
+		float aspect = (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height;
+		float yScale = cot(fovY/2.0f);
+
+		float originalYScale = yScale;
+		yScale *= p;
+
+		float xScale = originalYScale / aspect;
+		aspect /= p;
+
+		xScale *= o;
+
+		// column 1
+		matProjection._11 = xScale;
+		matProjection._21 = 0.0f;
+		matProjection._31 = 0.0f;
+		matProjection._41 = 0.0f;
+
+		// column 2
+		matProjection._12 = 0.0f;
+		matProjection._22 = yScale;
+		matProjection._32 = 0.0f;
+		matProjection._42 = 0.0f;
+
+		// column 3
+		matProjection._13 = 0.0f;
+		matProjection._23 = 0.0f;
+		matProjection._33 = zf/(zf-zn);
+		matProjection._43 = -zn*zf/(zf-zn);
+
+		// column 4
+		matProjection._14 = 0.0f;
+		matProjection._24 = 0.0f;
+		matProjection._34 = 1.0f;
+		matProjection._44 = 0.0f;
 	}
 
 	{
@@ -269,7 +314,8 @@ bool ExecuteBuffer()
 
 		// we don't need world matrix here as avp has done all the world transforms itself
 		R_MATRIX matWorldViewProj = viewMatrix * matProjection;
-		d3d.effectSystem->SetMatrix(d3d.mainEffect, "WorldViewProj", matWorldViewProj);
+//		d3d.effectSystem->SetMatrix(d3d.mainEffect, "WorldViewProj", matWorldViewProj);
+		d3d.effectSystem->SetVertexShaderConstant(d3d.mainEffect, 0, CONST_MATRIX, &matWorldViewProj);
 
 		// draw our main list (level geometry, player weapon etc)
 		mainList->Draw();
@@ -281,14 +327,14 @@ bool ExecuteBuffer()
 		d3d.particleVB->Set();
 		d3d.particleIB->Set();
 
-		d3d.effectSystem->SetMatrix(d3d.mainEffect, "WorldViewProj", matProjection);
+		// set main shaders to active
+		d3d.effectSystem->SetActive(d3d.mainEffect);
 
-//		ChangeTextureAddressMode(TEXTURE_CLAMP);
+//		d3d.effectSystem->SetMatrix(d3d.mainEffect, "WorldViewProj", matProjection);
+		d3d.effectSystem->SetVertexShaderConstant(d3d.mainEffect, 0, CONST_MATRIX, &matProjection);
 
 		// Draw the particles in the list
 		particleList->Draw();
-
-//		ChangeTextureAddressMode(TEXTURE_WRAP);
 	}
 
 	// render any orthographic quads
@@ -303,7 +349,8 @@ bool ExecuteBuffer()
 		d3d.effectSystem->SetActive(d3d.orthoEffect);
 
 		// pass the orthographicp projection matrix to the vertex shader
-		d3d.effectSystem->SetMatrix(d3d.orthoEffect, "WorldViewProj", matOrtho);
+//		d3d.effectSystem->SetMatrix(d3d.orthoEffect, "WorldViewProj", matOrtho);
+		d3d.effectSystem->SetVertexShaderConstant(d3d.orthoEffect, 0, CONST_MATRIX, &matOrtho);
 
 		// daw the ortho list
 		orthoList->Draw();
@@ -447,7 +494,8 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 	d3d.effectSystem->SetActive(d3d.fmvEffect);
 
 	// set orthographic projection
-	d3d.effectSystem->SetMatrix(d3d.fmvEffect, "WorldViewProj", matOrtho);
+//	d3d.effectSystem->SetMatrix(d3d.fmvEffect, "WorldViewProj", matOrtho);
+	d3d.effectSystem->SetVertexShaderConstant(d3d.fmvEffect, 0, CONST_MATRIX, &matOrtho);
 
 	ChangeTextureAddressMode(TEXTURE_CLAMP);
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
@@ -555,115 +603,125 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 	float x2 = WPos2DC(topX + charWidth);
 	float y2 = HPos2DC(topY + charHeight);
 
-#if 1
-
-	R_SetTexture(0, textureID);
-	R_SetTexture(1, AVPMENUGFX_CLOUDY);
-
-	// set vertex declaration
-	d3d.tallFontText->Set();
-
-	// set orthographic projection shaders as active
-	d3d.effectSystem->SetActive(d3d.cloudEffect);
-
-	d3d.effectSystem->SetMatrix(d3d.cloudEffect, "WorldViewProj", matOrtho);
-	d3d.effectSystem->SetInt(d3d.cloudEffect, "CloakingPhase", CloakingPhase);
-	d3d.effectSystem->SetInt(d3d.cloudEffect, "pX", static_cast<int32_t>(topX));
-
-	ChangeFilteringMode(FILTERING_BILINEAR_ON);
-
-	ORTHOVERTEX testOrtho[4];
-	int16_t indices[6];
-
-	indices[0] = 1;
-	indices[1] = 2;
-	indices[2] = 3;
-
-	indices[3] = 2;
-	indices[4] = 4;
-	indices[5] = 3;
-
-	// bottom left
-	testOrtho[0].x = x1;
-	testOrtho[0].y = y2;
-	testOrtho[0].z = 1.0f;
-	testOrtho[0].colour = colour;
-	testOrtho[0].u = (float)((texU) * RecipW);
-	testOrtho[0].v = (float)((texV + charHeight) * RecipH);
-
-	// top left
-	testOrtho[1].x = x1;
-	testOrtho[1].y = y1;
-	testOrtho[1].z = 1.0f;
-	testOrtho[1].colour = colour;
-	testOrtho[1].u = (float)((texU) * RecipW);
-	testOrtho[1].v = (float)((texV) * RecipH);
-
-	// bottom right
-	testOrtho[2].x = x2;
-	testOrtho[2].y = y2;
-	testOrtho[2].z = 1.0f;
-	testOrtho[2].colour = colour;
-	testOrtho[2].u = (float)((texU + charWidth) * RecipW);
-	testOrtho[2].v = (float)((texV + charHeight) * RecipH);
-
-	// top right
-	testOrtho[3].x = x2;
-	testOrtho[3].y = y1;
-	testOrtho[3].z = 1.0f;
-	testOrtho[3].colour = colour;
-	testOrtho[3].u = (float)((texU + charWidth) * RecipW);
-	testOrtho[3].v = (float)((texV) * RecipH);
-
-	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, testOrtho, sizeof(ORTHOVERTEX));
-	if (FAILED(LastError)) 
+	if (d3d.supportsShaders)
 	{
-		OutputDebugString("draw menu quad failed\n");
+		R_SetTexture(0, textureID);
+		R_SetTexture(1, AVPMENUGFX_CLOUDY);
+
+		// set vertex declaration
+		d3d.tallFontText->Set();
+
+		// set orthographic projection shaders as active
+		d3d.effectSystem->SetActive(d3d.cloudEffect);
+
+/*
+		d3d.effectSystem->SetMatrix(d3d.cloudEffect, "WorldViewProj", matOrtho);
+		d3d.effectSystem->SetFloat(d3d.cloudEffect, "CloakingPhase", CloakingPhase);
+		d3d.effectSystem->SetFloat(d3d.cloudEffect, "pX", static_cast<float>(topX));
+*/
+
+		// we need to pass these values as floats
+		float CloakingPhaseF = static_cast<float>(CloakingPhase);
+		float topXF = static_cast<float>(topX);
+
+		d3d.effectSystem->SetVertexShaderConstant(d3d.cloudEffect, 0, CONST_FLOAT, &CloakingPhaseF);
+		d3d.effectSystem->SetVertexShaderConstant(d3d.cloudEffect, 1, CONST_MATRIX, &matOrtho);
+		d3d.effectSystem->SetVertexShaderConstant(d3d.cloudEffect, 2, CONST_FLOAT, &topXF);
+
+		ChangeTranslucencyMode(TRANSLUCENCY_GLOWING);
+		ChangeFilteringMode(FILTERING_BILINEAR_ON);
+
+		ORTHOVERTEX textQuad[4];
+		int16_t indices[6];
+
+		indices[0] = 1;
+		indices[1] = 2;
+		indices[2] = 3;
+
+		indices[3] = 2;
+		indices[4] = 4;
+		indices[5] = 3;
+
+		// bottom left
+		textQuad[0].x = x1;
+		textQuad[0].y = y2;
+		textQuad[0].z = 1.0f;
+		textQuad[0].colour = colour;
+		textQuad[0].u = (float)((texU) * RecipW);
+		textQuad[0].v = (float)((texV + charHeight) * RecipH);
+
+		// top left
+		textQuad[1].x = x1;
+		textQuad[1].y = y1;
+		textQuad[1].z = 1.0f;
+		textQuad[1].colour = colour;
+		textQuad[1].u = (float)((texU) * RecipW);
+		textQuad[1].v = (float)((texV) * RecipH);
+
+		// bottom right
+		textQuad[2].x = x2;
+		textQuad[2].y = y2;
+		textQuad[2].z = 1.0f;
+		textQuad[2].colour = colour;
+		textQuad[2].u = (float)((texU + charWidth) * RecipW);
+		textQuad[2].v = (float)((texV + charHeight) * RecipH);
+
+		// top right
+		textQuad[3].x = x2;
+		textQuad[3].y = y1;
+		textQuad[3].z = 1.0f;
+		textQuad[3].colour = colour;
+		textQuad[3].u = (float)((texU + charWidth) * RecipW);
+		textQuad[3].v = (float)((texV) * RecipH);
+
+		LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, textQuad, sizeof(ORTHOVERTEX));
+		if (FAILED(LastError)) 
+		{
+			OutputDebugString("DrawTallFontCharacter quad draw failed\n");
+		}
 	}
+	else
+	{
+		orthoList->AddItem(4, textureID, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
-#else // turned off for testing
+		// bottom left
+		orthoVertex[orthoVBOffset].x = x1;
+		orthoVertex[orthoVBOffset].y = y2;
+		orthoVertex[orthoVBOffset].z = 1.0f;
+		orthoVertex[orthoVBOffset].colour = colour;
+		orthoVertex[orthoVBOffset].u = (float)((texU) * RecipW);
+		orthoVertex[orthoVBOffset].v = (float)((texV + charHeight) * RecipH);
+		orthoVBOffset++;
 
-	orthoList->AddItem(4, textureID, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
+		// top left
+		orthoVertex[orthoVBOffset].x = x1;
+		orthoVertex[orthoVBOffset].y = y1;
+		orthoVertex[orthoVBOffset].z = 1.0f;
+		orthoVertex[orthoVBOffset].colour = colour;
+		orthoVertex[orthoVBOffset].u = (float)((texU) * RecipW);
+		orthoVertex[orthoVBOffset].v = (float)((texV) * RecipH);
+		orthoVBOffset++;
 
-	// bottom left
-	orthoVertex[orthoVBOffset].x = x1;
-	orthoVertex[orthoVBOffset].y = y2;
-	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = (float)((texU) * RecipW);
-	orthoVertex[orthoVBOffset].v = (float)((texV + charHeight) * RecipH);
-	orthoVBOffset++;
+		// bottom right
+		orthoVertex[orthoVBOffset].x = x2;
+		orthoVertex[orthoVBOffset].y = y2;
+		orthoVertex[orthoVBOffset].z = 1.0f;
+		orthoVertex[orthoVBOffset].colour = colour;
+		orthoVertex[orthoVBOffset].u = (float)((texU + charWidth) * RecipW);
+		orthoVertex[orthoVBOffset].v = (float)((texV + charHeight) * RecipH);
+		orthoVBOffset++;
 
-	// top left
-	orthoVertex[orthoVBOffset].x = x1;
-	orthoVertex[orthoVBOffset].y = y1;
-	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = (float)((texU) * RecipW);
-	orthoVertex[orthoVBOffset].v = (float)((texV) * RecipH);
-	orthoVBOffset++;
+		// top right
+		orthoVertex[orthoVBOffset].x = x2;
+		orthoVertex[orthoVBOffset].y = y1;
+		orthoVertex[orthoVBOffset].z = 1.0f;
+		orthoVertex[orthoVBOffset].colour = colour;
+		orthoVertex[orthoVBOffset].u = (float)((texU + charWidth) * RecipW);
+		orthoVertex[orthoVBOffset].v = (float)((texV) * RecipH);
+		orthoVBOffset++;
 
-	// bottom right
-	orthoVertex[orthoVBOffset].x = x2;
-	orthoVertex[orthoVBOffset].y = y2;
-	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = (float)((texU + charWidth) * RecipW);
-	orthoVertex[orthoVBOffset].v = (float)((texV + charHeight) * RecipH);
-	orthoVBOffset++;
-
-	// top right
-	orthoVertex[orthoVBOffset].x = x2;
-	orthoVertex[orthoVBOffset].y = y1;
-	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = (float)((texU + charWidth) * RecipW);
-	orthoVertex[orthoVBOffset].v = (float)((texV) * RecipH);
-	orthoVBOffset++;
-
-	orthoList->CreateOrthoIndices(orthoIndex);
-
-#endif
+		orthoList->CreateOrthoIndices(orthoIndex);
+	}
 }
 
 void SetupFMVTexture(FMVTEXTURE *ftPtr)
@@ -1154,22 +1212,22 @@ void DrawCoronas()
 			if (coronaArray[i].particle.ParticleID == PARTICLE_SMOKECLOUD || coronaArray[i].particle.ParticleID == PARTICLE_ANDROID_BLOOD)
 			{
 				colour = RGBALIGHT_MAKE
-				  		(
-				   			MUL_FIXED(intensity, coronaArray[i].particle.ColourComponents.Red),
-				   			MUL_FIXED(intensity, coronaArray[i].particle.ColourComponents.Green),
-				   			MUL_FIXED(intensity, coronaArray[i].particle.ColourComponents.Blue),
-				   			coronaArray[i].particle.ColourComponents.Alpha
-				   		);
+						(
+							MUL_FIXED(intensity, coronaArray[i].particle.ColourComponents.Red),
+							MUL_FIXED(intensity, coronaArray[i].particle.ColourComponents.Green),
+							MUL_FIXED(intensity, coronaArray[i].particle.ColourComponents.Blue),
+							coronaArray[i].particle.ColourComponents.Alpha
+						);
 			}
 			else
 			{
 				colour = RGBALIGHT_MAKE
-				  		(
-				   			MUL_FIXED(intensity, particleDescPtr->RedScale[CurrentVisionMode]),
-				   			MUL_FIXED(intensity, particleDescPtr->GreenScale[CurrentVisionMode]),
-				   			MUL_FIXED(intensity, particleDescPtr->BlueScale[CurrentVisionMode]),
-				   			particleDescPtr->Alpha
-				   		);
+						(
+							MUL_FIXED(intensity, particleDescPtr->RedScale[CurrentVisionMode]),
+							MUL_FIXED(intensity, particleDescPtr->GreenScale[CurrentVisionMode]),
+							MUL_FIXED(intensity, particleDescPtr->BlueScale[CurrentVisionMode]),
+							particleDescPtr->Alpha
+						);
 			}
 		}
 		else
@@ -1196,6 +1254,9 @@ void DrawCoronas()
 		tempVec.y = coronaArray[i].coronaPoint.vy;
 		tempVec.z = coronaArray[i].coronaPoint.vz;
 
+		float centreX = tempVec.x / tempVec.z;
+		float centreY = tempVec.y / tempVec.z;
+
 		// already view transformed, do projection transform
 		D3DXVec3TransformCoord(&newVec, &tempVec, &matProjection);
 
@@ -1203,16 +1264,17 @@ void DrawCoronas()
 		D3DXVec3TransformCoord(&tempVec, &newVec, &matViewPort);
 
 		// generate the quad around this point
+
 		uint32_t size = 100;
 
-		uint32_t sizeX = (ScreenDescriptorBlock.SDB_Width<<13)/Global_VDB_Ptr->VDB_ProjX;
-		uint32_t sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13,87381)/Global_VDB_Ptr->VDB_ProjY;
+		uint32_t sizeX = (ScreenDescriptorBlock.SDB_Width / 100) * 10;
+		uint32_t sizeY = sizeX;//(ScreenDescriptorBlock.SDB_Height / 100) * 11;
 
 		orthoList->AddItem(4, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 		// bottom left
-		orthoVertex[orthoVBOffset].x = WPos2DC(tempVec.x - size);
-		orthoVertex[orthoVBOffset].y = HPos2DC(tempVec.y + size);
+		orthoVertex[orthoVBOffset].x = WPos2DC(tempVec.x - sizeX);
+		orthoVertex[orthoVBOffset].y = HPos2DC(tempVec.y + sizeY);
 		orthoVertex[orthoVBOffset].z = 1.0f;
 		orthoVertex[orthoVBOffset].colour = colour;
 		orthoVertex[orthoVBOffset].u = 192.0f * RecipW;
@@ -1220,8 +1282,8 @@ void DrawCoronas()
 		orthoVBOffset++;
 
 		// top left
-		orthoVertex[orthoVBOffset].x = WPos2DC(tempVec.x - size);
-		orthoVertex[orthoVBOffset].y = HPos2DC(tempVec.y - size);
+		orthoVertex[orthoVBOffset].x = WPos2DC(tempVec.x - sizeX);
+		orthoVertex[orthoVBOffset].y = HPos2DC(tempVec.y - sizeY);
 		orthoVertex[orthoVBOffset].z = 1.0f;
 		orthoVertex[orthoVBOffset].colour = colour;
 		orthoVertex[orthoVBOffset].u = 192.0f * RecipW;
@@ -1229,8 +1291,8 @@ void DrawCoronas()
 		orthoVBOffset++;
 
 		// bottom right
-		orthoVertex[orthoVBOffset].x = WPos2DC(tempVec.x + size);
-		orthoVertex[orthoVBOffset].y = HPos2DC(tempVec.y + size);
+		orthoVertex[orthoVBOffset].x = WPos2DC(tempVec.x + sizeX);
+		orthoVertex[orthoVBOffset].y = HPos2DC(tempVec.y + sizeY);
 		orthoVertex[orthoVBOffset].z = 1.0f;
 		orthoVertex[orthoVBOffset].colour = colour;
 		orthoVertex[orthoVBOffset].u = 255.0f * RecipW;
@@ -1238,8 +1300,8 @@ void DrawCoronas()
 		orthoVBOffset++;
 
 		// top right
-		orthoVertex[orthoVBOffset].x = WPos2DC(tempVec.x + size);
-		orthoVertex[orthoVBOffset].y = HPos2DC(tempVec.y - size);
+		orthoVertex[orthoVBOffset].x = WPos2DC(tempVec.x + sizeX);
+		orthoVertex[orthoVBOffset].y = HPos2DC(tempVec.y - sizeY);
 		orthoVertex[orthoVBOffset].z = 1.0f;
 		orthoVertex[orthoVBOffset].colour = colour;
 		orthoVertex[orthoVBOffset].u = 255.0f * RecipW;
@@ -1455,7 +1517,7 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 		}
 		else
 		{
-			mainVertex[vb].color = RGBLIGHT_MAKE(vertices->R, vertices->G, vertices->B);
+			mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R, vertices->G, vertices->B, 255);
 		}
 
 		mainVertex[vb].specular = (RCOLOR)1.0f;
@@ -2577,6 +2639,8 @@ void ThisFramesRenderingHasBegun(void)
 	}
 }
 
+size_t lastMem = 0;
+
 void ThisFramesRenderingHasFinished(void)
 {
 	Osk_Draw();
@@ -2586,6 +2650,32 @@ void ThisFramesRenderingHasFinished(void)
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
 	R_EndScene();
+
+#if 1 // output how much memory is free
+	#define MB	(1024*1024)
+	MEMORYSTATUS stat;
+	char buf[100];
+
+	// Get the memory status.
+	GlobalMemoryStatus( &stat );
+
+	if ((stat.dwAvailPhys / MB) < 13)
+	{
+//		OutputDebugString("break here plz\n");
+	}
+
+	if (stat.dwAvailPhys != lastMem)
+	{
+
+	sprintf(buf, "%4d  free bytes of physical memory.\n", stat.dwAvailPhys);
+	OutputDebugString( buf );
+
+	sprintf(buf, "%4d  free MB of physical memory.\n", stat.dwAvailPhys / MB );
+	OutputDebugString( buf );
+
+	lastMem = stat.dwAvailPhys;
+	}
+#endif
 
  	/* KJL 11:46:56 01/16/97 - kill off any lights which are fated to be removed */
 	LightBlockDeallocation();

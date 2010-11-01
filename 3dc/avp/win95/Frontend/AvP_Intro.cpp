@@ -55,6 +55,8 @@ extern void PlayIntroSequence(void)
 
 	PlayFMV("FMVs\\logos.ogv");
 
+//	StartMenuBackgroundFmv();
+
 	StartMenuMusic();
 	ResetFrameCounter();
 
@@ -66,13 +68,10 @@ extern void PlayIntroSequence(void)
 	Show_ARebellionGame();
 	Show_AvPLogo();
 	#endif
-
-	StartMenuBackgroundFmv();
 }
 
 extern void ShowSplashScreens(void)
 {
-#if 1 // bjd - texture test
 	LoadAllSplashScreenGfx();
 
 //	enum AVPMENUGFX_ID graphic[] =
@@ -121,12 +120,10 @@ extern void ShowSplashScreens(void)
 		}
 		while (timeRemaining >= 0 && !DebouncedGotAnyKey && bRunning);
 	}
-#endif
 }
 
 extern void Show_WinnerScreen(void)
 {
-#if 1 // bjd - texture test
 //bjd	LoadAvPMenuGfx(AVPMENUGFX_WINNER_SCREEN);
 
 	int timeRemaining = 10*ONE_FIXED;
@@ -154,7 +151,6 @@ extern void Show_WinnerScreen(void)
 		timeRemaining -= NormalFrameTime;
 	}
 	while (timeRemaining >= 0 && !DebouncedGotAnyKey && bRunning);
-#endif
 }
 
 void Show_CopyrightInfo(void)
@@ -308,6 +304,7 @@ void Show_ARebellionGame(void)
 	while(timeRemaining>0);// && !GotAnyKey);
 	#endif
 }
+
 void Show_AvPLogo(void)
 {
 	int timeRemaining = 5*ONE_FIXED;

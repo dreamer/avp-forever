@@ -46,6 +46,8 @@ extern DISPLAYBLOCK *Global_ODB_Ptr;
 extern EXTRAITEMDATA *Global_EID_Ptr;
 extern int *Global_EID_IPtr;
 extern int NormalFrameTime;
+extern int SmartTargetSightX, SmartTargetSightY;
+extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 
 extern SHAPEHEADER *Global_ShapeHeaderPtr;
 extern int *Global_ShapePoints;
@@ -94,12 +96,10 @@ void ShapePipeline(SHAPEHEADER *shapePtr);
 
 static void GouraudPolygon_Construct(POLYHEADER *polyPtr);
 static void GouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr);
+static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr);
 
 static void TexturedPolygon_Construct(POLYHEADER *polyPtr);
 static void TexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr);
-
-
-static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr);
 
 static void (*VertexIntensity)(RENDERVERTEX *renderVertexPtr);
 static void VertexIntensity_Hierarchical(RENDERVERTEX *renderVertexPtr);
@@ -110,7 +110,6 @@ static void VertexIntensity_Pred_SeePredatorTech(RENDERVERTEX *renderVertexPtr);
 static void VertexIntensity_ImageIntensifier(RENDERVERTEX *renderVertexPtr);
 static void VertexIntensity_Standard(RENDERVERTEX *renderVertexPtr);
 static void VertexIntensity_Alien_Sense(RENDERVERTEX *renderVertexPtr);
-
 static void VertexIntensity_Standard_Opt(RENDERVERTEX *renderVertexPtr);
 static void VertexIntensity_FullBright(RENDERVERTEX *renderVertexPtr);
 static void VertexIntensity_DiscoInferno(RENDERVERTEX *renderVertexPtr);
@@ -357,7 +356,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 			STRATEGYBLOCK *sbPtr = Global_ODB_Ptr->ObStrategyBlock;
 			if (sbPtr)
 			{
-				int useVision=0;
+				BOOL useVision = FALSE;
 				switch (sbPtr->I_SBtype)
 				{
 					case I_BehaviourAutoGun:
@@ -367,7 +366,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 					case I_BehaviourPredatorAlien:
 					case I_BehaviourXenoborg:
 					{
-						useVision = 1;
+						useVision = TRUE;
 						break;
 					}
 					case I_BehaviourMarine:
@@ -377,7 +376,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 
 						if (marineStatusPointer->Android)
 						{
-							useVision = 1;
+							useVision = TRUE;
 						}
 						break;
 					}
@@ -389,7 +388,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						if (ghostDataPtr->type==I_BehaviourAlienPlayer || ghostDataPtr->type==I_BehaviourAlien
 							|| (ghostDataPtr->type==I_BehaviourNetCorpse&&ghostDataPtr->subtype==I_BehaviourAlienPlayer))
 						{
-							useVision = 1;
+							useVision = TRUE;
 						}
 						break;
 					}
@@ -399,7 +398,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						NETCORPSEDATABLOCK *corpseDataPtr = (NETCORPSEDATABLOCK *)sbPtr->SBdataptr;
 						if (corpseDataPtr->Android || corpseDataPtr->Type==I_BehaviourAlienPlayer || corpseDataPtr->Type==I_BehaviourAlien)
 						{
-							useVision = 1;
+							useVision = TRUE;
 						}
 						break;
 					}
@@ -412,7 +411,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						  ||debrisDataPtr->Type==I_BehaviourAutoGun
 						  ||debrisDataPtr->Android)
 						{
-							useVision = 1;
+							useVision = TRUE;
 						}
 						break;
 					}
@@ -424,7 +423,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						  ||spearDataPtr->Type==I_BehaviourPredatorAlien
 						  ||spearDataPtr->Type==I_BehaviourAutoGun)
 						{
-							useVision = 1;
+							useVision = TRUE;
 						}
 						break;
 					}
@@ -454,14 +453,14 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 
 						if (!predData->CloakingEffectiveness)
 						{
-							useVision=1;
+							useVision = TRUE;
 						}
 						break;
 					}
 					case I_BehaviourNPCPredatorDisc:
 					case I_BehaviourPredatorDisc_SeekTrack:
 					{
-						useVision=1;
+						useVision = TRUE;
 						break;
 					}
 					case I_BehaviourNetGhost:
@@ -474,7 +473,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						|| (ghostDataPtr->type==I_BehaviourPredatorDisc_SeekTrack)
 						|| (ghostDataPtr->type==I_BehaviourNetCorpse&&ghostDataPtr->subtype==I_BehaviourPredatorPlayer) ))
 						{
-							useVision=1;
+							useVision = TRUE;
 						}
 						break;
 					}
@@ -484,7 +483,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						NETCORPSEDATABLOCK *corpseDataPtr = (NETCORPSEDATABLOCK *)sbPtr->SBdataptr;
 						if (corpseDataPtr->Type==I_BehaviourPredatorPlayer || corpseDataPtr->Type==I_BehaviourPredator)
 						{
-							useVision=1;
+							useVision = TRUE;
 						}
 						break;
 					}
@@ -493,7 +492,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						HDEBRIS_BEHAV_BLOCK *debrisDataPtr  = (HDEBRIS_BEHAV_BLOCK *)sbPtr->SBdataptr;
 						if (debrisDataPtr->Type==I_BehaviourPredator)
 						{
-							useVision=1;
+							useVision = TRUE;
 						}
 						break;
 					}
@@ -505,14 +504,14 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						{
 							case IOT_FieldCharge:
 							{
-								useVision = 1;
+								useVision = TRUE;
 								break;
 							}
 							case IOT_Ammo:
 							{
 								if (objStatPtr->subType == AMMO_PRED_RIFLE || objStatPtr->subType == AMMO_PRED_DISC)
 								{
-									useVision = 1;
+									useVision = TRUE;
 								}
 								break;
 							}
@@ -949,7 +948,6 @@ static void CloakedPolygon_Construct(POLYHEADER *polyPtr)
 					renderVerticesPtr->G = 255;
 					renderVerticesPtr->B = 255;
 				}
-
 			}
 			renderVerticesPtr++;
 			VertexNumberPtr++;
@@ -4047,22 +4045,7 @@ extern void TranslationSetup(void)
 	ViewMatrix[7] = ((float)v.vy);//*p;
 	ViewMatrix[11] = ((float)v.vz);
 	#endif
-/*
-	sprintf(buf,
-	"\t %f \t %f \t %f\n"
-	"\t %f \t %f \t %f\n"
-	"\t %f \t %f \t %f\n"
-	"\t %f \t %f \t %f\n",
-	ViewMatrix[0], ViewMatrix[1], ViewMatrix[2],
-	ViewMatrix[3], ViewMatrix[4], ViewMatrix[5],
-	ViewMatrix[6], ViewMatrix[7], ViewMatrix[8],
-	ViewMatrix[9], ViewMatrix[10], ViewMatrix[11]);
-	OutputDebugString(buf);
 
-	ViewMatrix[0], ViewMatrix[1], ViewMatrix[2], ViewMatrix[3],
-	ViewMatrix[4], ViewMatrix[5], ViewMatrix[6], ViewMatrix[7],
-	ViewMatrix[8], ViewMatrix[9], ViewMatrix[10], ViewMatrix[11]
-*/
 	if (MIRROR_CHEATMODE)
 	{
 		ViewMatrix[0] = -ViewMatrix[0];
@@ -5516,22 +5499,20 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 
 	z = MUL_FIXED(MUL_FIXED(z,z),2048);
 	{
-		extern int SmartTargetSightX, SmartTargetSightY;
-		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 		centreY = MUL_FIXED( (SmartTargetSightY-(ScreenDescriptorBlock.SDB_Height<<15)) / Global_VDB_Ptr->VDB_ProjY,z);
 		if (MIRROR_CHEATMODE)
 		{
-			centreX = MUL_FIXED( ( - (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width<<15))) / Global_VDB_Ptr->VDB_ProjX,z);
+			centreX = MUL_FIXED( ( - (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width<<15))) / Global_VDB_Ptr->VDB_ProjX, z);
 		}
 		else
 		{
-			centreX = MUL_FIXED( (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width<<15)) / Global_VDB_Ptr->VDB_ProjX,z);
+			centreX = MUL_FIXED( (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width<<15)) / Global_VDB_Ptr->VDB_ProjX, z);
 		}
 	}
 	z = (float)z*CameraZoomScale;
 
-	sprintf(buf, "centreX: %d\n", centreX);
-	OutputDebugString(buf);
+//	sprintf(buf, "centreX: %d\n", centreX);
+//	OutputDebugString(buf);
 
 	{
 		int a = 160;
@@ -5569,17 +5550,22 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 			offset[3].vx = -offset[3].vx;
 		}
 		VerticesBuffer[0].X = offset[0].vx+centreX;
-		VerticesBuffer[0].Y = MUL_FIXED(offset[0].vy,87381)+centreY;
+//		VerticesBuffer[0].Y = MUL_FIXED(offset[0].vy,87381)+centreY;
+		VerticesBuffer[0].Y = offset[0].vy+centreY;
 
 		VerticesBuffer[1].X = offset[1].vx+centreX;
-		VerticesBuffer[1].Y = MUL_FIXED(offset[1].vy,87381)+centreY;
+//		VerticesBuffer[1].Y = MUL_FIXED(offset[1].vy,87381)+centreY;
+		VerticesBuffer[1].Y = offset[1].vy+centreY;
 
 		VerticesBuffer[2].X = offset[2].vx+centreX;
-		VerticesBuffer[2].Y = MUL_FIXED(offset[2].vy,87381)+centreY;
+//		VerticesBuffer[2].Y = MUL_FIXED(offset[2].vy,87381)+centreY;
+		VerticesBuffer[2].Y = offset[2].vy+centreY;
 
 		VerticesBuffer[3].X = offset[3].vx+centreX;
-		VerticesBuffer[3].Y = MUL_FIXED(offset[3].vy,87381)+centreY;
+//		VerticesBuffer[3].Y = MUL_FIXED(offset[3].vy,87381)+centreY;
+		VerticesBuffer[3].Y = offset[3].vy+centreY;
 	}
+
 	fakeHeader.PolyFlags = iflag_transparent;
 	RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
 	{
@@ -5603,7 +5589,7 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 				VerticesBuffer[i].B = 255;
 			}
 		}
-		RenderPolygon.NumberOfVertices=4;
+		RenderPolygon.NumberOfVertices = 4;
 	}
 /*
 	GouraudPolygon_ClipWithZ();
@@ -5650,7 +5636,7 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 				VerticesBuffer[i].G	= 0;
 				VerticesBuffer[i].B = 0;
 			}
-			RenderPolygon.NumberOfVertices=4;
+			RenderPolygon.NumberOfVertices = 4;
 		}
 /*
 		GouraudPolygon_ClipWithZ();
@@ -5761,7 +5747,6 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 	if (point.vz < 64)
 		return;
 */
-
 	if (tempVector.vz < 64)
 		return;
 
@@ -5773,11 +5758,14 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 
 //	textprint("render fn %d %d %d\n",positionPtr->vx,positionPtr->vy,positionPtr->vz);
 
-	z = point.vz;//ONE_FIXED;
-	centreX = DIV_FIXED(point.vx, point.vz);
-	centreY = DIV_FIXED(point.vy, point.vz);
-	sizeX = (ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
-	sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
+	z = point.vz;
+//	z = ONE_FIXED;
+
+//	centreX = DIV_FIXED(point.vx, point.vz);
+//	centreY = DIV_FIXED(point.vy, point.vz);
+
+//	sizeX = (ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
+//	sizeY = MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381) / Global_VDB_Ptr->VDB_ProjY;
 
 	{
 		int outcode = QuadWithinFrustum();
@@ -6138,7 +6126,9 @@ typedef struct
 	int Phase;
 
 } STARDESC;
-static STARDESC StarArray[NO_OF_STARS];
+/*static*/ STARDESC StarArray[NO_OF_STARS];
+
+extern void LoadStars();
 
 void CreateStarArray(void)
 {
@@ -6161,6 +6151,9 @@ void CreateStarArray(void)
 		StarArray[i].Frequency = (FastRandom()&4095);
 		StarArray[i].Phase = FastRandom()&4095;
 	}
+
+	// load VB/IBs?
+//	LoadStars();
 }
 
 void RenderStarfield(void)
@@ -6169,6 +6162,7 @@ void RenderStarfield(void)
 
 	int sizeX;
 	int sizeY;
+	VECTORCHF tempVector;
 
 	sizeX = 256;
 
@@ -6181,11 +6175,23 @@ void RenderStarfield(void)
 		particle.ParticleID = PARTICLE_STAR;
 		particle.Colour = StarArray[i].Colour;
 
-//		position.vx += Global_VDB_Ptr->VDB_World.vx;
-//		position.vy += Global_VDB_Ptr->VDB_World.vy;
-//		position.vz += Global_VDB_Ptr->VDB_World.vz;
+		position.vx += Global_VDB_Ptr->VDB_World.vx;
+		position.vy += Global_VDB_Ptr->VDB_World.vy;
+		position.vz += Global_VDB_Ptr->VDB_World.vz;
 
-		TranslatePointIntoViewspace(&position);
+//		VECTORCH translatedPosition = particlePtr->Position;
+
+		tempVector.vx = (float)position.vx;
+		tempVector.vy = (float)-position.vy;
+		tempVector.vz = (float)position.vz;
+
+		TransformToViewspace(&tempVector);
+
+		position.vx = (int)tempVector.vx;
+		position.vy = (int)tempVector.vy;
+		position.vz = (int)tempVector.vz;
+
+//		TranslatePointIntoViewspace(&position);
 
 //		RotateVector(&position,&(Global_VDB_Ptr->VDB_Mat));
 

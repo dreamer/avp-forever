@@ -115,10 +115,10 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 	return 1;
 }
 
+extern "C" {
+
 void StartMenuBackgroundFmv()
 {
-	return;
-
 	const char *filenamePtr = "fmvs\\menubackground.ogv";
 
 	menuFMV = new TheoraFMV();
@@ -127,9 +127,6 @@ void StartMenuBackgroundFmv()
 	
 	MenuBackground = true;
 }
-
-
-extern "C" {
 
 #include "avp_userprofile.h"
 #include <math.h>
@@ -155,29 +152,26 @@ int GetVolumeOfNearestVideoScreen(void);
 
 extern int PlayMenuBackgroundFmv()
 {
-	return 0;
-/*
 	if (!MenuBackground)
 		return 0;
 
 	int playing = 0;
 
 	if (menuFMV->mFrameReady)
+	{
 		playing = menuFMV->NextFrame();
+	}
 
 	if (menuFMV->mTexturesReady)
 	{
-		DrawFmvFrame2(menuFMV->mFrameWidth, menuFMV->mFrameHeight, menuFMV->frameTextures[0].width, menuFMV->frameTextures[0].height, menuFMV->frameTextures[0].texture, menuFMV->frameTextures[1].texture, menuFMV->frameTextures[2].texture);
+		DrawFmvFrame2(menuFMV->mFrameWidth, menuFMV->mFrameHeight, &menuFMV->frameTextures[0], 3);
 	}
 
 	return 1;
-*/
 }
 
 extern void EndMenuBackgroundFmv()
 {
-	return;
-
 	if (!MenuBackground)
 		return;
 
@@ -186,16 +180,6 @@ extern void EndMenuBackgroundFmv()
 	menuFMV = 0;
 
 	MenuBackground = false;
-
-	return;
-#if 0 // temporarily disabled
-	if (!MenuBackground)
-		return;
-
-	FmvClose();
-
-	MenuBackground = false;
-#endif
 }
 
 void InitFmvCutscenes()
