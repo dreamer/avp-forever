@@ -89,7 +89,7 @@
 				Optimization="0"
 				InlineFunctionExpansion="0"
 				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet-1.2-xbox\include&quot;"
-				PreprocessorDefinitions="_XBOX;_DEBUG;AVP_DEBUG_VERSION;USE_D3DVIEWTRANSFORM;DB_NOWINDOWS"
+				PreprocessorDefinitions="_XBOX;USE_D3D_XBOX;_DEBUG;AVP_DEBUG_VERSION;USE_D3DVIEWTRANSFORM;DB_NOWINDOWS"
 				StringPooling="FALSE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -218,7 +218,7 @@
 				OmitFramePointers="TRUE"
 				EnableFiberSafeOptimizations="FALSE"
 				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet-1.2-xbox\include&quot;"
-				PreprocessorDefinitions="_XBOX;_WINDOWS;DB_NOWINDOWS;_SECURE_SCL=0;_HAS_ITERATOR_DEBUGGING=0"
+				PreprocessorDefinitions="_XBOX;USE_D3D_XBOX;_WINDOWS;DB_NOWINDOWS;_SECURE_SCL=0;_HAS_ITERATOR_DEBUGGING=0"
 				StringPooling="TRUE"
 				MinimalRebuild="FALSE"
 				ExceptionHandling="FALSE"
@@ -1595,7 +1595,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\d3d_render.cpp">
+				RelativePath="..\win32\d3d_render.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\Daemon.cpp">
@@ -3906,6 +3906,9 @@
 				RelativePath="..\3dc\vertexBuffer.cpp">
 			</File>
 			<File
+				RelativePath="..\3dc\VertexDeclaration.cpp">
+			</File>
+			<File
 				RelativePath="..\3dc\win95\VideoModes.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -4273,7 +4276,7 @@
 				RelativePath="..\3dc\avp\win95\d3d_hud.h">
 			</File>
 			<File
-				RelativePath=".\src\d3d_render.h">
+				RelativePath="..\win32\d3d_render.h">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\d3dmacs.h">
@@ -4593,9 +4596,6 @@
 				RelativePath="..\3dc\avp\win95\PathChnk.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Pentime.h">
-			</File>
-			<File
 				RelativePath="..\3dc\avp\Pfarlocs.h">
 			</File>
 			<File
@@ -4798,6 +4798,9 @@
 			</File>
 			<File
 				RelativePath="..\3dc\vertexBuffer.h">
+			</File>
+			<File
+				RelativePath="..\3dc\VertexDeclaration.h">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\VideoModes.h">

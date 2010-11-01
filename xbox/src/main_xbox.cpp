@@ -334,8 +334,6 @@ void _cdecl main()
 		ReleaseDirect3D();
 	}
 
-	LoadDeviceAndVideoModePreferences();
-
 	LoadKeyConfiguration();
 
 	/********** Grab The Video mode **********/

@@ -32,6 +32,9 @@
 #include "font2.h"
 #include <xgraphics.h>
 
+// Alien FOV - 115
+// Marine & Predator FOV - 77
+
 const char *orthoShader =
     "vs.1.1\n"
     "def c4, 0, 0, 0, 0\n"
@@ -66,51 +69,10 @@ extern int NumberOfFMVTextures;
 extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 
 D3DXMATRIX matOrtho;
-D3DXMATRIX matOrtho2;
 D3DXMATRIX matProjection;
 D3DXMATRIX matView;
 D3DXMATRIX matIdentity;
 D3DXMATRIX matViewPort;
-
-// vertex declarations
-DWORD declMain[] =
-{
-	D3DVSD_STREAM(0),
-		D3DVSD_REG(0, D3DVSDT_FLOAT3),    // position
-		D3DVSD_REG(1, D3DVSDT_D3DCOLOR),  // diffuse color
-		D3DVSD_REG(2, D3DVSDT_D3DCOLOR),  // specular color
-		D3DVSD_REG(3, D3DVSDT_FLOAT2),    // texture coordiantes
-	D3DVSD_END()
-};
-
-DWORD declOrtho[] =
-{
-	D3DVSD_STREAM(0),
-		D3DVSD_REG(0, D3DVSDT_FLOAT3),    // position
-		D3DVSD_REG(1, D3DVSDT_D3DCOLOR),  // diffuse color
-		D3DVSD_REG(2, D3DVSDT_FLOAT2),    // texture coordiantes
-	D3DVSD_END()
-};
-
-DWORD declFMV[] =
-{
-	D3DVSD_STREAM(0),
-		D3DVSD_REG(0, D3DVSDT_FLOAT3),    // position
-		D3DVSD_REG(1, D3DVSDT_FLOAT2),    // texture coordiantes 1
-		D3DVSD_REG(2, D3DVSDT_FLOAT2),    // texture coordiantes 2
-		D3DVSD_REG(3, D3DVSDT_FLOAT2),    // texture coordiantes 3
-	D3DVSD_END()
-};
-
-DWORD declTallFontText[] =
-{
-	D3DVSD_STREAM(0),
-		D3DVSD_REG(0, D3DVSDT_FLOAT3),    // position
-		D3DVSD_REG(1, D3DVSDT_D3DCOLOR),  // colour
-		D3DVSD_REG(2, D3DVSDT_FLOAT2),    // texture coordiantes 1
-		D3DVSD_REG(3, D3DVSDT_FLOAT2),    // texture coordiantes 2
-	D3DVSD_END()
-};
 
 extern void RenderListInit();
 extern void RenderListDeInit();
@@ -118,7 +80,6 @@ extern void RenderListDeInit();
 // size of vertex and index buffers
 const uint32_t MAX_VERTEXES = 4096;
 const uint32_t MAX_INDICES = 9216;
-uint32_t fov = 75;
 
 static HRESULT LastError;
 uint32_t NO_TEXTURE;
@@ -146,7 +107,7 @@ bool ReleaseVolatileResources();
 bool SetRenderStateDefaults();
 void ToggleWireframe();
 
-const int MAX_TEXTURE_STAGES = 8;
+const int MAX_TEXTURE_STAGES = 4;
 std::vector<uint32_t> setTextureArray;
 
 std::string videoModeDescription;
@@ -242,7 +203,7 @@ bool R_EndScene()
 	return true;
 }
 
-bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer **vertexBuffer)
+bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer &vertexBuffer)
 {
 	// TODO - how to handle dynamic VBs? thinking of new-ing some space and using DrawPrimitiveUP functions?
 
@@ -266,36 +227,87 @@ bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer **vertex
 
 	if (USAGE_STATIC == usage)
 	{
-
+		LastError = d3d.lpD3DDevice->CreateVertexBuffer(size, vbUsage, 0, vbPool, &vertexBuffer.vertexBuffer);
+		if (FAILED(LastError))
+		{
+			Con_PrintError("Can't create vertex buffer");
+			LogDxError(LastError, __LINE__, __FILE__);
+			return false;
+		}
 	}
 	else if (USAGE_DYNAMIC == usage)
 	{
-
+		vertexBuffer.dynamicVBMemory = static_cast<uint8_t*>(GlobalAlloc(GMEM_FIXED, size));//new(nothrow) uint8_t[size];
+		if (vertexBuffer.dynamicVBMemory == NULL)
+		{
+			Con_PrintError("Can't create vertex buffer - new() failed");
+		}
+		vertexBuffer.dynamicVBMemorySize = size;
 	}
-/*
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(size, vbUsage, 0, vbPool, vertexBuffer);
-	if (FAILED(LastError))
+
+	return true;
+}
+
+bool R_ReleaseVertexBuffer(r_VertexBuffer &vertexBuffer)
+{
+	if (vertexBuffer.vertexBuffer)
 	{
-		Con_PrintError("Can't create vertex buffer");
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
+		vertexBuffer.vertexBuffer->Release();
 	}
-*/
+
 	return true;
 }
 
-bool R_ReleaseVertexBuffer(r_VertexBuffer *vertexBuffer)
+bool R_CreateIndexBuffer(uint32_t size, uint32_t usage, r_IndexBuffer &indexBuffer)
 {
+	D3DPOOL ibPool;
+	DWORD	ibUsage;
+
+	switch (usage)
+	{
+		case USAGE_STATIC:
+			ibUsage = 0;
+			ibPool = D3DPOOL_MANAGED;
+			break;
+		case USAGE_DYNAMIC:
+			ibUsage = D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY;
+			ibPool = D3DPOOL_DEFAULT;
+			break;
+		default:
+			// error and return
+			break;
+	}
+
+	if (USAGE_STATIC == usage)
+	{
+		LastError = d3d.lpD3DDevice->CreateIndexBuffer(size * 3 * sizeof(WORD), ibUsage, D3DFMT_INDEX16, ibPool, &indexBuffer.indexBuffer);
+		if (FAILED(LastError))
+		{
+			Con_PrintError("Can't create index buffer");
+			LogDxError(LastError, __LINE__, __FILE__);
+			return false;
+		}
+	}
+	else if (USAGE_DYNAMIC == usage)
+	{
+		indexBuffer.dynamicIBMemory = static_cast<uint8_t*>(GlobalAlloc(GMEM_FIXED, size * 3 * sizeof(WORD)));//new(nothrow) uint8_t[size];
+		if (indexBuffer.dynamicIBMemory == NULL)
+		{
+			Con_PrintError("Can't create index buffer - new() failed");
+		}
+		indexBuffer.dynamicIBMemorySize = size;
+	}
+
 	return true;
 }
 
-bool R_CreateIndexBuffer(uint32_t size, uint32_t usage, r_IndexBuffer **indexBuffer)
+bool R_ReleaseIndexBuffer(r_IndexBuffer &indexBuffer)
 {
-	return true;
-}
+	if (indexBuffer.indexBuffer)
+	{
+		indexBuffer.indexBuffer->Release();
+	}
 
-bool R_ReleaseIndexBuffer(r_IndexBuffer *indexBuffer)
-{
 	return true;
 }
 
@@ -387,41 +399,75 @@ bool R_SetTexture(uint32_t stage, uint32_t textureID)
 }
 
 bool R_DrawPrimitive(uint32_t numPrimitives)
-{
+{	
+	// not actually used
 	return true;
 }
 
-bool R_LockVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage)
+bool R_LockVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage)
 {
+	if (usage == USAGE_DYNAMIC)
+	{
+		(*data) = (void*)(vertexBuffer.dynamicVBMemory + offsetToLock);
+	}
+	else if (usage == USAGE_STATIC)
+	{
+		// don't care yet
+	}
+
 	return true;
 }
 
 bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives)
 {
+	/*
+	LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
+			0,
+			0,
+			numVerts,				// total num verts in VB
+			startIndex,
+			numPrimitives);
+
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't draw indexed primitive");
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+*/
 	return true;
 }
 
-bool R_LockIndexBuffer(r_IndexBuffer *indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage)
+bool R_LockIndexBuffer(r_IndexBuffer &indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage)
+{
+	if (usage == USAGE_DYNAMIC)
+	{
+		(*data) = (uint16_t*)indexBuffer.dynamicIBMemory + offsetToLock;
+	}
+	else if (usage == USAGE_STATIC)
+	{
+
+	}
+
+	return true;
+}
+
+bool R_SetVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t FVFsize)
 {
 	return true;
 }
 
-bool R_SetVertexBuffer(r_VertexBuffer *vertexBuffer, uint32_t FVFsize)
+bool R_SetIndexBuffer(r_IndexBuffer &indexBuffer)
 {
 	return true;
 }
 
-bool R_SetIndexBuffer(r_IndexBuffer *indexBuffer)
+bool R_UnlockVertexBuffer(r_VertexBuffer &vertexBuffer)
 {
 	return true;
 }
 
-bool R_UnlockVertexBuffer(r_VertexBuffer *vertexBuffer)
-{
-	return true;
-}
-
-bool R_UnlockIndexBuffer(r_IndexBuffer *indexBuffer)
+bool R_UnlockIndexBuffer(r_IndexBuffer &indexBuffer)
 {
 	return true;
 }
@@ -452,6 +498,19 @@ bool CreateVolatileResources()
 	d3d.orthoIB->Create(MAX_INDICES, USAGE_DYNAMIC);
 
 	SetRenderStateDefaults();
+
+	// going to clear texture stages too
+	for (int stage = 0; stage < MAX_TEXTURE_STAGES; stage++)
+	{
+		LastError = d3d.lpD3DDevice->SetTexture(stage, Tex_GetTexture(NO_TEXTURE));
+		if (FAILED(LastError))
+		{
+			Con_PrintError("Unable to reset texture stage: " + stage);
+			return false;
+		}
+
+		setTextureArray[stage] = NO_TEXTURE;
+	}
 
 	return true;
 }
@@ -516,13 +575,14 @@ void SetFov()
 		return;
 	}
 
-	fov = StringToInt(Con_GetArgument(0));
+	d3d.fieldOfView = StringToInt(Con_GetArgument(0));
 
 	SetTransforms();
 }
 
 extern "C"
 {
+	#include "AvP_UserProfile.h"
 	extern void ThisFramesRenderingHasBegun(void);
 	extern void ThisFramesRenderingHasFinished(void);
 
@@ -544,6 +604,11 @@ extern "C"
 				d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 			}
 		}
+	}
+
+	void R_SetFov(uint32_t fov)
+	{
+		d3d.fieldOfView = fov;
 	}
 
 	void FlushD3DZBuffer()
@@ -725,23 +790,311 @@ r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	return swizTexture;
 }
 
-bool R_CreateVertexShader(const std::string &fileName, vertexShader_t &vertexShader)
+bool R_ReleaseVertexDeclaration(r_vertexDeclaration &declaration)
 {
-	return true;// CreateVertexShader(fileName, &vertexShader.vertexShader, &vertexShader.constantTable);
-}
-
-bool R_CreatePixelShader(const std::string &fileName, pixelShader_t &pixelShader)
-{
-	return true;// CreatePixelShader(fileName, &pixelShader.pixelShader);
-}
-
-bool R_SetVertexShader(vertexShader_t &vertexShader)
-{
+/* TODO
+	LastError = d3d.lpD3DDevice->DeleteVertexShader(declaration);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Could not release vertex declaration");
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+*/
 	return true;
 }
 
-bool R_SetPixelShader(pixelShader_t &pixelShader)
+bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexShader, VertexDeclaration *vertexDeclaration)
 {
+	XGBuffer* pShaderData = NULL;
+	XGBuffer* pErrors = NULL;
+
+	std::string properPath = "d:\\" + fileName;
+
+	// have to open the file ourselves and pass as string. XGAssembleShader won't do this for us
+	std::ifstream shaderFile(properPath.c_str(), std::ifstream::in);
+
+	if (!shaderFile.is_open())
+	{
+		LogErrorString("Error cannot open vertex shader file");
+		return false;
+	}
+
+	std::stringstream buffer;
+	buffer << shaderFile.rdbuf();
+
+	// compile shader from file
+	LastError = XGAssembleShader(properPath.c_str(), // filename (for errors only)
+			buffer.str().c_str(),
+			buffer.str().size(),
+			0,
+			NULL,
+			&pShaderData,
+			&pErrors,
+			NULL,
+			NULL,
+			NULL,
+			NULL);
+
+	if (FAILED(LastError))
+	{
+		LogErrorString("XGAssembleShader failed for " + properPath, __LINE__, __FILE__);
+
+		if (pErrors)
+		{
+			// shader didn't compile for some reason
+			LogErrorString("Shader compile errors found for " + properPath, __LINE__, __FILE__);
+			LogErrorString("\n" + std::string((const char*)pErrors->GetBufferPointer()));
+
+			pErrors->Release();
+		}
+
+		return false;
+	}
+
+	LastError = d3d.lpD3DDevice->CreateVertexShader(&vertexDeclaration->d3dElement[0], (const DWORD*)pShaderData->pData, &vertexShader.shader, 0); // ??
+	if (FAILED(LastError))
+	{
+		LogErrorString("CreateVertexShader failed for " + properPath, __LINE__, __FILE__);
+		return false;
+	}
+
+	// no longer needed
+	pShaderData->Release();
+
+	return true;
+}
+
+bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader)
+{
+	XGBuffer* pShaderData = NULL;
+	XGBuffer* pErrors = NULL;
+
+	std::string properPath = "d:\\" + fileName;
+
+	// have to open the file ourselves and pass as string. XGAssembleShader won't do this for us
+	std::ifstream shaderFile(properPath.c_str(), std::ifstream::in);
+
+	if (!shaderFile.is_open())
+	{
+		LogErrorString("Error cannot open pixel shader file");
+		return false;
+	}
+
+	std::stringstream buffer;
+	buffer << shaderFile.rdbuf();
+
+	// compile shader from file
+	LastError = XGAssembleShader(properPath.c_str(), // filename (for errors only)
+			buffer.str().c_str(),
+			buffer.str().size(),
+			0,
+			NULL,
+			&pShaderData,
+			&pErrors,
+			NULL,
+			NULL,
+			NULL,
+			NULL);
+
+	if (FAILED(LastError))
+	{
+		LogErrorString("XGAssembleShader failed for " + properPath, __LINE__, __FILE__);
+
+		if (pErrors)
+		{
+			// shader didn't compile for some reason
+			LogErrorString("Shader compile errors found for " + properPath, __LINE__, __FILE__);
+			LogErrorString("\n" + std::string((const char*)pErrors->GetBufferPointer()));
+
+			pErrors->Release();
+		}
+
+		return false;
+	}
+
+	LastError = d3d.lpD3DDevice->CreatePixelShader((D3DPIXELSHADERDEF*)pShaderData->GetBufferPointer(), &pixelShader.shader); // ??
+	if (FAILED(LastError))
+	{
+		LogErrorString("CreatePixelShader failed for " + properPath, __LINE__, __FILE__);
+		return false;
+	}
+
+	// no longer needed
+	pShaderData->Release();
+
+	return true;
+}
+
+static BYTE VD_USAGEtoD3DDECLUSAGE(VD_USAGE usage)
+{
+	BYTE d3dUsage = 0;
+/*
+	switch (usage)
+	{
+		case VDUSAGE_POSITION:
+			d3dUsage = D3DDECLUSAGE_POSITION;
+			break;
+		case VDUSAGE_BLENDWEIGHT:
+			d3dUsage = D3DDECLUSAGE_BLENDWEIGHT;
+			break;
+		case VDUSAGE_BLENDINDICES:
+			d3dUsage = D3DDECLUSAGE_BLENDINDICES;
+			break;
+		case VDUSAGE_NORMAL:
+			d3dUsage = D3DDECLUSAGE_NORMAL;
+			break;
+		case VDUSAGE_PSIZE:
+			d3dUsage = D3DDECLUSAGE_PSIZE;
+			break;
+		case VDUSAGE_TEXCOORD:
+			d3dUsage = D3DDECLUSAGE_TEXCOORD;
+			break;
+		case VDUSAGE_TANGENT:
+			d3dUsage = D3DDECLUSAGE_TANGENT;
+			break;
+		case VDUSAGE_BINORMAL:
+			d3dUsage = D3DDECLUSAGE_BINORMAL;
+			break;
+		case VDUSAGE_TESSFACTOR:
+			d3dUsage = D3DDECLUSAGE_TESSFACTOR;
+			break;
+		case VDUSAGE_POSITIONT:
+			d3dUsage = D3DDECLUSAGE_POSITIONT;
+			break;
+		case VDUSAGE_COLOR:
+			d3dUsage = D3DDECLUSAGE_COLOR;
+			break;
+		case VDUSAGE_FOG:
+			d3dUsage = D3DDECLUSAGE_FOG;
+			break;
+		case VDUSAGE_DEPTH:
+			d3dUsage = D3DDECLUSAGE_DEPTH;
+			break;
+		case VDUSAGE_SAMPLE:
+			d3dUsage = D3DDECLUSAGE_SAMPLE;
+			break;
+		default:
+			assert (1==0);
+			break;
+	}
+*/
+	return d3dUsage;
+}
+
+static BYTE VD_TYPEtoD3DDECLTYPE(VD_TYPE type)
+{
+	BYTE d3dType;
+
+	switch (type)
+	{
+		case VDTYPE_FLOAT1:
+			d3dType = D3DVSDT_FLOAT1;
+			break;
+		case VDTYPE_FLOAT2:
+			d3dType = D3DVSDT_FLOAT2;
+			break;
+		case VDTYPE_FLOAT3:
+			d3dType = D3DVSDT_FLOAT3;
+			break;
+		case VDTYPE_FLOAT4:
+			d3dType = D3DVSDT_FLOAT4;
+			break;
+		case VDTYPE_COLOR:
+			d3dType = D3DVSDT_D3DCOLOR;
+			break;
+		default:
+			assert (1==0);
+			break;
+	}
+
+	return d3dType;
+}
+
+bool R_CreateVertexDeclaration(class VertexDeclaration *vertexDeclaration)
+{
+	// take a local copy of this to aid in keeping the code below a bit tidier..
+	size_t numElements = vertexDeclaration->elements.size();
+
+	vertexDeclaration->d3dElement.resize(numElements+2); // +2 for D3DVSD_STREAM and D3DVSD_END()
+
+	vertexDeclaration->d3dElement[0] = D3DVSD_STREAM(0);
+
+	for (uint32_t i = 1; i <= numElements; i++) // offset first and last values (D3DVSD_STREAM and D3DVSD_END())
+	{
+		vertexDeclaration->d3dElement[i] = D3DVSD_REG(i-1, VD_TYPEtoD3DDECLTYPE(vertexDeclaration->elements[i-1].type));
+	}
+
+	vertexDeclaration->d3dElement[numElements+1] = D3DVSD_END();
+
+	// nothing else to do here, we'll create the vertex declaration in the create vertex shader function
+	return true;
+}
+
+bool R_SetVertexDeclaration(r_vertexDeclaration &declaration)
+{
+	// not needed?
+	return true;
+}
+
+bool R_SetVertexShader(r_VertexShader &vertexShader)
+{
+	LastError = d3d.lpD3DDevice->SetVertexShader(vertexShader.shader);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't set vertex shader " + vertexShader.shaderName);
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+bool R_SetVertexShaderMatrix(r_VertexShader &vertexShader, const char* constant, R_MATRIX &matrix)
+{
+	D3DXMATRIX tempMat;
+	tempMat._11 = matrix._11;
+	tempMat._12 = matrix._12;
+	tempMat._13 = matrix._13;
+	tempMat._14 = matrix._14;
+
+	tempMat._21 = matrix._21;
+	tempMat._22 = matrix._22;
+	tempMat._23 = matrix._23;
+	tempMat._24 = matrix._24;
+
+	tempMat._31 = matrix._31;
+	tempMat._32 = matrix._32;
+	tempMat._33 = matrix._33;
+	tempMat._34 = matrix._34;
+
+	tempMat._41 = matrix._41;
+	tempMat._42 = matrix._42;
+	tempMat._43 = matrix._43;
+	tempMat._44 = matrix._44;
+
+	// TODO - constant register address lookup
+	LastError = d3d.lpD3DDevice->SetVertexShaderConstant(0, &tempMat, 4);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't set matrix for vertex shader " + vertexShader.shaderName);
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+bool R_SetPixelShader(r_PixelShader &pixelShader)
+{
+	LastError = d3d.lpD3DDevice->SetPixelShader(pixelShader.shader);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't set pixel shader " + pixelShader.shaderName);
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
 	return true;
 }
 
@@ -1020,17 +1373,17 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum Texture
 	{
 		case 32:
 		{
-			textureFormat = D3DFMT_A8R8G8B8;
+			textureFormat = D3DFMT_LIN_A8R8G8B8;
 			break;
 		}
 		case 16:
 		{
-			textureFormat = D3DFMT_A1R5G5B5;
+			textureFormat = D3DFMT_LIN_A1R5G5B5;
 			break;
 		}
 		case 8:
 		{
-			textureFormat = D3DFMT_L8;
+			textureFormat = D3DFMT_LIN_L8;
 			break;
 		}
 	}
@@ -1177,6 +1530,8 @@ bool InitialiseDirect3D()
 	uint32_t thisDevice = D3DADAPTER_DEFAULT;
 	bool useTripleBuffering = Config_GetBool("[VideoMode]", "UseTripleBuffering", false);
 	shaderPath = Config_GetString("[VideoMode]", "ShaderPath", "shaders\\");
+
+	d3d.supportsShaders = true;
 
 	//	Zero d3d structure
     memset(&d3d, 0, sizeof(D3DINFO));
@@ -1416,7 +1771,7 @@ bool InitialiseDirect3D()
 	ScreenDescriptorBlock.SDB_ClipDown  = height;
 
 	// use an offset for hud items to account for tv safe zones. just use width for now. 5%?
-	int safeOffset = Config_GetInt("[VideoMode]", "SafeZoneOffset", 5);
+	uint32_t safeOffset = Config_GetInt("[VideoMode]", "SafeZoneOffset", 5);
 	ScreenDescriptorBlock.SDB_SafeZoneWidthOffset = (width / 100) * safeOffset;
 	ScreenDescriptorBlock.SDB_SafeZoneHeightOffset = (height / 100) * safeOffset;
 
@@ -1424,18 +1779,36 @@ bool InitialiseDirect3D()
 	// later (device reset, resolution/depth change)
 	d3d.d3dpp = d3dpp;
 
-	// create vertex and index buffers
-	CreateVolatileResources();
-
-//	mainVertex = new D3DLVERTEX[4096];
-//	mainIndex = new WORD[9216 * 3];
-
 	SetTransforms();
 
-	CreateVertexShader("vertex_1_1.vsh", &d3d.vertexShader, mainDecl);
-	CreateVertexShader("orthoVertex_1_1.vsh", &d3d.orthoVertexShader, orthoDecl);
+	// create vertex declarations
+	d3d.mainDecl = new VertexDeclaration;
+	d3d.mainDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
+	d3d.mainDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
+	d3d.mainDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    1);
+	d3d.mainDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
+	d3d.mainDecl->Create();
 
-	CreatePixelShader("pixel_1_1.psh", &d3d.pixelShader);
+	d3d.orthoDecl = new VertexDeclaration;
+	d3d.orthoDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
+	d3d.orthoDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
+	d3d.orthoDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
+	d3d.orthoDecl->Create();
+
+	d3d.fmvDecl = new VertexDeclaration;
+	d3d.fmvDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
+	d3d.fmvDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
+	d3d.fmvDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 1);
+	d3d.fmvDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 2);
+	d3d.fmvDecl->Create();
+
+	d3d.tallFontText = new VertexDeclaration;
+	d3d.tallFontText->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
+	d3d.tallFontText->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
+	d3d.tallFontText->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
+	d3d.tallFontText->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 1);
+	d3d.tallFontText->Create();
+
 
 	r_Texture whiteTexture;
 
@@ -1474,6 +1847,16 @@ bool InitialiseDirect3D()
 		d3d.lpD3DDevice->SetTexture(i, Tex_GetTexture(NO_TEXTURE));
 	}
 
+	d3d.effectSystem = new EffectManager;
+
+	d3d.mainEffect  = d3d.effectSystem->AddEffect("main", "vertex_1_1.vsh", "pixel_1_1.psh", d3d.mainDecl);
+	d3d.orthoEffect = d3d.effectSystem->AddEffect("ortho", "orthoVertex_1_1.vsh", "pixel_1_1.psh", d3d.orthoDecl);
+//	d3d.fmvEffect   = d3d.effectSystem->AddEffect("fmv", "fmvVertex.vsh", "fmvPixel.psh");
+//	d3d.cloudEffect = d3d.effectSystem->AddEffect("cloud", "tallFontTextVertex.vsh", "tallFontTextPixel.psh");
+
+	// create vertex and index buffers
+	CreateVolatileResources();
+
 	Con_Init();
 	Net_Initialise();
 	Font_Init();
@@ -1486,12 +1869,73 @@ bool InitialiseDirect3D()
 }
 
 void R_UpdateViewMatrix(float *viewMat)
-{
+{	
+	D3DXVECTOR3 vecRight	(viewMat[0], viewMat[1], viewMat[2]);
+	D3DXVECTOR3 vecUp		(viewMat[4], viewMat[5], viewMat[6]);
+	D3DXVECTOR3 vecFront	(viewMat[8], -viewMat[9], viewMat[10]);
+	D3DXVECTOR3 vecPosition (viewMat[3], -viewMat[7], viewMat[11]);
 
+	D3DXVec3Normalize(&vecFront, &vecFront);
+
+	D3DXVec3Cross(&vecUp, &vecFront, &vecRight);
+	D3DXVec3Normalize(&vecUp, &vecUp);
+
+	D3DXVec3Cross(&vecRight, &vecUp, &vecFront);
+	D3DXVec3Normalize(&vecRight, &vecRight);
+
+	// right
+	matView._11 = vecRight.x;
+	matView._21 = vecRight.y;
+	matView._31 = vecRight.z;
+
+	// up
+	matView._12 = vecUp.x;
+	matView._22 = vecUp.y;
+	matView._32 = vecUp.z;
+
+	// front
+	matView._13 = vecFront.x;
+	matView._23 = vecFront.y;
+	matView._33 = vecFront.z;
+
+	// 4th
+	matView._14 = 0.0f;
+	matView._24 = 0.0f;
+	matView._34 = 0.0f;
+	matView._44 = 1.0f;
+
+	matView._41 = -D3DXVec3Dot(&vecPosition, &vecRight);
+	matView._42 = -D3DXVec3Dot(&vecPosition, &vecUp);
+	matView._43 = -D3DXVec3Dot(&vecPosition, &vecFront);
 }
 
 void SetTransforms()
 {
+		// Setup orthographic projection matrix
+	uint32_t standardWidth = 640;
+	uint32_t wideScreenWidth = 852;
+
+	// create an identity matrix
+	D3DXMatrixIdentity(&matIdentity);
+
+	D3DXMatrixIdentity(&matView);
+
+	// set up orthographic projection matrix
+	D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
+
+	// set up projection matrix
+	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(d3d.fieldOfView), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+
+	// set up a viewport transform matrix
+	matViewPort = matIdentity;
+
+	matViewPort._11 = (float)(ScreenDescriptorBlock.SDB_Width / 2);
+	matViewPort._22 = (float)((-ScreenDescriptorBlock.SDB_Height) / 2);
+	matViewPort._33 = (1.0f - 0.0f);
+	matViewPort._41 = (0 + matViewPort._11); // dwX + dwWidth / 2
+	matViewPort._42 = (float)(ScreenDescriptorBlock.SDB_Height / 2) + 0;
+	matViewPort._43 = 0.0f; // minZ
+	matViewPort._44 = 1.0f;
 }
 
 void FlipBuffers()
@@ -1519,28 +1963,28 @@ void ReleaseDirect3D()
 //	SAFE_RELEASE(cloudConstantTable);
 
 	// release vertex declarations
-//	SAFE_RELEASE(d3d.vertexDecl);
-//	SAFE_RELEASE(d3d.orthoVertexDecl);
-//	SAFE_RELEASE(d3d.fmvVertexDecl);
-//	SAFE_RELEASE(d3d.cloudVertexDecl);
+	delete d3d.mainDecl;
+	delete d3d.orthoDecl;
+	delete d3d.fmvDecl;
+	delete d3d.tallFontText;
 
 	// release pixel shaders
 //	SAFE_RELEASE(d3d.pixelShader);
 //	SAFE_RELEASE(d3d.fmvPixelShader);
 //	SAFE_RELEASE(d3d.cloudPixelShader);
 
-	d3d.lpD3DDevice->SetPixelShader(0);
-	d3d.lpD3DDevice->DeletePixelShader(d3d.vertexShader);
-	d3d.lpD3DDevice->DeletePixelShader(d3d.pixelShader);
-	d3d.lpD3DDevice->DeletePixelShader(d3d.fmvPixelShader);
-	d3d.lpD3DDevice->DeletePixelShader(d3d.cloudPixelShader);
+//	d3d.lpD3DDevice->SetPixelShader(0);
+//	d3d.lpD3DDevice->DeletePixelShader(d3d.vertexShader);
+//	d3d.lpD3DDevice->DeletePixelShader(d3d.pixelShader);
+//	d3d.lpD3DDevice->DeletePixelShader(d3d.fmvPixelShader);
+//	d3d.lpD3DDevice->DeletePixelShader(d3d.cloudPixelShader);
 
 	// release vertex shaders
-	d3d.lpD3DDevice->SetVertexShader(0);
-	d3d.lpD3DDevice->DeleteVertexShader(d3d.vertexShader);
-	d3d.lpD3DDevice->DeleteVertexShader(d3d.fmvVertexShader);
-	d3d.lpD3DDevice->DeleteVertexShader(d3d.orthoVertexShader);
-	d3d.lpD3DDevice->DeleteVertexShader(d3d.cloudVertexShader);
+//	d3d.lpD3DDevice->SetVertexShader(0);
+//	d3d.lpD3DDevice->DeleteVertexShader(d3d.vertexShader);
+//	d3d.lpD3DDevice->DeleteVertexShader(d3d.fmvVertexShader);
+//	d3d.lpD3DDevice->DeleteVertexShader(d3d.orthoVertexShader);
+//	d3d.lpD3DDevice->DeleteVertexShader(d3d.cloudVertexShader);
 //	SAFE_RELEASE(d3d.vertexShader);
 //	SAFE_RELEASE(d3d.fmvVertexShader);
 //	SAFE_RELEASE(d3d.orthoVertexShader);
@@ -1592,8 +2036,7 @@ void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 	{
 	 	case TRANSLUCENCY_OFF:
 		{
-//bjd - fixme			if (TRIPTASTIC_CHEATMODE || MOTIONBLUR_CHEATMODE)
-			if (0)
+			if (TRIPTASTIC_CHEATMODE || MOTIONBLUR_CHEATMODE)
 			{
 				if (D3DAlphaBlendEnable != TRUE)
 				{
@@ -1748,6 +2191,36 @@ void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 	}
 }
 
+void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable)
+{
+	if (CurrentRenderStates.ZWriteEnable == zWriteEnable)
+		return;
+
+	if (zWriteEnable == ZWRITE_ENABLED)
+	{
+		LastError = d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DRS_ZWRITEENABLE D3DZB_TRUE failed\n");
+		}
+	}
+	else if (zWriteEnable == ZWRITE_DISABLED)
+	{
+		LastError = d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+		if (FAILED(LastError))
+		{
+			OutputDebugString("D3DRS_ZWRITEENABLE D3DZB_FALSE failed\n");
+			OutputDebugString("DISABLING Z WRITES\n");
+		}
+	}
+	else
+	{
+		LOCALASSERT("Unrecognized ZWriteEnable mode"==0);
+	}
+
+	CurrentRenderStates.ZWriteEnable = zWriteEnable;
+}
+
 void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode)
 {
 	if (CurrentRenderStates.TextureAddressMode == textureAddressMode)
@@ -1809,8 +2282,8 @@ void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired)
 	{
 		case FILTERING_BILINEAR_OFF:
 		{
-			d3d.lpD3DDevice->SetTextureStageState(0,D3DTSS_MAGFILTER,D3DTEXF_POINT);
-			d3d.lpD3DDevice->SetTextureStageState(0,D3DTSS_MINFILTER,D3DTEXF_POINT);
+			d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_POINT);
+			d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_POINT);
 			break;
 		}
 		case FILTERING_BILINEAR_ON:
@@ -1840,31 +2313,13 @@ void ToggleWireframe()
 	}
 }
 
-void EnableZBufferWrites()
-{
-	if (!ZWritesEnabled)
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE);
-		ZWritesEnabled = true;
-	}
-}
-
-void DisableZBufferWrites()
-{
-	if (ZWritesEnabled)
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE);
-		ZWritesEnabled = false;
-	}
-}
-
 bool SetRenderStateDefaults()
 {
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MIPFILTER, D3DTEXF_LINEAR);
 //	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MAXANISOTROPY, 8);
-
+/*
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP,	D3DTOP_MODULATE);
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1,	D3DTA_TEXTURE);
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG2,	D3DTA_DIFFUSE);
@@ -1879,17 +2334,13 @@ bool SetRenderStateDefaults()
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_WRAP);
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_WRAP);
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSW, D3DTADDRESS_WRAP);
-
+*/
 //	float alphaRef = 0.5f;
 //	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF,	 *((DWORD*)&alphaRef));//(DWORD)0.5);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAREF,	 (DWORD)0.5);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
-
 	d3d.lpD3DDevice->SetRenderState(D3DRS_OCCLUSIONCULLENABLE, FALSE);
-
-//	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
-	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 
 	d3d.lpD3DDevice->SetRenderState(D3DRS_CULLMODE,			D3DCULL_NONE);
 //	d3d.lpD3DDevice->SetRenderState(D3DRS_CLIPPING,			TRUE);
@@ -1897,12 +2348,48 @@ bool SetRenderStateDefaults()
 	d3d.lpD3DDevice->SetRenderState(D3DRS_SPECULARENABLE,	TRUE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_DITHERENABLE,		FALSE);
 
+	{
+		// set transparency to TRANSLUCENCY_OFF
+		d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+		D3DAlphaBlendEnable = FALSE;
+		
+		d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+		D3DSrcBlend = D3DBLEND_ONE;
+		
+		d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+		D3DDestBlend = D3DBLEND_ZERO;
+
+		// make sure render state tracking reflects above setting
+		CurrentRenderStates.TranslucencyMode = TRANSLUCENCY_OFF;
+	}
+
+	{
+		// enable bilinear filtering (FILTERING_BILINEAR_ON)
+		d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
+		d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
+
+		// make sure render state tracking reflects above setting
+		CurrentRenderStates.FilteringMode = FILTERING_BILINEAR_ON;
+	}
+
+	{
+		// set texture addressing mode to clamp (TEXTURE_CLAMP)
+		d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
+		d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
+		d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSW, D3DTADDRESS_CLAMP);
+
+		// make sure render state tracking reflects above setting
+		CurrentRenderStates.TextureAddressMode = TEXTURE_CLAMP;
+	}
+
 	// enable z-buffer
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
 
 	// enable z writes (already on by default)
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-	ZWritesEnabled = true;
+			
+	// make sure render state tracking reflects above setting
+	CurrentRenderStates.ZWriteEnable = ZWRITE_ENABLED;
 
 	// set less + equal z buffer test
 	d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
