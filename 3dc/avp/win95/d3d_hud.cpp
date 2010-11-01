@@ -205,13 +205,13 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 	quadVertices[3].Y = imageDescPtr->TopLeftY + scaledHeight;
 
 	D3D_HUDQuad_Output(imageDescPtr->ImageNumber, quadVertices, RGBALIGHT_MAKE
-			(
-				imageDescPtr->Red,
-				imageDescPtr->Green,
-				imageDescPtr->Blue,
-				imageDescPtr->Translucency
-			),
-			imageDescPtr->filterTexture	? FILTERING_BILINEAR_ON : FILTERING_BILINEAR_OFF);
+		(
+			imageDescPtr->Red,
+			imageDescPtr->Green,
+			imageDescPtr->Blue,
+			imageDescPtr->Translucency
+		),
+		imageDescPtr->filterTexture	? FILTERING_BILINEAR_ON : FILTERING_BILINEAR_OFF);
 }
 
 

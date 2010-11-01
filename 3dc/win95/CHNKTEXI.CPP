@@ -657,10 +657,8 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 	db_logf4(("\tLoading '%s'",szBuf));
 
 	// already loaded ?
-//	int iExistingImage = GetExistingImageNum(szBuf);
-//	if (GEI_NOTLOADED != iExistingImage)
 	int iExistingImage = Tex_CheckExists(szBuf);
-	if (/*GEI_NOTLOADED*/0 != iExistingImage)
+	if (0 != iExistingImage)
 	{
 		db_logf4(("\tImage already loaded to image number %d", iExistingImage));
 		return iExistingImage;

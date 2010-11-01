@@ -216,7 +216,6 @@ void InitMarineHUD(void)
 
 	HUD_PrimaryRounds = 0;
 	HUD_SecondaryRounds = 0;
-
 }
 
 
@@ -228,7 +227,6 @@ static void InitAlienHUD(void)
 
 	SmartTarget_Object=NULL;
 	Old_SmartTarget_Object=NULL;
-
 }
 
 void ReInitHUD(void)
@@ -310,7 +308,6 @@ void MaintainHUD(void)
 		/* YUCK! */
 		extern void PlotFaceHugger(STRATEGYBLOCK *sbPtr);
 		PlotFaceHugger(playerStatusPtr->MyFaceHugger);
-
 	}
 	else if (playerStatusPtr->IsAlive)
 	{
@@ -381,12 +378,13 @@ void MaintainHUD(void)
 				CheckWireFrameMode(0);
 
 				//flash health if invulnerable
-				if((playerStatusPtr->invulnerabilityTimer/12000 %2)==0)
+				if ((playerStatusPtr->invulnerabilityTimer/12000 %2)==0)
 				{
 					DisplayHealthAndArmour();
 				}
 				/* Paranoia check. */
-		  		if(predHUDSoundHandle != SOUND_NOACTIVEINDEX) {
+		  		if (predHUDSoundHandle != SOUND_NOACTIVEINDEX)
+				{
 		       		Sound_Stop(predHUDSoundHandle);
 				}
 				break;
@@ -398,7 +396,7 @@ void MaintainHUD(void)
 	}
 	else // player is dead!
 	{
-		switch(AvP.PlayerType)
+		switch (AvP.PlayerType)
 		{
 			case I_Marine:
 			{

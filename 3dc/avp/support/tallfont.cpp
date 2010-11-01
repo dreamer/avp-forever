@@ -37,7 +37,7 @@
 	extern "C"
 	{
 #endif
-		extern int CloudTable[128][128];
+//		extern int CloudTable[128][128];
 		extern int CloakingPhase;
 
 #ifdef __cplusplus

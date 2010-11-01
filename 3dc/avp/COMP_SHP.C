@@ -34,7 +34,7 @@ To deal with these problems we can now do the following
 3 Have a list of shapes that is either Compiled in
 or loaded at game init to represent the shapes that
 can be generated at run time. Have a set of functions
-to gnertae MAPBLOCKS for the above.
+to generate MAPBLOCKS for the above.
  
  
 
@@ -50,7 +50,7 @@ strategy blocks
 To generate stuff we have a list of compiled in shapes
 that are appended to the start of the mainshapelist.
 
-We then have functions that cen generate the maps and
+We then have functions that can generate the maps and
 strategyblocks for each. Texture maps for the shapes
 are read in at level init along with the rest of the
 texture maps for each env. 
@@ -68,22 +68,19 @@ SHAPEHEADER ** mainshapelist=0;
 
 /* compiled in shapes that do not exist as yet*/
 
-SHAPEHEADER* MarineCompiledShapes[] = {
+SHAPEHEADER* MarineCompiledShapes[] =
+{
 	&CUBE_header,
 	&CUBE_header,
-    &CUBE_header,			/*MarinePlayer*/
-    &CUBE_header,            /*PredatorPlayer*/
-	&CUBE_header,			/*AlienPlayer*/
-	&CUBE_header, /* was &ALIEN_header, but the textures are no longer there. The old alien should be fully purged. << keywords: BUG FIXME OPTIMIZEME OPTIMISEME ERROR MISTAKE HACK >> */
-	&CUBE_header,
-	&CUBE_header,
-	&CUBE_header,
-    &CUBE_header,		/* player crouch shape */
-    &CUBE_header,			/* player lying down shape */
+	&CUBE_header,		/*MarinePlayer*/
+	&CUBE_header,		/*PredatorPlayer*/
+	&CUBE_header,		/*AlienPlayer*/
+	&CUBE_header,		/* was &ALIEN_header, but the textures are no longer there. The old alien should be fully purged. << keywords: BUG FIXME OPTIMIZEME OPTIMISEME ERROR MISTAKE HACK >> */
 	&CUBE_header,
 	&CUBE_header,
 	&CUBE_header,
-	&CUBE_header,
+	&CUBE_header,		/* player crouch shape */
+	&CUBE_header,		/* player lying down shape */
 	&CUBE_header,
 	&CUBE_header,
 	&CUBE_header,
@@ -91,46 +88,50 @@ SHAPEHEADER* MarineCompiledShapes[] = {
 	&CUBE_header,
 	&CUBE_header,
 	&CUBE_header,
-	&CUBE_header,			/* alien generator */
+	&CUBE_header,
+	&CUBE_header,
+	&CUBE_header,
+	&CUBE_header,
+	&CUBE_header,		/* alien generator */
 };
 
 
 #define STARTOF_PRECOMPILEDSHAPES 0
 int load_precompiled_shapes(void)
 {
-	static int done = 0;
+	static BOOL done = FALSE;
 	int i,j = 0;
-	
-	if(!mainshapelist)
+
+	if (!mainshapelist)
 	{
-		maxshapes=750;
+		maxshapes = 750;
 		/*I'm not using AllocateMem because I'll have to realloc this later*/
-		mainshapelist=(SHAPEHEADER**)malloc(sizeof(SHAPEHEADER*)*maxshapes);
+		mainshapelist = (SHAPEHEADER**)malloc(sizeof(SHAPEHEADER*) * maxshapes);
 		LOCALASSERT(mainshapelist);
-		if(!mainshapelist)
+		if (!mainshapelist)
 		{
-	   		ReleaseDirect3D();
-			exit(0x74363); 
+			ReleaseDirect3D();
+			exit(0x74363);
 		}
-		for(i=0;i<maxshapes;i++)
+		for (i = 0; i < maxshapes; i++)
 		{
-			mainshapelist[i]=0;
+			mainshapelist[i] = 0;
 		}
 	}
 	
-	i=STARTOF_PRECOMPILEDSHAPES;
+	i = STARTOF_PRECOMPILEDSHAPES;
 
 	if (done) return i+NUM_MAR_SHAPES;
 
-    /* KJL 11:43:36 09/24/96 - load some marine stuff hacked in 'cos the old way was even worse */
-	while(j < NUM_MAR_SHAPES)
+	/* KJL 11:43:36 09/24/96 - load some marine stuff hacked in 'cos the old way was even worse */
+	while (j < NUM_MAR_SHAPES)
 	{
 		mainshapelist[i] = MarineCompiledShapes[j];
 		i++;
 		j++;
 	}
 	
-	done = 1;
+	done = TRUE;
 	
 	return i;
 }

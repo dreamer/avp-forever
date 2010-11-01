@@ -732,7 +732,6 @@ void PrepareVDBForShowView(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 
 void UpdateObjectLights(DISPLAYBLOCK *dptr)
 {
-
 	int i;
 	LIGHTBLOCK *lptr;
 	LIGHTBLOCK **larrayptr = &dptr->ObLights[0];
@@ -812,7 +811,6 @@ int AVPViewVolumeTest(VIEWDESCRIPTORBLOCK *VDB_Ptr, DISPLAYBLOCK *dblockptr)
 
 	else
 		return FALSE;
-
 }
 /*
 

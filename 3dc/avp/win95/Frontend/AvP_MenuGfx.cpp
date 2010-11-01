@@ -99,7 +99,7 @@ extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 
 char AAFontWidths[256];
 
-extern int CloudTable[128][128];
+//extern int CloudTable[128][128];
 extern int CloakingPhase;
 
 #if 0 // bjd - texture test
@@ -663,7 +663,7 @@ extern int Hardware_RenderSmallMenuText_Coloured(char *textPtr, int x, int y, in
 
 extern void RenderKeyConfigRectangle(int alpha)
 {
-	unsigned int colour = alpha>>8;
+	uint32_t colour = alpha>>8;
 
 	if (colour > 255)
 		colour = 255;
@@ -676,8 +676,24 @@ extern void RenderKeyConfigRectangle(int alpha)
 	int totalWidth = 620;
 	int totalHeight = 250;
 
+//	float totalWidth2f = (((float)ScreenDescriptorBlock.SDB_Width / 100) * 96.875f);
+//	float totalHeight2f = (((float)ScreenDescriptorBlock.SDB_Height / 100) * 52.083f);
+
 	int x = 10;
 	int y = 150;
+
+//	float x2f = (((float)ScreenDescriptorBlock.SDB_Width / 100) * 1.5625f);
+//	float y2f = (((float)ScreenDescriptorBlock.SDB_Height / 100) * 31.25f);
+
+//	uint32_t totalWidth2 = XPercentToScreen(96.875f);
+//	uint32_t totalHeight2 = YPercentToScreen(52.083f);
+
+//	uint32_t x2 = XPercentToScreen(1.5625f);
+//	uint32_t y2 = YPercentToScreen(31.25f);
+
+//	char buf[150];
+//	sprintf(buf, "x2: %f y2: %f width: %f height: %f\n", x2, y2, totalWidth2, totalHeight2);
+//	OutputDebugString(buf);
 
 	// top horizonal segment
 	DrawQuad(x, y, totalWidth, segHeight, NO_TEXTURE, colour, TRANSLUCENCY_NORMAL);

@@ -2724,8 +2724,7 @@ void HandleParticleSystem(void)
 		}
 		particlePtr++;
 	}
-	
-	//
+
 	PostLandscapeRendering();
 	D3D_DecalSystem_Setup();
 	OutputTranslucentPolyList();
@@ -4898,7 +4897,6 @@ void HandlePheromoneTrails(void)
 
 	}					 
 }
-#include "frustum.h"
 
 void RenderTrailSegment(PHEROMONE_TRAIL *trailPtr)
 {

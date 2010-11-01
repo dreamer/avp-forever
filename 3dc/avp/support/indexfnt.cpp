@@ -37,7 +37,7 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr,int x,int y,int colour);
 	extern "C"
 	{
 #endif
-		extern int CloudTable[128][128];
+//		extern int CloudTable[128][128];
 		extern int CloakingPhase;
 		#if 0
 		extern OurBool			DaveDebugOn;

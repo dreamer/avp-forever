@@ -1032,6 +1032,7 @@ extern void MakeMarineKeyConfigMenu(void)
 
 	AvPMenu_KeyConfig[i+j+1].ElementID = AVPMENU_ELEMENT_ENDOFMENU;
 }
+
 extern void MakeAlienKeyConfigMenu(void)
 {
 	int i=0;

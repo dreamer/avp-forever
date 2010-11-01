@@ -437,14 +437,15 @@ void ChangeToPredator()
 void MaintainPlayer(void)
 {
 	int rand = FastRandom();
-	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 
-    if (playerStatusPtr->IsAlive)
+	if (playerStatusPtr->IsAlive)
 	{
-	    MaintainPlayersInventory();
+		MaintainPlayersInventory();
 	}
 
-	if (ShowAdj) {
+	if (ShowAdj)
+	{
 		ShowAdjacencies();
 	}
 
@@ -456,23 +457,25 @@ void MaintainPlayer(void)
 
 	playerStatusPtr->incidentTimer-=NormalFrameTime;
 
-	if (playerStatusPtr->incidentTimer<0) {
+	if (playerStatusPtr->incidentTimer<0) 
+	{
 		playerStatusPtr->incidentFlag=1;
 		playerStatusPtr->incidentTimer=32767+(FastRandom()&65535);
 	}
 
 	/* CDF 9/6/98 - I can't believe this isn't done!!! */
-  	Player->ObStrategyBlock->containingModule = playerPherModule;
+	Player->ObStrategyBlock->containingModule = playerPherModule;
 
-	if (Observer) {
+	if (Observer)
+	{
 		textprint("Observer Mode...\n");
 	}
 	textprint("HtoH Strikes %d\n",HtoHStrikes);
 
 	DoPlayerCloakingSystem();/* Patrick 22/8/97 : Cloaking stuff */
-   //	HandlePredatorVisionModes();
+	//	HandlePredatorVisionModes();
 
-	CurrentLightAtPlayer=LightIntensityAtPoint(&Player->ObStrategyBlock->DynPtr->Position);
+	CurrentLightAtPlayer = LightIntensityAtPoint(&Player->ObStrategyBlock->DynPtr->Position);
 
 	#if 1
 	textprint("PlayerLight %d\n",CurrentLightAtPlayer);
@@ -538,13 +541,15 @@ void MaintainPlayer(void)
 		}
 	}
 
-	if (AvP.DestructTimer>0) {
+	if (AvP.DestructTimer>0)
+	{
 		extern int NormalFrameTime;
 
 		AvP.DestructTimer-=NormalFrameTime;
 		if (AvP.DestructTimer<0) AvP.DestructTimer=0;
-
-	} else if (AvP.DestructTimer==0) {
+	}
+	else if (AvP.DestructTimer==0)
+	{
 		// ...Destruct?
 		CauseDamageToObject(Player->ObStrategyBlock,&TemplateAmmo[AMMO_SADAR_TOW].MaxDamage[AvP.Difficulty], 25*ONE_FIXED,NULL);
 		// That'll learn 'em.
@@ -559,14 +564,16 @@ void MaintainPlayer(void)
 	}
 
 	/* Is the player on fire? */
-	if (Player->ObStrategyBlock->SBDamageBlock.IsOnFire) {
-
+	if (Player->ObStrategyBlock->SBDamageBlock.IsOnFire)
+	{
 		myNetworkKillerId=myIgniterId;
 		CauseDamageToObject(Player->ObStrategyBlock,&firedamage,NormalFrameTime,NULL);
 		myNetworkKillerId=AvPNetID;
 
-		if (playerStatusPtr->soundHandle3!=SOUND_NOACTIVEINDEX) {
-			if (ActiveSounds[playerStatusPtr->soundHandle3].soundIndex!=SID_FIRE) {
+		if (playerStatusPtr->soundHandle3!=SOUND_NOACTIVEINDEX)
+		{
+			if (ActiveSounds[playerStatusPtr->soundHandle3].soundIndex!=SID_FIRE)
+			{
 				Sound_Stop(playerStatusPtr->soundHandle3);
 			 	Sound_Play(SID_FIRE,"dlev",&(Player->ObStrategyBlock->DynPtr->Position),&playerStatusPtr->soundHandle3,127);
 			} else {
@@ -659,7 +666,6 @@ void MaintainPlayer(void)
 		}
 		#endif
 	}
-
 
 	/* KJL 14:54:48 25/05/98 - reset water flag to zero for next frame */
 	playerStatusPtr->IsMovingInWater = 0;

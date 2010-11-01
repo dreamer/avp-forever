@@ -1400,7 +1400,7 @@ void ObjectBehaviours(void)
 	while(i < NumActiveStBlocks)
 	{
 		ExecuteBehaviour(ActiveStBlockList[i++]);
-  }
+	}
 }
 
 
@@ -1430,7 +1430,7 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 			LiftBehaveFun(sbptr);
 			break;
 
-    case I_BehaviourGenerator:
+	case I_BehaviourGenerator:
 			GeneratorBehaviour(sbptr);
 			break;
 
@@ -1438,7 +1438,7 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 			PlayerBehaviour(sbptr);
 			break;
 
-  	case I_BehaviourAlien:
+	case I_BehaviourAlien:
 			AlienBehaviour(sbptr);
 			break;
 
@@ -1471,13 +1471,13 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 			MolotovBehaviour(sbptr);
 			break;
 
-    case I_BehaviourProximityGrenade:
+	case I_BehaviourProximityGrenade:
 			ProximityGrenadeBehaviour(sbptr);
-    	break;
+		break;
 
-    case I_BehaviourFlareGrenade:
+	case I_BehaviourFlareGrenade:
 			FlareGrenadeBehaviour(sbptr);
-    	break;
+		break;
 
 		case I_BehaviourClusterGrenade:
 			ClusterGrenadeBehaviour(sbptr);
@@ -1544,10 +1544,10 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 			AlienFragFun(sbptr);
 			break;
 
-  	case I_BehaviourFragment:
+	case I_BehaviourFragment:
 		case I_BehaviourAutoGunMuzzleFlash:
 			OneShotBehaveFun(sbptr);
-	  	break;
+			break;
 
 		case I_BehaviourOneShotAnim:
 			OneShot_Anim_BehaveFun(sbptr);
@@ -1597,7 +1597,7 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 			/* KJL 16:30:21 03/13/97 - no behaviour required */
 			break;
 
- 		case I_BehaviourNetGhost:
+		case I_BehaviourNetGhost:
 			NetGhostBehaviour(sbptr);
 			break;
 
@@ -1675,7 +1675,7 @@ void ExecuteBehaviour(STRATEGYBLOCK* sbptr)
 		case I_BehaviourParticleGenerator:
 			ParticleGeneratorBehaveFun(sbptr);
 			break;
-    default:
+	default:
 			break;
 	}
 }
@@ -1719,7 +1719,6 @@ void UnlockThisProxdoor(STRATEGYBLOCK* sbptr)
 
 	/* Unlock door! */
 	doorbhv->door_locked = 0;
-
 }
 
 static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
@@ -1730,7 +1729,7 @@ static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
 	MODULE *mptr;
 	BOOL open_door = FALSE;
 
- 	GLOBALASSERT(sbptr);
+	GLOBALASSERT(sbptr);
 	doorbhv = (PROXDOOR_BEHAV_BLOCK*)sbptr->SBdataptr;
 	GLOBALASSERT((doorbhv->bhvr_type == I_BehaviourProximityDoor));
 	mctrl = doorbhv->PDmctrl;
@@ -1757,9 +1756,9 @@ static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
 
 
 
- 	/* check for an alien trigger:
- 	NB Door could be either visible or not when triggered */
- 	if ((doorbhv->alienTrigger == 1)||((doorbhv->marineTrigger == 1)))
+	/* check for an alien trigger:
+	NB Door could be either visible or not when triggered */
+	if ((doorbhv->alienTrigger == 1)||((doorbhv->marineTrigger == 1)))
 	{
 		open_door = TRUE;
 		if (doorbhv->marineTrigger==1) {
@@ -1775,22 +1774,25 @@ static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
 		open_door = FALSE;
 	}
 
- 	switch(doorbhv->door_state)
+	switch(doorbhv->door_state)
 	{
 		case I_door_opening:
 		{
 			mptr->m_flags |= m_flag_open;
 			if(mctrl->ObMorphFlags & mph_flag_finished)
 			{
-		        if (doorbhv->SoundHandle!=SOUND_NOACTIVEINDEX)
-		        {
-		          if (doorbhv->triggeredByMarine) {
-			          Sound_Play(SID_DOOREND,"dpm",&mptr->m_world,doorbhv->doorType);
-				  } else {
-			          Sound_Play(SID_DOOREND,"dp",&mptr->m_world,doorbhv->doorType);
-				  }
-		          Sound_Stop(doorbhv->SoundHandle);
-		        }
+				if (doorbhv->SoundHandle!=SOUND_NOACTIVEINDEX)
+				{
+					if (doorbhv->triggeredByMarine) 
+					{
+						Sound_Play(SID_DOOREND,"dpm",&mptr->m_world,doorbhv->doorType);
+					}
+					else
+					{
+					Sound_Play(SID_DOOREND,"dp",&mptr->m_world,doorbhv->doorType);
+					}
+					Sound_Stop(doorbhv->SoundHandle);
+				}
 
 				doorbhv->door_state = I_door_open;
 			}
@@ -1807,18 +1809,21 @@ static void DoorProxBehaveFun(STRATEGYBLOCK* sbptr)
 					OpenDoor(mctrl, doorbhv->door_opening_speed);
 					if (doorbhv->SoundHandle==SOUND_NOACTIVEINDEX)
 					{
-		  		         if (doorbhv->triggeredByMarine) {
-		 	 				Sound_Play(SID_DOORSTART,"dpm",&mptr->m_world,doorbhv->doorType);
-					 		Sound_Play(SID_DOORMID,"delpm",&mptr->m_world,&doorbhv->SoundHandle,doorbhv->doorType);
-						 } else {
-		 	 				Sound_Play(SID_DOORSTART,"dp",&mptr->m_world,doorbhv->doorType);
-					 		Sound_Play(SID_DOORMID,"delp",&mptr->m_world,&doorbhv->SoundHandle,doorbhv->doorType);
-						 }
-				 	}
-		    }
+						if (doorbhv->triggeredByMarine) 
+						{
+							Sound_Play(SID_DOORSTART,"dpm",&mptr->m_world,doorbhv->doorType);
+							Sound_Play(SID_DOORMID,"delpm",&mptr->m_world,&doorbhv->SoundHandle,doorbhv->doorType);
+						}
+						else
+						{
+							Sound_Play(SID_DOORSTART,"dp",&mptr->m_world,doorbhv->doorType);
+							Sound_Play(SID_DOORMID,"delp",&mptr->m_world,&doorbhv->SoundHandle,doorbhv->doorType);
+						}
+					}
+				}
 				else
 				{
-				  OpenDoor(mctrl, DOOR_OPENFASTSPEED);
+					OpenDoor(mctrl, DOOR_OPENFASTSPEED);
 				}
 
 				doorbhv->door_state = I_door_opening;

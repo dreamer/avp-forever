@@ -2744,7 +2744,7 @@ int start_of_loaded_shapes;
 static int msl_term_pos;
 static int first_free_pos = GLS_NOTINLIST;
 
-// reserves the next avaialbe position in the main shape list and returns it
+// reserves the next available position in the main shape list and returns it
 int GetMSLPos(void)
 {
 	if (GLS_NOTINLIST == first_free_pos)
@@ -2972,13 +2972,14 @@ RIFFHANDLE avp_load_rif (const char * fname)
 		char RifName[MAX_PATH];
 		sprintf(RifName, "%s%s", AvpCDPath, fname);
 		return load_rif(RifName);
-
 	}
+
 	// extra check
 	if (rifFile)
 	{
 		fclose(rifFile);
 	}
+
 	return load_rif(fname); 
 }
 
