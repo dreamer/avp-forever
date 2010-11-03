@@ -12,6 +12,7 @@ struct r_VertexBuffer
 	IDirect3DVertexBuffer8 *vertexBuffer;
 	uint8_t *dynamicVBMemory;
 	size_t	dynamicVBMemorySize;
+	uint32_t stride;
 };
 
 struct r_IndexBuffer
@@ -59,11 +60,11 @@ bool R_BeginScene();
 bool R_EndScene();
 
 // vertex buffer functions
-bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer &vertexBuffer);
+bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer);
 bool R_ReleaseVertexBuffer(r_VertexBuffer &vertexBuffer);
 bool R_LockVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage);
 bool R_UnlockVertexBuffer(r_VertexBuffer &vertexBuffer);
-bool R_SetVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t FVFsize);
+bool R_SetVertexBuffer(class VertexBuffer &vertexBuffer);
 bool R_DrawPrimitive(uint32_t numPrimitives);
 bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives);
 

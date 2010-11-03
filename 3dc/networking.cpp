@@ -369,7 +369,7 @@ void Net_ConnectToAddress()
 	Net_SendSystemMessage(AVP_REQUEST_SESSION_DATA, 0, 0, NULL, 0);
 
 	if ((enet_host_service (Client, &eEvent, 3000) > 0) && (eEvent.type == ENET_EVENT_TYPE_RECEIVE))
-	{	
+	{
 		Con_PrintDebugMessage("Net_ConnectToAddress - we got something from the server!");
 		memcpy(&receiveBuffer[0], static_cast<uint8_t*> (eEvent.packet->data), eEvent.packet->dataLength);
 		size_t size = eEvent.packet->dataLength;

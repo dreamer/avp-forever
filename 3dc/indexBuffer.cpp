@@ -26,15 +26,15 @@
 
 bool IndexBuffer::Set()
 {
-	return R_SetIndexBuffer(this->indexBuffer);
+	return R_SetIndexBuffer(*this);
 }
 
-bool IndexBuffer::Create(uint32_t size, enum R_USAGE usage)
+bool IndexBuffer::Create(uint32_t capacity, enum R_USAGE usage)
 {
-	this->size = size;
+	this->capacity = capacity;
 	this->usage = usage;
 
-	return R_CreateIndexBuffer(this->size, this->usage, this->indexBuffer);
+	return R_CreateIndexBuffer(*this);
 }
 
 bool IndexBuffer::Release()

@@ -203,14 +203,14 @@ bool R_EndScene()
 	return true;
 }
 
-bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer &vertexBuffer)
+bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer)
 {
 	// TODO - how to handle dynamic VBs? thinking of new-ing some space and using DrawPrimitiveUP functions?
 
 	D3DPOOL vbPool;
 	DWORD	vbUsage;
 
-	switch (usage)
+	switch (vertexBuffer.usage)
 	{
 		case USAGE_STATIC:
 			vbUsage = 0;
@@ -225,9 +225,9 @@ bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer &vertexB
 			break;
 	}
 
-	if (USAGE_STATIC == usage)
+	if (USAGE_STATIC == vertexBuffer.usage)
 	{
-		LastError = d3d.lpD3DDevice->CreateVertexBuffer(size, vbUsage, 0, vbPool, &vertexBuffer.vertexBuffer);
+		LastError = d3d.lpD3DDevice->CreateVertexBuffer(vertexBuffer.sizeInBytes, vbUsage, 0, vbPool, &vertexBuffer.vertexBuffer.vertexBuffer);
 		if (FAILED(LastError))
 		{
 			Con_PrintError("Can't create vertex buffer");
@@ -235,14 +235,14 @@ bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer &vertexB
 			return false;
 		}
 	}
-	else if (USAGE_DYNAMIC == usage)
+	else if (USAGE_DYNAMIC == vertexBuffer.usage)
 	{
-		vertexBuffer.dynamicVBMemory = static_cast<uint8_t*>(GlobalAlloc(GMEM_FIXED, size));//new(nothrow) uint8_t[size];
-		if (vertexBuffer.dynamicVBMemory == NULL)
+		vertexBuffer.vertexBuffer.dynamicVBMemory = static_cast<uint8_t*>(GlobalAlloc(GMEM_FIXED, vertexBuffer.sizeInBytes));//new(nothrow) uint8_t[size];
+		if (vertexBuffer.vertexBuffer.dynamicVBMemory == NULL)
 		{
 			Con_PrintError("Can't create vertex buffer - new() failed");
 		}
-		vertexBuffer.dynamicVBMemorySize = size;
+		vertexBuffer.vertexBuffer.dynamicVBMemorySize = vertexBuffer.sizeInBytes;
 	}
 
 	return true;
@@ -418,15 +418,26 @@ bool R_LockVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t offsetToLock, uin
 	return true;
 }
 
+static uint8_t *currentVBPointer = 0;
+static uint8_t *currentIBPointer = 0;
+static uint32_t currentVertexStride = 0;
+
 bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives)
 {
-	/*
-	LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
+	if (!currentVBPointer || !currentIBPointer)
+	{
+		Con_PrintError("Can't draw indexed primitive");
+		return false;
+	}
+
+	LastError = d3d.lpD3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 
 			0,
 			0,
-			numVerts,				// total num verts in VB
-			startIndex,
-			numPrimitives);
+			numPrimitives,
+			static_cast<void*>(currentIBPointer),
+			D3DFMT_INDEX16,
+			static_cast<void*>(currentVBPointer),
+			currentVertexStride);
 
 	if (FAILED(LastError))
 	{
@@ -434,7 +445,7 @@ bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t num
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
-*/
+
 	return true;
 }
 
@@ -452,23 +463,54 @@ bool R_LockIndexBuffer(r_IndexBuffer &indexBuffer, uint32_t offsetToLock, uint32
 	return true;
 }
 
-bool R_SetVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t FVFsize)
+bool R_SetVertexBuffer(class VertexBuffer &vertexBuffer)
 {
+	currentVBPointer = 0;
+
+	if (vertexBuffer.vertexBuffer.dynamicVBMemory)
+	{
+		currentVBPointer = vertexBuffer.vertexBuffer.dynamicVBMemory;
+		currentVertexStride = vertexBuffer.stride;
+	}
+	else if (vertexBuffer.vertexBuffer.vertexBuffer)
+	{
+		LastError = d3d.lpD3DDevice->SetStreamSource(0, vertexBuffer.vertexBuffer.vertexBuffer, vertexBuffer.stride);
+		Con_PrintError("Can't set vertex buffer");
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
 	return true;
 }
 
 bool R_SetIndexBuffer(r_IndexBuffer &indexBuffer)
 {
+	currentIBPointer = 0;
+
+	if (indexBuffer.dynamicIBMemory)
+	{
+		currentIBPointer = indexBuffer.dynamicIBMemory;
+	}
+	else if (indexBuffer.indexBuffer)
+	{
+		LastError = d3d.lpD3DDevice->SetIndices(indexBuffer.indexBuffer, 0);
+		Con_PrintError("Can't set index buffer");
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
 	return true;
 }
 
 bool R_UnlockVertexBuffer(r_VertexBuffer &vertexBuffer)
 {
+	// nothing to do here yet
 	return true;
 }
 
 bool R_UnlockIndexBuffer(r_IndexBuffer &indexBuffer)
 {
+	// nothing to do here yet
 	return true;
 }
 
@@ -1047,6 +1089,11 @@ bool R_SetVertexShader(r_VertexShader &vertexShader)
 		return false;
 	}
 
+	return true;
+}
+
+bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
+{
 	return true;
 }
 

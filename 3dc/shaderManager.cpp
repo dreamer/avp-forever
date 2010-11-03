@@ -90,11 +90,6 @@ bool VertexShaderPool::SetVertexShaderConstant(uint32_t shaderID, uint32_t regis
 	return R_SetVertexShaderConstant(shaderList[shaderID], registerIndex, type, constantData);
 }
 
-bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
-{
-	return true;
-}
-
 /*
 bool VertexShaderPool::SetMatrix(uint32_t shaderID, const char* constant, R_MATRIX &matrix)
 {

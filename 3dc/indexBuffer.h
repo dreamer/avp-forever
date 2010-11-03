@@ -31,10 +31,15 @@
 class IndexBuffer
 {
 	public:
+		// members
+		r_IndexBuffer	indexBuffer;
+		uint32_t		capacity; // number of indicies we can hold
+		enum R_USAGE	usage;
+		bool			isLocked;
+
 		// constructor
 		IndexBuffer():
-			//indexBuffer(0),
-			size(0),
+			capacity(0),
 			usage(USAGE_DYNAMIC),
 			isLocked(false)
 		{
@@ -47,18 +52,12 @@ class IndexBuffer
 		}
 
 		// public functions
-		bool IndexBuffer::Create(uint32_t size, enum R_USAGE usage);
+		bool IndexBuffer::Create(uint32_t capacity, enum R_USAGE usage);
 		bool IndexBuffer::Release();
 		bool IndexBuffer::Lock(uint16_t **data);
 		bool IndexBuffer::Unlock();
 		bool IndexBuffer::Set();
-		uint32_t IndexBuffer::GetCapacity() const { return size; }
-
-	private:
-		r_IndexBuffer	indexBuffer;
-		uint32_t		size;
-		enum R_USAGE	usage;
-		bool			isLocked;
+		uint32_t IndexBuffer::GetCapacity() const { return capacity; }
 };
 
 #endif

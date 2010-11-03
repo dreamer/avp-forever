@@ -33,25 +33,8 @@ enum VertexPrimitive
 
 bool VertexBuffer::Set()
 {
-	return R_SetVertexBuffer(this->vertexBuffer, this->FVFsize);
+	return R_SetVertexBuffer(*this);
 }
-
-/*
-bool VertexBuffer::Draw()
-{
-	if (!R_SetVertexBuffer(this->vertexBuffer, this->FVFsize))
-	{
-		return false;
-	}
-
-	if (!R_DrawPrimitive(2))
-	{
-		return false;
-	}
-
-	return true;
-}
-*/
 
 bool VertexBuffer::Lock(void **data)
 {
@@ -68,30 +51,30 @@ bool VertexBuffer::Release()
 	return R_ReleaseVertexBuffer(this->vertexBuffer);
 }
 
-bool VertexBuffer::Create(uint32_t size, enum R_FVF fvf, enum R_USAGE usage)
+bool VertexBuffer::Create(uint32_t capacity, enum R_FVF fvf, enum R_USAGE usage)
 {
 	// store values for later use
-	this->size = size;
+	this->capacity = capacity;
 	this->usage = usage;
 	this->FVF = fvf;
 
 	switch (this->FVF)
 	{
 		case FVF_LVERTEX:
-			this->FVFsize = sizeof(D3DLVERTEX);
+			this->stride = sizeof(D3DLVERTEX);
 			break;
 		case FVF_ORTHO:
-			this->FVFsize = sizeof(ORTHOVERTEX);
+			this->stride = sizeof(ORTHOVERTEX);
 			break;
 		case FVF_FMV:
-			this->FVFsize = sizeof(FMVVERTEX);
+			this->stride = sizeof(FMVVERTEX);
 			break;
 		default:
 			// error and return
 			break;
 	}
 
-	this->sizeInBytes = this->size * this->FVFsize;
+	this->sizeInBytes = this->capacity * this->stride;
 
-	return R_CreateVertexBuffer(this->sizeInBytes, this->usage, vertexBuffer);
+	return R_CreateVertexBuffer(*this);
 }

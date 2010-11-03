@@ -343,12 +343,12 @@ bool R_EndScene()
 	return true;
 }
 
-bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer &vertexBuffer)
+bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer)
 {
 	D3DPOOL vbPool;
 	DWORD	vbUsage;
 
-	switch (usage)
+	switch (vertexBuffer.usage)
 	{
 		case USAGE_STATIC:
 			vbUsage = 0;
@@ -363,7 +363,7 @@ bool R_CreateVertexBuffer(uint32_t size, uint32_t usage, r_VertexBuffer &vertexB
 			break;
 	}
 
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(size, vbUsage, 0, vbPool, &vertexBuffer.vertexBuffer, NULL);
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(vertexBuffer.sizeInBytes, vbUsage, 0, vbPool, &vertexBuffer.vertexBuffer.vertexBuffer, NULL);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't create vertex buffer");
@@ -384,12 +384,12 @@ bool R_ReleaseVertexBuffer(r_VertexBuffer &vertexBuffer)
 	return true;
 }
 
-bool R_CreateIndexBuffer(uint32_t size, uint32_t usage, r_IndexBuffer &indexBuffer)
+bool R_CreateIndexBuffer(class IndexBuffer &indexBuffer)
 {
 	D3DPOOL ibPool;
 	DWORD	ibUsage;
 
-	switch (usage)
+	switch (indexBuffer.usage)
 	{
 		case USAGE_STATIC:
 			ibUsage = 0;
@@ -405,7 +405,7 @@ bool R_CreateIndexBuffer(uint32_t size, uint32_t usage, r_IndexBuffer &indexBuff
 	}
 	
 	// create index buffer
-	LastError = d3d.lpD3DDevice->CreateIndexBuffer(size * 3 * sizeof(WORD), ibUsage, D3DFMT_INDEX16, ibPool, &indexBuffer.indexBuffer, NULL);
+	LastError = d3d.lpD3DDevice->CreateIndexBuffer(indexBuffer.capacity * 3 * sizeof(WORD), ibUsage, D3DFMT_INDEX16, ibPool, &indexBuffer.indexBuffer.indexBuffer, NULL);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't create index buffer");
@@ -584,9 +584,9 @@ bool R_LockIndexBuffer(r_IndexBuffer &indexBuffer, uint32_t offsetToLock, uint32
 	return true;
 }
 
-bool R_SetVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t FVFsize)
+bool R_SetVertexBuffer(class VertexBuffer &vertexBuffer)
 {
-	LastError = d3d.lpD3DDevice->SetStreamSource(0, vertexBuffer.vertexBuffer, 0, FVFsize);
+	LastError = d3d.lpD3DDevice->SetStreamSource(0, vertexBuffer.vertexBuffer.vertexBuffer, 0, vertexBuffer.stride);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't set vertex buffer");
@@ -597,9 +597,9 @@ bool R_SetVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t FVFsize)
 	return true;
 }
 
-bool R_SetIndexBuffer(r_IndexBuffer &indexBuffer)
+bool R_SetIndexBuffer(class IndexBuffer &indexBuffer)
 {
-	LastError = d3d.lpD3DDevice->SetIndices(indexBuffer.indexBuffer);
+	LastError = d3d.lpD3DDevice->SetIndices(indexBuffer.indexBuffer.indexBuffer);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't set index buffer");
