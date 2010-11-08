@@ -72,14 +72,14 @@ void Font_Release()
 
 void Font_Init()
 {
-	Fonts[FONT_SMALL].textureID = Tex_CreateFromFile("avp_font.tga");
+	Fonts[FONT_SMALL].textureID = Tex_CreateFromFile("test_font.tga");
 
 	// zero out all values in the description struct
 	memset(&Fonts[FONT_SMALL].desc, 0, sizeof(BFD));
 
 	// see if there's a font description file
 	std::ifstream infile;
-	infile.open("avp_font.dat", std::ifstream::in | std::ifstream::binary);
+	infile.open("test_font.dat", std::ifstream::in | std::ifstream::binary);
 
 	if (infile.good())
 	{
