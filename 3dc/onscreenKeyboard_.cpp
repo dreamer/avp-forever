@@ -44,10 +44,6 @@
 
 extern "C"
 {
-	extern unsigned char KeyboardInput[];
-	extern char AAFontWidths[256];
-
-	#include "avp_menugfx.hpp"
 	#include "platform.h"
 }
 
@@ -59,23 +55,27 @@ static int currentColumn = 0;
 
 static int currentValue = 0;
 
-static uint32_t osk_x = 320;
-static uint32_t osk_y = 280;
-static uint32_t oskWidth = 400;
-static uint32_t oskHeight = 200;
+static uint16_t osk_x = 320;
+static uint16_t osk_y = 280;
+static uint16_t oskWidth = 400;
+static uint16_t oskHeight = 200;
 
-static const uint32_t keyWidth = 30;
-static const uint32_t keyHeight = 30;
+static const uint8_t keyWidth = 30;
+static const uint8_t keyHeight = 30;
 
-static const uint32_t space_between_keys = 3;
-static const uint32_t outline_border_size = 1;
-static const uint32_t indent_space = 5;
+static const uint8_t space_between_keys = 3;
+static const uint8_t outline_border_size = 1;
+static const uint8_t indent_space = 5;
+
+static const uint8_t numVerticalKeys = 5;
+static const uint8_t numHorizontalKeys = 12;
+static const uint8_t numKeys = numVerticalKeys * numHorizontalKeys;
 
 struct ButtonStruct
 {
 	uint32_t	numWidthBlocks;
-	uint32_t	height;
 	uint32_t	width;
+	uint32_t	height;
 	uint32_t	positionOffset;
 	uint32_t	stringID;
 	bool		isBlank;
@@ -85,19 +85,13 @@ std::vector<ButtonStruct> keyVector;
 // we store our strings seperately and index using the stringID (to avoid duplicates)
 std::vector<std::string> stringVector;
 
-static const uint32_t numVerticalKeys = 5;
-static const uint32_t numHorizontalKeys = 12;
-static const uint32_t numKeys = numVerticalKeys * numHorizontalKeys;
-
-static bool is_active = false;
-static bool is_inited = false;
+static bool isActive = false;
+static bool isInitialised = false;
 
 bool shift = false;
 bool capsLock = false;
 
 uint32_t buttonID = 0;
-
-//static char buf[100];
 
 template <class T> void Osk_AddKey(T buttonLabel, uint32_t numWidthBlocks)
 {
@@ -191,7 +185,7 @@ void Osk_Init()
 	oskWidth = (keyWidth * numHorizontalKeys) + (space_between_keys * numHorizontalKeys) + (indent_space * 2);
 	oskHeight = (keyHeight * numVerticalKeys) + (space_between_keys * numVerticalKeys) + (indent_space * 2);
 
-	is_inited = true;
+	isInitialised = true;
 }
 
 void Osk_Draw()
@@ -251,7 +245,7 @@ void Osk_Draw()
 
 bool Osk_IsActive()
 {
-	return is_active; // sort this later to only appear for text entry on xbox
+	return isActive; // sort this later to only appear for text entry on xbox
 }
 
 std::string Osk_GetKeyLabel(uint32_t buttonIndex)
@@ -271,15 +265,15 @@ std::string Osk_GetKeyLabel(uint32_t buttonIndex)
 
 void Osk_Activate()
 {
-	if (is_inited == false)
+	if (isInitialised == false)
 		Osk_Init();
 
-	is_active = true;
+	isActive = true;
 }
 
 void Osk_Deactivate()
 {
-	is_active = false;
+	isActive = false;
 }
 
 #ifdef _XBOX
@@ -372,7 +366,6 @@ void Osk_MoveLeft()
 
 	// store some information about current key
 	int buttonOffset = keyVector.at(currentPosition).positionOffset;
-//	int width = keyVector.at(currentPosition).numWidthBlocks;
 
 	// lets do the actual left move
 	currentColumn -= buttonOffset + 1;

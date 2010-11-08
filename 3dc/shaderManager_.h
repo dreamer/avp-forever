@@ -105,12 +105,14 @@ class EffectManager
 
 	public:
 		EffectManager();
+		~EffectManager();
 		bool SetActive(effectID_t effectID);
 		bool SetVertexShaderConstant(effectID_t effectID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
 //		bool SetMatrix(effectID_t effectID, const char* constant, R_MATRIX &matrix);
 //		bool SetFloat(effectID_t effectID, const char* constant, float n);
 //		bool SetInt(effectID_t effectID, const char* constant, int32_t n);
-		effectID_t AddEffect(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName, class VertexDeclaration *vertexDeclaration);
+		effectID_t Add(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName, class VertexDeclaration *vertexDeclaration);
+		void Remove(effectID_t effectID);
 };
 
 #endif

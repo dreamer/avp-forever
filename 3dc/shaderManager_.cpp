@@ -43,13 +43,25 @@ uint32_t VertexShaderPool::Add(r_VertexShader newShader)
 	this->shaderList.push_back(newShader);
 
 	// it's at the end, so our ID is the last array position
-	return this->shaderList.size() - 1;
+	shaderID =  this->shaderList.size() - 1;
+
+	// increase reference count
+	this->AddRef(shaderID);
+
+	return shaderID;
 }
 
 // remove the shader at ID position passed in
 void VertexShaderPool::Remove(uint32_t shaderID)
 {
-	this->shaderList.erase(this->shaderList.begin() + shaderID);
+	shaderList[shaderID].refCount--;
+	if (shaderList[shaderID].refCount <= 0)
+	{
+		R_ReleaseVertexShader(shaderList[shaderID]);
+
+		// gone now, remove entry from vector
+		this->shaderList.erase(this->shaderList.begin() + shaderID);
+	}
 }
 
 // set the shader as active (eg SetVertexShader() in D3D)
@@ -122,13 +134,25 @@ uint32_t PixelShaderPool::Add(r_PixelShader newShader)
 	this->shaderList.push_back(newShader);
 
 	// it's at the end, so our ID is the last array position
-	return this->shaderList.size() - 1;
+	shaderID = this->shaderList.size() - 1;
+
+	// increase reference count
+	this->AddRef(shaderID);
+
+	return shaderID;
 }
 
 // remove the shader at ID position passed in
 void PixelShaderPool::Remove(uint32_t shaderID)
 {
-	this->shaderList.erase(this->shaderList.begin() + shaderID);
+	shaderList[shaderID].refCount--;
+	if (shaderList[shaderID].refCount <= 0)
+	{
+		R_ReleasePixelShader(shaderList[shaderID]);
+
+		// gone now, remove entry from vector
+		this->shaderList.erase(this->shaderList.begin() + shaderID);
+	}
 }
 
 // set the shader as active (eg SetPixelShader() in D3D)
@@ -168,6 +192,15 @@ EffectManager::EffectManager()
 {
 }
 
+EffectManager::~EffectManager()
+{
+	// clear the list
+	for (uint32_t i = 0; i < effectList.size(); i++)
+	{
+		Remove(i);
+	}
+}
+
 bool EffectManager::SetActive(effectID_t effectID)
 {
 	vsPool.SetActive(effectList[effectID].vertexShaderID);
@@ -204,7 +237,18 @@ bool EffectManager::SetInt(effectID_t effectID, const char* constant, int32_t n)
 }
 */
 
-effectID_t EffectManager::AddEffect(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName, VertexDeclaration *vertexDeclaration)
+void EffectManager::Remove(effectID_t effectID)
+{
+	// remove VS if required
+	vsPool.Remove(effectList[effectID].vertexShaderID);
+
+	// remove PS if required
+	psPool.Remove(effectList[effectID].pixelShaderID);
+
+	// remove effect?
+}
+
+effectID_t EffectManager::Add(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName, VertexDeclaration *vertexDeclaration)
 {
 	shaderID_t vertexID = nullID;
 	shaderID_t pixelID = nullID;
