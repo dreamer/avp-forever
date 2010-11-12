@@ -1,4 +1,4 @@
-#include "fmvPlayback.h"
+#include "FmvPlayback.h"
 #include "3dc.h"
 #include "console.h"
 #include <stdint.h>

@@ -31,7 +31,7 @@ struct Texture;
 struct r_VertexShader
 {
 	bool 			isValid;
-	uint32_t		refCount;
+	int32_t			refCount;
 	IDirect3DVertexShader9	*shader;
 	ID3DXConstantTable		*constantTable;
 	r_vertexDeclaration		vertexDeclaration;
@@ -42,7 +42,7 @@ struct r_VertexShader
 struct r_PixelShader
 {
 	bool			isValid;
-	uint32_t		refCount;
+	int32_t			refCount;
 	IDirect3DPixelShader9	*shader;
 	ID3DXConstantTable		*constantTable;
 	std::string 			shaderName;
@@ -50,11 +50,11 @@ struct r_PixelShader
 };
 
 #include "aw.h"
-#include "vertexBuffer.h"
-#include "indexBuffer.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 #include "renderStates.h"
-#include "textureManager.h"
-#include "shaderManager.h"
+#include "TextureManager.h"
+#include "ShaderManager.h"
 #include "VertexDeclaration.h"
 #include <string>
 
@@ -112,7 +112,7 @@ std::string& R_GetVideoModeDescription();
 void R_SetCurrentVideoMode();
 
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
-void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
+void ChangeTextureAddressMode(uint32_t samplerIndex, enum TEXTURE_ADDRESS_MODE textureAddressMode);
 void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable);
 

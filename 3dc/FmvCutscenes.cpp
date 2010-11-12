@@ -3,12 +3,12 @@
 	#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
 #endif
 
-#include "fmvPlayback.h"
-#include "fmvCutscenes.h"
+#include "FmvPlayback.h"
+#include "FmvCutscenes.h"
 #include "console.h"
-#include "textureManager.h"
+#include "TextureManager.h"
 #include "logString.h"
-#include "vorbisPlayer.h"
+#include "VorbisPlayer.h"
 #include "console.h"
 #include <vector>
 #include <string>

@@ -92,7 +92,7 @@ extern void Mouse_ButtonDown(unsigned char button);
 
 int xPosRelative = 0;
 int yPosRelative = 0;
-int mouseMoved = 0;
+BOOL mouseMoved = FALSE;
 
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -125,7 +125,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 			if (raw->header.dwType == RIM_TYPEMOUSE) 
 			{
-				mouseMoved = 1;
+				mouseMoved = TRUE;
 				xPosRelative = raw->data.mouse.lLastX;
 				yPosRelative = raw->data.mouse.lLastY;
 			}

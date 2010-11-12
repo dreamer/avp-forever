@@ -1,14 +1,14 @@
 #include "console.h"
-#include "onscreenKeyboard.h"
-#include "textureManager.h"
+#include "OnScreenKeyboard.h"
+#include "TextureManager.h"
 #include "r2base.h"
 #include "font2.h"
 #include <vector>
 #include <algorithm>
 #include "logString.h"
 #include "RenderList.h"
-#include "vertexBuffer.h"
-#include "fmvCutscenes.h"
+#include "VertexBuffer.h"
+#include "FmvCutscenes.h"
 #define UseLocalAssert FALSE
 #include "ourasert.h"
 #include <assert.h>
@@ -490,14 +490,16 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 
 	d3d.fmvDecl->Set();
 
-	// set the yuv fmv shader
+	// set the YUV FMV shader
 	d3d.effectSystem->SetActive(d3d.fmvEffect);
 
 	// set orthographic projection
 //	d3d.effectSystem->SetMatrix(d3d.fmvEffect, "WorldViewProj", matOrtho);
 	d3d.effectSystem->SetVertexShaderConstant(d3d.fmvEffect, 0, CONST_MATRIX, &matOrtho);
 
-	ChangeTextureAddressMode(TEXTURE_CLAMP);
+	ChangeTextureAddressMode(0, TEXTURE_CLAMP);
+	ChangeTextureAddressMode(1, TEXTURE_CLAMP);
+	ChangeTextureAddressMode(2, TEXTURE_CLAMP);
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
 
@@ -628,6 +630,8 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 		d3d.effectSystem->SetVertexShaderConstant(d3d.cloudEffect, 1, CONST_MATRIX, &matOrtho);
 		d3d.effectSystem->SetVertexShaderConstant(d3d.cloudEffect, 2, CONST_FLOAT, &topXF);
 
+		ChangeTextureAddressMode(0, TEXTURE_CLAMP);
+		ChangeTextureAddressMode(1, TEXTURE_WRAP);
 		ChangeTranslucencyMode(TRANSLUCENCY_GLOWING);
 		ChangeFilteringMode(FILTERING_BILINEAR_ON);
 

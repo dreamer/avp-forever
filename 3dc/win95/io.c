@@ -145,7 +145,7 @@ int ReleasePrintDebuggingText(const char* t, ...);
 
 SHAPEHEADER* GetShapeData(int shapenum)
 {
-	if(shapenum >= 0 && shapenum < maxshapes)
+	if (shapenum >= 0 && shapenum < maxshapes)
 	{
 		SHAPEHEADER *sptr = mainshapelist[shapenum];
 		return sptr;
@@ -464,39 +464,74 @@ void ResetFrameCounter(void)
 	RouteFinder_CallsThisFrame = 0;
 }
 
+uint64_t lastTickCount2 = 0;
+
+
 void FrameCounterHandler(void)
 {
-	int newTickCount = timeGetTime();
-	int fcnt;
+	static BOOL inited = FALSE;
 
+	int newTickCount = timeGetTime();
+	uint64_t newTickCount2 = 0;
+	float RealFrameTime2 = 0.0f;
+
+	int fcnt;
+	uint64_t deltaTime;
+	char buf[300];
+
+	if (!inited)
+	{
+		lastTickCount2 = timeGetTime();
+		inited = TRUE;
+	}
+
+	newTickCount2 = timeGetTime();
+
+	// fcnt = time passed since last check
 	fcnt = newTickCount - lastTickCount;
+	deltaTime = newTickCount2 - lastTickCount2;
+
 	lastTickCount = newTickCount;
+	lastTickCount2 = newTickCount2;
 
     if (fcnt == 0)
-	  fcnt = 1; /* for safety */
+		fcnt = 1; /* for safety */
 
 	FrameRate = TimerFrame / fcnt;
 
 	PrevNormalFrameTime = NormalFrameTime;
 	NormalFrameTime = DIV_FIXED(fcnt,TimerFrame);
 
+	// seconds elapsed?
+//	RealFrameTime2 = (float)deltaTime / TimerFrame;
+
+	// RealFrameTime. unscaled frame time
 	RealFrameTime = NormalFrameTime;
 
+	// do the scaling on NormalFrameTime if reqired
+	if (TimeScale != ONE_FIXED)
 	{
-		if (TimeScale!=ONE_FIXED)
-		{
-			NormalFrameTime = MUL_FIXED(NormalFrameTime,TimeScale);
-		}
+		NormalFrameTime = MUL_FIXED(NormalFrameTime, TimeScale);
 	}
+
 	/* cap NormalFrameTime if frame rate is really low */
-	if (NormalFrameTime>16384) NormalFrameTime=16384;
+	if (NormalFrameTime > 16384) // 0.25. quarter of a second?
+		NormalFrameTime = 16384;
+
 	GlobalFrameCounter++;
 	CloakingPhase += NormalFrameTime>>5;
 
-//	sprintf(buf, "NormalFrameTime: %d\n", NormalFrameTime);
-//	OutputDebugString(buf);
+//	sprintf(buf, "RealFrameTime: %d, %d\n", RealFrameTime, RealFrameTime / 16);
+//	sprintf(buf, "Delta: %d, RealFrameTimef: %f\n", deltaTime, RealFrameTime2);
+	/*
+	if (deltaTime != 0)
+	{
+		sprintf(buf, "Delta: %d frameRate: %d\n", deltaTime, TimerFrame / deltaTime);
+		OutputDebugString(buf);
+	}
+	*/
 
-	RouteFinder_CallsThisFrame=0;
+	RouteFinder_CallsThisFrame = 0;
 }
 
 /*
@@ -525,12 +560,12 @@ void WaitForReturn(void)
 	FlipBuffers();
 
 	while (!(KeyboardInput[KEY_CR]))
-	   DirectReadKeyboard();
+	{
+		DirectReadKeyboard();
+	}
 
 	lastTickCount = SavedTickCount;
 }
-
-
 
 
 /*

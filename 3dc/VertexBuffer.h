@@ -22,8 +22,8 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _vertexBuffer_h_
-#define _vertexBuffer_h_
+#ifndef _VertexBuffer_h_
+#define _VertexBuffer_h_
 
 #include <stdint.h>
 #include "renderer.h"

@@ -3267,7 +3267,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\3dc\configFile.cpp"
+				RelativePath=".\3dc\ConfigFile.cpp"
 				>
 			</File>
 			<File
@@ -4571,11 +4571,11 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\3dc\fmvCutscenes.cpp"
+				RelativePath=".\3dc\FmvCutscenes.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\3dc\fmvPlayback.cpp"
+				RelativePath=".\3dc\FmvPlayback.cpp"
 				>
 			</File>
 			<File
@@ -5307,7 +5307,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\3dc\indexBuffer.cpp"
+				RelativePath=".\3dc\IndexBuffer.cpp"
 				>
 			</File>
 			<File
@@ -6725,7 +6725,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\3dc\onscreenKeyboard.cpp"
+				RelativePath=".\3dc\OnScreenKeyboard.cpp"
 				>
 			</File>
 			<File
@@ -7653,7 +7653,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\3dc\ringbuffer.cpp"
+				RelativePath=".\3dc\RingBuffer.cpp"
 				>
 			</File>
 			<File
@@ -7937,7 +7937,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\3dc\shaderManager.cpp"
+				RelativePath=".\3dc\ShaderManager.cpp"
 				>
 			</File>
 			<File
@@ -8665,7 +8665,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\3dc\textureManager.cpp"
+				RelativePath=".\3dc\TextureManager.cpp"
 				>
 			</File>
 			<File
@@ -8953,7 +8953,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\3dc\vertexBuffer.cpp"
+				RelativePath=".\3dc\VertexBuffer.cpp"
 				>
 			</File>
 			<File
@@ -9041,7 +9041,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\3dc\vorbisPlayer.cpp"
+				RelativePath=".\3dc\VorbisPlayer.cpp"
 				>
 			</File>
 			<File
@@ -9353,7 +9353,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\3dc\audioStreaming.h"
+					RelativePath=".\3dc\AudioStreaming.h"
 					>
 				</File>
 				<File
@@ -9609,7 +9609,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\3dc\configFile.h"
+					RelativePath=".\3dc\ConfigFile.h"
 					>
 				</File>
 				<File
@@ -9773,11 +9773,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\3dc\fmvCutscenes.h"
+					RelativePath=".\3dc\FmvCutscenes.h"
 					>
 				</File>
 				<File
-					RelativePath=".\3dc\fmvPlayback.h"
+					RelativePath=".\3dc\FmvPlayback.h"
 					>
 				</File>
 				<File
@@ -9881,7 +9881,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\3dc\indexBuffer.h"
+					RelativePath=".\3dc\IndexBuffer.h"
 					>
 				</File>
 				<File
@@ -10005,7 +10005,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\3dc\onscreenKeyboard.h"
+					RelativePath=".\3dc\OnScreenKeyboard.h"
 					>
 				</File>
 				<File
@@ -10133,7 +10133,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\3dc\ringbuffer.h"
+					RelativePath=".\3dc\RingBuffer.h"
 					>
 				</File>
 				<File
@@ -10165,7 +10165,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\3dc\shaderManager.h"
+					RelativePath=".\3dc\ShaderManager.h"
 					>
 				</File>
 				<File
@@ -10253,6 +10253,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\3dc\TextureManager.h"
+					>
+				</File>
+				<File
 					RelativePath="3dc\avp\track.h"
 					>
 				</File>
@@ -10281,7 +10285,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\3dc\vertexBuffer.h"
+					RelativePath=".\3dc\VertexBuffer.h"
 					>
 				</File>
 				<File
@@ -10301,7 +10305,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\3dc\vorbisPlayer.h"
+					RelativePath=".\3dc\VorbisPlayer.h"
 					>
 				</File>
 				<File

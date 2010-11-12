@@ -22,8 +22,8 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _vorbisPlayer_h_
-#define _vorbisPlayer_h_
+#ifndef _VorbisPlayer_h_
+#define _VorbisPlayer_h_
 
 #include "os_header.h"
 

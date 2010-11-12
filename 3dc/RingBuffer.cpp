@@ -24,7 +24,7 @@
 
 #include <assert.h>
 #include "os_header.h"
-#include "ringbuffer.h"
+#include "RingBuffer.h"
 
 RingBuffer::RingBuffer(uint32_t size)
 {

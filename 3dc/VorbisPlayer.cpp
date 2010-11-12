@@ -23,7 +23,7 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdio.h>
-#include "vorbisPlayer.h"
+#include "VorbisPlayer.h"
 #include "logString.h"
 #include <process.h>
 

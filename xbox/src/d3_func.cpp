@@ -1896,10 +1896,10 @@ bool InitialiseDirect3D()
 
 	d3d.effectSystem = new EffectManager;
 
-	d3d.mainEffect  = d3d.effectSystem->AddEffect("main", "vertex_1_1.vsh", "pixel_1_1.psh", d3d.mainDecl);
-	d3d.orthoEffect = d3d.effectSystem->AddEffect("ortho", "orthoVertex_1_1.vsh", "pixel_1_1.psh", d3d.orthoDecl);
-//	d3d.fmvEffect   = d3d.effectSystem->AddEffect("fmv", "fmvVertex.vsh", "fmvPixel.psh");
-//	d3d.cloudEffect = d3d.effectSystem->AddEffect("cloud", "tallFontTextVertex.vsh", "tallFontTextPixel.psh");
+	d3d.mainEffect  = d3d.effectSystem->Add("main", "vertex_1_1.vsh", "pixel_1_1.psh", d3d.mainDecl);
+	d3d.orthoEffect = d3d.effectSystem->Add("ortho", "orthoVertex_1_1.vsh", "pixel_1_1.psh", d3d.orthoDecl);
+//	d3d.fmvEffect   = d3d.effectSystem->Add("fmv", "fmvVertex.vsh", "fmvPixel.psh");
+//	d3d.cloudEffect = d3d.effectSystem->Add("cloud", "tallFontTextVertex.vsh", "tallFontTextPixel.psh");
 
 	// create vertex and index buffers
 	CreateVolatileResources();

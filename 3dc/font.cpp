@@ -30,7 +30,7 @@
 #include "renderer.h"
 #include "logString.h"
 #include "font2.h"
-#include "textureManager.h"
+#include "TextureManager.h"
 #include <iostream>
 #include <fstream>
 

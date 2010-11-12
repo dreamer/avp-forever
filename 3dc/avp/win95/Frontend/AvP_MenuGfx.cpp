@@ -10,7 +10,7 @@
 #include "ffstdio.h"
 #include "renderer.h"
 #include "console.h"
-#include "textureManager.h"
+#include "TextureManager.h"
 
 extern int Font_DrawText(const char* text, int x, int y, int colour, int fontType);
 

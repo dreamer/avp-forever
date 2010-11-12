@@ -22,8 +22,8 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _shaderManager_h_
-#define _shaderManager_h_
+#ifndef _ShaderManager_h_
+#define _ShaderManager_h_
 
 #include "renderer.h"
 #include <stdint.h>
@@ -31,8 +31,8 @@
 #include <vector>
 #include <utility>
 
-typedef uint32_t effectID_t;
-typedef uint32_t shaderID_t;
+typedef int32_t effectID_t;
+typedef int32_t shaderID_t;
 
 // shader constant types
 enum SHADER_CONSTANT
@@ -57,15 +57,12 @@ class VertexShaderPool
 
 		std::vector<r_VertexShader> shaderList;
 
-		uint32_t Add(r_VertexShader newShader);
-		bool SetActive(uint32_t shaderID);
-		uint32_t GetShaderByName(const std::string &shaderName);
-		void Remove(uint32_t shaderID);
-		void AddRef(uint32_t shaderID) { shaderList[shaderID].refCount++; }
-//		bool SetMatrix(uint32_t shaderID, const char* constant, R_MATRIX &matrix);
-//		bool SetFloat(uint32_t shaderID, const char* constant, float n);
-//		bool SetInt(uint32_t shaderID, const char* constant, int32_t n);
-		bool SetVertexShaderConstant(uint32_t shaderID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
+		int32_t Add(r_VertexShader newShader);
+		bool SetActive(int32_t shaderID);
+		int32_t GetShaderByName(const std::string &shaderName);
+		void Remove(int32_t shaderID);
+		void AddRef(int32_t shaderID) { shaderList[shaderID].refCount++; }
+		bool SetVertexShaderConstant(int32_t shaderID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
 };
 
 class PixelShaderPool
@@ -81,11 +78,11 @@ class PixelShaderPool
 
 		std::vector<r_PixelShader> shaderList;
 
-		uint32_t Add(r_PixelShader newShader);
-		bool SetActive(uint32_t shaderID);
-		uint32_t GetShaderByName(const std::string &shaderName);
-		void Remove(uint32_t shaderID);
-		void AddRef(uint32_t shaderID) { shaderList[shaderID].refCount++; }
+		int32_t Add(r_PixelShader newShader);
+		bool SetActive(int32_t shaderID);
+		int32_t GetShaderByName(const std::string &shaderName);
+		void Remove(int32_t shaderID);
+		void AddRef(int32_t shaderID) { shaderList[shaderID].refCount++; }
 };
 
 struct effect_t
@@ -108,9 +105,6 @@ class EffectManager
 		~EffectManager();
 		bool SetActive(effectID_t effectID);
 		bool SetVertexShaderConstant(effectID_t effectID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
-//		bool SetMatrix(effectID_t effectID, const char* constant, R_MATRIX &matrix);
-//		bool SetFloat(effectID_t effectID, const char* constant, float n);
-//		bool SetInt(effectID_t effectID, const char* constant, int32_t n);
 		effectID_t Add(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName, class VertexDeclaration *vertexDeclaration);
 		void Remove(effectID_t effectID);
 };

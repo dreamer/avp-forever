@@ -1,6 +1,6 @@
 
-#include "fmvCutscenes.h"
-#include "textureManager.h"
+#include "FmvCutscenes.h"
+#include "TextureManager.h"
 
 extern void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha);
 

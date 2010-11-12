@@ -1,5 +1,5 @@
-#ifndef _fmvPlayback_h_
-#define _fmvPlayback_h_
+#ifndef _FmvPlayback_h_
+#define _FmvPlayback_h_
 
 #ifdef _XBOX
 	#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
@@ -12,9 +12,9 @@
 #include <theora/theora.h>
 #include <theora/theoradec.h>
 #include <vorbis/vorbisfile.h>
-#include "ringbuffer.h"
-#include "audioStreaming.h"
-#include "textureManager.h"
+#include "RingBuffer.h"
+#include "AudioStreaming.h"
+#include "TextureManager.h"
 
 enum fmvErrors
 {

@@ -2003,6 +2003,13 @@ void R_ReleaseVertexShader(r_VertexShader &vertexShader)
 		vertexShader.shader->Release();
 		vertexShader.shader = 0;
 	}
+
+	// release the constant table too
+	if (vertexShader.constantTable)
+	{
+		vertexShader.constantTable->Release();
+		vertexShader.constantTable = 0;
+	}
 }
 
 void R_ReleasePixelShader(r_PixelShader &pixelShader)
@@ -2011,6 +2018,13 @@ void R_ReleasePixelShader(r_PixelShader &pixelShader)
 	{
 		pixelShader.shader->Release();
 		pixelShader.shader = 0;
+	}
+
+	// release the constant table too
+	if (pixelShader.constantTable)
+	{
+		pixelShader.constantTable->Release();
+		pixelShader.constantTable = 0;
 	}
 }
 
@@ -2644,10 +2658,10 @@ bool InitialiseDirect3D()
 
 	d3d.effectSystem = new EffectManager;
 
-	d3d.mainEffect  = d3d.effectSystem->AddEffect("main", "vertex.vsh", "pixel.psh", d3d.mainDecl);
-	d3d.orthoEffect = d3d.effectSystem->AddEffect("ortho", "orthoVertex.vsh", "pixel.psh", d3d.orthoDecl);
-	d3d.fmvEffect   = d3d.effectSystem->AddEffect("fmv", "fmvVertex.vsh", "fmvPixel.psh", d3d.fmvDecl);
-	d3d.cloudEffect = d3d.effectSystem->AddEffect("cloud", "tallFontTextVertex.vsh", "tallFontTextPixel.psh", d3d.tallFontText);
+	d3d.mainEffect  = d3d.effectSystem->Add("main", "vertex.vsh", "pixel.psh", d3d.mainDecl);
+	d3d.orthoEffect = d3d.effectSystem->Add("ortho", "orthoVertex.vsh", "pixel.psh", d3d.orthoDecl);
+	d3d.fmvEffect   = d3d.effectSystem->Add("fmv", "fmvVertex.vsh", "fmvPixel.psh", d3d.fmvDecl);
+	d3d.cloudEffect = d3d.effectSystem->Add("cloud", "tallFontTextVertex.vsh", "tallFontTextPixel.psh", d3d.tallFontText);
 
 	// create vertex and index buffers
 	CreateVolatileResources();
@@ -2716,28 +2730,11 @@ void ReleaseDirect3D()
 	// release back-buffer copy surface, vertex buffer and index buffer
 	ReleaseVolatileResources();
 
-	// release constant tables
-//	SAFE_RELEASE(vertexConstantTable);
-//	SAFE_RELEASE(orthoConstantTable);
-//	SAFE_RELEASE(fmvConstantTable);
-//	SAFE_RELEASE(cloudConstantTable);
-
 	// release vertex declarations
 	delete d3d.mainDecl;
 	delete d3d.orthoDecl;
 	delete d3d.fmvDecl;
 	delete d3d.tallFontText;
-
-	// release pixel shaders
-//	SAFE_RELEASE(d3d.pixelShader);
-///	SAFE_RELEASE(d3d.fmvPixelShader);
-//	SAFE_RELEASE(d3d.cloudPixelShader);
-
-	// release vertex shaders
-//	SAFE_RELEASE(d3d.vertexShader);
-//	SAFE_RELEASE(d3d.fmvVertexShader);
-//	SAFE_RELEASE(d3d.orthoVertexShader);
-//	SAFE_RELEASE(d3d.cloudVertexShader);
 
 	// clean up render list classes
 	RenderListDeInit();
@@ -2971,7 +2968,7 @@ void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable)
 	CurrentRenderStates.ZWriteEnable = zWriteEnable;
 }
 
-void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode)
+void ChangeTextureAddressMode(uint32_t samplerIndex, enum TEXTURE_ADDRESS_MODE textureAddressMode)
 {
 	if (CurrentRenderStates.TextureAddressMode == textureAddressMode)
 		return;
@@ -2981,19 +2978,19 @@ void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode)
 	if (textureAddressMode == TEXTURE_WRAP)
 	{
 		// wrap texture addresses
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+		LastError = d3d.lpD3DDevice->SetSamplerState(samplerIndex, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
 		if (FAILED(LastError))
 		{
 			OutputDebugString("D3DSAMP_ADDRESSU Wrap fail\n");
 		}
 
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+		LastError = d3d.lpD3DDevice->SetSamplerState(samplerIndex, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 		if (FAILED(LastError))
 		{
 			OutputDebugString("D3DSAMP_ADDRESSV Wrap fail\n");
 		}
 
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
+		LastError = d3d.lpD3DDevice->SetSamplerState(samplerIndex, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
 		if (FAILED(LastError))
 		{
 			OutputDebugString("D3DSAMP_ADDRESSW Wrap fail\n");
@@ -3002,19 +2999,19 @@ void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode)
 	else if (textureAddressMode == TEXTURE_CLAMP)
 	{
 		// clamp texture addresses
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+		LastError = d3d.lpD3DDevice->SetSamplerState(samplerIndex, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
 		if (FAILED(LastError))
 		{
 			OutputDebugString("D3DSAMP_ADDRESSU Clamp fail\n");
 		}
 
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+		LastError = d3d.lpD3DDevice->SetSamplerState(samplerIndex, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 		if (FAILED(LastError))
 		{
 			OutputDebugString("D3DSAMP_ADDRESSV Clamp fail\n");
 		}
 
-		LastError = d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
+		LastError = d3d.lpD3DDevice->SetSamplerState(samplerIndex, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
 		if (FAILED(LastError))
 		{
 			OutputDebugString("D3DSAMP_ADDRESSW Clamp fail\n");

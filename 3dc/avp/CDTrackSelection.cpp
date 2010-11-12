@@ -24,6 +24,7 @@ List<int> LevelCDTracks[AVP_ENVIRONMENT_END_OF_LIST];
 List<int> MultiplayerCDTracks[3];
 
 static int LastTrackChosen=-1;
+static uint32_t TrackSelectCounter=0;
 
 extern "C"
 {
@@ -192,7 +193,7 @@ void LoadCDTrackList()
 	}
 
 	char* buffer;
-	int file_size;
+	uint32_t file_size;
 	unsigned long bytes_read;
 
 	//copy the file contents into a buffer
@@ -221,8 +222,6 @@ void LoadCDTrackList()
 	buffer = NULL;
 	bufferptr = NULL;
 }
-
-static unsigned int TrackSelectCounter=0;
 
 static BOOL PickCDTrack(List<int>& track_list)
 {

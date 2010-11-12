@@ -233,11 +233,14 @@ HANDLE avp_FindFirstFile(LPCTSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData)
 #endif
 }
 
-void avp_GetCommandLineArgs(char *args, int size)
+void avp_GetCommandLineArgs(char *args, uint32_t size)
 {
 	assert (args);
 	std::string commandLine = Config_GetString("[Misc]", "CommandLine", "");
-	strcpy(args, commandLine.c_str());
+
+	uint32_t copySize = min(size, commandLine.size());
+
+	strncpy(args, commandLine.c_str(), copySize);
 }
 
 void avp_MessageBox(const char* message, int type)

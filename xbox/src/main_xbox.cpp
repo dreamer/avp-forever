@@ -141,8 +141,6 @@ void exit_break_point_fucntion ()
 extern int GotMouse;
 }
 
-static char buf[100];
-
 void _cdecl main()
 {
 	char command_line[200 + 1];

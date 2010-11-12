@@ -66,16 +66,16 @@ int GlobalAmbience;
 int LightScale = ONE_FIXED;
 int DrawingAReflection;
 
-int *Global_ShapePoints;
-int **Global_ShapeItems;
-int *Global_ShapeNormals;
-int *Global_ShapeVNormals;
-int **Global_ShapeTextures;
-VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
-DISPLAYBLOCK *Global_ODB_Ptr;
-SHAPEHEADER *Global_ShapeHeaderPtr;
-EXTRAITEMDATA *Global_EID_Ptr;
-int *Global_EID_IPtr;
+int *Global_ShapePoints = 0;
+int **Global_ShapeItems = 0;
+int *Global_ShapeNormals = 0;
+int *Global_ShapeVNormals = 0;
+int **Global_ShapeTextures = 0;
+VIEWDESCRIPTORBLOCK *Global_VDB_Ptr = 0;
+DISPLAYBLOCK *Global_ODB_Ptr = 0;
+SHAPEHEADER *Global_ShapeHeaderPtr = 0;
+EXTRAITEMDATA *Global_EID_Ptr = 0;
+int *Global_EID_IPtr = 0;
 
 
 extern float CameraZoomScale;

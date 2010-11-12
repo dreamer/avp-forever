@@ -43,6 +43,8 @@ extern int SetStreamingMusicVolume(int volume);
 
 void CDDA_Start(void)
 {
+	return; // bjd - revert
+
 	/* function should complete successfully even if no disc in drive */
 	CDDAVolume = CDDA_VOLUME_DEFAULT;
 	CDPlayerVolume = CDDAVolume;

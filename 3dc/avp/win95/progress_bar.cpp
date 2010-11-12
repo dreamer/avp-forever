@@ -9,7 +9,7 @@
 #include "inline.h"
 #include "gamedef.h"
 #include "psnd.h"
-#include "textureManager.h"
+#include "TextureManager.h"
 #include "d3d_render.h"
 
 extern "C"

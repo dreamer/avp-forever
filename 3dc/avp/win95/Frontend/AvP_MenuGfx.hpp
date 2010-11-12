@@ -156,7 +156,7 @@ typedef struct
 	AVPTEXTURE		*ImagePtr;
 //	RENDERTEXTURE	menuTexture;
 
-	uint32_t	textureID;	// texture ID for textureManager.cpp system
+	uint32_t	textureID;	// texture ID for TextureManager.cpp system
 	uint32_t	Width;
 	uint32_t	Height;
 

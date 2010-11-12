@@ -22,17 +22,18 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "shaderManager.h"
+#include "ShaderManager.h"
 #include <vector>
 #include "console.h"
+#include <sstream>
 
-const int nullID = 999;
+const int32_t nullID = -1;
 
 // add an already created vertexShader_t struct to our pool.
-uint32_t VertexShaderPool::Add(r_VertexShader newShader)
+int32_t VertexShaderPool::Add(r_VertexShader newShader)
 {
 	// see if it already exists, and return the ID to it if it does
-	uint32_t shaderID = GetShaderByName(newShader.shaderName);
+	int32_t shaderID = GetShaderByName(newShader.shaderName);
 
 	if (shaderID != nullID)
 	{
@@ -43,29 +44,35 @@ uint32_t VertexShaderPool::Add(r_VertexShader newShader)
 	this->shaderList.push_back(newShader);
 
 	// it's at the end, so our ID is the last array position
-	shaderID =  this->shaderList.size() - 1;
-
-	// increase reference count
-	this->AddRef(shaderID);
+	shaderID = this->shaderList.size() - 1;
 
 	return shaderID;
 }
 
 // remove the shader at ID position passed in
-void VertexShaderPool::Remove(uint32_t shaderID)
+void VertexShaderPool::Remove(int32_t shaderID)
 {
+/*
+	std::stringstream ss;
+	ss << "about to remove vertex shader " << shaderList[shaderID].shaderName << " with id " << shaderID << " and refcount " << shaderList[shaderID].refCount << std::endl;
+	OutputDebugString(ss.str().c_str());
+*/
 	shaderList[shaderID].refCount--;
 	if (shaderList[shaderID].refCount <= 0)
 	{
+/*
+		ss.str("");
+		ss << "removing shader " << shaderList[shaderID].shaderName << std::endl;
+		OutputDebugString(ss.str().c_str());
+*/
 		R_ReleaseVertexShader(shaderList[shaderID]);
 
-		// gone now, remove entry from vector
-		this->shaderList.erase(this->shaderList.begin() + shaderID);
+		this->shaderList[shaderID].isValid = false;
 	}
 }
 
 // set the shader as active (eg SetVertexShader() in D3D)
-bool VertexShaderPool::SetActive(uint32_t shaderID)
+bool VertexShaderPool::SetActive(int32_t shaderID)
 {
 	if (this->currentSetShaderID == shaderID) // already set
 	{
@@ -84,7 +91,7 @@ bool VertexShaderPool::SetActive(uint32_t shaderID)
 // pass a shader name in and see if it exists in the list. If it does, return
 // the position ID of that shader. Otherwise, return nullID to signify it's not
 // in the list (so we can then add it)
-uint32_t VertexShaderPool::GetShaderByName(const std::string &shaderName)
+int32_t VertexShaderPool::GetShaderByName(const std::string &shaderName)
 {
 	for (uint32_t i = 0; i < this->shaderList.size(); i++)
 	{
@@ -97,33 +104,19 @@ uint32_t VertexShaderPool::GetShaderByName(const std::string &shaderName)
 	return nullID;
 }
 
-bool VertexShaderPool::SetVertexShaderConstant(uint32_t shaderID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
+bool VertexShaderPool::SetVertexShaderConstant(int32_t shaderID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
 {
 	return R_SetVertexShaderConstant(shaderList[shaderID], registerIndex, type, constantData);
 }
 
-/*
-bool VertexShaderPool::SetMatrix(uint32_t shaderID, const char* constant, R_MATRIX &matrix)
-{
-	return R_SetVertexShaderMatrix(shaderList[shaderID], constant, matrix);
-}
 
-bool VertexShaderPool::SetFloat(uint32_t shaderID, const char* constant, float n)
-{
-	return R_SetVertexShaderFloat(shaderList[shaderID], constant, n);
-}
 
-bool VertexShaderPool::SetInt(uint32_t shaderID, const char* constant, int32_t n)
-{
-	return R_SetVertexShaderInt(shaderList[shaderID], constant, n);
-}
-*/
 
 // add an already created pixelShader_t struct to our pool.
-uint32_t PixelShaderPool::Add(r_PixelShader newShader)
+int32_t PixelShaderPool::Add(r_PixelShader newShader)
 {
 	// see if it already exists, and return the ID to it if it does
-	uint32_t shaderID = GetShaderByName(newShader.shaderName);
+	int32_t shaderID = GetShaderByName(newShader.shaderName);
 
 	if (shaderID != nullID)
 	{
@@ -136,27 +129,33 @@ uint32_t PixelShaderPool::Add(r_PixelShader newShader)
 	// it's at the end, so our ID is the last array position
 	shaderID = this->shaderList.size() - 1;
 
-	// increase reference count
-	this->AddRef(shaderID);
-
 	return shaderID;
 }
 
 // remove the shader at ID position passed in
-void PixelShaderPool::Remove(uint32_t shaderID)
+void PixelShaderPool::Remove(int32_t shaderID)
 {
+/*
+	std::stringstream ss;
+	ss << "about to remove pixel shader " << shaderList[shaderID].shaderName << " with id " << shaderID << " and refcount " << shaderList[shaderID].refCount << std::endl;
+	OutputDebugString(ss.str().c_str());
+*/
 	shaderList[shaderID].refCount--;
 	if (shaderList[shaderID].refCount <= 0)
 	{
+/*
+		ss.str("");
+		ss << "removing shader " << shaderList[shaderID].shaderName << std::endl;
+		OutputDebugString(ss.str().c_str());
+*/
 		R_ReleasePixelShader(shaderList[shaderID]);
 
-		// gone now, remove entry from vector
-		this->shaderList.erase(this->shaderList.begin() + shaderID);
+		this->shaderList[shaderID].isValid = false;
 	}
 }
 
 // set the shader as active (eg SetPixelShader() in D3D)
-bool PixelShaderPool::SetActive(uint32_t shaderID)
+bool PixelShaderPool::SetActive(int32_t shaderID)
 {
 	if (this->currentSetShaderID == shaderID) // already set
 	{
@@ -175,7 +174,7 @@ bool PixelShaderPool::SetActive(uint32_t shaderID)
 // pass a shader name in and see if it exists in the list. If it does, return
 // the position ID of that shader. Otherwise, return nullID to signify it's not
 // in the list (so we can then add it)
-uint32_t PixelShaderPool::GetShaderByName(const std::string &shaderName)
+int32_t PixelShaderPool::GetShaderByName(const std::string &shaderName)
 {
 	for (uint32_t i = 0; i < this->shaderList.size(); i++)
 	{
@@ -187,6 +186,16 @@ uint32_t PixelShaderPool::GetShaderByName(const std::string &shaderName)
 
 	return nullID;
 }
+
+
+
+
+
+
+
+
+
+
 
 EffectManager::EffectManager()
 {
@@ -213,29 +222,6 @@ bool EffectManager::SetVertexShaderConstant(effectID_t effectID, uint32_t regist
 {
 	return vsPool.SetVertexShaderConstant(effectList[effectID].vertexShaderID, registerIndex, type, constantData);
 }
-
-/*
-bool EffectManager::SetMatrix(effectID_t effectID, const char* constant, R_MATRIX &matrix)
-{
-	// just call another SetMatrix function within the vertex shader class
-	// until I find a tidier way to do this
-	return vsPool.SetMatrix(effectList[effectID].vertexShaderID, constant, matrix);
-}
-
-bool EffectManager::SetFloat(effectID_t effectID, const char* constant, float n)
-{
-	// just call another SetMatrix function within the vertex shader class
-	// until I find a tidier way to do this
-	return vsPool.SetFloat(effectList[effectID].vertexShaderID, constant, n);
-}
-
-bool EffectManager::SetInt(effectID_t effectID, const char* constant, int32_t n)
-{
-	// just call another SetInt function within the vertex shader class
-	// until I find a tidier way to do this
-	return vsPool.SetInt(effectList[effectID].vertexShaderID, constant, n);
-}
-*/
 
 void EffectManager::Remove(effectID_t effectID)
 {
@@ -273,14 +259,12 @@ effectID_t EffectManager::Add(const std::string &effectName, const std::string &
 	// see if the vertex shader is already loaded.
 	vertexID = vsPool.GetShaderByName(vertexShaderName);
 
-	// see if the pixel shader is already loaded.
-	pixelID = psPool.GetShaderByName(pixelShaderName);
-
 	// load a vertex shader if required
 	if (vertexID == nullID) // we have no slot or we don't already exist
 	{
 		r_VertexShader newVertexShader;
 		newVertexShader.isValid = false;
+		newVertexShader.refCount = 0;
 
 		if (R_CreateVertexShader(vertexShaderName, newVertexShader, vertexDeclaration))
 		{
@@ -292,11 +276,15 @@ effectID_t EffectManager::Add(const std::string &effectName, const std::string &
 		}
 	}
 
+	// see if the pixel shader is already loaded.
+	pixelID = psPool.GetShaderByName(pixelShaderName);
+
 	// load the pixel shader if required
 	if (pixelID == nullID) // we have no slot or we don't already exist
 	{
 		r_PixelShader newPixelShader;
 		newPixelShader.isValid = false;
+		newPixelShader.refCount = 0;
 
 		if (R_CreatePixelShader(pixelShaderName, newPixelShader))
 		{

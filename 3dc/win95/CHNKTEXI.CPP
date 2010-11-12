@@ -10,7 +10,7 @@
 #include "chunkpal.hpp"
 #include "renderer.h"
 
-#include "textureManager.h"
+#include "TextureManager.h"
 
 #ifndef CL_SUPPORT_FASTFILE
 	#error "Please #define CL_SUPPORT_FASTFILE to 0 or 1 in projload.hpp"
