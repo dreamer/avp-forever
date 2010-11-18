@@ -34,12 +34,14 @@ class IndexBuffer
 		// members
 		r_IndexBuffer	indexBuffer;
 		uint32_t		capacity; // number of indicies we can hold
+		uint32_t		sizeInBytes;
 		enum R_USAGE	usage;
 		bool			isLocked;
 
 		// constructor
 		IndexBuffer():
 			capacity(0),
+			sizeInBytes(0),
 			usage(USAGE_DYNAMIC),
 			isLocked(false)
 		{

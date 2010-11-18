@@ -62,24 +62,24 @@ bool R_EndScene();
 // vertex buffer functions
 bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer);
 bool R_ReleaseVertexBuffer(r_VertexBuffer &vertexBuffer);
-bool R_LockVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage);
-bool R_UnlockVertexBuffer(r_VertexBuffer &vertexBuffer);
+bool R_LockVertexBuffer(class VertexBuffer &vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage);
+bool R_UnlockVertexBuffer(class VertexBuffer &vertexBuffer);
 bool R_SetVertexBuffer(class VertexBuffer &vertexBuffer);
 bool R_DrawPrimitive(uint32_t numPrimitives);
 bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives);
 
 // index buffer functions
-bool R_CreateIndexBuffer(uint32_t size, uint32_t usage, r_IndexBuffer &indexBuffer);
+bool R_CreateIndexBuffer(class IndexBuffer &indexBuffer);
 bool R_ReleaseIndexBuffer(r_IndexBuffer &indexBuffer);
-bool R_LockIndexBuffer(r_IndexBuffer &indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage);
-bool R_UnlockIndexBuffer(r_IndexBuffer &indexBuffer);
-bool R_SetIndexBuffer(r_IndexBuffer &indexBuffer);
+bool R_LockIndexBuffer(class IndexBuffer &indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage);
+bool R_UnlockIndexBuffer(class IndexBuffer &indexBuffer);
+bool R_SetIndexBuffer(class IndexBuffer &indexBuffer);
 
 // texture functions
 bool R_SetTexture(uint32_t stage, uint32_t textureID);
 bool R_LockTexture(r_Texture texture, uint8_t **data, uint32_t *pitch, enum TextureLock lockType);
 bool R_UnlockTexture(r_Texture texture);
-bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum TextureUsage usageType, Texture &texture);
+bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usageType, Texture &texture);
 bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usageType, Texture &texture);
 bool R_CreateTextureFromFile(const std::string &fileName, Texture &texture);
 void R_ReleaseTexture(r_Texture &texture);
@@ -110,7 +110,7 @@ std::string& R_GetVideoModeDescription();
 void R_SetCurrentVideoMode();
 
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
-void ChangeTextureAddressMode(enum TEXTURE_ADDRESS_MODE textureAddressMode);
+void ChangeTextureAddressMode(uint32_t samplerIndex, enum TEXTURE_ADDRESS_MODE textureAddressMode);
 void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
 void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable);
 
@@ -264,6 +264,7 @@ void ReleaseD3DTexture		(r_Texture *d3dTexture);
 void SetTransforms();
 
 extern uint32_t NO_TEXTURE;
+extern uint32_t MISSING_TEXTURE;
 
 #define RGB_MAKE	D3DCOLOR_XRGB
 

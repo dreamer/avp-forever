@@ -26,7 +26,7 @@ char *GetVideoModeDescription3()
 
 	static char buf[bufferSize + 1]; // always have room for a null character
 
-	uint32_t sizeofText = R_GetVideoModeDescription().size();
+	size_t sizeofText = R_GetVideoModeDescription().size();
 
 	// ensure we don't overflow our char buffer
 	if (sizeofText > bufferSize)

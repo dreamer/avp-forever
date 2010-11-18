@@ -168,6 +168,7 @@ const uint32_t MAX_INDICES = 9216;
 
 static HRESULT LastError;
 uint32_t NO_TEXTURE;
+uint32_t MISSING_TEXTURE;
 
 // keep track of set render states
 static bool	D3DAlphaBlendEnable;
@@ -405,7 +406,7 @@ bool R_CreateIndexBuffer(class IndexBuffer &indexBuffer)
 	}
 	
 	// create index buffer
-	LastError = d3d.lpD3DDevice->CreateIndexBuffer(indexBuffer.capacity * 3 * sizeof(WORD), ibUsage, D3DFMT_INDEX16, ibPool, &indexBuffer.indexBuffer.indexBuffer, NULL);
+	LastError = d3d.lpD3DDevice->CreateIndexBuffer(indexBuffer.sizeInBytes, ibUsage, D3DFMT_INDEX16, ibPool, &indexBuffer.indexBuffer.indexBuffer, NULL);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't create index buffer");
@@ -527,7 +528,7 @@ bool R_DrawPrimitive(uint32_t numPrimitives)
 	return true;
 }
 
-bool R_LockVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage)
+bool R_LockVertexBuffer(class VertexBuffer &vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage)
 {
 	DWORD vbFlags = 0;
 	if (usage == USAGE_DYNAMIC)
@@ -535,13 +536,15 @@ bool R_LockVertexBuffer(r_VertexBuffer &vertexBuffer, uint32_t offsetToLock, uin
 		vbFlags = D3DLOCK_DISCARD;
 	}
 
-	LastError = vertexBuffer.vertexBuffer->Lock(offsetToLock, sizeToLock, data, vbFlags);
+	LastError = vertexBuffer.vertexBuffer.vertexBuffer->Lock(offsetToLock, sizeToLock, data, vbFlags);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't vertex index buffer");
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
+
+	vertexBuffer.isLocked = true;
 
 	return true;
 }
@@ -565,7 +568,7 @@ bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t num
 	return true;
 }
 
-bool R_LockIndexBuffer(r_IndexBuffer &indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage)
+bool R_LockIndexBuffer(class IndexBuffer &indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage)
 {
 	DWORD ibFlags = 0;
 	if (usage == USAGE_DYNAMIC)
@@ -573,7 +576,7 @@ bool R_LockIndexBuffer(r_IndexBuffer &indexBuffer, uint32_t offsetToLock, uint32
 		ibFlags = D3DLOCK_DISCARD;
 	}
 
-	LastError = indexBuffer.indexBuffer->Lock(offsetToLock, sizeToLock, (void**)data, ibFlags);
+	LastError = indexBuffer.indexBuffer.indexBuffer->Lock(offsetToLock, sizeToLock, (void**)data, ibFlags);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't lock index buffer");
@@ -610,9 +613,9 @@ bool R_SetIndexBuffer(class IndexBuffer &indexBuffer)
 	return true;
 }
 
-bool R_UnlockVertexBuffer(r_VertexBuffer &vertexBuffer)
+bool R_UnlockVertexBuffer(class VertexBuffer &vertexBuffer)
 {
-	LastError = vertexBuffer.vertexBuffer->Unlock();
+	LastError = vertexBuffer.vertexBuffer.vertexBuffer->Unlock();
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't unlock vertex buffer");
@@ -620,18 +623,22 @@ bool R_UnlockVertexBuffer(r_VertexBuffer &vertexBuffer)
 		return false;
 	}
 
+	vertexBuffer.isLocked = false;
+
 	return true;
 }
 
-bool R_UnlockIndexBuffer(r_IndexBuffer &indexBuffer)
+bool R_UnlockIndexBuffer(class IndexBuffer &indexBuffer)
 {
-	LastError = indexBuffer.indexBuffer->Unlock();
+	LastError = indexBuffer.indexBuffer.indexBuffer->Unlock();
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't unlock index buffer");
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
+
+	indexBuffer.isLocked = false;
 
 	return true;
 }
@@ -640,26 +647,26 @@ bool CreateVolatileResources()
 {
 	Tex_ReloadDynamicTextures();
 
-	// test vertex buffer
-	d3d.particleVB = new VertexBuffer;
-	d3d.particleVB->Create(MAX_VERTEXES*6, FVF_LVERTEX, USAGE_DYNAMIC);
-
-	d3d.particleIB = new IndexBuffer;
-	d3d.particleIB->Create(MAX_INDICES*6, USAGE_DYNAMIC);
-
-	// test main
+	// main
 	d3d.mainVB = new VertexBuffer;
 	d3d.mainVB->Create(MAX_VERTEXES*5, FVF_LVERTEX, USAGE_DYNAMIC);
 
 	d3d.mainIB = new IndexBuffer;
-	d3d.mainIB->Create(MAX_INDICES*5, USAGE_DYNAMIC);
+	d3d.mainIB->Create((MAX_VERTEXES*5) * 3, USAGE_DYNAMIC);
 
-	// ortho test
+	// particle vertex buffer
+	d3d.particleVB = new VertexBuffer;
+	d3d.particleVB->Create(MAX_VERTEXES*6, FVF_LVERTEX, USAGE_DYNAMIC);
+
+	d3d.particleIB = new IndexBuffer;
+	d3d.particleIB->Create((MAX_VERTEXES*6) * 3, USAGE_DYNAMIC);
+
+	// orthographic projected quads
 	d3d.orthoVB = new VertexBuffer;
-	d3d.orthoIB = new IndexBuffer;
-
 	d3d.orthoVB->Create(MAX_VERTEXES, FVF_ORTHO, USAGE_DYNAMIC);
-	d3d.orthoIB->Create(MAX_INDICES, USAGE_DYNAMIC);
+
+	d3d.orthoIB = new IndexBuffer;
+	d3d.orthoIB->Create(MAX_VERTEXES * 3, USAGE_DYNAMIC);
 
 	SetRenderStateDefaults();
 
@@ -1072,71 +1079,6 @@ r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	return destTexture;
 }
 
-/*
-static bool CreateVertexDeclaration(const D3DVERTEXELEMENT9* pVertexElements, LPDIRECT3DVERTEXDECLARATION9 *vertexDeclaration)
-{
-	LastError = d3d.lpD3DDevice->CreateVertexDeclaration(pVertexElements, vertexDeclaration);
-	if (FAILED(LastError))
-	{
-		Con_PrintError("Could not create vertex declaration");
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	return true;
-}
-*/
-
-/*
-static bool CreateVertexShader(const std::string &fileName, r_VertexShader &vertexShader)
-{
-	LPD3DXBUFFER pErrors = NULL;
-	LPD3DXBUFFER pCode = NULL;
-	std::string actualPath = shaderPath + fileName;
-
-	// test that the path to the file is valid first (d3dx doesn't give a specific error message for this)
-	std::ifstream fileOpenTest(actualPath.c_str(), std::ifstream::in | std::ifstream::binary);
-	if (!fileOpenTest.good())
-	{
-		LogErrorString("Can't open vertex shader file " + actualPath, __LINE__, __FILE__);
-		return false;
-	}
-	// close the file
-	fileOpenTest.close();
-
-	// set up vertex shader
-	LastError = D3DXCompileShaderFromFile(actualPath.c_str(), //filepath
-						NULL,            // macro's
-						NULL,            // includes
-						"vs_main",       // main function
-						"vs_2_0",        // shader profile
-						0,               // flags
-						&pCode,          // compiled operations
-						&pErrors,        // errors
-						&vertexShader.constantTable); // constants
-
-	if (FAILED(LastError))
-	{
-		OutputDebugString(DXGetErrorString(LastError));
-		OutputDebugString(DXGetErrorDescription(LastError));
-
-		if (pErrors)
-		{
-			// shader didn't compile for some reason
-			OutputDebugString((const char*)pErrors->GetBufferPointer());
-			pErrors->Release();
-		}
-
-		return false;
-	}
-
-	d3d.lpD3DDevice->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), &vertexShader.shader);
-	pCode->Release();
-
-	return true;
-}
-*/
-
 static BYTE VD_USAGEtoD3DDECLUSAGE(VD_USAGE usage)
 {
 	BYTE d3dUsage;
@@ -1530,34 +1472,6 @@ bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIn
 	return true;
 }
 
-/*
-bool R_SetVertexShaderFloat(r_VertexShader &vertexShader, const char* constant, float n)
-{
-	LastError = vertexShader.constantTable->SetFloat(d3d.lpD3DDevice, constant, n);
-	if (FAILED(LastError))
-	{
-		Con_PrintError("Can't set float for vertex shader " + vertexShader.shaderName);
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	return true;
-}
-
-bool R_SetVertexShaderInt(r_VertexShader &vertexShader, const char* constant, int32_t n)
-{
-	LastError = vertexShader.constantTable->SetInt(d3d.lpD3DDevice, constant, n);
-	if (FAILED(LastError))
-	{
-		Con_PrintError("Can't set int for vertex shader " + vertexShader.shaderName);
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	return true;
-}
-*/
-
 bool R_SetPixelShader(r_PixelShader &pixelShader)
 {
 	LastError = d3d.lpD3DDevice->SetPixelShader(pixelShader.shader);
@@ -1649,7 +1563,7 @@ r_Texture CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t 
 	image.Width = tex->width;
 	image.Height = tex->height;
 	image.MipLevels = 1;
-	image.Depth = D3DFMT_A8R8G8B8;
+	image.Format = D3DFMT_A8R8G8B8;
 
 	D3DPOOL poolType = D3DPOOL_MANAGED;
 
@@ -1718,6 +1632,9 @@ bool R_CreateTextureFromFile(const std::string &fileName, Texture &texture)
 {
 	D3DXIMAGE_INFO imageInfo;
 
+	// ensure this will be NULL unless we successfully create it
+	texture.texture = NULL;
+
 	LastError = D3DXCreateTextureFromFileEx(d3d.lpD3DDevice,
 		fileName.c_str(),
 		D3DX_DEFAULT,			// width
@@ -1743,6 +1660,7 @@ bool R_CreateTextureFromFile(const std::string &fileName, Texture &texture)
 
 	texture.width = imageInfo.Width;
 	texture.height = imageInfo.Height;
+	texture.bitsPerPixel = 32; // this should be ok?
 	texture.usage = TextureUsage_Normal;
 
 	return true;
@@ -1753,6 +1671,9 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 	D3DPOOL texturePool;
 	uint32_t textureUsage;
 	LPDIRECT3DTEXTURE9 d3dTexture = NULL;
+
+	// ensure this will be NULL unless we successfully create it
+	texture.texture = NULL;
 
 	switch (usageType)
 	{
@@ -1815,7 +1736,7 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 	image.Width = AvPTexture.width;
 	image.Height = AvPTexture.height;
 	image.MipLevels = 1;
-	image.Depth = D3DFMT_A8R8G8B8;
+	image.Format = D3DFMT_A8R8G8B8;
 
 	if (FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
 		buffer,
@@ -1850,12 +1771,15 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 	return true;
 }
 
-bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum TextureUsage usageType, Texture &texture)
+bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usageType, Texture &texture)
 {
 	D3DPOOL texturePool;
 	D3DFORMAT textureFormat;
 	uint32_t textureUsage;
 	LPDIRECT3DTEXTURE9 d3dTexture = NULL;
+
+	// ensure this will be NULL unless we successfully create it
+	texture.texture = NULL;
 
 	switch (usageType)
 	{
@@ -1877,7 +1801,7 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum Texture
 		}
 	}
 
-	switch (bpp)
+	switch (bitsPerPixel)
 	{
 		case 32:
 		{
@@ -1894,6 +1818,11 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum Texture
 			textureFormat = D3DFMT_L8;
 			break;
 		}
+		default:
+		{
+			Con_PrintError("Invalid bitsPerPixel value in R_CreateTexture");
+			return false;
+		}
 	}
 
 	// create the d3d9 texture
@@ -1904,7 +1833,7 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum Texture
 	}
 
 	// set texture struct members
-	texture.bitsPerPixel = bpp;
+	texture.bitsPerPixel = bitsPerPixel;
 	texture.width = width;
 	texture.height = height;
 	texture.usage = usageType;
@@ -1912,80 +1841,6 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bpp, enum Texture
 
 	return true;
 }
-
-/*
-r_Texture CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poolType)
-{
-	r_Texture destTexture = NULL;
-
-	// fill tga header
-	TgaHeader.idlength = 0;
-	TgaHeader.x_origin = tex->width;
-	TgaHeader.y_origin = tex->height;
-	TgaHeader.colourmapdepth	= 0;
-	TgaHeader.colourmaplength	= 0;
-	TgaHeader.colourmaporigin	= 0;
-	TgaHeader.colourmaptype		= 0;
-	TgaHeader.datatypecode		= 2;		// RGB
-	TgaHeader.bitsperpixel		= 32;
-	TgaHeader.imagedescriptor	= 0x20;		// set origin to top left
-	TgaHeader.height = tex->height;
-	TgaHeader.width = tex->width;
-
-	// size of raw image data
-	uint32_t imageSize = tex->height * tex->width * sizeof(uint32_t);
-
-	// create new buffer for header and image data
-	uint8_t *buffer = new uint8_t[sizeof(TGA_HEADER) + imageSize];
-
-	// copy header and image data to buffer
-	memcpy(buffer, &TgaHeader, sizeof(TGA_HEADER));
-
-	uint8_t *imageData = buffer + sizeof(TGA_HEADER);
-
-	// loop, converting RGB to BGR for D3DX function
-	for (uint32_t i = 0; i < imageSize; i+=4)
-	{
-		// ARGB
-		// BGR
-		imageData[i+2] = tex->buffer[i];
-		imageData[i+1] = tex->buffer[i+1];
-		imageData[i]   = tex->buffer[i+2];
-		imageData[i+3] = tex->buffer[i+3];
-	}
-
-	D3DXIMAGE_INFO image;
-	image.Depth = 32;
-	image.Width = tex->width;
-	image.Height = tex->height;
-	image.MipLevels = 1;
-	image.Depth = D3DFMT_A8R8G8B8;
-
-	if (FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
-		buffer,
-		sizeof(TGA_HEADER) + imageSize,
-		tex->width,
-		tex->height,
-		1, // mips
-		usage,
-		D3DFMT_A8R8G8B8,
-		poolType,
-		D3DX_FILTER_NONE,
-		D3DX_FILTER_NONE,
-		0,
-		&image,
-		0,
-		&destTexture)))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		delete[] buffer;
-		return NULL;
-	}
-
-	delete[] buffer;
-	return destTexture;
-}
-*/
 
 void R_ReleaseTexture(r_Texture &texture)
 {
@@ -2582,7 +2437,7 @@ bool InitialiseDirect3D()
 	// save a copy of the presentation parameters for use later (device reset, resolution/depth change)
 	d3d.d3dpp = d3dpp;
 
-	// set field of view (this needs to be set differently for alien but 75 seems ok for marine and predator
+	// set field of view (this needs to be set differently for alien but 77 seems ok for marine and predator
 	d3d.fieldOfView = 77;
 
 	SetTransforms();
@@ -2620,42 +2475,74 @@ bool InitialiseDirect3D()
 	d3d.tallFontText->Create();
 
 	r_Texture whiteTexture;
+	r_Texture missingTexture;
+
+	// create a hot pink texture to use when a texture resource can't be loaded
+	{
+		LastError = d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_X8R8G8B8, D3DPOOL_MANAGED, &missingTexture, NULL);
+		if (FAILED(LastError))
+		{
+			Con_PrintError("Could not create missing texture signifying texture");
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+
+		D3DLOCKED_RECT lock;
+		LastError = missingTexture->LockRect(0, &lock, NULL, 0);
+		if (FAILED(LastError))
+		{
+			Con_PrintError("Could not lock missing texture signifying texture");
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+		else
+		{
+			// set pixel to hot pink
+			//memset(lock.pBits, 255, lock.Pitch);
+			(*(reinterpret_cast<uint32_t*>(lock.pBits))) = D3DCOLOR_XRGB(255, 0, 255);
+
+			missingTexture->UnlockRect(0);
+
+			// should we just add it even if it fails?
+			MISSING_TEXTURE = Tex_AddTexture("missing", missingTexture, 1, 1, 32, TextureUsage_Normal);
+		}
+	}
 
 	// create a 1x1 resolution white texture to set to shader for sampling when we don't want to texture an object (eg what was NULL texture in fixed function pipeline)
-	LastError = d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &whiteTexture, NULL);
-	if (FAILED(LastError))
 	{
-		Con_PrintError("Could not create white texture for shader sampling");
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
+		LastError = d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &whiteTexture, NULL);
+		if (FAILED(LastError))
+		{
+			Con_PrintError("Could not create white texture for shader sampling");
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
 
-	D3DLOCKED_RECT lock;
-	LastError = whiteTexture->LockRect(0, &lock, NULL, 0);
-	if (FAILED(LastError))
-	{
-		Con_PrintError("Could not lock white texture for shader sampling");
-		LogDxError(LastError, __LINE__, __FILE__);
-	}
-	else
-	{
-		// set pixel to white
-		memset(lock.pBits, 255, lock.Pitch);
+		D3DLOCKED_RECT lock;
+		LastError = whiteTexture->LockRect(0, &lock, NULL, 0);
+		if (FAILED(LastError))
+		{
+			Con_PrintError("Could not lock white texture for shader sampling");
+			LogDxError(LastError, __LINE__, __FILE__);
+		}
+		else
+		{
+			// set pixel to white
+			memset(lock.pBits, 255, lock.Pitch);
 
-		whiteTexture->UnlockRect(0);
+			whiteTexture->UnlockRect(0);
 
-		// should we just add it even if it fails?
-		NO_TEXTURE = Tex_AddTexture("white", whiteTexture, 1, 1);
+			// should we just add it even if it fails?
+			NO_TEXTURE = Tex_AddTexture("white", whiteTexture, 1, 1, 8, TextureUsage_Normal);
+		}
 	}
 
 	setTextureArray.resize(MAX_TEXTURE_STAGES);
-
+/*
 	// set all texture stages to sample the white texture
 	for (uint32_t i = 0; i < MAX_TEXTURE_STAGES; i++)
 	{
 		setTextureArray[i] = NO_TEXTURE;
 		d3d.lpD3DDevice->SetTexture(i, Tex_GetTexture(NO_TEXTURE));
 	}
-
+*/
 	d3d.effectSystem = new EffectManager;
 
 	d3d.mainEffect  = d3d.effectSystem->Add("main", "vertex.vsh", "pixel.psh", d3d.mainDecl);

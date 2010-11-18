@@ -63,9 +63,9 @@ uint32_t vb = 0;
 static uint32_t orthoVBOffset = 0;
 static uint32_t NumberOfRenderedTriangles = 0;
 
-RenderList *particleList;
-RenderList *mainList;
-RenderList *orthoList;
+RenderList *particleList = 0;
+RenderList *mainList = 0;
+RenderList *orthoList = 0;
 
 bool UnlockExecuteBufferAndPrepareForUse();
 bool ExecuteBuffer();
@@ -82,8 +82,8 @@ void RenderListInit()
 {
 	// new, test particle list
 	particleList = new RenderList(200);
-	mainList = new RenderList(800);
-	orthoList = new RenderList(400);
+	mainList = new RenderList(400);
+	orthoList = new RenderList(200);
 }
 
 void RenderListDeInit()
@@ -301,6 +301,7 @@ bool ExecuteBuffer()
 		matProjection._44 = 0.0f;
 	}
 
+	if (mainList->GetSize())
 	{
 		// set vertex declaration
 		d3d.mainDecl->Set();
@@ -322,6 +323,7 @@ bool ExecuteBuffer()
 	}
 
 	// render any particles
+	if (particleList->GetSize())
 	{
 		// set the particle VB and IBs as active
 		d3d.particleVB->Set();
@@ -338,6 +340,7 @@ bool ExecuteBuffer()
 	}
 
 	// render any orthographic quads
+	if (orthoList->GetSize())
 	{
 		d3d.orthoVB->Set();
 		d3d.orthoIB->Set();
@@ -424,6 +427,11 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWid
 
 void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures, uint32_t numTextures)
 {
+
+#ifdef _XBOX
+	return;
+#endif
+
 	// offset the video vertically in the centre of the screen
 	uint32_t topX = (640 - frameWidth) / 2;
 	uint32_t topY = (480 - frameHeight) / 2;
@@ -2655,7 +2663,10 @@ void ThisFramesRenderingHasFinished(void)
 	ExecuteBuffer();
 	R_EndScene();
 
-#if 0 // output how much memory is free
+	Tex_CheckMemoryUsage();
+
+#ifdef _XBOX
+#if 1 // output how much memory is free
 	#define MB	(1024*1024)
 	MEMORYSTATUS stat;
 	char buf[100];
@@ -2670,15 +2681,15 @@ void ThisFramesRenderingHasFinished(void)
 
 	if (stat.dwAvailPhys != lastMem)
 	{
+		sprintf(buf, "%4d  free bytes of physical memory.\n", stat.dwAvailPhys);
+		OutputDebugString( buf );
 
-	sprintf(buf, "%4d  free bytes of physical memory.\n", stat.dwAvailPhys);
-	OutputDebugString( buf );
+		sprintf(buf, "%4d  free MB of physical memory.\n", stat.dwAvailPhys / MB );
+		OutputDebugString( buf );
 
-	sprintf(buf, "%4d  free MB of physical memory.\n", stat.dwAvailPhys / MB );
-	OutputDebugString( buf );
-
-	lastMem = stat.dwAvailPhys;
+		lastMem = stat.dwAvailPhys;
 	}
+#endif
 #endif
 
  	/* KJL 11:46:56 01/16/97 - kill off any lights which are fated to be removed */

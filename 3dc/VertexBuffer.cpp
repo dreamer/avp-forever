@@ -38,12 +38,12 @@ bool VertexBuffer::Set()
 
 bool VertexBuffer::Lock(void **data)
 {
-	return R_LockVertexBuffer(this->vertexBuffer, 0, 0, data, this->usage);
+	return R_LockVertexBuffer(*this, 0, 0, data, this->usage);
 }
 
 bool VertexBuffer::Unlock()
 {
-	return R_UnlockVertexBuffer(this->vertexBuffer);
+	return R_UnlockVertexBuffer(*this);
 }
 
 bool VertexBuffer::Release()

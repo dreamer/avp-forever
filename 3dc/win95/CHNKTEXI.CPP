@@ -651,7 +651,8 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 	if (!CL_GetImageFileName(szBuf, sizeof szBuf/sizeof szBuf[0], pszFileName, fFlagsEtc))
 	{
 		db_log1("CL_LoadImageOnce(): ERROR: unable to determine path of file");
-		return GEI_NOTLOADED;
+//		return GEI_NOTLOADED;
+		return MISSING_TEXTURE;
 	}
 
 	db_logf4(("\tLoading '%s'",szBuf));
@@ -745,7 +746,8 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 				else
 				{
 					db_log1("CL_LoadImageOnce(): ERROR copying data to texture");
-					return GEI_NOTLOADED;
+//					return GEI_NOTLOADED;
+					return MISSING_TEXTURE;
 				}
 			}
 			else
@@ -808,7 +810,8 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 				else
 				{
 					db_log1("CL_LoadImageOnce(): ERROR copying data to texture");
-					return GEI_NOTLOADED;
+//					return GEI_NOTLOADED;
+					return MISSING_TEXTURE;
 				}
 				#elif !CL_SUPPORT_FASTFILE
 					#error "CL_SUPPORTONLY_FASTFILE set but CL_SUPPORT_FASTFILE not set"
@@ -818,6 +821,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 		}
 		default:
 			db_log1("CL_LoadImageOnce(): ERROR: Invalid destination surface specification");
-			return GEI_NOTLOADED;
+//			return GEI_NOTLOADED;
+			return MISSING_TEXTURE;
 	}
 }

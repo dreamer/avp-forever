@@ -306,7 +306,7 @@ static void LoadMenuFont(void)
 
 	// we're going to try create a square texture
 	r_Texture texture = CreateD3DTallFontTexture(image);
-	gfxPtr->textureID = Tex_AddTexture(buffer, texture, image->width, image->height);
+	gfxPtr->textureID = Tex_AddTexture(buffer, texture, image->width, image->height, 32, TextureUsage_Normal);
 }
 
 static void UnloadMenuFont(void)
@@ -970,7 +970,7 @@ Determine area used by text , so we can draw it centrally
 	if (output_y) *output_y=sy;
 }
 
-void LoadTest()
+void LoadAllMenuTextures()
 {
 	AVPMENUGFX_CLOUDY = CL_LoadImageOnce("Menus\\fractal.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
@@ -1184,7 +1184,7 @@ extern void LoadAllAvPMenuGfx(void)
 {
 	int i = 0;
 
-	LoadTest();
+	LoadAllMenuTextures();
 	LoadMenuFont();
 	CalculateWidthsOfAAFont();
 
@@ -1260,6 +1260,69 @@ extern void InitialiseMenuGfx(void)
 
 extern void ReleaseAllAvPMenuGfx(void)
 {
+	// sigh..find a better way to do this..
+	Tex_Release(AVPMENUGFX_CLOUDY);
+	Tex_Release(AVPMENUGFX_SMALL_FONT);
+	Tex_Release(AVPMENUGFX_COPYRIGHT_SCREEN);
+	Tex_Release(AVPMENUGFX_PRESENTS);
+	Tex_Release(AVPMENUGFX_AREBELLIONGAME);
+	Tex_Release(AVPMENUGFX_ALIENSVPREDATOR);
+	Tex_Release(AVPMENUGFX_SLIDERBAR);
+	Tex_Release(AVPMENUGFX_SLIDER);
+	Tex_Release(AVPMENUGFX_BACKDROP);
+	Tex_Release(AVPMENUGFX_ALIENS_LOGO);
+	Tex_Release(AVPMENUGFX_ALIEN_LOGO);
+	Tex_Release(AVPMENUGFX_MARINE_LOGO);
+	Tex_Release(AVPMENUGFX_PREDATOR_LOGO);
+	Tex_Release(AVPMENUGFX_GLOWY_LEFT);
+	Tex_Release(AVPMENUGFX_GLOWY_MIDDLE);
+	Tex_Release(AVPMENUGFX_GLOWY_RIGHT);
+	Tex_Release(AVPMENUGFX_MARINE_EPISODE1);
+	Tex_Release(AVPMENUGFX_MARINE_EPISODE2);
+	Tex_Release(AVPMENUGFX_MARINE_EPISODE3);
+	Tex_Release(AVPMENUGFX_MARINE_EPISODE4);
+	Tex_Release(AVPMENUGFX_MARINE_EPISODE5);
+	Tex_Release(AVPMENUGFX_MARINE_EPISODE6);
+	Tex_Release(AVPMENUGFX_MARINE_EPISODE7);
+	Tex_Release(AVPMENUGFX_MARINE_EPISODE8);
+	Tex_Release(AVPMENUGFX_MARINE_EPISODE9);
+	Tex_Release(AVPMENUGFX_MARINE_EPISODE10);
+	Tex_Release(AVPMENUGFX_MARINE_EPISODE11);
+	Tex_Release(AVPMENUGFX_PREDATOR_EPISODE1);
+	Tex_Release(AVPMENUGFX_PREDATOR_EPISODE2);
+	Tex_Release(AVPMENUGFX_PREDATOR_EPISODE3);
+	Tex_Release(AVPMENUGFX_PREDATOR_EPISODE4);
+	Tex_Release(AVPMENUGFX_PREDATOR_EPISODE5);
+	Tex_Release(AVPMENUGFX_PREDATOR_EPISODE6);
+	Tex_Release(AVPMENUGFX_PREDATOR_EPISODE7);
+	Tex_Release(AVPMENUGFX_PREDATOR_EPISODE8);
+	Tex_Release(AVPMENUGFX_PREDATOR_EPISODE9);
+	Tex_Release(AVPMENUGFX_PREDATOR_EPISODE10);
+	Tex_Release(AVPMENUGFX_PREDATOR_EPISODE11);
+	Tex_Release(AVPMENUGFX_ALIEN_EPISODE1);
+	Tex_Release(AVPMENUGFX_ALIEN_EPISODE2);
+	Tex_Release(AVPMENUGFX_ALIEN_EPISODE3);
+	Tex_Release(AVPMENUGFX_ALIEN_EPISODE4);
+	Tex_Release(AVPMENUGFX_ALIEN_EPISODE5);
+	Tex_Release(AVPMENUGFX_ALIEN_EPISODE6);
+	Tex_Release(AVPMENUGFX_ALIEN_EPISODE7);
+	Tex_Release(AVPMENUGFX_ALIEN_EPISODE8);
+	Tex_Release(AVPMENUGFX_ALIEN_EPISODE9);
+	Tex_Release(AVPMENUGFX_ALIEN_EPISODE10);
+	Tex_Release(AVPMENUGFX_WINNER_SCREEN);
+	Tex_Release(AVPMENUGFX_SPLASH_SCREEN1);
+	Tex_Release(AVPMENUGFX_SPLASH_SCREEN2);
+	Tex_Release(AVPMENUGFX_SPLASH_SCREEN3);
+	Tex_Release(AVPMENUGFX_SPLASH_SCREEN4);
+	Tex_Release(AVPMENUGFX_SPLASH_SCREEN5);
+
+/*
+	for (int i = AVPMENUGFX_CLOUDY; i < AVPMENUGFX_SPLASH_SCREEN5; i++)
+	{
+		if (i == -1) return;
+		Tex_Release(i);
+	}
+*/
 #if 0 // bjd - texture test
 	int i=0;
 	while(i<MAX_NO_OF_AVPMENUGFXS)

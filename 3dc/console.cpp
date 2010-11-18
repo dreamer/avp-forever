@@ -117,7 +117,6 @@ void Con_AddCommand(char *command, funcPointer function)
 
 void Con_Init()
 {
-//	console.isActive = false;
 	console.xPos = 0;
 	console.yPos = 0;
 	console.width = 640;

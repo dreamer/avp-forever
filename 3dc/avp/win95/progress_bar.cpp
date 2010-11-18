@@ -93,7 +93,7 @@ void Start_Progress_Bar()
 		if (LoadingBarEmpty)
 		{
 			LoadingBarEmptyTexture = CreateD3DTexturePadded(LoadingBarEmpty, &emptybarWidth, &emptybarHeight);
-			emptyTextureID = Tex_AddTexture(Loading_Bar_Empty_Image_Name, LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height);
+			emptyTextureID = Tex_AddTexture(Loading_Bar_Empty_Image_Name, LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height, 32, TextureUsage_Normal);
 		}
 	}
 	{
@@ -117,7 +117,7 @@ void Start_Progress_Bar()
 		if (LoadingBarFull)
 		{
 			LoadingBarFullTexture = CreateD3DTexturePadded(LoadingBarFull, &fullbarWidth, &fullbarHeight);
-			fullTextureID = Tex_AddTexture(Loading_Bar_Full_Image_Name, LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height);
+			fullTextureID = Tex_AddTexture(Loading_Bar_Full_Image_Name, LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height, 32, TextureUsage_Normal);
 		}
 	}
 	
@@ -142,7 +142,7 @@ void Start_Progress_Bar()
 	if (image) // background image on demo loading screen
 	{
 		DemoBackgroundImage = CreateD3DTexturePadded(image, &dbWidth, &dbHeight);
-		dbTextureID = Tex_AddTexture(Loading_Image_Name, DemoBackgroundImage, dbWidth, dbHeight);
+		dbTextureID = Tex_AddTexture(Loading_Image_Name, DemoBackgroundImage, dbWidth, dbHeight, 32, TextureUsage_Normal);
 	}
 
 	// draw initial progress bar

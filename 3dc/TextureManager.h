@@ -45,16 +45,16 @@ enum TextureLock
 struct Texture
 {
 	std::string		name;
-	uint32_t		width;
-	uint32_t		height;
+	uint16_t		width;
+	uint16_t		height;
 	r_Texture		texture;
 	TextureUsage	usage;
 	uint8_t			bitsPerPixel;
 };
 
-uint32_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t height, uint32_t bpp, enum TextureUsage usageType);
+uint32_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usageType);
 uint32_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType);
-uint32_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32_t width, uint32_t height, enum TextureUsage usage = TextureUsage_Normal);
+uint32_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usage);
 uint32_t Tex_CreateFromFile(const std::string &filePath);
 uint32_t Tex_CheckExists(const char* fileName);
 const Texture& Tex_GetTextureDetails(uint32_t textureID);
@@ -68,6 +68,7 @@ void Tex_DeInit();
 void Tex_Release(uint32_t textureID);
 void Tex_ReleaseDynamicTextures();
 void Tex_ReloadDynamicTextures();
+void Tex_CheckMemoryUsage();
 
 #endif
 

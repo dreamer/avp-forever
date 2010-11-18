@@ -154,10 +154,7 @@ TheoraFMV::~TheoraFMV()
 
 	for (uint32_t i = 0; i < 3; i++)
 	{
-//		if (frameTextures[i] != NO_TEXTURE)
-		{
-//			Tex_Release(frameTextures[i]);
-		}
+		Tex_Release(frameTextures[i]);
 	}
 
 	if (mFrameCriticalSectionInited)
@@ -200,9 +197,9 @@ int TheoraFMV::Open(const std::string &fileName)
 	mFileName = fileName;
 #endif
 
-	frameTextures[0] = NO_TEXTURE;
-	frameTextures[1] = NO_TEXTURE;
-	frameTextures[2] = NO_TEXTURE;
+	frameTextures[0] = MISSING_TEXTURE;
+	frameTextures[1] = MISSING_TEXTURE;
+	frameTextures[2] = MISSING_TEXTURE;
 
 	// this'll do for now..
 	if (mFileName == "fmvs\\menubackground.ogv")
