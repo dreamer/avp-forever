@@ -525,7 +525,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 	}
 }
 
-void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t textureID, AVPTEXTURE *tex, uint32_t newWidth, uint32_t newHeight)
+void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t textureID)
 {
 	float x1 = WPos2DC(destRect.left);
 	float y1 = HPos2DC(destRect.top);
@@ -533,20 +533,10 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t texture
 	float x2 = WPos2DC(destRect.right);
 	float y2 = HPos2DC(destRect.bottom);
 
-	if (!tex)
-	{
-		return;
-	}
+	Texture tempTexture = Tex_GetTextureDetails(textureID);
 
-	uint32_t width = tex->width;
-	uint32_t height = tex->height;
-
-	// new, power of 2 values
-	uint32_t realWidth = newWidth;
-	uint32_t realHeight = newHeight;
-
-	float RecipW = (1.0f / realWidth);
-	float RecipH = (1.0f / realHeight);
+	float RecipW = (1.0f / tempTexture.realWidth);
+	float RecipH = (1.0f / tempTexture.realHeight);
 
 	orthoList->AddItem(4, textureID, TRANSLUCENCY_OFF, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
@@ -557,8 +547,8 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t texture
 	orthoVertex[orthoVBOffset].y = y2;
 	orthoVertex[orthoVBOffset].z = 1.0f;
 	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = (float)((width - srcRect.left) * RecipW);
-	orthoVertex[orthoVBOffset].v = (float)((height - srcRect.bottom) * RecipH);
+	orthoVertex[orthoVBOffset].u = (float)((tempTexture.width - srcRect.left) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((tempTexture.height - srcRect.bottom) * RecipH);
 	orthoVBOffset++;
 
 	// top left
@@ -566,8 +556,8 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t texture
 	orthoVertex[orthoVBOffset].y = y1;
 	orthoVertex[orthoVBOffset].z = 1.0f;
 	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = (float)((width - srcRect.left) * RecipW);
-	orthoVertex[orthoVBOffset].v = (float)((height - srcRect.top) * RecipH);
+	orthoVertex[orthoVBOffset].u = (float)((tempTexture.width - srcRect.left) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((tempTexture.height - srcRect.top) * RecipH);
 	orthoVBOffset++;
 
 	// bottom right
@@ -575,8 +565,8 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t texture
 	orthoVertex[orthoVBOffset].y = y2;
 	orthoVertex[orthoVBOffset].z = 1.0f;
 	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = (float)((width - srcRect.right) * RecipW);
-	orthoVertex[orthoVBOffset].v = (float)((height - srcRect.bottom) * RecipH);
+	orthoVertex[orthoVBOffset].u = (float)((tempTexture.width - srcRect.right) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((tempTexture.height - srcRect.bottom) * RecipH);
 	orthoVBOffset++;
 
 	// top right
@@ -584,8 +574,8 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t texture
 	orthoVertex[orthoVBOffset].y = y1;
 	orthoVertex[orthoVBOffset].z = 1.0f;
 	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = (float)((width - srcRect.right) * RecipW);
-	orthoVertex[orthoVBOffset].v = (float)((height - srcRect.top) * RecipH);
+	orthoVertex[orthoVBOffset].u = (float)((tempTexture.width - srcRect.right) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((tempTexture.height - srcRect.top) * RecipH);
 	orthoVBOffset++;
 
 	orthoList->CreateOrthoIndices(orthoIndex);
@@ -954,10 +944,36 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t 
 	float x2 = WPos2DC(x + width);
 	float y2 = HPos2DC(y + height);
 
-	uint32_t texturePOW2Width = 0;
-	uint32_t texturePOW2Height = 0;
-	Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
+	// the real texture resolution
+//	uint32_t textureWidth = 0;
+//	uint32_t textureHeight = 0;
 
+	// the real texture resolution adjusted to be powerof2 values (eg 512x512)
+//	uint32_t texturePOW2Width = 0;
+//	uint32_t texturePOW2Height = 0;
+
+	Texture tempTexture = Tex_GetTextureDetails(textureID);
+/*
+	Tex_GetDimensions(textureID, textureWidth, textureHeight);
+
+	if (!IsPowerOf2(textureWidth))
+	{
+		texturePOW2Width = NearestSuperiorPow2(textureWidth);
+	}
+	else
+	{
+		texturePOW2Width = textureWidth;
+	}
+
+	if (!IsPowerOf2(textureHeight))
+	{
+		texturePOW2Height = NearestSuperiorPow2(textureHeight);
+	}
+	else
+	{
+		texturePOW2Height = textureHeight;
+	}
+*/
 	orthoList->AddItem(4, textureID, translucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 	// bottom left
@@ -966,7 +982,7 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t 
 	orthoVertex[orthoVBOffset].z = 1.0f;
 	orthoVertex[orthoVBOffset].colour = colour;
 	orthoVertex[orthoVBOffset].u = 0.0f;
-	orthoVertex[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
+	orthoVertex[orthoVBOffset].v = (1.0f / tempTexture.realHeight) * tempTexture.height;
 	orthoVBOffset++;
 
 	// top left
@@ -983,8 +999,8 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t 
 	orthoVertex[orthoVBOffset].y = y2;
 	orthoVertex[orthoVBOffset].z = 1.0f;
 	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
-	orthoVertex[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
+	orthoVertex[orthoVBOffset].u = (1.0f / tempTexture.realWidth) * tempTexture.width;
+	orthoVertex[orthoVBOffset].v = (1.0f / tempTexture.realHeight) * tempTexture.height;
 	orthoVBOffset++;
 
 	// top right
@@ -992,7 +1008,7 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t 
 	orthoVertex[orthoVBOffset].y = y1;
 	orthoVertex[orthoVBOffset].z = 1.0f;
 	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
+	orthoVertex[orthoVBOffset].u = (1.0f / tempTexture.realWidth) * tempTexture.width;
 	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 

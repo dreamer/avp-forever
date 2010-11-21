@@ -45,15 +45,23 @@ enum TextureLock
 struct Texture
 {
 	std::string		name;
+	TextureUsage	usage;
+
+	// width and height of textures before adjustment (eg 640x480)
 	uint16_t		width;
 	uint16_t		height;
-	r_Texture		texture;
-	TextureUsage	usage;
+
+	// texture width and height, possible resized up to power-of-two dimension by graphics api (eg 1024x512)
+	uint16_t		realWidth;
+	uint16_t		realHeight;
+
 	uint8_t			bitsPerPixel;
+	r_Texture		texture;
 };
 
 uint32_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usageType);
 uint32_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType);
+uint32_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType);
 uint32_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usage);
 uint32_t Tex_CreateFromFile(const std::string &filePath);
 uint32_t Tex_CheckExists(const char* fileName);

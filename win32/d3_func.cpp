@@ -926,23 +926,36 @@ void CreateScreenShotImage()
  * bitmap font and rearranges it into a square texture, now containing more letters per row (as a standard bitmap font would be)
  * which can be used by Direct3D without issue.
  */
-r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
+bool R_CreateTallFontTexture(AVPTEXTURE &tex, enum TextureUsage usageType, Texture &texture)
 {
-	r_Texture destTexture = NULL;
-	D3DLOCKED_RECT lock;
-
 	// default colour format
-	D3DFORMAT colourFormat = D3DFMT_A8R8G8B8;//D3DFMT_R5G6B5;
-/*
-	if (ScreenDescriptorBlock.SDB_Depth == 16)
+	D3DFORMAT colourFormat = D3DFMT_A8R8G8B8;
+
+	D3DPOOL texturePool;
+	uint32_t textureUsage;
+
+	// ensure this will be NULL unless we successfully create it
+	texture.texture = 0;
+
+	switch (usageType)
 	{
-		colourFormat = D3DFMT_R5G6B5;
+		case TextureUsage_Normal:
+		{
+			texturePool = D3DPOOL_MANAGED;
+			textureUsage = 0;
+			break;
+		}
+		case TextureUsage_Dynamic:
+		{
+			texturePool = D3DPOOL_DEFAULT;
+			textureUsage = D3DUSAGE_DYNAMIC;
+			break;
+		}
+		default:
+		{
+			OutputDebugString("uh oh!\n");
+		}
 	}
-	if (ScreenDescriptorBlock.SDB_Depth == 32)
-	{
-		colourFormat = D3DFMT_A8R8G8B8;
-	}
-*/
 
 	uint32_t width = 450;
 	uint32_t height = 495;
@@ -953,21 +966,23 @@ r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	uint32_t charWidth = 30;
 	uint32_t charHeight = 33;
 
-	uint32_t numTotalChars = tex->height / charHeight;
+	uint32_t numTotalChars = tex.height / charHeight;
 
-	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, NULL, colourFormat, D3DPOOL_MANAGED, &destTexture, NULL);
+	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, textureUsage, colourFormat, texturePool, &texture.texture, NULL);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		return NULL;
+		return false;
 	}
 
-	LastError = destTexture->LockRect(0, &lock, NULL, NULL);
+	D3DLOCKED_RECT lock;
+
+	LastError = texture.texture->LockRect(0, &lock, NULL, NULL);
 	if (FAILED(LastError))
 	{
-		destTexture->Release();
+		texture.texture->Release();
 		LogDxError(LastError, __LINE__, __FILE__);
-		return NULL;
+		return false;
 	}
 /*
 	if (ScreenDescriptorBlock.SDB_Depth == 16)
@@ -1020,7 +1035,7 @@ r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	{
 		uint8_t *destPtr, *srcPtr;
 
-		srcPtr = (uint8_t*)tex->buffer;
+		srcPtr = (uint8_t*)tex.buffer;
 
 		D3DCOLOR padColour = D3DCOLOR_ARGB(255, 255, 0, 255);
 
@@ -1069,14 +1084,22 @@ r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
 		}
 	}
 
-	LastError = destTexture->UnlockRect(0);
+	LastError = texture.texture->UnlockRect(0);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		return NULL;
+		return false;
 	}
+	
+	// fill out newTexture struct
+	texture.bitsPerPixel = 32;
+	texture.width = width;
+	texture.height = height;
+	texture.realWidth = padWidth;
+	texture.realHeight = padHeight;
+	texture.usage = usageType;
 
-	return destTexture;
+	return true;
 }
 
 static BYTE VD_USAGEtoD3DDECLUSAGE(VD_USAGE usage)
@@ -1519,115 +1542,6 @@ void DeRedTexture(r_Texture texture)
 	R_UnlockTexture(texture);
 }
 
-// use this to make textures from non power of two images
-r_Texture CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight)
-{
-	if (tex == NULL)
-	{
-		*realWidth = 0;
-		*realHeight = 0;
-		return NULL;
-	}
-
-	uint32_t originalWidth = tex->width;
-	uint32_t originalHeight = tex->height;
-	uint32_t newWidth = originalWidth;
-	uint32_t newHeight = originalHeight;
-
-	// check if passed value is already a power of 2
-	if (!IsPowerOf2(tex->width))
-	{
-		newWidth = NearestSuperiorPow2(tex->width);
-	}
-	else { newWidth = originalWidth; }
-
-	if (!IsPowerOf2(tex->height))
-	{
-		newHeight = NearestSuperiorPow2(tex->height);
-	}
-	else { newHeight = originalHeight; }
-
-	// set passed in width and height values to be used later
-//	(*real_height) = new_height;
-//	(*real_width) = new_width;
-
-//	D3DXCheckTextureRequirements(d3d.lpD3DDevice, (UINT*)&new_width, (UINT*)&new_height, NULL, 0, NULL, D3DPOOL_MANAGED);
-
-	(*realHeight) = newHeight;
-	(*realWidth) = newWidth;
-
-	r_Texture destTexture = NULL;
-
-	D3DXIMAGE_INFO image;
-	image.Depth = 32;
-	image.Width = tex->width;
-	image.Height = tex->height;
-	image.MipLevels = 1;
-	image.Format = D3DFMT_A8R8G8B8;
-
-	D3DPOOL poolType = D3DPOOL_MANAGED;
-
-	// fill tga header
-	TgaHeader.idlength = 0;
-	TgaHeader.x_origin = tex->width;
-	TgaHeader.y_origin = tex->height;
-	TgaHeader.colourmapdepth  = 0;
-	TgaHeader.colourmaplength = 0;
-	TgaHeader.colourmaporigin = 0;
-	TgaHeader.colourmaptype   = 0;
-	TgaHeader.datatypecode    = 2;			// RGB
-	TgaHeader.bitsperpixel    = 32;
-	TgaHeader.imagedescriptor = 0x20;		// set origin to top left
-	TgaHeader.height = tex->height;
-	TgaHeader.width  = tex->width;
-
-	// size of raw image data
-	uint32_t imageSize = tex->height * tex->width * sizeof(uint32_t);
-
-	// create new buffer for header and image data
-	uint8_t *buffer = new uint8_t[sizeof(TGA_HEADER) + imageSize];
-
-	// copy header and image data to buffer
-	memcpy(buffer, &TgaHeader, sizeof(TGA_HEADER));
-
-	uint8_t *imageData = buffer + sizeof(TGA_HEADER);
-
-	// loop, converting RGB to BGR for D3DX function
-	for (uint32_t i = 0; i < imageSize; i+=4)
-	{
-		// BGRA			 // RGBA
-		imageData[i+2] = tex->buffer[i];
-		imageData[i+1] = tex->buffer[i+1];
-		imageData[i]   = tex->buffer[i+2];
-		imageData[i+3] = tex->buffer[i+3];
-	}
-
-	if (FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
-		buffer,
-		sizeof(TGA_HEADER) + imageSize,
-		D3DX_DEFAULT,//tex->width,
-		D3DX_DEFAULT,//tex->height,
-		1,
-		0,
-		D3DFMT_A8R8G8B8,
-		poolType,
-		D3DX_FILTER_NONE,
-		D3DX_FILTER_NONE,
-		0,
-		&image,
-		0,
-		&destTexture)))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		delete[] buffer;
-		return NULL;
-	}
-
-	delete[] buffer;
-
-	return destTexture;
-}
-
 bool R_CreateTextureFromFile(const std::string &fileName, Texture &texture)
 {
 	D3DXIMAGE_INFO imageInfo;
@@ -1658,6 +1572,14 @@ bool R_CreateTextureFromFile(const std::string &fileName, Texture &texture)
 		return false;
 	}
 
+	// check to see if D3D resized our texture
+	D3DSURFACE_DESC surfaceDescription;
+	texture.texture->GetLevelDesc(0, &surfaceDescription);
+
+	texture.realWidth = surfaceDescription.Width;
+	texture.realHeight = surfaceDescription.Height;
+
+	// save the original width and height
 	texture.width = imageInfo.Width;
 	texture.height = imageInfo.Height;
 	texture.bitsPerPixel = 32; // this should be ok?
@@ -1731,13 +1653,6 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 		imageData[i+3] = AvPTexture.buffer[i+3];
 	}
 
-	D3DXIMAGE_INFO image;
-	image.Depth = 32;
-	image.Width = AvPTexture.width;
-	image.Height = AvPTexture.height;
-	image.MipLevels = 1;
-	image.Format = D3DFMT_A8R8G8B8;
-
 	if (FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
 		buffer,
 		sizeof(TGA_HEADER) + imageSize,
@@ -1750,7 +1665,7 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 		D3DX_FILTER_NONE,
 		D3DX_FILTER_NONE,
 		0,
-		&image,
+		NULL,
 		0,
 		&d3dTexture)))
 	{
@@ -1759,6 +1674,13 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 		texture.texture = NULL;
 		return false;
 	}
+
+	// check to see if D3D resized our texture
+	D3DSURFACE_DESC surfaceDescription;
+	d3dTexture->GetLevelDesc(0, &surfaceDescription);
+
+	texture.realWidth = surfaceDescription.Width;
+	texture.realHeight = surfaceDescription.Height;
 
 	// set texture struct members
 	texture.bitsPerPixel = 32; // set to 32 for now
@@ -1773,6 +1695,8 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 
 bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usageType, Texture &texture)
 {
+	// TODO: Create texture correctly if the device can't do power of 2 textures
+
 	D3DPOOL texturePool;
 	D3DFORMAT textureFormat;
 	uint32_t textureUsage;
@@ -1836,6 +1760,8 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 	texture.bitsPerPixel = bitsPerPixel;
 	texture.width = width;
 	texture.height = height;
+	texture.realWidth = width;
+	texture.realHeight = height;
 	texture.usage = usageType;
 	texture.texture = d3dTexture;
 

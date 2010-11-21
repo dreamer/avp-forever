@@ -235,7 +235,7 @@ static void LoadMenuFont(void)
 	CL_GetImageFileName(buffer, 100, "Menus\\IntroFont.rim", LIO_RELATIVEPATH);
 	
 	pFastFileData = ffreadbuf(buffer, &fastFileLength);
-	
+
 	if (pFastFileData) 
 	{
 		gfxPtr->ImagePtr = AwCreateTexture(
@@ -305,8 +305,7 @@ static void LoadMenuFont(void)
 	}
 
 	// we're going to try create a square texture
-	r_Texture texture = CreateD3DTallFontTexture(image);
-	gfxPtr->textureID = Tex_AddTexture(buffer, texture, image->width, image->height, 32, TextureUsage_Normal);
+	gfxPtr->textureID = Tex_CreateTallFontTexture(buffer, *image, TextureUsage_Normal);
 }
 
 static void UnloadMenuFont(void)

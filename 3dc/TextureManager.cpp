@@ -114,6 +114,39 @@ uint32_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint3
 	return textureID;
 }
 
+uint32_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType)
+{
+	Texture newTexture;
+	newTexture.name = textureName;
+
+	if (!R_CreateTallFontTexture(AvPTexure, usageType, newTexture))
+	{
+		// log error
+		return MISSING_TEXTURE;
+	}
+
+	// get the next available ID
+	uint32_t textureID = Tex_GetFreeID();
+
+	// add texture to manager
+	if (textureID < textureList.size()) // we're reusing a slot in this case
+	{
+		textureList[textureID] = newTexture; // replace in the old unused slot
+	}
+	else // adding on to the end
+	{
+		textureList.push_back(newTexture);
+	}
+/*
+	std::stringstream ss;
+	ss << "added texture at ID: " << textureID << " with name " << textureName << " width: " << newTexture.width << " height: " << newTexture.height << std::endl;
+	OutputDebugString(ss.str().c_str());
+
+	Tex_CheckMemoryUsage();
+*/
+	return textureID;
+}
+
 uint32_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType)
 {
 	Texture newTexture;

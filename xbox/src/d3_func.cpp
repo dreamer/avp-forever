@@ -805,26 +805,58 @@ void CreateScreenShotImage()
  * bitmap font and rearranges it into a square texture, now containing more letters per row (as a standard bitmap font would be)
  * which can be used by Direct3D without issue.
  */
-r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
+bool R_CreateTallFontTexture(AVPTEXTURE &tex, enum TextureUsage usageType, Texture &texture)
 {
 	LPDIRECT3DTEXTURE8 destTexture = NULL;
 	LPDIRECT3DTEXTURE8 swizTexture = NULL;
 	D3DLOCKED_RECT	   lock;
 
 	// default colour format
-	D3DFORMAT colourFormat = D3DFMT_LIN_A8R8G8B8;
+	D3DFORMAT swizzledColourFormat = D3DFMT_A8R8G8B8;
+	D3DFORMAT colourFormat = D3DFMT_A8R8G8B8;
 
-	uint32_t height = 495;
+	D3DPOOL texturePool;
+	uint32_t textureUsage;
+
+	// ensure this will be NULL unless we successfully create it
+	texture.texture = 0;
+
+	switch (usageType)
+	{
+		case TextureUsage_Normal:
+		{
+			texturePool = D3DPOOL_MANAGED;
+			textureUsage = 0;
+			break;
+		}
+		case TextureUsage_Dynamic:
+		{
+			texturePool = D3DPOOL_DEFAULT;
+			textureUsage = 0; //D3DUSAGE_DYNAMIC; - not valid on xbox
+			break;
+		}
+		default:
+		{
+			OutputDebugString("uh oh!\n");
+		}
+	}
+
 	uint32_t width = 450;
+	uint32_t height = 495;
 
 	uint32_t padWidth = 512;
 	uint32_t padHeight = 512;
 
-	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, NULL, colourFormat, D3DPOOL_MANAGED, &destTexture);
+	uint32_t charWidth = 30;
+	uint32_t charHeight = 33;
+
+	uint32_t numTotalChars = tex.height / charHeight;
+
+	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, textureUsage, colourFormat, texturePool, &destTexture);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		return NULL;
+		return false;
 	}
 
 	LastError = destTexture->LockRect(0, &lock, NULL, NULL );
@@ -832,12 +864,12 @@ r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	{
 		destTexture->Release();
 		LogDxError(LastError, __LINE__, __FILE__);
-		return NULL;
+		return false;
 	}
 
 	uint8_t *destPtr, *srcPtr;
 
-	srcPtr = (uint8_t*)tex->buffer;
+	srcPtr = (uint8_t*)tex.buffer;
 
 	D3DCOLOR padColour = D3DCOLOR_XRGB(0,0,0);
 
@@ -855,15 +887,12 @@ r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
 		}
 	}
 
-	uint32_t charWidth = 30;
-	uint32_t charHeight = 33;
-
-	for (uint32_t i = 0; i < 224; i++)
+	for (uint32_t i = 0; i < numTotalChars; i++)
 	{
-		int row = i / 15; // get row
-		int column = i % 15; // get column from remainder value
+			uint32_t row = i / 15; // get row
+			uint32_t column = i % 15; // get column from remainder value
 
-		int offset = ((column * charWidth) * sizeof(uint32_t)) + ((row * charHeight) * lock.Pitch);
+		uint32_t offset = ((column * charWidth) * sizeof(uint32_t)) + ((row * charHeight) * lock.Pitch);
 
 		destPtr = (((uint8_t*)lock.pBits + offset));
 
@@ -889,7 +918,7 @@ r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	}
 
 	D3DLOCKED_RECT lock2;
-	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, NULL, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &swizTexture);
+	LastError = d3d.lpD3DDevice->CreateTexture(padWidth, padHeight, 1, textureUsage, swizzledColourFormat, texturePool, &swizTexture);
 	LastError = swizTexture->LockRect(0, &lock2, NULL, NULL );
 
 	XGSwizzleRect(lock.pBits, lock.Pitch, NULL, lock2.pBits, padWidth, padHeight, NULL, sizeof(uint32_t));
@@ -898,19 +927,29 @@ r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex)
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
 	}
 
 	LastError = swizTexture->UnlockRect(0);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
 	}
 
 	// we no longer need this
 	destTexture->Release();
 
-	//	return destTexture;
-	return swizTexture;
+	// fill out newTexture struct
+	texture.texture = swizTexture;
+	texture.bitsPerPixel = 32;
+	texture.width = width;
+	texture.height = height;
+	texture.realWidth = padWidth;
+	texture.realHeight = padHeight;
+	texture.usage = usageType;
+
+	return true;
 }
 
 bool R_ReleaseVertexDeclaration(r_vertexDeclaration &declaration)
@@ -1281,8 +1320,6 @@ bool R_SetPixelShader(r_PixelShader &pixelShader)
 // we remove the grid as it can sometimes bleed onto text when we use texture filtering. maybe add params for passing width/height?
 void DeRedTexture(r_Texture texture)
 {
-	return;
-
 	uint8_t *srcPtr = NULL;
 	uint8_t *destPtr = NULL;
 	uint32_t pitch = 0;
@@ -1311,109 +1348,6 @@ void DeRedTexture(r_Texture texture)
 	}
 
 	R_UnlockTexture(texture);
-}
-
-// use this to make textures from non power of two images
-r_Texture CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight)
-{
-	if (tex == NULL)
-	{
-		*realWidth = 0;
-		*realHeight = 0;
-		return NULL;
-	}
-
-	uint32_t originalWidth = tex->width;
-	uint32_t originalHeight = tex->height;
-	uint32_t newWidth = originalWidth;
-	uint32_t newHeight = originalHeight;
-
-	// check if passed value is already a power of 2
-	if (!IsPowerOf2(tex->width))
-	{
-		newWidth = NearestSuperiorPow2(tex->width);
-	}
-	else { newWidth = originalWidth; }
-
-	if (!IsPowerOf2(tex->height))
-	{
-		newHeight = NearestSuperiorPow2(tex->height);
-	}
-	else { newHeight = originalHeight; }
-
-//	(*realHeight) = new_height;
-//	(*realWidth) = new_width;
-
-	r_Texture destTexture = NULL;
-
-	D3DXIMAGE_INFO image;
-	image.Depth = 32;
-	image.Width = tex->width;
-	image.Height = tex->height;
-	image.MipLevels = 1;
-	image.Format = D3DFMT_A8R8G8B8;
-
-	D3DPOOL poolType = D3DPOOL_MANAGED;
-
-	// fill tga header
-	TgaHeader.idlength = 0;
-	TgaHeader.x_origin = tex->width;
-	TgaHeader.y_origin = tex->height;
-	TgaHeader.colourmapdepth  = 0;
-	TgaHeader.colourmaplength = 0;
-	TgaHeader.colourmaporigin = 0;
-	TgaHeader.colourmaptype   = 0;
-	TgaHeader.datatypecode    = 2;			// RGB
-	TgaHeader.bitsperpixel    = 32;
-	TgaHeader.imagedescriptor = 0x20;		// set origin to top left
-	TgaHeader.height = tex->height;
-	TgaHeader.width  = tex->width;
-
-	// size of raw image data
-	uint32_t imageSize = tex->height * tex->width * sizeof(uint32_t);
-
-	// create new buffer for header and image data
-	uint8_t *buffer = new uint8_t[sizeof(TGA_HEADER) + imageSize];
-
-	// copy header and image data to buffer
-	memcpy(buffer, &TgaHeader, sizeof(TGA_HEADER));
-
-	uint8_t *imageData = buffer + sizeof(TGA_HEADER);
-
-	// loop, converting RGB to BGR for D3DX function
-	for (uint32_t i = 0; i < imageSize; i+=4)
-	{
-		// BGRA			 // RGBA
-		imageData[i+2] = tex->buffer[i];
-		imageData[i+1] = tex->buffer[i+1];
-		imageData[i]   = tex->buffer[i+2];
-		imageData[i+3] = tex->buffer[i+3];
-	}
-
-	if (FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
-		buffer,
-		sizeof(TGA_HEADER) + imageSize,
-		D3DX_DEFAULT,//tex->width,
-		D3DX_DEFAULT,//tex->height,
-		1,
-		0,
-		D3DFMT_A8R8G8B8,
-		poolType,
-		D3DX_FILTER_NONE,
-		D3DX_FILTER_NONE,
-		0,
-		&image,
-		0,
-		&destTexture)))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		delete[] buffer;
-		return NULL;
-	}
-
-	delete[] buffer;
-
-	return destTexture;
 }
 
 bool R_CreateTextureFromFile(const std::string &fileName, Texture &texture)
@@ -1459,6 +1393,7 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 	D3DPOOL texturePool;
 	uint32_t textureUsage;
 	LPDIRECT3DTEXTURE8 d3dTexture = NULL;
+	D3DFORMAT textureFormat = D3DFMT_A8R8G8B8; // default format
 
 	// ensure this will be NULL unless we successfully create it
 	texture.texture = NULL;
@@ -1481,6 +1416,13 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 		{
 			OutputDebugString("uh oh!\n");
 		}
+	}
+
+	// hack to ensure the font texture isn't swizzled (we need to lockRect and update it later. this'll make that easier)
+	if (texture.name == "Common\\aa_font.rim")
+	{
+		// change to a linear format
+		textureFormat = D3DFMT_LIN_A8R8G8B8;
 	}
 
 	// fill tga header
@@ -1519,13 +1461,6 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 		imageData[i+3] = AvPTexture.buffer[i+3];
 	}
 
-	D3DXIMAGE_INFO image;
-	image.Depth = 32;
-	image.Width = AvPTexture.width;
-	image.Height = AvPTexture.height;
-	image.MipLevels = 1;
-	image.Format = D3DFMT_A8R8G8B8;
-
 	if (FAILED(D3DXCreateTextureFromFileInMemoryEx(d3d.lpD3DDevice,
 		buffer,
 		sizeof(TGA_HEADER) + imageSize,
@@ -1533,12 +1468,12 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 		AvPTexture.height,
 		1, // mips
 		textureUsage,
-		D3DFMT_A8R8G8B8,
+		textureFormat,
 		texturePool,
 		D3DX_FILTER_NONE,
 		D3DX_FILTER_NONE,
 		0,
-		&image,
+		NULL,
 		0,
 		&d3dTexture)))
 	{
@@ -1547,6 +1482,13 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 		texture.texture = NULL;
 		return false;
 	}
+
+	// check to see if D3D resized our texture
+	D3DSURFACE_DESC surfaceDescription;
+	d3dTexture->GetLevelDesc(0, &surfaceDescription);
+
+	texture.realWidth = surfaceDescription.Width;
+	texture.realHeight = surfaceDescription.Height;
 
 	// set texture struct members
 	texture.bitsPerPixel = 32; // set to 32 for now

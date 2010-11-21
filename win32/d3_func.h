@@ -85,9 +85,7 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usageType, Texture &texture);
 bool R_CreateTextureFromFile(const std::string &fileName, Texture &texture);
 void R_ReleaseTexture(r_Texture &texture);
-r_Texture CreateD3DTexture(AVPTEXTURE *tex, uint32_t usage, D3DPOOL poolType);
-r_Texture CreateD3DTexturePadded(AVPTEXTURE *tex, uint32_t *realWidth, uint32_t *realHeight);
-r_Texture CreateD3DTallFontTexture(AVPTEXTURE *tex);
+bool R_CreateTallFontTexture(AVPTEXTURE &tex, enum TextureUsage usageType, Texture &texture);
 
 // vertex declaration
 bool R_CreateVertexDeclaration(class VertexDeclaration *vertexDeclaration);

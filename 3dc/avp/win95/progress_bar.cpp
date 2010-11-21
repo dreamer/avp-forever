@@ -46,24 +46,16 @@ RECT LoadingBarEmpty_SrcRect;
 RECT LoadingBarFull_DestRect;
 RECT LoadingBarFull_SrcRect;
 
-r_Texture LoadingBarFullTexture;
-r_Texture LoadingBarEmptyTexture;
-r_Texture DemoBackgroundImage;
-
-void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t textureID, AVPTEXTURE *tex, uint32_t newWidth, uint32_t newHeight);
+extern void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t textureID);
 
 uint32_t	fullTextureID = 0;
 uint32_t	emptyTextureID = 0;
 uint32_t	dbTextureID = 0;
 
-uint32_t	dbWidth, dbHeight;
-
 AVPTEXTURE *image = NULL;
 AVPTEXTURE *LoadingBarEmpty = NULL;
 AVPTEXTURE *LoadingBarFull = NULL;
 AVPTEXTURE *aa_font = NULL;
-
-uint32_t fullbarHeight, fullbarWidth, emptybarHeight, emptybarWidth;
 
 void Start_Progress_Bar()
 {
@@ -92,8 +84,7 @@ void Start_Progress_Bar()
 		// create d3d texture here
 		if (LoadingBarEmpty)
 		{
-			LoadingBarEmptyTexture = CreateD3DTexturePadded(LoadingBarEmpty, &emptybarWidth, &emptybarHeight);
-			emptyTextureID = Tex_AddTexture(Loading_Bar_Empty_Image_Name, LoadingBarEmptyTexture, LoadingBarEmpty->width, LoadingBarEmpty->height, 32, TextureUsage_Normal);
+			emptyTextureID = Tex_CreateFromAvPTexture(Loading_Bar_Empty_Image_Name, *LoadingBarEmpty, TextureUsage_Normal);
 		}
 	}
 	{
@@ -116,8 +107,7 @@ void Start_Progress_Bar()
 
 		if (LoadingBarFull)
 		{
-			LoadingBarFullTexture = CreateD3DTexturePadded(LoadingBarFull, &fullbarWidth, &fullbarHeight);
-			fullTextureID = Tex_AddTexture(Loading_Bar_Full_Image_Name, LoadingBarFullTexture, LoadingBarFull->width, LoadingBarFull->height, 32, TextureUsage_Normal);
+			fullTextureID = Tex_CreateFromAvPTexture(Loading_Bar_Full_Image_Name, *LoadingBarFull, TextureUsage_Normal);
 		}
 	}
 	
@@ -141,8 +131,7 @@ void Start_Progress_Bar()
 
 	if (image) // background image on demo loading screen
 	{
-		DemoBackgroundImage = CreateD3DTexturePadded(image, &dbWidth, &dbHeight);
-		dbTextureID = Tex_AddTexture(Loading_Image_Name, DemoBackgroundImage, dbWidth, dbHeight, 32, TextureUsage_Normal);
+		dbTextureID = Tex_CreateFromAvPTexture(Loading_Image_Name, *image, TextureUsage_Normal);
 	}
 
 	// draw initial progress bar
@@ -160,7 +149,7 @@ void Start_Progress_Bar()
 
 		if (LoadingBarEmpty)
 		{
-			DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID, LoadingBarEmpty, emptybarWidth, emptybarHeight);
+			DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID);//, LoadingBarEmpty, emptybarWidth, emptybarHeight);
 
 			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
 		}
@@ -169,7 +158,7 @@ void Start_Progress_Bar()
 			// user is using demo files, therefor no progress bar graphics? draw demo style..
 
 			// background image
-			DrawQuad(0, 0, dbWidth, dbHeight, dbTextureID, RCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
+			DrawQuad(0, 0, 640, 480, dbTextureID, RCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
 			// white outline
 			DrawQuad(105, 413, 429, 46, NO_TEXTURE, RCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
@@ -207,7 +196,7 @@ void Set_Progress_Bar_Position(int pos)
 		if (!LoadingBarEmpty) // if we're using demo assets, draw the demo style progress bar
 		{
 			// background image
-			DrawQuad(0, 0, dbWidth, dbHeight, dbTextureID, RCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
+			DrawQuad(0, 0, 640, 480, dbTextureID, RCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
 			// white outline
 			DrawQuad(105, 413, 429, 46, NO_TEXTURE, RCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
@@ -222,13 +211,13 @@ void Set_Progress_Bar_Position(int pos)
 		{
 			// need to render the empty bar here again. As we're not blitting anymore, 
 			// the empty bar will only be rendered for one frame.
-			DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID, LoadingBarEmpty, emptybarWidth, emptybarHeight);
+			DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID);//, LoadingBarEmpty, emptybarWidth, emptybarHeight);
 
 			// also need this here again, or else the text disappears!
 			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED); // no briefing text on demo this this call is in this block
 
 			// now render the green percent loaded overlay
-			DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, fullTextureID, LoadingBarFull, fullbarWidth, fullbarHeight);
+			DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, fullTextureID);//, LoadingBarFull, fullbarWidth, fullbarHeight);
 		}
 
 		ThisFramesRenderingHasFinished();
@@ -290,12 +279,12 @@ void Game_Has_Loaded()
 	
 			if (LoadingBarFull)
 			{
-				DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, fullTextureID, LoadingBarFull, fullbarWidth, fullbarHeight);
+				DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, fullTextureID);//, LoadingBarFull, fullbarWidth, fullbarHeight);
 			}
 			else
 			{
 				// background image
-				DrawQuad(0, 0, dbWidth, dbHeight, dbTextureID, RCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
+				DrawQuad(0, 0, 640, 480, dbTextureID, RCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
 
 				// white outline
 				DrawQuad(105, 413, 429, 46, NO_TEXTURE, RCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
