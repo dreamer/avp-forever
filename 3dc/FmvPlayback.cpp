@@ -138,8 +138,6 @@ TheoraFMV::~TheoraFMV()
 			CloseHandle(mAudioThreadHandle);
 		}
 
-		ogg_sync_clear(&mState);
-
 		if (audioStream)
 			delete audioStream;
 
@@ -151,6 +149,8 @@ TheoraFMV::~TheoraFMV()
 
 		delete mRingBuffer;
 	}
+
+	ogg_sync_clear(&mState);
 
 	for (uint32_t i = 0; i < 3; i++)
 	{
@@ -756,7 +756,7 @@ unsigned int __stdcall decodeThread(void *args)
 								break;
 
 							// wait for the audio buffer to tell us it's just freed up another audio buffer for us to fill
-							WaitForSingleObject(fmv->audioStream->voiceContext->hBufferEndEvent, INFINITE );
+							WaitForSingleObject(fmv->audioStream->voiceContext->hBufferEndEvent, /*INFINITE*/20);
 						}
 					}
 

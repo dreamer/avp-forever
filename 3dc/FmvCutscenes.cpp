@@ -155,7 +155,7 @@ extern int PlayMenuBackgroundFmv()
 	if (!MenuBackground)
 		return 0;
 
-	int playing = 0;
+	bool playing = false;
 
 	if (menuFMV->mFrameReady)
 	{
