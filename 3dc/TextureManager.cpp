@@ -71,11 +71,11 @@ static uint32_t Tex_GetFreeID()
 	return static_cast<uint32_t>(textureList.size());
 }
 
-uint32_t Tex_CheckExists(const char* fileName)
+uint32_t Tex_CheckExists(const std::string &textureName)
 {
 	for (uint32_t i = 0; i < textureList.size(); i++)
 	{
-		if (textureList[i].name == fileName)
+		if (textureList[i].name == textureName)
 			return i;
 	}
 

@@ -57,6 +57,18 @@ struct Texture
 
 	uint8_t			bitsPerPixel;
 	r_Texture		texture;
+
+	// constructor
+	Texture()
+	{
+		usage = TextureUsage_Normal;
+		width = 0;
+		height = 0;
+		realWidth = 1;
+		realHeight = 1;
+		bitsPerPixel = 0;
+		texture = 0;
+	}
 };
 
 uint32_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usageType);
@@ -64,7 +76,7 @@ uint32_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &Av
 uint32_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType);
 uint32_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usage);
 uint32_t Tex_CreateFromFile(const std::string &filePath);
-uint32_t Tex_CheckExists(const char* fileName);
+uint32_t Tex_CheckExists(const std::string &textureName);
 const Texture& Tex_GetTextureDetails(uint32_t textureID);
 std::string& Tex_GetName(uint32_t textureID);
 void Tex_GetNamesVector(std::vector<std::string> &namesArray);

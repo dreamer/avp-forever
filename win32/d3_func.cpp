@@ -953,7 +953,8 @@ bool R_CreateTallFontTexture(AVPTEXTURE &tex, enum TextureUsage usageType, Textu
 		}
 		default:
 		{
-			OutputDebugString("uh oh!\n");
+			Con_PrintError("Invalid texture usageType value in R_CreateTallFontTexture");
+			return false;
 		}
 	}
 
@@ -1721,7 +1722,8 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 		}
 		default:
 		{
-			OutputDebugString("uh oh!\n");
+			Con_PrintError("Invalid texture usageType value in R_CreateTexture");
+			return false;
 		}
 	}
 
@@ -1754,6 +1756,7 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
 	}
 
 	// set texture struct members
@@ -2832,7 +2835,7 @@ void ChangeTextureAddressMode(uint32_t samplerIndex, enum TEXTURE_ADDRESS_MODE t
 	}
 }
 
-void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired)
+void ChangeFilteringMode(uint32_t samplerIndex, enum FILTERING_MODE_ID filteringRequired)
 {
 	if (CurrentRenderStates.FilteringMode == filteringRequired)
 		return;
@@ -2843,14 +2846,14 @@ void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired)
 	{
 		case FILTERING_BILINEAR_OFF:
 		{
-			d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-			d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+			d3d.lpD3DDevice->SetSamplerState(samplerIndex, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+			d3d.lpD3DDevice->SetSamplerState(samplerIndex, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 			break;
 		}
 		case FILTERING_BILINEAR_ON:
 		{
-			d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-			d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+			d3d.lpD3DDevice->SetSamplerState(samplerIndex, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+			d3d.lpD3DDevice->SetSamplerState(samplerIndex, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 			break;
 		}
 		default:

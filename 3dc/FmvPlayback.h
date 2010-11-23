@@ -62,7 +62,7 @@ class TheoraFMV
 		uint32_t		mAudioDataBufferSize;
 
 		// textures for video frames
-		uint32_t frameTextures[3];
+		std::vector<uint32_t> frameTextureIDs;
 
 		uint32_t mTextureWidth;
 		uint32_t mTextureHeight;
@@ -113,6 +113,12 @@ class TheoraFMV
 			mFrameCriticalSectionInited(false)
 		{
 			memset(&mState, 0, sizeof(ogg_sync_state));
+
+			frameTextureIDs.resize(3);
+
+			frameTextureIDs[0] = MISSING_TEXTURE;
+			frameTextureIDs[1] = MISSING_TEXTURE;
+			frameTextureIDs[2] = MISSING_TEXTURE;
 		}
 		~TheoraFMV();
 

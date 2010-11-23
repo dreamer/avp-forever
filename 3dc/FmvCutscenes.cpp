@@ -164,7 +164,7 @@ extern int PlayMenuBackgroundFmv()
 
 	if (menuFMV->mTexturesReady)
 	{
-		DrawFmvFrame2(menuFMV->mFrameWidth, menuFMV->mFrameHeight, &menuFMV->frameTextures[0], 3);
+		DrawFmvFrame2(menuFMV->mFrameWidth, menuFMV->mFrameHeight, menuFMV->frameTextureIDs);
 	}
 
 	return 1;
@@ -250,7 +250,7 @@ extern void PlayFMV(const char *filenamePtr)
 
 		if (fmv.mTexturesReady)
 		{
-			DrawFmvFrame2(fmv.mFrameWidth, fmv.mFrameHeight, &fmv.frameTextures[0], /*FIXME*/3 /*numTextures*/);
+			DrawFmvFrame2(fmv.mFrameWidth, fmv.mFrameHeight, fmv.frameTextureIDs);
 		}
 
 		ThisFramesRenderingHasFinished();

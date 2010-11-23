@@ -154,7 +154,7 @@ TheoraFMV::~TheoraFMV()
 
 	for (uint32_t i = 0; i < 3; i++)
 	{
-		Tex_Release(frameTextures[i]);
+		Tex_Release(frameTextureIDs[i]);
 	}
 
 	if (mFrameCriticalSectionInited)
@@ -196,10 +196,6 @@ int TheoraFMV::Open(const std::string &fileName)
 #else
 	mFileName = fileName;
 #endif
-
-	frameTextures[0] = MISSING_TEXTURE;
-	frameTextures[1] = MISSING_TEXTURE;
-	frameTextures[2] = MISSING_TEXTURE;
 
 	// this'll do for now..
 	if (mFileName == "fmvs\\menubackground.ogv")
@@ -278,7 +274,12 @@ int TheoraFMV::Open(const std::string &fileName)
 		}
 
 		// create the texture with desired parameters
-		frameTextures[i] = Tex_Create("CUTSCENE_" + IntToString(i), width, height, 8, TextureUsage_Dynamic);
+		frameTextureIDs[i] = Tex_Create("CUTSCENE_" + IntToString(i), width, height, 8, TextureUsage_Dynamic);
+		if (frameTextureIDs[i] == MISSING_TEXTURE)
+		{
+			Con_PrintError("Unable to create textures for FMV playback");
+			return false;
+		}
 	}
 
 	mFmvPlaying = true;
@@ -449,10 +450,10 @@ bool TheoraFMV::NextFrame()
 		uint32_t height = 0;
 
 		// get width and height
-		Tex_GetDimensions(frameTextures[i], width, height);
+		Tex_GetDimensions(frameTextureIDs[i], width, height);
 
 		// lock the texture
-		if (Tex_Lock(frameTextures[i], &originalDestPtr, &pitch, TextureLock_Discard)) // only do below if lock succeeds
+		if (Tex_Lock(frameTextureIDs[i], &originalDestPtr, &pitch, TextureLock_Discard)) // only do below if lock succeeds
 		{
 			for (uint32_t y = 0; y < height; y++)
 			{
@@ -476,7 +477,7 @@ bool TheoraFMV::NextFrame()
 			}
 
 			// unlock texture
-			Tex_Unlock(frameTextures[i]);
+			Tex_Unlock(frameTextureIDs[i]);
 		}
 	}
 
@@ -536,7 +537,7 @@ ogg_int64_t TheoraFMV::ReadPage(ogg_page *page)
 			continue;
 		}
 
-		ret = ogg_sync_wrote(&mState, amountRead);
+		ret = ogg_sync_wrote(&mState, static_cast<long>(amountRead));
 		assert(ret == 0);
 	}
 
@@ -731,9 +732,9 @@ unsigned int __stdcall decodeThread(void *args)
 
 					uint16_t* p = fmv->mAudioDataBuffer;
 
-					for (uint32_t i = 0; i < samples; ++i)
+					for (int32_t i = 0; i < samples; ++i)
 					{
-						for (uint32_t j = 0; j < fmv->mAudio->mVorbis.mInfo.channels; ++j)
+						for (int32_t j = 0; j < fmv->mAudio->mVorbis.mInfo.channels; ++j)
 						{
 							int v = static_cast<int>(floorf(0.5f + pcm[j][i]*32767.0f));
 							if (v > 32767) v = 32767;
@@ -806,7 +807,7 @@ unsigned int __stdcall audioThread(void *args)
 
 	TheoraFMV *fmv = static_cast<TheoraFMV*>(args);
 
-	uint32_t quantum = 1000 / 60;
+	const uint32_t quantum = 1000 / 60;
 
 	static int totalRead = 0;
 	static int lastRead = 0;

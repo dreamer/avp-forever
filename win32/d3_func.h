@@ -111,7 +111,7 @@ void R_SetCurrentVideoMode();
 
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired);
 void ChangeTextureAddressMode(uint32_t samplerIndex, enum TEXTURE_ADDRESS_MODE textureAddressMode);
-void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired);
+void ChangeFilteringMode(uint32_t samplerIndex, enum FILTERING_MODE_ID filteringRequired);
 void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable);
 
 /*
@@ -247,7 +247,7 @@ void DrawFadeQuad			(uint32_t topX, uint32_t topY, uint32_t alpha);
 void DrawSmallMenuCharacter (uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t red, uint32_t green, uint32_t blue, uint32_t alpha);
 void DrawQuad				(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
 void DrawFmvFrame			(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, r_Texture fmvTexture);
-void DrawFmvFrame2			(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures, uint32_t numTextures);
+void DrawFmvFrame2			(uint32_t frameWidth, uint32_t frameHeight, const std::vector<uint32_t> &textureIDs);
 void DrawFontQuad			(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeight, uint32_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
 void CreateScreenShotImage  ();
 void DeRedTexture			(r_Texture texture);

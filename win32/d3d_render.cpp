@@ -425,7 +425,7 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWid
 */
 }
 
-void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures, uint32_t numTextures)
+void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, const std::vector<uint32_t> &textureIDs)
 {
 
 #ifdef _XBOX
@@ -505,17 +505,15 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 //	d3d.effectSystem->SetMatrix(d3d.fmvEffect, "WorldViewProj", matOrtho);
 	d3d.effectSystem->SetVertexShaderConstant(d3d.fmvEffect, 0, CONST_MATRIX, &matOrtho);
 
-	ChangeTextureAddressMode(0, TEXTURE_CLAMP);
-	ChangeTextureAddressMode(1, TEXTURE_CLAMP);
-	ChangeTextureAddressMode(2, TEXTURE_CLAMP);
-	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
-	ChangeFilteringMode(FILTERING_BILINEAR_OFF);
-
 	// set the texture
-	for (uint32_t i = 0; i < numTextures; i++)
+	for (uint32_t i = 0; i < textureIDs.size(); i++)
 	{
-		R_SetTexture(i, textures[i]);
+		R_SetTexture(i, textureIDs[i]);
+		ChangeTextureAddressMode(i, TEXTURE_CLAMP);
+		ChangeFilteringMode(i, FILTERING_BILINEAR_OFF);
 	}
+
+	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(FMVVERTEX));
 	if (FAILED(LastError))
@@ -631,7 +629,8 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 		ChangeTextureAddressMode(0, TEXTURE_CLAMP);
 		ChangeTextureAddressMode(1, TEXTURE_WRAP);
 		ChangeTranslucencyMode(TRANSLUCENCY_GLOWING);
-		ChangeFilteringMode(FILTERING_BILINEAR_ON);
+		ChangeFilteringMode(0, FILTERING_BILINEAR_ON);
+		ChangeFilteringMode(1, FILTERING_BILINEAR_ON);
 
 		ORTHOVERTEX textQuad[4];
 		int16_t indices[6];
