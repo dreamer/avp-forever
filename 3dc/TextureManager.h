@@ -89,6 +89,7 @@ void Tex_Release(uint32_t textureID);
 void Tex_ReleaseDynamicTextures();
 void Tex_ReloadDynamicTextures();
 void Tex_CheckMemoryUsage();
+void Tex_ListTextures();
 
 #endif
 

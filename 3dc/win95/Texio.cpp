@@ -11,13 +11,19 @@
 #include "ourasert.h"
 #include "awTexLd.h"
 
+#include "TextureManager.h"
+
+extern void release_rif_bitmaps();
+
 /*
 	externs for commonly used global variables and arrays
 */
 
+extern "C" {
 extern SHAPEHEADER **mainshapelist;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern char projectsubdirectory[];
+}
 
 /*
 	Global Variables for PC Functions
@@ -182,6 +188,13 @@ int InitialiseTextures(void)
 				/* This function calls GetExistingImageHeader to figure out if the image is already loaded */
 				TxIndex = CL_LoadImageOnce(fname, LIO_D3DTEXTURE|LIO_TRANSPARENT|LIO_RELATIVEPATH|LIO_RESTORABLE);
 
+				// bjd - this correct?
+				char buf[100];
+				sprintf(buf, "adding tex: %d\n", TxIndex);
+				OutputDebugString(buf);
+
+				NextFreeImageHeaderPtr->textureID = TxIndex;
+
 				GLOBALASSERT(GEI_NOTLOADED != TxIndex);
 
 				/*
@@ -297,7 +310,7 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 				|| ShapeItemPtr->PolyItemType == I_ZB_Gouraud3dTexturedPolygon
 				|| ShapeItemPtr->PolyItemType == I_ScaledSprite
 				|| ShapeItemPtr->PolyItemType == I_3dTexturedPolygon
-				|| ShapeItemPtr->PolyItemType == I_ZB_3dTexturedPolygon) 
+				|| ShapeItemPtr->PolyItemType == I_ZB_3dTexturedPolygon)
 			{
 
 				if (ShapeItemPtr->PolyFlags & iflag_txanim)
@@ -344,7 +357,7 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr, POLYHEADER *pheader, int L
 	int *txf_imageptr;
 	int texture_defn_index;
 	int i, image;
-	int txi;
+	intptr_t txi;
 
 	/* Get the animation sequence header */
 	shape_textures = sptr->sh_textures;
@@ -455,7 +468,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 	VECTOR2D cen_uv;
 	VECTOR2D size_uv;
 	VECTOR2D tv;
-	int *txf_imageptr;
+	intptr_t *txf_imageptr;
 	int **txf_uvarrayptr;
 	int *txf_uvarray;
 	int image;
@@ -522,7 +535,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 				/* Multi-View Sprite? */
 				if (sptr->shapeflags & ShapeFlag_MultiViewSprite)
 				{
-					txf_imageptr = (int *)txaf->txf_image;
+					txf_imageptr = (intptr_t *)txaf->txf_image;
 					num_images = txah->txa_num_mvs_images;
 
 					txf_uvarrayptr = (int **) txaf->txf_uvdata;
@@ -781,7 +794,7 @@ static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 	if (ihptr->AvPTexture)
 	{
 		ReleaseAvPTexture(ihptr->AvPTexture);
-		ihptr->AvPTexture = (void*) 0;
+		ihptr->AvPTexture = 0;
 	}
 }
 
@@ -790,7 +803,7 @@ static void MinimizeImageHeader(IMAGEHEADER * ihptr)
 	if (ihptr->AvPTexture)
 	{
 		ReleaseAvPTexture(ihptr->AvPTexture);
-		ihptr->AvPTexture = (void*) 0;
+		ihptr->AvPTexture = 0;
 	}
 }
 
@@ -992,6 +1005,10 @@ int DeallocateAllImages(void)
 		NumImages = 0;
 		NextFreeImageHeaderPtr = ImageHeaderArray;
 	}
+
+	// release all ingame textures
+	release_rif_bitmaps();
+
 	return TRUE; /* ok for the moment */
 }
 

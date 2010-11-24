@@ -708,6 +708,7 @@ bool R_LockTexture(r_Texture texture, uint8_t **data, uint32_t *pitch, enum Text
 
 	if (FAILED(LastError))
 	{
+		Con_PrintError("Unable to lock texture");
 		*data = 0;
 		*pitch = 0;
 		return false;
@@ -726,6 +727,7 @@ bool R_UnlockTexture(r_Texture texture)
 
 	if (FAILED(LastError))
 	{
+		Con_PrintError("Unable to unlock texture");
 		return false;
 	}
 
@@ -2374,6 +2376,7 @@ bool InitialiseDirect3D()
 	Con_AddCommand("dumptex", WriteMenuTextures);
 	Con_AddCommand("r_toggleWireframe", ToggleWireframe);
 	Con_AddCommand("r_setfov", SetFov);
+	Con_AddCommand("r_texlist", Tex_ListTextures);
 
 	// create vertex declarations
 	d3d.mainDecl = new VertexDeclaration;

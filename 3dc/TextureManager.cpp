@@ -28,6 +28,7 @@
 std::vector<Texture> textureList;
 std::vector<Texture>::iterator texIt;
 
+size_t lastBytesUsed = 0;
 void Tex_CheckMemoryUsage();
 
 bool Tex_Lock(uint32_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
@@ -117,7 +118,19 @@ uint32_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint3
 uint32_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType)
 {
 	Texture newTexture;
+	uint32_t textureID;
 	newTexture.name = textureName;
+
+	// see if it exists already
+	textureID = Tex_CheckExists(textureName);
+	if (textureID != MISSING_TEXTURE)
+	{
+		// is it valid?
+		if (Tex_GetTexture(textureID) != NULL)
+		{
+			return textureID;
+		}
+	}
 
 	if (!R_CreateTallFontTexture(AvPTexure, usageType, newTexture))
 	{
@@ -126,7 +139,7 @@ uint32_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &A
 	}
 
 	// get the next available ID
-	uint32_t textureID = Tex_GetFreeID();
+	textureID = Tex_GetFreeID();
 
 	// add texture to manager
 	if (textureID < textureList.size()) // we're reusing a slot in this case
@@ -290,7 +303,20 @@ void Tex_GetDimensions(uint32_t textureID, uint32_t &width, uint32_t &height)
 	height = textureList[textureID].height;
 }
 
-size_t lastBytesUsed = 0;
+void Tex_ListTextures()
+{
+	std::stringstream ss;
+
+	for (uint32_t i = 0; i < textureList.size(); ++i)
+	{
+		if (textureList[i].texture != NULL)
+		{
+			ss.str("");
+			ss << "ID: " << i << " Name: " << textureList[i].name << std::endl;
+			OutputDebugString(ss.str().c_str());
+		}
+	}
+}
 
 void Tex_CheckMemoryUsage()
 {

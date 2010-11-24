@@ -576,10 +576,7 @@ typedef struct imageheader
 
 	AVPTEXTURE *AvPTexture;
 
-	// graphics api texture
-//	RENDERTEXTURE Direct3DTexture;
-
-	int ImageNum;						/* # MIP images */
+//	int ImageNum;						/* # MIP images */
 	char ImageName[ImageNameSize];		/* Filename */
 
 } IMAGEHEADER;

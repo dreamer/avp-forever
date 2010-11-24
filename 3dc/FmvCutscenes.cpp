@@ -119,6 +119,9 @@ extern "C" {
 
 void StartMenuBackgroundFmv()
 {
+	MenuBackground = false;
+	return;
+
 	const char *filenamePtr = "fmvs\\menubackground.ogv";
 
 	menuFMV = new TheoraFMV();

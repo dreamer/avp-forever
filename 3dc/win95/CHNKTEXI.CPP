@@ -659,7 +659,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 
 	// already loaded ?
 	int iExistingImage = Tex_CheckExists(szBuf);
-	if (0 != iExistingImage)
+	if (MISSING_TEXTURE != iExistingImage)
 	{
 		db_logf4(("\tImage already loaded to image number %d", iExistingImage));
 		return iExistingImage;

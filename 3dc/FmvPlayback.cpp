@@ -680,7 +680,16 @@ unsigned int __stdcall decodeThread(void *args)
 
 			fmv->HandleTheoraData(fmv->mVideo, &packet);
 			float framerate = float(fmv->mVideo->mTheora.mInfo.fps_numerator) / float(fmv->mVideo->mTheora.mInfo.fps_denominator);
-			Sleep(static_cast<DWORD>((1.0f / framerate) * 1000));
+
+			int32_t timeToSleep = static_cast<DWORD>((1.0f / framerate) * 1000);
+
+			// just to be sure, clamp the value to 0 and greater
+			if (timeToSleep < 0)
+			{
+				timeToSleep = 1;
+			}
+
+			Sleep(timeToSleep);
 		}
 	}
 	else // we have audio (and assume we have video..)
@@ -850,8 +859,14 @@ unsigned int __stdcall audioThread(void *args)
 		endTime = timeGetTime();
 
 		timetoSleep = endTime - startTime;
+		timetoSleep -= quantum;
 
-		Sleep(quantum - timetoSleep);
+		if (timetoSleep < 0 || timetoSleep > quantum)
+		{
+			timetoSleep = 1;
+		}
+
+		Sleep(timetoSleep);
 	}
 
 	_endthreadex(0);

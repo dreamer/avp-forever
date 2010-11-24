@@ -6,7 +6,7 @@
 #endif /* __cplusplus */
 
 /* image number for already loaded image - really an internal function */
-#define GEI_NOTLOADED (-1)
+#define GEI_NOTLOADED (/*-1*/0) // bjd
 extern int GetExistingImageNum(char const * pszActualFileName);
 
 enum /* flags, etc */

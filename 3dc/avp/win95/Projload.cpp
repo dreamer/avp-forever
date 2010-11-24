@@ -50,6 +50,29 @@
 #include "db.h"
 #include "pldnet.h"
 
+#include <vector>
+#include "TextureManager.h"
+
+// store texture handles for ingame textures
+std::vector<uint32_t> ingameTextureList;
+
+	extern "C" 
+	{
+		extern int HUDImageNumber;
+		extern int SpecialFXImageNumber;
+		extern int SmokyImageNumber;
+		extern int ChromeImageNumber;
+		extern int CloudyImageNumber;
+		extern int BurningImageNumber;
+		extern int HUDFontsImageNumber;
+		extern int PredatorVisionChangeImageNumber;
+		extern int PredatorNumbersImageNumber;
+		extern int StaticImageNumber;
+		extern int AlienTongueImageNumber;
+		extern int AAFontImageNumber;
+		extern int WaterShaftImageNumber;
+	}
+
 extern "C" {
 #include "inventry.h"
 
@@ -831,7 +854,7 @@ void Global_Hierarchy_Store::delete_section(SECTION * s2d)
 	}
 	
 	DeallocateMem ((void *)s2d);
-  	#endif
+	#endif
 }
 
 
@@ -840,9 +863,6 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 	// iterative bit
 	// should be called with the root node
 	// containing an object
-
-
-
 
 	Object_Hierarchy_Data_Chunk * ohdc = ohc->get_data();
 	
@@ -888,16 +908,14 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 			{
 				KEYFRAME_DATA ** next_frame_ptr=&seqa_p->first_frame;
 				KEYFRAME_DATA * delta_frame=0;
-				
+
 				Object_Animation_Sequence* seq=&all_seq->sequences[i];
-							
+
 				seqa_p->sequence_id = GetSequenceID (seq->sequence_number, seq->sub_sequence_number);
 				seqa_p->Time = (seq->sequence_time*ONE_FIXED)/1000;
-								
-				
+
 				KEYFRAME_DATA * kfd=0;
-								
-				
+
 				for(unsigned int frame_no=0;frame_no<seq->num_frames;)
 				{
 					Object_Animation_Frame* frame=&seq->frames[frame_no];
@@ -939,14 +957,13 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 					//set up previous frames next pointer
 					*next_frame_ptr=kfd;
 					next_frame_ptr=&kfd->Next_Frame;
-										
 
 					if(frame->flags & HierarchyFrameFlag_DeltaFrame)
 					{
 						GLOBALASSERT(delta_frame==0); //should only be one frame with this flag
 						delta_frame=kfd;
 					}
-										
+
 					VECTORCH offset;
 					
 					offset.vx = (int)(frame->transform.x * local_scale);
@@ -964,11 +981,8 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 
 					CopyIntQuatToShort(&q,&kfd->QOrient);
 
-					
 					int this_frame_no = frame->at_frame_no;
-									
-										
-					
+
 					frame_no++;
 					
 					if (frame_no<seq->num_frames)
@@ -2707,7 +2721,8 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 // hook to load a bitmap - so you can load them from test directories, etc. should return tex index
 int load_rif_bitmap (char const * fname, BMPN_Flags flags)
 {
-	return CL_LoadImageOnce
+	int textureID = 
+		CL_LoadImageOnce
 		(
 			fname,
 			(LIO_D3DTEXTURE)
@@ -2719,6 +2734,33 @@ int load_rif_bitmap (char const * fname, BMPN_Flags flags)
 				? LIO_LOADMIPMAPS : LIO_NOMIPMAPS)
 			|LIO_RESTORABLE
 		);
+
+	ingameTextureList.push_back(textureID);
+	return textureID;
+}
+
+void release_rif_bitmaps()
+{
+	for (uint32_t i = 0; i < ingameTextureList.size(); i++)
+	{
+		Tex_Release(ingameTextureList[i]);
+	}
+
+	Tex_Release(HUDImageNumber);
+	Tex_Release(SpecialFXImageNumber);
+	Tex_Release(SmokyImageNumber);
+	Tex_Release(ChromeImageNumber);
+	Tex_Release(CloudyImageNumber);
+	Tex_Release(BurningImageNumber);
+	Tex_Release(HUDFontsImageNumber);
+	Tex_Release(PredatorVisionChangeImageNumber);
+	Tex_Release(PredatorNumbersImageNumber);
+	Tex_Release(StaticImageNumber);
+	Tex_Release(AlienTongueImageNumber);
+	Tex_Release(AAFontImageNumber);
+	Tex_Release(WaterShaftImageNumber);
+
+	ingameTextureList.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////
