@@ -188,13 +188,6 @@ int InitialiseTextures(void)
 				/* This function calls GetExistingImageHeader to figure out if the image is already loaded */
 				TxIndex = CL_LoadImageOnce(fname, LIO_D3DTEXTURE|LIO_TRANSPARENT|LIO_RELATIVEPATH|LIO_RESTORABLE);
 
-				// bjd - this correct?
-				char buf[100];
-				sprintf(buf, "adding tex: %d\n", TxIndex);
-				OutputDebugString(buf);
-
-				NextFreeImageHeaderPtr->textureID = TxIndex;
-
 				GLOBALASSERT(GEI_NOTLOADED != TxIndex);
 
 				/*

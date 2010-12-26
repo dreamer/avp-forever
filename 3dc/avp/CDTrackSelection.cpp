@@ -194,7 +194,7 @@ void LoadCDTrackList()
 
 	char* buffer;
 	uint32_t file_size;
-	unsigned long bytes_read;
+	DWORD bytes_read;
 
 	//copy the file contents into a buffer
 	file_size = GetFileSize(file, 0);

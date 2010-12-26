@@ -81,9 +81,9 @@ static HRESULT LastError; // remove me
 void RenderListInit()
 {
 	// new, test particle list
-	particleList = new RenderList(200);
-	mainList = new RenderList(400);
-	orthoList = new RenderList(200);
+	particleList = new RenderList(400);
+	mainList = new RenderList(800);
+	orthoList = new RenderList(400);
 }
 
 void RenderListDeInit()
@@ -1452,29 +1452,19 @@ extern BOOL CheckPointIsInFrustum(D3DXVECTOR3 *point);
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
 	// bjd - This is the function responsible for drawing level geometry and the players weapon
-
-	bool valid = false;
 /*
+	bool valid = false;
+
 	// test frustum culling for each point
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 
-		VECTORCHF test;
-		test.vx = vertices->X;
-		test.vy = vertices->Y;
-		test.vz = vertices->Z;
-
-		TransformToViewspace(&test);
-
 		D3DXVECTOR3 temp;
-//		temp.x = (float)vertices->X;
-//		temp.y = (float)-vertices->Y;
-//		temp.z = (float)vertices->Z;
 
-		temp.x = (float)test.vx;
-		temp.y = (float)-test.vy;
-		temp.z = (float)test.vz;
+		temp.x = (float)vertices->X;
+		temp.y = (float)-vertices->Y;
+		temp.z = (float)vertices->Z;
 
 		if (CheckPointIsInFrustum(&temp) == TRUE)
 		{
@@ -1488,6 +1478,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 	if (valid == false)
 		return;
 */
+
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
 	uint32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);

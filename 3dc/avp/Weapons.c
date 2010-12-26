@@ -7738,7 +7738,7 @@ void AlienClaw_Strike(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr)
 		int alien_speed;
 
 		/* Consider possibility of bite first... */
-		Biting=GetBitingTarget();
+		Biting = GetBitingTarget();
 		if (Biting)
 		{
 			/* Fix the name. */
@@ -7746,24 +7746,24 @@ void AlienClaw_Strike(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr)
 			/* Fix the speed. */
 			FixAlienStrikeSpeed(ONE_FIXED/3);
 			/* Init attack. */
-			Bit=0;
+			Bit = 0;
 			/* Then leave. */
 			return;
 		}
 
-		alien_speed=Approximate3dMagnitude(&Player->ObStrategyBlock->DynPtr->LinVelocity);
+		alien_speed = Approximate3dMagnitude(&Player->ObStrategyBlock->DynPtr->LinVelocity);
 
 		/* Speed: < 5000 = standing.  > 22000 = jumping.
 			In practice, walk/fall = 18000 ish, jump = 27000 ish. */
 
 		/* Check we've got the claws. */
 
-		if (Alien_Visible_Weapon!=0)
+		if (Alien_Visible_Weapon != 0)
 		{
-			GetHierarchicalWeapon("alien_HUD","claws",(int)HMSQT_AlienHUD,(int)AHSS_LeftSwipeDown);
-			ProveHModel(&PlayersWeaponHModelController,&PlayersWeapon);
+			GetHierarchicalWeapon("alien_HUD","claws", (int)HMSQT_AlienHUD, (int)AHSS_LeftSwipeDown);
+			ProveHModel(&PlayersWeaponHModelController, &PlayersWeapon);
 
-			Alien_Visible_Weapon=0;
+			Alien_Visible_Weapon = 0;
 		}
 
 		/* Setup base damage. */
@@ -7773,36 +7773,40 @@ void AlienClaw_Strike(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr)
 		/* Choose attack type and speed. */
 
 		if ((alien_speed<5000)&&(PlayerStatusPtr->ShapeState==PMph_Standing)
-			&&(Player->ObStrategyBlock->DynPtr->IsInContactWithFloor)) {
+			&&(Player->ObStrategyBlock->DynPtr->IsInContactWithFloor))
+		{
 			/* Standing on solid ground. */
-
 			TemplateWeapon[WEAPON_ALIEN_CLAW].PrimaryIsAutomatic=1;
 
 			FixAlienStrikeSpeed(ONE_FIXED/3);
 
 			textprint("Standing Claw, Speed %d\n",alien_speed);
 
-			if ((FastRandom()&65536)>32768) {
-				InitHModelTweening(&PlayersWeaponHModelController,(ONE_FIXED>>4),HMSQT_AlienHUD,
-					(int)AHSS_Both_In,ACStrikeTime,0);
-			} else {
-				InitHModelTweening(&PlayersWeaponHModelController,(ONE_FIXED>>4),HMSQT_AlienHUD,
-					(int)AHSS_Both_Down,ACStrikeTime,0);
+			if ((FastRandom()&65536)>32768)
+			{
+				InitHModelTweening(&PlayersWeaponHModelController,(ONE_FIXED>>4),HMSQT_AlienHUD, (int)AHSS_Both_In,ACStrikeTime,0);
 			}
-
-		} else {
-			
+			else
+			{
+				InitHModelTweening(&PlayersWeaponHModelController,(ONE_FIXED>>4),HMSQT_AlienHUD, (int)AHSS_Both_Down,ACStrikeTime,0);
+			}
+		} 
+		else
+		{
 			/* Crouching, falling, or running? */
-
-			if ( (Player->ObStrategyBlock->DynPtr->IsInContactWithFloor==0) 
-				&& (Player->ObStrategyBlock->DynPtr->TimeNotInContactWithFloor<=0) ) {
+			if ((Player->ObStrategyBlock->DynPtr->IsInContactWithFloor == 0)
+				&& (Player->ObStrategyBlock->DynPtr->TimeNotInContactWithFloor <= 0))
+			{
 				/* Jumping or falling... */
-				TemplateWeapon[WEAPON_ALIEN_CLAW].PrimaryIsAutomatic=0;
-			} else {
-				TemplateWeapon[WEAPON_ALIEN_CLAW].PrimaryIsAutomatic=1;
+				TemplateWeapon[WEAPON_ALIEN_CLAW].PrimaryIsAutomatic = 0;
+			}
+			else
+			{
+				TemplateWeapon[WEAPON_ALIEN_CLAW].PrimaryIsAutomatic = 1;
 			}
 
-			if (PlayerStatusPtr->ShapeState!=PMph_Standing) {
+			if (PlayerStatusPtr->ShapeState!=PMph_Standing)
+			{
 				/* If crouching, falling or no, slower strike. */
 				if (  /* Gravity points vaguely down... */
 					(Player->ObStrategyBlock->DynPtr->GravityDirection.vx<46341)
@@ -7810,34 +7814,38 @@ void AlienClaw_Strike(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr)
 					&&(Player->ObStrategyBlock->DynPtr->GravityDirection.vy>46341)
 					&&(Player->ObStrategyBlock->DynPtr->GravityDirection.vz<46341)
 					&&(Player->ObStrategyBlock->DynPtr->GravityDirection.vz>-46341)
-				   ) {
+				   )
+				{
 					FixAlienStrikeSpeed(ONE_FIXED/4);
-				} else {
+				}
+				else
+				{
 					FixAlienStrikeSpeed(ONE_FIXED/3);
 				}
-			} else {
+			}
+			else
+			{
 				FixAlienStrikeSpeed(ONE_FIXED/5);
 			}
-			
+
 			/* Speed test here, for jumping? */
-
-			if ( (Player->ObStrategyBlock->DynPtr->IsInContactWithFloor==0) 
+			if ((Player->ObStrategyBlock->DynPtr->IsInContactWithFloor==0) 
 				&& (Player->ObStrategyBlock->DynPtr->TimeNotInContactWithFloor<=0)
-				&& (alien_speed>22000) ) {
-
+				&& (alien_speed>22000))
+			{
 				/* Must be jumping. */
 				FixAlienStrikeSpeed(ONE_FIXED/3);
 				/* Extra damage for pounce. */
-				Player_Weapon_Damage.Impact+=10;
-				Player_Weapon_Damage.Cutting+=10;
-				if ((FastRandom()&65536)>32768) {
-					InitHModelTweening(&PlayersWeaponHModelController,(ONE_FIXED>>4),HMSQT_AlienHUD,
-						(int)AHSS_PounceIn,ACStrikeTime,0);
-				} else {
-					InitHModelTweening(&PlayersWeaponHModelController,(ONE_FIXED>>4),HMSQT_AlienHUD,
-						(int)AHSS_PounceDown,ACStrikeTime,0);
+				Player_Weapon_Damage.Impact += 10;
+				Player_Weapon_Damage.Cutting += 10;
+				if ((FastRandom()&65536)>32768)
+				{
+					InitHModelTweening(&PlayersWeaponHModelController, (ONE_FIXED>>4), HMSQT_AlienHUD, (int)AHSS_PounceIn, ACStrikeTime, 0);
 				}
-
+				else
+				{
+					InitHModelTweening(&PlayersWeaponHModelController,(ONE_FIXED>>4), HMSQT_AlienHUD, (int)AHSS_PounceDown, ACStrikeTime, 0);
+				}
 			} else if (LastHand) {
 				if ((FastRandom()&65536)>32768) {
 					InitHModelTweening(&PlayersWeaponHModelController,(ONE_FIXED>>4),HMSQT_AlienHUD,
@@ -7902,7 +7910,6 @@ void AlienClaw_Strike(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr)
 						extern void AlienBiteAttackHasHappened(void);
 						AlienBiteAttackHasHappened();
 					}
-
 				}
 				else
 				{

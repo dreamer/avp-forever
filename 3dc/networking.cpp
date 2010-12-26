@@ -201,10 +201,11 @@ int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle
 			ServerAddress.host = ENET_HOST_ANY;
 			ServerAddress.port = netPortNumber;
 
-			Server = enet_host_create(&ServerAddress,	// the address to bind the server host to, 
-                                 32,					// allow up to 32 clients and/or outgoing connections,
-                                 incomingBandwidth,		// assume any amount of incoming bandwidth,
-                                 outgoingBandwidth);	// assume any amount of outgoing bandwidth;
+			Server = enet_host_create(&ServerAddress,	// the address to bind the server host to.
+                                 32,					// allow up to 32 clients and/or outgoing connections.
+								 0,                     // channel limit.
+                                 incomingBandwidth,		// assume any amount of incoming bandwidth.
+                                 outgoingBandwidth);	// assume any amount of outgoing bandwidth.
 			if (Server == NULL)
 			{
 				Con_PrintError("Failed to create ENet server");
@@ -336,6 +337,7 @@ void Net_ConnectToAddress()
 	// try connect
 	Client = enet_host_create(NULL,     // create a client host
                 1,                      // only allow 1 outgoing connection
+				0,                      // channel limit
                 incomingBandwidth,      // 57600 / 8 - 56K modem with 56 Kbps downstream bandwidth
                 outgoingBandwidth);     // 14400 / 8 - 56K modem with 14 Kbps upstream bandwidth
 
@@ -345,7 +347,7 @@ void Net_ConnectToAddress()
 		return;
     }
 	
-	ServerPeer = enet_host_connect(Client, &connectionAddress, 2);
+	ServerPeer = enet_host_connect(Client, &connectionAddress, 2, 0);
 	if (ServerPeer == NULL)
 	{
 		Con_PrintError("Net_ConnectToAddress - Failed to init connection to server host");
@@ -1010,6 +1012,7 @@ int Net_OpenSession(const char *hostName)
 	// create Enet client
 	Client = enet_host_create(NULL,     // create a client host
                 1,                      // only allow 1 outgoing connection
+				0,                      // channel limit
                 incomingBandwidth,      // 57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth
                 outgoingBandwidth);     // 14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth
 
@@ -1019,7 +1022,7 @@ int Net_OpenSession(const char *hostName)
 		return NET_FAIL;
     }
 	
-	ServerPeer = enet_host_connect(Client, &ServerAddress, 2);
+	ServerPeer = enet_host_connect(Client, &ServerAddress, 2, 0);
 	if (ServerPeer == NULL)
 	{
 		Con_PrintError("Net_OpenSession - Failed to init connection to server host");
@@ -1068,10 +1071,11 @@ unsigned int __stdcall SessionSearch(void *args)
 	BroadcastAddress.port = netPortNumber; // can I reuse port?? :\
 
 	// create Enet client
-	Client = enet_host_create (NULL,	// create a client host
-				1,						// only allow 1 outgoing connection
-				incomingBandwidth,		// 57600 / 8 - 56K modem with 56 Kbps downstream bandwidth
-				outgoingBandwidth);		// 14400 / 8 - 56K modem with 14 Kbps upstream bandwidth
+	Client = enet_host_create (NULL,    // create a client host
+				1,                      // only allow 1 outgoing connection
+				0,                      // channel limit
+				incomingBandwidth,      // 57600 / 8 - 56K modem with 56 Kbps downstream bandwidth
+				outgoingBandwidth);     // 14400 / 8 - 56K modem with 14 Kbps upstream bandwidth
 
 	if (Client == NULL)
     {
@@ -1079,7 +1083,7 @@ unsigned int __stdcall SessionSearch(void *args)
 		return -1;
     }
 
-	Peer = enet_host_connect(Client, &BroadcastAddress, 2);
+	Peer = enet_host_connect(Client, &BroadcastAddress, 2, 0);
 	if (Peer == NULL)
 	{
 		Con_PrintError("Failed to connect to ENet Broadcast peer");
@@ -1272,25 +1276,26 @@ void Net_FindAvPSessions()
 	BroadcastAddress.port = netPortNumber; // can I reuse port?? :\
 
 	// create Enet client
-	Client = enet_host_create (NULL,	// create a client host
-                1,						// only allow 1 outgoing connection
-                incomingBandwidth,		// 57600 / 8 - 56K modem with 56 Kbps downstream bandwidth
-                outgoingBandwidth);		// 14400 / 8 - 56K modem with 14 Kbps upstream bandwidth
+	Client = enet_host_create (NULL,    // create a client host
+				1,                      // only allow 1 outgoing connection
+				0,                      // channel limit
+				incomingBandwidth,      // 57600 / 8 - 56K modem with 56 Kbps downstream bandwidth
+				outgoingBandwidth);     // 14400 / 8 - 56K modem with 14 Kbps upstream bandwidth
 
-    if (Client == NULL)
-    {
+	if (Client == NULL)
+	{
 		Con_PrintError("Failed to create ENet client");
 		return;
-    }
+	}
 
-	Peer = enet_host_connect(Client, &BroadcastAddress, 2);
+	Peer = enet_host_connect(Client, &BroadcastAddress, 2, 0);
 	if (Peer == NULL)
 	{
 		Con_PrintError("Failed to connect to ENet Broadcast peer");
 		return;
 	}
 
-    // lets send a message out saying we're looking for available game sessions
+	// lets send a message out saying we're looking for available game sessions
 	if (enet_host_service(Client, &eEvent, 1000) > 0) // this could probably be lower?
 	{
 		if (ENET_EVENT_TYPE_CONNECT == eEvent.type)

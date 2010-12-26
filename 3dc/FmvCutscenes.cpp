@@ -17,7 +17,7 @@
 
 struct fmvCutscene
 {
-	BOOL isPlaying;
+	bool isPlaying;
 	TheoraFMV *FMVclass;
 };
 
@@ -85,7 +85,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 			ftPtr->MessageNumber = 0;
 			delete fmvList[ftPtr->fmvHandle].FMVclass;
 			fmvList[ftPtr->fmvHandle].FMVclass = NULL;
-			fmvList[ftPtr->fmvHandle].isPlaying = FALSE;
+			fmvList[ftPtr->fmvHandle].isPlaying = false;
 			ftPtr->fmvHandle = -1;
 		}
 		else
@@ -119,9 +119,6 @@ extern "C" {
 
 void StartMenuBackgroundFmv()
 {
-	MenuBackground = false;
-	return;
-
 	const char *filenamePtr = "fmvs\\menubackground.ogv";
 
 	menuFMV = new TheoraFMV();
@@ -140,12 +137,6 @@ extern int NumActiveBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
 extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
-extern IMAGEHEADER ImageHeaderArray[];
-#if MaxImageGroups>1
-	extern int NumImagesArray[];
-#else
-	extern int NumImages;
-#endif
 
 extern unsigned char DebouncedGotAnyKey;
 
@@ -217,7 +208,7 @@ int32_t OpenFMV(const char *filenamePtr)
 			fmvList[fmvHandle].FMVclass = NULL;
 			return -1;
 		}
-		fmvList[fmvHandle].isPlaying = TRUE;
+		fmvList[fmvHandle].isPlaying = true;
 	}
 	else
 	{

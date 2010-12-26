@@ -50,7 +50,7 @@ main (<span class="keywordtype">int</span> argc, <span class="keywordtype">char<
 }
 </pre></div><h2><a class="anchor" id="CreateServer">
 Creating an ENet server</a></h2>
-<p>Servers in ENet are constructed with <a class="el" href="group__host.html#ga929df1baa1662e1eb0ae89af9ee3b339" title="Creates a host for communicating to peers.">enet_host_create()</a>. You must specify an address on which to receive data and new connections, as well as the maximum allowable numbers of connected peers. You may optionally specify the incoming and outgoing bandwidth of the server in bytes per second so that ENet may try to statically manage bandwidth resources among connected peers in addition to its dynamic throttling algorithm; specifying 0 for these two options will cause ENet to rely entirely upon its dynamic throttling algorithm to manage bandwidth.</p>
+<p>Servers in ENet are constructed with <a class="el" href="group__host.html#ga5567a95d7a45521dc9cba93a9066c940" title="Creates a host for communicating to peers.">enet_host_create()</a>. You must specify an address on which to receive data and new connections, as well as the maximum allowable numbers of connected peers. You may optionally specify the incoming and outgoing bandwidth of the server in bytes per second so that ENet may try to statically manage bandwidth resources among connected peers in addition to its dynamic throttling algorithm; specifying 0 for these two options will cause ENet to rely entirely upon its dynamic throttling algorithm to manage bandwidth.</p>
 <p>When done with a host, the host may be destroyed with <a class="el" href="group__host.html#gacec1e9a0b528c1f9ce30544d2d5b5b79" title="Destroys the host and all resources associated with it.">enet_host_destroy()</a>. All connected peers to the host will be reset, and the resources used by the host will be freed.</p>
 <div class="fragment"><pre class="fragment">    <a class="code" href="struct__ENetAddress.html" title="Portable internet address structure.">ENetAddress</a> address;
     <a class="code" href="struct__ENetHost.html" title="An ENet host for communicating with peers.">ENetHost</a> * server;
@@ -59,12 +59,13 @@ Creating an ENet server</a></h2>
     <span class="comment">/* A specific host address can be specified by   */</span>
     <span class="comment">/* enet_address_set_host (&amp; address, &quot;x.x.x.x&quot;); */</span>
 
-    address.host = <a class="code" href="enet_8h.html#a06fc87d81c62e9abb8790b6e5713c55ba3d8d24eeb6e426826e88540d7c87d036" title="specifies the default server host">ENET_HOST_ANY</a>;
+    address.host = <a class="code" href="enet_8h.html#adf764cbdea00d65edcd07bb9953ad2b7a3d8d24eeb6e426826e88540d7c87d036" title="specifies the default server host">ENET_HOST_ANY</a>;
     <span class="comment">/* Bind the server to port 1234. */</span>
     address.port = 1234;
 
-    server = <a class="code" href="group__host.html#ga929df1baa1662e1eb0ae89af9ee3b339" title="Creates a host for communicating to peers.">enet_host_create</a> (&amp; address <span class="comment">/* the address to bind the server host to */</span>, 
+    server = <a class="code" href="group__host.html#ga5567a95d7a45521dc9cba93a9066c940" title="Creates a host for communicating to peers.">enet_host_create</a> (&amp; address <span class="comment">/* the address to bind the server host to */</span>, 
                                  32      <span class="comment">/* allow up to 32 clients and/or outgoing connections */</span>,
+                                  2      <span class="comment">/* allow up to 2 channels to be used, 0 and 1 */</span>,
                                   0      <span class="comment">/* assume any amount of incoming bandwidth */</span>,
                                   0      <span class="comment">/* assume any amount of outgoing bandwidth */</span>);
     <span class="keywordflow">if</span> (server == NULL)
@@ -79,11 +80,12 @@ Creating an ENet server</a></h2>
     <a class="code" href="group__host.html#gacec1e9a0b528c1f9ce30544d2d5b5b79" title="Destroys the host and all resources associated with it.">enet_host_destroy</a>(server);
 </pre></div><h2><a class="anchor" id="CreateClient">
 Creating an ENet client</a></h2>
-<p>Clients in ENet are similarly constructed with <a class="el" href="group__host.html#ga929df1baa1662e1eb0ae89af9ee3b339" title="Creates a host for communicating to peers.">enet_host_create()</a> when no address is specified to bind the host to. Bandwidth may be specified for the client host as in the above example. The peer count controls the maximum number of connections to other server hosts that may be simultaneously open.</p>
+<p>Clients in ENet are similarly constructed with <a class="el" href="group__host.html#ga5567a95d7a45521dc9cba93a9066c940" title="Creates a host for communicating to peers.">enet_host_create()</a> when no address is specified to bind the host to. Bandwidth may be specified for the client host as in the above example. The peer count controls the maximum number of connections to other server hosts that may be simultaneously open.</p>
 <div class="fragment"><pre class="fragment">    <a class="code" href="struct__ENetHost.html" title="An ENet host for communicating with peers.">ENetHost</a> * client;
 
-    client = <a class="code" href="group__host.html#ga929df1baa1662e1eb0ae89af9ee3b339" title="Creates a host for communicating to peers.">enet_host_create</a> (NULL <span class="comment">/* create a client host */</span>,
+    client = <a class="code" href="group__host.html#ga5567a95d7a45521dc9cba93a9066c940" title="Creates a host for communicating to peers.">enet_host_create</a> (NULL <span class="comment">/* create a client host */</span>,
                 1 <span class="comment">/* only allow 1 outgoing connection */</span>,
+                2 <span class="comment">/* allow up 2 channels to be used, 0 and 1 */</span>,
                 57600 / 8 <span class="comment">/* 56K modem with 56 Kbps downstream bandwidth */</span>,
                 14400 / 8 <span class="comment">/* 56K modem with 14 Kbps upstream bandwidth */</span>);
 
@@ -112,7 +114,7 @@ Managing an ENet host</a></h2>
     {
         <span class="keywordflow">switch</span> (event.<a class="code" href="struct__ENetEvent.html#a53cd59a74e46de03e8f4b3fd47822d96" title="type of the event">type</a>)
         {
-        <span class="keywordflow">case</span> <a class="code" href="enet_8h.html#adc5336f0698d4336b587f083d89df414aefd9fa36297e41ca4c1cbcfdeb7e4a9d" title="a connection request initiated by enet_host_connect has completed.">ENET_EVENT_TYPE_CONNECT</a>:
+        <span class="keywordflow">case</span> <a class="code" href="enet_8h.html#a3cf937b5cf72510493e0a7a2b71d3755aefd9fa36297e41ca4c1cbcfdeb7e4a9d" title="a connection request initiated by enet_host_connect has completed.">ENET_EVENT_TYPE_CONNECT</a>:
             printf (<span class="stringliteral">&quot;A new client connected from %x:%u.\n&quot;</span>, 
                     event.<a class="code" href="struct__ENetEvent.html#ac991d0db800bc1c70b56ad63f1670140" title="peer that generated a connect, disconnect or receive event">peer</a> -&gt; address.host,
                     event.<a class="code" href="struct__ENetEvent.html#ac991d0db800bc1c70b56ad63f1670140" title="peer that generated a connect, disconnect or receive event">peer</a> -&gt; address.port);
@@ -122,7 +124,7 @@ Managing an ENet host</a></h2>
 
             <span class="keywordflow">break</span>;
 
-        <span class="keywordflow">case</span> <a class="code" href="enet_8h.html#adc5336f0698d4336b587f083d89df414a67d928ca38b289db53ec9f56c91c5d9d" title="a packet has been received from a peer.">ENET_EVENT_TYPE_RECEIVE</a>:
+        <span class="keywordflow">case</span> <a class="code" href="enet_8h.html#a3cf937b5cf72510493e0a7a2b71d3755a67d928ca38b289db53ec9f56c91c5d9d" title="a packet has been received from a peer.">ENET_EVENT_TYPE_RECEIVE</a>:
             printf (<span class="stringliteral">&quot;A packet of length %u containing %s was received from %s on channel %u.\n&quot;</span>,
                     event.<a class="code" href="struct__ENetEvent.html#afb6303a5593fce6b9671efbc2ca1b5de" title="packet associated with the event, if appropriate">packet</a> -&gt; dataLength,
                     event.<a class="code" href="struct__ENetEvent.html#afb6303a5593fce6b9671efbc2ca1b5de" title="packet associated with the event, if appropriate">packet</a> -&gt; data,
@@ -134,7 +136,7 @@ Managing an ENet host</a></h2>
             
             <span class="keywordflow">break</span>;
            
-        <span class="keywordflow">case</span> <a class="code" href="enet_8h.html#adc5336f0698d4336b587f083d89df414a4fa47af84cf901810510aeba077a1c2f" title="a peer has disconnected.">ENET_EVENT_TYPE_DISCONNECT</a>:
+        <span class="keywordflow">case</span> <a class="code" href="enet_8h.html#a3cf937b5cf72510493e0a7a2b71d3755a4fa47af84cf901810510aeba077a1c2f" title="a peer has disconnected.">ENET_EVENT_TYPE_DISCONNECT</a>:
             printf (<span class="stringliteral">&quot;%s disconected.\n&quot;</span>, event.<a class="code" href="struct__ENetEvent.html#ac991d0db800bc1c70b56ad63f1670140" title="peer that generated a connect, disconnect or receive event">peer</a> -&gt; data);
 
             <span class="comment">/* Reset the peer&apos;s client information. */</span>
@@ -157,7 +159,7 @@ Sending a packet to an ENet peer</a></h2>
 <div class="fragment"><pre class="fragment">    <span class="comment">/* Create a reliable packet of size 7 containing &quot;packet\0&quot; */</span>
     <a class="code" href="struct__ENetPacket.html" title="ENet packet structure.">ENetPacket</a> * packet = <a class="code" href="group__Packet.html#gaac61b251aebbf9f5e5e313eca51339ea" title="Creates a packet that may be sent to a peer.">enet_packet_create</a> (<span class="stringliteral">&quot;packet&quot;</span>, 
                                               strlen (<span class="stringliteral">&quot;packet&quot;</span>) + 1, 
-                                              <a class="code" href="enet_8h.html#a38c59a481ed607b07d63b7bc3e88ca98aab20e7088245ab2ddb7f11dcc9433738" title="packet must be received by the target peer and resend attempts should be made until...">ENET_PACKET_FLAG_RELIABLE</a>);
+                                              <a class="code" href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003daab20e7088245ab2ddb7f11dcc9433738" title="packet must be received by the target peer and resend attempts should be made until...">ENET_PACKET_FLAG_RELIABLE</a>);
 
     <span class="comment">/* Extend the packet so and append the string &quot;foo&quot;, so it now */</span>
     <span class="comment">/* contains &quot;packetfoo\0&quot;                                      */</span>
@@ -188,11 +190,11 @@ Disconnecting an ENet peer</a></h2>
     {
         <span class="keywordflow">switch</span> (event.<a class="code" href="struct__ENetEvent.html#a53cd59a74e46de03e8f4b3fd47822d96" title="type of the event">type</a>)
         {
-        <span class="keywordflow">case</span> <a class="code" href="enet_8h.html#adc5336f0698d4336b587f083d89df414a67d928ca38b289db53ec9f56c91c5d9d" title="a packet has been received from a peer.">ENET_EVENT_TYPE_RECEIVE</a>:
+        <span class="keywordflow">case</span> <a class="code" href="enet_8h.html#a3cf937b5cf72510493e0a7a2b71d3755a67d928ca38b289db53ec9f56c91c5d9d" title="a packet has been received from a peer.">ENET_EVENT_TYPE_RECEIVE</a>:
             <a class="code" href="group__Packet.html#gab58895376ee4ade8f4e13761a44ba263" title="Destroys the packet and deallocates its data.">enet_packet_destroy</a> (event.<a class="code" href="struct__ENetEvent.html#afb6303a5593fce6b9671efbc2ca1b5de" title="packet associated with the event, if appropriate">packet</a>);
             <span class="keywordflow">break</span>;
 
-        <span class="keywordflow">case</span> <a class="code" href="enet_8h.html#adc5336f0698d4336b587f083d89df414a4fa47af84cf901810510aeba077a1c2f" title="a peer has disconnected.">ENET_EVENT_TYPE_DISCONNECT</a>:
+        <span class="keywordflow">case</span> <a class="code" href="enet_8h.html#a3cf937b5cf72510493e0a7a2b71d3755a4fa47af84cf901810510aeba077a1c2f" title="a peer has disconnected.">ENET_EVENT_TYPE_DISCONNECT</a>:
             puts (<span class="stringliteral">&quot;Disconnection succeeded.&quot;</span>);
             <span class="keywordflow">return</span>;
         ...
@@ -209,7 +211,7 @@ Disconnecting an ENet peer</a></h2>
     ...
 </pre></div><h2><a class="anchor" id="Connecting">
 Connecting to an ENet host</a></h2>
-<p>A connection to a foreign host is initiated with <a class="el" href="group__host.html#ga04f234142512c08dd86a22b05020bd88" title="Initiates a connection to a foreign host.">enet_host_connect()</a>. It accepts the address of a foreign host to connect to, and the number of channels that should be allocated for communication. If N channels are allocated for use, their channel ids will be numbered 0 through N-1. A peer representing the connection attempt is returned, or NULL if there were no available peers over which to initiate the connection. When the connection attempt succeeds, an event of type ENET_EVENT_TYPE_CONNECT will be generated. If the connection attempt times out or otherwise fails, an event of type ENET_EVENT_TYPE_DISCONNECT will be generated.</p>
+<p>A connection to a foreign host is initiated with <a class="el" href="group__host.html#ga23b3ac206326b84f42fa91673f12fca9" title="Initiates a connection to a foreign host.">enet_host_connect()</a>. It accepts the address of a foreign host to connect to, and the number of channels that should be allocated for communication. If N channels are allocated for use, their channel ids will be numbered 0 through N-1. A peer representing the connection attempt is returned, or NULL if there were no available peers over which to initiate the connection. When the connection attempt succeeds, an event of type ENET_EVENT_TYPE_CONNECT will be generated. If the connection attempt times out or otherwise fails, an event of type ENET_EVENT_TYPE_DISCONNECT will be generated.</p>
 <div class="fragment"><pre class="fragment">    <a class="code" href="struct__ENetAddress.html" title="Portable internet address structure.">ENetAddress</a> address;
     <a class="code" href="struct__ENetEvent.html" title="An ENet event as returned by enet_host_service().">ENetEvent</a> event;
     <a class="code" href="struct__ENetPeer.html" title="An ENet peer which data packets may be sent or received from.">ENetPeer</a> *peer;
@@ -219,7 +221,7 @@ Connecting to an ENet host</a></h2>
     address.port = 1234;
 
     <span class="comment">/* Initiate the connection, allocating the two channels 0 and 1. */</span>
-    peer = <a class="code" href="group__host.html#ga04f234142512c08dd86a22b05020bd88" title="Initiates a connection to a foreign host.">enet_host_connect</a> (client, &amp; address, 2);    
+    peer = <a class="code" href="group__host.html#ga23b3ac206326b84f42fa91673f12fca9" title="Initiates a connection to a foreign host.">enet_host_connect</a> (client, &amp; address, 2, 0);    
     
     <span class="keywordflow">if</span> (peer == NULL)
     {
@@ -230,7 +232,7 @@ Connecting to an ENet host</a></h2>
     
     <span class="comment">/* Wait up to 5 seconds for the connection attempt to succeed. */</span>
     <span class="keywordflow">if</span> (<a class="code" href="group__host.html#ga6ba501b3ee576e5578c8e6d1694ebd49" title="Waits for events on the host specified and shuttles packets between the host and...">enet_host_service</a> (client, &amp; event, 5000) &gt; 0 &amp;&amp;
-        event.<a class="code" href="struct__ENetEvent.html#a53cd59a74e46de03e8f4b3fd47822d96" title="type of the event">type</a> == <a class="code" href="enet_8h.html#adc5336f0698d4336b587f083d89df414aefd9fa36297e41ca4c1cbcfdeb7e4a9d" title="a connection request initiated by enet_host_connect has completed.">ENET_EVENT_TYPE_CONNECT</a>)
+        event.<a class="code" href="struct__ENetEvent.html#a53cd59a74e46de03e8f4b3fd47822d96" title="type of the event">type</a> == <a class="code" href="enet_8h.html#a3cf937b5cf72510493e0a7a2b71d3755aefd9fa36297e41ca4c1cbcfdeb7e4a9d" title="a connection request initiated by enet_host_connect has completed.">ENET_EVENT_TYPE_CONNECT</a>)
     {
         puts (<span class="stringliteral">&quot;Connection to some.server.net:1234 succeeded.&quot;</span>);
         ...
@@ -250,7 +252,7 @@ Connecting to an ENet host</a></h2>
     ...
     ...
 </pre></div> </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Thu Nov 12 17:02:45 2009 for enet by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Sun Jun 13 14:21:37 2010 for enet by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

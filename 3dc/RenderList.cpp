@@ -140,7 +140,8 @@ void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENC
 	{
 		// list is full, flush it
 		OutputDebugString("List full. Flushing...\n");
-		Draw();
+//		Draw();
+		return;
 	}
 
 	uint32_t realNumVerts = GetRealNumVerts(numVerts);

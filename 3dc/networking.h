@@ -81,6 +81,10 @@ extern const uint32_t MESSAGEHEADERSIZE;
 
 #define NET_BROADCAST_ID				255
 
+#define PLAYER_NAME_SIZE                40
+#define PLAYER_CLANTAG_SIZE             5
+#define SESSION_NAME_SIZE               40
+
 // enum for message types
 enum
 {
@@ -96,7 +100,7 @@ enum
 
 #pragma pack(1)
 
-typedef struct
+struct NET_SESSIONDESC
 {
     uint32_t	size;
     GUID		guidInstance;
@@ -105,13 +109,8 @@ typedef struct
     uint8_t		currentPlayers;
 	uint8_t		version;
 	uint32_t	level;
-
-	char		sessionName[40];
-
-} NET_SESSIONDESC;
-
-#define PLAYER_NAME_SIZE	40
-#define PLAYER_CLANTAG_SIZE	5
+	char		sessionName[SESSION_NAME_SIZE];
+};
 
 // easily sendable version of above
 typedef struct PlayerDetails
