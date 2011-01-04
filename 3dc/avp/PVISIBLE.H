@@ -6,10 +6,6 @@
 #ifndef _pvisible_h_
 	#define _pvisible_h_ 1
 
-	#ifdef __cplusplus
-		extern "C" {
-	#endif
-
   	/* this enum defines the different inanimate object types ... */
 	typedef enum inanimateobject_type
 	{
@@ -136,7 +132,4 @@
 	
 	STRATEGYBLOCK* CreateMultiplayerWeaponPickup(VECTORCH* location,int type,char* name);
 	void MakePlayersWeaponPickupVisible();
-	#ifdef __cplusplus
-		}
-	#endif
 #endif

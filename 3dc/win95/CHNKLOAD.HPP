@@ -3,6 +3,8 @@
 
 #include "chnkload.h"
 
+#include "TextureManager.h"
+
 #ifdef __cplusplus
 
 #include "chunk.hpp"
@@ -12,10 +14,6 @@
 #include "projload.hpp"
 
 class Sprite_Header_Chunk;
-#if 0
-extern BOOL copy_to_mainshpl (Shape_Chunk *shape, int list_pos);
-extern BOOL copy_to_mainshpl (Shape_Sub_Shape_Chunk *shape, int list_pos);
-#endif
 
 extern void copy_to_module (Object_Chunk * ob, int mod_pos, int shplst_pos);
 
@@ -74,7 +72,7 @@ int copy_sprite_to_mainshapelist(RIFFHANDLE, Sprite_Header_Chunk *, int flags);
 #define CopySpriteToMainshapelist(h,p,f) copy_sprite_to_mainshapelist(h,p,f)
 
 // hook to load a bitmap - so you can load them from test directories, etc. should return tex index
-extern int load_rif_bitmap (char const * fname, BMPN_Flags flags);
+extern texID_t load_rif_bitmap (char const * fname, BMPN_Flags flags);
 #define LoadRIFBitmap(s,f) load_rif_bitmap(s,f)
 
 // project specific shape pre processing - usually merge polys

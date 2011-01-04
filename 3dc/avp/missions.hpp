@@ -23,9 +23,6 @@
 	#include "strtab.hpp"
 	#endif
 
-#ifdef __cplusplus
-	extern "C" {
-#endif
 
 /* Version settings *****************************************************/
 	#define WithinTheGame	TRUE
@@ -261,11 +258,6 @@
 
 
 /* End of the header ****************************************************/
-
-
-#ifdef __cplusplus
-	};
-#endif
 
 #endif
 

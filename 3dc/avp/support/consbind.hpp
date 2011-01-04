@@ -184,14 +184,7 @@
 /* Exported globals *****************************************************/
 
 /* Function prototypes **************************************************/
-
-#ifdef __cplusplus
-	extern "C" {
-#endif
 		void CONSBIND_WriteKeyBindingsToConfigFile(void);
-#ifdef __cplusplus
-	};
-#endif
 
 
 /* End of the header ****************************************************/

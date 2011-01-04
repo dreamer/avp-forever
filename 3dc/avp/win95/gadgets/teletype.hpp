@@ -31,9 +31,6 @@
 		#endif
 
 // moved wrapper here since scstring.hpp is a C++ header and templates can't have C linkage
-#ifdef __cplusplus
-	extern "C" {
-#endif
 
 	class TeletypeDaemon; // fully declared in TELETYPE.CPP
 	class TextReportGadget; // fully declared in TREPGADG.HPP
@@ -99,10 +96,5 @@
 
 
 /* End of the header ****************************************************/
-
-
-#ifdef __cplusplus
-	};
-#endif
 
 #endif

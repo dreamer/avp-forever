@@ -26,7 +26,7 @@ char const * cl_pszGameMode = NULL;
 // used to determine if the display is palettized
 // currently assuming that if this is <= 8 then all
 // surfaces et. except d3d textures have a global palette
-/*extern "C" {*/ extern int VideoModeColourDepth; //}
+extern int VideoModeColourDepth;
 
 // useful filename handling functions
 
@@ -639,12 +639,12 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 	}
 }
 
-int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
+texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 {
 	// safe to handle windows messages at this point (I think - JCWH)
 	CheckForWindowsMessages();
 
-	uint32_t textureID = 0;
+	texID_t textureID = 0;
 
 	// get the filename
 	char szBuf[MAX_PATH];
@@ -658,7 +658,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 	db_logf4(("\tLoading '%s'",szBuf));
 
 	// already loaded ?
-	int iExistingImage = Tex_CheckExists(szBuf);
+	texID_t iExistingImage = Tex_CheckExists(szBuf);
 	if (MISSING_TEXTURE != iExistingImage)
 	{
 		db_logf4(("\tImage already loaded to image number %d", iExistingImage));

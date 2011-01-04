@@ -4,11 +4,8 @@
 #include <windows.h>
 #include <process.h>
 
-extern "C"
-{
-	extern BOOL bActive;
-	extern int WinLeftX, WinRightX, WinTopY, WinBotY;
-}
+extern BOOL bActive;
+extern int WinLeftX, WinRightX, WinTopY, WinBotY;
 
 static volatile int EndMouseThread=0;
 
@@ -28,12 +25,6 @@ void MouseThread(void*)
 	EndMouseThread = 0;
 }
 
-
-
-extern "C"
-{
-
-
 void InitCentreMouseThread()
 {
 	_beginthread(MouseThread,10000,0);
@@ -45,7 +36,4 @@ void FinishCentreMouseThread()
    	EndMouseThread=1;
 }
 
-
-
-};
 #endif

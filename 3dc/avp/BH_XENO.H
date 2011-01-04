@@ -7,13 +7,6 @@
 #ifndef _bhxeno_h_
 	#define _bhxeno_h_ 1
 
-
-	#ifdef __cplusplus
-
-		extern "C" {
-
-	#endif
-
 /* KJL 16:57:28 16/07/98 - particle.h is needed for LASER_BEAM_DESC */
 #include "particle.h"
 #include "bh_ais.h"
@@ -222,13 +215,5 @@
 	void MakeXenoborgFar(STRATEGYBLOCK *sbPtr);
 	void XenoborgIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, int wounds,VECTORCH *incoming);
 	int XenoSight_FrustumReject(STRATEGYBLOCK *sbtr,VECTORCH *localOffset);
-
-
-	#ifdef __cplusplus
-
-		}
-
-	#endif
-
 
 #endif

@@ -8,10 +8,6 @@
 #ifndef _huddefs_h
 #define _huddefs_h 1
 
-	#ifdef __cplusplus
-		extern "C" {
-	#endif
-
 /*KJL****************************************************************************************
 * 										D E F I N E S 										*
 ****************************************************************************************KJL*/
@@ -250,9 +246,5 @@ extern void NewOnScreenMessage(char *messagePtr);
 * This is a platform specific fn which draws the required message to the *
 * screen. Implemented in ddplat.cpp on the PC.                           *
 *********************************************************************KJL*/
-
-	#ifdef __cplusplus
-		};	/* end of C-Linkage spec */
-	#endif
 
 #endif /* one-time only guard */

@@ -13,7 +13,7 @@
 #include "gadget.h"
 #include "daemon.h"
 #include "rentrntq.h"
-
+#include "Player.h"
 #include "bh_types.h"
 #include "consvar.hpp"
 #include "conscmnd.hpp"
@@ -36,9 +36,6 @@
 #include "game_statistics.h"
 #include "AvP_EnvInfo.h"
 #include "AvP_UserProfile.h"
-
-extern "C"
-{
 
 extern int Simplify_HModel_Rendering;
 
@@ -1285,5 +1282,5 @@ void CreateMoreGameSpecificConsoleVariables(void)
 	#endif
 }
 
-}; // extern "C"
+
 

@@ -11,10 +11,6 @@
 
 #include <stdint.h>
 
-#ifdef __cplusplus
-	extern "C" {
-#endif
-
 
 /*
 
@@ -804,13 +800,6 @@ typedef enum
 
 
 #endif	/* StandardShapeLanguage */
-
-
-#ifdef __cplusplus
-
-	};
-
-#endif
 
 #define SHAPE_INCLUDED
 

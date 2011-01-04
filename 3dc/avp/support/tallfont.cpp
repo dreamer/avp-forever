@@ -33,18 +33,6 @@
 /* Imported function prototypes ************************************/
 
 /* Imported data ***************************************************/
-#ifdef __cplusplus
-	extern "C"
-	{
-#endif
-//		extern int CloudTable[128][128];
-		extern int CloakingPhase;
-
-#ifdef __cplusplus
-	};
-#endif
-
-
 
 /* Exported globals ************************************************/
 

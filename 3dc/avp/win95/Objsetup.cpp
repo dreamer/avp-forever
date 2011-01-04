@@ -60,21 +60,16 @@
 
 #include "pldnet.h"
 
-extern "C" {
 #include "3dc.h"
 extern MAPSETVDB chnk_playcam_vdb;
 extern int GlobalAmbience;
 extern VIEWDESCRIPTORBLOCK *ActiveVDBList[];
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
-};
 
 static void get_marine_facing_point(VECTORCH& pos,EULER& euler,VECTORCH& facing_point);
 
 //if this number is non-negative , use this value for all random location dierolls
-extern "C"
-{
 int QuantumObjectDieRollOveride=-1;
-};
 
 struct BehaviourBlockData
 {
@@ -2929,9 +2924,7 @@ static void add_xenoborg(AVP_Generator_Chunk * agc)
 	
 }	
 
-extern "C"{
 extern void SetHiveParamaters(int enemytype,int max,int genpermin,int deltagenpermin,int time);
-};
 
 void setup_generators (Environment_Data_Chunk * envd)
 {

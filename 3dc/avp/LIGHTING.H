@@ -1,3 +1,6 @@
+#ifndef _Lighting_h_
+#define _Lighting_h_
+
 enum LIGHTING_EFFECTS_ID
 {
 	LFX_EXPLOSION,
@@ -49,3 +52,4 @@ void InitialiseLightElementSystem(void);
 void MakeLightElement(VECTORCH *positionPtr, enum LIGHTELEMENT_BEHAVIOUR_ID behaviourID);
 void HandleLightElementSystem(void);
 
+#endif

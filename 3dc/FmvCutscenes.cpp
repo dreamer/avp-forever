@@ -12,6 +12,7 @@
 #include "console.h"
 #include <vector>
 #include <string>
+#include "Di_func.h"
 
 #define MAX_FMVS 4
 
@@ -29,8 +30,8 @@ uint32_t NumberOfFMVTextures = 0;
 
 extern void UpdateFMVTexture(FMVTEXTURE *ftPtr);
 extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
+extern unsigned char GotAnyKey;
 
-extern "C" {
 int FmvColourRed;
 int FmvColourGreen;
 int FmvColourBlue;
@@ -43,7 +44,6 @@ int IntroOutroMoviesAreActive = 1;
 int VolumeOfNearestVideoScreen = 0;
 int PanningOfNearestVideoScreen = 0;
 #include "inline.h"
-}
 
 VorbisPlayback	*menuMusic = NULL;
 TheoraFMV		*menuFMV = NULL;
@@ -115,8 +115,6 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 	return 1;
 }
 
-extern "C" {
-
 void StartMenuBackgroundFmv()
 {
 	const char *filenamePtr = "fmvs\\menubackground.ogv";
@@ -132,13 +130,10 @@ void StartMenuBackgroundFmv()
 #include <math.h>
 #include <assert.h>
 
-extern unsigned char GotAnyKey;
 extern int NumActiveBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
 extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
-
-extern unsigned char DebouncedGotAnyKey;
 
 int NextFMVFrame();
 void FmvClose();
@@ -539,5 +534,3 @@ int GetVolumeOfNearestVideoScreen(void)
 //	PrintDebuggingText("Volume: %d, Pan %d\n",VolumeOfNearestVideoScreen,PanningOfNearestVideoScreen);
 	return VolumeOfNearestVideoScreen;
 }
-
-}; // extern C

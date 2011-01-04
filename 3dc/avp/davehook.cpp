@@ -64,25 +64,13 @@
 /* Imported function prototypes ************************************/
 
 /* Imported data ***************************************************/
-#ifdef __cplusplus
-	extern "C"
-	{
-#endif
 
 		extern unsigned char KeyboardInput[];
 
 		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-//		extern int VideoModeColourDepth;
 
 		extern int bEnableTextprint;
 		extern int bEnableTextprintXY;
-		extern signed int HUDTranslucencyLevel;
-
-#ifdef __cplusplus
-	};
-#endif
-
-
 
 /* Exported globals ************************************************/
 	#if 0

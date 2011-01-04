@@ -1,21 +1,19 @@
 
 #include "FmvCutscenes.h"
 #include "TextureManager.h"
+#include "io.h"
+#include "Di_func.h"
 
 extern void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha);
 
-extern "C"
-{
-	#include "3dc.h"
-	#include "inline.h"
-	#include "AvP_Menus.h"
-	#include "avp_intro.h"
-	extern int NormalFrameTime;
-	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-	extern unsigned char GotAnyKey;
-	extern unsigned char DebouncedGotAnyKey;
+extern unsigned char GotAnyKey;
 
-//	extern AVPMENUGFX AvPMenuGfxStorage[];
+#include "3dc.h"
+#include "inline.h"
+#include "AvP_Menus.h"
+#include "avp_intro.h"
+extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+
 extern void DirectReadKeyboard(void);
 
 extern void ThisFramesRenderingHasBegun(void);
@@ -75,7 +73,7 @@ extern void ShowSplashScreens(void)
 	LoadAllSplashScreenGfx();
 
 //	enum AVPMENUGFX_ID graphic[] =
-	uint32_t graphic[] =
+	texID_t graphic[] =
 	{
 		AVPMENUGFX_SPLASH_SCREEN1, AVPMENUGFX_SPLASH_SCREEN2, AVPMENUGFX_SPLASH_SCREEN3,
 		AVPMENUGFX_SPLASH_SCREEN4, AVPMENUGFX_SPLASH_SCREEN5
@@ -351,6 +349,3 @@ void Show_AvPLogo(void)
 	while(timeRemaining>0);// && !GotAnyKey);
 	#endif
 }
-
-};
-

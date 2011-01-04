@@ -22,10 +22,6 @@
 	#include "langenum.h"
 	#endif
 
-#ifdef __cplusplus
-	extern "C" {
-#endif
-
 /* Version settings *****************************************************/
 
 /* Constants  ***********************************************************/
@@ -52,16 +48,10 @@
 		(
 			enum WEAPON_ID WeaponID
 		);
-
 	};
 	
 
 
 /* End of the header ****************************************************/
-
-
-#ifdef __cplusplus
-	};
-#endif
 
 #endif

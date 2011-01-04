@@ -73,7 +73,6 @@ extern HuffmanPackage *HuffmanCompression(unsigned char *sourcePtr, int length)
 {
 	HuffmanPackage *outpackage;
 
-
 	// Step 1: Perform the symbol census
 	PerformSymbolCensus(sourcePtr,length);
 	// Step 2: Sorting the census data

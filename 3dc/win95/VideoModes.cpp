@@ -2,9 +2,6 @@
 #include <assert.h>
 #include "renderer.h"
 
-extern "C"
-{
-
 void NextVideoMode2()
 {
 	R_NextVideoMode();
@@ -45,4 +42,3 @@ void SetAndSaveDeviceAndVideoModePreferences()
 	R_SetCurrentVideoMode();
 }
 
-}

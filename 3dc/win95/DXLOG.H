@@ -3,10 +3,6 @@
 
 #include "system.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if debug
 
 void dx_err_log(HRESULT error, int line, char const * file);
@@ -24,11 +20,6 @@ void dx_strf_log(char const * fmt, ...);
 #define LOGDXSTR(str) (void)0
 #define LOGDXFMT(args) (void)0
 
-#endif
-
-
-#ifdef __cplusplus
-}
 #endif
 
 #endif /* ! _included_dxlog_h_ */

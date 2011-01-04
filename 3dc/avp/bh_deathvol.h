@@ -1,15 +1,8 @@
 #ifndef _bh_deathvol_h
 #define _bh_deathvol_h 1
 
-#ifdef __cplusplus
-
-	extern "C" {
-
-#endif
-
 extern void*  DeathVolumeBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr);
 extern void  DeathVolumeBehaveFun(STRATEGYBLOCK* sbptr);
-
 
 typedef struct death_volume_behav_block
 {
@@ -30,16 +23,5 @@ typedef struct death_volume_tools_template
 	unsigned int active :1;
 	unsigned int collision_required :1;
 }DEATH_VOLUME_TOOLS_TEMPLATE;
-
-
-
-
-
-#ifdef __cplusplus
-
-	};
-
-#endif
-
 
 #endif

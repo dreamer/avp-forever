@@ -7,10 +7,6 @@
 
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define MaxObjectLights 50			/* Sources attached to the object */
 
 #define maxlightblocks 100			/* This ought to be MORE than enough */
@@ -120,9 +116,4 @@ typedef enum {
 } AVP_STRATEGIES;
 
 /***********end for C++************/
-
-#ifdef __cplusplus
-};
-#endif
-
 #endif

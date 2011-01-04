@@ -1,9 +1,7 @@
 #ifndef _INCLUDED_CHNKTEXI_H_
 #define _INCLUDED_CHNKTEXI_H_
 
-#ifdef __cplusplus
-	extern "C" {
-#endif /* __cplusplus */
+#include "TextureManager.h"
 
 /* image number for already loaded image - really an internal function */
 #define GEI_NOTLOADED (/*-1*/0) // bjd
@@ -58,13 +56,9 @@ extern char const * FirstTex_Directory;
 extern char const * SecondTex_Directory;
 
 /* returns GEI_NOTLOADED on failure */
-extern int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc);
+extern texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc);
 
 /* returns NULL on failure, or pointer to pszDestBuf on success, nBufSize includes nul terminator */
 extern char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * pszFileName, unsigned fFlagsEtc);
-
-#ifdef __cplusplus
-	}
-#endif /* __cplusplus */
 
 #endif /* !_INCLUDED_CHNKTEXI_H_ */

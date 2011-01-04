@@ -3,12 +3,6 @@
 
 #include "track.h"
 
-#ifdef __cplusplus
-
-	extern "C" {
-
-#endif
-
 extern void* TrackObjectBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr);
 extern void  TrackObjectBehaveFun(STRATEGYBLOCK* sbptr);
 extern void  TrackObjectIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple);
@@ -92,13 +86,5 @@ typedef struct track_object_tools_template
 	char destruct_target_ID[SB_NAME_LENGTH];
 
 }TRACK_OBJECT_TOOLS_TEMPLATE;
-
-
-#ifdef __cplusplus
-
-	};
-
-#endif
-
 
 #endif

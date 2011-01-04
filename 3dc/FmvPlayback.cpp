@@ -441,7 +441,7 @@ bool TheoraFMV::NextFrame()
 	// critical section
 	EnterCriticalSection(&mFrameCriticalSection);
 
-	for (uint32_t i = 0; i < 3; i++)
+	for (uint32_t i = 0; i < frameTextureIDs.size(); i++)
 	{
 		uint8_t *originalDestPtr = NULL;
 		uint32_t pitch = 0;
@@ -1055,7 +1055,7 @@ void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb)
 #endif
 }
 
-// this code is based on plogg by Chris Double. Also contains code written by Rebellion and myself. Below is the license from plogg
+// this code is based on plogg by Chris Double. Also contains code written by myself. Below is the license from plogg
 
 // Copyright (C) 2009 Chris Double. All Rights Reserved.
 // The original author of this code can be contacted at: chris.double@double.co.nz

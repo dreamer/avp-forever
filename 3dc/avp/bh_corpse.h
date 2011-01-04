@@ -1,8 +1,5 @@
 #ifndef bh_corpse_h_included
 #define bh_corpse_h_included
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #define CORPSE_SIGHTINGS 1
 
@@ -59,9 +56,5 @@ extern void CorpseIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int mu
 #define AGUN_DYINGTIME			(ONE_FIXED*8)
 #define HDEBRIS_LIFETIME		(ONE_FIXED*8)
 /* Was (ONE_FIXED*3)... */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

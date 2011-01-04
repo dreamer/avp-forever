@@ -14,7 +14,7 @@
 #include "teletype.hpp"
 #include "coordstr.hpp"
 #include "trig666.hpp"
-
+#include "io.h"
 #include "indexfnt.hpp"
 
 #include "wrapstr.hpp"
@@ -50,27 +50,6 @@
 /* Imported function prototypes ************************************/
 
 /* Imported data ***************************************************/
-#ifdef __cplusplus
-	extern "C"
-	{
-#endif
-		#if 0
-		extern OurBool			DaveDebugOn;
-		extern FDIEXTENSIONTAG	FDIET_Dummy;
-		extern IFEXTENSIONTAG	IFET_Dummy;
-		extern FDIQUAD			FDIQuad_WholeScreen;
-		extern FDIPOS			FDIPos_Origin;
-		extern FDIPOS			FDIPos_ScreenCentre;
-		extern IFOBJECTLOCATION IFObjLoc_Origin;
-		extern UncompressedGlobalPlotAtomID UGPAID_StandardNull;
-		extern IFCOLOUR			IFColour_Dummy;
- 		extern IFVECTOR			IFVec_Zero;
-		#endif
-		extern int RealFrameTime;
-#ifdef __cplusplus
-	};
-#endif
-
 
 static int NumberOfLinesToDisplay=0;
 

@@ -3,10 +3,6 @@
 #ifndef _bhais_h_
 #define _bhais_h_ 1
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*-----------------------------
 General AI Support
 -------------------------------*/
@@ -218,8 +214,6 @@ extern int *NPC_myPoly;
 extern int *NPC_myLastPoly;
 extern int *NPC_lastFrameModule;
 
-extern int Observer;
-
 typedef struct pathheader
 {
 	int path_length;
@@ -228,10 +222,5 @@ typedef struct pathheader
 
 extern int PathArraySize;
 extern PATHHEADER* PathArray;
-
-#ifdef __cplusplus
-}
-#endif
-
 
 #endif

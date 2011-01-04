@@ -7,13 +7,9 @@
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
-
 #include "stratdef.h"
 #include "gamedef.h"
-
 #include "davehook.h"
-
-
 #include "r2base.h"
 	// hooks to R2 code
 
@@ -24,26 +20,11 @@
 	// hooks to daemon code
 
 #include "rentrntq.h"
-
-//#include "ammo666.hpp"
-
-//#include "iofocus.h"
-
-//#include "statpane.h"
-
-//#include "font.h"
-
-//#include "hudgadg.hpp"
-
 #include "consvar.hpp"
 #include "conscmnd.hpp"
-
 #include "equipmnt.h"
 #include "pldnet.h"
 #include "avp_menus.h"
-
-extern "C"
-{
 
 /* KJL 11:48:45 28/01/98 - used to scale NormalFrameTime, so the game can be slowed down */
 extern int TimeScale;
@@ -466,5 +447,3 @@ void CreateGameSpecificConsoleVariables(void)
 	
 
 }
-
-}; // extern "C"

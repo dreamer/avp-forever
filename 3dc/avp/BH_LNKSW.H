@@ -3,13 +3,6 @@
 
 #include "track.h"
 
-#ifdef __cplusplus
-
-	extern "C" {
-
-#endif
-
-
 void* LinkSwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr);
 void LinkSwitchBehaveFun(STRATEGYBLOCK* sbptr);
 
@@ -151,13 +144,5 @@ typedef struct link_switch_tools_template
 	unsigned int switch_off_message_same:1;
 	unsigned int switch_off_message_none:1;
 } LINK_SWITCH_TOOLS_TEMPLATE;
-
-
-#ifdef __cplusplus
-
-	};
-
-#endif
-
 
 #endif

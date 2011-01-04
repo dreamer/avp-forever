@@ -3,11 +3,10 @@
   ----------------------------------------------------------------------*/
 #ifndef pldnet_h_included
 #define pldnet_h_included
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #define EXTRAPOLATION_TEST 1
+
+extern DPID MultiplayerObservedPlayer;
 
 /* Oh, for heaven's sake... */
 #include "psnd.h"
@@ -912,8 +911,8 @@ extern void NetSendMessages(void);
 extern void EndAVPNetGame(void);
 extern int PlayerIdInPlayerList(DPID Id);
 //use assignnewsbname instead of addnetgameobjectid
-#define AddNetGameObjectID AssignNewSBName
-extern void AddNetGameObjectID(STRATEGYBLOCK *sbPtr);
+//#define AddNetGameObjectID AssignNewSBName
+//extern void AddNetGameObjectID(STRATEGYBLOCK *sbPtr);
 extern void RecordFinalNetGameScores(void);
 extern void DoNetScoresForHostDeath(NETGAME_CHARACTERTYPE myType,NETGAME_CHARACTERTYPE killerType);
 extern void RemovePlayerFromGame(DPID id);
@@ -1004,12 +1003,7 @@ void TrackObjectSetSynchData(STRATEGYBLOCK* sbPtr,int status);
 void SetSeededFastRandom(int seed);
 int SeededFastRandom(void);
 void AllNewModuleHandler(void);
-//void CreateMarineHModel(NETGHOSTDATABLOCK *ghostDataPtr, int weapon);
-//void CreateAlienHModel(NETGHOSTDATABLOCK *ghostDataPtr,int alienType);
-//void CreatePredatorHModel(NETGHOSTDATABLOCK *ghostDataPtr, int weapon);
 void ReflectObject(DISPLAYBLOCK *dPtr);
-void SmartTarget_GetCofM(DISPLAYBLOCK *target,VECTORCH *viewSpaceOutput);
-int IsThisObjectVisibleFromThisPosition_WithIgnore(DISPLAYBLOCK *objectPtr,DISPLAYBLOCK *ignoredObjectPtr,VECTORCH *positionPtr,int maxRange);
 extern void D3D_FadeDownScreen(int brightness, int colour);
 extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, int colour);
 extern void RenderStringCentred(char *stringPtr, int centreX, int y, int colour);
@@ -1034,7 +1028,4 @@ extern MULTIPLAYER_START* predatorStartPositions;
 #define LobbiedGame_Client 2
 extern int LobbiedGame;
 
-#ifdef __cplusplus
-}
-#endif
 #endif

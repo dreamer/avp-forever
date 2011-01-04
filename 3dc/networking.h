@@ -1,10 +1,6 @@
 #ifndef _NETWORKING_H_
 #define _NETWORKING_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 #include "module.h"
 #include "stratdef.h"
 #include "equipmnt.h"
@@ -21,8 +17,8 @@ void Net_ServiceNetwork();
 int Net_OpenSession(const char *hostName);
 int Net_JoinGame();
 int Net_ConnectToSession(int sessionNumber, char *playerName);
+int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle, int level);
 
-extern int glpDP;
 extern uint32_t AvPNetID;
 
 typedef struct messageHeader
@@ -42,6 +38,40 @@ struct messageHeader; // forward declare the structure
 extern const uint32_t MESSAGEHEADERSIZE;
 
 // system messages
+enum
+{
+	NET_NO_MESSAGES,
+	NET_CREATEPLAYERORGROUP,
+	NET_DESTROYPLAYERORGROUP,
+	NET_ADDPLAYERTOGROUP,
+	NET_DELETEPLAYERFROMGROUP,
+	NET_SESSIONLOST,
+	NET_HOST,
+	NET_SETPLAYERORGROUPDATA,
+	NET_SETPLAYERORGROUPNAME,
+	NET_SETSESSIONDESC,
+	NET_ADDGROUPTOGROUP,
+	NET_DELETEGROUPFROMGROUP,
+	NET_SECUREMESSAGE,
+	NET_STARTSESSION,
+	NET_CHAT,
+	NET_SETGROUPOWNER,
+	NET_SENDCOMPLETE,
+	NET_PLAYERTYPE_GROUP,
+	NET_PLAYERTYPE_PLAYER,
+	NET_RECEIVE_ALL,
+	NET_SYSTEM_MESSAGE,
+	NET_ID_ALLPLAYERS,
+	NET_ID_SERVERPLAYER,
+	NET_ERR_BUSY,
+	NET_ERR_CONNECTIONLOST,
+	NET_ERR_INVALIDPARAMS,
+	NET_ERR_INVALIDPLAYER,
+	NET_ERR_NOTLOGGEDIN,
+	NET_ERR_SENDTOOBIG,
+	NET_ERR_BUFFERTOOSMALL
+};
+/*
 #define NET_CREATEPLAYERORGROUP			1
 #define NET_DESTROYPLAYERORGROUP		2
 #define NET_ADDPLAYERTOGROUP			3
@@ -74,12 +104,12 @@ extern const uint32_t MESSAGEHEADERSIZE;
 #define NET_ID_ALLPLAYERS				28
 #define NET_ID_SERVERPLAYER				29
 #define NET_NO_MESSAGES					30
-
+*/
 // error return types
-#define NET_OK							0
-#define NET_FAIL						1
+#define NET_OK                          0
+#define NET_FAIL                        1
 
-#define NET_BROADCAST_ID				255
+#define NET_BROADCAST_ID                255
 
 #define PLAYER_NAME_SIZE                40
 #define PLAYER_CLANTAG_SIZE             5
@@ -216,9 +246,5 @@ typedef struct DPMSG_CREATEPLAYERORGROUP
 #pragma pack()
 
 extern PlayerDetails thisClientPlayer;
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif // #ifndef _NETWORKING_

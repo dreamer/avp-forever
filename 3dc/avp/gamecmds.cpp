@@ -3,17 +3,9 @@
 #include "strutil.h"
 #include "fmvCutscenes.h"
 
-// Includes for the actual commands:
-//#include "consvar.hpp"
-//#include "modcmds.hpp"
-//#include "textexp.hpp"
-//#include "trepgadg.hpp"
-
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 
-extern "C"
-{
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
@@ -769,5 +761,3 @@ void CreateGameSpecificConsoleCommands(void)
 		DisplaySavesLeft
 	);
 }
-
-} // extern "C"

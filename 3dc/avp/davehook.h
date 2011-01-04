@@ -10,10 +10,6 @@
 #ifndef _davehook
 #define _davehook 1
 
-#ifdef __cplusplus
-	extern "C" {
-#endif
-
 /* Version settings *****************************************************/
 
 /* Constants  ***********************************************************/
@@ -36,10 +32,5 @@
 
 
 /* End of the header ****************************************************/
-
-
-#ifdef __cplusplus
-	};
-#endif
 
 #endif

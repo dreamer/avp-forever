@@ -445,10 +445,7 @@ void PurgeMSLShapeList()
 /////////////////////////////////////////
 /////////////////////////////////////////
 
-extern "C"
-{
-	extern unsigned char *TextureLightingTable;
-};
+extern unsigned char *TextureLightingTable;
 
 
 /////////////////////////////////////////
@@ -685,7 +682,7 @@ static void setup_tex_conv_array (
 					tex += bns().filename;
 				}
 
-				int imgnum = load_rif_bitmap(tex,bns().flags);
+				texID_t imgnum = load_rif_bitmap(tex,bns().flags);
 				if (GEI_NOTLOADED != imgnum)
 					conv_array[bns().index] = imgnum;
 			}
@@ -1169,7 +1166,7 @@ BOOL load_rif_bitmaps (RIFFHANDLE h, int /*flags*/)
 			if (!(bns().flags & ChunkBMPFlag_NotInPC))
 			{
 				// JH 17-2-97 -- image loaders have changed to avoid loading the same image twice
-				int imgnum = load_rif_bitmap(bns().filename,bns().flags);
+				texID_t imgnum = load_rif_bitmap(bns().filename,bns().flags);
 				if (GEI_NOTLOADED != imgnum)
 					h->tex_index_nos[bns().index] = imgnum;
 			}
@@ -1213,6 +1210,7 @@ BOOL set_quantization_event(RIFFHANDLE h, int /*flags*/)
 	}
 }
 
+#if 0
 // copy palette
 BOOL copy_rif_palette (RIFFHANDLE h, int /*flags*/)
 {
@@ -1236,6 +1234,7 @@ BOOL copy_rif_palette (RIFFHANDLE h, int /*flags*/)
 
 	return FALSE;
 }
+#endif
 
 // copy texture lighting table
 BOOL copy_rif_tlt (RIFFHANDLE h, int /*flags*/)
@@ -2568,7 +2567,7 @@ BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Heade
 				tex += bns().filename;
 			}
 
-			int imgnum = load_rif_bitmap(bns().filename,bns().flags);
+			texID_t imgnum = load_rif_bitmap(bns().filename,bns().flags);
 			if (GEI_NOTLOADED != imgnum)
 				BmpConv[bns().index] = imgnum;
 		}

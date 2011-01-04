@@ -14,8 +14,7 @@
 #include "gadget.h"
 #include "avp_menus.h"
 #include "psnd.h"
-extern "C"
-{
+
 	
 	#define UseLocalAssert TRUE
 	#include "ourasert.h"
@@ -84,5 +83,3 @@ void IOFOCUS_Toggle(void)
 
 
 /* Internal function definitions ***********************************/
-
-};

@@ -8,10 +8,6 @@
 #ifndef _statpane_h
 #define _statpane_h 1
 
-#ifdef __cplusplus
-	extern "C" {
-#endif
-
 /* Version settings *****************************************************/
 
 /* Constants  ***********************************************************/
@@ -54,10 +50,5 @@
 
 
 /* End of the header ****************************************************/
-
-
-#ifdef __cplusplus
-	};
-#endif
 
 #endif

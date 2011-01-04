@@ -81,11 +81,6 @@
 	#include <xtl.h>
 #endif
 
-/* Permit use in a C++ source file. */
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* ******************************************************************** *
  * 																		*
  *	I N T E R F A C E - both internal and external.						*
@@ -359,11 +354,6 @@ extern int db_option;
 #endif /* of #ifndef NDEBUG */
 
 /* E N D   W R A P P E R ********************************************** */
-
-/* Permit use in a C++ source file. */
-#ifdef __cplusplus
-}
-#endif
 
 /* Avoid multiple inclusions of this file in a single source file. */
 #endif

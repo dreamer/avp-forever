@@ -3,10 +3,6 @@
 
 #include <stdio.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define FFF_EOF  0x0001
 #define FFF_ERR  0x0002
 #define FFF_ALOC 0x0004
@@ -58,9 +54,5 @@ extern void const * ffreadbuf(char const * filename, size_t * len);
 #define fftell(fp) ((fp)->pos)
 #define ffread(ptr,size,n,fp) ffreadb(ptr,(size)*(n),fp)
 #define fflook(ptr,size,n,fp) fflookb(ptr,(size)*(n),fp)
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* ! _included_ffstdio_h_ */

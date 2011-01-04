@@ -1,10 +1,6 @@
 #ifndef _included_gameplat_h_ /* Is this your first time? */
 #define _included_gameplat_h_ 1
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 /*
 	This contains project platfrom specifc externs
 	and prototypes. Only valid when we are calling one
@@ -22,9 +18,5 @@ extern int AVP_NCmd;
 extern int WindowMode;
 extern int WindowRequestMode;
 extern int VideoRequestMode;
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif

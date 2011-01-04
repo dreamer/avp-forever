@@ -17,15 +17,13 @@
 #include "missions.hpp"
 #include "gadget.h"
 
-	#define UseLocalAssert TRUE
-	#include "ourasert.h"
+#define UseLocalAssert TRUE
+#include "ourasert.h"
 
-extern "C"
-{
-	#include "paintball.h"
-	extern PAINTBALLMODE PaintBallMode;
-	extern void MessageHistory_Add(enum TEXTSTRING_ID stringID);
-};
+#include "paintball.h"
+extern PAINTBALLMODE PaintBallMode;
+extern void MessageHistory_Add(enum TEXTSTRING_ID stringID);
+
 
 /* Version settings ************************************************/
 
@@ -36,27 +34,6 @@ extern "C"
 /* Imported function prototypes ************************************/
 
 /* Imported data ***************************************************/
-#ifdef __cplusplus
-	extern "C"
-	{
-#endif
-		#if 0
-		extern OurBool			DaveDebugOn;
-		extern FDIEXTENSIONTAG	FDIET_Dummy;
-		extern IFEXTENSIONTAG	IFET_Dummy;
-		extern FDIQUAD			FDIQuad_WholeScreen;
-		extern FDIPOS			FDIPos_Origin;
-		extern FDIPOS			FDIPos_ScreenCentre;
-		extern IFOBJECTLOCATION IFObjLoc_Origin;
-		extern UncompressedGlobalPlotAtomID UGPAID_StandardNull;
-		extern IFCOLOUR			IFColour_Dummy;
- 		extern IFVECTOR			IFVec_Zero;
-		#endif
-#ifdef __cplusplus
-	};
-#endif
-
-
 
 /* Exported globals ************************************************/
 	/*static*/ List<MissionHint*> MissionHint :: List_pMissionHint;
@@ -124,8 +101,7 @@ MissionEvent :: ~MissionEvent()
 
 // class MissionObjective
 // public:
-extern "C"
-{
+
 //function for triggering mission objective that can be called from a c file
 void MissionObjectiveTriggered(void* mission_objective)
 {
@@ -196,7 +172,6 @@ void PrintStringTableEntryInConsole(enum TEXTSTRING_ID string_id)
 	// add to message history
 	MessageHistory_Add(string_id);
 }
-};
 
 void MissionObjective :: OnTriggering(void)
 {
@@ -558,7 +533,6 @@ void MissionObjective :: TestCompleteNext(void)
 			}
 		}
 	}
-	
 }
 
 

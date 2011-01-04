@@ -1,10 +1,6 @@
 #ifndef _included_AvP_MP_Config_h_
 #define _included_AvP_MP_Config_h_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 BOOL BuildLoadMPConfigMenu();
 void LoadMultiplayerConfigurationByIndex(int index);
 void LoadMultiplayerConfiguration(const char* name);
@@ -38,9 +34,5 @@ int GetCustomMultiplayerLevelIndex(char* name,int gameType);
 char* GetCustomMultiplayerLevelName(int index,int gameType);
 
 int GetLocalMultiplayerLevelIndex(int index,char* customLevelName,int gameType);
-
-#ifdef __cplusplus
-};
-#endif
 
 #endif // _included_AvP_MP_Config_h_

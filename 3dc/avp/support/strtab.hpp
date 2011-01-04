@@ -21,10 +21,6 @@
 		#endif
 	#endif
 
-#ifdef __cplusplus
-	extern "C" {
-#endif
-
 /* Version settings *****************************************************/
 	#define OnlyOneStringTable	TRUE
 
@@ -72,10 +68,5 @@
 
 
 /* End of the header ****************************************************/
-
-
-#ifdef __cplusplus
-	};
-#endif
 
 #endif

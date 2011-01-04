@@ -6,10 +6,6 @@
 #ifndef _bhfar_h_
 #define _bhfar_h_ 1
 
-#ifdef __cplusplus
-	extern "C" {
-#endif
-
 /* enum for far alien target module	status */
 typedef	enum fnpc_targetmodulestatus
 {
@@ -46,9 +42,5 @@ extern void FarNpc_FlipAround(STRATEGYBLOCK *sbPtr);
 /* this define to help stop aliens coagulating in the environment */
 #define MAX_GENERATORNPCSPERMODULE	5
 #define MAX_VISIBLEGENERATORNPCS	8 //12
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

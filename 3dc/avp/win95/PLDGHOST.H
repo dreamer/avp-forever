@@ -3,9 +3,6 @@
   ----------------------------------------------------------------------*/
 #ifndef pldghost_h_included
 #define pldghost_h_included
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include "pvisible.h"
 #include "pldnet.h"
@@ -135,10 +132,6 @@ void CreatePredatorHModel(NETGHOSTDATABLOCK *ghostDataPtr, int weapon);
 /*---------------------------Patrick 28/3/97----------------------------
   Globals
   ----------------------------------------------------------------------*/
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
 

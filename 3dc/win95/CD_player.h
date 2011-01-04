@@ -4,11 +4,6 @@
 /* KJL 12:40:35 07/05/98 - This is code derived from Patrick's original stuff &
 moved into it's own file. */
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
-
 /* Patrick 10/6/97 --------------------------------------------------------------
   SUPPORT FOR CDDA SYSTEM
   -----------------------------------------------------------------------------*/
@@ -111,9 +106,6 @@ int PlatGetNumberOfCDTracks(int* numTracks);
   ----------------------------------------------------------------------------*/
 extern void PlatCDDAManagementCallBack(WPARAM flags, LONG deviceId);
 extern int CDPlayerVolume;
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
+extern void CheckCDVolume(void);
 
 #endif

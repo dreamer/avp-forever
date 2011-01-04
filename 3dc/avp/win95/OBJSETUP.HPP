@@ -4,12 +4,10 @@
 #include "envchunk.hpp"
 #include "obchunk.hpp"
 
-extern "C" {
 #include "3dc.h"
 void SetUpRunTimeLights ();
 void create_strategies_from_list();
 void deallocate_behaviour_list();
-};
 
 void deal_with_module_object(Object_Chunk * ob, int shape1, int AnimationShape, int shape2, MODULE * mod);
 void deal_with_placed_object(Object_Chunk * ob, int shape1, int AnimationShape);

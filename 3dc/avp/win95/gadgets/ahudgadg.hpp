@@ -13,11 +13,6 @@
 	#include "hudgadg.hpp"
 	#endif
 
-
-#ifdef __cplusplus
-	extern "C" {
-#endif
-
 /* Version settings *****************************************************/
 
 /* Constants  ***********************************************************/
@@ -93,10 +88,5 @@ void BringDownConsoleWithSaySpeciesTypedIn();
 
 
 /* End of the header ****************************************************/
-
-
-#ifdef __cplusplus
-	};
-#endif
 
 #endif

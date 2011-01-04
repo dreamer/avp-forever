@@ -1,11 +1,6 @@
 #ifndef _equipmnt_h_
 #define _equipmnt_h_ 1
 
-#ifdef __cplusplus
-
-	extern "C" {
-
-#endif
 #include "language.h"
 /* has to come after gameplat.h in the setup*/
 #include "gamedef.h"
@@ -390,11 +385,4 @@ extern void InitialiseEquipment(void);
 /*compare two damage profiles to see if they are the same*/
 extern BOOL AreDamageProfilesEqual(DAMAGE_PROFILE* profile1,DAMAGE_PROFILE* profile2);
 
-
-
-#ifdef __cplusplus
-
-	};
-
-#endif
 #endif

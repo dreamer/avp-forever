@@ -4,7 +4,7 @@
 #include "langenum.h"
 
 #define ENGLISH_TEXT_FILENAME "ENGLISH.TXT"
-extern unsigned char *LanguageFilename[];
+extern char *LanguageFilename[];
 
 extern void InitTextStrings(void);
 /*KJL***************************************************************

@@ -7,8 +7,6 @@
 #include "dxlog.h"
 #include "avp_menus.h"
 
-extern "C"
-{
 extern DISPLAYBLOCK* Player;
 
 
@@ -283,7 +281,3 @@ void PlayQueenSound(int VoiceType,int SoundCategory,int PitchShift,int* External
 {
 	QueenSounds.PlaySound(VoiceType,SoundCategory,PitchShift,ExternalRef,Location);
 }
-
-
-
-};

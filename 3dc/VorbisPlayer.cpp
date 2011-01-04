@@ -42,11 +42,8 @@ static const int BUFFER_COUNT = 3;
 
 unsigned int __stdcall VorbisUpdateThread(void *args);
 
-extern "C"
-{
-	extern int SetStreamingMusicVolume(int volume);
-	extern int CDPlayerVolume; // volume control from menus
-}
+extern int SetStreamingMusicVolume(int volume);
+extern int CDPlayerVolume; // volume control from menus
 
 std::vector<std::string> TrackList;
 

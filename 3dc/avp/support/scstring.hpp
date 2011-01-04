@@ -186,11 +186,6 @@
 		return NumberOfCharacters;
 	}
 
-
-#ifdef __cplusplus
-	extern "C" {
-#endif
-
 /* Version settings *****************************************************/
 
 /* Macros ***************************************************************/
@@ -204,11 +199,6 @@
 
 
 /* End of the header ****************************************************/
-
-
-#ifdef __cplusplus
-	};
-#endif
 
 #endif
 

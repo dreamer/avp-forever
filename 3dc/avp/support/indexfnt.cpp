@@ -12,14 +12,10 @@
 #include "3dc.h"
 #include "inline.h"
 #include "indexfnt.hpp"
-//#include "tallfont.hpp"
 
-extern "C"
-{
-	#include "d3d_hud.h"
-};
-	#define UseLocalAssert TRUE
-	#include "ourasert.h"
+#include "d3d_hud.h"
+#define UseLocalAssert TRUE
+#include "ourasert.h"
 
 /* Version settings ************************************************/
 	#define Use_BLT	FALSE	
@@ -33,29 +29,6 @@ extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour);
 extern void D3D_RenderHUDString_Clipped(char *stringPtr,int x,int y,int colour);
 
 /* Imported data ***************************************************/
-#ifdef __cplusplus
-	extern "C"
-	{
-#endif
-//		extern int CloudTable[128][128];
-		extern int CloakingPhase;
-		#if 0
-		extern OurBool			DaveDebugOn;
-		extern FDIEXTENSIONTAG	FDIET_Dummy;
-		extern IFEXTENSIONTAG	IFET_Dummy;
-		extern FDIQUAD			FDIQuad_WholeScreen;
-		extern FDIPOS			FDIPos_Origin;
-		extern FDIPOS			FDIPos_ScreenCentre;
-		extern IFOBJECTLOCATION IFObjLoc_Origin;
-		extern UncompressedGlobalPlotAtomID UGPAID_StandardNull;
-		extern IFCOLOUR			IFColour_Dummy;
- 		extern IFVECTOR			IFVec_Zero;
-		#endif
-#ifdef __cplusplus
-	};
-#endif
-
-
 
 /* Exported globals ************************************************/
 	/*static*/ IndexedFont* IndexedFont :: pIndexedFont[ IndexedFonts_MAX_NUMBER_OF_FONTS ];

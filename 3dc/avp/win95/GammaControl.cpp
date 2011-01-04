@@ -1,6 +1,3 @@
-extern "C"
-{
-
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
@@ -98,4 +95,3 @@ void UpdateGammaSettings(void)
 }
 #endif
 
-}

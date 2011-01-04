@@ -72,18 +72,10 @@ class VorbisPlayback
 		uint32_t GetVorbisData(uint32_t sizeToRead);
 };
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void Vorbis_CloseSystem();
 extern void LoadVorbisTrack(size_t track);
 extern bool LoadVorbisTrackList();
 bool IsVorbisPlaying();
 size_t CheckNumberOfVorbisTracks();
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

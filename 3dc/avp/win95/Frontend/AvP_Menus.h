@@ -1,16 +1,9 @@
 #ifndef _included_AvP_Menus_h_
 #define _included_AvP_Menus_h_
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
+#include "TextureManager.h"
 
-	extern BOOL mainMenu;
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
-
+extern BOOL mainMenu;
 
 #define MARINE_DEMO 0
 #define PREDATOR_DEMO 0
@@ -222,14 +215,18 @@ typedef struct
 
 	union
 	{
-		enum TEXTSTRING_ID TextDescription;
+		// bjd - changed enum type to uint32_t
+//		enum TEXTSTRING_ID TextDescription;
+		uint32_t TextDescription;
 //		enum AVPMENUGFX_ID GfxID;
-		uint32_t textureID;
+		texID_t textureID;
 	};
 
 	union
 	{
-		enum AVPMENU_ID MenuToGoTo;
+		// bjd - changed enum type to uint32_t
+//		enum AVPMENU_ID MenuToGoTo;
+		uint32_t MenuToGoTo;
 		int MaxSliderValue;
 		int MaxTextLength;
 		int MaxValue; //for number fields
@@ -246,8 +243,11 @@ typedef struct
 
 	union
 	{
-		enum TEXTSTRING_ID FirstTextSliderString;
-		enum TEXTSTRING_ID NumberFieldUnitsString;
+		// bjd - changed enum types to uint32_ts
+//		enum TEXTSTRING_ID FirstTextSliderString;
+//		enum TEXTSTRING_ID NumberFieldUnitsString;
+		uint32_t FirstTextSliderString;
+		uint32_t NumberFieldUnitsString;
 		char** TextSliderStringPointer;
 	};
 

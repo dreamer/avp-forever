@@ -1,3 +1,6 @@
+#ifndef _pheromon_h_
+#define _pheromon_h_
+
 /*-----------------------Patrick 14/11/96--------------------------
   Header for AVP Pheromone system
   -----------------------------------------------------------------*/
@@ -28,4 +31,6 @@ int AIModuleAdmitsPheromones(AIMODULE *targetModule);
 #if SUPER_PHEROMONE_SYSTEM
 void AddMarinePheromones(AIMODULE *targetModule);
 void MaintainMarineTargetZone(AIMODULE *targetModule);
+#endif
+
 #endif

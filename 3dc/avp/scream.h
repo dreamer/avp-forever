@@ -1,10 +1,6 @@
 #ifndef scream_h
 #define scream_h 1
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef enum sound_category {
 	SC_Angry=0,
 	SC_Panic,
@@ -69,9 +65,5 @@ void PlayMarineScream(int VoiceType,int SoundCategory,int PitchShift,int* Extern
 void PlayAlienSound(int VoiceType,int SoundCategory,int PitchShift,int* ExternalRef,VECTORCH* Location);
 void PlayPredatorSound(int VoiceType,int SoundCategory,int PitchShift,int* ExternalRef,VECTORCH* Location);
 void PlayQueenSound(int VoiceType,int SoundCategory,int PitchShift,int* ExternalRef,VECTORCH* Location);
-
-#ifdef __cplusplus
-};
-#endif
 
 #endif

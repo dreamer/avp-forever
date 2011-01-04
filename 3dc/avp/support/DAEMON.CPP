@@ -11,7 +11,7 @@
 /* Includes ********************************************************/
 #include "3dc.h"
 #include "daemon.h"
-
+#include "io.h"
 #include "inline.h"
 
 #if SupportCallbackHooks
@@ -27,20 +27,6 @@
 /* Imported function prototypes ************************************/
 
 /* Imported data ***************************************************/
-#ifdef __cplusplus
-	extern "C"
-	{
-#endif
-	#if 0
-	extern OurBool			DaveDebugOn;
-	extern FDIEXTENSIONTAG	FDIET_Dummy;
-	extern IFEXTENSIONTAG	IFET_Dummy;
-	extern FDIQUAD			FDIQuad_WholeScreen;
-	extern FDIPOS			FDIPos_Origin;
-	#endif
-#ifdef __cplusplus
-	};
-#endif
 
 
 /* Internal function prototypes ************************************/
@@ -371,12 +357,6 @@ void Daemon :: Maintain(int FixP_Time_ToUse)
 void DAEMON_Init(void)
 {
 }
-
-#if UseRealFrameTime
-extern "C" extern int RealFrameTime;
-#else
-extern "C" extern int NormalFrameTime;
-#endif
 
 void DAEMON_Maintain(void)
 {

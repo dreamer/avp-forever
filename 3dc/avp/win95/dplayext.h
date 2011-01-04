@@ -14,11 +14,6 @@
 #ifndef DPLAYEXT_H_INCLUDED
 #define DPLAYEXT_H_INCLUDED
 
-/* Permit use in a C++ source file. */
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* I N C L U D E S ---------------------------------------------------- */
 
 /* DirectPlay include. */
@@ -121,11 +116,6 @@ extern HRESULT DpExtRecv
 #endif
 
 /* E N D   W R A P P E R ---------------------------------------------- */
-
-/* Permit use in a C++ source file. */
-#ifdef __cplusplus
-}
-#endif
 
 /* Avoid multiple inclusions of this file in a single source file. */
 #endif

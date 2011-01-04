@@ -1,12 +1,8 @@
-
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
+#ifndef _CDTrackSelection_h_
+#define _CDTrackSelection_h_
 
 extern void LoadCDTrackList();
 extern void CheckCDAndChooseTrackIfNeeded();
 extern void ResetCDPlayForLevel();
 
-#ifdef __cplusplus
-}
-#endif // __cplusplus
+#endif

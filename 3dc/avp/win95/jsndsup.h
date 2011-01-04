@@ -5,12 +5,6 @@
 #include "inline.h"
 #include "module.h"
 
-#ifdef __cplusplus
-
-	extern "C" {
-
-#endif
-
 typedef struct loaded_sound
 {
 	int sound_num;
@@ -25,11 +19,5 @@ typedef struct loaded_sound
 
 void LoseSound (LOADED_SOUND const * ls);
 LOADED_SOUND const * GetSound (char const * fname);
-
-#ifdef __cplusplus
-
-	}; // end of extern "c"
-
-#endif
 
 #endif

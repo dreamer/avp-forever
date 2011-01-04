@@ -11,8 +11,6 @@ Project specific (or potentially project specific) windows functionality
 #include "iofocus.h"
 #include "logString.h"
 
-extern "C" {
-
 extern unsigned char KeyboardInput[256];
 extern unsigned char GotAnyKey;
 
@@ -654,7 +652,4 @@ void MakeToAsciiTable(void)
 }
 */
 
-// End of extern C declaration 
-
-};
 #endif //ifdef WIN32

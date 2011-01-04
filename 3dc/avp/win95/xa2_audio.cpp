@@ -8,12 +8,11 @@
 #include "configFile.h"
 #include "audioStreaming.h"
 #include <d3dx9math.h>
+#include "io.h"
 
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 
 extern D3DXMATRIX viewMatrix;
-
-extern "C" {
 
 #ifdef DAVEW
 	#define DB_LEVEL 4
@@ -419,7 +418,6 @@ static int ToneToFrequency(int currentFrequency, int currentPitch, int newPitch)
 extern HWND hWndMain;
 extern DISPLAYBLOCK *Player;
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
-extern int NormalFrameTime;
 extern int DopplerShiftIsOn;
 
 /* Patrick 5/6/97 -------------------------------------------------------------
@@ -2026,8 +2024,6 @@ void UpdateSoundFrequencies(void)
 	}
 }
 
-} // extern "C"
-
 AudioStream::AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers)
 {
 	WAVEFORMATEX waveFormat;
@@ -2191,4 +2187,4 @@ AudioStream::~AudioStream()
 	}
 }
 
-#endif
+#endif // #ifdef USE_XAUDIO2

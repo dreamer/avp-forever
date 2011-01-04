@@ -2,11 +2,6 @@
 #ifndef _progress_bar_h
 #define _progress_bar_h
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #define PBAR_HUD_START		0
 #define PBAR_LEVEL_START	1000
 #define PBAR_NPC_START		3000
@@ -19,11 +14,5 @@ extern "C"
 void Start_Progress_Bar();
 void Set_Progress_Bar_Position(int pos);
 void Game_Has_Loaded(void);
-
-#ifdef __cplusplus
-};
-#endif
-
-
 
 #endif

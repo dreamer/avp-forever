@@ -1,12 +1,10 @@
 #ifndef _font_h_included
 #define _font_h_included 1
 
-	#ifdef __cplusplus
-		// Necessary header files for the C++ stuff:
-		#ifndef _projtext
-		#include "projtext.h"
-		#endif
-	#endif
+// Necessary header files for the C++ stuff:
+#ifndef _projtext
+#include "projtext.h"
+#endif
 
 #include "aw.h"
 
@@ -71,7 +69,6 @@ typedef struct
 
 typedef struct pffont
 {
-//	LPDIRECTDRAWSURFACE *data;	 						/*LPDIRECTDRAWSURFACE, etc - fill out*/
 	char filename[100];				 						/*compile in -filename */
 	int fontHeight;												/* max height of chars */
 	int num_chars_in_font;								/*number of chars in this font */
@@ -85,7 +82,6 @@ typedef struct pffont
 	int fttexBitDepth;
 	unsigned hotSpotValue;
 
-	#ifdef __cplusplus
 	// C++ methods: ////////////////////////////////
 	int GetHeight(void) const;
 	int GetWidth(const ProjChar ProjCh) const;
@@ -99,12 +95,8 @@ typedef struct pffont
 	int GetMinChar(void) const;
 	int GetMaxChar(void) const;
 		// returns extent within the ASCII set that can be printed (inclusive of boundary values)
-	
-	#endif // __cplusplus
 
 }PFFONT;
-
-#ifdef __cplusplus
 
 	// Inline method implementations:
 	inline int pffont::GetHeight(void) const
@@ -165,10 +157,6 @@ typedef struct pffont
 		return (GetOffset() + num_chars_in_font -1);
 	}
 
-
-	extern "C" {
-#endif
-
 // platform independent externs
 extern void LoadAllFonts();
 
@@ -188,10 +176,6 @@ extern void LoadAllFonts();
 
 // the array of all the Fonts int the game
 extern PFFONT AvpFonts[];
-
-#ifdef __cplusplus
-	};
-#endif
 
 #endif /* _font_h_included */
 

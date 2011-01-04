@@ -1,10 +1,6 @@
 #ifndef _included_vision_h_
 #define _included_vision_h_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*KJL****************************************************************************************
 *                                    P R O T O T Y P E S	                                *
 ****************************************************************************************KJL*/
@@ -91,8 +87,5 @@ extern void ChangePredatorVisionMode(void);
 
 
 extern void SetupVision(void);
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* ! _included_vision_h_ */

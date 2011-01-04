@@ -1,11 +1,6 @@
 #ifndef _bh_pargen_h
 #define _bh_pargen_h 1
 
-#ifdef __cplusplus
-
-	extern "C" {
-
-#endif
 #include "track.h"
 
 extern void*  ParticleGeneratorBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr);
@@ -66,16 +61,5 @@ typedef struct particle_generator_tools_template
 	
 	unsigned int active :1;	
 }PARTICLE_GENERATOR_TOOLS_TEMPLATE;
-
-
-
-
-
-#ifdef __cplusplus
-
-	};
-
-#endif
-
 
 #endif

@@ -5,13 +5,6 @@
 #ifndef _bhalien_h_
 	#define _bhalien_h_ 1
 
-
-	#ifdef __cplusplus
-
-		extern "C" {
-
-	#endif
-
 #include "bh_pred.h"
 
  /*--------------------------------------------
@@ -246,11 +239,5 @@
 	void Alien_Awaken(STRATEGYBLOCK *sbPtr);
 	int AlienIsCrawling(STRATEGYBLOCK *sbPtr);
     void DoAlienLimbLossSound(VECTORCH *position);
-
-	#ifdef __cplusplus
-
-		}
-
-	#endif
 
 #endif

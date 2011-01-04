@@ -35,13 +35,10 @@
 static LogFile ConsoleLogFile("ConsoleLog.txt");
 #endif
 
-extern "C"
-{
 	int LogConsoleTextToFile;
 extern void OutputBugReportToConsoleLogfile(char *messagePtr)
 {
 #if 0
-	extern MODULE *playerPherModule;
 	extern struct Target PlayersTarget;
 
 	ConsoleLogFile.lprintf("\n*** AvP Automated Bug Report ****\n\n");
@@ -93,5 +90,3 @@ extern void OutputToConsoleLogfile(char *messagePtr)
 	}
 #endif
 }
-
-};

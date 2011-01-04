@@ -44,7 +44,7 @@
 #include "jsndsup.h"
 #include "AvpReg.hpp"
 #include "ffstdio.h"
-
+#include "d3d_hud.h"
 #include "decal.h"
 #include "mempool.h"
 #include "db.h"
@@ -56,24 +56,6 @@
 // store texture handles for ingame textures
 std::vector<uint32_t> ingameTextureList;
 
-	extern "C" 
-	{
-		extern int HUDImageNumber;
-		extern int SpecialFXImageNumber;
-		extern int SmokyImageNumber;
-		extern int ChromeImageNumber;
-		extern int CloudyImageNumber;
-		extern int BurningImageNumber;
-		extern int HUDFontsImageNumber;
-		extern int PredatorVisionChangeImageNumber;
-		extern int PredatorNumbersImageNumber;
-		extern int StaticImageNumber;
-		extern int AlienTongueImageNumber;
-		extern int AAFontImageNumber;
-		extern int WaterShaftImageNumber;
-	}
-
-extern "C" {
 #include "inventry.h"
 
 extern int VideoMode;
@@ -89,8 +71,6 @@ extern void NewOnScreenMessage(char *messagePtr);
 extern BOOL KeepMainRifFile;
 
 BOOL LevelHasStars;
-
-};
 
 // these are to link with chnkimag.cpp
 const char * ToolsTex_Directory = "\\\\Kate\\Kate Share\\avp\\ToolsTex\\";
@@ -236,12 +216,9 @@ void setup_paths(RIFFHANDLE h)
 	}
 }
 
-extern "C"
-{
 extern int SkyColour_R;
 extern int SkyColour_G;
 extern int SkyColour_B;
-};
 
 void set_environment_properties(Environment_Data_Chunk* edc)
 {
@@ -312,7 +289,6 @@ int ConvertObjectIndexToPathIndex(int path_index,int object_index)
 	}
 
 	return -1; //module isn't in path
-	
 }
 
 
@@ -441,7 +417,7 @@ void unload_placed_hierarchies()
 // stuff for handling hierarchies
 
 extern int GetSequenceID(int sequence_type,int sub_sequence);
-extern "C" void MulQuat(QUAT *q1,QUAT *q2,QUAT *output);
+void MulQuat(QUAT *q1,QUAT *q2,QUAT *output);
 
 
 List <Global_Hierarchy_Store *> Global_Hierarchy_Library;
@@ -707,7 +683,6 @@ void Global_Hierarchy_Store::setup_alternate_shape_sets(List <Object_ShapeNum_Pa
 				hsr->replacement_shape=0;
 				hsr->replacement_shape_index=0;
 			}
-			
 		}
 		hsr->replaced_section_name=0;
 		hsr->replacement_shape=0;
@@ -1605,9 +1580,6 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 ///////////////////////////////////////////////////////////////////////////////
 // Library management functions
 
-extern "C"
-{
-
 SECTION * GetNamedHierarchyFromLibrary(const char * rif_name, const char * hier_name);
 
 SECTION * GetHierarchyFromLibrary(const char * rif_name)
@@ -1651,6 +1623,7 @@ HIERARCHY_SHAPE_REPLACEMENT* GetHierarchyAlternateShapeSetFromLibrary(const char
 	}
 	return(0);
 }
+
 HIERARCHY_VARIANT_DATA* GetHierarchyAlternateShapeSetCollectionFromLibrary(const char* rif_name,int collection_index)
 {
 	for (LIF<Global_Hierarchy_Store *> ghli(&Global_Hierarchy_Library); !ghli.done(); ghli.next())
@@ -1743,8 +1716,6 @@ void DeleteHierarchyLibraryEntry(RIFFHANDLE h)
 	}
 }
 
-
-};
 ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -1806,7 +1777,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 		{
 			set_quantization_event (h,flags);
 
-			copy_rif_palette (h,flags);
+//			copy_rif_palette (h,flags);
 
 			copy_rif_tlt (h,flags);
 
@@ -2719,9 +2690,9 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 }
 
 // hook to load a bitmap - so you can load them from test directories, etc. should return tex index
-int load_rif_bitmap (char const * fname, BMPN_Flags flags)
+texID_t load_rif_bitmap (char const * fname, BMPN_Flags flags)
 {
-	int textureID = 
+	texID_t textureID = 
 		CL_LoadImageOnce
 		(
 			fname,
@@ -3046,9 +3017,9 @@ RIFFHANDLE avp_load_rif_non_env (const char * fname)
 
 
 #if debug
-extern "C"{
- extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
-}
+
+extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
+
 void LoadModuleData()
 {
  	GLOBALASSERT(env_rif);
@@ -3331,9 +3302,6 @@ static void MakeBackupFile(File_Chunk* fc)
 	delete [] Name2;
 #endif
 }
-extern "C"
-{
-
 
 void save_preplaced_decals()
 {
@@ -3425,16 +3393,12 @@ void check_preplaced_decal_modules()
 	}
 }
 
-};
-
 
 extern void DeallocateAllFragments();
 extern void LoseAllNonCommonSounds();
 extern void deallocate_behaviour_list();
 extern void PurgeMSLShapeList();
 
-extern "C"
-{
 void DeallocateSoundsAndPoolAllocatedMemory()
 {
 	deallocate_behaviour_list();
@@ -3449,4 +3413,3 @@ void DeallocateSoundsAndPoolAllocatedMemory()
 
 	PurgeMSLShapeList();
 }
-};

@@ -5,10 +5,6 @@
 #ifndef PSNDPLAT_H
 #define PSNDPLAT_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifdef USE_XAUDIO2
 #include <xaudio2.h>
 #include <xaudio2fx.h>
@@ -233,9 +229,6 @@ extern ACTIVESOUNDSAMPLE ActiveSounds[];
 extern SOUNDSAMPLEDATA BlankGameSound;
 extern ACTIVESOUNDSAMPLE BlankActiveSound;
 
-
-#ifdef __cplusplus
-}
-#endif
+void UpdateSoundFrequencies(void);
 
 #endif

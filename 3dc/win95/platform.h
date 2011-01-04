@@ -7,10 +7,6 @@
 
 */
 
-#ifdef __cplusplus
-extern "C"  {
-#endif
-
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -254,7 +250,6 @@ enum KEY_ID
 
 	KEY_VOID=255, // used to indicate a blank spot in the key config
 	MAX_NUMBER_OF_INPUT_KEYS,
-
 };
 /* 
 	Mouse handler modes (velocity mode is for
@@ -383,10 +378,6 @@ int RestoreAllImages(void);
 */
 
 void ExitGame(void);
-
-#ifdef __cplusplus
-};
-#endif
 
 //#define PLATFORM_INCLUDED
 

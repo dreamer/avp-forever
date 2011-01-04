@@ -7,10 +7,6 @@ not project specific.
 
 ****/
 
-// To link code to main C functions 
-
-extern "C" {
-
 #include "3dc.h"
 
 // For modifications necessary to make Alt-Tabbing
@@ -89,10 +85,6 @@ void CheckForWindowsMessages(void)
 	}
 	while (!bActive);
 }
-
-// End of extern C declaration 
-
-};
 
 #endif // ifdef WIN32
 

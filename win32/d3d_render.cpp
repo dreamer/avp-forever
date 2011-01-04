@@ -15,9 +15,12 @@
 #include "avp_menus.h"
 #include "avp_userprofile.h"
 #include "avp_menugfx.hpp"
+#include "io.h"
+#include "pheromon.h"
+#include "tables.h"
 
 // set to 'null' texture initially
-uint32_t currentWaterTexture = NO_TEXTURE;
+texID_t currentWaterTexture = NO_TEXTURE;
 
 D3DXMATRIX viewMatrix;
 
@@ -32,17 +35,13 @@ bool CreateVolatileResources();
 bool ReleaseVolatileResources();
 void ColourFillBackBuffer(int FillColour);
 
-extern "C" 
-{
-	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-	extern VIEWDESCRIPTORBLOCK* Global_VDB_Ptr;
-	extern int CloakingPhase;
-	#include "particle.h"
-	#include "kshape.h"
-	int LightIntensityAtPoint(VECTORCH *pointPtr);
-	extern float CameraZoomScale;
-	extern float p, o;
-}
+extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+extern VIEWDESCRIPTORBLOCK* Global_VDB_Ptr;
+#include "particle.h"
+#include "kshape.h"
+int LightIntensityAtPoint(VECTORCH *pointPtr);
+extern float CameraZoomScale;
+extern float p, o;
 
 static float currentCameraZoomScale = 1.0f;
 
@@ -1137,8 +1136,6 @@ void DrawSmallMenuCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_
 
 extern void BuildFrustum();
 
-extern "C" {
-
 #include "3dc.h"
 #include "inline.h"
 #include "gamedef.h"
@@ -1152,8 +1149,6 @@ extern "C" {
 #include "frustum.h"
 #include "d3d_render.h"
 #include "bh_types.h"
-
-extern int SpecialFXImageNumber;
 
 void TransformToViewspace(VECTORCHF *vector)
 {
@@ -1370,17 +1365,6 @@ void DrawParticles()
 #define FMV_ON 0
 #define FMV_SIZE 128
 
-extern int SmokyImageNumber;
-extern int ChromeImageNumber;
-extern int HUDFontsImageNumber;
-extern int BurningImageNumber;
-extern int PredatorVisionChangeImageNumber;
-extern int PredatorNumbersImageNumber;
-extern int StaticImageNumber;
-extern int AAFontImageNumber;
-extern int WaterShaftImageNumber;
-extern int HUDImageNumber;
-
 AVPTEXTURE FMVTextureHandle[4];
 AVPTEXTURE NoiseTextureHandle;
 
@@ -1399,9 +1383,7 @@ uint32_t MeshVertexColour[256];
 int WireFrameMode;
 
 // Externs
-extern int NormalFrameTime;
 extern int HUDScaleFactor;
-extern MODULE *playerPherModule;
 extern int NumOnScreenBlocks;
 extern DISPLAYBLOCK *OnScreenBlockList[];
 extern char LevelName[];
@@ -1784,7 +1766,7 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 	}
 }
 
-void D3D_DecalSystem_Setup(void)
+void D3D_DecalSystem_Setup()
 {
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
@@ -1793,7 +1775,7 @@ void D3D_DecalSystem_Setup(void)
 	ChangeZWriteEnable(ZWRITE_DISABLED);
 }
 
-void D3D_DecalSystem_End(void)
+void D3D_DecalSystem_End()
 {
 	DrawParticles();
 	DrawCoronas();
@@ -3299,10 +3281,6 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 	}
 }
 
-// For extern "C"
-
-};
-
 void r2rect :: AlphaFill
 (
 	unsigned char R,
@@ -3528,9 +3506,6 @@ void D3D_RenderHUDString_Centred(char *stringPtr, uint32_t centreX, uint32_t y, 
 	}
 }
 
-extern "C"
-{
-
 extern void RenderString(char *stringPtr, int x, int y, int colour)
 {
 	D3D_RenderHUDString(stringPtr, x, y, colour);
@@ -3597,5 +3572,3 @@ extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, in
 		y -= AAFontWidths[(unsigned char)c];
 	}
 }
-
-};

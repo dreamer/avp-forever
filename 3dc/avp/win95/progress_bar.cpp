@@ -11,16 +11,13 @@
 #include "psnd.h"
 #include "TextureManager.h"
 #include "d3d_render.h"
-
-extern "C"
-{
+#include "io.h"
+#include "Di_func.h"
 #include "language.h"
+#include "d3d_hud.h"
 
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern unsigned char DebouncedGotAnyKey;
-extern int AAFontImageNumber;
 extern int FadingGameInAfterLoading;
-extern int NormalFrameTime;
 
 extern void MinimalNetCollectMessages(void);
 extern void NetSendMessages(void);
@@ -29,7 +26,6 @@ extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
 extern void RenderBriefingText(int centreY, int brightness);
 extern void RenderStringCentred(char *stringPtr, int centreX, int y, int colour);
-};
 
 static uint32_t	CurrentPosition = 0;
 static uint32_t BarLeft;

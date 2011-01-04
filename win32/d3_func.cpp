@@ -35,11 +35,8 @@
 // Alien FOV - 115
 // Marine & Predator FOV - 77
 
-extern "C"
-{
-	#include "AvP_UserProfile.h"
-	extern HWND hWndMain;
-}
+#include "AvP_UserProfile.h"
+extern HWND hWndMain;
 
 extern int NumberOfFMVTextures;
 #define MAX_NO_FMVTEXTURES 10
@@ -53,23 +50,20 @@ D3DXMATRIX matViewPort;
 
 static D3DXPLANE m_frustum[6];
 
-extern "C"
+BOOL CheckPointIsInFrustum(D3DXVECTOR3 *point)
 {
-	BOOL CheckPointIsInFrustum(D3DXVECTOR3 *point)
+	// check if point is in front of each plane
+	for (int i = 0; i < 6; i++)
 	{
-		// check if point is in front of each plane
-		for (int i = 0; i < 6; i++)
+		if (D3DXPlaneDotCoord(&m_frustum[i], point) < 0.0f)
 		{
-			if (D3DXPlaneDotCoord(&m_frustum[i], point) < 0.0f)
-			{
-				// its outside
-				return FALSE;
-			}
+			// its outside
+			return FALSE;
 		}
-
-		// return here if the point is entirely within
-		return TRUE;
 	}
+
+	// return here if the point is entirely within
+	return TRUE;
 }
 
 // call per frame after we've updated view and projection matrixes
@@ -129,8 +123,8 @@ const uint32_t MAX_VERTEXES = 4096;
 const uint32_t MAX_INDICES = 9216;
 
 static HRESULT LastError;
-uint32_t NO_TEXTURE;
-uint32_t MISSING_TEXTURE;
+texID_t NO_TEXTURE;
+texID_t MISSING_TEXTURE;
 
 // keep track of set render states
 static bool	D3DAlphaBlendEnable;
@@ -715,43 +709,40 @@ void SetFov()
 	SetTransforms();
 }
 
-extern "C"
+// Functions
+void CheckWireFrameMode(int shouldBeOn)
 {
-	extern void ThisFramesRenderingHasBegun(void);
-	extern void ThisFramesRenderingHasFinished(void);
-	extern HWND hWndMain;
-	extern int WindowMode;
-	extern void ChangeWindowsSize(uint32_t width, uint32_t height);
+	if (shouldBeOn)
+		shouldBeOn = 1;
 
-	// Functions
-	extern void CheckWireFrameMode(int shouldBeOn)
+	if (CurrentRenderStates.WireFrameModeIsOn != shouldBeOn)
 	{
+		CurrentRenderStates.WireFrameModeIsOn = shouldBeOn;
 		if (shouldBeOn)
-			shouldBeOn = 1;
-
-		if (CurrentRenderStates.WireFrameModeIsOn != shouldBeOn)
 		{
-			CurrentRenderStates.WireFrameModeIsOn = shouldBeOn;
-			if (shouldBeOn)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
-			}
-			else
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
-			}
+			d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+		}
+		else
+		{
+			d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 		}
 	}
+}
 
-	void R_SetFov(uint32_t fov)
-	{
-		d3d.fieldOfView = fov;
-	}
+extern void ThisFramesRenderingHasBegun(void);
+extern void ThisFramesRenderingHasFinished(void);
+extern HWND hWndMain;
+extern int WindowMode;
+extern void ChangeWindowsSize(uint32_t width, uint32_t height);
 
-	void FlushD3DZBuffer()
-	{
-		d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
-	}
+void R_SetFov(uint32_t fov)
+{
+	d3d.fieldOfView = fov;
+}
+
+void FlushD3DZBuffer()
+{
+	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
 }
 
 // console command : output all menu textures as .png files

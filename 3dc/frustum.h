@@ -51,6 +51,13 @@ extern int DecalWithinFrustum(DECAL *decalPtr);
 extern int QuadWithinFrustum(void);
 extern int TriangleWithinFrustum(void);
 
+void GouraudTexturedPolygon_ClipWithZ(void);
+
+/* GOURAUD TEXTURED POLYGON CLIPPING */
+extern void (*GouraudTexturedPolygon_ClipWithNegativeX)(void);
+extern void (*GouraudTexturedPolygon_ClipWithPositiveY)(void);
+extern void (*GouraudTexturedPolygon_ClipWithNegativeY)(void);
+extern void (*GouraudTexturedPolygon_ClipWithPositiveX)(void);
 
 /* pass a pointer to a vertex to be tested; results are returned in an int,
 using the following defines */

@@ -1,10 +1,6 @@
 #ifndef _chnkload_h_
 #define _chnkload_h_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "system.h"
 #include "equates.h"
 #include "platform.h"
@@ -76,8 +72,8 @@ BOOL set_quantization_event(RIFFHANDLE, int flags);
 #define SetQuantizationEvent(h,f) set_quantization_event(h,f)
 
 // copy palette
-BOOL copy_rif_palette (RIFFHANDLE, int flags);
-#define CopyRIFPalette(h,f) copy_rif_palette(h,f)
+//BOOL copy_rif_palette (RIFFHANDLE, int flags);
+//#define CopyRIFPalette(h,f) copy_rif_palette(h,f)
 
 // copy texture lighting table
 BOOL copy_rif_tlt (RIFFHANDLE, int flags);
@@ -207,12 +203,6 @@ extern MODULE Empty_Module;
 extern MODULE Term_Module;
 
 extern MODULEMAPBLOCK Empty_Module_Map;
-
-#endif
-
-#ifdef __cplusplus
-
-}
 
 #endif
 

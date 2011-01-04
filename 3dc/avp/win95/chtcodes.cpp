@@ -21,36 +21,22 @@
 #include "equipmnt.h"
 #include "rootgadg.hpp"
 #include "hudgadg.hpp"
-//#include "introut.hpp"
 #include "modcmds.hpp"
-
 #include "bh_types.h"
-
 #include "consvar.hpp"
-
 #include "missions.hpp"
-
 #include "textexp.hpp"
-
 #include "refobj.hpp"
-
 #include "debuglog.hpp"
-
 #include "trepgadg.hpp"
-
 #include "conscmnd.hpp"
-
 #include "consbind.hpp"
 
-extern "C"
-{
-	#include "weapons.h"
-	#include "avp_menus.h"
-};
+#include "weapons.h"
+#include "avp_menus.h"
 
-
-	#define UseLocalAssert TRUE
-	#include "ourasert.h"
+#define UseLocalAssert TRUE
+#include "ourasert.h"
 
 /* Version settings ************************************************/
 
@@ -61,33 +47,11 @@ extern "C"
 /* Imported function prototypes ************************************/
 
 /* Imported data ***************************************************/
-#ifdef __cplusplus
-	extern "C"
-	{
-#endif
 		extern int DebuggingCommandsActive;
 	
 		extern int bEnableTextprint;
 
 		extern SCENE Global_Scene;
-
-		#if 0
-		extern OurBool			DaveDebugOn;
-		extern FDIEXTENSIONTAG	FDIET_Dummy;
-		extern IFEXTENSIONTAG	IFET_Dummy;
-		extern FDIQUAD			FDIQuad_WholeScreen;
-		extern FDIPOS			FDIPos_Origin;
-		extern FDIPOS			FDIPos_ScreenCentre;
-		extern IFOBJECTLOCATION IFObjLoc_Origin;
-		extern UncompressedGlobalPlotAtomID UGPAID_StandardNull;
-		extern IFCOLOUR			IFColour_Dummy;
- 		extern IFVECTOR			IFVec_Zero;
-		#endif
-#ifdef __cplusplus
-	};
-#endif
-
-
 
 /* Exported globals ************************************************/
 
@@ -334,7 +298,6 @@ void SCString :: ProcessAnyCheatCodes(void)
 void Cheats :: ToggleImmortality(void)
 {
 	// immortality cheat
-	#if 1
 	if ( PlayerStatusPtr->IsImmortal )
 	{
 		GADGET_NewOnScreenMessage("IMMORTALITY DISABLED");
@@ -347,7 +310,6 @@ void Cheats :: ToggleImmortality(void)
 		// LOCALISEME();
 		PlayerStatusPtr->IsImmortal = 1;
 	}		
-	#endif
 }
 
 void Cheats :: CommitSuicide(void)

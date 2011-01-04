@@ -4,10 +4,6 @@
 #ifndef PSNDPROJ_H
 #define PSNDPROJ_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "equipmnt.h"
 
 /* Andy 12/6/97 --------------------------------------------------------------
@@ -420,10 +416,6 @@ typedef enum cdtrackid
 } CDTRACKID;
 
 extern int CDTrackMax; //bas maximum cd track on the actual number of tracks
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
 

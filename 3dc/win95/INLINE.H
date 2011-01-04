@@ -9,10 +9,6 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* 
 	Standard macros.  Note that FIXED_TO_INT
 	and INT_TO_FIXED are very suboptimal in 
@@ -601,8 +597,8 @@ int FloatToInt(float);
 
 int SqRoot32(int A);
 void FloatToInt();
-extern float fti_fptmp;
-extern int fti_itmp;
+extern volatile float fti_fptmp;
+extern volatile int fti_itmp;
 
 #define f2i(a, b) { \
 fti_fptmp = (b); \
@@ -621,10 +617,5 @@ void RotVect(VECTORCH *v, MATRIXCH *m);
 #define RotateAndCopyVector(v_in,v_out,m) (_RotateAndCopyVector((v_in),(v_out),(m)))
 #define Dot(v1,v2) (_Dot((v1),(v2)))
 #define DotProduct(v1,v2) (_DotProduct((v1),(v2)))
-
-#ifdef __cplusplus
-}
-#endif
-
 
 #endif

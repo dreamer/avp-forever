@@ -4,7 +4,6 @@
 	so this file will hold all Direct 3D hud code.
 
  */
-extern "C" {
 
 // Mysterious definition required by objbase.h 
 // (included via one of the include files below)
@@ -23,15 +22,12 @@ extern "C" {
 #include "chnktexi.h"
 #include "HUD_layout.h"
 #include "language.h"
-
-extern "C++" 									  
-{
+#include "tables.h"
 #include "renderer.h"
 #include "r2base.h"
 #include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 extern void D3D_RenderHUDString_Centred(char *stringPtr, uint32_t centreX, uint32_t y, uint32_t colour);
 extern void D3D_RenderHUDNumber_Centred(uint32_t number, uint32_t x, uint32_t y, uint32_t colour);
-};
 
 #include "d3d_hud.h"
 
@@ -69,20 +65,19 @@ static int MT_BlipHeight;
 static int MT_BlipWidth;
 static HUDImageDesc BlueBar;
 
-
-int HUDImageNumber;
-int SpecialFXImageNumber;
-int SmokyImageNumber;
-int ChromeImageNumber;
-int CloudyImageNumber;
-int BurningImageNumber;
-int HUDFontsImageNumber;
-int PredatorVisionChangeImageNumber;
-int PredatorNumbersImageNumber;
-int StaticImageNumber;
-int AlienTongueImageNumber;
-int AAFontImageNumber;
-int WaterShaftImageNumber;
+texID_t HUDImageNumber;
+texID_t SpecialFXImageNumber;
+texID_t SmokyImageNumber;
+texID_t ChromeImageNumber;
+texID_t CloudyImageNumber;
+texID_t BurningImageNumber;
+texID_t HUDFontsImageNumber;
+texID_t PredatorVisionChangeImageNumber;
+texID_t PredatorNumbersImageNumber;
+texID_t StaticImageNumber;
+texID_t AlienTongueImageNumber;
+texID_t AAFontImageNumber;
+texID_t WaterShaftImageNumber;
 
 fixed_t HUDScaleFactor;
 fixed_t MotionTrackerScale;
@@ -374,7 +369,6 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 {
 	struct VertexTag quadVertices[4];
 	int widthCos, widthSin;
-	extern int CloakingPhase;
 
 	BlueBar.TopLeftY = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset) - MUL_FIXED(MotionTrackerScale,40);
 	MotionTrackerCentreY = BlueBar.TopLeftY;
@@ -982,4 +976,3 @@ void DrawPredatorEnergyBar(void)
 	}
 }
 
-};

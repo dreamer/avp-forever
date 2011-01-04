@@ -1,4 +1,3 @@
-/* Main designed spec for use with windows95*/
 
 #include "3dc.h"
 #include "module.h"
@@ -11,12 +10,7 @@
 #include "font.h"
 #include <mmsystem.h>
 #include "renderer.h"
-
-/* JH 27/1/97 */
-extern "C" {
 #include "comp_shp.h"
-}
-
 #include "chnkload.hpp"
 #include "npcsetup.h" /* JH 30/4/97 */
 #include "pldnet.h"
@@ -64,8 +58,6 @@ int DebugFontLoaded = 0;
 #else
 #define MainTextPrint 0
 #endif
-
-extern "C" {
 
 extern int PrintDebuggingText(const char* t, ...);
 extern int WindowRequestMode;
@@ -129,8 +121,6 @@ void exit_break_point_fucntion ()
 		__debugbreak();
 	}
 	#endif
-}
-
 }
 
 extern void LoadKeyConfiguration();

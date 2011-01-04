@@ -5,10 +5,6 @@
 #ifndef _bhpaq_h_
 #define _bhpaq_h_ 1
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "bh_pred.h"
 
 /* Patrick 18/2/97 ------------------------------------------------
@@ -94,10 +90,5 @@ void PAQBehaviour(STRATEGYBLOCK *sbPtr);
 void MakePAQNear(STRATEGYBLOCK *sbPtr);
 void MakePAQFar(STRATEGYBLOCK *sbPtr);
 void PAQIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple);
-
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

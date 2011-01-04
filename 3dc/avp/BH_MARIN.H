@@ -5,14 +5,6 @@
 #ifndef _bhmarin_h_
 	#define _bhmarin_h_ 1
 
-
-	#ifdef __cplusplus
-
-		extern "C" {
-
-	#endif
-
-
 	#include "bh_pred.h"
 	#include "psndproj.h"
 	#include "sfx.h"
@@ -247,8 +239,8 @@
 
  	}MARINE_STATUS_BLOCK;
 
-	typedef enum marine_npc_weapons {
-
+	typedef enum marine_npc_weapons 
+	{
 		MNPCW_PulseRifle,
 		MNPCW_Flamethrower,
 		MNPCW_Smartgun,
@@ -402,12 +394,5 @@
 	extern void ZoneAlert(int level,AIMODULE *targetModule);
 	extern void Marine_CorpseSightingTest(STRATEGYBLOCK *corpse);
 	int MarineSight_FrustumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRATEGYBLOCK *target);
-
-	#ifdef __cplusplus
-
-	}
-
-	#endif
-
 
 #endif

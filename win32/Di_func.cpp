@@ -8,8 +8,10 @@
 #include "logString.h"
 #include <dinput.h>
 #include <XInput.h> // XInput API
+#include "io.h"
+#include "Di_func.h"
 
-extern "C" {
+extern unsigned char GotAnyKey;
 
 // Note: INITGUID has NOT been defined here,
 // since the definition in d3_func.cpp is amply
@@ -26,12 +28,9 @@ extern "C" {
 
 extern void KeyboardEntryQueue_Add(char c);
 
-extern "C++"
-{
-	#include "console.h"
-	#include "onscreenKeyboard.h"
-	#include "iofocus.h"
-};
+#include "console.h"
+#include "onscreenKeyboard.h"
+#include "iofocus.h"
 
 #include "showcmds.h"
 
@@ -77,7 +76,6 @@ int MouseX;
 int MouseY;
 
 extern unsigned char KeyboardInput[];
-extern unsigned char GotAnyKey;
 static unsigned char LastGotAnyKey;
 unsigned char DebouncedGotAnyKey;
 
@@ -143,18 +141,13 @@ void ClearAllKeyArrays();
 /*
 	8/4/98 DHM: A new array, analagous to KeyboardInput, except it's debounced
 */
-extern "C"
-{
-	unsigned char DebouncedKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
-}
+
+unsigned char DebouncedKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
 
 // Implementation of the debounced KeyboardInput
 // There's probably a more efficient way of getting it direct from DirectInput
 // but it's getting late and I can't face reading any more Microsoft documentation...
 static unsigned char LastFramesKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
-
-
-extern int NormalFrameTime;
 
 static char IngameKeyboardInput[256];
 
@@ -1623,9 +1616,6 @@ extern void IngameKeyboardInput_ClearBuffer(void)
 	// start timer to ignore gamepad input
 	blockGamepadInputTimer = ONE_FIXED;
 }
-
-// For extern "C"
-};
 
 
 

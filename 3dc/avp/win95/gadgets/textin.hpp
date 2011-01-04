@@ -39,10 +39,6 @@
 	#include "textexp.hpp"
 	#endif
 
-#ifdef __cplusplus
-	extern "C" {
-#endif
-
 /* Version settings *****************************************************/
 	#define LimitedLineLength	TRUE
 
@@ -287,10 +283,5 @@
 
 
 /* End of the header ****************************************************/
-
-
-#ifdef __cplusplus
-	};
-#endif
 
 #endif

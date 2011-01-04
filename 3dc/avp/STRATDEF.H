@@ -1,14 +1,6 @@
 #ifndef _stratdef_h_
 #define _stratdef_h_ 1
 
-#ifdef __cplusplus
-
-	extern "C" {
-
-#endif
-
-
-
 /*
 stratgey block. We gain game control via the strategy blocks
 the overall sturcture is basically game independent, though if you
@@ -262,7 +254,7 @@ extern void GivePlayerCloakAway(void);
 // for lift and airlock code
 
 extern void InitPreservedSBs();
-extern void PreserveStBlocksInModule();
+extern void PreserveStBlocksInModule(MODULE* containing_mod);
 extern BOOL SBNeededForNextEnv(STRATEGYBLOCK* sbptr);
 extern void	AddPreservedSBsToActiveList();
 extern void TeleportPreservedSBsToNewEnvModule(MODULE* old_pos_module,
@@ -290,12 +282,5 @@ extern STRATEGYBLOCK *ActiveStBlockList[];
 #define NAME_ISNULL(name1) \
 				((*(int*)name1 == '\0') && \
 				(*(((int*)name1) + 1) == '\0'))
-
-
-#ifdef __cplusplus
-
-	};
-
-#endif
 
 #endif

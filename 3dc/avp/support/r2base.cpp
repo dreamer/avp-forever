@@ -26,30 +26,8 @@
 /* Imported function prototypes ************************************/
 
 /* Imported data ***************************************************/
-#ifdef __cplusplus
-	extern "C"
-	{
-#endif
 
-		extern int D3DDriverMode;
-
-		#if 0
-		extern OurBool			DaveDebugOn;
-		extern FDIEXTENSIONTAG	FDIET_Dummy;
-		extern IFEXTENSIONTAG	IFET_Dummy;
-		extern FDIQUAD			FDIQuad_WholeScreen;
-		extern FDIPOS			FDIPos_Origin;
-		extern FDIPOS			FDIPos_ScreenCentre;
-		extern IFOBJECTLOCATION IFObjLoc_Origin;
-		extern UncompressedGlobalPlotAtomID UGPAID_StandardNull;
-		extern IFCOLOUR			IFColour_Dummy;
- 		extern IFVECTOR			IFVec_Zero;
-		#endif
-#ifdef __cplusplus
-	};
-#endif
-
-
+extern int D3DDriverMode;
 
 /* Exported globals ************************************************/
 	/*static*/ const r2pos r2pos :: Origin = r2pos(0,0);
@@ -98,7 +76,7 @@ extern void R2BASE_ScreenModeChange_Setup(void)
 	}
 }
 
-extern "C" extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 
 extern void R2BASE_ScreenModeChange_Cleanup(void)
 {

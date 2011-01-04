@@ -1,8 +1,5 @@
 
 #include "vorbisPlayer.h"
-
-extern "C"
-{
 #include "3dc.h"
 #include "ourasert.h"
 #include "psndplat.h"
@@ -10,11 +7,8 @@ extern "C"
 #include "CD_player.h"
 #include "avp_menus.h"
 #include "gamedef.h"
-
 #include "AvP_EnvInfo.h"
 #include "dxlog.h"
-};
-
 #include "list_tem.hpp"
 
 //lists of tracks for each level
@@ -25,9 +19,6 @@ List<int> MultiplayerCDTracks[3];
 
 static int LastTrackChosen=-1;
 static uint32_t TrackSelectCounter=0;
-
-extern "C"
-{
 
 void EmptyCDTrackList()
 {
@@ -327,6 +318,4 @@ void ResetCDPlayForLevel()
 
 	TrackSelectCounter = 0;
 	CDDA_Stop();
-}
-
 }

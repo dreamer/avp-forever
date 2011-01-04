@@ -31,7 +31,7 @@ std::vector<Texture>::iterator texIt;
 size_t lastBytesUsed = 0;
 void Tex_CheckMemoryUsage();
 
-bool Tex_Lock(uint32_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
+bool Tex_Lock(texID_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
 {
 	r_Texture texture = Tex_GetTexture(textureID);
 	if (!texture)
@@ -40,7 +40,7 @@ bool Tex_Lock(uint32_t textureID, uint8_t **data, uint32_t *pitch, enum TextureL
 	return R_LockTexture(texture, data, pitch, lockType);
 }
 
-bool Tex_Unlock(uint32_t textureID)
+bool Tex_Unlock(texID_t textureID)
 {
 	r_Texture texture = Tex_GetTexture(textureID);
 	if (!texture)
@@ -58,7 +58,7 @@ void Tex_GetNamesVector(std::vector<std::string> &namesArray)
 	}
 }
 
-static uint32_t Tex_GetFreeID()
+static texID_t Tex_GetFreeID()
 {
 	for (uint32_t i = 0; i < textureList.size(); i++)
 	{
@@ -69,10 +69,10 @@ static uint32_t Tex_GetFreeID()
 	}
 
 	// no free slots in the vector, we'll be adding to the end
-	return static_cast<uint32_t>(textureList.size());
+	return textureList.size();
 }
 
-uint32_t Tex_CheckExists(const std::string &textureName)
+texID_t Tex_CheckExists(const std::string &textureName)
 {
 	for (uint32_t i = 0; i < textureList.size(); i++)
 	{
@@ -83,10 +83,10 @@ uint32_t Tex_CheckExists(const std::string &textureName)
 	return MISSING_TEXTURE;
 }
 
-uint32_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usage)
+texID_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usage)
 {
 	// get the next available ID
-	uint32_t textureID = Tex_GetFreeID();
+	texID_t textureID = Tex_GetFreeID();
 
 	Texture newTexture;
 	newTexture.name = textureName;
@@ -115,10 +115,10 @@ uint32_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint3
 	return textureID;
 }
 
-uint32_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType)
+texID_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType)
 {
 	Texture newTexture;
-	uint32_t textureID;
+	texID_t textureID;
 	newTexture.name = textureName;
 
 	// see if it exists already
@@ -160,7 +160,7 @@ uint32_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &A
 	return textureID;
 }
 
-uint32_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType)
+texID_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType)
 {
 	Texture newTexture;
 	newTexture.name = textureName;
@@ -172,7 +172,7 @@ uint32_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &Av
 	}
 
 	// get the next available ID
-	uint32_t textureID = Tex_GetFreeID();
+	texID_t textureID = Tex_GetFreeID();
 
 	// add texture to manager
 	if (textureID < textureList.size()) // we're reusing a slot in this case
@@ -193,7 +193,7 @@ uint32_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &Av
 	return textureID;
 }
 
-uint32_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usageType)
+texID_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usageType)
 {
 	Texture newTexture;
 	newTexture.name = textureName;
@@ -205,7 +205,7 @@ uint32_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t hei
 	}
 	
 	// get the next available ID
-	uint32_t textureID = Tex_GetFreeID();
+	texID_t textureID = Tex_GetFreeID();
 
 	// add texture to manager
 	if (textureID < textureList.size()) // we're reusing a slot in this case
@@ -216,20 +216,20 @@ uint32_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t hei
 	{
 		textureList.push_back(newTexture);
 	}
-/*
+
 	std::stringstream ss;
 	ss << "added texture at ID: " << textureID << " with name " << textureName << " width: " << width << " height: " << height << std::endl;
 	OutputDebugString(ss.str().c_str());
 
 	Tex_CheckMemoryUsage();
-*/
+
 	return textureID;
 }
 
-uint32_t Tex_CreateFromFile(const std::string &filePath)
+texID_t Tex_CreateFromFile(const std::string &filePath)
 {
 	// get the next available ID
-	uint32_t textureID = Tex_GetFreeID();
+	texID_t textureID = Tex_GetFreeID();
 
 	Texture	newTexture;
 	newTexture.name = filePath; // use file path as name
@@ -259,17 +259,17 @@ uint32_t Tex_CreateFromFile(const std::string &filePath)
 	return textureID;
 }
 
-std::string& Tex_GetName(uint32_t textureID)
+std::string& Tex_GetName(texID_t textureID)
 {
 	return textureList[textureID].name;
 }
 
-const r_Texture& Tex_GetTexture(uint32_t textureID)
+const r_Texture& Tex_GetTexture(texID_t textureID)
 {
 	return (textureList[textureID].texture);
 }
 
-const Texture& Tex_GetTextureDetails(uint32_t textureID)
+const Texture& Tex_GetTextureDetails(texID_t textureID)
 {
 	return (textureList[textureID]);
 }
@@ -289,15 +289,18 @@ void Tex_ReloadDynamicTextures()
 {
 	for (texIt = textureList.begin(); texIt != textureList.end(); ++texIt)
 	{
-		// check for NOT texture (ie released ones)
-		if ((texIt->texture != NULL) && (texIt->usage == TextureUsage_Dynamic))
+		if (texIt->usage == TextureUsage_Dynamic)
 		{
 			R_CreateTexture(texIt->width, texIt->height, texIt->bitsPerPixel, texIt->usage, (*texIt));
+
+			std::stringstream ss;
+			ss << "releasing texture with name " << texIt->name << " width: " << texIt->width << " height: " << texIt->height << std::endl;
+			OutputDebugString(ss.str().c_str());
 		}
 	}
 }
 
-void Tex_GetDimensions(uint32_t textureID, uint32_t &width, uint32_t &height)
+void Tex_GetDimensions(texID_t textureID, uint32_t &width, uint32_t &height)
 {
 	width  = textureList[textureID].width;
 	height = textureList[textureID].height;
@@ -346,7 +349,7 @@ void Tex_CheckMemoryUsage()
 	lastBytesUsed = bytesUsed;
 }
 
-void Tex_Release(uint32_t textureID)
+void Tex_Release(texID_t textureID)
 {
 	if (textureID == MISSING_TEXTURE)
 	{
@@ -358,11 +361,11 @@ void Tex_Release(uint32_t textureID)
 	if (textureList.at(textureID).texture != NULL)
 	{
 		R_ReleaseTexture(textureList[textureID].texture);
-/*
+
 		std::stringstream ss;
 		ss << "releasing texture at ID: " << textureID << " with name " << textureList[textureID].name << " width: " << textureList[textureID].width << " height: " << textureList[textureID].height << std::endl;
 		OutputDebugString(ss.str().c_str());
-*/
+
 		// blank the name out
 		textureList[textureID].name = ("");
 
@@ -376,14 +379,4 @@ void Tex_DeInit()
 	{
 		Tex_Release(i);
 	}
-/*
-	for (texIt = textureList.begin(); texIt != textureList.end(); ++texIt)
-	{
-		if (texIt->texture)
-		{
-			texIt->texture->Release();
-			texIt->texture = NULL;
-		}
-	}
-*/
 }

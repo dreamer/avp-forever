@@ -1,5 +1,4 @@
 #include "3dc.h"
-//#include "bmp2.h"
 #include "endianio.h"
 #include <String.hpp>
 #include "scrshot.hpp"
@@ -8,17 +7,15 @@
 #include "gamedef.h"
 #include "ourasert.h"
 #include "renderer.h"
+#include "pheromon.h"
 
 #include "frontend\avp_menus.h"
-extern "C"
-{
-	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-	extern int VideoModeTypeScreen;
-	extern unsigned char KeyboardInput[];
-	extern unsigned char DebouncedKeyboardInput[];
-	extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
-	extern MODULE* playerPherModule;
-};
+
+extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+extern int VideoModeTypeScreen;
+extern unsigned char KeyboardInput[];
+extern unsigned char DebouncedKeyboardInput[];
+extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 
 typedef VOID (*PutWord_F)(WORD, FILE *);
 typedef VOID (*PutDword_F)(DWORD, FILE *);

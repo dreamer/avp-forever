@@ -227,7 +227,6 @@ SCString :: SCString
 
 			pFirst = this;
 		}
-
 	}
 }
 

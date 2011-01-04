@@ -12,19 +12,12 @@
 #include "logString.h"
 #include "font2.h"
 #include <stdint.h>
+#include "Di_func.h"
+#include "io.h"
 
-extern "C"
-{
-	#include "avp_menugfx.hpp"
-	#include "platform.h"
-	extern unsigned char DebouncedKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
-	extern int RealFrameTime;
-}
 
 #define CHAR_WIDTH	12//16
 #define CHAR_HEIGHT	16
-
-char buf[100];
 
 struct Command
 {
@@ -130,8 +123,8 @@ void Con_Init()
 	console.currentY = 0;
 	console.destinationY = 0;
 
-	sprintf(buf, "console height: %d num lines: %d\n", console.lines * CHAR_HEIGHT, console.lines);
-	OutputDebugString(buf);
+//	sprintf(buf, "console height: %d num lines: %d\n", console.lines * CHAR_HEIGHT, console.lines);
+//	OutputDebugString(buf);
 
 	Con_AddCommand("toggleconsole", Con_Toggle);
 }

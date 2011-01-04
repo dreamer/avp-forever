@@ -510,17 +510,11 @@
 /* Exported globals *****************************************************/
 
 /* Function prototypes **************************************************/
-#ifdef __cplusplus
-	extern "C" {
-#endif
 		extern void INDEXFNT_PFLoadHook
 		(
 			FontIndex I_Font_New,
 			PFFONT *pffont_New
 		);
-#ifdef __cplusplus
-	};
-#endif
 
 /* End of the header ****************************************************/
 

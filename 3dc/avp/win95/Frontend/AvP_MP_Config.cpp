@@ -15,8 +15,6 @@
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 
-extern "C"
-{
 extern void SetDefaultMultiplayerConfig();
 extern char MP_SessionName[];
 extern char MP_Config_Description[];
@@ -835,6 +833,4 @@ int GetLocalMultiplayerLevelIndex(int index, char* customLevelName, int gameType
 	}
 
 	return -1;
-}
-
 }

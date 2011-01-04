@@ -1,4 +1,5 @@
 #include "langenum.h"
+#include "TextureManager.h"
 extern void D3D_HUD_Setup(void);
 extern void D3D_HUDQuad_Output(uint32_t textureID, struct VertexTag *quadVerticesPtr, uint32_t colour, enum FILTERING_MODE_ID filteringType);
 
@@ -52,6 +53,21 @@ typedef struct
 
 } HUDCharDesc;
 
+extern texID_t HUDImageNumber;
+extern texID_t SpecialFXImageNumber;
+extern texID_t SmokyImageNumber;
+extern texID_t ChromeImageNumber;
+extern texID_t CloudyImageNumber;
+extern texID_t BurningImageNumber;
+extern texID_t HUDFontsImageNumber;
+extern texID_t PredatorVisionChangeImageNumber;
+extern texID_t PredatorNumbersImageNumber;
+extern texID_t StaticImageNumber;
+extern texID_t AlienTongueImageNumber;
+extern texID_t AAFontImageNumber;
+extern texID_t WaterShaftImageNumber;
+
+extern signed int HUDTranslucencyLevel;
 
 extern void D3D_DrawHUDFontCharacter(HUDCharDesc *charDescPtr);
 extern void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr);

@@ -5,11 +5,6 @@
 #ifndef _bhgenerator_h_
 	#define _bhgenerator_h_ 1
 
-	#ifdef __cplusplus
-	extern "C" {
-	#endif
-
-
 	/*----------------Patrick 15/11/96-------------------
  	Generator behaviour data block. NB generators
 	have their own module ptr, as they are not included
@@ -121,10 +116,6 @@
 
 	/* globals */
 	extern HIVE_DATA NPCHive;
-
-	#ifdef __cplusplus
-	}
-	#endif
 
 extern void GeneratorBalance_NoteAIDeath();
 extern void GeneratorBalance_NotePlayerDeath();

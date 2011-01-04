@@ -4,13 +4,6 @@
 #include "3dc.h"
 #include "track.h"
 
-#ifdef __cplusplus
-
-	extern "C" {
-
-#endif
-
-
 extern void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr);
 extern void BinarySwitchBehaveFun(STRATEGYBLOCK* sbptr);
 
@@ -137,16 +130,6 @@ typedef struct bin_switch_tools_template
 	unsigned int switch_off_message_same:1;
 	unsigned int switch_off_message_none:1;
 
-
 } BIN_SWITCH_TOOLS_TEMPLATE;
-
-
-
-#ifdef __cplusplus
-
-	};
-
-#endif
-
 
 #endif

@@ -16,13 +16,6 @@
 	#include "fail.h"
 	#endif
 
-	
-
-#ifdef __cplusplus
-	extern "C" {
-#endif
-
-
 /* Version settings *****************************************************/
 	#define TrackReferenceCounted FALSE
 		/*
@@ -192,10 +185,5 @@
 
 
 /* End of the header ****************************************************/
-
-
-#ifdef __cplusplus
-	};
-#endif
 
 #endif

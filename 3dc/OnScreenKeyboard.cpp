@@ -42,10 +42,7 @@
 	- xbox specific graphics to indicate press B to go back, A to select..
 */
 
-extern "C"
-{
-	#include "platform.h"
-}
+#include "platform.h"
 
 static int Osk_GetCurrentLocation();
 std::string Osk_GetKeyLabel(uint32_t buttonIndex);

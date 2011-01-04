@@ -6,10 +6,6 @@
 #ifndef _pfarlocs_h_
 	#define _pfarlocs_h_ 1
 
-	#ifdef __cplusplus
-		extern "C" {
-	#endif
-
 
 /* various structure definitions used for module's auxilary location and
 entry point data and headers...*/
@@ -88,10 +84,5 @@ int NumAdjacentModules(AIMODULE* target);
 FARENTRYPOINT *GetModuleEP(MODULE* thisModule, MODULE*fromModule);
 FARENTRYPOINT *GetAIModuleEP(AIMODULE* thisModule, AIMODULE*fromModule);
 int PointIsInModule(MODULE* thisModule, VECTORCH* thisPoint);
-
-
-	#ifdef __cplusplus
-	}
-	#endif
 
 #endif

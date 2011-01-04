@@ -3,9 +3,6 @@
 #ifndef _hmodel_h
 #define _hmodel_h 1
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "decal.h"
 #include "psnd.h"
 
@@ -395,9 +392,5 @@ extern void DeInitialise_HModel(HMODELCONTROLLER *controller);
 
 extern void LoadHierarchy(struct save_block_header* header,HMODELCONTROLLER* controller);
 extern void SaveHierarchy(HMODELCONTROLLER* controller);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

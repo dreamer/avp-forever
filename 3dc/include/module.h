@@ -6,15 +6,6 @@
  Modules
 
 */
-
-
-#ifdef __cplusplus
-
-	extern "C" {
-
-#endif
-
-
 	#if SupportModules
 
 
@@ -54,11 +45,11 @@ typedef enum {
 } MODULETYPE;
 
 
-typedef union mref {
-
-	char mref_name[4];					/* Module name */
+typedef union mref 
+{
+	// bjd - was 4 - check me
+	char mref_name[5];					/* Module name */
 	struct module *mref_ptr;			/* Module pointer */
-
 } MREF;
 
 
@@ -206,11 +197,12 @@ typedef enum {
 
 struct aimodule;
 
-typedef struct module {
-
+typedef struct module 
+{
 	MODULETYPE m_type;
 
-	char m_name[4];						/* Unique name for this MODULE */
+	// bjd - was 4 - check me
+	char m_name[5];						/* Unique name for this MODULE */
 
 	int m_index;							/* Unique module index */
 
@@ -459,13 +451,6 @@ extern AIMODULE *AIModuleArray;
 
 
 #endif	/* SupportModules */
-
-
-#ifdef __cplusplus
-
-	};
-
-#endif
 
 #define MODULE_INCLUDED
 

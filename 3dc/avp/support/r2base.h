@@ -12,10 +12,6 @@
 #ifndef _r2base
 #define _r2base 1
 
-//#ifdef __cplusplus
-	//extern "C" {
-//#endif
-
 /* Version settings *****************************************************/
 	#define UseTemplates	FALSE
 
@@ -629,10 +625,5 @@
 
 
 /* End of the header ****************************************************/
-
-
-//#ifdef __cplusplus
-//	};
-//#endif
 
 #endif

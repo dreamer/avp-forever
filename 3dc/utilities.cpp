@@ -35,8 +35,6 @@
 
 static char saveFolder[MAX_PATH] = {0};
 
-extern "C" {
-
 // TODO: remove this
 extern void ReleaseDirect3D();
 
@@ -258,4 +256,3 @@ void avp_exit(int code)
 #endif
 }
 
-}

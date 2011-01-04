@@ -5,10 +5,6 @@
 #ifndef _bhfhug_h_
 #define _bhfhug_h_ 1
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "bh_pred.h"
 
 /* ------------------------------------------------------------
@@ -103,10 +99,5 @@ void MakeFacehuggerNear(STRATEGYBLOCK *sbPtr);
 void MakeFacehuggerFar(STRATEGYBLOCK *sbPtr);
 void FacehuggerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple);
 void Wake_Hugger(STRATEGYBLOCK *sbPtr);
-
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

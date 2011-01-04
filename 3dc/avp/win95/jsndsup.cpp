@@ -9,11 +9,8 @@
 #include "list_tem.hpp"
 #include "jsndsup.h"
 
-extern "C"
-{
-	extern int SoundSwitchedOn;
-	// Pat sets this up
-};
+extern int SoundSwitchedOn;
+// Pat sets this up
 
 List <LOADED_SOUND *> loaded_sounds;
 

@@ -21,10 +21,8 @@
 	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 
-extern "C" {
 	#include "prototyp.h"
 	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-}
 
 /* Version settings ************************************************/
 
@@ -35,25 +33,6 @@ extern "C" {
 /* Imported function prototypes ************************************/
 
 /* Imported data ***************************************************/
-#ifdef __cplusplus
-	extern "C"
-	{
-#endif
-		#if 0
-		extern OurBool			DaveDebugOn;
-		extern FDIEXTENSIONTAG	FDIET_Dummy;
-		extern IFEXTENSIONTAG	IFET_Dummy;
-		extern FDIQUAD			FDIQuad_WholeScreen;
-		extern FDIPOS			FDIPos_Origin;
-		extern FDIPOS			FDIPos_ScreenCentre;
-		extern IFOBJECTLOCATION IFObjLoc_Origin;
-		extern UncompressedGlobalPlotAtomID UGPAID_StandardNull;
-		extern IFCOLOUR			IFColour_Dummy;
- 		extern IFVECTOR			IFVec_Zero;
-		#endif
-#ifdef __cplusplus
-	};
-#endif
 
 
 
@@ -298,9 +277,6 @@ void AlienHUDGadget :: SetString(const char* text)
 	string->R_Release();
 }
 
-
-extern "C"
-{
 void BringDownConsoleWithSayTypedIn()
 {
 	//bring down console if it isn't already down
@@ -318,7 +294,6 @@ void BringDownConsoleWithSaySpeciesTypedIn()
 	//put "SAY_SPECIES " in the console
 	((AlienHUDGadget*)HUDGadget :: GetHUD())->SetString("SAY_SPECIES ");
 }
-};
 
 // private:
 #endif // UseGadgets

@@ -136,6 +136,7 @@ typedef struct
 #define MAX_NUMBER_OF_HEAT_SOURCES 10
 extern HEATSOURCE HeatSourceList[];
 extern int NumberOfHeatSources;
+extern int TripTasticPhase;
 
 #define MIRRORING_ON 1
 

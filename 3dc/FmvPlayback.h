@@ -62,7 +62,7 @@ class TheoraFMV
 		uint32_t		mAudioDataBufferSize;
 
 		// textures for video frames
-		std::vector<uint32_t> frameTextureIDs;
+		std::vector<texID_t> frameTextureIDs;
 
 		uint32_t mTextureWidth;
 		uint32_t mTextureHeight;

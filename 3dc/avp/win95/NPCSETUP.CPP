@@ -20,24 +20,20 @@
 #endif
 #define FIRST_FREE_IMAGE_GROUP 3 // 0 for char,1 for weapon rif ,2 for env
 
-//#if debug
-extern "C"
-{
-	BOOL ForceLoad_Alien=FALSE;
-	BOOL ForceLoad_Marine=FALSE;
-	BOOL ForceLoad_Predator=FALSE;
-	BOOL ForceLoad_Hugger=FALSE;
-	BOOL ForceLoad_Queen=FALSE;
-	BOOL ForceLoad_Civvie=FALSE;
-	BOOL ForceLoad_PredAlien=FALSE;
-	BOOL ForceLoad_Xenoborg=FALSE;
-	BOOL ForceLoad_Pretorian=FALSE;
-	BOOL ForceLoad_SentryGun=FALSE;
+BOOL ForceLoad_Alien=FALSE;
+BOOL ForceLoad_Marine=FALSE;
+BOOL ForceLoad_Predator=FALSE;
+BOOL ForceLoad_Hugger=FALSE;
+BOOL ForceLoad_Queen=FALSE;
+BOOL ForceLoad_Civvie=FALSE;
+BOOL ForceLoad_PredAlien=FALSE;
+BOOL ForceLoad_Xenoborg=FALSE;
+BOOL ForceLoad_Pretorian=FALSE;
+BOOL ForceLoad_SentryGun=FALSE;
 
-	extern BOOL KeepMainRifFile;
-
-};
-//#endif
+extern BOOL KeepMainRifFile;
+extern BOOL Current_Level_Requires_Mirror_Image();
+extern int AllowGoldWeapons;
 
 static char Marine_File[]= "hnpcmarine.rif";
 static char Alien_File[]= "hnpcalien.rif";
@@ -274,11 +270,6 @@ static BOOL MarineIsNomcombatant(AVP_Generator_Chunk* agc)
 
 List<int> LoadedNPC::image_groups;
 
-extern "C"
-{
-	extern BOOL Current_Level_Requires_Mirror_Image();
-	extern int AllowGoldWeapons;
-};
 void InitNPCs(RIFFHANDLE h)
 {
 	

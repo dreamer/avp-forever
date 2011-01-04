@@ -30,10 +30,6 @@
 #include <stdint.h>
 #include "os_header.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifdef _XBOX
 #define MB_OK			0x00000000L
 #define MB_SYSTEMMODAL	0x00001000L
@@ -47,9 +43,5 @@ void avp_GetCommandLineArgs(char *args, uint32_t size);
 char *GetSaveFolderPath();
 void avp_MessageBox(const char* message, int type);
 void avp_exit(int code);
-
-#ifdef __cplusplus
-};
-#endif
 
 #endif

@@ -3,8 +3,9 @@
 #include "console.h"
 #include "configFile.h"
 #include "logString.h"
+#include <process.h>
 
-extern "C" {
+bool running = false;
 
 #include "3dc.h"
 #include "AvP_Menus.h"
@@ -22,7 +23,6 @@ static bool net_IsInitialised = false;
 
 extern void NewOnScreenMessage(char *messagePtr);
 
-int glpDP = 0;
 uint32_t AvPNetID = 0;
 PlayerDetails thisClientPlayer;
 
@@ -148,7 +148,6 @@ int Net_Deinitialise()
 	enet_deinitialize();
 
 	net_IsInitialised = false;
-	glpDP = 0;
 
 	return NET_OK;
 }
@@ -237,9 +236,6 @@ int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle
 
 		// we're the host
 		AvP.Network = I_Host;
-
-		// need to remove this and use the above..?
-		glpDP = 1;
 
 		if (!Net_CreatePlayer(playerName, /*clanTag - ADDME!*/ NULL)) 
 			return NET_FAIL;
@@ -364,8 +360,6 @@ void Net_ConnectToAddress()
 		Con_PrintError("Net_ConnectToAddress - failed to connect to server!");
 		return;
 	}
-	
-	glpDP = 1;
 
 	// ask for session info
 	Net_SendSystemMessage(AVP_REQUEST_SESSION_DATA, 0, 0, NULL, 0);
@@ -392,7 +386,7 @@ void Net_ConnectToAddress()
 			memcpy(&tempSession, &receiveBuffer[MESSAGEHEADERSIZE], sizeof(NET_SESSIONDESC));
 
 			int gamestyle = (tempSession.level >> 8) & 0xff;
-			int level = tempSession.level  & 0xff;
+			int level = tempSession.level & 0xff;
 
 			char sessionName[100];
 			char levelName[100];
@@ -1040,14 +1034,9 @@ int Net_OpenSession(const char *hostName)
 		Con_PrintError("Net_OpenSession - failed to connect to server!\n");
 		return NET_FAIL;
 	}
-	
-	glpDP = 1;
 
 	return NET_OK;
 }
-
-int running = 0;
-#include <process.h>
 
 unsigned int __stdcall SessionSearch(void *args)
 {
@@ -1062,7 +1051,7 @@ unsigned int __stdcall SessionSearch(void *args)
 	int level;
 	char buf[100];
 
-	running = 1;
+	running = true;
 
 	OutputDebugString("in thread\n");
 
@@ -1484,5 +1473,3 @@ int Net_UpdateSessionDescForLobbiedGame(int gamestyle, int level)
 #endif
 	return NET_OK;
 }
-
-} // extern C

@@ -1,12 +1,6 @@
 #ifndef _bh_cable_h
 #define _bh_cable_h 1
 
-#ifdef __cplusplus
-
-	extern "C" {
-
-#endif
-
 extern void*  PowerCableBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr);
 extern void  PowerCableBehaveFun(STRATEGYBLOCK* sbptr);
 
@@ -34,16 +28,5 @@ typedef struct power_cable_tools_template
 	int current_charge;
 	int recharge_rate; 
 }POWER_CABLE_TOOLS_TEMPLATE;
-
-
-
-
-
-#ifdef __cplusplus
-
-	};
-
-#endif
-
 
 #endif

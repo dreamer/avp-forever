@@ -5,19 +5,12 @@
 #include "module.h"
 #include "stratdef.h"
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 void PlayMenuMusic(void);
 extern void PlayFMV(const char *filenamePtr);
 void StartMenuMusic();
 extern void StartTriggerPlotFMV(int number);
 void UpdateAllFMVTextures();
 void StartMenuBackgroundFmv();
-#ifdef __cplusplus
-}
-#endif
 
 typedef struct FMVTEXTURE
 {

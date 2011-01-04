@@ -7,15 +7,6 @@
 
 */
 
-
-#ifdef __cplusplus
-
-extern "C" {
-
-#endif
-
-
-
 /********************* SYSTEM, PLATFORM AND GAME************/
 
 /* redefined as visual studio 2008 uses Yes and No for sourceannotations.h */
@@ -104,8 +95,6 @@ typedef enum {
 
 
 /****************** BUFFER SIZES **********************/
-
-#define maxvdbs 1
 #define maxobjects 750
 extern int maxshapes;
 #define maxstblocks 1000
@@ -172,14 +161,6 @@ extern int maxshapes;
 #define TxLocal 0x8000			/* Set bit 15 to signify a local index */
 #define ClrTxIndex 0xffff0000	/* AND with this to clear the low 16-bits */
 #define ClrTxDefn 0x0000ffff	/* AND with this to clear the high 16-bits */
-
-#ifdef __cplusplus
-	
-	};
-
-#endif
-
-//#define SYSTEM_INCLUDED
 
 #endif
 

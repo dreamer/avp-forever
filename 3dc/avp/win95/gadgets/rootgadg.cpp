@@ -11,6 +11,7 @@
 /* Includes ********************************************************/
 #include "3dc.h"
 #include "rootgadg.hpp"
+#include "d3d_hud.h"
 
 #if UseGadgets
 	#include "hudgadg.hpp"
@@ -27,13 +28,6 @@
 /* Imported function prototypes ************************************/
 
 /* Imported data ***************************************************/
-#ifdef __cplusplus
-	extern "C"
-	{
-#endif
-		extern signed int HUDTranslucencyLevel;
-			// ranges from 0 to 255 inclusive ; convert to fixed point...
-
 
 		#if 0
 		extern OurBool			DaveDebugOn;
@@ -47,11 +41,6 @@
 		extern IFCOLOUR			IFColour_Dummy;
  		extern IFVECTOR			IFVec_Zero;
 		#endif
-#ifdef __cplusplus
-	};
-#endif
-
-
 
 /* Exported globals ************************************************/
 

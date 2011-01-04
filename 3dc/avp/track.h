@@ -1,10 +1,6 @@
 #ifndef track_h
 #define track_h 1
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 struct loaded_sound;
 
 typedef struct track_sound
@@ -109,9 +105,5 @@ struct save_block_header;
 
 void LoadTrackPosition(struct save_block_header*,TRACK_CONTROLLER*);
 void SaveTrackPosition(TRACK_CONTROLLER*);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

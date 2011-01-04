@@ -19,11 +19,9 @@ extern void release_rif_bitmaps();
 	externs for commonly used global variables and arrays
 */
 
-extern "C" {
 extern SHAPEHEADER **mainshapelist;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern char projectsubdirectory[];
-}
 
 /*
 	Global Variables for PC Functions

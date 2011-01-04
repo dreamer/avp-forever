@@ -165,7 +165,9 @@ extern PARTICLE_DESC ParticleDescription[];
 
 
 extern void InitialiseParticleSystem(void);
+
 extern void MakeParticle(VECTORCH *positionPtr, VECTORCH *velocityPtr, enum PARTICLE_ID particleID);
+
 extern void HandleParticleSystem(void);
 
 extern void HandleRainDrops(MODULE *modulePtr,int numberOfRaindrops);

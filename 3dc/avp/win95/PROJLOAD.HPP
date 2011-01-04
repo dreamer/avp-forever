@@ -6,7 +6,7 @@
 
 
 
-#ifdef __cplusplus
+//#ifdef __cplusplus
 
 #include "hierchnk.hpp"
 
@@ -46,13 +46,6 @@ struct Hierarchy_Descriptor
 	SECTION * hierarchy_root;
 
 	char * hierarchy_name;
-
-
-};
-
-extern "C"
-{
-struct hierarchy_variant_data;
 };
 
 class Global_Hierarchy_Store
@@ -94,13 +87,7 @@ public:
 	SECTION * build_hierarchy (Object_Hierarchy_Chunk * ohc,char* hierarchy_name);
 
 	void delete_section(SECTION *);
-
-
 };
-
-extern "C" {
-
-#endif
 
 #define LOAD_MORPH_SHAPES 1 // you can compile out the code that copies morph data
 
@@ -153,11 +140,5 @@ HIERARCHY_SHAPE_REPLACEMENT* GetHierarchyAlternateShapeSetFromLibrary(const char
 
 
 extern void save_preplaced_decals();
-
-#ifdef __cplusplus
-
-};
-#endif
-
 
 #endif

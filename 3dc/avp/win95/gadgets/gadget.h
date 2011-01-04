@@ -158,9 +158,7 @@
 /* Exported globals *****************************************************/
 
 /* Function prototypes **************************************************/
-#ifdef __cplusplus
-	extern "C" {
-#endif
+
 	#if UseGadgets
 
 	extern void GADGET_Init(void);
@@ -197,10 +195,5 @@
 
 
 /* End of the header ****************************************************/
-
-
-#ifdef __cplusplus
-	};
-#endif
 
 #endif
