@@ -12,7 +12,6 @@ Project specific (or potentially project specific) windows functionality
 #include "logString.h"
 
 extern unsigned char KeyboardInput[256];
-extern unsigned char GotAnyKey;
 
 #include "3dc.h"
 #include "inline.h"

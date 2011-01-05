@@ -6,8 +6,6 @@
 
 extern void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha);
 
-extern unsigned char GotAnyKey;
-
 #include "3dc.h"
 #include "inline.h"
 #include "AvP_Menus.h"

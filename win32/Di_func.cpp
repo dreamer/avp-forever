@@ -11,8 +11,6 @@
 #include "io.h"
 #include "Di_func.h"
 
-extern unsigned char GotAnyKey;
-
 // Note: INITGUID has NOT been defined here,
 // since the definition in d3_func.cpp is amply
 // sufficient.
@@ -76,8 +74,8 @@ int MouseX;
 int MouseY;
 
 extern unsigned char KeyboardInput[];
-static unsigned char LastGotAnyKey;
-unsigned char DebouncedGotAnyKey;
+static bool LastGotAnyKey;
+bool DebouncedGotAnyKey;
 
 int GotJoystick;
 JOYCAPS JoystickCaps;
@@ -354,7 +352,7 @@ void DirectReadKeyboard(void)
     // Zero current inputs (i.e. set all keys to FALSE,
 	// or not pressed)
     memset((void*)KeyboardInput, FALSE, MAX_NUMBER_OF_INPUT_KEYS);
-	GotAnyKey = FALSE;
+	GotAnyKey = false;
 
 	// letters
 	for (int i = LETTER_A; i <= LETTER_Z; i++)
@@ -362,7 +360,7 @@ void DirectReadKeyboard(void)
 		if (IngameKeyboardInput[i])
 		{
 			KeyboardInput[KEY_A + i - LETTER_A] = TRUE;
-			GotAnyKey = TRUE;
+			GotAnyKey = true;
 		}
 	}
 
@@ -372,85 +370,85 @@ void DirectReadKeyboard(void)
 		if (IngameKeyboardInput[i])
 		{
 			KeyboardInput[KEY_0 + i - NUMBER_0] = TRUE;
-			GotAnyKey = TRUE;
+			GotAnyKey = true;
 		}
 	}
 
 	if (IngameKeyboardInput[VK_OEM_7])
 	{
 		KeyboardInput[KEY_HASH] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_DIVIDE])
 	{
 		KeyboardInput[KEY_NUMPADDIVIDE] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_MULTIPLY])
 	{
 		KeyboardInput[KEY_NUMPADMULTIPLY] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_OEM_MINUS])
 	{
 		KeyboardInput[KEY_MINUS] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 	if (IngameKeyboardInput[VK_OEM_PLUS])
 	{
 		KeyboardInput[KEY_EQUALS] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_OEM_5])
 	{
 		KeyboardInput[KEY_BACKSLASH] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_OEM_2])
 	{
 		KeyboardInput[KEY_SLASH] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_OEM_4])
 	{
 		KeyboardInput[KEY_LBRACKET] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_OEM_6])
 	{
 		KeyboardInput[KEY_RBRACKET] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_OEM_1])
 	{
 		KeyboardInput[KEY_SEMICOLON] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_OEM_PERIOD])
 	{
 		KeyboardInput[KEY_FSTOP] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_OEM_COMMA])
 	{
 		KeyboardInput[KEY_COMMA] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_OEM_3])
 	{
 		KeyboardInput[KEY_APOSTROPHE] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 
@@ -458,91 +456,91 @@ void DirectReadKeyboard(void)
 	if (IngameKeyboardInput[0xDF])
 	{
 		KeyboardInput[KEY_GRAVE] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_LEFT])
 	{
 		KeyboardInput[KEY_LEFT] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_RIGHT])
 	{
 		KeyboardInput[KEY_RIGHT] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_UP])
 	{
 		KeyboardInput[KEY_UP] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_DOWN])
 	{
 		KeyboardInput[KEY_DOWN] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_ESCAPE])
 	{
 		KeyboardInput[KEY_ESCAPE] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_RETURN])
 	{
 		KeyboardInput[KEY_CR] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_TAB])
 	{
 		KeyboardInput[KEY_TAB] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_F1])
 	{
 		KeyboardInput[KEY_F1] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_F2])
 	{
 		KeyboardInput[KEY_F2] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_F3])
 	{
 		KeyboardInput[KEY_F3] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_F4])
 	{
 		KeyboardInput[KEY_F4] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_F5])
 	{
 		KeyboardInput[KEY_F5] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_F6])
 	{
 		KeyboardInput[KEY_F6] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_F7])
 	{
 		KeyboardInput[KEY_F7] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_F8])
@@ -556,252 +554,252 @@ void DirectReadKeyboard(void)
 	if (IngameKeyboardInput[VK_F9])
 	{
 		KeyboardInput[KEY_F9] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_F10])
 	{
 		KeyboardInput[KEY_F10] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_F11])
 	{
 		KeyboardInput[KEY_F11] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_F12])
 	{
 		KeyboardInput[KEY_F12] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_INSERT])
 	{
 		KeyboardInput[KEY_INS] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_DELETE])
 	{
 		KeyboardInput[KEY_DEL] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_END])
 	{
 		KeyboardInput[KEY_END] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_HOME])
 	{
 		KeyboardInput[KEY_HOME] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_PRIOR]) // page up virtual key
 	{
 		KeyboardInput[KEY_PAGEUP] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_NEXT]) // page down virtual key
 	{
 		KeyboardInput[KEY_PAGEDOWN] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_BACK])
 	{
 		KeyboardInput[KEY_BACKSPACE] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_SPACE])
 	{
 		KeyboardInput[KEY_SPACE] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_LSHIFT])
 	{
 		KeyboardInput[KEY_LEFTSHIFT] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_RSHIFT])
 	{
 		KeyboardInput[KEY_RIGHTSHIFT] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_LCONTROL])
 	{
 		KeyboardInput[KEY_LEFTCTRL] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_RCONTROL])
 	{
 		KeyboardInput[KEY_RIGHTCTRL] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_CAPITAL])
 	{
 		KeyboardInput[KEY_CAPS] = TRUE;
 		KeyboardInput[KEY_CAPITAL] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_NUMLOCK])
 	{
 		KeyboardInput[KEY_NUMLOCK] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_SCROLL])
 	{
 		KeyboardInput[KEY_SCROLLOK] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_LMENU])
 	{
 		KeyboardInput[KEY_LEFTALT] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_RMENU])
 	{
 		KeyboardInput[KEY_RIGHTALT] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_NUMPAD0])
 	{
 		KeyboardInput[KEY_NUMPAD0] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_NUMPAD1])
 	{
 		KeyboardInput[KEY_NUMPAD1] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_NUMPAD2])
 	{
 		KeyboardInput[KEY_NUMPAD2] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_NUMPAD3])
 	{
 		KeyboardInput[KEY_NUMPAD3] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_NUMPAD4])
 	{
 		KeyboardInput[KEY_NUMPAD4] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_NUMPAD5])
 	{
 		KeyboardInput[KEY_NUMPAD5] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_NUMPAD6])
 	{
 		KeyboardInput[KEY_NUMPAD6] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_NUMPAD7])
 	{
 		KeyboardInput[KEY_NUMPAD7] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_NUMPAD8])
 	{
 		KeyboardInput[KEY_NUMPAD8] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_NUMPAD9])
 	{
 		KeyboardInput[KEY_NUMPAD9] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	// subtract/minus symbol on keypad
 	if (IngameKeyboardInput[VK_SUBTRACT])
 	{
 		KeyboardInput[KEY_NUMPADSUB] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_ADD])
 	{
 		KeyboardInput[KEY_NUMPADADD] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_DECIMAL])
 	{
 		KeyboardInput[KEY_NUMPADDEL] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_LWIN])
 	{
 		KeyboardInput[KEY_LWIN] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_RWIN])
 	{
 		KeyboardInput[KEY_RWIN] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_APPS])
 	{
 		KeyboardInput[KEY_APPS] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	// mouse buttons
 	if (MouseButtons[LeftMouse])
 	{
 		KeyboardInput[KEY_LMOUSE] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 	if (MouseButtons[MiddleMouse])
 	{
 		KeyboardInput[KEY_MMOUSE] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 	if (MouseButtons[RightMouse])
 	{
 		KeyboardInput[KEY_RMOUSE] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 	if (MouseButtons[ExtraMouse1])
 	{
 		KeyboardInput[KEY_MOUSEBUTTON4] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 	if (MouseButtons[ExtraMouse2])
 	{
 		KeyboardInput[KEY_MOUSEBUTTON4] = TRUE;
-		GotAnyKey = TRUE;
+		GotAnyKey = true;
 	}
 
 	// mouse wheel - read using windows messages
@@ -810,12 +808,12 @@ void DirectReadKeyboard(void)
 		if (MouseWheelStatus > 0)
 		{
 			KeyboardInput[KEY_MOUSEWHEELUP] = TRUE;
-			GotAnyKey = TRUE;
+			GotAnyKey = true;
 		}
 		else if (MouseWheelStatus < 0)
 		{
 			KeyboardInput[KEY_MOUSEWHEELDOWN] = TRUE;
-			GotAnyKey = TRUE;
+			GotAnyKey = true;
 		}
 	}
 
@@ -829,7 +827,7 @@ void DirectReadKeyboard(void)
 			if (JoystickData.dwButtons&bit)
 			{
 				KeyboardInput[KEY_JOYSTICK_BUTTON_1+n] = TRUE;
-				GotAnyKey = TRUE;
+				GotAnyKey = true;
 			}
 		}
 	}
@@ -852,7 +850,7 @@ void DirectReadKeyboard(void)
 			if (GamePadButtons[i])
 			{
 				KeyboardInput[KEY_JOYSTICK_BUTTON_1+i] = TRUE;
-				GotAnyKey = TRUE;
+				GotAnyKey = true;
 			}
 		}
 	}
@@ -1572,8 +1570,8 @@ void ClearAllKeyArrays()
 {
 	memset(KeyboardInput, 0, MAX_NUMBER_OF_INPUT_KEYS);
 	memset(DebouncedKeyboardInput, 0, MAX_NUMBER_OF_INPUT_KEYS);
-	GotAnyKey = 0;
-	DebouncedGotAnyKey = 0;
+	GotAnyKey = false;
+	DebouncedGotAnyKey = false;
 }
 
 extern void IngameKeyboardInput_KeyDown(unsigned char key)

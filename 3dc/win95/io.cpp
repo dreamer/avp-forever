@@ -92,7 +92,7 @@ void InitialiseRawInput();
 	static VIEWDESCRIPTORBLOCK* vdb_tmp;
 	static SCREENDESCRIPTORBLOCK* sdb_tmp;
 
-	unsigned char GotAnyKey;
+	bool GotAnyKey;
 
     /* Input communication with Windows Procedure */
     /* Print system */
@@ -363,7 +363,7 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 
     /* Initialise input interface */
     memset((void*)KeyboardInput, FALSE, MAX_NUMBER_OF_INPUT_KEYS);
-	GotAnyKey = FALSE;
+	GotAnyKey = false;
 
 #ifdef WIN32
 	/* init raw input for mouse */

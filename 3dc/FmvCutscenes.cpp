@@ -12,6 +12,7 @@
 #include "console.h"
 #include <vector>
 #include <string>
+#include "io.h"
 #include "Di_func.h"
 
 #define MAX_FMVS 4
@@ -30,7 +31,6 @@ uint32_t NumberOfFMVTextures = 0;
 
 extern void UpdateFMVTexture(FMVTEXTURE *ftPtr);
 extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
-extern unsigned char GotAnyKey;
 
 int FmvColourRed;
 int FmvColourGreen;

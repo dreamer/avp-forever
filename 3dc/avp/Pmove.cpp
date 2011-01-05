@@ -93,7 +93,6 @@ extern DISPLAYBLOCK* Player;
 extern int predHUDSoundHandle;
 extern int predOVision_SoundHandle;
 extern int TauntSoundPlayed;
-extern unsigned char GotAnyKey;
 
 static char FlyModeOn = 0;			
 static char FlyModeDebounced = 0;

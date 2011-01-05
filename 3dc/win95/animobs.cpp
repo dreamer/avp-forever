@@ -18,7 +18,6 @@ void Object_Animation_Sequence_Frame_Chunk::fill_data_block (char *data_start)
 
 	data_start += 4;
 
-
 	*((float *) data_start) = orientation.x;
 	data_start += 4;
 	*((float *) data_start) = orientation.y;

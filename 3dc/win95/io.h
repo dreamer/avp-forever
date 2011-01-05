@@ -5,7 +5,7 @@ extern int NormalFrameTime;
 extern int RealFrameTime;
 extern int CloakingPhase;
 extern int TimeScale;
-extern unsigned char GotAnyKey;
+extern bool GotAnyKey;
 int PrintDebuggingText(const char* t, ...);
 
 #endif
