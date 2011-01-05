@@ -30,7 +30,7 @@ PS_OUTPUT ps_main( in PS_INPUT In )
 	Out.Color = tex2D(Tex0, In.Texture) * In.Diffuse;
 	
 	// specular addition
-	Out.Color += In.Specular;
+	// Out.Color += In.Specular;
 
 	return Out;                                // return output pixel
 }
