@@ -246,7 +246,7 @@ static const char* MultiplayerConfigurationName=0; //ditto
 
 extern int DebuggingCommandsActive;
 
-extern BOOL bRunning;
+extern bool bRunning;
 
 BOOL mainMenu = TRUE;
 

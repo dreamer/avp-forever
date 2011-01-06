@@ -1,17 +1,16 @@
 
+#include "3dc.h"
+#include "assert.h"
 #include "enet\enet.h"
 #include "console.h"
 #include "configFile.h"
 #include "logString.h"
 #include <process.h>
-
-bool running = false;
-
-#include "3dc.h"
 #include "AvP_Menus.h"
 #include "AvP_MP_Config.h"
-#include "assert.h"
 #include "networking.h"
+
+bool running = false;
 
 static ENetHost		*Client = NULL; // if we're a client
 static ENetHost		*Server = NULL; // if we're a server
@@ -830,7 +829,7 @@ int Net_Send(int fromID, int toID, int flags, uint8_t *messageData, size_t dataS
 
 	if (packet == NULL)
 	{
-		Con_PrintError("Net_Send - couldn't create packet");
+//		Con_PrintError("Net_Send - couldn't create packet");
 		return NET_FAIL;
 	}
 

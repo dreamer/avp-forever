@@ -53,7 +53,7 @@ unsigned char ToAsciiTable[256][256];
 
 HWND 		hWndMain;
 BOOL        bActive = TRUE;        // is application active?
-BOOL		bRunning = TRUE;
+bool		bRunning = true;
 
 // Parameters for main (assumed full screen) window
 int WinLeftX, WinRightX, WinTopY, WinBotY;
@@ -410,7 +410,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 		case WM_CLOSE:
 		{
-			bRunning = FALSE;
+			bRunning = false;
 			return 0;
 		}
 

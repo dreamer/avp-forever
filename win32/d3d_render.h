@@ -23,7 +23,6 @@ extern void D3D_FadeDownScreen(int brightness, int colour);
 extern void D3D_PlayerOnFireOverlay(void);
 
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a);
-//void NewQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t colour, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyType, float *UVList);
 
 /*extern*/ void CheckWireFrameMode(int shouldBeOn);
 

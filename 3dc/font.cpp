@@ -53,7 +53,7 @@ struct Font
 	enum FONT_TYPE  type;
 	uint32_t	textureWidth;
 	uint32_t	textureHeight;
-	uint32_t	textureID;
+	texID_t	textureID;
 	uint32_t	fontWidths[256];
 	uint32_t	blockWidth;
 	uint32_t	blockHeight;

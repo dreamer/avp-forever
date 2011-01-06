@@ -16,8 +16,8 @@
 #include "io.h"
 
 
-#define CHAR_WIDTH	12//16
-#define CHAR_HEIGHT	16
+const int kCharWidth  = 12;
+const int kCharHeight =	16;
 
 struct Command
 {
@@ -114,11 +114,11 @@ void Con_Init()
 	console.yPos = 0;
 	console.width = 640;
 
-	console.lines = 240 / CHAR_HEIGHT;
-	console.lineWidth = 640 / CHAR_WIDTH;
+	console.lines = 240 / kCharHeight;
+	console.lineWidth = 640 / kCharWidth;
 
-	console.height = console.lines * CHAR_HEIGHT;
-	console.indent = CHAR_WIDTH / 2;
+	console.height = console.lines * kCharHeight;
+	console.indent = kCharWidth / 2;
 
 	console.currentY = 0;
 	console.destinationY = 0;
@@ -293,20 +293,20 @@ void Con_Draw()
 		DrawQuad(console.xPos, console.yPos + console.height, console.width, 2, NO_TEXTURE, RCOLOR_ARGB(255, 255, 255, 255), TRANSLUCENCY_OFF);
 	}
 
-	uint32_t y = console.height - CHAR_HEIGHT;
+	uint32_t y = console.height - kCharHeight;
 
 	// draw input cusor
 	Font_DrawText(">", console.indent, y, RCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 	Font_DrawText("_", console.indent + charWidth, y, RCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 
-	y -= CHAR_HEIGHT;
+	y -= kCharHeight;
 
 	int32_t rows = console.text.size() - 1;
 
 	int xOffset = 0;
 
 	// draw all the lines of text
-	for (; rows >= 0; rows--, y -= CHAR_HEIGHT)
+	for (; rows >= 0; rows--, y -= kCharHeight)
 	{
 		xOffset = 0;
 		charWidth = 0;
@@ -314,9 +314,9 @@ void Con_Draw()
 		Font_DrawText(console.text.at(rows), console.indent + xOffset, y, RCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 	}
 
-	xOffset = CHAR_WIDTH;
+	xOffset = kCharWidth;
 	charWidth = 0;
 
 	// draw the line of text we're currently typing
-	Font_DrawText(console.inputLine, console.indent + xOffset, console.height - CHAR_HEIGHT, RCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
+	Font_DrawText(console.inputLine, console.indent + xOffset, console.height - kCharHeight, RCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 }

@@ -22,8 +22,9 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "TextureManager.h"
+//#include "TextureManager.h"
 #include <sstream>
+#include "renderer.h"
 
 std::vector<Texture> textureList;
 std::vector<Texture>::iterator texIt;

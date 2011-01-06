@@ -4,6 +4,7 @@
 #include "3dc.h"
 #include "module.h"
 #include "stratdef.h"
+#include "TextureManager.h"
 
 void PlayMenuMusic(void);
 extern void PlayFMV(const char *filenamePtr);
@@ -14,7 +15,7 @@ void StartMenuBackgroundFmv();
 
 typedef struct FMVTEXTURE
 {
-	uint32_t textureID;
+	texID_t textureID;
 	uint32_t width;
 	uint32_t height;
 	int32_t fmvHandle;

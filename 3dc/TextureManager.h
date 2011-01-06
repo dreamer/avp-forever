@@ -30,8 +30,6 @@
 #include <string>
 #include <vector>
 
-typedef size_t texID_t;
-
 enum TextureUsage
 {
 	TextureUsage_Normal,

@@ -29,7 +29,7 @@ extern void Show_WinnerScreen(void);
 extern void DrawMainMenusBackdrop(void);
 extern void FadedScreen(int alpha);
 
-extern BOOL bRunning;
+extern bool bRunning;
 
 void WeWantAnIntro(void)
 {

@@ -440,7 +440,7 @@ void R_SetCurrentVideoMode()
 	R_ChangeResolution(currentWidth, currentHeight);
 }
 
-bool R_SetTexture(uint32_t stage, uint32_t textureID)
+bool R_SetTexture(uint32_t stage, texID_t textureID)
 {
 	// check that the stage value is within range
 	if (stage > MAX_TEXTURE_STAGES-1)

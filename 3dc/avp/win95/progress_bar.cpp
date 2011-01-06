@@ -42,7 +42,7 @@ RECT LoadingBarEmpty_SrcRect;
 RECT LoadingBarFull_DestRect;
 RECT LoadingBarFull_SrcRect;
 
-extern void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t textureID);
+extern void DrawProgressBar(const RECT &srcRect, const RECT &destRect, texID_t textureID);
 
 uint32_t	fullTextureID = 0;
 uint32_t	emptyTextureID = 0;

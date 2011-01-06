@@ -109,7 +109,7 @@ extern void InitFmvCutscenes();
 
 extern struct DEBUGGINGTEXTOPTIONS ShowDebuggingText;
 
-extern BOOL bRunning;
+extern bool bRunning;
 
 BOOL unlimitedSaves = FALSE;
 

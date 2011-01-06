@@ -9,8 +9,11 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include "aw.h"
 
 typedef D3DXMATRIX R_MATRIX;
+
+typedef size_t texID_t;
 
 struct r_VertexBuffer
 {
@@ -49,14 +52,12 @@ struct r_PixelShader
 	std::vector<D3DXHANDLE>	constantsArray;
 };
 
-#include "aw.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "renderStates.h"
-#include "TextureManager.h"
 #include "ShaderManager.h"
 #include "VertexDeclaration.h"
-#include <string>
+#include "TextureManager.h"
 
 bool R_BeginScene();
 bool R_EndScene();
@@ -78,7 +79,7 @@ bool R_UnlockIndexBuffer(class IndexBuffer &indexBuffer);
 bool R_SetIndexBuffer(class IndexBuffer &indexBuffer);
 
 // texture functions
-bool R_SetTexture(uint32_t stage, uint32_t textureID);
+bool R_SetTexture(uint32_t stage, texID_t textureID);
 bool R_LockTexture(r_Texture texture, uint8_t **data, uint32_t *pitch, enum TextureLock lockType);
 bool R_UnlockTexture(r_Texture texture);
 bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usageType, Texture &texture);
@@ -240,15 +241,15 @@ extern D3DINFO d3d;
 
 bool InitialiseDirect3D();
 bool R_ChangeResolution		(uint32_t width, uint32_t height);
-void DrawAlphaMenuQuad		(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t alpha);
-void DrawTallFontCharacter	(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha);
+void DrawAlphaMenuQuad		(uint32_t topX, uint32_t topY, texID_t textureID, uint32_t alpha);
+void DrawTallFontCharacter	(uint32_t topX, uint32_t topY, texID_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha);
 void DrawCloudTable			(uint32_t topX, uint32_t topY, uint32_t wordLength, uint32_t alpha);
 void DrawFadeQuad			(uint32_t topX, uint32_t topY, uint32_t alpha);
 void DrawSmallMenuCharacter (uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t red, uint32_t green, uint32_t blue, uint32_t alpha);
-void DrawQuad				(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
+void DrawQuad				(uint32_t x, uint32_t y, uint32_t width, uint32_t height, texID_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
 void DrawFmvFrame			(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, r_Texture fmvTexture);
 void DrawFmvFrame2			(uint32_t frameWidth, uint32_t frameHeight, const std::vector<uint32_t> &textureIDs);
-void DrawFontQuad			(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeight, uint32_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
+void DrawFontQuad			(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeight, texID_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
 void CreateScreenShotImage  ();
 void DeRedTexture			(r_Texture texture);
 void ReleaseD3DTexture		(r_Texture *d3dTexture);

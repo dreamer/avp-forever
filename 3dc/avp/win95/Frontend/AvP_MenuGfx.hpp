@@ -147,7 +147,7 @@ typedef struct
 	char			*FilenamePtr;
 	AVPTEXTURE		*ImagePtr;
 
-	uint32_t	textureID;	// texture ID for TextureManager.cpp system
+	texID_t	textureID;	// texture ID for TextureManager.cpp system
 	uint32_t	Width;
 	uint32_t	Height;
 
@@ -191,9 +191,9 @@ extern int RenderSmallChar(char c, int x, int y, int alpha, int red, int green, 
 extern int RenderMenuText_Clipped(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int topY, int bottomY);
 extern void RenderSmallFontString_Wrapped(char *textPtr, RECT* area, int alpha, int* output_x, int* output_y);
 
-extern void DrawAvPMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/uint32_t textureID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format);
-extern void DrawAvPMenuGfx_Clipped(/*enum AVPMENUGFX_ID menuGfxID*/uint32_t textureID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format, int topY, int bottomY);
-extern void DrawAvPMenuGfx_Faded(/*enum AVPMENUGFX_ID menuGfxID*/uint32_t textureID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format);
-extern int HeightOfMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/uint32_t textureID);
+extern void DrawAvPMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textureID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format);
+extern void DrawAvPMenuGfx_Clipped(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textureID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format, int topY, int bottomY);
+extern void DrawAvPMenuGfx_Faded(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textureID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format);
+extern int HeightOfMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textureID);
 
 #endif

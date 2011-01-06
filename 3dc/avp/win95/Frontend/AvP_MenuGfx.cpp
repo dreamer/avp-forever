@@ -1323,7 +1323,7 @@ extern void ReleaseAllAvPMenuGfx(void)
 #endif
 }
 
-extern void DrawAvPMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/uint32_t textureID, int topleftX, int topleftY, int alpha, enum AVPMENUFORMAT_ID format)
+extern void DrawAvPMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textureID, int topleftX, int topleftY, int alpha, enum AVPMENUFORMAT_ID format)
 {
 	// bjd - texture tset
 //	AVPMENUGFX *gfxPtr;
@@ -1372,7 +1372,7 @@ extern void DrawAvPMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/uint32_t textureID, i
 	DrawAlphaMenuQuad(topleftX, topleftY, /*menuGfxID*/textureID, alpha);
 }
 
-extern void DrawAvPMenuGfx_Faded(/*enum AVPMENUGFX_ID menuGfxID*/uint32_t textureID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format)
+extern void DrawAvPMenuGfx_Faded(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textureID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format)
 {
 	// bjd - texture test
 //	AVPMENUGFX *gfxPtr;
@@ -1422,7 +1422,7 @@ extern void DrawAvPMenuGfx_Faded(/*enum AVPMENUGFX_ID menuGfxID*/uint32_t textur
 	DrawAlphaMenuQuad(topleftX, topleftY, textureID, alpha);
 }
 
-extern void DrawAvPMenuGfx_Clipped(/*enum AVPMENUGFX_ID menuGfxID*/uint32_t textureID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format, int topY, int bottomY)
+extern void DrawAvPMenuGfx_Clipped(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textureID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format, int topY, int bottomY)
 {	
 	// bjd - texture test
 //	GLOBALASSERT(menuGfxID < MAX_NO_OF_AVPMENUGFXS);
@@ -1473,7 +1473,7 @@ extern void DrawAvPMenuGfx_Clipped(/*enum AVPMENUGFX_ID menuGfxID*/uint32_t text
 	DrawAlphaMenuQuad(topleftX, topleftY, /*menuGfxID*/textureID, alpha);
 }
 
-extern int HeightOfMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/uint32_t textureID)
+extern int HeightOfMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textureID)
 {
 	// bjd - texture test
 	uint32_t texWidth, texHeight;

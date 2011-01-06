@@ -25,6 +25,7 @@
 #include <stdint.h>
 #include <vector>
 #include "renderStates.h"
+#include "renderer.h"
 
 // part of sort test
 enum Shaders
@@ -76,7 +77,7 @@ class RenderList
 	uint32_t RenderList::GetSize() const { return indexCount; }
 	void RenderList::Sort();
 	void RenderList::AddTriangle(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n);
-	void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON, enum TEXTURE_ADDRESS_MODE textureAddress = TEXTURE_WRAP, enum ZWRITE_ENABLE = ZWRITE_ENABLED);
+	void RenderList::AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON, enum TEXTURE_ADDRESS_MODE textureAddress = TEXTURE_WRAP, enum ZWRITE_ENABLE = ZWRITE_ENABLED);
 	void RenderList::CreateIndices(uint16_t *indexArray, uint32_t numVerts);
 	void RenderList::CreateOrthoIndices(uint16_t *indexArray);
 	void RenderList::Draw();

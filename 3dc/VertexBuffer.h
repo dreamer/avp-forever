@@ -25,14 +25,13 @@
 #ifndef _VertexBuffer_h_
 #define _VertexBuffer_h_
 
-#include <stdint.h>
 #include "renderer.h"
 
 class VertexBuffer
 {
 	public:
 		r_VertexBuffer	vertexBuffer;
-		uint32_t		capacity; // number of verts we can hold
+		uint32_t		capacity;      // number of verts we can hold
 		uint32_t		sizeInBytes;
 		enum R_USAGE	usage;
 		enum R_FVF		FVF;

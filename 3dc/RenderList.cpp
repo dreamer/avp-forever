@@ -132,7 +132,7 @@ void RenderList::AddIndices(uint16_t *indexArray, uint32_t a, uint32_t b, uint32
 	this->indexCount+=3;
 }
 
-void RenderList::AddItem(uint32_t numVerts, uint32_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode, enum TEXTURE_ADDRESS_MODE textureAddress, enum ZWRITE_ENABLE zWriteEnable)
+void RenderList::AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode, enum TEXTURE_ADDRESS_MODE textureAddress, enum ZWRITE_ENABLE zWriteEnable)
 {
 	assert(numVerts != 0);
 

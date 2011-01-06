@@ -522,7 +522,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, const std::vector<
 	}
 }
 
-void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t textureID)
+void DrawProgressBar(const RECT &srcRect, const RECT &destRect, texID_t textureID)
 {
 	float x1 = WPos2DC(destRect.left);
 	float y1 = HPos2DC(destRect.top);
@@ -578,7 +578,7 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, uint32_t texture
 	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
-void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha)
+void DrawTallFontCharacter(uint32_t topX, uint32_t topY, texID_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha)
 {
 	alpha = (alpha / 256);
 	if (alpha > 255)
@@ -828,7 +828,7 @@ void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha)
 	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
-void DrawHUDQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, float *UVList, int32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
+void DrawHUDQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, float *UVList, texID_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
 {
 	if (!UVList)
 		return;
@@ -885,7 +885,7 @@ void DrawHUDQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, float 
 	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
-void DrawFontQuad(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeight, uint32_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
+void DrawFontQuad(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeight, texID_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
 {
 	float x1 = WPos2DC(x);
 	float y1 = HPos2DC(y);
@@ -934,7 +934,7 @@ void DrawFontQuad(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeigh
 	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
-void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
+void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, texID_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
 {
 	float x1 = WPos2DC(x);
 	float y1 = HPos2DC(y);
@@ -1013,7 +1013,7 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t 
 	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
-void DrawAlphaMenuQuad(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t alpha)
+void DrawAlphaMenuQuad(uint32_t topX, uint32_t topY, texID_t textureID, uint32_t alpha)
 {
 	// textures actual height/width (whether it's non power of two or not)
 	uint32_t textureWidth, textureHeight;
@@ -1656,7 +1656,7 @@ void D3D_HUD_Setup(void)
 	*/ // bjd - fixme
 }
 
-void D3D_HUDQuad_Output(uint32_t textureID, struct VertexTag *quadVerticesPtr, uint32_t colour, enum FILTERING_MODE_ID filteringType)
+void D3D_HUDQuad_Output(texID_t textureID, struct VertexTag *quadVerticesPtr, uint32_t colour, enum FILTERING_MODE_ID filteringType)
 {
 	float RecipW, RecipH;
 
@@ -1792,7 +1792,7 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 	// function responsible for bullet marks on walls, etc
 	DECAL_DESC *decalDescPtr = &DecalDescription[decalPtr->DecalID];
 
-	uint32_t textureID = SpecialFXImageNumber;
+	texID_t textureID = SpecialFXImageNumber;
 
 //	AVPTEXTURE *textureHandle = NULL;
 
@@ -1912,7 +1912,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	// steam jets, wall lights, fire (inc aliens on fire) etc
 	PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
 
-	uint32_t textureID = SpecialFXImageNumber;
+	texID_t textureID = SpecialFXImageNumber;
 
 	float RecipW, RecipH;
 
@@ -2565,7 +2565,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 {
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
-	uint32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
+	texID_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
 
 	float RecipW, RecipH;
 
