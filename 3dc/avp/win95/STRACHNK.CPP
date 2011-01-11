@@ -159,7 +159,7 @@ BOOL AVP_Strategy_Chunk::output_chunk (HANDLE &hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
@@ -254,7 +254,7 @@ BOOL AVP_External_Strategy_Chunk::output_chunk (HANDLE &hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
@@ -445,7 +445,7 @@ MiscStrategy::MiscStrategy(const char* data_start,size_t size)
 
 MiscStrategy::~MiscStrategy()
 {
-	delete [] datablock;
+	delete[] datablock;
 }
 
 size_t MiscStrategy::GetStrategySize()
@@ -654,8 +654,8 @@ LiftStrategy::LiftStrategy(const char* data_start,size_t /*size*/)
 
 LiftStrategy::~LiftStrategy()
 {
-	if (AssocLifts) delete [] AssocLifts;
-	if (ExternalLifts) delete [] ExternalLifts;	
+	if (AssocLifts) delete[] AssocLifts;
+	if (ExternalLifts) delete[] ExternalLifts;	
 }
 
 size_t LiftStrategy::GetStrategySize()
@@ -861,7 +861,7 @@ LinkSwitchStrategy::LinkSwitchStrategy(const char* data_start,size_t size)
 
 LinkSwitchStrategy::~LinkSwitchStrategy()
 {
-	delete [] LinkedSwitches;
+	delete[] LinkedSwitches;
 }
 
 size_t LinkSwitchStrategy::GetStrategySize()

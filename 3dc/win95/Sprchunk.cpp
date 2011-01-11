@@ -73,11 +73,11 @@ Sprite_Action_Chunk::~Sprite_Action_Chunk()
 	{
 		for(int j=0;j<NumPitch;j++)
 		{
-			delete [] FrameList[i][j];
+			delete[] FrameList[i][j];
 		}
 		delete[]  FrameList[i];
 	}
-	delete [] FrameList;
+	delete[] FrameList;
 }
 
 
@@ -91,7 +91,7 @@ BOOL Sprite_Action_Chunk::output_chunk (HANDLE &hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
@@ -254,7 +254,7 @@ Sprite_Header_Chunk::Sprite_Header_Chunk(const char * file_name, Chunk_With_Chil
 		buffer_ptr += *(int *)(buffer_ptr + 8);
 	}
 
-	delete [] buffer;
+	delete[] buffer;
 
 	CloseHandle (rif_file);
 }
@@ -293,7 +293,7 @@ BOOL Sprite_Header_Chunk::output_chunk(HANDLE & hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
@@ -426,7 +426,7 @@ BOOL Sprite_Size_Chunk::output_chunk (HANDLE &hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
@@ -486,7 +486,7 @@ BOOL Sprite_Version_Number_Chunk::output_chunk (HANDLE &hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
@@ -542,7 +542,7 @@ Sprite_Bitmap_Scale_Chunk::Sprite_Bitmap_Scale_Chunk(Chunk_With_Children* parent
 }
 Sprite_Bitmap_Scale_Chunk::~Sprite_Bitmap_Scale_Chunk()
 {
-	delete [] Scale;
+	delete[] Scale;
 }
 size_t Sprite_Bitmap_Scale_Chunk::size_chunk()
 {
@@ -614,10 +614,10 @@ Sprite_Bitmap_Centre_Chunk::Sprite_Bitmap_Centre_Chunk(Chunk_With_Children* pare
 }
 Sprite_Bitmap_Centre_Chunk::~Sprite_Bitmap_Centre_Chunk()
 {
-	delete [] CentreX;
-	delete [] CentreY;
-	delete [] OffsetX;
-	delete [] OffsetY;
+	delete[] CentreX;
+	delete[] CentreY;
+	delete[] OffsetX;
+	delete[] OffsetY;
 }
 size_t Sprite_Bitmap_Centre_Chunk::size_chunk()
 {

@@ -105,7 +105,7 @@ void MediaWinFileMedium::CloseWriteBuffer(unsigned nPosOffset)
 	else if (nBytesWritten < nPosOffset)
 		m_fError |= MME_EOFMET;
 
-	delete [] m_pBuffer;
+	delete[] m_pBuffer;
 }
 
 void MediaWinFileMedium::CloseReadBuffer(unsigned nPosOffset)
@@ -122,7 +122,7 @@ void MediaWinFileMedium::CloseReadBuffer(unsigned nPosOffset)
 		
 	m_nReadBufLen = 0;
 
-	delete [] m_pBuffer;
+	delete[] m_pBuffer;
 }
 
 void MediaWinFileMedium::DoWriteBlock(void const * pData, unsigned nSize)
@@ -254,7 +254,7 @@ void MediaStdFileMedium::CloseWriteBuffer(unsigned nPosOffset)
 			m_fError |= MME_IOERROR;
 	}
 
-	delete [] m_pBuffer;
+	delete[] m_pBuffer;
 }
 
 void MediaStdFileMedium::CloseReadBuffer(unsigned nPosOffset)
@@ -270,7 +270,7 @@ void MediaStdFileMedium::CloseReadBuffer(unsigned nPosOffset)
 		m_fError |= MME_UNAVAIL;
 
 	m_nReadBufLen = 0;
-	delete [] m_pBuffer;
+	delete[] m_pBuffer;
 }
 
 void MediaStdFileMedium::DoWriteBlock(void const * pData, unsigned nSize)

@@ -9,12 +9,6 @@
 
 extern void LoadRifFile();
 
-/* record of the histance passed to winmain */
-
-
-extern HINSTANCE AVP_HInstance;
-extern int AVP_NCmd;
-
 extern int WindowMode;
 extern int WindowRequestMode;
 extern int VideoRequestMode;

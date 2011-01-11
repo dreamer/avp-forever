@@ -96,7 +96,7 @@ BOOL AllSprites_Header_Chunk::output_chunk (HANDLE & hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 

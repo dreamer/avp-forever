@@ -648,7 +648,7 @@ namespace IFF {
 			while (m_nMaxSize < nMinSize)
 				m_nMaxSize*=2;
 			
-			UBYTE * pNewBlock = new UBYTE [m_nMaxSize];
+			uint8_t * pNewBlock = new uint8_t [m_nMaxSize];
 			memcpy(pNewBlock,m_pBlock,m_nCurSize);
 			delete[] m_pBlock;
 			m_pBlock = pNewBlock;

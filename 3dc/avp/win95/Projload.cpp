@@ -1192,7 +1192,7 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 				}
 				seqa_p->last_frame = kfd;
 
-				delete [] frame_array;
+				delete[] frame_array;
 				
 
 				if(delta_frame)
@@ -2516,7 +2516,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 				}
 			}
 		}
-		delete [] entry_points;
+		delete[] entry_points;
 
 		// putting an infinite module at the beginning - followed by a term
 		// and setting the arrays back to point at them !!
@@ -3298,8 +3298,8 @@ static void MakeBackupFile(File_Chunk* fc)
 	Name2[length+1]='9';
 	CopyFile(fc->filename,Name2,FALSE);
 
-	delete [] Name1;
-	delete [] Name2;
+	delete[] Name1;
+	delete[] Name2;
 #endif
 }
 

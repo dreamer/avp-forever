@@ -29,14 +29,7 @@
 #include "avp_intro.h"
 #include "CDTrackSelection.h"
 #include "CD_Player.h"
-
-/*------------Patrick 1/6/97---------------
-New sound system 
--------------------------------------------*/
 #include "psndplat.h"
-
-#define FRAMEAV 100
-
 #include "AvP_UserProfile.h"
 #include "avp_menus.h"
 #include "configFile.h"
@@ -44,11 +37,6 @@ New sound system
 #include "networking.h"
 #include "avpview.h"
 #include "renderer.h"
-
-/*
-	externs for commonly used global variables and arrays
-*/
-extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 
 #if debug
 #define MainTextPrint 1
@@ -111,9 +99,9 @@ extern struct DEBUGGINGTEXTOPTIONS ShowDebuggingText;
 
 extern bool bRunning;
 
-BOOL unlimitedSaves = FALSE;
+bool unlimitedSaves = false;
 
-void exit_break_point_fucntion ()
+void exit_break_point_fucntion()
 {
 	#if debug
 	if (WindowMode == WindowModeSubWindow)
@@ -124,9 +112,6 @@ void exit_break_point_fucntion ()
 }
 
 extern void LoadKeyConfiguration();
-
-HINSTANCE AVP_HInstance, hInst;
-int AVP_NCmd;
 
 // so we can disable/enable stickey keys
 STICKYKEYS startupStickyKeys = {sizeof(STICKYKEYS), 0};
@@ -139,8 +124,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	char *command_line = lpCmdLine;
 	char *instr = 0;
 
-	AVP_HInstance = hInst = hInstance;
-	AVP_NCmd = nCmdShow;
 	skOff = startupStickyKeys;
 
 	if ((skOff.dwFlags & SKF_STICKYKEYSON) == 0)
@@ -162,11 +145,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	SetFastRandom();
 
-	/****
-		init game now ONLY sets up varibles for the whole
-		game. If you want to put something in it it must
-		be something that only needs to be called once
-	****/
 	//see if any extra npc rif files should be loaded
 	char* strpos = strstr(command_line, "-l");
 	if (strpos)
@@ -223,7 +201,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	}
 
 //	#ifdef AVP_DEBUG_VERSION
-	if (strstr(command_line, "-intro"))	WeWantAnIntro();
+	if (strstr(command_line, "-intro"))	
+		WeWantAnIntro();
+
 	if (strstr(command_line, "-qm"))
 	{
 		QuickStartMultiplayer = 1;
@@ -367,7 +347,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	// load language file and setup text string access
 	InitTextStrings();
 
-	BuildMultiplayerLevelNameArray();//sort out multiplayer level names
+	BuildMultiplayerLevelNameArray(); //sort out multiplayer level names
 
 	AvP.LevelCompleted = 0;
 	LoadSounds("PLAYER"); 
@@ -377,11 +357,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	#else
 
 	// support removing limit on number of game saves
-	if (!Config_GetBool("[Misc]", "UnlimitedSaves", false))
-	{
-		unlimitedSaves = FALSE;
-	}
-	else unlimitedSaves = TRUE;
+	unlimitedSaves = Config_GetBool("[Misc]", "UnlimitedSaves", false);
 
 	while (AvP_MainMenus() && bRunning)
 	#endif
@@ -399,7 +375,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		}
 		#endif
 
-		/* turn off any special effects */
+		// turn off any special effects
 		d3d_light_ctrl.ctrl = LCCM_NORMAL;
 
 		/* Check Gamma Settings are correct after video mode change */
@@ -508,7 +484,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 					else
 					{
 						ReadUserInput();
-//						UpdateAllFMVTextures();
 						SoundSys_Management();
 
 						ThisFramesRenderingHasBegun();
@@ -596,11 +571,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		EndNPCs(); /* JH 30/4/97 - unload npc rifs */
 		ExitGame();
-
-		// set menu resolution
-/* // bjd - we should be able to run menus at any resolution user selects now
-		ChangeGameResolution(640, 480, 32);
-*/
 
 		#endif
 		/* Patrick 26/6/97

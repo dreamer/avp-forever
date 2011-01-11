@@ -6,13 +6,6 @@
 #include "stratdef.h"
 #include "TextureManager.h"
 
-void PlayMenuMusic(void);
-extern void PlayFMV(const char *filenamePtr);
-void StartMenuMusic();
-extern void StartTriggerPlotFMV(int number);
-void UpdateAllFMVTextures();
-void StartMenuBackgroundFmv();
-
 typedef struct FMVTEXTURE
 {
 	texID_t textureID;
@@ -28,6 +21,18 @@ typedef struct FMVTEXTURE
 
 }FMVTEXTURE;
 
+// variables
+extern uint32_t NumberOfFMVTextures;
+#define MAX_NO_FMVTEXTURES 10
+extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
+
+// functions
+void PlayMenuMusic(void);
+extern void PlayFMV(const char *filenamePtr);
+void StartMenuMusic();
+extern void StartTriggerPlotFMV(int number);
+void UpdateAllFMVTextures();
+void StartMenuBackgroundFmv();
 int NextFMVTextureFrame(FMVTEXTURE *ftPtr);
 void ReleaseAllFMVTexturesForDeviceReset();
 void RecreateAllFMVTexturesAfterDeviceReset();

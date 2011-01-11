@@ -17,7 +17,7 @@ struct VertexTag
 
 typedef struct
 {
-	int ImageNumber;
+	texID_t ImageNumber;
 
 	int TopLeftX;
 	int TopLeftY;

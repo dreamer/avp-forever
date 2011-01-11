@@ -26,7 +26,6 @@
 #include "VorbisPlayer.h"
 #include "logString.h"
 #include <process.h>
-
 #include <vector>
 #include <fstream>
 #include <assert.h>
@@ -37,8 +36,9 @@
 	#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
 #endif
 
-static const int BUFFER_SIZE  = 32768;
-static const int BUFFER_COUNT = 3;
+static const int kBufferSize  = 32768;
+static const int kBufferCount = 3;
+static DWORD kQuantum = 1000 / 60;
 
 unsigned int __stdcall VorbisUpdateThread(void *args);
 
@@ -52,8 +52,8 @@ std::vector<std::string> TrackList;
 	const std::string musicFolderName = "Music/";
 #endif
 #ifdef _XBOX
-	const std::string tracklistFilename = "d:\\Music\\ogg_tracks.txt";
-	const std::string musicFolderName = "d:\\Music\\";
+	const std::string tracklistFilename = "d:/Music/ogg_tracks.txt";
+	const std::string musicFolderName = "d:/Music/";
 #endif
 
 static VorbisPlayback *inGameMusic = NULL;
@@ -78,19 +78,19 @@ bool VorbisPlayback::Open(const std::string &fileName)
 	mVorbisInfo = ov_info(&mOggFile, -1);
 
 	// create the streaming audio buffer
-	this->audioStream = new AudioStream(mVorbisInfo->channels, mVorbisInfo->rate, BUFFER_SIZE, BUFFER_COUNT);
+	this->audioStream = new AudioStream(mVorbisInfo->channels, mVorbisInfo->rate, kBufferSize, kBufferCount);
 
 	// init some temp audio data storage
-	mAudioData = new uint8_t[BUFFER_SIZE];
+	mAudioData = new uint8_t[kBufferSize];
 	if (mAudioData == NULL)
 	{
 		return false;
 	}
 
-	GetVorbisData(BUFFER_SIZE);
+	GetVorbisData(kBufferSize);
 
 	// fill the first buffer
-	this->audioStream->WriteData(mAudioData, BUFFER_SIZE);
+	this->audioStream->WriteData(mAudioData, kBufferSize);
 
 	// start playing
 	if (this->audioStream->Play() == AUDIOSTREAM_OK)
@@ -111,18 +111,12 @@ VorbisPlayback::~VorbisPlayback()
 {
 	Stop();
 
-	if (audioStream)
-	{
-		delete audioStream;
-	}
+	delete audioStream;
 
 	// clear out the OggVorbis_File struct
 	ov_clear(&mOggFile);
 
-	if (mAudioData)
-	{
-		delete[] mAudioData;
-	}
+	delete[] mAudioData;
 }
 
 uint32_t VorbisPlayback::GetVorbisData(uint32_t sizeToRead)
@@ -174,19 +168,17 @@ unsigned int __stdcall VorbisUpdateThread(void *args)
 	CoInitializeEx( NULL, COINIT_MULTITHREADED );
 #endif
 
-	DWORD dwQuantum = 1000 / 60;
-
 	while (vorbis->mIsPlaying)
 	{
 		uint32_t numBuffersFree = vorbis->audioStream->GetNumFreeBuffers();
 
 		if (numBuffersFree)
 		{
-			vorbis->GetVorbisData(BUFFER_SIZE);
-			vorbis->audioStream->WriteData(vorbis->mAudioData, BUFFER_SIZE);
+			vorbis->GetVorbisData(kBufferSize);
+			vorbis->audioStream->WriteData(vorbis->mAudioData, kBufferSize);
 		}
 
-		Sleep(dwQuantum);
+		Sleep(kQuantum);
 	}
 
 	_endthreadex(0);
@@ -299,10 +291,7 @@ int SetStreamingMusicVolume(int volume)
 
 void Vorbis_CloseSystem()
 {
-	if (inGameMusic)
-	{
-		delete inGameMusic;
-		inGameMusic = NULL;
-	}
+	delete inGameMusic;
+	inGameMusic = NULL;
 }
 

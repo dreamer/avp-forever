@@ -19,9 +19,9 @@ namespace IFF
 				TRANS_XY = 5,
 				TRANS_RGB = 6
 			};
-			UBYTE eTransType;
-			UINT16 xPos;
-			UINT16 yPos;
+			uint8_t eTransType;
+			uint16_t xPos;
+			uint16_t yPos;
 			RGBTriple rgb;
 			
 			IlbmTranChunk() { m_idCk = "TRAN"; }
@@ -33,10 +33,10 @@ namespace IFF
 	class IlbmAlphChunk : public IlbmBodyChunk // uses same encoding methodology
 	{
 		public:
-			UINT16 width;
-			UINT16 height;
-			UBYTE nBitPlanes;
-			UBYTE eCompression;
+			uint16_t width;
+			uint16_t height;
+			uint8_t nBitPlanes;
+			uint8_t eCompression;
 
 			IlbmAlphChunk()
 				{ m_idCk = "ALPH"; }
@@ -52,21 +52,19 @@ namespace IFF
 		public:
 			IlbmS3tcChunk();
 			virtual ~IlbmS3tcChunk();
-			
-			
-			
-			UINT32 flags; // none at the moment
-			UINT32 fourCC; //the fourcc code 'DXT1' - 'DXT5'
 
-			UINT16 redWeight; //weighting values used in compression
-			UINT16 blueWeight;
-			UINT16 greenWeight;
+			uint32_t flags; // none at the moment
+			uint32_t fourCC; //the fourcc code 'DXT1' - 'DXT5'
 
-			UINT16 width;
-			UINT16 height;
+			uint16_t redWeight; //weighting values used in compression
+			uint16_t blueWeight;
+			uint16_t greenWeight;
 
-			UINT32 dataSize;
-			UBYTE* pData;  //the compressed texture itself
+			uint16_t width;
+			uint16_t height;
+
+			uint32_t dataSize;
+			uint8_t* pData;  //the compressed texture itself
 
 		protected:
 			virtual void Serialize(Archive * pArchv);
@@ -86,8 +84,8 @@ namespace IFF
 				FILTER_LANCZOS3 = 5,
 				FILTER_MITCHELL = 6
 			};
-			UBYTE nMipMaps;
-			UBYTE eFilter;
+			uint8_t nMipMaps;
+			uint8_t eFilter;
 
 			MipmContChunk()
 				{ m_idCk = "CONT"; }
@@ -103,7 +101,7 @@ namespace IFF
 			{
 				FLAG_MANUAL_MIPS = 0x00000001,//some of the mip maps have been set by hand
 			};
-			UINT32 flags;
+			uint32_t flags;
 
 			MipmFlagChunk()
 				{ m_idCk = "FLAG"; flags = 0;}
@@ -111,7 +109,6 @@ namespace IFF
 		protected:
 			virtual void Serialize(Archive * pArchv);
 	};
-
 }
 
 #endif

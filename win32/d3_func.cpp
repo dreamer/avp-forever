@@ -38,10 +38,6 @@
 #include "AvP_UserProfile.h"
 extern HWND hWndMain;
 
-extern int NumberOfFMVTextures;
-#define MAX_NO_FMVTEXTURES 10
-extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
-
 D3DXMATRIX matOrtho;
 D3DXMATRIX matProjection;
 D3DXMATRIX matView;

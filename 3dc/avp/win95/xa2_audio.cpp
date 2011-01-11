@@ -1119,7 +1119,7 @@ void PlatEndGameSound(SOUNDINDEX index)
 		GameSounds[index].pSourceVoice = NULL;
 	}
 
-	if (GameSounds[index].audioBuffer)
+//	if (GameSounds[index].audioBuffer)
 	{
 		delete[] GameSounds[index].audioBuffer;
 		GameSounds[index].audioBuffer = NULL;
@@ -1500,7 +1500,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		if (res != (size_t)myChunkHeader.chunkLength)
 		{
 			LOCALASSERT(1==0);
-			delete []GameSounds[soundNum].audioBuffer;
+			delete[] GameSounds[soundNum].audioBuffer;
 			GameSounds[soundNum].audioBuffer = NULL;
 			ffclose(myFile);
 			return 0;
@@ -2176,15 +2176,8 @@ AudioStream::~AudioStream()
 	}
 
 	// clear the new-ed memory
-	if (this->buffers)
-	{
-		delete []this->buffers;
-	}
-
-	if (this->voiceContext)
-	{
-		delete this->voiceContext;
-	}
+	delete[] this->buffers;
+	delete this->voiceContext;
 }
 
 #endif // #ifdef USE_XAUDIO2

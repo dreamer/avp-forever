@@ -48,7 +48,7 @@ namespace IFF
 		{
 			nSize = pArchv->GetSize();
 			if (pData) delete[] pData;
-			pData = new UBYTE [nSize];
+			pData = new uint8_t [nSize];
 		}
 		
 		pArchv->TransferBlock(pData,nSize);
@@ -76,7 +76,7 @@ namespace IFF
 			}
 			
 			pEncodeDst = new DataBlock;
-			pEncodeSrc = new UBYTE [(nWidth+7)/8];
+			pEncodeSrc = new uint8_t [(nWidth+7)/8];
 			
 			nSizeNonCprss = 0;
 			nSizeCprss = 0;
@@ -90,7 +90,7 @@ namespace IFF
 			
 			for (unsigned b=0; b<nBitPlanes; ++b)
 			{
-				UBYTE * pBuf = pEncodeSrc;
+				uint8_t * pBuf = pEncodeSrc;
 				
 				unsigned byte = 0;
 				for (unsigned x=0; x<nWidth; ++x)
@@ -98,19 +98,19 @@ namespace IFF
 					byte <<= 1;
 					byte |= pRow[x]>>b & 1;
 					
-					if (7==(x&7)) *pBuf++ = static_cast<UBYTE>(byte);
+					if (7==(x&7)) *pBuf++ = static_cast<uint8_t>(byte);
 				}
 				if (nWidth & 7)
 				{
 					byte <<= 8-(nWidth & 7);
-					*pBuf = static_cast<UBYTE>(byte);
+					*pBuf = static_cast<uint8_t>(byte);
 				}
 				
 				if (eCompression)
 				{
 					nSizeNonCprss += (nWidth+7)/8;
 					
-					UBYTE const * pBuf = pEncodeSrc;
+					uint8_t const * pBuf = pEncodeSrc;
 					unsigned i=(nWidth+7)/8;
 					
 					while (i)
@@ -129,7 +129,7 @@ namespace IFF
 								unsigned j=2;
 								while (j<i && j<0x80 && pBuf[j-1]==pBuf[j])
 									++j;
-								pEncodeDst->Append(static_cast<UBYTE>(0x101-j));
+								pEncodeDst->Append(static_cast<uint8_t>(0x101-j));
 								pEncodeDst->Append(*pBuf);
 								pBuf += j;
 								i -= j;
@@ -142,7 +142,7 @@ namespace IFF
 									++j;
 								if (j<i && pBuf[j]==pBuf[j-1] && pBuf[j-1]==pBuf[j-2])
 									j-=2;
-								pEncodeDst->Append(static_cast<UBYTE>(j-1));
+								pEncodeDst->Append(static_cast<uint8_t>(j-1));
 								pEncodeDst->Append(pBuf,j);
 								pBuf += j;
 								i -= j;
@@ -167,7 +167,7 @@ namespace IFF
 			
 			if (pData) delete[] pData;
 			nSize = pEncodeDst->GetDataSize();
-			pData = new UBYTE[nSize];
+			pData = new uint8_t[nSize];
 			
 			memcpy(pData,pEncodeDst->GetDataPtr(),nSize);
 			

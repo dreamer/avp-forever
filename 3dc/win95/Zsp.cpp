@@ -80,9 +80,9 @@ ZSP_zone::ZSP_zone ()
 ZSP_zone::~ZSP_zone ()
 {
 	if (num_z_polys)
-		delete [] z_poly_list;
+		delete[] z_poly_list;
 	if (num_z_verts)
-		delete [] z_vert_list;
+		delete[] z_vert_list;
 }
 
 ZSP_zone::ZSP_zone (const ZSP_zone &zz)
@@ -128,9 +128,9 @@ ZSP_zone & ZSP_zone::operator=(const ZSP_zone &zz)
 {
 
 	if (num_z_polys)
-		delete [] z_poly_list;
+		delete[] z_poly_list;
 	if (num_z_verts)
-		delete [] z_vert_list;
+		delete[] z_vert_list;
 
 	if (zz.num_z_polys)
 	{

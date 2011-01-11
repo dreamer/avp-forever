@@ -209,7 +209,7 @@ void LoadCDTrackList()
 		ExtractTracksForLevel(bufferptr,LevelCDTracks[i]);
 	}
 
-	delete [] buffer;
+	delete[] buffer;
 	buffer = NULL;
 	bufferptr = NULL;
 }

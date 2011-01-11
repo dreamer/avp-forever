@@ -141,7 +141,7 @@ void CharacterSoundEffects::LoadSounds(const char* filename, const char* directo
 		}
 	}
 
-	delete [] buffer;
+	delete[] buffer;
 }
 
 void CharacterSoundEffects::UnloadSounds()

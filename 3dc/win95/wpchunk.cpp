@@ -15,12 +15,12 @@ ChunkWaypoint::ChunkWaypoint()
 }
 ChunkWaypoint::~ChunkWaypoint()
 {
-	if(WayLinks) delete [] WayLinks;
-	if(ModLinks) delete [] ModLinks;
+	if (WayLinks) delete[] WayLinks;
+	if (ModLinks) delete[] ModLinks;
 }
 ModuleLink::~ModuleLink()
 {
-	if(module_name) delete[] module_name;
+	if (module_name) delete[] module_name;
 }
 
 RIF_IMPLEMENT_DYNCREATE("WAYPOINT",Module_Waypoint_Chunk)
@@ -112,12 +112,10 @@ Module_Waypoint_Chunk::Module_Waypoint_Chunk(Chunk_With_Children* parent,const c
 		}
 	}
 
-
 	spare1=*(int*)data;
 	data+=4;
 	spare2=*(int*)data;
 	data+=4;
-
 }
 
 Module_Waypoint_Chunk::Module_Waypoint_Chunk(Chunk_With_Children* parent)
@@ -138,8 +136,9 @@ Module_Waypoint_Chunk::Module_Waypoint_Chunk(Chunk_With_Children* parent)
 
 Module_Waypoint_Chunk::~Module_Waypoint_Chunk()
 {
-	if(Waypoints)
-		delete [] Waypoints;
+//	if(Waypoints)
+	delete[] Waypoints;
+	Waypoints = 0;
 }
 
 size_t Module_Waypoint_Chunk::size_chunk()
@@ -213,7 +212,6 @@ void Module_Waypoint_Chunk::fill_data_block(char* data_start)
 			*(int*)data_start=ml->flags;
 			data_start+=4;
 		}
-		
 	}
 }
 
@@ -283,12 +281,12 @@ void Module_Waypoint_Chunk::TransferWaypointData(Module_Waypoint_Chunk* mwc_from
 			{
 				cw->WayLinks[j].index+=NumGroundWaypoints;
 			}
- 		}
+		}
 		NumGroundWaypoints+=mwc_from->NumGroundWaypoints;
 
 		NumWaypoints+=mwc_from->NumWaypoints;
 		//replace pointer to waypoints
-		delete [] Waypoints;
+		delete[] Waypoints;
 		Waypoints=new_wp;
 	}
 
@@ -302,9 +300,7 @@ void Module_Waypoint_Chunk::TransferWaypointData(Module_Waypoint_Chunk* mwc_from
 	else
 		GroundWaypoints=0;
 
-
-   	delete mwc_from;	
-
+   	delete mwc_from;
 }
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -339,16 +335,15 @@ AI_Module_Slave_Chunk* AddModuleSlaveChunk(Object_Chunk* oc,Object_Chunk* master
 {
 	Object_Module_Data_Chunk* omdc=0;
 	omdc=(Object_Module_Data_Chunk*)oc->lookup_single_child("MODULEDT");
-	if(!omdc)
-		omdc=new Object_Module_Data_Chunk(oc);
+	if (!omdc)
+		omdc = new Object_Module_Data_Chunk(oc);
 
 	Chunk* child_chunk=omdc->lookup_single_child("AIMODSLA");
 	
-	if(child_chunk)
+	if (child_chunk)
 		delete child_chunk;
 
 	return new AI_Module_Slave_Chunk(omdc,master);
-
 }
 
 void AI_Module_Master_Chunk::AddModule(Object_Chunk* oc)
@@ -397,11 +392,8 @@ void AI_Module_Master_Chunk::AddModule(Object_Chunk* oc)
 				mwc_to=new Module_Waypoint_Chunk(parent);
 
 			mwc_to->TransferWaypointData(mwc_from);
-
-
 		}
 	}
-	
 }
 
 Object_Chunk* AI_Module_Master_Chunk::get_my_object_chunk()
@@ -445,8 +437,6 @@ void AI_Module_Slave_Chunk::fill_data_block(char* data_start)
 	data_start += 4;
 	*((int *) data_start) = MasterModuleIndex;
 	data_start += 4;
-	
-	
 }
 
 void AI_Module_Slave_Chunk::post_input_processing()

@@ -252,7 +252,7 @@ BOOL Lockable_Chunk_With_Children::update_chunk_in_file(HANDLE &rif_file)
 
 			WriteFile (rif_file, (long *) tempbuffer, (file_length - (sfpl() + length)), &bytes_read, 0);
 
-			delete [] tempbuffer;
+			delete[] tempbuffer;
 
 			SetEndOfFile (rif_file);
 		}
@@ -409,7 +409,7 @@ File_Chunk::File_Chunk(const char * file_name)
 		uncompressedData = HuffmanDecompress((HuffmanPackage*)buffer); 
 		file_size = ((HuffmanPackage*)buffer)->UncompressedDataSize;
 
-		delete [] buffer; // kill the buffer the compressed file was loaded into
+		delete[] buffer; // kill the buffer the compressed file was loaded into
 
 		buffer_ptr = buffer = uncompressedData+12; // skip header data
 	}
@@ -460,7 +460,7 @@ File_Chunk::File_Chunk(const char * file_name)
 	}
 	else
 	{
-		delete [] buffer;
+		delete[] buffer;
 	}
 
 	CloseHandle (rif_file);
@@ -483,9 +483,9 @@ File_Chunk::File_Chunk()
 File_Chunk::~File_Chunk()
 {
 	if (filename)
-		delete [] filename;
+		delete[] filename;
 
-	if(object_array)
+	if (object_array)
 		free(object_array);
 }
 
@@ -506,7 +506,7 @@ BOOL File_Chunk::write_file (const char * fname)
 
 	HANDLE rif_file;
 
-	if (filename) delete [] filename;
+	if (filename) delete[] filename;
 
 	filename = new char [strlen(fname) + 1];
 	strcpy (filename, fname);
@@ -539,7 +539,7 @@ BOOL File_Chunk::write_file (const char * fname)
 
 	//do the compression thing
 	HuffmanPackage *outPackage = HuffmanCompression(uncompressedData,chunk_size);
-	delete [] uncompressedData;
+	delete[] uncompressedData;
 	if(!outPackage) return FALSE;
 
 	//and now try to write the file
@@ -548,7 +548,7 @@ BOOL File_Chunk::write_file (const char * fname)
 
 	if (rif_file == INVALID_HANDLE_VALUE)
 	{
-		delete [] temp_name;
+		delete[] temp_name;
 		free (outPackage);
 		return FALSE;
 	}
@@ -571,14 +571,14 @@ BOOL File_Chunk::write_file (const char * fname)
 					FILE_FLAG_RANDOM_ACCESS, 0);
 
 	if (rif_file == INVALID_HANDLE_VALUE) {
-		delete [] temp_name;
+		delete[] temp_name;
 		return FALSE;
 	}
 
 	if (!(this->output_chunk(rif_file)))
 	{
 		CloseHandle (rif_file);
-		delete [] temp_name;
+		delete[] temp_name;
 		return FALSE;
 	}
 
@@ -589,7 +589,7 @@ BOOL File_Chunk::write_file (const char * fname)
 	DeleteFileA(fname);
 	MoveFileA(temp_name,fname);
 
-	delete [] temp_name;
+	delete[] temp_name;
 
 	return TRUE;
 }
@@ -1328,7 +1328,7 @@ BOOL File_Chunk::update_chunks_from_file()
 					buffer = new char [length];
 					ReadFile(rif_file, (long *) buffer, length-12, &bytes_read, 0);
 					new Object_Chunk (this, buffer, length-12);
-					delete [] buffer;
+					delete[] buffer;
 					if (tmpobptr->get_header())
 					{
 						if (tmpobptr->get_header()->associated_shape)
@@ -1396,7 +1396,7 @@ BOOL File_Chunk::update_chunks_from_file()
 					buffer = new char [length];
 					ReadFile(rif_file, (long *) buffer, length-12, &bytes_read, 0);
 					new Shape_Chunk (this, buffer, length-12);
-					delete [] buffer;
+					delete[] buffer;
 					// Associate with the new objects
 					if ((shhead->associated_objects_store).size())
 					{
@@ -1662,7 +1662,7 @@ RIF_Name_Chunk::RIF_Name_Chunk (Chunk_With_Children * parent, const char * rdata
 RIF_Name_Chunk::~RIF_Name_Chunk ()
 {
 	if (rif_name)
-		delete [] rif_name;
+		delete[] rif_name;
 }
 
 
@@ -1760,13 +1760,13 @@ RIF_File_Chunk::RIF_File_Chunk (Chunk_With_Children * parent, const char * file_
 			error_code = CHUNK_FAILED_ON_LOAD;
 			CloseHandle (rif_file);
 			Parent_File = ParentFileStore;
-			delete [] buffer;
+			delete[] buffer;
 			return;
 		}
 		uncompressedData = HuffmanDecompress((HuffmanPackage*)buffer); 
 		file_size = ((HuffmanPackage*)buffer)->UncompressedDataSize;
 
-		delete [] buffer; // kill the buffer the compressed file was loaded into
+		delete[] buffer; // kill the buffer the compressed file was loaded into
 
 		buffer_ptr = buffer = uncompressedData+12; // skip header data
 	}
@@ -1778,7 +1778,7 @@ RIF_File_Chunk::RIF_File_Chunk (Chunk_With_Children * parent, const char * file_
 			error_code = CHUNK_FAILED_ON_LOAD;
 			CloseHandle (rif_file);
 			Parent_File = ParentFileStore;
-			delete [] buffer;
+			delete[] buffer;
 			return;
 		}
 
@@ -1788,7 +1788,7 @@ RIF_File_Chunk::RIF_File_Chunk (Chunk_With_Children * parent, const char * file_
 			error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
 			CloseHandle (rif_file);
 			Parent_File = ParentFileStore;
-			delete [] buffer;
+			delete[] buffer;
 			return;
 		}
 
@@ -1798,7 +1798,7 @@ RIF_File_Chunk::RIF_File_Chunk (Chunk_With_Children * parent, const char * file_
 			error_code = CHUNK_FAILED_ON_LOAD;
 			CloseHandle (rif_file);
 			Parent_File = ParentFileStore;
-			delete [] buffer;
+			delete[] buffer;
 			return;
 		}
 		buffer_ptr = buffer;
@@ -1827,7 +1827,7 @@ RIF_File_Chunk::RIF_File_Chunk (Chunk_With_Children * parent, const char * file_
 	}
 	else
 	{
-		delete [] buffer;
+		delete[] buffer;
 	}
 
 	CloseHandle (rif_file);

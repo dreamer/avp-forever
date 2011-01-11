@@ -37,7 +37,7 @@ BMP_Name::BMP_Name (const char * fname)
 BMP_Name::~BMP_Name ()
 {
 	if (filename)
-		delete [] filename;
+		delete[] filename;
 }
 
 BMP_Name::BMP_Name (const BMP_Name & bn)
@@ -70,7 +70,7 @@ const BMP_Name & BMP_Name::operator=(const BMP_Name & bn)
 	if (&bn == this) return(*this);
 
 	if (filename)
-		delete [] filename;
+		delete[] filename;
 
 	filename = new char [strlen(bn.filename)+1];
 	strcpy (filename, bn.filename);
@@ -83,13 +83,9 @@ const BMP_Name & BMP_Name::operator=(const BMP_Name & bn)
 	#if cencon
 	md5val = bn.md5val;
 	#endif
-	
+
 	return(*this);
-	
-	
 }
-
-
 
 BOOL operator==(const BMP_Name &o1, const BMP_Name &o2)
 {
@@ -168,9 +164,8 @@ size_t Chunk_With_BMPs::size_chunk ()
 	}
 
 	chunk_size = sz;
-	
+
 	return (chunk_size);
-	
 }
 
 void Chunk_With_BMPs::fill_data_block (char * data_start)
@@ -203,7 +198,6 @@ void Chunk_With_BMPs::fill_data_block (char * data_start)
 		strcpy (data_start, bl().filename);
 		data_start += (4-strlen(bl().filename)%4) + strlen(bl().filename);
 	}
-	
 }
 
 int Chunk_With_BMPs::get_version_num(void)
@@ -430,7 +424,6 @@ size_t BMP_Names_Version_Chunk::size_chunk ()
 	chunk_size = 12+4;
 	
 	return (chunk_size);
-	
 }
 
 void BMP_Names_Version_Chunk::fill_data_block (char * data_start)
@@ -444,7 +437,6 @@ void BMP_Names_Version_Chunk::fill_data_block (char * data_start)
 	data_start += 4;
 
 	*((int *) data_start) = version_num;
-
 }
 
 
@@ -461,7 +453,6 @@ size_t BMP_Names_ExtraData_Chunk::size_chunk ()
 	chunk_size = 12+52;
 	
 	return (chunk_size);
-	
 }
 
 void BMP_Names_ExtraData_Chunk::fill_data_block (char * data_start)
@@ -479,7 +470,6 @@ void BMP_Names_ExtraData_Chunk::fill_data_block (char * data_start)
 	{	
 		*(int *)data_start = reserved[i];
 	}
-
 }
 
 ///////////////////////////////////////
@@ -547,15 +537,15 @@ External_Shape_BMPs_Store_Chunk::External_Shape_BMPs_Store_Chunk (Chunk_With_Chi
 	unsigned int const l2 = strlen(sdata+l1)+1;
 	shapename = new char [l2];
 	strcpy(shapename,sdata+l1);
-	
+
 	sdata += l1+l2 +3&~3;
 
 	flags = (GlobalBMPFlags)(*(int *)sdata & GBF_MASK);
 	sdata+=4;
-	
+
 	version_num = *(int *)sdata;
 	sdata+=4;
-	
+
 	for (int i=0; i<12; ++i, sdata+=4)
 		reserved[i] = *(int *)sdata;
 }
@@ -686,7 +676,7 @@ ImageDescriptor & ImageDescriptor::operator = (ImageDescriptor const & id2)
 			delete[] fixrifname;
 			fixrifname = 0;
 		}
-		
+
 		if (id2.filename)
 		{
 			filename = new char [strlen(id2.filename)+1];
@@ -841,7 +831,7 @@ size_t Matching_Images_Chunk::size_chunk()
 	{
 		chunk_size += mlit().Size();
 	}
-	
+
 	return chunk_size;
 }
 
@@ -855,11 +845,11 @@ void Matching_Images_Chunk::fill_data_block(char * data_start)
 	*(int *)data_start = spares[0];
 	*(int *)(data_start+4) = spares[1];
 	*(int *)(data_start+8) = flags;
-	
+
 	*(int *)(data_start+12) = mlist.size();
 
 	data_start += 16;
-	
+
 	for (LIF<MatchingImages> mlit(&mlist); !mlit.done(); mlit.next())
 	{
 		mlit().WriteData(data_start);
@@ -883,16 +873,16 @@ Bitmap_MD5_Chunk::Bitmap_MD5_Chunk(Chunk_With_Children * parent, int const * md5
 : Chunk(parent,"BMPMD5ID"), spare(0), flags(BMD5F_0), version_num(rcbmp.version_num)
 {
 	memcpy(md5_val,md5id,16);
-	
+
 	char const * bname = rcbmp.filename;
 	if (!bname) bname = "";
 	bmpname = new char[strlen(bname)+1];
 	strcpy(bmpname,bname);
-	
+
 	if (!rname) rname = "";
 	rifname = new char[strlen(rname)+1];
 	strcpy(rifname,rname);
-	
+
 	if (!sname) sname = "";
 	shapename = new char[strlen(sname)+1];
 	strcpy(shapename,sname);
@@ -901,26 +891,29 @@ Bitmap_MD5_Chunk::Bitmap_MD5_Chunk(Chunk_With_Children * parent, int const * md5
 Bitmap_MD5_Chunk::Bitmap_MD5_Chunk(Chunk_With_Children * parent, char const * datablock, size_t)
 : Chunk(parent,"BMPMD5ID"), spare(*(int *)datablock), flags((BMPMD5_Flags)(*(int *)(datablock+4) & BMD5F_MASK)), version_num(*(int *)(datablock+8))
 {
-	memcpy(md5_val,datablock+12,16);
+	memcpy(md5_val, datablock+12, 16);
 	datablock += 28;
+
 	unsigned int const blen = strlen(datablock)+1;
 	bmpname = new char [blen];
-	strcpy(bmpname,datablock);
+	strcpy(bmpname, datablock);
 	datablock += blen;
+
 	unsigned int const rlen = strlen(datablock)+1;
 	rifname = new char [rlen];
-	strcpy(rifname,datablock);
+	strcpy(rifname, datablock);
 	datablock += rlen;
+
 	unsigned int const slen = strlen(datablock)+1;
 	shapename = new char [slen];
-	strcpy(shapename,datablock);
+	strcpy(shapename, datablock);
 }
 
 Bitmap_MD5_Chunk::~Bitmap_MD5_Chunk()
 {
-	delete [] bmpname;
-	delete [] rifname;
-	delete [] shapename;
+	delete[] bmpname;
+	delete[] rifname;
+	delete[] shapename;
 }
 
 void Bitmap_MD5_Chunk::fill_data_block(char * datastart)

@@ -1119,12 +1119,12 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk *tmpshp, int flag
 	}
 
 	CTM_ReturnType retval = { start_shape_no, main_shape_num, mc };
-	if (local_tex_index_nos!=h->tex_index_nos) delete [] local_tex_index_nos;
+	if (local_tex_index_nos!=h->tex_index_nos) delete[] local_tex_index_nos;
 	return retval;
 
 	#else
 
-	if(local_tex_index_nos!=h->tex_index_nos) delete [] local_tex_index_nos;
+	if(local_tex_index_nos!=h->tex_index_nos) delete[] local_tex_index_nos;
 	return list_pos;
 
 	#endif
@@ -1349,7 +1349,7 @@ static SHAPEHEADER * CreateShapeFromRif (RIFFHANDLE h, char const * shapename, i
 						local_tex_index_nos,
 						listpos
 						);
-					if (local_tex_index_nos!=h->tex_index_nos) delete [] local_tex_index_nos;
+					if (local_tex_index_nos!=h->tex_index_nos) delete[] local_tex_index_nos;
 
 					return shptr;
 				}
@@ -2011,7 +2011,7 @@ void SetupAnimatedTextures(Shape_Chunk* sc, SHAPEHEADER* shp, Animation_Chunk* a
 				}
 			}
 		}
-		if(PolyConv)delete [] PolyConv;
+		if (PolyConv) delete[] PolyConv;
 	}
 	else
 	{
@@ -2159,8 +2159,7 @@ void SetupAnimatingShape(Shape_Chunk* sc,SHAPEHEADER* shp, Shape_Merge_Data_Chun
 		}
 	}
 	
-	delete [] PolyConv;
-	
+	delete[] PolyConv;
 
 	//find a sequence which has some frames;
 	shapeanimationsequence* sas=0;
@@ -2841,7 +2840,7 @@ BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Heade
 		chlist.delete_first_entry();
 	}
 	shphd->sh_textures[0] = (int*)thlist;
-	delete [] BmpConv;
+	delete[] BmpConv;
 	return TRUE;
 }
 
@@ -3066,8 +3065,8 @@ void merge_polygons_in_chunkshape (ChunkShape & shp, Shape_Merge_Data_Chunk * sm
 		}
 	}
 
-	delete [] shp.poly_list;
-	delete [] shp.p_normal_list;
+	delete[] shp.poly_list;
+	delete[] shp.p_normal_list;
 	shp.poly_list = new_polys;
 	shp.p_normal_list = new_pnorms;
 	shp.num_polys = p_no;

@@ -45,8 +45,8 @@ class TheoraFMV
 		std::ifstream 	mFileStream;
 
 		// so we can easily reference these from the threads.
-		OggStream *mVideo;
-		OggStream *mAudio;
+		OggStream      *mVideo;
+		OggStream      *mAudio;
 
 		ogg_sync_state 	mState;
 		ogg_int64_t		mGranulePos;

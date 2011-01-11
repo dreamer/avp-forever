@@ -574,10 +574,8 @@ struct TrackPointEffect
 
 	~TrackPointEffect()
 	{
-		if(targets) delete [] targets;
+		if (targets) delete[] targets;
 	}
-	
-
 };
 
 class TrackStrategy : public AvpStrat

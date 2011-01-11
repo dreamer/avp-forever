@@ -8,11 +8,11 @@ namespace IFF
 	class IlbmBmhdChunk : public Chunk
 	{
 		public:
-			UINT16 width;
-			UINT16 height;
-			UINT16 xTopLeft;
-			UINT16 yTopLeft;
-			UBYTE nBitPlanes;
+			uint16_t width;
+			uint16_t height;
+			uint16_t xTopLeft;
+			uint16_t yTopLeft;
+			uint8_t nBitPlanes;
 			enum
 			{
 				MASK_NONE = 0,
@@ -20,20 +20,20 @@ namespace IFF
 				MASK_TRANSPARENTCOL = 2,
 				MASK_LASSO = 3
 			};
-			UBYTE eMasking;
+			uint8_t eMasking;
 			enum
 			{
 				COMPRESS_NONE = 0,
 				COMPRESS_RUNLENGTH = 1,
 				COMPRESS_S3TC =2   //will have s3tc chunk instead of body chunk
 			};
-			UBYTE eCompression;
-			UBYTE flags;
-			UINT16 iTranspCol;
-			UBYTE xAspectRatio;
-			UBYTE yAspectRatio;
-			UINT16 xMax;
-			UINT16 yMax;
+			uint8_t eCompression;
+			uint8_t flags;
+			uint16_t iTranspCol;
+			uint8_t xAspectRatio;
+			uint8_t yAspectRatio;
+			uint16_t xMax;
+			uint16_t yMax;
 			
 			IlbmBmhdChunk() { m_idCk = "BMHD"; }
 			
@@ -97,15 +97,15 @@ namespace IFF
 
 		private:
 			unsigned nSize;
-			UBYTE * pData;
+			uint8_t * pData;
 			
-			mutable UBYTE const * pDecodeSrc;
+			mutable uint8_t const * pDecodeSrc;
 			mutable unsigned nRemaining;
 			mutable unsigned * pDecodeDst;
 			
 			#ifndef IFF_READ_ONLY
 				DataBlock * pEncodeDst;
-				UBYTE * pEncodeSrc;
+				uint8_t * pEncodeSrc;
 				
 				unsigned nSizeNonCprss;
 				unsigned nSizeCprss;
@@ -151,8 +151,8 @@ namespace IFF
 	class IlbmGrabChunk : public Chunk
 	{
 		public:
-			UINT16 xHotSpot;
-			UINT16 yHotSpot;
+			uint16_t xHotSpot;
+			uint16_t yHotSpot;
 			
 			IlbmGrabChunk() { m_idCk = "GRAB"; }
 			

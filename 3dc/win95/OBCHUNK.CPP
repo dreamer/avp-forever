@@ -490,7 +490,7 @@ BOOL Object_Header_Chunk::output_chunk (HANDLE & hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
@@ -604,7 +604,7 @@ void Object_Notes_Chunk::fill_data_block (char * data_start)
 
 Object_Notes_Chunk::~Object_Notes_Chunk ()
 {
-	delete [] data_store;
+	delete[] data_store;
 }
 
 BOOL Object_Notes_Chunk::output_chunk (HANDLE &hand)
@@ -617,7 +617,7 @@ BOOL Object_Notes_Chunk::output_chunk (HANDLE &hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
@@ -749,7 +749,7 @@ VModule_Array_Chunk::VModule_Array_Chunk (Chunk_With_Children * parent, const ch
 
 VModule_Array_Chunk::~VModule_Array_Chunk ()
 {
-	delete [] vmod_array;
+	delete[] vmod_array;
 }
 
 ///////////////////////////////////////
@@ -1201,7 +1201,7 @@ Object_Alternate_Locations_Chunk::Object_Alternate_Locations_Chunk(Chunk_With_Ch
 
 Object_Alternate_Locations_Chunk::~Object_Alternate_Locations_Chunk()
 {
-	if(locations) delete [] locations;
+	if(locations) delete[] locations;
 }
 
 void Object_Alternate_Locations_Chunk::fill_data_block(char* data)

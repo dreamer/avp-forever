@@ -86,7 +86,7 @@ int InitialiseTextures(void)
 	SHAPEHEADER **shapelistptr;
 	SHAPEHEADER *shapePtr;
 	char **txfiles;
-	int TxIndex;
+	texID_t TxIndex;
 	int LocalTxIndex;
 
 	/*

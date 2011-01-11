@@ -122,7 +122,7 @@ BOOL Chunk::output_chunk (HANDLE & hand)
 	if (data_block)
 	{
 		ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
-		delete [] data_block;
+		delete[] data_block;
 
 		if (!ok) return FALSE;
 	}
@@ -243,7 +243,7 @@ void Miscellaneous_Chunk::fill_data_block (char * data_start)
 
 Miscellaneous_Chunk::~Miscellaneous_Chunk ()
 {
-	delete [] data_store;
+	delete[] data_store;
 }
 
 ///////////////////////////////////////

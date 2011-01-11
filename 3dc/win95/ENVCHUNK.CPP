@@ -118,7 +118,7 @@ BOOL Environment_Data_Header_Chunk::output_chunk (HANDLE & hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
@@ -223,7 +223,7 @@ Sound_Directory_Chunk::Sound_Directory_Chunk(Chunk_With_Children * const parent,
 
 Sound_Directory_Chunk::~Sound_Directory_Chunk()
 {
-	delete [] directory;
+	delete[] directory;
 }
 
 void Sound_Directory_Chunk::fill_data_block(char* data_start)
@@ -269,7 +269,7 @@ Random_Texture_ID_Chunk::Random_Texture_ID_Chunk(Chunk_With_Children* parent,con
 
 Random_Texture_ID_Chunk::~Random_Texture_ID_Chunk()
 {
-	delete [] name;
+	delete[] name;
 }
 
 void Random_Texture_ID_Chunk::fill_data_block(char* data)

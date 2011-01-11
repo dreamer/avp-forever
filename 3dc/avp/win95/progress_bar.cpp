@@ -44,9 +44,9 @@ RECT LoadingBarFull_SrcRect;
 
 extern void DrawProgressBar(const RECT &srcRect, const RECT &destRect, texID_t textureID);
 
-uint32_t	fullTextureID = 0;
-uint32_t	emptyTextureID = 0;
-uint32_t	dbTextureID = 0;
+texID_t	fullTextureID = 0;
+texID_t	emptyTextureID = 0;
+texID_t	dbTextureID = 0;
 
 AVPTEXTURE *image = NULL;
 AVPTEXTURE *LoadingBarEmpty = NULL;

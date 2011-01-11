@@ -456,7 +456,7 @@ if (envdatalist.size())
 						$load image$(filename)
 					}
 				}
-				delete [] imname;
+				delete[] imname;
 			}
 		}
 	}

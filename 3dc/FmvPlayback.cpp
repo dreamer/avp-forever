@@ -13,8 +13,10 @@
 #define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
 #endif
 
-static const int BUFFER_SIZE  = 4096;
-static const int BUFFER_COUNT = 3;
+static const int kBufferSize = 4096;
+static const int kBufferCount = 3;
+
+const uint32_t quantum = 1000 / 60;
 
 #define VANILLA
 
@@ -138,15 +140,9 @@ TheoraFMV::~TheoraFMV()
 			CloseHandle(mAudioThreadHandle);
 		}
 
-		if (audioStream)
-			delete audioStream;
-
-		if (mAudioData)
-			delete []mAudioData;
-
-		if (mAudioDataBuffer)
-			delete []mAudioDataBuffer;
-
+		delete audioStream;
+		delete[] mAudioData;
+		delete[] mAudioDataBuffer;
 		delete mRingBuffer;
 	}
 
@@ -191,14 +187,14 @@ void VorbisDecode::Init()
 int TheoraFMV::Open(const std::string &fileName)
 {
 #ifdef _XBOX
-	mFileName = "d:\\";
+	mFileName = "d:/";
 	mFileName += fileName;
 #else
 	mFileName = fileName;
 #endif
 
 	// this'll do for now..
-	if (mFileName == "fmvs\\menubackground.ogv")
+	if (mFileName == "fmvs/menubackground.ogv")
 	{
 		isLooped = true;
 	}
@@ -244,7 +240,7 @@ int TheoraFMV::Open(const std::string &fileName)
 	if (mAudio)
 	{
 		// create mAudio streaming buffer
-		this->audioStream = new AudioStream(mAudio->mVorbis.mInfo.channels, mAudio->mVorbis.mInfo.rate, BUFFER_SIZE, BUFFER_COUNT);
+		this->audioStream = new AudioStream(mAudio->mVorbis.mInfo.channels, mAudio->mVorbis.mInfo.rate, kBufferSize, kBufferCount);
 		if (this->audioStream == NULL)
 		{
 			Con_PrintError("Failed to create mAudio stream buffer for fmv playback");
@@ -252,8 +248,8 @@ int TheoraFMV::Open(const std::string &fileName)
 		}
 
 		// we need some temporary mAudio data storage space and a ring buffer instance
-		mAudioData = new uint8_t[BUFFER_SIZE];
-		mRingBuffer = new RingBuffer(BUFFER_SIZE * BUFFER_COUNT);
+		mAudioData = new uint8_t[kBufferSize];
+		mRingBuffer = new RingBuffer(kBufferSize * kBufferCount);
 
 		mAudioDataBuffer = NULL;
 	}
@@ -724,7 +720,7 @@ unsigned int __stdcall decodeThread(void *args)
 					{
 						if (fmv->mAudioDataBuffer != NULL)
 						{
-							delete []fmv->mAudioDataBuffer;
+							delete[]fmv->mAudioDataBuffer;
 							OutputDebugString("deleted mAudioDataBuffer to resize\n");
 						}
 
@@ -815,8 +811,6 @@ unsigned int __stdcall audioThread(void *args)
 	#endif
 
 	TheoraFMV *fmv = static_cast<TheoraFMV*>(args);
-
-	const uint32_t quantum = 1000 / 60;
 
 	static int totalRead = 0;
 	static int lastRead = 0;

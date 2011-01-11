@@ -14,6 +14,7 @@
 #include <string>
 #include "io.h"
 #include "Di_func.h"
+#include "inline.h"
 
 #define MAX_FMVS 4
 
@@ -25,7 +26,6 @@ struct fmvCutscene
 
 fmvCutscene fmvList[MAX_FMVS];
 
-#define MAX_NO_FMVTEXTURES 10
 FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 uint32_t NumberOfFMVTextures = 0;
 
@@ -43,7 +43,6 @@ int MoviesAreActive = 1;
 int IntroOutroMoviesAreActive = 1;
 int VolumeOfNearestVideoScreen = 0;
 int PanningOfNearestVideoScreen = 0;
-#include "inline.h"
 
 VorbisPlayback	*menuMusic = NULL;
 TheoraFMV		*menuFMV = NULL;
@@ -117,7 +116,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 
 void StartMenuBackgroundFmv()
 {
-	const char *filenamePtr = "fmvs\\menubackground.ogv";
+	const char *filenamePtr = "fmvs/menubackground.ogv";
 
 	menuFMV = new TheoraFMV();
 	if (menuFMV->Open(filenamePtr) != FMV_OK)
@@ -282,7 +281,7 @@ extern void StartTriggerPlotFMV(int number)
 	if (CheatMode_Active != CHEATMODE_NONACTIVE)
 		return;
 
-	sprintf(buffer, "FMVs\\message%d.ogv", number);
+	sprintf(buffer, "FMVs/message%d.ogv", number);
 	{
 		FILE *file = avp_fopen(buffer, "rb");
 		if (!file)
@@ -405,7 +404,7 @@ void ReleaseAllFMVTextures()
 
 		if (FMVTexture[i].RGBBuffer)
 		{
-			delete []FMVTexture[i].RGBBuffer;
+			delete[] FMVTexture[i].RGBBuffer;
 			FMVTexture[i].RGBBuffer = NULL;
 		}
 
@@ -419,7 +418,7 @@ void StartMenuMusic()
 {
 	// we need to load IntroSound.ogg here using vorbisPlayer
 	menuMusic = new VorbisPlayback;
-	if (!menuMusic->Open("FMVs\\IntroSound.ogg"))
+	if (!menuMusic->Open("FMVs/IntroSound.ogg"))
 	{
 		Con_PrintError("Can't open file IntroSound.ogg");
 		delete menuMusic;

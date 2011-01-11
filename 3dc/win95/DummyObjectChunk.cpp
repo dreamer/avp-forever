@@ -97,7 +97,7 @@ Dummy_Object_Data_Chunk::Dummy_Object_Data_Chunk(Chunk_With_Children* parent,con
 
 Dummy_Object_Data_Chunk::~Dummy_Object_Data_Chunk()
 {
-	if(name) delete [] name;
+	if(name) delete[] name;
 }
 
 
@@ -141,7 +141,7 @@ Dummy_Object_Text_Chunk::Dummy_Object_Text_Chunk(Chunk_With_Children* parent,con
 
 Dummy_Object_Text_Chunk::~Dummy_Object_Text_Chunk()
 {
-	delete [] text;
+	delete[] text;
 }
 
 void Dummy_Object_Text_Chunk::fill_data_block(char* data)
@@ -160,9 +160,8 @@ void Dummy_Object_Text_Chunk::set_text(const char* _text)
 		strcpy(new_text,_text);
 	}
 
-	delete [] text;
+	delete[] text;
 	text = new_text;
-	
 }
 
 

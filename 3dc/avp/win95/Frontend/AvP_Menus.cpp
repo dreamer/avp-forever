@@ -68,7 +68,7 @@ extern void Show_WinnerScreen(void);
 extern void GetNextAllowedSpecies(int* species,BOOL search_forwards);
 static void SetBriefingTextForMultiplayer();
 
-//int CloudTable[128][128];
+extern char AAFontWidths[256];
 
 extern char MP_Config_Name[];
 
@@ -239,10 +239,10 @@ static void UpdateMultiplayerConfigurationMenu();
 
 static char KeyboardEntryQueue_ProcessCharacter(void);
 
-static BOOL LaunchingMplayer=FALSE;
+static BOOL LaunchingMplayer = FALSE;
 
 static int MultiplayerConfigurationIndex; //just used for the configuration deletion stuff
-static const char* MultiplayerConfigurationName=0; //ditto
+static const char* MultiplayerConfigurationName = 0; //ditto
 
 extern int DebuggingCommandsActive;
 
@@ -1373,7 +1373,7 @@ static void RenderEpisodeSelectMenu(void)
 	I_PLAYER_TYPE playerID;
 	int i;
 	int numberOfBasicLevels;
-	int correctGraphicID;
+	texID_t correctGraphicID;
 	
 	switch (AvPMenus.CurrentMenu)
 	{
@@ -1432,16 +1432,16 @@ static void RenderEpisodeSelectMenu(void)
 
 			if (targetBrightness > Brightness[i])
 			{
-				Brightness[i]+=BRIGHTNESS_CHANGE_SPEED;
-				if(Brightness[i]>targetBrightness)
+				Brightness[i] += BRIGHTNESS_CHANGE_SPEED;
+				if (Brightness[i] > targetBrightness)
 				{
 					Brightness[i] = targetBrightness;
 				}
 			}
 			else
 			{
-				Brightness[i]-=BRIGHTNESS_CHANGE_SPEED;
-				if(Brightness[i]<targetBrightness)
+				Brightness[i] -= BRIGHTNESS_CHANGE_SPEED;
+				if (Brightness[i] < targetBrightness)
 				{
 					Brightness[i] = targetBrightness;
 				}
@@ -2204,7 +2204,6 @@ static void ActUponUsersInput(void)
 						}
 						else
 						{
-							extern char AAFontWidths[256];
 							//using small font
 							if (AvPMenus.WidthLeftForText < AAFontWidths[c]) 
 								break;

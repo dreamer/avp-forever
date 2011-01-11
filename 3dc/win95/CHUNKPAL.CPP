@@ -88,7 +88,7 @@ Environment_Palette_Chunk::~Environment_Palette_Chunk ()
 	if (pixel_data)
 	{
 		unsigned char * temp_pd = (unsigned char *)pixel_data;
-		delete [] temp_pd;
+		delete[] temp_pd;
 	}
 }
 
@@ -131,7 +131,7 @@ Preset_Palette::~Preset_Palette ()
 	if (pixel_data)
 	{
 		unsigned char * temp_pd = (unsigned char *)pixel_data;
-		delete [] temp_pd;
+		delete[] temp_pd;
 	}
 	if (name) delete[] name;
 }
@@ -157,7 +157,7 @@ Preset_Palette & Preset_Palette::operator = (Preset_Palette const & c)
 	if (pixel_data)
 	{
 		unsigned char * temp_pd = (unsigned char *)pixel_data;
-		delete [] temp_pd;
+		delete[] temp_pd;
 	}
 	if (name)
 	{
@@ -582,7 +582,7 @@ Environment_Game_Mode_Header_Chunk::~Environment_Game_Mode_Header_Chunk()
 
 	while (rif_files.size())
 	{
-		delete [] rif_files.first_entry();
+		delete[] rif_files.first_entry();
 		rif_files.delete_first_entry();
 	}
 }
@@ -927,8 +927,8 @@ Coloured_Polygons_Lookup_Chunk::Coloured_Polygons_Lookup_Chunk (Chunk_With_Child
 
 Coloured_Polygons_Lookup_Chunk::~Coloured_Polygons_Lookup_Chunk ()
 {
-	if (table) delete [] table;
-	if (filename) delete [] filename;
+	if (table) delete[] table;
+	if (filename) delete[] filename;
 }
 
 size_t Coloured_Polygons_Lookup_Chunk::size_chunk()

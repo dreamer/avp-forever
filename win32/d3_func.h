@@ -258,8 +258,8 @@ void SetTransforms();
 uint32_t XPercentToScreen(float percent);
 uint32_t YPercentToScreen(float percent);
 
-extern uint32_t NO_TEXTURE;
-extern uint32_t MISSING_TEXTURE;
+extern texID_t NO_TEXTURE;
+extern texID_t MISSING_TEXTURE;
 
 #define RGB_MAKE	D3DCOLOR_XRGB
 

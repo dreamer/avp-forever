@@ -93,6 +93,8 @@ extern AVP_USER_PROFILE *GetNextUserProfile(void)
 
 /*static*/ void EmptyUserProfilesList(void)
 {
+	return;
+
 	while (UserProfilesList.size())
 	{
 		delete UserProfilesList.first_entry();
@@ -103,8 +105,8 @@ extern AVP_USER_PROFILE *GetNextUserProfile(void)
 extern int SaveUserProfile(AVP_USER_PROFILE *profilePtr)
 {
 	// avp_fopen will add SaveFolderPath for us
-	char *filename = new char [/*strlen(GetSaveFolderPath()) +*/ strlen(USER_PROFILES_PATH)+strlen(profilePtr->Name)+strlen(USER_PROFILES_SUFFIX)+1];
-//	strcpy(filename, GetSaveFolderPath());
+	char *filename = new char [strlen(USER_PROFILES_PATH)+strlen(profilePtr->Name)+strlen(USER_PROFILES_SUFFIX)+1];
+
 	strcpy(filename, USER_PROFILES_PATH);
 	strcat(filename, profilePtr->Name);
 	strcat(filename, USER_PROFILES_SUFFIX);
@@ -142,17 +144,17 @@ extern void DeleteUserProfile(int number)
 	DeleteFile(filename);
 
 	// now delete all the user's savegame files
-	delete [] filename;
+	delete[] filename;
 	{
 		int i;
-		filename = new char [MAX_PATH];
+		filename = new char[MAX_PATH];
 
 		for (i=0; i<NUMBER_OF_SAVE_SLOTS; i++)
 		{
-			sprintf(filename,"%s%s%s_%d.sav",savePath,USER_PROFILES_PATH,profilePtr->Name,i+1);
+			sprintf(filename, "%s%s%s_%d.sav", savePath, USER_PROFILES_PATH, profilePtr->Name, i+1);
 			DeleteFile(filename);
 		}
-		delete [] filename;
+		delete[] filename;
 	}
 }
 

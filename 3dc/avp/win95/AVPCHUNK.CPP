@@ -90,7 +90,7 @@ AVP_Generator_Chunk::AVP_Generator_Chunk (Chunk_With_Children * parent, const ch
 AVP_Generator_Chunk::~AVP_Generator_Chunk ()
 {
 	if (name)
-		delete [] name;
+		delete[] name;
 }
 
 
@@ -491,7 +491,7 @@ AVP_Power_Cable_Chunk::AVP_Power_Cable_Chunk(Chunk_With_Children* parent,const c
 
 AVP_Power_Cable_Chunk::~AVP_Power_Cable_Chunk()
 {
-	if(name) delete[] name;
+	if (name) delete[] name;
 }
 
 void AVP_Power_Cable_Chunk::fill_data_block(char* data)
@@ -681,7 +681,7 @@ AVP_Decal_Chunk::AVP_Decal_Chunk(Chunk_With_Children* parent, int num_dec)
 
 AVP_Decal_Chunk::~AVP_Decal_Chunk()
 {
-	if(decal_buffer) delete [] decal_buffer;
+	if (decal_buffer) delete[] decal_buffer;
 }
 
 void AVP_Decal_Chunk::fill_data_block(char* data)
@@ -779,7 +779,7 @@ AVP_Particle_Generator_Data_Chunk::AVP_Particle_Generator_Data_Chunk(Chunk_With_
 
 AVP_Particle_Generator_Data_Chunk::~AVP_Particle_Generator_Data_Chunk()
 {
-	if(name) delete [] name;
+	if (name) delete[] name;
 }
 
 void AVP_Particle_Generator_Data_Chunk::fill_data_block(char* data)

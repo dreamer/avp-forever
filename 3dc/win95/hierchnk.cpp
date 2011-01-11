@@ -84,7 +84,7 @@ Object_Hierarchy_Data_Chunk::Object_Hierarchy_Data_Chunk (Object_Hierarchy_Chunk
 Object_Hierarchy_Data_Chunk::~Object_Hierarchy_Data_Chunk()
 {
 	if (ob_name)
-		delete [] ob_name;
+		delete[] ob_name;
 
 	if(extra_data)
 		delete[] extra_data;
@@ -206,7 +206,7 @@ Object_Hierarchy_Name_Chunk::~Object_Hierarchy_Name_Chunk()
 {
 	if (hierarchy_name)
 	{
-		delete [] hierarchy_name;
+		delete[] hierarchy_name;
 	}
 }
 

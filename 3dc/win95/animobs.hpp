@@ -255,7 +255,7 @@ struct Object_Animation_Frame
 
 struct Object_Animation_Sequence
 {
-	~Object_Animation_Sequence(){delete [] frames;}
+	~Object_Animation_Sequence() {delete[] frames;}
 
 	unsigned long num_frames;
 	signed long sequence_number;
@@ -274,7 +274,7 @@ public:
 
 	Object_Animation_All_Sequence_Chunk (Chunk_With_Children * parent);
 	Object_Animation_All_Sequence_Chunk (Chunk_With_Children * const parent,const char *, const size_t);
-	~Object_Animation_All_Sequence_Chunk () {delete [] sequences;}
+	~Object_Animation_All_Sequence_Chunk () { delete[] sequences;}
 
 	virtual void fill_data_block (char *);
 	virtual size_t size_chunk ();

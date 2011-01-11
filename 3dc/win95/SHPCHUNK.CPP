@@ -131,7 +131,7 @@ Shape_Chunk* Shape_Chunk::make_copy_of_chunk()
 {
 	char* Data=this->make_data_block_from_chunk();
 	Shape_Chunk* NewShape=new Shape_Chunk(parent,Data+12,this->size_chunk()-12);
-	delete [] Data;
+	delete[] Data;
 	delete NewShape->get_header();
 	new Shape_Header_Chunk(NewShape);
 	//need to call post_input_processing in order to copy morphing data correctly
@@ -590,7 +590,7 @@ BOOL Shape_Vertex_Chunk::output_chunk (HANDLE &hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
@@ -667,7 +667,7 @@ BOOL Shape_Vertex_Normal_Chunk::output_chunk (HANDLE &hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
@@ -759,7 +759,7 @@ BOOL Shape_Polygon_Normal_Chunk::output_chunk (HANDLE &hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
@@ -888,12 +888,11 @@ BOOL Shape_Polygon_Chunk::output_chunk (HANDLE &hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
 	return TRUE;
-		
 }
 
 void Shape_Polygon_Chunk::fill_data_block(char * data_start)
@@ -1080,13 +1079,12 @@ BOOL Shape_UV_Coord_Chunk::output_chunk (HANDLE &hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
 	return TRUE;
 }
-
 
 void Shape_UV_Coord_Chunk::fill_data_block(char * data_start)
 {
@@ -1184,7 +1182,7 @@ BOOL Shape_Texture_Filenames_Chunk::output_chunk (HANDLE &hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
@@ -1294,7 +1292,7 @@ Shape_Header_Chunk::~Shape_Header_Chunk()
 {
 	for (LIF<char *> aon(&object_names_store);
 			!aon.done(); aon.next() )
-		delete [] aon();
+		delete[] aon();
 }
 
 size_t Shape_Header_Chunk::size_chunk()
@@ -1322,7 +1320,7 @@ BOOL Shape_Header_Chunk::output_chunk(HANDLE & hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
@@ -1392,13 +1390,15 @@ void Shape_Header_Chunk::prepare_for_output()
 
 	if (file_id_num == -1) file_id_num = ++(Shape_Chunk::max_id);
 
-	while (object_names_store.size()) {
-		delete [] object_names_store.first_entry();
+	while (object_names_store.size()) 
+	{
+		delete[] object_names_store.first_entry();
 		object_names_store.delete_first_entry();
 	}
 
 	for (LIF<Object_Chunk *> aosl(&associated_objects_store);
-		!aosl.done(); aosl.next() ) {
+		!aosl.done(); aosl.next() ) 
+	{
 
 		if (aosl()->get_header())
 			aosl()->get_header()->shape_id_no = file_id_num;
@@ -1566,7 +1566,7 @@ Shape_External_Filename_Chunk::Shape_External_Filename_Chunk (Chunk_With_Childre
 Shape_External_Filename_Chunk::~Shape_External_Filename_Chunk()
 {
 	if (file_name)
-		delete [] file_name;
+		delete[] file_name;
 }
 
 void Shape_External_Filename_Chunk::fill_data_block (char *data_start)
@@ -1627,9 +1627,9 @@ Shape_External_Object_Name_Chunk::Shape_External_Object_Name_Chunk (Chunk_With_C
 Shape_External_Object_Name_Chunk::~Shape_External_Object_Name_Chunk()
 {
 	if (object_name)
-		delete [] object_name;
+		delete[] object_name;
 	if(shape_name)
-		delete [] shape_name;
+		delete[] shape_name;
 }
 
 void  Shape_External_Object_Name_Chunk::post_input_processing()
@@ -1792,7 +1792,7 @@ void Shape_Morphing_Frame_Data_Chunk::fill_data_block ( char * data_start)
 
 Shape_Morphing_Frame_Data_Chunk::~Shape_Morphing_Frame_Data_Chunk()
 {
-	if (frame_store) delete [] frame_store;
+	if (frame_store) delete[] frame_store;
 	while (anim_frames.size())
 	{
 		delete anim_frames.first_entry();
@@ -1809,7 +1809,7 @@ void Shape_Morphing_Frame_Data_Chunk::prepare_for_output()
 	// for output called first
 	
 	if (frame_store)
-		delete [] frame_store;
+		delete[] frame_store;
 
 	if (anim_frames.size())
 	{
@@ -2014,7 +2014,7 @@ Shape_Sub_Shape_Chunk* Shape_Sub_Shape_Chunk::make_copy_of_chunk()
 {
 	char* Data=this->make_data_block_from_chunk();
 	Shape_Sub_Shape_Chunk* NewShape=new Shape_Sub_Shape_Chunk(parent,Data+12,this->size_chunk()-12);
-	delete [] Data;
+	delete[] Data;
 	delete NewShape->get_header();
 	new Shape_Sub_Shape_Header_Chunk(NewShape);
 	return NewShape;
@@ -2332,7 +2332,7 @@ Shape_Name_Chunk::Shape_Name_Chunk (Chunk_With_Children * parent, const char * s
 Shape_Name_Chunk::~Shape_Name_Chunk ()
 {
 	if (shape_name)
-		delete [] shape_name;
+		delete[] shape_name;
 }
 
 
@@ -2952,8 +2952,7 @@ Shape_Sub_Shape_Chunk* Anim_Shape_Alternate_Texturing_Chunk::CreateNewSubShape(c
 	{
 		char * tempbuffer = anim_chunk->make_data_block_from_chunk();
 		sssc->DynCreate(tempbuffer);
-		delete [] tempbuffer;
-
+		delete[] tempbuffer;
 	}
 
 	Shape_Merge_Data_Chunk* smdc=(Shape_Merge_Data_Chunk*)parent->lookup_single_child("SHPMRGDT");
@@ -2962,7 +2961,6 @@ Shape_Sub_Shape_Chunk* Anim_Shape_Alternate_Texturing_Chunk::CreateNewSubShape(c
 		new Shape_Merge_Data_Chunk(sssc,smdc->merge_data,smdc->num_polys);	
 	}
 	return sssc;
-	
 }
 
 /////////////////////////////////////////
@@ -3139,12 +3137,12 @@ void Console_Shape_Chunk::generate_console_chunkshape()
 				shape_data_store->poly_list[i].vert_ind[j]=poly_list[i].vert_ind[j];
 			}
 		}
-		delete [] poly_list;
+		delete[] poly_list;
 	}
 	Shape_UV_Coord_Chunk* succ=(Shape_UV_Coord_Chunk*)lookup_single_child("SHPUVCRD");
 	if(succ)
 	{
-		delete [] shape_data_store->uv_list;
+		delete[] shape_data_store->uv_list;
 		shape_data_store->uv_list=(ChunkUV_List*)succ->uv_data;
 		shape_data_store->num_uvs=succ->num_uvs;
 	}

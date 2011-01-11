@@ -4004,7 +4004,6 @@ float o = 1.0f;
 
 extern void TranslationSetup(void)
 {
-	char buf[100];
 	VECTORCH v = Global_VDB_Ptr->VDB_World;
 	extern int PredatorVisionChangeCounter;
 	/*float*/ p = PredatorVisionChangeCounter / 65536.0f;

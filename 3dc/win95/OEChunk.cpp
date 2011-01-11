@@ -133,7 +133,7 @@ BOOL Map_Block_Chunk::output_chunk(HANDLE &hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 
@@ -150,7 +150,7 @@ BOOL Strategy_Chunk::output_chunk(HANDLE &hand)
 
 	ok = WriteFile (hand, (long *) data_block, (unsigned long) chunk_size, &junk, 0);
 
-	delete [] data_block;
+	delete[] data_block;
 
 	if (!ok) return FALSE;
 

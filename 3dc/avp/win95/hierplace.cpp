@@ -104,8 +104,8 @@ Placed_Hierarchy_Data_Chunk::Placed_Hierarchy_Data_Chunk(Chunk_With_Children* pa
 
 Placed_Hierarchy_Data_Chunk::~Placed_Hierarchy_Data_Chunk()
 {
-	if(extra_data)	delete [] extra_data;
-	if(name) delete [] name;
+	if(extra_data)	delete[] extra_data;
+	if(name) delete[] name;
 }
 
 void Placed_Hierarchy_Data_Chunk::fill_data_block(char* data)
