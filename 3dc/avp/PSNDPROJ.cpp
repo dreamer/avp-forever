@@ -843,8 +843,8 @@ void PlayCudgelSound(void) {
 }
 
 char * SecondSoundDir = 0;
-static const char *FirstSoundDir = "SOUND\\";
-static const char *CommonSoundDirectory = ".\\SOUND\\COMMON\\";
+static const char *FirstSoundDir = "SOUND/";
+static const char *CommonSoundDirectory = "./SOUND/COMMON/";
 
 int FindAndLoadWavFile(int soundNum, char* wavFileName)
 {
@@ -957,13 +957,13 @@ void LoadSounds(char *soundDirectory)
 	{
 		char filename[MAX_PATH];
 		#if ALIEN_DEMO
-		strcpy(filename, ".\\alienfastfile");//CommonSoundDirectory);
+		strcpy(filename, "./alienfastfile");//CommonSoundDirectory);
 		#else
 
 		strcpy(filename, "fastfile");//CommonSoundDirectory);
 
 		#endif
-		strcat(filename, "\\");
+		strcat(filename, "/");
 		strcat(filename, "common.ffl");
 
 		rebSndBuffer = LoadRebSndFile(filename);

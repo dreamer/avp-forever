@@ -522,7 +522,7 @@ Environment_Game_Mode_Chunk::Environment_Game_Mode_Chunk(Chunk_With_Children* co
 char * Environment_Game_Mode_Chunk::ExpandedIdentifier() const
 {
 	char const * full_fname = header->flags & GameModeFlag_Editable ? ((File_Chunk *)GetRootChunk())->filename : header->get_safe_source();
-	char const * skip = strrchr(full_fname,'\\');
+	char const * skip = strrchr(full_fname,'/');
 	if (skip) full_fname = skip+1;
 	skip = strrchr(full_fname,'/');
 	if (skip) full_fname = skip+1;

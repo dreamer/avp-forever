@@ -106,7 +106,7 @@ LOADED_SOUND const * GetSound (char const * fname)
 {
 	if(!SoundSwitchedOn) return (0);
 
-	const char * wavname = strrchr (fname, '\\');
+	const char * wavname = strrchr (fname, '/');
 	
 	if (wavname)
 	{

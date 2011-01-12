@@ -33,9 +33,9 @@ static uint32_t BarRight;
 static uint32_t BarTop;
 static uint32_t BarBottom;
 
-static const char* Loading_Image_Name = "Menus\\Loading.rim";
-static const char* Loading_Bar_Empty_Image_Name = "Menus\\Loadingbar_empty.rim";
-static const char* Loading_Bar_Full_Image_Name = "Menus\\Loadingbar_full.rim";
+static const char* Loading_Image_Name = "Menus/Loading.rim";
+static const char* Loading_Bar_Empty_Image_Name = "Menus/Loadingbar_empty.rim";
+static const char* Loading_Bar_Full_Image_Name = "Menus/Loadingbar_full.rim";
 
 RECT LoadingBarEmpty_DestRect;
 RECT LoadingBarEmpty_SrcRect;
@@ -57,7 +57,7 @@ void Start_Progress_Bar()
 {
 	char buffer[100];
 
-	AAFontImageNumber = CL_LoadImageOnce("Common\\aa_font.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AAFontImageNumber = CL_LoadImageOnce("Common/aa_font.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 	
 	// load other graphics
 	{

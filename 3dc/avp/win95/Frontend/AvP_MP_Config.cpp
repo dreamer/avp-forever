@@ -20,9 +20,9 @@ extern char MP_SessionName[];
 extern char MP_Config_Description[];
 
 #define MP_CONFIG_DIR "MPConfig"
-#define MP_CONFIG_WILDCARD "MPConfig\\*.cfg"
+#define MP_CONFIG_WILDCARD "MPConfig/*.cfg"
 
-#define SKIRMISH_CONFIG_WILDCARD "MPConfig\\*.skirmish_cfg"
+#define SKIRMISH_CONFIG_WILDCARD "MPConfig/*.skirmish_cfg"
 
 static List<char*> ConfigurationFilenameList;
 static List<char*> ConfigurationLocalisedFilenameList;
@@ -72,7 +72,7 @@ BOOL BuildLoadMPConfigMenu()
 	ptrdiff_t nPathLen = 0;
 	const char * pColon = strrchr(load_name,':');
 	if (pColon) nPathLen = pColon - load_name + 1;
-	const char * pBackSlash = strrchr(load_name,'\\');
+	const char * pBackSlash = strrchr(load_name,'/');
 	if (pBackSlash)
 	{
 		ptrdiff_t nLen = pBackSlash - load_name + 1;
@@ -200,9 +200,9 @@ const char* GetMultiplayerConfigDescription(int index)
 	FILE* file;
 	char filename[MAX_PATH];
 	if (netGameData.skirmishMode)
-		sprintf(filename, "%s%s\\%s.skirmish_cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
+		sprintf(filename, "%s%s/%s.skirmish_cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
 	else
-		sprintf(filename, "%s%s\\%s.cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
+		sprintf(filename, "%s%s/%s.cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
 
 	file = avp_fopen(filename, "rb");
 	if (!file)
@@ -239,9 +239,9 @@ void LoadMultiplayerConfiguration(const char* name)
 	FILE* file;
 	char filename[MAX_PATH];
 	if (netGameData.skirmishMode)
-		sprintf(filename, "%s%s\\%s.skirmish_cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
+		sprintf(filename, "%s%s/%s.skirmish_cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
 	else
-		sprintf(filename, "%s%s\\%s.cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
+		sprintf(filename, "%s%s/%s.cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
 
 	file = avp_fopen(filename, "rb");
 	if (!file) 
@@ -346,9 +346,9 @@ void SaveMultiplayerConfiguration(const char* name)
 	FILE* file;
 	char filename[MAX_PATH];
 	if (netGameData.skirmishMode)
-		sprintf(filename, "%s\\%s.skirmish_cfg", MP_CONFIG_DIR, name);
+		sprintf(filename, "%s/%s.skirmish_cfg", MP_CONFIG_DIR, name);
 	else
-		sprintf(filename, "%s\\%s.cfg", MP_CONFIG_DIR, name);
+		sprintf(filename, "%s/%s.cfg", MP_CONFIG_DIR, name);
 	
 	CreateDirectory(MP_CONFIG_DIR, 0);
 	file = avp_fopen(filename, "wb");
@@ -446,16 +446,16 @@ void DeleteMultiplayerConfigurationByIndex(int index)
 
 	char filename[MAX_PATH];
 	if (netGameData.skirmishMode)
-		sprintf(filename, "%s%s\\%s.skirmish_cfg", GetSaveFolderPath(), MP_CONFIG_DIR, ConfigurationFilenameList[index]);
+		sprintf(filename, "%s%s/%s.skirmish_cfg", GetSaveFolderPath(), MP_CONFIG_DIR, ConfigurationFilenameList[index]);
 	else
-		sprintf(filename, "%s%s\\%s.cfg", GetSaveFolderPath(), MP_CONFIG_DIR, ConfigurationFilenameList[index]);
+		sprintf(filename, "%s%s/%s.cfg", GetSaveFolderPath(), MP_CONFIG_DIR, ConfigurationFilenameList[index]);
 
 	DeleteFile(filename);
 }
 
 
 #define IP_ADDRESS_DIR "IP_Address"
-#define IP_ADDRESS_WILDCARD "IP_Address\\*.IP Address"
+#define IP_ADDRESS_WILDCARD "IP_Address/*.IP Address"
 
 static List<char*> IPAddFilenameList;
 
@@ -486,7 +486,7 @@ BOOL BuildLoadIPAddressMenu()
 	ptrdiff_t nPathLen = 0;
 	const char * pColon = strrchr(load_name,':');
 	if (pColon) nPathLen = pColon - load_name + 1;
-	const char * pBackSlash = strrchr(load_name,'\\');
+	const char * pBackSlash = strrchr(load_name,'/');
 	if (pBackSlash)
 	{
 		ptrdiff_t nLen = pBackSlash - load_name + 1;
@@ -554,7 +554,7 @@ void SaveIPAddress(const char* name,const char* address)
 
 	FILE* file;
 	char filename[MAX_PATH];
-	sprintf(filename,"%s\\%s.IP Address",IP_ADDRESS_DIR,name);
+	sprintf(filename,"%s/%s.IP Address",IP_ADDRESS_DIR,name);
 	
 	CreateDirectory(IP_ADDRESS_DIR, 0);
 	file = avp_fopen(filename,"wb");
@@ -573,7 +573,7 @@ void LoadIPAddress(const char* name)
 
 	FILE* file;
 	char filename[MAX_PATH];
-	sprintf(filename,"%s\\%s.IP Address",IP_ADDRESS_DIR,name);
+	sprintf(filename,"%s/%s.IP Address",IP_ADDRESS_DIR,name);
 
 	file = avp_fopen(filename,"rb");
 	if (!file) return;
@@ -609,7 +609,7 @@ void BuildMultiplayerLevelNameArray()
 	// allow a wildcard search
 	WIN32_FIND_DATA wfd;
 
-	const char* load_name = "avp_rifs\\custom\\*.rif";
+	const char* load_name = "avp_rifs/custom/*.rif";
 
 	HANDLE hFindFile = avp_FindFirstFile(load_name, &wfd);
 	

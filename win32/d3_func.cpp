@@ -1867,7 +1867,7 @@ bool InitialiseDirect3D()
 //	uint32_t colourDepth = Config_GetInt("[VideoMode]", "ColourDepth", 32);
 	bool useTripleBuffering = Config_GetBool("[VideoMode]", "UseTripleBuffering", false);
 	bool useVSync = Config_GetBool("[VideoMode]", "UseVSync", true);
-	shaderPath = Config_GetString("[VideoMode]", "ShaderPath", "shaders\\");
+	shaderPath = Config_GetString("[VideoMode]", "ShaderPath", "shaders/");
 
 	// set some defaults
 	uint32_t defaultDevice = D3DADAPTER_DEFAULT;

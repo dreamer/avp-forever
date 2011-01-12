@@ -1361,7 +1361,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 //		GameSounds[soundNum].xa2Emitter.pChannelAzimuths = GameSounds[soundNum].emitterAzimuths;
 
 		{
-			char * wavname = strrchr (wavFileName, '\\');
+			char * wavname = strrchr (wavFileName, '/');
 			if (wavname)
 			{
 				wavname ++;
@@ -1534,7 +1534,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 //		GameSounds[soundNum].xa2Emitter.pChannelAzimuths = GameSounds[soundNum].emitterAzimuths;
 
 		{
-			char * wavname = strrchr (wavFileName, '\\');
+			char * wavname = strrchr (wavFileName, '/');
 			if (wavname)
 			{
 				wavname ++;

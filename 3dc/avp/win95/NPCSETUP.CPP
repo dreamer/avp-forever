@@ -14,9 +14,9 @@
 
 
 #if ALIEN_DEMO
-#define DIRECTORY_FOR_RIFS "alienavp_huds\\"
+#define DIRECTORY_FOR_RIFS "alienavp_huds/"
 #else
-#define DIRECTORY_FOR_RIFS "avp_huds\\"
+#define DIRECTORY_FOR_RIFS "avp_huds/"
 #endif
 #define FIRST_FREE_IMAGE_GROUP 3 // 0 for char,1 for weapon rif ,2 for env
 
@@ -117,7 +117,6 @@ LoadedNPC::LoadedNPC(RIF_Child_Chunk const * rcc)
 	if (rcc->filename && *rcc->filename)
 	{
 		char const * fnptr = rcc->filename;
-		if (strchr(fnptr,'\\')) fnptr = strrchr(fnptr,'\\')+1;
 		if (strchr(fnptr,'/')) fnptr = strrchr(fnptr,'/')+1;
 		if (strchr(fnptr,':')) fnptr = strrchr(fnptr,':')+1;
 		
@@ -147,7 +146,6 @@ LoadedNPC::LoadedNPC(char const * name)
 	if (name && *name)
 	{
 		char const * fnptr = name;
-		if (strchr(fnptr,'\\')) fnptr = strrchr(fnptr,'\\')+1;
 		if (strchr(fnptr,'/')) fnptr = strrchr(fnptr,'/')+1;
 		if (strchr(fnptr,':')) fnptr = strrchr(fnptr,':')+1;
 		
@@ -157,7 +155,6 @@ LoadedNPC::LoadedNPC(char const * name)
 
 		rifname = new char[strlen(name)+1];
 		strcpy(rifname,name);
-		
 	}
 }
 
@@ -561,8 +558,7 @@ void InitNPCs(RIFFHANDLE h)
 	{
 		// as per linux port, check if mdisk.rif exists. if it does,
 		// we're using the gold version, else the regular
-		//FILE * mdisk = avp_fopen("\\avp_huds\\mdisk.rif","r");
-		FILE * mdisk = avp_fopen("avp_huds\\mdisk.rif","r");
+		FILE * mdisk = avp_fopen("avp_huds/mdisk.rif", "r");
 
 		if (mdisk != NULL)
 		{

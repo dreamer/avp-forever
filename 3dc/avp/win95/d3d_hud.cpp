@@ -225,7 +225,7 @@ void D3D_InitialiseMarineHUD(void)
 	/* load HUD gfx of correct resolution */
 	{
 //		HUDResolution = HUD_RES_HI;//HUD_RES_MED;
-		HUDImageNumber = CL_LoadImageOnce("Huds\\Marine\\MarineHUD.RIM", LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
+		HUDImageNumber = CL_LoadImageOnce("Huds/Marine/MarineHUD.RIM", LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
 		MotionTrackerHalfWidth = 127/2;
 		MotionTrackerTextureSize = 128;
 
@@ -246,7 +246,7 @@ void D3D_InitialiseMarineHUD(void)
 		MT_BlipWidth = 12;
 
 		/* load in sfx */
-		SpecialFXImageNumber = CL_LoadImageOnce("Common\\partclfx.RIM", LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
+		SpecialFXImageNumber = CL_LoadImageOnce("Common/partclfx.RIM", LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
 	}
 
 	/* centre of motion tracker */
@@ -265,26 +265,26 @@ void D3D_InitialiseMarineHUD(void)
 
 void LoadCommonTextures(void)
 {
-//	PredatorVisionChangeImageNumber = CL_LoadImageOnce("HUDs\\Predator\\predvisfx.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
+//	PredatorVisionChangeImageNumber = CL_LoadImageOnce("HUDs/Predator/predvisfx.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
 	if (AvP.Network == I_No_Network)
 	{
 		switch (AvP.PlayerType)
 		{
 			case I_Predator:
 			{
-				PredatorNumbersImageNumber = CL_LoadImageOnce("HUDs\\Predator\\predNumbers.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
-				StaticImageNumber = CL_LoadImageOnce("Common\\static.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+				PredatorNumbersImageNumber = CL_LoadImageOnce("HUDs/Predator/predNumbers.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
+				StaticImageNumber = CL_LoadImageOnce("Common/static.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 				break;
 			}
 			case I_Alien:
 			{
-				AlienTongueImageNumber = CL_LoadImageOnce("HUDs\\Alien\\AlienTongue.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
+				AlienTongueImageNumber = CL_LoadImageOnce("HUDs/Alien/AlienTongue.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
 				break;
 			}
 			case I_Marine:
 			{
-				StaticImageNumber = CL_LoadImageOnce("Common\\static.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
-//			   	ChromeImageNumber = CL_LoadImageOnce("Common\\water2.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+				StaticImageNumber = CL_LoadImageOnce("Common/static.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+//			   	ChromeImageNumber = CL_LoadImageOnce("Common/water2.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 				break;
 			}
 			default:
@@ -293,37 +293,37 @@ void LoadCommonTextures(void)
 	}
 	else
 	{
-   		PredatorNumbersImageNumber = CL_LoadImageOnce("HUDs\\Predator\\predNumbers.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
-   		StaticImageNumber = CL_LoadImageOnce("Common\\static.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
-		AlienTongueImageNumber = CL_LoadImageOnce("HUDs\\Alien\\AlienTongue.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
-//		ChromeImageNumber = CL_LoadImageOnce("Common\\water2.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+   		PredatorNumbersImageNumber = CL_LoadImageOnce("HUDs/Predator/predNumbers.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
+   		StaticImageNumber = CL_LoadImageOnce("Common/static.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+		AlienTongueImageNumber = CL_LoadImageOnce("HUDs/Alien/AlienTongue.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
+//		ChromeImageNumber = CL_LoadImageOnce("Common/water2.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 	}
 	
-	HUDFontsImageNumber = CL_LoadImageOnce("Common\\HUDfonts.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
-	SpecialFXImageNumber = CL_LoadImageOnce("Common\\partclfx.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE/*|LIO_TRANSPARENT*/);
-	CloudyImageNumber = CL_LoadImageOnce("Common\\cloudy.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
-	BurningImageNumber = CL_LoadImageOnce("Common\\burn.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
-//	RebellionLogoImageNumber = CL_LoadImageOnce("Common\\logo.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
-//	FoxLogoImageNumber = CL_LoadImageOnce("Common\\foxlogo.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+	HUDFontsImageNumber = CL_LoadImageOnce("Common/HUDfonts.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
+	SpecialFXImageNumber = CL_LoadImageOnce("Common/partclfx.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE/*|LIO_TRANSPARENT*/);
+	CloudyImageNumber = CL_LoadImageOnce("Common/cloudy.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
+	BurningImageNumber = CL_LoadImageOnce("Common/burn.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
+//	RebellionLogoImageNumber = CL_LoadImageOnce("Common/logo.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+//	FoxLogoImageNumber = CL_LoadImageOnce("Common/foxlogo.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 
 	{
 		extern char LevelName[];
 		if (!strcmp(LevelName,"invasion_a"))
 		{
-		   	ChromeImageNumber = CL_LoadImageOnce("Envrnmts\\Invasion\\water2.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
-			WaterShaftImageNumber = CL_LoadImageOnce("Envrnmts\\Invasion\\water-shaft.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+		   	ChromeImageNumber = CL_LoadImageOnce("Envrnmts/Invasion/water2.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+			WaterShaftImageNumber = CL_LoadImageOnce("Envrnmts/Invasion/water-shaft.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 		}
 		else if (!strcmp(LevelName,"genshd1"))
 		{
-			WaterShaftImageNumber = CL_LoadImageOnce("Envrnmts\\GenShd1\\colonywater.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+			WaterShaftImageNumber = CL_LoadImageOnce("Envrnmts/GenShd1/colonywater.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 		}
 		else if (!strcmp(LevelName,"fall") || !strcmp(LevelName,"fall_m"))
 		{
-			ChromeImageNumber = CL_LoadImageOnce("Envrnmts\\fall\\stream_water.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+			ChromeImageNumber = CL_LoadImageOnce("Envrnmts/fall/stream_water.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 		}
 		else if (!strcmp(LevelName,"derelict"))
 		{
-			ChromeImageNumber = CL_LoadImageOnce("Envrnmts\\derelict\\water.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+			ChromeImageNumber = CL_LoadImageOnce("Envrnmts/derelict/water.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 		}
 	}
 }

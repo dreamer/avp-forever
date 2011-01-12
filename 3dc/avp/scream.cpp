@@ -48,11 +48,11 @@ static CharacterSoundEffects PredatorSounds={0,0,0,SID_NOSOUND};
 static CharacterSoundEffects QueenSounds={0,0,0,SID_NOSOUND};
 
 #if ALIEN_DEMO
-#define ScreamFilePath "alienfastfile\\"
+#define ScreamFilePath "alienfastfile/"
 #elif LOAD_SCREAMS_FROM_FASTFILES
-#define ScreamFilePath "fastfile\\"
+#define ScreamFilePath "fastfile/"
 #else
-#define ScreamFilePath "sound\\"
+#define ScreamFilePath "sound/"
 #endif
 
 void CharacterSoundEffects::LoadSounds(const char* filename, const char* directory)
@@ -247,20 +247,20 @@ void UnloadScreamSounds()
 
 void LoadMarineScreamSounds()
 {
-	MarineSounds.LoadSounds("marsound.dat","npc\\marinevoice\\");
+	MarineSounds.LoadSounds("marsound.dat","npc/marinevoice/");
 }
 void LoadAlienScreamSounds()
 {
-	AlienSounds.LoadSounds("aliensound.dat","npc\\alienvoice\\");
+	AlienSounds.LoadSounds("aliensound.dat","npc/alienvoice/");
 }
 void LoadPredatorScreamSounds()
 {
-	PredatorSounds.LoadSounds("predsound.dat","npc\\predatorvoice\\");
+	PredatorSounds.LoadSounds("predsound.dat","npc/predatorvoice/");
 }
 
 void LoadQueenScreamSounds()
 {
-	QueenSounds.LoadSounds("queensound.dat","npc\\queenvoice\\");
+	QueenSounds.LoadSounds("queensound.dat","npc/queenvoice/");
 }
 
 

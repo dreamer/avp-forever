@@ -10,8 +10,8 @@ extern char * SecondSoundDir;
 
 void GetPathFromRegistry()
 {
-	SecondTex_Directory = "graphics\\";
-	SecondSoundDir = "sound\\";
+	SecondTex_Directory = "graphics/";
+	SecondSoundDir = "sound/";
 
 #if 0
 	HKEY hKey;
@@ -27,7 +27,7 @@ void GetPathFromRegistry()
 		ERROR_SUCCESS == RegOpenKeyEx
 		(
 			HKEY_LOCAL_MACHINE,
-			"Software\\Fox Interactive\\Aliens vs Predator\\1.00",
+			"Software/Fox Interactive/Aliens vs Predator/1.00",
 			REG_OPTION_NON_VOLATILE,
 			KEY_ALL_ACCESS,
 			&hKey
@@ -79,7 +79,7 @@ void GetPathFromRegistry()
 		else
 		{
 			directory=new char[40];
-			strcpy(directory,"\\\\bob\\textures\\avp_graphics");
+			strcpy(directory,"//bob/textures/avp_graphics");
 		}
 		*(char**)&SecondTex_Directory=directory;
 //		OutputDebugString("\n");
@@ -93,12 +93,12 @@ void GetPathFromRegistry()
 		if(AvpCDPath)
 		{
 			directory=new char[strlen(AvpCDPath)+20];
-			sprintf(directory,"%ssound\\",AvpCDPath);		
+			sprintf(directory,"%ssound/",AvpCDPath);		
 		}
 		else
 		{
 			directory=new char[40];
-			strcpy(directory,"\\\\bob\\vss\\avp\\sound\\");
+			strcpy(directory,"//bob/vss/avp/sound/");
 		}
 		SecondSoundDir=directory;
 //		OutputDebugString("\n");

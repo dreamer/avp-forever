@@ -678,7 +678,7 @@ static void setup_tex_conv_array (
 				else
 				{
 					tex = rif_name;
-					tex += "\\";
+					tex += "/";
 					tex += bns().filename;
 				}
 
@@ -2562,7 +2562,7 @@ BOOL copy_sprite_to_shapeheader (RIFFHANDLE h, SHAPEHEADER *& shphd,Sprite_Heade
 			else
 			{
 				tex = sprite_name;
-				tex += "\\";
+				tex += "/";
 				tex += bns().filename;
 			}
 

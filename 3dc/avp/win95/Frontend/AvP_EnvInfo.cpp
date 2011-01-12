@@ -5142,7 +5142,7 @@ void SetLevelToLoadForMultiplayer(int episode)
 	{
 		//it certainly is
 		//(the game type sent passed to the function doesn't really matter , as long as it isn't NGT_COOP)
-		sprintf(LevelName,"Custom\\%s",GetCustomMultiplayerLevelName(episode,NGT_Individual));
+		sprintf(LevelName,"Custom/%s",GetCustomMultiplayerLevelName(episode,NGT_Individual));
 	}
 	else
 	{
@@ -5155,7 +5155,7 @@ void SetLevelToLoadForCooperative(int episode)
 	if(episode>=MAX_NO_OF_COOPERATIVE_EPISODES)
 	{
 		//it certainly is
-		sprintf(LevelName,"Custom\\%s",GetCustomMultiplayerLevelName(episode,NGT_Coop));
+		sprintf(LevelName,"Custom/%s",GetCustomMultiplayerLevelName(episode,NGT_Coop));
 	}
 	else
 	{
@@ -5206,7 +5206,7 @@ static BOOL DoesNamedLevelExist(const char* level_name)
 
 	OutputDebugString("DoesNamedLevelExist\n");
 
-	sprintf(filename, "avp_rifs\\%s.rif", level_name);
+	sprintf(filename, "avp_rifs/%s.rif", level_name);
 
 	file_handle = avp_CreateFile(filename,GENERIC_READ,0,0,OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
 	if(file_handle == INVALID_HANDLE_VALUE)	return FALSE;

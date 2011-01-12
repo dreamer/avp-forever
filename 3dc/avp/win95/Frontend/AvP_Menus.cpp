@@ -406,7 +406,7 @@ void HandlePostGameFMVs(void)
 		{
 			if (MarineEpisodeToPlay==MAX_NO_OF_BASIC_MARINE_EPISODES-1)
 			{
-				PlayFMV("FMVs\\marineoutro.ogv");
+				PlayFMV("FMVs/marineoutro.ogv");
 			}
 			break;
 		}
@@ -414,7 +414,7 @@ void HandlePostGameFMVs(void)
 		{
 			if (AlienEpisodeToPlay==MAX_NO_OF_BASIC_ALIEN_EPISODES-1)
 			{
-				PlayFMV("FMVs\\alienoutro.ogv");
+				PlayFMV("FMVs/alienoutro.ogv");
 			}
 			break;
 		}
@@ -422,7 +422,7 @@ void HandlePostGameFMVs(void)
 		{
 			if (PredatorEpisodeToPlay==MAX_NO_OF_BASIC_PREDATOR_EPISODES-1)
 			{
-				PlayFMV("FMVs\\predatoroutro.ogv");
+				PlayFMV("FMVs/predatoroutro.ogv");
 			}
 			break;
 		}
@@ -436,15 +436,15 @@ void HandlePreGameFMVs(void)
 		extern char LevelName[];
 		if (!stricmp("derelict",LevelName))
 		{
-			PlayFMV("FMVs\\marineintro.ogv");
+			PlayFMV("FMVs/marineintro.ogv");
 		}
 		else if (!stricmp("temple",LevelName))
 		{
-			PlayFMV("FMVs\\alienintro.ogv");
+			PlayFMV("FMVs/alienintro.ogv");
 		}
 		else if (!stricmp("fall",LevelName))
 		{
-			PlayFMV("FMVs\\predatorintro.ogv");
+			PlayFMV("FMVs/predatorintro.ogv");
 		}
 	}
 }

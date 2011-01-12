@@ -49,7 +49,7 @@ extern void PlayIntroSequence(void)
 	ResetFrameCounter();
 	Show_CopyrightInfo();
 
-	PlayFMV("FMVs\\logos.ogv");
+	PlayFMV("FMVs/logos.ogv");
 
 //	StartMenuBackgroundFmv();
 

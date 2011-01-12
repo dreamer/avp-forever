@@ -42,9 +42,9 @@ void catpathandextension(char* dst, char* src)
 {
 	int len = lstrlen(dst);
 
-	if ((len > 0 && (dst[len-1] != '\\' && dst[len-1] != '/')) && *src != '.')
+	if ((len > 0 && (dst[len-1] != '/' && dst[len-1] != '/')) && *src != '.')
 		{
-			lstrcat(dst,"\\");
+			lstrcat(dst,"/");
 		}
 
     lstrcat(dst,src);

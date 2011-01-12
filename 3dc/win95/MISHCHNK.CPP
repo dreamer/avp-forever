@@ -516,7 +516,7 @@ BOOL File_Chunk::write_file (const char * fname)
 	int pos=0;
 	while(fname[pos])
 	{
-		if(fname[pos]=='\\' || fname[pos]==':')
+		if(fname[pos]=='/' || fname[pos]==':')
 		{
 			filename_start_pos=pos+1;
 		}

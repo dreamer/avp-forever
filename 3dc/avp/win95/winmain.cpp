@@ -295,11 +295,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	/* JH 28/5/97 */
 	/* Initialise 'fast' file system */
 	#if MARINE_DEMO
-	ffInit("fastfile\\mffinfo.txt","fastfile\\");
+	ffInit("fastfile/mffinfo.txt", "fastfile/");
 	#elif ALIEN_DEMO
-	ffInit("alienfastfile\\ffinfo.txt","alienfastfile\\");
+	ffInit("alienfastfile/ffinfo.txt", "alienfastfile/");
 	#else
-	ffInit("fastfile\\ffinfo.txt","fastfile\\");
+	ffInit("fastfile/ffinfo.txt", "fastfile/");
 	#endif
 
 	InitGame();

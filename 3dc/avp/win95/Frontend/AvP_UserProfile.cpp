@@ -212,7 +212,7 @@ static int LoadUserProfiles(void)
 	ptrdiff_t nPathLen = 0;
 	const char * pColon = strrchr(load_name,':');
 	if (pColon) nPathLen = pColon - load_name + 1;
-	const char * pBackSlash = strrchr(load_name,'\\');
+	const char * pBackSlash = strrchr(load_name,'/');
 	if (pBackSlash)
 	{
 		ptrdiff_t nLen = pBackSlash - load_name + 1;

@@ -357,7 +357,7 @@ void db_log_init(void)
 	sprintf( LogFileNameP, "%s", db_log_file_name ); 
 	#else
 	/* Append the log file name to the current working directory. */
-	sprintf( LogFileNameP, "%s\\%s", _getcwd( LogFileNameP, 240 ),
+	sprintf( LogFileNameP, "%s/%s", _getcwd( LogFileNameP, 240 ),
 		db_log_file_name );
 	#endif
 	

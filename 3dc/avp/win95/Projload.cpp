@@ -73,12 +73,12 @@ extern BOOL KeepMainRifFile;
 BOOL LevelHasStars;
 
 // these are to link with chnkimag.cpp
-const char * ToolsTex_Directory = "\\\\Kate\\Kate Share\\avp\\ToolsTex\\";
-const char * GenTex_Directory = "\\\\Kate\\Kate Share\\avp\\GenG-Tex\\";
-const char * SubShps_Directory = "SubShps\\All\\";
+const char * ToolsTex_Directory = "//Kate/Kate Share/avp/ToolsTex/";
+const char * GenTex_Directory = "//Kate/Kate Share/avp/GenG-Tex/";
+const char * SubShps_Directory = "SubShps/All/";
 // const char * GenTex_Directory = 0;
-const char * FixTex_Directory = "\\\\Kate\\Kate Share\\avp\\Fix-Tex\\";
-const char * GameTex_Directory = "\\\\Kate\\Kate Share\\avp\\game-tex\\";
+const char * FixTex_Directory = "//Kate/Kate Share/avp/Fix-Tex/";
+const char * GameTex_Directory = "//Kate/Kate Share/avp/game-tex/";
 // new directories for new-style graphics - to be determined properly
 char const * FirstTex_Directory = "Graphics"; // currently relative to cwd
 char const * SecondTex_Directory = 0; // will be the src safe shadow for development builds
@@ -349,7 +349,7 @@ void LoadedPlacedHierarchy::load_rif()
 {
 	if(placed_rif!=INVALID_RIFFHANDLE) return;
 	char file_path[100];
-	sprintf(file_path,"avp_huds\\%s.rif",file_name);
+	sprintf(file_path,"avp_huds/%s.rif",file_name);
 	
 	placed_rif=avp_load_rif_non_env(file_path);
 	if(placed_rif!=INVALID_RIFFHANDLE)
@@ -485,7 +485,7 @@ Global_Hierarchy_Store::Global_Hierarchy_Store (RIFFHANDLE h)
 			sound_array[index].volume=isc->max_volume;
 			if(dir_chunk)
 			{
-				sprintf(wavname,"%s\\%s",dir_chunk->directory,isc->wav_name);
+				sprintf(wavname,"%s/%s",dir_chunk->directory,isc->wav_name);
 				sound_array[index].sound_loaded=GetSound(wavname);
 			}
 			else
@@ -3024,7 +3024,7 @@ void LoadModuleData()
 {
  	GLOBALASSERT(env_rif);
 
- 	HANDLE file = avp_CreateFile ("avp_rifs\\module.bbb", GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 
+ 	HANDLE file = avp_CreateFile ("avp_rifs/module.bbb", GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 
  					FILE_FLAG_RANDOM_ACCESS, 0);
 	unsigned long byteswritten;
 	WriteFile(file,&Global_VDB_Ptr->VDB_World,sizeof(VECTORCH),&byteswritten,0);
@@ -3032,7 +3032,7 @@ void LoadModuleData()
  	
  	CloseHandle(file);
 
- 	file = avp_CreateFile ("avp_rifs\\module.aaa", GENERIC_READ, 0, 0, OPEN_EXISTING, 
+ 	file = avp_CreateFile ("avp_rifs/module.aaa", GENERIC_READ, 0, 0, OPEN_EXISTING, 
  					FILE_FLAG_RANDOM_ACCESS, 0);
 
 	if(file==INVALID_HANDLE_VALUE) return;
@@ -3056,7 +3056,7 @@ void LoadModuleData()
 		char* name1=&name[0];
 		while(name[i])
 		{
-			if(name[i]=='\\' || name[i]==':')
+			if(name[i]=='/' || name[i]==':')
 			{
 				name1=&name[i+1];
 			}
@@ -3066,7 +3066,7 @@ void LoadModuleData()
 		char* name2=&env_rif->fc->filename[0];
 		while(env_rif->fc->filename[i])
 		{
-			if(env_rif->fc->filename[i]=='\\' || env_rif->fc->filename[i]==':')
+			if(env_rif->fc->filename[i]=='/' || env_rif->fc->filename[i]==':')
 			{
 				name2=&env_rif->fc->filename[i+1];
 			}
@@ -3076,13 +3076,11 @@ void LoadModuleData()
 		if(_stricmp(name1,name2))
 		{
 			CloseHandle(file);
-			DeleteFile("avp_rifs\\module.aaa");
+			DeleteFile("avp_rifs/module.aaa");
 			return;
 		}
-
 	}
 	pos+=60;
-
 
 	while(pos<file_size)
 	{
@@ -3174,7 +3172,7 @@ void LoadModuleData()
 	}
 	
 	CloseHandle(file);
-	DeleteFile("avp_rifs\\module.aaa");
+	DeleteFile("avp_rifs/module.aaa");
 }
 #endif
 
@@ -3271,16 +3269,16 @@ static void MakeBackupFile(File_Chunk* fc)
 	}
 	WarnedAboutDiskSpace=FALSE;
 
-	CreateDirectory("avp_rifs\\Backup",0);
+	CreateDirectory("avp_rifs/Backup",0);
 	size_t length = strlen(fc->filename);
 	int32_t pos = (int32_t)length;
-	while(pos>=0 && fc->filename[pos]!='\\')pos--;
+	while(pos>=0 && fc->filename[pos]!='/')pos--;
 	char* filename=&fc->filename[pos+1];
 	length = strlen(filename)-4;
 
 	char* Name1 = new char[length+30];
 	char* Name2 = new char[length+30];
-	strncpy(Name1,"avp_rifs\\Backup\\",16);
+	strncpy(Name1,"avp_rifs/Backup/",16);
 	strncpy(&Name1[16],filename,length);
 	length += 16;
 	strncpy(Name2,Name1,length);

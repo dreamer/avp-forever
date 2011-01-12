@@ -27,7 +27,7 @@ void LogCameraPosForModuleLinking()
 	if(!playerPherModule) return;
 	if(!playerPherModule->name) return;
 	
-	char Filename[MAX_PATH]={"avp_rifs\\"};
+	char Filename[MAX_PATH]={"avp_rifs/"};
 	
 	strcat(Filename,Env_List[AvP.CurrentEnv]->main);
 	strcat(Filename,".mlf");
@@ -75,7 +75,7 @@ void HandleScreenShot()
 			if (KeyboardInput[KEY_LEFTSHIFT] || KeyboardInput[KEY_RIGHTSHIFT])
 			{
 				ModuleLinkAssist = TRUE;
-				DeleteFile("avp_rifs\\module.aaa");
+				DeleteFile("avp_rifs/module.aaa");
 			}
 			else
 			{

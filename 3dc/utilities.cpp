@@ -61,7 +61,7 @@ char *GetSaveFolderPath()
 		return 0;
 	}
 
-	strcat(saveFolder, "\\My Games");
+	strcat(saveFolder, "/My Games");
 
 	// first check if "My Games" folder exists, we try create it..
 	if (CreateDirectory(saveFolder, NULL) == 0)
@@ -79,7 +79,7 @@ char *GetSaveFolderPath()
 		}
 	}
 
-	strcat(saveFolder, "\\Aliens versus Predator");
+	strcat(saveFolder, "/Aliens versus Predator");
 
 	// then check Aliens versus Predator
 	if (CreateDirectory(saveFolder, NULL) == 0)
@@ -97,12 +97,12 @@ char *GetSaveFolderPath()
 		}
 	}
 
-	strcat(saveFolder, "\\");
+	strcat(saveFolder, "/");
 
 	// also, create User_Profiles folder if required
 	char tempPath[MAX_PATH] = {0};
 	strcpy(tempPath, saveFolder);
-	strcat(tempPath, "User_Profiles\\");
+	strcat(tempPath, "User_Profiles/");
 
 	if (CreateDirectory(tempPath, NULL) == 0)
 	{
@@ -122,7 +122,7 @@ char *GetSaveFolderPath()
 	// lets create MPConfig folder too
 	tempPath[0] = '\0';
 	strcpy(tempPath, saveFolder);
-	strcat(tempPath, "MPConfig\\");
+	strcat(tempPath, "MPConfig/");
 
 	if (CreateDirectory(tempPath, NULL) == 0)
 	{
@@ -150,13 +150,13 @@ FILE *avp_fopen(const char *fileName, const char *mode)
 
 #ifdef _XBOX
 
-	finalPath.append("d:\\");
+	finalPath.append("d:/");
 	finalPath.append(fileName);
 /*
 	// if write mode, direct to home path
 	if (strcmp(mode, "wb") == 0)
 	{
-		finalPath.append("d:\\");
+		finalPath.append("d:/");
 		finalPath.append(fileName);
 	}
 	else
@@ -189,7 +189,7 @@ DWORD avp_GetFileAttributes(LPCTSTR lpFileName)
 
 	std::string finalPath;
 
-	finalPath.append("d:\\");
+	finalPath.append("d:/");
 	finalPath.append(lpFileName);
 
 	return GetFileAttributes(finalPath.c_str());
@@ -205,7 +205,7 @@ HANDLE avp_CreateFile(LPCTSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMo
 
 	std::string finalPath;
 
-	finalPath.append("d:\\");
+	finalPath.append("d:/");
 	finalPath.append(lpFileName);
 
 	return CreateFile(finalPath.c_str(), dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
@@ -222,7 +222,7 @@ HANDLE avp_FindFirstFile(LPCTSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData)
 
 	std::string finalPath;
 
-	finalPath.append("d:\\");
+	finalPath.append("d:/");
 	finalPath.append(lpFileName);
 	return FindFirstFile(finalPath.c_str(), lpFindFileData);
 #endif

@@ -416,17 +416,17 @@ if (envdatalist.size())
 			
 			if ($loading pgms$)
 			{
-				dir = (String)"Game-Textures\\" + subdir + "\\" + (String)$your identifier$ + "\\";
+				dir = (String)"Game-Textures/" + subdir + "/" + (String)$your identifier$ + "/";
 				if (*current->filename)
 				{
-					dir += (String)current->rifname + "\\";
+					dir += (String)current->rifname + "/";
 				}
 				mipmap_0 = ".pg0";
 				mipmap_n = ".pg%1d";
 			}
 			else // loading bm0 to bm6
 			{
-				dir = (String)"Generic-Textures\\" + current->rifname + "\\";
+				dir = (String)"Generic-Textures/" + current->rifname + "/";
 				mipmap_0 = ".pg0";
 				mipmap_n = ".pg%1d";
 			}

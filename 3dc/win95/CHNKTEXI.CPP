@@ -38,7 +38,7 @@ static C * StripPath(C * n)
 	if (rm) n = rm+1;
 	rm = strrchr(n,'/');
 	if (rm) n = rm+1;
-	rm = strrchr(n,'\\');
+	rm = strrchr(n,'/');
 	if (rm) n = rm+1;
 
 	return n;
@@ -114,7 +114,7 @@ static char * GetPath(char * pszFileNameBuf, unsigned nBufSize, ImageDescriptor 
 
 	if (!bGloballyPalettized)
 	{
-		char const * dir2 = idsc.flags & IDSCF_SPRITE ? "Sprites\\" : idsc.flags & IDSCF_SUBSHAPE ? SubShps_Directory : "";
+		char const * dir2 = idsc.flags & IDSCF_SPRITE ? "Sprites/" : idsc.flags & IDSCF_SUBSHAPE ? SubShps_Directory : "";
 		char * riffname = RiffBasename(pEnvDataChunk);
 		char const * dir3 = idsc.flags & IDSCF_INCLUDED ? idsc.rifname : riffname;
 		if (nBufSize < strlen(GenTex_Directory)+strlen(dir2)+strlen(dir3)+1+strlen(pszName)+5)
@@ -127,7 +127,7 @@ static char * GetPath(char * pszFileNameBuf, unsigned nBufSize, ImageDescriptor 
 			strcpy(pszFileNameBuf,GenTex_Directory);
 			strcat(pszFileNameBuf,dir2);
 			strcat(pszFileNameBuf,dir3);
-			strcat(pszFileNameBuf,"\\");
+			strcat(pszFileNameBuf,"/");
 			strcat(pszFileNameBuf,pszName);
 			strcat(pszFileNameBuf,".BM0");
 		}
@@ -138,7 +138,7 @@ static char * GetPath(char * pszFileNameBuf, unsigned nBufSize, ImageDescriptor 
 		if (idsc.flags & IDSCF_FIXEDPALETTE)
 		{
 			char const * dir2 = idsc.fixrifname ? *idsc.fixrifname ? idsc.fixrifname : 0 : 0;
-			char const * dir3 = idsc.flags & IDSCF_SPRITE ? "Sprites\\" : "";
+			char const * dir3 = idsc.flags & IDSCF_SPRITE ? "Sprites/" : "";
 			char * riffname = RiffBasename(pEnvDataChunk);
 			char const * dir4 = idsc.flags & IDSCF_INCLUDED ? idsc.rifname : riffname;
 			if (nBufSize < strlen(FixTex_Directory)+(dir2 ? strlen(dir2)+1 : 0)+strlen(dir3)+strlen(dir4)+1+strlen(pszName)+5)
@@ -152,11 +152,11 @@ static char * GetPath(char * pszFileNameBuf, unsigned nBufSize, ImageDescriptor 
 				if (dir2)
 				{
 					strcat(pszFileNameBuf,dir2);
-					strcat(pszFileNameBuf,"\\");
+					strcat(pszFileNameBuf,"/");
 				}
 				strcat(pszFileNameBuf,dir3);
 				strcat(pszFileNameBuf,dir4);
-				strcat(pszFileNameBuf,"\\");
+				strcat(pszFileNameBuf,"/");
 				strcat(pszFileNameBuf,pszName);
 				strcat(pszFileNameBuf,pg0ext);
 			}
@@ -166,7 +166,7 @@ static char * GetPath(char * pszFileNameBuf, unsigned nBufSize, ImageDescriptor 
 		{
 			char const * dir1 = cl_pszGameMode ? GameTex_Directory : ToolsTex_Directory;
 			char * dir2 = RiffBasename(pEnvDataChunk);
-			char const * dir4 = idsc.flags & IDSCF_SPRITE ? "Sprites\\" : "";
+			char const * dir4 = idsc.flags & IDSCF_SPRITE ? "Sprites/" : "";
 			char const * dir5 = idsc.flags & IDSCF_INCLUDED ? idsc.rifname : 0;
 			if (nBufSize < strlen(dir1)+strlen(dir2)+1+(cl_pszGameMode ? strlen(cl_pszGameMode)+1 : 0)+strlen(dir4)+(dir5 ? strlen(dir5)+1 : 0)+strlen(pszName)+5)
 			{
@@ -177,17 +177,17 @@ static char * GetPath(char * pszFileNameBuf, unsigned nBufSize, ImageDescriptor 
 			{
 				strcpy(pszFileNameBuf,dir1);
 				strcat(pszFileNameBuf,dir2);
-				strcat(pszFileNameBuf,"\\");
+				strcat(pszFileNameBuf,"/");
 				if (cl_pszGameMode)
 				{
 					strcat(pszFileNameBuf,cl_pszGameMode);
-					strcat(pszFileNameBuf,"\\");
+					strcat(pszFileNameBuf,"/");
 				}
 				strcat(pszFileNameBuf,dir4);
 				if (dir5)
 				{
 					strcat(pszFileNameBuf,dir5);
-					strcat(pszFileNameBuf,"\\");
+					strcat(pszFileNameBuf,"/");
 				}
 				strcat(pszFileNameBuf,pszName);
 				strcat(pszFileNameBuf,pg0ext);
@@ -234,8 +234,8 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 					String str = pszDirectory; \
 					if (str.length()) { \
 						int chLast = str.get_at(str.length()-1); \
-						if (chLast != '\\' && chLast != '/') \
-							str += '\\'; \
+						if (chLast != '/' && chLast != '/') \
+							str += '/'; \
 						str += pszFileName; \
 						if (fnDoesExist(str)) { \
 							if (str.length() < nBufSize) { \
@@ -306,11 +306,11 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 			char * pszSubName = 0;
 			if (pszFileName)
 			{
-				if (strchr(pszFileName,'\\'))
+				if (strchr(pszFileName,'/'))
 				{
 					pszSubName = new char[strlen(pszFileName)+1];
 					strcpy(pszSubName,pszFileName);
-					*strchr(pszSubName,'\\')=0;
+					*strchr(pszSubName,'/')=0;
 				}
 				else if (strchr(pszFileName,'/'))
 				{
@@ -717,10 +717,10 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 						// load Direct3D Texture here?
 						if (AvPTexture->buffer)
 						{
-							if ((strcmp(ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0) ||
-								(strcmp(ImageName, "Graphics\\FMVs\\alien.RIM") == 0) ||		// for alien demo
-								(strcmp(ImageName, "Graphics\\FMVs\\predator.RIM") == 0) ||  // for marine(?) demo
-								(strcmp(ImageName, "Graphics\\FMVs\\final.RIM") == 0))		// for predator demo
+							if ((strcmp(ImageName, "Graphics/FMVs/triggered_plot.RIM") == 0) ||
+								(strcmp(ImageName, "Graphics/FMVs/alien.RIM") == 0) ||		// for alien demo
+								(strcmp(ImageName, "Graphics/FMVs/predator.RIM") == 0) ||  // for marine(?) demo
+								(strcmp(ImageName, "Graphics/FMVs/final.RIM") == 0))		// for predator demo
 							{
 								// is fmv texture, create in default pool so we can dynamically update it
 
@@ -780,10 +780,10 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					{
 						if (AvPTexture->buffer)
 						{
-							if ((strcmp(ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0) ||
-								(strcmp(ImageName, "Graphics\\FMVs\\alien.RIM") == 0) ||		// for alien demo
-								(strcmp(ImageName, "Graphics\\FMVs\\predator.RIM") == 0) ||  // for marine(?) demo
-								(strcmp(ImageName, "Graphics\\FMVs\\final.RIM") == 0))		// for predator demo
+							if ((strcmp(ImageName, "Graphics/FMVs/triggered_plot.RIM") == 0) ||
+								(strcmp(ImageName, "Graphics/FMVs/alien.RIM") == 0) ||		// for alien demo
+								(strcmp(ImageName, "Graphics/FMVs/predator.RIM") == 0) ||  // for marine(?) demo
+								(strcmp(ImageName, "Graphics/FMVs/final.RIM") == 0))		// for predator demo
 							{
 								// is fmv texture, create in default pool so we can dynamically update it
 								textureUsage = TextureUsage_Dynamic;

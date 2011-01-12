@@ -110,16 +110,15 @@ extern char* Rif_Sound_Directory;
 LOADED_SOUND const * GetSoundForMainRif(const char* wav_name)
 {
 	static char filename[200];
-	if(Rif_Sound_Directory)
+	if (Rif_Sound_Directory)
 	{
-		sprintf(filename,"%s\\%s",Rif_Sound_Directory,wav_name);
+		sprintf(filename,"%s/%s", Rif_Sound_Directory, wav_name);
 		return GetSound(filename);
 	}
 	else
 	{
 		return GetSound(wav_name);
 	}
-
 }
 
 void setup_track_sound(Indexed_Sound_Chunk* s_chunk,TRACK_SOUND** ts)

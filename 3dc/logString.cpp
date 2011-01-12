@@ -28,7 +28,7 @@
 
 #ifdef _XBOX
 	#include "D3dx8core.h"
-	std::string logFilename = "d:\\avp_log.txt";
+	std::string logFilename = "d:/avp_log.txt";
 #else
 	std::string logFilename = "avp_log.txt";
 #endif
