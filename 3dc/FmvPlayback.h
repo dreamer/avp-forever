@@ -45,8 +45,8 @@ class TheoraFMV
 		std::ifstream 	mFileStream;
 
 		// so we can easily reference these from the threads.
-		OggStream      *mVideo;
-		OggStream      *mAudio;
+		OggStream       *mVideo;
+		OggStream       *mAudio;
 
 		ogg_sync_state 	mState;
 		ogg_int64_t		mGranulePos;
@@ -113,12 +113,6 @@ class TheoraFMV
 			mFrameCriticalSectionInited(false)
 		{
 			memset(&mState, 0, sizeof(ogg_sync_state));
-
-			frameTextureIDs.resize(3);
-
-			frameTextureIDs[0] = MISSING_TEXTURE;
-			frameTextureIDs[1] = MISSING_TEXTURE;
-			frameTextureIDs[2] = MISSING_TEXTURE;
 		}
 		~TheoraFMV();
 

@@ -548,7 +548,7 @@ void DirectReadKeyboard(void)
 		KeyboardInput[KEY_F8] = TRUE;
 		/* KJL 14:51:38 21/04/98 - F8 does screen shots, and so this is a hack
 		to make F8 not count in a 'press any key' situation */
-		//	   GotAnyKey = TRUE;
+		//	   GotAnyKey = true;
 	}
 
 	if (IngameKeyboardInput[VK_F9])

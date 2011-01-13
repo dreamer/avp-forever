@@ -15,6 +15,9 @@
 #include "io.h"
 #include "Di_func.h"
 #include "inline.h"
+#include "avp_userprofile.h"
+#include <math.h>
+#include <assert.h>
 
 static const int kMaxFMVs = 4;
 
@@ -29,8 +32,18 @@ fmvCutscene fmvList[kMaxFMVs];
 FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 uint32_t NumberOfFMVTextures = 0;
 
+extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
+extern char LevelName[];
+extern int NumActiveBlocks;
+extern DISPLAYBLOCK *ActiveBlockList[];
+
 extern void UpdateFMVTexture(FMVTEXTURE *ftPtr);
 extern void SetupFMVTexture(FMVTEXTURE *ftPtr);
+extern void ThisFramesRenderingHasBegun(void);
+extern void ThisFramesRenderingHasFinished(void);
+
+int NextFMVFrame();
+void FmvClose();
 
 int FmvColourRed;
 int FmvColourGreen;
@@ -123,19 +136,6 @@ void StartMenuBackgroundFmv()
 	
 	MenuBackground = true;
 }
-
-#include "avp_userprofile.h"
-#include <math.h>
-#include <assert.h>
-
-extern int NumActiveBlocks;
-extern DISPLAYBLOCK *ActiveBlockList[];
-extern void ThisFramesRenderingHasBegun(void);
-extern void ThisFramesRenderingHasFinished(void);
-
-int NextFMVFrame();
-void FmvClose();
-int GetVolumeOfNearestVideoScreen(void);
 
 extern int PlayMenuBackgroundFmv()
 {
@@ -305,16 +305,13 @@ extern void StartTriggerPlotFMV(int number)
 				}
 			}
 
-			int32_t fmvHandle = OpenFMV(buffer);
-
-			// couldn't open it
-			if (fmvHandle == -1)
+			FMVTexture[i].fmvHandle = OpenFMV(buffer);
+			if (FMVTexture[i].fmvHandle == -1)
 			{
-				FMVTexture[i].fmvHandle = -1;
+				// couldn't open it
 				return;
 			}
 
-			FMVTexture[i].fmvHandle = fmvHandle;
 			FMVTexture[i].MessageNumber = number;
 		}
 	}
@@ -384,8 +381,6 @@ void ScanImagesForFMVs()
 // called when player quits level and returns to main menu
 void ReleaseAllFMVTextures()
 {
-	OutputDebugString("exiting level..closing FMV system\n");
-
 	for (uint32_t i = 0; i < NumberOfFMVTextures; i++)
 	{
 		FMVTexture[i].MessageNumber = 0;
@@ -401,11 +396,8 @@ void ReleaseAllFMVTextures()
 			FMVTexture[i].fmvHandle = -1;
 		}
 
-		if (FMVTexture[i].RGBBuffer)
-		{
-			delete[] FMVTexture[i].RGBBuffer;
-			FMVTexture[i].RGBBuffer = NULL;
-		}
+		delete[] FMVTexture[i].RGBBuffer;
+		FMVTexture[i].RGBBuffer = NULL;
 
 		Tex_Release(FMVTexture[i].textureID);
 	}
@@ -432,11 +424,8 @@ void PlayMenuMusic(void)
 
 void EndMenuMusic()
 {
-	if (menuMusic)
-	{
-		delete menuMusic;
-		menuMusic = NULL;
-	}
+	delete menuMusic;
+	menuMusic = NULL;
 }
 
 extern void InitialiseTriggeredFMVs()
@@ -475,20 +464,16 @@ extern void GetFMVInformation(int *messageNumberPtr, int *frameNumberPtr)
 	*frameNumberPtr = 0;
 }
 
-int GetVolumeOfNearestVideoScreen(void)
+int GetVolumeOfNearestVideoScreen()
 {
-	extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 	int numberOfObjects = NumActiveBlocks;
 	int leastDistanceRecorded = 0x7fffffff;
 	VolumeOfNearestVideoScreen = 0;
-
+	
+	if (!_stricmp(LevelName,"invasion_a"))
 	{
-		extern char LevelName[];
-		if (!_stricmp(LevelName,"invasion_a"))
-		{
-			VolumeOfNearestVideoScreen = ONE_FIXED;
-			PanningOfNearestVideoScreen = ONE_FIXED/2;
-		}
+		VolumeOfNearestVideoScreen = ONE_FIXED;
+		PanningOfNearestVideoScreen = ONE_FIXED/2;
 	}
 
 	while (numberOfObjects)

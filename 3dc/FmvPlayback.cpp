@@ -270,6 +270,12 @@ int TheoraFMV::Open(const std::string &fileName)
 	mFrameWidth = mVideo->mTheora.mInfo.frame_width;
 	mFrameHeight = mVideo->mTheora.mInfo.frame_height;
 
+	frameTextureIDs.resize(3);
+
+	frameTextureIDs[0] = MISSING_TEXTURE;
+	frameTextureIDs[1] = MISSING_TEXTURE;
+	frameTextureIDs[2] = MISSING_TEXTURE;
+
 	// TODO: single 32bit texture for a system that can't do shader based YUV->RGB conversion
 	for (uint32_t i = 0; i < frameTextureIDs.size(); i++)
 	{
