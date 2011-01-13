@@ -46,6 +46,7 @@ struct Texture
 {
 	std::string		name;
 	TextureUsage	usage;
+	bool			isValid;
 
 	// width and height of textures before adjustment (eg 640x480)
 	uint16_t		width;
@@ -62,6 +63,7 @@ struct Texture
 	Texture()
 	{
 		usage = TextureUsage_Normal;
+		isValid = false;
 		width = 0;
 		height = 0;
 		realWidth = 1;

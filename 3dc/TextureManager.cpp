@@ -25,6 +25,8 @@
 //#include "TextureManager.h"
 #include <sstream>
 #include "renderer.h"
+#include "console.h"
+#include <assert.h>
 
 std::vector<Texture> textureList;
 std::vector<Texture>::iterator texIt;
@@ -34,6 +36,14 @@ void Tex_CheckMemoryUsage();
 
 bool Tex_Lock(texID_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
 {
+	// check if it's valid
+	if (textureList[textureID].isValid == false)
+	{
+		data = 0;
+		pitch = 0;
+		return false;
+	}
+
 	r_Texture texture = Tex_GetTexture(textureID);
 	if (!texture)
 		return false;
@@ -43,6 +53,12 @@ bool Tex_Lock(texID_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLo
 
 bool Tex_Unlock(texID_t textureID)
 {
+	// check if it's valid
+	if (textureList[textureID].isValid == false)
+	{
+		return false;
+	}
+
 	r_Texture texture = Tex_GetTexture(textureID);
 	if (!texture)
 		return false;
@@ -63,7 +79,7 @@ static texID_t Tex_GetFreeID()
 {
 	for (uint32_t i = 0; i < textureList.size(); i++)
 	{
-		if (textureList[i].texture == NULL)
+		if (textureList[i].isValid == false)
 		{
 			return i; // this slot has no texture, return the ID so we can reuse it
 		}
@@ -77,7 +93,7 @@ texID_t Tex_CheckExists(const std::string &textureName)
 {
 	for (uint32_t i = 0; i < textureList.size(); i++)
 	{
-		if (textureList[i].name == textureName)
+		if ((textureList[i].name == textureName) && (textureList[i].isValid))
 			return i;
 	}
 
@@ -96,6 +112,7 @@ texID_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32
 	newTexture.height = height;
 	newTexture.bitsPerPixel = bitsPerPixel; 
 	newTexture.usage = usage;
+	newTexture.isValid = true;
 
 	// store it
 	if (textureID < textureList.size()) // we're reusing a slot in this case
@@ -142,6 +159,9 @@ texID_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &Av
 	// get the next available ID
 	textureID = Tex_GetFreeID();
 
+	// set as valid
+	newTexture.isValid = true;
+
 	// add texture to manager
 	if (textureID < textureList.size()) // we're reusing a slot in this case
 	{
@@ -174,6 +194,9 @@ texID_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &AvP
 
 	// get the next available ID
 	texID_t textureID = Tex_GetFreeID();
+
+	// set as valid
+	newTexture.isValid = true;
 
 	// add texture to manager
 	if (textureID < textureList.size()) // we're reusing a slot in this case
@@ -208,6 +231,9 @@ texID_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t heig
 	// get the next available ID
 	texID_t textureID = Tex_GetFreeID();
 
+	// set as valid
+	newTexture.isValid = true;
+
 	// add texture to manager
 	if (textureID < textureList.size()) // we're reusing a slot in this case
 	{
@@ -241,6 +267,9 @@ texID_t Tex_CreateFromFile(const std::string &filePath)
 		return MISSING_TEXTURE;
 	}
 
+	// set as valid
+	newTexture.isValid = true;
+
 	// store it
 	if (textureID < textureList.size()) // we're reusing a slot in this case
 	{
@@ -267,6 +296,12 @@ std::string& Tex_GetName(texID_t textureID)
 
 const r_Texture& Tex_GetTexture(texID_t textureID)
 {
+	// don't return references to invalid textures
+	if (textureList[textureID].isValid == false)
+	{
+		return textureList[MISSING_TEXTURE].texture;
+	}
+
 	return (textureList[textureID].texture);
 }
 
@@ -279,9 +314,10 @@ void Tex_ReleaseDynamicTextures()
 {
 	for (texIt = textureList.begin(); texIt != textureList.end(); ++texIt)
 	{
-		if ((texIt->texture) && (texIt->usage == TextureUsage_Dynamic))
+		if (/*(texIt->texture*/(texIt->isValid) && (texIt->usage == TextureUsage_Dynamic))
 		{
 			R_ReleaseTexture(texIt->texture);
+			texIt->isValid = false;
 		}
 	}
 }
@@ -292,10 +328,20 @@ void Tex_ReloadDynamicTextures()
 	{
 		if (texIt->usage == TextureUsage_Dynamic)
 		{
-			R_CreateTexture(texIt->width, texIt->height, texIt->bitsPerPixel, texIt->usage, (*texIt));
+			assert(texIt->isValid == false);
+
+			if (!R_CreateTexture(texIt->width, texIt->height, texIt->bitsPerPixel, texIt->usage, (*texIt)))
+			{
+				Con_PrintError("Couldn't reload texture " + texIt->name);
+				texIt->isValid = false;
+				return;
+			}
+
+			// set as valid
+			texIt->isValid = true;
 
 			std::stringstream ss;
-			ss << "releasing texture with name " << texIt->name << " width: " << texIt->width << " height: " << texIt->height << std::endl;
+			ss << "reloaded texture with name " << texIt->name << " width: " << texIt->width << " height: " << texIt->height << std::endl;
 			OutputDebugString(ss.str().c_str());
 		}
 	}
@@ -313,7 +359,8 @@ void Tex_ListTextures()
 
 	for (uint32_t i = 0; i < textureList.size(); ++i)
 	{
-		if (textureList[i].texture != NULL)
+//		if (textureList[i].texture != NULL)
+		if (textureList[i].isValid)
 		{
 			ss.str("");
 			ss << "ID: " << i << " Name: " << textureList[i].name << std::endl;
@@ -330,7 +377,8 @@ void Tex_CheckMemoryUsage()
 
 	for (texIt = textureList.begin(); texIt != textureList.end(); ++texIt)
 	{
-		if (texIt->texture != NULL)
+//		if (texIt->texture != NULL)
+		if (texIt->isValid)
 		{
 			bytesUsed += (texIt->width * texIt->height) * (texIt->bitsPerPixel / 8);
 		}
@@ -341,10 +389,10 @@ void Tex_CheckMemoryUsage()
 		return;
 	}
 
-	float test = (float)bytesUsed / float(MB);
+	float MBused = (float)bytesUsed / float(MB);
 
 	std::stringstream ss;
-	ss << "MB of textures used: " << test << std::endl;
+	ss << "MB of textures used: " << MBused << std::endl;
 	OutputDebugString(ss.str().c_str());
 
 	lastBytesUsed = bytesUsed;
@@ -359,7 +407,8 @@ void Tex_Release(texID_t textureID)
 	}
 
 	// only release a valid texture
-	if (textureList.at(textureID).texture != NULL)
+//	if (textureList.at(textureID).texture != NULL)
+	if (textureList.at(textureID).isValid)
 	{
 		R_ReleaseTexture(textureList[textureID].texture);
 
@@ -368,7 +417,10 @@ void Tex_Release(texID_t textureID)
 		OutputDebugString(ss.str().c_str());
 
 		// blank the name out
-		textureList[textureID].name = ("");
+//		textureList[textureID].name = ("");
+
+		// set as invalid
+		textureList[textureID].isValid = false;
 
 //		Tex_CheckMemoryUsage();
 	}
@@ -379,5 +431,6 @@ void Tex_DeInit()
 	for (uint32_t i = 0; i < textureList.size(); i++)
 	{
 		Tex_Release(i);
+		textureList[i].isValid = false;
 	}
 }

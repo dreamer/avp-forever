@@ -18,31 +18,65 @@
 #include "io.h"
 #include "pheromon.h"
 #include "tables.h"
+#include "particle.h"
+#include "kshape.h"
+#include "3dc.h"
+#include "inline.h"
+#include "gamedef.h"
+#include "dxlog.h"
+#include "d3d_hud.h"
+#include "HUD_layout.h"
+#define HAVE_VISION_H 1
+#include "lighting.h"
+#include "showcmds.h"
+#include "frustum.h"
+#include "d3d_render.h"
+#include "bh_types.h"
 
 // set to 'null' texture initially
 texID_t currentWaterTexture = NO_TEXTURE;
 
 D3DXMATRIX viewMatrix;
 
+// extern variables
 extern D3DXMATRIX matOrtho;
 extern D3DXMATRIX matProjection;
 extern D3DXMATRIX matIdentity;
 extern D3DXMATRIX matViewPort;
-// externs
-extern D3DINFO d3d;
+extern D3DINFO    d3d;
+extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+extern VIEWDESCRIPTORBLOCK* Global_VDB_Ptr;
+extern float CameraZoomScale;
+extern float p, o;
+extern DISPLAYBLOCK *Player;
+extern DISPLAYBLOCK *ActiveBlockList[];
+extern DISPLAYBLOCK *OnScreenBlockList[];
+extern int HUDScaleFactor;
+extern int NumOnScreenBlocks;
+extern char LevelName[];
+extern int NumActiveBlocks;
+extern unsigned char GammaValues[256];
+extern int GlobalAmbience;
+extern char CloakedPredatorIsMoving;
 
+// extern functions
+extern void BuildFrustum();
+extern BOOL LevelHasStars;
+extern void HandleRainShaft(MODULE *modulePtr, int bottomY, int topY, int numberOfRaindrops);
+extern void RenderMirrorSurface(void);
+extern void RenderMirrorSurface2(void);
+extern void RenderParticlesInMirror(void);
+extern void CheckForObjectsInWater(int minX, int maxX, int minZ, int maxZ, int averageY);
+extern void HandleRain(int numberOfRaindrops);
+extern void RenderSky(void);
+extern void RenderStarfield(void);
+extern void ScanImagesForFMVs();
+extern BOOL CheckPointIsInFrustum(D3DXVECTOR3 *point);
 bool CreateVolatileResources();
 bool ReleaseVolatileResources();
 void ColourFillBackBuffer(int FillColour);
 
-extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern VIEWDESCRIPTORBLOCK* Global_VDB_Ptr;
-#include "particle.h"
-#include "kshape.h"
 int LightIntensityAtPoint(VECTORCH *pointPtr);
-extern float CameraZoomScale;
-extern float p, o;
-
 static float currentCameraZoomScale = 1.0f;
 
 const uint32_t MAX_VERTEXES = 4096;
@@ -66,14 +100,14 @@ RenderList *particleList = 0;
 RenderList *mainList = 0;
 RenderList *orthoList = 0;
 
-bool UnlockExecuteBufferAndPrepareForUse();
-bool ExecuteBuffer();
-bool LockExecuteBuffer();
+static bool UnlockExecuteBufferAndPrepareForUse();
+static bool ExecuteBuffer();
+static bool LockExecuteBuffer();
 
 #define RGBLIGHT_MAKE(r,g,b) RGB_MAKE(r,g,b)
 #define RGBALIGHT_MAKE(r,g,b,a) RGBA_MAKE(r,g,b,a)
 
-static HRESULT LastError; // remove me
+static HRESULT LastError; // remove me eventually (when no more D3D calls exist in this file)
 
 // initialise our std::vectors to a particle size, allowing us to use them as
 // regular arrays
@@ -192,7 +226,7 @@ uint32_t GetRealNumVerts(uint32_t numVerts)
 // lock our vertex and index buffers, and reset counters and array indexes used to keep track 
 // of the number of verts and indices in those buffers. Function needs to be renamed as we no 
 // longer use an execute buffer
-bool LockExecuteBuffer()
+static bool LockExecuteBuffer()
 {
 	// lock particle vertex and index buffers
 	d3d.particleVB->Lock((void**)&particleVertex);
@@ -224,7 +258,7 @@ bool LockExecuteBuffer()
 }
 
 // unlock all vertex and index buffers. function needs to be renamed as no longer using execute buffers
-bool UnlockExecuteBufferAndPrepareForUse()
+static bool UnlockExecuteBufferAndPrepareForUse()
 {
 	// unlock particle vertex and index buffers
 	d3d.particleVB->Unlock();
@@ -246,7 +280,7 @@ float cot(float in)
 	return 1.0f / tan(in);
 }
 
-bool ExecuteBuffer()
+static bool ExecuteBuffer()
 {
 	// sort the list of render objects
 	particleList->Sort();
@@ -1134,22 +1168,6 @@ void DrawSmallMenuCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_
 	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
-extern void BuildFrustum();
-
-#include "3dc.h"
-#include "inline.h"
-#include "gamedef.h"
-#include "dxlog.h"
-#include "d3d_hud.h"
-
-#include "HUD_layout.h"
-#define HAVE_VISION_H 1
-#include "lighting.h"
-#include "showcmds.h"
-#include "frustum.h"
-#include "d3d_render.h"
-#include "bh_types.h"
-
 void TransformToViewspace(VECTORCHF *vector)
 {
 	D3DXVECTOR3 output;
@@ -1382,37 +1400,16 @@ uint32_t MeshVertexColour[256];
 
 int WireFrameMode;
 
-// Externs
-extern int HUDScaleFactor;
-extern int NumOnScreenBlocks;
-extern DISPLAYBLOCK *OnScreenBlockList[];
-extern char LevelName[];
-extern int NumActiveBlocks;
-extern DISPLAYBLOCK *ActiveBlockList[];
 
-extern unsigned char GammaValues[256];
-extern int GlobalAmbience;
-extern char CloakedPredatorIsMoving;
 
 uint32_t FMVParticleColour;
 VECTORCH MeshVertex[256];
 
-extern BOOL LevelHasStars;
-
-extern void HandleRainShaft(MODULE *modulePtr, int bottomY, int topY, int numberOfRaindrops);
 void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin);
-extern void RenderMirrorSurface(void);
-extern void RenderMirrorSurface2(void);
-extern void RenderParticlesInMirror(void);
-extern void CheckForObjectsInWater(int minX, int maxX, int minZ, int maxZ, int averageY);
-extern void HandleRain(int numberOfRaindrops);
+
 void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin);
-extern void RenderSky(void);
-extern void RenderStarfield(void);
 void D3D_DrawMoltenMetalMesh_Unclipped(void);
 static void D3D_OutputTriangles(void);
-
-extern void ScanImagesForFMVs();
 
 int NumberOfLandscapePolygons;
 
@@ -1428,8 +1425,6 @@ void SetFogDistance(int fogDistance)
 //	textprint("fog distance %d\n",fogDistance);
 }
 #endif
-
-extern BOOL CheckPointIsInFrustum(D3DXVECTOR3 *point);
 
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
@@ -2273,11 +2268,8 @@ void PostLandscapeRendering()
 
 void D3D_DrawWaterTest(MODULE *testModulePtr)
 {
-	extern char LevelName[];
 	if (!strcmp(LevelName, "genshd1"))
 	{
-		extern DISPLAYBLOCK *Player;
-
 		MODULE *modulePtr = testModulePtr;
 
 		if (modulePtr && modulePtr->name)
@@ -2405,8 +2397,6 @@ void D3D_DrawBackdrop(void)
 
 	{
 		int needToDrawBackdrop=0;
-		extern int NumActiveBlocks;
-		extern DISPLAYBLOCK *ActiveBlockList[];
 
 		int numOfObjects = NumActiveBlocks;
 		while (numOfObjects--)

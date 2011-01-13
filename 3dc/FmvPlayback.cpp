@@ -16,7 +16,7 @@
 static const int kBufferSize = 4096;
 static const int kBufferCount = 3;
 
-const uint32_t quantum = 1000 / 60;
+static const int kQuantum = 1000 / 60;
 
 #define VANILLA
 
@@ -148,9 +148,10 @@ TheoraFMV::~TheoraFMV()
 
 	ogg_sync_clear(&mState);
 
-	for (uint32_t i = 0; i < 3; i++)
+	for (uint32_t i = 0; i < frameTextureIDs.size(); i++)
 	{
 		Tex_Release(frameTextureIDs[i]);
+		frameTextureIDs[i] = MISSING_TEXTURE; // remove me
 	}
 
 	if (mFrameCriticalSectionInited)
@@ -193,7 +194,7 @@ int TheoraFMV::Open(const std::string &fileName)
 	mFileName = fileName;
 #endif
 
-	// this'll do for now..
+	// hack to make the menu background FMV loop
 	if (mFileName == "fmvs/menubackground.ogv")
 	{
 		isLooped = true;
@@ -243,21 +244,34 @@ int TheoraFMV::Open(const std::string &fileName)
 		this->audioStream = new AudioStream(mAudio->mVorbis.mInfo.channels, mAudio->mVorbis.mInfo.rate, kBufferSize, kBufferCount);
 		if (this->audioStream == NULL)
 		{
-			Con_PrintError("Failed to create mAudio stream buffer for fmv playback");
+			Con_PrintError("Failed to create mAudio stream buffer for FMV playback");
 			return FMV_ERROR;
 		}
 
 		// we need some temporary mAudio data storage space and a ring buffer instance
 		mAudioData = new uint8_t[kBufferSize];
-		mRingBuffer = new RingBuffer(kBufferSize * kBufferCount);
+		if (mAudioData == NULL)
+		{
+			Con_PrintError("Failed to create mAudioData stream buffer for FMV playback");
+			return FMV_ERROR;
+		}
 
+		mRingBuffer = new RingBuffer(kBufferSize * kBufferCount);
+		if (mRingBuffer == NULL)
+		{
+			Con_PrintError("Failed to create mRingBuffer for FMV playback");
+			return FMV_ERROR;
+		}
+
+		// TODO: can we allocate this up front?
 		mAudioDataBuffer = NULL;
 	}
 
 	mFrameWidth = mVideo->mTheora.mInfo.frame_width;
 	mFrameHeight = mVideo->mTheora.mInfo.frame_height;
 
-	for (uint32_t i = 0; i < 3; i++)
+	// TODO: single 32bit texture for a system that can't do shader based YUV->RGB conversion
+	for (uint32_t i = 0; i < frameTextureIDs.size(); i++)
 	{
 		uint32_t width = mFrameWidth;
 		uint32_t height = mFrameHeight;
@@ -720,18 +734,20 @@ unsigned int __stdcall decodeThread(void *args)
 					{
 						if (fmv->mAudioDataBuffer != NULL)
 						{
-							delete[]fmv->mAudioDataBuffer;
+							delete[] fmv->mAudioDataBuffer;
 							OutputDebugString("deleted mAudioDataBuffer to resize\n");
 						}
 
+						// double the bufer size
 						fmv->mAudioDataBuffer = new uint16_t[dataSize * 2];
-						OutputDebugString("alloc mAudioDataBuffer\n");
-
 						if (!fmv->mAudioDataBuffer)
 						{
-							OutputDebugString("Out of memory\n");
+							// TODO: break cleanly from FMV system here
+							Con_PrintError("Out of memory for mAudioDataBuffer alloc!");
 							break;
 						}
+
+						OutputDebugString("alloced mAudioDataBuffer\n");
 						fmv->mAudioDataBufferSize = dataSize * 2;
 					}
 
@@ -853,9 +869,9 @@ unsigned int __stdcall audioThread(void *args)
 		endTime = timeGetTime();
 
 		timetoSleep = endTime - startTime;
-		timetoSleep -= quantum;
+		timetoSleep -= kQuantum;
 
-		if (timetoSleep < 0 || timetoSleep > quantum)
+		if (timetoSleep < 0 || timetoSleep > kQuantum)
 		{
 			timetoSleep = 1;
 		}

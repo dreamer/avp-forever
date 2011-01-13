@@ -8,16 +8,15 @@
 
 typedef struct FMVTEXTURE
 {
-	texID_t textureID;
-	uint32_t width;
-	uint32_t height;
-	int32_t fmvHandle;
-	int SoundVolume;
-	int IsTriggeredPlotFMV;
-	int StaticImageDrawn;
-	int MessageNumber;
-
-	uint8_t *RGBBuffer;
+	texID_t    textureID;
+	uint32_t   width;
+	uint32_t   height;
+	int32_t    fmvHandle;
+	int        SoundVolume;
+	int        IsTriggeredPlotFMV;
+	bool       StaticImageDrawn;
+	int        MessageNumber;
+	uint8_t    *RGBBuffer;
 
 }FMVTEXTURE;
 

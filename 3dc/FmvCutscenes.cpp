@@ -16,7 +16,7 @@
 #include "Di_func.h"
 #include "inline.h"
 
-#define MAX_FMVS 4
+static const int kMaxFMVs = 4;
 
 struct fmvCutscene
 {
@@ -24,7 +24,7 @@ struct fmvCutscene
 	TheoraFMV *FMVclass;
 };
 
-fmvCutscene fmvList[MAX_FMVS];
+fmvCutscene fmvList[kMaxFMVs];
 
 FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 uint32_t NumberOfFMVTextures = 0;
@@ -62,9 +62,9 @@ void FindLightingValuesFromTriggeredFMV(uint8_t *bufferPtr, FMVTEXTURE *ftPtr)
 int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 {
 	// i think these are always 128x128 for ingame textures? fix this later I guess..
-	uint32_t w = 0;//128;
-	uint32_t h = 0;//128;
-	Tex_GetDimensions(ftPtr->textureID, w, h);
+	uint32_t width = 0;//128;
+	uint32_t height = 0;//128;
+	Tex_GetDimensions(ftPtr->textureID, width, height);
 
 	uint8_t *DestBufferPtr = ftPtr->RGBBuffer;
 
@@ -72,6 +72,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 	{
 		int volume = MUL_FIXED(FmvSoundVolume*256, GetVolumeOfNearestVideoScreen());
 
+		// TODO: Volume and Panning
 //fixme		AudioStream_SetBufferVolume(fmvList[ftPtr->fmvHandle].fmvClass->mAudioStream, volume);
 //fixme		AudioStream_SetPan(fmvList[ftPtr->fmvHandle].fmvClass->mAudioStream, PanningOfNearestVideoScreen);
 
@@ -79,8 +80,6 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 
 		if (ftPtr->IsTriggeredPlotFMV && (!fmvList[ftPtr->fmvHandle].FMVclass->IsPlaying()))
 		{
-			OutputDebugString("closing ingame fmv..\n");
-
 			ftPtr->MessageNumber = 0;
 			delete fmvList[ftPtr->fmvHandle].FMVclass;
 			fmvList[ftPtr->fmvHandle].FMVclass = NULL;
@@ -92,14 +91,14 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 			if (!fmvList[ftPtr->fmvHandle].FMVclass->mFrameReady)
 				return 0;
 
-			fmvList[ftPtr->fmvHandle].FMVclass->NextFrame(w, h, DestBufferPtr, w * sizeof(uint32_t));
+			fmvList[ftPtr->fmvHandle].FMVclass->NextFrame(width, height, DestBufferPtr, width * sizeof(uint32_t));
 		}
 
-		ftPtr->StaticImageDrawn = 0;
+		ftPtr->StaticImageDrawn = false;
 	}
-	else if (!ftPtr->StaticImageDrawn || /*smackerFormat*/1)
+	else// if (!ftPtr->StaticImageDrawn || /*smackerFormat*/1)
 	{
-		uint32_t i = w * h;
+		uint32_t i = width * height;
 		uint32_t seed = FastRandom();
 		int *ptr = (int*)DestBufferPtr;
 		do
@@ -108,7 +107,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 			*ptr++ = seed;
 		}
 		while (--i);
-		ftPtr->StaticImageDrawn = 1;
+		ftPtr->StaticImageDrawn = true;
 	}
 	FindLightingValuesFromTriggeredFMV(ftPtr->RGBBuffer, ftPtr);
 	return 1;
@@ -172,12 +171,12 @@ extern void EndMenuBackgroundFmv()
 
 void InitFmvCutscenes()
 {
-	memset(fmvList, 0, sizeof(fmvCutscene) * MAX_FMVS);
+	memset(fmvList, 0, sizeof(fmvCutscene) * kMaxFMVs);
 }
 
 int32_t FindFreeFmvHandle()
 {
-	for (uint32_t i = 0; i < MAX_FMVS; i++)
+	for (uint32_t i = 0; i < kMaxFMVs; i++)
 	{
 		if (!fmvList[i].isPlaying)
 		{
@@ -375,7 +374,7 @@ void ScanImagesForFMVs()
 			FMVTexture[NumberOfFMVTextures].width = width;
 			FMVTexture[NumberOfFMVTextures].height = height;
 			FMVTexture[NumberOfFMVTextures].fmvHandle = -1; // just to be sure
-			FMVTexture[NumberOfFMVTextures].StaticImageDrawn = 0;
+			FMVTexture[NumberOfFMVTextures].StaticImageDrawn = false;
 			SetupFMVTexture(&FMVTexture[NumberOfFMVTextures]);
 			NumberOfFMVTextures++;
 		}

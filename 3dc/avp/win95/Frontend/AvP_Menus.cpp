@@ -71,6 +71,7 @@ static void SetBriefingTextForMultiplayer();
 extern char AAFontWidths[256];
 
 extern char MP_Config_Name[];
+extern char LevelName[];
 
 void HandlePostGameFMVs(void);
 void HandlePreGameFMVs(void);
@@ -323,7 +324,6 @@ int AvP_MainMenus(void)
 	else
 	{
 		SetupNewMenu(AVPMENU_USERPROFILESELECT);
-		//AvPMenus.MenusState = MENUSSTATE_STARTGAME;
 	}
 
 	CheatMode_Active = CHEATMODE_NONACTIVE;
@@ -433,16 +433,15 @@ void HandlePreGameFMVs(void)
 {
 	if (AvPMenus.MenusState == MENUSSTATE_STARTGAME && LoadGameRequest == SAVELOAD_REQUEST_NONE)
 	{
-		extern char LevelName[];
-		if (!stricmp("derelict",LevelName))
+		if (!stricmp("derelict", LevelName))
 		{
 			PlayFMV("FMVs/marineintro.ogv");
 		}
-		else if (!stricmp("temple",LevelName))
+		else if (!stricmp("temple", LevelName))
 		{
 			PlayFMV("FMVs/alienintro.ogv");
 		}
-		else if (!stricmp("fall",LevelName))
+		else if (!stricmp("fall", LevelName))
 		{
 			PlayFMV("FMVs/predatorintro.ogv");
 		}
@@ -451,8 +450,6 @@ void HandlePreGameFMVs(void)
 
 extern void QuickSplashScreens(void)
 {
-	// bjd resolution change
-//	SelectMenuDisplayMode();
 	if (AvP.LevelCompleted)
 	{
 		Show_WinnerScreen();
@@ -467,7 +464,6 @@ extern void AvP_TriggerInGameMenus(void)
 
 	/* KJL 16:32:55 21/07/98 - tell the console to go away */
 	if (IOFOCUS_AcceptTyping()) IOFOCUS_Toggle();
-//	SoundSys_PauseOn();
 }
 
 extern int AvP_InGameMenus(void)
@@ -490,48 +486,6 @@ extern int InGameMenusAreRunning(void)
 
 extern void AvP_UpdateMenus(void)
 {
-//      DrawAvPMenuGfx(AVPMENUGFX_BIG_AVP_LOGO,50,50,16384);
-//      DrawAvPMenuGfx(AVPMENUGFX_ALIENS_LOGO,10,75,16384,AVPMENUFORMAT_LEFTJUSTIFIED);
-//      DrawAvPMenuGfx(AVPMENUGFX_PREDATOR_LOGO,380,77,16384,AVPMENUFORMAT_LEFTJUSTIFIED);
-//      RenderMenuText("VS",330,95,16384,AVPMENUFORMAT_CENTREJUSTIFIED);
-
-	#if 0
-	if (AvPMenus.CurrentMenu == AVPMENU_MULTIPLAYERJOINGAME2)
-	{
-		MinimalNetCollectMessages();
-		/* KJL 19:49:04 05/07/98 - ugh, there goes the interface */
-		{
-			extern int MP_GameStyle;
-			extern int MP_LevelNumber;
-			extern int MP_Species;
-			MP_GameStyle = netGameData.gameType;
-			MP_LevelNumber = netGameData.levelNumber;
-			switch (MP_Species)
-			{
-				default:
-				case 0:
-					netGameData.myCharacterType = NGCT_Marine;
-					netGameData.myNextCharacterType = NGCT_Marine;
-					AvP.PlayerType = I_Marine;
-					break;
-				case 1:
-					netGameData.myCharacterType = NGCT_Predator;
-					netGameData.myNextCharacterType = NGCT_Predator;
-					AvP.PlayerType = I_Predator;
-					break;
-				case 2:
-					netGameData.myCharacterType = NGCT_Alien;
-					netGameData.myNextCharacterType = NGCT_Alien;
-					AvP.PlayerType = I_Alien;
-					break;
-			}
-		}
-		AddNetMsg_PlayerDescription();
-
-		NetSendMessages();
-	}
-	#endif
-	
 	if (AvPMenus.CurrentMenu == AVPMENU_MULTIPLAYER_SPECIES_JOIN ||
 	    AvPMenus.CurrentMenu == AVPMENU_MULTIPLAYER_CONFIG_JOIN)
 	{
@@ -551,12 +505,6 @@ extern void AvP_UpdateMenus(void)
 		{
 			/* KJL 19:49:04 05/07/98 - ugh, there goes the interface */
 			{
-//				extern int MP_GameStyle;
-//				extern int MP_LevelNumber;
-				extern int MP_Species;
-//				MP_GameStyle = netGameData.gameType;
-//				MP_LevelNumber = netGameData.levelNumber;
-				
 				GetNextAllowedSpecies(&MP_Species,TRUE);
 				netGameData.myCharacterSubType=NGSCT_General;
 				switch (MP_Species)
@@ -600,7 +548,6 @@ extern void AvP_UpdateMenus(void)
 	}
 	else if (AvPMenus.CurrentMenu == AVPMENU_MULTIPLAYER_SPECIES_HOST)
 	{
-		extern int MP_Species;
 		GetNextAllowedSpecies(&MP_Species,TRUE);
 	}
 	else if (AvPMenus.CurrentMenu == AVPMENU_MULTIPLAYER_JOINING)
@@ -609,7 +556,6 @@ extern void AvP_UpdateMenus(void)
 		int retval=0;
 		if (LobbiedGame)
 		{
-			extern char MP_PlayerName[];
 			retval = Net_ConnectingToLobbiedGame(MP_PlayerName);
 			if (retval == NET_FAIL)
 			{
@@ -743,29 +689,29 @@ extern void AvP_UpdateMenus(void)
 
 			break;
 		}
-		case AVPMENU_SKIRMISH_CONFIG :
-		case AVPMENU_MULTIPLAYER_CONFIG :
-		case AVPMENU_MULTIPLAYER_CONFIG_JOIN :
+		case AVPMENU_SKIRMISH_CONFIG:
+		case AVPMENU_MULTIPLAYER_CONFIG:
+		case AVPMENU_MULTIPLAYER_CONFIG_JOIN:
 		{
 			UpdateMultiplayerConfigurationMenu();
 			RenderScrollyMenu();
 			RenderHelpString();
 			break;
 		}
-		case AVPMENU_MULTIPLAYEROPENADDRESS :
+		case AVPMENU_MULTIPLAYEROPENADDRESS:
 		{
 			RenderMenu();
 			RenderHelpString();
 			break;
 		}
 
-		case AVPMENU_MULTIPLAYER_LOADIPADDRESS :
+		case AVPMENU_MULTIPLAYER_LOADIPADDRESS:
 		{
 			RenderScrollyMenu();
 			break;
 		}
 
-		case AVPMENU_MULTIPLAYER_LOADCONFIG :
+		case AVPMENU_MULTIPLAYER_LOADCONFIG:
 		{
 			RenderScrollyMenu();
 			RenderConfigurationDescriptionString();

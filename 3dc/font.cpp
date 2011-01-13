@@ -53,7 +53,7 @@ struct Font
 	enum FONT_TYPE  type;
 	uint32_t	textureWidth;
 	uint32_t	textureHeight;
-	texID_t	textureID;
+	texID_t	    textureID;
 	uint32_t	fontWidths[256];
 	uint32_t	blockWidth;
 	uint32_t	blockHeight;
@@ -159,4 +159,3 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 
 	return 0;
 }
-

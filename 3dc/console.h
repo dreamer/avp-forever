@@ -9,13 +9,15 @@
 #include <xtl.h>
 #endif
 
+// function pointer for commands
 typedef void (*funcPointer) (void);
-std::string& Con_GetArgument(int argNum);
-size_t Con_GetNumArguments();
-void Con_AddCommand(char *command, funcPointer function);
-void Con_PrintError(const std::string &errorString);
-void Con_PrintMessage(const std::string &messageString);
-void Con_PrintDebugMessage(const std::string &messageString);
+
+std::string& Con_GetArgument (int argNum);
+size_t Con_GetNumArguments   ();
+void Con_AddCommand          (char *command, funcPointer function);
+void Con_PrintError          (const std::string &errorString);
+void Con_PrintMessage        (const std::string &messageString);
+void Con_PrintDebugMessage   (const std::string &messageString);
 
 void Con_Init();
 void Con_Draw();

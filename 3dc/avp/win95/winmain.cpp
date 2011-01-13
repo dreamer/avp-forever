@@ -522,7 +522,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 				case I_GM_Menus:
 				{
 					AvP.GameMode = I_GM_Playing;
-					//StartGameMenus();
 					LOCALASSERT(AvP.Network == I_No_Network);
 					//AccessDatabase(0);
 					break;
