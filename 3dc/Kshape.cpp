@@ -156,13 +156,13 @@ extern void AddCorona(PARTICLE *particlePtr, VECTORCHF *coronaPoint);
 * they will end up in high memory on the Saturn.                                        *
 ************************************************************************************KJL*/
 
-VECTORCH Global_LightVector;//={1,};
+VECTORCH Global_LightVector;
 
 /*
  Global variables and arrays
 */
 
-VECTORCH RotatedPts[maxrotpts];//={1,};
+VECTORCH RotatedPts[maxrotpts];
 int ItemColour=1;
 
 
@@ -5897,8 +5897,9 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 		int f;
 		POLYHEADER fakeHeader;
 		VECTORCH *vSphere = SphereRotatedVertex;
-			static int o=0;
-			o++;
+		
+		static int o = 0;
+		o++;
 
 		if (explosionPtr->ExplosionPhase)
 		{
@@ -5929,13 +5930,12 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 			int i;
 			VECTORCH vertex[3];
 
+			for (i=0; i<3; i++)
 			{
-				for (i=0; i<3; i++)
-				{
-					int n = SphereFace[f].v[i];
-					vertex[i] = SphereRotatedVertex[n];
-				}
+				int n = SphereFace[f].v[i];
+				vertex[i] = SphereRotatedVertex[n];
 			}
+
 			for (i=0; i<3; i++)
 			{
 				int n = SphereFace[f].v[i];
@@ -5944,15 +5944,11 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 				VerticesBuffer[i].Y	= vertex[i].vy;
 				VerticesBuffer[i].Z	= vertex[i].vz;
 
-
-//					SphereAtmosU[0]=(vertex[i].vx)*4*128+GetSin((CloakingPhase)&4095)*16;
-//					SphereAtmosV[0]=(vertex[i].vy)*4*128+GetCos((CloakingPhase)&4095)*16;
 				{
 					int u = -(ONE_FIXED-explosionPtr->LifeTime)*128*2;
-//						SphereAtmosU[0]=MUL_FIXED(SphereAtmosU[0],u);
-//						SphereAtmosV[0]=MUL_FIXED(SphereAtmosV[0],u);
-					VerticesBuffer[i].U = (SphereAtmosU[n]);//+u[0];
-					VerticesBuffer[i].V = (SphereAtmosV[n]+u);//+v[0];
+
+					VerticesBuffer[i].U = (SphereAtmosU[n]);
+					VerticesBuffer[i].V = (SphereAtmosV[n]+u);
 				}
 				{
 					int d1 = VerticesBuffer[0].U-VerticesBuffer[1].U;
@@ -5966,17 +5962,17 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 					if (ad2<0) ad2=-ad2;
 					if (ad3<0) ad3=-ad3;
 
-					if (ad1>(128*(SPHERE_TEXTURE_WRAP-1)+64)*65536)
+					if (ad1>(128*(SPHERE_TEXTURE_WRAP-1)+64)/**65536*/)
 					{
 						if (d1>0) i2=1;
 						else i1=1;
 					}
-					if (ad2>(128*(SPHERE_TEXTURE_WRAP-1)+64)*65536)
+					if (ad2>(128*(SPHERE_TEXTURE_WRAP-1)+64)/**65536*/)
 					{
 						if (d2>0) i3=1;
 						else i1=1;
 					}
-					if (ad3>(128*(SPHERE_TEXTURE_WRAP-1)+64)*65536)
+					if (ad3>(128*(SPHERE_TEXTURE_WRAP-1)+64)/**65536*/)
 					{
 						if (d3 > 0)
 							i3 = 1;
@@ -5985,11 +5981,11 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 					}
 
 					if (i1)
-						VerticesBuffer[0].U += 128*65536*SPHERE_TEXTURE_WRAP;
+						VerticesBuffer[0].U += 128*/*65536**/SPHERE_TEXTURE_WRAP;
 					if (i2)
-						VerticesBuffer[1].U += 128*65536*SPHERE_TEXTURE_WRAP;
+						VerticesBuffer[1].U += 128*/*65536**/SPHERE_TEXTURE_WRAP;
 					if (i3)
-						VerticesBuffer[2].U += 128*65536*SPHERE_TEXTURE_WRAP;
+						VerticesBuffer[2].U += 128*/*65536**/SPHERE_TEXTURE_WRAP;
 				}
 
 				VerticesBuffer[i].A = explosionPtr->LifeTime/256;
@@ -6001,8 +5997,10 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 				VerticesBuffer[i].SpecularB = 0;
 			}
 
-			RenderPolygon.NumberOfVertices=3;
+			RenderPolygon.NumberOfVertices = 3;
 
+			D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader, VerticesBuffer);
+/*
 			GouraudTexturedPolygon_ClipWithZ();
 			if (RenderPolygon.NumberOfVertices>=3)
 			{
@@ -6018,12 +6016,13 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 							GouraudTexturedPolygon_ClipWithPositiveX();
 							if (RenderPolygon.NumberOfVertices>=3)
 							{
-								D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
+								D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader, RenderPolygon.Vertices);
 							}
 						}
 					}
 				}
 			}
+*/
 		}
 	}
 }

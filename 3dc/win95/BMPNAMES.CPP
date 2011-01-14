@@ -36,8 +36,7 @@ BMP_Name::BMP_Name (const char * fname)
 
 BMP_Name::~BMP_Name ()
 {
-	if (filename)
-		delete[] filename;
+	delete[] filename;
 }
 
 BMP_Name::BMP_Name (const BMP_Name & bn)
@@ -69,8 +68,7 @@ const BMP_Name & BMP_Name::operator=(const BMP_Name & bn)
 {
 	if (&bn == this) return(*this);
 
-	if (filename)
-		delete[] filename;
+	delete[] filename;
 
 	filename = new char [strlen(bn.filename)+1];
 	strcpy (filename, bn.filename);
@@ -499,8 +497,8 @@ External_Shape_BMPs_Store_Chunk::External_Shape_BMPs_Store_Chunk (Chunk_With_Chi
 
 External_Shape_BMPs_Store_Chunk::~External_Shape_BMPs_Store_Chunk()
 {
-	if (rifname) delete[] rifname;
-	if (shapename) delete[] shapename;
+	delete[] rifname;
+	delete[] shapename;
 }
 
 void External_Shape_BMPs_Store_Chunk::fill_data_block(char * data_start)
@@ -524,7 +522,9 @@ void External_Shape_BMPs_Store_Chunk::fill_data_block(char * data_start)
 	data_start+=4;
 	
 	for (int i=0; i<12; ++i, data_start+=4)
+	{
 		*(int *)data_start = reserved[i];
+	}
 }
 
 External_Shape_BMPs_Store_Chunk::External_Shape_BMPs_Store_Chunk (Chunk_With_Children * parent, const char * sdata, size_t ssize)
@@ -547,7 +547,9 @@ External_Shape_BMPs_Store_Chunk::External_Shape_BMPs_Store_Chunk (Chunk_With_Chi
 	sdata+=4;
 
 	for (int i=0; i<12; ++i, sdata+=4)
+	{
 		reserved[i] = *(int *)sdata;
+	}
 }
 
 
@@ -647,9 +649,9 @@ ImageDescriptor::ImageDescriptor(IDscFlags idscf, char const * fname, char const
 
 ImageDescriptor::~ImageDescriptor()
 {
-	if (filename) delete[] filename;
-	if (rifname) delete[] rifname;
-	if (fixrifname) delete[] fixrifname;
+	delete[] filename;
+	delete[] rifname;
+	delete[] fixrifname;
 }
 
 ImageDescriptor & ImageDescriptor::operator = (ImageDescriptor const & id2)
@@ -661,21 +663,14 @@ ImageDescriptor & ImageDescriptor::operator = (ImageDescriptor const & id2)
 		spares[1] = id2.spares[1];
 		spares[2] = id2.spares[2];
 
-		if (filename)
-		{
-			delete[] filename;
-			filename = 0;
-		}
-		if (rifname)
-		{
-			delete[] rifname;
-			rifname = 0;
-		}
-		if (fixrifname)
-		{
-			delete[] fixrifname;
-			fixrifname = 0;
-		}
+		delete[] filename;
+		filename = 0;
+
+		delete[] rifname;
+		rifname = 0;
+
+		delete[] fixrifname;
+		fixrifname = 0;
 
 		if (id2.filename)
 		{

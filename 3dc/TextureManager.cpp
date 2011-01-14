@@ -114,6 +114,13 @@ texID_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32
 	newTexture.usage = usage;
 	newTexture.isValid = true;
 
+	// check path for backslashes
+	std::string::size_type pos = textureName.find("\\");
+	if (std::string::npos != pos)
+	{
+		int i = 0;
+	}
+
 	// store it
 	if (textureID < textureList.size()) // we're reusing a slot in this case
 	{
@@ -138,6 +145,13 @@ texID_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &Av
 	Texture newTexture;
 	texID_t textureID;
 	newTexture.name = textureName;
+
+	// check path for backslashes
+	std::string::size_type pos = textureName.find("\\");
+	if (std::string::npos != pos)
+	{
+		int i = 0;
+	}
 
 	// see if it exists already
 	textureID = Tex_CheckExists(textureName);
@@ -186,6 +200,13 @@ texID_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &AvP
 	Texture newTexture;
 	newTexture.name = textureName;
 
+	// check path for backslashes
+	std::string::size_type pos = textureName.find("\\");
+	if (std::string::npos != pos)
+	{
+		int i = 0;
+	}
+
 	if (!R_CreateTextureFromAvPTexture(AvPTexure, usageType, newTexture))
 	{
 		// log error
@@ -221,6 +242,13 @@ texID_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t heig
 {
 	Texture newTexture;
 	newTexture.name = textureName;
+
+	// check path for backslashes
+	std::string::size_type pos = textureName.find("\\");
+	if (std::string::npos != pos)
+	{
+		int i = 0;
+	}
 
 	if (!R_CreateTexture(width, height, bitsPerPixel, usageType, newTexture))
 	{
@@ -260,6 +288,13 @@ texID_t Tex_CreateFromFile(const std::string &filePath)
 
 	Texture	newTexture;
 	newTexture.name = filePath; // use file path as name
+
+	// check path for backslashes
+	std::string::size_type pos = filePath.find("\\");
+	if (std::string::npos != pos)
+	{
+		int i = 0;
+	}
 
 	if (!R_CreateTextureFromFile(filePath, newTexture))
 	{

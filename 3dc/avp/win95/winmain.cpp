@@ -116,7 +116,7 @@ extern void LoadKeyConfiguration();
 // so we can disable/enable stickey keys
 STICKYKEYS startupStickyKeys = {sizeof(STICKYKEYS), 0};
 STICKYKEYS skOff;
- 
+
 // entry point
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {

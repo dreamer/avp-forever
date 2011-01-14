@@ -564,10 +564,10 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, texID_t textureI
 	float x2 = WPos2DC(destRect.right);
 	float y2 = HPos2DC(destRect.bottom);
 
-	Texture tempTexture = Tex_GetTextureDetails(textureID);
+	Texture thisTexture = Tex_GetTextureDetails(textureID);
 
-	float RecipW = (1.0f / tempTexture.realWidth);
-	float RecipH = (1.0f / tempTexture.realHeight);
+	float RecipW = (1.0f / thisTexture.realWidth);
+	float RecipH = (1.0f / thisTexture.realHeight);
 
 	orthoList->AddItem(4, textureID, TRANSLUCENCY_OFF, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
@@ -578,8 +578,8 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, texID_t textureI
 	orthoVertex[orthoVBOffset].y = y2;
 	orthoVertex[orthoVBOffset].z = 1.0f;
 	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = (float)((tempTexture.width - srcRect.left) * RecipW);
-	orthoVertex[orthoVBOffset].v = (float)((tempTexture.height - srcRect.bottom) * RecipH);
+	orthoVertex[orthoVBOffset].u = (float)((thisTexture.width - srcRect.left) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((thisTexture.height - srcRect.bottom) * RecipH);
 	orthoVBOffset++;
 
 	// top left
@@ -587,8 +587,8 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, texID_t textureI
 	orthoVertex[orthoVBOffset].y = y1;
 	orthoVertex[orthoVBOffset].z = 1.0f;
 	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = (float)((tempTexture.width - srcRect.left) * RecipW);
-	orthoVertex[orthoVBOffset].v = (float)((tempTexture.height - srcRect.top) * RecipH);
+	orthoVertex[orthoVBOffset].u = (float)((thisTexture.width - srcRect.left) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((thisTexture.height - srcRect.top) * RecipH);
 	orthoVBOffset++;
 
 	// bottom right
@@ -596,8 +596,8 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, texID_t textureI
 	orthoVertex[orthoVBOffset].y = y2;
 	orthoVertex[orthoVBOffset].z = 1.0f;
 	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = (float)((tempTexture.width - srcRect.right) * RecipW);
-	orthoVertex[orthoVBOffset].v = (float)((tempTexture.height - srcRect.bottom) * RecipH);
+	orthoVertex[orthoVBOffset].u = (float)((thisTexture.width - srcRect.right) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((thisTexture.height - srcRect.bottom) * RecipH);
 	orthoVBOffset++;
 
 	// top right
@@ -605,8 +605,8 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, texID_t textureI
 	orthoVertex[orthoVBOffset].y = y1;
 	orthoVertex[orthoVBOffset].z = 1.0f;
 	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = (float)((tempTexture.width - srcRect.right) * RecipW);
-	orthoVertex[orthoVBOffset].v = (float)((tempTexture.height - srcRect.top) * RecipH);
+	orthoVertex[orthoVBOffset].u = (float)((thisTexture.width - srcRect.right) * RecipW);
+	orthoVertex[orthoVBOffset].v = (float)((thisTexture.height - srcRect.top) * RecipH);
 	orthoVBOffset++;
 
 	orthoList->CreateOrthoIndices(orthoIndex);

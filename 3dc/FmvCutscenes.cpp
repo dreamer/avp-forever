@@ -43,7 +43,6 @@ extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
 
 int NextFMVFrame();
-void FmvClose();
 
 int FmvColourRed;
 int FmvColourGreen;
@@ -126,17 +125,23 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 	return 1;
 }
 
+// opens the menu background FMV
 void StartMenuBackgroundFmv()
 {
+	return;
+
 	const char *filenamePtr = "fmvs/menubackground.ogv";
 
 	menuFMV = new TheoraFMV();
+
+	// start playback threads
 	if (menuFMV->Open(filenamePtr) != FMV_OK)
 		return;
 	
 	MenuBackground = true;
 }
 
+// called per frame to display a frame of the menu background FMV
 extern int PlayMenuBackgroundFmv()
 {
 	if (!MenuBackground)
@@ -254,14 +259,6 @@ extern void PlayFMV(const char *filenamePtr)
 	}
 }
 
-void FmvClose()
-{
-#if 0 // temporarily disabled
-	fmvPlaying = false;
-	CloseTheoraVideo();
-#endif
-}
-
 void UpdateAllFMVTextures()
 {
 	uint32_t i = NumberOfFMVTextures;
@@ -319,6 +316,7 @@ extern void StartTriggerPlotFMV(int number)
 
 extern void StartFMVAtFrame(int number, int frame)
 {
+	// TODO..
 }
 
 // called during each level load

@@ -315,9 +315,6 @@ public:
 	virtual void SetMD5Val(BMP_Name const & rcbmp, int const * md5id);
 	virtual void RemoveMD5Val(char const * bname);
 
-//	friend class BMP_Group; // for cencon
-//	friend class BMP_Info; // for cencon
-
 protected:
 	virtual Bitmap_MD5_Chunk * GetMD5Chunk(char const * bname) = 0;
 	virtual void CreateMD5Chunk(BMP_Name const & rcbmp, int const * md5id) = 0;
@@ -327,7 +324,6 @@ protected:
 
 	Chunk_With_BMPs (Chunk_With_Children * parent, const char * const ident) : Chunk(parent,ident), max_index(0) {}
 	Chunk_With_BMPs (Chunk_With_Children * parent, const char * const ident, const char * sdata, size_t ssize);
-
 };
 
 
@@ -346,10 +342,6 @@ private:
 	virtual void CreateMD5Chunk(BMP_Name const & rcbmp, int const * md5id);
 
 	friend class Environment_Data_Chunk;
-
-
-
-
 };
 
 
@@ -371,7 +363,6 @@ private:
 	virtual void CreateMD5Chunk(BMP_Name const & rcbmp, int const * md5id);
 
 	friend class Shape_External_File_Chunk;
-
 };
 
 

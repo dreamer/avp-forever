@@ -1427,12 +1427,13 @@ static void DeallocatePheromoneTrail(PHEROMONE_TRAIL *trailPtr)
 static void InitialiseVolumetricExplosions(void)
 {
 	int i;
-	for(i=0; i<MAX_NO_OF_EXPLOSIONS; i++)
+	for (i=0; i<MAX_NO_OF_EXPLOSIONS; i++)
 	{
 		ExplosionStorage[i].LifeTime = 0;
 	}
 	CurrentExplosionIndex = 0;
 }
+
 static VOLUMETRIC_EXPLOSION* AllocateVolumetricExplosion(void)
 {
 	VOLUMETRIC_EXPLOSION *explosionPtr = 0; /* Default to null ptr */
@@ -4162,7 +4163,7 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 				expPtr->UseCollisions = 1;
 			}
 
-			for(i=0; i<SPHERE_VERTICES; i++)
+			for (i=0; i<SPHERE_VERTICES; i++)
 			{
 				expPtr->Position[i] = *positionPtr;
 				expPtr->Velocity[i].vx = SphereVertex[i].vx;
@@ -4175,9 +4176,9 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 			expPtr->LifeTime = ONE_FIXED-1;
 			expPtr->ExplosionPhase = 1;
 			
-			for(i=0; i<r; i++)
+			for (i=0; i<r; i++)
 			{
-				CreateFlamingDebris(positionPtr,&SphereVertex[FastRandom()%SPHERE_VERTICES]);
+				CreateFlamingDebris(positionPtr, &SphereVertex[FastRandom()%SPHERE_VERTICES]);
 			}
 			if ((positionPtr->vx!=Player->ObWorld.vx)
 		      ||(positionPtr->vy!=Player->ObWorld.vy)
@@ -4198,7 +4199,7 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 		}
 		case EXPLOSION_MOLOTOV:
 		{
-			MakeMolotovExplosionAt(positionPtr,0);
+			MakeMolotovExplosionAt(positionPtr, 0);
 			break;
 		}
 		case EXPLOSION_PULSEGRENADE:
@@ -4213,44 +4214,19 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 				MODULE *module = ModuleFromPosition(positionPtr, (MODULE*)NULL);
 				if (!module) return;
 			}
-			#if 1
+
 			expPtr = AllocateVolumetricExplosion();
 
 			if (explosionID == EXPLOSION_SMALL_NOCOLLISIONS)
 			{
 				expPtr->UseCollisions = 0;
 			}
-			else
-			{
-				expPtr->UseCollisions = 1;
-			}
-			r = (FastRandom()&7)+1;
-			
-			for(i=0; i<SPHERE_VERTICES; i++)
-			{
-				expPtr->Position[i] = *positionPtr;
-				expPtr->Velocity[i].vx = SphereVertex[i].vx;
-				expPtr->Velocity[i].vy = SphereVertex[i].vy;
-				expPtr->Velocity[i].vz = SphereVertex[i].vz;
-				expPtr->BeenStopped[i] = 0;
-				expPtr->RipplePhase[i] = FastRandom()&4095;
-				expPtr->NumberVerticesMoving=SPHERE_VERTICES;
-			}
-			expPtr->LifeTime = ONE_FIXED/2;
-			expPtr->ExplosionPhase = 1;
-			#endif
-			#if 0
-			for(i=0; i<r; i++)
-			{
-				CreateFlamingDebris(positionPtr,&SphereVertex[FastRandom()%SPHERE_VERTICES]);
-			}
-			#endif
-			if ((positionPtr->vx!=Player->ObWorld.vx)
-		      ||(positionPtr->vy!=Player->ObWorld.vy)
-			  ||(positionPtr->vz!=Player->ObWorld.vz))
+
+			if ((positionPtr->vx != Player->ObWorld.vx)
+		      ||(positionPtr->vy != Player->ObWorld.vy)
+			  ||(positionPtr->vz != Player->ObWorld.vz))
 			{
 				MakeLightElement(positionPtr, LIGHTELEMENT_EXPLOSION);
-//				MakeLightElement(positionPtr, LIGHTELEMENT_ELECTRICAL_EXPLOSION);
 			}
 
 			for (i=0; i<LocalDetailLevels.NumberOfSmokeParticlesFromSmallExplosion; i++)
@@ -4397,49 +4373,50 @@ static void HandleVolumetricExplosion(VOLUMETRIC_EXPLOSION *expPtr)
 	int velocityModifier;
 	particle.ParticleID = PARTICLE_EXPLOSIONFIRE;
 
-	if (!expPtr->LifeTime) return;
+	if (!expPtr->LifeTime)
+		return;
+
 	RenderExplosionSurface(expPtr);
 	
 	if (expPtr->ExplosionPhase)
 	{
-		{
-			int v = (DIV_FIXED(SPHERE_VERTICES,expPtr->NumberVerticesMoving+1)+ONE_FIXED);
-			velocityModifier = MUL_FIXED(GetSin(expPtr->LifeTime/64)/16,v);
-		}
+		int v = (DIV_FIXED(SPHERE_VERTICES, expPtr->NumberVerticesMoving+1)+ONE_FIXED);
+		velocityModifier = MUL_FIXED(GetSin(expPtr->LifeTime/64)/16,v);
 		
 		for(i=0; i<SPHERE_VERTICES; i++)
 		{
 			int v;
 			VECTORCH obstacleNormal = {0,0,0};
 			int moduleIndex;
+
 			if ((expPtr->Velocity[i].vx==0)
 			   &&(expPtr->Velocity[i].vy==0)
 			   &&(expPtr->Velocity[i].vz==0))
 			 continue;
+
 			particle.Velocity = expPtr->Velocity[i];
-			#if 1
+
 			{
 				v = GetSin((CloakingPhase*4+expPtr->RipplePhase[i])&4095)/4;
-				v = velocityModifier+MUL_FIXED(v,velocityModifier);
+				v = velocityModifier+MUL_FIXED(v, velocityModifier);
 			}
-			#endif
-			particle.Velocity.vx = MUL_FIXED(particle.Velocity.vx,v);
-			particle.Velocity.vy = MUL_FIXED(particle.Velocity.vy,v);
-			particle.Velocity.vz = MUL_FIXED(particle.Velocity.vz,v);
-		
+
+			particle.Velocity.vx = MUL_FIXED(particle.Velocity.vx, v);
+			particle.Velocity.vy = MUL_FIXED(particle.Velocity.vy, v);
+			particle.Velocity.vz = MUL_FIXED(particle.Velocity.vz, v);
 
 			particle.Position = expPtr->Position[i];
-		
-			if(LocalDetailLevels.ExplosionsDeformToEnvironment && expPtr->UseCollisions)
+
+			if (LocalDetailLevels.ExplosionsDeformToEnvironment && expPtr->UseCollisions)
 			{
-				if(ParticleDynamics(&particle,&obstacleNormal,&moduleIndex))
+				if (ParticleDynamics(&particle,&obstacleNormal,&moduleIndex))
 				{
-					int magOfPerpImp = DotProduct(&obstacleNormal,&(expPtr->Velocity[i]));
+					int magOfPerpImp = DotProduct(&obstacleNormal, &(expPtr->Velocity[i]));
 					expPtr->Velocity[i].vx -= MUL_FIXED(obstacleNormal.vx, magOfPerpImp);
 					expPtr->Velocity[i].vy -= MUL_FIXED(obstacleNormal.vy, magOfPerpImp);
 					expPtr->Velocity[i].vz -= MUL_FIXED(obstacleNormal.vz, magOfPerpImp);
 
-					if(!expPtr->BeenStopped[i])
+					if (!expPtr->BeenStopped[i])
 					{
 						expPtr->BeenStopped[i] = 1;
 						expPtr->NumberVerticesMoving--;
@@ -4454,7 +4431,6 @@ static void HandleVolumetricExplosion(VOLUMETRIC_EXPLOSION *expPtr)
 			}
 			expPtr->Position[i] = particle.Position;
 		}
-
 
 		expPtr->LifeTime -= NormalFrameTime;
 
@@ -5276,13 +5252,14 @@ void Save_VolumetricExplosions()
 	int NumActiveExplosions = 0;
 
 	//first find the number of explosions currently active
-	for(i=0;i<MAX_NO_OF_EXPLOSIONS;i++)
+	for (i=0;i<MAX_NO_OF_EXPLOSIONS;i++)
 	{
-		if(ExplosionStorage[i].LifeTime) NumActiveExplosions++;
+		if (ExplosionStorage[i].LifeTime) NumActiveExplosions++;
 	}
 
 	//don's save if there aren't any
-	if(!NumActiveExplosions) return;
+	if (!NumActiveExplosions) 
+		return;
 
 	//get memory for header
 	GET_SAVE_BLOCK_POINTER(EXPLOSION_SAVE_BLOCK_HEADER, block);
@@ -5294,9 +5271,9 @@ void Save_VolumetricExplosions()
 	block->NumActiveExplosions = NumActiveExplosions;
 
 	//now save the explosions
-	for(i=0;i<MAX_NO_OF_EXPLOSIONS;i++)
+	for (i=0;i<MAX_NO_OF_EXPLOSIONS;i++)
 	{
-		if(ExplosionStorage[i].LifeTime)
+		if (ExplosionStorage[i].LifeTime)
 		{
 			VOLUMETRIC_EXPLOSION* explosion = static_cast<VOLUMETRIC_EXPLOSION*>(GetPointerForSaveBlock(sizeof(VOLUMETRIC_EXPLOSION)));
 			*explosion = ExplosionStorage[i];

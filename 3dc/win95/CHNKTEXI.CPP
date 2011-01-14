@@ -210,6 +210,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 	db_assert1(pszDestBuf);
 	db_assert1(nBufSize>0);
 	db_logf4(("CL_LoadImageOnce(): Getting the full pathname for %s",pszFileName));
+
 	switch (fFlagsEtc & _LIO_PATHTYPEMASK)
 	{
 		case LIO_ABSOLUTEPATH:
@@ -377,11 +378,9 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 							// load this image
 							if (GetPath(pszDestBuf,nBufSize,*pIdsc,pEnvDataChunk,bGloballyPalettized))
 							{
-								if (pszSubName)
-								{
-									delete[] pszSubName;
-								}
+								delete[] pszSubName;
 								delete[] pszName;
+
 								return pszDestBuf;
 							}
 						}
