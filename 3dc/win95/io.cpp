@@ -114,7 +114,7 @@ void InitialiseRawInput();
 
 /* Test Palette */
 
-unsigned char TestPalette[768];
+//unsigned char TestPalette[768];
 
 /*
 

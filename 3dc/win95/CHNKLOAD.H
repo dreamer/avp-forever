@@ -194,7 +194,7 @@ extern MAPBLOCK6 Empty_Landscape_Type6;
 extern MAPBLOCK6 Empty_Object_Type6;
 extern MAPBLOCK6 Term_Type6;
 
-extern unsigned char TestPalette[];
+//extern unsigned char TestPalette[];
 
 #if SupportModules
 

@@ -1,8 +1,6 @@
 // Interface  functions (written in C++) for
 // Direct3D immediate mode system
 
-// Must link to C code in main engine system
-
 #define DIRECTINPUT_VERSION 0x0800
 
 #include "logString.h"
@@ -10,11 +8,6 @@
 #include <XInput.h> // XInput API
 #include "io.h"
 #include "Di_func.h"
-
-// Note: INITGUID has NOT been defined here,
-// since the definition in d3_func.cpp is amply
-// sufficient.
-
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
@@ -23,14 +16,12 @@
 #include "gameplat.h"
 #include "usr_io.h"
 #include "rentrntq.h"
-
-extern void KeyboardEntryQueue_Add(char c);
-
 #include "console.h"
 #include "onscreenKeyboard.h"
 #include "iofocus.h"
-
 #include "showcmds.h"
+
+extern void KeyboardEntryQueue_Add(char c);
 
 // DirectInput key down value
 #define DikOn 0x80
@@ -57,7 +48,7 @@ static IDirectInputDevice*		g_pJoystick         = NULL;
 static IDirectInputDevice2*		g_pJoystickDevice2  = NULL;  // needed to poll joystick
 */
 
-static char bGravePressed = FALSE;
+static bool bGravePressed = false;
 // added 14/1/98 by DHM as a temporary hack to debounce the GRAVE key
 
 /*
@@ -73,9 +64,10 @@ int MouseVelY;
 int MouseX;
 int MouseY;
 
+extern int16_t MouseWheelStatus;
 extern unsigned char KeyboardInput[];
-static bool LastGotAnyKey;
-bool DebouncedGotAnyKey;
+static bool LastGotAnyKey = false;
+bool DebouncedGotAnyKey = false;
 
 int GotJoystick;
 JOYCAPS JoystickCaps;
@@ -160,10 +152,9 @@ extern void IngameKeyboardInput_ClearBuffer(void);
 #define LETTER_Z	0x5A
 #define NUMBER_0	0x30
 #define NUMBER_9	0x39
+
 /*
-
- Create DirectInput via CoCreateInstance
-
+	Create DirectInput via CoCreateInstance
 */
 
 BOOL InitialiseDirectInput(void)
@@ -803,18 +794,15 @@ void DirectReadKeyboard(void)
 	}
 
 	// mouse wheel - read using windows messages
+	if (MouseWheelStatus > 0)
 	{
-		extern int16_t MouseWheelStatus;
-		if (MouseWheelStatus > 0)
-		{
-			KeyboardInput[KEY_MOUSEWHEELUP] = TRUE;
-			GotAnyKey = true;
-		}
-		else if (MouseWheelStatus < 0)
-		{
-			KeyboardInput[KEY_MOUSEWHEELDOWN] = TRUE;
-			GotAnyKey = true;
-		}
+		KeyboardInput[KEY_MOUSEWHEELUP] = TRUE;
+		GotAnyKey = true;
+	}
+	else if (MouseWheelStatus < 0)
+	{
+		KeyboardInput[KEY_MOUSEWHEELDOWN] = TRUE;
+		GotAnyKey = true;
 	}
 
 	// joystick buttons
@@ -1303,44 +1291,36 @@ void ReadJoysticks(void)
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP)
 			{
 				GamePadButtons[DUP] = TRUE;
-				//OutputDebugString("xinput DPAD UP\n");
 			}
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN)
 			{
 				GamePadButtons[DDOWN] = TRUE;
-				//OutputDebugString("xinput DPAD DOWN\n");
 			}
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT)
 			{
 				GamePadButtons[DLEFT] = TRUE;
-				//OutputDebugString("xinput DPAD LEFT\n");
 			}
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT)
 			{
 				GamePadButtons[DRIGHT] = TRUE;
-				//OutputDebugString("xinput DPAD RIGHT\n");
 			}
 
 			// handle coloured buttons - X A Y B
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_X)
 			{
 				GamePadButtons[X] = TRUE;
-//				OutputDebugString("xinput button X pressed\n");
 			}
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_A)
 			{
 				GamePadButtons[A] = TRUE;
-				//OutputDebugString("xinput button A pressed\n");
 			}
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_Y)
 			{
 				GamePadButtons[Y] = TRUE;
-				//OutputDebugString("xinput button Y pressed\n");
 			}
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_B)
 			{
 				GamePadButtons[B] = TRUE;
-				//OutputDebugString("xinput button B pressed\n");
 			}
 
 			// handle triggers
@@ -1348,51 +1328,43 @@ void ReadJoysticks(void)
 				g_Controllers[0].state.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
 			{
 				GamePadButtons[LT] = TRUE;
-				//OutputDebugString("xinput left trigger pressed\n");
 			}
 
 			if (g_Controllers[0].state.Gamepad.bRightTrigger && 
 				g_Controllers[0].state.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
 			{
 				GamePadButtons[RT] = TRUE;
-				//OutputDebugString("xinput right trigger pressed\n");
 			}
 
 			// handle bumper buttons
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER)
 			{
 				GamePadButtons[LB] = TRUE;
-				//OutputDebugString("xinput left bumper pressed\n");
 			}
 
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER)
 			{
 				GamePadButtons[RB] = TRUE;
-				//OutputDebugString("xinput right bumper pressed\n");
 			}
 
 			// handle back and start
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_START)
 			{
 				GamePadButtons[START] = TRUE;
-				//OutputDebugString("xinput start pressed\n");
 			}
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK)
 			{
 				GamePadButtons[BACK] = TRUE;
-				//OutputDebugString("xinput back pressed\n");
 			}
 
 			// handle stick clicks
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB)
 			{
 				GamePadButtons[LEFTCLICK] = TRUE;
-				//OutputDebugString("xinput left stick clicked\n");
 			}
 			if (g_Controllers[0].state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB)
 			{
 				GamePadButtons[RIGHTCLICK] = TRUE;
-				//OutputDebugString("xinput right stick clicked\n");
 			}
 
 			// handle analogue stick movement
@@ -1438,7 +1410,7 @@ void ReadJoysticks(void)
 	}
 }
 
-int ReadJoystick(void)
+BOOL ReadJoystick(void)
 {
 	return FALSE;
 	MMRESULT joyreturn;
@@ -1454,7 +1426,7 @@ int ReadJoystick(void)
 	return FALSE;
 }
 
-int CheckForJoystick(void)
+BOOL CheckForJoystick(void)
 {
 	return FALSE;
 	MMRESULT joyreturn;

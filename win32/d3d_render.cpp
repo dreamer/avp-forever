@@ -458,7 +458,7 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWid
 */
 }
 
-void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, const std::vector<uint32_t> &textureIDs)
+void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, const std::vector<texID_t> &textureIDs)
 {
 
 #ifdef _XBOX

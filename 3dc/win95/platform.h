@@ -319,8 +319,8 @@ BOOL ExitWindowsSystem(void);
 BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode);
 void KeyboardHandlerKeyDown(WPARAM wParam);
 void KeyboardHandlerKeyUp(WPARAM wParam);
-int  ReadJoystick(void); 
-int  CheckForJoystick(void);
+BOOL ReadJoystick(void); 
+BOOL CheckForJoystick(void);
 
 
 /* Direct 3D */

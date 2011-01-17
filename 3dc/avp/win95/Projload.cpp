@@ -54,7 +54,7 @@
 #include "TextureManager.h"
 
 // store texture handles for ingame textures
-std::vector<uint32_t> ingameTextureList;
+std::vector<texID_t> ingameTextureList;
 
 #include "inventry.h"
 

@@ -145,7 +145,7 @@ bool SetRenderStateDefaults();
 void ToggleWireframe();
 
 const int MAX_TEXTURE_STAGES = 8;
-std::vector<uint32_t> setTextureArray;
+std::vector<texID_t> setTextureArray;
 
 // byte order macros for A8R8G8B8 d3d texture
 enum

@@ -244,14 +244,10 @@ void Generate_Sphere(void)
 	{
 		int i;
 		VECTORCH *vSphere = SphereVertex;
-		for(i=0;i<SPHERE_VERTICES;i++,vSphere++)
+		for (i = 0; i < SPHERE_VERTICES; i++, vSphere++)
 		{
-//			int radius = vSphere->vx*vSphere->vx+vSphere->vz*vSphere->vz;
-//			if (radius<16384) radius = 16384;
-
-//			SphereAtmosU[i] = DIV_FIXED(ArcCos(vSphere->vy)*32*128*8,radius);
-			SphereAtmosV[i] = ArcCos(vSphere->vy)*32*128*SPHERE_TEXTURE_WRAP;//*8;
-			SphereAtmosU[i] = ArcTan(vSphere->vz,vSphere->vx)*16*128*SPHERE_TEXTURE_WRAP;//*8;
+			SphereAtmosV[i] = ArcCos(vSphere->vy)*32*128*SPHERE_TEXTURE_WRAP;
+			SphereAtmosU[i] = ArcTan(vSphere->vz, vSphere->vx)*16*128*SPHERE_TEXTURE_WRAP;
 		}
 	}
 }

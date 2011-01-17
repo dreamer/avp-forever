@@ -1563,11 +1563,11 @@ static void VertexIntensity_Pred_Thermal(RENDERVERTEX *renderVertexPtr)
 
 			distanceToLight = Approximate3dMagnitude(&vertexToLight);
 
-			if(distanceToLight < lptr->LightRange)
+			if (distanceToLight < lptr->LightRange)
 			{
 				int idot = MUL_FIXED(lptr->LightRange-distanceToLight,lptr->BrightnessOverRange);
 
-				if( (distanceToLight>0) && (!(Global_ODB_Ptr->ObFlags3 & ObFlag3_NoLightDot)) )
+				if ((distanceToLight>0) && (!(Global_ODB_Ptr->ObFlags3 & ObFlag3_NoLightDot)))
 				{
 					int dotproduct = MUL_FIXED(vertexNormalPtr->vx,vertexToLight.vx)
 					     + MUL_FIXED(vertexNormalPtr->vy,vertexToLight.vy)
@@ -1670,12 +1670,12 @@ static void VertexIntensity_Pred_SeeAliens(RENDERVERTEX *renderVertexPtr)
 			vertexToLight.vz = lptr->LocalLP.vz - vertexPtr->vz;
 
 			distanceToLight = Approximate3dMagnitude(&vertexToLight);
-			if(distanceToLight < lptr->LightRange)
+			if (distanceToLight < lptr->LightRange)
 			{
 				int idot = MUL_FIXED(lptr->LightRange-distanceToLight,lptr->BrightnessOverRange);
 
 				redI += idot;
-				if(lptr->LightFlags&LFlag_Electrical)
+				if (lptr->LightFlags&LFlag_Electrical)
 				{
 					specular += idot;
 				}
@@ -1828,7 +1828,6 @@ static void VertexIntensity_ImageIntensifier(RENDERVERTEX *renderVertexPtr)
 
 		for (i = NumLightSourcesForObject; i!=0; i--)
 		{
-
 			VECTORCH vertexToLight;
 			int distanceToLight;
 
@@ -1877,13 +1876,13 @@ static void VertexIntensity_ImageIntensifier(RENDERVERTEX *renderVertexPtr)
 			{
 				int idot = MUL_FIXED(lptr->LightRange-distanceToLight,lptr->BrightnessOverRange);
 
-				if(distanceToLight>0)
+				if (distanceToLight>0)
 				{
 					int dotproduct = MUL_FIXED(vertexNormalPtr->vx,vertexToLight.vx)
 					     + MUL_FIXED(vertexNormalPtr->vy,vertexToLight.vy)
 					     + MUL_FIXED(vertexNormalPtr->vz,vertexToLight.vz);
 
-					if(dotproduct>0)
+					if (dotproduct>0)
 					{
 						idot = (WideMulNarrowDiv(idot,dotproduct,distanceToLight)+idot/4);
 					}
@@ -1892,7 +1891,7 @@ static void VertexIntensity_ImageIntensifier(RENDERVERTEX *renderVertexPtr)
 						idot /= 4;
 					}
 				}
-				if(idot<0)
+				if (idot<0)
 				{
 					LOCALASSERT(idot>=0);
 				}
@@ -2234,7 +2233,6 @@ static void VertexIntensity_DiscoInferno(RENDERVERTEX *renderVertexPtr)
 				dz = vertexToLight.vz;
 				if (dz<0) dz = -dz;
 
-
 				if (dx>dy)
 				{
 					if (dx>dz)
@@ -2440,7 +2438,6 @@ static void VertexIntensity_Underwater(RENDERVERTEX *renderVertexPtr)
 
 				dz = vertexToLight.vz;
 				if (dz<0) dz = -dz;
-
 
 				if (dx>dy)
 				{
@@ -4715,9 +4712,9 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 
 		do
 		{
-		if (outcode)
+		if (/*outcode*/1)
 		{
-			if (outcode!=2)
+			if (/*outcode!=2*/0)
 			{
 				GouraudPolygon_ClipWithZ();
 				if (RenderPolygon.NumberOfVertices<3) continue;
@@ -4759,9 +4756,9 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 
 		do
 		{
-		if (outcode)
+		if (/*outcode*/1)
 		{
-			if (outcode!=2)
+			if (/*outcode!=2*/0)
 			{
 				GouraudPolygon_ClipWithZ();
 				if (RenderPolygon.NumberOfVertices<3) continue;
@@ -4887,42 +4884,6 @@ static void DecalPolygon_Construct(DECAL *decalPtr)
 	VerticesBuffer[3].U = decalDescPtr->StartU + decalPtr->UOffset;
 	VerticesBuffer[3].V = decalDescPtr->EndV;
 }
-/*
-int polys[][4] =
-{
-	{0,1,3,2},
-	{2,3,5,4},
-	{4,5,7,6},
-
-	{1,3,5,7},
-	{0,2,4,6},
-	{6,8,10,0},
-	{7,9,11,1},
-
-	{0,1,11,10},
-	{6,7,9,8},
-};
-
-int alphaValue[]={32,32,32,32, 28,28,28,28, 4,4,4,4, 128,128,128,128};
-
-VECTORCH shaftVertices[]=
-{
-		{0,		0,		0},
-		{0,		0,		1956},
-		{-1492,	7969,	0},
-		{-1492,	7969,	1956},
-
-		{0,		8840,	0},
-		{0,		8840,	0},
-		{3138, 	8850,	0},
-		{3138, 	8850,	0},
-
-		{0,		14500,	0},
-		{0,		14500,	0},
-		{0, 	14500,	0},
-		{0, 	14500,	0},
-};
-*/
 
 void FindIntersectionWithYPlane(VECTORCH *startPtr, VECTORCH *directionPtr, VECTORCH *intersectionPtr)
 {
@@ -5018,26 +4979,6 @@ void OutputTranslucentPolyList(void)
 	RenderAllParticlesFurtherAwayThan(-0x7fffffff);
 }
 
-/*
-int CuboidPolyVertexList[][4] =
-{
-	{0,3,7,4},	 //+ve y
-#if 0
-	{0,1,2,3},	 //+ve x
-	{0,1,5,4},	 //-ve z
-
-	{6,7,4,5},	 //-ve x
-	{6,7,3,2},	 //+ve z
-#else
-	{6,7,3,2},	 //+ve z
-	{6,7,4,5},	 //-ve x
-
-	{0,1,5,4},	 //-ve z
-	{0,1,2,3},	 //+ve x
-#endif
-};
-*/
-
 EULER CubeOrient = {0,0,0};
 int CuboidPolyVertexU[][4] =
 {
@@ -5068,7 +5009,6 @@ void RenderMirrorSurface(void)
 		{-5596,-932,-702},
 		{-5596,1212,-702},
 		{-5596,1212,-1872},
-
 	};
 
 	int mirrorUV[]=
@@ -5092,7 +5032,6 @@ void RenderMirrorSurface(void)
 			VerticesBuffer[i].Z	= translatedPts[i].vz;
 			VerticesBuffer[i].U = mirrorUV[i*2];
 			VerticesBuffer[i].V = mirrorUV[i*2+1];
-
 
 			VerticesBuffer[i].R = 255;
 			VerticesBuffer[i].G	= 255;
@@ -5130,7 +5069,6 @@ void RenderMirrorSurface2(void)
 		{-5596,-592,1344},
 		{-5596,140,1344},
 		{-5596,140,562},
-
 	};
 
 	int mirrorUV[]=
@@ -5154,7 +5092,6 @@ void RenderMirrorSurface2(void)
 			VerticesBuffer[i].Z	= translatedPts[i].vz;
 			VerticesBuffer[i].U = mirrorUV[i*2];
 			VerticesBuffer[i].V = mirrorUV[i*2+1];
-
 
 			VerticesBuffer[i].R = 255;
 			VerticesBuffer[i].G	= 255;
@@ -5340,9 +5277,9 @@ void RenderWaterFall(int xOrigin, int yOrigin, int zOrigin)
 		int waterfallY[9];
 		int waterfallZ[9];
 		int waterfallZScale[9];
+
 		for (i=0; i<9; i++)
 		{
-
 			int u = (i*65536)/8;
 
 			int b = MUL_FIXED(2*u,(65536-u));
@@ -5354,15 +5291,15 @@ void RenderWaterFall(int xOrigin, int yOrigin, int zOrigin)
 
 			waterfallX[i] = MUL_FIXED(b,x2)+MUL_FIXED(c,x3);
 			waterfallY[i] = yOrigin+MUL_FIXED(b,y2)+MUL_FIXED(c,y3);
-		 	waterfallZ[i] = zOrigin+MUL_FIXED((66572-zOrigin),u);
+			waterfallZ[i] = zOrigin+MUL_FIXED((66572-zOrigin),u);
 			waterfallZScale[i] = ONE_FIXED+b/2-c;
 			if (i!=8)
 			{
 				waterfallZScale[i]+=(FastRandom()&8191);
 				waterfallY[i]-=(FastRandom()&127);
 			}
-
 		}
+
 		for (z=0; z<8; z++)
 		for (i=0; i<8; i++)
 		{
@@ -5375,8 +5312,7 @@ void RenderWaterFall(int xOrigin, int yOrigin, int zOrigin)
 			v[2].vy = waterfallY[i+1];
 			v[3].vy = waterfallY[i+1];
 
-
-		 	v[0].vz = waterfallZ[z];
+			v[0].vz = waterfallZ[z];
 			v[1].vz = waterfallZ[z+1];
 			v[2].vz = v[1].vz;
 			v[3].vz = v[0].vz;
@@ -5466,7 +5402,10 @@ void DrawWaterFallPoly(VECTORCH *v)
 		RenderPolygon.NumberOfVertices=4;
 	}
 
-	GouraudTexturedPolygon_ClipWithZ();
+//	GouraudTexturedPolygon_ClipWithZ();
+
+	D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader, VerticesBuffer);
+/*
 	if (RenderPolygon.NumberOfVertices>=3)
 	{
 		GouraudTexturedPolygon_ClipWithNegativeX();
@@ -5487,6 +5426,7 @@ void DrawWaterFallPoly(VECTORCH *v)
 			}
 		}
 	}
+*/
 }
 
 void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
@@ -5704,9 +5644,9 @@ void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRI
 	{
 		int outcode = QuadWithinFrustum();
 
-		if (outcode)
+		if (/*outcode*/1)
 		{
-			if (outcode!=2)
+			if (/*outcode!=2*/0)
 			{
 				GouraudPolygon_ClipWithZ();
 				if (RenderPolygon.NumberOfVertices<3) return;
@@ -5962,17 +5902,17 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 					if (ad2<0) ad2=-ad2;
 					if (ad3<0) ad3=-ad3;
 
-					if (ad1>(128*(SPHERE_TEXTURE_WRAP-1)+64)/**65536*/)
+					if (ad1>(128*(SPHERE_TEXTURE_WRAP-1)+64)*65536)
 					{
 						if (d1>0) i2=1;
 						else i1=1;
 					}
-					if (ad2>(128*(SPHERE_TEXTURE_WRAP-1)+64)/**65536*/)
+					if (ad2>(128*(SPHERE_TEXTURE_WRAP-1)+64)*65536)
 					{
 						if (d2>0) i3=1;
 						else i1=1;
 					}
-					if (ad3>(128*(SPHERE_TEXTURE_WRAP-1)+64)/**65536*/)
+					if (ad3>(128*(SPHERE_TEXTURE_WRAP-1)+64)*65536)
 					{
 						if (d3 > 0)
 							i3 = 1;
@@ -5981,13 +5921,32 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 					}
 
 					if (i1)
-						VerticesBuffer[0].U += 128*/*65536**/SPHERE_TEXTURE_WRAP;
+						VerticesBuffer[0].U += 128*65536*SPHERE_TEXTURE_WRAP;
 					if (i2)
-						VerticesBuffer[1].U += 128*/*65536**/SPHERE_TEXTURE_WRAP;
+						VerticesBuffer[1].U += 128*65536*SPHERE_TEXTURE_WRAP;
 					if (i3)
-						VerticesBuffer[2].U += 128*/*65536**/SPHERE_TEXTURE_WRAP;
+						VerticesBuffer[2].U += 128*65536*SPHERE_TEXTURE_WRAP;
 				}
 
+				// bjd - this isn't correct but looks better..kinda
+				VerticesBuffer[0].U /= 65536;
+				VerticesBuffer[1].U /= 65536;
+				VerticesBuffer[2].U /= 65536;
+				
+				VerticesBuffer[0].V /= 65536;
+				VerticesBuffer[1].V /= 65536;
+				VerticesBuffer[2].V /= 65536;
+/*
+				char buf[100];
+				sprintf(buf, "%d, %d, %d, %d, %d, %d\n",
+					VerticesBuffer[0].U,
+					VerticesBuffer[1].U,
+					VerticesBuffer[2].U,
+					VerticesBuffer[0].V,
+					VerticesBuffer[1].V,
+					VerticesBuffer[2].V);
+				OutputDebugString(buf);
+*/
 				VerticesBuffer[i].A = explosionPtr->LifeTime/256;
 				VerticesBuffer[i].R = red;
 				VerticesBuffer[i].G	= green;
@@ -6095,6 +6054,8 @@ void RenderInsideAlienTongue(int offset)
 			RenderPolygon.NumberOfVertices=4;
 		}
 		{
+			D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader, VerticesBuffer);
+/*
 			GouraudTexturedPolygon_ClipWithZ();
 			if (RenderPolygon.NumberOfVertices<3) continue;
 			GouraudTexturedPolygon_ClipWithNegativeX();
@@ -6106,6 +6067,7 @@ void RenderInsideAlienTongue(int offset)
 			GouraudTexturedPolygon_ClipWithPositiveX();
 			if (RenderPolygon.NumberOfVertices<3) continue;
 			D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
+*/
 		}
 	}
 }
@@ -6207,7 +6169,7 @@ void RenderStarfield(void)
 		{
 			int outcode = QuadWithinFrustum();
 
-			if (outcode)
+			if (/*outcode*/1)
 			{
 				RenderPolygon.NumberOfVertices=4;
 
@@ -6224,7 +6186,7 @@ void RenderStarfield(void)
 				VerticesBuffer[3].U = 192;
 				VerticesBuffer[3].V = 63;
 
-				if (outcode!=2)
+				if (/*outcode!=2*/0)
 				{
 					TexturedPolygon_ClipWithZ();
 					if (RenderPolygon.NumberOfVertices<3) return;

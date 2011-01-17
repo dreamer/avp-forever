@@ -4616,7 +4616,7 @@ void DoCredits(void)
 		PlayMenuMusic();
 		position -= RealFrameTime;
 	}
-	while(!DebouncedGotAnyKey && !FinishedCredits);
+	while (!DebouncedGotAnyKey && !FinishedCredits);
 
 	UnloadTextFile("credits.txt", creditsPtr);
 }

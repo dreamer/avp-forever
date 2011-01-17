@@ -64,7 +64,7 @@ Generate map block using reference into
 #define NUM_MAR_SHAPES 14
 
 int maxshapes=0;
-SHAPEHEADER ** mainshapelist=0;
+SHAPEHEADER **mainshapelist = 0;
 
 /* compiled in shapes that do not exist as yet*/
 
