@@ -16,6 +16,16 @@
 #include "dynamics.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
+#include "savegame.h"
+
+typedef struct light_element_save_block_header
+{
+	SAVE_BLOCK_HEADER header;
+
+	int NumActiveLightElements;
+
+	//followed by array of light elements
+}LIGHT_ELEMENT_SAVE_BLOCK_HEADER;
 
 static VECTORCH RotatingLightPosition;
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
@@ -371,7 +381,6 @@ void HandleLightElementSystem(void)
 		{
 			case LIGHTELEMENT_MOLTENMETAL:
 			{
-
 				lightPtr->LightBright = ONE_FIXED/4;
 				/* flags */
 				lightPtr->LightFlags = LFlag_Omni;
@@ -416,7 +425,8 @@ void HandleLightElementSystem(void)
 				lightElementPtr->LifeTime-=NormalFrameTime*4;
 				
 				break;
-			}case LIGHTELEMENT_FROMFMV:
+			}
+			case LIGHTELEMENT_FROMFMV:
 			{						 
 				extern int FmvColourRed;
 				extern int FmvColourGreen;
@@ -430,9 +440,9 @@ void HandleLightElementSystem(void)
 				/* range */
 				lightPtr->LightRange = 15000; 
 
-				lightPtr->RedScale=	  FmvColourRed;
-				lightPtr->GreenScale= FmvColourGreen;
-				lightPtr->BlueScale=  FmvColourBlue;
+				lightPtr->RedScale   = FmvColourRed;
+				lightPtr->GreenScale = FmvColourGreen;
+				lightPtr->BlueScale  = FmvColourBlue;
 				  					
 				break;
 			}
@@ -544,7 +554,6 @@ void HandleLightElementSystem(void)
 
 			case LIGHTELEMENT_ROTATING:
 			{						 
-
 				lightPtr->LightBright = ONE_FIXED/2;
 				/* flags */
 				lightPtr->LightFlags = LFlag_Omni;
@@ -553,21 +562,14 @@ void HandleLightElementSystem(void)
 				/* range */
 				lightPtr->LightRange = 10000; 
 
-				lightPtr->RedScale=	  ONE_FIXED;
-				lightPtr->GreenScale= ONE_FIXED;
-				lightPtr->BlueScale=  ONE_FIXED;
+				lightPtr->RedScale   = ONE_FIXED;
+				lightPtr->GreenScale = ONE_FIXED;
+				lightPtr->BlueScale  = ONE_FIXED;
 
 				lightElementPtr->LightBlock.LightWorld = Player->ObWorld;//RotatingLightPosition;
 //				lightElementPtr->LightBlock.LightWorld.vx += MUL_FIXED(2000,GetCos((CloakingPhase/2)&4095));  					
 				lightElementPtr->LightBlock.LightWorld.vy -= 2200;  					
 //				lightElementPtr->LightBlock.LightWorld.vz += MUL_FIXED(2000,GetSin((CloakingPhase/2)&4095));  					
-				#if 0
-				{	
-
-					VECTORCH zero = {0,0,0};
-					MakeParticle(&(lightElementPtr->LightBlock.LightWorld),&zero,PARTICLE_SPARK);	
-				}
-				#endif
 				break;
 			}
 			case LIGHTELEMENT_ALIEN_TEETH:
@@ -589,9 +591,9 @@ void HandleLightElementSystem(void)
 
 					//lightPtr->RedScale=	  255*256;
 					//lightPtr->GreenScale= 120*256;
-					lightPtr->RedScale=	  255*(200+(CloakingPhase%56));
-					lightPtr->GreenScale= 120*(200+((CloakingPhase/8)%56));
-					lightPtr->BlueScale=  0;
+					lightPtr->RedScale   = 255*(200+(CloakingPhase%56));
+					lightPtr->GreenScale = 120*(200+((CloakingPhase/8)%56));
+					lightPtr->BlueScale  = 0;
 					
 					lightPtr->LightRange = 6000;
 					lightPtr->LightBright = ONE_FIXED;
@@ -625,16 +627,6 @@ void HandleLightElementSystem(void)
 /*--------------------------**
 ** Load/Save Light Elements **
 **--------------------------*/
-#include "savegame.h"
-
-typedef struct light_element_save_block_header
-{
-	SAVE_BLOCK_HEADER header;
-
-	int NumActiveLightElements;
-
-	//followed by array of light elements
-}LIGHT_ELEMENT_SAVE_BLOCK_HEADER;
 
 void Load_LightElements(SAVE_BLOCK_HEADER* header)
 {
@@ -657,7 +649,6 @@ void Load_LightElements(SAVE_BLOCK_HEADER* header)
 			*light_element = *saved_light_element++;	
 		}
 	}
-
 }
 
 void Save_LightElements()
@@ -683,5 +674,4 @@ void Save_LightElements()
 		LIGHTELEMENT* light = GET_SAVE_BLOCK_POINTER(LIGHTELEMENT, light);
 		*light = LightElementStorage[i];	
 	}
-	
 }

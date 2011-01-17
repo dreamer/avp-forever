@@ -395,70 +395,7 @@ static bool ExecuteBuffer()
 	return true;
 }
 
-void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, uint32_t textureWidth, uint32_t textureHeight, r_Texture fmvTexture)
-{
-/*
-	uint32_t topX = (640 - frameWidth) / 2;
-	uint32_t topY = (480 - frameHeight) / 2;
-
-	float x1 = WPos2DC(topX);
-	float y1 = HPos2DC(topY);
-
-	float x2 = WPos2DC(topX + frameWidth);
-	float y2 = HPos2DC(topY + frameHeight);
-
-	RCOLOR colour = RCOLOR_ARGB(255, 255, 255, 255);
-
-	ORTHOVERTEX fmvVerts[4];
-
-	// bottom left
-	fmvVerts[0].x = x1;
-	fmvVerts[0].y = y2;
-	fmvVerts[0].z = 1.0f;
-	fmvVerts[0].colour = colour;
-	fmvVerts[0].u = 0.0f;
-	fmvVerts[0].v = (1.0f / textureHeight) * frameHeight;
-
-	// top left
-	fmvVerts[1].x = x1;
-	fmvVerts[1].y = y1;
-	fmvVerts[1].z = 1.0f;
-	fmvVerts[1].colour = colour;
-	fmvVerts[1].u = 0.0f;
-	fmvVerts[1].v = 0.0f;
-
-	// bottom right
-	fmvVerts[2].x = x2;
-	fmvVerts[2].y = y2;
-	fmvVerts[2].z = 1.0f;
-	fmvVerts[2].colour = colour;
-	fmvVerts[2].u = (1.0f / textureWidth) * frameWidth;
-	fmvVerts[2].v = (1.0f / textureHeight) * frameHeight;
-
-	// top right
-	fmvVerts[3].x = x2;
-	fmvVerts[3].y = y1;
-	fmvVerts[3].z = 1.0f;
-	fmvVerts[3].colour = colour;
-	fmvVerts[3].u = (1.0f / textureWidth) * frameWidth;
-	fmvVerts[3].v = 0.0f;
-
-	ChangeTextureAddressMode(TEXTURE_CLAMP);
-	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
-
-	// set the texture
-	LastError = d3d.lpD3DDevice->SetTexture(0, fmvTexture);
-
-	d3d.lpD3DDevice->SetFVF(D3DFVF_ORTHOVERTEX);
-	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &fmvVerts[0], sizeof(ORTHOVERTEX));
-	if (FAILED(LastError))
-	{
-		OutputDebugString("DrawPrimitiveUP failed\n");
-	}
-*/
-}
-
-void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, const std::vector<texID_t> &textureIDs)
+void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, const std::vector<texID_t> &textureIDs)
 {
 
 #ifdef _XBOX

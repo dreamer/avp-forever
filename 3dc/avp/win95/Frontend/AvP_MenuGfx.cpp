@@ -1302,13 +1302,6 @@ extern void ReleaseAllAvPMenuGfx(void)
 	Tex_Release(AVPMENUGFX_SPLASH_SCREEN4);
 	Tex_Release(AVPMENUGFX_SPLASH_SCREEN5);
 
-/*
-	for (int i = AVPMENUGFX_CLOUDY; i < AVPMENUGFX_SPLASH_SCREEN5; i++)
-	{
-		if (i == -1) return;
-		Tex_Release(i);
-	}
-*/
 #if 0 // bjd - texture test
 	int i=0;
 	while(i<MAX_NO_OF_AVPMENUGFXS)

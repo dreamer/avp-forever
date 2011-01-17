@@ -83,7 +83,7 @@ bool ReleaseVolatileResources();
 bool SetRenderStateDefaults();
 void ToggleWireframe();
 
-const int MAX_TEXTURE_STAGES = 8;
+const int kMaxTextureStages = 8;
 std::vector<texID_t> setTextureArray;
 
 // byte order macros for A8R8G8B8 d3d texture
@@ -478,7 +478,7 @@ void R_SetCurrentVideoMode()
 bool R_SetTexture(uint32_t stage, texID_t textureID)
 {
 	// check that the stage value is within range
-	if (stage > MAX_TEXTURE_STAGES-1)
+	if (stage > kMaxTextureStages-1)
 	{
 		Con_PrintError("Invalid texture stage: " + IntToString(stage) + " set for texture: " + Tex_GetName(textureID));
 		return false;
@@ -505,6 +505,19 @@ bool R_SetTexture(uint32_t stage, texID_t textureID)
 	}
 
 	return true;
+}
+
+void R_UnsetTexture(texID_t textureID)
+{
+	// unbind this texture if it's set to any stage
+	for (uint32_t i = 0; i < kMaxTextureStages; i++)
+	{
+		if (setTextureArray[i] == textureID)
+		{
+			setTextureArray[i] = NO_TEXTURE;
+//			d3d.lpD3DDevice->SetTexture(i, Tex_GetTexture(NO_TEXTURE));
+		}
+	}
 }
 
 bool R_DrawPrimitive(uint32_t numPrimitives)
@@ -662,7 +675,7 @@ bool CreateVolatileResources()
 	SetRenderStateDefaults();
 
 	// going to clear texture stages too
-	for (int stage = 0; stage < MAX_TEXTURE_STAGES; stage++)
+	for (int stage = 0; stage < kMaxTextureStages; stage++)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(stage, Tex_GetTexture(NO_TEXTURE));
 		if (FAILED(LastError))
@@ -2411,10 +2424,10 @@ bool InitialiseDirect3D()
 		}
 	}
 
-	setTextureArray.resize(MAX_TEXTURE_STAGES);
+	setTextureArray.resize(kMaxTextureStages);
 /*
 	// set all texture stages to sample the white texture
-	for (uint32_t i = 0; i < MAX_TEXTURE_STAGES; i++)
+	for (uint32_t i = 0; i < kMaxTextureStages; i++)
 	{
 		setTextureArray[i] = NO_TEXTURE;
 		d3d.lpD3DDevice->SetTexture(i, Tex_GetTexture(NO_TEXTURE));

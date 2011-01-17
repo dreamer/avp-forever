@@ -73,9 +73,8 @@ void FindLightingValuesFromTriggeredFMV(uint8_t *bufferPtr, FMVTEXTURE *ftPtr)
 
 int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 {
-	// i think these are always 128x128 for ingame textures? fix this later I guess..
-	uint32_t width = 0;//128;
-	uint32_t height = 0;//128;
+	uint32_t width = 0;
+	uint32_t height = 0;
 	Tex_GetDimensions(ftPtr->textureID, width, height);
 
 	uint8_t *DestBufferPtr = ftPtr->RGBBuffer;
@@ -108,7 +107,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 
 		ftPtr->StaticImageDrawn = false;
 	}
-	else// if (!ftPtr->StaticImageDrawn || /*smackerFormat*/1)
+	else
 	{
 		uint32_t i = width * height;
 		uint32_t seed = FastRandom();
@@ -128,8 +127,6 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 // opens the menu background FMV
 void StartMenuBackgroundFmv()
 {
-	return;
-
 	const char *filenamePtr = "fmvs/menubackground.ogv";
 
 	menuFMV = new TheoraFMV();
@@ -156,7 +153,7 @@ extern int PlayMenuBackgroundFmv()
 
 	if (menuFMV->mTexturesReady)
 	{
-		DrawFmvFrame2(menuFMV->mFrameWidth, menuFMV->mFrameHeight, menuFMV->frameTextureIDs);
+		DrawFmvFrame(menuFMV->mFrameWidth, menuFMV->mFrameHeight, menuFMV->frameTextureIDs);
 	}
 
 	return 1;
@@ -242,7 +239,7 @@ extern void PlayFMV(const char *filenamePtr)
 
 		if (fmv.mTexturesReady)
 		{
-			DrawFmvFrame2(fmv.mFrameWidth, fmv.mFrameHeight, fmv.frameTextureIDs);
+			DrawFmvFrame(fmv.mFrameWidth, fmv.mFrameHeight, fmv.frameTextureIDs);
 		}
 
 		ThisFramesRenderingHasFinished();

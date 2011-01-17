@@ -66,7 +66,7 @@ bool Tex_Unlock(texID_t textureID)
 	return R_UnlockTexture(texture);
 }
 
-// for avp's fmv code
+// for avp's FMV code
 void Tex_GetNamesVector(std::vector<std::string> &namesArray)
 {
 	for (uint32_t i = 0; i < textureList.size(); i++)
@@ -155,13 +155,9 @@ texID_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &Av
 
 	// see if it exists already
 	textureID = Tex_CheckExists(textureName);
-	if (textureID != MISSING_TEXTURE)
+	if ((textureID != MISSING_TEXTURE) && (textureList[textureID].isValid))
 	{
-		// is it valid?
-		if (Tex_GetTexture(textureID) != NULL)
-		{
-			return textureID;
-		}
+		return textureID;
 	}
 
 	if (!R_CreateTallFontTexture(AvPTexure, usageType, newTexture))
@@ -331,7 +327,7 @@ std::string& Tex_GetName(texID_t textureID)
 
 const r_Texture& Tex_GetTexture(texID_t textureID)
 {
-	// don't return references to invalid textures
+	// if the texture requested isn't valid, return a reference to our "missing texture" texture
 	if (textureList[textureID].isValid == false)
 	{
 		return textureList[MISSING_TEXTURE].texture;
@@ -349,7 +345,7 @@ void Tex_ReleaseDynamicTextures()
 {
 	for (texIt = textureList.begin(); texIt != textureList.end(); ++texIt)
 	{
-		if (/*(texIt->texture*/(texIt->isValid) && (texIt->usage == TextureUsage_Dynamic))
+		if ((texIt->isValid) && (texIt->usage == TextureUsage_Dynamic))
 		{
 			R_ReleaseTexture(texIt->texture);
 			texIt->isValid = false;
@@ -394,7 +390,6 @@ void Tex_ListTextures()
 
 	for (uint32_t i = 0; i < textureList.size(); ++i)
 	{
-//		if (textureList[i].texture != NULL)
 		if (textureList[i].isValid)
 		{
 			ss.str("");
@@ -412,7 +407,6 @@ void Tex_CheckMemoryUsage()
 
 	for (texIt = textureList.begin(); texIt != textureList.end(); ++texIt)
 	{
-//		if (texIt->texture != NULL)
 		if (texIt->isValid)
 		{
 			bytesUsed += (texIt->width * texIt->height) * (texIt->bitsPerPixel / 8);
@@ -435,24 +429,21 @@ void Tex_CheckMemoryUsage()
 
 void Tex_Release(texID_t textureID)
 {
-	if (textureID == MISSING_TEXTURE)
+	if ((textureID == MISSING_TEXTURE) || (textureID == NO_TEXTURE))
 	{
-		// hold onto this (and what about NO_TEXTURE?)
+		// hold onto these (will be released on game exit in Tex_DeInit() )
 		return;
 	}
 
 	// only release a valid texture
-//	if (textureList.at(textureID).texture != NULL)
 	if (textureList.at(textureID).isValid)
 	{
 		R_ReleaseTexture(textureList[textureID].texture);
+		R_UnsetTexture(textureID);
 
 		std::stringstream ss;
 		ss << "releasing texture at ID: " << textureID << " with name " << textureList[textureID].name << " width: " << textureList[textureID].width << " height: " << textureList[textureID].height << std::endl;
 		OutputDebugString(ss.str().c_str());
-
-		// blank the name out
-//		textureList[textureID].name = ("");
 
 		// set as invalid
 		textureList[textureID].isValid = false;

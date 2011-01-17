@@ -145,7 +145,7 @@ void Start_Progress_Bar()
 
 		if (LoadingBarEmpty)
 		{
-			DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID);//, LoadingBarEmpty, emptybarWidth, emptybarHeight);
+			DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID);
 
 			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
 		}
@@ -207,13 +207,13 @@ void Set_Progress_Bar_Position(int pos)
 		{
 			// need to render the empty bar here again. As we're not blitting anymore, 
 			// the empty bar will only be rendered for one frame.
-			DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID);//, LoadingBarEmpty, emptybarWidth, emptybarHeight);
+			DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID);
 
 			// also need this here again, or else the text disappears!
 			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED); // no briefing text on demo this this call is in this block
 
 			// now render the green percent loaded overlay
-			DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, fullTextureID);//, LoadingBarFull, fullbarWidth, fullbarHeight);
+			DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, fullTextureID);
 		}
 
 		ThisFramesRenderingHasFinished();
@@ -275,7 +275,7 @@ void Game_Has_Loaded()
 	
 			if (LoadingBarFull)
 			{
-				DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, fullTextureID);//, LoadingBarFull, fullbarWidth, fullbarHeight);
+				DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, fullTextureID);
 			}
 			else
 			{

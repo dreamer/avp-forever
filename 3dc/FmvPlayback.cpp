@@ -13,8 +13,8 @@
 #define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
 #endif
 
-static const int kBufferSize = 4096;
-static const int kBufferCount = 3;
+static const int kAudioBufferSize  = 4096;
+static const int kAudioBufferCount = 3;
 
 static const int kQuantum = 1000 / 60;
 
@@ -151,7 +151,6 @@ TheoraFMV::~TheoraFMV()
 	for (uint32_t i = 0; i < frameTextureIDs.size(); i++)
 	{
 		Tex_Release(frameTextureIDs[i]);
-		frameTextureIDs[i] = MISSING_TEXTURE; // remove me
 	}
 
 	if (mFrameCriticalSectionInited)
@@ -241,7 +240,7 @@ int TheoraFMV::Open(const std::string &fileName)
 	if (mAudio)
 	{
 		// create mAudio streaming buffer
-		this->audioStream = new AudioStream(mAudio->mVorbis.mInfo.channels, mAudio->mVorbis.mInfo.rate, kBufferSize, kBufferCount);
+		this->audioStream = new AudioStream(mAudio->mVorbis.mInfo.channels, mAudio->mVorbis.mInfo.rate, kAudioBufferSize, kAudioBufferCount);
 		if (this->audioStream == NULL)
 		{
 			Con_PrintError("Failed to create mAudio stream buffer for FMV playback");
@@ -249,14 +248,14 @@ int TheoraFMV::Open(const std::string &fileName)
 		}
 
 		// we need some temporary mAudio data storage space and a ring buffer instance
-		mAudioData = new uint8_t[kBufferSize];
+		mAudioData = new uint8_t[kAudioBufferSize];
 		if (mAudioData == NULL)
 		{
 			Con_PrintError("Failed to create mAudioData stream buffer for FMV playback");
 			return FMV_ERROR;
 		}
 
-		mRingBuffer = new RingBuffer(kBufferSize * kBufferCount);
+		mRingBuffer = new RingBuffer(kAudioBufferSize * kAudioBufferCount);
 		if (mRingBuffer == NULL)
 		{
 			Con_PrintError("Failed to create mRingBuffer for FMV playback");
@@ -270,13 +269,23 @@ int TheoraFMV::Open(const std::string &fileName)
 	mFrameWidth = mVideo->mTheora.mInfo.frame_width;
 	mFrameHeight = mVideo->mTheora.mInfo.frame_height;
 
-	frameTextureIDs.resize(3);
+	// determine how many textures we need
+	if (/* can gpu do shader yuv->rgb? */ 1)
+	{
+		frameTextureIDs.resize(3);
+		frameTextureIDs[0] = MISSING_TEXTURE;
+		frameTextureIDs[1] = MISSING_TEXTURE;
+		frameTextureIDs[2] = MISSING_TEXTURE;
+		mNumTextureBits = 8;
+	}
+	else
+	{
+		// do CPU YUV->RGB with a single 32bit texture
+		frameTextureIDs.resize(1);
+		frameTextureIDs[0] = MISSING_TEXTURE;
+		mNumTextureBits = 32;
+	}
 
-	frameTextureIDs[0] = MISSING_TEXTURE;
-	frameTextureIDs[1] = MISSING_TEXTURE;
-	frameTextureIDs[2] = MISSING_TEXTURE;
-
-	// TODO: single 32bit texture for a system that can't do shader based YUV->RGB conversion
 	for (uint32_t i = 0; i < frameTextureIDs.size(); i++)
 	{
 		uint32_t width = mFrameWidth;
@@ -290,10 +299,10 @@ int TheoraFMV::Open(const std::string &fileName)
 		}
 
 		// create the texture with desired parameters
-		frameTextureIDs[i] = Tex_Create("CUTSCENE_" + IntToString(i), width, height, 8, TextureUsage_Dynamic);
+		frameTextureIDs[i] = Tex_Create(/*"CUTSCENE_"*/fileName + IntToString(i), width, height, mNumTextureBits, TextureUsage_Dynamic);
 		if (frameTextureIDs[i] == MISSING_TEXTURE)
 		{
-			Con_PrintError("Unable to create textures for FMV playback");
+			Con_PrintError("Unable to create texture(s) for FMV playback");
 			return false;
 		}
 	}
@@ -440,10 +449,6 @@ bool TheoraFMV::NextFrame(uint32_t width, uint32_t height, uint8_t *bufferPtr, u
 
 	LeaveCriticalSection(&mFrameCriticalSection);
 
-//	char buf[100];
-//	sprintf(buf, "total time: %d\n", timeGetTime() - startTime);
-//	OutputDebugString(buf);
-
 	mFrameReady = false;
 
 	return true;
@@ -481,15 +486,6 @@ bool TheoraFMV::NextFrame()
 
 				destPtr += width * sizeof(uint8_t);
 				srcPtr += width * sizeof(uint8_t);
-	/*
-				for (uint32_t x = 0; x < frameTextures[i].width; x++)
-				{
-					memcpy(destPtr, srcPtr, sizeof(uint8_t));
-
-					destPtr += sizeof(uint8_t);
-					srcPtr += sizeof(uint8_t);
-				}
-	*/
 			}
 
 			// unlock texture

@@ -10,7 +10,6 @@
 #define UseLocalAssert 0
 #include "ourasert.h"
 #include "awTexLd.h"
-
 #include "TextureManager.h"
 
 extern void release_rif_bitmaps();
@@ -90,12 +89,9 @@ int InitialiseTextures(void)
 	int LocalTxIndex;
 
 	/*
-
-	Free up any currently loaded images
-
-	The caller is responsible for any other structures which might refer
-	to the currently loaded images
-
+		Free up any currently loaded images
+		The caller is responsible for any other structures which might refer
+		to the currently loaded images
 	*/
 
 	#ifdef MaxImageGroups
@@ -153,13 +149,10 @@ int InitialiseTextures(void)
 				txfilesptr = *txfiles++;
 
 				/*
-
-				"txfilesptr" is in the form "textures\<fname>". We need to
-				prefix that text with the name of the current textures path.
-
-				Soon this path may be varied but for now it is just the name of
-				the current project subdirectory.
-
+					"txfilesptr" is in the form "textures\<fname>". We need to
+					prefix that text with the name of the current textures path.
+					Soon this path may be varied but for now it is just the name of
+					the current project subdirectory.
 				*/
 
 				src = projectsubdirectory;
@@ -184,7 +177,7 @@ int InitialiseTextures(void)
 				#endif
 
 				/* This function calls GetExistingImageHeader to figure out if the image is already loaded */
-				TxIndex = CL_LoadImageOnce(fname, LIO_D3DTEXTURE|LIO_TRANSPARENT|LIO_RELATIVEPATH|LIO_RESTORABLE);
+				TxIndex = CL_LoadImageOnce(fname, LIO_D3DTEXTURE | LIO_TRANSPARENT | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
 				GLOBALASSERT(GEI_NOTLOADED != TxIndex);
 

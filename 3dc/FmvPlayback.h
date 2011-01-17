@@ -68,6 +68,7 @@ class TheoraFMV
 		uint32_t mTextureHeight;
 		uint32_t mFrameWidth;
 		uint32_t mFrameHeight;
+		uint8_t  mNumTextureBits;
 		CRITICAL_SECTION mFrameCriticalSection;
 		bool mFrameCriticalSectionInited;
 

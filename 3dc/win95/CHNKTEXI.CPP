@@ -643,14 +643,13 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 	// safe to handle windows messages at this point (I think - JCWH)
 	CheckForWindowsMessages();
 
-	texID_t textureID = 0;
+	texID_t textureID = MISSING_TEXTURE;
 
 	// get the filename
 	char szBuf[MAX_PATH];
 	if (!CL_GetImageFileName(szBuf, sizeof szBuf/sizeof szBuf[0], pszFileName, fFlagsEtc))
 	{
 		db_log1("CL_LoadImageOnce(): ERROR: unable to determine path of file");
-//		return GEI_NOTLOADED;
 		return MISSING_TEXTURE;
 	}
 
@@ -745,7 +744,6 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 				else
 				{
 					db_log1("CL_LoadImageOnce(): ERROR copying data to texture");
-//					return GEI_NOTLOADED;
 					return MISSING_TEXTURE;
 				}
 			}
@@ -809,7 +807,6 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 				else
 				{
 					db_log1("CL_LoadImageOnce(): ERROR copying data to texture");
-//					return GEI_NOTLOADED;
 					return MISSING_TEXTURE;
 				}
 				#elif !CL_SUPPORT_FASTFILE
@@ -820,7 +817,6 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 		}
 		default:
 			db_log1("CL_LoadImageOnce(): ERROR: Invalid destination surface specification");
-//			return GEI_NOTLOADED;
 			return MISSING_TEXTURE;
 	}
 }
