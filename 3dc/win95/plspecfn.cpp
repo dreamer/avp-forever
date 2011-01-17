@@ -210,16 +210,14 @@ void MakeNormal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, VECTORCH *v4)
 
 void Normalise(VECTORCH *nvector)
 {
-
 	VECTORCHF n;
 	float m;
-
 
 	n.vx = nvector->vx;
 	n.vy = nvector->vy;
 	n.vz = nvector->vz;
 
-	m = 65536.0/sqrt((n.vx * n.vx) + (n.vy * n.vy) + (n.vz * n.vz));
+	m = 65536.0f / sqrt((n.vx * n.vx) + (n.vy * n.vy) + (n.vz * n.vz));
 
 	f2i(nvector->vx, (n.vx * m) );
 	f2i(nvector->vy, (n.vy * m) );

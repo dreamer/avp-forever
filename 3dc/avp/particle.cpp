@@ -4207,7 +4207,6 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 		{
 			VOLUMETRIC_EXPLOSION *expPtr;
 			int i;
-			int r;
 			
 			/* KJL 11:49:25 19/08/98 - check to see if explosion is inside environment */
 			{

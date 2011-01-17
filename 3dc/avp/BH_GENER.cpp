@@ -17,7 +17,7 @@
 #include "bh_far.h"
 #include "pldghost.h"
 
-#include "load_shp.h" 
+#include "load_shp.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 
@@ -53,7 +53,7 @@ int Alt_FarAliens;
 int ShowHiveState=0;
 
 /* for testing */
-#define logGenData	0  					
+#define logGenData	0
 #if logGenData
 FILE *logFile;
 #endif
@@ -99,9 +99,9 @@ void ZapSlack(void) {
  ----------------------------------------------------*/
 void InitGenerator(void *bhdata, STRATEGYBLOCK *sbPtr)
 {
- 	
+	
 	GENERATOR_BLOCK *toolsData = (GENERATOR_BLOCK *)bhdata;
- 	GENERATOR_BLOCK *genBlock = (GENERATOR_BLOCK *)AllocateMem(sizeof(GENERATOR_BLOCK));
+	GENERATOR_BLOCK *genBlock = (GENERATOR_BLOCK *)AllocateMem(sizeof(GENERATOR_BLOCK));
 	if (!genBlock)
 	{
 		memoryInitialisationFailure = 1;
@@ -110,21 +110,21 @@ void InitGenerator(void *bhdata, STRATEGYBLOCK *sbPtr)
 
 	*genBlock=*toolsData;
 
- 	genBlock->Timer = 0;	   
+	genBlock->Timer = 0;
 	genBlock->RateIncreaseTimer=60*ONE_FIXED;
 	if(genBlock->GenerationRate<=0)
 		genBlock->GenerationRate=1;
 
- 	sbPtr->SBdataptr = (void *)genBlock;
- 	sbPtr->maintainVisibility = 0;
- 	sbPtr->containingModule = NULL;
+	sbPtr->SBdataptr = (void *)genBlock;
+	sbPtr->maintainVisibility = 0;
+	sbPtr->containingModule = NULL;
 
 
-  	sbPtr->shapeIndex=0; //shape index not relevant when using hierarchical	models
+	sbPtr->shapeIndex=0; //shape index not relevant when using hierarchical	models
 
 	if(UseGeneratorBalance && genBlock->use_own_max_npc)
 	{
-		GeneratorBalance.MaxOwnSettingNpc+=genBlock->MaxGenNPCs;					
+		GeneratorBalance.MaxOwnSettingNpc+=genBlock->MaxGenNPCs;
 	}
 }
 
@@ -162,17 +162,17 @@ void GeneratorBehaviour(STRATEGYBLOCK *sbPtr)
 		}
 	}
 		
-	/* check the timer */	
+	/* check the timer */
 	if(UseGeneratorBalance && AvP.Network != I_No_Network)
 	{
-		genBlock->Timer -= MUL_FIXED(NormalFrameTime,GeneratorBalance.RateMultiplier);	
+		genBlock->Timer -= MUL_FIXED(NormalFrameTime,GeneratorBalance.RateMultiplier);
 	}
 	else
 	{
-		genBlock->Timer -= NormalFrameTime;	
+		genBlock->Timer -= NormalFrameTime;
 	}
 	if(genBlock->Timer > 0) return;
-	
+
 	/* reset the timer */
 	ResetGeneratorTimer(genBlock);
 
@@ -182,14 +182,14 @@ void GeneratorBehaviour(STRATEGYBLOCK *sbPtr)
 	many generator npcs in the environment */
 	
 	/* if generator is visible, do not create a new NPC */
-	if(ModuleCurrVisArray[(sbPtr->containingModule->m_index)]) 
+	if(ModuleCurrVisArray[(sbPtr->containingModule->m_index)])
 	{	
 		#if logGenData
 		{
 			logFile = fopen("D:/PATRICK/GENLOG.TXT","a");
-			fprintf(logFile, "generator: I am visible \n \n");		 		
- 			fclose(logFile);
-		}	
+			fprintf(logFile, "generator: I am visible \n \n");
+			fclose(logFile);
+		}
 		#endif
 		return;
 	}
@@ -229,8 +229,8 @@ void GeneratorBehaviour(STRATEGYBLOCK *sbPtr)
 		#if logGenData
 		{
 			logFile = fopen("D:/PATRICK/GENLOG.TXT","a");
-			fprintf(logFile, "generator: too many aliens in my module \n \n");		 		
- 			fclose(logFile);
+			fprintf(logFile, "generator: too many aliens in my module \n \n");
+			fclose(logFile);
 		}	
 		#endif
 		return;
@@ -243,7 +243,6 @@ void GeneratorBehaviour(STRATEGYBLOCK *sbPtr)
 			//check npcs from this generator
 			if (NumNPCsFromThisGenerator(sbPtr) >= GeneratorBalance_LocalLimit(genBlock->MaxGenNPCs)) 
 				return;
-
 		}
 		else
 		{
@@ -267,7 +266,7 @@ void GeneratorBehaviour(STRATEGYBLOCK *sbPtr)
 			if (NumGeneratorNPCsInEnv() >= NPCHive.maxGeneratorNPCs) 
 				return;
 		}
-	}		
+	}
 	/* ok... create an NPC, then */
 	GLOBALASSERT(genBlock->WeightingTotal);
 	{
@@ -321,7 +320,6 @@ void GeneratorBehaviour(STRATEGYBLOCK *sbPtr)
 			return;
 		}
 		random-=genBlock->GrenadeMarine_Wt;
-
 
 		//minigun marine
 		if(random<genBlock->MinigunMarine_Wt)
@@ -396,9 +394,7 @@ void GeneratorBehaviour(STRATEGYBLOCK *sbPtr)
 		random-=genBlock->Praetorian_Wt;
 
 		GLOBALASSERT(0=="Failed to select generator badguy");
-
-	}	
-
+	}
 }
 
 
@@ -439,9 +435,6 @@ void InitHive(void)
 //	if(AvP.Network != I_No_Network && AvP.NetworkAIServer==0) return;
 //	if(AvP.Network != I_No_Network)	return;
 
-	
-
-
 	/* set the level parameters */
 //	NPCHive.maxGeneratorNPCs = hiveLevelData[AvP.CurrentEnv].maxGeneratorNPCs;
 //	NPCHive.generatorNPCsPerMinute = hiveLevelData[AvP.CurrentEnv].generatorNPCsPerMinute;
@@ -466,20 +459,20 @@ void InitHive(void)
 //	ResetHiveStateTime();
 
 	/* Now in ActivateHive. */
-		  
+
 	/* Some futher generator initialisations: work out what modules the generators are
 	in, and how many generators there are.
-	*/	
+	*/
 	sbIndex = 0;
 	while(sbIndex < NumActiveStBlocks)
-	{	
+	{
 		sbPtr = ActiveStBlockList[sbIndex++];
 		if(sbPtr->I_SBtype == I_BehaviourGenerator)
 		{
-   			GENERATOR_BLOCK *genBlock = (GENERATOR_BLOCK *)sbPtr->SBdataptr;			
+			GENERATOR_BLOCK *genBlock = (GENERATOR_BLOCK *)sbPtr->SBdataptr;
 			sbPtr->containingModule = ModuleFromPosition(&genBlock->Position, (MODULE *)0);
-			LOCALASSERT(sbPtr->containingModule);		
-			NPCHive.numGenerators++;			
+			LOCALASSERT(sbPtr->containingModule);
+			NPCHive.numGenerators++;
 			/* init generator times to something quite small... 
 			so that we get some npcs in the env quickly */
 			genBlock->Timer = ONE_FIXED;
@@ -495,17 +488,16 @@ void InitHive(void)
 	{
 		logFile = fopen("D:/PATRICK/GENLOG.TXT","w");
 		fprintf(logFile, "GENERATOR/HIVE DATA LOG \n \n");
-		fprintf(logFile, "num Geners: %d \n",NPCHive.numGenerators);		
-		fprintf(logFile, "hive timer: %d \n",NPCHive.hiveStateTimer);		
-		fprintf(logFile, "max npcs: %d \n",NPCHive.maxGeneratorNPCs);		
-		fprintf(logFile, "npcs per min: %d \n",NPCHive.generatorNPCsPerMinute);		
-		fprintf(logFile, "change in npcs per min: %d \n \n",NPCHive.deltaGeneratorNPCsPerMinute);		
- 		fclose(logFile);
-	}	
+		fprintf(logFile, "num Geners: %d \n",NPCHive.numGenerators);
+		fprintf(logFile, "hive timer: %d \n",NPCHive.hiveStateTimer);
+		fprintf(logFile, "max npcs: %d \n",NPCHive.maxGeneratorNPCs);
+		fprintf(logFile, "npcs per min: %d \n",NPCHive.generatorNPCsPerMinute);
+		fprintf(logFile, "change in npcs per min: %d \n \n",NPCHive.deltaGeneratorNPCsPerMinute);
+		fclose(logFile);
+	}
 	#endif
 
 	ActivateHive();
-
 }
 
 void ActivateHive(void) {
@@ -533,11 +525,10 @@ void ActivateHive(void) {
 
 	/* init the hive timer */
 	ResetHiveStateTime();
-
 }
 
-void DeActivateHive(void) {
-
+void DeActivateHive(void)
+{
 	NPCHive.genRateTimer = 0;
 	NPCHive.maxGeneratorNPCs = 0;
 	NPCHive.generatorNPCsPerMinute = 0;
@@ -559,7 +550,6 @@ void DeActivateHive(void) {
 
 	/* init the hive timer */
 	ResetHiveStateTime();
-
 }
 
 /*---------------------Patrick 21/1/97------------------------
@@ -608,7 +598,7 @@ void DoHive(void)
 		}
 		ResetHiveStateTime();
 	}
-	
+
 	/* check gen rate timer */
 	NPCHive.genRateTimer -= NormalFrameTime;
 	if(NPCHive.genRateTimer <= 0)
@@ -616,11 +606,11 @@ void DoHive(void)
 		/* increase frequency */
 		NPCHive.generatorNPCsPerMinute += NPCHive.deltaGeneratorNPCsPerMinute;
 		/* validate this value */
-		if(NPCHive.generatorNPCsPerMinute > GENSPERMINUTE_MAX) 
-			NPCHive.generatorNPCsPerMinute = GENSPERMINUTE_MAX;				
-		if(NPCHive.generatorNPCsPerMinute < GENSPERMINUTE_MIN) 
+		if(NPCHive.generatorNPCsPerMinute > GENSPERMINUTE_MAX)
+			NPCHive.generatorNPCsPerMinute = GENSPERMINUTE_MAX;
+		if(NPCHive.generatorNPCsPerMinute < GENSPERMINUTE_MIN)
 			NPCHive.generatorNPCsPerMinute = GENSPERMINUTE_MIN;
-		
+
 		NPCHive.genRateTimer = (ONE_FIXED*60);
 	}
 
@@ -635,12 +625,13 @@ void DoHive(void)
 			PrintDebuggingText("Hive Retreating %d...\n",NPCHive.hiveStateTimer);
 		}
 	}
-	
+
 	if (ShowHiveState) {
 		PrintDebuggingText("Near Aliens = %d\nFar Aliens = %d\n",NearAliens,FarAliens);
 	}
 
-	if ((SlackSize)&&(ShowSlack)) {
+	if ((SlackSize)&&(ShowSlack))
+	{
 		int Slack;
 		
 		Slack=(SlackTotal/SlackSize);
@@ -655,7 +646,7 @@ void DoHive(void)
 static void ResetGeneratorTimer(GENERATOR_BLOCK *genBlock)
 {
 	LOCALASSERT(genBlock);
-		
+
 	/* shouldn't be doing this for a net game */
 //	LOCALASSERT(AvP.Network == I_No_Network);
 
@@ -667,28 +658,28 @@ static void ResetGeneratorTimer(GENERATOR_BLOCK *genBlock)
 	else
 	{
 		/* if we get here, there must be at least one generator, and some kind of generator rate */
-		LOCALASSERT(NPCHive.numGenerators>0); 	
+		LOCALASSERT(NPCHive.numGenerators>0);
 		LOCALASSERT(NPCHive.generatorNPCsPerMinute>0);
 
-		/* set the timer */		
+		/* set the timer */
 		genBlock->Timer	= (((60 * ONE_FIXED)/(NPCHive.generatorNPCsPerMinute))*NPCHive.numGenerators);
 	}
 	/* randomise +- an eighth */
 	{
 		int baseTime = genBlock->Timer;
-		genBlock->Timer = ((baseTime*7)/8) + (FastRandom()%(baseTime/4)); 
+		genBlock->Timer = ((baseTime*7)/8) + (FastRandom()%(baseTime/4));
 	}
 	/* clamp */
 	if(genBlock->Timer>GENERATORTIME_MAX) genBlock->Timer=GENERATORTIME_MAX;
-	if(genBlock->Timer<GENERATORTIME_MIN) genBlock->Timer=GENERATORTIME_MIN;	
+	if(genBlock->Timer<GENERATORTIME_MIN) genBlock->Timer=GENERATORTIME_MIN;
 
 	#if logGenData
 	{
 		logFile = fopen("D:/PATRICK/GENLOG.TXT","a");
-		fprintf(logFile, "Reset Gen Timer \n");		
-		fprintf(logFile, "gen timer to: %d seconds \n \n",genBlock->Timer);		 		
- 		fclose(logFile);
-	}	
+		fprintf(logFile, "Reset Gen Timer \n");
+		fprintf(logFile, "gen timer to: %d seconds \n \n",genBlock->Timer);
+		fclose(logFile);
+	}
 	#endif
 }
 
@@ -699,19 +690,19 @@ static void ResetHiveStateTime(void)
 	/* shouldn't be doing this for a net game */
 //	LOCALASSERT(AvP.Network == I_No_Network);
 
-	/* set the timer, +- an eighth */	
+	/* set the timer, +- an eighth */
 	baseTime = LoadedHiveData.hiveStateBaseTime;
 	NPCHive.hiveStateTimer = ((baseTime*7)/8) + (FastRandom()%(baseTime/4));
 
 	#if logGenData
 	{
 		logFile = fopen("D:/PATRICK/GENLOG.TXT","a");
-		fprintf(logFile, "Reset Hive Timer \n");		
-		fprintf(logFile, "hive timer to: %d seconds \n \n",NPCHive.hiveStateTimer);		 		
- 		fclose(logFile);
-	}	
+		fprintf(logFile, "Reset Hive Timer \n");
+		fprintf(logFile, "hive timer to: %d seconds \n \n",NPCHive.hiveStateTimer);
+		fclose(logFile);
+	}
 	#endif
-}  					
+}
 
 
 /* Patrick 11/8/97 ---------------------------------------------------
@@ -722,9 +713,9 @@ int NumGeneratorNPCsInEnv(void)
 	int sbIndex = 0;
 	STRATEGYBLOCK *sbPtr;
 	int numOfNPCs = 0;
-		
+
 	while(sbIndex < NumActiveStBlocks)
-	{	
+	{
 		sbPtr = ActiveStBlockList[sbIndex++];
 		if((sbPtr->I_SBtype == I_BehaviourAlien)||(sbPtr->I_SBtype == I_BehaviourMarine))
 		{
@@ -740,20 +731,21 @@ int NumGeneratorNPCsInEnv(void)
 	#if logGenData
 	{
 		logFile = fopen("D:/PATRICK/GENLOG.TXT","a");
-		fprintf(logFile, "current num gener npcs: %d \n \n",numOfNPCs);		 		
- 		fclose(logFile);
-	}	
+		fprintf(logFile, "current num gener npcs: %d \n \n",numOfNPCs);
+		fclose(logFile);
+	}
 	#endif
 	return numOfNPCs;
 }
+
 int NumNPCsFromThisGenerator(STRATEGYBLOCK* gen_sbptr)
 {
 	int sbIndex = 0;
 	STRATEGYBLOCK *sbPtr;
 	int numOfNPCs = 0;
-		
+
 	while(sbIndex < NumActiveStBlocks)
-	{	
+	{
 		sbPtr = ActiveStBlockList[sbIndex++];
 		switch(sbPtr->I_SBtype)
 		{
@@ -785,7 +777,6 @@ int NumNPCsFromThisGenerator(STRATEGYBLOCK* gen_sbptr)
 
 			default: ; // do nothing
 		}
-		
 	}
 
 	return numOfNPCs;
@@ -797,27 +788,27 @@ int NumGeneratorNPCsVisible(void)
 	int sbIndex = 0;
 	STRATEGYBLOCK *sbPtr;
 	int numOfVisNPCs = 0;
-		
+
 	while(sbIndex < NumActiveStBlocks)
-	{	
+	{
 		sbPtr = ActiveStBlockList[sbIndex++];
 		if((sbPtr->I_SBtype == I_BehaviourAlien)||(sbPtr->I_SBtype == I_BehaviourMarine))
-		{	
+		{
 			if(sbPtr->SBdptr)numOfVisNPCs++;
 		}
 	}
 	#if logGenData
 	{
 		logFile = fopen("D:/PATRICK/GENLOG.TXT","a");
-		fprintf(logFile, "current num visible npcs: %d \n \n",numOfVisNPCs);		 		
- 		fclose(logFile);
-	}	
+		fprintf(logFile, "current num visible npcs: %d \n \n",numOfVisNPCs);
+		fclose(logFile);
+	}
 	#endif
 	return numOfVisNPCs;
 }
 
-void ForceAGenerator_Shell(void) {
-
+void ForceAGenerator_Shell(void)
+{
 	NewOnScreenMessage("FORCING...\n");
 	ForceAGenerator();
 }
@@ -829,29 +820,29 @@ void ForceAGenerator(void)
 	#if logGenData
 	{
 		logFile = fopen("D:/PATRICK/GENLOG.TXT","a");
-		fprintf(logFile, "forcing a generator... \n");		 		
- 		fclose(logFile);
-	}	
+		fprintf(logFile, "forcing a generator... \n");
+		fclose(logFile);
+	}
 	#endif
-		
+
 	while(sbIndex < NumActiveStBlocks)
-	{	
+	{
 		sbPtr = ActiveStBlockList[sbIndex++];
 		if(sbPtr->I_SBtype == I_BehaviourGenerator)
-		{	
+		{
 			GENERATOR_BLOCK *genBlock = (GENERATOR_BLOCK *)sbPtr->SBdataptr;
 			LOCALASSERT(genBlock);
-		
+
 			if(genBlock->Timer>0) 
-			{	
+			{
 				/* found a generator with timer>0, so set it to zero and return */
 				genBlock->Timer = 0;
 				#if logGenData
 				{
 					logFile = fopen("D:/PATRICK/GENLOG.TXT","a");
-					fprintf(logFile, "... forced generator ref %d \n \n",sbIndex);		 		
- 					fclose(logFile);
-				}	
+					fprintf(logFile, "... forced generator ref %d \n \n",sbIndex);
+					fclose(logFile);
+				}
 				#endif
 				return;
 			}
@@ -860,11 +851,10 @@ void ForceAGenerator(void)
 	#if logGenData
 	{
 		logFile = fopen("D:/PATRICK/GENLOG.TXT","a");
-		fprintf(logFile, "... didn't find one to force \n \n");		 		
- 		fclose(logFile);
+		fprintf(logFile, "... didn't find one to force \n \n");
+		fclose(logFile);
 	}	
 	#endif
-
 }
 
 
@@ -923,7 +913,6 @@ void LoadStrategy_Generator(SAVE_BLOCK_STRATEGY_HEADER* header)
 	COPYELEMENT_LOAD(Active)
 	COPYELEMENT_LOAD(GenerationRate)
 	COPYELEMENT_LOAD(RateIncreaseTimer)
-	
 }
 
 void SaveStrategy_Generator(STRATEGYBLOCK* sbPtr)
@@ -931,7 +920,6 @@ void SaveStrategy_Generator(STRATEGYBLOCK* sbPtr)
 	GENERATOR_SAVE_BLOCK *block;
 	GENERATOR_BLOCK *genBlock;
 	genBlock = (GENERATOR_BLOCK*)sbPtr->SBdataptr;
-	
 
 	GET_STRATEGY_SAVE_BLOCK(GENERATOR_SAVE_BLOCK,block,sbPtr);
 
@@ -941,7 +929,6 @@ void SaveStrategy_Generator(STRATEGYBLOCK* sbPtr)
 	COPYELEMENT_SAVE(Active)
 	COPYELEMENT_SAVE(GenerationRate)
 	COPYELEMENT_SAVE(RateIncreaseTimer)
-
 }
 
 
@@ -978,7 +965,6 @@ void LoadHiveSettings(SAVE_BLOCK_HEADER* header)
 	COPYELEMENT_LOAD(hiveStateTimer)
 	COPYELEMENT_LOAD(genRateTimer)
 	COPYELEMENT_LOAD(generatorNPCsPerMinute)
-	
 }
 
 void SaveHiveSettings()
@@ -990,19 +976,11 @@ void SaveHiveSettings()
 	block->header.type = SaveBlock_GlobalHive;
 	block->header.size = sizeof(*block);
 
-
 	COPYELEMENT_SAVE(currentState)
 	COPYELEMENT_SAVE(hiveStateTimer)
 	COPYELEMENT_SAVE(genRateTimer)
 	COPYELEMENT_SAVE(generatorNPCsPerMinute)
 }
-
-
-
-
-
-
-
 
 int GeneratorBalance_PlayerScoreValue = 0;
 
@@ -1012,7 +990,7 @@ int GeneratorBalance_PlayerScoreValue = 0;
 static void GeneratorBalance_Init()
 {
 	GeneratorBalance.PlayerValue = GeneratorBalance_PlayerScoreValue*100;
-	
+
 	GeneratorBalance.Timer = 0;
 	GeneratorBalance.AIScore = 0;
 	GeneratorBalance.PlayerScore = 0;
@@ -1021,7 +999,7 @@ static void GeneratorBalance_Init()
 	GeneratorBalance.MaxAIShift = 0;
 	GeneratorBalance.Counter = GENERATOR_BALANCE_THRESHHOLD/2;
 
-	GeneratorBalance.MaxOwnSettingNpc = 0;	
+	GeneratorBalance.MaxOwnSettingNpc = 0;
 
 }
 
@@ -1044,11 +1022,10 @@ static void GeneratorBalance_PerFrameMaintenance()
 	if(GeneratorBalance.PlayerValue!=GeneratorBalance_PlayerScoreValue*100)
 	{
 		GeneratorBalance.PlayerValue=GeneratorBalance_PlayerScoreValue*100;
-		UseGeneratorBalance = (GeneratorBalance.PlayerValue>0); 			
+		UseGeneratorBalance = (GeneratorBalance.PlayerValue>0); 
 	}
-	
-	if(!UseGeneratorBalance) return;
 
+	if(!UseGeneratorBalance) return;
 
 //	PrintDebuggingText("\n\n\n\n\nAI : %d\n",GeneratorBalance.AIScore);
 //	PrintDebuggingText("Player : %d\n",GeneratorBalance.PlayerScore);
@@ -1057,41 +1034,37 @@ static void GeneratorBalance_PerFrameMaintenance()
 	
 
 	GeneratorBalance.Timer += NormalFrameTime;
-	
+
 	if(GeneratorBalance.Timer > 10 * ONE_FIXED)
 	{
 		GeneratorBalance.Timer-= 10 * ONE_FIXED;
-	  
+
 		if(GeneratorBalance.PlayerScore>0 || GeneratorBalance.AIScore>0)
 		{
-			
 			if(GeneratorBalance.PlayerScore>GeneratorBalance.AIScore)
 			{
 				//make things easier
 				int ratio = DIV_FIXED(GeneratorBalance.PlayerScore+GeneratorBalance.PlayerValue,GeneratorBalance.AIScore+GeneratorBalance.PlayerValue);
-			
 /*			
 				if(ratio > (ONE_FIXED*1.1))
 				{
 					GeneratorBalance.RateMultiplier = DIV_FIXED(GeneratorBalance.RateMultiplier,ONE_FIXED *1.1);
 				}
-*/			
+*/
 				{
 					int decrement = ratio - ONE_FIXED;
 					if(GeneratorBalance.MaxAIShift < 0)
 					{
 						decrement /= (-GeneratorBalance.MaxAIShift)+1;
 					}
-					
+
 					GeneratorBalance.Counter-=decrement;
 					if(GeneratorBalance.Counter<0)
 					{
 						GeneratorBalance.Counter = GENERATOR_BALANCE_THRESHHOLD/2;
-						GeneratorBalance.MaxAIShift--;							
+						GeneratorBalance.MaxAIShift--;
 						GeneratorBalance.PlayerScore = 	GeneratorBalance.AIScore;
-
 					}
-
 				}
 			}
 			else
@@ -1104,36 +1077,28 @@ static void GeneratorBalance_PerFrameMaintenance()
 					GeneratorBalance.RateMultiplier = MUL_FIXED(GeneratorBalance.RateMultiplier,ONE_FIXED *1.1);
 				}
 */
-
-
 				{
 					int increment = ratio - ONE_FIXED;
 					if(GeneratorBalance.MaxAIShift > 0)
 					{
 						increment /= GeneratorBalance.MaxAIShift+1;
 					}
-					
+
 					GeneratorBalance.Counter+=increment;
 					if(GeneratorBalance.Counter>GENERATOR_BALANCE_THRESHHOLD)
 					{
 						GeneratorBalance.Counter = GENERATOR_BALANCE_THRESHHOLD/2;
-						GeneratorBalance.MaxAIShift++;							
+						GeneratorBalance.MaxAIShift++;
 						GeneratorBalance.AIScore = 	GeneratorBalance.PlayerScore;
-
 					}
-
 				}
 			}
-	   		GeneratorBalance.AIScore -= MUL_FIXED(GENERATOR_BALANCE_DECAY,GeneratorBalance.AIScore);
+			GeneratorBalance.AIScore -= MUL_FIXED(GENERATOR_BALANCE_DECAY,GeneratorBalance.AIScore);
 			GeneratorBalance.PlayerScore -= MUL_FIXED(GENERATOR_BALANCE_DECAY,GeneratorBalance.PlayerScore);
 		}
 
 		if(GeneratorBalance.RateMultiplier > 4*ONE_FIXED) GeneratorBalance.RateMultiplier = 4*ONE_FIXED;
 		if(GeneratorBalance.RateMultiplier < ONE_FIXED/4) GeneratorBalance.RateMultiplier = ONE_FIXED/4;
-
-
-
-   		
 	}
 }
 

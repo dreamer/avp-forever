@@ -3,7 +3,6 @@
 #include "3dc.h"
 #include "inline.h"
 #include "module.h"
-
 #include "list_tem.hpp"
 #include "chnkload.hpp"
 #include "projload.hpp"
@@ -19,7 +18,6 @@
 #include "ltchunk.hpp"
 #include "avpchunk.hpp"
 #include "pathchnk.hpp"
-
 #include "objsetup.hpp"
 #include "npcsetup.h"
 #include "sprchunk.hpp"
@@ -30,7 +28,6 @@
 #include "sequnces.h"
 #include "fragchnk.hpp"
 #include "hierplace.hpp"
-
 #include "pfarlocs.h"
 #include "progress_bar.h"
 #include "stratdef.h"
@@ -49,14 +46,12 @@
 #include "mempool.h"
 #include "db.h"
 #include "pldnet.h"
-
+#include "inventry.h"
 #include <vector>
 #include "TextureManager.h"
 
 // store texture handles for ingame textures
 std::vector<texID_t> ingameTextureList;
-
-#include "inventry.h"
 
 extern int VideoMode;
 extern VECTORCH PlayerStartLocation;

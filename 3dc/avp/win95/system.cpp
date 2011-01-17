@@ -54,6 +54,9 @@ extern MAPHEADER Map[];
 extern MAPHEADER * staticmaplist[];
 extern MAPBLOCK8 Player_and_Camera_Type8[];
 
+extern void create_strategies_from_list();
+extern void AssignAllSBNames();
+
 extern SCENEMODULE **Global_ModulePtr;
 extern SCENEMODULE *MainSceneArray[];
 
@@ -146,54 +149,53 @@ void InitCharacter()
 		{
 			// set up the standard single player game
 			switch(AvP.PlayerType)
-				{
-					case I_Marine:
-						{
-							marine_weapon_rif = avp_load_rif("avp_huds/marwep.rif");
-							Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.25);
-							player_rif = avp_load_rif("avp_huds/marine.rif");
-							break;
-						}
-					case I_Predator:
-						{
-							predator_weapon_rif = avp_load_rif("avp_huds/pred_hud.rif");
-							Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.25);
-							player_rif = avp_load_rif("avp_huds/predator.rif");
-							break;
-						}
-
-					case I_Alien:
-						{
-							#if ALIEN_DEMO
-							alien_weapon_rif = avp_load_rif("alienavp_huds/alien_hud.rif");
-							Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.25);
-							player_rif = avp_load_rif("alienavp_huds/alien.rif");
-							#else
-							alien_weapon_rif = avp_load_rif("avp_huds/alien_hud.rif");
-							Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.25);
-							player_rif = avp_load_rif("avp_huds/alien.rif");
-							#endif
-							break;
-						}
-					default:
-						{
-							GLOBALASSERT(2<1);
-						}
-				}
-				break;
-			}
-			default:
 			{
-				// set up a multiplayer game - here becuse we might end
-				// up with a cooperative game
-				//load all weapon rifs
-				marine_weapon_rif = avp_load_rif("avp_huds/marwep.rif");
-				predator_weapon_rif = avp_load_rif("avp_huds/pred_hud.rif");
-				alien_weapon_rif = avp_load_rif("avp_huds/alien_hud.rif");
-
-				Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.25);
-				player_rif = avp_load_rif("avp_huds/multip.rif");
+				case I_Marine:
+				{
+					marine_weapon_rif = avp_load_rif("avp_huds/marwep.rif");
+					Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.25);
+					player_rif = avp_load_rif("avp_huds/marine.rif");
+					break;
+				}
+				case I_Predator:
+				{
+					predator_weapon_rif = avp_load_rif("avp_huds/pred_hud.rif");
+					Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.25);
+					player_rif = avp_load_rif("avp_huds/predator.rif");
+					break;
+				}
+				case I_Alien:
+				{
+					#if ALIEN_DEMO
+					alien_weapon_rif = avp_load_rif("alienavp_huds/alien_hud.rif");
+					Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.25);
+					player_rif = avp_load_rif("alienavp_huds/alien.rif");
+					#else
+					alien_weapon_rif = avp_load_rif("avp_huds/alien_hud.rif");
+					Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.25);
+					player_rif = avp_load_rif("avp_huds/alien.rif");
+					#endif
+					break;
+				}
+				default:
+				{
+					GLOBALASSERT(2<1);
+				}
 			}
+			break;
+		}
+		default:
+		{
+			// set up a multiplayer game - here becuse we might end
+			// up with a cooperative game
+			//load all weapon rifs
+			marine_weapon_rif = avp_load_rif("avp_huds/marwep.rif");
+			predator_weapon_rif = avp_load_rif("avp_huds/pred_hud.rif");
+			alien_weapon_rif = avp_load_rif("avp_huds/alien_hud.rif");
+
+			Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.25);
+			player_rif = avp_load_rif("avp_huds/multip.rif");
+		}
 	}
 	Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.5);
 
@@ -224,9 +226,6 @@ void InitCharacter()
 
 	InitHUD();
 }
-
-extern void create_strategies_from_list ();
-extern void AssignAllSBNames();
 
 void RestartLevel()
 {
@@ -382,9 +381,10 @@ void ProcessSystemObjects()
 	Global_ModulePtr = MainSceneArray;
 	PreprocessAllModules();
 	i = GetModuleVisArrays();
-	if (i == FALSE) textprint("GetModuleVisArrays() failed\n");
-
-	/*WaitForReturn();*/
+	if (i == FALSE) 
+	{
+		textprint("GetModuleVisArrays() failed\n");
+	}
 
 	#endif
 }
@@ -447,13 +447,16 @@ void IntegrateNewEnvironment()
 
 	// elements we need form processsystemobjects
 
-	ReadMap(Map);							 /* for chunck loader*/
+	ReadMap(Map);                /* for chunck loader*/
 	ReadModuleMapList(mmbptr);
 
 	Global_ModulePtr = MainSceneArray;
 	PreprocessAllModules();
 	i = GetModuleVisArrays();
-	if (i == FALSE) textprint("GetModuleVisArrays() failed\n");
+	if (i == FALSE)
+	{
+		textprint("GetModuleVisArrays() failed\n");
+	}
 
 	// elements from start game for AI
 

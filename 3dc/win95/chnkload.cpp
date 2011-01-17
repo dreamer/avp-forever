@@ -716,9 +716,9 @@ void CopyShapeAnimationHeader(SHAPEHEADER* shpfrom,SHAPEHEADER* shpto)
 	DeallocateMem(shpto->sh_vnormals[0]);
 	#endif
 
-	shpto->points[0]=sas->anim_frames[0].vertices;
-	shpto->sh_normals[0]=sas->anim_frames[0].item_normals;
-	shpto->sh_vnormals[0]=sas->vertex_normals;
+	shpto->points[0] = sas->anim_frames[0].vertices;
+	shpto->sh_normals[0] = sas->anim_frames[0].item_normals;
+	shpto->sh_vnormals[0] = sas->vertex_normals;
 }
 
 // copies shape to main shape list
@@ -807,7 +807,7 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk *tmpshp, int flag
 				Shape_Sub_Shape_Chunk* sssc=(Shape_Sub_Shape_Chunk*)chlif();
 
 				list_pos=GetMSLPos();
-				copy_to_shapeheader (
+				copy_to_shapeheader(
 					h,
 					sssc->shape_data,
 					mainshapelist[list_pos],
@@ -818,6 +818,7 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk *tmpshp, int flag
 					list_pos,
 					object
 					);
+
 				CopyShapeAnimationHeader(mainshapelist[start_shape_no],mainshapelist[list_pos]);
 
 				const char* shpname=sssc->get_shape_name();
@@ -919,12 +920,12 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk *tmpshp, int flag
 				Fragment_Type_Sound_Chunk* ftsoc=(Fragment_Type_Sound_Chunk*) sfc->lookup_single_child("FRGSOUND");
 				if(ftsoc)
 				{
-					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound=(SHAPEFRAGMENTSOUND*)PoolAllocateMem(sizeof(SHAPEFRAGMENTSOUND));
-					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound->sound_loaded=GetSoundForMainRif (ftsoc->wav_name);
+					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound =(SHAPEFRAGMENTSOUND*)PoolAllocateMem(sizeof(SHAPEFRAGMENTSOUND));
+					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound->sound_loaded = GetSoundForMainRif(ftsoc->wav_name);
 					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound->inner_range = (unsigned long)(ftsoc->inner_range*local_scale);
 					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound->outer_range = (unsigned long)(ftsoc->outer_range*local_scale);
-					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound->pitch=ftsoc->pitch;
-					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound->max_volume=ftsoc->max_volume;
+					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound->pitch = ftsoc->pitch;
+					mainshapelist[main_shape_num]->sh_fragdesc->sh_fragsound->max_volume = ftsoc->max_volume;
 				}
 			}
 		}
@@ -1050,7 +1051,7 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk *tmpshp, int flag
 								Shape_Preprocessed_Data_Chunk* spdc=(Shape_Preprocessed_Data_Chunk*)afi()->shape2a->lookup_single_child("SHPPRPRO");
 								if (spdc)
 								{
-									copy_preprocessed_to_shapeheader (
+									copy_preprocessed_to_shapeheader(
 										h,
 										spdc,
 										mainshapelist[list_pos],
@@ -1064,7 +1065,7 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk *tmpshp, int flag
 								}
 								else
 								{
-									copy_to_shapeheader (
+									copy_to_shapeheader(
 										h,
 										afi()->shape2a->shape_data,
 										mainshapelist[list_pos],
@@ -2179,9 +2180,9 @@ void SetupAnimatingShape(Shape_Chunk* sc,SHAPEHEADER* shp, Shape_Merge_Data_Chun
 	DeallocateMem(shp->sh_vnormals[0]);
 	#endif
 	
-	shp->points[0]=sas->anim_frames[0].vertices;
-	shp->sh_normals[0]=sas->anim_frames[0].item_normals;
-	shp->sh_vnormals[0]=sas->vertex_normals;
+	shp->points[0] = sas->anim_frames[0].vertices;
+	shp->sh_normals[0] = sas->anim_frames[0].item_normals;
+	shp->sh_vnormals[0] = sas->vertex_normals;
 }
 
 

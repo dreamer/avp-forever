@@ -355,27 +355,27 @@ BOOL CalculateFiringSolution(VECTORCH* firing_pos,VECTORCH* target_pos,VECTORCH*
 	//the x and y components of the rotated solution should match the rotated velocity
 	//(scale down by projectile speed , because we want a normalised direction)
 
-	rotated_solution.vx=DIV_FIXED(rotated_vel.vx,projectile_speed);
-	rotated_solution.vy=DIV_FIXED(rotated_vel.vy,projectile_speed);
+	rotated_solution.vx = DIV_FIXED(rotated_vel.vx, projectile_speed);
+	rotated_solution.vy = DIV_FIXED(rotated_vel.vy, projectile_speed);
 	
 	//z=1-(x*x+y*y)
 	{
 		//not sure we have a fixed point square root
-		float x=(float)rotated_solution.vx;
-		float y=(float)rotated_solution.vy;
-		float z_squared=65536.0*65536.0-(x*x+y*y);
-		if(z_squared<0)
+		float x = (float)rotated_solution.vx;
+		float y = (float)rotated_solution.vy;
+		float z_squared = 65536.0f * 65536.0f - (x*x+y*y);
+		if (z_squared < 0)
 		{
 			//target moving too fast to hit
 			return FALSE;
 		}
-		rotated_solution.vz=(int)sqrt(z_squared);
+		rotated_solution.vz = (int)sqrt(z_squared);
 	}
 
 	//finally need to rotated solution back
 	*solution=rotated_solution;
 	TransposeMatrixCH(&mat);
-	RotateVector(solution,&mat);
+	RotateVector(solution, &mat);
 	
 	//normalise solution to be on the safe side
 	Normalise(solution);

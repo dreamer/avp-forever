@@ -98,12 +98,12 @@ void QNormalise(QUAT *q)
 	float nx = q->quatx;
 	float ny = q->quaty;
 	float nz = q->quatz;
-	
+
 	float m = sqrt(nw*nw+nx*nx+ny*ny+nz*nz);
-	
+
 	if (!m) return;
-		
-	m = 65536.0/m;
+
+	m = 65536.0f / m;
 
 	f2i(q->quatw,nw * m);
 	f2i(q->quatx,nx * m);

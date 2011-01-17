@@ -431,7 +431,6 @@ ACTIVITY_RETURN_TYPE AcyclicHomingCoordinate :: Activity(ACTIVITY_INPUT)
 	);
 	#endif
 
-		
 	//if target is within this frame's velocity...
 	if
 	(
@@ -462,12 +461,9 @@ ACTIVITY_RETURN_TYPE AcyclicHomingCoordinate :: Activity(ACTIVITY_INPUT)
 		#endif
 		
 		ApplyVelocity(FixP_Time);
-		
-		
 	}
 
 	ACTIVITY_RVAL_BOOL(Int_CurrentCoord_Old != Int_CurrentCoord_Val)
-
 }
 
 
@@ -518,7 +514,6 @@ void AcyclicHomingCoordinate :: SetTarget_Int
 		FIXP_SECONDS_FOR_STANDARD_HOMING
 	);
 
-	
 	SetActive( Int_TargetCoord != GetCoord_Int() );	
 }
 
@@ -631,8 +626,6 @@ ACTIVITY_RETURN_TYPE AcyclicFixedSpeedHoming :: Activity(ACTIVITY_INPUT)
 		#endif
 		
 		ApplyVelocity(FixP_Time);
-		
-		
 	}
 
 	ACTIVITY_RVAL_BOOL(Int_CurrentCoord_Old != Int_CurrentCoord_Val)
@@ -719,7 +712,6 @@ void AcyclicFixedSpeedHoming :: SetSpeed_FixP
 		:
 		( -FixP_Speed_Val )
 	);
-
 }
 
 #endif

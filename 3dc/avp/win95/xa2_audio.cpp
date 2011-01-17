@@ -9,17 +9,6 @@
 #include "audioStreaming.h"
 #include <d3dx9math.h>
 #include "io.h"
-
-#define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
-
-extern D3DXMATRIX viewMatrix;
-
-#ifdef DAVEW
-	#define DB_LEVEL 4
-#else
-	#define DB_LEVEL 3
-#endif
-
 #include "3dc.h"
 #include "inline.h"
 #include <assert.h>
@@ -35,6 +24,16 @@ extern D3DXMATRIX viewMatrix;
 #include <windows.h>
 #include "ffstdio.h"
 #include <math.h>
+
+#define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
+
+extern D3DXMATRIX viewMatrix;
+
+#ifdef DAVEW
+	#define DB_LEVEL 4
+#else
+	#define DB_LEVEL 3
+#endif
 
 /* Davew 27/7/98 --------------------------------------------------------------
 	Internal types.
@@ -1402,22 +1401,22 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	}
 
 	/* Read the WAV RIFF header */
-	res = ffread(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,myFile);
-	res = ffread(&myRiffHeader,sizeof(PWAVRIFFHEADER),1,myFile);
+	res = ffread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
+	res = ffread(&myRiffHeader, sizeof(PWAVRIFFHEADER), 1, myFile);
 
 	/* Read the WAV format chunk */
-	res = ffread(&myChunkHeader,sizeof(PWAVCHUNKHEADER),1,myFile);
+	res = ffread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
 	if (myChunkHeader.chunkLength == 16)
 	{
 		/* a standard PCM wave format chunk */
 		PCMWAVEFORMAT tmpWaveFormat;
 		res = ffread(&tmpWaveFormat, sizeof(PCMWAVEFORMAT), 1, myFile);
-		myWaveFormat.wFormatTag = tmpWaveFormat.wf.wFormatTag;
-		myWaveFormat.nChannels = tmpWaveFormat.wf.nChannels;
-		myWaveFormat.nSamplesPerSec = tmpWaveFormat.wf.nSamplesPerSec;;
+		myWaveFormat.wFormatTag      = tmpWaveFormat.wf.wFormatTag;
+		myWaveFormat.nChannels       = tmpWaveFormat.wf.nChannels;
+		myWaveFormat.nSamplesPerSec  = tmpWaveFormat.wf.nSamplesPerSec;;
 		myWaveFormat.nAvgBytesPerSec = tmpWaveFormat.wf.nAvgBytesPerSec;
-		myWaveFormat.nBlockAlign = tmpWaveFormat.wf.nBlockAlign;
-		myWaveFormat.wBitsPerSample = tmpWaveFormat.wBitsPerSample;
+		myWaveFormat.nBlockAlign     = tmpWaveFormat.wf.nBlockAlign;
+		myWaveFormat.wBitsPerSample  = tmpWaveFormat.wBitsPerSample;
 		myWaveFormat.cbSize = 0;
 /*
 		char buf[200];
@@ -1451,7 +1450,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 			break;
 		}
 
-		ffseek(myFile,myChunkHeader.chunkLength,SEEK_CUR);
+		ffseek(myFile, myChunkHeader.chunkLength, SEEK_CUR);
 	} while(res);
 
 	/* Now do a few checks */
@@ -1575,10 +1574,10 @@ static int ToneToFrequency(int currentFrequency, int currentPitch, int newPitch)
 	LOCALASSERT((currentFrequency>=FREQUENCY_MINPLAT)&&(currentPitch<=FREQUENCY_MAXPLAT));
 
 	/* limit pitch */
-	if(newPitch>PITCH_MAXPLAT) newPitch=PITCH_MAXPLAT;
-	if(newPitch<PITCH_MINPLAT) newPitch=PITCH_MINPLAT;
+	if (newPitch>PITCH_MAXPLAT) newPitch=PITCH_MAXPLAT;
+	if (newPitch<PITCH_MINPLAT) newPitch=PITCH_MINPLAT;
 
-	if(newPitch>currentPitch)
+	if (newPitch>currentPitch)
 	{
 		/* scale up */
 		int numOctaves, numTones;
@@ -1586,10 +1585,10 @@ static int ToneToFrequency(int currentFrequency, int currentPitch, int newPitch)
 		numTones = (newPitch-currentPitch)%1536;
 
 		newFrequency<<=numOctaves;
-		if(newFrequency>FREQUENCY_MAXPLAT) newFrequency=FREQUENCY_MAXPLAT;
+		if (newFrequency>FREQUENCY_MAXPLAT) newFrequency=FREQUENCY_MAXPLAT;
 		
-		if(numTones>0) newFrequency = (int)((float)(newFrequency)*pitch_to_frequency_mult_table[numTones]);
-		if(newFrequency>FREQUENCY_MAXPLAT) newFrequency=FREQUENCY_MAXPLAT;
+		if (numTones>0) newFrequency = (int)((float)(newFrequency)*pitch_to_frequency_mult_table[numTones]);
+		if (newFrequency>FREQUENCY_MAXPLAT) newFrequency=FREQUENCY_MAXPLAT;
 	}
 	else
 	{

@@ -5,12 +5,6 @@
 
  */
 
-// Mysterious definition required by objbase.h 
-// (included via one of the include files below)
-// to start definition of obscure unique in the
-// universe IDs required  by Direct3D before it
-// will deign to cough up with anything useful...
-
 #include "3dc.h"
 #include "module.h"
 #include "stratdef.h"
@@ -26,15 +20,15 @@
 #include "renderer.h"
 #include "r2base.h"
 #include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
+#include "d3d_hud.h"
+#define UseLocalAssert FALSE
+#include "ourasert.h"
+#include "vision.h"
+#include "kshape.h"
+
 extern void D3D_RenderHUDString_Centred(char *stringPtr, uint32_t centreX, uint32_t y, uint32_t colour);
 extern void D3D_RenderHUDNumber_Centred(uint32_t number, uint32_t x, uint32_t y, uint32_t colour);
 
-#include "d3d_hud.h"
-
-#define UseLocalAssert FALSE
-#include "ourasert.h"									
-
-#include "vision.h"
 #define RGBLIGHT_MAKE(rr,gg,bb) \
 ( \
 	LCCM_NORMAL == d3d_light_ctrl.ctrl ? \
@@ -48,7 +42,6 @@ extern void D3D_RenderHUDNumber_Centred(uint32_t number, uint32_t x, uint32_t y,
 ( \
 		RGBA_MAKE(rr,gg,bb,aa) \
 )
-#include "kshape.h"
 
 void D3D_DrawHUDFontCharacter(HUDCharDesc *charDescPtr);
 void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr);
@@ -56,6 +49,7 @@ void D3D_DrawHUDDigit(HUDCharDesc *charDescPtr);
 extern void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2);
 /* HUD globals */
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+extern char LevelName[];
 signed int HUDTranslucencyLevel = 64;
 static int MotionTrackerHalfWidth;
 static int MotionTrackerTextureSize;
@@ -307,7 +301,6 @@ void LoadCommonTextures(void)
 //	FoxLogoImageNumber = CL_LoadImageOnce("Common/foxlogo.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 
 	{
-		extern char LevelName[];
 		if (!strcmp(LevelName,"invasion_a"))
 		{
 		   	ChromeImageNumber = CL_LoadImageOnce("Envrnmts/Invasion/water2.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);

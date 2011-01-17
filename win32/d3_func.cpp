@@ -31,12 +31,10 @@
 #include "networking.h"
 #include "font2.h"
 #include <XInput.h> // XInput API
+#include "AvP_UserProfile.h"
 
 // Alien FOV - 115
 // Marine & Predator FOV - 77
-
-#include "AvP_UserProfile.h"
-extern HWND hWndMain;
 
 D3DXMATRIX matOrtho;
 D3DXMATRIX matProjection;
@@ -45,6 +43,155 @@ D3DXMATRIX matIdentity;
 D3DXMATRIX matViewPort;
 
 static D3DXPLANE m_frustum[6];
+
+extern void RenderListInit();
+extern void RenderListDeInit();
+extern void ThisFramesRenderingHasBegun(void);
+extern void ThisFramesRenderingHasFinished(void);
+extern HWND hWndMain;
+extern int WindowMode;
+extern void ChangeWindowsSize(uint32_t width, uint32_t height);
+
+// size of vertex and index buffers
+const uint32_t MAX_VERTEXES = 4096;
+const uint32_t MAX_INDICES = 9216;
+
+static HRESULT LastError;
+texID_t NO_TEXTURE = 0;
+texID_t MISSING_TEXTURE = 1;
+
+// keep track of set render states
+static bool	D3DAlphaBlendEnable;
+D3DBLEND D3DSrcBlend;
+D3DBLEND D3DDestBlend;
+RENDERSTATES CurrentRenderStates;
+bool D3DAlphaTestEnable = FALSE;
+static bool D3DStencilEnable;
+D3DCMPFUNC D3DStencilFunc;
+static D3DCMPFUNC D3DZFunc;
+
+int	VideoModeColourDepth;
+int	NumAvailableVideoModes;
+D3DINFO d3d;
+bool usingStencil = false;
+
+std::string shaderPath;
+std::string videoModeDescription;
+
+bool CreateVolatileResources();
+bool ReleaseVolatileResources();
+bool SetRenderStateDefaults();
+void ToggleWireframe();
+
+const int MAX_TEXTURE_STAGES = 8;
+std::vector<texID_t> setTextureArray;
+
+// byte order macros for A8R8G8B8 d3d texture
+enum
+{
+	BO_BLUE,
+	BO_GREEN,
+	BO_RED,
+	BO_ALPHA
+};
+
+// list of allowed display formats
+const D3DFORMAT DisplayFormats[] =
+{
+	D3DFMT_X8R8G8B8,
+	D3DFMT_A8R8G8B8,
+	D3DFMT_R8G8B8/*,
+	D3DFMT_A1R5G5B5,
+	D3DFMT_X1R5G5B5,
+	D3DFMT_R5G6B5*/
+};
+
+// 16 bit formats
+const D3DFORMAT DisplayFormats16[] =
+{
+	D3DFMT_R8G8B8/*,
+	D3DFMT_A1R5G5B5,
+	D3DFMT_X1R5G5B5,
+	D3DFMT_R5G6B5*/
+};
+
+// 32 bit formats
+const D3DFORMAT DisplayFormats32[] =
+{
+	D3DFMT_X8R8G8B8,
+	D3DFMT_A8R8G8B8
+};
+
+// list of allowed depth buffer formats
+const D3DFORMAT DepthFormats[] =
+{
+	D3DFMT_D32,
+	D3DFMT_D24S8,
+	D3DFMT_D24X8,
+	D3DFMT_D24FS8,
+	D3DFMT_D16
+};
+
+// TGA header structure
+#pragma pack(1)
+struct TGA_HEADER
+{
+	char		idlength;
+	char		colourmaptype;
+	char		datatypecode;
+	int16_t		colourmaporigin;
+	int16_t 	colourmaplength;
+	char		colourmapdepth;
+	int16_t		x_origin;
+	int16_t		y_origin;
+	int16_t		width;
+	int16_t		height;
+	char		bitsperpixel;
+	char		imagedescriptor;
+};
+#pragma pack()
+
+static TGA_HEADER TgaHeader = {0};
+
+bool IsPowerOf2(int i)
+{
+	if ((i & -i) == i) {
+		return true;
+	}
+	else return false;
+}
+
+int NearestSuperiorPow2(int i)
+{
+	int x = ((i - 1) & i);
+	return x ? NearestSuperiorPow2(x) : i << 1;
+}
+
+uint32_t XPercentToScreen(float percent)
+{
+	return ((((float)ScreenDescriptorBlock.SDB_Width) / 100) * percent);
+}
+
+uint32_t YPercentToScreen(float percent)
+{
+	return ((((float)ScreenDescriptorBlock.SDB_Height) / 100) * percent);
+}
+
+bool ReleaseVolatileResources()
+{
+	Tex_ReleaseDynamicTextures();
+
+	d3d.particleVB->Release();
+	d3d.particleIB->Release();
+
+	d3d.mainVB->Release();
+	d3d.mainIB->Release();
+
+	d3d.orthoVB->Release();
+	d3d.orthoIB->Release();
+
+	return true;
+}
 
 BOOL CheckPointIsInFrustum(D3DXVECTOR3 *point)
 {
@@ -109,112 +256,6 @@ void BuildFrustum()
 	{
 		D3DXPlaneNormalize(&m_frustum[i], &m_frustum[i]);
 	}
-}
-
-extern void RenderListInit();
-extern void RenderListDeInit();
-
-// size of vertex and index buffers
-const uint32_t MAX_VERTEXES = 4096;
-const uint32_t MAX_INDICES = 9216;
-
-static HRESULT LastError;
-texID_t NO_TEXTURE;
-texID_t MISSING_TEXTURE;
-
-// keep track of set render states
-static bool	D3DAlphaBlendEnable;
-D3DBLEND D3DSrcBlend;
-D3DBLEND D3DDestBlend;
-RENDERSTATES CurrentRenderStates;
-bool D3DAlphaTestEnable = FALSE;
-static bool D3DStencilEnable;
-D3DCMPFUNC D3DStencilFunc;
-static D3DCMPFUNC D3DZFunc;
-
-int	VideoModeColourDepth;
-int	NumAvailableVideoModes;
-D3DINFO d3d;
-bool usingStencil = false;
-
-std::string shaderPath;
-
-bool CreateVolatileResources();
-bool ReleaseVolatileResources();
-bool SetRenderStateDefaults();
-void ToggleWireframe();
-
-const int MAX_TEXTURE_STAGES = 8;
-std::vector<texID_t> setTextureArray;
-
-// byte order macros for A8R8G8B8 d3d texture
-enum
-{
-	BO_BLUE,
-	BO_GREEN,
-	BO_RED,
-	BO_ALPHA
-};
-
-// TGA header structure
-#pragma pack(1)
-struct TGA_HEADER
-{
-	char		idlength;
-	char		colourmaptype;
-	char		datatypecode;
-	int16_t		colourmaporigin;
-	int16_t 	colourmaplength;
-	char		colourmapdepth;
-	int16_t		x_origin;
-	int16_t		y_origin;
-	int16_t		width;
-	int16_t		height;
-	char		bitsperpixel;
-	char		imagedescriptor;
-};
-#pragma pack()
-
-static TGA_HEADER TgaHeader = {0};
-
-bool IsPowerOf2(int i)
-{
-	if ((i & -i) == i) {
-		return true;
-	}
-	else return false;
-}
-
-int NearestSuperiorPow2(int i)
-{
-	int x = ((i - 1) & i);
-	return x ? NearestSuperiorPow2(x) : i << 1;
-}
-
-uint32_t XPercentToScreen(float percent)
-{
-	return ((((float)ScreenDescriptorBlock.SDB_Width) / 100) * percent);
-}
-
-uint32_t YPercentToScreen(float percent)
-{
-	return ((((float)ScreenDescriptorBlock.SDB_Height) / 100) * percent);
-}
-
-bool ReleaseVolatileResources()
-{
-	Tex_ReleaseDynamicTextures();
-
-	d3d.particleVB->Release();
-	d3d.particleIB->Release();
-
-	d3d.mainVB->Release();
-	d3d.mainIB->Release();
-
-	d3d.orthoVB->Release();
-	d3d.orthoIB->Release();
-
-	return true;
 }
 
 bool R_BeginScene()
@@ -403,8 +444,6 @@ void R_PreviousVideoMode()
 		d3d.CurrentVideoMode = numModes - 1;
 	}
 }
-
-std::string videoModeDescription;
 
 std::string& R_GetVideoModeDescription()
 {
@@ -725,12 +764,6 @@ void CheckWireFrameMode(int shouldBeOn)
 	}
 }
 
-extern void ThisFramesRenderingHasBegun(void);
-extern void ThisFramesRenderingHasFinished(void);
-extern HWND hWndMain;
-extern int WindowMode;
-extern void ChangeWindowsSize(uint32_t width, uint32_t height);
-
 void R_SetFov(uint32_t fov)
 {
 	d3d.fieldOfView = fov;
@@ -755,43 +788,6 @@ void WriteMenuTextures()
 	}
 #endif
 }
-
-// list of allowed display formats
-const D3DFORMAT DisplayFormats[] =
-{
-	D3DFMT_X8R8G8B8,
-	D3DFMT_A8R8G8B8,
-	D3DFMT_R8G8B8/*,
-	D3DFMT_A1R5G5B5,
-	D3DFMT_X1R5G5B5,
-	D3DFMT_R5G6B5*/
-};
-
-// 16 bit formats
-const D3DFORMAT DisplayFormats16[] =
-{
-	D3DFMT_R8G8B8/*,
-	D3DFMT_A1R5G5B5,
-	D3DFMT_X1R5G5B5,
-	D3DFMT_R5G6B5*/
-};
-
-// 32 bit formats
-const D3DFORMAT DisplayFormats32[] =
-{
-	D3DFMT_X8R8G8B8,
-	D3DFMT_A8R8G8B8
-};
-
-// list of allowed depth buffer formats
-const D3DFORMAT DepthFormats[] =
-{
-	D3DFMT_D32,
-	D3DFMT_D24S8,
-	D3DFMT_D24X8,
-	D3DFMT_D24FS8,
-	D3DFMT_D16
-};
 
 void PrintD3DMatrix(const char* name, D3DXMATRIX &mat)
 {
