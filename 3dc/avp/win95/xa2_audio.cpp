@@ -58,8 +58,8 @@ struct SoundConfigTag
   ----------------------------------------------------------------------------*/
 SOUNDSAMPLEDATA GameSounds[SID_MAXIMUM];
 ACTIVESOUNDSAMPLE ActiveSounds[SOUND_MAXACTIVE];
-SOUNDSAMPLEDATA BlankGameSound;// = {0,0,0,0,FALSE,NULL,0,0,NULL,0,0,NULL,0};
-ACTIVESOUNDSAMPLE BlankActiveSound = {SID_NOSOUND,ASP_Minimum,0,0,NULL,0,0,0,0,0,{{0,0,0},0,0},FALSE, 0, 0, NULL};
+SOUNDSAMPLEDATA BlankGameSound;
+ACTIVESOUNDSAMPLE BlankActiveSound;// = {SID_NOSOUND,ASP_Minimum,0,0,NULL,0,0,0,0,0,{{0,0,0},0,0},FALSE, 0, 0, NULL};
 
 
 // XAudio2 globals
@@ -426,7 +426,7 @@ int PlatStartSoundSys()
 {
 	db_log4("PlatStartSound called");
 	Con_PrintMessage("Starting to initialise XAudio2");
-
+/*
 	// initialise sound structs
 	BlankGameSound.loaded = 0;
 	BlankGameSound.activeInstances = 0;
@@ -441,7 +441,7 @@ int PlatStartSoundSys()
 	BlankGameSound.dsFrequency = 0;
 	BlankGameSound.wavName = NULL;
 	BlankGameSound.length = 0;
-
+*/
 	uint32_t sampleRate = Config_GetInt("[Audio]", "SampleRate", 44100);
 
 	// Set the globals.
@@ -640,11 +640,7 @@ void PlatEndSoundSys()
 		pMasteringVoice = NULL;
 	}
 
-	if (XA2DSPSettings.pMatrixCoefficients)
-	{
-		delete[] XA2DSPSettings.pMatrixCoefficients;
-		XA2DSPSettings.pMatrixCoefficients = NULL;
-	}
+	delete[] XA2DSPSettings.pMatrixCoefficients;
 
 	if (pXAudio2)
 	{

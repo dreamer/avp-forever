@@ -58,7 +58,7 @@ void SoundSys_Start(void)
 
 	/* if we have already switched on, so do nothing */
 	if(SoundSwitchedOn) return;
-	/* we are not switched on, but we are initialised, so do nothing */	
+	/* we are not switched on, but we are initialised, so do nothing */
 	if(SoundInitialised) return;
 
 	/* initialise game sounds and active instances*/
@@ -71,7 +71,7 @@ void SoundSys_Start(void)
 	if(Sound_MaxActive_HW > SOUND_MAXACTIVE)
 	{
 		Sound_MaxActive_HW = SOUND_MAXACTIVE;
-	} 
+	}
 
 	SoundSys_SwitchOn();
 
@@ -83,7 +83,7 @@ void SoundSys_Start(void)
 	PlatChangeGlobalVolume(VOLUME_DEFAULT);
 	
 }
-	
+
 void SoundSys_End(void)
 {
 	/* end only if we are initialised, regardless of whether we are switched on */
@@ -97,6 +97,7 @@ void SoundSys_End(void)
 	SoundSys_SwitchOff();
 	SoundInitialised = 0; /* forces call to Soundsys_Start to re-start sound system */	
 }
+
 void SoundSys_Management(void)
 {
 	int i;
@@ -109,21 +110,22 @@ void SoundSys_Management(void)
 	/* go through all the active sounds */
 	for (i = 0;i < SOUND_MAXACTIVE; i++)
 	{
-		if (ActiveSounds[i].soundIndex == SID_NOSOUND) 
+		if (ActiveSounds[i].soundIndex == SID_NOSOUND)
 			continue; /* empty slot */
-		
+
 		numActive++;
 
 		if (PlatSoundHasStopped(i)!=0 && !ActiveSounds[i].paused)
 		{
 			Sound_Stop(i);
-			continue;			
+			continue;
 		}
-		if (ActiveSounds[i].threedee) 
+
+		if (ActiveSounds[i].threedee)
 		{
 			PlatDo3dSound(i);
 			num3dUpdates++;
-		}		
+		}
 	}
 
 	HandleFadingLevel();
@@ -152,30 +154,33 @@ void SoundSys_Management(void)
 		}
 	}
 
-   	if (WARPSPEED_CHEATMODE || JOHNWOO_CHEATMODE || DebuggingCommandsActive)
-   		UpdateSoundFrequencies();
+	if (WARPSPEED_CHEATMODE || JOHNWOO_CHEATMODE || DebuggingCommandsActive)
+		UpdateSoundFrequencies();
 }
 
 extern void SoundSys_ResetFadeLevel(void)
 {
 	MasterVolumeFadeLevel = ONE_FIXED;
-	MasterVolumeFadeStatus = FADE_STATUS_READY;	
+	MasterVolumeFadeStatus = FADE_STATUS_READY;
 }
 
 extern void SoundSys_FadeIn(void)
 {
 	/* always fade in from silence ? */
 	MasterVolumeFadeLevel = ONE_FIXED/2;
-	MasterVolumeFadeStatus = FADE_STATUS_UP;	
+	MasterVolumeFadeStatus = FADE_STATUS_UP;
 }
+
 extern void SoundSys_FadeOut(void)
 {
-	MasterVolumeFadeStatus = FADE_STATUS_DOWN;	
+	MasterVolumeFadeStatus = FADE_STATUS_DOWN;
 }
+
 extern void SoundSys_FadeOutFast(void)
 {
-	MasterVolumeFadeStatus = FADE_STATUS_DOWN_FAST;	
+	MasterVolumeFadeStatus = FADE_STATUS_DOWN_FAST;
 }
+
 static void HandleFadingLevel(void)
 {
 	switch (MasterVolumeFadeStatus)
@@ -216,6 +221,7 @@ static void HandleFadingLevel(void)
 		}
 	}
 }
+
 void SoundSys_PauseOn(void)
 {
 	int i;
@@ -225,7 +231,7 @@ void SoundSys_PauseOn(void)
 
 	for(i=0;i<SOUND_MAXACTIVE;i++)
 	{
-		if(ActiveSounds[i].soundIndex!=SID_NOSOUND) ActiveSounds[i].paused = 1;		
+		if(ActiveSounds[i].soundIndex!=SID_NOSOUND) ActiveSounds[i].paused = 1;
 	}
 }
 
@@ -238,7 +244,7 @@ void SoundSys_PauseOff(void)
 
 	for(i=0;i<SOUND_MAXACTIVE;i++)
 	{
-		if(ActiveSounds[i].soundIndex!=SID_NOSOUND) ActiveSounds[i].paused = 0;		
+		if(ActiveSounds[i].soundIndex!=SID_NOSOUND) ActiveSounds[i].paused = 0;
 	}
 }
 
@@ -252,8 +258,8 @@ void SoundSys_StopAll(void)
 
 	for (i = 0;i < SOUND_MAXACTIVE; i++)
 	{
-		if (ActiveSounds[i].soundIndex != SID_NOSOUND)  
-			Sound_Stop(i);		
+		if (ActiveSounds[i].soundIndex != SID_NOSOUND)
+			Sound_Stop(i);
 	}
 }
 
@@ -277,8 +283,8 @@ void SoundSys_RemoveAll(void)
 			LOCALASSERT(GameSounds[i].activeInstances == 0);
 			PlatEndGameSound(static_cast<SOUNDINDEX>(i));
 			GameSounds[i] = BlankGameSound;
-		}		
-	}	
+		}
+	}
 }
 
 void SoundSys_SwitchOn(void)
@@ -287,7 +293,7 @@ void SoundSys_SwitchOn(void)
 	if(SoundSwitchedOn) return; 
 	/* if not initialised, can't switch on */
 	if(!SoundInitialised) return;
-	 
+
 	SoundSwitchedOn = 1;	
 	/* initialise global volume controls */
 	GlobalVolume = VOLUME_DEFAULT;
@@ -376,40 +382,40 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 			switch(*nextChar)
 			{
 				case('d'):
-				{					
+				{
 					worldPosn = va_arg(argPtr,VECTORCH*);
 					break;
 				}
 				case('n'):
-				{					
+				{
 					p_3ddata = va_arg(argPtr,SOUND3DDATA*);
 					break;
 				}
 				case('e'):
-				{					
+				{
 					externalRef = va_arg(argPtr, int*);
 					break;
 				}
 				case('l'):
-				{					
+				{
 					loop = 1;
 					priority = ASP_Maximum;
 					break;
-				}				
+				}
 				case('h'):
-				{					
+				{
 					priority = ASP_Maximum;
 					break;
-				}		
+				}
 				case('v'):
-				{					
+				{
 					volume = va_arg(argPtr,int);
 					if(volume>VOLUME_MAX) volume=VOLUME_MAX;
 					if(volume<VOLUME_MIN) volume=VOLUME_MIN;
 					break;
-				}		
+				}
 				case('p'):
-				{					
+				{
 					pitch = va_arg(argPtr,int);;
 					if(pitch>PITCH_MAX) pitch=PITCH_MAX;
 					if(pitch<PITCH_MIN) pitch=PITCH_MIN;
@@ -426,18 +432,18 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 					break;
 				}
 				case('P'):
-				{					
+				{
 					soundStartPosition = va_arg(argPtr,int);;
 					break;
 				}
 				default:
 				{
 					break;
-				}		
+				}
 			}
 			nextChar++;
 		}
-		va_end(argPtr);	
+		va_end(argPtr);
 	}
 
 	/* check for invalid parameter combinations */
@@ -497,7 +503,7 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 			db_log3("Found a free slot.");
 		}
 	}
-	
+
 	/* fill out the active sound */
 	ActiveSounds[newIndex].soundIndex = soundNumber;
 	ActiveSounds[newIndex].priority = priority;
@@ -507,9 +513,11 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 	ActiveSounds[newIndex].loop = 1;
 	ActiveSounds[newIndex].marine_ignore=marine_ignore;
 	ActiveSounds[newIndex].reverb_off=reverb_off;
+
 	if(loop) ActiveSounds[newIndex].loop = 1;
 	else ActiveSounds[newIndex].loop = 0;
-	if(worldPosn) 
+
+	if(worldPosn)
 	{
 		VECTORCH zeroPosn = {0,0,0};
 		ActiveSounds[newIndex].threedeedata.position = *worldPosn;
@@ -531,7 +539,7 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 		ActiveSounds[newIndex].threedeedata.velocity = zeroPosn;
 		ActiveSounds[newIndex].threedee = 0;
 	}
-	
+
 	/* try and play the sound */
 	{
 		int ok = PlatPlaySound(newIndex);
@@ -542,8 +550,8 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 			ActiveSounds[newIndex] = BlankActiveSound;
 			db_log5("Error: PlatPlaySound failed.");
 			return;
-		}		
-	}	
+		}
+	}
 
 	/* finally, update the game sound instances, and external reference */
 	GameSounds[soundNumber].activeInstances++;
@@ -560,7 +568,7 @@ void Sound_Stop(int activeSoundNumber)
 {
 	SOUNDINDEX soundNo;
 
-	if (!SoundSwitchedOn) 
+	if (!SoundSwitchedOn)
 		return;
 
 	/* validate argument */
@@ -580,8 +588,8 @@ void Sound_Stop(int activeSoundNumber)
 	db_assert1((GameSounds[soundNo].activeInstances>=0) && (GameSounds[soundNo].activeInstances<SOUND_MAXINSTANCES));
 
 	if (ActiveSounds[activeSoundNumber].externalRef)
-		*(ActiveSounds[activeSoundNumber].externalRef) = SOUND_NOACTIVEINDEX;      
-			
+		*(ActiveSounds[activeSoundNumber].externalRef) = SOUND_NOACTIVEINDEX;
+
 	/* stop the sound: it may have already stopped, of course, but never mind */
 	PlatStopSound(activeSoundNumber);
 
@@ -614,7 +622,7 @@ void Sound_ChangeVolume(int activeSoundNumber, int volume)
 	/* if we're a 2d sound, just change the volume, but if we're 3d
 	then call 3d update instead */
 	if(ActiveSounds[activeSoundNumber].threedee) PlatDo3dSound(activeSoundNumber);
-	else PlatChangeSoundVolume(activeSoundNumber,ActiveSounds[activeSoundNumber].volume);	
+	else PlatChangeSoundVolume(activeSoundNumber,ActiveSounds[activeSoundNumber].volume);
 }
 
 void Sound_ChangePitch(int activeSoundNumber, int pitch)
@@ -667,7 +675,6 @@ void Sound_UpdateNew3d(int activeSoundNumber, SOUND3DDATA * s3d)
 	if(ActiveSounds[activeSoundNumber].soundIndex == SID_NOSOUND) return;
 
 	ActiveSounds[activeSoundNumber].threedeedata = *s3d;
-	
 }
 
 unsigned int SoundNumActiveVoices()
@@ -682,7 +689,7 @@ unsigned int SoundNumActiveVoices()
 			num_active++;
 		}
 	}
-	
+
 	return num_active;
 }
 
@@ -723,10 +730,10 @@ typedef struct sound_save_block
 	int fileNameLength;
 
 	SOUNDINDEX soundIndex;
-	ACTIVESOUNDPRIORITY priority;	
+	ACTIVESOUNDPRIORITY priority;
 	int volume;
 	int	pitch;
-	unsigned int loop :1;		
+	unsigned int loop :1;
 	unsigned int threedee :1;
 	unsigned int paused :1;
 	unsigned int marine_ignore	:1;
@@ -788,12 +795,12 @@ void Save_SoundState(int* soundHandle)
 {
 	if(!soundHandle) 
 		return;
-	
+
 	if(*soundHandle == SOUND_NOACTIVEINDEX)
 	{
 		SAVE_BLOCK_HEADER* header;
 		GET_SAVE_BLOCK_POINTER(SAVE_BLOCK_HEADER, header);
-	
+
 		//fill in the header
 		header->size = sizeof(*header);
 		header->type = SaveBlock_SoundState;
@@ -805,18 +812,18 @@ void Save_SoundState(int* soundHandle)
 		SOUND_SAVE_BLOCK* block;
 		const char* name = GameSounds[sound->soundIndex].wavName;
 		int name_length = strlen(name) + 1;
-			
-	   	block = static_cast<SOUND_SAVE_BLOCK*>(GetPointerForSaveBlock(sizeof(*block)+name_length));
-	
+
+		block = static_cast<SOUND_SAVE_BLOCK*>(GetPointerForSaveBlock(sizeof(*block)+name_length));
+
 		//fill in the header
 		block->header.size = sizeof(*block) + name_length;
 		block->header.type = SaveBlock_SoundState;
 
 		COPYELEMENT_SAVE(soundIndex)
-		COPYELEMENT_SAVE(priority)	
+		COPYELEMENT_SAVE(priority)
 		COPYELEMENT_SAVE(volume)
 		COPYELEMENT_SAVE(pitch)
-		COPYELEMENT_SAVE(loop)		
+		COPYELEMENT_SAVE(loop)
 		COPYELEMENT_SAVE(threedee)
 		COPYELEMENT_SAVE(paused)
 		COPYELEMENT_SAVE(marine_ignore)
@@ -825,7 +832,7 @@ void Save_SoundState(int* soundHandle)
 		block->externalRef = 1;
 
 		block->position = 0;
-	   	block->fileNameLength = name_length;
+		block->fileNameLength = name_length;
 
 		//the volume in the active sound list is scaled differently from the volume used
 		//by Sound_Play
@@ -838,7 +845,7 @@ void Save_SoundState(int* soundHandle)
 			block->position = 0;
 
 		strcpy((char*)(block+1),name);
-	}	
+	}
 }
 
 void Load_SoundState_NoRef(SAVE_BLOCK_HEADER* header)
@@ -891,19 +898,19 @@ void Save_SoundsWithNoReference()
 
 				const char* name = GameSounds[sound->soundIndex].wavName;
 				int name_length = strlen(name) + 1;
-					
+
 				block = static_cast<SOUND_SAVE_BLOCK*>(GetPointerForSaveBlock(sizeof(*block)+name_length));
-	
+
 				//fill in the header
 				block->header.size = sizeof(*block) + name_length;
 				block->header.type = SaveBlock_SoundState;
 				
 
 				COPYELEMENT_SAVE(soundIndex)
-				COPYELEMENT_SAVE(priority)	
+				COPYELEMENT_SAVE(priority)
 				COPYELEMENT_SAVE(volume)
 				COPYELEMENT_SAVE(pitch)
-				COPYELEMENT_SAVE(loop)		
+				COPYELEMENT_SAVE(loop)
 				COPYELEMENT_SAVE(threedee)
 				COPYELEMENT_SAVE(paused)
 				COPYELEMENT_SAVE(marine_ignore)

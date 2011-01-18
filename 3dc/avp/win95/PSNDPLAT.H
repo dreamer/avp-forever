@@ -49,6 +49,30 @@ typedef struct soundsampledata
 	int dsFrequency;
 	char * wavName;
 	int length; //time in fixed point seconds
+
+	// constructor
+	soundsampledata()
+	{
+		loaded = 0;
+		activeInstances = 0;
+		volume = 0;
+		pitch = 0;
+
+		#ifdef _XBOX
+			LPDIRECTSOUNDBUFFER dsBufferP = 0;
+		#endif
+
+		#ifdef USE_XAUDIO2
+			is3D = FALSE;
+			audioBuffer = 0;
+			pSourceVoice = 0;
+		#endif
+
+		flags = 0;
+		dsFrequency = 0;
+		wavName = '\0';
+		length = 0;
+	}
 	
 }SOUNDSAMPLEDATA;
 
@@ -87,6 +111,27 @@ typedef struct activesoundsample
 	X3DAUDIO_EMITTER xa2Emitter;
 	IXAudio2SourceVoice *pSourceVoice;
 #endif
+
+	// constructor
+	activesoundsample()
+	{
+		soundIndex = SID_NOSOUND;
+		priority = ASP_Minimum;
+		externalRef = 0;
+		is3D = FALSE;
+		pSourceVoice = 0;
+
+		#ifdef _XBOX
+			dsBufferP   = 0;
+			ds3DBufferP = 0;
+		#endif
+
+		#ifdef USE_XAUDIO2
+			is3D = FALSE;
+			audioBuffer = 0;
+			pSourceVoice = 0;
+		#endif
+	}
 
 }ACTIVESOUNDSAMPLE;
 
