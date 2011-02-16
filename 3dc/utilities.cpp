@@ -24,6 +24,7 @@
 
 #include "utilities.h"
 #include <string>
+#include <algorithm>
 #include "configFile.h"
 #include "logString.h"
 #include <assert.h>
@@ -55,88 +56,88 @@ char *GetSaveFolderPath()
 #endif
 #ifdef WIN32
 
-	if (FAILED(SHGetFolderPath(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, saveFolder)))
+	// get path to users "My Documents" folder
+	if (FAILED(::SHGetFolderPath(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, saveFolder)))
 	{
 		LogErrorString("Can't find save folder path", __LINE__, __FILE__);
 		return 0;
 	}
 
-	strcat(saveFolder, "/My Games");
+	std::string path = saveFolder;
+
+	// change backslashes in path to forwardslashes
+	std::replace(path.begin(), path.end(), '\\', '/');
+
+	path += "/My Games";
 
 	// first check if "My Games" folder exists, we try create it..
-	if (CreateDirectory(saveFolder, NULL) == 0)
+	if (::CreateDirectory(path.c_str(), NULL) == 0)
 	{
-		// something went wrong..
-		DWORD error = GetLastError();
-		if (error == ERROR_ALREADY_EXISTS)
+		// something went wrong.
+		DWORD error = ::GetLastError();
+		if (error == ERROR_PATH_NOT_FOUND)
 		{
-			// this is fine
-		}
-		else if (error == ERROR_PATH_NOT_FOUND)
-		{
-			LogErrorString("Can't create directory" + std::string(saveFolder), __LINE__, __FILE__);
+			LogErrorString("Can't create directory" + path, __LINE__, __FILE__);
 			return NULL;
 		}
 	}
 
-	strcat(saveFolder, "/Aliens versus Predator");
+	path += "/Aliens versus Predator";
 
-	// then check Aliens versus Predator
-	if (CreateDirectory(saveFolder, NULL) == 0)
+	// then check the "Aliens versus Predator" folder
+	if (::CreateDirectory(path.c_str(), NULL) == 0)
 	{
-		// something went wrong..
-		DWORD error = GetLastError();
-		if (error == ERROR_ALREADY_EXISTS)
+		// something went wrong.
+		DWORD error = ::GetLastError();
+		if (error == ERROR_PATH_NOT_FOUND)
 		{
-			// this is fine
-		}
-		else if (error == ERROR_PATH_NOT_FOUND)
-		{
-			LogErrorString("Can't create directory" + std::string(saveFolder), __LINE__, __FILE__);
+			LogErrorString("Can't create directory" + path, __LINE__, __FILE__);
 			return NULL;
 		}
 	}
 
-	strcat(saveFolder, "/");
+	// add a slash to the end of the path
+	path += "/";
 
 	// also, create User_Profiles folder if required
-	char tempPath[MAX_PATH] = {0};
-	strcpy(tempPath, saveFolder);
-	strcat(tempPath, "User_Profiles/");
+	std::string profilePath = path + "User_Profiles/";
 
-	if (CreateDirectory(tempPath, NULL) == 0)
+	if (::CreateDirectory(profilePath.c_str(), NULL) == 0)
 	{
-		// something went wrong..
-		DWORD error = GetLastError();
-		if (error == ERROR_ALREADY_EXISTS)
+		// something went wrong.
+		DWORD error = ::GetLastError();
+		if (error == ERROR_PATH_NOT_FOUND)
 		{
-			// this is fine
-		}
-		else if (error == ERROR_PATH_NOT_FOUND)
-		{
-			LogErrorString("Can't create directory" + std::string(saveFolder), __LINE__, __FILE__);
+			LogErrorString("Can't create directory" + profilePath, __LINE__, __FILE__);
 			return NULL;
 		}
 	}
 
 	// lets create MPConfig folder too
-	tempPath[0] = '\0';
-	strcpy(tempPath, saveFolder);
-	strcat(tempPath, "MPConfig/");
+	profilePath = path + "MPConfig/";
 
-	if (CreateDirectory(tempPath, NULL) == 0)
+	if (::CreateDirectory(profilePath.c_str(), NULL) == 0)
 	{
 		// something went wrong..
-		DWORD error = GetLastError();
-		if (error == ERROR_ALREADY_EXISTS)
+		DWORD error = ::GetLastError();
+		if (error == ERROR_PATH_NOT_FOUND)
 		{
-			// this is fine
-		}
-		else if (error == ERROR_PATH_NOT_FOUND)
-		{
-			LogErrorString("Can't create directory" + std::string(saveFolder), __LINE__, __FILE__);
+			LogErrorString("Can't create directory" + profilePath, __LINE__, __FILE__);
 			return NULL;
 		}
+	}
+
+	// check our path string will fit in saveFolder char[]
+	if (path.length() <= MAX_PATH - 1)
+	{
+		strncpy(saveFolder, path.c_str(), path.length());
+		saveFolder[path.length()] = '\0';
+	}
+	else
+	{
+		// fatal error?
+		LogErrorString("Save folder path too long");
+		return NULL;
 	}
 
 	// we're ok if we're here?
