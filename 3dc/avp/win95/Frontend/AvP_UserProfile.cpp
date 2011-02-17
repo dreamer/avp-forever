@@ -21,7 +21,7 @@
 
 static int LoadUserProfiles(void);
 
-/*static*/ void EmptyUserProfilesList(void);
+static void EmptyUserProfilesList(void);
 static int MakeNewUserProfile(void);
 static void InsertProfileIntoList(AVP_USER_PROFILE *profilePtr);
 static int ProfileIsMoreRecent(AVP_USER_PROFILE *profilePtr, AVP_USER_PROFILE *profileToTestAgainstPtr);
@@ -91,10 +91,8 @@ extern AVP_USER_PROFILE *GetNextUserProfile(void)
 	return CurrentUserProfilePtr;
 }
 
-/*static*/ void EmptyUserProfilesList(void)
+static void EmptyUserProfilesList(void)
 {
-	return;
-
 	while (UserProfilesList.size())
 	{
 		delete UserProfilesList.first_entry();
@@ -164,11 +162,11 @@ static void InsertProfileIntoList(AVP_USER_PROFILE *profilePtr)
 	{
 		AVP_USER_PROFILE *profileInListPtr = GetFirstUserProfile();
 
-		for (int i=0; i<UserProfilesList.size(); i++, profileInListPtr = GetNextUserProfile())
+		for (int i=0; i < UserProfilesList.size(); i++, profileInListPtr = GetNextUserProfile())
 		{
-			if (ProfileIsMoreRecent(profilePtr,profileInListPtr))
+			if (ProfileIsMoreRecent(profilePtr, profileInListPtr))
 			{
-				UserProfilesList.add_entry_before(profilePtr,profileInListPtr);
+				UserProfilesList.add_entry_before(profilePtr, profileInListPtr);
 				return;
 			}
 		}
@@ -178,7 +176,7 @@ static void InsertProfileIntoList(AVP_USER_PROFILE *profilePtr)
 
 static int ProfileIsMoreRecent(AVP_USER_PROFILE *profilePtr, AVP_USER_PROFILE *profileToTestAgainstPtr)
 {
-	if (CompareFileTime(&profilePtr->FileTime,&profileToTestAgainstPtr->FileTime)==1)
+	if (CompareFileTime(&profilePtr->FileTime, &profileToTestAgainstPtr->FileTime)==1)
 	{
 		return 1;
 	}
@@ -201,7 +199,6 @@ static int LoadUserProfiles(void)
 	WIN32_FIND_DATA wfd;
 
 	HANDLE hFindFile = avp_FindFirstFile(load_name, &wfd);
-
 	if (INVALID_HANDLE_VALUE == hFindFile)
 	{
 //		printf("File Not Found: <%s>\n",load_name);
@@ -243,7 +240,7 @@ static int LoadUserProfiles(void)
 
 			//make sure the file is a rif file
 			HANDLE rif_file;
-			rif_file = avp_CreateFile (pszFullPath, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, 0);
+			rif_file = avp_CreateFile(pszFullPath, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, 0);
 			if (rif_file==INVALID_HANDLE_VALUE)
 			{
 //				printf("couldn't open %s\n",pszFullPath);

@@ -33,7 +33,7 @@
 #include "AvP_UserProfile.h"
 #include "avp_menus.h"
 #include "configFile.h"
-#include "vorbisPlayer.h"
+#include "VorbisPlayer.h"
 #include "networking.h"
 #include "avpview.h"
 #include "renderer.h"
@@ -88,7 +88,6 @@ extern void FinishCentreMouseThread();
 extern void DoCompletedLevelStatisticsScreen(void);
 extern void DeInitialisePlayer();
 extern void BuildMultiplayerLevelNameArray();
-extern void EmptyUserProfilesList(void);
 extern char CommandLineIPAddressString[];
 extern int AvP_MainMenus(void);
 extern int AvP_InGameMenus(void);
@@ -616,9 +615,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	SoundSys_StopAll();
 	SoundSys_RemoveAll(); 
-
-	/* bjd - delete some profile data that was showing up as memory leaks */
-	EmptyUserProfilesList();
 
 	#else
 //	QuickSplashScreens();
