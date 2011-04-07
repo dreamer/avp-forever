@@ -273,7 +273,7 @@ char *LoadTextFile(char *filename)
 	save_pos = ftell(fp);
 	fseek(fp, 0L, SEEK_END);
 	size_of_file = ftell(fp);
-	
+
 	bufferPtr = (char*)AllocateMem(size_of_file);
 	if (!bufferPtr)
 	{
@@ -282,7 +282,6 @@ char *LoadTextFile(char *filename)
 	}
 
 	fseek(fp,save_pos,SEEK_SET);
-
 	
 	if (!fread(bufferPtr, size_of_file,1,fp))
 	{

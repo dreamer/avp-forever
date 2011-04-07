@@ -153,18 +153,10 @@ FILE *avp_fopen(const char *fileName, const char *mode)
 
 	finalPath.append("d:/");
 	finalPath.append(fileName);
-/*
-	// if write mode, direct to home path
-	if (strcmp(mode, "wb") == 0)
-	{
-		finalPath.append("d:/");
-		finalPath.append(fileName);
-	}
-	else
-	{
-		finalPath += fileName;
-	}
-*/
+
+	// change forwardslashes in path to backslashes
+	std::replace(finalPath.begin(), finalPath.end(), '/', '\\');
+
 	return fopen(finalPath.c_str(), mode);
 #endif
 #ifdef WIN32
@@ -193,6 +185,9 @@ DWORD avp_GetFileAttributes(LPCTSTR lpFileName)
 	finalPath.append("d:/");
 	finalPath.append(lpFileName);
 
+	// change forwardslashes in path to backslashes
+	std::replace(finalPath.begin(), finalPath.end(), '/', '\\');
+
 	return GetFileAttributes(finalPath.c_str());
 #endif
 #ifdef WIN32
@@ -208,6 +203,9 @@ HANDLE avp_CreateFile(LPCTSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMo
 
 	finalPath.append("d:/");
 	finalPath.append(lpFileName);
+
+	// change forwardslashes in path to backslashes
+	std::replace(finalPath.begin(), finalPath.end(), '/', '\\');
 
 	return CreateFile(finalPath.c_str(), dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 
@@ -225,6 +223,10 @@ HANDLE avp_FindFirstFile(LPCTSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData)
 
 	finalPath.append("d:/");
 	finalPath.append(lpFileName);
+
+	// change forwardslashes in path to backslashes
+	std::replace(finalPath.begin(), finalPath.end(), '/', '\\');
+
 	return FindFirstFile(finalPath.c_str(), lpFindFileData);
 #endif
 #ifdef WIN32

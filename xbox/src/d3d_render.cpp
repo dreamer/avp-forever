@@ -54,7 +54,7 @@ bool CreateVolatileResources();
 bool ReleaseVolatileResources();
 void ColourFillBackBuffer(int FillColour);
 
-extern "C" 
+extern "C"
 {
 	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 	extern VIEWDESCRIPTORBLOCK* Global_VDB_Ptr;
@@ -208,8 +208,8 @@ uint32_t GetRealNumVerts(uint32_t numVerts)
 	return realNumVerts;
 }
 
-// lock our vertex and index buffers, and reset counters and array indexes used to keep track 
-// of the number of verts and indices in those buffers. Function needs to be renamed as we no 
+// lock our vertex and index buffers, and reset counters and array indexes used to keep track
+// of the number of verts and indices in those buffers. Function needs to be renamed as we no
 // longer use an execute buffer
 bool LockExecuteBuffer()
 {
@@ -533,7 +533,7 @@ void DrawFmvFrame2(uint32_t frameWidth, uint32_t frameHeight, uint32_t *textures
 
 		fmvVerts[3].u3 = 1.0f;
 		fmvVerts[3].v3 = 0.0f;
-	
+
 		FMVvertexBuffer->Unlock();
 	}
 #endif
@@ -665,7 +665,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 	cloudConstantTable->SetMatrix(d3d.lpD3DDevice, "WorldViewProj", &matOrtho);
 	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "CloakingPhase", CloakingPhase);
 	LastError = cloudConstantTable->SetInt(d3d.lpD3DDevice, "pX", topX);
-	
+
 	if (FAILED(LastError))
 	{
 		OutputDebugString("SetInt failed\n");
@@ -717,7 +717,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, uint32_t textureID, uin
 	testOrtho[3].v = (float)((texV) * RecipH);
 
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, testOrtho, sizeof(ORTHOVERTEX));
-	if (FAILED(LastError)) 
+	if (FAILED(LastError))
 	{
 		OutputDebugString(" draw menu quad failed ");
 	}
@@ -2151,7 +2151,7 @@ void PostLandscapeRendering()
 			int z = 30238;
 			MeshXScale = (36353-20767);
 			MeshZScale = (41927-30238);
-				
+
 			CheckForObjectsInWater(x, x+MeshXScale, z, z+MeshZScale, y);
 
 			WaterXOrigin = x;
@@ -7325,8 +7325,6 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 	}
 }
 
-} // extern "C"
-
 }; // ?
 
 void r2rect :: AlphaFill
@@ -7551,9 +7549,6 @@ void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour
 		x += MUL_FIXED(HUDScaleFactor,AAFontWidths[(unsigned char)c]);
 	}
 }
-
-extern "C"
-{
 
 extern void RenderString(char *stringPtr, int x, int y, int colour)
 {

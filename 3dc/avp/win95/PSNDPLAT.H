@@ -92,6 +92,7 @@ typedef struct activesoundsample
 	int volume;
 	int	pitch;
 	int *externalRef;
+	BOOL is3D;
 	unsigned int loop :1;
 	unsigned int threedee :1;
 	unsigned int paused :1;
@@ -105,7 +106,6 @@ typedef struct activesoundsample
 #endif
 
 #ifdef USE_XAUDIO2
-	BOOL is3D;
 	uint8_t *audioBuffer;
 	XAUDIO2_BUFFER xa2Buffer;
 	X3DAUDIO_EMITTER xa2Emitter;
@@ -119,8 +119,9 @@ typedef struct activesoundsample
 		priority = ASP_Minimum;
 		externalRef = 0;
 		is3D = FALSE;
+#ifdef USE_XAUDIO2
 		pSourceVoice = 0;
-
+#endif
 		#ifdef _XBOX
 			dsBufferP   = 0;
 			ds3DBufferP = 0;

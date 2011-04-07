@@ -199,7 +199,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		}
 	}
 
-//	#ifdef AVP_DEBUG_VERSION
 	if (strstr(command_line, "-intro"))	
 		WeWantAnIntro();
 
@@ -468,9 +467,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 						//Do screen shot here so that text and  hud graphics aren't shown
 						MaintainHUD();
 
-						//#if debug
 						FlushTextprintBuffer();
-						//#endif
 
 						//check cd status
 						CheckCDAndChooseTrackIfNeeded();

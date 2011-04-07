@@ -1,13 +1,19 @@
-// Interface  functions (written in C++) for
-// Direct3D immediate mode system
-
-// Must link to C code in main engine system
 
 #include "iofocus.h"
-
 // keyboard queue stuff
 #include "onscreenKeyboard.h"
 #include <queue>
+#include "3dc.h"
+#include "module.h"
+#include "inline.h"
+#include "stratdef.h"
+#include "gamedef.h"
+#include "gameplat.h"
+#include "usr_io.h"
+#include "rentrntq.h"
+#include <xtl.h>
+#include "showcmds.h"
+
 /*
 struct KEYPRESS
 {
@@ -15,6 +21,7 @@ struct KEYPRESS
 	char keyCode;
 };
 */
+
 std::queue <KEYPRESS> keyboardQueue;
 
 void AddKeyToQueue(char virtualKeyCode)
@@ -49,28 +56,7 @@ int GetQueueSize()
 	return keyboardQueue.size();
 }
 
-
-extern "C" {
-
-// FALSEte: INITGUID has NOT been defined here,
-// since the definition in d3_func.cpp is amply
-// sufficient.
-
-#include "3dc.h"
-#include "module.h"
-#include "inline.h"
-#include "stratdef.h"
-#include "gamedef.h"
-#include "gameplat.h"
-#include "usr_io.h"
-
-#include "rentrntq.h"
-
 extern void KeyboardEntryQueue_Add(char c);
-
-#include <xtl.h>
-
-#include "showcmds.h"
 
 /*
 	Externs for input communication
@@ -100,9 +86,9 @@ int xPadMoveX;
 int xPadMoveY;
 
 extern unsigned char KeyboardInput[];
-extern unsigned char GotAnyKey;
-static unsigned char LastGotAnyKey;
-unsigned char DebouncedGotAnyKey;
+extern bool GotAnyKey;
+static bool LastGotAnyKey = false;
+bool DebouncedGotAnyKey = false;
 
 int GotJoystick;
 int JoystickEnabled;
@@ -110,7 +96,7 @@ int JoystickEnabled;
 #define MAX_CONTROLLERS 4  // XInput handles up to 4 controllers
 #define INPUT_DEADZONE  ( 0.24f * FLOAT(0x7FFF) )  // Default to 24% of the +/- 32767 range.   This is a reasonable default value but can be altered if needed.
 
-/* XInput controller state */
+// XInput controller state
 struct CONTROLER_STATE
 {
     XINPUT_STATE state;
@@ -164,12 +150,6 @@ static char IngameKeyboardInput[256];
 extern void IngameKeyboardInput_KeyDown(unsigned char key);
 extern void IngameKeyboardInput_KeyUp(unsigned char key);
 extern void IngameKeyboardInput_ClearBuffer(void);
-
-/*
-
- Create DirectInput via CoCreateInstance
-
-*/
 
 HANDLE gamePad;
 DWORD devices;
@@ -243,57 +223,15 @@ BOOL InitialiseDirectInput()
     return TRUE;
 }
 
-/*
-
-	Release DirectInput object
-
-*/
-
-
 void ReleaseDirectInput()
 {
-
 }
-
-
-// see comments below
-
-#define UseForegroundKeyboard FALSE
-
-//GUID     guid = GUID_SysKeyboard;
 
 BOOL InitialiseDirectKeyboard()
 {
     // if we get here, all objects were created successfully
     return TRUE;
 }
-
-
-
-/*
-
- Use DirectInput to read keyboard
-
- PS: I know this function involves an
- apparently unnecessary layer of translation
- between one keyboard array and another one.
- This is to allow people to swap from a windows
- procedure keyboard handler to a DirectInput one
- without having to change their IDemand functions.
-
- I can't think of a faster way to do the translation
- below, but given that it only runs once per frame
- it shouldn't be too bad.  BUT NOTE THAT IT DOES
- ONLY RUN ONCE PER FRAME (FROM READUSERINPUT) AND
- SO YOU MUST HAVE A DECENT FRAME RATE IF KEYS ARE NOT
- TO BE MISSED.
-
- NOTE ALSO THAT IF YOU ARE USING THIS SYSTEM YOU CAN
- ACCESS THE KEYBOARD ARRAY IN A TIGHT LOOP WHILE CALLING
- READUSERINPUT BUT -->NOT<-- CHECKWINDOWSMESSAGES (AS REQUIRED
- FOR THE WINPROC HANDLER).  BUT CHECKFORWINDOWSMESSAGES WON'T DO
- ANY HARM.
-*/
 
 #define XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE  7849
 #define XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE 8689
@@ -310,7 +248,7 @@ void DirectReadKeyboard()
     // Zero current inputs (i.e. set all keys to FALSE,
 	// or not pressed)
     memset((void*)KeyboardInput, FALSE, MAX_NUMBER_OF_INPUT_KEYS);
-	GotAnyKey = FALSE;
+	GotAnyKey = false;
 
 	/*
 		ignore gamepad input if this timer is still running down. The game normally keeps processing input as it returns to game from main menu. This timer ensures any button presses on the menu
@@ -330,7 +268,7 @@ void DirectReadKeyboard()
 			if (GamePadButtons[i])
 			{
 				KeyboardInput[KEY_JOYSTICK_BUTTON_1+i] = TRUE;
-				GotAnyKey = TRUE;
+				GotAnyKey = true;
 			}
 		}
 	}
@@ -351,7 +289,7 @@ void DirectReadKeyboard()
 		else if (newKeyPress.keyCode)
 		{
 			KeyboardInput[newKeyPress.keyCode] = TRUE;
-			GotAnyKey = TRUE;
+			GotAnyKey = true;
 		}
 	}
 
@@ -416,7 +354,7 @@ void DirectReadKeyboard()
 	}
 }
 
-const char *GetGamePadButtonTextString(enum TEXTSTRING_ID stringID)
+char *GetGamePadButtonTextString(enum TEXTSTRING_ID stringID)
 {
 	switch (stringID)
 	{
@@ -457,16 +395,8 @@ const char *GetGamePadButtonTextString(enum TEXTSTRING_ID stringID)
 	}
 }
 
-
-/*
-
- Clean up direct keyboard objects
-
-*/
-
 void ReleaseDirectKeyboard()
 {
-
 }
 
 
@@ -477,39 +407,11 @@ BOOL InitialiseDirectMouse()
 
 void DirectReadMouse()
 {
-
 }
 
 void ReleaseDirectMouse()
 {
-
 }
-
-
-
-/*KJL****************************************************************
-*                                                                   *
-*    JOYSTICK SUPPORT - I've moved all joystick support to here.    *
-*                                                                   *
-****************************************************************KJL*/
-
-
-/* KJL 11:32:46 04/30/97 -
-
-	Okay, this has been changed for the sake of AvP. I know that this
-	isn't in AvP\win95\..., but moving this file probably isn't worth
-	the trouble.
-
-	This code is designed to read only one joystick.
-
-*/
-
-
-/*
-  Decide which (if any) joysticks
-  exist, access capabilities,
-  initialise internal variables.
-*/
 
 void InitJoysticks()
 {
@@ -831,9 +733,5 @@ extern void IngameKeyboardInput_ClearBuffer(void)
 	// set timer to current time
 	blockGamepadInputTimerStart = timeGetTime();
 }
-
-// For extern "C"
-};
-
 
 

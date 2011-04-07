@@ -2,7 +2,7 @@
 #include "FmvCutscenes.h"
 #include "TextureManager.h"
 #include "io.h"
-#include "Di_func.h"
+#include "Input.h"
 
 extern void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha);
 

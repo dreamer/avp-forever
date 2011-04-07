@@ -32,6 +32,7 @@
 #include "font2.h"
 #include <xgraphics.h>
 #include <xgmath.h>
+#include "AvP_UserProfile.h"
 
 // Alien FOV - 115
 // Marine & Predator FOV - 77
@@ -65,7 +66,7 @@ const char *pixelShader =
     "mul r0, t0, r0\0";
 
 
-extern int NumberOfFMVTextures;
+extern uint32_t NumberOfFMVTextures;
 #define MAX_NO_FMVTEXTURES 10
 extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 
@@ -77,6 +78,8 @@ D3DXMATRIX matViewPort;
 
 extern void RenderListInit();
 extern void RenderListDeInit();
+extern void ThisFramesRenderingHasBegun(void);
+extern void ThisFramesRenderingHasFinished(void);
 
 // size of vertex and index buffers
 const uint32_t MAX_VERTEXES = 4096;
@@ -109,7 +112,7 @@ bool ReleaseVolatileResources();
 bool SetRenderStateDefaults();
 void ToggleWireframe();
 
-const int MAX_TEXTURE_STAGES = 4;
+const int kMaxTextureStages = 4;
 std::vector<uint32_t> setTextureArray;
 
 std::string videoModeDescription;
@@ -379,7 +382,7 @@ void R_SetCurrentVideoMode()
 bool R_SetTexture(uint32_t stage, uint32_t textureID)
 {
 	// check that the stage value is within range
-	if (stage > MAX_TEXTURE_STAGES-1)
+	if (stage > kMaxTextureStages-1)
 	{
 		Con_PrintError("Invalid texture stage: " + IntToString(stage) + " set for texture: " + Tex_GetName(textureID));
 		return false;
@@ -406,6 +409,18 @@ bool R_SetTexture(uint32_t stage, uint32_t textureID)
 	}
 
 	return true;
+}
+
+void R_UnsetTexture(texID_t textureID)
+{
+	// unbind this texture if it's set to any stage
+	for (uint32_t i = 0; i < kMaxTextureStages; i++)
+	{
+		if (setTextureArray[i] == textureID)
+		{
+			setTextureArray[i] = NO_TEXTURE;
+		}
+	}
 }
 
 bool R_LockVertexBuffer(class VertexBuffer &vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage)
@@ -622,7 +637,7 @@ bool CreateVolatileResources()
 	SetRenderStateDefaults();
 
 	// going to clear texture stages too
-	for (int stage = 0; stage < MAX_TEXTURE_STAGES; stage++)
+	for (int stage = 0; stage < kMaxTextureStages; stage++)
 	{
 		LastError = d3d.lpD3DDevice->SetTexture(stage, Tex_GetTexture(NO_TEXTURE));
 		if (FAILED(LastError))
@@ -702,41 +717,33 @@ void SetFov()
 	SetTransforms();
 }
 
-extern "C"
+extern void CheckWireFrameMode(int shouldBeOn)
 {
-	#include "AvP_UserProfile.h"
-	extern void ThisFramesRenderingHasBegun(void);
-	extern void ThisFramesRenderingHasFinished(void);
+	if (shouldBeOn)
+		shouldBeOn = 1;
 
-	// Functions
-	extern void CheckWireFrameMode(int shouldBeOn)
+	if (CurrentRenderStates.WireFrameModeIsOn != shouldBeOn)
 	{
+		CurrentRenderStates.WireFrameModeIsOn = shouldBeOn;
 		if (shouldBeOn)
-			shouldBeOn = 1;
-
-		if (CurrentRenderStates.WireFrameModeIsOn != shouldBeOn)
 		{
-			CurrentRenderStates.WireFrameModeIsOn = shouldBeOn;
-			if (shouldBeOn)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
-			}
-			else
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
-			}
+			d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+		}
+		else
+		{
+			d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 		}
 	}
+}
 
-	void R_SetFov(uint32_t fov)
-	{
-		d3d.fieldOfView = fov;
-	}
+void R_SetFov(uint32_t fov)
+{
+	d3d.fieldOfView = fov;
+}
 
-	void FlushD3DZBuffer()
-	{
-		d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
-	}
+void FlushD3DZBuffer()
+{
+	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
 }
 
 // console command : output all menu textures as .png files
@@ -2033,11 +2040,11 @@ bool InitialiseDirect3D()
 		}
 	}
 
-	setTextureArray.resize(MAX_TEXTURE_STAGES);
+	setTextureArray.resize(kMaxTextureStages);
 
 /*
 	// set all texture stages to sample the white texture
-	for (uint32_t i = 0; i < MAX_TEXTURE_STAGES; i++)
+	for (uint32_t i = 0; i < kMaxTextureStages; i++)
 	{
 		setTextureArray[i] = NO_TEXTURE;
 		d3d.lpD3DDevice->SetTexture(i, Tex_GetTexture(NO_TEXTURE));
@@ -2441,7 +2448,7 @@ void ChangeTextureAddressMode(uint32_t samplerIndex, enum TEXTURE_ADDRESS_MODE t
 	}
 }
 
-void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired)
+void ChangeFilteringMode(uint32_t samplerIndex, enum FILTERING_MODE_ID filteringRequired)
 {
 	if (CurrentRenderStates.FilteringMode == filteringRequired) 
 		return;
@@ -2452,14 +2459,14 @@ void ChangeFilteringMode(enum FILTERING_MODE_ID filteringRequired)
 	{
 		case FILTERING_BILINEAR_OFF:
 		{
-			d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_POINT);
-			d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_POINT);
+			d3d.lpD3DDevice->SetTextureStageState(samplerIndex, D3DTSS_MAGFILTER, D3DTEXF_POINT);
+			d3d.lpD3DDevice->SetTextureStageState(samplerIndex, D3DTSS_MINFILTER, D3DTEXF_POINT);
 			break;
 		}
 		case FILTERING_BILINEAR_ON:
 		{
-			d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
-			d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
+			d3d.lpD3DDevice->SetTextureStageState(samplerIndex, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
+			d3d.lpD3DDevice->SetTextureStageState(samplerIndex, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
 			break;
 		}
 		default:

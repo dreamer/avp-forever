@@ -37,7 +37,7 @@
 #include "scream.h"
 #include "targeting.h"
 #include "iofocus.h"
-#include "Di_func.h"
+#include "Input.h"
 
 #define UseLocalAssert TRUE
 #include "ourasert.h"

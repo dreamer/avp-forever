@@ -59,7 +59,7 @@ struct SoundConfigTag
 SOUNDSAMPLEDATA GameSounds[SID_MAXIMUM];
 ACTIVESOUNDSAMPLE ActiveSounds[SOUND_MAXACTIVE];
 SOUNDSAMPLEDATA BlankGameSound;
-ACTIVESOUNDSAMPLE BlankActiveSound;// = {SID_NOSOUND,ASP_Minimum,0,0,NULL,0,0,0,0,0,{{0,0,0},0,0},FALSE, 0, 0, NULL};
+ACTIVESOUNDSAMPLE BlankActiveSound;
 
 
 // XAudio2 globals
@@ -1221,15 +1221,15 @@ int LoadWavFile(int soundNum, char * wavFileName)
 		return 0;
 	}
 
-	/* Read the WAV RIFF header */
+	// Read the WAV RIFF header
 	res = fread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
 	res = fread(&myRiffHeader, sizeof(PWAVRIFFHEADER), 1, myFile);
 
-	/* Read the WAV format chunk */
+	// Read the WAV format chunk
 	res = fread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
 	if (myChunkHeader.chunkLength == 16)
 	{
-		/* a standard PCM wave format chunk */
+		// a standard PCM wave format chunk
 		PCMWAVEFORMAT tmpWaveFormat;
 		res = fread(&tmpWaveFormat, sizeof(PCMWAVEFORMAT), 1, myFile);
 		myWaveFormat.wFormatTag = tmpWaveFormat.wf.wFormatTag;
@@ -1247,24 +1247,24 @@ int LoadWavFile(int soundNum, char * wavFileName)
 	}
 	else if (myChunkHeader.chunkLength == 18)
 	{
-		/* an extended PCM wave format chunk */
+		// an extended PCM wave format chunk
 		res = fread(&myWaveFormat, sizeof(WAVEFORMATEX), 1, myFile);
 		myWaveFormat.cbSize = 0;
 	}
 	else
 	{
-		/* uh oh: a different chunk type */
+		// uh oh: a different chunk type
 		LOCALASSERT(1==0);
 		fclose(myFile);
 		return 0;
 	}
 
 	
-	/* Read	the data chunk header */
-	//skip chunks until we reach the 'data' chunk
+	// Read	the data chunk header
+	// skip chunks until we reach the 'data' chunk
 	do
 	{
-		/* Read	the data chunk header */
+		// Read	the data chunk header
 		res = fread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
 		if ((myChunkHeader.chunkName[0]=='d')&&(myChunkHeader.chunkName[1]=='a')&&
 	   		(myChunkHeader.chunkName[2]=='t')&&(myChunkHeader.chunkName[3]=='a'))
@@ -1272,14 +1272,14 @@ int LoadWavFile(int soundNum, char * wavFileName)
 			break;
 		}
 	
-		fseek(myFile,myChunkHeader.chunkLength,SEEK_CUR);
-	} while(res);
+		fseek(myFile, myChunkHeader.chunkLength, SEEK_CUR);
+	} while (res);
 
-	/* Now do a few checks */
+	// Now do a few checks
 	if ((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
-	   (myChunkHeader.chunkName[2]!='t')||(myChunkHeader.chunkName[3]!='a'))
+	    (myChunkHeader.chunkName[2]!='t')||(myChunkHeader.chunkName[3]!='a'))
 	{
-		/* chunk alignment disaster */
+		// chunk alignment disaster
 		LOCALASSERT(1==0);
 		fclose(myFile);
 		return 0;
@@ -1359,7 +1359,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 			char * wavname = strrchr (wavFileName, '/');
 			if (wavname)
 			{
-				wavname ++;
+				wavname++;
 			}
 			else
 			{
@@ -1396,15 +1396,15 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		return 0;
 	}
 
-	/* Read the WAV RIFF header */
+	// Read the WAV RIFF header
 	res = ffread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
-	res = ffread(&myRiffHeader, sizeof(PWAVRIFFHEADER), 1, myFile);
+	res = ffread(&myRiffHeader,  sizeof(PWAVRIFFHEADER),  1, myFile);
 
 	/* Read the WAV format chunk */
 	res = ffread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
 	if (myChunkHeader.chunkLength == 16)
 	{
-		/* a standard PCM wave format chunk */
+		// a standard PCM wave format chunk
 		PCMWAVEFORMAT tmpWaveFormat;
 		res = ffread(&tmpWaveFormat, sizeof(PCMWAVEFORMAT), 1, myFile);
 		myWaveFormat.wFormatTag      = tmpWaveFormat.wf.wFormatTag;
@@ -1414,31 +1414,26 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		myWaveFormat.nBlockAlign     = tmpWaveFormat.wf.nBlockAlign;
 		myWaveFormat.wBitsPerSample  = tmpWaveFormat.wBitsPerSample;
 		myWaveFormat.cbSize = 0;
-/*
-		char buf[200];
-		sprintf(buf, "name: %s channels: %d samsPerSec: %d\n", wavFileName, myWaveFormat.nChannels, myWaveFormat.nSamplesPerSec);
-		OutputDebugString(buf);
-*/
 	}
 	else if (myChunkHeader.chunkLength==18)
 	{
-		/* an extended PCM wave format chunk */
+		// an extended PCM wave format chunk
 		res = ffread(&myWaveFormat, sizeof(WAVEFORMATEX), 1, myFile);
 		myWaveFormat.cbSize = 0;
 	}
 	else
 	{
-		/* uh oh: a different chunk type */
+		// uh oh: a different chunk type
 		LOCALASSERT(1==0);
 		ffclose(myFile);
 		return 0;
 	}
 
-	/* Read	the data chunk header */
-	//skip chunks until we reach the 'data' chunk
+	// Read	the data chunk header
+	// skip chunks until we reach the 'data' chunk
 	do
 	{
-		/* Read	the data chunk header */
+		// Read	the data chunk header
 		res = ffread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
 		if ((myChunkHeader.chunkName[0]=='d')&&(myChunkHeader.chunkName[1]=='a')&&
 	   		(myChunkHeader.chunkName[2]=='t')&&(myChunkHeader.chunkName[3]=='a'))
@@ -1447,22 +1442,22 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 		}
 
 		ffseek(myFile, myChunkHeader.chunkLength, SEEK_CUR);
-	} while(res);
+	} while (res);
 
-	/* Now do a few checks */
+	// Now do a few checks
 	if ((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
-	   (myChunkHeader.chunkName[2]!='t')||(myChunkHeader.chunkName[3]!='a'))
+	    (myChunkHeader.chunkName[2]!='t')||(myChunkHeader.chunkName[3]!='a'))
 	{
-		/* chunk alignment disaster */
+		// chunk alignment disaster
 		LOCALASSERT(1==0);
 		ffclose(myFile);
 		return 0;
 	}
 	
-	//calculate length of sample
+	// calculate length of sample
 	lengthInSeconds=DIV_FIXED(myChunkHeader.chunkLength,myWaveFormat.nAvgBytesPerSec);
 
-	if ((myChunkHeader.chunkLength<0)||(myChunkHeader.chunkLength > SOUND_MAXSIZE))
+	if ((myChunkHeader.chunkLength < 0)||(myChunkHeader.chunkLength > SOUND_MAXSIZE))
 	{
 		LOCALASSERT(1==0);
 		ffclose(myFile);
@@ -1532,7 +1527,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 			char * wavname = strrchr (wavFileName, '/');
 			if (wavname)
 			{
-				wavname ++;
+				wavname++;
 			}
 			else
 			{
@@ -1738,18 +1733,6 @@ void PlatSetEnviroment(unsigned int env_index, float reverb_mix)
 	SoundConfig.reverb_changed = TRUE;
 #endif
 }
-/*
-#define RebSndRead(dest,size,n,src)\
-{\
-	unsigned char *d = (unsigned char*)(dest);\
-	int i = (n)*(size);\
-	do\
-	{\
-		*d++ = *(src)++;\
-	}\
-	while(--i);\
-}
-*/
 
 inline void RebSndRead(void *dest, size_t size, uint32_t n, uint8_t **src)
 {
@@ -1777,77 +1760,73 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 	uint32_t lengthInSeconds = 0;
 
 	{
-		size_t length = strlen ((const char *)bufferPtr) + 1;
+		size_t length = strlen ((const char*)bufferPtr) + 1;
 		GameSounds[soundIndex].wavName = (char *)AllocateMem (length);
-		strcpy (GameSounds[soundIndex].wavName, (const char *)bufferPtr);
+		strcpy (GameSounds[soundIndex].wavName, (const char*)bufferPtr);
 		bufferPtr += length;
 	}
 
-	/* Read the WAV RIFF header */
-	RebSndRead(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1 ,&bufferPtr);
+	// Read the WAV RIFF header
+	RebSndRead(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, &bufferPtr);
 	endOfBufferPtr = bufferPtr + myChunkHeader.chunkLength;
 
 	RebSndRead(&myRiffHeader, sizeof(PWAVRIFFHEADER), 1, &bufferPtr);
 
-	/* Read the WAV format chunk */
+	// Read the WAV format chunk
 	RebSndRead(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, &bufferPtr);
 	if (myChunkHeader.chunkLength == 16)
 	{
-		/* a standard PCM wave format chunk */
+		// a standard PCM wave format chunk
 		PCMWAVEFORMAT tmpWaveFormat;
-		RebSndRead(&tmpWaveFormat, sizeof(PCMWAVEFORMAT), 1, &bufferPtr);
-		myWaveFormat.wFormatTag = tmpWaveFormat.wf.wFormatTag;
-		myWaveFormat.nChannels = tmpWaveFormat.wf.nChannels;
-		myWaveFormat.nSamplesPerSec = tmpWaveFormat.wf.nSamplesPerSec;;
+		RebSndRead(&tmpWaveFormat, sizeof(PCMWAVEFORMAT), 1, bufferPtr);
+
+		myWaveFormat.wFormatTag      = tmpWaveFormat.wf.wFormatTag;
+		myWaveFormat.nChannels       = tmpWaveFormat.wf.nChannels;
+		myWaveFormat.nSamplesPerSec  = tmpWaveFormat.wf.nSamplesPerSec;
 		myWaveFormat.nAvgBytesPerSec = tmpWaveFormat.wf.nAvgBytesPerSec;
-		myWaveFormat.nBlockAlign = tmpWaveFormat.wf.nBlockAlign;
-		myWaveFormat.wBitsPerSample = tmpWaveFormat.wBitsPerSample;
+		myWaveFormat.nBlockAlign     = tmpWaveFormat.wf.nBlockAlign;
+		myWaveFormat.wBitsPerSample  = tmpWaveFormat.wBitsPerSample;
 		myWaveFormat.cbSize = 0;
-/*
-		char buf[200];
-		sprintf(buf, "name: %s channels: %d samsPerSec: %d\n", GameSounds[soundIndex].wavName, myWaveFormat.nChannels, myWaveFormat.nSamplesPerSec);
-		OutputDebugString(buf);
-*/
 	}
 	else if (myChunkHeader.chunkLength == 18)
 	{
-		/* an extended PCM wave format chunk */
+		// an extended PCM wave format chunk
 		RebSndRead(&myWaveFormat, sizeof(WAVEFORMATEX), 1, &bufferPtr);
 		myWaveFormat.cbSize = 0;
 	}
 	else
 	{
-		/* uh oh: a different chunk type */
+		// uh oh: a different chunk type
 		LOCALASSERT(1==0);
 		return 0;
 	}
 
-	/* Read	the data chunk header */
-	//skip chunks until we reach the 'data' chunk
+	// Read	the data chunk header
+	// skip chunks until we reach the 'data' chunk
 	do
 	{
-		/* Read	the data chunk header */
+		// Read	the data chunk header
 		RebSndRead(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, &bufferPtr);
 		if ((myChunkHeader.chunkName[0]=='d')&&(myChunkHeader.chunkName[1]=='a')&&
 			(myChunkHeader.chunkName[2]=='t')&&(myChunkHeader.chunkName[3]=='a'))
 		{
 			break;
 		}
-		//skip to next chunk
+		// skip to next chunk
 		bufferPtr += myChunkHeader.chunkLength;
-	} while (TRUE);
+	} while (1);
 
-	/* Now do a few checks */
+	// Now do a few checks
 	if ((myChunkHeader.chunkName[0]!='d')||(myChunkHeader.chunkName[1]!='a')||
-		(myChunkHeader.chunkName[2]!='t')||(myChunkHeader.chunkName[3]!='a'))
+	    (myChunkHeader.chunkName[2]!='t')||(myChunkHeader.chunkName[3]!='a'))
 	{
-		/* chunk alignment disaster */
+		// chunk alignment disaster
 		LOCALASSERT(1==0);
 		return 0;
 	}
 	
 	// calculate length of sample
-	lengthInSeconds = DIV_FIXED(myChunkHeader.chunkLength,myWaveFormat.nAvgBytesPerSec);
+	lengthInSeconds = DIV_FIXED(myChunkHeader.chunkLength, myWaveFormat.nAvgBytesPerSec);
 	
 	if ((myChunkHeader.chunkLength < 0) || (myChunkHeader.chunkLength > SOUND_MAXSIZE))
 	{

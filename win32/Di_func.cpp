@@ -7,7 +7,7 @@
 #include <dinput.h>
 #include <XInput.h> // XInput API
 #include "io.h"
-#include "Di_func.h"
+#include "Input.h"
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
@@ -1221,7 +1221,7 @@ int UpdateControllerState()
 
 char *GetGamePadButtonTextString(enum TEXTSTRING_ID stringID)
 {
-	switch(stringID)
+	switch (stringID)
 	{
 		case TEXTSTRING_KEYS_JOYSTICKBUTTON_1:
 			return "XPAD_X";

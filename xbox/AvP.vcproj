@@ -88,7 +88,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				InlineFunctionExpansion="0"
-				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet-1.2-xbox\include&quot;"
+				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet\include&quot;"
 				PreprocessorDefinitions="_XBOX;USE_D3D_XBOX;_DEBUG;AVP_DEBUG_VERSION;USE_D3DVIEWTRANSFORM;DB_NOWINDOWS"
 				StringPooling="FALSE"
 				MinimalRebuild="TRUE"
@@ -112,7 +112,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="xapilibd.lib d3d8d.lib d3dx8d.lib xgraphicsd.lib dsoundd.lib enet_debug.lib libogg_static.lib libvorbis_static.lib libvorbisfile_static.lib libtheora_static.lib xnetd.lib xboxkrnl.lib xbdm.lib"
-				AdditionalLibraryDirectories="..\xbox\enet-1.2-xbox\lib"
+				AdditionalLibraryDirectories="..\xbox\enet\lib"
 				IgnoreDefaultLibraryNames="libcmt.lib"
 				ProgramDatabaseFile=".\Debug/debug_AvP.pdb"
 				MapExports="TRUE"
@@ -217,7 +217,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="TRUE"
 				EnableFiberSafeOptimizations="FALSE"
-				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet-1.2-xbox\include&quot;"
+				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet\include&quot;"
 				PreprocessorDefinitions="_XBOX;USE_D3D_XBOX;_WINDOWS;DB_NOWINDOWS;_SECURE_SCL=0;_HAS_ITERATOR_DEBUGGING=0"
 				StringPooling="TRUE"
 				MinimalRebuild="FALSE"
@@ -240,7 +240,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="xapilib.lib d3d8.lib d3dx8.lib xgraphics.lib dsound.lib xacteng.lib xsndtrk.lib xvoice.lib xonline.lib xboxkrnl.lib xbdm.lib enet.lib libogg_static.lib libvorbis_static.lib libvorbisfile_static.lib libtheora_static.lib"
-				AdditionalLibraryDirectories="..\xbox\enet-1.2-xbox\lib"
+				AdditionalLibraryDirectories="..\xbox\enet\lib"
 				GenerateDebugInformation="FALSE"
 				GenerateMapFile="FALSE"
 				MapExports="FALSE"
@@ -285,7 +285,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\AI_Sight.c">
+				RelativePath="..\3dc\avp\AI_Sight.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -339,7 +339,7 @@
 				RelativePath=".\src\audio.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Frontend\AvP_EnvInfo.c">
+				RelativePath="..\3dc\avp\win95\Frontend\AvP_EnvInfo.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\Frontend\AvP_Intro.cpp">
@@ -359,7 +359,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Frontend\AvP_MenuData.c">
+				RelativePath="..\3dc\avp\win95\Frontend\AvP_MenuData.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -393,7 +393,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Frontend\AvP_Menus.c">
+				RelativePath="..\3dc\avp\win95\Frontend\AvP_Menus.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -478,7 +478,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Avpview.c">
+				RelativePath="..\3dc\avp\Avpview.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -563,7 +563,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_agun.c">
+				RelativePath="..\3dc\avp\bh_agun.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -580,7 +580,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_ais.c">
+				RelativePath="..\3dc\avp\bh_ais.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -597,7 +597,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_alien.c">
+				RelativePath="..\3dc\avp\Bh_alien.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -614,7 +614,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_binsw.c">
+				RelativePath="..\3dc\avp\Bh_binsw.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -631,7 +631,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_cable.c">
+				RelativePath="..\3dc\avp\bh_cable.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -648,7 +648,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_corpse.c">
+				RelativePath="..\3dc\avp\bh_corpse.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -665,7 +665,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_deathvol.c">
+				RelativePath="..\3dc\avp\bh_deathvol.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -682,7 +682,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_debri.c">
+				RelativePath="..\3dc\avp\Bh_debri.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -699,7 +699,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_dummy.c">
+				RelativePath="..\3dc\avp\bh_dummy.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -716,7 +716,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_fan.c">
+				RelativePath="..\3dc\avp\bh_fan.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -733,7 +733,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_far.c">
+				RelativePath="..\3dc\avp\bh_far.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -750,7 +750,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_fhug.c">
+				RelativePath="..\3dc\avp\Bh_fhug.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -767,7 +767,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_gener.c">
+				RelativePath="..\3dc\avp\Bh_gener.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -784,7 +784,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_ldoor.c">
+				RelativePath="..\3dc\avp\bh_ldoor.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -801,7 +801,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_lift.c">
+				RelativePath="..\3dc\avp\bh_lift.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -818,7 +818,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_light.c">
+				RelativePath="..\3dc\avp\bh_light.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -835,7 +835,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_lnksw.c">
+				RelativePath="..\3dc\avp\Bh_lnksw.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -852,7 +852,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_ltfx.c">
+				RelativePath="..\3dc\avp\bh_ltfx.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -869,7 +869,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_marin.c">
+				RelativePath="..\3dc\avp\Bh_marin.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -886,7 +886,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_mission.c">
+				RelativePath="..\3dc\avp\bh_mission.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -903,7 +903,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_near.c">
+				RelativePath="..\3dc\avp\Bh_near.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -920,7 +920,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_pargen.c">
+				RelativePath="..\3dc\avp\bh_pargen.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -937,7 +937,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_plachier.c">
+				RelativePath="..\3dc\avp\bh_plachier.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -954,7 +954,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_plift.c">
+				RelativePath="..\3dc\avp\bh_plift.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -971,7 +971,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_pred.c">
+				RelativePath="..\3dc\avp\Bh_pred.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -988,7 +988,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_queen.c">
+				RelativePath="..\3dc\avp\bh_queen.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1005,7 +1005,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_RubberDuck.c">
+				RelativePath="..\3dc\avp\bh_RubberDuck.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1022,7 +1022,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_selfdest.c">
+				RelativePath="..\3dc\avp\bh_selfdest.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1039,7 +1039,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_snds.c">
+				RelativePath="..\3dc\avp\bh_snds.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1056,7 +1056,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_spcl.c">
+				RelativePath="..\3dc\avp\bh_spcl.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1073,7 +1073,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_swdor.c">
+				RelativePath="..\3dc\avp\Bh_swdor.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1090,7 +1090,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_track.c">
+				RelativePath="..\3dc\avp\bh_track.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1107,7 +1107,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_types.c">
+				RelativePath="..\3dc\avp\Bh_types.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1124,7 +1124,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_videoscreen.c">
+				RelativePath="..\3dc\avp\bh_videoscreen.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1141,7 +1141,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_waypt.c">
+				RelativePath="..\3dc\avp\bh_waypt.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1158,7 +1158,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_weap.c">
+				RelativePath="..\3dc\avp\bh_weap.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1175,7 +1175,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_xeno.c">
+				RelativePath="..\3dc\avp\Bh_xeno.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1209,7 +1209,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\BonusAbilities.c">
+				RelativePath="..\3dc\avp\BonusAbilities.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1243,7 +1243,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\CD_player.c">
+				RelativePath=".\src\CD_player.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\CDTrackSelection.cpp">
@@ -1263,7 +1263,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Cheat.c">
+				RelativePath="..\3dc\avp\win95\Cheat.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1280,7 +1280,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\CheatModes.c">
+				RelativePath="..\3dc\avp\CheatModes.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1399,7 +1399,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\comp_map.c">
+				RelativePath="..\3dc\avp\comp_map.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1416,7 +1416,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Comp_shp.c">
+				RelativePath="..\3dc\avp\Comp_shp.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1558,7 +1558,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\shapes\Cube.c">
+				RelativePath="..\3dc\avp\shapes\Cube.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1632,10 +1632,10 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\win95\db.c">
+				RelativePath="..\3dc\win95\db.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\deaths.c">
+				RelativePath="..\3dc\avp\deaths.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1669,7 +1669,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\decal.c">
+				RelativePath="..\3dc\avp\decal.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1686,58 +1686,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\DetailLevels.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\DirectPlay.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Dp_func.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\dplayext.c">
+				RelativePath="..\3dc\avp\DetailLevels.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1771,7 +1720,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Dxlog.c">
+				RelativePath="..\3dc\win95\Dxlog.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1788,7 +1737,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Dynamics.c">
+				RelativePath="..\3dc\avp\Dynamics.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1805,7 +1754,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Dynblock.c">
+				RelativePath="..\3dc\avp\Dynblock.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1823,20 +1772,6 @@
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\endianio.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\3dc\win95\Enumchnk.cpp">
@@ -1890,7 +1825,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Equipmnt.c">
+				RelativePath="..\3dc\avp\Equipmnt.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1924,7 +1859,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\extents.c">
+				RelativePath="..\3dc\avp\extents.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1941,7 +1876,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\win95\fail.c">
+				RelativePath="..\3dc\win95\fail.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2018,7 +1953,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\frustum.c">
+				RelativePath="..\3dc\frustum.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\gadgets\gadget.cpp">
@@ -2038,7 +1973,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Game.c">
+				RelativePath="..\3dc\avp\Game.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2055,7 +1990,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\game_statistics.c">
+				RelativePath="..\3dc\avp\game_statistics.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2089,7 +2024,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\gameflow.c">
+				RelativePath="..\3dc\avp\gameflow.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2191,7 +2126,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\HModel.c">
+				RelativePath="..\3dc\avp\HModel.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2208,7 +2143,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Hud.c">
+				RelativePath="..\3dc\avp\Hud.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2357,7 +2292,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Inventry.c">
+				RelativePath="..\3dc\avp\Inventry.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2374,7 +2309,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\win95\io.c">
+				RelativePath="..\3dc\win95\io.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2425,7 +2360,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\Kshape.c">
+				RelativePath="..\3dc\Kshape.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2442,7 +2377,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Kzsort.c">
+				RelativePath="..\3dc\avp\win95\Kzsort.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2459,7 +2394,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Langplat.c">
+				RelativePath="..\3dc\avp\Language.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2476,24 +2411,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Language.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Lighting.c">
+				RelativePath="..\3dc\avp\Lighting.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2527,7 +2445,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\load_shp.c">
+				RelativePath="..\3dc\avp\load_shp.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2547,7 +2465,7 @@
 				RelativePath="..\3dc\logString.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\los.c">
+				RelativePath="..\3dc\avp\los.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2584,7 +2502,7 @@
 				RelativePath=".\src\main_xbox.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\Map.c">
+				RelativePath="..\3dc\Map.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2601,10 +2519,10 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\mathline.c">
+				RelativePath="..\3dc\mathline.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\Maths.c">
+				RelativePath="..\3dc\Maths.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2622,20 +2540,6 @@
 			</File>
 			<File
 				RelativePath="..\3dc\win95\md5.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\3dc\win95\media.cpp">
@@ -2656,20 +2560,6 @@
 			</File>
 			<File
 				RelativePath="..\3dc\mem3dc.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\3dc\Mem3dcpp.cpp">
@@ -2689,7 +2579,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\mempool.c">
+				RelativePath="..\3dc\avp\mempool.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2706,7 +2596,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\MessageHistory.c">
+				RelativePath="..\3dc\avp\MessageHistory.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2774,7 +2664,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\Module.c">
+				RelativePath="..\3dc\Module.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2791,7 +2681,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\Morph.c">
+				RelativePath="..\3dc\Morph.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2825,7 +2715,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\movement.c">
+				RelativePath="..\3dc\avp\movement.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2842,7 +2732,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\Mslhand.c">
+				RelativePath="..\3dc\Mslhand.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2896,7 +2786,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\Object.c">
+				RelativePath="..\3dc\Object.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2950,7 +2840,7 @@
 				RelativePath="..\3dc\onscreenKeyboard.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Our_mem.c">
+				RelativePath="..\3dc\win95\Our_mem.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2967,7 +2857,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Paintball.c">
+				RelativePath="..\3dc\avp\Paintball.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2984,7 +2874,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\particle.c">
+				RelativePath="..\3dc\avp\particle.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3018,7 +2908,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Pfarlocs.c">
+				RelativePath="..\3dc\avp\Pfarlocs.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3035,7 +2925,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Pheromon.c">
+				RelativePath="..\3dc\avp\Pheromon.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3052,7 +2942,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\win95\plat_shp.c">
+				RelativePath="..\3dc\win95\plat_shp.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3069,7 +2959,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Platsup.c">
+				RelativePath="..\3dc\avp\win95\Platsup.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3086,7 +2976,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Player.c">
+				RelativePath="..\3dc\avp\Player.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3103,7 +2993,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Pldghost.c">
+				RelativePath="..\3dc\avp\win95\Pldghost.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3120,7 +3010,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Pldnet.c">
+				RelativePath="..\3dc\avp\win95\Pldnet.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3137,7 +3027,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\win95\plspecfn.c">
+				RelativePath="..\3dc\win95\plspecfn.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3154,7 +3044,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Pmove.c">
+				RelativePath="..\3dc\avp\Pmove.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3205,7 +3095,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Psnd.c">
+				RelativePath="..\3dc\avp\Psnd.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3222,7 +3112,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Psndproj.c">
+				RelativePath="..\3dc\avp\Psndproj.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3239,7 +3129,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Pvisible.c">
+				RelativePath="..\3dc\avp\Pvisible.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3364,7 +3254,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\savegame.c">
+				RelativePath="..\3dc\avp\savegame.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3432,7 +3322,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\SecStats.c">
+				RelativePath="..\3dc\avp\SecStats.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3449,7 +3339,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\sfx.c">
+				RelativePath="..\3dc\avp\sfx.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3469,7 +3359,7 @@
 				RelativePath="..\3dc\shaderManager.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\shpanim.c">
+				RelativePath="..\3dc\shpanim.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3520,7 +3410,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\sphere.c">
+				RelativePath="..\3dc\sphere.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3571,7 +3461,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Stratdef.c">
+				RelativePath="..\3dc\avp\Stratdef.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3622,7 +3512,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\support\strutil.c">
+				RelativePath="..\3dc\avp\support\strutil.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3639,7 +3529,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\system.c">
+				RelativePath="..\3dc\avp\win95\system.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3673,7 +3563,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\Tables.c">
+				RelativePath="..\3dc\Tables.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3693,7 +3583,7 @@
 				RelativePath="..\3dc\avp\support\tallfont.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\targeting.c">
+				RelativePath="..\3dc\avp\targeting.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3727,7 +3617,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Texio.c">
+				RelativePath="..\3dc\win95\Texio.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3781,7 +3671,7 @@
 				RelativePath="..\3dc\textureManager.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\track.c">
+				RelativePath="..\3dc\avp\track.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3832,7 +3722,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Triggers.c">
+				RelativePath="..\3dc\avp\Triggers.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3849,7 +3739,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Usr_io.c">
+				RelativePath="..\3dc\avp\win95\Usr_io.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3869,7 +3759,7 @@
 				RelativePath="..\3dc\utilities.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\Vdb.c">
+				RelativePath="..\3dc\Vdb.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3886,7 +3776,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\version.c">
+				RelativePath="..\3dc\version.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3926,7 +3816,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Vision.c">
+				RelativePath="..\3dc\avp\win95\Vision.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -3946,7 +3836,7 @@
 				RelativePath="..\3dc\vorbisPlayer.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Weapons.c">
+				RelativePath="..\3dc\avp\Weapons.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -4469,6 +4359,9 @@
 			</File>
 			<File
 				RelativePath="..\3dc\win95\Inline.h">
+			</File>
+			<File
+				RelativePath="..\3dc\Input.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\intro.hpp">

@@ -113,7 +113,7 @@ void CDDA_PlayLoop(int CDDATrack)
 	if ((CDDATrack<=0)||(CDDATrack>=CDTrackMax)) return; /* no such track */
 
 	ok = PlatPlayCDDA((int)CDDATrack);
-	if(ok != SOUND_PLATFORMERROR)
+	if (ok != SOUND_PLATFORMERROR)
 	{
 		CDDAState=CDOp_Playing;
 		LastCommandGiven = CDCOMMANDID_PlayLoop;

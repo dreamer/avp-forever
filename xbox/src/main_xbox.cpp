@@ -1,4 +1,3 @@
-/* Main designed spec for use with windows95*/
 
 #include "3dc.h"
 #include "module.h"
@@ -10,12 +9,7 @@
 #include "usr_io.h"
 #include "font.h"
 #include "renderer.h"
-
-/* JH 27/1/97 */
-extern "C" {
 #include "comp_shp.h"
-}
-
 #include "chnkload.hpp"
 #include "npcsetup.h" /* JH 30/4/97 */
 #include "pldnet.h"
@@ -38,27 +32,14 @@ extern "C" {
 #include "avp_intro.h"
 #include "CDTrackSelection.h"
 #include "CD_Player.h"
-
-/*------------Patrick 1/6/97---------------
-New sound system
--------------------------------------------*/
 #include "psndplat.h"
-
-#define FRAMEAV 100
-
 #include "AvP_UserProfile.h"
 #include "avp_menus.h"
 #include "configFile.h"
 #include "vorbisPlayer.h"
 #include "networking.h"
 #include "avpview.h"
-
-/*
-
- externs for commonly used global variables and arrays
-
-*/
-extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+#include "renderer.h"
 
 #if debug
 #define MainTextPrint 1
@@ -68,8 +49,6 @@ int DebugFontLoaded = 0;
 #else
 #define MainTextPrint 0
 #endif
-
-extern "C" {
 
 extern int PrintDebuggingText(const char* t, ...);
 extern int WindowRequestMode;
@@ -88,7 +67,7 @@ extern BOOL ForceLoad_SentryGun;
 BOOL UseMouseCentreing = FALSE;
 BOOL KeepMainRifFile = FALSE;
 
-BOOL bRunning = TRUE;
+bool bRunning = true;
 
 char LevelName[] = {"predbit6\0QuiteALongNameActually"};
 
@@ -122,13 +101,11 @@ extern int InGameMenusAreRunning(void);
 extern void LoadDeviceAndVideoModePreferences();
 extern void InitFmvCutscenes();
 
-#include "VideoModes.h"
-extern DEVICEANDVIDEOMODE PreferredDeviceAndVideoMode;
 extern struct DEBUGGINGTEXTOPTIONS ShowDebuggingText;
 
-int unlimitedSaves = 0;
+bool unlimitedSaves = false;
 
-void exit_break_point_fucntion ()
+void exit_break_point_fucntion()
 {
 #if debug
 	if (WindowMode == WindowModeSubWindow)
@@ -136,9 +113,6 @@ void exit_break_point_fucntion ()
 		__debugbreak();
 	}
 #endif
-}
-
-extern int GotMouse;
 }
 
 void _cdecl main()
@@ -221,8 +195,9 @@ void _cdecl main()
 		}
 	}
 
-//	#ifdef AVP_DEBUG_VERSION
-	if (strstr(command_line, "-intro"))	WeWantAnIntro();
+	if (strstr(command_line, "-intro"))
+		WeWantAnIntro();
+
 	if (strstr(command_line, "-qm"))
 	{
 		QuickStartMultiplayer = 1;
@@ -244,7 +219,6 @@ void _cdecl main()
 	{
 		KeepMainRifFile = TRUE;
 	}
-//	#endif //AVP_DEBUG_VERSION
 
 	if (strstr(command_line,"-server"))
 	{
@@ -296,11 +270,11 @@ void _cdecl main()
 	/* JH 28/5/97 */
 	/* Initialise 'fast' file system */
 	#if MARINE_DEMO
-	ffInit("fastfile\\mffinfo.txt","fastfile\\");
+	ffInit("fastfile/mffinfo.txt", "fastfile/");
 	#elif ALIEN_DEMO
-	ffInit("alienfastfile\\ffinfo.txt","alienfastfile\\");
+	ffInit("alienfastfile/ffinfo.txt", "alienfastfile/");
 	#else
-	ffInit("fastfile\\ffinfo.txt","fastfile\\");
+	ffInit("fastfile/ffinfo.txt", "fastfile/");
 	#endif
 
 	InitGame();
@@ -321,9 +295,7 @@ void _cdecl main()
 	AvP.CurrentEnv = AvP.StartingEnv = I_Gen1;
 
 	/*******	System initialisation **********/
-
 	InitialiseSystem(0,0);
-	GotMouse = 1;
 
 	InitialiseRenderer();
 
@@ -358,19 +330,15 @@ void _cdecl main()
 	#else
 
 	// support removing limit on number of game saves
-	if (!Config_GetBool("[Misc]", "UnlimitedSaves", false))
-	{
-		unlimitedSaves = 0;
-	}
-	else unlimitedSaves = 1;
+	unlimitedSaves = Config_GetBool("[Misc]", "UnlimitedSaves", false);
 
 	while (AvP_MainMenus())
 	#endif
 	{
-		int menusActive=0;
-		int thisLevelHasBeenCompleted=0;
+		BOOL menusActive = FALSE;
+		int thisLevelHasBeenCompleted = 0;
 
-		mainMenu = 0;
+		mainMenu = FALSE;
 
 		#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
 /*
@@ -389,13 +357,10 @@ void _cdecl main()
 			(not necessary if user selects EXIT)
 			So it is set here */
 
-//		ChangeGameResolution(PreferredDeviceAndVideoMode.Width, PreferredDeviceAndVideoMode.Height, PreferredDeviceAndVideoMode.ColourDepth);
-
 		// Load precompiled shapes
 	    start_of_loaded_shapes = load_precompiled_shapes();
 
 		/***********  Load up the character stuff *******/
-
 		InitCharacter();
 
 		LoadRifFile(); /* sets up a map*/
@@ -495,16 +460,14 @@ void _cdecl main()
 					else
 					{
 						ReadUserInput();
-//						UpdateAllFMVTextures();
 						SoundSys_Management();
 
-						// bjd
 						ThisFramesRenderingHasBegun();
 					}
 
 					{
 						menusActive = AvP_InGameMenus();
-						if(AvP.RestartLevel) menusActive=0;
+						if (AvP.RestartLevel) menusActive = FALSE;
 					}
 					if (AvP.LevelCompleted)
 					{
@@ -540,16 +503,6 @@ void _cdecl main()
 					//AccessDatabase(0);
 					break;
 				}
-				#if 0
-				case I_GM_Paused:
-				{
-					{
-						extern void DoPcPause(void);
-						DoPcPause();
-					}
-					break;
-				}
-				#endif
 
 				default:
 				{
@@ -560,7 +513,7 @@ void _cdecl main()
 
 			if (AvP.RestartLevel)
 			{
-				AvP.RestartLevel=0;
+				AvP.RestartLevel = 0;
 				AvP.LevelCompleted = 0;
 				FixCheatModesInUserProfile(UserProfilePtr);
 				RestartLevel();
@@ -568,7 +521,7 @@ void _cdecl main()
 		}// end of main game loop
 
 		AvP.LevelCompleted = thisLevelHasBeenCompleted;
-		mainMenu = 1;
+		mainMenu = TRUE;
 
 		FixCheatModesInUserProfile(UserProfilePtr);
 
@@ -616,8 +569,6 @@ void _cdecl main()
 			//EndOfNetworkGameScreen();
 		}
 
-		//need to get rid of the player rifs before we can clear the memory pool
-
 		ClearMemoryPool();
 
 		if (LobbiedGame)
@@ -643,9 +594,6 @@ void _cdecl main()
 	----------------------------------------------------------*/
 	SoundSys_StopAll();
   	SoundSys_RemoveAll();
-
-	/* bjd - delete some profile data that was showing up as memory leaks */
-	EmptyUserProfilesList();
 
 	#else
 	QuickSplashScreens();

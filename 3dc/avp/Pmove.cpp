@@ -10,7 +10,7 @@
 #include "dynblock.h"
 #include "dynamics.h"
 #include "gameplat.h"
-#include "Di_func.h"
+#include "Input.h"
 #include "bh_types.h"
 #include "Player.h"
 #define UseLocalAssert 1

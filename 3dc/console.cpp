@@ -12,7 +12,7 @@
 #include "logString.h"
 #include "font2.h"
 #include <stdint.h>
-#include "Di_func.h"
+#include "Input.h"
 #include "io.h"
 
 

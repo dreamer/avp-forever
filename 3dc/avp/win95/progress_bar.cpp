@@ -12,7 +12,7 @@
 #include "TextureManager.h"
 #include "d3d_render.h"
 #include "io.h"
-#include "Di_func.h"
+#include "Input.h"
 #include "language.h"
 #include "d3d_hud.h"
 

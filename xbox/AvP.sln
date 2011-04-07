@@ -4,7 +4,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AvP", "AvP.vcproj", "{4BE36
 		{98034BF8-AE8C-4226-B84C-1F932834661D} = {98034BF8-AE8C-4226-B84C-1F932834661D}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "enet", "enet-1.2-xbox\enet.vcproj", "{98034BF8-AE8C-4226-B84C-1F932834661D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "enet", "enet\enet.vcproj", "{98034BF8-AE8C-4226-B84C-1F932834661D}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject

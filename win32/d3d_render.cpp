@@ -115,8 +115,8 @@ void RenderListInit()
 {
 	// new, test particle list
 	particleList = new RenderList(400);
-	mainList = new RenderList(800);
-	orthoList = new RenderList(400);
+	mainList     = new RenderList(800);
+	orthoList    = new RenderList(400);
 }
 
 void RenderListDeInit()

@@ -34,7 +34,7 @@
 #include "io.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
-#include "Di_func.h"
+#include "Input.h"
 #include "vision.h"
 #include "BonusAbilities.h"
 #include "avp_menus.h"

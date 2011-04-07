@@ -5,7 +5,7 @@
 #include "gamedef.h"
 #include "bh_types.h"
 #include "pldnet.h"
-#include "Di_func.h"
+#include "Input.h"
 #include "AvP_Menus.h"
 #include "AvP_EnvInfo.h"
 #include "io.h"
@@ -2048,7 +2048,6 @@ static void RenderConfigurationDescriptionString()
 		RenderSmallFontString_Wrapped((char*)text, &area, BRIGHTNESS_OF_HIGHLIGHTED_ELEMENT,0,0);
 	}
 }
-
 
 static void ActUponUsersInput(void)
 {

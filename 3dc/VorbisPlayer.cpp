@@ -241,18 +241,9 @@ bool LoadVorbisTrackList()
 	}
 
 	std::string trackName;
-//	unsigned int pos = 0;
 
 	while (std::getline(file, trackName))
 	{
-/*
-		pos = trackName.find(": ");
-		if (pos != 0)
-		{
-			trackName = trackName.substr(pos + 2);
-			TrackList.push_back(musicFolderName + trackName);
-		}
-*/
 		TrackList.push_back(musicFolderName + trackName);
 	}
 
@@ -271,10 +262,8 @@ bool IsVorbisPlaying()
 	{
 		return inGameMusic->mIsPlaying;
 	}
-	else
-	{
-		return false;
-	}
+	
+	return false;
 }
 
 int SetStreamingMusicVolume(int volume)
@@ -283,10 +272,8 @@ int SetStreamingMusicVolume(int volume)
 	{
 		return inGameMusic->audioStream->SetVolume(volume);
 	}
-	else
-	{
-		return 0;
-	}
+	
+	return 0;
 }
 
 void Vorbis_CloseSystem()
