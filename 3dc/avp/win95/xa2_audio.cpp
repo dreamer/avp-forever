@@ -1778,7 +1778,7 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 	{
 		// a standard PCM wave format chunk
 		PCMWAVEFORMAT tmpWaveFormat;
-		RebSndRead(&tmpWaveFormat, sizeof(PCMWAVEFORMAT), 1, bufferPtr);
+		RebSndRead(&tmpWaveFormat, sizeof(PCMWAVEFORMAT), 1, &bufferPtr);
 
 		myWaveFormat.wFormatTag      = tmpWaveFormat.wf.wFormatTag;
 		myWaveFormat.nChannels       = tmpWaveFormat.wf.nChannels;
