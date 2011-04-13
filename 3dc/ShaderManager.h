@@ -34,6 +34,9 @@
 typedef int32_t effectID_t;
 typedef int32_t shaderID_t;
 
+const shaderID_t kNullShaderID = -1;
+const effectID_t kNullEffectID = -1;
+
 // shader constant types
 enum SHADER_CONSTANT
 {
@@ -47,7 +50,7 @@ enum SHADER_CONSTANT
 class VertexShaderPool
 {
 	private:
-		int32_t currentSetShaderID;
+		shaderID_t currentSetShaderID;
 		
 	public:
 		VertexShaderPool()
@@ -57,18 +60,18 @@ class VertexShaderPool
 
 		std::vector<r_VertexShader> shaderList;
 
-		int32_t Add(r_VertexShader newShader);
+		shaderID_t Add(r_VertexShader newShader);
 		bool SetActive(int32_t shaderID);
-		int32_t GetShaderByName(const std::string &shaderName);
-		void Remove(int32_t shaderID);
-		void AddRef(int32_t shaderID) { shaderList[shaderID].refCount++; }
-		bool SetVertexShaderConstant(int32_t shaderID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
+		shaderID_t GetShaderByName(const std::string &shaderName);
+		void Remove(shaderID_t shaderID);
+		void AddRef(shaderID_t shaderID) { shaderList[shaderID].refCount++; }
+		bool SetVertexShaderConstant(shaderID_t shaderID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
 };
 
 class PixelShaderPool
 {
 	private:
-		int32_t currentSetShaderID;
+		shaderID_t currentSetShaderID;
 
 	public:
 		PixelShaderPool()
@@ -78,11 +81,11 @@ class PixelShaderPool
 
 		std::vector<r_PixelShader> shaderList;
 
-		int32_t Add(r_PixelShader newShader);
-		bool SetActive(int32_t shaderID);
-		int32_t GetShaderByName(const std::string &shaderName);
-		void Remove(int32_t shaderID);
-		void AddRef(int32_t shaderID) { shaderList[shaderID].refCount++; }
+		shaderID_t Add(r_PixelShader newShader);
+		bool SetActive(shaderID_t shaderID);
+		shaderID_t GetShaderByName(const std::string &shaderName);
+		void Remove(shaderID_t shaderID);
+		void AddRef(shaderID_t shaderID) { shaderList[shaderID].refCount++; }
 };
 
 struct effect_t
