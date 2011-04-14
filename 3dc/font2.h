@@ -28,7 +28,7 @@
 #include <string>
 #include <stdint.h>
 
-enum FONT_TYPE
+enum FONT_TYPE_2 // fixme
 {
 	FONT_SMALL,
 	FONT_BIG,
@@ -36,7 +36,7 @@ enum FONT_TYPE
 };
 
 void Font_Init();
-uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t colour, enum FONT_TYPE fontType);
+uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t colour, enum FONT_TYPE_2 fontType);
 void Font_Release();
 
 #endif
