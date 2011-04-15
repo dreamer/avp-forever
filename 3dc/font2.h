@@ -37,6 +37,8 @@ enum FONT_TYPE_2 // fixme
 
 void Font_Init();
 uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t colour, enum FONT_TYPE_2 fontType);
+uint32_t Font_GetCharWidth(char c);
+uint32_t Font_GetStringWidth(const std::string &text);
 void Font_Release();
 
 #endif
