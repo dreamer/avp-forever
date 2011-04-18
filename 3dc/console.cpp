@@ -254,8 +254,6 @@ void Con_RemoveTypedChar()
 
 void Con_Draw()
 {
-	uint32_t charWidth = 12;
-
 	if (IOFOCUS_Get() & IOFOCUS_NEWCONSOLE)
 	{
 		console.destinationY = 0.5f;
@@ -297,7 +295,7 @@ void Con_Draw()
 
 	// draw input cusor
 	Font_DrawText(">", console.indent, y, RCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
-	Font_DrawText("_", console.indent + charWidth, y, RCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
+	Font_DrawText("_", console.indent + kCharWidth, y, RCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 
 	y -= kCharHeight;
 
@@ -309,13 +307,11 @@ void Con_Draw()
 	for (; rows >= 0; rows--, y -= kCharHeight)
 	{
 		xOffset = 0;
-		charWidth = 0;
 
 		Font_DrawText(console.text.at(rows), console.indent + xOffset, y, RCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
 	}
 
 	xOffset = kCharWidth;
-	charWidth = 0;
 
 	// draw the line of text we're currently typing
 	Font_DrawText(console.inputLine, console.indent + xOffset, console.height - kCharHeight, RCOLOR_ARGB(255, 255, 255, 255), FONT_SMALL);
