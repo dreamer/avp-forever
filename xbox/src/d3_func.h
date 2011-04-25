@@ -62,47 +62,48 @@ bool R_BeginScene();
 bool R_EndScene();
 
 // vertex buffer functions
-bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer);
-bool R_ReleaseVertexBuffer(r_VertexBuffer &vertexBuffer);
-bool R_LockVertexBuffer(class VertexBuffer &vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage);
-bool R_UnlockVertexBuffer(class VertexBuffer &vertexBuffer);
-bool R_SetVertexBuffer(class VertexBuffer &vertexBuffer);
-bool R_DrawPrimitive(uint32_t numPrimitives);
+bool R_CreateVertexBuffer  (class VertexBuffer &vertexBuffer);
+bool R_ReleaseVertexBuffer (class VertexBuffer &vertexBuffer);
+bool R_LockVertexBuffer    (class VertexBuffer &vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage);
+bool R_UnlockVertexBuffer  (class VertexBuffer &vertexBuffer);
+bool R_SetVertexBuffer     (class VertexBuffer &vertexBuffer);
+bool R_DrawPrimitive       (uint32_t numPrimitives);
 bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives);
 
 // index buffer functions
-bool R_CreateIndexBuffer(class IndexBuffer &indexBuffer);
-bool R_ReleaseIndexBuffer(r_IndexBuffer &indexBuffer);
-bool R_LockIndexBuffer(class IndexBuffer &indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage);
-bool R_UnlockIndexBuffer(class IndexBuffer &indexBuffer);
-bool R_SetIndexBuffer(class IndexBuffer &indexBuffer);
+bool R_CreateIndexBuffer   (class IndexBuffer &indexBuffer);
+bool R_ReleaseIndexBuffer  (class IndexBuffer &indexBuffer);
+bool R_LockIndexBuffer     (class IndexBuffer &indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage);
+bool R_UnlockIndexBuffer   (class IndexBuffer &indexBuffer);
+bool R_SetIndexBuffer      (class IndexBuffer &indexBuffer);
 
 // texture functions
-bool R_SetTexture(uint32_t stage, texID_t textureID);
-void R_UnsetTexture(texID_t textureID);
-bool R_LockTexture(r_Texture texture, uint8_t **data, uint32_t *pitch, enum TextureLock lockType);
-bool R_UnlockTexture(r_Texture texture);
-bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usageType, Texture &texture);
-bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usageType, Texture &texture);
-bool R_CreateTextureFromFile(const std::string &fileName, Texture &texture);
-void R_ReleaseTexture(r_Texture &texture);
-bool R_CreateTallFontTexture(AVPTEXTURE &tex, enum TextureUsage usageType, Texture &texture);
+bool R_SetTexture            (uint32_t stage, texID_t textureID);
+void R_UnsetTexture          (texID_t textureID);
+bool R_LockTexture           (const Texture &texture, uint8_t **data, uint32_t *pitch, enum TextureLock lockType);
+bool R_UnlockTexture         (const Texture &texture);
+bool R_CreateTexture         (uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usageType, Texture &texture);
+void R_ReleaseTexture        (Texture &texture);
+bool R_CreateTextureFromFile (const std::string &fileName, Texture &texture);
+
+bool R_CreateTallFontTexture       (AVPTEXTURE &tex, enum TextureUsage usageType, Texture &texture);
+bool R_CreateTextureFromAvPTexture (AVPTEXTURE &AvPTexture, enum TextureUsage usageType, Texture &texture);
 
 // vertex declaration
-bool R_CreateVertexDeclaration(class VertexDeclaration *vertexDeclaration);
-bool R_SetVertexDeclaration(r_vertexDeclaration &declaration);
-bool R_ReleaseVertexDeclaration(r_vertexDeclaration &declaration);
+bool R_CreateVertexDeclaration  (class VertexDeclaration *vertexDeclaration);
+bool R_SetVertexDeclaration     (r_vertexDeclaration &declaration);
+bool R_ReleaseVertexDeclaration (r_vertexDeclaration &declaration);
 
 // vertex shader functions
-bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexShader, VertexDeclaration *vertexDeclaration);
-bool R_SetVertexShader(r_VertexShader &vertexShader);
-void R_ReleaseVertexShader(r_VertexShader &vertexShader);
-bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
+bool R_CreateVertexShader      (const std::string &fileName, r_VertexShader &vertexShader, VertexDeclaration *vertexDeclaration);
+bool R_SetVertexShader         (r_VertexShader &vertexShader);
+void R_ReleaseVertexShader     (r_VertexShader &vertexShader);
+bool R_SetVertexShaderConstant (r_VertexShader &vertexShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
 
 // pixel shader functions
-bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader);
-bool R_SetPixelShader(r_PixelShader &pixelShader);
-void R_ReleasePixelShader(r_PixelShader &pixelShader);
+bool R_CreatePixelShader  (const std::string &fileName, r_PixelShader &pixelShader);
+bool R_SetPixelShader     (r_PixelShader &pixelShader);
+void R_ReleasePixelShader (r_PixelShader &pixelShader);
 
 
 void R_NextVideoMode();
@@ -173,7 +174,7 @@ typedef struct FMVVERTEX
 
 } FMVVERTEX;
 
-/* 
+/*
   Maximum number of Direct3D drivers ever
   expected to be resident on the system.
 */
@@ -190,7 +191,7 @@ typedef struct FMVVERTEX
   Description of a D3D driver.
 */
 
-typedef struct D3DDriverInfo 
+typedef struct D3DDriverInfo
 {
 	D3DFORMAT				Formats[20];
 	D3DADAPTER_IDENTIFIER8	AdapterInfo;
@@ -199,7 +200,7 @@ typedef struct D3DDriverInfo
 } D3DDRIVERINFO;
 
 
-typedef struct D3DInfo 
+typedef struct D3DInfo
 {
 	LPDIRECT3D8				lpD3D;
 	LPDIRECT3DDEVICE8		lpD3DDevice;
@@ -250,21 +251,23 @@ extern D3DINFO d3d;
 
 bool InitialiseDirect3D();
 bool R_ChangeResolution		(uint32_t width, uint32_t height);
-void DrawAlphaMenuQuad		(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t alpha);
-void DrawTallFontCharacter	(uint32_t topX, uint32_t topY, uint32_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha);
+void DrawAlphaMenuQuad		(uint32_t topX, uint32_t topY, texID_t textureID, uint32_t alpha);
+void DrawTallFontCharacter	(uint32_t topX, uint32_t topY, texID_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha);
 void DrawCloudTable			(uint32_t topX, uint32_t topY, uint32_t wordLength, uint32_t alpha);
 void DrawFadeQuad			(uint32_t topX, uint32_t topY, uint32_t alpha);
 void DrawSmallMenuCharacter (uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t red, uint32_t green, uint32_t blue, uint32_t alpha);
-void DrawQuad				(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
+void DrawQuad				(uint32_t x, uint32_t y, uint32_t width, uint32_t height, texID_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
 void DrawFmvFrame			(uint32_t frameWidth, uint32_t frameHeight, const std::vector<texID_t> &textureIDs);
-void DrawFontQuad			(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeight, uint32_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
+void DrawFontQuad			(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeight, texID_t textureID, float *uvArray, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
 void CreateScreenShotImage  ();
-void DeRedTexture			(r_Texture texture);
+void DeRedTexture           (const Texture &texture);
 void ReleaseD3DTexture		(r_Texture *d3dTexture);
 void SetTransforms();
 
-extern uint32_t NO_TEXTURE;
-extern uint32_t MISSING_TEXTURE;
+uint32_t R_GetScreenWidth();
+
+extern texID_t NO_TEXTURE;
+extern texID_t MISSING_TEXTURE;
 
 #define RGB_MAKE	D3DCOLOR_XRGB
 

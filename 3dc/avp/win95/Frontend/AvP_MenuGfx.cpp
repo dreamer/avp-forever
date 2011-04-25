@@ -11,12 +11,17 @@
 #include "renderer.h"
 #include "console.h"
 #include "TextureManager.h"
-
-extern int Font_DrawText(const char* text, int x, int y, int colour, int fontType);
+#include "font2.h"
+#include "AvP_Menus.h"
 
 extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour);
 extern void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, BOOL alpha);
 extern void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint32_t alpha);
+static void LoadMenuFont(void);
+static void UnloadMenuFont(void);
+extern int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red, int green, int blue);
+static void CalculateWidthsOfAAFont(void);
+extern void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a);
 
 texID_t AVPMENUGFX_CLOUDY;
 texID_t AVPMENUGFX_SMALL_FONT;
@@ -84,7 +89,6 @@ texID_t AVPMENUGFX_SPLASH_SCREEN3;
 texID_t AVPMENUGFX_SPLASH_SCREEN4;
 texID_t AVPMENUGFX_SPLASH_SCREEN5;
 
-#include "AvP_Menus.h"
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 
 char AAFontWidths[256];
@@ -178,13 +182,6 @@ AVPMENUGFX AvPMenuGfxStorage[MAX_NO_OF_AVPMENUGFXS] =
 };
 #endif
 
-static void LoadMenuFont(void);
-static void UnloadMenuFont(void);
-/*static*/ extern int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red, int green, int blue);
-static void CalculateWidthsOfAAFont(void);
-
-extern void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a);
-
 AVPIndexedFont IntroFont_Light;
 
 static void LoadMenuFont(void)
@@ -214,7 +211,7 @@ static void LoadMenuFont(void)
 	
 	IntroFont_Light.height = 33;
 	IntroFont_Light.swidth = 5;
-	IntroFont_Light.ascii = 32;
+	IntroFont_Light.ascii  = 32;
 
 	gfxPtr = &IntroFont_Light.info;
 //	gfxPtr->menuTexture = NULL;
@@ -558,7 +555,7 @@ extern int Hardware_RenderSmallMenuText(char *textPtr, int x, int y, int alpha, 
 			int length = 0;
 			char *ptr = textPtr;
 
-			while(*ptr)
+			while (*ptr)
 			{
 				length += AAFontWidths[*ptr++];
 			}
@@ -571,14 +568,14 @@ extern int Hardware_RenderSmallMenuText(char *textPtr, int x, int y, int alpha, 
 			int length = 0;
 			char *ptr = textPtr;
 
-			while(*ptr)
+			while (*ptr)
 			{
 				length += AAFontWidths[*ptr++];
 			}
 
 			x -= length/2;
 			break;
-		}	
+		}
 	}
 
 	LOCALASSERT(x>0);
@@ -610,7 +607,7 @@ extern int Hardware_RenderSmallMenuText_Coloured(char *textPtr, int x, int y, in
 			int length = 0;
 			char *ptr = textPtr;
 
-			while(*ptr)
+			while (*ptr)
 			{
 				length+=AAFontWidths[*ptr++];
 			}
@@ -623,7 +620,7 @@ extern int Hardware_RenderSmallMenuText_Coloured(char *textPtr, int x, int y, in
 			int length = 0;
 			char *ptr = textPtr;
 
-			while(*ptr)
+			while (*ptr)
 			{
 				length+=AAFontWidths[*ptr++];
 			}
@@ -694,19 +691,8 @@ extern void RenderKeyConfigRectangle(int alpha)
 	DrawQuad(x, y + totalHeight-segHeight, totalWidth, segHeight, NO_TEXTURE, colour, TRANSLUCENCY_NORMAL);
 }
 
-extern void Hardware_RenderKeyConfigRectangle(int alpha)
-{
-	RenderKeyConfigRectangle(alpha);
-}
-
-extern void Hardware_RenderHighlightRectangle(int x1, int y1, int x2, int y2, int r, int g, int b)
-{
-	D3D_Rectangle(x1, y1, x2, y2, r, g, b, 255);
-}
-
 extern void RenderHighlightRectangle(int x1, int y1, int x2, int y2, int r, int g, int b)
 {
-	// green rectangle highlight on load screen etc
 	D3D_Rectangle(x1, y1, x2, y2, r, g, b, 255);
 }
 
@@ -730,11 +716,11 @@ extern int RenderSmallChar(char c, int x, int y, int alpha, int red, int green, 
 	int alphaG = MUL_FIXED(alpha, green);
 	int alphaB = MUL_FIXED(alpha, blue);
 
-	while ( *textPtr )
+	while (*textPtr)
 	{
 		char c = *textPtr++;
 
-		if (c>=' ')
+		if (c >= ' ')
 		{
 			int topLeftU = 1+((c-32)&15)*16;
 			int topLeftV = 1+((c-32)>>4)*16;
@@ -765,39 +751,39 @@ extern void RenderSmallFontString_Wrapped(char *textPtr, RECT* area, int alpha, 
 /*
 Determine area used by text , so we can draw it centrally
 */
-	const char *textPtr2=textPtr;
+	const char *textPtr2 = textPtr;
 	while (*textPtr2) 
 	{
-		int widthFromSpaces=0;
-		int widthFromChars=0;
+		int widthFromSpaces = 0;
+		int widthFromChars = 0;
 		
 		while (*textPtr2 && *textPtr2==' ') 
 		{
-			widthFromSpaces+=AAFontWidths[(unsigned int) *textPtr2++];
+			widthFromSpaces += AAFontWidths[(unsigned int) *textPtr2++];
 		}
 		
 		while (*textPtr2 && *textPtr2!=' ') 
 		{
-			widthFromChars+=AAFontWidths[(unsigned int) *textPtr2++];
+			widthFromChars += AAFontWidths[(unsigned int) *textPtr2++];
 		}
 		
 		wordWidth=widthFromSpaces+widthFromChars;
 		
-		if (wordWidth> area->right-sx) 
+		if (wordWidth > area->right - sx) 
 		{
-			if (wordWidth >area->right-area->left) 
+			if (wordWidth > area->right - area->left) 
 			{
-				int extraLinesNeeded=0;
+				int extraLinesNeeded = 0;
 				
-				wordWidth-=(area->right-sx);
+				wordWidth -= (area->right - sx);
 				
-				sy+=HUD_FONT_HEIGHT;
-				sx=area->left;
+				sy += HUD_FONT_HEIGHT;
+				sx = area->left;
 				
-				extraLinesNeeded=wordWidth/(area->right-area->left);
+				extraLinesNeeded = wordWidth / (area->right - area->left);
 				
-				sy+=HUD_FONT_HEIGHT*extraLinesNeeded;
-				wordWidth %= (area->right-area->left);
+				sy += HUD_FONT_HEIGHT * extraLinesNeeded;
+				wordWidth %= (area->right - area->left);
 				
 				if (sy + HUD_FONT_HEIGHT > area->bottom) 
 					break;
@@ -828,30 +814,30 @@ Determine area used by text , so we can draw it centrally
 		sx = area->left;
 	}
 	
-	sy+=HUD_FONT_HEIGHT;
-	if(sy<area->bottom) 
+	sy += HUD_FONT_HEIGHT;
+	if (sy < area->bottom) 
 	{
-		sy=area->top + (area->bottom-sy)/2;
+		sy = area->top + (area->bottom - sy) / 2;
 	} 
 	else 
 	{
-		sy=area->top;
+		sy = area->top;
 	}
 
-	while ( *textPtr ) 
+	while (*textPtr) 
 	{
-		const char* textPtr2=textPtr;
-		wordWidth=0;
+		const char* textPtr2 = textPtr;
+		wordWidth = 0;
 		
-		while(*textPtr2 && *textPtr2==' ') {
-			wordWidth+=AAFontWidths[(unsigned int) *textPtr2++];
+		while (*textPtr2 && *textPtr2==' ') {
+			wordWidth += AAFontWidths[(unsigned int) *textPtr2++];
 		}
 		
-		while(*textPtr2 && *textPtr2!=' ') {
-			wordWidth+=AAFontWidths[(unsigned int) *textPtr2++];
+		while (*textPtr2 && *textPtr2!=' ') {
+			wordWidth += AAFontWidths[(unsigned int) *textPtr2++];
 		}
 		
-		if (wordWidth> area->right-sx) 
+		if (wordWidth > area->right-sx) 
 		{
 			if (wordWidth>area->right - area->left) 
 			{
@@ -862,12 +848,13 @@ Determine area used by text , so we can draw it centrally
 			} 
 			else 
 			{
-				sy+=HUD_FONT_HEIGHT;
-				sx=area->left;
+				sy += HUD_FONT_HEIGHT;
+				sx = area->left;
 				
-				if (sy+HUD_FONT_HEIGHT> area->bottom) break;
+				if (sy + HUD_FONT_HEIGHT > area->bottom) break;
 				
-				if (wordWidth> area->right-sx) break;
+				if (wordWidth > area->right - sx) 
+					break;
 				
 				while (*textPtr && *textPtr==' ') {
 					textPtr++;
@@ -877,32 +864,33 @@ Determine area used by text , so we can draw it centrally
 
 		while (*textPtr && *textPtr==' ') 
 		{
-			sx+=AAFontWidths[(unsigned int) *textPtr++];
+			sx += AAFontWidths[(unsigned int) *textPtr++];
 		}
 		
-		if (sx>area->right) 
+		if (sx > area->right) 
 		{
-			while (sx>area->right) 
+			while (sx > area->right) 
 			{
-				sx-=(area->right-area->left);
-				sy+=HUD_FONT_HEIGHT;
+				sx -= (area->right - area->left);
+				sy += HUD_FONT_HEIGHT;
 			}
 			
-			if (sy+HUD_FONT_HEIGHT> area->bottom) 
+			if (sy + HUD_FONT_HEIGHT> area->bottom) 
 				break;
 		}
 		
-		while (*textPtr && *textPtr!=' ') 
+		while (*textPtr && *textPtr != ' ') 
 		{
 			char c = *textPtr++;
 			int letterWidth = AAFontWidths[(unsigned int) c];
 			
-			if (sx+letterWidth>area->right) 
+			if (sx + letterWidth > area->right) 
 			{
-				sx=area->left;
-				sy+=HUD_FONT_HEIGHT;
+				sx = area->left;
+				sy += HUD_FONT_HEIGHT;
 				
-				if(sy+HUD_FONT_HEIGHT> area->bottom) break;
+				if (sy + HUD_FONT_HEIGHT > area->bottom) 
+					break;
 			}
 			
 			if (c>=' ' || c<='z') 
@@ -1168,14 +1156,12 @@ extern AVPMENU_ELEMENT AvPMenu_SinglePlayer[];
 
 extern void LoadAllAvPMenuGfx(void)
 {
-	int i = 0;
-
 	LoadAllMenuTextures();
 	LoadMenuFont();
 	CalculateWidthsOfAAFont();
 
 	// call a function to remove the red grid from the small font texture
-	DeRedTexture(Tex_GetTexture(AVPMENUGFX_SMALL_FONT));
+	DeRedTexture(Tex_GetTextureDetails(AVPMENUGFX_SMALL_FONT));
 
 	/*
 		AVPMENUGFX_ALIEN_LOGO and friends were originally constants that could be assigned at 
@@ -1187,6 +1173,8 @@ extern void LoadAllAvPMenuGfx(void)
 	AvPMenu_SinglePlayer[2].textureID = AVPMENUGFX_PREDATOR_LOGO;
 
 #if 0 // bjd - texture test
+	int i = 0;
+
 	while (i < AVPMENUGFX_WINNER_SCREEN)
 	{
 		LoadAvPMenuGfx((enum AVPMENUGFX_ID)i++);
@@ -1479,7 +1467,6 @@ extern int HeightOfMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textureID)
 static void CalculateWidthsOfAAFont(void)
 {
 	// bjd - texture test
-	int c;
 
 	uint32_t textureWidth = 0;
 	uint32_t textureHeight = 0;
@@ -1499,7 +1486,7 @@ static void CalculateWidthsOfAAFont(void)
 
 	AAFontWidths[32] = 3;
 
-	for (c = 33; c < 255; c++) 
+	for (int c = 33; c < 255; c++) 
 	{
 		int x,y;
 		int x1 = 1+((c-32)&15)*16;

@@ -3832,7 +3832,6 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 					particle.Position.vz += MUL_FIXED(50 - (FastRandom()&15),directionPtr->vz);
 					particle.Size -= (FastRandom()&3)+3;
 				}
-
 			}
 			{
 				int a;
@@ -3875,15 +3874,19 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 
 			particle.Colour = RGBALIGHT_MAKE(particleDescPtr->RedScale[CurrentVisionMode],particleDescPtr->GreenScale[CurrentVisionMode],particleDescPtr->BlueScale[CurrentVisionMode],particleDescPtr->Alpha);
 			particle.Size = particleDescPtr->Size;
-		
+
 			RenderParticle(&particle);
+
 			particle.Position.vx += MUL_FIXED(100, directionPtr->vx);
 			particle.Position.vy += MUL_FIXED(100, directionPtr->vy);
 			particle.Position.vz += MUL_FIXED(100, directionPtr->vz);
+
 			RenderParticle(&particle);
+
 			particle.Position.vx += MUL_FIXED(100, directionPtr->vx);
 			particle.Position.vy += MUL_FIXED(100, directionPtr->vy);
 			particle.Position.vz += MUL_FIXED(100, directionPtr->vz);
+
 			RenderParticle(&particle);
 			{
 				int i = 16;

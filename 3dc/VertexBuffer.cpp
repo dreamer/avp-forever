@@ -24,6 +24,7 @@
 
 #include "VertexBuffer.h"
 #include "logString.h"
+#include "console.h"
 
 enum VertexPrimitive
 {
@@ -48,7 +49,7 @@ bool VertexBuffer::Unlock()
 
 bool VertexBuffer::Release()
 {
-	return R_ReleaseVertexBuffer(this->vertexBuffer);
+	return R_ReleaseVertexBuffer(*this);
 }
 
 bool VertexBuffer::Create(uint32_t capacity, enum R_FVF fvf, enum R_USAGE usage)
@@ -71,6 +72,8 @@ bool VertexBuffer::Create(uint32_t capacity, enum R_FVF fvf, enum R_USAGE usage)
 			break;
 		default:
 			// error and return
+			Con_PrintError("Invalid FVF type");
+			return false;
 			break;
 	}
 

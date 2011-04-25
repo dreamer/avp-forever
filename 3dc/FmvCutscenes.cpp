@@ -93,7 +93,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 		{
 			ftPtr->MessageNumber = 0;
 			delete fmvList[ftPtr->fmvHandle].FMVclass;
-			fmvList[ftPtr->fmvHandle].FMVclass = NULL;
+			fmvList[ftPtr->fmvHandle].FMVclass  = NULL;
 			fmvList[ftPtr->fmvHandle].isPlaying = false;
 			ftPtr->fmvHandle = -1;
 		}

@@ -202,7 +202,6 @@ bool EffectManager::SetActive(effectID_t effectID)
 {
 	vsPool.SetActive(effectList[effectID].vertexShaderID);
 	psPool.SetActive(effectList[effectID].pixelShaderID);
-
 	return true;
 }
 

@@ -92,7 +92,7 @@ typedef struct activesoundsample
 	int volume;
 	int	pitch;
 	int *externalRef;
-	BOOL is3D;
+	bool is3D;
 	unsigned int loop :1;
 	unsigned int threedee :1;
 	unsigned int paused :1;
@@ -118,7 +118,7 @@ typedef struct activesoundsample
 		soundIndex = SID_NOSOUND;
 		priority = ASP_Minimum;
 		externalRef = 0;
-		is3D = FALSE;
+		is3D = false;
 #ifdef USE_XAUDIO2
 		pSourceVoice = 0;
 #endif
@@ -128,7 +128,7 @@ typedef struct activesoundsample
 		#endif
 
 		#ifdef USE_XAUDIO2
-			is3D = FALSE;
+			is3D = false;
 			audioBuffer = 0;
 			pSourceVoice = 0;
 		#endif

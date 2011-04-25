@@ -33,9 +33,6 @@
 #include <XInput.h> // XInput API
 #include "AvP_UserProfile.h"
 
-// Alien FOV - 115
-// Marine & Predator FOV - 77
-
 D3DXMATRIX matOrtho;
 D3DXMATRIX matProjection;
 D3DXMATRIX matView;
@@ -53,8 +50,8 @@ extern int WindowMode;
 extern void ChangeWindowsSize(uint32_t width, uint32_t height);
 
 // size of vertex and index buffers
-const uint32_t MAX_VERTEXES = 4096;
-const uint32_t MAX_INDICES = 9216;
+const uint32_t kMaxVertices = 4096;
+const uint32_t kMaxIndices  = 9216;
 
 static HRESULT LastError;
 texID_t NO_TEXTURE = 0;
@@ -85,6 +82,10 @@ void ToggleWireframe();
 
 const int kMaxTextureStages = 8;
 std::vector<texID_t> setTextureArray;
+
+// Alien FOV - 115
+// Marine & Predator FOV - 77
+const int kDefaultFOV = 77;
 
 // byte order macros for A8R8G8B8 d3d texture
 enum
@@ -177,6 +178,11 @@ uint32_t YPercentToScreen(float percent)
 	return ((((float)ScreenDescriptorBlock.SDB_Height) / 100) * percent);
 }
 
+uint32_t R_GetScreenWidth()
+{
+	return ScreenDescriptorBlock.SDB_Width;
+}
+
 bool ReleaseVolatileResources()
 {
 	Tex_ReleaseDynamicTextures();
@@ -193,7 +199,7 @@ bool ReleaseVolatileResources()
 	return true;
 }
 
-BOOL CheckPointIsInFrustum(D3DXVECTOR3 *point)
+bool CheckPointIsInFrustum(D3DXVECTOR3 *point)
 {
 	// check if point is in front of each plane
 	for (int i = 0; i < 6; i++)
@@ -201,12 +207,12 @@ BOOL CheckPointIsInFrustum(D3DXVECTOR3 *point)
 		if (D3DXPlaneDotCoord(&m_frustum[i], point) < 0.0f)
 		{
 			// its outside
-			return FALSE;
+			return false;
 		}
 	}
 
 	// return here if the point is entirely within
-	return TRUE;
+	return true;
 }
 
 // call per frame after we've updated view and projection matrixes
@@ -256,6 +262,30 @@ void BuildFrustum()
 	{
 		D3DXPlaneNormalize(&m_frustum[i], &m_frustum[i]);
 	}
+}
+
+static float deltaTime = 0.0f;
+
+void UpdateTestTimer()
+{
+	static float currentTime = timeGetTime();
+
+	float newTime = timeGetTime();
+	float frameTime = newTime - currentTime;
+	currentTime = newTime;
+
+	deltaTime = frameTime;
+
+	std::stringstream ss;
+
+	ss << deltaTime;
+
+	Font_DrawCenteredText(ss.str());
+}
+
+float GetTestTimer()
+{
+	return deltaTime;
 }
 
 bool R_BeginScene()
@@ -346,14 +376,16 @@ bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer)
 	{
 		case USAGE_STATIC:
 			vbUsage = 0;
-			vbPool = D3DPOOL_MANAGED;
+			vbPool  = D3DPOOL_MANAGED;
 			break;
 		case USAGE_DYNAMIC:
 			vbUsage = D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY;
-			vbPool = D3DPOOL_DEFAULT;
+			vbPool  = D3DPOOL_DEFAULT;
 			break;
 		default:
 			// error and return
+			Con_PrintError("Unknown vertex buffer usage type");
+			return false;
 			break;
 	}
 
@@ -368,11 +400,11 @@ bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer)
 	return true;
 }
 
-bool R_ReleaseVertexBuffer(r_VertexBuffer &vertexBuffer)
+bool R_ReleaseVertexBuffer(class VertexBuffer &vertexBuffer)
 {
-	if (vertexBuffer.vertexBuffer)
+	if (vertexBuffer.vertexBuffer.vertexBuffer)
 	{
-		vertexBuffer.vertexBuffer->Release();
+		vertexBuffer.vertexBuffer.vertexBuffer->Release();
 	}
 
 	return true;
@@ -387,14 +419,16 @@ bool R_CreateIndexBuffer(class IndexBuffer &indexBuffer)
 	{
 		case USAGE_STATIC:
 			ibUsage = 0;
-			ibPool = D3DPOOL_MANAGED;
+			ibPool  = D3DPOOL_MANAGED;
 			break;
 		case USAGE_DYNAMIC:
 			ibUsage = D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY;
-			ibPool = D3DPOOL_DEFAULT;
+			ibPool  = D3DPOOL_DEFAULT;
 			break;
 		default:
 			// error and return
+			Con_PrintError("Unknown index buffer usage type");
+			return false;
 			break;
 	}
 	
@@ -410,11 +444,11 @@ bool R_CreateIndexBuffer(class IndexBuffer &indexBuffer)
 	return true;
 }
 
-bool R_ReleaseIndexBuffer(r_IndexBuffer &indexBuffer)
+bool R_ReleaseIndexBuffer(class IndexBuffer &indexBuffer)
 {
-	if (indexBuffer.indexBuffer)
+	if (indexBuffer.indexBuffer.indexBuffer)
 	{
-		indexBuffer.indexBuffer->Release();
+		indexBuffer.indexBuffer.indexBuffer->Release();
 	}
 
 	return true;
@@ -461,7 +495,7 @@ char* R_GetDeviceName()
 
 void R_SetCurrentVideoMode()
 {
-	uint32_t currentWidth = d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Width;
+	uint32_t currentWidth  = d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Width;
 	uint32_t currentHeight = d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Height;
 
 	// set the new values in the config file
@@ -515,7 +549,6 @@ void R_UnsetTexture(texID_t textureID)
 		if (setTextureArray[i] == textureID)
 		{
 			setTextureArray[i] = NO_TEXTURE;
-//			d3d.lpD3DDevice->SetTexture(i, Tex_GetTexture(NO_TEXTURE));
 		}
 	}
 }
@@ -653,24 +686,24 @@ bool CreateVolatileResources()
 
 	// main
 	d3d.mainVB = new VertexBuffer;
-	d3d.mainVB->Create(MAX_VERTEXES*5, FVF_LVERTEX, USAGE_DYNAMIC);
+	d3d.mainVB->Create(kMaxVertices*5, FVF_LVERTEX, USAGE_DYNAMIC);
 
 	d3d.mainIB = new IndexBuffer;
-	d3d.mainIB->Create((MAX_VERTEXES*5) * 3, USAGE_DYNAMIC);
+	d3d.mainIB->Create((kMaxIndices*5) * 3, USAGE_DYNAMIC);
 
 	// particle vertex buffer
 	d3d.particleVB = new VertexBuffer;
-	d3d.particleVB->Create(MAX_VERTEXES*6, FVF_LVERTEX, USAGE_DYNAMIC);
+	d3d.particleVB->Create(kMaxVertices*6, FVF_LVERTEX, USAGE_DYNAMIC);
 
 	d3d.particleIB = new IndexBuffer;
-	d3d.particleIB->Create((MAX_VERTEXES*6) * 3, USAGE_DYNAMIC);
+	d3d.particleIB->Create((kMaxIndices*6) * 3, USAGE_DYNAMIC);
 
 	// orthographic projected quads
 	d3d.orthoVB = new VertexBuffer;
-	d3d.orthoVB->Create(MAX_VERTEXES, FVF_ORTHO, USAGE_DYNAMIC);
+	d3d.orthoVB->Create(kMaxVertices, FVF_ORTHO, USAGE_DYNAMIC);
 
 	d3d.orthoIB = new IndexBuffer;
-	d3d.orthoIB->Create(MAX_VERTEXES * 3, USAGE_DYNAMIC);
+	d3d.orthoIB->Create(kMaxIndices * 3, USAGE_DYNAMIC);
 
 	SetRenderStateDefaults();
 
@@ -690,7 +723,7 @@ bool CreateVolatileResources()
 	return true;
 }
 
-bool R_LockTexture(r_Texture texture, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
+bool R_LockTexture(const Texture &texture, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
 {
 	D3DLOCKED_RECT lock;
 	uint32_t lockFlag;
@@ -708,8 +741,7 @@ bool R_LockTexture(r_Texture texture, uint8_t **data, uint32_t *pitch, enum Text
 			break;
 	}
 
-	LastError = texture->LockRect(0, &lock, NULL, lockFlag);
-
+	LastError = texture.texture->LockRect(0, &lock, NULL, lockFlag);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Unable to lock texture");
@@ -725,10 +757,9 @@ bool R_LockTexture(r_Texture texture, uint8_t **data, uint32_t *pitch, enum Text
 	}
 }
 
-bool R_UnlockTexture(r_Texture texture)
+bool R_UnlockTexture(const Texture &texture)
 {
-	LastError = texture->UnlockRect(0);
-
+	LastError = texture.texture->UnlockRect(0);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Unable to unlock texture");
@@ -757,7 +788,6 @@ void SetFov()
 	SetTransforms();
 }
 
-// Functions
 void CheckWireFrameMode(int shouldBeOn)
 {
 	if (shouldBeOn)
@@ -901,13 +931,13 @@ bool R_CreateTallFontTexture(AVPTEXTURE &tex, enum TextureUsage usageType, Textu
 	{
 		case TextureUsage_Normal:
 		{
-			texturePool = D3DPOOL_MANAGED;
+			texturePool  = D3DPOOL_MANAGED;
 			textureUsage = 0;
 			break;
 		}
 		case TextureUsage_Dynamic:
 		{
-			texturePool = D3DPOOL_DEFAULT;
+			texturePool  = D3DPOOL_DEFAULT;
 			textureUsage = D3DUSAGE_DYNAMIC;
 			break;
 		}
@@ -918,13 +948,13 @@ bool R_CreateTallFontTexture(AVPTEXTURE &tex, enum TextureUsage usageType, Textu
 		}
 	}
 
-	uint32_t width = 450;
+	uint32_t width  = 450;
 	uint32_t height = 495;
 
-	uint32_t padWidth = 512;
+	uint32_t padWidth  = 512;
 	uint32_t padHeight = 512;
 
-	uint32_t charWidth = 30;
+	uint32_t charWidth  = 30;
 	uint32_t charHeight = 33;
 
 	uint32_t numTotalChars = tex.height / charHeight;
@@ -1054,9 +1084,9 @@ bool R_CreateTallFontTexture(AVPTEXTURE &tex, enum TextureUsage usageType, Textu
 	
 	// fill out newTexture struct
 	texture.bitsPerPixel = 32;
-	texture.width = width;
+	texture.width  = width;
 	texture.height = height;
-	texture.realWidth = padWidth;
+	texture.realWidth  = padWidth;
 	texture.realHeight = padHeight;
 	texture.usage = usageType;
 
@@ -1471,7 +1501,7 @@ bool R_SetPixelShader(r_PixelShader &pixelShader)
 
 // removes pure red colour from a texture. used to remove red outline grid on small font texture.
 // we remove the grid as it can sometimes bleed onto text when we use texture filtering. maybe add params for passing width/height?
-void DeRedTexture(r_Texture texture)
+void DeRedTexture(const Texture &texture)
 {
 	uint8_t *srcPtr = NULL;
 	uint8_t *destPtr = NULL;
@@ -1485,11 +1515,11 @@ void DeRedTexture(r_Texture texture)
 	}
 
 	// loop, setting all full red pixels to black
-	for (uint32_t y = 0; y < 256; y++)
+	for (uint32_t y = 0; y < texture.height; y++)
 	{
 		destPtr = (srcPtr + y*pitch);
 
-		for (uint32_t x = 0; x < 256; x++)
+		for (uint32_t x = 0; x < texture.width; x++)
 		{
 			if ((destPtr[BO_RED] == 255) && (destPtr[BO_BLUE] == 0) && (destPtr[BO_GREEN] == 0))
 			{
@@ -1537,11 +1567,11 @@ bool R_CreateTextureFromFile(const std::string &fileName, Texture &texture)
 	D3DSURFACE_DESC surfaceDescription;
 	texture.texture->GetLevelDesc(0, &surfaceDescription);
 
-	texture.realWidth = surfaceDescription.Width;
+	texture.realWidth  = surfaceDescription.Width;
 	texture.realHeight = surfaceDescription.Height;
 
 	// save the original width and height
-	texture.width = imageInfo.Width;
+	texture.width  = imageInfo.Width;
 	texture.height = imageInfo.Height;
 	texture.bitsPerPixel = 32; // this should be ok?
 	texture.usage = TextureUsage_Normal;
@@ -1562,19 +1592,20 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 	{
 		case TextureUsage_Normal:
 		{
-			texturePool = D3DPOOL_MANAGED;
+			texturePool  = D3DPOOL_MANAGED;
 			textureUsage = 0;
 			break;
 		}
 		case TextureUsage_Dynamic:
 		{
-			texturePool = D3DPOOL_DEFAULT;
+			texturePool  = D3DPOOL_DEFAULT;
 			textureUsage = D3DUSAGE_DYNAMIC;
 			break;
 		}
 		default:
 		{
-			OutputDebugString("uh oh!\n");
+			Con_PrintError("Invalid texture usageType value in R_CreateTextureFromAvPTexture()");
+			return false;
 		}
 	}
 
@@ -1640,14 +1671,14 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 	D3DSURFACE_DESC surfaceDescription;
 	d3dTexture->GetLevelDesc(0, &surfaceDescription);
 
-	texture.realWidth = surfaceDescription.Width;
+	texture.realWidth  = surfaceDescription.Width;
 	texture.realHeight = surfaceDescription.Height;
 
 	// set texture struct members
 	texture.bitsPerPixel = 32; // set to 32 for now
-	texture.width = AvPTexture.width;
-	texture.height = AvPTexture.height;
-	texture.usage = usageType;
+	texture.width   = AvPTexture.width;
+	texture.height  = AvPTexture.height;
+	texture.usage   = usageType;
 	texture.texture = d3dTexture;
 
 	delete[] buffer;
@@ -1670,19 +1701,19 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 	{
 		case TextureUsage_Normal:
 		{
-			texturePool = D3DPOOL_MANAGED;
+			texturePool  = D3DPOOL_MANAGED;
 			textureUsage = 0;
 			break;
 		}
 		case TextureUsage_Dynamic:
 		{
-			texturePool = D3DPOOL_DEFAULT;
+			texturePool  = D3DPOOL_DEFAULT;
 			textureUsage = D3DUSAGE_DYNAMIC;
 			break;
 		}
 		default:
 		{
-			Con_PrintError("Invalid texture usageType value in R_CreateTexture");
+			Con_PrintError("Invalid texture usageType value in R_CreateTexture()");
 			return false;
 		}
 	}
@@ -1706,7 +1737,7 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 		}
 		default:
 		{
-			Con_PrintError("Invalid bitsPerPixel value in R_CreateTexture");
+			Con_PrintError("Invalid bitsPerPixel value in R_CreateTexture()");
 			return false;
 		}
 	}
@@ -1721,22 +1752,22 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 
 	// set texture struct members
 	texture.bitsPerPixel = bitsPerPixel;
-	texture.width = width;
+	texture.width  = width;
 	texture.height = height;
-	texture.realWidth = width;
+	texture.realWidth  = width;
 	texture.realHeight = height;
-	texture.usage = usageType;
+	texture.usage   = usageType;
 	texture.texture = d3dTexture;
 
 	return true;
 }
 
-void R_ReleaseTexture(r_Texture &texture)
+void R_ReleaseTexture(Texture &texture)
 {
-	if (texture)
+	if (texture.texture)
 	{
-		texture->Release();
-		texture = NULL;
+		texture.texture->Release();
+		texture.texture = NULL;
 	}
 }
 
@@ -1784,7 +1815,7 @@ bool R_ChangeResolution(uint32_t width, uint32_t height)
 
 	ReleaseVolatileResources();
 
-	d3d.d3dpp.BackBufferWidth = width;
+	d3d.d3dpp.BackBufferWidth  = width;
 	d3d.d3dpp.BackBufferHeight = height;
 
 	// change the window size
@@ -1807,12 +1838,12 @@ bool R_ChangeResolution(uint32_t width, uint32_t height)
 		if (D3DERR_INVALIDCALL == LastError)
 		{
 			// set some default, safe resolution?
-			width = 800;
+			width  = 800;
 			height = 600;
 
 			ChangeWindowsSize(width, height);
 
-			d3d.d3dpp.BackBufferWidth = width;
+			d3d.d3dpp.BackBufferWidth  = width;
 			d3d.d3dpp.BackBufferHeight = height;
 
 			// try reset again, if it doesnt work, bail out
@@ -1830,7 +1861,7 @@ bool R_ChangeResolution(uint32_t width, uint32_t height)
 		}
 	}
 
-	d3d.D3DViewport.Width = width;
+	d3d.D3DViewport.Width  = width;
 	d3d.D3DViewport.Height = height;
 
 	LastError = d3d.lpD3DDevice->SetViewport(&d3d.D3DViewport);
@@ -1941,7 +1972,6 @@ bool InitialiseDirect3D()
 
 	// count number of display formats in our array
 	uint32_t numDisplayFormats = sizeof(DisplayFormats) / sizeof(DisplayFormats[0]);
-
 	uint32_t numFomats = 0;
 
 	// loop through all the devices, getting the list of formats available for each
@@ -1968,7 +1998,7 @@ bool InitialiseDirect3D()
 				uint32_t j = 0;
 
 				// Check if the mode already exists (to filter out refresh rates)
-				for(; j < d3d.Driver[thisDevice].NumModes; j++)
+				for (; j < d3d.Driver[thisDevice].NumModes; j++)
 				{
 					if ((d3d.Driver[thisDevice].DisplayMode[j].Width  == DisplayMode.Width) &&
 						(d3d.Driver[thisDevice].DisplayMode[j].Height == DisplayMode.Height) &&
@@ -2262,7 +2292,7 @@ bool InitialiseDirect3D()
 			break;
 	}
 
-	// Log stencil buffer format set
+	// Log depth buffer format set
 	switch (d3dpp.AutoDepthStencilFormat)
 	{
 		case D3DFMT_D24S8:
@@ -2327,7 +2357,7 @@ bool InitialiseDirect3D()
 	d3d.d3dpp = d3dpp;
 
 	// set field of view (this needs to be set differently for alien but 77 seems ok for marine and predator
-	d3d.fieldOfView = 77;
+	d3d.fieldOfView = kDefaultFOV;
 
 	SetTransforms();
 
@@ -2415,7 +2445,7 @@ bool InitialiseDirect3D()
 		else
 		{
 			// set pixel to white
-			memset(lock.pBits, 255, lock.Pitch);
+			(*(reinterpret_cast<uint32_t*>(lock.pBits))) = D3DCOLOR_XRGB(255, 255, 255);
 
 			whiteTexture->UnlockRect(0);
 

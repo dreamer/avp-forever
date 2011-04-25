@@ -36,6 +36,9 @@
 // set to 'null' texture initially
 texID_t currentWaterTexture = NO_TEXTURE;
 
+const float zf = 1000000.0f;
+const float zn = 64.0f;
+
 D3DXMATRIX viewMatrix;
 
 // extern variables
@@ -71,7 +74,7 @@ extern void HandleRain(int numberOfRaindrops);
 extern void RenderSky(void);
 extern void RenderStarfield(void);
 extern void ScanImagesForFMVs();
-extern BOOL CheckPointIsInFrustum(D3DXVECTOR3 *point);
+extern bool CheckPointIsInFrustum(D3DXVECTOR3 *point);
 bool CreateVolatileResources();
 bool ReleaseVolatileResources();
 void ColourFillBackBuffer(int FillColour);
@@ -114,7 +117,7 @@ static HRESULT LastError; // remove me eventually (when no more D3D calls exist 
 void RenderListInit()
 {
 	// new, test particle list
-	particleList = new RenderList(400);
+	particleList = new RenderList(/*400*/800);
 	mainList     = new RenderList(800);
 	orthoList    = new RenderList(400);
 }
@@ -257,9 +260,15 @@ static bool LockExecuteBuffer()
     return true;
 }
 
+extern void UpdateTestTimer();
+
 // unlock all vertex and index buffers. function needs to be renamed as no longer using execute buffers
 static bool UnlockExecuteBufferAndPrepareForUse()
 {
+//	Font_DrawCenteredText("This is a test string");
+
+	UpdateTestTimer();
+
 	// unlock particle vertex and index buffers
 	d3d.particleVB->Unlock();
 	d3d.particleIB->Unlock();
@@ -295,8 +304,6 @@ static bool ExecuteBuffer()
 //		D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(d3d.fieldOfView * CameraZoomScale * p), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
 
 		// manually generate the perspective matrix as per http://msdn.microsoft.com/en-us/library/bb205350(VS.85).aspx
-		float zf = 1000000.0f;
-		float zn = 64.0f;
 		float fovY = D3DXToRadian(d3d.fieldOfView * CameraZoomScale);
 		float aspect = (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height;
 		float yScale = cot(fovY/2.0f);
@@ -348,7 +355,7 @@ static bool ExecuteBuffer()
 
 		// we don't need world matrix here as avp has done all the world transforms itself
 		R_MATRIX matWorldViewProj = viewMatrix * matProjection;
-//		d3d.effectSystem->SetMatrix(d3d.mainEffect, "WorldViewProj", matWorldViewProj);
+
 		d3d.effectSystem->SetVertexShaderConstant(d3d.mainEffect, 0, CONST_MATRIX, &matWorldViewProj);
 
 		// draw our main list (level geometry, player weapon etc)
@@ -365,7 +372,6 @@ static bool ExecuteBuffer()
 		// set main shaders to active
 		d3d.effectSystem->SetActive(d3d.mainEffect);
 
-//		d3d.effectSystem->SetMatrix(d3d.mainEffect, "WorldViewProj", matProjection);
 		d3d.effectSystem->SetVertexShaderConstant(d3d.mainEffect, 0, CONST_MATRIX, &matProjection);
 
 		// Draw the particles in the list
@@ -385,7 +391,6 @@ static bool ExecuteBuffer()
 		d3d.effectSystem->SetActive(d3d.orthoEffect);
 
 		// pass the orthographicp projection matrix to the vertex shader
-//		d3d.effectSystem->SetMatrix(d3d.orthoEffect, "WorldViewProj", matOrtho);
 		d3d.effectSystem->SetVertexShaderConstant(d3d.orthoEffect, 0, CONST_MATRIX, &matOrtho);
 
 		// daw the ortho list
@@ -557,7 +562,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, texID_t textureID, uint
 
 	RCOLOR colour = RCOLOR_ARGB(alpha, 255, 255, 255);
 
-	uint32_t realWidth = 512;
+	uint32_t realWidth  = 512;
 	uint32_t realHeight = 512;
 
 	float RecipW = 1.0f / realWidth;
@@ -864,7 +869,7 @@ void DrawFontQuad(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeigh
 	float x2 = WPos2DC(x + charWidth);
 	float y2 = HPos2DC(y + charHeight);
 
-	orthoList->AddItem(4, textureID, translucencyType, FILTERING_BILINEAR_OFF, TEXTURE_CLAMP);
+	orthoList->AddItem(4, textureID, translucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 	// bottom left
 	orthoVertex[orthoVBOffset].x = x1;
@@ -913,37 +918,9 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, texID_t t
 	float x2 = WPos2DC(x + width);
 	float y2 = HPos2DC(y + height);
 
-	// the real texture resolution
-//	uint32_t textureWidth = 0;
-//	uint32_t textureHeight = 0;
-
-	// the real texture resolution adjusted to be powerof2 values (eg 512x512)
-//	uint32_t texturePOW2Width = 0;
-//	uint32_t texturePOW2Height = 0;
-
 	Texture tempTexture = Tex_GetTextureDetails(textureID);
-/*
-	Tex_GetDimensions(textureID, textureWidth, textureHeight);
 
-	if (!IsPowerOf2(textureWidth))
-	{
-		texturePOW2Width = NearestSuperiorPow2(textureWidth);
-	}
-	else
-	{
-		texturePOW2Width = textureWidth;
-	}
-
-	if (!IsPowerOf2(textureHeight))
-	{
-		texturePOW2Height = NearestSuperiorPow2(textureHeight);
-	}
-	else
-	{
-		texturePOW2Height = textureHeight;
-	}
-*/
-	orthoList->AddItem(4, textureID, translucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
+	orthoList->AddItem(4, textureID, translucencyType, FILTERING_BILINEAR_ON, TEXTURE_WRAP);
 
 	// bottom left
 	orthoVertex[orthoVBOffset].x = x1;
@@ -1169,13 +1146,12 @@ void DrawCoronas()
 	uint32_t numVertsBackup = RenderPolygon.NumberOfVertices;
 
 	RCOLOR colour;
-	float RecipW, RecipH;
 
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(SpecialFXImageNumber, texWidth, texHeight);
 
-	RecipW = 1.0f / (float) texWidth;
-	RecipH = 1.0f / (float) texHeight;
+	float RecipW = 1.0f / (float) texWidth;
+	float RecipH = 1.0f / (float) texHeight;
 
 	for (size_t i = 0; i < coronaArray.size(); i++)
 	{
@@ -1337,8 +1313,6 @@ uint32_t MeshVertexColour[256];
 
 int WireFrameMode;
 
-
-
 uint32_t FMVParticleColour;
 VECTORCH MeshVertex[256];
 
@@ -1366,7 +1340,7 @@ void SetFogDistance(int fogDistance)
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
 	// bjd - This is the function responsible for drawing level geometry and the players weapon
-/*
+#if 1
 	bool valid = false;
 
 	// test frustum culling for each point
@@ -1380,7 +1354,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 		temp.y = (float)-vertices->Y;
 		temp.z = (float)vertices->Z;
 
-		if (CheckPointIsInFrustum(&temp) == TRUE)
+		if (CheckPointIsInFrustum(&temp) == true)
 		{
 			// true
 			valid = true;
@@ -1391,19 +1365,16 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 	// lets bail out of this function and not draw this poly if none of the points are inside the view frustum
 	if (valid == false)
 		return;
-*/
-
+#endif
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
 	uint32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-	float RecipW, RecipH;
-
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(textureID, texWidth, texHeight);
 
-	RecipW = 1.0f / (float) texWidth;
-	RecipH = 1.0f / (float) texHeight;
+	float RecipW = 1.0f / (float) texWidth;
+	float RecipH = 1.0f / (float) texHeight;
 
 	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
 
@@ -1489,13 +1460,11 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 	// properly cleared this time...
 	uint32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-	float RecipW, RecipH;
-
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(textureID, texWidth, texHeight);
 
-	RecipW = 1.0f / (float) texWidth;
-	RecipH = 1.0f / (float) texHeight;
+	float RecipW = 1.0f / (float) texWidth;
+	float RecipH = 1.0f / (float) texHeight;
 
 	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, TRANSLUCENCY_NORMAL);
 
@@ -1528,13 +1497,11 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 {
-	float new_x1, new_y1, new_x2, new_y2;
+	float new_x1 = WPos2DC(x0);
+	float new_y1 = HPos2DC(y0);
 
-	new_x1 = WPos2DC(x0);
-	new_y1 = HPos2DC(y0);
-
-	new_x2 = WPos2DC(x1);
-	new_y2 = HPos2DC(y1);
+	float new_x2 = WPos2DC(x1);
+	float new_y2 = HPos2DC(y1);
 
 	orthoList->AddItem(4, NO_TEXTURE, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
@@ -1590,13 +1557,11 @@ void D3D_HUD_Setup(void)
 
 void D3D_HUDQuad_Output(texID_t textureID, struct VertexTag *quadVerticesPtr, uint32_t colour, enum FILTERING_MODE_ID filteringType)
 {
-	float RecipW, RecipH;
-
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(textureID, texWidth, texHeight);
 
-	RecipW = 1.0f / texWidth;
-	RecipH = 1.0f / texHeight;
+	float RecipW = 1.0f / texWidth;
+	float RecipH = 1.0f / texHeight;
 
 	orthoList->AddItem(4, textureID, TRANSLUCENCY_GLOWING, filteringType, TEXTURE_CLAMP);
 
@@ -1726,11 +1691,8 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 
 	texID_t textureID = SpecialFXImageNumber;
 
-//	AVPTEXTURE *textureHandle = NULL;
-
 	float RecipW, RecipH;
 	RCOLOR colour;
-	RCOLOR specular = RGBALIGHT_MAKE(0, 0, 0, 0);
 
 	if (decalPtr->DecalID == DECAL_FMV)
 	{
@@ -1803,7 +1765,7 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 		mainVertex[vb].sz = (float)vertices->Z - 50;
 
 		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = specular;
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0, 0, 0, 0);
 
 		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
 		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
@@ -1841,18 +1803,16 @@ void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 {
-	// steam jets, wall lights, fire (inc aliens on fire) etc
+	// steam jets, pulse rifle muzzle flash, wall lights, fire (inc aliens on fire) etc
 	PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
 
 	texID_t textureID = SpecialFXImageNumber;
 
-	float RecipW, RecipH;
-
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(textureID, texWidth, texHeight);
 
-	RecipW = 1.0f / (float) texWidth;
-	RecipH = 1.0f / (float) texHeight;
+	float RecipW = 1.0f / (float) texWidth;
+	float RecipH = 1.0f / (float) texHeight;
 
 	// add the item to our test list
 	// 1: Check our VB and IBs are big enough?
@@ -1907,7 +1867,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 
 		float zvalue;
-
+/*
 		if (particleDescPtr->IsDrawnInFront)
 		{
 			zvalue = 0.0f;
@@ -1917,6 +1877,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 			zvalue = 1.0f;
 		}
 		else
+*/
 		{
 			zvalue = (float)vertices->Z;
 		}
@@ -2097,8 +2058,8 @@ void PostLandscapeRendering()
 
 			WaterXOrigin = x;
 			WaterZOrigin = z;
-			WaterUScale = 4.0f/(float)(MeshXScale+1800-3782);
-			WaterVScale = 4.0f/(float)MeshZScale;
+			WaterUScale = 4.0f / (float)(MeshXScale+1800-3782);
+			WaterVScale = 4.0f / (float)MeshZScale;
 		 	MeshXScale /= 4;
 		 	MeshZScale /= 2;
 
@@ -2494,13 +2455,11 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 	// properly cleared this time...
 	texID_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
 
-	float RecipW, RecipH;
-
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(textureID, texWidth, texHeight);
 
-	RecipW = 1.0f / (float) texWidth;
-	RecipH = 1.0f / (float) texHeight;
+	float RecipW = 1.0f / (float) texWidth;
+	float RecipH = 1.0f / (float) texHeight;
 
 	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode, FILTERING_BILINEAR_ON, TEXTURE_WRAP, ZWRITE_DISABLED);
 
@@ -2581,7 +2540,7 @@ void ThisFramesRenderingHasFinished(void)
 	Tex_CheckMemoryUsage();
 
 #ifdef _XBOX
-#if 1 // output how much memory is free
+#if 0 // output how much memory is free
 	#define MB	(1024*1024)
 	MEMORYSTATUS stat;
 	char buf[100];

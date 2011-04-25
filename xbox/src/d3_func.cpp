@@ -37,6 +37,8 @@
 // Alien FOV - 115
 // Marine & Predator FOV - 77
 
+/*
+// shaders
 const char *orthoShader =
     "vs.1.1\n"
     "def c4, 0, 0, 0, 0\n"
@@ -64,11 +66,7 @@ const char *pixelShader =
     "tex t0\n"
     "add r0, v0, v1\n"
     "mul r0, t0, r0\0";
-
-
-extern uint32_t NumberOfFMVTextures;
-#define MAX_NO_FMVTEXTURES 10
-extern FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
+*/
 
 D3DXMATRIX matOrtho;
 D3DXMATRIX matProjection;
@@ -86,8 +84,8 @@ const uint32_t MAX_VERTEXES = 4096;
 const uint32_t MAX_INDICES = 9216;
 
 static HRESULT LastError;
-uint32_t NO_TEXTURE;
-uint32_t MISSING_TEXTURE;
+texID_t NO_TEXTURE = 0;
+texID_t MISSING_TEXTURE = 1;
 
 // keep track of set render states
 static bool	D3DAlphaBlendEnable;
@@ -98,7 +96,6 @@ bool D3DAlphaTestEnable = FALSE;
 static bool D3DStencilEnable;
 D3DCMPFUNC D3DStencilFunc;
 static D3DCMPFUNC D3DZFunc;
-bool ZWritesEnabled = false;
 
 int	VideoModeColourDepth;
 int	NumAvailableVideoModes;
@@ -106,6 +103,7 @@ D3DINFO d3d;
 bool usingStencil = false;
 
 std::string shaderPath;
+std::string videoModeDescription;
 
 bool CreateVolatileResources();
 bool ReleaseVolatileResources();
@@ -114,8 +112,6 @@ void ToggleWireframe();
 
 const int kMaxTextureStages = 4;
 std::vector<uint32_t> setTextureArray;
-
-std::string videoModeDescription;
 
 // byte order macros for A8R8G8B8 d3d texture
 enum
@@ -159,6 +155,16 @@ int NearestSuperiorPow2(int i)
 {
 	int x = ((i - 1) & i);
 	return x ? NearestSuperiorPow2(x) : i << 1;
+}
+
+uint32_t XPercentToScreen(float percent)
+{
+	return ((((float)ScreenDescriptorBlock.SDB_Width) / 100) * percent);
+}
+
+uint32_t YPercentToScreen(float percent)
+{
+	return ((((float)ScreenDescriptorBlock.SDB_Height) / 100) * percent);
 }
 
 bool ReleaseVolatileResources()
@@ -223,14 +229,16 @@ bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer)
 	{
 		case USAGE_STATIC:
 			vbUsage = 0;
-			vbPool = D3DPOOL_MANAGED;
+			vbPool  = D3DPOOL_MANAGED;
 			break;
 		case USAGE_DYNAMIC:
 			vbUsage = D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY;
-			vbPool = D3DPOOL_DEFAULT;
+			vbPool  = D3DPOOL_DEFAULT;
 			break;
 		default:
 			// error and return
+			Con_PrintError("Unknown vertex buffer usage type");
+			return false;
 			break;
 	}
 
@@ -239,17 +247,18 @@ bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer)
 		LastError = d3d.lpD3DDevice->CreateVertexBuffer(vertexBuffer.sizeInBytes, vbUsage, 0, vbPool, &vertexBuffer.vertexBuffer.vertexBuffer);
 		if (FAILED(LastError))
 		{
-			Con_PrintError("Can't create vertex buffer");
+			Con_PrintError("Can't create static vertex buffer");
 			LogDxError(LastError, __LINE__, __FILE__);
 			return false;
 		}
 	}
 	else if (USAGE_DYNAMIC == vertexBuffer.usage)
 	{
-		vertexBuffer.vertexBuffer.dynamicVBMemory = static_cast<uint8_t*>(GlobalAlloc(GMEM_FIXED, vertexBuffer.sizeInBytes));//new(nothrow) uint8_t[size];
+		vertexBuffer.vertexBuffer.dynamicVBMemory = static_cast<uint8_t*>(GlobalAlloc(GMEM_FIXED, vertexBuffer.sizeInBytes));
 		if (vertexBuffer.vertexBuffer.dynamicVBMemory == NULL)
 		{
-			Con_PrintError("Can't create vertex buffer - new() failed");
+			Con_PrintError("Can't create dynamic vertex buffer - GlobalAlloc() failed");
+			return false;
 		}
 		vertexBuffer.vertexBuffer.dynamicVBMemorySize = vertexBuffer.sizeInBytes;
 	}
@@ -257,11 +266,11 @@ bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer)
 	return true;
 }
 
-bool R_ReleaseVertexBuffer(r_VertexBuffer &vertexBuffer)
+bool R_ReleaseVertexBuffer(class VertexBuffer &vertexBuffer)
 {
-	if (vertexBuffer.vertexBuffer)
+	if (vertexBuffer.vertexBuffer.vertexBuffer)
 	{
-		vertexBuffer.vertexBuffer->Release();
+		vertexBuffer.vertexBuffer.vertexBuffer->Release();
 	}
 
 	return true;
@@ -280,14 +289,15 @@ bool R_CreateIndexBuffer(class IndexBuffer &indexBuffer)
 	{
 		case USAGE_STATIC:
 			ibUsage = 0;
-			ibPool = D3DPOOL_MANAGED;
+			ibPool  = D3DPOOL_MANAGED;
 			break;
 		case USAGE_DYNAMIC:
 			ibUsage = D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY;
-			ibPool = D3DPOOL_DEFAULT;
+			ibPool  = D3DPOOL_DEFAULT;
 			break;
 		default:
-			// error and return
+			Con_PrintError("Unknown index buffer usage type");
+			return false;
 			break;
 	}
 
@@ -303,10 +313,11 @@ bool R_CreateIndexBuffer(class IndexBuffer &indexBuffer)
 	}
 	else if (USAGE_DYNAMIC == indexBuffer.usage)
 	{
-		indexBuffer.indexBuffer.dynamicIBMemory = static_cast<uint8_t*>(GlobalAlloc(GMEM_FIXED, indexBuffer.sizeInBytes));//new(nothrow) uint8_t[size];
+		indexBuffer.indexBuffer.dynamicIBMemory = static_cast<uint8_t*>(GlobalAlloc(GMEM_FIXED, indexBuffer.sizeInBytes));
 		if (indexBuffer.indexBuffer.dynamicIBMemory == NULL)
 		{
-			Con_PrintError("Can't create index buffer - new() failed");
+			Con_PrintError("Can't create index buffer - GlobalAlloc() failed");
+			return false;
 		}
 		indexBuffer.indexBuffer.dynamicIBMemorySize = indexBuffer.sizeInBytes;
 	}
@@ -314,11 +325,11 @@ bool R_CreateIndexBuffer(class IndexBuffer &indexBuffer)
 	return true;
 }
 
-bool R_ReleaseIndexBuffer(r_IndexBuffer &indexBuffer)
+bool R_ReleaseIndexBuffer(class IndexBuffer &indexBuffer)
 {
-	if (indexBuffer.indexBuffer)
+	if (indexBuffer.indexBuffer.indexBuffer)
 	{
-		indexBuffer.indexBuffer->Release();
+		indexBuffer.indexBuffer.indexBuffer->Release();
 	}
 
 	return true;
@@ -365,7 +376,7 @@ char* R_GetDeviceName()
 
 void R_SetCurrentVideoMode()
 {
-	uint32_t currentWidth = d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Width;
+	uint32_t currentWidth  = d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Width;
 	uint32_t currentHeight = d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Height;
 
 	// set the new values in the config file
@@ -379,7 +390,7 @@ void R_SetCurrentVideoMode()
 	R_ChangeResolution(currentWidth, currentHeight);
 }
 
-bool R_SetTexture(uint32_t stage, uint32_t textureID)
+bool R_SetTexture(uint32_t stage, texID_t textureID)
 {
 	// check that the stage value is within range
 	if (stage > kMaxTextureStages-1)
@@ -451,9 +462,12 @@ static uint8_t *currentVBPointer = 0;
 static uint8_t *currentIBPointer = 0;
 static uint32_t currentVertexStride = 0;
 
+/*
+	numVerts - number of vertices in the VB (not how many we actually end up rendering due to indexing
+*/
 bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives)
 {
-	if (!currentVBPointer || !currentIBPointer)
+	if (!currentVBPointer && !currentIBPointer)
 	{
 		// draw from a VB and IB
 		LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
@@ -462,31 +476,28 @@ bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t num
 //			numVerts,				// total num verts in VB
 			startIndex,
 			numPrimitives);
-
-		if (FAILED(LastError))
-		{
-			Con_PrintError("Can't draw indexed primitive");
-			LogDxError(LastError, __LINE__, __FILE__);
-			return false;
-		}
 	}
 	else
 	{
-		LastError = d3d.lpD3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 
-				0,
-				0,
-				numPrimitives,
+		assert(currentVBPointer);
+		assert(currentIBPointer);
+
+		LastError = d3d.lpD3DDevice->DrawIndexedVerticesUP(D3DPT_TRIANGLELIST,//DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST,
+			//	0,
+			//	0,
+			//	numPrimitives,
+				numVerts,
 				static_cast<void*>(currentIBPointer),
-				D3DFMT_INDEX16,
+			//	D3DFMT_INDEX16,
 				static_cast<void*>(currentVBPointer),
 				currentVertexStride);
+	}
 
-		if (FAILED(LastError))
-		{
-			Con_PrintError("Can't draw indexed primitive");
-			LogDxError(LastError, __LINE__, __FILE__);
-			return false;
-		}
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't draw indexed primitive");
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
 	}
 
 	return true;
@@ -498,7 +509,7 @@ bool R_LockIndexBuffer(class IndexBuffer &indexBuffer, uint32_t offsetToLock, ui
 
 	if (usage == USAGE_DYNAMIC)
 	{
-		(*data) = (uint16_t*)indexBuffer.indexBuffer.dynamicIBMemory + offsetToLock;
+		(*data) = (uint16_t*)(indexBuffer.indexBuffer.dynamicIBMemory + offsetToLock);
 	}
 	else if (usage == USAGE_STATIC)
 	{
@@ -652,7 +663,11 @@ bool CreateVolatileResources()
 	return true;
 }
 
-bool R_LockTexture(r_Texture texture, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
+uint8_t *aaUnswizzled = 0;
+uint32_t gPitch = 0;
+uint8_t  *gPbits = 0;
+
+bool R_LockTexture(const Texture &texture, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
 {
 	D3DLOCKED_RECT lock;
 	uint32_t lockFlag;
@@ -670,28 +685,58 @@ bool R_LockTexture(r_Texture texture, uint8_t **data, uint32_t *pitch, enum Text
 			break;
 	}
 
-	LastError = texture->LockRect(0, &lock, NULL, lockFlag);
-
+	LastError = texture.texture->LockRect(0, &lock, NULL, lockFlag);
 	if (FAILED(LastError))
 	{
+		Con_PrintError("Unable to lock texture");
 		*data = 0;
 		*pitch = 0;
 		return false;
 	}
 	else
 	{
-		*data = static_cast<uint8_t*>(lock.pBits);
-		*pitch = lock.Pitch;
+		// hack for aa_font :(
+//		if (textureID == AVPMENUGFX_SMALL_FONT)
+		if ((texture.height != 368) && (texture.height != 184))
+		{
+			aaUnswizzled = new uint8_t[texture.width*texture.height*4];
+
+			XGUnswizzleRect(lock.pBits, texture.width, texture.height, NULL, aaUnswizzled, (texture.width*4), NULL, 4);
+
+			gPbits = static_cast<uint8_t*>(lock.pBits);
+			gPitch = lock.Pitch;
+
+			*data = aaUnswizzled;
+			*pitch = (texture.width*4);
+		}
+		else
+		{
+			*data = static_cast<uint8_t*>(lock.pBits);
+			*pitch = lock.Pitch;
+		}
+
 		return true;
 	}
 }
 
-bool R_UnlockTexture(r_Texture texture)
+bool R_UnlockTexture(const Texture &texture)
 {
-	LastError = texture->UnlockRect(0);
+	if (aaUnswizzled)
+	{
+		// reupload texture
+		XGSwizzleRect(aaUnswizzled, (texture.width*4), NULL, gPbits, texture.width, texture.height, NULL, 4);
 
+		delete[] aaUnswizzled;
+		aaUnswizzled = 0;
+
+		gPbits = 0;
+		gPitch = 0;
+	}
+
+	LastError = texture.texture->UnlockRect(0);
 	if (FAILED(LastError))
 	{
+		Con_PrintError("Unable to unlock texture");
 		return false;
 	}
 
@@ -761,48 +806,11 @@ void WriteMenuTextures()
 #endif
 }
 
-#if 0
-// list of allowed display formats
-const D3DFORMAT DisplayFormats[] =
-{
-	D3DFMT_X8R8G8B8,
-	D3DFMT_A8R8G8B8,
-	D3DFMT_R8G8B8/*,
-	D3DFMT_A1R5G5B5,
-	D3DFMT_X1R5G5B5,
-	D3DFMT_R5G6B5*/
-};
-
-// 16 bit formats
-const D3DFORMAT DisplayFormats16[] =
-{
-	D3DFMT_R8G8B8/*,
-	D3DFMT_A1R5G5B5,
-	D3DFMT_X1R5G5B5,
-	D3DFMT_R5G6B5*/
-};
-
-// 32 bit formats
-const D3DFORMAT DisplayFormats32[] =
-{
-	D3DFMT_X8R8G8B8,
-	D3DFMT_A8R8G8B8
-};
-
-// list of allowed depth buffer formats
-const D3DFORMAT DepthFormats[] =
-{
-	D3DFMT_D32,
-	D3DFMT_D24S8,
-	D3DFMT_D24X8,
-	D3DFMT_D24FS8,
-	D3DFMT_D16
-};
-#endif
-
 // called from Scrshot.cpp
 void CreateScreenShotImage()
 {
+
+	// TODO
 }
 
 /*
@@ -844,17 +852,18 @@ bool R_CreateTallFontTexture(AVPTEXTURE &tex, enum TextureUsage usageType, Textu
 		}
 		default:
 		{
-			OutputDebugString("uh oh!\n");
+			Con_PrintError("Invalid texture usageType value in R_CreateTallFontTexture");
+			return false;
 		}
 	}
 
-	uint32_t width = 450;
+	uint32_t width  = 450;
 	uint32_t height = 495;
 
-	uint32_t padWidth = 512;
+	uint32_t padWidth  = 512;
 	uint32_t padHeight = 512;
 
-	uint32_t charWidth = 30;
+	uint32_t charWidth  = 30;
 	uint32_t charHeight = 33;
 
 	uint32_t numTotalChars = tex.height / charHeight;
@@ -896,8 +905,8 @@ bool R_CreateTallFontTexture(AVPTEXTURE &tex, enum TextureUsage usageType, Textu
 
 	for (uint32_t i = 0; i < numTotalChars; i++)
 	{
-			uint32_t row = i / 15; // get row
-			uint32_t column = i % 15; // get column from remainder value
+		uint32_t row = i / 15; // get row
+		uint32_t column = i % 15; // get column from remainder value
 
 		uint32_t offset = ((column * charWidth) * sizeof(uint32_t)) + ((row * charHeight) * lock.Pitch);
 
@@ -950,9 +959,9 @@ bool R_CreateTallFontTexture(AVPTEXTURE &tex, enum TextureUsage usageType, Textu
 	// fill out newTexture struct
 	texture.texture = swizTexture;
 	texture.bitsPerPixel = 32;
-	texture.width = width;
+	texture.width  = width;
 	texture.height = height;
-	texture.realWidth = padWidth;
+	texture.realWidth  = padWidth;
 	texture.realHeight = padHeight;
 	texture.usage = usageType;
 
@@ -1244,7 +1253,6 @@ bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIn
 			// we need to transpose the matrix before sending to SetVertexShaderConstant
 			memcpy(&tempMatrix, constantData, sizeof(XGMATRIX));
 			XGMatrixTranspose(&tempMatrix, &tempMatrix);
-
 			break;
 
 		default:
@@ -1252,7 +1260,6 @@ bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIn
 			return false;
 			break;
 	}
-
 
 	if (type == CONST_MATRIX)
 	{
@@ -1325,7 +1332,7 @@ bool R_SetPixelShader(r_PixelShader &pixelShader)
 
 // removes pure red colour from a texture. used to remove red outline grid on small font texture.
 // we remove the grid as it can sometimes bleed onto text when we use texture filtering. maybe add params for passing width/height?
-void DeRedTexture(r_Texture texture)
+void DeRedTexture(const Texture &texture)
 {
 	uint8_t *srcPtr = NULL;
 	uint8_t *destPtr = NULL;
@@ -1339,11 +1346,11 @@ void DeRedTexture(r_Texture texture)
 	}
 
 	// loop, setting all full red pixels to black
-	for (uint32_t y = 0; y < 256; y++)
+	for (uint32_t y = 0; y < texture.height; y++)
 	{
 		destPtr = (srcPtr + y*pitch);
 
-		for (uint32_t x = 0; x < 256; x++)
+		for (uint32_t x = 0; x < texture.width; x++)
 		{
 			if ((destPtr[BO_RED] == 255) && (destPtr[BO_BLUE] == 0) && (destPtr[BO_GREEN] == 0))
 			{
@@ -1387,7 +1394,7 @@ bool R_CreateTextureFromFile(const std::string &fileName, Texture &texture)
 		return false;
 	}
 
-	texture.width = imageInfo.Width;
+	texture.width  = imageInfo.Width;
 	texture.height = imageInfo.Height;
 	texture.bitsPerPixel = 32; // this should be ok?
 	texture.usage = TextureUsage_Normal;
@@ -1400,7 +1407,7 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 	D3DPOOL texturePool;
 	uint32_t textureUsage;
 	LPDIRECT3DTEXTURE8 d3dTexture = NULL;
-	D3DFORMAT textureFormat = D3DFMT_A8R8G8B8; // default format
+	D3DFORMAT textureFormat = D3DFMT_A8R8G8B8; // default format (swizzled)
 
 	// ensure this will be NULL unless we successfully create it
 	texture.texture = NULL;
@@ -1409,27 +1416,27 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 	{
 		case TextureUsage_Normal:
 		{
-			texturePool = D3DPOOL_MANAGED;
+			texturePool  = D3DPOOL_MANAGED;
 			textureUsage = 0;
 			break;
 		}
 		case TextureUsage_Dynamic:
 		{
-			texturePool = D3DPOOL_DEFAULT;
+			texturePool  = D3DPOOL_DEFAULT;
 			textureUsage = 0; //D3DUSAGE_DYNAMIC; - not valid on xbox
 			break;
 		}
 		default:
 		{
-			OutputDebugString("uh oh!\n");
+			Con_PrintError("Invalid texture usageType value in R_CreateTextureFromAvPTexture()");
 		}
 	}
 
 	// hack to ensure the font texture isn't swizzled (we need to lockRect and update it later. this'll make that easier)
-	if (texture.name == "Common\\aa_font.rim")
+	if (texture.name == "Graphics/Common/aa_font.rim") // file path
 	{
 		// change to a linear format
-		textureFormat = D3DFMT_LIN_A8R8G8B8;
+//		textureFormat = D3DFMT_LIN_A8R8G8B8;
 	}
 
 	// fill tga header
@@ -1443,7 +1450,7 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 	TgaHeader.datatypecode		= 2;		// RGB
 	TgaHeader.bitsperpixel		= 32;
 	TgaHeader.imagedescriptor	= 0x20;		// set origin to top left
-	TgaHeader.width = AvPTexture.width;
+	TgaHeader.width  = AvPTexture.width;
 	TgaHeader.height = AvPTexture.height;
 
 	// size of raw image data
@@ -1494,14 +1501,14 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 	D3DSURFACE_DESC surfaceDescription;
 	d3dTexture->GetLevelDesc(0, &surfaceDescription);
 
-	texture.realWidth = surfaceDescription.Width;
+	texture.realWidth  = surfaceDescription.Width;
 	texture.realHeight = surfaceDescription.Height;
 
 	// set texture struct members
 	texture.bitsPerPixel = 32; // set to 32 for now
-	texture.width = AvPTexture.width;
-	texture.height = AvPTexture.height;
-	texture.usage = usageType;
+	texture.width   = AvPTexture.width;
+	texture.height  = AvPTexture.height;
+	texture.usage   = usageType;
 	texture.texture = d3dTexture;
 
 	delete[] buffer;
@@ -1524,19 +1531,20 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 	{
 		case TextureUsage_Normal:
 		{
-			texturePool = D3DPOOL_MANAGED;
+			texturePool  = D3DPOOL_MANAGED;
 			textureUsage = 0;
 			break;
 		}
 		case TextureUsage_Dynamic:
 		{
-			texturePool = D3DPOOL_DEFAULT;
+			texturePool  = D3DPOOL_DEFAULT;
 			textureUsage = D3DUSAGE_DYNAMIC;
 			break;
 		}
 		default:
 		{
-			OutputDebugString("uh oh!\n");
+			Con_PrintError("Invalid texture usageType value in R_CreateTexture()");
+			return false;
 		}
 	}
 
@@ -1557,6 +1565,11 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 			textureFormat = D3DFMT_LIN_L8;
 			break;
 		}
+		default:
+		{
+			Con_PrintError("Invalid bitsPerPixel value in R_CreateTexture()");
+			return false;
+		}
 	}
 
 	// create the d3d9 texture
@@ -1568,20 +1581,20 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 
 	// set texture struct members
 	texture.bitsPerPixel = bitsPerPixel;
-	texture.width = width;
-	texture.height = height;
-	texture.usage = usageType;
+	texture.width   = width;
+	texture.height  = height;
+	texture.usage   = usageType;
 	texture.texture = d3dTexture;
 
 	return true;
 }
 
-void R_ReleaseTexture(r_Texture &texture)
+void R_ReleaseTexture(Texture &texture)
 {
-	if (texture)
+	if (texture.texture)
 	{
-		texture->Release();
-		texture = NULL;
+		texture.texture->Release();
+		texture.texture = NULL;
 	}
 }
 
@@ -1604,7 +1617,7 @@ void R_ReleasePixelShader(r_PixelShader &pixelShader)
 }
 
 bool R_ChangeResolution(uint32_t width, uint32_t height)
-{	
+{
 	// don't bother resetting device if we're already using the requested settings
 	if ((width == d3d.d3dpp.BackBufferWidth) && (height == d3d.d3dpp.BackBufferHeight))
 	{
@@ -1631,10 +1644,10 @@ bool R_ChangeResolution(uint32_t width, uint32_t height)
 		if (D3DERR_INVALIDCALL == LastError)
 		{
 			// set some default, safe resolution?
-			width = 800;
+			width  = 800;
 			height = 600;
 
-			d3d.d3dpp.BackBufferWidth = width;
+			d3d.d3dpp.BackBufferWidth  = width;
 			d3d.d3dpp.BackBufferHeight = height;
 
 			// try reset again, if it doesnt work, bail out
@@ -1652,7 +1665,7 @@ bool R_ChangeResolution(uint32_t width, uint32_t height)
 		}
 	}
 
-	d3d.D3DViewport.Width = width;
+	d3d.D3DViewport.Width  = width;
 	d3d.D3DViewport.Height = height;
 
 	LastError = d3d.lpD3DDevice->SetViewport(&d3d.D3DViewport);
@@ -1815,9 +1828,6 @@ bool InitialiseDirect3D()
 		}
 	}
 
-//	D3DDISPLAYMODE d3ddm;
-//	LastError = d3d.lpD3D->GetAdapterDisplayMode(defaultDevice, &d3ddm);
-
 	uint32_t modeCount = d3d.lpD3D->GetAdapterModeCount(defaultDevice);
 	D3DDISPLAYMODE tempMode;
 
@@ -1832,27 +1842,38 @@ bool InitialiseDirect3D()
 		}
 
 		// we only want D3DFMT_LIN_X8R8G8B8 format
-		if (tempMode.Format == D3DFMT_LIN_X8R8G8B8)
+		if (tempMode.Format == D3DFMT_X8R8G8B8) //D3DFMT_LIN_X8R8G8B8)
 		{
 			int j = 0;
 			// check if the mode already exists
-			for (; j < d3d.Driver[thisDevice].NumModes; j++)
+			for (; j < d3d.Driver[defaultDevice].NumModes; j++)
 			{
-				if ((d3d.Driver[defaultDevice].DisplayMode[j].Width == tempMode.Width) &&
+				if ((d3d.Driver[defaultDevice].DisplayMode[j].Width  == tempMode.Width) &&
 					(d3d.Driver[defaultDevice].DisplayMode[j].Height == tempMode.Height) &&
 					(d3d.Driver[defaultDevice].DisplayMode[j].Format == tempMode.Format))
 					break;
 			}
 
 			// we looped all the way through but didn't break early due to already existing item
-			if (j == d3d.Driver[thisDevice].NumModes)
+			if (j == d3d.Driver[defaultDevice].NumModes)
 			{
-				d3d.Driver[defaultDevice].DisplayMode[d3d.Driver[thisDevice].NumModes].Width       = tempMode.Width;
-				d3d.Driver[defaultDevice].DisplayMode[d3d.Driver[thisDevice].NumModes].Height      = tempMode.Height;
-				d3d.Driver[defaultDevice].DisplayMode[d3d.Driver[thisDevice].NumModes].Format      = tempMode.Format;
-				d3d.Driver[defaultDevice].DisplayMode[d3d.Driver[thisDevice].NumModes].RefreshRate = 0;
-				d3d.Driver[thisDevice].NumModes++;
+				d3d.Driver[defaultDevice].DisplayMode[d3d.Driver[defaultDevice].NumModes].Width       = tempMode.Width;
+				d3d.Driver[defaultDevice].DisplayMode[d3d.Driver[defaultDevice].NumModes].Height      = tempMode.Height;
+				d3d.Driver[defaultDevice].DisplayMode[d3d.Driver[defaultDevice].NumModes].Format      = tempMode.Format;
+				d3d.Driver[defaultDevice].DisplayMode[d3d.Driver[defaultDevice].NumModes].RefreshRate = 0;
+				d3d.Driver[defaultDevice].NumModes++;
 			}
+		}
+	}
+
+	// set CurrentVideoMode variable to index display mode that matches user requested settings
+	for (uint32_t i = 0; i < d3d.Driver[defaultDevice].NumModes; i++)
+	{
+		if ((width == d3d.Driver[defaultDevice].DisplayMode[i].Width)
+			&&(height == d3d.Driver[defaultDevice].DisplayMode[i].Height))
+		{
+			d3d.CurrentVideoMode = i;
+			break;
 		}
 	}
 
@@ -1877,6 +1898,8 @@ bool InitialiseDirect3D()
 		Con_PrintMessage("Using triple buffering");
 	}
 
+	d3d.lpD3D->SetPushBufferSize(524288 * 4, 32768);
+
 	LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, NULL,
 			D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
 
@@ -1886,6 +1909,9 @@ bool InitialiseDirect3D()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
+
+	// store the index of the driver we want to use
+//	d3d.CurrentDriver = defaultDevice;
 
 	D3DCAPS8 devCaps;
 	d3d.lpD3DDevice->GetDeviceCaps(&devCaps);
@@ -1907,7 +1933,53 @@ bool InitialiseDirect3D()
 
 	// Log resolution set
 	Con_PrintMessage("\t Resolution set: " + IntToString(d3dpp.BackBufferWidth) + " x " + IntToString(d3dpp.BackBufferHeight));
+/*
+	// Log format set
+	switch (d3dpp.BackBufferFormat)
+	{
+		case D3DFMT_A8R8G8B8:
+			Con_PrintMessage("\t Format set: 32bit - D3DFMT_A8R8G8B8");
+			break;
+		case D3DFMT_X8R8G8B8:
+			Con_PrintMessage("\t Format set: 32bit - D3DFMT_X8R8G8B8");
+			break;
+		case D3DFMT_R8G8B8:
+			Con_PrintMessage("\t Format set: 32bit - D3DFMT_R8G8B8");
+			break;
+		case D3DFMT_A1R5G5B5:
+			Con_PrintMessage("\t Format set: 16bit - D3DFMT_A1R5G5B5");
+			break;
+		case D3DFMT_R5G6B5:
+			Con_PrintMessage("\t Format set: 16bit - D3DFMT_R5G6B5");
+			break;
+		case D3DFMT_X1R5G5B5:
+			Con_PrintMessage("\t Format set: 16bit - D3DFMT_X1R5G5B5");
+			break;
+		default:
+			Con_PrintMessage("\t Format set: Unknown");
+			break;
+	}
 
+	// Log depth buffer format set
+	switch (d3dpp.AutoDepthStencilFormat)
+	{
+		case D3DFMT_D24S8:
+			Con_PrintMessage("\t Depth Format set: 24bit and 8bit stencil - D3DFMT_D24S8");
+			break;
+		case D3DFMT_D24X8:
+			Con_PrintMessage("\t Depth Format set: 24bit and 0bit stencil - D3DFMT_D24X8");
+			break;
+		case D3DFMT_D24FS8:
+			Con_PrintMessage("\t Depth Format set: 24bit and 8bit stencil - D3DFMT_D32");
+			break;
+		case D3DFMT_D32:
+			Con_PrintMessage("\t Depth Format set: 32bit and 0bit stencil - D3DFMT_D32");
+			break;
+		default:
+			Con_PrintMessage("\t Depth Format set: Unknown");
+			break;
+	}
+*/
 	ZeroMemory (&d3d.D3DViewport, sizeof(d3d.D3DViewport));
 	d3d.D3DViewport.X = 0;
 	d3d.D3DViewport.Y = 0;
@@ -1939,7 +2011,7 @@ bool InitialiseDirect3D()
 
 	// use an offset for hud items to account for tv safe zones. just use width for now. 5%?
 	uint32_t safeOffset = Config_GetInt("[VideoMode]", "SafeZoneOffset", 5);
-	ScreenDescriptorBlock.SDB_SafeZoneWidthOffset = (width / 100) * safeOffset;
+	ScreenDescriptorBlock.SDB_SafeZoneWidthOffset  = (width / 100) * safeOffset;
 	ScreenDescriptorBlock.SDB_SafeZoneHeightOffset = (height / 100) * safeOffset;
 
 	// save a copy of the presentation parameters for use
@@ -1979,7 +2051,6 @@ bool InitialiseDirect3D()
 	d3d.tallFontText->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 1);
 	d3d.tallFontText->Create();
 
-
 	r_Texture whiteTexture;
 	r_Texture missingTexture;
 
@@ -2002,7 +2073,6 @@ bool InitialiseDirect3D()
 		else
 		{
 			// set pixel to hot pink
-			//memset(lock.pBits, 255, lock.Pitch);
 			(*(reinterpret_cast<uint32_t*>(lock.pBits))) = D3DCOLOR_XRGB(255, 0, 255);
 
 			missingTexture->UnlockRect(0);
@@ -2031,7 +2101,7 @@ bool InitialiseDirect3D()
 		else
 		{
 			// set pixel to white
-			memset(lock.pBits, 255, lock.Pitch);
+			(*(reinterpret_cast<uint32_t*>(lock.pBits))) = D3DCOLOR_XRGB(255, 255, 255);
 
 			whiteTexture->UnlockRect(0);
 
@@ -2071,8 +2141,9 @@ bool InitialiseDirect3D()
 	return true;
 }
 
+/*
 void R_UpdateViewMatrix(float *viewMat)
-{	
+{
 	D3DXVECTOR3 vecRight	(viewMat[0], viewMat[1], viewMat[2]);
 	D3DXVECTOR3 vecUp		(viewMat[4], viewMat[5], viewMat[6]);
 	D3DXVECTOR3 vecFront	(viewMat[8], -viewMat[9], viewMat[10]);
@@ -2111,6 +2182,7 @@ void R_UpdateViewMatrix(float *viewMat)
 	matView._42 = -D3DXVec3Dot(&vecPosition, &vecUp);
 	matView._43 = -D3DXVec3Dot(&vecPosition, &vecFront);
 }
+*/
 
 void SetTransforms()
 {
@@ -2357,7 +2429,7 @@ void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
 				D3DSrcBlend = D3DBLEND_ZERO;
 			}
-			if (D3DDestBlend != D3DBLEND_ONE) 
+			if (D3DDestBlend != D3DBLEND_ONE)
 			{
 				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 				D3DDestBlend = D3DBLEND_ONE;
@@ -2450,7 +2522,7 @@ void ChangeTextureAddressMode(uint32_t samplerIndex, enum TEXTURE_ADDRESS_MODE t
 
 void ChangeFilteringMode(uint32_t samplerIndex, enum FILTERING_MODE_ID filteringRequired)
 {
-	if (CurrentRenderStates.FilteringMode == filteringRequired) 
+	if (CurrentRenderStates.FilteringMode == filteringRequired)
 		return;
 
 	CurrentRenderStates.FilteringMode = filteringRequired;
@@ -2529,10 +2601,10 @@ bool SetRenderStateDefaults()
 		// set transparency to TRANSLUCENCY_OFF
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 		D3DAlphaBlendEnable = FALSE;
-		
+
 		d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
 		D3DSrcBlend = D3DBLEND_ONE;
-		
+
 		d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
 		D3DDestBlend = D3DBLEND_ZERO;
 
@@ -2565,7 +2637,7 @@ bool SetRenderStateDefaults()
 
 		// enable z writes (already on by default)
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-				
+
 		// make sure render state tracking reflects above setting
 		CurrentRenderStates.ZWriteEnable = ZWRITE_ENABLED;
 

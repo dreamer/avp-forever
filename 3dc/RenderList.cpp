@@ -184,24 +184,24 @@ void RenderList::Reset()
 	listIndex = 0;
 
 	vertexCount = 0;
-	indexCount = 0;
+	indexCount  = 0;
 }
 
 void RenderList::Draw()
 {
 	for (std::vector<RenderItem>::iterator it = Items.begin(); it != Items.begin() + listIndex; ++it)
 	{
-		// set texture
-		R_SetTexture(0, (it->sortKey >> 24) & 65535);
-		ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)	((it->sortKey >> 20) & 15));
-		ChangeFilteringMode(0, (enum FILTERING_MODE_ID)	((it->sortKey >> 16) & 15));
-		ChangeTextureAddressMode(0, (enum TEXTURE_ADDRESS_MODE) ((it->sortKey >> 15) & 1));
-		ChangeZWriteEnable((enum ZWRITE_ENABLE) ((it->sortKey >> 14) & 1));
-
 		uint32_t numPrimitives = (it->indexEnd - it->indexStart) / 3;
 
 		if (numPrimitives)
 		{
+			// set texture
+			R_SetTexture(0, (it->sortKey >> 24) & 65535);
+			ChangeTranslucencyMode   ((enum TRANSLUCENCY_TYPE)	    ((it->sortKey >> 20) & 15));
+			ChangeFilteringMode      (0, (enum FILTERING_MODE_ID)	((it->sortKey >> 16) & 15));
+			ChangeTextureAddressMode (0, (enum TEXTURE_ADDRESS_MODE)((it->sortKey >> 15) & 1));
+			ChangeZWriteEnable       ((enum ZWRITE_ENABLE)          ((it->sortKey >> 14) & 1));
+
 			R_DrawIndexedPrimitive(this->vertexCount, it->indexStart, numPrimitives);
 		}
 	}

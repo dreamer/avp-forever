@@ -44,11 +44,10 @@ bool Tex_Lock(texID_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLo
 		return false;
 	}
 
-	r_Texture texture = Tex_GetTexture(textureID);
-	if (!texture)
+	if (!textureList[textureID].texture)
 		return false;
 
-	return R_LockTexture(texture, data, pitch, lockType);
+	return R_LockTexture(textureList[textureID], data, pitch, lockType);
 }
 
 bool Tex_Unlock(texID_t textureID)
@@ -59,11 +58,10 @@ bool Tex_Unlock(texID_t textureID)
 		return false;
 	}
 
-	r_Texture texture = Tex_GetTexture(textureID);
-	if (!texture)
+	if (!textureList[textureID].texture)
 		return false;
 
-	return R_UnlockTexture(texture);
+	return R_UnlockTexture(textureList[textureID]);
 }
 
 // for avp's FMV code
@@ -110,16 +108,18 @@ texID_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32
 	newTexture.texture = texture;
 	newTexture.width = width;
 	newTexture.height = height;
-	newTexture.bitsPerPixel = bitsPerPixel; 
+	newTexture.bitsPerPixel = bitsPerPixel;
 	newTexture.usage = usage;
 	newTexture.isValid = true;
 
+/*
 	// check path for backslashes
 	std::string::size_type pos = textureName.find("\\");
 	if (std::string::npos != pos)
 	{
 		int i = 0;
 	}
+*/
 
 	// store it
 	if (textureID < textureList.size()) // we're reusing a slot in this case
@@ -146,12 +146,14 @@ texID_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &Av
 	texID_t textureID;
 	newTexture.name = textureName;
 
+/*
 	// check path for backslashes
 	std::string::size_type pos = textureName.find("\\");
 	if (std::string::npos != pos)
 	{
 		int i = 0;
 	}
+*/
 
 	// see if it exists already
 	textureID = Tex_CheckExists(textureName);
@@ -197,12 +199,13 @@ texID_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &AvP
 	newTexture.name = textureName;
 
 	// check path for backslashes
+/*
 	std::string::size_type pos = textureName.find("\\");
 	if (std::string::npos != pos)
 	{
 		int i = 0;
 	}
-
+*/
 	if (!R_CreateTextureFromAvPTexture(AvPTexure, usageType, newTexture))
 	{
 		// log error
@@ -251,7 +254,7 @@ texID_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t heig
 		// log error
 		return MISSING_TEXTURE;
 	}
-	
+
 	// get the next available ID
 	texID_t textureID = Tex_GetFreeID();
 
@@ -267,11 +270,11 @@ texID_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t heig
 	{
 		textureList.push_back(newTexture);
 	}
-
+/*
 	std::stringstream ss;
 	ss << "added texture at ID: " << textureID << " with name " << textureName << " width: " << width << " height: " << height << std::endl;
 	OutputDebugString(ss.str().c_str());
-
+*/
 	Tex_CheckMemoryUsage();
 
 	return textureID;
@@ -347,7 +350,7 @@ void Tex_ReleaseDynamicTextures()
 	{
 		if ((texIt->isValid) && (texIt->usage == TextureUsage_Dynamic))
 		{
-			R_ReleaseTexture(texIt->texture);
+			R_ReleaseTexture(*texIt);
 			texIt->isValid = false;
 		}
 	}
@@ -401,6 +404,8 @@ void Tex_ListTextures()
 
 void Tex_CheckMemoryUsage()
 {
+	return;
+
 	#define MB	(1024*1024)
 
 	size_t bytesUsed = 0;
@@ -417,13 +422,13 @@ void Tex_CheckMemoryUsage()
 	{
 		return;
 	}
-
+/*
 	float MBused = (float)bytesUsed / float(MB);
 
 	std::stringstream ss;
 	ss << "MB of textures used: " << MBused << std::endl;
 	OutputDebugString(ss.str().c_str());
-
+*/
 	lastBytesUsed = bytesUsed;
 }
 
@@ -438,13 +443,13 @@ void Tex_Release(texID_t textureID)
 	// only release a valid texture
 	if (textureList.at(textureID).isValid)
 	{
-		R_ReleaseTexture(textureList[textureID].texture);
+		R_ReleaseTexture(textureList[textureID]);
 		R_UnsetTexture(textureID);
-
+/*
 		std::stringstream ss;
 		ss << "releasing texture at ID: " << textureID << " with name " << textureList[textureID].name << " width: " << textureList[textureID].width << " height: " << textureList[textureID].height << std::endl;
 		OutputDebugString(ss.str().c_str());
-
+*/
 		// set as invalid
 		textureList[textureID].isValid = false;
 

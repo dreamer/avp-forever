@@ -418,6 +418,7 @@ extern HWND hWndMain;
 extern DISPLAYBLOCK *Player;
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 extern int DopplerShiftIsOn;
+extern int SoundSwitchedOn;
 
 /* Patrick 5/6/97 -------------------------------------------------------------
   Function definitions
@@ -571,6 +572,7 @@ int PlatStartSoundSys()
     XAUDIO2FX_REVERB_PARAMETERS native;
     ReverbConvertI3DL2ToNative(&g_PRESET_PARAMS[0], &native);
     pSubmixVoice->SetEffectParameters(0, &native, sizeof(native));
+
 	// Initialise X3DAudio
 	const float SPEEDOFSOUND = X3DAUDIO_SPEED_OF_SOUND;
 	X3DAudioInitialize(deviceDetails.OutputFormat.dwChannelMask, SPEEDOFSOUND, x3DInstance);
@@ -699,14 +701,14 @@ int PlatPlaySound(int activeIndex)
 	LOCALASSERT (GameSounds[gameIndex].loaded);
 
 	// duplicate the game sound buffer
-	ActiveSounds[activeIndex].audioBuffer = GameSounds[gameIndex].audioBuffer;
+	ActiveSounds[activeIndex].audioBuffer  = GameSounds[gameIndex].audioBuffer;
 	memcpy(&ActiveSounds[activeIndex].xa2Buffer, &GameSounds[gameIndex].xa2Buffer, sizeof(XAUDIO2_BUFFER));
 	ActiveSounds[activeIndex].pSourceVoice = GameSounds[gameIndex].pSourceVoice;
-	ActiveSounds[activeIndex].xa2Emitter = GameSounds[gameIndex].xa2Emitter;
+	ActiveSounds[activeIndex].xa2Emitter   = GameSounds[gameIndex].xa2Emitter;
 
 	if ((ActiveSounds[activeIndex].threedee))
 	{
-		ActiveSounds[activeIndex].is3D = TRUE;
+		ActiveSounds[activeIndex].is3D = true;
 	}
 
 	// reverb stuff here
@@ -851,7 +853,7 @@ void PlatStopSound(int activeIndex)
 		ActiveSounds[activeIndex].pSourceVoice->FlushSourceBuffers();
 	}
 
-	ActiveSounds[activeIndex].is3D = FALSE;
+	ActiveSounds[activeIndex].is3D = false;
 	ActiveSounds[activeIndex].audioBuffer = NULL; // GameSounds has the original reference to this memory
 	ActiveSounds[activeIndex].pSourceVoice = NULL;
 	ActiveSounds[activeIndex].xa2Buffer.LoopCount = 0;
@@ -940,25 +942,21 @@ int PlatDo3dSound(int activeIndex)
 	int newVolume = 0;
 	int newPan = 0;
 
+	if (!soundEnabled)
+		return 0;
+
+	ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vx);
+	ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vy);
+	ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vz);
+
+	return 1;
+
 	// find the distance of the sound
 	relativePosn.vx = ActiveSounds[activeIndex].threedeedata.position.vx - Global_VDB_Ptr->VDB_World.vx;
 	relativePosn.vy = ActiveSounds[activeIndex].threedeedata.position.vy - Global_VDB_Ptr->VDB_World.vy;
 	relativePosn.vz = ActiveSounds[activeIndex].threedeedata.position.vz - Global_VDB_Ptr->VDB_World.vz;
-	distance = Magnitude(&relativePosn);
 
-//	ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vx);// / 65536.0f);
-//	ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vy);// / 65536.0f);
-//	ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vz);// / 65536.0f);
-/*
-	sprintf(buf, "Sound Id: %d Posn (%f, %f, %f)\n", activeIndex, ActiveSounds[activeIndex].xa2Emitter.Position.x, ActiveSounds[activeIndex].xa2Emitter.Position.y, ActiveSounds[activeIndex].xa2Emitter.Position.z);
-	OutputDebugString(buf);
-*/
-	db_logf5(("Sound Index %i", ActiveSounds[activeIndex].soundIndex));
-	db_logf5(("Global Player Posn (%i, %i, %i)",  Global_VDB_Ptr->VDB_World.vx, Global_VDB_Ptr->VDB_World.vy, Global_VDB_Ptr->VDB_World.vz));
-	db_logf5(("Sound Posn (%i, %i, %i)",  ActiveSounds[activeIndex].threedeedata.position.vx, ActiveSounds[activeIndex].threedeedata.position.vy, ActiveSounds[activeIndex].threedeedata.position.vz));
-	db_logf5(("Relative Posn (%i, %i, %i)",  relativePosn.vx, relativePosn.vy, relativePosn.vz));
-	db_logf5(("distance %i", distance));
-	db_logf5(("range (%i, %i)", ActiveSounds[activeIndex].threedeedata.inner_range, ActiveSounds[activeIndex].threedeedata.outer_range));
+	distance = Magnitude(&relativePosn);
 
 	// Deal with paused looping sounds.
 	if (ActiveSounds[activeIndex].paused)
@@ -1026,7 +1024,7 @@ int PlatDo3dSound(int activeIndex)
 
 	if (newVolume > VOLUME_MAX) newVolume = VOLUME_MAX;
 	if (newVolume < VOLUME_MIN) newVolume = VOLUME_MIN;
-	
+
 	if (PlatChangeSoundVolume(activeIndex, newVolume) == SOUND_PLATFORMERROR)
 	{
 		return SOUND_PLATFORMERROR;
@@ -1035,67 +1033,11 @@ int PlatDo3dSound(int activeIndex)
 	// Now deal with the panning issues.
 	if (distance < ActiveSounds[activeIndex].threedeedata.outer_range)
 	{
-		if (1)//(ActiveSounds[activeIndex].is3D)
-		{
-			ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(relativePosn.vx);
-			ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(relativePosn.vy);
-			ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(relativePosn.vz);
+		ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(relativePosn.vx);
+		ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(relativePosn.vy);
+		ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(relativePosn.vz);
 
-
-			/* Use the Hardware. */
-/*
-			ActiveSounds[activeIndex].IDirectSound3DBuffer_SetPosition
-				(
-					ActiveSounds[activeIndex].ds3DBufferP,
-					(D3DVALUE) relativePosn.vx,
-					(D3DVALUE) relativePosn.vy,
-					(D3DVALUE) relativePosn.vz,
-					DS3D_DEFERRED
-				);
-*/
-#if 0
-// FALSE doppler for now.
-			IDirectSound3DBuffer_SetVelocity
-				(
-					ActiveSounds[activeIndex].ds3DBufferP,
-					(D3DVALUE) ActiveSounds[activeIndex].threedeedata.velocity.vx,
-					(D3DVALUE) ActiveSounds[activeIndex].threedeedata.velocity.vy,
-					(D3DVALUE) ActiveSounds[activeIndex].threedeedata.velocity.vz,
-					DS3D_DEFERRED
-				);
-#endif
-		}
-		else
-		{
-			int angle;
-			Normalise(&relativePosn);
-			angle = ArcTan(relativePosn.vx,relativePosn.vz);
-			if (angle>=Player->ObEuler.EulerY) angle-=Player->ObEuler.EulerY;
-			else angle += (4096-Player->ObEuler.EulerY);
-			LOCALASSERT((angle>=0)&&(angle<=4095)); 
-		
-			/* map angle to range +- 1024 */
-			if (angle > 1024)
-			{
-				if (angle <= 3072) angle = (2048 - angle); /*quadrants 2 & 3*/
-				else angle = (angle - 4096);	  /* quadrant 4 */
-			}
-			LOCALASSERT((angle>=-1024)&&(angle<=1024));	
-			/* now scale pan to angle */
-			newPan = (PAN_MAXPLAT*angle)>>10;
-
-			/* now damp pan for close objects, so we don't get such a sharp contrast moving through a 3d object. */
-			if ((distance<ActiveSounds[activeIndex].threedeedata.inner_range)&&(newPan!=0))
-			{
-				newPan = (newPan*distance) / ActiveSounds[activeIndex].threedeedata.inner_range;
-	 		}
-	
-			if (PlatChangeSoundPan(activeIndex, newPan) == SOUND_PLATFORMERROR)
-			{
-				db_log3("PlatDo3dSound finished.");
-				return SOUND_PLATFORMERROR;
-			}
-		}
+		// TODO - velocity stuff?
 	}
 	return 1;
 }
@@ -1114,11 +1056,8 @@ void PlatEndGameSound(SOUNDINDEX index)
 		GameSounds[index].pSourceVoice = NULL;
 	}
 
-//	if (GameSounds[index].audioBuffer)
-	{
-		delete[] GameSounds[index].audioBuffer;
-		GameSounds[index].audioBuffer = NULL;
-	}
+	delete[] GameSounds[index].audioBuffer;
+	GameSounds[index].audioBuffer = NULL;
 
 	GameSounds[index].dsFrequency = 0;	
 	GameSounds[index].loaded = 0;
@@ -1168,14 +1107,14 @@ void InitialiseBaseFrequency(SOUNDINDEX soundNum)
 {
 	int frequency = 0;
 
-	/* validate the loaded pitch */
+	// validate the loaded pitch
 	if (GameSounds[soundNum].pitch > PITCH_MAXPLAT) GameSounds[soundNum].pitch = PITCH_MAXPLAT;
 	if (GameSounds[soundNum].pitch < PITCH_MINPLAT) GameSounds[soundNum].pitch = PITCH_MINPLAT;
 
 	// get the frequency
 	frequency = GameSounds[soundNum].dsFrequency;
 	
-	/* if the pitch is default, just return at this point */
+	// if the pitch is default, just return at this point
 	if (GameSounds[soundNum].pitch == PITCH_DEFAULTPLAT) 
 		return;
 
@@ -1193,6 +1132,7 @@ void InitialiseBaseFrequency(SOUNDINDEX soundNum)
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
+		return;
 	}
 
 	// store it
@@ -1370,7 +1310,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 			strcpy (GameSounds[soundNum].wavName, wavname);
 		}
 
-		/* need to save this here for later use */
+		// need to save this here for later use
 		GameSounds[soundNum].dsFrequency = myWaveFormat.nSamplesPerSec;
 		GameSounds[soundNum].length = lengthInSeconds;
 	}
@@ -1379,7 +1319,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
     return 1;
 }
 
-/*identical to above function except it loads from fast files*/
+// identical to above function except it loads from fast files
 int LoadWavFromFastFile(int soundNum, char * wavFileName)
 {
 	PWAVCHUNKHEADER myChunkHeader;
@@ -1485,7 +1425,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	{
 		GameSounds[soundNum].audioBuffer = new uint8_t[myChunkHeader.chunkLength];
 
-		/* Read data from file to buffer */
+		// Read data from file to buffer
 		res = ffread(GameSounds[soundNum].audioBuffer, 1, myChunkHeader.chunkLength, myFile);
 		if (res != (size_t)myChunkHeader.chunkLength)
 		{
@@ -1538,7 +1478,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 			strcpy (GameSounds[soundNum].wavName, wavname);
 		}
 
-		/* need to save this here for later use */
+		// need to save this here for later use
 		GameSounds[soundNum].dsFrequency = myWaveFormat.nSamplesPerSec;
 		GameSounds[soundNum].length = lengthInSeconds;
 	}
@@ -1564,41 +1504,52 @@ static int ToneToFrequency(int currentFrequency, int currentPitch, int newPitch)
 	LOCALASSERT((currentPitch>=PITCH_MINPLAT)&&(currentPitch<=PITCH_MAXPLAT));
 	LOCALASSERT((currentFrequency>=FREQUENCY_MINPLAT)&&(currentPitch<=FREQUENCY_MAXPLAT));
 
-	/* limit pitch */
-	if (newPitch>PITCH_MAXPLAT) newPitch=PITCH_MAXPLAT;
-	if (newPitch<PITCH_MINPLAT) newPitch=PITCH_MINPLAT;
+	// limit pitch
+	if (newPitch > PITCH_MAXPLAT) newPitch = PITCH_MAXPLAT;
+	if (newPitch < PITCH_MINPLAT) newPitch = PITCH_MINPLAT;
 
 	if (newPitch>currentPitch)
 	{
-		/* scale up */
+		// scale up
 		int numOctaves, numTones;
 		numOctaves = (newPitch-currentPitch)/1536;
 		numTones = (newPitch-currentPitch)%1536;
 
 		newFrequency<<=numOctaves;
-		if (newFrequency>FREQUENCY_MAXPLAT) newFrequency=FREQUENCY_MAXPLAT;
+		if (newFrequency > FREQUENCY_MAXPLAT) 
+			newFrequency=FREQUENCY_MAXPLAT;
 		
-		if (numTones>0) newFrequency = (int)((float)(newFrequency)*pitch_to_frequency_mult_table[numTones]);
-		if (newFrequency>FREQUENCY_MAXPLAT) newFrequency=FREQUENCY_MAXPLAT;
+		if (numTones > 0) 
+			newFrequency = (int)((float)(newFrequency)*pitch_to_frequency_mult_table[numTones]);
+
+		if (newFrequency > FREQUENCY_MAXPLAT) 
+			newFrequency = FREQUENCY_MAXPLAT;
 	}
 	else
 	{
-		/* scale down */
+		// scale down
 		int numOctaves, numTones;
 		numOctaves = (currentPitch-newPitch)/1536;
 		numTones = (currentPitch-newPitch)%1536;
 
 		newFrequency>>=numOctaves;
-		if(newFrequency<FREQUENCY_MINPLAT) newFrequency=FREQUENCY_MINPLAT;
+		if (newFrequency < FREQUENCY_MINPLAT) 
+			newFrequency = FREQUENCY_MINPLAT;
 
-		if(numTones>0) newFrequency = (int)((float)(newFrequency)/pitch_to_frequency_mult_table[numTones]);
-		if(newFrequency<FREQUENCY_MINPLAT) newFrequency=FREQUENCY_MINPLAT;
+		if (numTones > 0) 
+			newFrequency = (int)((float)(newFrequency)/pitch_to_frequency_mult_table[numTones]);
+
+		if (newFrequency < FREQUENCY_MINPLAT)
+			newFrequency = FREQUENCY_MINPLAT;
 	}
 	return newFrequency;
 }
 
 void PlatUpdatePlayer()
 {
+	if (!soundEnabled)
+		return;
+
 	// update the listener (ie the player)
 	if (Global_VDB_Ptr)
 	{
@@ -1607,9 +1558,10 @@ void PlatUpdatePlayer()
 				(Global_VDB_Ptr->VDB_World.vz == 0))
 			return;
 
-		XA2Listener.Position.x = 0.0f;//static_cast<float>(Global_VDB_Ptr->VDB_World.vx);
-		XA2Listener.Position.y = 0.0f;//static_cast<float>(Global_VDB_Ptr->VDB_World.vy);
-		XA2Listener.Position.z = 0.0f;//static_cast<float>(Global_VDB_Ptr->VDB_World.vz);
+		// position
+		XA2Listener.Position.x = static_cast<float>(Global_VDB_Ptr->VDB_World.vx);
+		XA2Listener.Position.y = static_cast<float>(Global_VDB_Ptr->VDB_World.vy);
+		XA2Listener.Position.z = static_cast<float>(Global_VDB_Ptr->VDB_World.vz);
 
 		// look-at
 		XA2Listener.OrientFront.x = (float)(Global_VDB_Ptr->VDB_Mat.mat13 / 65536.0f);
@@ -1649,32 +1601,35 @@ void PlatUpdatePlayer()
 			XA2Listener.Velocity.y = 0.0f;
 			XA2Listener.Velocity.z = 0.0f;
 		}
-	}
-#if 0 // not doing reverb stuff yet
-//
-#endif
+
+		// TODO - Reverb
+
 #if 0
-	char buf[100];
-	UINT32 calcFlags = X3DAUDIO_CALCULATE_MATRIX/* | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT | X3DAUDIO_CALCULATE_REVERB*/; // ????????????????????????????
+		char buf[100];
+		UINT32 calcFlags = X3DAUDIO_CALCULATE_MATRIX/* | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT | X3DAUDIO_CALCULATE_REVERB*/; // ????????????????????????????
 
-	for (int i = 0; i < SOUND_MAXACTIVE; i++)
-	{
-		if (ActiveSounds[i].is3D)
+		for (int i = 0; i < SOUND_MAXACTIVE; i++)
 		{
-			if (ActiveSounds[i].soundIndex == SID_NOSOUND)
-				continue;
+			if (ActiveSounds[i].is3D)
+			{
+				if (ActiveSounds[i].soundIndex == SID_NOSOUND)
+					continue;
 
-			X3DAudioCalculate(x3DInstance, &XA2Listener, &ActiveSounds[i].xa2Emitter, calcFlags, &XA2DSPSettings);
+				X3DAudioCalculate(x3DInstance, &XA2Listener, &ActiveSounds[i].xa2Emitter, calcFlags, &XA2DSPSettings);
 
-			sprintf(buf, "1: %f 2: %f\n", XA2DSPSettings.pMatrixCoefficients[0], XA2DSPSettings.pMatrixCoefficients[1]);
-			OutputDebugString(buf);
+				XA2DSPSettings.pMatrixCoefficients[0];// *= 100000;
+				XA2DSPSettings.pMatrixCoefficients[1];// *= 100000;
 
-			ActiveSounds[i].pSourceVoice->SetOutputMatrix(pMasteringVoice, 1, 2, XA2DSPSettings.pMatrixCoefficients);
-			ActiveSounds[i].pSourceVoice->SetFrequencyRatio(XA2DSPSettings.DopplerFactor);
+				sprintf(buf, "1: %f 2: %f\n", XA2DSPSettings.pMatrixCoefficients[0], XA2DSPSettings.pMatrixCoefficients[1]);
+				OutputDebugString(buf);
+
+				ActiveSounds[i].pSourceVoice->SetOutputMatrix(pMasteringVoice, 1, 2, XA2DSPSettings.pMatrixCoefficients);
+				ActiveSounds[i].pSourceVoice->SetFrequencyRatio(XA2DSPSettings.DopplerFactor);
+			}
 		}
-	}
 #endif
-	pXAudio2->CommitChanges(XAUDIO2_COMMIT_ALL);
+		pXAudio2->CommitChanges(XAUDIO2_COMMIT_ALL);
+	}
 }
 
 void PlatSetEnviroment(unsigned int env_index, float reverb_mix)
@@ -1730,7 +1685,7 @@ void PlatSetEnviroment(unsigned int env_index, float reverb_mix)
 		SoundConfig.reverb_mix = reverb_mix;
 	}
 
-	SoundConfig.reverb_changed = TRUE;
+	SoundConfig.reverb_changed = true;
 #endif
 }
 
@@ -1900,85 +1855,20 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 
 int PlatUse3DSoundHW()
 {
-	uint32_t count = SoundMaxHW;
-
-	char buf[100];
-	sprintf(buf, "SoundMaxHW: %d\n", count);
-	OutputDebugString(buf);
-
-	if (SoundConfig.flags & SOUND_USE_3DHW)
-	{
-		db_log1("Sound system already using 3DHW.");
-		return 2;
-	}
-
-	if (~SoundConfig.flags & SOUND_3DHW)
-	{
-		db_log1("Sound system does not have any 3DHW to use.");
-		return -1;
-	}
-
-	SoundConfig.flags |= SOUND_USE_3DHW;
-
-	// Go through and get 3DBuffers for all active sounds.
-	while (count--)
-	{
-		if (ActiveSounds[count].audioBuffer) // instead of dsBuffer
-		{
-			ActiveSounds[count].is3D = TRUE;
-/*
-			HRESULT hres = IDirectSoundBuffer_QueryInterface
-				(
-					ActiveSounds[count].dsBufferP,
-					IID_IDirectSound3DBuffer,
-					(LPVOID *)&ActiveSounds[count].ds3DBufferP
-				);
-
-			if(hres != DS_OK)
-			{
-				db_logf3(("Error: Failed to get a DirectSound3DBuffer. res %x", hres));
-			}
-*/
-		}
-	}
-
+	// only called by a console command
 	return 1;
 }
 
 int PlatDontUse3DSoundHW()
 {
-	uint32_t count = SoundMaxHW;
-
-	char buf[100];
-	sprintf(buf, "SoundMaxHW: %d\n", count);
-	OutputDebugString(buf);
-
-	if (~SoundConfig.flags & SOUND_USE_3DHW)
-	{
-		db_log1("Sound system already not using 3DHW.");
-		return 2;
-	}
-
-	SoundConfig.flags &= ~SOUND_USE_3DHW;
-
-	// Go through and release 3DBuffers for all active sounds.
-	while (count--)
-	{
-		if (ActiveSounds[count].audioBuffer) // instead of dsBuffer 
-		{
-			ActiveSounds[count].is3D = FALSE;
-//			IDirectSound3DBuffer_Release(ActiveSounds[count].ds3DBufferP);
-//			ActiveSounds[count].ds3DBufferP = NULL;
-	 	}
-	}
-
+	// only called by a console command
 	return 1;
 }
 
 void UpdateSoundFrequencies(void)
 {
-	extern int SoundSwitchedOn;
-	extern int TimeScale;
+	if (!soundEnabled)
+		return;
 
 	if (!SoundSwitchedOn) 
 		return;

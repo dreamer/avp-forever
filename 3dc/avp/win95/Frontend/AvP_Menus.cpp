@@ -128,8 +128,6 @@ extern void MakeConnectionSelectMenu();
 int MaxDifficultyLevelAllowed(I_PLAYER_TYPE playerID, int level);
 static int HeightOfMenuElement(AVPMENU_ELEMENT *elementPtr);
 extern void RenderKeyConfigRectangle(int alpha);
-extern void Hardware_RenderKeyConfigRectangle(int alpha);
-extern void Hardware_RenderHighlightRectangle(int x1,int y1,int x2,int y2,int r, int g, int b);
 char *GetVideoModeDescription2();
 char *GetVideoModeDescription3();
 void NextVideoMode2();
@@ -1539,7 +1537,7 @@ static void RenderKeyConfigurationMenu(void)
 			b = ONE_FIXED/4;
 		}
 		
-		Hardware_RenderKeyConfigRectangle(b);
+		RenderKeyConfigRectangle(b);
 	}
 	y = centreY-160;
 	for (i = 0; i<2; i++, elementPtr++)
@@ -1558,7 +1556,7 @@ static void RenderKeyConfigurationMenu(void)
 		if (targetBrightness > elementPtr->Brightness)
 		{
 			elementPtr->Brightness+=BRIGHTNESS_CHANGE_SPEED;
-			if(elementPtr->Brightness>targetBrightness)
+			if (elementPtr->Brightness>targetBrightness)
 			{
 				elementPtr->Brightness = targetBrightness;
 			}
@@ -1566,7 +1564,7 @@ static void RenderKeyConfigurationMenu(void)
 		else
 		{
 			elementPtr->Brightness-=BRIGHTNESS_CHANGE_SPEED;
-			if(elementPtr->Brightness<targetBrightness)
+			if (elementPtr->Brightness<targetBrightness)
 			{
 				elementPtr->Brightness = targetBrightness;
 			}
@@ -1655,27 +1653,27 @@ static void RenderScrollyMenu()
 	{
 		//draw the title
 		char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
-		RenderMenuText(textPtr,MENU_CENTREX,70,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
+		RenderMenuText(textPtr, MENU_CENTREX, 70, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
 	}
 
 	{
-		int first=AvPMenus.CurrentlySelectedElement;
-		int last=AvPMenus.CurrentlySelectedElement;
+		int first = AvPMenus.CurrentlySelectedElement;
+		int last  = AvPMenus.CurrentlySelectedElement;
 		int i;
 		int y;
-		BOOL done=FALSE;
+		BOOL done = FALSE;
 
-		int available_above=(MENU_HEIGHT-HeightOfMenuElement(&elementPtr[AvPMenus.CurrentlySelectedElement]))/2;
-		int available_below=available_above;
+		int available_above = (MENU_HEIGHT-HeightOfMenuElement(&elementPtr[AvPMenus.CurrentlySelectedElement]))/2;
+		int available_below = available_above;
 
 		//work out the first and last element to be drawn
 		do
 		{
-			done=TRUE;
-			if(first-1>=0)
+			done = TRUE;
+			if (first-1>=0)
 			{
 				int h=HeightOfMenuElement(&elementPtr[first-1]);
-				if(h<=available_above)
+				if (h<=available_above)
 				{
 					available_above-=h;
 					first--;
@@ -1687,14 +1685,14 @@ static void RenderScrollyMenu()
 					available_above=0;
 				}
 			}
-			if(first==0)
+			if (first==0)
 			{
 				//no more elements above selected element
 				available_below+=available_above;
 				available_above=0;
 			}
 
-			if(last+1<AvPMenus.NumberOfElementsInMenu)
+			if (last+1<AvPMenus.NumberOfElementsInMenu)
 			{
 				int h=HeightOfMenuElement(&elementPtr[last+1]);
 				if(h<=available_below)
@@ -1872,7 +1870,7 @@ static void RenderLoadGameMenu(void)
 		RenderText = Hardware_RenderSmallMenuText;
 	}
 
-	for (e = 0; e<AvPMenus.NumberOfElementsInMenu; e++, elementPtr++)
+	for (e = 0; e < AvPMenus.NumberOfElementsInMenu; e++, elementPtr++)
 	{
 		char buffer[100];
 		SAVE_SLOT_HEADER *slotPtr = &SaveGameSlot[e];
@@ -1880,14 +1878,8 @@ static void RenderLoadGameMenu(void)
 
 		if (e==AvPMenus.CurrentlySelectedElement)
 		{
-			if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
-			{
-				Hardware_RenderHighlightRectangle(MENU_LEFTXEDGE,y-2,MENU_RIGHTXEDGE,y+4+HUD_FONT_HEIGHT*2,0,128,0);
-			}
-			else
-			{
-				RenderHighlightRectangle(MENU_LEFTXEDGE,y-2,MENU_RIGHTXEDGE,y+4+HUD_FONT_HEIGHT*2,0,128,0);
-			}
+			RenderHighlightRectangle(MENU_LEFTXEDGE,y-2,MENU_RIGHTXEDGE,y+4+HUD_FONT_HEIGHT*2,0,128,0);
+
 			targetBrightness = BRIGHTNESS_OF_HIGHLIGHTED_ELEMENT;
 		}
 		else
@@ -1897,23 +1889,23 @@ static void RenderLoadGameMenu(void)
 
 		if (targetBrightness > elementPtr->Brightness)
 		{
-			elementPtr->Brightness+=BRIGHTNESS_CHANGE_SPEED;
-			if(elementPtr->Brightness>targetBrightness)
+			elementPtr->Brightness += BRIGHTNESS_CHANGE_SPEED;
+			if (elementPtr->Brightness > targetBrightness)
 			{
 				elementPtr->Brightness = targetBrightness;
 			}
 		}
 		else
 		{
-			elementPtr->Brightness-=BRIGHTNESS_CHANGE_SPEED;
-			if(elementPtr->Brightness<targetBrightness)
+			elementPtr->Brightness -= BRIGHTNESS_CHANGE_SPEED;
+			if (elementPtr->Brightness < targetBrightness)
 			{
 				elementPtr->Brightness = targetBrightness;
 			}
 		}
 		
 		sprintf(buffer,"%d.",e+1);
-		RenderText(buffer,MENU_LEFTXEDGE+20,y,elementPtr->Brightness,AVPMENUFORMAT_RIGHTJUSTIFIED);
+		RenderText(buffer, MENU_LEFTXEDGE+20, y, elementPtr->Brightness, AVPMENUFORMAT_RIGHTJUSTIFIED);
 		
 		if (slotPtr->SlotUsed)
 		{
@@ -1940,29 +1932,30 @@ static void RenderLoadGameMenu(void)
 					break;
 				}
 			}
-		
 
-			sprintf(buffer,"%s",GetTextString(static_cast<enum TEXTSTRING_ID>(TEXTSTRING_MULTIPLAYER_MARINE+slotPtr->Species)));
-			RenderText(buffer,MENU_LEFTXEDGE+30,y,elementPtr->Brightness,AVPMENUFORMAT_LEFTJUSTIFIED);
+			sprintf(buffer, "%s", GetTextString(static_cast<enum TEXTSTRING_ID>(TEXTSTRING_MULTIPLAYER_MARINE+slotPtr->Species)));
+			RenderText(buffer, MENU_LEFTXEDGE+30, y, elementPtr->Brightness, AVPMENUFORMAT_LEFTJUSTIFIED);
 			
-			sprintf(buffer,"%s",GetTextString(static_cast<enum TEXTSTRING_ID>(textID+slotPtr->Episode)));
-			RenderText(buffer,MENU_CENTREX,y,elementPtr->Brightness,AVPMENUFORMAT_CENTREJUSTIFIED);
+			sprintf(buffer, "%s", GetTextString(static_cast<enum TEXTSTRING_ID>(textID+slotPtr->Episode)));
+			RenderText(buffer, MENU_CENTREX, y, elementPtr->Brightness, AVPMENUFORMAT_CENTREJUSTIFIED);
 
 			if (numberOfBasicEpisodes>slotPtr->Episode)
 			{
-				sprintf(buffer,"%s",GetTextString(static_cast<enum TEXTSTRING_ID>(TEXTSTRING_DIFFICULTY_EASY+slotPtr->Difficulty)));
-				RenderText(buffer,MENU_RIGHTXEDGE-30,y,elementPtr->Brightness,AVPMENUFORMAT_RIGHTJUSTIFIED);
+				sprintf(buffer, "%s", GetTextString(static_cast<enum TEXTSTRING_ID>(TEXTSTRING_DIFFICULTY_EASY+slotPtr->Difficulty)));
+				RenderText(buffer, MENU_RIGHTXEDGE-30, y, elementPtr->Brightness, AVPMENUFORMAT_RIGHTJUSTIFIED);
 			}
 
-			sprintf(buffer, "%s %02d:%02d:%02d",GetTextString(TEXTSTRING_GAMESTATS_TIMEELAPSED),slotPtr->ElapsedTime_Hours,slotPtr->ElapsedTime_Minutes,slotPtr->ElapsedTime_Seconds);
-			RenderText(buffer,MENU_LEFTXEDGE+30,y+HUD_FONT_HEIGHT+1,elementPtr->Brightness,AVPMENUFORMAT_LEFTJUSTIFIED);
+			sprintf(buffer, "%s %02d:%02d:%02d", GetTextString(TEXTSTRING_GAMESTATS_TIMEELAPSED), slotPtr->ElapsedTime_Hours, slotPtr->ElapsedTime_Minutes, slotPtr->ElapsedTime_Seconds);
+			RenderText(buffer, MENU_LEFTXEDGE+30, y+HUD_FONT_HEIGHT+1, elementPtr->Brightness, AVPMENUFORMAT_LEFTJUSTIFIED);
 
-			sprintf(buffer, "%s: %d",GetTextString(TEXTSTRING_SAVEGAME_SAVESLEFT),slotPtr->SavesLeft);
-			RenderText(buffer,MENU_CENTREX,y+HUD_FONT_HEIGHT+1,elementPtr->Brightness,AVPMENUFORMAT_CENTREJUSTIFIED);
+			sprintf(buffer, "%s: %d", GetTextString(TEXTSTRING_SAVEGAME_SAVESLEFT), slotPtr->SavesLeft);
+			RenderText(buffer, MENU_CENTREX, y+HUD_FONT_HEIGHT+1, elementPtr->Brightness, AVPMENUFORMAT_CENTREJUSTIFIED);
 
 			{
 				char buffer2[100];
 				int nLen = 80;
+
+				// TODO. abstract out into system specific file
 
 				//GetLocalTime(&slotPtr->TimeStamp);
 
@@ -3318,7 +3311,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 	}
 	else
 	{
-		if(AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
+		if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 		{
 			RenderText = Hardware_RenderSmallMenuText;
 			RenderText_Coloured = Hardware_RenderSmallMenuText_Coloured;
@@ -3707,10 +3700,10 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 			int x = MENU_CENTREX+MENU_ELEMENT_SPACING+3;
 			x+=(201*(*elementPtr->SliderValuePtr))/elementPtr->MaxSliderValue;
 			RenderText(GetTextString(static_cast<enum TEXTSTRING_ID>(elementPtr->TextDescription)),MENU_CENTREX-MENU_ELEMENT_SPACING,y,elementPtr->Brightness,AVPMENUFORMAT_RIGHTJUSTIFIED);
-			
+
 			if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 			{
-				D3D_DrawSliderBar(/*MENU_CENTREX*/ScreenDescriptorBlock.SDB_Width+MENU_ELEMENT_SPACING,y+1,elementPtr->Brightness);
+				D3D_DrawSliderBar(/*MENU_CENTREX*/(ScreenDescriptorBlock.SDB_Width/2)+MENU_ELEMENT_SPACING,y+1,elementPtr->Brightness);
 				D3D_DrawSlider(x,y+4,elementPtr->Brightness);
 			}
 			else
@@ -3774,14 +3767,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 					g = 128;
 				}
 
-				if(AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
-				{
-					Hardware_RenderHighlightRectangle(x-100,y-4,x+4,y+19,0,g,0);
-				}
-				else
-				{
-					RenderHighlightRectangle(x-100,y-4,x+4,y+19,0,g,0);
-				}
+				RenderHighlightRectangle(x-100,y-4,x+4,y+19,0,g,0);
 			}
 			if (AvPMenus.UserChangingKeyConfig && e==AvPMenus.CurrentlySelectedElement)
 			{

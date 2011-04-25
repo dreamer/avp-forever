@@ -11,6 +11,10 @@
 
 #ifdef _XBOX
 #define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
+
+#include <string>
+#include <algorithm>
+
 #endif
 
 static const int kAudioBufferSize  = 4096;
@@ -199,6 +203,13 @@ int TheoraFMV::Open(const std::string &fileName)
 		isLooped = true;
 	}
 
+#ifdef _XBOX
+	
+	// change forwardslashes in path to backslashes
+	std::replace(mFileName.begin(), mFileName.end(), '/', '\\');
+
+#endif
+
 	// open the file
 	mFileStream.open(mFileName.c_str(), std::ios::in | std::ios::binary);
 
@@ -288,7 +299,7 @@ int TheoraFMV::Open(const std::string &fileName)
 
 	for (uint32_t i = 0; i < frameTextureIDs.size(); i++)
 	{
-		uint32_t width = mFrameWidth;
+		uint32_t width  = mFrameWidth;
 		uint32_t height = mFrameHeight;
 
 		// the first texture is fullsize, the second two are quartersize
@@ -431,19 +442,19 @@ bool TheoraFMV::NextFrame(uint32_t width, uint32_t height, uint8_t *bufferPtr, u
 	oggYuv.ptru = mYuvBuffer[2].data;
 	oggYuv.ptrv = mYuvBuffer[1].data;
 
-	oggYuv.y_width = mYuvBuffer[0].width;
+	oggYuv.y_width  = mYuvBuffer[0].width;
 	oggYuv.y_height = mYuvBuffer[0].height;
-	oggYuv.y_pitch = mYuvBuffer[0].stride;
+	oggYuv.y_pitch  = mYuvBuffer[0].stride;
 
-	oggYuv.uv_width = mYuvBuffer[1].width;
+	oggYuv.uv_width  = mYuvBuffer[1].width;
 	oggYuv.uv_height = mYuvBuffer[1].height;
-	oggYuv.uv_pitch = mYuvBuffer[1].stride;
+	oggYuv.uv_pitch  = mYuvBuffer[1].stride;
 
 	OggPlayRGBChannels oggRgb;
 	oggRgb.ptro = static_cast<uint8_t*>(bufferPtr);
 	oggRgb.rgb_height = height;
-	oggRgb.rgb_width = width;
-	oggRgb.rgb_pitch = pitch;
+	oggRgb.rgb_width  = width;
+	oggRgb.rgb_pitch  = pitch;
 
 	oggplay_yuv2rgb(&oggYuv, &oggRgb);
 
@@ -479,13 +490,13 @@ bool TheoraFMV::NextFrame()
 			for (uint32_t y = 0; y < height; y++)
 			{
 				uint8_t *destPtr = originalDestPtr + y * pitch;
-				uint8_t *srcPtr = mYuvBuffer[i].data + (y * mYuvBuffer[i].stride);
+				uint8_t *srcPtr  = mYuvBuffer[i].data + (y * mYuvBuffer[i].stride);
 
 				// copy entire width row in one go
 				memcpy(destPtr, srcPtr, width * sizeof(uint8_t));
 
 				destPtr += width * sizeof(uint8_t);
-				srcPtr += width * sizeof(uint8_t);
+				srcPtr  += width * sizeof(uint8_t);
 			}
 
 			// unlock texture
@@ -524,7 +535,7 @@ ogg_int64_t TheoraFMV::ReadPage(ogg_page *page)
 			{
 				// we have to loop, so reset back to the start and keep going (dont return)
 				mFileStream.clear();
-				mFileStream.seekg(mDataOffset, std::ios::beg);
+				mFileStream.seekg(static_cast<long>(mDataOffset), std::ios::beg);
 				mPageOffset = mDataOffset;
 				ogg_sync_reset(&mState);
 			}

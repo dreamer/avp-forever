@@ -1,4 +1,3 @@
-
 #ifndef _Input_h_
 #define _Input_h_
 

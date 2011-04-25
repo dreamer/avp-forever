@@ -41,7 +41,7 @@ bool IndexBuffer::Create(uint32_t capacity, enum R_USAGE usage)
 
 bool IndexBuffer::Release()
 {
-	return R_ReleaseIndexBuffer(this->indexBuffer);
+	return R_ReleaseIndexBuffer(*this);
 }
 
 bool IndexBuffer::Lock(uint16_t **data)

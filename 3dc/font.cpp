@@ -34,19 +34,7 @@
 #include <iostream>
 #include <fstream>
 
-#pragma pack(1) // ensure no padding on struct
-
-struct BFD
-{
-	uint32_t	mapWidth;
-	uint32_t	mapHeight;
-	uint32_t	cellWidth;
-	uint32_t	cellHeight;
-	char		startChar;
-	char		charWidths[256];
-};
-
-#pragma pack()
+const int kFontDATsize = 273; // 273 byte .dat file
 
 struct Font
 {
@@ -229,7 +217,7 @@ void Font_Init()
 		size_t fileLength = infile.tellg();
 		infile.seekg(0, std::ios::beg);
 
-		if (fileLength == sizeof(BFD))
+		if (fileLength == kFontDATsize)
 		{
 			infile.read(reinterpret_cast<char*>(&Fonts[FONT_SMALL].mapWidth),   4);
 			infile.read(reinterpret_cast<char*>(&Fonts[FONT_SMALL].mapHeight),  4);
@@ -270,7 +258,7 @@ uint32_t Font_DrawCenteredText(const std::string &text)
 {
 	uint32_t textWidth = Font_GetStringWidth(text);
 
-	int x = (640/2) - (textWidth/2);
+	int x = (R_GetScreenWidth()/2) - (textWidth/2);
 	int y = 40;
 
 	return Font_DrawText(text, x, y, RGB_MAKE(255, 255, 255), FONT_SMALL);
@@ -315,7 +303,7 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 		uvArray[6] = RecipW * (tex_x + charWidth);
 		uvArray[7] = RecipH * tex_y;
 
-		DrawFontQuad(x, y, charWidth, charHeight, Fonts[FONT_SMALL].textureID, uvArray, colour, TRANSLUCENCY_GLOWING);
+		DrawFontQuad(x, y, charWidth, charHeight, Fonts[FONT_SMALL].textureID, uvArray, colour, TRANSLUCENCY_NORMAL);
 
 		bool fixedWidth = false;
 

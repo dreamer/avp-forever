@@ -57,7 +57,7 @@ void Start_Progress_Bar()
 {
 	char buffer[100];
 
-	AAFontImageNumber = CL_LoadImageOnce("Common/aa_font.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AAFontImageNumber = CL_LoadImageOnce("Common/aa_font.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 	
 	// load other graphics
 	{

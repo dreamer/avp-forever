@@ -165,7 +165,7 @@ unsigned int __stdcall VorbisUpdateThread(void *args)
 	VorbisPlayback *vorbis = static_cast<VorbisPlayback*>(args);
 
 #ifdef USE_XAUDIO2
-	CoInitializeEx( NULL, COINIT_MULTITHREADED );
+	CoInitializeEx (NULL, COINIT_MULTITHREADED);
 #endif
 
 	while (vorbis->mIsPlaying)
