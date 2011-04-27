@@ -82,9 +82,6 @@ void ColourFillBackBuffer(int FillColour);
 int LightIntensityAtPoint(VECTORCH *pointPtr);
 static float currentCameraZoomScale = 1.0f;
 
-const uint32_t MAX_VERTEXES = 4096;
-const uint32_t MAX_INDICES = 9216;
-
 D3DLVERTEX *mainVertex = NULL;
 uint16_t *mainIndex = NULL;
 
@@ -103,21 +100,15 @@ RenderList *particleList = 0;
 RenderList *mainList = 0;
 RenderList *orthoList = 0;
 
-static bool UnlockExecuteBufferAndPrepareForUse();
-static bool ExecuteBuffer();
-static bool LockExecuteBuffer();
-
 #define RGBLIGHT_MAKE(r,g,b) RGB_MAKE(r,g,b)
 #define RGBALIGHT_MAKE(r,g,b,a) RGBA_MAKE(r,g,b,a)
 
 static HRESULT LastError; // remove me eventually (when no more D3D calls exist in this file)
 
-// initialise our std::vectors to a particle size, allowing us to use them as
-// regular arrays
+// set our std::vectors capacity allowing us to use them as regular arrays
 void RenderListInit()
 {
-	// new, test particle list
-	particleList = new RenderList(/*400*/800);
+	particleList = new RenderList(400);
 	mainList     = new RenderList(800);
 	orthoList    = new RenderList(400);
 }
@@ -365,6 +356,9 @@ static bool ExecuteBuffer()
 	// render any particles
 	if (particleList->GetSize())
 	{
+		// set vertex declaration
+		d3d.mainDecl->Set();
+
 		// set the particle VB and IBs as active
 		d3d.particleVB->Set();
 		d3d.particleIB->Set();
@@ -381,11 +375,11 @@ static bool ExecuteBuffer()
 	// render any orthographic quads
 	if (orthoList->GetSize())
 	{
-		d3d.orthoVB->Set();
-		d3d.orthoIB->Set();
-		
 		// set vertex declaration
 		d3d.orthoDecl->Set();
+
+		d3d.orthoVB->Set();
+		d3d.orthoIB->Set();
 
 		// set orthographic projection shaders as active
 		d3d.effectSystem->SetActive(d3d.orthoEffect);
@@ -1368,7 +1362,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 #endif
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
-	uint32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
+	texID_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
 
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(textureID, texWidth, texHeight);
@@ -1458,7 +1452,7 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 {
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
-	uint32_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
+	texID_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
 
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(textureID, texWidth, texHeight);
@@ -1867,7 +1861,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 
 		float zvalue;
-/*
+
 		if (particleDescPtr->IsDrawnInFront)
 		{
 			zvalue = 0.0f;
@@ -1877,7 +1871,6 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 			zvalue = 1.0f;
 		}
 		else
-*/
 		{
 			zvalue = (float)vertices->Z;
 		}
@@ -2141,7 +2134,7 @@ void PostLandscapeRendering()
 			DISPLAYBLOCK *objectPtr = OnScreenBlockList[--numOfObjects];
 			MODULE *modulePtr = objectPtr->ObMyModule;
 
-			/* if it's a module, which isn't inside another module */
+			// if it's a module, which isn't inside another module
 			if (modulePtr && modulePtr->name)
 			{
 				if ((!_stricmp(modulePtr->name, "largespace"))
@@ -2279,7 +2272,7 @@ void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin)
 
 void D3D_DrawBackdrop(void)
 {
-	if (TRIPTASTIC_CHEATMODE||MOTIONBLUR_CHEATMODE)
+	if (TRIPTASTIC_CHEATMODE || MOTIONBLUR_CHEATMODE)
 		return;
 
 	if (WireFrameMode)
@@ -2287,14 +2280,14 @@ void D3D_DrawBackdrop(void)
    		ColourFillBackBuffer(0);
 		return;
 	}
-	else if(ShowDebuggingText.Tears)
+	else if (ShowDebuggingText.Tears)
 	{
 		ColourFillBackBuffer((63<<5));
 		return;
 	}
 
 	{
-		int needToDrawBackdrop=0;
+		bool needToDrawBackdrop = false;
 
 		int numOfObjects = NumActiveBlocks;
 		while (numOfObjects--)
@@ -2302,9 +2295,9 @@ void D3D_DrawBackdrop(void)
 			DISPLAYBLOCK *objectPtr = ActiveBlockList[numOfObjects];
 			MODULE *modulePtr = objectPtr->ObMyModule;
 
-			if (modulePtr && (ModuleCurrVisArray[modulePtr->m_index] == 2) && modulePtr->m_flags&MODULEFLAG_SKY)
+			if (modulePtr && (ModuleCurrVisArray[modulePtr->m_index] == 2) && modulePtr->m_flags & MODULEFLAG_SKY)
 			{
-				needToDrawBackdrop=1;
+				needToDrawBackdrop = true;
 				break;
 			}
 		}
@@ -2324,7 +2317,7 @@ void D3D_DrawBackdrop(void)
 		}
 	}
 
-	/* if the player is outside the environment, clear the screen! */
+	// if the player is outside the environment, clear the screen!
 	{
  		if (!playerPherModule)
  		{
@@ -2333,7 +2326,7 @@ void D3D_DrawBackdrop(void)
 		}
 	}
 	{
-		PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+		PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *)(Player->ObStrategyBlock->SBdataptr);
 
 		if (!playerStatusPtr->IsAlive || FREEFALL_CHEATMODE)
 		{

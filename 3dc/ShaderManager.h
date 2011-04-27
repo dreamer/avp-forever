@@ -55,12 +55,12 @@ class VertexShaderPool
 	public:
 		VertexShaderPool()
 		{
-			currentSetShaderID = -1;
+			currentSetShaderID = kNullShaderID;
 		}
 
 		std::vector<r_VertexShader> shaderList;
 
-		shaderID_t Add(r_VertexShader newShader);
+		shaderID_t Add(r_VertexShader &newShader);
 		bool SetActive(int32_t shaderID);
 		shaderID_t GetShaderByName(const std::string &shaderName);
 		void Remove(shaderID_t shaderID);
@@ -76,12 +76,12 @@ class PixelShaderPool
 	public:
 		PixelShaderPool()
 		{
-			currentSetShaderID = -1;
+			currentSetShaderID = kNullShaderID;
 		}
 
 		std::vector<r_PixelShader> shaderList;
 
-		shaderID_t Add(r_PixelShader newShader);
+		shaderID_t Add(r_PixelShader &newShader);
 		bool SetActive(shaderID_t shaderID);
 		shaderID_t GetShaderByName(const std::string &shaderName);
 		void Remove(shaderID_t shaderID);

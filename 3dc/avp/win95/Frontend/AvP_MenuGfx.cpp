@@ -1161,7 +1161,7 @@ extern void LoadAllAvPMenuGfx(void)
 	CalculateWidthsOfAAFont();
 
 	// call a function to remove the red grid from the small font texture
-	DeRedTexture(Tex_GetTextureDetails(AVPMENUGFX_SMALL_FONT));
+	DeRedTexture((Texture)Tex_GetTextureDetails(AVPMENUGFX_SMALL_FONT));
 
 	/*
 		AVPMENUGFX_ALIEN_LOGO and friends were originally constants that could be assigned at 

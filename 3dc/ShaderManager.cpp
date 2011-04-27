@@ -28,7 +28,7 @@
 #include <sstream>
 
 // add an already created vertexShader_t struct to our pool.
-shaderID_t VertexShaderPool::Add(r_VertexShader newShader)
+shaderID_t VertexShaderPool::Add(r_VertexShader &newShader)
 {
 	// see if it already exists, and return the ID to it if it does
 	shaderID_t shaderID = GetShaderByName(newShader.shaderName);
@@ -77,7 +77,7 @@ bool VertexShaderPool::SetActive(shaderID_t shaderID)
 		return true;
 	}
 
-	if (R_SetVertexShader(this->shaderList[shaderID]))
+	if (R_SetVertexShader(shaderList[shaderID]))
 	{
 		currentSetShaderID = shaderID;
 		return true;
@@ -109,7 +109,7 @@ bool VertexShaderPool::SetVertexShaderConstant(shaderID_t shaderID, uint32_t reg
 
 
 // add an already created pixelShader_t struct to our pool.
-shaderID_t PixelShaderPool::Add(r_PixelShader newShader)
+shaderID_t PixelShaderPool::Add(r_PixelShader &newShader)
 {
 	// see if it already exists, and return the ID to it if it does
 	shaderID_t shaderID = GetShaderByName(newShader.shaderName);

@@ -40,11 +40,7 @@ RingBuffer::RingBuffer(uint32_t size)
 
 RingBuffer::~RingBuffer()
 {
-	if (buffer)
-	{
-		delete[] buffer;
-	}
-
+	delete[] buffer;
 	DeleteCriticalSection(&mCriticalSection);
 }
 
@@ -192,7 +188,7 @@ uint32_t RingBuffer::WriteData(uint8_t *srcData, uint32_t srcDataSize)
 		firstSize = srcDataSize;
 
 	// first part. from write cursor to end of buffer
-	memcpy( &buffer[writePos], &srcData[0], firstSize);
+	memcpy(&buffer[writePos], &srcData[0], firstSize);
 	totalWritten += firstSize;
 
 	secondSize = srcDataSize - firstSize;
@@ -201,7 +197,7 @@ uint32_t RingBuffer::WriteData(uint8_t *srcData, uint32_t srcDataSize)
 	if (secondSize > 0)
 	{
 		// copy second part. start of buffer to play cursor
-		memcpy( &buffer[0], &srcData[firstSize], secondSize);
+		memcpy(&buffer[0], &srcData[firstSize], secondSize);
 		totalWritten += secondSize;
 	}
 

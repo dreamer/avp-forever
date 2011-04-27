@@ -55,12 +55,12 @@ bool VertexDeclaration::Create()
 
 bool VertexDeclaration::Release()
 {
-	return R_ReleaseVertexDeclaration(this->declaration);
+	return R_ReleaseVertexDeclaration(*this);
 }
 
 bool VertexDeclaration::Set()
 {
-	return R_SetVertexDeclaration(this->declaration);
+	return R_SetVertexDeclaration(*this);
 }
 
 void VertexDeclaration::Add(uint16_t stream, VD_TYPE type, VD_METHOD method, VD_USAGE usage, uint8_t usageIndex)

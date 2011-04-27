@@ -3911,16 +3911,10 @@
 				RelativePath="..\3dc\include\3dc.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\advwin32.h">
-			</File>
-			<File
 				RelativePath="..\3dc\avp\win95\gadgets\ahudgadg.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\AI_Sight.h">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\alt_tab.h">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\Animchnk.hpp">
@@ -4085,12 +4079,6 @@
 				RelativePath="..\3dc\avp\Bh_xeno.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\bink.h">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\bink_Rad.h">
-			</File>
-			<File
 				RelativePath="..\3dc\avp\win95\Bmp2.h">
 			</File>
 			<File
@@ -4169,9 +4157,6 @@
 				RelativePath="..\win32\d3d_render.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\d3dmacs.h">
-			</File>
-			<File
 				RelativePath="..\3dc\avp\support\daemon.h">
 			</File>
 			<File
@@ -4203,12 +4188,6 @@
 			</File>
 			<File
 				RelativePath="..\3dc\avp\DetailLevels.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Dp_func.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\dp_Sprh.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\dplayext.h">
@@ -4414,9 +4393,6 @@
 				RelativePath="..\3dc\avp\ltfx_exp.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Macro.h">
-			</File>
-			<File
 				RelativePath="..\3dc\win95\md5.h">
 			</File>
 			<File
@@ -4429,16 +4405,10 @@
 				RelativePath="..\3dc\avp\menudefs.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\menugfx.h">
-			</File>
-			<File
 				RelativePath="..\3dc\win95\Mishchnk.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\missions.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\Mmx_math.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\modcmds.hpp">
@@ -4519,9 +4489,6 @@
 				RelativePath="..\3dc\avp\win95\Projload.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\projmenu.hpp">
-			</File>
-			<File
 				RelativePath="..\3dc\avp\projtext.h">
 			</File>
 			<File
@@ -4544,15 +4511,6 @@
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\r2pos666.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\Rad.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\support\rebitems.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\support\rebmenus.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\reflist.hpp">
@@ -4610,9 +4568,6 @@
 			</File>
 			<File
 				RelativePath="..\3dc\win95\Shpchunk.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\Smsopt.h">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\Sndchunk.hpp">
@@ -4700,9 +4655,6 @@
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\Vision.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Vmanpset.h">
 			</File>
 			<File
 				RelativePath="..\3dc\vorbisPlayer.h">

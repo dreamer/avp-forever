@@ -826,13 +826,13 @@ void PredatorThermalVision_ShapePipeline(SHAPEHEADER *shapePtr)
 
 		int pif = PolygonWithinFrustum(polyPtr);
 
-//		if (pif)
-		if (1)
+		if (pif)
+//		if (1)
 		{
 			PredatorThermalVisionPolygon_Construct(polyPtr);
 
-			//if (pif!=2)
-			if (0)
+			if (pif!=2)
+			//if (0)
 			{
 				GouraudPolygon_ClipWithZ();
 				if (RenderPolygon.NumberOfVertices<3) continue;
@@ -873,13 +873,13 @@ void PredatorSeeAliensVision_ShapePipeline(SHAPEHEADER *shapePtr)
 			{
 				int pif = PolygonWithinFrustum(polyPtr);
 
-				//if (pif)
-				if (1)
+				if (pif)
+				//if (1)
 				{
 					PredatorSeeAliensVisionPolygon_Construct(polyPtr);
 
-					//if (pif!=2)
-					if (0)
+					if (pif!=2)
+					//if (0)
 					{
 						GouraudTexturedPolygon_ClipWithZ();
 						if (RenderPolygon.NumberOfVertices<3) continue;
@@ -4568,10 +4568,8 @@ void RenderParticle(PARTICLE *particlePtr)
 
 		VerticesBuffer[1].X = VerticesBuffer[0].X;
 		VerticesBuffer[2].X = VerticesBuffer[0].X;
-
 		VerticesBuffer[1].Y = VerticesBuffer[0].Y;
 		VerticesBuffer[2].Y = VerticesBuffer[0].Y;
-
 		VerticesBuffer[1].Z = VerticesBuffer[0].Z;
 		VerticesBuffer[2].Z = VerticesBuffer[0].Z;
 
@@ -4608,16 +4606,16 @@ void RenderParticle(PARTICLE *particlePtr)
 		}
 
 		VerticesBuffer[0].X += offset[0].vx;
-		VerticesBuffer[0].Y += offset[0].vy;//MUL_FIXED(offset[0].vy, 87381);
+		VerticesBuffer[0].Y += offset[0].vy;
 
 		VerticesBuffer[1].X += offset[1].vx;
-		VerticesBuffer[1].Y += offset[1].vy;//MUL_FIXED(offset[1].vy, 87381);
+		VerticesBuffer[1].Y += offset[1].vy;
 
 		VerticesBuffer[2].X += offset[2].vx;
-		VerticesBuffer[2].Y += offset[2].vy;//MUL_FIXED(offset[2].vy, 87381);
+		VerticesBuffer[2].Y += offset[2].vy;
 
 		VerticesBuffer[3].X += offset[3].vx;
-		VerticesBuffer[3].Y += offset[3].vy;//MUL_FIXED(offset[3].vy, 87381);
+		VerticesBuffer[3].Y += offset[3].vy;
 	}
 
 	{

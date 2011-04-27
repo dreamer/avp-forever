@@ -74,14 +74,16 @@ D3DXMATRIX matView;
 D3DXMATRIX matIdentity;
 D3DXMATRIX matViewPort;
 
+static D3DXPLANE m_frustum[6];
+
 extern void RenderListInit();
 extern void RenderListDeInit();
 extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
 
 // size of vertex and index buffers
-const uint32_t MAX_VERTEXES = 4096;
-const uint32_t MAX_INDICES = 9216;
+const uint32_t kMaxVertices = 4096;
+const uint32_t kMaxIndices  = 9216;
 
 static HRESULT LastError;
 texID_t NO_TEXTURE = 0;
@@ -167,6 +169,11 @@ uint32_t YPercentToScreen(float percent)
 	return ((((float)ScreenDescriptorBlock.SDB_Height) / 100) * percent);
 }
 
+uint32_t R_GetScreenWidth()
+{
+	return ScreenDescriptorBlock.SDB_Width;
+}
+
 bool ReleaseVolatileResources()
 {
 	Tex_ReleaseDynamicTextures();
@@ -181,6 +188,46 @@ bool ReleaseVolatileResources()
 	d3d.orthoIB->Release();
 
 	return true;
+}
+
+bool CheckPointIsInFrustum(D3DXVECTOR3 *point)
+{
+	// check if point is in front of each plane
+	for (int i = 0; i < 6; i++)
+	{
+		if (D3DXPlaneDotCoord(&m_frustum[i], point) < 0.0f)
+		{
+			// its outside
+			return false;
+		}
+	}
+
+	// return here if the point is entirely within
+	return true;
+}
+
+static float deltaTime = 0.0f;
+
+void UpdateTestTimer()
+{
+	static float currentTime = timeGetTime();
+
+	float newTime = timeGetTime();
+	float frameTime = newTime - currentTime;
+	currentTime = newTime;
+
+	deltaTime = frameTime;
+
+	std::stringstream ss;
+
+	ss << deltaTime;
+
+	Font_DrawCenteredText(ss.str());
+}
+
+float GetTestTimer()
+{
+	return deltaTime;
 }
 
 bool R_BeginScene()
@@ -626,24 +673,24 @@ bool CreateVolatileResources()
 
 	// main
 	d3d.mainVB = new VertexBuffer;
-	d3d.mainVB->Create(MAX_VERTEXES*5, FVF_LVERTEX, USAGE_STATIC);
+	d3d.mainVB->Create(kMaxVertices*5, FVF_LVERTEX, USAGE_STATIC);
 
 	d3d.mainIB = new IndexBuffer;
-	d3d.mainIB->Create((MAX_VERTEXES*5) * 3, USAGE_STATIC);
+	d3d.mainIB->Create((kMaxIndices*5) * 3, USAGE_STATIC);
 
 	// particle vertex buffer
 	d3d.particleVB = new VertexBuffer;
-	d3d.particleVB->Create(MAX_VERTEXES*6, FVF_LVERTEX, USAGE_STATIC);
+	d3d.particleVB->Create(kMaxVertices*6, FVF_LVERTEX, USAGE_STATIC);
 
 	d3d.particleIB = new IndexBuffer;
-	d3d.particleIB->Create((MAX_VERTEXES*6) * 3, USAGE_STATIC);
+	d3d.particleIB->Create((kMaxIndices*6) * 3, USAGE_STATIC);
 
 	// orthographic projected quads
 	d3d.orthoVB = new VertexBuffer;
-	d3d.orthoVB->Create(MAX_VERTEXES, FVF_ORTHO, USAGE_STATIC);
+	d3d.orthoVB->Create(kMaxVertices, FVF_ORTHO, USAGE_STATIC);
 
 	d3d.orthoIB = new IndexBuffer;
-	d3d.orthoIB->Create(MAX_VERTEXES * 3, USAGE_STATIC);
+	d3d.orthoIB->Create(kMaxIndices * 3, USAGE_STATIC);
 
 	SetRenderStateDefaults();
 
@@ -667,7 +714,7 @@ uint8_t *aaUnswizzled = 0;
 uint32_t gPitch = 0;
 uint8_t  *gPbits = 0;
 
-bool R_LockTexture(const Texture &texture, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
+bool R_LockTexture(Texture &texture, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
 {
 	D3DLOCKED_RECT lock;
 	uint32_t lockFlag;
@@ -719,7 +766,7 @@ bool R_LockTexture(const Texture &texture, uint8_t **data, uint32_t *pitch, enum
 	}
 }
 
-bool R_UnlockTexture(const Texture &texture)
+bool R_UnlockTexture(Texture &texture)
 {
 	if (aaUnswizzled)
 	{
@@ -968,7 +1015,7 @@ bool R_CreateTallFontTexture(AVPTEXTURE &tex, enum TextureUsage usageType, Textu
 	return true;
 }
 
-bool R_ReleaseVertexDeclaration(r_vertexDeclaration &declaration)
+bool R_ReleaseVertexDeclaration(class VertexDeclaration &declaration)
 {
 /* TODO
 	LastError = d3d.lpD3DDevice->DeleteVertexShader(declaration);
@@ -1209,7 +1256,7 @@ bool R_CreateVertexDeclaration(class VertexDeclaration *vertexDeclaration)
 	return true;
 }
 
-bool R_SetVertexDeclaration(r_vertexDeclaration &declaration)
+bool R_SetVertexDeclaration(class VertexDeclaration &declaration)
 {
 	// not needed?
 	return true;
@@ -1332,7 +1379,7 @@ bool R_SetPixelShader(r_PixelShader &pixelShader)
 
 // removes pure red colour from a texture. used to remove red outline grid on small font texture.
 // we remove the grid as it can sometimes bleed onto text when we use texture filtering. maybe add params for passing width/height?
-void DeRedTexture(const Texture &texture)
+void DeRedTexture(Texture &texture)
 {
 	uint8_t *srcPtr = NULL;
 	uint8_t *destPtr = NULL;
@@ -2084,7 +2131,7 @@ bool InitialiseDirect3D()
 
 	{
 		// create a 1x1 resolution white texture to set to shader for sampling when we don't want to texture an object (eg what was NULL texture in fixed function pipeline)
-		LastError = d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &whiteTexture);
+		LastError = d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_X8R8G8B8, D3DPOOL_MANAGED, &whiteTexture);
 		if (FAILED(LastError))
 		{
 			Con_PrintError("Could not create white texture for shader sampling");
@@ -2106,7 +2153,7 @@ bool InitialiseDirect3D()
 			whiteTexture->UnlockRect(0);
 
 			// should we just add it even if it fails?
-			NO_TEXTURE = Tex_AddTexture("white", whiteTexture, 1, 1, 8, TextureUsage_Normal);
+			NO_TEXTURE = Tex_AddTexture("white", whiteTexture, 1, 1, 32, TextureUsage_Normal);
 		}
 	}
 
@@ -2140,49 +2187,6 @@ bool InitialiseDirect3D()
 
 	return true;
 }
-
-/*
-void R_UpdateViewMatrix(float *viewMat)
-{
-	D3DXVECTOR3 vecRight	(viewMat[0], viewMat[1], viewMat[2]);
-	D3DXVECTOR3 vecUp		(viewMat[4], viewMat[5], viewMat[6]);
-	D3DXVECTOR3 vecFront	(viewMat[8], -viewMat[9], viewMat[10]);
-	D3DXVECTOR3 vecPosition (viewMat[3], -viewMat[7], viewMat[11]);
-
-	D3DXVec3Normalize(&vecFront, &vecFront);
-
-	D3DXVec3Cross(&vecUp, &vecFront, &vecRight);
-	D3DXVec3Normalize(&vecUp, &vecUp);
-
-	D3DXVec3Cross(&vecRight, &vecUp, &vecFront);
-	D3DXVec3Normalize(&vecRight, &vecRight);
-
-	// right
-	matView._11 = vecRight.x;
-	matView._21 = vecRight.y;
-	matView._31 = vecRight.z;
-
-	// up
-	matView._12 = vecUp.x;
-	matView._22 = vecUp.y;
-	matView._32 = vecUp.z;
-
-	// front
-	matView._13 = vecFront.x;
-	matView._23 = vecFront.y;
-	matView._33 = vecFront.z;
-
-	// 4th
-	matView._14 = 0.0f;
-	matView._24 = 0.0f;
-	matView._34 = 0.0f;
-	matView._44 = 1.0f;
-
-	matView._41 = -D3DXVec3Dot(&vecPosition, &vecRight);
-	matView._42 = -D3DXVec3Dot(&vecPosition, &vecUp);
-	matView._43 = -D3DXVec3Dot(&vecPosition, &vecFront);
-}
-*/
 
 void SetTransforms()
 {

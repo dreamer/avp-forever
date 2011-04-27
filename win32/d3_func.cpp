@@ -723,7 +723,7 @@ bool CreateVolatileResources()
 	return true;
 }
 
-bool R_LockTexture(const Texture &texture, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
+bool R_LockTexture(Texture &texture, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
 {
 	D3DLOCKED_RECT lock;
 	uint32_t lockFlag;
@@ -757,7 +757,7 @@ bool R_LockTexture(const Texture &texture, uint8_t **data, uint32_t *pitch, enum
 	}
 }
 
-bool R_UnlockTexture(const Texture &texture)
+bool R_UnlockTexture(Texture &texture)
 {
 	LastError = texture.texture->UnlockRect(0);
 	if (FAILED(LastError))
@@ -1216,9 +1216,9 @@ bool R_CreateVertexDeclaration(class VertexDeclaration *vertexDeclaration)
 	return true;
 }
 
-bool R_SetVertexDeclaration(r_vertexDeclaration &declaration)
+bool R_SetVertexDeclaration(class VertexDeclaration &declaration)
 {
-	LastError = d3d.lpD3DDevice->SetVertexDeclaration(declaration);
+	LastError = d3d.lpD3DDevice->SetVertexDeclaration(declaration.declaration);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Could not set vertex declaration");
@@ -1228,9 +1228,9 @@ bool R_SetVertexDeclaration(r_vertexDeclaration &declaration)
 	return true;
 }
 
-bool R_ReleaseVertexDeclaration(r_vertexDeclaration &declaration)
+bool R_ReleaseVertexDeclaration(class VertexDeclaration &declaration)
 {
-	LastError = declaration->Release();
+	LastError = declaration.declaration->Release();
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Could not release vertex declaration");
@@ -1501,7 +1501,7 @@ bool R_SetPixelShader(r_PixelShader &pixelShader)
 
 // removes pure red colour from a texture. used to remove red outline grid on small font texture.
 // we remove the grid as it can sometimes bleed onto text when we use texture filtering. maybe add params for passing width/height?
-void DeRedTexture(const Texture &texture)
+void DeRedTexture(Texture &texture)
 {
 	uint8_t *srcPtr = NULL;
 	uint8_t *destPtr = NULL;
@@ -2428,7 +2428,7 @@ bool InitialiseDirect3D()
 
 	// create a 1x1 resolution white texture to set to shader for sampling when we don't want to texture an object (eg what was NULL texture in fixed function pipeline)
 	{
-		LastError = d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_L8, D3DPOOL_MANAGED, &whiteTexture, NULL);
+		LastError = d3d.lpD3DDevice->CreateTexture(1, 1, 1, 0, D3DFMT_X8R8G8B8, D3DPOOL_MANAGED, &whiteTexture, NULL);
 		if (FAILED(LastError))
 		{
 			Con_PrintError("Could not create white texture for shader sampling");
@@ -2450,7 +2450,7 @@ bool InitialiseDirect3D()
 			whiteTexture->UnlockRect(0);
 
 			// should we just add it even if it fails?
-			NO_TEXTURE = Tex_AddTexture("white", whiteTexture, 1, 1, 8, TextureUsage_Normal);
+			NO_TEXTURE = Tex_AddTexture("white", whiteTexture, 1, 1, 32, TextureUsage_Normal);
 		}
 	}
 
