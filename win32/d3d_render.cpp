@@ -2096,6 +2096,7 @@ void PostLandscapeRendering()
 
 		if (drawMirrorSurfaces)
 		{
+			// dirt on mirror in marines room
 			RenderParticlesInMirror();
 			RenderMirrorSurface();
 			RenderMirrorSurface2();

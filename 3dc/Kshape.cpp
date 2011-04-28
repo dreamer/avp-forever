@@ -5005,49 +5005,47 @@ int CuboidPolyVertexV[][4] =
 	{128,255,255,128},
 };
 
+// Draws some dirt on the smaller of the two mirrors in 
+// first room of marine level 1
 void RenderMirrorSurface(void)
 {
 	VECTORCH translatedPts[4] =
 	{
-		{-5596,-932,-1872},
-		{-5596,-932,-702},
-		{-5596,1212,-702},
-		{-5596,1212,-1872},
+		{-5596, -932, -1872},
+		{-5596, -932, -702},
+		{-5596, 1212, -702},
+		{-5596, 1212, -1872},
 	};
 
-	int mirrorUV[]=
+	int mirrorUV[] =
 	{ 0,0, 127,0, 127,127, 0,127};
+
 	POLYHEADER fakeHeader;
 
+	fakeHeader.PolyFlags  = iflag_transparent;
+	fakeHeader.PolyColour = CloudyImageNumber;
+
+	for (int i = 0; i < 4; i++)
 	{
-		fakeHeader.PolyFlags = iflag_transparent;
-		fakeHeader.PolyColour = CloudyImageNumber;
+//		TranslatePointIntoViewspace(&translatedPts[i]);
+
+		VerticesBuffer[i].X	= translatedPts[i].vx;
+		VerticesBuffer[i].Y	= translatedPts[i].vy;
+		VerticesBuffer[i].Z	= translatedPts[i].vz;
+		VerticesBuffer[i].U = mirrorUV[i*2];
+		VerticesBuffer[i].V = mirrorUV[i*2+1];
+
+		VerticesBuffer[i].R = 255;
+		VerticesBuffer[i].G	= 255;
+		VerticesBuffer[i].B = 255;
+		VerticesBuffer[i].A = 128;
+		VerticesBuffer[i].SpecularR = 0;
+		VerticesBuffer[i].SpecularG = 0;
+		VerticesBuffer[i].SpecularB = 0;
 	}
 
-	{
-		int i;
-		for (i=0; i<4; i++)
-		{
-			VerticesBuffer[i].A = 128;
-
-			TranslatePointIntoViewspace(&translatedPts[i]);
-			VerticesBuffer[i].X	= translatedPts[i].vx;
-			VerticesBuffer[i].Y	= translatedPts[i].vy;
-			VerticesBuffer[i].Z	= translatedPts[i].vz;
-			VerticesBuffer[i].U = mirrorUV[i*2];
-			VerticesBuffer[i].V = mirrorUV[i*2+1];
-
-			VerticesBuffer[i].R = 255;
-			VerticesBuffer[i].G	= 255;
-			VerticesBuffer[i].B = 255;
-			VerticesBuffer[i].SpecularR = 0;
-			VerticesBuffer[i].SpecularG = 0;
-			VerticesBuffer[i].SpecularB = 0;
-
-		}
-		RenderPolygon.NumberOfVertices = 4;
-		RenderPolygon.TranslucencyMode = TRANSLUCENCY_COLOUR;
-	}
+	RenderPolygon.NumberOfVertices = 4;
+	RenderPolygon.TranslucencyMode = TRANSLUCENCY_COLOUR;
 
 /* bjd - bypass clipping
 	GouraudTexturedPolygon_ClipWithZ();
@@ -5062,52 +5060,50 @@ void RenderMirrorSurface(void)
 	if(RenderPolygon.NumberOfVertices<3) return;
 	D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
 */
-	D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader, RenderPolygon.Vertices);
+	D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader, /*RenderPolygon.Vertices*/&VerticesBuffer[0]);
 }
 
+// Draws some dirt on the larger of the two mirrors in 
+// first room of marine level 1
 void RenderMirrorSurface2(void)
 {
 	VECTORCH translatedPts[4] =
 	{
-		{-5596,-592,562},
-		{-5596,-592,1344},
-		{-5596,140,1344},
-		{-5596,140,562},
+		{-5596, -592, 562},
+		{-5596, -592, 1344},
+		{-5596, 140,  1344},
+		{-5596, 140,  562},
 	};
 
-	int mirrorUV[]=
+	int mirrorUV[] =
 	{ 0,0, 127,0, 127,127, 0,127};
 	POLYHEADER fakeHeader;
 
+	fakeHeader.PolyFlags  = iflag_transparent;
+	fakeHeader.PolyColour = CloudyImageNumber;
+
+	for (int i = 0; i < 4; i++)
 	{
-		fakeHeader.PolyFlags = iflag_transparent;
-		fakeHeader.PolyColour = CloudyImageNumber;
+//		TranslatePointIntoViewspace(&translatedPts[i]);
+
+		VerticesBuffer[i].X	= translatedPts[i].vx;
+		VerticesBuffer[i].Y	= translatedPts[i].vy;
+		VerticesBuffer[i].Z	= translatedPts[i].vz;
+		VerticesBuffer[i].U = mirrorUV[i*2];
+		VerticesBuffer[i].V = mirrorUV[i*2+1];
+
+		VerticesBuffer[i].R = 255;
+		VerticesBuffer[i].G	= 255;
+		VerticesBuffer[i].B = 255;
+		VerticesBuffer[i].A = 128;
+		VerticesBuffer[i].SpecularR = 0;
+		VerticesBuffer[i].SpecularG = 0;
+		VerticesBuffer[i].SpecularB = 0;
+
 	}
 
-	{
-		int i;
-		for (i=0; i<4; i++)
-		{
-			VerticesBuffer[i].A = 128;
-
-			TranslatePointIntoViewspace(&translatedPts[i]);
-			VerticesBuffer[i].X	= translatedPts[i].vx;
-			VerticesBuffer[i].Y	= translatedPts[i].vy;
-			VerticesBuffer[i].Z	= translatedPts[i].vz;
-			VerticesBuffer[i].U = mirrorUV[i*2];
-			VerticesBuffer[i].V = mirrorUV[i*2+1];
-
-			VerticesBuffer[i].R = 255;
-			VerticesBuffer[i].G	= 255;
-			VerticesBuffer[i].B = 255;
-			VerticesBuffer[i].SpecularR = 0;
-			VerticesBuffer[i].SpecularG = 0;
-			VerticesBuffer[i].SpecularB = 0;
-
-		}
-		RenderPolygon.NumberOfVertices = 4;
-		RenderPolygon.TranslucencyMode = TRANSLUCENCY_COLOUR;
-	}
+	RenderPolygon.NumberOfVertices = 4;
+	RenderPolygon.TranslucencyMode = TRANSLUCENCY_COLOUR;
 
 /* bjd - bypass clipping
 	GouraudTexturedPolygon_ClipWithZ();
@@ -5122,7 +5118,7 @@ void RenderMirrorSurface2(void)
 	if(RenderPolygon.NumberOfVertices<3) return;
 	D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
 */
-	D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader, RenderPolygon.Vertices);
+	D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader, /*RenderPolygon.Vertices*/&VerticesBuffer[0]);
 }
 
 #define OCTAVES 3
