@@ -38,7 +38,7 @@ static C * StripPath(C * n)
 	if (rm) n = rm+1;
 	rm = strrchr(n,'/');
 	if (rm) n = rm+1;
-	rm = strrchr(n,'/');
+	rm = strrchr(n,'\\');
 	if (rm) n = rm+1;
 
 	return n;
@@ -87,7 +87,7 @@ static char * RiffBasename(Chunk_With_Children * pEnvDataChunk)
 static inline bool IsFileInFastFile(char const * pszFileName)
 {
 	size_t nLen;
-	return ffreadbuf(pszFileName,&nLen) ? true : false;
+	return ffreadbuf(pszFileName, &nLen) ? true : false;
 }
 #endif
 
@@ -114,7 +114,7 @@ static char * GetPath(char * pszFileNameBuf, unsigned nBufSize, ImageDescriptor 
 
 	if (!bGloballyPalettized)
 	{
-		char const * dir2 = idsc.flags & IDSCF_SPRITE ? "Sprites/" : idsc.flags & IDSCF_SUBSHAPE ? SubShps_Directory : "";
+		char const * dir2 = idsc.flags & IDSCF_SPRITE ? "Sprites\\" : idsc.flags & IDSCF_SUBSHAPE ? SubShps_Directory : "";
 		char * riffname = RiffBasename(pEnvDataChunk);
 		char const * dir3 = idsc.flags & IDSCF_INCLUDED ? idsc.rifname : riffname;
 		if (nBufSize < strlen(GenTex_Directory)+strlen(dir2)+strlen(dir3)+1+strlen(pszName)+5)
@@ -127,7 +127,7 @@ static char * GetPath(char * pszFileNameBuf, unsigned nBufSize, ImageDescriptor 
 			strcpy(pszFileNameBuf,GenTex_Directory);
 			strcat(pszFileNameBuf,dir2);
 			strcat(pszFileNameBuf,dir3);
-			strcat(pszFileNameBuf,"/");
+			strcat(pszFileNameBuf,"\\");
 			strcat(pszFileNameBuf,pszName);
 			strcat(pszFileNameBuf,".BM0");
 		}
@@ -138,7 +138,7 @@ static char * GetPath(char * pszFileNameBuf, unsigned nBufSize, ImageDescriptor 
 		if (idsc.flags & IDSCF_FIXEDPALETTE)
 		{
 			char const * dir2 = idsc.fixrifname ? *idsc.fixrifname ? idsc.fixrifname : 0 : 0;
-			char const * dir3 = idsc.flags & IDSCF_SPRITE ? "Sprites/" : "";
+			char const * dir3 = idsc.flags & IDSCF_SPRITE ? "Sprites\\" : "";
 			char * riffname = RiffBasename(pEnvDataChunk);
 			char const * dir4 = idsc.flags & IDSCF_INCLUDED ? idsc.rifname : riffname;
 			if (nBufSize < strlen(FixTex_Directory)+(dir2 ? strlen(dir2)+1 : 0)+strlen(dir3)+strlen(dir4)+1+strlen(pszName)+5)
@@ -152,11 +152,11 @@ static char * GetPath(char * pszFileNameBuf, unsigned nBufSize, ImageDescriptor 
 				if (dir2)
 				{
 					strcat(pszFileNameBuf,dir2);
-					strcat(pszFileNameBuf,"/");
+					strcat(pszFileNameBuf,"\\");
 				}
 				strcat(pszFileNameBuf,dir3);
 				strcat(pszFileNameBuf,dir4);
-				strcat(pszFileNameBuf,"/");
+				strcat(pszFileNameBuf,"\\");
 				strcat(pszFileNameBuf,pszName);
 				strcat(pszFileNameBuf,pg0ext);
 			}
@@ -166,7 +166,7 @@ static char * GetPath(char * pszFileNameBuf, unsigned nBufSize, ImageDescriptor 
 		{
 			char const * dir1 = cl_pszGameMode ? GameTex_Directory : ToolsTex_Directory;
 			char * dir2 = RiffBasename(pEnvDataChunk);
-			char const * dir4 = idsc.flags & IDSCF_SPRITE ? "Sprites/" : "";
+			char const * dir4 = idsc.flags & IDSCF_SPRITE ? "Sprites\\" : "";
 			char const * dir5 = idsc.flags & IDSCF_INCLUDED ? idsc.rifname : 0;
 			if (nBufSize < strlen(dir1)+strlen(dir2)+1+(cl_pszGameMode ? strlen(cl_pszGameMode)+1 : 0)+strlen(dir4)+(dir5 ? strlen(dir5)+1 : 0)+strlen(pszName)+5)
 			{
@@ -177,17 +177,17 @@ static char * GetPath(char * pszFileNameBuf, unsigned nBufSize, ImageDescriptor 
 			{
 				strcpy(pszFileNameBuf,dir1);
 				strcat(pszFileNameBuf,dir2);
-				strcat(pszFileNameBuf,"/");
+				strcat(pszFileNameBuf,"\\");
 				if (cl_pszGameMode)
 				{
 					strcat(pszFileNameBuf,cl_pszGameMode);
-					strcat(pszFileNameBuf,"/");
+					strcat(pszFileNameBuf,"\\");
 				}
 				strcat(pszFileNameBuf,dir4);
 				if (dir5)
 				{
 					strcat(pszFileNameBuf,dir5);
-					strcat(pszFileNameBuf,"/");
+					strcat(pszFileNameBuf,"\\");
 				}
 				strcat(pszFileNameBuf,pszName);
 				strcat(pszFileNameBuf,pg0ext);
@@ -204,6 +204,45 @@ static char * GetPath(char * pszFileNameBuf, unsigned nBufSize, ImageDescriptor 
 	return pszFileNameBuf;
 }
 
+#if 0
+int GetRelativePath(char * pszDestBuf, unsigned nBufSize, char const * pszFileName, char const *pszDirectory)
+{
+	if (pszDirectory) 
+	{
+		String str = pszDirectory;
+		if (str.length())
+		{
+			char chLast = str.get_at(str.length()-1);
+
+			if (chLast != '/')
+			str += '/';
+
+			str += pszFileName;
+
+#if CL_SUPPORT_FASTFILE
+			if (IsFileInFastFile(str))
+#endif
+#if !defined(CL_SUPPORTONLY_FASTFILE) || !CL_SUPPORTONLY_FASTFILE
+			if (DoesFileExist(str))
+#endif
+			{
+				if (str.length() < nBufSize)
+				{
+					strcpy(pszDestBuf, str);
+					return 1;//pszDestBuf;
+				}
+				else
+				{
+					db_log1("CL_LoadImageOnce(): ERROR: buffer not large enough to hold filename");
+					return -1;//NULL; /* fail because the buffer isnt big enough */
+				}
+			}
+		}
+	}
+	return 0; // nothing found or bad happened, move on to next call..
+}
+#endif
+
 char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * pszFileName, unsigned fFlagsEtc)
 {
 	db_assert1(pszFileName);
@@ -215,9 +254,9 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 	{
 		case LIO_ABSOLUTEPATH:
 			db_log4("\t(which is an absolute path)");
-			if (strlen(pszFileName)<nBufSize)
+			if (strlen(pszFileName) < nBufSize)
 			{
-				strcpy(pszDestBuf,pszFileName);
+				strcpy(pszDestBuf, pszFileName);
 				return pszDestBuf;
 			}
 			else
@@ -230,13 +269,13 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 				FirstTex_Directory ? FirstTex_Directory : "<not-specified>",
 				SecondTex_Directory ? SecondTex_Directory : "<not-specified>"));
 
-			#define _GET_RELATIVE_PATH(pszDirectory,fnDoesExist) \
+			#define _GET_RELATIVE_PATH(pszDirectory, fnDoesExist) \
 				if (pszDirectory) { \
 					String str = pszDirectory; \
 					if (str.length()) { \
 						int chLast = str.get_at(str.length()-1); \
-						if (chLast != '/' && chLast != '/') \
-							str += '/'; \
+						if (chLast != '\\' && chLast != '/') \
+							str += '\\'; \
 						str += pszFileName; \
 						if (fnDoesExist(str)) { \
 							if (str.length() < nBufSize) { \
@@ -247,14 +286,14 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 								return NULL; /* fail because the buffer isnt big enough */ \
 				}	}	}	}
 
-			#if CL_SUPPORT_FASTFILE
+#if CL_SUPPORT_FASTFILE
 			_GET_RELATIVE_PATH(FirstTex_Directory,IsFileInFastFile)
 			_GET_RELATIVE_PATH(SecondTex_Directory,IsFileInFastFile)
-			#endif
-			#if !defined(CL_SUPPORTONLY_FASTFILE) || !CL_SUPPORTONLY_FASTFILE
+#endif
+#if !defined(CL_SUPPORTONLY_FASTFILE) || !CL_SUPPORTONLY_FASTFILE
 			_GET_RELATIVE_PATH(FirstTex_Directory,DoesFileExist)
 			_GET_RELATIVE_PATH(SecondTex_Directory,DoesFileExist)
-			#endif
+#endif
 			db_log1("CL_LoadImageOnce(): ERROR: file not found in relative path");
 			return NULL;
 		case LIO_RIFFPATH:
@@ -307,11 +346,11 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 			char * pszSubName = 0;
 			if (pszFileName)
 			{
-				if (strchr(pszFileName,'/'))
+				if (strchr(pszFileName,'\\'))
 				{
 					pszSubName = new char[strlen(pszFileName)+1];
 					strcpy(pszSubName,pszFileName);
-					*strchr(pszSubName,'/')=0;
+					*strchr(pszSubName,'\\')=0;
 				}
 				else if (strchr(pszFileName,'/'))
 				{
@@ -376,7 +415,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 							else db_logf3(("CL_LoadImageOnce(): WARNING! no rule to find matching images in game mode '%s'\n",pGameModeChunk->header->mode_identifier));
 
 							// load this image
-							if (GetPath(pszDestBuf,nBufSize,*pIdsc,pEnvDataChunk,bGloballyPalettized))
+							if (GetPath(pszDestBuf, nBufSize, *pIdsc, pEnvDataChunk, bGloballyPalettized))
 							{
 								delete[] pszSubName;
 								delete[] pszName;
@@ -431,10 +470,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 							// load this image
 							if (GetPath(pszDestBuf,nBufSize,*pIdsc,pEnvDataChunk,bGloballyPalettized))
 							{
-								if (pszSubName)
-								{
-									delete[] pszSubName;
-								}
+								delete[] pszSubName;
 								delete[] pszName;
 								return pszDestBuf;
 							}
@@ -508,7 +544,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 
 				if (pszSubName)
 				{
-					if (_stricmp(pszSubRifName,pszSubName)) // must match shapes name exactly
+					if (_stricmp(pszSubRifName, pszSubName)) // must match shapes name exactly
 					{
 						delete[] pszSubRifName;
 						continue;
@@ -562,13 +598,10 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 							}
 
 							// load this image
-							if (GetPath(pszDestBuf,nBufSize,*pIdsc,pEnvDataChunk,bGloballyPalettized))
+							if (GetPath(pszDestBuf, nBufSize, *pIdsc, pEnvDataChunk, bGloballyPalettized))
 							{
 								delete[] pszSubRifName;
-								if (pszSubName)
-								{
-									delete[] pszSubName;
-								}
+								delete[] pszSubName;
 								delete[] pszName;
 								return pszDestBuf;
 							}
@@ -620,7 +653,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 							}
 
 							// load this image
-							if (GetPath(pszDestBuf,nBufSize,*pIdsc,pEnvDataChunk,bGloballyPalettized))
+							if (GetPath(pszDestBuf, nBufSize, *pIdsc, pEnvDataChunk, bGloballyPalettized))
 							{
 								delete[] pszName;
 								return pszDestBuf;
@@ -638,6 +671,8 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 	}
 }
 
+//#include "RimLoader.h"
+
 texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 {
 	// safe to handle windows messages at this point (I think - JCWH)
@@ -645,7 +680,39 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 
 	texID_t textureID = MISSING_TEXTURE;
 
+	// test RIM loading..
+#if 0
+	RimLoader newRim;
+	if (newRim.Init(pszFileName))
+	{
+		uint32_t width, height;
+		newRim.GetDimensions(width, height);
+
+		// 1: dx texture
+		Texture newTexture;
+		R_CreateTexture(width, height, 32, TextureUsage_Normal, newTexture);
+
+		// add to list
+		textureID = Tex_AddExistingTexture(newTexture);
+
+		// lock
+		//bool Tex_Lock(texID_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
+		uint8_t *src;
+		uint32_t pitch;
+
+		Tex_Lock(textureID, &src, &pitch, TextureLock_Normal);
+
+		newRim.Decode(src, pitch);
+
+		Tex_Unlock(textureID);
+	}
+
+	return textureID;
+
+#endif
+
 	// get the filename
+
 	char szBuf[MAX_PATH];
 	if (!CL_GetImageFileName(szBuf, sizeof szBuf/sizeof szBuf[0], pszFileName, fFlagsEtc))
 	{
@@ -680,7 +747,7 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 		case LIO_D3DTEXTURE:
 		{
 			fAwLoad |= AW_TLF_COMPRESS; // required on some cards!!
-			#if CL_SUPPORT_FASTFILE
+#if CL_SUPPORT_FASTFILE
 			size_t nFastFileLen;
 			void const * pFastFileData = ffreadbuf(szBuf, &nFastFileLen);
 
@@ -715,10 +782,10 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 						// load Direct3D Texture here?
 						if (AvPTexture->buffer)
 						{
-							if ((strcmp(ImageName, "Graphics/FMVs/triggered_plot.RIM") == 0) ||
-								(strcmp(ImageName, "Graphics/FMVs/alien.RIM") == 0) ||		// for alien demo
-								(strcmp(ImageName, "Graphics/FMVs/predator.RIM") == 0) ||  // for marine(?) demo
-								(strcmp(ImageName, "Graphics/FMVs/final.RIM") == 0))		// for predator demo
+							if ((strcmp(ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0) ||
+								(strcmp(ImageName, "Graphics\\FMVs\\alien.RIM") == 0) ||		// for alien demo
+								(strcmp(ImageName, "Graphics\\FMVs\\predator.RIM") == 0) ||  // for marine(?) demo
+								(strcmp(ImageName, "Graphics\\FMVs\\final.RIM") == 0))		// for predator demo
 							{
 								// is fmv texture, create in default pool so we can dynamically update it
 
@@ -748,9 +815,9 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 				}
 			}
 			else
-			#endif // CL_SUPPORT_FASTFILE
+#endif // CL_SUPPORT_FASTFILE
 			{
-				#if !defined(CL_SUPPORTONLY_FASTFILE) || !CL_SUPPORTONLY_FASTFILE
+#if !defined(CL_SUPPORTONLY_FASTFILE) || !CL_SUPPORTONLY_FASTFILE
 				db_log4("\tloading the actual file");
 				uint32_t nWidth, nHeight;
 
@@ -777,10 +844,10 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					{
 						if (AvPTexture->buffer)
 						{
-							if ((strcmp(ImageName, "Graphics/FMVs/triggered_plot.RIM") == 0) ||
-								(strcmp(ImageName, "Graphics/FMVs/alien.RIM") == 0) ||		// for alien demo
-								(strcmp(ImageName, "Graphics/FMVs/predator.RIM") == 0) ||  // for marine(?) demo
-								(strcmp(ImageName, "Graphics/FMVs/final.RIM") == 0))		// for predator demo
+							if ((strcmp(ImageName, "Graphics\\FMVs\\triggered_plot.RIM") == 0) ||
+								(strcmp(ImageName, "Graphics\\FMVs\\alien.RIM") == 0) ||		// for alien demo
+								(strcmp(ImageName, "Graphics\\FMVs\\predator.RIM") == 0) ||  // for marine(?) demo
+								(strcmp(ImageName, "Graphics\\FMVs\\final.RIM") == 0))		// for predator demo
 							{
 								// is fmv texture, create in default pool so we can dynamically update it
 								textureUsage = TextureUsage_Dynamic;
@@ -809,9 +876,9 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 					db_log1("CL_LoadImageOnce(): ERROR copying data to texture");
 					return MISSING_TEXTURE;
 				}
-				#elif !CL_SUPPORT_FASTFILE
+#elif !CL_SUPPORT_FASTFILE
 					#error "CL_SUPPORTONLY_FASTFILE set but CL_SUPPORT_FASTFILE not set"
-				#endif // !CL_SUPPORTONLY_FASTFILE
+#endif // !CL_SUPPORTONLY_FASTFILE
 			}
 			//db_msg1("THIS CODE SHOULD BE UNREACHABLE");
 		}
