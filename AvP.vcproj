@@ -2403,10 +2403,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\3dc\fft\fft4g.c"
-				>
-			</File>
-			<File
 				RelativePath=".\3dc\FmvCutscenes.cpp"
 				>
 			</File>
@@ -6025,10 +6021,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\3dc\stdint.h"
-					>
-				</File>
-				<File
 					RelativePath="3dc\avp\win95\Strachnk.hpp"
 					>
 				</File>
@@ -6193,15 +6185,15 @@
 					</File>
 				</Filter>
 			</Filter>
-		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
-			>
-			<File
-				RelativePath=".\3dc\avp.ico"
+			<Filter
+				Name="Resource Files"
+				Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 				>
-			</File>
+				<File
+					RelativePath=".\3dc\avp.ico"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
