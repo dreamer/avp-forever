@@ -261,6 +261,11 @@ effectID_t EffectManager::Add(const std::string &effectName, const std::string &
 
 			vertexID = vsPool.Add(newVertexShader);
 		}
+		else
+		{
+			// we errored out in R_CreateVertexShader()
+			return kNullShaderID;
+		}
 	}
 
 	// see if the pixel shader is already loaded.
@@ -280,6 +285,11 @@ effectID_t EffectManager::Add(const std::string &effectName, const std::string &
 			newPixelShader.shaderName = pixelShaderName;
 
 			pixelID = psPool.Add(newPixelShader);
+		}
+		else
+		{
+			// we errored out in R_CreatePixelShader()
+			return kNullShaderID;
 		}
 	}
 

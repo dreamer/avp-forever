@@ -187,14 +187,14 @@ bool ReleaseVolatileResources()
 {
 	Tex_ReleaseDynamicTextures();
 
-	d3d.particleVB->Release();
-	d3d.particleIB->Release();
+	if (d3d.particleVB) d3d.particleVB->Release();
+	if (d3d.particleIB) d3d.particleIB->Release();
 
-	d3d.mainVB->Release();
-	d3d.mainIB->Release();
+	if (d3d.mainVB) d3d.mainVB->Release();
+	if (d3d.mainIB) d3d.mainIB->Release();
 
-	d3d.orthoVB->Release();
-	d3d.orthoIB->Release();
+	if (d3d.orthoVB) d3d.orthoVB->Release();
+	if (d3d.orthoIB) d3d.orthoIB->Release();
 
 	return true;
 }
@@ -1758,6 +1758,7 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 	texture.realHeight = height;
 	texture.usage   = usageType;
 	texture.texture = d3dTexture;
+	texture.isValid = true;
 
 	return true;
 }
@@ -2469,6 +2470,15 @@ bool InitialiseDirect3D()
 	d3d.orthoEffect = d3d.effectSystem->Add("ortho", "orthoVertex.vsh", "pixel.psh", d3d.orthoDecl);
 	d3d.fmvEffect   = d3d.effectSystem->Add("fmv", "fmvVertex.vsh", "fmvPixel.psh", d3d.fmvDecl);
 	d3d.cloudEffect = d3d.effectSystem->Add("cloud", "tallFontTextVertex.vsh", "tallFontTextPixel.psh", d3d.tallFontText);
+
+	// we should bail out if the shaders can't be loaded
+	if ((d3d.mainEffect == kNullShaderID) ||
+		(d3d.orthoEffect == kNullShaderID) ||
+		(d3d.fmvEffect == kNullShaderID) || // make this optional?
+		(d3d.cloudEffect == kNullShaderID)) // make this optional?
+	{
+		return false;
+	}
 
 	// create vertex and index buffers
 	CreateVolatileResources();

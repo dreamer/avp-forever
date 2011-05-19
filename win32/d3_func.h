@@ -16,11 +16,23 @@ typedef D3DXMATRIX R_MATRIX;
 struct r_VertexBuffer
 {
 	IDirect3DVertexBuffer9	*vertexBuffer;
+
+	// constructor to ensure above pointer is null
+	r_VertexBuffer()
+	{
+		vertexBuffer = 0;
+	}
 };
 
 struct r_IndexBuffer
 {
 	IDirect3DIndexBuffer9	*indexBuffer;
+	
+	// constructor to ensure above pointer is null
+	r_IndexBuffer()
+	{
+		indexBuffer = 0;
+	}
 };
 
 typedef IDirect3DTexture9	*r_Texture;		// keep this as pointer type?
@@ -36,6 +48,15 @@ struct r_VertexShader
 	r_vertexDeclaration		vertexDeclaration;
 	std::string 			shaderName;
 	std::vector<D3DXHANDLE>	constantsArray;
+
+	r_VertexShader()
+	{
+		isValid = false;
+		refCount = 0;
+		shader = 0;
+		constantTable = 0;
+		vertexDeclaration = 0;
+	}
 };
 
 struct r_PixelShader
@@ -46,6 +67,14 @@ struct r_PixelShader
 	ID3DXConstantTable		*constantTable;
 	std::string 			shaderName;
 	std::vector<D3DXHANDLE>	constantsArray;
+
+	r_PixelShader()
+	{
+		isValid = false;
+		refCount = 0;
+		shader = 0;
+		constantTable = 0;
+	}
 };
 
 #include "VertexBuffer.h"
