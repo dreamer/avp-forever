@@ -23,6 +23,7 @@
 #include "ourasert.h"
 #include "pheromon.h"
 #include "VDB.h"
+#include <assert.h>
 
 /* KJL 13:59:05 04/19/97 - avpview.c
  *
@@ -61,7 +62,6 @@ MATRIXCH WToLMat = {1,};
 VECTORCH LocalView;
 
 /* KJL 11:16:37 06/06/97 - lights */
-//VECTORCH LocalLightCH;
 int NumLightSourcesForObject;
 LIGHTBLOCK *LightSourcesForObject[MaxLightsPerObject];
 int GlobalAmbience;
@@ -79,10 +79,16 @@ SHAPEHEADER *Global_ShapeHeaderPtr = 0;
 EXTRAITEMDATA *Global_EID_Ptr = 0;
 int *Global_EID_IPtr = 0;
 
-
 extern float CameraZoomScale;
 extern int CameraZoomLevel;
-extern int AlienBiteAttackInProgress=0;
+bool AlienBiteAttackInProgress = false;
+extern int AlienTongueOffset;
+extern int AlienTeethOffset;
+extern int deathFadeLevel;
+extern LIGHTELEMENT LightElementStorage[];
+extern int NumActiveLightElements;
+extern int NumberOfLandscapePolygons;
+extern char LevelName[];
 int LeanScale;
 EULER deathTargetOrientation = {0,0,0};
 
@@ -93,22 +99,22 @@ void UpdateAllFMVTextures();
 void D3D_DrawBackdrop(void);
 int AVPViewVolumePlaneTest(CLIPPLANEBLOCK *cpb, DISPLAYBLOCK *dblockptr, int or);
 
+#define TILT_THRESHOLD 128
+
 #if defined(_MSC_VER)
 #define stricmp		_stricmp
 #endif
 
 void UpdateRunTimeLights(void)
 {
-	extern int NumActiveBlocks;
-	extern DISPLAYBLOCK *ActiveBlockList[];
 	int numberOfObjects = NumActiveBlocks;
 
 	while (numberOfObjects--)
 	{
 		DISPLAYBLOCK *dispPtr = ActiveBlockList[numberOfObjects];
 
-		if( (dispPtr->SpecialFXFlags & SFXFLAG_ONFIRE)
-		  ||((dispPtr->ObStrategyBlock)&&(dispPtr->ObStrategyBlock->SBDamageBlock.IsOnFire)) )
+		if ((dispPtr->SpecialFXFlags & SFXFLAG_ONFIRE)
+		  ||((dispPtr->ObStrategyBlock) && (dispPtr->ObStrategyBlock->SBDamageBlock.IsOnFire)))
 			AddLightingEffectToObject(dispPtr,LFX_OBJECTONFIRE);
 
 		UpdateObjectLights(dispPtr);
@@ -119,19 +125,15 @@ void UpdateRunTimeLights(void)
 
 void LightSourcesInRangeOfObject(DISPLAYBLOCK *dptr)
 {
-
 	DISPLAYBLOCK **aptr;
 	DISPLAYBLOCK *dptr2;
 	LIGHTBLOCK *lptr;
 	VECTORCH llocal;
 	int i, j;
 
-
 	aptr = ActiveBlockList;
 
-
 	NumLightSourcesForObject = 0;
-
 
 	/*
 
@@ -183,14 +185,13 @@ void LightSourcesInRangeOfObject(DISPLAYBLOCK *dptr)
 							distanceToLight /= 2;
 						#endif
 
-						if(distanceToLight < (lptr->LightRange + dptr->ObRadius))
+						if (distanceToLight < (lptr->LightRange + dptr->ObRadius))
 						{
 
 							LightSourcesForObject[NumLightSourcesForObject] = lptr;
 							NumLightSourcesForObject++;
 
 							/* Transform the light position to local space */
-
 							llocal = vertexToLight;
 
 							RotateAndCopyVector(&llocal, &lptr->LocalLP, &WToLMat);
@@ -202,11 +203,9 @@ void LightSourcesInRangeOfObject(DISPLAYBLOCK *dptr)
 	}
 
 	{
-		extern LIGHTELEMENT LightElementStorage[];
-		extern int NumActiveLightElements;
 		int i = NumActiveLightElements;
 		LIGHTELEMENT *lightElementPtr = LightElementStorage;
-		while(i--)
+		while (i--)
 		{
 			LIGHTBLOCK *lptr = &(lightElementPtr->LightBlock);
 			VECTORCH vertexToLight;
@@ -223,7 +222,7 @@ void LightSourcesInRangeOfObject(DISPLAYBLOCK *dptr)
 				distanceToLight /= 2;
 			#endif
 
-			if(distanceToLight < (lptr->LightRange + dptr->ObRadius) )
+			if (distanceToLight < (lptr->LightRange + dptr->ObRadius) )
 			{
 
 				LightSourcesForObject[NumLightSourcesForObject] = lptr;
@@ -243,7 +242,6 @@ EULER HeadOrientation = {0,0,0};
 
 static void ModifyHeadOrientation(void)
 {
-	#define TILT_THRESHOLD 128
 	PLAYER_STATUS *playerStatusPtr;
 
 	/* get the player status block ... */
@@ -373,8 +371,6 @@ void InteriorType_Body()
 		}
 		if (!playerStatusPtr->IsAlive && !MultiplayerObservedPlayer)
 		{
-			extern int deathFadeLevel;
-
 			eyeOffset.vy = MUL_FIXED(deathFadeLevel*4-3*ONE_FIXED, eyeOffset.vy);
 
 			if (eyeOffset.vy > -100)
@@ -527,7 +523,7 @@ void AVPGetInViewVolumeList(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	DISPLAYBLOCK **activeblocksptr;
 	int t;
 	#if (SupportModules && SupportMultiCamModules)
-	int MVis;
+	bool MVis = false;
 	#endif
 
 	/* Initialisation */
@@ -549,11 +545,10 @@ void AVPGetInViewVolumeList(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 			MODULE *mptr = dptr->ObMyModule;
 			if (ModuleCurrVisArray[mptr->m_index] != 2)
 			{
-				MVis = FALSE;
+				MVis = false;
 			}
 			else
 			{
-				extern int NumberOfLandscapePolygons;
 				SHAPEHEADER *shapePtr = GetShapeData(dptr->ObShape);
 				NumberOfLandscapePolygons += shapePtr->numitems;
 			}
@@ -626,8 +621,8 @@ void AvpShowViews(void)
 
 	if (AvP.PlayerType==I_Alien)
 	{
-		MakeLightElement(&Player->ObWorld,LIGHTELEMENT_ALIEN_TEETH);
-		MakeLightElement(&Player->ObWorld,LIGHTELEMENT_ALIEN_TEETH2);
+		MakeLightElement(&Player->ObWorld, LIGHTELEMENT_ALIEN_TEETH);
+		MakeLightElement(&Player->ObWorld, LIGHTELEMENT_ALIEN_TEETH2);
 	}
 
 	/* Find out which objects are in the View Volume */
@@ -638,7 +633,7 @@ void AvpShowViews(void)
 		CameraZoomScale += (float)NormalFrameTime/65536.0f;
 		if (CameraZoomScale > 1.0f)
 		{
-			AlienBiteAttackInProgress = 0;
+			AlienBiteAttackInProgress = false;
 			CameraZoomScale = 1.0f;
 		}
 	}
@@ -670,8 +665,6 @@ void InitCameraValues(void)
 	CameraZoomLevel = 0;
 }
 
-
-
 /*
 
  Prepare the View Descriptor Block for use in ShowView() and others.
@@ -681,36 +674,19 @@ void InitCameraValues(void)
 
 */
 
-#include <assert.h>
-
 void PrepareVDBForShowView(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 {
-	EULER e;
-
 	/* Get the View Object Matrix, transposed */
  	TransposeMatrixCH(&VDB_Ptr->VDB_Mat);
 
 	/* Get the Matrix Euler Angles */
 	MatrixToEuler(&VDB_Ptr->VDB_Mat, &VDB_Ptr->VDB_MatrixEuler);
 
-	/* Get the Matrix Euler Angles */
-//	MatrixToEuler(&VDB_Ptr->VDB_Mat, &e);
-
-	// bjd - commented out above function call, and do below instead?
-	e = VDB_Ptr->VDB_MatrixEuler;
+	EULER e = VDB_Ptr->VDB_MatrixEuler;
 
 	assert(e.EulerX == VDB_Ptr->VDB_MatrixEuler.EulerX);
 	assert(e.EulerY == VDB_Ptr->VDB_MatrixEuler.EulerY);
 	assert(e.EulerZ == VDB_Ptr->VDB_MatrixEuler.EulerZ);
-
-	/* Create the "sprite" matrix" */
-/* // bjd - only referenced in commented out code
-	e.EulerX = 0;
-	e.EulerY = 0;
-	e.EulerZ = (-e.EulerZ) & wrap360; // wrap360 = 4095
-
-	CreateEulerMatrix(&e, &VDB_Ptr->VDB_SpriteMat);
-*/
 }
 
 
@@ -726,18 +702,16 @@ void PrepareVDBForShowView(VIEWDESCRIPTORBLOCK *VDB_Ptr)
 
 void UpdateObjectLights(DISPLAYBLOCK *dptr)
 {
-	int i;
 	LIGHTBLOCK *lptr;
 	LIGHTBLOCK **larrayptr = &dptr->ObLights[0];
 
-
-	for(i = dptr->ObNumLights; i!=0; i--)
+	for (int i = dptr->ObNumLights; i!=0; i--)
 	{
 		/* Get a light */
 		lptr = *larrayptr++;
 
 		/* Calculate the light's location */
-		if(!(lptr->LightFlags & LFlag_AbsPos))
+		if (!(lptr->LightFlags & LFlag_AbsPos))
 		{
 			CopyVector(&dptr->ObWorld, &lptr->LightWorld);
      	}
@@ -746,21 +720,8 @@ void UpdateObjectLights(DISPLAYBLOCK *dptr)
 	}
 }
 
-/****************************************************************************/
-
 /*
-
- Find out which light sources are in range of the object.
-
-*/
-
-
-
-
-/*
-
- Initialise the Renderer
-
+	Initialise the Renderer
 */
 
 void InitialiseRenderer(void)
@@ -777,10 +738,6 @@ void InitialiseRenderer(void)
 	InitialiseLightIntensityStamps();
 }
 
-
-
-
-
 /*
 
  General View Volume Test for Objects and Sub-Object Trees
@@ -788,14 +745,14 @@ void InitialiseRenderer(void)
  This function returns returns "TRUE" / "True" for an if()
 
 */
-
+/*
 int AVPViewVolumeTest(VIEWDESCRIPTORBLOCK *VDB_Ptr, DISPLAYBLOCK *dblockptr)
 {
 	int or = dblockptr->ObRadius;
 
-	/* Perform the view volume plane tests */
+	// Perform the view volume plane tests
 
-	if(
+	if (
 	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipZPlane, dblockptr, or) &&
 	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipLeftPlane, dblockptr, or) &&
 	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipRightPlane, dblockptr, or) &&
@@ -806,41 +763,40 @@ int AVPViewVolumeTest(VIEWDESCRIPTORBLOCK *VDB_Ptr, DISPLAYBLOCK *dblockptr)
 	else
 		return FALSE;
 }
-/*
-
- View Volume Plane Test
-
- Make the ODB VSL relative to the VDB Clip Plane POP and dot the resultant
- vector with the Clip Plane Normal.
-
 */
 
+/*
+	View Volume Plane Test
+
+	Make the ODB VSL relative to the VDB Clip Plane POP and dot the resultant
+	vector with the Clip Plane Normal.
+*/
+
+/*
 int AVPViewVolumePlaneTest(CLIPPLANEBLOCK *cpb, DISPLAYBLOCK *dblockptr, int or)
 {
 	VECTORCH POPRelObView;
 
 	MakeVector(&dblockptr->ObView, &cpb->CPB_POP, &POPRelObView);
 
-	if(DotProduct(&POPRelObView, &cpb->CPB_Normal) < or) return TRUE;
+	if (DotProduct(&POPRelObView, &cpb->CPB_Normal) < or) return TRUE;
 	else return FALSE;
 }
-
+*/
 
 #if MIRRORING_ON
 void CheckIfMirroringIsRequired(void)
 {
-	extern char LevelName[];
+	MirroringActive = false;
 
-	MirroringActive = 0;
-
-	if (!stricmp(LevelName,"derelict"))
+	if (!stricmp(LevelName, "derelict"))
 	{
 		if (playerPherModule && playerPherModule->name)
 		{
-			if((!stricmp(playerPherModule->name,"start"))
-			 ||(!stricmp(playerPherModule->name,"start-en01")) )
+			if ((!stricmp(playerPherModule->name, "start"))
+			  ||(!stricmp(playerPherModule->name, "start-en01")) )
 			{
-				MirroringActive = 1;
+				MirroringActive = true;
 				MirroringAxis = -5596*2;
 			}
 		}
@@ -848,67 +804,11 @@ void CheckIfMirroringIsRequired(void)
 }
 #endif
 
-#define MinChangeInXSize 8
-
-void MakeViewingWindowSmaller(void)
-{
-	extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
-	int MinChangeInYSize = (ScreenDescriptorBlock.SDB_Height * MinChangeInXSize) / ScreenDescriptorBlock.SDB_Width;
-
-	if (Global_VDB_Ptr->VDB_ClipLeft<ScreenDescriptorBlock.SDB_Width/2-16)
-	{
-		Global_VDB_Ptr->VDB_ClipLeft +=MinChangeInXSize;
-		Global_VDB_Ptr->VDB_ClipRight -=MinChangeInXSize;
-		Global_VDB_Ptr->VDB_ClipUp +=MinChangeInYSize;
-		Global_VDB_Ptr->VDB_ClipDown -=MinChangeInYSize;
-	}
-	if(AvP.PlayerType == I_Alien)
-	{
-		Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/4;
-		Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)/4;
-	}
-	else
-	{
-		Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/2;
-		Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)/2;
-	}
-	//BlankScreen();
-}
-
-void MakeViewingWindowLarger(void)
-{
-	extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
-	int MinChangeInYSize = (ScreenDescriptorBlock.SDB_Height * MinChangeInXSize) / ScreenDescriptorBlock.SDB_Width;
-
-	if (Global_VDB_Ptr->VDB_ClipLeft>0)
-	{
-		Global_VDB_Ptr->VDB_ClipLeft -=MinChangeInXSize;
-		Global_VDB_Ptr->VDB_ClipRight +=MinChangeInXSize;
-		Global_VDB_Ptr->VDB_ClipUp -=MinChangeInYSize;
-		Global_VDB_Ptr->VDB_ClipDown +=MinChangeInYSize;
-	}
-	if (AvP.PlayerType == I_Alien)
-	{
-		Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/4;
-		Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)/4;
-	}
-	else
-	{
-		Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/2;
-		Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)/2;
-	}
-}
-
-
 extern void AlienBiteAttackHasHappened(void)
 {
-	extern int AlienTongueOffset;
-	extern int AlienTeethOffset;
-
-	AlienBiteAttackInProgress = 1;
+	AlienBiteAttackInProgress = true;
 
 	CameraZoomScale = 0.25f;
 	AlienTongueOffset = ONE_FIXED;
 	AlienTeethOffset = 0;
 }
-

@@ -1471,7 +1471,7 @@ Shape_Merge_Data_Chunk::Shape_Merge_Data_Chunk (Shape_Sub_Shape_Chunk * parent, 
 
 Shape_Merge_Data_Chunk::~Shape_Merge_Data_Chunk()
 {
-	if (num_polys) delete[] merge_data;
+	delete[] merge_data;
 }
 
 void Shape_Merge_Data_Chunk::fill_data_block(char * data_start)
@@ -1565,8 +1565,7 @@ Shape_External_Filename_Chunk::Shape_External_Filename_Chunk (Chunk_With_Childre
 
 Shape_External_Filename_Chunk::~Shape_External_Filename_Chunk()
 {
-	if (file_name)
-		delete[] file_name;
+	delete[] file_name;
 }
 
 void Shape_External_Filename_Chunk::fill_data_block (char *data_start)
@@ -1626,10 +1625,8 @@ Shape_External_Object_Name_Chunk::Shape_External_Object_Name_Chunk (Chunk_With_C
 
 Shape_External_Object_Name_Chunk::~Shape_External_Object_Name_Chunk()
 {
-	if (object_name)
-		delete[] object_name;
-	if(shape_name)
-		delete[] shape_name;
+	delete[] object_name;
+	delete[] shape_name;
 }
 
 void  Shape_External_Object_Name_Chunk::post_input_processing()
@@ -1792,7 +1789,7 @@ void Shape_Morphing_Frame_Data_Chunk::fill_data_block ( char * data_start)
 
 Shape_Morphing_Frame_Data_Chunk::~Shape_Morphing_Frame_Data_Chunk()
 {
-	if (frame_store) delete[] frame_store;
+	delete[] frame_store;
 	while (anim_frames.size())
 	{
 		delete anim_frames.first_entry();
@@ -1808,8 +1805,7 @@ void Shape_Morphing_Frame_Data_Chunk::prepare_for_output()
 	// but they will be by the parent class which will have it's prepare
 	// for output called first
 	
-	if (frame_store)
-		delete[] frame_store;
+	delete[] frame_store;
 
 	if (anim_frames.size())
 	{
@@ -2331,8 +2327,7 @@ Shape_Name_Chunk::Shape_Name_Chunk (Chunk_With_Children * parent, const char * s
 
 Shape_Name_Chunk::~Shape_Name_Chunk ()
 {
-	if (shape_name)
-		delete[] shape_name;
+	delete[] shape_name;
 }
 
 
@@ -2506,7 +2501,7 @@ Shape_Fragment_Type_Chunk::Shape_Fragment_Type_Chunk(Chunk_With_Children* const 
 
 Shape_Fragment_Type_Chunk::~Shape_Fragment_Type_Chunk()
 {
-	if(frag_type_name) delete[] frag_type_name;
+	delete[] frag_type_name;
 }											 
 
 void Shape_Fragment_Type_Chunk::fill_data_block(char* data_start)

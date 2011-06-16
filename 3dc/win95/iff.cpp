@@ -114,7 +114,7 @@ namespace IFF
 	bool GenericFile::Load(TCHAR const * pszFileName)
 	{
 		#ifndef IFF_READ_ONLY
-			if (m_pszFileName) delete[] m_pszFileName;
+			delete[] m_pszFileName;
 			m_pszFileName = new TCHAR [_tcslen(pszFileName)+1];
 			_tcscpy(m_pszFileName,pszFileName);
 		#endif // ! IFF_READ_ONLY
@@ -139,7 +139,7 @@ namespace IFF
 		{
 			if (pszFileName)
 			{
-				if (m_pszFileName) delete[] m_pszFileName;
+				delete[] m_pszFileName;
 				m_pszFileName = new TCHAR [_tcslen(pszFileName)+1];
 				_tcscpy(m_pszFileName,pszFileName);
 			}
@@ -613,8 +613,7 @@ namespace IFF {
 		{
 			if (pArchv->m_bIsLoading)
 			{
-				if (m_pData)
-					delete[] m_pData;
+				delete[] m_pData;
 				m_nSize = pArchv->GetSize();
 				m_pData = new BYTE [m_nSize];
 			}
@@ -624,8 +623,7 @@ namespace IFF {
 	
 		MiscChunk::~MiscChunk()
 		{
-			if (m_pData)
-				delete[] m_pData;
+			delete[] m_pData;
 		}
 	
 		/*******************************/

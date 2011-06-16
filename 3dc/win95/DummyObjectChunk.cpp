@@ -97,7 +97,7 @@ Dummy_Object_Data_Chunk::Dummy_Object_Data_Chunk(Chunk_With_Children* parent,con
 
 Dummy_Object_Data_Chunk::~Dummy_Object_Data_Chunk()
 {
-	if(name) delete[] name;
+	delete[] name;
 }
 
 

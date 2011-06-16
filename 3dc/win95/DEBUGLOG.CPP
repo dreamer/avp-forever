@@ -48,14 +48,14 @@ LogFile::~LogFile()
 			fclose(fp);
 		}
 	}
-	if (fname) delete[] fname;
+	delete[] fname;
 }
 
 LogFile & LogFile::operator = (LogFile const & l)
 {
 	if (&l != this)
 	{
-		if (fname) delete[] fname;
+		delete[] fname;
 		if (l.fname)
 		{
 			fname = new char[strlen(l.fname)+1];

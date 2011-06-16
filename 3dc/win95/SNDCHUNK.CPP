@@ -32,10 +32,8 @@ Sound_Object_Chunk::Sound_Object_Chunk (Chunk_With_Children * parent,
 
 Sound_Object_Chunk::~Sound_Object_Chunk()
 {
-	if (snd_name)
-		delete[] snd_name;
-	if (wav_name)
-		delete[] wav_name;
+	delete[] snd_name;
+	delete[] wav_name;
 }
 
 Sound_Object_Chunk::Sound_Object_Chunk (Chunk_With_Children * parent, const char * data, size_t /*ssize*/)
@@ -231,7 +229,7 @@ Sound_Object_Extra_Name_Chunk::Sound_Object_Extra_Name_Chunk(Chunk_With_Children
 
 Sound_Object_Extra_Name_Chunk::~Sound_Object_Extra_Name_Chunk()
 {
-	if (name) delete[] name;
+	delete[] name;
 }
 
 void Sound_Object_Extra_Name_Chunk::fill_data_block(char* data_start)
@@ -278,8 +276,8 @@ Indexed_Sound_Chunk::Indexed_Sound_Chunk(Chunk_With_Children* parent)
 
 Indexed_Sound_Chunk::~Indexed_Sound_Chunk()
 {
-	if(extra_data) delete[] extra_data;
-	if(wav_name) delete[] wav_name;
+	delete[] extra_data;
+	delete[] wav_name;
 }
 
 void Indexed_Sound_Chunk::fill_data_block(char * data)
@@ -329,7 +327,7 @@ Sound_Collection_Chunk::Sound_Collection_Chunk(Chunk_With_Children* parent)
 
 Sound_Collection_Chunk::~Sound_Collection_Chunk()
 {
-	if (sounds) delete[] sounds;
+	delete[] sounds;
 }
 
 void Sound_Collection_Chunk::fill_data_block(char* data)

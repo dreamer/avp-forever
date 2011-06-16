@@ -224,8 +224,7 @@ Shape_Vertex_Intensities_Chunk::Shape_Vertex_Intensities_Chunk(Chunk_With_Childr
 
 Shape_Vertex_Intensities_Chunk::~Shape_Vertex_Intensities_Chunk()
 {
-	if (intensity_array)
-		delete[] intensity_array;
+	delete[] intensity_array;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -369,10 +368,7 @@ Placed_Object_Light_Chunk::Placed_Object_Light_Chunk(Chunk_With_Children * paren
 
 Placed_Object_Light_Chunk::~Placed_Object_Light_Chunk()
 {
-	if (extra_data)
-	{
-		delete[] extra_data;
-	}
+	delete[] extra_data;
 }
 
 void Placed_Object_Light_Chunk::fill_data_block(char* data)

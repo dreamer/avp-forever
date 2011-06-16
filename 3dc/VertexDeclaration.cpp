@@ -94,7 +94,7 @@ void VertexDeclaration::Add(uint16_t stream, VD_TYPE type, VD_METHOD method, VD_
 
 	newElement.stream = stream;
 	newElement.offset = this->offset;
-	newElement.usage = usage;
+	newElement.usage  = usage;
 	newElement.method = method;
 	newElement.type = type;
 	newElement.usageIndex = usageIndex;

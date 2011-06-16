@@ -101,21 +101,22 @@ static const MOVEMENT_DATA Movement_Stats[] = {
 	},
 };
 
-const MOVEMENT_DATA *GetThisMovementData(MOVEMENT_DATA_INDEX index) {
-	
-	int a;	
-	
-	if (index<0) {
-		return(NULL);
+const MOVEMENT_DATA *GetThisMovementData(MOVEMENT_DATA_INDEX index) 
+{	
+	if (index < 0) 
+	{
+		return NULL;
 	}
 	
-	a=0;
-	while (Movement_Stats[a].index!=MDI_End) {
-		if (Movement_Stats[a].index==index) {
+	int a=0;
+	while (Movement_Stats[a].index!=MDI_End) 
+	{
+		if (Movement_Stats[a].index==index) 
+		{
 			return(&Movement_Stats[a]);
 		}		
 		a++;	
 		GLOBALASSERT(a<1000);
 	}
-	return(NULL);	
+	return NULL;	
 }

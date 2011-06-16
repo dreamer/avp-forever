@@ -21,18 +21,13 @@
 #include "bh_corpse.h"
 #include "io.h"
 #define UseLocalAssert TRUE
-
 #include "ourasert.h"
-
 #include "weapons.h"
 #include "lighting.h"
 #include "sfx.h"
-/* for win95 net game support */
 #include "pldghost.h"
-
 #include "AvP_UserProfile.h"
 #include "savegame.h"
-
 #include <math.h>
 
 #define HDEBRIS_BLEEDING_TIME	(ONE_FIXED*2)

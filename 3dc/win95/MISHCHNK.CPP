@@ -482,8 +482,7 @@ File_Chunk::File_Chunk()
 
 File_Chunk::~File_Chunk()
 {
-	if (filename)
-		delete[] filename;
+	delete[] filename;
 
 	if (object_array)
 		free(object_array);
@@ -506,7 +505,7 @@ BOOL File_Chunk::write_file (const char * fname)
 
 	HANDLE rif_file;
 
-	if (filename) delete[] filename;
+	delete[] filename;
 
 	filename = new char [strlen(fname) + 1];
 	strcpy (filename, fname);
@@ -1661,8 +1660,7 @@ RIF_Name_Chunk::RIF_Name_Chunk (Chunk_With_Children * parent, const char * rdata
 
 RIF_Name_Chunk::~RIF_Name_Chunk ()
 {
-	if (rif_name)
-		delete[] rif_name;
+	delete[] rif_name;
 }
 
 

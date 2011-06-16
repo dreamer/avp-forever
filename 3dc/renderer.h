@@ -44,6 +44,8 @@ enum R_FVF
 };
 
 typedef size_t texID_t;
+typedef int32_t effectID_t;
+typedef int32_t shaderID_t;
 
 // forward declarations
 class VertexBuffer;

@@ -15,7 +15,6 @@
 #include "Input.h"
 #include "io.h"
 
-
 const int kCharWidth  = 12;
 const int kCharHeight =	16;
 

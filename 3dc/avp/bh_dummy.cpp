@@ -7,20 +7,15 @@
 #include "stratdef.h"
 #include "gamedef.h"
 #include "bh_types.h"
-
 #include "dynblock.h"
 #include "dynamics.h"
-
 #include "weapons.h"
 #include "comp_shp.h"
 #include "inventry.h"
 #include "triggers.h"
 #include "mslhand.h"
-
 #define UseLocalAssert TRUE
-
 #include "ourasert.h"
-
 #include "pmove.h"
 #include "pvisible.h"
 #include "bh_swdor.h"
@@ -49,8 +44,6 @@
 #include "los.h"
 #include "psndplat.h"
 #include "extents.h"
-
-/* for win95 net game support */
 #include "pldghost.h"
 #include "pldnet.h"
 

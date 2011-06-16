@@ -71,8 +71,8 @@ void CharacterSoundEffects::LoadSounds(const char* filename, const char* directo
 	}
 
 	char* buffer;
-	int file_size;
-	unsigned long bytes_read;
+	uint32_t file_size;
+	DWORD bytes_read;
 
 	file_size = GetFileSize(file, 0);
 	buffer = new char[file_size+1];
@@ -94,13 +94,13 @@ void CharacterSoundEffects::LoadSounds(const char* filename, const char* directo
 	voice_types = (ScreamVoiceType*) PoolAllocateMem(num_voice_types * sizeof(ScreamVoiceType));
 	
 	char wavpath[200];
-	strcpy(wavpath,directory);
+	strcpy(wavpath, directory);
 	char* wavname=&wavpath[strlen(wavpath)];
 	
-	for(int i=0;i<num_voice_types;i++)	
+	for (int i=0;i<num_voice_types;i++)	
 	{
 		voice_types[i].category = (ScreamSoundCategory*) PoolAllocateMem( num_voice_cats * sizeof(ScreamSoundCategory));
-		for(int j=0;j<num_voice_cats;j++)
+		for (int j=0;j<num_voice_cats;j++)
 		{
 			ScreamSoundCategory* cat=&voice_types[i].category[j];
 			cat->last_sound = SID_NOSOUND;
@@ -116,7 +116,7 @@ void CharacterSoundEffects::LoadSounds(const char* filename, const char* directo
 				cat->sounds = 0;
 			}
 
-			for(int k=0;k<cat->num_sounds;)
+			for (int k=0;k<cat->num_sounds;)
 			{
 				ScreamSound * sound=&cat->sounds[k];
 
@@ -128,8 +128,8 @@ void CharacterSoundEffects::LoadSounds(const char* filename, const char* directo
 				sound->volume=*(int*)bufpos;
 				bufpos+=4;
 
-				sound->sound_loaded=GetSound(wavpath);
-				if(sound->sound_loaded)
+				sound->sound_loaded = GetSound(wavpath);
+				if (sound->sound_loaded)
 				{
 					k++;
 				}

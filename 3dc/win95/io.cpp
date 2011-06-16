@@ -458,11 +458,8 @@ void FrameCounterHandler(void)
 	static BOOL inited = FALSE;
 
 	int newTickCount = timeGetTime();
-	uint64_t newTickCount2 = 0;
-	float RealFrameTime2 = 0.0f;
 
 	int fcnt;
-	uint64_t deltaTime;
 
 	if (!inited)
 	{
@@ -470,14 +467,10 @@ void FrameCounterHandler(void)
 		inited = TRUE;
 	}
 
-	newTickCount2 = timeGetTime();
-
 	// fcnt = time passed since last check
 	fcnt = newTickCount - lastTickCount;
-	deltaTime = newTickCount2 - lastTickCount2;
 
 	lastTickCount = newTickCount;
-	lastTickCount2 = newTickCount2;
 
     if (fcnt == 0)
 		fcnt = 1; /* for safety */
@@ -486,9 +479,6 @@ void FrameCounterHandler(void)
 
 	PrevNormalFrameTime = NormalFrameTime;
 	NormalFrameTime = DIV_FIXED(fcnt,TimerFrame);
-
-	// seconds elapsed?
-//	RealFrameTime2 = (float)deltaTime / TimerFrame;
 
 	// RealFrameTime. unscaled frame time
 	RealFrameTime = NormalFrameTime;
@@ -505,16 +495,6 @@ void FrameCounterHandler(void)
 
 	GlobalFrameCounter++;
 	CloakingPhase += NormalFrameTime>>5;
-
-//	sprintf(buf, "RealFrameTime: %d, %d\n", RealFrameTime, RealFrameTime / 16);
-//	sprintf(buf, "Delta: %d, RealFrameTimef: %f\n", deltaTime, RealFrameTime2);
-	/*
-	if (deltaTime != 0)
-	{
-		sprintf(buf, "Delta: %d frameRate: %d\n", deltaTime, TimerFrame / deltaTime);
-		OutputDebugString(buf);
-	}
-	*/
 
 	RouteFinder_CallsThisFrame = 0;
 }

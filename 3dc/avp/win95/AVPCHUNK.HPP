@@ -248,9 +248,8 @@ public :
 	int flags;
 
 	int spare[3];
-	
-
 };
+
 class AVP_Environment_Settings_Chunk;
 
 struct AVP_Environment_Settings

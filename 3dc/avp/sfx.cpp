@@ -36,7 +36,7 @@ void InitialiseSfxBlocks(void)
 	int blk;
 
 	for(blk=0; blk < MAX_NO_OF_SFX_BLOCKS; blk++) 
-	{								
+	{
 		FreeSfxBlockList[blk] = freeBlockPtr++;
 	}
 
@@ -58,7 +58,7 @@ SFXBLOCK* AllocateSfxBlock(void)
 	{
 		/* unable to allocate a sfxamics block I'm afraid; 
 		   MAX_NO_OF_SFX_BLOCKS is too low */
-   	  //LOCALASSERT(NumFreeSfxBlocks);
+	  //LOCALASSERT(NumFreeSfxBlocks);
 		textprint("No Free SFX blocks!\n");
 	}
 
@@ -209,17 +209,17 @@ void HandleSfxForObject(DISPLAYBLOCK *dispPtr)
 			NETCORPSEDATABLOCK *corpseDataPtr = (NETCORPSEDATABLOCK *)sbPtr->SBdataptr;
 		
 			if(!( (dispPtr->SpecialFXFlags & SFXFLAG_MELTINGINTOGROUND)&&(dispPtr->ObFlags2 < ONE_FIXED) )
-				&& corpseDataPtr->This_Death->Electrical && ((FastRandom()&255)==0))	
+				&& corpseDataPtr->This_Death->Electrical && ((FastRandom()&255)==0))
 			{
 				VECTORCH velocity;
 				velocity.vx = (FastRandom()&2047)-1024;
 				velocity.vy = (FastRandom()&2047)-1024;
 				velocity.vz = (FastRandom()&2047)-1024;
-				MakeParticle(&dispPtr->ObWorld,&velocity,PARTICLE_SPARK);	
+				MakeParticle(&dispPtr->ObWorld,&velocity,PARTICLE_SPARK);
 				velocity.vx = (FastRandom()&2047)-1024;
 				velocity.vy = (FastRandom()&2047)-1024;
 				velocity.vz = (FastRandom()&2047)-1024;
-				MakeParticle(&dispPtr->ObWorld,&velocity,PARTICLE_SPARK);	
+				MakeParticle(&dispPtr->ObWorld,&velocity,PARTICLE_SPARK);
 				MakeLightElement(&dispPtr->ObWorld,LIGHTELEMENT_ELECTRICAL_SPARKS);
 			}
 		}
@@ -241,7 +241,7 @@ void HandleObjectOnFire(DISPLAYBLOCK *dispPtr)
 		DYNAMICSBLOCK *dynPtr;
 		STRATEGYBLOCK *sbPtr;
 		
-	   	sbPtr = dispPtr->ObStrategyBlock;
+		sbPtr = dispPtr->ObStrategyBlock;
 		LOCALASSERT(sbPtr);
 		dynPtr = sbPtr->DynPtr;
 		LOCALASSERT(sbPtr);

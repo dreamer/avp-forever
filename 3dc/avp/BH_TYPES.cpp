@@ -8,19 +8,14 @@
 #include "gamedef.h"
 #include "bh_types.h"
 #include "bonusabilities.h"
-
 #include "weapons.h"
 #include "comp_shp.h"
 #include "inventry.h"
 #include "triggers.h"
-
 #include "dynblock.h"
 #include "dynamics.h"
-
 #define UseLocalAssert TRUE
-
 #include "ourasert.h"
-
 #include "pmove.h"
 #include "bh_alien.h"
 #include "bh_gener.h"
@@ -57,14 +52,10 @@
 #include "bh_dummy.h"
 #include "bh_pargen.h"
 #include "bh_videoscreen.h"
-
 #include "psnd.h"
 #include "plat_shp.h"
 #include "savegame.h"
-
 #include "db.h"
-
-/* for win95 net game support */
 #include "pldghost.h"
 #include "bh_corpse.h"
 

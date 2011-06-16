@@ -210,7 +210,7 @@ extern int UserProfileNumber;
 AVP_USER_PROFILE *UserProfilePtr;
 
 SESSION_DESC SessionData[MAX_NO_OF_SESSIONS];
-int NumberOfSessionsFound;
+uint32_t NumberOfSessionsFound;
 extern NETGAME_GAMEDATA netGameData;
 
 static int InputIsDebounced = 0;

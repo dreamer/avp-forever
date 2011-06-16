@@ -53,17 +53,25 @@
 // store texture handles for ingame textures
 std::vector<texID_t> ingameTextureList;
 
+// extern variables
 extern int VideoMode;
 extern VECTORCH PlayerStartLocation;
 extern MATRIXCH PlayerStartMat;
-
 extern FARENTRYPOINTSHEADER *FALLP_EntryPoints;
-
 extern RIFFHANDLE env_rif;
-
-extern void NewOnScreenMessage(char *messagePtr);
-
 extern BOOL KeepMainRifFile;
+extern int SkyColour_R;
+extern int SkyColour_G;
+extern int SkyColour_B;
+
+// extern functions
+extern void NewOnScreenMessage(char *messagePtr);
+extern void add_placed_hierarchy(Placed_Hierarchy_Chunk* phc,const char* fname,const char* hname);
+extern void MulQuat(QUAT *q1,QUAT *q2,QUAT *output);
+extern void SetupFragmentType(Fragment_Type_Chunk* ftc);
+extern void DeallocateAllFragments();
+extern void LoseAllNonCommonSounds();
+extern void PurgeMSLShapeList();
 
 BOOL LevelHasStars;
 
@@ -86,7 +94,7 @@ static char * light_set_name = "NORMALLT";
 static Object_Chunk * * o_chunk_array;
 static int * aimodule_indeces; //array parallel to o_chunk_array
 
-extern void setup_placed_hierarchies(Environment_Data_Chunk * envd);
+
 void setup_preplaced_decals(File_Chunk* fc,Environment_Data_Chunk* edc);
 /////////////////////////////////////////
 // Functions which operate on RIFFHANDLEs
@@ -96,16 +104,15 @@ void setup_start_position(RIFFHANDLE h)
 {
 	Chunk * pChunk = h->envd->lookup_single_child("SPECLOBJ");
 	AVP_Player_Start_Chunk* start_chunk=0;
-	if(pChunk)
+	if (pChunk)
 	{
 		List<Chunk*> start_list;
 		((Chunk_With_Children*)pChunk)->lookup_child("AVPSTART",start_list);
 
 		if(start_list.size())
 			start_chunk=(AVP_Player_Start_Chunk*)start_list.first_entry();
-		
 	}
-	if(start_chunk)
+	if (start_chunk)
 	{
 		PlayerStartLocation.vx = (int)(start_chunk->location.x*local_scale);
 		PlayerStartLocation.vy = (int)(start_chunk->location.y*local_scale);
@@ -211,10 +218,6 @@ void setup_paths(RIFFHANDLE h)
 	}
 }
 
-extern int SkyColour_R;
-extern int SkyColour_G;
-extern int SkyColour_B;
-
 void set_environment_properties(Environment_Data_Chunk* edc)
 {
 	GLOBALASSERT(edc);
@@ -316,11 +319,6 @@ void set_local_scale(RIFFHANDLE h, int /*flags*/)
 ////////////////////////////////////////////////////////////////////////////////////////////
 //placed hierarchy stuff
 
-extern LOADED_SOUND const * GetSoundFromSoundPath(char* wavname);
-
-
-extern void add_placed_hierarchy(Placed_Hierarchy_Chunk* phc,const char* fname,const char* hname);
-
 struct LoadedPlacedHierarchy
 {
 	void load_rif();
@@ -356,6 +354,7 @@ void LoadedPlacedHierarchy::load_rif()
 		unload_rif(placed_rif);
 	}
 }
+
 void LoadedPlacedHierarchy::unload()
 {
 	if(placed_rif!=INVALID_RIFFHANDLE)
@@ -364,8 +363,6 @@ void LoadedPlacedHierarchy::unload()
 	}
 	placed_rif=INVALID_RIFFHANDLE;
 }
-
-
 
 void setup_placed_hierarchies(Environment_Data_Chunk * envd)
 {
@@ -387,14 +384,13 @@ void setup_placed_hierarchies(Environment_Data_Chunk * envd)
 		//hierarchy rif file.
 		char* Temp_Rif_Sound_Directory = Rif_Sound_Directory;
 		
-		PlacedHierarchyArray[phdc->hierarchy_index].load_rif();	
+		PlacedHierarchyArray[phdc->hierarchy_index].load_rif();
 
 		//restore the sound directory
 		Rif_Sound_Directory = Temp_Rif_Sound_Directory;
 
 		add_placed_hierarchy(phc,PlacedHierarchyArray[phdc->hierarchy_index].file_name,PlacedHierarchyArray[phdc->hierarchy_index].hier_name);
-
-	}	
+	}
 }
 
 void unload_placed_hierarchies()
@@ -411,30 +407,26 @@ void unload_placed_hierarchies()
 ///////////////////////////////////////////////////////////////////////////////
 // stuff for handling hierarchies
 
-extern int GetSequenceID(int sequence_type,int sub_sequence);
-void MulQuat(QUAT *q1,QUAT *q2,QUAT *output);
-
-
 List <Global_Hierarchy_Store *> Global_Hierarchy_Library;
 List<Hierarchy_ID_Time_Pair*> Global_Hierarchy_Store::time_list;
 
 Global_Hierarchy_Store::Global_Hierarchy_Store (RIFFHANDLE h)
 {
 	GLOBALASSERT (h->envd);
-	
+
 	Chunk * pChunk = h->envd->lookup_single_child ("RIFFNAME");
-	
+
 	RIF_Name_Chunk * rnc = (RIF_Name_Chunk *) pChunk;
-	
+
 	GLOBALASSERT (rnc);
-	
+
 	riffname = (char*) PoolAllocateMem(strlen (rnc->rif_name)+1);
 	strcpy (riffname, rnc->rif_name);
 
 	rif_hand=h;
 
 	sound_array=0;
-	
+
 	//load the sounds used by this file
 	List<Chunk*> chlist;
 	h->fc->lookup_child("INDSOUND",chlist);
@@ -449,28 +441,28 @@ Global_Hierarchy_Store::Global_Hierarchy_Store (RIFFHANDLE h)
 		max_index=max(max_index,isc->index);
 	}
 	//now create a large enough array , and fill it in
-   	num_sounds=max_index+1;
+	num_sounds=max_index+1;
 	if(max_index>=0)
 	{
 		//find this rif's sound directory
 		Sound_Directory_Chunk* dir_chunk=(Sound_Directory_Chunk*) h->envd->lookup_single_child("SOUNDDIR");
 		char wavname[200];
-		
+
 		VECTORCH ZeroVector={0,0,0};
-		
+
 		sound_array=(HIERARCHY_SOUND*) PoolAllocateMem(sizeof(HIERARCHY_SOUND)*(max_index+1));
 		for(int i=0;i<=max_index;i++)
 		{
 			sound_array[i].sound_loaded=0;
 		}
-	
+
 		for(chlif.restart();!chlif.done();chlif.next())
 		{
 			Indexed_Sound_Chunk* isc=(Indexed_Sound_Chunk*)chlif();
 			int index=isc->index;
 
 			GLOBALASSERT(sound_array[index].sound_loaded==0);
-			
+
 			sound_array[index].s3d.inner_range = (int)(isc->inner_range*local_scale);
 			sound_array[index].s3d.outer_range = (int)(isc->outer_range*local_scale);
 			sound_array[index].s3d.velocity=ZeroVector;
@@ -561,7 +553,7 @@ Global_Hierarchy_Store::~Global_Hierarchy_Store()
 	#if !NEW_DEALLOCATION_ORDER
 	if(sound_array)
 	{
-		for(int i=0;i<num_sounds;i++)	
+		for(int i=0;i<num_sounds;i++)
 		{
 			if(sound_array[i].sound_loaded)
 			{
@@ -578,10 +570,9 @@ Global_Hierarchy_Store::~Global_Hierarchy_Store()
 void Global_Hierarchy_Store::add_hierarchy (List <Object_ShapeNum_Pair *> & osnp_lst, Object_Hierarchy_Chunk * ohc)
 {
 	List <Object_Hierarchy_Chunk *> ohcl = ohc->list_h_children();
-		
+
 	GLOBALASSERT (ohcl.size() == 1);
 
-	
 	//check to see if this hierarchy has any sequences
 	{
 		Object_Hierarchy_Chunk* ohc=(Object_Hierarchy_Chunk*) ohcl.first_entry();
@@ -611,21 +602,19 @@ void Global_Hierarchy_Store::add_hierarchy (List <Object_ShapeNum_Pair *> & osnp
 		hd->hierarchy_name = (char*) PoolAllocateMem(strlen ("Template") + 1);
 		strcpy (hd->hierarchy_name, "Template");
 	}
-	
-	
-	build_time_list(ohcl.first_entry());	
+
+	build_time_list(ohcl.first_entry());
 	hd->hierarchy_root = build_hierarchy (ohcl.first_entry(),hd->hierarchy_name);
 	while(time_list.size())
 	{
 		delete time_list.first_entry();
 		time_list.delete_first_entry();
 	}
-	
+
 	hd->hierarchy_root->flags |= section_is_master_root;
-	
-	
+
 	hierarchy_list.add_entry (hd);
-	
+
 	Preprocess_HModel (hd->hierarchy_root ,riffname);
 }
 
@@ -636,7 +625,7 @@ void Global_Hierarchy_Store::setup_alternate_shape_sets(List <Object_ShapeNum_Pa
 {
 	List<Chunk*> chlist;
 	fc->lookup_child("OBHALTSH",chlist);
-	
+
 	LIF<Chunk*> chlif(&chlist);
 	for(;!chlif.done();chlif.next())
 	{
@@ -660,7 +649,7 @@ void Global_Hierarchy_Store::setup_alternate_shape_sets(List <Object_ShapeNum_Pa
 			strcpy(hsr->replaced_section_name,rlif()->old_object_name);
 
 			hsr->replacement_id = 0;
-			
+
 			//find the shape num for the new shape
 			LIF<Object_ShapeNum_Pair*> olif(&osnp_lst);
 			for(;!olif.done();olif.next())
@@ -681,19 +670,18 @@ void Global_Hierarchy_Store::setup_alternate_shape_sets(List <Object_ShapeNum_Pa
 		}
 		hsr->replaced_section_name=0;
 		hsr->replacement_shape=0;
-	
+
 		alternate_shape_set_list.add_entry(hass);
 	}
 
-	
 	num_shape_collections=0;
 	shape_collections=0;
 
 	//now set up the shape set collections
 	List_Hierarchy_Shape_Set_Collection_Chunk(fc,chlist);
-		
+
 	//find the highest index
-	int max_index=-1;		
+	int max_index=-1;
 	for(chlif.restart();!chlif.done();chlif.next())
 	{
 		Hierarchy_Shape_Set_Collection_Chunk* coll=(Hierarchy_Shape_Set_Collection_Chunk*)chlif();
@@ -714,7 +702,7 @@ void Global_Hierarchy_Store::setup_alternate_shape_sets(List <Object_ShapeNum_Pa
 	}
 	//find the collections that can be randomly generated
 	List<int>* ran_list=0;
-	if(!_stricmp(riffname,"hnpcmarine"))	
+	if(!_stricmp(riffname,"hnpcmarine"))
 	{
 		if(random_marine_texturings.size()) ran_list=&random_marine_texturings;
 	}
@@ -739,10 +727,10 @@ void Global_Hierarchy_Store::setup_alternate_shape_sets(List <Object_ShapeNum_Pa
 		num_found_sets=0;
 		num_shapes_to_replace=0;
 		int combined_flags=0;
-			
+
 		for(LIF<int> ind_lif(&coll->Index_List);!ind_lif.done();ind_lif.next())
 		{
-			for(alt_lif.restart();!alt_lif.done();alt_lif.next())		
+			for(alt_lif.restart();!alt_lif.done();alt_lif.next())
 			{
 				if(ind_lif()==alt_lif()->index)
 				{
@@ -777,7 +765,6 @@ void Global_Hierarchy_Store::setup_alternate_shape_sets(List <Object_ShapeNum_Pa
 					hsr[pos].replacement_id = coll->Set_Collection_Num;
 					pos++;
 				}
-				
 			}
 			hsr[pos].replaced_section_name=0;
 			hsr[pos].replacement_shape=0;
@@ -835,23 +822,22 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 	// containing an object
 
 	Object_Hierarchy_Data_Chunk * ohdc = ohc->get_data();
-	
+
 	GLOBALASSERT (ohdc);
 	GLOBALASSERT (ohdc->ob_name);
-	
-	
+
 	// make a section
 	
 	SECTION * currsection = (SECTION *)PoolAllocateMem (sizeof (SECTION));
 
 	currsection->flags = 0;
 	currsection->ShapeName = 0;
-	currsection->Hierarchy_Name=hierarchy_name;	
+	currsection->Hierarchy_Name=hierarchy_name;
 	currsection->Rif_Name=riffname;
-	
+
 	currsection->Section_Name = (char *)PoolAllocateMem (strlen (ohdc->ob_name) + 1);
 	strcpy (currsection->Section_Name, ohdc->ob_name);
-	
+
 	if (ohdc->object)
 	{
 		GLOBALASSERT(ohdc->object->program_object_index!=-1);
@@ -863,18 +849,18 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 		currsection->ShapeNum = -1;
 		currsection->Shape = 0;
 	}
-	
+
 	Object_Animation_All_Sequence_Chunk* all_seq=Get_Object_Animation_All_Sequence_Chunk(ohc);
-	if(all_seq)
+	if (all_seq)
 	{
 		currsection->num_sequences=all_seq->num_sequences;
 		currsection->sequence_array = 0;
-		if(all_seq->num_sequences)
+		if (all_seq->num_sequences)
 		{
 			currsection->sequence_array = (SEQUENCE *)PoolAllocateMem (sizeof(SEQUENCE) * all_seq->num_sequences);
 			SEQUENCE * seqa_p = currsection->sequence_array;
-			
-			for(int i=0;i<all_seq->num_sequences;i++)
+
+			for (int i=0;i<all_seq->num_sequences;i++)
 			{
 				KEYFRAME_DATA ** next_frame_ptr=&seqa_p->first_frame;
 				KEYFRAME_DATA * delta_frame=0;
@@ -886,25 +872,25 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 
 				KEYFRAME_DATA * kfd=0;
 
-				for(unsigned int frame_no=0;frame_no<seq->num_frames;)
+				for (unsigned int frame_no=0;frame_no<seq->num_frames;)
 				{
 					Object_Animation_Frame* frame=&seq->frames[frame_no];
-					
+
 					int flags=0;
 					HIERARCHY_SOUND* sound=0;
-					
+
 					//see if there are any flags or sounds on this frame
 					flags=frame->flags & HierarchyFrame_FlagMask;
 					int sound_index=frame->get_sound_index();
-					if(sound_index>0 && sound_index<num_sounds)
+					if (sound_index>0 && sound_index<num_sounds)
 					{
-						if(sound_array[sound_index].sound_loaded)
+						if (sound_array[sound_index].sound_loaded)
 						{
 							sound=&sound_array[sound_index];
 						}
 					}
 
-					if(flags || sound)
+					if (flags || sound)
 					{
 						//need to use extended keyframe
 						KEYFRAME_DATA_EXTENDED* kfd_extended=(KEYFRAME_DATA_EXTENDED*) PoolAllocateMem(sizeof(KEYFRAME_DATA_EXTENDED));
@@ -918,7 +904,6 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 					{
 						//use standard keyframe
 						kfd =(KEYFRAME_DATA*) PoolAllocateMem(sizeof(KEYFRAME_DATA));
-
 						kfd->frame_has_extended_data=0;
 					}
 
@@ -954,7 +939,7 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 					int this_frame_no = frame->at_frame_no;
 
 					frame_no++;
-					
+
 					if (frame_no<seq->num_frames)
 					{
 						//calculate sequence length , making sure it doesn't overflow an unsigned short
@@ -964,7 +949,6 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 					{
 						kfd->Sequence_Length =(unsigned short) min(65536 - this_frame_no,65535);
 					}
-					
 				}
 				//sort out some settings for the last frame
 				kfd->last_frame=1;
@@ -981,136 +965,123 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 
 				seqa_p->last_frame = kfd;
 
-				
-
 				if(delta_frame)
 				{
 					//this sequence is a delta sequence , so convert all frames to deltas relative
 					//to delta_frame
-					
+
 					QUAT inverse_delta; 
-					
+
 					CopyShortQuatToInt(&delta_frame->QOrient,&inverse_delta);
-					
+
 					VECTORCH inverse_offset;
 					GetKeyFrameOffset(delta_frame,&inverse_offset);
-								
+
 					inverse_delta.quatx = -inverse_delta.quatx;
 					inverse_delta.quaty = -inverse_delta.quaty;
 					inverse_delta.quatz = -inverse_delta.quatz;
-	
+
 					inverse_offset.vx = -inverse_offset.vx;
 					inverse_offset.vy = -inverse_offset.vy;
 					inverse_offset.vz = -inverse_offset.vz;
-			
+
 					kfd = seqa_p->first_frame;
-			
+
 					while (1)
 					{
 						// do deltas
 						QUAT q;
 
 						CopyShortQuatToInt(&kfd->QOrient,&q);
-						
+
 						MulQuat (&q, &inverse_delta, &q);
 						CopyIntQuatToShort(&q,&kfd->QOrient);
 
 						VECTORCH offset;
 						GetKeyFrameOffset(kfd,&offset);
-						
+
 						offset.vx += inverse_offset.vx;
 						offset.vy += inverse_offset.vy;
 						offset.vz += inverse_offset.vz;
-						
+
 						SetKeyFrameOffset(kfd,&offset);
 
 						if(kfd->last_frame) break;
-			
+
 						kfd = kfd->Next_Frame;
 					}
-					
-
 				}
-				
-				
 				seqa_p ++;
 			}
-		
 		}
 	}
 	else
 	{
 		List <Object_Animation_Sequence_Chunk *> seql;
-	
+
 		Chunk * pChunk = ohc->lookup_single_child ("OBANSEQS");
-	
+
 		if (pChunk)
 		{
 			((Object_Animation_Sequences_Chunk *)pChunk)->list_sequences(&seql);
 		}
-	
+
 		currsection->num_sequences = seql.size();
 		currsection->sequence_array = 0;
 
 		// fill in sequences
-
-
 		if (seql.size())
 		{
 			currsection->sequence_array = (SEQUENCE *)PoolAllocateMem (sizeof(SEQUENCE) * seql.size());
 			SEQUENCE * seqa_p = currsection->sequence_array;
-			
+
 			for (LIF<Object_Animation_Sequence_Chunk *> seqi(&seql); !seqi.done(); seqi.next())
 			{
-			
 				Object_Animation_Sequence_Header_Chunk * oashc = seqi()->get_header();
 				GLOBALASSERT (oashc);
-				
+
 				seqa_p->sequence_id = GetSequenceID (oashc->sequence_number, oashc->sub_sequence_number);
 				seqa_p->Time = get_time_from_sequence_id(seqa_p->sequence_id);
 
 				List <Object_Animation_Sequence_Frame_Chunk	*> f_list;
 				seqi()->get_frames(&f_list);
-				
+
 				GLOBALASSERT (f_list.size());
-				
+
 				int num_frames=f_list.size();
 				Object_Animation_Sequence_Frame_Chunk ** frame_array= new Object_Animation_Sequence_Frame_Chunk*[num_frames];
 				
 				LIF<Object_Animation_Sequence_Frame_Chunk *> fli(&f_list);
-								
-				
+
 				for (; !fli.done(); fli.next())
 				{
 					GLOBALASSERT(fli()->frame_ref_no<num_frames);
 					frame_array[fli()->frame_ref_no]=fli();
-					
 				}
 				KEYFRAME_DATA ** next_frame_ptr=&seqa_p->first_frame;
 				KEYFRAME_DATA * delta_frame=0;
 
 				KEYFRAME_DATA * kfd=0;
-				
-				
-				for(int frame_no=0;frame_no<num_frames;)
+
+				for (int frame_no=0;frame_no<num_frames;)
 				{
 					Object_Animation_Sequence_Frame_Chunk* frame=frame_array[frame_no];
-					
+
 					int flags=0;
 					HIERARCHY_SOUND* sound=0;
-					
+
 					//see if there are any flags or sounds on this frame
 					flags=frame->flags & HierarchyFrame_FlagMask;
 					int sound_index=frame->get_sound_index();
-					if(sound_index>0 && sound_index<num_sounds)
+					if (sound_index>0 && sound_index<num_sounds)
 					{
 						if(sound_array[sound_index].sound_loaded)
 						{
 							sound=&sound_array[sound_index];
 						}
 					}
-					
-					if(flags || sound)
+
+					if (flags || sound)
 					{
 						//need to use extended keyframe
 						KEYFRAME_DATA_EXTENDED* kfd_extended=(KEYFRAME_DATA_EXTENDED*) PoolAllocateMem(sizeof(KEYFRAME_DATA_EXTENDED));
@@ -1119,7 +1090,6 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 						kfd->frame_has_extended_data=1;
 						kfd_extended->sound=sound;
 						kfd_extended->flags=flags;
-						
 					}
 					else
 					{
@@ -1127,7 +1097,6 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 						kfd =(KEYFRAME_DATA*) PoolAllocateMem(sizeof(KEYFRAME_DATA));
 
 						kfd->frame_has_extended_data=0;
-		
 					}
 					kfd->last_frame=0; //if this is in fact the last frame , then this will be changed later
 
@@ -1135,34 +1104,33 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 					*next_frame_ptr=kfd;
 					next_frame_ptr=&kfd->Next_Frame;
 
-					if(frame->flags & HierarchyFrameFlag_DeltaFrame)
+					if (frame->flags & HierarchyFrameFlag_DeltaFrame)
 					{
 						GLOBALASSERT(delta_frame==0); //should only be one frame with this flag
 						delta_frame=kfd;
 					}
 
 					VECTORCH offset;
-					
+
 					offset.vx = (int)(frame->transform.x * local_scale);
 					offset.vy = (int)(frame->transform.y * local_scale);
 					offset.vz = (int)(frame->transform.z * local_scale);
 
 					SetKeyFrameOffset(kfd,&offset);
-					
+
 					QUAT q;
 
 					q.quatx = (int) -(frame->orientation.x*ONE_FIXED);
 					q.quaty = (int) -(frame->orientation.y*ONE_FIXED);
 					q.quatz = (int) -(frame->orientation.z*ONE_FIXED);
 					q.quatw = (int) (frame->orientation.w*ONE_FIXED);
-					
 
 					CopyIntQuatToShort(&q,&kfd->QOrient);
-					
+
 					int this_frame_no = frame->at_frame_no;
-									
+
 					frame_no++;
-					
+
 					if (frame_no<num_frames)
 					{
 						//calculate sequence length , making sure it doesn't overflow an unsigned short
@@ -1188,66 +1156,61 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 				seqa_p->last_frame = kfd;
 
 				delete[] frame_array;
-				
 
-				if(delta_frame)
+				if (delta_frame)
 				{
 					//this sequence is a delta sequence , so convert all frames to deltas relative
 					//to the frame delta_frame
 
 					QUAT inverse_delta; 
 					CopyShortQuatToInt(&delta_frame->QOrient,&inverse_delta);
-					
+
 					VECTORCH inverse_offset;
 					GetKeyFrameOffset(delta_frame,&inverse_offset);
-			
-			
+
 					inverse_delta.quatx = -inverse_delta.quatx;
 					inverse_delta.quaty = -inverse_delta.quaty;
 					inverse_delta.quatz = -inverse_delta.quatz;
-	
+
 					inverse_offset.vx = -inverse_offset.vx;
 					inverse_offset.vy = -inverse_offset.vy;
 					inverse_offset.vz = -inverse_offset.vz;
-			
+
 					kfd = seqa_p->first_frame;
-			
+
 					while (1)
 					{
 						// do deltas
 						QUAT q;
 
 						CopyShortQuatToInt(&kfd->QOrient,&q);
-						
+
 						MulQuat (&q, &inverse_delta, &q);
 						CopyIntQuatToShort(&q,&kfd->QOrient);
 
 						VECTORCH offset;
 						GetKeyFrameOffset(kfd,&offset);
-						
+
 						offset.vx += inverse_offset.vx;
 						offset.vy += inverse_offset.vy;
 						offset.vz += inverse_offset.vz;
-						
+
 						SetKeyFrameOffset(kfd,&offset);
-			
-						if(kfd->last_frame) break;
+
+						if (kfd->last_frame) break;
 
 						kfd = kfd->Next_Frame;
 					}
-
 				}
-				
-				
 				seqa_p ++;
 			}
 		}
 	}
-	
+
 	currsection->Children = 0;
-	
+
 	List <Object_Hierarchy_Chunk *> h_children = ohc->list_h_children();
-	
+
 	if (h_children.size())
 	{
 		currsection->Children = (SECTION **)PoolAllocateMem (sizeof (SECTION *) * (h_children.size()+1));
@@ -1261,10 +1224,8 @@ SECTION * Global_Hierarchy_Store::build_hierarchy (Object_Hierarchy_Chunk * ohc,
 		}
 		currsection->Children[i] = 0;
 	}
-	
-	
-	return(currsection);
-	
+
+	return currsection;
 }
 
 void Global_Hierarchy_Store::build_time_list(Object_Hierarchy_Chunk* ohc)
@@ -1311,7 +1272,6 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
  //////////////////////////
  // Sort out local scale //
  //////////////////////////
-	int i;
 	set_local_scale(h,flags);
 	
 	Set_Progress_Bar_Position(progress_start);
@@ -1340,19 +1300,18 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 	List <Object_Chunk *> obl;
 	h->fc->list_objects(&obl);
 	
- 	int NumObjectsToLoad=obl.size(); //for progress_bar
- 	int NumObjectsLoaded=0;
+	int NumObjectsToLoad = obl.size(); //for progress_bar
+	int NumObjectsLoaded = 0;
 
 	for (LIF<Object_Chunk *> oli(&obl); !oli.done(); oli.next())
-	{							  
-		if((NumObjectsLoaded &0xf)==0)
+	{
+		if ((NumObjectsLoaded &0xf)==0)
 		{
 			//update bar every 16 objects
 			Set_Progress_Bar_Position((int)(progress_start+progress_interval*((.5*NumObjectsLoaded)/NumObjectsToLoad)));
 		}
 		NumObjectsLoaded++;
-		
-		
+
 		Shape_Chunk * tmpshp = oli()->get_assoc_shape();
 		//ChunkShape cs = tmpshp->shape_data;
 
@@ -1362,7 +1321,8 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 		osnp->sh_num = rt_temp.main_list_pos;
 		osnp->ob = oli();
 		const char* ob_name=osnp->ob->object_data.o_name;
-		if(ob_name[0]=='L' && ob_name[1] && ob_name[2]=='#')
+
+		if (ob_name[0]=='L' && ob_name[1] && ob_name[2]=='#')
 		{
 			low_osnp_list.add_entry(osnp);
 		}
@@ -1372,7 +1332,6 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 		}
 
 		osnp->ob->program_object_index=osnp->sh_num;
-
 
 		//add the prelighting data to the shape
 
@@ -1398,19 +1357,18 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 			{
 				memoryInitialisationFailure = 1;
 				return FALSE;
-			}					
+			}
 
 			for (int vn = 0; vn < svic->num_vertices; vn++) 
 			{
 				//convert coloured light to a brightness value
 				int ir = svic->intensity_array[vn]>>16;
-			 	int ig = svic->intensity_array[vn]>>8 &0xff;
-			 	int ib = svic->intensity_array[vn] &0xff;
-			 	int mag = (int)sqrt((ir*ir+ig*ig+ib*ib)/3.0);
+				int ig = svic->intensity_array[vn]>>8 &0xff;
+				int ib = svic->intensity_array[vn] &0xff;
+				int mag = (int)sqrt((ir*ir+ig*ig+ib*ib)/3.0);
 				
-			 	mainshapelist[osnp->sh_num]->sh_extraitemdata[vn].EID_VertexI = svic->intensity_array[vn] + (mag<<24);
+				mainshapelist[osnp->sh_num]->sh_extraitemdata[vn].EID_VertexI = svic->intensity_array[vn] + (mag<<24);
 			}
-		
 			mainshapelist[osnp->sh_num]->shapeflags |= ShapeFlag_PreLit;
 		}
 	}
@@ -1427,10 +1385,9 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 
 	for (LIF<Chunk *> shplst(&shps) ; !shplst.done() ; shplst.next())
 	{
- 	
- 		Shape_Chunk * tmpshp = (Shape_Chunk *)shplst();
+		Shape_Chunk * tmpshp = (Shape_Chunk *)shplst();
 
-		if ( ! tmpshp->list_assoc_objs().size() )
+		if (!tmpshp->list_assoc_objs().size())
 		{
 		//	ChunkShape cs = tmpshp->shape_data;
 			copy_to_mainshapelist(h,tmpshp,flags);
@@ -1448,25 +1405,24 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 	/*-----------------------------**
 	** set up hierarchy related stuff **
 	**-----------------------------*/
-	
-	
+
 	Set_Progress_Bar_Position((int)(progress_start+progress_interval*.5));
 	//get the distances at which the various detail levels should be used
 	int* distance_array=0;
 	Hierarchy_Degradation_Distance_Chunk* hddc=(Hierarchy_Degradation_Distance_Chunk*)h->fc->lookup_single_child("HIDEGDIS");
-	if(hddc)
+	if (hddc)
 	{
 		GLOBALASSERT(hddc->num_detail_levels==10);
 		distance_array=hddc->distance_array;
 	}
-	
+
 	//sort out the arrays of low detail shapes
 	SHAPEHEADER* low_detail_array[10];
-	for(LIF<Object_ShapeNum_Pair *> osnp_lif(&osnp_list);!osnp_lif.done();osnp_lif.next())
+	for (LIF<Object_ShapeNum_Pair *> osnp_lif(&osnp_list);!osnp_lif.done();osnp_lif.next())
 	{
-		if(!low_osnp_list.size()) break;
+		if (!low_osnp_list.size()) break;
 
-		for(i=0;i<10;i++)
+		for (int i=0;i<10;i++)
 		{
 			low_detail_array[i]=0;
 		}
@@ -1477,11 +1433,11 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 		for(LIF<Object_ShapeNum_Pair *> low_osnp_lif(&low_osnp_list);!low_osnp_lif.done();)
 		{
 			Object_ShapeNum_Pair* low_osnp=low_osnp_lif();
-			if(!strcmp(&low_osnp->ob->object_data.o_name[3],osnp->ob->object_data.o_name))
+			if (!strcmp(&low_osnp->ob->object_data.o_name[3],osnp->ob->object_data.o_name))
 			{
 				low_osnp_lif.delete_current();
 				int detail=low_osnp->ob->object_data.o_name[1]-'0';
-				if(detail>=1 && detail <=9)
+				if (detail>=1 && detail <=9)
 				{
 					low_detail_array[detail]=mainshapelist[low_osnp->sh_num];
 					num_detail_level++;
@@ -1494,7 +1450,7 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 			}
 		}
 
-		if(num_detail_level)//we have some lower detail shapes
+		if (num_detail_level)//we have some lower detail shapes
 		{
 			SHAPEHEADER* main_shape=mainshapelist[osnp->sh_num];
 			low_detail_array[0]=main_shape; //detail level 0 is the original shape
@@ -1503,9 +1459,9 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 			main_shape->shape_degradation_array=(ADAPTIVE_DEGRADATION_DESC*)PoolAllocateMem(sizeof(ADAPTIVE_DEGRADATION_DESC)*num_detail_level);
 			
 			ADAPTIVE_DEGRADATION_DESC* deg_ptr=main_shape->shape_degradation_array;
-			for(i=9;i>=0;i--) //shapes are entered in ascending order of detail.
+			for (int i=9;i>=0;i--) //shapes are entered in ascending order of detail.
 			{
-				if(low_detail_array[i])
+				if (low_detail_array[i])
 				{
 					if(distance_array)
 						deg_ptr->distance=distance_array[i];
@@ -1523,17 +1479,16 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 					}
 					deg_ptr++;
 				}
-			}	
+			}
 		}
 	}
 	//at this point low_osnp_list ought to be empty , but delete the rest anyway
-	while(low_osnp_list.size())
+	while (low_osnp_list.size())
 	{
 		delete low_osnp_list.first_entry();
 		low_osnp_list.delete_first_entry();
 	}
 
-	
 	List <Chunk *> cl;
 	h->fc->lookup_child ("OBJCHIER",cl);
 
@@ -1568,8 +1523,8 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 
 	//reset the sound directory
 	Rif_Sound_Directory=0;
-	
-	return(1);
+
+	return 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1712,9 +1667,6 @@ void DeleteHierarchyLibraryEntry(RIFFHANDLE h)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-
-extern void SetupFragmentType(Fragment_Type_Chunk* ftc);
 
 struct Adjacent_AIModule_EP
 {
@@ -3332,8 +3284,7 @@ void save_preplaced_decals()
 	{
 		List<Object_Chunk*> ob_list;
 		env_rif->fc->list_objects(&ob_list);
-				
-		
+
 		AVP_Decal_Chunk* decal_chunk=new AVP_Decal_Chunk(soc,NumFixedDecals);
 		for(int i=0;i<decal_chunk->num_decals;i++)
 		{
@@ -3385,12 +3336,6 @@ void check_preplaced_decal_modules()
 		}
 	}
 }
-
-
-extern void DeallocateAllFragments();
-extern void LoseAllNonCommonSounds();
-extern void deallocate_behaviour_list();
-extern void PurgeMSLShapeList();
 
 void DeallocateSoundsAndPoolAllocatedMemory()
 {

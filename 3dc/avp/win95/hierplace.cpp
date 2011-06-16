@@ -104,8 +104,8 @@ Placed_Hierarchy_Data_Chunk::Placed_Hierarchy_Data_Chunk(Chunk_With_Children* pa
 
 Placed_Hierarchy_Data_Chunk::~Placed_Hierarchy_Data_Chunk()
 {
-	if(extra_data)	delete[] extra_data;
-	if(name) delete[] name;
+	delete[] extra_data;
+	delete[] name;
 }
 
 void Placed_Hierarchy_Data_Chunk::fill_data_block(char* data)
@@ -235,14 +235,8 @@ Placed_Hierarchy_Sequence_Chunk::Placed_Hierarchy_Sequence_Chunk(Chunk_With_Chil
 
 Placed_Hierarchy_Sequence_Chunk::~Placed_Hierarchy_Sequence_Chunk()
 {
-	if(extra_data)
-	{
-		delete[] extra_data;
-	}
-	if(sound_list)
-	{
-		delete[] sound_list;
-	}		
+	delete[] extra_data;
+	delete[] sound_list;	
 }
 
 void Placed_Hierarchy_Sequence_Chunk::fill_data_block(char* data)

@@ -33,13 +33,32 @@ extern uint32_t GetRealNumVerts(uint32_t numVerts);
 RenderList::RenderList(size_t size)
 {
 	capacity = size;
-	listIndex = 0;
+	listIndex   = 0;
 	vertexCount = 0;
-	indexCount = 0;
+	indexCount  = 0;
 
 	// treat the vector as an array so resize it to desired size
 	Items.reserve(size);
 	Items.resize(size);
+
+	// determine if all render options fit within our sort key
+#if _DEBUG
+	
+	// lets give texture Ids 16 bits?
+	int texIDsize = 16;
+	int transSize = NUM_TRANSLUCENCY_TYPES; // num of bits per type
+	int filterSize = NUM_FILTERING_TYPES;
+	int texAddressSize = NUM_TEXTURE_ADDRESS_MODES;
+	int zWriteSize = 2; // either on or off
+
+	RenderItem tempItem;
+
+	if ((texIDsize + transSize + filterSize + texAddressSize + zWriteSize) > sizeof(tempItem.sortKey) * 8)
+	{
+		// sort key isn't big enough!
+		assert (1==0);
+	}
+#endif
 }
 
 RenderList::~RenderList()

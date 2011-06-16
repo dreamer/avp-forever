@@ -100,6 +100,9 @@ RenderList *particleList = 0;
 RenderList *mainList = 0;
 RenderList *orthoList = 0;
 
+// stars test
+RenderList *starsList = 0;
+
 #define RGBLIGHT_MAKE(r,g,b) RGB_MAKE(r,g,b)
 #define RGBALIGHT_MAKE(r,g,b,a) RGBA_MAKE(r,g,b,a)
 
@@ -111,6 +114,9 @@ void RenderListInit()
 	particleList = new RenderList(400);
 	mainList     = new RenderList(800);
 	orthoList    = new RenderList(400);
+
+	// stars test
+	starsList    = new RenderList(600);
 }
 
 void RenderListDeInit()
@@ -123,6 +129,10 @@ void RenderListDeInit()
 
 	delete orthoList;
 	orthoList = 0;
+
+	// stars test
+	delete starsList;
+	starsList = 0;
 }
 
 struct renderParticle
@@ -384,11 +394,53 @@ static bool ExecuteBuffer()
 		// set orthographic projection shaders as active
 		d3d.effectSystem->SetActive(d3d.orthoEffect);
 
-		// pass the orthographicp projection matrix to the vertex shader
+		// pass the orthographic projection matrix to the vertex shader
 		d3d.effectSystem->SetVertexShaderConstant(d3d.orthoEffect, 0, CONST_MATRIX, &matOrtho);
 
 		// daw the ortho list
 		orthoList->Draw();
+	}
+
+	// do test sky
+	if (starsList->GetSize())
+	{
+		// set vertex declaration
+		d3d.mainDecl->Set();
+
+		d3d.starsVB->Set();
+		d3d.starsIB->Set();
+
+		// set stars shaders as active
+		d3d.effectSystem->SetActive(d3d.starsEffect);
+
+		// we don't need world matrix here as avp has done all the world transforms itself
+//		R_MATRIX matWorldViewProj = viewMatrix * matProjection;
+/*
+		// translate
+		R_MATRIX matWorld = matIdentity;
+		D3DVECTOR playerPosition;
+		playerPosition.x = Global_VDB_Ptr->VDB_World.vx;
+		playerPosition.y = Global_VDB_Ptr->VDB_World.vy;
+		playerPosition.z = Global_VDB_Ptr->VDB_World.vz;
+	
+		matWorld._41 = playerPosition.x;
+		matWorld._42 = playerPosition.y;
+		matWorld._43 = playerPosition.z;
+
+		matWorldViewProj = matWorldViewProj *= matWorld;
+*/
+		D3DVECTOR playerPosition;
+
+		playerPosition.x = Global_VDB_Ptr->VDB_World.vx;
+		playerPosition.y = Global_VDB_Ptr->VDB_World.vy;
+		playerPosition.z = Global_VDB_Ptr->VDB_World.vz;
+
+		// pass the orthographic projection matrix to the vertex shader
+		d3d.effectSystem->SetVertexShaderConstant(d3d.starsEffect, 2, CONST_VECTOR3, &playerPosition);
+		d3d.effectSystem->SetVertexShaderConstant(d3d.starsEffect, 0, CONST_MATRIX, &viewMatrix);
+		d3d.effectSystem->SetVertexShaderConstant(d3d.starsEffect, 1, CONST_MATRIX, &matProjection);
+
+		starsList->Draw();
 	}
 
 	return true;
@@ -411,6 +463,10 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, const std::vector<t
 	float x2 = WPos2DC(topX + frameWidth);
 	float y2 = HPos2DC(topY + frameHeight);
 
+	// for non power of 2 texture UV adjustment - get top two textures (tex 2 and 3 should be the same resolution)
+	Texture tempTexture  = Tex_GetTextureDetails(textureIDs[0]);
+	Texture tempTexture2 = Tex_GetTextureDetails(textureIDs[1]);
+
 	FMVVERTEX fmvVerts[4];
 
 	// bottom left
@@ -418,13 +474,13 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, const std::vector<t
 	fmvVerts[0].y = y2;
 	fmvVerts[0].z = 1.0f;
 	fmvVerts[0].u1 = 0.0f;
-	fmvVerts[0].v1 = 1.0f; //(1.0f / textureHeight) * frameHeight;
+	fmvVerts[0].v1 = (1.0f / tempTexture.realHeight) * tempTexture.height;
 
 	fmvVerts[0].u2 = 0.0f;
-	fmvVerts[0].v2 = 1.0f;
+	fmvVerts[0].v2 = (1.0f / tempTexture2.realHeight) * tempTexture2.height;
 
 	fmvVerts[0].u3 = 0.0f;
-	fmvVerts[0].v3 = 1.0f;
+	fmvVerts[0].v3 = (1.0f / tempTexture2.realHeight) * tempTexture2.height;
 
 	// top left
 	fmvVerts[1].x = x1;
@@ -443,26 +499,26 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, const std::vector<t
 	fmvVerts[2].x = x2;
 	fmvVerts[2].y = y2;
 	fmvVerts[2].z = 1.0f;
-	fmvVerts[2].u1 = 1.0f; //(1.0f / textureWidth) * frameWidth;
-	fmvVerts[2].v1 = 1.0f; //(1.0f / textureHeight) * frameHeight;
+	fmvVerts[2].u1 = (1.0f / tempTexture.realWidth) * tempTexture.width;
+	fmvVerts[2].v1 = (1.0f / tempTexture.realHeight) * tempTexture.height;
 
-	fmvVerts[2].u2 = 1.0f;
-	fmvVerts[2].v2 = 1.0f;
+	fmvVerts[2].u2 = (1.0f / tempTexture2.realWidth) * tempTexture2.width;
+	fmvVerts[2].v2 = (1.0f / tempTexture2.realHeight) * tempTexture2.height;
 
-	fmvVerts[2].u3 = 1.0f;
-	fmvVerts[2].v3 = 1.0f;
+	fmvVerts[2].u3 = (1.0f / tempTexture2.realWidth) * tempTexture2.width;
+	fmvVerts[2].v3 = (1.0f / tempTexture2.realHeight) * tempTexture2.height;
 
 	// top right
 	fmvVerts[3].x = x2;
 	fmvVerts[3].y = y1;
 	fmvVerts[3].z = 1.0f;
-	fmvVerts[3].u1 = 1.0f; //(1.0f / textureWidth) * frameWidth;
+	fmvVerts[3].u1 = (1.0f / tempTexture.realWidth) * tempTexture.width;
 	fmvVerts[3].v1 = 0.0f;
 
-	fmvVerts[3].u2 = 1.0f;
+	fmvVerts[3].u2 = (1.0f / tempTexture2.realWidth) * tempTexture2.width;
 	fmvVerts[3].v2 = 0.0f;
 
-	fmvVerts[3].u3 = 1.0f;
+	fmvVerts[3].u3 = (1.0f / tempTexture2.realWidth) * tempTexture2.width;
 	fmvVerts[3].v3 = 0.0f;
 
 	d3d.fmvDecl->Set();
@@ -792,63 +848,6 @@ void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha)
 	orthoVertex[orthoVBOffset].z = 1.0f;
 	orthoVertex[orthoVBOffset].colour = colour;
 	orthoVertex[orthoVBOffset].u = 0.0f;
-	orthoVertex[orthoVBOffset].v = 0.0f;
-	orthoVBOffset++;
-
-	orthoList->CreateOrthoIndices(orthoIndex);
-}
-
-void DrawHUDQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, float *UVList, texID_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
-{
-	if (!UVList)
-		return;
-
-	assert (textureID != -1);
-
-	float x1 = WPos2DC(x);
-	float y1 = HPos2DC(y);
-
-	float x2 = WPos2DC(x + width);
-	float y2 = HPos2DC(y + height);
-
-	uint32_t texturePOW2Width, texturePOW2Height;
-	Tex_GetDimensions(textureID, texturePOW2Width, texturePOW2Height);
-
-	orthoList->AddItem(4, textureID, translucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
-
-	// bottom left
-	orthoVertex[orthoVBOffset].x = x1;
-	orthoVertex[orthoVBOffset].y = y2;
-	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = 0.0f;
-	orthoVertex[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
-	orthoVBOffset++;
-
-	// top left
-	orthoVertex[orthoVBOffset].x = x1;
-	orthoVertex[orthoVBOffset].y = y1;
-	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = 0.0f;
-	orthoVertex[orthoVBOffset].v = 0.0f;
-	orthoVBOffset++;
-
-	// bottom right
-	orthoVertex[orthoVBOffset].x = x2;
-	orthoVertex[orthoVBOffset].y = y2;
-	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
-	orthoVertex[orthoVBOffset].v = (1.0f / texturePOW2Height) * height;
-	orthoVBOffset++;
-
-	// top right
-	orthoVertex[orthoVBOffset].x = x2;
-	orthoVertex[orthoVBOffset].y = y1;
-	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = colour;
-	orthoVertex[orthoVBOffset].u = (1.0f / texturePOW2Width) * width;
 	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
 
@@ -1376,15 +1375,15 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 
-		mainVertex[vb].sx = (float)vertices->X;
-		mainVertex[vb].sy = (float)-vertices->Y;
-		mainVertex[vb].sz = (float)vertices->Z;
+		mainVertex[vb].x = (float)vertices->X;
+		mainVertex[vb].y = (float)-vertices->Y;
+		mainVertex[vb].z = (float)vertices->Z;
 
 		mainVertex[vb].color = RGBALIGHT_MAKE(GammaValues[vertices->R], GammaValues[vertices->G], GammaValues[vertices->B], vertices->A);
-		mainVertex[vb].specular = RGBALIGHT_MAKE(GammaValues[vertices->SpecularR], GammaValues[vertices->SpecularG], GammaValues[vertices->SpecularB], 255);
+		mainVertex[vb].specular = RGBALIGHT_MAKE(GammaValues[vertices->SpecularR], GammaValues[vertices->SpecularG], GammaValues[vertices->SpecularB], /*255*/0);
 
-		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
-		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
+		mainVertex[vb].u = (float)(vertices->U) * RecipW;
+		mainVertex[vb].v = (float)(vertices->V) * RecipH;
 		vb++;
 	}
 
@@ -1404,9 +1403,9 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 
-		mainVertex[vb].sx = (float)vertices->X;
-		mainVertex[vb].sy = (float)-vertices->Y;
-		mainVertex[vb].sz = (float)vertices->Z;
+		mainVertex[vb].x = (float)vertices->X;
+		mainVertex[vb].y = (float)-vertices->Y;
+		mainVertex[vb].z = (float)vertices->Z;
 
 		if (flags & iflag_transparent)
 		{
@@ -1417,9 +1416,9 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 			mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R, vertices->G, vertices->B, 255);
 		}
 
-		mainVertex[vb].specular = (RCOLOR)1.0f;
-		mainVertex[vb].tu = 0.0f;
-		mainVertex[vb].tv = 0.0f;
+		mainVertex[vb].specular = RGBLIGHT_MAKE(255, 255, 255);
+		mainVertex[vb].u = 0.0f;
+		mainVertex[vb].v = 0.0f;
 		vb++;
 	}
 
@@ -1434,14 +1433,14 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 
-		mainVertex[vb].sx = (float)vertices->X;
-		mainVertex[vb].sy = (float)-vertices->Y;
-		mainVertex[vb].sz = (float)vertices->Z;
+		mainVertex[vb].x = (float)vertices->X;
+		mainVertex[vb].y = (float)-vertices->Y;
+		mainVertex[vb].z = (float)vertices->Z;
 
 		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R, vertices->G, vertices->B, vertices->A);
-		mainVertex[vb].specular = (RCOLOR)1.0f;
-		mainVertex[vb].tu = 0.0f;
-		mainVertex[vb].tv = 0.0f;
+		mainVertex[vb].specular = RCOLOR_ARGB(0,0,0,0);
+		mainVertex[vb].u = 0.0f;
+		mainVertex[vb].v = 0.0f;
 		vb++;
 	}
 
@@ -1466,9 +1465,9 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 
-		mainVertex[vb].sx = (float)vertices->X;
-		mainVertex[vb].sy = (float)-vertices->Y;
-		mainVertex[vb].sz = (float)vertices->Z;
+		mainVertex[vb].x = (float)vertices->X;
+		mainVertex[vb].y = (float)-vertices->Y;
+		mainVertex[vb].z = (float)vertices->Z;
 
 		if (CloakedPredatorIsMoving)
 		{
@@ -1481,8 +1480,8 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
 
-		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
-		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
+		mainVertex[vb].u = (float)(vertices->U) * RecipW;
+		mainVertex[vb].v = (float)(vertices->V) * RecipH;
 		vb++;
 	}
 
@@ -1536,17 +1535,6 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	orthoVBOffset++;
 
 	orthoList->CreateOrthoIndices(orthoIndex);
-}
-
-void D3D_HUD_Setup(void)
-{
-	/*
-	if (D3DZFunc != D3DCMP_LESSEQUAL)
-	{
-		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
-		D3DZFunc = D3DCMP_LESSEQUAL;
-	}
-	*/ // bjd - fixme
 }
 
 void D3D_HUDQuad_Output(texID_t textureID, struct VertexTag *quadVerticesPtr, uint32_t colour, enum FILTERING_MODE_ID filteringType)
@@ -1632,9 +1620,9 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 
 		for (uint32_t i = 0; i < 3; i++)
 		{
-			mainVertex[vb].sx = (float)verticesPtr->vx;
-			mainVertex[vb].sy = (float)-verticesPtr->vy;
-			mainVertex[vb].sz = (float)verticesPtr->vz; // bjd - CHECK
+			mainVertex[vb].x = (float)verticesPtr->vx;
+			mainVertex[vb].y = (float)-verticesPtr->vy;
+			mainVertex[vb].z = (float)verticesPtr->vz; // bjd - CHECK
 
 			if (i==3)
 			{
@@ -1646,8 +1634,8 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 			}
 
 			mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-			mainVertex[vb].tu = 0.0f;
-			mainVertex[vb].tv = 0.0f;
+			mainVertex[vb].u = 0.0f;
+			mainVertex[vb].v = 0.0f;
 
 			vb++;
 			verticesPtr++;
@@ -1663,7 +1651,9 @@ void D3D_DecalSystem_Setup()
 	ExecuteBuffer();
 	LockExecuteBuffer();
 
-	ChangeZWriteEnable(ZWRITE_DISABLED);
+//	d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS  );
+
+//	ChangeZWriteEnable(ZWRITE_DISABLED);
 }
 
 void D3D_DecalSystem_End()
@@ -1675,7 +1665,9 @@ void D3D_DecalSystem_End()
 	ExecuteBuffer();
 	LockExecuteBuffer();
 
-	ChangeZWriteEnable(ZWRITE_ENABLED);
+//	d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+
+//	ChangeZWriteEnable(ZWRITE_ENABLED);
 }
 
 void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
@@ -1687,7 +1679,7 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 
 	float RecipW, RecipH;
 	RCOLOR colour;
-
+/*
 	if (decalPtr->DecalID == DECAL_FMV)
 	{
 		#if !FMV_ON
@@ -1702,7 +1694,7 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 		textureID = NO_TEXTURE;
 	}
 
-	else if (decalPtr->DecalID == DECAL_SHAFTOFLIGHT || decalPtr->DecalID == DECAL_SHAFTOFLIGHT_OUTER)
+	else*/ if (decalPtr->DecalID == DECAL_SHAFTOFLIGHT || decalPtr->DecalID == DECAL_SHAFTOFLIGHT_OUTER)
 	{
 		textureID = NO_TEXTURE;
 	}
@@ -1720,9 +1712,9 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 		int intensity = LightIntensityAtPoint(decalPtr->Vertices);
 		colour = RGBALIGHT_MAKE
 	  		  	(
-	  		   		MUL_FIXED(intensity,decalDescPtr->RedScale[CurrentVisionMode]),
-	  		   		MUL_FIXED(intensity,decalDescPtr->GreenScale[CurrentVisionMode]),
-	  		   		MUL_FIXED(intensity,decalDescPtr->BlueScale[CurrentVisionMode]),
+	  		   		MUL_FIXED(intensity, decalDescPtr->RedScale[CurrentVisionMode]),
+	  		   		MUL_FIXED(intensity, decalDescPtr->GreenScale[CurrentVisionMode]),
+	  		   		MUL_FIXED(intensity, decalDescPtr->BlueScale[CurrentVisionMode]),
 	  		   		decalDescPtr->Alpha
 	  		   	);
 	}
@@ -1754,15 +1746,15 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 
-		mainVertex[vb].sx = (float)vertices->X;
-		mainVertex[vb].sy = (float)-vertices->Y;
-		mainVertex[vb].sz = (float)vertices->Z - 50;
+		mainVertex[vb].x = (float)vertices->X;
+		mainVertex[vb].y = (float)-vertices->Y;
+		mainVertex[vb].z = (float)vertices->Z;
 
 		mainVertex[vb].color = colour;
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0, 0, 0, 0);
 
-		mainVertex[vb].tu = (float)(vertices->U) * RecipW;
-		mainVertex[vb].tv = (float)(vertices->V) * RecipH;
+		mainVertex[vb].u = (float)(vertices->U) * RecipW;
+		mainVertex[vb].v = (float)(vertices->V) * RecipH;
 		vb++;
 	}
 
@@ -1800,10 +1792,8 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	// steam jets, pulse rifle muzzle flash, wall lights, fire (inc aliens on fire) etc
 	PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
 
-	texID_t textureID = SpecialFXImageNumber;
-
 	uint32_t texWidth, texHeight;
-	Tex_GetDimensions(textureID, texWidth, texHeight);
+	Tex_GetDimensions(SpecialFXImageNumber, texWidth, texHeight);
 
 	float RecipW = 1.0f / (float) texWidth;
 	float RecipH = 1.0f / (float) texHeight;
@@ -1812,7 +1802,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	// 1: Check our VB and IBs are big enough?
 
 	// 2: If we're ok to add, add a RenderItem
-	particleList->AddItem(RenderPolygon.NumberOfVertices, textureID, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP, ZWRITE_DISABLED);
+	particleList->AddItem(RenderPolygon.NumberOfVertices, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP, ZWRITE_DISABLED);
 
 	RCOLOR colour;
 
@@ -1875,15 +1865,15 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 			zvalue = (float)vertices->Z;
 		}
 
-		particleVertex[pVb].sx = (float)vertices->X;
-		particleVertex[pVb].sy = (float)vertices->Y;
-		particleVertex[pVb].sz = (float)vertices->Z;
+		particleVertex[pVb].x = (float)vertices->X;
+		particleVertex[pVb].y = (float)vertices->Y;
+		particleVertex[pVb].z = (float)vertices->Z;
 
 		particleVertex[pVb].color = colour;
-		particleVertex[pVb].specular = RGBALIGHT_MAKE(0,0,0,255);
+		particleVertex[pVb].specular = RGBALIGHT_MAKE(0,0,0,/*255*/0);
 
-		particleVertex[pVb].tu = ((float)(vertices->U)/* + 0.5f*/) * RecipW;
-		particleVertex[pVb].tv = ((float)(vertices->V)/* + 0.5f*/) * RecipH;
+		particleVertex[pVb].u = ((float)(vertices->U)/* + 0.5f*/) * RecipW;
+		particleVertex[pVb].v = ((float)(vertices->V)/* + 0.5f*/) * RecipH;
 		pVb++;
 	}
 
@@ -2461,15 +2451,15 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 
-		mainVertex[vb].sx = (float)vertices->X;
-		mainVertex[vb].sy = (float)-vertices->Y;
-		mainVertex[vb].sz = (float)vertices->Z;
+		mainVertex[vb].x = (float)vertices->X;
+		mainVertex[vb].y = (float)-vertices->Y;
+		mainVertex[vb].z = (float)vertices->Z;
 
 		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,/*255*/0);
 
-		mainVertex[vb].tu = ((float)vertices->U) * RecipW;
-		mainVertex[vb].tv = ((float)vertices->V) * RecipH;
+		mainVertex[vb].u = ((float)vertices->U) * RecipW;
+		mainVertex[vb].v = ((float)vertices->V) * RecipH;
 		vb++;
 	}
 
@@ -2486,15 +2476,15 @@ void D3D_DrawMoltenMetalMesh_Unclipped()
 
 	for (uint32_t i = 0; i < 256; i++)
 	{
-		mainVertex[vb].sx = (float)point->vx;
-		mainVertex[vb].sy = (float)-point->vy;
-		mainVertex[vb].sz = (float)point->vz;
+		mainVertex[vb].x = (float)point->vx;
+		mainVertex[vb].y = (float)-point->vy;
+		mainVertex[vb].z = (float)point->vz;
 
 		mainVertex[vb].color = MeshVertexColour[i];
 		mainVertex[vb].specular = 0;
 
-		mainVertex[vb].tu = pointWS->vx*WaterUScale+(1.0f/256.0f);
-		mainVertex[vb].tv =	pointWS->vy*WaterVScale+(1.0f/256.0f);
+		mainVertex[vb].u = pointWS->vx*WaterUScale+(1.0f/256.0f);
+		mainVertex[vb].v =	pointWS->vy*WaterVScale+(1.0f/256.0f);
 
 		vb++;
 		point++;
@@ -2764,26 +2754,26 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 		colour = RGBA_MAKE(MUL_FIXED(c,rScale),MUL_FIXED(c,gScale),MUL_FIXED(c,bScale),255);
 /*
 		// top right?
-		mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
-		mainVertex[vb].sy = (float)yTop;
-		mainVertex[vb].sz = 0.0f;
+		mainVertex[vb].x = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		mainVertex[vb].y = (float)yTop;
+		mainVertex[vb].z = 0.0f;
 //		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = 0.0f;
-		mainVertex[vb].tv = 0.0f;
+		mainVertex[vb].u = 0.0f;
+		mainVertex[vb].v = 0.0f;
 
 		vb++;
 
 		// bottom right?
-		mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
-		mainVertex[vb].sy = (float)yBottom;
-		mainVertex[vb].sz = 0.0f;
+		mainVertex[vb].x = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		mainVertex[vb].y = (float)yBottom;
+		mainVertex[vb].z = 0.0f;
 //		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = 0.0f;
-		mainVertex[vb].tv = 0.0f;
+		mainVertex[vb].u = 0.0f;
+		mainVertex[vb].v = 0.0f;
 
 		vb++;
 */
@@ -2792,25 +2782,25 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 		colour = RGBA_MAKE(MUL_FIXED(c,rScale),MUL_FIXED(c,gScale),MUL_FIXED(c,bScale),255);
 /*
 		//
-		mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
-		mainVertex[vb].sy = (float)yBottom;
-		mainVertex[vb].sz = 0.0f;
+		mainVertex[vb].x = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		mainVertex[vb].y = (float)yBottom;
+		mainVertex[vb].z = 0.0f;
 //		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = 0.0f;
-		mainVertex[vb].tv = 0.0f;
+		mainVertex[vb].u = 0.0f;
+		mainVertex[vb].v = 0.0f;
 
 		vb++;
 
-		mainVertex[vb].sx = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
-		mainVertex[vb].sy = (float)yTop;
-		mainVertex[vb].sz = 0.0f;
+		mainVertex[vb].x = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		mainVertex[vb].y = (float)yTop;
+		mainVertex[vb].z = 0.0f;
 //		mainVertex[vb].rhw = 1.0f;
 		mainVertex[vb].color = colour;
 		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].tu = 0.0f;
-		mainVertex[vb].tv = 0.0f;
+		mainVertex[vb].u = 0.0f;
+		mainVertex[vb].v = 0.0f;
 */
 		vb++;
 
@@ -2984,7 +2974,7 @@ extern void D3D_ScreenInversionOverlay()
 
 extern void D3D_PredatorScreenInversionOverlay()
 {
-	int colour = 0xffffffff;
+	uint32_t colour = 0xffffffff;
 
 	orthoList->AddItem(4, NO_TEXTURE, TRANSLUCENCY_DARKENINGCOLOUR, FILTERING_BILINEAR_ON, TEXTURE_WRAP);
 
@@ -3124,11 +3114,9 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 	for (int field=0; field<3; field++)
 	{
 		int i=0;
-		int x;
-		for (x=(0+field*15); x<(16+field*15); x++)
+		for (int x=(0+field*15); x<(16+field*15); x++)
 		{
-			int z;
-			for (z=0; z<16; z++)
+			for (int z=0; z<16; z++)
 			{
 				VECTORCH *point = &MeshVertex[i];
 				{

@@ -953,7 +953,7 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 				PlayerDetails newPlayer = {0};
 
 				// copy message data to player struct
-				memcpy(&newPlayer, &msgP[MESSAGEHEADERSIZE], sizeof(PlayerDetails));
+				memcpy(&newPlayer, &msgP[kMessageHeaderSize], sizeof(PlayerDetails));
 				// FIXME if (DPPLAYERTYPE_PLAYER == newPlayer.playerType)
 				{
 					int id = newPlayer.playerID;
@@ -987,7 +987,7 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 			if ((AvP.Network == I_Host))
 			{	
 				DPMSG_DESTROYPLAYERORGROUP destroyMessage;
-				memcpy(&destroyMessage, &msgP[MESSAGEHEADERSIZE], sizeof(DPMSG_DESTROYPLAYERORGROUP));
+				memcpy(&destroyMessage, &msgP[kMessageHeaderSize], sizeof(DPMSG_DESTROYPLAYERORGROUP));
 
 				if (destroyMessage.playerType == NET_PLAYERTYPE_PLAYER)
 				{
@@ -1182,7 +1182,7 @@ static void ProcessGameMessage(DPID senderId, uint8_t *msgP, unsigned int msgSiz
 		return;
 
 	/* skip past our header */
-	subMessagePtr = &msgP[MESSAGEHEADERSIZE];
+	subMessagePtr = &msgP[kMessageHeaderSize];
 	endOfMessage = &msgP[msgSize];
 
 	/* Read through to the end of the message... */

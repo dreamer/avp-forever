@@ -57,28 +57,26 @@
 
 
 extern DISPLAYBLOCK* Player;
-
 extern int NumActiveBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
 extern int NumOnScreenBlocks;
 extern DISPLAYBLOCK *OnScreenBlockList[];
 extern int NumActiveStBlocks;
 extern STRATEGYBLOCK *ActiveStBlockList[maxstblocks];
-
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 extern signed int RequestFadeToBlackLevel;
 extern ACTIVESOUNDSAMPLE ActiveSounds[];
-
-extern int SmartTargetSightX, SmartTargetSightY;
+extern fixed_t SmartTargetSightX, SmartTargetSightY;
 extern char CurrentlySmartTargetingObject;
 extern DISPLAYBLOCK *SmartTarget_Object;
 extern DISPLAYBLOCK *Old_SmartTarget_Object;
+extern int Alien_Visible_Weapon;
+extern HMODELCONTROLLER PlayersWeaponHModelController;
 
 /* In 16.16 for smoothness. On-screen coords for the smart targeting system's sight */
 
-int GunMuzzleSightX, GunMuzzleSightY;
+fixed_t GunMuzzleSightX, GunMuzzleSightY;
 /* In 16.16 for smoothness. On-screen coords indicating to where the gun's muzzle is pointing */
 
 /* motion tracker info */
@@ -116,6 +114,7 @@ int MotionTrackerVolume = ONE_FIXED;
 
 int CameraZoomLevel;
 extern float CameraZoomScale;
+extern bool AlienBiteAttackInProgress;
 static int DrawScanlineOverlay;
 static float ScanlineLevel;
 
@@ -123,11 +122,12 @@ static float ScanlineLevel;
 /*KJL****************************************************************************************
 *                                    P R O T O T Y P E S	                                *
 ****************************************************************************************KJL*/
-//extern void SmartTarget(int speed);
 extern void SmartTarget(int speed,int projectile_speed);
 
 extern void DrawScanlinesOverlay(float level);
 extern void RenderThisDisplayblock(DISPLAYBLOCK *dbPtr);
+extern void PlotFaceHugger(STRATEGYBLOCK *sbPtr);
+extern STRATEGYBLOCK *GetBitingTarget(void);
 void DisplayPredatorHealthAndEnergy(void);
 void InitHUD();
 static void InitMarineHUD();
@@ -198,15 +198,12 @@ void InitMarineHUD(void)
 	****************************************************************************************KJL*/
 	PlatformSpecificInitMarineHUD();
 
-	SmartTarget_Object=NULL;
-	Old_SmartTarget_Object=NULL;
+	SmartTarget_Object = NULL;
+	Old_SmartTarget_Object = NULL;
 
+	for (int i = 0; i < MAX_NO_OF_COMMON_HUD_DIGITS; i++)
 	{
-		int i;
-//		for (i=0; i<MAX_NO_OF_MARINE_HUD_DIGITS; i++)
-		/* array size is 6, MAX_NO_OF_MARINE_HUD_DIGITS = 23.. */
-		for (i=0; i<MAX_NO_OF_COMMON_HUD_DIGITS; i++)
-			ValueOfHUDDigit[i]=0;
+		ValueOfHUDDigit[i] = 0;
 	}
 
 	/* Start the gun sight at the centre of the screen */
@@ -228,8 +225,8 @@ static void InitAlienHUD(void)
 	AlienTeethOffset = 0;
 	AlienTongueOffset = 0;
 
-	SmartTarget_Object=NULL;
-	Old_SmartTarget_Object=NULL;
+	SmartTarget_Object = NULL;
+	Old_SmartTarget_Object = NULL;
 }
 
 void ReInitHUD(void)
@@ -237,7 +234,6 @@ void ReInitHUD(void)
 	/* KJL 14:21:33 17/11/98 - Alien */
 	AlienTeethOffset = 0;
 	AlienTongueOffset = 0;
-
 
 	/* KJL 14:21:48 17/11/98 - Marine */
 	/* Start the gun sight at the centre of the screen */
@@ -309,7 +305,6 @@ void MaintainHUD(void)
 	if (playerStatusPtr->MyFaceHugger!=NULL)
 	{
 		/* YUCK! */
-		extern void PlotFaceHugger(STRATEGYBLOCK *sbPtr);
 		PlotFaceHugger(playerStatusPtr->MyFaceHugger);
 	}
 	else if (playerStatusPtr->IsAlive)
@@ -446,15 +441,12 @@ void MaintainHUD(void)
 		}
 	}
 	{
-		extern int AlienBiteAttackInProgress;
 		if (AlienBiteAttackInProgress)
 		{
-			extern void D3D_FadeDownScreen(int brightness, int colour);
-			int b;
 			if (CameraZoomScale!=0.25f)
 			{
 				//f2i(b,CameraZoomScale*65536.0f);
-				b = (int)(CameraZoomScale * 65536.0f);
+				int b = (int)(CameraZoomScale * 65536.0f);
 
 				if (b < 32768) 
 					b = 32768;
@@ -469,8 +461,6 @@ void MaintainHUD(void)
 	}
 	else
 	{
-
-		extern int PlayerDamagedOverlayIntensity;
 		int intensity = PlayerDamagedOverlayIntensity>>12;
 //		if (intensity>255) intensity = 255;
 		if (intensity>128) intensity = 128;
@@ -481,23 +471,26 @@ void MaintainHUD(void)
 		}
 
 		PlayerDamagedOverlayIntensity -= NormalFrameTime<<5;
-		if (PlayerDamagedOverlayIntensity<0) PlayerDamagedOverlayIntensity=0;
+
+		if (PlayerDamagedOverlayIntensity < 0) 
+			PlayerDamagedOverlayIntensity = 0;
 	}
 	{
 		if (FadingGameInAfterLoading)
 		{
-			extern void D3D_FadeDownScreen(int brightness, int colour);
 			D3D_FadeDownScreen(ONE_FIXED-FadingGameInAfterLoading, 0);
 
-			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2,FadingGameInAfterLoading);
+			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, FadingGameInAfterLoading);
 
-			FadingGameInAfterLoading-=RealFrameTime/2;
-			if (FadingGameInAfterLoading<0) FadingGameInAfterLoading = 0;
+			FadingGameInAfterLoading -= RealFrameTime/2;
+
+			if (FadingGameInAfterLoading < 0) 
+				FadingGameInAfterLoading = 0;
 		}
 	}
-	if(!playerStatusPtr->IsAlive)
+	if (!playerStatusPtr->IsAlive)
 	{
-		if (AvP.Network==I_No_Network)
+		if (AvP.Network == I_No_Network)
 		{
 			DoFailedLevelStatisticsScreen();
 		}
@@ -506,7 +499,7 @@ void MaintainHUD(void)
 			// place multiplayer stuff here - e.g. full scores/frags et al
 		}
 	}
-    if(AvP.Network != I_No_Network)
+    if (AvP.Network != I_No_Network)
 	{
 		DoMultiplayerSpecificHud();
 	}
@@ -749,6 +742,7 @@ int ObjectShouldAppearOnMotionTracker(STRATEGYBLOCK *sbPtr)
 
 	return 1;
 }
+
 static int DoMotionTrackerBlips(void)
 {
 	DYNAMICSBLOCK *playerDynPtr = Player->ObStrategyBlock->DynPtr;
@@ -837,7 +831,8 @@ static void DisplayHealthAndArmour(void)
 	switch (AvP.PlayerType)
 	{
 		case I_Marine:
-			switch (AvP.Difficulty) {
+			switch (AvP.Difficulty) 
+			{
 				case I_Easy:
 					NpcData=GetThisNpcData(I_PC_Marine_Easy);
 					break;
@@ -894,7 +889,6 @@ static void DisplayHealthAndArmour(void)
 	}
 
 	Render_HealthAndArmour(health,armour);
-
 }
 
 static void DisplayMarinesAmmo(void)
@@ -977,7 +971,6 @@ static void DisplayMarinesAmmo(void)
 			0
         );
 	}
-
 }
 
 static void HandleMarineWeapon(void)
@@ -1075,35 +1068,31 @@ static void DrawMarineSights(void)
 		PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 		PLAYER_WEAPON_DATA *weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
 
-	    if (TemplateWeapon[weaponPtr->WeaponIDNumber].IsSmartTarget)
-	    {
+		if (TemplateWeapon[weaponPtr->WeaponIDNumber].IsSmartTarget)
+		{
 			if (MIRROR_CHEATMODE)
 			{
-		     	if (CurrentlySmartTargetingObject)	/* tracking target so use the red box */
-		     	{
-		     		//BLTGunSightToScreen(ScreenDescriptorBlock.SDB_Width - (SmartTargetSightX>>16),SmartTargetSightY>>16,GUNSIGHT_REDBOX);
+			if (CurrentlySmartTargetingObject)	/* tracking target so use the red box */
+				{
 					D3D_BLTGunSightToHUD(ScreenDescriptorBlock.SDB_Width - (SmartTargetSightX>>16),SmartTargetSightY>>16,GUNSIGHT_REDBOX);
 				}
 				else /* not tracking anything, use green box */
 				{
-				   	//BLTGunSightToScreen(ScreenDescriptorBlock.SDB_Width - (SmartTargetSightX>>16),SmartTargetSightY>>16,GUNSIGHT_GREENBOX);
 					D3D_BLTGunSightToHUD(ScreenDescriptorBlock.SDB_Width - (SmartTargetSightX>>16),SmartTargetSightY>>16,GUNSIGHT_GREENBOX);
 				}
 			}
 			else
 			{
-		     	if (CurrentlySmartTargetingObject)	/* tracking target so use the red box */
-		     	{
-		     		//BLTGunSightToScreen(SmartTargetSightX>>16,SmartTargetSightY>>16,GUNSIGHT_REDBOX);
+				if (CurrentlySmartTargetingObject)	/* tracking target so use the red box */
+				{
 					D3D_BLTGunSightToHUD(SmartTargetSightX>>16,SmartTargetSightY>>16,GUNSIGHT_REDBOX);
 				}
 				else /* not tracking anything, use green box */
 				{
-				   	//BLTGunSightToScreen(SmartTargetSightX>>16,SmartTargetSightY>>16,GUNSIGHT_GREENBOX);
 					D3D_BLTGunSightToHUD(SmartTargetSightX>>16,SmartTargetSightY>>16,GUNSIGHT_GREENBOX);
 				}
 			}
-	    }
+		}
 	}
 }
 
@@ -1510,20 +1499,16 @@ static void HandlePredatorWeapon(void)
 
 	//PositionPlayersWeapon();
 
-	{
-		extern void RenderThisDisplayblock(DISPLAYBLOCK *dbPtr);
+	/* draw 3d muzzle flash */
+	if ((twPtr->MuzzleFlashShapeName != NULL)
+	  &&(!twPtr->PrimaryIsMeleeWeapon)
+	  &&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY) )
+		RenderThisDisplayblock(&PlayersWeaponMuzzleFlash);
 
-		/* draw 3d muzzle flash */
-		if ((twPtr->MuzzleFlashShapeName != NULL)
-		  &&(!twPtr->PrimaryIsMeleeWeapon)
-		  &&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY) )
-			RenderThisDisplayblock(&PlayersWeaponMuzzleFlash);
+	/* draw 3d weapon */
+	if (twPtr->WeaponShapeName != NULL)
+		RenderThisDisplayblock(&PlayersWeapon);
 
-		/* draw 3d weapon */
-		if (twPtr->WeaponShapeName != NULL)
-			RenderThisDisplayblock(&PlayersWeapon);
-
-	}
 	if (twPtr->PrimaryIsMeleeWeapon)
 	{
 		GunMuzzleSightX = (ScreenDescriptorBlock.SDB_Width<<15);
@@ -1563,83 +1548,97 @@ static void DrawPredatorSights(void)
 	PLAYER_WEAPON_DATA *weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
 
 	/* Enforce quiet unless we've got the plasmacaster. */
-	if (weaponPtr->WeaponIDNumber!=WEAPON_PRED_SHOULDERCANNON) {
-  		if(predHUDSoundHandle != SOUND_NOACTIVEINDEX) {
-       		Sound_Stop(predHUDSoundHandle);
-		}
-	} else {
-		/* Think about plasmacaster HUD sounds! */
-		textprint("PredSight_LockOnTime %d\n",PredSight_LockOnTime);
-		if ((PredSight_LockOnTime==0)
-			&&(weaponPtr->CurrentState!=WEAPONSTATE_SWAPPING_IN)
-			&&(weaponPtr->CurrentState!=WEAPONSTATE_READYING)
-			&&(SmartTarget_Object)) {
-			/* We must be locked on and steady. */
-  			if(predHUDSoundHandle != SOUND_NOACTIVEINDEX) {
-				if (ActiveSounds[predHUDSoundHandle].soundIndex!=SID_PREDATOR_PLASMACASTER_TARGET_LOCKED) {
-		       		Sound_Stop(predHUDSoundHandle);
-				}
-			}
-  			if(predHUDSoundHandle == SOUND_NOACTIVEINDEX) {
-	  			Sound_Play(SID_PREDATOR_PLASMACASTER_TARGET_LOCKED,"elh",&predHUDSoundHandle);
-			}
-		} else {
-			/* Not locked on - don't be looping! */
-	  		if(predHUDSoundHandle != SOUND_NOACTIVEINDEX) {
-	       		Sound_Stop(predHUDSoundHandle);
-				/* We were locked on... */
-				Sound_Play(SID_PREDATOR_PLASMACASTER_TARGET_LOST,"h");
-			}
+	if (weaponPtr->WeaponIDNumber!=WEAPON_PRED_SHOULDERCANNON)
+	{
+		if (predHUDSoundHandle != SOUND_NOACTIVEINDEX)
+		{
+			Sound_Stop(predHUDSoundHandle);
 		}
 	}
-
-    if (TemplateWeapon[weaponPtr->WeaponIDNumber].IsSmartTarget)
-    {
-		/* ChrisF 19/2/99 Changed this to prevent 'instant' re-targetting. */
-		if ((SmartTarget_Object==NULL)||(SmartTarget_Object!=Old_SmartTarget_Object))
+	else
+	{
+		/* Think about plasmacaster HUD sounds! */
+		textprint("PredSight_LockOnTime %d\n",PredSight_LockOnTime);
+		if ((PredSight_LockOnTime == 0)
+			&&(weaponPtr->CurrentState != WEAPONSTATE_SWAPPING_IN)
+			&&(weaponPtr->CurrentState != WEAPONSTATE_READYING)
+			&&(SmartTarget_Object))
 		{
-			PredSight_LockOnTime = PREDATOR_LOCK_ON_TIME;
-			PredSight_Angle = 0;
-			/* Think about sound... */
-			if (SmartTarget_Object) {
-				Sound_Play(SID_PREDATOR_PLASMACASTER_REDTRIANGLES,"h");
+			/* We must be locked on and steady. */
+			if(predHUDSoundHandle != SOUND_NOACTIVEINDEX)
+			{
+				if (ActiveSounds[predHUDSoundHandle].soundIndex != SID_PREDATOR_PLASMACASTER_TARGET_LOCKED)
+				{
+					Sound_Stop(predHUDSoundHandle);
+				}
+			}
+			if (predHUDSoundHandle == SOUND_NOACTIVEINDEX)
+			{
+				Sound_Play(SID_PREDATOR_PLASMACASTER_TARGET_LOCKED, "elh", &predHUDSoundHandle);
 			}
 		}
 		else
 		{
-			int segmentScale=PredSight_LockOnTime;
+			/* Not locked on - don't be looping! */
+			if (predHUDSoundHandle != SOUND_NOACTIVEINDEX)
+			{
+				Sound_Stop(predHUDSoundHandle);
+				/* We were locked on... */
+				Sound_Play(SID_PREDATOR_PLASMACASTER_TARGET_LOST, "h");
+			}
+		}
+	}
 
+	if (TemplateWeapon[weaponPtr->WeaponIDNumber].IsSmartTarget)
+	{
+		/* ChrisF 19/2/99 Changed this to prevent 'instant' re-targetting. */
+		if ((SmartTarget_Object == NULL) || (SmartTarget_Object != Old_SmartTarget_Object))
+		{
+			PredSight_LockOnTime = PREDATOR_LOCK_ON_TIME;
+			PredSight_Angle = 0;
+			/* Think about sound... */
+			if (SmartTarget_Object)
+			{
+				Sound_Play(SID_PREDATOR_PLASMACASTER_REDTRIANGLES, "h");
+			}
+		}
+		else
+		{
+			int segmentScale = PredSight_LockOnTime;
 
-			if (segmentScale<=ONE_FIXED)
+			if (segmentScale <= ONE_FIXED)
 			{
 				RenderPredatorTargetingSegment((PredSight_Angle+1365*2)&4095, segmentScale, PredSight_LockOnTime);
 			}
 
 			segmentScale -= PREDATOR_LOCK_ON_TIME/5;
-			if (segmentScale<0) segmentScale = 0;
-			if (segmentScale<=ONE_FIXED)
+			if (segmentScale < 0) segmentScale = 0;
+			if (segmentScale <= ONE_FIXED)
 			{
 				RenderPredatorTargetingSegment((PredSight_Angle+1365)&4095, segmentScale, PredSight_LockOnTime);
 			}
 
 			segmentScale -= PREDATOR_LOCK_ON_TIME/5;
-			if (segmentScale<0) segmentScale = 0;
-			if (segmentScale>ONE_FIXED) segmentScale = ONE_FIXED;
+			if (segmentScale < 0) segmentScale = 0;
+			if (segmentScale > ONE_FIXED) segmentScale = ONE_FIXED;
 
-	  		RenderPredatorTargetingSegment(PredSight_Angle, segmentScale, PredSight_LockOnTime);
+			RenderPredatorTargetingSegment(PredSight_Angle, segmentScale, PredSight_LockOnTime);
 
-			if (PredSight_LockOnTime>0)
+			if (PredSight_LockOnTime > 0)
 			{
 				PredSight_LockOnTime -= NormalFrameTime*PREDATOR_LOCK_ON_SPEED;
 
-				if (PredSight_LockOnTime<0)
+				if (PredSight_LockOnTime < 0)
 				{
 					PredSight_LockOnTime = 0;
 					/* Locked on - play a sound. */
-					if (weaponPtr->WeaponIDNumber==WEAPON_PRED_DISC) {
-						Sound_Play(SID_PREDATOR_DISK_TARGET_LOCKED,"h");
-					} else if (weaponPtr->WeaponIDNumber==WEAPON_PRED_SHOULDERCANNON) {
-						Sound_Play(SID_PREDATOR_PLASMACASTER_TARGET_FOUND,"h");
+					if (weaponPtr->WeaponIDNumber == WEAPON_PRED_DISC)
+					{
+						Sound_Play(SID_PREDATOR_DISK_TARGET_LOCKED, "h");
+					}
+					else if (weaponPtr->WeaponIDNumber == WEAPON_PRED_SHOULDERCANNON)
+					{
+						Sound_Play(SID_PREDATOR_PLASMACASTER_TARGET_FOUND, "h");
 					}
 				}
 			}
@@ -1651,7 +1650,7 @@ static void DrawPredatorSights(void)
 		}
 	}
 	{
-	  	HUDImageDesc imageDesc;
+		HUDImageDesc imageDesc;
 
 		imageDesc.ImageNumber = HUDFontsImageNumber;
 		imageDesc.TopLeftX = (ScreenDescriptorBlock.SDB_Width-16)/2;
@@ -1662,9 +1661,9 @@ static void DrawPredatorSights(void)
 		imageDesc.Width = 17;
 		imageDesc.Scale = ONE_FIXED;
 		imageDesc.Translucency = 255;
-		imageDesc.Red = 255;
+		imageDesc.Red   = 255;
 		imageDesc.Green = 255;
-		imageDesc.Blue = 255;
+		imageDesc.Blue  = 255;
 		imageDesc.filterTexture = FALSE;
 
 		Draw_HUDImage(&imageDesc);
@@ -1673,7 +1672,6 @@ static void DrawPredatorSights(void)
 
 void DrawWristDisplay(void)
 {
-	extern HMODELCONTROLLER PlayersWeaponHModelController;
 	SECTION_DATA *sectionPtr;
 
  	char *sectionName[]= {"Dum bar display","Dum 1 display","Dum 2 display","Dum 3 display","Dum 4 display"};
@@ -1758,7 +1756,6 @@ static void HandleAlienWeapon(void)
 {
 	PLAYER_WEAPON_DATA *weaponPtr;
 	TEMPLATE_WEAPON_DATA *twPtr;
-	extern int Alien_Visible_Weapon;
 
     /* access the extra data hanging off the strategy block */
 	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
@@ -1775,23 +1772,19 @@ static void HandleAlienWeapon(void)
 
 	//PositionPlayersWeapon();
 
-	{
-		extern void RenderThisDisplayblock(DISPLAYBLOCK *dbPtr);
+	/* draw 3d muzzle flash */
+	if ((twPtr->MuzzleFlashShapeName != NULL)
+	  &&(!twPtr->PrimaryIsMeleeWeapon)
+	  &&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY) )
+		RenderThisDisplayblock(&PlayersWeaponMuzzleFlash);
 
-		/* draw 3d muzzle flash */
-		if ((twPtr->MuzzleFlashShapeName != NULL)
-		  &&(!twPtr->PrimaryIsMeleeWeapon)
-		  &&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY) )
-			RenderThisDisplayblock(&PlayersWeaponMuzzleFlash);
+	/* draw 3d weapon */
+	/* if there is no shape name then return */
+	if (twPtr->WeaponShapeName == NULL)
+		return;
 
-		/* draw 3d weapon */
-		/* if there is no shape name then return */
-		if (twPtr->WeaponShapeName == NULL)
-			return;
+	RenderThisDisplayblock(&PlayersWeapon);
 
-		RenderThisDisplayblock(&PlayersWeapon);
-
-	}
 	//if ((twPtr->PrimaryIsMeleeWeapon)&&
 	if ((weaponPtr->WeaponIDNumber == WEAPON_ALIEN_CLAW)&&(Alien_Visible_Weapon==0))
 	{
@@ -1832,7 +1825,6 @@ static void DrawAlienTeeth(void)
 {
 	/* KJL 14:51:00 08/10/98 - test if bite attack is possible */
 	{
-		extern STRATEGYBLOCK *GetBitingTarget(void);
 		if(GetBitingTarget())
 		{
 			if (AlienTeethOffset<ONE_FIXED)
@@ -1950,7 +1942,7 @@ int Fast2dMagnitude(int dx, int dy)
 
 extern void NewOnScreenMessage(char *messagePtr)
 {
-	GADGET_NewOnScreenMessage( messagePtr );
+	GADGET_NewOnScreenMessage(messagePtr);
 }
 
 static void AimGunSight(int aimingSpeed, TEMPLATE_WEAPON_DATA *twPtr)

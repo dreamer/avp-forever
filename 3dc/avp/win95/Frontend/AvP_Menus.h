@@ -327,7 +327,7 @@ typedef struct
 
 #define MAX_NO_OF_SESSIONS 10
 extern SESSION_DESC SessionData[];
-extern int NumberOfSessionsFound;
+extern uint32_t NumberOfSessionsFound;
 
 
 typedef struct

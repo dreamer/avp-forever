@@ -49,8 +49,6 @@
 #include "psndplat.h"
 #include "bh_dummy.h"
 #include "bh_corpse.h"
-
-/* for win95 net game support */
 #include "pldghost.h"
 #include "pldnet.h"
 

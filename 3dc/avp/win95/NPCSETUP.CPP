@@ -178,16 +178,16 @@ LoadedNPC::LoadedNPC(LoadedNPC const & npc2)
 
 LoadedNPC::~LoadedNPC()
 {
-	if (rifname) delete[] rifname;
-	if (filename) delete[] filename;
+	delete[] rifname;
+	delete[] filename;
 }
 
 LoadedNPC & LoadedNPC::operator = (LoadedNPC const & npc2)
 {
 	if (&npc2 != this)
 	{
-		if (rifname) delete[] rifname;
-		if (filename) delete[] filename;
+		delete[] rifname;
+		delete[] filename;
 
 		rifname = npc2.rifname ? new char[strlen(npc2.rifname)+1] : 0;
 		filename = npc2.filename ? new char[strlen(npc2.filename)+1] : 0;

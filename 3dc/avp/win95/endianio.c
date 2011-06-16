@@ -5,7 +5,7 @@ uint8_t GetByte(FILE *fp)
   uint8_t c = fgetc(fp);
   return c;
 }
- 
+
 uint16_t GetLittleWord(FILE *fp)
 {
   uint8_t c1 = fgetc(fp);

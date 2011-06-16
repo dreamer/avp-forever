@@ -1,3 +1,5 @@
+#if 0
+
 #include "chunkpal.hpp"
 #include "mishchnk.hpp"
 
@@ -133,7 +135,7 @@ Preset_Palette::~Preset_Palette ()
 		unsigned char * temp_pd = (unsigned char *)pixel_data;
 		delete[] temp_pd;
 	}
-	if (name) delete[] name;
+	delete[] name;
 }
 
 Preset_Palette::Preset_Palette (Preset_Palette const & c)
@@ -159,11 +161,10 @@ Preset_Palette & Preset_Palette::operator = (Preset_Palette const & c)
 		unsigned char * temp_pd = (unsigned char *)pixel_data;
 		delete[] temp_pd;
 	}
-	if (name)
-	{
-		delete[] name;
-		name = 0;
-	}
+
+	delete[] name;
+	name = 0;
+
 	if (c.name)
 	{
 		name = new char[strlen(c.name)+1];
@@ -303,8 +304,8 @@ Environment_TLT_Chunk::Environment_TLT_Chunk (Chunk_With_Children * parent, cons
 
 Environment_TLT_Chunk::~Environment_TLT_Chunk ()
 {
-	if (table) delete[] table;
-	if (filename) delete[] filename;
+	delete[] table;
+	delete[] filename;
 }
 
 size_t Environment_TLT_Chunk::size_chunk()
@@ -578,7 +579,7 @@ Environment_Game_Mode_Header_Chunk::Environment_Game_Mode_Header_Chunk(Chunk_Wit
 
 Environment_Game_Mode_Header_Chunk::~Environment_Game_Mode_Header_Chunk()
 {
-	if (mode_identifier) delete[] mode_identifier;
+	delete[] mode_identifier;
 
 	while (rif_files.size())
 	{
@@ -647,8 +648,8 @@ RIF_IMPLEMENT_DYNCREATE("RIFCHILD",RIF_Child_Chunk)
 
 RIF_Child_Chunk::~RIF_Child_Chunk()
 {
-	if (filename) delete[] filename;
-	if (rifname) delete[] rifname;
+	delete[] filename;
+	delete[] rifname;
 }
 
 size_t RIF_Child_Chunk::size_chunk()
@@ -927,8 +928,8 @@ Coloured_Polygons_Lookup_Chunk::Coloured_Polygons_Lookup_Chunk (Chunk_With_Child
 
 Coloured_Polygons_Lookup_Chunk::~Coloured_Polygons_Lookup_Chunk ()
 {
-	if (table) delete[] table;
-	if (filename) delete[] filename;
+	delete[] table;
+	delete[] filename;
 }
 
 size_t Coloured_Polygons_Lookup_Chunk::size_chunk()
@@ -997,3 +998,5 @@ void Coloured_Polygons_Lookup_Chunk::fill_data_block (char * data_start)
 		}
 	}
 }
+
+#endif

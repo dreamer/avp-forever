@@ -118,7 +118,6 @@ LOADED_SOUND const * GetSound (char const * fname)
 	}
 	
 	// check if wavname already loaded
-	
 	for (LIF<LOADED_SOUND *> lsi(&loaded_sounds); !lsi.done(); lsi.next())
 	{
 		if (!_stricmp (lsi()->wavname, wavname))

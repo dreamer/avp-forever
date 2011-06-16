@@ -3,22 +3,19 @@
 #include "TextureManager.h"
 #include "io.h"
 #include "Input.h"
-
-extern void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha);
-
 #include "3dc.h"
 #include "inline.h"
 #include "AvP_Menus.h"
 #include "avp_intro.h"
+
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 
 extern void DirectReadKeyboard(void);
-
+extern void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha);
 extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
 
 static BOOL IntroHasAlreadyBeenPlayed = TRUE;
-
 
 void Show_CopyrightInfo(void);
 void Show_Presents(void);
@@ -157,12 +154,12 @@ void Show_CopyrightInfo(void)
 		CheckForWindowsMessages();
 
 		ThisFramesRenderingHasBegun();
-		DrawAvPMenuGfx_Faded(AVPMENUGFX_COPYRIGHT_SCREEN, 0, 0, ONE_FIXED-timeRemaining*2,AVPMENUFORMAT_LEFTJUSTIFIED);
+		DrawAvPMenuGfx_Faded(AVPMENUGFX_COPYRIGHT_SCREEN, 0, 0, ONE_FIXED-timeRemaining*2, AVPMENUFORMAT_LEFTJUSTIFIED);
 		ThisFramesRenderingHasFinished();
 		FlipBuffers();
 
 		FrameCounterHandler();
-		timeRemaining-=NormalFrameTime;
+		timeRemaining -= NormalFrameTime;
 	}
 	while (timeRemaining > 0 && bRunning);
 

@@ -83,11 +83,8 @@ Object_Hierarchy_Data_Chunk::Object_Hierarchy_Data_Chunk (Object_Hierarchy_Chunk
 
 Object_Hierarchy_Data_Chunk::~Object_Hierarchy_Data_Chunk()
 {
-	if (ob_name)
-		delete[] ob_name;
-
-	if(extra_data)
-		delete[] extra_data;
+	delete[] ob_name;
+	delete[] extra_data;
 }
 
 
@@ -204,10 +201,7 @@ Object_Hierarchy_Name_Chunk::Object_Hierarchy_Name_Chunk (Object_Hierarchy_Chunk
 
 Object_Hierarchy_Name_Chunk::~Object_Hierarchy_Name_Chunk()
 {
-	if (hierarchy_name)
-	{
-		delete[] hierarchy_name;
-	}
+	delete[] hierarchy_name;
 }
 
 void Object_Hierarchy_Name_Chunk::fill_data_block (char *data_start)
@@ -320,7 +314,7 @@ Object_Hierarchy_Alternate_Shape_Set_Chunk::Object_Hierarchy_Alternate_Shape_Set
 
 Object_Hierarchy_Alternate_Shape_Set_Chunk::~Object_Hierarchy_Alternate_Shape_Set_Chunk()
 {
-	if(Shape_Set_Name) delete[] Shape_Set_Name;
+	delete[] Shape_Set_Name;
 
 	while(Replaced_Shape_List.size())
 	{
@@ -425,7 +419,7 @@ Hierarchy_Shape_Set_Collection_Chunk::Hierarchy_Shape_Set_Collection_Chunk(Chunk
 
 Hierarchy_Shape_Set_Collection_Chunk::~Hierarchy_Shape_Set_Collection_Chunk()
 {
-	if(Set_Collection_Name) delete[] Set_Collection_Name;
+	delete[] Set_Collection_Name;
 }
 
 void Hierarchy_Shape_Set_Collection_Chunk::fill_data_block(char* data_start)
@@ -518,7 +512,7 @@ Hierarchy_Degradation_Distance_Chunk::Hierarchy_Degradation_Distance_Chunk(Chunk
 
 Hierarchy_Degradation_Distance_Chunk::~Hierarchy_Degradation_Distance_Chunk()
 {
-	if(distance_array) delete[] distance_array;
+	delete[] distance_array;
 }
 
 void Hierarchy_Degradation_Distance_Chunk::fill_data_block(char* data_start)

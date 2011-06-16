@@ -14,14 +14,10 @@
 #include "showcmds.h"
 #include "io.h"
 #define UseLocalAssert TRUE
-
 #include "ourasert.h"
 #include "bh_plift.h"
-
-/* for win95 net game support */
 #include "pldnet.h"
 #include "pldghost.h"
-
 #include "weapons.h"
 
 /* prototypes for this file */

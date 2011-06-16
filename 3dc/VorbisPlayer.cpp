@@ -31,6 +31,7 @@
 #include <assert.h>
 #include "utilities.h" // avp_open()
 #include "console.h"
+#include <new>
 
 #ifdef _XBOX
 	#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
@@ -78,12 +79,17 @@ bool VorbisPlayback::Open(const std::string &fileName)
 	mVorbisInfo = ov_info(&mOggFile, -1);
 
 	// create the streaming audio buffer
-	this->audioStream = new AudioStream(mVorbisInfo->channels, mVorbisInfo->rate, kBufferSize, kBufferCount);
+	this->audioStream = new(std::nothrow) AudioStream(mVorbisInfo->channels, mVorbisInfo->rate, kBufferSize, kBufferCount);
+	if (audioStream == NULL)
+	{
+		return false;
+	}
 
 	// init some temp audio data storage
-	mAudioData = new uint8_t[kBufferSize];
+	mAudioData = new(std::nothrow) uint8_t[kBufferSize];
 	if (mAudioData == NULL)
 	{
+		Con_PrintError("Couldn't allocate memory for Vorbis temp buffer");
 		return false;
 	}
 

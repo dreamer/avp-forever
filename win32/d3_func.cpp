@@ -268,6 +268,7 @@ static float deltaTime = 0.0f;
 
 void UpdateTestTimer()
 {
+	return; //
 	static float currentTime = timeGetTime();
 
 	float newTime = timeGetTime();
@@ -705,6 +706,13 @@ bool CreateVolatileResources()
 	d3d.orthoIB = new IndexBuffer;
 	d3d.orthoIB->Create(kMaxIndices * 3, USAGE_DYNAMIC);
 
+	// stars test
+	d3d.starsVB = new VertexBuffer;
+	d3d.starsVB->Create(kMaxVertices, FVF_LVERTEX, USAGE_STATIC);
+
+	d3d.starsIB = new IndexBuffer;
+	d3d.starsIB->Create(kMaxIndices * 3, USAGE_STATIC);
+
 	SetRenderStateDefaults();
 
 	// going to clear texture stages too
@@ -862,24 +870,22 @@ void CreateScreenShotImage()
 
 	//	creates filename from date and time, adding a prefix '0' to seconds value
 	//	otherwise 9 seconds appears as '9' instead of '09'
+	bool prefixSeconds = false;
+	if (systemTime.wYear < 10)
+		prefixSeconds = true;
+
+	fileName << "AvP_" << systemTime.wDay << "-" << systemTime.wMonth << "-" << systemTime.wYear << "_" << systemTime.wHour << "-" << systemTime.wMinute << "-";
+
+	if (systemTime.wSecond < 10)
 	{
-		bool prefixSeconds = false;
-		if (systemTime.wYear < 10)
-			prefixSeconds = true;
-
-		fileName << "AvP_" << systemTime.wDay << "-" << systemTime.wMonth << "-" << systemTime.wYear << "_" << systemTime.wHour << "-" << systemTime.wMinute << "-";
-
-		if (systemTime.wSecond < 10)
-		{
-			fileName << "0" << systemTime.wSecond;
-		}
-		else
-		{
-			fileName << systemTime.wSecond;
-		}
-
-		fileName << ".jpg";
+		fileName << "0" << systemTime.wSecond;
 	}
+	else
+	{
+		fileName << systemTime.wSecond;
+	}
+
+	fileName << ".jpg";
 
 	// create surface to copy screen to
 	if (FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(ScreenDescriptorBlock.SDB_Width, ScreenDescriptorBlock.SDB_Height, D3DFMT_A8R8G8B8, D3DPOOL_SCRATCH, &frontBuffer, NULL)))
@@ -1212,7 +1218,6 @@ bool R_CreateVertexDeclaration(class VertexDeclaration *vertexDeclaration)
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
-
 	return true;
 }
 
@@ -1465,6 +1470,14 @@ bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIn
 			sizeInBytes = sizeof(float);
 			break;
 
+		case CONST_VECTOR3:
+			sizeInBytes = sizeof(float) * 3;
+			break;
+
+		case CONST_VECTOR4:
+			sizeInBytes = sizeof(float) * 4;
+			break;
+
 		case CONST_MATRIX:
 			sizeInBytes = sizeof(float) * 16;
 			break;
@@ -1685,10 +1698,26 @@ bool R_CreateTextureFromAvPTexture(AVPTEXTURE &AvPTexture, enum TextureUsage usa
 	return true;
 }
 
+bool IsPowerOfTwo(uint32_t value)
+{
+	return ((value & (value - 1)) == 0);
+}
+
+uint32_t RoundUpToNextPowerOfTwo(uint32_t value)
+{
+	value--;
+	value |= value >> 1;  // handle  2 bit numbers
+	value |= value >> 2;  // handle  4 bit numbers
+	value |= value >> 4;  // handle  8 bit numbers
+	value |= value >> 8;  // handle 16 bit numbers
+	value |= value >> 16; // handle 32 bit numbers
+	value++;
+
+	return value;
+}
+
 bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usageType, Texture &texture)
 {
-	// TODO: Create texture correctly if the device can't do power of 2 textures
-
 	D3DPOOL texturePool;
 	D3DFORMAT textureFormat;
 	uint32_t textureUsage;
@@ -1742,8 +1771,21 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 		}
 	}
 
+	uint32_t realWidth = width;
+	uint32_t realHeight = height;
+
+	// check texture sizes are ok
+	if (!IsPowerOfTwo(width))
+	{
+		realWidth = RoundUpToNextPowerOfTwo(width);
+	}
+	if (!IsPowerOfTwo(height))
+	{
+		realHeight = RoundUpToNextPowerOfTwo(height);
+	}
+
 	// create the d3d9 texture
-	LastError = d3d.lpD3DDevice->CreateTexture(width, height, 1, textureUsage, textureFormat, texturePool, &d3dTexture, NULL);
+	LastError = d3d.lpD3DDevice->CreateTexture(realWidth, realHeight, 1, textureUsage, textureFormat, texturePool, &d3dTexture, NULL);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -1754,8 +1796,8 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 	texture.bitsPerPixel = bitsPerPixel;
 	texture.width  = width;
 	texture.height = height;
-	texture.realWidth  = width;
-	texture.realHeight = height;
+	texture.realWidth  = realWidth;
+	texture.realHeight = realHeight;
 	texture.usage   = usageType;
 	texture.texture = d3dTexture;
 	texture.isValid = true;
@@ -1885,6 +1927,9 @@ bool R_ChangeResolution(uint32_t width, uint32_t height)
 	ScreenDescriptorBlock.SDB_ClipRight = width;
 	ScreenDescriptorBlock.SDB_ClipUp    = 0;
 	ScreenDescriptorBlock.SDB_ClipDown  = height;
+
+	// aspect ratio
+	d3d.aspectRatio = (float)width / (float)height;
 
 	CreateVolatileResources();
 
@@ -2360,10 +2405,13 @@ bool InitialiseDirect3D()
 	// set field of view (this needs to be set differently for alien but 77 seems ok for marine and predator
 	d3d.fieldOfView = kDefaultFOV;
 
+	// set aspect ratio
+	d3d.aspectRatio = (float)width / (float)height;
+
 	SetTransforms();
 
 	Con_AddCommand("dumptex", WriteMenuTextures);
-	Con_AddCommand("r_toggleWireframe", ToggleWireframe);
+	Con_AddCommand("r_togglewireframe", ToggleWireframe);
 	Con_AddCommand("r_setfov", SetFov);
 	Con_AddCommand("r_texlist", Tex_ListTextures);
 
@@ -2471,6 +2519,9 @@ bool InitialiseDirect3D()
 	d3d.fmvEffect   = d3d.effectSystem->Add("fmv", "fmvVertex.vsh", "fmvPixel.psh", d3d.fmvDecl);
 	d3d.cloudEffect = d3d.effectSystem->Add("cloud", "tallFontTextVertex.vsh", "tallFontTextPixel.psh", d3d.tallFontText);
 
+	// stars test
+	d3d.starsEffect = d3d.effectSystem->Add("stars", "stars.vsh", "stars.psh", d3d.mainDecl);
+
 	// we should bail out if the shaders can't be loaded
 	if ((d3d.mainEffect == kNullShaderID) ||
 		(d3d.orthoEffect == kNullShaderID) ||
@@ -2521,12 +2572,6 @@ void SetTransforms()
 	matViewPort._42 = (float)(ScreenDescriptorBlock.SDB_Height / 2) + 0;
 	matViewPort._43 = 0.0f; // minZ
 	matViewPort._44 = 1.0f;
-
-/*
-	d3d.lpD3DDevice->SetTransform(D3DTS_WORLD,		&matIdentity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_VIEW,		&matIdentity);
-	d3d.lpD3DDevice->SetTransform(D3DTS_PROJECTION, &matOrtho);
-*/
 }
 
 void FlipBuffers()
@@ -2577,15 +2622,8 @@ void ReleaseDirect3D()
 
 void ReleaseAvPTexture(AVPTEXTURE *texture)
 {
-	if (texture->buffer)
-	{
-		free(texture->buffer);
-	}
-
-	if (texture)
-	{
-		free(texture);
-	}
+	delete[] texture->buffer;
+	delete texture;
 }
 
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
@@ -2964,6 +3002,9 @@ bool SetRenderStateDefaults()
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 		D3DZFunc = D3DCMP_LESSEQUAL;
 	}
+
+	CurrentRenderStates.FogIsOn = 0;
+	CurrentRenderStates.WireFrameModeIsOn = 0;
 
 	return true;
 }

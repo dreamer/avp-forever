@@ -48,15 +48,15 @@ void InitialiseStrategyBlocks(void)
 
 	FreeStBlockListPtr = &FreeStBlockList[maxstblocks-1];
 
-	for(NumFreeStBlocks=0; NumFreeStBlocks < maxstblocks; NumFreeStBlocks++) 
-		{
-			FreeStBlockList[NumFreeStBlocks] = FreeBlkPtr;
-			FreeBlkPtr->SBflags.destroyed_but_preserved=0;
-			#if debug
-			FreeBlkPtr->SBIsValid = 0;
-			#endif
-			FreeBlkPtr++;
-		}
+	for (NumFreeStBlocks=0; NumFreeStBlocks < maxstblocks; NumFreeStBlocks++) 
+	{
+		FreeStBlockList[NumFreeStBlocks] = FreeBlkPtr;
+		FreeBlkPtr->SBflags.destroyed_but_preserved=0;
+		#if debug
+		FreeBlkPtr->SBIsValid = 0;
+		#endif
+		FreeBlkPtr++;
+	}
 	
     /* KJL 17:31:18 11/13/96 - seems like a logical place to initialise dynamics blocks */
     InitialiseDynamicsBlocks();
@@ -191,35 +191,32 @@ STRATEGYBLOCK * AttachNewStratBlock
 	InitialiseSBValues(sptr);
 
 	for(i = 0; i < SB_NAME_LENGTH; i++);
-		{	
-			sptr->SBname[i] = '\0';
-		}													
+	{
+		sptr->SBname[i] = '\0';
+	}
 
 	sptr->SBmomptr = momptr;
 
 	if(moptr)
-		{
-/*			GLOBALASSERT(!moptr->m_sbptr); HACK*/
-			moptr->m_sbptr = sptr;
-			sptr->SBmoptr = moptr;
-		}
+	{
+/*		GLOBALASSERT(!moptr->m_sbptr); HACK*/
+		moptr->m_sbptr = sptr;
+		sptr->SBmoptr = moptr;
+	}
 
 	if(dptr)
-		{
-			GLOBALASSERT(!dptr->ObStrategyBlock);
-			dptr->ObStrategyBlock = sptr;
-			sptr->SBdptr = dptr;
-		}
+	{
+		GLOBALASSERT(!dptr->ObStrategyBlock);
+		dptr->ObStrategyBlock = sptr;
+		sptr->SBdptr = dptr;
+	}
 	else
-		{
-			sptr->SBflags.no_displayblock = 1;
-		}
+	{
+		sptr->SBflags.no_displayblock = 1;
+	}
 
-
-	
 	return(sptr);
-	
-}	
+}
 
 
 void InitialiseSBValues(STRATEGYBLOCK* sptr)
@@ -244,7 +241,7 @@ void InitialiseSBValues(STRATEGYBLOCK* sptr)
 	sptr->SBflags.not_on_motiontracker = 0;
 	
 	sptr->integrity = 0;
- 
+
 	sptr->maintainVisibility = 0;		  /* patrRWH - function to search thgough the list of active*/
 	sptr->containingModule = (MODULE *)0; /* patrstrat blocks and return the pointer*/
 	sptr->shapeIndex = 0;				  /* patr*/
@@ -256,7 +253,6 @@ void InitialiseSBValues(STRATEGYBLOCK* sptr)
 	sptr->SBdptr=NULL;
 
 	sptr->name=0;
-	
 }
 
 
@@ -267,14 +263,14 @@ strat blocks and return the pointer
 
 
 STRATEGYBLOCK* FindSBWithName(char* id_name)
-{	
+{
 	int stratblock = NumActiveStBlocks;
 	int i;
 	GLOBALASSERT(stratblock);
 
 	if(!id_name)
 		return NULL;
-	
+
 	//If the name is all 0`s I want to return a null pointer - Richard.
 	for(i=0;i<SB_NAME_LENGTH;i++)
 	{
@@ -286,23 +282,22 @@ STRATEGYBLOCK* FindSBWithName(char* id_name)
 	}
 
 	while(--stratblock >= 0)
-		{
-			STRATEGYBLOCK* sbptr = ActiveStBlockList[stratblock];
-			GLOBALASSERT(sbptr);
+	{
+		STRATEGYBLOCK* sbptr = ActiveStBlockList[stratblock];
+		GLOBALASSERT(sbptr);
 
-			if(sbptr->SBname)
-				{
-					if(NAME_ISEQUAL(sbptr->SBname, id_name))
-					{
-						return((sbptr));
-					}
-				}
+		if(sbptr->SBname)
+		{
+			if(NAME_ISEQUAL(sbptr->SBname, id_name))
+			{
+				return((sbptr));
+			}
 		}
+	}
 	// we have to return null for lifts - so that 
 	// we know that the lift is outside the env
 	return(NULL);
-}				
-			 
+}
 
 static STRATEGYBLOCK SB_Preserved[MAX_PRESERVED_SB];
 static int Num_SB_Preserved;
@@ -332,42 +327,42 @@ void PreserveStBlocksInModule(MODULE* containing_mod)
 	GLOBALASSERT(Num_SB_Preserved == 0);
 
 	for(i = 0; i < NumActiveStBlocks && Num_SB_Preserved < MAX_PRESERVED_SB; i++)
-		{
-			VECTORCH obj_world;
-			STRATEGYBLOCK	*sbptr;
-			DYNAMICSBLOCK	*dynptr;			
+	{
+		VECTORCH obj_world;
+		STRATEGYBLOCK	*sbptr;
+		DYNAMICSBLOCK	*dynptr;
 
-			sbptr = ActiveStBlockList[i];
+		sbptr = ActiveStBlockList[i];
 
-			if(!(dynptr = sbptr->DynPtr))
-				continue;
-			
-			obj_world = dynptr->Position;
+		if(!(dynptr = sbptr->DynPtr))
+			continue;
+		
+		obj_world = dynptr->Position;
 
-			if(obj_world.vx < max_x)
-				if(obj_world.vx > min_x)
-					if(obj_world.vz < max_z)
-						if(obj_world.vz > min_z)
-							if(obj_world.vy < max_y)
-								if(obj_world.vy > min_y)
-									{
-										// copy name into somthing
-										if(sbptr->I_SBtype == I_BehaviourMarinePlayer ||
-												sbptr->I_SBtype == I_BehaviourMarinePlayer ||
-												sbptr->I_SBtype == I_BehaviourMarinePlayer)
-											{
-												SB_Preserved[Num_SB_Preserved] = *sbptr;
-	
-												Num_SB_Preserved++;
-											}
-									}
-		}
+		if(obj_world.vx < max_x)
+			if(obj_world.vx > min_x)
+				if(obj_world.vz < max_z)
+					if(obj_world.vz > min_z)
+						if(obj_world.vy < max_y)
+							if(obj_world.vy > min_y)
+								{
+									// copy name into somthing
+									if(sbptr->I_SBtype == I_BehaviourMarinePlayer ||
+											sbptr->I_SBtype == I_BehaviourMarinePlayer ||
+											sbptr->I_SBtype == I_BehaviourMarinePlayer)
+										{
+											SB_Preserved[Num_SB_Preserved] = *sbptr;
+
+											Num_SB_Preserved++;
+										}
+								}
+	}
 }
 
 
 BOOL SBNeededForNextEnv(STRATEGYBLOCK* sbptr)
 {
-	int i = 0;	
+	int i = 0;
 	
 	if(Num_SB_Preserved == 0)
 		return(0);
@@ -379,14 +374,14 @@ BOOL SBNeededForNextEnv(STRATEGYBLOCK* sbptr)
 					return(0);
 
 	for(i = 0; i < Num_SB_Preserved; i++)
-		{
-			STRATEGYBLOCK	*pres_sbptr;
+	{
+		STRATEGYBLOCK	*pres_sbptr;
 
-			pres_sbptr = &SB_Preserved[i];
-			
-			if(NAME_ISEQUAL(pres_sbptr->SBname, sbptr->SBname))
-				return(1);
-  		}
+		pres_sbptr = &SB_Preserved[i];
+		
+		if(NAME_ISEQUAL(pres_sbptr->SBname, sbptr->SBname))
+			return(1);
+	}
 
 	return(0);
 }
@@ -413,7 +408,7 @@ void AddPreservedSBsToActiveList()
 
 					Player->ObStrategyBlock = new_sbptr;
 
-				 	playerDynPtr = Player->ObStrategyBlock->DynPtr;
+					playerDynPtr = Player->ObStrategyBlock->DynPtr;
 					// Need to copy some of the preserved SB info into the appropriate places
 
 					Player->ObWorld = playerDynPtr->Position;
@@ -423,7 +418,7 @@ void AddPreservedSBsToActiveList()
 					playerDynPtr->PrevPosition    = playerDynPtr->Position;
 					playerDynPtr->PrevOrientMat 	= playerDynPtr->OrientMat;
 					playerDynPtr->PrevOrientEuler = playerDynPtr->OrientEuler;
-			 	
+				
 					playerDynPtr->LinVelocity.vx = 0;
 					playerDynPtr->LinVelocity.vy = 0;
 					playerDynPtr->LinVelocity.vz = 0;
@@ -447,8 +442,7 @@ void AddPreservedSBsToActiveList()
 			// LIFT_FLOOR_SWITCHES and for objects
 			// whose shape reference has changed
 		}
-}						
-
+}
 
 void TeleportPreservedSBsToNewEnvModule(MODULE *new_pos, MODULE* old_pos, int orient_change)
 {
@@ -464,7 +458,7 @@ void TeleportPreservedSBsToNewEnvModule(MODULE *new_pos, MODULE* old_pos, int or
 			VECTORCH obj_world;
 			VECTORCH pos_rel; 
 			STRATEGYBLOCK	*sbptr;
-			DYNAMICSBLOCK	*dynptr;			
+			DYNAMICSBLOCK	*dynptr;
 
 			sbptr = &SB_Preserved[i];
 			
@@ -476,8 +470,8 @@ void TeleportPreservedSBsToNewEnvModule(MODULE *new_pos, MODULE* old_pos, int or
 			
 			{
 			  // okay we need to find our relative position to the moduke
-		  	int cos;
- 	  		int sin;
+			int cos;
+			int sin;
 				int angle;
 				MATRIXCH mat;
 
@@ -495,28 +489,28 @@ void TeleportPreservedSBsToNewEnvModule(MODULE *new_pos, MODULE* old_pos, int or
 				else
 					angle = 0;
 
-		  	cos = GetCos(angle);
- 	  		sin = GetSin(angle);
+			cos = GetCos(angle);
+			sin = GetSin(angle);
 
-			mat.mat11 = cos;		 
-	 	  	mat.mat12 = 0;
-		  	mat.mat13 = -sin;
- 		  	mat.mat21 = 0;	  	
- 	  		mat.mat22 = 65536;	  	
- 	  		mat.mat23 = 0;	  	
- 	  		mat.mat31 = sin;	  	
- 	  		mat.mat32 = 0;	  	
- 	  		mat.mat33 = cos;	
+			mat.mat11 = cos;
+			mat.mat12 = 0;
+			mat.mat13 = -sin;
+			mat.mat21 = 0;
+			mat.mat22 = 65536;
+			mat.mat23 = 0;
+			mat.mat31 = sin;
+			mat.mat32 = 0;
+			mat.mat33 = cos;
 			
 				// rotate the relative object about the center of the
 				// module and rotate the abject about its own y-axis
 				
 				RotateVector(&pos_rel, &mat);
-		  	MatrixMultiply(&dynptr->OrientMat,&mat,&dynptr->OrientMat);
-			 	MatrixToEuler(&dynptr->OrientMat, &dynptr->OrientEuler);
+			MatrixMultiply(&dynptr->OrientMat,&mat,&dynptr->OrientMat);
+				MatrixToEuler(&dynptr->OrientMat, &dynptr->OrientEuler);
 			}
 
-#if 0 
+#if 0
 			dynptr->Position.vx = mod_offset.vx; 
 			dynptr->Position.vy = mod_offset.vy; 
 			dynptr->Position.vz = mod_offset.vz; 
@@ -551,7 +545,7 @@ void DestroyAnyStrategyBlock(STRATEGYBLOCK *sbptr)
 	GLOBALASSERT(sbptr);
 
 	sbptr->SBflags.please_destroy_me = 1;
-}		
+}
 
 
 void RemoveDestroyedStrategyBlocks(void)
@@ -625,7 +619,7 @@ void RemoveDestroyedStrategyBlocks(void)
 				XENO_STATUS_BLOCK *xenoStatusPointer;
 				LOCALASSERT(sbptr);	
 				LOCALASSERT(sbptr->DynPtr);	
-		
+
 				xenoStatusPointer=(XENO_STATUS_BLOCK *)(sbptr->SBdataptr);    
 
 				if (xenoStatusPointer->GibbFactor>0) {
@@ -668,7 +662,7 @@ void RemoveDestroyedStrategyBlocks(void)
 				LOCALASSERT(sbptr);	
 				LOCALASSERT(sbptr->DynPtr);	
 		
-				debrisStatusPointer=(HDEBRIS_BEHAV_BLOCK *)(sbptr->SBdataptr);    
+				debrisStatusPointer=(HDEBRIS_BEHAV_BLOCK *)(sbptr->SBdataptr);
 
 				if (debrisStatusPointer->GibbFactor>0) {
 					Extreme_Gibbing(sbptr,debrisStatusPointer->HModelController.section_data,debrisStatusPointer->GibbFactor);
@@ -686,10 +680,9 @@ void RemoveDestroyedStrategyBlocks(void)
 
 void DestroyAllStrategyBlocks(void)
 {
-	int i = 0;	
+	int i = 0;
 	int a = NumActiveStBlocks;
-	
-	
+
 	while(i < a)
 		{
 			RemoveBehaviourStrategy(ActiveStBlockList[i++]);
@@ -701,13 +694,13 @@ void DestroyAllStrategyBlocks(void)
 	{
 		if(FreeStBlockData[i].SBflags.destroyed_but_preserved)
 		{
-	   		FreeStBlockData[i].SBflags.destroyed_but_preserved=0;
-	   		FreeStBlockData[i].SBflags.preserve_until_end_of_level=0;
+			FreeStBlockData[i].SBflags.destroyed_but_preserved=0;
+			FreeStBlockData[i].SBflags.preserve_until_end_of_level=0;
 			DeallocateStrategyBlock(&FreeStBlockData[i]);
-	   	}
+		}
 	}
 
-}			
+}
 
 void AssignNewSBName(STRATEGYBLOCK *sbPtr) 
 {

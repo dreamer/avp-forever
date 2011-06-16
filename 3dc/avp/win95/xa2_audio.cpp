@@ -24,6 +24,7 @@
 #include <windows.h>
 #include "ffstdio.h"
 #include <math.h>
+#include <new>
 
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 
@@ -115,6 +116,7 @@ XAUDIO2FX_REVERB_I3DL2_PARAMETERS g_PRESET_PARAMS[ NUM_PRESETS ] =
     XAUDIO2FX_I3DL2_PRESET_LARGEHALL,
     XAUDIO2FX_I3DL2_PRESET_PLATE,
 };
+
 /* Patrick 5/6/97 -------------------------------------------------------------
   Internal global variables
   ----------------------------------------------------------------------------*/
@@ -402,7 +404,7 @@ enum
 	EAX_MAX
 };
 
-static uint32_t SoundMaxHW;
+static int SoundMaxHW = 128;
 extern int GlobalFrameCounter;
 
 /* Patrick 5/6/97 -------------------------------------------------------------
@@ -420,29 +422,14 @@ extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 extern int DopplerShiftIsOn;
 extern int SoundSwitchedOn;
 
-/* Patrick 5/6/97 -------------------------------------------------------------
-  Function definitions
+/* ----------------------------------------------------------------------------
+  int PlatStartSoundSys
+  return 0 on failure, 1 for success
   ----------------------------------------------------------------------------*/
 int PlatStartSoundSys()
 {
-	db_log4("PlatStartSound called");
 	Con_PrintMessage("Starting to initialise XAudio2");
-/*
-	// initialise sound structs
-	BlankGameSound.loaded = 0;
-	BlankGameSound.activeInstances = 0;
-	BlankGameSound.volume = 0;
-	BlankGameSound.pitch = 0;
-	BlankGameSound.is3D = FALSE;
-	BlankGameSound.audioBuffer = NULL;
-	memset(&BlankGameSound.xa2Buffer, 0, sizeof(XAUDIO2_BUFFER));
-	memset(&BlankGameSound.xa2Emitter, 0, sizeof(X3DAUDIO_EMITTER));
-	BlankGameSound.pSourceVoice = NULL;
-	BlankGameSound.flags = 0;
-	BlankGameSound.dsFrequency = 0;
-	BlankGameSound.wavName = NULL;
-	BlankGameSound.length = 0;
-*/
+
 	uint32_t sampleRate = Config_GetInt("[Audio]", "SampleRate", 44100);
 
 	// Set the globals.
@@ -490,6 +477,11 @@ int PlatStartSoundSys()
 				Con_PrintError("XAUDIO2_E_DEVICE_INVALIDATED");
 				break;
 			}
+			default:
+			{
+				Con_PrintError("Unknown XAudio2 error");
+				break;
+			}
 		}
 		Con_PrintError("Couldn't initialise XAudio2");
 		LogDxError (LastError, __LINE__, __FILE__);
@@ -515,7 +507,7 @@ int PlatStartSoundSys()
 */
 
 	// Create a mastering voice
-	LastError = pXAudio2->CreateMasteringVoice(&pMasteringVoice, XAUDIO2_DEFAULT_CHANNELS, sampleRate, 0, 0, 0);
+	LastError = pXAudio2->CreateMasteringVoice(&pMasteringVoice);//, XAUDIO2_DEFAULT_CHANNELS, sampleRate, 0, 0, 0);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Couldn't create XAudio2 Mastering Voice");
@@ -550,7 +542,7 @@ int PlatStartSoundSys()
 #ifdef _DEBUG
     flags |= XAUDIO2FX_DEBUG;
 #endif
-
+/*
 	LastError = XAudio2CreateReverb(&pReverbEffect, flags);
 	if (FAILED(LastError))
 	{
@@ -560,19 +552,19 @@ int PlatStartSoundSys()
 	// create a submix voice
 	XAUDIO2_EFFECT_DESCRIPTOR effects[] = {{pReverbEffect, TRUE, 1}};
 	XAUDIO2_EFFECT_CHAIN effectChain = {1, effects};
-
-	LastError = pXAudio2->CreateSubmixVoice(&pSubmixVoice, 1, /*deviceDetails.OutputFormat.Format.nSamplesPerSec*/sampleRate, 0, 0,
-                                                               NULL, &effectChain);
+*/
+	LastError = pXAudio2->CreateSubmixVoice(&pSubmixVoice, 1, deviceDetails.OutputFormat.Format.nSamplesPerSec, 0, 0,
+                                                               NULL, /*&effectChain*/NULL);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("CreateSubmixVoice call failed");
 	}
-
+/*
     // Set default FX params
     XAUDIO2FX_REVERB_PARAMETERS native;
     ReverbConvertI3DL2ToNative(&g_PRESET_PARAMS[0], &native);
     pSubmixVoice->SetEffectParameters(0, &native, sizeof(native));
-
+*/
 	// Initialise X3DAudio
 	const float SPEEDOFSOUND = X3DAUDIO_SPEED_OF_SOUND;
 	X3DAudioInitialize(deviceDetails.OutputFormat.dwChannelMask, SPEEDOFSOUND, x3DInstance);
@@ -596,8 +588,10 @@ int PlatStartSoundSys()
 	XA2Listener.pCone = NULL;
 
 	FLOAT32 *matrix = new FLOAT32[deviceDetails.OutputFormat.Format.nChannels];
-	matrix[0] = 0.5f;
-	matrix[1] = 0.5f;
+	for (int i = 0; i < deviceDetails.OutputFormat.Format.nChannels; i++)
+	{
+		matrix[i] = 0.5f;
+	}
 
 	XA2DSPSettings.SrcChannelCount = 1;
 	XA2DSPSettings.DstChannelCount = deviceDetails.OutputFormat.Format.nChannels;
@@ -605,8 +599,6 @@ int PlatStartSoundSys()
 	XA2DSPSettings.pDelayTimes = NULL;
 
 	Con_PrintMessage("Initialised XAudio2 successfully");
-
-	db_log4("PlatStartSound finished");
 
 	soundEnabled = true;
 
@@ -714,7 +706,7 @@ int PlatPlaySound(int activeIndex)
 	// reverb stuff here
 
 
-	/* may need to initialise pitch before playing */
+	// may need to initialise pitch before playing
 	if (ActiveSounds[activeIndex].pitch != GameSounds[gameIndex].pitch)
 	{
 		int ok = PlatChangeSoundPitch(activeIndex, ActiveSounds[activeIndex].pitch);
@@ -725,21 +717,17 @@ int PlatPlaySound(int activeIndex)
 		}
 	}
 
-	/* Initialise volume before playing */
+	// Initialise volume before playing
 	if (ActiveSounds[activeIndex].threedee)
 	{
-		int ok;
-
 		if (ActiveSounds[activeIndex].is3D)
 		{
-			/*set 3d sound mode*/
+			// set 3d sound mode
 //			IDirectSound3DBuffer_SetMode(ActiveSounds[activeIndex].ds3DBufferP,DS3DMODE_NORMAL,DS3D_DEFERRED);
 
-			/*set distance at which attenuation starts*/
+			// set distance at which attenuation starts
 			if (ActiveSounds[activeIndex].threedeedata.inner_range == 0)
 				ActiveSounds[activeIndex].threedeedata.inner_range = static_cast<int>(1.0f);//DS3D_DEFAULTMINDISTANCE;
-
-//			ActiveSounds[activeIndex].xa2Emitter.pCone
 
 /*
 			hres = IDirectSound3DBuffer_SetMinDistance(ActiveSounds[activeIndex].ds3DBufferP,(D3DVALUE)ActiveSounds[activeIndex].threedeedata.inner_range,DS3D_DEFERRED);
@@ -755,9 +743,8 @@ int PlatPlaySound(int activeIndex)
 */
 		}
 
-		/* 3d sounds always need initialising */
-		ok = PlatDo3dSound (activeIndex);
-		if (ok == SOUND_PLATFORMERROR)
+		// 3D sounds always need initialising
+		if (PlatDo3dSound(activeIndex) == SOUND_PLATFORMERROR)
 		{
 		   	PlatStopSound (activeIndex);
 			return SOUND_PLATFORMERROR;
@@ -765,16 +752,14 @@ int PlatPlaySound(int activeIndex)
 	}
 	else 
 	{
-		int newVolume, ok;
 		/* 2d sound: ummm: cap all 2d sounds to SOUND_PLAT2DSCALE * their specified volume.
 		This is really project&platform specific, so that 3d sounds aren't drowned out by
 		2d ones...*/
-		newVolume = ActiveSounds[activeIndex].volume;
+		int newVolume = ActiveSounds[activeIndex].volume;
 		newVolume = (newVolume * VOLUME_PLAT2DSCALE) >> 7;
 		ActiveSounds[activeIndex].volume = newVolume;
-		
-		ok = PlatChangeSoundVolume(activeIndex, ActiveSounds[activeIndex].volume);
-		if (ok == SOUND_PLATFORMERROR)
+
+		if (PlatChangeSoundVolume(activeIndex, ActiveSounds[activeIndex].volume) == SOUND_PLATFORMERROR)
 		{
 		   	PlatStopSound (activeIndex);
 			return SOUND_PLATFORMERROR;
@@ -783,7 +768,7 @@ int PlatPlaySound(int activeIndex)
 
 	db_logf4(("RefCount after PlaySound %i, Active Inst %i, activeIndex %i", GET_REF_COUNT(ActiveSounds[activeIndex].PropSetP), GameSounds[gameIndex].activeInstances, activeIndex));
 
-	/* play the buffer then... */
+	// play the buffer then...
 	if (!ActiveSounds[activeIndex].paused)
 	{
 		int loopCount = 0;
@@ -819,7 +804,7 @@ int PlatPlaySound(int activeIndex)
 			return SOUND_PLATFORMERROR;	
 		}
 
-		/* success */
+		// success
 		if (ActiveSounds[activeIndex].loop)
 		{
 			db_logf5(("Playing Sound %i looping in slot %i on frame %i", ActiveSounds[activeIndex].soundIndex, activeIndex, GlobalFrameCounter));
@@ -881,16 +866,14 @@ int PlatChangeSoundVolume(int activeIndex, int volume)
 
 int PlatChangeSoundPitch(int activeIndex, int pitch)
 {
-	float frequency;
-
 	LOCALASSERT((pitch >= PITCH_MIN) && (pitch <= PITCH_MAX));
 
-	/* calculate new frequency from base pitch for game sound
-	(NB don't need to scale pitch values...) */
-
+	// calculate new frequency from base pitch for game sound (NB don't need to scale pitch values...)
 	SOUNDINDEX gameSoundIndex = ActiveSounds[activeIndex].soundIndex;
 
-	/* default pitch is a special case in ds */
+	float frequency;
+
+	// default pitch is a special case in ds
 	if (pitch == PITCH_DEFAULTPLAT)
 	{
 		frequency = (float)GameSounds[gameSoundIndex].dsFrequency;
@@ -907,6 +890,7 @@ int PlatChangeSoundPitch(int activeIndex, int pitch)
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
+		return SOUND_PLATFORMERROR;
 	}
 
 	ActiveSounds[activeIndex].pitch = pitch;
@@ -937,10 +921,7 @@ int PlatSoundHasStopped(int activeIndex)
 
 int PlatDo3dSound(int activeIndex)
 {
-	int distance = 0;
 	VECTORCH relativePosn;
-	int newVolume = 0;
-	int newPan = 0;
 
 	if (!soundEnabled)
 		return 0;
@@ -948,15 +929,18 @@ int PlatDo3dSound(int activeIndex)
 	ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vx);
 	ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vy);
 	ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vz);
-
-	return 1;
-
+	
 	// find the distance of the sound
 	relativePosn.vx = ActiveSounds[activeIndex].threedeedata.position.vx - Global_VDB_Ptr->VDB_World.vx;
 	relativePosn.vy = ActiveSounds[activeIndex].threedeedata.position.vy - Global_VDB_Ptr->VDB_World.vy;
 	relativePosn.vz = ActiveSounds[activeIndex].threedeedata.position.vz - Global_VDB_Ptr->VDB_World.vz;
-
-	distance = Magnitude(&relativePosn);
+/*
+	ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(relativePosn.vx);
+	ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(relativePosn.vy);
+	ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(relativePosn.vz);
+*/
+	int distance = Magnitude(&relativePosn);
+	int newVolume = 0;
 
 	// Deal with paused looping sounds.
 	if (ActiveSounds[activeIndex].paused)
@@ -970,8 +954,9 @@ int PlatDo3dSound(int activeIndex)
 			}
 			ActiveSounds[activeIndex].xa2Buffer.LoopCount = loopCount;
 			ActiveSounds[activeIndex].pSourceVoice->Start(0);
-			newVolume = 0;
 			ActiveSounds[activeIndex].paused = 0;
+
+			newVolume = 0;
 		}
 		else
 		{
@@ -987,7 +972,7 @@ int PlatDo3dSound(int activeIndex)
 	{
 		if (distance < ActiveSounds[activeIndex].threedeedata.outer_range)
 		{
-			/* Use proper 3D, but our own attenuation. */
+			// Use proper 3D, but our own attenuation.
 			float in_to_dis_to_out = static_cast<float>(ActiveSounds[activeIndex].threedeedata.outer_range - distance);
 			float in_to_out = static_cast<float>(ActiveSounds[activeIndex].threedeedata.outer_range - ActiveSounds[activeIndex].threedeedata.inner_range);
 
@@ -1033,10 +1018,11 @@ int PlatDo3dSound(int activeIndex)
 	// Now deal with the panning issues.
 	if (distance < ActiveSounds[activeIndex].threedeedata.outer_range)
 	{
+/*
 		ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(relativePosn.vx);
 		ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(relativePosn.vy);
 		ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(relativePosn.vz);
-
+*/
 		// TODO - velocity stuff?
 	}
 	return 1;
@@ -1062,6 +1048,7 @@ void PlatEndGameSound(SOUNDINDEX index)
 	GameSounds[index].dsFrequency = 0;	
 	GameSounds[index].loaded = 0;
 	GameSounds[index].xa2Buffer.LoopCount = 0;
+
 	if (GameSounds[index].wavName)
 	{
 		DeallocateMem (GameSounds[index].wavName);
@@ -1093,7 +1080,7 @@ static int PlatChangeSoundPan(int activeIndex, int pan)
 
 unsigned int PlatMaxHWSounds()
 {
-	return 128;//SoundMaxHW;
+	return SoundMaxHW;
 }
 
 /* Patrick 15/6/97 -------------------------------------------------------------
@@ -1327,7 +1314,6 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	FFILE *myFile;
 	WAVEFORMATEX myWaveFormat;
 	size_t res;
-	uint32_t lengthInSeconds;
 
 	myFile = ffopen(wavFileName,"rb");
 	if (!myFile)
@@ -1340,7 +1326,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	res = ffread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
 	res = ffread(&myRiffHeader,  sizeof(PWAVRIFFHEADER),  1, myFile);
 
-	/* Read the WAV format chunk */
+	// Read the WAV format chunk
 	res = ffread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
 	if (myChunkHeader.chunkLength == 16)
 	{
@@ -1395,9 +1381,9 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 	}
 	
 	// calculate length of sample
-	lengthInSeconds=DIV_FIXED(myChunkHeader.chunkLength,myWaveFormat.nAvgBytesPerSec);
+	uint32_t lengthInSeconds = DIV_FIXED(myChunkHeader.chunkLength, myWaveFormat.nAvgBytesPerSec);
 
-	if ((myChunkHeader.chunkLength < 0)||(myChunkHeader.chunkLength > SOUND_MAXSIZE))
+	if ((myChunkHeader.chunkLength < 0) || (myChunkHeader.chunkLength > SOUND_MAXSIZE))
 	{
 		LOCALASSERT(1==0);
 		ffclose(myFile);
@@ -1559,20 +1545,39 @@ void PlatUpdatePlayer()
 			return;
 
 		// position
-		XA2Listener.Position.x = static_cast<float>(Global_VDB_Ptr->VDB_World.vx);
-		XA2Listener.Position.y = static_cast<float>(Global_VDB_Ptr->VDB_World.vy);
-		XA2Listener.Position.z = static_cast<float>(Global_VDB_Ptr->VDB_World.vz);
+		XA2Listener.Position.x = 0.0f;//static_cast<float>(Global_VDB_Ptr->VDB_World.vx);
+		XA2Listener.Position.y = 0.0f;//static_cast<float>(Global_VDB_Ptr->VDB_World.vy);
+		XA2Listener.Position.z = 0.0f;//static_cast<float>(Global_VDB_Ptr->VDB_World.vz);
 
 		// look-at
-		XA2Listener.OrientFront.x = (float)(Global_VDB_Ptr->VDB_Mat.mat13 / 65536.0f);
-		XA2Listener.OrientFront.y = (float)(Global_VDB_Ptr->VDB_Mat.mat23 / 65536.0f);
-		XA2Listener.OrientFront.z = (float)(Global_VDB_Ptr->VDB_Mat.mat33 / 65536.0f);
+		D3DXVECTOR3 front;
+		front.x = (float)(Global_VDB_Ptr->VDB_Mat.mat13 / 65536.0f);
+		front.y = (float)(Global_VDB_Ptr->VDB_Mat.mat23 / 65536.0f);
+		front.z = (float)(Global_VDB_Ptr->VDB_Mat.mat33 / 65536.0f);
+
+		D3DXVec3Normalize(&front, &front);
+/*
+		XA2Listener.OrientFront.x = front.x;
+		XA2Listener.OrientFront.y = front.y;
+		XA2Listener.OrientFront.z = front.z;
+*/
+		XA2Listener.OrientFront.x = 0.0f;
+		XA2Listener.OrientFront.y = 0.0f;
+		XA2Listener.OrientFront.z = 1.0f;
+
+//		XA2Listener.OrientFront.x = (float)(Global_VDB_Ptr->VDB_Mat.mat13 / 65536.0f);
+//		XA2Listener.OrientFront.y = (float)(Global_VDB_Ptr->VDB_Mat.mat23 / 65536.0f);
+//		XA2Listener.OrientFront.z = (float)(Global_VDB_Ptr->VDB_Mat.mat33 / 65536.0f);
 
 		// up
-		XA2Listener.OrientTop.x = (float)(Global_VDB_Ptr->VDB_Mat.mat12 / 65536.0f);
-		XA2Listener.OrientTop.y = (float)(Global_VDB_Ptr->VDB_Mat.mat22 / 65536.0f);
-		XA2Listener.OrientTop.z = (float)(Global_VDB_Ptr->VDB_Mat.mat32 / 65536.0f);
-
+		XA2Listener.OrientTop.x = 0.0f;//(float)(Global_VDB_Ptr->VDB_Mat.mat12 / 65536.0f);
+		XA2Listener.OrientTop.y = 1.0f;//(float)(Global_VDB_Ptr->VDB_Mat.mat22 / 65536.0f);
+		XA2Listener.OrientTop.z = 0.0f;//(float)(Global_VDB_Ptr->VDB_Mat.mat32 / 65536.0f);
+/*
+		char buf2[100];
+		sprintf(buf, "listener x: %f y: %f z: %f\n", XA2Listener.Position.x, XA2Listener.Position.y, XA2Listener.Position.z);
+		OutputDebugString(buf);
+*/
 /*
 			char buf2[250];
 			sprintf(buf2, "of:x %f of:y %f of:z :%f - ot:x %f ot:y %f ot:z :%f\n", 
@@ -1615,13 +1620,19 @@ void PlatUpdatePlayer()
 				if (ActiveSounds[i].soundIndex == SID_NOSOUND)
 					continue;
 
+				ActiveSounds[i].xa2Emitter.Position.x = 100.0f;
+				ActiveSounds[i].xa2Emitter.Position.y = 100.0f;
+				ActiveSounds[i].xa2Emitter.Position.z = 100.0f;
+
+
+//				char buf2[100];
+//				sprintf(buf, "emitter x: %f y: %f z: %f\n", ActiveSounds[i].xa2Emitter.Position.x, ActiveSounds[i].xa2Emitter.Position.y, ActiveSounds[i].xa2Emitter.Position.z);
+//				OutputDebugString(buf);
+
 				X3DAudioCalculate(x3DInstance, &XA2Listener, &ActiveSounds[i].xa2Emitter, calcFlags, &XA2DSPSettings);
 
-				XA2DSPSettings.pMatrixCoefficients[0];// *= 100000;
-				XA2DSPSettings.pMatrixCoefficients[1];// *= 100000;
-
-				sprintf(buf, "1: %f 2: %f\n", XA2DSPSettings.pMatrixCoefficients[0], XA2DSPSettings.pMatrixCoefficients[1]);
-				OutputDebugString(buf);
+//				sprintf(buf, "1: %f 2: %f\n", XA2DSPSettings.pMatrixCoefficients[0], XA2DSPSettings.pMatrixCoefficients[1]);
+//				OutputDebugString(buf);
 
 				ActiveSounds[i].pSourceVoice->SetOutputMatrix(pMasteringVoice, 1, 2, XA2DSPSettings.pMatrixCoefficients);
 				ActiveSounds[i].pSourceVoice->SetFrequencyRatio(XA2DSPSettings.DopplerFactor);
@@ -1714,12 +1725,10 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 	uint8_t *endOfBufferPtr = NULL;
 	uint32_t lengthInSeconds = 0;
 
-	{
-		size_t length = strlen ((const char*)bufferPtr) + 1;
-		GameSounds[soundIndex].wavName = (char *)AllocateMem (length);
-		strcpy (GameSounds[soundIndex].wavName, (const char*)bufferPtr);
-		bufferPtr += length;
-	}
+	size_t length = strlen ((const char*)bufferPtr) + 1;
+	GameSounds[soundIndex].wavName = (char *)AllocateMem (length);
+	strcpy (GameSounds[soundIndex].wavName, (const char*)bufferPtr);
+	bufferPtr += length;
 
 	// Read the WAV RIFF header
 	RebSndRead(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, &bufferPtr);
@@ -1846,7 +1855,7 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 
 		GameSounds[soundIndex].length = lengthInSeconds;
 
-		/* need to save this here for later use */
+		// need to save this here for later use
 		GameSounds[soundIndex].dsFrequency = myWaveFormat.nSamplesPerSec;
 	}
 
@@ -1901,7 +1910,7 @@ AudioStream::AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, 
 	waveFormat.cbSize			= sizeof(waveFormat);
 
 	// create a new voice context for "on buffer end" callback
-	this->voiceContext = new StreamingVoiceContext;
+	this->voiceContext = new(std::nothrow) StreamingVoiceContext;
 
 	// create the source voice for playing the sound
 	LastError = pXAudio2->CreateSourceVoice(&this->pSourceVoice, &waveFormat, 0, XAUDIO2_DEFAULT_FREQ_RATIO, this->voiceContext);
@@ -1910,7 +1919,7 @@ AudioStream::AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, 
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
-	this->buffers = new uint8_t[bufferSize * numBuffers];
+	this->buffers = new(std::nothrow) uint8_t[bufferSize * numBuffers];
 	if (this->buffers == NULL)
 	{
 		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);

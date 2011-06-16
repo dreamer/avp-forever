@@ -852,7 +852,7 @@ namespace IFF
 		public:
 			#ifndef IFF_READ_ONLY
 				GenericFile() : m_pszFileName(NULL) {}
-				virtual ~GenericFile() { if (m_pszFileName) delete[] m_pszFileName; }
+				virtual ~GenericFile() { delete[] m_pszFileName; }
 			#endif
 		
 			bool Load(TCHAR const * pszFileName);

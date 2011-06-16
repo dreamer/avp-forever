@@ -55,7 +55,7 @@ namespace IFF
 
 	IlbmS3tcChunk::~IlbmS3tcChunk()
 	{
-		if (pData) delete[] pData;
+		delete[] pData;
 		pData = NULL;
 	}	
 	
@@ -73,12 +73,12 @@ namespace IFF
 
 		if (pArchv->m_bIsLoading)
 		{
-			if (pData) delete[] pData;
+			delete[] pData;
 			pData = new uint8_t[dataSize];
 		}
 
 		uint8_t *pDataPos = pData;
-		for(unsigned i=0;i<dataSize;i++)
+		for(uint32_t i = 0; i < dataSize; i++)
 		{
 			pArchv->Transfer(*pDataPos++);
 		}

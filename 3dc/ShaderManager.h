@@ -31,9 +31,6 @@
 #include <vector>
 #include <utility>
 
-typedef int32_t effectID_t;
-typedef int32_t shaderID_t;
-
 const shaderID_t kNullShaderID = -1;
 const effectID_t kNullEffectID = -1;
 
@@ -42,6 +39,8 @@ enum SHADER_CONSTANT
 {
 	CONST_INT,
 	CONST_FLOAT,
+	CONST_VECTOR3,
+	CONST_VECTOR4,
 	CONST_MATRIX
 	// etc etc
 };

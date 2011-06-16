@@ -131,7 +131,6 @@ BOOL AnythingInMyModule(MODULE* my_mod)
 	//	this used within level - find objects in module
 	// all will have sbs
 
-	int i;
 	int max_x, min_x, max_y, min_y, max_z, min_z;
 
 	max_x = my_mod->m_maxx + my_mod->m_world.vx;
@@ -141,7 +140,7 @@ BOOL AnythingInMyModule(MODULE* my_mod)
 	max_z = my_mod->m_maxz + my_mod->m_world.vz;
 	min_z = my_mod->m_minz + my_mod->m_world.vz;
 
-	for (i = 0; i < NumActiveStBlocks; i++)
+	for (int i = 0; i < NumActiveStBlocks; i++)
 	{
 		VECTORCH obj_world;
 		STRATEGYBLOCK	*sbptr;

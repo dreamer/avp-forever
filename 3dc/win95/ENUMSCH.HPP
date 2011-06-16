@@ -14,7 +14,7 @@ public:
 
 	~Enum_Constant()
 	{
-		if (cname) delete[] cname;
+		delete[] cname;
 	}
 
 	Enum_Constant(char const * const _cname, int const _value);
@@ -56,7 +56,7 @@ public:
 
 	~BMP_Enums_Chunk ()
 	{
-		if (ctype) delete[] ctype;
+		delete[] ctype;
 	}
 
 	virtual size_t size_chunk ();

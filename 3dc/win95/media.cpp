@@ -322,7 +322,7 @@ unsigned MediaStdFileMedium::DoGetPos()
 
 void MediaStdFileMedium::DoSetPos(unsigned nPos)
 {
-	if (fseek(m_pFile,nPos,SEEK_SET))
+	if (fseek(m_pFile, nPos, SEEK_SET))
 		m_fError |= MME_UNAVAIL;
 }
 

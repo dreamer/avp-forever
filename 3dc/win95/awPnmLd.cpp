@@ -1,3 +1,5 @@
+#if 0
+
 #ifndef DB_LEVEL
 #define DB_LEVEL 4
 #endif
@@ -102,6 +104,7 @@ AwTl::Colour * AwPpmLoader::GetPalette()
 void AwPpmLoader::LoadNextRow(AwTl::PtrUnion pRow)
 {
 	if (pm_maxval != 255)
+	{
 		for (unsigned colcount = m_nWidth; colcount; --colcount)
 		{
 			BYTE byte;
@@ -113,7 +116,9 @@ void AwPpmLoader::LoadNextRow(AwTl::PtrUnion pRow)
 			pRow.colourP->b = static_cast<BYTE>(static_cast<unsigned>(byte)*255/pm_maxval);
 			++pRow.colourP;
 		}
+	}
 	else
+	{
 		for (unsigned colcount = m_nWidth; colcount; --colcount)
 		{
 			MediaRead(m_pMedium,&pRow.colourP->r);
@@ -121,6 +126,7 @@ void AwPpmLoader::LoadNextRow(AwTl::PtrUnion pRow)
 			MediaRead(m_pMedium,&pRow.colourP->b);
 			++pRow.colourP;
 		}
+	}
 }
 
 
@@ -229,5 +235,4 @@ AWTEXLD_IMPLEMENT_DYNCREATE("P6",AwPpmLoader)
 AWTEXLD_IMPLEMENT_DYNCREATE("P5",AwPgmLoader)
 AWTEXLD_IMPLEMENT_DYNCREATE("P4",AwPbmLoader)
 
-
-
+#endif

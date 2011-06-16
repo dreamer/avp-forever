@@ -160,7 +160,6 @@ void PlatformSpecificInitPredatorHUD()
 
 void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 {
-	struct VertexTag quadVertices[4];
 	int scaledWidth;
 	int scaledHeight;
 
@@ -174,6 +173,8 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 		scaledWidth = MUL_FIXED(imageDescPtr->Scale, imageDescPtr->Width);
 		scaledHeight = MUL_FIXED(imageDescPtr->Scale, imageDescPtr->Height);
 	}
+
+	VertexTag quadVertices[4];
 
 	quadVertices[0].U = imageDescPtr->TopLeftU;
 	quadVertices[0].V = imageDescPtr->TopLeftV;
@@ -218,26 +219,25 @@ void D3D_InitialiseMarineHUD(void)
 
 	/* load HUD gfx of correct resolution */
 	{
-//		HUDResolution = HUD_RES_HI;//HUD_RES_MED;
 		HUDImageNumber = CL_LoadImageOnce("Huds\\Marine\\MarineHUD.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 		MotionTrackerHalfWidth = 127/2;
 		MotionTrackerTextureSize = 128;
 
 		BlueBar.ImageNumber = HUDImageNumber;
 		BlueBar.TopLeftX = ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;//0; bjd
-		BlueBar.TopLeftY = (ScreenDescriptorBlock.SDB_Height-40) - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
+		BlueBar.TopLeftY = (ScreenDescriptorBlock.SDB_Height-40) - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset;
 		BlueBar.TopLeftU = 1;
 		BlueBar.TopLeftV = 223;
-		BlueBar.Red = 255;
+		BlueBar.Red   = 255;
 		BlueBar.Green = 255;
-		BlueBar.Blue = 255;
+		BlueBar.Blue  = 255;
 
 		BlueBar.Height = BLUE_BAR_HEIGHT;
-		BlueBar.Width = BLUE_BAR_WIDTH;
+		BlueBar.Width  = BLUE_BAR_WIDTH;
 
 		/* motion tracker blips */
 		MT_BlipHeight = 12;
-		MT_BlipWidth = 12;
+		MT_BlipWidth  = 12;
 
 		/* load in sfx */
 		SpecialFXImageNumber = CL_LoadImageOnce("Common\\partclfx.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
@@ -285,8 +285,8 @@ void LoadCommonTextures(void)
 	}
 	else
 	{
-   		PredatorNumbersImageNumber = CL_LoadImageOnce("HUDs\\Predator\\predNumbers.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
-   		StaticImageNumber = CL_LoadImageOnce("Common\\static.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+		PredatorNumbersImageNumber = CL_LoadImageOnce("HUDs\\Predator\\predNumbers.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
+		StaticImageNumber = CL_LoadImageOnce("Common\\static.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 		AlienTongueImageNumber = CL_LoadImageOnce("HUDs\\Alien\\AlienTongue.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
 	}
 	
@@ -298,7 +298,7 @@ void LoadCommonTextures(void)
 	{
 		if (!strcmp(LevelName,"invasion_a"))
 		{
-		   	ChromeImageNumber = CL_LoadImageOnce("Envrnmts\\Invasion\\water2.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+			ChromeImageNumber = CL_LoadImageOnce("Envrnmts\\Invasion\\water2.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 			WaterShaftImageNumber = CL_LoadImageOnce("Envrnmts\\Invasion\\water-shaft.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 		}
 		else if (!strcmp(LevelName,"genshd1"))
@@ -355,25 +355,24 @@ void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2)
 
 void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 {
-	struct VertexTag quadVertices[4];
-	int widthCos, widthSin;
-
-	BlueBar.TopLeftY = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset) - MUL_FIXED(MotionTrackerScale,40);
+	BlueBar.TopLeftY = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset) - MUL_FIXED(MotionTrackerScale, 40);
 	MotionTrackerCentreY = BlueBar.TopLeftY;
-	MotionTrackerCentreX = BlueBar.TopLeftX+MUL_FIXED(MotionTrackerScale,(BlueBar.Width/2));
+	MotionTrackerCentreX = BlueBar.TopLeftX+MUL_FIXED(MotionTrackerScale, (BlueBar.Width/2));
 	BlueBar.Scale = MotionTrackerScale;
 
-	int motionTrackerScaledHalfWidth = MUL_FIXED(MotionTrackerScale*3,MotionTrackerHalfWidth/2);
+	int motionTrackerScaledHalfWidth = MUL_FIXED(MotionTrackerScale*3, MotionTrackerHalfWidth/2);
 
-	{
-		int angle = 4095 - Player->ObEuler.EulerY;
-	
-		widthCos = MUL_FIXED(motionTrackerScaledHalfWidth, GetCos(angle));
-		widthSin = MUL_FIXED(motionTrackerScaledHalfWidth, GetSin(angle));
-	}
-	
+	motionTrackerScaledHalfWidth /= 2;
+
+	int angle = 4095 - Player->ObEuler.EulerY;
+
+	int widthCos = MUL_FIXED(motionTrackerScaledHalfWidth, GetCos(angle));
+	int widthSin = MUL_FIXED(motionTrackerScaledHalfWidth, GetSin(angle));
+
 	/* I've put these -1s in here to help clipping 45 degree cases,
 	where two vertices can end up around the clipping line of Y=0 */
+
+	VertexTag quadVertices[4];
 
 	// top left
 	quadVertices[0].X = (-widthCos - (-widthSin));
@@ -396,7 +395,7 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 	// bottom left
 	quadVertices[3].X = ((-widthCos) - widthSin);
 	quadVertices[3].Y = ((-widthSin) + widthCos) -1;
-	quadVertices[3].U = 1;							   
+	quadVertices[3].U = 1;
 	quadVertices[3].V = 1+MotionTrackerTextureSize;
 
 	/* clip to Y<=0 */
@@ -420,7 +419,7 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 	if (quadVertices[1].X==-1) quadVertices[1].X = 0;
 	if (quadVertices[2].X==-1) quadVertices[2].X = 0;
 	if (quadVertices[3].X==-1) quadVertices[3].X = 0;
-		
+
 	/* check u & v are >0 */
 	if (quadVertices[0].V<0) quadVertices[0].V = 0;
 	if (quadVertices[1].V<0) quadVertices[1].V = 0;
@@ -431,8 +430,6 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 	if (quadVertices[1].U<0) quadVertices[1].U = 0;
 	if (quadVertices[2].U<0) quadVertices[2].U = 0;
 	if (quadVertices[3].U<0) quadVertices[3].U = 0;
-
-	D3D_HUD_Setup();
 
 	D3D_HUDQuad_Output
 	(
@@ -446,48 +443,45 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 		HUDImageDesc imageDesc;
 
 		imageDesc.ImageNumber = HUDImageNumber;
-		imageDesc.Scale = MUL_FIXED(MotionTrackerScale*3,scanLineSize/2);
-		imageDesc.TopLeftX = MotionTrackerCentreX - MUL_FIXED(motionTrackerScaledHalfWidth,scanLineSize);
-		imageDesc.TopLeftY = MotionTrackerCentreY - MUL_FIXED(motionTrackerScaledHalfWidth,scanLineSize);
+		imageDesc.Scale = MUL_FIXED(MotionTrackerScale*3, scanLineSize/2);
+		imageDesc.TopLeftX = MotionTrackerCentreX - MUL_FIXED(motionTrackerScaledHalfWidth, scanLineSize);
+		imageDesc.TopLeftY = MotionTrackerCentreY - MUL_FIXED(motionTrackerScaledHalfWidth, scanLineSize);
 		imageDesc.TopLeftU = 1;
 		imageDesc.TopLeftV = 132;
 		imageDesc.Height = 64;
-		imageDesc.Width = 128;
-		imageDesc.Red = 255;
-		imageDesc.Green = 255;
-		imageDesc.Blue = 255;
-		imageDesc.Translucency = HUDTranslucencyLevel;
+		imageDesc.Width  = 128;
+		imageDesc.Red    = 255;
+		imageDesc.Green  = 255;
+		imageDesc.Blue   = 255;
+		imageDesc.Translucency  = HUDTranslucencyLevel;
 		imageDesc.filterTexture = TRUE;
 
- 		Draw_HUDImage(&imageDesc);
+		Draw_HUDImage(&imageDesc);
 	}
 
 	/* KJL 16:14:29 30/01/98 - draw bottom bar of MT */
-	{
-		BlueBar.Translucency = HUDTranslucencyLevel;
-		Draw_HUDImage(&BlueBar);
-	}
+	BlueBar.Translucency = HUDTranslucencyLevel;
+	Draw_HUDImage(&BlueBar);
 	
-	D3D_BLTDigitToHUD(ValueOfHUDDigit[MARINE_HUD_MOTIONTRACKER_UNITS],17, -4, MARINE_HUD_FONT_MT_SMALL);	  
-	D3D_BLTDigitToHUD(ValueOfHUDDigit[MARINE_HUD_MOTIONTRACKER_TENS],9, -4, MARINE_HUD_FONT_MT_SMALL);	  
+	D3D_BLTDigitToHUD(ValueOfHUDDigit[MARINE_HUD_MOTIONTRACKER_UNITS],17, -4, MARINE_HUD_FONT_MT_SMALL);
+	D3D_BLTDigitToHUD(ValueOfHUDDigit[MARINE_HUD_MOTIONTRACKER_TENS],9, -4, MARINE_HUD_FONT_MT_SMALL);
 	D3D_BLTDigitToHUD(ValueOfHUDDigit[MARINE_HUD_MOTIONTRACKER_HUNDREDS],-9, -4, MARINE_HUD_FONT_MT_BIG);
-    D3D_BLTDigitToHUD(ValueOfHUDDigit[MARINE_HUD_MOTIONTRACKER_THOUSANDS],-25, -4,MARINE_HUD_FONT_MT_BIG);	
+	D3D_BLTDigitToHUD(ValueOfHUDDigit[MARINE_HUD_MOTIONTRACKER_THOUSANDS],-25, -4,MARINE_HUD_FONT_MT_BIG);
 }
 
 
 void D3D_BLTMotionTrackerBlipToHUD(int x, int y, int brightness)
 {
 	HUDImageDesc imageDesc;
-//	int screenX,screenY; /* in 16.16 */
-	int frame;
-	int motionTrackerScaledHalfWidth = MUL_FIXED(MotionTrackerScale*3,MotionTrackerHalfWidth/2);
-    
+
+	int motionTrackerScaledHalfWidth = MUL_FIXED(MotionTrackerScale*3, MotionTrackerHalfWidth/2);
+
 	GLOBALASSERT(brightness<=65536);
 	
-	frame = (brightness*5)/65537;
+	int frame = (brightness*5)/65537;
 	GLOBALASSERT(frame>=0 && frame<5);
 	
-    frame = 4 - frame; // frames bloody wrong way round
+	frame = 4 - frame; // frames bloody wrong way round
 	imageDesc.ImageNumber = HUDImageNumber;
 	imageDesc.Scale = MUL_FIXED(MotionTrackerScale*3,(brightness+ONE_FIXED)/4);
 	imageDesc.TopLeftX = MotionTrackerCentreX - MUL_FIXED(MT_BlipWidth/2,imageDesc.Scale) + MUL_FIXED(x,motionTrackerScaledHalfWidth);
@@ -496,12 +490,12 @@ void D3D_BLTMotionTrackerBlipToHUD(int x, int y, int brightness)
 	imageDesc.TopLeftV = 187;
 	imageDesc.Height = MT_BlipHeight;
 	imageDesc.Width = MT_BlipWidth;
-	{
-		int trans = MUL_FIXED(brightness*2,HUDTranslucencyLevel);
-		if (trans > 255) 
-			trans = 255;
-		imageDesc.Translucency = trans;
-	}
+
+	int trans = MUL_FIXED(brightness*2, HUDTranslucencyLevel);
+	if (trans > 255)
+		trans = 255;
+	imageDesc.Translucency = trans;
+
 	imageDesc.Red = 255;
 	imageDesc.Green = 255;
 	imageDesc.Blue = 255;
@@ -543,13 +537,13 @@ extern void D3D_BlitWhiteChar(int x, int y, unsigned char c)
 	imageDesc.filterTexture = FALSE;
 
 	Draw_HUDImage(&imageDesc);
-} 
+}
 
 void D3D_DrawHUDFontCharacter(HUDCharDesc *charDescPtr)
 {
 	HUDImageDesc imageDesc;
 
-  //	if (charDescPtr->Character<' ' || charDescPtr->Character>'_') return;
+//	if (charDescPtr->Character<' ' || charDescPtr->Character>'_') return;
 	if (charDescPtr->Character == ' ') return;
 
 	imageDesc.ImageNumber = AAFontImageNumber;
@@ -664,19 +658,19 @@ void D3D_BLTDigitToHUD(char digit, int x, int y, int font)
 	switch (font)
 	{
 		case MARINE_HUD_FONT_MT_SMALL:
-	  	case MARINE_HUD_FONT_MT_BIG:
+		case MARINE_HUD_FONT_MT_BIG:
 		{
-		   	gfxID = MARINE_HUD_GFX_TRACKERFONT;
+			gfxID = MARINE_HUD_GFX_TRACKERFONT;
 			imageDesc.Scale = MotionTrackerScale;
-			x = MUL_FIXED(x,MotionTrackerScale) + MotionTrackerCentreX;
-			y = MUL_FIXED(y,MotionTrackerScale) + MotionTrackerCentreY;
+			x = MUL_FIXED(x, MotionTrackerScale) + MotionTrackerCentreX;
+			y = MUL_FIXED(y, MotionTrackerScale) + MotionTrackerCentreY;
 			break;
 		}
 		case MARINE_HUD_FONT_RED:
 		case MARINE_HUD_FONT_BLUE:
 		{
 			if (x<0) x+=ScreenDescriptorBlock.SDB_Width;
-		   	gfxID = MARINE_HUD_GFX_NUMERALS;
+			gfxID = MARINE_HUD_GFX_NUMERALS;
 			imageDesc.Scale=ONE_FIXED;
 			break;
 		}
@@ -712,20 +706,20 @@ void D3D_BLTDigitToHUD(char digit, int x, int y, int font)
 
 void D3D_BLTGunSightToHUD(int screenX, int screenY, enum GUNSIGHT_SHAPE gunsightShape)
 {
-  	HUDImageDesc imageDesc;
+	HUDImageDesc imageDesc;
 	int gunsightSize=13;
 
 	screenX = (screenX-(gunsightSize/2));
-  	screenY = (screenY-(gunsightSize/2));
-  	
+	screenY = (screenY-(gunsightSize/2));
+	
 	imageDesc.ImageNumber = HUDImageNumber;
 	imageDesc.TopLeftX = screenX;
 	imageDesc.TopLeftY = screenY;
 	imageDesc.TopLeftU = 227;
 	imageDesc.TopLeftV = 131+(gunsightShape*(gunsightSize+1));
 	imageDesc.Height = gunsightSize;
-	imageDesc.Width = gunsightSize;
-	imageDesc.Scale = ONE_FIXED;
+	imageDesc.Width  = gunsightSize;
+	imageDesc.Scale  = ONE_FIXED;
 	imageDesc.Translucency = 128;
 	imageDesc.Red = 255;
 	imageDesc.Green = 255;
@@ -737,12 +731,11 @@ void D3D_BLTGunSightToHUD(int screenX, int screenY, enum GUNSIGHT_SHAPE gunsight
 
 void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 {
-	int i = MAX_NO_OF_COMMON_HUD_DIGITS;
 	unsigned int healthColour;
 	unsigned int armourColour;
 
 	if (AvP.PlayerType == I_Marine)
-	{										  
+	{
 		int xCentre = MUL_FIXED(HUDLayout_RightmostTextCentre,HUDScaleFactor)+ScreenDescriptorBlock.SDB_Width - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
 		healthColour = HUDLayout_Colour_MarineGreen;
 		armourColour = HUDLayout_Colour_MarineGreen;
@@ -760,7 +753,7 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 			xCentre,
 			MUL_FIXED(HUDLayout_Health_TopY+HUDLayout_Linespacing,HUDScaleFactor) + ScreenDescriptorBlock.SDB_SafeZoneWidthOffset,
 			healthColour
-		);	
+		);
 		D3D_RenderHUDString_Centred
 		(
 			GetTextString(TEXTSTRING_INGAME_ARMOUR),
@@ -774,10 +767,10 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 			xCentre,
 			MUL_FIXED(HUDLayout_Armour_TopY+HUDLayout_Linespacing,HUDScaleFactor) + ScreenDescriptorBlock.SDB_SafeZoneWidthOffset,
 			armourColour
-		);	
+		);
 	}
 	else
-	{										  
+	{
 		if (health > 100)
 		{
 			healthColour = HUDLayout_Colour_BrightWhite;
@@ -798,7 +791,7 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 		}
 
 		{
-   			struct VertexTag quadVertices[4];
+			struct VertexTag quadVertices[4];
 			int scaledWidth;
 			int scaledHeight;
 			int x,y;
@@ -853,10 +846,10 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 				scaledWidth = ScreenDescriptorBlock.SDB_Width;
 				scaledHeight = scaledWidth/32;
 			}
-	
+
 			x = (ScreenDescriptorBlock.SDB_Width - scaledWidth)/2;
 			y = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_Width/32 + x/32) - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
-	
+
 			quadVertices[0].X = x;
 			quadVertices[0].Y = y;
 			quadVertices[1].X = x + scaledWidth;
@@ -869,13 +862,13 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 			D3D_HUDQuad_Output(SpecialFXImageNumber, quadVertices, 0xffffffff, FILTERING_BILINEAR_ON);
 		}
 	}
-} 
+}
 
 void Render_MarineAmmo(enum TEXTSTRING_ID ammoText, enum TEXTSTRING_ID magazinesText, unsigned int magazines, enum TEXTSTRING_ID roundsText, unsigned int rounds, int primaryAmmo)
 {
-	int i = MAX_NO_OF_COMMON_HUD_DIGITS;
 	int xCentre = (MUL_FIXED(HUDLayout_RightmostTextCentre,HUDScaleFactor)+ScreenDescriptorBlock.SDB_Width) - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
-	if (!primaryAmmo) 
+
+	if (!primaryAmmo)
 		xCentre += MUL_FIXED(HUDScaleFactor, HUDLayout_RightmostTextCentre * 2);
 
 	D3D_RenderHUDString_Centred
@@ -898,7 +891,7 @@ void Render_MarineAmmo(enum TEXTSTRING_ID ammoText, enum TEXTSTRING_ID magazines
 		xCentre,
 		(ScreenDescriptorBlock.SDB_Height - MUL_FIXED(HUDScaleFactor,HUDLayout_Magazines_TopY - HUDLayout_Linespacing)) - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset,
 		HUDLayout_Colour_MarineRed
-	);	
+	);
 	D3D_RenderHUDString_Centred
 	(
 		GetTextString(roundsText),
@@ -912,8 +905,8 @@ void Render_MarineAmmo(enum TEXTSTRING_ID ammoText, enum TEXTSTRING_ID magazines
 		xCentre,
 		(ScreenDescriptorBlock.SDB_Height - MUL_FIXED(HUDScaleFactor,HUDLayout_Rounds_TopY - HUDLayout_Linespacing)) - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset,
 		HUDLayout_Colour_MarineRed
-	);	
-} 
+	);
+}
 
 void DrawPredatorEnergyBar(void)
 {
@@ -938,7 +931,7 @@ void DrawPredatorEnergyBar(void)
 			0xff, // unsigned char R,
 			0x00,// unsigned char G,
 			0x00,// unsigned char B,
-		   	128 // unsigned char translucency
+			128 // unsigned char translucency
 		);
 	}
 	if (weaponPtr->WeaponIDNumber == WEAPON_PRED_SHOULDERCANNON)
@@ -959,7 +952,7 @@ void DrawPredatorEnergyBar(void)
 			0x00, // unsigned char R,
 			0xff,// unsigned char G,
 			0xff,// unsigned char B,
-		   	128 // unsigned char translucency
+			128 // unsigned char translucency
 		);
 	}
 }

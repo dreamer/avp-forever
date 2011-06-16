@@ -31,50 +31,49 @@
 #include "davehook.h"
 #include "CDTrackSelection.h"
 #include "savegame.h"
-	// Added 18/11/97 by DHM: all hooks for my code
-
+// Added 18/11/97 by DHM: all hooks for my code
 #define UseLocalAssert TRUE
 #include "ourasert.h"
-
-/* KJL 09:47:33 03/19/97 - vision stuff for marine and predator.
-Currently PC only because it will probably be implemented in a completely
-different way on the consoles, so I won't worry the PSX guys for now.
-*/
-
 #include "vision.h"
 #include "cheat.h"	
 #include "pldnet.h"								 
 #include "kshape.h"
-
 #define	VERSION_DisableStartupMenus 	TRUE
 #define VERSION_DisableStartupCredits	TRUE
 #include "avp_menus.h"
 
-/******************
-Extern Engine Varibles
-******************/
-
+// extern Varibles
 extern int VideoMode;
-
 extern int FrameRate;
 extern int FrameRate;
-
 extern int Resolution;
-
-unsigned char Null_Name[8];
-
 extern int PlaySounds;
+extern int MotionTrackerScale;
+extern int LeanScale;
+extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+
+// extern functions
+extern void CheckCDStatus(void);
+extern void CreateGameSpecificConsoleVariables(void);
+extern void CreateGameSpecificConsoleCommands(void);
+extern void CreateMoreGameSpecificConsoleVariables(void);
+extern void create_strategies_from_list ();
+extern void AssignAllSBNames();
+extern BOOL Current_Level_Requires_Mirror_Image();
+extern void InitialiseTriggeredFMVs();
+void check_preplaced_decal_modules();
 
 /*******************************
 EXPORTED GLOBALS
 *******************************/
-
 
 AVP_GAME_DESC AvP;		 /* game description */
 
 char projectsubdirectory[] = {"avp/"};
 int SavedFrameRate;
 int SavedNormalFrameTime;
+
+unsigned char Null_Name[8];
 
 
 /* Andy 13/10/97
@@ -94,10 +93,7 @@ void ProcessSystemObjects();
 
 void FindObjectOfFocus();
 void MaintainPlayer(void);
-
-extern void CheckCDStatus(void);
 void CreatePlayersImageInMirror(void);
-extern void InitialiseTriggeredFMVs();
 void CreateStarArray(void);
 void MessageHistory_Initialise();
 void TimeScaleThingy();
@@ -108,7 +104,6 @@ void MessageHistory_Maintain(void);
 Init Game and Start Game
 
 *********************************************/
-
 
 void InitGame(void)
 {
@@ -140,34 +135,22 @@ void InitGame(void)
 	
 	AvP.NetworkAIServer = 0;
 
-
 	// Added by DHM 18/11/97: Hook for my initialisation code:
 	DAVEHOOK_Init();
 
-	/* KJL 15:17:35 28/01/98 - Initialise console variables */
-	{
-		extern void CreateGameSpecificConsoleVariables(void);
-		extern void CreateGameSpecificConsoleCommands(void);
+	/* KJL 12:03:18 30/01/98 - Init console variables and commands */
+	CreateGameSpecificConsoleVariables();
+	CreateGameSpecificConsoleCommands();
+	
+	/* Next one is CDF's */
+	CreateMoreGameSpecificConsoleVariables();
 
-		extern void CreateMoreGameSpecificConsoleVariables(void);
-
-		/* KJL 12:03:18 30/01/98 - Init console variables and commands */
-		CreateGameSpecificConsoleVariables();
-		CreateGameSpecificConsoleCommands();
-		
-		/* Next one is CDF's */
-		CreateMoreGameSpecificConsoleVariables();
-	}
 	#if DEATHMATCH_DEMO
 	SetToMinimalDetailLevels();
 	#else
 	SetToDefaultDetailLevels();
 	#endif
 }
-
-extern void create_strategies_from_list ();
-extern void AssignAllSBNames();
-extern BOOL Current_Level_Requires_Mirror_Image();
 
 void StartGame(void)
 {
@@ -239,32 +222,22 @@ void StartGame(void)
 	
 	CheckCDStatus();
 
+	if (AvP.PlayerType==I_Alien)
 	{
-		extern int LeanScale;
-		if (AvP.PlayerType==I_Alien)
-		{
-			LeanScale=ONE_FIXED*3;
-		}
-		else
-		{
-			LeanScale=ONE_FIXED;
-		}
+		LeanScale=ONE_FIXED*3;
 	}
+	else
 	{
-		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-		extern int MotionTrackerScale;
-		MotionTrackerScale = DIV_FIXED(ScreenDescriptorBlock.SDB_Width,640);
+		LeanScale=ONE_FIXED;
 	}
- //	BuildInvSqrtTable();
+	
+	MotionTrackerScale = DIV_FIXED(ScreenDescriptorBlock.SDB_Width,640);
 
 	InitialiseTriggeredFMVs();
 	CreateStarArray();
 
-	{
-		//check the containing modules for preplaced decals
-		void check_preplaced_decal_modules();
-		check_preplaced_decal_modules();
-	}
+	//check the containing modules for preplaced decals
+	check_preplaced_decal_modules();
 
 	CurrentGameStats_Initialise();
 	MessageHistory_Initialise();

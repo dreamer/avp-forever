@@ -5,19 +5,14 @@
 #include "stratdef.h"
 #include "gamedef.h"
 #include "bh_types.h"
-
 #include "weapons.h"
 #include "comp_shp.h"
 #include "inventry.h"
 #include "triggers.h"
-
 #include "dynblock.h"
 #include "dynamics.h"
-
 #define UseLocalAssert TRUE
-
 #include "ourasert.h"
-
 #include "pmove.h"
 #include "pvisible.h"
 #include "bh_pred.h"
@@ -29,13 +24,9 @@
 #include "bh_lnksw.h"
 #include "bh_binsw.h"
 #include "bh_lift.h"
-
 #include "psnd.h"
 #include "savegame.h"
-
-/* for win95 net game support */
 #include "pldghost.h"
-
 
 void* LiftDoorBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 {

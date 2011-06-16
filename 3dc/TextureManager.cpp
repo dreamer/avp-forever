@@ -98,6 +98,24 @@ texID_t Tex_CheckExists(const std::string &textureName)
 	return MISSING_TEXTURE;
 }
 
+texID_t Tex_AddExistingTexture(Texture &texture)
+{
+	// get the next available ID
+	texID_t textureID = Tex_GetFreeID();
+
+	// store it
+	if (textureID < textureList.size()) // we're reusing a slot in this case
+	{
+		textureList[textureID] = texture; // replace in the old unused slot
+	}
+	else // adding on to the end
+	{
+		textureList.push_back(texture);
+	}
+
+	return textureID;
+}
+
 texID_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usage)
 {
 	// get the next available ID

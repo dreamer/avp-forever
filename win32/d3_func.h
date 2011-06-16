@@ -92,17 +92,17 @@ struct r_PixelShader
  *	taken from http://www.mvps.org/directx/articles/definitions_for_dx7_vertex_types.htm
  */
 
-typedef struct _D3DTVERTEX
+typedef struct _D3DLVERTEX
 {
-	float sx;
-	float sy;
-	float sz;
+	float x;
+	float y;
+	float z;
 
 	D3DCOLOR color;
 	D3DCOLOR specular;
 
-	float tu;
-	float tv;
+	float u;
+	float v;
 
 } D3DLVERTEX;
 
@@ -176,14 +176,18 @@ typedef struct D3DInfo
 	class VertexBuffer		*orthoVB;
 	class IndexBuffer		*orthoIB;
 
+	class VertexBuffer		*starsVB;
+	class IndexBuffer		*starsIB;
+
 	// effect manager to handle shaders
 	class EffectManager		*effectSystem;
 
 	// shader IDs
-	uint32_t				mainEffect;
-	uint32_t				orthoEffect;
-	uint32_t				cloudEffect;
-	uint32_t				fmvEffect;
+	effectID_t				mainEffect;
+	effectID_t				orthoEffect;
+	effectID_t				cloudEffect;
+	effectID_t				fmvEffect;
+	effectID_t				starsEffect;
 
 	// vertex declarations
 	class VertexDeclaration		*mainDecl;
@@ -203,6 +207,7 @@ typedef struct D3DInfo
 	bool					supportsDynamicTextures;
 
 	uint32_t				fieldOfView;
+	float					aspectRatio;
 } D3DINFO;
 
 extern D3DINFO d3d;

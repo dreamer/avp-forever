@@ -25,7 +25,7 @@ Enum_Constant::Enum_Constant(Enum_Constant const & ec2) : cname(0), value(ec2.va
 
 Enum_Constant & Enum_Constant::operator = (Enum_Constant const & ec2)
 {
-	if (cname) delete[] cname;
+	delete[] cname;
 	cname = 0;
 	value = ec2.value;
 	reserved = ec2.reserved;

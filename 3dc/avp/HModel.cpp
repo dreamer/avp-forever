@@ -2946,9 +2946,7 @@ void MatToQuat (MATRIXCH *m, QUAT *quat)
 	mat[0][2] = (double) m->mat13 / ONE_FIXED;
 	mat[1][2] = (double) m->mat23 / ONE_FIXED;
 	mat[2][2] = (double) m->mat33 / ONE_FIXED;
-	
-	
-	
+
 	tr= mat[0][0]+mat[1][1]+mat[2][2];
 	
 	if (tr>0.0)
@@ -2985,7 +2983,6 @@ void MatToQuat (MATRIXCH *m, QUAT *quat)
 	quat->quatw = -quat->quatw;
 
 	QNormalise(quat);
-	
 }
 
 void Init_Tweening_Recursion(SECTION_DATA *this_section_data, int target_sequence_type,int target_subsequence, int seconds_for_tweening, int backwards) {
@@ -3018,11 +3015,9 @@ void Init_Tweening_Recursion(SECTION_DATA *this_section_data, int target_sequenc
 	/* Preprocess slerp values. */
 
 	{
-
 		this_section_data->delta_offset.vx=this_section_data->target_offset.vx-this_section_data->stored_offset.vx;
 		this_section_data->delta_offset.vy=this_section_data->target_offset.vy-this_section_data->stored_offset.vy;
 		this_section_data->delta_offset.vz=this_section_data->target_offset.vz-this_section_data->stored_offset.vz;
-
 	}
 
 	{
@@ -3032,9 +3027,8 @@ void Init_Tweening_Recursion(SECTION_DATA *this_section_data, int target_sequenc
 		this_quat=&this_section_data->stored_quat;
 		next_quat=&this_section_data->target_quat;
 
-		
 		cosom=QDot(this_quat,next_quat);
-		
+
 		if (cosom<0) {
 			next_quat->quatx=-next_quat->quatx;
 			next_quat->quaty=-next_quat->quaty;
@@ -3054,10 +3048,9 @@ void Init_Tweening_Recursion(SECTION_DATA *this_section_data, int target_sequenc
 			this_section_data->omega=0;
 			this_section_data->oneoversinomega=0;
 		}
-	
+
 		GLOBALASSERT(seconds_for_tweening>0);
 		this_section_data->oneovertweeninglength=DIV_FIXED(ONE_FIXED,seconds_for_tweening);
-
 	}
 
 	/* Init fields... I guess. */
@@ -3082,16 +3075,14 @@ void Init_Tweening_Recursion(SECTION_DATA *this_section_data, int target_sequenc
 		/* Respect the terminator! */
 
 		SECTION_DATA *child_list_ptr;
-	
+
 		child_list_ptr=this_section_data->First_Child;
-	
+
 		while (child_list_ptr!=NULL) {
 			Init_Tweening_Recursion(child_list_ptr,target_sequence_type,target_subsequence,seconds_for_tweening,backwards);
 			child_list_ptr=child_list_ptr->Next_Sibling;
 		}
-
 	}
-
 }
 
 
@@ -3126,7 +3117,6 @@ void InitHModelTweening(HMODELCONTROLLER *controller, int seconds_for_tweening,
 	/* Recurse though hierarchy, setting up all the section_data sequence stores? */
 
 	Init_Tweening_Recursion(controller->section_data, target_sequence_type, target_subsequence,seconds_for_tweening,0);
-
 }
 
 void InitHModelTweening_Backwards(HMODELCONTROLLER *controller, int seconds_for_tweening,
@@ -3160,7 +3150,6 @@ void InitHModelTweening_Backwards(HMODELCONTROLLER *controller, int seconds_for_
 	/* Recurse though hierarchy, setting up all the section_data sequence stores? */
 
 	Init_Tweening_Recursion(controller->section_data, target_sequence_type, target_subsequence,seconds_for_tweening,1);
-
 }
 
 void ReSnap(HMODELCONTROLLER *controller,SECTION_DATA *this_section_data, int elevation) {
@@ -3252,7 +3241,6 @@ void ReSnap(HMODELCONTROLLER *controller,SECTION_DATA *this_section_data, int el
 		/* Now deal with orientation. */
 
 		Slerp(this_frame,lerp,&this_section_data->target_quat);
-
 	}
 	#endif
 
@@ -3263,16 +3251,16 @@ void ReSnap(HMODELCONTROLLER *controller,SECTION_DATA *this_section_data, int el
 			DELTA_CONTROLLER *dcon;
 			QUAT elevation_quat,temp_quat;
 			VECTORCH elevation_offset;
-		
+
 			dcon=controller->Deltas;
-		
+
 			while (dcon) {
 				if (dcon->Active) {
 					Process_Delta_Controller(this_section_data,dcon,&elevation_offset,&elevation_quat);
 					this_section_data->target_offset.vx+=elevation_offset.vx;
 					this_section_data->target_offset.vy+=elevation_offset.vy;
 					this_section_data->target_offset.vz+=elevation_offset.vz;
-			
+
 					temp_quat.quatw=this_section_data->target_quat.quatw;
 					temp_quat.quatx=this_section_data->target_quat.quatx;
 					temp_quat.quaty=this_section_data->target_quat.quaty;
@@ -3283,17 +3271,14 @@ void ReSnap(HMODELCONTROLLER *controller,SECTION_DATA *this_section_data, int el
 				dcon=dcon->next_controller;
 			}
 		}
-		
 	}
 
 	/* Now recompute values. */
 
 	{
-
 		this_section_data->delta_offset.vx=this_section_data->target_offset.vx-this_section_data->stored_offset.vx;
 		this_section_data->delta_offset.vy=this_section_data->target_offset.vy-this_section_data->stored_offset.vy;
 		this_section_data->delta_offset.vz=this_section_data->target_offset.vz-this_section_data->stored_offset.vz;
-
 	}
 
 	{
@@ -3303,7 +3288,6 @@ void ReSnap(HMODELCONTROLLER *controller,SECTION_DATA *this_section_data, int el
 		this_quat=&this_section_data->stored_quat;
 		next_quat=&this_section_data->target_quat;
 
-		
 		cosom=QDot(this_quat,next_quat);
 		
 		if (cosom<0) {
@@ -3313,8 +3297,7 @@ void ReSnap(HMODELCONTROLLER *controller,SECTION_DATA *this_section_data, int el
 			next_quat->quatw=-next_quat->quatw;
 			cosom=-cosom;
 		}
-	
-	
+
 		this_section_data->omega=ArcCos(cosom);
 		sinom=GetSin(this_section_data->omega);
 		if (sinom) {
@@ -3324,13 +3307,11 @@ void ReSnap(HMODELCONTROLLER *controller,SECTION_DATA *this_section_data, int el
 			this_section_data->omega=0;
 			this_section_data->oneoversinomega=0;
 		}
-
 	}
-
 }
 
-void Analyse_Tweening_Data(HMODELCONTROLLER *controller,SECTION_DATA *this_section_data,int base_timer,VECTORCH *output_offset,MATRIXCH *output_matrix) {
-
+void Analyse_Tweening_Data(HMODELCONTROLLER *controller,SECTION_DATA *this_section_data,int base_timer,VECTORCH *output_offset,MATRIXCH *output_matrix)
+{
 	QUAT output_quat;
 	int working_timer,lerp;
 
@@ -3358,7 +3339,6 @@ void Analyse_Tweening_Data(HMODELCONTROLLER *controller,SECTION_DATA *this_secti
 		ReSnap(controller,this_section_data,0);
 		
 		controller->ElevationTweening=0;
-
 	}
 
 	/* Now, this_frame and next_frame are set, and working_timer<this_frame->Sequence_Length. */
@@ -3400,7 +3380,7 @@ int FindHeatSourcesInHModel(DISPLAYBLOCK *dispPtr)
 
 	return 0;
 }
-																	  
+
 static void FindHeatSource_Recursion(HMODELCONTROLLER *controllerPtr, SECTION_DATA *sectionDataPtr)
 {
 	/* KJL 16:29:40 10/02/98 - Recurse through hmodel */
@@ -3508,7 +3488,7 @@ DELTA_CONTROLLER *Add_Delta_Sequence(HMODELCONTROLLER *controller,char *id,int s
 	
 	if (seconds_for_sequence>=0) {
 		delta_controller->seconds_for_sequence=seconds_for_sequence; // Special case, 0 is legal.
-	} else {	
+	} else {
 		delta_controller->seconds_for_sequence=this_sequence->Time;
 		if (delta_controller->seconds_for_sequence<=0) {
 			delta_controller->seconds_for_sequence=ONE_FIXED;
@@ -3523,7 +3503,6 @@ DELTA_CONTROLLER *Add_Delta_Sequence(HMODELCONTROLLER *controller,char *id,int s
 	}
 
 	return(delta_controller);
-
 }
 
 void Start_Delta_Sequence(DELTA_CONTROLLER *delta_controller,int sequence_type,int sub_sequence,int seconds_for_sequence) {
@@ -3546,7 +3525,7 @@ void Start_Delta_Sequence(DELTA_CONTROLLER *delta_controller,int sequence_type,i
 	
 	if (seconds_for_sequence>=0) {
 		delta_controller->seconds_for_sequence=seconds_for_sequence; // Special case, 0 is legal.
-	} else {	
+	} else {
 		delta_controller->seconds_for_sequence=this_sequence->Time;
 		if (delta_controller->seconds_for_sequence<=0) {
 			delta_controller->seconds_for_sequence=ONE_FIXED;
@@ -3559,7 +3538,6 @@ void Start_Delta_Sequence(DELTA_CONTROLLER *delta_controller,int sequence_type,i
 	} else {
 		delta_controller->timer_increment=0;
 	}
-
 }
 
 void Delta_Sequence_ChangeSpeed(DELTA_CONTROLLER *delta_controller,int seconds_for_sequence) {
@@ -3573,7 +3551,6 @@ void Delta_Sequence_ChangeSpeed(DELTA_CONTROLLER *delta_controller,int seconds_f
 	} else {
 		delta_controller->timer_increment=0;
 	}
-
 }
 
 SECTION *Get_Corresponding_Section(SECTION **List_Ptr,char *Name) {
@@ -3600,15 +3577,16 @@ SECTION_DATA *GetThisSectionData_FromChildrenOnly(SECTION_DATA *parent,char *nam
 
 	sdptr=NULL;
 
-	if (parent->First_Child!=NULL) {
-		
+	if (parent->First_Child!=NULL)
+	{
 		SECTION_DATA *child_list_ptr;
 
 		child_list_ptr=parent->First_Child;
 
-		while (child_list_ptr!=NULL) {
-
-			if (strcmp(name,child_list_ptr->sempai->Section_Name)==0) {
+		while (child_list_ptr!=NULL)
+		{
+			if (strcmp(name,child_list_ptr->sempai->Section_Name)==0)
+			{
 				/* Got it. */
 				return(child_list_ptr);
 			}
@@ -3616,9 +3594,8 @@ SECTION_DATA *GetThisSectionData_FromChildrenOnly(SECTION_DATA *parent,char *nam
 			child_list_ptr=child_list_ptr->Next_Sibling;
 		}
 	}
-	
-	return(sdptr);
 
+	return(sdptr);
 }
 
 void Transmogrification_Recursion(STRATEGYBLOCK *sbPtr,HMODELCONTROLLER *controller,SECTION_DATA *this_section_data,SECTION *new_template, SECTION *old_template, int frag, int newsections, int regrowsections) {

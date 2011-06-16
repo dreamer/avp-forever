@@ -219,7 +219,7 @@ int CDDA_CheckNumberOfTracks()
 
 
 
-/* win95 specific */
+/* win32 specific */
 
 int PlatStartCDDA(void)
 {

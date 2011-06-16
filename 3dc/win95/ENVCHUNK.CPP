@@ -66,7 +66,6 @@ const char * Environment_Data_Chunk::get_head_id()
 	if (!hdptr) return (0);
 
 	return(hdptr->identifier);
-	
 }	
 
 void Environment_Data_Chunk::set_lock_user (char * user)
@@ -87,7 +86,6 @@ void Environment_Data_Chunk::post_input_processing()
 			external_lock = TRUE;
 
 	Chunk_With_Children::post_input_processing();
-
 }
 
 ///////////////////////////////////////
@@ -201,7 +199,6 @@ void Environment_Acoustics_Chunk::fill_data_block(char* data_start)
 	*(float*)data_start=reverb;
 	data_start+=4;
 	*(int*)data_start=spare;
-	
 }
 ///////////////////////////////////////
 
@@ -264,7 +261,6 @@ Random_Texture_ID_Chunk::Random_Texture_ID_Chunk(Chunk_With_Children* parent,con
 	}
 	CHUNK_EXTRACT(spare1,int);
 	CHUNK_EXTRACT(spare2,int);
-
 }
 
 Random_Texture_ID_Chunk::~Random_Texture_ID_Chunk()
@@ -286,7 +282,6 @@ void Random_Texture_ID_Chunk::fill_data_block(char* data)
 
 	CHUNK_FILL(spare1,int)
 	CHUNK_FILL(spare2,int)
-
 }
 
 size_t Random_Texture_ID_Chunk::size_chunk()

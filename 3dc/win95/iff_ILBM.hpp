@@ -12,7 +12,7 @@ namespace IFF
 			uint16_t height;
 			uint16_t xTopLeft;
 			uint16_t yTopLeft;
-			uint8_t nBitPlanes;
+			uint8_t  nBitPlanes;
 			enum
 			{
 				MASK_NONE = 0,
@@ -25,13 +25,13 @@ namespace IFF
 			{
 				COMPRESS_NONE = 0,
 				COMPRESS_RUNLENGTH = 1,
-				COMPRESS_S3TC =2   //will have s3tc chunk instead of body chunk
+				COMPRESS_S3TC = 2   //will have s3tc chunk instead of body chunk
 			};
-			uint8_t eCompression;
-			uint8_t flags;
+			uint8_t  eCompression;
+			uint8_t  flags;
 			uint16_t iTranspCol;
-			uint8_t xAspectRatio;
-			uint8_t yAspectRatio;
+			uint8_t  xAspectRatio;
+			uint8_t  yAspectRatio;
 			uint16_t xMax;
 			uint16_t yMax;
 			
@@ -44,7 +44,7 @@ namespace IFF
 	class IlbmCmapChunk : public Chunk
 	{
 		public:
-			unsigned nEntries;
+			uint32_t nEntries;
 			RGBTriple * pTable;
 			
 			void CreateNew(unsigned nSize);
@@ -56,9 +56,9 @@ namespace IFF
 			virtual void Serialize(Archive * pArchv);
 	};
 	
-	inline void IlbmCmapChunk::CreateNew(unsigned nSize)
+	inline void IlbmCmapChunk::CreateNew(uint32_t nSize)
 	{
-		if (pTable) delete[] pTable;
+		delete[] pTable;
 		pTable = new RGBTriple [nSize];
 		nEntries = nSize;
 	}
@@ -75,45 +75,45 @@ namespace IFF
 			
 			#ifndef IFF_READ_ONLY
 				bool BeginEncode();
-				bool EncodeFirstRow(unsigned const * pRow);
-				bool EncodeNextRow(unsigned const * pRow);
+				bool EncodeFirstRow(uint32_t const * pRow);
+				bool EncodeNextRow(uint32_t const * pRow);
 				bool EndEncode();
 				
 				float GetCompressionRatio() const;
 			#endif
 			
 			bool BeginDecode() const;
-			unsigned const * DecodeFirstRow() const;
-			unsigned const * DecodeNextRow() const;
+			uint32_t const * DecodeFirstRow() const;
+			uint32_t const * DecodeNextRow() const;
 			bool EndDecode() const;
 			
 		protected:
 			virtual void Serialize(Archive * pArchv);
 
 			virtual bool GetHeaderInfo() const; // fills in these three data members
-			mutable unsigned nWidth;
-			mutable unsigned eCompression;
-			mutable unsigned nBitPlanes;
+			mutable uint32_t nWidth;
+			mutable uint32_t eCompression;
+			mutable uint32_t nBitPlanes;
 
 		private:
-			unsigned nSize;
+			uint32_t nSize;
 			uint8_t * pData;
 			
 			mutable uint8_t const * pDecodeSrc;
-			mutable unsigned nRemaining;
-			mutable unsigned * pDecodeDst;
+			mutable uint32_t nRemaining;
+			mutable uint32_t * pDecodeDst;
 			
 			#ifndef IFF_READ_ONLY
 				DataBlock * pEncodeDst;
 				uint8_t * pEncodeSrc;
 				
-				unsigned nSizeNonCprss;
-				unsigned nSizeCprss;
+				uint32_t nSizeNonCprss;
+				uint32_t nSizeCprss;
 			#endif
 	};
 	
 	#ifndef IFF_READ_ONLY
-		inline bool IlbmBodyChunk::EncodeFirstRow(unsigned const * pRow)
+		inline bool IlbmBodyChunk::EncodeFirstRow(uint32_t const * pRow)
 		{
 			if (BeginEncode())
 				return EncodeNextRow(pRow);
@@ -129,7 +129,7 @@ namespace IFF
 		}
 	#endif
 	
-	inline unsigned const * IlbmBodyChunk::DecodeFirstRow() const
+	inline uint32_t const * IlbmBodyChunk::DecodeFirstRow() const
 	{
 		if (BeginDecode())
 			return DecodeNextRow();

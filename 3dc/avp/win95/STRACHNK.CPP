@@ -360,7 +360,7 @@ Virtual_Object_Properties_Chunk::Virtual_Object_Properties_Chunk(Chunk_With_Chil
 
 Virtual_Object_Properties_Chunk::~Virtual_Object_Properties_Chunk()
 {
-	if(name) delete[] name;
+	delete[] name;
 }
 
 size_t Virtual_Object_Properties_Chunk::size_chunk()
@@ -654,8 +654,8 @@ LiftStrategy::LiftStrategy(const char* data_start,size_t /*size*/)
 
 LiftStrategy::~LiftStrategy()
 {
-	if (AssocLifts) delete[] AssocLifts;
-	if (ExternalLifts) delete[] ExternalLifts;	
+	delete[] AssocLifts;
+	delete[] ExternalLifts;	
 }
 
 size_t LiftStrategy::GetStrategySize()
@@ -1521,8 +1521,8 @@ TrackStrategy::~TrackStrategy()
 	{
 		delete point_effects[i];
 	}
-	if(point_effects) 
-		delete[] point_effects;
+
+	delete[] point_effects;
 }
 
 size_t TrackStrategy::GetStrategySize()

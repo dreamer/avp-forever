@@ -54,7 +54,7 @@ int Net_UpdateSessionDescForLobbiedGame(int gamestyle, int level);
 // {379CCA80-8BDD-11d0-A078-004095E16EA5}
 static const GUID AvPGuid = { 0x379cca80, 0x8bdd, 0x11d0, { 0xa0, 0x78, 0x0, 0x40, 0x95, 0xe1, 0x6e, 0xa5 } };
 
-const uint32_t MESSAGEHEADERSIZE = sizeof(messageHeader);
+const uint32_t kMessageHeaderSize = sizeof(messageHeader);
 
 BOOL Net_UpdateSessionList(int *SelectedItem)
 {
@@ -381,8 +381,8 @@ void Net_ConnectToAddress()
 			NET_SESSIONDESC tempSession;
 
 			// grab the session description struct
-			assert(sizeof(NET_SESSIONDESC) == (size - MESSAGEHEADERSIZE));
-			memcpy(&tempSession, &receiveBuffer[MESSAGEHEADERSIZE], sizeof(NET_SESSIONDESC));
+			assert(sizeof(NET_SESSIONDESC) == (size - kMessageHeaderSize));
+			memcpy(&tempSession, &receiveBuffer[kMessageHeaderSize], sizeof(NET_SESSIONDESC));
 
 			int gamestyle = (tempSession.level >> 8) & 0xff;
 			int level = tempSession.level & 0xff;
@@ -611,9 +611,9 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, size_t 
 					memcpy(&packetBuffer[0], &newReplyHeader, sizeof(messageHeader));
 
 					assert(sizeof(netSession) == sizeof(NET_SESSIONDESC));
-					memcpy(&packetBuffer[MESSAGEHEADERSIZE], &netSession, sizeof(NET_SESSIONDESC));
+					memcpy(&packetBuffer[kMessageHeaderSize], &netSession, sizeof(NET_SESSIONDESC));
 
-					int length = MESSAGEHEADERSIZE + sizeof(NET_SESSIONDESC);
+					int length = kMessageHeaderSize + sizeof(NET_SESSIONDESC);
 
 					// create a packet with session struct inside
 					ENetPacket * packet = enet_packet_create(&packetBuffer[0], length, ENET_PACKET_FLAG_RELIABLE);
@@ -640,9 +640,9 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, size_t 
 				memcpy(&packetBuffer[0], &newReplyHeader, sizeof(messageHeader));
 
 				assert(sizeof(netSession) == sizeof(NET_SESSIONDESC));
-				memcpy(&packetBuffer[MESSAGEHEADERSIZE], &netSession, sizeof(NET_SESSIONDESC));
+				memcpy(&packetBuffer[kMessageHeaderSize], &netSession, sizeof(NET_SESSIONDESC));
 
-				int length = MESSAGEHEADERSIZE + sizeof(NET_SESSIONDESC);
+				int length = kMessageHeaderSize + sizeof(NET_SESSIONDESC);
 
 				// create a packet with session struct inside
 				ENetPacket * packet = enet_packet_create(&packetBuffer[0], length, ENET_PACKET_FLAG_RELIABLE);
@@ -694,10 +694,10 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, size_t 
 				newReplyHeader.fromID = playerFrom;
 				newReplyHeader.toID = idOfPlayerToGet;
 
-				int length = MESSAGEHEADERSIZE + sizeof(PlayerDetails);
+				int length = kMessageHeaderSize + sizeof(PlayerDetails);
 
 				// copy the struct in after the header
-				memcpy(&packetBuffer[MESSAGEHEADERSIZE], reinterpret_cast<uint8_t*>(&newPlayerDetails), sizeof(PlayerDetails));
+				memcpy(&packetBuffer[kMessageHeaderSize], reinterpret_cast<uint8_t*>(&newPlayerDetails), sizeof(PlayerDetails));
 
 				// create a packet with player name struct inside
 				ENetPacket * packet = enet_packet_create(&packetBuffer, length, ENET_PACKET_FLAG_RELIABLE);
@@ -718,7 +718,7 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, size_t 
 				int idOfPlayerWeGot = *toID;
 
 				PlayerDetails newPlayerDetails;
-				memcpy(&newPlayerDetails, &messageData[MESSAGEHEADERSIZE], sizeof(PlayerDetails));
+				memcpy(&newPlayerDetails, &messageData[kMessageHeaderSize], sizeof(PlayerDetails));
 
 				char buf[100];
 				sprintf(buf, "sent player id: %d and player name: %s from: %d", idOfPlayerWeGot, newPlayerDetails.name, playerFrom);
@@ -761,10 +761,10 @@ int Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messag
 	// put data after header
 	if (dataSize && messageData)
 	{
-		memcpy(&packetBuffer[MESSAGEHEADERSIZE], messageData, dataSize);
+		memcpy(&packetBuffer[kMessageHeaderSize], messageData, dataSize);
 	}
 
-	size_t length = MESSAGEHEADERSIZE + dataSize;
+	size_t length = kMessageHeaderSize + dataSize;
 
 	// create Enet packet
 	ENetPacket * packet = enet_packet_create (packetBuffer, length, ENET_PACKET_FLAG_RELIABLE);
@@ -820,9 +820,9 @@ int Net_Send(int fromID, int toID, int flags, uint8_t *messageData, size_t dataS
 
 	memcpy(&packetBuffer[0], &newMessageHeader, sizeof(messageHeader));
 
-	memcpy(&packetBuffer[MESSAGEHEADERSIZE], messageData, dataSize);
+	memcpy(&packetBuffer[kMessageHeaderSize], messageData, dataSize);
 
-	size_t length = MESSAGEHEADERSIZE + dataSize;
+	size_t length = kMessageHeaderSize + dataSize;
 
 	// create ENet packet
 	ENetPacket * packet = enet_packet_create(packetBuffer, length, ENET_PACKET_FLAG_RELIABLE);
@@ -907,7 +907,7 @@ int IDirectPlayX_GetPlayerName(int glpDP, DPID id, unsigned char *data, int *siz
 		if(type == DPSYS_GETPLAYERNAME)
 		{
 			OutputDebugString("we got the player name info\n");
-			memcpy(&tempName, &receiveBuffer[MESSAGEHEADERSIZE], sizeof(playerName));
+			memcpy(&tempName, &receiveBuffer[kMessageHeaderSize], sizeof(playerName));
 		}
 	}
 	else
@@ -1121,8 +1121,8 @@ unsigned int __stdcall SessionSearch(void *args)
 				enet_address_get_host_ip(&eEvent.peer->address, SessionData[NumberOfSessionsFound].hostAddress, 16);
 
 				// grab the session description struct
-				assert(sizeof(NET_SESSIONDESC) == (eEvent.packet->dataLength - MESSAGEHEADERSIZE));
-				memcpy(&tempSession, &receiveBuffer[MESSAGEHEADERSIZE], sizeof(NET_SESSIONDESC));
+				assert(sizeof(NET_SESSIONDESC) == (eEvent.packet->dataLength - kMessageHeaderSize));
+				memcpy(&tempSession, &receiveBuffer[kMessageHeaderSize], sizeof(NET_SESSIONDESC));
 
 				gamestyle = (tempSession.level >> 8) & 0xff;
 				level = tempSession.level  & 0xff;
@@ -1325,8 +1325,8 @@ void Net_FindAvPSessions()
 				enet_address_get_host_ip(&eEvent.peer->address, SessionData[NumberOfSessionsFound].hostAddress, 16);
 
 				// grab the session description struct
-				assert(sizeof(NET_SESSIONDESC) == (eEvent.packet->dataLength - MESSAGEHEADERSIZE));
-				memcpy(&tempSession, &receiveBuffer[MESSAGEHEADERSIZE], sizeof(NET_SESSIONDESC));
+				assert(sizeof(NET_SESSIONDESC) == (eEvent.packet->dataLength - kMessageHeaderSize));
+				memcpy(&tempSession, &receiveBuffer[kMessageHeaderSize], sizeof(NET_SESSIONDESC));
 
 				gamestyle = (tempSession.level >> 8) & 0xff;
 				level = tempSession.level  & 0xff;

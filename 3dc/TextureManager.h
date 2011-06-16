@@ -79,6 +79,7 @@ texID_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &Av
 texID_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usage);
 texID_t Tex_CreateFromFile(const std::string &filePath);
 texID_t Tex_CheckExists(const std::string &textureName);
+texID_t Tex_AddExistingTexture(Texture &texture);
 const Texture& Tex_GetTextureDetails(texID_t textureID);
 std::string& Tex_GetName(texID_t textureID);
 void Tex_GetNamesVector(std::vector<std::string> &namesArray);

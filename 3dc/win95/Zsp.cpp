@@ -1,3 +1,5 @@
+#if 0 // bjd - not used
+
 #include <math.h>
 
 #include "list_tem.hpp"
@@ -79,10 +81,8 @@ ZSP_zone::ZSP_zone ()
 
 ZSP_zone::~ZSP_zone ()
 {
-	if (num_z_polys)
-		delete[] z_poly_list;
-	if (num_z_verts)
-		delete[] z_vert_list;
+	delete[] z_poly_list;
+	delete[] z_vert_list;
 }
 
 ZSP_zone::ZSP_zone (const ZSP_zone &zz)
@@ -126,11 +126,8 @@ ZSP_zone::ZSP_zone (const ZSP_zone &zz)
 
 ZSP_zone & ZSP_zone::operator=(const ZSP_zone &zz)
 {
-
-	if (num_z_polys)
-		delete[] z_poly_list;
-	if (num_z_verts)
-		delete[] z_vert_list;
+	delete[] z_poly_list;
+	delete[] z_vert_list;
 
 	if (zz.num_z_polys)
 	{
@@ -248,3 +245,4 @@ void Shape_ZSP_Data_Chunk::fill_data_block ( char * data_start)
 		}
 	}
 }
+#endif

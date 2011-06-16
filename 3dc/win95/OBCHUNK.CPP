@@ -1130,7 +1130,7 @@ Object_Track_Sound_Chunk::Object_Track_Sound_Chunk(Chunk_With_Children* const pa
 
 Object_Track_Sound_Chunk::~Object_Track_Sound_Chunk()
 {
-	if(wav_name) delete[] wav_name;
+	delete[] wav_name;
 }											 
 
 void Object_Track_Sound_Chunk::fill_data_block(char* data_start)
@@ -1201,7 +1201,7 @@ Object_Alternate_Locations_Chunk::Object_Alternate_Locations_Chunk(Chunk_With_Ch
 
 Object_Alternate_Locations_Chunk::~Object_Alternate_Locations_Chunk()
 {
-	if(locations) delete[] locations;
+	delete[] locations;
 }
 
 void Object_Alternate_Locations_Chunk::fill_data_block(char* data)

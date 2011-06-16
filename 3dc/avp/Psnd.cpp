@@ -25,7 +25,7 @@ int SoundSwitchedOn = 0;
 static int SoundInitialised = 0;
 static int GlobalVolume = VOLUME_DEFAULT;
 extern int DebuggingCommandsActive;
-
+extern int PlaySounds;
 
 int EffectsSoundVolume=VOLUME_DEFAULT;
 
@@ -54,16 +54,14 @@ extern int GlobalFrameCounter;
   ----------------------------------------------------------------------------*/
 void SoundSys_Start(void)
 {
-	int i;
-
 	/* if we have already switched on, so do nothing */
 	if(SoundSwitchedOn) return;
 	/* we are not switched on, but we are initialised, so do nothing */
 	if(SoundInitialised) return;
 
 	/* initialise game sounds and active instances*/
-	for(i=0;i<SID_MAXIMUM;i++) GameSounds[i] = BlankGameSound;
-	for(i=0;i<SOUND_MAXACTIVE;i++) ActiveSounds[i] = BlankActiveSound;
+	for(int i=0;i<SID_MAXIMUM;i++) GameSounds[i] = BlankGameSound;
+	for(int i=0;i<SOUND_MAXACTIVE;i++) ActiveSounds[i] = BlankActiveSound;
 		
 	/* try to initialise sound, and turn on */
 	SoundInitialised = PlatStartSoundSys();
@@ -100,7 +98,6 @@ void SoundSys_End(void)
 
 void SoundSys_Management(void)
 {
-	int i;
 	int numActive = 0;
 	int num3dUpdates = 0;
 
@@ -108,7 +105,7 @@ void SoundSys_Management(void)
 		return;
 
 	/* go through all the active sounds */
-	for (i = 0;i < SOUND_MAXACTIVE; i++)
+	for (int i = 0;i < SOUND_MAXACTIVE; i++)
 	{
 		if (ActiveSounds[i].soundIndex == SID_NOSOUND)
 			continue; /* empty slot */
@@ -224,12 +221,10 @@ static void HandleFadingLevel(void)
 
 void SoundSys_PauseOn(void)
 {
-	int i;
-
 	/* if we're not switched on, should be nothing playing */
 	if(!SoundSwitchedOn) return;
 
-	for(i=0;i<SOUND_MAXACTIVE;i++)
+	for(int i=0;i<SOUND_MAXACTIVE;i++)
 	{
 		if(ActiveSounds[i].soundIndex!=SID_NOSOUND) ActiveSounds[i].paused = 1;
 	}
@@ -237,12 +232,10 @@ void SoundSys_PauseOn(void)
 
 void SoundSys_PauseOff(void)
 {
-	int i;
-
 	/* if we're not switched on, should be nothing playing */
 	if(!SoundSwitchedOn) return;
 
-	for(i=0;i<SOUND_MAXACTIVE;i++)
+	for(int i=0;i<SOUND_MAXACTIVE;i++)
 	{
 		if(ActiveSounds[i].soundIndex!=SID_NOSOUND) ActiveSounds[i].paused = 0;
 	}
@@ -250,13 +243,11 @@ void SoundSys_PauseOff(void)
 
 void SoundSys_StopAll(void)
 {
-	int i;
-
 	/* if we're not switched on, should be nothing playing */
 	if (!SoundSwitchedOn) 
 		return;
 
-	for (i = 0;i < SOUND_MAXACTIVE; i++)
+	for (int i = 0;i < SOUND_MAXACTIVE; i++)
 	{
 		if (ActiveSounds[i].soundIndex != SID_NOSOUND)
 			Sound_Stop(i);
@@ -265,8 +256,6 @@ void SoundSys_StopAll(void)
 
 void SoundSys_RemoveAll(void)
 {
-	int i;
-	
 	/* if we are not initialised, there should be no sounds loaded or playing.
 	if we are switched off, we should still unload them all */
 	if (!SoundInitialised) 
@@ -276,7 +265,7 @@ void SoundSys_RemoveAll(void)
 	SoundSys_StopAll();
 
 	/* deallocate all sounds */
-	for (i = 0;i < SID_MAXIMUM; i++)
+	for (int i = 0;i < SID_MAXIMUM; i++)
 	{
 		if (GameSounds[i].loaded) 
 		{
@@ -351,44 +340,41 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 	int reverb_off = 0;
 	int soundStartPosition = 0;
 
-	{
-		extern int PlaySounds;
-		if (!PlaySounds) return;
-	}
+	if (!PlaySounds) return;
 
-	if(!SoundSwitchedOn) return;
+	if (!SoundSwitchedOn) return;
 
 	/* check soundIndex for bounds, whether it has been loaded, and number of instances */
-	if((soundNumber<0)||(soundNumber>=SID_MAXIMUM)) return;
-	if(!(GameSounds[soundNumber].loaded)) return;
-	if(!(GameSounds[soundNumber].activeInstances<SOUND_MAXINSTANCES)) return;
+	if ((soundNumber<0)||(soundNumber>=SID_MAXIMUM)) return;
+	if (!(GameSounds[soundNumber].loaded)) return;
+	if (!(GameSounds[soundNumber].activeInstances<SOUND_MAXINSTANCES)) return;
 
 	db_logf5(("About to play sound %i", soundNumber));
 
 	/* initialise volume and pitch from game sound data */
 	volume = GameSounds[soundNumber].volume;
 	pitch = GameSounds[soundNumber].pitch;
-	marine_ignore=0;
+	marine_ignore = 0;
 
 	/* examine the format string: if it is null, ignore it */
-	if(format)
+	if (format)
 	{
 		char *nextChar = format;
 		va_list argPtr;
 
 		va_start(argPtr,format);
-		while(*nextChar!='\0')
+		while (*nextChar != '\0')
 		{
-			switch(*nextChar)
+			switch (*nextChar)
 			{
 				case('d'):
 				{
-					worldPosn = va_arg(argPtr,VECTORCH*);
+					worldPosn = va_arg(argPtr, VECTORCH*);
 					break;
 				}
 				case('n'):
 				{
-					p_3ddata = va_arg(argPtr,SOUND3DDATA*);
+					p_3ddata = va_arg(argPtr, SOUND3DDATA*);
 					break;
 				}
 				case('e'):
@@ -409,21 +395,21 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 				}
 				case('v'):
 				{
-					volume = va_arg(argPtr,int);
-					if(volume>VOLUME_MAX) volume=VOLUME_MAX;
-					if(volume<VOLUME_MIN) volume=VOLUME_MIN;
+					volume = va_arg(argPtr, int);
+					if (volume > VOLUME_MAX) volume = VOLUME_MAX;
+					if (volume < VOLUME_MIN) volume = VOLUME_MIN;
 					break;
 				}
 				case('p'):
 				{
-					pitch = va_arg(argPtr,int);;
-					if(pitch>PITCH_MAX) pitch=PITCH_MAX;
-					if(pitch<PITCH_MIN) pitch=PITCH_MIN;
+					pitch = va_arg(argPtr, int);
+					if (pitch > PITCH_MAX) pitch = PITCH_MAX;
+					if (pitch < PITCH_MIN) pitch = PITCH_MIN;
 					break;
 				}
 				case('m'):
 				{
-					marine_ignore=1;
+					marine_ignore = 1;
 					break;
 				}
 				case('r'):
@@ -433,7 +419,7 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 				}
 				case('P'):
 				{
-					soundStartPosition = va_arg(argPtr,int);;
+					soundStartPosition = va_arg(argPtr, int);
 					break;
 				}
 				default:
@@ -447,7 +433,7 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 	}
 
 	/* check for invalid parameter combinations */
-	if((loop)&&(externalRef==NULL))
+	if ((loop)&&(externalRef==NULL))
 	{
 		db_log5("SoundPlay bad params.");
 		return;
@@ -457,7 +443,7 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 	{
 		/* Range of active buffers to search. */
 		unsigned int min, max;
-		if(GameSounds[soundNumber].flags & SAMPLE_IN_SW)
+		if (GameSounds[soundNumber].flags & SAMPLE_IN_SW)
 		{
 			min = 0;
 			max = SOUND_MAXACTIVE_SW;
@@ -470,26 +456,26 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 
 		/* find free active sound slot */
 		newIndex = FindFreeActiveSound(min, max);
-		if(newIndex==SOUND_NOACTIVEINDEX && !(GameSounds[soundNumber].flags & SAMPLE_IN_SW))
+		if (newIndex==SOUND_NOACTIVEINDEX && !(GameSounds[soundNumber].flags & SAMPLE_IN_SW))
 		{
 			//failed to find a free hardware slot , so try software slot instead.
 			//mainly to cope with cards that can load sounds into hardware , but can't play them there
 			newIndex = FindFreeActiveSound(0, SOUND_MAXACTIVE_SW);
 
 		}
-		if(newIndex==SOUND_NOACTIVEINDEX)
+		if (newIndex==SOUND_NOACTIVEINDEX)
 		{
 			db_log3("Having to stop another sound.");
 			/* try to find an existing sound with a lower priority */
 			newIndex = FindLowerPriorityActiveSound(priority, min, max);
-			if(newIndex==SOUND_NOACTIVEINDEX && !(GameSounds[soundNumber].flags & SAMPLE_IN_SW))
+			if (newIndex==SOUND_NOACTIVEINDEX && !(GameSounds[soundNumber].flags & SAMPLE_IN_SW))
 			{
 				//failed to find a free hardware slot , so try software slot instead.
 				//mainly to cope with cards that can load sounds into hardware , but can't play them there
 				newIndex = FindLowerPriorityActiveSound(priority, 0, SOUND_MAXACTIVE_SW);
 			}
 
-			if(newIndex==SOUND_NOACTIVEINDEX)
+			if (newIndex==SOUND_NOACTIVEINDEX)
 			{
 				db_log3("Failed to find a lower priority sound.");
 				return; /* give up */
@@ -510,14 +496,11 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 	ActiveSounds[newIndex].volume = volume;
 	ActiveSounds[newIndex].pitch = pitch;
 	ActiveSounds[newIndex].externalRef = externalRef;
-	ActiveSounds[newIndex].loop = 1;
-	ActiveSounds[newIndex].marine_ignore=marine_ignore;
-	ActiveSounds[newIndex].reverb_off=reverb_off;
+	ActiveSounds[newIndex].loop = loop; // 1 or 0
+	ActiveSounds[newIndex].marine_ignore = marine_ignore;
+	ActiveSounds[newIndex].reverb_off = reverb_off;
 
-	if(loop) ActiveSounds[newIndex].loop = 1;
-	else ActiveSounds[newIndex].loop = 0;
-
-	if(worldPosn)
+	if (worldPosn)
 	{
 		VECTORCH zeroPosn = {0,0,0};
 		ActiveSounds[newIndex].threedeedata.position = *worldPosn;
@@ -541,23 +524,20 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 	}
 
 	/* try and play the sound */
+	if (PlatPlaySound(newIndex) == SOUND_PLATFORMERROR)
 	{
-		int ok = PlatPlaySound(newIndex);
-		if(ok==SOUND_PLATFORMERROR)
-		{
-			/* the sound failed to play: any platform cleanups should have been done,
-			so just bank the sound slot */
-			ActiveSounds[newIndex] = BlankActiveSound;
-			db_log5("Error: PlatPlaySound failed.");
-			return;
-		}
+		/* the sound failed to play: any platform cleanups should have been done,
+		so just bank the sound slot */
+		ActiveSounds[newIndex] = BlankActiveSound;
+		db_log5("Error: PlatPlaySound failed.");
+		return;
 	}
 
 	/* finally, update the game sound instances, and external reference */
 	GameSounds[soundNumber].activeInstances++;
-	if(externalRef) *externalRef = newIndex;
+	if (externalRef) { *externalRef = newIndex; }
 
-	if(soundStartPosition && CheckSoundBufferIsValid(&ActiveSounds[newIndex]))
+	if (soundStartPosition && CheckSoundBufferIsValid(&ActiveSounds[newIndex]))
 	{
 		//sound starts part of the way in
 		SetBufferCurrentPosition(&ActiveSounds[newIndex], soundStartPosition);

@@ -708,13 +708,14 @@ void BuildMultiplayerLevelNameArray()
 	AVPMENU_ELEMENT *elementPtr;
 
 	elementPtr = AvPMenu_Multiplayer_Config;
+
 	//search for the level name element
 	while (elementPtr->TextDescription != TEXTSTRING_MULTIPLAYER_ENVIRONMENT)
 	{
 		GLOBALASSERT(elementPtr->ElementID != AVPMENU_ELEMENT_ENDOFMENU);
 		elementPtr++;
-
 	}
+
 	elementPtr->MaxSliderValue = NumMultiplayerLevels-1;
 	elementPtr->TextSliderStringPointer = MultiplayerLevelNames;
 	

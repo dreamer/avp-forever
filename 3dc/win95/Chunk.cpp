@@ -57,7 +57,6 @@ void list_chunks_in_file(List<int> * pList, HANDLE hand, char const * chunk_id)
 #ifndef RIFF_OPTIMIZE
 List<int> list_chunks_in_file (HANDLE & hand, const char * chunk_id)
 {
-
 	List<int> chunk_list;
 
 	list_chunks_in_file(&chunk_list, hand, chunk_id);

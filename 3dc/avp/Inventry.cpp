@@ -18,16 +18,11 @@ rounds fired etc etc etc*/
 #include "psnd.h"
 #include "weapons.h"
 #include "inventry.h"
-
-/* for win95 net game support */
 #include "pldnet.h"
 #include "pldghost.h"
-
 #include "AvP_UserProfile.h"
-
 #define UseLocalAssert TRUE
 #include "ourasert.h"
-
 #include <assert.h>
 
 void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr);

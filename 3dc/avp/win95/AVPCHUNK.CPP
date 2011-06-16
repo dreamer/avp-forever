@@ -1,7 +1,5 @@
 #include "avpchunk.hpp"
 #include "md5.h"
-//#include "strachnk.hpp"
-//#include "obchunk.hpp"
 
 //macro for helping to force inclusion of chunks when using libraries
 FORCE_CHUNK_INCLUDE_IMPLEMENT(avpchunk)
@@ -20,8 +18,7 @@ void AVP_Generator_Chunk::fill_data_block (char * data_start)
 	
 	*((ChunkVectorInt *) data_start) = location;
 	data_start += sizeof(ChunkVectorInt);
-	
-	
+
 	*((int *) data_start) = orientation;
 	data_start += 4;
 	
@@ -44,7 +41,6 @@ void AVP_Generator_Chunk::fill_data_block (char * data_start)
 	data_start ++;
 	
 	strcpy (data_start, name);
-	
 }
 
 size_t AVP_Generator_Chunk::size_chunk ()
@@ -52,7 +48,6 @@ size_t AVP_Generator_Chunk::size_chunk ()
 	chunk_size = 12 + 3 * 4 + 4 * 4 + strlen(name) + 4 - strlen(name)%4;
 
 	return(chunk_size);
-	
 }
 
 AVP_Generator_Chunk::AVP_Generator_Chunk (Chunk_With_Children * parent, const char * data, size_t /*size*/)
@@ -89,8 +84,7 @@ AVP_Generator_Chunk::AVP_Generator_Chunk (Chunk_With_Children * parent, const ch
 
 AVP_Generator_Chunk::~AVP_Generator_Chunk ()
 {
-	if (name)
-		delete[] name;
+	delete[] name;
 }
 
 
@@ -114,7 +108,6 @@ ObjectID AVP_Generator_Chunk::CalculateID()
 	buffer[7]=0;
 	retval = *(ObjectID*)&buffer[0];
 	return retval;
-
 }
 
 AVP_Generator_Extra_Data_Chunk* AVP_Generator_Chunk::get_extra_data_chunk()
@@ -139,8 +132,8 @@ AVP_Generator_Extra_Data_Chunk* AVP_Generator_Chunk::get_extra_data_chunk()
 	}
 	//no extra data chunk found
 	return 0;
-
 }
+
 AVP_Generator_Extra_Data_Chunk* AVP_Generator_Chunk::create_extra_data_chunk()
 {
 	AVP_Generator_Extra_Data_Chunk* agedc=get_extra_data_chunk();
@@ -296,13 +289,12 @@ AVP_Generator_Extended_Settings_Chunk::AVP_Generator_Extended_Settings_Chunk(Chu
 	weights->data_size=sizeof(AVP_Generator_Weighting);
 	GenLimit=pad1=pad2=pad3=0;
 	spare1=spare2=0;
-	
 }
 
 
 AVP_Generator_Extended_Settings_Chunk::~AVP_Generator_Extended_Settings_Chunk()
 {
-	delete  weights;
+	delete weights;
 }
 
 void AVP_Generator_Extended_Settings_Chunk::fill_data_block (char * data)
@@ -317,8 +309,7 @@ void AVP_Generator_Extended_Settings_Chunk::fill_data_block (char * data)
 	CHUNK_FILL(pad3,unsigned char)
 	CHUNK_FILL(spare1,int)
 	CHUNK_FILL(spare2,int)
-	
-	
+
 	memcpy(data,weights,weights->data_size);
 }
 
@@ -326,7 +317,6 @@ size_t AVP_Generator_Extended_Settings_Chunk::size_chunk ()
 {
 	chunk_size = 12+20+weights->data_size;
 	return(chunk_size);
-	
 }
 
 
@@ -342,8 +332,8 @@ Global_Generator_Data_Chunk::Global_Generator_Data_Chunk(Chunk_With_Children* pa
 	NPCAcceleration=2;
 	HiveStateChangeTime=60;
 	spare1=spare2=0;
-
 }
+
 Global_Generator_Data_Chunk::Global_Generator_Data_Chunk(Chunk_With_Children* parent,const char* data,size_t)
 :Chunk(parent,"GLOGENDC")
 {
@@ -362,7 +352,6 @@ Global_Generator_Data_Chunk::Global_Generator_Data_Chunk(Chunk_With_Children* pa
 	data+=sizeof(int);
 	spare2=*(int*)data;
 	data+=sizeof(int);
-
 }
 
 void Global_Generator_Data_Chunk::fill_data_block (char * data_start)
@@ -395,8 +384,8 @@ size_t Global_Generator_Data_Chunk::size_chunk ()
 	chunk_size = 12+28;
 
 	return(chunk_size);
-	
 }
+
 //////////////////////////////////////////////////////////////////////////////
 RIF_IMPLEMENT_DYNCREATE("AVPSTART",AVP_Player_Start_Chunk)
 
@@ -409,7 +398,6 @@ AVP_Player_Start_Chunk::AVP_Player_Start_Chunk(Chunk_With_Children* parent)
 	orientation.mat21=orientation.mat32=orientation.mat13=0;
 	moduleID.id1=0;
 	moduleID.id2=0;
-
 }
 
 AVP_Player_Start_Chunk::AVP_Player_Start_Chunk(Chunk_With_Children* parent,const char* data,size_t)
@@ -435,7 +423,6 @@ size_t AVP_Player_Start_Chunk::size_chunk ()
 	chunk_size = 12+sizeof(ChunkVectorInt)+sizeof(ChunkMatrix)+sizeof(ObjectID);
 
 	return(chunk_size);
-	
 }
 //////////////////////////////////////////////////////////////////////////////
 RIF_IMPLEMENT_DYNCREATE("AVPCABLE",AVP_Power_Cable_Chunk)
@@ -491,7 +478,7 @@ AVP_Power_Cable_Chunk::AVP_Power_Cable_Chunk(Chunk_With_Children* parent,const c
 
 AVP_Power_Cable_Chunk::~AVP_Power_Cable_Chunk()
 {
-	if (name) delete[] name;
+	delete[] name;
 }
 
 void AVP_Power_Cable_Chunk::fill_data_block(char* data)
@@ -698,7 +685,6 @@ void AVP_Decal_Chunk::fill_data_block(char* data)
 	data+=4;
 
 	memcpy(data,decal_buffer,decal_size*num_decals);
-
 }
 
 size_t AVP_Decal_Chunk::size_chunk()
@@ -779,7 +765,7 @@ AVP_Particle_Generator_Data_Chunk::AVP_Particle_Generator_Data_Chunk(Chunk_With_
 
 AVP_Particle_Generator_Data_Chunk::~AVP_Particle_Generator_Data_Chunk()
 {
-	if (name) delete[] name;
+	delete[] name;
 }
 
 void AVP_Particle_Generator_Data_Chunk::fill_data_block(char* data)
@@ -849,7 +835,7 @@ Rainbow6_Generator_Extra_Data_Chunk::Rainbow6_Generator_Extra_Data_Chunk(Chunk_W
 
 Rainbow6_Generator_Extra_Data_Chunk::~Rainbow6_Generator_Extra_Data_Chunk()
 {
-	if(extra_data) delete[] extra_data;
+	delete[] extra_data;
 }
 
 

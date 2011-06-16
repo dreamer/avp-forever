@@ -412,11 +412,11 @@ double  mod(const ChunkVectorFloat& a)
 ////////////////////////////////////////////////////////
 ChunkShape::~ChunkShape()
 {
-	if (v_list) delete[] v_list;
-	if (v_normal_list) delete[] v_normal_list;
-	if (p_normal_list) delete[] p_normal_list;
-	if (poly_list) delete[] poly_list;
-	if (uv_list) delete[] uv_list;
+	delete[] v_list;
+	delete[] v_normal_list;
+	delete[] p_normal_list;
+	delete[] poly_list;
+	delete[] uv_list;
 
 	if (texture_fns)
 	{
@@ -509,11 +509,11 @@ ChunkShape& ChunkShape::operator=(const ChunkShape &shp)
 {
 	int i;	
 
-	if (v_list) delete[] v_list;
-	if (v_normal_list) delete[] v_normal_list;
-	if (p_normal_list) delete[] p_normal_list;
-	if (poly_list) delete[] poly_list;
-	if (uv_list) delete[] uv_list;
+	delete[] v_list;
+	delete[] v_normal_list;
+	delete[] p_normal_list;
+	delete[] poly_list;
+	delete[] uv_list;
 	if (texture_fns)
 		for (int i = 0; i<num_texfiles; i++)
 			if (texture_fns[i]) delete texture_fns[i];
@@ -704,10 +704,9 @@ BOOL operator!=(poly_change_info const &f1, poly_change_info const &f2)
 //////////////////////////////////////////////
 ChunkAnimFrame::~ChunkAnimFrame()
 {
-	if(name) delete[] name;
-	if(v_list) delete[] v_list;
-	if(p_normal_list) delete[] p_normal_list;
-
+	delete[] name;
+	delete[] v_list;
+	delete[] p_normal_list;
 }
 
 ChunkAnimFrame::ChunkAnimFrame()
@@ -800,14 +799,13 @@ ChunkAnimFrame::ChunkAnimFrame(ChunkAnimFrame* startframe,ChunkAnimFrame* endfra
 */
 ChunkAnimFrame& ChunkAnimFrame::operator=(const ChunkAnimFrame &frm)
 {
-	if(name) delete[] name;
-	if(v_list) delete[] v_list;
-	if(p_normal_list) delete[] p_normal_list;
+	delete[] name;
+	delete[] v_list;
+	delete[] p_normal_list;
 	
-	
-	if(frm.name)
+	if (frm.name)
 	{
-		name=new char[strlen(frm.name)+1];
+		name = new char[strlen(frm.name)+1];
 		strcpy(name,frm.name);
 	}
 	else
@@ -847,13 +845,13 @@ ChunkAnimFrame& ChunkAnimFrame::operator=(const ChunkAnimFrame &frm)
 
 ChunkAnimSequence::~ChunkAnimSequence()
 {
-	if(name) delete[] name;
+	delete[] name;
 	for(int i=0;i<NumFrames;i++)
 	{
 		if(Frames[i])delete Frames[i];
 	}
-	if(Frames) delete[] Frames;
-	if(v_normal_list) delete[] v_normal_list;
+	delete[] Frames;
+	delete[] v_normal_list;
 }
 
 ChunkAnimSequence::ChunkAnimSequence()
@@ -918,9 +916,9 @@ ChunkAnimSequence::ChunkAnimSequence(const ChunkAnimSequence & seq)
 
 ChunkAnimSequence& ChunkAnimSequence::operator=(const ChunkAnimSequence &seq)
 {
-	if(name) delete[] name;
-	if(Frames) delete[] Frames;
-	if(v_normal_list) delete[] v_normal_list;
+	delete[] name;
+	delete[] Frames;
+	delete[] v_normal_list;
 	SequenceNum=seq.SequenceNum;
 
 	if(seq.name)
@@ -1053,7 +1051,7 @@ void ChunkAnimSequence::UpdateNormalsAndExtents(ChunkShape const * cs,List<int>*
 			radius = max (radius, (float)temp_rad);
 		}
 	}
-	if(vert_in_bb) delete[] vert_in_bb;
+	delete[] vert_in_bb;
 }
 
 void ChunkAnimSequence::DeleteInterpolatedFrames()

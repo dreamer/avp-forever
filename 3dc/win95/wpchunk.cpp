@@ -15,12 +15,12 @@ ChunkWaypoint::ChunkWaypoint()
 }
 ChunkWaypoint::~ChunkWaypoint()
 {
-	if (WayLinks) delete[] WayLinks;
-	if (ModLinks) delete[] ModLinks;
+	delete[] WayLinks;
+	delete[] ModLinks;
 }
 ModuleLink::~ModuleLink()
 {
-	if (module_name) delete[] module_name;
+	delete[] module_name;
 }
 
 RIF_IMPLEMENT_DYNCREATE("WAYPOINT",Module_Waypoint_Chunk)
@@ -136,7 +136,6 @@ Module_Waypoint_Chunk::Module_Waypoint_Chunk(Chunk_With_Children* parent)
 
 Module_Waypoint_Chunk::~Module_Waypoint_Chunk()
 {
-//	if(Waypoints)
 	delete[] Waypoints;
 	Waypoints = 0;
 }

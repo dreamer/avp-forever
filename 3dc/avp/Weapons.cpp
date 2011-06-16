@@ -17,7 +17,6 @@
 #include "tables.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
-
 #include "dynblock.h"
 #include "dynamics.h"
 #include "lighting.h"
@@ -37,20 +36,15 @@
 #include "bh_ais.h"
 #include "weapons.h"
 #include "avpview.h"
-
 #include "psnd.h"
 #include "vision.h"
 #include "plat_shp.h"
-
 #include "particle.h"
 #include "psndproj.h"
 #include "psndplat.h"
 #include "showcmds.h"
-
-/* for win 95 net support */
 #include "pldghost.h"
 #include "pldnet.h"
-
 #include "los.h"
 #include "kshape.h"
 #include "targeting.h"

@@ -180,8 +180,8 @@ public:
 
   List<T>& operator= (const List<T>& l) {
     while(n_entries != 0) delete_last_entry();
-    if (entry_pointers != 0)
-      delete[] entry_pointers;
+
+    delete[] entry_pointers;
 
     List_Member_Base<T>* m = l.sentinel->next;
     while (m != l.sentinel) {
@@ -411,7 +411,7 @@ public:
       fail(list_fail_operator,LIST_TEM_TYPEID_THIS, i+1, n_entries);
 
     if (!calculated_indices) {
-      if (entry_pointers != 0)
+
         delete[] entry_pointers;
       entry_pointers = new T*[n_entries+1];
       List_Member_Base<T>*e = sentinel->next;
@@ -456,7 +456,7 @@ public:
     
   int size() const { return n_entries; }
 
-  void cleanup() { calculated_indices = false; if (entry_pointers != 0) delete[] entry_pointers; entry_pointers = 0;}
+  void cleanup() { calculated_indices = false; delete[] entry_pointers; entry_pointers = 0;}
 
   bool operator==(const List <T> &l1) const
   {

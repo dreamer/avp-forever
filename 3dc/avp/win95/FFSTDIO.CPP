@@ -76,6 +76,15 @@ FFileDesc::FFileDesc(char const * infoline, char const * path)
 			dname_len = strlen(dbuf);
 			dir_name = new char[1+dname_len];
 			strcpy(dir_name,dbuf);
+/*
+			// swap '\' to '/'
+			int length = strlen(dir_name);
+			for (int i = 0; i < length; i++)
+			{
+				if (dir_name[i] == '\\')
+					dir_name[i] = '/';
+			}
+*/
 			file_name = new char[1+strlen(fbuf)];
 			strcpy(file_name,fbuf);
 		}
@@ -103,8 +112,8 @@ FFileDesc & FFileDesc::operator = (FFileDesc const & ffd)
 {
 	if (&ffd != this)
 	{
-		if (dir_name) delete[] dir_name;
-		if (file_name) delete[] file_name;
+		delete[] dir_name;
+		delete[] file_name;
 		dir_name = 0;
 		file_name = 0;
 		dname_len = ffd.dname_len;
@@ -124,8 +133,8 @@ FFileDesc & FFileDesc::operator = (FFileDesc const & ffd)
 
 FFileDesc::~FFileDesc()
 {
-	if (dir_name) delete[] dir_name;
-	if (file_name) delete[] file_name;
+	delete[] dir_name;
+	delete[] file_name;
 }
 
 int FFileDesc::CouldInclude(char const * fname) const
@@ -139,7 +148,7 @@ int FFileDesc::CouldInclude(char const * fname) const
 
 FFHeaderI * FFileDesc::Load() const
 {
-	LOGDXFMT(("Loaded FastFile: %s\n(for directory: %s)\n",file_name,dir_name));
+	LOGDXFMT(("Loaded FastFile: %s\n(for directory: %s)\n",file_name, dir_name));
 	return new FFHeaderI(file_name,ShouldBeKept());
 }
 
@@ -166,11 +175,13 @@ int ffInit(char const * infofilename, char const * ffpath)
 	while (fdesclist.size())
 		fdesclist.delete_first_entry();
 
-	// read data
-	char buf[512];
-	buf[0]=0;
+	const int kBufferSize = 512;
 
-	fgets(buf,sizeof buf,fp);
+	// read data
+	char buf[kBufferSize];
+	buf[0] = '\0';
+
+	fgets(buf, kBufferSize, fp);
 	do
 	{
 		//Only look at lines that start with a letter
@@ -179,10 +190,10 @@ int ffInit(char const * infofilename, char const * ffpath)
 		if((buf[0]>='a' && buf[0]<='z') ||
 		   (buf[0]>='A' && buf[0]<='Z'))
 		{
-			fdesclist.add_entry(FFileDesc(buf,ffpath));
+			fdesclist.add_entry(FFileDesc(buf, ffpath));
 		}
 	}
-	while (fgets(buf,sizeof buf,fp));
+	while (fgets(buf, kBufferSize, fp));
 
 	fclose(fp);
 
@@ -321,12 +332,11 @@ void const * ffreadbuf(char const * filename, size_t * p_len)
 	
 	for (LIF<FFHeaderI *> i_ff(&fflist); !i_ff.done(); i_ff.next())
 	{
-		data = i_ff()->FindFile(filename,p_len);
+		data = i_ff()->FindFile(filename, p_len);
 		if (data) return data;
 	}
 
 	// try loading another big catfile
-	
 	for (LIF<FFileDesc> i_fdesc(&fdesclist); !i_fdesc.done(); i_fdesc.next())
 	{
 		if (i_fdesc().CouldInclude(filename) && !floadeddesclist.contains(i_fdesc()))
@@ -335,7 +345,7 @@ void const * ffreadbuf(char const * filename, size_t * p_len)
 			FFHeaderI * newffh = i_fdesc().Load();
 			fflist.add_entry(newffh);
 
-			data = newffh->FindFile(filename,p_len);
+			data = newffh->FindFile(filename, p_len);
 			if (data)
 			{
 				return data;
@@ -367,41 +377,7 @@ FFILE * ffopen(char const * filename, char const * mode)
 	}
 
 	errno = ENOENT;
-	// ok, just use fopen (if debug)
-	#if debug && 0 // dont do this, caller should handle this situation
-	LOGDXFMT(("%s not in any fastfile",filename));
-
-	FILE * sfp = avp_fopen(filename,mode);
-	if (!sfp) return 0;
-
-	fseek(sfp,0,SEEK_END);
-	length = ftell(sfp);
-	fseek(sfp,0,SEEK_SET);
-	data = malloc(length);
-	if (!data)
-	{
-		fclose(sfp);
-		return 0;
-	}
-	length = fread((void *)data,1,length,sfp);
-	
-	FFILE * fp = new FFILE;
-	fp->data_start = data;
-	fp->data_ptr = (unsigned char const *)data;
-	fp->length = length;
-	fp->pos = 0;
-	fp->remaining = length;
-	fp->flag = FFF_ALOC;
-	if (ferror(sfp))
-	{
-		fp->flag |= FFF_ERR;
-	}
-	fclose(sfp);
-	openlist.add_entry(fp);
-	return fp;
-	#else
 	return 0;
-	#endif
 }
 
 size_t ffreadb(void * ptr, size_t n, FFILE * fp)

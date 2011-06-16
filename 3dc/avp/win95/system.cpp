@@ -488,13 +488,12 @@ const char FileNameExtension[5] =  {".rif"};
 void LoadRifFile()
 {
 	char file_and_path[MAX_PATH];
-	int i = 0;
 	
 	Set_Progress_Bar_Position(PBAR_LEVEL_START);
 	
 	// clear the dir names
 
-	for(i = 0; i < 100; i++)
+	for(int i = 0; i < 100; i++)
 	{
 		file_and_path[i] = (char)0;
 		EnvFileName[i] = (char)0;
@@ -519,7 +518,6 @@ void LoadRifFile()
 	SetCurrentImageGroup(2); // FOR ENV
 	#endif
 	copy_rif_data(env_rif,CCF_ENVIRONMENT,PBAR_LEVEL_START+PBAR_LEVEL_INTERVAL*.4,PBAR_LEVEL_INTERVAL*.6);
-	//setup_shading_tables();
 }
 
 int Destroy_CurrentEnvironment(void)

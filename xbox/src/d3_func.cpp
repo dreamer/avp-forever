@@ -2265,15 +2265,8 @@ void ReleaseDirect3D()
 
 void ReleaseAvPTexture(AVPTEXTURE *texture)
 {
-	if (texture->buffer)
-	{
-		free(texture->buffer);
-	}
-
-	if (texture)
-	{
-		free(texture);
-	}
+	delete[] texture->buffer;
+	delete texture;
 }
 
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)

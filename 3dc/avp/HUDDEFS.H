@@ -158,16 +158,6 @@ extern void PlatformSpecificInitAlienHUD(void);
 /*RWH*****************
 * Ditto for alien. *
 ******************REH*/
-extern void PlatformSpecificExitingHUD(void);
-/*KJL******************************************************************************************
-* This is for the PSX (& possibly Saturn). Use this to pass your list of graphics to be drawn *
-* to your GPU.                                                                                *
-******************************************************************************************KJL*/
-
-//extern void PlatformSpecificEnteringHUD(void);
-/*KJL**************************************************
-* Made to complement PlatformSpecificExitingHUD() fn. *
-**************************************************KJL*/
 
 extern void BLTMotionTrackerToHUD(int scanLineSize);
 /*KJL******************************************************************************************
@@ -182,54 +172,7 @@ extern void BLTMotionTrackerBlipToHUD(int x, int y, int brightness);
 * brightness=65536 means brightest blip, 0 means darkest blip      		*
 ********************************************************************KJL*/
 
-//extern void BLTMarineNumericsToHUD(enum MARINE_HUD_DIGIT digitsToDraw);
-//extern void BLTPredatorNumericsToHUD(void);
-//extern void BLTAlienNumericsToHUD(void);
-/*KJL********************************************************************
-* Draws ALL the numeric digits (pertinent to the Marine) to the HUD.    *
-*                                                                       *
-* Ok, here's a quick explanation of how it's supposed to work:          *
-*                                                                       *
-* In hud.c there is a global array of chars called ValueOfHUDDigit[].   *
-* The index of the array takes a value from the MARINE_HUD_DIGIT enum   *
-* which occurs later in this file, and each char in the array holds a   *
-* single digit, ie. a value from 0 to 9 inclusive. For example,         *
-* ValueOfHUDDigit[MARINE_HUD_HEALTH_TENS] holds the 'tens' digit of the *
-* players health, say 5 if the players health was 152. So, the function *
-* BLTMarineNumericsToHUD() simply goes through the array blitting each  *
-* digit to its correct position on screen. I do this by having another  *
-* array which holds the X,Y coords and font number for each digit, and  *
-* implementing a fn which takes the parameters (digit value,x,y,font)   *
-* and does the actual blitting. This is in avp/win95/ddplat.cpp.        *
-********************************************************************KJL*/
-
-//extern void BLTGunSightToScreen(int screenX, int screenY, enum GUNSIGHT_SHAPE gunsightShape);
-/*KJL****************************************************************
-* screenX & screenY are in pixels (scaled to SDB so should be okay) *
-* (centre hotspot)													*
-* gunsightShape determines which sight to blit to screen.           *
-****************************************************************KJL*/
-
-
 extern void InitHUD(void);
-
-extern void BLTAlienOverlayToHUD(void);
-/*KJL**************************
-* Draw simple graphic overlay *
-**************************KJL*/
-
-extern void BLTPredatorOverlayToHUD(void);
-/*KJL**************************
-* Draw simple graphic overlay *
-**************************KJL*/
-
-
-//extern void KillHUD(void);
-/*KJL*********************
-* Free memory of HUD gfx *
-*********************KJL*/
-
-
 
 /* KJL 11:00:22 05/20/97 - On-screen messaging system */
 #define ON_SCREEN_MESSAGE_LIFETIME (ONE_FIXED*2)
@@ -240,11 +183,5 @@ extern void NewOnScreenMessage(char *messagePtr);
 * the time defined in ON_SCREEN_MESSAGE_LIFETIME. Any previous message  *
 * still being displayed will be overwritten.                            *
 ********************************************************************KJL*/
-
-//extern void DrawOnScreenMessage(unsigned char *messagePtr);
-/*KJL*********************************************************************
-* This is a platform specific fn which draws the required message to the *
-* screen. Implemented in ddplat.cpp on the PC.                           *
-*********************************************************************KJL*/
 
 #endif /* one-time only guard */

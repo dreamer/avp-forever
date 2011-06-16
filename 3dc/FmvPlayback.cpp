@@ -277,7 +277,7 @@ int TheoraFMV::Open(const std::string &fileName)
 		mAudioDataBuffer = NULL;
 	}
 
-	mFrameWidth = mVideo->mTheora.mInfo.frame_width;
+	mFrameWidth  = mVideo->mTheora.mInfo.frame_width;
 	mFrameHeight = mVideo->mTheora.mInfo.frame_height;
 
 	// determine how many textures we need

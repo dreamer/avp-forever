@@ -302,7 +302,7 @@ namespace AwTl
 /*******************/
 /* Generic Loaders */
 /*******************/
-
+/*
 #define HANDLE_DXERROR(s) \
 	if (DD_OK != awTlLastDxErr)	{ \
 		awTlLastErr = AW_TLE_DXERROR; \
@@ -312,7 +312,7 @@ namespace AwTl
 	} else { \
 		db_logf5(("\tsuccessfully completed %s",s)); \
 	}
-
+*/
 #define ON_ERROR_RETURN_NULL(s) \
 	if (awTlLastErr != AW_TLE_OK) { \
 		db_logf3(("AwCreateGraphic() failed whilst %s",s)); \
@@ -430,12 +430,12 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 {
 	using namespace AwTl;
 
-	if (_parmsR.originalWidthP) *_parmsR.originalWidthP = m_nWidth;
+	if (_parmsR.originalWidthP)  *_parmsR.originalWidthP  = m_nWidth;
 	if (_parmsR.originalHeightP) *_parmsR.originalHeightP = m_nHeight;
 
-	AVPTEXTURE *d3d_texture = (AVPTEXTURE*)malloc(sizeof(AVPTEXTURE));
+	AVPTEXTURE *d3d_texture = new AVPTEXTURE;
 
-	uint8_t *buffer = (uint8_t *)malloc(m_nWidth * m_nHeight * sizeof(uint32_t));
+	uint8_t *buffer = new uint8_t[m_nWidth * m_nHeight * sizeof(uint32_t)];
 
 	unsigned int y = 0;
 
@@ -448,7 +448,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 		y = m_nHeight-1;
 	}
 
-	for (int i = 0, rowcount = m_nHeight; rowcount; --rowcount, i++)
+	for (int rowcount = m_nHeight; rowcount; --rowcount)
 	{	
 		PtrUnion src_rowP = GetRowPtr(y);
 		db_assert1(src_rowP.voidP);
@@ -457,18 +457,12 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 		LoadNextRow(src_rowP);
 			
 		// loop for copying data to surfaces
-		{	
-			{
-				// are we in the vertical range of this surface?
-				{		
-					// convert and copy the section of the row to the direct draw surface
+		// are we in the vertical range of this surface?	
+			// convert and copy the section of the row to the direct draw surface
 //					ConvertRow(pLoadInfo->surface_dataP,pLoadInfo->surface_width,src_rowP,pLoadInfo->left,pLoadInfo->width,paletteP db_code1(DB_COMMA m_nPaletteSize));
-					PtrUnion my_data = &buffer[y*m_nWidth*4];
+			PtrUnion my_data = &buffer[y*m_nWidth*4];
 
-					ConvertRow(my_data, m_nWidth, src_rowP, 0, m_nWidth, paletteP db_code1(DB_COMMA m_nPaletteSize));					
-				}
-			}
-		}
+			ConvertRow(my_data, m_nWidth, src_rowP, 0, m_nWidth, paletteP db_code1(DB_COMMA m_nPaletteSize));					
 				
 		// next row
 		if (reversed_rowsB)
@@ -479,7 +473,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 		
 	db_logf4(("\tThe image with is %ux%u with %u %spalette",m_nWidth,m_nHeight,m_nPaletteSize ? m_nPaletteSize : 0,m_nPaletteSize ? "colour " : ""));
 
-	d3d_texture->width = m_nWidth;
+	d3d_texture->width  = m_nWidth;
 	d3d_texture->height = m_nHeight;
 
 	d3d_texture->buffer = buffer;
@@ -1087,13 +1081,13 @@ namespace AwTl {
 		if (pParams->fileNameS)
 		{
 			// opens a file, not creates one ;)
-			pParams->fileH = avp_CreateFile(pParams->fileNameS,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
+			pParams->fileH = avp_CreateFile(pParams->fileNameS, GENERIC_READ,FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
 			if (INVALID_HANDLE_VALUE==pParams->fileH)
 			{
 				awTlLastErr = AW_TLE_CANTOPENFILE;
 				awTlLastWinErr = GetLastError();
-				db_logf1(("AwCreateGraphic(): ERROR opening file \"%s\"",pParams->fileNameS));
+				db_logf1(("AwCreateGraphic(): ERROR opening file \"%s\"", pParams->fileNameS));
 				db_log2(AwTlErrorToString());
 				return static_cast<AVPTEXTURE *>(NULL);
 			}

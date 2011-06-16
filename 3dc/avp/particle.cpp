@@ -52,15 +52,19 @@ static PHEROMONE_TRAIL TrailStorage[MAX_NO_OF_PHEROMONE_TRAILS];
 static PARTICLE ParticleStorage[MAX_NO_OF_PARTICLES];
 static VOLUMETRIC_EXPLOSION ExplosionStorage[MAX_NO_OF_EXPLOSIONS];
 
+int NumberOfBloodParticles;
+int NumberOfFlaresActive;
 static int NumActiveTrails;
 static int NumActiveParticles;
 static int CurrentExplosionIndex;
 
 extern int PrevNormalFrameTime;
-
-int NumberOfBloodParticles;
-int NumberOfFlaresActive;
-
+extern int NumActiveBlocks;
+extern int NumOnScreenBlocks;
+extern int WaterFallBase;
+extern DISPLAYBLOCK* ActiveBlockList[];
+extern DISPLAYBLOCK *OnScreenBlockList[];
+extern SOUND3DDATA Explosion_SoundData;
 extern SOUND3DDATA PredPistolExplosion_SoundData;
 
 static void InitialiseVolumetricExplosions(void);
@@ -89,7 +93,7 @@ void D3D_DecalSystem_End();
 void PostLandscapeRendering();
 void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr);
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr);
-		
+
 PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 {
 	/* PARTICLE_PREDATOR_BLOOD */
@@ -260,7 +264,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		64,
 		//int StartV;
-	   	0,
+		0,
 		//int EndU;
 		127,
 		//int EndV;
@@ -292,7 +296,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		0,
 		//int StartV;
-	   	64,
+		64,
 		//int EndU;
 		63,
 		//int EndV;
@@ -311,7 +315,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{230,	230,	240,	0},
 		//unsigned char BlueScale;
 		{255,	255,	0,		120},
-	
+
 		//unsigned char IsLit:1;
 		1,
 		//IsDrawnInFront:1;
@@ -324,7 +328,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		0,
 		//int StartV;
-	   	64,
+		64,
 		//int EndU;
 		63,
 		//int EndV;
@@ -356,7 +360,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		0,
 		//int StartV;
-	   	130,
+		130,
 		//int EndU;
 		28,
 		//int EndV;
@@ -375,7 +379,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{64,	64,		64,		64,		64},
 		//unsigned char BlueScale;
 		{64,	64,		64,		64,		64},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -388,7 +392,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		128,
 		//int StartV;
-	   	0,
+		0,
 		//int EndU;
 		195,
 		//int EndV;
@@ -420,7 +424,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		0,
 		//int StartV;
-	   	130,
+		130,
 		//int EndU;
 		28,
 		//int EndV;
@@ -452,7 +456,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		0,
 		//int StartV;
-	   	130,
+		130,
 		//int EndU;
 		28,
 		//int EndV;
@@ -471,7 +475,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{64,	64,		64,		64,		64},
 		//unsigned char BlueScale;
 		{64,	64,		64,		64,		64},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -484,7 +488,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		128,
 		//int StartV;
-	   	0,
+		0,
 		//int EndU;
 		195,
 		//int EndV;
@@ -503,7 +507,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{255,	255,	255,	0,		64},
 		//unsigned char BlueScale;
 		{255,	255,	255,	64,		0},
-	
+
 		//unsigned char IsLit:1;
 		1,
 		//IsDrawnInFront:1;
@@ -516,7 +520,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		64,
 		//int StartV;
-	   	0,
+		0,
 		//int EndU;
 		(64+127),
 		//int EndV;
@@ -535,7 +539,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{128,	128,	255,	64,		64,		128},
 		//unsigned char BlueScale;
 		{64,	64,		255,	255,	0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -548,7 +552,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		64,
 		//int StartV;
-	   	0,
+	 0,
 		//int EndU;
 		(64+127),
 		//int EndV;
@@ -567,7 +571,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{128,	128,	255,	64,		64,		128},
 		//unsigned char BlueScale;
 		{64,	64,		255,	255,	0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -580,7 +584,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		64,
 		//int StartV;
-	   	0,
+		0,
 		//int EndU;
 		(64+127),
 		//int EndV;
@@ -599,7 +603,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{128,	128,	255,	64,		64,		128},
 		//unsigned char BlueScale;
 		{64,	64,		255,	255,	0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -609,10 +613,10 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 	},
 	/* PARTICLE_FIRE */
 	{
-	   	//int StartU;
+		//int StartU;
 		0,
 		//int StartV;
-	   	0,
+		0,
 		//int EndU;
 		63,
 		//int EndV;
@@ -631,7 +635,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{128,	128,	255,	64,		64,		128},
 		//unsigned char BlueScale;
 		{64,	64,		255,	255,	0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -644,7 +648,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		0,
 		//int StartV;
-	   	0,
+		0,
 		//int EndU;
 		48,
 		//int EndV;
@@ -676,7 +680,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		64,
 		//int StartV;
-	   	0,
+		0,
 		//int EndU;
 		(64+127),
 		//int EndV;
@@ -695,7 +699,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{128,	128,	255,	64,		64,		128},
 		//unsigned char BlueScale;
 		{64,	64,		255,	255,	0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -708,7 +712,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		64,
 		//int StartV;
-	   	0,
+		0,
 		//int EndU;
 		(64+127),
 		//int EndV;
@@ -720,14 +724,14 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		TRANSLUCENCY_GLOWING,
 
 		//unsigned char Alpha;
-		255,  
+		255,
 		//unsigned char RedScale;
 		{255,	255,	255,	128,	128,	0},
 		//unsigned char GreenScale;
 		{128,	128,	255,	64,		64,		128},
 		//unsigned char BlueScale;
 		{64,	64,		255,	255,	0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -740,7 +744,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		1,
 		//int StartV;
-	   	1,
+		1,
 		//int EndU;
 		64,
 		//int EndV;
@@ -759,7 +763,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{128,	128,	255,	0,		255},
 		//unsigned char BlueScale;
 		{64,	64,		255,	0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -772,7 +776,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		1,
 		//int StartV;
-	   	1,
+		1,
 		//int EndU;
 		64,
 		//int EndV;
@@ -791,7 +795,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{128,	128,	255,	0,		255},
 		//unsigned char BlueScale;
 		{64,	64,		255,	0,		255},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -804,7 +808,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		224,
 		//int StartV;
-	   	192,
+		192,
 		//int EndU;
 		255,
 		//int EndV;
@@ -823,7 +827,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{255,	64,		64,		64,		64},
 		//unsigned char BlueScale;
 		{255,	64,		64,		64,		64},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -836,7 +840,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		224,
 		//int StartV;
-	   	192,
+		192,
 		//int EndU;
 		255,
 		//int EndV;
@@ -855,7 +859,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{255,	64,		64,		64,		64,		64},
 		//unsigned char BlueScale;
 		{255,	64,		64,		64,		64,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -888,7 +892,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{128,	128,	255,	0,		255,	255},
 		//unsigned char BlueScale;
 		{64,	64,		255,	0,		0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -901,7 +905,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		32,
 		//int StartV;
-	   	0,
+		0,
 		//int EndU;
 		32,
 		//int EndV;
@@ -920,7 +924,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{128,	128,	255,	0,		255,	255},
 		//unsigned char BlueScale;
 		{64,	64,		255,	0,		0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -933,7 +937,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		192,
 		//int StartV;
-	   	224,
+		224,
 		//int EndU;
 		223,
 		//int EndV;
@@ -952,7 +956,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{128,	128,	255,	0,		255,	255},
 		//unsigned char BlueScale;
 		{64,	64,		255,	0,		0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -965,7 +969,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		32,
 		//int StartV;
-	   	0,
+		0,
 		//int EndU;
 		32,
 		//int EndV;
@@ -984,7 +988,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{255,	128,	255,	0,		255},
 		//unsigned char BlueScale;
 		{64,	64,		255,	0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -992,8 +996,6 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//IsDrawnAtBack:1;
 		0,
 	},
-   
-   
 
 	/* PARTICLE_LIGHTFLARE */
 	{
@@ -1019,7 +1021,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{255,	255,	255,	0,		255,	255},
 		//unsigned char BlueScale;
 		{255,	255,	255,	0,		0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -1083,7 +1085,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{255,	255,	255,	0,		255,	255},
 		//unsigned char BlueScale;
 		{255,	255,	255,	0,		0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -1096,7 +1098,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		128,
 		//int StartV;
-	   	64,
+		64,
 		//int EndU;
 		191,
 		//int EndV;
@@ -1115,7 +1117,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{128,	64,		64,		64,		64},
 		//unsigned char BlueScale;
 		{128,	64,		64,		64,		0},
-	
+
 		//unsigned char IsLit:1;
 		1,
 		//IsDrawnInFront:1;
@@ -1128,7 +1130,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		224,
 		//int StartV;
-	   	160,
+		160,
 		//int EndU;
 		255,
 		//int EndV;
@@ -1154,13 +1156,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		0,
 		//IsDrawnAtBack:1;
 		0,
-	}, 
+	},
 	/* PARTICLE_ELECTRICALPLASMASPHERE */
 	{
 		//int StartU;
 		64,
 		//int StartV;
-	   	128,
+		128,
 		//int EndU;
 		127,
 		//int EndV;
@@ -1186,13 +1188,13 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		0,
 		//IsDrawnAtBack:1;
 		0,
-	}, 
+	},
 	/* PARTICLE_PREDPISTOL_FLECHETTE */
 	{
 		//int StartU;
 		1,
 		//int StartV;
-	   	1,
+		1,
 		//int EndU;
 		64,
 		//int EndV;
@@ -1211,7 +1213,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{128,	128,	255,	0,		255,	255},
 		//unsigned char BlueScale;
 		{64,	64,		255,	0,		0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -1224,7 +1226,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		1,
 		//int StartV;
-	   	1,
+		1,
 		//int EndU;
 		64,
 		//int EndV;
@@ -1243,7 +1245,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{128,	128,	255,	0,		255,	255},
 		//unsigned char BlueScale;
 		{64,	64,		255,	0,		0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -1275,7 +1277,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{255,	255,	255,	0,		255,	255},
 		//unsigned char BlueScale;
 		{255,	255,	255,	0,		0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -1307,7 +1309,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{128,	128,	255,	0,		255,	255},
 		//unsigned char BlueScale;
 		{64,	64,		255,	0,		0,		0},
-	
+
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -1320,7 +1322,7 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//int StartU;
 		64,
 		//int StartV;
-	   	0,
+		0,
 		//int EndU;
 		(64+127),
 		//int EndV;
@@ -1339,7 +1341,6 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		{128,	128,	255,	64,		64,		128},
 		//unsigned char BlueScale;
 		{64,	64,		255,	255,	0,		0},
-	
 		//unsigned char IsLit:1;
 		0,
 		//IsDrawnInFront:1;
@@ -1347,7 +1348,6 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		//IsDrawnAtBack:1;
 		0,
 	},
-
 };
 
 
@@ -1358,10 +1358,10 @@ static void DeallocatePheromoneTrail(PHEROMONE_TRAIL *trailPtr);
 
 void InitialiseParticleSystem(void)
 {
- 	NumActiveParticles = 0;
+	NumActiveParticles = 0;
 	NumberOfBloodParticles = 0;
 
- 	NumActiveTrails = 0;
+	NumActiveTrails = 0;
 
 	InitialiseVolumetricExplosions();
 	InitialiseRainDrops();
@@ -1388,6 +1388,7 @@ static PARTICLE* AllocateParticle(void)
 
 	return particlePtr;
 }
+
 static void DeallocateParticle(PARTICLE *particlePtr)
 {
 	/* is pointer within array? */
@@ -1402,7 +1403,7 @@ static PHEROMONE_TRAIL* AllocatePheromoneTrail(void)
 {
 	PHEROMONE_TRAIL *trailPtr = 0; /* Default to null ptr */
 
-	if (NumActiveTrails != MAX_NO_OF_PHEROMONE_TRAILS) 
+	if (NumActiveTrails != MAX_NO_OF_PHEROMONE_TRAILS)
 	{
 		trailPtr = &TrailStorage[NumActiveTrails];
 		NumActiveTrails++;
@@ -1414,6 +1415,7 @@ static PHEROMONE_TRAIL* AllocatePheromoneTrail(void)
 
 	return trailPtr;
 }
+
 static void DeallocatePheromoneTrail(PHEROMONE_TRAIL *trailPtr)
 {
 	/* is pointer within array? */
@@ -1426,8 +1428,7 @@ static void DeallocatePheromoneTrail(PHEROMONE_TRAIL *trailPtr)
 
 static void InitialiseVolumetricExplosions(void)
 {
-	int i;
-	for (i=0; i<MAX_NO_OF_EXPLOSIONS; i++)
+	for (int i=0; i<MAX_NO_OF_EXPLOSIONS; i++)
 	{
 		ExplosionStorage[i].LifeTime = 0;
 	}
@@ -1454,7 +1455,7 @@ void MakeParticle(VECTORCH *positionPtr, VECTORCH *velocityPtr, enum PARTICLE_ID
 {
 	PARTICLE *particlePtr;
 
-	if( (particleID == PARTICLE_ALIEN_BLOOD) || (particleID == PARTICLE_PREDATOR_BLOOD) || (particleID == PARTICLE_HUMAN_BLOOD)|| (particleID == PARTICLE_ANDROID_BLOOD))
+	if ((particleID == PARTICLE_ALIEN_BLOOD) || (particleID == PARTICLE_PREDATOR_BLOOD) || (particleID == PARTICLE_HUMAN_BLOOD)|| (particleID == PARTICLE_ANDROID_BLOOD))
 		if (NumberOfBloodParticles>MAX_NO_OF_BLOOD_PARTICLES)
 			return;
 
@@ -1470,14 +1471,14 @@ void MakeParticle(VECTORCH *positionPtr, VECTORCH *velocityPtr, enum PARTICLE_ID
 
 		particlePtr->Colour = RGBALIGHT_MAKE
 							  (
-							  	particleDescPtr->RedScale[CurrentVisionMode],
-							  	particleDescPtr->GreenScale[CurrentVisionMode],
-							  	particleDescPtr->BlueScale[CurrentVisionMode],
-							  	particleDescPtr->Alpha
+								particleDescPtr->RedScale[CurrentVisionMode],
+								particleDescPtr->GreenScale[CurrentVisionMode],
+								particleDescPtr->BlueScale[CurrentVisionMode],
+								particleDescPtr->Alpha
 							  );
 		particlePtr->Size = particleDescPtr->Size;
-	
-		switch(particlePtr->ParticleID)
+
+		switch (particlePtr->ParticleID)
 		{
 			case PARTICLE_PREDATOR_BLOOD:
 			case PARTICLE_ALIEN_BLOOD:
@@ -1530,7 +1531,7 @@ void MakeParticle(VECTORCH *positionPtr, VECTORCH *velocityPtr, enum PARTICLE_ID
 				break;
 			}
 
-			case PARTICLE_SPARK:	  
+			case PARTICLE_SPARK:
 			{
 				particlePtr->LifeTime = ONE_FIXED;
 				break;
@@ -1581,16 +1582,16 @@ void MakeParticle(VECTORCH *positionPtr, VECTORCH *velocityPtr, enum PARTICLE_ID
 			{
 				particlePtr->LifeTime = ONE_FIXED/4;
 				particlePtr->Offset = particlePtr->Position;
-//	 			particlePtr->Position.vx += particlePtr->Velocity.vx;
-//	 			particlePtr->Position.vy += particlePtr->Velocity.vy;
-//	 			particlePtr->Position.vz += particlePtr->Velocity.vz;
-				break;					 
+//				particlePtr->Position.vx += particlePtr->Velocity.vx;
+//				particlePtr->Position.vy += particlePtr->Velocity.vy;
+//				particlePtr->Position.vz += particlePtr->Velocity.vz;
+				break;
 			}
 			case PARTICLE_MOLOTOVFLAME:
 			{
 				particlePtr->LifeTime = ONE_FIXED*2-(FastRandom()&32767);
 				break;
-			}	
+			}
 
 			case PARTICLE_FLECHETTE:
 			case PARTICLE_FLECHETTE_NONDAMAGING:
@@ -1646,7 +1647,6 @@ void MakeParticle(VECTORCH *positionPtr, VECTORCH *velocityPtr, enum PARTICLE_ID
 
 void HandleParticleSystem(void)
 {
-	int i;
 	PARTICLE *particlePtr;
 	HandleRipples();
 //	D3D_DrawWaterTest();
@@ -1654,18 +1654,17 @@ void HandleParticleSystem(void)
 	HandleDecalSystem();
 	D3D_DecalSystem_End();
 
-	
 //	textprint("Particles Active: %d\n",i);
 	D3D_DecalSystem_Setup();
-	i = NumActiveParticles;
+	int i = NumActiveParticles;
 	particlePtr = ParticleStorage;
 	
-	while(i--)
+	while (i--)
 	{
 		PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
 
 		particlePtr->NotYetRendered = TRUE;
-		switch(particlePtr->ParticleID)
+		switch (particlePtr->ParticleID)
 		{
 			case PARTICLE_ALIEN_BLOOD:
 			case PARTICLE_PREDATOR_BLOOD:
@@ -1709,7 +1708,6 @@ void HandleParticleSystem(void)
 					if (particlePtr->Velocity.vz > 0) particlePtr->Velocity.vz = 0;
 				}
 
-				
 				particlePtr->Position.vx += MUL_FIXED
 											(
 												particlePtr->Velocity.vx+
@@ -1719,7 +1717,6 @@ void HandleParticleSystem(void)
 													particlePtr->Offset.vx
 												),
 												NormalFrameTime
-											
 											);
 
 				particlePtr->Position.vz += MUL_FIXED
@@ -1731,15 +1728,14 @@ void HandleParticleSystem(void)
 													particlePtr->Offset.vz
 												),
 												NormalFrameTime
-											
 											);
 
 				particlePtr->Colour = RGBALIGHT_MAKE
 									  (
-									  	particleDescPtr->RedScale[CurrentVisionMode],
-									  	particleDescPtr->GreenScale[CurrentVisionMode],
-									  	particleDescPtr->BlueScale[CurrentVisionMode],
-									  	(particlePtr->LifeTime>>10)
+										particleDescPtr->RedScale[CurrentVisionMode],
+										particleDescPtr->GreenScale[CurrentVisionMode],
+										particleDescPtr->BlueScale[CurrentVisionMode],
+										(particlePtr->LifeTime>>10)
 									  );
 				particlePtr->Size = MUL_FIXED(ONE_FIXED-particlePtr->LifeTime,200)+50;
 				
@@ -1775,7 +1771,6 @@ void HandleParticleSystem(void)
 					if (particlePtr->Velocity.vz > 0) particlePtr->Velocity.vz = 0;
 				}
 
-				
 				particlePtr->Position.vx += MUL_FIXED
 											(
 												particlePtr->Velocity.vx+
@@ -1785,7 +1780,6 @@ void HandleParticleSystem(void)
 													particlePtr->Offset.vx
 												),
 												NormalFrameTime
-											
 											);
 
 				particlePtr->Position.vz += MUL_FIXED
@@ -1797,13 +1791,12 @@ void HandleParticleSystem(void)
 													particlePtr->Offset.vz
 												),
 												NormalFrameTime
-											
 											);
 				particlePtr->Colour = RGBALIGHT_MAKE
 									  (
-									  	particleDescPtr->RedScale[CurrentVisionMode],
-									  	particleDescPtr->GreenScale[CurrentVisionMode],
-									  	particleDescPtr->BlueScale[CurrentVisionMode],
+										particleDescPtr->RedScale[CurrentVisionMode],
+										particleDescPtr->GreenScale[CurrentVisionMode],
+										particleDescPtr->BlueScale[CurrentVisionMode],
 										(particlePtr->LifeTime>>14)+17
 									  );
 				break;
@@ -1849,7 +1842,6 @@ void HandleParticleSystem(void)
 													particlePtr->Offset.vx
 												),
 												NormalFrameTime
-											
 											);
 
 				particlePtr->Position.vz += MUL_FIXED
@@ -1861,12 +1853,11 @@ void HandleParticleSystem(void)
 													particlePtr->Offset.vz
 												),
 												NormalFrameTime
-											
 											);
 				{
 					int colour = particlePtr->LifeTime>>11;
-		  			particlePtr->Colour = RGBALIGHT_MAKE(colour,colour,colour,255);
-				}												
+					particlePtr->Colour = RGBALIGHT_MAKE(colour,colour,colour,255);
+				}
 				
 				break;
 			}
@@ -1900,7 +1891,7 @@ void HandleParticleSystem(void)
 					if (particlePtr->Velocity.vz > 0) particlePtr->Velocity.vz = 0;
 				}
 				#endif
-				
+
 				particlePtr->Position.vx += MUL_FIXED
 											(
 												particlePtr->Velocity.vx+
@@ -1910,7 +1901,6 @@ void HandleParticleSystem(void)
 													particlePtr->Offset.vx
 												),
 												NormalFrameTime
-											
 											);
 
 				particlePtr->Position.vz += MUL_FIXED
@@ -1922,22 +1912,21 @@ void HandleParticleSystem(void)
 													particlePtr->Offset.vz
 												),
 												NormalFrameTime
-											
 											);
 
 				particlePtr->Size = MUL_FIXED(ONE_FIXED-particlePtr->LifeTime,48);
 				{
 					int colour = particlePtr->LifeTime>>11;
-		  			particlePtr->Colour = RGBALIGHT_MAKE(32,32,32,colour);
-				}												
-				
+					particlePtr->Colour = RGBALIGHT_MAKE(32,32,32,colour);
+				}
+
 				break;
 			}
 			case PARTICLE_FLAME:
 			case PARTICLE_NONDAMAGINGFLAME:
 			case PARTICLE_PARGEN_FLAME:
 			{
-				particlePtr->Size = 20+(ONE_FIXED/2-particlePtr->LifeTime)/64;	 
+				particlePtr->Size = 20+(ONE_FIXED/2-particlePtr->LifeTime)/64;
 				if (particlePtr->LifeTime==ONE_FIXED/2)
 				{
 					switch (CurrentVisionMode)
@@ -1956,13 +1945,13 @@ void HandleParticleSystem(void)
 						case VISION_MODE_PRED_THERMAL:
 						{
 							particlePtr->Colour = RGBALIGHT_MAKE(0,0,128,(particlePtr->LifeTime>>8)|9);
-						  	break;
+							break;
 						}
 						case VISION_MODE_PRED_SEEALIENS:
 						case VISION_MODE_PRED_SEEPREDTECH:
 						{
 							particlePtr->Colour = RGBALIGHT_MAKE(192,128,32,(particlePtr->LifeTime>>8)|9);
-						  	break;
+							break;
 						}
 					}
 				}
@@ -1970,14 +1959,12 @@ void HandleParticleSystem(void)
 				{
 					particlePtr->Colour = RGBALIGHT_MAKE
 										  (
-										  	particleDescPtr->RedScale[CurrentVisionMode],
-										  	particleDescPtr->GreenScale[CurrentVisionMode],
-										  	particleDescPtr->BlueScale[CurrentVisionMode],
+											particleDescPtr->RedScale[CurrentVisionMode],
+											particleDescPtr->GreenScale[CurrentVisionMode],
+											particleDescPtr->BlueScale[CurrentVisionMode],
 											(particlePtr->LifeTime>>8)|9
 										  );
 				}
-
-				
 				break;
 			}
 			case PARTICLE_FIRE:
@@ -2004,9 +1991,9 @@ void HandleParticleSystem(void)
 					
 				particlePtr->Colour = RGBALIGHT_MAKE
 									  (
-									  	particleDescPtr->RedScale[CurrentVisionMode],
-									  	particleDescPtr->GreenScale[CurrentVisionMode],
-									  	particleDescPtr->BlueScale[CurrentVisionMode],
+										particleDescPtr->RedScale[CurrentVisionMode],
+										particleDescPtr->GreenScale[CurrentVisionMode],
+										particleDescPtr->BlueScale[CurrentVisionMode],
 										(particlePtr->LifeTime>>10)|9
 									  );
 
@@ -2024,10 +2011,9 @@ void HandleParticleSystem(void)
 				break;
 			}
 
-
 			case PARTICLE_NONCOLLIDINGFLAME:
-			{				
-				particlePtr->Size = 20+(ONE_FIXED/2-particlePtr->LifeTime)/64;	 
+			{
+				particlePtr->Size = 20+(ONE_FIXED/2-particlePtr->LifeTime)/64;
 				break;
 			}
 			case PARTICLE_ORANGE_SPARK:
@@ -2052,20 +2038,20 @@ void HandleParticleSystem(void)
 							default:
 							case VISION_MODE_NORMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(255,255,l-255,255);
+								particlePtr->Colour = RGBALIGHT_MAKE(255,255,l-255,255);
 								break;
 							}
 							case VISION_MODE_IMAGEINTENSIFIER:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l/2,255);
+								particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l/2,255);
 								break;
 							}
 							case VISION_MODE_PRED_THERMAL:
 							case VISION_MODE_PRED_SEEALIENS:
 							case VISION_MODE_PRED_SEEPREDTECH:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l-255,255,255,255);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(l-255,255,255,255);
+								break;
 							}
 						}
 					}
@@ -2076,25 +2062,24 @@ void HandleParticleSystem(void)
 							default:
 							case VISION_MODE_NORMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(255,l,0,l);
+								particlePtr->Colour = RGBALIGHT_MAKE(255,l,0,l);
 								break;
 							}
 							case VISION_MODE_IMAGEINTENSIFIER:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,128,l);
+								particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,128,l);
 								break;
 							}
 							case VISION_MODE_PRED_THERMAL:
 							case VISION_MODE_PRED_SEEALIENS:
 							case VISION_MODE_PRED_SEEPREDTECH:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(0,l,l,l);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(0,l,l,l);
+								break;
 							}
 						}
 					}
 				}
-
 				break;
 			}
 			case PARTICLE_ORANGE_PLASMA:
@@ -2119,20 +2104,20 @@ void HandleParticleSystem(void)
 							default:
 							case VISION_MODE_NORMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(255,255,l-255,255);
+								particlePtr->Colour = RGBALIGHT_MAKE(255,255,l-255,255);
 								break;
 							}
 							case VISION_MODE_IMAGEINTENSIFIER:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l/2,255);
+								particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l/2,255);
 								break;
 							}
 							case VISION_MODE_PRED_THERMAL:
 							case VISION_MODE_PRED_SEEALIENS:
 							case VISION_MODE_PRED_SEEPREDTECH:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l-255,255,255,255);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(l-255,255,255,255);
+								break;
 							}
 						}
 					}
@@ -2143,20 +2128,20 @@ void HandleParticleSystem(void)
 							default:
 							case VISION_MODE_NORMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(255,l,0,l);
+								particlePtr->Colour = RGBALIGHT_MAKE(255,l,0,l);
 								break;
 							}
 							case VISION_MODE_IMAGEINTENSIFIER:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,128,l);
+								particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,128,l);
 								break;
 							}
 							case VISION_MODE_PRED_THERMAL:
 							case VISION_MODE_PRED_SEEALIENS:
 							case VISION_MODE_PRED_SEEPREDTECH:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(0,l,l,l);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(0,l,l,l);
+								break;
 							}
 						}
 					}
@@ -2186,24 +2171,24 @@ void HandleParticleSystem(void)
 							default:
 							case VISION_MODE_NORMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(255,255,l-255,255);
+								particlePtr->Colour = RGBALIGHT_MAKE(255,255,l-255,255);
 								break;
 							}
 							case VISION_MODE_IMAGEINTENSIFIER:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l/2,255);
+								particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l/2,255);
 								break;
 							}
 							case VISION_MODE_PRED_THERMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l-255,255,255,255);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(l-255,255,255,255);
+								break;
 							}
 							case VISION_MODE_PRED_SEEALIENS:
 							case VISION_MODE_PRED_SEEPREDTECH:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(255,255,l-255,255);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(255,255,l-255,255);
+								break;
 							}
 						}
 					}
@@ -2214,24 +2199,24 @@ void HandleParticleSystem(void)
 							default:
 							case VISION_MODE_NORMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(255,l,0,l);
+								particlePtr->Colour = RGBALIGHT_MAKE(255,l,0,l);
 								break;
 							}
 							case VISION_MODE_IMAGEINTENSIFIER:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,128,l);
+								particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,128,l);
 								break;
 							}
 							case VISION_MODE_PRED_THERMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(0,l,l,l);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(0,l,l,l);
+								break;
 							}
 							case VISION_MODE_PRED_SEEALIENS:
 							case VISION_MODE_PRED_SEEPREDTECH:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l,l,0,l);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(l,l,0,l);
+								break;
 							}
 						}
 					}
@@ -2262,24 +2247,24 @@ void HandleParticleSystem(void)
 							default:
 							case VISION_MODE_NORMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,255,255);
+								particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,255,255);
 								break;
 							}
 							case VISION_MODE_IMAGEINTENSIFIER:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l/2,255);
+								particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l/2,255);
 								break;
 							}
 							case VISION_MODE_PRED_THERMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l-255,255,255,255);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(l-255,255,255,255);
+								break;
 							}
 							case VISION_MODE_PRED_SEEALIENS:
 							case VISION_MODE_PRED_SEEPREDTECH:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(255,255,l-255,255);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(255,255,l-255,255);
+								break;
 							}
 						}
 					}
@@ -2290,24 +2275,24 @@ void HandleParticleSystem(void)
 							default:
 							case VISION_MODE_NORMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l,l);
+								particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l,l);
 								break;
 							}
 							case VISION_MODE_IMAGEINTENSIFIER:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,128,l);
+								particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,128,l);
 								break;
 							}
 							case VISION_MODE_PRED_THERMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(0,l,l,l);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(0,l,l,l);
+								break;
 							}
 							case VISION_MODE_PRED_SEEALIENS:
 							case VISION_MODE_PRED_SEEPREDTECH:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l,l,0,l);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(l,l,0,l);
+								break;
 							}
 						}
 					}
@@ -2336,21 +2321,21 @@ void HandleParticleSystem(void)
 						case VISION_MODE_PRED_THERMAL:
 						{
 							particlePtr->Colour = RGBALIGHT_MAKE(255,0,0,255);
-						  	break;
+							break;
 						}
 						case VISION_MODE_PRED_SEEALIENS:
 						case VISION_MODE_PRED_SEEPREDTECH:
 						{
 							particlePtr->Colour = RGBALIGHT_MAKE(255,128,64,255);
-						  	break;
+							break;
 						}
 					}
 				}
 				else
 				{
-			 		particlePtr->Position.vx += MUL_FIXED(particlePtr->Velocity.vx,NormalFrameTime);
-			 		particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
-			 		particlePtr->Position.vz += MUL_FIXED(particlePtr->Velocity.vz,NormalFrameTime);
+					particlePtr->Position.vx += MUL_FIXED(particlePtr->Velocity.vx,NormalFrameTime);
+					particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
+					particlePtr->Position.vz += MUL_FIXED(particlePtr->Velocity.vz,NormalFrameTime);
 					switch (CurrentVisionMode)
 					{
 						default:
@@ -2367,13 +2352,13 @@ void HandleParticleSystem(void)
 						case VISION_MODE_PRED_THERMAL:
 						{
 							particlePtr->Colour = RGBALIGHT_MAKE(255,l/2,l/2,l);
-						  	break;
+							break;
 						}
 						case VISION_MODE_PRED_SEEALIENS:
 						case VISION_MODE_PRED_SEEPREDTECH:
 						{
 							particlePtr->Colour = RGBALIGHT_MAKE(255,l/2,l/4,l);
-						  	break;
+							break;
 						}
 					}
 					particlePtr->Size = 32+(FastRandom()&31);
@@ -2414,9 +2399,9 @@ void HandleParticleSystem(void)
 				}
 				else
 				{
-			 		particlePtr->Position.vx += MUL_FIXED(particlePtr->Velocity.vx,NormalFrameTime);
-			 		particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
-			 		particlePtr->Position.vz += MUL_FIXED(particlePtr->Velocity.vz,NormalFrameTime);
+					particlePtr->Position.vx += MUL_FIXED(particlePtr->Velocity.vx,NormalFrameTime);
+					particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
+					particlePtr->Position.vz += MUL_FIXED(particlePtr->Velocity.vz,NormalFrameTime);
 					switch (CurrentVisionMode)
 					{
 						default:
@@ -2433,13 +2418,13 @@ void HandleParticleSystem(void)
 						case VISION_MODE_PRED_THERMAL:
 						{
 							particlePtr->Colour = RGBALIGHT_MAKE(l/4,l/2,255,l);
-						  	break;
+							break;
 						}
 						case VISION_MODE_PRED_SEEALIENS:
 						case VISION_MODE_PRED_SEEPREDTECH:
 						{
 							particlePtr->Colour = RGBALIGHT_MAKE(255,l/2,l/4,l);
-						  	break;
+							break;
 						}
 					}
 					particlePtr->Size = 32+(FastRandom()&31);
@@ -2452,28 +2437,26 @@ void HandleParticleSystem(void)
 			{
 				particlePtr->Colour = RGBALIGHT_MAKE
 									  (
-									  	particleDescPtr->RedScale[CurrentVisionMode],
-									  	particleDescPtr->GreenScale[CurrentVisionMode],
-									  	particleDescPtr->BlueScale[CurrentVisionMode],
-									  	particleDescPtr->Alpha
+										particleDescPtr->RedScale[CurrentVisionMode],
+										particleDescPtr->GreenScale[CurrentVisionMode],
+										particleDescPtr->BlueScale[CurrentVisionMode],
+										particleDescPtr->Alpha
 									  );
 				particlePtr->Position.vx += MUL_FIXED(particlePtr->Velocity.vx,NormalFrameTime);
 				particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
 				particlePtr->Position.vz += MUL_FIXED(particlePtr->Velocity.vz,NormalFrameTime);
 				particlePtr->Velocity.vy += MUL_FIXED(10000,NormalFrameTime);
-
 				break;
 			}
 			case PARTICLE_WATERFALLSPRAY:
 			{
-				extern int WaterFallBase;
 				int y = particlePtr->Position.vy;
 				particlePtr->Colour = RGBALIGHT_MAKE
 									  (
-									  	particleDescPtr->RedScale[CurrentVisionMode],
-									  	particleDescPtr->GreenScale[CurrentVisionMode],
-									  	particleDescPtr->BlueScale[CurrentVisionMode],
-									  	particleDescPtr->Alpha
+										particleDescPtr->RedScale[CurrentVisionMode],
+										particleDescPtr->GreenScale[CurrentVisionMode],
+										particleDescPtr->BlueScale[CurrentVisionMode],
+										particleDescPtr->Alpha
 									  );
 
 				particlePtr->Position.vx += MUL_FIXED(particlePtr->Velocity.vx,NormalFrameTime);
@@ -2487,7 +2470,7 @@ void HandleParticleSystem(void)
 					if (y<4742 && particlePtr->Position.vy>4742)
 					{
 						particlePtr->Position.vy=4742;
-						particlePtr->Velocity.vy=-MUL_FIXED(particlePtr->Velocity.vy,ONE_FIXED/2-(FastRandom()&16384));						
+						particlePtr->Velocity.vy=-MUL_FIXED(particlePtr->Velocity.vy,ONE_FIXED/2-(FastRandom()&16384));
 					}
 				}
 				else if (particlePtr->Position.vz < 58600)
@@ -2530,20 +2513,20 @@ void HandleParticleSystem(void)
 							default:
 							case VISION_MODE_NORMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE((l-255)/2+32,0,0,255);
+								particlePtr->Colour = RGBALIGHT_MAKE((l-255)/2+32,0,0,255);
 								break;
 							}
 							case VISION_MODE_IMAGEINTENSIFIER:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l/2,255);
+								particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l/2,255);
 								break;
 							}
 							case VISION_MODE_PRED_THERMAL:
 							case VISION_MODE_PRED_SEEALIENS:
 							case VISION_MODE_PRED_SEEPREDTECH:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l-255,255,255,255);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(l-255,255,255,255);
+								break;
 							}
 						}
 					}
@@ -2554,20 +2537,20 @@ void HandleParticleSystem(void)
 							default:
 							case VISION_MODE_NORMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(32,0,0,l);
+								particlePtr->Colour = RGBALIGHT_MAKE(32,0,0,l);
 								break;
 							}
 							case VISION_MODE_IMAGEINTENSIFIER:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l/2,l);
+								particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l/2,l);
 								break;
 							}
 							case VISION_MODE_PRED_THERMAL:
 							case VISION_MODE_PRED_SEEALIENS:
 							case VISION_MODE_PRED_SEEPREDTECH:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(0,l,l,l);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(0,l,l,l);
+								break;
 							}
 						}
 					}
@@ -2578,7 +2561,7 @@ void HandleParticleSystem(void)
 					VECTORCH obstacleNormal;
 					int moduleIndex;
 					VECTORCH velocityBackup = particlePtr->Velocity;
-								
+
 					if(ParticleDynamics(particlePtr,&obstacleNormal,&moduleIndex))
 					{
 						if(moduleIndex==-1)
@@ -2603,11 +2586,11 @@ void HandleParticleSystem(void)
 				if (particlePtr->LifeTime<ONE_FIXED*8)
 				{
 					int colour = (particlePtr->LifeTime/(8*256*4));
-		  			particlePtr->Colour = RGBALIGHT_MAKE(255,255,255,colour);
+					particlePtr->Colour = RGBALIGHT_MAKE(255,255,255,colour);
 				}
 				else
 				{
-		  			particlePtr->Colour = RGBALIGHT_MAKE(255,255,255,64);
+					particlePtr->Colour = RGBALIGHT_MAKE(255,255,255,64);
 				}
 				particlePtr->Size = 1000+500-(particlePtr->LifeTime>>10);
 				
@@ -2624,7 +2607,7 @@ void HandleParticleSystem(void)
 				{
 					int colour = (particlePtr->LifeTime/128);
 					particlePtr->Size = 200+(ONE_FIXED-particlePtr->LifeTime)/16;
-		  			particlePtr->Colour = RGBALIGHT_MAKE(255,255,255,colour);
+					particlePtr->Colour = RGBALIGHT_MAKE(255,255,255,colour);
 				}
 				break;
 			}
@@ -2633,7 +2616,7 @@ void HandleParticleSystem(void)
 			{
 				/* CDF 7/12/98 Placeholder till Kevin gets better. */
 				
-				/* Based on PARTICLE_SPARK for vision... */				
+				/* Based on PARTICLE_SPARK for vision... */
 				particlePtr->Offset = particlePtr->Position;
 
 				{
@@ -2647,24 +2630,24 @@ void HandleParticleSystem(void)
 							default:
 							case VISION_MODE_NORMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,255,255);
+								particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,255,255);
 								break;
 							}
 							case VISION_MODE_IMAGEINTENSIFIER:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l/2,255);
+								particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l/2,255);
 								break;
 							}
 							case VISION_MODE_PRED_THERMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l-255,255,255,255);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(l-255,255,255,255);
+								break;
 							}
 							case VISION_MODE_PRED_SEEALIENS:
 							case VISION_MODE_PRED_SEEPREDTECH:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(255,255,l-255,255);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(255,255,l-255,255);
+								break;
 							}
 						}
 					}
@@ -2675,24 +2658,24 @@ void HandleParticleSystem(void)
 							default:
 							case VISION_MODE_NORMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l,l);
+								particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,l,l);
 								break;
 							}
 							case VISION_MODE_IMAGEINTENSIFIER:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,128,l);
+								particlePtr->Colour = RGBALIGHT_MAKE(l/2,l/2,128,l);
 								break;
 							}
 							case VISION_MODE_PRED_THERMAL:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(0,l,l,l);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(0,l,l,l);
+								break;
 							}
 							case VISION_MODE_PRED_SEEALIENS:
 							case VISION_MODE_PRED_SEEPREDTECH:
 							{
-			  					particlePtr->Colour = RGBALIGHT_MAKE(l,l,0,l);
-							  	break;
+								particlePtr->Colour = RGBALIGHT_MAKE(l,l,0,l);
+								break;
 							}
 						}
 					}
@@ -2745,7 +2728,7 @@ void HandleParticleSystem(void)
 				NumberOfBloodParticles--;
 				LOCALASSERT(NumberOfBloodParticles>=0);
 			}
-			
+
 			if ((particleID == PARTICLE_NONCOLLIDINGFLAME) && (FastRandom()&65535)<4096)
 			{
 				VECTORCH zero = {0,0,0};
@@ -2764,10 +2747,8 @@ void HandleParticleSystem(void)
 			particlePtr++;
 		}
 	}
-	
+
 	{
-		extern int NumOnScreenBlocks;
-		extern DISPLAYBLOCK *OnScreenBlockList[];
 		int numOfObjects = NumOnScreenBlocks;
 		while(numOfObjects)
 		{
@@ -2790,17 +2771,17 @@ void HandleParticleSystem(void)
 					case I_BehaviourPlacedLight:
 					{
 						PLACED_LIGHT_BEHAV_BLOCK *pl_bhv = static_cast<PLACED_LIGHT_BEHAV_BLOCK*>(sbPtr->SBdataptr);
-					   	GLOBALASSERT(pl_bhv);
+						GLOBALASSERT(pl_bhv);
 						GLOBALASSERT(sbPtr->containingModule);
 
-	  					if (LocalDetailLevels.DrawLightCoronas
-	  						&& pl_bhv->has_corona
-	  						&& pl_bhv->light->LightBright
-	  						&& (ModuleCurrVisArray[sbPtr->containingModule->m_index]==2)
-	  						&& (pl_bhv->light->RedScale
+						if (LocalDetailLevels.DrawLightCoronas
+							&& pl_bhv->has_corona
+							&& pl_bhv->light->LightBright
+							&& (ModuleCurrVisArray[sbPtr->containingModule->m_index]==2)
+							&& (pl_bhv->light->RedScale
 							 || pl_bhv->light->GreenScale
-	  					     || pl_bhv->light->BlueScale)
-	  						)
+							 || pl_bhv->light->BlueScale)
+							)
 						{
 							VECTORCH position = pl_bhv->corona_location;
 							RotateVector(&position, &objectPtr->ObMat);
@@ -2843,7 +2824,7 @@ void HandleParticleSystem(void)
 										if (b>255) b=255;
 
 										colour = 0xff000000+(b<<16)+((b>>1)<<8);
-									  	break;
+										break;
 									}
 								}
 								RenderLightFlare(&position, colour);
@@ -2862,7 +2843,7 @@ void HandleParticleSystem(void)
 					}
 					case I_BehaviourNetGhost:
 					{
-			   			NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)sbPtr->SBdataptr;
+						NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)sbPtr->SBdataptr;
 
 						if (ghostDataPtr->type==I_BehaviourFlareGrenade && LocalDetailLevels.DrawLightCoronas)
 						{
@@ -2893,7 +2874,7 @@ void HandleParticleSystem(void)
 										case VISION_MODE_PRED_SEEPREDTECH:
 										{
 											colour = 0x40ff8000;
-										  	break;
+											break;
 										}
 									}
 									RenderLightFlare(&(sbPtr->DynPtr->Position),colour);
@@ -2928,14 +2909,14 @@ void HandleParticleSystem(void)
 									case VISION_MODE_PRED_SEEPREDTECH:
 									{
 										colour = 0x40ff8000;
-									  	break;
+										break;
 									}
 								}
 								RenderLightFlare(&(sbPtr->DynPtr->Position),colour);
 							}
 						}
 						break;
-					}		 
+					}
 					/* CDF 21/7/99 Frisbee Laser? */
 					case I_BehaviourXenoborg:
 					{
@@ -2967,7 +2948,7 @@ void HandleParticleSystem(void)
 										case VISION_MODE_PRED_SEEPREDTECH:
 										{
 											colour = 0xffff8000;
-										  	break;
+											break;
 										}
 									}
 									RenderLightFlare(&(laserPtr->SourcePosition),colour);
@@ -2985,15 +2966,15 @@ void HandleParticleSystem(void)
 										}
 										case VISION_MODE_IMAGEINTENSIFIER:
 										{
-						  					particle.Colour = RGBALIGHT_MAKE(255,255,255,255);
+											particle.Colour = RGBALIGHT_MAKE(255,255,255,255);
 											break;
 										}
 										case VISION_MODE_PRED_THERMAL:
 										case VISION_MODE_PRED_SEEALIENS:
 										case VISION_MODE_PRED_SEEPREDTECH:
 										{
-						  					particle.Colour = RGBALIGHT_MAKE(255,128,0,255);
-										  	break;
+											particle.Colour = RGBALIGHT_MAKE(255,128,0,255);
+											break;
 										}
 									}
 									particle.ParticleID = PARTICLE_LASERBEAM;
@@ -3006,7 +2987,7 @@ void HandleParticleSystem(void)
 							laserPtr++;
 						}
 						while(i--);
-						
+
 						if (statusPtr->LeftMainBeam.BeamIsOn)
 						{
 							DrawXenoborgMainLaserbeam(&statusPtr->LeftMainBeam);
@@ -3019,7 +3000,7 @@ void HandleParticleSystem(void)
 					}
 					case I_BehaviourSpeargunBolt:
 					{
-					    SPEAR_BEHAV_BLOCK *bbPtr = (SPEAR_BEHAV_BLOCK * ) sbPtr->SBdataptr;
+						SPEAR_BEHAV_BLOCK *bbPtr = (SPEAR_BEHAV_BLOCK * ) sbPtr->SBdataptr;
 
 						if (bbPtr->SpearThroughFragment)
 						{
@@ -3052,7 +3033,7 @@ void HandleParticleSystem(void)
 							displayblock.ObStrategyBlock=NULL;
 							displayblock.ShapeAnimControlBlock=NULL;
 							displayblock.HModelControlBlock=NULL;
-							displayblock.ObMyModule=NULL;		
+							displayblock.ObMyModule=NULL;
 							displayblock.SpecialFXFlags = 0;
 							displayblock.SfxPtr=0;
 
@@ -3081,7 +3062,7 @@ void HandleParticleSystem(void)
 		}
 	}
 	//RenderBoom();
-   	//RenderFog();
+	//RenderFog();
 	D3D_DecalSystem_End();
 }
 
@@ -3112,7 +3093,7 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 							if (ParticleDynamics(particlePtr,&obstacleNormal,&moduleIndex))
 							{
 								if (moduleIndex!=-1)
-								{	
+								{
 									int i = 1;
 									MATRIXCH orientation;
 									MakeMatrixFromDirection(&obstacleNormal,&orientation);
@@ -3125,7 +3106,7 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 										RotateVector(&velocity,&orientation);
 										MakeParticle(&(particlePtr->Position),&(velocity),PARTICLE_IMPACTSMOKE);
 									}
-						 			MakeDecal(DECAL_SCORCHED,&obstacleNormal,&(particlePtr->Position),moduleIndex);
+									MakeDecal(DECAL_SCORCHED,&obstacleNormal,&(particlePtr->Position),moduleIndex);
 								}
 								particlePtr->LifeTime = 0;
 							}
@@ -3152,7 +3133,7 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 								particlePtr->LifeTime = 0;
 							}
 						}
-						
+
 						particlePtr->Velocity.vy += MUL_FIXED(10000,NormalFrameTime);
 						AddEffectsOfForceGenerators(&particlePtr->Position,&particlePtr->Velocity,32*16);
 						break;
@@ -3173,7 +3154,7 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 								particlePtr->LifeTime = 0;
 							}
 						}
-						
+
 						particlePtr->Velocity.vy += MUL_FIXED(10000,NormalFrameTime);
 						AddEffectsOfForceGenerators(&particlePtr->Position,&particlePtr->Velocity,32*16);
 						break;
@@ -3194,14 +3175,14 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 								particlePtr->LifeTime = 0;
 							}
 						}
-						
+
 						particlePtr->Velocity.vy += MUL_FIXED(10000,NormalFrameTime);
 						AddEffectsOfForceGenerators(&particlePtr->Position,&particlePtr->Velocity,32*16);
 						break;
 					}
 					case PARTICLE_FLARESMOKE:
 					{
-					 	RenderParticle(particlePtr);
+						RenderParticle(particlePtr);
 						{
 							VECTORCH impulse={0,0,0};
 							int t = MUL_FIXED(NormalFrameTime,NormalFrameTime*4);
@@ -3217,7 +3198,7 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 					case PARTICLE_NONDAMAGINGFLAME:
 					case PARTICLE_PARGEN_FLAME:
 					{
-					   	RenderParticle(particlePtr);
+						RenderParticle(particlePtr);
 						{
 							VECTORCH obstacleNormal;
 							int moduleIndex;
@@ -3243,12 +3224,11 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 						particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
 						particlePtr->Position.vz += MUL_FIXED(particlePtr->Velocity.vz,NormalFrameTime);
 						particlePtr->Velocity.vy -= MUL_FIXED(4000,NormalFrameTime);
-						
 						break;
 					}
 					case PARTICLE_NONCOLLIDINGFLAME:
 					{
-					   	RenderParticle(particlePtr);
+						RenderParticle(particlePtr);
 						
 						particlePtr->Position.vx += MUL_FIXED(particlePtr->Velocity.vx,NormalFrameTime);
 						particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
@@ -3339,7 +3319,7 @@ void DoFlareCorona(DISPLAYBLOCK *objectPtr)
 					b = 255;
 
 				colour = 0xff000000+(b<<16)+((b>>1)<<8);
-			  	break;
+				break;
 			}
 		}
 		RenderLightFlare(&position,colour);
@@ -3354,28 +3334,25 @@ int ActiveRippleNumber;
 
 void InitialiseRainDrops(void)
 {
+	int i = MAX_RAINDROPS;
+	PARTICLE *particlePtr = RainDropStorage;
+	do
 	{
-		int i = MAX_RAINDROPS;
-		PARTICLE *particlePtr = RainDropStorage;
-		do
-		{
-			particlePtr->Position.vy = 0x7fffffff;
-			particlePtr->LifeTime = 0;
-			particlePtr++;
-		}
-		while(--i);
+		particlePtr->Position.vy = 0x7fffffff;
+		particlePtr->LifeTime = 0;
+		particlePtr++;
 	}
+	while(--i);
+
+	i = MAX_NO_OF_RIPPLES;
+	RIPPLE *ripplePtr = RippleStorage;
+	do
 	{
-		int i = MAX_NO_OF_RIPPLES;
-		RIPPLE *ripplePtr = RippleStorage;
-		do
-		{
-			ripplePtr->Active = 0;
-			ripplePtr++;
-		}
-		while(--i);
-		ActiveRippleNumber=0;
+		ripplePtr->Active = 0;
+		ripplePtr++;
 	}
+	while(--i);
+	ActiveRippleNumber=0;
 }
 
 void HandleRain(int numberOfRaindrops)
@@ -3388,7 +3365,7 @@ void HandleRain(int numberOfRaindrops)
 	do
 	{
 		BOOL killDrop = FALSE;
-		
+
 		if ((particlePtr->Position.vx > -10418)
 		 &&(particlePtr->Position.vy > -4030)
 		 &&(particlePtr->Position.vz < 35070)
@@ -3405,7 +3382,7 @@ void HandleRain(int numberOfRaindrops)
 		{
 			killDrop = TRUE;
 		}
-		
+
 		if ((particlePtr->Position.vy > 3000)
 		 ||(particlePtr->Position.vx < -77000)
 		 ||(particlePtr->Position.vx > 134000)
@@ -3414,7 +3391,7 @@ void HandleRain(int numberOfRaindrops)
 		{
 			killDrop = TRUE;
 		}
-		
+
 		if (killDrop)
 		{
 			particlePtr->Position.vy = -10000;
@@ -3444,8 +3421,8 @@ void HandleRain(int numberOfRaindrops)
 		particlePtr++;
 	}
 	while (--i);
-	
 }
+
 void HandleRainInTrench(int numberOfRaindrops)
 {
 	int i = numberOfRaindrops;
@@ -3473,7 +3450,7 @@ void HandleRainInTrench(int numberOfRaindrops)
 		{
 			killDrop = TRUE;
 		}
-		
+
 		if (killDrop)
 		{
 			particlePtr->Position.vy = -16000;
@@ -3531,7 +3508,7 @@ void HandleRainShaft(MODULE *modulePtr, int bottomY, int topY, int numberOfRaind
 			particlePtr->Size = 100;
 			AddRipple(particlePtr->Position.vx,particlePtr->Position.vz,100);
 		}
-	
+
 		if (particlePtr->LifeTime<=0)
 		{
 			particlePtr->Position.vy = topY;
@@ -3544,10 +3521,10 @@ void HandleRainShaft(MODULE *modulePtr, int bottomY, int topY, int numberOfRaind
 			particlePtr->ParticleID = PARTICLE_WATERFALLSPRAY;
 			particlePtr->Colour = RGBALIGHT_MAKE
 								  (
-								  	particleDescPtr->RedScale[CurrentVisionMode],
-								  	particleDescPtr->GreenScale[CurrentVisionMode],
-								  	particleDescPtr->BlueScale[CurrentVisionMode],
-								  	particleDescPtr->Alpha
+									particleDescPtr->RedScale[CurrentVisionMode],
+									particleDescPtr->GreenScale[CurrentVisionMode],
+									particleDescPtr->BlueScale[CurrentVisionMode],
+									particleDescPtr->Alpha
 								  );
 			particlePtr->Size = 20;
 		}
@@ -3574,9 +3551,7 @@ void HandleRainShaft(MODULE *modulePtr, int bottomY, int topY, int numberOfRaind
 
 void HandleRipples(void)
 {
-	int i;
-
-	for (i=0; i<MAX_NO_OF_RIPPLES; i++)
+	for (int i=0; i<MAX_NO_OF_RIPPLES; i++)
 	{
 		if (RippleStorage[i].Active)
 		{
@@ -3595,11 +3570,10 @@ void HandleRipples(void)
 int EffectOfRipples(VECTORCH *point)
 {
 	int offset;
-	int i;
 	offset = GetSin((point->vx+point->vz+CloakingPhase)&4095)>>11;
 	offset += GetSin((point->vx-point->vz*2+CloakingPhase/2)&4095)>>12;
 
-	for(i=0; i<MAX_NO_OF_RIPPLES; i++)
+	for(int i=0; i<MAX_NO_OF_RIPPLES; i++)
 	{
 		if (RippleStorage[i].Active)
 		{
@@ -3626,14 +3600,14 @@ int EffectOfRipples(VECTORCH *point)
 
 					offset+= MUL_FIXED
 							 (
-							 	RippleStorage[i].Amplitude,
-							 	GetSin(a)
+								RippleStorage[i].Amplitude,
+								GetSin(a)
 							 );
 				}
 			}
 		}
 	}
-	
+
 	if (offset>256) offset = 256;
 	else if (offset<-256) offset = -256;
 	return offset;
@@ -3655,18 +3629,15 @@ void AddRipple(int x,int z,int amplitude)
 
 void CheckForObjectsInWater(int minX, int maxX, int minZ, int maxZ, int averageY)
 {
-	extern int NumActiveBlocks;
-	extern DISPLAYBLOCK* ActiveBlockList[];
 	int numberOfObjects = NumActiveBlocks;
-	
+
 	while (numberOfObjects--)
 	{
 		DISPLAYBLOCK* objectPtr = ActiveBlockList[numberOfObjects];
 
-		if(objectPtr->ObStrategyBlock)
+		if (objectPtr->ObStrategyBlock)
 		{
 			DYNAMICSBLOCK *dynPtr = objectPtr->ObStrategyBlock->DynPtr;
-
 
 			if (dynPtr)
 			{
@@ -3717,9 +3688,9 @@ void CheckForObjectsInWater(int minX, int maxX, int minZ, int maxZ, int averageY
 						overlapInX=1;
 					}
 				}
-				
+
 				if (!overlapInX) continue;
-				
+
 				if (dynPtr->Position.vz>dynPtr->PrevPosition.vz)
 				{
 					if ((dynPtr->Position.vz+objectPtr->ObRadius > minZ)
@@ -3930,7 +3901,7 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 					particle.Position.vx = positionPtr->vx + MUL_FIXED(100,directionPtr->vx) + (FastRandom()&127)-64;
 					particle.Position.vy = positionPtr->vy + MUL_FIXED(100,directionPtr->vy) + (FastRandom()&127)-64;
 					particle.Position.vz = positionPtr->vz + MUL_FIXED(100,directionPtr->vz) + (FastRandom()&127)-64;
-				}																								 
+				}
 			}
 			break;
 		}
@@ -4006,8 +3977,6 @@ void DrawSmallPredatorPlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr)
 	RenderParticle(&particle);
 }
 
-
-
 void MakeFlareParticle(DYNAMICSBLOCK *dynPtr)
 {
 //	int i = MUL_FIXED(4,density);
@@ -4021,6 +3990,7 @@ void MakeFlareParticle(DYNAMICSBLOCK *dynPtr)
 		MakeParticle(&(dynPtr->Position),&(velocity),PARTICLE_FLARESMOKE);
 	}
 }
+
 void MakeRocketTrailParticles(VECTORCH *prevPositionPtr, VECTORCH *positionPtr)
 {
 	VECTORCH disp;
@@ -4113,7 +4083,7 @@ void MakeImpactSparks(VECTORCH *incidentPtr, VECTORCH *normalPtr, VECTORCH *posi
 		velocity.vx = velocity.vx + (FastRandom()&2047)-1024;
 		velocity.vy = velocity.vy + (FastRandom()&2047)-1024;
 		velocity.vz = velocity.vz + (FastRandom()&2047)-1024;
-		MakeParticle(positionPtr,&velocity,PARTICLE_RICOCHET_SPARK);	
+		MakeParticle(positionPtr,&velocity,PARTICLE_RICOCHET_SPARK);
 	}
 	while(--noOfSparks);
 	MakeRicochetSound(positionPtr);
@@ -4130,7 +4100,7 @@ void MakeSprayOfSparks(MATRIXCH *orientationPtr, VECTORCH *positionPtr)
 		velocity.vy = (FastRandom()&2047);
 		velocity.vz = -(FastRandom()&2047)-1024;
 		RotateVector(&velocity, orientationPtr);
-		MakeParticle(positionPtr, &velocity, PARTICLE_SPARK);	
+		MakeParticle(positionPtr, &velocity, PARTICLE_SPARK);
 	}
 	while (--noOfSparks);
 
@@ -4145,7 +4115,7 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 		case EXPLOSION_HUGE_NOCOLLISIONS:
 		{
 			VOLUMETRIC_EXPLOSION *expPtr;
-			int i;
+
 			int r;
 			
 			/* KJL 11:49:25 19/08/98 - check to see if explosion is inside environment */
@@ -4166,7 +4136,7 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 				expPtr->UseCollisions = 1;
 			}
 
-			for (i=0; i<SPHERE_VERTICES; i++)
+			for (unsigned int i=0; i < SPHERE_VERTICES; i++)
 			{
 				expPtr->Position[i] = *positionPtr;
 				expPtr->Velocity[i].vx = SphereVertex[i].vx;
@@ -4179,18 +4149,18 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 			expPtr->LifeTime = ONE_FIXED-1;
 			expPtr->ExplosionPhase = 1;
 			
-			for (i=0; i<r; i++)
+			for (int i=0; i < r; i++)
 			{
 				CreateFlamingDebris(positionPtr, &SphereVertex[FastRandom()%SPHERE_VERTICES]);
 			}
 			if ((positionPtr->vx!=Player->ObWorld.vx)
-		      ||(positionPtr->vy!=Player->ObWorld.vy)
+			  ||(positionPtr->vy!=Player->ObWorld.vy)
 			  ||(positionPtr->vz!=Player->ObWorld.vz))
 			{
 				MakeLightElement(positionPtr, LIGHTELEMENT_EXPLOSION);
 			}
 
-			for (i=0; i<LocalDetailLevels.NumberOfSmokeParticlesFromLargeExplosion; i++)
+			for (unsigned int i = 0; i < LocalDetailLevels.NumberOfSmokeParticlesFromLargeExplosion; i++)
 			{
 				VECTORCH position = *positionPtr;
 				position.vx += (FastRandom()&2047)-1024;
@@ -4209,7 +4179,6 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 		case EXPLOSION_SMALL_NOCOLLISIONS:
 		{
 			VOLUMETRIC_EXPLOSION *expPtr;
-			int i;
 			
 			/* KJL 11:49:25 19/08/98 - check to see if explosion is inside environment */
 			{
@@ -4225,13 +4194,13 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 			}
 
 			if ((positionPtr->vx != Player->ObWorld.vx)
-		      ||(positionPtr->vy != Player->ObWorld.vy)
+			  ||(positionPtr->vy != Player->ObWorld.vy)
 			  ||(positionPtr->vz != Player->ObWorld.vz))
 			{
 				MakeLightElement(positionPtr, LIGHTELEMENT_EXPLOSION);
 			}
 
-			for (i=0; i<LocalDetailLevels.NumberOfSmokeParticlesFromSmallExplosion; i++)
+			for (unsigned int i=0; i < LocalDetailLevels.NumberOfSmokeParticlesFromSmallExplosion; i++)
 			{
 				VECTORCH position = *positionPtr;
 				position.vx += (FastRandom()&1023)-512;
@@ -4242,7 +4211,7 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 			break;
 		}
 		case EXPLOSION_PREDATORPISTOL:
-		{																			    
+		{
 			MakeElectricalExplosion(positionPtr);
 			break;
 		}
@@ -4254,14 +4223,13 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 
 void MakeFlechetteExplosionAt(VECTORCH *positionPtr,int seed)
 {
-	extern SOUND3DDATA Explosion_SoundData;
 	int i;
 	enum PARTICLE_ID particle_to_use;
 
-    Explosion_SoundData.position=*positionPtr;
-    Sound_Play(SID_FRAG_RICOCHETS,"n",&Explosion_SoundData);
-    
-    if(!seed)  
+	Explosion_SoundData.position=*positionPtr;
+	Sound_Play(SID_FRAG_RICOCHETS,"n",&Explosion_SoundData);
+
+	if(!seed)
 	{
 		//need to get a random number seed for this explosion
 		while(!seed) seed=FastRandom();
@@ -4313,12 +4281,12 @@ void MakeFlechetteExplosionAt(VECTORCH *positionPtr,int seed)
 	#endif
 	MakeLightElement(positionPtr, LIGHTELEMENT_EXPLOSION);
 }
+
 void MakeMolotovExplosionAt(VECTORCH *positionPtr,int seed)
 {
-	int i;
 	enum PARTICLE_ID particle_to_use;
 
-    if(!seed)  
+	if(!seed)
 	{
 		//need to get a random number seed for this explosion
 		while(!seed) seed=FastRandom();
@@ -4329,7 +4297,7 @@ void MakeMolotovExplosionAt(VECTORCH *positionPtr,int seed)
 		//if in a network game , send explosion to other players
 		if(AvP.Network!=I_No_Network)
 		{
-  //			AddNetMsg_MakeFlechetteExplosion(positionPtr,seed);
+//			AddNetMsg_MakeFlechetteExplosion(positionPtr,seed);
 		}
 	}
 	else
@@ -4345,7 +4313,7 @@ void MakeMolotovExplosionAt(VECTORCH *positionPtr,int seed)
 		MODULE *module = ModuleFromPosition(positionPtr, (MODULE*)NULL);
 		if (!module) return;
 	}
-	for (i=0; i<100; i++)
+	for (int i=0; i<100; i++)
 	{
 		VECTORCH velocity;
 		int phi = SeededFastRandom()&4095;
@@ -4364,13 +4332,11 @@ void MakeMolotovExplosionAt(VECTORCH *positionPtr,int seed)
 
 		MakeParticle(positionPtr, &velocity, particle_to_use);
 	}
-   //	MakeLightElement(positionPtr, LIGHTELEMENT_EXPLOSION);
+	//	MakeLightElement(positionPtr, LIGHTELEMENT_EXPLOSION);
 }
-
 
 static void HandleVolumetricExplosion(VOLUMETRIC_EXPLOSION *expPtr)
 {
-	int i;
 	PARTICLE particle;
 	int velocityModifier;
 	particle.ParticleID = PARTICLE_EXPLOSIONFIRE;
@@ -4385,7 +4351,7 @@ static void HandleVolumetricExplosion(VOLUMETRIC_EXPLOSION *expPtr)
 		int v = (DIV_FIXED(SPHERE_VERTICES, expPtr->NumberVerticesMoving+1)+ONE_FIXED);
 		velocityModifier = MUL_FIXED(GetSin(expPtr->LifeTime/64)/16,v);
 		
-		for(i=0; i<SPHERE_VERTICES; i++)
+		for(int i=0; i<SPHERE_VERTICES; i++)
 		{
 			int v;
 			VECTORCH obstacleNormal = {0,0,0};
@@ -4446,9 +4412,9 @@ static void HandleVolumetricExplosion(VOLUMETRIC_EXPLOSION *expPtr)
 void MakeOldVolumetricExplosionAt(VECTORCH *positionPtr)
 {
 	int noRequired = 32;//MUL_FIXED(2500,NormalFrameTime);
-	int i;
+
 //	VECTORCH zero={0,0,0};
-	for (i=0; i<noRequired; i++)
+	for (int i=0; i<noRequired; i++)
 	{
 		VECTORCH velocity;
 		int phi = FastRandom()&4095;
@@ -4499,10 +4465,9 @@ extern void MakePlasmaExplosion(VECTORCH *positionPtr, VECTORCH *fromPositionPtr
 }
 extern void MakeElectricalExplosion(VECTORCH *positionPtr)
 {
-	{
-		PredPistolExplosion_SoundData.position=*positionPtr;
-		Sound_Play(SID_WIL_PRED_PISTOL_EXPLOSION,"n",&PredPistolExplosion_SoundData);
-   	}
+	PredPistolExplosion_SoundData.position=*positionPtr;
+	Sound_Play(SID_WIL_PRED_PISTOL_EXPLOSION,"n",&PredPistolExplosion_SoundData);
+
 	//Sound_Play(SID_WIL_PRED_PISTOL_EXPLOSION,"d",positionPtr);
 	MakeParticle(positionPtr,positionPtr,PARTICLE_ELECTRICALPLASMASPHERE);
 	MakeLightElement(positionPtr, LIGHTELEMENT_ELECTRICAL_EXPLOSION);
@@ -4511,7 +4476,6 @@ extern void MakeElectricalExplosion(VECTORCH *positionPtr)
 void MakeBloodExplosion(VECTORCH *originPtr, int creationRadius, VECTORCH *blastPositionPtr, int noOfParticles, enum PARTICLE_ID particleID)
 {
 	VECTORCH blastDir;
-	int i;
 	
 	/* Dividing by zero can be bad for your health */
 	LOCALASSERT(creationRadius!=0);
@@ -4520,7 +4484,7 @@ void MakeBloodExplosion(VECTORCH *originPtr, int creationRadius, VECTORCH *blast
 	blastDir.vy = originPtr->vy - blastPositionPtr->vy;
 	blastDir.vz = originPtr->vz - blastPositionPtr->vz;
 
-	for (i=0; i<noOfParticles; i++)
+	for (int i=0; i<noOfParticles; i++)
 	{
 		VECTORCH velocity;
 		VECTORCH position;
@@ -4554,27 +4518,24 @@ void MakeBloodExplosion(VECTORCH *originPtr, int creationRadius, VECTORCH *blast
 		velocity.vy = MUL_FIXED(velocity.vy,speed);
 		velocity.vz = MUL_FIXED(velocity.vz,speed);
 
-
 		MakeParticle(&position, &velocity, particleID);
 	}
 }
 
-	
 void MakeFocusedExplosion(VECTORCH *originPtr, VECTORCH *blastPositionPtr, int noOfParticles, enum PARTICLE_ID particleID)
 {
 	VECTORCH blastDir;
-	int i;
-	
+
 	blastDir.vx = originPtr->vx - blastPositionPtr->vx;
 	blastDir.vy = originPtr->vy - blastPositionPtr->vy;
 	blastDir.vz = originPtr->vz - blastPositionPtr->vz;
 
-	for (i=0; i<noOfParticles; i++)
+	for (int i=0; i<noOfParticles; i++)
 	{
 		VECTORCH velocity,position;
 		int phi = FastRandom()&4095;
 		int speed = 6000+(FastRandom()&4095);
-		int r;
+
 		speed = FastRandom()&2047;
 
 		velocity.vz = (FastRandom()&131071) - ONE_FIXED;
@@ -4588,19 +4549,18 @@ void MakeFocusedExplosion(VECTORCH *originPtr, VECTORCH *blastPositionPtr, int n
 		
 		if (DotProduct(&velocity,&blastDir)<0)
 		{
-			velocity.vx = -velocity.vx; 
+			velocity.vx = -velocity.vx;
 			velocity.vy = -velocity.vy;
-			velocity.vz = -velocity.vz; 
+			velocity.vz = -velocity.vz;
 		}
-		r = FastRandom()%127;
-		position.vx = originPtr->vx + MUL_FIXED(velocity.vx,r);
-		position.vy = originPtr->vy + MUL_FIXED(velocity.vy,r);
-		position.vz = originPtr->vz + MUL_FIXED(velocity.vz,r);
+		int r = FastRandom()%127;
+		position.vx = originPtr->vx + MUL_FIXED(velocity.vx, r);
+		position.vy = originPtr->vy + MUL_FIXED(velocity.vy, r);
+		position.vz = originPtr->vz + MUL_FIXED(velocity.vz, r);
 		
-		velocity.vx = MUL_FIXED(velocity.vx,speed);
-		velocity.vy = MUL_FIXED(velocity.vy,speed);
-		velocity.vz = MUL_FIXED(velocity.vz,speed);
-
+		velocity.vx = MUL_FIXED(velocity.vx, speed);
+		velocity.vy = MUL_FIXED(velocity.vy, speed);
+		velocity.vz = MUL_FIXED(velocity.vz, speed);
 
 		MakeParticle(&position, &velocity, particleID);
 	}
@@ -4608,16 +4568,15 @@ void MakeFocusedExplosion(VECTORCH *originPtr, VECTORCH *blastPositionPtr, int n
 
 void MakePlasmaTrailParticles(DYNAMICSBLOCK *dynPtr, int number)
 {
-	
 	VECTORCH disp;
-	
+
 	disp.vx = dynPtr->Position.vx - dynPtr->PrevPosition.vx;
 	disp.vy = dynPtr->Position.vy - dynPtr->PrevPosition.vy;
 	disp.vz = dynPtr->Position.vz - dynPtr->PrevPosition.vz;
 
-  //	if (disp.vx!=0 || disp.vy!=0 || disp.vz!=0)
+	//	if (disp.vx!=0 || disp.vy!=0 || disp.vz!=0)
 	{
-		int i=number;
+		int i = number;
 		do
 		{
 			VECTORCH velocity;
@@ -4656,14 +4615,13 @@ void MakePlasmaTrailParticles(DYNAMICSBLOCK *dynPtr, int number)
 
 void MakeDewlineTrailParticles(DYNAMICSBLOCK *dynPtr, int number)
 {
-	
 	VECTORCH disp;
-	
+
 	disp.vx = dynPtr->Position.vx - dynPtr->PrevPosition.vx;
 	disp.vy = dynPtr->Position.vy - dynPtr->PrevPosition.vy;
 	disp.vz = dynPtr->Position.vz - dynPtr->PrevPosition.vz;
 
-  //	if (disp.vx!=0 || disp.vy!=0 || disp.vz!=0)
+	//	if (disp.vx!=0 || disp.vy!=0 || disp.vz!=0)
 	{
 		int i=number;
 		do
@@ -4683,7 +4641,7 @@ void MakeDewlineTrailParticles(DYNAMICSBLOCK *dynPtr, int number)
 				f2i(velocity.vx,(float)GetCos(phi)*z);
 				f2i(velocity.vy,(float)GetSin(phi)*z);
 			}
-			
+
 			velocity.vx = MUL_FIXED(velocity.vx,speed);//+dynPtr->LinVelocity.vx/32;
 			velocity.vy = MUL_FIXED(velocity.vy,speed);//+dynPtr->LinVelocity.vy/32;
 			velocity.vz = MUL_FIXED(velocity.vz,speed);//+dynPtr->LinVelocity.vz/32;
@@ -4705,7 +4663,7 @@ void MakeDewlineTrailParticles(DYNAMICSBLOCK *dynPtr, int number)
 void DrawXenoborgMainLaserbeam(LASER_BEAM_DESC *laserPtr)
 {
 	if (laserPtr->BeamHasHitPlayer)
-	{			  
+	{
 		int colour;
 		switch (CurrentVisionMode)
 		{
@@ -4725,7 +4683,7 @@ void DrawXenoborgMainLaserbeam(LASER_BEAM_DESC *laserPtr)
 			case VISION_MODE_PRED_SEEPREDTECH:
 			{
 				colour = 0xffff8000; 
-			  	break;
+				break;
 			}
 		}
 		RenderLightFlare(&(laserPtr->SourcePosition),colour);
@@ -4752,7 +4710,7 @@ void DrawXenoborgMainLaserbeam(LASER_BEAM_DESC *laserPtr)
 			case VISION_MODE_PRED_SEEPREDTECH:
 			{
 				particle.Colour = RGBALIGHT_MAKE(255,128,0,255);
-			  	break;
+				break;
 			}
 		}
 	 	particle.Colour = RGBALIGHT_MAKE(255,255,255,255);
@@ -4773,18 +4731,18 @@ PHEROMONE_TRAIL Trail[NO_OF_VERTICES_IN_TRAIL];
 
 void NewTrailPoint(DYNAMICSBLOCK *dynPtr)
 {
- 	PHEROMONE_TRAIL *trailPtr = AllocatePheromoneTrail();
+	PHEROMONE_TRAIL *trailPtr = AllocatePheromoneTrail();
 	if (!trailPtr) return;
 
- 	GLOBALASSERT(dynPtr);
+	GLOBALASSERT(dynPtr);
 	trailPtr->Vertex[0] = dynPtr->Position;
-   //	trailPtr->Vertex[0].vy -=1000;
+	//	trailPtr->Vertex[0].vy -=1000;
 	
 	trailPtr->Perp[0] = *((VECTORCH*)&(dynPtr->OrientMat.mat11));
 	trailPtr->Size[0] = 127*65536;
 
 	trailPtr->Vertex[1] = dynPtr->PrevPosition;
-   //	trailPtr->Vertex[1].vy -=1000;
+	//	trailPtr->Vertex[1].vy -=1000;
 	trailPtr->Perp[1] = *((VECTORCH*)&(dynPtr->PrevOrientMat.mat11));
 	trailPtr->Size[1] = 127*65536-MUL_FIXED(TRAIL_DECAY_SPEED,PrevNormalFrameTime);
 }
@@ -4792,7 +4750,7 @@ void NewTrailPoint(DYNAMICSBLOCK *dynPtr)
 VECTORCH PlayerPheromoneTrailPerp = {0,0,0};
 void PlayerPheromoneTrail(DYNAMICSBLOCK *dynPtr)
 {
- 	PHEROMONE_TRAIL *trailPtr = AllocatePheromoneTrail();
+	PHEROMONE_TRAIL *trailPtr = AllocatePheromoneTrail();
 	VECTORCH disp;
 	if (!trailPtr) return;
 
@@ -4806,7 +4764,7 @@ void PlayerPheromoneTrail(DYNAMICSBLOCK *dynPtr)
 	trailPtr->Vertex[0].vy -= dynPtr->OrientMat.mat22>>6;
 	trailPtr->Vertex[0].vz -= dynPtr->OrientMat.mat23>>6;
 	#endif
- //	trailPtr->Vertex[0].vy -= 500;
+	//	trailPtr->Vertex[0].vy -= 500;
 	
 	trailPtr->Perp[0] = *((VECTORCH*)&(dynPtr->OrientMat.mat11));
 #if 0
@@ -4830,10 +4788,10 @@ void PlayerPheromoneTrail(DYNAMICSBLOCK *dynPtr)
 	trailPtr->Vertex[1].vy -= dynPtr->PrevOrientMat.mat22>>6;
 	trailPtr->Vertex[1].vz -= dynPtr->PrevOrientMat.mat23>>6;
 	#endif
- //	trailPtr->Vertex[1].vy -= 500;
+	//	trailPtr->Vertex[1].vy -= 500;
 
 
-  trailPtr->Perp[1] = *((VECTORCH*)&(dynPtr->PrevOrientMat.mat11));
+	trailPtr->Perp[1] = *((VECTORCH*)&(dynPtr->PrevOrientMat.mat11));
 //	trailPtr->Perp[1] = PlayerPheromoneTrailPerp;
 //	PlayerPheromoneTrailPerp = trailPtr->Perp[0];
 
@@ -4841,12 +4799,11 @@ void PlayerPheromoneTrail(DYNAMICSBLOCK *dynPtr)
 }
 
 void HandlePheromoneTrails(void)
-{	
-	int i;
+{
 	PHEROMONE_TRAIL *trailPtr;
 	int decayDelta;
 
-	i = NumActiveTrails;
+	int i = NumActiveTrails;
 	trailPtr = TrailStorage;
 	//textprint("Pheromone Segments active:%d\n",NumActiveTrails);
 
@@ -4860,7 +4817,6 @@ void HandlePheromoneTrails(void)
 #endif
 	while(i--)
 	{
-
 		trailPtr->Size[0] -= decayDelta;
 		trailPtr->Size[1] -= decayDelta;
 		if (trailPtr->Size[1]<0) trailPtr->Size[1]=0;
@@ -4873,51 +4829,55 @@ void HandlePheromoneTrails(void)
 			RenderTrailSegment(trailPtr);	
 			trailPtr++;
 		}
-
-	}					 
+	}
 }
 
 void RenderTrailSegment(PHEROMONE_TRAIL *trailPtr)
 {
- 	POLYHEADER fakeHeader;
+	POLYHEADER fakeHeader;
 	VECTORCH temp;
 	int Uoffset = GetCos(CloakingPhase&4095)*128;
-	int Voffset	= GetSin(CloakingPhase&4095)*128;
+	int Voffset = GetSin(CloakingPhase&4095)*128;
 
 	temp.vx = trailPtr->Vertex[0].vx - MUL_FIXED(trailPtr->Perp[0].vx,trailPtr->Size[0]/65536);
 	temp.vy = trailPtr->Vertex[0].vy - MUL_FIXED(trailPtr->Perp[0].vy,trailPtr->Size[0]/65536);
 	temp.vz	= trailPtr->Vertex[0].vz - MUL_FIXED(trailPtr->Perp[0].vz,trailPtr->Size[0]/65536);
 	VerticesBuffer[0].U = (temp.vx+temp.vz)*8192+Uoffset;
 	VerticesBuffer[0].V = (temp.vy+temp.vz)*8192+Voffset;
+
 	TranslatePointIntoViewspace(&temp);
+
 	VerticesBuffer[0].X = temp.vx;
 	VerticesBuffer[0].Y = temp.vy;
-	VerticesBuffer[0].Z	= temp.vz;
+	VerticesBuffer[0].Z = temp.vz;
 //	VerticesBuffer[0].U = ParticleDescription[PARTICLE_PLASMABEAM].StartU/2;
 //	VerticesBuffer[0].V = ParticleDescription[PARTICLE_PLASMABEAM].StartV/2;
-	
+
 	temp.vx = trailPtr->Vertex[0].vx + MUL_FIXED(trailPtr->Perp[0].vx,trailPtr->Size[0]/65536);
 	temp.vy = trailPtr->Vertex[0].vy + MUL_FIXED(trailPtr->Perp[0].vy,trailPtr->Size[0]/65536);
-	temp.vz	= trailPtr->Vertex[0].vz + MUL_FIXED(trailPtr->Perp[0].vz,trailPtr->Size[0]/65536);
+	temp.vz = trailPtr->Vertex[0].vz + MUL_FIXED(trailPtr->Perp[0].vz,trailPtr->Size[0]/65536);
 	VerticesBuffer[1].U = (temp.vx+temp.vz)*8192+Uoffset;
 	VerticesBuffer[1].V = (temp.vy+temp.vz)*8192+Voffset;
+
 	TranslatePointIntoViewspace(&temp);
+
 	VerticesBuffer[1].X = temp.vx;
 	VerticesBuffer[1].Y = temp.vy;
-	VerticesBuffer[1].Z	= temp.vz;
+	VerticesBuffer[1].Z = temp.vz;
 //	VerticesBuffer[1].U = ParticleDescription[PARTICLE_PLASMABEAM].StartU/2;
 //	VerticesBuffer[1].V = ParticleDescription[PARTICLE_PLASMABEAM].EndV/2;
-
 
 	temp.vx = trailPtr->Vertex[1].vx + MUL_FIXED(trailPtr->Perp[1].vx,trailPtr->Size[1]/65536);
 	temp.vy = trailPtr->Vertex[1].vy + MUL_FIXED(trailPtr->Perp[1].vy,trailPtr->Size[1]/65536);
 	temp.vz	= trailPtr->Vertex[1].vz + MUL_FIXED(trailPtr->Perp[1].vz,trailPtr->Size[1]/65536);
 	VerticesBuffer[2].U = (temp.vx+temp.vz)*8192+Uoffset;
 	VerticesBuffer[2].V = (temp.vy+temp.vz)*8192+Voffset;
+
 	TranslatePointIntoViewspace(&temp);
+
 	VerticesBuffer[2].X = temp.vx;
 	VerticesBuffer[2].Y = temp.vy;
-	VerticesBuffer[2].Z	= temp.vz;
+	VerticesBuffer[2].Z = temp.vz;
 //	VerticesBuffer[2].U = ParticleDescription[PARTICLE_PLASMABEAM].EndU/2;
 //	VerticesBuffer[2].V = ParticleDescription[PARTICLE_PLASMABEAM].EndV/2;
 
@@ -4926,22 +4886,21 @@ void RenderTrailSegment(PHEROMONE_TRAIL *trailPtr)
 	temp.vz	= trailPtr->Vertex[1].vz - MUL_FIXED(trailPtr->Perp[1].vz,trailPtr->Size[1]/65536);
 	VerticesBuffer[3].U = (temp.vx+temp.vz)*8192+Uoffset;
 	VerticesBuffer[3].V = (temp.vy+temp.vz)*8192+Voffset;
+
 	TranslatePointIntoViewspace(&temp);
+
 	VerticesBuffer[3].X = temp.vx;
 	VerticesBuffer[3].Y = temp.vy;
-	VerticesBuffer[3].Z	= temp.vz;
+	VerticesBuffer[3].Z = temp.vz;
 //	VerticesBuffer[3].U = ParticleDescription[PARTICLE_PLASMABEAM].EndU/2;
 //	VerticesBuffer[3].V = ParticleDescription[PARTICLE_PLASMABEAM].StartV/2;
 
-	{
-		fakeHeader.PolyFlags = iflag_transparent;
-		fakeHeader.PolyColour = SpecialFXImageNumber;
-		fakeHeader.PolyColour = CloudyImageNumber;
-	}
+	fakeHeader.PolyFlags = iflag_transparent;
+	fakeHeader.PolyColour = CloudyImageNumber;
+
 	RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
- 	{
-		int i;
-		for (i=0; i<4; i++) 
+	{
+		for (int i=0; i<4; i++) 
 		{
 			VerticesBuffer[i].A = trailPtr->Size[i/2]/65536;
 
@@ -4954,7 +4913,7 @@ void RenderTrailSegment(PHEROMONE_TRAIL *trailPtr)
 		}
 		RenderPolygon.NumberOfVertices=4;
 	}
-			
+
 	GouraudTexturedPolygon_ClipWithZ();
 	if (RenderPolygon.NumberOfVertices<3) return;
 	GouraudTexturedPolygon_ClipWithNegativeX();
@@ -4971,17 +4930,17 @@ void RenderTrailSegment(PHEROMONE_TRAIL *trailPtr)
 
 extern void RenderParticlesInMirror(void)
 {
-	/* now render particles */
+	// now render particles
 	int i = NumActiveParticles;
 	PARTICLE *particlePtr = ParticleStorage;
 
-//  	RenderPlayersImageInMirror();
+//		RenderPlayersImageInMirror();
 
 	D3D_DecalSystem_Setup();
 
-	while(i--)
+	while (i--)
 	{
-		switch(particlePtr->ParticleID)
+		switch (particlePtr->ParticleID)
 		{
 			case PARTICLE_FLARESMOKE:
 			case PARTICLE_STEAM:
@@ -5001,8 +4960,6 @@ extern void RenderParticlesInMirror(void)
 	}
 
 	{
-		extern int NumOnScreenBlocks;
-		extern DISPLAYBLOCK *OnScreenBlockList[];
 		int numOfObjects = NumOnScreenBlocks;
 
 		while (numOfObjects)
@@ -5062,40 +5019,33 @@ void RenderFog(void)
 			particle.Colour = RGBA_MAKE(255,255,255,255);
 			particle.Size = 100;
 			RenderParticle(&particle);
-	  	}
+		}
 		Fog_Phi[i]+=	MUL_FIXED(Fog_PhiDelta[i],NormalFrameTime);
 		Fog_Theta[i]+=	MUL_FIXED(Fog_ThetaDelta[i],NormalFrameTime);
 		Fog_Phi[i]&=2047;
 		Fog_Theta[i]&=4095;
 		if (Fog_Radius[i]>4096)
-		{	
+		{
 			Fog_Radius[i]-=	MUL_FIXED(Fog_RadiusDelta[i],NormalFrameTime);
 		}
 		else
-		{	
+		{
 			Fog_Radius[i]+=	MUL_FIXED(Fog_RadiusDelta[i],NormalFrameTime);
 		}
-
 	}
-
 }
 #endif
 
 void TimeScaleThingy()
 {
-	extern int NumActiveBlocks;
-	extern DISPLAYBLOCK *ActiveBlockList[];
-	extern int TimeScale;
 	int DesiredTimeScale=ONE_FIXED;
-	
-	int i;
 
-	for(i=0;i<NumActiveBlocks;i++)
+	for (int i=0;i<NumActiveBlocks;i++)
 	{
 		STRATEGYBLOCK* sbPtr = ActiveBlockList[i]->ObStrategyBlock;
-		if(sbPtr)
+		if (sbPtr)
 		{
-			switch(sbPtr->I_SBtype)
+			switch (sbPtr->I_SBtype)
 			{
 				case I_BehaviourAlien:
 				case I_BehaviourQueenAlien :
@@ -5120,8 +5070,8 @@ void TimeScaleThingy()
 			}
 		}
 	}
-	
-	for(i=0; i<MAX_NO_OF_EXPLOSIONS; i++)
+
+	for (int i = 0; i < MAX_NO_OF_EXPLOSIONS; i++)
 	{
 		if (ExplosionStorage[i].LifeTime)
 		{
@@ -5129,12 +5079,11 @@ void TimeScaleThingy()
 		}
 	}
 
-	if(DesiredTimeScale<ONE_FIXED) DesiredTimeScale=MUL_FIXED(DesiredTimeScale,ONE_FIXED*.8);
+	if (DesiredTimeScale<ONE_FIXED) DesiredTimeScale=MUL_FIXED(DesiredTimeScale,ONE_FIXED*.8);
 
-	if(DesiredTimeScale<ONE_FIXED/10) DesiredTimeScale=ONE_FIXED/10;
+	if (DesiredTimeScale<ONE_FIXED/10) DesiredTimeScale=ONE_FIXED/10;
 
-
-	if(TimeScale<DesiredTimeScale)
+	if (TimeScale<DesiredTimeScale)
 	{
 		TimeScale+=RealFrameTime/8;
 		if(TimeScale>DesiredTimeScale) TimeScale=DesiredTimeScale;
@@ -5142,7 +5091,7 @@ void TimeScaleThingy()
 	else if (TimeScale>DesiredTimeScale)
 	{
 		TimeScale-=RealFrameTime;
-		if(TimeScale<DesiredTimeScale) TimeScale=DesiredTimeScale;
+		if (TimeScale < DesiredTimeScale) TimeScale=DesiredTimeScale;
 	}
 }
 
@@ -5166,7 +5115,6 @@ void Load_Particles(SAVE_BLOCK_HEADER* header)
 	PARTICLE_SAVE_BLOCK_HEADER* block = (PARTICLE_SAVE_BLOCK_HEADER*) header;
 	PARTICLE* saved_particle = (PARTICLE*)(block+1);
 	int expected_size;
-	int i;
 
 	//make sure the block is the correct size
 	expected_size = sizeof(*block);
@@ -5177,17 +5125,16 @@ void Load_Particles(SAVE_BLOCK_HEADER* header)
 	NumActiveParticles = block->NumActiveParticles;
 	NumberOfBloodParticles = block->NumberOfBloodParticles;
 
-	for(i=0;i<NumActiveParticles;i++)
+	for(int i=0;i<NumActiveParticles;i++)
 	{
 		ParticleStorage[i] = *saved_particle++;
-	}	
+	}
 }
 
 void Save_Particles()
 {
 	PARTICLE_SAVE_BLOCK_HEADER* block;
-	int i;
-	
+
 	if(!NumActiveParticles) return;
 
 	//get memory for header
@@ -5199,14 +5146,13 @@ void Save_Particles()
 
 	block->NumActiveParticles = NumActiveParticles;
 	block->NumberOfBloodParticles = NumberOfBloodParticles;
-	
-	
+
 	//now save the particles
-	for(i=0;i<NumActiveParticles;i++)
+	for(int i=0;i<NumActiveParticles;i++)
 	{
 		PARTICLE* particle = static_cast<PARTICLE*>(GetPointerForSaveBlock(sizeof(PARTICLE)));
 		*particle = ParticleStorage[i];
-	}	
+	}
 }
 
 /*----------------------**
@@ -5226,7 +5172,6 @@ typedef struct explosion_save_block_header
 
 void Load_VolumetricExplosions(SAVE_BLOCK_HEADER* header)
 {
-	int i;
 	EXPLOSION_SAVE_BLOCK_HEADER* block = (EXPLOSION_SAVE_BLOCK_HEADER*) header;
 	VOLUMETRIC_EXPLOSION* saved_explosion = (VOLUMETRIC_EXPLOSION*) (block+1);
 	int expected_size;
@@ -5236,7 +5181,7 @@ void Load_VolumetricExplosions(SAVE_BLOCK_HEADER* header)
 	expected_size += sizeof(VOLUMETRIC_EXPLOSION) * block->NumActiveExplosions;
 	if(header->size != expected_size) return;
 
-	for(i=0;i<block->NumActiveExplosions;i++)
+	for(int i=0;i<block->NumActiveExplosions;i++)
 	{
 		VOLUMETRIC_EXPLOSION* explosion = AllocateVolumetricExplosion();
 		if(explosion)
@@ -5244,17 +5189,15 @@ void Load_VolumetricExplosions(SAVE_BLOCK_HEADER* header)
 			*explosion = *saved_explosion++;
 		}
 	}
-	
 }
 
 void Save_VolumetricExplosions()
 {
-	int i;
 	EXPLOSION_SAVE_BLOCK_HEADER* block;
 	int NumActiveExplosions = 0;
 
 	//first find the number of explosions currently active
-	for (i=0;i<MAX_NO_OF_EXPLOSIONS;i++)
+	for (int i=0;i<MAX_NO_OF_EXPLOSIONS;i++)
 	{
 		if (ExplosionStorage[i].LifeTime) NumActiveExplosions++;
 	}
@@ -5273,7 +5216,7 @@ void Save_VolumetricExplosions()
 	block->NumActiveExplosions = NumActiveExplosions;
 
 	//now save the explosions
-	for (i=0;i<MAX_NO_OF_EXPLOSIONS;i++)
+	for (int i=0;i<MAX_NO_OF_EXPLOSIONS;i++)
 	{
 		if (ExplosionStorage[i].LifeTime)
 		{
@@ -5301,7 +5244,6 @@ typedef struct pheromone_save_block_header
 
 void Load_PheromoneTrails(SAVE_BLOCK_HEADER* header)
 {
-	int i;
 	PHEROMONE_SAVE_BLOCK_HEADER* block = (PHEROMONE_SAVE_BLOCK_HEADER*) header;
 	PHEROMONE_TRAIL* saved_trail = (PHEROMONE_TRAIL*) (block+1);
 	int expected_size;
@@ -5311,7 +5253,7 @@ void Load_PheromoneTrails(SAVE_BLOCK_HEADER* header)
 	expected_size += sizeof(PHEROMONE_TRAIL) * block->NumActiveTrails;
 	if(header->size != expected_size) return;
 
-	for(i=0;i<block->NumActiveTrails;i++)
+	for(int i=0;i<block->NumActiveTrails;i++)
 	{
 		PHEROMONE_TRAIL* trail = AllocatePheromoneTrail();
 		if(trail) 
@@ -5319,13 +5261,11 @@ void Load_PheromoneTrails(SAVE_BLOCK_HEADER* header)
 			*trail = *saved_trail++;	
 		}
 	}
-
 }
 
 void Save_PheromoneTrails()
 {
 	PHEROMONE_SAVE_BLOCK_HEADER* block;
-	int i;
 
 	if(!NumActiveTrails) return;
 
@@ -5338,12 +5278,10 @@ void Save_PheromoneTrails()
 
 	block->NumActiveTrails = NumActiveTrails;
 
-
 	//now save the trails
-	for(i=0;i<NumActiveTrails;i++)
+	for(int i=0;i<NumActiveTrails;i++)
 	{
 		PHEROMONE_TRAIL* trail = GET_SAVE_BLOCK_POINTER(PHEROMONE_TRAIL, trail);
 		*trail = TrailStorage[i];
 	}
-	
 }

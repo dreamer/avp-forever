@@ -29,7 +29,7 @@ namespace IFF
 		if (pArchv->m_bIsLoading)
 		{
 			nEntries = pArchv->GetSize()/3;
-			if (pTable) delete[] pTable;
+			delete[] pTable;
 			pTable = new RGBTriple [nEntries];
 		}
 		
@@ -39,7 +39,7 @@ namespace IFF
 	
 	IlbmCmapChunk::~IlbmCmapChunk()
 	{
-		if (pTable) delete[] pTable;
+		delete[] pTable;
 	}
 	
 	void IlbmBodyChunk::Serialize(Archive * pArchv)
@@ -47,11 +47,11 @@ namespace IFF
 		if (pArchv->m_bIsLoading)
 		{
 			nSize = pArchv->GetSize();
-			if (pData) delete[] pData;
+			delete[] pData;
 			pData = new uint8_t [nSize];
 		}
 		
-		pArchv->TransferBlock(pData,nSize);
+		pArchv->TransferBlock(pData, nSize);
 	}
 
 	bool IlbmBodyChunk::GetHeaderInfo() const
@@ -64,6 +64,7 @@ namespace IFF
 		nWidth = static_cast<IlbmBmhdChunk *>(pHdr)->width;
 		eCompression = static_cast<IlbmBmhdChunk *>(pHdr)->eCompression;
 		nBitPlanes = static_cast<IlbmBmhdChunk *>(pHdr)->nBitPlanes;
+
 		return true;
 	}
 	
@@ -165,11 +166,11 @@ namespace IFF
 		{
 			if (!pEncodeDst) return false;
 			
-			if (pData) delete[] pData;
+			delete[] pData;
 			nSize = pEncodeDst->GetDataSize();
 			pData = new uint8_t[nSize];
 			
-			memcpy(pData,pEncodeDst->GetDataPtr(),nSize);
+			memcpy(pData, pEncodeDst->GetDataPtr(), nSize);
 			
 			delete pEncodeDst;
 			delete[] pEncodeSrc;
@@ -183,7 +184,7 @@ namespace IFF
 	
 	bool IlbmBodyChunk::BeginDecode() const
 	{
-		if (pDecodeDst) delete[] pDecodeDst;
+		delete[] pDecodeDst;
 		if (!pData || !GetHeaderInfo())
 		{
 			pDecodeSrc = NULL;
@@ -193,7 +194,7 @@ namespace IFF
 		
 		pDecodeSrc = pData;
 		nRemaining = nSize;
-		
+
 		pDecodeDst = new unsigned [nWidth];
 		
 		return pData != NULL;
@@ -213,7 +214,7 @@ namespace IFF
 			
 			for (unsigned b=0; b<nBitPlanes; ++b)
 			{
-				unsigned byte = 0;
+				unsigned theByte = 0; // bjd - renaming this from ambiguous previous name "byte"
 				for (unsigned x=0; x<nWidth; ++x)
 				{
 					if (!(x&7))
@@ -221,7 +222,7 @@ namespace IFF
 						if (!nRemaining) return NULL;
 						
 					REPEAT_SKIP:
-						byte = *pDecodeSrc;
+						theByte = *pDecodeSrc;
 						
 						if (rawcnt)
 						{
@@ -238,69 +239,65 @@ namespace IFF
 								--nRemaining;
 							}
 						}
-						else // byte is control byte
+						else // theByte is control byte
 						{
 							++pDecodeSrc;
 							--nRemaining;
 							
 							if (!nRemaining) return NULL;
 							
-							if (byte<0x80)
+							if (theByte < 0x80)
 							{
-								rawcnt = byte;
-								byte = *pDecodeSrc++;
+								rawcnt = theByte;
+								theByte = *pDecodeSrc++;
 								--nRemaining;
 							}
-							else if (byte>0x80)
+							else if (theByte > 0x80)
 							{
-								repcnt = 0x100 - byte;
-								byte = *pDecodeSrc;
+								repcnt = 0x100 - theByte;
+								theByte = *pDecodeSrc;
 							}
 							else goto REPEAT_SKIP;
 						}
 					}
-					
-					pDecodeDst[x] |= (byte>>7 & 1)<<b;
-					
-					byte <<= 1;
+
+					pDecodeDst[x] |= (theByte>>7 & 1)<<b;
+					theByte <<= 1;
 				}
-				
 			}
 		}
 		else
 		{
 			for (unsigned b=0; b<nBitPlanes; ++b)
 			{
-				unsigned byte = 0;
+				unsigned theByte = 0; // bjd - renaming this from ambiguous previous name "byte"
 				for (unsigned x=0; x<nWidth; ++x)
 				{
 					if (!(x&7))
 					{
 						if (!nRemaining) return NULL;
 						
-						byte = *pDecodeSrc++;
+						theByte = *pDecodeSrc++;
 						--nRemaining;
 					}
 					
-					pDecodeDst[x] |= (byte>>7 & 1)<<b;
+					pDecodeDst[x] |= (theByte>>7 & 1)<<b;
 					
-					byte <<= 1;
+					theByte <<= 1;
 				}
-				
 			}
 		}
-			
-		
+
 		return pDecodeDst;
 	}
 	
 	IlbmBodyChunk::~IlbmBodyChunk()
 	{
-		if (pData) delete[] pData;
-		if (pDecodeDst) delete[] pDecodeDst;
+		delete[] pData;
+		delete[] pDecodeDst;
 		#ifndef IFF_READ_ONLY
-			if (pEncodeDst) delete pEncodeDst;
-			if (pEncodeSrc) delete[] pEncodeSrc;
+			delete pEncodeDst;
+			delete[] pEncodeSrc;
 		#endif
 	}
 	

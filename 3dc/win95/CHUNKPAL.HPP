@@ -288,7 +288,7 @@ public:
 	TLT_Config_Chunk (Chunk_With_Children * parent, const char * sdata, size_t ssize);
 
 	~TLT_Config_Chunk()
-		{ if (srcrifname) delete[] srcrifname; }
+		{ delete[] srcrifname; }
 
 	virtual size_t size_chunk ();
 
@@ -669,12 +669,12 @@ public:
 	}
 	~BMP_Flags()
 	{
-		if (filename) delete[] filename;
+		delete[] filename;
 	}
 	
 	BMP_Flags & operator = (BMP_Flags const & c)
 	{
-		if (filename) delete[] filename;
+		delete[] filename;
 		if (c.filename)
 		{
 			filename = new char[strlen(c.filename)+1];
@@ -774,7 +774,7 @@ public:
 	Preset_Palette_Store_Chunk (Chunk_With_Children * const parent, char const * sdata, size_t const ssize);
 	~Preset_Palette_Store_Chunk ()
 	{
-		if (rifname) delete[] rifname;
+		delete[] rifname;
 	}
 
 	virtual size_t size_chunk ();

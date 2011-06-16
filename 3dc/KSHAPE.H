@@ -141,7 +141,7 @@ extern int TripTasticPhase;
 #define MIRRORING_ON 1
 
 #if MIRRORING_ON
-extern int MirroringActive;
+extern bool MirroringActive;
 extern int MirroringAxis;
 #endif
 

@@ -433,6 +433,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			}
 			#endif
 
+			DWORD next_game_tick = timeGetTime();
+			int sleep_time = 0;
+
 			switch (AvP.GameMode)
 			{
 				case I_GM_Playing:
@@ -456,6 +459,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 						}
 						//#endif  /* MainTextPrint */
 
+						const int FRAMES_PER_SECOND = 60;
+						const int SKIP_TICKS = 1000 / FRAMES_PER_SECOND;
+
 						ThisFramesRenderingHasBegun();
 						
 						DoAllShapeAnimations();
@@ -476,6 +482,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 						// if so kill off any sound effects
 						if (InGameMenusAreRunning() && ((AvP.Network!=I_No_Network && netGameData.skirmishMode) || (AvP.Network==I_No_Network)))
 							SoundSys_StopAll();
+#if 0
+						next_game_tick += SKIP_TICKS;
+						sleep_time = next_game_tick - timeGetTime();
+						if (sleep_time >= 0) 
+						{
+							Sleep(sleep_time);
+						}
+						else
+						{
+							// running behind
+						}
+#endif
 					}
 					else
 					{

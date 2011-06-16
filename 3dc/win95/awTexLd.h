@@ -210,7 +210,7 @@ struct AwCreateGraphicRegion
 	unsigned left, top, right, bottom; /* rectangle to cut from the original image */
 	unsigned width, height; /* width and height of the resulting surface or texture */
 
-	AVPTEXTURE * pTexture; /* Direct 3D Texture object pointer */
+	AVPTEXTURE * pTexture; // texture buffer
 };
 
 /* typedef to save typing 'struct' when not using C++ */

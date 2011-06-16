@@ -37,15 +37,12 @@
 #define MARINES_LIFEFORCE_GLOW_COLOUR 0x208080ff
 #define PREDATORS_LIFEFORCE_GLOW_COLOUR 0x2080ff80
 
-/* KJL 15:02:50 05/14/97 - new max lighting intensity */
-//#define MAX_INTENSITY (65536*4-1)
-
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern DISPLAYBLOCK *Global_ODB_Ptr;
 extern EXTRAITEMDATA *Global_EID_Ptr;
 extern int *Global_EID_IPtr;
-extern int SmartTargetSightX, SmartTargetSightY;
+extern fixed_t SmartTargetSightX, SmartTargetSightY;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 
 extern SHAPEHEADER *Global_ShapeHeaderPtr;
@@ -63,6 +60,8 @@ extern VECTORCH LocalView;
 extern int NumLightSourcesForObject;
 extern LIGHTBLOCK *LightSourcesForObject[];
 
+extern int PredatorVisionChangeCounter;
+
 #if SupportMorphing
 extern MORPHDISPLAY MorphDisplay;
 #endif
@@ -74,7 +73,7 @@ extern int NumActiveBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
 extern SHAPEHEADER **mainshapelist;
 
-int MirroringActive=0;
+bool MirroringActive = false;
 
 int MirroringAxis=-149*2;
 float CameraZoomScale = 1.0f;
@@ -152,11 +151,6 @@ extern void TransformToViewspace(VECTORCHF *vector);
 extern void AddCorona(PARTICLE *particlePtr, VECTORCHF *coronaPoint);
 void MakeMatrixFromDirection(VECTORCH *directionPtr, MATRIXCH *matrixPtr);
 
-/*KJL************************************************************************************
-* N.B. All the following global variables have their first elements initialised so that *
-* they will end up in high memory on the Saturn.                                        *
-************************************************************************************KJL*/
-
 VECTORCH Global_LightVector;
 
 /*
@@ -182,7 +176,7 @@ RENDERPOLYGON RenderPolygon;
 RENDERVERTEX VerticesBuffer[9];
 static RENDERVERTEX TriangleVerticesBuffer[3];
 
-static int *VertexNumberPtr = (int*)1;
+static int *VertexNumberPtr = 0;
 
 extern struct KItem KItemList[maxpolyptrs];
 extern int *MorphedObjectPointsPtr;
@@ -446,7 +440,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 			STRATEGYBLOCK *sbPtr = Global_ODB_Ptr->ObStrategyBlock;
 			if (sbPtr)
 			{
-				int useVision = 0;
+				bool useVision = false;
 				switch (sbPtr->I_SBtype)
 				{
 					case I_BehaviourPredator:
@@ -455,14 +449,14 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 
 						if (!predData->CloakingEffectiveness)
 						{
-							useVision = TRUE;
+							useVision = true;
 						}
 						break;
 					}
 					case I_BehaviourNPCPredatorDisc:
 					case I_BehaviourPredatorDisc_SeekTrack:
 					{
-						useVision = TRUE;
+						useVision = true;
 						break;
 					}
 					case I_BehaviourNetGhost:
@@ -475,7 +469,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						|| (ghostDataPtr->type==I_BehaviourPredatorDisc_SeekTrack)
 						|| (ghostDataPtr->type==I_BehaviourNetCorpse&&ghostDataPtr->subtype==I_BehaviourPredatorPlayer) ))
 						{
-							useVision = TRUE;
+							useVision = true;
 						}
 						break;
 					}
@@ -485,7 +479,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						NETCORPSEDATABLOCK *corpseDataPtr = (NETCORPSEDATABLOCK *)sbPtr->SBdataptr;
 						if (corpseDataPtr->Type==I_BehaviourPredatorPlayer || corpseDataPtr->Type==I_BehaviourPredator)
 						{
-							useVision = TRUE;
+							useVision = true;
 						}
 						break;
 					}
@@ -494,7 +488,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						HDEBRIS_BEHAV_BLOCK *debrisDataPtr = (HDEBRIS_BEHAV_BLOCK *)sbPtr->SBdataptr;
 						if (debrisDataPtr->Type==I_BehaviourPredator)
 						{
-							useVision = TRUE;
+							useVision = true;
 						}
 						break;
 					}
@@ -506,14 +500,14 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						{
 							case IOT_FieldCharge:
 							{
-								useVision = TRUE;
+								useVision = true;
 								break;
 							}
 							case IOT_Ammo:
 							{
 								if (objStatPtr->subType == AMMO_PRED_RIFLE || objStatPtr->subType == AMMO_PRED_DISC)
 								{
-									useVision = TRUE;
+									useVision = true;
 								}
 								break;
 							}
@@ -589,6 +583,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 				pif = PolygonWithinFrustum(polyPtr);
 
 			if (pif)
+			//if (1)
 				{
 					switch (polyPtr->PolyItemType)
 					{
@@ -596,7 +591,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						case I_ZB_Gouraud2dTexturedPolygon:
 							
 							CloakedPolygon_Construct(polyPtr);
-
+/*
 						if (pif!=2)
 						{
 							GouraudTexturedPolygon_ClipWithZ();
@@ -611,7 +606,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 							if(RenderPolygon.NumberOfVertices<3) continue;
 							D3D_ZBufferedCloakedPolygon_Output(polyPtr,RenderPolygon.Vertices);
 						}
-						else D3D_ZBufferedCloakedPolygon_Output(polyPtr, VerticesBuffer);
+						else*/ D3D_ZBufferedCloakedPolygon_Output(polyPtr, VerticesBuffer);
 
 						break;
 						default:
@@ -620,7 +615,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 					}
 				}
 			}
-			while(--numitems);
+			while (--numitems);
 			return;
 		}
 	}
@@ -635,10 +630,11 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 			do
 			{
 				POLYHEADER *polyPtr = (POLYHEADER*) (*itemArrayPtr++);
-				int pif;
-				pif = PolygonWithinFrustum(polyPtr);
+
+				int pif = PolygonWithinFrustum(polyPtr);
 				
 				if (pif)
+				//if (1)
 				{
 					switch (polyPtr->PolyItemType)
 					{
@@ -646,7 +642,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						case I_ZB_Gouraud2dTexturedPolygon:
 
 							CloakedPolygon_Construct(polyPtr);
-
+/*
 						if (pif!=2)
 						{
 							GouraudTexturedPolygon_ClipWithZ();
@@ -661,7 +657,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 							if (RenderPolygon.NumberOfVertices<3) continue;
 							D3D_ZBufferedCloakedPolygon_Output(polyPtr,RenderPolygon.Vertices);
 						}
-						else D3D_ZBufferedCloakedPolygon_Output(polyPtr, VerticesBuffer);
+						else*/ D3D_ZBufferedCloakedPolygon_Output(polyPtr, VerticesBuffer);
 
 						break;
 						default:
@@ -769,6 +765,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 							VerticesBuffer[1] = TriangleVerticesBuffer[1];
 							VerticesBuffer[2] = TriangleVerticesBuffer[2];
 						}
+
 						GouraudTexturedPolygon_ClipWithZ();
 						if (RenderPolygon.NumberOfVertices<3) continue;
 						GouraudTexturedPolygon_ClipWithNegativeX();
@@ -782,24 +779,23 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 
 						if (polyPtr->PolyFlags & iflag_transparent)
 						{
-							AddToTranslucentPolyList(polyPtr,RenderPolygon.Vertices);
+							AddToTranslucentPolyList(polyPtr, RenderPolygon.Vertices);
 						}
 						else
 						{
-							D3D_ZBufferedGouraudTexturedPolygon_Output(polyPtr,RenderPolygon.Vertices);
+							D3D_ZBufferedGouraudTexturedPolygon_Output(polyPtr, RenderPolygon.Vertices);
 						}
 					}
 					else
 					{
-						//if (0)//if (polyPtr->PolyFlags & iflag_transparent)
 						if (polyPtr->PolyFlags & iflag_transparent)
 						{
 							// bjd - glass rendering goes through here
-							AddToTranslucentPolyList(polyPtr,VerticesBuffer);
+							AddToTranslucentPolyList(polyPtr, VerticesBuffer);
 						}
 						else
 						{
-							D3D_ZBufferedGouraudTexturedPolygon_Output(polyPtr,VerticesBuffer);
+							D3D_ZBufferedGouraudTexturedPolygon_Output(polyPtr, VerticesBuffer);
 						}
 					}
 					break;
@@ -819,7 +815,7 @@ void PredatorThermalVision_ShapePipeline(SHAPEHEADER *shapePtr)
 
 	LOCALASSERT(numitems);
 
-	TestVerticesWithFrustum();
+//	TestVerticesWithFrustum();
 	do
 	{
 		POLYHEADER *polyPtr = (POLYHEADER*) (*itemArrayPtr++);
@@ -831,8 +827,8 @@ void PredatorThermalVision_ShapePipeline(SHAPEHEADER *shapePtr)
 		{
 			PredatorThermalVisionPolygon_Construct(polyPtr);
 
-			if (pif!=2)
-			//if (0)
+			//if (pif!=2)
+			if (0)
 			{
 				GouraudPolygon_ClipWithZ();
 				if (RenderPolygon.NumberOfVertices<3) continue;
@@ -850,17 +846,17 @@ void PredatorThermalVision_ShapePipeline(SHAPEHEADER *shapePtr)
 			else D3D_PredatorThermalVisionPolygon_Output(polyPtr, VerticesBuffer);
 		}
 	}
-	while(--numitems);
+	while (--numitems);
 }
 
 void PredatorSeeAliensVision_ShapePipeline(SHAPEHEADER *shapePtr)
 {
-	int numitems= shapePtr->numitems;
+	int numitems = shapePtr->numitems;
 	int **itemArrayPtr = shapePtr->items;
 
 	LOCALASSERT(numitems);
 
-	TestVerticesWithFrustum();
+//	TestVerticesWithFrustum();
 
 	do
 	{
@@ -871,6 +867,7 @@ void PredatorSeeAliensVision_ShapePipeline(SHAPEHEADER *shapePtr)
 			case I_ZB_Gouraud3dTexturedPolygon:
 			case I_ZB_Gouraud2dTexturedPolygon:
 			{
+				// bjd - we have to call this to correctly set RenderPolygon.NumberOfVertices
 				int pif = PolygonWithinFrustum(polyPtr);
 
 				if (pif)
@@ -878,9 +875,10 @@ void PredatorSeeAliensVision_ShapePipeline(SHAPEHEADER *shapePtr)
 				{
 					PredatorSeeAliensVisionPolygon_Construct(polyPtr);
 
-					if (pif!=2)
+//					if (pif!=2)
 					//if (0)
-					{
+//					{
+/*
 						GouraudTexturedPolygon_ClipWithZ();
 						if (RenderPolygon.NumberOfVertices<3) continue;
 						GouraudTexturedPolygon_ClipWithNegativeX();
@@ -891,9 +889,9 @@ void PredatorSeeAliensVision_ShapePipeline(SHAPEHEADER *shapePtr)
 						if (RenderPolygon.NumberOfVertices<3) continue;
 						GouraudTexturedPolygon_ClipWithPositiveX();
 						if (RenderPolygon.NumberOfVertices<3) continue;
-						D3D_ZBufferedGouraudTexturedPolygon_Output(polyPtr,RenderPolygon.Vertices);
+						D3D_ZBufferedGouraudTexturedPolygon_Output(polyPtr, RenderPolygon.Vertices);
 					}
-					else D3D_ZBufferedGouraudTexturedPolygon_Output(polyPtr,VerticesBuffer);
+					else*/ D3D_ZBufferedGouraudTexturedPolygon_Output(polyPtr, VerticesBuffer);
 				}
 				break;
 			}
@@ -913,10 +911,8 @@ static void CloakedPolygon_Construct(POLYHEADER *polyPtr)
 	int i = RenderPolygon.NumberOfVertices;
 
 	/* get ptr to uv coords for this polygon */
-	{
-		int texture_defn_index = (polyPtr->PolyColour >> TxDefn);
-		texture_defn_ptr = Global_ShapeTextures[texture_defn_index];
-	}
+	int texture_defn_index = (polyPtr->PolyColour >> TxDefn);
+	texture_defn_ptr = Global_ShapeTextures[texture_defn_index];
 
 	VertexNumberPtr = &polyPtr->Poly1stPt;
 
@@ -952,7 +948,7 @@ static void CloakedPolygon_Construct(POLYHEADER *polyPtr)
 
 				renderVerticesPtr->A = MUL_FIXED(alpha,alpha)>>10;
 
-				if(renderVerticesPtr->A==255)
+				if (renderVerticesPtr->A==255)
 				{
 					renderVerticesPtr->R = 255;
 					renderVerticesPtr->G = 255;
@@ -983,7 +979,8 @@ static void CloakedPolygon_Construct(POLYHEADER *polyPtr)
 				int alpha;
 
 				mag.vx = vertexPtr->vx - ObjectCentre.vx;
-				mag.vy = vertexPtr->vy - MUL_FIXED(ObjectCentre.vy,87381);
+				//mag.vy = vertexPtr->vy - MUL_FIXED(ObjectCentre.vy,87381);
+				mag.vy = vertexPtr->vy - ObjectCentre.vy;
 				mag.vz = vertexPtr->vz - ObjectCentre.vz;
 
 				if (mag.vx<0) mag.vx = -mag.vx;
@@ -1044,12 +1041,11 @@ static void PredatorThermalVisionPolygon_Construct(POLYHEADER *polyPtr)
 				while (sourceNumber--)
 				{
 					VECTORCH mag;
-					int m;
 					mag.vx = vertexPtr->vx - HeatSourceList[sourceNumber].Position.vx;
 					mag.vy = vertexPtr->vy - HeatSourceList[sourceNumber].Position.vy;
 					mag.vz = vertexPtr->vz - HeatSourceList[sourceNumber].Position.vz;
 
-					m = Approximate3dMagnitude(&mag)*64;
+					int m = Approximate3dMagnitude(&mag)*64;
 
 					if (m<distanceFromHeatSource) distanceFromHeatSource = m;
 				}
@@ -1145,7 +1141,7 @@ static void PredatorSeeAliensVisionPolygon_Construct(POLYHEADER *polyPtr)
 		{
 			VECTORCH *vertexPtr = &(RotatedPts[*VertexNumberPtr]);
 
-			if(polyPtr->PolyFlags & iflag_txanim)
+			if (polyPtr->PolyFlags & iflag_txanim)
 			{
 				renderVerticesPtr->U = texture_defn_ptr[0];
 				renderVerticesPtr->V = texture_defn_ptr[1];
@@ -1167,13 +1163,13 @@ static void PredatorSeeAliensVisionPolygon_Construct(POLYHEADER *polyPtr)
 				mag.vz = vertexPtr->vz - Global_ODB_Ptr->ObView.vz;
 
 				colour = GetSin(((mag.vx+mag.vy+mag.vz)*8+CloakingPhase)&4095);
-				colour = MUL_FIXED(colour,colour);
-				renderVerticesPtr->B = MUL_FIXED(colour,255);
+				colour = MUL_FIXED(colour, colour);
+				renderVerticesPtr->B = MUL_FIXED(colour, 255);
 				renderVerticesPtr->R = renderVerticesPtr->B/2;
 				renderVerticesPtr->G = renderVerticesPtr->B/2;
 
-				colour = MUL_FIXED(colour,colour);
-				colour = MUL_FIXED(colour,colour);
+				colour = MUL_FIXED(colour, colour);
+				colour = MUL_FIXED(colour, colour);
 
 				renderVerticesPtr->SpecularR = colour/1024;
 				renderVerticesPtr->SpecularG = colour/1024;
@@ -1185,7 +1181,7 @@ static void PredatorSeeAliensVisionPolygon_Construct(POLYHEADER *polyPtr)
 			renderVerticesPtr++;
 			VertexNumberPtr++;
 		}
-		while(--i);
+		while (--i);
 	}
 }
 
@@ -1199,14 +1195,13 @@ static void GouraudPolygon_Construct(POLYHEADER *polyPtr)
 
 	do
 	{
-		int i;
 		renderVerticesPtr->X = RotatedPts[*VertexNumberPtr].vx;
 		renderVerticesPtr->Y = RotatedPts[*VertexNumberPtr].vy;
 		renderVerticesPtr->Z = RotatedPts[*VertexNumberPtr].vz;
 		VertexIntensity(renderVerticesPtr);
-		i = (renderVerticesPtr->B+renderVerticesPtr->R+renderVerticesPtr->G)/3;
-		renderVerticesPtr->R = i;
-		renderVerticesPtr->G = i;
+		int colour = (renderVerticesPtr->B+renderVerticesPtr->R+renderVerticesPtr->G)/3;
+		renderVerticesPtr->R = colour;
+		renderVerticesPtr->G = colour;
 		renderVerticesPtr->B = 0;
 		renderVerticesPtr++;
 		VertexNumberPtr++;
@@ -1522,17 +1517,13 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 	}
 }
 
-
-
-
-
 static void VertexIntensity_Pred_Thermal(RENDERVERTEX *renderVertexPtr)
 {
 	int redI,blueI,specular=0;
 
 	int vertexNumber = *VertexNumberPtr;
 
-	if(ColourIntensityArray[vertexNumber].Stamp==ObjectCounter)
+	if (ColourIntensityArray[vertexNumber].Stamp==ObjectCounter)
 	{
 		renderVertexPtr->R = ColourIntensityArray[vertexNumber].R;
 		renderVertexPtr->G = ColourIntensityArray[vertexNumber].G;
@@ -1547,13 +1538,12 @@ static void VertexIntensity_Pred_Thermal(RENDERVERTEX *renderVertexPtr)
 		VECTORCH *vertexPtr = ((VECTORCH *)Global_ShapePoints)+vertexNumber;
 		LIGHTBLOCK **larrayptr;
 		LIGHTBLOCK *lptr;
-		int i;
 
 		redI = 0;
 
 		larrayptr = LightSourcesForObject;
 
-		for(i = NumLightSourcesForObject; i!=0; i--)
+		for (int i = NumLightSourcesForObject; i!=0; i--)
 		{
 
 			VECTORCH vertexToLight;
@@ -1656,13 +1646,12 @@ static void VertexIntensity_Pred_SeeAliens(RENDERVERTEX *renderVertexPtr)
 		VECTORCH *vertexPtr = ((VECTORCH *)Global_ShapePoints)+vertexNumber;
 		LIGHTBLOCK **larrayptr;
 		LIGHTBLOCK *lptr;
-		int i;
 
 		redI = 0;
 
 		larrayptr = LightSourcesForObject;
 
-		for (i = NumLightSourcesForObject; i!=0; i--)
+		for (int i = NumLightSourcesForObject; i!=0; i--)
 		{
 			VECTORCH vertexToLight;
 			int distanceToLight;
@@ -1693,7 +1682,6 @@ static void VertexIntensity_Pred_SeeAliens(RENDERVERTEX *renderVertexPtr)
 	renderVertexPtr->G = redI;
 	ColourIntensityArray[vertexNumber].G = redI;
 
-
 	blueI = ONE_FIXED/2;
 	if (renderVertexPtr->Z>5000)
 	{
@@ -1708,7 +1696,7 @@ static void VertexIntensity_Pred_SeeAliens(RENDERVERTEX *renderVertexPtr)
 	ColourIntensityArray[vertexNumber].B = 0;
 
 	specular >>=10;
-	if(specular>255) specular = 255;
+	if (specular>255) specular = 255;
 	renderVertexPtr->SpecularR = specular;//specularR;
 	ColourIntensityArray[vertexNumber].SpecularR = specular;//specularR;
 	renderVertexPtr->SpecularG = specular;
@@ -1739,15 +1727,13 @@ static void VertexIntensity_Pred_SeePredatorTech(RENDERVERTEX *renderVertexPtr)
 		VECTORCH *vertexPtr = ((VECTORCH *)Global_ShapePoints)+vertexNumber;
 		LIGHTBLOCK **larrayptr;
 		LIGHTBLOCK *lptr;
-		int i;
 
 		redI = 0;
 
 		larrayptr = LightSourcesForObject;
 
-		for (i = NumLightSourcesForObject; i!=0; i--)
+		for (int i = NumLightSourcesForObject; i!=0; i--)
 		{
-
 			VECTORCH vertexToLight;
 			int distanceToLight;
 
@@ -1787,7 +1773,6 @@ static void VertexIntensity_Pred_SeePredatorTech(RENDERVERTEX *renderVertexPtr)
 	ColourIntensityArray[vertexNumber].B = 255;
 	renderVertexPtr->G = blueI;
 	ColourIntensityArray[vertexNumber].G = blueI;
-
 
 	renderVertexPtr->SpecularR = 255;//specularR;
 	ColourIntensityArray[vertexNumber].SpecularR = 255;//specularR;
@@ -2652,6 +2637,7 @@ TXANIMHEADER* GetTxAnimDataZ(int shape, int item, int sequence)
 
 */
 
+#if 0 // bjd - unused
 void ChangeSequence(TXANIMHEADER *txah_old, TXANIMHEADER *txah_new)
 {
 	if(txah_new->txa_numframes == txah_old->txa_numframes)
@@ -2665,6 +2651,7 @@ void ChangeSequence(TXANIMHEADER *txah_old, TXANIMHEADER *txah_new)
 								txah_old->txa_maxframe);
 	}
 }
+#endif
 
 
 /*
@@ -3321,6 +3308,7 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 
 #define ssrpi_kill_py FALSE
 
+#if 0 // bjd - unused
 void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 {
 
@@ -3473,6 +3461,7 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 		rotptsptr++;
 	}
 }
+#endif
 
 
 #endif		/* UseKevinsModifiedSSRPI */
@@ -4008,7 +3997,6 @@ float o = 1.0f;
 extern void TranslationSetup(void)
 {
 	VECTORCH v = Global_VDB_Ptr->VDB_World;
-	extern int PredatorVisionChangeCounter;
 	/*float*/ p = PredatorVisionChangeCounter / 65536.0f;
 	/*float*/ o = 1.0f;
 	p = 1.0f+p;
@@ -4374,7 +4362,7 @@ void RenderDecal(DECAL *decalPtr)
 				case DECAL_SCORCHED:
 				{
 					DecalPolygon_Construct(decalPtr);
-
+/*
 					if (0)//(outcode != 2) // bjd
 					{
 						TexturedPolygon_ClipWithZ();
@@ -4399,7 +4387,7 @@ void RenderDecal(DECAL *decalPtr)
 
 						D3D_Decal_Output(decalPtr, RenderPolygon.Vertices);
 					}
-					else D3D_Decal_Output(decalPtr, VerticesBuffer);
+					else*/ D3D_Decal_Output(decalPtr, VerticesBuffer);
 					break;
 				}
 			}
@@ -4839,7 +4827,7 @@ void RenderMirroredDecal(DECAL *decalPtr)
 	{
 		int outcode = DecalWithinFrustum(decalPtr);
 
-		if (/*outcode*/1) // bjd
+		if (outcode) // bjd
 		{
 			switch (decalPtr->DecalID)
 			{
@@ -5153,7 +5141,7 @@ void RenderSky(void)
 	}
 
 	// set render states and texture
-	fakeHeader.PolyFlags = iflag_transparent;
+	fakeHeader.PolyFlags  = iflag_transparent;
 	fakeHeader.PolyColour = CloudyImageNumber;
 	RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
 
@@ -5188,7 +5176,7 @@ void RenderSky(void)
 					translatedPts[i].vz += 32768*z;
 
 					translatedPts[i].vx += Global_VDB_Ptr->VDB_World.vx;
-					translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy+1000;
+					translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy + 1000;
 					translatedPts[i].vz += Global_VDB_Ptr->VDB_World.vz;
 
 //					TranslatePointIntoViewspace(&translatedPts[i]);
@@ -5432,16 +5420,90 @@ void DrawWaterFallPoly(VECTORCH *v)
 */
 }
 
+extern D3DXMATRIX matProjection;
+extern D3DXMATRIX matView;
+extern D3DXMATRIX matIdentity;
+
 void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 {
+	/* NOTES
+	
+	(ScreenDescriptorBlock.SDB_Width<<15) is centre of screen in 16.16
+
+	*/
+
+	uint32_t planeX, planeY, planeZ;
+
+	D3DXVECTOR3 planeLeft, planeRight, planeSource;
+
+	// bottom left?
+	planeSource.x = 0.0f;
+	planeSource.y = (float)ScreenDescriptorBlock.SDB_Height;
+	planeSource.z = 64.0f;
+
+	D3DXVec3Unproject(&planeLeft, &planeSource, &d3d.D3DViewport, &matProjection, &matView, &matIdentity);
+
+	// bottom right
+	planeSource.x = (float)ScreenDescriptorBlock.SDB_Width;
+	planeSource.y = (float)ScreenDescriptorBlock.SDB_Height;
+	planeSource.z = 64.0f;
+
+	D3DXVec3Unproject(&planeRight, &planeSource, &d3d.D3DViewport, &matProjection, &matView, &matIdentity);
+
+	POLYHEADER fakeHeader2;
+	fakeHeader2.PolyFlags = iflag_transparent;
+	RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
+
+	VerticesBuffer[0].X = planeLeft.x;
+	VerticesBuffer[0].Y = planeLeft.y;
+	VerticesBuffer[0].Z	= planeLeft.z;
+
+	VerticesBuffer[0].R = 255;
+	VerticesBuffer[0].G	= 255;
+	VerticesBuffer[0].B = 255;
+	VerticesBuffer[0].A = 128;
+
+	VerticesBuffer[1].X = planeLeft.x;
+	VerticesBuffer[1].Y = planeLeft.y;
+	VerticesBuffer[1].Z	= planeLeft.z+20000;
+
+	VerticesBuffer[1].R = 255;
+	VerticesBuffer[1].G	= 255;
+	VerticesBuffer[1].B = 255;
+	VerticesBuffer[1].A = 128;
+
+	VerticesBuffer[2].X = planeRight.x;
+	VerticesBuffer[2].Y = planeRight.y;
+	VerticesBuffer[2].Z	= planeRight.z;
+
+	VerticesBuffer[2].R = 255;
+	VerticesBuffer[2].G	= 255;
+	VerticesBuffer[2].B = 255;
+	VerticesBuffer[2].A = 128;
+
+	VerticesBuffer[3].X = planeRight.x;
+	VerticesBuffer[3].Y = planeRight.y;
+	VerticesBuffer[3].Z	= planeRight.z+20000;
+
+	VerticesBuffer[3].R = 255;
+	VerticesBuffer[3].G	= 255;
+	VerticesBuffer[3].B = 255;
+	VerticesBuffer[3].A = 128;
+
+	RenderPolygon.NumberOfVertices = 4;
+
+	D3D_ZBufferedGouraudPolygon_Output(&fakeHeader2, VerticesBuffer);
+
+	return;
+
 	VECTOR2D offset[4];
 	POLYHEADER fakeHeader;
-	int centreX,centreY;
+	int centreX, centreY;
 	int z = ONE_FIXED-scale;
 
-	z = MUL_FIXED(MUL_FIXED(z,z),2048);
+	z = MUL_FIXED(MUL_FIXED(z,z), 2048);
 	{
-		centreY = MUL_FIXED( (SmartTargetSightY-(ScreenDescriptorBlock.SDB_Height<<15)) / Global_VDB_Ptr->VDB_ProjY,z);
+		centreY = MUL_FIXED( (SmartTargetSightY-(ScreenDescriptorBlock.SDB_Height<<15)) / Global_VDB_Ptr->VDB_ProjY, z);
 		if (MIRROR_CHEATMODE)
 		{
 			centreX = MUL_FIXED( ( - (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width<<15))) / Global_VDB_Ptr->VDB_ProjX, z);
@@ -5453,7 +5515,8 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 	}
 	z = (float)z*CameraZoomScale;
 
-//	sprintf(buf, "centreX: %d\n", centreX);
+//	char buf[100];
+//	sprintf(buf, "centreX: %d, centreY: %d\n", centreX, centreY);
 //	OutputDebugString(buf);
 
 	{
@@ -5478,10 +5541,10 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 
 		if (theta)
 		{
-			RotateVertex(&offset[0],theta);
-			RotateVertex(&offset[1],theta);
-			RotateVertex(&offset[2],theta);
-			RotateVertex(&offset[3],theta);
+			RotateVertex(&offset[0], theta);
+			RotateVertex(&offset[1], theta);
+			RotateVertex(&offset[2], theta);
+			RotateVertex(&offset[3], theta);
 		}
 
 		if (MIRROR_CHEATMODE)
@@ -5491,44 +5554,40 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 			offset[2].vx = -offset[2].vx;
 			offset[3].vx = -offset[3].vx;
 		}
-		VerticesBuffer[0].X = offset[0].vx+centreX;
-//		VerticesBuffer[0].Y = MUL_FIXED(offset[0].vy,87381)+centreY;
-		VerticesBuffer[0].Y = offset[0].vy+centreY;
 
-		VerticesBuffer[1].X = offset[1].vx+centreX;
-//		VerticesBuffer[1].Y = MUL_FIXED(offset[1].vy,87381)+centreY;
-		VerticesBuffer[1].Y = offset[1].vy+centreY;
+		VerticesBuffer[0].X = offset[0].vx + centreX;
+		VerticesBuffer[0].Y = offset[0].vy + centreY;
 
-		VerticesBuffer[2].X = offset[2].vx+centreX;
-//		VerticesBuffer[2].Y = MUL_FIXED(offset[2].vy,87381)+centreY;
-		VerticesBuffer[2].Y = offset[2].vy+centreY;
+		VerticesBuffer[1].X = offset[1].vx + centreX;
+		VerticesBuffer[1].Y = offset[1].vy + centreY;
 
-		VerticesBuffer[3].X = offset[3].vx+centreX;
-//		VerticesBuffer[3].Y = MUL_FIXED(offset[3].vy,87381)+centreY;
-		VerticesBuffer[3].Y = offset[3].vy+centreY;
+		VerticesBuffer[2].X = offset[2].vx + centreX;
+		VerticesBuffer[2].Y = offset[2].vy + centreY;
+
+		VerticesBuffer[3].X = offset[3].vx + centreX;
+		VerticesBuffer[3].Y = offset[3].vy + centreY;
 	}
 
 	fakeHeader.PolyFlags = iflag_transparent;
 	RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
 	{
-		int i;
-		for (i=0; i<4; i++)
+		for (int i = 0; i < 4; i++)
 		{
-			VerticesBuffer[i].A = 128;
-
 			VerticesBuffer[i].Z	= z;
-
-			VerticesBuffer[i].R = 255;
 
 			if (drawInRed)
 			{
+				VerticesBuffer[i].R = 255;
 				VerticesBuffer[i].G	= 0;
 				VerticesBuffer[i].B = 0;
+				VerticesBuffer[i].A = 128;
 			}
 			else
 			{
+				VerticesBuffer[i].R = 255;
 				VerticesBuffer[i].G	= 255;
 				VerticesBuffer[i].B = 255;
+				VerticesBuffer[i].A = 128;
 			}
 		}
 		RenderPolygon.NumberOfVertices = 4;
@@ -5545,41 +5604,43 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 	GouraudPolygon_ClipWithPositiveX();
 	if (RenderPolygon.NumberOfVertices<3) return;
 */
-	D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,/*RenderPolygon.Vertices*/&VerticesBuffer[0]);
+
+//	DrawQuad(120, 120, 120, 120, NO_TEXTURE, RCOLOR_ARGB(255, 255, 0, 0), TRANSLUCENCY_NORMAL); 
+
+	D3D_ZBufferedGouraudPolygon_Output(&fakeHeader, /*RenderPolygon.Vertices*/&VerticesBuffer[0]);
 
 	if (drawInRed)
 	{
-		VerticesBuffer[0].X = MUL_FIXED(offset[3].vx,scale*8)+centreX;
-		VerticesBuffer[0].Y = MUL_FIXED(MUL_FIXED(offset[3].vy,scale*8),87381)+centreY;
+		VerticesBuffer[0].X = MUL_FIXED(offset[3].vx, scale*8) + centreX;
+		VerticesBuffer[0].Y = MUL_FIXED(offset[3].vy, scale*8) + centreY;
 
-		VerticesBuffer[1].X = MUL_FIXED(offset[2].vx,scale*8)+centreX;
-		VerticesBuffer[1].Y = MUL_FIXED(MUL_FIXED(offset[2].vy,scale*8),87381)+centreY;
+		VerticesBuffer[1].X = MUL_FIXED(offset[2].vx, scale*8) + centreX;
+		VerticesBuffer[1].Y = MUL_FIXED(offset[2].vy, scale*8) + centreY;
 
-		VerticesBuffer[2].X = offset[2].vx+centreX;
-		VerticesBuffer[2].Y = MUL_FIXED(offset[2].vy,87381)+centreY;
+		VerticesBuffer[2].X = offset[2].vx + centreX;
+		VerticesBuffer[2].Y = offset[2].vy + centreY;
 
 		VerticesBuffer[3].X = offset[3].vx+centreX;
-		VerticesBuffer[3].Y = MUL_FIXED(offset[3].vy,87381)+centreY;
+		VerticesBuffer[3].Y = offset[3].vy + centreY;
+
+		for (int i = 0; i < 2; i++)
 		{
-			int i;
-			for (i=0; i<2; i++)
-			{
-				VerticesBuffer[i].A = 0;
-				VerticesBuffer[i].Z	= z;
-				VerticesBuffer[i].R = 255;
-				VerticesBuffer[i].G	= 0;
-				VerticesBuffer[i].B = 0;
-			}
-			for (i=2; i<4; i++)
-			{
-				VerticesBuffer[i].A = 128;
-				VerticesBuffer[i].Z	= z;
-				VerticesBuffer[i].R = 255;
-				VerticesBuffer[i].G	= 0;
-				VerticesBuffer[i].B = 0;
-			}
-			RenderPolygon.NumberOfVertices = 4;
+			VerticesBuffer[i].Z	= z;
+			VerticesBuffer[i].R = 255;
+			VerticesBuffer[i].G	= 0;
+			VerticesBuffer[i].B = 0;
+			VerticesBuffer[i].A = 0;
 		}
+		for (int i = 2; i < 4; i++)
+		{
+			VerticesBuffer[i].Z	= z;
+			VerticesBuffer[i].R = 255;
+			VerticesBuffer[i].G	= 0;
+			VerticesBuffer[i].B = 0;
+			VerticesBuffer[i].A = 128;
+		}
+
+		RenderPolygon.NumberOfVertices = 4;
 /*
 		GouraudPolygon_ClipWithZ();
 		if(RenderPolygon.NumberOfVertices<3) return;
@@ -5837,7 +5898,6 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 		}
 	}
 	{
-		int f;
 		POLYHEADER fakeHeader;
 		VECTORCH *vSphere = SphereRotatedVertex;
 		
@@ -5860,7 +5920,7 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 			blue = explosionPtr->LifeTime/256;
 		}
 
-		for (f=0; f<SPHERE_VERTICES; f++)
+		for (int f=0; f<SPHERE_VERTICES; f++)
 		{
 			*vSphere = explosionPtr->Position[f];
 
@@ -5868,18 +5928,17 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 			vSphere++;
 		}
 
-		for (f=0; f<SPHERE_FACES; f++)
+		for (int f=0; f<SPHERE_FACES; f++)
 		{
-			int i;
 			VECTORCH vertex[3];
 
-			for (i=0; i<3; i++)
+			for (int i=0; i<3; i++)
 			{
 				int n = SphereFace[f].v[i];
 				vertex[i] = SphereRotatedVertex[n];
 			}
 
-			for (i=0; i<3; i++)
+			for (int i=0; i<3; i++)
 			{
 				int n = SphereFace[f].v[i];
 
@@ -6035,27 +6094,26 @@ void RenderInsideAlienTongue(int offset)
 
 	for (polyNumber=0; polyNumber<4; polyNumber++)
 	{
+		for (int i=0; i<4; i++)
 		{
-			int i;
-			for (i=0; i<4; i++)
-			{
-				int v = TonguePolyVertexList[polyNumber][i];
-				VerticesBuffer[i].A = 255;
-				VerticesBuffer[i].X = translatedPts[v].vx;
-				VerticesBuffer[i].Y = translatedPts[v].vy;
-				VerticesBuffer[i].Z = translatedPts[v].vz;
-				VerticesBuffer[i].U = CuboidPolyVertexU[3][i];
-				VerticesBuffer[i].V = CuboidPolyVertexV[3][i];
+			int v = TonguePolyVertexList[polyNumber][i];
+			VerticesBuffer[i].A = 255;
+			VerticesBuffer[i].X = translatedPts[v].vx;
+			VerticesBuffer[i].Y = translatedPts[v].vy;
+			VerticesBuffer[i].Z = translatedPts[v].vz;
+			VerticesBuffer[i].U = CuboidPolyVertexU[3][i];
+			VerticesBuffer[i].V = CuboidPolyVertexV[3][i];
 
-				VerticesBuffer[i].R = offset/2048;
-				VerticesBuffer[i].G = offset/2048;
-				VerticesBuffer[i].B = offset/2048;
-				VerticesBuffer[i].SpecularR = 0;
-				VerticesBuffer[i].SpecularG = 0;
-				VerticesBuffer[i].SpecularB = 0;
-			}
-			RenderPolygon.NumberOfVertices=4;
+			VerticesBuffer[i].R = offset/2048;
+			VerticesBuffer[i].G = offset/2048;
+			VerticesBuffer[i].B = offset/2048;
+			VerticesBuffer[i].SpecularR = 0;
+			VerticesBuffer[i].SpecularG = 0;
+			VerticesBuffer[i].SpecularB = 0;
 		}
+
+		RenderPolygon.NumberOfVertices=4;
+
 		{
 			D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader, VerticesBuffer);
 /*
@@ -6082,20 +6140,24 @@ typedef struct
 {
 	VECTORCH Position;
 	int Colour;
+/* bjd - unused
 	int Frequency;
 	int Phase;
-
+*/
 } STARDESC;
 /*static*/ STARDESC StarArray[NO_OF_STARS];
 
 extern void LoadStars();
 
+#include "renderer.h"
+#include "renderlist.h"
+
+extern RenderList *starsList;
+
 void CreateStarArray(void)
 {
-	int i;
-
 	SetSeededFastRandom(FastRandom());
-	for (i=0; i<NO_OF_STARS; i++)
+	for (int i=0; i < NO_OF_STARS; i++)
 	{
 		int phi = SeededFastRandom()&4095;
 
@@ -6104,21 +6166,82 @@ void CreateStarArray(void)
 			float y = ((float)StarArray[i].Position.vy)/65536.0f;
 			y = (float)(sqrt(1-y*y));
 
-			f2i(StarArray[i].Position.vx,(float)GetCos(phi)*y);
-			f2i(StarArray[i].Position.vz,(float)GetSin(phi)*y);
+			StarArray[i].Position.vx = ((float)GetCos(phi))*y;
+			StarArray[i].Position.vz = ((float)GetSin(phi))*y;
 		}
 		StarArray[i].Colour = 0xff000000 + (FastRandom()&0x7f7f7f)+0x7f7f7f;
+/* bjd - unused
 		StarArray[i].Frequency = (FastRandom()&4095);
 		StarArray[i].Phase = FastRandom()&4095;
+*/
 	}
 
-	// load VB/IBs?
-//	LoadStars();
+	// load vbs
+	D3DLVERTEX *starsVertex = NULL;
+	uint16_t *starsIndex = NULL;
+
+	d3d.starsVB->Lock((void**)&starsVertex);
+	d3d.starsIB->Lock(&starsIndex);
+
+	uint32_t sizeX = 256;
+
+	// load em up
+	for (int i=0; i < NO_OF_STARS; i++)
+	{
+		starsList->AddItem(4, SpecialFXImageNumber, TRANSLUCENCY_OFF);
+
+		// top left?
+		starsVertex[0].x = StarArray[i].Position.vx;// - sizeX;
+		starsVertex[0].y = StarArray[i].Position.vy;// - sizeX;
+		starsVertex[0].z = StarArray[i].Position.vz;
+
+		// top right
+		starsVertex[1].x = StarArray[i].Position.vx;//+sizeX;
+		starsVertex[1].y = StarArray[i].Position.vy;//-sizeX;
+		starsVertex[1].z = StarArray[i].Position.vz;
+
+		// bottom right
+		starsVertex[2].x = StarArray[i].Position.vx;//+sizeX;
+		starsVertex[2].y = StarArray[i].Position.vy;//+sizeX;
+		starsVertex[2].z = StarArray[i].Position.vz;
+
+		// bottom left
+		starsVertex[3].x = StarArray[i].Position.vx;//-sizeX;
+		starsVertex[3].y = StarArray[i].Position.vy;//+sizeX;
+		starsVertex[3].z = StarArray[i].Position.vz;
+
+		starsVertex[0].u = 192.0f;
+		starsVertex[0].v = 0.0f;
+
+		starsVertex[1].u = 255.0f;
+		starsVertex[1].v = 0.0f;
+
+		starsVertex[2].u = 255.0f;
+		starsVertex[2].v = 63.0f;
+
+		starsVertex[3].u = 192.0f;
+		starsVertex[3].v = 63.0f;
+
+		starsVertex[0].color = StarArray[i].Colour;
+		starsVertex[1].color = StarArray[i].Colour;
+		starsVertex[2].color = StarArray[i].Colour;
+		starsVertex[3].color = StarArray[i].Colour;
+
+		starsVertex[0].specular = RCOLOR_ARGB(0,0,0,0);
+		starsVertex[1].specular = RCOLOR_ARGB(255,0,0,0);
+		starsVertex[2].specular = RCOLOR_ARGB(255,255,0,0);
+		starsVertex[3].specular = RCOLOR_ARGB(0,255,0,0);
+
+		starsList->CreateIndices(starsIndex, 4);
+	}
+
+	d3d.starsVB->Unlock();
+	d3d.starsIB->Unlock();
 }
 
 void RenderStarfield(void)
 {
-	int i;
+	return; // stars test
 
 	int sizeX;
 	int sizeY;
@@ -6126,9 +6249,10 @@ void RenderStarfield(void)
 
 	sizeX = 256;
 
-	sizeY = MUL_FIXED(sizeX,87381);
+//	sizeY = MUL_FIXED(sizeX,87381);
+	sizeY = sizeX;
 
-	for (i=0; i<NO_OF_STARS; i++)
+	for (int i=0; i < NO_OF_STARS; i++)
 	{
 		VECTORCH position = StarArray[i].Position;
 		PARTICLE particle;
@@ -6169,44 +6293,42 @@ void RenderStarfield(void)
 		VerticesBuffer[3].Y = position.vy + sizeY;
 		VerticesBuffer[3].Z = position.vz;
 
+		int outcode = QuadWithinFrustum();
+
+		if (/*outcode*/1)
 		{
-			int outcode = QuadWithinFrustum();
+			RenderPolygon.NumberOfVertices = 4;
 
-			if (/*outcode*/1)
+//			textprint("On Screen!\n");
+			VerticesBuffer[0].U = 192;
+			VerticesBuffer[0].V = 0;
+
+			VerticesBuffer[1].U = 255;
+			VerticesBuffer[1].V = 0;
+
+			VerticesBuffer[2].U = 255;
+			VerticesBuffer[2].V = 63;
+
+			VerticesBuffer[3].U = 192;
+			VerticesBuffer[3].V = 63;
+
+			if (/*outcode!=2*/0)
 			{
-				RenderPolygon.NumberOfVertices = 4;
-
-	//			textprint("On Screen!\n");
-				VerticesBuffer[0].U = 192;
-				VerticesBuffer[0].V = 0;
-
-				VerticesBuffer[1].U = 255;
-				VerticesBuffer[1].V = 0;
-
-				VerticesBuffer[2].U = 255;
-				VerticesBuffer[2].V = 63;
-
-				VerticesBuffer[3].U = 192;
-				VerticesBuffer[3].V = 63;
-
-				if (/*outcode!=2*/0)
-				{
-					TexturedPolygon_ClipWithZ();
-					if (RenderPolygon.NumberOfVertices<3) return;
-					TexturedPolygon_ClipWithNegativeX();
-					if (RenderPolygon.NumberOfVertices<3) return;
-					TexturedPolygon_ClipWithPositiveY();
-					if (RenderPolygon.NumberOfVertices<3) return;
-					TexturedPolygon_ClipWithNegativeY();
-					if (RenderPolygon.NumberOfVertices<3) return;
-					TexturedPolygon_ClipWithPositiveX();
-					if (RenderPolygon.NumberOfVertices<3) return;
+				TexturedPolygon_ClipWithZ();
+				if (RenderPolygon.NumberOfVertices<3) return;
+				TexturedPolygon_ClipWithNegativeX();
+				if (RenderPolygon.NumberOfVertices<3) return;
+				TexturedPolygon_ClipWithPositiveY();
+				if (RenderPolygon.NumberOfVertices<3) return;
+				TexturedPolygon_ClipWithNegativeY();
+				if (RenderPolygon.NumberOfVertices<3) return;
+				TexturedPolygon_ClipWithPositiveX();
+				if (RenderPolygon.NumberOfVertices<3) return;
 //					D3D_Particle_Output(&particle,RenderPolygon.Vertices);
-					AddParticle(&particle, &RenderPolygon.Vertices[0]);
-				}
-//				else D3D_Particle_Output(&particle,VerticesBuffer);
-				else AddParticle(&particle, VerticesBuffer);
+				AddParticle(&particle, &RenderPolygon.Vertices[0]);
 			}
+//				else D3D_Particle_Output(&particle,VerticesBuffer);
+			else AddParticle(&particle, VerticesBuffer);
 		}
 	}
 }
@@ -6219,11 +6341,9 @@ unsigned char ForceFieldPointColour2[15*3+1][16];
 
 void InitForceField()
 {
-	int x, y;
-
-	for (x=0; x<15*3+1; x++)
+	for (int x=0; x<15*3+1; x++)
 	{
-		for (y=0; y<16; y++)
+		for (int y=0; y<16; y++)
 		{
 			ForceFieldPointDisplacement[x][y]=0;
 			ForceFieldPointDisplacement2[x][y]=0;
@@ -6235,16 +6355,16 @@ void InitForceField()
 int LightIntensityAtPoint(VECTORCH *pointPtr)
 {
 	int intensity=0;
-	int i, j, dist;
+	int dist;
 
 	DISPLAYBLOCK **activeBlockListPtr = ActiveBlockList;
-	for (i = NumActiveBlocks; i!=0; i--)
+	for (int i = NumActiveBlocks; i!=0; i--)
 	{
 		DISPLAYBLOCK *dispPtr = *activeBlockListPtr++;
 
 		if (dispPtr->ObNumLights)
 		{
-			for (j = 0; j < dispPtr->ObNumLights; j++)
+			for (int j = 0; j < dispPtr->ObNumLights; j++)
 			{
 				LIGHTBLOCK *lptr = dispPtr->ObLights[j];
 

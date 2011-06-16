@@ -115,7 +115,7 @@ FFDataI & FFDataI::operator = (FFDataI const & ffd)
 {
 	if (&ffd != this)
 	{
-		if (filename) delete[] filename;
+		delete[] filename;
 		
 		filename = 0;
 		data = ffd.data;
@@ -132,7 +132,7 @@ FFDataI & FFDataI::operator = (FFDataI const & ffd)
 
 FFDataI::~FFDataI()
 {
-	if (filename) delete[] filename;
+	delete[] filename;
 }
 
 int FFDataI::operator == (FFDataI const & ffd) const
@@ -214,7 +214,7 @@ FFHeaderI & FFHeaderI::operator = (FFHeaderI const & ffh)
 	if (&ffh != this)
 	{
 		if (data) free(data);
-		if (filename) delete[] filename;
+		delete[] filename;
 		
 		filename = 0;
 		data = 0;
@@ -244,7 +244,7 @@ FFHeaderI & FFHeaderI::operator = (FFHeaderI const & ffh)
 
 FFHeaderI::~FFHeaderI()
 {
-	if (filename) delete[] filename;
+	delete[] filename;
 	if (data) free(data);
 }
 
@@ -270,7 +270,7 @@ FFError FFHeaderI::Read(char const *_filename)
 {
 	if (_filename)
 	{
-		if (filename) delete[] filename;
+		delete[] filename;
 		filename = new char [strlen(_filename)+1];
 		strcpy(filename,_filename);
 	}
@@ -282,7 +282,7 @@ FFError FFHeaderI::Read(char const *_filename)
 		ReportError(_filename);
 		return FF_COULDNOTOPENFILE;
 	}
-	
+
 	// reset vars
 	Clear();
 	
@@ -294,7 +294,7 @@ FFError FFHeaderI::Read(char const *_filename)
 	uint32_t data_length;
 
 	DWORD bytes_read;
-	
+
 	READ_FILE(filename,(void)0,CloseHandle(h),h,magic,4,bytes_read,0)
 	READ_FILE(filename,(void)0,CloseHandle(h),h,&rffl_version,4,bytes_read,0)
 	READ_FILE(filename,(void)0,CloseHandle(h),h,&num_files,4,bytes_read,0)
@@ -302,7 +302,7 @@ FFError FFHeaderI::Read(char const *_filename)
 	READ_FILE(filename,(void)0,CloseHandle(h),h,&data_length,4,bytes_read,0)
 
 	length = static_cast<uint32_t>(data_length);
-	
+
 	if (strncmp(magic,"RFFL",4))
 	{
 		ReportError(filename,"Incorrect file type");
@@ -315,35 +315,34 @@ FFError FFHeaderI::Read(char const *_filename)
 		CloseHandle(h);
 		return FF_COULDNOTREADFILE;
 	}
-	
+
 	void * header = malloc(total_headsize);
 
 	READ_FILE(filename,(void)0,CloseHandle(h),h,header,total_headsize,bytes_read,0)
-	
+
 	data = malloc(length);
-	
+
 	READ_FILE(filename,(void)0,CloseHandle(h),h,data,data_length,bytes_read,0)
-	
+
 	CloseHandle(h);
-	
+
 	// now parse the header
-	
 	void * headerP = header;
-	
+
 	for (uint32_t i = 0; i < num_files; ++i)
 	{
 		char const * fnameP = (char *)((intptr_t)headerP + 8);
 		uint32_t leng = *(uint32_t *)((intptr_t)headerP + 4);
 		void * dataP = (void *)((intptr_t)data + *(uint32_t *)headerP);
-		
+
 		files[HashFunction(fnameP)].add_entry(FFDataI(fnameP,dataP,leng));
 
 		// increment pointer
 		headerP = (void *)(((intptr_t)headerP + 8 + strlen(fnameP) +4)&~3);
 	}
-	
+
 	free(header);
-	
+
 	return FF_OK;
 }
 
@@ -359,4 +358,3 @@ void const * FFHeaderI::FindFile(char const * name, size_t * lengthP) const
 	}
 	return 0;
 }
-

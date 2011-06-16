@@ -16,29 +16,21 @@ typedef struct HuffNode // 16-byte node structure
 {
     union
     { 		                        // the FIRST four bytes
-        struct HuffNode *zero;   // points to the "zero" branch or...
-        unsigned int       value;	// holds the value of an end node
+        struct HuffNode *zero;      // points to the "zero" branch or...
+        unsigned int       value;   // holds the value of an end node
     };
     
     union
-    {								// the SECOND four bytes
+    { // the SECOND four bytes
         struct HuffNode *one;    // points to the "one" branch or...
         struct HuffNode *link;   // points to next end node in list
     };
     
-    struct HuffNode     *parent; // the THIRD four bytes, parent node
+    struct HuffNode    *parent; // the THIRD four bytes, parent node
     
- //   union
- //   {   	                        // the FOURTH four bytes
-        unsigned int       bits;    // the bit pattern of this end node
-//        struct
-//       {
-//            unsigned char  flag;
-//            unsigned char  curdepth;
-//            unsigned char  maxdepth;
-//            unsigned char  unused;  
-//        };
-//    };
+	// the FOURTH four bytes
+    unsigned int       bits;    // the bit pattern of this end node
+
 
 } HuffNode;
 

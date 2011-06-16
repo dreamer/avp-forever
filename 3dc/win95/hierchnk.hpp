@@ -101,8 +101,8 @@ struct Replaced_Shape_Details
 {
 	~Replaced_Shape_Details()
 	{
-		if(old_object_name) delete[] old_object_name;
-		if(new_object_name) delete[] new_object_name;
+		delete[] old_object_name;
+		delete[] new_object_name;
 	}
 
 	//object name of shape to be replaced

@@ -16,6 +16,10 @@
 
 int Request_PolyFlags(void *polygon);
 
+extern int FmvColourRed;
+extern int FmvColourGreen;
+extern int FmvColourBlue;
+
 void* InitVideoScreen(void* bhdata,STRATEGYBLOCK *sbPtr)
 {
 	TOOLS_DATA_VIDEO_SCREEN *toolsData = (TOOLS_DATA_VIDEO_SCREEN *)bhdata;
@@ -162,10 +166,6 @@ void VideoScreenBehaviour(STRATEGYBLOCK *sbPtr)
 		{
 			if(sbPtr->SBdptr->ObNumLights==1)
 			{
-				extern int FmvColourRed;
-				extern int FmvColourGreen;
-				extern int FmvColourBlue;
-				
 				lightPtr->LightBright = ONE_FIXED;
 				lightPtr->LightFlags = LFlag_Omni;
 				lightPtr->LightType = LightType_PerVertex;

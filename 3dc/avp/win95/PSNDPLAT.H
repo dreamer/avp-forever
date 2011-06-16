@@ -128,7 +128,6 @@ typedef struct activesoundsample
 		#endif
 
 		#ifdef USE_XAUDIO2
-			is3D = false;
 			audioBuffer = 0;
 			pSourceVoice = 0;
 		#endif

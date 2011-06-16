@@ -4113,6 +4113,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\3dc\RimLoader.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\3dc\RingBuffer.cpp"
 				>
 			</File>
@@ -5950,6 +5954,10 @@
 				</File>
 				<File
 					RelativePath=".\resource.h"
+					>
+				</File>
+				<File
+					RelativePath=".\3dc\RimLoader.h"
 					>
 				</File>
 				<File

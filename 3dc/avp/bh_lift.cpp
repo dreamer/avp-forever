@@ -10,14 +10,10 @@
 #include "inventry.h"
 #include "triggers.h"
 #include "huddefs.h"
-
 #include "dynblock.h"
 #include "dynamics.h"
-
 #define UseLocalAssert TRUE
-
 #include "ourasert.h"
-
 #include "pmove.h"
 #include "pvisible.h"
 #include "bh_swdor.h"
@@ -26,10 +22,7 @@
 #include "bh_lnksw.h"
 #include "bh_binsw.h"
 #include "bh_lift.h"
-
 #include "psnd.h"
-
-/* for win95 net game support */
 #include "pldghost.h"
 
 // stuff for environment changing 

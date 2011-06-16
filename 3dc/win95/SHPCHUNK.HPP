@@ -1053,8 +1053,8 @@ public:
 	Shape_Preprocessed_Data_Chunk (Chunk_With_Children * parent, const char * data, size_t ssize);
 	~Shape_Preprocessed_Data_Chunk ()
 	{
-		if(extra_data) delete[] extra_data;
-		if(memory_block) delete[] memory_block;
+		delete[] extra_data;
+		delete[] memory_block;
 	}
 
 	virtual size_t size_chunk ()

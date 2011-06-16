@@ -6,7 +6,6 @@ char* AvpCDPath=0;
 
 extern char const * SecondTex_Directory;
 extern char * SecondSoundDir;
-//extern char const * BaseDir;
 
 void GetPathFromRegistry()
 {

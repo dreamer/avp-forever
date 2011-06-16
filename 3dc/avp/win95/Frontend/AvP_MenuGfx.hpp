@@ -144,10 +144,10 @@ enum AVPMENUGFX_ID
 
 typedef struct
 {
-	char			*FilenamePtr;
-	AVPTEXTURE		*ImagePtr;
+	char		*FilenamePtr;
+	AVPTEXTURE	*ImagePtr;
 
-	texID_t	textureID;	// texture ID for TextureManager.cpp system
+	texID_t	    textureID;	// texture ID for TextureManager.cpp system
 	uint32_t	Width;
 	uint32_t	Height;
 

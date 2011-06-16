@@ -808,8 +808,8 @@ void PlayPredSlashSound(void) {
 	#endif
 }
 
-void PlayCudgelSound(void) {
-
+void PlayCudgelSound(void)
+{
 	unsigned int rand=FastRandom() % 4;
 	if (rand == oldRandomValue) rand = (rand + 1) % 4;
 	oldRandomValue = rand;
@@ -855,7 +855,7 @@ int FindAndLoadWavFile(int soundNum, char* wavFileName)
 	//first look in fast file
 	{
 		size_t nLen;
-		if (ffreadbuf(sound_name,&nLen))
+		if (ffreadbuf(sound_name, &nLen))
 		{
 			return LoadWavFromFastFile(soundNum, sound_name);
 		}
@@ -885,7 +885,7 @@ int FindAndLoadWavFile(int soundNum, char* wavFileName)
 			fclose(wavFile);
 		}
 
-		return LoadWavFile(soundNum, sound_name) ;
+		return LoadWavFile(soundNum, sound_name);
 	}
 #else
 	OutputDebugString("else failed to find sound\n");
@@ -951,7 +951,8 @@ void LoadSounds(char *soundDirectory)
 	LOCALASSERT(soundDirectory);
 
 	/* first check that sound has initialised and is turned on */
-	if(!SoundSys_IsOn()) return;	
+	if (!SoundSys_IsOn()) 
+		return;	
 
 	/* load RebSnd file into a (big) buffer	*/
 	{

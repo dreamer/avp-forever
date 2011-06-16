@@ -64,10 +64,10 @@ extern VECTORCH GunMuzzleDirectionInWS;
 extern int Weapon_ThisBurst;
 
 /* stuff to do with where a gun is pointing */
-extern int GunMuzzleSightX, GunMuzzleSightY;
+extern fixed_t GunMuzzleSightX, GunMuzzleSightY;
 /* In 16.16 for smoothness. On-screen coords indicating to where the gun's muzzle is pointing */
 
-int SmartTargetSightX, SmartTargetSightY;
+fixed_t SmartTargetSightX, SmartTargetSightY;
 char CurrentlySmartTargetingObject;
 DISPLAYBLOCK *SmartTarget_Object;
 DISPLAYBLOCK *Old_SmartTarget_Object;
@@ -93,7 +93,7 @@ void CalculateWhereGunIsPointing(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA
     GunMuzzleDirectionInVS.vx = 
     	(GunMuzzleSightX-(ScreenDescriptorBlock.SDB_Width<<15))/(VDBPtr->VDB_ProjX);
 	GunMuzzleDirectionInVS.vy = 
-		(((GunMuzzleSightY-(ScreenDescriptorBlock.SDB_Height<<15))/(VDBPtr->VDB_ProjY))*3)/4;
+		/*((*/(GunMuzzleSightY-(ScreenDescriptorBlock.SDB_Height<<15))/(VDBPtr->VDB_ProjY)/*)*3)/4*/;
     
 	/* Now fudge for gun judder! */
  	if ((twPtr->UseStateMovement==0)||(weaponPtr->WeaponIDNumber == WEAPON_MINIGUN)) 
@@ -172,7 +172,6 @@ void CalculateWhereGunIsPointing(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA
 
 void CalculatePlayersTarget(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA *weaponPtr)
 {
-
 	CalculateWhereGunIsPointing(twPtr,weaponPtr);
 
 	FindPolygonInLineOfSight(&GunMuzzleDirectionInWS, &Global_VDB_Ptr->VDB_World, 1,Player);
@@ -338,9 +337,7 @@ BOOL CalculateFiringSolution(VECTORCH* firing_pos,VECTORCH* target_pos,VECTORCH*
 		mat.mat13=normal.vx;
 		mat.mat23=normal.vy;
 		mat.mat33=normal.vz;
-
 	}
-
 
 	//apply the rotation to the velocity
 	rotated_vel=*target_vel;
@@ -381,7 +378,6 @@ BOOL CalculateFiringSolution(VECTORCH* firing_pos,VECTORCH* target_pos,VECTORCH*
 	Normalise(solution);
 	
 	return TRUE;
-
 }
 
 void SmartTarget(int speed,int projectile_speed)
@@ -496,7 +492,7 @@ void SmartTarget(int speed,int projectile_speed)
 							
 			targetX = (ScreenDescriptorBlock.SDB_Width>>1);
 			targetY = (ScreenDescriptorBlock.SDB_Height>>1);
-					
+
 			{
 				int maxRangeX = (ScreenDescriptorBlock.SDB_Width*14)/32;  /* gives nearly 90% of screen */
 				

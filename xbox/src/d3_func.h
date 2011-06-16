@@ -62,7 +62,7 @@ struct r_PixelShader
  *	taken from http://www.mvps.org/directx/articles/definitions_for_dx7_vertex_types.htm
  */
 
-typedef struct _D3DTVERTEX
+typedef struct _D3DLVERTEX
 {
 	float sx;
 	float sy;
@@ -158,10 +158,10 @@ typedef struct D3DInfo
 	class EffectManager		*effectSystem;
 
 	// shader IDs
-	uint32_t				mainEffect;
-	uint32_t				orthoEffect;
-	uint32_t				cloudEffect;
-	uint32_t				fmvEffect;
+	effectID_t				mainEffect;
+	effectID_t				orthoEffect;
+	effectID_t				cloudEffect;
+	effectID_t				fmvEffect;
 
 	// vertex declarations
 	class VertexDeclaration		*mainDecl;

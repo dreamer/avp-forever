@@ -46,7 +46,6 @@ void * SoundBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	sbb->activ_no = SOUND_NOACTIVEINDEX;
 	
 	return((void*)sbb);
-	
 }
 
 void SoundBehaveDestroy (STRATEGYBLOCK * sbptr)
@@ -62,6 +61,7 @@ void SoundBehaveDestroy (STRATEGYBLOCK * sbptr)
 		DeallocateMem (sbb->wav_name);
 	}
 }
+
 void SoundBehaveFun (STRATEGYBLOCK * sbptr)
 {
 	SOUND_BEHAV_BLOCK * sbb = (SOUND_BEHAV_BLOCK*)sbptr->SBdataptr;
@@ -78,7 +78,6 @@ void SoundBehaveFun (STRATEGYBLOCK * sbptr)
 			int dist=VectorDistance(&Player->ObWorld,&sbb->position);
 			if(dist<=sbb->outer_range)
 			{
-
 				s3d.position = sbb->position;
 				s3d.inner_range = sbb->inner_range;
 				s3d.outer_range = sbb->outer_range;
@@ -108,7 +107,7 @@ void SoundBehaveFun (STRATEGYBLOCK * sbptr)
 		if(dist>sbb->outer_range)
 		{
 			//stop sound if it is playing
-		
+
 			if (sbb->activ_no != SOUND_NOACTIVEINDEX)
 			{
 				Sound_Stop (sbb->activ_no);
@@ -214,6 +213,7 @@ void StartPlacedSoundPlaying(STRATEGYBLOCK* sbptr)
 		sbb->playing=1;
 	}
 }
+
 void StopPlacedSoundPlaying(STRATEGYBLOCK* sbptr)
 {
 	SOUND_BEHAV_BLOCK * sbb = 0;
@@ -240,10 +240,7 @@ void StopPlacedSoundPlaying(STRATEGYBLOCK* sbptr)
 typedef struct placed_sound_save_block
 {
 	SAVE_BLOCK_STRATEGY_HEADER header;
-
 	BOOL playing;
-
-
 }PLACED_SOUND_SAVE_BLOCK;
 
 //defines for load/save macros
@@ -282,12 +279,10 @@ void SaveStrategy_PlacedSound(STRATEGYBLOCK* sbPtr)
 
 	sbb = (SOUND_BEHAV_BLOCK *)sbPtr->SBdataptr;
 
-
 	GET_STRATEGY_SAVE_BLOCK(PLACED_SOUND_SAVE_BLOCK,block,sbPtr);
 	
 	//start copying stuff
 	COPYELEMENT_SAVE(playing)
 	
 	Save_SoundState(&sbb->activ_no);
-
 }

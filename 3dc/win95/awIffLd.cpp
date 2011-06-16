@@ -7,12 +7,9 @@
 #endif
 
 #include "awTexLd.hpp"
-
 #include "iff.hpp"
 #include "iff_ILBM.hpp"
-
 #include "list_tem.hpp"
-
 #include <limits.h>
 
 // conversion functors for IFF loader
@@ -163,36 +160,36 @@ class AwIffLoader : public AwTl::TexFileLoader
 		AwIffLoader() : m_pPalette(NULL), m_bDecoding(false) {}
 	protected:
 		virtual ~AwIffLoader();
-	
+
 		virtual void LoadHeaderInfo(MediaMedium * pMedium);
 
 		virtual unsigned GetNumColours();
-		
+
 		virtual unsigned GetMinPaletteSize();
 
 		virtual bool HasTransparentMask(bool bDefault);
-		
+
 		virtual void AllocateBuffers(bool bWantBackup, unsigned nMaxPaletteSize);
-		
+
 		virtual void OnBeginRestoring(unsigned nMaxPaletteSize);
-		
+
 		virtual AwTl::Colour * GetPalette();
-		
-		
+
+
 		virtual AwTl::PtrUnion GetRowPtr(unsigned nRow);
-		
+
 		virtual void LoadNextRow(AwTl::PtrUnion pRow);
-		
+
 		virtual void ConvertRow(AwTl::PtrUnion pDest, unsigned nDestWidth, AwTl::PtrUnionConst pSrc, unsigned nSrcOffset, unsigned nSrcWidth, AwTl::Colour * pPalette db_code1(DB_COMMA unsigned nPaletteSize));
-		
+
 		virtual DWORD GetTransparentColour();
-		
+
 		virtual void OnFinishLoading(bool bSuccess);
-		
+
 		virtual void OnFinishRestoring(bool bSuccess);
-		
+
 		virtual AwBackupTexture * CreateBackupTexture();
-		
+
 	private:
 		static bool Enumerator(IFF::Chunk * pChunk, void * pData);
 		// list of chunks found by enumerator
@@ -201,12 +198,12 @@ class AwIffLoader : public AwTl::TexFileLoader
 		// smallest and largest palette sizes of versions of this image
 		unsigned m_nMaxPaletteSize;
 		unsigned m_nMinPaletteSize;
-		
+
 		// buffer for palette -
 		// since the IFF cmap table is in a different format to what the Aw loaders require
 		// (maybe should think about standardizing the data types?)
 		AwTl::Colour * m_pPalette;
-		
+
 		// iff data
 		IFF::File m_ifData;
 		IFF::IlbmBmhdChunk * m_pHdr;
@@ -218,23 +215,23 @@ class AwIffLoader : public AwTl::TexFileLoader
 
 AwIffLoader::~AwIffLoader()
 {
-	if (m_pPalette) delete[] m_pPalette;
+	delete[] m_pPalette;
 }
 
 void AwIffLoader::LoadHeaderInfo(MediaMedium * pMedium)
 {
 	db_log4("\tLoading an IFF file");
-	
+
 	while (m_listBodyChunks.size())
 		m_listBodyChunks.delete_first_entry();
-	
+
 	if (!m_ifData.Load(pMedium) || !m_ifData.GetContents())
 	{
 		if (NO_ERROR == (awTlLastWinErr = GetLastError()))
 			awTlLastErr = AW_TLE_BADFILEDATA;
 		else
 			awTlLastErr = AW_TLE_CANTREADFILE;
-			
+
 		db_log3("AwCreateTexture(): ERROR: IFF file load failed");
 	}
 	else
@@ -255,7 +252,7 @@ unsigned AwIffLoader::GetMinPaletteSize()
 	return m_nMinPaletteSize;
 }
 
-void AwIffLoader::AllocateBuffers(bool /*bWantBackup*/, unsigned nMaxPaletteSize)
+void AwIffLoader::AllocateBuffers(bool /*bWantBackup*/, uint32_t nMaxPaletteSize)
 {
 	// we will need to allocate buffers when restoring as well as first-time loading
 	// so allocate buffers in OnBeginRestoring() which we'll call here
@@ -289,7 +286,7 @@ bool AwIffLoader::Enumerator(IFF::Chunk * pChunk, void * pData)
 	return true; // continue enumeration
 }
 
-void AwIffLoader::OnBeginRestoring(unsigned nMaxPaletteSize)
+void AwIffLoader::OnBeginRestoring(uint32_t nMaxPaletteSize)
 {
 	using namespace AwTl;
 	
@@ -303,7 +300,7 @@ void AwIffLoader::OnBeginRestoring(unsigned nMaxPaletteSize)
 		}
 		
 		m_pBody = NULL;
-		unsigned nBestPaletteSize = 0;
+		uint32_t nBestPaletteSize = 0;
 		
 		for (LIF<IFF::IlbmBodyChunk *> itChunks(&m_listBodyChunks); !itChunks.done(); itChunks.next())
 		{
@@ -322,7 +319,7 @@ void AwIffLoader::OnBeginRestoring(unsigned nMaxPaletteSize)
 		{
 			m_pHdr = static_cast<IFF::IlbmBmhdChunk *>(m_pBody->GetProperty("BMHD"));
 			// delete old buffers
-			if (m_pPalette) delete[] m_pPalette;
+			delete[] m_pPalette;
 			// allocate buffer for palette, make it extra big to cope with corrupt files
 			unsigned nAllocPaletteSize = m_pCmap->nEntries;
 			unsigned nAllocPaletteSizeShift = 0;

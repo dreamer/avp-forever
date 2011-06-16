@@ -574,7 +574,7 @@ struct TrackPointEffect
 
 	~TrackPointEffect()
 	{
-		if (targets) delete[] targets;
+		delete[] targets;
 	}
 };
 

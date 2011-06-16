@@ -14,7 +14,6 @@
 #include "bh_types.h"
 #include "comp_shp.h"
 #include "dynblock.h"
-
 #include "bh_alien.h"
 #include "pvisible.h"
 #include "bh_pred.h"
@@ -33,12 +32,8 @@
 #include "bh_videoscreen.h"
 #include "bh_plift.h"
 #include "weapons.h"
-
-/* for win95 net game support */
 #include "pldghost.h"
-
 #include "pfarlocs.h"
-
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 
@@ -136,61 +131,56 @@ as the module system is not enabled at this point.
 --------------------------------------------------------------------*/
 void InitObjectVisibilities(void)
 {
-        int sbIndex = 0;
-        STRATEGYBLOCK *sbPtr;
+	int sbIndex = 0;
+	STRATEGYBLOCK *sbPtr;
 
-        /* loop thro' the strategy block list, looking for objects that will have
-        their visibilities managed ... */
-        while(sbIndex < NumActiveStBlocks)
-        {       
-                sbPtr = ActiveStBlockList[sbIndex++];
-                if(     (sbPtr->I_SBtype ==     I_BehaviourAlien)||
-                        (sbPtr->I_SBtype ==     I_BehaviourMarine)||
-                        (sbPtr->I_SBtype ==     I_BehaviourInanimateObject)||
-                        (sbPtr->I_SBtype ==     I_BehaviourVideoScreen)||
-                        (sbPtr->I_SBtype ==     I_BehaviourQueenAlien)||
-                        (sbPtr->I_SBtype ==     I_BehaviourFaceHugger)||
-                        (sbPtr->I_SBtype ==     I_BehaviourPredator)||
-                        (sbPtr->I_SBtype ==     I_BehaviourAutoGun)||
-                        (sbPtr->I_SBtype ==     I_BehaviourPlatform)||
-                        (sbPtr->I_SBtype ==     I_BehaviourBinarySwitch && sbPtr->DynPtr)||/*Allow for switches with no shape*/         
-                        (sbPtr->I_SBtype ==     I_BehaviourLinkSwitch && sbPtr->DynPtr)||                       
-                        (sbPtr->I_SBtype ==     I_BehaviourTrackObject)||                       
-                        (sbPtr->I_SBtype ==     I_BehaviourFan)||                       
-                        (sbPtr->I_SBtype ==     I_BehaviourPlacedHierarchy)||                   
-                        (sbPtr->I_SBtype ==     I_BehaviourPlacedLight)||                       
-                        (sbPtr->I_SBtype ==     I_BehaviourXenoborg)||
-                        (sbPtr->I_SBtype ==     I_BehaviourSeal)||
-                        (sbPtr->I_SBtype ==     I_BehaviourDatabase)||
-                        (sbPtr->I_SBtype ==     I_BehaviourDummy)||
-                        (sbPtr->I_SBtype ==     I_BehaviourPredatorAlien)
-                        )
-                {
-                        DYNAMICSBLOCK *dynPtr = sbPtr->DynPtr;
-                        LOCALASSERT(dynPtr);
-                        
-                        sbPtr->containingModule = ModuleFromPosition(&(dynPtr->Position), (MODULE *)0);
-						
-                        sbPtr->maintainVisibility = 1;
-						
-                        
-                }
-                else
-                {
-                        /* just in case ... */
-                        if(sbPtr->I_SBtype !=   I_BehaviourGenerator &&
-						   sbPtr->I_SBtype !=   I_BehaviourMarinePlayer)
-                        {
-                                sbPtr->containingModule = (MODULE *)0;
-                        }
-                        sbPtr->maintainVisibility = 0;
-                }
-                                                        
-        }
+	/* loop thro' the strategy block list, looking for objects that will have
+	their visibilities managed ... */
+	while(sbIndex < NumActiveStBlocks)
+	{
+		sbPtr = ActiveStBlockList[sbIndex++];
+		if(     (sbPtr->I_SBtype ==     I_BehaviourAlien)||
+				(sbPtr->I_SBtype ==     I_BehaviourMarine)||
+				(sbPtr->I_SBtype ==     I_BehaviourInanimateObject)||
+				(sbPtr->I_SBtype ==     I_BehaviourVideoScreen)||
+				(sbPtr->I_SBtype ==     I_BehaviourQueenAlien)||
+				(sbPtr->I_SBtype ==     I_BehaviourFaceHugger)||
+				(sbPtr->I_SBtype ==     I_BehaviourPredator)||
+				(sbPtr->I_SBtype ==     I_BehaviourAutoGun)||
+				(sbPtr->I_SBtype ==     I_BehaviourPlatform)||
+				(sbPtr->I_SBtype ==     I_BehaviourBinarySwitch && sbPtr->DynPtr)||/*Allow for switches with no shape*/
+				(sbPtr->I_SBtype ==     I_BehaviourLinkSwitch && sbPtr->DynPtr)||
+				(sbPtr->I_SBtype ==     I_BehaviourTrackObject)||
+				(sbPtr->I_SBtype ==     I_BehaviourFan)||
+				(sbPtr->I_SBtype ==     I_BehaviourPlacedHierarchy)||
+				(sbPtr->I_SBtype ==     I_BehaviourPlacedLight)||
+				(sbPtr->I_SBtype ==     I_BehaviourXenoborg)||
+				(sbPtr->I_SBtype ==     I_BehaviourSeal)||
+				(sbPtr->I_SBtype ==     I_BehaviourDatabase)||
+				(sbPtr->I_SBtype ==     I_BehaviourDummy)||
+				(sbPtr->I_SBtype ==     I_BehaviourPredatorAlien)
+				)
+		{
+				DYNAMICSBLOCK *dynPtr = sbPtr->DynPtr;
+				LOCALASSERT(dynPtr);
 
-        /* initialise each object's visibility */
-        DoObjectVisibilities();
+				sbPtr->containingModule = ModuleFromPosition(&(dynPtr->Position), (MODULE *)0);
+				sbPtr->maintainVisibility = 1;
+		}
+		else
+		{
+				/* just in case ... */
+				if(sbPtr->I_SBtype !=   I_BehaviourGenerator &&
+				   sbPtr->I_SBtype !=   I_BehaviourMarinePlayer)
+				{
+						sbPtr->containingModule = (MODULE *)0;
+				}
+				sbPtr->maintainVisibility = 0;
+		}
+	}
 
+	/* initialise each object's visibility */
+	DoObjectVisibilities();
 }
 
 

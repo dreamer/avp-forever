@@ -9,9 +9,7 @@
 #include "comp_shp.h"
 #include "Avpview.h"
 #define UseLocalAssert TRUE
-
 #include "ourasert.h"
-
 #include "bh_weap.h"
 #include "bh_debri.h"
 #include "weapons.h"
@@ -34,8 +32,6 @@
 #include "savegame.h"
 #include "los.h"
 #include "DetailLevels.h"
-
-/* for win95 net game support */
 #include "pldghost.h"
 #include "pldnet.h"
 
