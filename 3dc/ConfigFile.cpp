@@ -167,10 +167,10 @@ bool Config_Save()
 		while (variableIt != (*headingIt).second.end())
 		{
 			file << (*variableIt).first << " = " << (*variableIt).second << "\n";
-			variableIt++;
+			++variableIt;
 		}
 
-		headingIt++;
+		++headingIt;
 		file << "\n";
 	}
 	return true;
@@ -221,7 +221,7 @@ void Config_SetInt(const std::string &heading, const std::string &variable, int 
 	}
 }
 
-void Config_SetString(const std::string &heading, const std::string &variable, const std::string newValue)
+void Config_SetString(const std::string &heading, const std::string &variable, const std::string &newValue)
 {
 	if (CheckValuesExist(heading, variable))
 	{
