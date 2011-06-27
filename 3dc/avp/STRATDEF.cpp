@@ -190,7 +190,7 @@ STRATEGYBLOCK * AttachNewStratBlock
 
 	InitialiseSBValues(sptr);
 
-	for(i = 0; i < SB_NAME_LENGTH; i++);
+	for(i = 0; i < SB_NAME_LENGTH; i++)
 	{
 		sptr->SBname[i] = '\0';
 	}
