@@ -92,7 +92,8 @@ size_t Object_Hierarchy_Data_Chunk::size_chunk ()
 {
 	if (ob_name)
 	{
-		chunk_size = 12 + 4+4*num_extra_data + strlen(ob_name) + 4 - strlen(ob_name)%4;
+		size_t ob_name_length = strlen(ob_name);
+		chunk_size = 12 + 4+4*num_extra_data + ob_name_length + 4 - ob_name_length%4;
 	}
 	else
 	{

@@ -158,7 +158,8 @@ public:
 	{
 		if (sequence_name)
 		{
-			return(chunk_size = 12 + 16 + 4*num_extra_data + strlen(sequence_name) + 4 - strlen(sequence_name)%4);
+			size_t sequence_name_length = strlen(sequence_name);
+			return(chunk_size = 12 + 16 + 4*num_extra_data + sequence_name_length + 4 - sequence_name_length%4);
 		}
 		else
 		{

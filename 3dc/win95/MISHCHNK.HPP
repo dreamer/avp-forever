@@ -212,7 +212,8 @@ public:
 
 	virtual size_t size_chunk ()
 	{
-		return (chunk_size = 12 + strlen (rif_name) + 4 - strlen (rif_name)%4);
+		size_t rif_name_length = strlen (rif_name);
+		return (chunk_size = 12 + rif_name_length + 4 - rif_name_length%4);
 	}
 
 	virtual void fill_data_block (char * data_start);

@@ -84,7 +84,8 @@ public:
 
 	virtual size_t size_chunk ()
 	{
-		return(chunk_size = 12 + strlen (hierarchy_name) + 4 - strlen (hierarchy_name)%4);
+		size_t hierarchy_name_length = strlen (hierarchy_name);
+		return(chunk_size = 12 + hierarchy_name_length + 4 - hierarchy_name_length%4);
 	}
 
 	virtual void fill_data_block (char * data_start);

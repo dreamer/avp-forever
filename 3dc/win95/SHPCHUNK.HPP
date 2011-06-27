@@ -803,7 +803,8 @@ public:
 
 	size_t size_chunk()
 	{
-		return chunk_size = 12 + 8 + 4 + strlen(file_name) + (4-strlen(file_name)%4);
+		size_t file_name_length = strlen(file_name);
+		return chunk_size = 12 + 8 + 4 + file_name_length + (4-file_name_length%4);
 	}
 
 	void fill_data_block (char *);
@@ -834,7 +835,8 @@ public :
 	char* shape_name; //a combination of object and file name
 	size_t size_chunk()
 	{
-		return chunk_size = 12 +4+ strlen(object_name) + (4-strlen(object_name)%4);
+		size_t object_name_length = strlen(object_name);
+		return chunk_size = 12 +4+ object_name_length + (4-object_name_length%4);
 	}
 
 	void post_input_processing();
@@ -942,7 +944,8 @@ public:
 
 	virtual size_t size_chunk ()
 	{
-		return (chunk_size = 12 + strlen (shape_name) + 4 - strlen (shape_name)%4);
+		size_t shape_name_length = strlen (shape_name);
+		return (chunk_size = 12 + shape_name_length + 4 - shape_name_length%4);
 	}
 
 	virtual void fill_data_block (char * data_start);
