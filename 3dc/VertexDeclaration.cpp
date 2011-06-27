@@ -50,7 +50,8 @@ bool VertexDeclaration::Create()
 		this->elements.clear();
 		return true;
 	}
-	else return false;
+	
+	return false;
 }
 
 bool VertexDeclaration::Release()
@@ -65,33 +66,30 @@ bool VertexDeclaration::Set()
 
 void VertexDeclaration::Add(uint16_t stream, VD_TYPE type, VD_METHOD method, VD_USAGE usage, uint8_t usageIndex)
 {
-	vertexElement newElement;
-
 	uint16_t elementSize = 0;
 
 	// calculate element size
 	switch (type)
 	{
 		case VDTYPE_FLOAT1:
-			elementSize = sizeof(float);
+		case VDTYPE_COLOR:
+			elementSize = 4; // sizeof(float);
 			break;
 		case VDTYPE_FLOAT2:
-			elementSize = sizeof(float) * 2;
+			elementSize = 8; // sizeof(float) * 2;
 			break;
 		case VDTYPE_FLOAT3:
-			elementSize = sizeof(float) * 3;
+			elementSize = 12; // sizeof(float) * 3;
 			break;
 		case VDTYPE_FLOAT4:
-			elementSize = sizeof(float) * 4;
-			break;
-		case VDTYPE_COLOR:
-			elementSize = sizeof(uint32_t);
+			elementSize = 16; // sizeof(float) * 4;
 			break;
 		default:
 			assert (1==0);
 			break;
 	}
 
+	vertexElement newElement;
 	newElement.stream = stream;
 	newElement.offset = this->offset;
 	newElement.usage  = usage;

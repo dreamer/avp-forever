@@ -295,7 +295,7 @@ bool R_BeginScene()
 	LastError = d3d.lpD3DDevice->TestCooperativeLevel();
 	if (FAILED(LastError))
 	{
-		// release vertex + index buffers, and dynamic textures
+		// release dynamic vertex and index buffers and dynamic textures
 		ReleaseVolatileResources();
 
 		// disable XInput
@@ -705,13 +705,6 @@ bool CreateVolatileResources()
 
 	d3d.orthoIB = new IndexBuffer;
 	d3d.orthoIB->Create(kMaxIndices * 3, USAGE_DYNAMIC);
-
-	// stars test
-	d3d.starsVB = new VertexBuffer;
-	d3d.starsVB->Create(kMaxVertices, FVF_LVERTEX, USAGE_STATIC);
-
-	d3d.starsIB = new IndexBuffer;
-	d3d.starsIB->Create(kMaxIndices * 3, USAGE_STATIC);
 
 	SetRenderStateDefaults();
 
@@ -2443,6 +2436,14 @@ bool InitialiseDirect3D()
 	d3d.tallFontText->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 1);
 	d3d.tallFontText->Create();
 
+	// stars
+	d3d.starsDecl = new VertexDeclaration;
+	d3d.starsDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
+	d3d.starsDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
+	d3d.starsDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    1);
+	d3d.starsDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
+	d3d.starsDecl->Create();
+
 	r_Texture whiteTexture;
 	r_Texture missingTexture;
 
@@ -2520,7 +2521,7 @@ bool InitialiseDirect3D()
 	d3d.cloudEffect = d3d.effectSystem->Add("cloud", "tallFontTextVertex.vsh", "tallFontTextPixel.psh", d3d.tallFontText);
 
 	// stars test
-	d3d.starsEffect = d3d.effectSystem->Add("stars", "stars.vsh", "stars.psh", d3d.mainDecl);
+	d3d.starsEffect = d3d.effectSystem->Add("stars", "stars.vsh", "stars.psh", d3d.starsDecl);
 
 	// we should bail out if the shaders can't be loaded
 	if ((d3d.mainEffect == kNullShaderID) ||
@@ -2533,6 +2534,16 @@ bool InitialiseDirect3D()
 
 	// create vertex and index buffers
 	CreateVolatileResources();
+
+	// create static buffers
+	{
+		// stars test
+		d3d.starsVB = new VertexBuffer;
+		d3d.starsVB->Create(kMaxVertices, FVF_LVERTEX, USAGE_STATIC);
+
+		d3d.starsIB = new IndexBuffer;
+		d3d.starsIB->Create(kMaxIndices * 3, USAGE_STATIC);
+	}
 
 	Con_Init();
 	Net_Initialise();
@@ -2589,14 +2600,19 @@ void ReleaseDirect3D()
 
 	Tex_DeInit();
 
-	// release back-buffer copy surface, vertex buffer and index buffer
+	// release dynamic vertex buffers, index buffers and textures
 	ReleaseVolatileResources();
+
+	// static buffers
+	if (d3d.starsVB) d3d.starsVB->Release();
+	if (d3d.starsIB) d3d.starsIB->Release();
 
 	// release vertex declarations
 	delete d3d.mainDecl;
 	delete d3d.orthoDecl;
 	delete d3d.fmvDecl;
 	delete d3d.tallFontText;
+	delete d3d.starsDecl;
 
 	// clean up render list classes
 	RenderListDeInit();

@@ -195,6 +195,8 @@ typedef struct D3DInfo
 	class VertexDeclaration		*fmvDecl;
 	class VertexDeclaration		*tallFontText;
 
+	class VertexDeclaration		*starsDecl;
+
 	// enumeration
 	uint32_t				NumDrivers;
 	uint32_t				CurrentDriver;
