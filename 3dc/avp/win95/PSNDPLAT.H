@@ -70,7 +70,7 @@ typedef struct soundsampledata
 
 		flags = 0;
 		dsFrequency = 0;
-		wavName = '\0';
+		wavName = 0;
 		length = 0;
 	}
 	
