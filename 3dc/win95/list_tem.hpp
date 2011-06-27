@@ -261,7 +261,7 @@ public:
 
   void delete_entry(const T& d) {
     List_Member_Base<T> *e = sentinel->next;
-    while (e != sentinel && data(e) != d && e != sentinel) {
+    while (e != sentinel && data(e) != d) {
       e = e->next;
     }
     if (e == sentinel) {
@@ -277,7 +277,7 @@ public:
 
   void delete_entry_backward(const T& d) {
     List_Member_Base<T> *e = sentinel->prev;
-    while (e != sentinel && data(e) != d && e != sentinel) {
+    while (e != sentinel && data(e) != d) {
       e = e->prev;
     }
     if (e == sentinel) {
@@ -326,7 +326,7 @@ public:
 
   T next_entry(const T& d) const {
     List_Member_Base<T> *e = sentinel->next;
-    while (e != sentinel && data(e) != d && e != sentinel) {
+    while (e != sentinel && data(e) != d) {
       e = e->next;
     }
     if (e == sentinel) {
@@ -362,7 +362,6 @@ public:
           if (data(e) == d)
           	break;
           e = e->next;
-		  
       }
       if (e == sentinel) 
       {
