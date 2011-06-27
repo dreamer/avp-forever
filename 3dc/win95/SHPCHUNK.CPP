@@ -3257,6 +3257,7 @@ void Shape_Preprocessed_Data_Chunk::fill_data_block(char* data_start)
 	memcpy(data_start,extra_data,4*num_extra_data);
 }
 
+// bjd - FIXME
 void* Shape_Preprocessed_Data_Chunk::GetMemoryBlock()
 {
 	void* retval = memory_block;
