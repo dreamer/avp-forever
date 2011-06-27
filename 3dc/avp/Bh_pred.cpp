@@ -1181,11 +1181,15 @@ void PredatorBehaviour(STRATEGYBLOCK *sbPtr)
                 case (PBS_Dying):
                 {
                         descriptor="Dying";
+
+						Execute_Dying(sbPtr);
+/*
                         if (predatorIsNear) {
                                 Execute_Dying(sbPtr);
                         } else {
                                 Execute_Dying(sbPtr);
                         }
+*/
                         state_result=PRC_No_Change;
                         break;
                 }
@@ -1281,12 +1285,16 @@ void PredatorBehaviour(STRATEGYBLOCK *sbPtr)
                 case (PBS_SelfDestruct):
                 {
                         descriptor="Self Destructing";
+
+						state_result=Execute_PNS_SelfDestruct(sbPtr);
+/*
                         if (predatorIsNear) {
                                 state_result=Execute_PNS_SelfDestruct(sbPtr);
-                                /* No elevation should be present. */
+                                // No elevation should be present.
                         } else {
                                 state_result=Execute_PNS_SelfDestruct(sbPtr);
                         }
+*/
                         break;
                 }
                 default:
@@ -6791,7 +6799,6 @@ void StartPredatorSelfDestructExplosion(STRATEGYBLOCK *sbPtr) {
 		   SbPtr->I_SBtype==I_BehaviourMarine ||
 		   SbPtr->I_SBtype==I_BehaviourSeal ||
 		   SbPtr->I_SBtype==I_BehaviourPredatorAlien ||
-		   SbPtr->I_SBtype==I_BehaviourAlien ||
 		   SbPtr->I_SBtype==I_BehaviourMarinePlayer ||
 		   SbPtr->I_SBtype==I_BehaviourPredatorPlayer ||
 		   SbPtr->I_SBtype==I_BehaviourAlienPlayer)

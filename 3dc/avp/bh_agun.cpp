@@ -544,6 +544,11 @@ static void AGun_ComputeDeltaValues(STRATEGYBLOCK *sbPtr)
 	{
 		int fake_timer;
 
+		fake_timer=DIV_FIXED(angle,(SGUN_PAN_GIMBALL<<1));
+		fake_timer+=32767;
+		if (fake_timer>=65536) fake_timer=65535;
+		if (fake_timer<=0) fake_timer=0;
+/*
 		if (angle>0) {
 
 			fake_timer=DIV_FIXED(angle,(SGUN_PAN_GIMBALL<<1));
@@ -557,9 +562,8 @@ static void AGun_ComputeDeltaValues(STRATEGYBLOCK *sbPtr)
 			fake_timer+=32767;
 			if (fake_timer>=65536) fake_timer=65535;
 			if (fake_timer<=0) fake_timer=0;
-
 		}
-
+*/
 		GLOBALASSERT(fake_timer>=0);
 		GLOBALASSERT(fake_timer<65536);
 

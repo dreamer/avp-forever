@@ -8099,6 +8099,9 @@ void AlienGrab_Strike(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr)
 			TemplateWeapon[WEAPON_ALIEN_GRAB].TimeOutRateForState[WEAPONSTATE_FIRING_PRIMARY]=
 				(DIV_FIXED(WEAPONSTATE_INITIALTIMEOUTCOUNT,(ONE_FIXED/3)));
 
+			InitHModelTweening(&PlayersWeaponHModelController,(ONE_FIXED>>4),HMSQT_AlienHUD,
+					(int)AHSS_Eat,(ONE_FIXED/3),0);
+/*
 			if ((FastRandom()&65536)>32768) {
 				InitHModelTweening(&PlayersWeaponHModelController,(ONE_FIXED>>4),HMSQT_AlienHUD,
 					(int)AHSS_Eat,(ONE_FIXED/3),0);
@@ -8106,6 +8109,7 @@ void AlienGrab_Strike(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr)
 				InitHModelTweening(&PlayersWeaponHModelController,(ONE_FIXED>>4),HMSQT_AlienHUD,
 					(int)AHSS_Eat,(ONE_FIXED/3),0);
 			}
+*/
 			PlayersWeaponHModelController.Playing=1;
 
 		} else {

@@ -4187,11 +4187,14 @@ void LocalGuardMission_Control(STRATEGYBLOCK *sbPtr) {
 					PrintDebuggingText("Local Guard marine dying in %s\n",sbPtr->containingModule->name);
 				}
 
+				Execute_Dying(sbPtr);
+/*
 				if (marineIsNear) {
 					Execute_Dying(sbPtr);
 				} else {
 					Execute_Dying(sbPtr);
 				}
+*/
 				break;
 			}
 			case(MBS_GetWeapon):
@@ -5265,7 +5268,6 @@ void KillMarine(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, int 
 	}
 
 	/* Set GibbFactor */
-	gibbFactor=0;
 	{
 		int tkd;
 
@@ -19083,14 +19085,14 @@ void Marine_Activate_AcidAvoidance_State(STRATEGYBLOCK *sbPtr, VECTORCH *inciden
 			/* Boo. */
 			dest.vx=sbPtr->DynPtr->OrientMat.mat11;
 			dest.vy=sbPtr->DynPtr->OrientMat.mat12;
-			dest.vy=sbPtr->DynPtr->OrientMat.mat13;
+			dest.vy=sbPtr->DynPtr->OrientMat.mat13; // BJD - FIXME
 		}
 		AlignVelocityToGravity(sbPtr,&dest);
 		if (Approximate3dMagnitude(&dest)==0) {
 			/* Boo. */
 			dest.vx=sbPtr->DynPtr->OrientMat.mat11;
 			dest.vy=sbPtr->DynPtr->OrientMat.mat12;
-			dest.vy=sbPtr->DynPtr->OrientMat.mat13;
+			dest.vy=sbPtr->DynPtr->OrientMat.mat13; // BJD - FIXME
 		}
 		marineStatusPointer->wanderData.worldPosition=sbPtr->DynPtr->Position;
 
