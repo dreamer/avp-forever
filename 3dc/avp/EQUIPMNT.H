@@ -7,18 +7,17 @@
 
 /* KJL 12:34:46 09/18/96 - new stuff under development */
 
-/* KJL 12:39:41 09/18/96 -
-	Okay, I think we should have two weapon structures:
+/* KJL 12:39:41 09/18/96 - Okay, I think we should have two weapon structures:
 
-    TEMPLATE_WEAPON_DATA:	First the basic template for each weapon, which remains constant
-    						during the game & contains the base description of a weapon	eg.
-    						ammo type, weight, graphics, etc.
+    TEMPLATE_WEAPON_DATA:   First the basic template for each weapon, which remains constant
+                            during the game & contains the base description of a weapon	eg.
+                            ammo type, weight, graphics, etc.
 
-    PLAYER_WEAPON_DATA:		Second is the structure which describes a player's weapon
-    						eg. a pointer to a TEMPLATE_WEAPON_DATA, ammo remaining, jam
+    PLAYER_WEAPON_DATA:     Second is the structure which describes a player's weapon
+                            eg. a pointer to a TEMPLATE_WEAPON_DATA, ammo remaining, jam
                             status, and so on.
 
-                            eg.	PLAYER_WEAPON_DATA PlayerWeapons[];
+                            eg. PLAYER_WEAPON_DATA PlayerWeapons[];
 
 */
 /* KJL 16:09:51 09/20/96 - Weapon States */
@@ -27,10 +26,10 @@ enum WEAPON_STATE
 	WEAPONSTATE_IDLE=0,
 
 	WEAPONSTATE_FIRING_PRIMARY,
-    WEAPONSTATE_RECOIL_PRIMARY,
+	WEAPONSTATE_RECOIL_PRIMARY,
 	WEAPONSTATE_RELOAD_PRIMARY,
 
-    WEAPONSTATE_FIRING_SECONDARY,
+	WEAPONSTATE_FIRING_SECONDARY,
 	WEAPONSTATE_RECOIL_SECONDARY,
 	WEAPONSTATE_RELOAD_SECONDARY,
 
@@ -45,30 +44,31 @@ enum WEAPON_STATE
 
 	MAX_NO_OF_WEAPON_STATES
 };
+
 #define WEAPONSTATE_INITIALTIMEOUTCOUNT 65536
 #define WEAPONSTATE_INSTANTTIMEOUT		0
 
 /* KJL 10:42:38 09/19/96 - Weapon Enumerations */
 enum WEAPON_ID
 {
-	/* USED TO DENOTE AN EMPTY SLOT */
+    /* USED TO DENOTE AN EMPTY SLOT */
 	NULL_WEAPON=-1,
 
-	/* MARINE WEAPONS */
+    /* MARINE WEAPONS */
 	WEAPON_PULSERIFLE,
-    WEAPON_AUTOSHOTGUN,
+	WEAPON_AUTOSHOTGUN,
 	WEAPON_SMARTGUN,
-    WEAPON_FLAMETHROWER,
-    WEAPON_PLASMAGUN,
-    WEAPON_SADAR,
-    WEAPON_GRENADELAUNCHER,
-    WEAPON_MINIGUN,
+	WEAPON_FLAMETHROWER,
+	WEAPON_PLASMAGUN,
+	WEAPON_SADAR,
+	WEAPON_GRENADELAUNCHER,
+	WEAPON_MINIGUN,
 	WEAPON_SONICCANNON,
 	WEAPON_BEAMCANNON,
 	WEAPON_MYSTERYGUN,
 
-	/* PREDATOR WEAPONS */
-    WEAPON_PRED_WRISTBLADE,
+    /* PREDATOR WEAPONS */
+	WEAPON_PRED_WRISTBLADE,
 	WEAPON_PRED_PISTOL,
 	WEAPON_PRED_RIFLE,
 	WEAPON_PRED_SHOULDERCANNON,
@@ -77,16 +77,16 @@ enum WEAPON_ID
 	WEAPON_PRED_STAFF,
 
     /* ALIEN WEAPONS */
-    WEAPON_ALIEN_CLAW,
+	WEAPON_ALIEN_CLAW,
 	WEAPON_ALIEN_GRAB,
-    WEAPON_ALIEN_SPIT,
+	WEAPON_ALIEN_SPIT,
 
 	WEAPON_CUDGEL,
 	WEAPON_MARINE_PISTOL,
 	WEAPON_FRISBEE_LAUNCHER,
 	WEAPON_TWO_PISTOLS,
 
-    MAX_NO_OF_WEAPON_TEMPLATES
+	MAX_NO_OF_WEAPON_TEMPLATES
 };
 
 enum WEAPON_SLOT
@@ -104,7 +104,7 @@ enum WEAPON_SLOT
 	WEAPON_SLOT_11,
 	MAX_NO_OF_WEAPON_SLOTS,
 
-    WEAPON_FINISHED_SWAPPING
+	WEAPON_FINISHED_SWAPPING
 };
 
 
@@ -186,12 +186,11 @@ enum AMMO_ID
 	AMMO_FLECHETTE_POSTMAX,
 	AMMO_FALLING_POSTMAX,
 	AMMO_FIREDAMAGE_POSTMAX
-
 };
 
 /* CDF - 15/9/97 New Damage System */
-
-typedef struct {
+typedef struct
+{
 	short Impact;
 	short Cutting;
 	short Penetrative;
@@ -211,12 +210,12 @@ typedef struct {
 	unsigned int MakeExitWounds	:1;
 
 	enum AMMO_ID Id;
-
 } DAMAGE_PROFILE;
 
 /* CDF - 15/9/97 New Damage System */
 
-typedef struct {
+typedef struct
+{
 	unsigned int MovementMultiple;
 	unsigned int TurningMultiple;
 	unsigned int JumpingMultiple;
@@ -236,32 +235,31 @@ typedef struct
 
     /* ammo flags */
 	unsigned int		CreatesProjectile :1;
-	unsigned int 		ExplosionIsFlat:1;
+	unsigned int		ExplosionIsFlat:1;
 } TEMPLATE_AMMO_DATA;
 
 typedef struct
 {
-	enum WEAPON_ID	 	WeaponIDNumber;
+	enum WEAPON_ID		WeaponIDNumber;
 	/* eg.==MARINE_WEAPON_PULSE. This can be used to access the TemplateWeapon[] data, graphics, etc. */
 
-    enum WEAPON_STATE 	CurrentState;
+	enum WEAPON_STATE 	CurrentState;
 
-    int				 	StateTimeOutCounter; /* in 16.16 */
+	fixed_t				 StateTimeOutCounter;    /* in 16.16 */
 
-    unsigned int		PrimaryRoundsRemaining; /* in 'current' magazine */
-    unsigned int		SecondaryRoundsRemaining; /* in 'current' magazine */
-    unsigned char		PrimaryMagazinesRemaining;
-    unsigned char		SecondaryMagazinesRemaining;
+	unsigned int		PrimaryRoundsRemaining;    /* in 'current' magazine */
+	unsigned int		SecondaryRoundsRemaining;  /* in 'current' magazine */
+	unsigned char		PrimaryMagazinesRemaining;
+	unsigned char		SecondaryMagazinesRemaining;
 
 	VECTORCH			PositionOffset;
-    EULER				DirectionOffset;
+	EULER				DirectionOffset;
 
 	SHAPEANIMATIONCONTROLLER ShpAnimCtrl;
-    TXACTRLBLK			*TxAnimCtrl;
+	TXACTRLBLK			*TxAnimCtrl;
 
-    /* general flags */
-    signed int		Possessed :2; /* meaning you are carrying the weapon, not that an evil spirit etc etc. */
-
+	/* general flags */
+	signed int		Possessed :2; /* meaning you are carrying the weapon, not that an evil spirit etc etc. */
 } PLAYER_WEAPON_DATA;
 
 typedef struct
@@ -269,20 +267,20 @@ typedef struct
 	enum AMMO_ID		PrimaryAmmoID;
 	enum AMMO_ID		SecondaryAmmoID;
 
-	int 				(*FirePrimaryFunction)(PLAYER_WEAPON_DATA *);
-	int 				(*FireSecondaryFunction)(PLAYER_WEAPON_DATA *);
-	void 				(*WeaponInitFunction)(PLAYER_WEAPON_DATA *);
+	int					(*FirePrimaryFunction)(PLAYER_WEAPON_DATA *);
+	int					(*FireSecondaryFunction)(PLAYER_WEAPON_DATA *);
+	void				(*WeaponInitFunction)(PLAYER_WEAPON_DATA *);
 
-    int					TimeOutRateForState[MAX_NO_OF_WEAPON_STATES]; /* in 16.16 */
-	void 				(*WeaponStateFunction[MAX_NO_OF_WEAPON_STATES])(void *, PLAYER_WEAPON_DATA *);	// void * is for PLAYER_STATUS
+	fixed_t				TimeOutRateForState[MAX_NO_OF_WEAPON_STATES];    /* in 16.16 */
+	void				(*WeaponStateFunction[MAX_NO_OF_WEAPON_STATES])(void *, PLAYER_WEAPON_DATA *);    // void * is for PLAYER_STATUS
 	int					ProbabilityOfJamming;
-    int					FiringRate;
+	int					FiringRate;
 
     /* display stuff */
-	signed int 			SmartTargetSpeed;	/* how fast crosshair moves */
-    unsigned int		GunCrosshairSpeed;	/* how fast the gun moves to catch up */
-    unsigned int  		SmartTargetRadius;
-    VECTORCH			RestPosition;
+	signed int			SmartTargetSpeed;    /* how fast crosshair moves */
+	unsigned int		GunCrosshairSpeed;   /* how fast the gun moves to catch up */
+	unsigned int		SmartTargetRadius;
+	VECTORCH			RestPosition;
 
 	int					RecoilMaxZ;
 	int					RecoilMaxRandomZ;
@@ -293,22 +291,21 @@ typedef struct
 
 	enum TEXTSTRING_ID	Name;
 
-	/* shape reference */
+    /* shape reference */
 	char *				WeaponShapeName;
 	char *				MuzzleFlashShapeName;
 	char *				RiffName;
 	char *				HierarchyName;
-    int					InitialSequenceType;
+	int					InitialSequenceType;
 	int					InitialSubSequence;
 
-	/* Encumberance */
-
+    /* Encumberance */
 	ENCUMBERANCE_STATE	Encum_Idle;
 	ENCUMBERANCE_STATE	Encum_FirePrime;
 	ENCUMBERANCE_STATE	Encum_FireSec;
 
     /* flags */
-	unsigned int 		UseStateMovement :1;
+	unsigned int		UseStateMovement :1;
 	unsigned int		IsSmartTarget :1;
 	unsigned int		PrimaryIsRapidFire   :1;
 	unsigned int		PrimaryIsAutomatic   :1;
@@ -316,48 +313,46 @@ typedef struct
 	unsigned int		SecondaryIsRapidFire   :1;
 	unsigned int		SecondaryIsAutomatic   :1;
 	unsigned int		SecondaryIsMeleeWeapon :1;
-	unsigned int 		HasShapeAnimation: 1;
-	unsigned int 		HasTextureAnimation: 1;
-	unsigned int 		FireWhenCloaked: 1;
-	unsigned int 		FireInChangeVision: 1;
-	unsigned int 		FirePrimaryLate: 1;
-	unsigned int 		FireSecondaryLate: 1;
+	unsigned int		HasShapeAnimation: 1;
+	unsigned int		HasTextureAnimation: 1;
+	unsigned int		FireWhenCloaked: 1;
+	unsigned int		FireInChangeVision: 1;
+	unsigned int		FirePrimaryLate: 1;
+	unsigned int		FireSecondaryLate: 1;
 	unsigned int		PrimaryMuzzleFlash:	1;
-	unsigned int 		SecondaryMuzzleFlash:	1;
-	unsigned int 		LogAccuracy:	1;
-	unsigned int 		LogShots:	1;
+	unsigned int		SecondaryMuzzleFlash:	1;
+	unsigned int		LogAccuracy:	1;
+	unsigned int		LogShots:	1;
 
 } TEMPLATE_WEAPON_DATA;
-
-
-
-
 
 typedef struct
 {
 	enum AMMO_ID	SelectedAmmo;
 
 	unsigned int	StandardRoundsRemaining;
-    unsigned char	StandardMagazinesRemaining;
+	unsigned char	StandardMagazinesRemaining;
 
 	unsigned int	FlareRoundsRemaining;
-    unsigned char	FlareMagazinesRemaining;
+	unsigned char	FlareMagazinesRemaining;
 
 	unsigned int	ProximityRoundsRemaining;
-    unsigned char	ProximityMagazinesRemaining;
+	unsigned char	ProximityMagazinesRemaining;
 
 	unsigned int	FragmentationRoundsRemaining;
-    unsigned char	FragmentationMagazinesRemaining;
+	unsigned char	FragmentationMagazinesRemaining;
 
 } GRENADE_LAUNCHER_DATA;
 
-typedef enum Pred_Disc_Modes {
+typedef enum Pred_Disc_Modes
+{
 	I_Seek_Track,
 	I_Search_Destroy,
 	I_Proximity_Mine,
 } PRED_DISC_MODES;
 
-typedef enum Smartgun_Modes {
+typedef enum Smartgun_Modes
+{
 	I_Track,
 	I_Free,
 } SMARTGUN_MODES;
@@ -365,7 +360,7 @@ typedef enum Smartgun_Modes {
 extern PRED_DISC_MODES ThisDiscMode;
 extern SMARTGUN_MODES SmartgunMode;
 
-extern TEMPLATE_WEAPON_DATA	TemplateWeapon[];
+extern TEMPLATE_WEAPON_DATA TemplateWeapon[];
 extern TEMPLATE_AMMO_DATA   TemplateAmmo[];
 extern GRENADE_LAUNCHER_DATA GrenadeLauncherData;
 

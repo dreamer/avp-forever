@@ -1,4 +1,5 @@
-#ifndef PROTOTYP_INCLUDED
+#ifndef _included_prototyp_h_ /* Is this your first time? */
+#define _included_prototyp_h_
 
 /*
 
@@ -22,20 +23,16 @@
 
 */
 
-//extern const int sine[4096];
-//extern const int cosine[4096];
-
-
-typedef struct vectorch {
-
+typedef struct vectorch
+{
 	int vx;
 	int vy;
 	int vz;
 
 } VECTORCH;
 
-typedef struct quat {
-
+typedef struct quat
+{
 	int quatw;
 	int quatx;
 	int quaty;
@@ -43,8 +40,8 @@ typedef struct quat {
 
 } QUAT;
 
-typedef struct vectorchf {
-
+typedef struct vectorchf
+{
 	float vx;
 	float vy;
 	float vz;
@@ -53,15 +50,15 @@ typedef struct vectorchf {
 
 void FNormalise(VECTORCHF *n);
 
-typedef struct vector2d {
-
+typedef struct vector2d 
+{
 	int vx;
 	int vy;
 
 } VECTOR2D;
 
-typedef struct vector2df {
-
+typedef struct vector2df
+{
 	float vx;
 	float vy;
 
@@ -69,17 +66,8 @@ typedef struct vector2df {
 
 void FNormalise2d(VECTOR2DF *n);
 
-typedef struct line {
-
-	VECTORCH v0;
-	VECTORCH v1;
-
-} LINE;
-
-
-
-typedef struct euler {
-
+typedef struct euler
+{
 	int EulerX;
 	int EulerY;
 	int EulerZ;
@@ -87,8 +75,8 @@ typedef struct euler {
 } EULER;
 
 
-typedef struct angularvelocity {
-
+typedef struct angularvelocity
+{
 	EULER AngV;
 
 	int PitchCount;
@@ -98,8 +86,8 @@ typedef struct angularvelocity {
 } ANGULARVELOCITY;
 
 
-typedef struct matrixch {
-
+typedef struct matrixch
+{
 	int mat11;
 	int mat12;
 	int mat13;
@@ -114,8 +102,8 @@ typedef struct matrixch {
 
 } MATRIXCH;
 
-typedef struct matrixchf {
-
+typedef struct matrixchf
+{
 	float mat11;
 	float mat12;
 	float mat13;
@@ -130,10 +118,6 @@ typedef struct matrixchf {
 
 } MATRIXCHF;
 
-/* Sorry about this... */
-
-//#include "hmodel.h"
-
 struct hmodelcontroller;
 
 
@@ -144,8 +128,8 @@ struct hmodelcontroller;
 
 */
 
-typedef struct mapsetvdb {
-
+typedef struct mapsetvdb
+{
 	int SVDB_Flags;
 	int SVDB_ViewType;
 
@@ -174,7 +158,6 @@ typedef struct mapsetvdb {
 	int SVDB_ObPanX;
 	int SVDB_ObPanY;
 
-
 } MAPSETVDB;
 
 
@@ -186,10 +169,10 @@ typedef struct mapsetvdb {
 
 */
 
-typedef struct simshapelist {
-
-	int SSL_Threshold;			/* 1st trans. for proj. r */
-	int *SSL_Shapes;				/* ptr to array of shapes */
+typedef struct simshapelist
+{
+	int SSL_Threshold;          /* 1st trans. for proj. r */
+	int *SSL_Shapes;            /* ptr to array of shapes */
 
 } SIMSHAPELIST;
 
@@ -207,8 +190,8 @@ typedef struct simshapelist {
 
 
 
-typedef struct mapblock1 {
-
+typedef struct mapblock1
+{
 	int MapType;
 
 	#if LoadingMapsShapesAndTexturesEtc
@@ -222,8 +205,8 @@ typedef struct mapblock1 {
 } MAPBLOCK1;
 
 
-typedef struct mapblock2 {
-
+typedef struct mapblock2
+{
 	int MapType;
 	int MapShape;
 
@@ -238,8 +221,8 @@ typedef struct mapblock2 {
 } MAPBLOCK2;
 
 
-typedef struct mapblock3 {
-
+typedef struct mapblock3
+{
 	int MapType;
 	int MapShape;
 
@@ -256,8 +239,8 @@ typedef struct mapblock3 {
 } MAPBLOCK3;
 
 
-typedef struct mapblock4 {
-
+typedef struct mapblock4
+{
 	int MapType;
 	int MapShape;
 
@@ -276,8 +259,8 @@ typedef struct mapblock4 {
 } MAPBLOCK4;
 
 
-typedef struct mapblock5 {
-
+typedef struct mapblock5
+{
 	int MapType;
 	int MapShape;
 
@@ -294,13 +277,12 @@ typedef struct mapblock5 {
 	EULER MapEuler;
 
 	int MapFlags;
-
 
 } MAPBLOCK5;
 
 
-typedef struct mapblock6 {
-
+typedef struct mapblock6
+{
 	int MapType;
 	int MapShape;
 
@@ -317,7 +299,6 @@ typedef struct mapblock6 {
 	EULER MapEuler;
 
 	int MapFlags;
-
 
 	MAPSETVDB *MapVDBData;
 
@@ -326,8 +307,8 @@ typedef struct mapblock6 {
 } MAPBLOCK6;
 
 
-typedef struct mapblock7 {
-
+typedef struct mapblock7
+{
 	int MapType;
 	int MapShape;
 
@@ -347,26 +328,24 @@ typedef struct mapblock7 {
 	int MapFlags2;
 	int MapFlags3;
 
-
 	MAPSETVDB *MapVDBData;
 
 	int MapInteriorType;
 
-	int MapLightType;			/* See LIGHTTYPES */
+	int MapLightType;           /* See LIGHTTYPES */
 
 
-	VECTORCH MapOrigin;			/* Origin of Rotation */
+	VECTORCH MapOrigin;         /* Origin of Rotation */
 
 	SIMSHAPELIST *MapSimShapes;
 
-	int MapViewType;			/* See "VDB_ViewType" */
-
+	int MapViewType;            /* See "VDB_ViewType" */
 
 } MAPBLOCK7;
 
 
-typedef struct mapblock8 {
-
+typedef struct mapblock8
+{
 	int MapType;
 	int MapShape;
 
@@ -382,19 +361,18 @@ typedef struct mapblock8 {
 
 	int MapInteriorType;
 
-	int MapLightType;			/* See LIGHTTYPES */
+	int MapLightType;            /* See LIGHTTYPES */
 
-
-	VECTORCH MapOrigin;			/* Origin of Rotation */
+	VECTORCH MapOrigin;          /* Origin of Rotation */
 
 	SIMSHAPELIST *MapSimShapes;
 
-	int MapViewType;			/* See "VDB_ViewType" */
+	int MapViewType;             /* See "VDB_ViewType" */
 
-	struct displayblock **MapMPtr;	/* Write our dptr here as mother */
-	struct displayblock **MapDPtr;	/* Read our dptr here as daughter */
+	struct displayblock **MapMPtr;   /* Write our dptr here as mother */
+	struct displayblock **MapDPtr;   /* Read our dptr here as daughter */
 
-	VECTORCH MapMOffset;					/* Offset from mother */
+	VECTORCH MapMOffset;             /* Offset from mother */
 
 } MAPBLOCK8;
 
@@ -405,8 +383,8 @@ typedef struct mapblock8 {
 
 */
 
-typedef struct mapheader {
-
+typedef struct mapheader
+{
 	MAPBLOCK1 *MapType1Objects;
 	MAPBLOCK2 *MapType2Objects;
 	MAPBLOCK3 *MapType3Objects;
@@ -432,8 +410,8 @@ typedef struct mapheader {
 
 */
 
-typedef struct screendescriptorblock {
-
+typedef struct screendescriptorblock
+{
 	int SDB_Width;
 	int SDB_Height;
 	int SDB_Depth;
@@ -475,14 +453,14 @@ typedef struct screendescriptorblock {
 
 */
 
-#define SDB_Flag_222                0x00000001		/* 8-bit mode 222 texture palette */
-#define SDB_Flag_Raw256             0x00000002		/* 8-bit mode, no texture remap */
+#define SDB_Flag_222                0x00000001      /* 8-bit mode 222 texture palette */
+#define SDB_Flag_Raw256             0x00000002      /* 8-bit mode, no texture remap */
 
-#define SDB_Flag_MIP                0x00000004		/* Create MIP maps for images */
+#define SDB_Flag_MIP                0x00000004      /* Create MIP maps for images */
 
-#define SDB_Flag_SuperSample2x2     0x00000008		/* 8T and 24 only */
+#define SDB_Flag_SuperSample2x2     0x00000008      /* 8T and 24 only */
 
-#define SDB_Flag_DrawFrontToBack    0x00000010		/* Useful if Z-Buffering */
+#define SDB_Flag_DrawFrontToBack    0x00000010      /* Useful if Z-Buffering */
 
 #define SDB_Flag_TLTPalette         0x00000020      /* 8Raw only, Images may have ih_flag_tlt and the tlt maps colours from an abstract palette to the screen palette */
 #define SDB_Flag_TLTSize            0x00000040      /* The TLTSize member is valid, o/w TLTSize is 256 */
@@ -496,8 +474,8 @@ typedef struct screendescriptorblock {
 
 */
 
-typedef struct clipplaneblock {
-
+typedef struct clipplaneblock
+{
 	VECTORCH CPB_Normal;
 	VECTORCH CPB_POP;
 
@@ -510,8 +488,8 @@ typedef struct clipplaneblock {
 
 */
 
-typedef struct clipplanepoints {
-
+typedef struct clipplanepoints
+{
 	VECTORCH cpp1;
 	VECTORCH cpp2;
 	VECTORCH cpp3;
@@ -534,14 +512,14 @@ typedef struct clipplanepoints {
 
 */
 
-typedef struct viewdescriptorblock {
-
+typedef struct viewdescriptorblock
+{
 	struct viewdescriptorblock *VDB_HigherP;
 	struct viewdescriptorblock *VDB_LowerP;
 
-	int VDB_ViewType;	/* To match ObViewType, used by image backdrops */
+	int VDB_ViewType;   /* To match ObViewType, used by image backdrops */
 
-	int VDB_Priority;	/* Determines draw order */
+	int VDB_Priority;   /* Determines draw order */
 
 	int VDB_Flags;
 
@@ -586,7 +564,7 @@ typedef struct viewdescriptorblock {
 	int VDB_H2;
 	int VDB_HInterval;
 
-	int VDB_HColour;						/* "Sky" */
+	int VDB_HColour;           /* "Sky" */
 
 	int VDB_Ambience;
 
@@ -605,29 +583,25 @@ typedef struct viewdescriptorblock {
 
 #define ViewDB_Flag_SingleBuffer	0x00000001
 #define ViewDB_Flag_DoubleBuffer	0x00000002
-#define ViewDB_Flag_FullSize		0x00000004	/* Use fast screen clear */
+#define ViewDB_Flag_FullSize		0x00000004  /* Use fast screen clear */
 #define ViewDB_Flag_NoBackdrop		0x00000008
 
-#define ViewDB_Flag_LTrunc			0x00000010	/* Informs the VDB creator		*/
-#define ViewDB_Flag_RTrunc			0x00000020	/* that a physical screen		*/
-#define ViewDB_Flag_UTrunc			0x00000040	/* violation has forced a		*/
-#define ViewDB_Flag_DTrunc			0x00000080	/* truncation of the viewport	*/
+#define ViewDB_Flag_LTrunc			0x00000010  /* Informs the VDB creator      */
+#define ViewDB_Flag_RTrunc			0x00000020  /* that a physical screen       */
+#define ViewDB_Flag_UTrunc			0x00000040  /* violation has forced a       */
+#define ViewDB_Flag_DTrunc			0x00000080  /* truncation of the viewport   */
 
 #define ViewDB_Flag_Hazing			0x00000100
 #define ViewDB_Flag_DontDraw		0x00000200
-#define ViewDB_Flag_AdjustScale		0x00000400	/* Scale 320x200 definition up to equivalent size for the mode */
-#define ViewDB_Flag_AddSubject		0x00000800	/* For MapSetVDB, telling it to add dptr_last to the dptr */
+#define ViewDB_Flag_AdjustScale		0x00000400  /* Scale 320x200 definition up to equivalent size for the mode */
+#define ViewDB_Flag_AddSubject		0x00000800  /* For MapSetVDB, telling it to add dptr_last to the dptr */
 
-#define ViewDB_Flag_NeedToFlushZ	0x00001000	/* Cleared by flush function */
+#define ViewDB_Flag_NeedToFlushZ	0x00001000  /* Cleared by flush function */
 
 
-#define ViewDB_Flag_ImageBackdrop	0x00004000	/* This requires a backdrop
-																image array, accessed through
-																"Global_SceneBackdropPtr" */
+#define ViewDB_Flag_ImageBackdrop	0x00004000	/* This requires a backdrop image array, accessed through "Global_SceneBackdropPtr" */
 
-#define ViewDB_Flag_Horizon			0x00008000	/* Draw a "traditional"
-																Sky/Ground horizon - before
-																the backdrop is drawn */
+#define ViewDB_Flag_Horizon			0x00008000	/* Draw a "traditional" Sky/Ground horizon - before the backdrop is drawn */
 
 #define ViewDB_Flag_UseBackdropImageColoursForHorizon	0x00010000
 
@@ -669,17 +643,17 @@ typedef struct viewdescriptorblock {
 
 */
 
-typedef enum {
-
-	LightType_Infinite,		/* Default */
+typedef enum
+{
+	LightType_Infinite,     /* Default */
 	LightType_PerObject,
 	LightType_PerVertex
 
 } LIGHTTYPES;
 
 
-typedef struct lightblock {
-
+typedef struct lightblock
+{
 	int LightFlags;
 	int LightType;
 
@@ -740,8 +714,8 @@ avoids unnecessary texture wash-out. */
 
 */
 
-typedef struct morphframe {
-
+typedef struct morphframe
+{
 	int mf_shape1;
 	int mf_shape2;
 
@@ -754,8 +728,8 @@ typedef struct morphframe {
 
 */
 
-typedef struct morphheader {
-
+typedef struct morphheader
+{
 	int mph_numframes;
 	int mph_maxframes;
 	MORPHFRAME *mph_frames;
@@ -769,8 +743,8 @@ typedef struct morphheader {
 
 */
 
-typedef struct morphdisplay {
-
+typedef struct morphdisplay
+{
 	int md_lerp;
 	int md_one_minus_lerp;
 	int md_shape1;
@@ -787,8 +761,8 @@ typedef struct morphdisplay {
 
 */
 
-typedef struct morphctrl {
-
+typedef struct morphctrl
+{
 	int ObMorphCurrFrame;
 	int ObMorphFlags;
 	int ObMorphSpeed;
@@ -816,12 +790,12 @@ typedef struct displayblock
 	SHAPEHEADER* ObShapeData;
 
 	char * name;
-	
+
 	#if (SupportMorphing && LazyEvaluationForMorphing)
 	VECTORCH *ObMorphedPts;
 	#endif
 
- 	VECTORCH ObWorld;		/* World Space Location */
+	VECTORCH ObWorld;		/* World Space Location */
 	EULER ObEuler;			/* Euler Orientation */
 	MATRIXCH ObMat;			/* Local -> World Orientation Matrix */
 	
@@ -830,47 +804,47 @@ typedef struct displayblock
 	int ObFlags3;
 
 	/* Lights */
- 	int ObNumLights;
+	int ObNumLights;
 	LIGHTBLOCK *ObLights[MaxObjectLights];
- 
+
 	#if SupportModules
-	struct module *ObMyModule;	/* This is our module */
-	struct module *ObModule;	/* We are in this module */
+	struct module *ObMyModule;  /* This is our module */
+	struct module *ObModule;    /* We are in this module */
 	#endif
 
-	VECTORCH ObView;			/* View Space Location */
- 
+	VECTORCH ObView;            /* View Space Location */
+
 	struct viewdescriptorblock *ObVDBPtr;
- 
-  	/* Lights */
- 	int ObLightType;								/* See LIGHTTYPES above */
- 
+
+	/* Lights */
+	int ObLightType;            /* See LIGHTTYPES above */
+
 	/* Extent */
- 	int ObRadius;		/* max(sqr(x^2+y^2+z^2)) */
- 	int ObMaxX;
+	int ObRadius;               /* max(sqr(x^2+y^2+z^2)) */
+	int ObMaxX;
 	int ObMinX;
- 	int ObMaxY;
+	int ObMaxY;
 	int ObMinY;
- 	int ObMaxZ;
+	int ObMaxZ;
 	int ObMinZ;
 
 	struct txactrlblk *ObTxAnimCtrlBlks;
 
-	EXTRAITEMDATA *ObEIDPtr;				/* Overrides shape EID pointer */
+	EXTRAITEMDATA *ObEIDPtr;    /* Overrides shape EID pointer */
 
 	#if SupportMorphing
-	MORPHCTRL *ObMorphCtrl;				/* Structure provided by project */
+	MORPHCTRL *ObMorphCtrl;     /* Structure provided by project */
 	#endif
 
 	/* The Strategy Block Pointer */
- 	struct strategyblock *ObStrategyBlock;	/* Defined in stratdef.h */
- 	
+	struct strategyblock *ObStrategyBlock;  /* Defined in stratdef.h */
+
 	SHAPEANIMATIONCONTROLLER * ShapeAnimControlBlock;
 
 	struct hmodelcontroller * HModelControlBlock;
 	
-	unsigned int SpecialFXFlags;	
-											 
+	unsigned int SpecialFXFlags;
+
 } DISPLAYBLOCK;
 
 
@@ -887,11 +861,10 @@ typedef struct displayblock
 
 
 
-#define ObFlag_VertexHazing	0x00000020	/* For I_Gouraud, interpolate hue
-															across the polygon */
+#define ObFlag_VertexHazing	0x00000020      /* For I_Gouraud, interpolate hue across the polygon */
 
 
-#define ObFlag_TypeZ			0x00000080	/* Shape uses Z Sort */
+#define ObFlag_TypeZ			0x00000080  /* Shape uses Z Sort */
 
 
 
@@ -905,15 +878,10 @@ typedef struct displayblock
 #define ObFlag_OnlyInfLSrc		0x00080000	/* Only Infinite Light Sources */
 
 
-
-
-
-
 #define ObFlag_ZBuffer			0x08000000	/* Request item z-buffering */
 
 #define ObFlag_BFCRO			0x10000000	/* Back Face Cull Rot. Optimise */
-#define ObFlag_RSP				0x20000000	/* Radius Space Partitioning -
-															requires RFC data in shape */
+#define ObFlag_RSP				0x20000000	/* Radius Space Partitioning -requires RFC data in shape */
 
 
 #define ObFlag_ParrallelBFC   0x80000000  /* Roxby's scu dsp flag */
@@ -969,15 +937,11 @@ typedef struct displayblock
 
 */
 
-#define ObFlag3_DynamicModuleObject 0x00000001	/* Allocate module objects
-																	around this object as if
-																	it were a camera */
+#define ObFlag3_DynamicModuleObject 0x00000001	/* Allocate module objects around this object as if it were a camera */
 
 #define ObFlag3_ObjectSortedItems	0x00000002	/* Used by the Global Sort */
 
-#define ObFlag3_NoLightDot				0x00000004	/* Surface/Point is lit the
-																	same from all angles */
-
+#define ObFlag3_NoLightDot				0x00000004	/* Surface/Point is lit the same from all angles */
 
 #define ObFlag3_Teleport				0x00000040	/* No motion vector! */
 
@@ -985,12 +949,9 @@ typedef struct displayblock
 
 #define ObFlag3_PreLit					0x00000100	/* Not source specific */
 
-#define ObFlag3_JustCreated			0x00000200	/* Teleport status for just
-																	one frame */
+#define ObFlag3_JustCreated			0x00000200	/* Teleport status for just one frame */
 
-#define ObFlag3_DontDrawIfOurModuleIsNotVis 0x00000400	/* If the module we
-																				visible, don't
-																				draw us */
+#define ObFlag3_DontDrawIfOurModuleIsNotVis 0x00000400	/* If the module we visible, don't draw us */
 #define ObFlag3_AlwaysDynamic			0x00000800	/* Overrides auto-detect */
 
 
@@ -1006,7 +967,7 @@ typedef struct displayblock
 
 #define mph_flag_play					0x00000001
 #define mph_flag_reverse				0x00000002
-#define mph_flag_noloop	 				0x00000004
+#define mph_flag_noloop					0x00000004
 
 /*
 
@@ -1019,7 +980,7 @@ typedef struct displayblock
 */
 
 #define mph_flag_start					0x00000008
-#define mph_flag_end						0x00000010
+#define mph_flag_end					0x00000010
 #define mph_flag_finished				0x00000020
 #define mph_flag_looped					0x00000040
 
@@ -1038,7 +999,8 @@ void AddShape(DISPLAYBLOCK *dblockptr, VIEWDESCRIPTORBLOCK *VDB_Ptr);
 void PrepareVDBForShowView(VIEWDESCRIPTORBLOCK *VDB_Ptr);
 
 
-void SetupLight(
+void SetupLight
+(
 	LIGHTBLOCK *lptr,
 	int sl_flags,
 	int sl_type,
@@ -1169,8 +1131,6 @@ void MNormalise(MATRIXCH *m);
 
 void Normalise2d(VECTOR2D *nvector);
 
-int LineColinearity(LINE *l0, LINE *l1);
-
 void Renormalise(VECTORCH *nvector);
 
 int Magnitude(VECTORCH *v);
@@ -1266,9 +1226,6 @@ void ExitSystem(void);
 void ResetFrameCounter(void);
 void FrameCounterHandler(void);
 
-#ifdef __cplusplus
-#endif // for __cplusplus
-
 void InitGame(void);
 void StartGame(void);
 void ExitGame(void);
@@ -1305,8 +1262,6 @@ int LoadBackdrop(char *image, IMAGEHEADER *ihdr);
 
 
 void GetProjectFilename(char *fname, char *image);
-
-
 void GetDOSFilename(char *fnameptr);
 int CompareFilenameCH(char *string1, char *string2);
 
@@ -1314,7 +1269,6 @@ int NextLowPower2(int i);
 
 
 /* User Input */
-
 void ReadUserInput(void);
 void ReadKeyboard(void);
 void WaitForReturn(void);
@@ -1330,7 +1284,6 @@ void FlushZBuffer(VIEWDESCRIPTORBLOCK *vdb);
 
 
 /* Draw Item */
-
 void Draw_Item_GouraudPolygon(int *itemptr);
 void Draw_Item_2dTexturePolygon(int *itemptr);
 void Draw_Item_Gouraud2dTexturePolygon(int *itemptr);
@@ -1365,8 +1318,8 @@ int FastRandom(void);
 
 */
 
-typedef enum {
-
+typedef enum
+{
 	Boundary_Left,
 	Boundary_Right,
 	Boundary_Up,
@@ -1406,7 +1359,5 @@ void CrossProductF(VECTORCHF *a, VECTORCHF *b, VECTORCHF *c);
 /* KJL 12:01:08 7/16/97 - returns the magnitude of a vector - max error about 13%, though average error
    less than half this. Very fast compared to other approaches. */
 int Approximate3dMagnitude(VECTORCH *v);
-
-#define PROTOTYP_INCLUDED
 
 #endif

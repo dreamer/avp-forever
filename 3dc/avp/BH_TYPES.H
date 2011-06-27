@@ -21,21 +21,19 @@
 	to morphing equally as to sprites (morphing is some what easier as the object will always look
 	right
 
-
 	Other objects are rather dull and the above capability system is too complex. A module
 	playing a TV does not need such a comple behaviour. These objects have much simpler
 	strategies and we will have specfifc low level functions to deal with them.
-
 */
 
 
 typedef enum actor_capability_types
 {
-	BHTypeWalk,				/* gen movement */
-	BHTypeCrawl,			/* gen movement */
-	BHTypeRun,				/* gen movement */
-	BHTypeFly,				/* gen movement */
-	BHTypeStandUp,			
+	BHTypeWalk,             /* gen movement */
+	BHTypeCrawl,            /* gen movement */
+	BHTypeRun,              /* gen movement */
+	BHTypeFly,              /* gen movement */
+	BHTypeStandUp,
 	BHTypeSitDown,
 	BHTypeKneelDown,
 	BHTypeCroach,
@@ -52,8 +50,6 @@ typedef enum actor_capability_types
 } ACTOR_CAPABILITY_TYPES;
 
 
-
-
 /* ****************** STRATEGY BLOCK Behaviour DESCRIPTION ************ */
 
 
@@ -61,7 +57,6 @@ typedef struct CapabilityDescription
 {
 	int num_animating_items;
 	int **item_animations;
-
 } CAPABILITY_DESCRIPTION;
 
 
@@ -86,21 +81,17 @@ typedef struct sequence_descriptor
 	TXANIMHEADER* txanim_header;
 	int view_angle;
 	int view_azimuth;
-} SEQUENCE_DESCRIPTOR;	
+} SEQUENCE_DESCRIPTOR;
 
 
 typedef struct SuicideTimer
 {
-	int time_left;	/*agrgggghhh*****/
-
+	int time_left;      /*agrgggghhh*****/
 }SUICIDE_TIMER;
 
 
-	
-
 /**************************** SPECIFIC BEHAVIOUR TYPES ************************/
 
-		
 // ENUM now in Stratdef.h
 
 
@@ -118,22 +109,22 @@ typedef struct SuicideTimer
   --------------------------------------------------*/
 typedef struct player_input_requests
 {
-	unsigned int Rqst_Forward :1;					
+	unsigned int Rqst_Forward :1;
 	unsigned int Rqst_Backward :1;
 	unsigned int Rqst_TurnLeft :1;
 	unsigned int Rqst_TurnRight :1;
 	unsigned int Rqst_LookUp :1;
 	unsigned int Rqst_LookDown :1;
-	unsigned int Rqst_FirePrimaryWeapon :1;	  
-	unsigned int Rqst_Faster :1;	  
-	unsigned int Rqst_SideStepLeft :1;	  
-	unsigned int Rqst_SideStepRight :1;	  
+	unsigned int Rqst_FirePrimaryWeapon :1;
+	unsigned int Rqst_Faster :1;
+	unsigned int Rqst_SideStepLeft :1;
+	unsigned int Rqst_SideStepRight :1;
 	unsigned int Rqst_Strafe :1;
-	unsigned int Rqst_Crouch :1;	  
+	unsigned int Rqst_Crouch :1;
 	unsigned int Rqst_Jump :1;
 	/* NB Lie Down is set by special moves only (ie doesn't require a user input, configuration entry, etc) */
 	unsigned int Rqst_Operate :1;
-	unsigned int Rqst_CentreView :1;		  
+	unsigned int Rqst_CentreView :1;
 	unsigned int Rqst_NextWeapon :1;
 	unsigned int Rqst_PreviousWeapon :1;
 	unsigned int Rqst_WeaponNo :4;
@@ -143,14 +134,14 @@ typedef struct player_input_requests
 	/* KJL 16:58:37 04/11/98 - Change vision does a variety of things, dependent on the player's
 	character. */
 	unsigned int Rqst_ChangeVision :1;
-	unsigned int Rqst_FireSecondaryWeapon :1;	  
+	unsigned int Rqst_FireSecondaryWeapon :1;
 
 	/* Predator Specific */
 	unsigned int Rqst_CycleVisionMode :1;
 	unsigned int Rqst_ZoomIn :1;
 	unsigned int Rqst_ZoomOut :1;
 	unsigned int Rqst_GrapplingHook :1;
-	
+
 	/* Alien Specific */
 	unsigned int Rqst_Spit :1;
 
@@ -167,60 +158,51 @@ typedef struct player_input_requests
   these should correspond to the above request flags.
   --------------------------------------------------*/
 #define INPUT_BITMASK_FORWARD	0x00000001
-#define INPUT_BITMASK_BACKWARD 0x00000002
+#define INPUT_BITMASK_BACKWARD	0x00000002
 #define INPUT_BITMASK_LEFT		0x00000004
 #define INPUT_BITMASK_RIGHT		0x00000008
 #define INPUT_BITMASK_FIRE		0x00000040
-#define INPUT_BITMASK_FASTER 	0x00000080
-#define INPUT_BITMASK_STRAFE 	0x00000100
-#define INPUT_BITMASK_CROUCH 	0x00000200
-#define INPUT_BITMASK_JUMP 		0x00000400
+#define INPUT_BITMASK_FASTER	0x00000080
+#define INPUT_BITMASK_STRAFE	0x00000100
+#define INPUT_BITMASK_CROUCH	0x00000200
+#define INPUT_BITMASK_JUMP		0x00000400
 
 
 
-/* KJL 14:16:52 09/20/96 - the new player status type 
+/* KJL 14:16:52 09/20/96 - the new player status type
    modified by patrick */
 typedef struct player_status
-{	
-	AVP_BEHAVIOUR_TYPE	bhvr_type;
+{
+	AVP_BEHAVIOUR_TYPE bhvr_type;
 
     /* player's weapons */
 	PLAYER_WEAPON_DATA	WeaponSlot[MAX_NO_OF_WEAPON_SLOTS];
 	enum WEAPON_SLOT	SelectedWeaponSlot;
 	enum WEAPON_SLOT	SwapToWeaponSlot;
 	enum WEAPON_SLOT	PreviouslySelectedWeaponSlot;
-    
-    int	Health;	 /* in 16.16 */
-	int	Energy;	 /* in 16.16 */
-	int	Armour;	 /* in 16.16 */
- 
-    /* general info */
-	/* KJL 17:28:20 09/19/96 - not yet used
-	
-	int	ArmourType;
-	int	HealingRate;
-	int	CloakingType;
-	int	VisionType;
-    */
-		
+
+	fixed_t Health;    /* in 16.16 */
+	fixed_t Energy;    /* in 16.16 */
+	fixed_t Armour;    /* in 16.16 */
+
 	/*-----Patrick 15/10/96--------- 
 	Player movement bits...
 	------------------------------*/
-	enum player_morph_state ShapeState;		/* for controlling morphing */
-	
-	/* and these are for free (ie normal) movement, 
-	and should be set by the (platform dependant) input 
+	enum player_morph_state ShapeState;    /* for controlling morphing */
+
+	/* and these are for free (ie normal) movement,
+	and should be set by the (platform dependant) input
 	device reading function */
-	unsigned char Mvt_DeviceType;		  
-	signed int Mvt_MotionIncrement;		/* 65536 (Forward) to -65536 (Backward) */					
-	signed int Mvt_TurnIncrement;		/* 65536 (Right) to -65536 (Left)*/
-	signed int Mvt_PitchIncrement;		/* 65536 to -65536 */
-	signed int Mvt_SideStepIncrement;	/* 65536 to -65536 */
+	unsigned char Mvt_DeviceType;
+	signed int Mvt_MotionIncrement;       /* 65536 (Forward) to -65536 (Backward) */
+	signed int Mvt_TurnIncrement;         /* 65536 (Right) to -65536 (Left)*/
+	signed int Mvt_PitchIncrement;        /* 65536 to -65536 */
+	signed int Mvt_SideStepIncrement;     /* 65536 to -65536 */
 
 	/* KJL 10:48:33 03/26/97 - inertia data */
 	signed int ForwardInertia;
-	signed int StrafeInertia; 
-	signed int TurnInertia; 	
+	signed int StrafeInertia;
+	signed int TurnInertia;
 
 	int ViewPanX; /* the looking up/down value that used to be in displayblock */
 
@@ -228,11 +210,12 @@ typedef struct player_status
 	{
 		unsigned int Mask;
 		unsigned int Mask2;
-		PLAYER_INPUT_REQUESTS Flags;		
-	}Mvt_InputRequests;
+		PLAYER_INPUT_REQUESTS Flags;
+	} Mvt_InputRequests;
 
 	/* security clearances */
 	unsigned int securityClearances;
+
 	/* useful flags */
 	unsigned int IsAlive :1;
 	unsigned int IsImmortal :1;
@@ -256,7 +239,7 @@ typedef struct player_status
 	int PlasmaCasterCharge;
 	/* KJL 99/2/3 - Cloaking Effectiveness 
 	ranges from 0 (useless) to ONE_FIXED (practically invisible) */
-	int CloakingEffectiveness; 
+	int CloakingEffectiveness;
 	
 	// John 28/7/97 Game Flow stuff
 	PLAYERMISSION CurrentMission;
@@ -286,15 +269,14 @@ typedef struct player_status
 	int incidentTimer;
 	int fireTimer;
 	int invulnerabilityTimer;
-
-} PLAYER_STATUS;	
+} PLAYER_STATUS;
 
 #define TAUNT_LENGTH (ONE_FIXED<<1)
 #define PLAYER_ON_FIRE_TIME	(ONE_FIXED*20)
 
-#define STARTOFGAME_MARINE_HEALTH (100*65536) /* ie. 100 in 16.16 notation */
-#define STARTOFGAME_MARINE_ENERGY (100*65536) /* ie. 100 in 16.16 notation */
-#define STARTOFGAME_MARINE_ARMOUR (100*65536) /* ie. 100 in 16.16 notation */
+#define STARTOFGAME_MARINE_HEALTH (100*65536)    /* ie. 100 in 16.16 notation */
+#define STARTOFGAME_MARINE_ENERGY (100*65536)    /* ie. 100 in 16.16 notation */
+#define STARTOFGAME_MARINE_ARMOUR (100*65536)    /* ie. 100 in 16.16 notation */
 
 /* Patrick 22/8/97------------------------------------------------
 Cloaking stuff
@@ -318,7 +300,6 @@ typedef struct simpleanimbehaviour
 {
 	AVP_BEHAVIOUR_TYPE bhvr_type;
 	TXACTRLBLK *tacbSimple;
-
 }SIMPLE_ANIM_BEHAV_BLOCK;
 
 typedef struct simple_anim_tools_template
@@ -326,18 +307,18 @@ typedef struct simple_anim_tools_template
 	int shape_num;
 	MREF my_module;
 	char nameID[SB_NAME_LENGTH];
-} SIMPLE_ANIM_TOOLS_TEMPLATE;	
+} SIMPLE_ANIM_TOOLS_TEMPLATE;
 
 
 /**********************************************************/
 /**********************DOORS*******************************/
 
-typedef enum{					 /* this may be flags*/
+typedef enum    /* this may be flags*/
+{
 	I_door_opening,
 	I_door_closing,
 	I_door_open,
 	I_door_closed,
-
 } DOOR_STATES;
 
 
@@ -356,7 +337,7 @@ typedef struct ProxDoorBehaviourType
 	/*---- Patrick 1/1/97 ----- 
 	added for far ai stratgies 
 	--------------------------*/
-	int	alienTimer;
+	int alienTimer;
 	unsigned int alienTrigger :1;
 	unsigned int marineTrigger :1;
 	unsigned int triggeredByMarine :1;
@@ -370,8 +351,8 @@ typedef struct ProxDoorBehaviourType
 	BOOL door_locked;
 	char target_name[SB_NAME_LENGTH];
 	STRATEGYBLOCK* door_lock_target;
-  int SoundHandle;  
-  int doorType;      // Used to determine door sound type  
+	int SoundHandle;
+	int doorType;      // Used to determine door sound type  
 
 	int door_opening_speed;
 	int door_closing_speed;
@@ -392,11 +373,9 @@ typedef struct prox_door_tools_template
 } PROX_DOOR_TOOLS_TEMPLATE;
 
 
-
-
 /* Structures for Stat Initialisation */
-
-typedef enum {
+typedef enum
+{
 	I_NPC_Civilian=0,
 	I_NPC_FaceHugger,
 	I_NPC_ChestBurster,
@@ -427,7 +406,8 @@ typedef enum {
 	I_NPC_End,
 } NPC_TYPES;
 
-typedef struct {
+typedef struct
+{
 	NPC_TYPES Type;
 	//int StartingHealth;
 	//int StartingArmour;
@@ -442,10 +422,10 @@ extern NPC_DATA *GetThisNpcData(NPC_TYPES NpcType);
 /********************************************************/
 /*******************  Database behaviour************/
 
-/* 
-	we will need to include an enum into another menu
-	graphic which contains the text to overlay onto
-	the menugraphics
+/*
+    we will need to include an enum into another menu
+    graphic which contains the text to overlay onto
+    the menugraphics
 */
 
 typedef struct database
@@ -469,7 +449,7 @@ extern void DatabaseMenus(DATABASE_BLOCK* db);
 /* functions*/
 
 extern void AssignAllSBNames();
-extern void AssignRunTimeBehaviours(STRATEGYBLOCK* sbptr); 
+extern void AssignRunTimeBehaviours(STRATEGYBLOCK* sbptr);
 extern void EnableBehaviourType(STRATEGYBLOCK* sbptr, AVP_BEHAVIOUR_TYPE sb_type, void *bhdata);
 extern void ExecuteBehaviour(STRATEGYBLOCK* sbptr);
 extern void ObjectBehaviours(void);
@@ -486,14 +466,3 @@ extern DISPLAYBLOCK *MakeObject(AVP_BEHAVIOUR_TYPE bhvr, VECTORCH *positionPtr);
 extern void SetupPlayerAutoGun();
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
