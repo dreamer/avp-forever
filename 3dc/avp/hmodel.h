@@ -116,17 +116,17 @@ typedef struct keyframe_data_extended {
 } KEYFRAME_DATA_EXTENDED;
 
 typedef struct sequence {
-	int sequence_id;
 	KEYFRAME_DATA *first_frame;
 	KEYFRAME_DATA *last_frame;
+	int sequence_id;
 	int Time;
 } SEQUENCE;
 
 typedef struct Hierarchy_Shape_Replacement
 {
+	SHAPEHEADER* replacement_shape;
 	char* replaced_section_name;
 	int replacement_shape_index;
-	SHAPEHEADER* replacement_shape;
 	int replacement_id;
 }HIERARCHY_SHAPE_REPLACEMENT;
 

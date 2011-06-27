@@ -58,17 +58,11 @@ typedef struct shapeanimationsequence
 
 typedef struct shapeanimationheader
 {
-
-	// Public variables
-
-
-	// Private variables
-
 	int num_sequences;
 
-	SHAPEANIMATIONSEQUENCE * anim_sequences;
-
 	int num_shapes_using_this;  //number of shapes sharing the same shapeanimationheader
+
+	SHAPEANIMATIONSEQUENCE * anim_sequences;
 
 } SHAPEANIMATIONHEADER;
 
