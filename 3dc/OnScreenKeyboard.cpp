@@ -202,7 +202,7 @@ void Osk_Draw()
 	int pos_x = osk_x + indent_space;
 	int pos_y = osk_y + indent_space;
 
-	uint32_t index = 0;
+	size_t index = 0;
 
 	for (uint32_t y = 0; y < numVerticalKeys; y++)
 	{

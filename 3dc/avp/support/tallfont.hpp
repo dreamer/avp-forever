@@ -50,7 +50,7 @@
 			ProjChar ProjCh
 		) const;
 
-		OurBool bCanRender( ProjChar ProjCh_In ) const
+		bool bCanRender( ProjChar ProjCh_In ) const
 		{
 			unsigned int offsetTemp;
 			return GetOffset
@@ -118,7 +118,7 @@
 			WidthForOffset[ Offset ] = newWidth;
 		}
 
-		static OurBool bAnyNonTransparentPixelsInColumn
+		static bool bAnyNonTransparentPixelsInColumn
 		(
 			r2pos R2Pos_TopOfColumn,
 			int HeightOfColumn
@@ -126,7 +126,7 @@
 				// assumes you have a read lock
 		);
 
-		OurBool GetOffset
+		bool GetOffset
 		(
 			unsigned int& outputOffset,
 			ProjChar inProjCh
@@ -173,7 +173,7 @@
 			ProjChar ProjCh
 		) const;
 
-		OurBool bCanRender( ProjChar ProjCh_In ) const
+		bool bCanRender( ProjChar ProjCh_In ) const
 		{
 			unsigned int offsetTemp;
 			return GetOffset
@@ -251,13 +251,13 @@
 			FullWidthForOffset[ Offset ] = newWidth;
 		}
 
-		static OurBool bAnyNonTransparentPixelsInColumn
+		static bool bAnyNonTransparentPixelsInColumn
 		(
 			r2pos R2Pos_TopOfColumn,
 			int HeightOfColumn
 		);
 
-		OurBool GetOffset
+		bool GetOffset
 		(
 			unsigned int& outputOffset,
 			ProjChar inProjCh
@@ -286,7 +286,7 @@
 			int* maxOpaqueX
 		);
 
-		OurBool OverlapOnRow
+		bool OverlapOnRow
 		(
 			unsigned int currentOffset,
 			unsigned int nextOffset,
@@ -303,7 +303,7 @@
 			unsigned int Row
 		);		
 
-		OurBool bOpaque
+		bool bOpaque
 		(
 			int x,
 			int y

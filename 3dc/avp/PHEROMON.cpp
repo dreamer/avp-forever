@@ -215,6 +215,15 @@ int AIModuleAdmitsPheromones(AIMODULE *targetModule) {
 			renderModule=*(targetModule->m_module_ptrs);
 			pdbblk=((PROXDOOR_BEHAV_BLOCK *)renderModule->m_sbptr->SBdataptr);
 
+			if (pdbblk->door_locked) 
+			{
+				return 0;
+			} 
+			else 
+			{
+				return 1;
+			}
+/*
 			if (pdbblk->lockable_door) {
 				if (pdbblk->door_locked) {
 					return(0);
@@ -228,6 +237,7 @@ int AIModuleAdmitsPheromones(AIMODULE *targetModule) {
 					return(1);
 				}
 			}
+*/
 		}
 
 		case(MDT_LiftDoor):

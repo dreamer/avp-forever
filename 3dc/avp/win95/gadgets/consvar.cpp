@@ -40,8 +40,7 @@
 			ProjChar* pProjCh_Description_ToUse,
 			int MinVal_New,
 			int MaxVal_New,
-			OurBool Cheat = FALSE
-
+			bool Cheat = false
 		);
 
 		int GetValue(void) const;
@@ -66,8 +65,7 @@
 			ProjChar* pProjCh_Description_ToUse,
 			int MinVal_New,
 			int MaxVal_New,
-			OurBool Cheat = FALSE
-
+			bool Cheat = false
 		);
 
 		int GetValue(void) const;
@@ -104,8 +102,7 @@
 	ProjChar* pProjCh_Description_ToUse,
 	int MinVal_New,
 	int MaxVal_New,
-	OurBool Cheat
-
+	bool Cheat
 )
 {
 	/* PRECONDITION */
@@ -135,7 +132,7 @@
 	ProjChar* pProjCh_Description_ToUse,
 	int MinVal_New,
 	int MaxVal_New,
-	OurBool Cheat
+	bool Cheat
 
 )
 {
@@ -170,7 +167,7 @@ ConsoleVariable :: ~ConsoleVariable()
     );
 }
 
-/*static*/ OurBool ConsoleVariable :: Process( ProjChar* pProjCh_In )
+/*static*/ bool ConsoleVariable :: Process( ProjChar* pProjCh_In )
 {
 	// used for proccesing input text.  Could decide that the user
 	// was requesting the value of a variable, or was setting a new
@@ -315,7 +312,7 @@ ConsoleVariable :: ConsoleVariable
 	ProjChar* pProjCh_Description_ToUse,
 	int MinVal_New,
 	int MaxVal_New,
-	OurBool Cheat
+	bool Cheat
 
 ) :	ConsoleSymbol
 	(
@@ -465,7 +462,7 @@ ConsoleVariable_Simple_Int :: ConsoleVariable_Simple_Int
 	ProjChar* pProjCh_Description_ToUse,
 	int MinVal_New,
 	int MaxVal_New,
-	OurBool Cheat
+	bool Cheat
 ) : theValue( Value_ToUse ),
 	ConsoleVariable
 	(
@@ -588,7 +585,7 @@ ConsoleVariable_Simple_FixP :: ConsoleVariable_Simple_FixP
 	ProjChar* pProjCh_Description_ToUse,
 	int MinVal_New,
 	int MaxVal_New,
-	OurBool Cheat
+	bool Cheat
 ) : theValue( Value_ToUse ),
 	ConsoleVariable
 	(

@@ -158,7 +158,7 @@ KeyBinding :: ParseUnbindCommand
 	// Scan through the string, trying to find matches against strings for keys
 	// We will use the longest match:
 	{
-		OurBool bGotMatch = FALSE;
+		bool bGotMatch = false;
 		size_t LongestMatch = 0;
 		BindableKey theKey_ToUnbind;
 
@@ -586,7 +586,7 @@ KeyBinding :: ~KeyBinding()
 
 #if 0
 // static
-OurBool
+bool
 KeyBinding :: bGetKeyForString
 (
 	BindableKey& theKey_Out,
@@ -801,7 +801,7 @@ KeyBinding :: MakeStringForKey
 }
 
 // static
-OurBool KeyBinding :: ParseBindCommand
+bool KeyBinding :: ParseBindCommand
 (
 	BindableKey& theKey_Out,
 	ProjChar** ppProjCh_Out,
@@ -834,7 +834,7 @@ OurBool KeyBinding :: ParseBindCommand
 	// Scan through the string, trying to find matches against strings for keys
 	// We will use the longest match:
 	{
-		OurBool bGotMatch = FALSE;
+		bool bGotMatch = false;
 		size_t LongestMatch = 0;
 
 		for (int i=0;i<MAX_VALUE_BINDABLE_KEY; i++)

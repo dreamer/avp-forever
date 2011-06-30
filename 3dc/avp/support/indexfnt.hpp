@@ -123,7 +123,7 @@
 			// sizing/display fns are allowed to add spacing pixels
 			// in their own ways
 
-		virtual OurBool bCanRender( ProjChar ProjCh_In ) const = 0;
+		virtual bool bCanRender( ProjChar ProjCh_In ) const = 0;
 			// many fonts don't support all the characters within the ProjChar
 			// character set; you can check with this
 
@@ -134,7 +134,7 @@
 		) const = 0;
 		virtual int GetHeight(void) const = 0;
 
-		OurBool bCanRenderFully( ProjChar* pProjCh );
+		bool bCanRenderFully( ProjChar* pProjCh );
 			// returns true iff all characters in the string are renderable by the font
 
 		#if debug
@@ -202,7 +202,7 @@
 			ProjChar ProjCh
 		) const;
 
-		OurBool bCanRender( ProjChar ProjCh_In ) const
+		bool bCanRender( ProjChar ProjCh_In ) const
 		{
 			return TRUE;
 		}
@@ -313,10 +313,6 @@
 		(
 			ProjChar ProjCh
 		) const;
-
-		#if 0
-		OurBool bCanRender( ProjChar ProjCh_In ) const;
-		#endif
 
 	protected:
 		IndexedFont_Proportional
@@ -445,7 +441,7 @@
 			ProjChar ProjCh
 		) const;
 
-		OurBool bCanRender( ProjChar ProjCh_In ) const;
+		bool bCanRender( ProjChar ProjCh_In ) const;
 
 		int GetMaxWidth(void) const;
 		int GetWidth
@@ -485,7 +481,7 @@
 		}
 
 		// both inline and virtual...
-		inline OurBool IndexedFont_Proportional_PF::bCanRender( ProjChar ProjCh_In ) const
+		inline bool IndexedFont_Proportional_PF::bCanRender( ProjChar ProjCh_In ) const
 		{
 			return pffont_Val -> bPrintable(ProjCh_In);
 		}

@@ -9,53 +9,14 @@ not project specific.
 
 #include "3dc.h"
 
-// For modifications necessary to make Alt-Tabbing
-// behaviour (WM_ACTIVATEAPP) work full screen.
-// This is necessary to support full screen
-// ActiveMovie play.
-
-#define SupportAltTab TRUE
-
 // Externs
 
 extern BOOL bActive;
-
-// These function are here solely to provide a clean
-// interface layer, since Win32 include files are fully
-// available in both C and C++.
-// All functions linking to standard windows code are
-// in win_func.cpp or win_proj.cpp, and all DirectX 
-// interface functions
-// should be in dd_func.cpp (in the Win95 directory)
-// or d3_func.cpp, dp_func.cpp, ds_func.cpp etc.
-// Project specific platfrom functionality for Win95
-// should be in project/win95, in files called 
-// dd_proj.cpp etc.
-
-
-// This function is set up using a PeekMessage check,
-// with a return on a failure of GetMessage, on the
-// grounds that it might be more stable than just
-// GetMessage.  But then again, maybe not.  
-// PM_NOREMOVE means do not take this message out of
-// the queue.  The while loop is designed to ensure
-// that all messages are sent through to the Windows
-// Procedure are associated with a maximum of one frame's
-// delay in the main engine cycle, ensuring that e.g.
-// keydown messages do not build up in the queue.
-
-// if necessary, one could extern this flag
-// to determine if a task-switch has occurred which might
-// have trashed a static display, to decide whether to
-// redraw the screen. After doing so, one should reset
-// the flag
-
-BOOL g_bMustRedrawScreen = FALSE;
+extern int16_t MouseWheelStatus;
 
 void CheckForWindowsMessages(void)
 {
-	MSG	msg;
-	extern int16_t MouseWheelStatus;
+	MSG msg;
 	
 	MouseWheelStatus = 0;
 
@@ -75,17 +36,13 @@ void CheckForWindowsMessages(void)
 		
 		// JH 13/2/98 - if the app is not active we should not return from the message lopp
 		// until the app is re-activated
-		
 		if (!bActive)
 		{
 			ResetFrameCounter();
 			Sleep(0);
-			g_bMustRedrawScreen = TRUE;
 		}
 	}
 	while (!bActive);
 }
 
 #endif // ifdef WIN32
-
-

@@ -188,23 +188,11 @@
 
 	#define XENO_ARM_PITCH_GIMBALL		(1024)
 
-	#if 0
-	/* Original values. */
-	#define XENO_HEAD_LOCK_RATE			(2)	/* Was 0 */
-	#define XENO_HEAD_SCAN_RATE			(3)
-	#define XENO_TORSO_TWIST_RATE		(3)
-	#define XENO_ARM_LOCK_RATE			(4)
-	#define XENO_FOOT_TURN_RATE			(3)
-
-	#else
-	/* Let's slow everything down a wee bit. */
 	#define XENO_HEAD_LOCK_RATE			(2)	/* Was 0 */
 	#define XENO_HEAD_SCAN_RATE			(4)
 	#define XENO_TORSO_TWIST_RATE		(5)
 	#define XENO_ARM_LOCK_RATE			(5)
 	#define XENO_FOOT_TURN_RATE			(5)
-
-	#endif
 
 /* Patrick 4/7/97------------------------------
    Some prototypes

@@ -980,7 +980,6 @@ void LoadStrategy_Corpse(SAVE_BLOCK_STRATEGY_HEADER* header)
 	if(corpseDataPtr->My_Weapon)
 	{
 		corpseDataPtr->WeaponMisfireFunction=corpseDataPtr->My_Weapon->WeaponMisfireFunction;
-		corpseDataPtr->My_Gunflash_Section=corpseDataPtr->My_Gunflash_Section;
 		corpseDataPtr->TemplateRoot=GetNamedHierarchyFromLibrary(corpseDataPtr->My_Weapon->Riffname,corpseDataPtr->My_Weapon->TemplateName);
 	}
 	

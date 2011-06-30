@@ -39,10 +39,6 @@
 			// empty
 		}
 
-		#if 0
-		friend bool operator==(const r2pos& R2Pos_1, const r2pos& R2Pos_2);
-		#endif
-
 		int bIsOrigin(void) const;
 
 		friend r2pos operator+ ( const r2pos& R2Pos_1, const r2pos& R2Pos_2	);
@@ -492,12 +488,7 @@
 				R2Rect_ToClip . y1 = y1;
 			}
 		}
-		#if 0
-		inline void r2rect::Clip(const struct r2rect& R2Rect_In, struct r2rect& R2Rect_Out )
-		{
-			R2Rect_Out . x0 = 
-		}
-		#endif
+
 		inline /*static*/ const r2rect& r2rect::PhysicalScreen(void)
 		{
 			return R2Rect_PhysicalScreen;

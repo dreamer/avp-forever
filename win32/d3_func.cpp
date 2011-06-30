@@ -268,7 +268,7 @@ static float deltaTime = 0.0f;
 
 void UpdateTestTimer()
 {
-	return; //
+	return;
 	static float currentTime = timeGetTime();
 
 	float newTime = timeGetTime();
@@ -592,7 +592,7 @@ bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t num
 	LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
 			0,
 			0,
-			numVerts,				// total num verts in VB
+			numVerts,        // total num verts in VB
 			startIndex,
 			numPrimitives);
 
@@ -705,7 +705,14 @@ bool CreateVolatileResources()
 
 	d3d.orthoIB = new IndexBuffer;
 	d3d.orthoIB->Create(kMaxIndices * 3, USAGE_DYNAMIC);
+/*
+	// sky test
+	d3d.skyVB = new VertexBuffer;
+	d3d.skyVB->Create(kMaxVertices, FVF_LVERTEX, USAGE_STATIC);
 
+	d3d.skyIB = new IndexBuffer;
+	d3d.skyIB->Create(kMaxIndices * 3, USAGE_STATIC);
+*/
 	SetRenderStateDefaults();
 
 	// going to clear texture stages too
@@ -837,7 +844,6 @@ void PrintD3DMatrix(const char* name, D3DXMATRIX &mat)
 {
 	char buf[300];
 	sprintf(buf, "Printing D3D Matrix: - %s\n"
-//	"\t 1 \t 2 \t 3 \t 4\n"
 	"\t %f \t %f \t %f \t %f\n"
 	"\t %f \t %f \t %f \t %f\n"
 	"\t %f \t %f \t %f \t %f\n"
@@ -1185,7 +1191,7 @@ bool R_CreateVertexDeclaration(class VertexDeclaration *vertexDeclaration)
 	std::vector<D3DVERTEXELEMENT9> d3dElement;
 	d3dElement.resize(elementsSize+1); // +1 for DECL_END()
 
-	for (uint32_t i = 0; i < elementsSize; i++)
+	for (size_t i = 0; i < elementsSize; i++)
 	{
 		d3dElement[i].Stream = vertexDeclaration->elements[i].stream;
 		d3dElement[i].Offset = vertexDeclaration->elements[i].offset;
@@ -1306,7 +1312,7 @@ bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexSha
 	D3DXCONSTANT_DESC desc2;
 	uint32_t size = 1;
 
-	// loop, getting and storing a handle to each shader constant
+    // loop, getting and storing a handle to each shader constant
 	for (uint32_t i = 0; i < constantDesc.Constants; i++)
 	{
 		vertexShader.constantsArray[i] = vertexShader.constantTable->GetConstant(NULL, i);
@@ -1325,7 +1331,7 @@ bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader
 	LPD3DXBUFFER pCode = NULL;
 	std::string actualPath = shaderPath + fileName;
 
-	// test that the path to the file is valid first (d3dx doesn't give a specific error message for this)
+    // test that the path to the file is valid first (d3dx doesn't give a specific error message for this)
 	std::ifstream fileOpenTest(actualPath.c_str(), std::ifstream::in | std::ifstream::binary);
 	if (!fileOpenTest.good())
 	{
@@ -1344,7 +1350,7 @@ bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader
 						0,               // flags
 						&pCode,          // compiled operations
 						&pErrors,        // errors
-						&pixelShader.constantTable);			 // constants
+						&pixelShader.constantTable);    // constants
 
 	if (FAILED(LastError))
 	{
@@ -1413,42 +1419,6 @@ bool R_SetVertexShader(r_VertexShader &vertexShader)
 	return true;
 }
 
-/*
-bool R_SetVertexShaderMatrix(r_VertexShader &vertexShader, const char* constant, R_MATRIX &matrix)
-{
-	D3DXMATRIX tempMat;
-	tempMat._11 = matrix._11;
-	tempMat._12 = matrix._12;
-	tempMat._13 = matrix._13;
-	tempMat._14 = matrix._14;
-
-	tempMat._21 = matrix._21;
-	tempMat._22 = matrix._22;
-	tempMat._23 = matrix._23;
-	tempMat._24 = matrix._24;
-
-	tempMat._31 = matrix._31;
-	tempMat._32 = matrix._32;
-	tempMat._33 = matrix._33;
-	tempMat._34 = matrix._34;
-
-	tempMat._41 = matrix._41;
-	tempMat._42 = matrix._42;
-	tempMat._43 = matrix._43;
-	tempMat._44 = matrix._44;
-
-	LastError = vertexShader.constantTable->SetMatrix(d3d.lpD3DDevice, constant, &tempMat);
-	if (FAILED(LastError))
-	{
-		Con_PrintError("Can't set matrix for vertex shader " + vertexShader.shaderName);
-		LogDxError(LastError, __LINE__, __FILE__);
-		return false;
-	}
-
-	return true;
-}
-*/
-
 bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
 {
 	uint32_t sizeInBytes = 0;
@@ -1456,23 +1426,23 @@ bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIn
 	switch (type)
 	{
 		case CONST_INT:
-			sizeInBytes = sizeof(float);
+			sizeInBytes = 4; // sizeof(float);
 			break;
 
 		case CONST_FLOAT:
-			sizeInBytes = sizeof(float);
+			sizeInBytes = 4; // sizeof(float);
 			break;
 
 		case CONST_VECTOR3:
-			sizeInBytes = sizeof(float) * 3;
+			sizeInBytes = 12; // sizeof(float) * 3;
 			break;
 
 		case CONST_VECTOR4:
-			sizeInBytes = sizeof(float) * 4;
+			sizeInBytes = 16; // sizeof(float) * 4;
 			break;
 
 		case CONST_MATRIX:
-			sizeInBytes = sizeof(float) * 16;
+			sizeInBytes = 64; // sizeof(float) * 16;
 			break;
 
 		default:
@@ -1958,8 +1928,8 @@ bool InitialiseDirect3D()
 	if (WindowMode == WindowModeSubWindow)
 		windowed = true;
 
-	//	Zero d3d structure
-    ZeroMemory(&d3d, sizeof(D3DINFO));
+	// Zero d3d structure
+	ZeroMemory(&d3d, sizeof(D3DINFO));
 
 	// Set up Direct3D interface object
 	d3d.lpD3D = Direct3DCreate9(D3D_SDK_VERSION);
@@ -2150,7 +2120,7 @@ bool InitialiseDirect3D()
 	D3DPRESENT_PARAMETERS d3dpp;
 	ZeroMemory (&d3dpp, sizeof(D3DPRESENT_PARAMETERS));
 	d3dpp.hDeviceWindow = hWndMain;
-    d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
 
 	d3dpp.EnableAutoDepthStencil = TRUE;
 	d3dpp.AutoDepthStencilFormat = SelectedDepthFormat;
@@ -2522,6 +2492,8 @@ bool InitialiseDirect3D()
 
 	// stars test
 	d3d.starsEffect = d3d.effectSystem->Add("stars", "stars.vsh", "stars.psh", d3d.starsDecl);
+
+//	d3d.skyEffect = d3d.effectSystem->Add("sky", "sky.vsh", "sky.psh", d3d.mainDecl);
 
 	// we should bail out if the shaders can't be loaded
 	if ((d3d.mainEffect == kNullShaderID) ||

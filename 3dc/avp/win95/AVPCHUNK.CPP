@@ -45,7 +45,8 @@ void AVP_Generator_Chunk::fill_data_block (char * data_start)
 
 size_t AVP_Generator_Chunk::size_chunk ()
 {
-	chunk_size = 12 + 3 * 4 + 4 * 4 + strlen(name) + 4 - strlen(name)%4;
+	size_t name_length = strlen(name);
+	chunk_size = 12 + 3 * 4 + 4 * 4 + name_length + 4 - name_length%4;
 
 	return(chunk_size);
 }

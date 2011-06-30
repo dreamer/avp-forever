@@ -303,32 +303,6 @@ void NPC_IsObstructed(STRATEGYBLOCK *sbPtr, NPC_MOVEMENTDATA *moveData, NPC_OBST
         moveData->numObstructiveCollisions = 0;  
 }
 
-#if 0
-int NPCIsExperiencingObstructiveCollision(STRATEGYBLOCK *sbPtr, VECTORCH *velocityDirection)
-{
-        DYNAMICSBLOCK *dynPtr;
-        struct collisionreport *nextReport;
-
-        LOCALASSERT(sbPtr);
-        dynPtr = sbPtr->DynPtr;
-        LOCALASSERT(dynPtr);
-        nextReport = dynPtr->CollisionReportPtr;
-        
-        /* check our velocity: if we haven't got one, we can't be obstructed, so just return */
-        if((velocityDirection->vx==0)&&(velocityDirection->vy==0)&&(velocityDirection->vz==0)) return 0;
-                        
-        /* walk the collision report list, looking for collisions against inanimate objects */
-        while(nextReport)
-        {               
-                if(nextReport->ObstacleNormal.vy > -46341) return 1;
-                nextReport = nextReport->NextCollisionReportPtr;
-        }
-
-        /* no collision, then ... */
-        return 0;
-}
-#endif
-
 int NPC_CannotReachTarget(NPC_MOVEMENTDATA *moveData, VECTORCH* thisTarget, VECTORCH* thisVelocity)
 {
         LOCALASSERT(moveData);

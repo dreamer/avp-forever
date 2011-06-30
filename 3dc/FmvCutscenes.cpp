@@ -275,15 +275,14 @@ extern void StartTriggerPlotFMV(int number)
 		return;
 
 	sprintf(buffer, "FMVs/message%d.ogv", number);
+
+	FILE *file = avp_fopen(buffer, "rb");
+	if (!file)
 	{
-		FILE *file = avp_fopen(buffer, "rb");
-		if (!file)
-		{
-			Con_PrintError("Couldn't open triggered plot fmv file");
-			return;
-		}
-		fclose(file);
+		Con_PrintError("Couldn't open triggered plot fmv file");
+		return;
 	}
+	fclose(file);
 
 	while (i--)
 	{
@@ -326,7 +325,7 @@ void ScanImagesForFMVs()
 	// fill fmvTextures with all texture names
 	Tex_GetNamesVector(fmvTextures);
 
-	for (uint32_t i = 0; i < fmvTextures.size(); i++)
+	for (size_t i = 0; i < fmvTextures.size(); i++)
 	{
 		// find occurrence of "FMVs" in string and store position of occurrence
 		std::string::size_type offset1 = fmvTextures[i].find("FMVs");

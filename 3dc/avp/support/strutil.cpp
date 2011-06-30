@@ -131,7 +131,7 @@ void STRUTIL_MC_WriteTerminator
 
 
 /* Ansi to HHTS conversion ********************************************/
-OurBool STRUTIL_ANSI_To_ProjChar
+bool STRUTIL_ANSI_To_ProjChar
 (
 	ProjChar* pProjCh_Out,
 	unsigned int MaxSize, /* includes NULL-terminator; truncates after this */
@@ -158,7 +158,7 @@ OurBool STRUTIL_ANSI_To_ProjChar
 	}
 }
 
-OurBool STRUTIL_ProjChar_To_ANSI
+bool STRUTIL_ProjChar_To_ANSI
 (
 	LPTSTR lptszANSI_Out,
 	unsigned int MaxSize, /* includes NULL-terminator; truncates after this */
@@ -260,7 +260,7 @@ void STRUTIL_SC_FastCat
 }
 
 
-OurBool STRUTIL_SC_Strequal
+bool STRUTIL_SC_Strequal
 (
 	const ProjChar* String1,
 	const ProjChar* String2
@@ -300,7 +300,7 @@ OurBool STRUTIL_SC_Strequal
 	);
 }
 
-OurBool STRUTIL_SC_Strequal_Insensitive
+bool STRUTIL_SC_Strequal_Insensitive
 (
 	const ProjChar* String1,
 	const ProjChar* String2
@@ -588,7 +588,7 @@ void STRUTIL_MC_SafeCatHHTSOntoMCTS
 }
 
 
-OurBool fValidHHMCTS(HHMCTC* MCString)
+bool fValidHHMCTS(HHMCTC* MCString)
 {
 	GLOBALASSERT(MCString);
 
@@ -648,7 +648,7 @@ HHMCTC STRUTIL_SC_To_MC
 }
 #endif
 
-OurBool STRUTIL_SC_SafeCopy
+bool STRUTIL_SC_SafeCopy
 (
 	ProjChar* pProjCh_Dst,
 	size_t MaxSize,
@@ -682,7 +682,7 @@ OurBool STRUTIL_SC_SafeCopy
 }
 
 #if 0
-OurBool STRUTIL_MC_SafeCopy
+bool STRUTIL_MC_SafeCopy
 (
 	HHMCTC* pHHMCTC_Dst,
 	unsigned int MaxSize,
@@ -752,7 +752,7 @@ OurBool STRUTIL_MC_SafeCopy
 }
 #endif
 
-OurBool STRUTIL_SC_fIsTerminator
+bool STRUTIL_SC_fIsTerminator
 (
 	const ProjChar* pProjCh
 )
@@ -762,7 +762,7 @@ OurBool STRUTIL_SC_fIsTerminator
 }
 
 #if 0
-OurBool STRUTIL_MC_fIsTerminator(HHMCTC* pHHMCTC)
+bool STRUTIL_MC_fIsTerminator(HHMCTC* pHHMCTC)
 {
 	GLOBALASSERT(pHHMCTC);
 	return ((pHHMCTC->Char) == '\0');

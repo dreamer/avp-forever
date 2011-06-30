@@ -9,10 +9,6 @@
 #ifndef _iofocus
 #define _iofocus 1
 
-	#ifndef _ourbool
-	#include "ourbool.h"
-	#endif
-
 	#ifndef _gadget
 	#include "gadget.h"
 	#endif
@@ -29,8 +25,8 @@
 
 /* Function prototypes **************************************************/
 	#if UseGadgets
-		extern OurBool IOFOCUS_AcceptControls(void);
-		extern OurBool IOFOCUS_AcceptTyping(void);
+		extern bool IOFOCUS_AcceptControls(void);
+		extern bool IOFOCUS_AcceptTyping(void);
 
 		extern void IOFOCUS_Toggle(void);
 	#else

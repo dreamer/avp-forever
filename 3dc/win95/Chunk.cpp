@@ -18,9 +18,8 @@ Chunk * Parent_File;
 void list_chunks_in_file(List<int> * pList, HANDLE hand, char const * chunk_id)
 {
 	unsigned long bytes_read;
-
+	BOOL ok = FALSE;
 	char buffer[8];
-	BOOL ok = TRUE;
 	
 	while (pList->size())
 		pList->delete_first_entry();
@@ -32,25 +31,30 @@ void list_chunks_in_file(List<int> * pList, HANDLE hand, char const * chunk_id)
 	int file_pos;
 	int file_length = GetFileSize(hand, 0);
 
-	SetFilePointer (hand,8,0,FILE_CURRENT);
+	::SetFilePointer (hand,8,0,FILE_CURRENT);
 
 	int chunk_length;
 	int sub_chunk_ln;
 
-	ReadFile (hand, (long *) &chunk_length, 4, &bytes_read, 0);
+	::ReadFile (hand, (long *) &chunk_length, 4, &bytes_read, 0);
 
 	if ((init_file_pos + chunk_length) > file_length) return;
 
 	while ((file_pos = SetFilePointer (hand,0,0,FILE_CURRENT))
-					< (init_file_pos + chunk_length)  && ok) {
+					< (init_file_pos + chunk_length)) 
+	{
+		ok = ::ReadFile (hand, (long *) buffer, 8, &bytes_read, 0);
+		if (!ok)
+			break;
 
-		ok = ReadFile (hand, (long *) buffer, 8, &bytes_read, 0);
 		if (strncmp(buffer, chunk_id, 8) == 0)
 			pList->add_entry(file_pos);
 
-		ok = ReadFile (hand, (long *) &sub_chunk_ln, 4, &bytes_read, 0);
+		ok = ::ReadFile (hand, (long *) &sub_chunk_ln, 4, &bytes_read, 0);
+		if (!ok)
+			break;
 
-		SetFilePointer (hand,sub_chunk_ln-12,0,FILE_CURRENT);
+		::SetFilePointer (hand,sub_chunk_ln-12,0,FILE_CURRENT);
 	}
 }
 
@@ -274,18 +278,18 @@ size_t Chunk_With_Children::size_chunk ()
 
 BOOL Chunk_With_Children::output_chunk (HANDLE &hand)
 {
-	unsigned long junk;
+	DWORD nBytesWritten;
 	Chunk * child_ptr = children;
 	BOOL ok;
 
-	ok = WriteFile (hand, (long *) identifier, 8, &junk, 0);
+	ok = WriteFile (hand, reinterpret_cast<void*>(&identifier), 8, &nBytesWritten, 0);
 
 	if (!ok) return FALSE;
 
-	ok = WriteFile (hand, (long *) &chunk_size, 4, &junk, 0);
+	ok = WriteFile (hand, reinterpret_cast<void*>(&chunk_size), 4, &nBytesWritten, 0);
 
 	if (!ok) return FALSE;
-	
+
 	if (children)
 	{
 		while (child_ptr != NULL && ok)

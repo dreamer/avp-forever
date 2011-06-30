@@ -228,7 +228,7 @@ effectID_t EffectManager::Add(const std::string &effectName, const std::string &
 	effectID_t effectID = kNullEffectID;
 
 	// see if we already have an effect with that name
-	for (uint32_t i = 0; i < this->effectList.size(); i++)
+	for (size_t i = 0; i < this->effectList.size(); i++)
 	{
 		if ((effectList[i].effectName == effectName) && effectList[i].isValid)
 		{

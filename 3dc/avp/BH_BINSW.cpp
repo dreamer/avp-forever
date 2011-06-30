@@ -33,7 +33,7 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	if (!bs_bhv)
 	{
 		memoryInitialisationFailure = 1;
-		return ((void *)NULL);
+		return NULL;
 	}
 
  	bs_bhv->bhvr_type = I_BehaviourBinarySwitch;
@@ -66,21 +66,21 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 		if (!bs_bhv->target_names)
 		{
 			memoryInitialisationFailure = 1;
-			return ((void *)NULL);
+			return NULL;
 		}
 
 		bs_bhv->request_messages = (int *)AllocateMem(sizeof(int) * bs_tt->num_targets);
 		if (!bs_bhv->request_messages)
 		{
 			memoryInitialisationFailure = 1;
-			return ((void *)NULL);
+			return NULL;
 		}
 
 		bs_bhv->bs_targets = (STRATEGYBLOCK **)AllocateMem(sizeof(STRATEGYBLOCK *) * bs_tt->num_targets);
 		if (!bs_bhv->bs_targets)
 		{
 			memoryInitialisationFailure = 1;
-			return ((void *)NULL);
+			return NULL;
 		}
 	}
 	else
@@ -175,7 +175,6 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 	bs_bhv->bs_dtype = binswitch_no_display;
 
 
-
 	if (bs_bhv->bs_tac)
 	{
 		bs_bhv->bs_dtype = binswitch_animate_me;
@@ -227,7 +226,6 @@ void* BinarySwitchBehaveInit(void* bhdata, STRATEGYBLOCK* sbptr)
 			bs_bhv->bs_track->timer=bs_bhv->bs_track->sections[bs_bhv->bs_track->current_section].time_for_section;
 			bs_bhv->bs_track->playing=1;
 			Update_Track_Position(bs_bhv->bs_track);
-
 		}
 	}
 

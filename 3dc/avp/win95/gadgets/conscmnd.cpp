@@ -39,7 +39,7 @@
 			ProjChar* pProjCh_ToUse,
 			ProjChar* pProjCh_Description_ToUse,
 			void (*f) (void),
-			OurBool Cheat = FALSE
+			bool Cheat = false
 		);
 		void Execute(ProjChar* pProjCh_In);
 
@@ -54,7 +54,7 @@
 			ProjChar* pProjCh_ToUse,
 			ProjChar* pProjCh_Description_ToUse,
 			void (*f) (int),
-			OurBool Cheat = FALSE
+			bool Cheat = false
 		);
 		void Execute(ProjChar* pProjCh_In);
 	private:
@@ -68,7 +68,7 @@
 			ProjChar* pProjCh_ToUse,
 			ProjChar* pProjCh_Description_ToUse,
 			int (*f) (void),
-			OurBool Cheat = FALSE
+			bool Cheat = false
 		);
 		void Execute(ProjChar* pProjCh_In);
 	private:
@@ -82,7 +82,7 @@
 			ProjChar* pProjCh_ToUse,
 			ProjChar* pProjCh_Description_ToUse,
 			int (*f) (int),
-			OurBool Cheat = FALSE
+			bool Cheat = false
 		);
 		void Execute(ProjChar* pProjCh_In);
 	private:
@@ -96,7 +96,7 @@
 			ProjChar* pProjCh_ToUse,
 			ProjChar* pProjCh_Description_ToUse,
 			void (*f) (char*),
-			OurBool Cheat = FALSE
+			bool Cheat = false
 		);
 		void Execute(ProjChar* pProjCh_In);
 	private:
@@ -118,7 +118,7 @@
 	ProjChar* pProjCh_ToUse,
 	ProjChar* pProjCh_Description_ToUse,
 	void (&f) (void),
-	OurBool Cheat
+	bool Cheat
 )
 {
 	new ConsoleCommand_VoidVoid
@@ -134,7 +134,7 @@
 	ProjChar* pProjCh_ToUse,
 	ProjChar* pProjCh_Description_ToUse,
 	void (&f) (int),
-	OurBool Cheat
+	bool Cheat
 )
 {
 	new ConsoleCommand_VoidInt
@@ -150,7 +150,7 @@
 	ProjChar* pProjCh_ToUse,
 	ProjChar* pProjCh_Description_ToUse,
 	int (&f) (void),
-	OurBool Cheat
+	bool Cheat
 
 )
 {
@@ -168,7 +168,7 @@
 	ProjChar* pProjCh_ToUse,
 	ProjChar* pProjCh_Description_ToUse,
 	int (&f) (int),
-	OurBool Cheat
+	bool Cheat
 )
 {
 	new ConsoleCommand_IntInt
@@ -184,7 +184,7 @@
 	ProjChar* pProjCh_ToUse,
 	ProjChar* pProjCh_Description_ToUse,
 	void (&f) (char*),
-	OurBool Cheat
+	bool Cheat
 )
 {
 	new ConsoleCommand_VoidCharP
@@ -196,14 +196,14 @@
 	);
 }
 
-/*static*/ OurBool ConsoleCommand :: Process( ProjChar* pProjCh_In )
+/*static*/ bool ConsoleCommand :: Process( ProjChar* pProjCh_In )
 {
 	// used for proccesing input text.
 	// return value = was any processing performed?
 
 	GLOBALASSERT( pProjCh_In );
 
-	OurBool bProcessed = FALSE;
+	bool bProcessed = false;
 
 	// Parse into words; find the first word.  Iterate through the commands
 	// looking for a match:
@@ -331,7 +331,7 @@ ConsoleCommand :: ConsoleCommand
 (
 	ProjChar* pProjCh_ToUse,
 	ProjChar* pProjCh_Description_ToUse,
-	OurBool Cheat
+	bool Cheat
 ) : ConsoleSymbol(pProjCh_ToUse),
 	pSCString_Description( new SCString(pProjCh_Description_ToUse) )
 {
@@ -362,7 +362,7 @@ ConsoleCommand_VoidVoid :: ConsoleCommand_VoidVoid
 	ProjChar* pProjCh_ToUse,
 	ProjChar* pProjCh_Description_ToUse,
 	void (*f) (void),
-	OurBool Cheat
+	bool Cheat
 
 ) : ConsoleCommand
 	(
@@ -386,7 +386,7 @@ ConsoleCommand_VoidInt :: ConsoleCommand_VoidInt
 	ProjChar* pProjCh_ToUse,
 	ProjChar* pProjCh_Description_ToUse,
 	void (*f) (int),
-	OurBool Cheat
+	bool Cheat
 
 ) : ConsoleCommand
 	(
@@ -413,7 +413,7 @@ ConsoleCommand_IntVoid :: ConsoleCommand_IntVoid
 	ProjChar* pProjCh_ToUse,
 	ProjChar* pProjCh_Description_ToUse,
 	int (*f) (void),
-	OurBool Cheat
+	bool Cheat
 
 ) : ConsoleCommand
 	(
@@ -440,7 +440,7 @@ ConsoleCommand_IntInt :: ConsoleCommand_IntInt
 	ProjChar* pProjCh_ToUse,
 	ProjChar* pProjCh_Description_ToUse,
 	int (*f) (int),
-	OurBool Cheat
+	bool Cheat
 ) : ConsoleCommand
 	(
 		pProjCh_ToUse,
@@ -470,7 +470,7 @@ ConsoleCommand_VoidCharP :: ConsoleCommand_VoidCharP
 	ProjChar* pProjCh_ToUse,
 	ProjChar* pProjCh_Description_ToUse,
 	void (*f) (char*),
-	OurBool Cheat
+	bool Cheat
 
 ) : ConsoleCommand
 	(

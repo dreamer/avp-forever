@@ -71,7 +71,7 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr,int x,int y,int colour);
 }
 
 
-OurBool IndexedFont :: bCanRenderFully( ProjChar* pProjCh )
+bool IndexedFont :: bCanRenderFully( ProjChar* pProjCh )
 {
 	// returns true iff all characters in the string are renderable by the font
 

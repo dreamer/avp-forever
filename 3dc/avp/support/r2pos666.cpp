@@ -40,7 +40,7 @@
 R2PosDaemon :: R2PosDaemon
 (
 	r2pos R2Pos_Int_Initial,
-	OurBool bActive
+	bool bActive
 ) : Daemon( bActive ),
 	R2Pos_Int_Current( R2Pos_Int_Initial ),
 	R2Pos_FixP_Current

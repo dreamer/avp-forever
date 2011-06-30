@@ -2,11 +2,7 @@
 #define _chnkload_hpp 1
 
 #include "chnkload.h"
-
 #include "TextureManager.h"
-
-#ifdef __cplusplus
-
 #include "chunk.hpp"
 #include "shpchunk.hpp"
 #include "obchunk.hpp"
@@ -18,10 +14,10 @@ class Sprite_Header_Chunk;
 extern void copy_to_module (Object_Chunk * ob, int mod_pos, int shplst_pos);
 
 extern BOOL copy_to_shapeheader (
-							RIFFHANDLE, 
-							ChunkShape const & cshp, 
-							SHAPEHEADER *& shphd, 
-							Chunk_With_Children * shape, 
+							RIFFHANDLE,
+							ChunkShape const & cshp,
+							SHAPEHEADER *& shphd,
+							Chunk_With_Children * shape,
 							int flags,
 							int local_max_index,
 							int * local_tex_index_nos,
@@ -29,21 +25,18 @@ extern BOOL copy_to_shapeheader (
 							const ChunkObject* object=0	  //object used so that conversion from float to int can be done in world coordinates
 							);
 extern BOOL copy_preprocessed_to_shapeheader (
-							RIFFHANDLE, 
-							Shape_Preprocessed_Data_Chunk*, 
-							SHAPEHEADER *& shphd, 
-							Chunk_With_Children * shape, 
+							RIFFHANDLE,
+							Shape_Preprocessed_Data_Chunk*,
+							SHAPEHEADER *& shphd,
+							Chunk_With_Children * shape,
 							int flags,
 							int local_max_index,
 							int * local_tex_index_nos,
 							int listpos = GLS_NOTINLIST,
 							const ChunkObject* object=0	  //object used so that conversion from float to int can be done in world coordinates
 							);
-							
+
 extern BOOL copy_sprite_to_shapeheader (RIFFHANDLE, SHAPEHEADER *& shphd,Sprite_Header_Chunk* shc, int listpos = GLS_NOTINLIST);
-
-
-// bjd - not used // extern BOOL copy_to_map6(Object_Chunk *,MAPBLOCK6*, int shplst_pos);
 
 extern void merge_polygons_in_chunkshape (ChunkShape & shp, Shape_Merge_Data_Chunk * smdc);
 
@@ -99,7 +92,5 @@ struct _RifHandle : Project_RifHandle
 		, tex_index_nos(0)
 		{}
 };
-
-#endif
 
 #endif

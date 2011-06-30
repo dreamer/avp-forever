@@ -260,30 +260,6 @@ private:
 
 ///////////////////////////////////////////////
 
-#if 0
-class Adjacent_Modules_Chunk : public Chunk
-{
-public:
-
-	Adjacent_Modules_Chunk(Object_Module_Data_Chunk * parent, List<Adjacent_Module> aml)
-	: Chunk (parent, "ADJMDLST"), adjacent_modules_list (aml)
-	{}
-
-	List<Adjacent_Module> adjacent_modules_list;
-
-	virtual void fill_data_block (char *);
-	virtual size_t size_chunk ();
-
-
-private:
-
-	friend class Object_Module_Data_Chunk;
-
-	Adjacent_Modules_Chunk(Object_Module_Data_Chunk * parent, const char * data, size_t size);
-
-};
-#endif
-
 //a replacement for adjacent_modules_chunk
 #define AdjacentModuleFlag_EntryPointSetByHand 0x00000001
 #define AdjacentModuleFlag_InsideAdjacentModule 0x00000002

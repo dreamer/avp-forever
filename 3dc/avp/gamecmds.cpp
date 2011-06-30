@@ -299,7 +299,6 @@ static void CompleteLevel(void)
 	AvP.LevelCompleted = 1;
 }
 
-
 void CreateGameSpecificConsoleCommands(void)
 {
 	ShowDebuggingText.FPS = 0;
@@ -314,9 +313,9 @@ void CreateGameSpecificConsoleCommands(void)
 	ShowDebuggingText.PolyCount = 0;
 
 	#ifndef AVP_DEBUG_VERSION 
-	BOOL IsACheat = TRUE;
+	bool IsACheat = true;
 	#else
-	BOOL IsACheat = FALSE;
+	bool IsACheat = false;
 	#endif
 	
 	#ifndef AVP_DEBUG_VERSION // allow debug commands without -debug
@@ -332,7 +331,6 @@ void CreateGameSpecificConsoleCommands(void)
 			GiveAllWeaponsCheat,
 			IsACheat
 		);
-
 
 		/* KJL 14:51:09 29/03/98 - show commands */
 		ConsoleCommand::Make
@@ -356,7 +354,7 @@ void CreateGameSpecificConsoleCommands(void)
 			"CREATE A LIGHT",
 			MakeRotatingLight,
 			IsACheat
-		);	 
+		);
 		ConsoleCommand :: Make
 		(
 			"GIMME_CHARGE",

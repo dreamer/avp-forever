@@ -80,17 +80,6 @@
 			ProjChar* pProjCh_ToParse
 		);
 
-		#if 0
-		static void AttemptToBind
-		(
-			SCString* pSCString_Key, // description of key
-			SCString* pSCString_ToBind // string to be bound
-		);
-		static void AttemptToUnbind
-		(			
-			SCString* pSCString_Key // description of key
-		);
-		#endif
 		static void UnbindAll(void);
 
 		static void ListAllBindings(void);
@@ -125,19 +114,6 @@
 		);
 		~KeyBinding();
 
-		#if 0
-		static OurBool bGetKeyForString
-		(
-			BindableKey& theKey_Out,
-			const ProjChar* const pProjCh_In
-		);
-			// takes an input string and tries to figure out
-			// what the corresponding WPARAM would be...
-			// Returns truth if it manages to get a sensible value
-			// into the output area.
-		#endif
-			
-
 		static void ErrorDontRecogniseKey( SCString* pSCString_Key );
 
 		void ListThis(void) const;
@@ -148,7 +124,7 @@
 			BindableKey theKey
 		);
 
-		static OurBool ParseBindCommand
+		static bool ParseBindCommand
 		(
 			BindableKey& theKey_Out,
 			ProjChar** ppProjCh_Out,

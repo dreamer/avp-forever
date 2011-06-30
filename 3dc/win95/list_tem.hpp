@@ -609,15 +609,6 @@ class ConstList_Iterator_Forward
         return l->data(m);
     }
 
-    #if 0 // shouldn't really be available on a const list
-    void change_current(T const & new_val) const {
-        if (m != l->sentinel) {
-            m->data = new_val;
-        } else
-            fail(lit_fail_change_current,LIST_TEM_TYPEID_THIS);
-    }
-    #endif
-
     bool done() const { if (m == l->sentinel) return true; else return false; }
     void restart() { m = l->sentinel->next; }       
 	// Go to the end of the list.
@@ -727,15 +718,6 @@ class ConstList_Iterator_Backward
             fail(lit_fail_operator,LIST_TEM_TYPEID_THIS);
         return l->data(m);
     }
-
-    #if 0 // shouldn't really be available on a const list
-    void change_current(T const & new_val) const {
-        if (m != l->sentinel) {
-            m->data = new_val;
-        } else
-            fail(lit_fail_change_current,LIST_TEM_TYPEID_THIS);
-    }
-    #endif
 
     bool done() const { if (m == l->sentinel) return true; else return false; }
     void restart() { m = l->sentinel->prev; }

@@ -40,9 +40,9 @@ int IDemandPreviousWeapon(void);
 
 void catpathandextension(char* dst, char* src)
 {
-	int len = lstrlen(dst);
+	int len = strlen(dst); // bjd - CHECKME
 
-	if ((len > 0 && (dst[len-1] != '/' && dst[len-1] != '/')) && *src != '.')
+	if ((len > 0 && (dst[len-1] != '\\' && dst[len-1] != '/')) && *src != '.')
 		{
 			lstrcat(dst,"/");
 		}
@@ -56,9 +56,8 @@ void catpathandextension(char* dst, char* src)
 	with ver 10.5, but will hopefully become
 	available later...
 */
-    len = lstrlen(dst);
+    len = strlen(dst); // bjd - CHECKME
     dst[len+1] = 0;
-
 }
 
 

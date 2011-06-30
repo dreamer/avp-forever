@@ -1259,10 +1259,7 @@ static void DoAlienDeathScream(STRATEGYBLOCK *sbPtr) {
 	LOCALASSERT(dynPtr);
 	GLOBALASSERT(alienStatusPointer->soundHandle2==SOUND_NOACTIVEINDEX);
 
-	soundIndex=SID_NOSOUND;
-
 	/* This one is for ALIEN DEATH SCREAM. */
-
 	soundIndex=SID_NOSOUND;
 
 	if (alienStatusPointer->soundHandle2==SOUND_NOACTIVEINDEX) {
@@ -1274,8 +1271,6 @@ static void DoAlienDeathScream(STRATEGYBLOCK *sbPtr) {
 			AddNetMsg_SpotAlienSound((int)ASC_Scream_Dying,(int)alienStatusPointer->Type,0,&dynPtr->Position);
 		}
 	}
-
-
 }
 
 static void DoAlienDeathSound(STRATEGYBLOCK *sbPtr) {
@@ -1290,10 +1285,7 @@ static void DoAlienDeathSound(STRATEGYBLOCK *sbPtr) {
 	dynPtr = sbPtr->DynPtr;
 	LOCALASSERT(dynPtr);
 
-	soundIndex=SID_NOSOUND;
-
 	/* This one is for ALIEN DEATH SOUND. */
-
 	soundIndex=SID_NOSOUND;
 
 	PlayAlienSound((int)alienStatusPointer->Type,ASC_Death,0,
@@ -1308,15 +1300,13 @@ static void DoAlienDeathSound(STRATEGYBLOCK *sbPtr) {
 		}
 	}
 	#endif
-
 }
 
-extern void DoAlienLimbLossSound(VECTORCH *position) {
-
+extern void DoAlienLimbLossSound(VECTORCH *position) 
+{
 	/* This one is for ALIEN LIMBLOSS SOUND. */
 
 	PlayAlienSound(0,ASC_LimbLoss,0,NULL,position);
-
 }
 
 /*----------------------Patrick 7/11/96-----------------------------
@@ -1334,7 +1324,6 @@ Handle weapon impact on an alien
 
 void AlienIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, int wounds,SECTION_DATA *Section,VECTORCH *incoming, DISPLAYBLOCK *frag)
 {
-
 	int tkd;
 	ALIEN_STATUS_BLOCK *alienStatusPointer;
 	GLOBALASSERT(sbPtr);

@@ -53,7 +53,7 @@ extern void MessageHistory_Add(enum TEXTSTRING_ID stringID);
 MissionHint :: MissionHint
 (
 	enum TEXTSTRING_ID I_TextString_Description,
-	OurBool bVisible_New
+	bool bVisible_New
 ) : I_TextString_Description_Val
 	(
 		I_TextString_Description
@@ -349,7 +349,7 @@ MissionObjective :: MissionObjective
 			bVisible( MOS_New )
 			&&
 			!bComplete( MOS_New )
-		) // OurBool bVisible_New
+		) // bool bVisible_New
 	),
 	aMissionHint_Complete
 	(
@@ -358,7 +358,7 @@ MissionObjective :: MissionObjective
 			bVisible( MOS_New )
 			&&
 			bComplete( MOS_New )
-		) // OurBool bVisible_New
+		) // bool bVisible_New
 	),
 	I_TextString_Description_Val( I_TextString_Description ),
 	I_TextString_TriggeringFeedback_Val( I_TextString_TriggeringFeedback ),
@@ -415,65 +415,6 @@ void MissionObjective::AddMissionAlteration(MissionObjective* mission_objective,
 void MissionObjective::ResetMission()
 {
 	MOS_Val=initial_MOS_Val;
-}
-
-// Suggested mission objectives for GENSHD1:
-void MissionHacks :: TestInit(void)
-{
-	#if 0
-	#if 1
-	new MissionHint
-	(
-		TEXTSTRING_LEVELMSG_001, // ProjChar* pProjCh_Description,
-		TRUE // OurBool bVisible
-	);
-	#endif
-
-	new MissionObjective
-	(
-		TEXTSTRING_LEVELMSG_002,  // ProjChar* pProjCh_Description,
-		MOS_VisibleUnachieved, // enum MissionObjectiveState MOS_New,
-	
-		TEXTSTRING_LEVELMSG_003, // ProjChar* pProjCh_TriggeringFeedback,
-		MissionFX_UncoversNext // enum MissionEffects MissionFX,
-	);
-
-	new MissionObjective
-	(
-		TEXTSTRING_LEVELMSG_004, // ProjChar* pProjCh_Description,
-		MOS_HiddenUnachieved, // enum MissionObjectiveState MOS_New,
-
-		TEXTSTRING_LEVELMSG_005, // ProjChar* pProjCh_TriggeringFeedback,
-		MissionFX_UncoversNext // enum MissionEffects MissionFX,
-	);
-
-	new MissionObjective
-	(
-		TEXTSTRING_LEVELMSG_006,  // ProjChar* pProjCh_Description,
-		MOS_HiddenUnachieved, // enum MissionObjectiveState MOS_New,
-
-		TEXTSTRING_LEVELMSG_007, // ProjChar* pProjCh_TriggeringFeedback,
-		MissionFX_UncoversNext // enum MissionEffects MissionFX,
-	);
-
-	new MissionObjective
-	(
-		TEXTSTRING_LEVELMSG_008,  // ProjChar* pProjCh_Description,
-		MOS_HiddenUnachieved, // enum MissionObjectiveState MOS_New,
-
-		TEXTSTRING_LEVELMSG_009, // ProjChar* pProjCh_TriggeringFeedback,
-		MissionFX_UncoversNext // enum MissionEffects MissionFX,
-	);
-
-	new MissionObjective
-	(
-		TEXTSTRING_LEVELMSG_010,  // ProjChar* pProjCh_Description,
-		MOS_HiddenUnachieved, // enum MissionObjectiveState MOS_New,
-
-		TEXTSTRING_LEVELMSG_011, // ProjChar* pProjCh_TriggeringFeedback,
-		MissionFX_CompletesLevel // enum MissionEffects MissionFX,
-	);
-	#endif
 }
 
 void MissionObjective :: TestCompleteNext(void)
@@ -534,65 +475,3 @@ void MissionObjective :: TestCompleteNext(void)
 		}
 	}
 }
-
-
-
-/* Internal function definitions ***********************************/
-
-
-
-
-
-
-
-#if 0
-		"BACKUP POWER SYSTEM ACTIVATED", // ProjChar* pProjCh_TriggeringFeedback,
-		MissionFX_None // enum MissionEffects MissionFX,
-	);
-
-	new MissionObjective
-	(
-		"SECURITY DOORS RESTRICT ACCESS WITHIN THE COLONY.  FIND THE OPERATIONS ROOM IN THE MAIN BUILDING.  "
-		"INSIDE ARE FIVE SWITCHES.  TRIGGER ALL OF THEM TO OPEN THE SECURITY DOORS REMOTELY.  "
-			, // ProjChar* pProjCh_Description,
-		TRUE, // OurBool bHidden
-
-		"SECURITY DOOR EMERGENCY OVERRIDE TRIGGERED:  DOORS HAVE BEEN OPENED.  ", // ProjChar* pProjCh_TriggeringFeedback,
-		MissionFX_None // enum MissionEffects MissionFX,
-	);
-
-	new MissionObjective
-	(
-		"MAKE YOUR WAY TO MEDLAB.  COLLECT COMPUTER ARCHIVES "
-		"DOCUMENTING THE COLONISTS WORK ON THE FACEHUGGERS.  "
-			,  // ProjChar* pProjCh_Description,
-		TRUE, // OurBool bHidden
-
-		"PARTIAL MEDLAB ARCHIVE COLLECTED", // ProjChar* pProjCh_TriggeringFeedback,
-		MissionFX_None // enum MissionEffects MissionFX,
-	);
-
-	new MissionObjective
-	(
-		"THE MEDLAB ARCHIVE YOU HAVE COLLECTED IS ONLY ONE OF THREE FILES.  "
-		"WE'VE GOT A PDT READING ON THE MEDLAB OFFICER WHO WAS RESEARCHING THE FACEHUGGERS.  "
-		"IT'S COMING FROM THE BASEMENT OF THE PROCESSOR PLANT.  "
-		"SHE MIGHT BE ALIVE, BUT IT'S PROBABLY JUST HER REMAINS.  "
-		"MAKE YOUR WAY THERE AND TRY TO FIND MORE ARCHIVES.  "
-			,  // ProjChar* pProjCh_Description,
-		TRUE, // OurBool bHidden
-
-		"MEDLAB ARCHIVE COLLECTED", // ProjChar* pProjCh_TriggeringFeedback,
-		MissionFX_None // enum MissionEffects MissionFX,
-	);
-
-	new MissionObjective
-	(
-		"THAT LOOKS LIKE ALL THE FILES.  "
-		"GET BACK TO THE YARD.  THE LANDING BEACON CONTROLS ARE IN A RECESS TO THE LEFT OF THE "
-		"ATMOSPHERE PROCESSOR.  ACTIVATE THE BEACON AND PREPARE FOR EVAC."
-			,  // ProjChar* pProjCh_Description,
-		TRUE, // OurBool bHidden
-
-		"LANDING BEACON ACTIVATED.  STAND CLEAR AND PREPARE FOR EVAC.  ", // ProjChar* pProjCh_TriggeringFeedback,
-#endif

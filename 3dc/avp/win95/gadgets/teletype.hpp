@@ -22,9 +22,6 @@
 
 /* Type definitions *****************************************************/
 	#if UseGadgets
-		#ifndef _ourbool
-		#include "ourbool.h"
-		#endif
 
 		#ifndef _scstring
 		#include "scstring.hpp"
@@ -52,7 +49,7 @@
 		);
 		~TeletypeGadget();
 
-		OurBool HasFinishedPrinting(void);
+		bool HasFinishedPrinting(void);
 			// so that the next line knows when to begin
 
 		SCString* GetStringWithoutReference(void);

@@ -40,9 +40,7 @@ void* PoolAllocateMem(size_t amount)
 
 void ClearMemoryPool()
 {
-	int i;
-
-	for(i = 0; i <= CurrentMemoryBlock; i++)
+	for (int i = 0; i <= CurrentMemoryBlock; i++)
 	{
 		DeallocateMem(MemoryBlocks[i]);
 		MemoryBlocks[i] = 0;
@@ -52,6 +50,5 @@ void ClearMemoryPool()
 	MemoryLeft = 0;
 }
 
-
-
 #endif
+

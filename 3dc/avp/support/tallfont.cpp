@@ -326,7 +326,7 @@ IndexedFont_Proportional_Column :: UpdateWidths(void)
 }
 
 // static
-OurBool
+bool
 IndexedFont_Proportional_Column :: bAnyNonTransparentPixelsInColumn
 (
 	r2pos R2Pos_TopOfColumn,
@@ -940,7 +940,7 @@ IndexedFont_Kerned_Column :: UpdateXIncs(void)
 
 
 // static
-OurBool
+bool
 IndexedFont_Kerned_Column :: bAnyNonTransparentPixelsInColumn
 (
 	r2pos R2Pos_TopOfColumn,
@@ -1000,7 +1000,7 @@ IndexedFont_Kerned_Column :: CalcXInc
 	}
 }
 
-OurBool
+bool
 IndexedFont_Kerned_Column :: OverlapOnRow
 (
 	unsigned int currentOffset,
@@ -1110,7 +1110,7 @@ IndexedFont_Kerned_Column :: GetSmallestXIncForRow
 }
 
 
-OurBool
+bool
 IndexedFont_Kerned_Column :: bOpaque
 (
 	int x,

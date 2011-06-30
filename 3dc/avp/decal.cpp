@@ -1054,18 +1054,16 @@ void ScanHModelForDecals(DISPLAYBLOCK *objectPtr, SECTION_DATA *sectionDataPtr)
 	if (!(sectionDataPtr->flags&section_data_notreal) && (sectionPtr->Shape!=NULL))
 	{
 		/* does the object have decals? */
-		if(sectionDataPtr->NumberOfDecals && playerPherModule)
+		if (sectionDataPtr->NumberOfDecals && playerPherModule)
 		{
-			int d;
-			for(d=0; d<sectionDataPtr->NumberOfDecals; d++)
+			for (int d=0; d<sectionDataPtr->NumberOfDecals; d++)
 			{
-				int i;
 				DECAL decal;
 				decal.DecalID = sectionDataPtr->Decals[d].DecalID;
 				decal.ModuleIndex = playerPherModule->m_index;
 				decal.UOffset = 0;
 
-				for(i=0; i<5; i++)
+				for(int i=0; i<4; i++)
 				{
 					decal.Vertices[i] = sectionDataPtr->Decals[d].Vertices[i];
 					RotateVector(&(decal.Vertices[i]),&(sectionDataPtr->SecMat));

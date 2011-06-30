@@ -96,7 +96,7 @@ void CreateGameSpecificConsoleVariables(void)
 	#ifndef AVP_DEBUG_VERSION // allow debug commands without -debug
 	BOOL IsACheat = TRUE;
 	#else
-	BOOL IsACheat = FALSE;
+	bool IsACheat = false;
 	#endif
 
 	#ifndef AVP_DEBUG_VERSION // allow debug commands without -debug

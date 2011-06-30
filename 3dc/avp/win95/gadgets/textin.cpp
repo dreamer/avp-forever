@@ -34,7 +34,7 @@
 /* Imported data ***************************************************/
 
 /* Exported globals ************************************************/
-	/*static*/ OurBool TextInputState :: bOverwrite_Val = FALSE;
+	/*static*/ bool TextInputState :: bOverwrite_Val = FALSE;
 
 /* Internal type definitions ***************************************/
 
@@ -139,7 +139,6 @@ void TextInputState :: CharTyped
 	// add to list at cursor point...
 	#if LimitedLineLength
 	{
-		GLOBALASSERT( CursorPos >= 0 );
 		GLOBALASSERT( CursorPos <= NumChars );
 
 		GLOBALASSERT( 0 == ProjCh[ NumChars ] );
@@ -376,7 +375,7 @@ void TextInputState :: Key_Delete(void)
 // Protected methods:
 TextInputState :: TextInputState
 (
-	OurBool bForceUpperCase,
+	bool bForceUpperCase,
 	char* pProjCh_Init
 ) :
 	#if LimitedLineLength
@@ -562,7 +561,6 @@ int TextInputState :: bInsertAt(ProjChar ProjCh_In, size_t Pos_Where)
 
 			// The data-representation invariant:
 			#if LimitedLineLength
-			GLOBALASSERT( CursorPos >= 0 );
 			GLOBALASSERT( CursorPos <= NumChars );
 
 			GLOBALASSERT( 0 == ProjCh[ NumChars ] );
@@ -877,7 +875,7 @@ void TextInputState :: FullyManual(void)
 	pConsoleSym_CurrentCompletion = NULL;
 	#endif
 }
-OurBool TextInputState :: bManualMatch
+bool TextInputState :: bManualMatch
 (
 	ProjChar* pProjCh
 ) const
@@ -933,7 +931,7 @@ OurBool TextInputState :: bManualMatch
 	}
 
 }
-OurBool TextInputState :: bManualMatchInsensitive
+bool TextInputState :: bManualMatchInsensitive
 (
 	ProjChar* pProjCh
 ) const

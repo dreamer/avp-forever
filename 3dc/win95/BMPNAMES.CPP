@@ -131,7 +131,9 @@ Chunk_With_BMPs::Chunk_With_BMPs (Chunk_With_Children * parent, const char * con
 		bdata += 4;
 	
 		BMP_Name bn (bdata);
-		bdata += (4-strlen(bn.filename)%4) + strlen(bn.filename);
+
+		size_t filename_length = strlen(bn.filename);
+		bdata += (4-filename_length%4) + filename_length;
 
 		bn.flags = (BMPN_Flags)f;
 		bn.index = j;

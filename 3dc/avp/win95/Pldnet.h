@@ -761,11 +761,6 @@ typedef struct netmessage_alienaistate
 	unsigned char sub_sequence;
 	unsigned short sequence_length:13; //in 256ths of a second , up to ~32 seconds
 
-	#if 0
-	unsigned int Elevation : 12;
-	unsigned char IAmFiringPrimary: 1;								
-	unsigned char IAmFiringSecondary: 1;								
-	#endif
 	unsigned short IAmOnFire: 1;
 	unsigned short AlienType: 2;//alien/predalien/praetorian
 

@@ -11,10 +11,6 @@
 	#include "refobj.hpp"
 	#endif
 
-	#ifndef _ourbool
-	#include "ourbool.h"
-	#endif
-
 	#ifndef _projtext
 	#include "projtext.h"
 		#endif
@@ -116,7 +112,7 @@
 			// Size for this string drawn on a single line in the specified font
 			// Behaviour is not fully defined when unprintable characters occur in the string
 
-		OurBool bCanRenderFully( FontIndex I_Font );
+		bool bCanRenderFully( FontIndex I_Font );
 			// can this string be fully rendered by the font (not all fonts support
 			// all characters) ?
 
@@ -156,7 +152,7 @@
 
 		r2size R2Size[ IndexedFonts_MAX_NUMBER_OF_FONTS ];
 
-		OurBool bCanRender[ IndexedFonts_MAX_NUMBER_OF_FONTS ];			
+		bool bCanRender[ IndexedFonts_MAX_NUMBER_OF_FONTS ];			
 
 		size_t AllocatedSize;
 			// this includes the NULL terminator
@@ -176,7 +172,7 @@
 		return R2Size[ I_Font ];
 	}
 
-	inline OurBool SCString::bCanRenderFully( FontIndex I_Font )
+	inline bool SCString::bCanRenderFully( FontIndex I_Font )
 	{
 		return bCanRender[ I_Font ];
 	}

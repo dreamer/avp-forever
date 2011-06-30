@@ -40,7 +40,7 @@
 
 	public:
 	
-	OurBool ThisIsACheat;
+	bool ThisIsACheat;
 	protected:
 		ConsoleSymbol
 		(

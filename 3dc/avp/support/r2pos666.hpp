@@ -28,7 +28,7 @@
 		R2PosDaemon
 		(
 			r2pos R2Pos_Int_Initial,
-			OurBool bActive
+			bool bActive
 		);
 
 		~R2PosDaemon()

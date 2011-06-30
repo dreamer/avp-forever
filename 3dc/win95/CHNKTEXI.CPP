@@ -696,7 +696,6 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 		textureID = Tex_AddExistingTexture(newTexture);
 
 		// lock
-		//bool Tex_Lock(texID_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
 		uint8_t *src;
 		uint32_t pitch;
 

@@ -30,7 +30,7 @@
 /* Imported data ***************************************************/
 
 		#if 0
-		extern OurBool			DaveDebugOn;
+		extern bool			DaveDebugOn;
 		extern FDIEXTENSIONTAG	FDIET_Dummy;
 		extern IFEXTENSIONTAG	IFET_Dummy;
 		extern FDIQUAD			FDIQuad_WholeScreen;

@@ -105,7 +105,7 @@ CallbackHook :: ~CallbackHook()
 // class Daemon
 Daemon :: Daemon
 (
-	OurBool fActive
+	bool fActive
 )
 {
 	#if SupportCallbackHooks
@@ -127,18 +127,18 @@ Daemon :: Daemon
 
 Daemon :: ~Daemon()
 {
-	if (fIsActive_Val)	
+	if (fIsActive_Val)
 	{
 		Stop();
 	}
 
-    if ( p666_Iteration_Current == this )
-    {
-        // Then this daemon is being processed for Activity();
-        // Set the static iteration ptr to NULL to signify it has been deleted
-        // so that callback hooks don't get called
-        p666_Iteration_Current = NULL;
-    }
+	if ( p666_Iteration_Current == this )
+	{
+		// Then this daemon is being processed for Activity();
+		// Set the static iteration ptr to NULL to signify it has been deleted
+		// so that callback hooks don't get called
+		p666_Iteration_Current = NULL;
+	}
 
 	#if SupportCallbackHooks
 	// remove from screen objects lists of attached daemons
@@ -187,31 +187,31 @@ void Daemon :: Stop(void)
                 }
             }
 
-    		if ( p666_PrevActive )		
-    		{
-    			GLOBALASSERT( p666_PrevActive -> fIsActive_Val );
+			if ( p666_PrevActive )
+			{
+				GLOBALASSERT( p666_PrevActive -> fIsActive_Val );
 
-    			p666_PrevActive -> p666_NextActive = p666_NextActive;	
-    		} 
+				p666_PrevActive -> p666_NextActive = p666_NextActive;
+			}
 
-    		if ( p666_NextActive )		
-    		{
-    			GLOBALASSERT( p666_NextActive -> fIsActive_Val );
+			if ( p666_NextActive )
+			{
+				GLOBALASSERT( p666_NextActive -> fIsActive_Val );
 
-    			p666_NextActive -> p666_PrevActive = p666_PrevActive;
-    		}
+				p666_NextActive -> p666_PrevActive = p666_PrevActive;
+			}
 
-    		if (p666_FirstActive == this)
-    		{
-    			p666_FirstActive = p666_NextActive;
-    		}
-        }
+			if (p666_FirstActive == this)
+			{
+				p666_FirstActive = p666_NextActive;
+			}
+		}
 
 		fIsActive_Val = FALSE;
 	}
 }
 
-void Daemon :: SetActive(OurBool fActive)
+void Daemon :: SetActive(bool fActive)
 {
 	if (fActive)
 	{
@@ -223,7 +223,7 @@ void Daemon :: SetActive(OurBool fActive)
 	}
 }
 
-OurBool Daemon :: bActive(void) const
+bool Daemon :: bActive(void) const
 {
 	return fIsActive_Val;
 }
@@ -284,8 +284,8 @@ void Daemon :: Maintain(int FixP_Time_ToUse)
 
 		{
 			#if DaemonNaming && DaemonDiagnostics
-            char* tempDebugName = p666_Iteration_Current -> GetDebugName();
-                // in case it gets deleted during the loop
+			char* tempDebugName = p666_Iteration_Current -> GetDebugName();
+				// in case it gets deleted during the loop
 
 			ProfileStart();
 			#endif
@@ -297,19 +297,19 @@ void Daemon :: Maintain(int FixP_Time_ToUse)
 			)
 			{
 				if ( p666_Iteration_Current )
-                {
-    				// run the OnActivity() method for all the callback hooks attached to this daemon
-    				CallbackHook* pCallbackHook = p666_Iteration_Current -> pFirstHook;
-    				while ( pCallbackHook )
-    				{
-    					CallbackHook* pCallbackHook_Nxt = pCallbackHook -> pNxtHook;
-    					
-    					pCallbackHook -> OnActivity();
-    					
-    					pCallbackHook = pCallbackHook_Nxt;
-    				}
-                }
-                // else the iterating daemon got deleted during the call to Activity()
+				{
+					// run the OnActivity() method for all the callback hooks attached to this daemon
+					CallbackHook* pCallbackHook = p666_Iteration_Current -> pFirstHook;
+				while ( pCallbackHook )
+				{
+					CallbackHook* pCallbackHook_Nxt = pCallbackHook -> pNxtHook;
+					
+					pCallbackHook -> OnActivity();
+					
+					pCallbackHook = pCallbackHook_Nxt;
+				}
+				}
+				// else the iterating daemon got deleted during the call to Activity()
 			}
 			#else
 			{
@@ -351,7 +351,6 @@ void Daemon :: Maintain(int FixP_Time_ToUse)
 	#endif
 
 	#endif // #if DaemonDiagnostics
-
 }
 
 void DAEMON_Init(void)
@@ -360,14 +359,6 @@ void DAEMON_Init(void)
 
 void DAEMON_Maintain(void)
 {
-	#if 0
-	textprint("DAEMON_Maintain() called\n");
-	#endif
-	
-	#if 0
-	textprint("RealFrameTime=%i\n",RealFrameTime);
-	#endif
-
 	int DaemonFrameTime =
 	(
 		#if UseRealFrameTime
@@ -382,7 +373,6 @@ void DAEMON_Maintain(void)
 		{
 			DaemonFrameTime = MUL_FIXED(DaemonFrameTime,Daemon :: DaemonTimeScale);
 		}
-
 	}
 
 	/* cap DaemonFrameTime if frame rate is really low */

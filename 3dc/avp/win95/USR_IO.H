@@ -26,47 +26,6 @@
 #include "avp_menus.h"
 #include "stratdef.h"
 
-#if 0
-typedef struct player_input_configuration
-{
-	unsigned char Forward;
-	unsigned char Backward;
-	unsigned char Left;
-	unsigned char Right;
-
-	unsigned char Strafe;
-	unsigned char StrafeLeft;
-	unsigned char StrafeRight;
-
-	unsigned char LookUp;
-	unsigned char LookDown;
-	unsigned char CentreView;
-
-	unsigned char Walk;
-	unsigned char Crouch;
-	unsigned char Jump;
-
-	unsigned char Operate;
-
-	unsigned char NextWeapon;
-	unsigned char PreviousWeapon;
-	unsigned char FirePrimaryWeapon;
-	unsigned char FireSecondaryWeapon;
-
-	#ifdef __cplusplus
-	// C++ only stuff, added by DHM 17/3/98 to ease rewrite of the
-	// key configuration screens:
-	// (definitions are in REBITEMS.HPP)
-	unsigned char GetMethod( enum KeyConfigItems theEffect ) const;
-	void SetMethod
-	(
-		enum KeyConfigItems theEffect,
-		unsigned char newMethod
-	);
-	#endif
-
-}PLAYER_INPUT_CONFIGURATION;
-#endif
 enum PLAYER_INPUT_ID
 {
 	PLAYER_INPUT_FORWARD,

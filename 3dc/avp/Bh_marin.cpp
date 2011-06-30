@@ -3121,11 +3121,15 @@ void WanderMission_Control(STRATEGYBLOCK *sbPtr) {
 				if ((ShowSquadState)||((marineIsNear)&&(ShowNearSquad))) {
 					PrintDebuggingText("Wander marine dying in %s\n",sbPtr->containingModule->name);
 				}
+
+				Execute_Dying(sbPtr);
+/*
 				if (marineIsNear) {
 					Execute_Dying(sbPtr);
 				} else {
 					Execute_Dying(sbPtr);
 				}
+*/
 				break;
 			}
 			case(MBS_Taunting):
@@ -3449,11 +3453,15 @@ void PathfinderMission_Control(STRATEGYBLOCK *sbPtr) {
 				if ((ShowSquadState)||((marineIsNear)&&(ShowNearSquad))) {
 					PrintDebuggingText("Pathfinder marine dying in %s\n",sbPtr->containingModule->name);
 				}
+
+				Execute_Dying(sbPtr);
+/*
 				if (marineIsNear) {
 					Execute_Dying(sbPtr);
 				} else {
 					Execute_Dying(sbPtr);
 				}
+*/
 				break;
 			}
 			case(MBS_Pathfinding):
@@ -3793,11 +3801,14 @@ void GuardMission_Control(STRATEGYBLOCK *sbPtr) {
 					PrintDebuggingText("Guard marine dying in %s\n",sbPtr->containingModule->name);
 				}
 
+				Execute_Dying(sbPtr);
+/*
 				if (marineIsNear) {
 					Execute_Dying(sbPtr);
 				} else {
 					Execute_Dying(sbPtr);
 				}
+*/
 				break;
 			}
 			case(MBS_Taunting):

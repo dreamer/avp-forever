@@ -3502,8 +3502,8 @@ void HandleRainShaft(MODULE *modulePtr, int bottomY, int topY, int numberOfRaind
 		{
 			particlePtr->Position.vy = bottomY;
 			particlePtr->Velocity.vy = -particlePtr->Velocity.vy;
-			particlePtr->Velocity.vx = particlePtr->Velocity.vx;
-			particlePtr->Velocity.vz = particlePtr->Velocity.vz;
+//			particlePtr->Velocity.vx = particlePtr->Velocity.vx;
+//			particlePtr->Velocity.vz = particlePtr->Velocity.vz;
 			particlePtr->LifeTime = 1;
 			particlePtr->Size = 100;
 			AddRipple(particlePtr->Position.vx,particlePtr->Position.vz,100);
@@ -3916,15 +3916,13 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 
 void DrawFrisbeePlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr)
 {
-	int i = 16;
 	PARTICLE particle;
-
 	particle.Position = *positionPtr;
-
 	particle.ParticleID = PARTICLE_MUZZLEFLASH;
-
 	particle.Colour = RGBALIGHT_MAKE(255,255,255,255);
 	particle.Size = 200;
+
+	int i = 16;
 
 	while (i--)
 	{
@@ -3938,15 +3936,13 @@ void DrawFrisbeePlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr)
 
 void DrawPredatorPlasmaBolt(VECTORCH *positionPtr,VECTORCH *directionPtr)
 {
-	int i = 16;
 	PARTICLE particle;
-
 	particle.Position = *positionPtr;
-
 	particle.ParticleID = PARTICLE_MUZZLEFLASH;
-
 	particle.Colour = RGBALIGHT_MAKE(50, 255, 255, 255);
 	particle.Size = 200;
+
+	int i = 16;
 
 	while (i--)
 	{
@@ -4004,19 +4000,17 @@ void MakeRocketTrailParticles(VECTORCH *prevPositionPtr, VECTORCH *positionPtr)
 		int i=16;
 		do
 		{
-			{
-				VECTORCH position;
-				VECTORCH velocity;
-				velocity.vx = (FastRandom()&1023) - 512;
-				velocity.vy = (FastRandom()&1023) - 512;
-				velocity.vz = (FastRandom()&1023) - 512;
+			VECTORCH position;
+			VECTORCH velocity;
+			velocity.vx = (FastRandom()&1023) - 512;
+			velocity.vy = (FastRandom()&1023) - 512;
+			velocity.vz = (FastRandom()&1023) - 512;
 
-				position.vx = prevPositionPtr->vx + (disp.vx*i)/16;
-				position.vy = prevPositionPtr->vy + (disp.vy*i)/16;
-				position.vz = prevPositionPtr->vz + (disp.vz*i)/16;
+			position.vx = prevPositionPtr->vx + (disp.vx*i)/16;
+			position.vy = prevPositionPtr->vy + (disp.vy*i)/16;
+			position.vz = prevPositionPtr->vz + (disp.vz*i)/16;
 
-				MakeParticle(&position,&(velocity),PARTICLE_BLACKSMOKE);
-			}
+			MakeParticle(&position,&(velocity),PARTICLE_BLACKSMOKE);
 		}
 		while(i--);
 	}
@@ -4035,19 +4029,17 @@ void MakeGrenadeTrailParticles(VECTORCH *prevPositionPtr, VECTORCH *positionPtr)
 		int i=8;
 		do
 		{
-			{
-				VECTORCH position;
-				VECTORCH velocity;
-				velocity.vx = (FastRandom()&1023) - 512;
-				velocity.vy = (FastRandom()&1023) - 512;
-				velocity.vz = (FastRandom()&1023) - 512;
+			VECTORCH position;
+			VECTORCH velocity;
+			velocity.vx = (FastRandom()&1023) - 512;
+			velocity.vy = (FastRandom()&1023) - 512;
+			velocity.vz = (FastRandom()&1023) - 512;
 
-				position.vx = prevPositionPtr->vx + (disp.vx*i)/16;
-				position.vy = prevPositionPtr->vy + (disp.vy*i)/16;
-				position.vz = prevPositionPtr->vz + (disp.vz*i)/16;
+			position.vx = prevPositionPtr->vx + (disp.vx*i)/16;
+			position.vy = prevPositionPtr->vy + (disp.vy*i)/16;
+			position.vz = prevPositionPtr->vz + (disp.vz*i)/16;
 
-				MakeParticle(&position,&(velocity),PARTICLE_FLARESMOKE);
-			}
+			MakeParticle(&position,&(velocity),PARTICLE_FLARESMOKE);
 		}
 		while(i--);
 	}
@@ -4119,10 +4111,9 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 			int r;
 			
 			/* KJL 11:49:25 19/08/98 - check to see if explosion is inside environment */
-			{
-				MODULE *module = ModuleFromPosition(positionPtr, (MODULE*)NULL);
-				if (!module) return;
-			}
+			MODULE *module = ModuleFromPosition(positionPtr, (MODULE*)NULL);
+			if (!module) 
+				return;
 
 			expPtr = AllocateVolumetricExplosion();
 			r = (FastRandom()&7)+1;
@@ -4181,10 +4172,9 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 			VOLUMETRIC_EXPLOSION *expPtr;
 			
 			/* KJL 11:49:25 19/08/98 - check to see if explosion is inside environment */
-			{
-				MODULE *module = ModuleFromPosition(positionPtr, (MODULE*)NULL);
-				if (!module) return;
-			}
+			MODULE *module = ModuleFromPosition(positionPtr, (MODULE*)NULL);
+			if (!module)
+				return;
 
 			expPtr = AllocateVolumetricExplosion();
 
@@ -4223,7 +4213,6 @@ void MakeVolumetricExplosionAt(VECTORCH *positionPtr, enum EXPLOSION_ID explosio
 
 void MakeFlechetteExplosionAt(VECTORCH *positionPtr,int seed)
 {
-	int i;
 	enum PARTICLE_ID particle_to_use;
 
 	Explosion_SoundData.position=*positionPtr;
@@ -4262,7 +4251,7 @@ void MakeFlechetteExplosionAt(VECTORCH *positionPtr,int seed)
 		if (SphereVertex[i].vy<0) MakeParticle(positionPtr,&SphereVertex[i],PARTICLE_FLECHETTE);
 	}
 	#else
-	for (i=0; i<100; i++)
+	for (int i=0; i<100; i++)
 	{
 		VECTORCH velocity;
 		int phi = SeededFastRandom()&4095;

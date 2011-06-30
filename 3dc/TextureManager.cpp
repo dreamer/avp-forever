@@ -67,7 +67,7 @@ bool Tex_Unlock(texID_t textureID)
 // for avp's FMV code
 void Tex_GetNamesVector(std::vector<std::string> &namesArray)
 {
-	for (uint32_t i = 0; i < textureList.size(); i++)
+	for (size_t i = 0; i < textureList.size(); i++)
 	{
 		namesArray.push_back(textureList[i].name);
 	}
@@ -75,7 +75,7 @@ void Tex_GetNamesVector(std::vector<std::string> &namesArray)
 
 static texID_t Tex_GetFreeID()
 {
-	for (uint32_t i = 0; i < textureList.size(); i++)
+	for (size_t i = 0; i < textureList.size(); i++)
 	{
 		if (textureList[i].isValid == false)
 		{
@@ -477,7 +477,7 @@ void Tex_Release(texID_t textureID)
 
 void Tex_DeInit()
 {
-	for (uint32_t i = 0; i < textureList.size(); i++)
+	for (size_t i = 0; i < textureList.size(); i++)
 	{
 		Tex_Release(i);
 		textureList[i].isValid = false;

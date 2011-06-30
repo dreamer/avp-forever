@@ -54,7 +54,7 @@ void OperateObjectInLineOfSight(void)
 				if (objectPtr->ObView.vz > 0 && objectPtr->ObView.vz < ACTIVATION_Z_RANGE)
 				{
 					int absX = objectPtr->ObView.vx;
-				   	int absY = objectPtr->ObView.vy;
+					int absY = objectPtr->ObView.vy;
 
 					if (absX<0) absX=-absX;
 					if (absY<0) absY=-absY;
@@ -119,7 +119,7 @@ void OperateObjectInLineOfSight(void)
 			}
 		}
 	}
-    
+
 	return;
 }
 

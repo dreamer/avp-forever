@@ -833,9 +833,10 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 			D3D_HUDQuad_Output(SpecialFXImageNumber, quadVertices, 0xff003fff, FILTERING_BILINEAR_ON);
 
 			health = (health / 2);
+/*
 			if (health < 0) 
 				health = 0;
-
+*/
 			if (health<100)
 			{
 				scaledWidth = WideMulNarrowDiv(ScreenDescriptorBlock.SDB_Width,health,100);

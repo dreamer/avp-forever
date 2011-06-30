@@ -105,3 +105,4 @@ void GetPathFromRegistry()
 	}
 #endif
 }
+

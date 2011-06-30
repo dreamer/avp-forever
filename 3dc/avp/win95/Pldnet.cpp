@@ -10866,9 +10866,10 @@ BOOL AreThereAnyLivesLeft()
 	return (CountMultiplayerLivesLeft()>0);
 }
 
-#define FONT_ALIENSYMBOL 176
-#define FONT_MARINESYMBOL 177
+#define FONT_ALIENSYMBOL    176
+#define FONT_MARINESYMBOL   177
 #define FONT_PREDATORSYMBOL 178
+
 void DoMultiplayerEndGameScreen(void)
 {
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
@@ -10876,24 +10877,23 @@ void DoMultiplayerEndGameScreen(void)
 	int x,y;
 	char text[100];
 
-	if(netGameData.myGameState==NGS_EndGameScreen)
+	if (netGameData.myGameState==NGS_EndGameScreen)
 	{
 		D3D_FadeDownScreen(16384,0);
 	}
 	else
 	{
 		ShowMultiplayerScoreTimer-=RealFrameTime;
-		if(ShowMultiplayerScoreTimer<=0)ShowMultiplayerScoreTimer=0;
+		if (ShowMultiplayerScoreTimer<=0)ShowMultiplayerScoreTimer=0;
 	}
 	
 //   RenderStringCentred("Test Endgame Screen",ScreenDescriptorBlock.SDB_Width/2,ScreenDescriptorBlock.SDB_Height/2,0xffffffff);
 
-		
 	//draw headings
 	y=150;
 	x=120;
 	
-	for(i=0;i<NET_MAXPLAYERS;i++)
+	for (i=0;i<NET_MAXPLAYERS;i++)
 	{
 		if(netGameData.playerData[i].playerId)
 		{
@@ -10902,19 +10902,19 @@ void DoMultiplayerEndGameScreen(void)
 		}
 	}
 	x+=30;
-	if(netGameData.gameType==NGT_Coop)
+	if (netGameData.gameType==NGT_Coop)
 	{
-		if(NPCHive.AliensCanBeGenerated)
+		if (NPCHive.AliensCanBeGenerated)
 		{
 			RenderStringVertically(GetTextString(TEXTSTRING_MULTIPLAYER_ALIENS),x,y,0xffffffff);
 			x+=20;
 		}
-		if(NPCHive.PredAliensCanBeGenerated)
+		if (NPCHive.PredAliensCanBeGenerated)
 		{
 			RenderStringVertically(GetTextString(TEXTSTRING_MULTIPLAYER_PREDALIENS),x,y,0xffffffff);
 			x+=20;
 		}
-		if(NPCHive.PraetoriansCanBeGenerated)
+		if (NPCHive.PraetoriansCanBeGenerated)
 		{
 			RenderStringVertically(GetTextString(TEXTSTRING_MULTIPLAYER_PRAETORIANS),x,y,0xffffffff);
 			x+=20;
@@ -10931,92 +10931,83 @@ void DoMultiplayerEndGameScreen(void)
 		x+=30;
 	}
 
-	
-
-
 	y+=10;
 
-	for(i=0;i<NET_MAXPLAYERS;i++)
+	for (i=0;i<NET_MAXPLAYERS;i++)
 	{
-		if(netGameData.playerData[i].playerId)
+		if (netGameData.playerData[i].playerId)
 		{
 			RenderStringCentred(netGameData.playerData[i].name,50,y,0xffffffff);
-			
-			//draw the player's species symbol
+
+			// draw the player's species symbol
+			char symbol[2]={0,0};
+			switch (netGameData.playerData[i].characterType)
 			{
-				char symbol[2]={0,0};
-				switch(netGameData.playerData[i].characterType)
-				{
-					case NGCT_Marine :
-						symbol[0]=FONT_MARINESYMBOL;
-						RenderStringCentred(symbol,100,y,0xffffffff);
-						break;
+				case NGCT_Marine :
+					symbol[0] = FONT_MARINESYMBOL;
+					RenderStringCentred(symbol,100,y,0xffffffff);
+					break;
 
-					case NGCT_Alien :
-						symbol[0]=FONT_ALIENSYMBOL;
-						RenderStringCentred(symbol,100,y,0xffffffff);
-						break;
+				case NGCT_Alien :
+					symbol[0] = FONT_ALIENSYMBOL;
+					RenderStringCentred(symbol,100,y,0xffffffff);
+					break;
 
-					case NGCT_Predator :
-						symbol[0]=FONT_PREDATORSYMBOL;
-						RenderStringCentred(symbol,100,y,0xffffffff);
-						break;
+				case NGCT_Predator :
+					symbol[0] = FONT_PREDATORSYMBOL;
+					RenderStringCentred(symbol,100,y,0xffffffff);
+					break;
 
-					default:
-						break;
-				}
+				default:
+					break;
 			}
-			
-			
+
 			x=120;
-			for(j=0;j<NET_MAXPLAYERS;j++)
+			for (j=0;j<NET_MAXPLAYERS;j++)
 			{
-				if(netGameData.playerData[j].playerId)
+				if (netGameData.playerData[j].playerId)
 				{
 					sprintf(text,"%d",netGameData.playerData[i].playerFrags[j]);
-					if(i==j)
+					if (i==j)
 						RenderStringCentred(text,x,y,0xffff0000);
 					else
 						RenderStringCentred(text,x,y,0xff00ff00);
-							
+
 					x+=20;
 				}
 			}
-			
-			
+
 			x+=30;
-			if(netGameData.gameType==NGT_Coop)
+			if (netGameData.gameType==NGT_Coop)
 			{
 				int score=0;
 				
-				if(NPCHive.AliensCanBeGenerated)
+				if (NPCHive.AliensCanBeGenerated)
 				{
 					sprintf(text,"%d",netGameData.playerData[i].aliensKilled[0]);
 					RenderStringCentred(text,x,y,0xff00ff00);
 					x+=20;
 				}
-				if(NPCHive.PredAliensCanBeGenerated)
+				if (NPCHive.PredAliensCanBeGenerated)
 				{
 					sprintf(text,"%d",netGameData.playerData[i].aliensKilled[1]);
 					RenderStringCentred(text,x,y,0xff00ff00);
 					x+=20;
 				}
-				if(NPCHive.PraetoriansCanBeGenerated)
+				if (NPCHive.PraetoriansCanBeGenerated)
 				{
 					sprintf(text,"%d",netGameData.playerData[i].aliensKilled[2]);
 					RenderStringCentred(text,x,y,0xff00ff00);
 					x+=20;
 				}
-				
-				for(j=0;j<3;j++)
-				{
 
+				for (j=0;j<3;j++)
+				{
 					score+=netGameData.playerData[i].aliensKilled[j]*netGameData.aiKillValues[j];
 				}
 				x+=20;
 				sprintf(text,"%d",score);
 				RenderStringCentred(text,x,y,0xff00ff00);
-
 			}
 			else
 			{
@@ -11030,38 +11021,35 @@ void DoMultiplayerEndGameScreen(void)
 			}
 			y+=20;
 		}
-		
 	}
 
-	if(netGameData.gameType==NGT_Coop)
+	if (netGameData.gameType==NGT_Coop)
 	{
 		//show kills by ai aliens
 		RenderStringCentred(GetTextString(TEXTSTRING_MULTIPLAYER_ALIENS),50,y,0xffffffff);
 
-				
 		x=120;
-		for(j=0;j<NET_MAXPLAYERS;j++)
+		for (j=0;j<NET_MAXPLAYERS;j++)
 		{
-			if(netGameData.playerData[j].playerId)
+			if (netGameData.playerData[j].playerId)
 			{
 				sprintf(text,"%d",netGameData.playerData[j].deathsFromAI);
 				RenderStringCentred(text,x,y,0xff00ff00);
 				x+=20;
 			}
 		}
-		
 		y+=20;
 	}
 
-	if(netGameData.maxLives!=0)
+	if (netGameData.maxLives!=0)
 	{
-		if(netGameData.gameType==NGT_Individual ||
+		if (netGameData.gameType==NGT_Individual ||
 		   netGameData.gameType==NGT_Coop ||
 		   netGameData.gameType==NGT_CoopDeathmatch)
 		{
 			y+=20;
 
-			if(y<240)
+			if (y<240)
 			{
 				//make sure the text appears far enough down the screen , so we don't
 				//overlap with the species score stuff
@@ -11070,11 +11058,10 @@ void DoMultiplayerEndGameScreen(void)
 			//display remaining lives
 			sprintf(text,"%s: %d",GetTextString(TEXTSTRING_MULTIPLAYER_LIVES_LEFT),CountMultiplayerLivesLeft());
 			RenderStringCentred(text,ScreenDescriptorBlock.SDB_Width/2,y,0xffffffff);
-	
 		}
 	}
 
-	if(netGameData.gameType==NGT_CoopDeathmatch)
+	if (netGameData.gameType==NGT_CoopDeathmatch)
 	{
 		//show species scores
 		x+=50;
@@ -11094,13 +11081,11 @@ void DoMultiplayerEndGameScreen(void)
 		RenderStringCentred(text,x,180,0xffffffff);
 		sprintf(text,"%d",netGameData.teamScores[NGCT_Predator]);
 		RenderStringCentred(text,x,200,0xffffffff);
-
 	}
 
-	
-	if(netGameData.myGameState==NGS_EndGameScreen)
+	if (netGameData.myGameState==NGS_EndGameScreen)
 	{
-		if(AvP.Network==I_Host)
+		if (AvP.Network==I_Host)
 		{
 			
 			//pause before the host can restart
@@ -11111,7 +11096,7 @@ void DoMultiplayerEndGameScreen(void)
 			}
 			netGameData.stateCheckTimeDelay=0;
 			
-  			RenderStringCentred(GetTextString(TEXTSTRING_MULTIPLAYER_PRESSKEYTORESTARTGAME),ScreenDescriptorBlock.SDB_Width/2,ScreenDescriptorBlock.SDB_Height-20,0xffffffff);
+			RenderStringCentred(GetTextString(TEXTSTRING_MULTIPLAYER_PRESSKEYTORESTARTGAME),ScreenDescriptorBlock.SDB_Width/2,ScreenDescriptorBlock.SDB_Height-20,0xffffffff);
 			if (DebouncedGotAnyKey)
 			{
 				int seed=FastRandom();
@@ -11121,18 +11106,18 @@ void DoMultiplayerEndGameScreen(void)
 		}
 		else
 		{
- 			RenderStringCentred(GetTextString(TEXTSTRING_MULTIPLAYER_WAITFORRESTARTGAME),ScreenDescriptorBlock.SDB_Width/2,ScreenDescriptorBlock.SDB_Height-20,0xffffffff);
+			RenderStringCentred(GetTextString(TEXTSTRING_MULTIPLAYER_WAITFORRESTARTGAME),ScreenDescriptorBlock.SDB_Width/2,ScreenDescriptorBlock.SDB_Height-20,0xffffffff);
 		}
 	}
 	else if(!playerStatusPtr->IsAlive)
 	{
 		if(AreThereAnyLivesLeft())
 		{
- 			RenderStringCentred(GetTextString(TEXTSTRING_MULTIPLAYER_OPERATETORESPAWN),ScreenDescriptorBlock.SDB_Width/2,ScreenDescriptorBlock.SDB_Height-20,0xffffffff);
+			RenderStringCentred(GetTextString(TEXTSTRING_MULTIPLAYER_OPERATETORESPAWN),ScreenDescriptorBlock.SDB_Width/2,ScreenDescriptorBlock.SDB_Height-20,0xffffffff);
 		}
 		else
 		{
- 			RenderStringCentred(GetTextString(TEXTSTRING_MULTIPLAYER_OPERATETOOBSERVE),ScreenDescriptorBlock.SDB_Width/2,ScreenDescriptorBlock.SDB_Height-20,0xffffffff);
+			RenderStringCentred(GetTextString(TEXTSTRING_MULTIPLAYER_OPERATETOOBSERVE),ScreenDescriptorBlock.SDB_Width/2,ScreenDescriptorBlock.SDB_Height-20,0xffffffff);
 		}
 	}
 }

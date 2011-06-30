@@ -4,7 +4,7 @@
 #define UseLocalAssert 1
 #include "ourasert.h"
 
-extern SHAPEHEADER * mainshapelist[];
+extern SHAPEHEADER **mainshapelist;
 
 static int begins[ MSLS_MAXSECTIONS ];
 static int ends[ MSLS_MAXSECTIONS ];

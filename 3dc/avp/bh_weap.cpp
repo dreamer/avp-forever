@@ -399,12 +399,10 @@ static STRATEGYBLOCK* InitialiseFrisbeeBehaviour_ForLoad() {
 	bblk->soundHandle = SOUND_NOACTIVEINDEX;
 
 	bblk->Laser.SourcePosition=zeroVect;
-	bblk->Laser.SourcePosition=zeroVect;
 	bblk->Laser.BeamHasHitPlayer=0;
 	bblk->Laser.BeamIsOn=0;
 
 	dispPtr->HModelControlBlock=&bblk->HModelController;
-
 
 	return dispPtr->ObStrategyBlock;
 }
@@ -458,7 +456,6 @@ STRATEGYBLOCK* CreateFrisbeeKernel(VECTORCH *position, MATRIXCH *orient, int fro
 	fblk->Bounced = 0;
 	fblk->bounces = 0;
 
-	fblk->Laser.SourcePosition=*position;
 	fblk->Laser.SourcePosition=*position;
 	fblk->Laser.BeamHasHitPlayer=0;
 	fblk->Laser.BeamIsOn=0;

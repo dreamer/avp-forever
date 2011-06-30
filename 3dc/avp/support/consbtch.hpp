@@ -27,7 +27,7 @@
 	class BatchFileProcessing
 	{
 	public:
-		static OurBool Run(char* Filename);
+		static bool Run(char* Filename);
 			// Tries to find the file, if it finds it it reads it,
 			// adds the non-comment lines to the pending list, and returns TRUE
 			// If it can't find the file, it returns FALSE

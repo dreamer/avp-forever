@@ -7,7 +7,7 @@
 extern BOOL bActive;
 extern int WinLeftX, WinRightX, WinTopY, WinBotY;
 
-static volatile int EndMouseThread=0;
+static volatile int EndMouseThread = 0;
 
 // thread continually moves the mouse cursor to the centre of the window
 // so you don't accidently click outside it.
@@ -21,7 +21,7 @@ void MouseThread(void*)
 			continue;
 
 		SetCursorPos((WinLeftX+WinRightX)>>1,(WinTopY+WinBotY)>>1);
-	}	
+	}
 	EndMouseThread = 0;
 }
 
@@ -33,7 +33,7 @@ void InitCentreMouseThread()
 
 void FinishCentreMouseThread()
 {
-   	EndMouseThread=1;
+	EndMouseThread=1;
 }
 
 #endif

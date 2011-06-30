@@ -2737,8 +2737,6 @@ int Splice_HModels(HMODELCONTROLLER *new_controller,SECTION_DATA *top_section_da
 	SECTION_DATA *new_top_section;
 
 	/* Init new controller. */
-
-	wounds=0;
 	Global_Controller_Ptr=new_controller;
 
 	new_controller->Seconds_For_Sequence=ONE_FIXED;
@@ -2799,7 +2797,6 @@ int Splice_HModels(HMODELCONTROLLER *new_controller,SECTION_DATA *top_section_da
 
 			child_ptr=child_ptr->Next_Sibling;
 		}
-
 	}
 	
 	
@@ -2824,7 +2821,6 @@ int Splice_HModels(HMODELCONTROLLER *new_controller,SECTION_DATA *top_section_da
 	wounds=Change_Controller_Recursion(new_controller,new_top_section);
 	
 	return(wounds);
-
 }
 
 SECTION_DATA *GetSectionData_Recursion(SECTION_DATA *this_section_data,char *name) {

@@ -74,16 +74,16 @@
 		MissionHint
 		(
 			enum TEXTSTRING_ID I_TextString_Description,
-			OurBool bVisible_New
+			bool bVisible_New
 		);
 
 		SCString* GetDesc(void) const;
 
-		OurBool bVisible(void) const;
+		bool bVisible(void) const;
 
 		void SetVisibility
 		(
-			OurBool bVisible_New
+			bool bVisible_New
 		);
 
 		static const List<MissionHint*>& GetAll(void);
@@ -97,7 +97,7 @@
 	// Private data:
 	private:
 		enum TEXTSTRING_ID I_TextString_Description_Val;
-		OurBool bVisible_Val;
+		bool bVisible_Val;
 
 		static List<MissionHint*> List_pMissionHint;
 	public:
@@ -111,13 +111,13 @@
 				I_TextString_Description_Val
 			);
 		}
-		inline OurBool MissionHint::bVisible(void) const
+		inline bool MissionHint::bVisible(void) const
 		{
 			return bVisible_Val;
 		}
 		inline void MissionHint::SetVisibility
 		(
-			OurBool bVisible_New
+			bool bVisible_New
 		)
 		{
 			bVisible_Val = bVisible_New;
@@ -127,32 +127,6 @@
 			return List_pMissionHint;
 		}
 
-
-	#if 0
-	class MissionEvent
-	{
-	public:
-		virtual void OnTriggering(void) = 0;
-
-		virtual ~MissionEvent();
-
-	protected:
-		MissionEvent
-		(
-			enum TEXTSTRING_ID I_TextString_TriggeringFeedback,
-			enum MissionEffects MissionFX
-		);
-
-	protected:
-		enum MissionEffects MissionFX_Val;
-
-	private:
-		enum TEXTSTRING_ID I_TextString_TriggeringFeedback_Val;
-
-		static List<MissionEvent*> List_pMissionEvent;
-	};
-	#endif
-	
 	class MissionObjective;
 	#define MissionAlteration_MakeVisible  0x00000001
 	#define MissionAlteration_MakePossible  0x00000002
@@ -244,18 +218,6 @@
 		{
 			return bComplete( MOS_Val );
 		}
-		
-
-
-/* Exported globals *****************************************************/
-
-/* Function prototypes **************************************************/
-	namespace MissionHacks
-	{
-		void TestInit(void);
-	};
-
-
 
 /* End of the header ****************************************************/
 

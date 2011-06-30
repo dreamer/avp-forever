@@ -41,7 +41,7 @@
 		AVPTextInputState() :
 			TextInputState
 			(
-				TRUE, // OurBool bForceUpperCase,
+				TRUE, // bool bForceUpperCase,
 				"" // const char* pProjCh_Init
 			)
 		{

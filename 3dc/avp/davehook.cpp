@@ -11,50 +11,32 @@
 /* Includes ********************************************************/
 #include "3dc.h"
 #include "davehook.h"
-
-
 #include "r2base.h"
-	// hooks to R2 code
-
+// hooks to R2 code
 #include "gadget.h"
-	// hooks to gadgets code
-
+// hooks to gadgets code
 #include "daemon.h"
-	// hooks to daemon code
-
+// hooks to daemon code
 #include "rentrntq.h"
-
-//#include "ammo666.hpp"
-
 #include "iofocus.h"
-
 #include "font.h"
-
 #include "hudgadg.hpp"
-
 #include "consvar.hpp"
 #include "conscmnd.hpp"
-
 #include "missions.hpp"
-
 #include "indexfnt.hpp"
-	// Includes for console variables:
-	#include "textexp.hpp"
-
-	// Includes for console commands:
-	#include "consvar.hpp"
-	#include "modcmds.hpp"
-	#include "trepgadg.hpp"
-
-	#include "consbind.hpp"
-
-	#include "consbtch.hpp"
-
-	
-	#define UseLocalAssert TRUE
-	#include "ourasert.h"
-
+// Includes for console variables:
+#include "textexp.hpp"
+// Includes for console commands:
+#include "consvar.hpp"
+#include "modcmds.hpp"
+#include "trepgadg.hpp"
+#include "consbind.hpp"
+#include "consbtch.hpp"
+#define UseLocalAssert TRUE
+#include "ourasert.h"
 #include "frontend/avp_menus.h"
+
 /* Version settings ************************************************/
 
 /* Constants *******************************************************/
@@ -65,12 +47,12 @@
 
 /* Imported data ***************************************************/
 
-		extern unsigned char KeyboardInput[];
+	extern unsigned char KeyboardInput[];
 
-		extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 
-		extern int bEnableTextprint;
-		extern int bEnableTextprintXY;
+	extern int bEnableTextprint;
+	extern int bEnableTextprintXY;
 
 /* Exported globals ************************************************/
 	#if 0
@@ -173,8 +155,6 @@
 		1
 	);
 	#endif
-
-
 }
 
 /*static*/ void ConsoleCommand :: CreateAll(void)
@@ -200,8 +180,6 @@
 		ConsoleVariable :: ListAllVariables
 	);
 
-
-
 	// Need to add
 	#if 0
 		static void AttemptToBind
@@ -210,7 +188,7 @@
 			SCString* pSCString_ToBind // string to be bound
 		);
 		static void AttemptToUnbind
-		(			
+		(
 			SCString* pSCString_Key // description of key
 		);
 	#endif
@@ -288,9 +266,6 @@
 
 void DAVEHOOK_Init(void)
 {
-
-	MissionHacks :: TestInit();
-
 	{
 		DAEMON_Init();
 

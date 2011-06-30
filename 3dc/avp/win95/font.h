@@ -85,7 +85,7 @@ typedef struct pffont
 	// C++ methods: ////////////////////////////////
 	int GetHeight(void) const;
 	int GetWidth(const ProjChar ProjCh) const;
-	int bPrintable(const ProjChar ProjCh) const;
+	bool bPrintable(const ProjChar ProjCh) const;
 	int ProjCharToOffset(const ProjChar ProjCh) const;
 
 	int GetOffset(void) const;
@@ -116,19 +116,19 @@ typedef struct pffont
 			return 0;
 		}
 	}
-	inline int pffont::bPrintable(const ProjChar ProjCh) const
+	inline bool pffont::bPrintable(const ProjChar ProjCh) const
 	{
 		const int Offset = GetOffset();
 
 		if ( (int)ProjCh < Offset )
 		{
-			return FALSE;
+			return false;
 		}
 		if ( (int)ProjCh >= Offset + num_chars_in_font )
 		{
-			return FALSE;
+			return false;
 		}
-		return TRUE;
+		return true;
 	}
 	inline int pffont::ProjCharToOffset(const ProjChar ProjCh) const
 	{

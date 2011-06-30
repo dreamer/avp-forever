@@ -179,6 +179,9 @@ typedef struct D3DInfo
 	class VertexBuffer		*starsVB;
 	class IndexBuffer		*starsIB;
 
+	class VertexBuffer		*skyVB;
+	class IndexBuffer		*skyIB;
+
 	// effect manager to handle shaders
 	class EffectManager		*effectSystem;
 
@@ -188,6 +191,7 @@ typedef struct D3DInfo
 	effectID_t				cloudEffect;
 	effectID_t				fmvEffect;
 	effectID_t				starsEffect;
+	effectID_t				skyEffect;
 
 	// vertex declarations
 	class VertexDeclaration		*mainDecl;

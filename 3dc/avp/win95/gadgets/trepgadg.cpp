@@ -93,7 +93,7 @@ static int NumberOfLinesToDisplay=0;
 	{
 	public:
 		CheesyDaemon_Lifetime();
-		OurBool bStillAlive(void);
+		bool bStillAlive(void);
 		void Reset(void);
 	};
 
@@ -830,7 +830,7 @@ TextReportDaemon_Disappear :: TextReportDaemon_Disappear
 	TextReportGadget* pTextReportGadg
 ) : PulsingTriggerDaemon
 	(
-		TRUE, // OurBool fActive,
+		true, // bool fActive,
 		FIXP_SECONDS_UNTIL_TEXT_REPORTS_DISAPPEAR // int FixP_Period // interval between triggers in seconds			
 	)
 {
@@ -861,7 +861,7 @@ CheesyDaemon_Flash :: CheesyDaemon_Flash
 		0, // int Int_InitialCoord,
 		1, // int Int_SecondCoord,
 		(ONE_FIXED * 4), // int FixP_Velocity,
-		TRUE // OurBool fActive
+		true // bool fActive
 	)
 {
 	// empty
@@ -881,7 +881,7 @@ CheesyDaemon_Lifetime :: CheesyDaemon_Lifetime
 	// empty
 }
 
-OurBool CheesyDaemon_Lifetime :: bStillAlive(void)
+bool CheesyDaemon_Lifetime :: bStillAlive(void)
 {
 	return ( GetCoord_FixP() > 0);
 }

@@ -19,7 +19,7 @@
 			CoordinateWithStrategy
 			(
 				int Int_InitialCoord,
-				OurBool fActive
+				bool fActive
 			);
 
 			virtual ~CoordinateWithStrategy();
@@ -30,24 +30,9 @@
 			virtual ACTIVITY_RETURN_TYPE Activity(ACTIVITY_INPUT) = 0;
 				// the strategy to run when active...
 
-			#if 0
-			virtual void UpdateScreenObject
-			(
-				ScreenObject* pScrObj
-			) = 0;
-			#endif
-
 		protected:
 			int Int_CurrentCoord_Val;
 	};
-
-#if 0
-	class CoordinateWith2DStrategy : public Daemon
-	{
-		public
-			CoordinateWith2DStrategy
-	};    
-#endif
 
 	class CoordinateWithVelocity : public CoordinateWithStrategy
 	{
@@ -61,7 +46,7 @@
 			(
 				int Int_InitialCoord,
 				int FixP_Velocity,
-				OurBool fActive
+				bool fActive
 			);
 
 			virtual ~CoordinateWithVelocity();
@@ -86,7 +71,7 @@
 				int Int_InitialCoord,
 				int Int_SecondCoord,
 				int FixP_Velocity,
-				OurBool fActive
+				bool fActive
 			);
 
 			virtual ~PulsingCoordinate();
@@ -109,7 +94,7 @@
 				int Int_InitialCoord,
 				int Int_SecondCoord,
 				int FixP_Velocity,
-				OurBool fActive
+				bool fActive
 			);
 
 			virtual ~AcyclicPulsingCoordinate();
@@ -126,15 +111,14 @@
 				int Int_InitialCoord,
 				int Int_SecondCoord,
 				int FixP_Velocity,
-				OurBool fActive
+				bool fActive
 			);
 
 			virtual ~CyclicPulsingCoordinate();
 
 			ACTIVITY_RETURN_TYPE Activity(ACTIVITY_INPUT);
 		private:
-			OurBool fGoingForSecondCoord;
-
+			bool fGoingForSecondCoord;
 	};
 
 	class HomingCoordinate : public CoordinateWithVelocity
@@ -156,11 +140,6 @@
 
 			void SetCoord_Int(int Int_NewCoord);
 			void SetCoord_FixP(int FixP_NewCoord);
-
-			#if 0
-			virtual OurBool fTargetWithinThisFramesRange(void) = 0;
-			virtual void ChangeVelocityBasedOnHoming(int FixP_Time) = 0;
-			#endif
 	};
 
 		// Inline fns:
@@ -183,12 +162,6 @@
 			(
 				int Int_TargetCoord
 			);
-
-			#if 0
-			OurBool fTargetWithinThisFramesRange(void);
-			void ChangeVelocityBasedOnHoming(int FixP_Time);
-			#endif
-	
 	};
 
 	class CyclicHomingCoordinate : public CoordinateWithStrategy

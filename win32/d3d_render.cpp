@@ -103,9 +103,6 @@ RenderList *orthoList = 0;
 // stars test
 RenderList *starsList = 0;
 
-#define RGBLIGHT_MAKE(r,g,b) RGB_MAKE(r,g,b)
-#define RGBALIGHT_MAKE(r,g,b,a) RGBA_MAKE(r,g,b,a)
-
 static HRESULT LastError; // remove me eventually (when no more D3D calls exist in this file)
 
 // set our std::vectors capacity allowing us to use them as regular arrays
@@ -227,9 +224,9 @@ uint32_t GetRealNumVerts(uint32_t numVerts)
 	return realNumVerts;
 }
 
-// lock our vertex and index buffers, and reset counters and array indexes used to keep track 
-// of the number of verts and indices in those buffers. Function needs to be renamed as we no 
-// longer use an execute buffer
+// lock our dynamic vertex and index buffers, and reset counters and array indexes used to keep 
+// track of the number of verts and indices in those buffers. Function could be renamed as 
+// we no longer use an execute buffer
 static bool LockExecuteBuffer()
 {
 	// lock particle vertex and index buffers
@@ -263,7 +260,7 @@ static bool LockExecuteBuffer()
 
 extern void UpdateTestTimer();
 
-// unlock all vertex and index buffers. function needs to be renamed as no longer using execute buffers
+// unlock all dynamic vertex and index buffers. function could be renamed as no longer using execute buffers
 static bool UnlockExecuteBufferAndPrepareForUse()
 {
 //	Font_DrawCenteredText("This is a test string");
@@ -527,11 +524,10 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, const std::vector<t
 	d3d.effectSystem->SetActive(d3d.fmvEffect);
 
 	// set orthographic projection
-//	d3d.effectSystem->SetMatrix(d3d.fmvEffect, "WorldViewProj", matOrtho);
 	d3d.effectSystem->SetVertexShaderConstant(d3d.fmvEffect, 0, CONST_MATRIX, &matOrtho);
 
 	// set the texture
-	for (uint32_t i = 0; i < textureIDs.size(); i++)
+	for (size_t i = 0; i < textureIDs.size(); i++)
 	{
 		R_SetTexture(i, textureIDs[i]);
 		ChangeTextureAddressMode(i, TEXTURE_CLAMP);
@@ -626,7 +622,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, texID_t textureID, uint
 	float x2 = WPos2DC(topX + charWidth);
 	float y2 = HPos2DC(topY + charHeight);
 
-	if (d3d.supportsShaders)
+	if (/*d3d.supportsShaders*/0)
 	{
 		R_SetTexture(0, textureID);
 		R_SetTexture(1, AVPMENUGFX_CLOUDY);
@@ -1157,7 +1153,7 @@ void DrawCoronas()
 			int intensity = LightIntensityAtPoint(&coronaArray[i].particle.Position);
 			if (coronaArray[i].particle.ParticleID == PARTICLE_SMOKECLOUD || coronaArray[i].particle.ParticleID == PARTICLE_ANDROID_BLOOD)
 			{
-				colour = RGBALIGHT_MAKE
+				colour = RGBA_MAKE
 						(
 							MUL_FIXED(intensity, coronaArray[i].particle.ColourComponents.Red),
 							MUL_FIXED(intensity, coronaArray[i].particle.ColourComponents.Green),
@@ -1167,7 +1163,7 @@ void DrawCoronas()
 			}
 			else
 			{
-				colour = RGBALIGHT_MAKE
+				colour = RGBA_MAKE
 						(
 							MUL_FIXED(intensity, particleDescPtr->RedScale[CurrentVisionMode]),
 							MUL_FIXED(intensity, particleDescPtr->GreenScale[CurrentVisionMode]),
@@ -1183,7 +1179,7 @@ void DrawCoronas()
 
 		if (RAINBOWBLOOD_CHEATMODE)
 		{
-			colour = RGBALIGHT_MAKE
+			colour = RGBA_MAKE
 						(
 							FastRandom()&255,
 							FastRandom()&255,
@@ -1379,8 +1375,8 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 		mainVertex[vb].y = (float)-vertices->Y;
 		mainVertex[vb].z = (float)vertices->Z;
 
-		mainVertex[vb].color = RGBALIGHT_MAKE(GammaValues[vertices->R], GammaValues[vertices->G], GammaValues[vertices->B], vertices->A);
-		mainVertex[vb].specular = RGBALIGHT_MAKE(GammaValues[vertices->SpecularR], GammaValues[vertices->SpecularG], GammaValues[vertices->SpecularB], /*255*/0);
+		mainVertex[vb].color = RGBA_MAKE(GammaValues[vertices->R], GammaValues[vertices->G], GammaValues[vertices->B], vertices->A);
+		mainVertex[vb].specular = RGBA_MAKE(GammaValues[vertices->SpecularR], GammaValues[vertices->SpecularG], GammaValues[vertices->SpecularB], /*255*/0);
 
 		mainVertex[vb].u = (float)(vertices->U) * RecipW;
 		mainVertex[vb].v = (float)(vertices->V) * RecipH;
@@ -1409,14 +1405,14 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 
 		if (flags & iflag_transparent)
 		{
-	  		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R, vertices->G, vertices->B, vertices->A);
+	  		mainVertex[vb].color = RGBA_MAKE(vertices->R, vertices->G, vertices->B, vertices->A);
 		}
 		else
 		{
-			mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R, vertices->G, vertices->B, 255);
+			mainVertex[vb].color = RGBA_MAKE(vertices->R, vertices->G, vertices->B, 255);
 		}
 
-		mainVertex[vb].specular = RGBLIGHT_MAKE(255, 255, 255);
+		mainVertex[vb].specular = RGB_MAKE(255, 255, 255);
 		mainVertex[vb].u = 0.0f;
 		mainVertex[vb].v = 0.0f;
 		vb++;
@@ -1437,7 +1433,7 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
 		mainVertex[vb].y = (float)-vertices->Y;
 		mainVertex[vb].z = (float)vertices->Z;
 
-		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R, vertices->G, vertices->B, vertices->A);
+		mainVertex[vb].color = RGBA_MAKE(vertices->R, vertices->G, vertices->B, vertices->A);
 		mainVertex[vb].specular = RCOLOR_ARGB(0,0,0,0);
 		mainVertex[vb].u = 0.0f;
 		mainVertex[vb].v = 0.0f;
@@ -1469,16 +1465,8 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 		mainVertex[vb].y = (float)-vertices->Y;
 		mainVertex[vb].z = (float)vertices->Z;
 
-		if (CloakedPredatorIsMoving)
-		{
-	   		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
-		}
-		else
-		{
-	   		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
-		}
-
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+	   	mainVertex[vb].color = RGBA_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
+		mainVertex[vb].specular = RGBA_MAKE(0,0,0,255);
 
 		mainVertex[vb].u = (float)(vertices->U) * RecipW;
 		mainVertex[vb].v = (float)(vertices->V) * RecipH;
@@ -1502,7 +1490,7 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	orthoVertex[orthoVBOffset].x = new_x1;
 	orthoVertex[orthoVBOffset].y = new_y2;
 	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
+	orthoVertex[orthoVBOffset].colour = RGBA_MAKE(r,g,b,a);
 	orthoVertex[orthoVBOffset].u = 0.0f;
 	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
@@ -1511,7 +1499,7 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	orthoVertex[orthoVBOffset].x = new_x1;
 	orthoVertex[orthoVBOffset].y = new_y1;
 	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
+	orthoVertex[orthoVBOffset].colour = RGBA_MAKE(r,g,b,a);
 	orthoVertex[orthoVBOffset].u = 0.0f;
 	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
@@ -1520,7 +1508,7 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	orthoVertex[orthoVBOffset].x = new_x2;
 	orthoVertex[orthoVBOffset].y = new_y2;
 	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
+	orthoVertex[orthoVBOffset].colour = RGBA_MAKE(r,g,b,a);
 	orthoVertex[orthoVBOffset].u = 0.0f;
 	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
@@ -1529,7 +1517,7 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	orthoVertex[orthoVBOffset].x = new_x2;
 	orthoVertex[orthoVBOffset].y = new_y1;
 	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(r,g,b,a);
+	orthoVertex[orthoVBOffset].colour = RGBA_MAKE(r,g,b,a);
 	orthoVertex[orthoVBOffset].u = 0.0f;
 	orthoVertex[orthoVBOffset].v = 0.0f;
 	orthoVBOffset++;
@@ -1626,14 +1614,14 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 
 			if (i==3)
 			{
-				mainVertex[vb].color = RGBALIGHT_MAKE(0, 255, 255, 32);
+				mainVertex[vb].color = RGBA_MAKE(0, 255, 255, 32);
 			}
 			else
 			{
-				mainVertex[vb].color = RGBALIGHT_MAKE(255, 255, 255, 32);
+				mainVertex[vb].color = RGBA_MAKE(255, 255, 255, 32);
 			}
 
-			mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
+			mainVertex[vb].specular = RGBA_MAKE(0,0,0,255);
 			mainVertex[vb].u = 0.0f;
 			mainVertex[vb].v = 0.0f;
 
@@ -1710,7 +1698,7 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 	if (decalDescPtr->IsLit)
 	{
 		int intensity = LightIntensityAtPoint(decalPtr->Vertices);
-		colour = RGBALIGHT_MAKE
+		colour = RGBA_MAKE
 	  		  	(
 	  		   		MUL_FIXED(intensity, decalDescPtr->RedScale[CurrentVisionMode]),
 	  		   		MUL_FIXED(intensity, decalDescPtr->GreenScale[CurrentVisionMode]),
@@ -1720,7 +1708,7 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 	}
 	else
 	{
-		colour = RGBALIGHT_MAKE
+		colour = RGBA_MAKE
 			  	(
 			   		decalDescPtr->RedScale[CurrentVisionMode],
 			   		decalDescPtr->GreenScale[CurrentVisionMode],
@@ -1731,7 +1719,7 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 
 	if (RAINBOWBLOOD_CHEATMODE)
 	{
-		colour = RGBALIGHT_MAKE
+		colour = RGBA_MAKE
 				(
 					FastRandom()&255,
 					FastRandom()&255,
@@ -1751,7 +1739,7 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 		mainVertex[vb].z = (float)vertices->Z;
 
 		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0, 0, 0, 0);
+		mainVertex[vb].specular = RGBA_MAKE(0, 0, 0, 0);
 
 		mainVertex[vb].u = (float)(vertices->U) * RecipW;
 		mainVertex[vb].v = (float)(vertices->V) * RecipH;
@@ -1811,7 +1799,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		int intensity = LightIntensityAtPoint(&particlePtr->Position);
 		if (particlePtr->ParticleID == PARTICLE_SMOKECLOUD || particlePtr->ParticleID == PARTICLE_ANDROID_BLOOD)
 		{
-			colour = RGBALIGHT_MAKE
+			colour = RGBA_MAKE
 				  	(
 				   		MUL_FIXED(intensity,particlePtr->ColourComponents.Red),
 				   		MUL_FIXED(intensity,particlePtr->ColourComponents.Green),
@@ -1821,7 +1809,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		}
 		else
 		{
-			colour = RGBALIGHT_MAKE
+			colour = RGBA_MAKE
 				  	(
 				   		MUL_FIXED(intensity,particleDescPtr->RedScale[CurrentVisionMode]),
 				   		MUL_FIXED(intensity,particleDescPtr->GreenScale[CurrentVisionMode]),
@@ -1837,7 +1825,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 	if (RAINBOWBLOOD_CHEATMODE)
 	{
-		colour = RGBALIGHT_MAKE
+		colour = RGBA_MAKE
 					(
 						FastRandom()&255,
 						FastRandom()&255,
@@ -1870,7 +1858,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		particleVertex[pVb].z = (float)vertices->Z;
 
 		particleVertex[pVb].color = colour;
-		particleVertex[pVb].specular = RGBALIGHT_MAKE(0,0,0,/*255*/0);
+		particleVertex[pVb].specular = RGBA_MAKE(0,0,0,/*255*/0);
 
 		particleVertex[pVb].u = ((float)(vertices->U)/* + 0.5f*/) * RecipW;
 		particleVertex[pVb].v = ((float)(vertices->V)/* + 0.5f*/) * RecipH;
@@ -2213,19 +2201,19 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 				default:
 				case VISION_MODE_NORMAL:
 				{
-					MeshVertexColour[i] = RGBALIGHT_MAKE(255,255,255,alpha);
+					MeshVertexColour[i] = RGBA_MAKE(255,255,255,alpha);
 					break;
 				}
 				case VISION_MODE_IMAGEINTENSIFIER:
 				{
-					MeshVertexColour[i] = RGBALIGHT_MAKE(0,51,0,alpha);
+					MeshVertexColour[i] = RGBA_MAKE(0,51,0,alpha);
 					break;
 				}
 				case VISION_MODE_PRED_THERMAL:
 				case VISION_MODE_PRED_SEEALIENS:
 				case VISION_MODE_PRED_SEEPREDTECH:
 				{
-					MeshVertexColour[i] = RGBALIGHT_MAKE(0,0,28,alpha);
+					MeshVertexColour[i] = RGBA_MAKE(0,0,28,alpha);
 				  	break;
 				}
 			}
@@ -2277,54 +2265,49 @@ void D3D_DrawBackdrop(void)
 		return;
 	}
 
+	bool needToDrawBackdrop = false;
+
+	int numOfObjects = NumActiveBlocks;
+	while (numOfObjects--)
 	{
-		bool needToDrawBackdrop = false;
+		DISPLAYBLOCK *objectPtr = ActiveBlockList[numOfObjects];
+		MODULE *modulePtr = objectPtr->ObMyModule;
 
-		int numOfObjects = NumActiveBlocks;
-		while (numOfObjects--)
+		if (modulePtr && (ModuleCurrVisArray[modulePtr->m_index] == 2) && modulePtr->m_flags & MODULEFLAG_SKY)
 		{
-			DISPLAYBLOCK *objectPtr = ActiveBlockList[numOfObjects];
-			MODULE *modulePtr = objectPtr->ObMyModule;
-
-			if (modulePtr && (ModuleCurrVisArray[modulePtr->m_index] == 2) && modulePtr->m_flags & MODULEFLAG_SKY)
-			{
-				needToDrawBackdrop = true;
-				break;
-			}
+			needToDrawBackdrop = true;
+			break;
 		}
-		if (needToDrawBackdrop)
+	}
+	if (needToDrawBackdrop)
+	{
+		ColourFillBackBuffer(0);
+
+		if (LevelHasStars)
 		{
-			ColourFillBackBuffer(0);
-
-			if (LevelHasStars)
-			{
-				RenderStarfield();
-			}
-			else
-			{
-		  		RenderSky();
-			}
-			return;
+			RenderStarfield();
 		}
+		else
+		{
+	  		RenderSky();
+		}
+		return;
 	}
 
 	// if the player is outside the environment, clear the screen!
+	if (!playerPherModule)
 	{
- 		if (!playerPherModule)
- 		{
- 			ColourFillBackBuffer(0);
-			return;
-		}
+		ColourFillBackBuffer(0);
+		return;
 	}
-	{
-		PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *)(Player->ObStrategyBlock->SBdataptr);
 
-		if (!playerStatusPtr->IsAlive || FREEFALL_CHEATMODE)
-		{
-			// minimise effects of camera glitches
-			ColourFillBackBuffer(0);
-			return;
-		}
+	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *)(Player->ObStrategyBlock->SBdataptr);
+
+	if (!playerStatusPtr->IsAlive || FREEFALL_CHEATMODE)
+	{
+		// minimise effects of camera glitches
+		ColourFillBackBuffer(0);
+		return;
 	}
 }
 
@@ -2342,7 +2325,7 @@ void DrawNoiseOverlay(int t)
 	orthoVertex[orthoVBOffset].x = -1.0f;
 	orthoVertex[orthoVBOffset].y = 1.0f;
 	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVertex[orthoVBOffset].colour = RGBA_MAKE(c,c,c,t);
 	orthoVertex[orthoVBOffset].u = u/256.0f;
 	orthoVertex[orthoVBOffset].v = (v+size)/256.0f;
 	orthoVBOffset++;
@@ -2351,7 +2334,7 @@ void DrawNoiseOverlay(int t)
 	orthoVertex[orthoVBOffset].x = -1.0f;
 	orthoVertex[orthoVBOffset].y = -1.0f;
 	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVertex[orthoVBOffset].colour = RGBA_MAKE(c,c,c,t);
 	orthoVertex[orthoVBOffset].u = u/256.0f;
 	orthoVertex[orthoVBOffset].v = v/256.0f;
 	orthoVBOffset++;
@@ -2360,7 +2343,7 @@ void DrawNoiseOverlay(int t)
 	orthoVertex[orthoVBOffset].x = 1.0f;
 	orthoVertex[orthoVBOffset].y = 1.0f;
 	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVertex[orthoVBOffset].colour = RGBA_MAKE(c,c,c,t);
 	orthoVertex[orthoVBOffset].u = (u+size)/256.0f;
 	orthoVertex[orthoVBOffset].v = (v+size)/256.0f;
 	orthoVBOffset++;
@@ -2369,7 +2352,7 @@ void DrawNoiseOverlay(int t)
 	orthoVertex[orthoVBOffset].x = 1.0f;
 	orthoVertex[orthoVBOffset].y = -1.0f;
 	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVertex[orthoVBOffset].colour = RGBA_MAKE(c,c,c,t);
 	orthoVertex[orthoVBOffset].u = (u+size)/256.0f;
 	orthoVertex[orthoVBOffset].v = v/256.0f;
 	orthoVBOffset++;
@@ -2382,8 +2365,8 @@ void DrawScanlinesOverlay(float level)
 	float u = 0.0f;//FastRandom()&255;
 	float v = 128.0f;//FastRandom()&255;
 	uint32_t c = 255;
-	int t;
-   	f2i(t,64.0f+level*64.0f);
+
+	int t = static_cast<int>(4.0f+level*64.0f);
 
 	float size = 128.0f*(1.0f-level*0.8f);//*CameraZoomScale;
 
@@ -2393,7 +2376,7 @@ void DrawScanlinesOverlay(float level)
 	orthoVertex[orthoVBOffset].x = -1.0f;
 	orthoVertex[orthoVBOffset].y = 1.0f;
 	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVertex[orthoVBOffset].colour = RGBA_MAKE(c,c,c,t);
 	orthoVertex[orthoVBOffset].u = (v+size)/256.0f;
 	orthoVertex[orthoVBOffset].v = 1.0f;
 	orthoVBOffset++;
@@ -2402,7 +2385,7 @@ void DrawScanlinesOverlay(float level)
 	orthoVertex[orthoVBOffset].x = -1.0f;
 	orthoVertex[orthoVBOffset].y = -1.0f;
 	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVertex[orthoVBOffset].colour = RGBA_MAKE(c,c,c,t);
 	orthoVertex[orthoVBOffset].u = (v-size)/256.0f;
 	orthoVertex[orthoVBOffset].v = 1.0f;
 	orthoVBOffset++;
@@ -2411,7 +2394,7 @@ void DrawScanlinesOverlay(float level)
 	orthoVertex[orthoVBOffset].x = 1.0f;
 	orthoVertex[orthoVBOffset].y = 1.0f;
 	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVertex[orthoVBOffset].colour = RGBA_MAKE(c,c,c,t);
 	orthoVertex[orthoVBOffset].u = (v+size)/256.0f;
 	orthoVertex[orthoVBOffset].v = 1.0f;
 	orthoVBOffset++;
@@ -2420,7 +2403,7 @@ void DrawScanlinesOverlay(float level)
 	orthoVertex[orthoVBOffset].x = 1.0f;;
 	orthoVertex[orthoVBOffset].y = -1.0f;
 	orthoVertex[orthoVBOffset].z = 1.0f;
-	orthoVertex[orthoVBOffset].colour = RGBALIGHT_MAKE(c,c,c,t);
+	orthoVertex[orthoVBOffset].colour = RGBA_MAKE(c,c,c,t);
 	orthoVertex[orthoVBOffset].u = (v-size)/256.0f;
 	orthoVertex[orthoVBOffset].v = 1.0f;
 	orthoVBOffset++;
@@ -2455,8 +2438,8 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 		mainVertex[vb].y = (float)-vertices->Y;
 		mainVertex[vb].z = (float)vertices->Z;
 
-		mainVertex[vb].color = RGBALIGHT_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,/*255*/0);
+		mainVertex[vb].color = RGBA_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
+		mainVertex[vb].specular = RGBA_MAKE(0,0,0,/*255*/0);
 
 		mainVertex[vb].u = ((float)vertices->U) * RecipW;
 		mainVertex[vb].v = ((float)vertices->V) * RecipH;
@@ -3136,7 +3119,7 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 					point->vy = centrePtr[x].vy+radius.vy;
 					point->vz = centrePtr[x].vz+radius.vz;
 
-					MeshVertexColour[i] = RGBALIGHT_MAKE(0,rOffset,255,128);
+					MeshVertexColour[i] = RGBA_MAKE(0,rOffset,255,128);
 				}
 
 //bjd				TranslatePointIntoViewspace(point);

@@ -7,15 +7,6 @@
 #ifndef _daemon
 #define _daemon 1
 
-#ifdef __cplusplus
-
-	#ifndef _ourbool
-	#include "ourbool.h"
-	#endif
-
-	extern "C" {
-#endif
-
 /* Version settings *****************************************************/
 	#define SupportCallbackHooks	FALSE
 
@@ -23,12 +14,12 @@
 		/*
 			Should daemons get individually passed a time to run for,
 			or do they all share the same timing information?
-		*/	
+		*/
 /* Constants  ***********************************************************/
 
 /* Macros ***************************************************************/
 	#if SupportCallbackHooks
-		#define ACTIVITY_RETURN_TYPE	OurBool
+		#define ACTIVITY_RETURN_TYPE	bool
 
 		#define ACTIVITY_RVAL_CHANGE	{return TRUE;}
 		#define ACTIVITY_RVAL_NOCHANGE	{return FALSE;}
@@ -67,14 +58,12 @@
 				void* pUser_New
 			);
 			virtual ~CallbackHook();
-			
+
 		// ought to be private:
 			CallbackHook* pNxtHook;
 			CallbackHook* pPrvHook;
 			Daemon* p666_Val; 
 			void* pUser_Val;
-
-			
 	};
 	#endif // SupportCallbackHooks
 
@@ -84,7 +73,7 @@
 		public:
 			Daemon
 			(
-				OurBool fActive
+				bool fActive
 			);
 
 			virtual ~Daemon();
@@ -93,8 +82,8 @@
 		public:
 			void Start(void);
 			void Stop(void);
-			void SetActive(OurBool fActive);
-			OurBool bActive(void) const;
+			void SetActive(bool fActive);
+			bool bActive(void) const;
 
 			virtual ACTIVITY_RETURN_TYPE Activity(ACTIVITY_INPUT) = 0;
 				// the strategy to run when active; returns TRUE if linked screen objects/gadgets will
@@ -114,13 +103,12 @@
 			static void Maintain(int FixP_Time);
 
 			static int DaemonTimeScale;
-						
+
 		// Private stuff:
 		private:
-			OurBool fIsActive_Val;
+			bool fIsActive_Val;
 			Daemon* p666_NextActive;  // only valid if fIsActive
 			Daemon* p666_PrevActive;  // only valid if fIsActive
-
 
 		#if !IndividualTiming
 		protected:
@@ -143,10 +131,5 @@
 
 
 /* End of the header ****************************************************/
-
-
-#ifdef __cplusplus
-	};
-#endif
 
 #endif

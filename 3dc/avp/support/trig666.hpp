@@ -21,14 +21,13 @@
 	public:
 		TriggerDaemon
 		(
-			OurBool fActive
+			bool fActive
 		);
 		~TriggerDaemon();
 		virtual void Triggered(void) = 0;
 			// called by the daemon's activity whenever the daemon decides to
 			// trigger it.
 	private:
-				
 	};
 
 	// A daemon which fires at regular intervals (potentially more than once per frame)
@@ -37,13 +36,13 @@
 	public:
 		PulsingTriggerDaemon
 		(
-			OurBool fActive,
-			int FixP_Period // interval between triggers in seconds			
+			bool fActive,
+			int FixP_Period // interval between triggers in seconds
 		);
 
 		~PulsingTriggerDaemon();
 
-		ACTIVITY_RETURN_TYPE Activity(ACTIVITY_INPUT);		
+		ACTIVITY_RETURN_TYPE Activity(ACTIVITY_INPUT);
 			// never causes callback hooks to fire
 
 		void SetFuse_FixP
@@ -63,7 +62,7 @@
 	public:
 		CountdownDaemon
 		(
-			OurBool fActive,
+			bool fActive,
 			int FixP_Fuse // time until it triggers
 		);
 
@@ -81,7 +80,6 @@
 	private:
 		int FixP_TimeRemaining;
 	};
-		
 
 /* Exported globals *****************************************************/
 

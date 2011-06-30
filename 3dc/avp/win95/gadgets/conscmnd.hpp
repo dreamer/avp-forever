@@ -33,38 +33,38 @@
 			ProjChar* pProjCh_ToUse,
 			ProjChar* pProjCh_Description_ToUse,
 			void (&f) (void),
-			OurBool Cheat = FALSE
+			bool Cheat = false
 		);
 		static void Make
 		(
 			ProjChar* pProjCh_ToUse,
 			ProjChar* pProjCh_Description_ToUse,
 			void (&f) (int),
-			OurBool Cheat = FALSE
+			bool Cheat = false
 		);
 		static void Make
 		(
 			ProjChar* pProjCh_ToUse,
 			ProjChar* pProjCh_Description_ToUse,
 			int (&f) (void),
-			OurBool Cheat = FALSE
+			bool Cheat = false
 		);
 		static void Make
 		(
 			ProjChar* pProjCh_ToUse,
 			ProjChar* pProjCh_Description_ToUse,
 			int (&f) (int),
-			OurBool Cheat = FALSE
+			bool Cheat = false
 		);
 		static void Make
 		(
 			ProjChar* pProjCh_ToUse,
 			ProjChar* pProjCh_Description_ToUse,
 			void (&f) (char*),
-			OurBool Cheat = FALSE
+			bool Cheat = false
 		);
 
-		static OurBool Process( ProjChar* pProjCh_In );
+		static bool Process( ProjChar* pProjCh_In );
 			// used for proccesing input text.
 			// return value = was any processing performed?
 
@@ -82,7 +82,7 @@
 		(
 			ProjChar* pProjCh_ToUse,
 			ProjChar* pProjCh_Description_ToUse,
-			OurBool Cheat = FALSE
+			bool Cheat = false
 		);
 
 		void EchoResult(int Result);

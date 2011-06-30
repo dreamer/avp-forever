@@ -52,7 +52,7 @@ unsigned char ToAsciiTable[256][256];
 //	Necessary globals
 
 HWND 		hWndMain;
-BOOL        bActive = TRUE;        // is application active?
+BOOL		bActive = TRUE;        // is application active?
 bool		bRunning = true;
 
 // Parameters for main (assumed full screen) window
@@ -94,24 +94,24 @@ BOOL mouseMoved = FALSE;
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    PAINTSTRUCT ps;
-    HDC         hdc;
+	PAINTSTRUCT ps;
+	HDC			hdc;
 	RECT		NewWindCoord;
 
- 	if (message == RWM_MOUSEWHEEL)
+	if (message == RWM_MOUSEWHEEL)
 	{
 		message = WM_MOUSEWHEEL;
 	}
 
 	switch (message)
-    {
+	{
 		case WM_MOUSEWHEEL:
 		{
 			MouseWheelStatus = (int16_t)HIWORD(wParam);
 			return 0;
 		}
 
-		case WM_INPUT: 
+		case WM_INPUT:
 		{
 			UINT dwSize = 40;
 			static BYTE lpb[40];
@@ -120,7 +120,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 			RAWINPUT* raw = (RAWINPUT*)lpb;
 
-			if (raw->header.dwType == RIM_TYPEMOUSE) 
+			if (raw->header.dwType == RIM_TYPEMOUSE)
 			{
 				mouseMoved = TRUE;
 				xPosRelative = raw->data.mouse.lLastX;
@@ -128,7 +128,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			}
 			break;
 		}
-	
+
 		// 21/11/97 DHM: Added processing of WM_CHAR messages:
 		case WM_CHAR:
 		{
@@ -187,13 +187,13 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			unsigned char vkcode = (wParam&255);
 
 			// ignore the status of caps lock
-			//ksarray[VK_CAPITAL] = 0;	
-		 	//ksarray[VK_CAPITAL] = GetKeyState(VK_CAPITAL);	
+			//ksarray[VK_CAPITAL] = 0;
+			//ksarray[VK_CAPITAL] = GetKeyState(VK_CAPITAL);
 			if (vkcode!=VK_CAPITAL && vkcode!=VK_SCROLL)
 			{
-			 	#if 0
+				#if 0
 				WORD output;
-			 	if (ToAscii(vkcode,scancode,&ksarray[0],&output,0))
+				if (ToAscii(vkcode,scancode,&ksarray[0],&output,0))
 				{
 					IngameKeyboardInput_KeyDown((unsigned char)(output));
 				}
@@ -209,7 +209,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			}
 #endif
 			// reset caps lock status
-			//ksarray[VK_CAPITAL] = GetKeyState(VK_CAPITAL);	
+			//ksarray[VK_CAPITAL] = GetKeyState(VK_CAPITAL);
 			//ToAscii(wParam&255,scancode,&ksarray[0],&output,0);
 			//return 0;
 			break;
@@ -220,7 +220,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		{
 			// handle left/right alt keys
 			if (wParam == VK_MENU)
-			{	
+			{
 				if (lParam&(1<<24))
 					wParam = VK_RMENU;
 				else
@@ -229,7 +229,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 			// handle left/right control keys
 			if (wParam == VK_CONTROL)
-			{			
+			{
 				if (lParam&(1<<24))
 					wParam = VK_RCONTROL;
 				else
@@ -254,22 +254,21 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			int scancode = (lParam>>16)&255;
 			unsigned char vkcode = (wParam&255);
 
-			
 			// ignore the status of caps lock
-			//ksarray[VK_CAPITAL] = 0;	
-//MakeToAsciiTable();			
-		  	//ksarray[VK_CAPITAL] = GetKeyState(VK_CAPITAL);	
+			//ksarray[VK_CAPITAL] = 0;
+//MakeToAsciiTable();
+			//ksarray[VK_CAPITAL] = GetKeyState(VK_CAPITAL);
 			if (vkcode!=VK_CAPITAL && vkcode!=VK_SCROLL)
 			{
 				#if 0
-			 	WORD output;
-			 	unsigned char z = ToAscii(vkcode,scancode,&ksarray[0],&output,0);
+				WORD output;
+				unsigned char z = ToAscii(vkcode,scancode,&ksarray[0],&output,0);
 				unsigned char a = (unsigned char)output;
 				unsigned char b = ToAsciiTable[vkcode][scancode];
 				#endif
 				#if 0
 				WORD output;
-			 	if (ToAscii(vkcode,scancode,&ksarray[0],&output,0))
+				if (ToAscii(vkcode,scancode,&ksarray[0],&output,0))
 				{
 					IngameKeyboardInput_KeyUp((unsigned char)(output));
 				}
@@ -281,7 +280,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 				#endif
 			}
 			// reset caps lock status
-			//ksarray[VK_CAPITAL] = GetKeyState(VK_CAPITAL);	
+			//ksarray[VK_CAPITAL] = GetKeyState(VK_CAPITAL);
 			//ToAscii(wParam&255,scancode,&ksarray[0],&output,0);
 #endif
 			//return 0;
@@ -292,62 +291,47 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			Mouse_ButtonDown(LeftMouse);
 			break;
 		}
-        case WM_LBUTTONUP:
-        {
+		case WM_LBUTTONUP:
+		{
 			Mouse_ButtonUp(LeftMouse);
 			break;
-        }
+		}
 		case WM_RBUTTONDOWN:
 		{
 			Mouse_ButtonDown(RightMouse);
 			break;
 		}
-        case WM_RBUTTONUP:
-        {
+		case WM_RBUTTONUP:
+		{
 			Mouse_ButtonUp(RightMouse);
-            break;
-        }
+			break;
+		}
 		case WM_MBUTTONDOWN:
 		{
 			Mouse_ButtonDown(MiddleMouse);
 			break;
 		}
-        case WM_MBUTTONUP:
-        {
+		case WM_MBUTTONUP:
+		{
 			Mouse_ButtonUp(MiddleMouse);
-            break;
-        }
+			break;
+		}
 		case WM_XBUTTONDOWN:
-        {
+		{
 			Mouse_ButtonDown(GET_XBUTTON_WPARAM(wParam) == XBUTTON1 ? ExtraMouse1 : ExtraMouse2);
-            break;
-        }
+			break;
+		}
 		case WM_XBUTTONUP:
-        {
+		{
 			Mouse_ButtonUp(GET_XBUTTON_WPARAM(wParam) == XBUTTON1 ? ExtraMouse1 : ExtraMouse2);
-            break;
-        }
+			break;
+		}
 
 	 // This, in combination with code in win_func,
 	 // will hopefully disable Alt-Tabbing...
 		case WM_ACTIVATEAPP:
 		{
 			bActive = (BOOL) wParam;
-
-			//LOGDXFMT(("WM_ACTIVATEAPP msg: bActive = %d",(int)bActive));
-			if (bActive)
-			{
-        		// need to restore all surfaces - do the special ones first
-				/* BJD ALT TAB TEXTURE RESTORE STUFF HERE
- 				RESTORE_SURFACE(lpDDSPrimary)
-        		RESTORE_SURFACE(lpDDSBack)
-        		RESTORE_SURFACE(lpZBuffer)
-        		// dodgy, this is meant to be graphic, so it'll really need to be reloaded
-        		RESTORE_SURFACE(lpDDBackdrop)
-        		// now do all the graphics surfaces and textures, etc.
-				*/
-//        		ATOnAppReactivate();
-			}
 			IngameKeyboardInput_ClearBuffer();
 			return 0;
 		}
@@ -416,11 +400,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 		case WM_DESTROY:
 		{
-	   		PostQuitMessage(0);
+			PostQuitMessage(0);
 			break;
 		}
-    }
-    return DefWindowProc(hWnd, message, wParam, lParam);
+	}
+	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 /*
@@ -444,7 +428,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 // the windows class.
 
 BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
-{ 
+{
 	WNDCLASSEX	wcex;
 	RECT		clientRect;
 
@@ -512,7 +496,7 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 	{
 		// test DXUT code..
 		RECT rc;
-        SetRect(&rc, 0, 0, 800, 600);
+		SetRect(&rc, 0, 0, 800, 600);
 		AdjustWindowRect(&rc, WS_EX_TOPMOST, FALSE);
 
 		hWndMain = CreateWindowEx(
@@ -533,7 +517,7 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 		);
 	}
 
-    if (!hWndMain)
+	if (!hWndMain)
 	{
 		UnregisterClass(NULL, wcex.hInstance);
 		MessageBox(NULL, "Could not create Window", "Error!", MB_ICONEXCLAMATION | MB_OK);
@@ -551,13 +535,13 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 // we will still get MOUSEMOVE etc messages even
 // if the mouse is out of the defined window area.
 
-    #if grabmousecapture
-    SetCapture(hWndMain);
+	#if grabmousecapture
+	SetCapture(hWndMain);
 // Load null cursor shape
 	SetCursor(NULL);
 	#endif
 
-    return TRUE;
+	return TRUE;
 }
 
 void ChangeWindowsSize(uint32_t width, uint32_t height)
@@ -579,7 +563,7 @@ void ChangeWindowsSize(uint32_t width, uint32_t height)
 	}
 
 	if (SetWindowPos(hWndMain, 0, 0, 0, newWindowSize.right - newWindowSize.left, newWindowSize.bottom - newWindowSize.top, SWP_SHOWWINDOW) == 0)
-	{	
+	{
 		LastError = HRESULT_FROM_WIN32(GetLastError());
 		LogDxError(LastError, __LINE__, __FILE__);
 		return;
@@ -595,34 +579,34 @@ void ChangeWindowsSize(uint32_t width, uint32_t height)
 void InitialiseRawInput()
 {
 	#ifndef HID_USAGE_PAGE_GENERIC
-		#define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
-    #endif
-    #ifndef HID_USAGE_GENERIC_MOUSE
-		#define HID_USAGE_GENERIC_MOUSE        ((USHORT) 0x02)
-    #endif
+		#define HID_USAGE_PAGE_GENERIC			((USHORT) 0x01)
+	#endif
+	#ifndef HID_USAGE_GENERIC_MOUSE
+		#define HID_USAGE_GENERIC_MOUSE			((USHORT) 0x02)
+	#endif
 
-    RAWINPUTDEVICE Rid[1];
-    Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC; 
-    Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE; 
-    Rid[0].dwFlags = RIDEV_INPUTSINK;   
-    Rid[0].hwndTarget = hWndMain;
-    RegisterRawInputDevices(Rid, 1, sizeof(Rid[0]));
+	RAWINPUTDEVICE Rid[1];
+	Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC; 
+	Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE; 
+	Rid[0].dwFlags = RIDEV_INPUTSINK;   
+	Rid[0].hwndTarget = hWndMain;
+	RegisterRawInputDevices(Rid, 1, sizeof(Rid[0]));
 }
 
 // Project specific to go with the initialiser
 
 BOOL ExitWindowsSystem(void)
 {
-   BOOL rc = TRUE;
+	BOOL rc = TRUE;
 
-   // Release dedicated mouse capture
-   #if grabmousecapture
-   ReleaseCapture();
-   #endif
+	// Release dedicated mouse capture
+	#if grabmousecapture
+	ReleaseCapture();
+	#endif
 
-   rc = DestroyWindow(hWndMain);
+	rc = DestroyWindow(hWndMain);
 
-   return rc;
+	return rc;
 }
 
 /*

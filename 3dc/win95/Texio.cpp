@@ -26,17 +26,17 @@ extern char projectsubdirectory[];
 	Global Variables for PC Functions
 */
 
-	#ifdef MaxImageGroups
-	#if MaxImageGroups < 2 /* optimize if this multiple groups are not required */
-	#undef MaxImageGroups
-	#endif /* MaxImageGroups < 2 */
-	#endif /* MaxImageGroups */
+#ifdef MaxImageGroups
+#if MaxImageGroups < 2 /* optimize if this multiple groups are not required */
+#undef MaxImageGroups
+#endif /* MaxImageGroups < 2 */
+#endif /* MaxImageGroups */
 
-	#ifdef MaxImageGroups
+#ifdef MaxImageGroups
 
-	#include "txioctrl.h"
+#include "txioctrl.h"
 
-	/*
+/*
 	basically, I want there to be more than one image header array
 	so that I can load some images once only, then load shapes, call
 	InitializeTextures, DeallocateAllImages, etc. and only the images associated
@@ -50,26 +50,26 @@ extern char projectsubdirectory[];
 	PC projects that require this feature
 
 	Jake.
-	*/
+*/
 
-	/* these three globals must behave the same */
-	int NumImages = 0;								/* # current images */
-	IMAGEHEADER *ImageHeaderPtrs[MaxImageGroups*MaxImages];	/* Ptrs to Image Header Blocks */
-	IMAGEHEADER ImageHeaderArray[MaxImageGroups*MaxImages];	/* Array of Image Headers */
+/* these three globals must behave the same */
+int NumImages = 0;                                         /* # current images */
+IMAGEHEADER *ImageHeaderPtrs[MaxImageGroups*MaxImages];    /* Ptrs to Image Header Blocks */
+IMAGEHEADER ImageHeaderArray[MaxImageGroups*MaxImages];    /* Array of Image Headers */
 
-	int NumImagesArray[MaxImageGroups]; /* must be static to ensure initialization to zero */
-	static int CurrentImageGroup = 0;
-	static IMAGEHEADER *NextFreeImageHeaderPtr[MaxImageGroups];
+int NumImagesArray[MaxImageGroups]; /* must be static to ensure initialization to zero */
+static int CurrentImageGroup = 0;
+static IMAGEHEADER *NextFreeImageHeaderPtr[MaxImageGroups];
 
-	#else /* ! MaxImageGroups */
+#else /* ! MaxImageGroups */
 
-	int NumImages = 0;							/* # current images */
-	IMAGEHEADER *ImageHeaderPtrs[MaxImages];	/* Ptrs to Image Header Blocks */
-	IMAGEHEADER ImageHeaderArray[MaxImages];	/* Array of Image Headers */
+int NumImages = 0;                          /* # current images */
+IMAGEHEADER *ImageHeaderPtrs[MaxImages];    /* Ptrs to Image Header Blocks */
+IMAGEHEADER ImageHeaderArray[MaxImages];    /* Array of Image Headers */
 
-	static IMAGEHEADER *NextFreeImageHeaderPtr;
+static IMAGEHEADER *NextFreeImageHeaderPtr;
 
-	#endif /* ! MaxImageGroups */
+#endif /* ! MaxImageGroups */
 
 
 /*
@@ -106,7 +106,6 @@ int InitialiseTextures(void)
 	DeallocateAllImages();
 
 	/* Initialise Image Header Variables */
-
 	NumImages = 0;
 	NextFreeImageHeaderPtr = ImageHeaderArray;
 
@@ -182,7 +181,6 @@ int InitialiseTextures(void)
 				GLOBALASSERT(GEI_NOTLOADED != TxIndex);
 
 				/*
-
 					The local index for this image in this shape is
 					"LTxIndex".
 
@@ -190,7 +188,6 @@ int InitialiseTextures(void)
 
 					We must go through the shape's items and change all the
 					local references to global.
-
 				*/
 
 				#if InitTexPrnt
@@ -199,7 +196,7 @@ int InitialiseTextures(void)
 
 				MakeShapeTexturesGlobal(shapePtr, TxIndex, LocalTxIndex);
 
-				LocalTxIndex++;	/* Next Local Texture */
+				LocalTxIndex++;    /* Next Local Texture */
 			}
 
 			/* Is this shape a sprite that requires resizing? */
@@ -271,7 +268,7 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 	int **ShapeItemArrayPtr;
 	POLYHEADER *ShapeItemPtr;
 
-	int i, txi;
+	int txi;
 
 	/* Are the items in a pointer array? */
 	if (shptr->items)
@@ -282,7 +279,7 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 
 		ShapeItemArrayPtr = shptr->items;
 
-		for (i = shptr->numitems; i!=0; i--)
+		for (int i = shptr->numitems; i!=0; i--)
 		{
 			ShapeItemPtr = (POLYHEADER *) *ShapeItemArrayPtr++;
 
@@ -305,8 +302,8 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 				if (ShapeItemPtr->PolyColour & TxLocal)
 				{
 					txi = ShapeItemPtr->PolyColour;
-					txi &= ~TxLocal;							/* Clear Flag */
-					txi &= ClrTxDefn;							/* Clear UV array index */
+					txi &= ~TxLocal;                        /* Clear Flag (clear bit 15) */
+					txi &= ClrTxDefn;                       /* Clear UV array index (clear high 16-bits) */
 
 					/* Is this the local index? */
 					if (txi == LTxIndex)
@@ -340,14 +337,12 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr, POLYHEADER *pheader, int L
 	int **shape_textures;
 	int *txf_imageptr;
 	int texture_defn_index;
-	int i, image;
 	intptr_t txi;
 
 	/* Get the animation sequence header */
 	shape_textures = sptr->sh_textures;
 	texture_defn_index = (pheader->PolyColour >> TxDefn);
 	txah_ptr = (TXANIMHEADER **) shape_textures[texture_defn_index];
-
 
 	/* The first array element is the sequence shadow, which we skip here */
 	txah_ptr++;
@@ -363,19 +358,19 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr, POLYHEADER *pheader, int L
 		{
 			txaf = txah->txa_framedata;
 
-			for (i = txah->txa_numframes; i!=0; i--)
+			for (int i = txah->txa_numframes; i!=0; i--)
 			{
 				/* Multi-View Sprite? */
 				if (sptr->shapeflags & ShapeFlag_MultiViewSprite)
 				{
 					txf_imageptr = (int *)txaf->txf_image;
 
-					for (image = txah->txa_num_mvs_images; image!=0; image--)
+					for (int image = txah->txa_num_mvs_images; image!=0; image--)
 					{
 						if (*txf_imageptr & TxLocal)
 						{
 							txi = *txf_imageptr;
-							txi &= ~TxLocal;					/* Clear Flag */
+							txi &= ~TxLocal;            /* Clear Flag */
 
 							if (txi == LTxIndex)
 							{
@@ -390,7 +385,7 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr, POLYHEADER *pheader, int L
 					if (txaf->txf_image & TxLocal)
 					{
 						txi = txaf->txf_image;
-						txi &= ~TxLocal;					/* Clear Flag */
+						txi &= ~TxLocal;                 /* Clear Flag */
 
 						if (txi == LTxIndex)
 						{
@@ -467,8 +462,8 @@ void SpriteResizing(SHAPEHEADER *sptr)
 	/* Get the animation sequence header */
 	shape_textures = sptr->sh_textures;
 
-	item_array_ptr = sptr->items;		/* Assume item array */
-	item_ptr = item_array_ptr[0];		/* Assume only one polygon */
+	item_array_ptr = sptr->items;       /* Assume item array */
+	item_ptr = item_array_ptr[0];       /* Assume only one polygon */
 	pheader = (POLYHEADER *) item_ptr;
 
 	/* Get the polygon points, and at the same time the extents, assuming an XY plane polygon */
@@ -708,9 +703,6 @@ void SpriteResizing(SHAPEHEADER *sptr)
 
 void FindImageExtents(/*IMAGEHEADER *ihdr,*/ int numuvs, int *uvdata, IMAGEEXTENTS *e, IMAGEEXTENTS *e_curr)
 {
-	int i;
-	int *uvptr;
-
 	/* Find the current UV extents */
 	e_curr->u_low = bigint;
 	e_curr->v_low = bigint;
@@ -718,9 +710,9 @@ void FindImageExtents(/*IMAGEHEADER *ihdr,*/ int numuvs, int *uvdata, IMAGEEXTEN
 	e_curr->u_high = smallint;
 	e_curr->v_high = smallint;
 
-	uvptr = uvdata;
+	int *uvptr = uvdata;
 
-	for (i = numuvs; i!=0; i--)
+	for (int i = numuvs; i!=0; i--)
 	{
 		if (uvptr[0] < e_curr->u_low) e_curr->u_low = uvptr[0];
 		if (uvptr[1] < e_curr->v_low) e_curr->v_low = uvptr[1];
@@ -743,7 +735,6 @@ void FindImageExtents(/*IMAGEHEADER *ihdr,*/ int numuvs, int *uvdata, IMAGEEXTEN
 
 IMAGEHEADER* GetImageHeader(void)
 {
-
 	IMAGEHEADER *iheader;
 
 	#ifdef MaxImageGroups
@@ -765,7 +756,7 @@ IMAGEHEADER* GetImageHeader(void)
 	#endif
 
 	/* ensure flags are zero */
-	memset(iheader,0,sizeof(IMAGEHEADER));
+	memset(iheader, 0, sizeof(IMAGEHEADER));
 
 	ImageHeaderPtrs[NumImages] = iheader;
 	NumImages++;
@@ -976,13 +967,12 @@ void ImageGroupsDebugPrint(void)
 
 int DeallocateAllImages(void)
 {
-	int i;
 	IMAGEHEADER *ihptr;
 
 	if (NumImages)
 	{
 		ihptr = ImageHeaderArray;
-		for (i = NumImages; i!=0; i--)
+		for (int i = NumImages; i!=0; i--)
 		{
 			DeallocateImageHeader(ihptr++);
 		}
@@ -1020,6 +1010,7 @@ to see if the image is already loaded.
 Jake.
 */
 
+#if 0
 int GetExistingImageNum(char const * fname)
 {
 	int i;
@@ -1053,6 +1044,7 @@ int GetExistingImageNum(char const * fname)
 
 	return GEI_NOTLOADED;
 }
+#endif
 
 #endif
 

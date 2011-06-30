@@ -1,10 +1,6 @@
 #ifndef _included_ffread_hpp_
 #define _included_ffread_hpp_
 
-#ifndef __cplusplus
-#error "ffread.hpp requires C++ compilation"
-#endif
-
 /*
 
 Fastfile format:

@@ -1,7 +1,3 @@
-/*KJL****************************************************************************************
-*                                         	hud.c                                           *
-****************************************************************************************KJL*/
-
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
@@ -18,7 +14,7 @@
 #include "ourasert.h"
 
 /*KJL****************************************************************************************
-*                                    P R O T O T Y P E S	                                *
+*                                    P R O T O T Y P E S                                    *
 ****************************************************************************************KJL*/
 #include "vision.h"
 #include "frustum.h"
@@ -26,7 +22,7 @@
 #include "game_statistics.h"
 
 /*KJL****************************************************************************************
-*  										G L O B A L S 	            					    *
+*                                    G L O B A L S                                          *
 ****************************************************************************************KJL*/
 enum VISION_MODE_ID CurrentVisionMode;
 
@@ -64,7 +60,7 @@ void SetupVision(void)
 	/* KJL 16:33:47 01/10/97 - change view for alien;
 	this must be called after ProcessSystemObjects() */
 	if (AvP.PlayerType == I_Alien)
-   	{
+	{
 		/* setup wide-angle lens */
 		VIEWDESCRIPTORBLOCK *VDBPtr = ActiveVDBList[0];
 

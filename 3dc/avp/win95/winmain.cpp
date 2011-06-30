@@ -17,7 +17,6 @@
 #include "avpview.h"
 #include "vision.h"
 #include "avp_menus.h"
-//#define UseLocalAssert TRUE
 #include "ourasert.h" 
 #include "ffstdio.h" // fast file stdio
 #include "davehook.h"

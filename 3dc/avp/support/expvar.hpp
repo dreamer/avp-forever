@@ -1,5 +1,6 @@
+#if 0
 /*
-	
+
 	expvar.hpp
 
 	Template for variable with pure virtual get/set methods
@@ -29,10 +30,9 @@ protected:
 	{
 	}
 
-public:	
+public:
 	virtual T Get(void) const = 0;
 	virtual void Set(T NewVal) = 0;
-
 };
 
 // Similar to an ExportVariable, but has boundary values defined.
@@ -54,7 +54,7 @@ private:
 	// although it must be overridden by derived classes
 	virtual void Implement_Set(T NewVal) = 0;
 
-public:	
+public:
 	virtual T Get(void) const = 0;
 
 	T GetMin(void) const
@@ -99,7 +99,7 @@ public:
 	void Set(T NewVal)
 	{
 		theT = NewVal;
-	}	
+	}
 
 protected:
 	T& theT;
@@ -128,7 +128,7 @@ public:
 	{
 		return theT;
 	}
-	
+
 	void Implement_Set(T NewVal)
 	{
 		theT = NewVal;
@@ -143,5 +143,7 @@ private:
 /* End of the header ****************************************************/
 
 
+
+#endif
 
 #endif

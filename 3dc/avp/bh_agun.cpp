@@ -787,27 +787,22 @@ STRATEGYBLOCK *Autogun_GetNewTarget(STRATEGYBLOCK *sbPtr) {
 
 }
 
-int AGunSight_FrustumReject(VECTORCH *localOffset) {
-
+int AGunSight_FrustumReject(VECTORCH *localOffset) 
+{
 	VECTORCH fixed_offset;
-
-	#if 0
-	PrintDebuggingText("Local Offset: %d %d %d\n",localOffset->vx,localOffset->vy,localOffset->vz);
-	#endif
 
 	fixed_offset=*localOffset;
 	fixed_offset.vy-=300; /* ish */
 
 	if (((fixed_offset.vz <0) && (
 		((fixed_offset.vy) < (-fixed_offset.vz))&&(fixed_offset.vy>=0)))
- 		||((fixed_offset.vy<0)&&((-fixed_offset.vy) < (-fixed_offset.vz))
- 		)) {
+		||((fixed_offset.vy<0)&&((-fixed_offset.vy) < (-fixed_offset.vz))
+		)) {
 		/* 180 horizontal, 90 vertical. */
 		return(1);
 	} else {
 		return(0);
 	}
-
 }
 
 void AutoGunBehaveFun(STRATEGYBLOCK* sbPtr)

@@ -38,17 +38,17 @@ extern int InGameMenusAreRunning(void);
 /* Internal function prototypes ************************************/
 
 /* Internal globals ************************************************/
-	static OurBool iofocus_AcceptTyping = FALSE;
+	static bool iofocus_AcceptTyping = false;
 
 	static int ioFocus = 0;
 
 /* Exported function definitions ***********************************/
-OurBool IOFOCUS_AcceptControls(void)
+bool IOFOCUS_AcceptControls(void)
 {
 	return !iofocus_AcceptTyping;
 }
 
-OurBool IOFOCUS_AcceptTyping(void)
+bool IOFOCUS_AcceptTyping(void)
 {
 	return iofocus_AcceptTyping;
 }

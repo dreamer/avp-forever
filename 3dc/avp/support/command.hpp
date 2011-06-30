@@ -24,7 +24,7 @@
 	class Command : public RefCountObject
 	{
 	public:
-		virtual OurBool Execute(void) = 0;
+		virtual bool Execute(void) = 0;
 			// return value is "was command completed successfully?"
 
 	protected:

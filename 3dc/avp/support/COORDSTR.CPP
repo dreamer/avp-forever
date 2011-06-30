@@ -46,7 +46,7 @@
 CoordinateWithStrategy::CoordinateWithStrategy
 (
 	int Int_InitialCoord,
-	OurBool fActive
+	bool fActive
 ) : Daemon
 	(
 		fActive
@@ -79,7 +79,7 @@ CoordinateWithVelocity :: CoordinateWithVelocity
 (
 	int Int_InitialCoord,
 	int FixP_Velocity,
-	OurBool fActive
+	bool fActive
 ) :	CoordinateWithStrategy
 	(
 		Int_InitialCoord,
@@ -131,12 +131,11 @@ void CoordinateWithVelocity :: ApplyVelocity
 
 int CoordinateWithVelocity :: GetCoord_Int_RoundedUp(void)
 {
-
 	int ReturnVal = (FixP_Position_Val >> 16);
 
-    if ( (FixP_Position_Val&0xffff) )
-    {
-    	ReturnVal++;
+	if ( (FixP_Position_Val&0xffff) )
+	{
+		ReturnVal++;
 	}
 
 	#if 0
@@ -159,7 +158,7 @@ PulsingCoordinate :: PulsingCoordinate
 	int Int_InitialCoord,
 	int Int_SecondCoord,
 	int FixP_Velocity,
-	OurBool fActive
+	bool fActive
 ) :	CoordinateWithVelocity
 	(
 		Int_InitialCoord,
@@ -172,7 +171,6 @@ PulsingCoordinate :: PulsingCoordinate
 
 	Int_Target1_Val	= Int_SecondCoord;
 	FixP_Target1_Val = OUR_INT_TO_FIXED( Int_Target1_Val );
-
 }
 
 PulsingCoordinate :: ~PulsingCoordinate()
@@ -186,7 +184,7 @@ AcyclicPulsingCoordinate :: AcyclicPulsingCoordinate
 	int Int_InitialCoord,
 	int Int_SecondCoord,
 	int FixP_Velocity,
-	OurBool fActive
+	bool fActive
 ) : PulsingCoordinate
 	(
 		Int_InitialCoord,
@@ -240,7 +238,7 @@ ACTIVITY_RETURN_TYPE AcyclicPulsingCoordinate :: Activity(ACTIVITY_INPUT)
 				FixP_Target0_Val
 				+
 				FixP_Displacement
-			);			
+			);
 		}
 	}
 
@@ -253,7 +251,7 @@ CyclicPulsingCoordinate :: CyclicPulsingCoordinate
 	int Int_InitialCoord,
 	int Int_SecondCoord,
 	int FixP_Velocity,
-	OurBool fActive
+	bool fActive
 ) : PulsingCoordinate
 	(
 		Int_InitialCoord,
@@ -294,7 +292,7 @@ ACTIVITY_RETURN_TYPE CyclicPulsingCoordinate :: Activity(ACTIVITY_INPUT)
 	);
 	#endif
 
-	if 
+	if
 	(
 		DAVEMCRO_NONZERO_AND_OPPOSITESIGN
 		(
@@ -366,7 +364,7 @@ void HomingCoordinate :: SetCoord_Int(int Int_NewCoord)
 		Int_NewCoord
 	);
 
-	SetActive( Int_TargetCoord_Val != GetCoord_Int() );	
+	SetActive( Int_TargetCoord_Val != GetCoord_Int() );
 }
 
 void HomingCoordinate :: SetCoord_FixP(int FixP_NewCoord)
@@ -376,7 +374,7 @@ void HomingCoordinate :: SetCoord_FixP(int FixP_NewCoord)
 		FixP_NewCoord
 	);
 
-	SetActive( Int_TargetCoord_Val != GetCoord_Int() );	
+	SetActive( Int_TargetCoord_Val != GetCoord_Int() );
 }
 
 
@@ -427,7 +425,7 @@ ACTIVITY_RETURN_TYPE AcyclicHomingCoordinate :: Activity(ACTIVITY_INPUT)
 	(
 		"FixP delta Homing= %6i PosN=%6i\n",
 		(int)FixP_Delta_Homing,
-		(int)FixP_Delta_Position		
+		(int)FixP_Delta_Position
 	);
 	#endif
 
@@ -470,7 +468,7 @@ ACTIVITY_RETURN_TYPE AcyclicHomingCoordinate :: Activity(ACTIVITY_INPUT)
 
 
 #if 0
-OurBool AcyclicHomingCoordinate::Activity(int FixP_Time)
+bool AcyclicHomingCoordinate::Activity(int FixP_Time)
 {
 	#if 1
 	textprint("acyclic homing coord for time %i\n",FixP_Time);
@@ -491,8 +489,8 @@ void AcyclicHomingCoordinate :: SetTarget_Int
 		(
 			temp,
 			"SetTarget(Int_=%i)",
-			Int_TargetCoord			
-		);		
+			Int_TargetCoord
+		);
 		DAVELOG(temp);
 	}
 	#endif
@@ -501,8 +499,8 @@ void AcyclicHomingCoordinate :: SetTarget_Int
 		textprint
 		(
 			"SetTarget(Int_=%i)\n",
-			Int_TargetCoord			
-		);		
+			Int_TargetCoord
+		);
 	}
 	#endif
 
@@ -518,7 +516,7 @@ void AcyclicHomingCoordinate :: SetTarget_Int
 }
 
 #if 0
-OurBool AcyclicHomingCoordinate :: fTargetWithinThisFramesRange(void)
+bool AcyclicHomingCoordinate :: fTargetWithinThisFramesRange(void)
 {
 	
 }
@@ -546,7 +544,7 @@ AcyclicFixedSpeedHoming :: AcyclicFixedSpeedHoming
 			:
 			( -FixP_Speed_New )
 		), // int FixP_Velocity,
-		( Int_InitialCoord != Int_TargetCoord ) // OurBool fActive
+		( Int_InitialCoord != Int_TargetCoord ) // bool fActive
 	)
 {
 	GLOBALASSERT( FixP_Speed_New >= 0);
@@ -595,7 +593,7 @@ ACTIVITY_RETURN_TYPE AcyclicFixedSpeedHoming :: Activity(ACTIVITY_INPUT)
 	(
 		"FixP delta Homing= %6i PosN=%6i\n",
 		(int)FixP_Delta_Homing,
-		(int)FixP_Delta_Position		
+		(int)FixP_Delta_Position
 	);
 	#endif
 

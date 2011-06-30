@@ -54,14 +54,14 @@ public:
 
 	ACTIVITY_RETURN_TYPE Activity(ACTIVITY_INPUT);
 
-	OurBool HasFinishedPrinting(void);
+	bool HasFinishedPrinting(void);
 		// so it can trigger next line to print...
 
 	int CursorXOffset(void);
 
 private:
 	TeletypeGadget* pTeletypeGadg_Val;
-	OurBool fFinished_Val;
+	bool fFinished_Val;
 	int FixP_TotalPixels;
 		// total pixels within the string to be drawn
 
@@ -74,7 +74,7 @@ private:
 
 };
 // Inline functions:
-	inline OurBool TeletypeDaemon::HasFinishedPrinting(void)
+	inline bool TeletypeDaemon::HasFinishedPrinting(void)
 	{
 		// so it can trigger next line to print...
 		return fFinished_Val;
@@ -212,7 +212,7 @@ TeletypeGadget :: ~TeletypeGadget()
 	delete p666;
 }
 
-OurBool TeletypeGadget :: HasFinishedPrinting(void)
+bool TeletypeGadget :: HasFinishedPrinting(void)
 {
 	// so that the next line knows when to begin
 	GLOBALASSERT( p666 );
@@ -266,7 +266,7 @@ TeletypeDaemon :: TeletypeDaemon
 	TeletypeGadget* pTeletypeGadg
 ) : Daemon
 	(
-		TRUE // OurBool fActive
+		TRUE // bool fActive
 	)
 {
 	GLOBALASSERT( pTeletypeGadg );

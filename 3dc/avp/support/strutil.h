@@ -15,10 +15,6 @@
 	#include "projtext.h"
 	#endif
 
-	#ifndef _ourbool
-	#include "ourbool.h"
-	#endif
-
 /* Version settings *****************************************************/
 
 /* Constants  ***********************************************************/
@@ -36,31 +32,10 @@
 			ProjChar* pProjCh
 		);
 
-		extern OurBool STRUTIL_SC_fIsTerminator
+		extern bool STRUTIL_SC_fIsTerminator
 		(
 			const ProjChar* pProjCh
 		);
-
-	/* Ansi to HHTS conversion ********************************************/
-		/* Return value = TRUE iff no truncation occurred i.e. the whole string was copied */
-
- 		#if 0
- 		extern OurBool STRUTIL_ProjChar_To_ANSI
-		(
-			LPTSTR lptszANSI_Out,
-			unsigned int MaxSize, /* includes NULL-terminator; truncates after this */
-
-			ProjChar* pProjCh_In		
-		);
-
- 		extern OurBool STRUTIL_ANSI_To_ProjChar
-		(
-			ProjChar* pProjCh_Out,
-			unsigned int MaxSize, /* includes NULL-terminator; truncates after this */
-			
-			LPTSTR lptszANSI_In
-		);
-		#endif
 
 	/* Emulation of <string.h> *******************************************/
 		extern size_t STRUTIL_SC_Strlen
@@ -84,13 +59,13 @@
 			it copies Src0 followed by Src1 to the dest area.
 			*/
 
-		extern OurBool STRUTIL_SC_Strequal
+		extern bool STRUTIL_SC_Strequal
 		(
 			const ProjChar* pProjCh_1,
 			const ProjChar* pProjCh_2
 		);
 
-		extern OurBool STRUTIL_SC_Strequal_Insensitive
+		extern bool STRUTIL_SC_Strequal_Insensitive
 		(
 			const ProjChar* pProjCh_1,
 			const ProjChar* pProjCh_2
@@ -101,7 +76,7 @@
 			for the destination together with its size.  The return value is
 			whether the	entire string was copied.
 		*/
-		extern OurBool STRUTIL_SC_SafeCopy
+		extern bool STRUTIL_SC_SafeCopy
 		(
 			ProjChar* pProjCh_Dst,
 			size_t MaxSize,

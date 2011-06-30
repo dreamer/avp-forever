@@ -39,11 +39,6 @@ private:
 		}
 	}
 
-	#if 0
-	operator T const & () const { return data; }
-	operator T & () { return data; }
-	#endif
-
 	friend class Ordered_Heap<T>;
 	friend class Ordered_Heap_Iterator_Forward<T>;
 	friend class Ordered_Heap_Iterator_Backward<T>;

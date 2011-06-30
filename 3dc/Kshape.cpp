@@ -914,13 +914,14 @@ static void CloakedPolygon_Construct(POLYHEADER *polyPtr)
 	int texture_defn_index = (polyPtr->PolyColour >> TxDefn);
 	texture_defn_ptr = Global_ShapeTextures[texture_defn_index];
 
+	int uv_array[maxpolypts * 2];
+
 	VertexNumberPtr = &polyPtr->Poly1stPt;
 
 	/* If this texture is animated the UV array must be calculated */
 	if (polyPtr->PolyFlags & iflag_txanim)
 	{
 		/* Create the UV array */
-		int uv_array[maxpolypts * 2];
 		CreateTxAnimUVArray(texture_defn_ptr, uv_array, (int*)polyPtr);
 		texture_defn_ptr = uv_array;
 
@@ -1112,77 +1113,76 @@ static void PredatorSeeAliensVisionPolygon_Construct(POLYHEADER *polyPtr)
 
 	VertexNumberPtr = &polyPtr->Poly1stPt;
 
-	{
-		int texture_defn_index = (polyPtr->PolyColour >> TxDefn);
-		texture_defn_ptr = Global_ShapeTextures[texture_defn_index];
+	int texture_defn_index = (polyPtr->PolyColour >> TxDefn);
+	texture_defn_ptr = Global_ShapeTextures[texture_defn_index];
 
-		/* get ptr to uv coords for this polygon */
+	int uv_array[maxpolypts * 2];
+
+	/* get ptr to uv coords for this polygon */
+	if (polyPtr->PolyFlags & iflag_txanim)
+	{
+		/* Create the UV array */
+		CreateTxAnimUVArray(texture_defn_ptr, uv_array, (int*)polyPtr);
+		texture_defn_ptr = uv_array;
+	}
+
+	if( (Global_ODB_Ptr->SpecialFXFlags & SFXFLAG_MELTINGINTOGROUND)
+	  &&(Global_ODB_Ptr->ObFlags2 < ONE_FIXED) )
+	{
+		alpha = Global_ODB_Ptr->ObFlags2 >> 8;
+		RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
+	}
+	else
+	{
+		alpha = 255;
+		RenderPolygon.TranslucencyMode = TRANSLUCENCY_OFF;
+	}
+
+	do
+	{
+		VECTORCH *vertexPtr = &(RotatedPts[*VertexNumberPtr]);
+
 		if (polyPtr->PolyFlags & iflag_txanim)
 		{
-			/* Create the UV array */
-			int uv_array[maxpolypts * 2];
-			CreateTxAnimUVArray(texture_defn_ptr, uv_array, (int*)polyPtr);
-			texture_defn_ptr = uv_array;
-		}
-
-		if( (Global_ODB_Ptr->SpecialFXFlags & SFXFLAG_MELTINGINTOGROUND)
-		  &&(Global_ODB_Ptr->ObFlags2 < ONE_FIXED) )
-		{
-			alpha = Global_ODB_Ptr->ObFlags2 >> 8;
-			RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
+			renderVerticesPtr->U = texture_defn_ptr[0];
+			renderVerticesPtr->V = texture_defn_ptr[1];
 		}
 		else
 		{
-			alpha = 255;
-			RenderPolygon.TranslucencyMode = TRANSLUCENCY_OFF;
+			renderVerticesPtr->U = texture_defn_ptr[0];// << 16;
+			renderVerticesPtr->V = texture_defn_ptr[1];// << 16;
 		}
 
-		do
+		renderVerticesPtr->X = vertexPtr->vx;
+		renderVerticesPtr->Y = vertexPtr->vy;
+		renderVerticesPtr->Z = vertexPtr->vz;
 		{
-			VECTORCH *vertexPtr = &(RotatedPts[*VertexNumberPtr]);
+			VECTORCH mag = RotatedPts[*VertexNumberPtr];//*(((VECTORCH *)Global_ShapeVNormals) + *VertexNumberPtr);
+			int colour;
+			mag.vx = vertexPtr->vx - Global_ODB_Ptr->ObView.vx;
+			mag.vy = vertexPtr->vy - Global_ODB_Ptr->ObView.vy;
+			mag.vz = vertexPtr->vz - Global_ODB_Ptr->ObView.vz;
 
-			if (polyPtr->PolyFlags & iflag_txanim)
-			{
-				renderVerticesPtr->U = texture_defn_ptr[0];
-				renderVerticesPtr->V = texture_defn_ptr[1];
-			}
-			else
-			{
-				renderVerticesPtr->U = texture_defn_ptr[0];// << 16;
-				renderVerticesPtr->V = texture_defn_ptr[1];// << 16;
-			}
+			colour = GetSin(((mag.vx+mag.vy+mag.vz)*8+CloakingPhase)&4095);
+			colour = MUL_FIXED(colour, colour);
+			renderVerticesPtr->B = MUL_FIXED(colour, 255);
+			renderVerticesPtr->R = renderVerticesPtr->B/2;
+			renderVerticesPtr->G = renderVerticesPtr->B/2;
 
-			renderVerticesPtr->X = vertexPtr->vx;
-			renderVerticesPtr->Y = vertexPtr->vy;
-			renderVerticesPtr->Z = vertexPtr->vz;
-			{
-				VECTORCH mag = RotatedPts[*VertexNumberPtr];//*(((VECTORCH *)Global_ShapeVNormals) + *VertexNumberPtr);
-				int colour;
-				mag.vx = vertexPtr->vx - Global_ODB_Ptr->ObView.vx;
-				mag.vy = vertexPtr->vy - Global_ODB_Ptr->ObView.vy;
-				mag.vz = vertexPtr->vz - Global_ODB_Ptr->ObView.vz;
+			colour = MUL_FIXED(colour, colour);
+			colour = MUL_FIXED(colour, colour);
 
-				colour = GetSin(((mag.vx+mag.vy+mag.vz)*8+CloakingPhase)&4095);
-				colour = MUL_FIXED(colour, colour);
-				renderVerticesPtr->B = MUL_FIXED(colour, 255);
-				renderVerticesPtr->R = renderVerticesPtr->B/2;
-				renderVerticesPtr->G = renderVerticesPtr->B/2;
-
-				colour = MUL_FIXED(colour, colour);
-				colour = MUL_FIXED(colour, colour);
-
-				renderVerticesPtr->SpecularR = colour/1024;
-				renderVerticesPtr->SpecularG = colour/1024;
-				renderVerticesPtr->SpecularB = colour/1024;
-				renderVerticesPtr->A = alpha;
-			}
-
-			texture_defn_ptr += 2;
-			renderVerticesPtr++;
-			VertexNumberPtr++;
+			renderVerticesPtr->SpecularR = colour/1024;
+			renderVerticesPtr->SpecularG = colour/1024;
+			renderVerticesPtr->SpecularB = colour/1024;
+			renderVerticesPtr->A = alpha;
 		}
-		while (--i);
+
+		texture_defn_ptr += 2;
+		renderVerticesPtr++;
+		VertexNumberPtr++;
 	}
+	while (--i);
 }
 
 /* GOURAUD POLYGONS */
@@ -1222,10 +1222,10 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 	int i = RenderPolygon.NumberOfVertices;
 
 	/* get ptr to uv coords for this polygon */
-	{
-		int texture_defn_index = (polyPtr->PolyColour >> TxDefn);
-		texture_defn_ptr = Global_ShapeTextures[texture_defn_index];
-	}
+	int texture_defn_index = (polyPtr->PolyColour >> TxDefn);
+	texture_defn_ptr = Global_ShapeTextures[texture_defn_index];
+
+	int uv_array[maxpolypts * 2];
 
 	VertexNumberPtr = &polyPtr->Poly1stPt;
 
@@ -1233,7 +1233,6 @@ static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
 	if (polyPtr->PolyFlags & iflag_txanim)
 	{
 		/* Create the UV array */
-		int uv_array[maxpolypts * 2];
 		CreateTxAnimUVArray(texture_defn_ptr, uv_array, (int*)polyPtr);
 		texture_defn_ptr = uv_array;
 
@@ -3977,7 +3976,6 @@ void AddHierarchicalShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 
 	if (BALLSOFFIRE_CHEATMODE && dptr->ObStrategyBlock)
 	{
-		void HandleObjectOnFire(DISPLAYBLOCK *dispPtr);
 		HandleObjectOnFire(dptr);
 	}
 
@@ -4021,8 +4019,8 @@ extern void TranslationSetup(void)
 	ViewMatrix[6] = (float)(Global_VDB_Ptr->VDB_Mat.mat32)/65536.0f;//*p;
 
 	// lookat vector
-	ViewMatrix[8] = (float)(Global_VDB_Ptr->VDB_Mat.mat13)/65536.0f;
-	ViewMatrix[9] = (float)(Global_VDB_Ptr->VDB_Mat.mat23)/65536.0f;
+	ViewMatrix[8]  = (float)(Global_VDB_Ptr->VDB_Mat.mat13)/65536.0f;
+	ViewMatrix[9]  = (float)(Global_VDB_Ptr->VDB_Mat.mat23)/65536.0f;
 	ViewMatrix[10] = (float)(Global_VDB_Ptr->VDB_Mat.mat33)/65536.0f;
 
 	#ifndef USE_D3DVIEWTRANSFORM
@@ -4035,8 +4033,8 @@ extern void TranslationSetup(void)
 	ViewMatrix[7] = ((float)-v.vy)*p;
 	ViewMatrix[11] = ((float)-v.vz)*CameraZoomScale;
 	#else
-	ViewMatrix[3] = ((float)v.vx);//*o;
-	ViewMatrix[7] = ((float)v.vy);//*p;
+	ViewMatrix[3]  = ((float)v.vx);//*o;
+	ViewMatrix[7]  = ((float)v.vy);//*p;
 	ViewMatrix[11] = ((float)v.vz);
 	#endif
 
@@ -4110,10 +4108,9 @@ void SquishPoints(SHAPEINSTR *shapeinstrptr)
 
 	VECTORCH *shapePts = (VECTORCH*)*shapeitemarrayptr;
 	{
-		int i;
 		int scale = Global_ODB_Ptr->ObFlags2;
 
-		for (i = 0; i < Global_ShapeHeaderPtr->numpoints; i++)
+		for (int i = 0; i < Global_ShapeHeaderPtr->numpoints; i++)
 		{
 			VECTORCH point = shapePts[i];
 
@@ -4322,77 +4319,74 @@ void TranslateShapeVertices(SHAPEINSTR *shapeinstrptr)
 
 void RenderDecal(DECAL *decalPtr)
 {
+	VECTORCH translatedPosition;
+
 	/* translate decal into view space */
-	{
-		VECTORCH translatedPosition = decalPtr->Vertices[0];
-		TranslatePointIntoViewspace(&translatedPosition);
-		VerticesBuffer[0].X = translatedPosition.vx;
-		VerticesBuffer[0].Y = translatedPosition.vy;
-		VerticesBuffer[0].Z = translatedPosition.vz;
-	}
-	{
-		VECTORCH translatedPosition = decalPtr->Vertices[1];
-		TranslatePointIntoViewspace(&translatedPosition);
-		VerticesBuffer[1].X = translatedPosition.vx;
-		VerticesBuffer[1].Y = translatedPosition.vy;
-		VerticesBuffer[1].Z = translatedPosition.vz;
-	}
-	{
-		VECTORCH translatedPosition = decalPtr->Vertices[2];
-		TranslatePointIntoViewspace(&translatedPosition);
-		VerticesBuffer[2].X = translatedPosition.vx;
-		VerticesBuffer[2].Y = translatedPosition.vy;
-		VerticesBuffer[2].Z = translatedPosition.vz;
-	}
-	{
-		VECTORCH translatedPosition = decalPtr->Vertices[3];
-		TranslatePointIntoViewspace(&translatedPosition);
-		VerticesBuffer[3].X = translatedPosition.vx;
-		VerticesBuffer[3].Y = translatedPosition.vy;
-		VerticesBuffer[3].Z = translatedPosition.vz;
-	}
-	{
-		int outcode = DecalWithinFrustum(decalPtr);
+	translatedPosition = decalPtr->Vertices[0];
+	TranslatePointIntoViewspace(&translatedPosition);
+	VerticesBuffer[0].X = translatedPosition.vx;
+	VerticesBuffer[0].Y = translatedPosition.vy;
+	VerticesBuffer[0].Z = translatedPosition.vz;
 
-		if (1)//(outcode) // bjd
+	translatedPosition = decalPtr->Vertices[1];
+	TranslatePointIntoViewspace(&translatedPosition);
+	VerticesBuffer[1].X = translatedPosition.vx;
+	VerticesBuffer[1].Y = translatedPosition.vy;
+	VerticesBuffer[1].Z = translatedPosition.vz;
+
+	translatedPosition = decalPtr->Vertices[2];
+	TranslatePointIntoViewspace(&translatedPosition);
+	VerticesBuffer[2].X = translatedPosition.vx;
+	VerticesBuffer[2].Y = translatedPosition.vy;
+	VerticesBuffer[2].Z = translatedPosition.vz;
+
+	translatedPosition = decalPtr->Vertices[3];
+	TranslatePointIntoViewspace(&translatedPosition);
+	VerticesBuffer[3].X = translatedPosition.vx;
+	VerticesBuffer[3].Y = translatedPosition.vy;
+	VerticesBuffer[3].Z = translatedPosition.vz;
+
+	int outcode = DecalWithinFrustum(decalPtr);
+
+	if (1)//(outcode) // bjd
+	{
+		switch (decalPtr->DecalID)
 		{
-			switch (decalPtr->DecalID)
+			default:
+			case DECAL_SCORCHED:
 			{
-				default:
-				case DECAL_SCORCHED:
-				{
-					DecalPolygon_Construct(decalPtr);
+				DecalPolygon_Construct(decalPtr);
 /*
-					if (0)//(outcode != 2) // bjd
-					{
-						TexturedPolygon_ClipWithZ();
-						if (RenderPolygon.NumberOfVertices < 3)
-							return;
+				if (0)//(outcode != 2) // bjd
+				{
+					TexturedPolygon_ClipWithZ();
+					if (RenderPolygon.NumberOfVertices < 3)
+						return;
 
-						TexturedPolygon_ClipWithNegativeX();
-						if (RenderPolygon.NumberOfVertices < 3)
-							return;
+					TexturedPolygon_ClipWithNegativeX();
+					if (RenderPolygon.NumberOfVertices < 3)
+						return;
 
-						TexturedPolygon_ClipWithPositiveY();
-						if (RenderPolygon.NumberOfVertices < 3)
-							return;
+					TexturedPolygon_ClipWithPositiveY();
+					if (RenderPolygon.NumberOfVertices < 3)
+						return;
 
-						TexturedPolygon_ClipWithNegativeY();
-						if (RenderPolygon.NumberOfVertices < 3)
-							return;
+					TexturedPolygon_ClipWithNegativeY();
+					if (RenderPolygon.NumberOfVertices < 3)
+						return;
 
-						TexturedPolygon_ClipWithPositiveX();
-						if (RenderPolygon.NumberOfVertices < 3)
-							return;
+					TexturedPolygon_ClipWithPositiveX();
+					if (RenderPolygon.NumberOfVertices < 3)
+						return;
 
-						D3D_Decal_Output(decalPtr, RenderPolygon.Vertices);
-					}
-					else*/ D3D_Decal_Output(decalPtr, VerticesBuffer);
-					break;
+					D3D_Decal_Output(decalPtr, RenderPolygon.Vertices);
 				}
+				else*/ D3D_Decal_Output(decalPtr, VerticesBuffer);
+				break;
 			}
 		}
 	}
+
 	#if MIRRORING_ON
 	if (MirroringActive)
 		RenderMirroredDecal(decalPtr);
@@ -4644,7 +4638,7 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 	VECTORCH vertices[5];
 	MATRIXCH mat;
 
-	MakeMatrixFromDirection(&particlePtr->Velocity,&mat);
+	MakeMatrixFromDirection(&particlePtr->Velocity, &mat);
 
 	mat.mat11 >>= 12;
 	mat.mat12 >>= 12;
@@ -4655,7 +4649,6 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 	mat.mat31 >>= 9;
 	mat.mat32 >>= 9;
 	mat.mat33 >>= 9;
-
 
 	vertices[0].vx = particlePtr->Position.vx-mat.mat31+mat.mat11;
 	vertices[0].vy = particlePtr->Position.vy-mat.mat32+mat.mat12;
@@ -4681,29 +4674,27 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 	TranslatePointIntoViewspace(&vertices[3]);
 	TranslatePointIntoViewspace(&vertices[4]);
 
+	for (int i=0; i < 3; i++)
 	{
-		int i;
-		for (i=0; i<3; i++)
-		{
-			VerticesBuffer[i].X	= vertices[i].vx;
-			VerticesBuffer[i].Y	= vertices[i].vy;
-			VerticesBuffer[i].Z	= vertices[i].vz;
+		VerticesBuffer[i].X	= vertices[i].vx;
+		VerticesBuffer[i].Y	= vertices[i].vy;
+		VerticesBuffer[i].Z	= vertices[i].vz;
 
-			VerticesBuffer[i].A = (particlePtr->Colour>>24)&255;
-			VerticesBuffer[i].R = (particlePtr->Colour>>16)&255;
-			VerticesBuffer[i].G	= (particlePtr->Colour>>8)&255;
-			VerticesBuffer[i].B = (particlePtr->Colour)&255;
-		}
-		RenderPolygon.NumberOfVertices=3;
-		RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
+		VerticesBuffer[i].A = (particlePtr->Colour>>24)&255;
+		VerticesBuffer[i].R = (particlePtr->Colour>>16)&255;
+		VerticesBuffer[i].G	= (particlePtr->Colour>>8)&255;
+		VerticesBuffer[i].B = (particlePtr->Colour)&255;
 	}
-	{
-		int outcode = TriangleWithinFrustum();
-		POLYHEADER fakeHeader;
-		fakeHeader.PolyFlags  = iflag_transparent;
 
-		do
-		{
+	RenderPolygon.NumberOfVertices = 3;
+	RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
+
+	int outcode = TriangleWithinFrustum();
+	POLYHEADER fakeHeader;
+	fakeHeader.PolyFlags  = iflag_transparent;
+
+	do
+	{
 		if (/*outcode*/1)
 		{
 			if (/*outcode!=2*/0)
@@ -4722,32 +4713,28 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 			}
 			else D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,VerticesBuffer);
 		}
-		}
-		while(0);
 	}
-	{
-		int i;
-		for (i=0; i<3; i++)
-		{
-			VerticesBuffer[i].X	= vertices[i+2].vx;
-			VerticesBuffer[i].Y	= vertices[i+2].vy;
-			VerticesBuffer[i].Z	= vertices[i+2].vz;
+	while(0);
 
-			VerticesBuffer[i].A = (particlePtr->Colour>>24)&255;
-			VerticesBuffer[i].R = (particlePtr->Colour>>16)&255;
-			VerticesBuffer[i].G	= (particlePtr->Colour>>8)&255;
-			VerticesBuffer[i].B = (particlePtr->Colour)&255;
-		}
-		RenderPolygon.NumberOfVertices = 3;
-		RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
+	for (int i=0; i < 3; i++)
+	{
+		VerticesBuffer[i].X	= vertices[i+2].vx;
+		VerticesBuffer[i].Y	= vertices[i+2].vy;
+		VerticesBuffer[i].Z	= vertices[i+2].vz;
+
+		VerticesBuffer[i].A = (particlePtr->Colour>>24)&255;
+		VerticesBuffer[i].R = (particlePtr->Colour>>16)&255;
+		VerticesBuffer[i].G	= (particlePtr->Colour>>8)&255;
+		VerticesBuffer[i].B = (particlePtr->Colour)&255;
 	}
-	{
-		int outcode = TriangleWithinFrustum();
-		POLYHEADER fakeHeader;
-		fakeHeader.PolyFlags = iflag_transparent;
+	RenderPolygon.NumberOfVertices = 3;
+	RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
 
-		do
-		{
+	outcode = TriangleWithinFrustum();
+	fakeHeader.PolyFlags = iflag_transparent;
+
+	do
+	{
 		if (/*outcode*/1)
 		{
 			if (/*outcode!=2*/0)
@@ -4766,9 +4753,8 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 			}
 			else D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,VerticesBuffer);
 		}
-		}
-		while(0);
 	}
+	while (0);
 }
 
 static void ParticlePolygon_Construct(PARTICLE *particlePtr)
@@ -4791,69 +4777,64 @@ static void ParticlePolygon_Construct(PARTICLE *particlePtr)
 
 void RenderMirroredDecal(DECAL *decalPtr)
 {
-	/* translate decal into view space */
-	{
-		VECTORCH translatedPosition = decalPtr->Vertices[0];
-		translatedPosition.vx = MirroringAxis - translatedPosition.vx;
-		TranslatePointIntoViewspace(&translatedPosition);
-		VerticesBuffer[0].X = translatedPosition.vx;
-		VerticesBuffer[0].Y = translatedPosition.vy;
-		VerticesBuffer[0].Z = translatedPosition.vz;
-	}
-	{
-		VECTORCH translatedPosition = decalPtr->Vertices[1];
-		translatedPosition.vx = MirroringAxis - translatedPosition.vx;
-		TranslatePointIntoViewspace(&translatedPosition);
-		VerticesBuffer[1].X = translatedPosition.vx;
-		VerticesBuffer[1].Y = translatedPosition.vy;
-		VerticesBuffer[1].Z = translatedPosition.vz;
-	}
-	{
-		VECTORCH translatedPosition = decalPtr->Vertices[2];
-		translatedPosition.vx = MirroringAxis - translatedPosition.vx;
-		TranslatePointIntoViewspace(&translatedPosition);
-		VerticesBuffer[2].X = translatedPosition.vx;
-		VerticesBuffer[2].Y = translatedPosition.vy;
-		VerticesBuffer[2].Z = translatedPosition.vz;
-	}
-	{
-		VECTORCH translatedPosition = decalPtr->Vertices[3];
-		translatedPosition.vx = MirroringAxis - translatedPosition.vx;
-		TranslatePointIntoViewspace(&translatedPosition);
-		VerticesBuffer[3].X = translatedPosition.vx;
-		VerticesBuffer[3].Y = translatedPosition.vy;
-		VerticesBuffer[3].Z = translatedPosition.vz;
-	}
-	{
-		int outcode = DecalWithinFrustum(decalPtr);
+	VECTORCH translatedPosition;
 
-		if (outcode) // bjd
+    /* translate decal into view space */
+	translatedPosition = decalPtr->Vertices[0];
+	translatedPosition.vx = MirroringAxis - translatedPosition.vx;
+	TranslatePointIntoViewspace(&translatedPosition);
+	VerticesBuffer[0].X = translatedPosition.vx;
+	VerticesBuffer[0].Y = translatedPosition.vy;
+	VerticesBuffer[0].Z = translatedPosition.vz;
+
+	translatedPosition = decalPtr->Vertices[1];
+	translatedPosition.vx = MirroringAxis - translatedPosition.vx;
+	TranslatePointIntoViewspace(&translatedPosition);
+	VerticesBuffer[1].X = translatedPosition.vx;
+	VerticesBuffer[1].Y = translatedPosition.vy;
+	VerticesBuffer[1].Z = translatedPosition.vz;
+
+	translatedPosition = decalPtr->Vertices[2];
+	translatedPosition.vx = MirroringAxis - translatedPosition.vx;
+	TranslatePointIntoViewspace(&translatedPosition);
+	VerticesBuffer[2].X = translatedPosition.vx;
+	VerticesBuffer[2].Y = translatedPosition.vy;
+	VerticesBuffer[2].Z = translatedPosition.vz;
+
+	translatedPosition = decalPtr->Vertices[3];
+	translatedPosition.vx = MirroringAxis - translatedPosition.vx;
+	TranslatePointIntoViewspace(&translatedPosition);
+	VerticesBuffer[3].X = translatedPosition.vx;
+	VerticesBuffer[3].Y = translatedPosition.vy;
+	VerticesBuffer[3].Z = translatedPosition.vz;
+
+	int outcode = DecalWithinFrustum(decalPtr);
+
+	if (outcode) // bjd
+	{
+		switch (decalPtr->DecalID)
 		{
-			switch (decalPtr->DecalID)
+			default:
+			case DECAL_SCORCHED:
 			{
-				default:
-				case DECAL_SCORCHED:
+				DecalPolygon_Construct(decalPtr);
+
+				if (/*outcode!=2*/0) // bjd
 				{
-					DecalPolygon_Construct(decalPtr);
-
-					if (/*outcode!=2*/0) // bjd
-					{
-						TexturedPolygon_ClipWithZ();
-						if (RenderPolygon.NumberOfVertices<3) return;
-						TexturedPolygon_ClipWithNegativeX();
-						if (RenderPolygon.NumberOfVertices<3) return;
-						TexturedPolygon_ClipWithPositiveY();
-						if (RenderPolygon.NumberOfVertices<3) return;
-						TexturedPolygon_ClipWithNegativeY();
-						if (RenderPolygon.NumberOfVertices<3) return;
-						TexturedPolygon_ClipWithPositiveX();
-						if (RenderPolygon.NumberOfVertices<3) return;
-						D3D_Decal_Output(decalPtr,RenderPolygon.Vertices);
-
-					}
-					else D3D_Decal_Output(decalPtr, VerticesBuffer);
-					break;
+					TexturedPolygon_ClipWithZ();
+					if (RenderPolygon.NumberOfVertices<3) return;
+					TexturedPolygon_ClipWithNegativeX();
+					if (RenderPolygon.NumberOfVertices<3) return;
+					TexturedPolygon_ClipWithPositiveY();
+					if (RenderPolygon.NumberOfVertices<3) return;
+					TexturedPolygon_ClipWithNegativeY();
+					if (RenderPolygon.NumberOfVertices<3) return;
+					TexturedPolygon_ClipWithPositiveX();
+					if (RenderPolygon.NumberOfVertices<3) return;
+					D3D_Decal_Output(decalPtr,RenderPolygon.Vertices);
 				}
+				else D3D_Decal_Output(decalPtr, VerticesBuffer);
+				break;
 			}
 		}
 	}
@@ -4913,7 +4894,7 @@ void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVert
 
 	do
 	{
-#if 1 // bjd - temp fix to get glass to render correctly. should I need to views transform these?
+#if 1 // bjd - temp fix to get glass to render correctly. should I need to view transform these?
 		VECTORCHF test;
 		test.vx = renderVerticesPtr->X;
 		test.vy = renderVerticesPtr->Y;
@@ -5109,253 +5090,102 @@ void RenderMirrorSurface2(void)
 	D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader, /*RenderPolygon.Vertices*/&VerticesBuffer[0]);
 }
 
-#define OCTAVES 3
-int u[OCTAVES];
-int v[OCTAVES];
-int du[OCTAVES];
-int dv[OCTAVES];
-BOOL skySetup = FALSE;
-
-int SkyColour_R=200;
-int SkyColour_G=200;
-int SkyColour_B=200;
-
-extern float GetTestTimer();
-
-void RenderSky(void)
-{
-	POLYHEADER fakeHeader;
-	int x,z,o,i;
-
-	// if this is our first time in the function, initialise some values just the once
-	if (!skySetup)
-	{
-		for (i = 0; i < OCTAVES; i++)
-		{
-			u[i] = (FastRandom()&65535);//*128;
-			v[i] = (FastRandom()&65535);//*128;
-			du[i] = (((FastRandom()&65535)-32768)*(i+1));//*8;
-			dv[i] = (((FastRandom()&65535)-32768)*(i+1));//*8;
-		}
-		skySetup = TRUE;
-	}
-
-	// set render states and texture
-	fakeHeader.PolyFlags  = iflag_transparent;
-	fakeHeader.PolyColour = CloudyImageNumber;
-	RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
-
-	for (o = 0; o < OCTAVES; o++)
-	{
-		// makes the sky clouds move
-		u[o] += MUL_FIXED(du[o], GetTestTimer() * 0.1f);//0x0000001);
-		v[o] += MUL_FIXED(dv[o], GetTestTimer() * 0.1f);//0x0000001);
-	}
-
-	for (x = -10; x <= 10; x++)
-	{
-		for (z = -10; z <= 10; z++)
-		{
-			int t = 255;
-			int size = /*65536*/128;
-
-			for (o = 0; o < OCTAVES; o++)
-			{
-				VECTORCH translatedPts[4] =
-				{
-					// x   // y  // z
-					{-16384,-11000,-16384},
-					{-16384,-11000, 16384},
-					{ 16384,-11000, 16384},
-					{ 16384,-11000,-16384},
-				};
-
-				for (i = 0; i < 4; i++)
-				{
-					translatedPts[i].vx += 32768*x;
-					translatedPts[i].vz += 32768*z;
-
-					translatedPts[i].vx += Global_VDB_Ptr->VDB_World.vx;
-					translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy + 1000;
-					translatedPts[i].vz += Global_VDB_Ptr->VDB_World.vz;
-
-//					TranslatePointIntoViewspace(&translatedPts[i]);
-
-					VerticesBuffer[i].X = translatedPts[i].vx;
-					VerticesBuffer[i].Y = translatedPts[i].vy;
-					VerticesBuffer[i].Z = translatedPts[i].vz;
-
-					switch (CurrentVisionMode)
-					{
-						default:
-						case VISION_MODE_NORMAL:
-						{
-							VerticesBuffer[i].R = SkyColour_R;
-							VerticesBuffer[i].G = SkyColour_G;
-							VerticesBuffer[i].B = SkyColour_B;
-							break;
-						}
-						case VISION_MODE_IMAGEINTENSIFIER:
-						{
-							VerticesBuffer[i].R = 0;
-							VerticesBuffer[i].G = 255;
-							VerticesBuffer[i].B = 0;
-							break;
-						}
-						case VISION_MODE_PRED_THERMAL:
-						case VISION_MODE_PRED_SEEALIENS:
-						case VISION_MODE_PRED_SEEPREDTECH:
-						{
-							VerticesBuffer[i].R = 0;
-							VerticesBuffer[i].G = 0;
-							VerticesBuffer[i].B = 255;
-							break;
-						}
-					}
-
-					VerticesBuffer[i].A = t;
-
-					VerticesBuffer[0].U = (u[o]+size*x);
-					VerticesBuffer[0].V = (v[o]+size*z);
-					VerticesBuffer[1].U = (u[o]+size*x);
-					VerticesBuffer[1].V = (v[o]+size*(z+1));
-					VerticesBuffer[2].U = (u[o]+size*(x+1));
-					VerticesBuffer[2].V = (v[o]+size*(z+1));
-					VerticesBuffer[3].U = (u[o]+size*(x+1));
-					VerticesBuffer[3].V = (v[o]+size*z);
-
-					RenderPolygon.NumberOfVertices = 4;
-				}
-
-				D3D_SkyPolygon_Output(&fakeHeader, VerticesBuffer);
-/*
-				GouraudTexturedPolygon_ClipWithZ();
-				if (RenderPolygon.NumberOfVertices>=3)
-				{
-					GouraudTexturedPolygon_ClipWithNegativeX();
-					if (RenderPolygon.NumberOfVertices>=3)
-					{
-						GouraudTexturedPolygon_ClipWithPositiveY();
-						if (RenderPolygon.NumberOfVertices>=3)
-						{
-							GouraudTexturedPolygon_ClipWithNegativeY();
-							if (RenderPolygon.NumberOfVertices>=3)
-							{
-								GouraudTexturedPolygon_ClipWithPositiveX();
-								if (RenderPolygon.NumberOfVertices>=3)
-								{
-									D3D_SkyPolygon_Output(&fakeHeader, RenderPolygon.Vertices);
-								}
-							}
-						}
-					}
-				}
-*/
-				t/=2;
-				size*=2;
-			}
-		}
-	}
-}
-
 void RenderWaterFall(int xOrigin, int yOrigin, int zOrigin)
 {
-	int i,z;
 	VECTORCH v[4];
+	int i, z;
 
+	int waterfallX[9];
+	int waterfallY[9];
+	int waterfallZ[9];
+	int waterfallZScale[9];
+
+	for (i = 0; i < 9; i++)
 	{
-		int waterfallX[9];
-		int waterfallY[9];
-		int waterfallZ[9];
-		int waterfallZScale[9];
+		int u = (i*65536)/8;
 
-		for (i=0; i<9; i++)
+		int b = MUL_FIXED(2*u,(65536-u));
+		int c = MUL_FIXED(u,u);
+		int y3 = (4742-yOrigin);
+		int x3 = 2000;
+		int y2 = 2000;
+		int x2 = 1500;
+
+		waterfallX[i] = MUL_FIXED(b,x2)+MUL_FIXED(c,x3);
+		waterfallY[i] = yOrigin+MUL_FIXED(b,y2)+MUL_FIXED(c,y3);
+		waterfallZ[i] = zOrigin+MUL_FIXED((66572-zOrigin),u);
+		waterfallZScale[i] = ONE_FIXED+b/2-c;
+		if (i!=8)
 		{
-			int u = (i*65536)/8;
-
-			int b = MUL_FIXED(2*u,(65536-u));
-			int c = MUL_FIXED(u,u);
-			int y3 = (4742-yOrigin);
-			int x3 = 2000;
-			int y2 = 2000;
-			int x2 = 1500;
-
-			waterfallX[i] = MUL_FIXED(b,x2)+MUL_FIXED(c,x3);
-			waterfallY[i] = yOrigin+MUL_FIXED(b,y2)+MUL_FIXED(c,y3);
-			waterfallZ[i] = zOrigin+MUL_FIXED((66572-zOrigin),u);
-			waterfallZScale[i] = ONE_FIXED+b/2-c;
-			if (i!=8)
-			{
-				waterfallZScale[i]+=(FastRandom()&8191);
-				waterfallY[i]-=(FastRandom()&127);
-			}
+			waterfallZScale[i]+=(FastRandom()&8191);
+			waterfallY[i]-=(FastRandom()&127);
 		}
+	}
 
-		for (z=0; z<8; z++)
-		for (i=0; i<8; i++)
-		{
-			v[0].vx = xOrigin+MUL_FIXED(waterfallX[i],waterfallZScale[z]);
-			v[1].vx = xOrigin+MUL_FIXED(waterfallX[i],waterfallZScale[z+1]);
-			v[2].vx = xOrigin+MUL_FIXED(waterfallX[i+1],waterfallZScale[z+1]);
-			v[3].vx = xOrigin+MUL_FIXED(waterfallX[i+1],waterfallZScale[z]);
-			v[0].vy = waterfallY[i];
-			v[1].vy = waterfallY[i];
-			v[2].vy = waterfallY[i+1];
-			v[3].vy = waterfallY[i+1];
+	for (z=0; z<8; z++)
+	for (i=0; i<8; i++)
+	{
+		v[0].vx = xOrigin+MUL_FIXED(waterfallX[i],waterfallZScale[z]);
+		v[1].vx = xOrigin+MUL_FIXED(waterfallX[i],waterfallZScale[z+1]);
+		v[2].vx = xOrigin+MUL_FIXED(waterfallX[i+1],waterfallZScale[z+1]);
+		v[3].vx = xOrigin+MUL_FIXED(waterfallX[i+1],waterfallZScale[z]);
+		v[0].vy = waterfallY[i];
+		v[1].vy = waterfallY[i];
+		v[2].vy = waterfallY[i+1];
+		v[3].vy = waterfallY[i+1];
 
-			v[0].vz = waterfallZ[z];
-			v[1].vz = waterfallZ[z+1];
-			v[2].vz = v[1].vz;
-			v[3].vz = v[0].vz;
+		v[0].vz = waterfallZ[z];
+		v[1].vz = waterfallZ[z+1];
+		v[2].vz = v[1].vz;
+		v[3].vz = v[0].vz;
 
-			DrawWaterFallPoly(v);
-		}
-		for (z=0; z<3; z++)
-		{
-			v[0].vx = xOrigin+MUL_FIXED(waterfallX[8],waterfallZScale[z+1]);
-			v[1].vx = xOrigin+MUL_FIXED(waterfallX[8],waterfallZScale[z]);
-			v[2].vx = 179450;
-			v[3].vx = 179450;
+		DrawWaterFallPoly(v);
+	}
+	for (z=0; z<3; z++)
+	{
+		v[0].vx = xOrigin+MUL_FIXED(waterfallX[8],waterfallZScale[z+1]);
+		v[1].vx = xOrigin+MUL_FIXED(waterfallX[8],waterfallZScale[z]);
+		v[2].vx = 179450;
+		v[3].vx = 179450;
 
-			v[0].vy = 4742;
-			v[1].vy = 4742;
-			v[2].vy = 4742;
-			v[3].vy = 4742;
+		v[0].vy = 4742;
+		v[1].vy = 4742;
+		v[2].vy = 4742;
+		v[3].vy = 4742;
 
-			v[0].vz = waterfallZ[z];
-			v[1].vz = waterfallZ[z+1];
-			v[2].vz = v[1].vz;
-			v[3].vz = v[0].vz;
+		v[0].vz = waterfallZ[z];
+		v[1].vz = waterfallZ[z+1];
+		v[2].vz = v[1].vz;
+		v[3].vz = v[0].vz;
 
-			DrawWaterFallPoly(v);
-		}
+		DrawWaterFallPoly(v);
+	}
 
-		for (z=0; z<8; z++)
-		for (i=0; i<16; i++)
-		{
-			int xOffset,xOffset2;
-			if (z<3) xOffset = 179450;
-			else xOffset = xOrigin+MUL_FIXED(waterfallX[8],waterfallZScale[z]);
-			if (z<2) xOffset2 = 179450;
-			else xOffset2 = xOrigin+MUL_FIXED(waterfallX[8],waterfallZScale[z+1]);
+	for (z=0; z<8; z++)
+	for (i=0; i<16; i++)
+	{
+		int xOffset,xOffset2;
+		if (z<3) xOffset = 179450;
+		else xOffset = xOrigin+MUL_FIXED(waterfallX[8],waterfallZScale[z]);
+		if (z<2) xOffset2 = 179450;
+		else xOffset2 = xOrigin+MUL_FIXED(waterfallX[8],waterfallZScale[z+1]);
 
-			v[0].vx = xOffset;
-			v[1].vx = xOffset2;
-			v[2].vx = xOffset2;
-			v[3].vx = xOffset;
+		v[0].vx = xOffset;
+		v[1].vx = xOffset2;
+		v[2].vx = xOffset2;
+		v[3].vx = xOffset;
 
-			v[0].vy = 4742+i*4096;
-			v[1].vy = 4742+i*4096;
-			v[2].vy = 4742+(i+1)*4096;
-			v[3].vy = 4742+(i+1)*4096;
+		v[0].vy = 4742+i*4096;
+		v[1].vy = 4742+i*4096;
+		v[2].vy = 4742+(i+1)*4096;
+		v[3].vy = 4742+(i+1)*4096;
 
-			v[0].vz = waterfallZ[z];
-			v[1].vz = waterfallZ[z+1];
-			v[2].vz = v[1].vz;
-			v[3].vz = v[0].vz;
+		v[0].vz = waterfallZ[z];
+		v[1].vz = waterfallZ[z+1];
+		v[2].vz = v[1].vz;
+		v[3].vz = v[0].vz;
 
-			DrawWaterFallPoly(v);
-		}
+		DrawWaterFallPoly(v);
 	}
 }
 
@@ -5363,35 +5193,32 @@ void DrawWaterFallPoly(VECTORCH *v)
 {
 	POLYHEADER fakeHeader;
 
-	{
-		fakeHeader.PolyFlags = iflag_transparent;
-		fakeHeader.PolyColour = CloudyImageNumber;
-		RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
-	}
-	{
-		static int wv=0;
-		unsigned int a;
-		for (a=0; a<4; a++)
-		{
-			VerticesBuffer[a].A = 128;
-			VerticesBuffer[a].U = (v[a].vz)<<11;
-			VerticesBuffer[a].V = (v[a].vy<<10)-wv;
+	fakeHeader.PolyFlags = iflag_transparent;
+	fakeHeader.PolyColour = CloudyImageNumber;
+	RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
 
-			TranslatePointIntoViewspace(&v[a]);
-			VerticesBuffer[a].X	= v[a].vx;
-			VerticesBuffer[a].Y	= v[a].vy;
-			VerticesBuffer[a].Z	= v[a].vz;
-			VerticesBuffer[a].R = 200;
-			VerticesBuffer[a].G	= 200;
-			VerticesBuffer[a].B = 255;
-			VerticesBuffer[a].SpecularR = 0;
-			VerticesBuffer[a].SpecularG = 0;
-			VerticesBuffer[a].SpecularB = 0;
-		}
+	static int wv = 0;
 
-		wv+=NormalFrameTime*2;
-		RenderPolygon.NumberOfVertices=4;
+	for (unsigned int a = 0; a < 4; a++)
+	{
+		VerticesBuffer[a].A = 128;
+		VerticesBuffer[a].U = (v[a].vz)<<11;
+		VerticesBuffer[a].V = (v[a].vy<<10)-wv;
+
+		TranslatePointIntoViewspace(&v[a]);
+		VerticesBuffer[a].X	= v[a].vx;
+		VerticesBuffer[a].Y	= v[a].vy;
+		VerticesBuffer[a].Z	= v[a].vz;
+		VerticesBuffer[a].R = 200;
+		VerticesBuffer[a].G	= 200;
+		VerticesBuffer[a].B = 255;
+		VerticesBuffer[a].SpecularR = 0;
+		VerticesBuffer[a].SpecularG = 0;
+		VerticesBuffer[a].SpecularB = 0;
 	}
+
+	wv += NormalFrameTime*2;
+	RenderPolygon.NumberOfVertices=4;
 
 //	GouraudTexturedPolygon_ClipWithZ();
 
@@ -6133,7 +5960,159 @@ void RenderInsideAlienTongue(int offset)
 	}
 }
 
+#define OCTAVES 3
+int u[OCTAVES];
+int v[OCTAVES];
+int du[OCTAVES];
+int dv[OCTAVES];
+BOOL skySetup = FALSE;
 
+int SkyColour_R=200;
+int SkyColour_G=200;
+int SkyColour_B=200;
+
+extern float GetTestTimer();
+
+void RenderSky(void)
+{
+	POLYHEADER fakeHeader;
+	int x,z,o,i;
+
+	// if this is our first time in the function, initialise some values just the once
+	if (!skySetup)
+	{
+		for (i = 0; i < OCTAVES; i++)
+		{
+			u[i] = (FastRandom()&65535);//*128;
+			v[i] = (FastRandom()&65535);//*128;
+			du[i] = (((FastRandom()&65535)-32768)*(i+1));//*8;
+			dv[i] = (((FastRandom()&65535)-32768)*(i+1));//*8;
+		}
+		skySetup = TRUE;
+	}
+
+	// set render states and texture
+	fakeHeader.PolyFlags  = iflag_transparent;
+	fakeHeader.PolyColour = CloudyImageNumber;
+	RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
+
+	for (o = 0; o < OCTAVES; o++)
+	{
+		// makes the sky clouds move
+		u[o] += MUL_FIXED(du[o], GetTestTimer() * 0.1f);//0x0000001);
+		v[o] += MUL_FIXED(dv[o], GetTestTimer() * 0.1f);//0x0000001);
+	}
+
+	for (x = -10; x <= 10; x++)
+	{
+		for (z = -10; z <= 10; z++)
+		{
+			int t = 255;
+			int size = /*65536*/128;
+
+			for (o = 0; o < OCTAVES; o++)
+			{
+				VECTORCH translatedPts[4] =
+				{
+					// x   // y  // z
+					{-16384,-11000,-16384},
+					{-16384,-11000, 16384},
+					{ 16384,-11000, 16384},
+					{ 16384,-11000,-16384},
+				};
+
+				for (i = 0; i < 4; i++)
+				{
+					translatedPts[i].vx += 32768*x;
+					translatedPts[i].vz += 32768*z;
+
+					translatedPts[i].vx += Global_VDB_Ptr->VDB_World.vx;
+					translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy + 1000;
+					translatedPts[i].vz += Global_VDB_Ptr->VDB_World.vz;
+
+//					TranslatePointIntoViewspace(&translatedPts[i]);
+
+					VerticesBuffer[i].X = translatedPts[i].vx;
+					VerticesBuffer[i].Y = translatedPts[i].vy;
+					VerticesBuffer[i].Z = translatedPts[i].vz;
+
+					switch (CurrentVisionMode)
+					{
+						default:
+						case VISION_MODE_NORMAL:
+						{
+							VerticesBuffer[i].R = SkyColour_R;
+							VerticesBuffer[i].G = SkyColour_G;
+							VerticesBuffer[i].B = SkyColour_B;
+							break;
+						}
+						case VISION_MODE_IMAGEINTENSIFIER:
+						{
+							VerticesBuffer[i].R = 0;
+							VerticesBuffer[i].G = 255;
+							VerticesBuffer[i].B = 0;
+							break;
+						}
+						case VISION_MODE_PRED_THERMAL:
+						case VISION_MODE_PRED_SEEALIENS:
+						case VISION_MODE_PRED_SEEPREDTECH:
+						{
+							VerticesBuffer[i].R = 0;
+							VerticesBuffer[i].G = 0;
+							VerticesBuffer[i].B = 255;
+							break;
+						}
+					}
+
+					VerticesBuffer[i].A = t;
+
+					VerticesBuffer[0].U = (u[o]+size*x);
+					VerticesBuffer[0].V = (v[o]+size*z);
+					VerticesBuffer[1].U = (u[o]+size*x);
+					VerticesBuffer[1].V = (v[o]+size*(z+1));
+					VerticesBuffer[2].U = (u[o]+size*(x+1));
+					VerticesBuffer[2].V = (v[o]+size*(z+1));
+					VerticesBuffer[3].U = (u[o]+size*(x+1));
+					VerticesBuffer[3].V = (v[o]+size*z);
+
+					RenderPolygon.NumberOfVertices = 4;
+				}
+
+				D3D_SkyPolygon_Output(&fakeHeader, VerticesBuffer);
+/*
+				GouraudTexturedPolygon_ClipWithZ();
+				if (RenderPolygon.NumberOfVertices>=3)
+				{
+					GouraudTexturedPolygon_ClipWithNegativeX();
+					if (RenderPolygon.NumberOfVertices>=3)
+					{
+						GouraudTexturedPolygon_ClipWithPositiveY();
+						if (RenderPolygon.NumberOfVertices>=3)
+						{
+							GouraudTexturedPolygon_ClipWithNegativeY();
+							if (RenderPolygon.NumberOfVertices>=3)
+							{
+								GouraudTexturedPolygon_ClipWithPositiveX();
+								if (RenderPolygon.NumberOfVertices>=3)
+								{
+									D3D_SkyPolygon_Output(&fakeHeader, RenderPolygon.Vertices);
+								}
+							}
+						}
+					}
+				}
+*/
+				t/=2;
+				size*=2;
+			}
+		}
+	}
+}
+
+#include "renderer.h"
+#include "renderlist.h"
+
+extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 
 #define NO_OF_STARS 500
 typedef struct
@@ -6148,9 +6127,6 @@ typedef struct
 /*static*/ STARDESC StarArray[NO_OF_STARS];
 
 extern void LoadStars();
-
-#include "renderer.h"
-#include "renderlist.h"
 
 extern RenderList *starsList;
 

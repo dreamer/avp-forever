@@ -46,7 +46,7 @@
 // class BatchFileProcessing
 // public:
 // static
-OurBool
+bool
 BatchFileProcessing :: Run(char* Filename)
 {
 	// Tries to find the file, if it finds it it reads it,

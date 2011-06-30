@@ -94,63 +94,6 @@
 		return DebugName;
 	}
 	#endif
-		
-	#if 0
-	class GadgetWithSize : public Gadget
-	{
-	// Friends
-
-	// Protected data:
-	protected:
-		r2size R2Size_Val;
-
-	// Public methods:
-	public:
-		r2size GetSize(void) const;
-
-		void SetSize(r2size R2Size);		
-		virtual void SetSize_PostProcessing(void) {}
-
-	// Protected methods:
-	protected:
-		// Protected constructor since abstract class
-		// (It's abstract since Render() remains pure virtual )
-		GadgetWithSize
-		(
-			#if debug
-			char* DebugName_New,
-			#endif
-			r2size R2Size_New
-		) : Gadget
-			(
-				#if debug
-				DebugName_New
-				#endif				
-			),
-			R2Size_Val( R2Size_New ) {}
-
-	// Private methods:
-	private:
-
-	// Private data:
-	private:
-
-	// Inline methods:
-	public:
-		r2size GetSize(void) const
-		{
-			return R2Size_Val;			
-		}
-		void SetSize( r2size R2Size_New )
-		{
-			R2Size_Val = R2Size_New;
-			SetSize_PostProcessing();
-		}
-	protected:
-	private:
-
-	}; // end of class GadgetWithSize
-	#endif
 
 	#endif /* __cplusplus */
 	#endif /* UseGadgets */

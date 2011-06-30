@@ -4,10 +4,6 @@
 #include "chnkload.h"
 #include "hmodel.h"
 
-
-
-//#ifdef __cplusplus
-
 #include "hierchnk.hpp"
 
 class File_Chunk;
@@ -25,7 +21,6 @@ struct Hierarchy_ID_Time_Pair
 	int id;
 	int time;
 };
-
 
 struct Hierarchy_Alternate_Shape_Set
 {
@@ -91,8 +86,6 @@ public:
 
 #define LOAD_MORPH_SHAPES 1 // you can compile out the code that copies morph data
 
-/* bjd - won't need the below anymore */
-#define CL_SUPPORT_ALTTAB 0 // textures and surfaces loaded with CL_LoadImageOnce with LIO_RESTORABLE set will be added to ALT+TAB lists
 #define CL_SUPPORT_FASTFILE 1 // AvP uses fastfiles (but if the gfx aren't in them, it'll try the actual files
 #ifdef AVP_DEBUG_VERSION
 #define CL_SUPPORTONLY_FASTFILE 0 // for release, milestones, CDs, demos, may want this to be non-zero

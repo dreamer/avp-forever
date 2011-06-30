@@ -108,13 +108,6 @@
 
 	private:
 		static HUDGadget* pSingleton;
-
-	#if 0
-	// Temporary text feedback implementation:
-	protected:
-		SCString* pSCString_Current;
-	#endif
-
 	};
 
 	// Inline methods:

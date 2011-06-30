@@ -446,7 +446,7 @@ void MaintainHUD(void)
 			if (CameraZoomScale!=0.25f)
 			{
 				//f2i(b,CameraZoomScale*65536.0f);
-				int b = (int)(CameraZoomScale * 65536.0f);
+				int b = static_cast<int>(CameraZoomScale * 65536.0f);
 
 				if (b < 32768) 
 					b = 32768;

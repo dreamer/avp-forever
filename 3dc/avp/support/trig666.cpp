@@ -38,7 +38,7 @@
 // class TriggerDaemon : public Daemon
 TriggerDaemon :: TriggerDaemon
 (
-	OurBool fActive
+	bool fActive
 ) : Daemon
 	(
 		fActive
@@ -54,7 +54,7 @@ TriggerDaemon :: ~TriggerDaemon()
 // class PulsingTriggerDaemon : public TriggerDaemon
 PulsingTriggerDaemon :: PulsingTriggerDaemon
 (
-	OurBool fActive,
+	bool fActive,
 	int FixP_Period // interval between triggers in seconds			
 ) : TriggerDaemon
 	(
@@ -109,7 +109,7 @@ void PulsingTriggerDaemon :: SetFuse_FixP
 // class CountdownDaemon : public TriggerDaemon
 CountdownDaemon :: CountdownDaemon
 (
-	OurBool fActive,
+	bool fActive,
 	int FixP_Fuse // time until it triggers
 ) : TriggerDaemon
 	(

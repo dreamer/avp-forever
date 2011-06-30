@@ -20,11 +20,6 @@ int WideMulNarrowDiv(int a, int b, int c);
 void RotateVector_ASM(VECTORCH *v, MATRIXCH *m);
 void RotateAndCopyVector_ASM(VECTORCH *v1, VECTORCH *v2, MATRIXCH *m);
 
-#if 0
-int FloatToInt(float);
-#define f2i(a, b) { a = FloatToInt(b); }
-#endif
-
 #undef ASM386
 
 //#define USE_ASM

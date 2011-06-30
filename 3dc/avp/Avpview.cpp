@@ -1,5 +1,4 @@
 #include "3dc.h"
-
 #include "inline.h"
 #include "module.h"
 #include "gamedef.h"
@@ -180,11 +179,6 @@ void LightSourcesInRangeOfObject(DISPLAYBLOCK *dptr)
 
 						distanceToLight = Approximate3dMagnitude(&vertexToLight);
 
-						#if 0
-						if (CurrentVisionMode == VISION_MODE_IMAGEINTENSIFIER)
-							distanceToLight /= 2;
-						#endif
-
 						if (distanceToLight < (lptr->LightRange + dptr->ObRadius))
 						{
 
@@ -216,11 +210,6 @@ void LightSourcesInRangeOfObject(DISPLAYBLOCK *dptr)
 			vertexToLight.vz = lptr->LightWorld.vz - dptr->ObWorld.vz;
 
 			distanceToLight = Approximate3dMagnitude(&vertexToLight);
-
-			#if 0
-			if (CurrentVisionMode == VISION_MODE_IMAGEINTENSIFIER)
-				distanceToLight /= 2;
-			#endif
 
 			if (distanceToLight < (lptr->LightRange + dptr->ObRadius) )
 			{
@@ -483,7 +472,7 @@ void UpdateCamera(void)
 	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 	int cos = GetCos(playerStatusPtr->ViewPanX); // the looking up/down value that used to be in displayblock
 	int sin = GetSin(playerStatusPtr->ViewPanX);
-	MATRIXCH mat;
+
 	DISPLAYBLOCK *dptr_s = Player;
 
 	// update the two globals
@@ -504,6 +493,7 @@ void UpdateCamera(void)
 	Global_VDB_Ptr->VDB_Mat.mat31, Global_VDB_Ptr->VDB_Mat.mat32, Global_VDB_Ptr->VDB_Mat.mat33);
 //	OutputDebugString(buf);
 */
+	MATRIXCH mat;
 	mat.mat11 = ONE_FIXED;
 	mat.mat12 = 0;
 	mat.mat13 = 0;
@@ -640,6 +630,7 @@ void AvpShowViews(void)
 
 	/* update players weapon */
 	UpdateWeaponStateMachine();
+
 	/* lights associated with the player may have changed */
 	UpdateObjectLights(Player);
 
@@ -737,52 +728,6 @@ void InitialiseRenderer(void)
 	/* KJL 14:46:42 09/09/98 */
 	InitialiseLightIntensityStamps();
 }
-
-/*
-
- General View Volume Test for Objects and Sub-Object Trees
-
- This function returns returns "TRUE" / "True" for an if()
-
-*/
-/*
-int AVPViewVolumeTest(VIEWDESCRIPTORBLOCK *VDB_Ptr, DISPLAYBLOCK *dblockptr)
-{
-	int or = dblockptr->ObRadius;
-
-	// Perform the view volume plane tests
-
-	if (
-	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipZPlane, dblockptr, or) &&
-	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipLeftPlane, dblockptr, or) &&
-	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipRightPlane, dblockptr, or) &&
-	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipUpPlane, dblockptr, or) &&
-	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipDownPlane, dblockptr, or))
-		return TRUE;
-
-	else
-		return FALSE;
-}
-*/
-
-/*
-	View Volume Plane Test
-
-	Make the ODB VSL relative to the VDB Clip Plane POP and dot the resultant
-	vector with the Clip Plane Normal.
-*/
-
-/*
-int AVPViewVolumePlaneTest(CLIPPLANEBLOCK *cpb, DISPLAYBLOCK *dblockptr, int or)
-{
-	VECTORCH POPRelObView;
-
-	MakeVector(&dblockptr->ObView, &cpb->CPB_POP, &POPRelObView);
-
-	if (DotProduct(&POPRelObView, &cpb->CPB_Normal) < or) return TRUE;
-	else return FALSE;
-}
-*/
 
 #if MIRRORING_ON
 void CheckIfMirroringIsRequired(void)

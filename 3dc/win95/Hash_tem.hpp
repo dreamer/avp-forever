@@ -854,15 +854,6 @@ HT_DEFINE_FOR_SIMPLE_TYPE(float)
 #undef HT_DEFINE_FOR_SIMPLE_TYPE
 #undef HT_WATCOM_DEFINE_FOR_SIMPLE_TYPE
 
-// for pointer types
-#if 0 // doesnt't compile!!
-template <class TYPE>
-class HashTable<TYPE *> HT_DEFINITION(TYPE *, TYPE *, TYPE const *)
-
-template <class TYPE>
-class HashTable<TYPE const *> HT_DEFINITION(TYPE const *, TYPE const *, TYPE const *)
-#endif
-
 // for other types
 template <class TYPE>
 class HashTable HT_DEFINITION(TYPE,TYPE const &, TYPE const &)

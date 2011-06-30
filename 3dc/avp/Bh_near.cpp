@@ -654,10 +654,7 @@ static void DoAlienAIRandomHiss(STRATEGYBLOCK *sbPtr) {
 	dynPtr = sbPtr->DynPtr;
 	LOCALASSERT(dynPtr);
 
-	soundIndex=SID_NOSOUND;
-
 	/* This one is for ALIEN GENERAL SCREAM. */
-
 	soundIndex=SID_NOSOUND;
 
 	if (alienStatusPointer->soundHandle2==SOUND_NOACTIVEINDEX) {
@@ -684,10 +681,7 @@ static void DoAlienAITauntHiss(STRATEGYBLOCK *sbPtr) {
 	dynPtr = sbPtr->DynPtr;
 	LOCALASSERT(dynPtr);
 
-	soundIndex=SID_NOSOUND;
-
 	/* This one is for ALIEN TAUNT. */
-
 	soundIndex=SID_NOSOUND;
 
 	if (alienStatusPointer->soundHandle2==SOUND_NOACTIVEINDEX) {

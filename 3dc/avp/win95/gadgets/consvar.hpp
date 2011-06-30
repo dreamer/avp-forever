@@ -46,7 +46,7 @@
 			ProjChar* pProjCh_Description_ToUse,
 			int MinVal_New,
 			int MaxVal_New,
-			OurBool Cheat = FALSE
+			bool Cheat = false
 		);
 		static ConsoleVariable* MakeSimpleConsoleVariable_FixP
 		(
@@ -55,7 +55,7 @@
 			ProjChar* pProjCh_Description_ToUse,
 			int MinVal_New, // fixed point value
 			int MaxVal_New,	// fixed point value
-			OurBool Cheat = FALSE
+			bool Cheat = false
 		);
 
 		~ConsoleVariable();
@@ -64,7 +64,7 @@
 		virtual void SetValue(int Val_New) = 0;
 		virtual void SetValue(float Val_New) = 0;
 
-		static OurBool Process( ProjChar* pProjCh_In );
+		static bool Process( ProjChar* pProjCh_In );
 			// used for proccesing input text.  Could decide that the user
 			// was requesting the value of a variable, or was setting a new
 			// value etc; if so, acts accordingly.
@@ -83,7 +83,7 @@
 			ProjChar* pProjCh_Description_ToUse,
 			int MinVal_New,
 			int MaxVal_New,
-			OurBool Cheat = FALSE
+			bool Cheat = false
 		);
 
 	private:
