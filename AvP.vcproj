@@ -963,46 +963,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="3dc\win95\awPnmLd.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="3dc\win95\awTexLd.cpp"
 				>
 				<FileConfiguration
@@ -4341,6 +4301,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\3dc\Sky.cpp"
+				>
+			</File>
+			<File
 				RelativePath="3dc\win95\Sndchunk.cpp"
 				>
 				<FileConfiguration
@@ -5685,10 +5649,6 @@
 					>
 				</File>
 				<File
-					RelativePath="3dc\avp\win95\Ia3d.h"
-					>
-				</File>
-				<File
 					RelativePath="3dc\win95\iff.hpp"
 					>
 				</File>
@@ -5834,10 +5794,6 @@
 				</File>
 				<File
 					RelativePath="3dc\win95\Ourasert.h"
-					>
-				</File>
-				<File
-					RelativePath="3dc\avp\support\ourbool.h"
 					>
 				</File>
 				<File
@@ -6117,15 +6073,7 @@
 					>
 				</File>
 				<File
-					RelativePath="3dc\win95\VideoModes.h"
-					>
-				</File>
-				<File
 					RelativePath="3dc\avp\win95\Vision.h"
-					>
-				</File>
-				<File
-					RelativePath="3dc\avp\win95\Vmanpset.h"
 					>
 				</File>
 				<File
