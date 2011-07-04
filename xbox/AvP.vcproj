@@ -129,7 +129,9 @@
 				Name="XboxImageTool"
 				StackSize="0x10000"
 				IncludeDebugInfo="TRUE"
-				LimitAvailableMemoryTo64MB="TRUE"/>
+				LimitAvailableMemoryTo64MB="TRUE"
+				XboxGameRating="3"
+				TitleName="Aliens versus Predator - Debug"/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
@@ -258,7 +260,9 @@
 				Name="XboxImageTool"
 				StackSize="0x10000"
 				IncludeDebugInfo="FALSE"
-				LimitAvailableMemoryTo64MB="TRUE"/>
+				LimitAvailableMemoryTo64MB="TRUE"
+				XboxGameRating="3"
+				TitleName="Aliens versus Predator"/>
 		</Configuration>
 	</Configurations>
 	<References>
