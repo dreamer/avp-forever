@@ -771,7 +771,7 @@ unsigned int __stdcall decodeThread(void *args)
 						for (int32_t j = 0; j < fmv->mAudio->mVorbis.mInfo.channels; ++j)
 						{
 							int v = static_cast<int>(floorf(0.5f + pcm[j][i]*32767.0f));
-							if (v > 32767) v = 32767;
+							if (v > 32767)  v = 32767;
 							if (v < -32768) v = -32768;
 							*p++ = v;
 						}
@@ -905,12 +905,11 @@ void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb)
 	unsigned char * ptrv = yuv->ptrv;
 	unsigned char * ptro = rgb->ptro;
 	unsigned char * ptro2;
-	int i, j;
 
-	for (i = 0; i < yuv->y_height; i++)
+	for (int i = 0; i < yuv->y_height; i++)
 	{
 		ptro2 = ptro;
-		for (j = 0; j < yuv->y_width; j += 2)
+		for (int j = 0; j < yuv->y_width; j += 2)
 		{
 			short pr, pg, pb, y;
 			short r, g, b;
@@ -1078,7 +1077,7 @@ void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb)
 #endif
 }
 
-// this code is based on plogg by Chris Double. Also contains code written by myself. Below is the license from plogg
+// this code is based on plogg by Chris Double. Also contains code written by Barry Duncan. Below is the license from plogg
 
 // Copyright (C) 2009 Chris Double. All Rights Reserved.
 // The original author of this code can be contacted at: chris.double@double.co.nz
