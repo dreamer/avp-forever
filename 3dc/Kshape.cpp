@@ -6132,6 +6132,7 @@ extern RenderList *starsList;
 
 void CreateStarArray(void)
 {
+#if 0 // test code, disabled
 	SetSeededFastRandom(FastRandom());
 	for (int i=0; i < NO_OF_STARS; i++)
 	{
@@ -6213,6 +6214,7 @@ void CreateStarArray(void)
 
 	d3d.starsVB->Unlock();
 	d3d.starsIB->Unlock();
+#endif
 }
 
 void RenderStarfield(void)

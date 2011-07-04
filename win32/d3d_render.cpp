@@ -398,6 +398,7 @@ static bool ExecuteBuffer()
 		orthoList->Draw();
 	}
 
+#if 0 // test code, disabled
 	// do test sky
 	if (starsList->GetSize())
 	{
@@ -439,6 +440,7 @@ static bool ExecuteBuffer()
 
 		starsList->Draw();
 	}
+#endif
 
 	return true;
 }

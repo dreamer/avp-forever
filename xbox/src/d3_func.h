@@ -64,15 +64,15 @@ struct r_PixelShader
 
 typedef struct _D3DLVERTEX
 {
-	float sx;
-	float sy;
-	float sz;
+	float x;
+	float y;
+	float z;
 
 	D3DCOLOR color;
 	D3DCOLOR specular;
 
-	float tu;
-	float tv;
+	float u;
+	float v;
 
 } D3DLVERTEX;
 
