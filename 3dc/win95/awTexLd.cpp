@@ -10,15 +10,14 @@
 #endif
 
 #include "iff.hpp"
-
 #include "list_tem.hpp"
-
 #include <stdlib.h>
 #include <stdarg.h>
 #include <limits.h>
-
 #include "awTexLd.h"
 #include "awTexLd.hpp"
+
+#include <new>
 
 #ifdef _CPPRTTI
 	#include <typeinfo.h>
@@ -435,7 +434,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 
 	AVPTEXTURE *d3d_texture = new AVPTEXTURE;
 
-	uint8_t *buffer = new uint8_t[m_nWidth * m_nHeight * sizeof(uint32_t)];
+	d3d_texture->buffer = new (std::nothrow)uint8_t[m_nWidth * m_nHeight * sizeof(uint32_t)];
 
 	unsigned int y = 0;
 
@@ -460,7 +459,7 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 		// are we in the vertical range of this surface?	
 			// convert and copy the section of the row to the direct draw surface
 //					ConvertRow(pLoadInfo->surface_dataP,pLoadInfo->surface_width,src_rowP,pLoadInfo->left,pLoadInfo->width,paletteP db_code1(DB_COMMA m_nPaletteSize));
-			PtrUnion my_data = &buffer[y*m_nWidth*4];
+			PtrUnion my_data = &d3d_texture->buffer[y*m_nWidth*4];
 
 			ConvertRow(my_data, m_nWidth, src_rowP, 0, m_nWidth, paletteP db_code1(DB_COMMA m_nPaletteSize));					
 				
@@ -475,8 +474,6 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 
 	d3d_texture->width  = m_nWidth;
 	d3d_texture->height = m_nHeight;
-
-	d3d_texture->buffer = buffer;
 				
 	return static_cast<SurfUnion>(d3d_texture);
 }
