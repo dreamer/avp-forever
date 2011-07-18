@@ -14,14 +14,14 @@
 #include "font2.h"
 #include "AvP_Menus.h"
 
-extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour);
-extern void DrawMenuQuad(int topX, int topY, int bottomX, int bottomY, int image_num, BOOL alpha);
+void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a);
 extern void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint32_t alpha);
+
+extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour);
 static void LoadMenuFont(void);
 static void UnloadMenuFont(void);
 extern int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red, int green, int blue);
 static void CalculateWidthsOfAAFont(void);
-extern void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a);
 
 texID_t AVPMENUGFX_CLOUDY;
 texID_t AVPMENUGFX_SMALL_FONT;
@@ -219,7 +219,7 @@ static void LoadMenuFont(void)
 	
 	pFastFileData = ffreadbuf(buffer, &fastFileLength);
 
-	if (pFastFileData) 
+	if (pFastFileData)
 	{
 		gfxPtr->ImagePtr = AwCreateTexture(
 			"pxfXY",
@@ -229,8 +229,8 @@ static void LoadMenuFont(void)
 			&(gfxPtr->Width),
 			&(gfxPtr->Height)
 		);
-	} 
-	else 
+	}
+	else
 	{
 		gfxPtr->ImagePtr = AwCreateTexture(
 			"sfXY",
@@ -240,11 +240,11 @@ static void LoadMenuFont(void)
 			&(gfxPtr->Height)
 		);
 	}
-	
+
 	GLOBALASSERT(gfxPtr->ImagePtr);
 	GLOBALASSERT(gfxPtr->Width>0);
 	GLOBALASSERT(gfxPtr->Height>0);
-	
+
 	AVPTEXTURE *image = gfxPtr->ImagePtr;
 
 	uint8_t *srcPtr = image->buffer;
@@ -252,35 +252,35 @@ static void LoadMenuFont(void)
 	if ((image->width != 30) || ((image->height % 33) != 0)) {
 		// handle new texture
 	}
-*/	
-	IntroFont_Light.numchars = image->height / 33;	
+*/
+	IntroFont_Light.numchars = image->height / 33;
 	IntroFont_Light.FontWidth[32] = 5;
-	
-	for (int c = 33; c < (32+IntroFont_Light.numchars); c++) 
+
+	for (int c = 33; c < (32+IntroFont_Light.numchars); c++)
 	{
 		int y1 = 1+(c-32)*33;
-		
+
 		IntroFont_Light.FontWidth[c] = 31;
-		
-		for (int x = 29; x > 0; x--) 
+
+		for (int x = 29; x > 0; x--)
 		{
 			bool blank = true;
-			
-			for (int y = y1; y < y1+31; y++) 
+
+			for (int y = y1; y < y1+31; y++)
 			{
 				uint8_t *s = &srcPtr[(x + y*image->width) * sizeof(uint32_t)];
-				if (s[2]) 
+				if (s[2])
 				{
 					blank = false;
 					break;
 				}
 			}
-			
-			if (blank) 
+
+			if (blank)
 			{
 				IntroFont_Light.FontWidth[c]--;
-			} 
-			else 
+			}
+			else
 			{
 				break;
 			}
@@ -289,6 +289,9 @@ static void LoadMenuFont(void)
 
 	// we're going to try create a square texture
 	gfxPtr->textureID = Tex_CreateTallFontTexture(buffer, *image, TextureUsage_Normal);
+
+	ReleaseAvPTexture(IntroFont_Light.info.ImagePtr);
+	IntroFont_Light.info.ImagePtr = NULL;
 }
 
 static void UnloadMenuFont(void)
@@ -369,7 +372,7 @@ extern int RenderMenuText(char *textPtr, int pX, int pY, int alpha, enum AVPMENU
 	{
 		char c = *textPtr++;
 
-		if (c >= ' ') 
+		if (c >= ' ')
 		{
 			uint32_t charWidth = IntroFont_Light.FontWidth[(unsigned int) c];
 
@@ -384,37 +387,37 @@ extern int RenderMenuText(char *textPtr, int pX, int pY, int alpha, enum AVPMENU
 			int topLeftU = tex_x;
 			int topLeftV = tex_y;
 
-			/* 
+			/*
 				bjd note
 				need to fix the 'Cloud Table'
 				ie the moving hazy smoke/cloud effect behind the large font text on the menus
 			*/
 
 			DrawTallFontCharacter(positionX, positionY, IntroFont_Light.info.textureID, topLeftU, topLeftV, charWidth, alpha);
-/*			
+/*
 			srcPtr = &image->buf[(topLeftU+topLeftV*image->w)*4];
-			
+
 			for (y=pY; y<33+pY; y++) {
 				destPtr = (unsigned short *)(((unsigned char *)lock.pBits)+y*lock.Pitch) + pX;
-				
-				for (x=width; x>0; x--) {					
+
+				for (x=width; x>0; x--) {
 					if (srcPtr[0] || srcPtr[1] || srcPtr[2]) {
 						unsigned int destR, destG, destB;
-						
+
 						int r = CloudTable[(x+pX+CloakingPhase/64)&127][(y+CloakingPhase/128)&127];
 						r = MUL_FIXED(alpha, r);
-						
+
 						destR = (*destPtr & 0xF800)>>8;
 						destG = (*destPtr & 0x07E0)>>3;
 						destB = (*destPtr & 0x001F)<<3;
-						
+
 						destR += MUL_FIXED(r, srcPtr[0]);
 						destG += MUL_FIXED(r, srcPtr[1]);
 						destB += MUL_FIXED(r, srcPtr[2]);
 						if (destR > 0x00FF) destR = 0x00FF;
 						if (destG > 0x00FF) destG = 0x00FF;
 						if (destB > 0x00FF) destB = 0x00FF;
-						
+
 						*destPtr =	((destR>>3)<<11) |
 								((destG>>2)<<5 ) |
 								((destB>>3));
@@ -945,7 +948,7 @@ Determine area used by text , so we can draw it centrally
 
 void LoadAllMenuTextures()
 {
-AVPMENUGFX_CLOUDY = CL_LoadImageOnce("Menus\\fractal.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_CLOUDY = CL_LoadImageOnce("Menus\\fractal.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
 	AVPMENUGFX_SMALL_FONT  = CL_LoadImageOnce("Common\\aa_font.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 	AVPMENUGFX_COPYRIGHT_SCREEN = CL_LoadImageOnce("Menus\\copyright.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
@@ -1288,6 +1291,8 @@ extern void ReleaseAllAvPMenuGfx(void)
 	Tex_Release(AVPMENUGFX_SPLASH_SCREEN3);
 	Tex_Release(AVPMENUGFX_SPLASH_SCREEN4);
 	Tex_Release(AVPMENUGFX_SPLASH_SCREEN5);
+
+	Tex_Release(IntroFont_Light.info.textureID);
 
 #if 0 // bjd - texture test
 	int i=0;
