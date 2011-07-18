@@ -20,14 +20,7 @@
 #include <assert.h>
 
 static const int kMaxFMVs = 4;
-
-struct fmvCutscene
-{
-	bool isPlaying;
-	TheoraFMV *FMVclass;
-};
-
-fmvCutscene fmvList[kMaxFMVs];
+TheoraFMV *fmvList[kMaxFMVs];
 
 FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 uint32_t NumberOfFMVTextures = 0;
@@ -89,20 +82,19 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 
 		ftPtr->SoundVolume = FmvSoundVolume;
 
-		if (ftPtr->IsTriggeredPlotFMV && (!fmvList[ftPtr->fmvHandle].FMVclass->IsPlaying()))
+		if (ftPtr->IsTriggeredPlotFMV && (!fmvList[ftPtr->fmvHandle]->IsPlaying()))
 		{
 			ftPtr->MessageNumber = 0;
-			delete fmvList[ftPtr->fmvHandle].FMVclass;
-			fmvList[ftPtr->fmvHandle].FMVclass  = NULL;
-			fmvList[ftPtr->fmvHandle].isPlaying = false;
+			delete fmvList[ftPtr->fmvHandle];
+			fmvList[ftPtr->fmvHandle] = NULL;
 			ftPtr->fmvHandle = -1;
 		}
 		else
 		{
-			if (!fmvList[ftPtr->fmvHandle].FMVclass->mFrameReady)
+			if (!fmvList[ftPtr->fmvHandle]->mFrameReady)
 				return 0;
 
-			fmvList[ftPtr->fmvHandle].FMVclass->NextFrame(width, height, DestBufferPtr, width * sizeof(uint32_t));
+			fmvList[ftPtr->fmvHandle]->NextFrame(width, height, DestBufferPtr, width * sizeof(uint32_t));
 		}
 
 		ftPtr->StaticImageDrawn = false;
@@ -127,13 +119,19 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 // opens the menu background FMV
 void StartMenuBackgroundFmv()
 {
+	MenuBackground = false;
+
 	const char *filenamePtr = "fmvs/menubackground.ogv";
 
 	menuFMV = new TheoraFMV();
 
 	// start playback threads
 	if (menuFMV->Open(filenamePtr) != FMV_OK)
+	{
+		delete menuFMV;
+		menuFMV = NULL;
 		return;
+	}
 	
 	MenuBackground = true;
 }
@@ -173,14 +171,19 @@ extern void EndMenuBackgroundFmv()
 
 void InitFmvCutscenes()
 {
-	memset(fmvList, 0, sizeof(fmvCutscene) * kMaxFMVs);
+	for (uint32_t i = 0; i < kMaxFMVs; i++)
+	{
+		// null the pointer
+		fmvList[i] = 0;
+	}
 }
 
 int32_t FindFreeFmvHandle()
 {
 	for (uint32_t i = 0; i < kMaxFMVs; i++)
 	{
-		if (!fmvList[i].isPlaying)
+		// find a slot with a NULL (free) pointer
+		if (!fmvList[i])
 		{
 			return i;
 		}
@@ -196,21 +199,20 @@ int32_t OpenFMV(const char *filenamePtr)
 	if (fmvHandle != -1)
 	{
 		// found a free slot
-		fmvList[fmvHandle].FMVclass = new TheoraFMV();
-		if (fmvList[fmvHandle].FMVclass->Open(filenamePtr) != FMV_OK)
+		fmvList[fmvHandle] = new TheoraFMV();
+		if (fmvList[fmvHandle]->Open(filenamePtr) != FMV_OK)
 		{
-			delete fmvList[fmvHandle].FMVclass;
-			fmvList[fmvHandle].FMVclass = NULL;
+			delete fmvList[fmvHandle];
+			fmvList[fmvHandle] = NULL;
 			return -1;
 		}
-		fmvList[fmvHandle].isPlaying = true;
 	}
 	else
 	{
 		Con_PrintError("No more free fmv slots");
 		return -1;
 	}
-	
+
 	return fmvHandle;
 }
 
@@ -289,11 +291,13 @@ extern void StartTriggerPlotFMV(int number)
 		if (FMVTexture[i].IsTriggeredPlotFMV)
 		{
 			// close it if it's open
-			if (FMVTexture[i].fmvHandle)
+			if (FMVTexture[i].fmvHandle != -1)
 			{
-				if (fmvList[FMVTexture[i].fmvHandle].isPlaying)
+				if (fmvList[FMVTexture[i].fmvHandle]->IsPlaying())
 				{
-					fmvList[FMVTexture[i].fmvHandle].FMVclass->Close();
+					delete fmvList[FMVTexture[i].fmvHandle];
+					fmvList[FMVTexture[i].fmvHandle] = 0;
+//					fmvList[FMVTexture[i].fmvHandle]->Close();
 					FMVTexture[i].fmvHandle = -1;
 				}
 			}
@@ -381,12 +385,16 @@ void ReleaseAllFMVTextures()
 
 		if (FMVTexture[i].fmvHandle != -1)
 		{
-			if (fmvList[FMVTexture[i].fmvHandle].isPlaying)
+			// close and delete the FMV object
+			delete fmvList[FMVTexture[i].fmvHandle];
+			fmvList[FMVTexture[i].fmvHandle] = NULL;
+/*
+			if (fmvList[FMVTexture[i].fmvHandle]->IsPlaying())
 			{
-				delete fmvList[FMVTexture[i].fmvHandle].FMVclass;
-				fmvList[FMVTexture[i].fmvHandle].FMVclass = NULL;
+				delete fmvList[FMVTexture[i].fmvHandle];
+				fmvList[FMVTexture[i].fmvHandle] = NULL;
 			}
-
+*/
 			FMVTexture[i].fmvHandle = -1;
 		}
 
@@ -429,8 +437,8 @@ extern void InitialiseTriggeredFMVs()
 	{
 		if (FMVTexture[i].fmvHandle != -1)
 		{
-			delete fmvList[FMVTexture[i].fmvHandle].FMVclass;
-			fmvList[FMVTexture[i].fmvHandle].FMVclass = NULL;
+			delete fmvList[FMVTexture[i].fmvHandle];
+			fmvList[FMVTexture[i].fmvHandle] = NULL;
 		}
 		FMVTexture[i].MessageNumber = 0;
 		FMVTexture[i].fmvHandle = -1;
