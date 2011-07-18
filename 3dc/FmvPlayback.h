@@ -40,19 +40,35 @@ typedef std::map<int, OggStream*> streamMap;
 
 class TheoraFMV
 {
-	public:
-		std::string 	mFileName;
-		std::ifstream 	mFileStream;
+	private:
+		std::string		mFileName;
+		std::ifstream	mFileStream;
 
-		// so we can easily reference these from the threads.
-		OggStream       *mVideo;
-		OggStream       *mAudio;
-
-		ogg_sync_state 	mState;
-		ogg_int64_t		mGranulePos;
-		th_ycbcr_buffer mYuvBuffer;
-
+		ogg_sync_state	mState;
+		th_ycbcr_buffer	mYuvBuffer;
 		streamMap		mStreams;
+
+		// thread handles
+		HANDLE mDecodeThreadHandle;
+		HANDLE mAudioThreadHandle;
+
+		CRITICAL_SECTION mFrameCriticalSection;
+		bool mFrameCriticalSectionInited;
+
+		// Offset of the page which was last read.
+		ogg_int64_t mPageOffset;
+
+		// Offset of first non-header page in file.
+		ogg_int64_t mDataOffset;
+
+		bool isLooped;
+
+	public:
+		// so we can easily reference these from the threads.
+		OggStream		*mVideo;
+		OggStream		*mAudio;
+
+		ogg_int64_t		mGranulePos;
 
 		// audio
 		AudioStream		*audioStream;
@@ -69,25 +85,11 @@ class TheoraFMV
 		uint32_t mFrameWidth;
 		uint32_t mFrameHeight;
 		uint8_t  mNumTextureBits;
-		CRITICAL_SECTION mFrameCriticalSection;
-		bool mFrameCriticalSectionInited;
-
-		// thread handles
-		HANDLE mDecodeThreadHandle;
-		HANDLE mAudioThreadHandle;
 
 		bool mFmvPlaying;
 		bool mFrameReady;
 		bool mAudioStarted;
 		bool mTexturesReady;
-
-		bool isLooped;
-
-		// Offset of the page which was last read.
-		ogg_int64_t mPageOffset;
-
-		// Offset of first non-header page in file.
-		ogg_int64_t mDataOffset;
 
 		TheoraFMV() :
 			mGranulePos(0),
