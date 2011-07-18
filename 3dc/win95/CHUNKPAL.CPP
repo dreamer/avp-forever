@@ -1,5 +1,3 @@
-#if 0
-
 #include "chunkpal.hpp"
 #include "mishchnk.hpp"
 
@@ -998,5 +996,3 @@ void Coloured_Polygons_Lookup_Chunk::fill_data_block (char * data_start)
 		}
 	}
 }
-
-#endif
