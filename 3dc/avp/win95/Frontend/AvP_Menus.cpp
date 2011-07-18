@@ -27,24 +27,18 @@
 #include "networking.h"
 #include "utilities.h"
 #include "tables.h"
+#include "d3d_render.h"
+#include "OnScreenKeyboard.h"
 
 #if defined(_MSC_VER)
 #define stricmp		_stricmp
 #endif
 
-char buf[100];
-
 /* KJL 11:22:37 23/06/98 - Hopefully these will be the final menus! */
 
-extern int IDemandSelect(void);
+extern bool IDemandSelect();
 
 extern char IP_Address_Name[22];
-
-extern char *GetVideoModeDescription(void);
-extern void PreviousVideoMode(void);
-extern void NextVideoMode(void);
-extern void SaveVideoModeSettings(void);
-
 
 extern void MakeSelectSessionMenu(void);
 
@@ -55,10 +49,6 @@ extern void MakeAlienKeyConfigMenu(void);
 extern void MakeUserProfileSelectMenu(void);
 
 extern void SaveKeyConfiguration(void);
-
-extern void D3D_DrawSliderBar(int x, int y, int alpha);
-extern void D3D_DrawSlider(int x, int y, int alpha);
-extern void D3D_FadeDownScreen(int brightness, int colour);
 extern void PlayIntroSequence(void);
 
 extern void MinimalNetCollectMessages(void);
@@ -132,10 +122,7 @@ char *GetVideoModeDescription2();
 char *GetVideoModeDescription3();
 void NextVideoMode2();
 void PreviousVideoMode2();
-void ThisFramesRenderingHasBegun(void);
 extern void RenderHighlightRectangle(int x1, int y1, int x2, int y2, int r, int g, int b);
-void Osk_Activate();
-void Osk_Deactivate();
 extern void CheatMode_GetNextAllowedSpecies(int *speciesPtr, int searchForward);
 extern void CheatMode_GetNextAllowedMode(int *cheatModePtr, int searchForward);
 extern void CheatMode_GetNextAllowedEnvironment(int *environmentPtr, int searchForward);
@@ -247,7 +234,7 @@ extern int DebuggingCommandsActive;
 
 extern bool bRunning;
 
-BOOL mainMenu = TRUE;
+bool mainMenu = true;
 
 int GetAvPMenuState()
 {
@@ -330,7 +317,7 @@ int AvP_MainMenus(void)
 
 	while (AvPMenus.MenusState == MENUSSTATE_MAINMENUS && bRunning)
 	{
-		mainMenu = TRUE;
+		mainMenu = true;
 
 		CheckForWindowsMessages();
 
@@ -4575,7 +4562,7 @@ void DoCredits(void)
 	{
 		creditsPtr = (char*)HuffmanDecompress((HuffmanPackage*)(creditsBufferPtr));
 		DeallocateMem(creditsBufferPtr);
-		creditsBufferPtr=creditsPtr;
+		creditsBufferPtr = creditsPtr;
 	}
 	else
 	{
@@ -4589,7 +4576,6 @@ void DoCredits(void)
 		ThisFramesRenderingHasBegun();
 
 		DrawMainMenusBackdrop();
-		ReadUserInput();
 	
 		FinishedCredits = !RollCreditsText(position,creditsPtr+4);
 		ShowMenuFrameRate();
@@ -4600,6 +4586,8 @@ void DoCredits(void)
 		FrameCounterHandler();
 		PlayMenuMusic();
 		position -= RealFrameTime;
+
+		DirectReadKeyboard();
 	}
 	while (!DebouncedGotAnyKey && !FinishedCredits);
 
@@ -4706,13 +4694,6 @@ BOOL RollCreditsText(int position, char *textPtr)
 }
 /* KJL 17:50:06 24/06/98 - setup video mode for Menus */
 
-extern int VideoModeTypeScreen;
-extern int RasterisationRequestMode;
-extern int VideoMode;
-extern int WindowMode;
-extern int WindowRequestMode;
-
-
 extern void DrawMainMenusBackdrop(void)
 {
 	if (!PlayMenuBackgroundFmv())
@@ -4811,7 +4792,7 @@ static char BlankLine[]="";
 
 void SetBriefingTextForEpisode(int episode, I_PLAYER_TYPE playerID)
 {
-	int i,s;
+	int s;
 
 	switch(playerID)
 	{
@@ -4833,7 +4814,7 @@ void SetBriefingTextForEpisode(int episode, I_PLAYER_TYPE playerID)
 		}
 	}
 
-	for (i = 0; i < 5; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		BriefingTextString[i] = GetTextString(static_cast<enum TEXTSTRING_ID>(s+i+ episode*5));
 	}
@@ -4845,9 +4826,8 @@ static void AddMultiplayerBriefingString(const char* text)
 {
 	size_t shortest = 0;
 	size_t shortest_length = 1000;
-	int i;
 
-	for(i=0;i<3;i++)
+	for (int i=0;i<3;i++)
 	{
 		size_t length = strlen(MultiplayerBriefing[i]);
 		if (length < shortest_length)
@@ -4860,11 +4840,11 @@ static void AddMultiplayerBriefingString(const char* text)
 	if (shortest_length + 3 + strlen(text)>=100) 
 		return;
 
-	if(shortest_length>0)
+	if (shortest_length > 0)
 	{
 		strcat(MultiplayerBriefing[shortest]," , ");
 	}
-	strcat(MultiplayerBriefing[shortest],text);
+	strcat(MultiplayerBriefing[shortest], text);
 }
 
 static BOOL IsFlamerInLevel(int level)
@@ -4994,7 +4974,7 @@ static void SetBriefingTextForMultiplayer()
 		AddMultiplayerBriefingString(GetTextString(TEXTSTRING_INGAME_RIFLE));
 		num_not_available++;
 	}
-	if(!netGameData.allowMedicomp)
+	if (!netGameData.allowMedicomp)
 	{
 		AddMultiplayerBriefingString(GetTextString(TEXTSTRING_INGAME_MEDICOMP));
 		num_not_available++;
@@ -5020,9 +5000,7 @@ static void SetBriefingTextForMultiplayer()
 
 void SetBriefingTextToBlank(void)
 {
-	int i;
-
-	for (i=0; i<5; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		BriefingTextString[i] = BlankLine;
 	}
@@ -5030,7 +5008,6 @@ void SetBriefingTextToBlank(void)
 
 void RenderBriefingText(int centreY, int brightness)
 {
-
 	int lengthOfLongestLine = -1;
 	int x, y, i;
 
@@ -5086,14 +5063,13 @@ void RenderBriefingText(int centreY, int brightness)
 void CheckForKeysWithMultipleAssignments(void)
 {
 	unsigned char *configPtr[2];
-	int column,row;
 
 	configPtr[0] = (unsigned char*)&PlayerInputPrimaryConfig;
 	configPtr[1] = (unsigned char*)&PlayerInputSecondaryConfig;
 
-	for (column=0; column<=1; column++)
+	for (int column=0; column<=1; column++)
 	{
-		for (row=0; row<32; row++)
+		for (int row=0; row<32; row++)
 		{
 			int innerColumn,innerRow;
 
@@ -5160,9 +5136,9 @@ static int KeyboardEntryQueue_ProcessingIndex;
 
 extern void KeyboardEntryQueue_Add(char c)
 {
-	if (c<32) return;
+	if (c < 32) return;
 
-	if (NumberOfItemsInKeyboardEntryQueue<MAX_ITEMS_IN_KEYBOARDENTRYQUEUE)
+	if (NumberOfItemsInKeyboardEntryQueue < MAX_ITEMS_IN_KEYBOARDENTRYQUEUE)
 	{
 		KeyboardEntryQueue[NumberOfItemsInKeyboardEntryQueue++] = c;
 	}
@@ -5170,8 +5146,7 @@ extern void KeyboardEntryQueue_Add(char c)
 
 static void KeyboardEntryQueue_Clear(void)
 {
-	int i;
-	for (i=0; i<MAX_ITEMS_IN_KEYBOARDENTRYQUEUE; i++)
+	for (int i=0; i < MAX_ITEMS_IN_KEYBOARDENTRYQUEUE; i++)
 	{
 		KeyboardEntryQueue[i] = 0;
 	}
@@ -5196,10 +5171,9 @@ static char KeyboardEntryQueue_ProcessCharacter(void)
 void ScanSaveSlots(void)
 {
 	char filename[MAX_PATH];
-	int i;
 	SAVE_SLOT_HEADER *slotPtr = SaveGameSlot;
 
-	for (i=0; i<NUMBER_OF_SAVE_SLOTS; i++, slotPtr++)
+	for (int i=0; i < NUMBER_OF_SAVE_SLOTS; i++, slotPtr++)
 	{
 		GetFilenameForSaveSlot(i ,filename);
 
@@ -5209,22 +5183,17 @@ void ScanSaveSlots(void)
 
 extern void GetFilenameForSaveSlot(int i, char *filenamePtr)
 {
-	TCHAR strPath[MAX_PATH];
+	char filePath[MAX_PATH];
 
-	strcpy(strPath, GetSaveFolderPath());
+	strcpy(filePath, GetSaveFolderPath());
 
-	sprintf(filenamePtr, "%s%s%s_%d.sav", strPath, USER_PROFILES_PATH, UserProfilePtr->Name, i+1);
+	sprintf(filenamePtr, "%s%s%s_%d.sav", filePath, USER_PROFILES_PATH, UserProfilePtr->Name, i+1);
 }
 
 
 /*------------------------------------**
 ** Loading and saving main level info **
 **------------------------------------*/
-
-
-extern int AlienEpisodeToPlay;
-extern int MarineEpisodeToPlay;
-extern int PredatorEpisodeToPlay;
 
 void SaveLevelHeader()
 {

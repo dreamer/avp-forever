@@ -99,7 +99,7 @@ extern bool bRunning;
 
 bool unlimitedSaves = false;
 
-void exit_break_point_fucntion()
+void exit_break_point_function()
 {
 	#if debug
 	if (WindowMode == WindowModeSubWindow)
@@ -121,6 +121,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	I_AVP_ENVIRONMENTS level_to_load = I_Num_Environments;
 	char *command_line = lpCmdLine;
 	char *instr = 0;
+
+#ifdef _ALLOC_CONSOLE
+	AllocConsole();
+	freopen("CONOUT$", "wb", stdout);
+#endif
 
 	skOff = startupStickyKeys;
 
@@ -363,7 +368,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		BOOL menusActive = FALSE;
 		int thisLevelHasBeenCompleted = 0;
 
-		mainMenu = FALSE;
+		mainMenu = false;
 
 		#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
 		if (instr = strstr(command_line, "-n"))
@@ -515,7 +520,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 					{
 						/* after this call, no more graphics can be drawn until the next frame */
-						//extern void ThisFramesRend eringHasFinished(void);
 						ThisFramesRenderingHasFinished();
 					}
 
@@ -536,7 +540,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 				{
 					AvP.GameMode = I_GM_Playing;
 					LOCALASSERT(AvP.Network == I_No_Network);
-					//AccessDatabase(0);
 					break;
 				}
 
@@ -557,7 +560,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		}// end of main game loop
 
 		AvP.LevelCompleted = thisLevelHasBeenCompleted;
-		mainMenu = TRUE;
+		mainMenu = true;
 
 		FixCheatModesInUserProfile(UserProfilePtr);
 
@@ -622,6 +625,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	/* Added 28/1/98 by DHM: hook for my code on program shutdown */
 	DAVEHOOK_UnInit();
+
+	EmptyUserProfilesList();
 
 	/*-------------------Patrick 2/6/97-----------------------
 	End the sound system

@@ -21,7 +21,7 @@
 
 static int LoadUserProfiles(void);
 
-static void EmptyUserProfilesList(void);
+void EmptyUserProfilesList();
 static int MakeNewUserProfile(void);
 static void InsertProfileIntoList(AVP_USER_PROFILE *profilePtr);
 static int ProfileIsMoreRecent(AVP_USER_PROFILE *profilePtr, AVP_USER_PROFILE *profileToTestAgainstPtr);
@@ -91,7 +91,7 @@ extern AVP_USER_PROFILE *GetNextUserProfile(void)
 	return CurrentUserProfilePtr;
 }
 
-static void EmptyUserProfilesList(void)
+void EmptyUserProfilesList()
 {
 	while (UserProfilesList.size())
 	{
@@ -261,6 +261,7 @@ static int LoadUserProfiles(void)
 				delete profilePtr;
 				continue;
 			}
+
 			FILETIME ftLocal;
 			FileTimeToLocalFileTime(&wfd.ftLastWriteTime, &ftLocal);
 			FileTimeToSystemTime(&ftLocal, &profilePtr->TimeLastUpdated);

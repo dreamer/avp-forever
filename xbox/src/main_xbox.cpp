@@ -584,10 +584,9 @@ void _cdecl main()
 	TimeStampedMessage("After Menus");
 
 	/* Added 28/1/98 by DHM: hook for my code on program shutdown */
-	{
-		DAVEHOOK_UnInit();
-	}
-	TimeStampedMessage("After DAVEHOOK_UnInit");
+	DAVEHOOK_UnInit();
+
+	EmptyUserProfilesList();
 
 	/*-------------------Patrick 2/6/97-----------------------
 	End the sound system

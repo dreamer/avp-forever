@@ -3,7 +3,7 @@
 
 #include "TextureManager.h"
 
-extern BOOL mainMenu;
+extern bool mainMenu;
 
 #define MARINE_DEMO 0
 #define PREDATOR_DEMO 0
