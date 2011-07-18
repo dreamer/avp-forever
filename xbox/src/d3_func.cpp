@@ -178,14 +178,14 @@ bool ReleaseVolatileResources()
 {
 	Tex_ReleaseDynamicTextures();
 
-	d3d.particleVB->Release();
-	d3d.particleIB->Release();
+	SAFE_RELEASE(d3d.mainVB);
+	SAFE_RELEASE(d3d.mainIB);
 
-	d3d.mainVB->Release();
-	d3d.mainIB->Release();
+	SAFE_RELEASE(d3d.particleVB);
+	SAFE_RELEASE(d3d.particleIB);
 
-	d3d.orthoVB->Release();
-	d3d.orthoIB->Release();
+	SAFE_RELEASE(d3d.orthoVB);
+	SAFE_RELEASE(d3d.orthoIB);
 
 	return true;
 }
@@ -678,19 +678,19 @@ bool CreateVolatileResources()
 	d3d.mainIB = new IndexBuffer;
 	d3d.mainIB->Create((kMaxIndices*5) * 3, USAGE_STATIC);
 
-	// particle vertex buffer
-	d3d.particleVB = new VertexBuffer;
-	d3d.particleVB->Create(kMaxVertices*6, FVF_LVERTEX, USAGE_STATIC);
-
-	d3d.particleIB = new IndexBuffer;
-	d3d.particleIB->Create((kMaxIndices*6) * 3, USAGE_STATIC);
-
 	// orthographic projected quads
 	d3d.orthoVB = new VertexBuffer;
 	d3d.orthoVB->Create(kMaxVertices, FVF_ORTHO, USAGE_STATIC);
 
 	d3d.orthoIB = new IndexBuffer;
 	d3d.orthoIB->Create(kMaxIndices * 3, USAGE_STATIC);
+
+	// particle vertex buffer
+	d3d.particleVB = new VertexBuffer;
+	d3d.particleVB->Create(kMaxVertices*6, FVF_LVERTEX, USAGE_STATIC);
+
+	d3d.particleIB = new IndexBuffer;
+	d3d.particleIB->Create((kMaxIndices*6) * 3, USAGE_STATIC);
 
 	SetRenderStateDefaults();
 
@@ -1275,6 +1275,19 @@ bool R_SetVertexShader(r_VertexShader &vertexShader)
 	return true;
 }
 
+bool R_UnsetVertexShader()
+{
+	LastError = d3d.lpD3DDevice->SetVertexShader(NULL);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't set vertex shader to NULL");
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
 bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
 {
 	// notes: transpose matrixes
@@ -1370,6 +1383,19 @@ bool R_SetPixelShader(r_PixelShader &pixelShader)
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't set pixel shader " + pixelShader.shaderName);
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+bool R_UnsetPixelShader()
+{
+	LastError = d3d.lpD3DDevice->SetPixelShader(NULL);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't set pixel shader to NULL");
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}

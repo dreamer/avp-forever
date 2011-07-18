@@ -96,11 +96,13 @@ bool R_CreateVertexShader      (const std::string &fileName, r_VertexShader &ver
 bool R_SetVertexShader         (r_VertexShader &vertexShader);
 void R_ReleaseVertexShader     (r_VertexShader &vertexShader);
 bool R_SetVertexShaderConstant (r_VertexShader &vertexShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
+bool R_UnsetVertexShader();
 
 // pixel shader functions
 bool R_CreatePixelShader  (const std::string &fileName, r_PixelShader &pixelShader);
 bool R_SetPixelShader     (r_PixelShader &pixelShader);
 void R_ReleasePixelShader (r_PixelShader &pixelShader);
+bool R_UnsetPixelShader();
 
 void R_NextVideoMode();
 void R_PreviousVideoMode();

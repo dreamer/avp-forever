@@ -57,6 +57,8 @@ class VertexShaderPool
 			currentSetShaderID = kNullShaderID;
 		}
 
+		~VertexShaderPool();
+
 		std::vector<r_VertexShader> shaderList;
 
 		shaderID_t Add(r_VertexShader &newShader);
@@ -77,6 +79,8 @@ class PixelShaderPool
 		{
 			currentSetShaderID = kNullShaderID;
 		}
+
+		~PixelShaderPool();
 
 		std::vector<r_PixelShader> shaderList;
 

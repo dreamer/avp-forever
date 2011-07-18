@@ -124,10 +124,10 @@ texID_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32
 	Texture newTexture;
 	newTexture.name = textureName;
 	newTexture.texture = texture;
-	newTexture.width = width;
+	newTexture.width  = width;
 	newTexture.height = height;
 	newTexture.bitsPerPixel = bitsPerPixel;
-	newTexture.usage = usage;
+	newTexture.usage   = usage;
 	newTexture.isValid = true;
 
 /*
@@ -482,4 +482,11 @@ void Tex_DeInit()
 		Tex_Release(i);
 		textureList[i].isValid = false;
 	}
+
+	// special case releases
+	R_ReleaseTexture(textureList[MISSING_TEXTURE]);
+	R_UnsetTexture(MISSING_TEXTURE);
+
+	R_ReleaseTexture(textureList[NO_TEXTURE]);
+	R_UnsetTexture(NO_TEXTURE);
 }

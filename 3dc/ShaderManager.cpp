@@ -27,6 +27,11 @@
 #include "console.h"
 #include <sstream>
 
+VertexShaderPool::~VertexShaderPool()
+{
+	R_UnsetVertexShader();
+}
+
 // add an already created vertexShader_t struct to our pool.
 shaderID_t VertexShaderPool::Add(r_VertexShader &newShader)
 {
@@ -107,6 +112,10 @@ bool VertexShaderPool::SetVertexShaderConstant(shaderID_t shaderID, uint32_t reg
 	return R_SetVertexShaderConstant(shaderList[shaderID], registerIndex, type, constantData);
 }
 
+PixelShaderPool::~PixelShaderPool()
+{
+	R_UnsetPixelShader();
+}
 
 // add an already created pixelShader_t struct to our pool.
 shaderID_t PixelShaderPool::Add(r_PixelShader &newShader)

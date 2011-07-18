@@ -187,14 +187,14 @@ bool ReleaseVolatileResources()
 {
 	Tex_ReleaseDynamicTextures();
 
-	if (d3d.particleVB) d3d.particleVB->Release();
-	if (d3d.particleIB) d3d.particleIB->Release();
+	SAFE_RELEASE(d3d.mainVB);
+	SAFE_RELEASE(d3d.mainIB);
 
-	if (d3d.mainVB) d3d.mainVB->Release();
-	if (d3d.mainIB) d3d.mainIB->Release();
+	SAFE_RELEASE(d3d.particleVB);
+	SAFE_RELEASE(d3d.particleIB);
 
-	if (d3d.orthoVB) d3d.orthoVB->Release();
-	if (d3d.orthoIB) d3d.orthoIB->Release();
+	SAFE_RELEASE(d3d.orthoVB);
+	SAFE_RELEASE(d3d.orthoIB);
 
 	return true;
 }
@@ -692,6 +692,13 @@ bool CreateVolatileResources()
 	d3d.mainIB = new IndexBuffer;
 	d3d.mainIB->Create((kMaxIndices*5) * 3, USAGE_DYNAMIC);
 
+	// orthographic projected quads
+	d3d.orthoVB = new VertexBuffer;
+	d3d.orthoVB->Create(kMaxVertices, FVF_ORTHO, USAGE_DYNAMIC);
+
+	d3d.orthoIB = new IndexBuffer;
+	d3d.orthoIB->Create(kMaxIndices * 3, USAGE_DYNAMIC);
+
 	// particle vertex buffer
 	d3d.particleVB = new VertexBuffer;
 	d3d.particleVB->Create(kMaxVertices*6, FVF_LVERTEX, USAGE_DYNAMIC);
@@ -699,20 +706,6 @@ bool CreateVolatileResources()
 	d3d.particleIB = new IndexBuffer;
 	d3d.particleIB->Create((kMaxIndices*6) * 3, USAGE_DYNAMIC);
 
-	// orthographic projected quads
-	d3d.orthoVB = new VertexBuffer;
-	d3d.orthoVB->Create(kMaxVertices, FVF_ORTHO, USAGE_DYNAMIC);
-
-	d3d.orthoIB = new IndexBuffer;
-	d3d.orthoIB->Create(kMaxIndices * 3, USAGE_DYNAMIC);
-/*
-	// sky test
-	d3d.skyVB = new VertexBuffer;
-	d3d.skyVB->Create(kMaxVertices, FVF_LVERTEX, USAGE_STATIC);
-
-	d3d.skyIB = new IndexBuffer;
-	d3d.skyIB->Create(kMaxIndices * 3, USAGE_STATIC);
-*/
 	SetRenderStateDefaults();
 
 	// going to clear texture stages too
@@ -1419,6 +1412,19 @@ bool R_SetVertexShader(r_VertexShader &vertexShader)
 	return true;
 }
 
+bool R_UnsetVertexShader()
+{
+	LastError = d3d.lpD3DDevice->SetVertexShader(NULL);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't set vertex shader to NULL");
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
 bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
 {
 	uint32_t sizeInBytes = 0;
@@ -1468,6 +1474,19 @@ bool R_SetPixelShader(r_PixelShader &pixelShader)
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't set pixel shader " + pixelShader.shaderName);
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+}
+
+bool R_UnsetPixelShader()
+{
+	LastError = d3d.lpD3DDevice->SetPixelShader(NULL);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't set pixel shader to NULL");
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
@@ -2496,9 +2515,9 @@ bool InitialiseDirect3D()
 //	d3d.skyEffect = d3d.effectSystem->Add("sky", "sky.vsh", "sky.psh", d3d.mainDecl);
 
 	// we should bail out if the shaders can't be loaded
-	if ((d3d.mainEffect == kNullShaderID) ||
+	if ((d3d.mainEffect  == kNullShaderID) ||
 		(d3d.orthoEffect == kNullShaderID) ||
-		(d3d.fmvEffect == kNullShaderID) || // make this optional?
+		(d3d.fmvEffect   == kNullShaderID) || // make this optional?
 		(d3d.cloudEffect == kNullShaderID)) // make this optional?
 	{
 		return false;
@@ -2576,8 +2595,11 @@ void ReleaseDirect3D()
 	ReleaseVolatileResources();
 
 	// static buffers
-	if (d3d.starsVB) d3d.starsVB->Release();
-	if (d3d.starsIB) d3d.starsIB->Release();
+	SAFE_RELEASE(d3d.starsVB);
+	SAFE_RELEASE(d3d.starsIB);
+
+	SAFE_RELEASE(d3d.skyVB);
+	SAFE_RELEASE(d3d.skyIB);
 
 	// release vertex declarations
 	delete d3d.mainDecl;
