@@ -4,8 +4,6 @@
 #include <stdint.h>
 #include "assert.h"
 #include <process.h>
-#define restrict
-#include <emmintrin.h>
 #include <math.h>
 #include "logString.h"
 
@@ -22,7 +20,12 @@ static const int kAudioBufferCount = 3;
 
 static const int kQuantum = 1000 / 60;
 
-#define VANILLA
+// #define USE_MMX
+
+#ifdef USE_MMX
+#define restrict
+#include <emmintrin.h>
+#endif
 
 unsigned int __stdcall decodeThread(void *args);
 unsigned int __stdcall audioThread(void *args);
@@ -38,22 +41,22 @@ inline int CLAMP(int value)
 
 /* structure holds pointers to y, u, v channels */
 typedef struct _OggPlayYUVChannels {
-    unsigned char * ptry;
-    unsigned char * ptru;
-    unsigned char * ptrv;
-    int             y_width;
-    int             y_height;
+	unsigned char * ptry;
+	unsigned char * ptru;
+	unsigned char * ptrv;
+	int				y_width;
+	int				y_height;
 	int				y_pitch;
-    int             uv_width;
-    int             uv_height;
+	int				uv_width;
+	int				uv_height;
 	int				uv_pitch;
 } OggPlayYUVChannels;
 
 /* structure holds pointers to y, u, v channels */
 typedef struct _OggPlayRGBChannels {
-    unsigned char * ptro;
-    int             rgb_width;
-    int             rgb_height;
+	unsigned char * ptro;
+	int				rgb_width;
+	int				rgb_height;
 	int				rgb_pitch;
 } OggPlayRGBChannels;
 
@@ -62,9 +65,9 @@ void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb);
 class TheoraDecode
 {
 	public:
-		th_info 		mInfo;
-		th_comment 		mComment;
-		th_setup_info 	*mSetupInfo;
+		th_info		mInfo;
+		th_comment		mComment;
+		th_setup_info	*mSetupInfo;
 		th_dec_ctx		*mDecodeContext;
 
 		TheoraDecode() :
@@ -85,10 +88,10 @@ class TheoraDecode
 class VorbisDecode
 {
 	public:
-		vorbis_info 		mInfo;
-		vorbis_comment 		mComment;
-		vorbis_dsp_state 	mDspState;
-		vorbis_block 		mBlock;
+		vorbis_info			mInfo;
+		vorbis_comment		mComment;
+		vorbis_dsp_state	mDspState;
+		vorbis_block		mBlock;
 
 		VorbisDecode()
 		{
@@ -102,7 +105,7 @@ class VorbisDecode
 class OggStream
 {
 	public:
-		int 				mSerialNumber;
+		int					mSerialNumber;
 		ogg_stream_state	mStreamState;
 		bool				mHeadersRead;
 		bool				mActive;
@@ -125,9 +128,8 @@ class OggStream
 
 TheoraFMV::~TheoraFMV()
 {
-	if (mFmvPlaying)
-		mFmvPlaying = false;
-		
+	mFmvPlaying = false;
+
 	// wait for decode thread to finish
 	if (mDecodeThreadHandle)
 	{
@@ -151,6 +153,12 @@ TheoraFMV::~TheoraFMV()
 	}
 
 	ogg_sync_clear(&mState);
+
+	// clear stream map
+	for (streamMap::iterator it = mStreams.begin(); it != mStreams.end(); ++it)
+	{
+		delete it->second;
+	}
 
 	for (uint32_t i = 0; i < frameTextureIDs.size(); i++)
 	{
@@ -351,7 +359,7 @@ bool TheoraFMV::HandleTheoraHeader(OggStream* stream, ogg_packet* packet)
 	if (ret == TH_ENOTFORMAT)
 		return false; // Not a theora header
 
-	if (ret > 0) 
+	if (ret > 0)
 	{
 		// This is a theora header packet
 		stream->mType = TYPE_THEORA;
@@ -361,43 +369,43 @@ bool TheoraFMV::HandleTheoraHeader(OggStream* stream, ogg_packet* packet)
 	// Any other return value is treated as a fatal error
 	assert(ret == 0);
 
-	// This is not a header packet. It is the first 
+	// This is not a header packet. It is the first
 	// video data packet.
 	return true;
 }
 
-bool TheoraFMV::HandleSkeletonHeader(OggStream* stream, ogg_packet* packet) 
+bool TheoraFMV::HandleSkeletonHeader(OggStream* stream, ogg_packet* packet)
 {
 	// Is it a "fishead" skeleton identifier packet?
-	if (packet->bytes > 8 && memcmp(packet->packet, "fishead", 8) == 0) 
+	if (packet->bytes > 8 && memcmp(packet->packet, "fishead", 8) == 0)
 	{
 		stream->mType = TYPE_SKELETON;
 		return false;
 	}
-  
+
 	if (stream->mType != TYPE_SKELETON) 
 	{
 		// The first packet must be the skeleton identifier.
 		return false;
 	}
-  
+
 	// "fisbone" stream info packet?
 	if (packet->bytes >= 8 && memcmp(packet->packet, "fisbone", 8) == 0) 
 	{
 		return false;
 	}
-  
+
 	// "index" keyframe index packet?
 	if (packet->bytes > 6 && memcmp(packet->packet, "index", 6) == 0) 
 	{
 		return false;
 	}
-  
+
 	if (packet->e_o_s) 
 	{
 		return false;
 	}
-  
+
 	// Shouldn't actually get here.
 	return true;
 }
@@ -412,12 +420,12 @@ bool TheoraFMV::HandleVorbisHeader(OggStream* stream, ogg_packet* packet)
 	// indicate that we've finished loading the headers and got the
 	// first data packet. To detect this I check if I already know the
 	// stream type and if the vorbis_synthesis_headerin call failed.
-	if (stream->mType == TYPE_VORBIS && ret == OV_ENOTVORBIS) 
+	if (stream->mType == TYPE_VORBIS && ret == OV_ENOTVORBIS)
 	{
 		// First data packet
 		return true;
 	}
-	else if (ret == 0) 
+	else if (ret == 0)
 	{
 		stream->mType = TYPE_VORBIS;
 	}
@@ -523,7 +531,7 @@ ogg_int64_t TheoraFMV::ReadPage(ogg_page *page)
 	// if end of file, keep processing any remaining buffered pages
 	if (!mFileStream.good())
 	{
-		if (ogg_sync_pageout(&mState, page) == 1) 
+		if (ogg_sync_pageout(&mState, page) == 1)
 		{
 			offset = mPageOffset;
 			mPageOffset += page->header_len + page->body_len;
@@ -539,7 +547,7 @@ ogg_int64_t TheoraFMV::ReadPage(ogg_page *page)
 				mPageOffset = mDataOffset;
 				ogg_sync_reset(&mState);
 			}
-			else 
+			else
 			{
 				return -1;
 			}
@@ -590,7 +598,7 @@ bool TheoraFMV::ReadPacket(OggStream *stream, ogg_packet *packet)
 		{
 			ret = ogg_stream_pagein(&pageStream->mStreamState, &page);
 			assert(ret == 0);
-    	}
+		}
 	}
 	return true;
 }
@@ -644,13 +652,13 @@ void TheoraFMV::ReadHeaders()
 			headersDone = headersDone || HandleTheoraHeader(stream, &packet);
 			headersDone = headersDone || HandleVorbisHeader(stream, &packet);
 			headersDone = headersDone || HandleSkeletonHeader(stream, &packet);
-			if (!headersDone) 
+			if (!headersDone)
 			{
 				// Consume the packet
 				ret = ogg_stream_packetout(&stream->mStreamState, &packet);
 				assert(ret == 1);
-			} 
-			else 
+			}
+			else
 			{
 				// First non-header page. Remember its location, so we can seek
 				// to time 0.
@@ -690,8 +698,8 @@ unsigned int __stdcall decodeThread(void *args)
 
 	ogg_packet packet;
 	int ret = 0;
-    float** pcm = 0;
-    int samples = 0;
+	float** pcm = 0;
+	int samples = 0;
 
 	// this is the loop we run if our video has no audio (time to fps)
 	if (!fmv->mAudio)
@@ -899,7 +907,7 @@ unsigned int __stdcall audioThread(void *args)
 /* Vanilla implementation if YUV->RGB conversion */
 void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb)
 {
-#ifdef VANILLA
+#ifndef USE_MMX
 	unsigned char * ptry = yuv->ptry;
 	unsigned char * ptru = yuv->ptru;
 	unsigned char * ptrv = yuv->ptrv;
@@ -950,16 +958,16 @@ void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb)
 		ptro += rgb->rgb_pitch;
 	}
 #else // mmx
-	int               i;
-	unsigned char   * restrict ptry;
-	unsigned char   * restrict ptru;
-	unsigned char   * restrict ptrv;
-	unsigned char   * ptro;
+	int				i;
+	unsigned char	* restrict ptry;
+	unsigned char	* restrict ptru;
+	unsigned char	* restrict ptrv;
+	unsigned char	* ptro;
 
-	register __m64    *y, *o;
-	register __m64    zero, ut, vt, imm, imm2;
-	register __m64    r, g, b;
-	register __m64    tmp, tmp2;
+	register __m64		*y, *o;
+	register __m64		zero, ut, vt, imm, imm2;
+	register __m64		r, g, b;
+	register __m64		tmp, tmp2;
 
 	zero = _mm_setzero_si64();
 
