@@ -671,7 +671,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 	}
 }
 
-//#include "RimLoader.h"
+// #include "RimLoader.h"
 
 texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 {
@@ -683,7 +683,11 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 	// test RIM loading..
 #if 0
 	RimLoader newRim;
-	if (newRim.Init(pszFileName))
+	std::string fileName;
+	fileName += "graphics/";
+	fileName += (pszFileName);
+
+	if (newRim.Init(fileName))
 	{
 		uint32_t width, height;
 		newRim.GetDimensions(width, height);
@@ -799,8 +803,11 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 							textureID = Tex_CreateFromAvPTexture(ImageName, *AvPTexture, textureUsage);
 
 							// free this, as d3d now holds the texture
-							free(AvPTexture->buffer);
+							delete[] AvPTexture->buffer;
 							AvPTexture->buffer = NULL;
+
+							delete AvPTexture;
+							AvPTexture = NULL;
 						}
 						else OutputDebugString("pTexture->buf was Null!");
 					}
@@ -859,8 +866,11 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 							textureID = Tex_CreateFromAvPTexture(ImageName, *AvPTexture, textureUsage);
 
 							// free this, as d3d now holds the texture
-							free(AvPTexture->buffer);
+							delete[] AvPTexture->buffer;
 							AvPTexture->buffer = NULL;
+
+							delete AvPTexture;
+							AvPTexture = NULL;
 						}
 						else 
 						{
