@@ -5,13 +5,10 @@
 #include "gamedef.h"
 #include "bh_types.h"
 #include "pldnet.h"
-
 #include "AvP_MP_Config.h"
 #include "AvP_Envinfo.h"
-
 #include "AvP_Menus.h"
 #include "list_tem.hpp"
-
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 
@@ -591,6 +588,15 @@ char** MultiplayerLevelNames = 0;
 char** CoopLevelNames = 0;
 
 List<char*> CustomLevelNameList;
+
+void ClearMultiplayerLevelNameArray()
+{
+	for (int i = 0; i < CustomLevelNameList.size(); i++)
+	{
+		delete[] CustomLevelNameList.first_entry();
+		CustomLevelNameList.delete_first_entry();
+	}
+}
 
 void BuildMultiplayerLevelNameArray()
 {

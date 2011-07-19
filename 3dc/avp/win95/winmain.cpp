@@ -36,6 +36,7 @@
 #include "networking.h"
 #include "avpview.h"
 #include "renderer.h"
+#include "AvP_MP_Config.h"
 
 #if debug
 #define MainTextPrint 1
@@ -627,6 +628,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	DAVEHOOK_UnInit();
 
 	EmptyUserProfilesList();
+	ClearMultiplayerLevelNameArray();
 
 	/*-------------------Patrick 2/6/97-----------------------
 	End the sound system
@@ -638,20 +640,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	#else
 //	QuickSplashScreens();
 	#endif
-	#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
 
 	ExitSystem();
-
-	#else
-	SoundSys_End();
-	ReleaseDirect3D();
-	//TimeStampedMessage("after ReleaseDirect3D");
-
-	/* Kill windows procedures */
-//	ExitWindowsSystem();
-	//TimeStampedMessage("after ExitWindowsSystem");
-
-	#endif
 
 	Config_Save();
 

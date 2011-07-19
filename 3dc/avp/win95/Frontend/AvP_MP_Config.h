@@ -27,6 +27,7 @@ extern char** MultiplayerLevelNames;
 extern char** CoopLevelNames;
 
 extern void BuildMultiplayerLevelNameArray();
+void ClearMultiplayerLevelNameArray();
 
 //returns local index of a custom level (if it is a custom level)
 int GetCustomMultiplayerLevelIndex(char* name,int gameType);

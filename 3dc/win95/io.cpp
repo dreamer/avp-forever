@@ -10,6 +10,7 @@
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "hud_layout.h"
+#include "PSND.H"
 
 #undef textprint
 
@@ -50,6 +51,8 @@ extern IMAGEHEADER ImageHeaderArray[]; /* Array of Image Headers */
 
 void InitialiseRawInput();
 
+extern void ConstructOneOverSinTable(void);
+
 /*
 
  Global Variables for PC Watcom Functions
@@ -57,71 +60,60 @@ void InitialiseRawInput();
 
 */
 	
-	/* Timer */
-	long lastTickCount;
+/* Timer */
+long lastTickCount;
 
-	int VideoMode;
-	int VideoModeType;
-	int VideoModeTypeScreen;
-	int FrameRate;
+int VideoMode;
+int VideoModeType;
+int VideoModeTypeScreen;
+int FrameRate;
 
-	int WindowMode;
+int WindowMode;
 
-	int NormalFrameTime;
-	int PrevNormalFrameTime;
-	int CloakingPhase;
+int NormalFrameTime;
+int PrevNormalFrameTime;
+int CloakingPhase;
 
-	unsigned char *TextureLightingTable = 0;
-	
-	/* KJL 11:48:45 28/01/98 - used to scale NormalFrameTime, so the game can be slowed down */
-	int TimeScale = 65536;
+unsigned char *TextureLightingTable = 0;
 
-	/* KJL 16:00:11 28/01/98 - unscaled frame time */
-	int RealFrameTime;
+/* KJL 11:48:45 28/01/98 - used to scale NormalFrameTime, so the game can be slowed down */
+int TimeScale = 65536;
 
-	/* Keyboard */
-	unsigned char KeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
+/* KJL 16:00:11 28/01/98 - unscaled frame time */
+int RealFrameTime;
 
-	/* KJL 15:08:43 29/03/98 - added to give extra flexibility to debugging text */
-	int PrintDebuggingText(const char* t, ...);
-	int ReleasePrintDebuggingText(const char* t, ...);
+/* Keyboard */
+unsigned char KeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
 
-	int GlobalFrameCounter;
-	int RouteFinder_CallsThisFrame;
+/* KJL 15:08:43 29/03/98 - added to give extra flexibility to debugging text */
+int PrintDebuggingText(const char* t, ...);
+int ReleasePrintDebuggingText(const char* t, ...);
 
-	static VIEWDESCRIPTORBLOCK* vdb_tmp;
-	static SCREENDESCRIPTORBLOCK* sdb_tmp;
+int GlobalFrameCounter;
+int RouteFinder_CallsThisFrame;
 
-	bool GotAnyKey;
+static VIEWDESCRIPTORBLOCK* vdb_tmp;
+static SCREENDESCRIPTORBLOCK* sdb_tmp;
 
-    /* Input communication with Windows Procedure */
-    /* Print system */
+bool GotAnyKey = false;
+
+/* Input communication with Windows Procedure */
+/* Print system */
 
 #if !DHMtextprint
     PRINTQUEUEITEM PrintQueue[MaxMessages];
 	int MessagesStoredThisFrame;
 #endif
 
-	int textprintPosX;
-	int textprintPosY;
-	IMAGEHEADER* fontHeader;
+int textprintPosX;
+int textprintPosY;
+IMAGEHEADER* fontHeader;
 
-	/* Added 28/11/97 by DHM: boolean for run-time switching on/off of textprint */
-	int bEnableTextprint = FALSE;
+/* Added 28/11/97 by DHM: boolean for run-time switching on/off of textprint */
+int bEnableTextprint = FALSE;
 
-	/* Added 28/1/98 by DHM: as above, but applies specifically to textprintXY */
-	int bEnableTextprintXY = TRUE;
-
-/* Test Palette */
-
-//unsigned char TestPalette[768];
-
-/*
-
- IO and Other Functions for the PC
-
-*/
-
+/* Added 28/1/98 by DHM: as above, but applies specifically to textprintXY */
+int bEnableTextprintXY = TRUE;
 
 /*
 
@@ -168,178 +160,6 @@ void PlatformSpecificShowViewExit(VIEWDESCRIPTORBLOCK *vdb, SCREENDESCRIPTORBLOC
 	sdb_tmp = sdb;
 }
 
-
-/*
-
- Convert UNIX to MS-DOS
-
-*/
-
-void GetDOSFilename(char *fnameptr)
-{
-	while(*fnameptr) 
-	{
-		if(*fnameptr == 0x2f) *fnameptr = 0x5c;
-		fnameptr++;
-	}
-}
-
-
-/*
-
- Compare two strings.
-
- Return TRUE if they're the same, else FALSE.
-
-*/
-
-/*
-	       IMPORTANT!!!
-	This function is not ideal!!! It is used
-	here because this is only an initialisation
-	stage, but if you want to compare strings
-	elsewhere you should either use the C library
-	function or (if there's a problem with that)
-	write your own.
-*/
-
-int CompareStringCH(char *string1, char *string2)
-{
-	char *srtmp;
-	char *srtmp2;
-	int slen1 = 0;
-	int slen2 = 0;
-	int i;
-
-
-	srtmp = string1;
-
-	while(*srtmp++ != 0)
-		slen1++;
-
-	srtmp = string2;
-
-	while(*srtmp++ != 0)
-		slen2++;
-
-	if(slen1 != slen2) return FALSE;
-
-	else 
-	{
-		srtmp = string1;
-		srtmp2 = string2;
-
-		for(i=slen1; i!=0; i--)
-			if(*srtmp++ != *srtmp2++) return FALSE;
-
-		return TRUE;
-	}
-}
-
-
-/*
-
- Compare two filenames.
-
- The first filename is assumed to be raw i.e. has no project subdirectory appended.
- The second is assumed to be ready for use.
-
- Make a copy of both strings, prefix the copy of the first with the project subdirectory
- and convert them to DOS format before the comparison.
-
-*/
-
-int CompareFilenameCH(char *string1, char *string2)
-
-{
-
-	char *srtmp1;
-	char *srtmp2;
-	int slen1 = 0;
-	int slen2 = 0;
-	int i;
-	char fname1[ImageNameSize];
-	char fname2[ImageNameSize];
-
-
-	#if 0
-	textprint(" Compare "); textprint(string1); textprint("\n");
-	textprint(" with    "); textprint(string2); textprint("\n");
-	/*WaitForReturn();*/
-	#endif
-
-
-	/* Make a copy of string 1, adding the project subdirectory */
-
-	srtmp1 = projectsubdirectory;
-	srtmp2 = fname1;
-	while(*srtmp1) *srtmp2++ = *srtmp1++;
-	srtmp1 = string1;
-	while(*srtmp1) *srtmp2++ = *srtmp1++;
-	*srtmp2 = 0;
-
-	/* Make a copy of string 2 */
-
-	srtmp1 = string2;
-	srtmp2 = fname2;
-	while(*srtmp1) *srtmp2++ = *srtmp1++;
-	*srtmp2 = 0;
-
-	/* How long are they? */
-
-	srtmp1 = fname1;
-	while(*srtmp1++ != 0)
-		slen1++;
-
-	srtmp2 = fname2;
-	while(*srtmp2++ != 0)
-		slen2++;
-
-	fname1[slen1] = 0;	/* Term */
-	fname2[slen2] = 0;
-
-	#if 0
-	textprint("slen1 = %d, ", slen1);
-	textprint("slen2 = %d\n", slen2);
-	#endif
-
-	#if 0
-	textprint(" Compare "); textprint(fname1); textprint("\n");
-	textprint(" with    "); textprint(fname2); textprint("\n");
-	/*WaitForReturn();*/
-	#endif
-
-
-	GetDOSFilename(fname1);
-	GetDOSFilename(fname2);
-
-
-	if(slen1 != slen2) {
-		/*textprint("not same\n");*/
-		return FALSE;
-	}
-
-	srtmp1 = fname1;
-	srtmp2 = fname2;
-
-	#if 0
-	textprint(" Compare "); textprint(srtmp1); textprint("\n");
-	textprint(" with    "); textprint(srtmp2); textprint("\n");
-	WaitForReturn();
-	#endif
-
-	for(i = slen1; i!=0; i--) {
-		if(*srtmp1++ != *srtmp2++) {
-			/*textprint("not same\n");*/
-			return FALSE;
-		}
-	}
-
-	/*textprint("same\n");*/
-	return TRUE;
-
-}
-
 /*
 
  Initialise System and System Variables
@@ -348,46 +168,42 @@ int CompareFilenameCH(char *string1, char *string2)
 
 void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 {
-	BOOL	rc;
+	BOOL rc;
 
-    /*
+	/*
 		Copy initial requests to current variables,
 		subject to later modification.
 	*/
 
-    VideoMode = VideoRequestMode;
+	VideoMode = VideoRequestMode;
 	WindowMode = WindowRequestMode;
 
     /* Initialise main window, windows procedure etc */
 	rc = InitialiseWindowsSystem(hInstance, nCmdShow, WinInitFull);
 
     /* Initialise input interface */
-    memset((void*)KeyboardInput, FALSE, MAX_NUMBER_OF_INPUT_KEYS);
+	memset((void*)KeyboardInput, FALSE, MAX_NUMBER_OF_INPUT_KEYS);
 	GotAnyKey = false;
 
 #ifdef WIN32
-	/* init raw input for mouse */
+    /* init raw input for mouse */
 	InitialiseRawInput();
 #endif
 
-	/* launch Direct Input */
+    /* launch Direct Input */
 	InitialiseDirectInput();
 	InitialiseDirectKeyboard();
 	InitialiseDirectMouse();
 	InitJoysticks();
 
     /* Initialise textprint system */
-    textprintPosX = 0;
+	textprintPosX = 0;
 	textprintPosY = 0;
 	#if debug
 	InitPrintQueue();
 	#endif
 
-	{
-		/* CDF 4/2/97 */
-		extern void ConstructOneOverSinTable(void);
-		ConstructOneOverSinTable();
-	}
+	ConstructOneOverSinTable();
 }
 
 
@@ -402,19 +218,8 @@ void ExitSystem(void)
 	/* Game specific exit functions */
 	ExitGame();
 
-	// Added by Mark so that Direct Sound exits cleanly
-	#if SOUND_ON
-	ExitSoundSystem();	// In ds_func.cpp
-	#endif
-
-    /* 
-      Shaft DirectDraw and hit Direct3D 
-      with a blunt Bill.
-	  Note that ReleaseDirect3D is currently
-	  responsible for whacking DirectDraw
-	  and DirectInput as well; I should probably
-	  rename it ReleaseDirectX sometime...
-    */
+	// close sound system
+	SoundSys_End();
 
 	/* should be taken care of with WM_DESTROY ?*/
 	ReleaseDirect3D();

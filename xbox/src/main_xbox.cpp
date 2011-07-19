@@ -40,6 +40,7 @@
 #include "networking.h"
 #include "avpview.h"
 #include "renderer.h"
+#include "AvP_MP_Config.h"
 
 #if debug
 #define MainTextPrint 1
@@ -587,6 +588,7 @@ void _cdecl main()
 	DAVEHOOK_UnInit();
 
 	EmptyUserProfilesList();
+	ClearMultiplayerLevelNameArray();
 
 	/*-------------------Patrick 2/6/97-----------------------
 	End the sound system
@@ -597,17 +599,11 @@ void _cdecl main()
 	#else
 	QuickSplashScreens();
 	#endif
-	#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
 
 	ExitSystem();
 
 	Config_Save();
 
-	#else
-	SoundSys_End();
-	ReleaseDirect3D();
-
-	#endif
  	CDDA_End();
 	ClearMemoryPool();
 
