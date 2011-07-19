@@ -187,14 +187,14 @@ bool ReleaseVolatileResources()
 {
 	Tex_ReleaseDynamicTextures();
 
-	SAFE_RELEASE(d3d.mainVB);
-	SAFE_RELEASE(d3d.mainIB);
+	SAFE_DELETE(d3d.mainVB);
+	SAFE_DELETE(d3d.mainIB);
 
-	SAFE_RELEASE(d3d.particleVB);
-	SAFE_RELEASE(d3d.particleIB);
+	SAFE_DELETE(d3d.particleVB);
+	SAFE_DELETE(d3d.particleIB);
 
-	SAFE_RELEASE(d3d.orthoVB);
-	SAFE_RELEASE(d3d.orthoIB);
+	SAFE_DELETE(d3d.orthoVB);
+	SAFE_DELETE(d3d.orthoIB);
 
 	return true;
 }
@@ -2595,11 +2595,11 @@ void ReleaseDirect3D()
 	ReleaseVolatileResources();
 
 	// static buffers
-	SAFE_RELEASE(d3d.starsVB);
-	SAFE_RELEASE(d3d.starsIB);
+	SAFE_DELETE(d3d.starsVB);
+	SAFE_DELETE(d3d.starsIB);
 
-	SAFE_RELEASE(d3d.skyVB);
-	SAFE_RELEASE(d3d.skyIB);
+	SAFE_DELETE(d3d.skyVB);
+	SAFE_DELETE(d3d.skyIB);
 
 	// release vertex declarations
 	delete d3d.mainDecl;

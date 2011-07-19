@@ -167,14 +167,14 @@ typedef struct D3DInfo
 	D3DPRESENT_PARAMETERS	d3dpp;
 
 	// vertex and index buffers
-	class VertexBuffer		*particleVB;
-	class IndexBuffer		*particleIB;
-
 	class VertexBuffer		*mainVB;
 	class IndexBuffer		*mainIB;
 
 	class VertexBuffer		*orthoVB;
 	class IndexBuffer		*orthoIB;
+
+	class VertexBuffer		*particleVB;
+	class IndexBuffer		*particleIB;
 
 	class VertexBuffer		*starsVB;
 	class IndexBuffer		*starsIB;
@@ -228,6 +228,7 @@ extern texID_t MISSING_TEXTURE;
 
 #define RGB_MAKE	D3DCOLOR_XRGB
 
+#define SAFE_DELETE(p) { delete (p); (p) = 0; }
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 
 #endif /* ! _included_d3_func_h_ */

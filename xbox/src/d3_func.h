@@ -193,6 +193,7 @@ extern texID_t MISSING_TEXTURE;
 
 #define RGB_MAKE	D3DCOLOR_XRGB
 
+#define SAFE_DELETE(p) { delete (p); (p) = 0; }
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 
 #endif /* ! _included_d3_func_h_ */

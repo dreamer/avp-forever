@@ -178,14 +178,14 @@ bool ReleaseVolatileResources()
 {
 	Tex_ReleaseDynamicTextures();
 
-	SAFE_RELEASE(d3d.mainVB);
-	SAFE_RELEASE(d3d.mainIB);
+	SAFE_DELETE(d3d.mainVB);
+	SAFE_DELETE(d3d.mainIB);
 
-	SAFE_RELEASE(d3d.particleVB);
-	SAFE_RELEASE(d3d.particleIB);
+	SAFE_DELETE(d3d.particleVB);
+	SAFE_DELETE(d3d.particleIB);
 
-	SAFE_RELEASE(d3d.orthoVB);
-	SAFE_RELEASE(d3d.orthoIB);
+	SAFE_DELETE(d3d.orthoVB);
+	SAFE_DELETE(d3d.orthoIB);
 
 	return true;
 }
