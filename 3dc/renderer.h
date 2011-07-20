@@ -102,6 +102,7 @@ bool R_UnsetVertexShader();
 bool R_CreatePixelShader  (const std::string &fileName, r_PixelShader &pixelShader);
 bool R_SetPixelShader     (r_PixelShader &pixelShader);
 void R_ReleasePixelShader (r_PixelShader &pixelShader);
+bool R_SetPixelShaderConstant (r_PixelShader &pixelShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
 bool R_UnsetPixelShader();
 
 void R_NextVideoMode();

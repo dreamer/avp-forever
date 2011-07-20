@@ -50,7 +50,7 @@ class VertexShaderPool
 {
 	private:
 		shaderID_t currentSetShaderID;
-		
+
 	public:
 		VertexShaderPool()
 		{
@@ -89,6 +89,7 @@ class PixelShaderPool
 		shaderID_t GetShaderByName(const std::string &shaderName);
 		void Remove(shaderID_t shaderID);
 		void AddRef(shaderID_t shaderID) { shaderList[shaderID].refCount++; }
+		bool SetPixelShaderConstant(shaderID_t shaderID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
 };
 
 struct effect_t
@@ -104,13 +105,14 @@ class EffectManager
 	private:
 		std::vector<effect_t> effectList;
 		VertexShaderPool vsPool;
-		PixelShaderPool	 psPool;
+		PixelShaderPool  psPool;
 
 	public:
 		EffectManager();
 		~EffectManager();
 		bool SetActive(effectID_t effectID);
 		bool SetVertexShaderConstant(effectID_t effectID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
+		bool SetPixelShaderConstant(effectID_t effectID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
 		effectID_t Add(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName, class VertexDeclaration *vertexDeclaration);
 		void Remove(effectID_t effectID);
 };

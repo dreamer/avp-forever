@@ -1294,25 +1294,37 @@ bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexSha
 	pCode->Release();
 
 	// now find out how many constant registers our shader uses
-	D3DXCONSTANTTABLE_DESC constantDesc;
-	vertexShader.constantTable->GetDesc(&constantDesc);
-
-//	LogErrorString(actualPath + " has " + IntToString(constantDesc.Constants));
+	D3DXCONSTANTTABLE_DESC constantTableDesc;
+	LastError = vertexShader.constantTable->GetDesc(&constantTableDesc);
+	if (FAILED(LastError))
+	{
+		LogErrorString("CreateVertexShader failed getting constant table description for " + actualPath, __LINE__, __FILE__);
+		return false;
+	}
 
 	// we're going to store handles to each register in our std::vector so make it the right size
-	vertexShader.constantsArray.resize(constantDesc.Constants);
+	vertexShader.constantsArray.resize(constantTableDesc.Constants);
 
-	D3DXCONSTANT_DESC desc2;
-	uint32_t size = 1;
+	std::stringstream message;
+	message << "Processing constants for vertex shader '" << fileName << "' which has " << constantTableDesc.Constants << " constant(s)\n";
+	OutputDebugString(message.str().c_str());
+
+	D3DXCONSTANT_DESC constantDesc;
+
+	// we just want to get one constantDesc at a time
+	uint32_t constArraySize = 1;
 
     // loop, getting and storing a handle to each shader constant
-	for (uint32_t i = 0; i < constantDesc.Constants; i++)
+	for (uint32_t i = 0; i < constantTableDesc.Constants; i++)
 	{
 		vertexShader.constantsArray[i] = vertexShader.constantTable->GetConstant(NULL, i);
-		vertexShader.constantTable->GetConstantDesc(vertexShader.constantsArray[i], &desc2, &size);
-		char buf[1000];
-		sprintf(buf, "name: %s, Index: %d, regCount: %d\n", desc2.Name, desc2.RegisterIndex, desc2.RegisterCount);
-		OutputDebugString(buf);
+		vertexShader.constantTable->GetConstantDesc(vertexShader.constantsArray[i], &constantDesc, &constArraySize);
+
+		assert(constArraySize == 1);
+
+		std::stringstream constantInfo;
+		constantInfo << "\t Name: " << constantDesc.Name << ", Register Index: " << constantDesc.RegisterIndex << /*", Register Index: " << constantDesc.RegisterIndex <<*/ "\n";
+		OutputDebugString(constantInfo.str().c_str());
 	}
 
 	return true;
@@ -1377,23 +1389,37 @@ bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader
 	pCode->Release();
 
 	// now find out how many constant registers our shader uses
-	D3DXCONSTANTTABLE_DESC constantDesc;
-	pixelShader.constantTable->GetDesc(&constantDesc);
+	D3DXCONSTANTTABLE_DESC constantTableDesc;
+	pixelShader.constantTable->GetDesc(&constantTableDesc);
+	if (FAILED(LastError))
+	{
+		LogErrorString("CreatePixelShader failed getting constant table description for " + actualPath, __LINE__, __FILE__);
+		return false;
+	}
 
 	// we're going to store handles to each register in our std::vector so make it the right size
-	pixelShader.constantsArray.resize(constantDesc.Constants);
+	pixelShader.constantsArray.resize(constantTableDesc.Constants);
 
-	D3DXCONSTANT_DESC desc2;
-	uint32_t size = 1;
+	std::stringstream message;
+	message << "Processing constants for pixel shader '" << fileName << "' which has " << constantTableDesc.Constants << " constant(s)\n";
+	OutputDebugString(message.str().c_str());
+
+	D3DXCONSTANT_DESC constantDesc;
+
+	// we just want to get one constantDesc at a time
+	uint32_t constArraySize = 1;
 
 	// loop, getting and storing a handle to each shader constant
-	for (uint32_t i = 0; i < constantDesc.Constants; i++)
+	for (uint32_t i = 0; i < constantTableDesc.Constants; i++)
 	{
 		pixelShader.constantsArray[i] = pixelShader.constantTable->GetConstant(NULL, i);
-		pixelShader.constantTable->GetConstantDesc(pixelShader.constantsArray[i], &desc2, &size);
-		char buf[1000];
-		sprintf(buf, "name: %s, Index: %d, regCount: %d\n", desc2.Name, desc2.RegisterIndex, desc2.RegisterCount);
-		OutputDebugString(buf);
+		pixelShader.constantTable->GetConstantDesc(pixelShader.constantsArray[i], &constantDesc, &constArraySize);
+
+		assert(constArraySize == 1);
+
+		std::stringstream constantInfo;
+		constantInfo << "\t Name: " << constantDesc.Name << ", Register Index: " << constantDesc.RegisterIndex << /*", Register Index: " << constantDesc.RegisterIndex <<*/ "\n";
+		OutputDebugString(constantInfo.str().c_str());
 	}
 
 	return true;
@@ -1425,9 +1451,54 @@ bool R_UnsetVertexShader()
 	return true;
 }
 
+bool R_SetPixelShaderConstant(r_PixelShader &pixelShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
+{
+	uint32_t sizeInBytes = 0;
+
+	assert(registerIndex < pixelShader.constantsArray.size());
+
+	switch (type)
+	{
+		case CONST_INT:
+			sizeInBytes = 4; // sizeof(float);
+			break;
+
+		case CONST_FLOAT:
+			sizeInBytes = 4; // sizeof(float);
+			break;
+
+		case CONST_VECTOR3:
+			sizeInBytes = 12; // sizeof(float) * 3;
+			break;
+
+		case CONST_VECTOR4:
+			sizeInBytes = 16; // sizeof(float) * 4;
+			break;
+
+		case CONST_MATRIX:
+			sizeInBytes = 64; // sizeof(float) * 16;
+			break;
+
+		default:
+			LogErrorString("Unknown shader constant type");
+			return false;
+			break;
+	}
+
+	LastError = pixelShader.constantTable->SetValue(d3d.lpD3DDevice, pixelShader.constantsArray[registerIndex], constantData, sizeInBytes);
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't SetValue for pixel shader " + pixelShader.shaderName);
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+}
+
 bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
 {
 	uint32_t sizeInBytes = 0;
+
+	assert(registerIndex < vertexShader.constantsArray.size());
 
 	switch (type)
 	{

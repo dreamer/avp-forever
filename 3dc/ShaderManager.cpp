@@ -192,6 +192,11 @@ shaderID_t PixelShaderPool::GetShaderByName(const std::string &shaderName)
 	return kNullShaderID;
 }
 
+bool PixelShaderPool::SetPixelShaderConstant(shaderID_t shaderID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
+{
+	return R_SetPixelShaderConstant(shaderList[shaderID], registerIndex, type, constantData);
+}
+
 
 // Effect Manager
 EffectManager::EffectManager()
@@ -219,6 +224,11 @@ bool EffectManager::SetVertexShaderConstant(effectID_t effectID, uint32_t regist
 	return vsPool.SetVertexShaderConstant(effectList[effectID].vertexShaderID, registerIndex, type, constantData);
 }
 
+bool EffectManager::SetPixelShaderConstant(effectID_t effectID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
+{
+	return psPool.SetPixelShaderConstant(effectList[effectID].pixelShaderID, registerIndex, type, constantData);
+}
+
 void EffectManager::Remove(effectID_t effectID)
 {
 	// remove VS if required
@@ -226,8 +236,6 @@ void EffectManager::Remove(effectID_t effectID)
 
 	// remove PS if required
 	psPool.Remove(effectList[effectID].pixelShaderID);
-
-	// remove effect?
 }
 
 effectID_t EffectManager::Add(const std::string &effectName, const std::string &vertexShaderName, const std::string &pixelShaderName, VertexDeclaration *vertexDeclaration)
