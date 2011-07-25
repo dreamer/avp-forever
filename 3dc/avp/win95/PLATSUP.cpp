@@ -1,69 +1,17 @@
-/*
-
-  Platform specific project specific C functions
-
-*/
-
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
-
 #include "gameplat.h"
 #include "gamedef.h"
-
 #include "dynblock.h"
 #include "dynamics.h"
 #define UseLocalAssert FALSE
 #include "ourasert.h"
 
-/*
-	Externs from pc\io.c
-*/
-
 extern unsigned char KeyboardInput[];
 extern unsigned char DebouncedKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
-
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-
 extern  unsigned char KeyASCII;
-
-// Prototypes
-
-int IDemandFireWeapon(void);
-int IDemandNextWeapon(void);
-int IDemandPreviousWeapon(void);
-
-
-// Functions
-
-
-
-void catpathandextension(char* dst, char* src)
-{
-	int len = strlen(dst); // bjd - CHECKME
-
-	if ((len > 0 && (dst[len-1] != '\\' && dst[len-1] != '/')) && *src != '.')
-		{
-			lstrcat(dst,"/");
-		}
-
-    lstrcat(dst,src);
-
-/*
-	The second null here is to support the use
-	of SHFileOperation, which is a Windows 95
-	addition that is uncompilable under Watcom
-	with ver 10.5, but will hopefully become
-	available later...
-*/
-    len = strlen(dst); // bjd - CHECKME
-    dst[len+1] = 0;
-}
-
-
-/* game platform definition of the Mouse Mode*/
-
-int MouseMode = MouseVelocityMode;
 
 /*
 
@@ -71,188 +19,186 @@ int MouseMode = MouseVelocityMode;
 
 */
 
-int IDemandLookUp(void)
+bool IDemandLookUp()
 {
-	return FALSE;
+	return false;
 }
 
-
-int IDemandLookDown(void)
+bool IDemandLookDown()
 {
-	return FALSE;
+	return false;
 }
 
-int IDemandTurnLeft(void)
+bool IDemandTurnLeft()
 {
 	if (KeyboardInput[KEY_LEFT] || KeyboardInput[KEY_JOYSTICK_BUTTON_15])
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-int IDemandTurnRight(void)
+bool IDemandTurnRight()
 {
 	if (KeyboardInput[KEY_RIGHT] || KeyboardInput[KEY_JOYSTICK_BUTTON_16])
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-int IDemandGoForward(void)
+bool IDemandGoForward()
 {
 	if (KeyboardInput[KEY_UP] || KeyboardInput[KEY_JOYSTICK_BUTTON_13])
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-
-int IDemandGoBackward(void)
+bool IDemandGoBackward()
 {
 	if (KeyboardInput[KEY_DOWN] || KeyboardInput[KEY_JOYSTICK_BUTTON_14])
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-int IDemandJump(void)
+bool IDemandJump()
 {
 	if (KeyboardInput[KEY_CAPS])
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-int IDemandCrouch(void)
+bool IDemandCrouch()
 {
-	if(KeyboardInput[KEY_Z])
+	if (KeyboardInput[KEY_Z])
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-int IDemandSelect(void)
+bool IDemandSelect()
 {
 	if (KeyboardInput[KEY_CR])
-		return TRUE;
+		return true;
 
 	if (KeyboardInput[KEY_SPACE]) 
-		return TRUE;
+		return true;
 
 	if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2])
-		return TRUE; // bjd - A button?
+		return true; // bjd - A button?
 	else 
-		return FALSE;
+		return false;
 }
 
-int IDemandStop(void)
+bool IDemandStop()
 {
-	return FALSE;
+	return false;
 }
 
-
-int IDemandFaster(void)
+bool IDemandFaster()
 {
 	if (KeyboardInput[KEY_LEFTSHIFT])
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 
-int IDemandSideStep(void)
+bool IDemandSideStep()
 {
 	if (KeyboardInput[KEY_LEFTALT])
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-int IDemandPickupItem(void)
+bool IDemandPickupItem()
 {
 	if (KeyboardInput[KEY_P])
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-int IDemandDropItem(void)
+bool IDemandDropItem()
 {
 	if (KeyboardInput[KEY_D])
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-int IDemandMenu(void)
+bool IDemandMenu()
 {
 	if (KeyboardInput[KEY_M])
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-int IDemandOperate(void)
+bool IDemandOperate()
 {
 	if (KeyboardInput[KEY_SPACE])
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-int IDemandFireWeapon(void)
+bool IDemandFireWeapon()
 {
 	if (KeyboardInput[KEY_CR])
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 /* KJL 11:29:12 10/07/96 - added by me */
-int IDemandPreviousWeapon(void)
+bool IDemandPreviousWeapon()
 {
-	if(KeyboardInput[KEY_1])
+	if (KeyboardInput[KEY_1])
 	{
 		return TRUE;
 	}
-	return FALSE;
+	return false;
 }
-int IDemandNextWeapon(void)
+
+bool IDemandNextWeapon()
 {
 	if (KeyboardInput[KEY_2])
 	{
 		return TRUE;
 	}
-	return FALSE;
+	return false;
 }
 
 int IDemandChangeEnvironment()
 {
-	if(KeyboardInput[KEY_F1])
+	if (KeyboardInput[KEY_F1])
 		return 0;
-	else if(KeyboardInput[KEY_F2])
+	else if (KeyboardInput[KEY_F2])
 		return 1;
-	else if(KeyboardInput[KEY_F3])
+	else if (KeyboardInput[KEY_F3])
 		return 2;
-	else if(KeyboardInput[KEY_F4])
+	else if (KeyboardInput[KEY_F4])
 		return 3;
-	else if(KeyboardInput[KEY_F5])
+	else if (KeyboardInput[KEY_F5])
 		return 4;
 	else
-		return(-1);
+		return -1;
 }
 
 

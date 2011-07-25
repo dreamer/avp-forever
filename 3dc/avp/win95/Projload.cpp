@@ -2921,7 +2921,7 @@ void avp_undo_rif_load(RIFFHANDLE h)
    	undo_rif_load(h);
 }
 
-RIFFHANDLE avp_load_rif (const char * fname)
+RIFFHANDLE avp_load_rif(const char * fname)
 {
 	//see if there is a local copy of the rif file
 	FILE *rifFile = avp_fopen(fname, "rb");
@@ -2943,19 +2943,20 @@ RIFFHANDLE avp_load_rif (const char * fname)
 	return load_rif(fname); 
 }
 
-RIFFHANDLE avp_load_rif_non_env (const char * fname)
+RIFFHANDLE avp_load_rif_non_env(const char * fname)
 {
 	//see if there is a local copy of the rif file
 	FILE* rifFile = avp_fopen(fname,"rb");
 	if(!rifFile && AvpCDPath)
 	{
 		//try and load rif file from cd instead
-		char RifName[200];
+		char RifName[MAX_PATH];
 		sprintf(RifName,"%s%s",AvpCDPath,fname);
 		return load_rif_non_env(RifName);
 	}
+
 	// extra check
-	if(rifFile)
+	if (rifFile)
 	{
 		fclose(rifFile);
 	}

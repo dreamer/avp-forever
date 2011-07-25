@@ -332,11 +332,8 @@ static ELO JunkEnv; /* This is not needed */
 ELO* Env_List[I_Num_Environments] = { &JunkEnv };
 
 /**** Construct filename and go for it ***************/
-
-void catpathandextension(char*, char*);
 void DestroyActiveBlockList(void);
 void InitialiseObjectBlocks(void);
-
 
 char EnvFileName[100];
 char LevelDir[100];
@@ -442,7 +439,6 @@ void ChangeEnvironmentToEnv(I_AVP_ENVIRONMENTS env_to_load)
 
 void IntegrateNewEnvironment()
 {
-	int i;
 	MODULEMAPBLOCK* mmbptr = &AvpCompiledMaps[0];
 
 	// elements we need form processsystemobjects
@@ -452,8 +448,7 @@ void IntegrateNewEnvironment()
 
 	Global_ModulePtr = MainSceneArray;
 	PreprocessAllModules();
-	i = GetModuleVisArrays();
-	if (i == FALSE)
+	if (GetModuleVisArrays() == FALSE)
 	{
 		textprint("GetModuleVisArrays() failed\n");
 	}
@@ -482,8 +477,8 @@ void IntegrateNewEnvironment()
 	ResetFrameCounter();
 }
 
-const char GameDataDirName[20] = {"avp_rifs"};
-const char FileNameExtension[5] =  {".rif"};
+const char *GameDataDirName = "avp_rifs";
+const char *FileNameExtension = ".rif";
 
 void LoadRifFile()
 {
@@ -492,19 +487,16 @@ void LoadRifFile()
 	Set_Progress_Bar_Position(PBAR_LEVEL_START);
 	
 	// clear the dir names
-
-	for(int i = 0; i < 100; i++)
-	{
-		file_and_path[i] = (char)0;
-		EnvFileName[i] = (char)0;
-		LevelDir[i] = (char)0;
-	}
+	file_and_path[0] = '\0';
+	EnvFileName[0] = '\0';
+	LevelDir[0] = '\0';
 
 	// Set up the dirname for the Rif load
-	catpathandextension(&file_and_path[0], (char *)&GameDataDirName[0]);
-	catpathandextension(&file_and_path[0], Env_List[AvP.CurrentEnv]->main); /* root of the file name,smae as dir*/
-	catpathandextension(&file_and_path[0], (char *)&FileNameExtension[0]);  /* extension*/
-	
+	strcpy(file_and_path, GameDataDirName);
+	strcat(file_and_path, "/");
+	strcat(file_and_path, Env_List[AvP.CurrentEnv]->main);
+	strcat(file_and_path, FileNameExtension);
+
 	env_rif = avp_load_rif((const char*)&file_and_path[0]);
 	Set_Progress_Bar_Position(PBAR_LEVEL_START+PBAR_LEVEL_INTERVAL*.4);
 	
@@ -517,7 +509,7 @@ void LoadRifFile()
 	#if MaxImageGroups>1
 	SetCurrentImageGroup(2); // FOR ENV
 	#endif
-	copy_rif_data(env_rif,CCF_ENVIRONMENT,PBAR_LEVEL_START+PBAR_LEVEL_INTERVAL*.4,PBAR_LEVEL_INTERVAL*.6);
+	copy_rif_data(env_rif, CCF_ENVIRONMENT, PBAR_LEVEL_START+PBAR_LEVEL_INTERVAL*.4, PBAR_LEVEL_INTERVAL*.6);
 }
 
 int Destroy_CurrentEnvironment(void)
