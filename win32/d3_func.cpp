@@ -1492,6 +1492,8 @@ bool R_SetPixelShaderConstant(r_PixelShader &pixelShader, uint32_t registerIndex
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
+
+	return true;
 }
 
 bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
