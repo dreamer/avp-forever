@@ -121,13 +121,13 @@ class TheoraFMV
 
 		int	Open(const std::string &fileName);
 		void Close();
-		ogg_int64_t TheoraFMV::ReadPage(ogg_page *page);
+		ogg_int64_t ReadPage(ogg_page *page);
 		bool ReadPacket(OggStream *stream, ogg_packet *packet);
 		void ReadHeaders();
 		void HandleTheoraData(OggStream *stream, ogg_packet *packet);
 		bool IsPlaying();
-		bool NextFrame();
-		bool TheoraFMV::NextFrame(uint32_t width, uint32_t height, uint8_t *bufferPtr, uint32_t pitch);
+		bool ConvertFrame();
+		bool ConvertFrame(uint32_t width, uint32_t height, uint8_t *bufferPtr, uint32_t pitch);
 		bool HandleTheoraHeader(OggStream* stream, ogg_packet* packet);
 		bool HandleVorbisHeader(OggStream* stream, ogg_packet* packet);
 		bool HandleSkeletonHeader(OggStream* stream, ogg_packet* packet);

@@ -7,25 +7,22 @@
 #include <math.h>
 #include "logString.h"
 
-#ifdef _XBOX
-#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
-
-#include <string>
-#include <algorithm>
-
-#endif
-
-static const int kAudioBufferSize  = 4096;
-static const int kAudioBufferCount = 3;
-
-static const int kQuantum = 1000 / 60;
-
 // #define USE_MMX
 
 #ifdef USE_MMX
 #define restrict
 #include <emmintrin.h>
 #endif
+
+#ifdef _XBOX
+#define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
+#include <algorithm>
+#endif
+
+static const int kAudioBufferSize  = 4096;
+static const int kAudioBufferCount = 3;
+
+static const int kQuantum = 1000 / 60;
 
 unsigned int __stdcall decodeThread(void *args);
 unsigned int __stdcall audioThread(void *args);
@@ -40,7 +37,8 @@ inline int CLAMP(int value)
 }
 
 /* structure holds pointers to y, u, v channels */
-typedef struct _OggPlayYUVChannels {
+typedef struct _OggPlayYUVChannels 
+{
 	unsigned char * ptry;
 	unsigned char * ptru;
 	unsigned char * ptrv;
@@ -53,7 +51,8 @@ typedef struct _OggPlayYUVChannels {
 } OggPlayYUVChannels;
 
 /* structure holds pointers to y, u, v channels */
-typedef struct _OggPlayRGBChannels {
+typedef struct _OggPlayRGBChannels 
+{
 	unsigned char * ptro;
 	int				rgb_width;
 	int				rgb_height;
@@ -65,7 +64,7 @@ void oggplay_yuv2rgb(OggPlayYUVChannels * yuv, OggPlayRGBChannels * rgb);
 class TheoraDecode
 {
 	public:
-		th_info		mInfo;
+		th_info			mInfo;
 		th_comment		mComment;
 		th_setup_info	*mSetupInfo;
 		th_dec_ctx		*mDecodeContext;
@@ -322,7 +321,7 @@ int TheoraFMV::Open(const std::string &fileName)
 		if (frameTextureIDs[i] == MISSING_TEXTURE)
 		{
 			Con_PrintError("Unable to create texture(s) for FMV playback");
-			return false;
+			return FMV_ERROR;
 		}
 	}
 
@@ -333,7 +332,7 @@ int TheoraFMV::Open(const std::string &fileName)
 	InitializeCriticalSection(&mFrameCriticalSection);
 	mFrameCriticalSectionInited = true;
 
-	// time to start our threads
+	// now start the threads
 	mDecodeThreadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, decodeThread, static_cast<void*>(this), 0, NULL));
 
 	if (mAudio)
@@ -407,6 +406,7 @@ bool TheoraFMV::HandleSkeletonHeader(OggStream* stream, ogg_packet* packet)
 	}
 
 	// Shouldn't actually get here.
+	assert(0);
 	return true;
 }
 
@@ -437,7 +437,8 @@ bool TheoraFMV::IsPlaying()
 	return mFmvPlaying;
 }
 
-bool TheoraFMV::NextFrame(uint32_t width, uint32_t height, uint8_t *bufferPtr, uint32_t pitch)
+// converts a decoded Theora YUV frame to RGB texture using CPU conversion routine
+bool TheoraFMV::ConvertFrame(uint32_t width, uint32_t height, uint8_t *bufferPtr, uint32_t pitch)
 {
 	if (mFmvPlaying == false)
 		return false;
@@ -473,9 +474,10 @@ bool TheoraFMV::NextFrame(uint32_t width, uint32_t height, uint8_t *bufferPtr, u
 	return true;
 }
 
-bool TheoraFMV::NextFrame()
+// copies a decoded Theora YUV frame to texture(s) for GPU to convert via shader
+bool TheoraFMV::ConvertFrame()
 {
-	if (mFmvPlaying == false)
+	if (!mFmvPlaying)
 		return false;
 
 	// critical section
@@ -486,7 +488,7 @@ bool TheoraFMV::NextFrame()
 		uint8_t *originalDestPtr = NULL;
 		uint32_t pitch = 0;
 
-		uint32_t width = 0;
+		uint32_t width  = 0;
 		uint32_t height = 0;
 
 		// get width and height
@@ -513,8 +515,7 @@ bool TheoraFMV::NextFrame()
 	}
 
 	// set this value to true so we can now begin to draw the textured fmv frame
-	if (!mTexturesReady)
-		mTexturesReady = true;
+	mTexturesReady = true;
 
 	mFrameReady = false;
 

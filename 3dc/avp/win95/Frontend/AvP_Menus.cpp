@@ -4546,17 +4546,25 @@ void CheckForCredits(void)
 #endif
 }
 
+extern bool MenuBackgroundFMV;
+
 void DoCredits(void)
 {
+	// HACK / FIXME: don't run credits when displaying the menu FMV as 
+	// we presently have a bug that means you can't exit early from
+	// the credits roll in a Release build when the video is playing..
+	if (MenuBackgroundFMV)
+		return;
+
 	int position = 300*2048;
 	BOOL FinishedCredits = FALSE;
 	
 	char *creditsBufferPtr = LoadTextFile("credits.txt");
 
-	char *creditsPtr;
-	
 	if (!creditsBufferPtr)
 		return;
+
+	char *creditsPtr;
 
 	if (!strncmp (creditsBufferPtr, "REBCRIF1", 8))
 	{
@@ -4573,21 +4581,23 @@ void DoCredits(void)
 	{
 		CheckForWindowsMessages();
 
+		DirectReadKeyboard();
+
 		ThisFramesRenderingHasBegun();
 
 		DrawMainMenusBackdrop();
 	
-		FinishedCredits = !RollCreditsText(position,creditsPtr+4);
+		FinishedCredits = !RollCreditsText(position, creditsPtr+4);
 		ShowMenuFrameRate();
+
+		FrameCounterHandler();
+		PlayMenuMusic();
 
 		ThisFramesRenderingHasFinished();
 
 		FlipBuffers();
-		FrameCounterHandler();
-		PlayMenuMusic();
-		position -= RealFrameTime;
 
-		DirectReadKeyboard();
+		position -= RealFrameTime;
 	}
 	while (!DebouncedGotAnyKey && !FinishedCredits);
 

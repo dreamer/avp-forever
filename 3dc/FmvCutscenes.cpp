@@ -51,7 +51,7 @@ int PanningOfNearestVideoScreen = 0;
 
 VorbisPlayback	*menuMusic = NULL;
 TheoraFMV		*menuFMV = NULL;
-bool MenuBackground = false;
+bool MenuBackgroundFMV = false;
 
 void FindLightingValuesFromTriggeredFMV(uint8_t *bufferPtr, FMVTEXTURE *ftPtr)
 {
@@ -94,7 +94,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 			if (!fmvList[ftPtr->fmvHandle]->mFrameReady)
 				return 0;
 
-			fmvList[ftPtr->fmvHandle]->NextFrame(width, height, DestBufferPtr, width * sizeof(uint32_t));
+			fmvList[ftPtr->fmvHandle]->ConvertFrame(width, height, DestBufferPtr, width * sizeof(uint32_t));
 		}
 
 		ftPtr->StaticImageDrawn = false;
@@ -119,34 +119,30 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 // opens the menu background FMV
 void StartMenuBackgroundFmv()
 {
-	MenuBackground = false;
-
-	const char *filenamePtr = "fmvs/menubackground.ogv";
+	MenuBackgroundFMV = false;
 
 	menuFMV = new TheoraFMV();
 
 	// start playback threads
-	if (menuFMV->Open(filenamePtr) != FMV_OK)
+	if (menuFMV->Open("fmvs/menubackground.ogv") != FMV_OK)
 	{
 		delete menuFMV;
 		menuFMV = NULL;
 		return;
 	}
 	
-	MenuBackground = true;
+	MenuBackgroundFMV = true;
 }
 
 // called per frame to display a frame of the menu background FMV
 extern int PlayMenuBackgroundFmv()
 {
-	if (!MenuBackground)
+	if (!MenuBackgroundFMV)
 		return 0;
-
-	bool playing = false;
 
 	if (menuFMV->mFrameReady)
 	{
-		playing = menuFMV->NextFrame();
+		menuFMV->ConvertFrame();
 	}
 
 	if (menuFMV->mTexturesReady)
@@ -159,14 +155,14 @@ extern int PlayMenuBackgroundFmv()
 
 extern void EndMenuBackgroundFmv()
 {
-	if (!MenuBackground)
+	if (!MenuBackgroundFMV)
 		return;
 
 	menuFMV->Close();
 	delete menuFMV;
 	menuFMV = 0;
 
-	MenuBackground = false;
+	MenuBackgroundFMV = false;
 }
 
 void InitFmvCutscenes()
@@ -237,7 +233,7 @@ extern void PlayFMV(const char *filenamePtr)
 			playing = false;
 
 		if (fmv.mFrameReady)
-			playing = fmv.NextFrame();
+			playing = fmv.ConvertFrame();
 
 		if (fmv.mTexturesReady)
 		{
