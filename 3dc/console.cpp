@@ -16,7 +16,10 @@
 #include "io.h"
 
 const int kCharWidth  = 12;
-const int kCharHeight =	16;
+const int kCharHeight = 16;
+const int kOutlineBarHeight = 2;
+const char kBackspaceASCIIcode = 0x08;
+const char kReturnASCIIcode = 0x0D;
 
 struct Command
 {
@@ -45,6 +48,7 @@ struct Console
 	float destinationY;
 
 	std::vector<std::string> text;
+
 	std::string	inputLine;
 };
 
@@ -93,7 +97,7 @@ void Con_AddCommand(char *command, funcPointer function)
 	{
 		if (!strcmp(command, cmdIt->cmdName))
 		{
-			OutputDebugString("command already exists\n");
+			LogErrorString("console command already exists");
 			return;
 		}
 	}
@@ -145,7 +149,7 @@ void Con_ProcessCommand()
 	// the command will be first word up to first space
 	getline(stream, commandName, ' ');
 
-	// see if the command actually exists first.
+	// see if the command already exists first.
 	for (cmdIt = cmdList.begin(); cmdIt < cmdList.end(); ++cmdIt)
 	{
 		if (commandName == cmdIt->cmdName)
@@ -156,7 +160,7 @@ void Con_ProcessCommand()
 		}
 	}
 
-	// in case we didnt find it
+	// in case we didn't find it
 	if (theCommand.cmdFuncPointer == NULL)
 	{
 		Con_AddLine(commandName);
@@ -197,26 +201,8 @@ void Con_Toggle()
 	IOFOCUS_Set(IOFOCUS_Get() ^ IOFOCUS_NEWCONSOLE);
 }
 
-/*
-bool Con_IsActive()
-{
-	return console.isActive;
-}
-
-bool Con_IsOpen()
-{
-	return console.isOpen;
-}
-*/
-
 void Con_CheckResize()
 {
-/*
-	if (console.width != ScreenDescriptorBlock.SDB_Width)
-	{
-		console.width = ScreenDescriptorBlock.SDB_Width;
-	}
-*/
 }
 
 void Con_AddTypedChar(char c)
@@ -224,23 +210,26 @@ void Con_AddTypedChar(char c)
 //	if (!console.isActive)
 //		return;
 
-	if (c == 0x08) // backspace
+	switch (c)
 	{
-		Con_RemoveTypedChar();
-	}
-	else if (c == 13) // enter/return key
-	{
-		Con_ProcessCommand();
-	}
-	else
-	{
-		if (c < 32)
+		case kBackspaceASCIIcode:
+		{
+			Con_RemoveTypedChar();
 			return;
-	//	sprintf(buf, "Con_AddTypedChar: %c\n", c);
-	//	OutputDebugString(buf);
-
-		console.inputLine.push_back(c);
+		}
+		case kReturnASCIIcode:
+		{
+			Con_ProcessCommand();
+			return;
+		}
 	}
+
+	if (c < 32)
+	{
+		return;
+	}
+
+	console.inputLine.push_back(c);
 }
 
 void Con_RemoveTypedChar()
@@ -284,10 +273,10 @@ void Con_Draw()
 	// draw the background quad
 	DrawQuad(console.xPos, console.yPos, console.width, console.height, NO_TEXTURE, RCOLOR_ARGB(255, 38, 80, 145), TRANSLUCENCY_OFF);
 
+	// draw the outline bar that runs along the bottom of the console (if it's open)
 	if (console.height > 0)
 	{
-		// draw the outline bar that runs along the bottom of the console
-		DrawQuad(console.xPos, console.yPos + console.height, console.width, 2, NO_TEXTURE, RCOLOR_ARGB(255, 255, 255, 255), TRANSLUCENCY_OFF);
+		DrawQuad(console.xPos, console.yPos + console.height, console.width, kOutlineBarHeight, NO_TEXTURE, RCOLOR_ARGB(255, 255, 255, 255), TRANSLUCENCY_OFF);
 	}
 
 	uint32_t y = console.height - kCharHeight;
