@@ -30,11 +30,7 @@
 
 extern D3DXMATRIX viewMatrix;
 
-#ifdef DAVEW
-	#define DB_LEVEL 4
-#else
-	#define DB_LEVEL 3
-#endif
+#define DB_LEVEL 3
 
 /* Davew 27/7/98 --------------------------------------------------------------
 	Internal types.
@@ -1051,7 +1047,7 @@ void PlatEndGameSound(SOUNDINDEX index)
 
 	if (GameSounds[index].wavName)
 	{
-		DeallocateMem (GameSounds[index].wavName);
+		delete[] GameSounds[index].wavName;
 		GameSounds[index].wavName = 0;
 	}
 }
@@ -1283,7 +1279,7 @@ int LoadWavFile(int soundNum, char * wavFileName)
 //		GameSounds[soundNum].xa2Emitter.pChannelAzimuths = GameSounds[soundNum].emitterAzimuths;
 
 		{
-			char * wavname = strrchr (wavFileName, '/');
+			char * wavname = strrchr(wavFileName, '/');
 			if (wavname)
 			{
 				wavname++;
@@ -1293,8 +1289,8 @@ int LoadWavFile(int soundNum, char * wavFileName)
 				wavname = wavFileName;
 			}
 			
-			GameSounds[soundNum].wavName = (char *)AllocateMem (strlen (wavname) + 1);
-			strcpy (GameSounds[soundNum].wavName, wavname);
+			GameSounds[soundNum].wavName = new char[strlen(wavname) + 1];
+			strcpy(GameSounds[soundNum].wavName, wavname);
 		}
 
 		// need to save this here for later use
@@ -1450,7 +1446,7 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 //		GameSounds[soundNum].xa2Emitter.pChannelAzimuths = GameSounds[soundNum].emitterAzimuths;
 
 		{
-			char * wavname = strrchr (wavFileName, '/');
+			char * wavname = strrchr(wavFileName, '/');
 			if (wavname)
 			{
 				wavname++;
@@ -1460,8 +1456,8 @@ int LoadWavFromFastFile(int soundNum, char * wavFileName)
 				wavname = wavFileName;
 			}
 
-			GameSounds[soundNum].wavName = (char *)AllocateMem (strlen (wavname) + 1);
-			strcpy (GameSounds[soundNum].wavName, wavname);
+			GameSounds[soundNum].wavName = new char[strlen(wavname) + 1];
+			strcpy(GameSounds[soundNum].wavName, wavname);
 		}
 
 		// need to save this here for later use
@@ -1726,7 +1722,7 @@ extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr)
 	uint32_t lengthInSeconds = 0;
 
 	size_t length = strlen ((const char*)bufferPtr) + 1;
-	GameSounds[soundIndex].wavName = (char *)AllocateMem (length);
+	GameSounds[soundIndex].wavName = new char[length];
 	strcpy (GameSounds[soundIndex].wavName, (const char*)bufferPtr);
 	bufferPtr += length;
 
