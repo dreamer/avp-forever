@@ -15,7 +15,7 @@ typedef D3DXMATRIX R_MATRIX;
 
 struct r_VertexBuffer
 {
-	IDirect3DVertexBuffer9	*vertexBuffer;
+	IDirect3DVertexBuffer9 *vertexBuffer;
 
 	// constructor to ensure above pointer is null
 	r_VertexBuffer()
@@ -26,7 +26,7 @@ struct r_VertexBuffer
 
 struct r_IndexBuffer
 {
-	IDirect3DIndexBuffer9	*indexBuffer;
+	IDirect3DIndexBuffer9 *indexBuffer;
 	
 	// constructor to ensure above pointer is null
 	r_IndexBuffer()
@@ -35,7 +35,7 @@ struct r_IndexBuffer
 	}
 };
 
-typedef IDirect3DTexture9	*r_Texture;		// keep this as pointer type?
+typedef IDirect3DTexture9 *r_Texture;    // keep this as pointer type?
 
 typedef IDirect3DVertexDeclaration9 *r_vertexDeclaration;
 
@@ -114,10 +114,10 @@ typedef struct ORTHOVERTEX
 	float y;
 	float z;
 
-	DWORD colour;	// Colour
+	DWORD colour;   // Colour
 
 	float u;
-	float v;		// Texture coordinates
+	float v;        // Texture coordinates
 
 } ORTHOVERTEX;
 
@@ -128,16 +128,16 @@ typedef struct FMVVERTEX
 {
 	float x;
 	float y;
-	float z;		// Position in 3d space
+	float z;        // Position in 3d space
 
 	float u1;
-	float v1;		// Texture coordinates 1
+	float v1;        // Texture coordinates 1
 
 	float u2;
-	float v2;		// Texture coordinates 2
+	float v2;        // Texture coordinates 2
 
 	float u3;
-	float v3;		// Texture coordinates 3
+	float v3;        // Texture coordinates 3
 
 } FMVVERTEX;
 
@@ -201,6 +201,15 @@ typedef struct D3DInfo
 
 	class VertexDeclaration		*starsDecl;
 
+	// matrices
+	D3DXMATRIX matOrtho;
+	D3DXMATRIX matProjection;
+	D3DXMATRIX matView;
+	D3DXMATRIX matIdentity;
+	D3DXMATRIX matViewPort;
+
+	D3DXPLANE  frustumPlanes[6];
+
 	// enumeration
 	uint32_t				NumDrivers;
 	uint32_t				CurrentDriver;
@@ -226,7 +235,7 @@ uint32_t R_GetScreenWidth();
 extern texID_t NO_TEXTURE;
 extern texID_t MISSING_TEXTURE;
 
-#define RGB_MAKE	D3DCOLOR_XRGB
+#define RGB_MAKE D3DCOLOR_XRGB
 
 #define SAFE_DELETE(p) { delete (p); (p) = 0; }
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }

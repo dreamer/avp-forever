@@ -33,19 +33,44 @@
 #include "d3d_render.h"
 #include "bh_types.h"
 
+#define FMV_ON 0
+#define FMV_SIZE 128
+
+AVPTEXTURE FMVTextureHandle[4];
+AVPTEXTURE NoiseTextureHandle;
+
+int WaterXOrigin;
+int WaterZOrigin;
+float WaterUScale;
+float WaterVScale;
+
+int MeshZScale;
+int MeshXScale;
+int WaterFallBase;
+
+VECTORCH MeshWorldVertex[256];
+uint32_t MeshVertexColour[256];
+
+int WireFrameMode;
+
+uint32_t FMVParticleColour;
+VECTORCH MeshVertex[256];
+
+void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin);
+
+void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin);
+void D3D_DrawMoltenMetalMesh_Unclipped(void);
+static void D3D_OutputTriangles(void);
+
+int NumberOfLandscapePolygons;
+
 // set to 'null' texture initially
 texID_t currentWaterTexture = NO_TEXTURE;
 
 const float zf = 1000000.0f;
 const float zn = 64.0f;
 
-D3DXMATRIX viewMatrix;
-
 // extern variables
-extern D3DXMATRIX matOrtho;
-extern D3DXMATRIX matProjection;
-extern D3DXMATRIX matIdentity;
-extern D3DXMATRIX matViewPort;
 extern D3DINFO    d3d;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern VIEWDESCRIPTORBLOCK* Global_VDB_Ptr;
@@ -315,28 +340,28 @@ static bool ExecuteBuffer()
 		xScale *= o;
 
 		// column 1
-		matProjection._11 = xScale;
-		matProjection._21 = 0.0f;
-		matProjection._31 = 0.0f;
-		matProjection._41 = 0.0f;
+		d3d.matProjection._11 = xScale;
+		d3d.matProjection._21 = 0.0f;
+		d3d.matProjection._31 = 0.0f;
+		d3d.matProjection._41 = 0.0f;
 
 		// column 2
-		matProjection._12 = 0.0f;
-		matProjection._22 = yScale;
-		matProjection._32 = 0.0f;
-		matProjection._42 = 0.0f;
+		d3d.matProjection._12 = 0.0f;
+		d3d.matProjection._22 = yScale;
+		d3d.matProjection._32 = 0.0f;
+		d3d.matProjection._42 = 0.0f;
 
 		// column 3
-		matProjection._13 = 0.0f;
-		matProjection._23 = 0.0f;
-		matProjection._33 = zf/(zf-zn);
-		matProjection._43 = -zn*zf/(zf-zn);
+		d3d.matProjection._13 = 0.0f;
+		d3d.matProjection._23 = 0.0f;
+		d3d.matProjection._33 = zf/(zf-zn);
+		d3d.matProjection._43 = -zn*zf/(zf-zn);
 
 		// column 4
-		matProjection._14 = 0.0f;
-		matProjection._24 = 0.0f;
-		matProjection._34 = 1.0f;
-		matProjection._44 = 0.0f;
+		d3d.matProjection._14 = 0.0f;
+		d3d.matProjection._24 = 0.0f;
+		d3d.matProjection._34 = 1.0f;
+		d3d.matProjection._44 = 0.0f;
 	}
 
 	if (mainList->GetSize())
@@ -352,7 +377,7 @@ static bool ExecuteBuffer()
 		d3d.effectSystem->SetActive(d3d.mainEffect);
 
 		// we don't need world matrix here as avp has done all the world transforms itself
-		R_MATRIX matWorldViewProj = viewMatrix * matProjection;
+		R_MATRIX matWorldViewProj = d3d.matView * d3d.matProjection;
 
 		d3d.effectSystem->SetVertexShaderConstant(d3d.mainEffect, 0, CONST_MATRIX, &matWorldViewProj);
 
@@ -373,7 +398,7 @@ static bool ExecuteBuffer()
 		// set main shaders to active
 		d3d.effectSystem->SetActive(d3d.mainEffect);
 
-		d3d.effectSystem->SetVertexShaderConstant(d3d.mainEffect, 0, CONST_MATRIX, &matProjection);
+		d3d.effectSystem->SetVertexShaderConstant(d3d.mainEffect, 0, CONST_MATRIX, &d3d.matProjection);
 
 		// Draw the particles in the list
 		particleList->Draw();
@@ -392,7 +417,7 @@ static bool ExecuteBuffer()
 		d3d.effectSystem->SetActive(d3d.orthoEffect);
 
 		// pass the orthographic projection matrix to the vertex shader
-		d3d.effectSystem->SetVertexShaderConstant(d3d.orthoEffect, 0, CONST_MATRIX, &matOrtho);
+		d3d.effectSystem->SetVertexShaderConstant(d3d.orthoEffect, 0, CONST_MATRIX, &d3d.matOrtho);
 
 		// daw the ortho list
 		orthoList->Draw();
@@ -526,7 +551,7 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, const std::vector<t
 	d3d.effectSystem->SetActive(d3d.fmvEffect);
 
 	// set orthographic projection
-	d3d.effectSystem->SetVertexShaderConstant(d3d.fmvEffect, 0, CONST_MATRIX, &matOrtho);
+	d3d.effectSystem->SetVertexShaderConstant(d3d.fmvEffect, 0, CONST_MATRIX, &d3d.matOrtho);
 
 	// set the texture
 	for (size_t i = 0; i < textureIDs.size(); i++)
@@ -646,7 +671,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, texID_t textureID, uint
 		float topXF = static_cast<float>(topX);
 
 		d3d.effectSystem->SetVertexShaderConstant(d3d.cloudEffect, 0, CONST_FLOAT, &CloakingPhaseF);
-		d3d.effectSystem->SetVertexShaderConstant(d3d.cloudEffect, 1, CONST_MATRIX, &matOrtho);
+		d3d.effectSystem->SetVertexShaderConstant(d3d.cloudEffect, 1, CONST_MATRIX, &d3d.matOrtho);
 		d3d.effectSystem->SetVertexShaderConstant(d3d.cloudEffect, 2, CONST_FLOAT, &topXF);
 
 		ChangeTextureAddressMode(0, TEXTURE_CLAMP);
@@ -1078,7 +1103,7 @@ void TransformToViewspace(VECTORCHF *vector)
 	D3DXVECTOR3 output;
 	D3DXVECTOR3 input(vector->vx, vector->vy, vector->vz);
 
-	D3DXVec3TransformCoord(&output, &input, &viewMatrix);
+	D3DXVec3TransformCoord(&output, &input, &d3d.matView);
 
 	vector->vx = output.x;
 	vector->vy = output.y;
@@ -1101,32 +1126,32 @@ void UpdateViewMatrix(float *viewMat)
 	D3DXVec3Normalize(&vecRight, &vecRight);
 
 	// right
-	viewMatrix._11 = vecRight.x;
-	viewMatrix._21 = vecRight.y;
-	viewMatrix._31 = vecRight.z;
+	d3d.matView._11 = vecRight.x;
+	d3d.matView._21 = vecRight.y;
+	d3d.matView._31 = vecRight.z;
 
 	// up
-	viewMatrix._12 = vecUp.x;
-	viewMatrix._22 = vecUp.y;
-	viewMatrix._32 = vecUp.z;
+	d3d.matView._12 = vecUp.x;
+	d3d.matView._22 = vecUp.y;
+	d3d.matView._32 = vecUp.z;
 
 	// front
-	viewMatrix._13 = vecFront.x;
-	viewMatrix._23 = vecFront.y;
-	viewMatrix._33 = vecFront.z;
+	d3d.matView._13 = vecFront.x;
+	d3d.matView._23 = vecFront.y;
+	d3d.matView._33 = vecFront.z;
 
 	// 4th
-	viewMatrix._14 = 0.0f;
-	viewMatrix._24 = 0.0f;
-	viewMatrix._34 = 0.0f;
-	viewMatrix._44 = 1.0f;
+	d3d.matView._14 = 0.0f;
+	d3d.matView._24 = 0.0f;
+	d3d.matView._34 = 0.0f;
+	d3d.matView._44 = 1.0f;
 
-	viewMatrix._41 = -D3DXVec3Dot(&vecPosition, &vecRight);
-	viewMatrix._42 = -D3DXVec3Dot(&vecPosition, &vecUp);
-	viewMatrix._43 = -D3DXVec3Dot(&vecPosition, &vecFront);
+	d3d.matView._41 = -D3DXVec3Dot(&vecPosition, &vecRight);
+	d3d.matView._42 = -D3DXVec3Dot(&vecPosition, &vecUp);
+	d3d.matView._43 = -D3DXVec3Dot(&vecPosition, &vecFront);
 
 	// move this later (we may not catch projection matrix changes otherwise)
-//	BuildFrustum();
+	BuildFrustum();
 }
 
 void DrawCoronas()
@@ -1202,10 +1227,10 @@ void DrawCoronas()
 		float centreY = tempVec.y / tempVec.z;
 
 		// already view transformed, do projection transform
-		D3DXVec3TransformCoord(&newVec, &tempVec, &matProjection);
+		D3DXVec3TransformCoord(&newVec, &tempVec, &d3d.matProjection);
 
 		// do viewport transform on this
-		D3DXVec3TransformCoord(&tempVec, &newVec, &matViewPort);
+		D3DXVec3TransformCoord(&tempVec, &newVec, &d3d.matViewPort);
 
 		// generate the quad around this point
 
@@ -1284,37 +1309,6 @@ void DrawParticles()
 	RenderPolygon.NumberOfVertices = numVertsBackup;
 }
 
-#define FMV_ON 0
-#define FMV_SIZE 128
-
-AVPTEXTURE FMVTextureHandle[4];
-AVPTEXTURE NoiseTextureHandle;
-
-int WaterXOrigin;
-int WaterZOrigin;
-float WaterUScale;
-float WaterVScale;
-
-int MeshZScale;
-int MeshXScale;
-int WaterFallBase;
-
-VECTORCH MeshWorldVertex[256];
-uint32_t MeshVertexColour[256];
-
-int WireFrameMode;
-
-uint32_t FMVParticleColour;
-VECTORCH MeshVertex[256];
-
-void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin);
-
-void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin);
-void D3D_DrawMoltenMetalMesh_Unclipped(void);
-static void D3D_OutputTriangles(void);
-
-int NumberOfLandscapePolygons;
-
 #if 0 // bjd - commenting out
 void SetFogDistance(int fogDistance)
 {
@@ -1331,7 +1325,7 @@ void SetFogDistance(int fogDistance)
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
 	// bjd - This is the function responsible for drawing level geometry and the players weapon
-#if 1
+#if 0
 	bool valid = false;
 
 	// test frustum culling for each point
@@ -1342,7 +1336,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 		D3DXVECTOR3 temp;
 
 		temp.x = (float)vertices->X;
-		temp.y = (float)-vertices->Y;
+		temp.y = (float)vertices->Y;
 		temp.z = (float)vertices->Z;
 
 		if (CheckPointIsInFrustum(&temp) == true)
@@ -1355,7 +1349,9 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 
 	// lets bail out of this function and not draw this poly if none of the points are inside the view frustum
 	if (valid == false)
+	{
 		return;
+	}
 #endif
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
@@ -2486,7 +2482,7 @@ void D3D_DrawMoltenMetalMesh_Unclipped()
 	}
 }
 
-void ThisFramesRenderingHasBegun(void)
+void ThisFramesRenderingHasBegun()
 {
 	if (R_BeginScene()) // calls a function to perform d3d_device->Begin();
 	{
@@ -2496,7 +2492,7 @@ void ThisFramesRenderingHasBegun(void)
 
 size_t lastMem = 0;
 
-void ThisFramesRenderingHasFinished(void)
+void ThisFramesRenderingHasFinished()
 {
 	Osk_Draw();
 
@@ -2541,7 +2537,7 @@ void ThisFramesRenderingHasFinished(void)
 
 extern void D3D_DrawSliderBar(int x, int y, int alpha)
 {
-	struct VertexTag quadVertices[4];
+	VertexTag quadVertices[4];
 	uint32_t sliderHeight = 11;
 	uint32_t colour = alpha >> 8;
 
@@ -2672,7 +2668,7 @@ extern void D3D_DrawSliderBar(int x, int y, int alpha)
 extern void D3D_DrawSlider(int x, int y, int alpha)
 {
 	// the little thingy that slides through the rectangle
-	struct VertexTag quadVertices[4];
+	VertexTag quadVertices[4];
 	uint32_t sliderHeight = 5;
 	uint32_t colour = alpha >> 8;
 
@@ -3158,7 +3154,7 @@ void r2rect :: AlphaFill
 extern void D3D_RenderHUDNumber_Centred(uint32_t number, uint32_t x, uint32_t y, uint32_t colour)
 {
 	// green and red ammo numbers
-	struct VertexTag quadVertices[4];
+	VertexTag quadVertices[4];
 	int noOfDigits = 3;
 	int h = MUL_FIXED(HUDScaleFactor, HUD_DIGITAL_NUMBERS_HEIGHT);
 	int w = MUL_FIXED(HUDScaleFactor, HUD_DIGITAL_NUMBERS_WIDTH);
@@ -3216,7 +3212,7 @@ extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour)
 	if (stringPtr == NULL)
 		return;
 
-	struct VertexTag quadVertices[4];
+	VertexTag quadVertices[4];
 
 	quadVertices[0].Y = y-1;
 	quadVertices[1].Y = y-1;
@@ -3255,7 +3251,7 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr, int x, int y, int colou
 	if (stringPtr == NULL)
 		return;
 
-	struct VertexTag quadVertices[4];
+	VertexTag quadVertices[4];
 
 	LOCALASSERT(y<=0);
 
@@ -3317,7 +3313,7 @@ void D3D_RenderHUDString_Centred(char *stringPtr, uint32_t centreX, uint32_t y, 
 
 	int x = centreX-length/2;
 
-	struct VertexTag quadVertices[4];
+	VertexTag quadVertices[4];
 
 	quadVertices[0].Y = y - MUL_FIXED(HUDScaleFactor,1);
 	quadVertices[1].Y = y - MUL_FIXED(HUDScaleFactor,1);
@@ -3379,7 +3375,7 @@ extern void RenderStringCentred(char *stringPtr, int centreX, int y, int colour)
 
 extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, int colour)
 {
-	struct VertexTag quadVertices[4];
+	VertexTag quadVertices[4];
 	int y = bottomY;
 
 	quadVertices[0].X = centreX - (HUD_FONT_HEIGHT/2) - 1;

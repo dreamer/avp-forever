@@ -33,14 +33,6 @@
 #include <XInput.h> // XInput API
 #include "AvP_UserProfile.h"
 
-D3DXMATRIX matOrtho;
-D3DXMATRIX matProjection;
-D3DXMATRIX matView;
-D3DXMATRIX matIdentity;
-D3DXMATRIX matViewPort;
-
-static D3DXPLANE m_frustum[6];
-
 extern void RenderListInit();
 extern void RenderListDeInit();
 extern void ThisFramesRenderingHasBegun(void);
@@ -204,7 +196,7 @@ bool CheckPointIsInFrustum(D3DXVECTOR3 *point)
 	// check if point is in front of each plane
 	for (int i = 0; i < 6; i++)
 	{
-		if (D3DXPlaneDotCoord(&m_frustum[i], point) < 0.0f)
+		if (D3DXPlaneDotCoord(&d3d.frustumPlanes[i], point) < 0.0f)
 		{
 			// its outside
 			return false;
@@ -219,48 +211,48 @@ bool CheckPointIsInFrustum(D3DXVECTOR3 *point)
 void BuildFrustum()
 {
 	D3DXMATRIX viewProjection;
-	D3DXMatrixMultiply(&viewProjection, &matView, &matProjection);
+	D3DXMatrixMultiply(&viewProjection, &d3d.matView, &d3d.matProjection);
 
 	// Left plane
-	m_frustum[0].a = viewProjection._14 + viewProjection._11;
-	m_frustum[0].b = viewProjection._24 + viewProjection._21;
-	m_frustum[0].c = viewProjection._34 + viewProjection._31;
-	m_frustum[0].d = viewProjection._44 + viewProjection._41;
+	d3d.frustumPlanes[0].a = viewProjection._14 + viewProjection._11;
+	d3d.frustumPlanes[0].b = viewProjection._24 + viewProjection._21;
+	d3d.frustumPlanes[0].c = viewProjection._34 + viewProjection._31;
+	d3d.frustumPlanes[0].d = viewProjection._44 + viewProjection._41;
 
 	// Right plane
-	m_frustum[1].a = viewProjection._14 - viewProjection._11;
-	m_frustum[1].b = viewProjection._24 - viewProjection._21;
-	m_frustum[1].c = viewProjection._34 - viewProjection._31;
-	m_frustum[1].d = viewProjection._44 - viewProjection._41;
+	d3d.frustumPlanes[1].a = viewProjection._14 - viewProjection._11;
+	d3d.frustumPlanes[1].b = viewProjection._24 - viewProjection._21;
+	d3d.frustumPlanes[1].c = viewProjection._34 - viewProjection._31;
+	d3d.frustumPlanes[1].d = viewProjection._44 - viewProjection._41;
 
 	// Top plane
-	m_frustum[2].a = viewProjection._14 - viewProjection._12;
-	m_frustum[2].b = viewProjection._24 - viewProjection._22;
-	m_frustum[2].c = viewProjection._34 - viewProjection._32;
-	m_frustum[2].d = viewProjection._44 - viewProjection._42;
+	d3d.frustumPlanes[2].a = viewProjection._14 - viewProjection._12;
+	d3d.frustumPlanes[2].b = viewProjection._24 - viewProjection._22;
+	d3d.frustumPlanes[2].c = viewProjection._34 - viewProjection._32;
+	d3d.frustumPlanes[2].d = viewProjection._44 - viewProjection._42;
 
 	// Bottom plane
-	m_frustum[3].a = viewProjection._14 + viewProjection._12;
-	m_frustum[3].b = viewProjection._24 + viewProjection._22;
-	m_frustum[3].c = viewProjection._34 + viewProjection._32;
-	m_frustum[3].d = viewProjection._44 + viewProjection._42;
+	d3d.frustumPlanes[3].a = viewProjection._14 + viewProjection._12;
+	d3d.frustumPlanes[3].b = viewProjection._24 + viewProjection._22;
+	d3d.frustumPlanes[3].c = viewProjection._34 + viewProjection._32;
+	d3d.frustumPlanes[3].d = viewProjection._44 + viewProjection._42;
 
 	// Near plane
-	m_frustum[4].a = viewProjection._13;
-	m_frustum[4].b = viewProjection._23;
-	m_frustum[4].c = viewProjection._33;
-	m_frustum[4].d = viewProjection._43;
+	d3d.frustumPlanes[4].a = viewProjection._13;
+	d3d.frustumPlanes[4].b = viewProjection._23;
+	d3d.frustumPlanes[4].c = viewProjection._33;
+	d3d.frustumPlanes[4].d = viewProjection._43;
 
 	// Far plane
-	m_frustum[5].a = viewProjection._14 - viewProjection._13;
-	m_frustum[5].b = viewProjection._24 - viewProjection._23;
-	m_frustum[5].c = viewProjection._34 - viewProjection._33;
-	m_frustum[5].d = viewProjection._44 - viewProjection._43;
+	d3d.frustumPlanes[5].a = viewProjection._14 - viewProjection._13;
+	d3d.frustumPlanes[5].b = viewProjection._24 - viewProjection._23;
+	d3d.frustumPlanes[5].c = viewProjection._34 - viewProjection._33;
+	d3d.frustumPlanes[5].d = viewProjection._44 - viewProjection._43;
 
 	// Normalize planes
 	for (int i = 0; i < 6; i++)
 	{
-		D3DXPlaneNormalize(&m_frustum[i], &m_frustum[i]);
+		D3DXPlaneNormalize(&d3d.frustumPlanes[i], &d3d.frustumPlanes[i]);
 	}
 }
 
@@ -2627,26 +2619,26 @@ void SetTransforms()
 	uint32_t wideScreenWidth = 852;
 
 	// create an identity matrix
-	D3DXMatrixIdentity(&matIdentity);
+	D3DXMatrixIdentity(&d3d.matIdentity);
 
-	D3DXMatrixIdentity(&matView);
+	D3DXMatrixIdentity(&d3d.matView);
 
 	// set up orthographic projection matrix
-	D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
+	D3DXMatrixOrthoLH(&d3d.matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 
 	// set up projection matrix
-	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(d3d.fieldOfView), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+	D3DXMatrixPerspectiveFovLH(&d3d.matProjection, D3DXToRadian(d3d.fieldOfView), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
 
 	// set up a viewport transform matrix
-	matViewPort = matIdentity;
+	d3d.matViewPort = d3d.matIdentity;
 
-	matViewPort._11 = (float)(ScreenDescriptorBlock.SDB_Width / 2);
-	matViewPort._22 = (float)((-ScreenDescriptorBlock.SDB_Height) / 2);
-	matViewPort._33 = (1.0f - 0.0f);
-	matViewPort._41 = (0 + matViewPort._11); // dwX + dwWidth / 2
-	matViewPort._42 = (float)(ScreenDescriptorBlock.SDB_Height / 2) + 0;
-	matViewPort._43 = 0.0f; // minZ
-	matViewPort._44 = 1.0f;
+	d3d.matViewPort._11 = (float)(ScreenDescriptorBlock.SDB_Width / 2);
+	d3d.matViewPort._22 = (float)((-ScreenDescriptorBlock.SDB_Height) / 2);
+	d3d.matViewPort._33 = (1.0f - 0.0f);
+	d3d.matViewPort._41 = (0 + d3d.matViewPort._11); // dwX + dwWidth / 2
+	d3d.matViewPort._42 = (float)(ScreenDescriptorBlock.SDB_Height / 2) + 0;
+	d3d.matViewPort._43 = 0.0f; // minZ
+	d3d.matViewPort._44 = 1.0f;
 }
 
 void FlipBuffers()
@@ -3001,16 +2993,18 @@ void ToggleWireframe()
 
 bool SetRenderStateDefaults()
 {
-/*
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC );
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC );
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-*/
-//	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 8);
-
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+
+#if 0 // anisotropic
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC);
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC);
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_ANISOTROPIC);
+
+	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 16);
+#endif
+
 /*
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP,	D3DTOP_MODULATE);
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1,	D3DTA_TEXTURE);

@@ -2575,7 +2575,7 @@ int* GetTxAnimArrayZ(int shape, int item)
 
 		if (pheader->PolyFlags & iflag_txanim)
 		{
-			return (int*) shape_textures[texture_defn_index];
+			return /*(int*)*/ shape_textures[texture_defn_index];
 		}
 
 		else return 0;
@@ -5247,10 +5247,6 @@ void DrawWaterFallPoly(VECTORCH *v)
 */
 }
 
-extern D3DXMATRIX matProjection;
-extern D3DXMATRIX matView;
-extern D3DXMATRIX matIdentity;
-
 void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 {
 	/* NOTES
@@ -5268,14 +5264,14 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 	planeSource.y = (float)ScreenDescriptorBlock.SDB_Height;
 	planeSource.z = 64.0f;
 
-	D3DXVec3Unproject(&planeLeft, &planeSource, &d3d.D3DViewport, &matProjection, &matView, &matIdentity);
+	D3DXVec3Unproject(&planeLeft, &planeSource, &d3d.D3DViewport, &d3d.matProjection, &d3d.matView, &d3d.matIdentity);
 
 	// bottom right
 	planeSource.x = (float)ScreenDescriptorBlock.SDB_Width;
 	planeSource.y = (float)ScreenDescriptorBlock.SDB_Height;
 	planeSource.z = 64.0f;
 
-	D3DXVec3Unproject(&planeRight, &planeSource, &d3d.D3DViewport, &matProjection, &matView, &matIdentity);
+	D3DXVec3Unproject(&planeRight, &planeSource, &d3d.D3DViewport, &d3d.matProjection, &d3d.matView, &d3d.matIdentity);
 
 	POLYHEADER fakeHeader2;
 	fakeHeader2.PolyFlags = iflag_transparent;

@@ -28,8 +28,6 @@
 
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 
-extern D3DXMATRIX viewMatrix;
-
 #define DB_LEVEL 3
 
 /* Davew 27/7/98 --------------------------------------------------------------
