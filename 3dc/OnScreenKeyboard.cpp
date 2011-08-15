@@ -24,7 +24,7 @@
 
 #include "OnScreenKeyboard.h"
 #include "logString.h"
-#include "font2.h"
+#include "Fonts.h"
 #include "renderer.h"
 #include "stdio.h"
 #include <string>
@@ -228,7 +228,7 @@ void Osk_Draw()
 
 //				int positionX = pos_x + ((keyVector.at(index).width - 16) / 2);
 
-				Font_DrawText(Osk_GetKeyLabel(index), pos_x + (keyVector.at(index).width / 2), pos_y + space_between_keys, RCOLOR_ARGB(255, 255, 255, 0), FONT_SMALL);
+				Font_DrawText(Osk_GetKeyLabel(index), pos_x + (keyVector.at(index).width / 2), pos_y + space_between_keys, RCOLOR_ARGB(255, 255, 255, 0), kFontSmall);
 			}
 
 			pos_x += (keyVector.at(index).width + space_between_keys);

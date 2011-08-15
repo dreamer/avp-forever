@@ -29,7 +29,7 @@
 #include "configFile.h"
 #include "console.h"
 #include "networking.h"
-#include "font2.h"
+#include "Fonts.h"
 #include <XInput.h> // XInput API
 #include "AvP_UserProfile.h"
 
@@ -823,6 +823,13 @@ void WriteMenuTextures()
 		D3DXSaveTextureToFileA(filename, D3DXIFF_PNG, AvPMenuGfxStorage[i].menuTexture, NULL);
 	}
 #endif
+}
+
+extern bool frustumCull;
+
+void ToggleFrustumCull()
+{
+	frustumCull = !frustumCull;
 }
 
 void PrintD3DMatrix(const char* name, D3DXMATRIX &mat)
@@ -2461,6 +2468,7 @@ bool InitialiseDirect3D()
 	Con_AddCommand("r_togglewireframe", ToggleWireframe);
 	Con_AddCommand("r_setfov", SetFov);
 	Con_AddCommand("r_texlist", Tex_ListTextures);
+	Con_AddCommand("fcull", ToggleFrustumCull);
 
 	// create vertex declarations
 	d3d.mainDecl = new VertexDeclaration;

@@ -20,13 +20,23 @@
 #ifndef _projfont
 #define _projfont 1
 
-	#ifndef _font_h_included
-	#include "font.h"
-	#endif
+	// this was in the old font.h
+	typedef enum fonts
+	{
+		MENU_FONT_1,
+		DATABASE_FONT_DARK,
+		DATABASE_FONT_LITE,
+		DATABASE_MESSAGE_FONT,
+		IntroFont_Dark,
+
+		NUM_FONTS,
+
+	} AVP_FONTS;
 
 /* Version settings *****************************************************/
 
 /* Constants  ***********************************************************/
+
 	#define IndexedFonts_MAX_NUMBER_OF_FONTS ( NUM_FONTS )
 
 /* Macros ***************************************************************/

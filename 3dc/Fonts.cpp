@@ -27,52 +27,51 @@
  * from http://www.codehead.co.uk/cbfg/
  */
 
-#include "renderer.h"
 #include "logString.h"
-#include "font2.h"
+#include "Fonts.h"
 #include "TextureManager.h"
 #include <iostream>
 #include <fstream>
 
-const int kFontDATsize = 273; // 273 byte .dat file
+const int kFontDATsize = 273; // size in bytes of a font .dat file
+const int kNumChars = 256;    // number of ASCII characters
 
 struct Font
 {
-	enum FONT_TYPE  type;
-	texID_t	    textureID;
-	uint32_t	mapWidth;
-	uint32_t	mapHeight;
-	uint32_t	cellWidth;
-	uint32_t	cellHeight;
-	char		startChar;
-	char		charWidths[256];
+	enum eFontTypes  type;
+	texID_t  textureID;
+	uint32_t mapWidth;
+	uint32_t mapHeight;
+	uint32_t cellWidth;
+	uint32_t cellHeight;
+	char     startChar;
+	char     charWidths[kNumChars];
 };
 
-static Font Fonts[NUM_FONT_TYPES];
+static Font Fonts[kNumFontTypes];
 
 void Font_Release()
 {
-	for (uint32_t i = 0; i < NUM_FONT_TYPES; i++)
+	for (uint32_t i = 0; i < kNumFontTypes; i++)
 	{
 		Tex_Release(Fonts[i].textureID);
 	}
 }
 
-void Font_Init()
+bool Font_Init()
 {
-	Fonts[FONT_SMALL].textureID = Tex_CreateFromFile("aa_font_512.png");
+	Fonts[kFontSmall].textureID = Tex_CreateFromFile("aa_font_512.png");
 
 	uint8_t *srcPtr = NULL;
 	uint32_t pitch = 0;
 
 	// calculate widths
-	if (!Tex_Lock(Fonts[FONT_SMALL].textureID, &srcPtr, &pitch))
+	if (!Tex_Lock(Fonts[kFontSmall].textureID, &srcPtr, &pitch))
 	{
-//		Con_PrintError("CalculateWidthsOfAAFont() failed - Can't lock texture");
-		return;
+		return false;
 	}
 
-	uint8_t theWidths[256];
+	uint8_t theWidths[kNumChars];
 
 	uint8_t *s = NULL;
 
@@ -80,7 +79,7 @@ void Font_Init()
 
 	uint32_t width = 0;
 
-	for (uint32_t i = 0; i < 256; i++)
+	for (int i = 0; i < kNumChars; i++)
 	{
 		uint32_t row = i / 16; // get row
 		uint32_t column = i % 16; // get column from remainder value
@@ -141,7 +140,7 @@ void Font_Init()
 		}
 
 		// colour the position where max width was found
-		if (theWidth) 
+		if (theWidth)
 		{
 /*
 			// highlight the width
@@ -156,13 +155,13 @@ void Font_Init()
 		theWidths[i] = width+3;
 	}
 
-	Tex_Unlock(Fonts[FONT_SMALL].textureID);
- 
-//	D3DXSaveTextureToFile("c:/ATI/test.png", D3DXIFF_PNG, Tex_GetTexture(Fonts[FONT_SMALL].textureID), NULL);
+	Tex_Unlock(Fonts[kFontSmall].textureID);
+
+//	D3DXSaveTextureToFile("c:/ATI/test.png", D3DXIFF_PNG, Tex_GetTexture(Fonts[kFontSmall].textureID), NULL);
 /*
 	char buf[100];
 
-	for (int i = 0; i < 256; i++)
+	for (int i = 0; i < kNumChars; i++)
 	{
 		sprintf(buf, "char: %c = %d\n", (char)i+32, theWidths[i]);
 		OutputDebugString(buf);
@@ -170,16 +169,16 @@ void Font_Init()
 */
 	theWidths[0] = 10;
 
-	for (int i = 0; i < 256; i++)
+	for (int i = 0; i < kNumChars; i++)
 	{
-		Fonts[FONT_SMALL].charWidths[i] = theWidths[i];
+		Fonts[kFontSmall].charWidths[i] = theWidths[i];
 	}
 
-	Fonts[FONT_SMALL].cellHeight = 32;
-	Fonts[FONT_SMALL].cellWidth = 32;
-	Fonts[FONT_SMALL].mapHeight = 512;
-	Fonts[FONT_SMALL].mapWidth = 512;
-	Fonts[FONT_SMALL].startChar = ' ';
+	Fonts[kFontSmall].cellHeight = 32;
+	Fonts[kFontSmall].cellWidth  = 32;
+	Fonts[kFontSmall].mapHeight  = 512;
+	Fonts[kFontSmall].mapWidth   = 512;
+	Fonts[kFontSmall].startChar  = ' ';
 
 /*
 	// write data file
@@ -200,7 +199,7 @@ void Font_Init()
 		char start = ' ';
 		outfile.write(reinterpret_cast<char*>(&val), sizeof(char));
 
-		outfile.write(reinterpret_cast<char*>(&theWidths), 256);
+		outfile.write(reinterpret_cast<char*>(&theWidths), kNumChars);
 		outfile.close();
 	}
 */
@@ -219,36 +218,39 @@ void Font_Init()
 
 		if (fileLength == kFontDATsize)
 		{
-			infile.read(reinterpret_cast<char*>(&Fonts[FONT_SMALL].mapWidth),   4);
-			infile.read(reinterpret_cast<char*>(&Fonts[FONT_SMALL].mapHeight),  4);
-			infile.read(reinterpret_cast<char*>(&Fonts[FONT_SMALL].cellWidth),  4);
-			infile.read(reinterpret_cast<char*>(&Fonts[FONT_SMALL].cellHeight), 4);
-			infile.read(reinterpret_cast<char*>(&Fonts[FONT_SMALL].startChar),  1);
-			infile.read(reinterpret_cast<char*>(&Fonts[FONT_SMALL].charWidths), 256);
+			infile.read(reinterpret_cast<char*>(&Fonts[kFontSmall].mapWidth),   4);
+			infile.read(reinterpret_cast<char*>(&Fonts[kFontSmall].mapHeight),  4);
+			infile.read(reinterpret_cast<char*>(&Fonts[kFontSmall].cellWidth),  4);
+			infile.read(reinterpret_cast<char*>(&Fonts[kFontSmall].cellHeight), 4);
+			infile.read(reinterpret_cast<char*>(&Fonts[kFontSmall].startChar),  1);
+			infile.read(reinterpret_cast<char*>(&Fonts[kFontSmall].charWidths), kNumChars);
 		}
 	}
 #endif
+
 	// get the font texture width and height
-	Tex_GetDimensions(Fonts[FONT_SMALL].textureID, Fonts[FONT_SMALL].mapWidth, Fonts[FONT_SMALL].mapHeight);
+	Tex_GetDimensions(Fonts[kFontSmall].textureID, Fonts[kFontSmall].mapWidth, Fonts[kFontSmall].mapHeight);
+
+	return true;
 }
 
 uint32_t Font_GetCharWidth(char c)
 {
-	return Fonts[FONT_SMALL].charWidths[c];
+	return Fonts[kFontSmall].charWidths[c];
 }
 
 uint32_t Font_GetCharHeight()
 {
-	return Fonts[FONT_SMALL].cellHeight;
+	return Fonts[kFontSmall].cellHeight;
 }
 
 uint32_t Font_GetStringWidth(const std::string &text)
 {
 	uint32_t width = 0;
 
-	for (int i = 0; i < text.size(); i++)
+	for (size_t i = 0; i < text.size(); i++)
 	{
-		width += Fonts[FONT_SMALL].charWidths[text[i]];
+		width += Fonts[kFontSmall].charWidths[text[i]];
 	}
 
 	return width;
@@ -261,13 +263,13 @@ uint32_t Font_DrawCenteredText(const std::string &text)
 	int x = (R_GetScreenWidth()/2) - (textWidth/2);
 	int y = 40;
 
-	return Font_DrawText(text, x, y, RGB_MAKE(255, 255, 255), FONT_SMALL);
+	return Font_DrawText(text, x, y, RGB_MAKE(255, 255, 255), kFontSmall);
 }
 
-uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t colour, enum FONT_TYPE_2 fontType)
+uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, RCOLOR colour, enum eFontTypes fontType)
 {
-	float RecipW = (1.0f / Fonts[FONT_SMALL].mapWidth);
-	float RecipH = (1.0f / Fonts[FONT_SMALL].mapHeight);
+	float RecipW = (1.0f / Fonts[kFontSmall].mapWidth);
+	float RecipH = (1.0f / Fonts[kFontSmall].mapHeight);
 
 	uint32_t charIndex = 0;
 	uint32_t charHeight = Font_GetCharHeight();
@@ -276,13 +278,13 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 	{
 		// get the current char we're at in the string
 		char c = text[charIndex] - 32;
-		uint32_t charWidth = Fonts[FONT_SMALL].charWidths[c];
+		uint32_t charWidth = Fonts[kFontSmall].charWidths[c];
 
 		uint32_t row = (uint32_t)(c / 16);  // get row
 		uint32_t column = c % 16;           // get column from remainder value
 
-		uint32_t tex_x = column * Fonts[FONT_SMALL].cellWidth;
-		uint32_t tex_y = row * Fonts[FONT_SMALL].cellHeight;
+		uint32_t tex_x = column * Fonts[kFontSmall].cellWidth;
+		uint32_t tex_y = row * Fonts[kFontSmall].cellHeight;
 
 		// generate the texture UVs for this character
 		float uvArray[8];
@@ -303,13 +305,13 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 		uvArray[6] = RecipW * (tex_x + charWidth);
 		uvArray[7] = RecipH * tex_y;
 
-		DrawFontQuad(x, y, charWidth, charHeight, Fonts[FONT_SMALL].textureID, uvArray, colour, TRANSLUCENCY_NORMAL);
+		DrawFontQuad(x, y, charWidth, charHeight, Fonts[kFontSmall].textureID, uvArray, colour, TRANSLUCENCY_NORMAL);
 
 		bool fixedWidth = false;
 
 		if (fixedWidth)
 		{
-			x += Fonts[FONT_SMALL].cellWidth;
+			x += Fonts[kFontSmall].cellWidth;
 		}
 		else
 		{
@@ -321,4 +323,3 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t
 
 	return 0;
 }
-

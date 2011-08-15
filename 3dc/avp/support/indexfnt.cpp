@@ -850,7 +850,7 @@ IndexedFont_Kerned :: CalcSize
 	return R2Size_Return;
 }
 
-
+#if 0
 void IndexedFont_Proportional_PF :: RenderChar_Clipped
 (
 	struct r2pos& R2Pos_Cursor,
@@ -977,12 +977,13 @@ void IndexedFont_Proportional_PF :: RenderChar_Unclipped
 		}
 	}
 }
+#endif
 
-
+#if 0
 /*static*/ void IndexedFont_Proportional_PF :: PFLoadHook
 (
-	FontIndex I_Font_New,
-	PFFONT *pffont_New
+	FontIndex I_Font_New/*,
+	PFFONT *pffont_New*/
 )
 {
 	/* PRECONDITION */
@@ -1049,7 +1050,6 @@ IndexedFont_Proportional_PF :: IndexedFont_Proportional_PF
 				MaxWidth_Val = ThisWidth;
 			}
 		}
-
 	}
 }
 
@@ -1058,27 +1058,27 @@ IndexedFont_Proportional_PF :: IndexedFont_Proportional_PF
 
 void INDEXFNT_PFLoadHook
 (
-	FontIndex I_Font_New,
-	PFFONT *pffont_New
+	FontIndex I_Font_New/*,
+	PFFONT *pffont_New*/
 )
 {
 	/* PRECONDITION */
 	{
 		GLOBALASSERT( I_Font_New < IndexedFonts_MAX_NUMBER_OF_FONTS );
-		GLOBALASSERT( pffont_New );
+//		GLOBALASSERT( pffont_New );
 	}
 
 	/* CODE */
 	{
 		IndexedFont_Proportional_PF :: PFLoadHook
 		(
-			I_Font_New,
-			pffont_New // PFFONT *pffont_New
+			I_Font_New/*,
+			pffont_New // PFFONT *pffont_New*/
 		);
 
 	}
 }
-
+#endif
 
 void IndexedFont_HUD :: RenderString_Clipped
 (
@@ -1128,6 +1128,7 @@ void IndexedFont_HUD :: RenderString_Clipped
 	}
 //#endif
 }
+
 
 void IndexedFont_HUD :: RenderString_Unclipped
 (
@@ -1283,29 +1284,3 @@ void IndexedFont_HUD :: RenderChar_Unclipped
 }
 
 /* Internal function definitions ***********************************/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

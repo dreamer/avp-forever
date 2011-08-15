@@ -8,8 +8,9 @@
 
 #include "aw.h"
 
+#if 0
 /************* fonts. not set up yet************/
-
+/*
 typedef enum fonts
 {
 	MENU_FONT_1,
@@ -23,7 +24,7 @@ typedef enum fonts
 	NUM_FONTS,
 
 }AVP_FONTS;
-
+*/
 #define MAXNUM_CHARS_IN_FONT (0x7e)
 
 
@@ -66,7 +67,7 @@ typedef struct
 	
 }FONT_FLAGS;
 
-
+#if 0
 typedef struct pffont
 {
 	char filename[100];				 						/*compile in -filename */
@@ -156,6 +157,7 @@ typedef struct pffont
 	{
 		return (GetOffset() + num_chars_in_font -1);
 	}
+#endif
 
 // platform independent externs
 extern void LoadAllFonts();
@@ -175,7 +177,8 @@ extern void LoadAllFonts();
 //extern void FontUnlock(PFFONT const * pFont);
 
 // the array of all the Fonts int the game
-extern PFFONT AvpFonts[];
+//extern PFFONT AvpFonts[];
+#endif
 
 #endif /* _font_h_included */
 

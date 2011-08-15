@@ -22,25 +22,28 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _included_font2_h_
-#define _included_font2_h_
+#ifndef _included_Fonts_h_
+#define _included_Fonts_h_
 
 #include <string>
 #include <stdint.h>
+#include "renderer.h"
 
-enum FONT_TYPE_2 // fixme
+const int kNumFontTypes = 2;
+
+enum eFontTypes
 {
-	FONT_SMALL,
-	FONT_BIG,
-	NUM_FONT_TYPES
+	kFontSmall,
+	kFontBig
 };
 
-void Font_Init();
-uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, uint32_t colour, enum FONT_TYPE_2 fontType);
+bool Font_Init();
+void Font_Release();
+uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, RCOLOR colour, enum eFontTypes fontType);
 uint32_t Font_GetCharWidth(char c);
 uint32_t Font_GetCharHeight();
 uint32_t Font_GetStringWidth(const std::string &text);
 uint32_t Font_DrawCenteredText(const std::string &text);
-void Font_Release();
+
 
 #endif

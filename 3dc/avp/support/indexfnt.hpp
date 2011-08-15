@@ -393,8 +393,6 @@
 			ProjChar currentProjCh,
 			ProjChar nextProjCh
 		) const = 0;
-		
-//		virtual IDirect3DSurface9 * GetImagePtr(void) const = 0;
 
 	protected:
 		IndexedFont_Kerned
@@ -420,7 +418,7 @@
 				GetHeight()
 			);
 		}
-
+#if 0
 	// Interface to the old PFFONT system written by Roxby and loathed
 	// by all programmers and artists who've since worked with it...
 	class IndexedFont_Proportional_PF : public IndexedFont_Proportional
@@ -452,34 +450,34 @@
 
 		static void PFLoadHook
 		(
-			FontIndex I_Font_New,
-			PFFONT *pffont_New
+			FontIndex I_Font_New/*,
+			PFFONT *pffont_New*/
 		);
 		static void PFUnLoadHook
 		(
 			FontIndex I_Font_Old
 		);
 
-		const PFFONT& GetPFFont(void) const;
+//		const PFFONT& GetPFFont(void) const;
 
 	private:
 		IndexedFont_Proportional_PF
 		(
-			FontIndex I_Font_New,
-			PFFONT *pffont_New
+			FontIndex I_Font_New/*,
+			PFFONT *pffont_New*/
 		);
 
-		PFFONT *pffont_Val;
+//		PFFONT *pffont_Val;
 		int MaxWidth_Val;
-
 	};
 
 	// Inline methods:
+/*
 		inline const PFFONT& IndexedFont_Proportional_PF::GetPFFont(void) const
 		{
 			return *pffont_Val;
 		}
-
+*/
 		// both inline and virtual...
 		inline bool IndexedFont_Proportional_PF::bCanRender( ProjChar ProjCh_In ) const
 		{
@@ -500,18 +498,19 @@
 			return MaxWidth_Val;
 		}
 
-
+#endif
 
 	#endif // __cplusplus
 /* Exported globals *****************************************************/
 
 /* Function prototypes **************************************************/
+#if 0
 		extern void INDEXFNT_PFLoadHook
 		(
-			FontIndex I_Font_New,
-			PFFONT *pffont_New
+			FontIndex I_Font_New/*,
+			PFFONT *pffont_New*/
 		);
-
+#endif
 /* End of the header ****************************************************/
 
 

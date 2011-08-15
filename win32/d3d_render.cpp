@@ -2,7 +2,7 @@
 #include "OnScreenKeyboard.h"
 #include "TextureManager.h"
 #include "r2base.h"
-#include "font2.h"
+#include "Fonts.h"
 #include <vector>
 #include <algorithm>
 #include "logString.h"
@@ -32,6 +32,8 @@
 #include "frustum.h"
 #include "d3d_render.h"
 #include "bh_types.h"
+
+bool frustumCull = false;
 
 #define FMV_ON 0
 #define FMV_SIZE 128
@@ -317,52 +319,6 @@ static bool ExecuteBuffer()
 	// sort the list of render objects
 	particleList->Sort();
 	mainList->Sort();
-
-	// check if we're zooming in (Predator zoom)
-//	if (currentCameraZoomScale != CameraZoomScale)
-	{
-//		R_CameraZoom(CameraZoomScale);
-//		currentCameraZoomScale = CameraZoomScale;
-
-//		D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(d3d.fieldOfView * CameraZoomScale * p), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
-
-		// manually generate the perspective matrix as per http://msdn.microsoft.com/en-us/library/bb205350(VS.85).aspx
-		float fovY = D3DXToRadian(d3d.fieldOfView * CameraZoomScale);
-		float aspect = (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height;
-		float yScale = cot(fovY/2.0f);
-
-		float originalYScale = yScale;
-		yScale *= p;
-
-		float xScale = originalYScale / aspect;
-		aspect /= p;
-
-		xScale *= o;
-
-		// column 1
-		d3d.matProjection._11 = xScale;
-		d3d.matProjection._21 = 0.0f;
-		d3d.matProjection._31 = 0.0f;
-		d3d.matProjection._41 = 0.0f;
-
-		// column 2
-		d3d.matProjection._12 = 0.0f;
-		d3d.matProjection._22 = yScale;
-		d3d.matProjection._32 = 0.0f;
-		d3d.matProjection._42 = 0.0f;
-
-		// column 3
-		d3d.matProjection._13 = 0.0f;
-		d3d.matProjection._23 = 0.0f;
-		d3d.matProjection._33 = zf/(zf-zn);
-		d3d.matProjection._43 = -zn*zf/(zf-zn);
-
-		// column 4
-		d3d.matProjection._14 = 0.0f;
-		d3d.matProjection._24 = 0.0f;
-		d3d.matProjection._34 = 1.0f;
-		d3d.matProjection._44 = 0.0f;
-	}
 
 	if (mainList->GetSize())
 	{
@@ -1110,6 +1066,46 @@ void TransformToViewspace(VECTORCHF *vector)
 	vector->vz = output.z;
 }
 
+void UpdateProjectionMatrix()
+{
+	// manually generate the perspective matrix as per http://msdn.microsoft.com/en-us/library/bb205350(VS.85).aspx
+	float fovY = D3DXToRadian(d3d.fieldOfView * CameraZoomScale);
+	float aspect = (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height;
+	float yScale = cot(fovY/2.0f);
+
+	float originalYScale = yScale;
+	yScale *= p;
+
+	float xScale = originalYScale / aspect;
+	aspect /= p;
+
+	xScale *= o;
+
+	// column 1
+	d3d.matProjection._11 = xScale;
+	d3d.matProjection._21 = 0.0f;
+	d3d.matProjection._31 = 0.0f;
+	d3d.matProjection._41 = 0.0f;
+
+	// column 2
+	d3d.matProjection._12 = 0.0f;
+	d3d.matProjection._22 = yScale;
+	d3d.matProjection._32 = 0.0f;
+	d3d.matProjection._42 = 0.0f;
+
+	// column 3
+	d3d.matProjection._13 = 0.0f;
+	d3d.matProjection._23 = 0.0f;
+	d3d.matProjection._33 = zf/(zf-zn);
+	d3d.matProjection._43 = -zn*zf/(zf-zn);
+
+	// column 4
+	d3d.matProjection._14 = 0.0f;
+	d3d.matProjection._24 = 0.0f;
+	d3d.matProjection._34 = 1.0f;
+	d3d.matProjection._44 = 0.0f;
+}
+
 void UpdateViewMatrix(float *viewMat)
 {
 	D3DXVECTOR3 vecRight	(viewMat[0], viewMat[1], viewMat[2]);
@@ -1149,9 +1145,6 @@ void UpdateViewMatrix(float *viewMat)
 	d3d.matView._41 = -D3DXVec3Dot(&vecPosition, &vecRight);
 	d3d.matView._42 = -D3DXVec3Dot(&vecPosition, &vecUp);
 	d3d.matView._43 = -D3DXVec3Dot(&vecPosition, &vecFront);
-
-	// move this later (we may not catch projection matrix changes otherwise)
-	BuildFrustum();
 }
 
 void DrawCoronas()
@@ -1309,50 +1302,38 @@ void DrawParticles()
 	RenderPolygon.NumberOfVertices = numVertsBackup;
 }
 
-#if 0 // bjd - commenting out
-void SetFogDistance(int fogDistance)
-{
-	if (fogDistance > 10000)
-		fogDistance = 10000;
-
-	fogDistance += 5000;
-	fogDistance = 2000;
-	CurrentRenderStates.FogDistance = fogDistance;
-//	textprint("fog distance %d\n",fogDistance);
-}
-#endif
-
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
 	// bjd - This is the function responsible for drawing level geometry and the players weapon
-#if 0
-	bool valid = false;
 
-	// test frustum culling for each point
-	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
+	if (frustumCull)
 	{
-		RENDERVERTEX *vertices = &renderVerticesPtr[i];
+		bool valid = false;
 
-		D3DXVECTOR3 temp;
-
-		temp.x = (float)vertices->X;
-		temp.y = (float)vertices->Y;
-		temp.z = (float)vertices->Z;
-
-		if (CheckPointIsInFrustum(&temp) == true)
+		// test frustum culling for each point
+		for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 		{
-			// true
-			valid = true;
-			break;
+			RENDERVERTEX *vertices = &renderVerticesPtr[i];
+
+			D3DXVECTOR3 point;
+			point.x = (float)vertices->X;
+			point.y = (float)-vertices->Y;
+			point.z = (float)vertices->Z;
+
+			if (CheckPointIsInFrustum(&point) == true)
+			{
+				valid = true;
+				break;
+			}
+		}
+
+		// lets bail out of this function and not draw this poly if none of the points are inside the view frustum
+		if (valid == false)
+		{
+			return;
 		}
 	}
 
-	// lets bail out of this function and not draw this poly if none of the points are inside the view frustum
-	if (valid == false)
-	{
-		return;
-	}
-#endif
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
 	texID_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
