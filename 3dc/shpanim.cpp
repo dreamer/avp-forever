@@ -180,11 +180,9 @@ void DoShapeAnimation (DISPLAYBLOCK * dptr)
 
 void DoAllShapeAnimations()
 {
-	int i;
-
-	for (i=0; i<NumActiveBlocks; i++)
+	for (int i = 0; i < NumActiveBlocks; i++)
 	{
-		DISPLAYBLOCK * dptr = ActiveBlockList[i];
+		DISPLAYBLOCK *dptr = ActiveBlockList[i];
 
 		if (dptr->ShapeAnimControlBlock)
 		{

@@ -175,7 +175,6 @@ class AwIffLoader : public AwTl::TexFileLoader
 
 		virtual AwTl::Colour * GetPalette();
 
-
 		virtual AwTl::PtrUnion GetRowPtr(unsigned nRow);
 
 		virtual void LoadNextRow(AwTl::PtrUnion pRow);

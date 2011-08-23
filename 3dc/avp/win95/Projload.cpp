@@ -1273,9 +1273,9 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
  // Sort out local scale //
  //////////////////////////
 	set_local_scale(h,flags);
-	
+
 	Set_Progress_Bar_Position(progress_start);
-	
+
 	//SelectGenTexDirectory(ITI_TEXTURE);
 
 	#if 0 //disable the multiple image group stuff
@@ -1284,7 +1284,7 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 		InitialiseTextures();
 	}
 	#endif
-	
+
 	/*find this rif's sound directory*/
 	Rif_Sound_Directory = 0;
 	Sound_Directory_Chunk* dir_chunk = (Sound_Directory_Chunk*)h->envd->lookup_single_child("SOUNDDIR");
@@ -1299,7 +1299,7 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 	List <Object_ShapeNum_Pair *> low_osnp_list;
 	List <Object_Chunk *> obl;
 	h->fc->list_objects(&obl);
-	
+
 	int NumObjectsToLoad = obl.size(); //for progress_bar
 	int NumObjectsLoaded = 0;
 
@@ -1336,10 +1336,10 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 		//add the prelighting data to the shape
 
 		Shape_Vertex_Intensities_Chunk * svic = 0;
-		
+
 		List<Chunk *> cl;
 		osnp->ob->lookup_child ("SHPVTINT",cl);
-		
+
 		for (LIF<Chunk *> svici(&cl); !svici.done(); svici.next())
 		{
 			Shape_Vertex_Intensities_Chunk * temp_svic = (Shape_Vertex_Intensities_Chunk *) svici();
@@ -1349,7 +1349,7 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 				break;
 			}
 		}
-		
+
 		if (svic)
 		{
 			mainshapelist[osnp->sh_num]->sh_extraitemdata = (EXTRAITEMDATA *)PoolAllocateMem(12 * svic->num_vertices);
@@ -1366,7 +1366,7 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 				int ig = svic->intensity_array[vn]>>8 &0xff;
 				int ib = svic->intensity_array[vn] &0xff;
 				int mag = (int)sqrt((ir*ir+ig*ig+ib*ib)/3.0);
-				
+
 				mainshapelist[osnp->sh_num]->sh_extraitemdata[vn].EID_VertexI = svic->intensity_array[vn] + (mag<<24);
 			}
 			mainshapelist[osnp->sh_num]->shapeflags |= ShapeFlag_PreLit;
@@ -1395,7 +1395,7 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 	}
 
 	local_scale=temp_scale;
-	
+
 	if(!(flags & CCF_DONT_INITIALISE_TEXTURES))
 	{
 		//currently on the occasions this flag is used , the textures are shared with the level rif.
@@ -1427,7 +1427,7 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 			low_detail_array[i]=0;
 		}
 		int num_detail_level=0;
-		
+
 		Object_ShapeNum_Pair* osnp=osnp_lif();
 		//find all the low detail shapes for this shape;
 		for(LIF<Object_ShapeNum_Pair *> low_osnp_lif(&low_osnp_list);!low_osnp_lif.done();)
@@ -1578,7 +1578,6 @@ HIERARCHY_VARIANT_DATA* GetHierarchyAlternateShapeSetCollectionFromLibrary(const
 {
 	for (LIF<Global_Hierarchy_Store *> ghli(&Global_Hierarchy_Library); !ghli.done(); ghli.next())
 	{
-
 		if (!_stricmp (ghli()->riffname, rif_name))
 		{
 			//found the appropriate hierarchy library
@@ -1586,7 +1585,7 @@ HIERARCHY_VARIANT_DATA* GetHierarchyAlternateShapeSetCollectionFromLibrary(const
 
 			if(hier->num_shape_collections==0) return 0;
 
-			if(collection_index<=0) 
+			if(collection_index<=0)
 			{
 				if(hier->random_shape_colls.size()==0) return 0;
 
@@ -1610,7 +1609,6 @@ HIERARCHY_SHAPE_REPLACEMENT* GetHierarchyAlternateShapeFromId(const char* rif_na
 
 	for (LIF<Global_Hierarchy_Store *> ghli(&Global_Hierarchy_Library); !ghli.done(); ghli.next())
 	{
-
 		if (!_stricmp (ghli()->riffname, rif_name))
 		{
 			//found the appropriate hierarchy library
@@ -1685,9 +1683,9 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 		//therefore only clear the fast files if the flag is not set.
 		ffclose_almost_all();
 	}
-	
+
 	if (INVALID_RIFFHANDLE == h || !h->fc) return(FALSE);
-	
+
 	if (flags & CCF_LOAD_AS_HIERARCHY_IF_EXISTS)
 	{
 		if (h->fc->count_children("OBJCHIER"))
@@ -1715,7 +1713,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 	if (flags & CCF_ENVIRONMENT)
 	{
 		load_rif_bitmaps(h,flags);
-		
+
 		// Load in the palette, tlt, and set up lookup table for coloured polys
 
 		PaletteMapTable = 0;
@@ -1752,8 +1750,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 	** one array of modules and a        **
 	** pointer to an array of modules    **
 	**-----------------------------------*/
-			
-		
+
 		//count the modules
 		int num_modules=0;
 		{
@@ -1775,7 +1772,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 			memoryInitialisationFailure = 1;
 			return FALSE;
 		}
-		
+
 		MainScene.sm_marray = (MODULE **) PoolAllocateMem (sizeof(MODULE*) * (num_modules + 3)); // bjd - x64
 		if (!MainScene.sm_marray)
 		{
@@ -1791,7 +1788,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 
 		MainScene.sm_module += 2;
 		MainScene.sm_marray += 1;
-		
+
 		int i;
 		for (i=0; i<num_modules; i++)
 		{
@@ -1800,7 +1797,6 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 
 			MainScene.sm_module[i].m_sound_reverb=env_reverb;
 			MainScene.sm_module[i].m_sound_env_index=env_sound_type;
-
 		}
 
 		MainScene.sm_module[i] = Term_Module;
@@ -1808,7 +1804,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 		AIModuleArraySize=0;
 
 		// we'll set the rest up later !!!
-		
+
 	/*-------------------------------------**
 	** Load in shapes to the mainshapelist **
 	**-------------------------------------*/
@@ -1820,28 +1816,26 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 		List<Shape_Chunk*> shape_list;
 		List<Object_Chunk*> object_list;
 		h->fc->list_shapes(&shape_list);
-		
+
 		int NumShapesToLoad=shape_list.size(); //for progress_bar
 		int NumShapesLoaded=0;
-		
+
 		for(LIF<Shape_Chunk*> shplif(&shape_list);!shplif.done();shplif.next())
 		{
-			
 			if((NumShapesLoaded & 0xf)==0)
 			{
 				//update bar every 16 objects
 				Set_Progress_Bar_Position((int)(progress_start+progress_interval*((.6*NumShapesLoaded)/NumShapesToLoad)));
 			}
-			
+
 			NumShapesLoaded++;
-			
+
 			object_list=shplif()->list_assoc_objs();
 			if(object_list.size())
 			{
 				if(shplif()->get_header()->flags & SHAPE_FLAG_EXTERNALFILE)	
 				{
-					//only create one copy of the shape for imported objects
-					
+					//only create one copy of the shape for imported objects	
 					#if SupportMorphing && LOAD_MORPH_SHAPES
 					db_logf3(("Copying shape to shape list"));
 					CTM_ReturnType rt_temp = copy_to_mainshapelist(h,shplif(),flags,0);
@@ -1858,7 +1852,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 					{
 						AnimationShape=list_pos;
 					}
-					
+
 					for(LIF<Object_Chunk*> oblif(&object_list);!oblif.done();oblif.next())
 					{
 						Object_Chunk* ob=oblif();	
@@ -1889,13 +1883,13 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 						int list_pos = copy_to_mainshapelist(h,shplif(),flags,&ob->object_data);
 						int start_shape_no = list_pos;
 						#endif
-				
+
 						//see if object has prelighting data
 						Shape_Vertex_Intensities_Chunk * svic = 0;
-				
+
 						List<Chunk *> cl;
 						ob->lookup_child ("SHPVTINT",cl);
-				
+
 						for (LIF<Chunk *> svici(&cl); !svici.done(); svici.next())
 						{
 							Shape_Vertex_Intensities_Chunk * temp_svic = (Shape_Vertex_Intensities_Chunk *) svici();
@@ -1905,7 +1899,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 								break;
 							}
 						}
-				
+
 						if (svic)
 						{
 							//this object has prelighting , so set up extra item data
@@ -1914,18 +1908,17 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 							{
 								memoryInitialisationFailure = 1;
 								return FALSE;
-							}					
+							}
 
 							for (int vn = 0; vn < svic->num_vertices; vn++) 
 							{
 								//convert coloured light to a brightness value
 								int ir=svic->intensity_array[vn]>>16;
-							 	int ig=svic->intensity_array[vn]>>8 &0xff;
-							 	int ib=svic->intensity_array[vn] &0xff;
-							 	int mag =(int)sqrt((ir*ir+ig*ig+ib*ib)/3.0);
-								
-							 	mainshapelist[list_pos]->sh_extraitemdata[vn].EID_VertexI = svic->intensity_array[vn] + (mag<<24);
-								
+								int ig=svic->intensity_array[vn]>>8 &0xff;
+								int ib=svic->intensity_array[vn] &0xff;
+								int mag =(int)sqrt((ir*ir+ig*ig+ib*ib)/3.0);
+
+								mainshapelist[list_pos]->sh_extraitemdata[vn].EID_VertexI = svic->intensity_array[vn] + (mag<<24);
 							}
 
 							mainshapelist[list_pos]->shapeflags |= ShapeFlag_PreLit;
@@ -1936,12 +1929,12 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 						{
 							AnimationShape=list_pos;
 						}
-				
+
 						if (ob->get_header()->flags & OBJECT_FLAG_PLACED_OBJECT)
 						{
 							deal_with_placed_object(ob, start_shape_no, AnimationShape);
 						}
-						else 
+						else
 						{
 							copy_to_module (ob, mod_pos, start_shape_no);
 							
@@ -1954,7 +1947,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 									{
 										shape2 = mc->ObMorphHeader->mph_frames[0].mf_shape2;
 										DeallocateMem (mc->ObMorphHeader->mph_frames);
-									}	
+									}
 									DeallocateMem(mc->ObMorphHeader);
 								}
 								DeallocateMem (mc);
@@ -1962,14 +1955,14 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 							}
 							deal_with_module_object (ob, start_shape_no, AnimationShape, shape2, &MainScene.sm_module[mod_pos]);
 							
-						   	Object_Module_Data_Chunk* omdc=(Object_Module_Data_Chunk*)ob->lookup_single_child("MODULEDT");
-						   	if(omdc)
+							Object_Module_Data_Chunk* omdc=(Object_Module_Data_Chunk*)ob->lookup_single_child("MODULEDT");
+							if(omdc)
 							{
-						   		if(!omdc->lookup_single_child("AIMODSLA"))
-						   			AIModuleArraySize++;
+								if(!omdc->lookup_single_child("AIMODSLA"))
+									AIModuleArraySize++;
 							}
 							else
-			   					AIModuleArraySize++;
+								AIModuleArraySize++;
 							o_chunk_array[mod_pos] = ob; //for finding object_chunk from module
 							ob->program_object_index=mod_pos; //for finding module from object_chunk
 							aimodule_indeces[mod_pos]=-1;
@@ -2004,27 +1997,25 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 
 		AIModuleArraySize++;
 		AIModuleArray=(AIMODULE*)PoolAllocateMem(sizeof(AIMODULE)*AIModuleArraySize);
-			
+
 		AIModuleArray[0].m_link_ptrs=0;
 		AIModuleArray[0].m_module_ptrs=0;
 		AIModuleArray[0].m_waypoints=0;
 		AIModuleArray[0].m_index=0;
 
-		
 		List<Adjacent_AIModule_EP*>* entry_points=new List<Adjacent_AIModule_EP*>[AIModuleArraySize];
-		
+
 		int ai_mod_pos=1;
-		
+
 		//setup aimodules and the aimodule conversion array
 		for(i=0;i<mod_pos;i++)
 		{
-	   		Object_Module_Data_Chunk * omdc =(Object_Module_Data_Chunk*) o_chunk_array[i]->lookup_single_child("MODULEDT");
+			Object_Module_Data_Chunk * omdc =(Object_Module_Data_Chunk*) o_chunk_array[i]->lookup_single_child("MODULEDT");
 			AI_Module_Master_Chunk* ammc=0;
 			if(omdc)
 			{
 				if(omdc->lookup_single_child("AIMODSLA"))continue;
 				ammc=(AI_Module_Master_Chunk*)omdc->lookup_single_child("AIMODMAS");
-				
 			}
 
 			AIMODULE* aim=&AIModuleArray[ai_mod_pos];
@@ -2038,12 +2029,12 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 				aim->m_module_ptrs[0]=&MainScene.sm_module[i];
 				MainScene.sm_module[i].m_aimodule=aim;
 				aimodule_indeces[i]=ai_mod_pos;
-				
+
 				int pos=1;
 				for(LIF<Object_Chunk*> modlif(&ammc->ModuleList);!modlif.done();modlif.next())
 				{
-				  	for(int obj=0;obj<mod_pos;obj++)
-				  	{
+					for(int obj=0;obj<mod_pos;obj++)
+					{
 						if(o_chunk_array[obj]==modlif())
 						{
 							aim->m_module_ptrs[pos++]=&MainScene.sm_module[obj];
@@ -2058,19 +2049,19 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 			else
 			{
 				aim->m_module_ptrs=(MODULE**)PoolAllocateMem(2*sizeof(MODULE*));
-				
+
 				aim->m_module_ptrs[0]=&MainScene.sm_module[i];
 				MainScene.sm_module[i].m_aimodule=aim;
 				aimodule_indeces[i]=ai_mod_pos;
-				
+
 				aim->m_module_ptrs[1]=0;
 			}
-			
+
 			ai_mod_pos++;
 		}
 
-		FALLP_EntryPoints = (FARENTRYPOINTSHEADER *)AllocateMem(AIModuleArraySize*sizeof(FARENTRYPOINTSHEADER));		
-		if(!FALLP_EntryPoints) 
+		FALLP_EntryPoints = (FARENTRYPOINTSHEADER *)AllocateMem(AIModuleArraySize*sizeof(FARENTRYPOINTSHEADER));
+		if(!FALLP_EntryPoints)
 		{
 			memoryInitialisationFailure = 1;
 			return FALSE;
@@ -2086,16 +2077,15 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 		{
 			Set_Progress_Bar_Position((int)(progress_start+progress_interval*.7));
 		}
-		
+
 		for (i=0; i<mod_pos; i++)
 		{
-		
 			Object_Module_Data_Chunk * omdc = 0;
 			Adjacent_Module_Entry_Points_Chunk * amc = 0;
 			VModule_Array_Chunk * vmac = 0;
 			Module_Flag_Chunk * mfc=0;
 			Module_Waypoint_Chunk* mwc=0;
-			
+
 			//fill in module position and extents
 			{
 				MODULE* mod=&MainScene.sm_module[i];
@@ -2117,7 +2107,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 				mod->m_miny=world_min.vy - mod->m_world.vy;
 				mod->m_minz=world_min.vz - mod->m_world.vz;
 			}
-			
+
 			Chunk * pChunk = o_chunk_array[i]->lookup_single_child ("MODULEDT");
 			if (pChunk)
 			{
@@ -2132,8 +2122,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 				{
 					vmac = (VModule_Array_Chunk *) pChunk;
 				}
-				
-				
+
 				amc=(Adjacent_Module_Entry_Points_Chunk*) omdc->lookup_single_child("ADJMDLEP");
 
 				if(omdc->lookup_single_child("ADJMDLST"))
@@ -2187,7 +2176,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 				{
 					memoryInitialisationFailure = 1;
 					return FALSE;
-				}	
+				}
 
 				int vmac_no = 0;
 				int vmod_no = 0;
@@ -2221,10 +2210,9 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 						MainScene.sm_module[i].m_vmptr[vmod_no].vmod_dir.vz = 0;
 
 						MainScene.sm_module[i].m_vmptr[vmod_no].vmod_angle = 0;
-		   				MainScene.sm_module[i].m_vmptr[vmod_no].vmod_flags = vmac->vmod_array[vmac_no].flags;
+						MainScene.sm_module[i].m_vmptr[vmod_no].vmod_flags = vmac->vmod_array[vmac_no].flags;
 						vmod_no ++;
 					}
-
 					vmac_no ++;
 				}
 				MainScene.sm_module[i].m_vmptr[vmod_no].vmod_type = vmtype_term;
@@ -2237,7 +2225,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 				{
 					memoryInitialisationFailure = 1;
 					return FALSE;
-				}	
+				}
 
 				MainScene.sm_module[i].m_vmptr[0].vmod_type = vmtype_vmodule;
 				*((int *)MainScene.sm_module[i].m_vmptr[0].vmod_name) = 0;
@@ -2250,8 +2238,8 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 				MainScene.sm_module[i].m_vmptr[0].vmod_dir.vz = 0;
 
 				MainScene.sm_module[i].m_vmptr[0].vmod_angle = 0;
-		   		MainScene.sm_module[i].m_vmptr[0].vmod_flags = 0;
-				
+				MainScene.sm_module[i].m_vmptr[0].vmod_flags = 0;
+
 				MainScene.sm_module[i].m_vmptr[1].vmod_type = vmtype_term;
 				*((int *)MainScene.sm_module[i].m_vmptr[1].vmod_name) = 1;
 			}
@@ -2268,14 +2256,13 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 				if(omdc->lookup_single_child("AIMODSLA"))continue;
 				ammc=(AI_Module_Master_Chunk*)omdc->lookup_single_child("AIMODMAS");
 			}
-			
+
 			int this_ai_module_index=aimodule_indeces[i];
 			AIMODULE* aim=&AIModuleArray[this_ai_module_index];
 
-			
 			//build list of adjacent ai_modules
 			List<int> adjacent_aimodule_list; 
-			
+
 			if (amc)
 			{
 				
@@ -2298,12 +2285,11 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 							{
 								if(ami().flags & AdjacentModuleFlag_InsideAdjacentModule)
 								{
-									continue;	
+									continue;
 								}
 								if(ami().flags & AdjacentModuleFlag_AdjacentModuleInsideMe)
 								{
-									continue;	
-								
+									continue;
 								}
 								Adjacent_AIModule_EP* ad_aim=new Adjacent_AIModule_EP;
 								ad_aim->entry_point=ami().entry_point*local_scale;
@@ -2366,7 +2352,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 							}
 						}
 					}
-				}	
+				}
 			}
 
 			//setup adjacent modules
@@ -2385,15 +2371,12 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 			}
 			aim->m_link_ptrs[adj_pos]=0;
 
-
-			
-			
 			//Deal with waypoints
 			if(mwc && mwc->NumAlienWaypoints)
 			{
 				WAYPOINT_HEADER* wh=(WAYPOINT_HEADER*)PoolAllocateMem(sizeof(WAYPOINT_HEADER));
 				aim->m_waypoints=wh;
-			   	MainScene.sm_module[i].m_waypoints=wh;//temporary
+				MainScene.sm_module[i].m_waypoints=wh;//temporary
 				
 				wh->num_waypoints=mwc->NumAlienWaypoints;
 
@@ -2467,10 +2450,10 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 
 		// putting an infinite module at the beginning - followed by a term
 		// and setting the arrays back to point at them !!
-		
+
 		MainScene.sm_module = sm_module_start;
 		MainScene.sm_marray = sm_marray_start;
-		
+
 		MainScene.sm_module[0] = Empty_Module;
 		MainScene.sm_module[0].m_flags |= m_flag_infinite;
 		MainScene.sm_module[0].m_vptr.mref_ptr = &MainScene.sm_module[2];
@@ -2481,7 +2464,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 			memoryInitialisationFailure = 1;
 			return FALSE;
 		}
-		
+
 		for (i=0; i<mod_pos; i++)
 		{
 			MainScene.sm_module[0].m_vmptr[i].vmod_type = vmtype_vmodule;
@@ -2494,27 +2477,25 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 			MainScene.sm_module[0].m_vmptr[i].vmod_dir.vz = 0;
 			MainScene.sm_module[0].m_vmptr[i].vmod_angle = 0;
 			MainScene.sm_module[0].m_vmptr[i].vmod_flags = 0;
-			
+
 		  //	MainScene.sm_module[i]->m_flags|=m_flag_gotptrs;
 		}
 
 		MainScene.sm_module[0].m_vmptr[i].vmod_type = vmtype_term;
 		*((int *)MainScene.sm_module[0].m_vmptr[i].vmod_name) = i + 1000;
-		
+
 		MainScene.sm_marray[0] = &MainScene.sm_module[0];
-		
-		
+
 		MainScene.sm_module[1] = Term_Module;
 		*((int *)MainScene.sm_module[1].m_name) = 2;
 
 		setup_start_position(h);
-		
+
 		//setup ai paths
 		setup_paths(h);
-		
+
 		setup_placed_hierarchies(h->envd);
-		
-		
+
 		//alien power cables
 		setup_cables(h->envd);
 
@@ -2523,13 +2504,13 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 
 		// External lifts / airlocks
 		DealWithExternalObjectStategies (h->envd);
-		
+
 		setup_sounds (h->envd);
 
 		setup_preplaced_decals(h->fc,h->envd);
 
 	//	create_strategies_from_list(); //now called later
-		
+
 		//set sky colour , and other envionmental properties
 		set_environment_properties(h->envd);
 
@@ -2547,7 +2528,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 
 		for (LIF<Chunk *> shplst(&shps) ; !shplst.done() ; shplst.next())
 		{
- 			Shape_Chunk * tmpshp = (Shape_Chunk *)shplst();
+			Shape_Chunk * tmpshp = (Shape_Chunk *)shplst();
 
 			if ( ! tmpshp->list_assoc_objs().size() )
 			{
@@ -2725,7 +2706,7 @@ int GetMSLPos(void)
 			LOCALASSERT(mainshapelist);
 			if(!mainshapelist)
 			{
-	   			ReleaseDirect3D();
+				ReleaseDirect3D();
 				exit(0x74363); 
 			}
 			for(int i=maxshapes;i<maxshapes+50;i++)
@@ -2884,7 +2865,7 @@ void DeallocateModules()
 			}
 			if(wh->first_waypoint)DeallocateMem(wh->first_waypoint);
 			DeallocateMem(wh);
-  		}
+		}
 	}
 	DeallocateMem(AIModuleArray);
 	#endif
@@ -2918,7 +2899,7 @@ void DeallocateModules()
 void avp_undo_rif_load(RIFFHANDLE h)
 {
 	DeleteHierarchyLibraryEntry(h);
-   	undo_rif_load(h);
+	undo_rif_load(h);
 }
 
 RIFFHANDLE avp_load_rif(const char * fname)
@@ -2970,24 +2951,22 @@ extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 
 void LoadModuleData()
 {
- 	GLOBALASSERT(env_rif);
+	GLOBALASSERT(env_rif);
 
- 	HANDLE file = avp_CreateFile ("avp_rifs/module.bbb", GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 
- 					FILE_FLAG_RANDOM_ACCESS, 0);
+	HANDLE file = avp_CreateFile ("avp_rifs/module.bbb", GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_FLAG_RANDOM_ACCESS, 0);
 	unsigned long byteswritten;
 	WriteFile(file,&Global_VDB_Ptr->VDB_World,sizeof(VECTORCH),&byteswritten,0);
 	WriteFile(file,&Global_VDB_Ptr->VDB_Mat,sizeof(MATRIXCH),&byteswritten,0);
- 	
- 	CloseHandle(file);
+	
+	CloseHandle(file);
 
- 	file = avp_CreateFile ("avp_rifs/module.aaa", GENERIC_READ, 0, 0, OPEN_EXISTING, 
- 					FILE_FLAG_RANDOM_ACCESS, 0);
+	file = avp_CreateFile ("avp_rifs/module.aaa", GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, 0);
 
 	if(file==INVALID_HANDLE_VALUE) return;
 
 	if(!env_rif->fc)
 	{
-	 	CloseHandle(file);
+		CloseHandle(file);
 		NewOnScreenMessage("MODULE UPDATING REQUIRES -KEEPRIF OPTION.");
 		return;
 	}
@@ -3051,7 +3030,6 @@ void LoadModuleData()
 			DeallocateMem(this_mod->m_vmptr);
 
 		this_mod->m_vmptr = (VMODULE *)AllocateMem(sizeof(VMODULE) * (numlinks+1));
-	
 
 		int vmac_no = 0;
 		int vmod_no = 0;
@@ -3062,9 +3040,9 @@ void LoadModuleData()
 			ReadFile(file,&linked_index,4,&bytesread,0);
 			ReadFile(file,&branch_no,4,&bytesread,0);
 			pos+=8;
-			
+
 			Object_Chunk* linked_module=env_rif->fc->get_object_by_index(linked_index);
-			
+
 			GLOBALASSERT(linked_module);
 			if (linked_module && linked_module->program_object_index!=-1)
 			{
@@ -3082,19 +3060,17 @@ void LoadModuleData()
 
 				this_mod->m_vmptr[vmod_no].vmod_data.vmodidata = branch_no;
 
-
 				this_mod->m_vmptr[vmod_no].vmod_mref.mref_ptr = &MainScene.sm_module[linked_module->program_object_index+2];
 				this_mod->m_vmptr[vmod_no].vmod_dir.vx = 0;
 				this_mod->m_vmptr[vmod_no].vmod_dir.vy = 0;
 				this_mod->m_vmptr[vmod_no].vmod_dir.vz = 0;
 
 				this_mod->m_vmptr[vmod_no].vmod_angle = 0;
-		 		this_mod->m_vmptr[vmod_no].vmod_flags = 0;
+				this_mod->m_vmptr[vmod_no].vmod_flags = 0;
 				vmod_no ++;
 			}
 
 			vmac_no ++;
-
 		}
 		for(int j=0;j<vmac_no;j++)
 		{
@@ -3124,11 +3100,6 @@ void LoadModuleData()
 }
 #endif
 
-
-
-
-
-
 void setup_preplaced_decals(File_Chunk* fc,Environment_Data_Chunk* edc)
 {
 	NumFixedDecals=0;
@@ -3138,28 +3109,27 @@ void setup_preplaced_decals(File_Chunk* fc,Environment_Data_Chunk* edc)
 	GLOBALASSERT(fc);
 
 	Special_Objects_Chunk* soc=(Special_Objects_Chunk*) edc->lookup_single_child("SPECLOBJ");
-	if(!soc) return;
+	if (!soc) return;
 
 	AVP_Decal_Chunk* decal_chunk=(AVP_Decal_Chunk*) soc->lookup_single_child("AVPDECAL");
-	if(!decal_chunk) return;
+	if (!decal_chunk) return;
 
 	GLOBALASSERT(decal_chunk->decals);
 
 	NumFixedDecals=0;
 
-	
-	for(int i=0;i<decal_chunk->num_decals;i++)
+	for (int i = 0;i < decal_chunk->num_decals; i++)
 	{
 		FIXED_DECAL* fd=&FixedDecalStorage[NumFixedDecals];
 		AVP_Decal * ad=&decal_chunk->decals[i];
 
 		//find the decal's module
-		Object_Chunk* module=fc->get_object_by_index(ad->object_index) ;
-		if(!module) continue; //module not found
-		if(module->program_object_index==-1) continue;
+		Object_Chunk* module=fc->get_object_by_index(ad->object_index);
+		if (!module) continue; //module not found
+		if (module->program_object_index==-1) continue;
 		
 		fd->DecalID=(DECAL_ID)ad->DecalID;
-		for(int j=0;j<4;j++)
+		for (int j=0;j<4;j++)
 		{
 			fd->Vertices[j].vx=ad->Vertices[j].x;
 			fd->Vertices[j].vy=ad->Vertices[j].y;
@@ -3171,10 +3141,8 @@ void setup_preplaced_decals(File_Chunk* fc,Environment_Data_Chunk* edc)
 
 		NumFixedDecals++;
 	}
-	
-	
-	CurrentFixedDecalIndex=NumFixedDecals;
 
+	CurrentFixedDecalIndex=NumFixedDecals;
 }
 
 int get_object_index_from_module_index(List<Object_Chunk*>& ob_list,int index)

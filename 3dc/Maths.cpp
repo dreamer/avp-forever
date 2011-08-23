@@ -1593,10 +1593,10 @@ int ArcTan(int height_x, int width_z)
 		}
 	}
 
-	if (signsame == FALSE) 
+	if (signsame == FALSE)
 		angle =- angle;
 
-	if (width_z <= 0) 
+	if (width_z <= 0)
 		angle += deg180;
 
 	angle&=wrap360;
@@ -1617,7 +1617,6 @@ void MatrixFromZVector(VECTORCH *v, MATRIXCH *m)
 	VECTORCH YVector;
 
 	VECTORCH zero = {0, 0, 0};
-
 
 	XVector.vx = v->vz;
 	XVector.vy = 0;
@@ -1672,10 +1671,8 @@ void MatrixFromZVector(VECTORCH *v, MATRIXCH *m)
 
 int FandVD_Distance_2d(VECTOR2D *v0, VECTOR2D *v1)
 {
-
 	int max;
 	int d;
-
 
 	int dx = v1->vx - v0->vx;
 	int dy = v1->vy - v0->vy;
@@ -1689,7 +1686,6 @@ int FandVD_Distance_2d(VECTOR2D *v0, VECTOR2D *v1)
 	d = (dx + dy + (max * 2));
 
 	return d;
-
 }
 
 
@@ -1705,7 +1701,6 @@ int FandVD_Distance_2d(VECTOR2D *v0, VECTOR2D *v1)
 
 int FandVD_Distance_3d(VECTORCH *v0, VECTORCH *v1)
 {
-
 	int dxy, max;
 
 	int dz = v1->vz - v0->vz;
@@ -1733,11 +1728,9 @@ int FandVD_Distance_3d(VECTORCH *v0, VECTORCH *v1)
 
 int NextLowPower2(int i)
 {
-
 	int n = 1;
 
-
-	while(n <= i)
+	while (n <= i)
 		n <<= 1;
 
 	return n >> 1;
@@ -1765,7 +1758,6 @@ int NextLowPower2(int i)
 
 void MakeVectorLocal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, MATRIXCH *m)
 {
-
 	MATRIXCH transmat;
 
 	CopyMatrix(m, &transmat);

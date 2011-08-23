@@ -1922,8 +1922,8 @@ void SaveKeyConfiguration(void)
 void LoadAKeyConfiguration(char* Filename)
 {
 	#if 0
-	FILE* file=avp_fopen(Filename,"rb");
-	if(!file)
+	FILE* file = avp_fopen(Filename, "rb");
+	if (!file)
 	{
 		MarineInputPrimaryConfig = DefaultMarineInputPrimaryConfig;
 		MarineInputSecondaryConfig = DefaultMarineInputSecondaryConfig;
@@ -1950,8 +1950,8 @@ void LoadAKeyConfiguration(char* Filename)
 void SaveAKeyConfiguration(char* Filename)
 {
 	#if 0
-	FILE* file=avp_fopen(Filename,"wb");
-	if(!file) return;
+	FILE* file = avp_fopen(Filename, "wb");
+	if (!file) return;
 
 	fwrite(&MarineInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
 	fwrite(&MarineInputSecondaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
@@ -1970,7 +1970,7 @@ void SaveAKeyConfiguration(char* Filename)
 void SaveDefaultPrimaryConfigs(void)
 {
 	FILE* file = avp_fopen("default.cfg","wb");
-	if(!file) return;
+	if (!file) return;
 
 	fwrite(&DefaultMarineInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
 	fwrite(&DefaultPredatorInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
@@ -1982,7 +1982,7 @@ void LoadDefaultPrimaryConfigs(void)
 {
 #ifdef WIN32
 	FILE* file = avp_fopen("default.cfg","rb");
-	if(!file) return;
+	if (!file) return;
 
 	fread(&DefaultMarineInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
 	fread(&DefaultPredatorInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);

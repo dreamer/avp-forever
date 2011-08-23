@@ -87,7 +87,7 @@ Shape_Fragment_Type::~Shape_Fragment_Type()
 		DeallocateMem(sh_fragdesc);
 		#endif
 	}
-	if (name) delete[] name;
+	delete[] name;
 }
 
 void Shape_Fragment_Type::AddShape(SHAPEHEADER* shp)
@@ -581,7 +581,7 @@ void unload_rif (RIFFHANDLE h)
 	h->envd = 0;
 	h->palparent = 0;
 	h->max_index = 0;
-	if (h->tex_index_nos) delete[] h->tex_index_nos;
+	delete[] h->tex_index_nos;
 	h->tex_index_nos = 0;
 }
 
@@ -700,14 +700,12 @@ void CopyShapeAnimationHeader(SHAPEHEADER* shpfrom,SHAPEHEADER* shpto)
 
 	shapeanimationsequence* sas=0;
 
-	int i;
-	for(i=0;i<shpto->animation_header->num_sequences;i++)
+	for (int i=0;i < shpto->animation_header->num_sequences; i++)
 	{
-		sas=&shpto->animation_header->anim_sequences[i];
-		if(sas->num_frames)
+		sas = &shpto->animation_header->anim_sequences[i];
+		if (sas->num_frames)
 			break;
 	}
-	GLOBALASSERT(i<shpto->animation_header->num_sequences);
 
 	//copy the pointers for the first frame of this sequence
 	#if !USE_LEVEL_MEMORY_POOL
@@ -1304,7 +1302,6 @@ BOOL get_rif_palette_remap_table (RIFFHANDLE h, int /*flags*/)
 				PaletteMapTable = cplook->table;
 				return TRUE;
 			}
-			
 		}
 	}
 
@@ -2012,7 +2009,7 @@ void SetupAnimatedTextures(Shape_Chunk* sc, SHAPEHEADER* shp, Animation_Chunk* a
 				}
 			}
 		}
-		if (PolyConv) delete[] PolyConv;
+		delete[] PolyConv;
 	}
 	else
 	{
@@ -2376,7 +2373,7 @@ BOOL copy_to_shapeheader (
 			item_list[i*9 + 4 +j] = -1;
 	}
 
-	if (uv_imnums) delete[] uv_imnums;
+	delete[] uv_imnums;
 
 	if (cshp_ptr->num_texfiles)
 	{
@@ -2859,7 +2856,6 @@ BOOL tex_merge_polys ( ChunkPoly & p1, ChunkPoly & p2, ChunkPoly & p, ChunkShape
 	if (p1.flags != p2.flags)
 		return(FALSE);
 
-	
 	int p1_uvind = p1.colour >> 16;
 	int p2_uvind = p2.colour >> 16;
 
@@ -2878,7 +2874,7 @@ BOOL tex_merge_polys ( ChunkPoly & p1, ChunkPoly & p2, ChunkPoly & p, ChunkShape
 	ChunkUV * uv_on = shp.uv_list[p1_uvind].vert;
 	ChunkUV * uv_oth = shp.uv_list[p2_uvind].vert;
 	ChunkUV * uvtemp;
-	
+
 	while (num_ins < 4)
 	{
 		uv.vert[num_ins] = uv_on[p_onv];
@@ -2939,7 +2935,6 @@ BOOL merge_polys ( ChunkPoly & p1, ChunkPoly & p2, ChunkPoly & p, int * /*mgd*/)
 
 	if (p1.flags != p2.flags)
 		return(FALSE);
-
 
 	p = p1;
 	p.num_verts = 4;
@@ -3029,7 +3024,7 @@ void merge_polygons_in_chunkshape (ChunkShape & shp, Shape_Merge_Data_Chunk * sm
 			ChunkVectorFloat* norm=&shp.p_normal_list[i];
 
 			//take the dot product of the normal and the difference to find the distance form the first 
-			//triangles plane		
+			//triangles plane
 			float distance= (float)diff.x*norm->x + (float)diff.y*norm->y + (float)diff.z*norm->z;
 
 			if (distance>-1 && distance <1) 
@@ -3062,7 +3057,6 @@ void merge_polygons_in_chunkshape (ChunkShape & shp, Shape_Merge_Data_Chunk * sm
 				new_pnorms[p_no] = shp.p_normal_list[mgd[i]];
 				p_no ++;
 			}
-		
 		}
 	}
 

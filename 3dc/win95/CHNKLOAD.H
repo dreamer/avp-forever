@@ -65,7 +65,6 @@ void close_rif_handle (RIFFHANDLE);
 
 // load textures for environment
 BOOL load_rif_bitmaps (RIFFHANDLE, int flags);
-#define LoadRIFBitmaps(h,f) load_rif_bitmaps(h,f)
 
 // set the quantization event depending on CL_RIFFImage::game_mode
 BOOL set_quantization_event(RIFFHANDLE, int flags);

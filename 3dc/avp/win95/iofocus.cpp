@@ -14,10 +14,8 @@
 #include "gadget.h"
 #include "avp_menus.h"
 #include "psnd.h"
-
-	
-	#define UseLocalAssert TRUE
-	#include "ourasert.h"
+#define UseLocalAssert TRUE
+#include "ourasert.h"
 
 /* Version settings ************************************************/
 
@@ -38,9 +36,8 @@ extern int InGameMenusAreRunning(void);
 /* Internal function prototypes ************************************/
 
 /* Internal globals ************************************************/
-	static bool iofocus_AcceptTyping = false;
-
-	static int ioFocus = 0;
+static bool iofocus_AcceptTyping = false;
+static int ioFocus = IOFOCUS_GAME;
 
 /* Exported function definitions ***********************************/
 bool IOFOCUS_AcceptControls(void)
@@ -66,7 +63,7 @@ void IOFOCUS_Set(int focus)
 void IOFOCUS_Toggle(void)
 {
 	#if CONSOLE_DEBUGGING_COMMANDS_ACTIVATED||!(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
-	if(InGameMenusAreRunning()) return;;
+	if (InGameMenusAreRunning()) return;;
 
 	iofocus_AcceptTyping = !iofocus_AcceptTyping;
 	if (iofocus_AcceptTyping)

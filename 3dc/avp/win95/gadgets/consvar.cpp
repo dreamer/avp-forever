@@ -12,9 +12,8 @@
 #include "3dc.h"
 #include "consvar.hpp"
 #include "strutil.h"
-
-	#define UseLocalAssert TRUE
-	#include "ourasert.h"
+#define UseLocalAssert TRUE
+#include "ourasert.h"
 
 /* Version settings ************************************************/
 
@@ -106,26 +105,22 @@
 )
 {
 	/* PRECONDITION */
-	{
-		GLOBALASSERT( pProjCh_Symbol_ToUse );
-		GLOBALASSERT( pProjCh_Description_ToUse );
-	}
+	GLOBALASSERT( pProjCh_Symbol_ToUse );
+	GLOBALASSERT( pProjCh_Description_ToUse );
 
 	/* CODE */
-	{
-		return new ConsoleVariable_Simple_Int
-		(
-			Value_ToUse,
-			pProjCh_Symbol_ToUse,
-			pProjCh_Description_ToUse,
-			MinVal_New,
-			MaxVal_New,
-			Cheat
-		);
-	}
+	return new ConsoleVariable_Simple_Int
+	(
+		Value_ToUse,
+		pProjCh_Symbol_ToUse,
+		pProjCh_Description_ToUse,
+		MinVal_New,
+		MaxVal_New,
+		Cheat
+	);
 }
 
-/*static*/ ConsoleVariable* ConsoleVariable :: MakeSimpleConsoleVariable_FixP
+/*static*/ ConsoleVariable* ConsoleVariable::MakeSimpleConsoleVariable_FixP
 (
 	int& Value_ToUse,
 	ProjChar* pProjCh_Symbol_ToUse,
@@ -133,38 +128,30 @@
 	int MinVal_New,
 	int MaxVal_New,
 	bool Cheat
-
 )
 {
 	/* PRECONDITION */
-	{
-		GLOBALASSERT( pProjCh_Symbol_ToUse );
-		GLOBALASSERT( pProjCh_Description_ToUse );
-	}
+	GLOBALASSERT( pProjCh_Symbol_ToUse );
+	GLOBALASSERT( pProjCh_Description_ToUse );
 
 	/* CODE */
-	{
-		return new ConsoleVariable_Simple_FixP
-		(
-			Value_ToUse,
-			pProjCh_Symbol_ToUse,
-			pProjCh_Description_ToUse,
-			MinVal_New,
-			MaxVal_New,
-			Cheat
-		);
-	}
+	return new ConsoleVariable_Simple_FixP
+	(
+		Value_ToUse,
+		pProjCh_Symbol_ToUse,
+		pProjCh_Description_ToUse,
+		MinVal_New,
+		MaxVal_New,
+		Cheat
+	);
 }
 
-ConsoleVariable :: ~ConsoleVariable()
+ConsoleVariable::~ConsoleVariable()
 {
-	pSCString_Description ->R_Release();
+	pSCString_Description->R_Release();
 
 	// remove from the list
-    List_pConsoleVar . delete_entry
-    (
-    	this
-    );
+	List_pConsoleVar.delete_entry(this);
 }
 
 /*static*/ bool ConsoleVariable :: Process( ProjChar* pProjCh_In )
@@ -186,25 +173,25 @@ ConsoleVariable :: ~ConsoleVariable()
 		{
 			if
 			(
-				oi() -> ThisIsACheat
+				oi()->ThisIsACheat
 				?
 				STRUTIL_SC_Strequal //case sensitive comparisons for cheats
 				(
 					pProjCh_In,
-					oi() -> pSCString_Symbol -> pProjCh()
+					oi()->pSCString_Symbol->pProjCh()
 				)
 				:
 				STRUTIL_SC_Strequal_Insensitive
 				(
 					pProjCh_In,
-					oi() -> pSCString_Symbol -> pProjCh()
+					oi()->pSCString_Symbol->pProjCh()
 				)
 			)
 			{
-				oi() -> Display();
+				oi()->Display();
 				return TRUE;
 			}
-		}				
+		}
 	}
 
 	// Otherwise check to see if there's a match between the front
@@ -230,7 +217,6 @@ ConsoleVariable :: ~ConsoleVariable()
 		if ( *pProjCh_Search == '\0' )
 		{
 			// then there were no word breaks; stop
-
 			return FALSE;
 		}
 
@@ -246,14 +232,13 @@ ConsoleVariable :: ~ConsoleVariable()
 			oi.next()
 		)
 		{
-		
 			// LOCALISEME():
 			if
 			(
 				0 == strncmp
 				(
 					pProjCh_In,
-					oi() -> pSCString_Symbol -> pProjCh(),
+					oi()->pSCString_Symbol->pProjCh(),
 					NumChars
 				)
 			)
@@ -263,7 +248,7 @@ ConsoleVariable :: ~ConsoleVariable()
 					// interpret as fraction
 					float NewValue = atof(pProjCh_Search);
 
-					oi() -> ProcessSetValue( NewValue );
+					oi()->ProcessSetValue( NewValue );
 
 					return TRUE;
 				}
@@ -272,19 +257,16 @@ ConsoleVariable :: ~ConsoleVariable()
 					// interpret as int
 					int NewValue = atoi(pProjCh_Search);
 
-					oi() -> ProcessSetValue( NewValue );
+					oi()->ProcessSetValue( NewValue );
 
 					return TRUE;
-
 				}
 			}
 		}
 	}
 
-
 	// If you get here, no processing has been performed:
 	return FALSE;
-
 }
 
 /*static*/ void ConsoleVariable :: ListAllVariables(void)
@@ -302,8 +284,8 @@ ConsoleVariable :: ~ConsoleVariable()
 		oi.next()
 	)
 	{
-		oi() -> Display();
-	}	
+		oi()->Display();
+	}
 }
 // protected:
 ConsoleVariable :: ConsoleVariable
@@ -314,7 +296,7 @@ ConsoleVariable :: ConsoleVariable
 	int MaxVal_New,
 	bool Cheat
 
-) :	ConsoleSymbol
+) : ConsoleSymbol
 	(
 		pProjCh_ToUse
 	),
@@ -335,10 +317,7 @@ ConsoleVariable :: ConsoleVariable
 		ThisIsACheat = Cheat;
 	
 		// add to list of all console variables
-	    List_pConsoleVar . add_entry
-	    (
-	    	this
-	    );
+		List_pConsoleVar.add_entry(this);
 	}
 }
 
@@ -387,7 +366,6 @@ void ConsoleVariable :: ProcessSetValue
 	SetValue( Val_New );
 
 	OutputResultOfSetValue( OldValue );
-
 }
 
 void ConsoleVariable :: ProcessSetValue
@@ -448,7 +426,6 @@ void ConsoleVariable :: OutputResultOfSetValue( int OldVal )
 		pSCString_Out -> SendToScreen();
 		
 		pSCString_Out ->R_Release();
-
 	}
 	
 }
@@ -564,7 +541,7 @@ SCString* ConsoleVariable_Simple_Int :: MakeRangeString(void)
 	pSCString_Temp2_4 ->R_Release();
 	pSCString_Temp2_3 ->R_Release();
 	pSCString_Temp2_2 ->R_Release();
-	pSCString_Temp2_1 ->R_Release();		
+	pSCString_Temp2_1 ->R_Release();
 
 	return pSCString_Return;
 }
@@ -689,15 +666,12 @@ SCString* ConsoleVariable_Simple_FixP :: MakeRangeString(void)
 	pSCString_Temp2_4 ->R_Release();
 	pSCString_Temp2_3 ->R_Release();
 	pSCString_Temp2_2 ->R_Release();
-	pSCString_Temp2_1 ->R_Release();		
+	pSCString_Temp2_1 ->R_Release();
 
 	return pSCString_Return;
 }
 
-SCString* ConsoleVariable_Simple_FixP :: MakeValueString(int Val)
+SCString* ConsoleVariable_Simple_FixP::MakeValueString(int Val)
 {
-	return new SCString
-	(
-		FixP2Float( Val )
-	);
+	return new SCString(FixP2Float(Val));
 }

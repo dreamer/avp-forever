@@ -58,20 +58,15 @@ typedef int CTM_ReturnType;
 #endif
 
 CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE,  Shape_Chunk *, int flags,const ChunkObject* object=0);
-#define CopyToMainshapelist(h,r,p,f) copy_to_mainshapelist(h,r,p,f)
 
 // copies sprite to msl
 int copy_sprite_to_mainshapelist(RIFFHANDLE, Sprite_Header_Chunk *, int flags);
-#define CopySpriteToMainshapelist(h,p,f) copy_sprite_to_mainshapelist(h,p,f)
 
 // hook to load a bitmap - so you can load them from test directories, etc. should return tex index
 extern texID_t load_rif_bitmap (char const * fname, BMPN_Flags flags);
-#define LoadRIFBitmap(s,f) load_rif_bitmap(s,f)
 
 // project specific shape pre processing - usually merge polys
 extern void pre_process_shape (RIFFHANDLE, ChunkShape &, Chunk_With_Children * shape_chunk, int flags);
-#define PreProcessShape(h,r,p,f) pre_process_shape(h,r,p,f)
-
 
 struct _RifHandle : Project_RifHandle
 {
