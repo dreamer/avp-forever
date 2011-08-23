@@ -268,8 +268,6 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 	int **ShapeItemArrayPtr;
 	POLYHEADER *ShapeItemPtr;
 
-	int txi;
-
 	/* Are the items in a pointer array? */
 	if (shptr->items)
 	{
@@ -301,7 +299,7 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 
 				if (ShapeItemPtr->PolyColour & TxLocal)
 				{
-					txi = ShapeItemPtr->PolyColour;
+					int txi = ShapeItemPtr->PolyColour;
 					txi &= ~TxLocal;                        /* Clear Flag (clear bit 15) */
 					txi &= ClrTxDefn;                       /* Clear UV array index (clear high 16-bits) */
 
@@ -542,7 +540,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 					txf_uvarray = txf_uvarrayptr[image];
 
 					/* Find the extents of the image, assuming transparency */
-					FindImageExtents(/*ihdr,*/ txaf->txf_numuvs, txf_uvarray, &e, &e_curr);
+					FindImageExtents(txaf->txf_numuvs, txf_uvarray, &e, &e_curr);
 
 					/* Convert the image extents to fixed point */
 
@@ -701,7 +699,7 @@ void SpriteResizing(SHAPEHEADER *sptr)
 
 */
 
-void FindImageExtents(/*IMAGEHEADER *ihdr,*/ int numuvs, int *uvdata, IMAGEEXTENTS *e, IMAGEEXTENTS *e_curr)
+void FindImageExtents(int numuvs, int *uvdata, IMAGEEXTENTS *e, IMAGEEXTENTS *e_curr)
 {
 	/* Find the current UV extents */
 	e_curr->u_low = bigint;

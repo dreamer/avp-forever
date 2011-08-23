@@ -1247,7 +1247,7 @@ int InitialiseTextures(void);
 void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex);
 void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr, POLYHEADER *pheader, int LTxIndex, int TxIndex);
 void SpriteResizing(SHAPEHEADER *sptr);
-void FindImageExtents(/*IMAGEHEADER *ihdr,*/ int numuvs, int *uvdata, IMAGEEXTENTS *e, IMAGEEXTENTS *e_curr);
+void FindImageExtents(int numuvs, int *uvdata, IMAGEEXTENTS *e, IMAGEEXTENTS *e_curr);
 int GetMVSIndex(TXANIMHEADER *txah, EULER *e);
 
 IMAGEHEADER* GetImageHeader(void);
