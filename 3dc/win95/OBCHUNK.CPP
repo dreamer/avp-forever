@@ -469,7 +469,7 @@ flags (0), version_no (0), associated_shape(0)
 
 size_t Object_Header_Chunk::size_chunk()
 {
-	int length = 72;
+	size_t length = 72;
 
 	length += (strlen(object_data->o_name)+1);
 
