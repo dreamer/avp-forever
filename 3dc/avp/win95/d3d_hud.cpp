@@ -219,7 +219,7 @@ void D3D_InitialiseMarineHUD(void)
 
 	/* load HUD gfx of correct resolution */
 	{
-		HUDImageNumber = CL_LoadImageOnce("Huds\\Marine\\MarineHUD.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		HUDImageNumber = CL_LoadImageOnce("HUDs\\Marine\\MarineHUD.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 		MotionTrackerHalfWidth = 127/2;
 		MotionTrackerTextureSize = 128;
 
@@ -265,7 +265,7 @@ void LoadCommonTextures(void)
 		{
 			case I_Predator:
 			{
-				PredatorNumbersImageNumber = CL_LoadImageOnce("HUDs\\Predator\\predNumbers.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
+				PredatorNumbersImageNumber = CL_LoadImageOnce("HUDs\\Predator\\prednumbers.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
 				StaticImageNumber = CL_LoadImageOnce("Common\\static.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 				break;
 			}
@@ -285,7 +285,7 @@ void LoadCommonTextures(void)
 	}
 	else
 	{
-		PredatorNumbersImageNumber = CL_LoadImageOnce("HUDs\\Predator\\predNumbers.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
+		PredatorNumbersImageNumber = CL_LoadImageOnce("HUDs\\Predator\\prednumbers.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
 		StaticImageNumber = CL_LoadImageOnce("Common\\static.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 		AlienTongueImageNumber = CL_LoadImageOnce("HUDs\\Alien\\AlienTongue.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
 	}
@@ -311,7 +311,7 @@ void LoadCommonTextures(void)
 		}
 		else if (!strcmp(LevelName,"derelict"))
 		{
-			ChromeImageNumber = CL_LoadImageOnce("Envrnmts\\derelict\\water.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+			ChromeImageNumber = CL_LoadImageOnce("Envrnmts\\Derelict\\water.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 		}
 	}
 }

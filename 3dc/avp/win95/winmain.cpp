@@ -7,7 +7,6 @@
 #include "gameplat.h"
 #include "bh_types.h"
 #include "usr_io.h"
-#include "font.h"
 #include <mmsystem.h>
 #include "renderer.h"
 #include "comp_shp.h"
@@ -42,7 +41,6 @@
 #define MainTextPrint 1
 extern int alloc_cnt, deall_cnt;
 extern int ItemCount;
-int DebugFontLoaded = 0;
 #else
 #define MainTextPrint 0
 #endif
@@ -109,6 +107,8 @@ void exit_break_point_function()
 	}
 	#endif
 }
+
+//#define _ALLOC_CONSOLE
 
 extern void LoadKeyConfiguration();
 
@@ -353,7 +353,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	BuildMultiplayerLevelNameArray(); //sort out multiplayer level names
 
 	AvP.LevelCompleted = 0;
-	LoadSounds("PLAYER"); 
+	LoadSounds("PLAYER");
 
 	#if PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO
 	if(AvP_MainMenus())
@@ -391,9 +391,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		InitCharacter();
 
 		LoadRifFile(); /* sets up a map*/
-		#if debug
-		DebugFontLoaded = 1;
-		#endif
 
 		/*********** Process the data ************/
 		AssignAllSBNames();
@@ -475,7 +472,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 						AvpShowViews();
 
-						//Do screen shot here so that text and  hud graphics aren't shown
+						// Do screen shot here so that text and hud graphics aren't shown
 						MaintainHUD();
 
 						FlushTextprintBuffer();
@@ -629,6 +626,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	EmptyUserProfilesList();
 	ClearMultiplayerLevelNameArray();
+
+	ffKill();
 
 	/*-------------------Patrick 2/6/97-----------------------
 	End the sound system

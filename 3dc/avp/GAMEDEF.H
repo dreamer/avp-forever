@@ -178,11 +178,11 @@ extern void MaintainHUD(void);
 
 /*********************************************************/
 /*********************** PLAYER CONTROL STUFF ************/
-extern int AnyUserInput();
-extern int IDemandGoBackward();
-extern int IDemandGoForward();
-extern int IDemandTurnRight();
-extern int IDemandTurnLeft();
+extern bool AnyUserInput();
+extern bool IDemandGoBackward();
+extern bool IDemandGoForward();
+extern bool IDemandTurnRight();
+extern bool IDemandTurnLeft();
 
 /*************************************************
 ************* ENVIRONMENT STUFF

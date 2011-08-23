@@ -29,9 +29,6 @@
 	#include "hudgadg.hpp"
 		// for ClearTheQueue()
 
-	#include "font.h"
-		// for the font tests
-
 	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 

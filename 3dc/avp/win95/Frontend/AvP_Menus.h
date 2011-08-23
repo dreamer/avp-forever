@@ -100,7 +100,6 @@ enum AVPMENU_ID
 	AVPMENU_MAINMENUAVOPTIONS,
 	AVPMENU_VIDEOMODE,
 
-
 	AVPMENU_INGAME,
 	AVPMENU_INNETGAME,
 
@@ -151,7 +150,7 @@ enum AVPMENU_ELEMENT_ID
 	AVPMENU_ELEMENT_DUMMYTEXTSLIDER,
 	AVPMENU_ELEMENT_SPECIES_TEXTSLIDER,
 
-	AVPMENU_ELEMENT_TEXTSLIDER_POINTER,		 // text slider with a char** rather than a string index
+	AVPMENU_ELEMENT_TEXTSLIDER_POINTER,      // text slider with a char** rather than a string index
 	AVPMENU_ELEMENT_DUMMYTEXTSLIDER_POINTER, // text slider with a char** rather than a string index
 
 	AVPMENU_ELEMENT_CHEATMODE_TEXTSLIDER,
@@ -341,7 +340,7 @@ typedef struct
 	unsigned char	ElapsedTime_Seconds;
 	unsigned char	Difficulty;
 
-	SYSTEMTIME 		TimeStamp;
+	SYSTEMTIME		TimeStamp;
 
 } SAVE_SLOT_HEADER;
 

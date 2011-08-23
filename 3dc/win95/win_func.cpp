@@ -11,7 +11,7 @@ not project specific.
 
 // Externs
 
-extern BOOL bActive;
+extern bool bActive;
 extern int16_t MouseWheelStatus;
 
 void CheckForWindowsMessages(void)

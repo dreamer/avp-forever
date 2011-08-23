@@ -14,7 +14,6 @@
 #include "pheromon.h"
 #include "huddefs.h"
 #include "hudgfx.h"
-#include "font.h"
 #include "bh_gener.h"
 #include "pvisible.h"
 

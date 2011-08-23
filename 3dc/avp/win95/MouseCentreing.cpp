@@ -4,7 +4,7 @@
 #include <windows.h>
 #include <process.h>
 
-extern BOOL bActive;
+extern bool bActive;
 extern int WinLeftX, WinRightX, WinTopY, WinBotY;
 
 static volatile int EndMouseThread = 0;

@@ -52,7 +52,7 @@ unsigned char ToAsciiTable[256][256];
 //	Necessary globals
 
 HWND 		hWndMain;
-BOOL		bActive = TRUE;        // is application active?
+bool		bActive  = true;        // is application active?
 bool		bRunning = true;
 
 // Parameters for main (assumed full screen) window
@@ -331,7 +331,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	 // will hopefully disable Alt-Tabbing...
 		case WM_ACTIVATEAPP:
 		{
-			bActive = (BOOL) wParam;
+			if (wParam)
+				bActive = true;
+			else
+				bActive = false;
+
 			IngameKeyboardInput_ClearBuffer();
 			return 0;
 		}
@@ -434,15 +438,15 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 
 	memset(&wcex, 0, sizeof(WNDCLASSEX));
 	wcex.cbSize = sizeof(WNDCLASSEX);
-	wcex.style = CS_DBLCLKS;
+	wcex.style  = CS_DBLCLKS;
 	wcex.lpfnWndProc = WindowProc;
 	wcex.cbClsExtra = 0; 
 	wcex.cbWndExtra = 0;
-	wcex.hInstance = hInstance;
-	wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	wcex.hInstance  = hInstance;
+	wcex.hIcon   = LoadIcon(NULL, IDI_APPLICATION);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = NULL;
-	wcex.lpszMenuName = NULL;
+	wcex.lpszMenuName  = NULL;
 	wcex.lpszClassName = NAME;
 
 	if (!RegisterClassEx(&wcex))
@@ -597,7 +601,7 @@ void InitialiseRawInput()
 
 BOOL ExitWindowsSystem(void)
 {
-	BOOL rc = TRUE;
+	BOOL rc;
 
 	// Release dedicated mouse capture
 	#if grabmousecapture

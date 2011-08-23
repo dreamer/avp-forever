@@ -637,7 +637,7 @@ void BuildMultiplayerLevelNameArray()
 				strcat(buffer,")");
 
 				char* name = new char[strlen(buffer)+1];
-				strcpy(name,buffer);
+				strcpy(name, buffer);
 
 				CustomLevelNameList.add_entry(name);
 			}

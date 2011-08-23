@@ -11,8 +11,9 @@
 #include "renderer.h"
 #include "console.h"
 #include "TextureManager.h"
-#include "font2.h"
+#include "Fonts.h"
 #include "AvP_Menus.h"
+#include <assert.h>
 
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a);
 extern void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint32_t alpha);
@@ -90,97 +91,9 @@ texID_t AVPMENUGFX_SPLASH_SCREEN4;
 texID_t AVPMENUGFX_SPLASH_SCREEN5;
 
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+extern AVPMENU_ELEMENT AvPMenu_SinglePlayer[];
 
 char AAFontWidths[256];
-
-#if 0 // bjd - texture test
-AVPMENUGFX AvPMenuGfxStorage[MAX_NO_OF_AVPMENUGFXS] =
-{
-	{"Menus/fractal.rim"},
-	{"Common/aa_font.rim"},// Warning! Texture from common used
-
-	{"Menus/copyright.rim"},
-
-	{"Menus/FIandRD.rim"},
-	{"Menus/presents.rim"},
-	{"Menus/AliensVPredator.rim"},
-	
-	{"Menus/sliderbar.rim"},//AVPMENUGFX_SLIDERBAR,
-	{"Menus/slider.rim"},//AVPMENUGFX_SLIDER,
-
-	{"Menus/starfield.rim"},
-	{"Menus/aliens.rim"},
-	{"Menus/Alien.rim"},
-	{"Menus/Marine.rim"},
-	{"Menus/Predator.rim"},
-
-	{"Menus/glowy_left.rim"},
-	{"Menus/glowy_middle.rim"},
-	{"Menus/glowy_right.rim"},
-	
-	// Marine level
-	{"Menus/MarineEpisode1.rim"},
-	{"Menus/MarineEpisode2.rim"},
-	{"Menus/MarineEpisode3.rim"},
-	{"Menus/MarineEpisode4.rim"},
-	{"Menus/MarineEpisode5.rim"},
-	{"Menus/MarineEpisode6.rim"},
-	{"Menus/bonus.rim"},
-	{"Menus/bonus.rim"},
-	{"Menus/bonus.rim"},
-	{"Menus/bonus.rim"},
-	{"Menus/bonus.rim"},
-	
-	// Predator level
-	{"Menus/PredatorEpisode1.rim"},
-	{"Menus/PredatorEpisode2.rim"},
-	{"Menus/PredatorEpisode3.rim"},
-	{"Menus/PredatorEpisode4.rim"},
-	{"Menus/PredatorEpisode5.rim"},
-	{"Menus/PredatorEpisode5.rim"},
-	{"Menus/bonus.rim"},
-	{"Menus/bonus.rim"},
-	{"Menus/bonus.rim"},
-	{"Menus/bonus.rim"},
-	{"Menus/bonus.rim"},
-
-	// Alien level
-	{"Menus/AlienEpisode2.rim"},
-	{"Menus/AlienEpisode4.rim"},
-	{"Menus/AlienEpisode1.rim"},
-	{"Menus/AlienEpisode3.rim"},
-	{"Menus/AlienEpisode5.rim"},
-	{"Menus/bonus.rim"},
-	{"Menus/bonus.rim"},
-	{"Menus/bonus.rim"},
-	{"Menus/bonus.rim"},
-	{"Menus/bonus.rim"},
-
-	// Splash screens
-	#if MARINE_DEMO
-	{"MarineSplash/splash00.rim"},
-	{"MarineSplash/splash01.rim"},
-	{"MarineSplash/splash02.rim"},
-	{"MarineSplash/splash03.rim"},
-	{"MarineSplash/splash04.rim"},
-	{"MarineSplash/splash05.rim"},
-	#elif ALIEN_DEMO
-	{"AlienSplash/splash00.rim"},
-	{"AlienSplash/splash01.rim"},
-	{"AlienSplash/splash02.rim"},
-	{"AlienSplash/splash03.rim"},
-	{"AlienSplash/splash04.rim"},
-	{"AlienSplash/splash05.rim"},
-	#else
-	{"PredatorSplash/splash00.rim"},
-	{"PredatorSplash/splash01.rim"},
-	{"PredatorSplash/splash02.rim"},
-	{"PredatorSplash/splash03.rim"},
-	{"PredatorSplash/splash04.rim"},
-	{"PredatorSplash/splash05.rim"},
-	#endif
-};
-#endif
 
 AVPIndexedFont IntroFont_Light;
 
@@ -215,7 +128,7 @@ static void LoadMenuFont(void)
 
 	gfxPtr = &IntroFont_Light.info;
 	
-	CL_GetImageFileName(buffer, 100, "Menus\\IntroFont.rim", LIO_RELATIVEPATH);
+	CL_GetImageFileName(buffer, 100, "Menus\\IntroFont.RIM", LIO_RELATIVEPATH);
 	
 	pFastFileData = ffreadbuf(buffer, &fastFileLength);
 
@@ -948,90 +861,90 @@ Determine area used by text , so we can draw it centrally
 
 void LoadAllMenuTextures()
 {
-	AVPMENUGFX_CLOUDY = CL_LoadImageOnce("Menus\\fractal.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_CLOUDY = CL_LoadImageOnce("Menus\\fractal.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
-	AVPMENUGFX_SMALL_FONT  = CL_LoadImageOnce("Common\\aa_font.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_COPYRIGHT_SCREEN = CL_LoadImageOnce("Menus\\copyright.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_SMALL_FONT  = CL_LoadImageOnce("Common\\aa_font.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_COPYRIGHT_SCREEN = CL_LoadImageOnce("Menus\\Copyright.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
-	AVPMENUGFX_PRESENTS = CL_LoadImageOnce("Menus\\FIandRD.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_AREBELLIONGAME = CL_LoadImageOnce("Menus\\presents.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIENSVPREDATOR = CL_LoadImageOnce("Menus\\AliensVPredator.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_PRESENTS = CL_LoadImageOnce("Menus\\FIandRD.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_AREBELLIONGAME = CL_LoadImageOnce("Menus\\presents.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_ALIENSVPREDATOR = CL_LoadImageOnce("Menus\\AliensVPredator.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
-	AVPMENUGFX_SLIDERBAR = CL_LoadImageOnce("Menus\\sliderbar.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_SLIDER = CL_LoadImageOnce("Menus\\slider.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_SLIDERBAR = CL_LoadImageOnce("Menus\\SliderBar.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_SLIDER = CL_LoadImageOnce("Menus\\Slider.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
-	AVPMENUGFX_BACKDROP = CL_LoadImageOnce("Menus\\starfield.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIENS_LOGO = CL_LoadImageOnce("Menus\\aliens.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_LOGO = CL_LoadImageOnce("Menus\\Alien.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_LOGO = CL_LoadImageOnce("Menus\\Marine.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_LOGO = CL_LoadImageOnce("Menus\\Predator.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_BACKDROP = CL_LoadImageOnce("Menus\\Starfield.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_ALIENS_LOGO = CL_LoadImageOnce("Menus\\aliens.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_ALIEN_LOGO = CL_LoadImageOnce("Menus\\Alien.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_MARINE_LOGO = CL_LoadImageOnce("Menus\\Marine.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_PREDATOR_LOGO = CL_LoadImageOnce("Menus\\Predator.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
-	AVPMENUGFX_GLOWY_LEFT = CL_LoadImageOnce("Menus\\glowy_left.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_GLOWY_MIDDLE = CL_LoadImageOnce("Menus\\glowy_middle.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_GLOWY_RIGHT = CL_LoadImageOnce("Menus\\glowy_right.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_GLOWY_LEFT = CL_LoadImageOnce("Menus\\glowy_left.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_GLOWY_MIDDLE = CL_LoadImageOnce("Menus\\glowy_middle.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_GLOWY_RIGHT = CL_LoadImageOnce("Menus\\glowy_right.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
-	AVPMENUGFX_MARINE_EPISODE1 = CL_LoadImageOnce("Menus\\MarineEpisode1.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE2 = CL_LoadImageOnce("Menus\\MarineEpisode2.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE3 = CL_LoadImageOnce("Menus\\MarineEpisode3.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE4 = CL_LoadImageOnce("Menus\\MarineEpisode4.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE5 = CL_LoadImageOnce("Menus\\MarineEpisode5.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE6 = CL_LoadImageOnce("Menus\\MarineEpisode6.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_MARINE_EPISODE1 = CL_LoadImageOnce("Menus\\MarineEpisode1.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_MARINE_EPISODE2 = CL_LoadImageOnce("Menus\\MarineEpisode2.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_MARINE_EPISODE3 = CL_LoadImageOnce("Menus\\MarineEpisode3.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_MARINE_EPISODE4 = CL_LoadImageOnce("Menus\\MarineEpisode4.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_MARINE_EPISODE5 = CL_LoadImageOnce("Menus\\MarineEpisode5.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_MARINE_EPISODE6 = CL_LoadImageOnce("Menus\\MarineEpisode6.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
-	AVPMENUGFX_MARINE_EPISODE7 = CL_LoadImageOnce("Menus\\bonus.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE8 = CL_LoadImageOnce("Menus\\bonus.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE9 = CL_LoadImageOnce("Menus\\bonus.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE10 = CL_LoadImageOnce("Menus\\bonus.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE11 = CL_LoadImageOnce("Menus\\bonus.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_MARINE_EPISODE7 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_MARINE_EPISODE8 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_MARINE_EPISODE9 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_MARINE_EPISODE10 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_MARINE_EPISODE11 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
-	AVPMENUGFX_PREDATOR_EPISODE1 = CL_LoadImageOnce("Menus\\PredatorEpisode1.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE2 = CL_LoadImageOnce("Menus\\PredatorEpisode2.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE3 = CL_LoadImageOnce("Menus\\PredatorEpisode3.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE4 = CL_LoadImageOnce("Menus\\PredatorEpisode4.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE5 = CL_LoadImageOnce("Menus\\PredatorEpisode5.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE6 = CL_LoadImageOnce("Menus\\PredatorEpisode5.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_PREDATOR_EPISODE1 = CL_LoadImageOnce("Menus\\PredatorEpisode1.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_PREDATOR_EPISODE2 = CL_LoadImageOnce("Menus\\PredatorEpisode2.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_PREDATOR_EPISODE3 = CL_LoadImageOnce("Menus\\PredatorEpisode3.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_PREDATOR_EPISODE4 = CL_LoadImageOnce("Menus\\PredatorEpisode4.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_PREDATOR_EPISODE5 = CL_LoadImageOnce("Menus\\PredatorEpisode5.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_PREDATOR_EPISODE6 = CL_LoadImageOnce("Menus\\PredatorEpisode5.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
-	AVPMENUGFX_PREDATOR_EPISODE7 = CL_LoadImageOnce("Menus\\bonus.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE8 = CL_LoadImageOnce("Menus\\bonus.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE9 = CL_LoadImageOnce("Menus\\bonus.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE10 = CL_LoadImageOnce("Menus\\bonus.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE11 = CL_LoadImageOnce("Menus\\bonus.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_PREDATOR_EPISODE7 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_PREDATOR_EPISODE8 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_PREDATOR_EPISODE9 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_PREDATOR_EPISODE10 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_PREDATOR_EPISODE11 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
-	AVPMENUGFX_ALIEN_EPISODE1 = CL_LoadImageOnce("Menus\\AlienEpisode2.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE2 = CL_LoadImageOnce("Menus\\AlienEpisode4.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE3 = CL_LoadImageOnce("Menus\\AlienEpisode1.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE4 = CL_LoadImageOnce("Menus\\AlienEpisode3.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE5 = CL_LoadImageOnce("Menus\\AlienEpisode5.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE6 = CL_LoadImageOnce("Menus\\bonus.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE7 = CL_LoadImageOnce("Menus\\bonus.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE8 = CL_LoadImageOnce("Menus\\bonus.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE9 = CL_LoadImageOnce("Menus\\bonus.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE10 = CL_LoadImageOnce("Menus\\bonus.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_ALIEN_EPISODE1 = CL_LoadImageOnce("Menus\\AlienEpisode2.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_ALIEN_EPISODE2 = CL_LoadImageOnce("Menus\\AlienEpisode4.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_ALIEN_EPISODE3 = CL_LoadImageOnce("Menus\\AlienEpisode1.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_ALIEN_EPISODE4 = CL_LoadImageOnce("Menus\\AlienEpisode3.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_ALIEN_EPISODE5 = CL_LoadImageOnce("Menus\\AlienEpisode5.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_ALIEN_EPISODE6 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_ALIEN_EPISODE7 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_ALIEN_EPISODE8 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_ALIEN_EPISODE9 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AVPMENUGFX_ALIEN_EPISODE10 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
 	// Splash screens
 	#if MARINE_DEMO
-		AVPMENUGFX_WINNER_SCREEN = CL_LoadImageOnce("MarineSplash\\splash00.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_WINNER_SCREEN = CL_LoadImageOnce("MarineSplash\\splash00.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
-		AVPMENUGFX_SPLASH_SCREEN1 = CL_LoadImageOnce("MarineSplash\\splash01.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN2 = CL_LoadImageOnce("MarineSplash\\splash02.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN3 = CL_LoadImageOnce("MarineSplash\\splash03.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN4 = CL_LoadImageOnce("MarineSplash\\splash04.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN5 = CL_LoadImageOnce("MarineSplash\\splash05.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_SPLASH_SCREEN1 = CL_LoadImageOnce("MarineSplash\\splash01.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_SPLASH_SCREEN2 = CL_LoadImageOnce("MarineSplash\\splash02.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_SPLASH_SCREEN3 = CL_LoadImageOnce("MarineSplash\\splash03.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_SPLASH_SCREEN4 = CL_LoadImageOnce("MarineSplash\\splash04.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_SPLASH_SCREEN5 = CL_LoadImageOnce("MarineSplash\\splash05.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 	#elif ALIEN_DEMO
-		AVPMENUGFX_WINNER_SCREEN = CL_LoadImageOnce("AlienSplash\\splash00.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_WINNER_SCREEN = CL_LoadImageOnce("AlienSplash\\splash00.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
-		AVPMENUGFX_SPLASH_SCREEN1 = CL_LoadImageOnce("AlienSplash\\splash01.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN2 = CL_LoadImageOnce("AlienSplash\\splash02.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN3 = CL_LoadImageOnce("AlienSplash\\splash03.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN4 = CL_LoadImageOnce("AlienSplash\\splash04.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN5 = CL_LoadImageOnce("AlienSplash\\splash05.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_SPLASH_SCREEN1 = CL_LoadImageOnce("AlienSplash\\splash01.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_SPLASH_SCREEN2 = CL_LoadImageOnce("AlienSplash\\splash02.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_SPLASH_SCREEN3 = CL_LoadImageOnce("AlienSplash\\splash03.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_SPLASH_SCREEN4 = CL_LoadImageOnce("AlienSplash\\splash04.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_SPLASH_SCREEN5 = CL_LoadImageOnce("AlienSplash\\splash05.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 	#else
-		AVPMENUGFX_WINNER_SCREEN = CL_LoadImageOnce("PredatorSplash\\splash00.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_WINNER_SCREEN = CL_LoadImageOnce("PredatorSplash\\splash00.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
-		AVPMENUGFX_SPLASH_SCREEN1 = CL_LoadImageOnce("PredatorSplash\\splash01.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN2 = CL_LoadImageOnce("PredatorSplash\\splash02.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN3 = CL_LoadImageOnce("PredatorSplash\\splash03.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN4 = CL_LoadImageOnce("PredatorSplash\\splash04.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN5 = CL_LoadImageOnce("PredatorSplash\\splash05.rim", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_SPLASH_SCREEN1 = CL_LoadImageOnce("PredatorSplash\\splash01.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_SPLASH_SCREEN2 = CL_LoadImageOnce("PredatorSplash\\splash02.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_SPLASH_SCREEN3 = CL_LoadImageOnce("PredatorSplash\\splash03.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_SPLASH_SCREEN4 = CL_LoadImageOnce("PredatorSplash\\splash04.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+		AVPMENUGFX_SPLASH_SCREEN5 = CL_LoadImageOnce("PredatorSplash\\splash05.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 	#endif
 }
 
@@ -1154,16 +1067,17 @@ static void ReleaseAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 #endif
 }
 
-extern AVPMENU_ELEMENT AvPMenu_SinglePlayer[];
-
 extern void LoadAllAvPMenuGfx(void)
 {
 	LoadAllMenuTextures();
 	LoadMenuFont();
 	CalculateWidthsOfAAFont();
 
-	// call a function to remove the red grid from the small font texture
-	DeRedTexture((Texture)Tex_GetTextureDetails(AVPMENUGFX_SMALL_FONT));
+	// call a function to remove the red grid from the small font texture- only if the texture is loaded
+	if (MISSING_TEXTURE != AVPMENUGFX_SMALL_FONT)
+	{
+		DeRedTexture((Texture)Tex_GetTextureDetails(AVPMENUGFX_SMALL_FONT));
+	}
 
 	/*
 		AVPMENUGFX_ALIEN_LOGO and friends were originally constants that could be assigned at 
@@ -1470,12 +1384,20 @@ extern int HeightOfMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textureID)
 
 static void CalculateWidthsOfAAFont(void)
 {
-	// bjd - texture test
+	if (MISSING_TEXTURE == AVPMENUGFX_SMALL_FONT)
+	{
+		// the texture isn't loaded or hasn't loaded correctly so we can't perform the width calculation
+		return;
+	}
 
-	uint32_t textureWidth = 0;
+	uint32_t textureWidth  = 0;
 	uint32_t textureHeight = 0;
 
 	Tex_GetDimensions(AVPMENUGFX_SMALL_FONT, textureWidth, textureHeight);
+
+	// we'll assume it can't be smaller than the original AvP font texture
+	assert(textureWidth  >= 256);
+	assert(textureHeight >= 256);
 
 	uint8_t *originalSrcPtr = NULL;
 	uint32_t pitch = 0;
