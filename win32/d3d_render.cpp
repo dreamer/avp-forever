@@ -118,14 +118,19 @@ uint16_t *orthoIndex = NULL;
 D3DLVERTEX *particleVertex = NULL;
 uint16_t *particleIndex = NULL;
 
-uint32_t pVb = 0;
-uint32_t vb = 0;
+DECAL_VERTEX *decalVertex = NULL;
+uint16_t *decalIndex = NULL;
+
+static uint32_t pVb = 0;
+static uint32_t vb = 0;
+static uint32_t decalVb = 0;
 static uint32_t orthoVBOffset = 0;
 static uint32_t NumberOfRenderedTriangles = 0;
 
 RenderList *particleList = 0;
 RenderList *mainList = 0;
 RenderList *orthoList = 0;
+RenderList *decalList = 0;
 
 // stars test
 RenderList *starsList = 0;
@@ -138,6 +143,7 @@ void RenderListInit()
 	particleList = new RenderList(400);
 	mainList     = new RenderList(800);
 	orthoList    = new RenderList(400);
+	decalList    = new RenderList(400);
 
 	// stars test
 	starsList    = new RenderList(600);
@@ -153,6 +159,9 @@ void RenderListDeInit()
 
 	delete orthoList;
 	orthoList = 0;
+
+	delete decalList;
+	decalList = 0;
 
 	// stars test
 	delete starsList;
@@ -277,8 +286,13 @@ static bool LockExecuteBuffer()
 	// reset list to empty state
 	orthoList->Reset();
 
+	d3d.decalVB->Lock((void**)&decalVertex);
+	d3d.decalIB->Lock(&decalIndex);
+	decalList->Reset();
+
 	// reset counters and indexes
 	vb = 0;
+	decalVb = 0;
 	orthoVBOffset = 0;
 	pVb = 0;
 
@@ -306,6 +320,9 @@ static bool UnlockExecuteBufferAndPrepareForUse()
 	d3d.orthoVB->Unlock();
 	d3d.orthoIB->Unlock();
 
+	d3d.decalVB->Unlock();
+	d3d.decalIB->Unlock();
+
 	return true;
 }
 
@@ -314,11 +331,19 @@ float cot(float in)
 	return 1.0f / tan(in);
 }
 
+extern void DrawParticles();
+extern void DrawCoronas();
+
 static bool ExecuteBuffer()
 {
 	// sort the list of render objects
 	particleList->Sort();
 	mainList->Sort();
+
+	// these two just add the vertex data to the below lists (they dont draw anything themselves
+	// and they HAVE to be called before the below code)
+	DrawParticles();
+	DrawCoronas();
 
 	if (mainList->GetSize())
 	{
@@ -377,6 +402,31 @@ static bool ExecuteBuffer()
 
 		// daw the ortho list
 		orthoList->Draw();
+	}
+
+	// render any decals
+	if (decalList->GetSize())
+	{
+		// set vertex declaration
+		d3d.decalDecl->Set();
+
+		d3d.decalVB->Set();
+		d3d.decalIB->Set();
+
+		// set decal shaders as active
+		d3d.effectSystem->SetActive(d3d.decalEffect);
+
+		R_MATRIX matWorldViewProj = d3d.matView * d3d.matProjection;
+
+		// pass the projection matrix to the vertex shader
+		d3d.effectSystem->SetVertexShaderConstant(d3d.decalEffect, 0, CONST_MATRIX, &matWorldViewProj);
+
+//		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
+
+		// daw the ortho list
+		decalList->Draw();
+
+//		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 	}
 
 #if 0 // test code, disabled
@@ -841,7 +891,7 @@ void DrawFontQuad(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeigh
 	float x2 = WPos2DC(x + charWidth);
 	float y2 = HPos2DC(y + charHeight);
 
-	orthoList->AddItem(4, textureID, translucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
+	orthoList->AddItem(4, textureID, translucencyType, FILTERING_BILINEAR_OFF, TEXTURE_CLAMP);
 
 	// bottom left
 	orthoVertex[orthoVBOffset].x = x1;
@@ -1305,7 +1355,7 @@ void DrawParticles()
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
 	// bjd - This is the function responsible for drawing level geometry and the players weapon
-
+#if 0
 	if (frustumCull)
 	{
 		bool valid = false;
@@ -1333,7 +1383,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 			return;
 		}
 	}
-
+#endif
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
 	texID_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
@@ -1614,27 +1664,22 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 
 void D3D_DecalSystem_Setup()
 {
+/*
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
 	LockExecuteBuffer();
-
-//	d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS  );
-
-//	ChangeZWriteEnable(ZWRITE_DISABLED);
+*/
 }
 
 void D3D_DecalSystem_End()
 {
-	DrawParticles();
-	DrawCoronas();
-
+//	DrawParticles();
+//	DrawCoronas();
+/*
 	UnlockExecuteBufferAndPrepareForUse();
 	ExecuteBuffer();
 	LockExecuteBuffer();
-
-//	d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
-
-//	ChangeZWriteEnable(ZWRITE_ENABLED);
+*/
 }
 
 void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
@@ -1646,22 +1691,8 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 
 	float RecipW, RecipH;
 	RCOLOR colour;
-/*
-	if (decalPtr->DecalID == DECAL_FMV)
-	{
-		#if !FMV_ON
-			return;
-		#endif
 
-//		textureHandle = FMVTextureHandle[decalPtr->Centre.vx];
-
-		RecipW = 1.0f / 128.0f;
-		RecipH = 1.0f / 128.0f;
-
-		textureID = NO_TEXTURE;
-	}
-
-	else*/ if (decalPtr->DecalID == DECAL_SHAFTOFLIGHT || decalPtr->DecalID == DECAL_SHAFTOFLIGHT_OUTER)
+	if (decalPtr->DecalID == DECAL_SHAFTOFLIGHT || decalPtr->DecalID == DECAL_SHAFTOFLIGHT_OUTER)
 	{
 		textureID = NO_TEXTURE;
 	}
@@ -1707,25 +1738,32 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 				);
 	}
 
-	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, decalDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP, ZWRITE_DISABLED);
+	// temp fix - don't overload the VB with more verts than it can hold
+	if ((decalVb+RenderPolygon.NumberOfVertices) >= (1024*2*2*2))
+	{
+		return;
+	}
+
+	decalList->AddItem(RenderPolygon.NumberOfVertices, textureID, decalDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP, ZWRITE_DISABLED);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 
-		mainVertex[vb].x = (float)vertices->X;
-		mainVertex[vb].y = (float)-vertices->Y;
-		mainVertex[vb].z = (float)vertices->Z;
+		// assert(decalVb < (1024*2*2*2));
 
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBA_MAKE(0, 0, 0, 0);
+		decalVertex[decalVb].x = (float)vertices->X;
+		decalVertex[decalVb].y = (float)-vertices->Y;
+		decalVertex[decalVb].z = (float)vertices->Z;
 
-		mainVertex[vb].u = (float)(vertices->U) * RecipW;
-		mainVertex[vb].v = (float)(vertices->V) * RecipH;
-		vb++;
+		decalVertex[decalVb].colour = colour;
+
+		decalVertex[decalVb].u = (float)(vertices->U) * RecipW;
+		decalVertex[decalVb].v = (float)(vertices->V) * RecipH;
+		decalVb++;
 	}
 
-	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
+	decalList->CreateIndices(decalIndex, RenderPolygon.NumberOfVertices);
 }
 
 void AddCorona(PARTICLE *particlePtr, VECTORCHF *coronaPoint)

@@ -185,6 +185,9 @@ bool ReleaseVolatileResources()
 	SAFE_DELETE(d3d.particleVB);
 	SAFE_DELETE(d3d.particleIB);
 
+	SAFE_DELETE(d3d.decalVB);
+	SAFE_DELETE(d3d.decalIB);
+
 	SAFE_DELETE(d3d.orthoVB);
 	SAFE_DELETE(d3d.orthoIB);
 
@@ -272,8 +275,6 @@ void UpdateTestTimer()
 	std::stringstream ss;
 
 	ss << deltaTime;
-
-	Font_DrawCenteredText(ss.str());
 }
 
 float GetTestTimer()
@@ -698,6 +699,13 @@ bool CreateVolatileResources()
 	d3d.particleIB = new IndexBuffer;
 	d3d.particleIB->Create((kMaxIndices*6) * 3, USAGE_DYNAMIC);
 
+	// decal buffers
+	d3d.decalVB = new VertexBuffer;
+	d3d.decalVB->Create((1024*2*2*2), FVF_DECAL, USAGE_DYNAMIC);
+
+	d3d.decalIB = new IndexBuffer;
+	d3d.decalIB->Create((1024*2*6*2) * 3, USAGE_DYNAMIC);
+
 	SetRenderStateDefaults();
 
 	// going to clear texture stages too
@@ -830,6 +838,15 @@ extern bool frustumCull;
 void ToggleFrustumCull()
 {
 	frustumCull = !frustumCull;
+
+	if (frustumCull)
+	{
+		Con_PrintMessage("Frustum culling is now ON");
+	}
+	else
+	{
+		Con_PrintMessage("Frustum culling is now OFF");
+	}
 }
 
 void PrintD3DMatrix(const char* name, D3DXMATRIX &mat)
@@ -2484,6 +2501,12 @@ bool InitialiseDirect3D()
 	d3d.orthoDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
 	d3d.orthoDecl->Create();
 
+	d3d.decalDecl = new VertexDeclaration;
+	d3d.decalDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
+	d3d.decalDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
+	d3d.decalDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
+	d3d.decalDecl->Create();
+
 	d3d.fmvDecl = new VertexDeclaration;
 	d3d.fmvDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
 	d3d.fmvDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
@@ -2579,6 +2602,7 @@ bool InitialiseDirect3D()
 
 	d3d.mainEffect  = d3d.effectSystem->Add("main", "vertex.vsh", "pixel.psh", d3d.mainDecl);
 	d3d.orthoEffect = d3d.effectSystem->Add("ortho", "orthoVertex.vsh", "pixel.psh", d3d.orthoDecl);
+	d3d.decalEffect = d3d.effectSystem->Add("decal", "decal.vsh", "decal.psh", d3d.decalDecl);
 	d3d.fmvEffect   = d3d.effectSystem->Add("fmv", "fmvVertex.vsh", "fmvPixel.psh", d3d.fmvDecl);
 	d3d.cloudEffect = d3d.effectSystem->Add("cloud", "tallFontTextVertex.vsh", "tallFontTextPixel.psh", d3d.tallFontText);
 
@@ -2609,13 +2633,13 @@ bool InitialiseDirect3D()
 		d3d.starsIB->Create(kMaxIndices * 3, USAGE_STATIC);
 	}
 
-	Con_Init();
-	Net_Initialise();
-	Font_Init();
-
 	RenderListInit();
 
 	Con_PrintMessage("Initialised Direct3D9 succesfully");
+
+	Con_Init();
+
+	Net_Initialise();
 
 	return true;
 }

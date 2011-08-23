@@ -40,6 +40,7 @@ enum R_FVF
 {
 	FVF_LVERTEX,
 	FVF_ORTHO,
+	FVF_DECAL,
 	FVF_FMV
 };
 

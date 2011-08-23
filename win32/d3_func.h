@@ -92,7 +92,7 @@ struct r_PixelShader
  *	taken from http://www.mvps.org/directx/articles/definitions_for_dx7_vertex_types.htm
  */
 
-typedef struct _D3DLVERTEX
+struct D3DLVERTEX
 {
 	float x;
 	float y;
@@ -104,31 +104,26 @@ typedef struct _D3DLVERTEX
 	float u;
 	float v;
 
-} D3DLVERTEX;
+};
 
-#define D3DFVF_LVERTEX	(D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_SPECULAR | D3DFVF_TEX1)
-
-typedef struct ORTHOVERTEX
+struct ORTHOVERTEX
 {
 	float x;
 	float y;
 	float z;
 
-	DWORD colour;   // Colour
+	DWORD colour;
 
 	float u;
-	float v;        // Texture coordinates
+	float v;
 
-} ORTHOVERTEX;
+};
 
-// orthographic quad vertex format
-#define D3DFVF_ORTHOVERTEX (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1)
-
-typedef struct FMVVERTEX
+struct FMVVERTEX
 {
 	float x;
 	float y;
-	float z;        // Position in 3d space
+	float z;
 
 	float u1;
 	float v1;        // Texture coordinates 1
@@ -139,7 +134,19 @@ typedef struct FMVVERTEX
 	float u3;
 	float v3;        // Texture coordinates 3
 
-} FMVVERTEX;
+};
+
+struct DECAL_VERTEX
+{
+	float x;
+	float y;
+	float z;
+
+	DWORD colour;
+
+	float u;
+	float v;
+};
 
 /*
   Maximum number of Direct3D drivers ever
@@ -176,6 +183,9 @@ typedef struct D3DInfo
 	class VertexBuffer		*particleVB;
 	class IndexBuffer		*particleIB;
 
+	class VertexBuffer		*decalVB;
+	class IndexBuffer		*decalIB;
+
 	class VertexBuffer		*starsVB;
 	class IndexBuffer		*starsIB;
 
@@ -187,6 +197,7 @@ typedef struct D3DInfo
 
 	// shader IDs
 	effectID_t				mainEffect;
+	effectID_t				decalEffect;
 	effectID_t				orthoEffect;
 	effectID_t				cloudEffect;
 	effectID_t				fmvEffect;
@@ -196,6 +207,7 @@ typedef struct D3DInfo
 	// vertex declarations
 	class VertexDeclaration		*mainDecl;
 	class VertexDeclaration		*orthoDecl;
+	class VertexDeclaration		*decalDecl;
 	class VertexDeclaration		*fmvDecl;
 	class VertexDeclaration		*tallFontText;
 

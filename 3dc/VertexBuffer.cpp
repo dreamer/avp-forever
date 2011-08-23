@@ -67,6 +67,9 @@ bool VertexBuffer::Create(uint32_t capacity, enum R_FVF fvf, enum R_USAGE usage)
 		case FVF_ORTHO:
 			this->stride = sizeof(ORTHOVERTEX);
 			break;
+		case FVF_DECAL:
+			this->stride = sizeof(DECAL_VERTEX);
+			break;
 		case FVF_FMV:
 			this->stride = sizeof(FMVVERTEX);
 			break;

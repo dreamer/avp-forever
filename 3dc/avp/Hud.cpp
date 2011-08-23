@@ -261,6 +261,7 @@ void MaintainHUD(void)
 //	PlatformSpecificEnteringHUD();
 
 	HandleParticleSystem();
+	HandleDecalSystem();
 
 	RenderGrapplingHook();
 

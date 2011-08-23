@@ -11,24 +11,20 @@
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
-
 #include "stratdef.h"
 #include "gamedef.h"
-
 #include "kshape.h"
 #include "kzsort.h"
 #include "frustum.h"
-
 #include "particle.h"
-
 #define UseLocalAssert Yes
 #include "ourasert.h"
 
 /*KJL****************************************************************************************
-*  										G L O B A L S 	            					    *
+*                                       G L O B A L S                                       *
 ****************************************************************************************KJL*/
 extern VECTORCH RotatedPts[];
-
+extern MORPHDISPLAY MorphDisplay;
 extern DISPLAYBLOCK *Global_ODB_Ptr;
 extern SHAPEHEADER *Global_ShapeHeaderPtr;
 extern int *Global_ShapePoints;
@@ -40,7 +36,7 @@ extern VECTORCH LocalView;
 #define FAR_Z_CLIP_RANGE 49000
 
 /*KJL****************************************************************************************
-*                                    P R O T O T Y P E S	                                *
+*                                    P R O T O T Y P E S                                    *
 ****************************************************************************************KJL*/
 /* GOURAUD POLYGON CLIPPING */
 void (*GouraudPolygon_ClipWithNegativeX)(void);
@@ -104,7 +100,7 @@ static void TestVerticesWith_Norm_Frustum(void);
 static void TestVerticesWith_Wide_Frustum(void);
 
 /*KJL****************************************************************************************
-*                                     F U N C T I O N S	                                    *
+*                                     F U N C T I O N S                                     *
 ****************************************************************************************KJL*/
 void SetFrustumType(enum FrustumType frustumType)
 {
@@ -203,7 +199,7 @@ clipping fns for different polygon types with the minimum of fuss */
 		{ \
 			numberOfPointsOutputted++; \
 			*outputVerticesPtr++ = *curVertexPtr; \
-  		} \
+		} \
  \
 		/* test if next vertex is inside the plane */ \
 			nextVertexInside =
@@ -1010,7 +1006,6 @@ int PolygonWithinFrustum(POLYHEADER *polyPtr)
 
 		if (Global_ODB_Ptr->ObMorphCtrl)
 		{
-			extern MORPHDISPLAY MorphDisplay;
 		   	SHAPEHEADER *shape1Ptr;
 		   	VECTORCH *shape1PointsPtr;
 			VECTORCH *shape2PointsPtr;
@@ -1024,7 +1019,6 @@ int PolygonWithinFrustum(POLYHEADER *polyPtr)
 			{
 				shape1PointsPtr = (VECTORCH *)*shape1Ptr->points;
 				pop = shape1PointsPtr[polyPtr->Poly1stPt];
-
 			}
 			else if (MorphDisplay.md_lerp == 0xffff)
 			{

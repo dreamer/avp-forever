@@ -26,6 +26,7 @@
 #include "ourasert.h"
 #include "tables.h"
 #include "renderStates.h"
+#include <assert.h>
 
 #define MAX_NO_OF_DECALS 1024
 #define MAX_NO_OF_FIXED_DECALS 1024
@@ -48,6 +49,14 @@ int CurrentFixedDecalIndex;
 
 void D3D_DecalSystem_Setup();
 
+static DECAL* AllocateDecal(void);
+static int TooManyDecalsOfThisType(enum DECAL_ID decalID, VECTORCH *positionPtr);
+
+extern int NumActiveBlocks;
+extern DISPLAYBLOCK *ActiveBlockList[];
+extern DPID AvPNetID;
+extern void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour);
+
 DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 {
 	/* DECAL_FMV */
@@ -59,7 +68,7 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 		//int EndU;
 		(127),
 		//int EndV;
-	    (95),
+		(95),
 
 		//int MinSize;
 		3000,
@@ -453,19 +462,10 @@ DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 	}
 };
 
-
-
-static DECAL* AllocateDecal(void);
-static int TooManyDecalsOfThisType(enum DECAL_ID decalID, VECTORCH *positionPtr);
-
 void InitialiseDecalSystem(void)
 {
-// 	VECTORCH normal = {0,0,65536};
-// 	VECTORCH position = {-1603,2675,8000};
-	NumActiveDecals=0;
-	CurrentDecalIndex=0;
-
- //	MakeDecal(DECAL_FMV, &normal,&position,1);
+	NumActiveDecals = 0;
+	CurrentDecalIndex = 0;
 }
 
 static DECAL* AllocateDecal(void)
@@ -475,6 +475,9 @@ static DECAL* AllocateDecal(void)
 	decalPtr = &DecalStorage[CurrentDecalIndex];
 
 	CurrentDecalIndex++;
+
+	assert(CurrentDecalIndex < MAX_NO_OF_DECALS);
+
 	if (CurrentDecalIndex >= LocalDetailLevels.MaximumAllowedNumberOfDecals)
 	{
 		CurrentDecalIndex = 0;
@@ -493,7 +496,7 @@ extern FIXED_DECAL* AllocateFixedDecal(void)
 {
 	FIXED_DECAL *decalPtr;
 
-	if (CurrentFixedDecalIndex>=MAX_NO_OF_FIXED_DECALS)
+	if (CurrentFixedDecalIndex >= MAX_NO_OF_FIXED_DECALS)
 	{
 		return 0;
 	}
@@ -528,12 +531,13 @@ extern void RemoveAllFixedDecals(void)
 void MakeDecal(enum DECAL_ID decalID, VECTORCH *normalPtr, VECTORCH *positionPtr, int moduleIndex)
 {
 	if (TooManyDecalsOfThisType(decalID,positionPtr)) return;
-	AddDecal(decalID,normalPtr,positionPtr,moduleIndex);
+
+	AddDecal(decalID, normalPtr, positionPtr, moduleIndex);
 
 	/* no blood across network? */
- 	if(AvP.Network!=I_No_Network)
+	if (AvP.Network!=I_No_Network)
 	{
-		if(netGameData.sendDecals)
+		if (netGameData.sendDecals)
 		{
 			switch (decalID)
 			{
@@ -588,7 +592,7 @@ static int TooManyDecalsOfThisType(enum DECAL_ID decalID, VECTORCH *positionPtr)
 			if (DecalDescription[decalID].CanCombine)
 			{
 				int j;//= FastRandom()%MAX_NO_OF_SIMILAR_DECALS_IN_ONE_PLACE;
-		  		for (j=0; j<MAX_NO_OF_SIMILAR_DECALS_IN_ONE_PLACE; j++)
+				for (j=0; j<MAX_NO_OF_SIMILAR_DECALS_IN_ONE_PLACE; j++)
 				{
 					similarDecalsPtr[j]->TargetSize += INCREMENT_IN_DECAL_SIZE;
 					if (similarDecalsPtr[j]->TargetSize > DecalDescription[decalID].MaxSize)
@@ -618,12 +622,11 @@ void AddDecal(enum DECAL_ID decalID, VECTORCH *normalPtr, VECTORCH *positionPtr,
 	int sin = GetSin(theta);
 	int cos = GetCos(theta);
 
-
-	MakeMatrixFromDirection(normalPtr,&orientation);
+	MakeMatrixFromDirection(normalPtr, &orientation);
 
 	if (decalID == DECAL_BULLETHOLE)
 	{
-		MakeImpactSmoke(&orientation,positionPtr);
+		MakeImpactSmoke(&orientation, positionPtr);
 	}
 
 	decalPtr = AllocateDecal();
@@ -632,68 +635,71 @@ void AddDecal(enum DECAL_ID decalID, VECTORCH *normalPtr, VECTORCH *positionPtr,
 
 	decalPtr->Centre = *positionPtr;
 
-	if(DecalDescription[decalID].GrowthRate)
+	if (DecalDescription[decalID].GrowthRate)
 	{
 		decalSize = ONE_FIXED;
-		decalPtr->Direction[0].vx = MUL_FIXED(-decalSize,cos) - MUL_FIXED(-decalSize,sin);
-		decalPtr->Direction[0].vy = MUL_FIXED(-decalSize,sin) + MUL_FIXED(-decalSize,cos);
+		decalPtr->Direction[0].vx = MUL_FIXED(-decalSize, cos) - MUL_FIXED(-decalSize, sin);
+		decalPtr->Direction[0].vy = MUL_FIXED(-decalSize, sin) + MUL_FIXED(-decalSize, cos);
 		decalPtr->Direction[0].vz = DECAL_Z_OFFSET;
 		RotateVector(&(decalPtr->Direction[0]),&orientation);
 		Normalise(&(decalPtr->Direction[0]));
 
-		decalPtr->Direction[1].vx = MUL_FIXED(decalSize,cos) - MUL_FIXED(-decalSize,sin);
-		decalPtr->Direction[1].vy = MUL_FIXED(decalSize,sin) + MUL_FIXED(-decalSize,cos);
+		decalPtr->Direction[1].vx = MUL_FIXED(decalSize, cos) - MUL_FIXED(-decalSize, sin);
+		decalPtr->Direction[1].vy = MUL_FIXED(decalSize, sin) + MUL_FIXED(-decalSize, cos);
 		decalPtr->Direction[1].vz = DECAL_Z_OFFSET;
 		RotateVector(&(decalPtr->Direction[1]),&orientation);
 		Normalise(&(decalPtr->Direction[1]));
 
-		decalPtr->Direction[2].vx = MUL_FIXED(decalSize,cos) - MUL_FIXED(decalSize,sin);
-		decalPtr->Direction[2].vy = MUL_FIXED(decalSize,sin) + MUL_FIXED(decalSize,cos);
+		decalPtr->Direction[2].vx = MUL_FIXED(decalSize, cos) - MUL_FIXED(decalSize, sin);
+		decalPtr->Direction[2].vy = MUL_FIXED(decalSize, sin) + MUL_FIXED(decalSize, cos);
 		decalPtr->Direction[2].vz = DECAL_Z_OFFSET;
 		RotateVector(&(decalPtr->Direction[2]),&orientation);
 		Normalise(&(decalPtr->Direction[2]));
 
-		decalPtr->Direction[3].vx = MUL_FIXED(-decalSize,cos) - MUL_FIXED(decalSize,sin);
-		decalPtr->Direction[3].vy = MUL_FIXED(-decalSize,sin) + MUL_FIXED(decalSize,cos);
+		decalPtr->Direction[3].vx = MUL_FIXED(-decalSize, cos) - MUL_FIXED(decalSize, sin);
+		decalPtr->Direction[3].vy = MUL_FIXED(-decalSize, sin) + MUL_FIXED(decalSize, cos);
 		decalPtr->Direction[3].vz = DECAL_Z_OFFSET;
-		RotateVector(&(decalPtr->Direction[3]),&orientation);
+		RotateVector(&(decalPtr->Direction[3]), &orientation);
 		Normalise(&(decalPtr->Direction[3]));
-	   	decalPtr->CurrentSize = DecalDescription[decalID].MinSize;
-		decalPtr->TargetSize = DecalDescription[decalID].MaxSize;
+		decalPtr->CurrentSize = DecalDescription[decalID].MinSize;
+		decalPtr->TargetSize  = DecalDescription[decalID].MaxSize;
 		if (DecalDescription[decalID].CanCombine) decalPtr->TargetSize/=4;
 	}
 	else
 	{
 		decalSize = DecalDescription[decalID].MinSize;
-		decalPtr->Vertices[0].vx = MUL_FIXED(-decalSize,cos) - MUL_FIXED(-decalSize,sin);
-		decalPtr->Vertices[0].vy = MUL_FIXED(-decalSize,sin) + MUL_FIXED(-decalSize,cos);
+		decalPtr->Vertices[0].vx = MUL_FIXED(-decalSize, cos) - MUL_FIXED(-decalSize, sin);
+		decalPtr->Vertices[0].vy = MUL_FIXED(-decalSize, sin) + MUL_FIXED(-decalSize, cos);
 		decalPtr->Vertices[0].vz = DECAL_Z_OFFSET;
-		RotateVector(&(decalPtr->Vertices[0]),&orientation);
+
+		RotateVector(&(decalPtr->Vertices[0]), &orientation);
 		decalPtr->Vertices[0].vx += positionPtr->vx;
 		decalPtr->Vertices[0].vy += positionPtr->vy;
 		decalPtr->Vertices[0].vz += positionPtr->vz;
 
-
-		decalPtr->Vertices[1].vx = MUL_FIXED(decalSize,cos) - MUL_FIXED(-decalSize,sin);
-		decalPtr->Vertices[1].vy = MUL_FIXED(decalSize,sin) + MUL_FIXED(-decalSize,cos);
+		decalPtr->Vertices[1].vx = MUL_FIXED(decalSize, cos) - MUL_FIXED(-decalSize, sin);
+		decalPtr->Vertices[1].vy = MUL_FIXED(decalSize, sin) + MUL_FIXED(-decalSize, cos);
 		decalPtr->Vertices[1].vz = DECAL_Z_OFFSET;
-		RotateVector(&(decalPtr->Vertices[1]),&orientation);
+
+		RotateVector(&(decalPtr->Vertices[1]), &orientation);
 		decalPtr->Vertices[1].vx += positionPtr->vx;
 		decalPtr->Vertices[1].vy += positionPtr->vy;
 		decalPtr->Vertices[1].vz += positionPtr->vz;
 
-		decalPtr->Vertices[2].vx = MUL_FIXED(decalSize,cos) - MUL_FIXED(decalSize,sin);
-		decalPtr->Vertices[2].vy = MUL_FIXED(decalSize,sin) + MUL_FIXED(decalSize,cos);
+		decalPtr->Vertices[2].vx = MUL_FIXED(decalSize, cos) - MUL_FIXED(decalSize, sin);
+		decalPtr->Vertices[2].vy = MUL_FIXED(decalSize, sin) + MUL_FIXED(decalSize, cos);
 		decalPtr->Vertices[2].vz = DECAL_Z_OFFSET;
-		RotateVector(&(decalPtr->Vertices[2]),&orientation);
+
+		RotateVector(&(decalPtr->Vertices[2]), &orientation);
 		decalPtr->Vertices[2].vx += positionPtr->vx;
 		decalPtr->Vertices[2].vy += positionPtr->vy;
 		decalPtr->Vertices[2].vz += positionPtr->vz;
 
-		decalPtr->Vertices[3].vx = MUL_FIXED(-decalSize,cos) - MUL_FIXED(decalSize,sin);
-		decalPtr->Vertices[3].vy = MUL_FIXED(-decalSize,sin) + MUL_FIXED(decalSize,cos);
+		decalPtr->Vertices[3].vx = MUL_FIXED(-decalSize, cos) - MUL_FIXED(decalSize ,sin);
+		decalPtr->Vertices[3].vy = MUL_FIXED(-decalSize, sin) + MUL_FIXED(decalSize, cos);
 		decalPtr->Vertices[3].vz = DECAL_Z_OFFSET;
-		RotateVector(&(decalPtr->Vertices[3]),&orientation);
+
+		RotateVector(&(decalPtr->Vertices[3]), &orientation);
 		decalPtr->Vertices[3].vx += positionPtr->vx;
 		decalPtr->Vertices[3].vy += positionPtr->vy;
 		decalPtr->Vertices[3].vz += positionPtr->vz;
@@ -795,54 +801,59 @@ void HandleDecalSystem(void)
 		NumActiveDecals = LocalDetailLevels.MaximumAllowedNumberOfDecals;
 	}
 
-	{
-		int i = NumActiveDecals;
-		DECAL *decalPtr = DecalStorage;
-	//	textprint("Decals Active: %d\n",i);
-		while (i--)
-		{
-			DECAL_DESC *decalDescPtr = &DecalDescription[decalPtr->DecalID];
+	int i = NumActiveDecals;
+	DECAL *decalPtr = DecalStorage;
+//	textprint("Decals Active: %d\n",i);
 
-			if (decalDescPtr->GrowthRate && decalPtr->CurrentSize < decalPtr->TargetSize)
+//	char buf[100];
+//	sprintf(buf, "Decals Active: %d\n", NumActiveDecals);
+//	OutputDebugString(buf);
+
+	while (i--)
+	{
+		DECAL_DESC *decalDescPtr = &DecalDescription[decalPtr->DecalID];
+
+		if (decalDescPtr->GrowthRate && decalPtr->CurrentSize < decalPtr->TargetSize)
+		{
+			decalPtr->CurrentSize += MUL_FIXED(decalDescPtr->GrowthRate, NormalFrameTime);
+			if (decalPtr->CurrentSize > decalPtr->TargetSize)
 			{
-				int i;
-				decalPtr->CurrentSize += MUL_FIXED(decalDescPtr->GrowthRate,NormalFrameTime);
-				if (decalPtr->CurrentSize > decalPtr->TargetSize)
-				{
-					decalPtr->CurrentSize = decalPtr->TargetSize;
-				}
-				for (i=0; i < 4; i++)
-				{
-					decalPtr->Vertices[i].vx = MUL_FIXED(decalPtr->Direction[i].vx, decalPtr->CurrentSize);
-					decalPtr->Vertices[i].vy = MUL_FIXED(decalPtr->Direction[i].vy, decalPtr->CurrentSize);
-					decalPtr->Vertices[i].vz = MUL_FIXED(decalPtr->Direction[i].vz, decalPtr->CurrentSize);
-					decalPtr->Vertices[i].vx += decalPtr->Centre.vx;
-					decalPtr->Vertices[i].vy += decalPtr->Centre.vy;
-					decalPtr->Vertices[i].vz += decalPtr->Centre.vz;
-				}
+				decalPtr->CurrentSize = decalPtr->TargetSize;
 			}
-			RenderDecal(decalPtr);
-			decalPtr++;
+			for (int i = 0; i < 4; i++)
+			{
+				decalPtr->Vertices[i].vx = MUL_FIXED(decalPtr->Direction[i].vx, decalPtr->CurrentSize);
+				decalPtr->Vertices[i].vy = MUL_FIXED(decalPtr->Direction[i].vy, decalPtr->CurrentSize);
+				decalPtr->Vertices[i].vz = MUL_FIXED(decalPtr->Direction[i].vz, decalPtr->CurrentSize);
+				decalPtr->Vertices[i].vx += decalPtr->Centre.vx;
+				decalPtr->Vertices[i].vy += decalPtr->Centre.vy;
+				decalPtr->Vertices[i].vz += decalPtr->Centre.vz;
+			}
 		}
+		RenderDecal(decalPtr);
+		decalPtr++;
 	}
-	{
-		int i = NumFixedDecals;
-		DECAL dummyDecal;
-		FIXED_DECAL *decalPtr = FixedDecalStorage;
-	//	textprint("Decals Active: %d\n",i);
-		while (i--)
-		{
-			dummyDecal.DecalID = decalPtr->DecalID;
-			dummyDecal.Vertices[0] = decalPtr->Vertices[0];
-			dummyDecal.Vertices[1] = decalPtr->Vertices[1];
-			dummyDecal.Vertices[2] = decalPtr->Vertices[2];
-			dummyDecal.Vertices[3] = decalPtr->Vertices[3];
-			dummyDecal.ModuleIndex = decalPtr->ModuleIndex;
-			dummyDecal.UOffset = decalPtr->UOffset;
 
-			RenderDecal(&dummyDecal);
-			decalPtr++;;
-		}
+	i = NumFixedDecals;
+	DECAL dummyDecal;
+	FIXED_DECAL *fixedDecalPtr = FixedDecalStorage;
+//	textprint("Decals Active: %d\n",i);
+
+//	sprintf(buf, "Fixed Decals Active: %d\n", NumFixedDecals);
+//	OutputDebugString(buf);
+
+	while (i--)
+	{
+		dummyDecal.DecalID = fixedDecalPtr->DecalID;
+		dummyDecal.Vertices[0] = fixedDecalPtr->Vertices[0];
+		dummyDecal.Vertices[1] = fixedDecalPtr->Vertices[1];
+		dummyDecal.Vertices[2] = fixedDecalPtr->Vertices[2];
+		dummyDecal.Vertices[3] = fixedDecalPtr->Vertices[3];
+		dummyDecal.ModuleIndex = fixedDecalPtr->ModuleIndex;
+		dummyDecal.UOffset = fixedDecalPtr->UOffset;
+
+		RenderDecal(&dummyDecal);
+		fixedDecalPtr++;;
 	}
 
 	if (AvP.PlayerType == I_Predator && PredatorLaserTarget.ShouldBeDrawn)
@@ -850,89 +861,80 @@ void HandleDecalSystem(void)
 		RenderLaserTarget(&PredatorLaserTarget);
 	}
 
+	int numOfObjects = NumActiveBlocks;
+	while (numOfObjects)
 	{
-		extern int NumActiveBlocks;
-		extern DISPLAYBLOCK *ActiveBlockList[];
-		int numOfObjects = NumActiveBlocks;
-		while (numOfObjects)
+		DISPLAYBLOCK *objectPtr = ActiveBlockList[--numOfObjects];
+		STRATEGYBLOCK *sbPtr = objectPtr->ObStrategyBlock;
+
+		if (sbPtr)
 		{
-			DISPLAYBLOCK *objectPtr = ActiveBlockList[--numOfObjects];
-			STRATEGYBLOCK *sbPtr = objectPtr->ObStrategyBlock;
-
-			if (sbPtr)
+			switch(sbPtr->I_SBtype)
 			{
-				switch(sbPtr->I_SBtype)
+				case (I_BehaviourNetGhost):
 				{
-					case (I_BehaviourNetGhost):
-				   	{
-					 	NETGHOSTDATABLOCK *ghostData = (NETGHOSTDATABLOCK *)sbPtr->SBdataptr;
-						GLOBALASSERT(AvP.Network != I_No_Network);
-						if (ghostData->type == I_BehaviourPredatorPlayer)
+					NETGHOSTDATABLOCK *ghostData = (NETGHOSTDATABLOCK *)sbPtr->SBdataptr;
+					GLOBALASSERT(AvP.Network != I_No_Network);
+					if (ghostData->type == I_BehaviourPredatorPlayer)
+					{
+						int playerIndex = PlayerIdInPlayerList(ghostData->playerId);
+						if (playerIndex == NET_IDNOTINPLAYERLIST)
 						{
-							extern DPID AvPNetID;
-							int playerIndex = PlayerIdInPlayerList(ghostData->playerId);
-							if (playerIndex == NET_IDNOTINPLAYERLIST)
-							{
-								continue;
-							}
-							if ((ghostData->CurrentWeapon != WEAPON_PRED_RIFLE)
-							  &&(ghostData->CurrentWeapon != WEAPON_PRED_SHOULDERCANNON))
-							{
-								continue;
-							}
+							continue;
+						}
+						if ((ghostData->CurrentWeapon != WEAPON_PRED_RIFLE)
+						  &&(ghostData->CurrentWeapon != WEAPON_PRED_SHOULDERCANNON))
+						{
+							continue;
+						}
 
-							if (AvPNetID==PredatorLaserSights[playerIndex].TargetID)
+						if (AvPNetID==PredatorLaserSights[playerIndex].TargetID)
+						{
+							SECTION_DATA *plasma_muzzle;
+							plasma_muzzle = GetThisSectionData(ghostData->HModelController.section_data, "dum flash");
+							if (plasma_muzzle != NULL)
 							{
-								SECTION_DATA *plasma_muzzle;
-								plasma_muzzle = GetThisSectionData(ghostData->HModelController.section_data, "dum flash");
-								if (plasma_muzzle != NULL)
-								{
-									extern void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour);
-									RenderLightFlare(&plasma_muzzle->World_Offset, 0xffff0000);
-								}
-							}
-							else
-							{
-								RenderLaserTarget(&PredatorLaserSights[playerIndex]);
+								RenderLightFlare(&plasma_muzzle->World_Offset, 0xffff0000);
 							}
 						}
-						break;
+						else
+						{
+							RenderLaserTarget(&PredatorLaserSights[playerIndex]);
+						}
 					}
-					case (I_BehaviourPredator):
-					{
-						extern void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour);
-						PREDATOR_STATUS_BLOCK *statusPtr = (PREDATOR_STATUS_BLOCK *)sbPtr->SBdataptr;
-						LOCALASSERT(statusPtr);
+					break;
+				}
+				case (I_BehaviourPredator):
+				{
+					PREDATOR_STATUS_BLOCK *statusPtr = (PREDATOR_STATUS_BLOCK *)sbPtr->SBdataptr;
+					LOCALASSERT(statusPtr);
 //						RenderLightFlare(&(sbPtr->DynPtr->Position),0x7fffffff);
 //						textprint("predator?\n");
-						if (statusPtr->Pred_Laser_On)
+					if (statusPtr->Pred_Laser_On)
+					{
+						if (statusPtr->Pred_Laser_Sight.DotIsOnPlayer)
 						{
-							if (statusPtr->Pred_Laser_Sight.DotIsOnPlayer)
-							{
-//								textprint("Render flare\n");
-								RenderLightFlare(&(statusPtr->Pred_Laser_Sight.LightSource),0xffff0000);
-							}
-							else
-							{
-//								textprint("Render dots\n");
-								RenderLaserTarget(&(statusPtr->Pred_Laser_Sight));
-							}
+//							textprint("Render flare\n");
+							RenderLightFlare(&(statusPtr->Pred_Laser_Sight.LightSource),0xffff0000);
 						}
-						break;
+						else
+						{
+//							textprint("Render dots\n");
+							RenderLaserTarget(&(statusPtr->Pred_Laser_Sight));
+						}
 					}
-					default:
-						break;
+					break;
 				}
+				default:
+					break;
 			}
 		}
 	}
 
 	/* KJL 11:03:53 01/10/98 - check for paintball mode */
+	if (PaintBallMode.IsOn)
 	{
-		if (PaintBallMode.IsOn)
-		{
-			PaintBallMode_DrawCurrentDecalAtTarget();
-		}
+		PaintBallMode_DrawCurrentDecalAtTarget();
 	}
 }
 
@@ -951,7 +953,6 @@ void AddDecalToHModel(VECTORCH *normalPtr, VECTORCH *positionPtr, SECTION_DATA *
 	theta = FastRandom()&4095;
 	sin = GetSin(theta);
 	cos = GetCos(theta);
-
 
 	LOCALASSERT(sectionDataPtr->NumberOfDecals <= MAX_NO_OF_DECALS_PER_HIERARCHICAL_SECTION);
 	{
@@ -1006,7 +1007,6 @@ void AddDecalToHModel(VECTORCH *normalPtr, VECTORCH *positionPtr, SECTION_DATA *
 		sectionDataPtr->NumberOfDecals++;
 	}
 
-
 	decalPtr->DecalID = decalID;
 	decalSize = 40;//DecalDescription[decalID].MaxSize;
 
@@ -1044,7 +1044,6 @@ void AddDecalToHModel(VECTORCH *normalPtr, VECTORCH *positionPtr, SECTION_DATA *
 	decalPtr->Vertices[3].vy += v.vy;
 	decalPtr->Vertices[3].vz += v.vz;
 }
-
 
 void ScanHModelForDecals(DISPLAYBLOCK *objectPtr, SECTION_DATA *sectionDataPtr)
 {
@@ -1128,9 +1127,8 @@ void Load_Decals(SAVE_BLOCK_HEADER* header)
 void Save_Decals()
 {
 	DECAL_SAVE_BLOCK_HEADER* block;
-	int i;
 
-	if(!NumActiveDecals) return;
+	if (!NumActiveDecals) return;
 
 	//get memory for header
 	GET_SAVE_BLOCK_POINTER(DECAL_SAVE_BLOCK_HEADER, block);
@@ -1141,9 +1139,8 @@ void Save_Decals()
 
 	block->NumActiveDecals = NumActiveDecals;
 
-
 	//now save the decals
-	for(i=0;i<NumActiveDecals;i++)
+	for (int i = 0; i < NumActiveDecals; i++)
 	{
 		DECAL* decal = GET_SAVE_BLOCK_POINTER(DECAL, decal);
 		*decal = DecalStorage[i];

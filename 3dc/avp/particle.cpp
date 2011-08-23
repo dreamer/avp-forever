@@ -1651,7 +1651,7 @@ void HandleParticleSystem(void)
 	HandleRipples();
 //	D3D_DrawWaterTest();
 	
-	HandleDecalSystem();
+//	HandleDecalSystem();
 	D3D_DecalSystem_End();
 
 //	textprint("Particles Active: %d\n",i);
@@ -4839,8 +4839,6 @@ void RenderTrailSegment(PHEROMONE_TRAIL *trailPtr)
 	VerticesBuffer[0].X = temp.vx;
 	VerticesBuffer[0].Y = temp.vy;
 	VerticesBuffer[0].Z = temp.vz;
-//	VerticesBuffer[0].U = ParticleDescription[PARTICLE_PLASMABEAM].StartU/2;
-//	VerticesBuffer[0].V = ParticleDescription[PARTICLE_PLASMABEAM].StartV/2;
 
 	temp.vx = trailPtr->Vertex[0].vx + MUL_FIXED(trailPtr->Perp[0].vx,trailPtr->Size[0]/65536);
 	temp.vy = trailPtr->Vertex[0].vy + MUL_FIXED(trailPtr->Perp[0].vy,trailPtr->Size[0]/65536);
@@ -4853,8 +4851,6 @@ void RenderTrailSegment(PHEROMONE_TRAIL *trailPtr)
 	VerticesBuffer[1].X = temp.vx;
 	VerticesBuffer[1].Y = temp.vy;
 	VerticesBuffer[1].Z = temp.vz;
-//	VerticesBuffer[1].U = ParticleDescription[PARTICLE_PLASMABEAM].StartU/2;
-//	VerticesBuffer[1].V = ParticleDescription[PARTICLE_PLASMABEAM].EndV/2;
 
 	temp.vx = trailPtr->Vertex[1].vx + MUL_FIXED(trailPtr->Perp[1].vx,trailPtr->Size[1]/65536);
 	temp.vy = trailPtr->Vertex[1].vy + MUL_FIXED(trailPtr->Perp[1].vy,trailPtr->Size[1]/65536);
@@ -4867,8 +4863,6 @@ void RenderTrailSegment(PHEROMONE_TRAIL *trailPtr)
 	VerticesBuffer[2].X = temp.vx;
 	VerticesBuffer[2].Y = temp.vy;
 	VerticesBuffer[2].Z = temp.vz;
-//	VerticesBuffer[2].U = ParticleDescription[PARTICLE_PLASMABEAM].EndU/2;
-//	VerticesBuffer[2].V = ParticleDescription[PARTICLE_PLASMABEAM].EndV/2;
 
 	temp.vx = trailPtr->Vertex[1].vx - MUL_FIXED(trailPtr->Perp[1].vx,trailPtr->Size[1]/65536);
 	temp.vy = trailPtr->Vertex[1].vy - MUL_FIXED(trailPtr->Perp[1].vy,trailPtr->Size[1]/65536);
@@ -4881,8 +4875,6 @@ void RenderTrailSegment(PHEROMONE_TRAIL *trailPtr)
 	VerticesBuffer[3].X = temp.vx;
 	VerticesBuffer[3].Y = temp.vy;
 	VerticesBuffer[3].Z = temp.vz;
-//	VerticesBuffer[3].U = ParticleDescription[PARTICLE_PLASMABEAM].EndU/2;
-//	VerticesBuffer[3].V = ParticleDescription[PARTICLE_PLASMABEAM].StartV/2;
 
 	fakeHeader.PolyFlags = iflag_transparent;
 	fakeHeader.PolyColour = CloudyImageNumber;
@@ -4900,7 +4892,7 @@ void RenderTrailSegment(PHEROMONE_TRAIL *trailPtr)
 			VerticesBuffer[i].SpecularG = 0;
 			VerticesBuffer[i].SpecularB = 0;
 		}
-		RenderPolygon.NumberOfVertices=4;
+		RenderPolygon.NumberOfVertices = 4;
 	}
 
 	GouraudTexturedPolygon_ClipWithZ();
@@ -4914,7 +4906,7 @@ void RenderTrailSegment(PHEROMONE_TRAIL *trailPtr)
 	GouraudTexturedPolygon_ClipWithPositiveX();
 	if (RenderPolygon.NumberOfVertices<3) return;
 
-	D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
+	D3D_ZBufferedGouraudTexturedPolygon_Output(&fakeHeader, RenderPolygon.Vertices);
 }
 
 extern void RenderParticlesInMirror(void)
