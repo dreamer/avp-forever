@@ -157,9 +157,8 @@ void RenderList::AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY
 
 	if (listIndex >= GetCapacity())
 	{
-		// list is full, flush it
-		OutputDebugString("List full. Flushing...\n");
-//		Draw();
+		// list is full
+		OutputDebugString("List full\n");
 		return;
 	}
 

@@ -4,8 +4,7 @@
 #include "TextureManager.h"
 
 /* image number for already loaded image - really an internal function */
-#define GEI_NOTLOADED (/*-1*/0) // bjd
-//extern int GetExistingImageNum(char const * pszActualFileName);
+#define GEI_NOTLOADED	MISSING_TEXTURE
 
 enum /* flags, etc */
 {

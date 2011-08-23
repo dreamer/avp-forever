@@ -59,7 +59,7 @@ char *GetSaveFolderPath()
 	// get path to users "My Documents" folder
 	if (FAILED(::SHGetFolderPath(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, saveFolder)))
 	{
-		LogErrorString("Can't find save folder path", __LINE__, __FILE__);
+		LogErrorString("Can't find save folder path. ", __LINE__, __FILE__);
 		return 0;
 	}
 
@@ -77,7 +77,7 @@ char *GetSaveFolderPath()
 		DWORD error = ::GetLastError();
 		if (error == ERROR_PATH_NOT_FOUND)
 		{
-			LogErrorString("Can't create directory" + path, __LINE__, __FILE__);
+			LogErrorString("Can't create directory " + path, __LINE__, __FILE__);
 			return NULL;
 		}
 	}
@@ -91,7 +91,7 @@ char *GetSaveFolderPath()
 		DWORD error = ::GetLastError();
 		if (error == ERROR_PATH_NOT_FOUND)
 		{
-			LogErrorString("Can't create directory" + path, __LINE__, __FILE__);
+			LogErrorString("Can't create directory " + path, __LINE__, __FILE__);
 			return NULL;
 		}
 	}
@@ -108,7 +108,7 @@ char *GetSaveFolderPath()
 		DWORD error = ::GetLastError();
 		if (error == ERROR_PATH_NOT_FOUND)
 		{
-			LogErrorString("Can't create directory" + profilePath, __LINE__, __FILE__);
+			LogErrorString("Can't create directory " + profilePath, __LINE__, __FILE__);
 			return NULL;
 		}
 	}
@@ -122,7 +122,7 @@ char *GetSaveFolderPath()
 		DWORD error = ::GetLastError();
 		if (error == ERROR_PATH_NOT_FOUND)
 		{
-			LogErrorString("Can't create directory" + profilePath, __LINE__, __FILE__);
+			LogErrorString("Can't create directory " + profilePath, __LINE__, __FILE__);
 			return NULL;
 		}
 	}

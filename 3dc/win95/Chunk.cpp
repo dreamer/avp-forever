@@ -2,9 +2,13 @@
 
 #include "chunk.hpp"
 
+/*
 #define UseLocalAssert FALSE
 #include "ourasert.h"
 #define assert(x) GLOBALASSERT(x)
+*/
+
+#include <assert.h>
 
 #define twprintf printf
 

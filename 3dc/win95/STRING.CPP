@@ -299,6 +299,3 @@ String::String(String const & str1, char c)
 	if (str1.len) memcpy(rep,str1.rep,str1.len*sizeof(char));
 	rep[str1.len]=c;
 }
-
-
-

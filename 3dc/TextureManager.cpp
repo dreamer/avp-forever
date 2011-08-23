@@ -409,7 +409,7 @@ void Tex_ListTextures()
 {
 	std::stringstream ss;
 
-	for (uint32_t i = 0; i < textureList.size(); ++i)
+	for (size_t i = 0; i < textureList.size(); ++i)
 	{
 		if (textureList[i].isValid)
 		{
