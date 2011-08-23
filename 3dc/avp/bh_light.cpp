@@ -21,22 +21,21 @@ void UpdatePlacedLightState(PLACED_LIGHT_BEHAV_BLOCK* pl_bhv,STRATEGYBLOCK* sbPt
 void UpdatePlacedLightColour(PLACED_LIGHT_BEHAV_BLOCK* pl_bhv);
 void MakeSprayOfSparks(MATRIXCH *orientationPtr, VECTORCH *positionPtr);
 
-void SetTextureAnimationSequence(int shapeindex,TXACTRLBLK* tac,int sequence)
+void SetTextureAnimationSequence(int shapeindex, TXACTRLBLK* tac, int sequence)
 {
-	while(tac)
+	while (tac)
 	{
-		tac->tac_sequence=sequence;
-		tac->tac_txah_s=GetTxAnimHeaderFromShape(tac, shapeindex);
-		tac=tac->tac_next;
+		tac->tac_sequence = sequence;
+		tac->tac_txah_s = GetTxAnimHeaderFromShape(tac, shapeindex);
+		tac = tac->tac_next;
 	}
 }
 
 
-void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
+/*void**/PLACED_LIGHT_BEHAV_BLOCK* InitPlacedLight(void* bhdata, STRATEGYBLOCK *sbPtr)
 {
 	TOOLS_DATA_PLACEDLIGHT *toolsData = (TOOLS_DATA_PLACEDLIGHT *)bhdata;
 	PLACED_LIGHT_BEHAV_BLOCK* pl_bhv;
-	int i;
 
 	LOCALASSERT(sbPtr->I_SBtype == I_BehaviourPlacedLight);
 	LOCALASSERT(toolsData);
@@ -46,54 +45,53 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 	if (!pl_bhv)
 	{
 		memoryInitialisationFailure = 1;
-		return ((void *)NULL);
+		return NULL;
 	}
 	pl_bhv->bhvr_type=I_BehaviourPlacedLight;
 
 	sbPtr->SBdataptr = pl_bhv;
-			
+
 	/* these should be loaded */
-	
+
 	/* set default indestructibility */
 	pl_bhv->Indestructable = FALSE;
 
-	
 	/* Initialise object's stats */
 	{
 		NPC_DATA *NpcData;
-   
+
 		NpcData=GetThisNpcData(I_NPC_DefaultInanimate);
 		LOCALASSERT(NpcData);
 		sbPtr->SBDamageBlock.Health=NpcData->StartingStats.Health<<ONE_FIXED_SHIFT;
 		sbPtr->SBDamageBlock.Armour=NpcData->StartingStats.Armour<<ONE_FIXED_SHIFT;
 		sbPtr->SBDamageBlock.SB_H_flags=NpcData->StartingStats.SB_H_flags;
 	}
-	
+
 	pl_bhv->destruct_target_request=toolsData->destruct_target_request;
-	for(i=0;i<SB_NAME_LENGTH;i++)
+	for (int i=0;i < SB_NAME_LENGTH;i++)
 	{
 		pl_bhv->destruct_target_ID[i]=toolsData->destruct_target_ID[i];
 	}
-	pl_bhv->destruct_target_sbptr=0;
+	pl_bhv->destruct_target_sbptr = 0;
 
-	pl_bhv->sequence=toolsData->sequence;
-	pl_bhv->colour_red=toolsData->colour_red;
-	pl_bhv->colour_green=toolsData->colour_green;
-	pl_bhv->colour_blue=toolsData->colour_blue;
-	pl_bhv->colour_diff_red=toolsData->colour_diff_red;
-	pl_bhv->colour_diff_green=toolsData->colour_diff_green;
-	pl_bhv->colour_diff_blue=toolsData->colour_diff_blue;
-	pl_bhv->fade_up_time=toolsData->fade_up_time;
-	pl_bhv->fade_down_time=toolsData->fade_down_time;
-	pl_bhv->up_time=toolsData->up_time;
-	pl_bhv->down_time=toolsData->down_time;
-	pl_bhv->timer=toolsData->timer;
-	pl_bhv->flicker_timer=0;
-	pl_bhv->type=toolsData->type;
-	pl_bhv->on_off_type=toolsData->on_off_type;
-	pl_bhv->state=toolsData->state;
-	pl_bhv->on_off_state=toolsData->on_off_state;
-	pl_bhv->swap_colour_and_brightness_alterations=toolsData->swap_colour_and_brightness_alterations;
+	pl_bhv->sequence     = toolsData->sequence;
+	pl_bhv->colour_red   = toolsData->colour_red;
+	pl_bhv->colour_green = toolsData->colour_green;
+	pl_bhv->colour_blue  = toolsData->colour_blue;
+	pl_bhv->colour_diff_red   = toolsData->colour_diff_red;
+	pl_bhv->colour_diff_green = toolsData->colour_diff_green;
+	pl_bhv->colour_diff_blue  = toolsData->colour_diff_blue;
+	pl_bhv->fade_up_time   = toolsData->fade_up_time;
+	pl_bhv->fade_down_time = toolsData->fade_down_time;
+	pl_bhv->up_time   = toolsData->up_time;
+	pl_bhv->down_time = toolsData->down_time;
+	pl_bhv->timer = toolsData->timer;
+	pl_bhv->flicker_timer = 0;
+	pl_bhv->type = toolsData->type;
+	pl_bhv->on_off_type = toolsData->on_off_type;
+	pl_bhv->state = toolsData->state;
+	pl_bhv->on_off_state = toolsData->on_off_state;
+	pl_bhv->swap_colour_and_brightness_alterations = toolsData->swap_colour_and_brightness_alterations;
 
 	pl_bhv->on_off_timer=0;
 
@@ -107,11 +105,11 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 	{
 		sbPtr->DynPtr = AllocateDynamicsBlock(DYNAMICS_TEMPLATE_INANIMATE);
 	}
-	
+
 	if (!sbPtr->DynPtr)
 	{
 		RemoveBehaviourStrategy(sbPtr);
-		return 0;
+		return NULL;
 	}
 
 	sbPtr->DynPtr->Mass = toolsData->mass;
@@ -135,11 +133,12 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 	/*check to see if object is animated.*/
 	/*also check for corona flag at the same time*/
 	{
-		TXACTRLBLK **pptxactrlblk;		
+		TXACTRLBLK **pptxactrlblk;
 		int item_num;
 		int shape_num = toolsData->shapeIndex;
 		SHAPEHEADER *shptr = GetShapeData(shape_num);
 		pptxactrlblk = &pl_bhv->inan_tac;
+
 		for (item_num = 0; item_num < shptr->numitems; item_num ++)
 		{
 			POLYHEADER *poly = (POLYHEADER*)(shptr->items[item_num]);
@@ -157,9 +156,9 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 					pnew_txactrlblk->tac_sequence = 0;
 					pnew_txactrlblk->tac_node = 0;
 					pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);
-					pnew_txactrlblk->tac_txah_s = GetTxAnimHeaderFromShape(pnew_txactrlblk, shape_num);
+					pnew_txactrlblk->tac_txah_s  = GetTxAnimHeaderFromShape(pnew_txactrlblk, shape_num);
 
-					*pptxactrlblk = pnew_txactrlblk;
+					(*pptxactrlblk) = pnew_txactrlblk;
 					pptxactrlblk = &pnew_txactrlblk->tac_next;
 					{
 						//see how many sequences there are
@@ -175,7 +174,7 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 						GLOBALASSERT(num_seq >= 2);
 					}
 				}
-				else *pptxactrlblk = NULL; 
+				else (*pptxactrlblk) = NULL; 
 			}
 
 			if ((Request_PolyFlags((void *)poly)) & iflag_light_corona)
@@ -209,7 +208,7 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 		pl_bhv->light->GreenScale = pl_bhv->colour_green;
 		pl_bhv->light->BlueScale  = pl_bhv->colour_blue;
 	}
-	if(!pl_bhv->inan_tac)
+	if (!pl_bhv->inan_tac)
 	{
 		pl_bhv->has_broken_sequence=0;
 	}
@@ -220,16 +219,19 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 	{
 		DYNAMICSBLOCK *dynPtr = sbPtr->DynPtr;
 		GLOBALASSERT(dynPtr);
-      	
-      	dynPtr->PrevPosition = dynPtr->Position = toolsData->position;
+
+		dynPtr->PrevPosition = dynPtr->Position = toolsData->position;
 		dynPtr->OrientEuler = toolsData->orientation;
 		CreateEulerMatrix(&dynPtr->OrientEuler, &dynPtr->OrientMat);
-		TransposeMatrixCH(&dynPtr->OrientMat);      
+		TransposeMatrixCH(&dynPtr->OrientMat);
 	}
 
 	/* strategy block initialisation */
 	sbPtr->shapeIndex = toolsData->shapeIndex;
-	for(i=0;i<SB_NAME_LENGTH;i++) sbPtr->SBname[i] = toolsData->nameID[i];
+	for (int i=0;i < SB_NAME_LENGTH;i++)
+	{
+		sbPtr->SBname[i] = toolsData->nameID[i];
+	}
 
 	UpdatePlacedLightState(pl_bhv,sbPtr);
 	
@@ -237,11 +239,11 @@ void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr)
 	pl_bhv->startingHealth = sbPtr->SBDamageBlock.Health;
 	pl_bhv->startingArmour = sbPtr->SBDamageBlock.Armour;
 	
-	return((void*)pl_bhv);
+	return pl_bhv;
 }
 
 void PlacedLightBehaviour(STRATEGYBLOCK *sbPtr)
-{		
+{
 	PLACED_LIGHT_BEHAV_BLOCK* pl_bhv = static_cast<PLACED_LIGHT_BEHAV_BLOCK*>(sbPtr->SBdataptr);
 	LOCALASSERT(pl_bhv);
 

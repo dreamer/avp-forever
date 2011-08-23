@@ -63,16 +63,16 @@ struct StreamingVoiceContext : public IXAudio2VoiceCallback
 	{
 	}
 
-    HANDLE hBufferEndEvent;
+	HANDLE hBufferEndEvent;
 
-    StreamingVoiceContext() : hBufferEndEvent(CreateEvent(NULL, FALSE, FALSE, NULL))
-    {
-    }
+	StreamingVoiceContext() : hBufferEndEvent(CreateEvent(NULL, FALSE, FALSE, NULL))
+	{
+	}
 
-    virtual ~StreamingVoiceContext()
-    {
-        CloseHandle(hBufferEndEvent);
-    }
+	virtual ~StreamingVoiceContext()
+	{
+		CloseHandle(hBufferEndEvent);
+	}
 };
 
 class AudioStream
@@ -121,16 +121,16 @@ struct StreamingVoiceContext
 
 	void TriggerEvent()
 	{
-		SetEvent( hBufferEndEvent );
+		SetEvent(hBufferEndEvent);
 	}
 
-	StreamingVoiceContext() : hBufferEndEvent( CreateEvent( NULL, FALSE, FALSE, NULL ) )
+	StreamingVoiceContext() : hBufferEndEvent(CreateEvent(NULL, FALSE, FALSE, NULL))
 	{
 	}
-    virtual ~StreamingVoiceContext()
-    {
-        CloseHandle( hBufferEndEvent );
-    }
+	virtual ~StreamingVoiceContext()
+	{
+		CloseHandle(hBufferEndEvent);
+	}
 };
 
 class AudioStream
@@ -146,7 +146,7 @@ class AudioStream
 		bool		isPaused;
 		uint8_t		*buffers;
 		std::vector<DWORD> PacketStatus;
-		LPDIRECTSOUNDSTREAM	dsStreamBuffer;
+		LPDIRECTSOUNDSTREAM dsStreamBuffer;
 
 	public:
 		AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers);
@@ -161,29 +161,10 @@ class AudioStream
 		uint32_t GetWritableBufferSize();
 		uint32_t GetBufferSize();
 		StreamingVoiceContext *voiceContext;
-		uint64_t	totalBytesPlayed;
+		uint64_t totalBytesPlayed;
 
 		~AudioStream();
 };
-
-/*
-struct StreamingAudioBuffer
-{
-	int bufferSize;
-	int bufferCount;
-	int currentBuffer;
-	int numChannels;
-	int rate;
-	int bytesPerSample;
-	uint8_t *buffers;
-	UINT64 totalBytesPlayed;
-	UINT64 totalSamplesWritten;
-	bool isPaused;
-	std::vector<DWORD> PacketStatus;
-	LPDIRECTSOUNDSTREAM	dsStreamBuffer;
-	StreamingVoiceContext *voiceContext;
-};
-*/
 
 #endif
 

@@ -503,7 +503,7 @@ void UpdateCamera(void)
 	mat.mat31 = 0;
 	mat.mat32 = sin;
 	mat.mat33 = cos;
- 	MatrixMultiply(&Global_VDB_Ptr->VDB_Mat, &mat, &Global_VDB_Ptr->VDB_Mat);
+	MatrixMultiply(&Global_VDB_Ptr->VDB_Mat, &mat, &Global_VDB_Ptr->VDB_Mat);
 
 	InteriorType_Body();
 }

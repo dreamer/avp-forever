@@ -1,7 +1,7 @@
 typedef enum light_state
 {
 	Light_State_Standard,
-	Light_State_Broken,	
+	Light_State_Broken,
 	Light_State_StrobeUp,
 	Light_State_StrobeDown,
 	Light_State_StrobeUpDelay,
@@ -46,7 +46,7 @@ typedef struct placed_light_behav_block
 
 	LIGHT_STATE state;
 	LIGHT_ON_OFF_STATE on_off_state;
-	int sequence;	//texture animation sequence
+	int sequence;    //texture animation sequence
 
 	int colour_red;  //colour for fade up state
 	int colour_green;
@@ -54,12 +54,12 @@ typedef struct placed_light_behav_block
 	int colour_diff_red;  //difference from up colour to down colour
 	int colour_diff_green;
 	int colour_diff_blue;
-	
+
 	int fade_up_time;
 	int fade_down_time;
 	int up_time;
 	int down_time;
-	
+
 	int timer;
 	int on_off_timer;
 	int flicker_timer;
@@ -75,7 +75,7 @@ typedef struct placed_light_behav_block
 
 	int startingHealth; //for network games
 	int startingArmour;
-	
+
 	int has_broken_sequence:1; //is there a third texture sequence 
 	int has_corona:1;
 	int swap_colour_and_brightness_alterations:1;
@@ -86,14 +86,14 @@ typedef struct toolsdata_placed_light
 {
 	struct vectorch position;
 	struct euler orientation;
-	int shapeIndex;	/* for john */
+	int shapeIndex;  /* for john */
 	char nameID[SB_NAME_LENGTH];
 
 	int mass; // Kilos??
 	int integrity; // 0-20 (>20 = indestructable)
 
 	LIGHTBLOCK* light;
-	
+
 	unsigned int static_light:1;
 
 	int sequence;
@@ -112,7 +112,6 @@ typedef struct toolsdata_placed_light
 	
 	int timer;
 
-
 	LIGHT_STATE state;
 	LIGHT_ON_OFF_STATE on_off_state;
 	LIGHT_TYPE type;
@@ -125,17 +124,14 @@ typedef struct toolsdata_placed_light
 }TOOLS_DATA_PLACEDLIGHT;
 
 
-
-
-
-void* InitPlacedLight(void* bhdata,STRATEGYBLOCK *sbPtr);
+/*void**/PLACED_LIGHT_BEHAV_BLOCK* InitPlacedLight(void* bhdata, STRATEGYBLOCK *sbPtr);
 void PlacedLightBehaviour(STRATEGYBLOCK *sbPtr);
 
 void MakePlacedLightNear(STRATEGYBLOCK *sbPtr);
 
 void PlacedLightIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple);
 
-void SendRequestToPlacedLight(STRATEGYBLOCK* sbptr,BOOL state,int extended_data);
+void SendRequestToPlacedLight(STRATEGYBLOCK* sbptr, BOOL state, int extended_data);
 
 void RespawnLight(STRATEGYBLOCK *sbPtr);
 void KillLightForRespawn(STRATEGYBLOCK *sbPtr);
