@@ -106,12 +106,12 @@
 
 /* Exported function definitions ***********************************/
 /* Functions callable within the Windows procedure */
-void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR( char Ch )
+void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(char Ch)
 {
-	if ( NumQMessages < MAX_Q_MESSAGES )
+	if (NumQMessages < MAX_Q_MESSAGES)
 	{
-		OurQ[ NumQMessages ] . QEntryCat = QEntryCat_WM_CHAR;
-		OurQ[ NumQMessages ] . CatData . Ch = Ch;
+		OurQ[NumQMessages].QEntryCat = QEntryCat_WM_CHAR;
+		OurQ[NumQMessages].CatData.Ch = Ch;
 		NumQMessages++;
 	}
 	// otherwise ignore the message
@@ -121,10 +121,10 @@ void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR( char Ch )
 
 void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN( WPARAM wParam )
 {
-	if ( NumQMessages < MAX_Q_MESSAGES )
+	if (NumQMessages < MAX_Q_MESSAGES)
 	{
-		OurQ[ NumQMessages ] . QEntryCat = QEntryCat_WM_KEYDOWN;
-		OurQ[ NumQMessages ] . CatData . wParam = wParam;
+		OurQ[NumQMessages].QEntryCat = QEntryCat_WM_KEYDOWN;
+		OurQ[NumQMessages].CatData.wParam = wParam;
 		NumQMessages++;
 	}
 	// otherwise ignore the message
@@ -143,9 +143,7 @@ void RE_ENTRANT_QUEUE_WinMain_FlushMessages(void)
 		// AVP/Win95-specific code
 		if (HUDGadget::GetHUD())
 		{
-			unsigned int i;
-
-			for (i = 0; i < NumQMessages; i++)
+			for (unsigned int i = 0; i < NumQMessages; i++)
 			{
 				switch (OurQ[ i ].QEntryCat)
 				{

@@ -79,7 +79,6 @@ void SoundSys_Start(void)
 	/* set global volume */
 	GlobalVolume = VOLUME_DEFAULT;
 	PlatChangeGlobalVolume(VOLUME_DEFAULT);
-	
 }
 
 void SoundSys_End(void)

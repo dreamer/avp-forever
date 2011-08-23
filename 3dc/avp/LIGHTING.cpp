@@ -27,6 +27,8 @@ typedef struct light_element_save_block_header
 	//followed by array of light elements
 }LIGHT_ELEMENT_SAVE_BLOCK_HEADER;
 
+extern int NumActiveBlocks;
+extern DISPLAYBLOCK *ActiveBlockList[];
 static VECTORCH RotatingLightPosition;
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 extern int LightScale;
@@ -215,12 +217,8 @@ void AddLightingEffectToObject(DISPLAYBLOCK *objectPtr, enum LIGHTING_EFFECTS_ID
 	}
 }
 
-
-
 void LightBlockDeallocation(void)
 {
-	extern int NumActiveBlocks;
-	extern DISPLAYBLOCK *ActiveBlockList[];
 	int numblocks = NumActiveBlocks;
 
 	while(numblocks)
@@ -235,13 +233,12 @@ void LightBlockDeallocation(void)
 				DeleteLightBlock(lightPtr, dptr);
 		}
 	}
-
 }
 
 /*KJL******************************
 *                                 *
 *      LIGHT ELEMENT CODE         *
-* 								  *
+*                                 *
 ******************************KJL*/
 #define MAX_NO_OF_LIGHTELEMENTS 500
 LIGHTELEMENT LightElementStorage[MAX_NO_OF_LIGHTELEMENTS];
@@ -289,7 +286,7 @@ void MakeLightElement(VECTORCH *positionPtr, enum LIGHTELEMENT_BEHAVIOUR_ID beha
 	if (!lightElementPtr) return;
 
 	lightElementPtr->BehaviourID = behaviourID;
-	lightElementPtr->LightBlock.LightWorld = *positionPtr;	
+	lightElementPtr->LightBlock.LightWorld = *positionPtr;
 	lightElementPtr->LifeTime=ONE_FIXED;
 
 	switch (behaviourID)
@@ -307,29 +304,29 @@ void MakeLightElement(VECTORCH *positionPtr, enum LIGHTELEMENT_BEHAVIOUR_ID beha
 			/* lightblock light type */
 			lightPtr->LightType = LightType_PerVertex;
 			/* range */
-			lightPtr->LightRange = 200; 
+			lightPtr->LightRange = 200;
 
-			lightPtr->RedScale=	  ONE_FIXED;
+			lightPtr->RedScale=   ONE_FIXED;
 			lightPtr->GreenScale= ONE_FIXED;
 			lightPtr->BlueScale=  ONE_FIXED;
 
 			{
 				VECTORCH position;
-			   	position.vx = MUL_FIXED(200,GetSin((CloakingPhase)&4095));
-			   	position.vy = MUL_FIXED(200,GetCos((CloakingPhase)&4095));
-			   	position.vz = 80+MUL_FIXED(50,GetCos((CloakingPhase/2)&4095));
-			   	{
-			   		MATRIXCH myMat = Global_VDB_Ptr->VDB_Mat;
-			   		TransposeMatrixCH(&myMat);
-			   		RotateVector(&(position), &(myMat));	
-			   		position.vx += Global_VDB_Ptr->VDB_World.vx;
-			   		position.vy += Global_VDB_Ptr->VDB_World.vy;
-			   		position.vz += Global_VDB_Ptr->VDB_World.vz;
-			   	}
+				position.vx = MUL_FIXED(200,GetSin((CloakingPhase)&4095));
+				position.vy = MUL_FIXED(200,GetCos((CloakingPhase)&4095));
+				position.vz = 80+MUL_FIXED(50,GetCos((CloakingPhase/2)&4095));
+				{
+					MATRIXCH myMat = Global_VDB_Ptr->VDB_Mat;
+					TransposeMatrixCH(&myMat);
+					RotateVector(&(position), &(myMat));
+					position.vx += Global_VDB_Ptr->VDB_World.vx;
+					position.vy += Global_VDB_Ptr->VDB_World.vy;
+					position.vz += Global_VDB_Ptr->VDB_World.vz;
+				}
 				lightElementPtr->LightBlock.LightWorld = position;
 			}
 			lightElementPtr->LifeTime = 0;
-			break;						  
+			break;
 		}
 		case LIGHTELEMENT_ALIEN_TEETH2:
 		{
@@ -347,17 +344,17 @@ void MakeLightElement(VECTORCH *positionPtr, enum LIGHTELEMENT_BEHAVIOUR_ID beha
 
 			{
 				VECTORCH position;
-			   	position.vx = MUL_FIXED(200,GetSin((CloakingPhase/3+2048)&4095));
-			   	position.vy = MUL_FIXED(200,GetCos((CloakingPhase/3+2048)&4095));
-			   	position.vz = 80+MUL_FIXED(50,GetCos((CloakingPhase/2+2048)&4095));
-			   	{
-			   		MATRIXCH myMat = Global_VDB_Ptr->VDB_Mat;
-			   		TransposeMatrixCH(&myMat);
-			   		RotateVector(&(position), &(myMat));	
-			   		position.vx += Global_VDB_Ptr->VDB_World.vx;
-			   		position.vy += Global_VDB_Ptr->VDB_World.vy;
-			   		position.vz += Global_VDB_Ptr->VDB_World.vz;
-			   	}
+				position.vx = MUL_FIXED(200,GetSin((CloakingPhase/3+2048)&4095));
+				position.vy = MUL_FIXED(200,GetCos((CloakingPhase/3+2048)&4095));
+				position.vz = 80+MUL_FIXED(50,GetCos((CloakingPhase/2+2048)&4095));
+				{
+					MATRIXCH myMat = Global_VDB_Ptr->VDB_Mat;
+					TransposeMatrixCH(&myMat);
+					RotateVector(&(position), &(myMat));	
+					position.vx += Global_VDB_Ptr->VDB_World.vx;
+					position.vy += Global_VDB_Ptr->VDB_World.vy;
+					position.vz += Global_VDB_Ptr->VDB_World.vz;
+				}
 				lightElementPtr->LightBlock.LightWorld = position;
 			}
 			lightElementPtr->LifeTime = 0;
@@ -366,7 +363,6 @@ void MakeLightElement(VECTORCH *positionPtr, enum LIGHTELEMENT_BEHAVIOUR_ID beha
 		default: ;
 	}
 }
-
 
 void HandleLightElementSystem(void)
 {
@@ -427,7 +423,7 @@ void HandleLightElementSystem(void)
 				break;
 			}
 			case LIGHTELEMENT_FROMFMV:
-			{						 
+			{
 				extern int FmvColourRed;
 				extern int FmvColourGreen;
 				extern int FmvColourBlue;
@@ -443,12 +439,11 @@ void HandleLightElementSystem(void)
 				lightPtr->RedScale   = FmvColourRed;
 				lightPtr->GreenScale = FmvColourGreen;
 				lightPtr->BlueScale  = FmvColourBlue;
-				  					
+
 				break;
 			}
 			case LIGHTELEMENT_EXPLOSION:
 			{
-
 				/* flags */
 				lightPtr->LightFlags = LFlag_Omni;
 				/* lightblock light type */
@@ -553,7 +548,7 @@ void HandleLightElementSystem(void)
 			}
 
 			case LIGHTELEMENT_ROTATING:
-			{						 
+			{
 				lightPtr->LightBright = ONE_FIXED/2;
 				/* flags */
 				lightPtr->LightFlags = LFlag_Omni;
@@ -567,9 +562,9 @@ void HandleLightElementSystem(void)
 				lightPtr->BlueScale  = ONE_FIXED;
 
 				lightElementPtr->LightBlock.LightWorld = Player->ObWorld;//RotatingLightPosition;
-//				lightElementPtr->LightBlock.LightWorld.vx += MUL_FIXED(2000,GetCos((CloakingPhase/2)&4095));  					
-				lightElementPtr->LightBlock.LightWorld.vy -= 2200;  					
-//				lightElementPtr->LightBlock.LightWorld.vz += MUL_FIXED(2000,GetSin((CloakingPhase/2)&4095));  					
+//				lightElementPtr->LightBlock.LightWorld.vx += MUL_FIXED(2000,GetCos((CloakingPhase/2)&4095));
+				lightElementPtr->LightBlock.LightWorld.vy -= 2200;
+//				lightElementPtr->LightBlock.LightWorld.vz += MUL_FIXED(2000,GetSin((CloakingPhase/2)&4095));
 				break;
 			}
 			case LIGHTELEMENT_ALIEN_TEETH:
@@ -640,13 +635,12 @@ void Load_LightElements(SAVE_BLOCK_HEADER* header)
 	expected_size += sizeof(LIGHTELEMENT) * block->NumActiveLightElements;
 	if(header->size != expected_size) return;
 
-
 	for(i=0;i<block->NumActiveLightElements;i++)
 	{
 		LIGHTELEMENT* light_element = AllocateLightElement();
 		if(light_element) 
 		{
-			*light_element = *saved_light_element++;	
+			*light_element = *saved_light_element++;
 		}
 	}
 }
@@ -666,7 +660,6 @@ void Save_LightElements()
 	block->header.size = sizeof(*block) + NumActiveLightElements * sizeof(LIGHTELEMENT);
 
 	block->NumActiveLightElements = NumActiveLightElements;
-
 
 	//now save the light elements
 	for(i=0;i<NumActiveLightElements;i++)

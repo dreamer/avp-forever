@@ -669,7 +669,7 @@ AVP_Decal_Chunk::AVP_Decal_Chunk(Chunk_With_Children* parent, int num_dec)
 
 AVP_Decal_Chunk::~AVP_Decal_Chunk()
 {
-	if (decal_buffer) delete[] decal_buffer;
+	delete[] decal_buffer;
 }
 
 void AVP_Decal_Chunk::fill_data_block(char* data)

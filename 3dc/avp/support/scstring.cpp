@@ -1054,32 +1054,20 @@ SCString :: SCString
 //private:
 SCString :: ~SCString()
 {
-//	OutputDebugString("string destructor\n");
-	/* PRECONDITION */
+	delete[] pProjCh_Val;
+
+	// Remove from list:
+	if (pFirst == this)
 	{
-		GLOBALASSERT( pProjCh_Val );
+		pFirst = pNxt;
+	}
+	else
+	{
+		pPrv->pNxt = pNxt;
 	}
 
-	/* CODE */
+	if (pNxt)
 	{
-//		OutputDebugString("deleting pProjCh_Val\n");
-		delete[] pProjCh_Val;
-
-		// Remove from list:
-		{
-			if ( pFirst == this )
-			{
-				pFirst = pNxt;
-			}
-			else
-			{
-				pPrv -> pNxt = pNxt;
-			}
-
-			if (pNxt)
-			{
-				pNxt -> pPrv = pPrv;
-			}			
-		}
-	}
+		pNxt->pPrv = pPrv;
+	}			
 }

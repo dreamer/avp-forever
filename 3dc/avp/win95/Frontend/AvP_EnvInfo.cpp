@@ -201,7 +201,6 @@ static char *RifNamesForEnvironments[] =
 	"Elevator_co-op",//AVP_ENVIRONMENT_ELEVATOR_COOP,
 	"Lab14coop",//AVP_ENVIRONMENT_LAB14_COOP,
 	"CompoundCoop",//AVP_ENVIRONMENT_COMPOUND_COOP,
-	
 };
 
 extern char LevelName[];

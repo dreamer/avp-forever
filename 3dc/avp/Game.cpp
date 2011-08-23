@@ -287,7 +287,7 @@ void UpdateGame(void)
 	/* Read Keyboard, Keypad, Joystick etc. */
 	ReadUserInput();
 
-	/* DHM 18/11/97: hook for my code */	
+	/* DHM 18/11/97: hook for my code */
 	DAVEHOOK_Maintain();
 
 	/*-------------- Patrick 14/11/96 ----------------
@@ -302,8 +302,8 @@ void UpdateGame(void)
 	DoHive();
 	DoSquad();
 
- 	ObjectBehaviours();
-	 
+	ObjectBehaviours();
+
 	/* KJL 10:32:55 09/24/96 - update player */
 	MaintainPlayer();
 
@@ -313,16 +313,15 @@ void UpdateGame(void)
 	/* netgame support: it seems necessary to collect all our messages here, as some
 	things depend on the player's behaviour running before anything else... 
 	including firing the player's weapon */
-	if(AvP.Network != I_No_Network)	NetCollectMessages();
+	if (AvP.Network != I_No_Network) NetCollectMessages();
 
 	RemoveDestroyedStrategyBlocks();
 	{
-
-		if(SaveGameRequest != SAVELOAD_REQUEST_NONE)
+		if (SaveGameRequest != SAVELOAD_REQUEST_NONE)
 		{
 			SaveGame();
 		}
-		else if(LoadGameRequest != SAVELOAD_REQUEST_NONE)
+		else if (LoadGameRequest != SAVELOAD_REQUEST_NONE)
 		{
 			LoadSavedGame();
 		}
@@ -331,39 +330,39 @@ void UpdateGame(void)
 	ObjectDynamics();
 
 	// now for the env teleports
-	
-	if(RequestEnvChangeViaLift)
+	if (RequestEnvChangeViaLift)
 	{
-		CleanUpLiftControl();								
- 	}
+		CleanUpLiftControl();
+	}
+
 	/* netgame support */
-	if(AvP.Network != I_No_Network)	NetSendMessages();
+	if (AvP.Network != I_No_Network) NetSendMessages();
 
 	/* KJL 11:50:18 03/21/97 - cheat modes */
 	HandleCheatModes();
 
 	/*------------Patrick 1/6/97---------------
-	New sound system 
+	New sound system
 	-------------------------------------------*/
 	
-	if(playerPherModule)
+	if (playerPherModule)
 	{
-		PlatSetEnviroment(playerPherModule->m_sound_env_index,playerPherModule->m_sound_reverb);		
+		PlatSetEnviroment(playerPherModule->m_sound_env_index, playerPherModule->m_sound_reverb);
 	}
+
 	SoundSys_Management();
 	DoPlayerSounds();
 
-//	NormaliseTest();
 	MessageHistory_Maintain();
 
-	if(AvP.LevelCompleted)
+	if (AvP.LevelCompleted)
 	{
 		/*
 		If player is dead and has also completed level , then cancel
 		level completion.
 		*/
 		PLAYER_STATUS* PlayerStatusPtr = (PLAYER_STATUS*) Player->ObStrategyBlock->SBdataptr;
-		if(!PlayerStatusPtr->IsAlive)
+		if (!PlayerStatusPtr->IsAlive)
 		{
 			AvP.LevelCompleted=0;
 		}
@@ -371,8 +370,8 @@ void UpdateGame(void)
 
 	if (TRIPTASTIC_CHEATMODE)
 	{
-	 	int a = GetSin(CloakingPhase&4095);
-	 	TripTasticPhase = MUL_FIXED(MUL_FIXED(a,a),128)+64;
+		int a = GetSin(CloakingPhase&4095);
+		TripTasticPhase = MUL_FIXED(MUL_FIXED(a,a),128)+64;
 	}
 	if (JOHNWOO_CHEATMODE)
 	{

@@ -58,12 +58,7 @@ IndexedFont_Proportional_Column :: RenderChar_Clipped
 	// required.  Otherwise ignore...
 	if
 	(
-		r2rect
-		(
-			R2Pos_Cursor,
-			GetWidth(ProjCh),
-			GetHeight()
-		) . bFitsIn( R2Rect_Clip )
+		r2rect(R2Pos_Cursor, GetWidth(ProjCh), GetHeight()).bFitsIn(R2Rect_Clip)
 	)
 	{
 		RenderChar_Unclipped
@@ -75,7 +70,7 @@ IndexedFont_Proportional_Column :: RenderChar_Clipped
 	}
 	else
 	{
-		R2Pos_Cursor . x += GetWidth(ProjCh);
+		R2Pos_Cursor.x += GetWidth(ProjCh);
 	}
 }
 
@@ -93,7 +88,7 @@ IndexedFont_Proportional_Column :: RenderChar_Unclipped
 	if (ProjCh == ' ')
 	{
 		// Space is a special case:
-		R2Pos_Cursor . x += SpaceWidth();
+		R2Pos_Cursor.x += SpaceWidth();
 		return;
 	}
 
@@ -113,13 +108,13 @@ IndexedFont_Proportional_Column :: RenderChar_Unclipped
 		{
 			RECT destRect;
 
-			destRect.left = R2Pos_Cursor . x;
-			destRect.top = R2Pos_Cursor . y;
+			destRect.left = R2Pos_Cursor.x;
+			destRect.top = R2Pos_Cursor.y;
 
-			R2Pos_Cursor . x += GetWidth(ProjCh);
+			R2Pos_Cursor.x += GetWidth(ProjCh);
 
-			destRect.right = R2Pos_Cursor . x++;
-			destRect.bottom = R2Pos_Cursor . y + GetHeight();
+			destRect.right = R2Pos_Cursor.x++;
+			destRect.bottom = R2Pos_Cursor.y + GetHeight();
 
 			RECT tempnonConstRECTSoThatItCanWorkWithMicrosoft = WindowsRectForOffset[ theOffset ];
 		}
@@ -138,7 +133,7 @@ IndexedFont_Proportional_Column :: RenderChar_Unclipped
 int
 IndexedFont_Proportional_Column :: GetMaxWidth(void) const
 {
-	return R2Size_OverallImage . w;
+	return R2Size_OverallImage.w;
 }
 
 int
@@ -167,7 +162,7 @@ IndexedFont_Proportional_Column :: GetWidth
 	}
 	else
 	{
-		return 0;		
+		return 0;
 	}
 }
 
@@ -271,14 +266,14 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 
 	GLOBALASSERT( NumChars < MAX_CHARS_IN_TALLFONT );
 
-	for (int i=0;i<NumChars;i++)
+	for (int i=0;i < NumChars;i++)
 	{
 		WindowsRectForOffset[ i ].top = (i*HeightPerChar_Val);
 		WindowsRectForOffset[ i ].bottom = ((i+1)*HeightPerChar_Val);
 		WindowsRectForOffset[ i ].left = 0;
-		WindowsRectForOffset[ i ].right = R2Size_OverallImage . w;
+		WindowsRectForOffset[ i ].right = R2Size_OverallImage.w;
 
-		WidthForOffset[ i ] = R2Size_OverallImage . w;
+		WidthForOffset[ i ] = R2Size_OverallImage.w;
 	}
 
 	UpdateWidths();
@@ -456,8 +451,8 @@ IndexedFont_Kerned_Column :: RenderChar_Clipped
 					}
 				}
 #endif
-			   	
-//			   	image_ptr->Unlock((LPVOID)ddsdimage.lpSurface);
+				
+//				image_ptr->Unlock((LPVOID)ddsdimage.lpSurface);
 			}
 		}
 	}
@@ -579,8 +574,8 @@ IndexedFont_Kerned_Column :: RenderChar_Unclipped
 						backbufferRowStartPtr += backbufferPitchInShorts;
 					}
 				}
-#endif			   	
-//			   	lpDDSBack->Unlock((LPVOID)ddsdback.lpSurface);
+#endif				
+//				lpDDSBack->Unlock((LPVOID)ddsdback.lpSurface);
 //				image_ptr->Unlock((LPVOID)ddsdimage.lpSurface);
 			}
 		}
@@ -590,7 +585,7 @@ IndexedFont_Kerned_Column :: RenderChar_Unclipped
 int
 IndexedFont_Kerned_Column :: GetMaxWidth(void) const
 {
-	return R2Size_OverallImage . w;
+	return R2Size_OverallImage.w;
 }
 
 int
@@ -619,7 +614,7 @@ IndexedFont_Kerned_Column :: GetWidth
 	}
 	else
 	{
-		return 0;		
+		return 0;
 	}
 }
 
@@ -905,7 +900,7 @@ IndexedFont_Kerned_Column :: UpdateXIncs(void)
 				}
 				minOpaqueX[Row] = leftmostX;
 			}
-		}		
+		}
 	}
 		// Use the table of opaque extents:
 
@@ -927,7 +922,7 @@ IndexedFont_Kerned_Column :: UpdateXIncs(void)
 				#endif
 
 				XIncForOffset[i][j] =XInc;
-			}		
+			}
 		}
 //	}
 
@@ -988,7 +983,7 @@ IndexedFont_Kerned_Column :: CalcXInc
 				minOpaqueX,
 				maxOpaqueX,
 				Row
-			);		
+			);
 
 			if (MinXIncForRow > Biggest_MinXInc)
 			{
@@ -1106,7 +1101,7 @@ IndexedFont_Kerned_Column :: GetSmallestXIncForRow
 		{
 			return 0;
 		}
-	}	
+	}
 }
 
 
@@ -1120,7 +1115,6 @@ IndexedFont_Kerned_Column :: bOpaque
 {
 	return true;
 }
-
 
 
 
