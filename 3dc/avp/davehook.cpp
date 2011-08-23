@@ -19,7 +19,6 @@
 // hooks to daemon code
 #include "rentrntq.h"
 #include "iofocus.h"
-#include "font.h"
 #include "hudgadg.hpp"
 #include "consvar.hpp"
 #include "conscmnd.hpp"
