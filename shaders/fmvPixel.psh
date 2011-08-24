@@ -38,13 +38,11 @@ struct PS_INPUT
     float2 Texture3   : TEXCOORD2;
 };
 
-
 // Pixel shader output structure
 struct PS_OUTPUT
 {
     float4 Color   : COLOR0;
 };
-
 
 // Global variables
 sampler2D Tex0;
@@ -52,28 +50,28 @@ sampler2D Tex1;
 sampler2D Tex2;
 
 
-// Name: Simple Pixel Shader
+// Name: FMV YUV->RGB conversion pixel shader
 // Type: Pixel shader
-// Desc: Fetch texture and blend with constant color
-//
-PS_OUTPUT ps_main( in PS_INPUT In )
-{
-	PS_OUTPUT Out;                             //create an output pixel
-	
-	float3 pre;
-	
-	pre.r = tex2D(Tex0, In.Texture1).x - (16.0 / 256.0);
-	pre.g = tex2D(Tex1, In.Texture2).x - (128.0 / 256.0);
-	pre.b = tex2D(Tex2, In.Texture3).x - (128.0 / 256.0);
-	
-	const float3 red = float3 (0.00456621, 0.0, 0.00625893) * 255.0;
-	const float3 green = float3 (0.00456621, -0.00153632, -0.00318811) * 255.0;
-	const float3 blue = float3 (0.00456621, 0.00791071, 0.0) * 255.0;
-	
-	Out.Color.r = dot(red, pre);
-	Out.Color.g = dot(green, pre);
-	Out.Color.b = dot(blue, pre);
-	Out.Color.a = 1.0;
+// Desc: Takes three 8bit textures containing Y,U and V planes and converts to 32bit ARGB pixel
 
-	return Out;                                //return output pixel
+PS_OUTPUT ps_main(in PS_INPUT In)
+{
+    PS_OUTPUT Out;
+
+    float3 pre;
+
+    pre.r = tex2D(Tex0, In.Texture1).x - (16.0  / 256.0);
+    pre.g = tex2D(Tex1, In.Texture2).x - (128.0 / 256.0);
+    pre.b = tex2D(Tex2, In.Texture3).x - (128.0 / 256.0);
+
+    const float3 red   = float3 (0.00456621, 0.0, 0.00625893) * 255.0;
+    const float3 green = float3 (0.00456621, -0.00153632, -0.00318811) * 255.0;
+    const float3 blue  = float3 (0.00456621, 0.00791071, 0.0) * 255.0;
+
+    Out.Color.r = dot(red, pre);
+    Out.Color.g = dot(green, pre);
+    Out.Color.b = dot(blue, pre);
+    Out.Color.a = 1.0;
+
+    return Out;
 }

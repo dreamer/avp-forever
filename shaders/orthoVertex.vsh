@@ -6,7 +6,6 @@ struct VS_INPUT
     float2 Texture    : TEXCOORD0;
 };
 
-
 // Vertex shader output structure
 struct VS_OUTPUT
 {
@@ -16,25 +15,25 @@ struct VS_OUTPUT
     float2 Texture    : TEXCOORD0;
 };
 
-
 // Global variables
-float4x4 WorldViewProj;
+float4x4 OrthographicProj;
 
 
 // Name: Simple Vertex Shader
 // Type: Vertex shader
 // Desc: Vertex transformation and texture coord pass-through
-//
-VS_OUTPUT vs_main( in VS_INPUT In )
-{
-    VS_OUTPUT Out;                      //create an output vertex
 
-    Out.Position = mul(In.Position, WorldViewProj);  //apply vertex transformation
-    Out.Texture  = In.Texture;          //copy original texcoords
-    
+VS_OUTPUT vs_main(in VS_INPUT In)
+{
+    VS_OUTPUT Out;
+
+    // do orthographic projection transform
+    Out.Position = mul(In.Position, OrthographicProj);
+
+    Out.Texture = In.Texture;
     Out.Diffuse = In.Diffuse;
     
     Out.Specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-    return Out;                         //return output vertex
+    return Out;
 }

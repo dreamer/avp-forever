@@ -6,27 +6,25 @@ struct PS_INPUT
     float2 Texture    : TEXCOORD0;
 };
 
-
 // Pixel shader output structure
 struct PS_OUTPUT
 {
     float4 Color   : COLOR0;
 };
 
-
 // Global variables
 sampler2D Tex0;
 
 
-// Name: Main pixel shader used to render level geometry
+// Name: Decal pixel shader
 // Type: Pixel shader
-// Desc: Fetch texture and blend with constant color, then perform specular addition
-//
+// Desc: Colour from texture and diffuse colours
+
 PS_OUTPUT ps_main(in PS_INPUT In)
 {
-	PS_OUTPUT Out;                             // create an output pixel
+    PS_OUTPUT Out;
 
-	Out.Color = tex2D(Tex0, In.Texture) * In.Diffuse;
+    Out.Color = tex2D(Tex0, In.Texture) * In.Diffuse;
 
-	return Out;                                // return output pixel
+    return Out;
 }

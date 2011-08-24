@@ -7,7 +7,6 @@ struct VS_INPUT
     float2 Texture3   : TEXCOORD2;
 };
 
-
 // Vertex shader output structure
 struct VS_OUTPUT
 {
@@ -17,24 +16,24 @@ struct VS_OUTPUT
     float2 Texture3   : TEXCOORD2;
 };
 
-
 // Global variables
-float4x4 WorldViewProj;
+float4x4 OrthographicProj;
 
 
-// Name: Simple Vertex Shader
+// Name: FMV Vertex shader
 // Type: Vertex shader
 // Desc: Vertex transformation and texture coord pass-through
-//
-VS_OUTPUT vs_main( in VS_INPUT In )
+
+VS_OUTPUT vs_main(in VS_INPUT In)
 {
-    VS_OUTPUT Out;                        //create an output vertex
+    VS_OUTPUT Out;
 
-    Out.Position = mul(In.Position, WorldViewProj);  //apply vertex transformation
+    // do orthographic projection transform
+    Out.Position = mul(In.Position, OrthographicProj);
 
-    Out.Texture1  = In.Texture1;          //copy original texcoords
-    Out.Texture2  = In.Texture2;          //copy original texcoords
-    Out.Texture3  = In.Texture3;          //copy original texcoords
+    Out.Texture1 = In.Texture1;
+    Out.Texture2 = In.Texture2;
+    Out.Texture3 = In.Texture3;
 
-    return Out;                           //return output vertex
+    return Out;
 }

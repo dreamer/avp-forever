@@ -24,24 +24,27 @@ sampler2D Tex1;
 // Type: Pixel shader
 // Desc: Blends the cloud texture on to the menu text
 //
-PS_OUTPUT ps_main( in PS_INPUT In )
+PS_OUTPUT ps_main(in PS_INPUT In)
 {
-	PS_OUTPUT Out; // create an output pixel
+    PS_OUTPUT Out;
 
-	float4 destColour;
-	float4 srcColour1 = tex2D(Tex0, In.Texture1);
-	float4 srcColour2 = tex2D(Tex1, In.Texture2);
+    float4 destColour;
+    float4 srcColour1 = tex2D(Tex0, In.Texture1); // font texture
+    float4 srcColour2 = tex2D(Tex1, In.Texture2); // cloud texture
 
-	if ((srcColour1.r) && (srcColour1.g) && (srcColour1.b))
-	{
-		destColour = (srcColour1 * srcColour2) * In.Diffuse;
-	}
-	else
-	{
-		destColour = srcColour1 * In.Diffuse;	
-	}
+    // if the colour pixel is greater than black (ie grey/white of font letter..
+    if ((srcColour1.r) && (srcColour1.g) && (srcColour1.b))
+    {
+        // blend in smoke effect
+        destColour = (srcColour1 * srcColour2) * In.Diffuse;
+    }
+    else
+    {
+        // not a letter, just draw the texture font (black space)
+        destColour = srcColour1 * In.Diffuse;	
+    }
 
-	Out.Color = destColour;
+    Out.Color = destColour;
 
-	return Out; // return output pixel
+    return Out;
 }
