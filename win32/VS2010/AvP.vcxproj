@@ -1,0 +1,895 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}</ProjectGuid>
+    <RootNamespace>AvP</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">D:\Development\libtheora\include;D:\Development\libvorbis\include;D:\Development\libogg\include;D:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Barry\dev\avp\trunk\enet\lib;C:\Barry\dev\libtheora\lib;C:\Barry\dev\libvorbis\lib;C:\Barry\dev\libogg\lib;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">debug_AvPx</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AvPx</TargetName>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">D:\Development\libtheora\include;D:\Development\libvorbis\include;D:\Development\libogg\include;D:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Barry\dev\avp\trunk\enet\lib;C:\Barry\dev\libtheora\lib;C:\Barry\dev\libvorbis\lib;C:\Barry\dev\libogg\lib;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Debug/AvP.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP /J %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\3dc;..\..\3dc\avp;..\;..\..\3dc\avp\support;..\..\3dc\avp\win95;..\..\3dc\avp\win95\frontend;..\..\3dc\avp\win95\gadgets;..\..\3dc\include;..\..\3dc\win95;..\..\win32;..\..\enet\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;USE_D3D9;USE_D3DVIEWTRANSFORM;USE_XAUDIO2;_DEBUG;AVP_DEBUG_VERSION;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <FloatingPointExceptions>true</FloatingPointExceptions>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <ExpandAttributedSource>true</ExpandAttributedSource>
+      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc90.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <ShowIncludes>false</ShowIncludes>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0000</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>winmm.lib;shell32.lib;shlwapi.lib;d3d9.lib;d3dx9d.lib;dxerr.lib;x3daudio.lib;dxguid.lib;ws2_32.lib;ole32.lib;../../enet/lib/enet.lib;../../enet/lib/enet.exp;libvorbisfile.lib;libvorbis.lib;libogg.lib;libtheora.lib;user32.lib;xinput.lib</AdditionalDependencies>
+      <OutputFile>$(OutDir)\$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>3dc; enet;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AssemblyDebug>true</AssemblyDebug>
+      <ProgramDatabaseFile>$(Platform)\$(Configuration)\$(TargetName).pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapExports>true</MapExports>
+      <SubSystem>Windows</SubSystem>
+      <HeapReserveSize>0</HeapReserveSize>
+      <HeapCommitSize>0</HeapCommitSize>
+      <StackReserveSize>0</StackReserveSize>
+      <StackCommitSize>0</StackCommitSize>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Debug/AvP.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>.\Debug/AvP.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP /Wp64 /J %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>3dc;3dc\avp;3dc\avp\support;3dc\avp\win95;3dc\avp\win95\frontend;3dc\avp\win95\gadgets;3dc\include;3dc\win95;win32;enet\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;USE_D3D9;USE_D3DVIEWTRANSFORM;USE_XAUDIO2;_DEBUG;AVP_DEBUG_VERSION;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <FloatingPointExceptions>true</FloatingPointExceptions>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <ExpandAttributedSource>true</ExpandAttributedSource>
+      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc90.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0000</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>winmm.lib;shell32.lib;shlwapi.lib;d3d9.lib;d3dx9d.lib;dxerr.lib;dsound.lib;x3daudio.lib;dxguid.lib;ws2_32.lib;ole32.lib;enet.lib;enet.exp;libvorbisfile.lib;libvorbis.lib;libogg.lib;libtheora.lib;user32.lib;xinput.lib</AdditionalDependencies>
+      <OutputFile>debug_AvPx.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>3dc; enet;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AssemblyDebug>
+      </AssemblyDebug>
+      <ProgramDatabaseFile>$(Platform)\$(Configuration)\debug_AvPx.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapExports>true</MapExports>
+      <SubSystem>Windows</SubSystem>
+      <HeapReserveSize>0</HeapReserveSize>
+      <HeapCommitSize>0</HeapCommitSize>
+      <StackReserveSize>0</StackReserveSize>
+      <StackCommitSize>0</StackCommitSize>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Debug/AvP.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Release/AvP.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>..\..\3dc;..\..\3dc\avp;..\..\3dc\avp\support;..\..\3dc\avp\win95;..\..\3dc\avp\win95\frontend;..\..\3dc\avp\win95\gadgets;..\..\3dc\include;..\..\3dc\win95;..\..\win32;..\..\enet\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;USE_D3D9;_WINDOWS;USE_D3DVIEWTRANSFORM;USE_XAUDIO2;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINNT=0x0501;_SECURE_SCL=0;_HAS_ITERATOR_DEBUGGING=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <AdditionalOptions> /J</AdditionalOptions>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc90.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>4018;4013;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0809</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>winmm.lib;shell32.lib;shlwapi.lib;d3d9.lib;d3dx9d.lib;dxerr.lib;x3daudio.lib;dxguid.lib;ws2_32.lib;ole32.lib;../../enet/lib/enet.lib;../../enet/lib/enet.exp;libvorbisfile.lib;libvorbis.lib;libogg.lib;libtheora.lib;user32.lib;xinput.lib</AdditionalDependencies>
+      <OutputFile>$(OutDir)\$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>3dc; enet;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AssemblyDebug>false</AssemblyDebug>
+      <ProgramDatabaseFile>$(Platform)\$(Configuration)\$(Platform)\$(Configuration)\$(TargetName).pdb</ProgramDatabaseFile>
+      <GenerateMapFile>false</GenerateMapFile>
+      <MapExports>false</MapExports>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Release/AvP.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>.\Release/AvP.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>3dc;3dc\avp;3dc\avp\support;3dc\avp\win95;3dc\avp\win95\frontend;3dc\avp\win95\gadgets;3dc\include;3dc\win95;win32;enet\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;USE_D3D9;_WINDOWS;USE_XAUDIO2;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINNT=0x0501;_SECURE_SCL=0;_HAS_ITERATOR_DEBUGGING=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <AdditionalOptions> /J</AdditionalOptions>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc90.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>4018;4013;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0809</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>winmm.lib;shell32.lib;shlwapi.lib;d3d9.lib;d3dx9.lib;Dxerr.lib;x3daudio.lib;ws2_32.lib;ole32.lib;enet.lib;enet.exp;libvorbisfile.lib;libvorbis.lib;libogg.lib;libtheora.lib;user32.lib;xinput.lib</AdditionalDependencies>
+      <OutputFile>AvPx.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>3dc; enet;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AssemblyDebug>false</AssemblyDebug>
+      <ProgramDatabaseFile>$(Platform)\$(Configuration)\AvPx.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>false</GenerateMapFile>
+      <MapExports>false</MapExports>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>
+      </OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Release/AvP.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="shaders\fmvPixel.psh" />
+    <None Include="shaders\fmvVertex.vsh" />
+    <None Include="shaders\orthoVertex.vsh" />
+    <None Include="shaders\pixel.psh" />
+    <None Include="shaders\PointSpritePixel.psh" />
+    <None Include="shaders\PointSpriteVertex.vsh" />
+    <None Include="shaders\pretransformedVert.vsh" />
+    <None Include="shaders\tallFontTexttPixel.psh" />
+    <None Include="shaders\tallFontTextVertex.vsh" />
+    <None Include="shaders\vertex.vsh" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\3dc\avp\AI_Sight.cpp" />
+    <ClCompile Include="..\..\3dc\avp\Avpview.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_agun.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_ais.cpp" />
+    <ClCompile Include="..\..\3dc\avp\BH_ALIEN.cpp" />
+    <ClCompile Include="..\..\3dc\avp\BH_BINSW.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_cable.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_corpse.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_deathvol.cpp" />
+    <ClCompile Include="..\..\3dc\avp\Bh_debri.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_dummy.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_fan.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_far.cpp" />
+    <ClCompile Include="..\..\3dc\avp\BH_FHUG.cpp" />
+    <ClCompile Include="..\..\3dc\avp\BH_GENER.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_ldoor.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_lift.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_light.cpp" />
+    <ClCompile Include="..\..\3dc\avp\BH_LNKSW.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_ltfx.cpp" />
+    <ClCompile Include="..\..\3dc\avp\Bh_marin.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_mission.cpp" />
+    <ClCompile Include="..\..\3dc\avp\Bh_near.cpp" />
+    <ClCompile Include="..\..\3dc\avp\BH_PAQ.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_pargen.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_plachier.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_plift.cpp" />
+    <ClCompile Include="..\..\3dc\avp\Bh_pred.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_queen.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_RubberDuck.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_selfdest.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_snds.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_spcl.cpp" />
+    <ClCompile Include="..\..\3dc\avp\BH_SWDOR.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_track.cpp" />
+    <ClCompile Include="..\..\3dc\avp\BH_TYPES.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_videoscreen.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_waypt.cpp" />
+    <ClCompile Include="..\..\3dc\avp\bh_weap.cpp" />
+    <ClCompile Include="..\..\3dc\avp\Bh_xeno.cpp" />
+    <ClCompile Include="..\..\3dc\avp\BonusAbilities.cpp" />
+    <ClCompile Include="..\..\3dc\avp\cconvars.cpp" />
+    <ClCompile Include="..\..\3dc\avp\CDTrackSelection.cpp" />
+    <ClCompile Include="..\..\3dc\avp\CheatModes.cpp" />
+    <ClCompile Include="..\..\3dc\avp\comp_map.cpp" />
+    <ClCompile Include="..\..\3dc\avp\COMP_SHP.cpp" />
+    <ClCompile Include="..\..\3dc\avp\ConsoleLog.cpp" />
+    <ClCompile Include="..\..\3dc\avp\davehook.cpp" />
+    <ClCompile Include="..\..\3dc\avp\deaths.cpp" />
+    <ClCompile Include="..\..\3dc\avp\decal.cpp" />
+    <ClCompile Include="..\..\3dc\avp\DetailLevels.cpp" />
+    <ClCompile Include="..\..\3dc\avp\Dynamics.cpp" />
+    <ClCompile Include="..\..\3dc\avp\DYNBLOCK.cpp" />
+    <ClCompile Include="..\..\3dc\avp\EQUIPMNT.cpp" />
+    <ClCompile Include="..\..\3dc\avp\equiputl.cpp" />
+    <ClCompile Include="..\..\3dc\avp\extents.cpp" />
+    <ClCompile Include="..\..\3dc\avp\Game.cpp" />
+    <ClCompile Include="..\..\3dc\avp\gamecmds.cpp" />
+    <ClCompile Include="..\..\3dc\avp\gameflow.cpp" />
+    <ClCompile Include="..\..\3dc\avp\gamevars.cpp" />
+    <ClCompile Include="..\..\3dc\avp\game_statistics.cpp" />
+    <ClCompile Include="..\..\3dc\avp\HModel.cpp" />
+    <ClCompile Include="..\..\3dc\avp\Hud.cpp" />
+    <ClCompile Include="..\..\3dc\avp\Inventry.cpp" />
+    <ClCompile Include="..\..\3dc\avp\LANGUAGE.cpp" />
+    <ClCompile Include="..\..\3dc\avp\LIGHTING.cpp" />
+    <ClCompile Include="..\..\3dc\avp\load_shp.cpp" />
+    <ClCompile Include="..\..\3dc\avp\los.cpp" />
+    <ClCompile Include="..\..\3dc\avp\mempool.cpp" />
+    <ClCompile Include="..\..\3dc\avp\MessageHistory.cpp" />
+    <ClCompile Include="..\..\3dc\avp\missions.cpp" />
+    <ClCompile Include="..\..\3dc\avp\movement.cpp" />
+    <ClCompile Include="..\..\3dc\avp\Paintball.cpp" />
+    <ClCompile Include="..\..\3dc\avp\particle.cpp" />
+    <ClCompile Include="..\..\3dc\avp\PFARLOCS.cpp" />
+    <ClCompile Include="..\..\3dc\avp\PHEROMON.cpp" />
+    <ClCompile Include="..\..\3dc\avp\Player.cpp" />
+    <ClCompile Include="..\..\3dc\avp\Pmove.cpp" />
+    <ClCompile Include="..\..\3dc\avp\Psnd.cpp" />
+    <ClCompile Include="..\..\3dc\avp\PSNDPROJ.cpp" />
+    <ClCompile Include="..\..\3dc\avp\PVISIBLE.cpp" />
+    <ClCompile Include="..\..\3dc\avp\savegame.cpp" />
+    <ClCompile Include="..\..\3dc\avp\scream.cpp" />
+    <ClCompile Include="..\..\3dc\avp\SecStats.cpp" />
+    <ClCompile Include="..\..\3dc\avp\sfx.cpp" />
+    <ClCompile Include="..\..\3dc\avp\shapes\CUBE.cpp" />
+    <ClCompile Include="..\..\3dc\avp\STRATDEF.cpp" />
+    <ClCompile Include="..\..\3dc\avp\support\consbind.cpp" />
+    <ClCompile Include="..\..\3dc\avp\support\consbtch.cpp" />
+    <ClCompile Include="..\..\3dc\avp\support\COORDSTR.CPP" />
+    <ClCompile Include="..\..\3dc\avp\support\DAEMON.CPP" />
+    <ClCompile Include="..\..\3dc\avp\support\indexfnt.cpp" />
+    <ClCompile Include="..\..\3dc\avp\support\r2base.cpp" />
+    <ClCompile Include="..\..\3dc\avp\support\r2pos666.cpp" />
+    <ClCompile Include="..\..\3dc\avp\support\reflist.cpp" />
+    <ClCompile Include="..\..\3dc\avp\support\refobj.cpp" />
+    <ClCompile Include="..\..\3dc\avp\support\rentrntq.cpp" />
+    <ClCompile Include="..\..\3dc\avp\support\scstring.cpp" />
+    <ClCompile Include="..\..\3dc\avp\support\strtab.cpp" />
+    <ClCompile Include="..\..\3dc\avp\support\strutil.cpp" />
+    <ClCompile Include="..\..\3dc\avp\support\tallfont.cpp" />
+    <ClCompile Include="..\..\3dc\avp\support\trig666.cpp" />
+    <ClCompile Include="..\..\3dc\avp\support\wrapstr.cpp" />
+    <ClCompile Include="..\..\3dc\avp\targeting.cpp" />
+    <ClCompile Include="..\..\3dc\avp\track.cpp" />
+    <ClCompile Include="..\..\3dc\avp\TRIGGERS.cpp" />
+    <ClCompile Include="..\..\3dc\avp\Weapons.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\AVPCHUNK.CPP" />
+    <ClCompile Include="..\..\3dc\avp\win95\AvpReg.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\CHEAT.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\chtcodes.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\d3d_hud.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\DirectPlay.c" />
+    <ClCompile Include="..\..\3dc\avp\win95\dplayext.c" />
+    <ClCompile Include="..\..\3dc\avp\win95\Dp_func.c" />
+    <ClCompile Include="..\..\3dc\avp\win95\endianio.c" />
+    <ClCompile Include="..\..\3dc\avp\win95\FFREAD.CPP" />
+    <ClCompile Include="..\..\3dc\avp\win95\FFSTDIO.CPP" />
+    <ClCompile Include="..\..\3dc\avp\win95\Frontend\AvP_EnvInfo.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\Frontend\AvP_Intro.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\Frontend\AvP_MenuData.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\Frontend\AvP_MenuGfx.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\Frontend\AvP_Menus.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\Frontend\AvP_MP_Config.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\Frontend\AvP_UserProfile.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\gadgets\ahudgadg.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\gadgets\conscmnd.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\gadgets\conssym.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\gadgets\consvar.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\gadgets\gadget.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\gadgets\hudgadg.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\gadgets\rootgadg.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\gadgets\teletype.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\gadgets\textexp.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\gadgets\textin.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\gadgets\trepgadg.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\gadgets\t_ingadg.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\GammaControl.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\hierplace.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\iofocus.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\jsndsup.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\KZSORT.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\LANGPLAT.C" />
+    <ClCompile Include="..\..\3dc\avp\win95\modcmds.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\MouseCentreing.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\NPCSETUP.CPP" />
+    <ClCompile Include="..\..\3dc\avp\win95\Objsetup.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\PathChnk.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\PLATSUP.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\Pldghost.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\Pldnet.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\progress_bar.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\Projload.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\Psndplat.c" />
+    <ClCompile Include="..\..\3dc\avp\win95\SCRSHOT.CPP" />
+    <ClCompile Include="..\..\3dc\avp\win95\STRACHNK.CPP" />
+    <ClCompile Include="..\..\3dc\avp\win95\system.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\USR_IO.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\VISION.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\winmain.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\win_proj.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\xa2_audio.cpp" />
+    <ClCompile Include="..\..\3dc\ConfigFile.cpp" />
+    <ClCompile Include="..\..\3dc\console.cpp" />
+    <ClCompile Include="..\..\3dc\FastFile.cpp" />
+    <ClCompile Include="..\..\3dc\FileStream.cpp" />
+    <ClCompile Include="..\..\3dc\FmvCutscenes.cpp" />
+    <ClCompile Include="..\..\3dc\FmvPlayback.cpp" />
+    <ClCompile Include="..\..\3dc\Fmv_stubbed.cpp" />
+    <ClCompile Include="..\..\3dc\Fonts.cpp" />
+    <ClCompile Include="..\..\3dc\frustum.cpp" />
+    <ClCompile Include="..\..\3dc\IndexBuffer.cpp" />
+    <ClCompile Include="..\..\3dc\Kshape.cpp" />
+    <ClCompile Include="..\..\3dc\logString.cpp" />
+    <ClCompile Include="..\..\3dc\MAP.cpp" />
+    <ClCompile Include="..\..\3dc\mathline.cpp" />
+    <ClCompile Include="..\..\3dc\Maths.cpp" />
+    <ClCompile Include="..\..\3dc\MEM3DCPP.CPP" />
+    <ClCompile Include="..\..\3dc\MODULE.cpp" />
+    <ClCompile Include="..\..\3dc\MORPH.cpp" />
+    <ClCompile Include="..\..\3dc\MSLHAND.cpp" />
+    <ClCompile Include="..\..\3dc\networking.cpp" />
+    <ClCompile Include="..\..\3dc\OBJECT.cpp" />
+    <ClCompile Include="..\..\3dc\OnScreenKeyboard.cpp" />
+    <ClCompile Include="..\..\3dc\RenderList.cpp" />
+    <ClCompile Include="..\..\3dc\RingBuffer.cpp" />
+    <ClCompile Include="..\..\3dc\ShaderManager.cpp" />
+    <ClCompile Include="..\..\3dc\shpanim.cpp" />
+    <ClCompile Include="..\..\3dc\sphere.cpp" />
+    <ClCompile Include="..\..\3dc\TABLES.cpp" />
+    <ClCompile Include="..\..\3dc\TextureManager.cpp" />
+    <ClCompile Include="..\..\3dc\utilities.cpp" />
+    <ClCompile Include="..\..\3dc\VDB.cpp" />
+    <ClCompile Include="..\..\3dc\version.cpp" />
+    <ClCompile Include="..\..\3dc\VertexBuffer.cpp" />
+    <ClCompile Include="..\..\3dc\VertexDeclaration.cpp" />
+    <ClCompile Include="..\..\3dc\VorbisPlayer.cpp" />
+    <ClCompile Include="..\..\3dc\win95\ANIMCHNK.CPP" />
+    <ClCompile Include="..\..\3dc\win95\animobs.cpp" />
+    <ClCompile Include="..\..\3dc\win95\awBmpLd.cpp" />
+    <ClCompile Include="..\..\3dc\win95\awIffLd.cpp" />
+    <ClCompile Include="..\..\3dc\win95\awTexLd.cpp" />
+    <ClCompile Include="..\..\3dc\win95\BMPNAMES.CPP" />
+    <ClCompile Include="..\..\3dc\win95\CD_player.cpp" />
+    <ClCompile Include="..\..\3dc\win95\chnkload.cpp" />
+    <ClCompile Include="..\..\3dc\win95\CHNKTEXI.CPP" />
+    <ClCompile Include="..\..\3dc\win95\CHNKTYPE.CPP" />
+    <ClCompile Include="..\..\3dc\win95\Chunk.cpp" />
+    <ClCompile Include="..\..\3dc\win95\CHUNKPAL.CPP" />
+    <ClCompile Include="..\..\3dc\win95\db.cpp" />
+    <ClCompile Include="..\..\3dc\win95\DEBUGLOG.CPP" />
+    <ClCompile Include="..\..\3dc\win95\DummyObjectChunk.cpp" />
+    <ClCompile Include="..\..\3dc\win95\DXLOG.cpp" />
+    <ClCompile Include="..\..\3dc\win95\ENUMCHNK.CPP" />
+    <ClCompile Include="..\..\3dc\win95\ENUMSCH.CPP" />
+    <ClCompile Include="..\..\3dc\win95\ENVCHUNK.CPP" />
+    <ClCompile Include="..\..\3dc\win95\fail.cpp" />
+    <ClCompile Include="..\..\3dc\win95\fragchnk.cpp" />
+    <ClCompile Include="..\..\3dc\win95\GSPRCHNK.CPP" />
+    <ClCompile Include="..\..\3dc\win95\hierchnk.cpp" />
+    <ClCompile Include="..\..\3dc\win95\huffman.cpp" />
+    <ClCompile Include="..\..\3dc\win95\iff.cpp" />
+    <ClCompile Include="..\..\3dc\win95\iff_ILBM.cpp" />
+    <ClCompile Include="..\..\3dc\win95\ILBM_ext.cpp" />
+    <ClCompile Include="..\..\3dc\win95\io.cpp" />
+    <ClCompile Include="..\..\3dc\win95\list_tem.cpp" />
+    <ClCompile Include="..\..\3dc\win95\LTCHUNK.CPP" />
+    <ClCompile Include="..\..\3dc\win95\md5.c" />
+    <ClCompile Include="..\..\3dc\win95\media.cpp" />
+    <ClCompile Include="..\..\3dc\win95\MISHCHNK.CPP" />
+    <ClCompile Include="..\..\3dc\win95\OBCHUNK.CPP" />
+    <ClCompile Include="..\..\3dc\win95\OEChunk.cpp" />
+    <ClCompile Include="..\..\3dc\win95\OUR_MEM.cpp" />
+    <ClCompile Include="..\..\3dc\win95\plat_shp.cpp" />
+    <ClCompile Include="..\..\3dc\win95\plspecfn.cpp" />
+    <ClCompile Include="..\..\3dc\win95\SHPCHUNK.CPP" />
+    <ClCompile Include="..\..\3dc\win95\SNDCHUNK.CPP" />
+    <ClCompile Include="..\..\3dc\win95\Sprchunk.cpp" />
+    <ClCompile Include="..\..\3dc\win95\STRING.CPP" />
+    <ClCompile Include="..\..\3dc\win95\Texio.cpp" />
+    <ClCompile Include="..\..\3dc\win95\VideoModes.cpp" />
+    <ClCompile Include="..\..\3dc\win95\win_func.cpp" />
+    <ClCompile Include="..\..\3dc\win95\wpchunk.cpp" />
+    <ClCompile Include="..\..\3dc\win95\Zsp.cpp" />
+    <ClCompile Include="..\d3d_render.cpp" />
+    <ClCompile Include="..\d3_func.cpp" />
+    <ClCompile Include="..\Di_func.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\3dc\AudioStreaming.h" />
+    <ClInclude Include="..\..\3dc\avp\AI_Sight.h" />
+    <ClInclude Include="..\..\3dc\avp\AVPVIEW.H" />
+    <ClInclude Include="..\..\3dc\avp\bh_agun.h" />
+    <ClInclude Include="..\..\3dc\avp\bh_ais.h" />
+    <ClInclude Include="..\..\3dc\avp\BH_ALIEN.H" />
+    <ClInclude Include="..\..\3dc\avp\BH_BINSW.H" />
+    <ClInclude Include="..\..\3dc\avp\bh_cable.h" />
+    <ClInclude Include="..\..\3dc\avp\bh_corpse.h" />
+    <ClInclude Include="..\..\3dc\avp\bh_deathvol.h" />
+    <ClInclude Include="..\..\3dc\avp\bh_debri.h" />
+    <ClInclude Include="..\..\3dc\avp\bh_dummy.h" />
+    <ClInclude Include="..\..\3dc\avp\bh_fan.h" />
+    <ClInclude Include="..\..\3dc\avp\BH_FAR.H" />
+    <ClInclude Include="..\..\3dc\avp\BH_FHUG.H" />
+    <ClInclude Include="..\..\3dc\avp\BH_GENER.H" />
+    <ClInclude Include="..\..\3dc\avp\bh_ldoor.h" />
+    <ClInclude Include="..\..\3dc\avp\bh_lift.h" />
+    <ClInclude Include="..\..\3dc\avp\bh_light.h" />
+    <ClInclude Include="..\..\3dc\avp\BH_LNKSW.H" />
+    <ClInclude Include="..\..\3dc\avp\bh_ltfx.h" />
+    <ClInclude Include="..\..\3dc\avp\BH_MARIN.H" />
+    <ClInclude Include="..\..\3dc\avp\bh_mission.h" />
+    <ClInclude Include="..\..\3dc\avp\BH_NEAR.H" />
+    <ClInclude Include="..\..\3dc\avp\BH_PAQ.H" />
+    <ClInclude Include="..\..\3dc\avp\bh_pargen.h" />
+    <ClInclude Include="..\..\3dc\avp\bh_plachier.h" />
+    <ClInclude Include="..\..\3dc\avp\bh_plift.h" />
+    <ClInclude Include="..\..\3dc\avp\BH_PRED.H" />
+    <ClInclude Include="..\..\3dc\avp\bh_queen.h" />
+    <ClInclude Include="..\..\3dc\avp\bh_RubberDuck.h" />
+    <ClInclude Include="..\..\3dc\avp\bh_selfdest.h" />
+    <ClInclude Include="..\..\3dc\avp\bh_snds.h" />
+    <ClInclude Include="..\..\3dc\avp\bh_spcl.h" />
+    <ClInclude Include="..\..\3dc\avp\BH_SWDOR.H" />
+    <ClInclude Include="..\..\3dc\avp\bh_track.h" />
+    <ClInclude Include="..\..\3dc\avp\BH_TYPES.H" />
+    <ClInclude Include="..\..\3dc\avp\bh_videoscreen.h" />
+    <ClInclude Include="..\..\3dc\avp\bh_waypt.h" />
+    <ClInclude Include="..\..\3dc\avp\bh_weap.h" />
+    <ClInclude Include="..\..\3dc\avp\BH_XENO.H" />
+    <ClInclude Include="..\..\3dc\avp\BonusAbilities.h" />
+    <ClInclude Include="..\..\3dc\avp\CDTrackSelection.h" />
+    <ClInclude Include="..\..\3dc\avp\COMP_SHP.H" />
+    <ClInclude Include="..\..\3dc\avp\ConsoleLog.hpp" />
+    <ClInclude Include="..\..\3dc\avp\davehook.h" />
+    <ClInclude Include="..\..\3dc\avp\decal.h" />
+    <ClInclude Include="..\..\3dc\avp\DetailLevels.h" />
+    <ClInclude Include="..\..\3dc\avp\DYNAMICS.H" />
+    <ClInclude Include="..\..\3dc\avp\DYNBLOCK.H" />
+    <ClInclude Include="..\..\3dc\avp\EQUATES.H" />
+    <ClInclude Include="..\..\3dc\avp\EQUIPMNT.H" />
+    <ClInclude Include="..\..\3dc\avp\equiputl.hpp" />
+    <ClInclude Include="..\..\3dc\avp\extents.h" />
+    <ClInclude Include="..\..\3dc\avp\GAMEDEF.H" />
+    <ClInclude Include="..\..\3dc\avp\gameflow.h" />
+    <ClInclude Include="..\..\3dc\avp\game_statistics.h" />
+    <ClInclude Include="..\..\3dc\avp\hmodel.h" />
+    <ClInclude Include="..\..\3dc\avp\HUDDEFS.H" />
+    <ClInclude Include="..\..\3dc\avp\INVENTRY.H" />
+    <ClInclude Include="..\..\3dc\avp\langenum.h" />
+    <ClInclude Include="..\..\3dc\avp\LANGUAGE.H" />
+    <ClInclude Include="..\..\3dc\avp\LIGHTING.H" />
+    <ClInclude Include="..\..\3dc\avp\load_shp.h" />
+    <ClInclude Include="..\..\3dc\avp\los.h" />
+    <ClInclude Include="..\..\3dc\avp\ltfx_exp.h" />
+    <ClInclude Include="..\..\3dc\avp\mempool.h" />
+    <ClInclude Include="..\..\3dc\avp\missions.hpp" />
+    <ClInclude Include="..\..\3dc\avp\Paintball.h" />
+    <ClInclude Include="..\..\3dc\avp\particle.h" />
+    <ClInclude Include="..\..\3dc\avp\PFARLOCS.H" />
+    <ClInclude Include="..\..\3dc\avp\PHEROMON.H" />
+    <ClInclude Include="..\..\3dc\avp\Player.h" />
+    <ClInclude Include="..\..\3dc\avp\PMOVE.H" />
+    <ClInclude Include="..\..\3dc\avp\projfont.h" />
+    <ClInclude Include="..\..\3dc\avp\projtext.h" />
+    <ClInclude Include="..\..\3dc\avp\PSND.H" />
+    <ClInclude Include="..\..\3dc\avp\PSNDPROJ.H" />
+    <ClInclude Include="..\..\3dc\avp\PVISIBLE.H" />
+    <ClInclude Include="..\..\3dc\avp\savegame.h" />
+    <ClInclude Include="..\..\3dc\avp\scream.h" />
+    <ClInclude Include="..\..\3dc\avp\sequnces.h" />
+    <ClInclude Include="..\..\3dc\avp\sfx.h" />
+    <ClInclude Include="..\..\3dc\avp\statpane.h" />
+    <ClInclude Include="..\..\3dc\avp\STRATDEF.H" />
+    <ClInclude Include="..\..\3dc\avp\support\command.hpp" />
+    <ClInclude Include="..\..\3dc\avp\support\consbind.hpp" />
+    <ClInclude Include="..\..\3dc\avp\support\consbtch.hpp" />
+    <ClInclude Include="..\..\3dc\avp\support\COORDSTR.HPP" />
+    <ClInclude Include="..\..\3dc\avp\support\daemon.h" />
+    <ClInclude Include="..\..\3dc\avp\support\dcontext.hpp" />
+    <ClInclude Include="..\..\3dc\avp\support\expvar.hpp" />
+    <ClInclude Include="..\..\3dc\avp\support\indexfnt.hpp" />
+    <ClInclude Include="..\..\3dc\avp\support\r2base.h" />
+    <ClInclude Include="..\..\3dc\avp\support\r2pos666.hpp" />
+    <ClInclude Include="..\..\3dc\avp\support\reflist.hpp" />
+    <ClInclude Include="..\..\3dc\avp\support\refobj.hpp" />
+    <ClInclude Include="..\..\3dc\avp\support\rentrntq.h" />
+    <ClInclude Include="..\..\3dc\avp\support\scstring.hpp" />
+    <ClInclude Include="..\..\3dc\avp\support\strtab.hpp" />
+    <ClInclude Include="..\..\3dc\avp\support\strutil.h" />
+    <ClInclude Include="..\..\3dc\avp\support\tallfont.hpp" />
+    <ClInclude Include="..\..\3dc\avp\support\trig666.hpp" />
+    <ClInclude Include="..\..\3dc\avp\support\wrapstr.hpp" />
+    <ClInclude Include="..\..\3dc\avp\targeting.h" />
+    <ClInclude Include="..\..\3dc\avp\track.h" />
+    <ClInclude Include="..\..\3dc\avp\TRIGGERS.H" />
+    <ClInclude Include="..\..\3dc\avp\WEAPONS.H" />
+    <ClInclude Include="..\..\3dc\avp\win95\AVPCHUNK.HPP" />
+    <ClInclude Include="..\..\3dc\avp\win95\AvpReg.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\BMP2.H" />
+    <ClInclude Include="..\..\3dc\avp\win95\CHEAT.H" />
+    <ClInclude Include="..\..\3dc\avp\win95\d3d_hud.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\dbdefs.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\dplayext.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\Dp_func.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\EAX.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\endianio.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\FFREAD.HPP" />
+    <ClInclude Include="..\..\3dc\avp\win95\FFSTDIO.H" />
+    <ClInclude Include="..\..\3dc\avp\win95\font.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\Frontend\AvP_EnvInfo.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\Frontend\avp_intro.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\Frontend\AvP_MenuData.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\Frontend\AvP_MenuGfx.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\Frontend\AvP_Menus.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\Frontend\AvP_MP_Config.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\Frontend\AvP_UserProfile.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\gadgets\ahudgadg.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\gadgets\conscmnd.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\gadgets\conssym.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\gadgets\consvar.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\gadgets\gadget.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\gadgets\hudgadg.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\gadgets\rootgadg.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\gadgets\teletype.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\gadgets\textexp.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\gadgets\textin.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\gadgets\trepgadg.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\gadgets\t_ingadg.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\GAMEPLAT.H" />
+    <ClInclude Include="..\..\3dc\avp\win95\GammaControl.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\HEAP_TEM.HPP" />
+    <ClInclude Include="..\..\3dc\avp\win95\hierplace.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\HUDGFX.H" />
+    <ClInclude Include="..\..\3dc\avp\win95\HUD_layout.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\iofocus.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\jsndsup.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\KZSORT.H" />
+    <ClInclude Include="..\..\3dc\avp\win95\modcmds.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\MULTMENU.H" />
+    <ClInclude Include="..\..\3dc\avp\win95\NPCSETUP.H" />
+    <ClInclude Include="..\..\3dc\avp\win95\OBJSETUP.HPP" />
+    <ClInclude Include="..\..\3dc\avp\win95\PathChnk.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\PLDGHOST.H" />
+    <ClInclude Include="..\..\3dc\avp\win95\Pldnet.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\progress_bar.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\PROJLOAD.HPP" />
+    <ClInclude Include="..\..\3dc\avp\win95\PSNDPLAT.H" />
+    <ClInclude Include="..\..\3dc\avp\win95\SCRSHOT.HPP" />
+    <ClInclude Include="..\..\3dc\avp\win95\Strachnk.hpp" />
+    <ClInclude Include="..\..\3dc\avp\win95\System.h" />
+    <ClInclude Include="..\..\3dc\avp\win95\USR_IO.H" />
+    <ClInclude Include="..\..\3dc\avp\win95\VISION.H" />
+    <ClInclude Include="..\..\3dc\ConfigFile.h" />
+    <ClInclude Include="..\..\3dc\console.h" />
+    <ClInclude Include="..\..\3dc\FastFile.h" />
+    <ClInclude Include="..\..\3dc\FileStream.h" />
+    <ClInclude Include="..\..\3dc\FmvCutscenes.h" />
+    <ClInclude Include="..\..\3dc\FmvPlayback.h" />
+    <ClInclude Include="..\..\3dc\Fonts.h" />
+    <ClInclude Include="..\..\3dc\frustum.h" />
+    <ClInclude Include="..\..\3dc\include\3dc.h" />
+    <ClInclude Include="..\..\3dc\include\mem3dc.h" />
+    <ClInclude Include="..\..\3dc\include\module.h" />
+    <ClInclude Include="..\..\3dc\include\prototyp.h" />
+    <ClInclude Include="..\..\3dc\include\shape.h" />
+    <ClInclude Include="..\..\3dc\IndexBuffer.h" />
+    <ClInclude Include="..\..\3dc\Input.h" />
+    <ClInclude Include="..\..\3dc\KSHAPE.H" />
+    <ClInclude Include="..\..\3dc\logstring.h" />
+    <ClInclude Include="..\..\3dc\MSLHAND.H" />
+    <ClInclude Include="..\..\3dc\networking.h" />
+    <ClInclude Include="..\..\3dc\OnScreenKeyboard.h" />
+    <ClInclude Include="..\..\3dc\os_header.h" />
+    <ClInclude Include="..\..\3dc\renderer.h" />
+    <ClInclude Include="..\..\3dc\RenderList.h" />
+    <ClInclude Include="..\..\3dc\renderStates.h" />
+    <ClInclude Include="..\..\3dc\RingBuffer.h" />
+    <ClInclude Include="..\..\3dc\ShaderManager.h" />
+    <ClInclude Include="..\..\3dc\sphere.h" />
+    <ClInclude Include="..\..\3dc\Tables.h" />
+    <ClInclude Include="..\..\3dc\TextureManager.h" />
+    <ClInclude Include="..\..\3dc\utilities.h" />
+    <ClInclude Include="..\..\3dc\VDB.h" />
+    <ClInclude Include="..\..\3dc\version.h" />
+    <ClInclude Include="..\..\3dc\VertexBuffer.h" />
+    <ClInclude Include="..\..\3dc\VertexDeclaration.h" />
+    <ClInclude Include="..\..\3dc\VorbisPlayer.h" />
+    <ClInclude Include="..\..\3dc\win95\ANIMCHNK.HPP" />
+    <ClInclude Include="..\..\3dc\win95\animobs.hpp" />
+    <ClInclude Include="..\..\3dc\win95\aw.h" />
+    <ClInclude Include="..\..\3dc\win95\awTexLd.h" />
+    <ClInclude Include="..\..\3dc\win95\awTexLd.hpp" />
+    <ClInclude Include="..\..\3dc\win95\BMPNAMES.HPP" />
+    <ClInclude Include="..\..\3dc\win95\CD_player.h" />
+    <ClInclude Include="..\..\3dc\win95\CHNKLOAD.H" />
+    <ClInclude Include="..\..\3dc\win95\CHNKLOAD.HPP" />
+    <ClInclude Include="..\..\3dc\win95\CHNKTEXI.H" />
+    <ClInclude Include="..\..\3dc\win95\CHNKTYPE.HPP" />
+    <ClInclude Include="..\..\3dc\win95\Chunk.hpp" />
+    <ClInclude Include="..\..\3dc\win95\CHUNKPAL.HPP" />
+    <ClInclude Include="..\..\3dc\win95\DB.H" />
+    <ClInclude Include="..\..\3dc\win95\DEBUGLOG.H" />
+    <ClInclude Include="..\..\3dc\win95\DEBUGLOG.HPP" />
+    <ClInclude Include="..\..\3dc\win95\DummyObjectChunk.hpp" />
+    <ClInclude Include="..\..\3dc\win95\DXLOG.H" />
+    <ClInclude Include="..\..\3dc\win95\ENUMCHNK.HPP" />
+    <ClInclude Include="..\..\3dc\win95\ENUMSCH.HPP" />
+    <ClInclude Include="..\..\3dc\win95\ENVCHUNK.HPP" />
+    <ClInclude Include="..\..\3dc\win95\fail.h" />
+    <ClInclude Include="..\..\3dc\win95\fragchnk.hpp" />
+    <ClInclude Include="..\..\3dc\win95\GSPRCHNK.HPP" />
+    <ClInclude Include="..\..\3dc\win95\Hash_tem.hpp" />
+    <ClInclude Include="..\..\3dc\win95\hierchnk.hpp" />
+    <ClInclude Include="..\..\3dc\win95\huffman.hpp" />
+    <ClInclude Include="..\..\3dc\win95\iff.hpp" />
+    <ClInclude Include="..\..\3dc\win95\iff_ILBM.hpp" />
+    <ClInclude Include="..\..\3dc\win95\ILBM_ext.hpp" />
+    <ClInclude Include="..\..\3dc\win95\INLINE.H" />
+    <ClInclude Include="..\..\3dc\win95\io.h" />
+    <ClInclude Include="..\..\3dc\win95\list_tem.hpp" />
+    <ClInclude Include="..\..\3dc\win95\LTCHUNK.HPP" />
+    <ClInclude Include="..\..\3dc\win95\md5.h" />
+    <ClInclude Include="..\..\3dc\win95\media.hpp" />
+    <ClInclude Include="..\..\3dc\win95\MISHCHNK.HPP" />
+    <ClInclude Include="..\..\3dc\win95\OBCHUNK.HPP" />
+    <ClInclude Include="..\..\3dc\win95\objedit.h" />
+    <ClInclude Include="..\..\3dc\win95\OEChunk.h" />
+    <ClInclude Include="..\..\3dc\win95\OURASERT.H" />
+    <ClInclude Include="..\..\3dc\win95\platform.h" />
+    <ClInclude Include="..\..\3dc\win95\plat_shp.h" />
+    <ClInclude Include="..\..\3dc\win95\ShowCmds.h" />
+    <ClInclude Include="..\..\3dc\win95\shpanim.h" />
+    <ClInclude Include="..\..\3dc\win95\SHPCHUNK.HPP" />
+    <ClInclude Include="..\..\3dc\win95\SNDCHUNK.HPP" />
+    <ClInclude Include="..\..\3dc\win95\Sprchunk.hpp" />
+    <ClInclude Include="..\..\3dc\win95\STRING.HPP" />
+    <ClInclude Include="..\..\3dc\win95\wpchunk.hpp" />
+    <ClInclude Include="..\..\3dc\win95\Zsp.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\AvP.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

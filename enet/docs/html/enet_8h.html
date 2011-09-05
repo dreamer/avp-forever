@@ -73,7 +73,7 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7e3fba7774ffbf6f095c7c1c643db823"></a><!-- doxytag: member="enet.h::ENET_VERSION_MINOR" ref="a7e3fba7774ffbf6f095c7c1c643db823" args="" -->
 #define&nbsp;</td><td class="memItemRight" valign="bottom"><b>ENET_VERSION_MINOR</b>&nbsp;&nbsp;&nbsp;3</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7e08f37772431845fe118f9a87bebda2"></a><!-- doxytag: member="enet.h::ENET_VERSION_PATCH" ref="a7e08f37772431845fe118f9a87bebda2" args="" -->
-#define&nbsp;</td><td class="memItemRight" valign="bottom"><b>ENET_VERSION_PATCH</b>&nbsp;&nbsp;&nbsp;1</td></tr>
+#define&nbsp;</td><td class="memItemRight" valign="bottom"><b>ENET_VERSION_PATCH</b>&nbsp;&nbsp;&nbsp;2</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab3ebd57b901e14fa1ff745b0472ea786"></a><!-- doxytag: member="enet.h::ENET_VERSION_CREATE" ref="ab3ebd57b901e14fa1ff745b0472ea786" args="(major, minor, patch)" -->
 #define&nbsp;</td><td class="memItemRight" valign="bottom"><b>ENET_VERSION_CREATE</b>(major, minor, patch)&nbsp;&nbsp;&nbsp;(((major)&lt;&lt;16) | ((minor)&lt;&lt;8) | (patch))</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aefb355eb62b5a7096faf91b3134e9016"></a><!-- doxytag: member="enet.h::ENET_VERSION" ref="aefb355eb62b5a7096faf91b3134e9016" args="" -->
@@ -144,7 +144,8 @@ Enumerations</h2></td></tr>
  }</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">enum &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003d">_ENetPacketFlag</a> { <a class="el" href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003daab20e7088245ab2ddb7f11dcc9433738">ENET_PACKET_FLAG_RELIABLE</a> =  (1 &lt;&lt; 0), 
 <a class="el" href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003dad230cc769ef9cc4c7c582b28f9c443fe">ENET_PACKET_FLAG_UNSEQUENCED</a> =  (1 &lt;&lt; 1), 
-<a class="el" href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003daa6ce462752c36aad22e68ebefac3df8c">ENET_PACKET_FLAG_NO_ALLOCATE</a> =  (1 &lt;&lt; 2)
+<a class="el" href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003daa6ce462752c36aad22e68ebefac3df8c">ENET_PACKET_FLAG_NO_ALLOCATE</a> =  (1 &lt;&lt; 2), 
+<a class="el" href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003da7f79cd86eacd2543d6cde2eeccea995e">ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT</a> =  (1 &lt;&lt; 3)
  }</td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight"><p>Packet flag bit constants. </p>
  <a href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003d">More...</a><br/></td></tr>
@@ -516,6 +517,9 @@ enet_host_bandwidth_throttle() </dd></dl>
 <tr><td valign="top"><em><a class="anchor" id="a9d1fc0ce6da0a057f18bd8b9c762003daa6ce462752c36aad22e68ebefac3df8c"></a><!-- doxytag: member="ENET_PACKET_FLAG_NO_ALLOCATE" ref="a9d1fc0ce6da0a057f18bd8b9c762003daa6ce462752c36aad22e68ebefac3df8c" args="" -->ENET_PACKET_FLAG_NO_ALLOCATE</em>&nbsp;</td><td>
 <p>packet will not allocate data, and user must supply it instead </p>
 </td></tr>
+<tr><td valign="top"><em><a class="anchor" id="a9d1fc0ce6da0a057f18bd8b9c762003da7f79cd86eacd2543d6cde2eeccea995e"></a><!-- doxytag: member="ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT" ref="a9d1fc0ce6da0a057f18bd8b9c762003da7f79cd86eacd2543d6cde2eeccea995e" args="" -->ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT</em>&nbsp;</td><td>
+<p>packet will be fragmented using unreliable (instead of reliable) sends if it exceeds the MTU </p>
+</td></tr>
 </table>
 </dd>
 </dl>
@@ -545,7 +549,7 @@ enet_host_bandwidth_throttle() </dd></dl>
 </div>
 </div>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Wed Feb 9 2011 21:31:05 for enet by&nbsp;
+<hr class="footer"/><address class="footer"><small>Generated on Tue May 31 2011 03:26:47 for enet by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.1 </small></address>
 </body>
