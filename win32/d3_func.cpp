@@ -701,10 +701,10 @@ bool CreateVolatileResources()
 
 	// decal buffers
 	d3d.decalVB = new VertexBuffer;
-	d3d.decalVB->Create((1024*2*2*2), FVF_DECAL, USAGE_DYNAMIC);
+	d3d.decalVB->Create(8192, FVF_DECAL, USAGE_DYNAMIC);
 
 	d3d.decalIB = new IndexBuffer;
-	d3d.decalIB->Create((1024*2*6*2) * 3, USAGE_DYNAMIC);
+	d3d.decalIB->Create(12288, USAGE_DYNAMIC);
 
 	SetRenderStateDefaults();
 
@@ -2614,8 +2614,9 @@ bool InitialiseDirect3D()
 	// we should bail out if the shaders can't be loaded
 	if ((d3d.mainEffect  == kNullShaderID) ||
 		(d3d.orthoEffect == kNullShaderID) ||
+		(d3d.decalEffect == kNullShaderID) ||
 		(d3d.fmvEffect   == kNullShaderID) || // make this optional?
-		(d3d.cloudEffect == kNullShaderID)) // make this optional?
+		(d3d.cloudEffect == kNullShaderID))   // make this optional?
 	{
 		return false;
 	}
@@ -2701,6 +2702,7 @@ void ReleaseDirect3D()
 	// release vertex declarations
 	delete d3d.mainDecl;
 	delete d3d.orthoDecl;
+	delete d3d.decalDecl;
 	delete d3d.fmvDecl;
 	delete d3d.tallFontText;
 	delete d3d.starsDecl;
