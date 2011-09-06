@@ -378,18 +378,6 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="shaders\fmvPixel.psh" />
-    <None Include="shaders\fmvVertex.vsh" />
-    <None Include="shaders\orthoVertex.vsh" />
-    <None Include="shaders\pixel.psh" />
-    <None Include="shaders\PointSpritePixel.psh" />
-    <None Include="shaders\PointSpriteVertex.vsh" />
-    <None Include="shaders\pretransformedVert.vsh" />
-    <None Include="shaders\tallFontTexttPixel.psh" />
-    <None Include="shaders\tallFontTextVertex.vsh" />
-    <None Include="shaders\vertex.vsh" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\3dc\avp\AI_Sight.cpp" />
     <ClCompile Include="..\..\3dc\avp\Avpview.cpp" />
     <ClCompile Include="..\..\3dc\avp\bh_agun.cpp" />
@@ -889,6 +877,17 @@
     <ClInclude Include="..\..\3dc\win95\STRING.HPP" />
     <ClInclude Include="..\..\3dc\win95\wpchunk.hpp" />
     <ClInclude Include="..\..\3dc\win95\Zsp.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\shaders\decal.psh" />
+    <None Include="..\..\shaders\decal.vsh" />
+    <None Include="..\..\shaders\fmvPixel.psh" />
+    <None Include="..\..\shaders\fmvVertex.vsh" />
+    <None Include="..\..\shaders\orthoVertex.vsh" />
+    <None Include="..\..\shaders\pixel.psh" />
+    <None Include="..\..\shaders\tallFontTextPixel.psh" />
+    <None Include="..\..\shaders\tallFontTextVertex.vsh" />
+    <None Include="..\..\shaders\vertex.vsh" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\AvP.rc" />
