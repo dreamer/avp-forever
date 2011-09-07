@@ -672,7 +672,7 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 }
 
 #include "FastFile.h"
-#include "RimLoader.h"
+//#include "RimLoader.h"
 
 texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 {
