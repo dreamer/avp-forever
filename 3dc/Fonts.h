@@ -29,21 +29,22 @@
 #include <stdint.h>
 #include "renderer.h"
 
-const int kNumFontTypes = 2;
-
 enum eFontTypes
 {
 	kFontSmall,
-	kFontBig
+	kFontBig,
+	kFontConsole
 };
 
-bool Font_Init();
+const int kNumFontTypes = 3;
+
+bool Font_Load(const std::string &fontFile, enum eFontTypes fontType);
 void Font_Release();
 uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, RCOLOR colour, enum eFontTypes fontType);
-uint32_t Font_GetCharWidth(char c);
-uint32_t Font_GetCharHeight();
-uint32_t Font_GetStringWidth(const std::string &text);
-uint32_t Font_DrawCenteredText(const std::string &text);
+uint32_t Font_GetCharWidth(char c, enum eFontTypes fontType);
+uint32_t Font_GetCharHeight(enum eFontTypes fontType);
+uint32_t Font_GetStringWidth(const std::string &text, enum eFontTypes fontType);
+uint32_t Font_DrawCenteredText(const std::string &text, enum eFontTypes fontType);
 
 
 #endif
