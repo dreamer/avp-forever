@@ -36,9 +36,11 @@
 // function pointer for commands
 typedef void (*funcPointer) (void);
 
+typedef unsigned char colourIndex_t;
+
 std::string& Con_GetArgument (int argNum);
 size_t Con_GetNumArguments   ();
-void Con_AddCommand          (char *command, funcPointer function);
+void Con_AddCommand          (char *commandName, funcPointer function);
 void Con_PrintError          (const std::string &errorString);
 void Con_PrintMessage        (const std::string &messageString);
 void Con_PrintDebugMessage   (const std::string &messageString);
@@ -53,5 +55,6 @@ void Con_Key_Enter(bool state);
 void Con_Key_Backspace(bool state);
 void Con_RemoveTypedChar();
 void Con_ProcessInput();
+void Con_DrawChar(const char c, colourIndex_t colourIndex);
 
 #endif
