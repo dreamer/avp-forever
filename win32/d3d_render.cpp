@@ -339,9 +339,9 @@ float cot(float in)
 static bool ExecuteBuffer()
 {
 	// sort the list of render objects
-	particleList->Sort();
-	decalList->Sort();
-	mainList->Sort();
+//	particleList->Sort();
+//	decalList->Sort();
+//	mainList->Sort();
 
 	// these two just add the vertex data to the below lists (they dont draw anything themselves
 	// and they HAVE to be called before the below code)
@@ -367,25 +367,6 @@ static bool ExecuteBuffer()
 
 		// draw our main list (level geometry, player weapon etc)
 		mainList->Draw();
-	}
-
-	// render any orthographic quads
-	if (orthoList->GetSize())
-	{
-		// set vertex declaration
-		d3d.orthoDecl->Set();
-
-		d3d.orthoVB->Set();
-		d3d.orthoIB->Set();
-
-		// set orthographic projection shaders as active
-		d3d.effectSystem->SetActive(d3d.orthoEffect);
-
-		// pass the orthographic projection matrix to the vertex shader
-		d3d.effectSystem->SetVertexShaderConstant(d3d.orthoEffect, 0, CONST_MATRIX, &d3d.matOrtho);
-
-		// daw the ortho list
-		orthoList->Draw();
 	}
 
 	// render any decals
@@ -426,6 +407,25 @@ static bool ExecuteBuffer()
 
 		// Draw the particles in the list
 		particleList->Draw();
+	}
+
+	// render any orthographic quads
+	if (orthoList->GetSize())
+	{
+		// set vertex declaration
+		d3d.orthoDecl->Set();
+
+		d3d.orthoVB->Set();
+		d3d.orthoIB->Set();
+
+		// set orthographic projection shaders as active
+		d3d.effectSystem->SetActive(d3d.orthoEffect);
+
+		// pass the orthographic projection matrix to the vertex shader
+		d3d.effectSystem->SetVertexShaderConstant(d3d.orthoEffect, 0, CONST_MATRIX, &d3d.matOrtho);
+
+		// daw the ortho list
+		orthoList->Draw();
 	}
 
 #if 0 // test code, disabled
