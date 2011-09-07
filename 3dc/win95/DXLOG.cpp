@@ -9,45 +9,56 @@
 /*
  * D3DAppErrorToString
  */
-static char*
-D3DAppErrorToString(HRESULT error)
+static char* D3DAppErrorToString(HRESULT error)
 {
 	return "D3DAppErrorToString function in Dxlog.c";
 }
 
-#define LOGFILE_NAME "dx_error.log"
+static const char *LOGFILE_NAME = "dx_error.log";
 
-static LOGFILE * dxlog = 0;
-static int closed_once = 0;
+static LOGFILE *dxlog = 0;
+static bool closed_once = false;
+
+extern void exit_break_point_function();
 
 void dx_err_log(HRESULT error, int line, char const * file)
 {
-	if (closed_once) return;
+	if (closed_once)
+		return;
 	
-	if (!dxlog) dxlog = lfopen(LOGFILE_NAME);
+	if (!dxlog)
+		dxlog = lfopen(LOGFILE_NAME);
 
 //	lfprintf(dxlog,"Line %d of %s:\n%s\n\n",line,file,D3DAppErrorToString(error));
 }
 
 void dx_str_log(char const * str, int line, char const * file)
 {
-	if (closed_once) return;
-	if (!dxlog) dxlog = lfopen(LOGFILE_NAME);
+	if (closed_once)
+		return;
 
-	lfprintf(dxlog,"Line %d of %s:\n%s\n\n",line,file,str);
+	if (!dxlog)
+		dxlog = lfopen(LOGFILE_NAME);
+
+	lfprintf(dxlog, "Line %d of %s:\n%s\n\n", line, file, str);
 }
 
 void dx_line_log(int line, char const * file)
 {
-	if (closed_once) return;
-	if (!dxlog) dxlog = lfopen(LOGFILE_NAME);
+	if (closed_once)
+		return;
 
-	lfprintf(dxlog,"Line %d of %s:\n",line,file);
+	if (!dxlog)
+		dxlog = lfopen(LOGFILE_NAME);
+
+	lfprintf(dxlog, "Line %d of %s:\n", line, file);
 }
 
 void dx_strf_log(char const * fmt, ... )
 {
-	if (closed_once) return;
+	if (closed_once)
+		return;
+
 	if (!dxlog) dxlog = lfopen(LOGFILE_NAME);
 	{
 		va_list ap;
@@ -60,21 +71,25 @@ void dx_strf_log(char const * fmt, ... )
 
 void dx_log_close()
 {
-	if(dxlog) lfclose(dxlog);
+	if (dxlog)
+		lfclose(dxlog);
 }
 
 #undef exit
 int GlobalAssertFired(char * Filename, int LineNum,char * Condition)
 {
-	extern void exit_break_point_fucntion ();
-	exit_break_point_fucntion();
-	if (closed_once) return 0;
-	if (!dxlog) dxlog = lfopen(LOGFILE_NAME);
+	exit_break_point_function();
 
-	lfprintf(dxlog,"Line %d of %s:\nGAF: %s\n",LineNum,Filename,Condition);
+	if (closed_once)
+		return 0;
+
+	if (!dxlog) 
+		dxlog = lfopen(LOGFILE_NAME);
+
+	lfprintf(dxlog, "Line %d of %s:\nGAF: %s\n", LineNum, Filename, Condition);
 	lfclose(dxlog);
-	closed_once = 1;
-	textprint("Line %d of %s:\nGAF: %s\n",LineNum,Filename,Condition);
+	closed_once = true;
+	textprint("Line %d of %s:\nGAF: %s\n", LineNum, Filename, Condition);
 	WaitForReturn();
 
 	ExitSystem();
@@ -83,15 +98,18 @@ int GlobalAssertFired(char * Filename, int LineNum,char * Condition)
 
 int LocalAssertFired(char * Filename, int LineNum,char * Condition)
 {
-	extern void exit_break_point_fucntion ();
-	exit_break_point_fucntion();
-	if (closed_once) return 0;
-	if (!dxlog) dxlog = lfopen(LOGFILE_NAME);
+	exit_break_point_function();
 
-	lfprintf(dxlog,"Line %d of %s:\nLAF: %s\n",LineNum,Filename,Condition);
+	if (closed_once)
+		return 0;
+
+	if (!dxlog)
+		dxlog = lfopen(LOGFILE_NAME);
+
+	lfprintf(dxlog, "Line %d of %s:\nLAF: %s\n", LineNum, Filename, Condition);
 	lfclose(dxlog);
-	closed_once = 1;
-	textprint("Line %d of %s:\nLAF: %s\n",LineNum,Filename,Condition);
+	closed_once = true;
+	textprint("Line %d of %s:\nLAF: %s\n", LineNum, Filename, Condition);
 	WaitForReturn();
 
 	ExitSystem();
@@ -100,15 +118,19 @@ int LocalAssertFired(char * Filename, int LineNum,char * Condition)
 
 void ExitFired(char* Filename, int LineNum, int ExitCode)
 {
-	extern void exit_break_point_fucntion ();
-	exit_break_point_fucntion();
-	if (closed_once) return ;
-	if (!dxlog) dxlog = lfopen(LOGFILE_NAME);
+	exit_break_point_function();
 
-	lfprintf(dxlog,"Line %d of %s:\nExit: %x\n",LineNum,Filename,ExitCode);
+	if (closed_once)
+		return;
+
+	if (!dxlog)
+		dxlog = lfopen(LOGFILE_NAME);
+
+	lfprintf(dxlog, "Line %d of %s:\nExit: %x\n", LineNum, Filename, ExitCode);
 	lfclose(dxlog);
-	closed_once = 1;
+	closed_once = true;
 
 	exit(ExitCode);
 }
+
 #endif
