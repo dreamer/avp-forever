@@ -55,12 +55,12 @@ r2pos r2pos :: FixP_Scale
 	);
 }
 
-r2pos operator+ ( const r2pos& R2Pos_1, const r2pos& R2Pos_2 )
+r2pos operator+ (const r2pos& R2Pos_1, const r2pos& R2Pos_2)
 {
 	return r2pos
 	(
-		R2Pos_1 . x + R2Pos_2 . x,
-		R2Pos_1 . y + R2Pos_2 . y
+		R2Pos_1.x + R2Pos_2.x,
+		R2Pos_1.y + R2Pos_2.y
 	);
 }
 
@@ -87,8 +87,8 @@ extern void R2BASE_ScreenModeChange_Cleanup(void)
 	/* CODE */
 	{
 
-		r2rect :: R2Rect_PhysicalScreen .x1 = ScreenDescriptorBlock.SDB_Width;
-		r2rect :: R2Rect_PhysicalScreen .y1 = ScreenDescriptorBlock.SDB_Height;
+		r2rect::R2Rect_PhysicalScreen.x1 = ScreenDescriptorBlock.SDB_Width;
+		r2rect::R2Rect_PhysicalScreen.y1 = ScreenDescriptorBlock.SDB_Height;
 	}
 }
 

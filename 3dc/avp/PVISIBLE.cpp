@@ -71,41 +71,41 @@ extern SOUND3DDATA Explosion_SoundData;
 NB If you use this, you MUST set the shapeIndex field appropriately*/
 MODULEMAPBLOCK VisibilityDefaultObjectMap =
 {
-        MapType_Default,
-        I_ShapeCube, /* this is a default value */
-    	{0,0,0},
-        {0,0,0},
-        #if StandardStrategyAndCollisions
-        ObFlag_Dynamic|ObFlag_NewtonMovement|ObFlag_MatMul,
-        #else
-        0,
-        #endif
-        0,
-        0,
-        #if StandardStrategyAndCollisions
-        StrategyI_Null,
-        0,                                                                      
-    GameCollStrat_Default,              
-        ShapeCStrat_DoubleExtentEllipsoid,      
-        0,                                                      
-        #endif
-        0,                                                      
-        0,                                                      
-        0,      
-        #if StandardStrategyAndCollisions                                               
-        0,                                                      
-        0,0,0,                                  
-        #endif
-        {0,0,0},
-        0,                                               
-        0,                                               
-        #if StandardStrategyAndCollisions
-        0,                                               
-        0,
-        #endif
-		0,
-		0,
-        {0,0,0},
+	MapType_Default,
+	I_ShapeCube, /* this is a default value */
+	{0,0,0},
+	{0,0,0},
+	#if StandardStrategyAndCollisions
+	ObFlag_Dynamic|ObFlag_NewtonMovement|ObFlag_MatMul,
+	#else
+	0,
+	#endif
+	0,
+	0,
+	#if StandardStrategyAndCollisions
+	StrategyI_Null,
+	0,
+	GameCollStrat_Default,
+	ShapeCStrat_DoubleExtentEllipsoid,
+	0,
+	#endif
+	0,
+	0,
+	0,
+	#if StandardStrategyAndCollisions
+	0,
+	0,0,0,
+	#endif
+	{0,0,0},
+	0,
+	0,
+	#if StandardStrategyAndCollisions
+	0,
+	0,
+	#endif
+	0,
+	0,
+	{0,0,0},
 };
 
 
@@ -136,10 +136,10 @@ void InitObjectVisibilities(void)
 
 	/* loop thro' the strategy block list, looking for objects that will have
 	their visibilities managed ... */
-	while(sbIndex < NumActiveStBlocks)
+	while (sbIndex < NumActiveStBlocks)
 	{
 		sbPtr = ActiveStBlockList[sbIndex++];
-		if(     (sbPtr->I_SBtype ==     I_BehaviourAlien)||
+		if ((sbPtr->I_SBtype ==     I_BehaviourAlien)||
 				(sbPtr->I_SBtype ==     I_BehaviourMarine)||
 				(sbPtr->I_SBtype ==     I_BehaviourInanimateObject)||
 				(sbPtr->I_SBtype ==     I_BehaviourVideoScreen)||
@@ -170,10 +170,10 @@ void InitObjectVisibilities(void)
 		else
 		{
 				/* just in case ... */
-				if(sbPtr->I_SBtype !=   I_BehaviourGenerator &&
+				if (sbPtr->I_SBtype !=   I_BehaviourGenerator &&
 				   sbPtr->I_SBtype !=   I_BehaviourMarinePlayer)
 				{
-						sbPtr->containingModule = (MODULE *)0;
+					sbPtr->containingModule = (MODULE *)0;
 				}
 				sbPtr->maintainVisibility = 0;
 		}
@@ -205,63 +205,63 @@ void DoObjectVisibilities(void)
 	{
 		sbPtr = ActiveStBlockList[sbIndex++];
 		if (sbPtr->maintainVisibility)
-			DoObjectVisibility(sbPtr);                              
+			DoObjectVisibility(sbPtr);
 	}
 }
 
 
 void DoObjectVisibility(STRATEGYBLOCK *sbPtr)
 {
-    if (!(sbPtr->SBdptr))
-    {
-        /* Note that we don't call modulefromposition() for far objects, as they mostly don't 
-        move, and those that do (eg AIs) move to precalculated positions in modules. Thus
-        invisible objects are responsible for looking after their own containingModule field.
-        This should always be ok: we should always have a correct and valid containing
-        module. However, we will do a paranoia check for a null containingModule... */ 
-        if (!sbPtr->containingModule)    
-        {
+	if (!(sbPtr->SBdptr))
+	{
+		/* Note that we don't call modulefromposition() for far objects, as they mostly don't 
+		move, and those that do (eg AIs) move to precalculated positions in modules. Thus
+		invisible objects are responsible for looking after their own containingModule field.
+		This should always be ok: we should always have a correct and valid containing
+		module. However, we will do a paranoia check for a null containingModule... */ 
+		if (!sbPtr->containingModule)    
+		{
 //            textprint("Calling Far EmergencyRelocateObject, On object %x, type %d!\n", (int)sbPtr, sbPtr->I_SBtype);
-            IdentifyObject(sbPtr);
-            if (!(EmergencyRelocateObject(sbPtr))) 
+			IdentifyObject(sbPtr);
+			if (!(EmergencyRelocateObject(sbPtr))) 
 			{
-                textprint("Relocate failed!\n");
-                return;
-            }
-        }
-        if (!sbPtr->containingModule)
-        {
-            textprint("Relocate failed and reported success\n");
-            return;
-        }
+				textprint("Relocate failed!\n");
+				return;
+			}
+		}
+		if (!sbPtr->containingModule)
+		{
+			textprint("Relocate failed and reported success\n");
+			return;
+		}
 
-        /* Now do the visibility check: the object has no display block, so check if 
-        it's module is visible. If so, make the object visibile too. */
+		/* Now do the visibility check: the object has no display block, so check if 
+		it's module is visible. If so, make the object visibile too. */
 
-        if ((sbPtr->I_SBtype == I_BehaviourPlacedLight)
-        &&ThisObjectIsInAModuleVisibleFromCurrentlyVisibleModules(sbPtr))
-        {
-            MakePlacedLightNear(sbPtr);
-            return;
-        }
-        else if (sbPtr->I_SBtype == I_BehaviourNetGhost)
-        {
-            NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)sbPtr->SBdataptr;
-            if (ghostDataPtr && ghostDataPtr->type == I_BehaviourFlareGrenade)
-            {
-                if (ThisObjectIsInAModuleVisibleFromCurrentlyVisibleModules(sbPtr))
-                {
-                    MakeGhostNear(sbPtr);
-                    return;
-                }
-            }
-        }
+		if ((sbPtr->I_SBtype == I_BehaviourPlacedLight)
+		&&ThisObjectIsInAModuleVisibleFromCurrentlyVisibleModules(sbPtr))
+		{
+			MakePlacedLightNear(sbPtr);
+			return;
+		}
+		else if (sbPtr->I_SBtype == I_BehaviourNetGhost)
+		{
+			NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)sbPtr->SBdataptr;
+			if (ghostDataPtr && ghostDataPtr->type == I_BehaviourFlareGrenade)
+			{
+				if (ThisObjectIsInAModuleVisibleFromCurrentlyVisibleModules(sbPtr))
+				{
+					MakeGhostNear(sbPtr);
+					return;
+				}
+			}
+		}
 		else if (sbPtr->I_SBtype == I_BehaviourPlatform)
 		{
 			PLATFORMLIFT_BEHAVIOUR_BLOCK *platformliftdata = (PLATFORMLIFT_BEHAVIOUR_BLOCK *)sbPtr->SBdataptr;
-        	//platform lift needs to be made near if its module near or 
+			//platform lift needs to be made near if its module near or 
 			//if it is moving
-        	if (ModuleCurrVisArray[(sbPtr->containingModule->m_index)] ||
+			if (ModuleCurrVisArray[(sbPtr->containingModule->m_index)] ||
 			   platformliftdata->state==PLBS_GoingUp ||
 			   platformliftdata->state==PLBS_GoingDown)
 			{
@@ -627,35 +627,32 @@ void MakeObjectNear(STRATEGYBLOCK *sbPtr)
 
                 //dPtr->HModelControlBlock->Playing=1;
                 dPtr->HModelControlBlock->Looped=1;
-
-        }       
+        } 
         
         #endif
-
-
 }
 
 void MakeObjectFar(STRATEGYBLOCK *sbPtr)
 {
-        int i;
+	int i;
 
-        #if HMODEL_HACK
-           
-        if (sbPtr->SBdptr->ObShape==GetLoadedShapeMSL("chest")) {
-                Dispel_HModel(&DropShipHModelController);
-        }
+	#if HMODEL_HACK
 
-        #endif
+	if (sbPtr->SBdptr->ObShape==GetLoadedShapeMSL("chest")) {
+			Dispel_HModel(&DropShipHModelController);
+	}
 
-        LOCALASSERT(sbPtr->SBdptr != NULL);
+	#endif
 
-        /* get rid of the displayblock */
-        i = DestroyActiveObject(sbPtr->SBdptr);
-        if(i!=0)
-        {
-                LOCALASSERT(1==0);
-        }
-        sbPtr->SBdptr = NULL;
+	LOCALASSERT(sbPtr->SBdptr != NULL);
+
+	/* get rid of the displayblock */
+	i = DestroyActiveObject(sbPtr->SBdptr);
+	if (i!=0)
+	{
+		LOCALASSERT(1==0);
+	}
+	sbPtr->SBdptr = NULL;
 
 }
 

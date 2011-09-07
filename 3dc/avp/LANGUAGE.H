@@ -25,13 +25,13 @@ extern char *GetTextString(enum TEXTSTRING_ID stringID);
 
 
 
-extern char *LoadTextFile(char *filename);
+extern char *LoadTextFile(const char *filename);
 /*KJL*****************************************************
 * Platform specific function, which loads the named file *
 * and returns a pointer to the start of the file's data. *
 *****************************************************KJL*/
 
-extern void UnloadTextFile(char *filename, char *bufferPtr);
+extern void UnloadTextFile(const char *filename, char *bufferPtr);
 /*KJL**********************************************************
 * Platform specific function, which unloads the named file    *
 * and frees the memory pointed to by the bufferPtr. You may   *

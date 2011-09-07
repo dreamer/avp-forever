@@ -1,5 +1,4 @@
 #include "3dc.h"
-
 #include "inline.h"
 #include "module.h"
 #include "stratdef.h"
@@ -7,7 +6,6 @@
 #include "bh_types.h"
 #include "comp_shp.h"
 #include "dynblock.h"
-
 #include "bh_alien.h"
 #include "pvisible.h"
 #include "bh_pred.h"
@@ -28,11 +26,9 @@
 #include "bh_ldoor.h"
 #include "game_statistics.h"
 #include "AvP_UserProfile.h"
-
 #include "savegame.h"
 #include "huffman.hpp"
 #include "fmvCutscenes.h"
-
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 

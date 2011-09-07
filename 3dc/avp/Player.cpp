@@ -26,8 +26,6 @@ so player.c is looking a bit bare at the moment. */
 #include "psnd.h"
 #include "psndplat.h"
 #include "tables.h"
-
-/* for win 95 net support */
 #include "pldnet.h"
 #include "pldghost.h"
 #include "dp_func.h"
@@ -48,6 +46,9 @@ extern int predHUDSoundHandle;
 extern int predOVision_SoundHandle;
 
 extern int AIModuleArraySize;
+extern EULER deathTargetOrientation;
+extern int deathFadeLevel;
+extern int weaponHandle;
 
 int GimmeChargeCalls;
 int HtoHStrikes;
@@ -1020,10 +1021,6 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 		playerStatusPtr->Armour=sbPtr->SBDamageBlock.Armour;
 	}
 }
-
-extern EULER deathTargetOrientation;
-extern int deathFadeLevel;
-extern int weaponHandle;
 
 static void PlayerIsDead(DAMAGE_PROFILE* damage,int multiplier,VECTORCH* incoming)
 {

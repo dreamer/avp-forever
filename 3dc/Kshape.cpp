@@ -32,10 +32,12 @@
 #include "renderStates.h"
 #include "d3d_hud.h"
 #include "tables.h"
+#include "renderer.h"
+#include "renderlist.h"
 
-#define ALIENS_LIFEFORCE_GLOW_COLOUR 0x20ff8080
-#define MARINES_LIFEFORCE_GLOW_COLOUR 0x208080ff
-#define PREDATORS_LIFEFORCE_GLOW_COLOUR 0x2080ff80
+const RCOLOR ALIENS_LIFEFORCE_GLOW_COLOUR    = 0x20ff8080;
+const RCOLOR MARINES_LIFEFORCE_GLOW_COLOUR   = 0x208080ff;
+const RCOLOR PREDATORS_LIFEFORCE_GLOW_COLOUR = 0x2080ff80;
 
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
@@ -138,6 +140,9 @@ void DrawWaterFallPoly(VECTORCH *v);
 void RenderAllParticlesFurtherAwayThan(int zThreshold);
 
 extern void UpdateViewMatrix(float *viewMat);
+extern void UpdateProjectionMatrix();
+extern void BuildFrustum();
+
 void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr);
 void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr);
 void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr);
@@ -196,6 +201,19 @@ char CloakedPredatorIsMoving;
 static VECTORCH LocalCameraZAxis;
 
 static int ObjectCounter;
+
+const int kNumStars = 500;
+
+// starfield rendering
+typedef struct
+{
+	VECTORCH Position;
+	int Colour;
+} STARDESC;
+/*static*/ STARDESC StarArray[kNumStars];
+
+extern void LoadStars();
+extern RenderList *starsList;
 
 extern void InitialiseLightIntensityStamps(void)
 {
@@ -334,6 +352,8 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 	int **itemArrayPtr = shapePtr->items;
 
 	LOCALASSERT(numitems);
+
+	bool isCulled = false;
 
 	switch (CurrentVisionMode)
 	{
@@ -545,6 +565,9 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 // 	if((Global_ODB_Ptr->ObStrategyBlock)&&(Global_ODB_Ptr->ObStrategyBlock->I_SBtype == I_BehaviourAlien))
 	//textprint("shape alien\n");
 
+	extern bool frustumCull;
+	extern bool CheckPointIsInFrustum(D3DXVECTOR3 *point);
+
 	TestVerticesWithFrustum();
 
 	/* interesting hack for predator cloaking */
@@ -578,12 +601,11 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 			do
 			{
 				POLYHEADER *polyPtr = (POLYHEADER*) (*itemArrayPtr++);
-				int pif;
 
-				pif = PolygonWithinFrustum(polyPtr);
+				int pif = PolygonWithinFrustum(polyPtr);
 
-			if (pif)
-			//if (1)
+				if (pif)
+				//if (1)
 				{
 					switch (polyPtr->PolyItemType)
 					{
@@ -614,6 +636,8 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 							break;
 					}
 				}
+
+				isCulled = false; // ?
 			}
 			while (--numitems);
 			return;
@@ -688,7 +712,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 
 				/* NB This is intended to fall through to the GouraudPolygon case */
 				#endif
-//				case I_Gouraud3dTexturedPolygon:
 				case I_GouraudPolygon:
 				case I_Gouraud2dTexturedPolygon:
 				case I_Gouraud3dTexturedPolygon:
@@ -727,6 +750,43 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 				case I_ZB_Gouraud3dTexturedPolygon:
 				case I_ZB_Gouraud2dTexturedPolygon:
 				{
+					// cull test
+					if (frustumCull)
+					{
+						bool valid = false;
+
+						int *VertexNumberPtrStart = VertexNumberPtr;
+
+						// test frustum culling for each point
+						for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
+						{
+							VertexNumberPtr = &polyPtr->Poly1stPt;
+
+							VECTORCH *vertices = &RotatedPts[*VertexNumberPtr];
+							VertexNumberPtr++;
+
+							D3DXVECTOR3 point;
+							point.x = (float)vertices->vx;
+							point.y = (float)-vertices->vy;
+							point.z = (float)vertices->vz;
+
+							if (CheckPointIsInFrustum(&point) == true)
+							{
+								valid = true;
+								break;
+							}
+						}
+
+						// restore pointer
+						VertexNumberPtr = VertexNumberPtrStart;
+
+						// lets bail out of this function and not draw this poly if none of the points are inside the view frustum
+						if (valid == false)
+						{
+							break;
+						}
+					}
+
 					GouraudTexturedPolygon_Construct(polyPtr);
 
 					if (pif != 2)
@@ -3637,7 +3697,6 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 
 	*/
 
-
 	MakeVector(&VDB_Ptr->VDB_World, &dptr->ObWorld, &LocalView);
 	RotateVector(&LocalView, &WToLMat);
 
@@ -3740,7 +3799,7 @@ void DoAlienEnergyView(DISPLAYBLOCK *dispPtr)
 	/* KJL 16:36:25 10/02/98 - process model */
 	{
 		STRATEGYBLOCK *sbPtr = Global_ODB_Ptr->ObStrategyBlock;
-		if(sbPtr)
+		if (sbPtr)
 		{
 			switch (sbPtr->I_SBtype)
 			{
@@ -3772,12 +3831,12 @@ void DoAlienEnergyView(DISPLAYBLOCK *dispPtr)
 					NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)Global_ODB_Ptr->ObStrategyBlock->SBdataptr;
 
 					if (ghostDataPtr->type==I_BehaviourAlienPlayer || ghostDataPtr->type==I_BehaviourAlien
-						|| (ghostDataPtr->type==I_BehaviourNetCorpse&&ghostDataPtr->subtype==I_BehaviourAlienPlayer) )
+						|| (ghostDataPtr->type==I_BehaviourNetCorpse&&ghostDataPtr->subtype==I_BehaviourAlienPlayer))
 					{
 						colour = ALIENS_LIFEFORCE_GLOW_COLOUR;
 					}
 					else if (ghostDataPtr->type==I_BehaviourPredatorPlayer || ghostDataPtr->type==I_BehaviourPredator
-						|| (ghostDataPtr->type==I_BehaviourNetCorpse&&ghostDataPtr->subtype==I_BehaviourPredatorPlayer) )
+						|| (ghostDataPtr->type==I_BehaviourNetCorpse&&ghostDataPtr->subtype==I_BehaviourPredatorPlayer))
 					{
 						colour = PREDATORS_LIFEFORCE_GLOW_COLOUR;
 					}
@@ -3806,8 +3865,8 @@ void DoAlienEnergyView(DISPLAYBLOCK *dispPtr)
 				}
 				case I_BehaviourHierarchicalFragment:
 				{
-					HDEBRIS_BEHAV_BLOCK *debrisDataPtr  = (HDEBRIS_BEHAV_BLOCK *)sbPtr->SBdataptr;
-					if(debrisDataPtr->Type==I_BehaviourAutoGun || debrisDataPtr->Android)
+					HDEBRIS_BEHAV_BLOCK *debrisDataPtr = (HDEBRIS_BEHAV_BLOCK *)sbPtr->SBdataptr;
+					if (debrisDataPtr->Type==I_BehaviourAutoGun || debrisDataPtr->Android)
 					{
 						return;
 					}
@@ -3819,7 +3878,7 @@ void DoAlienEnergyView(DISPLAYBLOCK *dispPtr)
 					{
 						colour = PREDATORS_LIFEFORCE_GLOW_COLOUR;
 					}
-					else if ((debrisDataPtr->Type==I_BehaviourMarine)||(debrisDataPtr->Type==I_BehaviourSeal))
+					else if ((debrisDataPtr->Type==I_BehaviourMarine) || (debrisDataPtr->Type==I_BehaviourSeal))
 					{
 						colour = MARINES_LIFEFORCE_GLOW_COLOUR;
 					}
@@ -3838,8 +3897,9 @@ void DoAlienEnergyView(DISPLAYBLOCK *dispPtr)
 			}
 		}
 	}
-	if( (Global_ODB_Ptr->SpecialFXFlags & SFXFLAG_MELTINGINTOGROUND)
-	  &&(Global_ODB_Ptr->ObFlags2 < ONE_FIXED) )
+
+	if ((Global_ODB_Ptr->SpecialFXFlags & SFXFLAG_MELTINGINTOGROUND)
+	  &&(Global_ODB_Ptr->ObFlags2 < ONE_FIXED))
 	{
 		unsigned int alpha = MUL_FIXED(Global_ODB_Ptr->ObFlags2,colour >> 24);
 		colour = (colour&0xffffff)+(alpha<<24);
@@ -3858,7 +3918,7 @@ void DoAlienEnergyView(DISPLAYBLOCK *dispPtr)
 static void FindAlienEnergySource_Recursion(HMODELCONTROLLER *controllerPtr, SECTION_DATA *sectionDataPtr, unsigned int colour)
 {
 	/* KJL 16:29:40 10/02/98 - Recurse through hmodel */
-	if ((sectionDataPtr->First_Child!=NULL)&&(!(sectionDataPtr->flags&section_data_terminate_here)))
+	if ((sectionDataPtr->First_Child!=NULL) && (!(sectionDataPtr->flags&section_data_terminate_here)))
 	{
 		SECTION_DATA *childSectionPtr = sectionDataPtr->First_Child;
 
@@ -3870,6 +3930,7 @@ static void FindAlienEnergySource_Recursion(HMODELCONTROLLER *controllerPtr, SEC
 			childSectionPtr = childSectionPtr->Next_Sibling;
 		}
 	}
+
 	if (sectionDataPtr->Shape && sectionDataPtr->Shape->shaperadius>LocalDetailLevels.AlienEnergyViewThreshold)
 	{
 		PARTICLE particle;
@@ -3889,7 +3950,7 @@ void AddHierarchicalShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 {
 	// players gun, player, alien, predator models..
 	SHAPEHEADER *shapeheaderptr;
-	SHAPEINSTR *shapeinstrptr;
+	SHAPEINSTR  *shapeinstrptr;
 
 	GLOBALASSERT(!dptr->HModelControlBlock);
 
@@ -4047,6 +4108,8 @@ extern void TranslationSetup(void)
 	}
 
 	UpdateViewMatrix(&ViewMatrix[0]);
+	UpdateProjectionMatrix();
+	BuildFrustum();
 }
 
 static void TranslatePoint(const float *source, float *dest, const float *matrix)
@@ -4319,32 +4382,53 @@ void TranslateShapeVertices(SHAPEINSTR *shapeinstrptr)
 
 void RenderDecal(DECAL *decalPtr)
 {
+#if 0
+
 	VECTORCH translatedPosition;
 
 	/* translate decal into view space */
 	translatedPosition = decalPtr->Vertices[0];
-	TranslatePointIntoViewspace(&translatedPosition);
+	TranslatePointIntoViewspace2(&translatedPosition);
 	VerticesBuffer[0].X = translatedPosition.vx;
 	VerticesBuffer[0].Y = translatedPosition.vy;
 	VerticesBuffer[0].Z = translatedPosition.vz;
 
 	translatedPosition = decalPtr->Vertices[1];
-	TranslatePointIntoViewspace(&translatedPosition);
+	TranslatePointIntoViewspace2(&translatedPosition);
 	VerticesBuffer[1].X = translatedPosition.vx;
 	VerticesBuffer[1].Y = translatedPosition.vy;
 	VerticesBuffer[1].Z = translatedPosition.vz;
 
 	translatedPosition = decalPtr->Vertices[2];
-	TranslatePointIntoViewspace(&translatedPosition);
+	TranslatePointIntoViewspace2(&translatedPosition);
 	VerticesBuffer[2].X = translatedPosition.vx;
 	VerticesBuffer[2].Y = translatedPosition.vy;
 	VerticesBuffer[2].Z = translatedPosition.vz;
 
 	translatedPosition = decalPtr->Vertices[3];
-	TranslatePointIntoViewspace(&translatedPosition);
+	TranslatePointIntoViewspace2(&translatedPosition);
 	VerticesBuffer[3].X = translatedPosition.vx;
 	VerticesBuffer[3].Y = translatedPosition.vy;
 	VerticesBuffer[3].Z = translatedPosition.vz;
+#else
+
+	VerticesBuffer[0].X = decalPtr->Vertices[0].vx;
+	VerticesBuffer[0].Y = decalPtr->Vertices[0].vy;
+	VerticesBuffer[0].Z = decalPtr->Vertices[0].vz;
+
+	VerticesBuffer[1].X = decalPtr->Vertices[1].vx;
+	VerticesBuffer[1].Y = decalPtr->Vertices[1].vy;
+	VerticesBuffer[1].Z = decalPtr->Vertices[1].vz;
+
+	VerticesBuffer[2].X = decalPtr->Vertices[2].vx;
+	VerticesBuffer[2].Y = decalPtr->Vertices[2].vy;
+	VerticesBuffer[2].Z = decalPtr->Vertices[2].vz;
+
+	VerticesBuffer[3].X = decalPtr->Vertices[3].vx;
+	VerticesBuffer[3].Y = decalPtr->Vertices[3].vy;
+	VerticesBuffer[3].Z = decalPtr->Vertices[3].vz;
+
+#endif
 
 	int outcode = DecalWithinFrustum(decalPtr);
 
@@ -6105,32 +6189,11 @@ void RenderSky(void)
 	}
 }
 
-#include "renderer.h"
-#include "renderlist.h"
-
-extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
-
-#define NO_OF_STARS 500
-typedef struct
-{
-	VECTORCH Position;
-	int Colour;
-/* bjd - unused
-	int Frequency;
-	int Phase;
-*/
-} STARDESC;
-/*static*/ STARDESC StarArray[NO_OF_STARS];
-
-extern void LoadStars();
-
-extern RenderList *starsList;
-
 void CreateStarArray(void)
 {
 #if 0 // test code, disabled
 	SetSeededFastRandom(FastRandom());
-	for (int i=0; i < NO_OF_STARS; i++)
+	for (int i=0; i < kNumStars; i++)
 	{
 		int phi = SeededFastRandom()&4095;
 
@@ -6159,7 +6222,7 @@ void CreateStarArray(void)
 	uint32_t sizeX = 256;
 
 	// load em up
-	for (int i=0; i < NO_OF_STARS; i++)
+	for (int i=0; i < kNumStars; i++)
 	{
 		starsList->AddItem(4, SpecialFXImageNumber, TRANSLUCENCY_OFF);
 
@@ -6215,7 +6278,7 @@ void CreateStarArray(void)
 
 void RenderStarfield(void)
 {
-	return; // stars test
+//	return; // stars test
 
 	int sizeX;
 	int sizeY;
@@ -6226,7 +6289,7 @@ void RenderStarfield(void)
 //	sizeY = MUL_FIXED(sizeX,87381);
 	sizeY = sizeX;
 
-	for (int i=0; i < NO_OF_STARS; i++)
+	for (int i = 0; i < kNumStars; i++)
 	{
 		VECTORCH position = StarArray[i].Position;
 		PARTICLE particle;
@@ -6252,7 +6315,6 @@ void RenderStarfield(void)
 //		TranslatePointIntoViewspace(&position);
 
 //		RotateVector(&position,&(Global_VDB_Ptr->VDB_Mat));
-
 
 		VerticesBuffer[0].X = position.vx - sizeX;
 		VerticesBuffer[0].Y = position.vy - sizeY;

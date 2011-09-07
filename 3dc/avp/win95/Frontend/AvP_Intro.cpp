@@ -8,14 +8,12 @@
 #include "AvP_Menus.h"
 #include "avp_intro.h"
 
-extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-
 extern void DirectReadKeyboard(void);
 extern void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha);
 extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
 
-static BOOL IntroHasAlreadyBeenPlayed = TRUE;
+static bool IntroHasAlreadyBeenPlayed = true;
 
 void Show_CopyrightInfo(void);
 void Show_Presents(void);
@@ -30,7 +28,7 @@ extern bool bRunning;
 
 void WeWantAnIntro(void)
 {
-	IntroHasAlreadyBeenPlayed = FALSE;
+	IntroHasAlreadyBeenPlayed = false;
 }
 
 extern void PlayIntroSequence(void)
@@ -41,7 +39,7 @@ extern void PlayIntroSequence(void)
 		return;
 	}
 
-	IntroHasAlreadyBeenPlayed = TRUE;
+	IntroHasAlreadyBeenPlayed = true;
 
 	ResetFrameCounter();
 	Show_CopyrightInfo();

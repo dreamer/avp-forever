@@ -56,7 +56,9 @@ uint32_t MeshVertexColour[256];
 int WireFrameMode;
 
 uint32_t FMVParticleColour;
-VECTORCH MeshVertex[256];
+
+const int kNumMeshVerts = 256;
+VECTORCH MeshVertex[kNumMeshVerts];
 
 void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin);
 
@@ -64,13 +66,16 @@ void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin);
 void D3D_DrawMoltenMetalMesh_Unclipped(void);
 static void D3D_OutputTriangles(void);
 
+extern void DrawParticles();
+extern void DrawCoronas();
+
 int NumberOfLandscapePolygons;
 
 // set to 'null' texture initially
 texID_t currentWaterTexture = NO_TEXTURE;
 
-const float zf = 1000000.0f;
-const float zn = 64.0f;
+const float zNear = 64.0f;
+const float zFar  = 1000000.0f;
 
 // extern variables
 extern D3DINFO    d3d;
@@ -331,13 +336,11 @@ float cot(float in)
 	return 1.0f / tan(in);
 }
 
-extern void DrawParticles();
-extern void DrawCoronas();
-
 static bool ExecuteBuffer()
 {
 	// sort the list of render objects
 	particleList->Sort();
+	decalList->Sort();
 	mainList->Sort();
 
 	// these two just add the vertex data to the below lists (they dont draw anything themselves
@@ -364,25 +367,6 @@ static bool ExecuteBuffer()
 
 		// draw our main list (level geometry, player weapon etc)
 		mainList->Draw();
-	}
-
-	// render any particles
-	if (particleList->GetSize())
-	{
-		// set vertex declaration
-		d3d.mainDecl->Set();
-
-		// set the particle VB and IBs as active
-		d3d.particleVB->Set();
-		d3d.particleIB->Set();
-
-		// set main shaders to active
-		d3d.effectSystem->SetActive(d3d.mainEffect);
-
-		d3d.effectSystem->SetVertexShaderConstant(d3d.mainEffect, 0, CONST_MATRIX, &d3d.matProjection);
-
-		// Draw the particles in the list
-		particleList->Draw();
 	}
 
 	// render any orthographic quads
@@ -421,12 +405,27 @@ static bool ExecuteBuffer()
 		// pass the projection matrix to the vertex shader
 		d3d.effectSystem->SetVertexShaderConstant(d3d.decalEffect, 0, CONST_MATRIX, &matWorldViewProj);
 
-//		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
-
 		// daw the ortho list
 		decalList->Draw();
+	}
 
-//		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+	// render any particles
+	if (particleList->GetSize())
+	{
+		// set vertex declaration
+		d3d.mainDecl->Set();
+
+		// set the particle VB and IBs as active
+		d3d.particleVB->Set();
+		d3d.particleIB->Set();
+
+		// set main shaders to active
+		d3d.effectSystem->SetActive(d3d.mainEffect);
+
+		d3d.effectSystem->SetVertexShaderConstant(d3d.mainEffect, 0, CONST_MATRIX, &d3d.matProjection);
+
+		// Draw the particles in the list
+		particleList->Draw();
 	}
 
 #if 0 // test code, disabled
@@ -1146,8 +1145,8 @@ void UpdateProjectionMatrix()
 	// column 3
 	d3d.matProjection._13 = 0.0f;
 	d3d.matProjection._23 = 0.0f;
-	d3d.matProjection._33 = zf/(zf-zn);
-	d3d.matProjection._43 = -zn*zf/(zf-zn);
+	d3d.matProjection._33 = zFar/(zFar-zNear);
+	d3d.matProjection._43 = -zNear*zFar/(zFar-zNear);
 
 	// column 4
 	d3d.matProjection._14 = 0.0f;
@@ -1259,34 +1258,31 @@ void DrawCoronas()
 		}
 
 		// transform our coronas worldview position into projection then viewport space
-		D3DXVECTOR3 tempVec;
-		D3DXVECTOR3 newVec;
+		D3DXVECTOR3 transformedPoint;
 
-		tempVec.x = coronaArray[i].coronaPoint.vx;
-		tempVec.y = coronaArray[i].coronaPoint.vy;
-		tempVec.z = coronaArray[i].coronaPoint.vz;
+		transformedPoint.x = coronaArray[i].coronaPoint.vx;
+		transformedPoint.y = coronaArray[i].coronaPoint.vy;
+		transformedPoint.z = coronaArray[i].coronaPoint.vz;
 
-		float centreX = tempVec.x / tempVec.z;
-		float centreY = tempVec.y / tempVec.z;
+		float centreX = transformedPoint.x / transformedPoint.z;
+		float centreY = transformedPoint.y / transformedPoint.z;
 
-		// already view transformed, do projection transform
-		D3DXVec3TransformCoord(&newVec, &tempVec, &d3d.matProjection);
+		D3DXMATRIX finalMatrix = d3d.matProjection * d3d.matViewPort;
 
-		// do viewport transform on this
-		D3DXVec3TransformCoord(&tempVec, &newVec, &d3d.matViewPort);
+		// already view transformed, do projection transform and viewport transform
+		D3DXVec3TransformCoord(&transformedPoint, &transformedPoint, &finalMatrix);
 
 		// generate the quad around this point
-
 		uint32_t size = 100;
 
 		uint32_t sizeX = (ScreenDescriptorBlock.SDB_Width / 100) * 10;
 		uint32_t sizeY = sizeX;//(ScreenDescriptorBlock.SDB_Height / 100) * 11;
 
-		orthoList->AddItem(4, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
+		orthoList->AddItem(4, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP, ZWRITE_DISABLED);
 
 		// bottom left
-		orthoVertex[orthoVBOffset].x = WPos2DC(tempVec.x - sizeX);
-		orthoVertex[orthoVBOffset].y = HPos2DC(tempVec.y + sizeY);
+		orthoVertex[orthoVBOffset].x = WPos2DC(transformedPoint.x - sizeX);
+		orthoVertex[orthoVBOffset].y = HPos2DC(transformedPoint.y + sizeY);
 		orthoVertex[orthoVBOffset].z = 1.0f;
 		orthoVertex[orthoVBOffset].colour = colour;
 		orthoVertex[orthoVBOffset].u = 192.0f * RecipW;
@@ -1294,8 +1290,8 @@ void DrawCoronas()
 		orthoVBOffset++;
 
 		// top left
-		orthoVertex[orthoVBOffset].x = WPos2DC(tempVec.x - sizeX);
-		orthoVertex[orthoVBOffset].y = HPos2DC(tempVec.y - sizeY);
+		orthoVertex[orthoVBOffset].x = WPos2DC(transformedPoint.x - sizeX);
+		orthoVertex[orthoVBOffset].y = HPos2DC(transformedPoint.y - sizeY);
 		orthoVertex[orthoVBOffset].z = 1.0f;
 		orthoVertex[orthoVBOffset].colour = colour;
 		orthoVertex[orthoVBOffset].u = 192.0f * RecipW;
@@ -1303,8 +1299,8 @@ void DrawCoronas()
 		orthoVBOffset++;
 
 		// bottom right
-		orthoVertex[orthoVBOffset].x = WPos2DC(tempVec.x + sizeX);
-		orthoVertex[orthoVBOffset].y = HPos2DC(tempVec.y + sizeY);
+		orthoVertex[orthoVBOffset].x = WPos2DC(transformedPoint.x + sizeX);
+		orthoVertex[orthoVBOffset].y = HPos2DC(transformedPoint.y + sizeY);
 		orthoVertex[orthoVBOffset].z = 1.0f;
 		orthoVertex[orthoVBOffset].colour = colour;
 		orthoVertex[orthoVBOffset].u = 255.0f * RecipW;
@@ -1312,8 +1308,8 @@ void DrawCoronas()
 		orthoVBOffset++;
 
 		// top right
-		orthoVertex[orthoVBOffset].x = WPos2DC(tempVec.x + sizeX);
-		orthoVertex[orthoVBOffset].y = HPos2DC(tempVec.y - sizeY);
+		orthoVertex[orthoVBOffset].x = WPos2DC(transformedPoint.x + sizeX);
+		orthoVertex[orthoVBOffset].y = HPos2DC(transformedPoint.y - sizeY);
 		orthoVertex[orthoVBOffset].z = 1.0f;
 		orthoVertex[orthoVBOffset].colour = colour;
 		orthoVertex[orthoVBOffset].u = 255.0f * RecipW;
@@ -1355,37 +1351,7 @@ void DrawParticles()
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
 	// bjd - This is the function responsible for drawing level geometry and the players weapon
-#if 0
-	if (frustumCull)
-	{
-		bool valid = false;
 
-		// test frustum culling for each point
-		for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
-		{
-			RENDERVERTEX *vertices = &renderVerticesPtr[i];
-
-			D3DXVECTOR3 point;
-			point.x = (float)vertices->X;
-			point.y = (float)-vertices->Y;
-			point.z = (float)vertices->Z;
-
-			if (CheckPointIsInFrustum(&point) == true)
-			{
-				valid = true;
-				break;
-			}
-		}
-
-		// lets bail out of this function and not draw this poly if none of the points are inside the view frustum
-		if (valid == false)
-		{
-			return;
-		}
-	}
-#endif
-	// We assume bit 15 (TxLocal) HAS been
-	// properly cleared this time...
 	texID_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
 
 	uint32_t texWidth, texHeight;
@@ -1739,9 +1705,9 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 	}
 
 	// temp fix - don't overload the VB with more verts than it can hold
-	if ((decalVb+RenderPolygon.NumberOfVertices) >= (1024*2*2*2))
+//	if ((decalVb+RenderPolygon.NumberOfVertices) >= (1024*2*2*2))
 	{
-		return;
+//		return;
 	}
 
 	decalList->AddItem(RenderPolygon.NumberOfVertices, textureID, decalDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP, ZWRITE_DISABLED);
@@ -2202,41 +2168,41 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 		{
 			VECTORCH *point = &MeshVertex[i];
 
-			point->vx = xOrigin+(x*MeshXScale)/15;
-			point->vz = zOrigin+(z*MeshZScale)/15;
+			point->vx = xOrigin + (x*MeshXScale)/15;
+			point->vz = zOrigin + (z*MeshZScale)/15;
 
 			int offset = 0;
 
  			offset += EffectOfRipples(point);
 
-			point->vy = yOrigin+offset;
+			point->vy = yOrigin + offset;
 
-			int alpha = 128-offset/4;
+			int alpha = 128 - offset / 4;
 
 			switch (CurrentVisionMode)
 			{
 				default:
 				case VISION_MODE_NORMAL:
 				{
-					MeshVertexColour[i] = RGBA_MAKE(255,255,255,alpha);
+					MeshVertexColour[i] = RGBA_MAKE(255, 255, 255, alpha);
 					break;
 				}
 				case VISION_MODE_IMAGEINTENSIFIER:
 				{
-					MeshVertexColour[i] = RGBA_MAKE(0,51,0,alpha);
+					MeshVertexColour[i] = RGBA_MAKE(0, 51 ,0, alpha);
 					break;
 				}
 				case VISION_MODE_PRED_THERMAL:
 				case VISION_MODE_PRED_SEEALIENS:
 				case VISION_MODE_PRED_SEEPREDTECH:
 				{
-					MeshVertexColour[i] = RGBA_MAKE(0,0,28,alpha);
+					MeshVertexColour[i] = RGBA_MAKE(0, 0, 28, alpha);
 				  	break;
 				}
 			}
 
-			MeshWorldVertex[i].vx = ((point->vx-WaterXOrigin)/4+MUL_FIXED(GetSin((point->vy*16)&4095),128));
-			MeshWorldVertex[i].vy = ((point->vz-WaterZOrigin)/4+MUL_FIXED(GetSin((point->vy*16+200)&4095),128));
+			MeshWorldVertex[i].vx = ((point->vx - WaterXOrigin)/4 + MUL_FIXED(GetSin((point->vy*16) & 4095), 128));
+			MeshWorldVertex[i].vy = ((point->vz - WaterZOrigin)/4 + MUL_FIXED(GetSin((point->vy*16+200) & 4095), 128));
 
 //bjd			TranslatePointIntoViewspace(point);
 
@@ -2472,9 +2438,9 @@ void D3D_DrawMoltenMetalMesh_Unclipped()
 	VECTORCH *point = MeshVertex;
 	VECTORCH *pointWS = MeshWorldVertex;
 
-	mainList->AddItem(256, currentWaterTexture, TRANSLUCENCY_NORMAL);
+	mainList->AddItem(kNumMeshVerts, currentWaterTexture, TRANSLUCENCY_NORMAL);
 
-	for (uint32_t i = 0; i < 256; i++)
+	for (uint32_t i = 0; i < kNumMeshVerts; i++)
 	{
 		mainVertex[vb].x = (float)point->vx;
 		mainVertex[vb].y = (float)-point->vy;
@@ -2484,7 +2450,7 @@ void D3D_DrawMoltenMetalMesh_Unclipped()
 		mainVertex[vb].specular = 0;
 
 		mainVertex[vb].u = pointWS->vx*WaterUScale+(1.0f/256.0f);
-		mainVertex[vb].v =	pointWS->vy*WaterVScale+(1.0f/256.0f);
+		mainVertex[vb].v = pointWS->vy*WaterVScale+(1.0f/256.0f);
 
 		vb++;
 		point++;
@@ -2495,8 +2461,8 @@ void D3D_DrawMoltenMetalMesh_Unclipped()
 	{
 		for (uint32_t y = 0; y < 15; y++)
 		{
-			mainList->AddTriangle(mainIndex, 0+x+(16*y),1+x+(16*y),16+x+(16*y), 256);
-			mainList->AddTriangle(mainIndex, 1+x+(16*y),17+x+(16*y),16+x+(16*y), 256);
+			mainList->AddTriangle(mainIndex, 0+x+(16*y),1+x+(16*y),16+x+(16*y), kNumMeshVerts);
+			mainList->AddTriangle(mainIndex, 1+x+(16*y),17+x+(16*y),16+x+(16*y), kNumMeshVerts);
 		}
 	}
 }
@@ -3108,36 +3074,35 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 
 	currentWaterTexture = NO_TEXTURE;
 
-	MeshXScale = 4096/16;
-	MeshZScale = 4096/16;
+	MeshXScale = 4096 / 16;
+	MeshZScale = 4096 / 16;
 
-	for (int field=0; field<3; field++)
+	for (int field = 0; field < 3; field++)
 	{
-		int i=0;
-		for (int x=(0+field*15); x<(16+field*15); x++)
+		int i = 0;
+		for (int x = (0 + field*15); x < (16 + field*15); x++)
 		{
-			for (int z=0; z<16; z++)
+			for (int z = 0; z < 16; z++)
 			{
 				VECTORCH *point = &MeshVertex[i];
-				{
-					int innerRadius = 20;
-					VECTORCH radius;
-					int theta = ((4096*z)/15)&4095;
-					int rOffset = GetSin((x*64+theta/32-CloakingPhase)&4095);
-					rOffset = MUL_FIXED(rOffset,rOffset)/512;
 
-					radius.vx = MUL_FIXED(innerRadius+rOffset/8,GetSin(theta));
-					radius.vy = MUL_FIXED(innerRadius+rOffset/8,GetCos(theta));
-					radius.vz = 0;
+				int innerRadius = 20;
+				VECTORCH radius;
+				int theta = ((4096*z) / 15) & 4095;
+				int rOffset = GetSin((x*64 + theta/32 - CloakingPhase) & 4095);
+				rOffset = MUL_FIXED(rOffset, rOffset) / 512;
 
-					RotateVector(&radius,orientationPtr);
+				radius.vx = MUL_FIXED(innerRadius + rOffset/8, GetSin(theta));
+				radius.vy = MUL_FIXED(innerRadius + rOffset/8, GetCos(theta));
+				radius.vz = 0;
 
-					point->vx = centrePtr[x].vx+radius.vx;
-					point->vy = centrePtr[x].vy+radius.vy;
-					point->vz = centrePtr[x].vz+radius.vz;
+				RotateVector(&radius, orientationPtr);
 
-					MeshVertexColour[i] = RGBA_MAKE(0,rOffset,255,128);
-				}
+				point->vx = centrePtr[x].vx + radius.vx;
+				point->vy = centrePtr[x].vy + radius.vy;
+				point->vz = centrePtr[x].vz + radius.vz;
+
+				MeshVertexColour[i] = RGBA_MAKE(0, rOffset, 255, 128);
 
 //bjd				TranslatePointIntoViewspace(point);
 

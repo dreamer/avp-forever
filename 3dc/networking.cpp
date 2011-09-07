@@ -1,6 +1,5 @@
 
 #include "3dc.h"
-#include "assert.h"
 #include "enet\enet.h"
 #include "console.h"
 #include "configFile.h"
@@ -9,6 +8,7 @@
 #include "AvP_Menus.h"
 #include "AvP_MP_Config.h"
 #include "networking.h"
+#include <assert.h>
 
 bool running = false;
 
@@ -32,7 +32,7 @@ static uint32_t netPortNumber = 23513;
 static uint32_t incomingBandwidth = 0;
 static uint32_t outgoingBandwidth = 0;
 
-NET_SESSIONDESC netSession; // main game session
+SessionDescription netSession; // main game session
 
 extern void MinimalNetCollectMessages(void);
 extern void InitAVPNetGameForHost(int species, int gamestyle, int level);
@@ -54,7 +54,7 @@ int Net_UpdateSessionDescForLobbiedGame(int gamestyle, int level);
 // {379CCA80-8BDD-11d0-A078-004095E16EA5}
 static const GUID AvPGuid = { 0x379cca80, 0x8bdd, 0x11d0, { 0xa0, 0x78, 0x0, 0x40, 0x95, 0xe1, 0x6e, 0xa5 } };
 
-const uint32_t kMessageHeaderSize = sizeof(messageHeader);
+const uint32_t kMessageHeaderSize = sizeof(MessageHeader);
 
 BOOL Net_UpdateSessionList(int *SelectedItem)
 {
@@ -119,7 +119,7 @@ int Net_Initialise()
 	// initialise ENet
 	if (enet_initialize() != 0)
 	{
-		Con_PrintMessage("Failed to initialise ENet networking");
+		Con_PrintError("Failed to initialise ENet networking");
 		return NET_FAIL;
 	}
 
@@ -133,6 +133,8 @@ int Net_Initialise()
 	Con_AddCommand("disconnect", Net_Disconnect);
 
 	net_IsInitialised = true;
+
+	Con_PrintMessage("Initialised ENet networking succesfully");
 
 	return NET_OK;
 }
@@ -186,7 +188,11 @@ int Net_ConnectingToLobbiedGame(char* playerName)
 
 int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle, int level)
 {
-	assert (net_IsInitialised);
+	if (!net_IsInitialised)
+	{
+		Con_PrintError("Networking is not initialisedr");
+		return NET_FAIL;
+	}
 
 	int maxPlayers = DetermineAvailableCharacterTypes(FALSE);
 	if (maxPlayers < 1) maxPlayers = 1;
@@ -199,45 +205,53 @@ int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle
 			ServerAddress.host = ENET_HOST_ANY;
 			ServerAddress.port = netPortNumber;
 
-			Server = enet_host_create(&ServerAddress,	// the address to bind the server host to.
-                                 32,					// allow up to 32 clients and/or outgoing connections.
-								 0,                     // channel limit.
-                                 incomingBandwidth,		// assume any amount of incoming bandwidth.
-                                 outgoingBandwidth);	// assume any amount of outgoing bandwidth.
-			if (Server == NULL)
+			Server = enet_host_create(&ServerAddress,    // the address to bind the server host to.
+								32,                      // allow up to 32 clients and/or outgoing connections.
+								0,                       // channel limit.
+								incomingBandwidth,       // assume any amount of incoming bandwidth.
+								outgoingBandwidth);      // assume any amount of outgoing bandwidth.
+			if (NULL == Server)
 			{
 				Con_PrintError("Failed to create ENet server");
 				return NET_FAIL;
 			}
 
 			// create session
-			char* customLevelName = GetCustomMultiplayerLevelName(level, gamestyle);
+			char *customLevelName = GetCustomMultiplayerLevelName(level, gamestyle);
 			if (customLevelName[0])
 			{
 				// add the level name to the beginning of the session name
 				char name_buffer[100];
 				sprintf(name_buffer, "%s:%s", customLevelName, sessionName);
-				if ((Net_CreateSession(name_buffer, maxPlayers, AVP_MULTIPLAYER_VERSION, (gamestyle<<8)|100)) != NET_OK) 
-                    return NET_FAIL;
+				if ((Net_CreateSession(name_buffer, maxPlayers, kMultiplayerVersion, (gamestyle<<8) | 100)) != NET_OK)
+				{
+					return NET_FAIL;
+				}
 			}
 			else
 			{
-				if ((Net_CreateSession(sessionName, maxPlayers, AVP_MULTIPLAYER_VERSION, (gamestyle<<8)|level)) != NET_OK) 
+				if ((Net_CreateSession(sessionName, maxPlayers, kMultiplayerVersion, (gamestyle<<8) | level)) != NET_OK)
+				{
 					return NET_FAIL;
+				}
 			}
 		}
 		else
 		{
 			// for lobbied games we need to fill in the level number into the existing session description
 			if (Net_UpdateSessionDescForLobbiedGame(gamestyle, level) != NET_OK) 
+			{
 				return NET_FAIL;
+			}
 		}
 
 		// we're the host
 		AvP.Network = I_Host;
 
-		if (!Net_CreatePlayer(playerName, /*clanTag - ADDME!*/ NULL)) 
+		if (!Net_CreatePlayer(playerName, /*clanTag - ADDME!*/ NULL))
+		{
 			return NET_FAIL;
+		}
 	}
 	else
 	{
@@ -248,7 +262,7 @@ int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle
 		strncpy(thisClientPlayer.name, playerName, PLAYER_NAME_SIZE-1);
 		thisClientPlayer.name[PLAYER_NAME_SIZE-1] = '\0';
 		thisClientPlayer.clanTag[0] = '\0';
-		thisClientPlayer.playerID = AvPNetID;
+		thisClientPlayer.playerID   = AvPNetID;
 		thisClientPlayer.playerType = 0; // ??
 	}
 
@@ -296,7 +310,11 @@ void Net_Disconnect()
 
 int Net_JoinGame()
 {	
-	assert (net_IsInitialised);
+	if (!net_IsInitialised)
+	{
+		Con_PrintError("Networking is not initialisedr");
+		return NET_FAIL;
+	}
 
 	// enumerate sessions
 	Net_FindAvPSessions();
@@ -330,27 +348,27 @@ void Net_ConnectToAddress()
 	connectionAddress.port = (uint16_t)StringToInt(addressString.substr(colonPos + 1));
 
 	// try connect
-	Client = enet_host_create(NULL,     // create a client host
-                1,                      // only allow 1 outgoing connection
-				0,                      // channel limit
-                incomingBandwidth,      // 57600 / 8 - 56K modem with 56 Kbps downstream bandwidth
-                outgoingBandwidth);     // 14400 / 8 - 56K modem with 14 Kbps upstream bandwidth
+	Client = enet_host_create(NULL,         // create a client host
+					1,                      // only allow 1 outgoing connection
+					0,                      // channel limit
+					incomingBandwidth,      // 57600 / 8 - 56K modem with 56 Kbps downstream bandwidth
+					outgoingBandwidth);     // 14400 / 8 - 56K modem with 14 Kbps upstream bandwidth
 
-	if (Client == NULL)
-    {
+	if (NULL == Client)
+	{
 		Con_PrintError("Net_ConnectToAddress - Failed to create Enet client");
 		return;
-    }
+	}
 	
 	ServerPeer = enet_host_connect(Client, &connectionAddress, 2, 0);
-	if (ServerPeer == NULL)
+	if (NULL == ServerPeer)
 	{
 		Con_PrintError("Net_ConnectToAddress - Failed to init connection to server host");
 		return;
 	}
 
 	// Wait up to 3 seconds for the connection attempt to succeed.
-	if ((enet_host_service (Client, &eEvent, 3000) > 0) && (eEvent.type == ENET_EVENT_TYPE_CONNECT))
+	if ((enet_host_service(Client, &eEvent, 3000) > 0) && (eEvent.type == ENET_EVENT_TYPE_CONNECT))
 	{	
 		Con_PrintDebugMessage("Net_ConnectToAddress - we connected to server!");
 	}
@@ -370,19 +388,19 @@ void Net_ConnectToAddress()
 		size_t size = eEvent.packet->dataLength;
 		enet_packet_destroy(eEvent.packet);
 
-		messageHeader newHeader;
-		memcpy(&newHeader, &receiveBuffer[0], sizeof(messageHeader));
+		MessageHeader newHeader;
+		memcpy(&newHeader, &receiveBuffer[0], sizeof(MessageHeader));
 
 		if (newHeader.messageType == AVP_SESSIONDATA)
 		{
 			// get the hosts ip address for later use
 			enet_address_get_host_ip(&eEvent.peer->address, SessionData[NumberOfSessionsFound].hostAddress, 16);
 
-			NET_SESSIONDESC tempSession;
+			SessionDescription tempSession;
 
 			// grab the session description struct
-			assert(sizeof(NET_SESSIONDESC) == (size - kMessageHeaderSize));
-			memcpy(&tempSession, &receiveBuffer[kMessageHeaderSize], sizeof(NET_SESSIONDESC));
+			assert(sizeof(SessionDescription) == (size - kMessageHeaderSize));
+			memcpy(&tempSession, &receiveBuffer[kMessageHeaderSize], sizeof(SessionDescription));
 
 			int gamestyle = (tempSession.level >> 8) & 0xff;
 			int level = tempSession.level & 0xff;
@@ -393,11 +411,10 @@ void Net_ConnectToAddress()
 			// split the session name up into its parts
 			if (level >= 100)
 			{
-				char* colon_pos;
 				// custom level name may be at the start
 				strcpy(levelName, tempSession.sessionName);
 
-				colon_pos = strchr(levelName,':');
+				char *colon_pos = strchr(levelName,':');
 				if (colon_pos)
 				{
 					*colon_pos = 0;
@@ -424,7 +441,7 @@ void Net_ConnectToAddress()
 				SessionData[NumberOfSessionsFound].AllowedToJoin = FALSE;
 
 			// multiplayer version number (possibly)
-			if (tempSession.version != AVP_MULTIPLAYER_VERSION)
+			if (tempSession.version != kMultiplayerVersion)
 			{
 				float version = 1.0f + tempSession.version / 100.0f;
 				SessionData[NumberOfSessionsFound].AllowedToJoin = FALSE;
@@ -488,9 +505,9 @@ void Net_ServiceNetwork()
 int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, size_t *dataSize)
 {
 	// this function is called from a loop. only return something other than NET_OK when we've no more messages
-	bool	isInternalOnly = false;
-	bool	isSystemMessage = false;
-	int		messageType = 0;
+	bool isInternalOnly  = false;
+	bool isSystemMessage = false;
+	int  messageType = 0;
 
 	do
 	{
@@ -586,8 +603,8 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, size_t 
 		}
 
 		// we broke from recieve above and got here as we have some data to process (move this to a separate funtion?
-		messageHeader newHeader;
-		memcpy(&newHeader, &messageData[0], sizeof(messageHeader));
+		MessageHeader newHeader;
+		memcpy(&newHeader, &messageData[0], sizeof(MessageHeader));
 
 		messageType = newHeader.messageType;
 
@@ -604,16 +621,16 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, size_t 
 					OutputDebugString("Someone sent us a broadcast packet!\n");
 
 					// reply to it? handle this properly..dont send something from a receive function??
-					messageHeader newReplyHeader;
+					MessageHeader newReplyHeader;
 					newReplyHeader.messageType = AVP_SESSIONDATA;
 					newReplyHeader.fromID = AvPNetID;
 					newReplyHeader.toID = 0;
-					memcpy(&packetBuffer[0], &newReplyHeader, sizeof(messageHeader));
+					memcpy(&packetBuffer[0], &newReplyHeader, sizeof(MessageHeader));
 
-					assert(sizeof(netSession) == sizeof(NET_SESSIONDESC));
-					memcpy(&packetBuffer[kMessageHeaderSize], &netSession, sizeof(NET_SESSIONDESC));
+					assert(sizeof(netSession) == sizeof(SessionDescription));
+					memcpy(&packetBuffer[kMessageHeaderSize], &netSession, sizeof(SessionDescription));
 
-					int length = kMessageHeaderSize + sizeof(NET_SESSIONDESC);
+					int length = kMessageHeaderSize + sizeof(SessionDescription);
 
 					// create a packet with session struct inside
 					ENetPacket * packet = enet_packet_create(&packetBuffer[0], length, ENET_PACKET_FLAG_RELIABLE);
@@ -633,16 +650,16 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, size_t 
 				NewOnScreenMessage("SENDING SESSION DATA");
 
 				// a client requested a copy ofthe session data
-				messageHeader newReplyHeader;
+				MessageHeader newReplyHeader;
 				newReplyHeader.messageType = AVP_SESSIONDATA;
 				newReplyHeader.fromID = AvPNetID;
 				newReplyHeader.toID = 0;
-				memcpy(&packetBuffer[0], &newReplyHeader, sizeof(messageHeader));
+				memcpy(&packetBuffer[0], &newReplyHeader, sizeof(MessageHeader));
 
-				assert(sizeof(netSession) == sizeof(NET_SESSIONDESC));
-				memcpy(&packetBuffer[kMessageHeaderSize], &netSession, sizeof(NET_SESSIONDESC));
+				assert(sizeof(netSession) == sizeof(SessionDescription));
+				memcpy(&packetBuffer[kMessageHeaderSize], &netSession, sizeof(SessionDescription));
 
-				int length = kMessageHeaderSize + sizeof(NET_SESSIONDESC);
+				int length = kMessageHeaderSize + sizeof(SessionDescription);
 
 				// create a packet with session struct inside
 				ENetPacket * packet = enet_packet_create(&packetBuffer[0], length, ENET_PACKET_FLAG_RELIABLE);
@@ -689,7 +706,7 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, size_t 
 				}
 
 				// pass it back..
-				messageHeader newReplyHeader;
+				MessageHeader newReplyHeader;
 				newReplyHeader.messageType = AVP_SENTPLAYERNAME;
 				newReplyHeader.fromID = playerFrom;
 				newReplyHeader.toID = idOfPlayerToGet;
@@ -752,7 +769,7 @@ int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, size_t 
 int Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messageData, size_t dataSize)
 {
 	// create a new header and copy it into the packet buffer
-	messageHeader newMessageHeader;
+	MessageHeader newMessageHeader;
 	newMessageHeader.messageType = messageType;
 	newMessageHeader.fromID = fromID;
 	newMessageHeader.toID = toID;
@@ -802,7 +819,7 @@ int Net_Send(int fromID, int toID, int flags, uint8_t *messageData, size_t dataS
 
 	return NET_OK;
 
-	messageHeader newMessageHeader;
+	MessageHeader newMessageHeader;
 /*
 	if (NET_SYSTEM_MESSAGE == fromID)
 	{
@@ -818,7 +835,7 @@ int Net_Send(int fromID, int toID, int flags, uint8_t *messageData, size_t dataS
 	newMessageHeader.fromID = fromID;
 	newMessageHeader.toID = toID;
 
-	memcpy(&packetBuffer[0], &newMessageHeader, sizeof(messageHeader));
+	memcpy(&packetBuffer[0], &newMessageHeader, sizeof(newMessageHeader));
 
 	memcpy(&packetBuffer[kMessageHeaderSize], messageData, dataSize);
 
@@ -1043,7 +1060,7 @@ unsigned int __stdcall SessionSearch(void *args)
 	ENetEvent eEvent;
 	uint8_t receiveBuffer[NET_MESSAGEBUFFERSIZE]; // can reduce this in size?
 	int messageType;
-	NET_SESSIONDESC tempSession;
+	SessionDescription tempSession;
 	char sessionName[100];
 	char levelName[100];
 	int gamestyle;
@@ -1065,14 +1082,14 @@ unsigned int __stdcall SessionSearch(void *args)
 				incomingBandwidth,      // 57600 / 8 - 56K modem with 56 Kbps downstream bandwidth
 				outgoingBandwidth);     // 14400 / 8 - 56K modem with 14 Kbps upstream bandwidth
 
-	if (Client == NULL)
-    {
+	if (NULL == Client)
+	{
 		Con_PrintError("Failed to create ENet client");
 		return -1;
-    }
+	}
 
 	Peer = enet_host_connect(Client, &BroadcastAddress, 2, 0);
-	if (Peer == NULL)
+	if (NULL == Peer)
 	{
 		Con_PrintError("Failed to connect to ENet Broadcast peer");
 		return -1;
@@ -1086,15 +1103,15 @@ unsigned int __stdcall SessionSearch(void *args)
 			Con_PrintDebugMessage("Net - Connected for Broadcast");
 
             // create broadcast header
-			messageHeader newHeader;
+			MessageHeader newHeader;
 			newHeader.messageType = AVP_BROADCAST;
 			newHeader.fromID = NET_BROADCAST_ID;
 			newHeader.toID = NET_BROADCAST_ID;
 
-			memcpy(packetBuffer, &newHeader, sizeof(messageHeader));
+			memcpy(packetBuffer, &newHeader, sizeof(newHeader));
 
 			// create ENet packet
-			ENetPacket * packet = enet_packet_create(packetBuffer, sizeof(messageHeader), ENET_PACKET_FLAG_RELIABLE);
+			ENetPacket * packet = enet_packet_create(packetBuffer, sizeof(newHeader), ENET_PACKET_FLAG_RELIABLE);
 
 			enet_peer_send(Peer, 0, packet);
 			enet_host_flush(Client);
@@ -1109,9 +1126,9 @@ unsigned int __stdcall SessionSearch(void *args)
 			memcpy(&receiveBuffer[0], static_cast<uint8_t*> (eEvent.packet->data), eEvent.packet->dataLength);
 
             // grab the header from the packet
-            messageHeader newHeader;
-            memcpy(&newHeader, &receiveBuffer[0], sizeof(messageHeader));
-            messageType = newHeader.messageType;
+			MessageHeader newHeader;
+			memcpy(&newHeader, &receiveBuffer[0], sizeof(newHeader));
+			messageType = newHeader.messageType;
 
 			if (AVP_SESSIONDATA == messageType)
 			{
@@ -1121,8 +1138,8 @@ unsigned int __stdcall SessionSearch(void *args)
 				enet_address_get_host_ip(&eEvent.peer->address, SessionData[NumberOfSessionsFound].hostAddress, 16);
 
 				// grab the session description struct
-				assert(sizeof(NET_SESSIONDESC) == (eEvent.packet->dataLength - kMessageHeaderSize));
-				memcpy(&tempSession, &receiveBuffer[kMessageHeaderSize], sizeof(NET_SESSIONDESC));
+				assert(sizeof(tempSession) == (eEvent.packet->dataLength - kMessageHeaderSize));
+				memcpy(&tempSession, &receiveBuffer[kMessageHeaderSize], sizeof(tempSession));
 
 				gamestyle = (tempSession.level >> 8) & 0xff;
 				level = tempSession.level  & 0xff;
@@ -1161,7 +1178,7 @@ unsigned int __stdcall SessionSearch(void *args)
 					SessionData[NumberOfSessionsFound].AllowedToJoin = FALSE;
 
 				// multiplayer version number (possibly)
-				if (tempSession.version != AVP_MULTIPLAYER_VERSION)
+				if (tempSession.version != kMultiplayerVersion)
 				{
 					float version = 1.0f + tempSession.version / 100.0f;
 					SessionData[NumberOfSessionsFound].AllowedToJoin = FALSE;
@@ -1252,7 +1269,7 @@ void Net_FindAvPSessions()
 	ENetPeer *Peer = NULL;
 	ENetEvent eEvent;
 	uint8_t receiveBuffer[NET_MESSAGEBUFFERSIZE]; // can reduce this in size?
-	NET_SESSIONDESC tempSession;
+	SessionDescription tempSession;
 	char sessionName[100] = "";
 	char levelName[100] = "";
 	int gamestyle;
@@ -1270,14 +1287,14 @@ void Net_FindAvPSessions()
 				incomingBandwidth,      // 57600 / 8 - 56K modem with 56 Kbps downstream bandwidth
 				outgoingBandwidth);     // 14400 / 8 - 56K modem with 14 Kbps upstream bandwidth
 
-	if (Client == NULL)
+	if (NULL == Client)
 	{
 		Con_PrintError("Failed to create ENet client");
 		return;
 	}
 
 	Peer = enet_host_connect(Client, &BroadcastAddress, 2, 0);
-	if (Peer == NULL)
+	if (NULL == Peer)
 	{
 		Con_PrintError("Failed to connect to ENet Broadcast peer");
 		return;
@@ -1291,15 +1308,15 @@ void Net_FindAvPSessions()
 			Con_PrintDebugMessage("Net - Connected for Broadcast");
 
             // create broadcast header
-			messageHeader newHeader;
+			MessageHeader newHeader;
 			newHeader.messageType = AVP_BROADCAST;
 			newHeader.fromID = NET_BROADCAST_ID;
 			newHeader.toID = NET_BROADCAST_ID;
 
-			memcpy(packetBuffer, &newHeader, sizeof(messageHeader));
+			memcpy(packetBuffer, &newHeader, sizeof(newHeader));
 
 			// create ENet packet
-			ENetPacket *packet = enet_packet_create(packetBuffer, sizeof(messageHeader), ENET_PACKET_FLAG_RELIABLE);
+			ENetPacket *packet = enet_packet_create(packetBuffer, sizeof(newHeader), ENET_PACKET_FLAG_RELIABLE);
 
 			enet_peer_send(Peer, 0, packet);
 			enet_host_flush(Client);
@@ -1314,8 +1331,8 @@ void Net_FindAvPSessions()
 			memcpy(&receiveBuffer[0], static_cast<uint8_t*> (eEvent.packet->data), eEvent.packet->dataLength);
 
             // grab the header from the packet
-            messageHeader newHeader;
-            memcpy(&newHeader, &receiveBuffer[0], sizeof(messageHeader));
+			MessageHeader newHeader;
+			memcpy(&newHeader, &receiveBuffer[0], sizeof(newHeader));
 
 			if (AVP_SESSIONDATA == newHeader.messageType)
 			{
@@ -1325,8 +1342,8 @@ void Net_FindAvPSessions()
 				enet_address_get_host_ip(&eEvent.peer->address, SessionData[NumberOfSessionsFound].hostAddress, 16);
 
 				// grab the session description struct
-				assert(sizeof(NET_SESSIONDESC) == (eEvent.packet->dataLength - kMessageHeaderSize));
-				memcpy(&tempSession, &receiveBuffer[kMessageHeaderSize], sizeof(NET_SESSIONDESC));
+				assert(sizeof(tempSession) == (eEvent.packet->dataLength - kMessageHeaderSize));
+				memcpy(&tempSession, &receiveBuffer[kMessageHeaderSize], sizeof(tempSession));
 
 				gamestyle = (tempSession.level >> 8) & 0xff;
 				level = tempSession.level  & 0xff;
@@ -1365,7 +1382,7 @@ void Net_FindAvPSessions()
 					SessionData[NumberOfSessionsFound].AllowedToJoin = FALSE;
 
 				// multiplayer version number (possibly)
-				if (tempSession.version != AVP_MULTIPLAYER_VERSION)
+				if (tempSession.version != kMultiplayerVersion)
 				{
 					float version = 1.0f + tempSession.version / 100.0f;
 					SessionData[NumberOfSessionsFound].AllowedToJoin = FALSE;
@@ -1409,8 +1426,8 @@ void Net_FindAvPSessions()
 
 int Net_CreateSession(const char* sessionName, int maxPlayers, int version, int level)
 {
-	ZeroMemory(&netSession, sizeof(NET_SESSIONDESC));
-	netSession.size = sizeof(NET_SESSIONDESC);
+	ZeroMemory(&netSession, sizeof(netSession));
+	netSession.size = sizeof(netSession);
 
 	strcpy(netSession.sessionName, sessionName);
 

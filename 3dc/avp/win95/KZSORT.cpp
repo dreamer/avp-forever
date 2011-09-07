@@ -241,9 +241,9 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 				position.vy = modulePtr->m_world.vy - Player->ObWorld.vy;
 				position.vz = modulePtr->m_world.vz - Player->ObWorld.vz;
 
-			    {
-				    int minX = modulePtr->m_minx + position.vx;
-				    int maxX = modulePtr->m_maxx + position.vx;
+				{
+					int minX = modulePtr->m_minx + position.vx;
+					int maxX = modulePtr->m_maxx + position.vx;
 
 					if (maxX<0) /* outside maxX side */
 					{
@@ -258,9 +258,9 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 						dist.vx = 0;
 					}
 				}
-			    {
-				    int minY = modulePtr->m_miny + position.vy;
-				    int maxY = modulePtr->m_maxy + position.vy;
+				{
+					int minY = modulePtr->m_miny + position.vy;
+					int maxY = modulePtr->m_maxy + position.vy;
 
 					if (maxY<0) /* outside maxY side */
 					{
@@ -275,9 +275,9 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 						dist.vy = 0;
 					}
 				}
-			    {
-				    int minZ = modulePtr->m_minz + position.vz;
-				    int maxZ = modulePtr->m_maxz + position.vz;
+				{
+					int minZ = modulePtr->m_minz + position.vz;
+					int maxZ = modulePtr->m_maxz + position.vz;
 
 					if (maxZ<0) /* outside maxZ side */
 					{
@@ -298,7 +298,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 				VisibleModules[numVisMods].SortKey = Magnitude(&dist);
 			}
 
-   			if(numVisMods>MAX_NUMBER_OF_VISIBLE_MODULES)
+			if(numVisMods>MAX_NUMBER_OF_VISIBLE_MODULES)
 			{
 				/* outside the environment! */
 				textprint("MAX_NUMBER_OF_VISIBLE_MODULES (%d) exceeded!\n",MAX_NUMBER_OF_VISIBLE_MODULES);
@@ -308,7 +308,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 			}
 
 			numVisMods++;
-   		}
+		}
 		else /* it's just an object */
 		{
 			VisibleObjects[numVisObjs].DispPtr = objectPtr;
@@ -318,7 +318,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 			VisibleObjects[numVisObjs].SortKey = 0X7FFFFFFF;
 			numVisObjs++;
 		}
-   	}
+	}
 	textprint("numvismods %d\n",numVisMods);
 	textprint("numvisobjs %d\n",numVisObjs);
 	{
@@ -331,7 +331,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 			int furthestModule=0;
 			int furthestDistance=0;
 
-		   	while(n)
+			while(n)
 			{
 				n--;
 				if (furthestDistance < VisibleModules[n].SortKey)
@@ -369,10 +369,10 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 
 				if (maxX >= modulePtr->m_minx+modulePtr->m_world.vx)
 				if (minX <= modulePtr->m_maxx+modulePtr->m_world.vx)
-			    if (maxZ >= modulePtr->m_minz+modulePtr->m_world.vz)
-			    if (minZ <= modulePtr->m_maxz+modulePtr->m_world.vz)
-			    if (maxY >= modulePtr->m_miny+modulePtr->m_world.vy)
-			    if (minY <= modulePtr->m_maxy+modulePtr->m_world.vy)
+				if (maxZ >= modulePtr->m_minz+modulePtr->m_world.vz)
+				if (minZ <= modulePtr->m_maxz+modulePtr->m_world.vz)
+				if (maxY >= modulePtr->m_miny+modulePtr->m_world.vy)
+				if (minY <= modulePtr->m_maxy+modulePtr->m_world.vy)
 				{
 					VisibleObjects[o].SortKey=numMods;
 					break;
@@ -402,11 +402,11 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 		{
 			int o = numVisObjs;
 			CheckWireFrameMode(WireFrameMode&2);
-			while(o)
+			while (o)
 			{
 				o--;
 
-				if(VisibleObjects[o].DrawBeforeEnvironment)
+				if (VisibleObjects[o].DrawBeforeEnvironment)
 				{
 					DISPLAYBLOCK *dptr = VisibleObjects[o].DispPtr;
 					AddShape(VisibleObjects[o].DispPtr,VDBPtr);
@@ -418,9 +418,9 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 						MakeVector(&dptr->ObWorld, &VDBPtr->VDB_World, &dptr->ObView);
 						RotateVector(&dptr->ObView, &VDBPtr->VDB_Mat);
 
-				  		DrawingAReflection=1;
-				  		AddShape(dptr,VDBPtr);
-				  		DrawingAReflection=0;
+						DrawingAReflection = 1;
+						AddShape(dptr, VDBPtr);
+						DrawingAReflection = 0;
 						ReflectObject(dptr);
 					}
 					#endif
@@ -437,7 +437,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 				MODULE *modulePtr = SortedModules[numMods].DispPtr->ObMyModule;
 
 				CheckWireFrameMode(WireFrameMode&1);
-		  		AddShape(SortedModules[numMods].DispPtr,VDBPtr);
+				AddShape(SortedModules[numMods].DispPtr,VDBPtr);
 				#if MIRRORING_ON
 				if (MirroringActive)
 				{
@@ -448,21 +448,21 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 						MakeVector(&dptr->ObWorld, &VDBPtr->VDB_World, &dptr->ObView);
 						RotateVector(&dptr->ObView, &VDBPtr->VDB_Mat);
 
-					  	DrawingAReflection=1;
-				  		AddShape(dptr,VDBPtr);
-			  			DrawingAReflection=0;
-		 				ReflectObject(dptr);
+						DrawingAReflection = 1;
+						AddShape(dptr, VDBPtr);
+						DrawingAReflection = 0;
+						ReflectObject(dptr);
 					}
 				}
 				#endif
 				CheckWireFrameMode(WireFrameMode&2);
 				{
 					int o = numVisObjs;
-					while(o)
+					while (o)
 					{
 						o--;
 
-						if(VisibleObjects[o].SortKey == numMods && !VisibleObjects[o].DrawBeforeEnvironment)
+						if (VisibleObjects[o].SortKey == numMods && !VisibleObjects[o].DrawBeforeEnvironment)
 						{
 							DISPLAYBLOCK *dptr = VisibleObjects[o].DispPtr;
 							AddShape(VisibleObjects[o].DispPtr,VDBPtr);
@@ -474,9 +474,9 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 								MakeVector(&dptr->ObWorld, &VDBPtr->VDB_World, &dptr->ObView);
 								RotateVector(&dptr->ObView, &VDBPtr->VDB_Mat);
 
-					  			DrawingAReflection=1;
-						  		AddShape(dptr,VDBPtr);
-					  			DrawingAReflection=0;
+								DrawingAReflection=1;
+								AddShape(dptr,VDBPtr);
+								DrawingAReflection=0;
 								ReflectObject(dptr);
 							}
 							#endif
@@ -484,17 +484,17 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 					}
 				}
 
-		 		D3D_DrawWaterTest(modulePtr);
+				D3D_DrawWaterTest(modulePtr);
 			}
 		}
 		else
 		{
-			while(numMods--)
+			while (numMods--)
 			{
 				MODULE *modulePtr = SortedModules[numMods].DispPtr->ObMyModule;
 
 				CheckWireFrameMode(WireFrameMode&1);
-		  		AddShape(SortedModules[numMods].DispPtr,VDBPtr);
+				AddShape(SortedModules[numMods].DispPtr,VDBPtr);
 				#if MIRRORING_ON
 				if (MirroringActive)
 				{
@@ -505,21 +505,21 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 						MakeVector(&dptr->ObWorld, &VDBPtr->VDB_World, &dptr->ObView);
 						RotateVector(&dptr->ObView, &VDBPtr->VDB_Mat);
 
-					  	DrawingAReflection=1;
-				  		AddShape(dptr,VDBPtr);
-			  			DrawingAReflection=0;
-		 				ReflectObject(dptr);
+						DrawingAReflection=1;
+						AddShape(dptr,VDBPtr);
+						DrawingAReflection=0;
+						ReflectObject(dptr);
 					}
 				}
 				#endif
 				CheckWireFrameMode(WireFrameMode&2);
 				{
 					int o = numVisObjs;
-					while(o)
+					while (o)
 					{
 						o--;
 
-						if(VisibleObjects[o].SortKey == numMods && !VisibleObjects[o].DrawBeforeEnvironment)
+						if (VisibleObjects[o].SortKey == numMods && !VisibleObjects[o].DrawBeforeEnvironment)
 						{
 							DISPLAYBLOCK *dptr = VisibleObjects[o].DispPtr;
 							AddShape(VisibleObjects[o].DispPtr,VDBPtr);
@@ -531,9 +531,9 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 								MakeVector(&dptr->ObWorld, &VDBPtr->VDB_World, &dptr->ObView);
 								RotateVector(&dptr->ObView, &VDBPtr->VDB_Mat);
 
-					  			DrawingAReflection=1;
-						  		AddShape(dptr,VDBPtr);
-					  			DrawingAReflection=0;
+								DrawingAReflection=1;
+								AddShape(dptr,VDBPtr);
+								DrawingAReflection=0;
 								ReflectObject(dptr);
 							}
 							#endif
@@ -551,13 +551,13 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 		and update their timers */
 		{
 			int o = numVisObjs;
-			while(o)
+			while (o)
 			{
 				o--;
 
-				if(VisibleObjects[o].SortKey == 0x7fffffff)
+				if (VisibleObjects[o].SortKey == 0x7fffffff)
 				{
-					if(VisibleObjects[o].DispPtr->HModelControlBlock)
+					if (VisibleObjects[o].DispPtr->HModelControlBlock)
 					{
 						DoHModelTimer(VisibleObjects[o].DispPtr->HModelControlBlock);
 					}
@@ -568,9 +568,9 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 	#if MIRRORING_ON
 		if (MirroringActive)
 		{
-			DrawingAReflection=1;
+			DrawingAReflection = 1;
 			RenderPlayersImageInMirror();
-			DrawingAReflection=0;
+			DrawingAReflection = 0;
 		}
 	#endif
 	}
@@ -587,17 +587,17 @@ static int ObjectIsInModule(DISPLAYBLOCK *objectPtr,MODULE *modulePtr)
 	position.vz -= modulePtr->m_world.vz;
 
 	if (position.vx + objectSize >= modulePtr->m_minx)
-    	if (position.vx - objectSize <= modulePtr->m_maxx)
-		    if (position.vz + objectSize >= modulePtr->m_minz)
-			    if (position.vz - objectSize <= modulePtr->m_maxz)
-				    if (position.vy + objectSize >= modulePtr->m_miny)
-					    if (position.vy - objectSize <= modulePtr->m_maxy)
+		if (position.vx - objectSize <= modulePtr->m_maxx)
+			if (position.vz + objectSize >= modulePtr->m_minz)
+				if (position.vz - objectSize <= modulePtr->m_maxz)
+					if (position.vy + objectSize >= modulePtr->m_miny)
+						if (position.vy - objectSize <= modulePtr->m_maxy)
 							return 1;
 
 	return 0;
-
 }
 #endif
+
 static int PointIsInModule(VECTORCH *pointPtr,MODULE *modulePtr)
 {
 	VECTORCH position = *pointPtr;
@@ -606,14 +606,13 @@ static int PointIsInModule(VECTORCH *pointPtr,MODULE *modulePtr)
 	position.vz -= modulePtr->m_world.vz;
 
 	if (position.vx >= modulePtr->m_minx)
-    	if (position.vx <= modulePtr->m_maxx)
-		    if (position.vz >= modulePtr->m_minz)
-			    if (position.vz <= modulePtr->m_maxz)
-				    if (position.vy >= modulePtr->m_miny)
-					    if (position.vy <= modulePtr->m_maxy)
+		if (position.vx <= modulePtr->m_maxx)
+			if (position.vz >= modulePtr->m_minz)
+				if (position.vz <= modulePtr->m_maxz)
+					if (position.vy >= modulePtr->m_miny)
+						if (position.vy <= modulePtr->m_maxy)
 							return 1;
 	return 0;
-
 }
 
 
@@ -627,7 +626,7 @@ void RenderThisDisplayblock(DISPLAYBLOCK *dbPtr)
 */
 	VIEWDESCRIPTORBLOCK *VDBPtr = ActiveVDBList[0];
 
-  	AddShape(dbPtr, VDBPtr);
+	AddShape(dbPtr, VDBPtr);
 }
 
 void RenderThisHierarchicalDisplayblock(DISPLAYBLOCK *dbPtr)
@@ -638,7 +637,8 @@ void RenderThisHierarchicalDisplayblock(DISPLAYBLOCK *dbPtr)
 */
 	VIEWDESCRIPTORBLOCK *VDBPtr = ActiveVDBList[0];
 
-  	AddHierarchicalShape(dbPtr,VDBPtr);
+	AddHierarchicalShape(dbPtr, VDBPtr);
+
 	#if MIRRORING_ON
 	if (MirroringActive && dbPtr->ObStrategyBlock)
 	{
@@ -647,7 +647,7 @@ void RenderThisHierarchicalDisplayblock(DISPLAYBLOCK *dbPtr)
 		MakeVector(&dbPtr->ObWorld, &VDBPtr->VDB_World, &dbPtr->ObView);
 		RotateVector(&dbPtr->ObView, &VDBPtr->VDB_Mat);
 
-	  	AddHierarchicalShape(dbPtr,VDBPtr);
+		AddHierarchicalShape(dbPtr, VDBPtr);
 		ReflectObject(dbPtr);
 	}
 	#endif

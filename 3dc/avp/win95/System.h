@@ -32,15 +32,11 @@
 
 #define GlobalScale 1
 
-
-
 #define one14 16383
 
 typedef int fixed_t;
 #define ONE_FIXED 65536
 #define ONE_FIXED_SHIFT 16
-
-#define Digital	FALSE
 
 
 /* Offsets from *** int pointer *** for vectors and vertices */
@@ -113,8 +109,6 @@ extern int maxshapes;
 #define MaxImages 400
 #define MaxImageGroups 1
 
-#define oversample_8bitg_threshold 256
-
 
 
 /************** Some Shell and Loading Platform Compiler Options ******************/
@@ -123,10 +117,6 @@ extern int maxshapes;
 #define RIFF_SYSTEM
 #define TestRiffLoaders TRUE
 #define LoadingMapsShapesAndTexturesEtc		FALSE
-
-#define pc_backdrops						FALSE
-
-#define flic_player							TRUE
 
 
 /***************** DRAW SORT *******************/

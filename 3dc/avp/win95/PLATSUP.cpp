@@ -205,7 +205,7 @@ int IDemandChangeEnvironment()
 /* KJL 15:53:52 05/04/97 - 
 Loaders/Unloaders for language internationalization code in language.c */
 
-char *LoadTextFile(char *filename)
+char *LoadTextFile(const char *filename)
 {
 	char *bufferPtr;
 	long int save_pos, size_of_file;
@@ -247,7 +247,7 @@ error:
 }
 
 
-void UnloadTextFile(char *filename, char *bufferPtr)
+void UnloadTextFile(const char *filename, char *bufferPtr)
 {
 	if (bufferPtr) DeallocateMem(bufferPtr);
 }

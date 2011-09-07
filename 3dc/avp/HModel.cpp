@@ -27,7 +27,6 @@
 #include "load_shp.h"
 #include "plat_shp.h"
 #include "avp_userprofile.h"
-
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "particle.h"
@@ -139,15 +138,16 @@ SEQUENCE *GetSequencePointer(int sequence_type,int sub_sequence,SECTION *this_se
 	}
 
 	return(sequence_pointer);
-
 }
+
 #if 0
 void Preprocess_Keyframe(KEYFRAME_DATA *this_keyframe, KEYFRAME_DATA *next_keyframe,int one) {
 {
 	
-	New_Preprocess_Keyframe(this_keyframe,next_keyframe,one);		
+	New_Preprocess_Keyframe(this_keyframe,next_keyframe,one);
 }
 #endif
+
 int QDot(QUAT *this_quat, QUAT *next_quat) {
 
 	int qdot;
@@ -171,15 +171,10 @@ void New_Preprocess_Keyframe(KEYFRAME_DATA *this_keyframe, KEYFRAME_DATA *next_k
 	this_quat=&this_keyframe->QOrient;
 	next_quat=&next_keyframe->QOrient;
 
-	//QNormalise(this_quat);
-	//QNormalise(next_quat);
-
-	
-	//cosom=QDot(this_quat,next_quat);
 	cosom=( (MUL_FIXED((int)this_quat->quatx,(int)next_quat->quatx)) +
-		 	(MUL_FIXED((int)this_quat->quaty,(int)next_quat->quaty)) +
-		 	(MUL_FIXED((int)this_quat->quatz,(int)next_quat->quatz)) +
-		 	(MUL_FIXED((int)this_quat->quatw,(int)next_quat->quatw)))<<1;
+			(MUL_FIXED((int)this_quat->quaty,(int)next_quat->quaty)) +
+			(MUL_FIXED((int)this_quat->quatz,(int)next_quat->quatz)) +
+			(MUL_FIXED((int)this_quat->quatw,(int)next_quat->quatw)))<<1;
 
 	if (cosom<0) {
 		this_keyframe->slerp_to_negative_quat=1;
@@ -189,12 +184,10 @@ void New_Preprocess_Keyframe(KEYFRAME_DATA *this_keyframe, KEYFRAME_DATA *next_k
 		this_keyframe->slerp_to_negative_quat=0;
 	}
 
-	
 	this_keyframe->omega=(unsigned short)ArcCos(cosom);
 
 	GLOBALASSERT(this_keyframe->Sequence_Length>0);
 	this_keyframe->oneoversequencelength=DIV_FIXED(one,(int)this_keyframe->Sequence_Length);
-
 }
 
 void Preprocess_Section(SECTION *this_section, char *riffname ,VECTORCH* offset_to_return) {
@@ -240,7 +233,7 @@ void Preprocess_Section(SECTION *this_section, char *riffname ,VECTORCH* offset_
 	incIDnum++;
 
 	/* Okay. */
-	
+
 	for (a=0; a<this_section->num_sequences; a++) {
 
 		int one=0;
@@ -249,33 +242,28 @@ void Preprocess_Section(SECTION *this_section, char *riffname ,VECTORCH* offset_
 
 		this_keyframe=this_section->sequence_array[a].first_frame;
 
-		while(1){
-
+		while (1)
+		{
 			one+=this_keyframe->Sequence_Length;
 
 			/*See if we have got to the end*/
 			if(this_keyframe->last_frame) break;
 			/* Next frame */
 			this_keyframe=this_keyframe->Next_Frame;
-	
 		}
 
 		/* Second pass. */
-
 		this_keyframe=this_section->sequence_array[a].first_frame;
 
-		while(1) {
-			
+		while(1)
+		{
 			New_Preprocess_Keyframe(this_keyframe, this_keyframe->Next_Frame,one);
-			
 
 			/*See if we have got to the end*/
 			if(this_keyframe->last_frame) break;
 			/* Next frame */
 			this_keyframe=this_keyframe->Next_Frame;
-	
 		}
-
 	}
 
 	cumulative_gore_direction.vx=0;
@@ -318,7 +306,6 @@ void Preprocess_Section(SECTION *this_section, char *riffname ,VECTORCH* offset_
 	{
 		GetKeyFrameOffset(this_section->sequence_array[0].first_frame,offset_to_return);
 	}
-
 }
 
 void Preprocess_HModel(SECTION *root, char *riffname) {
@@ -335,33 +322,32 @@ void Preprocess_HModel(SECTION *root, char *riffname) {
 
 	/* Shouldn't this be set anyway? */
 	root->flags|=section_is_master_root;
-
 }
 
 void Setup_Texture_Animation_For_Section(SECTION_DATA *this_section_data)
 {
 	GLOBALASSERT(this_section_data);
 
-	if(this_section_data->tac_ptr)
+	if (this_section_data->tac_ptr)
 	{
 		//get rid of old animation control blocks
 		TXACTRLBLK *tac_next;
 		tac_next=this_section_data->tac_ptr;
-		while (tac_next) {
+		while (tac_next)
+		{
 			TXACTRLBLK *tac_temp;
 
 			tac_temp=tac_next->tac_next;
 			DeallocateMem(tac_next);
 			tac_next=tac_temp;
-			
 		}
 		this_section_data->tac_ptr=0;
 	}
-	
+
 	if (this_section_data->Shape) {
 		if (this_section_data->Shape->shapeflags & ShapeFlag_HasTextureAnimation) {
-	
-			TXACTRLBLK **pptxactrlblk;		
+
+			TXACTRLBLK **pptxactrlblk;
 			int item_num;
 			int shape_num = this_section_data->ShapeNum;
 			SHAPEHEADER *shptr = GetShapeData(shape_num);
@@ -370,34 +356,34 @@ void Setup_Texture_Animation_For_Section(SECTION_DATA *this_section_data)
 			{
 				POLYHEADER *poly =  (POLYHEADER*)(shptr->items[item_num]);
 				LOCALASSERT(poly);
-					
-				if((Request_PolyFlags((void *)poly)) & iflag_txanim)
+
+				if ((Request_PolyFlags((void *)poly)) & iflag_txanim)
+				{
+					TXACTRLBLK *pnew_txactrlblk;
+
+					pnew_txactrlblk = (TXACTRLBLK*)AllocateMem(sizeof(TXACTRLBLK));
+					if (pnew_txactrlblk)
 					{
-						TXACTRLBLK *pnew_txactrlblk;
+						pnew_txactrlblk->tac_flags = 0;
+						pnew_txactrlblk->tac_item = item_num;
+						pnew_txactrlblk->tac_sequence = 0;
+						pnew_txactrlblk->tac_node = 0;
+						pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);
+						pnew_txactrlblk->tac_txah_s = GetTxAnimHeaderFromShape(pnew_txactrlblk, shape_num);
 
-						pnew_txactrlblk = (TXACTRLBLK*)AllocateMem(sizeof(TXACTRLBLK));
-						if(pnew_txactrlblk)
-						{
-							pnew_txactrlblk->tac_flags = 0;										
-							pnew_txactrlblk->tac_item = item_num;										
-							pnew_txactrlblk->tac_sequence = 0;										
-							pnew_txactrlblk->tac_node = 0;										
-							pnew_txactrlblk->tac_txarray = GetTxAnimArrayZ(shape_num, item_num);										
-							pnew_txactrlblk->tac_txah_s = GetTxAnimHeaderFromShape(pnew_txactrlblk, shape_num);
-
-							*pptxactrlblk = pnew_txactrlblk;
-							pptxactrlblk = &pnew_txactrlblk->tac_next;
-						}
-						else *pptxactrlblk = NULL; 
+						*pptxactrlblk = pnew_txactrlblk;
+						pptxactrlblk = &pnew_txactrlblk->tac_next;
 					}
+					else *pptxactrlblk = NULL; 
+				}
 			}
 			*pptxactrlblk=0;
 		}
 	}
 }
 
-SECTION_DATA *Create_New_Section(SECTION *this_section) {
-
+SECTION_DATA *Create_New_Section(SECTION *this_section)
+{
 	SECTION_DATA *this_section_data;
 	int num_children;
 
@@ -419,26 +405,25 @@ SECTION_DATA *Create_New_Section(SECTION *this_section) {
 	this_section_data->sac_ptr=NULL;
 	this_section_data->tac_ptr=NULL;
 	this_section_data->sempai=this_section;
-	
+
 	this_section_data->current_damage.Health=this_section_data->sempai->StartingStats.Health<<16;
 	this_section_data->current_damage.Armour=this_section_data->sempai->StartingStats.Armour<<16;
 	this_section_data->current_damage.SB_H_flags=this_section_data->sempai->StartingStats.SB_H_flags;
 
-	if (this_section_data->current_damage.Health<=0) {
+	if (this_section_data->current_damage.Health<=0)
+	{
 		/* Wrong! */
-
 		this_section_data->current_damage=Default_Damageblock;
 	}
 
 	this_section_data->my_controller=Global_Controller_Ptr;
 	/* Note not initialised! */
 	this_section_data->flags=0;
-	
+
 	/* KJL 17:04:41 31/07/98 - Decal support */
 	this_section_data->NumberOfDecals = 0;
 	this_section_data->NextDecalToUse = 0;
-	
-	
+
 	this_section_data->ShapeNum=this_section->ShapeNum;
 	this_section_data->Shape=this_section->Shape;
 
@@ -452,18 +437,18 @@ SECTION_DATA *Create_New_Section(SECTION *this_section) {
 	/* Init shape animations... */
 
 	#if AUTODETECT
-	if (this_section->Shape) {
-		if (this_section->Shape->animation_header) {
+	if (this_section->Shape)
+	{
+		if (this_section->Shape->animation_header)
+		{
 	#else
 		if (this_section->flags&section_has_shape_animation) {
 	#endif
 
 			GLOBALASSERT(this_section->Shape->animation_header);
-			
 			this_section_data->sac_ptr = (SHAPEANIMATIONCONTROLLER*)AllocateMem(sizeof(SHAPEANIMATIONCONTROLLER));
 
 			InitShapeAnimationController (this_section_data->sac_ptr, this_section->Shape);
-	
 		}
 	#if AUTODETECT
 	}
@@ -477,12 +462,13 @@ SECTION_DATA *Create_New_Section(SECTION *this_section) {
 
 	num_children=0;
 
-	if (this_section->Children!=NULL) {
+	if (this_section->Children!=NULL)
+	{
 		SECTION **child_list_ptr;
 		SECTION_DATA *new_child_list_ptr;
 
 		SECTION_DATA *last_child,*first_child;
-		
+
 		last_child=NULL;
 		first_child=NULL;
 
@@ -490,8 +476,8 @@ SECTION_DATA *Create_New_Section(SECTION *this_section) {
 
 		child_list_ptr=this_section->Children;
 
-		while (*child_list_ptr!=NULL) {
-
+		while (*child_list_ptr!=NULL)
+		{
 			(new_child_list_ptr)=Create_New_Section(*child_list_ptr);
 
 			(new_child_list_ptr)->Prev_Sibling=last_child;
@@ -505,7 +491,7 @@ SECTION_DATA *Create_New_Section(SECTION *this_section) {
 			if (last_child) {
 				last_child->Next_Sibling=(new_child_list_ptr);
 			}
-			last_child=(new_child_list_ptr);			
+			last_child=(new_child_list_ptr);
 
 			child_list_ptr++;
 		}
@@ -517,11 +503,10 @@ SECTION_DATA *Create_New_Section(SECTION *this_section) {
 	}
 
 	return(this_section_data);
-
 }
 
-void Create_HModel(HMODELCONTROLLER *controller,SECTION *root) {
-
+void Create_HModel(HMODELCONTROLLER *controller,SECTION *root)
+{
 	/* Connects sequence to controller and must generate 
 	the list of section_data structures. */
 
@@ -529,12 +514,12 @@ void Create_HModel(HMODELCONTROLLER *controller,SECTION *root) {
 
 	Global_Controller_Ptr=controller;
 
-	controller->Root_Section=root; /* That's a given. */		
+	controller->Root_Section=root; /* That's a given. */
 	controller->Seconds_For_Sequence=ONE_FIXED;
 	controller->timer_increment=ONE_FIXED;
 	/* Seconds_For_Sequence and timer_increment are dealt with elsewhere. */
 	controller->sequence_timer=0;
-	
+
 	controller->FrameStamp=-1;
 	controller->View_FrameStamp=-1;
 	controller->Computed_Position.vx=0;
@@ -573,59 +558,59 @@ void Create_HModel(HMODELCONTROLLER *controller,SECTION *root) {
 	controller->section_data->My_Parent=NULL;
 	controller->section_data->Next_Sibling=NULL;
 
-	if (root->flags&section_is_master_root) {
+	if (root->flags&section_is_master_root)
+	{
 		controller->section_data->flags|=section_data_master_root;
 	}
-
 }
 
-void Destructor_Recursion(SECTION_DATA *doomed_section_data) {
-
+void Destructor_Recursion(SECTION_DATA *doomed_section_data)
+{
 	/* Remove other bits. */
 
 	if (doomed_section_data->sac_ptr) {
 		DeallocateMem(doomed_section_data->sac_ptr);
 	}
 
-	if (doomed_section_data->tac_ptr) {
+	if (doomed_section_data->tac_ptr)
+	{
 		TXACTRLBLK *tac_next;
 		tac_next=doomed_section_data->tac_ptr;
-		while (tac_next) {
+		while (tac_next)
+		{
 			TXACTRLBLK *tac_temp;
 
 			tac_temp=tac_next->tac_next;
 			DeallocateMem(tac_next);
 			tac_next=tac_temp;
-			
 		}
 	}
 
 	/* Recurse. */
 
-	if (doomed_section_data->First_Child!=NULL) {
-	
+	if (doomed_section_data->First_Child!=NULL)
+	{
 		SECTION_DATA *child_list_ptr;
-	
+
 		child_list_ptr=doomed_section_data->First_Child;
-	
-		while (child_list_ptr!=NULL) {
+
+		while (child_list_ptr!=NULL)
+		{
 			/* Remove each child... */
 			/* JH - 19/2/98 store the next sibling so that we don't access dealloced memory */
 			SECTION_DATA * next_sibling_ptr = child_list_ptr->Next_Sibling;
 			Destructor_Recursion(child_list_ptr);
 			child_list_ptr=next_sibling_ptr;
 		}
-
-	}	
+	}
 
 	/* Now remove the section... */
 
 	DeallocateMem(doomed_section_data);
-
 }
 
-void Prune_Section(SECTION_DATA *doomed_section_data) {
-
+void Prune_Section(SECTION_DATA *doomed_section_data)
+{
 	GLOBALASSERT(doomed_section_data);
 	/* Destroys section, and all children. */
 
@@ -647,54 +632,49 @@ void Prune_Section(SECTION_DATA *doomed_section_data) {
 
 	/* Now destroy. */
 	Destructor_Recursion(doomed_section_data);
-
 }
 
-void Delete_Deltas_Recursion(DELTA_CONTROLLER *delta_controller) {
-
+void Delete_Deltas_Recursion(DELTA_CONTROLLER *delta_controller)
+{
 	if (delta_controller==NULL) {
 		return;
 	}
 	
-	if (delta_controller->next_controller) {
+	if (delta_controller->next_controller)
+	{
 		Delete_Deltas_Recursion(delta_controller->next_controller);
 	}
 
 	DeallocateMem(delta_controller->id);
 	DeallocateMem(delta_controller);
-
 }
 
-void Dispel_HModel(HMODELCONTROLLER *controller) {
-
+void Dispel_HModel(HMODELCONTROLLER *controller)
+{
 	/* For getting rid of the section_data. */
 
-	if (controller->section_data!=NULL) {
-
+	if (controller->section_data!=NULL)
+	{
 		Destructor_Recursion(controller->section_data);
-
 		controller->section_data=NULL;
-
 	}
 
 	Delete_Deltas_Recursion(controller->Deltas);
-
 }
 
-void RemoveAllDeltas(HMODELCONTROLLER *controller) {
-
+void RemoveAllDeltas(HMODELCONTROLLER *controller)
+{
 	/* Pretty self explainatory. */
 	GLOBALASSERT(controller);
 
 	Delete_Deltas_Recursion(controller->Deltas);
 	controller->Deltas=NULL;
-
 }
 
 /* SetElevationDeltas removed, 8.4.98. CDF. */
 
-void Process_Delta_Controller(SECTION_DATA *this_section_data,DELTA_CONTROLLER *delta_controller,VECTORCH *output_offset,QUAT *output_quat) {
-
+void Process_Delta_Controller(SECTION_DATA *this_section_data,DELTA_CONTROLLER *delta_controller,VECTORCH *output_offset,QUAT *output_quat) 
+{
 	SEQUENCE *delta_sequence;
 	int a;
 	int working_timer,lerp,lastframe_working_timer;
@@ -711,13 +691,13 @@ void Process_Delta_Controller(SECTION_DATA *this_section_data,DELTA_CONTROLLER *
 
 	GLOBALASSERT(sequence_type>-1);
 	GLOBALASSERT(sub_sequence>-1);
-	
+
 	delta_sequence=GetSequencePointer(sequence_type,sub_sequence,this_section_data->sempai);
 
 	GLOBALASSERT(delta_sequence);
 
 	/* Final Frame Correction. */
-		
+
 	this_frame=delta_sequence->first_frame;
 
 	a=0;
@@ -726,7 +706,7 @@ void Process_Delta_Controller(SECTION_DATA *this_section_data,DELTA_CONTROLLER *
 		a+=this_frame->Sequence_Length;
 		this_frame=this_frame->Next_Frame;
 	}
-	
+
 	/* Now a is the 'real' sequence length. */
 
 	working_timer=MUL_FIXED(timer,a);
@@ -740,15 +720,18 @@ void Process_Delta_Controller(SECTION_DATA *this_section_data,DELTA_CONTROLLER *
 
 	a=0; /* Status flag... */
 
-	while (a==0) {
+	while (a==0)
+	{
 		next_frame=this_frame->Next_Frame;
-		if (working_timer>=this_frame->Sequence_Length) {
+		if (working_timer>=this_frame->Sequence_Length)
+		{
 			/* We've gone beyond this frame: get next keyframe. */
 			working_timer-=this_frame->Sequence_Length;
 			lastframe_working_timer-=this_frame->Sequence_Length;
-			
+
 			/* Have we looped? */
-			if (this_frame->last_frame) {
+			if (this_frame->last_frame)
+			{
 				/* Some deltas are really fast. */
 				this_frame=delta_sequence->first_frame;
 			}
@@ -757,7 +740,8 @@ void Process_Delta_Controller(SECTION_DATA *this_section_data,DELTA_CONTROLLER *
 				this_frame=next_frame;
 			}
 
-			if (lastframe_working_timer<=0) {
+			if (lastframe_working_timer<=0)
+			{
 				if(this_frame->frame_has_extended_data)
 				{
 					KEYFRAME_DATA_EXTENDED* this_frame_extended=(KEYFRAME_DATA_EXTENDED*) this_frame;
@@ -771,16 +755,15 @@ void Process_Delta_Controller(SECTION_DATA *this_section_data,DELTA_CONTROLLER *
 					}
 				}
 			}
-
 		} else {
 			a=1; /* Exit loop with success. */
-		}	
+		}
 		/* Better make sure the last 'frame' has 65536 length... */
 	}
-			
+
 	/* Now, this_frame and next_frame are set, and working_timer<this_frame->Sequence_Length. */
 	lerp=MUL_FIXED(working_timer,this_frame->oneoversequencelength);
-	
+
 	GetKeyFrameOffset(this_frame,output_offset);
 	if(next_frame->shift_offset)
 	{
@@ -796,19 +779,14 @@ void Process_Delta_Controller(SECTION_DATA *this_section_data,DELTA_CONTROLLER *
 		output_offset->vy+=MUL_FIXED((int)next_frame->Offset_y - output_offset->vy,lerp);
 		output_offset->vz+=MUL_FIXED((int)next_frame->Offset_z - output_offset->vz,lerp);
 	}
-		
-	
+
 	/* Now deal with orientation. */
-
-
 	Slerp(this_frame,lerp,output_quat);
-
 	delta_controller->lastframe_timer=delta_controller->timer;
-
 }
 
-void Handle_Section_Timer(HMODELCONTROLLER *controller,SECTION_DATA *this_section_data,KEYFRAME_DATA *input_frame,int base_timer, int *working_timer) {
-
+void Handle_Section_Timer(HMODELCONTROLLER *controller,SECTION_DATA *this_section_data,KEYFRAME_DATA *input_frame,int base_timer, int *working_timer)
+{
 	KEYFRAME_DATA *this_frame,*next_frame;
 	int a;
 
@@ -817,7 +795,7 @@ void Handle_Section_Timer(HMODELCONTROLLER *controller,SECTION_DATA *this_sectio
 	} else {
 		(*working_timer)=base_timer;
 	}
-		
+
 	if (this_section_data->accumulated_timer>(*working_timer)) {
 		/* We must have looped. Or be reversed.... ! */
 		this_section_data->accumulated_timer=0;
@@ -881,7 +859,7 @@ void Handle_Section_Timer(HMODELCONTROLLER *controller,SECTION_DATA *this_sectio
 			this_section_data->current_keyframe=this_frame;
 		} else {
 			a=1; /* Exit loop with success. */
-		}	
+		}
 		/* Better make sure the last 'frame' has 65536 length... */
 	}
 
@@ -927,7 +905,6 @@ void Handle_Section_Timer(HMODELCONTROLLER *controller,SECTION_DATA *this_sectio
 			}	
 			/* Better make sure the last 'frame' has 65536 length... */
 		}
-
 	}
 
 	/* Check for looping? */
@@ -941,8 +918,8 @@ void Handle_Section_Timer(HMODELCONTROLLER *controller,SECTION_DATA *this_sectio
 	this_section_data->lastframe_timer=base_timer;
 }
 
-void New_Analyse_Keyframe_Data(HMODELCONTROLLER *controller,SECTION_DATA *this_section_data,KEYFRAME_DATA *input_frame,int base_timer,VECTORCH *output_offset,MATRIXCH *output_matrix) {
-
+void New_Analyse_Keyframe_Data(HMODELCONTROLLER *controller,SECTION_DATA *this_section_data,KEYFRAME_DATA *input_frame,int base_timer,VECTORCH *output_offset,MATRIXCH *output_matrix)
+{
 	KEYFRAME_DATA *this_frame;
 	QUAT output_quat;
 	int working_timer,lerp;
@@ -1269,7 +1246,7 @@ void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_dat
 	diagnostic_vector.vx=0;
 	diagnostic_vector.vy=0;
 	diagnostic_vector.vz=0;
-	
+
 	if ((controller->FrameStamp!=GlobalFrameCounter)
 		||((this_section_data->flags&section_data_initialised)==0)) {
 
@@ -1300,11 +1277,11 @@ void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_dat
 			this_section_data->World_Offset.vy=0;
 			this_section_data->World_Offset.vz=0;
 		}
-		
+
 		if ((controller->ZeroRootRotation)&&(this_section_data==controller->section_data)) {
 			this_section_data->RelSecMat=Identity_RotMat;
 		}
-						
+
 		this_section_data->Offset=this_section_data->World_Offset;
 
 		diagnostic_vector=this_section_data->World_Offset;
@@ -1327,7 +1304,7 @@ void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_dat
 		 &&	(this_section_data->World_Offset.vy<1000000 && this_section_data->World_Offset.vy>-1000000)
 		 &&	(this_section_data->World_Offset.vz<1000000 && this_section_data->World_Offset.vz>-1000000) 
 		 ) ) {
-	
+
 		LOGDXFMT(("Tests in PROCESS_SECTION.\n"));
 		if (Global_HModel_Sptr) {
 			LOGDXFMT(("Misplaced object is of type %d\n",Global_HModel_Sptr->I_SBtype));
@@ -1355,20 +1332,19 @@ void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_dat
 		LOCALASSERT(this_section_data->World_Offset.vx<1000000 && this_section_data->World_Offset.vx>-1000000);
 		LOCALASSERT(this_section_data->World_Offset.vy<1000000 && this_section_data->World_Offset.vy>-1000000);
 		LOCALASSERT(this_section_data->World_Offset.vz<1000000 && this_section_data->World_Offset.vz>-1000000);
-		
 	}
 
 	/* Now call recursion... */
 
 	if ((this_section_data->First_Child!=NULL)
-		&&( (this_section_data->flags&section_data_terminate_here)==0)) {
-
+		&&( (this_section_data->flags&section_data_terminate_here)==0)) 
+	{
 		SECTION_DATA *child_ptr;
 	
 		child_ptr=this_section_data->First_Child;
 	
-		while (child_ptr!=NULL) {
-
+		while (child_ptr!=NULL)
+		{
 			LOCALASSERT(child_ptr->My_Parent==this_section_data);
 
 			Process_Section(controller,child_ptr,&(this_section_data->World_Offset),&(this_section_data->SecMat),frame_timer,sequence_type,subsequence,render);

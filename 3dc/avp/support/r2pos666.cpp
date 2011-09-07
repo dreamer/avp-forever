@@ -37,49 +37,41 @@
 /* Exported function definitions ***********************************/
 // class R2PosDaemon : public Daemon
 // public:
-R2PosDaemon :: R2PosDaemon
+R2PosDaemon::R2PosDaemon
 (
 	r2pos R2Pos_Int_Initial,
 	bool bActive
-) : Daemon( bActive ),
-	R2Pos_Int_Current( R2Pos_Int_Initial ),
+) : Daemon(bActive),
+	R2Pos_Int_Current(R2Pos_Int_Initial),
 	R2Pos_FixP_Current
 	(
-		OUR_INT_TO_FIXED( R2Pos_Int_Initial . x ),
-		OUR_INT_TO_FIXED( R2Pos_Int_Initial . y )		
+		OUR_INT_TO_FIXED(R2Pos_Int_Initial.x),
+		OUR_INT_TO_FIXED(R2Pos_Int_Initial.y)
 	)
 {
 
 }
 
-void R2PosDaemon :: SetPos_Int(const r2pos R2Pos_Int_New )
+void R2PosDaemon::SetPos_Int(const r2pos R2Pos_Int_New)
 {
 	R2Pos_Int_Current = R2Pos_Int_New;
 	R2Pos_FixP_Current = r2pos
 	(
-		OUR_INT_TO_FIXED( R2Pos_Int_Current . x ),
-		OUR_INT_TO_FIXED( R2Pos_Int_Current . y )
+		OUR_INT_TO_FIXED(R2Pos_Int_Current.x),
+		OUR_INT_TO_FIXED(R2Pos_Int_Current.y)
 	);
 }
 
-void R2PosDaemon :: SetPos_FixP(const r2pos R2Pos_FixP_New )
+void R2PosDaemon::SetPos_FixP(const r2pos R2Pos_FixP_New)
 {
 	R2Pos_FixP_Current = R2Pos_FixP_New;
 	R2Pos_Int_Current = r2pos
 	(
-		OUR_FIXED_TO_INT( R2Pos_FixP_Current . x ),
-		OUR_FIXED_TO_INT( R2Pos_FixP_Current . y )
+		OUR_FIXED_TO_INT(R2Pos_FixP_Current.x),
+		OUR_FIXED_TO_INT(R2Pos_FixP_Current.y)
 	);
 }
 
 // Activity remains pure virtual...
-
-
-// private:
-#if 0
-r2pos R2Pos_Int_Current;
-r2pos R2Pos_FixP_Current;
-#endif
-
 
 /* Internal function definitions ***********************************/

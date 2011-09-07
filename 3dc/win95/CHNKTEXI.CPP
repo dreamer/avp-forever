@@ -671,7 +671,8 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 	}
 }
 
-// #include "RimLoader.h"
+#include "FastFile.h"
+#include "RimLoader.h"
 
 texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 {
@@ -682,12 +683,28 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 
 	// test RIM loading..
 #if 0
+
+	static bool doneffinit = false;
+
+	if (!doneffinit)
+	{
+		FF_Init();
+		doneffinit = true;
+	}
+
 	RimLoader newRim;
 	std::string fileName;
-	fileName += "graphics/";
+	fileName += "graphics\\";
 	fileName += (pszFileName);
 
-	if (newRim.Init(fileName))
+	// check if the texture already exists
+	texID_t existingImageID = Tex_CheckExists(fileName);
+	if (MISSING_TEXTURE != existingImageID)
+	{
+		return existingImageID;
+	}
+
+	if (newRim.Open(fileName))
 	{
 		uint32_t width, height;
 		newRim.GetDimensions(width, height);
@@ -695,6 +712,9 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 		// 1: dx texture
 		Texture newTexture;
 		R_CreateTexture(width, height, 32, TextureUsage_Normal, newTexture);
+
+		// set its name
+		newTexture.name = fileName;
 
 		// add to list
 		textureID = Tex_AddExistingTexture(newTexture);

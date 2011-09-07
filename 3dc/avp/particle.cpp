@@ -3569,61 +3569,56 @@ void HandleRipples(void)
 
 int EffectOfRipples(VECTORCH *point)
 {
-	int offset;
-	offset = GetSin((point->vx+point->vz+CloakingPhase)&4095)>>11;
-	offset += GetSin((point->vx-point->vz*2+CloakingPhase/2)&4095)>>12;
+	int offset = GetSin((point->vx + point->vz + CloakingPhase) & 4095) >> 11;
+	offset += GetSin((point->vx - point->vz*2 + CloakingPhase / 2) & 4095) >> 12;
 
-	for(int i=0; i<MAX_NO_OF_RIPPLES; i++)
+	for (int i = 0; i < MAX_NO_OF_RIPPLES; i++)
 	{
 		if (RippleStorage[i].Active)
 		{
-			int dx=point->vx-RippleStorage[i].X;
-			int dz=point->vz-RippleStorage[i].Z;
+			int dx = point->vx - RippleStorage[i].X;
+			int dz = point->vz - RippleStorage[i].Z;
 
-			if (dx<0) dx = -dx;
-			if (dz<0) dz = -dz;
+			if (dx < 0) dx = -dx;
+			if (dz < 0) dz = -dz;
 			{
 				int a;
 
-				if (dx>dz)
+				if (dx > dz)
 				{
-					a = dx+(dz>>1);
+					a = dx + (dz >> 1);
 				}
 				else
 				{
-					a = dz+(dx>>1);
+					a = dz + (dx >> 1);
 				}
 
-				if (a<RippleStorage[i].Radius)
+				if (a < RippleStorage[i].Radius)
 				{
-					a = MUL_FIXED(a,RippleStorage[i].InvRadius);
+					a = MUL_FIXED(a, RippleStorage[i].InvRadius);
 
-					offset+= MUL_FIXED
-							 (
-								RippleStorage[i].Amplitude,
-								GetSin(a)
-							 );
+					offset += MUL_FIXED(RippleStorage[i].Amplitude, GetSin(a));
 				}
 			}
 		}
 	}
 
-	if (offset>256) offset = 256;
-	else if (offset<-256) offset = -256;
+	if (offset > 256) offset = 256;
+	else if (offset < -256) offset = -256;
 	return offset;
 }
 
 
-void AddRipple(int x,int z,int amplitude)
+void AddRipple(int x, int z, int amplitude)
 {
-	RippleStorage[ActiveRippleNumber].Active=1;
+	RippleStorage[ActiveRippleNumber].Active = 1;
 	RippleStorage[ActiveRippleNumber].X = x;
 	RippleStorage[ActiveRippleNumber].Z = z;
 	RippleStorage[ActiveRippleNumber].Radius = 200;
 	RippleStorage[ActiveRippleNumber].Amplitude = amplitude;
 
 	ActiveRippleNumber++;
-	if (ActiveRippleNumber == MAX_NO_OF_RIPPLES) ActiveRippleNumber=0;
+	if (ActiveRippleNumber == MAX_NO_OF_RIPPLES) ActiveRippleNumber = 0;
 }
 
 
@@ -3641,79 +3636,83 @@ void CheckForObjectsInWater(int minX, int maxX, int minZ, int maxZ, int averageY
 
 			if (dynPtr)
 			{
-				int overlapInY=0;
-				int overlapInX=0;
-				int overlapInZ=0;
+				bool overlapInY = false;
+				bool overlapInX = false;
+				bool overlapInZ = false;
 
-				/* floating objects are ignored to avoid positive feedback */
-				if(dynPtr->IsFloating) continue;
+				// floating objects are ignored to avoid positive feedback
+				if (dynPtr->IsFloating) 
+					continue;
 
-				if ( (dynPtr->Position.vx==dynPtr->PrevPosition.vx)
-				   &&(dynPtr->Position.vy==dynPtr->PrevPosition.vy)
-				   &&(dynPtr->Position.vz==dynPtr->PrevPosition.vz) )
+				if ((dynPtr->Position.vx  == dynPtr->PrevPosition.vx)
+				   && (dynPtr->Position.vy == dynPtr->PrevPosition.vy)
+				   && (dynPtr->Position.vz == dynPtr->PrevPosition.vz))
 				   continue;
 
-				if (dynPtr->Position.vy>dynPtr->PrevPosition.vy)
+				if (dynPtr->Position.vy > dynPtr->PrevPosition.vy)
 				{
-					if ((dynPtr->Position.vy+objectPtr->ObRadius > averageY)
-					  &&(dynPtr->PrevPosition.vy-objectPtr->ObRadius < averageY))
+					if ((dynPtr->Position.vy + objectPtr->ObRadius > averageY)
+					  && (dynPtr->PrevPosition.vy - objectPtr->ObRadius < averageY))
 					{
-						overlapInY=1;
+						overlapInY = true;
 					}
 				}
 				else
 				{
-					if ((dynPtr->PrevPosition.vy+objectPtr->ObRadius > averageY)
-					  &&(dynPtr->Position.vy-objectPtr->ObRadius < averageY))
+					if ((dynPtr->PrevPosition.vy + objectPtr->ObRadius > averageY)
+					  &&(dynPtr->Position.vy - objectPtr->ObRadius < averageY))
 					{
-						overlapInY=1;
+						overlapInY = true;
 					}
 				}
 
-				if (!overlapInY) continue;
+				if (!overlapInY)
+					continue;
 
-				if (dynPtr->Position.vx>dynPtr->PrevPosition.vx)
+				if (dynPtr->Position.vx > dynPtr->PrevPosition.vx)
 				{
-					if ((dynPtr->Position.vx+objectPtr->ObRadius > minX)
-					  &&(dynPtr->PrevPosition.vx-objectPtr->ObRadius < maxX))
+					if ((dynPtr->Position.vx + objectPtr->ObRadius > minX)
+					  && (dynPtr->PrevPosition.vx - objectPtr->ObRadius < maxX))
 					{
-						overlapInX=1;
+						overlapInX = true;
 					}
 				}
 				else
 				{
-					if ((dynPtr->PrevPosition.vx+objectPtr->ObRadius > minX)
-					  &&(dynPtr->Position.vx-objectPtr->ObRadius < maxX))
+					if ((dynPtr->PrevPosition.vx + objectPtr->ObRadius > minX)
+					  && (dynPtr->Position.vx - objectPtr->ObRadius < maxX))
 					{
-						overlapInX=1;
+						overlapInX = true;
 					}
 				}
 
-				if (!overlapInX) continue;
+				if (!overlapInX) 
+					continue;
 
-				if (dynPtr->Position.vz>dynPtr->PrevPosition.vz)
+				if (dynPtr->Position.vz > dynPtr->PrevPosition.vz)
 				{
-					if ((dynPtr->Position.vz+objectPtr->ObRadius > minZ)
-					  &&(dynPtr->PrevPosition.vz-objectPtr->ObRadius < maxZ))
+					if ((dynPtr->Position.vz + objectPtr->ObRadius > minZ)
+					  && (dynPtr->PrevPosition.vz - objectPtr->ObRadius < maxZ))
 					{
-						overlapInZ=1;
+						overlapInZ = true;
 					}
 				}
 				else
 				{
-					if ((dynPtr->PrevPosition.vz+objectPtr->ObRadius > minZ)
-					  &&(dynPtr->Position.vz-objectPtr->ObRadius < maxZ))
+					if ((dynPtr->PrevPosition.vz + objectPtr->ObRadius > minZ)
+					  && (dynPtr->Position.vz - objectPtr->ObRadius < maxZ))
 					{
-						overlapInZ=1;
+						overlapInZ = true;
 					}
 				}
 
-				if (!overlapInZ) continue;
+				if (!overlapInZ) 
+					continue;
 
 				/* we have an overlap */
 				
 				/* KJL 16:37:29 27/08/98 - if object is on fire its now put out */
-				objectPtr->ObStrategyBlock->SBDamageBlock.IsOnFire=0;
+				objectPtr->ObStrategyBlock->SBDamageBlock.IsOnFire = 0;
 
 				if (objectPtr->ObStrategyBlock->I_SBtype == I_BehaviourFlareGrenade)
 				{
@@ -3721,7 +3720,7 @@ void CheckForObjectsInWater(int minX, int maxX, int minZ, int maxZ, int averageY
 					dynPtr->IsFloating = 1;
 					dynPtr->GravityOn = 0;
 					dynPtr->Elasticity = 0;
-					MakeMatrixFromDirection(&upwards,&(dynPtr->OrientMat));
+					MakeMatrixFromDirection(&upwards, &(dynPtr->OrientMat));
 				}
 				else if (objectPtr == Player)
 				{
@@ -3730,23 +3729,8 @@ void CheckForObjectsInWater(int minX, int maxX, int minZ, int maxZ, int averageY
 
 					playerStatusPtr->IsMovingInWater = 1;
 				}
-				{
 					
-					AddRipple(dynPtr->Position.vx,dynPtr->Position.vz,100);
-					#if 0
-					{
-						int i;
-						for (i=0; i<10; i++)
-						{
-							VECTORCH velocity;
-							velocity.vy = (-(FastRandom()%(magnitude)))*8;
-							velocity.vx = ((FastRandom()&1023)-512)*8;
-							velocity.vz = ((FastRandom()&1023)-512)*8;
-							MakeParticle(&(dynPtr->Position), &velocity, PARTICLE_WATERSPRAY);
-						}
-					}
-					#endif
-				}
+				AddRipple(dynPtr->Position.vx, dynPtr->Position.vz, 100);
 			}
 		}
 	}
@@ -3805,10 +3789,9 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 				}
 			}
 			{
-				int a;
-				for (a=0; a<12;a++)
+				for (int a = 0; a < 12; a++)
 				{
-					int i=8;
+					int i = 8;
 					PARTICLE particle;
 
 					particle.Position = *positionPtr;
@@ -3826,13 +3809,13 @@ void DrawMuzzleFlash(VECTORCH *positionPtr, VECTORCH *directionPtr, enum MUZZLE_
 					while(i--)
 					{
 						RenderParticle(&particle);
-						particle.Position.vx += MUL_FIXED((FastRandom()&31)+16,muzzleMatrix.mat21);
-						particle.Position.vy += MUL_FIXED((FastRandom()&31)+16,muzzleMatrix.mat22);
-						particle.Position.vz += MUL_FIXED((FastRandom()&31)+16,muzzleMatrix.mat23);
+						particle.Position.vx += MUL_FIXED((FastRandom()&31) + 16, muzzleMatrix.mat21);
+						particle.Position.vy += MUL_FIXED((FastRandom()&31) + 16, muzzleMatrix.mat22);
+						particle.Position.vz += MUL_FIXED((FastRandom()&31) + 16, muzzleMatrix.mat23);
 						particle.Size += (FastRandom()&15);
 					}
 
-					MatrixMultiply(&muzzleMatrix,&rotmat,&muzzleMatrix);
+					MatrixMultiply(&muzzleMatrix, &rotmat, &muzzleMatrix);
 				}
 			}
 			break;

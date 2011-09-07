@@ -3,26 +3,12 @@
 #include "inline.h"
 #include "VDB.h"
 
-/*
-	General System Globals
-*/
+SCENE Global_Scene = AVP_Scene0;
 
-SCENE Global_Scene = AVP_Scene0;//0;
-
-
-
-
-/*
-	Screen Descriptor Block
-*/
-
+// Screen Descriptor Block
 SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 
-
-/*
-	View Descriptor Blocks
-*/
-
+// View Descriptor Blocks
 int NumFreeVDBs;
 VIEWDESCRIPTORBLOCK *FreeVDBList[maxvdbs];
 static VIEWDESCRIPTORBLOCK **FreeVDBListPtr = &FreeVDBList[maxvdbs-1];
@@ -33,10 +19,8 @@ static VIEWDESCRIPTORBLOCK **ActiveVDBListPtr = &ActiveVDBList[0];
 
 static VIEWDESCRIPTORBLOCK FreeVDBData[maxvdbs];
 
-/* Clip Plane Block */
+// Clip Plane Block
 static CLIPPLANEPOINTS ClipPlanePoints;
-
-
 
 extern int GlobalAmbience;
 
@@ -57,7 +41,6 @@ extern int GlobalAmbience;
 
 void VDBClipPlanes(VIEWDESCRIPTORBLOCK *vdb)
 {
-
 	/* Check Clip Boundaries against the Physical Screen */
 
 	/* Check Left Boundary */
@@ -88,7 +71,6 @@ void VDBClipPlanes(VIEWDESCRIPTORBLOCK *vdb)
 		vdb->VDB_Flags |= ViewDB_Flag_DTrunc;
 	}
 
-
 	/* Calculate Width and Height */
 
 	/* textprint("current wh = %d, %d\n", vdb->VDB_Width, vdb->VDB_Height); */
@@ -107,7 +89,6 @@ void VDBClipPlanes(VIEWDESCRIPTORBLOCK *vdb)
 
 	/* Set up the Clip Planes */
 
-
 	/* Clip Left */
 	ClipPlanePoints.cpp1.vx = vdb->VDB_ClipLeft;
 	ClipPlanePoints.cpp1.vy = vdb->VDB_ClipUp;
@@ -122,7 +103,6 @@ void VDBClipPlanes(VIEWDESCRIPTORBLOCK *vdb)
 	ClipPlanePoints.cpp3.vz = NearZ;
 
 	MakeClipPlane(vdb, &vdb->VDB_ClipLeftPlane, &ClipPlanePoints);
-
 
 	/* Clip Right */
 	ClipPlanePoints.cpp1.vx = vdb->VDB_ClipRight;
@@ -139,7 +119,6 @@ void VDBClipPlanes(VIEWDESCRIPTORBLOCK *vdb)
 
 	MakeClipPlane(vdb, &vdb->VDB_ClipRightPlane, &ClipPlanePoints);
 
-
 	/* Clip Up */
 	ClipPlanePoints.cpp1.vx = vdb->VDB_ClipLeft;
 	ClipPlanePoints.cpp1.vy = vdb->VDB_ClipUp;
@@ -155,7 +134,6 @@ void VDBClipPlanes(VIEWDESCRIPTORBLOCK *vdb)
 
 	MakeClipPlane(vdb, &vdb->VDB_ClipUpPlane, &ClipPlanePoints);
 
-
 	/* Clip Down */
 	ClipPlanePoints.cpp1.vx = vdb->VDB_ClipLeft;
 	ClipPlanePoints.cpp1.vy = vdb->VDB_ClipDown;
@@ -170,7 +148,6 @@ void VDBClipPlanes(VIEWDESCRIPTORBLOCK *vdb)
 	ClipPlanePoints.cpp3.vz = NearZ;
 
 	MakeClipPlane(vdb, &vdb->VDB_ClipDownPlane, &ClipPlanePoints);
-
 
 	/* Clip Z */
 	vdb->VDB_ClipZPlane.CPB_Normal.vx = 0;
@@ -240,7 +217,6 @@ void MakeClipPlane(VIEWDESCRIPTORBLOCK *vdb, CLIPPLANEBLOCK *cpb, CLIPPLANEPOINT
 	y /= vdb->VDB_ProjY;
 	cpp->cpp2.vy = y;
 
-
 	/* cpp3 */
 
 	/* x */
@@ -288,9 +264,7 @@ void MakeClipPlane(VIEWDESCRIPTORBLOCK *vdb, CLIPPLANEBLOCK *cpb, CLIPPLANEPOINT
 */
 
 static void CreateProjectorArray(VIEWDESCRIPTORBLOCK *vdb)
-
 {
-
 	int sx, x, vx, vz, i, ao;
 
 
@@ -318,7 +292,6 @@ static void CreateProjectorArray(VIEWDESCRIPTORBLOCK *vdb)
 		sx++; i++;
 
 	}
-
 }
 
 #endif
@@ -405,10 +378,9 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 	/* Width and Height are set by the Clip Boundaries */
 	if (vdb->VDB_Flags & ViewDB_Flag_FullSize)
 	{
-
 		vdb->VDB_Depth			= ScreenDescriptorBlock.SDB_Depth;
 
-        vdb->VDB_ScreenDepth    = ScreenDescriptorBlock.SDB_ScreenDepth;
+		vdb->VDB_ScreenDepth	= ScreenDescriptorBlock.SDB_ScreenDepth;
 
 		vdb->VDB_CentreX		= ScreenDescriptorBlock.SDB_CentreX;
 		vdb->VDB_CentreY		= ScreenDescriptorBlock.SDB_CentreY;
@@ -429,7 +401,7 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 //		 else
 //		   vdb->VDB_Depth = VideoModeType_24;
 
-        vdb->VDB_ScreenDepth    = ScreenDescriptorBlock.SDB_ScreenDepth;
+		vdb->VDB_ScreenDepth	= ScreenDescriptorBlock.SDB_ScreenDepth;
 
 		vdb->VDB_CentreX		= cx;
 		vdb->VDB_CentreY		= cy;
@@ -457,7 +429,6 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 					ScreenDescriptorBlock.SDB_Height,
 					200);
 
-
 			vdb->VDB_ProjX =
 				WideMulNarrowDiv(
 					vdb->VDB_ProjX,
@@ -475,7 +446,6 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 					vdb->VDB_MaxProj,
 					ScreenDescriptorBlock.SDB_Width,
 					320);
-
 
 			vdb->VDB_ClipLeft =
 				WideMulNarrowDiv(
@@ -500,7 +470,6 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 					vdb->VDB_ClipDown,
 					ScreenDescriptorBlock.SDB_Height,
 					200);
-
 		}
 	}
 
@@ -524,7 +493,6 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 
 void InitialiseVDBs(void)
 {
-
 	VIEWDESCRIPTORBLOCK *FreeVDBPtr = &FreeVDBData[0];
 
 	NumActiveVDBs = 0;
@@ -532,7 +500,6 @@ void InitialiseVDBs(void)
 	for (NumFreeVDBs = 0; NumFreeVDBs < maxvdbs; NumFreeVDBs++)
 	{
 		FreeVDBList[NumFreeVDBs] = FreeVDBPtr;
-
 		FreeVDBPtr++;
 	}
 
@@ -549,17 +516,15 @@ void InitialiseVDBs(void)
 
 VIEWDESCRIPTORBLOCK* AllocateVDB(void)
 {
-
 	VIEWDESCRIPTORBLOCK *FreeVDBPtr = 0;	/* Default to null ptr */
 	int *i_src;
 	int i;
-
 
 	if (NumFreeVDBs)
 	{
 		FreeVDBPtr = *FreeVDBListPtr--;
 
-		NumFreeVDBs -= 1;							/* One less free block */
+		NumFreeVDBs -= 1;   /* One less free block */
 
 		/* Clear the block */
 
@@ -580,11 +545,10 @@ VIEWDESCRIPTORBLOCK* AllocateVDB(void)
 
 void DeallocateVDB(VIEWDESCRIPTORBLOCK *vdb)
 {
-
 	FreeVDBListPtr++;
 	*FreeVDBListPtr = vdb;
 
-	NumFreeVDBs++;							/* One more free block */
+	NumFreeVDBs++;     /* One more free block */
 }
 
 
@@ -596,7 +560,6 @@ void DeallocateVDB(VIEWDESCRIPTORBLOCK *vdb)
 
 VIEWDESCRIPTORBLOCK* CreateActiveVDB(void)
 {
-
 	VIEWDESCRIPTORBLOCK *vdb;
 	VIEWDESCRIPTORBLOCK *vdb_tmp;
 	VIEWDESCRIPTORBLOCK **v_src;
@@ -604,13 +567,11 @@ VIEWDESCRIPTORBLOCK* CreateActiveVDB(void)
 	int v;
 	int p = -1;
 
-
 	vdb = AllocateVDB();
 
 	if (vdb)
 	{
 		/* Find the next "VDB_Priority" */
-
 		if (NumActiveVDBs)
 		{
 			v_src = &ActiveVDBList[0];
@@ -647,19 +608,17 @@ VIEWDESCRIPTORBLOCK* CreateActiveVDB(void)
 
 int DestroyActiveVDB(VIEWDESCRIPTORBLOCK *dblockptr)
 {
-
 	int j = -1;
 	int i;
 
-
 	/* If the VDB ptr is OK, search the Active VDB List */
 
-	if(dblockptr) {
-
-		for(i = 0; i < NumActiveVDBs && j!=0; i++) {
-
-			if(ActiveVDBList[i] == dblockptr) {
-
+	if (dblockptr)
+	{
+		for(i = 0; i < NumActiveVDBs && j!=0; i++)
+		{
+			if (ActiveVDBList[i] == dblockptr)
+			{
 				#if ProjectSpecificVDBs
 				ProjectSpecificVDBDestroy(dblockptr);
 				#endif
@@ -667,13 +626,11 @@ int DestroyActiveVDB(VIEWDESCRIPTORBLOCK *dblockptr)
 				ActiveVDBList[i] = ActiveVDBList[NumActiveVDBs - 1];
 				NumActiveVDBs--;
 				ActiveVDBListPtr--;
-				DeallocateVDB(dblockptr);		/* Return VDB to Free List */
-				j = 0;								/* Flag OK */
-
+				DeallocateVDB(dblockptr);    /* Return VDB to Free List */
+				j = 0;                       /* Flag OK */
 			}
 		}
 	}
 
-	return(j);
-
+	return j;
 }

@@ -2899,7 +2899,7 @@ void PositionPlayersWeapon(void)
 	TEMPLATE_WEAPON_DATA *twPtr = &TemplateWeapon[weaponPtr->WeaponIDNumber];
 
 	VECTORCH gunDirection;
-	//VECTORCH gunOffset = twPtr->RestPosition;
+
 	VECTORCH gunOffset = PlayersWeaponCameraOffset;
 	gunOffset.vx += twPtr->RestPosition.vx;
 	gunOffset.vy += twPtr->RestPosition.vy;
@@ -2910,8 +2910,8 @@ void PositionPlayersWeapon(void)
 	gunOffset.vz += weaponPtr->PositionOffset.vz;
 
    	if ( (!(twPtr->PrimaryIsMeleeWeapon || (weaponPtr->WeaponIDNumber == WEAPON_PRED_DISC)
-		||(weaponPtr->WeaponIDNumber == WEAPON_PRED_SHOULDERCANNON) 
-		||(weaponPtr->WeaponIDNumber == WEAPON_PRED_MEDICOMP) 
+		|| (weaponPtr->WeaponIDNumber == WEAPON_PRED_SHOULDERCANNON) 
+		|| (weaponPtr->WeaponIDNumber == WEAPON_PRED_MEDICOMP) 
 		)) ) {
 		{
 			gunDirection = PlayersTarget.Position;
@@ -2927,9 +2927,9 @@ void PositionPlayersWeapon(void)
 					TransposeMatrixCH(&mat);
 					RotateVector(&offset, &mat);
 		 		}
-			 	gunDirection.vx -= Global_VDB_Ptr->VDB_World.vx-offset.vx;
-			  	gunDirection.vy -= Global_VDB_Ptr->VDB_World.vy-offset.vy;
-			  	gunDirection.vz -= Global_VDB_Ptr->VDB_World.vz-offset.vz;
+			 	gunDirection.vx -= Global_VDB_Ptr->VDB_World.vx - offset.vx;
+			  	gunDirection.vy -= Global_VDB_Ptr->VDB_World.vy - offset.vy;
+			  	gunDirection.vz -= Global_VDB_Ptr->VDB_World.vz - offset.vz;
 			}
 			Normalise(&gunDirection);
 		}
@@ -2946,7 +2946,7 @@ void PositionPlayersWeapon(void)
 			YVector.vx = Global_VDB_Ptr->VDB_Mat.mat12;
 			YVector.vy = Global_VDB_Ptr->VDB_Mat.mat22;
 			YVector.vz = Global_VDB_Ptr->VDB_Mat.mat32;
-			CrossProduct(&YVector,&ZVector, &XVector);
+			CrossProduct(&YVector, &ZVector, &XVector);
 			Normalise(&XVector);
 
 			PlayersWeapon.ObMat.mat11 = XVector.vx;
@@ -3052,7 +3052,6 @@ void PositionPlayersWeaponMuzzleFlash(void)
 
 	{
 		VECTORCH v = CentreOfMuzzleOffset;
- //		int disp = MUL_FIXED(MuzzleFlashLength,length);
 		
 		RotateVector(&v, &PlayersWeapon.ObMat);
 	
@@ -3064,9 +3063,6 @@ void PositionPlayersWeaponMuzzleFlash(void)
 		PlayersWeaponMuzzleFlash.ObWorld.vx = v.vx+MUL_FIXED(200,PlayersWeapon.ObMat.mat31);
 		PlayersWeaponMuzzleFlash.ObWorld.vy = v.vy+MUL_FIXED(200,PlayersWeapon.ObMat.mat32);
 		PlayersWeaponMuzzleFlash.ObWorld.vz = v.vz+MUL_FIXED(200,PlayersWeapon.ObMat.mat33);
- //		PlayersWeaponMuzzleFlash.ObWorld.vx = v.vx+MUL_FIXED(disp,PlayersWeapon.ObMat.mat31);
- //		PlayersWeaponMuzzleFlash.ObWorld.vy = v.vy+MUL_FIXED(disp,PlayersWeapon.ObMat.mat32);
- //		PlayersWeaponMuzzleFlash.ObWorld.vz = v.vz+MUL_FIXED(disp,PlayersWeapon.ObMat.mat33);
 	}
 	
 	/* calculate it's view space position */
@@ -3094,22 +3090,20 @@ void PositionPlayersWeaponMuzzleFlash(void)
 	PlayersWeaponMuzzleFlash.ObMat.mat33 = MUL_FIXED(length,PlayersWeapon.ObMat.mat33);
 	
 	/* rotate flash around in random multiples of 60 degrees */
-	{
-		MATRIXCH mat;
-   		int angle = (FastRandom()%6)*683;
- 	  	int cos = GetCos(angle);
- 	  	int sin = GetSin(angle);
- 	  	mat.mat11 = cos;		 
- 	  	mat.mat12 = sin;
- 	  	mat.mat13 = 0;
- 	  	mat.mat21 = -sin;	  	
- 	  	mat.mat22 = cos;	  	
- 	  	mat.mat23 = 0;	  	
- 	  	mat.mat31 = 0;	  	
- 	  	mat.mat32 = 0;	  	
- 	  	mat.mat33 = 65536;	  	
-		 	MatrixMultiply(&PlayersWeaponMuzzleFlash.ObMat,&mat,&PlayersWeaponMuzzleFlash.ObMat);
-	}
+	MATRIXCH mat;
+   	int angle = (FastRandom()%6)*683;
+ 	int cos = GetCos(angle);
+ 	int sin = GetSin(angle);
+ 	mat.mat11 = cos;		 
+ 	mat.mat12 = sin;
+ 	mat.mat13 = 0;
+ 	mat.mat21 = -sin;	  	
+ 	mat.mat22 = cos;	  	
+ 	mat.mat23 = 0;	  	
+ 	mat.mat31 = 0;	  	
+ 	mat.mat32 = 0;	  	
+ 	mat.mat33 = 65536;	  	
+		MatrixMultiply(&PlayersWeaponMuzzleFlash.ObMat,&mat,&PlayersWeaponMuzzleFlash.ObMat);
 }	
 
 

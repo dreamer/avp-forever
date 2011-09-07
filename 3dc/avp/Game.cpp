@@ -211,7 +211,7 @@ void StartGame(void)
 	#endif
 
 	#if MIRRORING_ON
-	if(Current_Level_Requires_Mirror_Image())
+	if (Current_Level_Requires_Mirror_Image())
 	{
 		CreatePlayersImageInMirror();
 	}

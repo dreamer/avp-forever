@@ -50,7 +50,6 @@
 #define DO_PREDATOR_OVERLAY FALSE
 #define DO_ALIEN_OVERLAY FALSE
 
-#define DRAW_HUD TRUE
 /*KJL****************************************************************************************
 *  										G L O B A L S 	            					    *
 ****************************************************************************************KJL*/
@@ -254,24 +253,26 @@ void ReInitHUD(void)
 /* KJL 16:27:39 09/20/96 - routine which handles all HUD activity */
 void MaintainHUD(void)
 {
-	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 	GLOBALASSERT(playerStatusPtr);
-
-//	RenderSmokeTest();
-//	PlatformSpecificEnteringHUD();
 
 	HandleParticleSystem();
 	HandleDecalSystem();
 
 	RenderGrapplingHook();
 
+#if 0
+	D3DPERF_BeginEvent(D3DCOLOR_XRGB(255, 0, 255), L"MaintainHUD - FlushD3DZBuffer() call");
+
 	// stops player weapon sinking into walls
 	FlushD3DZBuffer();
 
-	//DrawFontTest();
+	D3DPERF_EndEvent();
+#endif
+
 	if (Observer)
 	{
-		switch(AvP.PlayerType)
+		switch (AvP.PlayerType)
 		{
 			case I_Marine:
 			{
@@ -292,9 +293,11 @@ void MaintainHUD(void)
 				break;
 		}
 		CheckWireFrameMode(0);
-		#if 1||!PREDATOR_DEMO
-		GADGET_Render();
+
+		#if 1 || !PREDATOR_DEMO
+			GADGET_Render();
 		#endif
+
 		return;
 	}
 
@@ -302,7 +305,6 @@ void MaintainHUD(void)
 
 	/* KJL 18:46:04 03/10/97 - for now I've completely turned off the HUD if you die; this
 	can easily be changed */
-	#if DRAW_HUD
 	if (playerStatusPtr->MyFaceHugger!=NULL)
 	{
 		/* YUCK! */
@@ -311,23 +313,31 @@ void MaintainHUD(void)
 	else if (playerStatusPtr->IsAlive)
 	{
 		/* switch on player type */
-		switch(AvP.PlayerType)
+		switch (AvP.PlayerType)
 		{
 			case I_Marine:
 			{
 				HandleMarineWeapon();
-	  	 	 	if (CurrentVisionMode==VISION_MODE_NORMAL) DoMotionTracker();
+
+	  	 	 	if (CurrentVisionMode==VISION_MODE_NORMAL)
+				{
+					DoMotionTracker();
+				}
+
 				CheckWireFrameMode(0);
-				//flash health if invulnerable
-				if((playerStatusPtr->invulnerabilityTimer/12000 %2)==0)
+
+				// flash health if invulnerable
+				if ((playerStatusPtr->invulnerabilityTimer/12000 %2) == 0)
 				{
 					DisplayHealthAndArmour();
 				}
+
 				DisplayMarinesAmmo();
 		  		DrawMarineSights();
 
 				/* Paranoia check. */
-		  		if(predHUDSoundHandle != SOUND_NOACTIVEINDEX) {
+		  		if (predHUDSoundHandle != SOUND_NOACTIVEINDEX) 
+				{
 		       		Sound_Stop(predHUDSoundHandle);
 				}
 				break;
@@ -341,11 +351,15 @@ void MaintainHUD(void)
 			   	DrawWristDisplay();
 
   				HandlePredOVision();
-				if (DrawScanlineOverlay) DrawScanlinesOverlay(ScanlineLevel);
+				if (DrawScanlineOverlay) 
+				{
+					DrawScanlinesOverlay(ScanlineLevel);
+				}
 
 			   	DrawPredatorSights();
-				//flash health if invulnerable
-				if((playerStatusPtr->invulnerabilityTimer/12000 %2)==0)
+
+				// flash health if invulnerable
+				if ((playerStatusPtr->invulnerabilityTimer/12000 %2) == 0)
 				{
 	  				DisplayPredatorHealthAndEnergy();
 				}
@@ -416,16 +430,14 @@ void MaintainHUD(void)
 		}
 	}
 
-	#endif
-
 	CheckWireFrameMode(0);
 
 	{
-		#if 1||!PREDATOR_DEMO
-		GADGET_Render();
+		#if 1 || !PREDATOR_DEMO
+			GADGET_Render();
 		#endif
 
-		switch(AvP.PlayerType)
+		switch (AvP.PlayerType)
 		{
 			case I_Marine:
 			{
@@ -444,7 +456,7 @@ void MaintainHUD(void)
 	{
 		if (AlienBiteAttackInProgress)
 		{
-			if (CameraZoomScale!=0.25f)
+			if (CameraZoomScale != 0.25f)
 			{
 				//f2i(b,CameraZoomScale*65536.0f);
 				int b = static_cast<int>(CameraZoomScale * 65536.0f);
@@ -979,40 +991,38 @@ static void HandleMarineWeapon(void)
 	PLAYER_WEAPON_DATA *weaponPtr;
 	TEMPLATE_WEAPON_DATA *twPtr;
 
-	/* access the extra data hanging off the strategy block */
+	// access the extra data hanging off the strategy block
 	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
-    GLOBALASSERT(playerStatusPtr);
+	GLOBALASSERT(playerStatusPtr);
 
-	{
-		/* player's current weapon */
-    	GLOBALASSERT(playerStatusPtr->SelectedWeaponSlot<MAX_NO_OF_WEAPON_SLOTS);
+	// player's current weapon
+	GLOBALASSERT(playerStatusPtr->SelectedWeaponSlot<MAX_NO_OF_WEAPON_SLOTS);
 
-        /* init a pointer to the weapon's data */
-        weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
-        twPtr = &TemplateWeapon[weaponPtr->WeaponIDNumber];
-    }
+	// init a pointer to the weapon's data
+	weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
+	twPtr = &TemplateWeapon[weaponPtr->WeaponIDNumber];
 
-	/* draw 3d weapon */
+	// draw 3d weapon
 	PositionPlayersWeapon();
 
-	/* if there is no shape name then return */
+	// if there is no shape name then return
 	if (twPtr->WeaponShapeName == NULL)
 		return;
 
 	RenderThisDisplayblock(&PlayersWeapon);
 
 	if ((twPtr->MuzzleFlashShapeName != NULL)
-	  &&(!twPtr->PrimaryIsMeleeWeapon)
-	  &&( (weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY)
-	   	||( (weaponPtr->WeaponIDNumber == WEAPON_MARINE_PISTOL)&&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY) )
-	   	||( (weaponPtr->WeaponIDNumber == WEAPON_TWO_PISTOLS)&&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY) ) ) )
+	  && (!twPtr->PrimaryIsMeleeWeapon)
+	  && ((weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY)
+		|| ( (weaponPtr->WeaponIDNumber == WEAPON_MARINE_PISTOL)&&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY) )
+		|| ( (weaponPtr->WeaponIDNumber == WEAPON_TWO_PISTOLS)&&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY) ) ) )
 		PositionPlayersWeaponMuzzleFlash();
 	{
 		if ((twPtr->MuzzleFlashShapeName != NULL)
-		  	   &&(!twPtr->PrimaryIsMeleeWeapon)
-		  	   &&((weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY)
-		  	   	||((weaponPtr->WeaponIDNumber == WEAPON_MARINE_PISTOL)&&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY))
-		  	   	||((weaponPtr->WeaponIDNumber == WEAPON_TWO_PISTOLS)&&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY) )))
+				&& (!twPtr->PrimaryIsMeleeWeapon)
+				&& ((weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY)
+				|| ((weaponPtr->WeaponIDNumber == WEAPON_MARINE_PISTOL)&&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY))
+				|| ((weaponPtr->WeaponIDNumber == WEAPON_TWO_PISTOLS)&&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY) )))
 		{
 			static int onThisFrame=1;
 			if (onThisFrame || !twPtr->PrimaryIsRapidFire)
@@ -1037,18 +1047,15 @@ static void HandleMarineWeapon(void)
 				}
 			}
 			onThisFrame=!onThisFrame;
-		//	RenderThisDisplayblock(&PlayersWeaponMuzzleFlash);
 		}
 	}
 
-	/* handle smart targeting */
-    SmartTarget(twPtr->SmartTargetSpeed,0);
+	// handle smart targeting
+	SmartTarget(twPtr->SmartTargetSpeed, 0);
 
-	/* aim gun sight */
-    {
-    	int aimingSpeed = twPtr->GunCrosshairSpeed * NormalFrameTime;
-        AimGunSight(aimingSpeed, twPtr);
-	}
+	// aim gun sight
+	int aimingSpeed = twPtr->GunCrosshairSpeed * NormalFrameTime;
+	AimGunSight(aimingSpeed, twPtr);
 }
 
 static void DrawMarineSights(void)

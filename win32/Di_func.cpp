@@ -48,15 +48,15 @@ static IDirectInputDevice*		g_pJoystick         = NULL;
 static IDirectInputDevice2*		g_pJoystickDevice2  = NULL;  // needed to poll joystick
 */
 
-static bool bGravePressed = false;
+//static bool bGravePressed = false;
 // added 14/1/98 by DHM as a temporary hack to debounce the GRAVE key
 
 /*
 	Externs for input communication
 */
 
-extern HINSTANCE hInst;
-extern HWND hWndMain;
+//extern HINSTANCE hInst;
+//extern HWND hWndMain;
 
 int GotMouse;
 int MouseVelX;
@@ -74,7 +74,7 @@ JOYCAPS JoystickCaps;
 JOYINFOEX JoystickData;
 int JoystickEnabled;
 
-DIJOYSTATE JoystickState;          // DirectInput joystick state 
+//DIJOYSTATE JoystickState;          // DirectInput joystick state 
 
 // XInput stuff from dx sdk samples
 BOOL GotXPad = FALSE;
@@ -124,7 +124,7 @@ enum
 const int NUMPADBUTTONS = 16;
 static unsigned char GamePadButtons[NUMPADBUTTONS];
 
-int blockGamepadInputTimer = 0;
+fixed_t blockGamepadInputTimer = 0;
 
 void ClearAllKeyArrays();
 
@@ -139,7 +139,7 @@ unsigned char DebouncedKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
 // but it's getting late and I can't face reading any more Microsoft documentation...
 static unsigned char LastFramesKeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
 
-static char IngameKeyboardInput[256];
+static unsigned char IngameKeyboardInput[256];
 
 // mouse - 5 buttons?
 unsigned char MouseButtons[5] = {0};
@@ -340,8 +340,7 @@ void DirectReadKeyboard(void)
 	memcpy((void*)LastFramesKeyboardInput, (void*)KeyboardInput, MAX_NUMBER_OF_INPUT_KEYS);
 	LastGotAnyKey = GotAnyKey;
 
-    // Zero current inputs (i.e. set all keys to FALSE,
-	// or not pressed)
+    // Zero current inputs (i.e. set all keys to FALSE, or not pressed)
     memset((void*)KeyboardInput, FALSE, MAX_NUMBER_OF_INPUT_KEYS);
 	GotAnyKey = false;
 
@@ -844,16 +843,28 @@ void DirectReadKeyboard(void)
 	}
 
 	// update debounced keys array
-	{
-		for (int i = 0; i < MAX_NUMBER_OF_INPUT_KEYS; i++)
-		{ 
-			DebouncedKeyboardInput[i] =
-			(
-				KeyboardInput[i] && !LastFramesKeyboardInput[i]
-			);
-		}
+	for (int i = 0; i < MAX_NUMBER_OF_INPUT_KEYS; i++)
+	{ 
+		DebouncedKeyboardInput[i] =
+		(
+			KeyboardInput[i] && !LastFramesKeyboardInput[i]
+		);
+	}
 
-		DebouncedGotAnyKey = GotAnyKey && !LastGotAnyKey;
+	DebouncedGotAnyKey = GotAnyKey && !LastGotAnyKey;
+	if (DebouncedGotAnyKey)
+	{
+		//printf("DebouncedGotAnyKey is set\n");
+	}
+/*
+	if (GotAnyKey)
+	{
+		printf("GotAnyKey is set\n");
+	}
+*/
+	if (!LastGotAnyKey)
+	{
+	//	printf("LastGotAnyKey is not set\n");
 	}
 
 	if (Osk_IsActive())
@@ -1543,6 +1554,7 @@ void ClearAllKeyArrays()
 	memset(KeyboardInput, 0, MAX_NUMBER_OF_INPUT_KEYS);
 	memset(DebouncedKeyboardInput, 0, MAX_NUMBER_OF_INPUT_KEYS);
 	GotAnyKey = false;
+	LastGotAnyKey = false;
 	DebouncedGotAnyKey = false;
 }
 

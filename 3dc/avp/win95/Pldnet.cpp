@@ -690,7 +690,7 @@ void MinimalNetCollectMessages(void)
 
 		while ((res == NET_OK) && AvPNetID)
 		{
-			res = Net_Receive(&fromID, &toID, NET_RECEIVE_ALL, &msg[0], &msgSize);				
+			res = Net_Receive(&fromID, &toID, NET_RECEIVE_ALL, &msg[0], &msgSize);
 			if (NET_OK == res)
 			{
 				/* process last message, if there is one */
@@ -698,27 +698,27 @@ void MinimalNetCollectMessages(void)
 				{
 					ProcessSystemMessage(&msg[0], msgSize);
 				}
-				else ProcessGameMessage(fromID, &msg[0], msgSize);										
+				else ProcessGameMessage(fromID, &msg[0], msgSize);
 			}
 		}
 	}
 }
 
 void NetCollectMessages(void)
-{			
+{
 	int res = NET_OK;
 	int	fromID = 0;
 	int	toID = 0;
 	size_t msgSize = 0;
 		
 	/* first off, some assertions about our game state */
-	LOCALASSERT(!((AvP.Network==I_Host)&&(netGameData.myGameState==NGS_Leaving)));	
+	LOCALASSERT(!((AvP.Network==I_Host)&&(netGameData.myGameState==NGS_Leaving)));
 	LOCALASSERT(!((AvP.Network==I_Host)&&(netGameData.myGameState==NGS_Error_GameFull)));
 	LOCALASSERT(!((AvP.Network==I_Host)&&(netGameData.myGameState==NGS_Error_GameStarted)));
 	LOCALASSERT(!((AvP.Network==I_Host)&&(netGameData.myGameState==NGS_Error_HostLost)));
 
 	/* only bother colecting messages under certain game conditions... */
-	if ((netGameData.myGameState!=NGS_StartUp)&&(netGameData.myGameState!=NGS_Playing)&&(netGameData.myGameState!=NGS_Joining)&&(netGameData.myGameState!=NGS_EndGameScreen)) 
+	if ((netGameData.myGameState!=NGS_StartUp)&&(netGameData.myGameState!=NGS_Playing)&&(netGameData.myGameState!=NGS_Joining)&&(netGameData.myGameState!=NGS_EndGameScreen))
 		return;
 
 	InitNetLog();
@@ -731,7 +731,7 @@ void NetCollectMessages(void)
 
 		while ((NET_OK == res) && AvPNetID)
 		{
-			res = Net_Receive(&fromID, &toID, NET_RECEIVE_ALL, &msg[0], &msgSize);				
+			res = Net_Receive(&fromID, &toID, NET_RECEIVE_ALL, &msg[0], &msgSize);
 			if (NET_OK == res)
 			{
 				numMessagesReceived++;
@@ -740,7 +740,7 @@ void NetCollectMessages(void)
 				{
 					ProcessSystemMessage(&msg[0], msgSize);
 				}
-				else ProcessGameMessage(fromID, &msg[0] ,msgSize);										
+				else ProcessGameMessage(fromID, &msg[0] ,msgSize);
 			}
 		}
 	}
@@ -753,14 +753,14 @@ void NetCollectMessages(void)
 	/* time and score limit checks...*/
 	{
 		//update timer
-		if(netGameData.myGameState==NGS_Playing)
+		if (netGameData.myGameState==NGS_Playing)
 		{
 			netGameData.GameTimeElapsed += RealFrameTime;
 		}
 		
-		if((AvP.Network==I_Host)&&(netGameData.myGameState==NGS_Playing))
+		if ((AvP.Network==I_Host)&&(netGameData.myGameState==NGS_Playing))
 		{
-			if(netGameData.timeLimit>0)
+			if (netGameData.timeLimit>0)
 			{
 				if(((netGameData.GameTimeElapsed>>16)/60) >= netGameData.timeLimit)
 				{
@@ -777,7 +777,7 @@ void NetCollectMessages(void)
 				for(i=0;i<NET_MAXPLAYERS;i++)
 				{
 					if(netGameData.playerData[i].playerId)
-					{	
+					{
 						int score=0;
 						for(j=0;j<3;j++)
 						{
@@ -792,9 +792,9 @@ void NetCollectMessages(void)
 						//	AvP.MainLoopRunning = 0;
 						}
 					}
-				}			
+				}
 			}
-			if(netGameData.maxLives>0)
+			if (netGameData.maxLives>0)
 			{
 				int i;
 				int numPlayers=0;
@@ -806,10 +806,11 @@ void NetCollectMessages(void)
 				int numPredators=0;
 				int numPredatorsWithLifeLeft=0;
 				BOOL gameOver=FALSE;
-				for(i=0;i<NET_MAXPLAYERS;i++)
+
+				for (i=0;i<NET_MAXPLAYERS;i++)
 				{
-					if(netGameData.playerData[i].playerId)
-					{	
+					if (netGameData.playerData[i].playerId)
+					{
 						numPlayers++;
 						numPlayersWithLifeLeft+=netGameData.playerData[i].playerHasLives;
 
@@ -829,7 +830,6 @@ void NetCollectMessages(void)
 								numPredators++;
 								numPredatorsWithLifeLeft+=netGameData.playerData[i].playerHasLives;
 								break;
-
 						}
 					}
 				}
@@ -869,7 +869,7 @@ void NetCollectMessages(void)
 						gameOver=TRUE;
 					}
 				}
-				
+
 				if(gameOver)
 				{
 					TransmitEndOfGameNetMsg();
@@ -887,14 +887,14 @@ void NetCollectMessages(void)
 		int myScore;
 		int myIndex = PlayerIdInPlayerList(AvPNetID);
 		myScore = AddUpPlayerFrags(myIndex);
-		LOCALASSERT(myIndex!=NET_IDNOTINPLAYERLIST);		
+		LOCALASSERT(myIndex!=NET_IDNOTINPLAYERLIST);
 		#if PreBeta
 		{
 			extern void	jtextprint(const char *t,...);
-			jtextprint("NET GAME SCORE: %d \n", myScore);	
+			jtextprint("NET GAME SCORE: %d \n", myScore);
 		}
 		#else
-			textprint("NET GAME SCORE: %d \n", myScore);	
+			textprint("NET GAME SCORE: %d \n", myScore);
 		#endif
 
 		#else
@@ -923,14 +923,14 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 {
 	int systemMessageType;
 	char buf[100];
-	messageHeader newMessageHeader = {0};
+	MessageHeader newMessageHeader = {0};
 
 	/* currently, only the host deals with system mesages */
 	/* check for invalid parameters */
 	if ((msgSize == 0) || (msgP == NULL)) 
 		return;
 
-	memcpy(&newMessageHeader, &msgP[0], sizeof(messageHeader));
+	memcpy(&newMessageHeader, &msgP[0], sizeof(MessageHeader));
 	systemMessageType = newMessageHeader.toID;
 
 	OutputDebugString("we're going to process a system message\n");
@@ -9314,27 +9314,28 @@ void CreatePlayersImageInMirror(void)
 	sbPtr->SBdataptr = (void *)ghostData;
 	sbPtr->DynPtr = &PlayersMirrorDynBlock;
 	
-	switch(AvP.PlayerType)
+	switch (AvP.PlayerType)
 	{
-		case(I_Marine):
+		case (I_Marine):
 		{
 			type = I_BehaviourMarinePlayer;
 			break;
 		}
-		case(I_Predator):
+		case (I_Predator):
 		{
 			type = I_BehaviourPredatorPlayer;
 			break;
 		}
-		case(I_Alien):
+		case (I_Alien):
 		{
 			type = I_BehaviourAlienPlayer;
 			break;
 		}
 	}
+
 	ghostData->type = type;
-	ghostData->IOType=IOT_Non;
-	ghostData->subtype=0;
+	ghostData->IOType = IOT_Non;
+	ghostData->subtype = 0;
 	ghostData->myGunFlash = NULL;
 	ghostData->SoundHandle = SOUND_NOACTIVEINDEX;
 	ghostData->currentAnimSequence = 0;
@@ -9342,46 +9343,47 @@ void CreatePlayersImageInMirror(void)
 	ghostData->IgnitionHandshaking = 0;
 	ghostData->soundStartFlag = 0;
 	
-	if(AvP.Network == I_No_Network)
+	if (AvP.Network == I_No_Network)
 	{
-		ghostData->playerId=0;
+		ghostData->playerId = 0;
 	}
 	else
 	{
-		ghostData->playerId=AvPNetID;
+		ghostData->playerId = AvPNetID;
 	}
 
 	/* set the shape */
 
-	switch(type)
+	switch (type)
 	{
-		case(I_BehaviourMarinePlayer):
+		case (I_BehaviourMarinePlayer):
 		{
 			extern void CreateMarineHModel(NETGHOSTDATABLOCK *ghostDataPtr, int weapon); // remove undefined warning
-			CreateMarineHModel(ghostData,WEAPON_PULSERIFLE);
+			CreateMarineHModel(ghostData, WEAPON_PULSERIFLE);
 			break;
 		}
-		case(I_BehaviourAlienPlayer):
+		case (I_BehaviourAlienPlayer):
 		{
 //			extern void CreateAlienHModel(NETGHOSTDATABLOCK *ghostDataPtr,int alienType); // remove undefined warning
 			CreateAlienHModel(ghostData, AT_Standard);
 			break;
 		}
-			case(I_BehaviourPredatorPlayer):
+		case (I_BehaviourPredatorPlayer):
 		{
 			extern void CreatePredatorHModel(NETGHOSTDATABLOCK *ghostDataPtr, int weapon); // remove undefined warning
-			CreatePredatorHModel(ghostData,WEAPON_PRED_WRISTBLADE);
+			CreatePredatorHModel(ghostData, WEAPON_PRED_WRISTBLADE);
 			break;
 		}
 	}
-		sbPtr->SBdptr->HModelControlBlock=&ghostData->HModelController;
-		ProveHModel(sbPtr->SBdptr->HModelControlBlock,sbPtr->SBdptr);
+
+	sbPtr->SBdptr->HModelControlBlock=&ghostData->HModelController;
+	ProveHModel(sbPtr->SBdptr->HModelControlBlock, sbPtr->SBdptr);
 }
 
 void DeallocatePlayersMirrorImage()
 {
 	#if MIRRORING_ON
-	if(Current_Level_Requires_Mirror_Image())
+	if (Current_Level_Requires_Mirror_Image())
 	{
 		Dispel_HModel(&PlayersMirrorGhost.HModelController);
 	}

@@ -19,19 +19,21 @@ char *GetVideoModeDescription2()
 
 char *GetVideoModeDescription3() 
 {
-	const uint32_t bufferSize = 64;
+	const uint32_t kBufferSize = 32;
 
-	static char buf[bufferSize + 1]; // always have room for a null character
+	static char buf[kBufferSize + 1]; // always have room for a null character
+	buf[kBufferSize] = '\0';
 
-	size_t sizeofText = R_GetVideoModeDescription().size();
+	size_t sizeofText = R_GetVideoModeDescription().size(); // number of chars in string (doesn't include a null terminator)
 
 	// ensure we don't overflow our char buffer
-	if (sizeofText > bufferSize)
+	if (sizeofText > kBufferSize)
 	{
-		sizeofText = bufferSize;
+		sizeofText = kBufferSize;
 	}
 
-	strncpy(buf, R_GetVideoModeDescription().c_str(), sizeofText + 1); // sizeofText + 1 so strncpy will append a '0' to string
+	// copy the string to buf
+	memcpy(&buf[0], R_GetVideoModeDescription().c_str(), sizeofText+1); // R_GetVideoModeDescription().c_str() returns a null terminated string
 
 	return buf;
 }

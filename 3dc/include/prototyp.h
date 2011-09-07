@@ -568,10 +568,6 @@ typedef struct viewdescriptorblock
 
 	int VDB_Ambience;
 
-	#if pc_backdrops
-	BACKDROPTYPE VDB_BackdropType;
-	#endif
-
 	#if ProjectSpecificVDBs
 	void* VDB_ProjectSpecificHook;
 	#endif
@@ -1251,15 +1247,6 @@ void FindImageExtents(int numuvs, int *uvdata, IMAGEEXTENTS *e, IMAGEEXTENTS *e_
 int GetMVSIndex(TXANIMHEADER *txah, EULER *e);
 
 IMAGEHEADER* GetImageHeader(void);
-
-/* Backdrops */
-
-#if pc_backdrops
-int UpdateBackdrops(SCENE Scene);
-int DeallocateBackdrops(SCENE Scene);
-int LoadBackdrop(char *image, IMAGEHEADER *ihdr);
-#endif
-
 
 void GetProjectFilename(char *fname, char *image);
 void GetDOSFilename(char *fnameptr);

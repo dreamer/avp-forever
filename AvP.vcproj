@@ -2284,6 +2284,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\3dc\FastFile.cpp"
+				>
+			</File>
+			<File
 				RelativePath="3dc\avp\win95\Ffread.cpp"
 				>
 				<FileConfiguration
@@ -2362,6 +2366,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\3dc\FileStream.cpp"
+				>
 			</File>
 			<File
 				RelativePath=".\3dc\FmvCutscenes.cpp"
@@ -5554,11 +5562,19 @@
 					>
 				</File>
 				<File
+					RelativePath=".\3dc\FastFile.h"
+					>
+				</File>
+				<File
 					RelativePath="3dc\avp\win95\Ffread.hpp"
 					>
 				</File>
 				<File
 					RelativePath="3dc\avp\win95\Ffstdio.h"
+					>
+				</File>
+				<File
+					RelativePath=".\3dc\FileStream.h"
 					>
 				</File>
 				<File

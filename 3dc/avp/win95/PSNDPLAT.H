@@ -10,10 +10,6 @@
 #include <xaudio2fx.h>
 #include <x3daudio.h>
 #endif
-#ifdef USE_OPENAL
-#include <AL/al.h>
-#include <AL/alc.h>
-#endif
 #include "psnd.h"
 
 /* Patrick 10/6/97 -------------------------------------------------------------
@@ -31,18 +27,18 @@ typedef struct soundsampledata
 	int volume;
 	int pitch;
 
+	bool is3D;
+
 #ifdef _XBOX
 	LPDIRECTSOUNDBUFFER dsBufferP;
 #endif
 
 #ifdef USE_XAUDIO2
-	BOOL is3D;
 	uint8_t *audioBuffer;
 	XAUDIO2_BUFFER xa2Buffer;
 	X3DAUDIO_EMITTER xa2Emitter;
 	IXAudio2SourceVoice *pSourceVoice;
 	WAVEFORMATEX audioWaveFormat;
-//	FLOAT32 emitterAzimuths;//[1];
 #endif
 
 	uint32_t flags;
@@ -57,14 +53,14 @@ typedef struct soundsampledata
 		activeInstances = 0;
 		volume = 0;
 		pitch = 0;
+		is3D = false;
 
 		#ifdef _XBOX
 			LPDIRECTSOUNDBUFFER dsBufferP = 0;
 		#endif
 
 		#ifdef USE_XAUDIO2
-			is3D = FALSE;
-			audioBuffer = 0;
+			audioBuffer  = 0;
 			pSourceVoice = 0;
 		#endif
 
@@ -119,16 +115,14 @@ typedef struct activesoundsample
 		priority = ASP_Minimum;
 		externalRef = 0;
 		is3D = false;
-#ifdef USE_XAUDIO2
-		pSourceVoice = 0;
-#endif
+
 		#ifdef _XBOX
 			dsBufferP   = 0;
 			ds3DBufferP = 0;
 		#endif
 
 		#ifdef USE_XAUDIO2
-			audioBuffer = 0;
+			audioBuffer  = 0;
 			pSourceVoice = 0;
 		#endif
 	}

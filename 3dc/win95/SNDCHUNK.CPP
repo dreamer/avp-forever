@@ -110,7 +110,7 @@ void Sound_Object_Chunk::fill_data_block ( char * data_start)
 
 ObjectID Sound_Object_Chunk::CalculateID()
 {
-	ObjectID retval={0,0};
+	ObjectID retval;
 
 	char buffer[16];
 	md5_buffer(snd_name,strlen(snd_name),&buffer[0]);
