@@ -57,6 +57,9 @@ extern DISPLAYBLOCK *ActiveBlockList[];
 extern DPID AvPNetID;
 extern void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour);
 
+#define MAX_NO_OF_SIMILAR_DECALS_IN_ONE_PLACE 4
+#define INCREMENT_IN_DECAL_SIZE (25*4)
+
 DECAL_DESC DecalDescription[MAX_NO_OF_DECAL_IDS] =
 {
 	/* DECAL_FMV */
@@ -476,8 +479,6 @@ static DECAL* AllocateDecal(void)
 
 	CurrentDecalIndex++;
 
-	assert(CurrentDecalIndex < MAX_NO_OF_DECALS);
-
 	if (CurrentDecalIndex >= LocalDetailLevels.MaximumAllowedNumberOfDecals)
 	{
 		CurrentDecalIndex = 0;
@@ -553,9 +554,6 @@ void MakeDecal(enum DECAL_ID decalID, VECTORCH *normalPtr, VECTORCH *positionPtr
 		}
 	}
 }
-
-#define MAX_NO_OF_SIMILAR_DECALS_IN_ONE_PLACE 4
-#define INCREMENT_IN_DECAL_SIZE (25*4)
 
 static int TooManyDecalsOfThisType(enum DECAL_ID decalID, VECTORCH *positionPtr)
 {
