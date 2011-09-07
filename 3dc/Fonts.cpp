@@ -31,12 +31,14 @@
 #include "Fonts.h"
 #include "TextureManager.h"
 #include "FileStream.h"
+#include "console.h"
 
 const int kFontDATsize = 273; // size in bytes of a font .dat file
 const int kNumChars = 256;    // number of ASCII characters
 
 struct Font
 {
+	bool isValid;
 	enum eFontTypes  type;
 	texID_t  textureID;
 	uint32_t mapWidth;
@@ -54,12 +56,22 @@ void Font_Release()
 	for (uint32_t i = 0; i < kNumFontTypes; i++)
 	{
 		Tex_Release(Fonts[i].textureID);
+		Fonts[i].isValid = false;
 	}
 }
 
 bool Font_Load(const std::string &fontFile, enum eFontTypes fontType)
 {
+	// initially set to false
+	Fonts[fontType].isValid = false;
+
 	Fonts[fontType].textureID = Tex_CreateFromFile(fontFile + ".tga");
+
+	if (Fonts[fontType].textureID == MISSING_TEXTURE)
+	{
+		Con_PrintError("Couldn't load font texture file" + fontFile);
+		return false;
+	}
 
 #if 0 // calculates the width of the chars when we dont have a .dat file
 
@@ -213,27 +225,33 @@ bool Font_Load(const std::string &fontFile, enum eFontTypes fontType)
 	FileStream file;
 	file.Open(fontFile + ".dat", FileStream::FileRead);
 
-	if (file.IsGood())
+	if (!file.IsGood())
 	{
-		size_t fileLength = file.GetFileSize();
+		Con_PrintError("Can't open font data file for" + fontFile);
+		Tex_Release(Fonts[fontType].textureID);
+		return false;
+	}
 
-		if (fileLength == kFontDATsize)
+	size_t fileLength = file.GetFileSize();
+
+	if (kFontDATsize == fileLength)
+	{
+		Fonts[fontType].mapWidth   = file.GetUint32LE();
+		Fonts[fontType].mapHeight  = file.GetUint32LE();
+		Fonts[fontType].cellWidth  = file.GetUint32LE();
+		Fonts[fontType].cellHeight = file.GetUint32LE();
+		Fonts[fontType].startChar  = file.GetByte();
+		for (int i = 0; i < kNumChars; i++)
 		{
-			Fonts[fontType].mapWidth   = file.GetUint32LE();
-			Fonts[fontType].mapHeight  = file.GetUint32LE();
-			Fonts[fontType].cellWidth  = file.GetUint32LE();
-			Fonts[fontType].cellHeight = file.GetUint32LE();
-			Fonts[fontType].startChar  = file.GetByte();
-			for (int i = 0; i < kNumChars; i++)
-			{
-				Fonts[fontType].charWidths[i] = file.GetByte();
-			}
+			Fonts[fontType].charWidths[i] = file.GetByte();
 		}
 	}
 #endif
 
 	// get the font texture width and height
 	Tex_GetDimensions(Fonts[fontType].textureID, Fonts[fontType].mapWidth, Fonts[fontType].mapHeight);
+
+	Fonts[fontType].isValid = true;
 
 	return true;
 }
@@ -249,7 +267,10 @@ uint32_t Font_GetCharHeight(enum eFontTypes fontType)
 }
 
 uint32_t Font_GetStringWidth(const std::string &text, enum eFontTypes fontType)
-{
+{	
+	if (!Fonts[fontType].isValid)
+		return 0;
+
 	uint32_t width = 0;
 
 	for (size_t i = 0; i < text.size(); i++)
@@ -262,6 +283,9 @@ uint32_t Font_GetStringWidth(const std::string &text, enum eFontTypes fontType)
 
 uint32_t Font_DrawCenteredText(const std::string &text, enum eFontTypes fontType)
 {
+	if (!Fonts[fontType].isValid)
+		return 0;
+
 	uint32_t textWidth = Font_GetStringWidth(text, fontType);
 
 	int x = (R_GetScreenWidth()/2) - (textWidth/2);
@@ -272,6 +296,9 @@ uint32_t Font_DrawCenteredText(const std::string &text, enum eFontTypes fontType
 
 uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, RCOLOR colour, enum eFontTypes fontType)
 {
+	if (!Fonts[fontType].isValid)
+		return 0;
+
 	float RecipW = (1.0f / Fonts[fontType].mapWidth);
 	float RecipH = (1.0f / Fonts[fontType].mapHeight);
 
