@@ -1263,7 +1263,7 @@ bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexSha
 	std::ifstream fileOpenTest(actualPath.c_str(), std::ifstream::in | std::ifstream::binary);
 	if (!fileOpenTest.good())
 	{
-		LogErrorString("Can't open vertex shader file " + actualPath, __LINE__, __FILE__);
+		LogErrorString("Can't open vertex shader file '" + actualPath + "'", __LINE__, __FILE__);
 		return false;
 	}
 	// close the file
@@ -1285,12 +1285,12 @@ bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexSha
 		OutputDebugString(DXGetErrorString(LastError));
 		OutputDebugString(DXGetErrorDescription(LastError));
 
-		LogErrorString("D3DXCompileShaderFromFile failed for " + actualPath, __LINE__, __FILE__);
+		LogErrorString("D3DXCompileShaderFromFile failed for '" + actualPath + "'", __LINE__, __FILE__);
 
 		if (pErrors)
 		{
 			// shader didn't compile for some reason
-			LogErrorString("Shader compile errors found for " + actualPath, __LINE__, __FILE__);
+			LogErrorString("Shader compile errors found for '" + actualPath + "'", __LINE__, __FILE__);
 			LogErrorString("\n" + std::string((const char*)pErrors->GetBufferPointer()));
 
 			pErrors->Release();
@@ -1302,7 +1302,7 @@ bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexSha
 	LastError = d3d.lpD3DDevice->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), &vertexShader.shader);
 	if (FAILED(LastError))
 	{
-		LogErrorString("CreateVertexShader failed for " + actualPath, __LINE__, __FILE__);
+		LogErrorString("CreateVertexShader failed for '" + actualPath + "'", __LINE__, __FILE__);
 		return false;
 	}
 
@@ -1314,7 +1314,7 @@ bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexSha
 	LastError = vertexShader.constantTable->GetDesc(&constantTableDesc);
 	if (FAILED(LastError))
 	{
-		LogErrorString("CreateVertexShader failed getting constant table description for " + actualPath, __LINE__, __FILE__);
+		LogErrorString("CreateVertexShader failed getting constant table description for '" + actualPath + "'", __LINE__, __FILE__);
 		return false;
 	}
 
@@ -1356,7 +1356,7 @@ bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader
 	std::ifstream fileOpenTest(actualPath.c_str(), std::ifstream::in | std::ifstream::binary);
 	if (!fileOpenTest.good())
 	{
-		LogErrorString("Can't open pixel shader file " + actualPath, __LINE__, __FILE__);
+		LogErrorString("Can't open pixel shader file '" + actualPath + "'", __LINE__, __FILE__);
 		return false;
 	}
 	// close the file
@@ -1378,14 +1378,14 @@ bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader
 		OutputDebugString(DXGetErrorString(LastError));
 		OutputDebugString(DXGetErrorDescription(LastError));
 
-		LogErrorString("D3DXCompileShaderFromFile failed for " + actualPath, __LINE__, __FILE__);
+		LogErrorString("D3DXCompileShaderFromFile failed for '" + actualPath + "'", __LINE__, __FILE__);
 
 		if (pErrors)
 		{
 			// shader didn't compile for some reason
 			OutputDebugString((const char*)pErrors->GetBufferPointer());
 
-			LogErrorString("Shader compile errors found for " + actualPath, __LINE__, __FILE__);
+			LogErrorString("Shader compile errors found for '" + actualPath + "'", __LINE__, __FILE__);
 			LogErrorString("\n" + std::string((const char*)pErrors->GetBufferPointer()));
 
 			pErrors->Release();
@@ -1397,7 +1397,7 @@ bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader
 	LastError = d3d.lpD3DDevice->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), &pixelShader.shader);
 	if (FAILED(LastError))
 	{
-		LogErrorString("CreatePixelShader failed for " + actualPath, __LINE__, __FILE__);
+		LogErrorString("CreatePixelShader failed for '" + actualPath + "'", __LINE__, __FILE__);
 		return false;
 	}
 
@@ -1409,7 +1409,7 @@ bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader
 	pixelShader.constantTable->GetDesc(&constantTableDesc);
 	if (FAILED(LastError))
 	{
-		LogErrorString("CreatePixelShader failed getting constant table description for " + actualPath, __LINE__, __FILE__);
+		LogErrorString("CreatePixelShader failed getting constant table description for '" + actualPath + "'", __LINE__, __FILE__);
 		return false;
 	}
 

@@ -178,7 +178,6 @@ extern void MaintainHUD(void);
 
 /*********************************************************/
 /*********************** PLAYER CONTROL STUFF ************/
-extern bool AnyUserInput();
 extern bool IDemandGoBackward();
 extern bool IDemandGoForward();
 extern bool IDemandTurnRight();

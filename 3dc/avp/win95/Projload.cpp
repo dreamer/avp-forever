@@ -2640,7 +2640,7 @@ texID_t load_rif_bitmap (char const * fname, BMPN_Flags flags)
 
 void release_rif_bitmaps()
 {
-	for (uint32_t i = 0; i < ingameTextureList.size(); i++)
+	for (size_t i = 0; i < ingameTextureList.size(); i++)
 	{
 		Tex_Release(ingameTextureList[i]);
 	}

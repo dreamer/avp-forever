@@ -36,6 +36,7 @@
 #include "avpview.h"
 #include "renderer.h"
 #include "AvP_MP_Config.h"
+#include "logString.h"
 
 #if debug
 #define MainTextPrint 1
@@ -91,6 +92,7 @@ extern int AvP_MainMenus(void);
 extern int AvP_InGameMenus(void);
 extern int InGameMenusAreRunning(void);
 extern void InitFmvCutscenes();
+extern void ChangeWindowsSize(uint32_t width, uint32_t height); 
 
 extern struct DEBUGGINGTEXTOPTIONS ShowDebuggingText;
 
@@ -331,8 +333,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	if (!InitialiseDirect3D())
 	{
-		MessageBox(hWndMain, "Couldn't create a Direct3D device. See avp_log.txt for details", "Couldn't create render device!", MB_OK | MB_ICONSTOP);
-		ReleaseDirect3D();
+		// the device might have actually created OK, but maybe we are missing an important shader, so release
+		// this first so we can exit fullscreen mode if needed
+		ReleaseDirect3D(); 
+
+		// give the user back their mouse cursor
+		if (UseMouseCentreing)
+		{
+			FinishCentreMouseThread();
+		}
+
+		std::string error = "Couldn't create a Direct3D device.\n" + GetLastErrorMessage();
+		MessageBox(hWndMain, error.c_str(), "Couldn't create render device!", MB_OK | MB_ICONSTOP);
 		exit(-1);
 	}
 
