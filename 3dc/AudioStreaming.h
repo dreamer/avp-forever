@@ -91,7 +91,8 @@ class AudioStream
 		IXAudio2SourceVoice *pSourceVoice;
 
 	public:
-		AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers);
+		AudioStream();
+		bool Init(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers);
 		int32_t  Stop();
 		int32_t  Play();
 		int32_t  SetVolume(uint32_t volume);
@@ -103,6 +104,7 @@ class AudioStream
 		uint32_t GetWritableBufferSize();
 		uint32_t GetBytesWritten();
 		uint32_t GetBufferSize();
+
 		StreamingVoiceContext *voiceContext;
 
 		~AudioStream();

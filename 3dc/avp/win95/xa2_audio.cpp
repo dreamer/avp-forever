@@ -1891,8 +1891,27 @@ void UpdateSoundFrequencies(void)
 	}
 }
 
-AudioStream::AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers)
+AudioStream::AudioStream()
 {
+	bufferSize    = 0;
+	bufferCount   = 0;
+	currentBuffer = 0;
+	numChannels   = 0;
+	rate = 0;
+	bytesPerSample      = 0;
+	totalBytesPlayed    = 0;
+	totalSamplesWritten = 0;
+	isPaused = false;
+	buffers  = 0;
+	pSourceVoice = 0;
+	voiceContext = 0;
+}
+
+bool AudioStream::Init(uint32_t channels, uint32_t rate, uint32_t bufferSize, uint32_t numBuffers)
+{
+	if (!soundEnabled)
+		return false;
+
 	WAVEFORMATEX waveFormat;
 	ZeroMemory (&waveFormat, sizeof(waveFormat));
 	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
@@ -1905,29 +1924,35 @@ AudioStream::AudioStream(uint32_t channels, uint32_t rate, uint32_t bufferSize, 
 
 	// create a new voice context for "on buffer end" callback
 	this->voiceContext = new(std::nothrow) StreamingVoiceContext;
+	if (NULL == this->voiceContext)
+	{
+		Con_PrintError("Out of memory trying to create streaming voice context");
+		return false;
+	}
 
 	// create the source voice for playing the sound
 	LastError = pXAudio2->CreateSourceVoice(&this->pSourceVoice, &waveFormat, 0, XAUDIO2_DEFAULT_FREQ_RATIO, this->voiceContext);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
 	}
 
 	this->buffers = new(std::nothrow) uint8_t[bufferSize * numBuffers];
-	if (this->buffers == NULL)
+	if (NULL == this->buffers)
 	{
-		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
+		Con_PrintError("Out of memory trying to create streaming audio buffer");
+		return false;
 	}
 
 	this->bytesPerSample = waveFormat.wBitsPerSample / 8;
 	this->numChannels = waveFormat.nChannels;
 	this->rate = waveFormat.nSamplesPerSec;
 	this->isPaused = true;
-
-	this->currentBuffer = 0;
 	this->bufferSize = bufferSize;
 	this->bufferCount = numBuffers;
-	this->totalSamplesWritten = 0;
+
+	return true;
 }
 
 uint32_t AudioStream::WriteData(uint8_t *audioData, uint32_t size)
@@ -2044,6 +2069,7 @@ AudioStream::~AudioStream()
 
 	// clear the new-ed memory
 	delete[] this->buffers;
+
 	delete this->voiceContext;
 }
 

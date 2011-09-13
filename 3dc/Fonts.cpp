@@ -69,7 +69,7 @@ bool Font_Load(const std::string &fontFile, enum eFontTypes fontType)
 
 	if (Fonts[fontType].textureID == MISSING_TEXTURE)
 	{
-		Con_PrintError("Couldn't load font texture file" + fontFile);
+		Con_PrintError("Couldn't load font texture file '" + fontFile + ".tga'");
 		return false;
 	}
 
@@ -227,7 +227,7 @@ bool Font_Load(const std::string &fontFile, enum eFontTypes fontType)
 
 	if (!file.IsGood())
 	{
-		Con_PrintError("Can't open font data file for" + fontFile);
+		Con_PrintError("Can't open font data file '" + fontFile + ".dat'");
 		Tex_Release(Fonts[fontType].textureID);
 		return false;
 	}

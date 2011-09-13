@@ -79,9 +79,10 @@ bool VorbisPlayback::Open(const std::string &fileName)
 	mVorbisInfo = ov_info(&mOggFile, -1);
 
 	// create the streaming audio buffer
-	this->audioStream = new(std::nothrow) AudioStream(mVorbisInfo->channels, mVorbisInfo->rate, kBufferSize, kBufferCount);
-	if (audioStream == NULL)
+	this->audioStream = new (std::nothrow) AudioStream;
+	if (!this->audioStream->Init(mVorbisInfo->channels, mVorbisInfo->rate, kBufferSize, kBufferCount))
 	{
+		Con_PrintError("Couldn't initialise audio stream for Vorbis playback");
 		return false;
 	}
 

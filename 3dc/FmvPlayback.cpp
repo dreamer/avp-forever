@@ -258,8 +258,9 @@ int TheoraFMV::Open(const std::string &fileName)
 	if (mAudio)
 	{
 		// create mAudio streaming buffer
-		this->audioStream = new AudioStream(mAudio->mVorbis.mInfo.channels, mAudio->mVorbis.mInfo.rate, kAudioBufferSize, kAudioBufferCount);
-		if (this->audioStream == NULL)
+		this->audioStream = new AudioStream();
+
+		if (!this->audioStream->Init(mAudio->mVorbis.mInfo.channels, mAudio->mVorbis.mInfo.rate, kAudioBufferSize, kAudioBufferCount))
 		{
 			Con_PrintError("Failed to create mAudio stream buffer for FMV playback");
 			return FMV_ERROR;
