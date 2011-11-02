@@ -40,25 +40,6 @@ RenderList::RenderList(size_t size)
 	// treat the vector as an array so resize it to desired size
 	Items.reserve(size);
 	Items.resize(size);
-
-	// determine if all render options fit within our sort key
-#if _DEBUG
-	
-	// lets give texture Ids 16 bits?
-	int texIDsize = 16;
-	int transSize = NUM_TRANSLUCENCY_TYPES; // num of bits per type
-	int filterSize = NUM_FILTERING_TYPES;
-	int texAddressSize = NUM_TEXTURE_ADDRESS_MODES;
-	int zWriteSize = 2; // either on or off
-
-	RenderItem tempItem;
-
-	if ((texIDsize + transSize + filterSize + texAddressSize + zWriteSize) > sizeof(tempItem.sortKey) * 8)
-	{
-		// sort key isn't big enough!
-		assert (1==0);
-	}
-#endif
 }
 
 RenderList::~RenderList()
@@ -165,7 +146,12 @@ void RenderList::AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY
 	uint32_t realNumVerts = GetRealNumVerts(numVerts);
 
 	Items[listIndex].sortKey = 0; // zero it out
-	Items[listIndex].sortKey = (textureID << 24) | (translucencyMode << 20) | (filteringMode << 16) | (textureAddress << 15) | (zWriteEnable << 14);
+
+	Items[listIndex].texID          = textureID;
+	Items[listIndex].transType      = translucencyMode;
+	Items[listIndex].filterType     = filteringMode;
+	Items[listIndex].texAddressType = textureAddress;
+	Items[listIndex].zWrite         = zWriteEnable;
 
 	// lets see if we can merge this item with the previous item
 	if ((listIndex != 0) &&		// only do this check if we're not adding the first item
@@ -214,11 +200,11 @@ void RenderList::Draw()
 		if (numPrimitives)
 		{
 			// set texture
-			R_SetTexture(0, (it->sortKey >> 24) & 65535);
-			ChangeTranslucencyMode   ((enum TRANSLUCENCY_TYPE)	    ((it->sortKey >> 20) & 15));
-			ChangeFilteringMode      (0, (enum FILTERING_MODE_ID)	((it->sortKey >> 16) & 15));
-			ChangeTextureAddressMode (0, (enum TEXTURE_ADDRESS_MODE)((it->sortKey >> 15) & 1));
-			ChangeZWriteEnable       ((enum ZWRITE_ENABLE)          ((it->sortKey >> 14) & 1));
+			R_SetTexture(0, it->texID);
+			ChangeTranslucencyMode   ((enum TRANSLUCENCY_TYPE)       it->transType);
+			ChangeFilteringMode      (0, (enum FILTERING_MODE_ID)    it->filterType);
+			ChangeTextureAddressMode (0, (enum TEXTURE_ADDRESS_MODE) it->texAddressType);
+			ChangeZWriteEnable       ((enum ZWRITE_ENABLE)           it->zWrite);
 
 			R_DrawIndexedPrimitive(this->vertexCount, it->indexStart, numPrimitives);
 		}

@@ -27,19 +27,6 @@
 #include "renderStates.h"
 #include "renderer.h"
 
-// part of sort test
-enum Shaders
-{
-	SHADER_SKY,
-	SHADER_DECAL,
-	SHADER_WATER,
-	SHADER_FMV,
-	SHADER_FIRE
-};
-
-#define SORT_TEXTURE_SHIFT	16
-#define SORT_SHADER_SHIFT	32
-
 struct RenderItem
 {
 	uint32_t	vertStart;
@@ -48,7 +35,23 @@ struct RenderItem
 	uint32_t	indexStart;
 	uint32_t	indexEnd;
 
-	uint32_t	sortKey;
+	// various render states can be set with the below struct members
+	// and then this render item can be sorted with the sortKey member
+	union
+	{
+		struct
+		{
+			// should be equal in size to sortKey
+			unsigned texID          : 16;
+			unsigned transType      : 8;
+			unsigned filterType     : 3;
+			unsigned texAddressType : 2;
+			unsigned zWrite         : 2;
+			unsigned unused         : 1;
+		};
+
+		uint32_t sortKey;
+	};
 
 	bool operator<(const RenderItem& rhs) const {return sortKey < rhs.sortKey;}
 };
