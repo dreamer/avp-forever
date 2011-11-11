@@ -625,7 +625,7 @@ void Sound_ChangePitch(int activeSoundNumber, int pitch)
 
 	/* set pitch field in active sound, and change it... */
 	ActiveSounds[activeSoundNumber].pitch = newPitch;
-	PlatChangeSoundPitch(activeSoundNumber,ActiveSounds[activeSoundNumber].pitch);	
+	PlatChangeSoundPitch(activeSoundNumber,ActiveSounds[activeSoundNumber].pitch);
 }
 
 void Sound_Update3d(int activeSoundNumber, VECTORCH* posn)
@@ -772,7 +772,7 @@ void Load_SoundState(int* soundHandle)
 
 void Save_SoundState(int* soundHandle)
 {
-	if(!soundHandle) 
+	if(!soundHandle)
 		return;
 
 	if(*soundHandle == SOUND_NOACTIVEINDEX)

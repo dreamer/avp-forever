@@ -460,30 +460,37 @@ void InitAVPNetGameForHost(int species, int gamestyle, int level)
 	InitialiseSendMessageBuffer();
 
 	netGameData.myGameState = NGS_Joining;
-	/* base initialisation of game description */	
+	/* base initialisation of game description */
 	{
-		int i,j;
-		for(i=0;i<(NET_MAXPLAYERS);i++)
+		for (int i = 0; i < (NET_MAXPLAYERS); i++)
 		{
-			netGameData.playerData[i].playerId = 0;		
-			for(j=0;j<(NET_PLAYERNAMELENGTH);j++) netGameData.playerData[i].name[j] = '\0';
+			netGameData.playerData[i].playerId = 0;
+
+			for (int j = 0; j < (NET_PLAYERNAMELENGTH); j++)
+				netGameData.playerData[i].name[j] = '\0';
+
 			netGameData.playerData[i].characterType = NGCT_Marine;
 			netGameData.playerData[i].characterSubType = NGSCT_General;
-			for(j=0;j<(NET_MAXPLAYERS);j++) netGameData.playerData[i].playerFrags[j] = 0;
+
+			for (int j = 0; j < (NET_MAXPLAYERS); j++)
+				netGameData.playerData[i].playerFrags[j] = 0;
+
 			netGameData.playerData[i].playerScore = 0;
 			netGameData.playerData[i].playerScoreAgainst = 0;
-			netGameData.playerData[i].aliensKilled[0]=0;
-			netGameData.playerData[i].aliensKilled[1]=0;
-			netGameData.playerData[i].aliensKilled[2]=0;
-			netGameData.playerData[i].deathsFromAI=0;
-			netGameData.playerData[i].playerAlive=1;
-			netGameData.playerData[i].playerHasLives=1;
-			netGameData.playerData[i].startFlag = 0;		
+			netGameData.playerData[i].aliensKilled[0] = 0;
+			netGameData.playerData[i].aliensKilled[1] = 0;
+			netGameData.playerData[i].aliensKilled[2] = 0;
+			netGameData.playerData[i].deathsFromAI = 0;
+			netGameData.playerData[i].playerAlive  = 1;
+			netGameData.playerData[i].playerHasLives = 1;
+			netGameData.playerData[i].startFlag = 0;
 		}
-		for(j=0;j<3;j++) netGameData.teamScores[j] = 0;
+
+		for (int j = 0; j < 3; j++)
+			netGameData.teamScores[j] = 0;
+
 //		netGameData.myGameState = NGS_Playing;
 
-		
 		netGameData.myCharacterSubType=NGSCT_General;
 		switch (species)
 		{
@@ -540,18 +547,18 @@ void InitAVPNetGameForHost(int species, int gamestyle, int level)
 		if(LobbiedGame/* || netGameData.connectionType==CONN_Modem*/)
 		{
 			netGameData.sendFrequency=ONE_FIXED/15;
-   	   		netGameData.sendDecals=FALSE;
+			netGameData.sendDecals=FALSE;
 		}
 		else
 		{
 			netGameData.sendFrequency=0;//ONE_FIXED/15;
-   	   		netGameData.sendDecals=TRUE;
+			netGameData.sendDecals=TRUE;
 		}
 	}
 
-	myNetworkKillerId = AvPNetID;	/* init global id of player who killed me last */
-	netNextLocalObjectId = 1;	/* init local object network id */
-	numMessagesReceived = 0;	/* these are for testing */
+	myNetworkKillerId = AvPNetID;    /* init global id of player who killed me last */
+	netNextLocalObjectId = 1;        /* init local object network id */
+	numMessagesReceived = 0;         /* these are for testing */
 	numMessagesTransmitted = 0;
 
 	/* If I'm the host, add myself to the game data */
@@ -573,7 +580,7 @@ void InitAVPNetGameForHost(int species, int gamestyle, int level)
 	InitNetLog();
 
 	//make sure our time scale is set correctly
-	switch(netGameData.gameSpeed)
+	switch (netGameData.gameSpeed)
 	{
 		case NETGAMESPEED_70PERCENT :
 			TimeScale=(ONE_FIXED*70)/100;
@@ -592,17 +599,17 @@ void InitAVPNetGameForHost(int species, int gamestyle, int level)
 			break;
 	}
 
-	netGameData.myStrategyCheckSum=0;
+	netGameData.myStrategyCheckSum = 0;
 
-	netGameData.numDeaths[0]=0;
-	netGameData.numDeaths[1]=0;
-	netGameData.numDeaths[2]=0;
+	netGameData.numDeaths[0] = 0;
+	netGameData.numDeaths[1] = 0;
+	netGameData.numDeaths[2] = 0;
 }
 
 void InitAVPNetGameForJoin(void)
 {
 	AvP.GameMode = I_GM_Playing;
-	AvP.Network = I_Peer;
+	AvP.Network  = I_Peer;
 
 	AvP.NetworkAIServer = 0;
 
@@ -612,61 +619,69 @@ void InitAVPNetGameForJoin(void)
 	netGameData.myGameState = NGS_Joining;
 	/* base initialisation of game description */	
 	{
-		int i,j;
-		for(i=0;i<(NET_MAXPLAYERS);i++)
+		for (int i = 0; i < (NET_MAXPLAYERS); i++)
 		{
-			netGameData.playerData[i].playerId = 0;		
-			for(j=0;j<(NET_PLAYERNAMELENGTH);j++) netGameData.playerData[i].name[j] = '\0';
+			netGameData.playerData[i].playerId = 0;
+
+			for (int j = 0; j < (NET_PLAYERNAMELENGTH); j++) 
+				netGameData.playerData[i].name[j] = '\0';
+
 			netGameData.playerData[i].characterType = NGCT_Marine;
 			netGameData.playerData[i].characterSubType = NGSCT_General;
-			for(j=0;j<(NET_MAXPLAYERS);j++) netGameData.playerData[i].playerFrags[j] = 0;
+
+			for (int j = 0; j < (NET_MAXPLAYERS); j++) 
+				netGameData.playerData[i].playerFrags[j] = 0;
+
 			netGameData.playerData[i].playerScore = 0;
 			netGameData.playerData[i].playerScoreAgainst = 0;
-			netGameData.playerData[i].aliensKilled[0]=0;
-			netGameData.playerData[i].aliensKilled[1]=0;
-			netGameData.playerData[i].aliensKilled[2]=0;
-			netGameData.playerData[i].deathsFromAI=0;
-			netGameData.playerData[i].playerAlive=1;
-			netGameData.playerData[i].playerHasLives=1;
-			netGameData.playerData[i].startFlag = 0;		
+			netGameData.playerData[i].aliensKilled[0] = 0;
+			netGameData.playerData[i].aliensKilled[1] = 0;
+			netGameData.playerData[i].aliensKilled[2] = 0;
+			netGameData.playerData[i].deathsFromAI    = 0;
+			netGameData.playerData[i].playerAlive     = 1;
+			netGameData.playerData[i].playerHasLives  = 1;
+			netGameData.playerData[i].startFlag       = 0;
 		}
-		for(j=0;j<3;j++) netGameData.teamScores[j] = 0;
-		netGameData.myStartFlag = 0;		
+
+		for (int j = 0; j < 3; j++) 
+			netGameData.teamScores[j] = 0;
+
+		netGameData.myStartFlag = 0;
 		netGameData.myGameState = NGS_Joining;
 
 		netGameData.myCharacterType = NGCT_Marine;
 		netGameData.myNextCharacterType = NGCT_Marine;
-		netGameData.myCharacterSubType=NGSCT_General;
+		netGameData.myCharacterSubType = NGSCT_General;
 		
-		netGameData.stateCheckTimeDelay=0;
-		netGameData.gameDescriptionTimeDelay=0;
+		netGameData.stateCheckTimeDelay = 0;
+		netGameData.gameDescriptionTimeDelay = 0;
 	
 		if (LobbiedGame/* || netGameData.connectionType==CONN_Modem*/)
 		{
 			netGameData.sendFrequency=ONE_FIXED/15;
-   	   		netGameData.sendDecals=FALSE;
+			netGameData.sendDecals=FALSE;
 		}
 		else
 		{
 			netGameData.sendFrequency=0;//ONE_FIXED/15;
-   	   		netGameData.sendDecals=TRUE;
+			netGameData.sendDecals=TRUE;
 		}
 		netGameData.sendTimer = 0;
 		
 		netGameData.needGameDescription = 1;
 	}
 
-	myNetworkKillerId = AvPNetID;	/* init global id of player who killed me last */
-	netNextLocalObjectId = 1;	/* init local object network id */
-	numMessagesReceived = 0;	/* these are for testing */
+	myNetworkKillerId = AvPNetID;    /* init global id of player who killed me last */
+	netNextLocalObjectId   = 1;      /* init local object network id */
+	numMessagesReceived    = 0;      /* these are for testing */
 	numMessagesTransmitted = 0;
 	InitNetLog();
 	
 	netGameData.myStrategyCheckSum=0;
 
-	netGameData.numDeaths[0]=0;
-	netGameData.numDeaths[1]=0;
-	netGameData.numDeaths[2]=0;
+	netGameData.numDeaths[0] = 0;
+	netGameData.numDeaths[1] = 0;
+	netGameData.numDeaths[2] = 0;
 
 	netGameData.joiningGameStatus = JOINNETGAME_WAITFORSTART;
 }

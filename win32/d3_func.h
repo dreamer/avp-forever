@@ -148,6 +148,19 @@ struct DECAL_VERTEX
 	float v;
 };
 
+struct RHW_VERTEX
+{
+	float x;
+	float y;
+	float z;
+	float rhw;
+
+	D3DCOLOR color;
+
+	float u;
+	float v;
+};
+
 /*
   Maximum number of Direct3D drivers ever
   expected to be resident on the system.
@@ -186,12 +199,6 @@ typedef struct D3DInfo
 	class VertexBuffer		*decalVB;
 	class IndexBuffer		*decalIB;
 
-	class VertexBuffer		*starsVB;
-	class IndexBuffer		*starsIB;
-
-	class VertexBuffer		*skyVB;
-	class IndexBuffer		*skyIB;
-
 	// effect manager to handle shaders
 	class EffectManager		*effectSystem;
 
@@ -199,19 +206,17 @@ typedef struct D3DInfo
 	effectID_t				mainEffect;
 	effectID_t				decalEffect;
 	effectID_t				orthoEffect;
-	effectID_t				cloudEffect;
+	effectID_t				tallTextEffect;
 	effectID_t				fmvEffect;
-	effectID_t				starsEffect;
-	effectID_t				skyEffect;
+	effectID_t				rhwEffect;
 
 	// vertex declarations
 	class VertexDeclaration		*mainDecl;
 	class VertexDeclaration		*orthoDecl;
 	class VertexDeclaration		*decalDecl;
 	class VertexDeclaration		*fmvDecl;
-	class VertexDeclaration		*tallFontText;
-
-	class VertexDeclaration		*starsDecl;
+	class VertexDeclaration		*tallTextDecl;
+	class VertexDeclaration		*rhwDecl;
 
 	// matrices
 	D3DXMATRIX matOrtho;

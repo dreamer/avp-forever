@@ -18,7 +18,7 @@ typedef struct FMVTEXTURE
 	int        MessageNumber;
 	uint8_t    *RGBBuffer;
 
-}FMVTEXTURE;
+} FMVTEXTURE;
 
 // variables
 extern uint32_t NumberOfFMVTextures;

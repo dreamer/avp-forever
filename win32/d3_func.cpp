@@ -259,29 +259,6 @@ void BuildFrustum()
 	}
 }
 
-static float deltaTime = 0.0f;
-
-void UpdateTestTimer()
-{
-	return;
-	static float currentTime = timeGetTime();
-
-	float newTime = timeGetTime();
-	float frameTime = newTime - currentTime;
-	currentTime = newTime;
-
-	deltaTime = frameTime;
-
-	std::stringstream ss;
-
-	ss << deltaTime;
-}
-
-float GetTestTimer()
-{
-	return deltaTime;
-}
-
 bool R_BeginScene()
 {
 	// check for lost device
@@ -1213,9 +1190,9 @@ bool R_CreateVertexDeclaration(class VertexDeclaration *vertexDeclaration)
 	// add D3DDECL_END() which is {0xFF,0,D3DDECLTYPE_UNUSED,0,0,0}
 	d3dElement[elementsSize].Stream = 0xFF;
 	d3dElement[elementsSize].Offset = 0;
-	d3dElement[elementsSize].Type = D3DDECLTYPE_UNUSED;
+	d3dElement[elementsSize].Type   = D3DDECLTYPE_UNUSED;
 	d3dElement[elementsSize].Method = 0;
-	d3dElement[elementsSize].Usage = 0;
+	d3dElement[elementsSize].Usage  = 0;
 	d3dElement[elementsSize].UsageIndex = 0;
 
 	// try and create it now
@@ -1842,7 +1819,7 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 		}
 	}
 
-	uint32_t realWidth = width;
+	uint32_t realWidth  = width;
 	uint32_t realHeight = height;
 
 	// check texture sizes are ok
@@ -2005,6 +1982,8 @@ bool R_ChangeResolution(uint32_t width, uint32_t height)
 	CreateVolatileResources();
 
 	SetTransforms();
+
+	d3d.effectSystem->Reset();
 
 	ThisFramesRenderingHasBegun();
 
@@ -2514,20 +2493,19 @@ bool InitialiseDirect3D()
 	d3d.fmvDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 2);
 	d3d.fmvDecl->Create();
 
-	d3d.tallFontText = new VertexDeclaration;
-	d3d.tallFontText->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
-	d3d.tallFontText->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
-	d3d.tallFontText->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
-	d3d.tallFontText->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 1);
-	d3d.tallFontText->Create();
+	d3d.tallTextDecl = new VertexDeclaration;
+	d3d.tallTextDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
+	d3d.tallTextDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
+	d3d.tallTextDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
+	d3d.tallTextDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 1);
+	d3d.tallTextDecl->Create();
 
-	// stars
-	d3d.starsDecl = new VertexDeclaration;
-	d3d.starsDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
-	d3d.starsDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
-	d3d.starsDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    1);
-	d3d.starsDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
-	d3d.starsDecl->Create();
+	// rhw pretransformed
+	d3d.rhwDecl = new VertexDeclaration;
+	d3d.rhwDecl->Add(0, VDTYPE_FLOAT4, VDMETHOD_DEFAULT, VDUSAGE_POSITIONT, 0);
+	d3d.rhwDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,     0);
+	d3d.rhwDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD,  0);
+	d3d.rhwDecl->Create();
 
 	r_Texture whiteTexture;
 	r_Texture missingTexture;
@@ -2590,49 +2568,28 @@ bool InitialiseDirect3D()
 	}
 
 	setTextureArray.resize(kMaxTextureStages);
-/*
-	// set all texture stages to sample the white texture
-	for (uint32_t i = 0; i < kMaxTextureStages; i++)
-	{
-		setTextureArray[i] = NO_TEXTURE;
-		d3d.lpD3DDevice->SetTexture(i, Tex_GetTexture(NO_TEXTURE));
-	}
-*/
+
 	d3d.effectSystem = new EffectManager;
 
 	d3d.mainEffect  = d3d.effectSystem->Add("main", "vertex.vsh", "pixel.psh", d3d.mainDecl);
 	d3d.orthoEffect = d3d.effectSystem->Add("ortho", "orthoVertex.vsh", "pixel.psh", d3d.orthoDecl);
 	d3d.decalEffect = d3d.effectSystem->Add("decal", "decal.vsh", "decal.psh", d3d.decalDecl);
 	d3d.fmvEffect   = d3d.effectSystem->Add("fmv", "fmvVertex.vsh", "fmvPixel.psh", d3d.fmvDecl);
-	d3d.cloudEffect = d3d.effectSystem->Add("cloud", "tallFontTextVertex.vsh", "tallFontTextPixel.psh", d3d.tallFontText);
-
-	// stars test
-	d3d.starsEffect = d3d.effectSystem->Add("stars", "stars.vsh", "stars.psh", d3d.starsDecl);
-
-//	d3d.skyEffect = d3d.effectSystem->Add("sky", "sky.vsh", "sky.psh", d3d.mainDecl);
+	d3d.tallTextEffect = d3d.effectSystem->Add("tallText", "tallText.vsh", "tallText.psh", d3d.tallTextDecl);
+	d3d.rhwEffect   = d3d.effectSystem->Add("rhw", "rhw.vsh", "rhw.psh", d3d.rhwDecl);
 
 	// we should bail out if the shaders can't be loaded
 	if ((d3d.mainEffect  == kNullShaderID) ||
 		(d3d.orthoEffect == kNullShaderID) ||
 		(d3d.decalEffect == kNullShaderID) ||
 		(d3d.fmvEffect   == kNullShaderID) || // make this optional?
-		(d3d.cloudEffect == kNullShaderID))   // make this optional?
+		(d3d.tallTextEffect == kNullShaderID))   // make this optional?
 	{
 		return false;
 	}
 
 	// create vertex and index buffers
 	CreateVolatileResources();
-
-	// create static buffers
-	{
-		// stars test
-		d3d.starsVB = new VertexBuffer;
-		d3d.starsVB->Create(kMaxVertices, FVF_LVERTEX, USAGE_STATIC);
-
-		d3d.starsIB = new IndexBuffer;
-		d3d.starsIB->Create(kMaxIndices * 3, USAGE_STATIC);
-	}
 
 	RenderListInit();
 
@@ -2647,10 +2604,6 @@ bool InitialiseDirect3D()
 
 void SetTransforms()
 {
-	// Setup orthographic projection matrix
-	uint32_t standardWidth = 640;
-	uint32_t wideScreenWidth = 852;
-
 	// create an identity matrix
 	D3DXMatrixIdentity(&d3d.matIdentity);
 
@@ -2668,7 +2621,7 @@ void SetTransforms()
 	d3d.matViewPort._11 = (float)(ScreenDescriptorBlock.SDB_Width / 2);
 	d3d.matViewPort._22 = (float)((-ScreenDescriptorBlock.SDB_Height) / 2);
 	d3d.matViewPort._33 = (1.0f - 0.0f);
-	d3d.matViewPort._41 = (0 + d3d.matViewPort._11); // dwX + dwWidth / 2
+	d3d.matViewPort._41 = (0.0f + d3d.matViewPort._11); // dwX + dwWidth / 2
 	d3d.matViewPort._42 = (float)(ScreenDescriptorBlock.SDB_Height / 2) + 0;
 	d3d.matViewPort._43 = 0.0f; // minZ
 	d3d.matViewPort._44 = 1.0f;
@@ -2692,20 +2645,13 @@ void ReleaseDirect3D()
 	// release dynamic vertex buffers, index buffers and textures
 	ReleaseVolatileResources();
 
-	// static buffers
-	SAFE_DELETE(d3d.starsVB);
-	SAFE_DELETE(d3d.starsIB);
-
-	SAFE_DELETE(d3d.skyVB);
-	SAFE_DELETE(d3d.skyIB);
-
 	// release vertex declarations
 	delete d3d.mainDecl;
 	delete d3d.orthoDecl;
 	delete d3d.decalDecl;
 	delete d3d.fmvDecl;
-	delete d3d.tallFontText;
-	delete d3d.starsDecl;
+	delete d3d.tallTextDecl;
+	delete d3d.rhwDecl;
 
 	// clean up render list classes
 	RenderListDeInit();

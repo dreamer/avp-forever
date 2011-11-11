@@ -10,6 +10,7 @@
 #include <xaudio2fx.h>
 #include <x3daudio.h>
 #endif
+
 #include "psnd.h"
 
 /* Patrick 10/6/97 -------------------------------------------------------------
@@ -34,11 +35,11 @@ typedef struct soundsampledata
 #endif
 
 #ifdef USE_XAUDIO2
-	uint8_t *audioBuffer;
-	XAUDIO2_BUFFER xa2Buffer;
-	X3DAUDIO_EMITTER xa2Emitter;
+	uint8_t             *audioBuffer;
+	XAUDIO2_BUFFER      xa2Buffer;
+	X3DAUDIO_EMITTER    xa2Emitter;
 	IXAudio2SourceVoice *pSourceVoice;
-	WAVEFORMATEX audioWaveFormat;
+	WAVEFORMATEX        audioWaveFormat;
 #endif
 
 	uint32_t flags;

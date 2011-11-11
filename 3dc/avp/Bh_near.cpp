@@ -2635,13 +2635,17 @@ static void AlienNearState_Jump(STRATEGYBLOCK *sbPtr)
 	dynPtr->UseStandardGravity=1;
 	/* Just to be on the safe side. */
 
-	while(nextReport)
+	while (nextReport)
 	{
-		if (nextReport->ObstacleSBPtr==NULL) {
+		if (nextReport->ObstacleSBPtr==NULL) 
+		{
 			/* This is the environment. */
 			terminateState=1;
-		} else {
-			switch (nextReport->ObstacleSBPtr->I_SBtype) {
+		} 
+		else 
+		{
+			switch (nextReport->ObstacleSBPtr->I_SBtype) 
+			{
 				/* Futureproofing. */
 				default:
 					/* Oh, what the heck. */

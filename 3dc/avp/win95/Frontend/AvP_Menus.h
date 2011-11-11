@@ -321,7 +321,7 @@ typedef struct
 	char levelIndex; //local level index
 	char hostAddress[16];
 	GUID Guid;
-	BOOL AllowedToJoin;
+	bool AllowedToJoin;
 } SESSION_DESC;
 
 #define MAX_NO_OF_SESSIONS 10

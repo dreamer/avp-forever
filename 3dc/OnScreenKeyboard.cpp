@@ -47,6 +47,10 @@
 static int Osk_GetCurrentLocation();
 std::string Osk_GetKeyLabel(uint32_t buttonIndex);
 
+#ifdef _XBOX
+extern void AddKeyToQueue(char virtualKeyCode);
+#endif
+
 static int currentRow = 0;
 static int currentColumn = 0;
 
@@ -130,6 +134,10 @@ template <class T> void Osk_AddKey(T buttonLabel, uint32_t numWidthBlocks)
 
 void Osk_Init()
 {
+	// disable for now
+	return;
+
+
 	currentRow = 0;
 	currentColumn = 0;
 
@@ -187,6 +195,10 @@ void Osk_Init()
 
 void Osk_Draw()
 {
+	// disable for now
+	return;
+
+
 	if (!Osk_IsActive())
 		return;
 
@@ -262,6 +274,10 @@ std::string Osk_GetKeyLabel(uint32_t buttonIndex)
 
 void Osk_Activate()
 {
+	// disable for now
+	return;
+
+
 	if (isInitialised == false)
 		Osk_Init();
 
@@ -270,12 +286,12 @@ void Osk_Activate()
 
 void Osk_Deactivate()
 {
+	// disable for now
+	return;
+
+
 	isActive = false;
 }
-
-#ifdef _XBOX
-extern void AddKeyToQueue(char virtualKeyCode);
-#endif
 
 KEYPRESS Osk_HandleKeypress()
 {

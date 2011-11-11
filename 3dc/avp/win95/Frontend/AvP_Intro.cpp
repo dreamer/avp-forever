@@ -44,9 +44,7 @@ extern void PlayIntroSequence(void)
 	ResetFrameCounter();
 	Show_CopyrightInfo();
 
-	PlayFMV("FMVs/logos.ogv");
-
-//	StartMenuBackgroundFmv();
+	PlayFMV("FMVs/logos.bik");
 
 	StartMenuMusic();
 	ResetFrameCounter();

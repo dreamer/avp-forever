@@ -19,8 +19,12 @@
 #include <math.h>
 #include <assert.h>
 
+#include "TheoraPlayback.h"
+#include "BinkPlayback.h"
+#include "SmackerPlayback.h"
+
 static const int kMaxFMVs = 4;
-TheoraFMV *fmvList[kMaxFMVs];
+SmackerPlayback *fmvList[kMaxFMVs];
 
 FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 uint32_t NumberOfFMVTextures = 0;
@@ -49,19 +53,25 @@ int IntroOutroMoviesAreActive = 1;
 int VolumeOfNearestVideoScreen = 0;
 int PanningOfNearestVideoScreen = 0;
 
-VorbisPlayback	*menuMusic = NULL;
-TheoraFMV		*menuFMV = NULL;
+//VorbisPlayback	*menuMusic = NULL;
+SmackerPlayback		*menuMusic = NULL;
+//TheoraPlayback	*menuFMV = NULL;
+BinkPlayback	*menuFMV = NULL;
 bool MenuBackgroundFMV = false;
+
+extern void ThisFramesRenderingHasBegun(void);
+extern void ThisFramesRenderingHasFinished(void);
+
 
 void FindLightingValuesFromTriggeredFMV(uint8_t *bufferPtr, FMVTEXTURE *ftPtr)
 {
-	uint32_t totalRed = 0;
-	uint32_t totalBlue = 0;
+	uint32_t totalRed   = 0;
+	uint32_t totalBlue  = 0;
 	uint32_t totalGreen = 0;
 
-	FmvColourRed = totalRed/48*16;
+	FmvColourRed   = totalRed/48*16;
 	FmvColourGreen = totalGreen/48*16;
-	FmvColourBlue = totalBlue/48*16;
+	FmvColourBlue  = totalBlue/48*16;
 }
 
 int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
@@ -121,16 +131,16 @@ void StartMenuBackgroundFmv()
 {
 	MenuBackgroundFMV = false;
 
-	menuFMV = new TheoraFMV();
+	menuFMV = new BinkPlayback();
 
 	// start playback threads
-	if (menuFMV->Open("fmvs/menubackground.ogv") != FMV_OK)
+	if (menuFMV->Open("fmvs/menubackground.bik") != FMV_OK)
 	{
 		delete menuFMV;
 		menuFMV = NULL;
 		return;
 	}
-	
+
 	MenuBackgroundFMV = true;
 }
 
@@ -195,7 +205,7 @@ int32_t OpenFMV(const char *filenamePtr)
 	if (fmvHandle != -1)
 	{
 		// found a free slot
-		fmvList[fmvHandle] = new TheoraFMV();
+		fmvList[fmvHandle] = new SmackerPlayback();
 		if (fmvList[fmvHandle]->Open(filenamePtr) != FMV_OK)
 		{
 			delete fmvList[fmvHandle];
@@ -217,7 +227,8 @@ extern void PlayFMV(const char *filenamePtr)
 	if (!IntroOutroMoviesAreActive)
 		return;
 
-	TheoraFMV fmv;
+	BinkPlayback fmv;
+
 	if (fmv.Open(filenamePtr) != FMV_OK)
 		return;
 
@@ -272,7 +283,7 @@ extern void StartTriggerPlotFMV(int number)
 	if (CheatMode_Active != CHEATMODE_NONACTIVE)
 		return;
 
-	sprintf(buffer, "FMVs/message%d.ogv", number);
+	sprintf(buffer, "FMVs/message%d.smk", number);
 
 	FILE *file = avp_fopen(buffer, "rb");
 	if (!file)
@@ -339,10 +350,10 @@ void ScanImagesForFMVs()
 			// we found an occurrence. Now find offset of fullstop to allow us to remove the .RIM extension
 			std::string::size_type offset2 = fmvTextures[i].find(".");
 
-			// generate a new string, from occurrence of "FMVs" in string to before the fullstop, then append ".ogv" extension
-			std::string fileName = fmvTextures[i].substr(offset1, offset2-offset1) + ".ogv";
+			// generate a new string, from occurrence of "FMVs" in string to before the fullstop, then append ".smk" extension
+			std::string fileName = fmvTextures[i].substr(offset1, offset2-offset1) + ".smk";
 			
-			// do a check here to see if it's a theora file rather than just any old file with the right name?
+			// do a check here to see if it's a valid video file rather than just any old file with the right name?
 			FILE *file = avp_fopen(fileName.c_str(), "rb");
 			if (file)
 			{
@@ -354,7 +365,7 @@ void ScanImagesForFMVs()
 				FMVTexture[NumberOfFMVTextures].IsTriggeredPlotFMV = 1;
 			}
 
-			uint32_t width = 0;
+			uint32_t width  = 0;
 			uint32_t height = 0;
 
 			Tex_GetDimensions(i, width, height); // TODO: check that i is always going to be correct as texture id
@@ -362,8 +373,8 @@ void ScanImagesForFMVs()
 			assert((width == 128) && (height == 128));
 
 			FMVTexture[NumberOfFMVTextures].textureID = i;
-			FMVTexture[NumberOfFMVTextures].width = width;
-			FMVTexture[NumberOfFMVTextures].height = height;
+			FMVTexture[NumberOfFMVTextures].width     = width;
+			FMVTexture[NumberOfFMVTextures].height    = height;
 			FMVTexture[NumberOfFMVTextures].fmvHandle = -1; // just to be sure
 			FMVTexture[NumberOfFMVTextures].StaticImageDrawn = false;
 			SetupFMVTexture(&FMVTexture[NumberOfFMVTextures]);
@@ -405,6 +416,14 @@ void ReleaseAllFMVTextures()
 // bjd - the below three functions could maybe be moved out of this file altogether as vorbisPlayer can handle it
 void StartMenuMusic()
 {
+	menuMusic = new SmackerPlayback;
+	if (menuMusic->Open("FMVs/IntroSound.smk") != FMV_OK)
+	{
+		Con_PrintError("Can't open file IntroSound.smk");
+		delete menuMusic;
+		menuMusic = NULL;
+	}
+#if 0
 	// we need to load IntroSound.ogg here using vorbisPlayer
 	menuMusic = new VorbisPlayback;
 	if (!menuMusic->Open("FMVs/IntroSound.ogg"))
@@ -413,6 +432,7 @@ void StartMenuMusic()
 		delete menuMusic;
 		menuMusic = NULL;
 	}
+#endif
 }
 
 void PlayMenuMusic(void)
@@ -495,7 +515,7 @@ int GetVolumeOfNearestVideoScreen()
 				{
 					leastDistanceRecorded = dist;
 					VolumeOfNearestVideoScreen = ONE_FIXED + 1024 - dist/2;
-					if (VolumeOfNearestVideoScreen>ONE_FIXED) VolumeOfNearestVideoScreen = ONE_FIXED;
+					if (VolumeOfNearestVideoScreen > ONE_FIXED) VolumeOfNearestVideoScreen = ONE_FIXED;
 					{
 						VECTORCH rightEarDirection;
 

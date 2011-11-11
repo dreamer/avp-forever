@@ -225,7 +225,8 @@ void Set_Progress_Bar_Position(int pos)
 		Has nothing to do with the progress bar , but this is a convenient place to
 		do the check.
 		*/
-		
+	
+#if 0
 		if (AvP.Network != I_No_Network)
 		{
 			static uint32_t LastSendTime;
@@ -240,6 +241,7 @@ void Set_Progress_Bar_Position(int pos)
 				NetSendMessages();
 			}
 		}
+#endif
 	}
 }
 

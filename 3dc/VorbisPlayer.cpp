@@ -80,7 +80,7 @@ bool VorbisPlayback::Open(const std::string &fileName)
 
 	// create the streaming audio buffer
 	this->audioStream = new (std::nothrow) AudioStream;
-	if (!this->audioStream->Init(mVorbisInfo->channels, mVorbisInfo->rate, kBufferSize, kBufferCount))
+	if (!this->audioStream->Init(mVorbisInfo->channels, mVorbisInfo->rate, 16, kBufferSize, kBufferCount))
 	{
 		Con_PrintError("Couldn't initialise audio stream for Vorbis playback");
 		return false;

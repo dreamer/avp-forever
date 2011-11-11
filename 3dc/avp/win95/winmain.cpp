@@ -343,7 +343,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			FinishCentreMouseThread();
 		}
 
-		std::string error = "Couldn't create a Direct3D device.\n" + GetLastErrorMessage();
+		std::string error = "Failed to initialise Direct3D backend.\n" + GetLastErrorMessage();
 		MessageBox(hWndMain, error.c_str(), "Couldn't create render device!", MB_OK | MB_ICONSTOP);
 		exit(-1);
 	}
