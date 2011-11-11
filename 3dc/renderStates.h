@@ -43,8 +43,8 @@ enum ZWRITE_ENABLE
 typedef struct
 {
 	enum TRANSLUCENCY_TYPE		TranslucencyMode;
-	enum FILTERING_MODE_ID		FilteringMode;
-	enum TEXTURE_ADDRESS_MODE	TextureAddressMode;
+	enum FILTERING_MODE_ID		FilteringMode[8];
+	enum TEXTURE_ADDRESS_MODE	TextureAddressMode[8];
 	enum ZWRITE_ENABLE			ZWriteEnable;
 	int FogDistance;
 	unsigned int FogIsOn :1;

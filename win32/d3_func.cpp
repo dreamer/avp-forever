@@ -2880,10 +2880,10 @@ void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable)
 
 void ChangeTextureAddressMode(uint32_t samplerIndex, enum TEXTURE_ADDRESS_MODE textureAddressMode)
 {
-	if (CurrentRenderStates.TextureAddressMode == textureAddressMode)
+	if (CurrentRenderStates.TextureAddressMode[samplerIndex] == textureAddressMode)
 		return;
 
-	CurrentRenderStates.TextureAddressMode = textureAddressMode;
+	CurrentRenderStates.TextureAddressMode[samplerIndex] = textureAddressMode;
 
 	if (textureAddressMode == TEXTURE_WRAP)
 	{
@@ -2931,12 +2931,12 @@ void ChangeTextureAddressMode(uint32_t samplerIndex, enum TEXTURE_ADDRESS_MODE t
 
 void ChangeFilteringMode(uint32_t samplerIndex, enum FILTERING_MODE_ID filteringRequired)
 {
-	if (CurrentRenderStates.FilteringMode == filteringRequired)
+	if (CurrentRenderStates.FilteringMode[samplerIndex] == filteringRequired)
 		return;
 
-	CurrentRenderStates.FilteringMode = filteringRequired;
+	CurrentRenderStates.FilteringMode[samplerIndex] = filteringRequired;
 
-	switch (CurrentRenderStates.FilteringMode)
+	switch (CurrentRenderStates.FilteringMode[samplerIndex])
 	{
 		case FILTERING_BILINEAR_OFF:
 		{
@@ -2973,9 +2973,14 @@ void ToggleWireframe()
 
 bool SetRenderStateDefaults()
 {
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+	const int kNumStages = 8; // TODO, dont hardcode this?
+
+	for (int i = 0; i < kNumStages; i++)
+	{
+		d3d.lpD3DDevice->SetSamplerState(i, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+		d3d.lpD3DDevice->SetSamplerState(i, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+		d3d.lpD3DDevice->SetSamplerState(i, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+	}
 
 #if 0 // anisotropic
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC);
@@ -3028,21 +3033,27 @@ bool SetRenderStateDefaults()
 
 	{
 		// enable bilinear filtering (FILTERING_BILINEAR_ON)
-		d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-		d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+		for (int i = 0; i < kNumStages; i++)
+		{
+			d3d.lpD3DDevice->SetSamplerState(i, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+			d3d.lpD3DDevice->SetSamplerState(i, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 
-		// make sure render state tracking reflects above setting
-		CurrentRenderStates.FilteringMode = FILTERING_BILINEAR_ON;
+			// make sure render state tracking reflects above setting
+			CurrentRenderStates.FilteringMode[i] = FILTERING_BILINEAR_ON;
+		}
 	}
 
 	{
 		// set texture addressing mode to clamp (TEXTURE_CLAMP)
-		d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
-		d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
-		d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
+		for (int i = 0; i < kNumStages; i++)
+		{
+			d3d.lpD3DDevice->SetSamplerState(i, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+			d3d.lpD3DDevice->SetSamplerState(i, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+			d3d.lpD3DDevice->SetSamplerState(i, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
 
-		// make sure render state tracking reflects above setting
-		CurrentRenderStates.TextureAddressMode = TEXTURE_CLAMP;
+			// make sure render state tracking reflects above setting
+			CurrentRenderStates.TextureAddressMode[i] = TEXTURE_CLAMP;
+		}
 	}
 
 	{

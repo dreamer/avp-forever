@@ -230,8 +230,6 @@ bool BinkPlayback::ConvertFrame()
 	// critical section
 	EnterCriticalSection(&mFrameCriticalSection);
 
-	int doneCount = 0;
-
 	for (uint32_t i = 0; i < frameTextureIDs.size(); i++)
 	{
 		uint8_t *originalDestPtr = NULL;
@@ -248,7 +246,7 @@ bool BinkPlayback::ConvertFrame()
 		{
 			for (uint32_t y = 0; y < height; y++)
 			{
-				uint8_t *destPtr = originalDestPtr + y * pitch;
+				uint8_t *destPtr = originalDestPtr + (y * pitch);
 				uint8_t *srcPtr  = yuvBuffer[i].data + (y * yuvBuffer[i].pitch);
 
 				// copy entire width row in one go
@@ -261,13 +259,6 @@ bool BinkPlayback::ConvertFrame()
 			// unlock texture
 			Tex_Unlock(frameTextureIDs[i]);
 		}
-
-		doneCount++;
-	}
-
-	if (doneCount)
-	{
-		OutputDebugString("textures loaded\n");
 	}
 
 	// set this value to true so we can now begin to draw the textured fmv frame
