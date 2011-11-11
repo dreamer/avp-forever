@@ -947,7 +947,7 @@ void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, texID_t t
 
 	Texture tempTexture = Tex_GetTextureDetails(textureID);
 
-	orthoList->AddItem(4, textureID, translucencyType, FILTERING_BILINEAR_ON, TEXTURE_WRAP);
+	orthoList->AddItem(4, textureID, translucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 	// bottom left
 	orthoVertex[orthoVBOffset].x = x1;
@@ -1003,7 +1003,7 @@ void DrawAlphaMenuQuad(uint32_t topX, uint32_t topY, texID_t textureID, uint32_t
 
 void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint32_t alpha)
 {
-	uint32_t textureWidth = 0;
+	uint32_t textureWidth  = 0;
 	uint32_t textureHeight = 0;
 
 	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
@@ -1018,8 +1018,6 @@ void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint3
 
 	// do the text alignment justification
 	topLeftX -= textureWidth;
-
-//	DrawRHWquad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_LEFT, RCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
 
 	DrawQuad(topLeftX, topLeftY, textureWidth, textureHeight, AVPMENUGFX_GLOWY_LEFT, RCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
 
