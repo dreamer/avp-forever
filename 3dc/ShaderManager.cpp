@@ -77,11 +77,12 @@ void VertexShaderPool::Remove(shaderID_t shaderID)
 // set the shader as active (eg SetVertexShader() in D3D)
 bool VertexShaderPool::SetActive(shaderID_t shaderID)
 {
+/* FIXME
 	if (this->currentSetShaderID == shaderID) // already set
 	{
 		return true;
 	}
-
+*/
 	if (R_SetVertexShader(shaderList[shaderID]))
 	{
 		currentSetShaderID = shaderID;
@@ -89,6 +90,12 @@ bool VertexShaderPool::SetActive(shaderID_t shaderID)
 	}
 
 	return false;
+}
+
+// call this when we reset render device, to force shaders to re-set on next frame draw
+void VertexShaderPool::Unset()
+{
+	this->currentSetShaderID = kNullShaderID;
 }
 
 // pass a shader name in and see if it exists in the list. If it does, return
@@ -162,11 +169,12 @@ void PixelShaderPool::Remove(shaderID_t shaderID)
 // set the shader as active (eg SetPixelShader() in D3D)
 bool PixelShaderPool::SetActive(shaderID_t shaderID)
 {
+/* FIXME
 	if (this->currentSetShaderID == shaderID) // already set
 	{
 		return true;
 	}
-
+*/
 	if (R_SetPixelShader(this->shaderList[shaderID]))
 	{
 		currentSetShaderID = shaderID;
@@ -174,6 +182,12 @@ bool PixelShaderPool::SetActive(shaderID_t shaderID)
 	}
 
 	return false;
+}
+
+// call this when we reset render device, to force shaders to re-set on next frame draw
+void PixelShaderPool::Unset()
+{
+	this->currentSetShaderID = kNullShaderID;
 }
 
 // pass a shader name in and see if it exists in the list. If it does, return
@@ -210,6 +224,12 @@ EffectManager::~EffectManager()
 	{
 		Remove(i);
 	}
+}
+
+void EffectManager::Reset()
+{
+	vsPool.Unset();
+	psPool.Unset();
 }
 
 bool EffectManager::SetActive(effectID_t effectID)

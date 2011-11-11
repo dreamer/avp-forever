@@ -67,6 +67,7 @@ class VertexShaderPool
 		void Remove(shaderID_t shaderID);
 		void AddRef(shaderID_t shaderID) { shaderList[shaderID].refCount++; }
 		bool SetVertexShaderConstant(shaderID_t shaderID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
+		void Unset();
 };
 
 class PixelShaderPool
@@ -90,6 +91,7 @@ class PixelShaderPool
 		void Remove(shaderID_t shaderID);
 		void AddRef(shaderID_t shaderID) { shaderList[shaderID].refCount++; }
 		bool SetPixelShaderConstant(shaderID_t shaderID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
+		void Unset();
 };
 
 struct effect_t
@@ -110,6 +112,7 @@ class EffectManager
 	public:
 		EffectManager();
 		~EffectManager();
+		void Reset();
 		bool SetActive(effectID_t effectID);
 		bool SetVertexShaderConstant(effectID_t effectID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
 		bool SetPixelShaderConstant(effectID_t effectID, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData);
