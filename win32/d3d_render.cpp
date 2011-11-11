@@ -598,7 +598,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, texID_t textureID, uint
 	float x2 = WPos2DC(topX + charWidth);
 	float y2 = HPos2DC(topY + charHeight);
 
-	if (/*d3d.supportsShaders*/0)
+	if (/*d3d.supportsShaders*/1)
 	{
 		R_SetTexture(0, textureID);
 		R_SetTexture(1, AVPMENUGFX_CLOUDY);
@@ -623,50 +623,53 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, texID_t textureID, uint
 		ChangeFilteringMode(0, FILTERING_BILINEAR_ON);
 		ChangeFilteringMode(1, FILTERING_BILINEAR_ON);
 
-		ORTHOVERTEX textQuad[4];
-		int16_t indices[6];
-
-		indices[0] = 1;
-		indices[1] = 2;
-		indices[2] = 3;
-
-		indices[3] = 2;
-		indices[4] = 4;
-		indices[5] = 3;
+		TALLFONT textQuad[4];
 
 		// bottom left
 		textQuad[0].x = x1;
 		textQuad[0].y = y2;
 		textQuad[0].z = 1.0f;
 		textQuad[0].colour = colour;
-		textQuad[0].u = (float)((texU) * RecipW);
-		textQuad[0].v = (float)((texV + charHeight) * RecipH);
+		textQuad[0].u1 = (float)((texU) * RecipW);
+		textQuad[0].v1 = (float)((texV + charHeight) * RecipH);
+
+		textQuad[0].u2 = 0.0f;
+		textQuad[0].v2 = 1.0f;
 
 		// top left
 		textQuad[1].x = x1;
 		textQuad[1].y = y1;
 		textQuad[1].z = 1.0f;
 		textQuad[1].colour = colour;
-		textQuad[1].u = (float)((texU) * RecipW);
-		textQuad[1].v = (float)((texV) * RecipH);
+		textQuad[1].u1 = (float)((texU) * RecipW);
+		textQuad[1].v1 = (float)((texV) * RecipH);
+
+		textQuad[1].u2 = 0.0f;
+		textQuad[1].v2 = 0.0f;
 
 		// bottom right
 		textQuad[2].x = x2;
 		textQuad[2].y = y2;
 		textQuad[2].z = 1.0f;
 		textQuad[2].colour = colour;
-		textQuad[2].u = (float)((texU + charWidth) * RecipW);
-		textQuad[2].v = (float)((texV + charHeight) * RecipH);
+		textQuad[2].u1 = (float)((texU + charWidth) * RecipW);
+		textQuad[2].v1 = (float)((texV + charHeight) * RecipH);
+
+		textQuad[2].u2 = 1.0f;
+		textQuad[2].v2 = 1.0f;
 
 		// top right
 		textQuad[3].x = x2;
 		textQuad[3].y = y1;
 		textQuad[3].z = 1.0f;
 		textQuad[3].colour = colour;
-		textQuad[3].u = (float)((texU + charWidth) * RecipW);
-		textQuad[3].v = (float)((texV) * RecipH);
+		textQuad[3].u1 = (float)((texU + charWidth) * RecipW);
+		textQuad[3].v1 = (float)((texV) * RecipH);
 
-		LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, textQuad, sizeof(ORTHOVERTEX));
+		textQuad[3].u2 = 1.0f;
+		textQuad[3].v2 = 0.0f;
+
+		LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, textQuad, sizeof(TALLFONT));
 		if (FAILED(LastError)) 
 		{
 			OutputDebugString("DrawTallFontCharacter quad draw failed\n");

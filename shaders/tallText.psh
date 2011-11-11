@@ -35,7 +35,7 @@ PS_OUTPUT ps_main(in PS_INPUT In)
     // if the colour pixel is greater than black (ie grey/white of font letter..
     if ((srcColour1.r) && (srcColour1.g) && (srcColour1.b))
     {
-        // blend in smoke effect
+        // blend in smoke effect  
         destColour = (srcColour1 * srcColour2) * In.Diffuse;
     }
     else

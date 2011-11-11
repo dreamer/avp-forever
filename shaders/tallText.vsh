@@ -17,7 +17,7 @@ struct VS_OUTPUT
 };
 
 // Global variables
-float4x4 WorldViewProj;
+float4x4 OrthographicProj;
 float CloakingPhase;
 float pX;
 
@@ -29,19 +29,23 @@ float pX;
 VS_OUTPUT vs_main(in VS_INPUT In)
 {
     VS_OUTPUT Out;
-    
-    float texX = pX + (CloakingPhase/64.0f) * 0.005f;
-    float texY = (CloakingPhase/128.0f) * 0.005f;
-    
-    // -= here instead of += to get the effect to move left to right 
-    In.Texture2.x -= texX;
-    In.Texture2.y -= texY;
 
-    Out.Position = mul(In.Position, WorldViewProj);
+    // minus x to make effect move right to left (instead of left to right) and multiply by 0.005f to control speed
+    float texX = (-In.Position.x) + pX + ((CloakingPhase/64.0f) * 0.005f);
+    
+    // minus y to make effect move down to up (instead of up to down) and multiply by 0.005f to control speed
+    float texY = (-In.Position.y) + ((CloakingPhase/128.0f) * 0.005f);
+    
+    // we don't set In.Texture2 correctly from the application - we do it here with above values
+    In.Texture2.x = texX;
+    In.Texture2.y = texY;
 
     Out.Texture1 = In.Texture1;
-    Out.Texture2 = In.Texture2; 
+    Out.Texture2 = In.Texture2;
     Out.Diffuse  = In.Diffuse;
+    
+    // finally do our orthographic projection
+    Out.Position = mul(In.Position, OrthographicProj);
 
     return Out;
 }

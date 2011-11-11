@@ -103,7 +103,6 @@ struct D3DLVERTEX
 
 	float u;
 	float v;
-
 };
 
 struct ORTHOVERTEX
@@ -116,8 +115,23 @@ struct ORTHOVERTEX
 
 	float u;
 	float v;
-
 };
+
+struct TALLFONT
+{
+	float x;
+	float y;
+	float z;
+
+	DWORD colour;
+
+	float u1;
+	float v1;
+
+	float u2;
+	float v2;
+};
+
 
 struct FMVVERTEX
 {
@@ -133,7 +147,6 @@ struct FMVVERTEX
 
 	float u3;
 	float v3;        // Texture coordinates 3
-
 };
 
 struct DECAL_VERTEX
