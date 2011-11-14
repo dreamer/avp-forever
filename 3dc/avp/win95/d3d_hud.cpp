@@ -362,7 +362,7 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 
 	int motionTrackerScaledHalfWidth = MUL_FIXED(MotionTrackerScale*3, MotionTrackerHalfWidth/2);
 
-	motionTrackerScaledHalfWidth /= 2;
+//	motionTrackerScaledHalfWidth /= 2;
 
 	int angle = 4095 - Player->ObEuler.EulerY;
 
@@ -529,7 +529,7 @@ extern void D3D_BlitWhiteChar(int x, int y, unsigned char c)
 	imageDesc.Height = 15;
 	imageDesc.Width = 15;
 
-	imageDesc.Scale = DIV_FIXED(640, ScreenDescriptorBlock.SDB_Width);//ONE_FIXED;
+	imageDesc.Scale = ONE_FIXED; //DIV_FIXED(640, ScreenDescriptorBlock.SDB_Width);//ONE_FIXED;
 	imageDesc.Translucency = 255;
 	imageDesc.Red = 255;
 	imageDesc.Green = 255;
