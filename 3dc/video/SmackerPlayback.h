@@ -39,7 +39,6 @@ class SmackerPlayback
 		HANDLE mDecodeThreadHandle;
 		HANDLE mAudioThreadHandle;
 
-//		CRITICAL_SECTION mFrameCriticalSection;
 		bool mFrameCriticalSectionInited;
 		bool isLooped;
 
@@ -81,6 +80,8 @@ class SmackerPlayback
 			mFrameReady(false),
 			isLooped(false),
 			mFrameCriticalSectionInited(false),
+			mDecodeThreadHandle(0),
+			mAudioThreadHandle(0),
 			audioStream(0),
 			mRingBuffer(0),
 			mAudioData(0),
