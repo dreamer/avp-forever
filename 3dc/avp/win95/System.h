@@ -107,14 +107,8 @@ extern int maxshapes;
 #define vsize 3					/* Scale for polygon vertex indices */
 
 #define MaxImages 400
-#define MaxImageGroups 1
-
-
 
 /************** Some Shell and Loading Platform Compiler Options ******************/
-
-#undef RIFF_SYSTEM
-#define RIFF_SYSTEM
 #define TestRiffLoaders TRUE
 #define LoadingMapsShapesAndTexturesEtc		FALSE
 

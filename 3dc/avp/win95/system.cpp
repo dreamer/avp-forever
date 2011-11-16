@@ -131,23 +131,18 @@ void InitCharacter()
 		avp_undo_rif_load(predator_weapon_rif);
 	}
 
-	#if MaxImageGroups==1
 	InitialiseTextures();
-	#else
-	SetCurrentImageGroup(0);
-	DeallocateCurrentImages();
-	#endif
 
 	Start_Progress_Bar();
 
 	Set_Progress_Bar_Position(PBAR_HUD_START);
 
-	switch(AvP.Network)
+	switch (AvP.Network)
 	{
 		case I_No_Network:
 		{
 			// set up the standard single player game
-			switch(AvP.PlayerType)
+			switch (AvP.PlayerType)
 			{
 				case I_Marine:
 				{
@@ -198,9 +193,6 @@ void InitCharacter()
 	}
 	Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.5);
 
-	#if MaxImageGroups>1
-	SetCurrentImageGroup(0);
-	#endif
 	copy_rif_data(player_rif,CCF_IMAGEGROUPSET,PBAR_HUD_START+PBAR_HUD_INTERVAL*.5,PBAR_HUD_INTERVAL*.25);
 
 	Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.75);
@@ -505,9 +497,6 @@ void LoadRifFile()
 		exit(0x3421);
 	};
 
-	#if MaxImageGroups>1
-	SetCurrentImageGroup(2); // FOR ENV
-	#endif
 	copy_rif_data(env_rif, CCF_ENVIRONMENT, PBAR_LEVEL_START+PBAR_LEVEL_INTERVAL*.4, PBAR_LEVEL_INTERVAL*.6);
 }
 
@@ -555,14 +544,7 @@ int Destroy_CurrentEnvironment(void)
 	TimeStampedMessage("After KillFarModuleLocs");
 	CleanUpPheromoneSystem();
 	TimeStampedMessage("After CleanUpPheromoneSystem");
-	
-	#if MaxImageGroups>1
-	SetCurrentImageGroup(2); // FOR ENV
-	TimeStampedMessage("After SetCurrentImageGroup");
 
-	DeallocateCurrentImages();
-	TimeStampedMessage("After DeallocateCurrentImages");
-	#endif
 	// now deasllocate the module vis array
 	DeallocateModuleVisArrays();
 	TimeStampedMessage("After DeallocateModuleVisArrays");
@@ -611,8 +593,4 @@ void ExitGame(void)
 		avp_undo_rif_load(predator_weapon_rif);
 		predator_weapon_rif=INVALID_RIFFHANDLE;
 	}
-	#if MaxImageGroups>1
-	SetCurrentImageGroup(0);
-	DeallocateCurrentImages();
-	#endif
 }

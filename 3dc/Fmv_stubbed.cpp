@@ -28,11 +28,7 @@ FMVTEXTURE FMVTexture[MAX_NO_FMVTEXTURES];
 int NumberOfFMVTextures;
 
 extern IMAGEHEADER ImageHeaderArray[];
-#if MaxImageGroups>1
-	extern int NumImagesArray[];
-#else
-	extern int NumImages;
-#endif
+extern int NumImages;
 
 int FmvColourRed;
 int FmvColourGreen;
@@ -105,22 +101,12 @@ void ScanImagesForFMVs()
 	IMAGEHEADER *ihPtr;
 	NumberOfFMVTextures = 0;
 
-	#if MaxImageGroups>1
-	for (j=0; j<MaxImageGroups; j++)
-	{
-		if (NumImagesArray[j])
-		{
-			ihPtr = &ImageHeaderArray[j*MaxImages];
-			for (i = 0; i<NumImagesArray[j]; i++, ihPtr++)
-			{
-	#else
 	{
 		if(NumImages)
 		{
 			ihPtr = &ImageHeaderArray[0];
 			for (i = 0; i<NumImages; i++, ihPtr++)
 			{
-	#endif
 				char *strPtr;
 				if(strPtr = strstr(ihPtr->ImageName,"FMVs"))
 				{

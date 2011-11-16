@@ -354,31 +354,6 @@ void InitJoysticks(void);
 void ReadJoysticks(void);
 int DeallocateAllImages(void);
 int RestoreAllImages(void);
-
-/*
-
- Jake's image functions
-
-*/
-
-#ifdef MaxImageGroups
-
-	#if (MaxImageGroups > 1)
-
-		void SetCurrentImageGroup(unsigned int group);
-		int DeallocateCurrentImages(void);
-
-	#endif /* MaxImageGroups > 1 */
-
-#endif /* defined(MaxImageGroups) */
-
-
-/*
-	Project callbacks
-*/
-
 void ExitGame(void);
-
-//#define PLATFORM_INCLUDED
 
 #endif

@@ -213,13 +213,6 @@ void LoadedNPC::Load(int progress_start,int progress_interval)
 		npc_rif = avp_load_rif_non_env(filename);
 		if (INVALID_RIFFHANDLE != npc_rif)
 		{
-			#if MaxImageGroups>1
-			for (img_group=FIRST_FREE_IMAGE_GROUP; image_groups.contains(img_group); ++img_group)
-				;
-			GLOBALASSERT(img_group<MaxImageGroups);
-			image_groups.add_entry(img_group);
-			SetCurrentImageGroup(img_group); // PROBLEM AT PRESENT, copy_rif_data changes this
-			#endif
 			Set_Progress_Bar_Position(progress_start+progress_interval/2);
 			copy_rif_data(npc_rif,CCF_IMAGEGROUPSET + CCF_LOAD_AS_HIERARCHY_IF_EXISTS,progress_start+progress_interval/2,progress_interval/2);
 			unload_rif(npc_rif); // doesnt destroy copied data
@@ -231,11 +224,6 @@ void LoadedNPC::Unload()
 {
 	if (INVALID_RIFFHANDLE != npc_rif)
 	{
-		#if MaxImageGroups>1
-		image_groups.delete_entry(img_group);
-		SetCurrentImageGroup(img_group);
-		DeallocateCurrentImages();
-		#endif
 		avp_undo_rif_load(npc_rif); // destroys copied shapes
 	}
 	npc_rif = INVALID_RIFFHANDLE;

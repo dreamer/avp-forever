@@ -340,16 +340,13 @@ LoadedPlacedHierarchy PlacedHierarchyArray[NumPlacedHierarchy]=
 
 void LoadedPlacedHierarchy::load_rif()
 {
-	if(placed_rif!=INVALID_RIFFHANDLE) return;
+	if (placed_rif!=INVALID_RIFFHANDLE) return;
 	char file_path[100];
 	sprintf(file_path,"avp_huds/%s.rif",file_name);
 	
 	placed_rif=avp_load_rif_non_env(file_path);
-	if(placed_rif!=INVALID_RIFFHANDLE)
+	if (placed_rif != INVALID_RIFFHANDLE)
 	{
-		#if MaxImageGroups>1
-		SetCurrentImageGroup(2); // load into environment image group
-		#endif
 		copy_rif_data(placed_rif,CCF_IMAGEGROUPSET + CCF_LOAD_AS_HIERARCHY_IF_EXISTS+CCF_DONT_INITIALISE_TEXTURES,0,0);
 		unload_rif(placed_rif);
 	}

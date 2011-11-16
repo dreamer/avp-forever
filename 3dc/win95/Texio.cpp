@@ -2,11 +2,7 @@
 #include "3dc.h"
 #include <conio.h>
 #include "inline.h"
-
-#ifdef RIFF_SYSTEM
 #include "chnktexi.h"
-#endif
-
 #define UseLocalAssert 0
 #include "ourasert.h"
 #include "awTexLd.h"
@@ -26,50 +22,19 @@ extern char projectsubdirectory[];
 	Global Variables for PC Functions
 */
 
+#define MaxImageGroups 1
+
 #ifdef MaxImageGroups
 #if MaxImageGroups < 2 /* optimize if this multiple groups are not required */
 #undef MaxImageGroups
 #endif /* MaxImageGroups < 2 */
 #endif /* MaxImageGroups */
 
-#ifdef MaxImageGroups
-
-#include "txioctrl.h"
-
-/*
-	basically, I want there to be more than one image header array
-	so that I can load some images once only, then load shapes, call
-	InitializeTextures, DeallocateAllImages, etc. and only the images associated
-	with the shapes load are deallocated.
-	I might want to load shapes in two blocks, calling InitializeTextures
-	for each load.
-
-	There will need to be as many slots for ImageHeaderArrays as MaxImageGroups
-
-	I want this to be completely invisible to anyone except programmers on
-	PC projects that require this feature
-
-	Jake.
-*/
-
-/* these three globals must behave the same */
-int NumImages = 0;                                         /* # current images */
-IMAGEHEADER *ImageHeaderPtrs[MaxImageGroups*MaxImages];    /* Ptrs to Image Header Blocks */
-IMAGEHEADER ImageHeaderArray[MaxImageGroups*MaxImages];    /* Array of Image Headers */
-
-int NumImagesArray[MaxImageGroups]; /* must be static to ensure initialization to zero */
-static int CurrentImageGroup = 0;
-static IMAGEHEADER *NextFreeImageHeaderPtr[MaxImageGroups];
-
-#else /* ! MaxImageGroups */
-
 int NumImages = 0;                          /* # current images */
 IMAGEHEADER *ImageHeaderPtrs[MaxImages];    /* Ptrs to Image Header Blocks */
 IMAGEHEADER ImageHeaderArray[MaxImages];    /* Array of Image Headers */
 
 static IMAGEHEADER *NextFreeImageHeaderPtr;
-
-#endif /* ! MaxImageGroups */
 
 
 /*
@@ -93,23 +58,11 @@ int InitialiseTextures(void)
 		The caller is responsible for any other structures which might refer
 		to the currently loaded images
 	*/
-
-	#ifdef MaxImageGroups
-
-	DeallocateCurrentImages();
-
-	NumImages = CurrentImageGroup * MaxImages;
-	NextFreeImageHeaderPtr[CurrentImageGroup] = &ImageHeaderArray[CurrentImageGroup*MaxImages];
-
-	#else
-
 	DeallocateAllImages();
 
 	/* Initialise Image Header Variables */
 	NumImages = 0;
 	NextFreeImageHeaderPtr = ImageHeaderArray;
-
-	#endif
 
 	/* Added 23/3/98 by DHM so that this can be called without loading any
 	shapes (to get textprint working in the menus):
@@ -265,6 +218,8 @@ int CUBE_item3[]={
 
 void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 {
+	return;
+
 	int **ShapeItemArrayPtr;
 	POLYHEADER *ShapeItemPtr;
 
@@ -308,7 +263,7 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 					{
 						/* Clear low word, OR in global index */
 						ShapeItemPtr->PolyColour &= ClrTxIndex;
-						ShapeItemPtr->PolyColour |= TxIndex;
+//						ShapeItemPtr->PolyColour |= TxIndex;
 					}
 				}
 			}
@@ -329,6 +284,8 @@ void MakeShapeTexturesGlobal(SHAPEHEADER *shptr, int TxIndex, int LTxIndex)
 
 void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr, POLYHEADER *pheader, int LTxIndex, int TxIndex)
 {
+	return;
+
 	TXANIMHEADER **txah_ptr;
 	TXANIMHEADER *txah;
 	TXANIMFRAME *txaf;
@@ -419,6 +376,8 @@ void MakeTxAnimFrameTexturesGlobal(SHAPEHEADER *sptr, POLYHEADER *pheader, int L
 
 void SpriteResizing(SHAPEHEADER *sptr)
 {
+	return;
+
 	TXANIMHEADER **txah_ptr;
 	TXANIMHEADER *txah;
 	TXANIMFRAME *txaf;
@@ -701,6 +660,8 @@ void SpriteResizing(SHAPEHEADER *sptr)
 
 void FindImageExtents(int numuvs, int *uvdata, IMAGEEXTENTS *e, IMAGEEXTENTS *e_curr)
 {
+	return;
+
 	/* Find the current UV extents */
 	e_curr->u_low = bigint;
 	e_curr->v_low = bigint;
@@ -735,23 +696,8 @@ IMAGEHEADER* GetImageHeader(void)
 {
 	IMAGEHEADER *iheader;
 
-	#ifdef MaxImageGroups
-
-	/* NumImages always points to the correct point in the array */
-	do
-	{
-		iheader = NextFreeImageHeaderPtr[CurrentImageGroup]++;
-	}
-	while (IsImageInUse(CurrentImageGroup,NumImagesArray[CurrentImageGroup]++) ? ++NumImages : 0);
-
-	GLOBALASSERT(NumImagesArray[CurrentImageGroup] < MaxImages);
-
-	#else
-
 	iheader = NextFreeImageHeaderPtr++;
 	GLOBALASSERT(NumImages < MaxImages);
-
-	#endif
 
 	/* ensure flags are zero */
 	memset(iheader, 0, sizeof(IMAGEHEADER));
@@ -780,189 +726,6 @@ static void MinimizeImageHeader(IMAGEHEADER * ihptr)
 	}
 }
 
-#ifdef MaxImageGroups
-
-void SetCurrentImageGroup(unsigned int group)
-{
-	GLOBALASSERT(group < MaxImageGroups);
-	CurrentImageGroup = group;
-	NumImages = group*MaxImages + NumImagesArray[group];
-}
-
-int DeallocateCurrentImages(void)
-{
-	int i;
-	IMAGEHEADER *ihptr;
-
-	if (NumImagesArray[CurrentImageGroup])
-	{
-		ihptr = &ImageHeaderArray[CurrentImageGroup*MaxImages];
-		for (i = 0; i < NumImagesArray[CurrentImageGroup]; ++i)
-		{
-			if (CanDeleteImage(CurrentImageGroup,i))
-				DeallocateImageHeader(ihptr);
-			++ihptr;
-		}
-		NumImagesArray[CurrentImageGroup] = 0;
-		NumImages = CurrentImageGroup * MaxImages;
-		NextFreeImageHeaderPtr[CurrentImageGroup] = &ImageHeaderArray[CurrentImageGroup*MaxImages];
-		ImageGroupFreed(CurrentImageGroup);
-	}
-
-	return TRUE; /* ok for the moment */
-}
-
-void NowDeleteImage(int img_group, int img_num_offset)
-{
-	DeallocateImageHeader(&ImageHeaderArray[img_group*MaxImages+img_num_offset]);
-}
-
-int DeallocateAllImages(void)
-{
-	int i, j;
-	IMAGEHEADER *ihptr;
-
-	for (j=0; j<MaxImageGroups; ++j)
-	{
-		if (NumImagesArray[j])
-		{
-			ihptr = &ImageHeaderArray[j*MaxImages];
-			for (i = 0; i<NumImagesArray[j]; ++i)
-			{
-				if (CanDeleteImage(j,i))
-					DeallocateImageHeader(ihptr);
-				++ihptr;
-			}
-			NumImagesArray[j] = 0;
-		}
-		ImageGroupFreed(j);
-	}
-	NumImages = CurrentImageGroup * MaxImages;
-	NextFreeImageHeaderPtr[CurrentImageGroup] = &ImageHeaderArray[CurrentImageGroup*MaxImages];
-
-	return TRUE; /* ok for the moment */
-}
-
-static void MinimizeImageCallback(int i, void * gP)
-{
-	int g = *(int *)gP;
-	MinimizeImageHeader(ImageHeaderPtrs[g*MaxImages+i]);
-}
-
-int MinimizeAllImages(void)
-{
-	int i, j;
-	IMAGEHEADER *ihptr;
-
-	for (j=0; j<MaxImageGroups; ++j)
-	{
-		if (NumImagesArray[j])
-		{
-			ihptr = &ImageHeaderArray[j*MaxImages];
-			for (i = 0; i<NumImagesArray[j]; ++i)
-			{
-				MinimizeImageHeader(ihptr);
-				++ihptr;
-			}
-		}
-		EnumLeftoverImages(j,NumImagesArray[j],MinimizeImageCallback,&j);
-	}
-
-	return TRUE; /* ok for the moment */
-}
-
-static void RestoreImageCallback(int i, void * gP)
-{
-	int g = *(int *)gP;
-	RestoreImageHeader(ImageHeaderPtrs[g*MaxImages+i]);
-}
-
-int RestoreAllImages(void)
-{
-	int i, j;
-	IMAGEHEADER *ihptr;
-
-	for (j=0; j<MaxImageGroups; ++j)
-	{
-		if (NumImagesArray[j])
-		{
-			ihptr = &ImageHeaderArray[j*MaxImages];
-			for (i = 0; i<NumImagesArray[j]; ++i)
-			{
-				RestoreImageHeader(ihptr);
-				++ihptr;
-			}
-		}
-		EnumLeftoverImages(j,NumImagesArray[j],RestoreImageCallback,&j);
-	}
-
-	return TRUE; /* ok for the moment */
-}
-
-#if debug
-
-struct ImageGroupDebugInfo
-{
-	int num_texels;
-	int num_images;
-	int num_shared;
-	int num_leftover;
-};
-
-static struct ImageGroupDebugInfo db_gp_info[MaxImageGroups];
-
-static void DbShareImgCallback(int imgnum, void * user)
-{
-	int g = *(int *)user;
-
-	++db_gp_info[g].num_shared;
-}
-
-static void DbLeftoverImgCallback(int i, void * user)
-{
-	int g = *(int *)user;
-
-	++db_gp_info[g].num_leftover;
-
-	db_gp_info[g].num_texels += ImageHeaderPtrs[g*MaxImages+i]->ImageWidth * ImageHeaderPtrs[g*MaxImages+i]->ImageHeight;
-}
-
-void ImageGroupsDebugPrintInit(void)
-{
-	int g;
-	for (g=0; g<MaxImageGroups; g++)
-	{
-		int i;
-
-		db_gp_info[g].num_texels = 0;
-		db_gp_info[g].num_images = NumImagesArray[g];
-		db_gp_info[g].num_shared = 0;
-		db_gp_info[g].num_leftover = 0;
-
-		EnumSharedImages(g,NumImagesArray[g],DbShareImgCallback,&g);
-		EnumLeftoverImages(g,NumImagesArray[g],DbLeftoverImgCallback,&g);
-
-		for (i=0; i<NumImagesArray[g]; ++i)
-		{
-			db_gp_info[g].num_texels += ImageHeaderPtrs[g*MaxImages+i]->ImageWidth * ImageHeaderPtrs[g*MaxImages+i]->ImageHeight;
-		}
-	}
-}
-
-void ImageGroupsDebugPrint(void)
-{
-	int g;
-	textprint("IMAGE GROUP DEBUG INFO\nGP  N_IMG  N_SHR  N_LFT  N_TEXELS\n");
-	for (g=0; g<MaxImageGroups; ++g)
-	{
-		textprint("%2d  %5d  %5d  %5d  %8d\n",g,db_gp_info[g].num_images,db_gp_info[g].num_shared,db_gp_info[g].num_leftover,db_gp_info[g].num_texels);
-	}
-}
-
-#endif
-
-#else
-
 int DeallocateAllImages(void)
 {
 	IMAGEHEADER *ihptr;
@@ -983,66 +746,4 @@ int DeallocateAllImages(void)
 
 	return TRUE; /* ok for the moment */
 }
-
-#endif
-
-
-#ifdef RIFF_SYSTEM
-
-/*
-The RIFF_SYSTEM uses this function to return an image number
-for an image which might be already loaded. The argument
-passed points to the full pathname of the image that the
-system wants to load, so an explicit stricmp on the
-image names of already loaded images will suffice. To
-avoid loading images more than once, it ensures that the
-path generated for two identical images will always be
-the same. It also fills in the ImageName field with the
-fill path of images it loads.
-
-Currently I am assuming that users of ImageGroups will
-no longer need images in group n+1 when images in group
-n are deleted, so I can check in all groups from 0...Current
-to see if the image is already loaded.
-
-Jake.
-*/
-
-#if 0
-int GetExistingImageNum(char const * fname)
-{
-	int i;
-	IMAGEHEADER * iharrayptr;
-
-	#ifdef MaxImageGroups
-
-	int g;
-
-	for (g=0; g<MaxImageGroups; ++g)
-	{
-		for (i=0, iharrayptr = &ImageHeaderArray[g*MaxImages]; i<NumImagesArray[g]; ++i, ++iharrayptr)
-		{
-			if (!stricmp(iharrayptr->ImageName,fname))
-			{
-				if (g!=CurrentImageGroup)
-					MarkImageInUseByGroup(g,i,CurrentImageGroup);
-				return i+g*MaxImages;
-			}
-		}
-	}
-
-	#else
-
-	for (i=0, iharrayptr = ImageHeaderArray; i<NumImages; ++i, ++iharrayptr)
-	{
-		if (!_stricmp(iharrayptr->ImageName,fname)) return i;
-	}
-
-	#endif
-
-	return GEI_NOTLOADED;
-}
-#endif
-
-#endif
 
