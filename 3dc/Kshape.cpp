@@ -5333,75 +5333,6 @@ void DrawWaterFallPoly(VECTORCH *v)
 
 void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 {
-	/* NOTES
-	
-	(ScreenDescriptorBlock.SDB_Width<<15) is centre of screen in 16.16
-
-	*/
-
-	uint32_t planeX, planeY, planeZ;
-
-	D3DXVECTOR3 planeLeft, planeRight, planeSource;
-
-	// bottom left?
-	planeSource.x = 0.0f;
-	planeSource.y = (float)ScreenDescriptorBlock.SDB_Height;
-	planeSource.z = 64.0f;
-
-	D3DXVec3Unproject(&planeLeft, &planeSource, &d3d.D3DViewport, &d3d.matProjection, &d3d.matView, &d3d.matIdentity);
-
-	// bottom right
-	planeSource.x = (float)ScreenDescriptorBlock.SDB_Width;
-	planeSource.y = (float)ScreenDescriptorBlock.SDB_Height;
-	planeSource.z = 64.0f;
-
-	D3DXVec3Unproject(&planeRight, &planeSource, &d3d.D3DViewport, &d3d.matProjection, &d3d.matView, &d3d.matIdentity);
-
-	POLYHEADER fakeHeader2;
-	fakeHeader2.PolyFlags = iflag_transparent;
-	RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
-
-	VerticesBuffer[0].X = planeLeft.x;
-	VerticesBuffer[0].Y = planeLeft.y;
-	VerticesBuffer[0].Z	= planeLeft.z;
-
-	VerticesBuffer[0].R = 255;
-	VerticesBuffer[0].G	= 255;
-	VerticesBuffer[0].B = 255;
-	VerticesBuffer[0].A = 128;
-
-	VerticesBuffer[1].X = planeLeft.x;
-	VerticesBuffer[1].Y = planeLeft.y;
-	VerticesBuffer[1].Z	= planeLeft.z+20000;
-
-	VerticesBuffer[1].R = 255;
-	VerticesBuffer[1].G	= 255;
-	VerticesBuffer[1].B = 255;
-	VerticesBuffer[1].A = 128;
-
-	VerticesBuffer[2].X = planeRight.x;
-	VerticesBuffer[2].Y = planeRight.y;
-	VerticesBuffer[2].Z	= planeRight.z;
-
-	VerticesBuffer[2].R = 255;
-	VerticesBuffer[2].G	= 255;
-	VerticesBuffer[2].B = 255;
-	VerticesBuffer[2].A = 128;
-
-	VerticesBuffer[3].X = planeRight.x;
-	VerticesBuffer[3].Y = planeRight.y;
-	VerticesBuffer[3].Z	= planeRight.z+20000;
-
-	VerticesBuffer[3].R = 255;
-	VerticesBuffer[3].G	= 255;
-	VerticesBuffer[3].B = 255;
-	VerticesBuffer[3].A = 128;
-
-	RenderPolygon.NumberOfVertices = 4;
-
-	D3D_ZBufferedGouraudPolygon_Output(&fakeHeader2, VerticesBuffer);
-
-	return;
 
 	VECTOR2D offset[4];
 	POLYHEADER fakeHeader;
@@ -5409,24 +5340,43 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 	int z = ONE_FIXED-scale;
 
 	z = MUL_FIXED(MUL_FIXED(z,z), 2048);
-	{
-		centreY = MUL_FIXED( (SmartTargetSightY-(ScreenDescriptorBlock.SDB_Height<<15)) / Global_VDB_Ptr->VDB_ProjY, z);
+
+	/**
+	 * Melanikus - 17/11/2011
+	 * I'm not sure what all that did, but we just need the floating point of the center of the targeting system
+	 * which is given to us by 
+	 * centreX = (SmartTargetSightX / 65535.0f);
+	 * centreY = (SmartTargetSightY / 65535.0f);
+	 */ 
+	/*{
+		centreY = MUL_FIXED( (SmartTargetSightY-(ScreenDescriptorBlock.SDB_Height)) / Global_VDB_Ptr->VDB_ProjY, z);
 		if (MIRROR_CHEATMODE)
 		{
-			centreX = MUL_FIXED( ( - (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width<<15))) / Global_VDB_Ptr->VDB_ProjX, z);
+			centreX = MUL_FIXED( ( - (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width))) / Global_VDB_Ptr->VDB_ProjX, z);
 		}
 		else
 		{
-			centreX = MUL_FIXED( (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width<<15)) / Global_VDB_Ptr->VDB_ProjX, z);
+			centreX = MUL_FIXED( (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width)) / Global_VDB_Ptr->VDB_ProjX, z);
 		}
-	}
-	z = (float)z*CameraZoomScale;
+	}*/
+	centreX = (SmartTargetSightX / 65535.0f);
+	centreY = (SmartTargetSightY / 65535.0f);
+	// Camera was used to make the quads smaler but our projection does not make the quads bigger
+	// z = (float)z*CameraZoomScale;
 
-//	char buf[100];
-//	sprintf(buf, "centreX: %d, centreY: %d\n", centreX, centreY);
-//	OutputDebugString(buf);
+	RHW_VERTEX list[4];
+	VECTORCHF scalePoint;
+
+	scalePoint.vx = centreX;
+	scalePoint.vy = centreY;
+	scalePoint.vz = 0.0f;
+
+	
+	
 
 	{
+		
+
 		int a = 160;
 		int b = 40;
 
@@ -5462,21 +5412,19 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 			offset[3].vx = -offset[3].vx;
 		}
 
-		VerticesBuffer[0].X = offset[0].vx + centreX;
-		VerticesBuffer[0].Y = offset[0].vy + centreY;
+		// Send our quad to the center of the targetting system
+		for(int i = 0; i < 4; i++)
+		{
+			VerticesBuffer[i].X = offset[i].vx + centreX;
+			VerticesBuffer[i].Y = offset[i].vy + centreY;
+		}
+	
 
-		VerticesBuffer[1].X = offset[1].vx + centreX;
-		VerticesBuffer[1].Y = offset[1].vy + centreY;
-
-		VerticesBuffer[2].X = offset[2].vx + centreX;
-		VerticesBuffer[2].Y = offset[2].vy + centreY;
-
-		VerticesBuffer[3].X = offset[3].vx + centreX;
-		VerticesBuffer[3].Y = offset[3].vy + centreY;
 	}
 
-	fakeHeader.PolyFlags = iflag_transparent;
-	RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
+	
+	
+	
 	{
 		for (int i = 0; i < 4; i++)
 		{
@@ -5496,25 +5444,30 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 				VerticesBuffer[i].B = 255;
 				VerticesBuffer[i].A = 128;
 			}
+			
+			
+ 			VerticesBuffer[i].X -= scalePoint.vx; 
+			VerticesBuffer[i].Y -= scalePoint.vy; 
+
+			
+			if(z < 1) z = 1;
+			float scaleFactor = float(2048 / (z));
+
+			VerticesBuffer[i].X *= scaleFactor * 0.25f;
+			VerticesBuffer[i].Y *= scaleFactor * 0.25f;
+
+			list[i].x = VerticesBuffer[i].X + scalePoint.vx;
+			list[i].y = VerticesBuffer[i].Y + scalePoint.vy;
+			list[i].z = 0.0;
+			list[i].color = RGBA_MAKE(VerticesBuffer[i].R,VerticesBuffer[i].G,VerticesBuffer[i].B,VerticesBuffer[i].A);
+			list[i].rhw = 1.0;
+			list[i].u = 0.5f;
+			list[i].v = 0.5f;
 		}
-		RenderPolygon.NumberOfVertices = 4;
+
 	}
-/*
-	GouraudPolygon_ClipWithZ();
-	if (RenderPolygon.NumberOfVertices<3) return;
-	GouraudPolygon_ClipWithNegativeX();
-	if (RenderPolygon.NumberOfVertices<3) return;
-	GouraudPolygon_ClipWithPositiveY();
-	if (RenderPolygon.NumberOfVertices<3) return;
-	GouraudPolygon_ClipWithNegativeY();
-	if (RenderPolygon.NumberOfVertices<3) return;
-	GouraudPolygon_ClipWithPositiveX();
-	if (RenderPolygon.NumberOfVertices<3) return;
-*/
 
-//	DrawQuad(120, 120, 120, 120, NO_TEXTURE, RCOLOR_ARGB(255, 255, 0, 0), TRANSLUCENCY_NORMAL); 
 
-	D3D_ZBufferedGouraudPolygon_Output(&fakeHeader, /*RenderPolygon.Vertices*/&VerticesBuffer[0]);
 
 	if (drawInRed)
 	{
@@ -5548,20 +5501,23 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 		}
 
 		RenderPolygon.NumberOfVertices = 4;
-/*
-		GouraudPolygon_ClipWithZ();
-		if(RenderPolygon.NumberOfVertices<3) return;
-		GouraudPolygon_ClipWithNegativeX();
-		if(RenderPolygon.NumberOfVertices<3) return;
-		GouraudPolygon_ClipWithPositiveY();
-		if(RenderPolygon.NumberOfVertices<3) return;
-		GouraudPolygon_ClipWithNegativeY();
-		if(RenderPolygon.NumberOfVertices<3) return;
-		GouraudPolygon_ClipWithPositiveX();
-		if(RenderPolygon.NumberOfVertices<3) return;
-*/
-		D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,/*RenderPolygon.Vertices*/&VerticesBuffer[0]);
+
+		
 	}
+	
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,D3DZB_TRUE);
+
+	d3d.rhwDecl->Set();
+	d3d.effectSystem->SetActive(d3d.rhwEffect);
+
+	R_SetTexture(0, NO_TEXTURE);
+
+	ChangeTextureAddressMode(0, TEXTURE_CLAMP);
+	ChangeFilteringMode(0, FILTERING_BILINEAR_OFF);
+	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
+	
+	d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &list[0], sizeof(RHW_VERTEX));
 }
 
 void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRIXCH *orientationPtr)
@@ -6051,7 +6007,6 @@ int SkyColour_R=200;
 int SkyColour_G=200;
 int SkyColour_B=200;
 
-extern float GetTestTimer();
 
 void RenderSky(void)
 {
@@ -6079,8 +6034,8 @@ void RenderSky(void)
 	for (o = 0; o < OCTAVES; o++)
 	{
 		// makes the sky clouds move
-		u[o] += MUL_FIXED(du[o], GetTestTimer() * 0.1f);//0x0000001);
-		v[o] += MUL_FIXED(dv[o], GetTestTimer() * 0.1f);//0x0000001);
+		//u[o] += MUL_FIXED(du[o], GetTestTimer() * 0.1f);//0x0000001);
+		//v[o] += MUL_FIXED(dv[o], GetTestTimer() * 0.1f);//0x0000001);
 	}
 
 	for (x = -10; x <= 10; x++)
