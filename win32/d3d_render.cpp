@@ -33,6 +33,8 @@
 #include "d3d_render.h"
 #include "bh_types.h"
 
+
+
 bool frustumCull = false;
 
 #define FMV_ON 0
@@ -328,10 +330,20 @@ static bool ExecuteBuffer()
 //	decalList->Sort();
 //	mainList->Sort();
 
+	// Melanikus 18/11/11 - Nvidia 3D Vision fix
+	// Setting the projection matrix to 
+	// the rhw shader so we can have a non
+	// ortho projection
+	R_MATRIX projection;
+	D3DXMatrixPerspectiveFovRH(&projection,D3DXToRadian(90.0f),4.0f/3.0f,0.0f,1.0f);
+	d3d.rhwDecl->Set();
+	d3d.effectSystem->SetActive(d3d.rhwEffect);
+	d3d.effectSystem->SetVertexShaderConstant(d3d.rhwEffect, 0, CONST_MATRIX, &d3d.matProjection);
 	// these two just add the vertex data to the below lists (they dont draw anything themselves
 	// and they HAVE to be called before the below code)
 	DrawParticles();
 	DrawCoronas();
+
 
 	if (mainList->GetSize())
 	{

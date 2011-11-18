@@ -5335,7 +5335,6 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 {
 
 	VECTOR2D offset[4];
-	POLYHEADER fakeHeader;
 	int centreX, centreY;
 	int z = ONE_FIXED-scale;
 
@@ -5359,17 +5358,22 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 			centreX = MUL_FIXED( (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width)) / Global_VDB_Ptr->VDB_ProjX, z);
 		}
 	}*/
-	centreX = (SmartTargetSightX / 65535.0f);
-	centreY = (SmartTargetSightY / 65535.0f);
+	/*centreX = ((SmartTargetSightX / 65535.0f) - ScreenDescriptorBlock.SDB_Width) * 2;
+	centreY = ((SmartTargetSightY / 65535.0f) - ScreenDescriptorBlock.SDB_Height) * 2;*/
+	 Global_VDB_Ptr->VDB_ProjX *= 1;
+	 Global_VDB_Ptr->VDB_ProjY *= 1;
+	 ScreenDescriptorBlock.SDB_Height;
+	 ScreenDescriptorBlock.SDB_Width;
+	 centreX = ((SmartTargetSightX / 65535.0f) - Global_VDB_Ptr->VDB_ProjX) * 4;
+	 centreY = ((SmartTargetSightY / 65535.0f) - Global_VDB_Ptr->VDB_ProjY) * 4;
+
+
 	// Camera was used to make the quads smaler but our projection does not make the quads bigger
 	// z = (float)z*CameraZoomScale;
 
 	RHW_VERTEX list[4];
-	VECTORCHF scalePoint;
 
-	scalePoint.vx = centreX;
-	scalePoint.vy = centreY;
-	scalePoint.vz = 0.0f;
+
 
 	
 	
@@ -5445,22 +5449,13 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 				VerticesBuffer[i].A = 128;
 			}
 			
-			
- 			VerticesBuffer[i].X -= scalePoint.vx; 
-			VerticesBuffer[i].Y -= scalePoint.vy; 
+	
 
-			
-			if(z < 1) z = 1;
-			float scaleFactor = float(2048 / (z));
-
-			VerticesBuffer[i].X *= scaleFactor * 0.25f;
-			VerticesBuffer[i].Y *= scaleFactor * 0.25f;
-
-			list[i].x = VerticesBuffer[i].X + scalePoint.vx;
-			list[i].y = VerticesBuffer[i].Y + scalePoint.vy;
-			list[i].z = 0.0;
+			list[i].x = VerticesBuffer[i].X;
+			list[i].y = VerticesBuffer[i].Y;
+			list[i].z = z;
 			list[i].color = RGBA_MAKE(VerticesBuffer[i].R,VerticesBuffer[i].G,VerticesBuffer[i].B,VerticesBuffer[i].A);
-			list[i].rhw = 1.0;
+			list[i].rhw = z;
 			list[i].u = 0.5f;
 			list[i].v = 0.5f;
 		}
@@ -5481,7 +5476,7 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 		VerticesBuffer[2].Y = offset[2].vy + centreY;
 
 		VerticesBuffer[3].X = offset[3].vx+centreX;
-		VerticesBuffer[3].Y = offset[3].vy + centreY;
+		VerticesBuffer[3].Y = offset[3].vy +centreY;
 
 		for (int i = 0; i < 2; i++)
 		{
@@ -5510,14 +5505,9 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 
 	d3d.rhwDecl->Set();
 	d3d.effectSystem->SetActive(d3d.rhwEffect);
-
-	R_SetTexture(0, NO_TEXTURE);
-
-	ChangeTextureAddressMode(0, TEXTURE_CLAMP);
-	ChangeFilteringMode(0, FILTERING_BILINEAR_OFF);
-	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
 	
 	d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &list[0], sizeof(RHW_VERTEX));
+	d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
 }
 
 void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRIXCH *orientationPtr)

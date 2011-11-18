@@ -2502,7 +2502,7 @@ bool InitialiseDirect3D()
 
 	// rhw pretransformed
 	d3d.rhwDecl = new VertexDeclaration;
-	d3d.rhwDecl->Add(0, VDTYPE_FLOAT4, VDMETHOD_DEFAULT, VDUSAGE_POSITIONT, 0);
+	d3d.rhwDecl->Add(0, VDTYPE_FLOAT4, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
 	d3d.rhwDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,     0);
 	d3d.rhwDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD,  0);
 	d3d.rhwDecl->Create();
