@@ -1663,7 +1663,7 @@ void HandleParticleSystem(void)
 	{
 		PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
 
-		particlePtr->NotYetRendered = TRUE;
+		particlePtr->NotYetRendered = true;
 		switch (particlePtr->ParticleID)
 		{
 			case PARTICLE_ALIEN_BLOOD:
@@ -3061,8 +3061,7 @@ void HandleParticleSystem(void)
 				HandleVolumetricExplosion(&ExplosionStorage[i]);
 		}
 	}
-	//RenderBoom();
-	//RenderFog();
+
 	D3D_DecalSystem_End();
 }
 
@@ -3080,7 +3079,7 @@ void RenderAllParticlesFurtherAwayThan(int zThreshold)
 
 			if (position.vz > zThreshold)
 			{
-				particlePtr->NotYetRendered = FALSE;
+				particlePtr->NotYetRendered = false;
 				switch (particlePtr->ParticleID)
 				{
 					case PARTICLE_ALIEN_BLOOD:

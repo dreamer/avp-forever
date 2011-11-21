@@ -568,11 +568,10 @@ typedef struct texelf
 typedef struct imageheader 
 {
 	uint32_t ImageWidth;
-	uint32_t ImageHeight;					/* Height, Pixels */
+	uint32_t ImageHeight;				/* Height, Pixels */
 
 	AVPTEXTURE *AvPTexture;
 
-//	int ImageNum;						/* # MIP images */
 	char ImageName[ImageNameSize];		/* Filename */
 
 } IMAGEHEADER;

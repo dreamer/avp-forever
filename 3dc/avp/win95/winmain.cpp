@@ -335,7 +335,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	{
 		// the device might have actually created OK, but maybe we are missing an important shader, so release
 		// this first so we can exit fullscreen mode if needed
-		ReleaseDirect3D(); 
+		ReleaseDirect3D();
+
+		ChangeWindowsSize(1, 1);
 
 		// give the user back their mouse cursor
 		if (UseMouseCentreing)

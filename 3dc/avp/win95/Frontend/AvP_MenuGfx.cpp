@@ -233,7 +233,7 @@ extern int RenderMenuText(char *textPtr, int pX, int pY, int alpha, enum AVPMENU
 	int width = LengthOfMenuText(textPtr);
 	int word_length = 0;
 
-	switch(format)
+	switch (format)
 	{
 		default:
 		GLOBALASSERT("UNKNOWN TEXT FORMAT"==0);

@@ -168,11 +168,15 @@ void RenderListDeInit()
 struct renderParticle
 {
 	PARTICLE		particle;
-	RENDERVERTEX	vertices[4];
-	int				translucency;
+	PARTICLEVERTEX	vertices[4];
+//	int				translucency;
 
-	inline bool operator<(const renderParticle& rhs) const {return translucency < rhs.translucency;}
+//	inline bool operator<(const renderParticle& rhs) const {return translucency < rhs.translucency;}
 };
+
+// particle buckets
+std::vector<std::vector<renderParticle>> particleBucket;
+bool pbInit = false;
 
 struct renderCorona
 {
@@ -294,7 +298,7 @@ static bool LockExecuteBuffer()
 	orthoVBOffset = 0;
 	pVb = 0;
 
-	return true;
+    return true;
 }
 
 // unlock all dynamic vertex and index buffers. function could be renamed as no longer using execute buffers
@@ -322,6 +326,9 @@ float cot(float in)
 {
 	return 1.0f / tan(in);
 }
+
+// REMOVE ME 
+void DrawRHWquad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, texID_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
 
 static bool ExecuteBuffer()
 {
@@ -742,14 +749,14 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 
 	if (!NextFMVTextureFrame(ftPtr))
 	{
-		return;
+	 	return;
 	}
 
-	uint32_t width  = 0;
+	uint32_t width = 0;
 	uint32_t height = 0;
 	Tex_GetDimensions(ftPtr->textureID, width, height);
 
-	uint8_t *srcPtr  = &ftPtr->RGBBuffer[0];
+	uint8_t *srcPtr = &ftPtr->RGBBuffer[0];
 	uint8_t *destPtr = 0;
 	uint8_t *originalPtr = 0;
 	uint32_t pitch = 0;
@@ -766,6 +773,12 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 
 		for (uint32_t x = 0; x < width; x++)
 		{
+/*
+			destPtr[0] = srcPtr[0];
+			destPtr[1] = srcPtr[1];
+			destPtr[2] = srcPtr[2];
+			destPtr[3] = srcPtr[3];
+*/
 			memcpy(destPtr, srcPtr, sizeof(uint32_t));
 
 			destPtr += sizeof(uint32_t);
@@ -918,14 +931,17 @@ void DrawRHWquad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, texID_
 
 	d3d.rhwDecl->Set();
 
+	// set the YUV FMV shader
 	d3d.effectSystem->SetActive(d3d.rhwEffect);
+
+	// set orthographic projection
+//	d3d.effectSystem->SetVertexShaderConstant(d3d.rhwEffect, 0, CONST_MATRIX, &d3d.matOrtho);
 
 	R_SetTexture(0, textureID);
 
 	ChangeTextureAddressMode(0, TEXTURE_CLAMP);
 	ChangeFilteringMode(0, FILTERING_BILINEAR_OFF);
 	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
-	ChangeZWriteEnable(ZWRITE_ENABLED);
 
 	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &rhw[0], sizeof(RHW_VERTEX));
 	if (FAILED(LastError))
@@ -933,6 +949,7 @@ void DrawRHWquad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, texID_
 		LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("DrawPrimitiveUP failed\n");
 	}
+
 }
 
 void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, texID_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
@@ -1038,24 +1055,24 @@ void DrawSmallMenuCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_
 {
 	alpha = (alpha / 256);
 
-	red   = (red   / 256);
+	red = (red / 256);
 	green = (green / 256);
-	blue  = (blue  / 256);
+	blue = (blue / 256);
 
 	// clamp if needed
 	if (alpha > 255) alpha = 255;
-	if (red   > 255) red   = 255;
+	if (red > 255) red = 255;
 	if (green > 255) green = 255;
-	if (blue  > 255) blue  = 255;
+	if (blue > 255) blue = 255;
 
 	RCOLOR colour = RCOLOR_ARGB(alpha, 255, 255, 255);
 
 	uint32_t font_height = 15;
-	uint32_t font_width  = 15;
+	uint32_t font_width = 15;
 
 	// aa_font.bmp is 256 x 256
 	uint32_t image_height = 256;
-	uint32_t image_width  = 256;
+	uint32_t image_width = 256;
 
 	float RecipW = 1.0f / image_width; // 0.00390625
 	float RecipH = 1.0f / image_height;
@@ -1124,7 +1141,7 @@ void UpdateProjectionMatrix()
 	// manually generate the perspective matrix as per http://msdn.microsoft.com/en-us/library/bb205350(VS.85).aspx
 	float fovY = D3DXToRadian(d3d.fieldOfView * CameraZoomScale);
 	float aspect = (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height;
-	float yScale = cot(fovY / 2.0f);
+	float yScale = cot(fovY/2.0f);
 
 	float originalYScale = yScale;
 	yScale *= p;
@@ -1338,13 +1355,26 @@ void DrawCoronas()
 
 void DrawParticles()
 {
+	if (!particleBucket.size())
+		return;
+
+	// loop particles and add them to vertex buffer
+	for (size_t i = 0; i < NUM_TRANSLUCENCY_TYPES; i++)
+	{
+		for (size_t j = 0; j < particleBucket[i].size(); j++)
+		{
+			D3D_Particle_Output(&particleBucket[i][j].particle, &particleBucket[i][j].vertices[0]);
+		}
+	}
+
+	for (size_t i = 0; i < NUM_TRANSLUCENCY_TYPES; i++)
+	{
+		particleBucket[i].clear();
+	}
+/*
 	if (particleArray.size() == 0)
 		return;
-/*
-	char buf[100];
-	sprintf(buf, "n particles: %d\n", particleArray.size());
-	OutputDebugString(buf);
-*/
+
 	uint32_t numVertsBackup = RenderPolygon.NumberOfVertices;
 
 	// sort particle array
@@ -1361,6 +1391,7 @@ void DrawParticles()
 
 	// restore RenderPolygon.NumberOfVertices value...
 	RenderPolygon.NumberOfVertices = numVertsBackup;
+*/
 }
 
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
@@ -1475,7 +1506,7 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 		mainVertex[vb].y = (float)-vertices->Y;
 		mainVertex[vb].z = (float)vertices->Z;
 
-		mainVertex[vb].color = RGBA_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
+	   	mainVertex[vb].color = RGBA_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
 		mainVertex[vb].specular = RGBA_MAKE(0,0,0,255);
 
 		mainVertex[vb].u = (float)(vertices->U) * RecipW;
@@ -1631,7 +1662,7 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 				mainVertex[vb].color = RGBA_MAKE(255, 255, 255, 32);
 			}
 
-			mainVertex[vb].specular = RGBA_MAKE(0,0,0,0);
+			mainVertex[vb].specular = RGBA_MAKE(0,0,0,255);
 			mainVertex[vb].u = 0.0f;
 			mainVertex[vb].v = 0.0f;
 
@@ -1690,22 +1721,22 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 	{
 		int intensity = LightIntensityAtPoint(decalPtr->Vertices);
 		colour = RGBA_MAKE
-				(
-					MUL_FIXED(intensity, decalDescPtr->RedScale[CurrentVisionMode]),
-					MUL_FIXED(intensity, decalDescPtr->GreenScale[CurrentVisionMode]),
-					MUL_FIXED(intensity, decalDescPtr->BlueScale[CurrentVisionMode]),
-					decalDescPtr->Alpha
-				);
+	  		  	(
+	  		   		MUL_FIXED(intensity, decalDescPtr->RedScale[CurrentVisionMode]),
+	  		   		MUL_FIXED(intensity, decalDescPtr->GreenScale[CurrentVisionMode]),
+	  		   		MUL_FIXED(intensity, decalDescPtr->BlueScale[CurrentVisionMode]),
+	  		   		decalDescPtr->Alpha
+	  		   	);
 	}
 	else
 	{
 		colour = RGBA_MAKE
-				(
-					decalDescPtr->RedScale[CurrentVisionMode],
-					decalDescPtr->GreenScale[CurrentVisionMode],
-					decalDescPtr->BlueScale[CurrentVisionMode],
-					decalDescPtr->Alpha
-				);
+			  	(
+			   		decalDescPtr->RedScale[CurrentVisionMode],
+			   		decalDescPtr->GreenScale[CurrentVisionMode],
+			   		decalDescPtr->BlueScale[CurrentVisionMode],
+			   		decalDescPtr->Alpha
+			   	);
 	}
 
 	if (RAINBOWBLOOD_CHEATMODE)
@@ -1754,6 +1785,32 @@ void AddCorona(PARTICLE *particlePtr, VECTORCHF *coronaPoint)
 
 void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 {
+	if (!pbInit)
+	{
+		particleBucket.resize(NUM_TRANSLUCENCY_TYPES);
+		pbInit = true;
+	}
+
+	renderParticle newParticle;
+	newParticle.particle = *particlePtr;
+
+	// copy vertex data
+	for (int i = 0; i < 4; i++)
+	{
+		newParticle.vertices[i].x = renderVerticesPtr->X;
+		newParticle.vertices[i].y = renderVerticesPtr->Y;
+		newParticle.vertices[i].z = renderVerticesPtr->Z;
+//		newParticle.vertices[i].colour = renderVerticesPtr->
+		newParticle.vertices[i].u = renderVerticesPtr->U;
+		newParticle.vertices[i].v = renderVerticesPtr->V;
+		renderVerticesPtr++;
+	}
+
+	uint32_t transID = ParticleDescription[particlePtr->ParticleID].TranslucencyType;
+
+	// add to correct bucket
+	particleBucket[transID].push_back(newParticle);
+/*
 	renderParticle newParticle;
 
 	newParticle.particle = *particlePtr;
@@ -1762,14 +1819,13 @@ void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	newParticle.translucency = ParticleDescription[particlePtr->ParticleID].TranslucencyType;
 
 	particleArray.push_back(newParticle);
+*/
 }
 
-void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
+void D3D_Particle_Output(PARTICLE *particlePtr, PARTICLEVERTEX *renderVerticesPtr)
 {
 	// steam jets, pulse rifle muzzle flash, wall lights, fire (inc aliens on fire) etc
 	PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
-
-	assert(RenderPolygon.NumberOfVertices == 4);
 
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(SpecialFXImageNumber, texWidth, texHeight);
@@ -1777,8 +1833,11 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	float RecipW = 1.0f / (float) texWidth;
 	float RecipH = 1.0f / (float) texHeight;
 
+	// add the item to our test list
+	// 1: Check our VB and IBs are big enough?
+
 	// 2: If we're ok to add, add a RenderItem
-	particleList->AddItem(RenderPolygon.NumberOfVertices, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP, ZWRITE_DISABLED);
+	particleList->AddItem(4, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP, ZWRITE_DISABLED);
 
 	RCOLOR colour;
 
@@ -1788,22 +1847,22 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		if (particlePtr->ParticleID == PARTICLE_SMOKECLOUD || particlePtr->ParticleID == PARTICLE_ANDROID_BLOOD)
 		{
 			colour = RGBA_MAKE
-					(
-						MUL_FIXED(intensity, particlePtr->ColourComponents.Red),
-						MUL_FIXED(intensity, particlePtr->ColourComponents.Green),
-						MUL_FIXED(intensity, particlePtr->ColourComponents.Blue),
-						particlePtr->ColourComponents.Alpha
-					);
+				  	(
+				   		MUL_FIXED(intensity, particlePtr->ColourComponents.Red),
+				   		MUL_FIXED(intensity, particlePtr->ColourComponents.Green),
+				   		MUL_FIXED(intensity, particlePtr->ColourComponents.Blue),
+				   		particlePtr->ColourComponents.Alpha
+				   	);
 		}
 		else
 		{
 			colour = RGBA_MAKE
-					(
-						MUL_FIXED(intensity, particleDescPtr->RedScale[CurrentVisionMode]),
-						MUL_FIXED(intensity, particleDescPtr->GreenScale[CurrentVisionMode]),
-						MUL_FIXED(intensity, particleDescPtr->BlueScale[CurrentVisionMode]),
-						particleDescPtr->Alpha
-					);
+				  	(
+				   		MUL_FIXED(intensity, particleDescPtr->RedScale[CurrentVisionMode]),
+				   		MUL_FIXED(intensity, particleDescPtr->GreenScale[CurrentVisionMode]),
+				   		MUL_FIXED(intensity, particleDescPtr->BlueScale[CurrentVisionMode]),
+				   		particleDescPtr->Alpha
+				   	);
 		}
 	}
 	else
@@ -1822,9 +1881,10 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 					);
 	}
 
-	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
+	for (uint32_t i = 0; i < 4; i++)
 	{
-		RENDERVERTEX *vertices = &renderVerticesPtr[i];
+//		RENDERVERTEX *vertices = &renderVerticesPtr[i];
+		PARTICLEVERTEX *vertices = &renderVerticesPtr[i];
 
 		float zvalue;
 
@@ -1838,9 +1898,19 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		}
 		else
 		{
-			zvalue = (float)vertices->Z;
+			zvalue = (float)vertices->z;
 		}
 
+		particleVertex[pVb].x = vertices->x;
+		particleVertex[pVb].y = vertices->y;
+		particleVertex[pVb].z = vertices->z;
+
+		particleVertex[pVb].color = colour;
+		particleVertex[pVb].specular = RGBA_MAKE(0,0,0,/*255*/0);
+
+		particleVertex[pVb].u = ((vertices->u)/* + 0.5f*/) * RecipW;
+		particleVertex[pVb].v = ((vertices->v)/* + 0.5f*/) * RecipH;
+#if 0
 		particleVertex[pVb].x = (float)vertices->X;
 		particleVertex[pVb].y = (float)vertices->Y;
 		particleVertex[pVb].z = (float)vertices->Z;
@@ -1850,11 +1920,12 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 		particleVertex[pVb].u = ((float)(vertices->U)/* + 0.5f*/) * RecipW;
 		particleVertex[pVb].v = ((float)(vertices->V)/* + 0.5f*/) * RecipH;
+#endif
 		pVb++;
 	}
 
 	// 3: Create Indices
-	particleList->CreateIndices(particleIndex, RenderPolygon.NumberOfVertices);
+	particleList->CreateIndices(particleIndex, 4);
 }
 
 void PostLandscapeRendering()
@@ -1890,23 +1961,23 @@ void PostLandscapeRendering()
 					drawWaterFall = true;
 				}
 				else if ((!strcmp(modulePtr->name, "stream02"))
-					   ||(!strcmp(modulePtr->name, "stream03"))
-					   ||(!strcmp(modulePtr->name, "watergate")))
+				       ||(!strcmp(modulePtr->name, "stream03"))
+				       ||(!strcmp(modulePtr->name, "watergate")))
 				{
-					drawStream = true;
+		   			drawStream = true;
 				}
 			}
 		}
 
 		if (drawWaterFall)
 		{
-			//UpdateWaterFall();
+	   		//UpdateWaterFall();
 			WaterFallBase = 109952;
 
 			MeshZScale = (66572 - 51026)/15;
 			MeshXScale = (109952 + 3039)/45;
 
-			D3D_DrawWaterFall(175545, -3039, 51026);
+	   		D3D_DrawWaterFall(175545, -3039, 51026);
 		}
 		if (drawStream)
 		{
@@ -1922,19 +1993,19 @@ void PostLandscapeRendering()
 			WaterZOrigin = z;
 			WaterUScale = 4.0f / (float)MeshXScale;
 			WaterVScale = 4.0f / (float)MeshZScale;
-			MeshXScale /= 4;
-			MeshZScale /= 2;
+		 	MeshXScale /= 4;
+		 	MeshZScale /= 2;
 
 			currentWaterTexture = ChromeImageNumber;
 
-			D3D_DrawWaterPatch(x, y, z);
-			D3D_DrawWaterPatch(x+MeshXScale, y, z);
-			D3D_DrawWaterPatch(x+MeshXScale*2, y, z);
-			D3D_DrawWaterPatch(x+MeshXScale*3, y, z);
-			D3D_DrawWaterPatch(x, y, z+MeshZScale);
-			D3D_DrawWaterPatch(x+MeshXScale, y, z+MeshZScale);
-			D3D_DrawWaterPatch(x+MeshXScale*2, y, z+MeshZScale);
-			D3D_DrawWaterPatch(x+MeshXScale*3, y, z+MeshZScale);
+		 	D3D_DrawWaterPatch(x, y, z);
+		 	D3D_DrawWaterPatch(x+MeshXScale, y, z);
+		 	D3D_DrawWaterPatch(x+MeshXScale*2, y, z);
+		 	D3D_DrawWaterPatch(x+MeshXScale*3, y, z);
+		 	D3D_DrawWaterPatch(x, y, z+MeshZScale);
+		 	D3D_DrawWaterPatch(x+MeshXScale, y, z+MeshZScale);
+		 	D3D_DrawWaterPatch(x+MeshXScale*2, y, z+MeshZScale);
+		 	D3D_DrawWaterPatch(x+MeshXScale*3, y, z+MeshZScale);
 		}
 	}
 	else if (!_stricmp(LevelName,"invasion_a"))
@@ -1963,11 +2034,11 @@ void PostLandscapeRendering()
 						drawEndWater = true;
 					}
 					if ((!_stricmp(modulePtr->name, "shaft01"))
-					  ||(!_stricmp(modulePtr->name, "shaft02"))
-					  ||(!_stricmp(modulePtr->name, "shaft03"))
-					  ||(!_stricmp(modulePtr->name, "shaft04"))
-					  ||(!_stricmp(modulePtr->name, "shaft05"))
-					  ||(!_stricmp(modulePtr->name, "shaft06")))
+					 ||(!_stricmp(modulePtr->name, "shaft02"))
+					 ||(!_stricmp(modulePtr->name, "shaft03"))
+					 ||(!_stricmp(modulePtr->name, "shaft04"))
+					 ||(!_stricmp(modulePtr->name, "shaft05"))
+					 ||(!_stricmp(modulePtr->name, "shaft06")))
 					{
 						HandleRainShaft(modulePtr, -11726,-107080,10);
 						drawEndWater = true;
@@ -1984,26 +2055,26 @@ void PostLandscapeRendering()
 			int z = 30238;
 			MeshXScale = (36353-20767);
 			MeshZScale = (41927-30238);
-
+				
 			CheckForObjectsInWater(x, x+MeshXScale, z, z+MeshZScale, y);
 
 			WaterXOrigin = x;
 			WaterZOrigin = z;
 			WaterUScale = 4.0f / (float)MeshXScale;
 			WaterVScale = 4.0f / (float)MeshZScale;
-			MeshXScale /= 4;
-			MeshZScale /= 2;
+		 	MeshXScale /= 4;
+		 	MeshZScale /= 2;
 
 			currentWaterTexture = ChromeImageNumber;
 
-			D3D_DrawWaterPatch(x, y, z);
-			D3D_DrawWaterPatch(x+MeshXScale, y, z);
-			D3D_DrawWaterPatch(x+MeshXScale*2, y, z);
-			D3D_DrawWaterPatch(x+MeshXScale*3, y, z);
-			D3D_DrawWaterPatch(x, y, z+MeshZScale);
-			D3D_DrawWaterPatch(x+MeshXScale, y, z+MeshZScale);
-			D3D_DrawWaterPatch(x+MeshXScale*2, y, z+MeshZScale);
-			D3D_DrawWaterPatch(x+MeshXScale*3, y, z+MeshZScale);
+		 	D3D_DrawWaterPatch(x, y, z);
+		 	D3D_DrawWaterPatch(x+MeshXScale, y, z);
+		 	D3D_DrawWaterPatch(x+MeshXScale*2, y, z);
+		 	D3D_DrawWaterPatch(x+MeshXScale*3, y, z);
+		 	D3D_DrawWaterPatch(x, y, z+MeshZScale);
+		 	D3D_DrawWaterPatch(x+MeshXScale, y, z+MeshZScale);
+		 	D3D_DrawWaterPatch(x+MeshXScale*2, y, z+MeshZScale);
+		 	D3D_DrawWaterPatch(x+MeshXScale*3, y, z+MeshZScale);
 		}
 		else if (drawEndWater)
 		{
@@ -2019,19 +2090,19 @@ void PostLandscapeRendering()
 			WaterZOrigin = z;
 			WaterUScale = 4.0f / (float)(MeshXScale+1800-3782);
 			WaterVScale = 4.0f / (float)MeshZScale;
-			MeshXScale /= 4;
-			MeshZScale /= 2;
+		 	MeshXScale /= 4;
+		 	MeshZScale /= 2;
 
 			currentWaterTexture = WaterShaftImageNumber;
 
-			D3D_DrawWaterPatch(x, y, z);
-			D3D_DrawWaterPatch(x+MeshXScale, y, z);
-			D3D_DrawWaterPatch(x+MeshXScale*2, y, z);
-			D3D_DrawWaterPatch(x+MeshXScale*3, y, z);
-			D3D_DrawWaterPatch(x, y, z+MeshZScale);
-			D3D_DrawWaterPatch(x+MeshXScale, y, z+MeshZScale);
-			D3D_DrawWaterPatch(x+MeshXScale*2, y, z+MeshZScale);
-			D3D_DrawWaterPatch(x+MeshXScale*3, y, z+MeshZScale);
+		 	D3D_DrawWaterPatch(x, y, z);
+		 	D3D_DrawWaterPatch(x+MeshXScale, y, z);
+		 	D3D_DrawWaterPatch(x+MeshXScale*2, y, z);
+		 	D3D_DrawWaterPatch(x+MeshXScale*3, y, z);
+		 	D3D_DrawWaterPatch(x, y, z+MeshZScale);
+		 	D3D_DrawWaterPatch(x+MeshXScale, y, z+MeshZScale);
+		 	D3D_DrawWaterPatch(x+MeshXScale*2, y, z+MeshZScale);
+		 	D3D_DrawWaterPatch(x+MeshXScale*3, y, z+MeshZScale);
 		}
 	}
 	else if (!_stricmp(LevelName, "derelict"))
@@ -2047,8 +2118,8 @@ void PostLandscapeRendering()
 			// if it's a module, which isn't inside another module
 			if (modulePtr && modulePtr->name)
 			{
-				if ((!_stricmp(modulePtr->name, "start-en01"))
-				   ||(!_stricmp(modulePtr->name, "start")))
+			  	if ((!_stricmp(modulePtr->name, "start-en01"))
+			  	  ||(!_stricmp(modulePtr->name, "start")))
 				{
 					drawMirrorSurfaces = true;
 				}
@@ -2081,15 +2152,15 @@ void PostLandscapeRendering()
 			WaterZOrigin = z;
 			WaterUScale = 4.0f / (float)MeshXScale;
 			WaterVScale = 4.0f / (float)MeshZScale;
-			MeshXScale /= 2;
-			MeshZScale /= 2;
+		 	MeshXScale /= 2;
+		 	MeshZScale /= 2;
 
 			currentWaterTexture = ChromeImageNumber;
 
-			D3D_DrawWaterPatch(x, y, z);
-			D3D_DrawWaterPatch(x+MeshXScale, y, z);
-			D3D_DrawWaterPatch(x, y, z+MeshZScale);
-			D3D_DrawWaterPatch(x+MeshXScale, y, z+MeshZScale);
+		 	D3D_DrawWaterPatch(x, y, z);
+		 	D3D_DrawWaterPatch(x+MeshXScale, y, z);
+		 	D3D_DrawWaterPatch(x, y, z+MeshZScale);
+		 	D3D_DrawWaterPatch(x+MeshXScale, y, z+MeshZScale);
 		}
 	}
 	else if (!_stricmp(LevelName, "genshd1"))
@@ -2135,8 +2206,8 @@ void D3D_DrawWaterTest(MODULE *testModulePtr)
 			if (!strcmp(modulePtr->name,"05"))
 			{
 				int y = modulePtr->m_maxy+modulePtr->m_world.vy-500;
-				int x = modulePtr->m_minx+modulePtr->m_world.vx;
-				int z = modulePtr->m_minz+modulePtr->m_world.vz;
+		   		int x = modulePtr->m_minx+modulePtr->m_world.vx;
+		   		int z = modulePtr->m_minz+modulePtr->m_world.vz;
 				MeshXScale = (7791 - -7794);
 				MeshZScale = (23378 - 7793);
 				{
@@ -2178,7 +2249,7 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 
 			int offset = 0;
 
-			offset += EffectOfRipples(point);
+ 			offset += EffectOfRipples(point);
 
 			point->vy = yOrigin + offset;
 
@@ -2202,7 +2273,7 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 				case VISION_MODE_PRED_SEEPREDTECH:
 				{
 					MeshVertexColour[i] = RGBA_MAKE(0, 0, 28, alpha);
-					break;
+				  	break;
 				}
 			}
 
@@ -2244,7 +2315,7 @@ void D3D_DrawBackdrop(void)
 
 	if (WireFrameMode)
 	{
-		ColourFillBackBuffer(0);
+   		ColourFillBackBuffer(0);
 		return;
 	}
 	else if (ShowDebuggingText.Tears)
@@ -2277,7 +2348,7 @@ void D3D_DrawBackdrop(void)
 		}
 		else
 		{
-			RenderSky();
+	  		RenderSky();
 		}
 		return;
 	}
@@ -2521,7 +2592,7 @@ void ThisFramesRenderingHasFinished()
 #endif
 #endif
 
-	/* KJL 11:46:56 01/16/97 - kill off any lights which are fated to be removed */
+ 	/* KJL 11:46:56 01/16/97 - kill off any lights which are fated to be removed */
 	LightBlockDeallocation();
 }
 
@@ -3072,9 +3143,9 @@ extern void D3D_PlayerDamagedOverlay(int intensity)
 	}
 }
 
+// D3D_DrawCable - draws predator grappling hook
 void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 {
-	// draws predator grappling hook
 	// TODO - not disabling zwrites. probably need to do this but double check (be handy if we didn't have to)
 
 	currentWaterTexture = NO_TEXTURE;

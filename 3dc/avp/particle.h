@@ -89,7 +89,7 @@ struct ColourComponents
 
 typedef struct
 {
-	BOOL NotYetRendered;
+	bool NotYetRendered;
 
 	enum PARTICLE_ID ParticleID;
 	signed int LifeTime;
@@ -158,23 +158,13 @@ typedef struct
 	char		BeamIsOn;
 } LASER_BEAM_DESC;
 
-
-
 extern PARTICLE_DESC ParticleDescription[];
 
-
-
 extern void InitialiseParticleSystem(void);
-
 extern void MakeParticle(VECTORCH *positionPtr, VECTORCH *velocityPtr, enum PARTICLE_ID particleID);
-
 extern void HandleParticleSystem(void);
-
 extern void HandleRainDrops(MODULE *modulePtr,int numberOfRaindrops);
 extern int EffectOfRipples(VECTORCH *point);
-
-
-
 
 enum MUZZLE_FLASH_ID
 {

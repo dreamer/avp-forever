@@ -117,6 +117,18 @@ struct ORTHOVERTEX
 	float v;
 };
 
+struct PARTICLEVERTEX
+{
+	float x;
+	float y;
+	float z;
+
+	DWORD colour;
+
+	float u;
+	float v;
+};
+
 struct TALLFONT
 {
 	float x;

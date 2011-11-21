@@ -2826,6 +2826,7 @@ void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 			}
 			break;
 		}
+/*
 		case TRANSLUCENCY_JUSTSETZ:
 		{
 			if (D3DAlphaBlendEnable != TRUE)
@@ -2844,6 +2845,7 @@ void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 				D3DDestBlend = D3DBLEND_ONE;
 			}
 		}
+*/
 		default: break;
 	}
 }
