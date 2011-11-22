@@ -169,15 +169,15 @@ bool FileStream::WriteBytes(const uint8_t *buffer, size_t nBytes)
 	return true;
 }
 
-bool FileStream::ReadBytes(uint8_t *buffer, size_t nBytes)
+DWORD FileStream::ReadBytes(uint8_t *buffer, size_t nBytes)
 {
 	DWORD nBytesRead = 0;
 
 	if (::ReadFile(fileHandle, static_cast<LPVOID>(buffer), nBytes, &nBytesRead, NULL) == 0)
 	{
-		return false;
+		return 0;
 	}
-	return true;
+	return nBytesRead;
 }
 
 // writes an STL string to the file

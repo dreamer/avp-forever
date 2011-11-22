@@ -32,7 +32,6 @@ void LoseSound (LOADED_SOUND const * ls)
 				DeallocateMem (ls_in_list->wavname);
 				DeallocateMem (ls_in_list);
 			}
-		
 			return;
 		}
 		
@@ -53,12 +52,12 @@ void LoseSound (LOADED_SOUND const * ls)
 void LoseAllNonCommonSounds()
 {
 	LOADED_SOUND* ls;
-	while(loaded_sounds.size())
+	while (loaded_sounds.size())
 	{
-		ls=loaded_sounds.first_entry();
-		loaded_sounds.delete_first_entry();		
+		ls = loaded_sounds.first_entry();
+		loaded_sounds.delete_first_entry();
 
-		if(!ls->permanent)
+		if (!ls->permanent)
 		{
 			PlatEndGameSound ((SOUNDINDEX)ls->sound_num);
 		}
@@ -70,22 +69,21 @@ void LoseAllNonCommonSounds()
 
 static int find_empty_game_sound()
 {
-	if(!SoundSwitchedOn) return (-1);
+	if (!SoundSwitchedOn) return -1;
 
 	for (int i=SID_STARTOF_LOADSLOTS; i<=SID_ENDOF_LOADSLOTS; i++)
 	{
 		if (GameSounds[i].loaded == 0)
 		{
-			return(i);
+			return i;
 		}
 	}
-	return(-1);
-	
+	return -1;
 }
 
 static int find_permanent_game_sound(const char * wavname)
 {
-	if(!SoundSwitchedOn) return (-1);
+	if (!SoundSwitchedOn) return -1;
 
 	for (int i=0; i<SID_MAXIMUM; i++)
 	{
@@ -93,20 +91,18 @@ static int find_permanent_game_sound(const char * wavname)
 		{
 			if (!(_stricmp( GameSounds[i].wavName, wavname)))
 			{
-				return(i);
+				return i;
 			}
 		}
 	}
-	return(-1);
-	
+	return -1;
 }
 
-
-LOADED_SOUND const * GetSound (char const * fname)
+LOADED_SOUND const * GetSound(char const *fname)
 {
-	if(!SoundSwitchedOn) return (0);
+	if (!SoundSwitchedOn) return 0;
 
-	const char * wavname = strrchr (fname, '/');
+	const char * wavname = strrchr (fname, '\\');
 	
 	if (wavname)
 	{
@@ -123,7 +119,7 @@ LOADED_SOUND const * GetSound (char const * fname)
 		if (!_stricmp (lsi()->wavname, wavname))
 		{
 			lsi()->num_attached ++;
-			return(lsi());
+			return lsi();
 		}
 	}
 	
@@ -141,7 +137,7 @@ LOADED_SOUND const * GetSound (char const * fname)
 		ls->num_attached = 1;
 		ls->permanent = 1;
 		loaded_sounds.add_entry (ls);
-		return (ls);
+		return ls;
 	}
 	
 	// not loaded, so try and load it
@@ -150,7 +146,7 @@ LOADED_SOUND const * GetSound (char const * fname)
 	if (soundNum == -1)
 	{
 		GLOBALASSERT(0=="Run out of sound slots");
-		return(0);
+		return 0;
 	}
 	
 	int ok = FindAndLoadWavFile (soundNum, (char *)fname);
@@ -158,8 +154,8 @@ LOADED_SOUND const * GetSound (char const * fname)
 	if (ok)
 	{
 		GameSounds[soundNum].loaded = 1;
-		GameSounds[soundNum].activeInstances = 0;;	 
-		GameSounds[soundNum].volume = VOLUME_DEFAULT;		
+		GameSounds[soundNum].activeInstances = 0;
+		GameSounds[soundNum].volume = VOLUME_DEFAULT;
 		GameSounds[soundNum].pitch = 0;
 		InitialiseBaseFrequency((SOUNDINDEX)soundNum);
 
@@ -173,6 +169,6 @@ LOADED_SOUND const * GetSound (char const * fname)
 		loaded_sounds.add_entry (ls);
 	}
 	
-	return(ls);
-	
+	return ls;
 }
+

@@ -27,6 +27,7 @@
 #include "renderer.h"
 #include "console.h"
 #include <assert.h>
+#include "RimLoader.h"
 
 std::vector<Texture> textureList;
 std::vector<Texture>::iterator texIt;
@@ -69,7 +70,9 @@ void Tex_GetNamesVector(std::vector<std::string> &namesArray)
 {
 	for (size_t i = 0; i < textureList.size(); i++)
 	{
-		namesArray.push_back(textureList[i].name);
+		// only add valid textures
+		if (textureList[i].isValid)
+			namesArray.push_back(textureList[i].name);
 	}
 }
 
@@ -208,6 +211,88 @@ texID_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &Av
 
 	Tex_CheckMemoryUsage();
 */
+	return textureID;
+}
+
+#include "FastFile.h"
+
+texID_t Tex_CreateFromRIM(const std::string &fileName)
+{
+	static bool isInited = false;
+
+	if (!isInited)
+	{
+		FF_Init();
+		isInited = true;
+	}
+
+	texID_t textureID;
+	
+	textureID = Tex_CheckExists(fileName);
+	if (textureID != MISSING_TEXTURE)
+	{
+		return textureID;
+	}
+
+	RimLoader newRim;
+
+	Texture newTexture;
+	newTexture.name = fileName;
+
+	uint32_t width, height;
+	uint32_t bitsPerPixel = 32;
+
+	if (!newRim.Open(fileName))
+	{
+		return MISSING_TEXTURE;
+	}
+
+	newRim.GetDimensions(width, height);
+
+	TextureUsage usage = TextureUsage_Normal;
+
+	// TODO - FMV textures must be dynamic. Try handle this some other way
+	size_t found = fileName.find("graphics\\FMVs");
+	if (found != std::string::npos)
+	{
+		usage = TextureUsage_Dynamic;
+	}
+
+	if (!R_CreateTexture(width, height, bitsPerPixel, usage, newTexture))
+	{
+		// log error
+		return MISSING_TEXTURE;
+	}
+
+	// lock texture and decode RIM data into it
+	uint8_t *dest = 0;
+	uint32_t pitch = 0;
+	if (!R_LockTexture(newTexture, &dest, &pitch, TextureLock_Normal))
+	{
+		// log error
+		return MISSING_TEXTURE;
+	}
+
+	newRim.Decode(dest, pitch);
+
+	R_UnlockTexture(newTexture);
+
+	// get the next available ID
+	textureID = Tex_GetFreeID();
+
+	// set as valid
+	newTexture.isValid = true;
+
+	// add texture to manager
+	if (textureID < textureList.size()) // we're reusing a slot in this case
+	{
+		textureList[textureID] = newTexture; // replace in the old unused slot
+	}
+	else // adding on to the end
+	{
+		textureList.push_back(newTexture);
+	}
+
 	return textureID;
 }
 

@@ -33,6 +33,8 @@ static bool isInited = false;
 // the size of the main fast file header, consisting of DWORDS (signature, version, nFiles, nHeaderBytes, nDataBytes)
 const int kMainHeaderSize = 20;
 
+static bool FF_Open(const std::string &fastFileName);
+
 // pass this function the name of a file within a fast file you want to find (eg comp1.wav) and it'll return
 // a handle to the file if it exists in a known fast file, or a null handle if file doesn't exist in a known fast file,
 // or also null if the fast file system hasn't been initialised
@@ -86,7 +88,7 @@ bool FF_Init()
 }
 
 // takes in the file name of a fast file, opens it and parses header information and adds all file entries to an std::map
-bool FF_Open(const std::string &fastFileName)
+static bool FF_Open(const std::string &fastFileName)
 {
 	FileStream file;
 	file.Open(fastFileName, FileStream::FileRead);

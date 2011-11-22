@@ -42,7 +42,6 @@ struct FastFileHandle
 typedef std::map<std::string, FastFileHandle> fastFileHandles;
 
 bool FF_Init();
-bool FF_Open(const std::string &fastFileName);
 FastFileHandle* FF_Find(const std::string &fileName);
 
 #endif

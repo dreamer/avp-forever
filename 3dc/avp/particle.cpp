@@ -4690,9 +4690,6 @@ void DrawXenoborgMainLaserbeam(LASER_BEAM_DESC *laserPtr)
 		particle.Offset = laserPtr->TargetPosition;
 		particle.Size = 32;
 		RenderParticle(&particle);
-	 //	particle.Colour = RGBALIGHT_MAKE(255,255,255,255);
-	 //	particle.Size = 20;
-	 //	RenderParticle(&particle);
 	}
 }
 

@@ -87,7 +87,7 @@ char const * FirstTex_Directory = "Graphics"; // currently relative to cwd
 char const * SecondTex_Directory = 0; // will be the src safe shadow for development builds
 								//used for cd graphics directory in final version
 
-char* Rif_Sound_Directory=0;//set for the main level rif
+char* Rif_Sound_Directory = 0;//set for the main level rif
 
 static char * light_set_name = "NORMALLT";
 
@@ -467,18 +467,18 @@ Global_Hierarchy_Store::Global_Hierarchy_Store (RIFFHANDLE h)
 
 			sound_array[index].pitch=isc->pitch;
 			sound_array[index].volume=isc->max_volume;
-			if(dir_chunk)
+			if (dir_chunk)
 			{
-				sprintf(wavname,"%s/%s",dir_chunk->directory,isc->wav_name);
-				sound_array[index].sound_loaded=GetSound(wavname);
+				sprintf(wavname, "%s\\%s", dir_chunk->directory, isc->wav_name);
+				sound_array[index].sound_loaded = GetSound(wavname);
 			}
 			else
 			{
-				sound_array[index].sound_loaded=GetSound(isc->wav_name);
+				sound_array[index].sound_loaded = GetSound(isc->wav_name);
 			}
-			if(sound_array[index].sound_loaded)
+			if (sound_array[index].sound_loaded)
 			{
-				sound_array[index].sound_index=(SOUNDINDEX)sound_array[index].sound_loaded->sound_num;
+				sound_array[index].sound_index = (SOUNDINDEX)sound_array[index].sound_loaded->sound_num;
 			}
 		}
 	}
@@ -2615,9 +2615,12 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 }
 
 // hook to load a bitmap - so you can load them from test directories, etc. should return tex index
-texID_t load_rif_bitmap (char const * fname, BMPN_Flags flags)
+texID_t load_rif_bitmap(char const * fname, BMPN_Flags flags)
 {
-	texID_t textureID = 
+	std::string fileName = fname;
+
+	texID_t textureID = Tex_CreateFromRIM("graphics\\" + fileName);
+/*
 		CL_LoadImageOnce
 		(
 			fname,
@@ -2630,7 +2633,7 @@ texID_t load_rif_bitmap (char const * fname, BMPN_Flags flags)
 				? LIO_LOADMIPMAPS : LIO_NOMIPMAPS)
 			|LIO_RESTORABLE
 		);
-
+*/
 	ingameTextureList.push_back(textureID);
 	return textureID;
 }

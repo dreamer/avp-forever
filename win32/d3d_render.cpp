@@ -33,9 +33,9 @@
 #include "d3d_render.h"
 #include "bh_types.h"
 
-
-
 bool frustumCull = false;
+
+uint32_t nParticles = 0;
 
 #define FMV_ON 0
 #define FMV_SIZE 128
@@ -146,7 +146,7 @@ void RenderListInit()
 {
 	particleList = new RenderList(400);
 	mainList     = new RenderList(800);
-	orthoList    = new RenderList(400);
+	orthoList    = new RenderList(50);
 	decalList    = new RenderList(400);
 }
 
@@ -221,43 +221,42 @@ inline float HPos2DC(int32_t pos)
 // we then use the OUTPUT_TRIANGLE function to generate the indices required to represent those
 // polygons. This function calculates the number of indices required based on the number of verts.
 // AvP code defined these, so hence the magic numbers.
-// TODO: rename to GetNumIndices to more accurately reflect what this function does?
 
-uint32_t GetRealNumVerts(uint32_t numVerts)
+uint32_t GetNumIndices(uint32_t numVerts)
 {
-	uint32_t realNumVerts = 0;
+	uint32_t numIndices = 0;
 
 	switch (numVerts)
 	{
 		case 3:
-			realNumVerts = 3;
+			numIndices = 3;
 			break;
 		case 4:
-			realNumVerts = 6;
+			numIndices = 6;
 			break;
 		case 5:
-			realNumVerts = 9;
+			numIndices = 9;
 			break;
 		case 6:
-			realNumVerts = 12;
+			numIndices = 12;
 			break;
 		case 7:
-			realNumVerts = 15;
+			numIndices = 15;
 			break;
 		case 8:
-			realNumVerts = 18;
+			numIndices = 18;
 			break;
 		case 0:
-			realNumVerts = 0;
+			numIndices = 0;
 			break;
 		case 256:
-			realNumVerts = 1350;
+			numIndices = 1350;
 			break;
 		default:
 			// need to check this is ok!!
-			realNumVerts = numVerts;
+			numIndices = numVerts;
 	}
-	return realNumVerts;
+	return numIndices;
 }
 
 // lock our dynamic vertex and index buffers, and reset counters and array indexes used to keep 
@@ -269,27 +268,21 @@ static bool LockExecuteBuffer()
 	d3d.particleVB->Lock((void**)&particleVertex);
 	d3d.particleIB->Lock(&particleIndex);
 
-	// reset list to empty state
-	particleList->Reset();
-
 	// lock main vertex and index buffers
 	d3d.mainVB->Lock((void**)&mainVertex);
 	d3d.mainIB->Lock(&mainIndex);
-
-	// reset list to empty state
-	mainList->Reset();
-
+	
 	// lock ortho vertex and index buffers
 	d3d.orthoVB->Lock((void**)&orthoVertex);
 	d3d.orthoIB->Lock(&orthoIndex);
 
-	// reset list to empty state
-	orthoList->Reset();
-
 	d3d.decalVB->Lock((void**)&decalVertex);
 	d3d.decalIB->Lock(&decalIndex);
 
-	// reset list to empty state
+	// reset lists to empty state
+	particleList->Reset();
+	mainList->Reset();
+	orthoList->Reset();
 	decalList->Reset();
 
 	// reset counters and indexes
@@ -346,12 +339,20 @@ static bool ExecuteBuffer()
 	d3d.rhwDecl->Set();
 	d3d.effectSystem->SetActive(d3d.rhwEffect);
 	d3d.effectSystem->SetVertexShaderConstant(d3d.rhwEffect, 0, CONST_MATRIX, &d3d.matProjection);
+
 	// these two just add the vertex data to the below lists (they dont draw anything themselves
 	// and they HAVE to be called before the below code)
 	DrawParticles();
 	DrawCoronas();
-
-
+/*
+	char buf[100];
+	if (nParticles)
+	{
+		sprintf(buf, "%d decals this frame\n", nParticles);
+		OutputDebugString(buf);
+	}
+	nParticles = 0;
+*/
 	if (mainList->GetSize())
 	{
 		// set vertex declaration
@@ -376,6 +377,7 @@ static bool ExecuteBuffer()
 	// render any decals
 	if (decalList->GetSize())
 	{
+#if 0 // TODO - fix decal code
 		// set vertex declaration
 		d3d.decalDecl->Set();
 
@@ -392,6 +394,7 @@ static bool ExecuteBuffer()
 
 		// daw the ortho list
 		decalList->Draw();
+#endif
 	}
 
 	// render any particles
@@ -773,12 +776,6 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 
 		for (uint32_t x = 0; x < width; x++)
 		{
-/*
-			destPtr[0] = srcPtr[0];
-			destPtr[1] = srcPtr[1];
-			destPtr[2] = srcPtr[2];
-			destPtr[3] = srcPtr[3];
-*/
 			memcpy(destPtr, srcPtr, sizeof(uint32_t));
 
 			destPtr += sizeof(uint32_t);
@@ -1768,6 +1765,8 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 	}
 
 	decalList->CreateIndices(decalIndex, RenderPolygon.NumberOfVertices);
+
+	nParticles ++;;
 }
 
 void AddCorona(PARTICLE *particlePtr, VECTORCHF *coronaPoint)
@@ -1833,10 +1832,6 @@ void D3D_Particle_Output(PARTICLE *particlePtr, PARTICLEVERTEX *renderVerticesPt
 	float RecipW = 1.0f / (float) texWidth;
 	float RecipH = 1.0f / (float) texHeight;
 
-	// add the item to our test list
-	// 1: Check our VB and IBs are big enough?
-
-	// 2: If we're ok to add, add a RenderItem
 	particleList->AddItem(4, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP, ZWRITE_DISABLED);
 
 	RCOLOR colour;

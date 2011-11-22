@@ -53,7 +53,7 @@ struct RenderItem
 		uint32_t sortKey;
 	};
 
-	bool operator<(const RenderItem& rhs) const {return sortKey < rhs.sortKey;}
+	bool operator < (const RenderItem& rhs) const {return sortKey < rhs.sortKey;}
 };
 
 class RenderList
@@ -65,10 +65,11 @@ class RenderList
 		uint32_t	vertexCount;
 		uint32_t	indexCount;
 
+		std::vector<RenderItem> Items;
+
 		void RenderList::AddIndices(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n);
 
 	public:
-		std::vector<RenderItem> Items;
 		RenderList(size_t size);
 		~RenderList();
 

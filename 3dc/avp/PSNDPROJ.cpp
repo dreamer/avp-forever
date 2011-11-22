@@ -28,12 +28,9 @@
 #define SOUND_TEST_3D   FALSE
 
 #define LOAD_SOUND_FROM_FAST_FILE    TRUE
-#if 1
+
 //allow loading from outside of fastfiles to help with custom levels
 #define LOAD_SOUND_FROM_FAST_FILE_ONLY FALSE
-#else
-#define LOAD_SOUND_FROM_FAST_FILE_ONLY (LOAD_USING_FASTFILES)
-#endif
 
 #define USE_REBSND_LOADERS  (LOAD_USING_FASTFILES||PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO||DEATHMATCH_DEMO)
 #define USE_COMMON_FLL_FILE  (LOAD_USING_FASTFILES||PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO||DEATHMATCH_DEMO)
@@ -559,22 +556,41 @@ void PlayCudgelSound(void)
 }
 
 char * SecondSoundDir = 0;
-static const char *FirstSoundDir = "SOUND/";
-static const char *CommonSoundDirectory = "./SOUND/COMMON/";
+static const char *FirstSoundDir = "SOUND\\";
+
+#include "FileStream.h"
+#include <algorithm>
+
+int LoadWavFromFastFile_2(int soundNum, char * wavFileName, FileStream &fStream);
 
 int FindAndLoadWavFile(int soundNum, char* wavFileName)
 {
-	static char sound_name[MAX_PATH];
-	sprintf (sound_name, "%s%s", FirstSoundDir, wavFileName);
+	char sound_name[MAX_PATH];
+	sprintf(sound_name, "%s%s", FirstSoundDir, wavFileName);
 
 #if LOAD_SOUND_FROM_FAST_FILE
 	//first look in fast file
 	{
+		std::string fileName = sound_name;
+		
+		// change forwardslashes in path to backslashes
+		std::replace(fileName.begin(), fileName.end(), '/', '\\');
+
+		FileStream newStream;
+		newStream.Open(fileName, FileStream::FileRead);
+
+		if (newStream.IsGood())
+		{
+//			return LoadWavFromFastFile(soundNum, sound_name);
+			return LoadWavFromFastFile_2(soundNum, sound_name, newStream);
+		}
+/*
 		size_t nLen;
 		if (ffreadbuf(sound_name, &nLen))
 		{
 			return LoadWavFromFastFile(soundNum, sound_name);
 		}
+*/
 	}
 #endif
 
@@ -593,8 +609,11 @@ int FindAndLoadWavFile(int soundNum, char* wavFileName)
 				wavFile = avp_fopen(sound_name,"rb");
 				if (!wavFile)
 				{
-					OutputDebugString("failed to find sound\n");
-					LOGDXFMT(("Failed to find %s\n",wavFileName));	
+					OutputDebugString("failed to find sound - ");
+					OutputDebugString(sound_name);
+					OutputDebugString("\n");
+
+					LOGDXFMT(("Failed to find %s\n", sound_name));	
 					return 0;
 				}
 			}
@@ -657,7 +676,7 @@ void ReleaseRebSndFile(void *bufferPtr)
 void LoadSounds(char *soundDirectory)
 {
 	void *rebSndBuffer;
-	unsigned char *bufferPtr;
+	uint8_t *bufferPtr;
 	int soundIndex;
 	int pitch;
 
@@ -668,34 +687,30 @@ void LoadSounds(char *soundDirectory)
 		return;
 
 	/* load RebSnd file into a (big) buffer	*/
+	char filename[MAX_PATH];
+
+#if ALIEN_DEMO
+	strcpy(filename, ".\\alienfastfile");
+#else
+	strcpy(filename, ".\\fastfile");
+#endif
+	strcat(filename, "\\common.ffl");
+
+	rebSndBuffer = LoadRebSndFile(filename);
+
+	if (!rebSndBuffer)
 	{
-		char filename[MAX_PATH];
-		#if ALIEN_DEMO
-		strcpy(filename, "./alienfastfile");//CommonSoundDirectory);
-		#else
-
-		strcpy(filename, "fastfile");//CommonSoundDirectory);
-
-		#endif
-		strcat(filename, "/");
-		strcat(filename, "common.ffl");
-
-		rebSndBuffer = LoadRebSndFile(filename);
-
-		if (!rebSndBuffer)
-		{
-			LOCALASSERT(0);
-			return;
-		}
+		LOCALASSERT(0);
+		return;
 	}
 
 	/* Process the file */
-	bufferPtr = (unsigned char*) rebSndBuffer;
+	bufferPtr = (uint8_t*) rebSndBuffer;
 	soundIndex = (int)(*bufferPtr++);
-	pitch = (int)((signed char)(*bufferPtr++));
+	pitch = (int)((int8_t)(*bufferPtr++));
 	while ((soundIndex!=0xff)||(pitch!=-1))
 	{
-		if ((soundIndex<0)||(soundIndex>=SID_MAXIMUM))
+		if ((soundIndex < 0) || (soundIndex >= SID_MAXIMUM))
 		{
 			/* invalid sound number */
 			LOCALASSERT("Invalid Sound Index"==0);
@@ -717,8 +732,9 @@ void LoadSounds(char *soundDirectory)
 
 		InitialiseBaseFrequency(static_cast<enum soundindex>(soundIndex));
 		soundIndex = (int)(*bufferPtr++);
-		pitch = (int)((signed char)(*bufferPtr++));
+		pitch = (int)((int8_t)(*bufferPtr++));
 	}
 
 	ReleaseRebSndFile(rebSndBuffer);
 }
+

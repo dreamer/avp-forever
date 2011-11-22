@@ -861,6 +861,95 @@ Determine area used by text , so we can draw it centrally
 
 void LoadAllMenuTextures()
 {
+#if 1
+	AVPMENUGFX_CLOUDY = Tex_CreateFromRIM("graphics\\Menus\\fractal.RIM");
+
+	AVPMENUGFX_SMALL_FONT       = Tex_CreateFromRIM("graphics\\Common\\aa_font.RIM");
+	AVPMENUGFX_COPYRIGHT_SCREEN = Tex_CreateFromRIM("graphics\\Menus\\Copyright.RIM");
+
+	AVPMENUGFX_PRESENTS        = Tex_CreateFromRIM("graphics\\Menus\\FIandRD.RIM");
+	AVPMENUGFX_AREBELLIONGAME  = Tex_CreateFromRIM("graphics\\Menus\\presents.RIM");
+	AVPMENUGFX_ALIENSVPREDATOR = Tex_CreateFromRIM("graphics\\Menus\\AliensVPredator.RIM");
+
+	AVPMENUGFX_SLIDERBAR       = Tex_CreateFromRIM("graphics\\Menus\\SliderBar.RIM");
+	AVPMENUGFX_SLIDER          = Tex_CreateFromRIM("graphics\\Menus\\Slider.RIM");
+
+	AVPMENUGFX_BACKDROP        = Tex_CreateFromRIM("graphics\\Menus\\Starfield.RIM");
+	AVPMENUGFX_ALIENS_LOGO     = Tex_CreateFromRIM("graphics\\Menus\\aliens.RIM");
+	AVPMENUGFX_ALIEN_LOGO      = Tex_CreateFromRIM("graphics\\Menus\\Alien.RIM");
+	AVPMENUGFX_MARINE_LOGO     = Tex_CreateFromRIM("graphics\\Menus\\Marine.RIM");
+	AVPMENUGFX_PREDATOR_LOGO   = Tex_CreateFromRIM("graphics\\Menus\\Predator.RIM");
+
+	AVPMENUGFX_GLOWY_LEFT      = Tex_CreateFromRIM("graphics\\Menus\\glowy_left.RIM");
+	AVPMENUGFX_GLOWY_MIDDLE    = Tex_CreateFromRIM("graphics\\Menus\\glowy_middle.RIM");
+	AVPMENUGFX_GLOWY_RIGHT     = Tex_CreateFromRIM("graphics\\Menus\\glowy_right.RIM");
+
+	AVPMENUGFX_MARINE_EPISODE1 = Tex_CreateFromRIM("graphics\\Menus\\MarineEpisode1.RIM");
+	AVPMENUGFX_MARINE_EPISODE2 = Tex_CreateFromRIM("graphics\\Menus\\MarineEpisode2.RIM");
+	AVPMENUGFX_MARINE_EPISODE3 = Tex_CreateFromRIM("graphics\\Menus\\MarineEpisode3.RIM");
+	AVPMENUGFX_MARINE_EPISODE4 = Tex_CreateFromRIM("graphics\\Menus\\MarineEpisode4.RIM");
+	AVPMENUGFX_MARINE_EPISODE5 = Tex_CreateFromRIM("graphics\\Menus\\MarineEpisode5.RIM");
+	AVPMENUGFX_MARINE_EPISODE6 = Tex_CreateFromRIM("graphics\\Menus\\MarineEpisode6.RIM");
+
+	AVPMENUGFX_MARINE_EPISODE7  = Tex_CreateFromRIM("graphics\\Menus\\bonus.RIM");
+	AVPMENUGFX_MARINE_EPISODE8  = Tex_CreateFromRIM("graphics\\Menus\\bonus.RIM");
+	AVPMENUGFX_MARINE_EPISODE9  = Tex_CreateFromRIM("graphics\\Menus\\bonus.RIM");
+	AVPMENUGFX_MARINE_EPISODE10 = Tex_CreateFromRIM("graphics\\Menus\\bonus.RIM");
+	AVPMENUGFX_MARINE_EPISODE11 = Tex_CreateFromRIM("graphics\\Menus\\bonus.RIM");
+
+	AVPMENUGFX_PREDATOR_EPISODE1 = Tex_CreateFromRIM("graphics\\Menus\\PredatorEpisode1.RIM");
+	AVPMENUGFX_PREDATOR_EPISODE2 = Tex_CreateFromRIM("graphics\\Menus\\PredatorEpisode2.RIM");
+	AVPMENUGFX_PREDATOR_EPISODE3 = Tex_CreateFromRIM("graphics\\Menus\\PredatorEpisode3.RIM");
+	AVPMENUGFX_PREDATOR_EPISODE4 = Tex_CreateFromRIM("graphics\\Menus\\PredatorEpisode4.RIM");
+	AVPMENUGFX_PREDATOR_EPISODE5 = Tex_CreateFromRIM("graphics\\Menus\\PredatorEpisode5.RIM");
+	AVPMENUGFX_PREDATOR_EPISODE6 = Tex_CreateFromRIM("graphics\\Menus\\PredatorEpisode5.RIM");
+
+	AVPMENUGFX_PREDATOR_EPISODE7  = Tex_CreateFromRIM("graphics\\Menus\\bonus.RIM");
+	AVPMENUGFX_PREDATOR_EPISODE8  = Tex_CreateFromRIM("graphics\\Menus\\bonus.RIM");
+	AVPMENUGFX_PREDATOR_EPISODE9  = Tex_CreateFromRIM("graphics\\Menus\\bonus.RIM");
+	AVPMENUGFX_PREDATOR_EPISODE10 = Tex_CreateFromRIM("graphics\\Menus\\bonus.RIM");
+	AVPMENUGFX_PREDATOR_EPISODE11 = Tex_CreateFromRIM("graphics\\Menus\\bonus.RIM");
+
+	AVPMENUGFX_ALIEN_EPISODE1  = Tex_CreateFromRIM("graphics\\Menus\\AlienEpisode2.RIM");
+	AVPMENUGFX_ALIEN_EPISODE2  = Tex_CreateFromRIM("graphics\\Menus\\AlienEpisode4.RIM");
+	AVPMENUGFX_ALIEN_EPISODE3  = Tex_CreateFromRIM("graphics\\Menus\\AlienEpisode1.RIM");
+	AVPMENUGFX_ALIEN_EPISODE4  = Tex_CreateFromRIM("graphics\\Menus\\AlienEpisode3.RIM");
+	AVPMENUGFX_ALIEN_EPISODE5  = Tex_CreateFromRIM("graphics\\Menus\\AlienEpisode5.RIM");
+	AVPMENUGFX_ALIEN_EPISODE6  = Tex_CreateFromRIM("graphics\\Menus\\bonus.RIM");
+	AVPMENUGFX_ALIEN_EPISODE7  = Tex_CreateFromRIM("graphics\\Menus\\bonus.RIM");
+	AVPMENUGFX_ALIEN_EPISODE8  = Tex_CreateFromRIM("graphics\\Menus\\bonus.RIM");
+	AVPMENUGFX_ALIEN_EPISODE9  = Tex_CreateFromRIM("graphics\\Menus\\bonus.RIM");
+	AVPMENUGFX_ALIEN_EPISODE10 = Tex_CreateFromRIM("graphics\\Menus\\bonus.RIM");
+
+	// Splash screens
+	#if MARINE_DEMO
+		AVPMENUGFX_WINNER_SCREEN = Tex_CreateFromRIM("graphics\\MarineSplash\\splash00.RIM");
+
+		AVPMENUGFX_SPLASH_SCREEN1 = Tex_CreateFromRIM("graphics\\MarineSplash\\splash01.RIM");
+		AVPMENUGFX_SPLASH_SCREEN2 = Tex_CreateFromRIM("graphics\\MarineSplash\\splash02.RIM");
+		AVPMENUGFX_SPLASH_SCREEN3 = Tex_CreateFromRIM("graphics\\MarineSplash\\splash03.RIM");
+		AVPMENUGFX_SPLASH_SCREEN4 = Tex_CreateFromRIM("graphics\\MarineSplash\\splash04.RIM");
+		AVPMENUGFX_SPLASH_SCREEN5 = Tex_CreateFromRIM("graphics\\MarineSplash\\splash05.RIM");
+	#elif ALIEN_DEMO
+		AVPMENUGFX_WINNER_SCREEN = Tex_CreateFromRIM("graphics\\AlienSplash\\splash00.RIM");
+
+		AVPMENUGFX_SPLASH_SCREEN1 = Tex_CreateFromRIM("graphics\\AlienSplash\\splash01.RIM");
+		AVPMENUGFX_SPLASH_SCREEN2 = Tex_CreateFromRIM("graphics\\AlienSplash\\splash02.RIM");
+		AVPMENUGFX_SPLASH_SCREEN3 = Tex_CreateFromRIM("graphics\\AlienSplash\\splash03.RIM");
+		AVPMENUGFX_SPLASH_SCREEN4 = Tex_CreateFromRIM("graphics\\AlienSplash\\splash04.RIM");
+		AVPMENUGFX_SPLASH_SCREEN5 = Tex_CreateFromRIM("graphics\\AlienSplash\\splash05.RIM");
+	#else
+		AVPMENUGFX_WINNER_SCREEN = Tex_CreateFromRIM("graphics\\PredatorSplash\\splash00.RIM");
+
+		AVPMENUGFX_SPLASH_SCREEN1 = Tex_CreateFromRIM("graphics\\PredatorSplash\\splash01.RIM");
+		AVPMENUGFX_SPLASH_SCREEN2 = Tex_CreateFromRIM("graphics\\PredatorSplash\\splash02.RIM");
+		AVPMENUGFX_SPLASH_SCREEN3 = Tex_CreateFromRIM("graphics\\PredatorSplash\\splash03.RIM");
+		AVPMENUGFX_SPLASH_SCREEN4 = Tex_CreateFromRIM("graphics\\PredatorSplash\\splash04.RIM");
+		AVPMENUGFX_SPLASH_SCREEN5 = Tex_CreateFromRIM("graphics\\PredatorSplash\\splash05.RIM");
+	#endif
+
+#else
+
 	AVPMENUGFX_CLOUDY = CL_LoadImageOnce("Menus\\fractal.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 
 	AVPMENUGFX_SMALL_FONT  = CL_LoadImageOnce("Common\\aa_font.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
@@ -946,6 +1035,7 @@ void LoadAllMenuTextures()
 		AVPMENUGFX_SPLASH_SCREEN4 = CL_LoadImageOnce("PredatorSplash\\splash04.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 		AVPMENUGFX_SPLASH_SCREEN5 = CL_LoadImageOnce("PredatorSplash\\splash05.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 	#endif
+#endif
 }
 
 extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)

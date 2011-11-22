@@ -236,6 +236,9 @@ int GetAvPMenuState()
 	return AvPMenus.MenusState;
 }
 
+const int FRAMES_PER_SECOND = 60;
+const int SKIP_TICKS = 1000 / FRAMES_PER_SECOND;
+
 int AvP_MainMenus(void)
 {
 	LoadDefaultPrimaryConfigs();
@@ -314,6 +317,9 @@ int AvP_MainMenus(void)
 	{
 		mainMenu = true;
 
+		DWORD nextGameTick = timeGetTime();
+		int sleepTime = 0;
+
 		CheckForWindowsMessages();
 
 		ThisFramesRenderingHasBegun();
@@ -336,6 +342,13 @@ int AvP_MainMenus(void)
 
 		ThisFramesRenderingHasFinished();
 		FlipBuffers();
+
+		nextGameTick += SKIP_TICKS;
+		sleepTime = nextGameTick - timeGetTime();
+		if (sleepTime >= 0) 
+		{
+			Sleep(sleepTime);
+		}
 	}
 
 	if (AvPMenus.MenusState == MENUSSTATE_OUTSIDEMENUS)

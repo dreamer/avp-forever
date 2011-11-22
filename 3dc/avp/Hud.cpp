@@ -141,7 +141,6 @@ static void DrawMarineSights(void);
 static void DrawPredatorSights(void);
 void DrawWristDisplay(void);
 static void DrawAlienTeeth(void);
-void CentreGunSight(void);
 void RenderInsideAlienTongue(int offset);
 void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed);
 void RenderBriefingText(int centreY, int brightness);
@@ -301,8 +300,6 @@ void MaintainHUD(void)
 		return;
 	}
 
-//	GlobalAmbience=16384;
-
 	/* KJL 18:46:04 03/10/97 - for now I've completely turned off the HUD if you die; this
 	can easily be changed */
 	if (playerStatusPtr->MyFaceHugger!=NULL)
@@ -346,8 +343,7 @@ void MaintainHUD(void)
 			{
 				HandlePredatorWeapon();
 				CheckWireFrameMode(0);
-				//DrawPredatorEnergyBar();
-	  			//DisplayHealthAndArmour();
+
 			   	DrawWristDisplay();
 
   				HandlePredOVision();
@@ -1071,34 +1067,32 @@ static void DrawMarineSights(void)
 	}
 
 	/* draw smart target sights if required */
-	{
-	    /* access the extra data hanging off the strategy block */
-		PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
-		PLAYER_WEAPON_DATA *weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
+	/* access the extra data hanging off the strategy block */
+	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+	PLAYER_WEAPON_DATA *weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
 
-		if (TemplateWeapon[weaponPtr->WeaponIDNumber].IsSmartTarget)
+	if (TemplateWeapon[weaponPtr->WeaponIDNumber].IsSmartTarget)
+	{
+		if (MIRROR_CHEATMODE)
 		{
-			if (MIRROR_CHEATMODE)
-			{
 			if (CurrentlySmartTargetingObject)	/* tracking target so use the red box */
-				{
-					D3D_BLTGunSightToHUD(ScreenDescriptorBlock.SDB_Width - (SmartTargetSightX>>16),SmartTargetSightY>>16,GUNSIGHT_REDBOX);
-				}
-				else /* not tracking anything, use green box */
-				{
-					D3D_BLTGunSightToHUD(ScreenDescriptorBlock.SDB_Width - (SmartTargetSightX>>16),SmartTargetSightY>>16,GUNSIGHT_GREENBOX);
-				}
-			}
-			else
 			{
-				if (CurrentlySmartTargetingObject)	/* tracking target so use the red box */
-				{
-					D3D_BLTGunSightToHUD(SmartTargetSightX>>16,SmartTargetSightY>>16,GUNSIGHT_REDBOX);
-				}
-				else /* not tracking anything, use green box */
-				{
-					D3D_BLTGunSightToHUD(SmartTargetSightX>>16,SmartTargetSightY>>16,GUNSIGHT_GREENBOX);
-				}
+				D3D_BLTGunSightToHUD(ScreenDescriptorBlock.SDB_Width - (SmartTargetSightX>>16),SmartTargetSightY>>16,GUNSIGHT_REDBOX);
+			}
+			else /* not tracking anything, use green box */
+			{
+				D3D_BLTGunSightToHUD(ScreenDescriptorBlock.SDB_Width - (SmartTargetSightX>>16),SmartTargetSightY>>16,GUNSIGHT_GREENBOX);
+			}
+		}
+		else
+		{
+			if (CurrentlySmartTargetingObject)	/* tracking target so use the red box */
+			{
+				D3D_BLTGunSightToHUD(SmartTargetSightX>>16,SmartTargetSightY>>16,GUNSIGHT_REDBOX);
+			}
+			else /* not tracking anything, use green box */
+			{
+				D3D_BLTGunSightToHUD(SmartTargetSightX>>16,SmartTargetSightY>>16,GUNSIGHT_GREENBOX);
 			}
 		}
 	}

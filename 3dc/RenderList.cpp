@@ -28,7 +28,7 @@
 #include <assert.h>
 #include "console.h"
 
-extern uint32_t GetRealNumVerts(uint32_t numVerts);
+extern uint32_t GetNumIndices(uint32_t numVerts);
 
 RenderList::RenderList(size_t size)
 {
@@ -143,7 +143,7 @@ void RenderList::AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY
 		return;
 	}
 
-	uint32_t realNumVerts = GetRealNumVerts(numVerts);
+	uint32_t numIndices = GetNumIndices(numVerts);
 
 	Items[listIndex].sortKey = 0; // zero it out
 
@@ -168,7 +168,7 @@ void RenderList::AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY
 	}
 
 	Items[listIndex].vertEnd = vertexCount + numVerts;
-	Items[listIndex].indexEnd = indexCount + realNumVerts;
+	Items[listIndex].indexEnd = indexCount + numIndices;
 	listIndex++;
 
 	vertexCount += numVerts;
@@ -193,8 +193,11 @@ void RenderList::Reset()
 
 void RenderList::Draw()
 {
-	for (std::vector<RenderItem>::iterator it = Items.begin(); it != Items.begin() + listIndex; ++it)
+//	for (std::vector<RenderItem>::iterator it = Items.begin(); it != Items.begin() + listIndex; ++it)
+	for (size_t i = 0; i < listIndex; i++)
 	{
+		RenderItem *it = &Items[i];
+
 		uint32_t numPrimitives = (it->indexEnd - it->indexStart) / 3;
 
 		if (numPrimitives)

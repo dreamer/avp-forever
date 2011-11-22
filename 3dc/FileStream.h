@@ -77,7 +77,7 @@ class FileStream
 		void Close();
 		bool IsGood();
 
-		bool ReadBytes(uint8_t *buffer, size_t nBytes);
+		DWORD ReadBytes(uint8_t *buffer, size_t nBytes);
 		bool WriteBytes(const uint8_t *buffer, size_t nBytes);
 
 		uint8_t  GetByte();

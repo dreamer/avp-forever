@@ -116,7 +116,7 @@ void CharacterSoundEffects::LoadSounds(const char* filename, const char* directo
 				cat->sounds = 0;
 			}
 
-			for (int k=0;k<cat->num_sounds;)
+			for (int k = 0;k < cat->num_sounds;)
 			{
 				ScreamSound * sound=&cat->sounds[k];
 

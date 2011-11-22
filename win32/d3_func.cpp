@@ -1822,6 +1822,9 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 	uint32_t realWidth  = width;
 	uint32_t realHeight = height;
 
+	D3DXCheckTextureRequirements(d3d.lpD3DDevice, &realWidth, &realHeight, NULL, textureUsage, &textureFormat, texturePool);
+
+#if 0
 	// check texture sizes are ok
 	if (!IsPowerOfTwo(width))
 	{
@@ -1831,7 +1834,7 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 	{
 		realHeight = RoundUpToNextPowerOfTwo(height);
 	}
-
+#endif
 	// create the d3d9 texture
 	LastError = d3d.lpD3DDevice->CreateTexture(realWidth, realHeight, 1, textureUsage, textureFormat, texturePool, &d3dTexture, NULL);
 	if (FAILED(LastError))

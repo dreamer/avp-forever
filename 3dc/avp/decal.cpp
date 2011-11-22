@@ -802,11 +802,11 @@ void HandleDecalSystem(void)
 	int i = NumActiveDecals;
 	DECAL *decalPtr = DecalStorage;
 //	textprint("Decals Active: %d\n",i);
-
-//	char buf[100];
-//	sprintf(buf, "Decals Active: %d\n", NumActiveDecals);
-//	OutputDebugString(buf);
-
+/*
+	char buf[100];
+	sprintf(buf, "Decals Active: %d\n", NumActiveDecals);
+	OutputDebugString(buf);
+*/
 	while (i--)
 	{
 		DECAL_DESC *decalDescPtr = &DecalDescription[decalPtr->DecalID];
@@ -836,10 +836,11 @@ void HandleDecalSystem(void)
 	DECAL dummyDecal;
 	FIXED_DECAL *fixedDecalPtr = FixedDecalStorage;
 //	textprint("Decals Active: %d\n",i);
-
-//	sprintf(buf, "Fixed Decals Active: %d\n", NumFixedDecals);
-//	OutputDebugString(buf);
-
+/*
+	char buf[100];
+	sprintf(buf, "Fixed Decals Active: %d\n", NumFixedDecals);
+	OutputDebugString(buf);
+*/
 	while (i--)
 	{
 		dummyDecal.DecalID = fixedDecalPtr->DecalID;
@@ -1053,17 +1054,17 @@ void ScanHModelForDecals(DISPLAYBLOCK *objectPtr, SECTION_DATA *sectionDataPtr)
 		/* does the object have decals? */
 		if (sectionDataPtr->NumberOfDecals && playerPherModule)
 		{
-			for (int d=0; d<sectionDataPtr->NumberOfDecals; d++)
+			for (int d = 0; d < sectionDataPtr->NumberOfDecals; d++)
 			{
 				DECAL decal;
 				decal.DecalID = sectionDataPtr->Decals[d].DecalID;
 				decal.ModuleIndex = playerPherModule->m_index;
 				decal.UOffset = 0;
 
-				for(int i=0; i<4; i++)
+				for (int i = 0; i < 4; i++)
 				{
 					decal.Vertices[i] = sectionDataPtr->Decals[d].Vertices[i];
-					RotateVector(&(decal.Vertices[i]),&(sectionDataPtr->SecMat));
+					RotateVector(&(decal.Vertices[i]), &(sectionDataPtr->SecMat));
 					decal.Vertices[i].vx += sectionDataPtr->World_Offset.vx;
 					decal.Vertices[i].vy += sectionDataPtr->World_Offset.vy;
 					decal.Vertices[i].vz += sectionDataPtr->World_Offset.vz;

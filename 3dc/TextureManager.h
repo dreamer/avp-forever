@@ -73,14 +73,18 @@ struct Texture
 	}
 };
 
-texID_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usageType);
-texID_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType);
-texID_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType);
-texID_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usage);
-texID_t Tex_CreateFromFile(const std::string &filePath);
-texID_t Tex_CheckExists(const std::string &textureName);
+texID_t Tex_Create         (const std::string &textureName, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usageType);
+texID_t Tex_AddTexture     (const std::string &textureName, r_Texture texture, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usage);
+texID_t Tex_CreateFromRIM  (const std::string &fileName);
+texID_t Tex_CreateFromFile (const std::string &filePath);
+texID_t Tex_CheckExists    (const std::string &textureName);
+
 texID_t Tex_AddExistingTexture(Texture &texture);
 const Texture& Tex_GetTextureDetails(texID_t textureID);
+
+texID_t Tex_CreateFromAvPTexture  (const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType);
+texID_t Tex_CreateTallFontTexture (const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType);
+
 std::string& Tex_GetName(texID_t textureID);
 void Tex_GetNamesVector(std::vector<std::string> &namesArray);
 void Tex_GetDimensions(texID_t textureID, uint32_t &width, uint32_t &height);

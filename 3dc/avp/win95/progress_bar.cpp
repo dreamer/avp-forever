@@ -44,25 +44,27 @@ RECT LoadingBarFull_SrcRect;
 
 extern void DrawProgressBar(const RECT &srcRect, const RECT &destRect, texID_t textureID);
 
-texID_t	fullTextureID = 0;
-texID_t	emptyTextureID = 0;
-texID_t	dbTextureID = 0;
+texID_t fullTextureID  = 0;
+texID_t emptyTextureID = 0;
+texID_t dbTextureID    = 0;
 
-AVPTEXTURE *image = NULL;
 AVPTEXTURE *LoadingBarEmpty = NULL;
-AVPTEXTURE *LoadingBarFull = NULL;
+AVPTEXTURE *LoadingBarFull  = NULL;
+AVPTEXTURE *image   = NULL;
 AVPTEXTURE *aa_font = NULL;
 
 void Start_Progress_Bar()
 {
-	char buffer[100];
+	char buffer[MAX_PATH];
 
-	AAFontImageNumber = CL_LoadImageOnce("Common\\aa_font.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+//	AAFontImageNumber = CL_LoadImageOnce("Common\\aa_font.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
+	AAFontImageNumber = Tex_CreateFromRIM("graphics\\Common\\aa_font.RIM");
 	
 	// load other graphics
 	{
+
 		CL_GetImageFileName(buffer, 100, Loading_Bar_Empty_Image_Name, LIO_RELATIVEPATH);
-		
+#if 0
 		// see if graphic can be found in fast file
 		size_t fastFileLength;
 		void const * pFastFileData = ffreadbuf(buffer, &fastFileLength);
@@ -82,10 +84,12 @@ void Start_Progress_Bar()
 		{
 			emptyTextureID = Tex_CreateFromAvPTexture(Loading_Bar_Empty_Image_Name, *LoadingBarEmpty, TextureUsage_Normal);
 		}
+#endif
+		emptyTextureID = Tex_CreateFromRIM(buffer);
 	}
 	{
 		CL_GetImageFileName(buffer, 100, Loading_Bar_Full_Image_Name, LIO_RELATIVEPATH);
-		
+#if 0	
 		// see if graphic can be found in fast file
 		size_t fastFileLength;
 		void const * pFastFileData = ffreadbuf(buffer, &fastFileLength);
@@ -105,11 +109,16 @@ void Start_Progress_Bar()
 		{
 			fullTextureID = Tex_CreateFromAvPTexture(Loading_Bar_Full_Image_Name, *LoadingBarFull, TextureUsage_Normal);
 		}
+#endif
+		fullTextureID = Tex_CreateFromRIM(buffer);
 	}
 	
 	// load background image for bar
 	CL_GetImageFileName(buffer, 100, Loading_Image_Name, LIO_RELATIVEPATH);
+
+	dbTextureID = Tex_CreateFromRIM(Loading_Image_Name);
 	
+#if 0
 	// see if graphic can be found in fast file
 	size_t fastFileLength;
 	void const * pFastFileData = ffreadbuf(buffer, &fastFileLength);
@@ -129,6 +138,7 @@ void Start_Progress_Bar()
 	{
 		dbTextureID = Tex_CreateFromAvPTexture(Loading_Image_Name, *image, TextureUsage_Normal);
 	}
+#endif
 
 	// draw initial progress bar
 	LoadingBarEmpty_SrcRect.left = 0;
@@ -143,7 +153,7 @@ void Start_Progress_Bar()
 	{
 		ThisFramesRenderingHasBegun();
 
-		if (LoadingBarEmpty)
+		if (/*LoadingBarEmpty*/1)
 		{
 			DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID);
 
@@ -189,7 +199,19 @@ void Set_Progress_Bar_Position(int pos)
 		
 		ThisFramesRenderingHasBegun();
 
-		if (!LoadingBarEmpty) // if we're using demo assets, draw the demo style progress bar
+		if (/*LoadingBarEmpty*/1)
+		{
+			// need to render the empty bar here again. As we're not blitting anymore, 
+			// the empty bar will only be rendered for one frame.
+			DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID);
+
+			// also need this here again, or else the text disappears!
+			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED); // no briefing text on demo this this call is in this block
+
+			// now render the green percent loaded overlay
+			DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, fullTextureID);
+		}
+		else // if we're using demo assets, draw the demo style progress bar
 		{
 			// background image
 			DrawQuad(0, 0, 640, 480, dbTextureID, RCOLOR_XRGB(255, 255, 255), TRANSLUCENCY_OFF);
@@ -202,18 +224,6 @@ void Set_Progress_Bar_Position(int pos)
 
 			// red progress bar
 			DrawQuad(106, 414, MUL_FIXED(427, NewPosition), 44, NO_TEXTURE, RCOLOR_XRGB(248, 0, 0), TRANSLUCENCY_OFF);
-		}
-		else		
-		{
-			// need to render the empty bar here again. As we're not blitting anymore, 
-			// the empty bar will only be rendered for one frame.
-			DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID);
-
-			// also need this here again, or else the text disappears!
-			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED); // no briefing text on demo this this call is in this block
-
-			// now render the green percent loaded overlay
-			DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, fullTextureID);
 		}
 
 		ThisFramesRenderingHasFinished();
@@ -275,7 +285,7 @@ void Game_Has_Loaded()
 			// also need this here again, or else the text disappears!
 			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
 	
-			if (LoadingBarFull)
+			if (/*LoadingBarFull*/1)
 			{
 				DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, fullTextureID);
 			}
@@ -296,7 +306,7 @@ void Game_Has_Loaded()
 				f = 0;
 		}
 
-		if (LoadingBarFull) // demo doesn't show this
+//		if (LoadingBarFull) // demo doesn't show this
 			RenderStringCentred(GetTextString(TEXTSTRING_INGAME_PRESSANYKEYTOCONTINUE), ScreenDescriptorBlock.SDB_Width/2, ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*23)/24-9, 0xffffffff);
 
 		ThisFramesRenderingHasFinished();

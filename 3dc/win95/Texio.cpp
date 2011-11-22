@@ -129,7 +129,9 @@ int InitialiseTextures(void)
 				#endif
 
 				/* This function calls GetExistingImageHeader to figure out if the image is already loaded */
-				TxIndex = CL_LoadImageOnce(fname, LIO_D3DTEXTURE | LIO_TRANSPARENT | LIO_RELATIVEPATH | LIO_RESTORABLE);
+//				TxIndex = CL_LoadImageOnce(fname, LIO_D3DTEXTURE | LIO_TRANSPARENT | LIO_RELATIVEPATH | LIO_RESTORABLE);
+				std::string fileName = fname;
+				TxIndex = Tex_CreateFromRIM("graphics\\" + fileName);
 
 				GLOBALASSERT(GEI_NOTLOADED != TxIndex);
 

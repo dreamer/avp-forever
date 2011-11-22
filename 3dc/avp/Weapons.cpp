@@ -648,23 +648,23 @@ void UpdateWeaponStateMachine(void)
 {
 	PLAYER_WEAPON_DATA *weaponPtr;
 	TEMPLATE_WEAPON_DATA *twPtr;
-    int justfiredp,justfireds,ps;
+	int justfiredp,justfireds,ps;
 
-    /* access the extra data hanging off the strategy block */
+	/* access the extra data hanging off the strategy block */
 	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
-    GLOBALASSERT(playerStatusPtr);
-    	
+	GLOBALASSERT(playerStatusPtr);
+
 	/* player's current weapon */
-    GLOBALASSERT(playerStatusPtr->SelectedWeaponSlot<MAX_NO_OF_WEAPON_SLOTS);
-    
+	GLOBALASSERT(playerStatusPtr->SelectedWeaponSlot<MAX_NO_OF_WEAPON_SLOTS);
+
 	if (playerStatusPtr->MyFaceHugger) {
 		return;
 	}
 
 	CurrentGameStats_UsingWeapon(playerStatusPtr->SelectedWeaponSlot);
 
-    /* init a pointer to the weapon's data */
-    weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
+	/* init a pointer to the weapon's data */
+	weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
 
 	justfiredp=0; // Has the player just fired...
 	justfireds=0; // Has the player just fired...
@@ -675,7 +675,7 @@ void UpdateWeaponStateMachine(void)
 
 	/* Hack for autoswap commmands. */
 	if (AutoSwap!=-1) {
-        PlayerStatusPtr->Mvt_InputRequests.Flags.Rqst_WeaponNo=(AutoSwap+1);
+		PlayerStatusPtr->Mvt_InputRequests.Flags.Rqst_WeaponNo=(AutoSwap+1);
 		AutoSwap=-1;
 	}
 
@@ -685,20 +685,20 @@ void UpdateWeaponStateMachine(void)
 		return;
 
 	/* Player is dead. Weapon goes idle */
-    if (!playerStatusPtr->IsAlive)
+	if (!playerStatusPtr->IsAlive)
 	{
 		#if 0
 		WeaponCreateStartFrame((void *)playerStatusPtr, weaponPtr);
 		#endif
 
 		weaponPtr->CurrentState = WEAPONSTATE_IDLE;
-    	weaponPtr->StateTimeOutCounter=0;
+		weaponPtr->StateTimeOutCounter=0;
 		return;
 	}
 
-    twPtr = &TemplateWeapon[weaponPtr->WeaponIDNumber];
-    
- 	CalculatePlayersTarget(twPtr, weaponPtr);
+	twPtr = &TemplateWeapon[weaponPtr->WeaponIDNumber];
+
+	CalculatePlayersTarget(twPtr, weaponPtr);
 
 	playerStatusPtr->Encumberance=twPtr->Encum_Idle; //Default state
 
@@ -2909,7 +2909,7 @@ void PositionPlayersWeapon(void)
 	gunOffset.vy += weaponPtr->PositionOffset.vy;
 	gunOffset.vz += weaponPtr->PositionOffset.vz;
 
-   	if ( (!(twPtr->PrimaryIsMeleeWeapon || (weaponPtr->WeaponIDNumber == WEAPON_PRED_DISC)
+	if ( (!(twPtr->PrimaryIsMeleeWeapon || (weaponPtr->WeaponIDNumber == WEAPON_PRED_DISC)
 		|| (weaponPtr->WeaponIDNumber == WEAPON_PRED_SHOULDERCANNON) 
 		|| (weaponPtr->WeaponIDNumber == WEAPON_PRED_MEDICOMP) 
 		)) ) {
@@ -2926,10 +2926,10 @@ void PositionPlayersWeapon(void)
 					MATRIXCH mat = Global_VDB_Ptr->VDB_Mat;
 					TransposeMatrixCH(&mat);
 					RotateVector(&offset, &mat);
-		 		}
-			 	gunDirection.vx -= Global_VDB_Ptr->VDB_World.vx - offset.vx;
-			  	gunDirection.vy -= Global_VDB_Ptr->VDB_World.vy - offset.vy;
-			  	gunDirection.vz -= Global_VDB_Ptr->VDB_World.vz - offset.vz;
+				}
+				gunDirection.vx -= Global_VDB_Ptr->VDB_World.vx - offset.vx;
+				gunDirection.vy -= Global_VDB_Ptr->VDB_World.vy - offset.vy;
+				gunDirection.vz -= Global_VDB_Ptr->VDB_World.vz - offset.vz;
 			}
 			Normalise(&gunDirection);
 		}
@@ -2938,7 +2938,7 @@ void PositionPlayersWeapon(void)
 			EULER dir = weaponPtr->DirectionOffset;
 			VECTORCH XVector;
 			VECTORCH YVector;
-		    VECTORCH ZVector;
+			VECTORCH ZVector;
 
 			ZVector = gunDirection;
 
@@ -2989,9 +2989,9 @@ void PositionPlayersWeapon(void)
 		MATRIXCH matrix	= VDBPtr->VDB_Mat;
 
 		TransposeMatrixCH(&matrix);
-		 
-	   	RotateVector(&offset, &matrix);
-	 	 
+
+		RotateVector(&offset, &matrix);
+
 		PlayersWeapon.ObWorld.vx = (VDBPtr->VDB_World.vx + offset.vx);
 		PlayersWeapon.ObWorld.vy = (VDBPtr->VDB_World.vy + offset.vy);
 		PlayersWeapon.ObWorld.vz = (VDBPtr->VDB_World.vz + offset.vz);
@@ -3007,14 +3007,14 @@ void PositionPlayersWeapon(void)
 				if (twPtr->PrimaryAmmoID==AMMO_PARTICLE_BEAM) 
 				{
 					AddLightingEffectToObject(Player,LFX_PARTICLECANNON);
-				} 
-				else 
+				}
+				else
 				{
 					AddLightingEffectToObject(Player,LFX_MUZZLEFLASH);
 				}
 			}
 		}
-	} 
+	}
 	else if (FireSecondaryLate) 
 	{
 		if (twPtr->SecondaryMuzzleFlash) 

@@ -560,6 +560,7 @@
     <ClCompile Include="..\..\3dc\OBJECT.cpp" />
     <ClCompile Include="..\..\3dc\OnScreenKeyboard.cpp" />
     <ClCompile Include="..\..\3dc\RenderList.cpp" />
+    <ClCompile Include="..\..\3dc\RimLoader.cpp" />
     <ClCompile Include="..\..\3dc\RingBuffer.cpp" />
     <ClCompile Include="..\..\3dc\ShaderManager.cpp" />
     <ClCompile Include="..\..\3dc\shpanim.cpp" />
@@ -812,6 +813,7 @@
     <ClInclude Include="..\..\3dc\renderer.h" />
     <ClInclude Include="..\..\3dc\RenderList.h" />
     <ClInclude Include="..\..\3dc\renderStates.h" />
+    <ClInclude Include="..\..\3dc\RimLoader.h" />
     <ClInclude Include="..\..\3dc\RingBuffer.h" />
     <ClInclude Include="..\..\3dc\ShaderManager.h" />
     <ClInclude Include="..\..\3dc\sphere.h" />

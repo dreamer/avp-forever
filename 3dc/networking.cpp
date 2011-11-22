@@ -101,7 +101,6 @@ extern unsigned char DebouncedKeyboardInput[];
 static bool Net_CreatePlayer(char *playerName, char *clanTag);
 int Net_GetNextPlayerID();
 void Net_FindAvPSessions();
-static BOOL DpExtProcessRecvdMsg(BOOL bIsSystemMsg, LPVOID lpData, DWORD dwDataSize);
 void Net_Disconnect();
 void Net_ConnectToAddress();
 int Net_CreateSession(const char* sessionName, int maxPlayers, int version, int level);
@@ -117,7 +116,7 @@ BOOL Net_UpdateSessionList(int *SelectedItem)
 {
 	GUID OldSessionGuids[MAX_NO_OF_SESSIONS];
 	uint32_t OldNumberOfSessions = NumberOfSessionsFound;
-	BOOL changed = FALSE;
+	bool changed = false;
 
 	const int32_t waitTime = 5000; // in ms, 5 ms
 
@@ -135,7 +134,7 @@ BOOL Net_UpdateSessionList(int *SelectedItem)
 	// Have the available sessions changed? first check number of sessions
 	if (NumberOfSessionsFound != OldNumberOfSessions)
 	{
-		changed = TRUE;
+		changed = true;
 	}
 	else
 	{
@@ -144,7 +143,7 @@ BOOL Net_UpdateSessionList(int *SelectedItem)
 		{
 			if (!IsEqualGUID(OldSessionGuids[i], SessionData[i].Guid))
 			{
-				changed = TRUE;
+				changed = true;
 			}
 		}
 	}
@@ -181,7 +180,7 @@ int Net_Initialise()
 	}
 
 	// get user config data
-	netPortNumber = Config_GetInt("[Networking]", "PortNumber", 1234);
+	netPortNumber = Config_GetInt("[Networking]", "PortNumber", netPortNumber);
 	incomingBandwidth = Config_GetInt("[Networking]", "IncomingBandwidth", 0);
 	outgoingBandwidth = Config_GetInt("[Networking]", "OutgoingBandwidth", 0);
 
