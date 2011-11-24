@@ -1393,12 +1393,14 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 
 	local_scale=temp_scale;
 
+/*
 	if(!(flags & CCF_DONT_INITIALISE_TEXTURES))
 	{
 		//currently on the occasions this flag is used , the textures are shared with the level rif.
 		//therefore only clear the fast files if the flag is not set.
 		ffclose_almost_all();
 	}
+*/
 	/*-----------------------------**
 	** set up hierarchy related stuff **
 	**-----------------------------*/
@@ -1673,6 +1675,7 @@ struct Adjacent_AIModule_EP
 // copies all shapes and objects etc
 BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_interval)
 {
+#if 0
 	/*close all fastfiles so we don't end up with too many open at once*/
 	if(!(flags & CCF_DONT_INITIALISE_TEXTURES))
 	{
@@ -1680,7 +1683,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 		//therefore only clear the fast files if the flag is not set.
 		ffclose_almost_all();
 	}
-
+#endif
 	if (INVALID_RIFFHANDLE == h || !h->fc) return(FALSE);
 
 	if (flags & CCF_LOAD_AS_HIERARCHY_IF_EXISTS)

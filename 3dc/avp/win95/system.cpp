@@ -463,7 +463,7 @@ void IntegrateNewEnvironment()
 	LoadSounds("PLAYER");
 
 	/* remove resident loaded 'fast' files */
-	ffcloseall();
+//	ffcloseall();
 
 	ResetFrameCounter();
 }

@@ -148,7 +148,7 @@ LOADED_SOUND const * GetSound(char const *fname)
 		GLOBALASSERT(0=="Run out of sound slots");
 		return 0;
 	}
-	
+
 	int ok = FindAndLoadWavFile (soundNum, (char *)fname);
 
 	if (ok)

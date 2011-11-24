@@ -37,6 +37,7 @@
 #include "renderer.h"
 #include "AvP_MP_Config.h"
 #include "logString.h"
+#include "FastFile.h"
 
 #if debug
 #define MainTextPrint 1
@@ -228,7 +229,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	if (strstr(command_line, "-keeprif"))
 	{
-		KeepMainRifFile = TRUE;			
+		KeepMainRifFile = TRUE;
 	}
 
 	if (strstr(command_line, "-m"))
@@ -290,15 +291,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		strncpy(CommandLineIPAddressString,buffer,15);
 		CommandLineIPAddressString[15] = 0;
 	}
- 
- 	#if PLAY_INTRO//(MARINE_DEMO||ALIEN_DEMO||PREDATOR_DEMO)
-  	if (!LobbiedGame)  // Edmond
-	 	WeWantAnIntro();
+
+	#if PLAY_INTRO//(MARINE_DEMO||ALIEN_DEMO||PREDATOR_DEMO)
+	if (!LobbiedGame)  // Edmond
+		WeWantAnIntro();
 	#endif
 	GetPathFromRegistry();
 
 	/* JH 28/5/97 */
 	/* Initialise 'fast' file system */
+
+/*
 	#if MARINE_DEMO
 	ffInit("fastfile/mffinfo.txt", "fastfile/");
 	#elif ALIEN_DEMO
@@ -306,6 +309,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	#else
 	ffInit("fastfile/ffinfo.txt", "fastfile/");
 	#endif
+*/
+	FF_Init();
 
 	InitGame();
 
@@ -399,7 +404,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 //bjd		InitialiseGammaSettings(RequestedGammaSetting);
 
 		// Load precompiled shapes 
-	    start_of_loaded_shapes = load_precompiled_shapes();
+		start_of_loaded_shapes = load_precompiled_shapes();
 
 		/***********  Load up the character stuff *******/
 		InitCharacter();
@@ -412,7 +417,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		/* JH 28/5/97 */
 		/* remove resident loaded 'fast' files */
-		ffcloseall();
+//		ffcloseall();
 		/*********** Play the game ***************/
 
 		/* KJL 15:43:25 03/11/97 - run until this boolean is set to 0 */
@@ -448,9 +453,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 				GLOBALASSERT(1 == 0);
 			}
 			#endif
-
-			DWORD next_game_tick = timeGetTime();
-			int sleep_time = 0;
 
 			switch (AvP.GameMode)
 			{
@@ -493,23 +495,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 						//check cd status
 						CheckCDAndChooseTrackIfNeeded();
-		
+
 						// check to see if we're pausing the game;
 						// if so kill off any sound effects
-						if (InGameMenusAreRunning() && ((AvP.Network!=I_No_Network && netGameData.skirmishMode) || (AvP.Network==I_No_Network)))
+						if (InGameMenusAreRunning() && ((AvP.Network != I_No_Network && netGameData.skirmishMode) || (AvP.Network == I_No_Network)))
 							SoundSys_StopAll();
-#if 0
-						next_game_tick += SKIP_TICKS;
-						sleep_time = next_game_tick - timeGetTime();
-						if (sleep_time >= 0) 
-						{
-							Sleep(sleep_time);
-						}
-						else
-						{
-							// running behind
-						}
-#endif
 					}
 					else
 					{
@@ -519,10 +509,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 						ThisFramesRenderingHasBegun();
 					}
 
-					{
-						menusActive = AvP_InGameMenus();
-						if (AvP.RestartLevel) menusActive = FALSE;
-					}
+					// draw ingame menu
+					menusActive = AvP_InGameMenus();
+					if (AvP.RestartLevel) menusActive = FALSE;
+
 					if (AvP.LevelCompleted)
 					{
 						SoundSys_FadeOutFast();
@@ -530,16 +520,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 						thisLevelHasBeenCompleted = 1;
 					}
 
-					{
-						/* after this call, no more graphics can be drawn until the next frame */
-						ThisFramesRenderingHasFinished();
-					}
+					/* after this call, no more graphics can be drawn until the next frame */
+					ThisFramesRenderingHasFinished();
 
 					FlipBuffers();
 
 					FrameCounterHandler();
 					{
-						PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+						PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 
 						if (!menusActive && playerStatusPtr->IsAlive && !AvP.LevelCompleted)
 						{
@@ -641,7 +629,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	EmptyUserProfilesList();
 	ClearMultiplayerLevelNameArray();
 
-	ffKill();
+//	ffKill();
 
 	/*-------------------Patrick 2/6/97-----------------------
 	End the sound system

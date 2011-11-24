@@ -145,8 +145,7 @@ typedef struct pwavriffheader
 } PWAVRIFFHEADER;
 
 void InitialiseBaseFrequency(SOUNDINDEX soundNum);
-int LoadWavFile(int soundNum, char *);
-int LoadWavFromFastFile(int soundNum, char *);
+int LoadWavFile(int soundNum, const char *fileName);
 
 /* Patrick 5/6/97 -------------------------------------------------------------
   Start and EndSoundSys: does any platform operations required to initialise

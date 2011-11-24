@@ -20,6 +20,7 @@
 #include "ffstdio.h"
 #include "db.h"
 #include "dxlog.h"
+#include <algorithm>
 
 #define PRED_PISTOL_PITCH_CHANGE 300
 
@@ -27,14 +28,11 @@
 #define CD_VOLUME_TEST  FALSE
 #define SOUND_TEST_3D   FALSE
 
-#define LOAD_SOUND_FROM_FAST_FILE    TRUE
-
-//allow loading from outside of fastfiles to help with custom levels
-#define LOAD_SOUND_FROM_FAST_FILE_ONLY FALSE
-
 #define USE_REBSND_LOADERS  (LOAD_USING_FASTFILES||PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO||DEATHMATCH_DEMO)
 #define USE_COMMON_FLL_FILE  (LOAD_USING_FASTFILES||PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO||DEATHMATCH_DEMO)
 
+char * SecondSoundDir = 0;
+static const char *FirstSoundDir = "SOUND\\";
 
 /* Andy 9/6/97 ----------------------------------------------------------------
   Internal globals  
@@ -555,81 +553,18 @@ void PlayCudgelSound(void)
 	}
 }
 
-char * SecondSoundDir = 0;
-static const char *FirstSoundDir = "SOUND\\";
-
-#include "FileStream.h"
-#include <algorithm>
-
-int LoadWavFromFastFile_2(int soundNum, char * wavFileName, FileStream &fStream);
-
 int FindAndLoadWavFile(int soundNum, char* wavFileName)
 {
 	char sound_name[MAX_PATH];
 	sprintf(sound_name, "%s%s", FirstSoundDir, wavFileName);
 
-#if LOAD_SOUND_FROM_FAST_FILE
-	//first look in fast file
-	{
-		std::string fileName = sound_name;
+	std::string fileName = sound_name;
 		
-		// change forwardslashes in path to backslashes
-		std::replace(fileName.begin(), fileName.end(), '/', '\\');
+	// change forwardslashes in path to backslashes
+	std::replace(fileName.begin(), fileName.end(), '/', '\\');
 
-		FileStream newStream;
-		newStream.Open(fileName, FileStream::FileRead);
-
-		if (newStream.IsGood())
-		{
-//			return LoadWavFromFastFile(soundNum, sound_name);
-			return LoadWavFromFastFile_2(soundNum, sound_name, newStream);
-		}
-/*
-		size_t nLen;
-		if (ffreadbuf(sound_name, &nLen))
-		{
-			return LoadWavFromFastFile(soundNum, sound_name);
-		}
-*/
-	}
-#endif
-
-#if !LOAD_SOUND_FROM_FAST_FILE_ONLY
-	//look for sound locally
-	{
-		{
-			//check to see if file exists locally first
-			FILE* wavFile = avp_fopen(sound_name,"rb");
-	
-			if (!wavFile && SecondSoundDir)
-			{
-				//look for sound over network
-				sprintf(sound_name, "%s%s", SecondSoundDir, wavFileName);
-	
-				wavFile = avp_fopen(sound_name,"rb");
-				if (!wavFile)
-				{
-					OutputDebugString("failed to find sound - ");
-					OutputDebugString(sound_name);
-					OutputDebugString("\n");
-
-					LOGDXFMT(("Failed to find %s\n", sound_name));	
-					return 0;
-				}
-			}
-			fclose(wavFile);
-		}
-
-		return LoadWavFile(soundNum, sound_name);
-	}
-#else
-	OutputDebugString("else failed to find sound\n");
-	LOGDXFMT(("Failed to find %s\n",wavFileName));	
-	return 0;
-#endif
+	return LoadWavFile(soundNum, fileName.c_str());
 }
-
-
 
 /* Patrick 5/6/97 -------------------------------------------------------------
   Sound data loaders 
@@ -642,7 +577,7 @@ void *LoadRebSndFile(const char *filename)
 	long int save_pos, size_of_file;
 	FILE *fp;
 	fp = avp_fopen(filename,"rb");
-	
+
 	if (!fp)
 	{
 		return NULL;
@@ -652,7 +587,7 @@ void *LoadRebSndFile(const char *filename)
 	fseek(fp ,0L, SEEK_END);
 	size_of_file = ftell(fp);
 	fseek(fp, save_pos,SEEK_SET);
-	
+
 	bufferPtr = AllocateMem(size_of_file);
 	LOCALASSERT(bufferPtr);
 
@@ -708,7 +643,8 @@ void LoadSounds(char *soundDirectory)
 	bufferPtr = (uint8_t*) rebSndBuffer;
 	soundIndex = (int)(*bufferPtr++);
 	pitch = (int)((int8_t)(*bufferPtr++));
-	while ((soundIndex!=0xff)||(pitch!=-1))
+
+	while ((soundIndex != 0xff) || (pitch != -1))
 	{
 		if ((soundIndex < 0) || (soundIndex >= SID_MAXIMUM))
 		{

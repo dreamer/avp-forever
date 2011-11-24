@@ -142,6 +142,7 @@ enum AVPMENUGFX_ID
 };
 #endif
 
+/*
 typedef struct
 {
 	char		*FilenamePtr;
@@ -155,10 +156,12 @@ typedef struct
 	uint32_t	newHeight;
 
 } AVPMENUGFX;
+*/
 
 typedef struct AVPIndexedFont
 {
-	AVPMENUGFX info;	// graphic info
+//	AVPMENUGFX info;	// graphic info
+	texID_t textureID;
 	int swidth;			// width for space
 	int ascii;			// ascii code for initial character
 	int height;			// height per character

@@ -1,3 +1,5 @@
+#if 0
+
 #include <errno.h>
 #include <string.h>
 #include "ffstdio.h"
@@ -471,3 +473,5 @@ int ffsetpos(FFILE * fp, ffpos_t const * pos)
 
 	return 0;
 }
+
+#endif

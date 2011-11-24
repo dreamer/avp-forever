@@ -13,18 +13,13 @@
 
 	#include "db.h"
 	#include "dxlog.h"
-
 	#include "tallfont.hpp"
-
 	#include "awTexLd.h"
-
 	#include "ffstdio.h"
-	
 	#define UseLocalAssert TRUE
 	#include "ourasert.h"
-
-/* Version settings ************************************************/
 	#include "inline.h"
+	#include "RimLoader.h"
 
 /* Constants *******************************************************/
 
@@ -56,10 +51,7 @@ IndexedFont_Proportional_Column :: RenderChar_Clipped
 {
 	// Easy first attempt: pass on to unclipped routine, but only if no clipping
 	// required.  Otherwise ignore...
-	if
-	(
-		r2rect(R2Pos_Cursor, GetWidth(ProjCh), GetHeight()).bFitsIn(R2Rect_Clip)
-	)
+	if (r2rect(R2Pos_Cursor, GetWidth(ProjCh), GetHeight()).bFitsIn(R2Rect_Clip))
 	{
 		RenderChar_Unclipped
 		(
@@ -92,19 +84,9 @@ IndexedFont_Proportional_Column :: RenderChar_Unclipped
 		return;
 	}
 
-	if
-	(
-		GetOffset
-		(
-			theOffset,
-			ProjCh
-		)
-	)
+	if (GetOffset(theOffset, ProjCh))
 	{
-		if
-		(
-			GetWidth(ProjCh)>0
-		)
+		if (GetWidth(ProjCh) > 0)
 		{
 			RECT destRect;
 
@@ -149,14 +131,7 @@ IndexedFont_Proportional_Column :: GetWidth
 		return SpaceWidth();
 	}
 
-	if
-	(
-		GetOffset
-		(
-			offsetTemp,
-			ProjCh_In
-		)
-	)
+	if (GetOffset(offsetTemp, ProjCh_In))
 	{
 		return WidthForOffset[ offsetTemp ];
 	}
@@ -185,7 +160,7 @@ IndexedFont_Proportional_Column* IndexedFont_Proportional_Column :: Create
 		ASCIICodeForInitialCharacter
 	);
 
-	SCString :: UpdateAfterFontChange( I_Font_New );
+	SCString::UpdateAfterFontChange( I_Font_New );
 
 	return pFont;
 }
@@ -218,6 +193,18 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 	NumChars(0)
 {
 	{
+		uint32_t nWidth  = 0;
+		uint32_t nHeight = 0;
+
+		RimLoader indexFontRIM;
+		std::string filePath = Filename;
+		if (!indexFontRIM.Open("graphics\\" + filePath))
+		{
+			return;
+		}
+
+		indexFontRIM.GetDimensions(nWidth, nHeight);
+#if 0
 		unsigned nWidth, nHeight;
 	
 		//see if graphic can be found in fast file
@@ -253,6 +240,8 @@ IndexedFont_Proportional_Column :: IndexedFont_Proportional_Column
 				&nHeight
 			);
 		}
+#endif
+
 		R2Size_OverallImage.w = nWidth;
 		R2Size_OverallImage.h = nHeight;
 	}
@@ -299,22 +288,16 @@ IndexedFont_Proportional_Column :: UpdateWidths(void)
 
 				while (x>0)
 				{
-					if (
-						bAnyNonTransparentPixelsInColumn
-						(
-							r2pos(x,y), // r2pos R2Pos_TopOfColumn,
-							HeightPerChar_Val // int HeightOfColumn
-						)
-					)
+					if (bAnyNonTransparentPixelsInColumn(r2pos(x,y), HeightPerChar_Val))
 					{
-						break;
-							// and the current value of (x+1) is the width to use
+						break; 
+							
 					}
-
+					// and the current value of (x+1) is the width to use
 					x--;
 				}
 
-				SetWidth(iOffset,x+1);
+				SetWidth(iOffset, x+1);
 			}
 		}
 	}
@@ -355,18 +338,11 @@ IndexedFont_Kerned_Column :: RenderChar_Clipped
 		return;
 	}
 
-	if
-	(
-		GetOffset
-		(
-			theOffset,
-			ProjCh
-		)
-	)
+	if (GetOffset(theOffset, ProjCh))
 	{
 		if
 		(
-			GetWidth(ProjCh)>0
+			GetWidth(ProjCh) > 0
 		)
 		{
 			{
@@ -474,19 +450,9 @@ IndexedFont_Kerned_Column :: RenderChar_Unclipped
 		return;
 	}
 
-	if
-	(
-		GetOffset
-		(
-			theOffset,
-			ProjCh
-		)
-	)
+	if (GetOffset(theOffset, ProjCh))
 	{
-		if
-		(
-			GetWidth(ProjCh)>0
-		)
+		if (GetWidth(ProjCh) > 0)
 		{
 			{
 #if 0 // bjd
@@ -601,14 +567,7 @@ IndexedFont_Kerned_Column :: GetWidth
 		return SpaceWidth();
 	}
 
-	if
-	(
-		GetOffset
-		(
-			offsetTemp,
-			ProjCh_In
-		)
-	)
+	if (GetOffset(offsetTemp, ProjCh_In))
 	{
 		return FullWidthForOffset[ offsetTemp ];
 	}
@@ -640,25 +599,11 @@ IndexedFont_Kerned_Column :: GetXInc
 
 	unsigned int currentOffset;
 
-	if
-	(
-		GetOffset
-		(
-			currentOffset,
-			currentProjCh
-		)
-	)
+	if (GetOffset(currentOffset, currentProjCh))
 	{
 		unsigned int nextOffset;
 
-		if
-		(
-			GetOffset
-			(
-				nextOffset,
-				nextProjCh
-			)
-		)
+		if (GetOffset(nextOffset, nextProjCh))
 		{
 			return XIncForOffset[currentOffset][nextOffset];
 		}
@@ -693,7 +638,7 @@ IndexedFont_Kerned_Column* IndexedFont_Kerned_Column :: Create
 		ASCIICodeForInitialCharacter
 	);
 */
-	SCString :: UpdateAfterFontChange( I_Font_New );
+	SCString::UpdateAfterFontChange( I_Font_New );
 
 //	return pFont;
 	return 0;
@@ -707,13 +652,7 @@ IndexedFont_Kerned_Column :: ~IndexedFont_Kerned_Column()
 	image_ptr = NULL;
 }
 
-IndexedFont_Kerned_Column::IndexedFont_Kerned_Column
-(
-	FontIndex I_Font_New,
-	char* Filename,
-	int HeightPerChar_New,
-	int SpaceWidth_New,
-	int ASCIICodeForInitialCharacter
+IndexedFont_Kerned_Column::IndexedFont_Kerned_Column(FontIndex I_Font_New, char* Filename, int HeightPerChar_New, int SpaceWidth_New, int ASCIICodeForInitialCharacter
 ) : IndexedFont_Kerned
 	(
 		I_Font_New
@@ -727,8 +666,19 @@ IndexedFont_Kerned_Column::IndexedFont_Kerned_Column
 	NumChars(0)
 {
 	{
-		unsigned nWidth,nHeight;
-		
+		uint32_t nWidth  = 0;
+		uint32_t nHeight = 0;
+
+		RimLoader indexFontRIM;
+		std::string filePath = Filename;
+		if (!indexFontRIM.Open("graphics\\" + filePath))
+		{
+			return;
+		}
+
+		indexFontRIM.GetDimensions(nWidth, nHeight);
+
+#if 0
 		//see if graphic can be found in fast file
 		size_t fastFileLength;
 		void const * pFastFileData = ffreadbuf(Filename,&fastFileLength);
@@ -762,12 +712,13 @@ IndexedFont_Kerned_Column::IndexedFont_Kerned_Column
 				&nHeight
 			);
 		}
-		
+#endif	
 		R2Size_OverallImage.w = nWidth;
 		R2Size_OverallImage.h = nHeight;
+
 	}
 
-	GLOBALASSERT(image_ptr);
+//	GLOBALASSERT(image_ptr);
 
 	GLOBALASSERT(R2Size_OverallImage.w > 0);
 	GLOBALASSERT(R2Size_OverallImage.h > 0); 

@@ -14,6 +14,7 @@
 #include "Fonts.h"
 #include "AvP_Menus.h"
 #include <assert.h>
+#include "RimLoader.h"
 
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a);
 extern void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint32_t alpha);
@@ -117,7 +118,7 @@ static void LoadMenuFont(void)
 		will fit nicely into a 512 x 512 d3d texture
 	*/
 
-	AVPMENUGFX *gfxPtr;
+//	AVPMENUGFX *gfxPtr;
 	size_t fastFileLength;
 	char buffer[100];
 	void const *pFastFileData;
@@ -126,8 +127,24 @@ static void LoadMenuFont(void)
 	IntroFont_Light.swidth = 5;
 	IntroFont_Light.ascii  = 32;
 
-	gfxPtr = &IntroFont_Light.info;
-	
+//	gfxPtr = &IntroFont_Light.info;
+
+	RimLoader introFontRIM;
+	if (!introFontRIM.Open("graphics\\Menus\\IntroFont.RIM"))
+	{
+		Con_PrintError("Can't find Menus/IntroFont.RIM");
+		return;
+	}
+
+	uint32_t width, height;
+
+	introFontRIM.GetDimensions(width, height);
+
+	// allocate buffer to decode into
+	uint8_t *srcBuffer = new uint8_t[width*height*4];
+	introFontRIM.Decode(srcBuffer, width*4);
+
+#if 0	
 	CL_GetImageFileName(buffer, 100, "Menus\\IntroFont.RIM", LIO_RELATIVEPATH);
 	
 	pFastFileData = ffreadbuf(buffer, &fastFileLength);
@@ -157,16 +174,17 @@ static void LoadMenuFont(void)
 	GLOBALASSERT(gfxPtr->ImagePtr);
 	GLOBALASSERT(gfxPtr->Width>0);
 	GLOBALASSERT(gfxPtr->Height>0);
+#endif
 
-	AVPTEXTURE *image = gfxPtr->ImagePtr;
+//	AVPTEXTURE *image = gfxPtr->ImagePtr;
 
-	uint8_t *srcPtr = image->buffer;
+	uint8_t *srcPtr = srcBuffer; // image->buffer;
 /*
 	if ((image->width != 30) || ((image->height % 33) != 0)) {
 		// handle new texture
 	}
 */
-	IntroFont_Light.numchars = image->height / 33;
+	IntroFont_Light.numchars = /*image->height*/height / 33;
 	IntroFont_Light.FontWidth[32] = 5;
 
 	for (int c = 33; c < (32+IntroFont_Light.numchars); c++)
@@ -181,7 +199,7 @@ static void LoadMenuFont(void)
 
 			for (int y = y1; y < y1+31; y++)
 			{
-				uint8_t *s = &srcPtr[(x + y*image->width) * sizeof(uint32_t)];
+				uint8_t *s = &srcPtr[(x + y*/*image->width*/width) * sizeof(uint32_t)];
 				if (s[2])
 				{
 					blank = false;
@@ -189,30 +207,34 @@ static void LoadMenuFont(void)
 				}
 			}
 
-			if (blank)
-			{
+			if (blank) {
 				IntroFont_Light.FontWidth[c]--;
 			}
-			else
-			{
+			else {
 				break;
 			}
 		}
 	}
 
-	// we're going to try create a square texture
-	gfxPtr->textureID = Tex_CreateTallFontTexture(buffer, *image, TextureUsage_Normal);
+	AVPTEXTURE image;
+	image.buffer = srcBuffer;
+	image.width  = width;
+	image.height = height;
 
-	ReleaseAvPTexture(IntroFont_Light.info.ImagePtr);
-	IntroFont_Light.info.ImagePtr = NULL;
+	// we're going to try create a square texture
+	IntroFont_Light.textureID = Tex_CreateTallFontTexture("graphics\\Menus\\IntroFont.RIM", image, TextureUsage_Normal);
+
+//	ReleaseAvPTexture(IntroFont_Light.info.ImagePtr);
+//	IntroFont_Light.info.ImagePtr = NULL;
 }
 
 static void UnloadMenuFont(void)
 {
-	ReleaseAvPTexture(IntroFont_Light.info.ImagePtr);
-	IntroFont_Light.info.ImagePtr = NULL;
+//	ReleaseAvPTexture(IntroFont_Light.info.ImagePtr);
+//	IntroFont_Light.info.ImagePtr = NULL;
 
-	Tex_Release(IntroFont_Light.info.textureID);
+//	Tex_Release(IntroFont_Light.info.textureID);
+	Tex_Release(IntroFont_Light.textureID);
 }
 
 extern int LengthOfMenuText(const char *textPtr)
@@ -306,7 +328,7 @@ extern int RenderMenuText(char *textPtr, int pX, int pY, int alpha, enum AVPMENU
 				ie the moving hazy smoke/cloud effect behind the large font text on the menus
 			*/
 
-			DrawTallFontCharacter(positionX, positionY, IntroFont_Light.info.textureID, topLeftU, topLeftV, charWidth, alpha);
+			DrawTallFontCharacter(positionX, positionY, IntroFont_Light/*.info.*/.textureID, topLeftU, topLeftV, charWidth, alpha);
 /*
 			srcPtr = &image->buf[(topLeftU+topLeftV*image->w)*4];
 
@@ -1296,7 +1318,7 @@ extern void ReleaseAllAvPMenuGfx(void)
 	Tex_Release(AVPMENUGFX_SPLASH_SCREEN4);
 	Tex_Release(AVPMENUGFX_SPLASH_SCREEN5);
 
-	Tex_Release(IntroFont_Light.info.textureID);
+	Tex_Release(IntroFont_Light/*.info.*/.textureID);
 
 #if 0 // bjd - texture test
 	int i=0;

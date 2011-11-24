@@ -145,7 +145,6 @@
 			}
 
 			return TRUE;
-
 		}
 	};
 

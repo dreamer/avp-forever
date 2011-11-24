@@ -528,7 +528,6 @@
     <ClCompile Include="..\..\3dc\avp\win95\Pldnet.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\progress_bar.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\Projload.cpp" />
-    <ClCompile Include="..\..\3dc\avp\win95\Psndplat.c" />
     <ClCompile Include="..\..\3dc\avp\win95\SCRSHOT.CPP" />
     <ClCompile Include="..\..\3dc\avp\win95\STRACHNK.CPP" />
     <ClCompile Include="..\..\3dc\avp\win95\system.cpp" />

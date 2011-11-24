@@ -55,7 +55,7 @@ AVPTEXTURE *aa_font = NULL;
 
 void Start_Progress_Bar()
 {
-	char buffer[MAX_PATH];
+//	char buffer[MAX_PATH];
 
 //	AAFontImageNumber = CL_LoadImageOnce("Common\\aa_font.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
 	AAFontImageNumber = Tex_CreateFromRIM("graphics\\Common\\aa_font.RIM");
@@ -63,7 +63,7 @@ void Start_Progress_Bar()
 	// load other graphics
 	{
 
-		CL_GetImageFileName(buffer, 100, Loading_Bar_Empty_Image_Name, LIO_RELATIVEPATH);
+//		CL_GetImageFileName(buffer, 100, Loading_Bar_Empty_Image_Name, LIO_RELATIVEPATH);
 #if 0
 		// see if graphic can be found in fast file
 		size_t fastFileLength;
@@ -85,10 +85,10 @@ void Start_Progress_Bar()
 			emptyTextureID = Tex_CreateFromAvPTexture(Loading_Bar_Empty_Image_Name, *LoadingBarEmpty, TextureUsage_Normal);
 		}
 #endif
-		emptyTextureID = Tex_CreateFromRIM(buffer);
+		emptyTextureID = Tex_CreateFromRIM("graphics\\Menus\\LoadingBar_Empty.RIM");
 	}
 	{
-		CL_GetImageFileName(buffer, 100, Loading_Bar_Full_Image_Name, LIO_RELATIVEPATH);
+//		CL_GetImageFileName(buffer, 100, Loading_Bar_Full_Image_Name, LIO_RELATIVEPATH);
 #if 0	
 		// see if graphic can be found in fast file
 		size_t fastFileLength;
@@ -110,13 +110,13 @@ void Start_Progress_Bar()
 			fullTextureID = Tex_CreateFromAvPTexture(Loading_Bar_Full_Image_Name, *LoadingBarFull, TextureUsage_Normal);
 		}
 #endif
-		fullTextureID = Tex_CreateFromRIM(buffer);
+		fullTextureID = Tex_CreateFromRIM("graphics\\Menus\\LoadingBar_Full.RIM");
 	}
 	
 	// load background image for bar
-	CL_GetImageFileName(buffer, 100, Loading_Image_Name, LIO_RELATIVEPATH);
+//	CL_GetImageFileName(buffer, 100, Loading_Image_Name, LIO_RELATIVEPATH);
 
-	dbTextureID = Tex_CreateFromRIM(Loading_Image_Name);
+	dbTextureID = Tex_CreateFromRIM("graphics\\Menus\\Loading.RIM");
 	
 #if 0
 	// see if graphic can be found in fast file

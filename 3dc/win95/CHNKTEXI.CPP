@@ -83,12 +83,14 @@ static char * RiffBasename(Chunk_With_Children * pEnvDataChunk)
 	return pszBaseName;
 }
 
+#if 0
 #if CL_SUPPORT_FASTFILE
 static inline bool IsFileInFastFile(char const * pszFileName)
 {
 	size_t nLen;
 	return ffreadbuf(pszFileName, &nLen) ? true : false;
 }
+#endif
 #endif
 
 static bool DoesFileExist(char const * pszFileName)
@@ -243,6 +245,7 @@ int GetRelativePath(char * pszDestBuf, unsigned nBufSize, char const * pszFileNa
 }
 #endif
 
+#if 0
 char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * pszFileName, unsigned fFlagsEtc)
 {
 	db_assert1(pszFileName);
@@ -670,10 +673,9 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 			return NULL;
 	}
 }
+#endif
 
-#include "FastFile.h"
-//#include "RimLoader.h"
-
+#if 0
 texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 {
 	// safe to handle windows messages at this point (I think - JCWH)
@@ -916,3 +918,4 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 			return MISSING_TEXTURE;
 	}
 }
+#endif

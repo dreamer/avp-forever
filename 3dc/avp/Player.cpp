@@ -28,7 +28,6 @@ so player.c is looking a bit bare at the moment. */
 #include "tables.h"
 #include "pldnet.h"
 #include "pldghost.h"
-#include "dp_func.h"
 #include "ShowCmds.h"
 #include "BonusAbilities.h"
 

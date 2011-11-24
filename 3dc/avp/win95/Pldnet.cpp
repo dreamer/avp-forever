@@ -13,9 +13,7 @@
 #include "bh_debri.h"
 #include "pvisible.h"
 #include "bh_plift.h"
-#include "dplayext.h"
 #include "pldnet.h"
-#include "dp_func.h"
 #include "pldghost.h"
 #include "equipmnt.h"
 #include "weapons.h"
@@ -1680,8 +1678,7 @@ void NetSendMessages(void)
 			if (numBytes == 0/*DPEXT_HEADER_SIZE*/) 
 				return;
 		}
-
-		LOCALASSERT(numBytes > DPEXT_HEADER_SIZE);			
+			
 		LOCALASSERT(numBytes <= NET_MESSAGEBUFFERSIZE);
 		if (!netGameData.skirmishMode)
 		{
@@ -1756,8 +1753,6 @@ static void InitialiseSendMessageBuffer(void)
 	/* NB the receive buffer is maintained internally to garry's dp-extension */
 	/* reset the end of send buffer pointer */
 	endSendBuffer = &sendBuffer[0];
-	/* add space for a dpext header to the send buffer */
-	endSendBuffer += DPEXT_HEADER_SIZE;
 }
 
 

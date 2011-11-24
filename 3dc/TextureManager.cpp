@@ -22,7 +22,6 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-//#include "TextureManager.h"
 #include <sstream>
 #include "renderer.h"
 #include "console.h"
@@ -133,15 +132,6 @@ texID_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32
 	newTexture.usage   = usage;
 	newTexture.isValid = true;
 
-/*
-	// check path for backslashes
-	std::string::size_type pos = textureName.find("\\");
-	if (std::string::npos != pos)
-	{
-		int i = 0;
-	}
-*/
-
 	// store it
 	if (textureID < textureList.size()) // we're reusing a slot in this case
 	{
@@ -151,13 +141,7 @@ texID_t Tex_AddTexture(const std::string &textureName, r_Texture texture, uint32
 	{
 		textureList.push_back(newTexture);
 	}
-/*
-	std::stringstream ss;
-	ss << "added texture at ID: " << textureID << " with name " << textureName << " width: " << newTexture.width << " height: " << newTexture.height << std::endl;
-	OutputDebugString(ss.str().c_str());
 
-	Tex_CheckMemoryUsage();
-*/
 	return textureID;
 }
 
@@ -166,15 +150,6 @@ texID_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &Av
 	Texture newTexture;
 	texID_t textureID;
 	newTexture.name = textureName;
-
-/*
-	// check path for backslashes
-	std::string::size_type pos = textureName.find("\\");
-	if (std::string::npos != pos)
-	{
-		int i = 0;
-	}
-*/
 
 	// see if it exists already
 	textureID = Tex_CheckExists(textureName);
@@ -204,28 +179,12 @@ texID_t Tex_CreateTallFontTexture(const std::string &textureName, AVPTEXTURE &Av
 	{
 		textureList.push_back(newTexture);
 	}
-/*
-	std::stringstream ss;
-	ss << "added texture at ID: " << textureID << " with name " << textureName << " width: " << newTexture.width << " height: " << newTexture.height << std::endl;
-	OutputDebugString(ss.str().c_str());
 
-	Tex_CheckMemoryUsage();
-*/
 	return textureID;
 }
 
-#include "FastFile.h"
-
 texID_t Tex_CreateFromRIM(const std::string &fileName)
 {
-	static bool isInited = false;
-
-	if (!isInited)
-	{
-		FF_Init();
-		isInited = true;
-	}
-
 	texID_t textureID;
 	
 	textureID = Tex_CheckExists(fileName);
@@ -301,14 +260,6 @@ texID_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &AvP
 	Texture newTexture;
 	newTexture.name = textureName;
 
-	// check path for backslashes
-/*
-	std::string::size_type pos = textureName.find("\\");
-	if (std::string::npos != pos)
-	{
-		int i = 0;
-	}
-*/
 	if (!R_CreateTextureFromAvPTexture(AvPTexure, usageType, newTexture))
 	{
 		// log error
@@ -330,13 +281,7 @@ texID_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &AvP
 	{
 		textureList.push_back(newTexture);
 	}
-/*
-	std::stringstream ss;
-	ss << "added texture at ID: " << textureID << " with name " << textureName << " width: " << newTexture.width << " height: " << newTexture.height << std::endl;
-	OutputDebugString(ss.str().c_str());
 
-	Tex_CheckMemoryUsage();
-*/
 	return textureID;
 }
 
@@ -373,11 +318,7 @@ texID_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t heig
 	{
 		textureList.push_back(newTexture);
 	}
-/*
-	std::stringstream ss;
-	ss << "added texture at ID: " << textureID << " with name " << textureName << " width: " << width << " height: " << height << std::endl;
-	OutputDebugString(ss.str().c_str());
-*/
+
 	Tex_CheckMemoryUsage();
 
 	return textureID;
@@ -416,13 +357,7 @@ texID_t Tex_CreateFromFile(const std::string &filePath)
 	{
 		textureList.push_back(newTexture);
 	}
-/*
-	std::stringstream ss;
-	ss << "added texture at ID: " << textureID << " with name " << filePath << " width: " << newTexture.width << " height: " << newTexture.height << std::endl;
-	OutputDebugString(ss.str().c_str());
 
-	Tex_CheckMemoryUsage();
-*/
 	return textureID;
 }
 

@@ -25,6 +25,7 @@
 #include "ffstdio.h"
 #include <math.h>
 #include <new>
+#include "FileStream.h"
 
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 
@@ -1120,507 +1121,123 @@ void InitialiseBaseFrequency(SOUNDINDEX soundNum)
 	GameSounds[soundNum].dsFrequency = frequency;
 }
 
-
-/* Patrick 5/6/97 -------------------------------------------------------------
-  This function loads a WAV file, and inserts into the game sounds array, with
-  any required platform initialistions
-  NB should manage to load PCM and Extended WAV files 
-  ----------------------------------------------------------------------------*/
-int LoadWavFile(int soundNum, char * wavFileName)
+int ReturnInvalidWAV()
 {
-	PWAVCHUNKHEADER myChunkHeader = {0};
-	PWAVRIFFHEADER myRiffHeader = {0};
-	FILE *myFile = NULL;
-	WAVEFORMATEX myWaveFormat = {0};
-	size_t res = 0;
-	uint32_t lengthInSeconds = 0;
-
-	myFile = avp_fopen(wavFileName, "rb");
-	if (!myFile)
-	{
-		GLOBALASSERT (0);
-		return 0;
-	}
-
-	// Read the WAV RIFF header
-	res = fread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
-	res = fread(&myRiffHeader, sizeof(PWAVRIFFHEADER), 1, myFile);
-
-	// Read the WAV format chunk
-	res = fread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
-	if (myChunkHeader.chunkLength == 16)
-	{
-		// a standard PCM wave format chunk
-		PCMWAVEFORMAT tmpWaveFormat;
-		res = fread(&tmpWaveFormat, sizeof(PCMWAVEFORMAT), 1, myFile);
-		myWaveFormat.wFormatTag      = tmpWaveFormat.wf.wFormatTag;
-		myWaveFormat.nChannels       = tmpWaveFormat.wf.nChannels;
-		myWaveFormat.nSamplesPerSec  = tmpWaveFormat.wf.nSamplesPerSec;
-		myWaveFormat.nAvgBytesPerSec = tmpWaveFormat.wf.nAvgBytesPerSec;
-		myWaveFormat.nBlockAlign     = tmpWaveFormat.wf.nBlockAlign;
-		myWaveFormat.wBitsPerSample  = tmpWaveFormat.wBitsPerSample;
-		myWaveFormat.cbSize          = 0;
-/*
-		char buf[200];
-		sprintf(buf, "channels: %d samsPerSec: %d\n", myWaveFormat.nChannels, myWaveFormat.nSamplesPerSec);
-		OutputDebugString(buf);
-*/
-	}
-	else if (myChunkHeader.chunkLength == 18)
-	{
-		// an extended PCM wave format chunk
-		res = fread(&myWaveFormat, sizeof(WAVEFORMATEX), 1, myFile);
-		myWaveFormat.cbSize = 0;
-	}
-	else
-	{
-		// uh oh: a different chunk type
-		LOCALASSERT(1==0);
-		fclose(myFile);
-		return 0;
-	}
-
-	// Read	the data chunk header
-	// skip chunks until we reach the 'data' chunk
-	do
-	{
-		// Read	the data chunk header
-		res = fread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
-		if ((myChunkHeader.chunkName[0]=='d') && (myChunkHeader.chunkName[1]=='a')&&
-			(myChunkHeader.chunkName[2]=='t') && (myChunkHeader.chunkName[3]=='a'))
-		{
-			break;
-		}
-	
-		fseek(myFile, myChunkHeader.chunkLength, SEEK_CUR);
-	} while (res);
-
-	// Now do a few checks
-	if ((myChunkHeader.chunkName[0]!='d') || (myChunkHeader.chunkName[1]!='a')||
-		(myChunkHeader.chunkName[2]!='t') || (myChunkHeader.chunkName[3]!='a'))
-	{
-		// chunk alignment disaster
-		LOCALASSERT(1==0);
-		fclose(myFile);
-		return 0;
-	}
-
-	// Calculate length of sample
-	lengthInSeconds = DIV_FIXED(myChunkHeader.chunkLength, myWaveFormat.nAvgBytesPerSec);
-
-	if ((myChunkHeader.chunkLength < 0) || (myChunkHeader.chunkLength > SOUND_MAXSIZE))
-	{
-		LOCALASSERT(1==0);
-		fclose(myFile);
-		return 0;
-	}
-	if (myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
-	{
-		LOCALASSERT(1==0);
-		fclose(myFile);
-		return 0;
-	}
-	if ((myWaveFormat.nChannels != 1) && (myWaveFormat.nChannels != 2))
-	{
-		LOCALASSERT(1==0);
-		fclose(myFile);
-		return 0;
-	}
-	if ((myWaveFormat.wBitsPerSample != 8) && (myWaveFormat.wBitsPerSample != 16))
-	{
-		LOCALASSERT(1==0);
-		fclose(myFile);
-		return 0;
-	}
-
-	{
-		// Now set the buffer description and make a sound object
-		GameSounds[soundNum].audioBuffer = new uint8_t[myChunkHeader.chunkLength];
-
-		// Read data from file to buffer
-		res = fread(GameSounds[soundNum].audioBuffer, 1, myChunkHeader.chunkLength, myFile);
-		if (res != (size_t)myChunkHeader.chunkLength)
-		{
-			LOCALASSERT(1==0);
-			delete[] GameSounds[soundNum].audioBuffer;
-			GameSounds[soundNum].audioBuffer = NULL;
-			fclose(myFile);
-			return 0;
-		}
-
-		memset(&GameSounds[soundNum].xa2Buffer, 0, sizeof(XAUDIO2_BUFFER));
-		GameSounds[soundNum].xa2Buffer.AudioBytes = myChunkHeader.chunkLength;
-		GameSounds[soundNum].xa2Buffer.pAudioData = GameSounds[soundNum].audioBuffer;
-		GameSounds[soundNum].xa2Buffer.Flags = XAUDIO2_END_OF_STREAM; // tell the source voice not to expect any data after this buffer
-
-		LastError = pXAudio2->CreateSourceVoice(&GameSounds[soundNum].pSourceVoice, &myWaveFormat);
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-			PlatEndSoundSys();
-			return 0;
-		}
-
-		// Set the emitter stuff
-		memset(&GameSounds[soundNum].xa2Emitter, 0, sizeof(X3DAUDIO_EMITTER));
-		GameSounds[soundNum].xa2Emitter.ChannelCount = myWaveFormat.nChannels;
-		GameSounds[soundNum].xa2Emitter.CurveDistanceScaler = FLT_MIN;
-
-		GameSounds[soundNum].xa2Emitter.OrientFront = D3DXVECTOR3( 0, 0, 1 );
-		GameSounds[soundNum].xa2Emitter.OrientTop = D3DXVECTOR3( 0, 1, 0 );
-		GameSounds[soundNum].xa2Emitter.ChannelRadius = 1.0f;
-		GameSounds[soundNum].xa2Emitter.InnerRadius = 0.0f;
-		GameSounds[soundNum].xa2Emitter.InnerRadiusAngle = 0.0f;
-		GameSounds[soundNum].xa2Emitter.CurveDistanceScaler = 1.0f;
-		GameSounds[soundNum].xa2Emitter.DopplerScaler = 1.0f;
-//		GameSounds[soundNum].xa2Emitter.pChannelAzimuths = GameSounds[soundNum].emitterAzimuths;
-
-		{
-			char * wavname = strrchr(wavFileName, '/');
-			if (wavname)
-			{
-				wavname++;
-			}
-			else
-			{
-				wavname = wavFileName;
-			}
-			
-			GameSounds[soundNum].wavName = new char[strlen(wavname) + 1];
-			strcpy(GameSounds[soundNum].wavName, wavname);
-		}
-
-		// need to save this here for later use
-		GameSounds[soundNum].dsFrequency = myWaveFormat.nSamplesPerSec;
-		GameSounds[soundNum].length = lengthInSeconds;
-	}
-
-	fclose(myFile);
-	return 1;
+	Con_PrintError("Invalid WAV file");
+	return 0;
 }
 
-#include "FileStream.h"
-
-// identical to above function except it loads from fast files
-int LoadWavFromFastFile_2(int soundNum, char * wavFileName, FileStream &fStream)
+int LoadWavFile(int soundNum, const char *fileName)
 {
-	PWAVCHUNKHEADER myChunkHeader;
-	PWAVRIFFHEADER myRiffHeader;
-	WAVEFORMATEX myWaveFormat;
-	size_t res;
+	// try open the file
+	FileStream fStream;
+	fStream.Open(fileName, FileStream::FileRead);
 
-	// Read the WAV RIFF header
-	res = fStream.ReadBytes((uint8_t*)&myChunkHeader, sizeof(PWAVCHUNKHEADER));
-	res = fStream.ReadBytes((uint8_t*)&myRiffHeader, sizeof(PWAVRIFFHEADER));
-
-	// Read the WAV format chunk
-	res = fStream.ReadBytes((uint8_t*)&myChunkHeader, sizeof(PWAVCHUNKHEADER));
-
-	if (myChunkHeader.chunkLength == 16)
+	if (!fStream.IsGood())
 	{
-		// a standard PCM wave format chunk
-		PCMWAVEFORMAT tmpWaveFormat;
-		res = fStream.ReadBytes((uint8_t*)&tmpWaveFormat, sizeof(PCMWAVEFORMAT));
-
-		myWaveFormat.wFormatTag      = tmpWaveFormat.wf.wFormatTag;
-		myWaveFormat.nChannels       = tmpWaveFormat.wf.nChannels;
-		myWaveFormat.nSamplesPerSec  = tmpWaveFormat.wf.nSamplesPerSec;;
-		myWaveFormat.nAvgBytesPerSec = tmpWaveFormat.wf.nAvgBytesPerSec;
-		myWaveFormat.nBlockAlign     = tmpWaveFormat.wf.nBlockAlign;
-		myWaveFormat.wBitsPerSample  = tmpWaveFormat.wBitsPerSample;
-		myWaveFormat.cbSize          = 0;
-	}
-	else if (myChunkHeader.chunkLength==18)
-	{
-		// an extended PCM wave format chunk
-		res = fStream.ReadBytes((uint8_t*)&myWaveFormat, sizeof(WAVEFORMATEX));
-		myWaveFormat.cbSize = 0;
-	}
-	else
-	{
-		// uh oh: a different chunk type
-		LOCALASSERT(1==0);
-		return 0;
-	}
-
-	// Read	the data chunk header
-	// skip chunks until we reach the 'data' chunk
-	do
-	{
-		// Read	the data chunk header
-		res = fStream.ReadBytes((uint8_t*)&myChunkHeader, sizeof(PWAVCHUNKHEADER));
-
-		if ((myChunkHeader.chunkName[0]=='d') && (myChunkHeader.chunkName[1]=='a')&&
-			(myChunkHeader.chunkName[2]=='t') && (myChunkHeader.chunkName[3]=='a'))
-		{
-			break;
-		}
-
-		fStream.Seek(myChunkHeader.chunkLength, FileStream::SeekCurrent);
-
-	} while (res);
-
-	// Now do a few checks
-	if ((myChunkHeader.chunkName[0]!='d') || (myChunkHeader.chunkName[1]!='a')||
-	    (myChunkHeader.chunkName[2]!='t') || (myChunkHeader.chunkName[3]!='a'))
-	{
-		// chunk alignment disaster
-		LOCALASSERT(1==0);
-		return 0;
-	}
-	
-	// calculate length of sample
-	uint32_t lengthInSeconds = DIV_FIXED(myChunkHeader.chunkLength, myWaveFormat.nAvgBytesPerSec);
-
-	if ((myChunkHeader.chunkLength < 0) || (myChunkHeader.chunkLength > SOUND_MAXSIZE))
-	{
-		LOCALASSERT(1==0);
-		return 0;
-	}
-	if (myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
-	{
-		LOCALASSERT(1==0);
-		return 0;
-	}
-	if ((myWaveFormat.nChannels != 1) && (myWaveFormat.nChannels != 2))
-	{
-		LOCALASSERT(1==0);
-		return 0;
-	}
-	if ((myWaveFormat.wBitsPerSample != 8) && (myWaveFormat.wBitsPerSample != 16))
-	{
-		LOCALASSERT(1==0);
-		return 0;
-	}
-
-	{
-		GameSounds[soundNum].audioBuffer = new uint8_t[myChunkHeader.chunkLength];
-
-		// Read data from file to buffer
-		res = fStream.ReadBytes(GameSounds[soundNum].audioBuffer, myChunkHeader.chunkLength);
-
-		if (res != (size_t)myChunkHeader.chunkLength)
-		{
-			LOCALASSERT(1==0);
-			delete[] GameSounds[soundNum].audioBuffer;
-			GameSounds[soundNum].audioBuffer = NULL;
-			return 0;
-		}
-
-		memset(&GameSounds[soundNum].xa2Buffer, 0, sizeof(XAUDIO2_BUFFER));
-		GameSounds[soundNum].xa2Buffer.AudioBytes = myChunkHeader.chunkLength;
-		GameSounds[soundNum].xa2Buffer.pAudioData = GameSounds[soundNum].audioBuffer;
-		GameSounds[soundNum].xa2Buffer.Flags = XAUDIO2_END_OF_STREAM; // tell the source voice not to expect any data after this buffer
-
-		LastError = pXAudio2->CreateSourceVoice(&GameSounds[soundNum].pSourceVoice, &myWaveFormat);
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-			PlatEndSoundSys();
-			return 0;
-		}
-
-		// Set the emitter stuff
-		memset(&GameSounds[soundNum].xa2Emitter, 0, sizeof(X3DAUDIO_EMITTER));
-		GameSounds[soundNum].xa2Emitter.ChannelCount = myWaveFormat.nChannels;
-//		GameSounds[soundNum].xa2Emitter.CurveDistanceScaler = FLT_MIN;
-
-		GameSounds[soundNum].xa2Emitter.OrientFront = D3DXVECTOR3( 0, 0, 1 );
-		GameSounds[soundNum].xa2Emitter.OrientTop = D3DXVECTOR3( 0, 1, 0 );
-		GameSounds[soundNum].xa2Emitter.ChannelRadius = 1.0f;
-		GameSounds[soundNum].xa2Emitter.InnerRadius = 0.0f;
-		GameSounds[soundNum].xa2Emitter.InnerRadiusAngle = 0.0f;
-		GameSounds[soundNum].xa2Emitter.CurveDistanceScaler = 1.0f;
-		GameSounds[soundNum].xa2Emitter.DopplerScaler = 1.0f;
-//		GameSounds[soundNum].xa2Emitter.pChannelAzimuths = GameSounds[soundNum].emitterAzimuths;
-
-		{
-			char * wavname = strrchr(wavFileName, '/');
-			if (wavname)
-			{
-				wavname++;
-			}
-			else
-			{
-				wavname = wavFileName;
-			}
-
-			GameSounds[soundNum].wavName = new char[strlen(wavname) + 1];
-			strcpy(GameSounds[soundNum].wavName, wavname);
-		}
-
-		// need to save this here for later use
-		GameSounds[soundNum].dsFrequency = myWaveFormat.nSamplesPerSec;
-		GameSounds[soundNum].length = lengthInSeconds;
-	}
-
-	return 1;
-}
-
-// identical to above function except it loads from fast files
-int LoadWavFromFastFile(int soundNum, char * wavFileName)
-{
-	PWAVCHUNKHEADER myChunkHeader;
-	PWAVRIFFHEADER myRiffHeader;
-	FFILE *myFile;
-	WAVEFORMATEX myWaveFormat;
-	size_t res;
-
-	myFile = ffopen(wavFileName,"rb");
-	if (!myFile)
-	{
-		GLOBALASSERT (0);
+		Con_PrintError("Can't open WAV file");
 		return 0;
 	}
 
 	// Read the WAV RIFF header
-	res = ffread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
-	res = ffread(&myRiffHeader,  sizeof(PWAVRIFFHEADER),  1, myFile);
+	uint32_t chunkID   = fStream.GetUint32BE();
 
-	// Read the WAV format chunk
-	res = ffread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
-	if (myChunkHeader.chunkLength == 16)
-	{
-		// a standard PCM wave format chunk
-		PCMWAVEFORMAT tmpWaveFormat;
-		res = ffread(&tmpWaveFormat, sizeof(PCMWAVEFORMAT), 1, myFile);
-		myWaveFormat.wFormatTag      = tmpWaveFormat.wf.wFormatTag;
-		myWaveFormat.nChannels       = tmpWaveFormat.wf.nChannels;
-		myWaveFormat.nSamplesPerSec  = tmpWaveFormat.wf.nSamplesPerSec;;
-		myWaveFormat.nAvgBytesPerSec = tmpWaveFormat.wf.nAvgBytesPerSec;
-		myWaveFormat.nBlockAlign     = tmpWaveFormat.wf.nBlockAlign;
-		myWaveFormat.wBitsPerSample  = tmpWaveFormat.wBitsPerSample;
-		myWaveFormat.cbSize          = 0;
+	if (chunkID != 'RIFF') {
+		return ReturnInvalidWAV();
 	}
-	else if (myChunkHeader.chunkLength==18)
-	{
-		// an extended PCM wave format chunk
-		res = ffread(&myWaveFormat, sizeof(WAVEFORMATEX), 1, myFile);
-		myWaveFormat.cbSize = 0;
+
+	uint32_t chunkSize = fStream.GetUint32LE();
+	uint32_t format    = fStream.GetUint32BE();
+	if (format != 'WAVE') {
+		return ReturnInvalidWAV();
 	}
-	else
-	{
-		// uh oh: a different chunk type
-		LOCALASSERT(1==0);
-		ffclose(myFile);
+
+	uint32_t subChunkID   = fStream.GetUint32BE();
+	if (subChunkID != 'fmt ') {
+		return ReturnInvalidWAV();
+	}
+
+	uint32_t subChunkSize = fStream.GetUint32LE();
+
+	WAVEFORMATEX myWaveFormat;
+	myWaveFormat.wFormatTag      = fStream.GetUint16LE();
+	myWaveFormat.nChannels       = fStream.GetUint16LE();
+	myWaveFormat.nSamplesPerSec  = fStream.GetUint32LE();
+	myWaveFormat.nAvgBytesPerSec = fStream.GetUint32LE();
+	myWaveFormat.nBlockAlign     = fStream.GetUint16LE();
+	myWaveFormat.wBitsPerSample  = fStream.GetUint16LE();
+
+	// not PCM
+	if (subChunkSize == 18) {
+		Con_PrintError("Only PCM WAV files are supported");
 		return 0;
 	}
 
-	// Read	the data chunk header
-	// skip chunks until we reach the 'data' chunk
-	do
-	{
-		// Read	the data chunk header
-		res = ffread(&myChunkHeader, sizeof(PWAVCHUNKHEADER), 1, myFile);
-		if ((myChunkHeader.chunkName[0]=='d') && (myChunkHeader.chunkName[1]=='a')&&
-			(myChunkHeader.chunkName[2]=='t') && (myChunkHeader.chunkName[3]=='a'))
-		{
-			break;
-		}
-
-		ffseek(myFile, myChunkHeader.chunkLength, SEEK_CUR);
-	} while (res);
-
-	// Now do a few checks
-	if ((myChunkHeader.chunkName[0]!='d') || (myChunkHeader.chunkName[1]!='a')||
-	    (myChunkHeader.chunkName[2]!='t') || (myChunkHeader.chunkName[3]!='a'))
-	{
-		// chunk alignment disaster
-		LOCALASSERT(1==0);
-		ffclose(myFile);
-		return 0;
+	subChunkID = fStream.GetUint32BE();
+	if (subChunkID != 'data') {
+		return ReturnInvalidWAV();
 	}
-	
+
+	uint32_t nAudioBytes = fStream.GetUint32LE();
+
 	// calculate length of sample
-	uint32_t lengthInSeconds = DIV_FIXED(myChunkHeader.chunkLength, myWaveFormat.nAvgBytesPerSec);
+	uint32_t lengthInSeconds = nAudioBytes / myWaveFormat.nAvgBytesPerSec;
 
-	if ((myChunkHeader.chunkLength < 0) || (myChunkHeader.chunkLength > SOUND_MAXSIZE))
+	GameSounds[soundNum].audioBuffer = new uint8_t[nAudioBytes];
+
+	// Read sound data from file to buffer
+	uint32_t nBytesRead = fStream.ReadBytes(GameSounds[soundNum].audioBuffer, nAudioBytes);
+
+	if (nBytesRead != nAudioBytes)
 	{
 		LOCALASSERT(1==0);
-		ffclose(myFile);
-		return 0;
-	}
-	if (myWaveFormat.wFormatTag != WAVE_FORMAT_PCM)
-	{
-		LOCALASSERT(1==0);
-		ffclose(myFile);
-		return 0;
-	}
-	if ((myWaveFormat.nChannels != 1) && (myWaveFormat.nChannels != 2))
-	{
-		LOCALASSERT(1==0);
-		ffclose(myFile);
-		return 0;
-	}
-	if ((myWaveFormat.wBitsPerSample != 8) && (myWaveFormat.wBitsPerSample != 16))
-	{
-		LOCALASSERT(1==0);
-		ffclose(myFile);
+		delete[] GameSounds[soundNum].audioBuffer;
+		GameSounds[soundNum].audioBuffer = NULL;
 		return 0;
 	}
 
-	{
-		GameSounds[soundNum].audioBuffer = new uint8_t[myChunkHeader.chunkLength];
+	memset(&GameSounds[soundNum].xa2Buffer, 0, sizeof(XAUDIO2_BUFFER));
+	GameSounds[soundNum].xa2Buffer.AudioBytes = nAudioBytes;
+	GameSounds[soundNum].xa2Buffer.pAudioData = GameSounds[soundNum].audioBuffer;
+	GameSounds[soundNum].xa2Buffer.Flags = XAUDIO2_END_OF_STREAM; // tell the source voice not to expect any data after this buffer
 
-		// Read data from file to buffer
-		res = ffread(GameSounds[soundNum].audioBuffer, 1, myChunkHeader.chunkLength, myFile);
-		if (res != (size_t)myChunkHeader.chunkLength)
-		{
-			LOCALASSERT(1==0);
-			delete[] GameSounds[soundNum].audioBuffer;
-			GameSounds[soundNum].audioBuffer = NULL;
-			ffclose(myFile);
-			return 0;
+	LastError = pXAudio2->CreateSourceVoice(&GameSounds[soundNum].pSourceVoice, &myWaveFormat);
+	if (FAILED(LastError))
+	{
+		LogDxError(LastError, __LINE__, __FILE__);
+		PlatEndSoundSys();
+		return 0;
+	}
+
+	// Set the emitter stuff
+	memset(&GameSounds[soundNum].xa2Emitter, 0, sizeof(X3DAUDIO_EMITTER));
+	GameSounds[soundNum].xa2Emitter.ChannelCount = myWaveFormat.nChannels;
+
+	GameSounds[soundNum].xa2Emitter.OrientFront = D3DXVECTOR3( 0, 0, 1 );
+	GameSounds[soundNum].xa2Emitter.OrientTop = D3DXVECTOR3( 0, 1, 0 );
+	GameSounds[soundNum].xa2Emitter.ChannelRadius = 1.0f;
+	GameSounds[soundNum].xa2Emitter.InnerRadius = 0.0f;
+	GameSounds[soundNum].xa2Emitter.InnerRadiusAngle = 0.0f;
+	GameSounds[soundNum].xa2Emitter.CurveDistanceScaler = 1.0f;
+	GameSounds[soundNum].xa2Emitter.DopplerScaler = 1.0f;
+
+	{
+		const char * wavname = strrchr(fileName, '/');
+		if (wavname) {
+			wavname++;
+		}
+		else {
+			wavname = fileName;
 		}
 
-		memset(&GameSounds[soundNum].xa2Buffer, 0, sizeof(XAUDIO2_BUFFER));
-		GameSounds[soundNum].xa2Buffer.AudioBytes = myChunkHeader.chunkLength;
-		GameSounds[soundNum].xa2Buffer.pAudioData = GameSounds[soundNum].audioBuffer;
-		GameSounds[soundNum].xa2Buffer.Flags = XAUDIO2_END_OF_STREAM; // tell the source voice not to expect any data after this buffer
-
-		LastError = pXAudio2->CreateSourceVoice(&GameSounds[soundNum].pSourceVoice, &myWaveFormat);
-		if (FAILED(LastError))
-		{
-			LogDxError(LastError, __LINE__, __FILE__);
-			PlatEndSoundSys();
-			return 0;
-		}
-
-		// Set the emitter stuff
-		memset(&GameSounds[soundNum].xa2Emitter, 0, sizeof(X3DAUDIO_EMITTER));
-		GameSounds[soundNum].xa2Emitter.ChannelCount = myWaveFormat.nChannels;
-//		GameSounds[soundNum].xa2Emitter.CurveDistanceScaler = FLT_MIN;
-
-		GameSounds[soundNum].xa2Emitter.OrientFront = D3DXVECTOR3( 0, 0, 1 );
-		GameSounds[soundNum].xa2Emitter.OrientTop = D3DXVECTOR3( 0, 1, 0 );
-		GameSounds[soundNum].xa2Emitter.ChannelRadius = 1.0f;
-		GameSounds[soundNum].xa2Emitter.InnerRadius = 0.0f;
-		GameSounds[soundNum].xa2Emitter.InnerRadiusAngle = 0.0f;
-		GameSounds[soundNum].xa2Emitter.CurveDistanceScaler = 1.0f;
-		GameSounds[soundNum].xa2Emitter.DopplerScaler = 1.0f;
-//		GameSounds[soundNum].xa2Emitter.pChannelAzimuths = GameSounds[soundNum].emitterAzimuths;
-
-		{
-			char * wavname = strrchr(wavFileName, '/');
-			if (wavname)
-			{
-				wavname++;
-			}
-			else
-			{
-				wavname = wavFileName;
-			}
-
-			GameSounds[soundNum].wavName = new char[strlen(wavname) + 1];
-			strcpy(GameSounds[soundNum].wavName, wavname);
-		}
-
-		// need to save this here for later use
-		GameSounds[soundNum].dsFrequency = myWaveFormat.nSamplesPerSec;
-		GameSounds[soundNum].length = lengthInSeconds;
+		GameSounds[soundNum].wavName = new char[strlen(wavname) + 1];
+		strcpy(GameSounds[soundNum].wavName, wavname);
 	}
 
-	ffclose(myFile);
+	// need to save this here for later use
+	GameSounds[soundNum].dsFrequency = myWaveFormat.nSamplesPerSec;
+	GameSounds[soundNum].length = lengthInSeconds;
+
 	return 1;
 }
 

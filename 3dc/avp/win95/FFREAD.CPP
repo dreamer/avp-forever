@@ -1,3 +1,5 @@
+#if 0
+
 #include <string.h>
 #include <malloc.h>
 #include "os_header.h"
@@ -358,3 +360,4 @@ void const * FFHeaderI::FindFile(char const * name, size_t * lengthP) const
 	}
 	return 0;
 }
+#endif
