@@ -118,16 +118,9 @@ static void LoadMenuFont(void)
 		will fit nicely into a 512 x 512 d3d texture
 	*/
 
-//	AVPMENUGFX *gfxPtr;
-	size_t fastFileLength;
-	char buffer[100];
-	void const *pFastFileData;
-	
 	IntroFont_Light.height = 33;
 	IntroFont_Light.swidth = 5;
 	IntroFont_Light.ascii  = 32;
-
-//	gfxPtr = &IntroFont_Light.info;
 
 	RimLoader introFontRIM;
 	if (!introFontRIM.Open("graphics\\Menus\\IntroFont.RIM"))
@@ -144,47 +137,9 @@ static void LoadMenuFont(void)
 	uint8_t *srcBuffer = new uint8_t[width*height*4];
 	introFontRIM.Decode(srcBuffer, width*4);
 
-#if 0	
-	CL_GetImageFileName(buffer, 100, "Menus\\IntroFont.RIM", LIO_RELATIVEPATH);
-	
-	pFastFileData = ffreadbuf(buffer, &fastFileLength);
+	uint8_t *srcPtr = srcBuffer;
 
-	if (pFastFileData)
-	{
-		gfxPtr->ImagePtr = AwCreateTexture(
-			"pxfXY",
-			pFastFileData,
-			fastFileLength,
-			AW_TLF_TRANSP|AW_TLF_CHROMAKEY,
-			&(gfxPtr->Width),
-			&(gfxPtr->Height)
-		);
-	}
-	else
-	{
-		gfxPtr->ImagePtr = AwCreateTexture(
-			"sfXY",
-			buffer,
-			AW_TLF_TRANSP|AW_TLF_CHROMAKEY,
-			&(gfxPtr->Width),
-			&(gfxPtr->Height)
-		);
-	}
-
-	GLOBALASSERT(gfxPtr->ImagePtr);
-	GLOBALASSERT(gfxPtr->Width>0);
-	GLOBALASSERT(gfxPtr->Height>0);
-#endif
-
-//	AVPTEXTURE *image = gfxPtr->ImagePtr;
-
-	uint8_t *srcPtr = srcBuffer; // image->buffer;
-/*
-	if ((image->width != 30) || ((image->height % 33) != 0)) {
-		// handle new texture
-	}
-*/
-	IntroFont_Light.numchars = /*image->height*/height / 33;
+	IntroFont_Light.numchars = height / 33;
 	IntroFont_Light.FontWidth[32] = 5;
 
 	for (int c = 33; c < (32+IntroFont_Light.numchars); c++)
@@ -199,7 +154,7 @@ static void LoadMenuFont(void)
 
 			for (int y = y1; y < y1+31; y++)
 			{
-				uint8_t *s = &srcPtr[(x + y*/*image->width*/width) * sizeof(uint32_t)];
+				uint8_t *s = &srcPtr[(x + y * width) * sizeof(uint32_t)];
 				if (s[2])
 				{
 					blank = false;
@@ -223,17 +178,10 @@ static void LoadMenuFont(void)
 
 	// we're going to try create a square texture
 	IntroFont_Light.textureID = Tex_CreateTallFontTexture("graphics\\Menus\\IntroFont.RIM", image, TextureUsage_Normal);
-
-//	ReleaseAvPTexture(IntroFont_Light.info.ImagePtr);
-//	IntroFont_Light.info.ImagePtr = NULL;
 }
 
 static void UnloadMenuFont(void)
 {
-//	ReleaseAvPTexture(IntroFont_Light.info.ImagePtr);
-//	IntroFont_Light.info.ImagePtr = NULL;
-
-//	Tex_Release(IntroFont_Light.info.textureID);
 	Tex_Release(IntroFont_Light.textureID);
 }
 
@@ -322,47 +270,8 @@ extern int RenderMenuText(char *textPtr, int pX, int pY, int alpha, enum AVPMENU
 			int topLeftU = tex_x;
 			int topLeftV = tex_y;
 
-			/*
-				bjd note
-				need to fix the 'Cloud Table'
-				ie the moving hazy smoke/cloud effect behind the large font text on the menus
-			*/
-
 			DrawTallFontCharacter(positionX, positionY, IntroFont_Light/*.info.*/.textureID, topLeftU, topLeftV, charWidth, alpha);
-/*
-			srcPtr = &image->buf[(topLeftU+topLeftV*image->w)*4];
 
-			for (y=pY; y<33+pY; y++) {
-				destPtr = (unsigned short *)(((unsigned char *)lock.pBits)+y*lock.Pitch) + pX;
-
-				for (x=width; x>0; x--) {
-					if (srcPtr[0] || srcPtr[1] || srcPtr[2]) {
-						unsigned int destR, destG, destB;
-
-						int r = CloudTable[(x+pX+CloakingPhase/64)&127][(y+CloakingPhase/128)&127];
-						r = MUL_FIXED(alpha, r);
-
-						destR = (*destPtr & 0xF800)>>8;
-						destG = (*destPtr & 0x07E0)>>3;
-						destB = (*destPtr & 0x001F)<<3;
-
-						destR += MUL_FIXED(r, srcPtr[0]);
-						destG += MUL_FIXED(r, srcPtr[1]);
-						destB += MUL_FIXED(r, srcPtr[2]);
-						if (destR > 0x00FF) destR = 0x00FF;
-						if (destG > 0x00FF) destG = 0x00FF;
-						if (destB > 0x00FF) destB = 0x00FF;
-
-						*destPtr =	((destR>>3)<<11) |
-								((destG>>2)<<5 ) |
-								((destB>>3));
-					}
-					srcPtr += 4;
-					destPtr++;
-				}
-				srcPtr += (image->w - width) * 4;
-			}
-*/
 			positionX += charWidth;
 			word_length += charWidth;
 		}
@@ -373,7 +282,6 @@ extern int RenderMenuText(char *textPtr, int pX, int pY, int alpha, enum AVPMENU
 
 extern int RenderMenuText_Clipped(char *textPtr, int pX, int pY, int alpha, enum AVPMENUFORMAT_ID format, int topY, int bottomY) 
 {
-	// this'll do for now :)
 	RenderMenuText(textPtr, pX, pY, alpha, format); 
 
 	return pX;
@@ -523,7 +431,6 @@ extern int Hardware_RenderSmallMenuText(char *textPtr, int x, int y, int alpha, 
 		colour = (colour<<24)+0xffffff;
 
 		D3D_RenderHUDString(textPtr,x,y,colour);
-//		Font_DrawText(textPtr, x, y, colour, 1);
 	}
 	return x;
 }
@@ -596,24 +503,8 @@ extern void RenderKeyConfigRectangle(int alpha)
 	int totalWidth = 620;
 	int totalHeight = 250;
 
-//	float totalWidth2f = (((float)ScreenDescriptorBlock.SDB_Width / 100) * 96.875f);
-//	float totalHeight2f = (((float)ScreenDescriptorBlock.SDB_Height / 100) * 52.083f);
-
 	int x = 10;
 	int y = 150;
-
-//	float x2f = (((float)ScreenDescriptorBlock.SDB_Width / 100) * 1.5625f);
-//	float y2f = (((float)ScreenDescriptorBlock.SDB_Height / 100) * 31.25f);
-
-//	uint32_t totalWidth2 = XPercentToScreen(96.875f);
-//	uint32_t totalHeight2 = YPercentToScreen(52.083f);
-
-//	uint32_t x2 = XPercentToScreen(1.5625f);
-//	uint32_t y2 = YPercentToScreen(31.25f);
-
-//	char buf[150];
-//	sprintf(buf, "x2: %f y2: %f width: %f height: %f\n", x2, y2, totalWidth2, totalHeight2);
-//	OutputDebugString(buf);
 
 	// top horizonal segment
 	DrawQuad(x, y, totalWidth, segHeight, NO_TEXTURE, colour, TRANSLUCENCY_NORMAL);
@@ -674,16 +565,9 @@ extern int RenderSmallChar(char c, int x, int y, int alpha, int red, int green, 
 extern void RenderSmallFontString_Wrapped(char *textPtr, RECT* area, int alpha, int* output_x, int* output_y)
 {
 	// text on menus in bottom black space
-
-//	unsigned char *srcPtr;
-//	AVPMENUGFX *gfxPtr;
-//	AvPTexture *image;
 	int wordWidth;
 	int sx = area->left;
 	int sy = area->top;
-	
-//	gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_SMALL_FONT];
-//	image = (AvPTexture*)gfxPtr->ImagePtr;
 
 /*
 Determine area used by text , so we can draw it centrally
@@ -834,44 +718,9 @@ Determine area used by text , so we can draw it centrally
 			{
 				int topLeftU = 1+((c-32)&15)*16;
 				int topLeftV = 1+((c-32)>>4)*16;
-//				int x, y;
-				
-//				srcPtr = &image->buffer[(topLeftU+topLeftV*image->width)*4];
 
 				DrawSmallMenuCharacter(sx, sy, topLeftU, topLeftV, ONE_FIXED, ONE_FIXED, ONE_FIXED, alpha);
-#if 0	
-				for (y=sy; y<HUD_FONT_HEIGHT+sy; y++) 
-				{
-//					destPtr = (unsigned short *)(((unsigned char *)lock.pBits) + y*lock.Pitch) + sx;
-					
-					for (x=0; x<HUD_FONT_WIDTH; x++) 
-					{
-/*
-						if (srcPtr[0] || srcPtr[1] || srcPtr[2]) {
-							unsigned int destR, destG, destB;
-						
-							destR = (*destPtr & 0xF800)>>8;
-							destG = (*destPtr & 0x07E0)>>3;
-							destB = (*destPtr & 0x001F)<<3;
-						
-							destR += MUL_FIXED(alpha, srcPtr[0]);
-							destG += MUL_FIXED(alpha, srcPtr[1]);
-							destB += MUL_FIXED(alpha, srcPtr[2]);
-							if (destR > 0x00FF) destR = 0x00FF;
-							if (destG > 0x00FF) destG = 0x00FF;
-							if (destB > 0x00FF) destB = 0x00FF;
-						
-							*destPtr =	((destR>>3)<<11) |
-									((destG>>2)<<5 ) |
-									((destB>>3));
-						}
-*/
-//						srcPtr += 4;
-//						destPtr++;
-					}
-//					srcPtr += (image->w - HUD_FONT_WIDTH) * 4;	
-				}
-#endif
+
 				sx += AAFontWidths[(unsigned int) c];
 			}
 		}
@@ -883,7 +732,6 @@ Determine area used by text , so we can draw it centrally
 
 void LoadAllMenuTextures()
 {
-#if 1
 	AVPMENUGFX_CLOUDY = Tex_CreateFromRIM("graphics\\Menus\\fractal.RIM");
 
 	AVPMENUGFX_SMALL_FONT       = Tex_CreateFromRIM("graphics\\Common\\aa_font.RIM");
@@ -969,214 +817,6 @@ void LoadAllMenuTextures()
 		AVPMENUGFX_SPLASH_SCREEN4 = Tex_CreateFromRIM("graphics\\PredatorSplash\\splash04.RIM");
 		AVPMENUGFX_SPLASH_SCREEN5 = Tex_CreateFromRIM("graphics\\PredatorSplash\\splash05.RIM");
 	#endif
-
-#else
-
-	AVPMENUGFX_CLOUDY = CL_LoadImageOnce("Menus\\fractal.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-
-	AVPMENUGFX_SMALL_FONT  = CL_LoadImageOnce("Common\\aa_font.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_COPYRIGHT_SCREEN = CL_LoadImageOnce("Menus\\Copyright.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-
-	AVPMENUGFX_PRESENTS = CL_LoadImageOnce("Menus\\FIandRD.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_AREBELLIONGAME = CL_LoadImageOnce("Menus\\presents.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIENSVPREDATOR = CL_LoadImageOnce("Menus\\AliensVPredator.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-
-	AVPMENUGFX_SLIDERBAR = CL_LoadImageOnce("Menus\\SliderBar.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_SLIDER = CL_LoadImageOnce("Menus\\Slider.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-
-	AVPMENUGFX_BACKDROP = CL_LoadImageOnce("Menus\\Starfield.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIENS_LOGO = CL_LoadImageOnce("Menus\\aliens.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_LOGO = CL_LoadImageOnce("Menus\\Alien.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_LOGO = CL_LoadImageOnce("Menus\\Marine.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_LOGO = CL_LoadImageOnce("Menus\\Predator.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-
-	AVPMENUGFX_GLOWY_LEFT = CL_LoadImageOnce("Menus\\glowy_left.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_GLOWY_MIDDLE = CL_LoadImageOnce("Menus\\glowy_middle.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_GLOWY_RIGHT = CL_LoadImageOnce("Menus\\glowy_right.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-
-	AVPMENUGFX_MARINE_EPISODE1 = CL_LoadImageOnce("Menus\\MarineEpisode1.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE2 = CL_LoadImageOnce("Menus\\MarineEpisode2.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE3 = CL_LoadImageOnce("Menus\\MarineEpisode3.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE4 = CL_LoadImageOnce("Menus\\MarineEpisode4.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE5 = CL_LoadImageOnce("Menus\\MarineEpisode5.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE6 = CL_LoadImageOnce("Menus\\MarineEpisode6.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-
-	AVPMENUGFX_MARINE_EPISODE7 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE8 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE9 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE10 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_MARINE_EPISODE11 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-
-	AVPMENUGFX_PREDATOR_EPISODE1 = CL_LoadImageOnce("Menus\\PredatorEpisode1.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE2 = CL_LoadImageOnce("Menus\\PredatorEpisode2.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE3 = CL_LoadImageOnce("Menus\\PredatorEpisode3.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE4 = CL_LoadImageOnce("Menus\\PredatorEpisode4.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE5 = CL_LoadImageOnce("Menus\\PredatorEpisode5.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE6 = CL_LoadImageOnce("Menus\\PredatorEpisode5.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-
-	AVPMENUGFX_PREDATOR_EPISODE7 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE8 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE9 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE10 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_PREDATOR_EPISODE11 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-
-	AVPMENUGFX_ALIEN_EPISODE1 = CL_LoadImageOnce("Menus\\AlienEpisode2.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE2 = CL_LoadImageOnce("Menus\\AlienEpisode4.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE3 = CL_LoadImageOnce("Menus\\AlienEpisode1.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE4 = CL_LoadImageOnce("Menus\\AlienEpisode3.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE5 = CL_LoadImageOnce("Menus\\AlienEpisode5.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE6 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE7 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE8 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE9 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AVPMENUGFX_ALIEN_EPISODE10 = CL_LoadImageOnce("Menus\\bonus.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-
-	// Splash screens
-	#if MARINE_DEMO
-		AVPMENUGFX_WINNER_SCREEN = CL_LoadImageOnce("MarineSplash\\splash00.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-
-		AVPMENUGFX_SPLASH_SCREEN1 = CL_LoadImageOnce("MarineSplash\\splash01.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN2 = CL_LoadImageOnce("MarineSplash\\splash02.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN3 = CL_LoadImageOnce("MarineSplash\\splash03.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN4 = CL_LoadImageOnce("MarineSplash\\splash04.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN5 = CL_LoadImageOnce("MarineSplash\\splash05.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	#elif ALIEN_DEMO
-		AVPMENUGFX_WINNER_SCREEN = CL_LoadImageOnce("AlienSplash\\splash00.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-
-		AVPMENUGFX_SPLASH_SCREEN1 = CL_LoadImageOnce("AlienSplash\\splash01.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN2 = CL_LoadImageOnce("AlienSplash\\splash02.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN3 = CL_LoadImageOnce("AlienSplash\\splash03.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN4 = CL_LoadImageOnce("AlienSplash\\splash04.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN5 = CL_LoadImageOnce("AlienSplash\\splash05.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	#else
-		AVPMENUGFX_WINNER_SCREEN = CL_LoadImageOnce("PredatorSplash\\splash00.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-
-		AVPMENUGFX_SPLASH_SCREEN1 = CL_LoadImageOnce("PredatorSplash\\splash01.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN2 = CL_LoadImageOnce("PredatorSplash\\splash02.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN3 = CL_LoadImageOnce("PredatorSplash\\splash03.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN4 = CL_LoadImageOnce("PredatorSplash\\splash04.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-		AVPMENUGFX_SPLASH_SCREEN5 = CL_LoadImageOnce("PredatorSplash\\splash05.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	#endif
-#endif
-}
-
-extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
-{
-#if 0 // bjd - texture test
-
-	AVPMENUGFX *gfxPtr;
-	char buffer[100];
-	
-	GLOBALASSERT(menuGfxID < MAX_NO_OF_AVPMENUGFXS);
-
-	gfxPtr = &AvPMenuGfxStorage[menuGfxID];
-
-	CL_GetImageFileName(buffer, 100, gfxPtr->FilenamePtr, LIO_RELATIVEPATH);
-	
-	//see if graphic can be found in fast file
-	size_t fastFileLength;
-	void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
-
-	if (pFastFileData)
-	{
-		//D3DTexture *ImagePtr; 
-
-		/* bjd
-		I think we use AwCreateSurface to tell the engine we'll be loading non-power of 2 
-		or image files for "raw" pixel by pixel drawing.
-
-		Eg, linux code:
-
-			if (pixelFormat.texB) {
-				Tex->buf = NULL; 
-				CreateOGLTexture(Tex, buf); 
-				free(buf);
-			} else {
-				Tex->buf = buf; 
-				CreateIMGSurface(Tex, buf);
-			}
-			
-		Only create a texture (d3d texture, ogl texture etc) IF pixelFormat.texB is true.
-		.texB being true means its a TEXTURE, not surface creation function we called.
-		We don't need to keep a copy of Tex->buf with this.
-
-		If .textB is false and we're dealing with a surface, stick all the buffered image data 
-		into tex->buf so we can do pixel by pixel drawing with it later
-		*/
-
-		//load from fast file
-		gfxPtr->ImagePtr = AwCreateTexture
-							(
-								"pxfXYB",
-								pFastFileData,
-								fastFileLength,
-								AW_TLF_TRANSP|AW_TLF_CHROMAKEY,
-								&(gfxPtr->Width),
-								&(gfxPtr->Height)
-							);
-	}
-	else
-	{
-		//load graphic from rim file
-		gfxPtr->ImagePtr = AwCreateTexture
-							(
-								"sfXYB",
-								buffer,
-								AW_TLF_TRANSP|AW_TLF_CHROMAKEY,
-								&(gfxPtr->Width),
-								&(gfxPtr->Height)
-							);
-
-	}
-
-	if (gfxPtr->ImagePtr) 
-	{
-		AvPMenuGfxStorage[menuGfxID].menuTexture = CreateD3DTexturePadded(gfxPtr->ImagePtr, (uint32_t*)&gfxPtr->newWidth, (uint32_t*)&gfxPtr->newHeight);
-
-		if (AvPMenuGfxStorage[menuGfxID].menuTexture == NULL) {
-			OutputDebugString("Texture in AvPMenuGfxStorage was NULL!");
-		}
-	}
-	else
-	{
-		// bjd - bail out?
-		gfxPtr->Height = 0;
-		gfxPtr->Width = 0;
-		return;
-	}
-
-	// remove the red outline grid from the font texture
-	if (menuGfxID == AVPMENUGFX_SMALL_FONT)
-	{
-		DeRedTexture(AvPMenuGfxStorage[menuGfxID].menuTexture);
-	}
-
-	GLOBALASSERT(gfxPtr->ImagePtr);
-	GLOBALASSERT(gfxPtr->Width  > 0);
-	GLOBALASSERT(gfxPtr->Height > 0);
-
-#endif
-}
-
-static void ReleaseAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
-{
-
-#if 0 // bjd - texture test
-	AVPMENUGFX *gfxPtr;
-	
-	GLOBALASSERT(menuGfxID < MAX_NO_OF_AVPMENUGFXS);
-		
-	gfxPtr = &AvPMenuGfxStorage[menuGfxID];
-	
-	GLOBALASSERT(gfxPtr);
-	GLOBALASSERT(gfxPtr->ImagePtr);
-
-	ReleaseAvPTexture(gfxPtr->ImagePtr);
-	gfxPtr->ImagePtr = NULL;
-
-	/* release d3d texture */
-	SAFE_RELEASE(gfxPtr->menuTexture);
-#endif
 }
 
 extern void LoadAllAvPMenuGfx(void)
@@ -1199,70 +839,10 @@ extern void LoadAllAvPMenuGfx(void)
 	AvPMenu_SinglePlayer[0].textureID = AVPMENUGFX_ALIEN_LOGO;
 	AvPMenu_SinglePlayer[1].textureID = AVPMENUGFX_MARINE_LOGO;
 	AvPMenu_SinglePlayer[2].textureID = AVPMENUGFX_PREDATOR_LOGO;
-
-#if 0 // bjd - texture test
-	int i = 0;
-
-	while (i < AVPMENUGFX_WINNER_SCREEN)
-	{
-		LoadAvPMenuGfx((enum AVPMENUGFX_ID)i++);
-	}
-
-	LoadMenuFont();
-	
-	uint8_t *srcPtr = 0;
-
-	AVPMENUGFX *gfxPtr = &AvPMenuGfxStorage[AVPMENUGFX_CLOUDY];
-	
-	AVPTEXTURE *image = gfxPtr->ImagePtr;
-
-	if (image != NULL)
-	{
-		srcPtr = image->buffer;
-
-		for (uint32_t y = 0; y < gfxPtr->Height; y++)
-		{
-			for (uint32_t x = 0; x < gfxPtr->Width; x++)
-			{
-				int r = srcPtr[0];
-
-				r = DIV_FIXED(r, 0xFF);
-				CloudTable[x][y] = r;
-		
-				srcPtr += 4;
-			}
-		}
-	}
-
-	CalculateWidthsOfAAFont();
-#endif
-}
-
-extern void LoadAllSplashScreenGfx(void)
-{
-#if 0 // bjd - texture test
-	int i = AVPMENUGFX_SPLASH_SCREEN1;
-	while(i<MAX_NO_OF_AVPMENUGFXS)
-	{
-		LoadAvPMenuGfx((enum AVPMENUGFX_ID)i++);
-	}
-#endif
-}
-
-extern void InitialiseMenuGfx(void)
-{
-#if 0 // bjd - texture test
-	int i=0;
-	while(i<MAX_NO_OF_AVPMENUGFXS)
-	{
-		AvPMenuGfxStorage[i++].ImagePtr = 0;
-	}
-#endif
 }
 
 extern void ReleaseAllAvPMenuGfx(void)
 {
-	// sigh..find a better way to do this..
 	Tex_Release(AVPMENUGFX_CLOUDY);
 	Tex_Release(AVPMENUGFX_SMALL_FONT);
 	Tex_Release(AVPMENUGFX_COPYRIGHT_SCREEN);
@@ -1318,30 +898,11 @@ extern void ReleaseAllAvPMenuGfx(void)
 	Tex_Release(AVPMENUGFX_SPLASH_SCREEN4);
 	Tex_Release(AVPMENUGFX_SPLASH_SCREEN5);
 
-	Tex_Release(IntroFont_Light/*.info.*/.textureID);
-
-#if 0 // bjd - texture test
-	int i=0;
-	while(i<MAX_NO_OF_AVPMENUGFXS)
-	{
-		if (AvPMenuGfxStorage[i].ImagePtr)
-		{
-			ReleaseAvPMenuGfx((enum AVPMENUGFX_ID)i);
-		}
-		i++;
-	}	
-	UnloadMenuFont();
-#endif
+	Tex_Release(IntroFont_Light.textureID);
 }
 
-extern void DrawAvPMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textureID, int topleftX, int topleftY, int alpha, enum AVPMENUFORMAT_ID format)
+extern void DrawAvPMenuGfx(texID_t textureID, int topleftX, int topleftY, int alpha, enum AVPMENUFORMAT_ID format)
 {
-	// bjd - texture tset
-//	AVPMENUGFX *gfxPtr;
-	
-//	GLOBALASSERT(menuGfxID < MAX_NO_OF_AVPMENUGFXS);
-
-//	gfxPtr = &AvPMenuGfxStorage[menuGfxID];
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(textureID, texWidth, texHeight);
 
@@ -1356,17 +917,17 @@ extern void DrawAvPMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textureID, in
 		}
 		case AVPMENUFORMAT_RIGHTJUSTIFIED:
 		{
-			topleftX -= texWidth;//gfxPtr->Width;
+			topleftX -= texWidth;
 			break;
 		}
 		case AVPMENUFORMAT_CENTREJUSTIFIED:
 		{
-			topleftX -= /*gfxPtr->Width*/texWidth / 2;
+			topleftX -= texWidth / 2;
 			break;
 		}
 	}
 
-	int32_t width = /*gfxPtr->Width*/texWidth;
+	int32_t width = texWidth;
 	if (640 - topleftX < width)
 	{
 		width = 640 - topleftX;
@@ -1380,19 +941,11 @@ extern void DrawAvPMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textureID, in
 	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
 			alpha = ONE_FIXED;
 
-	DrawAlphaMenuQuad(topleftX, topleftY, /*menuGfxID*/textureID, alpha);
+	DrawAlphaMenuQuad(topleftX, topleftY, textureID, alpha);
 }
 
-extern void DrawAvPMenuGfx_Faded(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textureID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format)
+extern void DrawAvPMenuGfx_Faded(texID_t textureID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format)
 {
-	// bjd - texture test
-//	AVPMENUGFX *gfxPtr;
-//	gfxPtr = &AvPMenuGfxStorage[menuGfxID];
-
-	// bjd - temp
-	if (textureID == 0)
-		return;
-
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(textureID, texWidth, texHeight);
 
@@ -1407,12 +960,12 @@ extern void DrawAvPMenuGfx_Faded(/*enum AVPMENUGFX_ID menuGfxID*/texID_t texture
 		}
 		case AVPMENUFORMAT_RIGHTJUSTIFIED:
 		{
-			topleftX -= texWidth;//gfxPtr->Width;
+			topleftX -= texWidth;
 			break;
 		}
 		case AVPMENUFORMAT_CENTREJUSTIFIED:
 		{
-			topleftX -= /*gfxPtr->Width*/texWidth / 2;
+			topleftX -= texWidth / 2;
 			break;
 		}
 	}
@@ -1433,14 +986,8 @@ extern void DrawAvPMenuGfx_Faded(/*enum AVPMENUGFX_ID menuGfxID*/texID_t texture
 	DrawAlphaMenuQuad(topleftX, topleftY, textureID, alpha);
 }
 
-extern void DrawAvPMenuGfx_Clipped(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textureID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format, int topY, int bottomY)
-{	
-	// bjd - texture test
-//	GLOBALASSERT(menuGfxID < MAX_NO_OF_AVPMENUGFXS);
-
-//	AVPMENUGFX *gfxPtr;
-//	gfxPtr = &AvPMenuGfxStorage[menuGfxID];
-
+extern void DrawAvPMenuGfx_Clipped(texID_t textureID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format, int topY, int bottomY)
+{
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(textureID, texWidth, texHeight);
 
@@ -1455,17 +1002,17 @@ extern void DrawAvPMenuGfx_Clipped(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textu
 		}
 		case AVPMENUFORMAT_RIGHTJUSTIFIED:
 		{
-			topleftX -= texWidth;//gfxPtr->Width;
+			topleftX -= texWidth;
 			break;
 		}
 		case AVPMENUFORMAT_CENTREJUSTIFIED:
 		{
-			topleftX -= /*gfxPtr->Width*/texWidth / 2;
+			topleftX -= texWidth / 2;
 			break;
 		}
 	}
 
-	int32_t length = texWidth;//gfxPtr->Width;
+	int32_t length = texWidth;
 
 	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length) 
 	{
@@ -1476,22 +1023,18 @@ extern void DrawAvPMenuGfx_Clipped(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textu
 		return;
 	}
 
-//	DrawMenuQuad(topleftX, topleftY, topleftX, topleftY, menuGfxID, alpha);
-
 	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
 		alpha = ONE_FIXED;
 
-	DrawAlphaMenuQuad(topleftX, topleftY, /*menuGfxID*/textureID, alpha);
+	DrawAlphaMenuQuad(topleftX, topleftY, textureID, alpha);
 }
 
-extern int HeightOfMenuGfx(/*enum AVPMENUGFX_ID menuGfxID*/texID_t textureID)
+extern int HeightOfMenuGfx(texID_t textureID)
 {
-	// bjd - texture test
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(textureID, texWidth, texHeight);
 
 	return texHeight;
-//	return AvPMenuGfxStorage[menuGfxID].Height; 
 }
 
 static void CalculateWidthsOfAAFont(void)

@@ -26,8 +26,6 @@ char CommandLineIPAddressString[MAX_IPADDRESS_LENGTH+1]= "";
 char UserProfileName[MAX_SIZE_OF_USERS_NAME+1]="";
 char IP_Address_Name[22];
 
-int port = 0;
-
 int MP_Species=0;
 int MP_GameStyle=0;
 int MP_LevelNumber=0;

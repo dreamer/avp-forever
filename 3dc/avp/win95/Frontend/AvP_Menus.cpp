@@ -56,7 +56,6 @@ extern BOOL Net_UpdateSessionList(int * SelectedItem);
 extern void SelectMenuDisplayMode(void);
 extern void DrawMainMenusBackdrop(void);
 extern void GetFilenameForSaveSlot(int i, char *filenamePtr);
-extern void InitialiseMenuGfx(void);
 extern void EndMenuBackgroundFmv(void);
 extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale);
 extern int AnyCheatModesAllowed(void);
@@ -76,6 +75,14 @@ extern char AAFontWidths[256];
 extern char MP_Config_Name[];
 extern char LevelName[];
 extern char IP_Address_Name[22];
+extern char IPAddressString[];
+extern char CommandLineIPAddressString[];
+extern AVPMENU_ELEMENT* AvPMenu_Multiplayer_LoadConfig;
+extern AVPMENU_ELEMENT* AvPMenu_Multiplayer_LoadIPAddress;
+extern void MakeOpenIPAddressMenu();
+extern int AutoWeaponChangeOn_Temp;
+extern int AutoWeaponChangeOn;
+extern void SetDefaultMultiplayerConfig();
 
 void HandlePostGameFMVs(void);
 void HandlePreGameFMVs(void);
@@ -146,7 +153,7 @@ void SetAndSaveDeviceAndVideoModePreferences();
 		Gameplay Options
 		Audio/Visual Options
 		Exit
-						  
+
 	2.      Singleplayer
 		
 		Alien
@@ -165,7 +172,7 @@ void SetAndSaveDeviceAndVideoModePreferences();
  */
 
 
-/* KJL 11:57:21 23/06/98 - 
+/* KJL 11:57:21 23/06/98 -
 
 
 	Need mouse position code (?) etc. In-game menus using mouse? Ugh.
@@ -253,14 +260,8 @@ int AvP_MainMenus(void)
 	
 	TimeStampedMessage("start of menus");
 
-	TimeStampedMessage("after SelectMenuDisplayMode");
-
-	InitialiseMenuGfx();
-	TimeStampedMessage("after InitialiseMenuGfx");
-
 	// start background FMV
 	StartMenuBackgroundFmv();
-//	TimeStampedMessage("after StartMenuBackgroundFmv");
 
 	#if PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO
 	if (AvP.LevelCompleted)
@@ -358,7 +359,7 @@ int AvP_MainMenus(void)
 		//played the game
 		if (!LaunchingMplayer)
 		{
-			if (!LobbiedGame)	// Edmond
+			if (!LobbiedGame)    // Edmond
 				DoCredits();
 		}
 	}
@@ -626,30 +627,26 @@ extern void AvP_UpdateMenus(void)
 				char buffer2[100];
 				int nLen = 80;
 
-//				time_t time_of_day;
-
-//				time_of_day = time( NULL );
-
 #ifdef WIN32
-				nLen = GetDateFormat(GetThreadLocale(), DATE_LONGDATE, &profilePtr->TimeLastUpdated,NULL,buffer,nLen);
-				nLen = GetTimeFormat(GetThreadLocale(), 0, &profilePtr->TimeLastUpdated,NULL,buffer2,100);
+				nLen = GetDateFormat(GetThreadLocale(), DATE_LONGDATE, &profilePtr->TimeLastUpdated, NULL, buffer, nLen);
+				nLen = GetTimeFormat(GetThreadLocale(), 0, &profilePtr->TimeLastUpdated,NULL, buffer2, 100);
 
 				strcat(buffer2,"  ");
 				strcat(buffer2,buffer);
 #endif
 #ifdef _XBOX
 				// manually format the string as we don't have either GetDateFormat or GetTimeFormat
-				sprintf(buffer2, "%02d:%02d:%02d %02d/%02d/%02d", 
-							profilePtr->TimeLastUpdated.wHour, 
-							profilePtr->TimeLastUpdated.wMinute, 
+				sprintf(buffer2, "%02d:%02d:%02d %02d/%02d/%02d",
+							profilePtr->TimeLastUpdated.wHour,
+							profilePtr->TimeLastUpdated.wMinute,
 							profilePtr->TimeLastUpdated.wSecond,
-							profilePtr->TimeLastUpdated.wDay, 
-							profilePtr->TimeLastUpdated.wMonth, 
+							profilePtr->TimeLastUpdated.wDay,
+							profilePtr->TimeLastUpdated.wMonth,
 							profilePtr->TimeLastUpdated.wYear
 						);
 
 #endif
-				RenderSmallMenuText(buffer2,MENU_CENTREX,MENU_CENTREY-70,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
+				RenderSmallMenuText(buffer2, MENU_CENTREX, MENU_CENTREY-70, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
 			}
 			
 			RenderMenu();
@@ -756,7 +753,6 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 	AvPMenus.PositionInTextField = 0;
 	AvPMenus.WidthLeftForText = 0;
 
-
 	/* menu specific stuff */
 	switch (menuID)
 	{
@@ -850,10 +846,9 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 		}
 		case AVPMENU_MULTIPLAYERSELECTSESSION:
 		{
-			if(previousMenuID!=AVPMENU_MULTIPLAYERSELECTSESSION)
+			if (previousMenuID!=AVPMENU_MULTIPLAYERSELECTSESSION)
 			{
 				//save ip address (if it has been set)
-				extern char IPAddressString[];
 				SaveIPAddress(IP_Address_Name,IPAddressString);
 				Net_JoinGame();
 			}
@@ -863,16 +858,14 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 
 		case AVPMENU_MULTIPLAYER_SKIRMISH :
 		{
-			extern char MP_Config_Description[];
-			netGameData.skirmishMode=TRUE;
+			netGameData.skirmishMode = TRUE;
 			LoadMultiplayerConfiguration(GetTextString(TEXTSTRING_PREVIOUSGAME_FILENAME));
-			MP_Config_Description[0]=0;
+			MP_Config_Description[0] = 0;
 			break;
 		}
 
 		case AVPMENU_MULTIPLAYER_CONNECTION:
 		{
-			extern char MP_Config_Description[];
 			//skirmishMode must be false
 			netGameData.skirmishMode = FALSE;
 
@@ -894,10 +887,6 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 			}
 
 			SetupNewMenu(AVPMENU_MULTIPLAYER);
-
-//			Net_EnumConnections();
-//			MakeConnectionSelectMenu();
-
 			break;
 		}
 
@@ -955,25 +944,13 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 
 		case AVPMENU_MULTIPLAYERJOINGAME:
 		{
-			extern char IPAddressString[]; 
-			extern char CommandLineIPAddressString[];
-			strcpy(IPAddressString,CommandLineIPAddressString);
+			strcpy(IPAddressString, CommandLineIPAddressString);
 			IP_Address_Name[0] = 0;
-/*
-			if(netGameData.connectionType!=CONN_TCPIP)  
-			{
-				////for non tcpip games skip to the select session menu
-				SetupNewMenu(AVPMENU_MULTIPLAYERSELECTSESSION);
-				return;
-			}
-*/
 			break;
 		}
 
 		case AVPMENU_MULTIPLAYER :
 		{
-			extern char MP_Config_Description[];
-			
 			//skirmishMode must be false
 			netGameData.skirmishMode = FALSE;
 
@@ -998,13 +975,12 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 
 		case AVPMENU_MULTIPLAYER_LOADCONFIG :
 		{
-			extern AVPMENU_ELEMENT* AvPMenu_Multiplayer_LoadConfig;
-			if(!BuildLoadMPConfigMenu())
+			if (!BuildLoadMPConfigMenu())
 			{
 				SetupNewMenu(AVPMENU_MULTIPLAYER_CONFIG);
 				return;
 			}
-			AvPMenus.MenuElements=AvPMenu_Multiplayer_LoadConfig;
+			AvPMenus.MenuElements = AvPMenu_Multiplayer_LoadConfig;
 			break;
 		}
 
@@ -1012,11 +988,11 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 		{
 			//need to set the menu we return to , according to whether this is
 			//a lobbied game or not.
-			if(LobbiedGame)
+			if (LobbiedGame)
 			{
 				AvPMenusData[AvPMenus.CurrentMenu].ParentMenu=AVPMENU_MULTIPLAYER_LOBBIEDSERVER;
 			}
-			else if(netGameData.skirmishMode)
+			else if (netGameData.skirmishMode)
 			{
 				//for skirmish games , use skirmish config menu instead
 				SetupNewMenu(AVPMENU_SKIRMISH_CONFIG);
@@ -1033,27 +1009,27 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 		{
 			//need to set the menu we return to , according to whether this is
 			//a lobbied game or not.
-			if(LobbiedGame)
+			if (LobbiedGame)
 			{
-				AvPMenusData[AvPMenus.CurrentMenu].ParentMenu=AVPMENU_MULTIPLAYER_LOBBIEDCLIENT;
+				AvPMenusData[AvPMenus.CurrentMenu].ParentMenu = AVPMENU_MULTIPLAYER_LOBBIEDCLIENT;
 			}
 			else
 			{
-				AvPMenusData[AvPMenus.CurrentMenu].ParentMenu=AVPMENU_MULTIPLAYER;
+				AvPMenusData[AvPMenus.CurrentMenu].ParentMenu = AVPMENU_MULTIPLAYER;
 			}
 			break;
 		}
 
 		case AVPMENU_MULTIPLAYER_LOADIPADDRESS :
 		{
-			extern AVPMENU_ELEMENT* AvPMenu_Multiplayer_LoadIPAddress;
-			AvPMenus.MenuElements=AvPMenu_Multiplayer_LoadIPAddress;
+
+			AvPMenus.MenuElements = AvPMenu_Multiplayer_LoadIPAddress;
 			break;
 		}
 
 		case AVPMENU_MULTIPLAYEROPENADDRESS :
 		{
-			extern void MakeOpenIPAddressMenu();
+
 			MakeOpenIPAddressMenu();
 			break;
 		}
@@ -1086,7 +1062,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 		while(elementPtr->ElementID != AVPMENU_ELEMENT_ENDOFMENU);
 	}
 
-	switch(menuID)
+	switch (menuID)
 	{
 		case AVPMENU_CHEATOPTIONS:
 		{
@@ -1225,7 +1201,7 @@ static void RenderMenu(void)
 				elementPtr->Brightness = targetBrightness;
 			}
 		}
-		
+
 		RenderMenuElement(elementPtr,e,y);
 		y += HeightOfMenuElement(elementPtr);
 	}
@@ -1235,21 +1211,7 @@ static void RenderMenu(void)
 	{
 		char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
 		RenderMenuText(textPtr, MENU_CENTREX, 70, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
-		
-#if 0 // and now we've been told to remove the "Gamers Edition" etc. :)
-		// main menu subtitle e.g. "Gamers Edition" etc.
-		if (AvPMenusData[AvPMenus.CurrentMenu].MenuTitle==TEXTSTRING_MAINMENU_TITLE)
-			RenderMenuText(GetTextString(TEXTSTRING_MAINMENU_SUBTITLE),MENU_CENTREX,100,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
-#endif
 	}
-
-	#if 0
-	else
-	{
-		char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
-		Hardware_RenderSmallMenuText(textPtr,MENU_CENTREX,70,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
-	}
-	#endif
 }
 
 static void RenderBriefingScreenInfo(void)
@@ -1274,27 +1236,6 @@ static void RenderBriefingScreenInfo(void)
 		}
 	}
 	RenderMenuText(GetTextString(textID),MENU_LEFTXEDGE,120,ONE_FIXED,AVPMENUFORMAT_LEFTJUSTIFIED);
-#if 0
-	switch (AvP.PlayerType)
-	{
-		case I_Marine:
-		{
-			textID = MarineEpisodeToPlay+TEXTSTRING_LEVELBRIEFING_MARINELEVELS_1;
-			break;
-		}
-		case I_Predator:
-		{
-			textID = PredatorEpisodeToPlay+TEXTSTRING_LEVELBRIEFING_PREDATORLEVELS_1;
-			break;
-		}
-		case I_Alien:
-		{
-			textID = AlienEpisodeToPlay+TEXTSTRING_LEVELBRIEFING_ALIENLEVELS_1;
-			break;
-		}
-	}
-	RenderMenuText(GetTextString(textID),MENU_LEFTXEDGE,180,ONE_FIXED/2,AVPMENUFORMAT_LEFTJUSTIFIED);
-#endif	
 
 	RenderBriefingText(/*ScreenDescriptorBlock.SDB_Height*/480 / 2, ONE_FIXED);
 }
@@ -1306,7 +1247,6 @@ static void RenderEpisodeSelectMenu(void)
 	AVPMENU_ELEMENT *elementPtr = &AvPMenus.MenuElements[AvPMenus.CurrentlySelectedElement];
 	int currentEpisode = *(elementPtr->SliderValuePtr);
 	int centrePosition = (currentEpisode)*65536+EpisodeSelectScrollOffset;
-//	enum AVPMENUGFX_ID graphicID;
 	texID_t graphicID;
 	I_PLAYER_TYPE playerID;
 	int i;
@@ -1403,8 +1343,8 @@ static void RenderEpisodeSelectMenu(void)
 					correctGraphicID += i;
 				}
 
-				RenderMenuText_Clipped(textPtr,MENU_LEFTXEDGE+150, yCoord, b,AVPMENUFORMAT_LEFTJUSTIFIED,MENU_CENTREY-60-100,MENU_CENTREY-60+180);
-				DrawAvPMenuGfx_Clipped(correctGraphicID/*+i*/, MENU_LEFTXEDGE, yCoord, b,AVPMENUFORMAT_LEFTJUSTIFIED, MENU_CENTREY-60-100, MENU_CENTREY-60+180);
+				RenderMenuText_Clipped(textPtr, MENU_LEFTXEDGE+150, yCoord, b, AVPMENUFORMAT_LEFTJUSTIFIED, MENU_CENTREY-60-100, MENU_CENTREY-60+180);
+				DrawAvPMenuGfx_Clipped(correctGraphicID, MENU_LEFTXEDGE, yCoord, b, AVPMENUFORMAT_LEFTJUSTIFIED, MENU_CENTREY-60-100, MENU_CENTREY-60+180);
 
 				if (MaximumSelectableLevel>=i)
 				{
@@ -1488,7 +1428,7 @@ static void RenderEpisodeSelectMenu(void)
 
 static void RenderKeyConfigurationMenu(void)
 {
-	AVPMENU_ELEMENT *elementPtr = AvPMenus.MenuElements;//AvPMenus.CurrentlySelectedElement];
+	AVPMENU_ELEMENT *elementPtr = AvPMenus.MenuElements;
 	int centrePosition;
 	int i;
 	int y;
@@ -1588,38 +1528,8 @@ static void RenderKeyConfigurationMenu(void)
 				targetBrightness = BRIGHTNESS_OF_DARKENED_ELEMENT;
 			}
 
-			#if 0
-			if (targetBrightness > elementPtr->Brightness)
-			{
-				elementPtr->Brightness+=BRIGHTNESS_CHANGE_SPEED;
-				if(elementPtr->Brightness>targetBrightness)
-				{
-					elementPtr->Brightness = targetBrightness;
-				}
-			}
-			else
-			{
-				elementPtr->Brightness-=BRIGHTNESS_CHANGE_SPEED;
-				if(elementPtr->Brightness<targetBrightness)
-				{
-					elementPtr->Brightness = targetBrightness;
-				}
-				
-			}
-			#else
 			elementPtr->Brightness = targetBrightness;
-			#endif
 			RenderMenuElement(elementPtr, i, centreY+y);
-			#if 0
-			if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
-			{
-				Hardware_RenderSmallMenuText(textPtr,MENU_LEFTXEDGE+150,centreY+y,b,AVPMENUFORMAT_LEFTJUSTIFIED/*,MENU_CENTREY-60-100,MENU_CENTREY-60+180*/);
-			}
-			else
-			{
-				RenderSmallMenuText(textPtr,MENU_LEFTXEDGE+150,centreY+y,b,AVPMENUFORMAT_LEFTJUSTIFIED/*,MENU_CENTREY-60-100,MENU_CENTREY-60+180*/);
-			}
-			#endif
 		}
 	}
 
@@ -1705,13 +1615,12 @@ static void RenderScrollyMenu()
 		}
 		while(!done);
 
-
 		//draw the appropriate elements
-		elementPtr=&elementPtr[first];
-		y=MENU_TOPY;
-		for(i=first;i<=last;i++,elementPtr++)
+		elementPtr = &elementPtr[first];
+		y = MENU_TOPY;
+
+		for (i = first; i <= last; i++, elementPtr++)
 		{
-//			char *textPtr = GetTextString(elementPtr->TextDescription);
 			int targetBrightness;
 
 			if (i==AvPMenus.CurrentlySelectedElement)
@@ -1726,11 +1635,10 @@ static void RenderScrollyMenu()
 			elementPtr->Brightness = targetBrightness;
 
 			RenderMenuElement(elementPtr, i, y);
-			y+=HeightOfMenuElement(elementPtr);
+			y += HeightOfMenuElement(elementPtr);
 		}
 	}
 }
-
 
 static void RenderUserProfileSelectMenu(void)
 {
@@ -1787,19 +1695,6 @@ static void RenderUserProfileSelectMenu(void)
 				char buffer[100];
 				char buffer2[100];
 				int nLen = 80;
-				/*sprintf(buffer,"%d:%d:%d  %d/%d/%d",
-					profilePtr->TimeLastUpdated.wHour,
-					profilePtr->TimeLastUpdated.wMinute,
-					profilePtr->TimeLastUpdated.wSecond,
-					profilePtr->TimeLastUpdated.wYear,
-					profilePtr->TimeLastUpdated.wMonth,
-					profilePtr->TimeLastUpdated.wDay);
-				*/
-//				time_t time_of_day;
-
-//			    time_of_day = time( NULL );
-//			  strftime( buffer, 80, "%c",
-//				     localtime( &time_of_day ) );
 
 #ifdef WIN32
 				nLen = GetDateFormat(GetThreadLocale(), DATE_LONGDATE, &profilePtr->TimeLastUpdated,
@@ -1814,11 +1709,11 @@ static void RenderUserProfileSelectMenu(void)
 #ifdef _XBOX
 				// manually format the string as we don't have either GetDateFormat or GetTimeFormat
 				sprintf(buffer2, "%02d:%02d:%02d %02d/%02d/%02d", 
-							profilePtr->TimeLastUpdated.wHour, 
-							profilePtr->TimeLastUpdated.wMinute, 
+							profilePtr->TimeLastUpdated.wHour,
+							profilePtr->TimeLastUpdated.wMinute,
 							profilePtr->TimeLastUpdated.wSecond,
-							profilePtr->TimeLastUpdated.wDay, 
-							profilePtr->TimeLastUpdated.wMonth, 
+							profilePtr->TimeLastUpdated.wDay,
+							profilePtr->TimeLastUpdated.wMonth,
 							profilePtr->TimeLastUpdated.wYear
 						);
 #endif
@@ -1949,10 +1844,6 @@ static void RenderLoadGameMenu(void)
 				char buffer2[100];
 				int nLen = 80;
 
-				// TODO. abstract out into system specific file
-
-				//GetLocalTime(&slotPtr->TimeStamp);
-
 #ifdef WIN32
 				nLen = GetDateFormat(GetThreadLocale(), DATE_SHORTDATE, &slotPtr->TimeStamp ,NULL, buffer, nLen);
 				nLen = GetTimeFormat(GetThreadLocale(), 0, &slotPtr->TimeStamp, NULL, buffer2, 100);
@@ -1963,11 +1854,11 @@ static void RenderLoadGameMenu(void)
 #ifdef _XBOX
 				// manually format the string as we don't have either GetDateFormat or GetTimeFormat
 				sprintf(buffer2, "%02d:%02d:%02d %02d/%02d/%02d", 
-							slotPtr->TimeStamp.wHour, 
-							slotPtr->TimeStamp.wMinute, 
+							slotPtr->TimeStamp.wHour,
+							slotPtr->TimeStamp.wMinute,
 							slotPtr->TimeStamp.wSecond,
-							slotPtr->TimeStamp.wDay, 
-							slotPtr->TimeStamp.wMonth, 
+							slotPtr->TimeStamp.wDay,
+							slotPtr->TimeStamp.wMonth,
 							slotPtr->TimeStamp.wYear
 						);
 #endif
@@ -2179,7 +2070,7 @@ static void ActUponUsersInput(void)
 
 						if ((*elementPtr->NumberPtr)>elementPtr->MaxValue)
 						{
-							(*elementPtr->NumberPtr)=elementPtr->MaxValue;	
+							(*elementPtr->NumberPtr)=elementPtr->MaxValue;
 						}
 					}
 				}
@@ -2199,9 +2090,11 @@ static void ActUponUsersInput(void)
 			signed int key,selectedKey=-1;
 
 			// see if a valid key has been pressed
-			/* bjd - changed from key <= MAX_NUMBER_OF_INPUT_KEYS
-			/* to
-			/* key < MAX_NUMBER_OF_INPUT_KEYS				*/
+			/* 
+			 * bjd - changed from key <= MAX_NUMBER_OF_INPUT_KEYS
+			 * to
+			 * key < MAX_NUMBER_OF_INPUT_KEYS
+			 */
 
 			for (key = 0 ; key < MAX_NUMBER_OF_INPUT_KEYS ; key++)
 			{
@@ -2237,10 +2130,8 @@ static void ActUponUsersInput(void)
 	}
 	else
 	{	
-//		if (DebouncedKeyboardInput[KEY_ESCAPE] && (AvPMenus.CurrentMenu != AVPMENU_MAIN && AvPMenus.CurrentMenu != AVPMENU_INGAME))
 		if ((DebouncedKeyboardInput[KEY_ESCAPE] || DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_4]) && (AvPMenus.CurrentMenu != AVPMENU_MAIN && AvPMenus.CurrentMenu != AVPMENU_INGAME))
 		{
-			//if (AvPMenus.CurrentMenu == AVPMENU_MULTIPLAYERJOINGAME2)
 			switch(AvPMenus.CurrentMenu)
 			{
 				case AVPMENU_MULTIPLAYER_CONFIG_JOIN:
@@ -2279,7 +2170,6 @@ static void ActUponUsersInput(void)
 				case AVPMENU_SKIRMISH_CONFIG :
 				{
 					//reload the previous multiplayer configuration
-					extern char MP_Config_Description[];
 					LoadMultiplayerConfiguration(GetTextString(TEXTSTRING_PREVIOUSGAME_FILENAME));
 					MP_Config_Description[0]=0;
 					break;
@@ -3046,22 +2936,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 		{
 			if (interactionID == AVPMENU_ELEMENT_INTERACTION_SELECT)
 			{
-//				netGameData.connectionType=elementPtr->Value;
-/*
-				if(netGameData.connectionType == CONN_Mplayer)
-				{
-					//exit the game and launch the mplayer stuff
-					LaunchingMplayer=TRUE;
-					LaunchMplayer();
-					AvP.MainLoopRunning = 0;
-					AvPMenus.MenusState = MENUSSTATE_OUTSIDEMENUS; 
-					break;
-				}
-				else
-*/
-				{
- 					SetupNewMenu(static_cast<enum AVPMENU_ID>(elementPtr->MenuToGoTo));
-				}
+				SetupNewMenu(static_cast<enum AVPMENU_ID>(elementPtr->MenuToGoTo));
 			}
 			break;
 		}
@@ -3138,8 +3013,6 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 						MarineInputPrimaryConfig   = PlayerInputPrimaryConfig;
 						MarineInputSecondaryConfig = PlayerInputSecondaryConfig;
 						{
-							extern int AutoWeaponChangeOn_Temp;
-							extern int AutoWeaponChangeOn;
 							AutoWeaponChangeOn = AutoWeaponChangeOn_Temp;
 						}
 						break;
@@ -3223,7 +3096,6 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 		case AVPMENU_ELEMENT_RESETMPCONFIG :
 		{
 			//reset the multiplayer configuration
-			extern void SetDefaultMultiplayerConfig();
 			SetDefaultMultiplayerConfig();
 			break;
 		}
@@ -3354,25 +3226,6 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 				break;
 			}
 		}
-		#if 0
-		case AVPMENU_ELEMENT_STARTALIENGAME:
-		case AVPMENU_ELEMENT_STARTMARINEGAME:
-		case AVPMENU_ELEMENT_STARTPREDATORGAME:
-		{
-			char *textPtr = GetTextString(elementPtr->TextDescription);
-			RenderText(textPtr,MENU_LEFTXEDGE,MENU_BOTTOMYEDGE,elementPtr->Brightness,AVPMENUFORMAT_LEFTJUSTIFIED);
-			break;
-		}
-	
-		case AVPMENU_ELEMENT_MARINEEPISODE:
-		case AVPMENU_ELEMENT_ALIENEPISODE:
-		case AVPMENU_ELEMENT_PREDATOREPISODE:
-		{
-			char *textPtr = GetTextString(elementPtr->TextDescription+*(elementPtr->SliderValuePtr));
-			RenderText(textPtr,MENU_LEFTXEDGE,MENU_TOPYEDGE,elementPtr->Brightness,AVPMENUFORMAT_LEFTJUSTIFIED);
-			break;
-		}
-		#endif
 
 		case AVPMENU_ELEMENT_DUMMYTEXTSLIDER:
 		case AVPMENU_ELEMENT_DUMMYTEXTSLIDER_POINTER:
@@ -3420,7 +3273,6 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 						elementPtr->Brightness,
 						AVPMENUFORMAT_LEFTJUSTIFIED
 					);
-
 				}
 				else
 				{
@@ -3663,7 +3515,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 		
 		case AVPMENU_ELEMENT_GOTOMENU_GFX:
 		{
-			DrawAvPMenuGfx(/*elementPtr->GfxID*/elementPtr->textureID, MENU_CENTREX,y,elementPtr->Brightness,AVPMENUFORMAT_CENTREJUSTIFIED);
+			DrawAvPMenuGfx(elementPtr->textureID, MENU_CENTREX,y,elementPtr->Brightness,AVPMENUFORMAT_CENTREJUSTIFIED);
 			break;
 		}
 		case AVPMENU_ELEMENT_LISTCHOICE:
@@ -3707,14 +3559,6 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 		}
 		case AVPMENU_ELEMENT_VIDEOMODE:
 		{
-/*			RenderText
-			(
-				GetTextString(elementPtr->TextDescription),
-				MENU_CENTREX-MENU_ELEMENT_SPACING,
-				y,
-				elementPtr->Brightness,
-				AVPMENUFORMAT_RIGHTJUSTIFIED
-			);	 */
 			RenderText
 			(
 				GetVideoModeDescription2(),
@@ -3895,23 +3739,9 @@ static int HeightOfMenuElement(AVPMENU_ELEMENT *elementPtr)
 			break;
 		}
 
-		#if 0
-		case AVPMENU_ELEMENT_STARTALIENGAME:
-		case AVPMENU_ELEMENT_STARTMARINEGAME:
-		case AVPMENU_ELEMENT_STARTPREDATORGAME:
-		#endif
-		/*
-		case AVPMENU_ELEMENT_DUMMYTEXTFIELD:
-		case AVPMENU_ELEMENT_TEXTFIELD:
-		{
-			h += MENU_FONT_HEIGHT*2;
-			break;
-		}
-		*/
-		
 		case AVPMENU_ELEMENT_GOTOMENU_GFX:
 		{
-			h += HeightOfMenuGfx(/*elementPtr->GfxID*/elementPtr->textureID);
+			h += HeightOfMenuGfx(elementPtr->textureID);
 			break;
 		}
 #if 0
@@ -3927,7 +3757,6 @@ static int HeightOfMenuElement(AVPMENU_ELEMENT *elementPtr)
 
 static char *GetDescriptionOfKey(unsigned char key)
 {
-//	static char KeyDescBuffer[2]="\0\0";
 	static char KeyDescBuffer[2];
 	KeyDescBuffer[0] = '\0';
 	KeyDescBuffer[1] = '\0';
@@ -4329,14 +4158,6 @@ static int OkayToPlayNextEpisode(void)
 			SaveUserProfile(UserProfilePtr);
 			SetupNewMenu(AVPMENU_MARINELEVELS);
 			return 1;
-			#if 0
-			if (MarineEpisodeToPlay<MAX_NO_OF_BASIC_MARINE_EPISODES-1)
-			{
-				MarineEpisodeToPlay++;
-				SetLevelToLoadForMarine(MarineEpisodeToPlay);
-				return 1;
-			}
-			#endif
 			break;
 		}
 		case I_Predator:
@@ -4348,14 +4169,6 @@ static int OkayToPlayNextEpisode(void)
 			SaveUserProfile(UserProfilePtr);
 			SetupNewMenu(AVPMENU_PREDATORLEVELS);
 			return 1;
-			#if 0
-			if (PredatorEpisodeToPlay<MAX_NO_OF_BASIC_PREDATOR_EPISODES-1)
-			{
-				PredatorEpisodeToPlay++;
-				SetLevelToLoadForPredator(PredatorEpisodeToPlay);
-				return 1;
-			}
-			#endif
 			break;
 		}
 		case I_Alien:
@@ -4367,20 +4180,11 @@ static int OkayToPlayNextEpisode(void)
 			SaveUserProfile(UserProfilePtr);
 			SetupNewMenu(AVPMENU_ALIENLEVELS);
 			return 1;
-			#if 0
-			if (AlienEpisodeToPlay<MAX_NO_OF_BASIC_ALIEN_EPISODES-1)
-			{
-				AlienEpisodeToPlay++;
-				SetLevelToLoadForAlien(AlienEpisodeToPlay);
-				return 1;
-			}
-			#endif
 			break;
 		}
 	}
 	return 0;
 }
-
 
 int NumberOfAvailableLevels(I_PLAYER_TYPE playerID)
 {
@@ -4589,7 +4393,7 @@ void DoCredits(void)
 		ThisFramesRenderingHasBegun();
 
 		DrawMainMenusBackdrop();
-	
+
 		FinishedCredits = !RollCreditsText(position, creditsPtr+4);
 		ShowMenuFrameRate();
 
@@ -4637,7 +4441,6 @@ BOOL RollCreditsText(int position, char *textPtr)
 					for (i=0; i<80 && (*textPtr!='\r')&&(*textPtr!='\n')&&(*textPtr!='\0')&&(*textPtr!='|'); i++)
 					{
 						buffer1[i] = *textPtr++;
-		//				if (buffer1[i]>='a' && buffer1[i]<='z') buffer1[i] += 'A' - 'a';
 					}
 					buffer1[i]=0;
 
@@ -4711,7 +4514,7 @@ extern void DrawMainMenusBackdrop(void)
 {
 	if (!PlayMenuBackgroundFmv())
 	{
-		DrawAvPMenuGfx(AVPMENUGFX_BACKDROP,0,0,ONE_FIXED+1,AVPMENUFORMAT_LEFTJUSTIFIED);
+		DrawAvPMenuGfx(AVPMENUGFX_BACKDROP, 0, 0, ONE_FIXED+1, AVPMENUFORMAT_LEFTJUSTIFIED);
 	}
 	/* PlayMenuBackgroundFmv takes care of rendering to screen */
 }
@@ -4753,7 +4556,6 @@ static void UpdateMultiplayerConfigurationMenu()
 		//make sure the level number is within bounds
 		netGameData.levelNumber%=NumCoopLevels;
 	}
-
 
 	//see if selected element is the gamestyle element
 	elementPtr = &AvPMenus.MenuElements[AvPMenus.CurrentlySelectedElement];
@@ -4881,15 +4683,15 @@ static BOOL IsMinigunInLevel(int level)
 static BOOL IsSadarInLevel(int level)
 {
 	if (level == AVP_ENVIRONMENT_MASSACRE ||
-	   level == AVP_ENVIRONMENT_MEATFACTORY_MP ||
-	   level == AVP_ENVIRONMENT_MEATFACTORY_COOP ||
-	   level == AVP_ENVIRONMENT_HADLEYSHOPE_MP ||
-	   level == AVP_ENVIRONMENT_HADLEYSHOPE_COOP ||
-	   level == AVP_ENVIRONMENT_HIVE ||
-	   level == AVP_ENVIRONMENT_HIVE_COOP ||
-	   level == AVP_ENVIRONMENT_KENS_COOP ||
-	   level == AVP_ENVIRONMENT_LEADWORKS_MP ||
-	   level == AVP_ENVIRONMENT_LEADWORKS_COOP)
+		level == AVP_ENVIRONMENT_MEATFACTORY_MP ||
+		level == AVP_ENVIRONMENT_MEATFACTORY_COOP ||
+		level == AVP_ENVIRONMENT_HADLEYSHOPE_MP ||
+		level == AVP_ENVIRONMENT_HADLEYSHOPE_COOP ||
+		level == AVP_ENVIRONMENT_HIVE ||
+		level == AVP_ENVIRONMENT_HIVE_COOP ||
+		level == AVP_ENVIRONMENT_KENS_COOP ||
+		level == AVP_ENVIRONMENT_LEADWORKS_MP ||
+		level == AVP_ENVIRONMENT_LEADWORKS_COOP)
 	{
 		return FALSE;
 	}
@@ -5092,7 +4894,6 @@ void CheckForKeysWithMultipleAssignments(void)
 			for (innerRow=0; innerRow<32; innerRow++)
 			{
 				if (innerRow==row) continue;
-				// && innerColumn==column) continue;
 				if ( (configPtr[column])[row]==(configPtr[innerColumn])[innerRow] )
 				{
 					MultipleAssignments[column][row] = 1;
@@ -5296,8 +5097,8 @@ static void GetHeaderInfoForSaveSlot(SAVE_SLOT_HEADER* save_slot, const char* fi
 
 	//a few checks
 	if (block.header.type != SaveBlock_MainHeader ||
-	   block.header.size != sizeof(block) ||
-	   strncmp(block.AvP_Save_String,"AVPSAVE0",8))
+		block.header.size != sizeof(block) ||
+		strncmp(block.AvP_Save_String,"AVPSAVE0",8))
 	{
 		//no good.
 		return;
@@ -5354,7 +5155,6 @@ static void CheckForLoadGame()
 		}
 	}
 }
-
 
 static void PasteFromClipboard(char* Text, int MaxTextLength)
 {

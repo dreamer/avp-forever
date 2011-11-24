@@ -177,9 +177,7 @@ enum AVPMENUFORMAT_ID
 	AVPMENUFORMAT_CENTREJUSTIFIED,
 };
 
-extern void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID);
 extern void LoadAllAvPMenuGfx(void);
-extern void LoadAllSplashScreenGfx(void);
 extern void ReleaseAllAvPMenuGfx(void);
 
 extern int RenderMenuText(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);

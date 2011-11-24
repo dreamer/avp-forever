@@ -12,9 +12,6 @@ extern void DirectReadKeyboard(void);
 extern void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha);
 extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
-
-static bool IntroHasAlreadyBeenPlayed = true;
-
 void Show_CopyrightInfo(void);
 void Show_Presents(void);
 void Show_ARebellionGame(void);
@@ -24,6 +21,7 @@ extern void Show_WinnerScreen(void);
 extern void DrawMainMenusBackdrop(void);
 extern void FadedScreen(int alpha);
 
+static bool IntroHasAlreadyBeenPlayed = true;
 extern bool bRunning;
 
 void WeWantAnIntro(void)
@@ -61,9 +59,6 @@ extern void PlayIntroSequence(void)
 
 extern void ShowSplashScreens(void)
 {
-	LoadAllSplashScreenGfx();
-
-//	enum AVPMENUGFX_ID graphic[] =
 	texID_t graphic[] =
 	{
 		AVPMENUGFX_SPLASH_SCREEN1, AVPMENUGFX_SPLASH_SCREEN2, AVPMENUGFX_SPLASH_SCREEN3,
@@ -113,8 +108,6 @@ extern void ShowSplashScreens(void)
 
 extern void Show_WinnerScreen(void)
 {
-//bjd	LoadAvPMenuGfx(AVPMENUGFX_WINNER_SCREEN);
-
 	int timeRemaining = 10*ONE_FIXED;
 	do
 	{
