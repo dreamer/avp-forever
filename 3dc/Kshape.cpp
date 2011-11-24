@@ -5336,44 +5336,37 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 	VECTOR2D offset[4];
 	int centreX, centreY;
 	int z = ONE_FIXED-scale;
+	// Mel - In the end, all we needed to do was to subtract screen's width and height
+	// from the SmartTargetSight, it's later used to aim predator shoulder cannon and
+	// marine smartgun, so we won't alter it to keep those from breaking, still need 
+	// to fix targeting segment's size, but the vertical error in widescreen is almost
+	// unoticeable
+	fixed_t centeredSmartTargetSightX = SmartTargetSightX - (ScreenDescriptorBlock.SDB_Width<<15);
+	fixed_t centeredSmartTargetSightY = SmartTargetSightY - (ScreenDescriptorBlock.SDB_Height<<15);
 
 	z = MUL_FIXED(MUL_FIXED(z,z), 2048);
-
-	/**
-	 * Melanikus - 17/11/2011
-	 * I'm not sure what all that did, but we just need the floating point of the center of the targeting system
-	 * which is given to us by 
-	 * centreX = (SmartTargetSightX / 65535.0f);
-	 * centreY = (SmartTargetSightY / 65535.0f);
-	 */
-	/*{
-		centreY = MUL_FIXED( (SmartTargetSightY-(ScreenDescriptorBlock.SDB_Height)) / Global_VDB_Ptr->VDB_ProjY, z);
+	{
+		centreY = MUL_FIXED( (centeredSmartTargetSightY-(ScreenDescriptorBlock.SDB_Height)) / Global_VDB_Ptr->VDB_ProjY, z);
 		if (MIRROR_CHEATMODE)
 		{
-			centreX = MUL_FIXED( ( - (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width))) / Global_VDB_Ptr->VDB_ProjX, z);
+			centreX = MUL_FIXED( ( - (centeredSmartTargetSightX-(ScreenDescriptorBlock.SDB_Width))) / Global_VDB_Ptr->VDB_ProjX, z);
 		}
 		else
 		{
-			centreX = MUL_FIXED( (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width)) / Global_VDB_Ptr->VDB_ProjX, z);
+			centreX = MUL_FIXED( (centeredSmartTargetSightX-(ScreenDescriptorBlock.SDB_Width)) / Global_VDB_Ptr->VDB_ProjX, z);
 		}
-	}*/
-	/*centreX = ((SmartTargetSightX / 65535.0f) - ScreenDescriptorBlock.SDB_Width) * 2;
-	centreY = ((SmartTargetSightY / 65535.0f) - ScreenDescriptorBlock.SDB_Height) * 2;*/
-	Global_VDB_Ptr->VDB_ProjX *= 1;
-	Global_VDB_Ptr->VDB_ProjY *= 1;
-	ScreenDescriptorBlock.SDB_Height;
-	ScreenDescriptorBlock.SDB_Width;
-	centreX = ((SmartTargetSightX / 65535.0f) - Global_VDB_Ptr->VDB_ProjX) * 4;
-	centreY = ((SmartTargetSightY / 65535.0f) - Global_VDB_Ptr->VDB_ProjY) * 4;
+	}
+	float posZ = z*CameraZoomScale;
+	
 
-	// Camera was used to make the quads smaler but our projection does not make the quads bigger
-	// z = (float)z*CameraZoomScale;
+
+
 
 	RHW_VERTEX list[4];
 
 	{
-		int a = 160;
-		int b = 40;
+		int a = 160 * CameraZoomScale;
+		int b = 40  * CameraZoomScale;
 
 		/* tan(30) = 1/sqrt(3), & 65536/(sqrt(3)) = 37837 */
 
@@ -5410,8 +5403,8 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 		// Send our quad to the center of the targetting system
 		for(int i = 0; i < 4; i++)
 		{
-			VerticesBuffer[i].X = offset[i].vx + centreX;
-			VerticesBuffer[i].Y = offset[i].vy + centreY;
+			VerticesBuffer[i].X = (offset[i].vx + centreX);
+			VerticesBuffer[i].Y = (offset[i].vy + centreY);
 		}
 	}
 
@@ -5437,9 +5430,9 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 
 			list[i].x = VerticesBuffer[i].X;
 			list[i].y = VerticesBuffer[i].Y;
-			list[i].z = z;
+			list[i].z = posZ;
 			list[i].color = RGBA_MAKE(VerticesBuffer[i].R, VerticesBuffer[i].G, VerticesBuffer[i].B, VerticesBuffer[i].A);
-			list[i].rhw = z;
+			list[i].rhw = posZ;
 			list[i].u = 0.5f;
 			list[i].v = 0.5f;
 		}
