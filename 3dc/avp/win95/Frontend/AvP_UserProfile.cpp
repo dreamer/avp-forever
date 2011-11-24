@@ -9,14 +9,10 @@
 #include "GammaControl.h"
 #include "psnd.h"
 #include "cd_player.h"
-
 #define UseLocalAssert TRUE
 #include "ourasert.h"
-
- // Edmond
 #include "pldnet.h"
 #include <time.h>
-
 #include "utilities.h"
 
 static int LoadUserProfiles(void);
@@ -189,8 +185,46 @@ static int ProfileIsMoreRecent(AVP_USER_PROFILE *profilePtr, AVP_USER_PROFILE *p
 	return 0;
 }
 
+#include "FileStream.h"
+
 static int LoadUserProfiles(void)
 {
+#if 0 // filestream test
+	std::vector<std::string> profileFiles;
+	std::string path = GetSaveFolderPath();
+	path += "User_Profiles/";
+
+//	path += USER_PROFILES_WILDCARD_NAME;
+
+	if (FindFiles(path + "*.prf", profileFiles))
+	{
+		for (size_t i = 0; i < profileFiles.size(); i++)
+		{
+			FileStream findFile;
+
+			findFile.Open(path + profileFiles[i], FileStream::FileRead);
+			if (!findFile.IsGood())
+				continue;
+
+			AVP_USER_PROFILE *profilePtr = new AVP_USER_PROFILE;
+
+			// read in profile file
+			findFile.ReadBytes((uint8_t*)profilePtr, sizeof(AVP_USER_PROFILE));
+
+			// do extra stuff
+/* TODO
+			FILETIME ftLocal;
+			FileTimeToLocalFileTime(&wfd.ftLastWriteTime, &ftLocal);
+			FileTimeToSystemTime(&ftLocal, &profilePtr->TimeLastUpdated);
+			profilePtr->FileTime = ftLocal;
+*/
+			InsertProfileIntoList(profilePtr);
+		}
+	}
+
+	return 1;
+#else
+
 	TCHAR strPath[MAX_PATH];
 
 	strcpy(strPath, GetSaveFolderPath());
@@ -281,6 +315,7 @@ static int LoadUserProfiles(void)
 	::FindClose(hFindFile);
 
 	return 1;
+#endif
 }
 
 static void SetDefaultProfileOptions(AVP_USER_PROFILE *profilePtr)

@@ -1972,21 +1972,22 @@ void SaveDefaultPrimaryConfigs(void)
 	FILE* file = avp_fopen("default.cfg","wb");
 	if (!file) return;
 
-	fwrite(&DefaultMarineInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
-	fwrite(&DefaultPredatorInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
-	fwrite(&DefaultAlienInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
+	fwrite(&DefaultMarineInputPrimaryConfig,   sizeof(PLAYER_INPUT_CONFIGURATION), 1, file);
+	fwrite(&DefaultPredatorInputPrimaryConfig, sizeof(PLAYER_INPUT_CONFIGURATION), 1, file);
+	fwrite(&DefaultAlienInputPrimaryConfig,    sizeof(PLAYER_INPUT_CONFIGURATION), 1, file);
 
 	fclose(file);
 }
+
 void LoadDefaultPrimaryConfigs(void)
 {
 #ifdef WIN32
 	FILE* file = avp_fopen("default.cfg","rb");
 	if (!file) return;
 
-	fread(&DefaultMarineInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
-	fread(&DefaultPredatorInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
-	fread(&DefaultAlienInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
+	fread(&DefaultMarineInputPrimaryConfig,   sizeof(PLAYER_INPUT_CONFIGURATION), 1, file);
+	fread(&DefaultPredatorInputPrimaryConfig, sizeof(PLAYER_INPUT_CONFIGURATION), 1, file);
+	fread(&DefaultAlienInputPrimaryConfig,    sizeof(PLAYER_INPUT_CONFIGURATION), 1, file);
 
 	fclose(file);
 #endif
