@@ -678,10 +678,12 @@ bool CreateVolatileResources()
 
 	// decal buffers
 	d3d.decalVB = new VertexBuffer;
-	d3d.decalVB->Create(8192, FVF_DECAL, USAGE_DYNAMIC);
+	// (MAX_NO_OF_DECALS + MAX_NO_OF_FIXED_DECALS) * 4 * 2 (as we have mirrored decals so we redraw everything)
+	d3d.decalVB->Create(8192 * 2, FVF_DECAL, USAGE_DYNAMIC);
 
 	d3d.decalIB = new IndexBuffer;
-	d3d.decalIB->Create(12288, USAGE_DYNAMIC);
+	// (MAX_NO_OF_DECALS + MAX_NO_OF_FIXED_DECALS) * 6 * 2 (as we have mirrored decals so we redraw everything)
+	d3d.decalIB->Create(12288 * 2, USAGE_DYNAMIC);
 
 	SetRenderStateDefaults();
 

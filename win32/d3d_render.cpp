@@ -35,8 +35,6 @@
 
 bool frustumCull = false;
 
-uint32_t nParticles = 0;
-
 #define FMV_ON 0
 #define FMV_SIZE 128
 
@@ -344,15 +342,7 @@ static bool ExecuteBuffer()
 	// and they HAVE to be called before the below code)
 	DrawParticles();
 	DrawCoronas();
-/*
-	char buf[100];
-	if (nParticles)
-	{
-		sprintf(buf, "%d decals this frame\n", nParticles);
-		OutputDebugString(buf);
-	}
-	nParticles = 0;
-*/
+
 	if (mainList->GetSize())
 	{
 		// set vertex declaration
@@ -377,7 +367,6 @@ static bool ExecuteBuffer()
 	// render any decals
 	if (decalList->GetSize())
 	{
-#if 0 // TODO - fix decal code
 		// set vertex declaration
 		d3d.decalDecl->Set();
 
@@ -394,7 +383,6 @@ static bool ExecuteBuffer()
 
 		// daw the ortho list
 		decalList->Draw();
-#endif
 	}
 
 	// render any particles
@@ -1765,8 +1753,6 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 	}
 
 	decalList->CreateIndices(decalIndex, RenderPolygon.NumberOfVertices);
-
-	nParticles ++;;
 }
 
 void AddCorona(PARTICLE *particlePtr, VECTORCHF *coronaPoint)
@@ -1927,12 +1913,10 @@ void PostLandscapeRendering()
 {
 	int numOfObjects = NumOnScreenBlocks;
 
- //bjd - commenting out 	CurrentRenderStates.FogIsOn = 1;
-
 	if (!strcmp(LevelName,"fall") || !strcmp(LevelName,"fall_m"))
 	{
 		bool drawWaterFall = false;
-		bool drawStream = false;
+		bool drawStream    = false;
 
 		while (numOfObjects)
 		{
@@ -2005,7 +1989,7 @@ void PostLandscapeRendering()
 	}
 	else if (!_stricmp(LevelName,"invasion_a"))
 	{
-		bool drawWater = false;
+		bool drawWater    = false;
 		bool drawEndWater = false;
 
 		while (numOfObjects)
@@ -2160,7 +2144,7 @@ void PostLandscapeRendering()
 	}
 	else if (!_stricmp(LevelName, "genshd1"))
 	{
-		bool drawWater = 0;
+		bool drawWater = false;
 
 		while (numOfObjects)
 		{

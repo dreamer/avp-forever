@@ -4430,9 +4430,9 @@ void RenderDecal(DECAL *decalPtr)
 
 #endif
 
-	int outcode = DecalWithinFrustum(decalPtr);
+//	int outcode = DecalWithinFrustum(decalPtr);
 
-	if (1)//(outcode) // bjd
+//	if (outcode) // bjd
 	{
 		switch (decalPtr->DecalID)
 		{
@@ -4866,35 +4866,35 @@ void RenderMirroredDecal(DECAL *decalPtr)
     /* translate decal into view space */
 	translatedPosition = decalPtr->Vertices[0];
 	translatedPosition.vx = MirroringAxis - translatedPosition.vx;
-	TranslatePointIntoViewspace(&translatedPosition);
+//	TranslatePointIntoViewspace(&translatedPosition);
 	VerticesBuffer[0].X = translatedPosition.vx;
 	VerticesBuffer[0].Y = translatedPosition.vy;
 	VerticesBuffer[0].Z = translatedPosition.vz;
 
 	translatedPosition = decalPtr->Vertices[1];
 	translatedPosition.vx = MirroringAxis - translatedPosition.vx;
-	TranslatePointIntoViewspace(&translatedPosition);
+//	TranslatePointIntoViewspace(&translatedPosition);
 	VerticesBuffer[1].X = translatedPosition.vx;
 	VerticesBuffer[1].Y = translatedPosition.vy;
 	VerticesBuffer[1].Z = translatedPosition.vz;
 
 	translatedPosition = decalPtr->Vertices[2];
 	translatedPosition.vx = MirroringAxis - translatedPosition.vx;
-	TranslatePointIntoViewspace(&translatedPosition);
+//	TranslatePointIntoViewspace(&translatedPosition);
 	VerticesBuffer[2].X = translatedPosition.vx;
 	VerticesBuffer[2].Y = translatedPosition.vy;
 	VerticesBuffer[2].Z = translatedPosition.vz;
 
 	translatedPosition = decalPtr->Vertices[3];
 	translatedPosition.vx = MirroringAxis - translatedPosition.vx;
-	TranslatePointIntoViewspace(&translatedPosition);
+//	TranslatePointIntoViewspace(&translatedPosition);
 	VerticesBuffer[3].X = translatedPosition.vx;
 	VerticesBuffer[3].Y = translatedPosition.vy;
 	VerticesBuffer[3].Z = translatedPosition.vz;
 
-	int outcode = DecalWithinFrustum(decalPtr);
+//	int outcode = DecalWithinFrustum(decalPtr);
 
-	if (outcode) // bjd
+//	if (outcode) // bjd
 	{
 		switch (decalPtr->DecalID)
 		{
