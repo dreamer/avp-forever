@@ -71,11 +71,11 @@ bool FF_Init()
 	// search fast file folder for list of fast files
 	std::vector<std::string> fastFiles;
 
-	if (FindFiles("fastfile\\*.FFL", fastFiles))
+	if (FindFiles("fastfile/*.FFL", fastFiles))
 	{
 		for (size_t i = 0; i < fastFiles.size(); i++)
 		{
-			FF_Open("fastfile\\" + fastFiles[i]);
+			FF_Open("fastfile/" + fastFiles[i]);
 		}
 
 		// only set to true if some fast files were found and loaded
@@ -169,6 +169,9 @@ static bool FF_Open(const std::string &fastFileName)
 		// make the whole filename string lowercase
 		std::string requestedFile = fileName;
 		std::transform(requestedFile.begin(), requestedFile.end(), requestedFile.begin(), tolower);
+
+		// change backslashes in path to forwardslashes
+		std::replace(requestedFile.begin(), requestedFile.end(), '\\', '/');
 
 		fastFileMap.insert(std::make_pair(requestedFile, newHandle));
 	}

@@ -109,9 +109,8 @@ void FileStream::Close()
 	isGood = false;
 }
 
-bool FileStream::GetCurrentPos(int64_t &position)
+int64_t FileStream::GetCurrentPos()
 {
-	// TODO: check this is correct
 	LARGE_INTEGER theOffset;
 	theOffset.QuadPart = 0;
 
@@ -119,11 +118,10 @@ bool FileStream::GetCurrentPos(int64_t &position)
 
 	if (::SetFilePointerEx(fileHandle, theOffset, &theOffset2, FILE_CURRENT) == 0)
 	{
-		return false;
+		return -1;
 	}
 
-	position = theOffset2.QuadPart;
-	return true;
+	return theOffset2.QuadPart;
 }
 
 bool FileStream::Seek(int64_t offset, eSeek seekType)
@@ -208,89 +206,102 @@ uint32_t FileStream::GetFileSize()
 uint8_t FileStream::GetByte()
 {
 	uint8_t ret;
-	ReadBytes(&ret, sizeof(uint8_t));
+	ReadBytes(&ret, sizeof(ret));
 	return ret;
 }
 
 uint16_t FileStream::GetUint16LE()
 {
 	uint16_t ret;
-	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(uint16_t));
+	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(ret));
 	return ret;
 }
 
 uint16_t FileStream::GetUint16BE()
 {
 	uint16_t ret;
-	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(uint16_t));
+	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(ret));
 	return _byteswap_ushort(ret);
 }
 
 uint32_t FileStream::GetUint32LE()
 {
 	uint32_t ret;
-	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(uint32_t));
+	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(ret));
 	return ret;
 }
 
 uint32_t FileStream::GetUint32BE()
 {
 	uint32_t ret;
-	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(uint32_t));
+	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(ret));
 	return _byteswap_ulong(ret);
 }
 
 uint64_t FileStream::GetUint64LE()
 {
 	uint64_t ret;
-	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(uint64_t));
+	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(ret));
 	return ret;
 }
 
 uint64_t FileStream::GetUint64BE()
 {
 	uint64_t ret;
-	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(uint64_t));
+	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(ret));
 	return _byteswap_uint64(ret);
+}
+
+uint8_t FileStream::PeekByte()
+{
+	uint8_t ret;
+	ReadBytes(&ret, sizeof(ret));
+	Seek(-1, SeekCurrent);
+	return ret;
+}
+
+bool FileStream::SkipBytes(int64_t nBytes)
+{
+	return Seek(nBytes, SeekCurrent);
 }
 
 // Write
 void FileStream::PutByte(uint8_t value)
 {
-	WriteBytes(&value, sizeof(uint8_t));
+	WriteBytes(&value, sizeof(value));
 }
 
 void FileStream::PutUint16LE(uint16_t value)
 {
-	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(uint16_t));
+	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(value));
 }
 
 void FileStream::PutUint16BE(uint16_t value)
 {
 	_byteswap_ushort(value);
-	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(uint16_t));
+	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(value));
 }
 
 void FileStream::PutUint32LE(uint32_t value)
 {
-	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(uint32_t));
+	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(value));
 }
 
 void FileStream::PutUint32BE(uint32_t value)
 {
 	_byteswap_ulong(value);
-	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(uint32_t));
+	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(value));
 }
 
 void FileStream::PutUint64LE(uint64_t value)
 {
-	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(uint64_t));
+	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(value));
 }
 
 void FileStream::PutUint64BE(uint64_t value)
 {
 	_byteswap_uint64(value);
-	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(uint64_t));
+	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(value));
 }
 
 bool FileStream::DoesFileExist(const std::string &fileName)

@@ -1,11 +1,9 @@
 #include "3dc.h"
 #include "inline.h"
 #include "module.h"
-
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "psndplat.h"
-
 #include "list_tem.hpp"
 #include "jsndsup.h"
 
@@ -87,12 +85,9 @@ static int find_permanent_game_sound(const char * wavname)
 
 	for (int i=0; i<SID_MAXIMUM; i++)
 	{
-		if (GameSounds[i].wavName)
+		if (!(_stricmp(GameSounds[i].wavName.c_str(), wavname)))
 		{
-			if (!(_stricmp( GameSounds[i].wavName, wavname)))
-			{
-				return i;
-			}
+			return i;
 		}
 	}
 	return -1;
@@ -102,7 +97,7 @@ LOADED_SOUND const * GetSound(char const *fname)
 {
 	if (!SoundSwitchedOn) return 0;
 
-	const char * wavname = strrchr (fname, '\\');
+	const char * wavname = strrchr (fname, '/');
 	
 	if (wavname)
 	{
@@ -171,4 +166,3 @@ LOADED_SOUND const * GetSound(char const *fname)
 	
 	return ls;
 }
-

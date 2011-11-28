@@ -44,8 +44,9 @@ typedef struct soundsampledata
 
 	uint32_t flags;
 	int dsFrequency;
-	char * wavName;
-	int length; //time in fixed point seconds
+	std::string wavName;
+
+	fixed_t length; // time in fixed point seconds
 
 	// constructor
 	soundsampledata()
@@ -67,7 +68,6 @@ typedef struct soundsampledata
 
 		flags = 0;
 		dsFrequency = 0;
-		wavName = 0;
 		length = 0;
 	}
 	
@@ -145,7 +145,7 @@ typedef struct pwavriffheader
 } PWAVRIFFHEADER;
 
 void InitialiseBaseFrequency(SOUNDINDEX soundNum);
-int LoadWavFile(int soundNum, const char *fileName);
+int LoadWavFile(int soundNum, const std::string &fileName);
 
 /* Patrick 5/6/97 -------------------------------------------------------------
   Start and EndSoundSys: does any platform operations required to initialise

@@ -158,7 +158,7 @@ void SoundBehaveFun (STRATEGYBLOCK * sbptr)
 	{
 		if (sbb->sound_loaded && sbb->activ_no != SOUND_NOACTIVEINDEX)
 		{
-			if (!_stricmp(GameSounds[sbb->sound_loaded->sound_num].wavName, "siren.wav"))
+			if (!_stricmp(GameSounds[sbb->sound_loaded->sound_num].wavName.c_str(), "siren.wav"))
 			{
 				if (AvP.DestructTimer < ONE_FIXED * 10)
 				{

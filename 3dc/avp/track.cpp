@@ -159,7 +159,7 @@ void Start_Track_Sound(TRACK_SOUND* ts,VECTORCH * location)
 	}
 	ts->time_left=GameSounds[ts->sound_loaded->sound_num].length;
 
-	db_logf3(("Playing sound %d\t%s",ts->sound_loaded->sound_num,GameSounds[ts->sound_loaded->sound_num].wavName));
+	db_logf3(("Playing sound %d\t%s",ts->sound_loaded->sound_num,GameSounds[ts->sound_loaded->sound_num].wavName.c_str()));
 }
 
 void Stop_Track_Sound(TRACK_SOUND* ts)

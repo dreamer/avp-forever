@@ -49,6 +49,7 @@
 #include "inventry.h"
 #include <vector>
 #include "TextureManager.h"
+#include "utilities.h"
 
 // store texture handles for ingame textures
 std::vector<texID_t> ingameTextureList;
@@ -469,7 +470,7 @@ Global_Hierarchy_Store::Global_Hierarchy_Store (RIFFHANDLE h)
 			sound_array[index].volume=isc->max_volume;
 			if (dir_chunk)
 			{
-				sprintf(wavname, "%s\\%s", dir_chunk->directory, isc->wav_name);
+				sprintf(wavname, "%s/%s", dir_chunk->directory, isc->wav_name);
 				sound_array[index].sound_loaded = GetSound(wavname);
 			}
 			else
@@ -2622,7 +2623,9 @@ texID_t load_rif_bitmap(char const * fname, BMPN_Flags flags)
 {
 	std::string fileName = fname;
 
-	texID_t textureID = Tex_CreateFromRIM("graphics\\" + fileName);
+	ChangeSlashes(fileName);
+
+	texID_t textureID = Tex_CreateFromRIM("graphics/" + fileName);
 /*
 		CL_LoadImageOnce
 		(

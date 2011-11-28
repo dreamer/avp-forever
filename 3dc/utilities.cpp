@@ -43,6 +43,12 @@ extern void ReleaseDirect3D();
 	extern HWND	hWndMain;
 #endif
 
+void ChangeSlashes(std::string &theString)
+{
+	// change backslashes in path to forwardslashes
+	std::replace(theString.begin(), theString.end(), '\\', '/');
+}
+
 char *GetSaveFolderPath()
 {
 	// check if we've got the path previously and use it again

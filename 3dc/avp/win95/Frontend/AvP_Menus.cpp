@@ -1447,7 +1447,7 @@ static void RenderKeyConfigurationMenu(void)
 	{
 		char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
 		int b;
-		if (AvPMenus.CurrentlySelectedElement>=2)
+		if (AvPMenus.CurrentlySelectedElement >= 2)
 		{
 			b = ONE_FIXED;
 		}
@@ -1457,7 +1457,7 @@ static void RenderKeyConfigurationMenu(void)
 		}
 		
 		RenderKeyConfigRectangle(b);
-		RenderMenuText(textPtr,MENU_CENTREX,70,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
+		RenderMenuText(textPtr, MENU_CENTREX, 70, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
 	}
 	else
 	{
@@ -1509,14 +1509,13 @@ static void RenderKeyConfigurationMenu(void)
 	}
 	centrePosition = (AvPMenus.CurrentlySelectedElement)*ONE_FIXED;
 	if (centrePosition<2*ONE_FIXED) centrePosition = 2*ONE_FIXED;
+
 	for (i=2; i<AvPMenus.NumberOfElementsInMenu; i++,elementPtr++)
 	{
-
 		y = MUL_FIXED(i*65536-centrePosition,20);
 
 		if (y>=-100 && y<=100)
 		{
-//			char *textPtr = GetTextString(elementPtr->TextDescription);
 			int targetBrightness;
 
 			if (i==AvPMenus.CurrentlySelectedElement)
@@ -1533,20 +1532,20 @@ static void RenderKeyConfigurationMenu(void)
 		}
 	}
 
-	if (EpisodeSelectScrollOffset>0)
+	if (EpisodeSelectScrollOffset > 0)
 	{
-		EpisodeSelectScrollOffset -= MUL_FIXED(EpisodeSelectScrollOffset*2+8192,RealFrameTime<<1);
-		if (EpisodeSelectScrollOffset<0)
+		EpisodeSelectScrollOffset -= MUL_FIXED(EpisodeSelectScrollOffset*2+8192, RealFrameTime<<1);
+		if (EpisodeSelectScrollOffset < 0)
 		{
-			EpisodeSelectScrollOffset=0;
+			EpisodeSelectScrollOffset = 0;
 		}
 	}
-	else if (EpisodeSelectScrollOffset<0)
+	else if (EpisodeSelectScrollOffset < 0)
 	{
-		EpisodeSelectScrollOffset += MUL_FIXED(-EpisodeSelectScrollOffset*2+8192,RealFrameTime<<1);
-		if (EpisodeSelectScrollOffset>0)
+		EpisodeSelectScrollOffset += MUL_FIXED(-EpisodeSelectScrollOffset*2 + 8192,RealFrameTime<<1);
+		if (EpisodeSelectScrollOffset > 0)
 		{
-			EpisodeSelectScrollOffset=0;
+			EpisodeSelectScrollOffset = 0;
 		}
 	}
 }
@@ -3237,11 +3236,11 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 		case AVPMENU_ELEMENT_CHEATMODE_ENVIRONMENT_TEXTSLIDER:
 		{
 			char *textPtr = "";
-			if(elementPtr->ElementID == AVPMENU_ELEMENT_TEXTSLIDER_POINTER ||
-			   elementPtr->ElementID == AVPMENU_ELEMENT_DUMMYTEXTSLIDER_POINTER)	
+			if (elementPtr->ElementID == AVPMENU_ELEMENT_TEXTSLIDER_POINTER ||
+			    elementPtr->ElementID == AVPMENU_ELEMENT_DUMMYTEXTSLIDER_POINTER)	
 			{
 				//we have a pointer to the strings rather than the first string index
-				if(elementPtr->TextSliderStringPointer)
+				if (elementPtr->TextSliderStringPointer)
 				{
 					textPtr = elementPtr->TextSliderStringPointer[*(elementPtr->SliderValuePtr)];
 				}
@@ -3546,7 +3545,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 
 			if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 			{
-				D3D_DrawSliderBar(/*MENU_CENTREX*/(ScreenDescriptorBlock.SDB_Width/2)+MENU_ELEMENT_SPACING,y+1,elementPtr->Brightness);
+				D3D_DrawSliderBar(/*MENU_CENTREX*/(ScreenDescriptorBlock.SDB_Width/2)+MENU_ELEMENT_SPACING, y+1, elementPtr->Brightness);
 				D3D_DrawSlider(x,y+4,elementPtr->Brightness);
 			}
 			else

@@ -112,7 +112,7 @@ LOADED_SOUND const * GetSoundForMainRif(const char* wav_name)
 	static char filename[200];
 	if (Rif_Sound_Directory)
 	{
-		sprintf(filename, "%s\\%s", Rif_Sound_Directory, wav_name);
+		sprintf(filename, "%s/%s", Rif_Sound_Directory, wav_name);
 		return GetSound(filename);
 	}
 	else
@@ -3677,9 +3677,9 @@ void DealWithExternalObjectStategies (Environment_Data_Chunk * envd)
 }
 
 
-void setup_sounds (Environment_Data_Chunk * envd)
+void setup_sounds (Environment_Data_Chunk *envd)
 {
-	Special_Objects_Chunk * soc = 0;
+	Special_Objects_Chunk *soc = 0;
 
  	Chunk * pChunk = envd->lookup_single_child ("SPECLOBJ");
 	if (pChunk)
@@ -3693,8 +3693,8 @@ void setup_sounds (Environment_Data_Chunk * envd)
 		soc->lookup_child("SOUNDOB2",cl);
 		for (LIF<Chunk *> cli(&cl); !cli.done(); cli.next())
 		{
-			Sound_Object_Chunk * snd = (Sound_Object_Chunk *) cli();
-			SOUND_TOOLS_TEMPLATE* stt =(SOUND_TOOLS_TEMPLATE*) PoolAllocateMem(sizeof(SOUND_TOOLS_TEMPLATE));
+			Sound_Object_Chunk *snd = (Sound_Object_Chunk *) cli();
+			SOUND_TOOLS_TEMPLATE *stt = (SOUND_TOOLS_TEMPLATE*) PoolAllocateMem(sizeof(SOUND_TOOLS_TEMPLATE));
 			
 			stt->position.vx = (int)(snd->position.x * local_scale);
 			stt->position.vy = (int)(snd->position.y * local_scale);
@@ -3717,13 +3717,11 @@ void setup_sounds (Environment_Data_Chunk * envd)
 				stt->loop=0;
 			else
 				stt->loop=1;
-		
 
-			stt->sound_name =(char*) PoolAllocateMem(strlen (snd->wav_name) + 1);
-			strcpy(stt->sound_name,snd->wav_name);
-			stt->sound_loaded=GetSoundForMainRif(snd->wav_name);
-			
-		
+			stt->sound_name = (char*) PoolAllocateMem(strlen (snd->wav_name) + 1);
+			strcpy(stt->sound_name, snd->wav_name);
+			stt->sound_loaded = GetSoundForMainRif(snd->wav_name);
+
 			AddToBehaviourList(snd->snd_name,snd->CalculateID(), I_BehaviourPlacedSound, (void *) stt);
 		}
 	}

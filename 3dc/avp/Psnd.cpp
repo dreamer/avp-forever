@@ -145,7 +145,7 @@ void SoundSys_Management(void)
 		{
 			if (ActiveSounds[i].soundIndex != SID_NOSOUND)
 			{
-				PrintDebuggingText("%s\n",GameSounds[ActiveSounds[i].soundIndex].wavName);
+				PrintDebuggingText("%s\n",GameSounds[ActiveSounds[i].soundIndex].wavName.c_str());
 			}
 		}
 	}
@@ -677,10 +677,9 @@ unsigned int SoundNumActiveVoices()
   ----------------------------------------------------------------------------*/
 static int FindFreeActiveSound(unsigned int min, unsigned int max)
 {
-	int i;
-	for(i = min; (i < max); i++) 
+	for (int i = min; (i < max); i++) 
 	{
-		if(ActiveSounds[i].soundIndex == SID_NOSOUND) return i;
+		if (ActiveSounds[i].soundIndex == SID_NOSOUND) return i;
 	}
 	return SOUND_NOACTIVEINDEX;
 }
@@ -789,7 +788,7 @@ void Save_SoundState(int* soundHandle)
 		ACTIVESOUNDSAMPLE* sound = &ActiveSounds[*soundHandle];
 		
 		SOUND_SAVE_BLOCK* block;
-		const char* name = GameSounds[sound->soundIndex].wavName;
+		const char* name = GameSounds[sound->soundIndex].wavName.c_str();
 		int name_length = strlen(name) + 1;
 
 		block = static_cast<SOUND_SAVE_BLOCK*>(GetPointerForSaveBlock(sizeof(*block)+name_length));
@@ -875,7 +874,7 @@ void Save_SoundsWithNoReference()
 				ACTIVESOUNDSAMPLE* sound = &ActiveSounds[i];
 				SOUND_SAVE_BLOCK* block;
 
-				const char* name = GameSounds[sound->soundIndex].wavName;
+				const char* name = GameSounds[sound->soundIndex].wavName.c_str();
 				int name_length = strlen(name) + 1;
 
 				block = static_cast<SOUND_SAVE_BLOCK*>(GetPointerForSaveBlock(sizeof(*block)+name_length));
@@ -919,20 +918,19 @@ void Save_SoundsWithNoReference()
 
 static SOUNDINDEX GetSoundIndexFromNameAndIndex(const char* name,SOUNDINDEX index)
 {
-	int i;
-	if(index>=0 && index<SID_MAXIMUM)
+	if (index >= 0 && index < SID_MAXIMUM)
 	{
-		if(GameSounds[index].loaded)
+		if (GameSounds[index].loaded)
 		{
-			if(!strcmp(GameSounds[index].wavName,name)) return index;
+			if (!strcmp(GameSounds[index].wavName.c_str(), name)) return index;
 		}
 	}
 
-	for(i=0;i<SID_MAXIMUM;i++)
+	for (int i = 0; i < SID_MAXIMUM;i++)
 	{
-		if(GameSounds[i].loaded)
+		if (GameSounds[i].loaded)
 		{
-			if(!strcmp(GameSounds[i].wavName,name)) return (SOUNDINDEX) i;
+			if (!strcmp(GameSounds[i].wavName.c_str(), name)) return (SOUNDINDEX) i;
 		}
 	}
 	return SID_NOSOUND;

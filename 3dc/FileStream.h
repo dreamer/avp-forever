@@ -88,6 +88,8 @@ class FileStream
 		uint64_t GetUint64LE();
 		uint64_t GetUint64BE();
 
+		uint8_t PeekByte();
+
 		void PutByte(uint8_t value);
 		void PutUint16LE(uint16_t value);
 		void PutUint16BE(uint16_t value);
@@ -101,7 +103,8 @@ class FileStream
 		uint32_t GetFileSize();
 		bool DoesFileExist(const std::string &fileName);
 		bool Seek(int64_t offset, eSeek seekType);
-		bool GetCurrentPos(int64_t &position);
+		bool SkipBytes(int64_t nBytes);
+		int64_t FileStream::GetCurrentPos();
 
 	private:
 		HANDLE fileHandle;

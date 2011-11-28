@@ -20,7 +20,9 @@
 #include "ffstdio.h"
 #include "db.h"
 #include "dxlog.h"
-#include <algorithm>
+#include "FileStream.h"
+
+int ExtractWavFile(int soundNum, FileStream &fStream);
 
 #define PRED_PISTOL_PITCH_CHANGE 300
 
@@ -32,7 +34,7 @@
 #define USE_COMMON_FLL_FILE  (LOAD_USING_FASTFILES||PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO||DEATHMATCH_DEMO)
 
 char * SecondSoundDir = 0;
-static const char *FirstSoundDir = "SOUND\\";
+static const char *FirstSoundDir = "sound/";
 
 /* Andy 9/6/97 ----------------------------------------------------------------
   Internal globals  
@@ -555,65 +557,22 @@ void PlayCudgelSound(void)
 
 int FindAndLoadWavFile(int soundNum, char* wavFileName)
 {
-	char sound_name[MAX_PATH];
-	sprintf(sound_name, "%s%s", FirstSoundDir, wavFileName);
+	std::string fileName = FirstSoundDir;
+	fileName += wavFileName;
 
-	std::string fileName = sound_name;
-		
-	// change forwardslashes in path to backslashes
-	std::replace(fileName.begin(), fileName.end(), '/', '\\');
+	ChangeSlashes(fileName);
 
-	return LoadWavFile(soundNum, fileName.c_str());
+	return LoadWavFile(soundNum, fileName);
 }
 
 /* Patrick 5/6/97 -------------------------------------------------------------
   Sound data loaders 
   ----------------------------------------------------------------------------*/
-extern uint8_t *ExtractWavFile(int soundIndex, uint8_t *bufferPtr);
-
-void *LoadRebSndFile(const char *filename)
-{
-	void *bufferPtr;
-	long int save_pos, size_of_file;
-	FILE *fp;
-	fp = avp_fopen(filename,"rb");
-
-	if (!fp)
-	{
-		return NULL;
-	}
-
-	save_pos = ftell(fp);
-	fseek(fp ,0L, SEEK_END);
-	size_of_file = ftell(fp);
-	fseek(fp, save_pos,SEEK_SET);
-
-	bufferPtr = AllocateMem(size_of_file);
-	LOCALASSERT(bufferPtr);
-
-	if (!fread(bufferPtr, size_of_file,1,fp))
-	{
-		fclose(fp);
-		DeallocateMem(bufferPtr);
-		return NULL;
-	}
-
-	fclose(fp);
-	return bufferPtr;
-}
-
-void ReleaseRebSndFile(void *bufferPtr)
-{
-	LOCALASSERT(bufferPtr);
-	DeallocateMem(bufferPtr);
-}
 
 void LoadSounds(char *soundDirectory)
 {
-	void *rebSndBuffer;
-	uint8_t *bufferPtr;
 	int soundIndex;
-	int pitch;
+	int8_t pitch;
 
 	LOCALASSERT(soundDirectory);
 
@@ -625,24 +584,17 @@ void LoadSounds(char *soundDirectory)
 	char filename[MAX_PATH];
 
 #if ALIEN_DEMO
-	strcpy(filename, ".\\alienfastfile");
+	strcpy(filename, "./alienfastfile");
 #else
-	strcpy(filename, ".\\fastfile");
+	strcpy(filename, "./fastfile");
 #endif
-	strcat(filename, "\\common.ffl");
+	strcat(filename, "/common.ffl");
 
-	rebSndBuffer = LoadRebSndFile(filename);
+	FileStream fStream;
+	fStream.Open(filename, FileStream::FileRead);
 
-	if (!rebSndBuffer)
-	{
-		LOCALASSERT(0);
-		return;
-	}
-
-	/* Process the file */
-	bufferPtr = (uint8_t*) rebSndBuffer;
-	soundIndex = (int)(*bufferPtr++);
-	pitch = (int)((int8_t)(*bufferPtr++));
+	soundIndex = fStream.GetByte();
+	pitch      = fStream.GetByte();
 
 	while ((soundIndex != 0xff) || (pitch != -1))
 	{
@@ -657,7 +609,7 @@ void LoadSounds(char *soundDirectory)
 			LOCALASSERT("Duplicate game sound loaded"==0);
 		}
 
-		bufferPtr = ExtractWavFile(soundIndex, bufferPtr);
+		ExtractWavFile(soundIndex, fStream);
 
 		GameSounds[soundIndex].loaded = 1;
 		GameSounds[soundIndex].activeInstances = 0;
@@ -667,10 +619,7 @@ void LoadSounds(char *soundDirectory)
 		GameSounds[soundIndex].pitch = pitch;
 
 		InitialiseBaseFrequency(static_cast<enum soundindex>(soundIndex));
-		soundIndex = (int)(*bufferPtr++);
-		pitch = (int)((int8_t)(*bufferPtr++));
+		soundIndex = fStream.GetByte();
+		pitch      = fStream.GetByte();
 	}
-
-	ReleaseRebSndFile(rebSndBuffer);
 }
-

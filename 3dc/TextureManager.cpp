@@ -211,7 +211,7 @@ texID_t Tex_CreateFromRIM(const std::string &fileName)
 	TextureUsage usage = TextureUsage_Normal;
 
 	// TODO - FMV textures must be dynamic. Try handle this some other way
-	size_t found = fileName.find("graphics\\FMVs");
+	size_t found = fileName.find("graphics/FMVs");
 	if (found != std::string::npos)
 	{
 		usage = TextureUsage_Dynamic;
@@ -294,7 +294,7 @@ texID_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t heig
 	std::string::size_type pos = textureName.find("\\");
 	if (std::string::npos != pos)
 	{
-		int i = 0;
+		assert(0);
 	}
 
 	if (!R_CreateTexture(width, height, bitsPerPixel, usageType, newTexture))
@@ -336,7 +336,7 @@ texID_t Tex_CreateFromFile(const std::string &filePath)
 	std::string::size_type pos = filePath.find("\\");
 	if (std::string::npos != pos)
 	{
-		int i = 0;
+		assert(0);
 	}
 
 	if (!R_CreateTextureFromFile(filePath, newTexture))

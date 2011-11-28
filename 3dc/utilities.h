@@ -26,7 +26,7 @@
 #define _avp_utilities_h_
 
 #include <stdio.h>
-#include <string.h>
+#include <string>
 #include <stdint.h>
 #include "os_header.h"
 
@@ -35,6 +35,7 @@
 #define MB_SYSTEMMODAL	0x00001000L
 #endif
 
+void ChangeSlashes(std::string &theString);
 FILE *avp_fopen(const char *fileName, const char *mode);
 HANDLE avp_CreateFile(LPCTSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
 HANDLE avp_FindFirstFile(LPCTSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData);

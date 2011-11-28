@@ -5,7 +5,6 @@
 #include "progress_bar.h"
 #include "chnktexi.h"
 #include "awtexld.h"
-#include "ffstdio.h"
 #include "inline.h"
 #include "gamedef.h"
 #include "psnd.h"
@@ -33,9 +32,9 @@ static uint32_t BarRight;
 static uint32_t BarTop;
 static uint32_t BarBottom;
 
-static const char* Loading_Image_Name = "Menus\\Loading.RIM";
-static const char* Loading_Bar_Empty_Image_Name = "Menus\\LoadingBar_Empty.RIM";
-static const char* Loading_Bar_Full_Image_Name = "Menus\\LoadingBar_Full.RIM";
+static const char* Loading_Image_Name = "Menus/Loading.RIM";
+static const char* Loading_Bar_Empty_Image_Name = "Menus/LoadingBar_Empty.RIM";
+static const char* Loading_Bar_Full_Image_Name = "Menus/LoadingBar_Full.RIM";
 
 RECT LoadingBarEmpty_DestRect;
 RECT LoadingBarEmpty_SrcRect;
@@ -55,90 +54,14 @@ AVPTEXTURE *aa_font = NULL;
 
 void Start_Progress_Bar()
 {
-//	char buffer[MAX_PATH];
-
-//	AAFontImageNumber = CL_LoadImageOnce("Common\\aa_font.RIM", LIO_D3DTEXTURE | LIO_RELATIVEPATH | LIO_RESTORABLE);
-	AAFontImageNumber = Tex_CreateFromRIM("graphics\\Common\\aa_font.RIM");
+	AAFontImageNumber = Tex_CreateFromRIM("graphics/Common/aa_font.RIM");
 	
 	// load other graphics
-	{
+	emptyTextureID = Tex_CreateFromRIM("graphics/Menus/LoadingBar_Empty.RIM");
+	fullTextureID = Tex_CreateFromRIM("graphics/Menus/LoadingBar_Full.RIM");
 
-//		CL_GetImageFileName(buffer, 100, Loading_Bar_Empty_Image_Name, LIO_RELATIVEPATH);
-#if 0
-		// see if graphic can be found in fast file
-		size_t fastFileLength;
-		void const * pFastFileData = ffreadbuf(buffer, &fastFileLength);
-
-		if (pFastFileData)
-		{
-			// load from fast file
-			LoadingBarEmpty = AwCreateTexture("pxf", pFastFileData, fastFileLength, 0);
-		}
-		else
-		{
-			// load graphic from rim file
-			LoadingBarEmpty = AwCreateTexture("sf", buffer, 0);
-		}
-		// create d3d texture here
-		if (LoadingBarEmpty)
-		{
-			emptyTextureID = Tex_CreateFromAvPTexture(Loading_Bar_Empty_Image_Name, *LoadingBarEmpty, TextureUsage_Normal);
-		}
-#endif
-		emptyTextureID = Tex_CreateFromRIM("graphics\\Menus\\LoadingBar_Empty.RIM");
-	}
-	{
-//		CL_GetImageFileName(buffer, 100, Loading_Bar_Full_Image_Name, LIO_RELATIVEPATH);
-#if 0	
-		// see if graphic can be found in fast file
-		size_t fastFileLength;
-		void const * pFastFileData = ffreadbuf(buffer, &fastFileLength);
-		
-		if (pFastFileData)
-		{
-			// load from fast file
-			LoadingBarFull = AwCreateTexture("pxf", pFastFileData, fastFileLength, 0);
-		}
-		else
-		{
-			// load graphic from rim file
-			LoadingBarFull = AwCreateTexture("sf", buffer, 0);
-		}
-
-		if (LoadingBarFull)
-		{
-			fullTextureID = Tex_CreateFromAvPTexture(Loading_Bar_Full_Image_Name, *LoadingBarFull, TextureUsage_Normal);
-		}
-#endif
-		fullTextureID = Tex_CreateFromRIM("graphics\\Menus\\LoadingBar_Full.RIM");
-	}
-	
 	// load background image for bar
-//	CL_GetImageFileName(buffer, 100, Loading_Image_Name, LIO_RELATIVEPATH);
-
-	dbTextureID = Tex_CreateFromRIM("graphics\\Menus\\Loading.RIM");
-	
-#if 0
-	// see if graphic can be found in fast file
-	size_t fastFileLength;
-	void const * pFastFileData = ffreadbuf(buffer, &fastFileLength);
-
-	if (pFastFileData)
-	{
-		// load from fast file
-		image = AwCreateTexture("pxf", pFastFileData, fastFileLength, 0);
-	}
-	else
-	{
-		// load graphic from rim file
-		image = AwCreateTexture("sf", buffer, 0);
-	}
-
-	if (image) // background image on demo loading screen
-	{
-		dbTextureID = Tex_CreateFromAvPTexture(Loading_Image_Name, *image, TextureUsage_Normal);
-	}
-#endif
+	dbTextureID = Tex_CreateFromRIM("graphics/Menus/Loading.RIM");
 
 	// draw initial progress bar
 	LoadingBarEmpty_SrcRect.left = 0;
@@ -153,6 +76,7 @@ void Start_Progress_Bar()
 	{
 		ThisFramesRenderingHasBegun();
 
+		// FIXME
 		if (/*LoadingBarEmpty*/1)
 		{
 			DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID);
@@ -175,7 +99,7 @@ void Start_Progress_Bar()
 
 		ThisFramesRenderingHasFinished();
 
-		FlipBuffers();	
+		FlipBuffers();
 	}
 
 	CurrentPosition = 0;
@@ -199,6 +123,7 @@ void Set_Progress_Bar_Position(int pos)
 		
 		ThisFramesRenderingHasBegun();
 
+		// FIXME
 		if (/*LoadingBarEmpty*/1)
 		{
 			// need to render the empty bar here again. As we're not blitting anymore, 
@@ -228,7 +153,7 @@ void Set_Progress_Bar_Position(int pos)
 
 		ThisFramesRenderingHasFinished();
 		
-		FlipBuffers();	
+		FlipBuffers();
 		/*
 		If this is a network game , then check the received network messages from 
 		time to time (~every second).
@@ -302,15 +227,16 @@ void Game_Has_Loaded()
 			}
 
 			f -= NormalFrameTime;
-			if (f < 0) 
+			if (f < 0)
 				f = 0;
 		}
 
+		// FIXME
 //		if (LoadingBarFull) // demo doesn't show this
 			RenderStringCentred(GetTextString(TEXTSTRING_INGAME_PRESSANYKEYTOCONTINUE), ScreenDescriptorBlock.SDB_Width/2, ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*23)/24-9, 0xffffffff);
 
 		ThisFramesRenderingHasFinished();
-		FlipBuffers();	
+		FlipBuffers();
 		FrameCounterHandler();
 
 		/* If in a network game then we may as well check the network messages while waiting*/
