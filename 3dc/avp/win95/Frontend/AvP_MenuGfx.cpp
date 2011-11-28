@@ -1,6 +1,5 @@
 #include "3dc.h"
 #include "inline.h"
-#include "tallfont.hpp"
 #include "strtab.hpp"
 #include "awTexLd.h"
 #include "chnktexi.h"

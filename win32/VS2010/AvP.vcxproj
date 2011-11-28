@@ -478,7 +478,6 @@
     <ClCompile Include="..\..\3dc\avp\support\scstring.cpp" />
     <ClCompile Include="..\..\3dc\avp\support\strtab.cpp" />
     <ClCompile Include="..\..\3dc\avp\support\strutil.cpp" />
-    <ClCompile Include="..\..\3dc\avp\support\tallfont.cpp" />
     <ClCompile Include="..\..\3dc\avp\support\trig666.cpp" />
     <ClCompile Include="..\..\3dc\avp\support\wrapstr.cpp" />
     <ClCompile Include="..\..\3dc\avp\targeting.cpp" />
@@ -728,7 +727,6 @@
     <ClInclude Include="..\..\3dc\avp\support\scstring.hpp" />
     <ClInclude Include="..\..\3dc\avp\support\strtab.hpp" />
     <ClInclude Include="..\..\3dc\avp\support\strutil.h" />
-    <ClInclude Include="..\..\3dc\avp\support\tallfont.hpp" />
     <ClInclude Include="..\..\3dc\avp\support\trig666.hpp" />
     <ClInclude Include="..\..\3dc\avp\support\wrapstr.hpp" />
     <ClInclude Include="..\..\3dc\avp\targeting.h" />
