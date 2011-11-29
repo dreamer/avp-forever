@@ -43,10 +43,33 @@ extern void ReleaseDirect3D();
 	extern HWND	hWndMain;
 #endif
 
+namespace Util {
+
 void ChangeSlashes(std::string &theString)
 {
 	// change backslashes in path to forwardslashes
 	std::replace(theString.begin(), theString.end(), '\\', '/');
+}
+
+/* 
+ *	For passing to std::transform.
+ *  Changes c to lowercase if is an uppercase letter
+ *  or changes c to a forwardslash if it's a backslash
+ *  else it leaves c unmodified.
+ */
+int LowercaseAndChangeSlash(char c)
+{ 
+	if ((c >= 'A') && (c <= 'Z'))
+	{
+		// to lowercase
+		return c + 32;
+	}
+
+	if (c == '\\')
+		return '/';
+
+	return c;
+}
 }
 
 char *GetSaveFolderPath()

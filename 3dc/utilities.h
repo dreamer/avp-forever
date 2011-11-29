@@ -35,7 +35,11 @@
 #define MB_SYSTEMMODAL	0x00001000L
 #endif
 
-void ChangeSlashes(std::string &theString);
+namespace Util {
+	void ChangeSlashes(std::string &theString);
+	int LowercaseAndChangeSlash(char c);
+}
+
 FILE *avp_fopen(const char *fileName, const char *mode);
 HANDLE avp_CreateFile(LPCTSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
 HANDLE avp_FindFirstFile(LPCTSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData);

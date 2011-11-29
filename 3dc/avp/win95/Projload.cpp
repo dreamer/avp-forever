@@ -2623,7 +2623,7 @@ texID_t load_rif_bitmap(char const * fname, BMPN_Flags flags)
 {
 	std::string fileName = fname;
 
-	ChangeSlashes(fileName);
+	Util::ChangeSlashes(fileName);
 
 	texID_t textureID = Tex_CreateFromRIM("graphics/" + fileName);
 /*

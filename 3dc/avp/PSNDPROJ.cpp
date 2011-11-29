@@ -560,7 +560,7 @@ int FindAndLoadWavFile(int soundNum, char* wavFileName)
 	std::string fileName = FirstSoundDir;
 	fileName += wavFileName;
 
-	ChangeSlashes(fileName);
+	Util::ChangeSlashes(fileName);
 
 	return LoadWavFile(soundNum, fileName);
 }

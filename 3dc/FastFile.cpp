@@ -24,6 +24,7 @@
 
 #include "FastFile.h"
 #include "FileStream.h"
+#include "utilities.h"
 #include <algorithm>
 
 fastFileHandles fastFileMap;
@@ -119,7 +120,7 @@ static bool FF_Open(const std::string &fastFileName)
 	uint32_t nHeaderBytes = file.GetUint32LE(); // total bytes of file data header in fast file
 	uint32_t nDataBytes   = file.GetUint32LE(); // we don't need this
 
-	char fileName[MAX_PATH];
+	std::string requestedFile;
 
 	for (uint32_t i = 0; i < nFiles; i++)
 	{
@@ -127,28 +128,18 @@ static bool FF_Open(const std::string &fastFileName)
 		uint32_t dataOffset = file.GetUint32LE();
 		uint32_t fileLength = file.GetUint32LE(); // size of the file data
 
-		// read the file name
-		fileName[0] = '\0';
-
-		bool gotTerminator = false;
-
-		uint8_t *destChar = (uint8_t*)&fileName[0];
-
-		while (!gotTerminator)
+		// read in the wav file name until we hit the null terminator
+		while (file.PeekByte() != '\0')
 		{
-			file.ReadBytes(destChar, 1);
-			if (*destChar == '\0')
-			{
-				gotTerminator = true;
-				break;
-			}
-
-			destChar++;
+			requestedFile += file.GetByte();
 		}
 
-		// strings are 4 byte aligned in file. determine how much pad to skip vs what we actually read
-		uint32_t alignedStringLength = (strlen(fileName) + 4) &~3;
-		uint32_t bytesToSkip = alignedStringLength-strlen(fileName)-1;
+		// skip string null terminator
+		file.GetByte();
+
+		size_t stringLength = requestedFile.size();
+		uint32_t alignedStringLength = (stringLength + 4) &~3;
+		uint32_t bytesToSkip = alignedStringLength - stringLength - 1;
 
 		// skip the 4 byte align pad bytes
 		while (bytesToSkip)
@@ -166,14 +157,12 @@ static bool FF_Open(const std::string &fastFileName)
 		newHandle.fileOffset = realFileOffset;
 		newHandle.fileSize   = fileLength;
 
-		// make the whole filename string lowercase
-		std::string requestedFile = fileName;
-		std::transform(requestedFile.begin(), requestedFile.end(), requestedFile.begin(), tolower);
-
-		// change backslashes in path to forwardslashes
-		std::replace(requestedFile.begin(), requestedFile.end(), '\\', '/');
+		// make the whole filename string lowercase and change '\\' to '/'
+		std::transform(requestedFile.begin(), requestedFile.end(), requestedFile.begin(), Util::LowercaseAndChangeSlash);
 
 		fastFileMap.insert(std::make_pair(requestedFile, newHandle));
+
+		requestedFile.clear();
 	}
 
 	return true;
