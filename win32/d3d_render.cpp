@@ -120,7 +120,7 @@ uint16_t *mainIndex = NULL;
 ORTHOVERTEX *orthoVertex = NULL;
 uint16_t *orthoIndex = NULL;
 
-D3DLVERTEX *particleVertex = NULL;
+PARTICLEVERTEX *particleVertex = NULL;
 uint16_t *particleIndex = NULL;
 
 DECAL_VERTEX *decalVertex = NULL;
@@ -389,16 +389,16 @@ static bool ExecuteBuffer()
 	if (particleList->GetSize())
 	{
 		// set vertex declaration
-		d3d.mainDecl->Set();
+		d3d.particleDecl->Set();
 
 		// set the particle VB and IBs as active
 		d3d.particleVB->Set();
 		d3d.particleIB->Set();
 
 		// set main shaders to active
-		d3d.effectSystem->SetActive(d3d.mainEffect);
+		d3d.effectSystem->SetActive(d3d.particleEffect);
 
-		d3d.effectSystem->SetVertexShaderConstant(d3d.mainEffect, 0, CONST_MATRIX, &d3d.matProjection);
+		d3d.effectSystem->SetVertexShaderConstant(d3d.particleEffect, 0, CONST_MATRIX, &d3d.matProjection);
 
 		// Draw the particles in the list
 		particleList->Draw();
@@ -1356,27 +1356,6 @@ void DrawParticles()
 	{
 		particleBucket[i].clear();
 	}
-/*
-	if (particleArray.size() == 0)
-		return;
-
-	uint32_t numVertsBackup = RenderPolygon.NumberOfVertices;
-
-	// sort particle array
-	std::sort(particleArray.begin(), particleArray.end());
-
-	// loop particles and add them to vertex buffer
-	for (size_t i = 0; i < particleArray.size(); i++)
-	{
-		RenderPolygon.NumberOfVertices = 4; // always 4 for particles
-		D3D_Particle_Output(&particleArray[i].particle, &particleArray[i].vertices[0]);
-	}
-
-	particleArray.clear();
-
-	// restore RenderPolygon.NumberOfVertices value...
-	RenderPolygon.NumberOfVertices = numVertsBackup;
-*/
 }
 
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
@@ -1785,7 +1764,6 @@ void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		newParticle.vertices[i].x = renderVerticesPtr->X;
 		newParticle.vertices[i].y = renderVerticesPtr->Y;
 		newParticle.vertices[i].z = renderVerticesPtr->Z;
-//		newParticle.vertices[i].colour = renderVerticesPtr->
 		newParticle.vertices[i].u = renderVerticesPtr->U;
 		newParticle.vertices[i].v = renderVerticesPtr->V;
 		renderVerticesPtr++;
@@ -1795,16 +1773,6 @@ void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 
 	// add to correct bucket
 	particleBucket[transID].push_back(newParticle);
-/*
-	renderParticle newParticle;
-
-	newParticle.particle = *particlePtr;
-
-	memcpy(&newParticle.vertices[0], renderVerticesPtr, 4 * sizeof(RENDERVERTEX)); // always 4 for particles
-	newParticle.translucency = ParticleDescription[particlePtr->ParticleID].TranslucencyType;
-
-	particleArray.push_back(newParticle);
-*/
 }
 
 void D3D_Particle_Output(PARTICLE *particlePtr, PARTICLEVERTEX *renderVerticesPtr)
@@ -1864,7 +1832,6 @@ void D3D_Particle_Output(PARTICLE *particlePtr, PARTICLEVERTEX *renderVerticesPt
 
 	for (uint32_t i = 0; i < 4; i++)
 	{
-//		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 		PARTICLEVERTEX *vertices = &renderVerticesPtr[i];
 
 		float zvalue;
@@ -1886,22 +1853,10 @@ void D3D_Particle_Output(PARTICLE *particlePtr, PARTICLEVERTEX *renderVerticesPt
 		particleVertex[pVb].y = vertices->y;
 		particleVertex[pVb].z = vertices->z;
 
-		particleVertex[pVb].color = colour;
-		particleVertex[pVb].specular = RGBA_MAKE(0,0,0,/*255*/0);
+		particleVertex[pVb].colour = colour;
 
-		particleVertex[pVb].u = ((vertices->u)/* + 0.5f*/) * RecipW;
-		particleVertex[pVb].v = ((vertices->v)/* + 0.5f*/) * RecipH;
-#if 0
-		particleVertex[pVb].x = (float)vertices->X;
-		particleVertex[pVb].y = (float)vertices->Y;
-		particleVertex[pVb].z = (float)vertices->Z;
-
-		particleVertex[pVb].color = colour;
-		particleVertex[pVb].specular = RGBA_MAKE(0,0,0,/*255*/0);
-
-		particleVertex[pVb].u = ((float)(vertices->U)/* + 0.5f*/) * RecipW;
-		particleVertex[pVb].v = ((float)(vertices->V)/* + 0.5f*/) * RecipH;
-#endif
+		particleVertex[pVb].u = vertices->u * RecipW;
+		particleVertex[pVb].v = vertices->v * RecipH;
 		pVb++;
 	}
 

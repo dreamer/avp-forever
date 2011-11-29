@@ -671,7 +671,7 @@ bool CreateVolatileResources()
 
 	// particle vertex buffer
 	d3d.particleVB = new VertexBuffer;
-	d3d.particleVB->Create(kMaxVertices*6, FVF_LVERTEX, USAGE_DYNAMIC);
+	d3d.particleVB->Create(kMaxVertices*6, FVF_PARTICLE, USAGE_DYNAMIC);
 
 	d3d.particleIB = new IndexBuffer;
 	d3d.particleIB->Create((kMaxIndices*6) * 3, USAGE_DYNAMIC);
@@ -2505,6 +2505,12 @@ bool InitialiseDirect3D()
 	d3d.tallTextDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 1);
 	d3d.tallTextDecl->Create();
 
+	d3d.particleDecl = new VertexDeclaration;
+	d3d.particleDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
+	d3d.particleDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
+	d3d.particleDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
+	d3d.particleDecl->Create();
+
 	// rhw pretransformed
 	d3d.rhwDecl = new VertexDeclaration;
 	d3d.rhwDecl->Add(0, VDTYPE_FLOAT4, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
@@ -2581,13 +2587,15 @@ bool InitialiseDirect3D()
 	d3d.decalEffect = d3d.effectSystem->Add("decal", "decal.vsh", "decal.psh", d3d.decalDecl);
 	d3d.fmvEffect   = d3d.effectSystem->Add("fmv", "fmvVertex.vsh", "fmvPixel.psh", d3d.fmvDecl);
 	d3d.tallTextEffect = d3d.effectSystem->Add("tallText", "tallText.vsh", "tallText.psh", d3d.tallTextDecl);
+	d3d.particleEffect = d3d.effectSystem->Add("particle", "particle.vsh", "particle.psh", d3d.particleDecl);
 	d3d.rhwEffect   = d3d.effectSystem->Add("rhw", "rhw.vsh", "rhw.psh", d3d.rhwDecl);
 
 	// we should bail out if the shaders can't be loaded
-	if ((d3d.mainEffect  == kNullShaderID) ||
-		(d3d.orthoEffect == kNullShaderID) ||
-		(d3d.decalEffect == kNullShaderID) ||
-		(d3d.fmvEffect   == kNullShaderID) || // make this optional?
+	if ((d3d.mainEffect  == kNullShaderID)    ||
+		(d3d.orthoEffect == kNullShaderID)    ||
+		(d3d.decalEffect == kNullShaderID)    ||
+		(d3d.particleEffect == kNullShaderID) ||
+		(d3d.fmvEffect   == kNullShaderID)    || // make this optional?
 		(d3d.tallTextEffect == kNullShaderID))   // make this optional?
 	{
 		return false;
@@ -2656,6 +2664,7 @@ void ReleaseDirect3D()
 	delete d3d.decalDecl;
 	delete d3d.fmvDecl;
 	delete d3d.tallTextDecl;
+	delete d3d.particleDecl;
 	delete d3d.rhwDecl;
 
 	// clean up render list classes

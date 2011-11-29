@@ -73,6 +73,9 @@ bool VertexBuffer::Create(uint32_t capacity, enum R_FVF fvf, enum R_USAGE usage)
 		case FVF_FMV:
 			this->stride = sizeof(FMVVERTEX);
 			break;
+		case FVF_PARTICLE:
+			this->stride = sizeof(PARTICLEVERTEX);
+			break;
 		default:
 			// error and return
 			Con_PrintError("Invalid FVF type");

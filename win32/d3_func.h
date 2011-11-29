@@ -233,6 +233,7 @@ typedef struct D3DInfo
 	effectID_t				orthoEffect;
 	effectID_t				tallTextEffect;
 	effectID_t				fmvEffect;
+	effectID_t				particleEffect;
 	effectID_t				rhwEffect;
 
 	// vertex declarations
@@ -241,6 +242,7 @@ typedef struct D3DInfo
 	class VertexDeclaration		*decalDecl;
 	class VertexDeclaration		*fmvDecl;
 	class VertexDeclaration		*tallTextDecl;
+	class VertexDeclaration		*particleDecl;
 	class VertexDeclaration		*rhwDecl;
 
 	// matrices

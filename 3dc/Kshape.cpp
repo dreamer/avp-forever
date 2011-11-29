@@ -3759,11 +3759,9 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 			INANIMATEOBJECT_STATUSBLOCK* objStatPtr = static_cast<INANIMATEOBJECT_STATUSBLOCK*>(dptr->ObStrategyBlock->SBdataptr);
 			if (objStatPtr->typeId == IOT_FieldCharge)
 			{
-				int i;
-
 				D3D_DecalSystem_Setup();
 
-				for (i = 0; i < 63; i++)
+				for (int i = 0; i < 63; i++)
 				{
 					PARTICLE particle = {0};
 
