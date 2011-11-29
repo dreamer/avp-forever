@@ -2577,7 +2577,7 @@ bool InitialiseDirect3D()
 	d3d.effectSystem = new EffectManager;
 
 	d3d.mainEffect  = d3d.effectSystem->Add("main", "vertex.vsh", "pixel.psh", d3d.mainDecl);
-	d3d.orthoEffect = d3d.effectSystem->Add("ortho", "orthoVertex.vsh", "pixel.psh", d3d.orthoDecl);
+	d3d.orthoEffect = d3d.effectSystem->Add("ortho", "orthoVertex.vsh", "orthoPixel.psh", d3d.orthoDecl);
 	d3d.decalEffect = d3d.effectSystem->Add("decal", "decal.vsh", "decal.psh", d3d.decalDecl);
 	d3d.fmvEffect   = d3d.effectSystem->Add("fmv", "fmvVertex.vsh", "fmvPixel.psh", d3d.fmvDecl);
 	d3d.tallTextEffect = d3d.effectSystem->Add("tallText", "tallText.vsh", "tallText.psh", d3d.tallTextDecl);
