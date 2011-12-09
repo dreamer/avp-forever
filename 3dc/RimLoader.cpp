@@ -274,7 +274,7 @@ uint32_t RimLoader::GetScanLine()
 
 	for (uint16_t x = 0; x < header.width; x++)
 	{
-		uint8_t pixel = 0;
+		uint16_t pixel = 0;
 
 		// 128, then 64, 32, 16 etc (and wrap back to 128)
 		uint8_t bitMask = 128 >> (x % 8);
